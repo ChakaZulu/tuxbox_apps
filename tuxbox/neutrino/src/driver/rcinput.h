@@ -125,7 +125,16 @@ class CRCInput
 		static const uint RC_WithData = 0xA0000000;
 		enum
 		{
-			RC_0=0x0, RC_1=0x1, RC_2=0x2, RC_3=0x3, RC_4=0x4, RC_5=0x5, RC_6=0x6, RC_7=0x7, RC_8=0x8, RC_9=0x9,
+			RC_0            = KEY_0,            /* /include/linux/input.h: #define KEY_0			11   */
+			RC_1            = KEY_1,            /* /include/linux/input.h: #define KEY_1			 2   */
+			RC_2            = KEY_2,            /* /include/linux/input.h: #define KEY_2			 3   */
+			RC_3            = KEY_3,            /* /include/linux/input.h: #define KEY_3			 4   */
+			RC_4            = KEY_4,            /* /include/linux/input.h: #define KEY_4			 5   */
+			RC_5            = KEY_5,            /* /include/linux/input.h: #define KEY_5			 6   */
+			RC_6            = KEY_6,            /* /include/linux/input.h: #define KEY_6			 7   */
+			RC_7            = KEY_7,            /* /include/linux/input.h: #define KEY_7			 8   */
+			RC_8            = KEY_8,            /* /include/linux/input.h: #define KEY_8			 9   */
+			RC_9            = KEY_9,            /* /include/linux/input.h: #define KEY_9			10   */
 			RC_home         = KEY_HOME,         /* /include/linux/input.h: #define KEY_HOME                102   */
 			RC_up           = KEY_UP,           /* /include/linux/input.h: #define KEY_UP                  103   */
 			RC_page_up      = KEY_PAGEUP,       /* /include/linux/input.h: #define KEY_PAGEUP              104   */

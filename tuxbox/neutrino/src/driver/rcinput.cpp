@@ -1411,25 +1411,15 @@ int CRCInput::translate(int code)
 	switch (code)
 	{
 	case KEY_0:
-		return RC_0;
 	case KEY_1:
-		return RC_1;
 	case KEY_2:
-		return RC_2;
 	case KEY_3:
-		return RC_3;
 	case KEY_4:
-		return RC_4;
 	case KEY_5:
-		return RC_5;
 	case KEY_6:
-		return RC_6;
 	case KEY_7:
-		return RC_7;
 	case KEY_8:
-		return RC_8;
 	case KEY_9:
-		return RC_9;
 	case KEY_HOME:
 	case KEY_UP:
 	case KEY_PAGEUP:
