@@ -326,7 +326,7 @@ scants.digituerk Digituerk
 scants.tuerksat Tuerksat
 scants.transponders Transponders:
 scants.freqdata	Frequency:
-scants.Servicenames	TV     Radio  Data
+scants.servicenames	TV     Radio  Data
 scants.services Services:
 scants.bouquet Bouquet
 scants.bouquet_leave leave current
