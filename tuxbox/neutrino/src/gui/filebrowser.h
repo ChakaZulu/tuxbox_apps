@@ -91,11 +91,12 @@ public:
 	string	getFileName();
 	string	getPath();
 
-	CFile(){Marked = false; Size=0;Mode=0;};
+	CFile(){Marked = false; Size=0;Mode=0;Time=0;};
 	off_t Size;
 	string Name;
 	mode_t Mode;
 	bool Marked;
+	time_t Time;
 };
 
 typedef vector<CFile> CFileList;

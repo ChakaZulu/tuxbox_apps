@@ -230,6 +230,7 @@ int n;
 					perror("stat error");
 				file.Mode = statbuf.st_mode;
 				file.Size = statbuf.st_size;
+				file.Time = statbuf.st_mtime;
 
 				if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
 					if(!Filter->matchFilter(file.Name))
@@ -482,6 +483,7 @@ CFile file;
 					perror("stat error");
 				file.Mode = statbuf.st_mode;
 				file.Size = statbuf.st_size;
+				file.Time = statbuf.st_mtime;
 
 				if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
 				{
@@ -575,6 +577,16 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 				snprintf(tmpstr,sizeof(tmpstr),"%d kb", (int)((actual_file->Size / 1024) +0.9));
 				int breite = g_Fonts->filebrowser_item->getRenderWidth(tmpstr)< 70?g_Fonts->filebrowser_item->getRenderWidth(tmpstr):60;
 				g_Fonts->filebrowser_item->RenderString(x + width - 80 + (60 - breite), ypos+ fheight, breite, tmpstr, color);
+			}
+			if( S_ISDIR(actual_file->Mode) )
+			{
+				char timestring[18];
+				time_t rawtime;
+
+				rawtime = actual_file->Time;
+				strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&rawtime));
+
+				g_Fonts->filebrowser_item->RenderString(x + width - 160 , ypos+ fheight, 150, timestring, color);
 			}
 		}
 	}
