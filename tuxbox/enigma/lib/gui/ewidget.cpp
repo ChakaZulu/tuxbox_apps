@@ -23,7 +23,11 @@ eWidget::eWidget(eWidget *parent, int takefocus):
 	LCDTmp=0;
 	target=parent?0:gFBDC::getInstance();
 	in_loop=0;
-	state=parent?stateShow:0;
+	if (parent && !(parent->state&stateVisible))
+		state=stateShow;
+	else
+		state=0;
+
  	have_focus=0;
  	pixmap=0;
 	if (takefocus)
@@ -47,10 +51,15 @@ eWidget::~eWidget()
 
 void eWidget::takeFocus()
 {
-	if ((!parent) && !have_focus)
+	if (parent)
+		return;
+
+	if (!have_focus)
 	{
 		oldTLfocus=eZap::getInstance()->focus;
 		eZap::getInstance()->focus=this;
+		if (oldTLfocus)
+			eFatal("da hat %s den focus und %s wil ihn haben", oldTLfocus->getText().c_str(), getText().c_str());
 		addActionMap(&i_focusActions->map);
 	}
 	have_focus++;
@@ -58,7 +67,10 @@ void eWidget::takeFocus()
 
 void eWidget::releaseFocus()
 {
-	if ((!parent) && have_focus)
+	if (parent)
+		return;
+
+	if (have_focus)
 	{
 	 	have_focus--;
 		if (!have_focus)
@@ -66,12 +78,17 @@ void eWidget::releaseFocus()
 			removeActionMap(&i_focusActions->map);
 			if (eZap::getInstance()->focus==this)	// if we don't have lost the focus, ...
 				eZap::getInstance()->focus=oldTLfocus;	// give it back
+			else
+				eFatal("someone has stolen the focus");
 		}
  	}
 }
 
 void eWidget::_willShow()
 {
+	ASSERT(state&stateShow);
+	ASSERT(!(state&stateVisible));
+	state|=stateVisible;
 	if (takefocus)
 		getTLW()->takeFocus();
 	willShow();
@@ -79,6 +96,10 @@ void eWidget::_willShow()
 
 void eWidget::_willHide()
 {
+	ASSERT(state&stateShow);
+	ASSERT(state&stateVisible);
+	state&=~stateVisible;
+
 	willHide();
 	if (takefocus)
 		getTLW()->releaseFocus();
@@ -127,7 +148,7 @@ void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 {
 	if (getTLW()->just_showing)
 		return;
-	if (isVisible())
+	if (state & stateVisible )
 	{
 		if (area.isNull())
 			area=eRect(0, 0, size.width(), size.height());
@@ -159,7 +180,7 @@ void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 
 void eWidget::invalidate(eRect area)
 {
-	if (!isVisible())
+	if (!(state & stateVisible))
 		return;
 
 	if (area.isNull())
@@ -263,15 +284,23 @@ void eWidget::close(int res)
 
 void eWidget::show()
 {
-	int oldstate=state;
-	getTLW()->just_showing++;
-	state|=stateShow;
-	willShowChildren();
+	if (state & stateShow)
+		return;
+	
+	ASSERT(!(state&stateVisible));
 
-	checkFocus();
-	getTLW()->just_showing--;
-	if (!(oldstate&stateShow))
+	state|=stateShow;
+
+	if (!parent || (parent->state&stateVisible))
+	{
+		int oldstate=state;
+		getTLW()->just_showing++;
+		willShowChildren();
+
+		checkFocus();
+		getTLW()->just_showing--;
 		redraw();
+	}
 }
 
 void eWidget::accept()
@@ -286,34 +315,38 @@ void eWidget::reject()
 
 void eWidget::willShowChildren()
 {
-	if (state&stateShow)
+	if (!(state & stateShow))
+		return;
+	_willShow();
+	if (!childlist.empty())
 	{
-		_willShow();
-		if (!childlist.empty())
+		ePtrList<eWidget>::iterator It(childlist);
+		while(It != childlist.end())
 		{
-			ePtrList<eWidget>::iterator It(childlist);
-			while(It != childlist.end())
-			{
-				It->willShowChildren();
-				It++;
-			}
+			It->willShowChildren();
+			It++;
 		}
 	}
 }
 
 void eWidget::hide()
 {
-	if (state&stateShow)
+	if (!(state&stateShow))
+		return;
+	
+	if (state&stateVisible)
 	{
 		willHideChildren();
-		state&=~stateShow;
 		clear();	// hide -> immer erasen. dieses Hide ist IMMER explizit.
 		checkFocus();
 	}
+	state&=~stateShow; 
 }
 
 void eWidget::willHideChildren()
 {
+	if (!(state & stateShow))
+		return;
 	_willHide();
 	if (!childlist.empty())
 	{
@@ -452,11 +485,11 @@ void eWidget::recalcClip()
 void eWidget::checkFocus()
 {
 	ePtrList<eWidget> *l=getTLW()->focusList();
-	if (!(getTLW()->focus && getTLW()->focus->isVisible()))
+	if (!(getTLW()->focus && getTLW()->focus->state&stateVisible))
 	{
 		l->first();
 
-		while (l->current() && !(l->current()->isVisible()))
+		while (l->current() && !(l->current()->stateVisible))
 			l->next();
 
 		setFocus(l->current());
@@ -524,7 +557,7 @@ void eWidget::focusNext(int dir)
 				} else
 					_focusList.prev();
 			}
-			if (_focusList.current() && _focusList.current()->isVisible())
+			if (_focusList.current() && _focusList.current()->state&stateVisible)
 				break;
 		}
 		if (!tries)
@@ -545,7 +578,7 @@ void eWidget::focusNext(int dir)
 		{
 			if (_focusList.current() == i)
 				continue;
-			if (!i->isVisible())
+			if (!i->state&stateVisible)
 				continue;
 			ePoint m1=i->getPosition();
 			m1+=ePoint(i->getSize().width()/2, i->getSize().height()/2);

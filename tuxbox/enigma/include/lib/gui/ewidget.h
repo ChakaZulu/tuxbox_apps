@@ -62,7 +62,10 @@ class eWidget: public Object
 //	Q_OBJECT
 	enum
 	{
-		stateShow=1
+		/// Widget was shown with show() or implicit show()
+		stateShow=1,
+		/// Widget is visible on screen. Implies stateShow.
+		stateVisible=2
 	};
 
 public:// slots:
@@ -343,7 +346,7 @@ public:
 	 *
 	 * \return If the widget and all parents are visible, \c true is returned, else false.
 	 */
-	int isVisible() { return (state&stateShow) && ((!parent) || parent->isVisible()); }
+	int isVisible() { return (state&stateVisible) && ((!parent) || parent->isVisible()); }
 	
 	/**
 	 * \brief Possible focus directions.
