@@ -1,0 +1,10 @@
+<html>
+	<head>
+		<title>EPG Details</title>
+		<link rel="stylesheet" type="text/css" href="/webif.css">
+	</head>
+	<body>
+		<h1>#EVENT#</h1>
+		#BODY#
+	</body>
+</html>
