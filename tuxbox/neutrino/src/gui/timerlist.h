@@ -85,12 +85,10 @@ class CTimerList : public CMenuTarget
 		void updateEvents(void);
 		int  show();
 		int  exec(CMenuTarget* parent, std::string actionKey);
-		std::string convertTimerType2String(const CTimerd::CTimerEventTypes type); // UTF-8
-		std::string convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep); // UTF-8
+		const char * convertTimerType2String(const CTimerd::CTimerEventTypes type); // UTF-8
+		const char * convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep); // UTF-8
 		std::string convertChannelId2String(const t_channel_id id, const CTimerd::CChannelMode mode); // UTF-8
 };
 
 
 #endif
-
-

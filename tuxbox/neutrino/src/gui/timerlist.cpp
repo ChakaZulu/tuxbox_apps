@@ -47,6 +47,7 @@
 #include <gui/widget/hintbox.h>
 #include <gui/widget/icons.h>
 #include <gui/widget/stringinput.h>
+#include <gui/widget/stringinput_ext.h>
 
 #include <system/settings.h>
 
@@ -618,7 +619,7 @@ void CTimerList::paint()
 	visible = true;
 }
 
-std::string CTimerList::convertTimerType2String(const CTimerd::CTimerEventTypes type) // UTF-8
+const char * CTimerList::convertTimerType2String(const CTimerd::CTimerEventTypes type) // UTF-8
 {
 	switch(type)
 	{
@@ -633,7 +634,7 @@ std::string CTimerList::convertTimerType2String(const CTimerd::CTimerEventTypes 
 	}
 }
 
-std::string CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep) // UTF-8
+const char * CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep) // UTF-8
 {
 	switch(rep)
 	{
@@ -669,7 +670,7 @@ std::string CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRepe
 				weekdays >>= 1;
 				if(weekdays & 1)
 					weekdayStr+= g_Locale->getText("timerlist.repeat.sunday");
-				return weekdayStr;
+				return weekdayStr.c_str();
 			}
 			else
 				return g_Locale->getText("timerlist.repeat.unknown");

@@ -29,6 +29,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <system/setting_helpers.h>
+
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -45,8 +47,6 @@
 
 #include <gui/streaminfo.h>
 
-#include "setting_helpers.h"
-
 #include <gui/widget/messagebox.h>
 
 #include <gui/gamelist.h>
@@ -56,7 +56,7 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 extern "C" int pinghost( const char *hostname );
 
-bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
+bool CSatDiseqcNotifier::changeNotify(std::string OptionName, void* Data)
 {
 	if (*((int*) Data) == NO_DISEQC)
 	{
@@ -93,7 +93,7 @@ CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwa
 }
 
 
-bool CDHCPNotifier::changeNotify(string OptionName, void* data)
+bool CDHCPNotifier::changeNotify(std::string OptionName, void* data)
 {
 	CNeutrinoApp::getInstance()->networkConfig.inet_static = ((*(int*)(data)) == 0);
 	for(int x=0;x<5;x++)
@@ -113,7 +113,7 @@ CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
 
 }
 
-bool CStreamingNotifier::changeNotify(string OptionName, void*)
+bool CStreamingNotifier::changeNotify(std::string OptionName, void*)
 {
    if(g_settings.streaming_type==0)
    {
@@ -150,7 +150,7 @@ CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[5]=i6;
    toDisable[6]=i7;
 }
-bool CRecordingNotifier::changeNotify(string OptionName, void*)
+bool CRecordingNotifier::changeNotify(std::string OptionName, void*)
 {
    if(g_settings.recording_type==0)
    {
@@ -184,7 +184,7 @@ CRecordingNotifier2::CRecordingNotifier2( CMenuItem* i1)
 {
    toDisable[0]=i1;
 }
-bool CRecordingNotifier2::changeNotify(string OptionName, void*)
+bool CRecordingNotifier2::changeNotify(std::string OptionName, void*)
 {
    toDisable[0]->setActive(g_settings.recording_server_wakeup==1);
    return true;
@@ -194,13 +194,13 @@ CMiscNotifier::CMiscNotifier( CMenuItem* i1)
 {
    toDisable[0]=i1;
 }
-bool CMiscNotifier::changeNotify( string OptionName, void* )
+bool CMiscNotifier::changeNotify( std::string OptionName, void* )
 {
    toDisable[0]->setActive(!g_settings.shutdown_real);
    return true;
 }
 
-bool CConsoleDestChangeNotifier::changeNotify(string OptionName, void *Data)
+bool CConsoleDestChangeNotifier::changeNotify(std::string OptionName, void *Data)
 {
 	g_settings.uboot_console = *(int *)Data;
 
@@ -214,7 +214,7 @@ CLcdNotifier::CLcdNotifier(int *lcdPowerSetting, int *lcdInverseSetting, int *lc
 	LcdAutoDimmSetting = lcdAutoDimmSetting;
 }
 
-bool CLcdNotifier::changeNotify(string OptionName, void *Data)
+bool CLcdNotifier::changeNotify(std::string OptionName, void *Data)
 {
 	CLCD::getInstance()->setPower(*LcdPowerSetting == 1);
 	CLCD::getInstance()->setInverse(*LcdInverseSetting == 1);
@@ -224,7 +224,7 @@ bool CLcdNotifier::changeNotify(string OptionName, void *Data)
 }
 
 /*
-bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
+bool CCableSpectalInversionNotifier::changeNotify(std::string OptionName, void* Data)
 {
 	static bool messageShowed = false;
 	
@@ -251,17 +251,14 @@ bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 	return true;
 }
 */
-bool CPauseSectionsdNotifier::changeNotify(string OptionName, void* Data)
+bool CPauseSectionsdNotifier::changeNotify(std::string OptionName, void* Data)
 {
-	if( *((int*) Data)!=0)
-		g_Sectionsd->setPauseScanning(false);
-	else
-		g_Sectionsd->setPauseScanning(true);
+	g_Sectionsd->setPauseScanning((*((int *)Data)) == 0);
 
 	return true;
 }
 
-bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
+bool CStartNeutrinoDirectNotifier::changeNotify(std::string OptionName, void* Data)
 {
 	if( *((int*) Data)!=0)
 	{	//file anlegen (direktstart)
@@ -280,7 +277,7 @@ bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
 	return true;
 }
 
-bool CBHDriverNotifier::changeNotify(string OptionName, void* Data)
+bool CBHDriverNotifier::changeNotify(std::string OptionName, void* Data)
 {
 	if( *((int*) Data)!=0)
 	{	//file anlegen (BH Treiber laden)
@@ -299,7 +296,7 @@ bool CBHDriverNotifier::changeNotify(string OptionName, void* Data)
 	return true;
 }
 
-bool CIPChangeNotifier::changeNotify(string OptionName, void* Data)
+bool CIPChangeNotifier::changeNotify(std::string OptionName, void* Data)
 {
 	char ip[16];
 	unsigned char _ip[4];
@@ -313,7 +310,7 @@ bool CIPChangeNotifier::changeNotify(string OptionName, void* Data)
 	return true;
 }
 
-bool CColorSetupNotifier::changeNotify(string OptionName, void*)
+bool CColorSetupNotifier::changeNotify(std::string OptionName, void*)
 {
 	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
 //	unsigned char r,g,b;
@@ -366,7 +363,7 @@ bool CColorSetupNotifier::changeNotify(string OptionName, void*)
 	return false;
 }
 
-bool CAudioSetupNotifier::changeNotify(string OptionName, void*)
+bool CAudioSetupNotifier::changeNotify(std::string OptionName, void*)
 {
 	//printf("notify: %s\n", OptionName.c_str() );
 
@@ -385,7 +382,7 @@ bool CAudioSetupNotifier::changeNotify(string OptionName, void*)
 	return false;
 }
 
-bool CVideoSetupNotifier::changeNotify(string OptionName, void*)
+bool CVideoSetupNotifier::changeNotify(std::string OptionName, void*)
 {
 	if(OptionName=="videomenu.videosignal")
 	{
@@ -400,14 +397,14 @@ bool CVideoSetupNotifier::changeNotify(string OptionName, void*)
 	return false;
 }
 
-bool CLanguageSetupNotifier::changeNotify(string OptionName, void*)
+bool CLanguageSetupNotifier::changeNotify(std::string OptionName, void*)
 {
 	//	printf("language notify: %s - %s\n", OptionName.c_str(), g_settings.language );
 	g_Locale->loadLocale(g_settings.language);
 	return true;
 }
 
-bool CKeySetupNotifier::changeNotify(string OptionName, void*)
+bool CKeySetupNotifier::changeNotify(std::string OptionName, void*)
 {
 	//    printf("CKeySetupNotifier notify: %s\n", OptionName.c_str() );
 	g_RCInput->repeat_block = atoi(g_settings.repeat_blocker)* 1000;
@@ -415,7 +412,7 @@ bool CKeySetupNotifier::changeNotify(string OptionName, void*)
 	return false;
 }
 
-int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
+int CAPIDChangeExec::exec(CMenuTarget* parent, std::string actionKey)
 {
 	//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
 	unsigned int sel= atoi(actionKey.c_str());
@@ -427,7 +424,7 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 }
 
 
-int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
+int CNVODChangeExec::exec(CMenuTarget* parent, std::string actionKey)
 {
 	//    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
 	unsigned sel= atoi(actionKey.c_str());
@@ -438,7 +435,7 @@ int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 	return menu_return::RETURN_EXIT;
 }
 
-int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, string actionKey)
+int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, std::string actionKey)
 {
 	//printf("CStreamFeaturesChangeExec exec: %s\n", actionKey.c_str());
 	int sel= atoi(actionKey.c_str());
@@ -490,7 +487,7 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string actionKey)
 	return 1;
 }
 
-const std::string mypinghost(const char * const host)
+const char * mypinghost(const char * const host)
 {
 	int retvalue = pinghost(host);
 	switch (retvalue)

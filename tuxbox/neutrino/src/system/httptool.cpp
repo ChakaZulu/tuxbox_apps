@@ -19,13 +19,13 @@
 */
 
 
+#include <system/httptool.h>
+
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
 
 #include <global.h>
-
-#include "httptool.h"
 
 
 CHTTPTool::CHTTPTool()
@@ -56,7 +56,7 @@ int CHTTPTool::show_progress( void *clientp, size_t dltotal, size_t dlnow, size_
 	return 0;
 }
 
-bool CHTTPTool::downloadFile( string URL, string downloadTarget, int globalProgressEnd )
+bool CHTTPTool::downloadFile(std::string URL, std::string downloadTarget, int globalProgressEnd)
 {
 	CURL *curl;
 	CURLcode res;

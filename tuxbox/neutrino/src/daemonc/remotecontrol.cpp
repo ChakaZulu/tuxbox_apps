@@ -29,10 +29,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <global.h>
+#include <daemonc/remotecontrol.h>
 
-#include "remotecontrol.h"
-#include "neutrino.h"
+#include <global.h>
+#include <neutrino.h>
 
 
 CSubService::CSubService(const t_original_network_id anoriginal_network_id, const t_service_id aservice_id, const t_transport_stream_id atransport_stream_id, const std::string &asubservice_name)
@@ -256,8 +256,8 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 	{
 		if ( data == current_channel_id )
 		{
-		    needs_nvods = true;
-			CLCD::getInstance()->showServicename(std::string("[") + current_channel_name + std::string("]")); // UTF-8
+			needs_nvods = true;
+			CLCD::getInstance()->showServicename(std::string("[") + current_channel_name + ']'); // UTF-8
 			if ( current_EPGid != 0)
 			{
 				getNVODs();

@@ -33,11 +33,10 @@
 #ifndef __flashtool__
 #define __flashtool__
 
+#include <gui/widget/progressstatus.h>
+
 #include <string>
 #include <vector>
-
-
-#include <gui/widget/progressstatus.h>
 
 
 class CFlashTool
@@ -113,18 +112,17 @@ class CMTDInfo
 		int getMTDCount();
 
 		//mtdinfos abfragen (nach mtdnummer)
-		std::string getMTDName( int pos );
-		std::string getMTDFileName( int pos );
-		int getMTDSize( int pos );
-		int getMTDEraseSize( int pos );
+		std::string getMTDName(const int pos );
+		std::string getMTDFileName(const int pos );
+		int getMTDSize(const int pos );
+		int getMTDEraseSize(const int pos );
 
 		//mtdinfos abfragen (nach mtd-filename)
-		std::string getMTDName( std::string filename );
-		std::string getMTDFileName( std::string filename );
+		std::string getMTDName(const std::string filename);
 		int getMTDSize( std::string filename );
 		int getMTDEraseSize( std::string filename );
 
-		int findMTDNumber( std::string filename );
+		int findMTDNumber(const std::string & filename);
 
 };
 

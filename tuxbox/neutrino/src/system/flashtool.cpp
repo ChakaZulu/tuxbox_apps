@@ -23,7 +23,7 @@
 #include <config.h>
 #endif
 
-#include "flashtool.h"
+#include <system/flashtool.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -77,13 +77,13 @@ bool CFlashTool::readFromMTD( std::string filename, int globalProgressEnd )
 		statusViewer->showLocalStatus(0);
 	}
 
-	if(mtdDevice=="")
+	if (mtdDevice.empty())
 	{
 		ErrorMessage = "mtd-device not set";
 		return false;
 	}
 
-	if(filename=="")
+	if (filename.empty())
 	{
 		ErrorMessage = "filename not set";
 		return false;
@@ -153,13 +153,13 @@ bool CFlashTool::program( std::string filename, int globalProgressEndErase, int 
 		statusViewer->showLocalStatus(0);
 	}
 
-	if(mtdDevice=="")
+	if (mtdDevice.empty())
 	{
 		ErrorMessage = "mtd-device not set";
 		return false;
 	}
 
-	if(filename=="")
+	if (filename.empty())
 	{
 		ErrorMessage = "filename not set";
 		return false;
@@ -451,7 +451,7 @@ void CMTDInfo::getPartitionInfo()
 				tmp->size = mtdsize;
 				tmp->erasesize = mtderasesize;
 				std::string tmpstr = buf;
-				tmp->name = tmpstr.substr( tmpstr.find("\"")+1, tmpstr.rfind("\"")-tmpstr.find("\"")-1);
+				tmp->name = tmpstr.substr( tmpstr.find('\"')+1, tmpstr.rfind('\"')-tmpstr.find('\"')-1);
 				sprintf((char*) &buf, "/dev/mtd/%d", mtdnr);
 				tmp->filename = buf;
 			mtdData.push_back(tmp);
@@ -475,22 +475,22 @@ std::string CMTDInfo::getMTDName(const int pos)
 #endif
 }
 
-std::string CMTDInfo::getMTDFileName( int pos )
+std::string CMTDInfo::getMTDFileName(const int pos)
 {
 	return mtdData[pos]->filename;
 }
 
-int CMTDInfo::getMTDSize( int pos )
+int CMTDInfo::getMTDSize(const int pos)
 {
 	return mtdData[pos]->size;
 }
 
-int CMTDInfo::getMTDEraseSize( int pos )
+int CMTDInfo::getMTDEraseSize(const int pos)
 {
 	return mtdData[pos]->erasesize;
 }
 
-int CMTDInfo::findMTDNumber( std::string filename )
+int CMTDInfo::findMTDNumber(const std::string & filename)
 {
 	for(int x=0;x<getMTDCount();x++)
 	{
@@ -502,14 +502,9 @@ int CMTDInfo::findMTDNumber( std::string filename )
 	return -1;
 }
 
-std::string CMTDInfo::getMTDName( std::string filename )
+std::string CMTDInfo::getMTDName(const std::string filename)
 {
 	return getMTDName( findMTDNumber(filename) );
-}
-
-std::string CMTDInfo::getMTDFileName( std::string filename )
-{
-	return getMTDFileName( findMTDNumber(filename) );
 }
 
 int CMTDInfo::getMTDSize( std::string filename )

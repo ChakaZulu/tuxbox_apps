@@ -33,17 +33,14 @@
 #ifndef __httptool__
 #define __httptool__
 
-#include <string>
-
 #include <gui/widget/progressstatus.h>
 
-
-using namespace std;
+#include <string>
 
 class CHTTPTool
 {
 	private:
-		string userAgent;
+		std::string userAgent;
 		int	iGlobalProgressEnd;
 		int	iGlobalProgressBegin;
 
@@ -54,7 +51,7 @@ class CHTTPTool
 		CHTTPTool();
 		void setStatusViewer( CProgress_StatusViewer* statusview );
 
-		bool downloadFile( string URL, string downloadTarget, int globalProgressEnd=-1 );
+		bool downloadFile( std::string URL, std::string downloadTarget, int globalProgressEnd=-1 );
 
 };
 
