@@ -43,6 +43,7 @@ std::set<int> eSystemInfo::getCAIDs()
 	std::set<int> i;
 	i.insert(0x1702);
 	i.insert(0x1722);
+	i.insert(0x1762);
 	return i;
 }
 
