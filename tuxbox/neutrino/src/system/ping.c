@@ -116,12 +116,14 @@ send_ping( const char *host, struct sockaddr_in *taddr )
 #ifdef  DEBUG
   perror( "sock" );
 #endif/*DEBUG*/
+    close( sock );
     return -2;
   }
   if( ss != len ){
 #ifdef  DEBUG
   perror( "malformed packet" );
 #endif/*DEBUG*/
+    close( sock );
     return -2;
   }
 
@@ -220,7 +222,6 @@ myping( const char *hostname, int t )
 
   (void) gettimeofday( &mytime, (struct timezone *)NULL); 
   if(( err = send_ping( hostname, &sa )) < 0 ){
-    close( sock );
     return err;
   }
   do{
