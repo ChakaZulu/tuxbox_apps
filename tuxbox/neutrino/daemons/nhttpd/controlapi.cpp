@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.20 2003/03/27 00:35:04 dirch Exp $
+	$Id: controlapi.cpp,v 1.21 2003/04/23 18:02:45 zwen Exp $
 
 	License: GPL
 
@@ -863,7 +863,7 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 			break;
 		}
 
-		request->printf("%d %d %d %d %d %d %d %s\n",
+		request->printf("%d %d %d %d %d %d %s\n",
 			timer->eventID,
 			(int)timer->eventType,
 			(int)timer->eventRepeat,

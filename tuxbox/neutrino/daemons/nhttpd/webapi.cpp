@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.37 2003/03/27 00:35:04 dirch Exp $
+	$Id: webapi.cpp,v 1.38 2003/04/23 18:02:45 zwen Exp $
 
 	License: GPL
 
@@ -859,7 +859,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 					if(channel == channellist_tv.end())
 						sAddData="Unbekannter TV-Kanal";
 				}
-				if(timer->apids!="")
+				if(strlen(timer->apids) > 0)
 				{
 					sAddData+= string("(") + timer->apids + ")";
 				}
