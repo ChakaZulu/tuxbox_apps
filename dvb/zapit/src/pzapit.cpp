@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.5 2002/03/28 18:07:34 obi Exp $
+ * $Id: pzapit.cpp,v 1.6 2002/04/07 02:30:24 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -37,16 +37,18 @@ int main (int argc, char** argv)
 	unsigned int bouquet;
 	unsigned int channel;
 	unsigned int count;
-	bool show_bouquets;
-	bool show_channels;
-	bool zap;
+
+	int satmask;
+	
+	bool scan = false;
+	bool show_bouquets = false;
+	bool show_channels = false;
+	bool zap = false;
 
 	/* commandline parameters */
 	if (argc == 1)
 	{
-		zap = false;
 		show_bouquets = true;
-		show_channels = false;
 	}
 	else if (argc == 2)
 	{
@@ -56,31 +58,43 @@ int main (int argc, char** argv)
 		}
 		else
 		{
-			zap = false;
-			show_bouquets = false;
 			show_channels = true;
 			sscanf(argv[1], "%d", &bouquet);
 		}
 	}
 	else if (argc == 3)
 	{
-		zap = true;
-		show_bouquets = false;
-		show_channels = false;
-		sscanf(argv[1], "%d", &bouquet);
-       		sscanf(argv[2], "%d", &channel);
+		if (!strncmp(argv[1], "-s", 2))
+		{
+			sscanf(argv[2], "%d", &satmask);
+			scan = true;
+		}
+		else
+		{
+			zap = true;
+			sscanf(argv[1], "%d", &bouquet);
+			sscanf(argv[2], "%d", &channel);
+		}
 	}
 	else
 	{
 		return usage(argv[0]);
 	}
 
+	CZapitClient *zapit = new CZapitClient();
 	std::vector<CZapitClient::responseGetBouquets> bouquets;
 	std::vector<CZapitClient::responseGetBouquetChannels> channels;
 
-	CZapitClient *zapit = new CZapitClient();
-	zapit->getBouquets(bouquets, true);
-	zapit->getBouquetChannels(bouquet, channels);
+	if (scan)
+	{
+		printf("starting scan, satmask %d\n", satmask);
+		zapit->startScan(satmask);
+	}
+	else
+	{
+		zapit->getBouquets(bouquets, true);
+		zapit->getBouquetChannels(bouquet, channels);
+	}
 
 	if (show_bouquets)
 	{
