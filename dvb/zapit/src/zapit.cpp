@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.142 2002/04/20 16:23:47 obi Exp $
+ * $Id: zapit.cpp,v 1.143 2002/04/20 16:45:36 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1863,7 +1863,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.142 2002/04/20 16:23:47 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.143 2002/04/20 16:45:36 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2347,6 +2347,11 @@ int stopPlayBack()
 
 	if (video_fd != -1)
 	{
+		if (ioctl(video_fd, VIDEO_STOP, 1) < 0)
+		{
+			perror("[zapit] VIDEO_STOP");
+		}
+
 		close(video_fd);
 		video_fd = -1;
 	}
