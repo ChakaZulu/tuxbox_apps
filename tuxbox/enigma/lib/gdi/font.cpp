@@ -26,7 +26,7 @@
 #endif
 
 #include <map>
-
+        
 fontRenderClass *fontRenderClass::instance;
 
 static pthread_mutex_t ftlock = 
@@ -121,22 +121,22 @@ eString fontRenderClass::AddFont(const eString &filename, const eString &name, i
 {
 	eDebugNoNewLine("[FONT] adding font %s...", filename.c_str());
 	int error;
-
-	{
-		FT_Face face;
-		singleLock s(ftlock);
-		if ((error=FT_New_Face(library, filename.c_str(), 0, &face)))
-			eFatal(" failed: %s", strerror(error));
-		FT_Done_Face(face);
-	}
-
 	fontListEntry *n=new fontListEntry;
+
 	n->scale=scale;
+	FT_Face face;
+	singleLock s(ftlock);
+
+	if ((error=FT_New_Face(library, filename.c_str(), 0, &face)))
+		eFatal(" failed: %s", strerror(error));
+
 	n->filename=filename;
 	n->face=name;
+	FT_Done_Face(face);
+
 	n->next=font;
-	font=n;
 	eDebug("OK (%s)", n->face.c_str());
+	font=n;
 
 	return n->face;
 }
@@ -191,16 +191,13 @@ float fontRenderClass::getLineHeight(const gFont& font)
 	Font *fnt = getFont( font.family.c_str(), font.pointSize);
 	if (!fnt)
 		return 0;
-
+	singleLock s(ftlock);
 	FT_Face current_face;
+	if (FTC_Manager_Lookup_Size(cacheManager, &fnt->font.font, &current_face, &fnt->size)<0)
 	{
-		singleLock s(ftlock);
-		if (FTC_Manager_Lookup_Size(cacheManager, &fnt->font.font, &current_face, &fnt->size)<0)
-		{
-			delete fnt;
-			eDebug("FTC_Manager_Lookup_Size failed!");
-			return 0;
-		}
+		delete fnt;
+		eDebug("FTC_Manager_Lookup_Size failed!");
+		return 0;
 	}
 	int linegap=current_face->size->metrics.height-(current_face->size->metrics.ascender+current_face->size->metrics.descender);
 	float height=(current_face->size->metrics.ascender+current_face->size->metrics.descender+linegap/2.0)/64;
@@ -211,6 +208,7 @@ float fontRenderClass::getLineHeight(const gFont& font)
 
 fontRenderClass::~fontRenderClass()
 {
+	singleLock s(ftlock);
 	while(font)
 	{
 		fontListEntry *f=font;
@@ -440,10 +438,11 @@ void eTextPara::setFont(Font *fnt, Font *replacement)
 			delete replacement_font;
 	}
 	replacement_font=replacement;
+	singleLock s(ftlock);
+
 			// we ask for replacment_font first becauseof the cache
 	if (replacement_font)
 	{
-		singleLock s(ftlock);
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, 
 				&replacement_font->font.font, &replacement_face, 
 				&replacement_font->size)<0)
@@ -454,7 +453,6 @@ void eTextPara::setFont(Font *fnt, Font *replacement)
 	}
 	if (current_font)
 	{
-		singleLock s(ftlock);
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 		{
 			eDebug("FTC_Manager_Lookup_Size failed!");
@@ -471,12 +469,14 @@ shape (std::vector<unsigned long> &string, const std::vector<unsigned long> &tex
 
 int eTextPara::renderString(const eString &string, int rflags)
 {
+	singleLock s(ftlock);
+	
 	if (refcnt)
 		eFatal("mod. after lock");
 
 	if (!current_font)
 		return -1;
-
+		
 	if (cursor.y()==-1)
 	{
 		cursor=ePoint(area.x(), area.y()+(current_face->size->metrics.ascender>>6));
@@ -485,7 +485,6 @@ int eTextPara::renderString(const eString &string, int rflags)
 		
 	if (&current_font->font.font != cache_current_font)
 	{
-		singleLock s(ftlock);
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 		{
 			eDebug("FTC_Manager_Lookup_Size failed!");
@@ -616,8 +615,8 @@ nprint:	isprintable=0;
 		}
 		if (isprintable)
 		{
-			singleLock s(ftlock);
 			FT_UInt index;
+
 			index=(rflags&RS_DIRECT)? *i : FT_Get_Char_Index(current_face, *i);
 
 			if (!index)
@@ -644,12 +643,13 @@ nprint:	isprintable=0;
 
 void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background, const gRGB &foreground)
 {
+	singleLock s(ftlock);
+	
 	if (!current_font)
 		return;
 
 	if (&current_font->font.font != cache_current_font)
 	{
-		singleLock s(ftlock);
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 		{
 			eDebug("FTC_Manager_Lookup_Size failed!");
@@ -864,6 +864,8 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 
 void eTextPara::clear()
 {
+	singleLock s(ftlock);
+
 	if ( current_font && !current_font->ref )
 		delete current_font;
 
