@@ -17,7 +17,7 @@ mainmenu.streaming_stop stop
 
 servicemenu.head Service
 servicemenu.update Software-Aktualisierung
-servicemenu.scants Transponderscan
+servicemenu.scants Kanalsuche
 servicemenu.ucodecheck UCodes überprüfen
 
 cablesetup.spectralInversion Spectrale Inversion
@@ -169,7 +169,7 @@ screensetup.upperleft rot = Bildrand oben, links
 screensetup.lowerright grün = Bildrand unten, rechts
 
 channellist.head Alle Kanäle
-channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte einen Kanal-Scan durch\n(dbox-Taste -> Service)
+channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte eine Kanalsuche durch\n(dbox-Taste -> Service)
 channellist.since seit %02d:%02d
 
 infoviewer.epgnotload Informationen noch nicht geladen...
@@ -241,8 +241,8 @@ date.Dec  Dez
 nvod.starting (Beginn in %d min)
 nvod.proz (%d%% vorbei)
 
-scants.head Transponderscan
-scants.startnow Scan starten
+scants.head Kanalsuche
+scants.startnow Kanalsuche starten
 scants.actsatellite Satellit:
 scants.astra Astra
 scants.hotbird Hotbird
@@ -257,7 +257,7 @@ scants.bouquet Bouquets
 scants.bouquet_leave nicht ändern
 scants.bouquet_create neu erstellen
 scants.bouquet_erase löschen
-scants.finished Transponderscan erfolgreich beendet!
+scants.finished Kanalsuche erfolgreich beendet!
 
 flashupdate.head Aktualisierung
 flashupdate.action Aktion:
