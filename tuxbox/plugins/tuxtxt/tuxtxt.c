@@ -132,7 +132,7 @@ void savehotlist()
 	}
 	else
 	{
-		remove(line); /* remove current hotlist file */
+		unlink(line); /* remove current hotlist file */
 #if DEBUG
 		printf(" (default - just deleted)");
 #endif
@@ -422,7 +422,7 @@ void RenderClearMenuLineBB(char *p, int attrcol, int attr)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.58 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.59 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -2488,15 +2488,15 @@ void RenderCatchedPage()
 		zoom = 1<<10;
 
 	/* restore pagenumber */
-	if (pc_old_row || pc_old_col) /* not at first call */
+	PosX = StartX + pc_old_col*type0.font.pix_width;
+
+	if (zoommode == 2)
+		PosY = StartY + (pc_old_row-12)*fixfontheight*((zoom>>10)+1);
+	else
+		PosY = StartY + pc_old_row*fixfontheight*((zoom>>10)+1);
+
+	if (pc_old_row && pc_old_col) /* not at first call */
 	{
-		PosX = StartX + pc_old_col*type0.font.pix_width;
-
-		if (zoommode == 2)
-			PosY = StartY + (pc_old_row-12)*fixfontheight*((zoom>>10)+1);
-		else
-			PosY = StartY + pc_old_row*fixfontheight*((zoom>>10)+1);
-
 		RenderCharFB(page_char[pc_old_row*40 + pc_old_col    ], page_atrb[pc_old_row*40 + pc_old_col    ]);
 		RenderCharFB(page_char[pc_old_row*40 + pc_old_col + 1], page_atrb[pc_old_row*40 + pc_old_col + 1]);
 		RenderCharFB(page_char[pc_old_row*40 + pc_old_col + 2], page_atrb[pc_old_row*40 + pc_old_col + 2]);
