@@ -199,6 +199,20 @@ bool CFlashTool::erase()
 CHTTPUpdater::CHTTPUpdater()
 {
 	BasePath = "http://dboxupdate.berlios.de/update/";
+	//use other path?
+	FILE* fd = fopen("/var/etc/update.conf", "r");
+	if(fd)
+	{
+		char buf[1000];
+		char buf2[1000];
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			sscanf(buf, "basepath: %s\n", &buf2);
+		}
+		fclose(fd);
+		BasePath = buf2;
+		printf("useing HTTP-Basepath: %s\n", BasePath.c_str() );
+	}
 	statusViewer = NULL;
 }
 
