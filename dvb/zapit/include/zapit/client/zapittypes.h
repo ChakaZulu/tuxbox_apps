@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.12 2003/05/28 18:43:14 digi_casi Exp $
+ * $Id: zapittypes.h,v 1.13 2003/06/01 16:59:52 digi_casi Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -35,12 +35,21 @@ typedef uint16_t t_original_network_id;
 #define SCANF_ORIGINAL_NETWORK_ID_TYPE "%hx"
 
 typedef uint16_t t_transport_stream_id;
+#define SCANF_TRANSPORT_STREAM_ID_TYPE "%hx"
+
+typedef uint16_t t_satellite_position;
+#define SCANF_SATELLITE_POSITION_TYPE "%hx"
+
 typedef uint16_t t_network_id;
 
 /* unique channel identification */
 typedef uint32_t t_channel_id;
 #define CREATE_CHANNEL_ID ((original_network_id << 16) | service_id)
 #define PRINTF_CHANNEL_ID_TYPE "%08x"
+
+typedef uint64_t t_channel_id64;
+#define CREATE_CHANNEL_ID64 (((uint64_t)satellitePosition << 48) | ((uint64_t) transport_stream_id << 32) | ((uint64_t)original_network_id << 16) | (uint64_t)service_id)
+#define PRINTF_CHANNEL_ID64_TYPE "%16llx"
 
 /* diseqc types */
 typedef enum {
