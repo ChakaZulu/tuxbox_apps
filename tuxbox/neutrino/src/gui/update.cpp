@@ -112,7 +112,7 @@ bool CFlashUpdate::getInfo()
 {
 	CHTTPTool httpTool;
 	httpTool.setStatusViewer( this );
-	showStatusMessage( g_Locale->getText("flashupdate.getinfofile") );
+	showStatusMessage(g_Locale->getText("flashupdate.getinfofile"), true); // UTF-8
 	string gURL = BasePath + VersionFile;
 	string sFileName = gTmpPath+ VersionFile;
 
@@ -120,12 +120,12 @@ bool CFlashUpdate::getInfo()
 	return httpTool.downloadFile( gURL, sFileName, 20 );
 }
 
-bool CFlashUpdate::getUpdateImage( string version )
+bool CFlashUpdate::getUpdateImage(std::string version)
 {
 	CHTTPTool httpTool;
 	httpTool.setStatusViewer( this );
 
-	showStatusMessage( g_Locale->getText("flashupdate.getupdatefile")+ " " + version );
+	showStatusMessage((g_Locale->getText("flashupdate.getupdatefile")+ " " + version), true); // UTF-8
 	string gURL = BasePath + ImageFile;
 	string sFileName = gTmpPath+ ImageFile;
 
@@ -146,7 +146,7 @@ bool CFlashUpdate::checkVersion4Update()
 
 		showLocalStatus(100);
 		showGlobalStatus(20);
-		showStatusMessage(g_Locale->getText("flashupdate.versioncheck").c_str());
+		showStatusMessage(g_Locale->getText("flashupdate.versioncheck"), true); // UTF-8
 
 
 		string sFileName = gTmpPath+VersionFile;
@@ -277,7 +277,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	string sFileName = gTmpPath+ ImageFile;
 
 	//image-check
-	showStatusMessage(g_Locale->getText("flashupdate.md5check") );
+	showStatusMessage(g_Locale->getText("flashupdate.md5check"), true); // UTF-8
 	if(!ft.check_cramfs(sFileName))
 	{
 		hide();
@@ -299,7 +299,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 
 	//status anzeigen
 	showGlobalStatus(100);
-	showStatusMessage( g_Locale->getText("flashupdate.ready") );
+	showStatusMessage(g_Locale->getText("flashupdate.ready"), true); // UTF-8
 
 	hide();
 	ShowHintUTF("messagebox.info", g_Locale->getText("flashupdate.flashreadyreboot")); // UTF-8
@@ -334,19 +334,19 @@ void CFlashExpert::readmtd(int readmtd)
 	setTitle(g_Locale->getText("flashupdate.titlereadflash")); // UTF-8
 	paint();
 	showGlobalStatus(0);
-	showStatusMessage(g_Locale->getText("flashupdate.actionreadflash") + " (" + string(CMTDInfo::getInstance()->getMTDName(readmtd)) + ")");
+	showStatusMessage((g_Locale->getText("flashupdate.actionreadflash") + " (" + string(CMTDInfo::getInstance()->getMTDName(readmtd)) + ")"));
 	CFlashTool ft;
 	ft.setStatusViewer( this );
 	ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(readmtd));
 	if(!ft.readFromMTD(filename, 100))
 	{
-		showStatusMessage( ft.getErrorMessage() );
+		showStatusMessage(ft.getErrorMessage());
 		sleep(10);
 	}
 	else
 	{
 		showGlobalStatus(100);
-		showStatusMessage( g_Locale->getText("flashupdate.ready"));
+		showStatusMessage(g_Locale->getText("flashupdate.ready"), true); // UTF-8
 		char message[500];
 		sprintf(message, g_Locale->getText("flashupdate.savesuccess").c_str(), filename.c_str() );
 		sleep(1);
@@ -372,13 +372,13 @@ void CFlashExpert::writemtd(string filename, int mtdNumber)
 	ft.setMTDDevice( CMTDInfo::getInstance()->getMTDFileName(mtdNumber) );
 	if(!ft.program( "/tmp/" + filename, 50, 100))
 	{
-		showStatusMessage( ft.getErrorMessage() );
+		showStatusMessage(ft.getErrorMessage());
 		sleep(10);
 	}
 	else
 	{
 		showGlobalStatus(100);
-		showStatusMessage( g_Locale->getText("flashupdate.ready"));
+		showStatusMessage(g_Locale->getText("flashupdate.ready"), true); // UTF-8
 		sleep(1);
 		hide();
 		ShowHintUTF("messagebox.info", g_Locale->getText("flashupdate.flashreadyreboot")); // UTF-8

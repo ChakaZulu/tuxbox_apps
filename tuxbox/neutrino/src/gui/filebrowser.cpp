@@ -527,7 +527,11 @@ CFile file;
 	{
 		if(progress)
 		{
-			progress->showStatusMessage(rpath);
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+			progress->showStatusMessage(rpath, false); // ISO-8859-1
+#else
+			progress->showStatusMessage(rpath, true); // UTF-8
+#endif
 		}
 		for(int i = 0; i < n;i++)
 		{

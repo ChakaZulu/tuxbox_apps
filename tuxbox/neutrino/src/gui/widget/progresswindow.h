@@ -25,13 +25,12 @@
 #ifndef __progresswindow__
 #define __progresswindow__
 
-#include <string>
-
 #include <driver/framebuffer.h>
 
 #include "progressstatus.h"
 #include "menue.h"
 
+#include <string>
 
 class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 {
@@ -46,11 +45,13 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 		int height;
 		int hheight; // head font height
 		int mheight; // menu font height
-		int globalstatus; 
+		unsigned int global_progress;
+		unsigned int local_progress;
 		int globalstatusX;
 		int globalstatusY;
 		int localstatusY;
 		int statusTextY;
+		bool utf8encoded;
 		std::string statusText;
 
 
@@ -66,11 +67,10 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 
 		virtual int exec( CMenuTarget* parent, std::string actionKey );
 
-		virtual void showGlobalStatus(int prog);
-		virtual int getGlobalStatus();
-		virtual void showLocalStatus(int prog);
-		virtual void showStatusMessage(std::string text);
-
+		virtual void showGlobalStatus(const unsigned int prog);
+		virtual unsigned int getGlobalStatus(void);
+		virtual void showLocalStatus(const unsigned int prog);
+		virtual void showStatusMessage(const std::string text, const bool utf8_encoded = false);
 };
 
 

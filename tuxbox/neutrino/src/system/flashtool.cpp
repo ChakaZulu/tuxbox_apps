@@ -184,7 +184,7 @@ bool CFlashTool::program( string filename, int globalProgressEndErase, int globa
 	if(statusViewer)
 	{
 		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.eraseingflash"));
+		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.eraseingflash"), true); // UTF-8
 	}
 
 	//jetzt wirds kritisch - daher filehandle auf fp öffen um reset machen zu können
@@ -206,7 +206,7 @@ bool CFlashTool::program( string filename, int globalProgressEndErase, int globa
 			statusViewer->showGlobalStatus(globalProgressEndErase);
 		}
 		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.programmingflash"));
+		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.programmingflash"), true); // UTF-8
 	}
 
 	if( (fd2 = open( mtdDevice.c_str(), O_WRONLY )) < 0 )
