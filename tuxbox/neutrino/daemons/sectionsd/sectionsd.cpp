@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.110 2002/04/06 20:01:50 Simplex Exp $
+//  $Id: sectionsd.cpp,v 1.111 2002/04/08 18:46:06 Simplex Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.111  2002/04/08 18:46:06  Simplex
+//  checks availability of timerd
+//
 //  Revision 1.110  2002/04/06 20:01:50  Simplex
 //  - made EVT_NEXTPROGRAM work
 //  - communication with timerd should be changed to eventserver
@@ -606,9 +609,10 @@ static void addEvent(const SIevent &evt)
                 {
                 	time_t actTime_t;
                 	::time(&actTime_t);
-                	if (it->startzeit > actTime_t)
+                	if (it->startzeit + it->dauer > actTime_t)
                 	{
-                		struct tm* startTime = localtime( &(it->startzeit));
+                		time_t kurzvorStartzeit = it->startzeit/* - 60*/;
+                		struct tm* startTime = localtime( &(kurzvorStartzeit));
                 		timerdClient->addTimerEvent(
                 			CTimerdClient::TIMER_NEXTPROGRAM,
                 			&evInfo,
@@ -1543,7 +1547,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.110 2002/04/06 20:01:50 Simplex Exp $\n"
+    "$Id: sectionsd.cpp,v 1.111 2002/04/08 18:46:06 Simplex Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -3577,7 +3581,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.110 2002/04/06 20:01:50 Simplex Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.111 2002/04/08 18:46:06 Simplex Exp $\n");
 	try
 	{
 
@@ -3590,11 +3594,6 @@ int main(int argc, char **argv)
 		{
 			if(!strcmp(argv[1], "-d"))
 				debug=1;
-			else if(!strcmp(argv[1], "-t"))
-			{
-				timerd=true;
-				printf("[sectionsd] using timerd");
-			}
 			else
 			{
 				printHelp();
@@ -3653,6 +3652,13 @@ int main(int argc, char **argv)
 
 		eventServer = new CEventServer;
 		timerdClient = new CTimerdClient;
+
+		printf("[sectionsd ] checking timerd\n");
+		timerd = timerdClient->isTimerdAvailable();
+		if (timerd)
+			printf("[sectionsd ] timerd available\n");
+		else
+			printf("[sectionsd ] timerd NOT available\n");
 
 		// SDT-Thread starten
 		rc=pthread_create(&threadSDT, 0, sdtThread, 0);
