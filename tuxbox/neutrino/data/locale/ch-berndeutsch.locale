@@ -512,7 +512,7 @@ nfs.ip NFS/CIFS Sörver IP
 nfs.localdir lokaus Verzeichnis
 nfs.mount NFS/CIFS Verzeichnis mounte
 nfs.mount_options Mount-Optione
-nfs.mounterror Mount-Fähler: lade default-Ischtöuige
+nfs.mounterror Mount-Fähler
 nfs.mounterror_notsup Dateisystem-Typ wird nid ungerstützt
 nfs.mountnow Jetz mounte
 nfs.mounttimeout Mount-Fehler: Timeout

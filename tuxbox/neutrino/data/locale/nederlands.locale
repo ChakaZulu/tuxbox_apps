@@ -474,7 +474,7 @@ nfs.ip NFS/CIFS Server IP
 nfs.localdir plaatselijke directory
 nfs.mount Mount NFS/CIFS volume
 nfs.mount_options mountoptie's
-nfs.mounterror mountfout: laden standaardwaarden
+nfs.mounterror mountfout
 nfs.mounterror_notsup Type filesysteem niet ondersteund
 nfs.mountnow direct mounten
 nfs.mounttimeout mountfout: timeout

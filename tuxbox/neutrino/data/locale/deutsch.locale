@@ -536,7 +536,7 @@ nfs.ip NFS/CIFS Server IP
 nfs.localdir lokales Verzeichnis
 nfs.mount NFS/CIFS Verzeichnis mounten
 nfs.mount_options Mount-Optionen
-nfs.mounterror Mount-Fehler: lade default-Einstellungen
+nfs.mounterror Mount-Fehler
 nfs.mounterror_notsup Dateisystem-Typ wird nicht unterstützt.
 nfs.mountnow Jetzt mounten
 nfs.mounttimeout Mount-Fehler: Timeout

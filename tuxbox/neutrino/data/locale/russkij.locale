@@ -535,7 +535,6 @@ nfs.ip IP-адрес сервера NFS/CIFS
 nfs.localdir Локальный каталог
 nfs.mount Монтировать NFS/CIFS раздел
 nfs.mount_options Опции монтирования
-nfs.mounterror mount error: loading default values
 nfs.mounterror_notsup Тип файловой системы не поддерживается
 nfs.mountnow Монтировать сейчас
 nfs.mounttimeout mount error: таймаут

@@ -498,7 +498,7 @@ nfs.ip NFS/CIFS Server IP
 nfs.localdir local dir
 nfs.mount Mount NFS/CIFS volume
 nfs.mount_options mount options
-nfs.mounterror mount error: loading default values
+nfs.mounterror mount error
 nfs.mounterror_notsup filesystem type not supported
 nfs.mountnow mount now
 nfs.mounttimeout mount error: timeout
