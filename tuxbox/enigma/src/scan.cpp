@@ -178,11 +178,11 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 
 void tsFindInit::tunedIn(eTransponder *trans, int error)
 {
-  static std::list<eTransponder*>::iterator current = packets.current()->possibleTransponders.begin();
-
 	if (!packets.current())
 		return;
-	
+
+  static std::list<eTransponder*>::iterator current = packets.current()->possibleTransponders.begin();
+
 	if (trans != *current)
 		return;
 
@@ -192,14 +192,18 @@ void tsFindInit::tunedIn(eTransponder *trans, int error)
 		body->setFlags(RS_WRAP);
 		body->setText("Es wurde ein Transponder gefunden, die Suche kann nun beginnen.");
 		result=packets.take();
-	} else
+	}
+	else
 	{
-		eTransponder *n = ++current != packets.current()->possibleTransponders.end()?*current:0;
-		if (n)
+		eTransponder *n = (++current != packets.current()->possibleTransponders.end()?*current:0);
+
+		if (!n)
 		{
 			packets.next();
+			current = packets.current()->possibleTransponders.begin();
 			scanPacket();
-		}	else
+		}	
+		else
 			n->tune();
 	}
 }
