@@ -2095,6 +2095,7 @@ struct getEntryString
 			<< "ref=" << ref2string(se->service)
 			<< "&start=" << se->time_begin
 			<< "&type=" << se->type
+			<< "&force=no"
 			<< "\')\"><img src=\"trash.gif\" border=0 height=20></a></td>";
 		if (!repeating)
 		{
@@ -3839,6 +3840,8 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 	eString serviceRef = opt["ref"];
 	eString eventType = opt["type"];
 	eString eventStartTime = opt["start"];
+	eString force = opt["force"];
+	eString result;
 
 	eDebug("[ENIGMA_DYN] deleteTimerEvent: serviceRef = %s, type = %s, start = %s", serviceRef.c_str(), eventType.c_str(), eventStartTime.c_str());
 
@@ -3847,19 +3850,29 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 		atoi(eventStartTime.c_str()),
 		-1, -1, atoi(eventType.c_str()));
 
-	int ret = eTimerManager::getInstance()->deleteEventFromTimerList(e);
-#if 0	
+	int ret = eTimerManager::getInstance()->deleteEventFromTimerList(e, (force == "yes"));
+
 	if ( ret == -1 )  // event currently running...
 	{
-		// TODO ask user if he realy want to do this..
-		// then call deleteEventFromtTimerList again.. with true as third parameter..
+		// ask user if he really wants to do this..
+		// then call deleteEventFromtTimerList again.. with true as second parameter..
 		// then the running event will aborted
+		content->local_header["Content-Type"]="text/html; charset=utf-8";
+		result = readFile(TEMPLATE_DIR + "queryDeleteTimer.tmp");
+		opts.strReplace("force=no", "force=yes");
+		if (opts.find("?") != 0)
+			opts = "?" + opts;
+		result.strReplace("#URL#", "/deleteTimerEvent" + opts);
 	}
-#endif
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	else
+	{
+		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		content->code=204;
+		content->code_descr="No Content";
+		result = NOCONTENT;
+	}
+
+	return result;
 }
 
 static eString genOptions(int start, int end, int delta, int selected)
@@ -3902,6 +3915,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	eString description = httpUnescape(opt["descr"]);
 	eString channel = httpUnescape(opt["channel"]);
 	eString after_event = opt["after_event"];
+	eString force = opt["force"];
 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
@@ -3958,16 +3972,23 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 		eventid,
 		oldType);
 
-	int ret = eTimerManager::getInstance()->modifyEventInTimerList(oldEvent, newEvent);
-#if 0	
+	int ret = eTimerManager::getInstance()->modifyEventInTimerList(oldEvent, newEvent, (force == "yes"));
+
 	if ( ret == -1 )  // event currently running...
 	{
-		// TODO ask user if he wants to update only after_event action and duration
+		// ask user if he wants to update only after_event action and duration
 		// then call modifyEvent again.. with true as third parameter..
+		result = readFile(TEMPLATE_DIR + "queryEditTimer.tmp");
+		opts.strReplace("force=no", "force=yes");
+		if (opts.find("?") != 0)
+			opts = "?" + opts;
+		result.strReplace("#URL#", "/changeTimerEvent" + opts);
 	}
-#endif
+	else
+		result = "<script language=\"javascript\">window.close();</script>";
+
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	return "<script language=\"javascript\">window.close();</script>";
+	return result;
 }
 
 static eString addTimerEvent2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -4036,13 +4057,13 @@ static eString buildAfterEventOpts(int type)
 		<< "</option>";
 	if ( type & ePlaylistEntry::doGoSleep )
 		afterOpts << "<option selected value=\"" << ePlaylistEntry::doGoSleep << "\">";
-	else 
+	else
 		afterOpts << "<option value=\"" << ePlaylistEntry::doGoSleep << "\">";
 	afterOpts << _("Standby")
 		<< "</option>";
 	if ( type & ePlaylistEntry::doShutdown )
 		afterOpts << "<option selected value=\"" << ePlaylistEntry::doShutdown << "\">";
-	else 
+	else
 		afterOpts << "<option value=\"" << ePlaylistEntry::doShutdown << "\">";
 	afterOpts << _("Shutdown")
 		<< "</option>";
@@ -4060,7 +4081,7 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	eString description = httpUnescape(opt["descr"]);
 
 	// this is only for renamed services ( or subservices )... changing this in the edit dialog has no effect to
-	// the recording service	
+	// the recording service
 	eString channel = httpUnescape(opt["channel"]);
 
 	eString eventType = opt["type"];
@@ -4073,7 +4094,7 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 
 	// printf("[ENIGMA_DYN] editTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
 
-	// TODO: check if ( type & ePlaylistEntry::isRepeating ) 
+	// TODO: check if ( type & ePlaylistEntry::isRepeating )
 	// .. then load another template.. with checkboxes for weekdays..
 	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
 
