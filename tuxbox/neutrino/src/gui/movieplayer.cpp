@@ -98,6 +98,14 @@
 #define AVIA_AV_STREAM_TYPE_PES         0x02
 #define AVIA_AV_STREAM_TYPE_ES          0x03
 
+#define STOPPED		0
+#define PLAY		1
+#define PAUSE		2
+#define FF			3
+#define REW			4
+#define SOFTRESET	99
+
+
 #define ConnectLineBox_Width	15
 
 static int playstate;
@@ -261,27 +269,27 @@ void* Play_Thread( void* filename )
 
 	if( isTS && !failed )
 	{
-		while( (r = read(fd, buf, cache)) > 0 && playstate >= 1 )
+		while( (r = read(fd, buf, cache)) > 0 && playstate >= PLAY )
 		{
 			done = 0;
 			wr = 0;
 
 			switch( playstate )
 			{
-				case 2:	// pause
+				case PAUSE:
 					while (playstate == 2)
 					{
 						ioctl(dmxa, DMX_STOP);
 					}
 					break;
 
-				case 3:	// ff
-				case 4:	// rew
+				case FF:
+				case REW:
 					ioctl(dmxa, DMX_STOP);
 					lseek( fd, cache*speed, SEEK_CUR );
 					break;
 
-				case 99: // Softreset
+				case SOFTRESET:
 					speed = 1;
 					ioctl(vdec, VIDEO_STOP);
 					ioctl(adec, AUDIO_STOP);
@@ -291,13 +299,13 @@ void* Play_Thread( void* filename )
 					ioctl(dmxa, DMX_START);
 					ioctl(vdec, VIDEO_PLAY);
 					ioctl(adec, AUDIO_PLAY);
-					playstate = 1;
+					playstate = PLAY;
 			}
 
 			do
 			{
 				wr = write(dvr, &buf[done], r);
-				if ( playstate > 1) break;
+				if ( playstate > PLAY) break;
 				if (!done ) cache = wr;
 				done += wr;
 				r -= wr;
@@ -326,10 +334,7 @@ void* Play_Thread( void* filename )
 	close(adec);
 	close(vdec);
 
-	isTS = true;					// to let the fast exit also work in pes mode ;)
-	g_RCInput->postMsg( CRCInput::RC_red, 0 );	// for faster exit in PlayStream()
-
-	playstate = 0;
+	playstate = STOPPED;
 
 	pthread_exit(NULL);
 }
@@ -339,14 +344,14 @@ void CMoviePlayerGui::PlayStream( void )
 	uint msg, data;
 	bool update_lcd = true, open_filebrowser = true, start_play = false, exit = false;
 
-	playstate = 0;
+	playstate = STOPPED;
 
-	/* playstate == 0 : stopped
-	 * playstate == 1 : playing
-	 * playstate == 2 : pause-mode
-	 * playstate == 3 : fast-forward
-	 * playstate == 4 : rewind
-	 * playstate == 99: softreset without clearing buffer (playstate toggle to 1)
+	/* playstate == STOPPED		: stopped
+	 * playstate == PLAY		: playing
+	 * playstate == PAUSE		: pause-mode
+	 * playstate == FF			: fast-forward
+	 * playstate == REW			: rewind
+	 * playstate == SOFTRESET	: softreset without clearing buffer (playstate toggle to 1)
 	 */
 
 	do
@@ -355,9 +360,9 @@ void CMoviePlayerGui::PlayStream( void )
 		{
 			exit = false;
 
-			if( playstate >= 1 )
+			if( playstate >= PLAY )
 			{
-					playstate = 0;
+					playstate = STOPPED;
 					break;
 			}
 		}
@@ -379,7 +384,7 @@ void CMoviePlayerGui::PlayStream( void )
 			}
 			else
 			{
-				if( playstate == 0 )
+				if( playstate == STOPPED )
 					break;
 			}
 
@@ -390,25 +395,24 @@ void CMoviePlayerGui::PlayStream( void )
 		{
 			start_play = false;
 
-			if( playstate >= 1 )
+			if( playstate >= PLAY )
 			{
-				playstate = 0;
+				playstate = STOPPED;
 				pthread_join( rct, NULL );
 			}
-			playstate = 99;
 
 			if( pthread_create(&rct, 0, Play_Thread, (void *) filename) != 0 )
 			{
-				playstate = 0;
 				break;
 			}
+			playstate = SOFTRESET;
 		}
 
 		if( update_lcd )
 		{
 			update_lcd = false;
 
-			if( playstate == 1 )
+			if( playstate == PLAY )
 				CLCD::getInstance()->showServicename(filebrowser->getSelectedFile()->getFileName());
 			else
 				CLCD::getInstance()->showServicename("("+filebrowser->getSelectedFile()->getFileName()+")");
@@ -424,17 +428,16 @@ void CMoviePlayerGui::PlayStream( void )
 		}
 		else if( msg == CRCInput::RC_yellow )
 		{
-		  	if( playstate != 2 )
+		  	if( playstate != PAUSE )
 		  	{
-		  		// pause play
 		  		update_lcd = true;
-		  		playstate = 2;
+		  		playstate = PAUSE;
 		  	}
 		  	else
 		  	{
 		  		// resume play
 		  		update_lcd = true;
-		  		playstate = 99;
+		  		playstate = SOFTRESET;
 		  	}
 		}
 		else if( msg == CRCInput::RC_left )
@@ -443,14 +446,14 @@ void CMoviePlayerGui::PlayStream( void )
 			if ( speed > 1) speed = 1;
 			speed *= -2;
 			speed *= (speed > 1 ? -1 : 1);
-			playstate = 3;
+			playstate = REW;
 		}
 		else if( msg == CRCInput::RC_right )
 		{
 			// fast-forward
 			if ( speed < 1) speed = 1;
 			speed *= 2;
-			playstate = 4;
+			playstate = FF;
 		}
 		else if( msg == CRCInput::RC_up ||
 			 msg == CRCInput::RC_down )
@@ -463,12 +466,14 @@ void CMoviePlayerGui::PlayStream( void )
 		}
 		else if( msg == CRCInput::RC_ok )
 		{
-			if (playstate > 1)
+			if (playstate > PLAY)
 			{
-				playstate = 99;
+				playstate = SOFTRESET;
 			}
 			else
+			{
 				open_filebrowser = true;
+			}
 		}
 		else if( msg == NeutrinoMessages::RECORD_START ||
 			 msg == NeutrinoMessages::ZAPTO ||
@@ -486,7 +491,7 @@ void CMoviePlayerGui::PlayStream( void )
 			isTS = true;	// also exit in PES Mode
 			exit = true;
 		}
-	} while( playstate >= 1 );
+	} while( playstate >= PLAY );
 
 	pthread_join( rct, NULL );
 }
