@@ -52,7 +52,7 @@ function openEPG(xy)
 
 function admin(xy)
 {
-	NewWindow(xy, 'admin', '150', '100', 'no');
+	NewWindow(xy, 'admin', '200', '100', 'no');
 }
 
 function openSI()
