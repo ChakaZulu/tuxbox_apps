@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.57 2002/08/29 18:21:57 obi Exp $
+ * $Id: scan.cpp,v 1.58 2002/09/03 08:39:47 thegoodguy Exp $
  */
 
 #include <clientlib/zapitclient.h>
@@ -223,6 +223,8 @@ void write_bouquets()
 	{
 		scanBouquetManager->saveBouquets();
 	}
+// TODO:
+// make zapit reload its bouquets
 }
 
 void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t diseqc)

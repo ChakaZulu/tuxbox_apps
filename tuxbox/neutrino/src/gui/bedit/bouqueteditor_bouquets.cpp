@@ -518,10 +518,11 @@ void CBEBouquetWidget::saveChanges()
 	CHintBox* hintBox= new CHintBox( "bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), "info.raw", 480 );
 	hintBox->paint();
 	g_Zapit->saveBouquets();
+	g_Zapit->reinitChannels();  // reload services & bouquets
 	hintBox->hide();
 	delete hintBox;
 
-	g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );
+//	g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );  // event send by zapit
 }
 
 void CBEBouquetWidget::discardChanges()

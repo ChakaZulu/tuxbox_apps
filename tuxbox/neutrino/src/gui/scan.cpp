@@ -154,7 +154,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 
 	hide();
-	g_RCInput->postMsg( NeutrinoMessages::EVT_SERVICESCHANGED, 0 );
+//	g_RCInput->postMsg( NeutrinoMessages::EVT_SERVICESCHANGED, 0 );  // instead: NeutrinoMessages::EVT_BOUQUETSCHANGED send by zapit
+	g_Zapit->reinitChannels();  // reload services & bouquets
 	g_Sectionsd->setPauseScanning( false );
 	ShowMsg ( "messagebox.info", g_Locale->getText("scants.finished"), CMessageBox::mbBack, CMessageBox::mbBack, "info.raw" );
 

@@ -73,7 +73,7 @@ struct NeutrinoMessages {
 		EVT_VCRCHANGED	= 			CRCInput::RC_Events + 3,
 		EVT_MODECHANGED = 			CRCInput::RC_Events + 4,
 		EVT_BOUQUETSCHANGED =		CRCInput::RC_Events + 6,
-		EVT_SERVICESCHANGED =		CRCInput::RC_Events + 7,
+//		EVT_SERVICESCHANGED =		CRCInput::RC_Events + 7,
 		EVT_CURRENTNEXT_EPG =		CRCInput::RC_Events + 8,
 		EVT_ZAP_GOT_SUBSERVICES =	CRCInput::RC_Events + 9,
 		EVT_ZAP_GOTPIDS		= 		CRCInput::RC_Events + 10,

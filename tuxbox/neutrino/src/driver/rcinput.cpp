@@ -731,6 +731,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 				*data = (unsigned) p;
 			 				dont_delete_p = true;
 			 			}
+			 			else if (emsg.eventID==CZapitClient::EVT_BOUQUETS_CHANGED)
+			 			{
+			 				*msg = NeutrinoMessages::EVT_BOUQUETSCHANGED;
+			 				*data = 0;
+			 			}
 			 			else
 			 				printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
 			 		}
