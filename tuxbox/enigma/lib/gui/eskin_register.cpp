@@ -17,7 +17,7 @@ public:
 		if (default_skin.load( DATADIR "/enigma/skins/default.esml"))
 			eFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
 
-		char *temp="neutrino.esml";
+		char *temp=DEFAULTSKIN;
 		eConfig::getInstance()->getKey("/ezap/ui/skin", temp);
 
 		eString skinfile=DATADIR "/enigma/skins/";
@@ -26,7 +26,7 @@ public:
 		if (default_skin.load(skinfile.c_str()))
 		{
 			eWarning("failed to load user defined skin %s, falling back to " DEFAULTSKIN, skinfile.c_str());
-			if (default_skin.load(DATADIR "/enigma/skins/neutrino.esml"))
+			if (default_skin.load(DATADIR "/enigma/skins/" DEFAULTSKIN))
 				eFatal("couldn't load fallback skin " DATADIR "/enigma/skins/" DEFAULTSKIN);
 		}
 
