@@ -97,7 +97,12 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 
 eString getTitle(eString title)
 {
-	return "<script>parent.setTitle('" + title + "');</script>";
+	eString result;
+	if (pdaScreen == 0)
+		result = "<script>parent.setTitle('" + title + "');</script>";
+	else
+		result = "<h1>" + title + "</h1>";
+	return result;
 }
 
 eString filter_string(eString string)
