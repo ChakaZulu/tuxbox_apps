@@ -44,6 +44,12 @@ extern "C" {
      
 #define dprintf if(debug) fprintf
 
+/* file access modes */
+#define ACC_RO	0
+#define ACC_RW	1
+#define	ACC_UD	2	/* -> this is used for the 'r+' mode */
+#define ACC_WO	3
+
 #define	MODE_FILE  0
 #define MODE_HTTP  1
 #define MODE_SCAST 2	/* pseudo transfer mode; is actually HTTP/SHOUTCAST */
@@ -65,16 +71,17 @@ extern "C" {
 #define rewind  f_rewind
 #define fseek   f_seek
 #define fstatus f_status
-#define ftype   f_type
+#define ftype	f_type
 
-extern FILE *f_open(const char *, const char *);
-extern int f_close(FILE *);
-extern size_t f_read (void *, size_t, size_t, FILE *);
-extern long f_tell(FILE *);
-extern void f_rewind(FILE *);
-extern int f_seek(FILE *, long, int);
-extern int f_status(FILE *, void (*)(void*));
-extern char *f_type(FILE *, char*);
+extern FILE	*f_open(const char *, const char *);
+extern int	f_close(FILE *);
+extern size_t	f_read (void *, size_t, size_t, FILE *);
+extern long	f_tell(FILE *);
+extern void	f_rewind(FILE *);
+extern int	f_seek(FILE *, long, int);
+extern int	f_status(FILE *, void (*)(void*));
+extern char	*f_type(FILE*, char*);
+
 extern char err_txt[2048];
 
 #define CACHESIZE	cache_size
@@ -89,6 +96,7 @@ typedef struct
   char	host[2048];
   int	port;
   char	file[2048];
+  char entity[2048];	/* data to send on POST requests */
   int 	fd;		/* filedescriptor of the file*/
   FILE	*stream;	/* streamdescriptor */
 } URL;
@@ -128,19 +136,22 @@ typedef struct
   int	meta_int;		/* meta data intervall */
   char	meta_data[4096];	/* meta blocks cam be at most 4096 bytes */
 } FILTERDATA;
-  
+
 typedef struct
 {
   FILE	*fd;		/* stream ID */
+  
+  int acc_mode;		/* ACC_RO, ACC_RW, ACC_UD (unused yet) */
+  
   char	*cache;		/* cache buffer */
   char	*ceiling;	/* cache ceiling */
   int	csize;		/* cache size */
   char	*wptr;		/* next write position */
   char	*rptr;		/* next read position */
   long 	filled;
-  int   closed;		/* flag; closed = 1 of supply */
-  			/* tread has been terminated due to a */
-			/* disrupted incoming stream */
+  int   closed;		/* flag; closed = 1 if supply thread */
+  			/* has been terminated due to a */
+			/* disrupted incoming stream or an EOF */
   long total_bytes_delivered;
   
   pthread_t fill_thread;
@@ -162,6 +173,12 @@ typedef struct
 
 typedef struct
 {
+  FILE	*stream;
+  char	type[64];
+} STREAM_TYPE;
+
+typedef struct
+{
   char	magic[3];	/* "ID3" */
   char version[2];	/* version of the tag */
   char flags;
@@ -178,11 +195,6 @@ typedef  struct
     char base[1024];
 } ID3_frame;
 
-typedef struct
-{
-	FILE	*stream;	/* streamdescriptor */
-	char type[65];
-} STREAM_TYPE;
 #ifdef __cplusplus
 }
 #endif

@@ -62,6 +62,11 @@
 |	private radio stations which are not listed in the official            |
 |	shoutcast directory. The stream is opened read-only.                   |
 |	                                                                       |
+| file access modes, selectable by the fopen 'access type':                    |
+|	                                                                       |
+|	"r"	read only, stream caching enabled                              |
+|	"rc"	read only, stream caching disabled (compatibility mode)        |
+|	                                                                       |
 | NOTE: All network accesses are only possible read only. Although some        |
 |       protocols could allow write access to the remote resource, this        |
 |       is not (and rather unlikely to be anytime) implemented here.           |
@@ -91,8 +96,10 @@
 
 /*
 TODO:
+	- shoutcast database queries, to make 'scast://R1live' working
 	- follow redirection errors (server error codes 302, 301)
 	- support for automatic playlist processing (shoutcast pls files)
+	- HTTP POST requests
 */
 
 #define STATIC /**/
@@ -230,7 +237,7 @@ int ConnectToServer(char *hostname, int port)
 
 int request_file(URL *url)
 {
-  char str[255];
+  char str[255], *ptr;
   int slot, rval;
   ID3 id3;
 
@@ -238,6 +245,16 @@ int request_file(URL *url)
   /* indicates that no cache has been set up for this stream */
   slot = getCacheSlot(url->stream);
 
+  /* if the filename contains a line break, then use everything */
+  /* up to the line break as file name and everything beyond as */
+  /* entity to be sent with the request */
+  ptr = strchr(url->file, '\n');
+  if(ptr)
+  {
+    strcpy(url->entity, ptr + 1);
+    *ptr = 0;
+  }
+  
   switch(url->proto_version)
   {
   /* send a HTTP/1.0 request */
@@ -250,7 +267,8 @@ int request_file(URL *url)
 
   /* send a HTTP/1.1 request */
   case HTTP11:	{
-  		  sprintf(str, "GET %s HTTP/1.1\r\n", url->file);
+//findme
+  		  sprintf(str, "%s %s HTTP/1.1\r\n", (url->entity[0]) ? "POST" : "GET", url->file);
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
 		  sprintf(str, "Host: %s\r\n", url->host);
@@ -261,13 +279,22 @@ int request_file(URL *url)
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
 
-		  sprintf(str, "User-Agent: %s\r\n\r\n", "Mozilla/4.0");
+		  /* if we have a entity, announce it to the server */
+		  if(url->entity[0])
+		  {
+		    sprintf(str, "Content-Length: %d\r\n", strlen(url->entity));
+		    dprintf(stderr, "> %s", str);
+		    send(url->fd, str, strlen(str), 0);
+		  }
+
+		  sprintf(str, "User-Agent: %s\r\n\r\n%s", "Mozilla/4.0", 
+		  	(url->entity[0]) ? url->entity : "");
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
 		  
 		  rval = parse_response(url, NULL, NULL);
 
-//		  dprintf(stderr, "server response parser: return value = %d\n", rval);
+		  dprintf(stderr, "server response parser: return value = %d\n", rval);
 
 		  /* if the header indicated a zero length document or an */
 		  /* error, then close the cache, if there is any */
@@ -371,7 +398,7 @@ int request_file(URL *url)
   if(ptr) \
   { \
     ptr = strchr(ptr, ':'); \
-    for(;!isalnum(*ptr);ptr++); \
+    for(ptr++;isspace(*ptr);ptr++); \
     strcpy(b, ptr); \
     ptr = strchr(b, '\n'); \
     if(ptr) *ptr = 0; \
@@ -386,7 +413,7 @@ void readln(int fd, char *buf)
 int parse_response(URL *url, void *opt, CSTATE *state)
 {
   char header[2049], str[255];
-  char *ptr, chr=0, lastchr=0;
+  char *ptr, chr, lastchr;
   int hlen = 0, response;
   int meta_interval = 0, rval;
   int fd = url->fd;
@@ -693,14 +720,14 @@ FILE *f_open(const char *filename, const char *acctype)
 
   dprintf(stderr, "URL  to open: %s, access mode %s%s\n", 
   	url.url, 
-	(url.access_mode == MODE_HTTP) ? "HTTP" : 
+	(url.access_mode == MODE_HTTP)  ? "HTTP" : 
 	(url.access_mode == MODE_SCAST) ? "SHOUTCAST" :
-	(url.access_mode == MODE_PLS) ? "PLAYLIST" : "FILE",
-	(url.access_mode != MODE_FILE) ? (
-		(url.proto_version == 0) ? "/1.0" : 
-		(url.proto_version == 1) ? "/1.1" :
-		(url.proto_version == 2) ? "/SHOUTCAST" : "") : ""
-	);
+	(url.access_mode == MODE_PLS)   ? "PLAYLIST" : "FILE",
+	(url.access_mode != MODE_FILE)  ? (
+	(url.proto_version == 0) ? "/1.0" : 
+	(url.proto_version == 1) ? "/1.1" :
+	(url.proto_version == 2) ? "/SHOUTCAST" : "") : "" );
+	
   dprintf(stderr, "FILE to open: %s, access mode: %d\n", url.file, url.access_mode);
   
   switch(url.access_mode)
@@ -751,16 +778,16 @@ FILE *f_open(const char *filename, const char *acctype)
 			         }
 			       
 			         dprintf(stderr, "f_open: adding stream %x to cache[%d]\n", fd, i);
-
-			         cache[i].fd      = fd;
-			         cache[i].csize   = CACHESIZE;
-			         cache[i].cache   = (char*)malloc(cache[i].csize);
-			         cache[i].ceiling = cache[i].cache + CACHESIZE;
-			         cache[i].wptr    = cache[i].cache;
-			         cache[i].rptr    = cache[i].cache;
-			         cache[i].closed  = 0;
+				 
+			         cache[i].fd       = fd;
+			         cache[i].csize    = CACHESIZE;
+			         cache[i].cache    = (char*)malloc(cache[i].csize);
+			         cache[i].ceiling  = cache[i].cache + CACHESIZE;
+			         cache[i].wptr     = cache[i].cache;
+			         cache[i].rptr     = cache[i].cache;
+			         cache[i].closed   = 0;
 			         cache[i].total_bytes_delivered = 0;
-			         cache[i].filter  = NULL;
+			         cache[i].filter   = NULL;
 			     
 			         /* create the readable/writeable mutex locks */
 			         dprintf(stderr, "f_open: creating mutexes\n");
@@ -799,11 +826,46 @@ FILE *f_open(const char *filename, const char *acctype)
 			 /* f_open() several times recursively - so the function should  */
 			 /* better be free from any bugs ;)                              */
 			 
+			 /* if we didn't get a station number, query the shoutcast database */
+			 /* and look in the reply for the station number */
+			 if(atoi(url.host) == 0)
+			 {
+			   char buf[32768], *ptr;
+			   FILE *fd;
+			   
+			   for(ptr=url.host; *ptr; ptr++)
+			     *ptr = (*ptr != 32) ? *ptr : '+';
+			   
+			   sprintf(buf, "http://www.shoutcast.com/directory/?orderby=listeners&s=%s", url.host);
+
+			   fd = f_open(buf, "rc");
+
+			   if(!fd)
+			   {
+			     sprintf(err_txt, "shoutcast database query failed\nfailed action: %s", buf);
+			     return NULL;
+			   }
+			   
+			   fread(buf, 1, 32768, fd);
+			   f_close(fd);
+			   
+			   ptr = strstr(buf, "rn=");
+			   
+			   if(!ptr)
+			   {
+			     sprintf(err_txt, "failed to find station number");
+			     dprintf(stderr, "%s\n", buf);
+			     return NULL;
+			   }
+			     
+			   sprintf(url.host, "%d", atoi(ptr + 3));
+			 } 
+
 			 /* create the correct url from the station number */
 			 sprintf(url.url, "http://www.shoutcast.com/sbin/shoutcast-playlist.pls?rn=%s&file=filename.pls", url.host);
 
   case MODE_PLS:	{
-  			    char *ptr=NULL, *ptr2, buf[4096], servers[25][1024];
+  			    char *ptr, *ptr2, buf[4096], servers[25][1024];
 			    int rval, i, retries = 15;
 
 			    /* fetch the playlist from the shoutcast directory with our own */
@@ -864,8 +926,6 @@ FILE *f_open(const char *filename, const char *acctype)
 
   			 if(strstr(url.file, ".ogg")) f_type(fd, "audio/ogg");
   			 if(strstr(url.file, ".mp3")) f_type(fd, "audio/mpeg");
-  			 if(strstr(url.file, ".mp2")) f_type(fd, "audio/mpeg");
-  			 if(strstr(url.file, ".mpa")) f_type(fd, "audio/mpeg");
   			 if(strstr(url.file, ".wav")) f_type(fd, "audio/wave");
   			 if(strstr(url.file, ".aif")) f_type(fd, "audio/aifc");
   			 if(strstr(url.file, ".snd")) f_type(fd, "audio/snd");
