@@ -528,7 +528,7 @@ eString filter_string(eString string)
 
 static eString getNavi(eString mode, eString path)
 {
-	eString result = "";
+	eString result;
 	if (mode.find("zap") == 0)
 	{
 		result += button(110, "TV", OCKER, "?path=;0:7:1:0:0:0:0:0:0:0:");
@@ -594,7 +594,7 @@ extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 
 static eString getDiskSpace(void)
 {
-	eString result = "";
+	eString result;
 	eString tmp;
 	result = "<span class=\"white\">";
 	result += "Remaining Disk Space: ";
@@ -624,7 +624,7 @@ static eString getDiskSpace(void)
 
 static eString getStats()
 {
-	eString result = "";
+	eString result;
 	eString apid, vpid;
 	int bootcount = 0;
 
@@ -954,8 +954,8 @@ struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 	void operator()(ePlaylistEntry* se)
 	{
 		result += "<tr>";
-		begin = "";
-		end = "";
+		begin;
+		end;
 		tm startTime = *localtime(&se->time_begin);
 		time_t time_end = se->time_begin + se->duration;
 		tm endTime = *localtime(&time_end);
@@ -996,9 +996,9 @@ struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 
 static eString genTimerListBody(void)
 {
-	eString result = "";
-	eString tbody = "";
-	eString tmpFile = "";
+	eString result;
+	eString tbody;
+	eString tmpFile;
 	eTimerManager::getInstance()->forEachEntry(getEntryString(tbody));
 	if (tbody == "")
 		result = "No timer events available.<br>";
@@ -1032,8 +1032,8 @@ static eString genTimerListBody(void)
 
 static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result = "";
-	eString tmpFile = "";
+	eString result;
+	eString tmpFile;
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	result = genTimerListBody();
 	tmpFile += read_file(TEMPLATE_DIR + "timerList.tmp");
@@ -1139,7 +1139,7 @@ static eString getEITC()
 
 static eString getScreenShot(void)
 {
-	eString result = "";
+	eString result;
 
 	if (access("/dev/grabber", R_OK) == 0)
 	{
@@ -1199,8 +1199,8 @@ static eString getScreenShot(void)
 
 static eString getContent(eString mode, eString path)
 {
-	eString result = "";
-	eString zap_result = "";
+	eString result;
+	eString zap_result;
 	if (mode == "zap")
 	{
 		result = getTitle("Zap");
@@ -1469,7 +1469,7 @@ static eString getEITC2()
 	result.strReplace("#VOLBAR#", getVolBar());
 	eString curService = filter_string(getCurService());
 	if (curService == "n/a")
-		curService = "";
+		curService;
 	result.strReplace("#SERVICENAME#", curService);
 	result.strReplace("#STATS#", getStats());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
@@ -1547,7 +1547,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 
 eString genRecordString(eServiceReference ref, EITEvent event)
 {
-	eString result = "";
+	eString result;
 	result += "javascript:record(\"ref=" + ref2string(ref);
 	result += "&ID=" + eString().sprintf("%d", event.event_id);
 	result += "&start=" + eString().sprintf("%d", event.start_time);
@@ -2239,7 +2239,7 @@ static eString neutrino_suck_getchannellist(eString request, eString dirpath, eS
 
 static eString cleanupTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result = "";
+	eString result;
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	result+="<script language=\"javascript\">window.close();</script>";
 	eTimerManager::getInstance()->cleanupEvents();
@@ -2249,7 +2249,7 @@ static eString cleanupTimerList(eString request, eString dirpath, eString opt, e
 
 static eString clearTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result = "";
+	eString result;
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	result+="<script language=\"javascript\">window.close();</script>";
 	eTimerManager::getInstance()->clearEvents();
