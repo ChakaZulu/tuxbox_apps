@@ -3,7 +3,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 noinst_LIBRARIES = libdvbapi.a
 
 noinst_HEADERS = \
-	dvb_ap.h \
+	dvb_api.h \
 	dmx_pes.h \
 	dmx_sect.h \
 	dmx_ts.h \
