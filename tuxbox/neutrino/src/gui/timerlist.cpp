@@ -533,7 +533,7 @@ void CTimerList::paintItem(int pos)
 				break;
 			case CTimerd::TIMER_STANDBY:
 				{
-					zAddData = g_Locale->getText(timer.standby_on ? "timerlist.standby.on" : "timerlist.standby.off"); // UTF-8
+					zAddData = g_Locale->getText(timer.standby_on ? LOCALE_TIMERLIST_STANDBY_ON : LOCALE_TIMERLIST_STANDBY_OFF);
 					break;
 				}
 			case CTimerd::TIMER_REMIND :
@@ -591,8 +591,8 @@ void CTimerList::paintHead()
 const struct button_label TimerListButtons[3] =
 {
 	{ NEUTRINO_ICON_BUTTON_RED   , "timerlist.delete" },
-	{ NEUTRINO_ICON_BUTTON_GREEN , "timerlist.new"    },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, "timerlist.reload" }
+	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_TIMERLIST_NEW    },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_TIMERLIST_RELOAD }
 };
 
 void CTimerList::paintFoot()
@@ -645,14 +645,14 @@ const char * CTimerList::convertTimerType2String(const CTimerd::CTimerEventTypes
 {
 	switch(type)
 	{
-		case CTimerd::TIMER_SHUTDOWN : return g_Locale->getText("timerlist.type.shutdown");
-		case CTimerd::TIMER_NEXTPROGRAM : return g_Locale->getText("timerlist.type.nextprogram");
-		case CTimerd::TIMER_ZAPTO : return g_Locale->getText("timerlist.type.zapto");
-		case CTimerd::TIMER_STANDBY : return g_Locale->getText("timerlist.type.standby");
-		case CTimerd::TIMER_RECORD : return g_Locale->getText("timerlist.type.record");
-		case CTimerd::TIMER_REMIND : return g_Locale->getText("timerlist.type.remind");
-		case CTimerd::TIMER_SLEEPTIMER: return g_Locale->getText("timerlist.type.sleeptimer");
-		default: return g_Locale->getText("timerlist.type.unknown");
+		case CTimerd::TIMER_SHUTDOWN    : return g_Locale->getText(LOCALE_TIMERLIST_TYPE_SHUTDOWN   );
+		case CTimerd::TIMER_NEXTPROGRAM : return g_Locale->getText(LOCALE_TIMERLIST_TYPE_NEXTPROGRAM);
+		case CTimerd::TIMER_ZAPTO       : return g_Locale->getText(LOCALE_TIMERLIST_TYPE_ZAPTO      );
+		case CTimerd::TIMER_STANDBY     : return g_Locale->getText(LOCALE_TIMERLIST_TYPE_STANDBY    );
+		case CTimerd::TIMER_RECORD      : return g_Locale->getText(LOCALE_TIMERLIST_TYPE_RECORD     );
+		case CTimerd::TIMER_REMIND      : return g_Locale->getText(LOCALE_TIMERLIST_TYPE_REMIND     );
+		case CTimerd::TIMER_SLEEPTIMER  : return g_Locale->getText(LOCALE_TIMERLIST_TYPE_SLEEPTIMER );
+		default                         : return g_Locale->getText(LOCALE_TIMERLIST_TYPE_UNKNOWN    );
 	}
 }
 
@@ -704,21 +704,46 @@ std::string CTimerList::convertChannelId2String(const t_channel_id id) // UTF-8
 	CZapitClient Zapit;
 	std::string name = Zapit.getChannelName(id); // UTF-8
 	if (name.empty())
-		name = g_Locale->getText("timerlist.program.unknown"); // UTF-8
+		name = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
    
 	return name;
 }
 
-#define TIMER_REPEAT_OPTION_COUNT 7
-const CMenuOptionChooser::keyval TIMER_REPEAT_OPTIONS[TIMER_REPEAT_OPTION_COUNT] =
+#define TIMERLIST_REPEAT_OPTION_COUNT 7
+const CMenuOptionChooser::keyval TIMERLIST_REPEAT_OPTIONS[TIMERLIST_REPEAT_OPTION_COUNT] =
 {
-	{(int)CTimerd::TIMERREPEAT_ONCE       , LOCALE_TIMERLIST_REPEAT_ONCE      },
-	{(int)CTimerd::TIMERREPEAT_DAILY      , LOCALE_TIMERLIST_REPEAT_DAILY     },
-	{(int)CTimerd::TIMERREPEAT_WEEKLY     , LOCALE_TIMERLIST_REPEAT_WEEKLY    },
-	{(int)CTimerd::TIMERREPEAT_BIWEEKLY   , LOCALE_TIMERLIST_REPEAT_BIWEEKLY  },
-	{(int)CTimerd::TIMERREPEAT_FOURWEEKLY , LOCALE_TIMERLIST_REPEAT_FOURWEEKLY},
-	{(int)CTimerd::TIMERREPEAT_MONTHLY    , LOCALE_TIMERLIST_REPEAT_MONTHLY   },
-	{(int)CTimerd::TIMERREPEAT_WEEKDAYS   , LOCALE_TIMERLIST_REPEAT_WEEKDAYS  }
+	{ CTimerd::TIMERREPEAT_ONCE       , LOCALE_TIMERLIST_REPEAT_ONCE       },
+	{ CTimerd::TIMERREPEAT_DAILY      , LOCALE_TIMERLIST_REPEAT_DAILY      },
+	{ CTimerd::TIMERREPEAT_WEEKLY     , LOCALE_TIMERLIST_REPEAT_WEEKLY     },
+	{ CTimerd::TIMERREPEAT_BIWEEKLY   , LOCALE_TIMERLIST_REPEAT_BIWEEKLY   },
+	{ CTimerd::TIMERREPEAT_FOURWEEKLY , LOCALE_TIMERLIST_REPEAT_FOURWEEKLY },
+	{ CTimerd::TIMERREPEAT_MONTHLY    , LOCALE_TIMERLIST_REPEAT_MONTHLY    },
+	{ CTimerd::TIMERREPEAT_WEEKDAYS   , LOCALE_TIMERLIST_REPEAT_WEEKDAYS   }
+};
+
+#define TIMERLIST_STANDBY_OPTION_COUNT 2
+const CMenuOptionChooser::keyval TIMERLIST_STANDBY_OPTIONS[TIMERLIST_STANDBY_OPTION_COUNT] =
+{
+	{ 0 , LOCALE_TIMERLIST_STANDBY_OFF },
+	{ 1 , LOCALE_TIMERLIST_STANDBY_ON  }
+};
+
+#if 1
+#define TIMERLIST_TYPE_OPTION_COUNT 6
+#else
+#define TIMERLIST_TYPE_OPTION_COUNT 7
+#endif
+const CMenuOptionChooser::keyval TIMERLIST_TYPE_OPTIONS[TIMERLIST_TYPE_OPTION_COUNT] =
+{
+	{ CTimerd::TIMER_SHUTDOWN   , LOCALE_TIMERLIST_TYPE_SHUTDOWN    },
+#if 0
+	{ CTimerd::TIMER_NEXTPROGRAM, LOCALE_TIMERLIST_TYPE_NEXTPROGRAM },
+#endif
+	{ CTimerd::TIMER_ZAPTO      , LOCALE_TIMERLIST_TYPE_ZAPTO       },
+	{ CTimerd::TIMER_STANDBY    , LOCALE_TIMERLIST_TYPE_STANDBY     },
+	{ CTimerd::TIMER_RECORD     , LOCALE_TIMERLIST_TYPE_RECORD      },
+	{ CTimerd::TIMER_SLEEPTIMER , LOCALE_TIMERLIST_TYPE_SLEEPTIMER  },
+	{ CTimerd::TIMER_REMIND     , LOCALE_TIMERLIST_TYPE_REMIND      }
 };
 
 int CTimerList::modifyTimer()
@@ -731,29 +756,26 @@ int CTimerList::modifyTimer()
 
 	char type[80];
 	strcpy(type, ZapitTools::UTF8_to_Latin1(convertTimerType2String(timer->eventType)).c_str()); // UTF8, UTF8 -> Latin1
-	CMenuForwarder *m0 = new CMenuForwarder("timerlist.type", false, type);
+	CMenuForwarder *m0 = new CMenuForwarder(LOCALE_TIMERLIST_TYPE, false, type);
 	timerSettings.addItem( m0);
 
 	CDateInput timerSettings_alarmTime("timerlist.alarmtime", &timer->alarmTime , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
 	timerSettings.addItem( m1);
 
-   CDateInput timerSettings_stopTime("timerlist.stoptime", &timer->stopTime , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
+	CDateInput timerSettings_stopTime(LOCALE_TIMERLIST_STOPTIME, &timer->stopTime , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	if(timer->stopTime != 0)
 	{
-		CMenuForwarder *m2 = new CMenuForwarder("timerlist.stoptime", true, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
+		CMenuForwarder *m2 = new CMenuForwarder(LOCALE_TIMERLIST_STOPTIME, true, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
 		timerSettings.addItem( m2);
 	}
 
 	Timer->setWeekdaysToStr(timer->eventRepeat, m_weekdaysStr);
 	timer->eventRepeat = (CTimerd::CTimerEventRepeat)(((int)timer->eventRepeat) & 0x1FF);
-	CStringInput timerSettings_weekdays("timerlist.weekdays", m_weekdaysStr, 7, "timerlist.weekdays.hint_1", "timerlist.weekdays.hint_2", "-X");
-	CMenuForwarder *m4 = new CMenuForwarder("timerlist.weekdays", ((int)timer->eventRepeat) >= (int)CTimerd::TIMERREPEAT_WEEKDAYS,
-														  m_weekdaysStr, &timerSettings_weekdays );
+	CStringInput timerSettings_weekdays(LOCALE_TIMERLIST_WEEKDAYS, m_weekdaysStr, 7, LOCALE_TIMERLIST_WEEKDAYS_HINT_1, LOCALE_TIMERLIST_WEEKDAYS_HINT_2, "-X");
+	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_TIMERLIST_WEEKDAYS, ((int)timer->eventRepeat) >= (int)CTimerd::TIMERREPEAT_WEEKDAYS, m_weekdaysStr, &timerSettings_weekdays );
 	CTimerListRepeatNotifier notifier((int *)&timer->eventRepeat,m4);
-	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timer->eventRepeat, true, &notifier);
-	for (int i = 0; i < TIMER_REPEAT_OPTION_COUNT; i++)
-		m3->addOption(TIMER_REPEAT_OPTIONS[i].key, TIMER_REPEAT_OPTIONS[i].value);
+	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timer->eventRepeat, TIMERLIST_REPEAT_OPTIONS, TIMERLIST_REPEAT_OPTION_COUNT, true, &notifier);
 
 	timerSettings.addItem(m3);
 	timerSettings.addItem(m4);
@@ -764,7 +786,7 @@ int CTimerList::modifyTimer()
 		CMenuForwarder *m5 = new CMenuForwarder("timerlist.apids", true, timer->apids, &timerSettings_apids );
 		timerSettings.addItem( m5);
 	}
-	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, NULL, this, "modifytimer") );
+	timerSettings.addItem(new CMenuForwarder(LOCALE_TIMERLIST_SAVE, true, NULL, this, "modifytimer"));
 
 	return timerSettings.exec(this,"");
 }
@@ -789,17 +811,14 @@ int CTimerList::newTimer()
 	CDateInput timerSettings_alarmTime("timerlist.alarmtime", &(timerNew.alarmTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
 
-	CDateInput timerSettings_stopTime("timerlist.stoptime", &(timerNew.stopTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CMenuForwarder *m2 = new CMenuForwarder("timerlist.stoptime", false, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
+	CDateInput timerSettings_stopTime(LOCALE_TIMERLIST_STOPTIME, &(timerNew.stopTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
+	CMenuForwarder *m2 = new CMenuForwarder(LOCALE_TIMERLIST_STOPTIME, false, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
 
 	strcpy(m_weekdaysStr,"-------");
-	CStringInput timerSettings_weekdays("timerlist.weekdays", m_weekdaysStr, 7, "timerlist.weekdays.hint_1", "timerlist.weekdays.hint_2", "-X");
-	CMenuForwarder *m4 = new CMenuForwarder("timerlist.weekdays", false,  m_weekdaysStr, 
-														 &timerSettings_weekdays );
+	CStringInput timerSettings_weekdays(LOCALE_TIMERLIST_WEEKDAYS, m_weekdaysStr, 7, LOCALE_TIMERLIST_WEEKDAYS_HINT_1, LOCALE_TIMERLIST_WEEKDAYS_HINT_2, "-X");
+	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_TIMERLIST_WEEKDAYS, false,  m_weekdaysStr, &timerSettings_weekdays);
 	CTimerListRepeatNotifier notifier((int *)&timerNew.eventRepeat,m4);
-	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timerNew.eventRepeat, true, &notifier);
-	for (int i = 0; i < TIMER_REPEAT_OPTION_COUNT; i++)
-		m3->addOption(TIMER_REPEAT_OPTIONS[i].key, TIMER_REPEAT_OPTIONS[i].value);
+	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timerNew.eventRepeat, TIMERLIST_REPEAT_OPTIONS, TIMERLIST_REPEAT_OPTION_COUNT, true, &notifier);
 
 	CZapitClient zapit;
 	CZapitClient::BouquetList bouquetlist;
@@ -850,9 +869,7 @@ int CTimerList::newTimer()
 	strcpy(timerNew_channel_name,"---");
 	CMenuForwarder* m5 = new CMenuForwarder("timerlist.channel", false, timerNew_channel_name, &mm); 
 
-	CMenuOptionChooser* m6 = new CMenuOptionChooser("timerlist.standby", &timerNew_standby_on , false); 
-	m6->addOption(0 , "timerlist.standby.off");
-	m6->addOption(1 , "timerlist.standby.on");
+	CMenuOptionChooser* m6 = new CMenuOptionChooser(LOCALE_TIMERLIST_STANDBY, &timerNew_standby_on, TIMERLIST_STANDBY_OPTIONS, TIMERLIST_STANDBY_OPTION_COUNT, false); 
 
 	CStringInputSMS timerSettings_msg("timerlist.message", timerNew.message, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
 	CMenuForwarder *m7 = new CMenuForwarder("timerlist.message", false, NULL, &timerSettings_msg );
@@ -860,14 +877,7 @@ int CTimerList::newTimer()
 	CTimerListNewNotifier notifier2((int *)&timerNew.eventType,
 											  &timerNew.stopTime,m2,m5,m6,m7,
 											  timerSettings_stopTime.getValue ());
-	CMenuOptionChooser* m0 = new CMenuOptionChooser("timerlist.type", (int *)&timerNew.eventType, true, &notifier2); 
-	m0->addOption((int)CTimerd::TIMER_SHUTDOWN, "timerlist.type.shutdown");
-	//m0->addOption((int)CTimerd::TIMER_NEXTPROGRAM, "timerlist.type.nextprogram");
-	m0->addOption((int)CTimerd::TIMER_ZAPTO, "timerlist.type.zapto");
-	m0->addOption((int)CTimerd::TIMER_STANDBY, "timerlist.type.standby");
-	m0->addOption((int)CTimerd::TIMER_RECORD, "timerlist.type.record");
-	m0->addOption((int)CTimerd::TIMER_SLEEPTIMER, "timerlist.type.sleeptimer");
-	m0->addOption((int)CTimerd::TIMER_REMIND, "timerlist.type.remind");
+	CMenuOptionChooser* m0 = new CMenuOptionChooser(LOCALE_TIMERLIST_TYPE, (int *)&timerNew.eventType, TIMERLIST_TYPE_OPTIONS, TIMERLIST_TYPE_OPTION_COUNT, true, &notifier2); 
 
 	timerSettings.addItem( m0);
 	timerSettings.addItem( m1);
@@ -877,7 +887,7 @@ int CTimerList::newTimer()
 	timerSettings.addItem( m5);
 	timerSettings.addItem( m6);
 	timerSettings.addItem( m7);
-	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, NULL, this, "newtimer") );
+	timerSettings.addItem(new CMenuForwarder(LOCALE_TIMERLIST_SAVE, true, NULL, this, "newtimer"));
 	strcpy(timerSettings_stopTime.getValue (), "                ");
 	
 	int ret=timerSettings.exec(this,"");

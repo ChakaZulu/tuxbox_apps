@@ -281,6 +281,21 @@ int CNFSMountGui::menu()
 	return ret;
 }
 
+#warning MESSAGEBOX_NO_YES_XXX is defined in neutrino.cpp, too!
+#define MESSAGEBOX_NO_YES_OPTION_COUNT 2
+const CMenuOptionChooser::keyval MESSAGEBOX_NO_YES_OPTIONS[MESSAGEBOX_NO_YES_OPTION_COUNT] =
+{
+	{ 0, LOCALE_MESSAGEBOX_NO  },
+	{ 1, LOCALE_MESSAGEBOX_YES }
+};
+
+#define NFS_TYPE_OPTION_COUNT 2
+const CMenuOptionChooser::keyval NFS_TYPE_OPTIONS[NFS_TYPE_OPTION_COUNT] =
+{
+	{ CNFSMountGui::NFS , LOCALE_NFS_TYPE_NFS  },
+	{ CNFSMountGui::CIFS, LOCALE_NFS_TYPE_CIFS }
+};
+
 int CNFSMountGui::menuEntry(int nr)
 {
 	char *dir,*local_dir, *username, *password;
@@ -315,9 +330,7 @@ int CNFSMountGui::menuEntry(int nr)
 	mountMenuEntryW.addItem(GenericMenuSeparatorLine);
 	CIPInput ipInput(LOCALE_NFS_IP, g_settings.network_nfs_ip[nr], LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CStringInputSMS dirInput(LOCALE_NFS_DIR, dir, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
-	CMenuOptionChooser *automountInput= new CMenuOptionChooser(LOCALE_NFS_AUTOMOUNT, automount, true);
-	automountInput->addOption(0, LOCALE_MESSAGEBOX_NO);
-	automountInput->addOption(1, LOCALE_MESSAGEBOX_YES);
+	CMenuOptionChooser *automountInput= new CMenuOptionChooser(LOCALE_NFS_AUTOMOUNT, automount, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
 	CStringInputSMS options1(LOCALE_NFS_MOUNT_OPTIONS, g_settings.network_nfs_mount_options[0], 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
 	CMenuForwarder *options1_fwd = new CMenuForwarder(LOCALE_NFS_MOUNT_OPTIONS, true, g_settings.network_nfs_mount_options[0], &options1);
 	CStringInputSMS options2(LOCALE_NFS_MOUNT_OPTIONS, g_settings.network_nfs_mount_options[1], 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
@@ -327,10 +340,8 @@ int CNFSMountGui::menuEntry(int nr)
 	CStringInputSMS passInput(LOCALE_NFS_PASSWORD, password, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuForwarder *password_fwd = new CMenuForwarder(LOCALE_NFS_PASSWORD, *type==CIFS, NULL, &passInput);
 	CNFSMountGuiNotifier notifier(username_fwd, password_fwd, type);
-	CMenuOptionChooser *typeInput= new CMenuOptionChooser(LOCALE_NFS_TYPE, type, typeEnabled, &notifier);
-	typeInput->addOption((int) NFS , LOCALE_NFS_TYPE_NFS );
-	typeInput->addOption((int) CIFS, LOCALE_NFS_TYPE_CIFS);
-	mountMenuEntryW.addItem(typeInput);
+
+	mountMenuEntryW.addItem(new CMenuOptionChooser(LOCALE_NFS_TYPE, type, NFS_TYPE_OPTIONS, NFS_TYPE_OPTION_COUNT, typeEnabled, &notifier));
 	mountMenuEntryW.addItem(new CMenuForwarder(LOCALE_NFS_IP       , true, g_settings.network_nfs_ip[nr], &ipInput       ));
 	mountMenuEntryW.addItem(new CMenuForwarder(LOCALE_NFS_DIR      , true, dir                          , &dirInput      ));
 	mountMenuEntryW.addItem(new CMenuForwarder(LOCALE_NFS_LOCALEDIR, true, local_dir                    , this     , cmd2));

@@ -1287,9 +1287,7 @@ const CMenuOptionChooser::keyval SATSETUP_DISEQC_OPTIONS[SATSETUP_DISEQC_OPTION_
 void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
-	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, true);
-	for (int i = 0; i < SCANTS_BOUQUET_OPTION_COUNT; i++)
-		ojBouquets->addOption(SCANTS_BOUQUET_OPTIONS[i].key, SCANTS_BOUQUET_OPTIONS[i].value);
+	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, SCANTS_BOUQUET_OPTIONS, SCANTS_BOUQUET_OPTION_COUNT, true);
 
 	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
@@ -1362,9 +1360,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			extMotorSettings->addItem(oj);
 		}
 
-		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser(LOCALE_SATSETUP_DISEQC, (int *)&scanSettings.diseqcMode, true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojExtMotorSettings, ojDiseqcRepeats));
-		for (int i = 0; i < SATSETUP_DISEQC_OPTION_COUNT; i++)
-			ojDiseqc->addOption(SATSETUP_DISEQC_OPTIONS[i].key, SATSETUP_DISEQC_OPTIONS[i].value);
+		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser(LOCALE_SATSETUP_DISEQC, (int *)&scanSettings.diseqcMode, SATSETUP_DISEQC_OPTIONS, SATSETUP_DISEQC_OPTION_COUNT, true, new CSatDiseqcNotifier(ojSat, ojExtSatSettings, ojExtMotorSettings, ojDiseqcRepeats));
 
 		settings.addItem( ojDiseqc );
 		settings.addItem( ojBouquets );
@@ -1387,7 +1383,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		for( uint i=0; i< providerList.size(); i++)
 		{
-			oj->addOption( providerList[i].satName);
+			oj->addOption(providerList[i].satName);
 			dprintf(DEBUG_DEBUG, "got scanprovider (cable): %s\n", providerList[i].satName );
 		}
 		settings.addItem( ojBouquets);
@@ -1397,6 +1393,13 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	settings.addItem(new CMenuForwarder(LOCALE_SCANTS_STARTNOW, true, NULL, new CScanTs()));
 }
 
+
+#define FLASHUPDATE_UPDATEMODE_OPTION_COUNT 2
+const CMenuOptionChooser::keyval FLASHUPDATE_UPDATEMODE_OPTIONS[FLASHUPDATE_UPDATEMODE_OPTION_COUNT] =
+{
+	{ 0, LOCALE_FLASHUPDATE_UPDATEMODE_MANUAL   },
+	{ 1, LOCALE_FLASHUPDATE_UPDATEMODE_INTERNET }
+};
 
 void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSettings)
 {
@@ -1438,9 +1441,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, NULL, mtdexpert ) );
 
 		updateSettings->addItem(GenericMenuSeparatorLine);
-		CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_FLASHUPDATE_UPDATEMODE, &g_settings.softupdate_mode, true);
-		oj->addOption(0, LOCALE_FLASHUPDATE_UPDATEMODE_MANUAL  );
-		oj->addOption(1, LOCALE_FLASHUPDATE_UPDATEMODE_INTERNET);
+		CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_FLASHUPDATE_UPDATEMODE, &g_settings.softupdate_mode, FLASHUPDATE_UPDATEMODE_OPTIONS, FLASHUPDATE_UPDATEMODE_OPTION_COUNT, true);
 		updateSettings->addItem( oj );
 
 
@@ -1480,59 +1481,92 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	}
 }
 
+#define MESSAGEBOX_NO_YES_OPTION_COUNT 2
+const CMenuOptionChooser::keyval MESSAGEBOX_NO_YES_OPTIONS[MESSAGEBOX_NO_YES_OPTION_COUNT] =
+{
+	{ 0, LOCALE_MESSAGEBOX_NO  },
+	{ 1, LOCALE_MESSAGEBOX_YES }
+};
+
+#define PICTUREVIEWER_SCALING_OPTION_COUNT 3
+const CMenuOptionChooser::keyval PICTUREVIEWER_SCALING_OPTIONS[PICTUREVIEWER_SCALING_OPTION_COUNT] =
+{
+#warning TODO: localize pictureviewer scaling option
+	{ CPictureViewer::SIMPLE, "Simple"        },
+	{ CPictureViewer::COLOR , "Color Average" },
+	{ CPictureViewer::NONE  , "None"          }
+};
+
+#define MP3PLAYER_DISPLAY_ORDER_OPTION_COUNT 2
+const CMenuOptionChooser::keyval MP3PLAYER_DISPLAY_ORDER_OPTIONS[MP3PLAYER_DISPLAY_ORDER_OPTION_COUNT] =
+{
+	{ CMP3PlayerGui::ARTIST_TITLE, LOCALE_MP3PLAYER_ARTIST_TITLE },
+	{ CMP3PlayerGui::TITLE_ARTIST, LOCALE_MP3PLAYER_TITLE_ARTIST }
+};
+
 void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 {
 	mp3PicSettings.addItem(GenericMenuSeparator);
 	mp3PicSettings.addItem(GenericMenuBack);
 	
-	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_PICTUREVIEWER_SCALING, &g_settings.picviewer_scaling, true);
-#warning: TODO: localize pictureviewer scaling option
-	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
-	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
-	oj->addOption((int)CPictureViewer::NONE, "None");
-	CStringInput * pic_timeout= new CStringInput(LOCALE_PICTUREVIEWER_SLIDE_TIME, g_settings.picviewer_slide_time, 2, NULL, NULL, "0123456789 ");
 	mp3PicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PICTUREVIEWER_HEAD));
-	mp3PicSettings.addItem(oj);
+	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_PICTUREVIEWER_SCALING  , &g_settings.picviewer_scaling     , PICTUREVIEWER_SCALING_OPTIONS  , PICTUREVIEWER_SCALING_OPTION_COUNT  , true ));
+	CStringInput * pic_timeout= new CStringInput(LOCALE_PICTUREVIEWER_SLIDE_TIME, g_settings.picviewer_slide_time, 2, NULL, NULL, "0123456789 ");
 	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_SLIDE_TIME, true, g_settings.picviewer_slide_time, pic_timeout));
 	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DEFDIR, true, g_settings.network_nfs_picturedir, this, "picturedir"));
 
-	oj = new CMenuOptionChooser(LOCALE_MP3PLAYER_DISPLAY_ORDER, &g_settings.mp3player_display, true);
-	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, LOCALE_MP3PLAYER_ARTIST_TITLE);
-	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, LOCALE_MP3PLAYER_TITLE_ARTIST);
 	mp3PicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MP3PLAYER_NAME));
-	mp3PicSettings.addItem( oj );
-
-  	oj = new CMenuOptionChooser(LOCALE_MP3PLAYER_FOLLOW, &g_settings.mp3player_follow, true );
-	oj->addOption(0, LOCALE_MESSAGEBOX_NO);
-	oj->addOption(1, LOCALE_MESSAGEBOX_YES);
-	mp3PicSettings.addItem( oj );
+	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_MP3PLAYER_DISPLAY_ORDER, &g_settings.mp3player_display     , MP3PLAYER_DISPLAY_ORDER_OPTIONS, MP3PLAYER_DISPLAY_ORDER_OPTION_COUNT, true ));
+	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_MP3PLAYER_FOLLOW       , &g_settings.mp3player_follow      , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
 
 	CStringInput * mp3_screensaver= new CStringInput(LOCALE_MP3PLAYER_SCREENSAVER_TIMEOUT, g_settings.mp3player_screensaver, 2, NULL, NULL, "0123456789 ");
 	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_MP3PLAYER_SCREENSAVER_TIMEOUT, true, g_settings.mp3player_screensaver, mp3_screensaver));
 
-  	oj = new CMenuOptionChooser(LOCALE_MP3PLAYER_HIGHPRIO, &g_settings.mp3player_highprio, true );
-	oj->addOption(0, LOCALE_MESSAGEBOX_NO);
-	oj->addOption(1, LOCALE_MESSAGEBOX_YES);
-	mp3PicSettings.addItem( oj );
-
+	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_MP3PLAYER_HIGHPRIO     , &g_settings.mp3player_highprio    , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
 	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_MP3PLAYER_DEFDIR, true, g_settings.network_nfs_mp3dir, this, "mp3dir"));
 
 	mp3PicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
-	oj = new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS, &g_settings.filebrowser_showrights, true);
-	oj->addOption(0, LOCALE_MESSAGEBOX_NO);
-	oj->addOption(1, LOCALE_MESSAGEBOX_YES);
-	mp3PicSettings.addItem( oj );
+	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS , &g_settings.filebrowser_showrights, MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
 
 }
 
-const char * misc_setting_files[MISC_SETTING_FILES_COUNT][4] =
+#define OPTIONS_OFF0_ON1_OPTION_COUNT 2
+const CMenuOptionChooser::keyval OPTIONS_OFF0_ON1_OPTIONS[OPTIONS_OFF0_ON1_OPTION_COUNT] =
 {
-	{LOCALE_MISCSETTINGS_SPTSMODE     , "/var/etc/.spts_mode"  , LOCALE_OPTIONS_OFF, LOCALE_OPTIONS_ON }, /* cf. #define MISC_SETTING_SPTS_MODE 0 (settings.h) */
-	{LOCALE_MISCSETTINGS_BOOTINFO     , "/var/etc/.cdkVcInfo"  , LOCALE_OPTIONS_ON , LOCALE_OPTIONS_OFF},
+	{ 0, LOCALE_OPTIONS_OFF },
+	{ 1, LOCALE_OPTIONS_ON  }
+};
+
+#define OPTIONS_OFF1_ON0_OPTION_COUNT 2
+const CMenuOptionChooser::keyval OPTIONS_OFF1_ON0_OPTIONS[OPTIONS_OFF1_ON0_OPTION_COUNT] =
+{
+	{ 1, LOCALE_OPTIONS_OFF },
+	{ 0, LOCALE_OPTIONS_ON  }
+};
+
+#define MISCSETTINGS_FB_DESTINATION_OPTION_COUNT 3
+const CMenuOptionChooser::keyval MISCSETTINGS_FB_DESTINATION_OPTIONS[MISCSETTINGS_FB_DESTINATION_OPTION_COUNT] =
+{
+	{ 0, LOCALE_OPTIONS_NULL   },
+	{ 1, LOCALE_OPTIONS_SERIAL },
+	{ 2, LOCALE_OPTIONS_FB     }
+};
+
+typedef struct misc_setting_files_t
+{
+	const neutrino_locale_t                  name;
+	const char * const                       filename;
+	const CMenuOptionChooser::keyval * const options;
+} misc_setting_files_struct_t;
+
+const misc_setting_files_struct_t misc_setting_files[MISC_SETTING_FILES_COUNT] =
+{
+	{LOCALE_MISCSETTINGS_SPTSMODE     , "/var/etc/.spts_mode"  , OPTIONS_OFF0_ON1_OPTIONS }, /* cf. #define MISC_SETTING_SPTS_MODE 0 (settings.h) */
+	{LOCALE_MISCSETTINGS_BOOTINFO     , "/var/etc/.cdkVcInfo"  , OPTIONS_OFF1_ON0_OPTIONS },
 #if HAVE_DVB_API_VERSION == 1
-	{LOCALE_MISCSETTINGS_STARTBHDRIVER, "/var/etc/.bh"         , LOCALE_OPTIONS_OFF, LOCALE_OPTIONS_ON },
+	{LOCALE_MISCSETTINGS_STARTBHDRIVER, "/var/etc/.bh"         , OPTIONS_OFF0_ON1_OPTIONS },
 #endif
-	{LOCALE_MISCSETTINGS_HWSECTIONS   , "/var/etc/.hw_sections", LOCALE_OPTIONS_ON , LOCALE_OPTIONS_OFF}
+	{LOCALE_MISCSETTINGS_HWSECTIONS   , "/var/etc/.hw_sections", OPTIONS_OFF1_ON0_OPTIONS }
 };
 
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
@@ -1542,21 +1576,13 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(GenericMenuBack);
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_GENERAL));
 
-	CMenuOptionChooser *m1 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL_RCDELAY, &g_settings.shutdown_real_rcdelay, !g_settings.shutdown_real );
-	m1->addOption(0, LOCALE_OPTIONS_OFF);
-	m1->addOption(1, LOCALE_OPTIONS_ON );
+	CMenuOptionChooser *m1 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL_RCDELAY, &g_settings.shutdown_real_rcdelay, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, !g_settings.shutdown_real);
 
 	CMiscNotifier* miscNotifier = new CMiscNotifier( m1 );
 
-	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL, &g_settings.shutdown_real, true, miscNotifier );
-	oj->addOption(1, LOCALE_OPTIONS_OFF);
-	oj->addOption(0, LOCALE_OPTIONS_ON );
-	miscSettings.addItem( oj );
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL, &g_settings.shutdown_real, OPTIONS_OFF1_ON0_OPTIONS, OPTIONS_OFF1_ON0_OPTION_COUNT, true, miscNotifier));
 
-	CMenuOptionChooser *oj2 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, true);
-	oj2->addOption(1, LOCALE_OPTIONS_ON );
-	oj2->addOption(0, LOCALE_OPTIONS_OFF);
-	miscSettings.addItem( oj2 );
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 
 	if (fromflash)
 	{
@@ -1564,7 +1590,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 		for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
 		{
-			FILE * fd = fopen(misc_setting_files[i][1], "r");
+			FILE * fd = fopen(misc_setting_files[i].filename, "r");
 			if (fd)
 			{
 				fclose(fd);
@@ -1573,17 +1599,10 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 			else
 				g_settings.misc_option[i] = 0;
 
-			oj = new CMenuOptionChooser(misc_setting_files[i][0], &(g_settings.misc_option[i]), true, new CTouchFileNotifier(misc_setting_files[i][1]));
-			oj->addOption(0, misc_setting_files[i][2]);
-			oj->addOption(1, misc_setting_files[i][3]);
-			miscSettings.addItem(oj);
+			miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CTouchFileNotifier(misc_setting_files[i].filename)));
 		}
 
-		oj = new CMenuOptionChooser(LOCALE_MISCSETTINGS_FB_DESTINATION, &g_settings.uboot_console, true, ConsoleDestinationChanger );
-		oj->addOption(0, LOCALE_OPTIONS_NULL  );
-		oj->addOption(1, LOCALE_OPTIONS_SERIAL);
-		oj->addOption(2, LOCALE_OPTIONS_FB    );
-		miscSettings.addItem( oj );
+		miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_FB_DESTINATION, &g_settings.uboot_console, MISCSETTINGS_FB_DESTINATION_OPTIONS, MISCSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
 	}
 
 	keySetupNotifier = new CKeySetupNotifier;
@@ -1594,7 +1613,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_RC));
 	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCK, true, g_settings.repeat_blocker, keySettings_repeatBlocker));
  	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, true, g_settings.repeat_genericblocker, keySettings_repeat_genericblocker));
-	miscSettings.addItem( m1 );
+	miscSettings.addItem(m1);
 }
 
 
@@ -1662,24 +1681,18 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem(GenericMenuBack);
 	audioSettings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_ANALOGOUT, &g_settings.audio_AnalogMode, true, audioSetupNotifier);
-	for (int i = 0; i < AUDIOMENU_ANALOGOUT_OPTION_COUNT; i++)
-		oj->addOption(AUDIOMENU_ANALOGOUT_OPTIONS[i].key, AUDIOMENU_ANALOGOUT_OPTIONS[i].value);
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_ANALOGOUT, &g_settings.audio_AnalogMode, AUDIOMENU_ANALOGOUT_OPTIONS, AUDIOMENU_ANALOGOUT_OPTION_COUNT, true, audioSetupNotifier);
 
 	audioSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_DOLBYDIGITAL, &g_settings.audio_DolbyDigital, true, audioSetupNotifier);
-	oj->addOption(0, LOCALE_OPTIONS_OFF);
-	oj->addOption(1, LOCALE_OPTIONS_ON );
-	audioSettings.addItem( oj );
+	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_DOLBYDIGITAL, &g_settings.audio_DolbyDigital, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, audioSetupNotifier);
+	audioSettings.addItem(oj);
 
 	CStringInput * audio_PCMOffset = new CStringInput(LOCALE_AUDIOMENU_PCMOFFSET, g_settings.audio_PCMOffset, 2, NULL, NULL, "0123456789 ", audioSetupNotifier);
 	CMenuForwarder *mf = new CMenuForwarder(LOCALE_AUDIOMENU_PCMOFFSET, (g_settings.audio_avs_Control == CControld::TYPE_LIRC), g_settings.audio_PCMOffset, audio_PCMOffset );
 	CAudioSetupNotifier2 *audioSetupNotifier2 = new CAudioSetupNotifier2(mf);
 
-	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AVS_CONTROL, &g_settings.audio_avs_Control, true, audioSetupNotifier2);
-	for (int i = 0; i < AUDIOMENU_AVS_CONTROL_OPTION_COUNT; i++)
-		oj->addOption(AUDIOMENU_AVS_CONTROL_OPTIONS[i].key, AUDIOMENU_AVS_CONTROL_OPTIONS[i].value);
+	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AVS_CONTROL, &g_settings.audio_avs_Control, AUDIOMENU_AVS_CONTROL_OPTIONS, AUDIOMENU_AVS_CONTROL_OPTION_COUNT, true, audioSetupNotifier2);
 	audioSettings.addItem(oj);
 	audioSettings.addItem(mf);
 }
@@ -1730,16 +1743,12 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 	CMenuForwarder* scf = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, bVisible, NULL, sc);
 	
 	CVideoSetupNotifier * videoSetupNotifier = new CVideoSetupNotifier(scf);
-	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOSIGNAL, &g_settings.video_Signal, true, videoSetupNotifier);
-	for (int i = 0; i < VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT; i++)
-		oj->addOption(VIDEOMENU_VIDEOSIGNAL_OPTIONS[i].key, VIDEOMENU_VIDEOSIGNAL_OPTIONS[i].value);
-	videoSettings.addItem( oj );
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOSIGNAL, &g_settings.video_Signal, VIDEOMENU_VIDEOSIGNAL_OPTIONS, VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT, true, videoSetupNotifier);
+	videoSettings.addItem(oj);
 
 	videoSettings.addItem(scf);
 
-	oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &g_settings.video_Format, true, videoSetupNotifier);
-	for (int i = 0; i < VIDEOMENU_VIDEOFORMAT_OPTION_COUNT; i++)
-		oj->addOption(VIDEOMENU_VIDEOFORMAT_OPTIONS[i].key, VIDEOMENU_VIDEOFORMAT_OPTIONS[i].value);
+	oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &g_settings.video_Format, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT, true, videoSetupNotifier);
 
 	if (g_settings.video_Format == CControldClient::VIDEOFORMAT_AUTO)
 	{
@@ -1748,14 +1757,27 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 
 	videoSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSWITCH, &g_settings.vcr_AutoSwitch, true);
-	oj->addOption(0, LOCALE_OPTIONS_OFF);
-	oj->addOption(1, LOCALE_OPTIONS_ON );
-	videoSettings.addItem( oj );
+	oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSWITCH, &g_settings.vcr_AutoSwitch, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
+	videoSettings.addItem(oj);
 
 	videoSettings.addItem(GenericMenuSeparatorLine);
 	videoSettings.addItem(new CMenuForwarder(LOCALE_VIDEOMENU_SCREENSETUP, true, NULL, new CScreenSetup()));
 }
+
+#if 1
+#define PARENTALLOCK_PROMPT_OPTION_COUNT 3
+#else
+#define PARENTALLOCK_PROMPT_OPTION_COUNT 4
+#endif
+const CMenuOptionChooser::keyval PARENTALLOCK_PROMPT_OPTIONS[PARENTALLOCK_PROMPT_OPTION_COUNT] =
+{
+	{ PARENTALLOCK_PROMPT_NEVER         , LOCALE_PARENTALLOCK_NEVER          },
+#if 0
+	{ PARENTALLOCK_PROMPT_ONSTART       , LOCALE_PARENTALLOCK_ONSTART        },
+#endif
+	{ PARENTALLOCK_PROMPT_CHANGETOLOCKED, LOCALE_PARENTALLOCK_CHANGETOLOCKED },
+	{ PARENTALLOCK_PROMPT_ONSIGNAL      , LOCALE_PARENTALLOCK_ONSIGNAL       }
+};
 
 #define PARENTALLOCK_LOCKAGE_OPTION_COUNT 3
 const CMenuOptionChooser::keyval PARENTALLOCK_LOCKAGE_OPTIONS[PARENTALLOCK_LOCKAGE_OPTION_COUNT] =
@@ -1771,17 +1793,9 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	parentallockSettings.addItem(GenericMenuBack);
 	parentallockSettings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_PARENTALLOCK_PROMPT, &g_settings.parentallock_prompt, !parentallocked);
-	oj->addOption(PARENTALLOCK_PROMPT_NEVER         , LOCALE_PARENTALLOCK_NEVER         );
-//	oj->addOption(PARENTALLOCK_PROMPT_ONSTART       , LOCALE_PARENTALLOCK_ONSTART       );
-	oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, LOCALE_PARENTALLOCK_CHANGETOLOCKED);
-	oj->addOption(PARENTALLOCK_PROMPT_ONSIGNAL      , LOCALE_PARENTALLOCK_ONSIGNAL      );
-	parentallockSettings.addItem( oj );
+	parentallockSettings.addItem(new CMenuOptionChooser(LOCALE_PARENTALLOCK_PROMPT , &g_settings.parentallock_prompt , PARENTALLOCK_PROMPT_OPTIONS , PARENTALLOCK_PROMPT_OPTION_COUNT , !parentallocked));
 
-	oj = new CMenuOptionChooser(LOCALE_PARENTALLOCK_LOCKAGE, &g_settings.parentallock_lockage, !parentallocked);
-	for (int i = 0; i < PARENTALLOCK_LOCKAGE_OPTION_COUNT; i++)
-		oj->addOption(PARENTALLOCK_LOCKAGE_OPTIONS[i].key, PARENTALLOCK_LOCKAGE_OPTIONS[i].value);
-	parentallockSettings.addItem( oj );
+	parentallockSettings.addItem(new CMenuOptionChooser(LOCALE_PARENTALLOCK_LOCKAGE, &g_settings.parentallock_lockage, PARENTALLOCK_LOCKAGE_OPTIONS, PARENTALLOCK_LOCKAGE_OPTION_COUNT, !parentallocked));
 
 	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget(LOCALE_PATENTALLOCK_CHANGEPIN, g_settings.parentallock_pincode, 4, LOCALE_PARENTALLOCK_CHANGEPIN_HINT1);
 	parentallockSettings.addItem( new CMenuForwarder(LOCALE_PATENTALLOCK_CHANGEPIN, true, g_settings.parentallock_pincode, pinChangeWidget));
@@ -1794,9 +1808,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem(GenericMenuSeparatorLine);
 
 	network_automatic_start = networkConfig.automatic_start ? 1 : 0;
-	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_NETWORKMENU_SETUPONSTARTUP, &network_automatic_start, true);
-	oj->addOption(0, LOCALE_OPTIONS_OFF);
-	oj->addOption(1, LOCALE_OPTIONS_ON );
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_NETWORKMENU_SETUPONSTARTUP, &network_automatic_start, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
 	networkSettings.addItem( oj );
 	networkSettings.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_TEST, true, NULL, this, "networktest"));
@@ -1821,10 +1833,8 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5);
 
 	network_dhcp = networkConfig.inet_static ? 0 : 1;
-	oj = new CMenuOptionChooser("dhcp", &network_dhcp, true, dhcpNotifier);
-	oj->addOption(0, LOCALE_OPTIONS_OFF);
-	oj->addOption(1, LOCALE_OPTIONS_ON );
-	networkSettings.addItem( oj );
+	oj = new CMenuOptionChooser("dhcp", &network_dhcp, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, dhcpNotifier);
+	networkSettings.addItem(oj);
 	networkSettings.addItem(GenericMenuSeparatorLine);
 
 	networkSettings.addItem( m1);
@@ -1859,22 +1869,13 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CMACInput * recordingSettings_server_mac = new CMACInput(LOCALE_RECORDINGMENU_SERVER_MAC,  g_settings.recording_server_mac, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CMenuForwarder * mf3 = new CMenuForwarder(LOCALE_RECORDINGMENU_SERVER_MAC, ((g_settings.recording_type == RECORDING_SERVER) && g_settings.recording_server_wakeup==1), g_settings.recording_server_mac, recordingSettings_server_mac);
 	CRecordingNotifier2 * RecordingNotifier2 = new CRecordingNotifier2(mf3);
-	CMenuOptionChooser * oj2 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SERVER_WAKEUP, &g_settings.recording_server_wakeup, (g_settings.recording_type == RECORDING_SERVER), RecordingNotifier2);
-	oj2->addOption(0, LOCALE_OPTIONS_OFF);
-	oj2->addOption(1, LOCALE_OPTIONS_ON );
+	CMenuOptionChooser * oj2 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SERVER_WAKEUP, &g_settings.recording_server_wakeup, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER), RecordingNotifier2);
 
+	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPPLAYBACK, &g_settings.recording_stopplayback, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER));
 
-	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPPLAYBACK, &g_settings.recording_stopplayback, (g_settings.recording_type == RECORDING_SERVER));
-	oj3->addOption(0, LOCALE_OPTIONS_OFF);
-	oj3->addOption(1, LOCALE_OPTIONS_ON );
+	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPSECTIONSD, &g_settings.recording_stopsectionsd, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER));
 
-	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPSECTIONSD, &g_settings.recording_stopsectionsd, (g_settings.recording_type == RECORDING_SERVER));
-	oj4->addOption(0, LOCALE_OPTIONS_OFF);
-	oj4->addOption(1, LOCALE_OPTIONS_ON );
-
-	CMenuOptionChooser* oj5 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_NO_SCART, &g_settings.recording_vcr_no_scart, (g_settings.recording_type == RECORDING_VCR));
-	oj5->addOption(0, LOCALE_OPTIONS_OFF);
-	oj5->addOption(1, LOCALE_OPTIONS_ON );
+	CMenuOptionChooser* oj5 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_NO_SCART, &g_settings.recording_vcr_no_scart, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_VCR));
 
 	int pre,post;
 	g_Timerd->getRecordingSafety(pre,post);
@@ -1892,15 +1893,11 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CStringInput * recordingSettings_splitsize = new CStringInput(LOCALE_RECORDINGMENU_SPLITSIZE, g_settings.recording_splitsize, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
 	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_RECORDINGMENU_SPLITSIZE, (g_settings.recording_type == RECORDING_FILE), g_settings.recording_splitsize,recordingSettings_splitsize);
 
-	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, (g_settings.recording_type == RECORDING_FILE));
-	oj6->addOption(0, LOCALE_OPTIONS_OFF);
-	oj6->addOption(1, LOCALE_OPTIONS_ON );
+	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
 	
 	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6);
 
-	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, true, RecordingNotifier);
-	for (int i = 0; i < RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT; i++)
-		oj1->addOption(RECORDINGMENU_RECORDING_TYPE_OPTIONS[i].key, RECORDINGMENU_RECORDING_TYPE_OPTIONS[i].value);
+	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, RECORDINGMENU_RECORDING_TYPE_OPTIONS, RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT, true, RecordingNotifier);
 
 	recordingSettings.addItem(GenericMenuSeparator);
 	recordingSettings.addItem(GenericMenuBack);
@@ -1927,6 +1924,13 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingstatus = 0;
 }
 
+#define STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTION_COUNT 2
+const CMenuOptionChooser::keyval STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTIONS[STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTION_COUNT] =
+{
+	{ 0, LOCALE_STREAMINGMENU_MPEG1 },
+	{ 1, LOCALE_STREAMINGMENU_MPEG2 }
+};
+
 #define STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT 4
 const CMenuOptionChooser::keyval STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS[STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT] =
 {
@@ -1936,8 +1940,19 @@ const CMenuOptionChooser::keyval STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS[STRE
 	{ 3, LOCALE_STREAMINGMENU_704x576 }
 };
 
+#define STREAMINGMENU_STREAMING_TYPE_OPTION_COUNT 2
+const CMenuOptionChooser::keyval STREAMINGMENU_STREAMING_TYPE_OPTIONS[STREAMINGMENU_STREAMING_TYPE_OPTION_COUNT] =
+{
+	{ 0, LOCALE_STREAMINGMENU_OFF },
+	{ 1, LOCALE_STREAMINGMENU_ON  }
+};
+
 void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 {
+	streamingSettings.addItem(GenericMenuSeparator);
+	streamingSettings.addItem(GenericMenuBack);
+	streamingSettings.addItem(GenericMenuSeparatorLine);
+
 	CIPInput * streamingSettings_server_ip = new CIPInput(LOCALE_STREAMINGMENU_SERVER_IP, g_settings.streaming_server_ip, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CStringInput * streamingSettings_server_port = new CStringInput(LOCALE_STREAMINGMENU_SERVER_PORT, g_settings.streaming_server_port, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2,"0123456789 ");
  	CStringInputSMS * cddriveInput = new CStringInputSMS(LOCALE_STREAMINGMENU_STREAMING_SERVER_CDDRIVE, g_settings.streaming_server_cddrive, 20, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
@@ -1953,37 +1968,20 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CMenuForwarder* mf6 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_SERVER_STARTDIR, (g_settings.streaming_type==1), g_settings.streaming_server_startdir, startdirInput);
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFDIR, true, g_settings.network_nfs_moviedir,this,"moviedir");
  
-	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_AUDIO      , &g_settings.streaming_transcode_audio      , true);
-	oj1->addOption(0, LOCALE_MESSAGEBOX_NO);
-	oj1->addOption(1, LOCALE_MESSAGEBOX_YES);
+	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_AUDIO      , &g_settings.streaming_transcode_audio      , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
                                              
-	CMenuOptionChooser* oj2 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_AVI_RAWAUDIO   , &g_settings.streaming_force_avi_rawaudio   , true);
-	oj2->addOption(0, LOCALE_MESSAGEBOX_NO);
-	oj2->addOption(1, LOCALE_MESSAGEBOX_YES);
+	CMenuOptionChooser* oj2 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_AVI_RAWAUDIO   , &g_settings.streaming_force_avi_rawaudio   , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
                                              
-	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_TRANSCODE_VIDEO, &g_settings.streaming_force_transcode_video, true);
-	oj3->addOption(0, LOCALE_MESSAGEBOX_NO);
-	oj3->addOption(1, LOCALE_MESSAGEBOX_YES);
+	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_TRANSCODE_VIDEO, &g_settings.streaming_force_transcode_video, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
 
 // not yet supported by VLC
-	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC, &g_settings.streaming_transcode_video_codec, true);
-	oj4->addOption(0, LOCALE_STREAMINGMENU_MPEG1);
-	oj4->addOption(1, LOCALE_STREAMINGMENU_MPEG2);
+	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC, &g_settings.streaming_transcode_video_codec, STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTIONS, STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC_OPTION_COUNT, true);
 
-	CMenuOptionChooser* oj5 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_RESOLUTION           , &g_settings.streaming_resolution           , true);
-	for (int i = 0; i < STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT; i++)
-		oj5->addOption(STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS[i].key, STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS[i].value);
+	CMenuOptionChooser* oj5 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_RESOLUTION           , &g_settings.streaming_resolution           , STREAMINGMENU_STREAMING_RESOLUTION_OPTIONS, STREAMINGMENU_STREAMING_RESOLUTION_OPTION_COUNT, true);
 
 	CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,mf7,oj1,oj2,oj3,oj4,oj5);
-	CMenuOptionChooser* oj0 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TYPE                 , &g_settings.streaming_type                 , true, StreamingNotifier);
-	oj0->addOption(0, LOCALE_STREAMINGMENU_OFF);
-	oj0->addOption(1, LOCALE_STREAMINGMENU_ON );
 
-
-	streamingSettings.addItem(GenericMenuSeparator);
-	streamingSettings.addItem(GenericMenuBack);
-	streamingSettings.addItem(GenericMenuSeparatorLine);
-	streamingSettings.addItem( oj0);                          //Streaming Type
+	streamingSettings.addItem(new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TYPE                 , &g_settings.streaming_type                 , STREAMINGMENU_STREAMING_TYPE_OPTIONS, STREAMINGMENU_STREAMING_TYPE_OPTION_COUNT, true, StreamingNotifier));
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf1);                          //Server IP
 	streamingSettings.addItem( mf2);                          //Server Port
@@ -2169,10 +2167,8 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	colorSettings.addItem(GenericMenuSeparatorLine);
 	if ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) // eNX
 	{
-		CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_COLORMENU_FADE, &g_settings.widget_fade, true );
-		oj->addOption(0, LOCALE_OPTIONS_OFF);
-		oj->addOption(1, LOCALE_OPTIONS_ON );
-		colorSettings.addItem( oj );
+		CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_COLORMENU_FADE, &g_settings.widget_fade, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true );
+		colorSettings.addItem(oj);
 	}
 	else // GTX, ...
 	{
@@ -2279,22 +2275,16 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 
 	CLcdNotifier* lcdnotifier = new CLcdNotifier();
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_LCDMENU_INVERSE, &g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE], true, lcdnotifier);
-	oj->addOption(0, LOCALE_OPTIONS_OFF);
-	oj->addOption(1, LOCALE_OPTIONS_ON );
-	lcdSettings.addItem( oj );
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_LCDMENU_INVERSE, &g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE], OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, lcdnotifier);
+	lcdSettings.addItem(oj);
 
-	oj = new CMenuOptionChooser(LOCALE_LCDMENU_POWER, &g_settings.lcd_setting[SNeutrinoSettings::LCD_POWER], true, lcdnotifier);
-	oj->addOption(0, LOCALE_OPTIONS_OFF);
-	oj->addOption(1, LOCALE_OPTIONS_ON );
-	lcdSettings.addItem( oj );
+	oj = new CMenuOptionChooser(LOCALE_LCDMENU_POWER, &g_settings.lcd_setting[SNeutrinoSettings::LCD_POWER], OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, lcdnotifier);
+	lcdSettings.addItem(oj);
 
 	if ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM))
 	{
 		// Autodimm available on Sagem/Philips only
-		oj = new CMenuOptionChooser(LOCALE_LCDMENU_AUTODIMM, &g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM], true, lcdnotifier);
-		oj->addOption(0, LOCALE_OPTIONS_OFF);
-		oj->addOption(1, LOCALE_OPTIONS_ON );
+		oj = new CMenuOptionChooser(LOCALE_LCDMENU_AUTODIMM, &g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM], OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, lcdnotifier);
 		lcdSettings.addItem( oj );
 	}
 
@@ -2302,10 +2292,8 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	lcdSettings.addItem(new CMenuForwarder(LOCALE_LCDMENU_LCDCONTROLER, true, NULL, lcdsliders));
 
 	lcdSettings.addItem(GenericMenuSeparatorLine);
-	oj = new CMenuOptionChooser(LOCALE_LCDMENU_STATUSLINE, &g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME], true);
-	for (int i = 0; i < LCDMENU_STATUSLINE_OPTION_COUNT; i++)
-		oj->addOption(LCDMENU_STATUSLINE_OPTIONS[i].key, LCDMENU_STATUSLINE_OPTIONS[i].value);
-	lcdSettings.addItem( oj );
+	oj = new CMenuOptionChooser(LOCALE_LCDMENU_STATUSLINE, &g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME], LCDMENU_STATUSLINE_OPTIONS, LCDMENU_STATUSLINE_OPTION_COUNT, true);
+	lcdSettings.addItem(oj);
 }
 
 #define KEYBINDINGMENU_BOUQUETHANDLING_OPTION_COUNT 3
@@ -2398,10 +2386,8 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_CHANNELLIST));
 
-	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_KEYBINDINGMENU_BOUQUETHANDLING, &g_settings.bouquetlist_mode, true );
-	for (int i = 0; i < KEYBINDINGMENU_BOUQUETHANDLING_OPTION_COUNT; i++)
-		oj->addOption(KEYBINDINGMENU_BOUQUETHANDLING_OPTIONS[i].key, KEYBINDINGMENU_BOUQUETHANDLING_OPTIONS[i].value);
-	keySettings.addItem( oj );
+	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_KEYBINDINGMENU_BOUQUETHANDLING, &g_settings.bouquetlist_mode, KEYBINDINGMENU_BOUQUETHANDLING_OPTIONS, KEYBINDINGMENU_BOUQUETHANDLING_OPTION_COUNT, true );
+	keySettings.addItem(oj);
 
 	for (int i = KEY_PAGE_UP; i <= KEY_ADD_REMIND; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
@@ -2470,10 +2456,8 @@ void CNeutrinoApp::SelectNVOD()
 		if( g_RemoteControl->are_subchannels )
 		{
 			NVODSelector.addItem(GenericMenuSeparatorLine);
-			CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_NVODSELECTOR_DIRECTORMODE, &g_RemoteControl->director_mode, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
-			oj->addOption(0, LOCALE_OPTIONS_OFF);
-			oj->addOption(1, LOCALE_OPTIONS_ON );
-			NVODSelector.addItem( oj );
+			CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_NVODSELECTOR_DIRECTORMODE, &g_RemoteControl->director_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
+			NVODSelector.addItem(oj);
 		}
 
 		NVODSelector.exec(NULL, "");
@@ -2498,6 +2482,13 @@ void CNeutrinoApp::SelectAPID()
 		APIDSelector.exec(NULL, "");
 	}
 }
+
+#define MAINMENU_RECORDING_OPTION_COUNT 2
+const CMenuOptionChooser::keyval MAINMENU_RECORDING_OPTIONS[MAINMENU_RECORDING_OPTION_COUNT] =
+{
+	{ 0, LOCALE_MAINMENU_RECORDING_START },
+	{ 1, LOCALE_MAINMENU_RECORDING_STOP  }
+};
 
 void CNeutrinoApp::ShowStreamFeatures()
 {
@@ -2536,10 +2527,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// start/stop recording
 	if (g_settings.recording_type != RECORDING_OFF)
 	{
-		CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, true, this, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
-		oj->addOption(0, LOCALE_MAINMENU_RECORDING_START);
-		oj->addOption(1, LOCALE_MAINMENU_RECORDING_STOP);
-		StreamFeatureSelector.addItem( oj );
+		StreamFeatureSelector.addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, MAINMENU_RECORDING_OPTIONS, MAINMENU_RECORDING_OPTION_COUNT, true, this, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	}
 	// -- Timer Liste
 	StreamFeatureSelector.addItem(new CMenuForwarder("timerlist.name", true, NULL, new CTimerList(), id, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
@@ -2551,10 +2539,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	// -- Sectionsd pause
 	int dummy = g_Sectionsd->getIsScanningActive();
-	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_MAINMENU_PAUSESECTIONSD, &dummy, true, new CPauseSectionsdNotifier );
-	oj->addOption(0, LOCALE_OPTIONS_OFF);
-	oj->addOption(1, LOCALE_OPTIONS_ON );
-	StreamFeatureSelector.addItem( oj );
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_MAINMENU_PAUSESECTIONSD, &dummy, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, new CPauseSectionsdNotifier );
+	StreamFeatureSelector.addItem(oj);
 
 	// -- Stream Info
 	// -- !! obsolete (rasc 2004-03-06) 
@@ -3425,7 +3411,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			text[pos] = '\n';
 		}
 		if( mode != mode_scart )
-			ShowMsgUTF("timerlist.type.remind", text, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+			ShowMsgUTF(LOCALE_TIMERLIST_TYPE_REMIND, text, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}

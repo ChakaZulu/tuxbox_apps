@@ -624,6 +624,9 @@ class CLocaleManager
 #define LOCALE_STREAMINGMENU_STREAMING_VIDEORATE             "streamingmenu.streaming_videorate"
 
 
+#define LOCALE_TIMERLIST_NEW                                 "timerlist.new"
+#define LOCALE_TIMERLIST_PROGRAM_UNKNOWN                     "timerlist.program.unknown"
+#define LOCALE_TIMERLIST_RELOAD                              "timerlist.reload"
 #define LOCALE_TIMERLIST_REPEAT                              "timerlist.repeat"
 #define LOCALE_TIMERLIST_REPEAT_BIWEEKLY                     "timerlist.repeat.biweekly"
 #define LOCALE_TIMERLIST_REPEAT_BYEVENTDESCRIPTION           "timerlist.repeat.byeventdescription"
@@ -641,6 +644,23 @@ class CLocaleManager
 #define LOCALE_TIMERLIST_REPEAT_WEDNESDAY                    "timerlist.repeat.wednesday"
 #define LOCALE_TIMERLIST_REPEAT_WEEKDAYS                     "timerlist.repeat.weekdays"
 #define LOCALE_TIMERLIST_REPEAT_WEEKLY                       "timerlist.repeat.weekly"
+#define LOCALE_TIMERLIST_SAVE                                "timerlist.save"
+#define LOCALE_TIMERLIST_STANDBY                             "timerlist.standby"
+#define LOCALE_TIMERLIST_STANDBY_OFF                         "timerlist.standby.off"
+#define LOCALE_TIMERLIST_STANDBY_ON                          "timerlist.standby.on"
+#define LOCALE_TIMERLIST_STOPTIME                            "timerlist.stoptime"
+#define LOCALE_TIMERLIST_TYPE                                "timerlist.type"
+#define LOCALE_TIMERLIST_TYPE_NEXTPROGRAM                    "timerlist.type.nextprogram"
+#define LOCALE_TIMERLIST_TYPE_RECORD                         "timerlist.type.record"
+#define LOCALE_TIMERLIST_TYPE_REMIND                         "timerlist.type.remind"
+#define LOCALE_TIMERLIST_TYPE_SHUTDOWN                       "timerlist.type.shutdown"
+#define LOCALE_TIMERLIST_TYPE_SLEEPTIMER                     "timerlist.type.sleeptimer"
+#define LOCALE_TIMERLIST_TYPE_STANDBY                        "timerlist.type.standby"
+#define LOCALE_TIMERLIST_TYPE_UNKNOWN                        "timerlist.type.unknown"
+#define LOCALE_TIMERLIST_TYPE_ZAPTO                          "timerlist.type.zapto"
+#define LOCALE_TIMERLIST_WEEKDAYS                            "timerlist.weekdays"
+#define LOCALE_TIMERLIST_WEEKDAYS_HINT_1                     "timerlist.weekdays.hint_1"
+#define LOCALE_TIMERLIST_WEEKDAYS_HINT_2                     "timerlist.weekdays.hint_2"
 
 
 #define LOCALE_TIMING_CHANLIST                               "timing.chanlist"

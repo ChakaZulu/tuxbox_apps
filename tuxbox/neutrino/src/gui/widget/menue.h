@@ -170,8 +170,9 @@ class CMenuForwarder : public CMenuItem
 class CAbstractMenuOptionChooser : public CMenuItem
 {
  protected:
-	int   height;
-	int * optionValue;
+	neutrino_locale_t optionName;
+	int               height;
+	int *             optionValue;
 
 	int getHeight(void) const
 		{
@@ -186,7 +187,6 @@ class CAbstractMenuOptionChooser : public CMenuItem
 
 class CMenuOptionNumberChooser : public CAbstractMenuOptionChooser
 {
-	neutrino_locale_t  optionName;
 	const char *       optionString;
 
 	int                lower_bound;
@@ -210,22 +210,18 @@ class CMenuOptionChooser : public CAbstractMenuOptionChooser
  public:
 	struct keyval
 	{
-		int               key;
-		neutrino_locale_t value;
+		const int               key;
+		const neutrino_locale_t value;
 	};
 
  private:
-	std::vector<keyval *> options;
-	neutrino_locale_t     optionName;
+	const struct keyval * options;
+	unsigned              number_of_options;
 	CChangeObserver *     observ;
-	bool                  localizing;
 
  public:
-	CMenuOptionChooser(const neutrino_locale_t OptionName, int * const OptionValue, const bool Active = false, CChangeObserver * const Observ = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const std::string & IconName= ""); // UTF-8
-	~CMenuOptionChooser();
+	CMenuOptionChooser(const neutrino_locale_t OptionName, int * const OptionValue, const struct keyval * const Options, const unsigned Number_Of_Options, const bool Active = false, CChangeObserver * const Observ = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const std::string & IconName= ""); // UTF-8
 
-	void addOption(const int key, const neutrino_locale_t value_utf8_encoded); // UTF-8
-	void removeAllOptions();
 	void setOptionValue(const int newvalue);
 	int getOptionValue(void) const;
 

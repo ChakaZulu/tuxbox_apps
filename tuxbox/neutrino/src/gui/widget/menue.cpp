@@ -463,40 +463,19 @@ int CMenuOptionNumberChooser::paint(bool selected)
 
 
 
-CMenuOptionChooser::CMenuOptionChooser(const neutrino_locale_t OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const neutrino_msg_t DirectKey, const std::string & IconName)
+CMenuOptionChooser::CMenuOptionChooser(const neutrino_locale_t OptionName, int * const OptionValue, const struct keyval * const Options, const unsigned Number_Of_Options, const bool Active, CChangeObserver * const Observ, const neutrino_msg_t DirectKey, const std::string & IconName)
 {
-	height = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
-	optionName = OptionName;
-	active = Active;
-	optionValue = OptionValue;
-	observ=Observ;
-	directKey = DirectKey;
-	iconName = IconName;
+	height            = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	optionName        = OptionName;
+	options           = Options;
+	active            = Active;
+	optionValue       = OptionValue;
+	number_of_options = Number_Of_Options;
+	observ            = Observ;
+	directKey         = DirectKey;
+	iconName          = IconName;
 }
 
-
-CMenuOptionChooser::~CMenuOptionChooser()
-{
-	removeAllOptions();
-}
-
-void CMenuOptionChooser::addOption(const int key, const neutrino_locale_t value_utf8_encoded)
-{
-	keyval *tmp = new keyval();
-	tmp->key=key;
-	tmp->value = value_utf8_encoded;
-	options.push_back(tmp);
-}
-
-void CMenuOptionChooser::removeAllOptions()
-{
-	for(unsigned int count=0;count<options.size();count++)
-	{
-		keyval* kv = options[count];
-		delete kv;
-	}
-	options.clear();
-}
 
 void CMenuOptionChooser::setOptionValue(const int newvalue)
 {
@@ -511,12 +490,11 @@ int CMenuOptionChooser::getOptionValue(void) const
 
 int CMenuOptionChooser::exec(CMenuTarget*)
 {
-	for(unsigned int count=0;count<options.size();count++)
+	for(unsigned int count = 0; count < number_of_options; count++)
 	{
-		keyval* kv = options[count];
-		if(kv->key == *optionValue)
+		if (options[count].key == (*optionValue))
 		{
-			*optionValue = options[ (count+1)%options.size() ]->key;
+			*optionValue = options[(count+1) % number_of_options].key;
 			break;
 		}
 	}
@@ -549,12 +527,11 @@ int CMenuOptionChooser::paint( bool selected )
 
 	const char * option = "error";
 
-	for(unsigned int count=0;count<options.size();count++)
+	for(unsigned int count = 0 ; count < number_of_options; count++)
 	{
-		keyval* kv = options[count];
-		if(kv->key == *optionValue)
+		if (options[count].key == *optionValue)
 		{
-			option = kv->value;
+			option = options[count].value;
 			break;
 		}
 	}
