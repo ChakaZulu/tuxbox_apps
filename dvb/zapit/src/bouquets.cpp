@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.67 2002/10/07 14:46:41 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.68 2002/10/07 22:47:26 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -24,7 +24,7 @@
  */
 
 #include <map>
-#include <ext/hash_set>
+#include <set>
 
 /* tuxbox headers */
 #include <configfile.h>
@@ -306,7 +306,7 @@ void CBouquetManager::restoreBouquets()
 void CBouquetManager::makeRemainingChannelsBouquet()
 {
 	ChannelList unusedChannels;
-	__gnu_cxx::hash_set<t_channel_id> chans_processed;
+	set<t_channel_id> chans_processed;
 
 	for (vector<CBouquet*>::iterator it = Bouquets.begin(); it != Bouquets.end(); it++)
 	{

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.42 2002/09/24 10:11:12 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.43 2002/10/07 22:47:26 obi Exp $
  */
 
 #ifndef __bouquets_h__
@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <functional>
 #include <vector>
-#include <ext/hash_map>
+#include <map>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -17,8 +17,8 @@
 
 using namespace std;
 
-typedef __gnu_cxx::hash_map<t_channel_id, CZapitChannel> tallchans;
-typedef __gnu_cxx::hash_map<t_channel_id, CZapitChannel>::iterator tallchans_iterator;
+typedef map<t_channel_id, CZapitChannel> tallchans;
+typedef map<t_channel_id, CZapitChannel>::iterator tallchans_iterator;
 
 typedef vector<CZapitChannel*> ChannelList;
 
