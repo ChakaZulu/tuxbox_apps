@@ -151,6 +151,13 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
 
+	// reset mode to auto if appl.
+	if(g_settings.video_Format==0)
+	{
+		CControldClient cdc;
+		cdc.setVideoFormat(CControldClient::VIDEOFORMAT_AUTO);
+	}
+	
 	// Restore last mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
 
