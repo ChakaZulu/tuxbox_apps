@@ -202,7 +202,7 @@ void eDVB::configureNetwork()
 {
 	__u32 sip=0, snetmask=0, sdns=0, sgateway=0;
 	int ip[4], netmask[4], dns[4], gateway[4];
-	int sdosetup=0, maxmtu=0;
+	int sdosetup=0, maxmtu=0, samba=1;
 
 	eConfig::getInstance()->getKey("/elitedvb/network/ip", sip);
 	eConfig::getInstance()->getKey("/elitedvb/network/netmask", snetmask);
@@ -210,12 +210,13 @@ void eDVB::configureNetwork()
 	eConfig::getInstance()->getKey("/elitedvb/network/gateway", sgateway);
 	eConfig::getInstance()->getKey("/elitedvb/network/dosetup", sdosetup);
 	eConfig::getInstance()->getKey("/elitedvb/network/maxmtu", maxmtu);
+	eConfig::getInstance()->getKey("/elitedvb/network/samba", samba);
 
 	unpack(sip, ip);
 	unpack(snetmask, netmask);
 	unpack(sdns, dns);
 	unpack(sgateway, gateway);
-	
+
 	if (sdosetup)
 	{
 		FILE *f=fopen("/etc/resolv.conf", "wt");
@@ -246,22 +247,28 @@ void eDVB::configureNetwork()
 		}
 		system("killall nmbd");
 		signal(SIGCHLD, SIG_IGN);
-		if (fork() == 0)
+		if (samba != 0)
 		{
-			for (unsigned int i=0; i < 90; ++i )
-				close(i);
-			execlp("nmbd", "nmbd", "-D", NULL);
-			
-			_exit(0);
+			if (fork() == 0)
+			{
+				for (unsigned int i=0; i < 90; ++i )
+					close(i);
+				execlp("nmbd", "nmbd", "-D", NULL);
+
+				_exit(0);
+			}
 		}
 		system("killall smbd");
 		signal(SIGCHLD, SIG_IGN);
-		if (fork() == 0)
+		if (samba != 0)
 		{
-			for (unsigned int i=0; i < 90; ++i )
-				close(i);
-			execlp("smbd", "smbd", "-D", NULL);
-			_exit(0);
+			if (fork() == 0)
+			{
+				for (unsigned int i=0; i < 90; ++i )
+					close(i);
+				execlp("smbd", "smbd", "-D", NULL);
+				_exit(0);
+			}
 		}
 	}
 }
