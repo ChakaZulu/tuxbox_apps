@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.9 2002/04/20 12:35:37 obi Exp $
+ * $Id: pmt.cpp,v 1.10 2002/04/23 06:57:45 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -144,14 +144,23 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 				data_broadcast_id_descriptor(buffer + descr_pos);
 				break;
 
-			case 0x6a: /* AC3 descriptor */
+			case 0x6A: /* AC3 descriptor */
 				if (ap_count < max_num_apids)
 				{
 					ret_pids->apids[ap_count].is_ac3 = true;
 				}
 				break;
 
-			case 0xc5: /* User Private descriptor - Canal+ Radio                                     */
+			case 0xC0: /* unknown, Astra 19.2E */
+				break;
+
+			case 0xC1: /* unknown, Astra 19.2E */
+				break;
+
+			case 0xC2: /* unknown, Astra 19.2E */
+				break;
+
+			case 0xC5: /* User Private descriptor - Canal+ Radio                                     */
 				   /* Double apid entries are ignored or overwritten (depending on the name tag) */
 				if (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06)
 				{
@@ -186,6 +195,9 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 						}
 					}
 				}
+				break;
+
+			case 0xC6: /* unknown, Astra 19.2E */
 				break;
 
 			default:
