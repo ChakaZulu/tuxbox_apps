@@ -512,6 +512,8 @@ void  CMP3Player::ResetDSP(FILE *soundfd)
                 printf("channel set failed\n");
         if(::ioctl(fileno(soundfd), SNDCTL_DSP_SETFMT, &fmt))
                 printf("setfmt failed\n");
+		  printf("Debug: SNDCTL_DSP_RESET %d / SNDCTL_DSP_SPEED %d / SNDCTL_DSP_CHANNELS %d / SNDCTL_DSP_SETFMT %d\n",
+					SNDCTL_DSP_RESET, SNDCTL_DSP_SPEED, SNDCTL_DSP_CHANNELS, SNDCTL_DSP_SETFMT);
 }
 
 void CMP3Player::stop()

@@ -52,6 +52,7 @@
 
 #include "update.h"
 #include "color.h"
+#include "nfs.h"
 
 #include "widget/messagebox.h"
 #include "widget/hintbox.h"
@@ -233,6 +234,9 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 		parent->hide();
 	}
 	paint();
+
+	// Umpount all NFS volumes
+	CNFSUmountGui::umount();
 
 	if(!checkVersion4Update())
 	{

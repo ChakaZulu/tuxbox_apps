@@ -122,6 +122,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void setupColors_classic();
 		void setupColors_neutrino();
 		void setupNetwork( bool force= false );
+		void setupNFS();
 		void setupRecordingDevice(void);
 		void testNetwork();
 		void showNetwork();
@@ -175,7 +176,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		bool getEnvironment(const char* name, int* value);
 		void ShowStreamFeatures();
 
-        long long last_profile_call;
+		long long last_profile_call;
 
 		CNeutrinoApp();
 		~CNeutrinoApp();

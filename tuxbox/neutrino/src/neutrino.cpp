@@ -100,6 +100,7 @@
 #include "gui/timerlist.h"
 #include "gui/alphasetup.h"
 #include "gui/mp3player.h"
+#include "gui/nfs.h"
 
 #include "system/setting_helpers.h"
 #include "system/settings.h"
@@ -203,6 +204,7 @@ void CNeutrinoApp::setupNetwork(bool force)
 		}
 	}
 }
+
 void CNeutrinoApp::testNetwork( )
 {
 	setupNetwork( true );
@@ -440,7 +442,23 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_broadcast, configfile.getString( "network_broadcast", "10.10.10.255" ).c_str() );
 	strcpy( g_settings.network_defaultgateway, configfile.getString( "network_defaultgateway", "" ).c_str() );
 	strcpy( g_settings.network_nameserver, configfile.getString( "network_nameserver", "" ).c_str() );
-
+	strcpy( g_settings.network_nfs_ip[0], configfile.getString( "network_nfs_ip_1", "" ).c_str() );
+	strcpy( g_settings.network_nfs_ip[1], configfile.getString( "network_nfs_ip_2", "" ).c_str() );
+	strcpy( g_settings.network_nfs_ip[2], configfile.getString( "network_nfs_ip_3", "" ).c_str() );
+	strcpy( g_settings.network_nfs_ip[3], configfile.getString( "network_nfs_ip_4", "" ).c_str() );
+	strcpy( g_settings.network_nfs_dir[0], configfile.getString( "network_nfs_dir_1", "" ).c_str() );
+	strcpy( g_settings.network_nfs_dir[1], configfile.getString( "network_nfs_dir_2", "" ).c_str() );
+	strcpy( g_settings.network_nfs_dir[2], configfile.getString( "network_nfs_dir_3", "" ).c_str() );
+	strcpy( g_settings.network_nfs_dir[3], configfile.getString( "network_nfs_dir_4", "" ).c_str() );
+	strcpy( g_settings.network_nfs_local_dir[0], configfile.getString( "network_nfs_local_dir_1", "" ).c_str() );
+	strcpy( g_settings.network_nfs_local_dir[1], configfile.getString( "network_nfs_local_dir_2", "" ).c_str() );
+	strcpy( g_settings.network_nfs_local_dir[2], configfile.getString( "network_nfs_local_dir_3", "" ).c_str() );
+	strcpy( g_settings.network_nfs_local_dir[3], configfile.getString( "network_nfs_local_dir_4", "" ).c_str() );
+	g_settings.network_nfs_automount[0] = configfile.getInt32( "network_nfs_automount_1", 0);
+	g_settings.network_nfs_automount[1] = configfile.getInt32( "network_nfs_automount_2", 0);
+	g_settings.network_nfs_automount[2] = configfile.getInt32( "network_nfs_automount_3", 0);
+	g_settings.network_nfs_automount[3] = configfile.getInt32( "network_nfs_automount_4", 0);
+	
 	//streaming (server + vcr)
 	g_settings.recording_type = configfile.getInt32( "recording_type", 0 );
 	g_settings.recording_stopplayback = configfile.getInt32( "recording_stopplayback", 0 );
@@ -644,6 +662,22 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_broadcast", g_settings.network_broadcast );
 	configfile.setString( "network_defaultgateway", g_settings.network_defaultgateway );
 	configfile.setString( "network_nameserver", g_settings.network_nameserver );
+	configfile.setString( "network_nfs_ip_1", g_settings.network_nfs_ip[0] );
+	configfile.setString( "network_nfs_ip_2", g_settings.network_nfs_ip[1] );
+	configfile.setString( "network_nfs_ip_3", g_settings.network_nfs_ip[2] );
+	configfile.setString( "network_nfs_ip_4", g_settings.network_nfs_ip[3] );
+	configfile.setString( "network_nfs_dir_1", g_settings.network_nfs_dir[0] );
+	configfile.setString( "network_nfs_dir_2", g_settings.network_nfs_dir[1] );
+	configfile.setString( "network_nfs_dir_3", g_settings.network_nfs_dir[2] );
+	configfile.setString( "network_nfs_dir_4", g_settings.network_nfs_dir[3] );
+	configfile.setString( "network_nfs_local_dir_1", g_settings.network_nfs_local_dir[0] );
+	configfile.setString( "network_nfs_local_dir_2", g_settings.network_nfs_local_dir[1] );
+	configfile.setString( "network_nfs_local_dir_3", g_settings.network_nfs_local_dir[2] );
+	configfile.setString( "network_nfs_local_dir_4", g_settings.network_nfs_local_dir[3] );
+	configfile.setInt32( "network_nfs_automount_1", g_settings.network_nfs_automount[0]);
+	configfile.setInt32( "network_nfs_automount_2", g_settings.network_nfs_automount[1]);
+	configfile.setInt32( "network_nfs_automount_3", g_settings.network_nfs_automount[2]);
+	configfile.setInt32( "network_nfs_automount_4", g_settings.network_nfs_automount[3]);
 
 	//recording (server + vcr)
 	configfile.setInt32 ( "recording_type", g_settings.recording_type );
@@ -1236,12 +1270,6 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuForwarder("menu.back") );
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.general" ) );
 
-/*	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, false, NULL, false );
-	oj->addOption(1, "Nokia");
-	oj->addOption(2, "Sagem");
-	oj->addOption(3, "Philips");
-	miscSettings.addItem( oj );
-*/
 	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.shutdown_real", &g_settings.shutdown_real, true );
 	oj->addOption(1, "options.off");
 	oj->addOption(0, "options.on");
@@ -1481,6 +1509,11 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	networkSettings.addItem( m4);
 	networkSettings.addItem( m5);
+	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "NFS") );
+//	networkSettings.addItem( new CMenuForwarder("networkmenu.mount", true, "", this, "mount"));
+//	networkSettings.addItem( new CMenuForwarder("networkmenu.umount", true, "", this, "umount"));
+	networkSettings.addItem( new CMenuForwarder("nfs.mount", true, "", new CNFSMountGui()));
+	networkSettings.addItem( new CMenuForwarder("nfs.umount", true, "", new CNFSUmountGui()));
 }
 
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
@@ -2113,6 +2146,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	colorSetupNotifier->changeNotify("initial", NULL);
 
 	setupNetwork();
+	CNFSMountGui::automount();
 
 	// setup recording device
 	if(g_settings.recording_type > 0)
@@ -3301,7 +3335,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.388 2003/01/11 17:32:31 rasc Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.389 2003/01/12 16:41:17 Zwen Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

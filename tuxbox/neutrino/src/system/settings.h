@@ -141,7 +141,11 @@ struct SNeutrinoSettings
 	char network_broadcast[20];
 	char network_defaultgateway[20];
 	char network_nameserver[20];
-
+	char network_nfs_ip[4][20];
+	char network_nfs_local_dir[4][100];
+	char network_nfs_dir[4][100];
+	int  network_nfs_automount[4];
+	
 	//streaming
 	int  recording_type;
 	int  recording_stopplayback;
