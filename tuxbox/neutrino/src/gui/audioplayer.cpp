@@ -207,10 +207,6 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
-	// restore volume display
-	char current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
-	CLCD::getInstance()->showVolume(current_volume);
-
 	// always exit all	
 	return menu_return::RETURN_EXIT_ALL;
 }
@@ -225,6 +221,7 @@ int CAudioPlayerGui::show()
 	int res = -1;
 
 	CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
+	paintLCD();
 
 	bool loop=true;
 	bool update=true;
@@ -633,6 +630,7 @@ int CAudioPlayerGui::show()
 			}
 			// update mute icon
 			paintHead();
+			paintLCD();
 		}
 	}
 	hide();
@@ -1261,7 +1259,7 @@ void CAudioPlayerGui::updateTimes(const bool force)
 		}
 		if((updatePlayed || updateTotal) && m_time_total!=0)
 		{
-			CLCD::getInstance()->showVolume((int)(100.0 * m_time_played / m_time_total));
+			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total));
 		}
 	}
 }
@@ -1272,15 +1270,15 @@ void CAudioPlayerGui::paintLCD()
 	{
 	case CAudioPlayerGui::STOP:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_STOP);
-	   CLCD::getInstance()->showVolume(0);
+	   CLCD::getInstance()->showAudioProgress(0);
 		break;
 	case CAudioPlayerGui::PLAY:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PLAY);
 		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
 		if(m_time_total!=0)
-			CLCD::getInstance()->showVolume((int)(100.0 * m_time_played / m_time_total));
+			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total));
 		else
-			CLCD::getInstance()->showVolume(0);
+			CLCD::getInstance()->showAudioProgress(0);
 		break;
 	case CAudioPlayerGui::PAUSE:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PAUSE);

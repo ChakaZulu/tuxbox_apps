@@ -307,6 +307,14 @@ void CLCD::showVolume(const char vol, const bool perform_update)
 			int dp = int( vol/100.0*61.0+12.0);
 			display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
 		}
+		if(mode == MODE_AUDIO)
+		{
+			display.draw_fill_rect (-1, 51, 10, 62, CLCDDisplay::PIXEL_OFF);
+			display.draw_rectangle ( 1, 55,  3, 58, CLCDDisplay::PIXEL_ON, CLCDDisplay::PIXEL_OFF);
+			display.draw_line      ( 3, 55,  6, 52, CLCDDisplay::PIXEL_ON);
+			display.draw_line      ( 3, 58,  6, 61, CLCDDisplay::PIXEL_ON);
+			display.draw_line      ( 6, 54,  6, 59, CLCDDisplay::PIXEL_ON);
+		}
 
 		if (perform_update)
 		  display.update();
@@ -428,6 +436,18 @@ void CLCD::showAudioPlayMode(AUDIOMODES m)
 	}
 	display.update();
 }
+
+void CLCD::showAudioProgress(const char perc)
+{
+	if (mode == MODE_AUDIO)
+	{
+		display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
+		int dp = int( perc/100.0*61.0+12.0);
+		display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
+		display.update();
+	}
+}
+
 void CLCD::setMode(const MODES m, const char * const title)
 {
 	mode = m;
