@@ -15,7 +15,7 @@
 #include <enigma_mount.h>
 #include <enigma_osd_mount.h>
 
-eMountManager *eMountManager::instance = 0;
+eMountOSD *eMountOSD::instance = 0;
 
 gFont eListBoxEntryMount::ServerFont;
 gFont eListBoxEntryMount::LocalFont;
@@ -159,7 +159,7 @@ const eString &eListBoxEntryMount::redraw(gPainter *rc, const eRect& rect, gColo
 /************************************************
 *		MAIN MOUNT MANAGER              *
 ************************************************/
-eMountManager::eMountManager():	eWindow(0)
+eMountOSD::eMountOSD():	eWindow(0)
 {
 	if (!instance)
 		instance = this;
@@ -173,7 +173,7 @@ eMountManager::eMountManager():	eWindow(0)
 	mountList->loadDeco();
 	mountList->setHelpText(_("press ok to edit mount entry"));
 	mountList->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
-	CONNECT(mountList->selected, eMountManager::mountSelected);
+	CONNECT(mountList->selected, eMountOSD::mountSelected);
 
 	updateList();
 
@@ -185,7 +185,7 @@ eMountManager::eMountManager():	eWindow(0)
 	remmount->setShortcutPixmap("red");
 	remmount->loadDeco();
 	remmount->setHelpText(_("remove selected mount point"));
-	CONNECT(remmount->selected, eMountManager::removeMount);
+	CONNECT(remmount->selected, eMountOSD::removeMount);
 
 	newmount = new eButton(this);
 	newmount->setText(_("add"));
@@ -195,7 +195,7 @@ eMountManager::eMountManager():	eWindow(0)
 	newmount->setShortcutPixmap("green");
 	newmount->loadDeco();
 	newmount->setHelpText(_("add new mount point"));
-	CONNECT(newmount->selected, eMountManager::addMount);
+	CONNECT(newmount->selected, eMountOSD::addMount);
 
 	unmount = new eButton(this);
 	unmount->setText(_("unmount"));
@@ -205,7 +205,7 @@ eMountManager::eMountManager():	eWindow(0)
 	unmount->setShortcutPixmap("yellow");
 	unmount->loadDeco();
 	unmount->setHelpText(_("unmount selected mount point"));
-	CONNECT(unmount->selected, eMountManager::unmountNow);
+	CONNECT(unmount->selected, eMountOSD::unmountNow);
 
 	mountnow = new eButton(this);
 	mountnow->setText(_("mount"));
@@ -215,7 +215,7 @@ eMountManager::eMountManager():	eWindow(0)
 	mountnow->setShortcutPixmap("blue");
 	mountnow->loadDeco();
 	mountnow->setHelpText(_("mount selected mount point"));
-	CONNECT(mountnow->selected, eMountManager::mountNow);
+	CONNECT(mountnow->selected, eMountOSD::mountNow);
 
 	statusbar = new eStatusBar(this);
 	statusbar->move(ePoint(0, clientrect.height() - 30));
@@ -223,12 +223,12 @@ eMountManager::eMountManager():	eWindow(0)
 	statusbar->loadDeco();
 }
 
-void eMountManager::mountSelected(eListBoxEntryMount *sel)
+void eMountOSD::mountSelected(eListBoxEntryMount *sel)
 {
 	if (sel)
 	{
 		hide();
-		eMountWindow wndMnt = eMountWindow(mountList->getCurrent()->id);
+		eMountOSDWindow wndMnt = eMountOSDWindow(mountList->getCurrent()->id);
 		wndMnt.show();
 		wndMnt.exec();
 		wndMnt.hide();
@@ -238,7 +238,7 @@ void eMountManager::mountSelected(eListBoxEntryMount *sel)
 	}
 }
 
-void eMountManager::removeMount()
+void eMountOSD::removeMount()
 {
 	if (mountList->getCurrent())
 	{	
@@ -261,7 +261,7 @@ void eMountManager::removeMount()
 	}
 }
 
-void eMountManager::addMount()
+void eMountOSD::addMount()
 {
 	hide();
 	t_mount mp;
@@ -278,7 +278,7 @@ void eMountManager::addMount()
 	mp.ownOptions = "";
 	mp.mounted    = false;
 	mp.id         = -1; //don't care
-	eMountWindow newMountWindow = eMountWindow(eMountMgr::getInstance()->addMountPoint(mp));
+	eMountOSDWindow newMountWindow = eMountOSDWindow(eMountMgr::getInstance()->addMountPoint(mp));
 	newMountWindow.show();
 	newMountWindow.exec();
 	newMountWindow.hide();
@@ -287,7 +287,7 @@ void eMountManager::addMount()
 	setFocus(mountList);
 }
 
-void eMountManager::unmountNow()
+void eMountOSD::unmountNow()
 {
 	if (mountList->getCurrent())
 	{
@@ -306,7 +306,7 @@ void eMountManager::unmountNow()
 	return;
 }
 
-void eMountManager::mountNow()
+void eMountOSD::mountNow()
 {
 	t_mount mp = eMountMgr::getInstance()->getMountPointData(mountList->getCurrent()->id);
 	if (mountList->getCurrent())
@@ -349,7 +349,7 @@ void eMountManager::mountNow()
 	}
 }
 
-void eMountManager::createDirectory(eString directory)
+void eMountOSD::createDirectory(eString directory)
 {
 	eMessageBox box(_("Local directory does not exist! Create it now?"), _("Mount Error"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconWarning, eMessageBox::btYes);
 	box.show();
@@ -363,11 +363,11 @@ void eMountManager::createDirectory(eString directory)
 	return;
 }
 
-eMountManager::~eMountManager()
+eMountOSD::~eMountOSD()
 {
 }
 
-void eMountManager::updateList()
+void eMountOSD::updateList()
 {
 	mountList->beginAtomic();
 	mountList->clearList();
@@ -377,7 +377,7 @@ void eMountManager::updateList()
 	return;
 }
 
-void eMountManager::fieldSelected(int *number)
+void eMountOSD::fieldSelected(int *number)
 {
 	focusNext(eWidget::focusDirNext);
 }
@@ -385,7 +385,7 @@ void eMountManager::fieldSelected(int *number)
 /*********************
 *  MAIN MOUNT WINDOW *
 *********************/
-eMountWindow::eMountWindow(int id): eWindow(0)
+eMountOSDWindow::eMountOSDWindow(int id): eWindow(0)
 {
 	mp = eMountMgr::getInstance()->getMountPointData(mp.id);
 
@@ -410,7 +410,7 @@ eMountWindow::eMountWindow(int id): eWindow(0)
 	entry[1] = new eListBoxEntryText(*fstype,_("CIFS (Common Internet FS)"), new eString("CIFS"));
 	entry[2] = new eListBoxEntryText(*fstype,_("Block device"), new eString("Device"));
 	fstype->setCurrent(entry[mp.fstype]);
-	CONNECT(fstype->selchanged, eMountWindow::mountFSChanged);
+	CONNECT(fstype->selchanged, eMountOSDWindow::mountFSChanged);
 
 	lserver = new eLabel(this);
 	lserver->setText(_("Server IP"));
@@ -425,7 +425,7 @@ eMountWindow::eMountWindow(int id): eWindow(0)
 	ip->setFlags(eNumber::flagDrawPoints);
 	ip->setHelpText(_("enter IP address from server"));
 	ip->loadDeco();
-	CONNECT(ip->selected, eMountWindow::fieldSelected);
+	CONNECT(ip->selected, eMountOSDWindow::fieldSelected);
 	if (mp.fstype == 2)
 		ip->hide();
 
@@ -493,7 +493,7 @@ eMountWindow::eMountWindow(int id): eWindow(0)
 	tpassword->setMaxChars(60);
 	if (mp.fstype != 1)
 		tpassword->hide();
-	CONNECT(tpassword->selected, eMountWindow::passwordSelected);
+	CONNECT(tpassword->selected, eMountOSDWindow::passwordSelected);
 
 	l = new eLabel(this);
 	l->setText(_("Options"));
@@ -529,7 +529,7 @@ eMountWindow::eMountWindow(int id): eWindow(0)
 	editoptions->resize(eSize(130, 35));
 	editoptions->setHelpText(_("edit mount options"));
 	editoptions->loadDeco();
-	CONNECT(editoptions->selected, eMountWindow::editOptions);
+	CONNECT(editoptions->selected, eMountOSDWindow::editOptions);
 
 	savemount = new eButton(this);
 	savemount->setText(_("save"));
@@ -540,7 +540,7 @@ eMountWindow::eMountWindow(int id): eWindow(0)
 	savemount->resize(eSize(130, 35));
 	savemount->setHelpText(_("save mount options"));
 	savemount->loadDeco();
-	CONNECT(savemount->selected, eMountWindow::saveMount);
+	CONNECT(savemount->selected, eMountOSDWindow::saveMount);
 
 	abort = new eButton(this);
 	abort->setText(_("abort"));
@@ -559,11 +559,11 @@ eMountWindow::eMountWindow(int id): eWindow(0)
 	statusbar->loadDeco();
 }
 
-eMountWindow::~eMountWindow()
+eMountOSDWindow::~eMountOSDWindow()
 {
 }
 
-void eMountWindow::passwordSelected()
+void eMountOSDWindow::passwordSelected()
 {
 	if (tpassword->inEditMode())
 	{
@@ -586,7 +586,7 @@ void eMountWindow::passwordSelected()
 	}
 }
 
-void eMountWindow::mountFSChanged(eListBoxEntryText *sel)
+void eMountOSDWindow::mountFSChanged(eListBoxEntryText *sel)
 {
 	if (sel->getKey() == "CIFS")
 	{
@@ -618,10 +618,10 @@ void eMountWindow::mountFSChanged(eListBoxEntryText *sel)
 	}
 }
 
-void eMountWindow::editOptions()
+void eMountOSDWindow::editOptions()
 {
 	hide();
-	eMountOptionsWindow *options = new eMountOptionsWindow(mp.id);
+	eMountOSDOptionsWindow *options = new eMountOSDOptionsWindow(mp.id);
 	options->show();
 	options->exec();
 	options->hide();
@@ -637,7 +637,7 @@ void eMountWindow::editOptions()
 	loptions->setText(optionsdummy.c_str());
 }
 
-void eMountWindow::saveMount()
+void eMountOSDWindow::saveMount()
 {
 	if (mp.mounted)
 	{
@@ -696,7 +696,7 @@ void eMountWindow::saveMount()
 	close(0);
 }
 
-void eMountWindow::fieldSelected(int *number)
+void eMountOSDWindow::fieldSelected(int *number)
 {
 	focusNext(eWidget::focusDirNext);
 }
@@ -704,10 +704,10 @@ void eMountWindow::fieldSelected(int *number)
 /**********************************************************
 *		MOUNT OPTIONS WINDOW                      *
 **********************************************************/
-eMountOptionsWindow::eMountOptionsWindow(int id): eWindow(0)
+eMountOSDOptionsWindow::eMountOSDOptionsWindow(int id): eWindow(0)
 {
 	mp = eMountMgr::getInstance()->getMountPointData(mp.id);
-	
+
 	int fd = eSkin::getActive()->queryValue("fontsize", 20);
 
 	setText(_("Mount options"));
@@ -813,7 +813,7 @@ eMountOptionsWindow::eMountOptionsWindow(int id): eWindow(0)
 	newoptions->setShortcutPixmap("blue");
 	newoptions->loadDeco();
 	newoptions->setHelpText(_("enter new options"));
-	CONNECT(newoptions->selected, eMountOptionsWindow::enterOptions);
+	CONNECT(newoptions->selected, eMountOSDOptionsWindow::enterOptions);
 
 	restore = new eButton(this);
 	restore->setText(_("default"));
@@ -823,7 +823,7 @@ eMountOptionsWindow::eMountOptionsWindow(int id): eWindow(0)
 	restore->setShortcutPixmap("yellow");
 	restore->loadDeco();
 	restore->setHelpText(_("restore default settings"));
-	CONNECT(restore->selected, eMountOptionsWindow::setDefaultOptions);
+	CONNECT(restore->selected, eMountOSDOptionsWindow::setDefaultOptions);
 
 	save = new eButton(this);
 	save->setText(_("save"));
@@ -833,7 +833,7 @@ eMountOptionsWindow::eMountOptionsWindow(int id): eWindow(0)
 	save->setShortcutPixmap("green");
 	save->loadDeco();
 	save->setHelpText(_("save changes and close window"));
-	CONNECT(save->selected, eMountOptionsWindow::saveOptions);
+	CONNECT(save->selected, eMountOSDOptionsWindow::saveOptions);
 
 	abort = new eButton(this);
 	abort->setText(_("abort"));
@@ -851,26 +851,26 @@ eMountOptionsWindow::eMountOptionsWindow(int id): eWindow(0)
 	statusbar->loadDeco();
 }
 
-eMountOptionsWindow::~eMountOptionsWindow()
+eMountOSDOptionsWindow::~eMountOSDOptionsWindow()
 {
 }
 
-int eMountOptionsWindow::checkOptions(eString options, eString option)
+int eMountOSDOptionsWindow::checkOptions(eString options, eString option)
 {
 	return (options.find(option) != eString::npos) ? 1 : 0;
 }
 
-void eMountOptionsWindow::enterOptions()
+void eMountOSDOptionsWindow::enterOptions()
 {
 	hide();
-	eTextInputWindow *textinput = new eTextInputWindow();
+	eTextInput *textinput = new eTextInput();
 	mp.ownOptions = textinput->showTextInput(_("Options"),_("Enter your own mount options, comma separated"), NULL);
 	eMountMgr::getInstance()->changeMountPoint(mp.id, mp);
 	ownopt->setText(mp.ownOptions.c_str());
 	show();
 }
 
-void eMountOptionsWindow::setDefaultOptions()
+void eMountOSDOptionsWindow::setDefaultOptions()
 {
 	async->setCheck(0);
 	sync->setCheck(0);
@@ -889,7 +889,7 @@ void eMountOptionsWindow::setDefaultOptions()
 	mp.ownOptions = "";
 }
 
-void eMountOptionsWindow::saveOptions()
+void eMountOSDOptionsWindow::saveOptions()
 {
 	mp.options = "";
 	mp.options += async->isChecked() ? "async," : "";
@@ -913,11 +913,11 @@ void eMountOptionsWindow::saveOptions()
 /*************************************************
 *		TEXT INPUT WINDOW                *
 *************************************************/
-eTextInputWindow::eTextInputWindow()
+eTextInput::eTextInput()
 {
 }
 
-eString eTextInputWindow::showTextInput(eString title, eString helptext, eButton *button)
+eString eTextInput::showTextInput(eString title, eString helptext, eButton *button)
 {
 	TextEditWindow wnd(title.c_str(), helptext.c_str());
 	if (button)
@@ -930,7 +930,7 @@ eString eTextInputWindow::showTextInput(eString title, eString helptext, eButton
 	return wnd.getEditText();
 }
 
-eTextInputWindow::~eTextInputWindow()
+eTextInput::~eTextInput()
 {
 }
 #endif

@@ -36,10 +36,10 @@ public:
 	~eListBoxEntryMount();
 };
 
-class eMountManager: public eWindow
+class eMountOSD: public eWindow
 {
 private:
-	static eMountManager *instance;
+	static eMountOSD *instance;
 
 	eListBox<eListBoxEntryMount> *mountList;
 	eButton	*newmount, *remmount, *unmount, *mountnow;
@@ -55,13 +55,13 @@ public:
 	void mountNow();
 	void unmountNow();
 	void updateList();
-	static eMountManager *getInstance() {return (instance) ? instance : instance = new eMountManager();}
+	static eMountOSD *getInstance() {return (instance) ? instance : instance = new eMountOSD();}
 
-	eMountManager();
-	~eMountManager();
+	eMountOSD();
+	~eMountOSD();
 };
 
-class eMountWindow: public eWindow
+class eMountOSDWindow: public eWindow
 {
 private:
 	t_mount mp;
@@ -81,11 +81,11 @@ private:
 	void passwordSelected();
 
 public:
-	eMountWindow(int id);
-	~eMountWindow();
+	eMountOSDWindow(int id);
+	~eMountOSDWindow();
 };
 
-class eMountOptionsWindow: public eWindow
+class eMountOSDOptionsWindow: public eWindow
 {
 private:
 	eCheckbox *async, *sync, *atime, *autom, *execm, *noexec, *ro, *rw, *users, *nolock, *intr, *soft, *udp;
@@ -99,15 +99,15 @@ private:
 	void saveOptions();
 
 public:
-	eMountOptionsWindow(int id);
-	~eMountOptionsWindow();
+	eMountOSDOptionsWindow(int id);
+	~eMountOSDOptionsWindow();
 };
 
-class eTextInputWindow
+class eTextInput
 {
 public:
-	eTextInputWindow();
-	~eTextInputWindow();
+	eTextInput();
+	~eTextInput();
 	eString	showTextInput(eString title, eString helptext, eButton *button);
 };
 
