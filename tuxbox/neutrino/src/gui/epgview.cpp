@@ -29,10 +29,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "epgdata.h"
-#include "../global.h"
-#include "../neutrino.h"
-#include "widget/hintbox.h"
+#include "neutrino.h"
+
+#include "gui/widget/hintbox.h"
 
 
 CEpgData::CEpgData()

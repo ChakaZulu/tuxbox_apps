@@ -32,7 +32,7 @@
 #ifndef __setting_helpers__
 #define __setting_helpers__
 
-#include "widget/menue.h"
+#include "gui/widget/menue.h"
 
 
 class CSatDiseqcNotifier : public CChangeObserver

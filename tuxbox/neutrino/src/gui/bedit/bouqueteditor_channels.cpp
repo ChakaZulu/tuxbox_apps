@@ -31,10 +31,11 @@
 
 #include "global.h"
 
+#include "neutrino.h"
+
 #include "bouqueteditor_channels.h"
 #include "bouqueteditor_chanselect.h"
 
-#include "neutrino.h"
 #include "driver/fontrenderer.h"
 #include "zapitclient.h"
 

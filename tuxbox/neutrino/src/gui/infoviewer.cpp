@@ -29,10 +29,30 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "infoviewer.h"
-#include "../global.h"
-#include "../neutrino.h"
-#include "widget/hintbox.h"
+#include "neutrino.h"
+
+#include "gui/widget/hintbox.h"
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#include <sys/timeb.h>
+#include <time.h>
+
+#include <string>
+#include <controldclient.h>
+
 
 #define COL_INFOBAR_BUTTONS				COL_INFOBAR_SHADOW+ 1
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1

@@ -34,16 +34,19 @@
 #include "channellist.h"
 #include "neutrino.h"
 
+#include "eventlist.hpp"
+
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 #include "daemonc/remotecontrol.h"
 #include "helpers/infoviewer.h"
 #include "helpers/settings.h"
 #include "helpers/lastchannel.h"
-#include "eventlist.hpp"
-#include "menue.h"
-#include "color.h"
-#include "messagebox.h"
+
+#include "gui/widget/menue.h"
+#include "gui/color.h"
+#include "gui/widget/messagebox.h"
+
 #include "sectionsdclient.h"
 
 

@@ -34,7 +34,7 @@
 
 #include "libnet.h"
 #include "helpers/streaminfo.h"
-#include "widget/messagebox.h"
+#include "gui/widget/messagebox.h"
 #include "libucodes/libucodes.h"
 
 

@@ -44,12 +44,12 @@
 
 #include "helpers/epgdata.h"
 #include "helpers/infoviewer.h"
-
-#include "widget/bouquetlist.h"
-#include "helpers/settings.h"
-#include "widget/eventlist.hpp"
 #include "helpers/locale.h"
-#include "widget/gamelist.h"
+#include "helpers/settings.h"
+
+#include "gui/bouquetlist.h"
+#include "gui/eventlist.hpp"
+#include "gui/gamelist.h"
 
 
 #ifndef NEUTRINO_CPP

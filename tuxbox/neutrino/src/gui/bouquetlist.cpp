@@ -40,8 +40,9 @@
 #include "helpers/infoviewer.h"
 #include "helpers/settings.h"
 #include "eventlist.hpp"
-#include "menue.h"
-#include "color.h"
+
+#include "gui/widget/menue.h"
+#include "gui/color.h"
 
 
 

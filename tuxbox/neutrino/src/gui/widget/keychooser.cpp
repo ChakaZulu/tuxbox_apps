@@ -29,9 +29,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "keychooser.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "neutrino.h"
+
+#include "gui/color.h"
 
 
 CKeyChooser::CKeyChooser( int* Key, string title, string Icon )

@@ -35,10 +35,12 @@
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
+
 #include "daemonc/remotecontrol.h"
 #include "helpers/settings.h"
-#include "menue.h"
-#include "color.h"
+
+#include "gui/widget/menue.h"
+#include "gui/color.h"
 
 using namespace std;
 

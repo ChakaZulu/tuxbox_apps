@@ -33,7 +33,7 @@
 #define __bouqueteditor_chanselect__
 
 #include "driver/framebuffer.h"
-#include "menue.h"
+#include "gui/widget/menue.h"
 
 #include <string>
 #include <vector>

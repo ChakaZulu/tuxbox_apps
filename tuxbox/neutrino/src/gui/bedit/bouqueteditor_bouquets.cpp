@@ -31,14 +31,16 @@
 
 #include "global.h"
 
-#include "bouqueteditor_bouquets.h"
 #include "neutrino.h"
 
-#include "driver/fontrenderer.h"
-#include "messagebox.h"
-#include "hintbox.h"
-#include "stringinput.h"
+#include "bouqueteditor_bouquets.h"
 #include "bouqueteditor_channels.h"
+
+#include "driver/fontrenderer.h"
+#include "gui/widget/messagebox.h"
+#include "gui/widget/hintbox.h"
+#include "gui/widget/stringinput.h"
+
 #include "zapitclient.h"
 
 

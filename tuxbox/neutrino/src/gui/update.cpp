@@ -29,9 +29,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "update.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "neutrino.h"
 
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"

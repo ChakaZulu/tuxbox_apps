@@ -29,9 +29,9 @@
 #include "favorites.h"
 #include "zapitclient.h"
 
-#include "widget/channellist.h"
-#include "widget/messagebox.h"
-#include "widget/hintbox.h"
+#include "gui/widget/messagebox.h"
+#include "gui/widget/hintbox.h"
+#include "gui/channellist.h"
 
 
 //

@@ -35,9 +35,10 @@
 
 #include "driver/rcinput.h"
 
-#include "widget/menue.h"
-#include "widget/color.h"
-#include "widget/messagebox.h"
+#include "gui/widget/menue.h"
+#include "gui/widget/messagebox.h"
+#include "gui/color.h"
+
 #include "libucodes/libucodes.h"
 
 #include <stdio.h>

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.245 2002/04/25 13:34:10 field Exp $
+        $Id: neutrino.cpp,v 1.246 2002/04/25 19:03:29 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -46,18 +46,20 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
-#include "widget/eventlist.hpp"
-#include "widget/color.h"
-#include "widget/menue.h"
-#include "widget/channellist.h"
-#include "widget/colorchooser.h"
-#include "widget/keychooser.h"
-#include "widget/stringinput.h"
-#include "widget/stringinput_ext.h"
-#include "widget/screensetup.h"
-#include "widget/gamelist.h"
-#include "widget/bouqueteditor_bouquets.h"
-#include "widget/messagebox.h"
+#include "gui/widget/menue.h"
+#include "gui/widget/messagebox.h"
+#include "gui/widget/colorchooser.h"
+#include "gui/widget/keychooser.h"
+#include "gui/widget/stringinput.h"
+#include "gui/widget/stringinput_ext.h"
+
+#include "gui/color.h"
+
+#include "gui/eventlist.hpp"
+#include "gui/channellist.h"
+#include "gui/screensetup.h"
+#include "gui/gamelist.h"
+#include "gui/bedit/bouqueteditor_bouquets.h"
 
 #include "helpers/infoviewer.h"
 #include "helpers/epgdata.h"
@@ -2350,7 +2352,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.245 2002/04/25 13:34:10 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.246 2002/04/25 19:03:29 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

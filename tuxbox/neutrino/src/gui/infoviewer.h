@@ -35,7 +35,8 @@
 #include "driver/rcinput.h"
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
-#include "widget/color.h"
+
+#include "gui/color.h"
 #include "helpers/settings.h"
 #include "streaminfo.h"
 
@@ -46,22 +47,6 @@
 
 #include "sections/sectionsdMsg.h"
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-#include <sys/timeb.h>
-#include <time.h>
-
-#include <string>
-#include <controldclient.h>
 
 using namespace std;
 

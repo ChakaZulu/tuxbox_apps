@@ -32,6 +32,15 @@
 #ifndef __epgdata__
 #define __epgdata__
 
+#include "driver/framebuffer.h"
+#include "driver/rcinput.h"
+#include "driver/fontrenderer.h"
+
+#include "gui/color.h"
+#include "helpers/settings.h"
+
+#include "sections/sectionsdMsg.h"
+#include "sectionsdclient.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -44,15 +53,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <vector>
-
-#include "driver/framebuffer.h"
-#include "driver/rcinput.h"
-#include "driver/fontrenderer.h"
-#include "widget/color.h"
-#include "helpers/settings.h"
-
-#include "sections/sectionsdMsg.h"
-#include "sectionsdclient.h"
 
 #include "pthread.h"
 

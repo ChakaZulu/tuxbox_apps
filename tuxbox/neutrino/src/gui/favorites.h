@@ -23,7 +23,7 @@
 #ifndef __favorites__
 #define __favorites__
 
-#include "widget/menue.h"
+#include "gui/widget/menue.h"
 #include <string>
 
 using namespace std;

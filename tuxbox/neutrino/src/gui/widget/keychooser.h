@@ -32,15 +32,14 @@
 #ifndef __keychooser__
 #define __keychooser__
 
-#include <stdio.h>
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
-#include "menue.h"
-#include "color.h"
+#include "gui/widget/menue.h"
 
 #include <string>
+#include <stdio.h>
 
 using namespace std;
 

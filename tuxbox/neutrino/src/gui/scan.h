@@ -33,7 +33,7 @@
 #define __scants__
 
 #include "driver/framebuffer.h"
-#include "widget/menue.h"
+#include "gui/widget/menue.h"
 
 #include <string>
 

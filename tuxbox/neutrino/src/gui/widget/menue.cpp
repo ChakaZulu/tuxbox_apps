@@ -32,13 +32,15 @@
 #include "global.h"
 
 #include "menue.h"
-#include "neutrino.h"
 
+#include "neutrino.h"
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
+
+#include "gui/color.h"
+#include "gui/widget/stringinput.h"
+
 #include "lcddclient.h"
-#include "color.h"
-#include "stringinput.h"
 
 #include <stdio.h>
 

@@ -29,9 +29,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "gamelist.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "neutrino.h"
 
 #include <strstream.h>
 #include <sstream>
