@@ -5,7 +5,7 @@ CC=$(PREF)gcc
 STRIP=$(PREF)strip
 CDEBUGFLAGS=-g -O2 -Wall -pedantic -DUSEX
 INCLUDES=-I. -I../lib -I../../include -I../..
-OBJS=board.o
+OBJS=board.o h.o
 
 SingleProgramTarget(tetris,main.o $(OBJS),,-L../lib -lfx2 -lX11)
 
