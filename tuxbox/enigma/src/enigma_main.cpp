@@ -7069,8 +7069,10 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 #ifndef DISABLE_FILE
 		if ( b && (ref.type == eServiceReference::idDVB && ref.path)
 			|| ( ref.type == eServiceReference::idUser
-				&& ( (ref.data[0] == eMP3Decoder::codecMPG)
-				  || (ref.data[0] == eMP3Decoder::codecMP3) ) ) )
+				&& ( (ref.data[0] == eMP3Decoder::codecMPG) || (ref.data[0] == eMP3Decoder::codecMP3) )
+			   )
+			|| (ref.type == 0x2000) // picture
+		   )
 		{// deleteable file
 			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected file to a selectable bouquet"));
 			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
