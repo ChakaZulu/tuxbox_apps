@@ -1,9 +1,12 @@
 /* 
-$Id: fontrenderer.cpp,v 1.12 2001/10/14 14:30:47 rasc Exp $
+$Id: fontrenderer.cpp,v 1.13 2001/10/14 15:48:16 McClean Exp $
 
 -- misc font / text rendering functions
 
 $Log: fontrenderer.cpp,v $
+Revision 1.13  2001/10/14 15:48:16  McClean
+use font-cache
+
 Revision 1.12  2001/10/14 14:30:47  rasc
 -- EventList Darstellung ueberarbeitet
 -- kleiner Aenderungen und kleinere Bugfixes
@@ -49,11 +52,11 @@ fontRenderClass::fontRenderClass()
 	AddFont("/usr/lib/fonts/Arial_Bold.ttf");
 	AddFont("/usr/lib/fonts/Arial_Italic.ttf");
     AddFont("/usr/lib/fonts/Arial_Black.ttf");
-//    AddFont("/usr/lib/fonts/Marlett.ttf");
 
-	printf("[FONT] Intializing font cache...");
+	int maxbytes=4*1024*1024;
+	printf("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
 	fflush(stdout);
-	if (FTC_Manager_New(library, 0, 0, 0, myFTC_Face_Requester, this, &cacheManager))
+	if (FTC_Manager_New(library, 0, 0, maxbytes, myFTC_Face_Requester, this, &cacheManager))
 	{
 		printf(" manager failed!\n");
 		return;
