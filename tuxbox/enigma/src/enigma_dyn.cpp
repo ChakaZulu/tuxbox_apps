@@ -48,9 +48,7 @@
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_mount.h>
 #include <enigma_dyn_wap.h>
-#ifdef ENABLE_DYN_CONF
 #include <enigma_dyn_conf.h>
-#endif
 
 using namespace std;
 
@@ -69,11 +67,11 @@ extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDV
 
 eString zap[5][5] =
 {
-	{"TV", ";0:7:1:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:6:0:0:0:0:0:0:" },
-	{"Radio", ";0:7:2:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:4:0:0:0:0:0:0:" },
-	{"Data", ";0:7:6:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ "" },
+	{"TV", ";0:7:1:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:6:0:0:0:0:0:0:"},
+	{"Radio", ";0:7:2:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:4:0:0:0:0:0:0:"},
+	{"Data", ";0:7:6:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ ""},
 	{"Recordings", ";4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""},
-	{"Root", ";2:47:0:0:0:0:/", /* Satellites */ "", /* Providers */ "", /* Bouquets */ "" }
+	{"Root", ";2:47:0:0:0:0:/", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""}
 };
 
 eString removeBadChars(eString s)
@@ -754,8 +752,7 @@ static eString getLeftNavi(eString mode, eString path)
 	{
 		if (pdaScreen == 0)
 		{
-			if ( zap[zapMode][ZAPSUBMODESATELLITES]
-				&& eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
+			if (zap[zapMode][ZAPSUBMODESATELLITES])
 			{
 				result += button(110, "Satellites", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODESATELLITES]);
 				result += "<br>";
@@ -2230,12 +2227,14 @@ static eString getContent(eString mode, eString path)
 		result += getZap(mode, path);
 	}
 	else
+#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF
 	if (mode == "config")
 	{
 		result = getTitle("CONFIG");
 		result += "Select one of the configuration categories on the left";
 	}
 	else
+#endif
 #ifndef DISABLE_FILE
 #ifdef ENABLE_DYN_MOUNT
 	if (mode == "configMountMgr")
@@ -2245,6 +2244,7 @@ static eString getContent(eString mode, eString path)
 	}
 	else
 #endif
+#ifdef ENABLE_DYN_CONF
 	if (mode == "configHDD")
 	{
 		result = getTitle("CONFIG: HDD");
@@ -2257,6 +2257,7 @@ static eString getContent(eString mode, eString path)
 		result += getConfigUSB();
 	}
 	else
+#endif
 #endif
 	if (mode == "help")
 	{
