@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.10 2001/12/14 06:09:05 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.11 2001/12/14 16:57:13 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.11  2001/12/14 16:57:13  obi
+ * power off after three pin failures
+ *
  * Revision 1.10  2001/12/14 06:09:05  obi
  * moved fontrenderer and lcddisplay to a lib
  *
@@ -104,6 +107,7 @@ CLCDMenu::CLCDMenu()
 
     newSalt = getNewSalt();
     menuFont = fontRenderer->getFont("Arial", "Bold", fontSize);
+    pinFailures = 0;
 }
 
 void CLCDMenu::addNumberPrefix()
@@ -411,6 +415,11 @@ bool CLCDMenu::checkPin(string title)
 #ifdef DEBUG
 	cout << "invalid pin entered." << endl;
 #endif
+	if (pinFailures >= 2)
+		poweroff();
+	else
+		pinFailures++;
+
         return false;
     }
     else
@@ -418,14 +427,33 @@ bool CLCDMenu::checkPin(string title)
 #ifdef DEBUG
 	cout << "pin accepted" << endl;
 #endif
+	pinFailures = 0;
         return true;
     }
+}
+
+void CLCDMenu::poweroff()
+{
+	int fd = open("/dev/dbox/fp0", O_RDWR);
+	if (fd < 0)
+	{
+		cerr << "unable to open /dev/dbox/fp0" << endl;
+		return;
+	}
+
+	int val;
+	if(ioctl(fd, FP_IOCTL_POWEROFF, &val) < 0)
+	{
+		cerr << "poweroff failed." << endl;
+		return;
+	}
+	close(fd);
 }
 
 int main(int argc, char **argv)
 {
     /* print version information */
-    cout << "$Id: lcdmenu.cpp,v 1.10 2001/12/14 06:09:05 obi Exp $" << endl;
+    cout << "$Id: lcdmenu.cpp,v 1.11 2001/12/14 16:57:13 obi Exp $" << endl;
 
     /* create menu instance */
     CLCDMenu *menu = new CLCDMenu();

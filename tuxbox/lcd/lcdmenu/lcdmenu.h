@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.7 2001/12/14 06:09:05 obi Exp $
+ * $Id: lcdmenu.h,v 1.8 2001/12/14 16:57:13 obi Exp $
  *
  * Copyright (C) 2001 Andreas Oberritter <obi@saftware.de>
  *
@@ -25,10 +25,11 @@
 #include <config.h>
 #include <crypt.h>
 #include <liblcddisplay.h>
+#include <dbox/fp.h>
 #include "configManager.h"
 
 #ifndef X86_BUILD
-#include "rcinput.h"
+#include <librcinput.h>
 #endif /* X86_BUILD */
 
 #include <string>
@@ -68,6 +69,8 @@ class CLCDMenu : public CLCDDisplay
 
 	const char *getCurrentSalt();
 	char *getNewSalt();
+	
+	void poweroff();
 
 	CConfigManager *getConfig() { return config; }
 
@@ -92,6 +95,7 @@ class CLCDMenu : public CLCDDisplay
 	vector<string> entries;
 	vector<int> pinEntries;
 
+	int pinFailures;
 	string cryptedPin;
 	char *newSalt;
 };
