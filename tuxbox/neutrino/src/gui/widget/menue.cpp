@@ -759,7 +759,7 @@ int CMenuForwarder::paint(bool selected)
 	if (option_text != NULL)
 	{
 		int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(option_text);
-		int stringstartposOption = x + dx - stringwidth - 10; //+ offx
+		int stringstartposOption = std::max(stringstartposX, x + dx - stringwidth - 10); //+ offx
 
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x),  option_text, color);
 	}
