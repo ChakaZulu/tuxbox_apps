@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.1 2003/02/28 16:04:55 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.2 2003/06/18 12:19:22 alexw Exp $
  *
  * Sectionsd command line interface - The Tuxbox Project
  *
@@ -31,11 +31,20 @@ int main(int argc, char** argv)
 {
 	for (int i = 1; i < argc; i++)
 	{
-		if (strcmp(argv[i], "--pause"))
+		if (!strcmp(argv[i], "--pause"))
+		{
+			printf("setPauseScanning true\n");
 			client.setPauseScanning(true);
+		}
 		else
-		if (strcmp(argv[i], "--nopause"))
+		if (!strcmp(argv[i], "--nopause"))
+		{
+			printf("setPauseScanning false\n");
 			client.setPauseScanning(false);
+		}
+		else
+		if (!strcmp(argv[i], "--state"))
+			printf("Scanning is active: %s\n", client.getIsScanningActive()?"true":"false");
 	}
 
 	return 0;

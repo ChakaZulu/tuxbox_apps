@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.24 2002/12/09 20:07:52 thegoodguy Exp $
+  $Id: sectionsdclient.h,v 1.25 2003/06/18 12:19:22 alexw Exp $
 
   License: GPL
 
@@ -152,6 +152,8 @@ class CSectionsdClient : private CBasicClient
 	void setEventsAreOldInMinutes(const unsigned short minutes);
 	
 	void setPauseScanning(const bool doPause);
+
+	bool getIsScanningActive();
 
 	void setPauseSorting(const bool doPause);
 

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.166 2003/03/14 04:27:55 obi Exp $
+//  $Id: sectionsd.cpp,v 1.167 2003/06/18 12:19:23 alexw Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -762,6 +762,20 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 	return ;
 }
 
+static void commandGetIsScanningActive(int connfd, char* /*data*/, const unsigned /*dataLength*/)
+{
+	struct sectionsd::msgResponseHeader responseHeader;
+
+	responseHeader.dataLength = sizeof(scanning);
+
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true)
+	{
+		writeNbytes(connfd, (const char *)&scanning, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
+	}
+	else
+		dputs("[sectionsd] Fehler/Timeout bei write");
+}
+
 static void commandPauseSorting(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 4)
@@ -1046,7 +1060,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.166 2003/03/14 04:27:55 obi Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.167 2003/06/18 12:19:23 alexw Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2466,6 +2480,7 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char
         commandGetNextEPG,
         commandGetNextShort,
         commandPauseScanning,
+        commandGetIsScanningActive,
         commandActualEPGchannelID,
         commandEventListTVids,
         commandEventListRadioIDs,
@@ -3454,7 +3469,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.166 2003/03/14 04:27:55 obi Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.167 2003/06/18 12:19:23 alexw Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {

@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.6 2002/12/24 12:15:48 Zwen Exp $
+//  $Id: sectionsdMsg.h,v 1.7 2003/06/18 12:23:46 alexw Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -64,6 +64,7 @@ struct sectionsd
 		getNextEPG,
 		getNextShort,
 		pauseScanning, // for the grabbers ;)
+		getIsScanningActive,
 		actualEPGchannelID,
 		actualEventListTVshortIDs,
 		actualEventListRadioShortIDs,

@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.32 2003/03/09 22:44:49 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.33 2003/06/18 12:19:22 alexw Exp $
 
   License: GPL
 
@@ -146,6 +146,24 @@ void CSectionsdClient::setPauseScanning(const bool doPause)
 
 	readResponse();
 	close_connection();
+}
+
+bool CSectionsdClient::getIsScanningActive()
+{
+	int scanning;
+
+	if (send(sectionsd::getIsScanningActive))
+	{
+		readResponse((char*)&scanning, sizeof(scanning));
+		close_connection();
+
+		return scanning;
+	}
+	else
+	{
+		close_connection();
+		return false;
+	}
 }
 
 void CSectionsdClient::setServiceChanged(const t_channel_id channel_id, const bool requestEvent)
