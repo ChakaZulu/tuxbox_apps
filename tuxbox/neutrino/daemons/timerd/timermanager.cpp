@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.11 2002/05/14 23:10:36 dirch Exp $
+	$Id: timermanager.cpp,v 1.12 2002/05/17 03:28:06 dirch Exp $
 
 	License: GPL
 
@@ -75,7 +75,7 @@ void* CTimerManager::timerThread(void *arg)
 			}
 			else if (pos->second->time() <= eNow.time()+10)			// print events before their time has come
 			{
-				dprintf("soon starting: %d (%02d:%02d)\n", pos->second->eventType, pos->second->alarmtime.tm_hour, pos->second->alarmtime.tm_min);
+				dprintf("soon starting: type: %d (%02d:%02d)\n", pos->second->eventType, pos->second->alarmtime.tm_hour, pos->second->alarmtime.tm_min);
 			}
 		}
 
@@ -140,7 +140,20 @@ void CTimerManager::listEvents(CTimerEventMap &Events)
 //------------------------------------------------------------
 void CTimerEvent::printEvent(void)
 {
-	dprintf("eventID: %03d type: %d  %02d.%02d. %02d:%02d\n",eventID,eventType,alarmtime.tm_mday,alarmtime.tm_mon+1,alarmtime.tm_hour,alarmtime.tm_min)
+	dprintf("eventID: %03d type: %d time:%d (%02d.%02d. %02d:%02d) ",eventID,eventType,time(),alarmtime.tm_mday,alarmtime.tm_mon+1,alarmtime.tm_hour,alarmtime.tm_min)
+	switch(eventType)
+	{		
+		case CTimerdClient::TIMER_NEXTPROGRAM :
+			dprintf("NextProgram: %u\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.onidSid);
+		break;
+
+		case CTimerdClient::TIMER_STANDBY :
+			dprintf("standby: %s\n",(static_cast<CTimerEvent_Standby*>(this)->standby_on == 1)?"on":"off");
+		break;
+
+		default:
+			dprintf("(no extra data)\n");
+	}
 }
 
 //------------------------------------------------------------
@@ -193,6 +206,15 @@ void CTimerEvent_Shutdown::fireEvent()
 void CTimerEvent_Standby::fireEvent()
 {
 	dprintf("Standby Timer fired: %s\n",standby_on?"on":"off");
+	if(standby_on)
+		CTimerManager::getInstance()->getEventServer()->sendEvent(
+			CTimerdClient::EVT_STANDBY_ON,
+			CEventServer::INITID_TIMERD);
+	else
+		CTimerManager::getInstance()->getEventServer()->sendEvent(
+			CTimerdClient::EVT_STANDBY_OFF,
+			CEventServer::INITID_TIMERD);
+
 }
 //-----------------------------------------
 void CTimerEvent_Record::fireEvent()
