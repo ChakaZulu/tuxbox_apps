@@ -10,6 +10,8 @@ AM_PROG_LIBTOOL
 TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
 TUXBOX_APPS_LIB_PKGCONFIG(EVENTSERVER,tuxbox-eventserver)
+TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
+TUXBOX_APPS_LIB_PKGCONFIG(ZAPITCLIENT,tuxbox-zapitclient)
 
 AC_OUTPUT([
 Makefile
@@ -17,10 +19,11 @@ daemons/Makefile
 daemons/controld/Makefile
 daemons/controld/driver/Makefile
 daemons/lcdd/Makefile
-daemons/sections/Makefile
+daemons/sectionsd/Makefile
 daemons/timerd/Makefile
 libs/Makefile
 libs/libcontroldclient/Makefile
 libs/liblcddclient/Makefile
+libs/libsectionsdclient/Makefile
 ])
 
