@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.11 2002/07/22 01:57:19 Homar Exp $
+ * $Id: frontend.h,v 1.12 2002/07/22 18:25:18 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -24,7 +24,6 @@
 
 /* system */
 #include <stdint.h>
-#include <linux/kernel.h>
 
 /* nokia api */
 #include <ost/frontend.h>
