@@ -82,8 +82,9 @@ public:
 		stateWait, stateRequest, stateResponse, stateHeader, stateData, stateDone, stateClose
 	};
 	int localstate, remotestate;
+	int persistent;
 	
-	eHTTPConnection(int socket, eHTTPD *parent);
+	eHTTPConnection(int socket, int issocket, eHTTPD *parent, int persistent=0);
 	eHTTPConnection(eString host, int port=80);
 	static eHTTPConnection *doRequest(const char *uri, int *error=0);
 	void start();

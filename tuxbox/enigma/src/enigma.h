@@ -12,12 +12,17 @@ class eWidget;
 struct gRGB;
 class eInit;
 class eRCKey;
+class eHTTPD;
+class eHTTPConnection;
 
 class eZap: public eApplication, public Object
 {
 	static eZap *instance;
 
 	eWidget *desktop_lcd, *desktop_fb;
+	
+	eHTTPD *httpd;
+	eHTTPConnection *serialhttpd;
 
 private:
 	void keyEvent(const eRCKey &key);

@@ -7,10 +7,13 @@ class eHTTPFile: public eHTTPDataSource
 {
 	int fd, size;
 	const char *mime;
+	int method;
 public:
-	eHTTPFile(eHTTPConnection *c, int fd, const char *mime);
+	enum { methodGET, methodPUT };
+	eHTTPFile(eHTTPConnection *c, int fd, int method, const char *mime);
 	~eHTTPFile();
 	int doWrite(int);
+	void haveData(void *data, int len);
 };
 
 class eHTTPFilePathResolver: public eHTTPPathResolver
@@ -19,7 +22,8 @@ class eHTTPFilePathResolver: public eHTTPPathResolver
 	{
 		eString path;
 		eString root;
-		eHTTPFilePath(eString path, eString root): path(path), root(root)
+		int authorized; // must be authorized (1 means read, 2 write)
+		eHTTPFilePath(eString path, eString root, int authorized): path(path), root(root), authorized(authorized)
 		{
 		}
 	};
@@ -27,7 +31,7 @@ class eHTTPFilePathResolver: public eHTTPPathResolver
 public:
 	eHTTPFilePathResolver();
 	eHTTPDataSource *getDataSource(eString request, eString path, eHTTPConnection *conn);
-	void addTranslation(eString path, eString root);
+	void addTranslation(eString path, eString root, int auth);
 };
 
 #endif

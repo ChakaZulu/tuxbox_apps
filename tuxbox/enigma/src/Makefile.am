@@ -22,5 +22,5 @@ enigma_LDADD = \
 	$(top_builddir)/lib/system/libenigma_system.la \
 	@SIGC_LIBS@ \
 	@XMLTREE_LIBS@ \
-	-ldl -lpthread -lid3tag -lmad
+	-ldl -lpthread -lid3tag -lmad -lcrypt
 

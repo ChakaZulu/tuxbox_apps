@@ -66,7 +66,6 @@ eZap::eZap(int argc, char **argv)
 	int bootcount;
 
 	eZapLCD *pLCD;
-	eHTTPD *httpd;
 	eHTTPDynPathResolver *dyn_resolver;
 	eHTTPFilePathResolver *fileresolver;
 
@@ -152,11 +151,28 @@ eZap::eZap(int argc, char **argv)
 	ezapInitializeDyn(dyn_resolver);
 
 	fileresolver = new eHTTPFilePathResolver();
-  fileresolver->addTranslation("/var/tuxbox/htdocs", "/www"); /* TODO: make user configurable */
-	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/");
+  fileresolver->addTranslation("/var/tuxbox/htdocs", "/www", 2); /* TODO: make user configurable */
+	fileresolver->addTranslation(CONFIGDIR , "/config", 3);
+	fileresolver->addTranslation("/", "/root", 3);
+	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/", 2);
 
 	eDebug("[ENIGMA] starting httpd");
 	httpd = new eHTTPD(80);
+	eDebug("[ENIGMA] starting httpd on serial port...");
+	
+	{
+		int fd=::open("/dev/tts/0", O_RDWR);
+		serialhttpd=0;
+		if (fd < 0)
+			eDebug("[ENIGMA] serial port error (%m)");
+		else
+		{
+			char *banner="Welcome to the enigma serial access.\r\n"
+					"you may start a HTTP session now.\r\n";
+			write(fd, banner, strlen(banner));
+			serialhttpd = new eHTTPConnection(fd, 0, httpd, 1);
+		}
+	}
 	ezapInitializeXMLRPC(httpd);
 	httpd->addResolver(dyn_resolver);
 	httpd->addResolver(fileresolver);
@@ -201,6 +217,8 @@ eZap::~eZap()
 	delete serviceSelector;
 	eDebug("[ENIGMA] fertig");
 	init->setRunlevel(-1);
+	delete serialhttpd;
+	delete httpd;
 	delete init;
 	instance = 0;
 }

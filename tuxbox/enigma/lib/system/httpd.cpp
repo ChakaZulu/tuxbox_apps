@@ -26,8 +26,10 @@ eHTTPError::eHTTPError(eHTTPConnection *c, int errcode): eHTTPDataSource(c), err
 	switch (errcode)
 	{
 	case 400: error="Bad Request"; break;
+	case 401: error="Unauthorized"; break;
 	case 403: error="Forbidden"; break;
 	case 404: error="Not found"; break;
+	case 405: error="Method not allowed"; break;
 	case 500: error="Internal server error"; break;
 	}
 	connection->code_descr=error;
@@ -45,7 +47,7 @@ int eHTTPError::doWrite(int w)
 	return -1;
 }
 
-eHTTPConnection::eHTTPConnection(int socket, eHTTPD *parent): eSocket(socket), parent(parent)
+eHTTPConnection::eHTTPConnection(int socket, int issocket, eHTTPD *parent, int persistent): eSocket(socket, issocket), parent(parent), persistent(persistent)
 {
 #if 0
 	eDebug("eHTTPConnection");
@@ -67,7 +69,7 @@ void eHTTPConnection::destruct()
 	delete this;
 }
 
-eHTTPConnection::eHTTPConnection(eString host, int port): eSocket(0), parent(0)
+eHTTPConnection::eHTTPConnection(eString host, int port): eSocket(), parent(0), persistent(0)
 {
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
@@ -296,7 +298,10 @@ int eHTTPConnection::processLocalState()
 			}
 #endif
 			eDebug("locate state done");
-			localstate=stateClose;
+			if (!persistent)
+				localstate=stateClose;
+			else
+				localstate=stateWait;
 			break;
 		case stateClose:
 			eDebug("closedown");
@@ -349,7 +354,9 @@ int eHTTPConnection::processRemoteState()
 				if (data)
 					delete data;
 				eDebug("request buggy");
+				httpversion="HTTP/1.0";
 				data=new eHTTPError(this, 400);
+				done=0;
 				localstate=stateResponse;
 				remotestate=stateDone;
 				if (processLocalState())
@@ -365,9 +372,11 @@ int eHTTPConnection::processRemoteState()
 			} else
 				is09=1;
 
-			if (is09)
+			if (is09 || (httpversion.left(7) != "HTTP/1.") || httpversion.size()!=8)
 			{
 				remotestate=stateData;
+				done=0;
+				httpversion="HTTP/1.0";
 				content_length_remaining=content_length_remaining=0;
 				data=new eHTTPError(this, 400);	// bad request - not supporting version 0.9 yet
 			} else
@@ -455,16 +464,13 @@ int eHTTPConnection::processRemoteState()
 			break;
 		}
 		case stateDone:
-#if 1
-			eDebug("remote stateDone");
-#endif
 			remotestate=stateClose;
 			break;
 		case stateClose:
-#if 1
-			eDebug("remote stateClose");
-#endif
-			remotestate=stateWait;
+			if (!persistent)
+				remotestate=stateWait;
+			else
+				remotestate=stateRequest;
 			abort=1;
 			break;
 		default:
@@ -511,7 +517,7 @@ eHTTPD::eHTTPD(int port): eServerSocket(port)
 
 eHTTPConnection::~eHTTPConnection()
 {
-	if (state()!=Idle)
+	if ((!persistent) && (state()!=Idle))
 		eWarning("~eHTTPConnection, status still %d", state());
 	if (data)
 		delete data;
@@ -519,5 +525,5 @@ eHTTPConnection::~eHTTPConnection()
 
 void eHTTPD::newConnection(int socket)
 {
-	new eHTTPConnection(socket, this);
+	new eHTTPConnection(socket, 1, this);
 }

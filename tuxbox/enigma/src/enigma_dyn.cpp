@@ -487,7 +487,6 @@ public:
 		iface.removeRef(e);
 
 		result+="</a></font></td></tr>\n";
-		eDebug("ok");
 		num++;
 	}
 };
@@ -502,7 +501,7 @@ static eString getWatchContent(eString mode, eString path)
 
 	int pos=0, lastpos=0, temp=0;
 
-	if((path.find(";", 0))==-1)
+	if((path.find(";", 0))==(unsigned)-1)
 		path=";"+path;
 
 	while((pos=path.find(";", lastpos))!=-1)
@@ -958,6 +957,19 @@ static eString record_on(eString request, eString dirpath, eString opt, eHTTPCon
 }
 */
 
+static eString reload_settings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if (!eDVB::getInstance())
+		return "-no dvb\n";
+	if (eDVB::getInstance()->settings)
+	{
+		eDVB::getInstance()->settings->loadServices();
+		eDVB::getInstance()->settings->loadBouquets();
+		return "+ok\n";
+	}
+	return "-no settings to load\n";
+}
+
 #define NAVIGATOR_PATH "/cgi-bin/navigator"
 
 class eNavigatorListDirectory: public Object
@@ -1137,7 +1149,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
-
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings);
 
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 

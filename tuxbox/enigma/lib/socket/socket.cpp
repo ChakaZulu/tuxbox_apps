@@ -56,12 +56,14 @@ int eSocket::state()
 	return mystate;
 }
 
-int eSocket::setSocket(int blub)
+int eSocket::setSocket(int s, int iss)
 {
-#if 0
-	eDebug("[SOCKET] setting socket to non-blocking");
-#endif
+	socketdesc=s;
+	issocket=iss;
 	fcntl(socketdesc, F_SETFL, O_NONBLOCK);
+
+	if (rsn)
+		delete rsn;
 	rsn=new eSocketNotifier(eApp, getDescriptor(), 
 		eSocketNotifier::Read|eSocketNotifier::Priority|
 		eSocketNotifier::Hungup);
@@ -119,7 +121,7 @@ void eSocket::notifier(int what)
 int eSocket::writeBlock(const char *data, unsigned int len)
 {
 	int w=len;
-	if (writebuffer.empty())
+	if (issocket && writebuffer.empty())
 	{
 		int tw=::send(getDescriptor(), data, len, MSG_NOSIGNAL);
 		if ((tw < 0) && (errno != EWOULDBLOCK))
@@ -176,19 +178,18 @@ int eSocket::connectToHost(eString hostname, int port)
 	return(0);
 }
 
-eSocket::eSocket(): readbuffer(32768), writebuffer(32768)
+eSocket::eSocket(): readbuffer(32768), writebuffer(32768), rsn(0)
 {
-	socketdesc=socket(AF_INET, SOCK_STREAM, 0);
+	int s=socket(AF_INET, SOCK_STREAM, 0);
 #if 0
 	eDebug("[SOCKET]: initalized socket %d", socketdesc);
 #endif
-	setSocket(socketdesc);
+	setSocket(s, 1);
 }
 
-eSocket::eSocket(int socket): readbuffer(32768), writebuffer(32768) 
+eSocket::eSocket(int socket, int issocket): readbuffer(32768), writebuffer(32768), rsn(0)
 {
-	socketdesc=socket;
-	setSocket(socketdesc);
+	setSocket(socket, issocket);
 	mystate=Connection;
 }
 
