@@ -51,8 +51,20 @@ class CMotorControl : public CMenuTarget
 		int width;
 		int height;
 		int hheight,mheight; // head/menu font height
+		int ypos;
+		int ypos_status;
+		int ypos_menue;
+		
+		int8_t stepSize;
+		bool stepMode;
+		bool installerMenue;
+		uint8_t motorPosition;
+		int32_t satellitePosition;
 
 		void paint();
+		void paintMenu(void);
+		void paintStatus(void);
+		void paintLine(char * txt, char * icon);
 
 	public:
 
