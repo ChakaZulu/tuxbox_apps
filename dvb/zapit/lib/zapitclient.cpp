@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.26 2002/04/14 10:55:25 obi Exp $
+  $Id: zapitclient.cpp,v 1.27 2002/04/20 11:55:24 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.27  2002/04/20 11:55:24  Simplex
+  Command for setting BouquetMode
+
   Revision 1.26  2002/04/14 10:55:25  obi
   small fixes
 
@@ -459,8 +462,15 @@ void CZapitClient::reinitChannels()
 	zapit_close();
 }
 
+
+/***********************************************/
+/*                                             */
+/*  Scanning stuff                             */
+/*                                             */
+/***********************************************/
+
 /* start TS-Scan */
-void CZapitClient::startScan( int satelliteMask )
+void CZapitClient::startScan( )
 {
 	commandHead msgHead;
 	msgHead.version=ACTVERSION;
@@ -468,10 +478,6 @@ void CZapitClient::startScan( int satelliteMask )
 
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
-
-	commandStartScan msgExt;
-	msgExt.satelliteMask = satelliteMask;
-	send((char*)&msgExt, sizeof(msgExt));
 
 	zapit_close();
 }
@@ -497,11 +503,6 @@ bool CZapitClient::isScanReady(unsigned int &satellite, unsigned int &transponde
 	return response.scanReady;
 }
 
-/***********************************************/
-/*                                             */
-/*  Scanning stuff                             */
-/*                                             */
-/***********************************************/
 /* query possible satellits*/
 void CZapitClient::getScanSatelliteList( SatelliteList& satelliteList )
 {
@@ -559,6 +560,19 @@ void CZapitClient::setDiseqcRepeat( uint32_t repeat)
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
 	send((char*)&repeat, sizeof(repeat));
+	zapit_close();
+}
+
+/* set diseqcRepeat*/
+void CZapitClient::setScanBouquetMode( bouquetMode mode)
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SCANSETBOUQUETMODE;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&mode, sizeof(mode));
 	zapit_close();
 }
 
