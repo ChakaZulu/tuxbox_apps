@@ -34,17 +34,6 @@
 
 #define info_height 60
 
-static char* copyStringto(const char* from, char* to, int len)
-{
-	const char *fromend=from+len;
-	while(*from!='\n' && from<fromend && *from)
-	{
-		*(to++)=*(from++);
-	}
-	*to=0;
-	return (char *)++from;
-}
-
 CChannelList::CChannel::CChannel()
 {
 	bAlwaysLocked = false;

@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.27 2002/04/10 16:39:19 field Exp $
+$Id: rcinput.h,v 1.28 2002/04/16 11:22:57 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.28  2002/04/16 11:22:57  field
+ Timeout-Handling verbessert
+
  Revision 1.27  2002/04/10 16:39:19  field
  Timeset bugfix (beim scan zb)
 
@@ -144,12 +147,22 @@ class CRCInput
 			uint	data;
 		};
 
+		struct timer
+		{
+			uint		id;
+			long long	interval;
+			long long	times_out;
+		};
+
+		uint			timerid;
+		vector<timer>	timers;
+
 		int 		fd_pipe_high_priority[2];
 		int 		fd_pipe_low_priority[2];
 		int         fd_rc;
 		int			fd_keyb;
 		int			fd_event;
-		int			fd_eventclient;
+
 		int			fd_max;
 
 		void open();
@@ -196,12 +209,16 @@ class CRCInput
 
 		static string getKeyName(int);
 
+		int addTimer(long long Interval, bool oneshot= true);
+		int addTimer(struct timeval Timeout);
 
 		long long calcTimeoutEnd( int Timeout );
 		long long calcTimeoutEnd_MS( int Timeout );
 
 		void getMsgAbsoluteTimeout(uint *msg, uint* data, long long *TimeoutEnd, bool bAllowRepeatLR= false);
-		void getMsg(uint *msg, uint* data, int Timeout= -1, bool bAllowRepeatLR= false);     //get message :)
+		void getMsg(uint *msg, uint* data, int Timeout= -1, bool bAllowRepeatLR= false);     //get message, timeout in 1/10 secs :)
+		void getMsg_ms(uint *msg, uint* data, int Timeout= -1, bool bAllowRepeatLR= false);     //get message, timeout in msecs :)
+		void getMsg_us(uint *msg, uint* data, long long Timeout= -1, bool bAllowRepeatLR= false);     //get message, timeout in µsecs :)
 		void postMsg(uint msg, uint data, bool Priority = true );  // push message back into buffer
 		void clearMsg();						// Msgs aus der Schleife löschen - löscht zZ ALLES :(
 };
