@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapittools.cpp,v 1.1 2004/04/02 13:26:57 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapittools.cpp,v 1.2 2004/04/03 13:18:41 obi Exp $
  *
  * some tools for zapit and its clients - d-box2 linux project
  *
@@ -60,7 +60,7 @@ namespace ZapitTools {
 					return r;
 				r += (c | ((*s) & 0x3f));
 			}
-			else r += *s;
+			else r += *s++;
 		}
 		return r;
 	}
