@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.84 2001/11/08 13:50:32 field Exp $
+//  $Id: sectionsd.cpp,v 1.85 2001/11/15 13:25:58 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.85  2001/11/15 13:25:58  field
+//  Bugfix, zeigt endlich auch die Events im gleichen Bouquet
+//
 //  Revision 1.84  2001/11/08 13:50:32  field
 //  Debug-Out verbessert
 //
@@ -492,6 +495,7 @@ static void addEvent(const SIevent &evt)
             mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
         }
 //    }
+
 }
 
 static void addNVODevent(const SIevent &evt)
@@ -912,6 +916,13 @@ int DMX::change(void)
     flt.pid              = pID;
     flt.filter.filter[0] = filter2; // schedule
     flt.filter.mask[0]   = mask2; // -> 5x
+/*    if (filter2==0x50)
+    {
+        // quick hack - BUH!
+        flt.filter.filter[1] = 0x60; // schedule
+        flt.filter.mask[1]   = mask2; // -> 5x
+    }
+*/
     flt.flags            = DMX_IMMEDIATE_START;
     if(!noCRC)
       flt.flags|=DMX_CHECK_CRC;
@@ -932,7 +943,7 @@ int DMX::change(void)
 
 // k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
 // falsch ist es zumindest nicht
-static DMX dmxEIT(0x12, 0x4e, 0xfe, 0x50, 0xf0, 384);
+static DMX dmxEIT(0x12, 0x4f, 0xfe, 0x50, 0xf0, 384);
 static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
 static DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
 
@@ -1007,8 +1018,11 @@ static const SIevent& findSIeventForEventUniqueKey(const long long& eventUniqueK
 static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned serviceUniqueKey, SItime& zeit, long plusminus = 0, unsigned char *flag = 0)
 {
     time_t azeit=time(NULL);
+    if (flag!=0)
+        *flag= 0;
+/*
     // Event (serviceid) suchen
-/*    int serviceIDfound=0;
+    int serviceIDfound=0;
 
     // Hier sollte man nicht jedesmal von vorne Anfangen, sondern den Anfang
     // des entsprechenden Services irgendwie schneller finden
@@ -1024,6 +1038,8 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
             for(SItimes::iterator t=e->first->times.begin(); t!=e->first->times.end(); t++)
                 if(t->startzeit<=azeit && azeit<=(long)(t->startzeit+t->dauer))
                 {
+                    if (flag!=0)
+                        *flag|= 4; // aktuelles event da...
                     zeit=*t;
                     return *(e->first);
                 }
@@ -1035,8 +1051,6 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
     // weil normalerweise ist der cache nach hinten kürzer als nach vorne... :)
     // deswegen sollten die meisten events am anfang zu finden sein
 
-    if (flag!=0)
-        *flag= 0;
     for(MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
         if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey)
         {
@@ -1372,7 +1386,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.84 2001/11/08 13:50:32 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.85 2001/11/15 13:25:58 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1998,11 +2012,19 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
             // new service, check service- type
             MySIservicesOrderUniqueKey::iterator s=mySIservicesOrderUniqueKey.find(uniqueNow);
             if(s!=mySIservicesOrderUniqueKey.end())
+            {
                 if(s->second->serviceTyp==serviceTyp1 || (serviceTyp2 && s->second->serviceTyp==serviceTyp2))
                 {
                     sname= s->second->serviceName;
                     found_already= false;
                 }
+            }
+            else
+            {
+                // wenn noch nie hingetuned wurde, dann gibts keine Info über den ServiceTyp...
+                // im Zweifel mitnehmen
+                found_already= false;
+            }
             uniqueOld= uniqueNow;
         }
 
@@ -2848,6 +2870,8 @@ const unsigned timeoutInSeconds=1;
                 continue;
             }
 
+            if ((header.table_id>= 0x4E) && (header.table_id<= 0x6F))
+            {
             if((header.current_next_indicator) && (!dmxEIT.pauseCounter ))
             {
                 // Wir wollen nur aktuelle sections
@@ -2916,6 +2940,7 @@ const unsigned timeoutInSeconds=1;
             {
                 delete[] buf;
                 dprintf("[eitThread] skipped sections: pauseCounter %d\n", dmxEIT.pauseCounter);
+            }
             }
         } // for
     } // try
@@ -3037,7 +3062,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.84 2001/11/08 13:50:32 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.85 2001/11/15 13:25:58 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
