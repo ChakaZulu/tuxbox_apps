@@ -48,7 +48,7 @@ fontRenderClass		*fontRenderer;
 FontsDef		fonts;
 pthread_t		thrTime;
 
-bool			setup_mode;
+lcdd_mode		mode;
 raw_display_t		icon_lcd;
 raw_display_t		icon_setup;
 raw_display_t		icon_power;
@@ -59,7 +59,7 @@ bool			muted;
 
 void show_channelname(char *);
 void show_volume(unsigned char);
-void set_setup(unsigned char);
+void set_mode(lcdd_mode);
 void set_poweroff();
 
 void parse_command() {
@@ -90,11 +90,14 @@ void parse_command() {
 			muted = false;
 		show_volume(volume);
 		break;
-	case LC_SET_SETUP:
-		set_setup(rmsg.param);
+	case LC_SET_MODE:
+		mode = (lcdd_mode)rmsg.param;
+		set_mode(mode);
 		break;
 	case LC_POWEROFF:
-		set_poweroff();
+		mode = LCDM_POWEROFF;
+		set_mode(LCDM_POWEROFF);
+		exit(0);
 		break;
 	default: 
 		printf("unknown command %i\n", rmsg.cmd);
@@ -103,7 +106,7 @@ void parse_command() {
 
 void show_channelname( char * name)
 {
-	if (setup_mode) return;
+	if (mode!=LCDM_TV) return;
 	display.draw_fill_rect (0,26,120,50, CLCDDisplay::PIXEL_OFF);
 	fonts.channelname->RenderString(1,43, 130, name, CLCDDisplay::PIXEL_ON);
 	display.update();
@@ -113,7 +116,7 @@ void show_time()
 {
 	char timestr[50];
 	struct timeb tm;
-	if (setup_mode) return;
+	if (mode!=LCDM_TV) return;
 	ftime(&tm);
 	strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
 
@@ -124,7 +127,7 @@ void show_time()
 
 void show_volume(unsigned char vol)
 {
-	if (setup_mode) return;
+	if (mode!=LCDM_TV) return;
 	display.draw_fill_rect (3,54,29,64, CLCDDisplay::PIXEL_OFF);
 	display.draw_fill_rect (3,54,3+(vol>>2),64, CLCDDisplay::PIXEL_ON);
 	if (muted) {
@@ -133,17 +136,11 @@ void show_volume(unsigned char vol)
 	display.update();
 }
 
-void set_setup(unsigned char mode) {
+void set_mode(lcdd_mode mode) {
 	//int y, t;
 	//raw_display_t s;
-	if (mode == LC_SET_SETUP_OFF) {
-		display.load_screen(&icon_lcd);
-		show_volume(volume);
-		show_channelname(channelname);
-		show_time();
-		setup_mode = false;
-	} else {
-		setup_mode = true;
+	switch (mode) {
+	case LCDM_TV:
 		/*display.dump_screen(&s);
 		for (t=0; t<23; t++) {
 			for (y=0; y<27-t; y++) {
@@ -156,15 +153,22 @@ void set_setup(unsigned char mode) {
 		}*/
 		display.load_screen(&icon_setup);
 		display.update();
+		break;
+	case LCDM_MENU:
+		display.load_screen(&icon_lcd);
+		show_volume(volume);
+		show_channelname(channelname);
+		show_time();
+		break;
+	case LCDM_POWEROFF:
+		display.load_screen(&icon_power);
+		display.update();
+		break;
+	default:
+		printf("[lcdd] Unknown mode: %i\n", mode);
 	}
 } 
 
-void set_poweroff() {
-	// verhindern, dass irgendwelche ausgaben stattfinden
-	setup_mode = true;
-	display.load_screen(&icon_power);
-	display.update();
-}
 
 void * TimeThread (void *)
 {
@@ -213,7 +217,7 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 	display.dump_screen(&icon_lcd);
-	setup_mode = false;
+	mode = LCDM_TV;
 
 	show_channelname("");
 	show_time();
