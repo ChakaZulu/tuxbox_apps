@@ -279,6 +279,8 @@ void eServiceDVB::update(const SDTEntry *sdtentry)
 				service_name="unnamed service";
 
 			service_type=nd->service_type;
+			if ( service_type == 195 )
+				service_type = 1;
 		}
 
 //	printf("%04x:%04x %02x %s", transport_stream_id, service_id, service_type, (const char*)service_name);
