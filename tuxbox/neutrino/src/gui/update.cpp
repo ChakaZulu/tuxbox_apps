@@ -456,10 +456,10 @@ int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
 
 	if(actionKey=="readflash")
 	{
-		setTitle("Flash auslesen");
+		setTitle( g_Locale->getText("flashupdate.titlereadflash"));
 		paint();
 		showGlobalStatus(0);
-		showStatusMessage("lese flash");
+		showStatusMessage(g_Locale->getText("flashupdate.actionreadflash"));
 		CFlashTool ft;
 		ft.setStatusViewer( this );
 		ft.setMTDDevice("/dev/mtd/5");
@@ -484,9 +484,54 @@ int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
 	}
 	else if(actionKey=="readflashmtd")
 	{
+		CMenuWidget* mtdselector = new CMenuWidget("flashupdate.mtdselector", "softupdate.raw");
+		mtdselector->addItem( new CMenuSeparator() );
+		mtdselector->addItem( new CMenuForwarder("messagebox.cancel") );
+		mtdselector->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		CMTDInfo* mtdInfo =CMTDInfo::getInstance();
+		for(int x=0;x<mtdInfo->getMTDCount();x++)
+		{
+			char actionKey[20];
+			sprintf(actionKey, "readmtd%d", x);
+			mtdselector->addItem(  new CMenuForwarder( mtdInfo->getMTDName(x), true, "", this, actionKey ) );
+		}
+		mtdselector->exec(NULL,"");
 	}
 	else if(actionKey=="writeflashmtd")
 	{
+	}
+	else
+	{
+		int readmtd = -1;
+		sscanf(actionKey.c_str(), "readmtd%d", &readmtd);
+		if(readmtd!=-1)
+		{
+			char tmp[10];
+			sprintf(tmp, "%d", readmtd);
+			string filename = "/tmp/mtd" + string(tmp) + string(".img");
+			setTitle(g_Locale->getText("flashupdate.titlereadflash"));
+			paint();
+			showGlobalStatus(0);
+			showStatusMessage(g_Locale->getText("flashupdate.actionreadflash") + " (" + string(CMTDInfo::getInstance()->getMTDName(readmtd)) + ")");
+			CFlashTool ft;
+			ft.setStatusViewer( this );
+			ft.setMTDDevice("/dev/mtd/" + string(tmp));
+			if(!ft.readFromMTD(filename))
+			{
+				showStatusMessage( ft.getErrorMessage() );
+				sleep(10);
+			}
+			else
+			{
+				showGlobalStatus(100);
+				showStatusMessage( g_Locale->getText("flashupdate.ready"));
+				char message[500];
+				sprintf(message, g_Locale->getText("flashupdate.savesuccess").c_str(), filename.c_str() );
+				sleep(1);
+				hide();
+				ShowHint ( "messagebox.info", message );
+			}
+		}
 	}
 
 	hide();

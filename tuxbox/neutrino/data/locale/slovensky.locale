@@ -305,6 +305,10 @@ flashupdate.readflash Read hole image
 flashupdate.writeflash Write hole image
 flashupdate.readflashmtd Read one partition
 flashupdate.writeflashmtd Write one partition
+flashupdate.savesuccess The image was successfully saved \nunder %s.
+flashupdate.mtdselector Partition-Selektor
+flashupdate.titlereadflash Reading Flash
+flashupdate.actionreadflash reading
 
 bouqueteditor.name Bouquet-vedenie
 bouqueteditor.delete vymazat

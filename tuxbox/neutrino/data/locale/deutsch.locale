@@ -307,6 +307,9 @@ flashupdate.writeflash ganzes Flashimage einspielen
 flashupdate.readflashmtd einzelne Partition auslesen
 flashupdate.writeflashmtd einzelne Partition einspielen
 flashupdate.savesuccess Das Image wurde erfolgreich unter dem\nDateinamen %s gespeichert.
+flashupdate.mtdselector Partitions-Auswahl
+flashupdate.titlereadflash Flash auslesen
+flashupdate.actionreadflash lese flash
 
 
 bouqueteditor.name Bouquet-Verwaltung
