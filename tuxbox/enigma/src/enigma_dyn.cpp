@@ -430,31 +430,16 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eString command = opt["command"];
 	if (command == "rewind")
 	{
-		if (eZapMain::getInstance()->isSkipping())
-		{
-			eZapMain::getInstance()->stopSkip(eZapMain::skipForward);
-			eZapMain::getInstance()->stopSkip(eZapMain::skipReverse);
-		}
 		eZapMain::getInstance()->startSkip(eZapMain::skipReverse);
 	}
 	else
 	if (command == "forward")
 	{
-		if (eZapMain::getInstance()->isSkipping())
-		{
-			eZapMain::getInstance()->stopSkip(eZapMain::skipForward);
-			eZapMain::getInstance()->stopSkip(eZapMain::skipReverse);
-		}
 		eZapMain::getInstance()->startSkip(eZapMain::skipForward);
 	}
 	else
 	if (command == "stop")
 	{
-		if (eZapMain::getInstance()->isSkipping())
-		{
-			eZapMain::getInstance()->stopSkip(eZapMain::skipForward);
-			eZapMain::getInstance()->stopSkip(eZapMain::skipReverse);
-		}
 		eZapMain::getInstance()->stop();
 	}
 	else
