@@ -578,7 +578,7 @@ timerlist.program.unknown Programm unbekannt
 timerlist.standby.off Aufwachen aus Standby
 timerlist.standby.on Auf Standby gehen
 timerlist.alarmtime Alarmzeit
-timerlist.stoptime Stopzeit
+timerlist.stoptime Stoppzeit
 timerlist.new Neuer Timer
 timerlist.menumodify Timer bearbeiten
 timerlist.type Timertyp

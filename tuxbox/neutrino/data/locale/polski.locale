@@ -626,7 +626,7 @@ fontsize.infobar_info Info
 fontsize.infobar_small maly
 fontsize.gamelist_itemLarge duzy
 fontsize.gamelist_itemSmall maly
-fontsize.filebrowser_item undef
+fontsize.filebrowser_item element przeglad.
 
 fontmenu.head Rozmiar czcionki
 fontmenu.channellist Lista kan.

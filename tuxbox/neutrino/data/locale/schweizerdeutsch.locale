@@ -625,7 +625,7 @@ fontsize.infobar_info Infobar Info
 fontsize.infobar_small Infobar chlei 
 fontsize.gamelist_itemLarge gross 
 fontsize.gamelist_itemSmall chlei 
-fontsize.filebrowser_item undef
+fontsize.filebrowser_item Dateibrowser-Iidrag
 
 fontmenu.head Schriftgrössen Iischdellige 
 fontmenu.channellist Kanallischde 
@@ -669,6 +669,5 @@ nfs.umount NFS Verzeichniss abhänge
 nfs.umounterror Abhäng-Fehler 
 nfs.alreadymounted Verzeichnis bereits a'ghängt
 
-apids.hint_1 undef
-apids.hint_2 undef
-
+apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,
+apids.hint_2 abdrennd durch ' ' in hexadezimaler Form
