@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.14 2001/09/21 14:33:39 field Exp $
+// $Id: channellist.h,v 1.15 2001/10/02 17:56:33 McClean Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.15  2001/10/02 17:56:33  McClean
+// time in infobar (thread probs?) and "0" quickzap added
+//
 // Revision 1.14  2001/09/21 14:33:39  field
 // Eventlist - ok/? vertauscht, epg-Breite flexibel
 //
@@ -67,14 +70,15 @@ class CChannelList
 
 	unsigned int		selected;
 	unsigned int		tuned;
+	unsigned int		lasttuned;
 	unsigned int		liststart;
 	unsigned int		listmaxshow;
 	unsigned int		numwidth;
-	int			fheight; // Fonthoehe Channellist-Inhalt
-	int			theight; // Fonthoehe Channellist-Titel
+	int					fheight; // Fonthoehe Channellist-Inhalt
+	int					theight; // Fonthoehe Channellist-Titel
 
-	int			key;
-	string			name;
+	int					key;
+	string				name;
 	vector<channel*>	chanlist;
 
 	int 			width;

@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.28 2001/09/27 17:19:21 field Exp $
+// $Id: channellist.cpp,v 1.29 2001/10/02 17:56:33 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.29  2001/10/02 17:56:33  McClean
+// time in infobar (thread probs?) and "0" quickzap added
+//
 // Revision 1.28  2001/09/27 17:19:21  field
 // Numeric-Zap fix gefixt
 //
@@ -228,6 +231,7 @@ CChannelList::CChannelList(int Key=-1, const std::string &Name)
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	tuned=0xfffffff;
+	lasttuned = 0xfffffff;
 }
 
 CChannelList::~CChannelList()
@@ -383,12 +387,12 @@ void CChannelList::zapTo(int pos)
     {
         return;
     }
-
     selected= pos;
   	channel* chan = chanlist[selected];
     if ( pos!=(int)tuned )
 	{
-        tuned = pos;
+		lasttuned = tuned;
+		tuned = pos;
     	g_RemoteControl->zapTo(chan->key, chan->name);
     }
     g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
@@ -402,6 +406,17 @@ void CChannelList::numericZap(int key)
         return;
     }
  
+	//schneller zap mit "0" taste zwischen den letzten beiden sendern...
+	if(key==0)
+	{
+		if((tuned!=lasttuned) && (lasttuned!=0xfffffff))
+		{
+			printf("quicknumtune(0)\n");
+			zapTo(lasttuned);
+		}
+		return;
+	}
+
 	int ox=300;
     int oy=200;
 	int sx = g_Fonts->channel_num_zap->getRenderWidth("0000")+14;

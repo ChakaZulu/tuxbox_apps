@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.31 2001/09/27 11:23:50 field Exp $
+// $Id: infoviewer.cpp,v 1.32 2001/10/02 17:56:33 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.32  2001/10/02 17:56:33  McClean
+// time in infobar (thread probs?) and "0" quickzap added
+//
 // Revision 1.31  2001/09/27 11:23:50  field
 // Numzap gefixt, kleiner Bugfixes
 //
@@ -192,6 +195,15 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 	int height=g_Fonts->infobar_channame->getHeight()+5;
 	g_Fonts->infobar_channame->RenderString(ChanNameX+ 20, ChanNameY+height, BoxEndX-ChanNameX- 140, Channel.c_str(), COL_INFOBAR);
 
+	//time? todo - thread suxx...
+	char timestr[50];
+	struct timeb tm;
+	ftime(&tm);
+	strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
+	int timewidth = g_Fonts->infobar_channame->getRenderWidth(timestr);
+	g_Fonts->infobar_channame->RenderString(BoxEndX-timewidth-10, ChanNameY+height, timewidth+5, timestr, COL_INFOBAR);
+
+
 	ChanInfoX = BoxStartX + (ChanWidth >>1);
 	int ChanInfoY = BoxStartY + ChanHeight+10;
 	g_FrameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndY, COL_INFOBAR);
@@ -297,17 +309,22 @@ void CInfoViewer::showButtons()
 void CInfoViewer::showData()
 {
 
-	int height;
+	int height = g_Fonts->infobar_channame->getHeight()/3;
 	int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
 	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
 	
 
 	//percent
-	height = g_Fonts->infobar_channame->getHeight()/3;
-	int height2= int( g_Fonts->infobar_channame->getHeight()/1.5);
-	g_FrameBuffer->paintBoxRel(BoxEndX-114, ChanNameY+height,   2+100+2, height2, COL_INFOBAR+7);
-	g_FrameBuffer->paintBoxRel(BoxEndX-112, ChanNameY+height+2, runningPercent+2, height2-4, COL_INFOBAR+5);
-	g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, ChanNameY+height+2, 100-runningPercent, height2-4, COL_INFOBAR+2);
+	int posy = BoxStartY+12;
+	int height2= 20;//int( g_Fonts->infobar_channame->getHeight()/1.7);
+
+	
+//	g_FrameBuffer->paintBox(BoxEndX-130, BoxStartY, BoxEndX, ChanNameY+2, COL_INFOBAR+1); //bounding box (off)
+
+	g_FrameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
+	g_FrameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
+	g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR+3);//fill passive
+
 
 	//info running
 //	int start1width      = g_Fonts->infobar_info->getRenderWidth(runningStart);
