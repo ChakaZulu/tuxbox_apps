@@ -41,8 +41,6 @@ bool CZapitClient::zapit_connect()
 	struct sockaddr_un servaddr;
 	int clilen;
 	std::string filename = ZAPIT_UDS_NAME;
-	filename += ".";
-	filename += getSystemId();
 
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;
@@ -915,19 +913,5 @@ void CZapitClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
 	send((char*)&msgHead, sizeof(msgHead));
 	send((char*)&msg, sizeof(msg));
 	zapit_close();
-}
-
-const std::string CZapitClient::getSystemId ()
-{
-	const char *id = getenv("dsID");
-
-	if (id == NULL)
-	{
-		return "noSystemId";
-	}
-	else
-	{
-		return id;
-	}
 }
 

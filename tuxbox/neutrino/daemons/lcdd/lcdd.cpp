@@ -216,7 +216,7 @@ void CLCDD::sig_catch(int)
 int CLCDD::main(int argc, char **argv)
 {
 	debugoutput = true;
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.52 2002/08/14 20:02:01 alexw Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.53 2002/08/22 09:24:15 obi Exp $\n\n");
 
 	InitNewClock();
 
@@ -234,8 +234,6 @@ int CLCDD::main(int argc, char **argv)
 	int clilen;
 
 	std::string filename = LCDD_UDS_NAME;
-	filename += ".";
-	filename += CLcddClient::getSystemId();
 
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;

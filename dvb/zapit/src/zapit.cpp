@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.194 2002/08/21 09:59:23 obi Exp $
+ * $Id: zapit.cpp,v 1.195 2002/08/22 09:21:57 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1137,7 +1137,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.194 2002/08/21 09:59:23 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.195 2002/08/22 09:21:57 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1273,8 +1273,6 @@ int main (int argc, char **argv)
 
 	/* network setup */
 	std::string filename = ZAPIT_UDS_NAME;
-	filename += ".";
-	filename += CZapitClient::getSystemId();
 
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;

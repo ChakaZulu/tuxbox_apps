@@ -53,8 +53,6 @@ bool CLcddClient::lcdd_connect()
 	int clilen;
 
 	std::string filename = LCDD_UDS_NAME;
-	filename += ".";
-	filename += getSystemId();
 
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;
@@ -347,19 +345,5 @@ void CLcddClient::resume()
 	lcdd_connect();
 	send((char*)&msg, sizeof(msg));
 	lcdd_close();
-}
-
-const std::string CLcddClient::getSystemId ()
-{
-	char *id = getenv("dsID");
-
-	if (id == NULL)
-	{
-		return "noSystemId";
-	}
-	else
-	{
-		return id;
-	}
 }
 

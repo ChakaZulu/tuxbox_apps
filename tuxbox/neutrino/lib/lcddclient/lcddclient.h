@@ -47,8 +47,6 @@ class CLcddClient
 		bool lcdd_close();
 
 	public:
-		static const std::string getSystemId();
-
 		static const bool MUTE_ON  = true;
 		static const bool MUTE_OFF = false;
 
