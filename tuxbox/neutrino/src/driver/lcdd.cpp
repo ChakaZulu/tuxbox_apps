@@ -166,6 +166,13 @@ bool CLCD::lcdInit(const char * fontfile, const char * fontname,
 	return true;
 }
 
+void CLCD::displayUpdate()
+{
+	struct stat buf;
+	if (stat("/tmp/lcd.locked", &buf) == -1)
+		display.update();
+}
+
 void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const int inverse)
 {
 	int fd;
@@ -256,7 +263,7 @@ void CLCD::showServicename(const std::string & name) // UTF-8
 		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 	}
 	
-	display.update();
+	displayUpdate();
 }
 
 void CLCD::showTime()
@@ -293,7 +300,7 @@ void CLCD::showTime()
 
 			fonts.time->RenderString(122 - fonts.time->getRenderWidth(timestr), 62, 50, timestr, CLCDDisplay::PIXEL_ON);
 		}
-		display.update();
+		displayUpdate();
 	}
 }
 
@@ -327,7 +334,7 @@ void CLCD::showVolume(const char vol, const bool perform_update)
 		}
 
 		if (perform_update)
-		  display.update();
+		  displayUpdate();
 	}
 }
 
@@ -350,7 +357,7 @@ void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 				display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
 			}
 			if (perform_update)
-				display.update();
+				displayUpdate();
 		}
 		else if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 2)
 		{
@@ -366,7 +373,7 @@ void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 				display.draw_fill_rect (11,2,dp,8, CLCDDisplay::PIXEL_ON);
 			}
 			if (perform_update)
-				display.update();
+				displayUpdate();
 		}
 	}
 }
@@ -379,7 +386,7 @@ void CLCD::showMenuText(const int position, const char * text, const int highlig
 	// reload specified line
 	display.draw_fill_rect(-1,35+14*position,120,35+14+14*position, CLCDDisplay::PIXEL_OFF);
 	fonts.menu->RenderString(0,35+11+14*position, 140, text, CLCDDisplay::PIXEL_INV, highlight, utf_encoded);
-	display.update();
+	displayUpdate();
 }
 
 void CLCD::showAudioTrack(const std::string & artist, const std::string & title, const std::string & album)
@@ -395,7 +402,7 @@ void CLCD::showAudioTrack(const std::string & artist, const std::string & title,
 	fonts.menu->RenderString(0,22, 125, artist.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 	fonts.menu->RenderString(0,35, 125, album.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 	fonts.menu->RenderString(0,48, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
-	display.update();
+	displayUpdate();
 }
 
 void CLCD::showAudioPlayMode(AUDIOMODES m)
@@ -445,7 +452,7 @@ void CLCD::showAudioPlayMode(AUDIOMODES m)
 			}
 			break;
 	}
-	display.update();
+	displayUpdate();
 }
 
 void CLCD::showAudioProgress(const char perc, bool isMuted)
@@ -465,7 +472,7 @@ void CLCD::showAudioProgress(const char perc, bool isMuted)
 			else
 				display.draw_line (12,55,72,59, CLCDDisplay::PIXEL_ON);
 		}
-		display.update();
+		displayUpdate();
 	}
 }
 
@@ -495,7 +502,7 @@ void CLCD::setMode(const MODES m, const char * const title)
 		}
 		showServicename(servicename);
 		showclock = true;
-		showTime();      /* "showclock = true;" implies that "showTime();" does a "display.update();" */
+		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 		break;
 	case MODE_AUDIO:
 	{
@@ -505,29 +512,29 @@ void CLCD::setMode(const MODES m, const char * const title)
 		showAudioPlayMode(AUDIO_MODE_STOP);
 		showVolume(volume, false);
 		showclock = true;
-		showTime();      /* "showclock = true;" implies that "showTime();" does a "display.update();" */
+		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 		break;
 	}
 	case MODE_SCART:
 		display.load_screen(&(background[BACKGROUND_LCD]));
 		showVolume(volume, false);
 		showclock = true;
-		showTime();      /* "showclock = true;" implies that "showTime();" does a "display.update();" */
+		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 		break;
 	case MODE_MENU_UTF8:
 		showclock = false;
 		display.load_screen(&(background[BACKGROUND_SETUP]));
 		fonts.menutitle->RenderString(0,28, 140, title, CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
-		display.update();
+		displayUpdate();
 		break;
 	case MODE_SHUTDOWN:
 		showclock = false;
 		display.load_screen(&(background[BACKGROUND_POWER]));
-		display.update();
+		displayUpdate();
 		break;
 	case MODE_STANDBY:
 		showclock = true;
-		showTime();      /* "showclock = true;" implies that "showTime();" does a "display.update();" */
+		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 		                 /* "showTime()" clears the whole lcd in MODE_STANDBY                         */
 		break;
 	}

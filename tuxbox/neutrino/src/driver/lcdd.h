@@ -94,7 +94,7 @@ class CLCD
 		             const char * fontfile2=NULL, const char * fontname2=NULL,
 		             const char * fontfile3=NULL, const char * fontname3=NULL);
 		void setlcdparameter(int dimm, int contrast, int power, int inverse);
-
+		void displayUpdate();
 	public:
 
 		void setlcdparameter(void);
