@@ -171,6 +171,22 @@ public:
 	static gRC &getInstance();
 };
 
+class gDC
+{
+protected:
+	eLock dclock;
+public:
+	virtual void exec(gOpcode *opcode)=0;
+	virtual gPixmap &getPixmap()=0;
+	virtual eSize getSize()=0;
+	virtual const eRect &getClip()=0;
+	virtual gRGB getRGB(gColor col)=0;
+	virtual ~gDC();
+	virtual int islocked() { return 0; }
+	void lock() { dclock.lock(1); }
+	void unlock() { dclock.unlock(1); }
+};
+
 class gPainter
 {
 	gDC &dc;
@@ -203,6 +219,8 @@ public:
 	
 	void gPainter::blit(gPixmap &pixmap, ePoint pos, eRect clip=eRect(), int flags=0)
 	{
+		if ( dc.islocked() )
+			return;
 		gOpcode o;
 		o.dc=&dc;
 		o.opcode=gOpcode::blit;
@@ -226,22 +244,6 @@ public:
 	void clippop();
 
 	void flush();
-};
-
-class gDC
-{
-protected:
-	eLock dclock;
-public:
-	virtual void exec(gOpcode *opcode)=0;
-	virtual gPixmap &getPixmap()=0;
-	virtual eSize getSize()=0;
-	virtual const eRect &getClip()=0;
-	virtual gRGB getRGB(gColor col)=0;
-	virtual ~gDC();
-	virtual int islocked() { return 0; }
-	void lock() { dclock.lock(1); }
-	void unlock() { dclock.unlock(1); }
 };
 
 class gPixmapDC: public gDC
