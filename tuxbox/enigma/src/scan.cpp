@@ -651,7 +651,6 @@ void tsScan::dvbEvent(const eDVBEvent &event)
 			progress->setPerc(perc);
 		break;
 	case eDVBScanEvent::eventScanCompleted:
-			tpScanned--;
 			timer.stop();
 			close(0);
 		break;
