@@ -29,61 +29,64 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __EVENTLIST_HPP__
-#define __EVENTLIST_HPP__
-
-#include <sectionsdclient/sectionsdclient.h>
-
-#include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "daemonc/remotecontrol.h"
-
-#include "system/settings.h"
-
-#include "gui/widget/menue.h"
-#include "gui/color.h"
-#include "gui/infoviewer.h"
+#ifndef __lcddclient__
+#define __lcddclient__
 
 #include <string>
-#include <vector>
+
+#include <lcddclient/lcddMsg.h>
+
 
 using namespace std;
 
-class EventList
+class CLcddClient
 {
-	private:
-		CFrameBuffer	*frameBuffer;
-        CChannelEventList	evtlist;
-		void readEvents(const t_channel_id channel_id, const std::string& channelname); // I really don't like handling names
-		unsigned int	selected;
-		unsigned int	current_event;
-		unsigned int	liststart;
-		unsigned int	listmaxshow;
-		unsigned int	numwidth;
-		int				fheight; // Fonthoehe Channellist-Inhalt
-		int				fheight1,fheight2;
-		int				fwidth1,fwidth2;
-		int				theight; // Fonthoehe Channellist-Titel
+		int sock_fd;
 
-		int				key;
-		string			name;
-
-		int 			width;
-		int 			height;
-		int 			x;
-		int 			y;
-
-		void paintItem(unsigned pos);
-		void paint();
-		void paintHead();
-		void hide();
+		bool lcdd_connect();
+		bool send(char* data, int size);
+		bool receive(char* data, int size);
+		bool lcdd_close();
 
 	public:
-		EventList();
-		~EventList();
-		int exec(const t_channel_id channel_id, const string& channelname);
-};
+		enum mode
+		{
+			MODE_TVRADIO,
+			MODE_SCART,
+			MODE_MENU,
+			MODE_SAVER,
+			MODE_SHUTDOWN,
+			MODE_STANDBY,
+			MODE_MENU_UTF8
+		};
 
+		CLcddClient();
+
+		void setMode(char mode, string head="");
+		void setMenuText(char pos, string text, char highlight=0);
+		void setServiceName(string name);
+		void setMute(bool);
+		void setVolume(char);
+		void shutdown();
+
+		void setBrightness(int brightness);
+		int getBrightness();
+
+		void setBrightnessStandby(int brightness);
+		int getBrightnessStandby();
+
+		void setContrast(int contrast);
+		int getContrast();
+
+		void setPower(bool power);
+		bool getPower();
+
+		void setInverse(bool inverse);
+		bool getInverse();
+
+		void update();			// applies new brightness, contrast, etc
+		void pause();			// for plugins only
+		void resume();			// for plugins only
+};
 
 #endif

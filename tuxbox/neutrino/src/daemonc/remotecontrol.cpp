@@ -31,8 +31,8 @@
 
 
 #include "remotecontrol.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "global.h"
+#include "neutrino.h"
 
 CRemoteControl::CRemoteControl()
 {

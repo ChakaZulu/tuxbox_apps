@@ -42,7 +42,6 @@
 using namespace std;
 
 
-
 class CChannelList
 {
 	public:

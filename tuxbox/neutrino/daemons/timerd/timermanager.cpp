@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.40 2002/10/13 08:34:16 woglinde Exp $
+	$Id: timermanager.cpp,v 1.41 2002/10/13 11:35:03 woglinde Exp $
 
 	License: GPL
 
@@ -29,10 +29,9 @@
 
 #include <dbox/fp.h>
 
-#include <timermanager.h>
-#include <debug.h>
-#include <timerdclient.h>
-#include <sectionsdclient.h>
+#include <timerdclient/timerdclient.h>
+#include <timerdclient/debug.h>
+#include <sectionsdclient/sectionsdclient.h>
 
 //CTimerEvent_NextProgram::EventMap CTimerEvent_NextProgram::events;
 
@@ -134,6 +133,7 @@ void* CTimerManager::timerThread(void *arg)
 			timerManager->saveEventsToConfig();
 		(debug)?usleep(10 * 1000000):usleep(20 * 1000000);		// sleep for 10 / 20 seconds
 	}
+	return 0;
 }
 
 //------------------------------------------------------------

@@ -5,7 +5,7 @@ INCLUDES = \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
 	@ZAPIT_CFLAGS@ \
-	-I$(top_srcdir)/lib/include
+	-I$(top_srcdir)/lib
 
 noinst_LIBRARIES = libneutrino_gui_widget_basic.a libneutrino_gui_widget.a libneutrino_gui_widget2.a 
 

@@ -417,7 +417,7 @@ void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *
 	if ( *msg == NeutrinoMessages::EVT_TIMESET )
 	{
 		// recalculate timeout....
-		unsigned long long ta= *TimeoutEnd;
+		//unsigned long long ta= *TimeoutEnd;
 		*TimeoutEnd= *TimeoutEnd + *(long long*) *data;
 
 		//printf("[getMsgAbsoluteTimeout]: EVT_TIMESET - recalculate timeout\n%llx/%llx - %llx/%llx\n", timeNow, *(long long*) *data, *TimeoutEnd, ta );

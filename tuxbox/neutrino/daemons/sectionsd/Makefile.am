@@ -1,5 +1,5 @@
 INCLUDES = \
-	-I$(top_srcdir)/lib/include \
+	-I$(top_srcdir)/lib \
 	@EVENTSERVER_CFLAGS@ \
 	-I@DRIVER@
 

@@ -33,10 +33,10 @@
 #include "gui/widget/messagebox.h"
 
 #include "vcrcontrol.h"
-#include "sectionsdclient.h"
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
+
 
 CVCRControl* CVCRControl::getInstance()
 {

@@ -34,7 +34,7 @@
 
 #include <zapit/zapitclient.h>
 
-#include <sectionsdMsg.h>
+#include <sectionsdclient/sectionsdMsg.h>
 
 using namespace std;
 #include <vector>

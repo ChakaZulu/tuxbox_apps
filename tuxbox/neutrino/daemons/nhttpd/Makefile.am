@@ -3,7 +3,7 @@ INCLUDES = \
 	-I$(top_srcdir)/src \
 	@EVENTSERVER_CFLAGS@ \
 	-I@DRIVER@ \
-	-I$(top_srcdir)/lib/include
+	-I$(top_srcdir)/lib
 
 
 bin_PROGRAMS = nhttpd

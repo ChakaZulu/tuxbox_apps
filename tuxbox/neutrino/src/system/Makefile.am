@@ -5,7 +5,7 @@ INCLUDES = \
 	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
-	@ZAPITCLIENT_CFLAGS@
+	@ZAPIT_CFLAGS@
 
 noinst_LIBRARIES = libneutrino_system.a
 

@@ -1,5 +1,5 @@
 /*
-	LCD-Daemon  -   DBoxII-Project
+	Timer-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -23,44 +23,13 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __lcdd__
-#define __lcdd__
+#ifndef __timerd_debug__
+#define __timerd_debug__
 
-#include <configfile.h>
-#include <pthread.h>
+static int debug = 0;
 
-#include <lcddisplay/lcddisplay.h>
-#include <lcddclient/lcddclient.h>
-
-#include "lcdpainter.h"
-
-
-class CLCDD
-{
-	private:
-		CLCDPainter		lcdPainter;
-		CConfigFile		configfile;
-		pthread_t		thrTime;
-
-		bool			shall_exit;
-		bool			debugoutput;
-
-		CLCDD();
-		~CLCDD();
-
-		static void* TimeThread(void*);
-		static void sig_catch(int);
-
-		void parse_command(int connfd, CLcddMsg::commandHead rmsg);
-		
-	public:
-
-		static CLCDD* getInstance();
-		int main(int argc, char **argv);
-
-		void saveConfig();
-		void loadConfig();
-};
+#define dprintf(fmt, args...) {if(debug) printf( "[timerd] " fmt, ## args);}
+#define dperror(str) {perror("[timerd] " str);}
 
 
 #endif

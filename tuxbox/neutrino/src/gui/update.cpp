@@ -29,6 +29,19 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <dirent.h>
+
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
+
+#include <libmd5sum.h>
+#include <libcramfs.h>
+
 #include "global.h"
 
 #include "update.h"
@@ -42,22 +55,10 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
-#include <libmd5sum/libmd5sum.h>
-#include <libcramfs/libcramfs.h>
-
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <dirent.h>
-
-#include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
-
 
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
+
 
 CFlashUpdate::CFlashUpdate()
 	:CProgressWindow()

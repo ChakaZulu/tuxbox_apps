@@ -1,6 +1,6 @@
 INCLUDES = \
+	-I$(top_srcdir)/lib \
 	@ZAPIT_CFLAGS@ \
-	-I../include \
 	@EVENTSERVER_CFLAGS@
 
 lib_LTLIBRARIES  = libcontroldclient.la

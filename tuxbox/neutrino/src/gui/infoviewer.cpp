@@ -40,7 +40,6 @@
 #include <time.h>
 
 #include <string>
-#include <controldclient.h>
 
 #define COL_INFOBAR_BUTTONS				COL_INFOBAR_SHADOW+ 1
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1

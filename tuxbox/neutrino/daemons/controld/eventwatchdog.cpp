@@ -21,7 +21,7 @@
 #include <dbox/event.h>
 
 #include <eventserver.h>
-#include <controldclient.h>
+#include <controldclient/controldclient.h>
 
 #include "eventwatchdog.h"
 

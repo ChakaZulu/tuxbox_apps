@@ -34,10 +34,10 @@
 
 #include <zapit/zapitclient.h>
 
-#include "controldclient.h"
-#include "lcddclient.h"
-#include "sectionsdclient.h"
-#include "timerdclient.h"
+#include <controldclient/controldclient.h>
+#include <lcddclient/lcddclient.h>
+#include <sectionsdclient/sectionsdclient.h>
+#include <timerdclient/timerdclient.h>
 #include "daemonc/remotecontrol.h"
 
 #include "driver/fontrenderer.h"

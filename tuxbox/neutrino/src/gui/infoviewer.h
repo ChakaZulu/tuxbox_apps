@@ -32,7 +32,7 @@
 #ifndef __infoview__
 #define __infoview__
 
-#include <sectionsdMsg.h>
+#include <sectionsdclient/sectionsdMsg.h>
 
 #include "driver/rcinput.h"
 #include "driver/framebuffer.h"

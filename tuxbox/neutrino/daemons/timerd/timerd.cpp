@@ -4,7 +4,7 @@
    Copyright (C) 2001 Steffen Hehn 'McClean'
    Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timerd.cpp,v 1.25 2002/10/13 08:34:16 woglinde Exp $
+   $Id: timerd.cpp,v 1.26 2002/10/13 11:35:03 woglinde Exp $
 
    License: GPL
 
@@ -42,10 +42,9 @@
 #include <config.h>
 #include <configfile.h>
 
-#include <timermanager.h>
-#include <timerdMsg.h>
-#include <debug.h>
-#include <sectionsdclient.h>
+#include <timerdclient/timerdclient.h>
+#include <timerdclient/debug.h>
+#include <sectionsdclient/sectionsdclient.h>
 
 
 bool doLoop;

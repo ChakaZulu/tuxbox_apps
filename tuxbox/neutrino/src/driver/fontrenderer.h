@@ -33,7 +33,7 @@
 #define __FONTRENDERER__
 
 #include "framebuffer.h"
-#include "pthread.h"
+#include <pthread.h>
 #include <string>
 
 #include <ft2build.h>

@@ -11,9 +11,9 @@
 #include <map>
 
 #include <zapit/zapitclient.h>
-#include <controldclient.h>
-#include <sectionsdclient.h>
-#include <timerdclient.h>
+#include <controldclient/controldclient.h>
+#include <sectionsdclient/sectionsdclient.h>
+#include <timerdclient/timerdclient.h>
 #include <eventserver.h>
 
 #include "request.h"

@@ -32,8 +32,7 @@
 #ifndef __epgview__
 #define __epgview__
 
-#include <sectionsdMsg.h>
-#include <sectionsdclient.h>
+#include <sectionsdclient/sectionsdclient.h>
 
 #include "driver/framebuffer.h"
 #include "driver/rcinput.h"

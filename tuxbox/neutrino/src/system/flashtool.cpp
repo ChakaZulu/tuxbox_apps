@@ -30,9 +30,9 @@
 #include <sys/mount.h>
 
 #include <linux/mtd/mtd.h>
-#include <libcramfs/libcramfs.h>
+#include <libcramfs.h>
 
-#include "dbox/fp.h"
+#include <dbox/fp.h>
 
 
 CFlashTool::CFlashTool()

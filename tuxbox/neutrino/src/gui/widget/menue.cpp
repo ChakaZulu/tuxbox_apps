@@ -40,8 +40,6 @@
 #include "gui/color.h"
 #include "gui/widget/stringinput.h"
 
-#include "lcddclient.h"
-
 
 bool isDigit(const char ch)
 {

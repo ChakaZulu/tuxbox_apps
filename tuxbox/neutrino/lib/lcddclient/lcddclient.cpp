@@ -37,7 +37,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include <lcddclient.h>
+#include <lcddclient/lcddclient.h>
 
 
 CLcddClient::CLcddClient()

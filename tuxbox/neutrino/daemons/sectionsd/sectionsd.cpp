@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.136 2002/10/08 22:09:10 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.137 2002/10/13 11:35:03 woglinde Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,12 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.137  2002/10/13 11:35:03  woglinde
+//
+//
+//  yeah, its done neutrino compiles now again,
+//  you can go on and find bugs
+//
 //  Revision 1.136  2002/10/08 22:09:10  thegoodguy
 //  Code cleanup (SDTThread & EITThread now use common read routine)
 //
@@ -429,14 +435,14 @@
 // Daher nehmen wir SmartPointers aus der Boost-Lib (www.boost.org)
 #include <boost/smart_ptr.hpp>
 
-#include "sectionsdMsg.h"
+#include <eventserver.h>
+#include <sectionsdclient/sectionsdclient.h>
+
 #include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
 #include "SIsections.hpp"
 
-#include "eventserver.h"
-#include "sectionsdclient.h"
 
 //#include "timerdclient.h"
 //#include "../timermanager.h"
@@ -1997,7 +2003,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.136 2002/10/08 22:09:10 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.137 2002/10/13 11:35:03 woglinde Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4557,7 +4563,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.136 2002/10/08 22:09:10 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.137 2002/10/13 11:35:03 woglinde Exp $\n");
 
 	try
 	{

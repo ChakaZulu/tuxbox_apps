@@ -6,7 +6,7 @@ INCLUDES = \
 	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
-	@ZAPITCLIENT_CFLAGS@
+	@ZAPIT_CFLAGS@
 
 bin_PROGRAMS = neutrino
 
@@ -17,6 +17,7 @@ neutrino_LDADD = \
 	driver/libneutrino_driver.a \
 	gui/bedit/libneutrino_gui_bedit.a \
 	gui/widget/libneutrino_gui_widget.a \
+	gui/libtimerlist.a \
 	gui/libneutrino_gui.a \
 	gui/widget/libneutrino_gui_widget2.a \
 	gui/widget/libneutrino_gui_widget_basic.a \
@@ -33,6 +34,6 @@ neutrino_LDADD = \
 	@MD5SUM_LIBS@ \
 	@NET_LIBS@ \
 	@UCODES_LIBS@ \
-	@ZAPITCLIENT_LIBS@ \
+	@ZAPIT_LIBS@ \
 	-lpthread -lz
 

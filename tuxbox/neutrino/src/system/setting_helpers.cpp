@@ -35,12 +35,12 @@
 #include "libnet.h"
 #include "gui/streaminfo.h"
 #include "gui/widget/messagebox.h"
-#include "libucodes/libucodes.h"
 
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <libucodes.h>
 
 
 extern "C" int pinghost( const char *hostname );

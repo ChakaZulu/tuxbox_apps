@@ -47,8 +47,6 @@
 #include "gui/color.h"
 #include "gui/infoviewer.h"
 
-#include "sectionsdclient.h"
-
 
 //#define info_height 60
 int info_height;

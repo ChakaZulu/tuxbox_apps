@@ -24,10 +24,11 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <zapit/zapitclient.h>
+
 #include "global.h"
 #include "neutrino.h"
 #include "favorites.h"
-#include "zapitclient.h"
 
 #include "gui/widget/messagebox.h"
 #include "gui/widget/hintbox.h"

@@ -1,5 +1,5 @@
 INCLUDES = \
-	-I../include 
+        -I$(top_srcdir)/lib
 
 lib_LTLIBRARIES  = liblcddclient.la
 

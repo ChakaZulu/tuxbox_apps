@@ -33,13 +33,13 @@
 #ifndef __timerlist__
 #define __timerlist__
 
+#include <timerdclient/timerdclient.h>
+#include <zapit/zapitclient.h>
+
 #include "driver/framebuffer.h"
 #include "gui/widget/menue.h"
-#include "timerdclient.h"
-#include "zapitclient.h"
 
 using namespace std;
-
 
 
 class CTimerList : public CMenuTarget

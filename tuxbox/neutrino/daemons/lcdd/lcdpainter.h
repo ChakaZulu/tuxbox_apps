@@ -28,7 +28,7 @@
 
 #include <lcddisplay/lcddisplay.h>
 #include <lcddisplay/fontrenderer.h>
-#include <lcddclient.h>
+#include <lcddclient/lcddclient.h>
 
 
 class CLCDPainter
