@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.20 2003/05/20 06:25:02 digi_casi Exp $
+        $Id: settings.cpp,v 1.21 2003/05/20 06:54:28 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -92,19 +92,34 @@ void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 {
 	satList.clear();
 	CZapitClient::commandSetScanSatelliteList sat;
-	if  ((diseqcMode == NO_DISEQC) || (diseqcMode == DISEQC_1_2))
+	if  (diseqcMode == NO_DISEQC)
+	{
+		strncpy(sat.satName, satNameNoDiseqc, 30);
+		sat.diseqc = 0;
+		satList.insert(satList.end(), sat);
+	}
+	else if  (diseqcMode == DISEQC_1_2)
 	{
 		strncpy( sat.satName, satNameNoDiseqc, 30);
 		sat.diseqc = 0;
-		satList.insert( satList.end(), sat);
+		for (int i = 0; i < MAX_SATELLITES; i++)
+		{
+			if (satName[i] == satNameNoDiseqc)
+			{
+				if (satDiseqc[i] != -1)
+					sat.diseqc = satDiseqc[i];
+				break;
+			}
+		}
+		satList.insert(satList.end(), sat);
 	}
 	else
 	{
-		for( int i=0; i<MAX_SATELLITES; i++)
+		for( int i = 0; i < MAX_SATELLITES; i++)
 		{
-			if ( satDiseqc[i] != -1)
+			if (satDiseqc[i] != -1)
 			{
-				strncpy( sat.satName, satName[i], 30);
+				strncpy(sat.satName, satName[i], 30);
 				sat.diseqc = satDiseqc[i];
 				satList.insert( satList.end(), sat);
 			}
