@@ -7,7 +7,7 @@
 		if (currentTransponder >= 0)
 		{
 			var transponder = document.channelselector.channel.options[currentTransponder].value;
-			alert("tuning to " + transponder + " not working yet...");		
+			document.location = "/cgi-bin/tuneTransponder?" + transponder;		
 		} 
 		satFinder();
 	}

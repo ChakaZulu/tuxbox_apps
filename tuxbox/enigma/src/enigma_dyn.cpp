@@ -55,7 +55,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.5.3"
+#define WEBXFACEVERSION "1.5.4"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -430,50 +430,27 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 static eString tuneTransponder(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	int frequency, symbol_rate, polarisation, fec, orbital_position, inversion;
+	sscanf(opt.c_str(), "%d:%d:%d:%d:%d:%d:", &frequency, &symbol_rate, &polarisation, &fec, &orbital_position, &inversion);
 
-	int service_id = -1, dvb_namespace = -1, original_network_id = -1, transport_stream_id = -1, service_type = -1;
-	unsigned int optval = opt.find("=");
-	if (optval != eString::npos)
-		opt = opt.mid(optval + 1);
-	if (opt.length())
-		sscanf(opt.c_str(), "%x:%x:%x:%x:%x", &service_id, &dvb_namespace, &transport_stream_id, &original_network_id, &service_type);
-
-	eString result;
-
-	if ((service_id != -1) && (original_network_id != -1) && (transport_stream_id != -1) && (service_type != -1))
+	// search for the right transponder...
+	for (std::list<tpPacket>::iterator it3(eTransponderList::getInstance()->getNetworks().begin()); it3 != eTransponderList::getInstance()->getNetworks().end(); it3++)
 	{
-		eServiceInterface *iface = eServiceInterface::getInstance();
-		if (!iface)
-			return "-1";
-		eServiceReferenceDVB *ref = new eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
-#ifndef DISABLE_FILE
-		if (eDVB::getInstance()->recorder && !ref->path)
+		if (it3->orbital_position == orbital_position)
 		{
-			int canHandleTwoScrambledServices = 0;
-			eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices", canHandleTwoScrambledServices);
-
-			if (!canHandleTwoScrambledServices && eDVB::getInstance()->recorder->scrambled)
+			// ok, we have the right satellite now...
+			for (std::list<eTransponder>::iterator it(it3->possibleTransponders.begin()); it != it3->possibleTransponders.end(); it++)
 			{
-				delete ref;
-				return "-1";
-			}
-			if (!onSameTP(*ref,eDVB::getInstance()->recorder->recRef))
-			{
-				delete ref;
-				return "-1";
+				if (it->satellite.frequency == frequency && it->satellite.symbol_rate == symbol_rate && it->satellite.polarisation == polarisation && it->satellite.fec == fec && it->satellite.inversion == inversion)
+				{
+					// and this should be the right transponder...
+					it->tune();
+				}
 			}
 		}
-#endif
-		if ( playService(*ref) )
-			result = "0";
-		else
-			result = "-1";
-		delete ref;
 	}
-	else
-		result = "-1";
 
-	return result;
+	return closeWindow(content, "", 5);
 }
 
 static eString admin(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -2448,7 +2425,7 @@ static eString getControlSatFinder(void)
 						}
 						transponder = eString().sprintf("%d / %d / %c", it->satellite.frequency / 1000, it->satellite.symbol_rate / 1000, it->satellite.polarisation ? 'V' : 'H');
 						chs += "\"" + transponder + "\", ";
-						chrefs += "\"" + transponder + "\", ";
+						chrefs += "\"" + it->satellite.toString() + "\", ";
 					}
 				}
 				j++;
