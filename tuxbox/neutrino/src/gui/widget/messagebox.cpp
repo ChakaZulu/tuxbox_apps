@@ -49,7 +49,8 @@ CMessageBox::CMessageBox(const char * const Caption, const char * const Text, co
 
 void CMessageBox::paintButtons()
 {
-	int color;
+	uint8_t    color;
+	fb_pixel_t bgcolor;
 	//irgendwann alle vergleichen - aber cancel ist sicher der längste
 	int MaxButtonTextWidth = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(g_Locale->getText("messagebox.cancel"), true); // UTF-8
 
@@ -64,8 +65,17 @@ void CMessageBox::paintButtons()
 
 	if (showbuttons & mbYes)
 	{
-		color = (result == mbrYes) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
-		window->paintBoxRel(xpos, height - fheight - 20, ButtonWidth, fheight, (CFBWindow::color_t)color);
+		if (result == mbrYes)
+		{
+			color   = COL_MENUCONTENTSELECTED;
+			bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		}
+		else
+		{
+			color   = COL_INFOBAR_SHADOW;
+			bgcolor = COL_INFOBAR_SHADOW_PLUS_0;
+		}
+		window->paintBoxRel(xpos, height - fheight - 20, ButtonWidth, fheight, (CFBWindow::color_t)bgcolor);
 		window->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos + 14, height - fheight - 15);
 		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
@@ -74,9 +84,18 @@ void CMessageBox::paintButtons()
 
 	if (showbuttons & mbNo)
 	{
-		color = (result == mbrNo) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
+		if (result == mbrNo)
+		{
+			color   = COL_MENUCONTENTSELECTED;
+			bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		}
+		else
+		{
+			color   = COL_INFOBAR_SHADOW;
+			bgcolor = COL_INFOBAR_SHADOW_PLUS_0;
+		}
 
-		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
+		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)bgcolor);
 		window->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, xpos+14, height-fheight-15);
 		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.no"), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
@@ -85,9 +104,18 @@ void CMessageBox::paintButtons()
 
 	if (showbuttons & (mbCancel | mbBack))
 	{
-		color = (result >= mbrCancel) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
+		if (result >= mbrCancel)
+		{
+			color   = COL_MENUCONTENTSELECTED;
+			bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		}
+		else
+		{
+			color   = COL_INFOBAR_SHADOW;
+			bgcolor = COL_INFOBAR_SHADOW_PLUS_0;
+		}
 
-		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
+		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)bgcolor);
 		window->paintIcon(NEUTRINO_ICON_BUTTON_HOME, xpos+10, height-fheight-19);
 		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText( ( showbuttons & mbCancel ) ? "messagebox.cancel" : "messagebox.back" ), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}

@@ -117,10 +117,10 @@ void CHintBox::paint(void)
 		return; /* out of memory */
 	}
 
-	window->paintBoxRel(borderwidth, height, width, borderwidth, COL_BACKGROUND);
-	window->paintBoxRel(width, borderwidth, borderwidth, height - borderwidth, COL_BACKGROUND);
+	window->paintBoxRel(borderwidth, height, width, borderwidth, COL_BACKGROUND_PLUS_0);
+	window->paintBoxRel(width, borderwidth, borderwidth, height - borderwidth, COL_BACKGROUND_PLUS_0);
 
-	window->paintBoxRel(0, 0, width, theight, (CFBWindow::color_t)COL_MENUHEAD);
+	window->paintBoxRel(0, 0, width, theight, (CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
 	if (!iconfile.empty())
 	{
 		window->paintIcon(iconfile.c_str(), 8, 5);
@@ -129,7 +129,7 @@ void CHintBox::paint(void)
 	else
 		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE], 10, theight, width - 10, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
 
-	window->paintBoxRel(0, theight, width, height - theight, (CFBWindow::color_t)COL_MENUCONTENT);
+	window->paintBoxRel(0, theight, width, height - theight, (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0);
 
 	ypos = theight + (fheight >> 1);
 

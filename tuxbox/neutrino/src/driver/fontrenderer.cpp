@@ -420,7 +420,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 			for (ax=0; ax < w + spread_by; ax++)
 			{
 				if (stylemodifier != Font::Embolden)
-					*td++= colors[*s++];
+					frameBuffer->paintPixel(td++, colors[*s++]);
 				else
 				{
 					int start, end;
@@ -439,7 +439,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 					for (int i = start; i < end; i++)
 						if (color < *(s - i))
 							color = *(s - i);
-					*td++ = colors[color];
+					frameBuffer->paintPixel(td++, colors[color]);
 					s++;
 				}
 			}

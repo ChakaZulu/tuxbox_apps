@@ -1,7 +1,7 @@
 #ifndef __fb_window_h__
 #define __fb_window_h__
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.h,v 1.2 2003/09/24 19:25:27 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.h,v 1.3 2004/03/13 12:45:41 thegoodguy Exp $
  *
  * abstract fb_window class - d-box2 linux project
  *
@@ -26,9 +26,9 @@
 class CFBWindow
 {
  public:
-	typedef unsigned char color_t;
-	typedef void *        font_t;
-	typedef void *        private_data_t;
+	typedef unsigned short color_t;
+	typedef void *         font_t;
+	typedef void *         private_data_t;
 
  private:
 	private_data_t private_data;

@@ -141,7 +141,7 @@ void CEpgData::showText( int startPos, int ypos )
 	int textCount = epgText.size();
 	int y=ypos;
 
-	frameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT_PLUS_0);
 
 	for(int i=startPos; i<textCount && i<startPos+medlinecount; i++,y+=medlineheight)
 	{
@@ -268,7 +268,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	height = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->getHeight();
 	if (doLoop)
 	{
-		frameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_INFOBAR);
+		frameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_INFOBAR_PLUS_0);
 		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(g_settings.screen_StartX+10, g_settings.screen_StartY+height, 40, "-@-", COL_INFOBAR);
 	}
 
@@ -344,13 +344,13 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 
 	//show the epg
-	frameBuffer->paintBoxRel(sx, sy- toph, ox, toph, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(sx, sy- toph, ox, toph, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy- toph+ topheight+ 3, ox-15, text1, COL_MENUHEAD);
 	if (!(text2.empty()))
 		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->RenderString(sx+10, sy- toph+ 2* topheight+ 3, ox-15, text2, COL_MENUHEAD);
 
 	//show date-time....
-	frameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD_PLUS_0);
 	std::string fromto;
 	int widthl,widthr;
 	fromto = epg_start;
@@ -375,7 +375,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	{
 		int pbx = sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1);
 		frameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUCONTENT_PLUS_6);
-		frameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUCONTENT);
+		frameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUCONTENT_PLUS_0);
 		frameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, epg_done, height-10, COL_MENUCONTENT_PLUS_3);
 	}
 
@@ -383,13 +383,13 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	if (prev_id != 0)
 	{
 		frameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT_PLUS_3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT_PLUS_3);
+		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT + 3);
 	}
 
 	if (next_id != 0)
 	{
 		frameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT_PLUS_3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT_PLUS_3);
+		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT + 3);
 	}
 
 	if ( doLoop )
@@ -415,7 +415,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 					if (prev_id != 0)
 					{
 						frameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT_PLUS_1);
-						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT_PLUS_1);
+						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT + 1);
 
 						show(channel_id, prev_id, &prev_zeit, false);
 						showPos=0;
@@ -426,7 +426,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 					if (next_id != 0)
 					{
 						frameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT_PLUS_1);
-						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT_PLUS_1);
+						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT + 1);
 
 						show(channel_id, next_id, &next_zeit, false);
 						showPos=0;
@@ -687,7 +687,7 @@ void CEpgData::showTimerEventBar (bool show)
     if (! show) return;
 
     // frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW_PLUS_1);
-    frameBuffer->paintBoxRel(x,y,w,h, COL_MENUHEAD);
+    frameBuffer->paintBoxRel(x,y,w,h, COL_MENUHEAD_PLUS_0);
 
 
 

@@ -50,7 +50,7 @@ EpgPlus::CHeader::CHeader ( CFrameBuffer* frameBuffer , int x , int y , int widt
 	this->height  = height;
 
 	this->textColor = COL_MENUHEAD;
-	this->backColor = COL_MENUHEAD;
+	this->backColor = COL_MENUHEAD_PLUS_0;
 }
 
 EpgPlus::CHeader::~CHeader()
@@ -483,7 +483,7 @@ EpgPlus::CFooter::CFooter ( CFrameBuffer* frameBuffer , int x , int y , int widt
 	this->height3 = height3;
 
 	this->textColor = COL_MENUHEAD;
-	this->backColor = COL_MENUHEAD;
+	this->backColor = COL_MENUHEAD_PLUS_0;
 
 
 }
@@ -1431,7 +1431,7 @@ void EpgPlus::paint()
 		, this->sliderY
 		, this->sliderWidth
 		, this->sliderHeight
-		, COL_MENUCONTENT
+		, COL_MENUCONTENT_PLUS_0
 		);
 
 	#ifdef DEBUG_
@@ -1440,7 +1440,7 @@ void EpgPlus::paint()
 
 	int tmp = ((this->channelList->getSize() - 1)/this->maxNumberOfDisplayableEntries) + 1;
 	float sliderKnobHeight = (sliderHeight - 4)/tmp;
-	int sliderKnobPosition = (this->selectedChannelEntry->index/this->maxNumberOfDisplayableEntries);
+	int sliderKnobPosition = this->selectedChannelEntry == NULL ? 0 : (this->selectedChannelEntry->index / this->maxNumberOfDisplayableEntries);
 
 	this->frameBuffer->paintBoxRel
 		( this->sliderX + 2

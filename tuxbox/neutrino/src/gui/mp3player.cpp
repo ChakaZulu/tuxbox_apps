@@ -527,7 +527,7 @@ int CMP3PlayerGui::show()
 				int w = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getRenderWidth(str);
 				int h = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight();
 				frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT_PLUS_6 );
-				frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED);
+				frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED_PLUS_0);
 				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->RenderString(x1,y1,w+1,str,COL_MENUCONTENTSELECTED,0);
 				g_RCInput->getMsg( &msg, &data, 100 ); 
 			} while (g_RCInput->isNumeric(msg) && val < 1000000);
@@ -687,7 +687,7 @@ void CMP3PlayerGui::paintHead()
 {
 //	printf("paintHead{\n");
 	std::string strCaption = g_Locale->getText("mp3player.head");
-	frameBuffer->paintBoxRel(x,y+title_height, width,theight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y+title_height, width,theight, COL_MENUHEAD_PLUS_0);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+title_height+10);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
 	int ypos=y+title_height;
@@ -729,8 +729,8 @@ void CMP3PlayerGui::paintFoot()
 		key_level=0;
 	int ButtonWidth = (width-20) / 4;
 	int ButtonWidth2 = (width-50) / 2;
-	frameBuffer->paintBoxRel(x,y+(height-info_height-2*buttonHeight), width,2*buttonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+width,  y+(height-info_height-2*buttonHeight), COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+(height-info_height-2*buttonHeight), width,2*buttonHeight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintHLine(x, x+width,  y+(height-info_height-2*buttonHeight), COL_INFOBAR_SHADOW_PLUS_0);
 
 	if (!(playlist.empty()))
 	{
@@ -765,9 +765,8 @@ void CMP3PlayerGui::paintInfo()
 		frameBuffer->paintBackgroundBoxRel(x, y, width, title_height);
 	else
 	{
-		fb_pixel_t colFrame = COL_MENUCONTENT_PLUS_6;
-		frameBuffer->paintBoxRel(x,         y, width, title_height-10, colFrame);
-		frameBuffer->paintBoxRel(x+2, y +2 , width-4, title_height-14, COL_MENUCONTENTSELECTED);
+		frameBuffer->paintBoxRel(x,         y, width, title_height-10, COL_MENUCONTENT_PLUS_6);
+		frameBuffer->paintBoxRel(x+2, y +2 , width-4, title_height-14, COL_MENUCONTENTSELECTED_PLUS_0);
 		char sNr[20];
 		sprintf(sNr, ": %2d", current+1);
 		std::string tmp = g_Locale->getText("mp3player.playing");
@@ -1204,7 +1203,7 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 //		frameBuffer->paintBoxRel(x, ypos2, width, info_height, col1);
 
 		// paint id3 infobox 
-		frameBuffer->paintBoxRel(x+2, ypos2 +2 , width-4, info_height-4, COL_MENUCONTENTDARK);
+		frameBuffer->paintBoxRel(x+2, ypos2 +2 , width-4, info_height-4, COL_MENUCONTENTDARK_PLUS_0);
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, ypos2 + 2 + 1*fheight, width- 80, playlist[selected].Title, COL_MENUCONTENTDARK, 0, true); // UTF-8
 		std::string tmp;
 		if (playlist[selected].Genre.empty())
@@ -1376,7 +1375,7 @@ void CMP3PlayerGui::updateMP3Infos()
 		if(m_mp3info!=CMP3Player::getInstance()->getMp3Info())
 		{
 			m_mp3info=CMP3Player::getInstance()->getMp3Info();
-			frameBuffer->paintBoxRel(x + 10, y+ 4 + 2*fheight, width-20, sheight, COL_MENUCONTENTSELECTED);
+			frameBuffer->paintBoxRel(x + 10, y+ 4 + 2*fheight, width-20, sheight, COL_MENUCONTENTSELECTED_PLUS_0);
 			int xstart = ((width - 20 - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth( m_mp3info ))/2)+10;
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, m_mp3info, COL_MENUCONTENTSELECTED);
 		}
@@ -1414,12 +1413,12 @@ void CMP3PlayerGui::updateTimes(const bool force)
 
 		if (updateTotal)
 		{
-			frameBuffer->paintBoxRel(x+width-w1-10, y+4, w1+4, fheight, COL_MENUCONTENTSELECTED);
+			frameBuffer->paintBoxRel(x+width-w1-10, y+4, w1+4, fheight, COL_MENUCONTENTSELECTED_PLUS_0);
 			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-10, y+4 + fheight, w1, " / " + m_time_total, COL_MENUCONTENTSELECTED);
 		}
 		if (updatePlayed || (m_state == CMP3PlayerGui::PAUSE))
 		{
-			frameBuffer->paintBoxRel(x+width-w1-w2-15, y+4, w2+4, fheight, COL_MENUCONTENTSELECTED);
+			frameBuffer->paintBoxRel(x+width-w1-w2-15, y+4, w2+4, fheight, COL_MENUCONTENTSELECTED_PLUS_0);
 			struct timeval tv;
 			gettimeofday(&tv, NULL);
 			if ((m_state != CMP3PlayerGui::PAUSE) || (tv.tv_sec & 1))

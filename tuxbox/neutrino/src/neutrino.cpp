@@ -3409,14 +3409,14 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 
       if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3) && ( mode != mode_pic))
       {
-         // anzeigen NUR, wenn es vom Event kommt
-         if( current_muted )
-         {
-            frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
-            frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+5, y+5);
-         }
-         else
-            frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+	      // anzeigen NUR, wenn es vom Event kommt
+	      if( current_muted )
+	      {
+		      frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0);
+		      frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+5, y+5);
+	      }
+	      else
+		      frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
       }
    }
 }

@@ -325,6 +325,20 @@ void CFrameBuffer::paletteSetColor(int i, __u32 rgb, int tr)
 	cmap.transp[i] =tr;
 }
 
+#ifndef FB_USE_PALETTE
+inline unsigned short make16color(uint16_t r, uint16_t g, uint16_t b, uint16_t t, 
+				  uint32_t rl, uint32_t ro, 
+				  uint32_t gl, uint32_t go, 
+				  uint32_t bl, uint32_t bo, 
+				  uint32_t tl, uint32_t to)
+{
+	return (
+		((t >> (16 - tl)) << to) |
+		((r >> (16 - rl)) << ro) |
+		((g >> (16 - gl)) << go) |
+		((b >> (16 - bl)) << bo));
+}
+#endif
 void CFrameBuffer::paletteSet(struct fb_cmap *map)
 {
 	if (!active)
@@ -333,7 +347,26 @@ void CFrameBuffer::paletteSet(struct fb_cmap *map)
 	if(map == NULL)
 		map = &cmap;
 
+#ifdef FB_USE_PALETTE
 	ioctl(fd, FBIOPUTCMAP, map);
+#else
+	uint32_t rl, ro, gl, go, bl, bo, tl, to;
+	
+	rl = screeninfo.red.length;
+	ro = screeninfo.red.offset;
+	gl = screeninfo.green.length;
+	go = screeninfo.green.offset;
+	bl = screeninfo.blue.length;
+	bo = screeninfo.blue.offset;
+	tl = screeninfo.transp.length;
+	to = screeninfo.transp.offset;
+
+	for (int i = 0; i < 256; i++)
+	{
+		realcolor[i] = make16color(cmap.red[i], cmap.green[i], cmap.blue[i], cmap.transp[i],
+					   rl, ro, gl, go, bl, bo, tl, to);
+	}
+#endif
 }
 
 
@@ -344,9 +377,16 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 
 	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 
-	for(int count = 0; count < dy; count++)
+	for (int count = 0; count < dy; count++)
 	{
-		memset(pos, col, dx * sizeof(fb_pixel_t));
+#ifdef FB_USE_PALETTE
+		memset(pos, col, dx);
+//		memset(pos, col, dx * sizeof(fb_pixel_t));
+#else
+		fb_pixel_t * dest = (fb_pixel_t *)pos;
+		for (int i = 0; i < dx; i++)
+			*(dest++) = col;
+#endif
 		pos += stride;
 	}
 }
@@ -388,7 +428,14 @@ void CFrameBuffer::paintHLine(int xa, int xb, int y, const fb_pixel_t col)
 	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + xa * sizeof(fb_pixel_t) + stride * y;
 
 	int dx = xb -xa;
-	memset(pos, col, dx * sizeof(fb_pixel_t));
+#ifdef FB_USE_PALETTE
+	memset(pos, col, dx);
+//	memset(pos, col, dx * sizeof(fb_pixel_t));
+#else
+	fb_pixel_t * dest = (fb_pixel_t *)pos;
+	for (int i = 0; i < dx; i++)
+		*(dest++) = col;
+#endif
 }
 
 void CFrameBuffer::paintHLineRel(int x, int dx, int y, const fb_pixel_t col)
@@ -398,7 +445,14 @@ void CFrameBuffer::paintHLineRel(int x, int dx, int y, const fb_pixel_t col)
 
 	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 
-	memset(pos, col, dx * sizeof(fb_pixel_t));
+#ifdef FB_USE_PALETTE
+	memset(pos, col, dx);
+//	memset(pos, col, dx * sizeof(fb_pixel_t));
+#else
+	fb_pixel_t * dest = (fb_pixel_t *)pos;
+	for (int i = 0; i < dx; i++)
+		*(dest++) = col;
+#endif
 }
 
 void CFrameBuffer::setIconBasePath(const std::string & iconPath)
@@ -442,7 +496,7 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 			unsigned char color = *pixpos;
 			if (color != header.transp)
 			{
-				*d2 = color + offset;
+				paintPixel(d2, color + offset);
 			}
 			d2++;
 			pixpos++;
@@ -491,12 +545,12 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 
 			if (pix1 != header.transp)
 			{
-				*d2 = pix1 + offset;
+				paintPixel(d2, pix1 + offset);
 			}
 			d2++;
 			if (pix2 != header.transp)
 			{
-				*d2 = pix2 + offset;
+				paintPixel(d2, pix2 + offset);
 			}
 			d2++;
 			pixpos++;

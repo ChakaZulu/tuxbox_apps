@@ -32,7 +32,12 @@
 #include <stdint.h>
 #include <string>
 
+#define FB_USE_PALETTE 1
+#ifdef FB_USE_PALETTE
 #define fb_pixel_t uint8_t
+#else
+#define fb_pixel_t uint16_t
+#endif
 
 typedef struct fb_var_screeninfo t_fb_var_screeninfo;
 
@@ -82,6 +87,9 @@ class CFrameBuffer
 		static	void switch_signal (int);
 
 	public:
+#ifndef FB_USE_PALETTE
+		fb_pixel_t realcolor[256];
+#endif
 
 		~CFrameBuffer();
 
@@ -107,6 +115,14 @@ class CFrameBuffer
 		void paletteSet(struct fb_cmap *map = NULL);
 
 		//paint functions
+		inline void paintPixel(fb_pixel_t * const dest, const uint8_t color) const
+			{
+#ifdef FB_USE_PALETTE
+				*dest = color;
+#else
+				*dest = realcolor[color];
+#endif
+			};
 		void paintPixel(int x, int y, const fb_pixel_t col);
 
 		void paintBoxRel(const int x, const int y, const int dx, const int dy, const fb_pixel_t col);

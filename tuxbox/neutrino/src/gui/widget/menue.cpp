@@ -343,7 +343,7 @@ void CMenuWidget::paint()
 	else
 		sb_width=0;
 
-	frameBuffer->paintBoxRel(x,y, width+sb_width,hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width+sb_width,hheight, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+38,y+hheight+1, width-40, l_name, COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintIcon(iconfile, x + 8, y + 5);
 
@@ -372,7 +372,7 @@ void CMenuWidget::paintItems()
 		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ int(current_page* sbh) , 11, 
 										 int(sbh),  COL_MENUCONTENT_PLUS_3);
 	}
-	frameBuffer->paintBoxRel(x,item_start_y, width,item_height, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,item_start_y, width,item_height, COL_MENUCONTENT_PLUS_0);
 	unsigned int count;
 	int ypos=item_start_y;
 	for(count=page_start[current_page]; count <= page_end[current_page];count++)
@@ -467,13 +467,20 @@ int CMenuOptionChooser::paint( bool selected )
 {
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 
-	unsigned char color = COL_MENUCONTENT;
+	unsigned char color   = COL_MENUCONTENT;
+	fb_pixel_t    bgcolor = COL_MENUCONTENT_PLUS_0;
 	if (selected)
-		color = COL_MENUCONTENTSELECTED;
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
 	if (!active)
-		color = COL_MENUCONTENTINACTIVE;
+	{
+		color   = COL_MENUCONTENTINACTIVE;
+		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
+	}
 
-	frameBuffer->paintBoxRel(x,y, dx, height, color );
+	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor);
 
 	std::string option = "error";
 
@@ -574,13 +581,20 @@ int CMenuOptionStringChooser::exec(CMenuTarget*)
 
 int CMenuOptionStringChooser::paint( bool selected )
 {
-	unsigned char color = COL_MENUCONTENT;
+	unsigned char color   = COL_MENUCONTENT;
+	fb_pixel_t    bgcolor = COL_MENUCONTENT_PLUS_0;
 	if (selected)
-		color = COL_MENUCONTENTSELECTED;
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
 	if (!active)
-		color = COL_MENUCONTENTINACTIVE;
+	{
+		color   = COL_MENUCONTENTINACTIVE;
+		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
+	}
 
-	CFrameBuffer::getInstance()->paintBoxRel(x,y, dx, height, color );
+	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor);
 
 	const char * l_option = localizing ? g_Locale->getText(optionValue) : optionValue;
 
@@ -679,13 +693,20 @@ int CMenuForwarder::paint(bool selected)
 			lcd->showMenuText(1, "", -1, true); // UTF-8
 	}
 
-	unsigned char color = COL_MENUCONTENT;
+	unsigned char color   = COL_MENUCONTENT;
+	fb_pixel_t    bgcolor = COL_MENUCONTENT_PLUS_0;
 	if (selected)
-		color = COL_MENUCONTENTSELECTED;
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
 	if (!active)
-		color = COL_MENUCONTENTINACTIVE;
+	{
+		color   = COL_MENUCONTENTINACTIVE;
+		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
+	}
 
-	frameBuffer->paintBoxRel(x,y, dx, height, color );
+	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x), l_text, color, 0, true); // UTF-8
 
 	if (!iconName.empty())
@@ -730,7 +751,7 @@ int CMenuSeparator::paint(bool selected)
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 	height = getHeight();
 	
-	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT );
+	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT_PLUS_0);
 	if(type&LINE)
 	{
 		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1), COL_MENUCONTENT_PLUS_3);
@@ -750,7 +771,7 @@ int CMenuSeparator::paint(bool selected)
 		else /* ALIGN_CENTER */
 			stringstartposX = x + (dx >> 1) - (stringwidth >> 1);
 
-		frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT );
+		frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT_PLUS_0);
 
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
 
