@@ -2142,12 +2142,12 @@ struct getEntryString
 		else
 		{
 			result 	<< std::setw(2) << startTime.tm_mday << '.'
-				<< std::setw(2) << startTime.tm_mon+1 << " - "
+				<< std::setw(2) << startTime.tm_mon+1 << ". - "
 				<< std::setw(2) << startTime.tm_hour << ':'
 				<< std::setw(2) << startTime.tm_min
 				<< "</td><td>"
 				<< std::setw(2) << endTime.tm_mday << '.'
-				<< std::setw(2) << endTime.tm_mon+1 << " - ";
+				<< std::setw(2) << endTime.tm_mon+1 << ". - ";
 		}
 
 		result 	<< std::setw(2) << endTime.tm_hour << ':'
@@ -2237,12 +2237,12 @@ struct getWapEntryString
 			description = _("No description available");
 
 		result 	<< std::setw(2) << startTime.tm_mday << '.'
-			<< std::setw(2) << startTime.tm_mon+1 << " - "
+			<< std::setw(2) << startTime.tm_mon+1 << ". - "
 			<< std::setw(2) << startTime.tm_hour << ':'
 			<< std::setw(2) << startTime.tm_min
 			<< " / "
 			<< std::setw(2) << endTime.tm_mday << '.'
-			<< std::setw(2) << endTime.tm_mon+1 << " - "
+			<< std::setw(2) << endTime.tm_mon+1 << ". - "
 		 	<< std::setw(2) << endTime.tm_hour << ':'
 			<< std::setw(2) << endTime.tm_min
 			<< "<br/>"
@@ -2270,7 +2270,7 @@ static eString wapTimerList(void)
 	}
 	else
 		result << eString(_("No timer events available"));
-		
+
 	tmp.strReplace("#BODY#", result.str());
 
 	return tmp;
