@@ -1,5 +1,5 @@
 /*
-$Id: bat.c,v 1.8 2004/02/07 01:28:04 rasc Exp $
+$Id: bat.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
 
  DVBSNOOP
 
@@ -16,6 +16,10 @@ $Id: bat.c,v 1.8 2004/02/07 01:28:04 rasc Exp $
 
 
 $Log: bat.c,v $
+Revision 1.9  2004/02/12 21:21:21  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.8  2004/02/07 01:28:04  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -161,12 +165,12 @@ void decode_BAT (u_char *b, int len)
    len1 -= x;
  }
  indent (-1);
+ out_NL (3);
 
 
  t.reserved_5	 		 = getBits (b, 0, 0, 4);
  t.transport_stream_loop_length	 = getBits (b, 0, 4, 12);
 
- out_NL (3);
  out_SB_NL (6,"reserved_5: ",t.reserved_5);
  out_SW_NL (5,"Transport_stream_loop_length: ",t.transport_stream_loop_length);
 
@@ -204,6 +208,7 @@ void decode_BAT (u_char *b, int len)
       len1 -= x;
    }
    indent (-1);
+   out_NL (3);
 
 
  } // while len1

@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.4 2004/02/11 20:27:32 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.5 2004/02/12 21:21:20 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: mhp_ait_descriptor.c,v 1.4 2004/02/11 20:27:32 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.5  2004/02/12 21:21:20  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.4  2004/02/11 20:27:32  rasc
 MHP AIT descriptors...
 
@@ -97,12 +101,13 @@ int  descriptorMHP_AIT (u_char *b)
      case 0x08:  descriptorMHP_AIT_dvb_html_application (b); break;
      case 0x09:  descriptorMHP_AIT_dvb_html_application_location (b); break;
      case 0x0A:  descriptorMHP_AIT_dvb_html_application_boundary (b); break;
-//     {  0x0B, 0x0B,  "Application icons descriptor" },
-//     {  0x0C, 0x0C,  "Pre-fetch descriptor" },
-//     {  0x0D, 0x0D,  "DII location descriptor" },
-//     {  0x0E, 0x0E,  "delegated application descriptor" },
-//     {  0x0F, 0x0F,  "Plug-in descriptor" },
-//     {  0x10, 0x10,  "Application storage descriptor" },
+     case 0x0B:  descriptorMHP_AIT_application_icons (b); break;
+     case 0x0C:  descriptorMHP_AIT_pre_fetch (b); break;
+     case 0x0D:  descriptorMHP_AIT_DII_location (b); break;
+     case 0x0E:  descriptorMHP_AIT_delegated_application (b); break;
+     case 0x0F:  descriptorMHP_AIT_plug_in (b); break;
+     case 0x10:  descriptorMHP_AIT_application_storage (b); break;
+     case 0x11:  descriptorMHP_AIT_ip_signalling (b); break;
 
      case 0x5F:  descriptorDVB_PrivateDataSpecifier (b); break;
 
@@ -154,14 +159,14 @@ void descriptorMHP_AIT_application (u_char *b)
 
  indent (+1);
  while (len2 > 0) {
+	int x;
+
 	out_NL(4);
- 	outBit_Sx_NL (4,"application_profile: ",	b,   0, 16);
- 	outBit_Sx_NL (4,"version.major: ",		b,  16,  8);
- 	outBit_Sx_NL (4,"version.minor: ",		b,  24,  8);
- 	outBit_Sx_NL (4,"version.micro: ",		b,  32,  8);
-	b += 5;
-	len -= 5;
-	len2 -= 5;
+	x =   mhp_application_profile_version (4, b);
+
+	b += x;
+	len -= x;
+	len2 -= x;
  }
  out_NL(4);
  indent (-1);
@@ -293,7 +298,7 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 			out_NL (4);
 			len2 = outBit_Sx_NL (4,"URL_length: ",	b,  0,  8);
   			out (4,"URL: ");
-	 		print_std_ascii (4, "URL: ", b+1, len2);
+	 		print_text_UTF8 (4, "URL: ", b+1, len2);
 			b += 1+len2;
 			len -= 1+len2;
 		}
@@ -308,7 +313,7 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 
 	out_NL (4);
 	len2 = outBit_Sx_NL (4,"URL_base_length: ",	b,  0,  8);
-	print_std_ascii (4, "URL_base: ", b+1, len2);
+	print_text_UTF8 (4, "URL_base: ", b+1, len2);
 	b += 1+len2;
 	len -= 1+len2;
 
@@ -318,7 +323,7 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 
 		out_NL (4);
 		len2 = outBit_Sx_NL (4,"URL_extension_length: ", b,  0,  8);
-		print_std_ascii (4, "URL_extension: ", b+1, len2);
+		print_text_UTF8 (4, "URL_extension: ", b+1, len2);
 		b += 1+len2;
 		len -= 1+len2;
 	}
@@ -357,7 +362,7 @@ void descriptorMHP_AIT_dvb_j_application (u_char *b)
 	int len2;
 
   	len2 = outBit_Sx_NL (4,"parameter_length: ",	b, 0, 8);
-	print_std_ascii (4, "Parameter: ", b+1, len2);
+	print_text_UTF8 (4, "Parameter: ", b+1, len2);
 
 	b += len2+1;
 	len -= len2+1;
@@ -386,16 +391,16 @@ void descriptorMHP_AIT_dvb_j_application_location (u_char *b)
 
 
   len2 = outBit_Sx_NL (4,"base_directory_length: ",	b, 0, 8);
-  print_std_ascii (4, "base_directory: ", b+1, len2);
+  print_text_UTF8 (4, "base_directory: ", b+1, len2);
   b += len2+1;
   len -= len2+1;
 
   len2 = outBit_Sx_NL (4,"classpath_extension_length: ",	b, 0, 8);
-  print_std_ascii (4, "classpath_extension: ", b+1, len2);
+  print_text_UTF8 (4, "classpath_extension: ", b+1, len2);
   b += len2+1;
   len -= len2+1;
 
-  print_std_ascii (4, "initial_class: ", b, len);
+  print_text_UTF8 (4, "initial_class: ", b, len);
 
 }
 
@@ -454,9 +459,8 @@ void descriptorMHP_AIT_dvb_html_application (u_char *b)
 
   // descriptor_tag	= b[0];
   len		        = b[1];
-  b += 2;
 
-  len2 = outBit_Sx_NL (4,"appid_set_length: ",	b, 0, 8);
+  len2 = outBit_Sx_NL (4,"appid_set_length: ",	b+2, 0, 8);
   b += 3;
   len --;
 
@@ -469,7 +473,7 @@ void descriptorMHP_AIT_dvb_html_application (u_char *b)
   }
   indent(-1);
 
-  print_std_ascii (4, "parameter: ", b, len);
+  print_text_UTF8 (4, "parameter: ", b, len);
 }
 
 
@@ -488,15 +492,14 @@ void descriptorMHP_AIT_dvb_html_application_location (u_char *b)
 
   // descriptor_tag	= b[0];
   len		        = b[1];
-  b += 2;
 
   len2 = outBit_Sx_NL (4,"physical_root_length: ",	b+2, 0, 8);
-  print_std_ascii (4, "physical_root: ", b+3, len2);
+  print_text_UTF8 (4, "physical_root: ", b+3, len2);
 
   b += 3 + len2;
   len -= 1 + len2;
 
-  print_std_ascii (4, "initial_path: ", b, len);
+  print_text_UTF8 (4, "initial_path: ", b, len);
 }
 
 
@@ -516,15 +519,14 @@ void descriptorMHP_AIT_dvb_html_application_boundary (u_char *b)
 
   // descriptor_tag	= b[0];
   len		        = b[1];
-  b += 2;
 
   len2 = outBit_Sx_NL (4,"label_length: ",	b+2, 0, 8);
-  print_std_ascii (4, "label: ", b+3, len2);
+  print_text_UTF8 (4, "label: ", b+3, len2);
 
   b += 3 + len2;
   len -= 1 + len2;
 
-  print_std_ascii (4, "regular_expression: ", b, len);
+  print_text_UTF8 (4, "regular_expression: ", b, len);
 }
 
 
@@ -532,17 +534,215 @@ void descriptorMHP_AIT_dvb_html_application_boundary (u_char *b)
 
 
 
+/*
+  0x0B -- Application Icons
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_application_icons (u_char *b)
+{
+  int  len;
+  int  len2;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+
+  len2 = outBit_Sx_NL (4,"icon_locator_length: ",	b+2, 0, 8);
+  print_text_UTF8 (4, "icon_locator: ", b+3, len2);
+
+  b += 3 + len2;
+  len -= 1 + len2;
+
+  outBit_Sx_NL (4,"icon_flags: ",	b, 0, 16);	// $$$ TODO table
+  b += 2;
+  len -= 2;
+
+  print_databytes(4,"reserved_future_use:", b, len); 
+}
+
+
+
+
+
+/*
+  0x0C -- Pre-Fetch descriptor
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_pre_fetch (u_char *b)
+{
+  int  len;
+  int  len2;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+
+  outBit_Sx_NL (4,"transport_protcol_label: ",	b+2, 0, 8);
+  b += 3;
+  len --;
+
+  indent(+1);
+  while (len > 0) {
+	out_NL (4);
+  	len2 = outBit_Sx_NL (4,"label_length: ",	b, 0, 8);
+  	print_text_UTF8 (4, "label: ", b+1, len2);
+	out_nl (4, "  ==> [= matches DII modul label]");
+	b += 1 + len2;
+	len -= 1 + len2;
+
+  	outBit_Sx_NL (4,"prefetch_priority: ",	b, 0, 8);
+	b++;
+	len--;
+  }
+  indent(-1);
+
+}
+
+
+
+
+
+/*
+  0x0D -- DII location  descriptor
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_DII_location (u_char *b)
+{
+  int  len;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+
+  outBit_Sx_NL (4,"transport_protcol_label: ",	b+2, 0, 8);
+  b += 3;
+  len --;
+
+  indent(+1);
+  while (len > 0) {
+	out_NL (4);
+  	outBit_Sx_NL (4,"reserved: ",		b,  0,  1);
+  	outBit_Sx (4,"DII_identification: ",	b,  1, 15);
+	   out_nl (4, "  [= refers to identification in transaction_id]");
+  	outBit_Sx_NL (4,"association_tag: ",	b, 16, 16);
+	b += 4;
+	len -= 4;
+  }
+  indent(-1);
+
+}
+
+
+
+
+
+/*
+  0x0E -- Delegated Application descriptor
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_delegated_application (u_char *b)
+{
+  int  len;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+
+  // indent(+1);
+  while (len > 0) {
+	out_NL (4);
+  	outBit64_Sx_NL (4,"application_identifier: ",	b,  0,  48);
+	b += 6;
+	len -= 6;
+  }
+  // indent(-1);
+}
 
 
 
 
 
 
+/*
+  0x0F -- Plug-in descriptor
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_plug_in (u_char *b)
+{
+  int  len;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+
+  outBit_Sx_NL (4,"application_type: ",	b,  0,  16);
+  b += 4;
+  len -= 2;
+
+  indent(+1);
+  while (len > 0) {
+	int x;
+
+	out_NL(4);
+	x =   mhp_application_profile_version (4, b);
+	b += x;
+	len -= x;
+  }
+  // indent(-1);
+}
 
 
 
 
 
+/*
+  0x10 -- Application Storage descriptor
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_application_storage (u_char *b)
+{
+  // descriptor_tag	= b[0];
+  // len	        = b[1];
+
+  outBit_S2x_NL(4,"storage_property: ",			b,  0,  8,
+		  	(char *(*)(u_long)) dsmccStrMHP_storage_property);
+  outBit_Sx_NL (4,"not_launchable_from_broadcast: ",	b,  8,  1);
+  outBit_Sx_NL (4,"reserved: ",				b,  9,  7);
+  outBit_Sx_NL (4,"version: ",				b, 16, 32);
+  outBit_Sx_NL (4,"priority: ",				b, 48,  8);
+}
+
+
+
+
+
+/*
+  0x11 -- IP signalling descriptor
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_ip_signalling (u_char *b)
+{
+  // descriptor_tag	= b[0];
+  // len	        = b[1];
+
+  outBit_S2x_NL (4,"platform_id: ",	b,  0, 24,
+		  	(char *(*)(u_long)) dsmccStrPlatform_ID);
+}
+
+
+
+
+
+
+// $$$ TODO  B.2.2.4.1 Label descriptor
+// ... caching descr.
 
 
 

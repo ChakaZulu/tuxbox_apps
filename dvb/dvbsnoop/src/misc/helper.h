@@ -32,6 +32,7 @@ unsigned long long getBits64 (u_char *buf, int byte_offset, int startbit, int bi
 u_char *getISO639_3 (u_char *str, u_char *buf);
 
 void print_text_468A (int v, const char *s, u_char *b, u_int len);
+void print_text_UTF8 (int v, const char *s, u_char *b, u_int len);
 void print_std_ascii (int v, const char *s, u_char *b, u_int len);
 
 void print_time40 (int verbose, u_long mjd, u_long utc);

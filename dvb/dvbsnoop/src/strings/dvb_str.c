@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.43 2004/02/09 22:57:01 rasc Exp $
+$Id: dvb_str.c,v 1.44 2004/02/12 21:21:22 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,10 @@ $Id: dvb_str.c,v 1.43 2004/02/09 22:57:01 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.44  2004/02/12 21:21:22  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.43  2004/02/09 22:57:01  rasc
 Bugfix VBI Data descriptor
 
@@ -227,10 +231,10 @@ char *dvbstrTableID (u_int id)
 
  	// updated -- 2003-11-04
 	// ATSC Table IDs could be included...
-     {  0x00, 0x00,  "program_association_section" },
-     {  0x01, 0x01,  "conditional_access_section" },
-     {  0x02, 0x02,  "program_map_section" },
-     {  0x03, 0x03,  "transport_stream_description_section" },
+     {  0x00, 0x00,  "Program Association Table (PAT)" },
+     {  0x01, 0x01,  "Conditional Access Table (CAT)" },
+     {  0x02, 0x02,  "Program Map Table (PMT)" },
+     {  0x03, 0x03,  "Transport Stream Description Table (TSDT)" },
      {  0x04, 0x04,  "ISO_IEC_14496_scene_description_section" },	/* $$$ TODO */
      {  0x05, 0x05,  "ISO_IEC_14496_object_description_section" },	/* $$$ TODO */
      {  0x06, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
@@ -242,29 +246,29 @@ char *dvbstrTableID (u_int id)
      {  0x3e, 0x3e,  "DSM-CC - private data section  // DVB datagram" }, /* EN 301 192 // ISO 13818-6 */
      {  0x3f, 0x3f,  "ISO/IEC 13818-6 reserved" },
 
-     {  0x40, 0x40,  "network_information_section - actual network" },
-     {  0x41, 0x41,  "network_information_section - other network" },
-     {  0x42, 0x42,  "service_description_section - actual transport stream" },
+     {  0x40, 0x40,  "Network Information Table (NIT) - actual network" },
+     {  0x41, 0x41,  "Network Information Table (NIT) - other network" },
+     {  0x42, 0x42,  "Service Description Table (SDT) - actual transport stream" },
      {  0x43, 0x45,  "reserved" },
-     {  0x46, 0x46,  "service_description_section - other transport stream" },
+     {  0x46, 0x46,  "Service Description Table (SDT) - other transport stream" },
      {  0x47, 0x49,  "reserved" },
-     {  0x4A, 0x4A,  "bouquet_association_section" },
-     {  0x4B, 0x4B,  "update notification table" },	/* TR 102 006 */
-     {  0x4C, 0x4C,  "IP/MAC notification table [EN 301 192]" },  /* EN 192 */
+     {  0x4A, 0x4A,  "Bouquet Association Table (BAT)" },
+     {  0x4B, 0x4B,  "Update Notification Table (UNT)" },	/* TR 102 006 */
+     {  0x4C, 0x4C,  "IP/MAC Notification Table (INT) [EN 301 192]" },  /* EN 192 */
      {  0x4D, 0x4D,  "reserved" },
 
-     {  0x4E, 0x4E,  "event_information_section - actual transport stream, present/following" },
-     {  0x4F, 0x4F,  "event_information_section - other transport stream, present/following" },
-     {  0x50, 0x5F,  "event_information_section - actual transport stream, schedule" },
-     {  0x60, 0x6F,  "event_information_section - other transport stream, schedule" },
-     {  0x70, 0x70,  "time_date_section" },
-     {  0x71, 0x71,  "running_status_section" },
-     {  0x72, 0x72,  "stuffing_section" },
-     {  0x73, 0x73,  "time_offset_section" },
-     {  0x74, 0x74,  "AIT Application_information_section" }, /* MHP */
+     {  0x4E, 0x4E,  "Event Information Table (EIT) - actual transport stream, present/following" },
+     {  0x4F, 0x4F,  "Event Information Table (EIT) - other transport stream, present/following" },
+     {  0x50, 0x5F,  "Event Information Table (EIT) - actual transport stream, schedule" },
+     {  0x60, 0x6F,  "Event Information Table (EIT) - other transport stream, schedule" },
+     {  0x70, 0x70,  "Time Date Table (TDT)" },
+     {  0x71, 0x71,  "Running Status Table (RST)" },
+     {  0x72, 0x72,  "Stuffing Table (ST)" },
+     {  0x73, 0x73,  "Time Offset Table (TOT)" },
+     {  0x74, 0x74,  "Application Information Table (AIT)" }, /* MHP */
      {  0x75, 0x7D,  "reserved" },
-     {  0x7E, 0x7E,  "discontinuity_information_section" },
-     {  0x7F, 0x7F,  "selection_information_section" },
+     {  0x7E, 0x7E,  "Discontinuity Information Table (DIT)" },
+     {  0x7F, 0x7F,  "Selection Information Table (SIT)" },
      {  0x80, 0x8F,  "DVB CA message section (EMM/ECM)" },   /* ITU-R BT.1300 ref. */
      {  0x90, 0xBF,  "User private" },
      {  0xC0, 0xFE,  "ATSC reserved" },		/* ETR 211e02 */

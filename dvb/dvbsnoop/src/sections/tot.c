@@ -1,5 +1,5 @@
 /*
-$Id: tot.c,v 1.7 2004/02/07 01:28:04 rasc Exp $
+$Id: tot.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: tot.c,v 1.7 2004/02/07 01:28:04 rasc Exp $
 
 
 $Log: tot.c,v $
+Revision 1.8  2004/02/12 21:21:21  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.7  2004/02/07 01:28:04  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -130,6 +134,7 @@ void decode_TOT (u_char *b, int len)
    b += x;
  }
  indent (-1);
+ out_NL (3);
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.h,v 1.4 2004/02/11 20:27:32 rasc Exp $ 
+$Id: mhp_ait_descriptor.h,v 1.5 2004/02/12 21:21:20 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: mhp_ait_descriptor.h,v 1.4 2004/02/11 20:27:32 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.h,v $
+Revision 1.5  2004/02/12 21:21:20  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.4  2004/02/11 20:27:32  rasc
 MHP AIT descriptors...
 
@@ -52,6 +56,13 @@ void descriptorMHP_AIT_external_application_authorisation (u_char *b);
 void descriptorMHP_AIT_dvb_html_application (u_char *b);
 void descriptorMHP_AIT_dvb_html_application_location (u_char *b);
 void descriptorMHP_AIT_dvb_html_application_boundary (u_char *b);
+void descriptorMHP_AIT_application_icons (u_char *b);
+void descriptorMHP_AIT_pre_fetch (u_char *b);
+void descriptorMHP_AIT_DII_location (u_char *b);
+void descriptorMHP_AIT_delegated_application (u_char *b);
+void descriptorMHP_AIT_plug_in (u_char *b);
+void descriptorMHP_AIT_application_storage (u_char *b);
+void descriptorMHP_AIT_ip_signalling (u_char *b);
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: mhp_misc.h,v 1.1 2004/02/10 22:57:52 rasc Exp $
+$Id: mhp_misc.h,v 1.2 2004/02/12 21:21:19 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,7 @@ $Id: mhp_misc.h,v 1.1 2004/02/10 22:57:52 rasc Exp $
 
 
 int  mhp_application_identifier (int  v, u_char *b);
+int  mhp_application_profile_version (int  v, u_char *b);
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-$Id: mhp_misc.c,v 1.1 2004/02/10 22:57:52 rasc Exp $
+$Id: mhp_misc.c,v 1.2 2004/02/12 21:21:19 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,10 @@ $Id: mhp_misc.c,v 1.1 2004/02/10 22:57:52 rasc Exp $
 
 
 $Log: mhp_misc.c,v $
+Revision 1.2  2004/02/12 21:21:19  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.1  2004/02/10 22:57:52  rasc
 MHP descriptor, missing DVB descriptor done
 
@@ -44,6 +48,33 @@ int  mhp_application_identifier (int  v, u_char *b)
 			(char *(*)(u_long)) dsmccStrMHP_application_id );
 	return 6;
 }
+
+
+
+
+/*
+ *  used in AIT and in descriptors
+ *  ETSI TS 102 812
+ */
+
+int  mhp_application_profile_version (int  v, u_char *b)
+{
+ 	outBit_Sx_NL (v,"application_profile: ",	b,   0, 16);
+ 	outBit_Sx_NL (v,"version.major: ",		b,  16,  8);
+ 	outBit_Sx_NL (v,"version.minor: ",		b,  24,  8);
+ 	outBit_Sx_NL (v,"version.micro: ",		b,  32,  8);
+
+	return 5;
+}
+
+
+
+
+
+
+
+
+// $$$ TODO details of transaction_id  TS 102 812  B.2.7
 
 
 

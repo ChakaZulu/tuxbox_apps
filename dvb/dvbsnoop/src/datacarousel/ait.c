@@ -1,5 +1,5 @@
 /*
-$Id: ait.c,v 1.3 2004/02/10 22:57:52 rasc Exp $
+$Id: ait.c,v 1.4 2004/02/12 21:21:19 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: ait.c,v 1.3 2004/02/10 22:57:52 rasc Exp $
 
 
 $Log: ait.c,v $
+Revision 1.4  2004/02/12 21:21:19  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.3  2004/02/10 22:57:52  rasc
 MHP descriptor, missing DVB descriptor done
 
@@ -96,6 +100,7 @@ void decode_MHP_AIT (u_char *b, int len)
 	len2 -= x;
  }
  indent (-1);
+ out_NL (4);
 
 
  outBit_Sx_NL (6,"reserved_5: ",			b, 0, 4);
@@ -128,6 +133,7 @@ void decode_MHP_AIT (u_char *b, int len)
 		len3 -= x;
 	}
  	indent (-1);
+ 	out_NL (4);
 
 
  }

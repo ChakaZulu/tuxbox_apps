@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.21 2004/02/07 01:28:07 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.22 2004/02/12 21:21:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: dsmcc_str.h,v 1.21 2004/02/07 01:28:07 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.22  2004/02/12 21:21:22  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.21  2004/02/07 01:28:07  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -141,6 +145,7 @@ char *dsmccStrMHP_application_id (u_int id);
 char *dsmccStrMHP_application_control_code (u_int id);
 char *dsmccStrMHP_visibility_state (u_int id);
 char *dsmccStrMHP_protocol_id (u_int id);
+char *dsmccStrMHP_storage_property (u_int id);
 
 
 

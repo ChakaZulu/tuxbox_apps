@@ -1,5 +1,5 @@
 /*
-$Id: sdt.c,v 1.8 2004/02/07 01:28:04 rasc Exp $
+$Id: sdt.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: sdt.c,v 1.8 2004/02/07 01:28:04 rasc Exp $
 
 
 $Log: sdt.c,v $
+Revision 1.9  2004/02/12 21:21:21  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.8  2004/02/07 01:28:04  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -157,6 +161,7 @@ void decode_SDT (u_char *b, int len)
  len1 = s.section_length - 11 - 4;
  b   += 11;
 
+ out_NL (3);
  indent (+1);
  while (len1 > 0 ) {
 
@@ -195,6 +200,7 @@ void decode_SDT (u_char *b, int len)
      len1 -= x;
    }
    indent (-1);
+   out_NL (3);
 
  }
  indent (-1);

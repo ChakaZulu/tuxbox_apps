@@ -1,5 +1,5 @@
 /*
-$Id: cat.c,v 1.8 2004/01/01 20:09:31 rasc Exp $
+$Id: cat.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: cat.c,v 1.8 2004/01/01 20:09:31 rasc Exp $
 
 
 $Log: cat.c,v $
+Revision 1.9  2004/02/12 21:21:21  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.8  2004/01/01 20:09:31  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -128,6 +132,7 @@ void decode_CAT (u_char *b, int len)
    
  }
  indent (-1);
+ out_NL (3);
 
 
  c.CRC 		 = getBits (b, 0, 0, 32);

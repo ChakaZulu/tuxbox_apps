@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.24 2004/02/09 21:25:00 rasc Exp $
+$Id: helper.c,v 1.25 2004/02/12 21:21:20 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,10 @@ $Id: helper.c,v 1.24 2004/02/09 21:25:00 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.25  2004/02/12 21:21:20  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.24  2004/02/09 21:25:00  rasc
 AIT descriptors
 minor redesign on output routines
@@ -426,7 +430,6 @@ u_char *getISO639_3 (u_char *str, u_char *buf)
   -- ETSI EN 300 468  Annex A
   -- evaluate string and look on DVB control codes
   -- print the string
-
 */
 
 static void print_text2_468A (int v, u_char *b, u_int len);
@@ -483,7 +486,22 @@ static void print_text2_468A (int v, u_char *b, u_int len)
 }
 
 
+/*
+  -- print_text_UTF8
+  -- print the string using UTF8
+  -- (use std_ascii)
+*/
 
+void print_text_UTF8 (int v, const char *s,  u_char *b, u_int len)
+{
+   print_std_ascii (v, s, b, len);
+}
+
+
+
+/*
+  -- print standard ascii text
+*/
 
 void print_std_ascii (int v, const char *s, u_char *b, u_int len)
 {
@@ -579,7 +597,12 @@ void print_private_data (int v, u_char *b, u_int len)
 long  str2i  (char *s)
 {
  long v;
-  
+ 
+ if (!s) {
+	 fprintf (stderr,"str2i: NULL ptr (abort)\n");
+	 exit(-1);
+ }
+
  v = strtol (s, NULL, 0);
  return v;
 

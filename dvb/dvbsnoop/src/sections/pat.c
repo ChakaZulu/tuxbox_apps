@@ -1,5 +1,5 @@
 /*
-$Id: pat.c,v 1.7 2004/02/07 01:28:04 rasc Exp $
+$Id: pat.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: pat.c,v 1.7 2004/02/07 01:28:04 rasc Exp $
 
 
 $Log: pat.c,v $
+Revision 1.8  2004/02/12 21:21:21  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.7  2004/02/07 01:28:04  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -148,6 +152,7 @@ void decode_PAT (u_char *b, int len)
 
  }
  indent (-1);
+ out_NL (3);
 
  p.CRC = getBits (b,0,0,32);
  out_SL_NL (5,"CRC: ",p.CRC);

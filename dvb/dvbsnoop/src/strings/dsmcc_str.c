@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.24 2004/02/07 01:28:07 rasc Exp $
+$Id: dsmcc_str.c,v 1.25 2004/02/12 21:21:22 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: dsmcc_str.c,v 1.24 2004/02/07 01:28:07 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.25  2004/02/12 21:21:22  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.24  2004/02/07 01:28:07  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -946,7 +950,7 @@ char *dsmccStrMHP_visibility_state (u_int id)
 
 
 /*
-  -- MHP protocoll_id  
+  -- MHP protocol_id  
   -- ETR162
 */
 
@@ -959,6 +963,26 @@ char *dsmccStrMHP_protocol_id (u_int id)
 	{ 0x0003, 0x0003,   "Transport via HTTP over the interaction channel" },
 	{ 0x0004, 0x00FF,   "Reserved for use by DVB" },
 	{ 0x0100, 0xFFFF,   "Subject to registration in ETSI TR 101 162" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  -- MHP storage property
+  -- ETR162
+*/
+
+char *dsmccStrMHP_storage_property (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "broadcast related" },
+	{ 0x01, 0x01,   "stand alone" },
+	{ 0x02, 0xFF,   "reserved" },
       	{  0,0, NULL }
   };
 

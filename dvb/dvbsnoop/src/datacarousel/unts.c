@@ -1,5 +1,5 @@
 /*
-$Id: unts.c,v 1.4 2004/01/01 20:09:16 rasc Exp $
+$Id: unts.c,v 1.5 2004/02/12 21:21:19 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: unts.c,v 1.4 2004/01/01 20:09:16 rasc Exp $
 
 
 $Log: unts.c,v $
+Revision 1.5  2004/02/12 21:21:19  rasc
+MHP AIT descriptors
+some smaller changes
+
 Revision 1.4  2004/01/01 20:09:16  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -102,7 +106,7 @@ void decode_DSMCC_UNT (u_char *b, int len)
  len1 -= i;
 
 
-
+ indent (+1);
  while (len1 > 4) {
 	int len2;
 
@@ -126,7 +130,9 @@ void decode_DSMCC_UNT (u_char *b, int len)
 		len1 -= i;
 		len2 -= i;
 	}
+	out_NL (4);
  }
+ indent (-1);
 
 
  outBit_Sx_NL (5,"CRC: ",	b,0,32);
