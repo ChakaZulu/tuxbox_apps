@@ -1398,7 +1398,7 @@ int EpgPlus::exec
 			if ( msg <= CRCInput::RC_MaxRC )
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-			if ( (msg == (neutrino_msg_t)g_settings.key_channelList_pagedown) 
+			if ( (msg == (neutrino_msg_t)g_settings.key_channelList_pageup) 
          ||(msg == CRCInput::RC_yellow)
          )
 			{
@@ -1452,7 +1452,7 @@ int EpgPlus::exec
             break;
          }
 			}
-			else if ( (msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
+			else if ( (msg == (neutrino_msg_t)g_settings.key_channelList_pagedown)
               ||(msg == CRCInput::RC_green)
               )
 			{
