@@ -268,12 +268,13 @@ void routeVideo(int a, int b, int nothing, int fblk)
 	close(fd);
 }
 
+char BoxNames[4][10] = {"","Nokia", "Sagem", "Philips"};
 void switch_vcr( bool vcr_on)
 {
-	if (!vcr_on)
+	if (vcr_on)
 	{
 		//turn to scart-input
-		printf("switch to scart-input...\n");
+		printf("switch to scart-input... (%s)\n", BoxNames[settings.boxtype]);
 		if (settings.boxtype == 2) // Sagem
 		{
 			routeVideo(2, 1, 7, 2);
@@ -307,7 +308,8 @@ void switch_vcr( bool vcr_on)
 
 void setScartMode(char onoff)
 {
-	switch_vcr( onoff==1 );
+
+	switch_vcr( onoff );
 }
 
 void setBoxType(char type)
@@ -529,6 +531,7 @@ int main(int argc, char **argv)
 		settings.mute = 0;
 		settings.videotype = 1; // fblk1 - rgb
 		settings.videoformat = 2; // fnc2 - 4:3
+		settings.boxtype = 1; //nokia
 	}
 
 
