@@ -20,7 +20,7 @@ the tuxbox project, bringing Linux based TV software to some
 set top boxes (digital satellite/cable receivers).
 
 
-Documentation and example outputs can be found on:
+Documentation and example outputs can be found at:
 
 	http://dvbsnoop.sourceforge.net
 
@@ -131,7 +131,7 @@ Bugs, requests:
   (check first, if the data stream is not broken).
 
   Please do not send binary data stream files or large 
-  decoding output via email! (I needed, I will ask for it!)
+  decoding output via email! (If needed, I will ask for it!)
   But it is a good advise to save the data stream using
   the option "dvbsnoop -s ... -b ... > file" on your harddrive.
   It might be helpful for further investigations.
@@ -155,4 +155,5 @@ Keywords:
 
 (c) 2001-2004   Rainer Scherg (Rainer.Scherg@gmx.de)
 http://dvbsnoop.sourceforge.net
+
 
