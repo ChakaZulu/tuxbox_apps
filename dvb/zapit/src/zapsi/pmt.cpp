@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.15 2002/05/12 01:56:19 obi Exp $
+ * $Id: pmt.cpp,v 1.16 2002/05/13 05:20:52 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -226,6 +226,9 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 		break;
 
 	case 0x0B:
+		break;
+
+	case 0x90:
 		break;
 
 	case 0x93:
