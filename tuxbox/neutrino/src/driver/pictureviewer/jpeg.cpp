@@ -19,11 +19,13 @@ struct r_jpeg_error_mgr
 
 int fh_jpeg_id(char *name)
 {
+	dbout("fh_jpeg_id {\n");
     int fd;
     unsigned char id[10];
     fd=open(name,O_RDONLY); if(fd==-1) return(0);
     read(fd,id,10);
     close(fd);
+	 dbout("fh_jpeg_id }\n");
     if(id[6]=='J' && id[7]=='F' && id[8]=='I' && id[9]=='F') return(1);
     if(id[0]==0xff && id[1]==0xd8 && id[2]==0xff) return(1);
     return(0);
@@ -32,14 +34,17 @@ int fh_jpeg_id(char *name)
 
 void jpeg_cb_error_exit(j_common_ptr cinfo)
 {
+	dbout("jpeg_cd_error_exit {\n");
     struct r_jpeg_error_mgr *mptr;
     mptr=(struct r_jpeg_error_mgr*) cinfo->err;
     (*cinfo->err->output_message) (cinfo);
     longjmp(mptr->envbuffer,1);
+	 dbout("jpeg_cd_error_exit }\n");
 }
 
 int fh_jpeg_load(char *filename,unsigned char *buffer,int x,int y)
 {
+	dbout("fh_jpeg_load {\n");
     struct jpeg_decompress_struct cinfo;
     struct jpeg_decompress_struct *ciptr;
     struct r_jpeg_error_mgr emgr;
@@ -58,6 +63,7 @@ int fh_jpeg_load(char *filename,unsigned char *buffer,int x,int y)
 	// FATAL ERROR - Free the object and return...
 	jpeg_destroy_decompress(ciptr);
 	fclose(fh);
+	dbout("fh_jpeg_load } - FATAL ERROR\n");
 	return(FH_ERROR_FORMAT);
     }
     
@@ -86,11 +92,13 @@ int fh_jpeg_load(char *filename,unsigned char *buffer,int x,int y)
     jpeg_finish_decompress(ciptr);
     jpeg_destroy_decompress(ciptr);
     fclose(fh);
+	 dbout("fh_jpeg_load }\n");
     return(FH_ERROR_OK);
 }
 
 int fh_jpeg_getsize(char *filename,int *x,int *y)
 {
+	dbout("fh_jpeg_getsize {\n");
     struct jpeg_decompress_struct cinfo;
     struct jpeg_decompress_struct *ciptr;
     struct r_jpeg_error_mgr emgr;
@@ -108,6 +116,7 @@ int fh_jpeg_getsize(char *filename,int *x,int *y)
 	// FATAL ERROR - Free the object and return...
 	jpeg_destroy_decompress(ciptr);
 	fclose(fh);
+	dbout("fh_jpeg_getsize } - FATAL ERROR\n");
 	return(FH_ERROR_FORMAT);
     }
     
@@ -121,6 +130,7 @@ int fh_jpeg_getsize(char *filename,int *x,int *y)
     *x=px; *y=py;
     jpeg_destroy_decompress(ciptr);
     fclose(fh);
+	 dbout("fh_jpeg_getsize }\n");
     return(FH_ERROR_OK);
 }
 #endif

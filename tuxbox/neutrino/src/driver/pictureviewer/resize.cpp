@@ -4,20 +4,21 @@ unsigned char * simple_resize(unsigned char * orgin,int ox,int oy,int dx,int dy)
 {
     unsigned char *cr,*p,*l;
     int i,j,k,ip;
-    cr=(unsigned char*) malloc(dx*dy*3); l=cr;
+    cr=(unsigned char*) malloc(dx*dy*3); 
+	 l=cr;
     
     for(j=0;j<dy;j++,l+=dx*3)
     {
-	p=orgin+(j*oy/dy*ox*3);
-	for(i=0,k=0;i<dx;i++,k+=3)
-	{
-	    ip=i*ox/dx*3;
-	    l[k]=p[ip];
-	    l[k+1]=p[ip+1];
-	    l[k+2]=p[ip+2];
-	}
-    }
-    free(orgin);
+		 p=orgin+(j*oy/dy*ox*3);
+		 for(i=0,k=0;i<dx;i++,k+=3)
+		 {
+			 ip=i*ox/dx*3;
+			 l[k]=p[ip];
+			 l[k+1]=p[ip+1];
+			 l[k+2]=p[ip+2];
+		 }
+	 }
+	 free(orgin);
     return(cr);
 }
 

@@ -55,14 +55,16 @@ CPictureViewerGui::CPictureViewerGui()
 	visible = false;
 	selected = 0;
 
-	filebrowser = new CFileBrowser();
-	filebrowser->Multi_Select = true;
-	filebrowser->Dirs_Selectable = true;
+	m_viewer = new CPictureViewer();
+	m_viewer->SetScaling(CPictureViewer::SIMPLE);
+	m_filebrowser = new CFileBrowser();
+	m_filebrowser->Multi_Select = true;
+	m_filebrowser->Dirs_Selectable = true;
 	picture_filter.addFilter("png");
 	picture_filter.addFilter("bmp");
 	picture_filter.addFilter("jpg");
 	picture_filter.addFilter("gif");
-	filebrowser->Filter = &picture_filter;
+	m_filebrowser->Filter = &picture_filter;
 	Path = "/";
 }
 
@@ -71,13 +73,13 @@ CPictureViewerGui::CPictureViewerGui()
 CPictureViewerGui::~CPictureViewerGui()
 {
 	playlist.clear();
-	delete filebrowser;
+	delete m_filebrowser;
+	delete m_viewer;
 }
 
 //------------------------------------------------------------------------
 int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 {
-	m_state=STOP;
 	current=-1;
 	selected = 0;
 	width = 710;
@@ -108,13 +110,10 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 //	frameBuffer->loadBackground("radiomode.raw");
 /*	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
 	frameBuffer->loadBackground("scan.raw");*/
+	frameBuffer->useBackground(false);
 	frameBuffer->setBackgroundColor(0);
 	frameBuffer->paintBackgroundBox(0,0,720,576);
-	frameBuffer->useBackground(true);
-	frameBuffer->paintBackground();
 
-	// set zapit in standby mode
-	g_Zapit->setStandby(true);
 
 	// tell neutrino we're in mp3_mode
 	//CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_mp3 );
@@ -122,16 +121,17 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	//m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() /*| NeutrinoMessages::norezap*/);
 
 	// Stop sectionsd
+	printf("4\n");
 	g_Sectionsd->setPauseScanning(true); 
 
 	/*int ret =*/
 
+	printf("5\n");
 	show();
 
 	// Restore normal background
 	if(frameBuffer->getActive())
 		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
-	frameBuffer->useBackground(false);
 
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
@@ -139,7 +139,6 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	// Restore last mode
 	//t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
 	//g_Zapit->zapTo_serviceID(channel_id);
-	g_Zapit->setStandby(false);
 	//CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
 	//sleep(3); // zapit doesnt like fast zapping in the moment
 
@@ -154,6 +153,7 @@ int CPictureViewerGui::show()
 	int res = -1;
 
 	//CLCD::getInstance()->setMode(CLCD::MODE_MP3);
+	m_state=MENU;
 
 	uint msg; uint data;
 
@@ -168,11 +168,17 @@ int CPictureViewerGui::show()
 			update=false;
 			paint();
 		}
-		g_RCInput->getMsg( &msg, &data, 10 ); // 1 sec timeout to update play/stop state display
+		g_RCInput->getMsg( &msg, &data, 100 ); // 1 sec timeout to update play/stop state display
 
 		if( msg == CRCInput::RC_home)
 		{ //Exit after cancel key
-			loop=false;
+			if(m_state==VIEW)
+			{
+				endView();
+				update=true;
+			}
+			else
+				loop=false;
 		}
 		else if( msg == CRCInput::RC_timeout )
 		{
@@ -180,66 +186,85 @@ int CPictureViewerGui::show()
 		}
 		else if( msg == CRCInput::RC_left)
 		{
-
+			unsigned int next=current-1;
+			if(next < 0)
+				next = 0;
+			view(next);
 		}
 		else if( msg == CRCInput::RC_right)
 		{
-
+			unsigned int next=current+1;
+			if( next+1 > playlist.size())
+				next=0;
+			view(next);
 		}
 		else if( msg == CRCInput::RC_up && playlist.size() > 0)
 		{
-			int prevselected=selected;
-			if(selected==0)
+			if(m_state==MENU)
 			{
-				selected = playlist.size()-1;
-			}
-			else
-				selected--;
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
-			{
-				update=true;
-			}
-			else
-			{
-				paintItem(selected - liststart);
+				int prevselected=selected;
+				if(selected==0)
+				{
+					selected = playlist.size()-1;
+				}
+				else
+					selected--;
+				paintItem(prevselected - liststart);
+				unsigned int oldliststart = liststart;
+				liststart = (selected/listmaxshow)*listmaxshow;
+				if(oldliststart!=liststart)
+				{
+					update=true;
+				}
+				else
+				{
+					paintItem(selected - liststart);
+				}
 			}
 		}
 		else if( msg == CRCInput::RC_down && playlist.size() > 0)
 		{
-			int prevselected=selected;
-			selected = (selected+1)%playlist.size();
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
+			if(m_state==MENU)
 			{
-				update=true;
-			}
-			else
-			{
-				paintItem(selected - liststart);
+				int prevselected=selected;
+				selected = (selected+1)%playlist.size();
+				paintItem(prevselected - liststart);
+				unsigned int oldliststart = liststart;
+				liststart = (selected/listmaxshow)*listmaxshow;
+				if(oldliststart!=liststart)
+				{
+					update=true;
+				}
+				else
+					{
+					paintItem(selected - liststart);
+				}
 			}
 		}
 		else if( msg == CRCInput::RC_ok && playlist.size() > 0)
 		{
-			// OK button
-			view(selected);
-			update=true;
+			if(m_state==MENU)
+			{
+				view(selected);
+			}
+			else
+			{
+				endView();
+				update=true;
+			}
 		}
 		else if(msg==CRCInput::RC_red )
 		{
+			m_viewer->SetScaling(CPictureViewer::COLOR);
 		}
 		else if(msg==CRCInput::RC_green)
 		{
 			hide();
-			if(filebrowser->exec(Path))
+			if(m_filebrowser->exec(Path))
 			{
-				Path=filebrowser->getCurrentDir();
-				CFileList::iterator files = filebrowser->getSelectedFiles()->begin();
-				for(; files != filebrowser->getSelectedFiles()->end();files++)
+				Path=m_filebrowser->getCurrentDir();
+				CFileList::iterator files = m_filebrowser->getSelectedFiles()->begin();
+				for(; files != m_filebrowser->getSelectedFiles()->end();files++)
 				{
 					if(files->getType() == CFile::FILE_PICTURE)
 					{
@@ -263,9 +288,11 @@ int CPictureViewerGui::show()
 		}
 		else if(msg==CRCInput::RC_blue)
 		{
+			m_viewer->SetScaling(CPictureViewer::SIMPLE);
 		}
 		else if(msg==CRCInput::RC_help)
 		{
+			m_viewer->SetScaling(CPictureViewer::NONE);
 		}
 		else if( ( msg >= CRCInput::RC_1 ) && ( msg <= CRCInput::RC_9 ) && playlist.size() > 0)
 		{ //numeric zap
@@ -384,7 +411,7 @@ void CPictureViewerGui::paintItem(int pos)
 void CPictureViewerGui::paintHead()
 {
 //	printf("paintHead{\n");
-	string strCaption = g_Locale->getText("mp3player.head");
+	string strCaption = g_Locale->getText("pictureviewer.head");
 	frameBuffer->paintBoxRel(x,y+title_height, width,theight, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+title_height+10);
 	g_Fonts->menu_title->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption.c_str(), COL_MENUHEAD, 0, true); // UTF-8
@@ -408,8 +435,6 @@ void CPictureViewerGui::paintHead()
 void CPictureViewerGui::paintFoot()
 {
 //	printf("paintFoot{\n");
-	if(m_state==STOP) // insurance
-		key_level=0;
 	int ButtonWidth = (width-20) / 4;
 	int ButtonWidth2 = (width-50) / 2;
 	frameBuffer->paintBoxRel(x,y+(height-info_height-2*buttonHeight), width,2*buttonHeight, COL_MENUHEAD);
@@ -421,53 +446,27 @@ void CPictureViewerGui::paintFoot()
 		g_Fonts->infobar_small->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, 
 						     ButtonWidth2- 28, g_Locale->getText("mp3player.play").c_str(), COL_INFOBAR, 0, true); // UTF-8
 	}
-	if(m_state!=STOP)
+	frameBuffer->paintIcon("help.raw", x+ 0* ButtonWidth + 25, y+(height-info_height-buttonHeight)-3);
+	g_Fonts->infobar_small->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, 
+													 ButtonWidth2- 28, g_Locale->getText("mp3player.keylevel").c_str(), COL_INFOBAR, 0, true); // UTF-8
+	if(playlist.size()>0)
 	{
-		frameBuffer->paintIcon("help.raw", x+ 0* ButtonWidth + 25, y+(height-info_height-buttonHeight)-3);
-		g_Fonts->infobar_small->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, 
-						     ButtonWidth2- 28, g_Locale->getText("mp3player.keylevel").c_str(), COL_INFOBAR, 0, true); // UTF-8
-	}
-
-	if(key_level==0)
-	{
-		if(playlist.size()>0)
-		{
-			frameBuffer->paintIcon("rot.raw", x+ 0* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
-			g_Fonts->infobar_small->RenderString(x + 0* ButtonWidth + 30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-							     ButtonWidth- 20, g_Locale->getText("mp3player.delete").c_str(), COL_INFOBAR, 0, true); // UTF-8
-
-			frameBuffer->paintIcon("gelb.raw", x+ 2* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
-			g_Fonts->infobar_small->RenderString(x+ 2* ButtonWidth + 30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-							     ButtonWidth- 20, g_Locale->getText("mp3player.deleteall").c_str(), COL_INFOBAR, 0, true); // UTF-8
-
-			frameBuffer->paintIcon("blau.raw", x+ 3* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
-			g_Fonts->infobar_small->RenderString(x+ 3* ButtonWidth +30 , y+(height-info_height-2*buttonHeight)+24 - 1, 
-							     ButtonWidth- 20, g_Locale->getText("mp3player.shuffle").c_str(), COL_INFOBAR, 0, true); // UTF-8
-		}
-
-		frameBuffer->paintIcon("gruen.raw", x+ 1* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
-		g_Fonts->infobar_small->RenderString(x+ 1* ButtonWidth +30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-						     ButtonWidth- 20, g_Locale->getText("mp3player.add").c_str(), COL_INFOBAR, 0, true); // UTF-8
-	}
-	else
-	{
-
 		frameBuffer->paintIcon("rot.raw", x+ 0* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x + 0* ButtonWidth + 30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-						     ButtonWidth- 20, g_Locale->getText("mp3player.stop").c_str(), COL_INFOBAR, 0, true); // UTF-8
+														 ButtonWidth- 20, g_Locale->getText("mp3player.delete").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
-		frameBuffer->paintIcon("gruen.raw", x+ 1* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
-		g_Fonts->infobar_small->RenderString(x+ 1* ButtonWidth +30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-						     ButtonWidth- 20, g_Locale->getText("mp3player.rewind").c_str(), COL_INFOBAR, 0, true); // UTF-8
-		
 		frameBuffer->paintIcon("gelb.raw", x+ 2* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 2* ButtonWidth + 30, y+(height-info_height-2*buttonHeight)+24 - 1, 
-						     ButtonWidth- 20, g_Locale->getText("mp3player.pause").c_str(), COL_INFOBAR, 0, true); // UTF-8
+														 ButtonWidth- 20, g_Locale->getText("mp3player.deleteall").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 		frameBuffer->paintIcon("blau.raw", x+ 3* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
 		g_Fonts->infobar_small->RenderString(x+ 3* ButtonWidth +30 , y+(height-info_height-2*buttonHeight)+24 - 1, 
-						     ButtonWidth- 20, g_Locale->getText("mp3player.fastforward").c_str(), COL_INFOBAR, 0, true); // UTF-8
+														 ButtonWidth- 20, g_Locale->getText("mp3player.shuffle").c_str(), COL_INFOBAR, 0, true); // UTF-8
 	}
+
+	frameBuffer->paintIcon("gruen.raw", x+ 1* ButtonWidth + 10, y+(height-info_height-2*buttonHeight)+4);
+	g_Fonts->infobar_small->RenderString(x+ 1* ButtonWidth +30, y+(height-info_height-2*buttonHeight)+24 - 1, 
+													 ButtonWidth- 20, g_Locale->getText("mp3player.add").c_str(), COL_INFOBAR, 0, true); // UTF-8
 //	printf("paintFoot}\n");
 }
 //------------------------------------------------------------------------
@@ -504,11 +503,21 @@ void CPictureViewerGui::paint()
 
 void CPictureViewerGui::view(unsigned int index)
 {
-	uint msg; uint data;
-	frameBuffer->setMode(720,576,16);
-	CPictureViewer viewer;
-	viewer.ShowImage(playlist[index].Filename);
-	g_RCInput->getMsg( &msg, &data, 10000 ); // 1 sec timeout to update play/stop state display
-	frameBuffer->setMode(720,576,8);
-	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
+	current=index;
+	if(m_state != VIEW)
+		frameBuffer->setMode(720,576,16);
+	m_viewer->ShowImage(playlist[index].Filename);
+	m_state=VIEW;
+}
+
+void CPictureViewerGui::endView()
+{
+	if(m_state != MENU)
+	{
+		frameBuffer->setMode(720,576,8);
+		frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
+		frameBuffer->setBackgroundColor(0);
+		frameBuffer->paintBackgroundBox(0,0,720,576);
+		m_state=MENU;
+	}
 }

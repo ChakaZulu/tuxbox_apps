@@ -23,8 +23,6 @@ extern unsigned char * simple_resize(unsigned char * orgin,int ox,int oy,int dx,
 extern unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,int dx,int dy);
 
 
-int clear=1,delay=0,hide=1,dispinfo=1,allowstrech=0;
-
 #ifdef FBV_SUPPORT_GIF
     extern int fh_gif_getsize(char *,int *,int*);
     extern int fh_gif_load(char *,unsigned char *,int,int);
@@ -99,7 +97,7 @@ int CPictureViewer::show_image(char *name)
 		if(fh->get_pic(name,buffer,x,y)==FH_ERROR_OK)
 		{
 			getCurrentRes(&xs,&ys);
-			if((x>xs || y>ys) && allowstrech)
+			if((x>xs || y>ys) && m_scaling!=NONE)
 			{
 				if( (y*xs/x) <= ys)
 				{
@@ -111,7 +109,7 @@ int CPictureViewer::show_image(char *name)
 					imx=x*ys/y;
 					imy=ys;
 				}
-				if(allowstrech==1)
+				if(m_scaling==SIMPLE)
 					buffer=simple_resize(buffer,x,y,imx,imy);
 				else
 					buffer=color_average_resize(buffer,x,y,imx,imy);
@@ -187,7 +185,13 @@ int CPictureViewer::show_image(char *name)
 bool CPictureViewer::ShowImage(std::string filename)
 {
     int r;
-    init_handlers();																       
     r=show_image((char *)filename.c_str());
     return true;
 }
+CPictureViewer::CPictureViewer()
+{
+	fh_root=NULL;
+	m_scaling=NONE;
+	init_handlers();																     
+}
+

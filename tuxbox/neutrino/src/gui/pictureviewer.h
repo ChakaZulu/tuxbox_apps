@@ -54,15 +54,13 @@ class CPictureViewerGui : public CMenuTarget
 	public:
 		enum State
 		{
-			PLAY=0,
-			STOP,
-			PAUSE,
-			FF,
-			REV
+			VIEW=0,
+			MENU
 		};
 	private:
 		CFrameBuffer		*frameBuffer;
-		CFileBrowser		*filebrowser;
+		CFileBrowser		*m_filebrowser;
+		CPictureViewer		*m_viewer;
 		unsigned int		selected;
 		int      current;
 		unsigned int		liststart;
@@ -98,6 +96,7 @@ class CPictureViewerGui : public CMenuTarget
 
 		CFileFilter picture_filter;
 		void view(unsigned int nr);
+		void endView();
 
 	public:
 		CPictureViewerGui();

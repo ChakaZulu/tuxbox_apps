@@ -24,7 +24,6 @@ struct color {
 
 int fh_bmp_id(char *name)
 {
-	dbout("fh_bmp_id {\n");
 	int fd;
 	char id[2];
 	
@@ -37,10 +36,8 @@ int fh_bmp_id(char *name)
 	read(fd, id, 2);
 	close(fd);
 	if ( id[0]=='B' && id[1]=='M' ) {
-		dbout("fh_bmp_id {\n");
 		return(1);
 	}
-	dbout("fh_bmp_id {\n");
 	return(0);
 }
 

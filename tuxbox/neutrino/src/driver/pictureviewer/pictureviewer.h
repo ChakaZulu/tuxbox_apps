@@ -48,18 +48,26 @@ struct cformathandler
 };
 typedef  struct cformathandler CFormathandler;
 
+public:
+	enum ScalingMode
+	{
+		NONE=0,
+		SIMPLE=1,
+		COLOR=2
+	};
+	CPictureViewer();
+	~CPictureViewer(){};
+	bool ShowImage(std::string filename);
+	void SetScaling(ScalingMode s){m_scaling=s;}
+	
+private:
 	CFormathandler *fh_root;
-
-
+	ScalingMode m_scaling;
 	int show_image(char *name);
 	CFormathandler * fh_getsize(char *name,int *x,int *y);
 	void init_handlers(void);
 	void add_format(int (*picsize)(char *,int *,int*),int (*picread)(char *,unsigned char *,int,int), int (*id)(char*));
 
-public:
-	CPictureViewer(){fh_root=NULL;};
-	~CPictureViewer(){};
-	bool ShowImage(std::string filename);
 };
 
 
