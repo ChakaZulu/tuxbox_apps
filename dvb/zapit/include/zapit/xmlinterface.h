@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.15 2002/12/23 10:47:04 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.16 2002/12/23 11:41:10 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -27,6 +27,9 @@
 
 #include <string>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifdef USE_LIBXML
 #include <libxml/parser.h>

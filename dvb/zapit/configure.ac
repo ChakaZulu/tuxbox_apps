@@ -12,7 +12,6 @@ TUXBOX_APPS_DVB
 TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 TUXBOX_APPS_LIB_PKGCONFIG(CONNECTION,tuxbox-connection)
 TUXBOX_APPS_LIB_PKGCONFIG(EVENTSERVER,tuxbox-eventserver)
-TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)
 CPPFLAGS="$CPPFLAGS $EVENTSERVER_CFLAGS"
 LDFLAGS="$LDFLAGS $EVENTSERVER_LIBS"
 
@@ -21,6 +20,12 @@ AC_LANG(C++)
 AC_ARG_ENABLE(pid-cache,
 	[  --enable-pid-cache      do not read pids after every channel change],
 	[AC_DEFINE(USE_PID_CACHE,1,[do not read pids after every channel change])])
+
+AC_ARG_ENABLE(use-libxml2,
+	[  --enable-use-libxml2    use libxml2 instead of libxmltree],
+	[AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
+         TUXBOX_APPS_LIB_PKGCONFIG(LIBXML,libxml-2.0)],
+        [TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)])
 
 AC_OUTPUT([
 Makefile

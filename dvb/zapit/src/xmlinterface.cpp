@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.18 2002/12/23 10:47:04 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.19 2002/12/23 11:41:10 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -23,6 +23,8 @@
 
 #include <stdio.h>
 
+#include <zapit/debug.h>
+#include <zapit/xmlinterface.h>
 
 #ifdef USE_LIBXML
 #include <libxml/xmlmemory.h>
@@ -32,9 +34,6 @@
 #include <xmltok.h>
 #endif /* USE_LIBXML */
 
-
-#include <zapit/debug.h>
-#include <zapit/xmlinterface.h>
 
 xmlNodePtr xmlGetNextOccurence(xmlNodePtr cur, const char * s)
 {
