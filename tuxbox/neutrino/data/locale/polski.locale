@@ -1,18 +1,18 @@
 menu.back Spowrotem
 
-options.off wyl
-options.on wla
+options.off wylolczyc
+options.on wlolczyc
 
-mainmenu.head Menu Glowne
+mainmenu.head Menu Glówne
 mainmenu.tvmode Telewizja
 mainmenu.radiomode Radio
 mainmenu.scartmode Scart-Mode
-mainmenu.games w Gry grac
-mainmenu.sleeptimer SleepTimer
+mainmenu.games sagrac gre
+mainmenu.sleeptimer czas do snu
 mainmenu.shutdown Wylaczyc
-mainmenu.settings Settings
+mainmenu.settings Ustawienia
 mainmenu.service Service
-mainmenu.streaming Streaming (recorde)
+mainmenu.streaming nagrywac
 mainmenu.streaming_start start
 mainmenu.streaming_stop stop
 
@@ -31,32 +31,32 @@ satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
 satsetup.diseqc11 DiSEqC 1.1
 satsetup.smatvremote SMATV Remote Tuning
-satsetup.diseqcrepeat DiSEqC-repeats
+satsetup.diseqcrepeat DiSEqC-powtórzenia
 
-mainsettings.head Settings
-mainsettings.savesettingsnow save settings now
+mainsettings.head Ustawienia
+mainsettings.savesettingsnow sabezpieczyc ustawienia
 mainsettings.language Jezyk
 mainsettings.audio Dzwiek
 mainsettings.video Obraz
 mainsettings.network Siec
 mainsettings.colors Farby / Tematy
 mainsettings.keybinding Ustawienie klawiszy
-mainsettings.misc Misc Settings
-mainsettings.scan Scan settings
+mainsettings.misc rórzne ustawienia
+mainsettings.scan ustawienia dla szukania kanalów
 
-miscsettings.head Misc Settings
-miscsettings.shutdown_real Enable Standby
-miscsettings.boxtype DBox type
-miscsettings.startneutrinodirect start neutrino directly
-miscsettings.general General
+miscsettings.head rórzne ustawienia
+miscsettings.shutdown_real umorzliwic Standby
+miscsettings.boxtype typ dbox
+miscsettings.startneutrinodirect start neutrino odrazu
+miscsettings.general glówne ustawienia
 
 languagesetup.head Ustawienie jezyka
 languagesetup.select Jezyk
 
 audiomenu.head Ustawienie Dzwieku
 audiomenu.analogout Analog Output
-audiomenu.monoright mono right
-audiomenu.monoleft mono left
+audiomenu.monoright mono prawy
+audiomenu.monoleft mono lewy
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digital
 
@@ -70,11 +70,11 @@ videomenu.videoformat Format Obrazu
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect autodetect
-videomenu.vcrswitch Switch Scart automatically
+videomenu.vcrswitch Switch Scart automatycznie
 
 networkmenu.head Ustawienia Sieciowe
-networkmenu.test test network now
-networkmenu.show show active network settings
+networkmenu.test test sieci teraz
+networkmenu.show aktualne ustawienie sieci
 networkmenu.setupnow Ustawienia teraz przekazac
 networkmenu.setuponstartup Przy starcie przekazac
 networkmenu.ipaddress IP-Adres
@@ -86,15 +86,15 @@ networkmenu.usestreamserver use streamserver
 networkmenu.streamingserver Streamingserver
 networkmenu.streamingserverport Port
 
-ping.ok is reachable (ping)
-ping.unreachable is unreachable
+ping.ok siec jest (ping)
+ping.unreachable sieci niema
 ping.protocol is unreachable (host or protocol error)
 ping.socket is unreachable (socket error)
 
 ipsetup.hint_1 Klawisze "0"-"9", Czerwony jest " ", Zielony jest "."
 ipsetup.hint_2 albo Gora/Dol, OK zapisuje, Home wychodzi
 
-colormenu.head Ustawienia Kolorow
+colormenu.head Ustawienia Kolorów
 colormenu.statusbar Listwa Statusowa
 colormenu.themeselect Wybor Tematu
 colormenu.menucolors Kolory Menu
@@ -122,8 +122,8 @@ repeatblocker.hint_2 0 wylacza blokade (Czerwony jest " ")
 
 keybindingmenu.RC Pilot
 keybindingmenu.repeatblock Blokada powtarzania klawiszy
-keybindingmenu.repeatblock repeat delay
-keybindingmenu.repeatblockgeneric generic delay
+keybindingmenu.repeatblock powtórna przerwa
+keybindingmenu.repeatblockgeneric pierwsza przerwa
 keybindingmenu.head Ustawienia Klawiszy
 keybindingmenu.modechange Zmiana Modusu
 keybindingmenu.channellist Lista Kanalow
@@ -170,7 +170,7 @@ screensetup.upperleft czerw = Rog u gory, po lewej
 screensetup.lowerright ziel = Rog na dole, po prawej
 
 channellist.head Wszystkie Kanaly
-channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
+channellist.nonefound niema rzadnego kanalu!\nProsze zastartowac szukanie kanalów\n(dbox-klawisz -> service)
 channellist.since since %02d:%02d
 
 infoviewer.epgnotload EPG jeszcze nie zaladowane...
@@ -181,10 +181,10 @@ infoviewer.languages Wybor Dzwieku
 infoviewer.notavailable Kanal (na razie) niedostepny
 infoviewer.cantdecode Kanal nie mozliwy do dekodowania
 infoviewer.selecttime Timeselection
-infoviewer.nocurrent No info for current program available
-infoviewer.noepg EPG not available
+infoviewer.nocurrent niema informacji do audicji
+infoviewer.noepg niema EPG
 infoviewer.subservice Subservices
-infoviewer.waittime Waiting for time...
+infoviewer.waittime Czekam na czas...
 
 epgviewer.notfound EPG-Informacje nie znalezione
 epgviewer.nodetailed Informacje nie sa dostepne
@@ -220,26 +220,26 @@ ucodecheck.avia600 Avia 600
 ucodecheck.ucode UCode
 ucodecheck.cam-alpha Cam-Alpha
 
-date.Mon  Mon
-date.Tue  Tue
-date.Wed  Wed
-date.Thu  Thu
-date.Fri  Fri
-date.Sat  Sat
-date.Sun  Sun
+date.Mon Pon
+date.Tue Wto
+date.Wed Sro
+date.Thu Czw
+date.Fri Pio
+date.Sat Sob
+date.Sun Nie
 
-date.Jan  Jan
-date.Feb  Feb
-date.Mar  Mar
-date.Apr  Apr
-date.May  May
-date.Jun  Jun
-date.Jul  Jul
-date.Aug  Aug
-date.Sep  Sep
-date.Oct  Oct
-date.Nov  Nov
-date.Dec  Dec
+date.Jan Sty
+date.Feb Lut
+date.Mar Mar
+date.Apr Kwi
+date.May Maj
+date.Jun Cze
+date.Jul Lip
+date.Aug Sie
+date.Sep Wrz
+date.Oct Pas
+date.Nov Lis
+date.Dec Gru
 
 nvod.starting (starting in %d min)
 nvod.proz (%d%% over)
@@ -264,44 +264,44 @@ scants.finished Transponderscan finished successfully!
 
 flashupdate.head Software Update
 flashupdate.action Action:
-flashupdate.globalprogress Global Progress:
-flashupdate.getinfofile getting versioninfo
-flashupdate.getinfofileerror can't get versioninfo
-flashupdate.getupdatefile getting update
+flashupdate.globalprogress Razem:
+flashupdate.getinfofile Laduje informacje do wersji
+flashupdate.getinfofileerror niema informacji do wersji
+flashupdate.getupdatefile Laduje update
 flashupdate.getupdatefileerror can't get update
 flashupdate.cantopenfile can't open file
 flashupdate.fileis0bytes the filesize is 0 Bytes
-flashupdate.eraseingflash erasing flash
-flashupdate.programmingflash programming flash
-flashupdate.cantopenmtd can't open mtd-device
+flashupdate.eraseingflash marze flash
+flashupdate.programmingflash programmuje flash
+flashupdate.cantopenmtd niemoge otworzyc mtd-device
 flashupdate.ready ready
 flashupdate.reboot rebooting box....
 flashupdate.updatemode Updatemode
 flashupdate.updatemode_manual manual (ftp)
 flashupdate.updatemode_internet internet
 flashupdate.currentversion Current version
-flashupdate.checkupdate search for new version
+flashupdate.checkupdate szukam nowej wersji
 flashupdate.versioncheck checking version
 flashupdate.majorversiondiffer1 the major version differs
 flashupdate.majorversiondiffer2 please install new flashimage
 flashupdate.providerversiondiffer1 the provider id differs
 flashupdate.providerversiondiffer2 please install new flashimage
-flashupdate.nonewversion1 no new version available
+flashupdate.nonewversion1 niema nowej wersji
 flashupdate.nonewversion2
-flashupdate.md5sumerror image has errors
+flashupdate.md5sumerror image ma bleldy
 flashupdate.updatemode Updatemode
 flashupdate.updatemode_manual manual (ftp)
 flashupdate.updatemode_internet internet
 flashupdate.currentversion_sep Current version
-flashupdate.currentversiondate Date
-flashupdate.currentversiontime Time
+flashupdate.currentversiondate Data
+flashupdate.currentversiontime Czas
 flashupdate.currentversionbaseversion Baseimage
 flashupdate.currentversionsnapshot ImageType
-flashupdate.checkupdate search for new version
+flashupdate.checkupdate szukam nowej wersji
 flashupdate.versioncheck checking version
-flashupdate.nonewversion no new version available
+flashupdate.nonewversion niema nowej wersji
 flashupdate.md5check checking image
-flashupdate.md5sumerror image has errors
+flashupdate.md5sumerror image ma bleldy
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Hostname
 flashupdate.proxyserver_hint1 enter proxyserver name or ip, use host:port
@@ -312,8 +312,8 @@ flashupdate.proxyusername_hint2 a empty entry means no proxy-auth
 flashupdate.proxypassword Password
 flashupdate.proxypassword_hint1 enter the proxyserver password
 flashupdate.proxypassword_hint2
-flashupdate.msgbox Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to download and install this version now?
-flashupdate.msgbox_manual Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to install this version now?
+flashupdate.msgbox Znalaslem taki image:\nDzien: %s, %s\nBaseImage: %s\nImageType: %s\n\nChzesz teraz ladowac i instalowac?
+flashupdate.msgbox_manual Znalazlem taki nowy image:\nDzien: %s, %s\nBaseImage: %s\nImageType: %s\n\nCzzesz teraz instalowac?
 flashupdate.expertfunctions Expert-functions
 flashupdate.readflash Read hole image
 flashupdate.writeflash Write hole image
@@ -326,15 +326,15 @@ flashupdate.actionreadflash reading
 flashupdate.fileselector File-Selector
 flashupdate.titlewriteflash Writing Flash
 flashupdate.actionwriteflash writing
-flashupdate.flashreadyreboot The image was successfully flashed.\nThe DBox will be rebooted now.
-flashupdate.reallyflashmtd Do you really want to flash?\n\nIf a error occurs or the image is not\nvalid, the box will not boot after flashing.\n\nImagename: %s\nTarget: %s
+flashupdate.flashreadyreboot flash jest teraz gotowy.\nThe DBox startóje.
+flashupdate.reallyflashmtd Chzesch naprawde teraz przeprowadzic flash?\n\nJak beldol bledy albo image nie bedzie \nwarzny, dbox nie bedzie startowac po flashowaniu.\n\nImagename: %s\nTarget: %s
 
 bouqueteditor.name Bouquet-editor
-bouqueteditor.delete Delete
-bouqueteditor.add Add
-bouqueteditor.move Move
+bouqueteditor.delete Zmasac
+bouqueteditor.add Dodac
+bouqueteditor.move Przsunanc
 bouqueteditor.rename Rename
-bouqueteditor.hide Hide
+bouqueteditor.hide Zchowac
 bouqueteditor.lock Lock
 bouqueteditor.newbouquetname New name of bouquets
 bouqueteditor.bouquetname Name of bouquets
@@ -345,15 +345,15 @@ bouqueteditor.switch channel add/remove
 bouqueteditor.switchmode TV/Radio
 bouqueteditor.return ready
 
-messagebox.yes Yes
-messagebox.no No
-messagebox.cancel Cancel
-messagebox.back Back
-messagebox.error Error
-messagebox.discard Discard changes?
+messagebox.yes Tag
+messagebox.no Nie
+messagebox.cancel Przerwac
+messagebox.back Zpowrotem
+messagebox.error Blald
+messagebox.discard Nic nie zmieniac?
 messagebox.info Information
 
-settings.noconffile No neutrino-settings found.\nUseing defaults.
+settings.noconffile Nie znalaslem neutrino-settings .\nUrzywam defaults.
 settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
 
 cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish to get this warning again?
