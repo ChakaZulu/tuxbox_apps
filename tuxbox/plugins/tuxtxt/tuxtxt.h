@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.h,v $
+ * Revision 1.36  2003/03/08 16:17:48  happydude
+ * national subset detection for TV Romania Int
+ *
  * Revision 1.35  2003/03/06 18:14:43  lazyt
  * fix error-detection and configmenu
  *
@@ -250,7 +253,7 @@ char countrystring[] =	"  CS/SK  (#$@[\\]^_`{|}~)  "	/* czech, slovak */
 						" SV/FI/HU (#$@[\\]^_`{|}~) "	/* swedish, finnish, hungarian */
 						"    TR (#$@[\\]^_`{|}~)    ";	/* turkish */
 
-unsigned char countryconverstiontable[] = { 1, 4, 11, 5, 3, 8, 0, 1 };
+unsigned char countryconverstiontable[] = { 1, 4, 11, 5, 3, 8, 0, 9 };
 
 //buffers
 
