@@ -44,6 +44,4 @@ neutrino_LDADD = \
 	@PNG_LIBS@ \
 	-lmad \
 	-lid3tag \
-	-lpthread -lz \
-	-ljpeg
-
+	-lpthread -lz
