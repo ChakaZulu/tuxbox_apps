@@ -1,4 +1,6 @@
 /*
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.h,v 1.5 2002/10/09 15:27:42 thegoodguy Exp $
+
 	LCD-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -51,9 +53,9 @@ class Font
         FT_Error getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit);
 
         public:
-                void RenderString(int x, int y, int width, const char *string, int color, int selected=0);
+                void RenderString(int x, int y, int width, const char *text, int color, int selected=0, const bool utf8_encoded = false);
 
-                int getRenderWidth(const char *string);
+                int getRenderWidth(const char *text);
 
                 Font(CLCDDisplay *fb, fontRenderClass *render, FTC_FaceID faceid, int isize);
                 ~Font(){}

@@ -1,4 +1,6 @@
 /*
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.4 2002/10/09 15:27:42 thegoodguy Exp $        
+
 	LCD-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -178,7 +180,7 @@ FT_Error Font::getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit)
 	return renderer->getGlyphBitmap(&font, glyph_index, sbit);
 }
 
-void Font::RenderString(int x, int y, int width, const char *string, int color, int selected)
+void Font::RenderString(int x, int y, int width, const char *text, int color, int selected, const bool utf8_encoded)
 {
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
@@ -188,21 +190,63 @@ void Font::RenderString(int x, int y, int width, const char *string, int color, 
 	int left=x, step_y=(size->metrics.height >> 6 )*3/4 + 4;
 
 	int pos =0;
-	for (; *string; string++)
+	for (; *text; text++)
 	{
 		pos++;
 		FTC_SBit glyph;
-		//if ((x + size->metrics.x_ppem > (left+width)) || (*string=='\n'))
+		//if ((x + size->metrics.x_ppem > (left+width)) || (*text=='\n'))
 		if (x + size->metrics.x_ppem > (left+width))
 		{ //width clip
 			return;
 		}
-		if (*string=='\n')
+		if (*text=='\n')
 		{
 		  x  = left;
 		  y += step_y;
 		}
-		int index=FT_Get_Char_Index(face, *string);
+
+		int unicode_value;
+
+		if (utf8_encoded && ((((unsigned char)(*text)) & 0x80) != 0))
+		{
+			int remaining_unicode_length;
+			if ((((unsigned char)(*text)) & 0xf8) == 0xf0)
+			{
+				unicode_value = ((unsigned char)(*text)) & 0x07;
+				remaining_unicode_length = 3;
+			}
+			else if ((((unsigned char)(*text)) & 0xf0) == 0xe0)
+			{
+				unicode_value = ((unsigned char)(*text)) & 0x0f;
+				remaining_unicode_length = 2;
+			}
+			else if ((((unsigned char)(*text)) & 0xe0) == 0xc0)
+			{
+				unicode_value = ((unsigned char)(*text)) & 0x1f;
+				remaining_unicode_length = 1;
+			}
+			else                     // cf.: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+				break;           // corrupted character or a character with > 4 bytes utf-8 representation
+
+			for (int i = 0; i < remaining_unicode_length; i++)
+			{
+				text++;
+				if ((*text) & 0xc0 != 0x80)
+				{
+					remaining_unicode_length = -1;
+					break;           // incomplete or corrupted character
+				}
+				unicode_value <<= 6;
+				unicode_value |= ((unsigned char)(*text)) & 0x3f;
+			}
+			if (remaining_unicode_length == -1)
+				break;           // incomplete or corrupted character
+		}
+		else
+		    unicode_value = (unsigned char)(*text);
+
+		int index = FT_Get_Char_Index(face, unicode_value);
+
 		if (!index)
 		  continue;
 		if (getGlyphBitmap(index, &glyph))
@@ -237,7 +281,7 @@ void Font::RenderString(int x, int y, int width, const char *string, int color, 
     }
 }
 
-int Font::getRenderWidth(const char *string)
+int Font::getRenderWidth(const char *text)
 {
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
@@ -245,11 +289,11 @@ int Font::getRenderWidth(const char *string)
 		return -1;
 	}
 	int x=0;
-	for (; *string; string++)
+	for (; *text; text++)
 	{
 		FTC_SBit glyph;
 
-		int index=FT_Get_Char_Index(face, *string);
+		int index=FT_Get_Char_Index(face, *text);
 		if (!index)
 			continue;
 		if (getGlyphBitmap(index, &glyph))
