@@ -8,6 +8,7 @@ extern	void	FBSetupColors( void );
 extern	int		FBInitialize( int xRes, int yRes, int bpp, int extfd );
 extern	void	FBClose( void );
 extern	void	FBPaintPixel( int x, int y, unsigned char col );
+extern	unsigned char	FBGetPixel( int x, int y );
 extern	void	FBDrawLine( int xa, int ya, int xb, int yb, unsigned char col );
 extern	void	FBDrawHLine( int x, int y, int dx, unsigned char col );
 extern	void	FBDrawVLine( int x, int y, int dy, unsigned char col );

@@ -161,6 +161,11 @@ void	FBPaintPixel( int x, int y, unsigned char farbe )
 	*(lfb + stride*y + x) = farbe;
 }
 
+unsigned char	FBGetPixel( int x, int y )
+{
+	return *(lfb + stride*y + x);
+}
+
 void	FBDrawLine( int xa, int ya, int xb, int yb, unsigned char farbe )
 {
 	int dx = abs (xa - xb);
@@ -592,6 +597,7 @@ static int			pos[64] =
 
 #include <X11/Xlib.h>
 #include <X11/X.h>
+#include <X11/Xutil.h>
 
 #include <draw.h>
 #include <rcinput.h>
@@ -662,6 +668,21 @@ void	FBPaintPixel( int x, int y, unsigned char col )
 {
 	XSetForeground(dpy,gc,colors[col]);
 	XDrawPoint( dpy, window, gc, x, y );
+}
+
+unsigned char	FBGetPixel( int x, int y )
+{
+	XImage			*image;
+	unsigned long	c;
+	int				i;
+
+	image=XGetImage(dpy,window,x,y,1,1,-1,ZPixmap);
+	c=XGetPixel(image,0,0);
+	XDestroyImage(image);
+	for(i=0;i<256;i++)
+		if (colors[i]==c)
+			return i;
+	return 0;
 }
 
 void	FBDrawLine( int xa, int ya, int xb, int yb, unsigned char col )
