@@ -216,7 +216,7 @@ bool CFlashUpdate::checkVersion4Update()
 {
 	char msg[400];
 	CFlashVersionInfo * versionInfo;
-	const neutrino_locale_t msg_body;
+	neutrino_locale_t msg_body;
 
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
