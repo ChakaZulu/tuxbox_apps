@@ -50,7 +50,7 @@ void	FBSetColor( int idx, uchar r, uchar g, uchar b )
 	red[idx] = r<<8;
 	green[idx] = g<<8;
 	blue[idx] = b<<8;
-	trans[idx] = 0;
+	trans[idx] = idx ? 0 : 0xffff;
 
 	if ( idx > lastcolor )
 		lastcolor=idx;
@@ -102,7 +102,7 @@ int	FBInitialize( int xRes, int yRes, int nbpp, int extfd )
 		perror("failed - FBIOGET_VSCREENINFO");
 
 	FBSetColor( BLACK, 1, 1, 1 );
-    FBSetColor( BNR0, 1, 1, 1 ); 
+    FBSetColor( BNR0, 0, 0, 0 ); 
     FBSetColor( WHITE, 255, 255, 255 );
 
 	if (ioctl(fd, FBIOPUTCMAP, &cmap )<0)
@@ -630,7 +630,7 @@ int	FBInitialize( int xRes, int yRes, int bpp, int extfd )
 	XSetFunction( dpy,gc,GXcopy);
 
 	FBSetColor( BLACK, 1, 1, 1 );
-    FBSetColor( BNR0, 1, 1, 1 ); 
+    FBSetColor( BNR0, 0, 0, 0 ); 
     FBSetColor( WHITE, 255, 255, 255 );
 
 	XFlush(dpy);
