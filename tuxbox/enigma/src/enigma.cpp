@@ -147,7 +147,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 
 	__u32 tmp;
 
-	eConfig::getInstance()->setKey("/ezap/ui/lastchannel", tmp);
+//	eConfig::getInstance()->setKey("/ezap/ui/lastchannel", tmp);
 
 	if (!eConfig::getInstance()->getKey("/ezap/ui/lastchannel", tmp))
 	{
