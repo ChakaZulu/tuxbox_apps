@@ -91,8 +91,8 @@ static enum mad_flow output(void *data,
     /* output sample(s) in 16-bit signed little-endian PCM */
 
     sample = scale(*left_ch++);
-    putchar((sample >> 0) & 0xff);
-    putchar((sample >> 8) & 0xff);
+    fputc((sample >> 0) & 0xff);
+    fputc((sample >> 8) & 0xff);
 
     if (nchannels == 2) {
       sample = scale(*right_ch++);
@@ -144,9 +144,9 @@ void CMP3Player::play(){
 		   error, 0 /* message */);
 
 	buffer.start  = fdm;
-	buffer.length = stat.st_size;
+	buffer.length = 4000000; //stat.st_size;
 
-	printf("running mp3-decoder: %d\n", stat.st_size);
+	printf("running mp3-decoder: %ul\n", stat.st_size);
 	result = mad_decoder_run(&decoder, MAD_DECODER_MODE_SYNC);
 
 	mad_decoder_finish(&decoder);
