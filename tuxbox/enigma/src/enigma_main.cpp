@@ -2597,7 +2597,7 @@ void eZapMain::playlistPrevService()
 		if ( playlist->current->service != ref && (extZap || ModeTypeEqual(ref, playlist->current->service) ) )
 		{
 			const eServicePath &p = playlist->current->getPath();
-			playService((eServiceReference&)(*playlist->current), playlistmode?psDontAdd:psDontAdd|psSeekPos);
+			playService((eServiceReference&)(*playlist->current), (playlistmode?psDontAdd:psDontAdd|psSeekPos)|(extZap?psSetMode:0));
 			if (p.size() > 1)
 				setServiceSelectorPath(p);
 			return;
@@ -2623,7 +2623,7 @@ void eZapMain::playlistNextService()
 		if ( playlist->current->service != ref && (extZap || ModeTypeEqual(ref,playlist->current->service)) )
 		{
 			const eServicePath &p = playlist->current->getPath();
-			playService((eServiceReference&)(*playlist->current), playlistmode?psDontAdd:psDontAdd|psSeekPos);
+			playService((eServiceReference&)(*playlist->current), (playlistmode?psDontAdd:psDontAdd|psSeekPos)|(extZap?psSetMode:0));
 			if (p.size() > 1)
 				setServiceSelectorPath(p);
 			return;
@@ -3403,6 +3403,7 @@ void eZapMain::skipLoop()
 			if(skipspeed<0 && pos < (time<<2) ) //back and begin reached
 			{ 
 				endSkip();
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, 0));
 				updateProgress();
 				return;
 			}
@@ -4753,7 +4754,7 @@ void eZapMain::showMultiEPG()
 	while ( direction > 0 );
 	epg.hide();
 	if ( !direction ) // switch to service requested...
-		playService(epg.getCurSelected()->service, psDontAdd|psSeekPos);
+		playService(epg.getCurSelected()->service, psDontAdd|psSeekPos|psSetMode);
 	if (!doHideInfobar())
 		show();
 }
@@ -5322,7 +5323,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 					std::iter_swap( prev, last );
 					playlist->current=last;
 					const eServicePath &p = playlist->current->getPath();
-					playService( playlist->current->service, psDontAdd|psSeekPos );
+					playService( playlist->current->service, psDontAdd|psSeekPos|(extZap?psSetMode:0) );
 					if (p.size() > 1)
 						setServiceSelectorPath(p);
 				}
