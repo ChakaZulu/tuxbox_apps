@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.22 2003/05/07 18:28:09 digi_casi Exp $
+ * $Id: channel.h,v 1.23 2003/05/28 08:12:46 digi_casi Exp $
  *
  * (C) 2002 Steffen Hehn <mcclean@berlios.de>
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
@@ -47,8 +47,6 @@ class CZapitChannel
 		std::string name;
 		/* satellite */
 		std::string satellite;
-		/* satellite position */
-		int32_t satellitePosition;
 
 		/* pids of this channel */
 		std::vector <CZapitAudioChannel *> audioChannels;
@@ -69,6 +67,7 @@ class CZapitChannel
 		t_original_network_id		original_network_id;
 		t_network_id			network_id;
 		unsigned char			DiSEqC;
+		int32_t 			satellitePosition;
 
 		/* read/write properties (write possibility needed by scan) */
 		unsigned char			serviceType;
@@ -90,6 +89,7 @@ class CZapitChannel
 		unsigned char        	getDiSEqC(void)            	const { return DiSEqC; }
 		t_channel_id         	getChannelID(void)         	const { return CREATE_CHANNEL_ID; }
 		uint32_t             	getTsidOnid(void)          	const { return (transport_stream_id << 16) | original_network_id; }
+		uint64_t             	getSposTsidOnid(void)          	const { return ((uint64_t)satellitePosition << 32 | transport_stream_id << 16) | original_network_id; }
 
 		/* get methods - read and write variables */
 		const std::string	getName(void)			const { return name; }
