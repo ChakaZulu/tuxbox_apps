@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.10 2002/03/30 03:45:37 dirch Exp $
+  $Id: sectionsdclient.cpp,v 1.11 2002/03/30 03:54:31 dirch Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.11  2002/03/30 03:54:31  dirch
+  sectionsd_close vergessen ;)
+
   Revision 1.10  2002/03/30 03:45:37  dirch
   getChannelEvents() gefixt, getEPGid() and getEPGidShort() added
 
@@ -413,6 +416,8 @@ CChannelEventList CSectionsdClient::getChannelEvents()
 		{
 			char* pData = new char[nBufSize];
 			receive(pData, nBufSize);
+			sectionsd_close();
+
 			char* dp = pData;
 
 			while(dp < pData + nBufSize)
@@ -467,6 +472,8 @@ bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEP
 		{
 			char* pData = new char[nBufSize];
 			receive(pData, nBufSize);
+			sectionsd_close();
+			
 			char* dp = pData;
 
 
@@ -519,6 +526,8 @@ bool CSectionsdClient::getEPGidShort( unsigned long long eventid,CShortEPGData *
 		{
 			char* pData = new char[nBufSize];
 			receive(pData, nBufSize);
+			sectionsd_close();
+
 			char* dp = pData;
 
 			for(int i = 0; i < nBufSize;i++)
