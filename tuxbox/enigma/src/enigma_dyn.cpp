@@ -578,9 +578,7 @@ static eString admin2(eString command)
 	else
 	if (command == "standby")
 	{
-		if (eZapStandby::getInstance())
-			int i=0;
-		else
+		if (!(eZapStandby::getInstance()))
 			eZapMain::getInstance()->gotoStandby();
 	}
 
@@ -1463,6 +1461,46 @@ struct countDVBServices: public Object
 	}
 };
 
+class eWapNavigatorListDirectory: public Object
+{
+	eString &result;
+	eString origpath;
+	eString path;
+	eServiceInterface &iface;
+public:
+	eWapNavigatorListDirectory(eString &result, eString origpath, eString path, eServiceInterface &iface): result(result), origpath(origpath), path(path), iface(iface)
+	{
+		eDebug("path: %s", path.c_str());
+	}
+	void addEntry(const eServiceReference &e)
+	{
+#ifndef DISABLE_FILE
+		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
+		{
+			if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
+					 return;
+		}
+#endif
+		eString serviceRef = ref2string(e);
+
+		if (!(e.flags & eServiceReference::isDirectory))
+			result += "<a href=\"/wap?mode=zapto?path=\"" + serviceRef + "\">";
+		else
+			result += "<a href=\"/wap?mode=zap&path=" + serviceRef + "\">";
+
+		eService *service = iface.addRef(e);
+		if (!service)
+			result += "N/A";
+		else
+		{
+			result += filter_string(service->service_name);
+			iface.removeRef(e);
+		}
+
+		result += "</a>";
+		result += "<br/>\n";
+	}
+};
 
 class eWebNavigatorListDirectory: public Object
 {
@@ -1687,6 +1725,39 @@ static eString getZapContent2(eString mode, eString path)
 		result.strReplace("#CHANNELREFS#", channelrefs);
 		result.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
 		result.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
+	}
+
+	return result;
+}
+
+static eString getWapZapContent(eString path)
+{
+	eString tpath, result;
+
+	unsigned int pos = 0, lastpos = 0, temp = 0;
+
+	if ((path.find(";", 0)) == eString::npos)
+		path = ";" + path;
+
+	while ((pos = path.find(";", lastpos)) != eString::npos)
+	{
+		lastpos = pos + 1;
+		if ((temp = path.find(";", lastpos)) != eString::npos)
+			tpath = path.mid(lastpos, temp - lastpos);
+		else
+			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
+
+		eServiceReference current_service = string2ref(tpath);
+		eServiceInterface *iface = eServiceInterface::getInstance();
+
+		// first pass thru is to get all user bouquets
+		eWapNavigatorListDirectory navlist(result, path, tpath, *iface);
+		Signal1<void, const eServiceReference&> signal;
+		signal.connect(slot(navlist, &eWapNavigatorListDirectory::addEntry));
+		iface->enterDirectory(current_service, signal);
+		eDebug("entered");
+		iface->leaveDirectory(current_service);
+		eDebug("exited");
 	}
 
 	return result;
@@ -2865,10 +2936,11 @@ static eString wapEPG(void)
 
 			tm* t = localtime(&event.start_time);
 
-//			result	<< std::setw(2) << t->tm_mday << '.'
-//				<< std::setw(2) << t->tm_mon+1 << ". - "
-			result	<< std::setw(2) << t->tm_hour << ':'
-				<< std::setw(2) << t->tm_min << ' ';
+			result	<< std::setw(2) << t->tm_mday << '.'
+				<< std::setw(2) << t->tm_mon+1 << ". - "
+				<< std::setw(2) << t->tm_hour << ':'
+				<< std::setw(2) << t->tm_min << ' '
+				<< "<br/>";
 #if 0
 #ifndef DISABLE_FILE
 			result << "<td>"
@@ -3403,6 +3475,26 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 	{
 		eString command = opt["command"];
 		result = admin2(command);
+	}
+	else
+	if (mode == "zap")
+	{
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODETV][ZAPSUBMODEBOUQUETS];
+		result = readFile(TEMPLATE_DIR + "wapzap.tmp");
+		result.strReplace("#BODY#", getWapZapContent(spath));
+	}
+	else
+	if (mode == "zapto")
+	{
+		eServiceReference current_service = string2ref(spath);
+
+		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
+			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
+
+		result = readFile(TEMPLATE_DIR + "wap.tmp");
+		result = getEITC2(result);
+		result.strReplace("#SERVICE#", getCurService());
 	}
 	else
 	if (mode == "epg")
