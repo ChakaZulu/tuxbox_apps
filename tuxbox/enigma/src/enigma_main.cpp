@@ -268,7 +268,7 @@ void eZapMain::eraseBackground(gPainter *painter, const QRect &where)
 }
 
 #define ASSIGN(v, t, n)	\
-	v =(t*)search(n); if (! v ) { qFatal("skin has undefined element: %s", n); }
+	v =(t*)search(n); if (! v ) { qWarning("skin has undefined element: %s", n); v=new t(this); }
 
 eZapMain::eZapMain(): eWidget(0, 1)
 {
@@ -294,7 +294,7 @@ eZapMain::eZapMain(): eWidget(0, 1)
 
 	ASSIGN(Description, eLabel, "description");
 	ASSIGN(VolumeBar, eProgress, "volume_bar");
-
+	ASSIGN(Progress, eProgress, "progress_bar");
 
 	Clock=new eLabel(this);
 	ASSIGN(Clock, eLabel, "time");
@@ -305,7 +305,6 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ButtonGreen=new eLabel(this);
 	ButtonYellow=new eLabel(this);
 	ButtonBlue=new eLabel(this);
-	Progress=new eProgress(this);
 	
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));
 	connect(eDVB::getInstance(), SIGNAL(gotEIT(EIT*,int)), SLOT(gotEIT(EIT*,int)));
