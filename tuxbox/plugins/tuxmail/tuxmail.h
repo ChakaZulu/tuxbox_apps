@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.4  2004/06/23 11:05:04  obi
+ * compile fix
+ *
  * Revision 1.3  2004/04/24 22:24:23  carjay
  * fix compiler warnings
  *
@@ -14,6 +17,10 @@
  ******************************************************************************/
 
 #include "config.h"
+
+#if !defined(HAVE_DVB_API_VERSION) && defined(HAVE_OST_DMX_H)
+#define HAVE_DVB_API_VERSION 1
+#endif
 
 #include <errno.h>
 #include <fcntl.h>
