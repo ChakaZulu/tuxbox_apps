@@ -1,5 +1,5 @@
 /*
- * $Id: debug.h,v 1.2 2002/12/02 22:22:46 thegoodguy Exp $
+ * $Id: debug.h,v 1.3 2002/12/27 16:57:39 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -34,6 +34,12 @@
 #define DEBUG	1
 #endif
 
+/*
+ * Suppress warnings when GCC is in -pedantic mode and not -std=c99
+ */
+#if (__GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))
+#pragma GCC system_header
+#endif
 
 /* zapit.cpp */
 extern int debug;
