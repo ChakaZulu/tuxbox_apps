@@ -673,6 +673,7 @@ nfs.mounterror Mount-Fehler
 nfs.umount NFS Verzeichnis unmounten
 nfs.umounterror Umount-Fehler
 nfs.alreadymounted Verzeichnis bereits gemountet
+nfsmenu.head NFS Einstellungen
 
 apids.hint_1 Geben Sie die zu streamenden APIDs ein,
 apids.hint_2 getrennt durch ' ' in hexadezimaler Form

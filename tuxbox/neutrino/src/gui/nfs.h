@@ -66,6 +66,18 @@ class CNFSUmountGui : public CMenuTarget
 		static void umount(string dir="");
 };
 
+class CNFSSmallMenu : public CMenuTarget
+{
+	private:
+		CMenuWidget* m_menu;
+		CNFSMountGui* m_mountGui;
+		CNFSUmountGui* m_umountGui;
+
+   public:
+		CNFSSmallMenu();
+		~CNFSSmallMenu();
+		int exec( CMenuTarget* parent, string actionKey );
+};
 
 #endif
 

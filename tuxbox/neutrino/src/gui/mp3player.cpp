@@ -44,6 +44,7 @@
 #include "mp3player.h"
 #include "color.h"
 #include "infoviewer.h"
+#include "nfs.h"
 
 #include "widget/menue.h"
 #include "widget/messagebox.h"
@@ -421,9 +422,12 @@ int CMP3PlayerGui::show()
 		}
 		else if(msg==CRCInput::RC_setup)
 		{
+			CNFSSmallMenu nfsMenu;
+			nfsMenu.exec(this, "");
+			update=true;
 			//pushback key if...
-			g_RCInput->postMsg( msg, data );
-			loop=false;
+			//g_RCInput->postMsg( msg, data );
+			//loop=false;
 		}
 		else if(msg == NeutrinoMessages::CHANGEMODE)
 		{
@@ -551,10 +555,14 @@ void CMP3PlayerGui::paintHead()
 	frameBuffer->paintBoxRel(x,y+title_height, width,theight, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+title_height+10);
 	g_Fonts->menu_title->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption.c_str(), COL_MENUHEAD, 0, true); // UTF-8
+	int ypos=y+title_height;
+	if(theight > 26)
+		ypos = (theight-26) / 2 + y + title_height;
+	frameBuffer->paintIcon("dbox.raw", x+ width- 30, ypos );
 	if( CNeutrinoApp::getInstance()->isMuted() )
 	{
-		int xpos=x+width-40;
-		int ypos=y+title_height;
+		int xpos=x+width-75;
+		ypos=y+title_height;
 		if(theight > 32)
 			ypos = (theight-32) / 2 + y + title_height;
 		frameBuffer->paintIcon("mute.raw", xpos, ypos);
