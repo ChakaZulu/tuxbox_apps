@@ -139,12 +139,12 @@ void gPainter::renderText(const eRect &pos, const std::string &string, int flags
 	rc.submit(o);
 }
 
-void gPainter::renderPara(eTextPara &para)
+void gPainter::renderPara(eTextPara &para, ePoint offset)
 {
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::renderPara;
-	o.parm.renderPara=new gOpcode::para::prenderPara(logicalZero, para.grab(), dc.getRGB(foregroundColor), dc.getRGB(backgroundColor));
+	o.parm.renderPara=new gOpcode::para::prenderPara(logicalZero+offset, para.grab(), dc.getRGB(foregroundColor), dc.getRGB(backgroundColor));
 	rc.submit(o);
 }
 
