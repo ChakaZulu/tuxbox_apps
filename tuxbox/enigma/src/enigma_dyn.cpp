@@ -2102,6 +2102,7 @@ eString getConfigSwapFile(void)
 	return result;
 }
 
+#ifdef ENABLE_DYN_CONF
 eString getConfigMultiBoot(void)
 {
 	eString result;
@@ -2120,6 +2121,7 @@ eString getConfigMultiBoot(void)
 
 	return result;
 }
+#endif
 #endif
 
 static eString getControlScreenShot(void)
