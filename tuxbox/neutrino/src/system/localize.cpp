@@ -142,6 +142,7 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strncmp(keystr, "mp3player", 9) != 0) &&
 			    (strncmp(keystr, "streaminfo", 10) != 0) &&
 			    (strcmp(keystr, "epglist.head") != 0) &&
+			    (strcmp(keystr, "bouquetlist.head") != 0) &&
 			    (strcmp(keystr, "channellist.head") != 0) &&
 			    (strcmp(keystr, "flashupdate.head") != 0) &&
 			    (strncmp(keystr, "flashupdate.title", 17) != 0) &&

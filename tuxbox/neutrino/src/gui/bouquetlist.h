@@ -87,8 +87,6 @@ class CBouquetList
 		int					fheight; // Fonthoehe Bouquetlist-Inhalt
 		int					theight; // Fonthoehe Bouquetlist-Titel
 
-		string				name;
-
 		int		width;
 		int		height;
 		int		x;
@@ -100,7 +98,7 @@ class CBouquetList
 		void hide();
 
 	public:
-		CBouquetList( const std::string& Name="" );
+		CBouquetList();
 		~CBouquetList();
 
 		vector<CBouquet*>	Bouquets;

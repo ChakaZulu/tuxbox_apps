@@ -243,6 +243,8 @@ keychooser.text2 wait a few seconds for abort
 screensetup.upperleft red = setup upper left
 screensetup.lowerright green = setup lower right
 
+bouquetlist.head Bouquets
+
 channellist.head All Services
 channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
 channellist.since since %02d:%02d

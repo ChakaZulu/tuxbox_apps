@@ -815,7 +815,7 @@ void CNeutrinoApp::channelsInit()
 	dprintf(DEBUG_DEBUG, "got channels\n");
 
 	delete bouquetList;
-	bouquetList = new CBouquetList( "bouquetlist.head" );
+	bouquetList = new CBouquetList();
 	bouquetList->orgChannelList = channelList;
 	CZapitClient::BouquetList zapitBouquets;
 	g_Zapit->getBouquets(zapitBouquets, false, true); // UTF-8
@@ -3542,7 +3542,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.476 2003/07/11 19:41:05 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.477 2003/07/16 08:58:13 thegoodguy Exp $\n\n");
 
 	tzset();
 	initGlobals();

@@ -46,10 +46,9 @@
 #include "infoviewer.h"
 
 
-CBouquetList::CBouquetList( const std::string &Name )
+CBouquetList::CBouquetList()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	name = Name;
 	selected = 0;
 	width =  500;
 	height = 440;
@@ -363,7 +362,7 @@ void CBouquetList::paintItem(int pos)
 void CBouquetList::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, "Bouquets" /*g_Locale->getText(name).c_str()*/, COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText("bouquetlist.head").c_str(), COL_MENUHEAD, 0, true); // UTF-8
 }
 
 void CBouquetList::paint()
