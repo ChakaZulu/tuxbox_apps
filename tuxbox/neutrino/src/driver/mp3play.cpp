@@ -378,11 +378,18 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 		 * stream.
 		 */
 		if(FrameCount==0)
+		{
 			if(PrintFrameInfo(stderr,&Frame.header))
 			{
 				Status=1;
 				break;
 			}
+			if (SetDSP(OutputFp, &Frame.header))
+			{
+				Status=1;
+				break;
+			}
+		}
 
 		/* Accounting. The computed frame duration is in the frame
 		 * header structure. It is expressed as a fixed point number
@@ -498,22 +505,31 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 /****************************************************************************
  * Program entry point.														*
  ****************************************************************************/
-void  CMP3Player::ResetDSP(FILE *soundfd)
+bool  CMP3Player::SetDSP(FILE *soundfd, struct mad_header *Header)
 {
-    long dsp_speed=44100;
-    long channels=2;
-    long fmt=AFMT_S16_BE;
+	 int fmt=AFMT_S16_BE;
+	 unsigned int dsp_speed;
+	 unsigned int channels;
+	 bool crit_error=false;
+
+	 dsp_speed = Header->samplerate;
+	 // Single channel is transformed to dual channel in MpegAudioDecoder, there for set oss channels to 2 always
+	 channels=2;
     
-        if (::ioctl(fileno(soundfd), SNDCTL_DSP_RESET))
-                printf("reset failed\n");
-        if (::ioctl(fileno(soundfd), SNDCTL_DSP_SPEED, &dsp_speed))
-                printf("speed set failed\n");
-        if(::ioctl(fileno(soundfd), SNDCTL_DSP_CHANNELS, &channels))
-                printf("channel set failed\n");
-        if(::ioctl(fileno(soundfd), SNDCTL_DSP_SETFMT, &fmt))
-                printf("setfmt failed\n");
+	 if (::ioctl(fileno(soundfd), SNDCTL_DSP_RESET))
+		 printf("reset failed\n");
+	 if(::ioctl(fileno(soundfd), SNDCTL_DSP_SETFMT, &fmt))
+		 printf("setfmt failed\n");
+	 if(::ioctl(fileno(soundfd), SNDCTL_DSP_CHANNELS, &channels))
+		 printf("channel set failed\n");
+	 if (::ioctl(fileno(soundfd), SNDCTL_DSP_SPEED, &dsp_speed))
+	 {
+		 printf("speed set failed\n");
+		 crit_error=true;
+	 }
 //		  printf("Debug: SNDCTL_DSP_RESET %d / SNDCTL_DSP_SPEED %d / SNDCTL_DSP_CHANNELS %d / SNDCTL_DSP_SETFMT %d\n",
 //					SNDCTL_DSP_RESET, SNDCTL_DSP_SPEED, SNDCTL_DSP_CHANNELS, SNDCTL_DSP_SETFMT);
+		  return crit_error;
 }
 
 void CMP3Player::stop()
@@ -538,7 +554,6 @@ void* CMP3Player::PlayThread(void * filename)
 {
 	FILE *fp = fopen((char *)filename,"r");
 	FILE *soundfd=::fopen("/dev/sound/dsp","w");
-	CMP3Player::getInstance()->ResetDSP(soundfd);
 
 	/* Decode stdin to stdout. */
 	int Status = CMP3Player::getInstance()->MpegAudioDecoder(fp,soundfd);

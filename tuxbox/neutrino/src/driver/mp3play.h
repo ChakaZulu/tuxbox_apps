@@ -69,7 +69,7 @@ public:
 	enum State {STOP = 0, PLAY};
 	State state;
 	static CMP3Player* getInstance();
-	void ResetDSP(FILE *soundfd);
+	bool SetDSP(FILE *soundfd, struct mad_header *Header);
 	bool play(const char *filename);
 	void stop();
 	void init();
