@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.16 2003/03/01 16:18:22 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.17 2003/03/01 16:39:07 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -36,7 +36,10 @@
 #include <string>
 
 
-//#define PAUSE_EQUALS_STOP
+/*
+#define PAUSE_EQUALS_STOP 1
+#define DEBUG_MUTEX 1
+*/
 
 
 int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds);
@@ -53,7 +56,14 @@ DMX::DMX(const unsigned char p, const unsigned short bufferSizeInKB, const bool 
 	dmxBufferSizeInKB = bufferSizeInKB;
 	noCRC = nCRC;
 	pthread_mutex_init(&pauselock, NULL);        // default = fast mutex
+#ifdef DEBUG_MUTEX
+	pthread_mutexattr_t start_stop_mutex_attr;
+	pthread_mutexattr_init(&start_stop_mutex_attr);
+	pthread_mutexattr_settype(&start_stop_mutex_attr, PTHREAD_MUTEX_ERRORCHECK_NP);
+	pthread_mutex_init(&start_stop_mutex, &start_stop_mutex_attr));
+#else
 	pthread_mutex_init(&start_stop_mutex, NULL); // default = fast mutex
+#endif
 	pthread_cond_init (&change_cond, NULL);
 	pauseCounter = 0;
 	real_pauseCounter = 0;
@@ -115,12 +125,30 @@ int DMX::stop(void)
 
 void DMX::lock(void)
 {
+#ifdef DEBUG_MUTEX
+	int rc = pthread_mutex_lock(&start_stop_mutex);
+	if (rc != 0)
+	{
+		fprintf(stderr, "[sectionsd] mutex_lock: %d %d %d\n", rc, EINVAL, EDEADLK); fflush(stderr);
+		fprintf(stderr, "[sectionsd] pid: %d\n", getpid()); fflush(stderr);
+	}
+#else
 	pthread_mutex_lock(&start_stop_mutex);
+#endif
 }
 
 void DMX::unlock(void)
 {
+#ifdef DEBUG_MUTEX
+	int rc = pthread_mutex_unlock(&start_stop_mutex);
+	if (rc != 0)
+	{
+		fprintf(stderr, "[sectionsd] mutex_unlock: %d %d %d\n", rc, EINVAL, EPERM); fflush(stderr);
+		fprintf(stderr, "[sectionsd] pid: %d\n", getpid()); fflush(stderr);
+	}
+#else
 	pthread_mutex_unlock(&start_stop_mutex);
+#endif
 }
 
 bool DMX::isOpen(void)
