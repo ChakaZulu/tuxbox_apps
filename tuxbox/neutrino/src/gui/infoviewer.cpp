@@ -324,7 +324,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 				fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
 
 			bool hideIt = true;
-			unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_infobar );
+			unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR]);
 
 			int res = messages_return::none;
 

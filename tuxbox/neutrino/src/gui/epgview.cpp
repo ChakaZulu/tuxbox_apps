@@ -479,7 +479,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 		bool loop = true;
 
-		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_epg );
+		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_EPG]);
 
 		while(loop)
 		{

@@ -4,7 +4,7 @@
   Part of Movieplayer (c) 2003, 2004 by gagga
   Based on code by Zwen. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.10 2004/05/15 21:35:18 thegoodguy Exp $
+  $Id: bookmarkmanager.cpp,v 1.11 2004/05/17 09:36:43 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -256,7 +256,7 @@ const CBookmark * CBookmarkManager::getBookmark(CMenuTarget* parent)
 
 	int res = -1;
 
-	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 	uint msg; uint data;
 
 	bool loop=true;
@@ -272,7 +272,7 @@ const CBookmark * CBookmarkManager::getBookmark(CMenuTarget* parent)
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 
 		if( ( msg == CRCInput::RC_timeout ) ||
 			 ( msg == CRCInput::RC_home) )

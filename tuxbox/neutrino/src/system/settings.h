@@ -65,16 +65,17 @@ struct SNeutrinoSettings
 	char language[25];
 
 	//timing
-	int timing_menu;
-	int timing_chanlist;
-	int timing_epg;
-	int timing_infobar;
-	int timing_filebrowser;
-	char timing_menu_string[4];
-	char timing_chanlist_string[4];
-	char timing_epg_string[4];
-	char timing_infobar_string[4];
-	char timing_filebrowser_string[4];
+#define TIMING_SETTING_COUNT 5
+	enum TIMING_SETTINGS {
+		TIMING_MENU        = 0,
+		TIMING_CHANLIST    = 1,
+		TIMING_EPG         = 2,
+		TIMING_INFOBAR     = 3,
+		TIMING_FILEBROWSER = 4
+	};
+
+	int  timing       [TIMING_SETTING_COUNT]   ;
+	char timing_string[TIMING_SETTING_COUNT][4];
 
 	//widget settings
 	int widget_fade;
@@ -291,6 +292,14 @@ struct SNeutrinoSettings
 
 /* some default Values */
 
+static const int default_timing[TIMING_SETTING_COUNT] = {
+	60,
+	60,
+	240,
+	6,
+	60
+};
+
 // lcdd
 #define DEFAULT_LCD_BRIGHTNESS			0xff
 #define DEFAULT_LCD_STANDBYBRIGHTNESS		0xaa
@@ -299,13 +308,6 @@ struct SNeutrinoSettings
 #define DEFAULT_LCD_INVERSE			0x00
 #define DEFAULT_LCD_AUTODIMM			0x00
 #define DEFAULT_LCD_SHOW_VOLUME			1
-
-//timing
-#define DEFAULT_TIMING_MENU			60
-#define DEFAULT_TIMING_CHANLIST			60
-#define DEFAULT_TIMING_EPG			120
-#define DEFAULT_TIMING_INFOBAR			6
-#define DEFAULT_TIMING_FILEBROWSER		60
 
 /* end default values */
 

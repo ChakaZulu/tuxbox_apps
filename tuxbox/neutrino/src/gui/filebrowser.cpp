@@ -502,7 +502,7 @@ bool CFileBrowser::exec(std::string Dirname)
 		g_ActionLog->println(buf);
 	#endif
 
-	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_filebrowser );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_FILEBROWSER]);
 
 	bool loop=true;
 	while (loop)
@@ -510,7 +510,7 @@ bool CFileBrowser::exec(std::string Dirname)
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_filebrowser );
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_FILEBROWSER]);
 
 		if(!CRCInput::isNumeric(msg))
 		{

@@ -177,7 +177,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 
 	channelsChanged = false;
 
-	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_epg );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_EPG]);
 
 	bool loop=true;
 	while (loop)
@@ -185,7 +185,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_epg );
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_EPG]);
 
 		if ((msg == CRCInput::RC_timeout) ||
 		    (msg == (neutrino_msg_t)g_settings.key_channelList_cancel))

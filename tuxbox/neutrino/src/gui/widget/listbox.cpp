@@ -163,7 +163,7 @@ int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 	modified = false;
 	while (loop)
 	{
-		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
+		g_RCInput->getMsg(&msg, &data, g_settings.timing[SNeutrinoSettings::TIMING_EPG]);
 
 		if (( msg == (neutrino_msg_t)g_settings.key_channelList_cancel) ||
 		    ( msg == CRCInput::RC_home))

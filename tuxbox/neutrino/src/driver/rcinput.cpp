@@ -296,7 +296,7 @@ int CRCInput::messageLoop( bool anyKeyCancels, int timeout )
 	bool doLoop = true;
 
 	if ( timeout == -1 )
-		timeout = g_settings.timing_menu ;
+		timeout = g_settings.timing[SNeutrinoSettings::TIMING_MENU];
 
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
 

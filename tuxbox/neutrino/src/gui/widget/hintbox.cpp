@@ -159,7 +159,7 @@ int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const 
 	hintBox->paint();
 
 	if ( timeout == -1 )
-		timeout = g_settings.timing_infobar ;
+		timeout = g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR];
 
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
 

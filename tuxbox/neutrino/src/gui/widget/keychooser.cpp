@@ -101,7 +101,7 @@ int CKeyChooserItem::exec(CMenuTarget* parent, const std::string &)
 
 	g_RCInput->clearRCMsg();
 
-	timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_menu);
+	timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 
  get_Message:
 	g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );

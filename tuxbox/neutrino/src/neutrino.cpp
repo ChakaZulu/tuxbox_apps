@@ -367,6 +367,15 @@ const font_sizes_struct neutrino_font[FONT_TYPE_COUNT] =
 	{"fontsize.filebrowser_item"   ,  16, FONT_STYLE_BOLD   , 1}
 };
 
+const neutrino_locale_t timing_setting_name[TIMING_SETTING_COUNT] =
+{
+	LOCALE_TIMING_MENU,
+	LOCALE_TIMING_CHANLIST,
+	LOCALE_TIMING_EPG,
+	LOCALE_TIMING_INFOBAR,
+	LOCALE_TIMING_FILEBROWSER
+};
+
 typedef struct lcd_setting_t
 {
 	const char * const name;
@@ -599,12 +608,8 @@ int CNeutrinoApp::loadSetup()
 	}
 	strcpy( g_settings.parentallock_pincode, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
 
-	//timing  (Einheit= 1 sec )
-	g_settings.timing_menu = configfile.getInt32( "timing_menu", DEFAULT_TIMING_MENU );
-	g_settings.timing_chanlist = configfile.getInt32( "timing_chanlist", DEFAULT_TIMING_CHANLIST );
-	g_settings.timing_epg = configfile.getInt32( "timing_epg", 2* DEFAULT_TIMING_EPG );
-	g_settings.timing_infobar = configfile.getInt32( "timing_infobar", DEFAULT_TIMING_INFOBAR );
-	g_settings.timing_filebrowser = configfile.getInt32( "timing_filebrowser", DEFAULT_TIMING_FILEBROWSER );
+	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
+		g_settings.timing[i] = configfile.getInt32(timing_setting_name[i], default_timing[i]);
 
 	for (int i = 0; i < LCD_SETTING_COUNT; i++)
 		g_settings.lcd_setting[i] = configfile.getInt32(lcd_setting[i].name, lcd_setting[i].default_value);
@@ -912,11 +917,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "parentallock_pincode", g_settings.parentallock_pincode );
 
 	//timing
-	configfile.setInt32( "timing_menu", g_settings.timing_menu );
-	configfile.setInt32( "timing_chanlist", g_settings.timing_chanlist );
-	configfile.setInt32( "timing_epg", g_settings.timing_epg );
-	configfile.setInt32( "timing_infobar", g_settings.timing_infobar );
-	configfile.setInt32( "timing_filebrowser", g_settings.timing_filebrowser );
+	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
+		configfile.setInt32(timing_setting_name[i], g_settings.timing[i]);
 
 	for (int i = 0; i < LCD_SETTING_COUNT; i++)
 		configfile.setInt32(lcd_setting[i].name, g_settings.lcd_setting[i]);
@@ -1182,11 +1184,8 @@ void CNeutrinoApp::SetupFonts()
 
 void CNeutrinoApp::SetupTiming()
 {
-	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
-	sprintf(g_settings.timing_chanlist_string,"%d",g_settings.timing_chanlist);
-	sprintf(g_settings.timing_epg_string,"%d",g_settings.timing_epg);
-	sprintf(g_settings.timing_infobar_string,"%d",g_settings.timing_infobar);
-	sprintf(g_settings.timing_filebrowser_string,"%d",g_settings.timing_filebrowser);
+	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
+		sprintf(g_settings.timing_string[i], "%d", g_settings.timing[i]);
 }
 
 
@@ -2100,7 +2099,7 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	colorSettings.addItem( new CMenuForwarder(LOCALE_COLORMENU_FONT, true, NULL, &fontSettings) );
 	CMenuWidget *colorSettings_timing = new CMenuWidget(LOCALE_COLORMENU_TIMING, NEUTRINO_ICON_SETTINGS);
 	InitColorSettingsTiming(*colorSettings_timing);
-	colorSettings.addItem( new CMenuForwarder("timing.head", true, NULL, colorSettings_timing));
+	colorSettings.addItem(new CMenuForwarder(LOCALE_TIMING_HEAD, true, NULL, colorSettings_timing));
 
 	colorSettings.addItem(GenericMenuSeparatorLine);
 	if ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) // eNX
@@ -2180,30 +2179,17 @@ void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_s
 
 void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 {
-	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
-	sprintf(g_settings.timing_chanlist_string,"%d",g_settings.timing_chanlist);
-	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
-	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
-	sprintf(g_settings.timing_filebrowser_string,"%d",g_settings.timing_filebrowser);
+	/* note: SetupTiming() is already called in CNeutrinoApp::run */
 
 	colorSettings_timing.addItem(GenericMenuSeparator);
 	colorSettings_timing.addItem(GenericMenuBack);
 	colorSettings_timing.addItem(GenericMenuSeparatorLine);
 
-	CStringInput * colorSettings_timing_menu = new CStringInput("timing.menu", g_settings.timing_menu_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
-	colorSettings_timing.addItem( new CMenuForwarder("timing.menu", true, g_settings.timing_menu_string, colorSettings_timing_menu ) );
-
-	CStringInput * colorSettings_timing_chanlist = new CStringInput("timing.chanlist", g_settings.timing_chanlist_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
-	colorSettings_timing.addItem( new CMenuForwarder("timing.chanlist", true, g_settings.timing_chanlist_string, colorSettings_timing_chanlist ) );
-
-	CStringInput * colorSettings_timing_epg = new CStringInput("timing.epg", g_settings.timing_epg_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
-	colorSettings_timing.addItem( new CMenuForwarder("timing.epg", true, g_settings.timing_epg_string, colorSettings_timing_epg ) );
-
-	CStringInput * colorSettings_timing_infobar = new CStringInput("timing.infobar", g_settings.timing_infobar_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
-	colorSettings_timing.addItem( new CMenuForwarder("timing.infobar", true,  g_settings.timing_infobar_string, colorSettings_timing_infobar ) );
-
-	CStringInput * colorSettings_timing_filebrowser = new CStringInput("timing.filebrowser", g_settings.timing_filebrowser_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
-	colorSettings_timing.addItem( new CMenuForwarder("timing.filebrowser", true,  g_settings.timing_filebrowser_string, colorSettings_timing_filebrowser ) );
+	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
+	{
+		CStringInput * colorSettings_timing_item = new CStringInput(timing_setting_name[i], g_settings.timing_string[i], 3, LOCALE_TIMING_HINT_1, LOCALE_TIMING_HINT_2, "0123456789 ", this);
+		colorSettings_timing.addItem(new CMenuForwarder(timing_setting_name[i], true, g_settings.timing_string[i], colorSettings_timing_item));
+	}
 
 	colorSettings_timing.addItem(GenericMenuSeparatorLine);
 	colorSettings_timing.addItem( new CMenuForwarder("options.default", true, NULL, this, "osd.def"));
@@ -3605,12 +3591,12 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			{
 				current_volume = 50;
 			}
-			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_infobar / 2);
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR] / 2);
 		}
 		else if (msg == NeutrinoMessages::EVT_VOLCHANGED)
 		{
 			current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
-			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_infobar / 2);
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR] / 2);
 		}
 		else if (handleMsg(msg, data) & messages_return::unhandled)
 		{
@@ -3938,12 +3924,10 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	else if(actionKey=="osd.def")
 	{
-		sprintf(g_settings.timing_menu_string,		"%d", DEFAULT_TIMING_MENU);
-		sprintf(g_settings.timing_chanlist_string,	"%d", DEFAULT_TIMING_CHANLIST);
-		sprintf(g_settings.timing_epg_string,		"%d", DEFAULT_TIMING_EPG);
-		sprintf(g_settings.timing_infobar_string,	"%d", DEFAULT_TIMING_INFOBAR);
-		sprintf(g_settings.timing_filebrowser_string,	"%d", DEFAULT_TIMING_FILEBROWSER);
-		changeNotify("timing.", NULL);
+		for (int i = 0; i < TIMING_SETTING_COUNT; i++)
+			g_settings.timing[i] = default_timing[i];
+
+		SetupTiming();
 	}
 	else if(actionKey == "mp3dir")
 	{
@@ -4001,6 +3985,15 @@ bool CNeutrinoApp::changeNotify(const std::string & OptionName, void * data)
 
 bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 {
+	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
+	{
+		if (strcmp(OptionName, timing_setting_name[i]) == 0)
+		{
+			g_settings.timing[i] = 	atoi(g_settings.timing_string[i]);
+			return true;
+		}
+	}
+
 	if (strncmp(OptionName, "fontsize.", 9) == 0)
 	{
 		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("fontsize.hint")); // UTF-8
@@ -4010,15 +4003,6 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 
 		hintBox->hide();
 		delete hintBox;
-	}
-	else if (strncmp(OptionName, "timing.", 7) == 0)
-	{
-		g_settings.timing_menu = atoi(g_settings.timing_menu_string);
-		g_settings.timing_chanlist = atoi(g_settings.timing_chanlist_string);
-		g_settings.timing_epg = atoi(g_settings.timing_epg_string);
-		g_settings.timing_infobar = atoi(g_settings.timing_infobar_string);
-		g_settings.timing_filebrowser = atoi(g_settings.timing_filebrowser_string);
-
 	}
 	else if (strncmp(OptionName, "mainmenu.recording", 18) == 0)
 	{

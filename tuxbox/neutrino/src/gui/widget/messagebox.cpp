@@ -141,7 +141,7 @@ int CMessageBox::exec(int timeout)
 	paintButtons();
 
 	if ( timeout == -1 )
-		timeout = g_settings.timing_epg ;
+		timeout = g_settings.timing[SNeutrinoSettings::TIMING_EPG];
 
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
 

@@ -255,6 +255,17 @@ class CLocaleManager
 #define LOCALE_FAVORITES_NOBOUQUETS                "favorites.nobouquets"
 
 
+#define LOCALE_TIMING_CHANLIST                     "timing.chanlist"
+#define LOCALE_TIMING_EPG                          "timing.epg"
+#define LOCALE_TIMING_FILEBROWSER                  "timing.filebrowser"
+#define LOCALE_TIMING_HEAD                         "timing.head"
+#define LOCALE_TIMING_HINT_1                       "timing.hint_1"
+#define LOCALE_TIMING_HINT_2                       "timing.hint_2"
+#define LOCALE_TIMING_INFOBAR                      "timing.infobar"
+#define LOCALE_TIMING_MENU                         "timing.menu"
+
+
+
 /* #warning fix usage of locales in system/setting_helpers.cpp */
 
 #endif

@@ -192,7 +192,7 @@ int CBouquetList::show()
 	unsigned int chn= 0;
 	int pos= maxpos;
 
-	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
 	bool loop=true;
 	while (loop)
@@ -200,7 +200,7 @@ int CBouquetList::show()
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
 		if ((msg == CRCInput::RC_timeout                             ) ||
 		    (msg == (neutrino_msg_t)g_settings.key_channelList_cancel))

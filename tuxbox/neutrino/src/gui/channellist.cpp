@@ -236,7 +236,7 @@ int CChannelList::show()
 	int zapOnExit = false;
 	bool bShowBouquetList = false;
 
-	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
+	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
 	bool loop=true;
 	while (loop)
@@ -244,7 +244,7 @@ int CChannelList::show()
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
 			 ( msg == (neutrino_msg_t)g_settings.key_channelList_cancel) )
