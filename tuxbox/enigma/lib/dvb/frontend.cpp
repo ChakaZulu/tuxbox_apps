@@ -148,7 +148,8 @@ void eFrontend::timeout()
 		}
 		else
 		{
-			needreset=1;
+			if ( !eDVB::getInstance()->getScanAPI() )
+				needreset=1;
 			eDebug("couldn't lock. (state: %x)", Status());
 			state=stateIdle;
 			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
