@@ -107,7 +107,7 @@ int eString::icompare(const eString& s)
 	return length() == s.length() ? 0 : length() < s.length() ? -1 : 1;
 }
 
-		// 8859-x to dvb coding tables. taken from www.unicode.org/Public/MAPPINGS/ISO8859/
+		// 8859-x to ucs-16 coding tables. taken from www.unicode.org/Public/MAPPINGS/ISO8859/
 
 static unsigned long c88592[128]={
 0x0080, 0x0081, 0x0082, 0x0083, 0x0084, 0x0085, 0x0086, 0x0087, 0x0088, 0x0089, 0x008A, 0x008B, 0x008C, 0x008D, 0x008E, 0x008F, 
@@ -286,13 +286,44 @@ eString convertDVBUTF8(const unsigned char *data, int len, int table)
 		return "";
 
 	i=0;
-	if (data[0] <= 5)
-		table=data[i++];
-	else if ((data[0] >= 0x10) && (data[0] <= 0x12))
-		return "<unsupported encoding>";
-
+	switch(data[0])
+	{
+		case 1 ... 5:
+			table=data[i++];
+//			eDebug("(0..5)text encoded in ISO-8859-%d",table+4);
+			break;
+		case 0x10:
+		{
+//			eDebug("(0x10)text encoded in ISO-8859-%d",n);			
+			int n=(data[++i]<<8)|(data[++i]);
+			switch(n)
+			{
+				case 2:
+					table=6;
+					break;
+				case 5 ... 9:
+					table=n-4;
+					break;
+				default:
+					eDebug("unsup. ISO8859-%d enc.", n);
+					break;
+			}
+			break;
+		}
+		case 0x11:
+			eDebug("unsup. ISO/IEC 10646-1 enc.");
+			break;
+		case 0x12:
+			eDebug("unsup. KSC 5601 enc.");
+			break;
+		case 0x0:
+		case 0x6 ... 0xF:
+		case 0x13 ... 0x1F:
+			eDebug("reserved");
+			break;
+	}
 	int bytesneeded=0, t=0, s=i;
-	
+
 	for (; i<len; ++i)
 	{
 		unsigned long code=0;
