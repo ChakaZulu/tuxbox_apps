@@ -958,7 +958,7 @@ ok
 
 Handler: http://dbox/cgi-bin/exec
 
-Parameter: <Scriptname>
+Parameter: <Scriptname> (ohne .sh!)
 Rückgabe: Ausgabe des Scripts
 
 Führt das Shellscript aus und liefert die Ausgabe an den Client zurück
@@ -967,5 +967,5 @@ Beispiel:
 buli.sh gibt einen RSS-Feed zurück, der vom Newsticker angezeigt wird. In newsticker.list
 muss dann der Aufruf folgendermassen aussehen:
 
-http://dbox/cgi-bin/exec?buli.sh
+http://dbox/cgi-bin/exec?buli
 

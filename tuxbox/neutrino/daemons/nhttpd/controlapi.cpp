@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.43 2004/11/30 20:17:08 chakazulu Exp $
+	$Id: controlapi.cpp,v 1.44 2004/11/30 21:48:20 chakazulu Exp $
 
 	License: GPL
 
@@ -263,13 +263,15 @@ static const std::string pluginDirs[2] = {
 bool CControlAPI::ExecCGI(CWebserverRequest *request)
 {
 	bool res = false;
+	std::string script;
+	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size() > 0) 
 	{
-		std::string script = request->ParameterList["1"];
+		script = request->ParameterList["1"];
 		std::string::size_type i = script.find_last_of("/");
 		if (i != std::string::npos)
 			script = script.substr(i+1);
-
+		script += ".sh";
 		for (unsigned int i=0;i<2;i++) {
 			DIR *scriptdir = opendir(pluginDirs[i].c_str());
 			if (scriptdir != NULL)
@@ -286,7 +288,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 					std::string abscmd(pluginDirs[i].c_str());
 					abscmd += "/";
 					abscmd += script;
-					dprintf("executing %s\n",abscmd.c_str());
+					printf("[CControlApi] executing %s\n",abscmd.c_str());
 					FILE *f = popen(abscmd.c_str(),"r");
 					if (f != NULL)
 					{
@@ -301,20 +303,21 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 					} 
 					else 
 					{	
-						printf("can't open %s\n",abscmd.c_str());
+						printf("[CControlApi] can't open %s\n",abscmd.c_str());
 					}
 				} 
-				else
-				{
-					printf("script %s not found in %s\n",
-							script.c_str(),pluginDirs[i].c_str());
-				}	
 				closedir(scriptdir);
-				
 			}
 			else 
 			{
-				printf("could not open: %s\n",pluginDirs[i].c_str());
+				printf("[CControlApi] could not open: %s\n",pluginDirs[i].c_str());
+			}
+		}
+		if (!res)
+		{
+			printf("[CControlApi] script %s not found in\n",script.c_str());
+			for (unsigned int i=0;i<2;i++) {
+				printf("%s\n",pluginDirs[i].c_str());
 			}
 		}
 	}
@@ -323,7 +326,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 		printf("No script given\n");
 		request->Send404Error();
 	}
-	
+
 	return res;
 }
 
