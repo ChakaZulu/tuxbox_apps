@@ -65,6 +65,7 @@ struct SNeutrinoSettings
 	int scan_astra;
 	int scan_eutel;
 	int scan_kopernikus;
+	int scan_sirius;
 	int scan_digituerk;
 	int scan_bouquet;
 

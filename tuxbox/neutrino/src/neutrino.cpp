@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.206 2002/03/25 18:24:24 field Exp $
+        $Id: neutrino.cpp,v 1.207 2002/03/27 12:26:41 flfs Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -275,7 +275,8 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.scan_astra = 1;
 	g_settings.scan_eutel = 0;
 	g_settings.scan_kopernikus = 0;
-	g_settings.scan_digituerk = 0;
+	g_settings.scan_sirius = 0;
+        g_settings.scan_digituerk = 0;
 	g_settings.scan_bouquet = 1024; //erase bouquets
 
 
@@ -756,7 +757,11 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 		oj->addOption(0, "options.off");
 		oj->addOption(4, "options.on");
 		TSScan->addItem( oj );
-		oj = new CMenuOptionChooser("scants.digituerk", &g_settings.scan_digituerk, true );
+		oj = new CMenuOptionChooser("scants.sirius", &g_settings.scan_sirius, true );
+		oj->addOption(0, "options.off");
+		oj->addOption(16, "options.on");
+		TSScan->addItem( oj );
+                oj = new CMenuOptionChooser("scants.digituerk", &g_settings.scan_digituerk, true );
 		oj->addOption(0, "options.off");
 		oj->addOption(8, "options.on");
 		TSScan->addItem( oj );
@@ -2196,7 +2201,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.206 2002/03/25 18:24:24 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.207 2002/03/27 12:26:41 flfs Exp $\n\n");
 	tzset();
 	initGlobals();
 
