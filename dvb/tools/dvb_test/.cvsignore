@@ -9,6 +9,7 @@ stream_to_ts
 test_av
 test_av_play
 test_clip
+test_clip_teletext
 test_clip_pes
 test_clip_vlc
 test_clip_vls

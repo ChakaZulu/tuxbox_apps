@@ -9,6 +9,7 @@ bin_PROGRAMS = \
 	test_av \
 	test_av_play \
 	test_clip \
+	test_clip_teletext \
 	test_clip_pes \
 	test_clip_vlc \
 	test_clip_vls \
@@ -34,6 +35,7 @@ setvoltage_SOURCES = setvoltage.c
 test_av_SOURCES = test_av.c
 test_av_play_SOURCES = test_av_play.c
 test_clip_SOURCES = test_clip.c
+test_clip_teletext = test_clip_teletext.c
 test_clip_pes_SOURCES = test_clip_pes.c
 test_clip_vlc_SOURCES = test_clip_vlc.c ringbuffer.c
 test_clip_vls_SOURCES = test_clip_vls.c
