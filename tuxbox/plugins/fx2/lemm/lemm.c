@@ -717,18 +717,30 @@ void	RunKey( void )
 	Sprite	*s;
 static	int		step=2;
 static	int		cnt=0;
+static	int		zcnt=0;
 	int			nac;
 	int			sel_type=0;
 
 	if ( realcode == 0xee )
 	{
-		step=2;
-		cnt=0;
+		if ( step == 2 )
+			return;
+		zcnt++;
+		if ( zcnt > 4 )
+		{
+			step=2;
+			cnt=0;
+			zcnt=0;
+		}
 		return;
 	}
 
 	cnt++;
 	if( cnt > 8 )
+		step=32;
+	else if( cnt > 6 )
+		step=16;
+	else if( cnt > 4 )
 		step=8;
 	else if( cnt > 2 )
 		step=4;
