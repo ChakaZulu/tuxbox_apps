@@ -25,6 +25,47 @@
 
 using namespace std;
 
+class CShortEPGData
+{
+	public:
+		string 		title;
+		string 		info1;
+		string 		info2;
+	CShortEPGData(){	title	= "";	info1 	= "";	info2 	= ""; };
+};
+
+class CEPGData
+{
+	public:
+		unsigned long long			eventID;
+		sectionsd::sectionsdTime	epg_times;
+		string 		title;
+		string 		info1;
+		string 		info2;
+		string 		date;
+		string 		start;
+		string 		end;
+		int			done;
+		char		fsk;
+		string 		contentClassification;
+		string 		userClassification;
+
+	CEPGData(){	
+		eventID = 0;
+		title	= "";
+		info1 	= "";
+		info2 	= "";
+		date 	= "";
+		start 	= "";
+		end 	= "";
+		done 	= -1;
+		fsk	= 0;
+		contentClassification	= "";
+		userClassification		= "";
+	};
+
+};
+
 class CChannelEvent
 {
 	public:
@@ -69,6 +110,10 @@ class CSectionsdClient
 		void setServiceChanged( unsigned ServiceKey, bool requestEvent );
 
 		CChannelEventList getChannelEvents();
+
+		bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEPGData * epgdata);
+
+		bool CSectionsdClient::getEPGidShort( unsigned long long eventid,CShortEPGData * epgdata);
 
 
 		/*

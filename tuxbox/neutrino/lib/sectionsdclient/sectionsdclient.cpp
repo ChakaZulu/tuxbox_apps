@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.9 2002/03/28 14:58:30 dirch Exp $
+  $Id: sectionsdclient.cpp,v 1.10 2002/03/30 03:45:37 dirch Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.10  2002/03/30 03:45:37  dirch
+  getChannelEvents() gefixt, getEPGid() and getEPGidShort() added
+
   Revision 1.9  2002/03/28 14:58:30  dirch
   getChannelEvents() gefixt
 
@@ -389,6 +392,8 @@ bool CSectionsdClient::getCurrentNextServiceKey( unsigned serviceKey, sectionsd:
 		return false;
 }
 
+
+
 CChannelEventList CSectionsdClient::getChannelEvents()
 {
 	CChannelEventList eList;
@@ -398,60 +403,146 @@ CChannelEventList CSectionsdClient::getChannelEvents()
 
 	req.command = sectionsd::actualEventListTVshortIDs;
 	req.dataLength = 0;
-	send((char*)&req, sizeof(req));
-
-
-	sectionsd::msgResponseHeader resp;
-	memset(&resp, 0, sizeof(resp));
-
-	if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+	if ( sectionsd_connect() )
 	{
-		sectionsd_close();
-		return eList;
+		send((char*)&req, sizeof(req));
+
+		int nBufSize = readResponse();
+		
+		if( nBufSize > 0)
+		{
+			char* pData = new char[nBufSize];
+			receive(pData, nBufSize);
+			char* dp = pData;
+
+			while(dp < pData + nBufSize)
+			{
+				CChannelEvent aEvent;
+
+				aEvent.serviceID = *((unsigned *) dp);
+				dp+=sizeof(aEvent.serviceID);
+
+				aEvent.eventID = *((unsigned long long *) dp);
+				dp+=sizeof(aEvent.eventID);
+
+				aEvent.startTime = *((time_t *) dp);
+				dp+=sizeof(aEvent.startTime);
+
+				aEvent.duration = *((unsigned *) dp);
+				dp+=sizeof(aEvent.duration);
+
+				aEvent.description= dp;
+				dp+=strlen(dp)+1;
+
+				aEvent.text= dp;
+				dp+=strlen(dp)+1;
+
+				eList.insert(eList.end(), aEvent);
+			}
+			delete[] pData;
+		}
 	}
-	if(resp.dataLength<=0)
-	{
-		sectionsd_close();
-		return eList;
-	}
-
-	char* pData = new char[resp.dataLength] ;
-	if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
-	{
-		delete[] pData;
-		sectionsd_close();
-		return eList;
-	}
-	sectionsd_close();
-
-	char *actPos = pData;
-	while(actPos<pData+resp.dataLength)
-	{
-		CChannelEvent aEvent;
-
-		aEvent.serviceID = *((unsigned *) actPos);
-		actPos+=4;
-
-		aEvent.eventID = *((unsigned long long *) actPos);
-		actPos+=8;
-
-		aEvent.startTime = *((time_t *) actPos);
-		actPos+=4;
-
-		aEvent.duration = *((unsigned *) actPos);
-		actPos+=4;
-
-		aEvent.description= actPos;
-		actPos+=strlen(actPos)+1;
-
-		aEvent.text= actPos;
-		actPos+=strlen(actPos)+1;
-
-		eList.insert(eList.end(), aEvent);
-	}
-
-	delete[] pData;
+	else
+		printf("no connection to sectionsd\n");
 	return eList;
+}
+
+
+
+bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEPGData * epgdata)
+{
+	sectionsd::msgRequestHeader req;
+	req.version = 2;
+
+	req.command = sectionsd::epgEPGid;
+	req.dataLength = 12;
+	if ( sectionsd_connect() )
+	{
+		send((char*)&req, sizeof(req));
+		send((char*)&eventid, sizeof(eventid));
+		send((char*)&starttime,sizeof(starttime));
+
+		int nBufSize = readResponse();
+		if( nBufSize > 0)
+		{
+			char* pData = new char[nBufSize];
+			receive(pData, nBufSize);
+			char* dp = pData;
+
+
+			epgdata->eventID = *((unsigned long long *)dp);
+			dp+= sizeof(epgdata->eventID);
+
+			epgdata->title = dp;
+			dp+=strlen(dp)+1;
+			epgdata->info1 = dp;
+			dp+=strlen(dp)+1;
+			epgdata->info2 = dp;
+			dp+=strlen(dp)+1;
+			epgdata->contentClassification = dp;
+			dp+=strlen(dp)+1;
+			epgdata->userClassification = dp;
+			dp+=strlen(dp)+1;
+			epgdata->fsk = *dp++;
+//			printf("titel: %s\n",epgdata->title.c_str());
+
+			epgdata->epg_times.startzeit = ((sectionsd::sectionsdTime *) dp)->startzeit;
+			epgdata->epg_times.dauer = ((sectionsd::sectionsdTime *) dp)->dauer;
+			dp+= sizeof(sectionsd::sectionsdTime);			
+
+			delete[] pData;
+			return true;
+		}
+		else
+			printf("no response from sectionsd\n");
+	}
+	else
+		printf("no connection to sectionsd\n");
+	return false;
+}
+
+
+bool CSectionsdClient::getEPGidShort( unsigned long long eventid,CShortEPGData * epgdata)
+{
+	sectionsd::msgRequestHeader req;
+	req.version = 2;
+
+	req.command = sectionsd::epgEPGidShort;
+	req.dataLength = 8;
+	if ( sectionsd_connect() )
+	{
+		send((char*)&req, sizeof(req));
+		send((char*)&eventid, sizeof(eventid));
+
+		int nBufSize = readResponse();
+		if( nBufSize > 0)
+		{
+			char* pData = new char[nBufSize];
+			receive(pData, nBufSize);
+			char* dp = pData;
+
+			for(int i = 0; i < nBufSize;i++)
+				if(pData[i] == 0xff)
+					pData[i] = 0;
+
+			epgdata->title = dp;
+			dp+=strlen(dp)+1;
+			epgdata->info1 = dp;
+			dp+=strlen(dp)+1;
+			epgdata->info2 = dp;
+			dp+=strlen(dp)+1;
+//			printf("titel: %s\n",epgdata->title.c_str());
+
+
+			delete[] pData;
+			return true;
+		}
+		else
+			printf("no response from sectionsd\n");
+	}
+	else
+		printf("no connection to sectionsd\n");
+	return false;
 }
 
 
