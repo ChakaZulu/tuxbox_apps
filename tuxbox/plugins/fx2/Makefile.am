@@ -1,1 +1,1 @@
-SUBDIRS = lib mines pac tetris snake yahtzee bouquet master tank lemm
+SUBDIRS = lib mines pac tetris snake yahtzee bouquet master tank lemm lcdcirc satfind
