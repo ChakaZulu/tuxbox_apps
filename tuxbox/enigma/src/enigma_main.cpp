@@ -2788,10 +2788,15 @@ void eZapMain::standbyPress(int n)
 
 void eZapMain::standbyRepeat()
 {
-	timeval now;
-	gettimeofday(&now,0);
-	if ( standbyTime < now )
+	if (state&stateInTimerMode && state&stateRecording)
 		standbyRelease();
+	else
+	{
+		timeval now;
+		gettimeofday(&now,0);
+		if ( standbyTime < now )
+			standbyRelease();
+	}
 }
 
 void eZapMain::standbyRelease()
@@ -2866,6 +2871,11 @@ standby:
 			standby.show();
 			state |= stateSleeping;
 			standbyTime.tv_sec=-1;
+			if (state&stateInTimerMode && state&stateRecording)
+			{
+				wasSleeping=3;
+				standby.setDontStopService();
+			}
 			standby.exec();   // this blocks all main actions...
 /*
 	  ...... sleeeeeeeep
@@ -3167,13 +3177,6 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 
 			DVRSpaceLeft->show();
 
-			// if standby enable lcdMain
-			if(state & stateSleeping)
-			{ 
-				pLCD->lcdStandby->hide();
-				pLCD->lcdMain->show();
-			}
-			
 			recStatusBlink.start(500, 1);
 			eZap::getInstance()->getServiceSelector()->actualize();
 
@@ -3245,7 +3248,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 			pLCD->lcdStandby->show();
 		}
 
-	        // disable lcd-blink
+		// disable lcd-blink
 		pLCD->lcdMain->Clock->show();
 
 		eZap::getInstance()->getServiceSelector()->actualize();
@@ -5000,6 +5003,13 @@ void eZapMain::blinkRecord()
 {
 	eZapLCD *pLCD=eZapLCD::getInstance();
 
+	// if standby enable lcdMain
+	if(state & stateSleeping && !pLCD->lcdMain->isVisible() )
+	{
+		pLCD->lcdStandby->hide();
+		pLCD->lcdMain->show();
+	}
+
 	if (state & stateRecording)
 	{
 		// handle clock-blinking when record is active..
@@ -5102,12 +5112,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->standby_press)
 		{
-			if ( handleState() )
+			if ( (state&stateInTimerMode && state&stateRecording) || handleState() )
 				standbyPress(0);
 		}
 		else if (event.action == &i_enigmaMainActions->standby_nomenu_press)
 		{
-			if ( handleState() )
+			if ( (state&stateInTimerMode && state&stateRecording) || handleState() )
 				standbyPress(1);
 		}
 		else if (event.action == &i_enigmaMainActions->standby_repeat)

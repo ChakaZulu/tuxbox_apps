@@ -10,9 +10,11 @@ class eZapStandby: public eWidget
 	eServiceReference ref;
 	int rezap;
 	int oldpin8;
+	int dontStopService;
 protected:
 	int eventHandler(const eWidgetEvent &);
 public:
+	void setDontStopService() { dontStopService=1; }
 	void renewSleep();
 	void wakeUp(int norezap);
 	static eZapStandby *getInstance() { return instance; }

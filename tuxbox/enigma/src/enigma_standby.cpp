@@ -97,7 +97,10 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 #endif
 		eAVSwitch::getInstance()->setInput(1);
 		eAVSwitch::getInstance()->setTVPin8(0);
-		renewSleep();
+		if (!dontStopService)
+			renewSleep();
+		else
+			dontStopService=0;
 		if( !eSystemInfo::getInstance()->hasLCD() ) //  in standby
 		{
 			time_t c=time(0)+eDVB::getInstance()->time_difference;
@@ -162,7 +165,7 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 	return eWidget::eventHandler(event);
 }
 
-eZapStandby::eZapStandby(): eWidget(0, 1)
+eZapStandby::eZapStandby(): eWidget(0, 1), dontStopService(0)
 {
 	addActionMap(&i_enigmaStandbyActions->map);
 	if (!instance)
