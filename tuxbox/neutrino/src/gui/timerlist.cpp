@@ -57,6 +57,8 @@
 
 #include <zapit/client/zapitclient.h>
 
+#include <string.h>
+
 #define info_height 60
 
 
@@ -171,7 +173,9 @@ CTimerList::~CTimerList()
 
 int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 {
-	if(actionKey=="modifytimer")
+	const char * key = actionKey.c_str();
+
+	if (strcmp(key, "modifytimer") == 0)
 	{
 		timerlist[selected].announceTime = timerlist[selected].alarmTime -60;
 		if(timerlist[selected].eventRepeat >= CTimerd::TIMERREPEAT_WEEKDAYS)
@@ -186,7 +190,7 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 										 timerlist[selected].stopTime, timerlist[selected].eventRepeat);
 		return menu_return::RETURN_EXIT;
 	}
-	else if(actionKey=="newtimer")
+	else if (strcmp(key, "newtimer") == 0)
 	{
 		timerNew.announceTime=timerNew.alarmTime-60;
 		CTimerd::EventInfo eventinfo;
@@ -217,17 +221,21 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 									timerNew.stopTime,timerNew.eventRepeat);
 		return menu_return::RETURN_EXIT;
 	}
-	else if (actionKey.substr(0,4)=="SC:")
+	else if (strncmp(key, "SC:", 3) == 0)
 	{
 		int delta;
-		sscanf(actionKey.substr(4).c_str(),
+		sscanf(&(key[3]),
 		       SCANF_CHANNEL_ID_TYPE
 		       "%n",
 		       &timerNew.channel_id,
 		       &delta);
-		strncpy(timerNew_channel_name,actionKey.substr(4 + delta + 1).c_str(),30);
-		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
-		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
+#if 0
+		strncpy(timerNew_channel_name, &(key[3 + delta + 1]), 30);
+#else
+		strncpy(timerNew_channel_name, CZapitClient::Utf8_to_Latin1(&(key[3 + delta + 1])).c_str(), 30);
+#endif
+		g_RCInput->postMsg(CRCInput::RC_timeout, 0); // leave underlying menu also
+		g_RCInput->postMsg(CRCInput::RC_timeout, 0); // leave underlying menu also
 		return menu_return::RETURN_EXIT;
 	}
 
@@ -792,7 +800,7 @@ int CTimerList::newTimer()
 		CZapitClient::BouquetChannelList::iterator channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
-			char cChannelId[4+16+1+1];
+			char cChannelId[3+16+1+1];
 			sprintf(cChannelId,
 				"SC:"
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -807,7 +815,7 @@ int CTimerList::newTimer()
 		channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
-			char cChannelId[4+16+1+1];
+			char cChannelId[3+16+1+1];
 			sprintf(cChannelId,
 				"SC:"
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
