@@ -44,7 +44,7 @@ static	void	SaveGame( void )
 	if ( !score || !hscore )
 		return;
 
-	FBDrawString( 150,300,64,"Save Highscore ? (OK/BLUE)",WHITE,0);
+	FBDrawString( 150,350,64,"Save Highscore ? (OK/BLUE)",WHITE,0);
 
 	while( realcode != 0xee )
 		RcGetActCode();
@@ -65,9 +65,9 @@ static	void	SaveGame( void )
 	if ( doexit )
 		return;
 
-	FBFillRect( 150,300,570,64,BLACK );
-	x=FBDrawString( 150,300,64,"name : ",WHITE,0);
-	user=FBEnterWord(150+x,300,64,9,WHITE);
+	FBFillRect( 150,350,570,64,BLACK );
+	x=FBDrawString( 150,350,64,"name : ",WHITE,0);
+	user=FBEnterWord(150+x,350,64,9,WHITE);
 
 /* clean name */
 	x = strlen(user);
@@ -102,9 +102,9 @@ static	void	SaveGame( void )
 	res = curl_easy_perform(curl);
 
 	if ( !res )
-		FBDrawString( 170,364,64,"success",WHITE,0);
+		FBDrawString( 170,415,64,"success",WHITE,0);
 	else
-		FBDrawString( 170,364,64,"failed",WHITE,0);
+		FBDrawString( 170,415,64,"failed",WHITE,0);
 
 	curl_easy_cleanup(curl);
 	fclose( fp );
@@ -252,6 +252,8 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		{
 			actcode=0xee;
 			DrawGameOver();
+			SaveGame();
+			FBDrawString( 170, 350, 64, " play again with OK ",WHITE,BLACK);
 			doexit=0;
 			while(( actcode != RC_OK ) && !doexit )
 			{
