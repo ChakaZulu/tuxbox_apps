@@ -2,7 +2,7 @@
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2004 Zwen
-   base decoder class
+	base decoder class
 	Homepage: http://www.cyberphoria.org/
 
 	Kommentar:
@@ -37,6 +37,9 @@
 #include <unistd.h>
 #include <dbox/avs_core.h>
 #include <driver/netfile.h>
+#ifdef DBOX
+#include <driver/aviaext.h>
+#endif
 #define AVS_DEVICE "/dev/dbox/avs0"
 
 unsigned int CBaseDec::mSamplerate=0;
@@ -111,7 +114,13 @@ bool CBaseDec::SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int
 			crit_error=true;
 	 	}
 	 	else
+	 	{
 	 		mSamplerate = dsp_speed;
+#ifdef DBOX
+			// disable iec aka digi out (avia reset enables it again)
+			CAViAExt::getInstance()->iecOff();
+#endif
+		}	 		
 		usleep(400000);
 		if (!was_muted)
 			avs_mute(false);
