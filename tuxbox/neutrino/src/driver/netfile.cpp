@@ -123,9 +123,10 @@ static int cache_size = 196608;/* default cache size; can be overridden at */
 				/* runtime with an option in the options file */
 
 STATIC STREAM_CACHE cache[CACHEENTMAX];
+STATIC STREAM_TYPE stream_type[CACHEENTMAX];
 
 static int  ConnectToServer(char *hostname, int port);
-static int  parse_response(int fd, void *, CSTATE*);
+static int  parse_response(URL *url, void *, CSTATE*);
 static int  request_file(URL *url);
 static void readln(int, char *);
 static int  getCacheSlot(FILE *fd);
@@ -233,6 +234,8 @@ int request_file(URL *url)
   int slot, rval;
   ID3 id3;
 
+  /* get the cache slot for this stream. A negative return value */
+  /* indicates that no cache has been set up for this stream */
   slot = getCacheSlot(url->stream);
 
   switch(url->proto_version)
@@ -262,13 +265,13 @@ int request_file(URL *url)
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
 		  
-		  rval = parse_response(url->fd, NULL, NULL);
-		  
+		  rval = parse_response(url, NULL, NULL);
+
 //		  dprintf(stderr, "server response parser: return value = %d\n", rval);
-		  
+
 		  /* if the header indicated a zero length document or an */
-		  /* error, then close the cache */
-		  if(rval <= 0)
+		  /* error, then close the cache, if there is any */
+		  if((slot >= 0) && (rval <= 0))
 		    cache[slot].closed = 1;
 		  
 		  /* return on error */
@@ -301,7 +304,7 @@ int request_file(URL *url)
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
 
-		  if( (meta_int = parse_response(url->fd, &id3, &tmp)) < 0)
+		  if( (meta_int = parse_response(url, &id3, &tmp)) < 0)
 		    return -1;
 		    
 		  if(meta_int)
@@ -328,13 +331,18 @@ int request_file(URL *url)
   /* now it get's nasty ;) */
   /* create a thread that continously feeds the cache */
   /* with the data it fetches from the network stream */
+  /* but *ONLY* if there is a cache slot for this stream at all ! */
+  /* HINT: in compatibility mode no cache is configured */
  
-  pthread_attr_init(&cache[slot].attr);
-  pthread_create(
+  if(slot >= 0)
+  {
+    pthread_attr_init(&cache[slot].attr);
+    pthread_create(
   	&cache[slot].fill_thread, 
 	&cache[slot].attr, 
 	(void *(*)(void*))&CacheFillThread, (void*)&cache[slot]);
-
+  }
+  
   /* now we do not care any longer about fetching new data,*/
   /* but we can not be shure that the cache is filled with */
   /* enough stuff ! */
@@ -375,12 +383,13 @@ void readln(int fd, char *buf)
   if(buf) *buf = 0;
 }
 
-int parse_response(int fd, void *opt, CSTATE *state)
+int parse_response(URL *url, void *opt, CSTATE *state)
 {
   char header[2049], str[255];
-  char *ptr, chr, lastchr;
+  char *ptr, chr=0, lastchr=0;
   int hlen = 0, response;
   int meta_interval = 0, rval;
+  int fd = url->fd;
   ID3 *id3 = (ID3*)opt;
   
   bzero(header, 2048);
@@ -440,6 +449,11 @@ int parse_response(int fd, void *opt, CSTATE *state)
   		  return -1;
   }
 
+  /* use 'audio/mpeg' as default type, in case we are not told otherwise */
+  strcpy(str, "audio/mpeg");
+  getHeaderStr("Content-Type:", str);
+  f_type(url->stream, str);
+  
   /* if we got a content length from the server, i.e. rval >= 0 */
   /* then return now with the content length as return value */
   getHeaderVal("Content-Length:", rval);
@@ -561,19 +575,34 @@ int parse_response(int fd, void *opt, CSTATE *state)
       url.proto_version = c; \
     }
 
-FILE *f_open(const char *filename, const char *type)
+FILE *f_open(const char *filename, const char *acctype)
 {
   URL url;
   FILE *fd;
-  int i;
-  char *ptr = NULL, buf[4096];
-  
-  getOpts();			/* read some options from the options-file */
+  int i, compatibility_mode = 0;
+  char *ptr = NULL, buf[4096], type[10];
 
+  if(acctype)
+    strcpy(type, acctype);
+  
+  /* read some options from the options-file */
+  getOpts();
+  
+  /* test if compatibility mode has been requested. */
+  /* e.g. "rbc" = read, binary, without stream caching */
+  if(strchr(type, 'c'))
+  {
+    compatibility_mode = 1;
+    *strchr(type, 'c') = 0;
+  }
+  
+  dprintf(stderr, "f_open: %s %s\n", (compatibility_mode) ? "(compatibility mode)" : "", filename);
+
+  /* set default protocol and port */
   bzero(&url, sizeof(URL));
+  url.proto_version = HTTP11;
+  url.port = 80;
   strcpy(url.url, filename);
-  url.port = 80;		/* default port is 80 */
-  url.proto_version = HTTP11;	/* default protocol is HTTP/1.1 */
 
   /* remove leading spaces */
   for (ptr = url.url; (ptr != NULL) && ((*ptr == ' ') || (*ptr == '	')); ptr++);
@@ -584,10 +613,7 @@ FILE *f_open(const char *filename, const char *type)
   /* did we get an URL file as argument ? If so, then open */
   /* this file, read out the url and open the url instead */
 #ifndef DISABLE_URLFILES
-  if(
-  	strstr(filename, ".url") || 
-	strstr(filename, ".imu") 	/* image URL - analog m3u */
-     )
+  if( strstr(filename, ".url") || strstr(filename, ".imu"))
   {
     fd = fopen(filename, "r");
 			    
@@ -707,43 +733,52 @@ FILE *f_open(const char *filename, const char *type)
 			     }
 			     else
 			     {
-			       /* look for a free cache slot */
-			       for(i=0; ((i<CACHEENTMAX) && (cache[i].cache != NULL)); i++);
-			       
-			       /* no free cache slot ? return an error */
-			       if(i == CACHEENTMAX)
+			       /* in compatibility mode we must not use our own stream cache */
+			       /* because the application makes use of their own f*() calls */
+			       /* which we can not replace by our own functions and thus they'll */
+			       /* interfere with each other. All we can do is to open the stream */
+			       /* and return a valid stream descriptor */
+			       if(!compatibility_mode)
 			       {
-			         sprintf(err_txt, "no more free cache slots. Too many open files.\n");
-				 return NULL;
+			         /* look for a free cache slot */
+			         for(i=0; ((i<CACHEENTMAX) && (cache[i].cache != NULL)); i++);
+			       
+			         /* no free cache slot ? return an error */
+			         if(i == CACHEENTMAX)
+			         {
+			           sprintf(err_txt, "no more free cache slots. Too many open files.\n");
+				   return NULL;
+			         }
+			       
+			         dprintf(stderr, "f_open: adding stream %x to cache[%d]\n", fd, i);
+
+			         cache[i].fd      = fd;
+			         cache[i].csize   = CACHESIZE;
+			         cache[i].cache   = (char*)malloc(cache[i].csize);
+			         cache[i].ceiling = cache[i].cache + CACHESIZE;
+			         cache[i].wptr    = cache[i].cache;
+			         cache[i].rptr    = cache[i].cache;
+			         cache[i].closed  = 0;
+			         cache[i].total_bytes_delivered = 0;
+			         cache[i].filter  = NULL;
+			     
+			         /* create the readable/writeable mutex locks */
+			         dprintf(stderr, "f_open: creating mutexes\n");
+			         pthread_mutex_init(&cache[i].cache_lock, &cache[i].cache_lock_attr);
+			         pthread_mutex_init(&cache[i].readable,   &cache[i].readable_attr);
+			         pthread_mutex_init(&cache[i].writeable,  &cache[i].writeable_attr);
+
+			         /* and set the empty cache to 'unreadable' */
+			         dprintf(stderr, "f_open: locking read direction\n");
+			         pthread_mutex_lock( &cache[i].readable );
+			     
+			         /* but writeable. */
+			         dprintf(stderr, "f_open: unlocking write direction\n");
+			         pthread_mutex_unlock( &cache[i].writeable );
 			       }
 			       
-			       dprintf(stderr, "f_open: adding stream %x to cache[%d]\n", fd, i);
-
-			       cache[i].fd      = fd;
-			       cache[i].csize   = CACHESIZE;
-			       cache[i].cache   = (char*)malloc(cache[i].csize);
-			       cache[i].ceiling = cache[i].cache + CACHESIZE;
-			       cache[i].wptr    = cache[i].cache;
-			       cache[i].rptr    = cache[i].cache;
-			       cache[i].closed  = 0;
-			       cache[i].total_bytes_delivered = 0;
-			       cache[i].filter  = NULL;
-			     
-			       /* create the readable/writeable mutex locks */
-			       dprintf(stderr, "f_open: creating mutexes\n");
-			       pthread_mutex_init(&cache[i].cache_lock, &cache[i].cache_lock_attr);
-			       pthread_mutex_init(&cache[i].readable,   &cache[i].readable_attr);
-			       pthread_mutex_init(&cache[i].writeable,  &cache[i].writeable_attr);
-
-			       /* and set the empty cache to 'unreadable' */
-			       dprintf(stderr, "f_open: locking read direction\n");
-			       pthread_mutex_lock( &cache[i].readable );
-			     
-			       /* but writeable. */
-			       dprintf(stderr, "f_open: unlocking write direction\n");
-			       pthread_mutex_unlock( &cache[i].writeable );
-			     
-			       /* did the request fail ? Then close the stream */
+			       /* send the file request and check it'S revurn value */
+			       /* if it failed, then close the stream */
 			       if(request_file(&url) < 0)
 			       {
 			         /* we need out own f_close() function here, because everything */
@@ -753,7 +788,7 @@ FILE *f_open(const char *filename, const char *type)
 			       }
 			     }
 			   }
-			 }			   
+			 }
   			 break;
 			 
   case MODE_SCAST:	/* pseude transport mode; create the url to fetch the shoutcast */
@@ -768,14 +803,15 @@ FILE *f_open(const char *filename, const char *type)
 			 sprintf(url.url, "http://www.shoutcast.com/sbin/shoutcast-playlist.pls?rn=%s&file=filename.pls", url.host);
 
   case MODE_PLS:	{
-  			    char *ptr, *ptr2, buf[4096], servers[25][1024];
+  			    char *ptr=NULL, *ptr2, buf[4096], servers[25][1024];
 			    int rval, i, retries = 15;
 
 			    /* fetch the playlist from the shoutcast directory with our own */
-			    /* url-capable f_open() call */
+			    /* url-capable f_open() call. We need the compatibility mode for */
+			    /* this because we will read the data with the standard OS fread() call */
 			    do
 			    {
-			      fd = f_open(url.url, "r");
+			      fd = f_open(url.url, "rc");
 			    
 			      if(fd)
 			      {
@@ -797,7 +833,7 @@ FILE *f_open(const char *filename, const char *type)
 			    if(!ptr)
 			    {
 			      dprintf(stderr, "Ups! Playlist doesn't seem to contain any URL !\nbuffer:%s\n", buf);
-			      printf("Ups! Playlist doesn't seem to contain any URL !\nbuffer:%s\n", buf);
+			      sprintf(err_txt, "Ups! Playlist doesn't seem to contain any URL !");
 			      return NULL;
 			    }
 			    
@@ -823,6 +859,17 @@ FILE *f_open(const char *filename, const char *type)
 
   case MODE_FILE:	
   default:	       fd = fopen(url.file, type);
+
+			 /* a smarter solution would be to get this info from /etc/mime.types */
+
+  			 if(strstr(url.file, ".ogg")) f_type(fd, "audio/ogg");
+  			 if(strstr(url.file, ".mp3")) f_type(fd, "audio/mpeg");
+  			 if(strstr(url.file, ".mp2")) f_type(fd, "audio/mpeg");
+  			 if(strstr(url.file, ".mpa")) f_type(fd, "audio/mpeg");
+  			 if(strstr(url.file, ".wav")) f_type(fd, "audio/wave");
+  			 if(strstr(url.file, ".aif")) f_type(fd, "audio/aifc");
+  			 if(strstr(url.file, ".snd")) f_type(fd, "audio/snd");
+
   			 break;
   }
   
@@ -833,8 +880,18 @@ int f_close(FILE *stream)
 {
   int i, rval;
   
+  /* at first, lookup the stream in the stream type table and remove it */
+  for(i=0 ; (i<CACHEENTMAX) && (stream_type[i].stream != stream); i++);
+
+  if(i < CACHEENTMAX)
+    stream_type[i].stream = NULL;
+
   /* lookup the stream ID in the cache table */
   i = getCacheSlot(stream);
+
+  /* no associated cache slot ? Simply close the stream */
+  if(i < 0)
+    return( fclose(stream) );
 
   if(cache[i].fd == stream)
   {
@@ -886,6 +943,9 @@ long f_tell(FILE *stream)
   /* lookup the stream ID in the cache table */
   i = getCacheSlot(stream);
 
+  if(i < 0)
+    return( ftell(stream) );
+
   if(cache[i].fd == stream) 
     rval = cache[i].total_bytes_delivered;
   else
@@ -901,6 +961,12 @@ void f_rewind(FILE *stream)
   /* lookup the stream ID in the cache table */
   i = getCacheSlot(stream);
 
+  if(i < 0)
+  {
+    rewind(stream);
+    return;
+  }
+
   if(cache[i].fd == stream)
   {
     /* nothing to do */
@@ -915,6 +981,9 @@ int f_seek(FILE *stream, long offset, int whence)
   
   /* lookup the stream ID in the cache table */
   i = getCacheSlot(stream);
+
+  if(i < 0)
+    return( fseek(stream, offset, whence) );
 
   if(cache[i].fd == stream)
   {
@@ -935,12 +1004,60 @@ size_t f_read (void *ptr, size_t size, size_t nitems, FILE *stream)
   /* lookup the stream ID in the cache table */
   i = getCacheSlot(stream);
 
+  if(i < 0)
+    return( fread(ptr, size, nitems, stream) );
+
   if(cache[i].fd == stream)
     rval = pop(stream, (char*)ptr, size * nitems);
   else
     rval = fread(ptr, size, nitems, stream);
 
   return rval;
+}
+
+char *f_type(FILE *stream, char *type)
+{
+  int i;
+  
+  /* lookup the stream in the stream type table */
+  for(i=0 ; (i<CACHEENTMAX) && (stream_type[i].stream != stream); i++);
+  
+  /* if the stream could not be found, look for a free slot ... */
+  if(i == CACHEENTMAX)
+  {
+    dprintf(stderr, "stream %x not in type table, ", stream);
+
+    for(i=0 ; (i<CACHEENTMAX) && (stream_type[i].stream != NULL); i++);
+
+    /* ... and copy the supplied type into the table */
+    if(i < CACHEENTMAX)
+    {
+      if(type)
+      {
+        stream_type[i].stream = stream;
+        strncpy(stream_type[i].type, type, 64);
+        dprintf(stderr, "added entry (%s) for %x\n", type, stream);
+      }
+      return type;
+    }
+    else
+      dprintf(stderr, "failed to add entry (%s)\n", type);
+
+  }
+
+  /* the stream is already in the table */
+  else
+  {
+    dprintf(stderr, "stream %x lookup in type table succeded\n", stream);
+
+    if(!type)
+      return stream_type[i].type;
+    else
+    if(strstr(stream_type[i].type, type))
+      return stream_type[i].type;
+  }
+
+  return NULL;
 }
 
 
@@ -975,7 +1092,9 @@ int getCacheSlot(FILE *fd)
 {
   int i;
 
-  for(i=0; ((i<CACHEENTMAX) && (cache[i].fd != fd)); i++);
+  for(i=0; (
+  (i<CACHEENTMAX) && ((cache[i].fd != fd) || (!cache[i].cache)) 
+  ); i++);
   
   return (i == CACHEENTMAX) ? -1 : i;
 }

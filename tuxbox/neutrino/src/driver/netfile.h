@@ -65,6 +65,7 @@ extern "C" {
 #define rewind  f_rewind
 #define fseek   f_seek
 #define fstatus f_status
+#define ftype   f_type
 
 extern FILE *f_open(const char *, const char *);
 extern int f_close(FILE *);
@@ -73,6 +74,7 @@ extern long f_tell(FILE *);
 extern void f_rewind(FILE *);
 extern int f_seek(FILE *, long, int);
 extern int f_status(FILE *, void (*)(void*));
+extern char *f_type(FILE *, char*);
 extern char err_txt[2048];
 
 #define CACHESIZE	cache_size
@@ -176,6 +178,11 @@ typedef  struct
     char base[1024];
 } ID3_frame;
 
+typedef struct
+{
+	FILE	*stream;	/* streamdescriptor */
+	char type[65];
+} STREAM_TYPE;
 #ifdef __cplusplus
 }
 #endif

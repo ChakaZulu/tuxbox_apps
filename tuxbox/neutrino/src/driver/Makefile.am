@@ -1,4 +1,4 @@
-SUBDIRS = pictureviewer
+SUBDIRS = pictureviewer audiodec
 
 INCLUDES = \
 	-I$(top_srcdir)/daemons \
@@ -18,7 +18,7 @@ libneutrino_driver_a_SOURCES = \
 	fb_window.cpp \
 	rcinput.cpp \
 	vcrcontrol.cpp \
-	mp3play.cpp \
+	audioplay.cpp \
 	lcdd.cpp \
 	bigclock.cpp \
 	newclock.cpp \

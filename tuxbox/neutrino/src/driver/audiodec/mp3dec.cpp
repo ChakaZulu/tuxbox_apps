@@ -30,32 +30,25 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define DBOX
 
 /****************************************************************************
  * Includes																	*
  ****************************************************************************/
-#include "global.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <mad.h>
-#include <sched.h>
 
-#include <neutrino.h>
-#include <driver/mp3play.h>
-#include <dbox/avs_core.h>
-
+#include <driver/audiodec/mp3dec.h>
 #include <driver/netfile.h>
-
-#define AVS_DEVICE "/dev/dbox/avs0"
+#include <linux/soundcard.h>
 
 // Frames to skip in ff/rev mode
 #define FRAMES_TO_SKIP 75 
 // nr of frames to play after skipping in rev/ff mode
 #define FRAMES_TO_PLAY 5
 
-#define ProgName "CMP3Player"
+#define ProgName "CMP3Dec"
 
 /****************************************************************************
  * Global variables.														*
@@ -73,7 +66,7 @@
       (MAD_VERSION_MINOR>14)))
 #define MadErrorString(x) mad_stream_errorstr(x)
 #else
-const char *CMP3Player::MadErrorString(const struct mad_stream *Stream)
+const char *CMP3Dec::MadErrorString(const struct mad_stream *Stream)
 {
 	switch(Stream->error)
 	{
@@ -136,7 +129,7 @@ const char *CMP3Player::MadErrorString(const struct mad_stream *Stream)
  * Converts a sample from mad's fixed point number format to a signed       *
  * short (16 bits).                                                         *
  ****************************************************************************/
-inline signed short CMP3Player::MadFixedToSShort(const mad_fixed_t Fixed)
+inline signed short CMP3Dec::MadFixedToSShort(const mad_fixed_t Fixed)
 {
 	/* A fixed point number is formed of the following bit pattern:
 	 *
@@ -167,7 +160,7 @@ inline signed short CMP3Player::MadFixedToSShort(const mad_fixed_t Fixed)
 /****************************************************************************
  * Print human readable informations about an audio MPEG frame.             *
  ****************************************************************************/
-void CMP3Player::CreateInfo()
+void CMP3Dec::CreateInfo()
 {
 	const char	*Layer,
 				   *Mode,
@@ -232,16 +225,12 @@ void CMP3Player::CreateInfo()
    else
       Vbr="";
 
-//	fprintf(fp,"%s: %lu kb/s audio mpeg layer %s stream %s crc, "
-//			"%s with %s emphasis at %d Hz sample rate\n",
-//			ProgName,Header->bitrate,Layer,
-//			Header->flags&MAD_FLAG_PROTECTION?"with":"without",
-//			Mode,Emphasis,Header->samplerate);
-   
-   sprintf(m_mp3info,"%s%lukbs / %.1fKHz / %s / layer %s", Vbr, m_bitrate/1000,
-           (float)m_samplerate/1000, Mode,Layer);
-   long secs = m_filesize * 8 / m_bitrate;
-   sprintf(m_timeTotal,"%lu:%02lu", secs/60, secs%60);
+	CAudioPlayer::getInstance()->m_MetaData.type = CAudioPlayer::MP3;
+	CAudioPlayer::getInstance()->m_MetaData.bitrate = m_bitrate;
+	CAudioPlayer::getInstance()->m_MetaData.samplerate = m_samplerate;
+	CAudioPlayer::getInstance()->m_MetaData.total_time = m_filesize * 8 / m_bitrate;
+	snprintf(CAudioPlayer::getInstance()->m_MetaData.type_info, 99, "MPEG Layer %s / %s", Layer, Mode);
+	CAudioPlayer::getInstance()->m_MetaData.changed=true;
 }
 
 /****************************************************************************
@@ -249,7 +238,7 @@ void CMP3Player::CreateInfo()
  ****************************************************************************/
 #define INPUT_BUFFER_SIZE	(2*8192)
 #define OUTPUT_BUFFER_SIZE	1022*4 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
-int CMP3Player::MpegAudioDecoder(FILE *InputFp,int OutputFd)
+int CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state)
 {
 	struct mad_stream	Stream;
 	struct mad_frame	Frame;
@@ -263,6 +252,11 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,int OutputFd)
 						ret;
 	unsigned long		FrameCount=0;
 
+	/* Calc file length */
+	fseek(InputFp, 0, SEEK_END);
+	m_filesize=ftell(InputFp);
+	rewind(InputFp);
+	
 	/* First the structures used by libmad must be initialized. */
 	mad_stream_init(&Stream);
 	mad_frame_init(&Frame);
@@ -274,10 +268,9 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,int OutputFd)
 	 */
 
 	/* This is the decoding loop. */
-	state = PLAY;
 	do
 	{
-		if(state==PAUSE)
+		if(*state==PAUSE)
 		{
 			// in pause mode do nothing
 			usleep(100000);
@@ -376,9 +369,11 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		 * skip the faulty part and re-sync to the next frame.
 		 */
 		// decode 'FRAMES_TO_PLAY' frames each 'FRAMES_TO_SKIP' frames in ff/rev mode 
-		if( (state!=FF && state!=REV) || FrameCount % FRAMES_TO_SKIP < FRAMES_TO_PLAY )
+		if( (*state!=FF && 
+			  *state!=REV) || 
+			 FrameCount % FRAMES_TO_SKIP < FRAMES_TO_PLAY )
 			ret=mad_frame_decode(&Frame,&Stream);
-		else if(state==FF) // in FF mode just decode the header, this sets bufferptr to next frame and also gives stats about the frame for totals
+		else if(*state==FF) // in FF mode just decode the header, this sets bufferptr to next frame and also gives stats about the frame for totals
 			ret=mad_header_decode(&Frame.header,&Stream);
 		else
 		{ //REV
@@ -391,7 +386,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 				Timer.fraction=0;
 				Timer.seconds=0;
 				FrameCount=0;
-				state=PLAY;
+				*state=PLAY;
 			}
 			else
 			{
@@ -412,6 +407,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 					Timer.seconds=0;
 					Timer.fraction=0;
 				}
+				CAudioPlayer::getInstance()->setTimePlayed(Timer.seconds);
 				FrameCount-=FRAMES_TO_SKIP + FRAMES_TO_PLAY;
 			}
 			Stream.buffer=NULL;
@@ -424,7 +420,8 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 			if(MAD_RECOVERABLE(Stream.error))
 			{
 				// no errrors in FF mode
-				if(state!=FF && state!=REV)
+				if(*state!=FF && 
+					*state!=REV)
 				{
 					fprintf(stderr,"%s: recoverable frame level error (%s)\n",
 						ProgName,MadErrorString(&Stream));
@@ -451,7 +448,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		FrameCount++;
 		if (FrameCount == 1)
 		{
-			if (SetDSP(OutputFd, &Frame.header))
+			if (SetDSP(OutputFd, AFMT_S16_NE, Frame.header.samplerate, 2))
 			{
 				Status=1;
 				break;
@@ -475,6 +472,13 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 			}
 		}
 
+		// if played time was modified from outside, take this value...
+		if(CAudioPlayer::getInstance()->getTimePlayed()!=Timer.seconds)
+		{
+			mad_timer_reset(&Timer);
+			Timer.seconds = CAudioPlayer::getInstance()->getTimePlayed();
+		}
+		
 		/* Accounting. The computed frame duration is in the frame
 		 * header structure. It is expressed as a fixed point number
 		 * whole data type is mad_timer_t. It is different from the
@@ -485,12 +489,13 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		 * mad_timer_t arguments by value!
 		 */
 		mad_timer_add(&Timer,Frame.header.duration);
-		mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
-                       MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
+		//mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
+      //                 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
+		CAudioPlayer::getInstance()->setTimePlayed(Timer.seconds);
 
 				
 		// decode 5 frames each 75 frames in ff mode
-		if( state!=FF || FrameCount % 75 < 5)
+		if( *state!=FF || FrameCount % 75 < 5)
 		{
 			
 			/* Once decoded the frame is synthesized to PCM samples. No errors
@@ -562,7 +567,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 				}
 			}
 		}
-	}while(do_loop);
+	}while(*state!=STOP_REQ);
 
 	/* Mad is no longer used, the structures that were initialized must
      * now be cleared.
@@ -605,9 +610,11 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		 * of the available units, fraction of units, their meanings,
 		 * the format arguments, etc.
 		 */
-		mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
-						 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
-//		fprintf(stderr,"%s: %lu frames decoded (%s).\n",
+	   //		mad_timer_string(Timer,m_timePlayed,"%lu:%02lu",
+		//				 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
+		CAudioPlayer::getInstance()->setTimePlayed(Timer.seconds);
+
+//		      fprintf(stderr,"%s: %lu frames decoded (%s).\n",
 //				ProgName,FrameCount,Buffer);
 	}
 
@@ -615,201 +622,13 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 	return(Status);
 }
 
-bool  CMP3Player::SetDSP(int soundfd, struct mad_header *Header)
+CMP3Dec* CMP3Dec::getInstance()
 {
-	int fmt = AFMT_S16_NE; /* signed 16 bit native endian */
-	 unsigned int dsp_speed;
-	 unsigned int channels;
-	 bool crit_error=false;
-
-	 dsp_speed = Header->samplerate;
-	 // Single channel is transformed to dual channel in MpegAudioDecoder, there for set oss channels to 2 always
-	 channels=2;
-    
-	 if (::ioctl(soundfd, SNDCTL_DSP_RESET))
-		 printf("reset failed\n");
-	 if(::ioctl(soundfd, SNDCTL_DSP_SETFMT, &fmt))
-		 printf("setfmt failed\n");
-	 if(::ioctl(soundfd, SNDCTL_DSP_CHANNELS, &channels))
-		 printf("channel set failed\n");
-#ifdef DBOX
-	 if (dsp_speed != m_samplerate)
-#endif
-	 {
-		// mute audio to reduce pops when changing samplerate (avia_reset)
-		bool was_muted = avs_mute(true);
-		if (::ioctl(soundfd, SNDCTL_DSP_SPEED, &dsp_speed))
-		{
-			printf("speed set failed\n");
-			crit_error=true;
-	 	}
-	 	else
-	 		m_samplerate = dsp_speed;
-		usleep(400000);
-		if (!was_muted)
-			avs_mute(false);
-	 }
-//		  printf("Debug: SNDCTL_DSP_RESET %d / SNDCTL_DSP_SPEED %d / SNDCTL_DSP_CHANNELS %d / SNDCTL_DSP_SETFMT %d\n",
-//					SNDCTL_DSP_RESET, SNDCTL_DSP_SPEED, SNDCTL_DSP_CHANNELS, SNDCTL_DSP_SETFMT);
-		  return crit_error;
-}
-
-void CMP3Player::stop()
-{
-	do_loop = false;
-	pthread_join(thrPlay,NULL);
-}
-void CMP3Player::pause()
-{
-   if(state==PLAY || state==FF || state==REV)
-      state=PAUSE;
-   else if(state==PAUSE)
-      state=PLAY;
-}
-void CMP3Player::ff()
-{
-   if(state==PLAY || state==PAUSE || state==REV)
-      state=FF;
-   else if(state==FF)
-      state=PLAY;
-}
-void CMP3Player::rev()
-{
-   if(state==PLAY || state==PAUSE || state==FF)
-      state=REV;
-   else if(state==REV)
-      state=PLAY;
-}
-CMP3Player* CMP3Player::getInstance()
-{
-	static CMP3Player* mp3player = NULL;
-	if(mp3player == NULL)
+	static CMP3Dec* MP3Dec = NULL;
+	if(MP3Dec == NULL)
 	{
-		mp3player = new CMP3Player();
+		MP3Dec = new CMP3Dec();
 	}
-	return mp3player;
+	return MP3Dec;
 }
-
-void ShoutcastCallback(void *arg)
-{
-	CMP3Player::getInstance()->sc_callback(arg);
-}
-
-void* CMP3Player::PlayThread(void * filename)
-{
-	FILE *fp;
-	int soundfd;
-	soundfd=::open("/dev/sound/dsp",O_WRONLY);
-	if (soundfd != -1)
-	{
-		fp = ::fopen((char *)filename,"r");
-		if (fp!=NULL)
-		{
-			/* add callback function for shoutcast */
-			if (fstatus(fp, ShoutcastCallback) < 0)
-			{
-				fprintf(stderr,"Error adding shoutcast callback!\n%s",err_txt);
-			}
-         
-			/* Calc file length */
-         fseek(fp, 0, SEEK_END);
-         CMP3Player::getInstance()->m_filesize=ftell(fp);
-         rewind(fp);
-
-			/* Decode stdin to stdout. */
-			int Status = CMP3Player::getInstance()->MpegAudioDecoder(fp,soundfd);
-			if(Status > 0)
-				fprintf(stderr,"Error %d occured during decoding.\n",Status);
-	
-			fclose(fp);
-		}
-		else
-			fprintf(stderr,"Error opening file %s\n",(char *) filename);
-		close(soundfd);
-	}
-	else
-		fprintf(stderr,"Error opening /dev/sound/dsp\n");
-		
-	CMP3Player::getInstance()->state = STOP;
-	pthread_exit(0);
-	return NULL;
-}
-
-bool CMP3Player::play(const char *filename, bool highPrio)
-{
-	stop();
-	strcpy(m_mp3info,"");
-	strcpy(m_timePlayed,"0:00");
-	strcpy(m_timeTotal,"0:00");
-	CMP3Player::getInstance()->clearScData();
-	do_loop = true;
-	state = PLAY;
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	if(highPrio)
-	{
-		struct sched_param param;
-		pthread_attr_setschedpolicy(&attr, SCHED_RR);
-		param.sched_priority=1;
-		pthread_attr_setschedparam(&attr, &param);
-		usleep(100000); // give the event thread some time to handle his stuff
-							 // without this sleep there were duplicated events...
-	}
-	if (pthread_create (&thrPlay, &attr, PlayThread,(void *) filename) != 0 )
-	{
-		perror("mp3play: pthread_create(PlayThread)");
-		return false;
-	}
-	return true;
-}
-
-CMP3Player::CMP3Player()
-{
-	init();
-}
-
-void CMP3Player::init()
-{
-	state = STOP;
-	m_samplerate=0;
-}
-
-bool CMP3Player::avs_mute(bool mute)
-{
-	int fd, a, b=AVS_UNMUTE;
-	a = mute ? AVS_MUTE : AVS_UNMUTE;
-	if ((fd = open(AVS_DEVICE, O_RDWR)) < 0)
-		 perror("[CMP3Player::avs_mute] " AVS_DEVICE);
-	 else 
-	 {
-		 if (ioctl(fd, AVSIOGMUTE, &b) < 0)
-			 perror("[CMP3Player::avs_mute] AVSIOSMUTE");
-		 if(a!=b)
-		 {
-			 if (ioctl(fd, AVSIOSMUTE, &a) < 0)
-				 perror("[CMP3Player::avs_mute] AVSIOSMUTE");
-		 }
-		 close(fd);
-	 }
-	 return (b==AVS_MUTE);
-}
-
-void CMP3Player::sc_callback(void *arg)
-{
-  CSTATE *state = (CSTATE*)arg;
-  m_sc_artist = state->artist;
-  m_sc_title = state->title;
-  m_sc_station = state->station;
-  m_sc_buffered = state->buffered;
-  //printf("Callback %s %s %d\n",state->artist, state->title, state->buffered);
-}
-
-void CMP3Player::clearScData()
-{
-  m_sc_artist = "";
-  m_sc_title = "";
-  m_sc_station = "";
-  m_sc_buffered=0;
-}
-
 

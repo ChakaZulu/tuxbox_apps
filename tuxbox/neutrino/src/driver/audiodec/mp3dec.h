@@ -2,8 +2,11 @@
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2002 Bjoern Kalkbrenner <terminar@cyberphoria.org>
+	Copyright (C) 2002,2003 Dirch
+	Copyright (C) 2002,2003,2004 Zwen
+	
 	libmad MP3 low-level core
-	Homepage: http://www.cyberphoria.org/
+	Homepage: http://www.dbox2.info/
 
 	Kommentar:
 
@@ -31,74 +34,35 @@
 */
 
 
-#ifndef __MP3_PLAY__
-#define __MP3_PLAY__
+#ifndef __MP3_DEC__
+#define __MP3_DEC__
 
 #include <mad.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <linux/soundcard.h>
 #include <pthread.h>
+#include <driver/audioplay.h>
 
-
-class CMP3Player
+class CMP3Dec : public CBaseDec
 {
 
-	FILE		*soundfd;
-	bool		do_loop;
-	pthread_t	thrPlay;
-	FILE		*fp;
-	static void* PlayThread(void*);
-   char m_mp3info[100];
-   char m_timePlayed[11];
-   char m_timeTotal[11];
-   long m_filesize;
    enum mad_layer m_layer;
    enum mad_mode m_mode;
    enum mad_emphasis m_emphasis;
    unsigned long m_bitrate;
    unsigned int m_samplerate;
    bool m_vbr;
+	unsigned int m_filesize;
 
-	std::string m_sc_title;
-	std::string m_sc_artist;
-	std::string m_sc_station;
-	int m_sc_buffered;
-
-
-	const char		*MadErrorString(const struct mad_stream *Stream);
+	const char*  MadErrorString(const struct mad_stream *Stream);
 	signed short MadFixedToSShort(const mad_fixed_t Fixed);
-	void				CreateInfo();
-	int				MpegAudioDecoder(FILE *InputFp,int OutputFd);
-	bool SetDSP(int soundfd, struct mad_header *Header);
-	void clearScData();
+	void			 CreateInfo();
 
 public:
-	enum State {STOP = 0, PLAY, PAUSE, FF, REV};
-	State state;
-	static CMP3Player* getInstance();
-	bool play(const char *filename, bool highPrio=false);
-	void stop();
-   void pause();
-	void init();
-   void ff();
-   void rev();
-   char* getMp3Info(){return m_mp3info;}
-   char* getTimePlayed(){return m_timePlayed;}
-   char* getTimeTotal(){return m_timeTotal;}
-	bool avs_mute(bool mute);
-	void sc_callback(void *arg);
-	std::string & getScArtist() {return m_sc_artist;}
-	std::string & getScTitle() {return m_sc_title;}
-	std::string & getScStation() {return m_sc_station;}
-	int getScBuffered() {return m_sc_buffered;}
-	CMP3Player();
-	~CMP3Player();
+	static CMP3Dec* getInstance();
+	virtual int Decoder(FILE *InputFp,int OutputFd, State* state);
+	CMP3Dec(){};
 
 };
 

@@ -83,7 +83,7 @@
 #define ConnectLineBox_Width	15
 
 //------------------------------------------------------------------------
-bool sortByIndex (const CMP3& a, const CMP3& b)
+bool sortByIndex (const CAudiofile& a, const CAudiofile& b)
 {
 	return a.Index < b.Index ;
 }
@@ -95,18 +95,19 @@ CMP3PlayerGui::CMP3PlayerGui()
 
 	visible = false;
 	selected = 0;
-	m_mp3info = "";
+	m_metainfo = "";
 
 	filebrowser = new CFileBrowser();
 	filebrowser->Multi_Select = true;
 	filebrowser->Dirs_Selectable = true;
-	mp3filter.addFilter("mp3");
-	mp3filter.addFilter("m2a");
-	mp3filter.addFilter("mpa");
-	mp3filter.addFilter("mp2");
-	mp3filter.addFilter("m3u");
-	mp3filter.addFilter("url");
-	filebrowser->Filter = &mp3filter;
+	audiofilefilter.addFilter("mp3");
+	audiofilefilter.addFilter("m2a");
+	audiofilefilter.addFilter("mpa");
+	audiofilefilter.addFilter("mp2");
+	audiofilefilter.addFilter("m3u");
+	audiofilefilter.addFilter("url");
+	audiofilefilter.addFilter("ogg");
+	filebrowser->Filter = &audiofilefilter;
 	if(strlen(g_settings.network_nfs_mp3dir)!=0)
 		Path = g_settings.network_nfs_mp3dir;
 	else
@@ -126,7 +127,7 @@ CMP3PlayerGui::~CMP3PlayerGui()
 //------------------------------------------------------------------------
 int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 {
-	CMP3Player::getInstance()->init();
+	CAudioPlayer::getInstance()->init();
 	m_state=CMP3PlayerGui::STOP;
 	current=-1;
 	selected = 0;
@@ -232,8 +233,7 @@ int CMP3PlayerGui::show()
 		if(!m_screensaver)
 		{
 			updateTimes();
-			updateMP3Infos();
-			updateScInfos();
+			updateMetaData();
 		}
 
 		if(CNeutrinoApp::getInstance()->getMode()!=NeutrinoMessages::mode_mp3)
@@ -242,7 +242,7 @@ int CMP3PlayerGui::show()
 			loop=false;
 		}
 		if ((m_state != CMP3PlayerGui::STOP) && 
-		    (CMP3Player::getInstance()->state == CMP3Player::STOP) && 
+		    (CAudioPlayer::getInstance()->getState() == CBaseDec::STOP) && 
 		    (!playlist.empty()))
 		{
 			int next = getNext();
@@ -414,16 +414,23 @@ int CMP3PlayerGui::show()
 					CFileList::iterator files = filebrowser->getSelectedFiles()->begin();
 					for(; files != filebrowser->getSelectedFiles()->end();files++)
 					{
-						if(files->getType() == CFile::FILE_MP3)
+						if(files->getType() == CFile::FILE_MP3 )
 						{
-							CMP3 mp3;
+							CAudiofile mp3;
 							mp3.Filename = files->Name;
 							mp3.FileType = CFile::FILE_MP3;
 							playlist.push_back(mp3);
 						}
+						if(files->getType() == CFile::FILE_OGG)
+						{
+							CAudiofile mp3;
+							mp3.Filename = files->Name;
+							mp3.FileType = CFile::FILE_OGG;
+							playlist.push_back(mp3);
+						}
 						if(files->getType() == CFile::STREAM_MP3)
 						{
-							CMP3 mp3;
+							CAudiofile mp3;
 							mp3.FileType = CFile::STREAM_MP3;
 							mp3.Filename = files->Name;
 							mp3.Artist = "Shoutcast";
@@ -442,7 +449,7 @@ int CMP3PlayerGui::show()
 								fclose(f);
 							}
 						}
-						else if(files->getType() == CFile::FILE_MP3_PLAYLIST)
+						else if(files->getType() == CFile::FILE_PLAYLIST)
 						{
 							std::string sPath = files->Name.substr(0, files->Name.rfind('/'));
 							std::ifstream infile;
@@ -477,7 +484,7 @@ int CMP3PlayerGui::show()
 											else
 												p++;
 										}
-										CMP3 mp3;
+										CAudiofile mp3;
 										mp3.FileType = CFile::FILE_MP3;
 										mp3.Filename = filename;
 										playlist.push_back(mp3);
@@ -495,7 +502,7 @@ int CMP3PlayerGui::show()
 			}
 			else
 			{
-				if(curr_mp3.FileType == CFile::FILE_MP3)
+				if(curr_audiofile.FileType == CFile::FILE_MP3)
 					rev();
 			}
 		}
@@ -539,7 +546,7 @@ int CMP3PlayerGui::show()
 			}
 			else
 			{
-				if(curr_mp3.FileType == CFile::FILE_MP3)
+				if(curr_audiofile.FileType == CFile::FILE_MP3)
 					ff();
 			}
 
@@ -746,9 +753,11 @@ void CMP3PlayerGui::paintItem(int pos)
 			tmp += ')';
 		}
 		
-		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(playlist[pos + liststart].Duration)+5;
+		char dura[9];
+		snprintf(dura, 8, "%ld:%02ld", playlist[pos + liststart].Duration / 60, playlist[pos + liststart].Duration % 60);
+		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(dura)+5;
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,ypos+fheight, width-30-w, tmp, color, fheight, true); // UTF-8
-		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-15-w,ypos+fheight, w, playlist[pos + liststart].Duration, color, fheight);
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-15-w,ypos+fheight, w, dura, color, fheight);
 		
 		if ((pos + liststart) == selected)
 		{
@@ -853,21 +862,21 @@ void CMP3PlayerGui::paintInfo()
 		if(xstart < 10)
 			xstart=10;
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
-		if (curr_mp3.Title.empty())
-			tmp = curr_mp3.Artist;
-		else if (curr_mp3.Artist.empty())
-			tmp = curr_mp3.Title;
+		if (curr_audiofile.Title.empty())
+			tmp = curr_audiofile.Artist;
+		else if (curr_audiofile.Artist.empty())
+			tmp = curr_audiofile.Title;
 		else if (g_settings.mp3player_display == TITLE_ARTIST)
 		{
-			tmp = curr_mp3.Title;
+			tmp = curr_audiofile.Title;
 			tmp += " / ";
-			tmp += curr_mp3.Artist;
+			tmp += curr_audiofile.Artist;
 		}
 		else //if(g_settings.mp3player_display == ARTIST_TITLE)
 		{
-			tmp = curr_mp3.Artist;
+			tmp = curr_audiofile.Artist;
 			tmp += " / ";
-			tmp += curr_mp3.Title;
+			tmp += curr_audiofile.Title;
 		}
 
 		w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true); // UTF-8
@@ -876,13 +885,13 @@ void CMP3PlayerGui::paintInfo()
 			xstart=10;
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 #ifdef INCLUDE_UNUSED_STUFF
-		tmp = curr_mp3.Bitrate + " / " + curr_mp3.Samplerate + " / " + curr_mp3.ChannelMode + " / " + curr_mp3.Layer;
+		tmp = curr_audiofile.Bitrate + " / " + curr_audiofile.Samplerate + " / " + curr_audiofile.ChannelMode + " / " + curr_audiofile.Layer;
 #endif
 		// reset so fields get painted always
-		m_mp3info="";
-		m_time_total="0:00";
-		m_time_played="0:00";
-		updateMP3Infos();
+		m_metainfo="";
+		m_time_total=0;
+		m_time_played=0;
+		updateMetaData();
 		updateTimes(true);
 	}
 }
@@ -916,9 +925,14 @@ void CMP3PlayerGui::paint()
 
 //------------------------------------------------------------------------
 #define BUFFER_SIZE 2100
-void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
+void CMP3PlayerGui::get_mp3info(CAudiofile *mp3)
 {
 //   printf("get_mp3info %s\n",mp3->Filename.c_str());
+	if(mp3->FileType!=CFile::FILE_MP3)
+	{
+		mp3->Duration=0;
+		return;
+	}
 	FILE* in;
 	struct mad_stream	Stream;
 	struct mad_header	Header;
@@ -980,15 +994,14 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 		filesize=ftell(in);
 		fclose(in);
 
-		char tmp[20];
 #ifdef INCLUDE_UNUSED_STUFF
+		char tmp[20];
 		sprintf(tmp,"%lu kbps",Header.bitrate / 1000);
 		mp3->Bitrate=tmp;
 		sprintf(tmp,"%u kHz",Header.samplerate / 1000);
 		mp3->Samplerate=tmp;
 #endif
-		sprintf(tmp, "%lu:%02lu", filesize*8/Header.bitrate/60, filesize*8/Header.bitrate%60);
-		mp3->Duration=tmp;
+		mp3->Duration=filesize*8/Header.bitrate;
 #ifdef INCLUDE_UNUSED_STUFF
 		/* Convert the layer number to it's printed representation. */
 		switch(Header.layer)
@@ -1023,13 +1036,13 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 	}
 	else
 	{
-		mp3->Duration="?:??";
+		mp3->Duration=0;
 	}
 }
 
 
 //------------------------------------------------------------------------
-void CMP3PlayerGui::get_id3(CMP3 *mp3)
+void CMP3PlayerGui::get_id3(CAudiofile *mp3)
 {
 	unsigned int i;
 	struct id3_frame const *frame;
@@ -1210,7 +1223,7 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 	{
 		//Set from Filename
 		std::string tmp = mp3->Filename.substr(mp3->Filename.rfind('/')+1);
-		tmp = tmp.substr(0,tmp.length()-4);	//remove .mp3
+		tmp = tmp.substr(0,tmp.length()-4);	//remove extension (.mp3)
 		unsigned int i = tmp.rfind(" - ");
 		if(i != std::string::npos)
 		{ // Trennzeiche " - " gefunden
@@ -1329,8 +1342,8 @@ void CMP3PlayerGui::stop()
 	key_level=0;
 	paintFoot();
 	//MP3
-	if(CMP3Player::getInstance()->state != CMP3Player::STOP)
-		CMP3Player::getInstance()->stop();
+	if(CAudioPlayer::getInstance()->getState() != CBaseDec::STOP)
+		CAudioPlayer::getInstance()->stop();
 }
 
 void CMP3PlayerGui::pause()
@@ -1338,12 +1351,12 @@ void CMP3PlayerGui::pause()
 	if(m_state==CMP3PlayerGui::PLAY || m_state==CMP3PlayerGui::FF || m_state==CMP3PlayerGui::REV)
 	{
 		m_state=CMP3PlayerGui::PAUSE;
-		CMP3Player::getInstance()->pause();
+		CAudioPlayer::getInstance()->pause();
 	}
 	else if(m_state==CMP3PlayerGui::PAUSE)
 	{
 		m_state=CMP3PlayerGui::PLAY;
-		CMP3Player::getInstance()->pause();
+		CAudioPlayer::getInstance()->pause();
 	}
 	paintLCD();
 }
@@ -1353,12 +1366,12 @@ void CMP3PlayerGui::ff()
 	if(m_state==CMP3PlayerGui::FF)
 	{
 		m_state=CMP3PlayerGui::PLAY;
-		CMP3Player::getInstance()->ff();
+		CAudioPlayer::getInstance()->ff();
 	}
 	else if(m_state==CMP3PlayerGui::PLAY || m_state==CMP3PlayerGui::PAUSE || m_state==CMP3PlayerGui::REV)
 	{
 		m_state=CMP3PlayerGui::FF;
-		CMP3Player::getInstance()->ff();
+		CAudioPlayer::getInstance()->ff();
 	}
 	paintLCD();
 }
@@ -1368,12 +1381,12 @@ void CMP3PlayerGui::rev()
 	if(m_state==CMP3PlayerGui::REV)
 	{
 		m_state=CMP3PlayerGui::PLAY;
-		CMP3Player::getInstance()->rev();
+		CAudioPlayer::getInstance()->rev();
 	}
 	else if(m_state==CMP3PlayerGui::PLAY || m_state==CMP3PlayerGui::PAUSE || m_state==CMP3PlayerGui::FF)
 	{
 		m_state=CMP3PlayerGui::FF;
-		CMP3Player::getInstance()->rev();
+		CAudioPlayer::getInstance()->rev();
 	}
 	paintLCD();
 }
@@ -1421,19 +1434,19 @@ void CMP3PlayerGui::play(int pos)
 		}
 	}
 
-	if (playlist[pos].Artist.empty())
+	if (playlist[pos].Title.empty())
 	{
 		// id3tag noch nicht geholt
 		get_id3(&playlist[pos]);
 		get_mp3info(&playlist[pos]);
 	}
-	m_mp3info="";
-	m_time_played="0:00";
+	m_metainfo="";
+	m_time_played=0;
 	m_time_total=playlist[current].Duration;
 	m_state=CMP3PlayerGui::PLAY;
-	curr_mp3 = playlist[current];
+	curr_audiofile = playlist[current];
 	// Play
-	CMP3Player::getInstance()->play(curr_mp3.Filename.c_str(), g_settings.mp3player_highprio==1); 
+	CAudioPlayer::getInstance()->play(curr_audiofile.Filename.c_str(), g_settings.mp3player_highprio==1); 
 	//LCD
 	paintLCD();
 	// Display
@@ -1453,18 +1466,83 @@ int CMP3PlayerGui::getNext()
 		ret=0;
 	return ret;
 }
-void CMP3PlayerGui::updateMP3Infos()
+void CMP3PlayerGui::updateMetaData()
 {
+	bool updateMeta=false;
+	bool updateLcd=false;
+	bool updateScreen=false;
+
 	if(m_state!=CMP3PlayerGui::STOP)
 	{
-		if(m_mp3info!=CMP3Player::getInstance()->getMp3Info())
+		CAudioPlayer::MetaData metaData;
+		CAudioPlayer::getInstance()->getMetaData(&metaData);
+		if(metaData.changed || m_metainfo.empty())
 		{
-			m_mp3info=CMP3Player::getInstance()->getMp3Info();
+			std::string info = metaData.type_info;
+			if(metaData.bitrate > 0)
+			{
+				info += " / " ;
+				if(metaData.vbr)
+					info += "VBR ";
+				char rate[31];
+				snprintf(rate, 30, "%ukbs", metaData.bitrate/1000);
+				info += rate;
+			}
+			if(metaData.samplerate > 0)
+			{
+				info += " / " ;
+				char rate[31];
+				snprintf(rate, 30, "%.1fKHz", (float)metaData.samplerate/1000);
+				info += rate;
+			}
+			if(m_metainfo!=info)
+			{
+				m_metainfo=info;
+				updateMeta=true;
+			}
+			
+			if (strlen(metaData.artist) > 0  &&
+				 strcmp(metaData.artist, curr_audiofile.Artist.c_str())!=0)
+			{
+				curr_audiofile.Artist = metaData.artist;
+				updateScreen=true;
+				updateLcd=true;
+			}
+			if (strlen(metaData.title) > 0  &&
+				 strcmp(metaData.title, curr_audiofile.Title.c_str())!=0)
+			{
+				curr_audiofile.Title = metaData.title;
+				updateScreen=true;
+				updateLcd=true;
+			}
+			if (strlen(metaData.sc_station) > 0  &&
+				 strcmp(metaData.sc_station, curr_audiofile.Album.c_str())!=0)
+			{
+				curr_audiofile.Album = metaData.sc_station;
+				updateLcd=true;
+			}
+		}
+		if (CAudioPlayer::getInstance()->getScBuffered()!=0)
+		{
+			char perc[4];
+			snprintf(perc,3,"%d",(int)CAudioPlayer::getInstance()->getScBuffered() * 100 / 65535);
+			curr_audiofile.Album = perc;
+			curr_audiofile.Album += "% ";
+			curr_audiofile.Album += metaData.sc_station;
+			updateLcd=true;
+		}
+		if(updateLcd)
+			paintLCD();
+		if(updateScreen)
+			paintInfo();
+		if(updateMeta || updateScreen)
+		{
 			frameBuffer->paintBoxRel(x + 10, y+ 4 + 2*fheight, width-20, sheight, COL_MENUCONTENTSELECTED_PLUS_0);
-			int xstart = ((width - 20 - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth( m_mp3info ))/2)+10;
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, m_mp3info, COL_MENUCONTENTSELECTED);
+			int xstart = ((width - 20 - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth( m_metainfo ))/2)+10;
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, m_metainfo, COL_MENUCONTENTSELECTED);
 		}
 	}
+
 }
 
 void CMP3PlayerGui::updateTimes(const bool force)
@@ -1474,32 +1552,37 @@ void CMP3PlayerGui::updateTimes(const bool force)
 		bool updateTotal = force;
 		bool updatePlayed = force;
 
-		if (m_time_total != CMP3Player::getInstance()->getTimeTotal())
+		if (m_time_total != CAudioPlayer::getInstance()->getTimeTotal())
 		{
-			m_time_total = CMP3Player::getInstance()->getTimeTotal();
-			if (curr_mp3.Duration != CMP3Player::getInstance()->getTimeTotal())
+			m_time_total = CAudioPlayer::getInstance()->getTimeTotal();
+			if (curr_audiofile.Duration != CAudioPlayer::getInstance()->getTimeTotal())
 			{
-				curr_mp3.Duration = CMP3Player::getInstance()->getTimeTotal();
+				curr_audiofile.Duration = CAudioPlayer::getInstance()->getTimeTotal();
 				if(current >=0)
-					playlist[current].Duration = CMP3Player::getInstance()->getTimeTotal();
+					playlist[current].Duration = CAudioPlayer::getInstance()->getTimeTotal();
 			}
 			updateTotal = true;
 		}
-		if ((m_time_played != CMP3Player::getInstance()->getTimePlayed()))
+		if ((m_time_played != CAudioPlayer::getInstance()->getTimePlayed()))
 		{
-			m_time_played = CMP3Player::getInstance()->getTimePlayed();
+			m_time_played = CAudioPlayer::getInstance()->getTimePlayed();
 			updatePlayed = true;
 		}
-		std::string time_tmp = m_time_played.substr(0,m_time_played.find(':')+1);
-		time_tmp += "00";
+		char tot_time[11];
+		snprintf(tot_time, 10, " / %ld:%02ld", m_time_total / 60, m_time_total % 60);
+		char tmp_time[8];
+		snprintf(tmp_time, 7, "%ld:00", m_time_total / 60);
+		char play_time[8];
+		snprintf(play_time, 7, "%ld:%02ld", m_time_played / 60, m_time_played % 60);
 
-		int w1 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(" / " + m_time_total);
-		int w2 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(time_tmp);
+		int w1 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tot_time);
+		int w2 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp_time);
 
 		if (updateTotal)
 		{
 			frameBuffer->paintBoxRel(x+width-w1-10, y+4, w1+4, fheight, COL_MENUCONTENTSELECTED_PLUS_0);
-			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-10, y+4 + fheight, w1, " / " + m_time_total, COL_MENUCONTENTSELECTED);
+			if(m_time_total > 0)
+				g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-10, y+4 + fheight, w1, tot_time, COL_MENUCONTENTSELECTED);
 		}
 		if (updatePlayed || (m_state == CMP3PlayerGui::PAUSE))
 		{
@@ -1508,7 +1591,7 @@ void CMP3PlayerGui::updateTimes(const bool force)
 			gettimeofday(&tv, NULL);
 			if ((m_state != CMP3PlayerGui::PAUSE) || (tv.tv_sec & 1))
 			{
-				g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-w2-11, y+4 + fheight, w2, m_time_played, COL_MENUCONTENTSELECTED);
+				g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-w2-11, y+4 + fheight, w2, play_time, COL_MENUCONTENTSELECTED);
 			}
 		}
 	}
@@ -1523,15 +1606,15 @@ void CMP3PlayerGui::paintLCD()
 		break;
 	case CMP3PlayerGui::PLAY:
 		CLCD::getInstance()->showMP3Play(CLCD::MP3_PLAY);
-		CLCD::getInstance()->showMP3(curr_mp3.Artist, curr_mp3.Title, curr_mp3.Album);
+		CLCD::getInstance()->showMP3(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
 		break;
 	case CMP3PlayerGui::PAUSE:
 		CLCD::getInstance()->showMP3Play(CLCD::MP3_PAUSE);
-		CLCD::getInstance()->showMP3(curr_mp3.Artist, curr_mp3.Title, curr_mp3.Album);
+		CLCD::getInstance()->showMP3(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
 		break;
 	case CMP3PlayerGui::FF:
 		CLCD::getInstance()->showMP3Play(CLCD::MP3_FF);
-		CLCD::getInstance()->showMP3(curr_mp3.Artist, curr_mp3.Title, curr_mp3.Album);
+		CLCD::getInstance()->showMP3(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
 		break;
 	case CMP3PlayerGui::REV:
 		break;
@@ -1557,41 +1640,4 @@ void CMP3PlayerGui::screensaver(bool on)
 	}
 }
 
-void CMP3PlayerGui::updateScInfos()
-{
-	bool updateScreen=false,updateLcd=false;
-	if (!CMP3Player::getInstance()->getScArtist().empty() &&
-		 CMP3Player::getInstance()->getScArtist() != curr_mp3.Artist)
-	{
-		curr_mp3.Artist = CMP3Player::getInstance()->getScArtist();
-		updateScreen=true;
-		updateLcd=true;
-	}
-	if (!CMP3Player::getInstance()->getScTitle().empty() &&
-		 CMP3Player::getInstance()->getScTitle() != curr_mp3.Title)
-	{
-		curr_mp3.Title = CMP3Player::getInstance()->getScTitle();
-		updateScreen=true;
-		updateLcd=true;
-	}
-	if (!CMP3Player::getInstance()->getScStation().empty() &&
-		 CMP3Player::getInstance()->getScStation() != curr_mp3.Album)
-	{
-		curr_mp3.Album = CMP3Player::getInstance()->getScStation();
-		updateLcd=true;
-	}
-	if (CMP3Player::getInstance()->getScBuffered()!=0)
-	{
-		char perc[4];
-		sprintf(perc,"%d",CMP3Player::getInstance()->getScBuffered() * 100 / 65535);
-		curr_mp3.Album = perc;
-		curr_mp3.Album += "% ";
-		curr_mp3.Album += CMP3Player::getInstance()->getScStation();
-		updateLcd=true;
-	}
-	if(updateLcd)
-		paintLCD();
-	if(updateScreen)
-		paintInfo();
-}
 

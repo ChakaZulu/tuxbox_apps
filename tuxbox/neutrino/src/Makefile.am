@@ -24,6 +24,7 @@ neutrino_LDADD = \
 	gui/widget/libneutrino_gui_widget2.a \
 	driver/pictureviewer/libneutrino_pictureviewer.a \
 	driver/libneutrino_driver.a \
+	driver/audiodec/libneutrino_driver_audiodec.a \
 	system/libneutrino_system.a \
 	gui/libneutrino_gui2.a \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
@@ -44,6 +45,7 @@ neutrino_LDADD = \
 	@MAD_LIBS@ \
 	@ID3TAG_LIBS@ \
 	@MPEGTOOLS_LIBS@ \
+	@VORBISIDEC_LIBS@ \
 	-ljpeg \
 	-lpthread
 

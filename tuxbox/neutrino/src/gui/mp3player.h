@@ -34,7 +34,7 @@
 
 
 #include "driver/framebuffer.h"
-#include "driver/mp3play.h"
+#include "driver/audioplay.h"
 #include "gui/filebrowser.h"
 #include "gui/widget/menue.h"
 
@@ -43,7 +43,7 @@
 #include <vector>
 
 
-class CMP3
+class CAudiofile
 {
  public:
 	std::string Filename;
@@ -58,14 +58,14 @@ class CMP3
 	std::string Samplerate;
 	std::string Layer;
 #endif
-	std::string Duration;
+	time_t Duration;
 	std::string Genre;
 	bool VBR;
 	int Index;
 	CFile::FileType FileType;
 };
 
-typedef std::vector<CMP3> CPlayList;
+typedef std::vector<CAudiofile> CPlayList;
 
 
 class CMP3PlayerGui : public CMenuTarget
@@ -97,12 +97,12 @@ class CMP3PlayerGui : public CMenuTarget
 	int            key_level;
 	bool           visible;			
 	State          m_state;
-	std::string    m_time_total;
-	std::string    m_time_played;
-	std::string    m_mp3info;
+	time_t         m_time_total;
+	time_t         m_time_played;
+	std::string    m_metainfo;
 
 	CPlayList      playlist;
-	CMP3           curr_mp3;
+	CAudiofile     curr_audiofile;
 	std::string    Path;
 
 	int            width;
@@ -124,9 +124,9 @@ class CMP3PlayerGui : public CMenuTarget
 	void paintLCD();
 	void hide();
 
-	void get_id3(CMP3 * mp3);
-	void get_mp3info(CMP3 * mp3);
-	CFileFilter mp3filter;
+	void get_id3(CAudiofile * audiofile);
+	void get_mp3info(CAudiofile * audiofile);
+	CFileFilter audiofilefilter;
 	void paintItemID3DetailsLine (int pos);
 	void clearItemID3DetailsLine ();
 	void play(int pos);
@@ -135,10 +135,9 @@ class CMP3PlayerGui : public CMenuTarget
 	void ff();
 	void rev();
 	int getNext();
-	void updateMP3Infos();
+	void updateMetaData();
 	void updateTimes(const bool force = false);
-	void updateScInfos();
-	void showMP3Info();
+	void showMetaData();
    void screensaver(bool on);
 
  public:

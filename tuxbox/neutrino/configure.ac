@@ -15,6 +15,7 @@ TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
 TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
 TUXBOX_APPS_LIB_PKGCONFIG(ID3TAG,id3tag)
 TUXBOX_APPS_LIB_PKGCONFIG(MAD,mad)
+TUXBOX_APPS_LIB_PKGCONFIG(VORBISIDEC,vorbisidec)
 TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
 TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 TUXBOX_APPS_LIB_PKGCONFIG(CONNECTION,tuxbox-connection)
@@ -65,6 +66,7 @@ daemons/timerd/Makefile
 src/Makefile
 src/daemonc/Makefile
 src/driver/pictureviewer/Makefile
+src/driver/audiodec/Makefile
 src/driver/Makefile
 src/gui/Makefile
 src/gui/bedit/Makefile
