@@ -200,7 +200,7 @@ static void unpack(__u32 l, int *t)
 
 void eDVB::configureNetwork()
 {
-	__u32 sip=0, snetmask=0, sdns=0, sgateway=0;
+	__u32 sip=0, snetmask=0, sdns=0, sgateway=0, maxmtu=0;
 	int ip[4], netmask[4], dns[4], gateway[4];
 	int sdosetup=0;
 
@@ -209,6 +209,7 @@ void eDVB::configureNetwork()
 	eConfig::getInstance()->getKey("/elitedvb/network/dns", sdns);
 	eConfig::getInstance()->getKey("/elitedvb/network/gateway", sgateway);
 	eConfig::getInstance()->getKey("/elitedvb/network/dosetup", sdosetup);
+	eConfig::getInstance()->getKey("/elitedvb/network/maxmtu", maxmtu);
 
 	unpack(sip, ip);
 	unpack(snetmask, netmask);
@@ -254,6 +255,13 @@ void eDVB::configureNetwork()
 				close(i);
 			execlp("smbd", "smbd", "-D", NULL);
 			_exit(0);
+		}
+		if (maxmtu != 0)
+		{
+			char setmtu[32];
+			sprintf(setmtu, "ifconfig eth0 mtu %d", maxmtu);
+			printf("[EDVB] configureNetwork: setting MAXMTU to %d\n", maxmtu);
+			system(setmtu);
 		}
 	}
 }
