@@ -3287,6 +3287,8 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 	content->local_header["Content-Type"]="text/vnd.wap.wml";
 
 	result = readFile(TEMPLATE_DIR + "wap.tmp");
+	result = getEITC2(result);
+	result.strReplace("#SERVICE#", getCurService());
 
 	return result;
 }

@@ -4,7 +4,12 @@
 <wml>
 	<card id="c1" title="Dreambox">
 		<p>
-			Welcome!
+			#SERVICE#<br/>
+			#NOWST#	
+		</p>
+		<p>
+			<a href="/wap?mode=zap">ZAP</a><br/>
+			<a href="/wap?mode=control">CONTROL</a>
 		</p>
 	</card>
 </wml>
