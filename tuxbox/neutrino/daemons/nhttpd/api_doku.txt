@@ -17,7 +17,7 @@ Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 9. Datum von der Box abfragen		http://dbox/control/getdate
 10. Uhrzeit von der Box abfragen	http://dbox/control/gettime
 11. Allgemeine Informationen 		http://dbox/control/info
-12. Aktuellen Kanal abfragen		http://dbox/control/getonidsid (DEPRECATED)
+12. Aktuellen Kanal abfragen		http://dbox/control/getonidsid
 13. services.xml lesen			http://dbox/control/getservicesxml
 14. bouquets.xml auslesen		http://dbox/control/getbouquetsxml
 15. Bouquetlist abfragen		http://dbox/control/getbouquets
@@ -354,12 +354,20 @@ Rückgabe-Format:
 Beispiel:
 
 >>>http://dbox/control/zapto?getallpids
-110
-120 deu 
-125 dd  (AC3)
-121 2ch 
-130 vtxt
 
+00511
+00512 deutsch
+00513 englisch
+00515 Dolby Digital 2.0
+00032 vtxt
+00101 pmt
+
+oder 
+
+00101
+00102 German  
+00104 vtxt
+00100 pmt
 
 Parameter: stopplayback
 Rückgabe:
@@ -651,22 +659,22 @@ Beispiel:
 **********************************************************************************************
 12. Aktuellen Kanal abfragen
 *********************************************************************************************
-Handler: http://dbox/control/getonidsid (DEPRECATED)
+Handler: http://dbox/control/getonidsid 
 
 Parameter: 
 Rueckgabe:
 
-Es wird die ONIDSID des aktuellen Kanals zurueckgegeben.
+Es wird die TSIDONIDSID des aktuellen Kanals zurueckgegeben.
 
 Diese Funktion sollte NICHT mehr verwendet werden und ist durch folgenden Aufruf ersetzt:
 http://dbox/control/zapto
 
-Rueckgabe-Format: ONIDSID
+Rueckgabe-Format: TSIDONIDSID
 
 Beispiel:
 
 >>>http://dbox/control/getonidsid
-93647
+44d00016dca
 
 
 

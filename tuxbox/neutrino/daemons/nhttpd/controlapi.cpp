@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.48 2005/01/12 20:06:31 chakazulu Exp $
+	$Id: controlapi.cpp,v 1.49 2005/01/16 14:12:36 diemade Exp $
 
 	License: GPL
 
@@ -33,6 +33,8 @@
 #include <string>
 #include <cctype>
 #include <dirent.h>
+#include <fstream>
+#include <map>
 
 // tuxbox
 #include <neutrinoMessages.h>
@@ -40,6 +42,39 @@
 // nhttpd
 #include "controlapi.h"
 #include "debug.h"
+
+std::map<std::string, std::string> iso639;
+
+bool initialize_iso639_map(void)
+{
+	std::string s, t, u, v;
+	std::ifstream in("/share/iso-codes/iso-639.tab");
+	if (in.is_open())
+	{
+		while (in.peek() == '#')
+			getline(in, s);
+		while (in >> s >> t >> u >> std::ws)
+		{
+			getline(in, v);
+			iso639[s] = v;
+			if (s != t)
+				iso639[t] = v;
+		}
+		in.close();
+		return true;
+	}
+ 	else
+		return false;
+}
+
+const char * getISO639Description(const char * const iso)
+{
+	std::map<std::string, std::string>::const_iterator it = iso639.find(std::string(iso));
+	if (it == iso639.end())
+		return iso;
+	else
+		return it->second.c_str();
+}
 
 bool CControlAPI::Execute(CWebserverRequest* request)
 {
@@ -436,9 +471,9 @@ bool CControlAPI::GetBouquetsxmlCGI(CWebserverRequest *request)		// sendet die d
 
 bool CControlAPI::GetChannel_IDCGI(CWebserverRequest *request) // sendet die aktuelle channel_id
 {
-	t_channel_id channel_id = Parent->Zapit->getCurrentServiceID();
+	CZapitClient::CCurrentServiceInfo current_pids = Parent->Zapit->getCurrentServiceInfo();
 	request->SendPlainHeader("text/plain");
-	request->printf("%u\n", ((((uint32_t)GET_ORIGINAL_NETWORK_ID_FROM_CHANNEL_ID(channel_id)) << 16) | GET_SERVICE_ID_FROM_CHANNEL_ID(channel_id)));
+	request->printf("%x%04x%04x\n",current_pids.tsid, current_pids.onid, current_pids.sid);
 	return true;
 }
 
@@ -966,30 +1001,64 @@ void CControlAPI::SendcurrentVAPid(CWebserverRequest* request)
 
 void CControlAPI::SendAllCurrentVAPid(CWebserverRequest* request)
 {
+	static bool init_iso=true;
+	bool eit_not_ok=true;
 	CZapitClient::responseGetPIDs pids;
+
+	CSectionsdClient::ComponentTagList tags;
 	pids.PIDs.vpid=0;
 	Parent->Zapit->getPIDS(pids);
 
-	request->printf("%u\n", pids.PIDs.vpid);
-	int i = 0;
-	for (CZapitClient::APIDList::iterator it = pids.APIDs.begin(); 
-		 it!=pids.APIDs.end(); it++)
+	request->printf("%05u\n", pids.PIDs.vpid);
+	
+	t_channel_id current_channel = Parent->Zapit->getCurrentServiceID();
+	CSectionsdClient::responseGetCurrentNextInfoChannelID currentNextInfo;
+	Parent->Sectionsd->getCurrentNextServiceKey(current_channel, currentNextInfo);
+	if (Parent->Sectionsd->getComponentTagsUniqueKey(currentNextInfo.current_uniqueKey,tags))
 	{
-		request->printf("%u %s %s\n",it->pid,pids.APIDs[i].desc,pids.APIDs[i].is_ac3 ? " (AC3)": " ");
-		i++;
+		for (unsigned int i=0; i< tags.size(); i++)
+		{
+			for (unsigned short j=0; j< pids.APIDs.size(); j++)
+			{
+				if ( pids.APIDs[j].component_tag == tags[i].componentTag )
+				{
+					if(!tags[i].component.empty())
+					{
+						request->printf("%05u %s\n",pids.APIDs[j].pid,tags[i].component.c_str());
+						eit_not_ok=false;
+					}
+					break;
+				}
+			}
+		}
+	}
+	if(eit_not_ok)
+	{
+		unsigned short i = 0;
+		if(init_iso)
+		{
+			if(initialize_iso639_map())
+				init_iso=false;
+		}
+		for (CZapitClient::APIDList::iterator it = pids.APIDs.begin(); it!=pids.APIDs.end(); it++)
+		{
+			if(!(init_iso))
+			{
+				strcpy( pids.APIDs[i].desc, getISO639Description( pids.APIDs[i].desc ) );
+			}
+ 			request->printf("%05u %s %s\n",it->pid,pids.APIDs[i].desc,pids.APIDs[i].is_ac3 ? " (AC3)": " ");
+			i++;
+		}
 	}
 
 	if(pids.APIDs.empty())
 		request->printf("0\n"); // shouldnt happen, but print at least one apid
 	if(pids.PIDs.vtxtpid)
-		request->printf("%u vtxt\n",pids.PIDs.vtxtpid);
-	
-	if(pids.APIDs.empty())
-		request->printf("0\n"); // shouldnt happen, but print at least one apid 
+		request->printf("%05u vtxt\n",pids.PIDs.vtxtpid);
 	if (pids.PIDs.pmtpid)
-		request->printf("%u pmt\n",pids.PIDs.pmtpid);
-}
+		request->printf("%05u pmt\n",pids.PIDs.pmtpid);
 
+}
 //-------------------------------------------------------------------------
 
 void CControlAPI::SendSettings(CWebserverRequest* request)
