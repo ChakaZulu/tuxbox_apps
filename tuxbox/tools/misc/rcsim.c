@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  ******************************************************************************
- * $Id: rcsim.c,v 1.1 2003/12/20 20:00:23 carjay Exp $
+ * $Id: rcsim.c,v 1.2 2003/12/27 20:16:44 carjay Exp $
  ******************************************************************************/
 
 #include <stdio.h>
@@ -81,7 +81,7 @@ static const struct key keyname[] = {
 };
 
 void usage(char *n){
-	printf ("Usage: %s <keyname> [<time>] [<repeat]\n"
+	printf ("Usage: %s <keyname> [<time>] [<repeat>]\n"
 		"       <keyname> is an excerpt from <linux/input.h> and corresponds\n"
 		"             to the keys on the dbox2-remote control\n"
 		"       <time> is how long a code is repeatedly sent,\n"
