@@ -16,11 +16,9 @@
 #include <plugin.h>
 #include <fx2math.h>
 
-#ifndef __i386__
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
-#endif
 
 extern	int				debug;
 extern	int				doexit;
@@ -31,6 +29,7 @@ extern	long			score;
 static	char			*proxy_addr=0;
 static	char			*proxy_user=0;
 static	char			*hscore=0;
+static	int				localuser=-1;
 
 typedef struct _HScore
 {
@@ -39,12 +38,89 @@ typedef struct _HScore
 } HScore;
 
 static	HScore	hsc[8];
+static	HScore	ihsc[8];
+static	int		use_ihsc=0;
+
+static	void	LoadHScore( void )
+{
+	CURL			*curl;
+	CURLcode		res;
+	FILE			*fp;
+	char			url[ 512 ];
+	char			*user=0;
+	int				x;
+	char			*p;
+	struct timeval	tv;
+	int				i;
+
+	FBDrawString( 150,32,32,"try load high score from",GRAY,0);
+	FBDrawString( 150,64,32,hscore,GRAY,0);
+#ifdef USEX
+	FBFlushGrafic();
+#endif
+
+	sprintf(url,"%s/games/tetris.php?action=get",hscore);
+
+	curl = curl_easy_init();
+	if ( !curl )
+		return;
+	fp = fopen( "/var/tmp/trash", "w");
+	if ( !fp )
+	{
+		curl_easy_cleanup(curl);
+		return;
+	}
+	curl_easy_setopt( curl, CURLOPT_URL, url );
+	curl_easy_setopt( curl, CURLOPT_FILE, fp );
+	curl_easy_setopt( curl, CURLOPT_NOPROGRESS, TRUE );
+	if ( proxy_addr )
+	{
+		curl_easy_setopt( curl, CURLOPT_PROXY, proxy_addr );
+		if ( proxy_user )
+			curl_easy_setopt( curl, CURLOPT_PROXYUSERPWD, proxy_user );
+	}
+	res = curl_easy_perform(curl);
+
+	curl_easy_cleanup(curl);
+	fclose( fp );
+
+	if ( res )
+		return;
+
+	fp=fopen( "/var/tmp/trash", "r" );
+	if ( !fp )
+		return;
+
+	for( i=0; i<8; i++ )
+	{
+		if ( !fgets(url,512,fp) )
+			break;
+		p=strchr(url,'\n');
+		if ( p )
+			*p=0;
+		p=strchr(url,'&');
+		if ( !p )
+			break;
+		*p=0;
+		p++;
+
+		strncpy(ihsc[i].name,url,10);
+		ihsc[i].name[9]=0;
+		ihsc[i].points = atoi(p);
+	}
+	if ( i==8 )
+		use_ihsc=1;
+	fclose(fp);
+	unlink("/var/tmp/trash");
+}
 
 static	void	LocalSave( void )
 {
 	int		x;
 	char	*user;
 	int		i;
+
+	localuser=-1;
 
 	for( i=0; i < 8; i++ )
 		if ( score > hsc[i].points )
@@ -68,35 +144,42 @@ static	void	LocalSave( void )
 		memmove( hsc+i+1,hsc+i,sizeof(HScore)*(7-i) );
 	strcpy(hsc[i].name,user);
 	hsc[i].points=score;
+
+	localuser=i;
 }
 
 static	void	SaveGame( void )
 {
-#ifndef __i386__
 	CURL		*curl;
 	CURLcode	res;
-#else
-	int			res;
-#endif
 	FILE		*fp;
 	char		url[ 512 ];
-	char		*user="nobody";
+	char		*user=0;
+	char		luser[ 32 ];
 	int			x;
 	char		*p;
 	struct timeval	tv;
+	unsigned long	chk=0;
 
 	doexit=0;
 
 	if ( score < 31 )
 		return;
 
-	if ( !hscore )
-	{
-		LocalSave();
-		return;
-	}
+	LocalSave();
 
-	FBDrawString( 150,350,64,"Save Highscore ? (OK/BLUE)",WHITE,0);
+	if ( !use_ihsc )
+		return;
+
+	for( x=0; x < 8; x++ )
+	{
+		if ( score > ihsc[x].points )
+			break;
+	}
+	if ( x == 8 )
+		return;
+
+	FBDrawString( 150,350,64,"Inet-Send Highscore ? (OK/BLUE)",WHITE,0);
 
 	while( realcode != 0xee )
 		RcGetActCode();
@@ -116,13 +199,21 @@ static	void	SaveGame( void )
 	if ( doexit )
 		return;
 
-	Fx2PigPause();
+	if ( localuser != -1 )
+	{
+		strcpy(luser,hsc[localuser].name);
+		user=luser;
+	}
+	else
+	{
+		Fx2PigPause();
 
-	FBFillRect( 150,350,570,64,BLACK );
-	x=FBDrawString( 150,350,64,"name : ",WHITE,0);
-	user=FBEnterWord(150+x,350,64,9,WHITE);
+		FBFillRect( 150,350,570,64,BLACK );
+		x=FBDrawString( 150,350,64,"name : ",WHITE,0);
+		user=FBEnterWord(150+x,350,64,9,WHITE);
 
-	Fx2PigResume();
+		Fx2PigResume();
+	}
 
 /* clean name */
 	x = strlen(user);
@@ -133,9 +224,15 @@ static	void	SaveGame( void )
 			memcpy(p,p+1,x);
 	}
 
-#ifndef __i386__
-	sprintf(url,"%s/games/tetris.php?action=put&user=%s&score=%d",
-		hscore,user,score);
+	for( p=user,x='a'; *p; p++,x+=2 )
+	{
+		chk <<= 1;
+		chk ^= ((*p)+x);
+	}
+	chk ^= score;
+
+	sprintf(url,"%s/games/tetris.php?action=put&user=%s&score=%d&chk=%d",
+		hscore,user,score,chk);
 
 	curl = curl_easy_init();
 	if ( !curl )
@@ -146,7 +243,7 @@ static	void	SaveGame( void )
 		curl_easy_cleanup(curl);
 		return;
 	}
-	curl_easy_setopt( curl, CURLOPT_URL, hscore );
+	curl_easy_setopt( curl, CURLOPT_URL, url );
 	curl_easy_setopt( curl, CURLOPT_FILE, fp );
 	curl_easy_setopt( curl, CURLOPT_NOPROGRESS, TRUE );
 	if ( proxy_addr )
@@ -156,20 +253,15 @@ static	void	SaveGame( void )
 			curl_easy_setopt( curl, CURLOPT_PROXYUSERPWD, proxy_user );
 	}
 	res = curl_easy_perform(curl);
-#else
-	res=1;
-#endif
 
 	if ( !res )
 		FBDrawString( 170,415,64,"success",WHITE,0);
 	else
 		FBDrawString( 170,415,64,"failed",WHITE,0);
 
-#ifndef __i386__
 	curl_easy_cleanup(curl);
 	fclose( fp );
 	unlink( "/var/tmp/trash" );
-#endif
 
 	tv.tv_sec = 2;
 	tv.tv_usec = 0;
@@ -178,7 +270,7 @@ static	void	SaveGame( void )
 	return;
 }
 
-static	void	ShowHScore( void )
+static	void	ShowHScore( HScore *g )
 {
 	int				i;
 	int				x;
@@ -186,16 +278,36 @@ static	void	ShowHScore( void )
 
 	FBFillRect( 0, 0, 720, 576, BLACK );
 
-	FBDrawString( 190, 32, 64, "HighScore", RED, BLACK );
+	if ( g==ihsc )
+		FBDrawString( 190, 32, 64, "Internet HighScore", RED, BLACK );
+	else
+		FBDrawString( 220, 32, 64, "HighScore", RED, BLACK );
 	for( i=0; i < 8; i++ )
 	{
-		FBDrawString( 100, 100+i*48, 48, hsc[i].name, WHITE, 0 );
-		sprintf(pp,"%d",hsc[i].points);
+		FBDrawString( 100, 100+i*48, 48, g[i].name, WHITE, 0 );
+		sprintf(pp,"%d",g[i].points);
 		x = FBDrawString( 400, 100+i*48, 48, pp, BLACK, BLACK );
 		FBDrawString( 500-x, 100+i*48, 48, pp, WHITE, BLACK );
 	}
 	while( realcode != 0xee )
 		RcGetActCode();
+}
+
+static	void	ShowIHScore( void )
+{
+	int				i = 50;
+	struct timeval	tv;
+
+	ShowHScore( ihsc );
+
+	while( !doexit && ( realcode == 0xee ) && ( i>0 ))
+	{
+		tv.tv_sec=0;
+		tv.tv_usec=200000;
+		select( 0,0,0,0,&tv);
+		RcGetActCode();
+		i--;
+	}
 }
 
 static	void	setup_colors(void)
@@ -320,6 +432,11 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		close(fd);
 	}
 
+	if ( hscore )
+	{
+		LoadHScore();
+	}
+
 	Fx2ShowPig( 450, 105, 128, 96 );
 
 	while( doexit != 3 )
@@ -353,17 +470,29 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			actcode=0xee;
 			DrawGameOver();
 			SaveGame();
-			ShowHScore();
+			doexit=0;
+			if ( use_ihsc )
+				ShowIHScore();
+			ShowHScore(hsc);
+
 #ifdef USEX
 			FBFlushGrafic();
 #endif
-			doexit=0;
+			i=0;
 			while(( actcode != RC_OK ) && !doexit )
 			{
 				tv.tv_sec = 0;
 				tv.tv_usec = 100000;
 				x = select( 0, 0, 0, 0, &tv );		/* 100ms pause */
 				RcGetActCode( );
+				i++;
+				if ( i == 50 )
+				{
+					FBDrawString( 190, 480, 48, "press OK for new game",GRAY,0);
+#ifdef USEX
+					FBFlushGrafic();
+#endif
+				}
 			}
 		}
 	}
