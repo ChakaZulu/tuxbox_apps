@@ -526,8 +526,8 @@ timerlist.repeat.monthly monthly
 timerlist.repeat.byeventdescription see timer
 timerlist.repeat.unknown unknown
 timerlist.program.unknown Program unknown
-timerlist.standby.on Leave standby
-timerlist.standby.off Enter standby
+timerlist.standby.off Leave standby
+timerlist.standby.on Enter standby
 timerlist.alarmtime Alarmtime
 timerlist.stoptime Stoptime
 timerlist.new New timer

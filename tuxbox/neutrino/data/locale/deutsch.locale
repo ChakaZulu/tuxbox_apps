@@ -523,8 +523,8 @@ timerlist.repeat.monthly monatlich
 timerlist.repeat.byeventdescription siehe timer
 timerlist.repeat.unknown unbekannt
 timerlist.program.unknown Programm unbekannt
-timerlist.standby.on Aufwachen aus Standby
-timerlist.standby.off Auf Standby gehen
+timerlist.standby.off Aufwachen aus Standby
+timerlist.standby.on Auf Standby gehen
 timerlist.alarmtime Alarmzeit
 timerlist.stoptime Stopzeit
 timerlist.new Neuer Timer
