@@ -215,7 +215,6 @@ int CHTTPUpdater::show_progress( void *clientp, size_t dltotal, size_t dlnow, si
 	return 0;
 }
 
-
 bool CHTTPUpdater::getInfo()
 {
 	statusViewer->showStatusMessage( g_Locale->getText("flashupdate.getinfofile") );
@@ -233,6 +232,22 @@ bool CHTTPUpdater::getInfo()
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, show_progress);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, statusViewer);
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+		if(strcmp(g_settings.softupdate_proxyserver,"")!=0)
+		{//use proxyserver
+			printf("use proxyserver\n");
+			curl_easy_setopt(curl, CURLOPT_PROXY, g_settings.softupdate_proxyserver);
+
+			if(strcmp(g_settings.softupdate_proxyusername,"")!=0)
+			{//use auth
+				printf("use proxyauth\n");
+				char tmp[200];
+				strcpy(tmp, g_settings.softupdate_proxyusername);
+				strcat(tmp, ":");
+				strcat(tmp, g_settings.softupdate_proxypassword);
+				curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, tmp);
+			}
+		}
+
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 	}
@@ -261,6 +276,20 @@ bool CHTTPUpdater::getFile()
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, show_progress);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, statusViewer);
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+		if(strcmp(g_settings.softupdate_proxyserver,"")!=0)
+		{//use proxyserver
+			printf("use proxyserver\n");
+			curl_easy_setopt(curl, CURLOPT_PROXY, g_settings.softupdate_proxyserver);
+
+			if(strcmp(g_settings.softupdate_proxyusername,"")!=0)
+			{//use auth
+				printf("use proxyauth\n");
+				char tmp[200];
+				strcpy(tmp, g_settings.softupdate_proxyusername);
+				strcat(tmp, g_settings.softupdate_proxypassword);
+				curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, tmp);
+			}
+		}
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 	}	

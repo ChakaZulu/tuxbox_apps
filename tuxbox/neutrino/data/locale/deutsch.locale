@@ -228,4 +228,15 @@ flashupdate.nonewversion1 keine neue Version verfügbar
 flashupdate.nonewversion2
 flashupdate.md5check Imageprüfung 
 flashupdate.md5sumerror Das Image ist fehlerhaft
+flashupdate.proxyserver_sep Proxyserver
+flashupdate.proxyserver Proxyname
+flashupdate.proxyserver_hint1 Geben Sie den Proxynamen oder IP ein (Host:Post)
+flashupdate.proxyserver_hint2 Ein leerer Eintrag bedeutet kein Proxy
+flashupdate.proxyusername Benutzername
+flashupdate.proxyusername_hint1 Geben Sie den Proxy-Benutzernamen ein
+flashupdate.proxyusername_hint2 Ein leerer Eintrag bedeutet keine Authentifizierung
+flashupdate.proxypassword Passwort
+flashupdate.proxypassword_hint1 Geben sie das Proxy-Passwort ein
+flashupdate.proxypassword_hint2 
+
 

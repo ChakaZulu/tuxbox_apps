@@ -230,3 +230,14 @@ flashupdate.nonewversion1 no new version available
 flashupdate.nonewversion2
 flashupdate.md5check checking image
 flashupdate.md5sumerror image has errors
+flashupdate.proxyserver_sep Proxyserver
+flashupdate.proxyserver Hostname
+flashupdate.proxyserver_hint1 enter proxyserver name or ip, use host:port 
+flashupdate.proxyserver_hint2 a empty entry means no proxy
+flashupdate.proxyusername Username
+flashupdate.proxyusername_hint1 enter the proxyserver username 
+flashupdate.proxyusername_hint2 a empty entry means no proxy-auth
+flashupdate.proxypassword Password
+flashupdate.proxypassword_hint1 enter the proxyserver password 
+flashupdate.proxypassword_hint2 
+

@@ -43,8 +43,13 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
     validchars = Valid_Chars;
 
     observ = Observ;
+	width = (Size*20)+40;
+	if (width<420)
+	{
+		width=420;
+	}
 
-	width = 420;
+
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
     iheight = g_Fonts->menu_info->getHeight();
@@ -55,7 +60,7 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
     if ( hint_2.length()> 0 )
         height+= iheight;
 
-	x = ((720-width) >> 1) -50;
+	x = ((720-width)>>1);
 	y = ((500-height)>>1);
 	selected = 0;
 }
