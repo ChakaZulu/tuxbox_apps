@@ -105,6 +105,7 @@ eString filter_string(eString string)
 	string.strReplace("\xc2\x86","");
 	string.strReplace("\xc2\x87","");
 	string.strReplace("\xc2\x8a"," ");
+	string.strReplace("\"", "'");
 	return string;
 }
 

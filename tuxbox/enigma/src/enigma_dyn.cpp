@@ -2666,10 +2666,10 @@ eString getEITC(eString result)
 						switch(p)
 						{
 							case 0:
-								now_text = ss->event_name;
+								now_text = filter_string(ss->event_name);
 								break;
 							case 1:
-								next_text = ss->event_name;
+								next_text = filter_string(ss->event_name);
 								break;
 						}
 					}
@@ -2679,10 +2679,10 @@ eString getEITC(eString result)
 						switch(p)
 						{
 							case 0:
-								now_longtext += ss->text;
+								now_longtext += filter_string(ss->text);
 								break;
 							case 1:
-								next_longtext += ss->text;
+								next_longtext += filter_string(ss->text);
 								break;
 						}
 					}
