@@ -3,6 +3,7 @@
 
 #include <lib/base/estring.h>
 #include <lib/gui/ewidget.h>
+#include <src/enigma_main.h>
 
 #define FH_ERROR_OK 0
 #define FH_ERROR_FILE 1		/* read/access error */
@@ -30,11 +31,17 @@ class ePictureViewer: public eWidget
 	void listDirectory(eString, int);
 	void nextPicture();
 	void previousPicture();
+	void showNameOnLCD(const eString& filename);
+	bool DecodeImage(const std::string& name, bool unscaled = false);
+	bool DisplayNextImage();
 	bool showBusySign;
 	bool switchto43;
 	int format169;
+#ifndef DISABLE_LCD
+	eZapLCD* pLCD;
+#endif
 public:
-	ePictureViewer( const eString &filename);
+	ePictureViewer(const eString &filename);
 	~ePictureViewer();
 
 	enum ScalingMode
@@ -45,8 +52,6 @@ public:
 	};
 
 	bool ShowImage(const std::string& filename, bool unscaled = false);
-	bool DecodeImage(const std::string& name, bool unscaled = false);
-	bool DisplayNextImage();
 	void SetScaling(ScalingMode s) {m_scaling = s;}
 	void SetAspectRatio(float aspect_ratio) {m_aspect = aspect_ratio;}
 	void showBusy(int sx, int sy, int width, char r, char g, char b);

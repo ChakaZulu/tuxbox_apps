@@ -70,6 +70,18 @@ void ePictureViewer::previousPicture()
 		myIt--;
 }
 
+void ePictureViewer::showNameOnLCD(const eString& filename)
+{
+	int pos = filename.find_last_of("/");
+	if (pos == -1)
+		pos = 0;
+	eString name = pos ? filename.substr(pos + 1, filename.length() - 1) : filename;
+#ifndef DISABLE_LCD
+	pLCD->lcdMain->ServiceName->setText(name);
+	pLCD->lcdMain->show();
+#endif
+}
+
 ePictureViewer::ePictureViewer(const eString &filename)
 	:eWidget(0, 1), slideshowTimer(eApp), filename(filename)
 {
@@ -85,8 +97,8 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	l->setFont(eSkin::getActive()->queryFont("epg.title"));
 	l->resize(eSize(clientrect.width() - 100, 30));
 	l->setText(_("Loading slide... please wait."));
-
-	setText(_("Slide Viewer"));
+	
+	pLCD = eZapLCD::getInstance();
 
 	fh_root = NULL;
 	m_scaling = COLOR;
@@ -347,6 +359,10 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 		fbClass::getInstance()->setTransparency(0);
 #endif
 	}
+#ifndef DISABLE_LCD
+	pLCD->lcdMenu->hide();
+#endif
+	showNameOnLCD(filename);
 	DisplayNextImage();
 	eDebug("Show Image }");
 	return true;
@@ -357,6 +373,7 @@ void ePictureViewer::slideshowTimeout()
 	eString tmp = *myIt;
 	eDebug("[PICTUREVIEWER] slideshowTimeout: show %s", tmp.c_str());
 	DecodeImage(*myIt, false);
+	showNameOnLCD(tmp);
 	DisplayNextImage();
 	nextPicture();
 	int timeout = 5;
@@ -366,6 +383,7 @@ void ePictureViewer::slideshowTimeout()
 
 int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 {
+	static eString serviceName;
 	fflush(stdout);
 	switch(evt.type)
 	{
@@ -391,6 +409,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			{
 				nextPicture();
 				DecodeImage(*myIt, false);
+				showNameOnLCD(*myIt);
 				DisplayNextImage();
 			}
 			else
@@ -400,12 +419,16 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			{
 				previousPicture();
 				DecodeImage(*myIt, false);
+				showNameOnLCD(*myIt);
 				DisplayNextImage();
 			}
 			break;
 		}
 		case eWidgetEvent::execBegin:
 		{
+#ifndef DISABLE_LCD
+			serviceName = pLCD->lcdMain->ServiceName->getText();
+#endif
 			ShowImage(filename, false);
 			break;
 		}
@@ -416,6 +439,11 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			fbClass::getInstance()->unlock();
 			if (switchto43 && format169)
 				eAVSwitch::getInstance()->setAspectRatio(r43);
+			showNameOnLCD(serviceName);
+#ifndef DISABLE_LCD
+			pLCD->lcdMain->hide();
+			pLCD->lcdMenu->show();
+#endif
 			break;
 		}
 		default:

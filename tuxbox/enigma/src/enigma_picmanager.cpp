@@ -24,7 +24,7 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 
 	int fd = eSkin::getActive()->queryValue("fontsize", 20);
 
-	setText(_("Slide Viewer (1.5)"));
+	setText(_("Slide Viewer (1.6)"));
 	cmove(ePoint(100, 80));
 
 	int y = 10, dy = 35, h = fd + 6;
