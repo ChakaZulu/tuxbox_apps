@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.h,v 1.18 2003/03/14 08:22:04 obi Exp $
+ * $Id: descriptors.h,v 1.19 2004/02/17 16:26:04 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -53,10 +53,10 @@ void FmxBufferSize_descriptor(const unsigned char * const buffer);
 void MultiplexBuffer_descriptor(const unsigned char * const buffer);
 void FlexMuxTiming_descriptor(const unsigned char * const buffer);
 void network_name_descriptor(const unsigned char * const buffer);
-void service_list_descriptor(const unsigned char * const buffer, uint16_t original_network_id);
+void service_list_descriptor(const unsigned char * const buffer, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id);
 void stuffing_descriptor(const unsigned char * const buffer);
-int satellite_delivery_system_descriptor(const unsigned char * const buffer, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC);
-int cable_delivery_system_descriptor(const unsigned char * const buffer, uint16_t transport_stream_id, uint16_t original_network_id);
+int satellite_delivery_system_descriptor(const unsigned char * const buffer, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, uint8_t DiSEqC);
+int cable_delivery_system_descriptor(const unsigned char * const buffer, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id);
 void VBI_data_descriptor(const unsigned char * const buffer);
 void VBI_teletext_descriptor(const unsigned char * const buffer);
 void bouquet_name_descriptor(const unsigned char * const buffer);

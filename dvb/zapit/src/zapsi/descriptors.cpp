@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.64 2003/11/09 06:35:39 obi Exp $
+ * $Id: descriptors.cpp,v 1.65 2004/02/17 16:26:07 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -211,11 +211,10 @@ void network_name_descriptor(const unsigned char * const)
 }
 
 /* 0x41 */
-void service_list_descriptor(const unsigned char * const buffer, uint16_t original_network_id)
+void service_list_descriptor(const unsigned char * const buffer, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id)
 {
 	for (int i = 0; i < buffer[1]; i += 3) {
-		t_service_id service_id = (buffer[i + 2] << 8) | buffer[i + 3];
-		service_types[CREATE_CHANNEL_ID] = buffer[i + 4];
+		service_types[CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID((((t_service_id)buffer[i + 2]) << 8) | buffer[i + 3], original_network_id, transport_stream_id)] = buffer[i + 4];
 	}
 }
 

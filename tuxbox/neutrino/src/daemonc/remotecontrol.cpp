@@ -57,9 +57,7 @@ CSubService::CSubService(const t_original_network_id anoriginal_network_id, cons
 
 t_channel_id CSubService::getChannelID(void) const
 {
-	t_original_network_id original_network_id = service.original_network_id;
-	t_service_id          service_id          = service.service_id;
-	return CREATE_CHANNEL_ID;
+	return CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service.service_id, service.original_network_id, service.transport_stream_id);
 }
 
 

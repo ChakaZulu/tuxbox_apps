@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.19 2003/11/27 00:32:06 homar Exp $
+ * $Id: zapittypes.h,v 1.20 2004/02/17 16:26:05 thegoodguy Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -47,7 +47,8 @@ typedef uint16_t t_network_id;
 
 /* unique channel identification */
 typedef uint32_t t_channel_id;
-#define CREATE_CHANNEL_ID ((original_network_id << 16) | service_id)
+#define CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id,original_network_id,transport_stream_id) ((original_network_id << 16) | service_id)
+#define CREATE_CHANNEL_ID CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id, original_network_id, transport_stream_id)
 #define PRINTF_CHANNEL_ID_TYPE "%08x"
 
 typedef uint64_t t_channel_id64;

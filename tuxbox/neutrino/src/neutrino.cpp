@@ -3849,9 +3849,7 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 			{
 				recording_id=0;
 				CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
-				t_original_network_id original_network_id = si.onid;
-				t_service_id          service_id          = si.sid;
-				eventinfo.channel_id = CREATE_CHANNEL_ID;
+				eventinfo.channel_id = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(si.sid, si.onid, si.tsid);
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
 				eventinfo.epg_starttime = 0;
 				strcpy(eventinfo.apids, "");

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.342 2004/01/12 15:35:16 zwen Exp $
+ * $Id: zapit.cpp,v 1.343 2004/02/17 16:26:06 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1096,7 +1096,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			(
 				std::pair <t_channel_id, CZapitChannel>
 				(
-					CREATE_CHANNEL_ID,
+					CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(msgAddSubService.service_id, msgAddSubService.original_network_id, msgAddSubService.transport_stream_id),
 					CZapitChannel
 					(
 					    "NVOD",
@@ -1605,7 +1605,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.342 2004/01/12 15:35:16 zwen Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.343 2004/02/17 16:26:06 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
