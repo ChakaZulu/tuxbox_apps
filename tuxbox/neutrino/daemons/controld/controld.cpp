@@ -48,6 +48,10 @@
  
 #include "../lcdd/lcdd.h"
 
+
+#define CONF_FILE "/var/controld.conf"
+
+
 struct rmsg {
   unsigned char version;
   unsigned char cmd;
@@ -56,6 +60,50 @@ struct rmsg {
   char param3[30];
  
 } rmsg;
+
+struct Ssettings
+{
+	char gen_Volume;
+}settings;
+
+
+void sig_catch(int);
+
+
+
+int loadSettings()
+{
+	int fd;
+	fd = open(CONF_FILE, O_RDONLY );
+	
+	if (fd==-1)
+	{
+		printf("[controld] error while loading settings: %s\n", CONF_FILE );
+		return 0;
+	}
+	if(read(fd, &settings, sizeof(settings))!=sizeof(settings))
+	{
+		printf("[controld] error while loading settings: %s - config from old version?\n", CONF_FILE );
+		return 0;
+	}
+	close(fd);
+	return 1;
+}
+
+void saveSettings()
+{
+	int fd;
+	fd = open(CONF_FILE, O_WRONLY | O_CREAT );
+	
+	if (fd==-1)
+	{
+		printf("[controld] error while saving settings: %s\n", CONF_FILE );
+		return;
+	}
+	write(fd, &settings,  sizeof(settings) );
+	close(fd);
+}
+
 
 void sendto_lcdd(unsigned char cmd, unsigned char param) {
 	int sock_fd;
@@ -82,6 +130,7 @@ void sendto_lcdd(unsigned char cmd, unsigned char param) {
 void shutdownBox()
 {
     sendto_lcdd(LC_POWEROFF, 0);
+	sig_catch(1);
     if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
     {
       perror("exec failed - halt\n");
@@ -101,11 +150,11 @@ void setVideoRGB()
 }
 
 
-char gen_Volume;
+
 void setVolume(char volume)
 {
 	int fd;
-	gen_Volume = volume;
+	settings.gen_Volume = volume;
 
 	int i = 64-int(volume*64.0/100.0);
 	printf("[controld] set volume: %d\n", i );
@@ -179,7 +228,7 @@ void UnMute()
 }
 
 
-void parse_command()
+void parse_command(int connfd)
 {
   //byteorder!!!!!!
   rmsg.param = ((rmsg.param & 0x00ff) << 8) | ((rmsg.param & 0xff00) >> 8);
@@ -218,51 +267,71 @@ void parse_command()
       printf("unmute\n");
       UnMute();
       break;
+	case 128:
+		printf("get volume\n");
+		write(connfd,&settings.gen_Volume,sizeof(settings.gen_Volume));
+		break;
+
     default:
-    printf("unknown command\n");
+		printf("unknown command\n");
   }
  
 }
 
 
-
+void sig_catch(int)
+{
+	printf("[controld] shutdown\n");
+	saveSettings();
+	printf("[controld] data saved\n");
+}
 
 
 int main(int argc, char **argv)
 {
-  int listenfd, connfd;
-  socklen_t clilen;
-  SAI cliaddr, servaddr;
+
+	int listenfd, connfd;
+	socklen_t clilen;
+	SAI cliaddr, servaddr;
  
-  printf("Controld  0.1\n\n");
+	printf("Controld  0.1\n\n");
  
-  if (fork() != 0) return 0;
+	if (fork() != 0) return 0;
  
-  //network-setup
-  listenfd = socket(AF_INET, SOCK_STREAM, 0);
+	//network-setup
+	listenfd = socket(AF_INET, SOCK_STREAM, 0);
  
-  memset(&servaddr, 0, sizeof(servaddr));
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(1610);
+	memset(&servaddr, 0, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servaddr.sin_port = htons(1610);
  
-  if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
-  {
-    perror("bind failed...\n");
-    exit(-1);
-  }
+	if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
+	{
+		perror("[controld] bind failed...\n");
+		exit(-1);
+	}
  
  
-  if (listen(listenfd, 5) !=0)
-  {
-    perror("listen failed...\n");
-    exit( -1 );
-  }
+	if (listen(listenfd, 5) !=0)
+	{
+		perror("[controld] listen failed...\n");
+		exit( -1 );
+	}
+
+	signal(SIGHUP,sig_catch);
+	signal(SIGKILL,sig_catch);
+	signal(SIGTERM,sig_catch);
+
+	if (!loadSettings())
+	{
+		printf("[controld] useing defaults\n");
+		settings.gen_Volume = 100;
+	}
 
 
 	//init 
-	gen_Volume = 100;
-	setVolume(gen_Volume);
+	setVolume(settings.gen_Volume);
 	while(1)
 	{
 		clilen = sizeof(cliaddr);
@@ -271,7 +340,7 @@ int main(int argc, char **argv)
 		memset(&rmsg, 0, sizeof(rmsg));
 		read(connfd,&rmsg,sizeof(rmsg));
  
-		parse_command();
+		parse_command(connfd);
  
 		close(connfd);
   }
