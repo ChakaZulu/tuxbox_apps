@@ -273,3 +273,7 @@ flashupdate.proxypassword_hint1 enter the proxyserver password
 flashupdate.proxypassword_hint2
 
 bouqueteditor.name Bouquet-editor
+bouqueteditor.delete Delete
+bouqueteditor.add Add
+bouqueteditor.move Move
+bouqueteditor.rename Rename
