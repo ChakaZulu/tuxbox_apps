@@ -18,31 +18,29 @@ struct r_jpeg_error_mgr
 	jmp_buf envbuffer;
 };
 
-
 int fh_jpeg_id(const char *name)
 {
 //	dbout("fh_jpeg_id {\n");
 	int fd;
 	unsigned char id[10];
-	fd=open(name,O_RDONLY); 
+	fd = open(name,O_RDONLY); 
 	if (fd == -1) 
 		return(0);
 	read(fd, id, 10);
 	close(fd);
 //	dbout("fh_jpeg_id }\n");
-	if (id[6] == 'J' && id[7] == 'F' && id[8]== 'I' && id[9]== 'F')	
+	if (id[6] == 'J' && id[7] == 'F' && id[8] == 'I' && id[9] == 'F')	
 		return(1);
 	if (id[0] == 0xff && id[1] == 0xd8 && id[2] == 0xff) 
 		return(1);
 	return(0);
 }
 
-
 void jpeg_cb_error_exit(j_common_ptr cinfo)
 {
 //	dbout("jpeg_cd_error_exit {\n");
 	struct r_jpeg_error_mgr *mptr;
-	mptr = (struct r_jpeg_error_mgr*) cinfo->err;
+	mptr = (struct r_jpeg_error_mgr *) cinfo->err;
 	(*cinfo->err->output_message) (cinfo);
 	longjmp(mptr->envbuffer, 1);
 //	dbout("jpeg_cd_error_exit }\n");
@@ -74,8 +72,8 @@ int fh_jpeg_load(const char *filename, unsigned char *buffer, int x, int y)
 	}
 
 	jpeg_create_decompress(ciptr);
-	jpeg_stdio_src(ciptr,fh);
-	jpeg_read_header(ciptr,TRUE);
+	jpeg_stdio_src(ciptr, fh);
+	jpeg_read_header(ciptr, TRUE);
 	ciptr->out_color_space = JCS_RGB;
 	if (x == (int)ciptr->image_width)
 		ciptr->scale_denom = 1;
@@ -98,7 +96,7 @@ int fh_jpeg_load(const char *filename, unsigned char *buffer, int x, int y)
 
 	if (c == 3)
 	{
-		lb = (JSAMPLE*)(*ciptr->mem->alloc_small)((j_common_ptr) ciptr, JPOOL_PERMANENT, c*px);
+		lb = (JSAMPLE *)(*ciptr->mem->alloc_small)((j_common_ptr) ciptr, JPOOL_PERMANENT, c * px);
 		bp = buffer;
 		while (ciptr->output_scanline < ciptr->output_height)
 		{

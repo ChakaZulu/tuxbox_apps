@@ -1,16 +1,16 @@
 #include "config.h"
 
 #ifdef FBV_SUPPORT_PNG
-	#include <png.h>
-	#include <sys/types.h>
-	#include <sys/stat.h>
-	#include <fcntl.h>
-	#include <unistd.h>
+#include <png.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-	#include <lib/picviewer/pictureviewer.h>
+#include <lib/picviewer/pictureviewer.h>
 
-	#define PNG_BYTES_TO_CHECK 4
-	#define min(x,y) ((x) < (y) ? (x) : (y))
+#define PNG_BYTES_TO_CHECK 4
+#define min(x, y) ((x) < (y) ? (x) : (y))
 
 int fh_png_id(const char *name)
 {
@@ -36,14 +36,14 @@ int fh_png_load(const char *name, unsigned char *buffer, int x, int y)
 	png_uint_32 width, height;
 	unsigned int i;
 	int bit_depth, color_type, interlace_type;
-	int number_passes,pass;
+	int number_passes, pass;
 	png_byte * fbptr;
 	FILE * fh;
 
-	if (!(fh = fopen(name,"rb")))
+	if (!(fh = fopen(name, "rb")))
 		return(FH_ERROR_FILE);
 
-	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,NULL,NULL,NULL);
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (png_ptr == NULL) 
 		return(FH_ERROR_FORMAT);
 	info_ptr = png_create_info_struct(png_ptr);
@@ -61,15 +61,15 @@ int fh_png_load(const char *name, unsigned char *buffer, int x, int y)
 		return(FH_ERROR_FORMAT);
 	}
 
-	png_init_io(png_ptr,fh);
+	png_init_io(png_ptr, fh);
 
 	png_read_info(png_ptr, info_ptr);
-	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type,&interlace_type, NULL, NULL);
+	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
 
 	if (color_type == PNG_COLOR_TYPE_PALETTE)
 	{
 		png_set_palette_to_rgb(png_ptr);
-		png_set_background(png_ptr, (png_color_16*)&my_background, PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
+		png_set_background(png_ptr, (png_color_16 *)&my_background, PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
 		/* other possibility for png_set_background: use png_get_bKGD */
 	}
 
@@ -77,7 +77,7 @@ int fh_png_load(const char *name, unsigned char *buffer, int x, int y)
 	    color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
 	{
 		png_set_gray_to_rgb(png_ptr);
-		png_set_background(png_ptr, (png_color_16*)&my_background, PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
+		png_set_background(png_ptr, (png_color_16 *)&my_background, PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
 	}
 
 	if (color_type & PNG_COLOR_MASK_ALPHA)
@@ -90,12 +90,12 @@ int fh_png_load(const char *name, unsigned char *buffer, int x, int y)
 		png_set_strip_16(png_ptr);
 
 /* on Intel PC ?:
-   if (bit_depth == 16)
-   png_set_swap(png_ptr);
+	if (bit_depth == 16)
+		png_set_swap(png_ptr);
 */
 
 	number_passes = png_set_interlace_handling(png_ptr);
-	png_read_update_info(png_ptr,info_ptr);
+	png_read_update_info(png_ptr, info_ptr);
 
 	if (width * 3 != png_get_rowbytes(png_ptr, info_ptr))
 	{
@@ -116,7 +116,7 @@ int fh_png_load(const char *name, unsigned char *buffer, int x, int y)
 	fclose(fh);
 	return(FH_ERROR_OK);
 }
-int fh_png_getsize(const char *name,int *x,int *y, int wanted_width, int wanted_height)
+int fh_png_getsize(const char *name, int *x, int *y, int wanted_width, int wanted_height)
 {
 	png_structp png_ptr;
 	png_infop info_ptr;
@@ -124,10 +124,10 @@ int fh_png_getsize(const char *name,int *x,int *y, int wanted_width, int wanted_
 	int bit_depth, color_type, interlace_type;
 	FILE *fh;
 
-	if (!(fh = fopen(name,"rb")))	
+	if (!(fh = fopen(name, "rb")))	
 		return(FH_ERROR_FILE);
 
-	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,NULL,NULL,NULL);
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (png_ptr == NULL) 
 		return(FH_ERROR_FORMAT);
 	info_ptr = png_create_info_struct(png_ptr);
@@ -147,7 +147,7 @@ int fh_png_getsize(const char *name,int *x,int *y, int wanted_width, int wanted_
 
 	png_init_io(png_ptr,fh);
 	png_read_info(png_ptr, info_ptr);
-	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type,&interlace_type, NULL, NULL);
+	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
 	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 	*x = width;
 	*y = height;
