@@ -31,6 +31,9 @@
 /****************************************************************************
  * Includes																	*
  ****************************************************************************/
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "global.h"
 #include <stdio.h>
 #include <fcntl.h>
@@ -85,12 +88,10 @@ void ShoutcastCallback(void *arg)
 
 void* CAudioPlayer::PlayThread(void * filename)
 {
-	FILE *fp;
-	int soundfd;
-	soundfd=::open("/dev/sound/dsp",O_WRONLY);
+	int soundfd = ::open("/dev/sound/dsp",O_WRONLY);
 	if (soundfd != -1)
 	{
-		fp = ::fopen((char *)filename,"r");
+		FILE* fp = ::fopen( static_cast<char*>(filename), "r" );
 		if (fp!=NULL)
 		{
 			/* add callback function for shoutcast */
@@ -123,13 +124,24 @@ void* CAudioPlayer::PlayThread(void * filename)
 	return NULL;
 }
 
-bool CAudioPlayer::play(const char *filename, bool highPrio)
+bool CAudioPlayer::play(const CAudiofile* file, bool highPrio)
 {
 	stop();
 	getInstance()->clearMetaData();
+
+	/* + transfer information from CAudiofile to
+	   Audiometadata, so that it does not have to be
+	   gathered again
+	   + this assignment is important, otherwise the player
+	   would crash if the file currently played was
+	   deleted
+	*/
+	m_MetaData = file->MetaData;
+
 	state = CBaseDec::PLAY;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 	if(highPrio)
 	{
 		struct sched_param param;
@@ -139,12 +151,16 @@ bool CAudioPlayer::play(const char *filename, bool highPrio)
 		usleep(100000); // give the event thread some time to handle his stuff
 							 // without this sleep there were duplicated events...
 	}
-	if (pthread_create (&thrPlay, &attr, PlayThread,(void *) filename) != 0 )
+
+	bool ret = true;
+	if (pthread_create (&thrPlay, &attr, PlayThread, (void*)file->Filename.c_str()) != 0 )
 	{
-		perror("mp3play: pthread_create(PlayThread)");
-		return false;
+		perror("audioplay: pthread_create(PlayThread)");
+		ret = false;
 	}
-	return true;
+
+	pthread_attr_destroy(&attr);
+	return ret;
 }
 
 CAudioPlayer::CAudioPlayer()
@@ -205,6 +221,11 @@ CAudioMetaData CAudioPlayer::getMetaData()
 	return m;
 }
 
+bool CAudioPlayer::hasMetaDataChanged()
+{
+	return m_MetaData.changed;
+}
+
 CAudioMetaData CAudioPlayer::readMetaData(const char* filename, bool nice)
 {
 	FILE* fp;
@@ -220,9 +241,7 @@ CAudioMetaData CAudioPlayer::readMetaData(const char* filename, bool nice)
 		}
 
 		/* Decode stdin to stdout. */
-		bool Status;
-		Status = CBaseDec::GetMetaDataBase(fp, nice, &m);
-		if(!Status)
+		if( !CBaseDec::GetMetaDataBase(fp, nice, &m) )
 			fprintf(stderr,"Error occured during meta data reading.\n");
 
 		fclose(fp);

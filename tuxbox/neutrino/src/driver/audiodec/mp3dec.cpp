@@ -39,12 +39,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <mad.h>
-#include <sstream>
+#include <string>
 #include <driver/audiodec/mp3dec.h>
 #include <driver/netfile.h>
 #include <linux/soundcard.h>
 #include <assert.h>
+#include <cmath>
 
 #include <id3tag.h>
 
@@ -193,14 +193,26 @@ inline signed short CMP3Dec::MadFixedToSShort(const mad_fixed_t Fixed)
 /****************************************************************************
  * Print human readable informations about an audio MPEG frame.             *
  ****************************************************************************/
-void CMP3Dec::CreateInfo(CAudioMetaData* m)
+void CMP3Dec::CreateInfo(CAudioMetaData* m, int FrameNumber)
 {
-	const char	*Layer,
-				   *Mode,
-				   *Emphasis,
-               *Vbr;
+	if ( !m )
+		return;
+
+	if ( !m->hasInfoOrXingTag )
+	{
+		m->total_time = m->avg_bitrate != 0 ?
+			static_cast<int>( round( static_cast<double>( m->filesize )
+									 / m->avg_bitrate ) )
+			: 0;
+	}
+
+	if ( FrameNumber == 1 )
+	{
+		using namespace std;
+		string Layer, Mode;
+
 	/* Convert the layer number to it's printed representation. */
-	switch(m_layer)
+		switch(m->layer)
 	{
 		case MAD_LAYER_I:
 			Layer="I";
@@ -217,7 +229,7 @@ void CMP3Dec::CreateInfo(CAudioMetaData* m)
 	}
 
 	/* Convert the audio mode to it's printed representation. */
-	switch(m_mode)
+		switch(m->mode)
 	{
 		case MAD_MODE_SINGLE_CHANNEL:
 			Mode="single channel";
@@ -236,8 +248,11 @@ void CMP3Dec::CreateInfo(CAudioMetaData* m)
 			break;
 	}
 
+#ifdef INCLUDE_UNUSED_STUFF
+		const char *Emphasis, *Vbr;
+
 	/* Convert the emphasis to it's printed representation. */
-	switch(m_emphasis)
+		switch(m->emphasis)
 	{
 		case MAD_EMPHASIS_NONE:
 			Emphasis="no";
@@ -253,19 +268,16 @@ void CMP3Dec::CreateInfo(CAudioMetaData* m)
 			break;
 	}
 
-   if(m_vbr)
+		if(m->vbr)
       Vbr="VBR ";
    else
       Vbr="";
+#endif /* INCLUDE_UNUSED_STUFF */
 
-	m->type = CAudioMetaData::MP3;
-	m->bitrate = m_bitrate;
-	m->samplerate = m_samplerate;
-	m->total_time = m_filesize * 8 / m_bitrate;
-	std::stringstream ss;
-	ss << "MPEG Layer " << Layer << " / " << Mode;
-	m->type_info = ss.str();
-	m->changed=true;
+		m->type_info = string("MPEG Layer ") + Layer + string(" / ") + Mode;
+	}
+
+	m->changed = true;
 }
 
 /****************************************************************************
@@ -287,11 +299,6 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp,int OutputFd, State* state, CAu
 	int 					ret;
 	unsigned long		FrameCount=0;
 
-	/* Calc file length */
-	fseek(InputFp, 0, SEEK_END);
-	m_filesize=ftell(InputFp);
-	rewind(InputFp);
-	
 	/* First the structures used by libmad must be initialized. */
 	mad_stream_init(&Stream);
 	mad_frame_init(&Frame);
@@ -558,22 +565,31 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 				Status=DSPSET_ERR;
 				break;
 			}
-			m_samplerate=Frame.header.samplerate;
-			m_bitrate=Frame.header.bitrate;
-			m_mode=Frame.header.mode;
-			m_layer=Frame.header.layer;
-			m_emphasis=Frame.header.emphasis;
-			m_vbr=false;
-			CreateInfo(meta_data);
+
+			if ( !meta_data )
+			{
+				meta_data = new CAudioMetaData;
+			}
+			meta_data->samplerate = Frame.header.samplerate;
+			meta_data->bitrate = Frame.header.bitrate;
+			meta_data->mode = Frame.header.mode;
+			meta_data->layer = Frame.header.layer;
+			CreateInfo( meta_data, FrameCount );
 		}
 		else
 		{
-			if (m_bitrate != Frame.header.bitrate)
+			if ( meta_data->bitrate != Frame.header.bitrate )
 			{
-				m_vbr = true;
-				m_bitrate -= m_bitrate / FrameCount;
-				m_bitrate += Frame.header.bitrate / FrameCount;
-				CreateInfo(meta_data);
+				/* bitrate of actual frame */
+				meta_data->vbr = true;
+				meta_data->bitrate = Frame.header.bitrate;
+
+				/* approximate average bitrate */
+				meta_data->avg_bitrate -=
+					meta_data->avg_bitrate / FrameCount;
+				meta_data->avg_bitrate +=
+					Frame.header.bitrate / FrameCount;
+				CreateInfo( meta_data, FrameCount );
 			}
 		}
 
@@ -744,83 +760,215 @@ CMP3Dec* CMP3Dec::getInstance()
 	return MP3Dec;
 }
 
-bool CMP3Dec::GetMetaData(FILE *in, bool nice, CAudioMetaData* m)
+bool CMP3Dec::GetMetaData(FILE* in, const bool nice, CAudioMetaData* const m)
 {
-	GetMP3Info(in, nice, m);
+	bool res;
+	if ( in && m )
+	{
+		res = GetMP3Info(in, nice, m);
 	GetID3(in, m);
-	return true;
-}
-
-#define BUFFER_SIZE 2100
-void CMP3Dec::GetMP3Info(FILE* in, bool nice, CAudioMetaData *m)
-{
-	struct mad_stream	Stream;
-	struct mad_header	Header;
-	unsigned char		InputBuffer[BUFFER_SIZE];
-	int ReadSize;
-	int filesize;
-
-	ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
-
-	if(nice)
-		usleep(15000);
-	bool foundSyncmark=true;
-	// Check for sync mark (some encoder produce data befor 1st frame in mp3 stream)
-	if(InputBuffer[0]!=0xff || (InputBuffer[1]&0xe0)!=0xe0)
-	{
-		foundSyncmark=false;
-		//skip to first sync mark
-		int n=0,j=0;
-		while((InputBuffer[n]!=0xff || (InputBuffer[n+1]&0xe0)!=0xe0) && ReadSize > 1)
-		{
-			n++;
-			j++;
-			if(n > ReadSize-2)
-			{
-				j--;
-				n=0;
-				fseek(in, -1, SEEK_CUR);
-				ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
-				if(nice)
-					usleep(15000);
-			}
-		}
-		if(ReadSize > 1)
-		{
-			fseek(in, j, SEEK_SET);
-			ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
-			if(nice)
-				usleep(15000);
-			foundSyncmark=true;
-		}
-	}
-	if(foundSyncmark)
-	{
-//      printf("found syncmark...\n");
-		mad_stream_init(&Stream);
-		mad_stream_buffer(&Stream,InputBuffer,ReadSize);
-		mad_header_decode(&Header,&Stream);
-
-		m->vbr=false;
-
-		if(nice)
-			usleep(15000);
-		mad_stream_finish(&Stream);
-		// filesize
-		fseek(in, 0, SEEK_END);
-		filesize=ftell(in);
-
-		m->total_time = (Header.bitrate != 0) ? (filesize * 8 / Header.bitrate) : 0;
 	}
 	else
 	{
-		m->total_time=0;
+		res = false;
 	}
+
+	return res;
+}
+
+/*
+ * Scans MP3 header for Xing, Info and Lame tag.  Returns false on failure,
+ * true on success.
+ *
+ * @author Christian Schlotter
+ * @date   2004
+ *
+ * Based on scan_header() from Robert Leslie's "MAD Plug-in for Winamp".
+ */
+#define BUFFER_SIZE 2560
+bool CMP3Dec::scanHeader( FILE* input, struct mad_header* const header,
+						  struct tag* const ftag, const bool nice )
+{
+	struct mad_stream stream;
+	struct mad_frame frame;
+	unsigned char buffer[BUFFER_SIZE];
+	unsigned int buflen = 0;
+	int count = 0;
+	bool allowRefill = true;
+	bool result = true;
+
+	mad_stream_init( &stream );
+	mad_frame_init( &frame );
+
+	if ( ftag )
+	  tag_init( ftag );
+
+	while ( true )
+	{
+		if ( buflen < sizeof(buffer) )
+		{
+			if ( nice )
+				usleep( 15000 );
+
+			/* fill buffer */
+			int readbytes = fread( buffer+buflen, 1, sizeof(buffer)-buflen,
+								   input );
+			if ( readbytes <= 0 )
+			{
+				if ( readbytes == -1 )
+					result = false;
+				break;
+			}
+
+			buflen += readbytes;
+		}
+
+		mad_stream_buffer( &stream, buffer, buflen );
+
+		while ( true )
+	{
+			if ( mad_frame_decode( &frame, &stream ) == -1 )
+		{
+				if ( !MAD_RECOVERABLE( stream.error ) )
+					break;
+
+				/* check if id3 tag is in the way */
+				long tagsize =
+					id3_tag_query( stream.this_frame,
+								   stream.bufend - stream.this_frame );
+
+				if ( tagsize > 0 ) /* id3 tag recognized */
+			{
+					mad_stream_skip( &stream, tagsize );
+					continue;
+			}
+				else if ( mad_stream_sync( &stream ) != -1 ) /* try to sync */
+				{
+					continue;
+		}
+				else /* syncing attempt failed */
+		{
+					/* we have to set some limit here, otherwise we would scan
+					   junk files completely -- the following allows to refill
+					   the buffer one-time */
+					if ( allowRefill )
+					{
+						allowRefill = false;
+						stream.error = MAD_ERROR_BUFLEN;
+					}
+					break;
+		}
+	}
+
+			if ( count++ || ( ftag && tag_parse(ftag, &stream) == -1 ) )
+				break;
+		}
+
+		if ( count || stream.error != MAD_ERROR_BUFLEN )
+			break;
+
+		memmove( buffer, stream.next_frame,
+				 buflen = &buffer[buflen] - stream.next_frame );
+	}
+
+	if ( count )
+	{
+		if ( header )
+		{
+			*header = frame.header;
+		}
+	}
+	else
+	{
+		result = false;
+	}
+
+	mad_frame_finish( &frame );
+	mad_stream_finish( &stream );
+
+	return result;
+}
+
+/*
+ * Function retrieves MP3 metadata.  Returns false on failure, true on success.
+ *
+ * Inspired by get_fileinfo() from Robert Leslie's "MAD Plug-in for Winamp" and
+ * decode_filter() from Robert Leslie's "madplay".
+ */
+bool CMP3Dec::GetMP3Info( FILE* input, const bool nice,
+						  CAudioMetaData* const meta )
+{
+	struct mad_header header;
+	struct tag ftag;
+	mad_header_init( &header );
+	tag_init( &ftag );
+	bool result = true;
+
+	if ( scanHeader(input, &header, &ftag, nice) )
+	{
+		meta->type = CAudioMetaData::MP3;
+		meta->bitrate = header.bitrate;
+		meta->layer = header.layer;
+		meta->mode = header.mode;
+		meta->samplerate = header.samplerate;
+
+		if ( fseek( input, 0, SEEK_END ) )
+		{
+			perror( "fseek()" );
+			result = false;
+		}
+		meta->filesize = ftell( input ) * 8;
+
+		/* valid Xing vbr tag present? */
+		if ( ( ftag.flags & TAG_XING ) &&
+			 ( ftag.xing.flags & TAG_XING_FRAMES ) )
+		{
+			printf( "File has Xing/Info tag\n" );
+			meta->hasInfoOrXingTag = true;
+			mad_timer_t timer = header.duration;
+			mad_timer_multiply( &timer, ftag.xing.frames );
+
+			meta->total_time = mad_timer_count( timer, MAD_UNITS_SECONDS );
+		}
+		else /* no valid Xing vbr tag present */
+		{
+			printf( "File has no Xing/Info tag\n" );
+			meta->total_time = header.bitrate != 0
+				? meta->filesize / header.bitrate : 0;
+		}
+
+		/* vbr file */
+		if ( ftag.flags & TAG_VBR )
+		{
+			meta->vbr = true;
+			meta->avg_bitrate = meta->total_time != 0
+				? static_cast<int>( round( static_cast<double>(meta->filesize)
+										   / meta->total_time ) )
+				: 0;
+	}
+		else /* we do not know wether the file is vbr or not */
+		{
+			meta->vbr = false;
+			meta->avg_bitrate = header.bitrate;
+
+		}
+	}
+	else /* scanning failed */
+	{
+		result = false;
+	}
+
+	if ( !result )
+	{
+		meta->clear();
+	}
+
+	return result;
 }
 
 
 //------------------------------------------------------------------------
-void CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
+void CMP3Dec::GetID3(FILE* in, CAudioMetaData* const m)
 {
 	unsigned int i;
 	struct id3_frame const *frame;
@@ -998,7 +1146,7 @@ void CMP3Dec::GetID3(FILE* in, CAudioMetaData* m)
 	if(0)
 	{
 		fail:
-			printf("id3: not enough memory to display tag");
+			printf("id3: not enough memory to display tag\n");
 	}
 }
 

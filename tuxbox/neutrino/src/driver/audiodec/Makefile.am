@@ -1,6 +1,9 @@
 INCLUDES = \
 	-I$(top_srcdir)/src \
-	@VORBISIDEC_CFLAGS@
+        -I$(top_srcdir)/lib \
+        @FREETYPE_CFLAGS@ \
+        @VORBISIDEC_CFLAGS@ \
+        @ZAPIT_CFLAGS@ 
 
 noinst_LIBRARIES = libneutrino_driver_audiodec.a
 
@@ -9,4 +12,6 @@ libneutrino_driver_audiodec_a_SOURCES = \
 	cdrdec.cpp \
 	mp3dec.cpp \
 	oggdec.cpp \
-	wavdec.cpp
+	wavdec.cpp \
+	tag.c \
+	crc.c

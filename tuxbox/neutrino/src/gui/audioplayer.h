@@ -34,37 +34,13 @@
 
 
 #include "driver/framebuffer.h"
+#include "driver/audiofile.h"
 #include "driver/audioplay.h"
 #include "gui/filebrowser.h"
 #include "gui/widget/menue.h"
 
 
 #include <string>
-#include <vector>
-
-
-class CAudiofile
-{
- public:
-	std::string Filename;
-	std::string Title;
-	std::string Artist;
-	std::string Album;
-	std::string Year;
-#ifdef INCLUDE_UNUSED_STUFF
-	std::string Comment;
-	std::string ChannelMode;
-	std::string Bitrate;
-	std::string Samplerate;
-	std::string Layer;
-#endif
-	time_t Duration;
-	std::string Genre;
-	bool VBR;
-	CFile::FileType FileType;
-};
-
-typedef std::vector<CAudiofile> CPlayList;
 
 
 class CAudioPlayerGui : public CMenuTarget

@@ -69,6 +69,7 @@
 #include <sys/time.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 #if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/audio.h>
@@ -480,11 +481,11 @@ int CAudioPlayerGui::show()
 							CAudiofile mp3;
 							mp3.FileType = CFile::STREAM_MP3;
 							mp3.Filename = files->Name;
-							mp3.Artist = "Shoutcast";
+							mp3.MetaData.artist = "Shoutcast";
 							std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
 							tmp = tmp.substr(0,tmp.length()-4);	//remove .url
-							mp3.Title = tmp;
-							mp3.Duration = 0;
+							mp3.MetaData.title = tmp;
+							mp3.MetaData.total_time = 0;
 							char url[80];
 							FILE* f=fopen(files->Name.c_str(), "r");
 							if(f!=NULL)
@@ -492,7 +493,7 @@ int CAudioPlayerGui::show()
 								fgets(url, 80, f);
 								if(url[strlen(url)-1] == '\n') url[strlen(url)-1]=0;
 								if(url[strlen(url)-1] == '\r') url[strlen(url)-1]=0;
-								mp3.Album = url;
+								mp3.MetaData.album = url;
 								playlist.push_back(mp3);
 								fclose(f);
 							}
@@ -537,11 +538,11 @@ int CAudioPlayerGui::show()
 										if(strcasecmp(filename.substr(filename.length()-3,3).c_str(), "url")==0)
 										{
 											mp3.FileType = CFile::STREAM_MP3;
-											mp3.Artist = "Shoutcast";
+											mp3.MetaData.artist = "Shoutcast";
 											std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
 											tmp = tmp.substr(0,tmp.length()-4);	//remove .url
-											mp3.Title = tmp;
-											mp3.Duration = 0;
+											mp3.MetaData.title = tmp;
+											mp3.MetaData.total_time = 0;
 											char url[80];
 											FILE* f=fopen(filename.c_str(), "r");
 											if(f!=NULL)
@@ -549,7 +550,7 @@ int CAudioPlayerGui::show()
 												fgets(url, 80, f);
 												if(url[strlen(url)-1] == '\n') url[strlen(url)-1]=0;
 												if(url[strlen(url)-1] == '\r') url[strlen(url)-1]=0;
-												mp3.Album = url;
+												mp3.MetaData.album = url;
 												playlist.push_back(mp3);
 												fclose(f);
 											}
@@ -867,7 +868,7 @@ void CAudioPlayerGui::paintItem(int pos)
 
 	if ((pos + liststart) < playlist.size())
 	{
-		if (playlist[pos + liststart].Title.empty())
+		if ( !playlist[pos + liststart].MetaData.bitrate )
 		{
 			// id3tag noch nicht geholt
 			GetMetaData(&playlist[pos + liststart]);
@@ -880,7 +881,7 @@ void CAudioPlayerGui::paintItem(int pos)
 		getFileInfoToDisplay(tmp,pos+liststart,false);
 		
 		char dura[9];
-		snprintf(dura, 8, "%ld:%02ld", playlist[pos + liststart].Duration / 60, playlist[pos + liststart].Duration % 60);
+		snprintf(dura, 8, "%ld:%02ld", playlist[pos + liststart].MetaData.total_time / 60, playlist[pos + liststart].MetaData.total_time % 60);
 		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(dura)+5;
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,ypos+fheight, width-30-w, tmp, color, fheight, true); // UTF-8
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-15-w,ypos+fheight, w, dura, color, fheight);
@@ -889,7 +890,7 @@ void CAudioPlayerGui::paintItem(int pos)
 		{
 			paintItemID3DetailsLine(pos);
 			if (m_state == CAudioPlayerGui::STOP)
-				CLCD::getInstance()->showAudioTrack(playlist[pos + liststart].Artist, playlist[pos + liststart].Title, playlist[pos + liststart].Album);
+				CLCD::getInstance()->showAudioTrack(playlist[pos + liststart].MetaData.artist, playlist[pos + liststart].MetaData.title, playlist[pos + liststart].MetaData.album);
 		}
 		
 	}
@@ -1051,22 +1052,23 @@ void CAudioPlayerGui::paintInfo()
 		// second line (Artist/Title...)
 		if (!playlist.empty() && current >=0)
 		{
+			if ( !playlist[current].MetaData.bitrate )
 			GetMetaData(&playlist[current]);
-			if (playlist[current].Title.empty())
-				tmp = playlist[current].Artist;
-			else if (playlist[current].Artist.empty())
-				tmp = playlist[current].Title;
+			if (playlist[current].MetaData.title.empty())
+				tmp = playlist[current].MetaData.artist;
+			else if (playlist[current].MetaData.artist.empty())
+				tmp = playlist[current].MetaData.title;
 			else if (g_settings.audioplayer_display == TITLE_ARTIST)
 			{
-				tmp = playlist[current].Title;
+				tmp = playlist[current].MetaData.title;
 				tmp += " / ";
-				tmp += playlist[current].Artist;
+				tmp += playlist[current].MetaData.artist;
 			}
 			else //if(g_settings.audioplayer_display == ARTIST_TITLE)
 			{
-				tmp = playlist[current].Artist;
+				tmp = playlist[current].MetaData.artist;
 				tmp += " / ";
-				tmp += playlist[current].Title;
+				tmp += playlist[current].MetaData.title;
 			}
 			w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true); // UTF-8
 			xstart=(width-w)/2;
@@ -1167,25 +1169,25 @@ void CAudioPlayerGui::paintItemID3DetailsLine (int pos)
 
 		// paint id3 infobox 
 		frameBuffer->paintBoxRel(x+2, ypos2 +2 , width-4, info_height-4, COL_MENUCONTENTDARK_PLUS_0);
-		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, ypos2 + 2 + 1*fheight, width- 80, playlist[selected].Title, COL_MENUCONTENTDARK, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, ypos2 + 2 + 1*fheight, width- 80, playlist[selected].MetaData.title, COL_MENUCONTENTDARK, 0, true); // UTF-8
 		std::string tmp;
-		if (playlist[selected].Genre.empty())
-			tmp = playlist[selected].Year;
-		else if (playlist[selected].Year.empty())
-			tmp = playlist[selected].Genre;
+		if (playlist[selected].MetaData.genre.empty())
+			tmp = playlist[selected].MetaData.date;
+		else if (playlist[selected].MetaData.date.empty())
+			tmp = playlist[selected].MetaData.genre;
 		else
 		{
-			tmp = playlist[selected].Genre;
+			tmp = playlist[selected].MetaData.genre;
 			tmp += " / ";
-			tmp += playlist[selected].Year;
+			tmp += playlist[selected].MetaData.date;
 		}
 		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true) + 10; // UTF-8
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w-5, ypos2 + 2 + 1*fheight, w, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
-		tmp = playlist[selected].Artist;
-		if (!(playlist[selected].Album.empty()))
+		tmp = playlist[selected].MetaData.artist;
+		if (!(playlist[selected].MetaData.album.empty()))
 		{
 			tmp += " (";
-			tmp += playlist[selected].Album;
+			tmp += playlist[selected].MetaData.album;
 			tmp += ')';
 		}
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, ypos2 + 2*fheight-2, width- 20, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
@@ -1303,18 +1305,18 @@ void CAudioPlayerGui::play(int pos)
 		}
 	}
 
-	if (playlist[pos].Title.empty())
+	if (playlist[pos].MetaData.title.empty())
 	{
 		// id3tag noch nicht geholt
 		GetMetaData(&playlist[pos]);
 	}
 	m_metainfo="";
 	m_time_played=0;
-	m_time_total=playlist[current].Duration;
+	m_time_total=playlist[current].MetaData.total_time;
 	m_state=CAudioPlayerGui::PLAY;
 	curr_audiofile = playlist[current];
 	// Play
-	CAudioPlayer::getInstance()->play(curr_audiofile.Filename.c_str(), g_settings.audioplayer_highprio==1); 
+	CAudioPlayer::getInstance()->play(&curr_audiofile, g_settings.audioplayer_highprio==1); 
 	//LCD
 	paintLCD();
 	// Display
@@ -1350,50 +1352,52 @@ void CAudioPlayerGui::updateMetaData()
 	if(m_state==CAudioPlayerGui::STOP || !m_show_playlist)
 		return;
 
-	CAudioMetaData metaData = CAudioPlayer::getInstance()->getMetaData();
-	if(metaData.changed || m_metainfo.empty())
+	if( CAudioPlayer::getInstance()->hasMetaDataChanged()
+		|| m_metainfo.empty() );
 	{
-		std::string info = metaData.type_info;
-		if(metaData.bitrate > 0)
+		const CAudioMetaData meta =
+			CAudioPlayer::getInstance()->getMetaData();
+
+		std::stringstream info;
+		info.precision(3);
+
+		if ( meta.bitrate > 0 )
 		{
-			info += " / " ;
-			if(metaData.vbr)
-				info += "VBR ";
-			char rate[31];
-			snprintf(rate, 30, "%ukbs", metaData.bitrate/1000);
-			info += rate;
+			info << " / ";
+			if ( meta.vbr )
+		{
+				info << "VBR ";
 		}
-		if(metaData.samplerate > 0)
-		{
-			info += " / " ;
-			char rate[31];
-			snprintf(rate, 30, "%.1fKHz", (float)metaData.samplerate/1000);
-			info += rate;
+			info << meta.bitrate/1000 << "kbps";
 		}
-		if(m_metainfo!=info)
+
+		if ( meta.samplerate > 0 )
 		{
-			m_metainfo=info;
-			updateMeta=true;
+			info << " / " << std::showpoint
+				 << static_cast<float>( meta.samplerate ) / 1000 << "kHz";
 		}
 		
-		if (!metaData.artist.empty()  &&
-			 metaData.artist != curr_audiofile.Artist)
+		m_metainfo = meta.type_info + info.str();
+		updateMeta = true;
+		
+		if (!meta.artist.empty()  &&
+			 meta.artist != curr_audiofile.MetaData.artist)
 		{
-			curr_audiofile.Artist = metaData.artist;
+			curr_audiofile.MetaData.artist = meta.artist;
 			updateScreen=true;
 			updateLcd=true;
 		}
-		if (!metaData.title.empty() &&
-			 metaData.title != curr_audiofile.Title)
+		if (!meta.title.empty() &&
+			 meta.title != curr_audiofile.MetaData.title)
 		{
-			curr_audiofile.Title = metaData.title;
+			curr_audiofile.MetaData.title = meta.title;
 			updateScreen=true;
 			updateLcd=true;
 		}
-		if (!metaData.sc_station.empty()  &&
-			 metaData.sc_station != curr_audiofile.Album)
+		if (!meta.sc_station.empty()  &&
+			 meta.sc_station != curr_audiofile.MetaData.album)
 		{
-			curr_audiofile.Album = metaData.sc_station;
+			curr_audiofile.MetaData.album = meta.sc_station;
 			updateLcd=true;
 		}
 	}
@@ -1425,11 +1429,11 @@ void CAudioPlayerGui::updateTimes(const bool force)
 		if (m_time_total != CAudioPlayer::getInstance()->getTimeTotal())
 		{
 			m_time_total = CAudioPlayer::getInstance()->getTimeTotal();
-			if (curr_audiofile.Duration != CAudioPlayer::getInstance()->getTimeTotal())
+			if (curr_audiofile.MetaData.total_time != CAudioPlayer::getInstance()->getTimeTotal())
 			{
-				curr_audiofile.Duration = CAudioPlayer::getInstance()->getTimeTotal();
+				curr_audiofile.MetaData.total_time = CAudioPlayer::getInstance()->getTimeTotal();
 				if(current >=0)
-					playlist[current].Duration = CAudioPlayer::getInstance()->getTimeTotal();
+					playlist[current].MetaData.total_time = CAudioPlayer::getInstance()->getTimeTotal();
 			}
 			updateTotal = true;
 		}
@@ -1479,21 +1483,19 @@ void CAudioPlayerGui::getFileInfoToDisplay(std::string& fileInfo, int pos, bool 
 {
 	std::string artist ="Artist?";
 	std::string title = "Title?";
-	CAudioMetaData meta;
-	meta.clear();
 	CAudiofile file = playlist[pos];
 	// make sure that fields are read
 	if (loadMetaData
-	    && (file.Artist.empty() || file.Title.empty()))
+	    && (file.MetaData.artist.empty() || file.MetaData.title.empty()))
 	{
 		GetMetaData(&file);
 	}
 
-	if (!file.Artist.empty())
-		artist = file.Artist;
+	if (!file.MetaData.artist.empty())
+		artist = file.MetaData.artist;
 
-	if (!file.Title.empty())
-		title = file.Title;
+	if (!file.MetaData.title.empty())
+		title = file.MetaData.title;
 
 	if(g_settings.audioplayer_display == TITLE_ARTIST)
 	{
@@ -1508,10 +1510,10 @@ void CAudioPlayerGui::getFileInfoToDisplay(std::string& fileInfo, int pos, bool 
 		fileInfo += title;
 	}
 	
-	if (!file.Album.empty())
+	if (!file.MetaData.album.empty())
 	{
 		fileInfo += " (";
-		fileInfo += file.Album;
+		fileInfo += file.MetaData.album;
 		fileInfo += ')';
 	} 
 	if (fileInfo.empty())
@@ -1532,7 +1534,7 @@ void CAudioPlayerGui::paintLCD()
 		break;
 	case CAudioPlayerGui::PLAY:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PLAY);
-		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
+		CLCD::getInstance()->showAudioTrack(curr_audiofile.MetaData.artist, curr_audiofile.MetaData.title, curr_audiofile.MetaData.album);
 		if(m_time_total!=0)
 			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total), CNeutrinoApp::getInstance()->isMuted());
 		else
@@ -1540,15 +1542,15 @@ void CAudioPlayerGui::paintLCD()
 		break;
 	case CAudioPlayerGui::PAUSE:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PAUSE);
-		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
+		CLCD::getInstance()->showAudioTrack(curr_audiofile.MetaData.artist, curr_audiofile.MetaData.title, curr_audiofile.MetaData.album);
 		break;
 	case CAudioPlayerGui::FF:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_FF);
-		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
+		CLCD::getInstance()->showAudioTrack(curr_audiofile.MetaData.artist, curr_audiofile.MetaData.title, curr_audiofile.MetaData.album);
 		break;
 	case CAudioPlayerGui::REV:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_REV);
-		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
+		CLCD::getInstance()->showAudioTrack(curr_audiofile.MetaData.artist, curr_audiofile.MetaData.title, curr_audiofile.MetaData.album);
 		break;
 	}
 }
@@ -1576,42 +1578,36 @@ void CAudioPlayerGui::screensaver(bool on)
 
 void CAudioPlayerGui::GetMetaData(CAudiofile *File)
 {
-	CAudioMetaData m=CAudioPlayer::getInstance()->readMetaData(File->Filename.c_str(), 
-																				  m_state!=CAudioPlayerGui::STOP && 
-																				  !g_settings.audioplayer_highprio);
-
-	File->Title = m.title;
-	File->Artist = m.artist;
-	File->Album = m.album;
-	File->Year = m.date;
-	File->Duration = m.total_time;
-	File->Genre = m.genre;
+	File->MetaData =
+		CAudioPlayer::getInstance()->readMetaData( File->Filename.c_str(),
+												   m_state != CAudioPlayerGui::STOP &&
+												   !g_settings.audioplayer_highprio );
 	
-	if (File->Artist.empty() && File->Title.empty())
+	if (File->MetaData.artist.empty() && File->MetaData.title.empty())
 	{
 		//Set from Filename
 		std::string tmp = File->Filename.substr(File->Filename.rfind('/')+1);
 		tmp = tmp.substr(0,tmp.length()-4);	//remove extension (.mp3)
 		unsigned int i = tmp.rfind(" - ");
 		if(i != std::string::npos)
-		{ // Trennzeiche " - " gefunden
-			File->Artist = tmp.substr(0, i);
-			File->Title = tmp.substr(i+3);
+		{ // Trennzeichen " - " gefunden
+			File->MetaData.artist = tmp.substr(0, i);
+			File->MetaData.title = tmp.substr(i+3);
 		}
 		else
 		{
 			i = tmp.rfind('-');
 			if(i != std::string::npos)
 			{ //Trennzeichen "-"
-				File->Artist = tmp.substr(0, i);
-				File->Title = tmp.substr(i+1);
+				File->MetaData.artist = tmp.substr(0, i);
+				File->MetaData.title = tmp.substr(i+1);
 			}
 			else
-				File->Title	= tmp;
+				File->MetaData.title	= tmp;
 		}
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-		File->Artist = Latin1_to_UTF8(File->Artist);
-		File->Title = Latin1_to_UTF8(File->Title);
+		File->MetaData.artist = Latin1_to_UTF8(File->MetaData.artist);
+		File->MetaData.title = Latin1_to_UTF8(File->MetaData.title);
 #endif
 	}
 }
@@ -1785,8 +1781,8 @@ void CAudioPlayerGui::savePlaylist()
 		
 		CPlayList::const_iterator it;
 		for (it = playlist.begin();it!=playlist.end();it++) {
-			playlistFile << "#EXTINF:" << it->Duration << ","
-				     << it->Artist << " - " << it->Title << std::endl;
+			playlistFile << "#EXTINF:" << it->MetaData.total_time << ","
+				     << it->MetaData.artist << " - " << it->MetaData.title << std::endl;
 			playlistFile << absPath2Rel(absPlaylistDir, it->Filename) << std::endl;
 		}
 		playlistFile.close();
