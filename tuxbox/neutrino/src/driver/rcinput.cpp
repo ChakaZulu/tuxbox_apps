@@ -1022,7 +1022,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 					long long now_pressed;
 					bool keyok = true;
 
+#ifdef OLD_RC_API
 					gettimeofday( &tv, NULL );
+#else /* OLD_RC_API */
+					tv = ev.time;
+#endif /* OLD_RC_API */
 					now_pressed = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 					//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
 #ifdef OLD_RC_API
