@@ -30,15 +30,15 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.32 2002/01/30 23:50:41 field Exp $
+// $Id: eventlist.cpp,v 1.33 2002/01/31 00:33:25 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
-// Revision 1.32  2002/01/30 23:50:41  field
-// OnScreen Help :)
+// Revision 1.33  2002/01/31 00:33:25  field
+// Kosmetik
 //
 // Revision 1.31  2002/01/16 00:28:30  McClean
 // cleanup
@@ -514,13 +514,14 @@ void EventList::paintHead()
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD);
 
-	g_FrameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
 }
 
 void EventList::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
 
+	if (evtlist[0]->epg.id != 0)
+		g_FrameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
 
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{

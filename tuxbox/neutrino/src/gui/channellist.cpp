@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.60 2002/01/30 23:50:41 field Exp $
+// $Id: channellist.cpp,v 1.61 2002/01/31 00:33:25 field Exp $
 //
 // $Log: channellist.cpp,v $
-// Revision 1.60  2002/01/30 23:50:41  field
-// OnScreen Help :)
+// Revision 1.61  2002/01/31 00:33:25  field
+// Kosmetik
 //
 // Revision 1.58  2002/01/30 17:28:37  McClean
 // new channellist painting
@@ -619,10 +619,15 @@ void CChannelList::numericZap(int key)
 		sprintf((char*) &valstr, "%d", chn);
 		while(strlen(valstr)<4)
 		{
-			strcat(valstr,"_");
+			strcat(valstr,"·");   //"_"
 		}
 		g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
-		g_Fonts->channel_num_zap->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
+
+		for (int i=3; i>=0; i--)
+		{
+			valstr[i+ 1]= 0;
+			g_Fonts->channel_num_zap->RenderString(ox+7+ i*((sx-14)>>2), oy+sy-3, sx, &valstr[i], COL_INFOBAR);
+		}
 
 		showInfo(chn- 1);
 

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.146 2002/01/30 20:58:55 field Exp $
+        $Id: neutrino.cpp,v 1.147 2002/01/31 00:33:25 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.146  2002/01/30 20:58:55  field
-  DD-Symbol
+  Revision 1.147  2002/01/31 00:33:25  field
+  Kosmetik
 
   Revision 1.145  2002/01/30 18:10:19  McClean
   dont use home-key for modeswitch by default (dont worxx) :(
@@ -1154,7 +1154,7 @@ void CNeutrinoApp::SetupFrameBuffer()
 void CNeutrinoApp::SetupFonts()
 {
 	g_Fonts->menu =         g_fontRenderer->getFont("Arial", "Regular", 20);
-	g_Fonts->menu_title =   g_fontRenderer->getFont("Arial", "Regular", 30);
+	g_Fonts->menu_title =   g_fontRenderer->getFont("Arial", "Bold", 30);
 	g_Fonts->menu_info =    g_fontRenderer->getFont("Arial", "Regular", 16);
 
 	g_Fonts->epg_title =    g_fontRenderer->getFont("Arial", "Regular", 30);
@@ -2450,7 +2450,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.146 2002/01/30 20:58:55 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.147 2002/01/31 00:33:25 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
