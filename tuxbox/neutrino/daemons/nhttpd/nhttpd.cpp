@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: nhttpd.cpp,v 1.18 2003/03/14 07:20:01 obi Exp $
+	$Id: nhttpd.cpp,v 1.19 2003/09/16 18:00:42 zwen Exp $
 
 	License: GPL
 
@@ -91,7 +91,6 @@ static void usage(FILE *dest)
 
 int main(int argc, char **argv)
 {
-	bool debug = false;
 	bool do_fork = true;
 
 	for (int i = 1; i < argc; i++)
@@ -148,7 +147,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ((webserver = new CWebserver(debug)))
+	if ((webserver = new CWebserver(CDEBUG::getInstance()->Debug)))
 	{
 		if (webserver->Start())
 		{
