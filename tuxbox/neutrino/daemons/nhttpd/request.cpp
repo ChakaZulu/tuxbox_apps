@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.13 2002/05/17 13:06:51 woglinde Exp $
+	$Id: request.cpp,v 1.14 2002/05/17 18:13:16 dirch Exp $
 
 	License: GPL
 
@@ -53,7 +53,8 @@ CWebserverRequest::~CWebserverRequest()
 	EndRequest();
 }
 
-bool CWebserverRequest::Authenticate()
+//-------------------------------------------------------------------------
+bool CWebserverRequest::Authenticate()			// check if authentication is required
 {
 	if(Parent->MustAuthenticate)
 	{
@@ -76,7 +77,7 @@ bool CWebserverRequest::Authenticate()
 }
 
 //-------------------------------------------------------------------------
-bool CWebserverRequest::CheckAuth()
+bool CWebserverRequest::CheckAuth()			// check if given username an pssword are valid
 {
 	if(HeaderList["Authorization"] == "")
 		return false;
@@ -134,7 +135,7 @@ string nummer = "1";
 }
 //-------------------------------------------------------------------------
 
-bool CWebserverRequest::ParseParams(string param_string)
+bool CWebserverRequest::ParseParams(string param_string)			// parse parameter string
 {
 string name,value,param;
 string param_str;
@@ -166,7 +167,7 @@ bool ende = false;
 //-------------------------------------------------------------------------
 
 
-bool CWebserverRequest::ParseFirstLine(string zeile)
+bool CWebserverRequest::ParseFirstLine(string zeile)				// parse first line of request
 {
 int ende, anfang, t;
 
@@ -209,7 +210,7 @@ int ende, anfang, t;
 
 
 //-------------------------------------------------------------------------
-bool CWebserverRequest::ParseHeader(string header)
+bool CWebserverRequest::ParseHeader(string header)					// parse the header of the request
 {
 bool ende = false;
 int pos;
@@ -237,7 +238,7 @@ string sheader;
 }
 
 //-------------------------------------------------------------------------
-bool CWebserverRequest::ParseBoundaries(string bounds)
+bool CWebserverRequest::ParseBoundaries(string bounds)			// parse boundaries of post method
 {
 	printf("formdata: '%s'\n",bounds.c_str());
 	int i=0;
@@ -359,7 +360,7 @@ int ende;
 	}
 }
 //-------------------------------------------------------------------------
-bool CWebserverRequest::HandleUpload()
+bool CWebserverRequest::HandleUpload()				// momentan broken 
 {
 	int t = 0;
 	FILE *output;
@@ -407,15 +408,13 @@ bool CWebserverRequest::HandleUpload()
 	}
 }
 //-------------------------------------------------------------------------
-void CWebserverRequest::PrintRequest()
+void CWebserverRequest::PrintRequest()					// for debugging and verbose output
 {
 	char method[6] = {0};
 	if(Method == M_GET)
 		sprintf(method,"GET");
 	if(Method == M_POST)
 		sprintf(method,"POST");
-
-
 	printf("%04lu %s %3d %-6s %-35s %-20s %-25s %-10s %s\n",RequestNumber,Client_Addr.c_str(),HttpStatus,method,Path.c_str(),Filename.c_str(),URL.c_str(),ContentType.c_str(),Param_String.c_str());
 }
 
@@ -435,11 +434,11 @@ void CWebserverRequest::SendHTMLFooter()
 //-------------------------------------------------------------------------
 void CWebserverRequest::Send404Error()
 {
+	if(Parent->DEBUG) printf("Sende 404 Error\n");
 	SocketWrite("HTTP/1.0 404 Not Found\n");		//404 - file not found
 	SocketWrite("Content-Type: text/plain\n\n");
-	SocketWrite("404 : File not found\n\n");
+	SocketWrite("404 : File not found\n\nThe requested file was not found on this dbox ;)\n");
 	HttpStatus = 404;
-	if(Parent->DEBUG) printf("Sende 404 Error\n");
 }
 //-------------------------------------------------------------------------
 void CWebserverRequest::Send500Error()
@@ -484,10 +483,10 @@ void CWebserverRequest::RewriteURL()
 		else
 			if(Parent->DEBUG) printf("Kein Dateiname !\n");	
 	}
-
-	if( (strncmp(Path.c_str(),"/fb",3) != 0) && (strncmp(Path.c_str(),"/control",8) != 0) )	// Nur umschreiben wenn nicht mit /fb/ anfängt
+	// Nur umschreiben wenn nicht mit /fb/ oder /control/ anfängt
+	if( (strncmp(Path.c_str(),"/fb",3) != 0) && (strncmp(Path.c_str(),"/control",8) != 0) )	
 	{
-		if(strncmp(Path.c_str(),"/public",7) == 0)
+		if(strncmp(Path.c_str(),"/public",7) == 0)							// mit /public gelangt man in den inhalt von PublicDocumentRoor
 			Path = Parent->PublicDocumentRoot + Path.substr(7,Path.length() - 7);	
 		else
 			Path = Parent->PrivateDocumentRoot + Path;
@@ -550,7 +549,13 @@ bool CWebserverRequest::SendResponse()
 		Parent->WebDbox->ExecuteCGI(this);
 		return true;
 	}
-	if(Path.compare("/fb/") == 0)
+	else if(Path.compare("/bouquetedit/") == 0)
+	{
+		if(Parent->DEBUG) printf("Bouqueteditor api\n");
+		Parent->WebDbox->ExecuteBouquetEditor(this);
+		return true;
+	}
+	else if(Path.compare("/fb/") == 0)
 	{
 		if(Parent->DEBUG) printf("Browser api\n");
 		Parent->WebDbox->Execute(this);
@@ -681,7 +686,7 @@ int CWebserverRequest::OpenFile(string path, string filename)
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 
-bool CWebserverRequest::ParseFile(string file,CStringList params)
+bool CWebserverRequest::ParseFile(string file,CStringList params)		// replace all parameters if file
 {
 	FILE * f;
 	if((f = fopen(file.c_str(),"r")) == NULL)
@@ -700,8 +705,8 @@ bool CWebserverRequest::ParseFile(string file,CStringList params)
 }
 //-------------------------------------------------------------------------
 
-string CWebserverRequest::ParseLine(string line,CStringList params)
-{
+string CWebserverRequest::ParseLine(string line,CStringList params)		// replaces %%xx%% with string in params["xx"]
+{					
 	int a = 0,e = 0,anfang = 0, ende = 0;
 	if((a = line.find_first_of('%')) >= 0)
 	{

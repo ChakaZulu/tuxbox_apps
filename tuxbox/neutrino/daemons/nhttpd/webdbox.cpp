@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.28 2002/05/17 03:42:52 dirch Exp $
+	$Id: webdbox.cpp,v 1.29 2002/05/17 18:13:16 dirch Exp $
 
 	License: GPL
 
@@ -183,3 +183,26 @@ string TWebDbox::GetServiceName(int onid_sid)
 	return "";
 }
 
+//-------------------------------------------------------------------------
+bool TWebDbox::GetBouquets(void)
+{
+	BouquetList.clear();
+	zapit->getBouquets(BouquetList); 
+	return true;
+}
+
+//-------------------------------------------------------------------------
+bool TWebDbox::GetBouquet(unsigned int BouquetNr)
+{
+	BouquetsList[BouquetNr].clear();
+	zapit->getBouquetChannels(BouquetNr,BouquetsList[BouquetNr]);
+	return true;
+}
+//-------------------------------------------------------------------------
+
+bool TWebDbox::GetChannelList(void)
+{
+	ChannelList.clear();
+	zapit->getChannels(ChannelList);
+	return true;
+}

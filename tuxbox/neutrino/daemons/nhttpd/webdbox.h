@@ -40,22 +40,27 @@ class TWebDbox
 {
 	CWebserver * Parent;
 
+	// Clientlibs
 	CControldClient *controld;
 	CSectionsdClient *sectionsd;
 	CZapitClient *zapit;
 	CTimerdClient *timerd;
 
-	CZapitClient::BouquetChannelList ChannelList;
-	map<unsigned, CChannelEvent *> ChannelListEvents;
-	map<int, CZapitClient::BouquetChannelList> BouquetsList;
-	CZapitClient::BouquetList BouquetList;
+	CZapitClient::BouquetChannelList ChannelList;					// complete channellist
+	map<unsigned, CChannelEvent *> ChannelListEvents;				// events of actual channel
+	map<int, CZapitClient::BouquetChannelList> BouquetsList;		// List of available bouquets
+	CZapitClient::BouquetList BouquetList;							// List of current bouquet
+
+
 	bool standby_mode;
+
+	// some constants
 	string Dbox_Hersteller[4];
 	string videooutput_names[3];
 	string videoformat_names[3];
 	string audiotype_names[5];
+	map<unsigned, string> TimerEventNames;							
 
-	map<unsigned, string> TimerEventNames;
 
 
 public:
@@ -68,29 +73,10 @@ public:
 // get functions to collect data
 	void GetChannelEvents();
 	bool GetStreamInfo(int bitinfo[10]);
-
 	string GetServiceName(int onid_sid);
-
-	bool GetBouquets(void)
-	{
-		BouquetList.clear();
-		zapit->getBouquets(BouquetList); 
-		return true;
-	};
-
-	bool GetBouquet(unsigned int BouquetNr)
-	{
-		BouquetsList[BouquetNr].clear();
-		zapit->getBouquetChannels(BouquetNr,BouquetsList[BouquetNr]);
-		return true;
-	};
-
-	bool GetChannelList(void)
-	{
-		ChannelList.clear();
-		zapit->getChannels(ChannelList);
-		return true;
-	};
+	bool GetBouquets(void);
+	bool GetBouquet(unsigned int BouquetNr);
+	bool GetChannelList(void);
 
 	bool ExecuteCGI(CWebserverRequest* request);
 // send functions for ExecuteCGI (controld api)
@@ -116,13 +102,14 @@ public:
 	void ShowEPG(CWebserverRequest *request,CEPGData *epg);
 	bool ShowActualEpg(CWebserverRequest *request);
 
+
+	bool ExecuteBouquetEditor(CWebserverRequest* request);
+// BouquetEditor functions
+
 // support functions
 	void ZapTo(string target);
 	void UpdateBouquets(void);
 
-
-// alt
-	void GetEPG(CWebserverRequest *request,unsigned long long epgid, time_t *,bool cgi=false);
 };
 
 #endif
