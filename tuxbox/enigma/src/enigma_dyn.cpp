@@ -55,7 +55,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.5.5"
+#define WEBXFACEVERSION "1.5.6"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
