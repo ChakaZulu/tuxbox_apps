@@ -23,10 +23,6 @@ nhttpd_LDADD = \
 	@ZAPIT_LIBS@ \
 	-lpthread
 
-install-exec-hook:
-	chown root $(bindir)/nhttpd
-	chmod u+s $(bindir)/nhttpd
-
 $(top_builddir)/lib/controldclient/libcontroldclient.la:
 	$(MAKE) -C $(top_builddir)/lib/controldclient
 
