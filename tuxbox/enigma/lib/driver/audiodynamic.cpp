@@ -52,9 +52,9 @@ void eAudioDynamicCompression::doPoll()
  	}
 	
 //	eDebug("%d, %d (%d %d) %d %d", sum, result, hyst_low, hyst_hi, maxval, current_fast);
-	
-	if (result && enabled)
-		eAVSwitch::getInstance()->changeVolume(0, -result);
+	eAVSwitch *avsw=eAVSwitch::getInstance();
+	if (avsw && result && enabled && !avsw->getMute())
+		avsw->changeVolume(0, -result);
 }
 
 eAudioDynamicCompression *eAudioDynamicCompression::instance;
@@ -71,7 +71,7 @@ eAudioDynamicCompression::eAudioDynamicCompression(): pollTimer(eApp)
 	CONNECT(pollTimer.timeout, eAudioDynamicCompression::doPoll);
 	
 	enabled = 0;
-	eConfig::getInstance()->getKey("/ezap/audio/dynamicadjust", enabled);
+	eConfig::getInstance()->getKey("/elitedvb/audio/dynamicadjust", enabled);
 	int val = 8000;;
 	eConfig::getInstance()->getKey("/ezap/audio/dynamicadjust_value", val);
 	setMax(val);

@@ -88,7 +88,7 @@ int eSocket::setSocket(int s, int iss, eMainloop *ml)
 	last_break = 0xFFFFFFFF;
 
 	if (rsn)
-		delete rsn;
+		delete rsn;  
 	rsn=new eSocketNotifier(ml, getDescriptor(), 
 		eSocketNotifier::Read|eSocketNotifier::Hungup);
 	CONNECT(rsn->activated, eSocket::notifier);
@@ -183,7 +183,7 @@ void eSocket::notifier(int what)
 		}
 	} else if (what & eSocketNotifier::Hungup)
 	{
-		if (mystate == Connection)
+		if (mystate == Connection || mystate == Closing)
 		{
 			writebuffer.clear();
 			close();
@@ -206,12 +206,7 @@ int eSocket::writeBlock(const char *data, unsigned int len)
 	{
 		int tw=::send(getDescriptor(), data, len, MSG_NOSIGNAL);
 		if ((tw < 0) && (errno != EWOULDBLOCK))
-		{
-			if ( errno == EPIPE )  // broken pipe.. (connection closed)
-				++err;
-			else
-				eDebug("write: %m");
-		}
+			eDebug("write: %m");
 		if (tw < 0)
 			tw = 0;
 		data+=tw;

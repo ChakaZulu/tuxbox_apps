@@ -198,17 +198,16 @@ public:
 	eWizardLanguageInit()
 	{
 		FILE *f=fopen("/share/locale/locales", "rt");
-
 			// only run wizzard when language not yet setup'ed
 		char *temp;
-		if (! eConfig::getInstance()->getKey("/elitedvb/language", temp) )
+		if (!eConfig::getInstance()->getKey("/elitedvb/language", temp) )
 			free(temp);
 		else if ( f )
-		{
-			fclose(f);
 			eWizardLanguage::run();
-		}	else
+		else
 			eDebug("no locales found (/share/locale/locales).. do not start language wizard");
+		if (f)
+			fclose(f);
 	}
 };
 

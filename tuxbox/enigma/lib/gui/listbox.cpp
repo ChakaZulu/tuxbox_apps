@@ -934,6 +934,69 @@ int eListBoxBaseExt::eventHandler(const eWidgetEvent &event)
 				}
 				browseTimer.start(2*1000,true);
 			}
+			else if (event.action == &i_cursorActions->down && browseTimer.isActive())
+			{
+				const char *browseBuf = browseText.c_str();
+				int len = browseText.length();
+				ePtrList<eListBoxEntry>::iterator it(current);
+				++it;
+				for (;it != childs.end(); ++it )
+				{
+					if ( !strncasecmp(it->getText().c_str(), browseBuf, len) )
+					{
+						if ( it != current )
+						{
+							setCurrent(*it,false);
+							browseTimer.start(2*1000,true);
+						}
+						return 1;
+					}
+				}
+				it=childs.begin();
+				for (;it != childs.end(); ++it)
+				{
+					if ( !strncasecmp(it->getText().c_str(), browseBuf, len) )
+					{
+						if ( it != current )
+						{
+							setCurrent(*it,false);
+							browseTimer.start(2*1000,true);
+						}
+						return 1;
+					}
+				}
+			}
+			else if (event.action == &i_cursorActions->up && browseTimer.isActive() )
+			{
+				const char *browseBuf = browseText.c_str();
+				int len = browseText.length();
+				ePtrList<eListBoxEntry>::reverse_iterator it((ePtrList<eListBoxEntry>::reverse_iterator&)current);
+				for (;it != childs.rend(); ++it )
+				{
+					if ( !strncasecmp(it->getText().c_str(), browseBuf, len) )
+					{
+						if ( it != current )
+						{
+							setCurrent(*it,false);
+							browseTimer.start(2*1000,true);
+						}
+						return 1;
+					}
+				}
+				it=childs.rbegin();
+				for (;it != childs.rend(); ++it )
+				{
+					if ( !strncasecmp(it->getText().c_str(), browseBuf, len) )
+					{
+						if ( it != current )
+						{
+							setCurrent(*it,false);
+							browseTimer.start(2*1000,true);
+						}
+						return 1;
+					}
+				}
+			}
 			else
 				break;
 		return 1;
