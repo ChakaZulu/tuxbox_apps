@@ -1,6 +1,6 @@
 /**********************************************
 *
-*	$Revision: 1.1 $
+*	$Revision: 1.2 $
 *
 **********************************************/
 
@@ -501,7 +501,7 @@ eFlashtoolImageView::~eFlashtoolImageView()
 }
 
 eFlashtoolSource::eFlashtoolSource(int direction)
-#ifdef	DREAMBOX
+#ifndef DISABLE_FILE
 	:eListBoxWindow<eListBoxEntryText>(_("Save to..."), 5, 400)
 #else
 	:eListBoxWindow<eListBoxEntryText>(_("Save to..."), 3, 400)
@@ -518,7 +518,7 @@ eFlashtoolSource::eFlashtoolSource(int direction)
 	move(ePoint(150, 100));
 	//new eListBoxEntryText(&list, _("back"), (void*)"back");
 	new eListBoxEntryText(&list, "tmp", (void*)"/tmp");
-#ifdef	DREAMBOX
+#ifdef	DISABLE_FILE
 	new eListBoxEntryText(&list, "HDD", (void*)"/hdd/images");
 	new eListBoxEntryText(&list, "USB", (void*)"/var/mnt/USB/images");
 #endif
