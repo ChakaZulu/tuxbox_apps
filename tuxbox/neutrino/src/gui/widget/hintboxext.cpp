@@ -52,16 +52,9 @@ CHintBoxExt::CHintBoxExt(const neutrino_locale_t Caption, const char * const Tex
 
 	char *begin   = m_message;
 
-//      int pos = 0;
-//      int oldPos = 0;
-//      char endline = '\n';
-//      int length = strlen(m_message);
-//      int actPos =
-
 	begin = strtok(m_message, "\n");
 	while (begin != NULL)
 	{
-		printf("hintbox: found string %s\n", begin);
 		std::vector<Drawable*> oneLine;
 		std::string s(begin);
 		DText *d = new DText(s);
