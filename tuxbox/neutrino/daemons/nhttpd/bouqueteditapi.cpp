@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.19 2004/03/07 12:43:50 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.20 2004/03/07 13:07:00 thegoodguy Exp $
 
 	License: GPL
 
@@ -293,7 +293,7 @@ bool CBouqueteditAPI::editBouquet(CWebserverRequest * request)
 		CZapitClient::BouquetChannelList BChannelList;
 		CZapitClient::BouquetChannelList::iterator channels;
 
-		int selected = atoi(request->ParameterList["selected"].c_str());
+		int selected = atoi(request->ParameterList["selected"].c_str()) - 1;
 
 		request->SendPlainHeader("text/html");
 
@@ -311,14 +311,13 @@ bool CBouqueteditAPI::editBouquet(CWebserverRequest * request)
 			"</head>\n"
 			"\n"
 			"<body>\n"
-			);
-
-
-//		request->SendHTMLHeader("Bouquet-Editor");
-		request->SocketWrite("<script src=\"/channels.js\" type=\"text/javascript\"></script>\n"
-				     "<h2>Bouquet-Editor</h2>\n");
-		request->printf("<h3>Bouquet %s bearbeiten</h3>\n", request->ParameterList["name"].c_str()); // FIXME: should be UTF-8 encoded
-		request->SocketWrite("<form action=\"editchannels\" method=\"post\" id=\"channels\" name=\"channels\" enctype=\"x-www-form-urlencoded\">\n"
+			"<script src=\"/channels.js\" type=\"text/javascript\"></script>\n"
+			"<h2>Bouquet-Editor</h2>\n"
+			"<h3>Bouquet ");
+		request->SocketWrite(request->ParameterList["name"].c_str());
+#warning xhtml strict violation: form tag name is deprecated. however: removing it results in non-working javascript
+		request->SocketWrite(" bearbeiten</h3>\n"
+				     "<form action=\"editchannels\" method=\"post\" id=\"channels\" name=\"channels\" enctype=\"x-www-form-urlencoded\">\n"
 				     "<p>"
 				     "<input type=\"hidden\" name=\"selected\" value=\"");
 		request->SocketWrite(request->ParameterList["selected"].c_str());
@@ -328,7 +327,7 @@ bool CBouqueteditAPI::editBouquet(CWebserverRequest * request)
 				     "<select multiple=\"multiple\" size=\"20\" name=\"bchannels\">\n");
 
 		// List channels in bouquet
-		Parent->Zapit->getBouquetChannels(selected - 1, BChannelList, CZapitClient::MODE_CURRENT, true); // UTF-8
+		Parent->Zapit->getBouquetChannels(selected, BChannelList, CZapitClient::MODE_CURRENT, true); // UTF-8
 		for(channels = BChannelList.begin(); channels != BChannelList.end(); channels++)
 		{
 			request->printf("<option value=\""
@@ -347,10 +346,9 @@ bool CBouqueteditAPI::editBouquet(CWebserverRequest * request)
 				     "<select multiple=\"multiple\" size=\"20\" name=\"achannels\">\n");
 		// List all channels
 		Parent->Zapit->getChannels(BChannelList, CZapitClient::MODE_CURRENT, CZapitClient::SORT_ALPHA, true); // UTF-8
-		channels = BChannelList.begin();
-		for(; channels != BChannelList.end();channels++)
+		for(channels = BChannelList.begin(); channels != BChannelList.end(); channels++)
 		{
-			if (!Parent->Zapit->existsChannelInBouquet(selected - 1, channels->channel_id)){
+			if (!Parent->Zapit->existsChannelInBouquet(selected, channels->channel_id)){
 				request->printf("<option value=\""
 						PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 						"\">%s</option>\n",
