@@ -70,10 +70,11 @@ eHTTPDataSource *eHTTPDynPathResolver::getDataSource(eString request, eString pa
 			conn->code=-1;
 			eString s=i->function(request, path, opt, conn);
 
-			if (s)
+// removed to allow return of empty string for e.g. 204 no content...
+//			if (s) 
 				return new eHTTPDyn(conn, s);
 
-			return new eHTTPError(conn, 500);
+//			return new eHTTPError(conn, 500);
 		}
 	}
 	return 0;
