@@ -327,67 +327,89 @@ void CMotorControl::hide()
 	stopSatFind();
 }
 
-void CMotorControl::paintLine(char * txt, char * icon)
+void CMotorControl::paintLine(int xpos, int * ypos, char * txt)
 {
-	ypos += mheight;
-	frameBuffer->paintBoxRel(x, ypos - mheight, width, hheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x + 10, ypos, width - 10, txt, COL_MENUCONTENT);
+	*ypos += mheight;
+	frameBuffer->paintBoxRel(xpos, *ypos - mheight, width - xpos, hheight, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(xpos, *ypos, g_Fonts->menu->getRenderWidth(txt), txt, COL_MENUCONTENT);
+}
+
+void CMotorControl::paintLine(int xpos, int ypos, char * txt)
+{
+	frameBuffer->paintBoxRel(xpos, ypos - mheight, width - xpos, hheight, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(xpos, ypos, g_Fonts->menu->getRenderWidth(txt), txt, COL_MENUCONTENT);
+}
+
+void CMotorControl::paintSeparator(int xpos, int * ypos, int width, char * txt)
+{
+	int stringwidth = 0;
+	int stringstartposX = 0;
+	
+	*ypos += mheight;
+	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1), COL_MENUCONTENT + 3);
+	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1) + 1, COL_MENUCONTENT + 1);
+	
+	stringwidth = g_Fonts->menu->getRenderWidth(txt);
+	stringstartposX = 0;
+	stringstartposX = (xpos + (width >> 1)) - (stringwidth >> 1);
+	frameBuffer->paintBoxRel(stringstartposX - 5, *ypos - mheight, stringwidth + 10, mheight, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(stringstartposX, *ypos, stringwidth, txt, COL_MENUCONTENT);
 }
 
 void CMotorControl::paintStatus()
 {
 	char buf[256];
 	char buf2[256];
+	int xpos1, xpos2;
+	
+	xpos1 = x + 10;
+	xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth("(a) Motor Position:");
 	
 	ypos = ypos_status;
-	paintLine("------ Motor Control Settings ------", NULL);
+	paintSeparator(xpos1, &ypos, width, "Motor Control Settings");
+	//paintLine(xpos1, &ypos, "------ Motor Control Settings ------");
 	
-	buf[0] = buf2[0] = 0;
-	strcat(buf, "(a) Motor Position: ");
-	sprintf(buf2, "%d", motorPosition);
-	strcat(buf, buf2);
-	paintLine(buf, NULL);
+	paintLine(xpos1, &ypos, "(a) Motor Position:");
+	sprintf(buf, "%d", motorPosition);
+	paintLine(xpos2, ypos, buf);
 	
-	buf[0] = buf2[0] = 0;
-	strcat(buf, "(b) Movement: ");
+	paintLine(xpos1, &ypos, "(b) Movement:");
 	switch(stepMode)
 	{
 		case STEP_MODE_ON:
-			strcat(buf, "Step Mode");
+			strcpy(buf, "Step Mode");
 			break;
 		case STEP_MODE_OFF:
-			strcat(buf, "Drive Mode");
+			strcpy(buf, "Drive Mode");
 			break;
 		case STEP_MODE_TIMED:
-			strcat(buf, "Timed Step Mode");
+			strcpy(buf, "Timed Step Mode");
 			break;
 	}
-	paintLine(buf, NULL);
+	paintLine(xpos2, ypos, buf);
 	
-	buf[0] = buf2[0] = 0;
-	strcat(buf, "(c) Step Size: ");
+	paintLine(xpos1, &ypos, "(c) Step Size:");
 	switch(stepMode)
 	{
 		case STEP_MODE_ON:
-			sprintf(buf2, "%d", stepSize);
+			sprintf(buf, "%d", stepSize);
 			break;
 		case STEP_MODE_OFF:
-			strcpy(buf2, "don't care");
+			strcpy(buf, "don't care");
 			break;
 		case STEP_MODE_TIMED:
-			sprintf(buf2, "%d", stepSize * stepDelay);
-			strcat(buf2, " milliseconds");
+			sprintf(buf, "%d", stepSize * stepDelay);
+			strcat(buf, " milliseconds");
 			break;
 	}
-	strcat(buf, buf2);
-	paintLine(buf, NULL);
+	paintLine(xpos2, ypos, buf);
 	
-	paintLine("---------------- Status ---------------", NULL);
-	buf[0] = buf2[0] = 0;
-	strcat(buf, "Satellite Position (Step Mode): ");
+	paintSeparator(xpos1, &ypos, width, "Status");
+	//paintLine(xpos1, &ypos, "---------------- Status ---------------");
+	strcpy(buf, "Satellite Position (Step Mode): ");
 	sprintf(buf2, "%d", satellitePosition);
 	strcat(buf, buf2);
-	paintLine(buf, NULL);
+	paintLine(xpos1, &ypos, buf);
 	
 }
 
@@ -404,39 +426,62 @@ void CMotorControl::paint()
 
 void CMotorControl::paintMenu()
 {
+	int xpos1, xpos2;
+	
 	ypos = ypos_menue;
+	
+	xpos1 = x + 10;
+	xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth("(7/yellow)");
+	paintLine(xpos1, &ypos, "(0/OK)");
+	(installerMenue ? paintLine(xpos2, ypos, "User Menue") : paintLine(xpos2, ypos, "Installer Menue"));
+	paintLine(xpos1, &ypos, "(1/right)");
+	paintLine(xpos2, ypos, "Step/Drive Motor West (b,c)");
+	paintLine(xpos1, &ypos, "(2/red)");
+	paintLine(xpos2, ypos, "Halt Motor");
+	paintLine(xpos1, &ypos, "(3/left)");
+	paintLine(xpos2, ypos, "Step/Drive Motor East (b,c)");
 	
 	if (installerMenue)
 	{
-		paintLine("(0/OK) User Menue", NULL);
-		paintLine("(1/right)) Step/Drive Motor West (b,c)", NULL);
-		paintLine("(2/red) Halt Motor", NULL);
-		paintLine("(3/left) Step/Drive Motor East (b,c)", NULL);
-		paintLine("(4) Set West (soft) Limit", NULL);
-		paintLine("(5) Disable (soft) Limits", NULL);
-		paintLine("(6) Set East (soft) Limit", NULL);
-		paintLine("(7) Goto Reference Position", NULL);
-		paintLine("(8) Enable (soft) Limits", NULL);
-		paintLine("(9) (Re)-Calculate Positions", NULL);
-		paintLine("(+/up) Increase Motor Position (a)", NULL);
-		paintLine("(-/down) Decrease Motor Position (a)", NULL);
-		paintLine("(blue) Switch Step/Drive Mode (b)", NULL);
+		paintLine(xpos1, &ypos, "(4)");
+		paintLine(xpos2, ypos, "Set West (soft) Limit");
+		paintLine(xpos1, &ypos, "(5)");
+		paintLine(xpos2, ypos, "Disable (soft) Limits");
+		paintLine(xpos1, &ypos, "(6)");
+		paintLine(xpos2, ypos, "Set East (soft) Limit");
+		paintLine(xpos1, &ypos, "(7)");
+		paintLine(xpos2, ypos, "Goto Reference Position");
+		paintLine(xpos1, &ypos, "(8)");
+		paintLine(xpos2, ypos, "Enable (soft) Limits");
+		paintLine(xpos1, &ypos, "(9)");
+		paintLine(xpos2, ypos, "(Re)-Calculate Positions");
+		paintLine(xpos1, &ypos, "(+/up)");
+		paintLine(xpos2, ypos, "Increase Motor Position (a)");
+		paintLine(xpos1, &ypos, "(-/down)");
+		paintLine(xpos2, ypos, "Decrease Motor Position (a)");
+		paintLine(xpos1, &ypos, "(blue)");
+		paintLine(xpos2, ypos, "Switch Step/Drive Mode (b)");
 	}
 	else
 	{
-		paintLine("(0/OK) Installer Menue", NULL);
-		paintLine("(1/right)) Step/Drive Motor West (b,c)", NULL);
-		paintLine("(2/red) Halt Motor", NULL);
-		paintLine("(3/left) Step/Drive Motor East (b,c)", NULL);
-		paintLine("(4) not defined", NULL);
-		paintLine("(5/green) Store Motor Position (a)", NULL);
-		paintLine("(6) Increase Step Size (c)", NULL);
-		paintLine("(7/yellow) Goto Motor Position (a)", NULL);
-		paintLine("(8) not defined", NULL);
-		paintLine("(9) Decrease Step Size (c)", NULL);
-		paintLine("(+/up) Increase Motor Position (a)", NULL);
-		paintLine("(-/down) Decrease Motor Position (a)", NULL);
-		paintLine("(blue) Switch Step/Drive Mode (b)", NULL);	
+		paintLine(xpos1, &ypos, "(4)");
+		paintLine(xpos2, ypos, "not defined");
+		paintLine(xpos1, &ypos, "(5/green)");
+		paintLine(xpos2, ypos, "Store Motor Position (a)");
+		paintLine(xpos1, &ypos, "(6)");
+		paintLine(xpos2, ypos, "Increase Step Size (c)");
+		paintLine(xpos1, &ypos, "(7/yellow)");
+		paintLine(xpos2, ypos, "Goto Motor Position (a)");
+		paintLine(xpos1, &ypos, "(8)");
+		paintLine(xpos2, ypos, "not defined");
+		paintLine(xpos1, &ypos, "(9)");
+		paintLine(xpos2, ypos, "Decrease Step Size (c)");
+		paintLine(xpos1, &ypos, "(+/up)");
+		paintLine(xpos2, ypos, "Increase Motor Position (a)");
+		paintLine(xpos1, &ypos, "(-/down)");
+		paintLine(xpos2, ypos, "Decrease Motor Position (a)");
+		paintLine(xpos1, &ypos, "(blue)");
+		paintLine(xpos2, ypos, "Switch Step/Drive Mode (b)");	
 	}
 	
 	ypos_status = ypos;
