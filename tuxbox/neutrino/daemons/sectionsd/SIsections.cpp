@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.18 2001/09/20 10:12:46 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.19 2001/10/02 16:18:53 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.19  2001/10/02 16:18:53  fnbrd
+// Fehler behoben.
+//
 // Revision 1.18  2001/09/20 10:12:46  fnbrd
 // Fehler behoben.
 //
@@ -256,8 +259,14 @@ void SIsectionEIT::parseDescriptors(const char *des, unsigned len, SIevent &e)
 void SIsectionEIT::parse(void)
 {
 //  printf("parse\n");
-  if(!buffer || bufferLength<sizeof(SI_section_EIT_header)+sizeof(struct eit_event) || parsed)
+  if(!buffer || parsed)
     return;
+  if(bufferLength<sizeof(SI_section_EIT_header)+sizeof(struct eit_event)) {
+    delete [] buffer;
+    buffer=0;
+    bufferLength=0;
+    return;
+  }
   const char *actPos=buffer+sizeof(SI_section_EIT_header);
   while(actPos<buffer+bufferLength-sizeof(struct eit_event)) {
     struct eit_event *evt=(struct eit_event *)actPos;
