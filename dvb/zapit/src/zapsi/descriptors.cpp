@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.44 2002/09/25 18:51:13 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.45 2002/10/05 00:06:30 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -422,8 +422,8 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 	uint8_t service_type = buffer[2];
 	uint8_t service_provider_name_length = buffer[3];
 
-	std::string providerName = convertForXML(std::string((const char*)&(buffer[4]), service_provider_name_length));
-	std::string serviceName  = convertForXML(std::string((const char*)&(buffer[service_provider_name_length + 4]), (2 + buffer[1]) - (service_provider_name_length + 4)));
+	std::string providerName = std::string((const char*)&(buffer[4]), service_provider_name_length);
+	std::string serviceName  = std::string((const char*)&(buffer[service_provider_name_length + 4]), (2 + buffer[1]) - (service_provider_name_length + 4));
 
 	found_channels++;
 
