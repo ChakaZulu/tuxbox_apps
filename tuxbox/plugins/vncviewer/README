@@ -11,15 +11,15 @@ Keys:
 ===============
 home : quit plugin
 ok : left mouse click
-2 : middle mouse click
-3 : right mouse click
 ? : mouse up/ mouse down toggle (e.g. for moving windows)
 mute: toggle mouse movement/panning mode
 up/down/left/right: move pointer/pan screen
 vol_down: scale++ (zoom out)
 vol_up: scale-- (zoom in)
-red: toggle virtual keyboard
-blue: left double click
+red: left mouse double click
+green: mouse middle click
+yellow: mouse right click
+blue: toggle virtual keyboard
 
 Configfile (CONFIGDIR + vnc.conf) syntax
 =========================================

@@ -354,8 +354,6 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 	struct timeval timeout;
 	static fbvnc_event_t nextev = {0,0,0,0,0,0,0};
 	static int next_mb = -1, countevt=0;
-	static unsigned short lastcode=0;
-	static struct timeval evttime;
 	IMPORT_FRAMEBUFFER_VARS
 
 	if(nextev.evtype!=0)
@@ -475,26 +473,16 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 		count = read(rc_fd, &iev, sizeof(struct input_event));
 		if((count == sizeof(struct input_event)) && ((iev.value == 1)||(iev.value == 2)))
 		{
+			dprintf("Input event: \ntime: %d.%d\ntype: %d\ncode: %d\nvalue: %d\n",
+				(int)iev.time.tv_sec,(int)iev.time.tv_usec,iev.type,iev.code,iev.value);
 			retval=FBVNC_EVENT_NULL;
 
 			// count events for speedup
-			if(lastcode==iev.code)
-			{
-				if((iev.time.tv_sec == evttime.tv_sec
-					 && (iev.time.tv_usec - evttime.tv_usec) < rcCycleDuration) ||
-					((iev.time.tv_sec-1) == evttime.tv_sec
-					 && ((iev.time.tv_usec+1000000) -evttime.tv_usec) < rcCycleDuration))
-				{
-					countevt++;
-				}
-				else
-					countevt=0;
-			}
+			if(iev.value == 2) // REPEAT
+				countevt++;
 			else
-				countevt=0;
-			lastcode = iev.code;
-			memcpy(&evttime, &iev.time, sizeof(evttime));
-
+				countevt=0;			
+			
 			if(iev.code == KEY_TOPLEFT || iev.code == KEY_TOPRIGHT || iev.code == KEY_UP ||
 				iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN ||
 				iev.code == KEY_LEFT || iev.code == KEY_RIGHT)
@@ -506,6 +494,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 					((now.tv_sec == iev.time.tv_sec+1) && ((now.tv_usec+1000000) - iev.time.tv_usec) > 350000) ||
 					((now.tv_sec == iev.time.tv_sec) && ((now.tv_usec) - iev.time.tv_usec) > 350000))
 				{
+					dprintf("Ignoring old cursor event\n");
 					RetEvent(FBVNC_EVENT_NULL);
 				}
 
@@ -513,6 +502,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 					step=STEP_PAN;
 				else
 				{
+					dprintf("count %d\n", countevt);
 					if(countevt>20)
 						step=80;
 					else if(countevt>15)
@@ -530,7 +520,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 				if(countevt>0)
 				{
 					// for othe rkeys reject because of prelling
-					iev.code=0;
+					RetEvent(FBVNC_EVENT_NULL);
 				}
 			}
 			// codes
@@ -695,7 +685,11 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 				mouse_button=1;
 				retval=FBVNC_EVENT_TS_DOWN;
 			}
-			else if(iev.code == KEY_2)
+			else if(iev.code == KEY_RED)
+			{
+				retval=FBVNC_EVENT_DCLICK;				
+			}
+			else if(iev.code == KEY_GREEN)
 			{
 				nextev.x =global_framebuffer.mouse_x;
 				nextev.y =global_framebuffer.mouse_y;  
@@ -704,7 +698,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 				mouse_button=2;
 				retval=FBVNC_EVENT_TS_DOWN;
 			}
-			else if(iev.code == KEY_3)
+			else if(iev.code == KEY_YELLOW)
 			{
 				nextev.x =global_framebuffer.mouse_x;
 				nextev.y =global_framebuffer.mouse_y;  
@@ -713,13 +707,25 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 				mouse_button=4;
 				retval=FBVNC_EVENT_TS_DOWN;
 			}
-			else if(iev.code == KEY_RED)
+			else if(iev.code == KEY_BLUE)
 			{
 				toggle_keyboard();
 			}
-			else if(iev.code == KEY_BLUE)
+			else if (iev.code != KEY_TOPLEFT && iev.code != KEY_TOPRIGHT && iev.code != KEY_UP &&
+						iev.code != KEY_BOTTOMLEFT && iev.code != KEY_BOTTOMRIGHT && iev.code != KEY_DOWN &&
+						iev.code != KEY_LEFT && iev.code != KEY_RIGHT && iev.code != KEY_HOME)
+
 			{
-				retval=FBVNC_EVENT_DCLICK;				
+				ev->key = iev.code;
+				if(iev.value == 1) //KEY RELEASE
+				{
+					retval = FBVNC_EVENT_BTN_UP;
+					if(!btn_state[iev.code])
+						retval = (fbvnc_event) (retval | FBVNC_EVENT_BTN_DOWN);
+
+				}
+				else // KEY PRESS
+					retval=FBVNC_EVENT_BTN_DOWN;
 			}
 
 			// action
@@ -894,7 +900,6 @@ extern "C" {
 		fbvnc_overlay_t *active_overlay = 0;
 		int panning = 0;
 		int readfd[2];	/* pnmfd and/or rfbsock */
-		int key_pending = 0;
 		static int pnmfd = -1;
 		int lcd;
 
@@ -957,7 +962,7 @@ extern "C" {
 		terminate=0;
 		requestedDepth = 16;
 		forceTruecolour = True;
-		hwType = "ps2de";
+		hwType = "dbox";
 #if 0
 		processArgs(argc, argv);
 #endif
@@ -1149,11 +1154,9 @@ extern "C" {
 						vp_hide_overlays();
 						panning = 1;
 					}
-					else if(key_pending)	key_press(key_pending);
 					else
 					{
 						key_press(ev.key);
-						if(key_pending) key_release(key_pending);
 					}
 				}
 				if(ev.evtype & FBVNC_EVENT_BTN_UP)
@@ -1213,7 +1216,6 @@ extern "C" {
 				if(ev.evtype & FBVNC_EVENT_TS_DOWN)
 				{
 					pan_toggle_count = 0;
-					key_pending = 0;
 					active_overlay = check_overlays(&ev);
 					if(!active_overlay)
 					{
@@ -1231,7 +1233,6 @@ extern "C" {
 				}
 				if(ev.evtype & FBVNC_EVENT_TS_MOVE)
 				{
-					key_pending = 0;
 					if(active_overlay)
 					{
 						overlay_event(&ev, active_overlay, 0);
@@ -1249,7 +1250,6 @@ extern "C" {
 				}
 				if(ev.evtype & FBVNC_EVENT_TS_UP)
 				{
-					key_pending = 0;
 					if(active_overlay)
 					{
 						overlay_event(&ev, active_overlay, 0);

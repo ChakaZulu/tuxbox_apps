@@ -1,6 +1,5 @@
 TODO: 
 - beautify virtual keyboard / convert to german keyboard
-- support for IR keyboard
 
 lots more;-)
 
@@ -14,4 +13,6 @@ DONE:
 - virtual overlay keyboard
 - server side scaling
 - automatic panning of screen when cursor reaches screen borders
+- support for IR keyboard
+
 
