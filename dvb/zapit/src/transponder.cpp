@@ -1,5 +1,5 @@
 /*
- * $Id: transponder.cpp,v 1.3 2002/05/15 22:14:33 McClean Exp $
+ * $Id: transponder.cpp,v 1.4 2002/05/20 09:51:47 obi Exp $
  *
  * (C) 2002 by Steffen Hehn "McClean" <McClean@tuxbox.org>
  *
@@ -32,6 +32,7 @@ CTransponder::CTransponder()
 	polarisation = 0;
 	innerFec = 0;
 	diseqc = 0;
+	inversion = 0;
 	originalNetworkId = 0;
 	transportStreamId = 0;
 }
@@ -94,6 +95,16 @@ unsigned char CTransponder::getInnerFec()
 void CTransponder::setInnerFec(unsigned char cinnerFec)
 {
 	innerFec = cinnerFec;
+}
+
+unsigned char CTransponder::getInversion()
+{
+	return inversion;
+}
+
+void CTransponder::setInversion(unsigned char cinversion)
+{
+	inversion = cinversion;
 }
 
 unsigned short CTransponder::getOriginalNetworkId()

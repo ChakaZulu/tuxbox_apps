@@ -1,5 +1,5 @@
 /*
- * $Id: transponder.h,v 1.3 2002/05/15 22:14:33 McClean Exp $
+ * $Id: transponder.h,v 1.4 2002/05/20 09:51:47 obi Exp $
  *
  * (C) 2002 by Steffen Hehn "McClean" <McClean@tuxbox.org>
  *
@@ -33,6 +33,7 @@ class CTransponder
 		unsigned char	polarisation;
 		unsigned char	innerFec;
 		unsigned char	diseqc;
+		unsigned char	inversion;
 
 		unsigned short	originalNetworkId;
 		unsigned short	transportStreamId;
@@ -58,6 +59,9 @@ class CTransponder
 
 		unsigned char getInnerFec();
 		void setInnerFec(unsigned char);
+
+		unsigned char getInversion();
+		void setInversion(unsigned char);
 
 		unsigned short getOriginalNetworkId();
 		void setOriginalNetworkId(unsigned short);
