@@ -1227,7 +1227,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_VCDPLAYBACK, true, NULL, moviePlayerGui, "vcdplayback", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	moviePlayer.addItem(GenericMenuSeparatorLine);
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &streamingSettings, NULL, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
-	moviePlayer.addItem(new CMenuForwarder("nfsmenu.head", true, NULL, new CNFSSmallMenu(), NULL, true, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_NFSMENU_HEAD, true, NULL, new CNFSSmallMenu(), NULL, true, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
 #endif
 
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, true, CRCInput::RC_3));
@@ -1266,12 +1266,12 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
-	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser("scants.bouquet", (int *)&scanSettings.bouquetMode, true );
-	ojBouquets->addOption(CZapitClient::BM_DELETEBOUQUETS, "scants.bouquet_erase");
-	ojBouquets->addOption(CZapitClient::BM_CREATEBOUQUETS, "scants.bouquet_create");
-	ojBouquets->addOption(CZapitClient::BM_DONTTOUCHBOUQUETS, "scants.bouquet_leave");
-	ojBouquets->addOption(CZapitClient::BM_UPDATEBOUQUETS, "scants.bouquet_update");
-	ojBouquets->addOption(CZapitClient::BM_CREATESATELLITEBOUQUET, "scants.bouquet_satellite");
+	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, true);
+	ojBouquets->addOption(CZapitClient::BM_DELETEBOUQUETS        , LOCALE_SCANTS_BOUQUET_ERASE    );
+	ojBouquets->addOption(CZapitClient::BM_CREATEBOUQUETS        , LOCALE_SCANTS_BOUQUET_CREATE   );
+	ojBouquets->addOption(CZapitClient::BM_DONTTOUCHBOUQUETS     , LOCALE_SCANTS_BOUQUET_LEAVE    );
+	ojBouquets->addOption(CZapitClient::BM_UPDATEBOUQUETS        , LOCALE_SCANTS_BOUQUET_UPDATE   );
+	ojBouquets->addOption(CZapitClient::BM_CREATESATELLITEBOUQUET, LOCALE_SCANTS_BOUQUET_SATELLITE);
 
 	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
@@ -1306,24 +1306,24 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			}
 		}
 
-		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser("satsetup.satellite", scanSettings.satNameNoDiseqc, (scanSettings.diseqcMode == NO_DISEQC)/*, new CSatelliteNotifier*/, NULL, false);
+		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.satNameNoDiseqc, (scanSettings.diseqcMode == NO_DISEQC)/*, new CSatelliteNotifier*/, NULL, false);
 		for (uint i=0; i < satList.size(); i++)
 		{
 			ojSat->addOption(satList[i].satName);
 			dprintf(DEBUG_DEBUG, "got scanprovider (sat): %s\n", satList[i].satName );
 		}
 
-		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", (int *)&scanSettings.diseqcRepeat, (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0)/*, new CSatelliteNotifier*/, NULL, false);
+		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser(LOCALE_SATSETUP_DISEQCREPEAT, (int *)&scanSettings.diseqcRepeat, (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0)/*, new CSatelliteNotifier*/, NULL, false);
 		ojDiseqcRepeats->addOption(0, "0");
 		ojDiseqcRepeats->addOption(1, "1");
 		ojDiseqcRepeats->addOption(2, "2");
 
-		CMenuWidget* extSatSettings = new CMenuWidget("satsetup.extended", NEUTRINO_ICON_SETTINGS);
+		CMenuWidget* extSatSettings = new CMenuWidget(LOCALE_SATSETUP_EXTENDED, NEUTRINO_ICON_SETTINGS);
 		extSatSettings->addItem(GenericMenuSeparator);
 		extSatSettings->addItem(GenericMenuBack);
 		extSatSettings->addItem(GenericMenuSeparatorLine);
 
-		CMenuForwarder* ojExtSatSettings = new CMenuForwarder("satsetup.extended", (scanSettings.diseqcMode != NO_DISEQC), NULL, extSatSettings);
+		CMenuForwarder* ojExtSatSettings = new CMenuForwarder(LOCALE_SATSETUP_EXTENDED, (scanSettings.diseqcMode != NO_DISEQC), NULL, extSatSettings);
 		for( uint i=0; i < satList.size(); i++)
 		{
 			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.diseqscOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
@@ -1337,18 +1337,18 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			extSatSettings->addItem( oj);
 		}
 
-		CMenuWidget* extMotorSettings = new CMenuWidget("satsetup.extended_motor", NEUTRINO_ICON_SETTINGS);
+		CMenuWidget* extMotorSettings = new CMenuWidget(LOCALE_SATSETUP_EXTENDED_MOTOR, NEUTRINO_ICON_SETTINGS);
 		extMotorSettings->addItem(GenericMenuSeparator);
 		extMotorSettings->addItem(GenericMenuBack);
-		extMotorSettings->addItem( new CMenuForwarder("satsetup.savesettingsnow", true, NULL, this, "savesettings") );
-		extMotorSettings->addItem( new CMenuForwarder("satsetup.motorcontrol", true, NULL, new CMotorControl()) );
+		extMotorSettings->addItem(new CMenuForwarder(LOCALE_SATSETUP_SAVESETTINGSNOW, true, NULL, this, "savesettings"));
+		extMotorSettings->addItem(new CMenuForwarder(LOCALE_SATSETUP_MOTORCONTROL   , true, NULL, new CMotorControl()));
 		extMotorSettings->addItem(GenericMenuSeparatorLine);
 
-		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder("satsetup.extended_motor", (scanSettings.diseqcMode == DISEQC_1_2), NULL, extMotorSettings);
+		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder(LOCALE_SATSETUP_EXTENDED_MOTOR, (scanSettings.diseqcMode == DISEQC_1_2), NULL, extMotorSettings);
 
 		for( uint i=0; i < satList.size(); i++)
 		{
-			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.motorPosOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
+			CMenuOptionChooser* oj = new CMenuOptionChooser(satList[i].satName, scanSettings.motorPosOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
 			oj->addOption(0, LOCALE_OPTIONS_OFF);
 			for(uint j=1; j<=satList.size(); j++)
 			{
@@ -1359,13 +1359,13 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			extMotorSettings->addItem(oj);
 		}
 
-		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.diseqc", (int *)&scanSettings.diseqcMode, true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojExtMotorSettings, ojDiseqcRepeats));
-		ojDiseqc->addOption( NO_DISEQC,   "satsetup.nodiseqc");
-		ojDiseqc->addOption( MINI_DISEQC, "satsetup.minidiseqc");
-		ojDiseqc->addOption( DISEQC_1_0,  "satsetup.diseqc10");
-		ojDiseqc->addOption( DISEQC_1_1,  "satsetup.diseqc11");
-		ojDiseqc->addOption( DISEQC_1_2,  "satsetup.diseqc12");
-		ojDiseqc->addOption( SMATV_REMOTE_TUNING,  "satsetup.smatvremote");
+		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser(LOCALE_SATSETUP_DISEQC, (int *)&scanSettings.diseqcMode, true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojExtMotorSettings, ojDiseqcRepeats));
+		ojDiseqc->addOption(NO_DISEQC          , LOCALE_SATSETUP_NODISEQC   );
+		ojDiseqc->addOption(MINI_DISEQC        , LOCALE_SATSETUP_MINIDISEQC );
+		ojDiseqc->addOption(DISEQC_1_0         , LOCALE_SATSETUP_DISEQC10   );
+		ojDiseqc->addOption(DISEQC_1_1         , LOCALE_SATSETUP_DISEQC11   );
+		ojDiseqc->addOption(DISEQC_1_2         , LOCALE_SATSETUP_DISEQC12   );
+		ojDiseqc->addOption(SMATV_REMOTE_TUNING, LOCALE_SATSETUP_SMATVREMOTE);
 
 		settings.addItem( ojDiseqc );
 		settings.addItem( ojBouquets );
@@ -1395,7 +1395,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( oj);
 	}
 
-	settings.addItem(new CMenuForwarder("scants.startnow", true, NULL, new CScanTs()));
+	settings.addItem(new CMenuForwarder(LOCALE_SCANTS_STARTNOW, true, NULL, new CScanTs()));
 }
 
 
@@ -1670,6 +1670,22 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem(oj);
 	audioSettings.addItem(mf);
 }
+
+class CVideoSettings : public CMenuWidget
+{
+ public:
+	CVideoSettings() : CMenuWidget(LOCALE_VIDEOMENU_HEAD, "video.raw")
+		{
+		};
+
+	virtual void paint()
+		{
+			g_settings.video_Signal = g_Controld->getVideoOutput();
+			g_settings.video_Format = g_Controld->getVideoFormat();
+			
+			CMenuWidget::paint();
+		};
+};
 
 void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 {
@@ -2642,24 +2658,24 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	dprintf( DEBUG_NORMAL, "menue setup\n");
 	//Main settings
-	CMenuWidget mainMenu            (LOCALE_MAINMENU_HEAD            , "mainmenue.raw"       );
-	CMenuWidget mainSettings        (LOCALE_MAINSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget languageSettings    (LOCALE_LANGUAGESETUP_HEAD       , "language.raw"        );
-	CMenuWidget videoSettings       (LOCALE_VIDEOMENU_HEAD           , "video.raw"           );
-	CMenuWidget audioSettings       (LOCALE_AUDIOMENU_HEAD           , "audio.raw"           );
-	CMenuWidget parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK, "lock.raw"            , 500);
-	CMenuWidget networkSettings     (LOCALE_NETWORKMENU_HEAD         , "network.raw"         );
-	CMenuWidget recordingSettings   (LOCALE_RECORDINGMENU_HEAD       , "recording.raw"       );
-	CMenuWidget streamingSettings   ("streamingmenu.head"            , "streaming.raw"       );
-	CMenuWidget colorSettings       (LOCALE_COLORMENU_HEAD           , "colors.raw"          );
-	CMenuWidget fontSettings        ("fontmenu.head"                 , "colors.raw"          );
-	CMenuWidget lcdSettings         (LOCALE_LCDMENU_HEAD             , "lcd.raw"             );
-	CMenuWidget keySettings         (LOCALE_KEYBINDINGMENU_HEAD      , "keybinding.raw"      , 400);
-	CMenuWidget miscSettings        (LOCALE_MISCSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget mp3picSettings      (LOCALE_MP3PICSETTINGS_GENERAL   , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget scanSettings        ("servicemenu.scants"            , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget service             ("servicemenu.head"              , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget moviePlayer         (LOCALE_MOVIEPLAYER_HEAD         , "streaming.raw"       );
+	CMenuWidget    mainMenu            (LOCALE_MAINMENU_HEAD            , "mainmenue.raw"       );
+	CMenuWidget    mainSettings        (LOCALE_MAINSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    languageSettings    (LOCALE_LANGUAGESETUP_HEAD       , "language.raw"        );
+	CVideoSettings videoSettings                                                                 ;
+	CMenuWidget    audioSettings       (LOCALE_AUDIOMENU_HEAD           , "audio.raw"           );
+	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK, "lock.raw"            , 500);
+	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD         , "network.raw"         );
+	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD       , "recording.raw"       );
+	CMenuWidget    streamingSettings   ("streamingmenu.head"            , "streaming.raw"       );
+	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD           , "colors.raw"          );
+	CMenuWidget    fontSettings        ("fontmenu.head"                 , "colors.raw"          );
+	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD             , "lcd.raw"             );
+	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD      , "keybinding.raw"      , 400);
+	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    mp3picSettings      (LOCALE_MP3PICSETTINGS_GENERAL   , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    scanSettings        ("servicemenu.scants"            , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    service             ("servicemenu.head"              , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD         , "streaming.raw"       );
     
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
@@ -2682,7 +2698,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//video Setup
 	InitVideoSettings(videoSettings);
-	videoSettings.setOnPaintNotifier(this);
 
 	// Parentallock settings
 	InitParentalLockSettings(parentallockSettings);
@@ -3459,17 +3474,6 @@ void CNeutrinoApp::ExitRun()
 	}
 		
 	exit(0);
-}
-
-bool CNeutrinoApp::onPaintNotify(const std::string & MenuName)
-{
-	if (ARE_LOCALES_EQUAL(MenuName.c_str(), LOCALE_VIDEOMENU_HEAD))
-	{//aktuelle werte vom controld holen...
-		g_settings.video_Signal = g_Controld->getVideoOutput();
-		g_settings.video_Format = g_Controld->getVideoFormat();
-	}
-
-	return false;
 }
 
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )

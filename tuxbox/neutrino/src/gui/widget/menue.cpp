@@ -72,7 +72,6 @@ bool isNumber(const std::string& str)
 CMenuWidget::CMenuWidget(const char * const Name, const std::string & Icon, const int mwidth, const int mheight, const bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	onPaintNotifier = NULL;
 	name = Name;
 	iconfile = Icon;
 	selected = -1;
@@ -106,11 +105,6 @@ void CMenuWidget::addItem(CMenuItem* menuItem, const bool defaultselected)
 	items.push_back(menuItem);
 }
 
-void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
-{
-	onPaintNotifier = nf;
-}
-
 int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 {
 	neutrino_msg_t      msg;
@@ -120,9 +114,6 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 
 	if (parent)
 		parent->hide();
-
-	if (onPaintNotifier)
-		onPaintNotifier->onPaintNotify(name);
 
 	paint();
 	int retval = menu_return::RETURN_REPAINT;

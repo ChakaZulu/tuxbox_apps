@@ -129,7 +129,7 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 	
 	g_Sectionsd->setPauseScanning(false);
 	
-	ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, success ? g_Locale->getText("scants.finished") : g_Locale->getText("scants.failed"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+	ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, success ? g_Locale->getText(LOCALE_SCANTS_FINISHED) : g_Locale->getText(LOCALE_SCANTS_FAILED), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 
 	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
 		g_Controld->setVideoFormat(g_settings.video_Format);
@@ -226,25 +226,27 @@ void CScanTs::hide()
 	frameBuffer->paintBackgroundBoxRel(0, 0, 720, 576);
 }
 
-void CScanTs::paintLine(int x, int * y, int width, char * txt)
+void CScanTs::paintLineLocale(int x, int * y, int width, const neutrino_locale_t l)
 {
 	frameBuffer->paintBoxRel(x, *y, width, mheight, COL_MENUCONTENT_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, *y + mheight, width, g_Locale->getText(txt), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, *y + mheight, width, g_Locale->getText(l), COL_MENUCONTENT, 0, true); // UTF-8
 	*y += mheight;
 }
 
-void CScanTs::paintLine(int x, int y, int width, char * txt)
+void CScanTs::paintLine(int x, int y, int width, const char * const txt)
 {
 	frameBuffer->paintBoxRel(x, y, width, mheight, COL_MENUCONTENT_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y + mheight, width, g_Locale->getText(txt), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y + mheight, width, txt, COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 void CScanTs::paint()
 {
+	int ypos;
+
 	ypos = y;
 	
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(xpos1, ypos + hheight, width, g_Locale->getText("scants.head"), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(xpos1, ypos + hheight, width, g_Locale->getText(LOCALE_SCANTS_HEAD), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0);
 	
 	frameBuffer->loadPal("radar.pal", 17, 37);
@@ -255,43 +257,42 @@ void CScanTs::paint()
 	
 	if (g_info.delivery_system == DVB_S)
 	{	//sat
-		paintLine(xpos1, &ypos, width - xpos1, "scants.actsatellite");
-		xpos2 = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(g_Locale->getText("scants.actsatellite"), true); // UTF-8
+		paintLineLocale(xpos1, &ypos, width - xpos1, LOCALE_SCANTS_ACTSATELLITE);
+		xpos2 = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(g_Locale->getText(LOCALE_SCANTS_ACTSATELLITE), true); // UTF-8
 	}
 	if (g_info.delivery_system == DVB_C)
 	{	//cable
-		paintLine(xpos1, &ypos, width - xpos1, "scants.actcable");
-		xpos2 = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(g_Locale->getText("scants.actcable"), true); // UTF-8
+		paintLineLocale(xpos1, &ypos, width - xpos1, LOCALE_SCANTS_ACTCABLE);
+		xpos2 = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(g_Locale->getText(LOCALE_SCANTS_ACTCABLE), true); // UTF-8
 	}
 
 	ypos_transponder = ypos;
-	paintLine(xpos1, &ypos, width - xpos1, "scants.transponders");
-	xpos2 = greater_xpos(xpos2, "scants.transponders");
+	paintLineLocale(xpos1, &ypos, width - xpos1, LOCALE_SCANTS_TRANSPONDERS);
+	xpos2 = greater_xpos(xpos2, LOCALE_SCANTS_TRANSPONDERS);
 
 	ypos_frequency = ypos;
-	paintLine(xpos1, &ypos, width - xpos1, "scants.freqdata");
-	xpos2 = greater_xpos(xpos2, "scants.freqdata");
+	paintLineLocale(xpos1, &ypos, width - xpos1, LOCALE_SCANTS_FREQDATA);
+	xpos2 = greater_xpos(xpos2, LOCALE_SCANTS_FREQDATA);
 
 	ypos += mheight >> 1; // 1/2 blank line
 	
 	ypos_provider = ypos;
-	paintLine(xpos1, &ypos, width - xpos1, "scants.provider");
-	xpos2 = greater_xpos(xpos2, "scants.provider");
+	paintLineLocale(xpos1, &ypos, width - xpos1, LOCALE_SCANTS_PROVIDER);
+	xpos2 = greater_xpos(xpos2, LOCALE_SCANTS_PROVIDER);
 	
 	ypos_channel = ypos;
-	paintLine(xpos1, &ypos, width - xpos1, "scants.channel");
-	xpos2 = greater_xpos(xpos2, "scants.channel");
+	paintLineLocale(xpos1, &ypos, width - xpos1, LOCALE_SCANTS_CHANNEL);
+	xpos2 = greater_xpos(xpos2, LOCALE_SCANTS_CHANNEL);
 
 	ypos += mheight >> 1; // 1/2 blank line
 
-	ypos_service_numbers = ypos;
-	paintLine(xpos1, ypos, 72, "scants.numberoftvservices");
-	paintLine(xpos1 + 72, ypos, 72, "scants.numberofradioservices");
-	paintLine(xpos1 + 2 * 72, ypos, 72, "scants.numberofdataservices");
-	paintLine(xpos1 + 3 * 72, ypos, width - 3 * 72 - 10, "scants.numberoftotalservices");
+	ypos_service_numbers = ypos; paintLineLocale(xpos1         , &ypos, 72                 , LOCALE_SCANTS_NUMBEROFTVSERVICES   );
+	ypos = ypos_service_numbers; paintLineLocale(xpos1 +     72, &ypos, 72                 , LOCALE_SCANTS_NUMBEROFRADIOSERVICES);
+	ypos = ypos_service_numbers; paintLineLocale(xpos1 + 2 * 72, &ypos, 72                 , LOCALE_SCANTS_NUMBEROFDATASERVICES );
+	ypos = ypos_service_numbers; paintLineLocale(xpos1 + 3 * 72, &ypos, width - 3 * 72 - 10, LOCALE_SCANTS_NUMBEROFTOTALSERVICES);
 }
 
-int CScanTs::greater_xpos(int xpos, char * txt)
+int CScanTs::greater_xpos(int xpos, const neutrino_locale_t txt)
 {
 	int txt_xpos = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(g_Locale->getText(txt), true); // UTF-8
 	if (txt_xpos > xpos)
@@ -299,4 +300,3 @@ int CScanTs::greater_xpos(int xpos, char * txt)
 	else 
 		return xpos;
 }
-

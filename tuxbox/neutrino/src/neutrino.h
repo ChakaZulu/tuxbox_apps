@@ -64,7 +64,7 @@ typedef struct neutrino_font_descr
 	int          size_offset;
 } neutrino_font_descr_struct;
 
-class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
+class CNeutrinoApp : public CMenuTarget, CChangeObserver
 {
  public:
 	enum
@@ -203,8 +203,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		int run(int argc, char **argv);
 		//callback stuff only....
 		int exec(CMenuTarget* parent, const std::string & actionKey);
-		//callback for menue
-		bool onPaintNotify(const std::string & MenuName);
+
 		//onchange
 		bool changeNotify(const std::string & OptionName, void * data);
 		bool changeNotify(const char * const OptionName, void * data);

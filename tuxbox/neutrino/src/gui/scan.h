@@ -35,6 +35,7 @@
 #include <gui/widget/menue.h>
 
 #include <driver/framebuffer.h>
+#include <system/localize.h>
 
 #include <string>
 
@@ -48,7 +49,6 @@ class CScanTs : public CMenuTarget
 		int width;
 		int height;
 		int hheight, mheight; // head/menu font height
-		int ypos; //current y position
 		int xpos1; //x position for first column
 		int xpos2; //x position for second column
 		int radar; 
@@ -65,11 +65,11 @@ class CScanTs : public CMenuTarget
 		uint found_transponder;
 
 		void paint();
-		void paintLine(int x, int * y, int width, char * txt);
-		void paintLine(int x, int y, int width, char * txt);
+		void paintLineLocale(int x, int * y, int width, const neutrino_locale_t l);
+		void paintLine(int x, int y, int width, const char * const txt);
 		void paintRadar(void);
 		int handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data);
-		int greater_xpos(int xpos, char * txt);
+		int greater_xpos(int xpos, const neutrino_locale_t txt);
 
 	public:
 		CScanTs();

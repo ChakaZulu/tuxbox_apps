@@ -60,16 +60,6 @@ class CChangeObserver
 		}
 };
 
-class COnPaintNotifier
-{
-	public:
-		virtual ~COnPaintNotifier(){}
-		virtual bool onPaintNotify(const std::string & MenuName)
-		{
-			return false;
-		}
-};
-
 class CMenuTarget
 {
 	public:
@@ -104,10 +94,7 @@ class CMenuItem
 			dx=DX;
 			offx=OFFX;
 		}
-		virtual int paint(bool selected=false)
-		{
-			return -1;
-		}
+		virtual int paint (bool selected = false) = 0;
 
 		virtual int getHeight(void) const = 0;
 
@@ -250,7 +237,6 @@ class CMenuWidget : public CMenuTarget
 {
 	protected:
 		CFrameBuffer		*frameBuffer;
-		COnPaintNotifier*	onPaintNotifier;
 		std::vector<CMenuItem*>	items;
 		std::vector<unsigned int> page_start;
 		std::string			name;
@@ -275,7 +261,6 @@ class CMenuWidget : public CMenuTarget
 			name="";
 			iconfile="";
 			selected=-1;
-			onPaintNotifier=NULL;
 			iconOffset= 0;
 		};
 		// Name must be UTF-8 encoded:
@@ -286,8 +271,6 @@ class CMenuWidget : public CMenuTarget
 		virtual void paint();
 		virtual void hide();
 		virtual int exec(CMenuTarget* parent, const std::string & actionKey);
-
-		void setOnPaintNotifier( COnPaintNotifier* );
 };
 
 class CPINProtection
