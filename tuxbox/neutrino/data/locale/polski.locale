@@ -89,7 +89,7 @@ audiomenu.avs_control sterowanie avs
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
-audiomenu.PCMOffset Volume Decrease PCM
+audiomenu.PCMOffset unset
 
 videomenu.head Ustawienie Obrazu
 videomenu.screensetup Ustawienie widocznej czesci obrazu
