@@ -95,16 +95,15 @@ void *mount_thread(void* cmd)
 
 CNFSMountGui::CNFSMountGui()
 {
-	m_nfs_sup = fsSupported(CNFSMountGui::NFS);
-	m_cifs_sup = fsSupported(CNFSMountGui::CIFS);
-	printf("SUPPORT: NFS: %d, CIFS: %d\n", m_nfs_sup, m_cifs_sup);
+	m_nfs_sup = CNFSMountGui::FS_UNPROBED;
+	m_cifs_sup = CNFSMountGui::FS_UNPROBED;
 }
 
 bool in_proc_filesystems(const char * const fsname)
 {
 	std::string s;
 	std::string t;
-	std::ifstream in("/proc/filesystems", ifstream::in);
+	std::ifstream in("/proc/filesystems", std::ifstream::in);
 
 	t = fsname;
 	
@@ -154,7 +153,7 @@ CNFSMountGui::FS_Support CNFSMountGui::fsSupported(const CNFSMountGui::FSType fs
 		fsname = "cifs";
 
 	if (in_proc_filesystems(fsname))
-		return FS_READY;
+		return CNFSMountGui::FS_READY;
 
 	if (insert_modules(fstype))
 	{
@@ -170,17 +169,25 @@ CNFSMountGui::FS_Support CNFSMountGui::fsSupported(const CNFSMountGui::FSType fs
 				remove_modules(fstype);
 			}
 
-			return FS_NEEDS_MODULES;
+			return CNFSMountGui::FS_NEEDS_MODULES;
 		}
 	}
 	remove_modules(fstype);
-	return FS_UNSUPPORTED;
+	return CNFSMountGui::FS_UNSUPPORTED;
 }
 
 int CNFSMountGui::exec( CMenuTarget* parent, std::string actionKey )
 {
 //	printf("exec: %s\n", actionKey.c_str());
 	int returnval = menu_return::RETURN_REPAINT;
+	
+	if (m_nfs_sup == CNFSMountGui::FS_UNPROBED)
+		m_nfs_sup = fsSupported(CNFSMountGui::NFS);
+
+	if (m_cifs_sup == CNFSMountGui::FS_UNPROBED)
+		m_cifs_sup = fsSupported(CNFSMountGui::CIFS);
+
+	printf("SUPPORT: NFS: %d, CIFS: %d\n", m_nfs_sup, m_cifs_sup);
 
 	if (actionKey.empty())
 	{
@@ -281,12 +288,12 @@ int CNFSMountGui::menuEntry(int nr)
    /* rewrite fstype in new entries */
    if(strlen(local_dir)==0)
    {
-      if(m_cifs_sup != FS_UNSUPPORTED && m_nfs_sup==FS_UNSUPPORTED)
+      if(m_cifs_sup != CNFSMountGui::FS_UNSUPPORTED && m_nfs_sup == CNFSMountGui::FS_UNSUPPORTED)
          *type = (int) CIFS;
    }
-   bool typeEnabled = (m_cifs_sup != FS_UNSUPPORTED && m_nfs_sup != FS_UNSUPPORTED) || 
-      (m_cifs_sup != FS_UNSUPPORTED && *type != (int)CIFS) || 
-      (m_nfs_sup != FS_UNSUPPORTED && *type != (int)NFS);
+   bool typeEnabled = (m_cifs_sup != CNFSMountGui::FS_UNSUPPORTED && m_nfs_sup != CNFSMountGui::FS_UNSUPPORTED) || 
+      (m_cifs_sup != CNFSMountGui::FS_UNSUPPORTED && *type != (int)CIFS) || 
+      (m_nfs_sup != CNFSMountGui::FS_UNSUPPORTED && *type != (int)NFS);
 
 	CMenuWidget mountMenuEntryW("nfs.mount", "network.raw",720);
 	mountMenuEntryW.addItem(new CMenuSeparator());
@@ -304,7 +311,7 @@ int CNFSMountGui::menuEntry(int nr)
 	CStringInputSMS userInput("nfs.username", username, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuForwarder *username_fwd = new CMenuForwarder("nfs.username", *type==CIFS, username, &userInput);
 	CStringInputSMS passInput("nfs.password", password, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
-	CMenuForwarder *password_fwd = new CMenuForwarder("nfs.password", *type==CIFS, "", &passInput);
+	CMenuForwarder *password_fwd = new CMenuForwarder("nfs.password", *type==CIFS, NULL, &passInput);
 	CNFSMountGuiNotifier notifier(username_fwd, password_fwd, type);
 	CMenuOptionChooser *typeInput= new CMenuOptionChooser("nfs.type", type, typeEnabled, &notifier);
 	typeInput->addOption((int) NFS, "nfs.type_nfs");
@@ -324,7 +331,7 @@ int CNFSMountGui::menuEntry(int nr)
 	return ret;
 }
 
-void CNFSMountGui::mount(const char * const ip, const char * const dir, const char* local_dir, const FSType fstype, const char * const username, const char * const password, const bool showerror)
+void CNFSMountGui::mount(const char * const ip, const char * const dir, const char * const local_dir, const FSType fstype, const char * const username, const char * const password, const bool showerror)
 {
 	char buffer[200+1],mountDev[100],mountOn[100],mountType[20];
 	std::string cmd;
@@ -334,7 +341,7 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 
 	FS_Support sup = fsSupported(fstype, true); /* keep modules if necessary */
 
-	if (sup == FS_UNSUPPORTED)
+	if (sup == CNFSMountGui::FS_UNSUPPORTED)
 	{
 		printf("FS type %d not supported\n", (int) fstype);
 		ShowHintUTF("messagebox.info", (std::string(g_Locale->getText("nfs.mounterror_notsup")) + ((fstype == NFS) ? " (NFS)" : " (CIFS)")).c_str()); // UTF-8
@@ -347,9 +354,9 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 	in.open("/proc/mounts", std::ifstream::in);
 	while(in.good())
 	{
-		strcpy(mountDev,"");
-		strcpy(mountOn,"");
-		strcpy(mountType,"");
+		mountDev[0] = 0; /* strcpy(mountDev,""); */
+		mountOn[0] = 0; /* strcpy(mountOn,""); */
+		mountType[0] = 0; /* strcpy(mountType,""); */
 		in.getline(buffer, 200);
 		sscanf(buffer,"%s %s %s ", mountDev, mountOn, mountType);
 		if(strcmp(mountOn,local_dir)==0)
@@ -445,7 +452,7 @@ int CNFSUmountGui::exec( CMenuTarget* parent, std::string actionKey )
 	}
 	else if(actionKey.substr(0,8)=="doumount")
 	{
-		umount(actionKey.substr(9));
+		umount((actionKey.substr(9)).c_str());
 		returnval = menu_return::RETURN_EXIT;
 	}
 	else
@@ -456,8 +463,8 @@ int CNFSUmountGui::exec( CMenuTarget* parent, std::string actionKey )
 int CNFSUmountGui::menu()
 {
 	char buffer[200+1],mountDev[100],mountOn[100],mountType[20];
-	ifstream in;
-	in.open("/proc/mounts",ifstream::in);
+	std::ifstream in;
+	in.open("/proc/mounts",std::ifstream::in);
 	int count=0;
 	CMenuWidget umountMenu("nfs.umount", "network.raw",720);
 	umountMenu.addItem(new CMenuSeparator());
@@ -465,9 +472,9 @@ int CNFSUmountGui::menu()
 	umountMenu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
 	while(in.good())
 	{
-		strcpy(mountDev,"");
-		strcpy(mountOn,"");
-		strcpy(mountType,"");
+		mountDev[0] = 0; /* strcpy(mountDev,""); */
+		mountOn[0] = 0; /* strcpy(mountOn,""); */
+		mountType[0] = 0; /* strcpy(mountType,""); */
 		in.getline(buffer, 200);
 		sscanf(buffer,"%s %s %s ", mountDev, mountOn, mountType);
 		if(strcmp(mountType,"nfs")==0 || strcmp(mountType,"cifs")==0)
@@ -486,11 +493,11 @@ int CNFSUmountGui::menu()
 }
 
 
-void CNFSUmountGui::umount(const std::string dir)
+void CNFSUmountGui::umount(const char * const dir)
 {
-	if (dir != "")
+	if (dir != NULL)
 	{
-		if (umount2(dir.c_str(), MNT_FORCE) != 0)
+		if (umount2(dir, MNT_FORCE) != 0)
 		{
 			ShowHintUTF("messagebox.info", g_Locale->getText("nfs.umounterror")); // UTF-8
 			return;
@@ -500,12 +507,12 @@ void CNFSUmountGui::umount(const std::string dir)
 	{
 		char buffer[200+1],mountDev[100],mountOn[100],mountType[20];
 		std::ifstream in;
-		in.open("/proc/mounts",ifstream::in);
+		in.open("/proc/mounts",std::ifstream::in);
 		while(in.good())
 		{
-			strcpy(mountDev,"");
-			strcpy(mountOn,"");
-			strcpy(mountType,"");
+			mountDev[0] = 0; /* strcpy(mountDev,""); */
+			mountOn[0] = 0; /* strcpy(mountOn,""); */
+			mountType[0] = 0; /* strcpy(mountType,""); */
 			in.getline(buffer, 200);
 			sscanf(buffer,"%s %s %s ", mountDev, mountOn, mountType);
 			if(strcmp(mountType,"nfs")==0 && strcmp(mountOn,"/")==0)
@@ -527,8 +534,8 @@ int CNFSSmallMenu::exec( CMenuTarget* parent, std::string actionKey )
 	menu.addItem(new CMenuSeparator());
 	menu.addItem(new CMenuForwarder("menu.back"));
 	menu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
-	menu.addItem( new CMenuForwarder("nfs.mount", true, "", &mountGui));
-	menu.addItem( new CMenuForwarder("nfs.umount", true, "", &umountGui));
+	menu.addItem( new CMenuForwarder("nfs.mount", true, NULL, &mountGui));
+	menu.addItem( new CMenuForwarder("nfs.umount", true, NULL, &umountGui));
 	return menu.exec(parent, actionKey);
 }
 

@@ -33,8 +33,7 @@
 #ifndef __neutrino_nfs_gui__
 #define __neutrino_nfs_gui__
 
-#include <pthread.h>
-#include "gui/widget/menue.h"
+#include <gui/widget/menue.h>
 
 
 class CNFSMountGui : public CMenuTarget
@@ -45,7 +44,8 @@ class CNFSMountGui : public CMenuTarget
 		{
 			FS_UNSUPPORTED   = 0,
 			FS_READY         = 1,
-			FS_NEEDS_MODULES = 2
+			FS_NEEDS_MODULES = 2,
+			FS_UNPROBED      = 3
 		};
 	
  public:
@@ -69,7 +69,7 @@ class CNFSMountGui : public CMenuTarget
  public:
 	CNFSMountGui();
 	int exec(CMenuTarget* parent, std::string actionKey);
-	static void mount(const char * const ip, const char * const dir, const char* local_dir, const FSType fstype, const char * const username, const char * const password, const bool showerror = false);
+	static void mount(const char * const ip, const char * const dir, const char * const local_dir, const FSType fstype, const char * const username, const char * const password, const bool showerror = false);
 	static void automount();
 };
 
@@ -83,7 +83,7 @@ class CNFSUmountGui : public CMenuTarget
 		CNFSUmountGui(){};
 		~CNFSUmountGui(){};
 		int  exec(CMenuTarget* parent, std::string actionKey);
-		static void umount(std::string dir="");
+		static void umount(const char * const dir = NULL);
 };
 
 class CNFSSmallMenu : public CMenuTarget
