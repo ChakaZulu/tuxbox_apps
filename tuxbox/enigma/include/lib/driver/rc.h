@@ -125,7 +125,7 @@ public:
 	{
 		__u16 buf;
 		if (handle != -1)
-			while ( ::read(handle, &buf, 2) );
+			while ( ::read(handle, &buf, 2) == 2 );
 	}
 };
 #endif
@@ -140,11 +140,11 @@ public:
 	eString getDeviceName();
 	eRCInputEventDriver(const char *filename);
 	~eRCInputEventDriver();
-	void flushBuffer()
+	void flushBuffer() const
 	{
 		struct input_event ev;
 		if (handle != -1)
-			while (1) ( ::read(handle, &ev, sizeof(struct input_event)));
+			while ( ::read(handle, &ev, sizeof(struct input_event)) == sizeof(struct input_event) );
 	}
 };
 
