@@ -60,6 +60,7 @@ public:
 #define GS_ISFIRST  2
 #define GS_USED			4
 #define GS_MYWRAP   8
+#define GS_HEAP    16
 
 struct pGlyph
 {

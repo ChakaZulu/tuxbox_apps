@@ -202,7 +202,7 @@ void Font::unlock()
 		delete this;
 }
 
-static const int num_glyph=1024;
+static const int num_glyph=2048;
 static pGlyph glyphs[num_glyph];
 static int cptr=0;
 
@@ -220,7 +220,9 @@ pGlyph *allocateGlyph()
 		if (cptr==num_glyph)
 			cptr=0;
 	} while (s!=cptr);
-	return 0;
+	pGlyph *g=new pGlyph;
+	g->flags=GS_USED|GS_HEAP;
+	return g;
 }
 
 int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
@@ -547,7 +549,10 @@ void eTextPara::clear()
 	for (glyphs.first(); glyphs.current(); glyphs.next())
 	{
 		glyphs.current()->font->unlock();
-		glyphs.current()->flags=0;
+		if (glyphs.current()->flags&GS_HEAP)
+			delete glyphs.current();
+		else
+			glyphs.current()->flags=0;
 	}
 	glyphs.clear();
 }
