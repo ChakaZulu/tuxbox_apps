@@ -23,23 +23,18 @@
 
 #include <config.h>
 
+#include <fcntl.h>
 #include <math.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <arpa/inet.h>
+#include <unistd.h>
 
 #include <sys/ioctl.h>
+#include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <signal.h>
+#include <sys/un.h>
 
 #include <dbox/avs_core.h>
 #include <dbox/fp.h>
@@ -579,9 +574,9 @@ void setBoxType()
 }
 
 
-// input:  0 <=     volume           <= 100
-// output: 63 <= map_volume(., true)  <= 0
-// output: 0 <= map_volume(., false) <= 255 (well rather <= 0xFC)
+// input:   0 (min volume) <=     volume           <= 100 (max volume)
+// output: 63 (min volume) >= map_volume(., true)  >=   0 (max volume)
+// output:  0 (min volume) <= map_volume(., false) <= 255 (max volume)
 const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 {
 	int res = 0;
@@ -778,7 +773,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.75 2002/10/17 21:56:37 dirch Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.76 2002/10/17 22:54:55 thegoodguy Exp $\n\n");
 	
 	switch (fork())
 	{
