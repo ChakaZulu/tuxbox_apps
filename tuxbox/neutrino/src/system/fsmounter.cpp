@@ -194,7 +194,7 @@ CFSMounter::MountRes CFSMounter::mount(const char * const ip, const char * const
 	
 	if (isMounted(local_dir))
 	{
-		printf("[CFSMounter] NFS mount error %s already mounted\n", local_dir);
+		printf("[CFSMounter] FS mount error %s already mounted\n", local_dir);
 		return MRES_FS_ALREADY_MOUNTED;
 	}
 
@@ -292,7 +292,7 @@ CFSMounter::MountRes CFSMounter::mount(const char * const ip, const char * const
 
 	if ( g_mntstatus != 0 )
 	{
-		printf("[CFSMounter] NFS mount error: \"%s\"\n", cmd.c_str());
+		printf("[CFSMounter] FS mount error: \"%s\"\n", cmd.c_str());
 		return (retcode == ETIMEDOUT) ? MRES_TIMEOUT : MRES_UNKNOWN;
 	}
 	return MRES_OK;
