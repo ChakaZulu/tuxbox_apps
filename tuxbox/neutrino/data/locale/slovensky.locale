@@ -304,6 +304,8 @@ bouqueteditor.delete vymazat
 bouqueteditor.add pridat
 bouqueteditor.move premiestnit
 bouqueteditor.rename premenovat
+bouqueteditor.hide Hide
+bouqueteditor.lock Lock
 bouqueteditor.newbouquetname nove meno bouquetu
 bouqueteditor.bouquetname meno bouquetu
 bouqueteditor.savechanges? Maju byt zmeny zachovane?

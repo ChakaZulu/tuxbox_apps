@@ -60,6 +60,7 @@ CBEBouquetWidget::CBEBouquetWidget()
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	state = beDefault;
+	blueFunction = beRename;
 }
 
 void CBEBouquetWidget::paintItem(int pos)
@@ -78,7 +79,15 @@ void CBEBouquetWidget::paintItem(int pos)
 	}
 	if(liststart+pos<Bouquets.size())
 	{
-		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, Bouquets[liststart+pos].name, color);
+		if (Bouquets[liststart+pos].locked)
+		{
+			frameBuffer->paintIcon("lock.raw", x + 28, ypos);
+		}
+		if (Bouquets[liststart+pos].hidden)
+		{
+			//frameBuffer->paintIcon("hidden.raw", x + 48, ypos);
+		}
+		g_Fonts->channellist->RenderString(x+68, ypos+ fheight, width-68, Bouquets[liststart+pos].name, color);
 	}
 }
 
@@ -123,22 +132,33 @@ void CBEBouquetWidget::paintHead()
 
 void CBEBouquetWidget::paintFoot()
 {
-	int ButtonWidth = width / 4;
+	int ButtonWidth = (width-28) / 4;
 	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete").c_str(), COL_INFOBAR);
+	frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete").c_str(), COL_INFOBAR);
 
-	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add").c_str(), COL_INFOBAR);
+	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add").c_str(), COL_INFOBAR);
 
-	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move").c_str(), COL_INFOBAR);
+	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move").c_str(), COL_INFOBAR);
 
-	frameBuffer->paintIcon("blau.raw", x+width- ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.rename").c_str(), COL_INFOBAR);
-
+	frameBuffer->paintIcon("blau.raw", x+width- ButtonWidth - 30, y+height+4);
+	switch( blueFunction)
+	{
+		case beRename:
+			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.rename").c_str(), COL_INFOBAR);
+		break;
+		case beHide:
+			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.hide").c_str(), COL_INFOBAR);
+		break;
+		case beLock:
+			g_Fonts->infobar_small->RenderString(x+width- ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 10, g_Locale->getText("bouqueteditor.lock").c_str(), COL_INFOBAR);
+		break;
+	}
+	frameBuffer->paintIcon("dbox.raw", x+width - 28, y+height);
 }
 
 void CBEBouquetWidget::hide()
@@ -301,7 +321,35 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		else if(msg==CRCInput::RC_blue)
 		{
 			if (state == beDefault)
-				renameBouquet();
+			switch (blueFunction)
+			{
+				case beRename:
+					renameBouquet();
+				break;
+				case beHide:
+					switchHideBouquet();
+				break;
+				case beLock:
+					switchLockBouquet();
+				break;
+			}
+		}
+		else if(msg==CRCInput::RC_setup)
+		{
+			if (state == beDefault)
+			switch (blueFunction)
+			{
+				case beRename:
+					blueFunction = beHide;
+				break;
+				case beHide:
+					blueFunction = beLock;
+				break;
+				case beLock:
+					blueFunction = beRename;
+				break;
+			}
+			paintFoot();
 		}
 		else if(msg==CRCInput::RC_ok)
 		{
@@ -411,6 +459,22 @@ void CBEBouquetWidget::renameBouquet()
 	paintHead();
 	paint();
 	paintFoot();
+}
+
+void CBEBouquetWidget::switchHideBouquet()
+{
+	bouquetsChanged = true;
+	Bouquets[selected].hidden = !Bouquets[selected].hidden;
+	g_Zapit->setBouquetHidden( selected + 1, Bouquets[selected].hidden);
+	paint();
+}
+
+void CBEBouquetWidget::switchLockBouquet()
+{
+	bouquetsChanged = true;
+	Bouquets[selected].locked = !Bouquets[selected].locked;
+	g_Zapit->setBouquetLock( selected + 1, Bouquets[selected].locked);
+	paint();
 }
 
 string CBEBouquetWidget::inputName( string defaultName, string caption)

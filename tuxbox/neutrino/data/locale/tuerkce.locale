@@ -304,6 +304,8 @@ bouqueteditor.delete Delete
 bouqueteditor.add Add
 bouqueteditor.move Move
 bouqueteditor.rename Rename
+bouqueteditor.hide Hide
+bouqueteditor.lock Lock
 bouqueteditor.newbouquetname New name of bouquets
 bouqueteditor.bouquetname Name of bouquets
 bouqueteditor.savechanges? Do you want to save the changes?

@@ -41,7 +41,7 @@
 using namespace std;
 
 
-	
+
 /* class for handling when bouquets changed.                  */
 /* This class should be a temporarily work around             */
 /* and should be replaced by standard neutrino event handlers */
@@ -59,11 +59,18 @@ class CBEBouquetWidget : public CMenuWidget
 
 		CFrameBuffer	*frameBuffer;
 
-		enum state_
+		enum
 		{
 			beDefault,
 			beMoving
 		} state;
+
+		enum
+		{
+			beRename,
+			beHide,
+			beLock
+		} blueFunction;
 
 		unsigned int		selected;
 		unsigned int		origPosition;
@@ -96,6 +103,8 @@ class CBEBouquetWidget : public CMenuWidget
 		void cancelMoveBouquet();
 		void internalMoveBouquet( unsigned int fromPosition, unsigned int toPosition);
 		void renameBouquet();
+		void switchHideBouquet();
+		void switchLockBouquet();
 
 		void saveChanges();
 		void discardChanges();
