@@ -109,13 +109,11 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 			break;
 		case eFrontend::feSatellite:
 			p=new tpPacket("Astra 19.2E", SCAN_SKIP);
-			t=new eTransponder(-1, -1); t->setSatellite(11797500, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -1); t->setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -1); t->setSatellite(12168000, 27500000, eFrontend::polVert, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -1); t->setSatellite(11797500, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -1); t->setSatellite(12692000, 22000000, eFrontend::polHor, 4, 0); p->possibleTransponders.append(t);
+			t=new eTransponder(-1, -1); t->setSatellite(11913000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
+			t=new eTransponder(0x0454, 0x0001); t->setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0); p->possibleTransponders.append(t);
+			t=new eTransponder(0x0441, 0x0001); t->setSatellite(12187500, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
 			packets.append(p);
-			
+
 			p=new tpPacket("Hotbird 13.0E", SCAN_ONIT);
 			t=new eTransponder(-1, -1); t->setSatellite(12692000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
 			t=new eTransponder(-1, -1); t->setSatellite(12539000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
@@ -129,11 +127,11 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 			t=new eTransponder(-1, -1); t->setSatellite(12111000, 27500000, eFrontend::polVert, 3, 0); p->possibleTransponders.append(t);
 			packets.append(p);
 	
-			p=new tpPacket("Astra 24.2E", SCAN_ONIT);
+/*			p=new tpPacket("Astra 24.2E", SCAN_ONIT);
 			t=new eTransponder(-1, -1); t->setSatellite(11913000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			packets.append(p);
+			packets.append(p); */
 	
-			p=new tpPacket("Astra 2 28E", SCAN_ONIT);
+			p=new tpPacket("Astra 2 28E", 0);
 			t=new eTransponder(-1, -1); t->setSatellite(11954000, 27500000, eFrontend::polHor, 2, 0); p->possibleTransponders.append(t);
 			t=new eTransponder(-1, -1); t->setSatellite(12051000, 27500000, eFrontend::polVert, 2, 0); p->possibleTransponders.append(t);
 			packets.append(p);

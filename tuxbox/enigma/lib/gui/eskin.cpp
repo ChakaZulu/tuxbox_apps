@@ -313,12 +313,18 @@ int eSkin::build(eWidget *widget, XMLTreeNode *node)
 	for (XMLTreeNode *c=node->GetChild(); c; c=c->GetNext())
 	{
 		eWidget *w=0;
-		if (!widget_creator.contains(c->GetType()))
+		const char *name=c->GetAttributeValue("name");
+		if (name)
+			w=widget->search(name);
+		if (!w)
 		{
-			qDebug("widget class %s does not exist", c->GetType());
-			return -ENOENT;
+			if (!widget_creator.contains(c->GetType()))
+			{
+				qDebug("widget class %s does not exist", c->GetType());
+				return -ENOENT;
+			}
+			w=widget_creator[c->GetType()](widget);
 		}
-		w=widget_creator[c->GetType()](widget);
 		if (!w)
 		{
 			// qDebug("failed.");

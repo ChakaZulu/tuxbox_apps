@@ -361,7 +361,7 @@ public:
 class EITEvent
 {
 public:
-	EITEvent(eit_event_struct *event);
+	EITEvent(const eit_event_struct *event);
 	EITEvent();
 	int event_id;
 	time_t start_time;

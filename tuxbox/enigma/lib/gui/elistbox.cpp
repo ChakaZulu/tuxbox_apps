@@ -4,6 +4,7 @@
 #include "eskin.h"
 #include <qrect.h>
 #include "elabel.h"
+#include "init.h"
 
 QString eListboxEntryText::getText(int col) const
 {
@@ -375,3 +376,23 @@ void eListbox::setActiveColor(gColor active)
 	if (current && current->current())
 		invalidateEntry(active);		/* das ist ja wohl buggy hier */
 }
+
+static eWidget *create_eListbox(eWidget *parent)
+{
+	return new eListbox(parent);
+}
+
+class eListboxSkinInit
+{
+public:
+	eListboxSkinInit()
+	{
+		eSkin::addWidgetCreator("eListbox", create_eListbox);
+	}
+	~eListboxSkinInit()
+	{
+		eSkin::removeWidgetCreator("eListbox", create_eListbox);
+	}
+};
+
+eAutoInitP0<eListboxSkinInit> init_eListboxSkinInit(3, "eListbox");

@@ -587,5 +587,5 @@ QSize eTextPara::getExtend()
 	return res;
 }
 
-eAutoInitP0<fontRenderClass, 1> init_fontRenderClass("Font Render Class");
+eAutoInitP0<fontRenderClass> init_fontRenderClass(1, "Font Render Class");
   

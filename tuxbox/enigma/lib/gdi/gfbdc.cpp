@@ -64,4 +64,4 @@ gFBDC *gFBDC::getInstance()
 	return instance;
 }
 
-eAutoInitP0<gFBDC, 1> init_gFBDC("GFBDC");
+eAutoInitP0<gFBDC> init_gFBDC(1, "GFBDC");

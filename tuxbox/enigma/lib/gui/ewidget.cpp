@@ -469,6 +469,11 @@ void eWidget::setLCD(eWidget *_lcdtitle, eWidget *_lcdelement)
 	LCDElement=_lcdelement;
 }
 
+void eWidget::setName(const char *_name)
+{
+	name=_name;
+}
+
 gPainter *eWidget::getPainter(QRect area)
 {
 	QRect myclip=QRect(getAbsolutePosition(), size);
@@ -599,4 +604,4 @@ public:
 	}
 };
 
-eAutoInitP0<eWidgetSkinInit,3> init_eWidgetSkinInit("eWidget");
+eAutoInitP0<eWidgetSkinInit> init_eWidgetSkinInit(3, "eWidget");

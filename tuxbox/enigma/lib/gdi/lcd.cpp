@@ -119,8 +119,4 @@ public:
 	}
 };
 
-eAutoInitP0<eDBoxLCDHardware, 1> init_eDBoxLCDHardware("d-Box LCD Hardware");
-
-void lcd_dummy()
-{
-}
+eAutoInitP0<eDBoxLCDHardware> init_eDBoxLCDHardware(1, "d-Box LCD Hardware");

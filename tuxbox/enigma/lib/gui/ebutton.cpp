@@ -98,4 +98,4 @@ public:
 	}
 };
 
-eAutoInitP0<eButtonSkinInit,3> init_eButtonSkinInit("eButton");
+eAutoInitP0<eButtonSkinInit> init_eButtonSkinInit(3, "eButton");

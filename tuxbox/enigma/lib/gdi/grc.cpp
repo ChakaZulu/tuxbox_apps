@@ -340,4 +340,4 @@ void gPixmapDC::exec(gOpcode *o)
 	}
 }
 
-eAutoInitP0<gRC, 1> init_grc("gRC");
+eAutoInitP0<gRC> init_grc(1, "gRC");

@@ -6,6 +6,7 @@
 #include "edvb.h"
 #include "eskin.h"
 #include "elabel.h"
+#include "satconfig.h"
 
 eZapSetup::eZapSetup()
 	:eLBWindow("Setup", eListbox::tBorder, 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
@@ -16,6 +17,7 @@ eZapSetup::eZapSetup()
 	connect(new eListboxEntryText(list, "Network..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_network(eListboxEntry*)));
 //	connect(new eListboxEntryText(list, "Audio..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_sound(eListboxEntry*)));
 	connect(new eListboxEntryText(list, "Video..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_video(eListboxEntry*)));
+	connect(new eListboxEntryText(list, "Satelliten..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_satconfig()));
 }
 
 eZapSetup::~eZapSetup()
@@ -58,3 +60,13 @@ void eZapSetup::sel_video(eListboxEntry *lbe)
 	show();
 }
 
+
+void eZapSetup::sel_satconfig()
+{
+	eSatelliteConfigurationManager satconfig;
+	hide();
+	satconfig.show();
+	satconfig.exec();
+	satconfig.hide();
+	show();
+}

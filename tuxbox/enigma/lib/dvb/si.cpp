@@ -840,7 +840,7 @@ int NIT::data(__u8* data)
 	return ptr!=len;
 }
 
-EITEvent::EITEvent(eit_event_struct *event)
+EITEvent::EITEvent(const eit_event_struct *event)
 {
 	descriptor.setAutoDelete(true);
 	event_id=HILO(event->event_id);

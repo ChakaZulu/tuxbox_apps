@@ -196,4 +196,4 @@ public:
 	}
 };
 
-eAutoInitP0<eWindowSkinInit,3> init_eWindowSkinInit("eWindow");
+eAutoInitP0<eWindowSkinInit> init_eWindowSkinInit(3, "eWindow");

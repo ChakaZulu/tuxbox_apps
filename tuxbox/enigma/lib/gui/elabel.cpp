@@ -118,4 +118,4 @@ public:
 	}
 };
 
-eAutoInitP0<eLabelSkinInit,3> init_eLabelSkinInit("eLabel");
+eAutoInitP0<eLabelSkinInit> init_eLabelSkinInit(3, "eLabel");

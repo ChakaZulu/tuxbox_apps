@@ -5,7 +5,6 @@
 #include "qlist.h"
 #include "esection.h"
 #include <stdio.h>
-#include "epgcache.h"
 #include "nconfig.h"
 
 class eService;
@@ -38,6 +37,7 @@ class Descriptor;
 class eBouquet;
 class eAVSwitch;
 class eStreamWatchdog;
+class MHWEIT;
 
 class eDVB: public QObject
 {
@@ -75,7 +75,6 @@ protected:
 	
 	TDT *tdt;
 	
-	eEPGCache epgcache;
 	eStreamWatchdog *streamwd;
 	
 public:

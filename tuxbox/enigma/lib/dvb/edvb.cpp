@@ -300,6 +300,22 @@ void eDVB::scanEvent(int event)
 			if (event==eventScanGotNIT)
 				if (currentONID!=-1)
 					knownNetworks.append(new int(currentONID));
+#if 0
+			for (QListIterator<Descriptor> i(nit->network_descriptor; i.current(); ++i)
+			{
+				Descriptor *d=i.current();
+				if (d->Tag()==DESCR_LINKAGE)
+				{
+					LinkageDescriptor *l=(LinkageDescriptor*)d;
+					if ((l->linkage_type==0x01) && 		// information service
+							(original_network_id==transponder->original_network_id) &&
+							(transport_stream_id==transponder->transport_stream_id))
+					{
+						tSDT.abort();
+					}
+				}
+			}
+#endif
 			for (QListIterator<NITEntry> i(nit->entries); i.current(); ++i)
 			{
 				NITEntry *entry=i.current();
@@ -1409,4 +1425,4 @@ void eDVB::configureNetwork()
 	}
 }
 
-eAutoInitP0<eDVB, 5> init_dvb("eDVB core");
+eAutoInitP0<eDVB> init_dvb(5, "eDVB core");

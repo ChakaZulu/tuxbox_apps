@@ -162,4 +162,4 @@ public:
 	}
 };
 
-eAutoInitP0<eDreamboxRCHardware, 2> init_rcdreambox("DreamBox RC Hardware");
+eAutoInitP0<eDreamboxRCHardware> init_rcdreambox(2, "DreamBox RC Hardware");

@@ -75,4 +75,4 @@ public:
 	}
 };
 
-eAutoInitP0<eProgressSkinInit,3> init_eProgressSkinInit("eProgress");
+eAutoInitP0<eProgressSkinInit> init_eProgressSkinInit(3, "eProgress");

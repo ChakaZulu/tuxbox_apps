@@ -142,6 +142,7 @@ public:
 	void setPixmap(gPixmap *pmap);
 	void setTarget(gDC *target);
 	void setLCD(eWidget *lcdtitle, eWidget *lcdelement);
+	void setName(const char *name);
 	
 	gColor getBackgroundColor() { return backgroundColor; }
 	gColor getForegroundColor() { return foregroundColor; }

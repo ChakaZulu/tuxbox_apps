@@ -5,6 +5,7 @@
 #include "dvb.h"
 #include "rc.h"
 #include "eskin.h"
+#include "epgcache.h"
 #include <algorithm>
 
 eListboxEntryService::eListboxEntryService(eService &service, eListbox *listbox): eListboxEntry(listbox), service(service)
@@ -35,6 +36,23 @@ QString eListboxEntryService::getText(int col=0) const
 			if (ch.unicode()==0x87)
 				continue;
 			sname+=ch;
+		}
+		EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service.original_network_id, service.service_id);
+		if (e)
+		{
+			for (QListIterator<Descriptor> d(e->descriptor); d.current(); ++d)
+			{
+				Descriptor *descriptor=d.current();
+				if (descriptor->Tag()==DESCR_SHORT_EVENT)
+				{
+					ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
+					sname+=" (";
+					sname+=ss->event_name;
+					sname+=")";
+					break;
+				}
+			}
+			delete e;
 		}
 		return sname;
 	}

@@ -154,6 +154,7 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 		if (t)
 			eDVB::getInstance()->switchService(t);
 	}
+	init->setRunlevel(10);
 }
 
 eZap::~eZap()

@@ -40,4 +40,4 @@ public:
 	}
 };
 
-eAutoInitP0<ePixmapSkinInit,3> init_ePixmapSkinInit("ePixmap");
+eAutoInitP0<ePixmapSkinInit> init_ePixmapSkinInit(3, "ePixmap");

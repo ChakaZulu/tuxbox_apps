@@ -17,4 +17,4 @@ public:
 	}
 };
 
-eAutoInitP0<eSkinInit, 2> init_skin("skin subsystem");
+eAutoInitP0<eSkinInit> init_skin(2, "skin subsystem");

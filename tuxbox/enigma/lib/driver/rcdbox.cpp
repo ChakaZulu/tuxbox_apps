@@ -344,4 +344,4 @@ public:
   }
 };
 
-eAutoInitP0<eDBoxRCHardware, 2> init_rcdbox("d-Box RC Hardware");
+eAutoInitP0<eDBoxRCHardware> init_rcdbox(2, "d-Box RC Hardware");

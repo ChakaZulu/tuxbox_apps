@@ -46,4 +46,4 @@ public:
 	}
 };
 
-eAutoInitP0<eCheckboxSkinInit,3> init_eCheckboxSkinInit("eCheckbox");
+eAutoInitP0<eCheckboxSkinInit> init_eCheckboxSkinInit(3, "eCheckbox");

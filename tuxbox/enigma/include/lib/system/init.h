@@ -39,7 +39,7 @@ public:
 	const char *getDescription() const { return description; };
 };
 
-template<class T1, int runl, class T2> class
+template<class T1, class T2> class
 eAutoInitP1: protected eAutoInit
 {
 	T1 *t;
@@ -57,12 +57,12 @@ public:
 	{
 		return t;
 	}
-	eAutoInitP1(const T2 &arg, char *description): eAutoInit(runl, description), arg(arg)
+	eAutoInitP1(const T2 &arg, int runl, char *description): eAutoInit(runl, description), arg(arg)
 	{
 	}
 };
 
-template<class T1, int runl> class
+template<class T1> class
 eAutoInitP0: protected eAutoInit
 {
 	T1 *t;
@@ -79,7 +79,7 @@ public:
 	{
 		return t;
 	}
-	eAutoInitP0(char *description): eAutoInit(runl, description)
+	eAutoInitP0(int runl, char *description): eAutoInit(runl, description)
 	{
 	}
 };

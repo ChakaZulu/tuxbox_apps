@@ -108,4 +108,4 @@ void eRCInput::setFile(QFile* file)
 	rc = file;
 }
 
-eAutoInitP0<eRCInput, 1> init_rcinput("RC Input layer");
+eAutoInitP0<eRCInput> init_rcinput(1, "RC Input layer");
