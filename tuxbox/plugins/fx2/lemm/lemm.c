@@ -1073,6 +1073,7 @@ static	int		blinkc=0;
 	}
 	if ( action==4 )
 	{
+		counter1++;
 		if ( counter1 < 8 )
 			return;
 
