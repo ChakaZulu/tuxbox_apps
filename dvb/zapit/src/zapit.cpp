@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.40 2001/11/22 00:01:38 faralla Exp $
+  $Id: zapit.cpp,v 1.41 2001/11/23 13:45:59 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -68,8 +68,9 @@
   		cam-type D == 32
   		cam-type F == 64
   		other cam-type == 128
-  		so valid are : 34, 17 and 68
+  		so valid are : 33, 18 and 68
   		
+
   Bei Fehlschlagen eines Kommandos wird der negative Wert des kommandos zurückgegeben.
 
   License: GPL
@@ -89,6 +90,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.41  2001/11/23 13:45:59  faralla
+  fixes for ca_version
+
   Revision 1.40  2001/11/22 00:01:38  faralla
   check for caid and ca-ver
 
@@ -1997,10 +2001,7 @@ void parse_command()
 		break;
 	case 't':
 		status = "00t";
-		if (send(connfd, status, strlen(status),0) == -1) {
-			perror("[zapit] could not send any return\n");
-			return;
-		}
+		
 		switch (caid)
 		{
 			case 0x1722 : caid_ver = 1;
@@ -2011,7 +2012,7 @@ void parse_command()
 				break;
 			default : caid_ver = 8;
 		}
-		caid_ver |= get_caver();
+		caid_ver |= caver;
 		if (send(connfd, status, strlen(status),0) == -1) {
 			perror("[zapit] could not send any return\n");
 			return;
@@ -2084,7 +2085,7 @@ int main(int argc, char **argv) {
     }
 
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.40 2001/11/22 00:01:38 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.41 2001/11/23 13:45:59 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2095,6 +2096,7 @@ int main(int argc, char **argv) {
   if (testmsg.mode== 'r')
     Radiomode_on = true;
 
+  caver = get_caver();
   caid = get_caid();
   
   memset(&pids_desc, 0, sizeof(pids));

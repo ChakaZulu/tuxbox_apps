@@ -52,7 +52,7 @@ socklen_t clilen;
 SAI cliaddr, servaddr;
 int offset=0;
 int caid = 0;
-
+int caver = 0;
 
 struct rmsg {
   		unsigned char version;
