@@ -33,21 +33,22 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	void updatePosition();
 
 	int filelength, // in 1880 packets
-	    buffersize; // bytes in enigma buffer...
+		curBufferFullness; // bytes in enigma buffer...
 	off64_t position;
+	bool needasyncworkaround;
 
 	off64_t slicesize;
 	eString filename;
 	eSocketNotifier *inputsn, *outputsn;
 	void readMore(int what);
 	void outputReady(int what);
-	int maxBufferSize;
+	int maxBufferFullness;
 	int seekbusy, seeking;
 
 	void dvrFlush();
 	int openFile(int slice=0);
 	void seekTo(off64_t offset);
-	int getBufferSize();
+	int getDriverBufferFullness();
 public:
 	struct eDVRPlayerThreadMessage
 	{

@@ -84,8 +84,15 @@ install_location=
 type=HEADER
 
 [data/Makefile.am]
+files=data/encoding.txt
 sub_dirs=skins,resources
 type=normal
+
+[data/encoding.txt]
+dist=true
+install=false
+install_location=
+type=DATA
 
 [data/resources/Makefile.am]
 files=data/resources/rcdboxbuttons.xml,data/resources/rcdboxnew.xml,data/resources/rcdboxold.xml,data/resources/rcdreambox2.xml,data/resources/help.xml,data/resources/rcdbox_inputdev.xml,data/resources/rcdreambox_inputdev.xml,data/resources/rcgeneric_inputdev.xml,data/resources/keymappings.xml,data/resources/rcdm5xxx.xml,data/resources/rcdm7000.xml,data/resources/rcdreambox_keyboard.xml,data/resources/rctrdvb272.xml,data/resources/rctriax.xml
