@@ -144,6 +144,7 @@ eSystemInfo::eSystemInfo()
 					cpustr="STBx25xx, 252MHz";
 					alphaincrement=25;
 					canshutdown=0;
+					canupdateTransponder=1;
 					hasci = 2;
 					hwtype = getInfo("type", true) == "DM5600" ? DM5600 : DM5620;
 					if ( hwtype == DM5600 )
@@ -166,6 +167,7 @@ eSystemInfo::eSystemInfo()
 					alphaincrement=25;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 					canshutdown=0;
+					canupdateTransponder=1;
 					hwtype = DM500;
 					caids.insert(0x4a70);
 					break;
