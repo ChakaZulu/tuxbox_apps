@@ -1,11 +1,16 @@
 /*
- *  $Id: scan.h,v 1.14 2002/04/24 21:25:12 Simplex Exp $
+ *  $Id: scan.h,v 1.15 2002/05/15 20:47:31 obi Exp $
  */
 
 #ifndef __scan_h__
 #define __scan_h__
 
+#if (DVB_API_VERSION == 1)
 #include <ost/frontend.h>
+#else
+#include <linux/dvb/frontend.h>
+#endif
+
 #include <stdint.h>
 
 #include <map>

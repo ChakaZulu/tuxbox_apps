@@ -1,11 +1,16 @@
 /*
- * $Id: getservices.h,v 1.42 2002/05/13 17:17:04 obi Exp $
+ * $Id: getservices.h,v 1.43 2002/05/15 20:47:07 obi Exp $
  */
 
 #ifndef __getservices_h__
 #define __getservices_h__
 
+#if (DVB_API_VERSION == 1)
 #include <ost/frontend.h>
+#else
+#include <linux/dvb/frontend.h>
+#endif
+
 #include <stdint.h>
 #include <string.h>
 
