@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.h,v 1.2 2004/05/03 15:24:38 thegoodguy Exp $
+ * $Id: stream2file.h,v 1.3 2004/05/03 20:41:39 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -22,12 +22,21 @@
 #ifndef __stream2file_h__
 #define __stream2file_h__
 
-bool start_recording(const char * const filename,
-		     const char * const info,
-		     const unsigned long long splitsize,
-		     const unsigned int numpids,
-		     const unsigned short * const pids);
-bool stop_recording(void);
+enum stream2file_error_msg_t
+{
+	STREAM2FILE_OK                 =  0,
+	STREAM2FILE_BUSY               = -1,
+	STREAM2FILE_INVALID_DIRECTORY  = -2,
+	STREAM2FILE_INVALID_PID        = -3,
+	STREAM2FILE_PES_FILTER_FAILURE = -4
+};
+
+stream2file_error_msg_t start_recording(const char * const filename,
+				      const char * const info,
+				      const unsigned long long splitsize,
+				      const unsigned int numpids,
+				      const unsigned short * const pids);
+stream2file_error_msg_t stop_recording(void);
 
 #endif
 

@@ -2555,25 +2555,6 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		info->Name = "file";
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_FILE, info);
 		delete info;
-		
-		// check if recording dir is writeable
-		std::string filename = g_settings.network_nfs_recordingdir;
-		filename += "/.writetest";
-		unlink(filename.c_str());
-		int fd;
-		if ((fd = open(filename.c_str(), O_SYNC | O_WRONLY | O_CREAT | O_TRUNC , S_IRUSR | S_IWUSR))>=0)
-		{
-			write(fd, "test", 4);
-			fdatasync(fd);
-			close(fd);
-			unlink(filename.c_str());
-			fprintf(stderr, "[neutrino.cpp] recording dir is writeable\n");
-		}
-		else
-		{
-			DisplayErrorMessage(g_Locale->getText("recordingmenu.error_dir_not_writable")); // UTF-8
-			fprintf(stderr, "[neutrino.cpp] recording dir is NOT writeable\n");
-		}
 	}
 	else if(g_settings.recording_type == RECORDING_VCR)
 	{

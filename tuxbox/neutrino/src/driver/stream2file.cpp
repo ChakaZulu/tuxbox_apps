@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.6 2004/05/03 19:58:34 thegoodguy Exp $
+ * $Id: stream2file.cpp,v 1.7 2004/05/03 20:41:39 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -31,6 +31,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
+#include <stream2file.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -336,17 +338,17 @@ void * DMXThread(void * v_arg)
 }
 
 
-bool start_recording(const char * const filename,
-		     const char * const info,
-		     const unsigned long long splitsize,
-		     const unsigned int numpids,
-		     const unsigned short * const pids)
+stream2file_error_msg_t start_recording(const char * const filename,
+					const char * const info,
+					const unsigned long long splitsize,
+					const unsigned int numpids,
+					const unsigned short * const pids)
 {
 	int fd;
 	char buf[FILENAMEBUFFERSIZE];
 
 	if (exit_flag != 2)
-		return false; // other thread is running
+		return STREAM2FILE_BUSY; // other thread is running
 
 	exit_flag = 0;
 
@@ -354,10 +356,19 @@ bool start_recording(const char * const filename,
 
 	// write stream information (should wakeup the disk from standby, too)
 	sprintf(buf, "%s.info", filename);
-	fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-	write(fd, info, strlen(info));
-	fdatasync(fd);
-	close(fd);
+	if ((fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) >= 0)
+	{
+		write(fd, info, strlen(info));
+		fdatasync(fd);
+		close(fd);
+	}
+	else
+	{
+		exit_flag = 2;
+		return STREAM2FILE_INVALID_DIRECTORY;
+	}
+
+
 
 	if (splitsize < TS_SIZE)
 	{
@@ -370,17 +381,17 @@ bool start_recording(const char * const filename,
 	{
 		if (pids[i] > 0x1fff)
 		{
-			printf ("invalid pid 0x%04x specified\n", pids[i]);
 			exit_flag = 2;
-			return false;
+			return STREAM2FILE_INVALID_PID;
 		}
 		
 		if ((demuxfd[i] = setPesFilter(pids[i], DMX_OUT_TS_TAP)) < 0)
 		{
 			for (unsigned int j = 0; j < i; j++)
 				unsetPesFilter(demuxfd[j]);
+
 			exit_flag = 2;
-			return false;
+			return STREAM2FILE_PES_FILTER_FAILURE;
 		}
 	}
 	
@@ -389,14 +400,14 @@ bool start_recording(const char * const filename,
 	demuxfd_count = numpids;
 	pthread_create(&demux_thread, 0, DMXThread, NULL);
 
-	return true;
+	return STREAM2FILE_OK;
 }
 
-bool stop_recording(void)
+stream2file_error_msg_t stop_recording(void)
 {
 	exit_flag = 1;
 
 	// pthread_join(demux_thread, NULL);
 
-	return true;
+	return STREAM2FILE_OK;
 }

@@ -618,19 +618,25 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	time_t t = time(NULL);
 	strftime(&(filename[pos]), sizeof(filename) - pos - 1, "%Y%m%d_%H%M%S", localtime(&t));
 
-	if (!(::start_recording(filename, getCommandString(CMD_VCR_RECORD, channel_id, epgid, apids).c_str(), ((unsigned long long)SplitSize) * 1073741824ULL, numpids, pids)))
-	{
-		RestoreNeutrino();
+	stream2file_error_msg_t error_msg = ::start_recording(filename, getCommandString(CMD_VCR_RECORD, channel_id, epgid, apids).c_str(), ((unsigned long long)SplitSize) * 1073741824ULL, numpids, pids);
 
-#warning FIXME: Use better error message
-		DisplayErrorMessage(g_Locale->getText("streamingserver.noconnect")); // UTF-8
-
-		return false;
-	}
-	else
+	if (error_msg == STREAM2FILE_OK)
 	{
 		deviceState = CMD_VCR_RECORD;
 		return true;
+	}
+	else
+	{
+		RestoreNeutrino();
+
+		printf("[vcrcontrol] stream2file error code: %d\n", error_msg);
+#warning FIXME: Use better error message
+		DisplayErrorMessage(g_Locale->getText(
+						      error_msg == STREAM2FILE_INVALID_DIRECTORY ? "recordingmenu.error_dir_not_writable" :
+						      "streamingserver.noconnect"
+						      )); // UTF-8
+
+		return false;
 	}
 }
 
