@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.130 2002/04/14 23:26:21 obi Exp $
+ * $Id: zapit.cpp,v 1.131 2002/04/15 23:02:45 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -365,8 +365,11 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	if (video_fd != -1)
 	{
 		debug("[zapit] close video device\n");
+
 		if (ioctl(video_fd, VIDEO_STOP, 1) < 0)
+		{
 			perror("[zapit] VIDEO_STOP");
+		}
 
 		close(video_fd);
 		video_fd = -1;
@@ -460,22 +463,19 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	if (cit->second.knowsPids() == false)
 	{
 		/* get program map table pid from program association table */
-		if (!current_is_nvod)
-		{
-			debug("[zapit] trying to find pmt for sid %04x, onid %04x\n", cit->second.getServiceId(), cit->second.getOriginalNetworkId());
+		debug("[zapit] trying to find pmt for sid %04x, onid %04x\n", cit->second.getServiceId(), cit->second.getOriginalNetworkId());
 
-			if (in_nvod)
-			{
-				parse_pat(cit->second.getOriginalNetworkId(), &nvodchannels);
-			}
-			else if (Radiomode_on)
-			{
-				parse_pat(cit->second.getOriginalNetworkId(), &allchans_radio);
-			}
-			else
-			{
-				parse_pat(cit->second.getOriginalNetworkId(), &allchans_tv);
-			}
+		if (in_nvod)
+		{
+			parse_pat(cit->second.getOriginalNetworkId(), &nvodchannels);
+		}
+		else if (Radiomode_on)
+		{
+			parse_pat(cit->second.getOriginalNetworkId(), &allchans_radio);
+		}
+		else
+		{
+			parse_pat(cit->second.getOriginalNetworkId(), &allchans_tv);
 		}
 
 		/* parse program map table and store pids */
@@ -486,10 +486,14 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 
 		if ((cit->second.getAudioPid() == NONE) && (cit->second.getVideoPid() == NONE))
 		{
-			debug("[zapit] not a channel. Won´t zap\n");
+			debug("[zapit] neither audio nor video pid found.\n");
 			cit->second.resetPids();
 			return -3;
 		}
+	}
+	else
+	{
+		debug("[zapit] pids already known\n");
 	}
 
 #ifndef DVBS
@@ -2233,7 +2237,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.130 2002/04/14 23:26:21 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.131 2002/04/15 23:02:45 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
