@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.13 2001/10/09 20:10:08 fnbrd Exp $
+// $Id: remotecontrol.cpp,v 1.14 2001/10/10 02:56:34 fnbrd Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.14  2001/10/10 02:56:34  fnbrd
+// nvod vorbereitet
+//
 // Revision 1.13  2001/10/09 20:10:08  fnbrd
 // Ein paar fehlende Initialisierungen implementiert.
 //
@@ -40,6 +43,56 @@ void CRemoteControl::send()
 //    printf("CRemoteControl: after pthread_cond_signal (with %s)\n", remotemsg.param3);
 }
 
+// quick'n dirty, damit der Rest was zum arbeiten hat ;)
+static void getNVODs(unsigned onidSid)
+{
+  char rip[]="127.0.0.1";
+
+  int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  SAI servaddr;
+  memset(&servaddr,0,sizeof(servaddr));
+  servaddr.sin_family=AF_INET;
+  servaddr.sin_port=htons(sectionsd::portNumber);
+  inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+  if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1) {
+    perror("Couldn't connect to sectionsd!");
+    return;
+  }
+  sectionsd::msgRequestHeader req;
+  req.version = 2;
+  req.command = sectionsd::timesNVODservice;
+  req.dataLength = 4;
+  write(sock_fd, &req, sizeof(req));
+  write(sock_fd, &onidSid, req.dataLength);
+  sectionsd::msgResponseHeader resp;
+  memset(&resp, 0, sizeof(resp));
+  if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) {
+    close(sock_fd);
+    return;
+  }
+  if(resp.dataLength) {
+    char* pData = new char[resp.dataLength] ;
+    if(read(sock_fd, pData, resp.dataLength)>0) {
+      printf("dataLength: %u\n", resp.dataLength);
+      char *p=pData;
+      while(p<pData+resp.dataLength) {
+	unsigned onidsid2=*(unsigned *)p;
+	printf("onid_sid: 0x%x\n", onidsid2);
+	p+=4;
+	unsigned char numberOfTimes=*p;
+	p++;
+	for(int i=0; i<numberOfTimes; i++) {
+	  time_t zeit=*(time_t *)p;
+	  p+=4;
+	  printf("%s", ctime(&zeit));
+	}
+      }
+    }
+    delete[] pData;
+  }
+  close(sock_fd);
+}
 
 void * CRemoteControl::RemoteControlThread (void *arg)
 {
@@ -120,7 +173,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                     case 3: {
                                 // printf("Zapping by name returned successful\n");
 
-                                // šberprfen, ob wir die Audio-PIDs holen sollen...
+                                // ueberpruefen, ob wir die Audio-PIDs holen sollen...
 //                                printf("Checking for Audio-PIDs %s - %s - %d\n", RemoteControl->remotemsg.param3, r_msg.param3, RemoteControl->remotemsg.cmd);
                                 pthread_mutex_trylock( &RemoteControl->send_mutex );
                                 if ( ( RemoteControl->remotemsg.cmd== 3 ) &&
@@ -139,7 +192,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                 break;
                             }
                             break;
-                    case -3: printf("\n\nHier w„re Platz fr ne Fehlerbild-funktion\n\n");
+                    case -3: printf("\n\nHier waere Platz fuer ne Fehlerbild-funktion\n\n");
                             break;
                     case 4: printf("Shutdown Box returned successful\n");
                             break;
@@ -170,7 +223,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
                                 if ( read(sock_fd, &apid_return_buf, sizeof(apid_return_buf)) > 0 )
                                 {
-                                // PIDs emfangen, berprfen, ob wir die Audio-PIDs bernehmen sollen...
+                                // PIDs emfangen, ueberpruefen, ob wir die Audio-PIDs uebernehmen sollen...
 
                                     pthread_mutex_trylock( &RemoteControl->send_mutex );
                                     if ( //( remotemsg.cmd== 8 ) &&
@@ -278,7 +331,7 @@ void CRemoteControl::setAPID(int APID)
 void CRemoteControl::zapTo(int, string chnlname )
 {
     pthread_mutex_lock( &send_mutex );
-
+//    getNVODs(0x850001); // Cinedom 1 fest zum testen
     remotemsg.version=1;
     remotemsg.cmd=3;
     remotemsg.param=0x0100;
@@ -327,6 +380,12 @@ void  CRemoteControl::shutdown()
 
     send();
 }
+
+
+
+
+
+
 
 
 
