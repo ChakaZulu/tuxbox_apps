@@ -58,11 +58,12 @@ all-no:
 # have been downloaded.
 
 $(DOMAIN).pot-update: $(POTFILES) $(srcdir)/POTFILES.in
+	$(srcdir)/xml2po $(srcdir)/POTFILES.xml $(top_srcdir) > $(DOMAIN).po
 	@XGETTEXT@ --default-domain=$(DOMAIN) --directory=$(top_srcdir) \
 	  --add-comments=TRANSLATORS: $(XGETTEXT_OPTIONS) \
 	  --files-from=$(srcdir)/POTFILES.in \
-	  --copyright-holder='$(COPYRIGHT_HOLDER)'
-	$(srcdir)/xml2po $(srcdir)/POTFILES.xml.in $(top_srcdir) ) >> $(DOMAIN).pot
+	  --copyright-holder='$(COPYRIGHT_HOLDER)' \
+	  --join-existing
 	test ! -f $(DOMAIN).po || { \
 	  if test -f $(srcdir)/$(DOMAIN).pot; then \
 	    sed -e 's/^"POT-Creation-Date: .*\"$$//' < $(srcdir)/$(DOMAIN).pot > $(DOMAIN).1po && \
