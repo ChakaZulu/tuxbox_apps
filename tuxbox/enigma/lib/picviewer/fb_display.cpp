@@ -11,7 +11,7 @@
 #include <string.h>
 #include <errno.h>
 #include "fb_display.h"
-#include "pictureviewer.h"
+#include <lib/picviewer/pictureviewer.h>
 #include "lib/gdi/fb.h"
 /*
  * FrameBuffer Image Display Function
@@ -46,11 +46,11 @@ int openFB(const char *name);
 void getFixScreenInfo(struct fb_fix_screeninfo *fix);
 void set332map();
 void blit2FB(void *fbbuff,
-	unsigned int pic_xs, unsigned int pic_ys,
-	unsigned int scr_xs, unsigned int scr_ys,
-	unsigned int xp, unsigned int yp,
-	unsigned int xoffs, unsigned int yoffs,
-	int cpp);
+		unsigned int pic_xs, unsigned int pic_ys,
+		unsigned int scr_xs, unsigned int scr_ys,
+		unsigned int xp, unsigned int yp,
+		unsigned int xoffs, unsigned int yoffs,
+		int cpp);
 void clearFB(int bpp,int cpp);
 inline unsigned short make16color(uint32_t r, uint32_t g,
 				uint32_t b, uint32_t rl,
