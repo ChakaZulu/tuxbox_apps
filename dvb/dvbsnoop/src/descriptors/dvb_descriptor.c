@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.35 2004/08/07 22:10:00 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.36 2004/08/22 18:36:45 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dvb_descriptor.c,v 1.35 2004/08/07 22:10:00 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.36  2004/08/22 18:36:45  rasc
+ - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert)
+ - New: MetaData Section  (Basic) (H.222.0 AMD1)
+
 Revision 1.35  2004/08/07 22:10:00  rasc
 Bugfix: NIT cable frequency display (reported by Karsten Siebert )
 
@@ -2264,67 +2268,39 @@ void descriptorDVB_MultilingBouquetName (u_char *b)
 /*
   0x5D  Multilingual Service Name  descriptor 
   ETSI EN 300 468     6.2.xx
+  -- 2004-08-22 Bugfix, rewrite
 */
 
 void descriptorDVB_MultilingServiceName (u_char *b)
 
 {
-
- typedef struct  _descMultiServiceName {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    //  N .. List2
-
- } descMultiServiceName;
-
- typedef struct  _descMultiServiceName2 {
-    u_char     ISO639_2_language_code[4];
-    u_int      service_provider_name_length;
-
-    //  N2 ..  char
-
-    u_int      service_name_length;
-
-    //  N3 ..  char
-
- } descMultiServiceName2;
+ int   len;
 
 
-
- descMultiServiceName   d;
- descMultiServiceName2  d2;
- int                    len1;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
-
+ // tag		= b[0];
+ len 		= b[1];
  b += 2;
- len1 = d.descriptor_length;
+
 
  indent (+1);
- while (len1 > 0 ) {
-
-    getISO639_3 (d2.ISO639_2_language_code, b);
-    d2.service_provider_name_length	 = getBits (b, 0, 24, 8);
-
-    out_nl    (4,"ISO639_2_language_code:  %3.3s", d2.ISO639_2_language_code);
-    out_SB_NL (5,"Service_provider_name_length: ",d2.service_provider_name_length);
-    print_text_468A (4, "Service_provider_name: ", b+4,d2.service_provider_name_length);
-
-    len1 -= (4 + d2.service_provider_name_length);
-    b    +=  4 + d2.service_provider_name_length;
+ while (len > 0 ) {
+    int len2;
+    char ISO639_2_language_code[4];
 
 
-    d2.service_name_length	 = getBits (b, 0, 24, 8);
-    out_SB_NL (5,"Service_name_length: ",d2.service_name_length);
-    print_text_468A (4, "Service_name: ", b+4,d2.service_name_length);
+    getISO639_3 (ISO639_2_language_code, b);
+    out_nl    (4,"ISO639_2_language_code:  %3.3s", ISO639_2_language_code);
 
-    len1 -= (4 + d2.service_name_length);
-    b    +=  4 + d2.service_name_length;
+    len2 = outBit_Sx_NL  (5,"Service_provider_name_length: ",	b, 24, 8);
+    print_text_468A (4, "Service_provider_name: ", b+4,len2);
+    b   += 4 + len2;
+    len -= 4 + len2;
+
+
+    len2 = outBit_Sx_NL  (5,"Service_name_length: ",	b, 0, 8);
+    print_text_468A      (4, "Service_name: ", 		b+1,len2);
+    b   += 1 + len2;
+    len -= 1 + len2;
 
     out_NL (4);
 

@@ -8,7 +8,8 @@ noinst_HEADERS = \
 	cat.h \
 	dit.h \
 	eit.h \
-	nit.h \
+	eit.h \
+	mdt.h \
 	pat.h \
 	pmt.h \
 	rst.h \
@@ -28,6 +29,7 @@ libsections_a_SOURCES = \
 	cat.c \
 	dit.c \
 	eit.c \
+	mdt.c \
 	nit.c \
 	pat.c \
 	pmt.c \

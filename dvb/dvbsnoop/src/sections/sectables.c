@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.27 2004/08/13 01:15:54 rasc Exp $
+$Id: sectables.c,v 1.28 2004/08/22 18:36:45 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: sectables.c,v 1.27 2004/08/13 01:15:54 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.28  2004/08/22 18:36:45  rasc
+ - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert)
+ - New: MetaData Section  (Basic) (H.222.0 AMD1)
+
 Revision 1.27  2004/08/13 01:15:54  rasc
 small change in PID assignment display
 
@@ -135,6 +139,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dit.h"
 #include "sit.h"
 #include "eit.h"
+#include "mdt.h"
 #include "emm_ecm.h"
 #include "userdef.h"
 #include "datacarousel/ait.h"
@@ -239,7 +244,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x03, 0x03,  decode_TSDT },
 // $$$ TODO     {  0x04, 0x04,  decode_14496_SCT },
 // $$$ TODO     {  0x05, 0x05,  decode_14496_OCT },
-// $$$ TODO     {  0x06, 0x06,  decode_MT },	// Metadata section
+     {  0x06, 0x06,  decode_MDT },	// Metadata section
 // $$$ TODO     {  0x07, 0x07,  decode_IPMP_CIT },	// IPMP_Control_Information_section (defined in ISO/IEC13818-11)
      /* res. */
      {  0x3a, 0x3d,  decode_DSMCC_section },
