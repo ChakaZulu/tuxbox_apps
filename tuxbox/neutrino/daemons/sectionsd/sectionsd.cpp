@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.28 2001/07/20 00:02:47 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.29 2001/07/23 00:22:15 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.29  2001/07/23 00:22:15  fnbrd
+//  Many internal changes, nvod-events now functional.
+//
 //  Revision 1.28  2001/07/20 00:02:47  fnbrd
 //  Kleiner Hack fuer besseres Zusammenspiel mit Neutrino.
 //
@@ -138,8 +141,15 @@
 #include "SIsections.hpp"
 
 #define PORT_NUMBER 1600
+
+// Zeit die fuer die scheduled eit's benutzt wird (in Sekunden)
+#define TIME_EIT_SCHEDULED 50
+
+// Zeit die fuer die present/following (und nvods) eit's benutzt wird (in Sekunden)
+#define TIME_EIT_PRESENT 15
+
 // Wieviele Sekunden EPG gecached werden sollen
-static long secondsToCache=24*60L*60L; // 24h
+static long secondsToCache=72*60L*60L; // 3 Tage (72h)
 // Ab wann ein Event als alt gilt (in Sekunden)
 static long oldEventsAre=120*60L; // 2h
 static int debug=0;
@@ -149,69 +159,96 @@ static int debug=0;
 
 static pthread_mutex_t eventsLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
 static pthread_mutex_t servicesLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
-static pthread_mutex_t dmxEITlock=PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t dmxSDTlock=PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t dmxEITnvodLock=PTHREAD_MUTEX_INITIALIZER;
-static int dmxEITfd=0;
-static int dmxSDTfd=0;
-//static int dmxEITfd2=0;
-static int timeset=0;
-static SIevent nullEvt; // Null-Event, falls keins gefunden
+
+inline void lockServices(void)
+{
+  pthread_mutex_lock(&servicesLock);
+}
+
+inline void unlockServices(void)
+{
+  pthread_mutex_unlock(&servicesLock);
+}
+
+inline void lockEvents(void)
+{
+  pthread_mutex_lock(&eventsLock);
+}
+
+inline void unlockEvents(void)
+{
+  pthread_mutex_unlock(&eventsLock);
+}
+
+static int timeset=0; // = 1 falls Uhrzeit gesetzt
+static const SIevent nullEvt; // Null-Event
 
 //------------------------------------------------------------
 // Wir verwalten die events in SmartPointers
 // und nutzen verschieden sortierte Menge zum Zugriff
 //------------------------------------------------------------
-using namespace Loki;
 
-//typedef SmartPtr<class SIevent, RefCounted, DisallowConversion, AssertCheckStrict>
-typedef SmartPtr<class SIevent, RefCounted, DisallowConversion, NoCheck>
+// SmartPointer auf SIevent
+typedef Loki::SmartPtr<class SIevent, Loki::RefCounted, Loki::DisallowConversion, Loki::NoCheck>
   SIeventPtr;
 
-// Key ist unsigned short (Event-ID), data ist ein SIeventPtr
-typedef map<unsigned short, SIeventPtr, less<unsigned short> > MySIeventsOrderEventID;
-MySIeventsOrderEventID mySIeventsOrderEventID;
+// Mengen mit SIeventPtr sortiert nach Event-ID
+typedef std::map<unsigned short, SIeventPtr, std::less<unsigned short> > MySIeventsOrderEventID;
+static MySIeventsOrderEventID mySIeventsOrderEventID;
+
+// Mengen mit SIeventPtr sortiert nach Event-ID fuer NVOD-Events (mehrere Zeiten)
+static MySIeventsOrderEventID mySIeventsNVODorderEventID;
 
 struct OrderServiceIDFirstStartTimeEventID
 {
-    bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
-
-      return
-        p1->serviceID == p2->serviceID ?
-        (p1->times.begin()->startzeit == p2->times.begin()->startzeit ? p1->eventID < p2->eventID : p1->times.begin()->startzeit < p2->times.begin()->startzeit )
-        :
-        (p1->serviceID < p2->serviceID );
-    }
+  bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
+    return
+      p1->serviceID == p2->serviceID ?
+      (p1->times.begin()->startzeit == p2->times.begin()->startzeit ? p1->eventID < p2->eventID : p1->times.begin()->startzeit < p2->times.begin()->startzeit )
+      :
+      (p1->serviceID < p2->serviceID );
+  }
 };
 
-typedef map<const SIeventPtr, SIeventPtr, OrderServiceIDFirstStartTimeEventID > MySIeventsOrderServiceIDFirstStartTimeEventID;
-MySIeventsOrderServiceIDFirstStartTimeEventID mySIeventsOrderServiceIDFirstStartTimeEventID;
-
+typedef std::map<const SIeventPtr, SIeventPtr, OrderServiceIDFirstStartTimeEventID > MySIeventsOrderServiceIDFirstStartTimeEventID;
+static MySIeventsOrderServiceIDFirstStartTimeEventID mySIeventsOrderServiceIDFirstStartTimeEventID;
 
 struct OrderFirstEndTimeServiceIDEventID
 {
-    bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
-
-      return
-        p1->times.begin()->startzeit + (long)p1->times.begin()->dauer == p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ?
-        ( p1->serviceID == p2->serviceID ? p1->eventID < p2->eventID : p1->serviceID < p2->serviceID )
+  bool operator()(const SIeventPtr &p1, const SIeventPtr &p2) {
+    return
+      p1->times.begin()->startzeit + (long)p1->times.begin()->dauer == p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ?
+      ( p1->serviceID == p2->serviceID ? p1->eventID < p2->eventID : p1->serviceID < p2->serviceID )
         :
-	( p1->times.begin()->startzeit + (long)p1->times.begin()->dauer < p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ) ;
-    }
+	    ( p1->times.begin()->startzeit + (long)p1->times.begin()->dauer < p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ) ;
+  }
 };
 
-typedef map<const SIeventPtr, SIeventPtr, OrderFirstEndTimeServiceIDEventID > MySIeventsOrderFirstEndTimeServiceIDEventID;
-MySIeventsOrderFirstEndTimeServiceIDEventID mySIeventsOrderFirstEndTimeServiceIDEventID;
+typedef std::map<const SIeventPtr, SIeventPtr, OrderFirstEndTimeServiceIDEventID > MySIeventsOrderFirstEndTimeServiceIDEventID;
+static MySIeventsOrderFirstEndTimeServiceIDEventID mySIeventsOrderFirstEndTimeServiceIDEventID;
+
+// Hier landen alle Service-Ids von Meta-Events inkl. der zugehoerigen Event-ID (nvod)
+// d.h. key ist Service-Id des Meta-Events und Data ist die Event-ID
+typedef std::map<unsigned short, unsigned short, std::less<unsigned short> > MySIeventIDsMetaOrderServiceID;
+static MySIeventIDsMetaOrderServiceID mySIeventIDsMetaOrderServiceID;
 
 // Loescht ein Event aus allen Mengen
 static void deleteEvent(const unsigned short eventID)
 {
   MySIeventsOrderEventID::iterator e=mySIeventsOrderEventID.find(eventID);
   if(e!=mySIeventsOrderEventID.end()) {
-    mySIeventsOrderFirstEndTimeServiceIDEventID.erase(e->second);
-    mySIeventsOrderServiceIDFirstStartTimeEventID.erase(e->second);
+    if(e->second->times.size()) {
+      mySIeventsOrderFirstEndTimeServiceIDEventID.erase(e->second);
+      mySIeventsOrderServiceIDFirstStartTimeEventID.erase(e->second);
+    }
     mySIeventsOrderEventID.erase(eventID);
+    mySIeventsNVODorderEventID.erase(eventID);
   }
+/*
+  for(MySIeventIDsMetaOrderServiceID::iterator i=mySIeventIDsMetaOrderServiceID.begin(); i!=mySIeventIDsMetaOrderServiceID.end(); i++)
+    if(i->second==eventID)
+      mySIeventIDsMetaOrderServiceID.erase(i);
+*/
 }
 
 // Fuegt ein Event in alle Mengen ein
@@ -220,10 +257,58 @@ static void addEvent(const SIevent &e)
   SIeventPtr s(new SIevent(e));
   // Damit in den nicht nach Event-ID sortierten Mengen
   // Mehrere Events mit gleicher ID sind, diese vorher loeschen
-  deleteEvent(e.eventID);
-  mySIeventsOrderEventID.insert(make_pair(e.eventID, s));
-  mySIeventsOrderServiceIDFirstStartTimeEventID.insert(make_pair(s, SIeventPtr(s)));
-  mySIeventsOrderFirstEndTimeServiceIDEventID.insert(make_pair(s, SIeventPtr(s)));
+  deleteEvent(s->eventID);
+  // Pruefen ob es ein Meta-Event ist
+  MySIeventIDsMetaOrderServiceID::iterator i=mySIeventIDsMetaOrderServiceID.find(s->serviceID);
+  if(i!=mySIeventIDsMetaOrderServiceID.end()) {
+    // ist ein MetaEvent, d.h. mit Zeiten fuer NVOD-Event
+    if(s->times.size()) {
+      // D.h. wir fuegen die Zeiten in das richtige Event ein
+      MySIeventsOrderEventID::iterator ie=mySIeventsOrderEventID.find(i->second);
+      if(ie!=mySIeventsOrderEventID.end()) {
+        // Event vorhanden
+        // Falls das Event in den beiden Mengen mit Zeiten nicht vorhanden
+        // ist, dieses dort einfuegen
+	      MySIeventsOrderServiceIDFirstStartTimeEventID::iterator i2=mySIeventsOrderServiceIDFirstStartTimeEventID.find(ie->second);
+	      if(i2==mySIeventsOrderServiceIDFirstStartTimeEventID.end()) {
+	        // nicht vorhanden -> einfuegen
+          mySIeventsOrderServiceIDFirstStartTimeEventID.insert(std::make_pair(ie->second, ie->second));
+          mySIeventsOrderFirstEndTimeServiceIDEventID.insert(std::make_pair(ie->second, ie->second));
+   	    }
+        // Und die Zeiten im Event updaten
+        ie->second->times.insert(s->times.begin(), s->times.end());
+      }
+    }
+  }
+  else {
+    // normales Event
+    mySIeventsOrderEventID.insert(std::make_pair(s->eventID, s));
+    if(s->times.size()) {
+      // diese beiden Mengen enthalten nur Events mit Zeiten
+      mySIeventsOrderServiceIDFirstStartTimeEventID.insert(std::make_pair(s, s));
+      mySIeventsOrderFirstEndTimeServiceIDEventID.insert(std::make_pair(s, s));
+    }
+  }
+}
+
+static void addNVODevent(const SIevent &e)
+{
+  SIeventPtr s(new SIevent(e));
+  MySIeventsOrderEventID::iterator e2=mySIeventsOrderEventID.find(s->eventID);
+  if(e2!=mySIeventsOrderEventID.end()) {
+    // bisher gespeicherte Zeiten retten
+    s->times.insert(e2->second->times.begin(), e2->second->times.end());
+  }
+  // Damit in den nicht nach Event-ID sortierten Mengen
+  // Mehrere Events mit gleicher ID sind, diese vorher loeschen
+  deleteEvent(s->eventID);
+  mySIeventsOrderEventID.insert(std::make_pair(s->eventID, s));
+  mySIeventsNVODorderEventID.insert(std::make_pair(s->eventID, s));
+  if(s->times.size()) {
+    // diese beiden Mengen enthalten nur Events mit Zeiten
+    mySIeventsOrderServiceIDFirstStartTimeEventID.insert(std::make_pair(s, s));
+    mySIeventsOrderFirstEndTimeServiceIDEventID.insert(std::make_pair(s, s));
+  }
 }
 
 static void removeOldEvents(long seconds)
@@ -231,45 +316,34 @@ static void removeOldEvents(long seconds)
   // Alte events loeschen
   time_t zeit=time(NULL);
   for(MySIeventsOrderFirstEndTimeServiceIDEventID::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventID.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventID.end(); e++)
-    if(e->first->times.size()) {
-      if(e->first->times.begin()->startzeit+(long)e->first->times.begin()->dauer<zeit-seconds)
-        deleteEvent(e->first->eventID);
-      else
-        break; // sortiert nach Endzeit, daher weiter Suchen unnoetig
-    }
+    if(e->first->times.begin()->startzeit+(long)e->first->times.begin()->dauer<zeit-seconds)
+      deleteEvent(e->first->eventID);
+    else
+      break; // sortiert nach Endzeit, daher weiteres Suchen unnoetig
   return;
 }
 
 //typedef SmartPtr<class SIservice, RefCounted, DisallowConversion, AssertCheckStrict>
-typedef SmartPtr<class SIservice, RefCounted, DisallowConversion, NoCheck>
+typedef Loki::SmartPtr<class SIservice, Loki::RefCounted, Loki::DisallowConversion, Loki::NoCheck>
   SIservicePtr;
 
 // Key ist unsigned short (Sevice-ID), data ist ein SIservicePtr
-typedef map<unsigned short, SIservicePtr, less<unsigned short> > MySIservicesOrderServiceID;
-MySIservicesOrderServiceID mySIservicesOrderServiceID;
+typedef std::map<unsigned short, SIservicePtr, std::less<unsigned short> > MySIservicesOrderServiceID;
+static MySIservicesOrderServiceID mySIservicesOrderServiceID;
+
+// Key ist unsigned short (Sevice-ID), data ist ein SIservicePtr
+typedef std::map<unsigned short, SIservicePtr, std::less<unsigned short> > MySIservicesNVODorderServiceID;
+static MySIservicesNVODorderServiceID mySIservicesNVODorderServiceID;
 
 struct OrderServiceName
 {
-  // Evtl. waere es schneller die Controlcodes beim einfuegen zu loeschen
   bool operator()(const SIservicePtr &p1, const SIservicePtr &p2) {
-/*
-    // Erst mal die Controlcodes entfernen
-    char servicename1[50];
-    strncpy(servicename1, p1->serviceName.c_str(), sizeof(servicename1)-1);
-    servicename1[sizeof(servicename1)-1]=0;
-    removeControlCodes(servicename1);
-    char servicename2[50];
-    strncpy(servicename2, p2->serviceName.c_str(), sizeof(servicename2)-1);
-    servicename2[sizeof(servicename2)-1]=0;
-    removeControlCodes(servicename2);
-    return strcasecmp(servicename1, servicename2) < 0;
-*/
     return strcasecmp(p1->serviceName.c_str(), p2->serviceName.c_str()) < 0;
   }
 };
 
-typedef map<const SIservicePtr, SIservicePtr, OrderServiceName > MySIservicesOrderServiceName;
-MySIservicesOrderServiceName mySIservicesOrderServiceName;
+typedef std::map<const SIservicePtr, SIservicePtr, OrderServiceName > MySIservicesOrderServiceName;
+static MySIservicesOrderServiceName mySIservicesOrderServiceName;
 
 /*
 // Loescht ein Event aus allen Mengen
@@ -282,6 +356,7 @@ static void deleteService(const unsigned short serviceID)
   }
 }
 */
+
 // Fuegt ein Event in alle Mengen ein
 static void addService(const SIservice &s)
 {
@@ -292,219 +367,15 @@ static void addService(const SIservice &s)
   servicename[sizeof(servicename)-1]=0;
   removeControlCodes(servicename);
   sptr->serviceName=servicename;
-  mySIservicesOrderServiceID.insert(make_pair(s.serviceID, sptr));
-  mySIservicesOrderServiceName.insert(make_pair(sptr, SIservicePtr(sptr)));
+  mySIservicesOrderServiceID.insert(std::make_pair(sptr->serviceID, sptr));
+  if(sptr->nvods.size())
+    mySIservicesNVODorderServiceID.insert(std::make_pair(sptr->serviceID, sptr));
+  mySIservicesOrderServiceName.insert(std::make_pair(sptr, sptr));
 }
 
 //------------------------------------------------------------
 // other stuff
 //------------------------------------------------------------
-
-static int startDMXeit(void)
-{
-  if ((dmxEITfd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
-    return 1;
-  }
-  if (ioctl (dmxEITfd, DMX_SET_BUFFER_SIZE, 384*1024) == -1) {
-    close(dmxEITfd);
-    dmxEITfd=0;
-    perror ("DMX_SET_BUFFER_SIZE");
-    return 2;
-  }
-  struct dmxSctFilterParams flt;
-  memset (&flt.filter, 0, sizeof (struct dmxFilter));
-  flt.pid              = 0x12;
-  flt.filter.filter[0] = 0x50; // schedule
-  flt.filter.mask[0]   = 0xf0; // -> 5x
-  flt.timeout          = 0;
-  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-
-  if (ioctl (dmxEITfd, DMX_SET_FILTER, &flt) == -1) {
-    close(dmxEITfd);
-    dmxEITfd=0;
-    perror ("DMX_SET_FILTER");
-    return 3;
-  }
-  pthread_mutex_unlock(&dmxEITlock);
-  return 0;
-}
-
-static int stopDMXeit(void)
-{
-  pthread_mutex_lock(&dmxEITlock);
-  close(dmxEITfd);
-  dmxEITfd=0;
-  return 0;
-}
-
-static int pauseDMXeit(void)
-{
-  pthread_mutex_lock(&dmxEITlock);
-  if (ioctl (dmxEITfd, DMX_STOP, 0) == -1) {
-    close(dmxEITfd);
-    dmxEITfd=0;
-    perror ("DMX_STOP");
-    return 1;
-  }
-  return 0;
-}
-
-static int unpauseDMXeit(void)
-{
-  if (ioctl (dmxEITfd, DMX_START, 0) == -1) {
-    close(dmxEITfd);
-    dmxEITfd=0;
-    perror ("DMX_START");
-    pthread_mutex_unlock(&dmxEITlock);
-    return 4;
-  }
-  pthread_mutex_unlock(&dmxEITlock);
-  return 0;
-}
-
-static int startDMXsdt(void)
-{
-  if ((dmxSDTfd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
-    return 1;
-  }
-  struct dmxSctFilterParams flt;
-  memset (&flt.filter, 0, sizeof (struct dmxFilter));
-  flt.pid              = 0x11;
-  flt.filter.filter[0] = 0x42;
-  flt.filter.mask[0]   = 0xff;
-  flt.timeout          = 0;
-  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-  if (ioctl (dmxSDTfd, DMX_SET_FILTER, &flt) == -1) {
-    close(dmxSDTfd);
-    dmxSDTfd=0;
-    perror ("DMX_SET_FILTER");
-    return 2;
-  }
-  pthread_mutex_unlock(&dmxSDTlock);
-  return 0;
-}
-
-static int stopDMXsdt(void)
-{
-  pthread_mutex_lock(&dmxSDTlock);
-  close(dmxSDTfd);
-  dmxSDTfd=0;
-  return 0;
-}
-
-#ifdef NO_ZAPD_NEUTRINO_HACK
-static int pauseDMXsdt(void)
-{
-  pthread_mutex_lock(&dmxSDTlock);
-  if (ioctl (dmxSDTfd, DMX_STOP, 0) == -1) {
-    close(dmxSDTfd);
-    dmxSDTfd=0;
-    perror ("DMX_STOP");
-    return 1;
-  }
-  return 0;
-}
-
-static int unpauseDMXsdt(void)
-{
-  if (ioctl (dmxSDTfd, DMX_START, 0) == -1) {
-    close(dmxSDTfd);
-    dmxSDTfd=0;
-    perror ("DMX_START");
-    pthread_mutex_unlock(&dmxSDTlock);
-    return 4;
-  }
-  pthread_mutex_unlock(&dmxSDTlock);
-  return 0;
-}
-#endif
-
-/*
-static int startDMXeitNVOD(void)
-{
-  if (ioctl (dmxEITfd2, DMX_START, 0) == -1) {
-    close(dmxEITfd2);
-    dmxEITfd2=0;
-    perror ("DMX_START");
-    pthread_mutex_unlock(&dmxEITnvodLock);
-    return -1;
-  }
-  pthread_mutex_unlock(&dmxEITnvodLock);
-  return 0;
-}
-
-static int stopDMXeitNVOD(void)
-{
-  pthread_mutex_lock(&dmxEITnvodLock);
-  if (ioctl (dmxEITfd2, DMX_STOP, 0) == -1) {
-    close(dmxEITfd2);
-    dmxEITfd2=0;
-    perror ("DMX_STOP");
-    return -1;
-  }
-  return 0;
-}
-*/
-
-// Liefert die ServiceID zu einem Namen
-// 0 bei Misserfolg
-static unsigned short findServiceIDforServiceName(const char *serviceName)
-{
-  SIservicePtr s(new SIservice((unsigned short)0));
-  s->serviceName=serviceName;
-  dprintf("Search for Service '%s'\n", serviceName);
-  MySIservicesOrderServiceName::iterator si=mySIservicesOrderServiceName.find(s);
-  if(si!=mySIservicesOrderServiceName.end())
-    return si->first->serviceID;
-  dputs("Service not found");
-  return 0;
-}
-
-static const SIevent &findActualSIeventForServiceID(const unsigned serviceID)
-{
-  time_t zeit=time(NULL);
-  // Event (serviceid) suchen
-  int serviceIDfound=0;
-  for(MySIeventsOrderServiceIDFirstStartTimeEventID::iterator e=mySIeventsOrderServiceIDFirstStartTimeEventID.begin(); e!=mySIeventsOrderServiceIDFirstStartTimeEventID.end(); e++)
-    if(e->first->serviceID==serviceID) {
-      serviceIDfound=1;
-      for(SItimes::iterator t=e->first->times.begin(); t!=e->first->times.end(); t++)
-        if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer))
-          return *(e->first);
-    } // if = serviceID
-    else if(serviceIDfound)
-      break; // sind nach serviceID und startzeit sortiert, daher weiter Suchen unnoetig
-  return nullEvt;
-}
-
-static const SIevent &findActualSIeventForServiceName(const char *serviceName)
-{
-  unsigned short serviceID=findServiceIDforServiceName(serviceName);
-  if(serviceID)
-    return findActualSIeventForServiceID(serviceID);
-  return nullEvt;
-}
-
-static const SIevent &findNextSIevent(const unsigned short eventID)
-{
-  MySIeventsOrderEventID::iterator eFirst=mySIeventsOrderEventID.find(eventID);
-  if(eFirst!=mySIeventsOrderEventID.end()) {
-    MySIeventsOrderServiceIDFirstStartTimeEventID::iterator eNext=mySIeventsOrderServiceIDFirstStartTimeEventID.find(eFirst->second);
-    eNext++;
-    if(eNext!=mySIeventsOrderServiceIDFirstStartTimeEventID.end())
-      return *(eNext->second);
-  }
-  return nullEvt;
-}
-
-// Liefert 1 wenn das Event entweder ein zu einem NVOD-Service gehoert
-// oder selbst nur NVOD-Zeiten hat
-static int isNVODevent(const SIevent &e)
-{
-  return 0;
-}
 
 // Liest n Bytes aus einem Socket per read
 // Liefert 0 bei timeout
@@ -525,7 +396,7 @@ int j;
     else if(rc<0 && errno==EINTR)
       continue; // interuppted
     else if(rc<0) {
-      perror ("poll");
+      perror ("[sectionsd] poll");
 //      printf("errno: %d\n", errno);
       return -1;
     }
@@ -534,12 +405,251 @@ int j;
       j+=r;
       buf+=r;
     }
-    else if(r<=0 && errno!=EINTR && errno!=EAGAIN) {
-      perror ("read");
+    else if(r<=0 && errno!=EINTR) {
+      // Hier kommt manchmal ein ETIMEDOUT
+      // Darf eigentlich nicht sein, da oben gebprueft wird
+      // ob Daten vorhanden sind. D.h. es sind
+      // weniger Daten da, als abgefragt werden
+      // Da aber nie mehr als ein Packet vom DMX requestet
+      // wird, und dieser auf CHECK_CRC steht, duerfte
+      // das nicht vorkommen
+//      printf("errno: %d\n", errno);
+      perror ("[sectionsd] read");
       return -1;
     }
   }
   return j;
+}
+
+//------------------------------------------------------------
+// class DMX<>
+//------------------------------------------------------------
+
+class DMX {
+  public:
+    DMX(unsigned char p, unsigned char f1, unsigned char m1, unsigned char f2, unsigned char m2, unsigned short bufferSizeInKB) {
+      fd=0;
+      isScheduled=false;
+      lastChanged=0;
+      pID=p;
+      filter1=f1;
+      mask1=m1;
+      filter2=f2;
+      mask2=m2;
+      dmxBufferSizeInKB=bufferSizeInKB;
+      pthread_mutex_init(&dmxlock, NULL); // default = fast mutex
+    }
+    ~DMX() {
+      closefd();
+    }
+    int start(void); // calls unlock at end
+    int read(char *buf, size_t buflength, unsigned timeoutInSeconds) {
+      return readNbytes(fd, buf, buflength, timeoutInSeconds);
+    }
+    void closefd(void) {
+      if(fd) {
+        close(fd);
+        fd=0;
+      }
+    }
+/*
+    int stop(void) {
+      if(!fd)
+        return 1;
+      lock();
+      closefd();
+      return 0;
+    }
+*/
+    int pause(void); // calls lock at begin
+    int unpause(void); // calls unlock at end
+    int change(void); // locks while changing
+    void lock(void) {
+      pthread_mutex_lock(&dmxlock);
+    }
+    void unlock(void) {
+      pthread_mutex_unlock(&dmxlock);
+    }
+    bool isScheduled;
+    time_t lastChanged;
+
+  private:
+    int fd;
+    pthread_mutex_t dmxlock;
+    unsigned char pID, filter1, mask1, filter2, mask2;
+    unsigned short dmxBufferSizeInKB;
+};
+
+int DMX::start(void)
+{
+  if(fd)
+    return 1;
+  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
+    perror ("[sectionsd] DMX: /dev/ost/demux0");
+    return 2;
+  }
+  if(dmxBufferSizeInKB!=256)
+    if (ioctl (fd, DMX_SET_BUFFER_SIZE, (unsigned long)(dmxBufferSizeInKB*1024UL)) == -1) {
+      closefd();
+      perror ("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
+      return 3;
+    }
+  struct dmxSctFilterParams flt;
+  memset (&flt.filter, 0, sizeof (struct dmxFilter));
+  flt.pid              = pID;
+  flt.filter.filter[0] = filter1; // current/next
+  flt.filter.mask[0]   = mask1; // -> 4e und 4f
+  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+
+  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
+    closefd();
+    perror ("[sectionsd] DMX: DMX_SET_FILTER");
+    return 4;
+  }
+  isScheduled=false;
+  lastChanged=time(NULL);
+  unlock();
+  return 0;
+}
+
+int DMX::pause(void)
+{
+  if(!fd)
+    return 1;
+  lock();
+  if (ioctl (fd, DMX_STOP, 0) == -1) {
+    closefd();
+    perror ("[sectionsd] DMX: DMX_STOP");
+    return 2;
+  }
+  return 0;
+}
+
+int DMX::unpause(void)
+{
+  if(!fd)
+    return 1;
+  if (ioctl (fd, DMX_START, 0) == -1) {
+    closefd();
+    perror ("[sectionsd] DMX: DMX_START");
+    unlock();
+    return 2;
+  }
+  unlock();
+  return 0;
+}
+
+int DMX::change(void)
+{
+  if(!fd)
+    return 1;
+  dprintf("changeDMX -> %s\n", isScheduled ? "current/next" : "scheduled" );
+  if(pause()) // -> lock
+    return 2;
+  struct dmxSctFilterParams flt;
+  memset (&flt.filter, 0, sizeof (struct dmxFilter));
+  if(isScheduled) {
+    flt.pid              = pID;
+    flt.filter.filter[0] = filter1; // current/next
+    flt.filter.mask[0]   = mask1; // -> 4e und 4f
+    isScheduled=false;
+  }
+  else {
+    flt.pid              = pID;
+    flt.filter.filter[0] = filter2; // schedule
+    flt.filter.mask[0]   = mask2; // -> 5x
+    isScheduled=true;
+  }
+  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+
+  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
+    closefd();
+    perror ("[sectionsd] DMX: DMX_SET_FILTER");
+    unlock();
+    return 3;
+  }
+  lastChanged=time(NULL);
+  unlock();
+  return 0;
+}
+
+static DMX dmxEIT(0x12, 0x4e, 0xfe, 0x50, 0xf0, 384);
+static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
+
+//------------------------------------------------------------
+// misc. functions
+//------------------------------------------------------------
+
+// Liefert die ServiceID zu einem Namen
+// 0 bei Misserfolg
+static unsigned short findServiceIDforServiceName(const char *serviceName)
+{
+  SIservicePtr s(new SIservice((unsigned short)0));
+  s->serviceName=serviceName;
+  dprintf("Search for Service '%s'\n", serviceName);
+  MySIservicesOrderServiceName::iterator si=mySIservicesOrderServiceName.find(s);
+  if(si!=mySIservicesOrderServiceName.end())
+    return si->first->serviceID;
+  dputs("Service not found");
+  return 0;
+}
+
+static const SIevent &findActualSIeventForServiceID(const unsigned serviceID, SItime& zeit)
+{
+  time_t azeit=time(NULL);
+  // Event (serviceid) suchen
+  int serviceIDfound=0;
+  for(MySIeventsOrderServiceIDFirstStartTimeEventID::iterator e=mySIeventsOrderServiceIDFirstStartTimeEventID.begin(); e!=mySIeventsOrderServiceIDFirstStartTimeEventID.end(); e++)
+    if(e->first->serviceID==serviceID) {
+      serviceIDfound=1;
+      for(SItimes::iterator t=e->first->times.begin(); t!=e->first->times.end(); t++)
+        if(t->startzeit<=azeit && azeit<=(long)(t->startzeit+t->dauer)) {
+          zeit=*t;
+          return *(e->first);
+        }
+    } // if = serviceID
+    else if(serviceIDfound)
+      break; // sind nach serviceID und startzeit sortiert, daher weiteres Suchen unnoetig
+  return nullEvt;
+}
+
+static const SIevent &findActualSIeventForServiceName(const char *serviceName, SItime& zeit)
+{
+  unsigned short serviceID=findServiceIDforServiceName(serviceName);
+  if(serviceID)
+    return findActualSIeventForServiceID(serviceID, zeit);
+  return nullEvt;
+}
+
+static const SIevent &findNextSIevent(const unsigned short eventID, SItime &zeit)
+{
+  MySIeventsOrderEventID::iterator eFirst=mySIeventsOrderEventID.find(eventID);
+  if(eFirst!=mySIeventsOrderEventID.end()) {
+    if(eFirst->second->times.size()>1) {
+      // Wir haben ein NVOD-Event
+      // d.h. wir suchen die aktuelle Zeit und nehmen die naechste davon, falls existent
+      for(SItimes::iterator t=eFirst->second->times.begin(); t!=eFirst->second->times.end(); t++)
+        if(t->startzeit==zeit.startzeit) {
+          t++;
+          if(t!=eFirst->second->times.end()) {
+            zeit=*t;
+            return *(eFirst->second);
+          }
+          break; // ganz normal naechstes Event suchen
+        }
+    }
+    MySIeventsOrderServiceIDFirstStartTimeEventID::iterator eNext=mySIeventsOrderServiceIDFirstStartTimeEventID.find(eFirst->second);
+    eNext++;
+    if(eNext!=mySIeventsOrderServiceIDFirstStartTimeEventID.end()) {
+      if(eNext->second->serviceID==eFirst->second->serviceID) {
+        zeit=*(eNext->second->times.begin());
+        return *(eNext->second);
+      }
+      else
+        return nullEvt;
+    }
+  }
+  return nullEvt;
 }
 
 //*********************************************************************
@@ -562,7 +672,7 @@ static void commandDumpAllServices(struct connectionData *client, char *data, un
     return;
   }
   *serviceList=0;
-  pthread_mutex_lock(&servicesLock);
+  lockServices();
   char daten[200];
   for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++) {
     sprintf(daten, "%hu %hhu %d %d %d %d %u ",
@@ -577,7 +687,7 @@ static void commandDumpAllServices(struct connectionData *client, char *data, un
     strcat(serviceList, s->first->providerName.c_str());
     strcat(serviceList, "\n");
   }
-  pthread_mutex_unlock(&servicesLock);
+  unlockServices();
   struct msgSectionsdResponseHeader msgResponse;
   msgResponse.dataLength=strlen(serviceList)+1;
   if(msgResponse.dataLength==1)
@@ -617,9 +727,9 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
 {
   data[dataLength-1]=0; // to be sure it has an trailing 0
   dprintf("Request of all events for '%s'\n", data);
-  pthread_mutex_lock(&servicesLock);
+  lockServices();
   unsigned short serviceID=findServiceIDforServiceName(data);
-  pthread_mutex_unlock(&servicesLock);
+  unlockServices();
   char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
   if(!evtList) {
     fprintf(stderr, "low on memory!\n");
@@ -628,30 +738,28 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
   *evtList=0;
   if(serviceID!=0) {
     // service Found
-    if(pauseDMXeit()) {
+    if(dmxEIT.pause()) {
       delete[] evtList;
       return;
     }
-    pthread_mutex_lock(&eventsLock);
+    lockEvents();
     int serviceIDfound=0;
     for(MySIeventsOrderServiceIDFirstStartTimeEventID::iterator e=mySIeventsOrderServiceIDFirstStartTimeEventID.begin(); e!=mySIeventsOrderServiceIDFirstStartTimeEventID.end(); e++)
       if(e->first->serviceID==serviceID) {
         serviceIDfound=1;
-        if(e->first->times.size()) { // Nur events mit Zeiten
-	  char strZeit[50];
-	  struct tm *tmZeit;
-          tmZeit=localtime(&(e->first->times.begin()->startzeit));
-	  sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
-	    tmZeit->tm_mday, tmZeit->tm_mon+1, tmZeit->tm_hour, tmZeit->tm_min, e->first->times.begin()->dauer/60);
-	  strcat(evtList, strZeit);
-	  strcat(evtList, e->first->name.c_str());
-	  strcat(evtList, "\n");
-	} // if times.size
+        char strZeit[50];
+        struct tm *tmZeit;
+        tmZeit=localtime(&(e->first->times.begin()->startzeit));
+        sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
+          tmZeit->tm_mday, tmZeit->tm_mon+1, tmZeit->tm_hour, tmZeit->tm_min, e->first->times.begin()->dauer/60);
+        strcat(evtList, strZeit);
+        strcat(evtList, e->first->name.c_str());
+        strcat(evtList, "\n");
       } // if = serviceID
       else if(serviceIDfound)
         break; // sind nach serviceID und startzeit sortiert -> nicht weiter suchen
-    pthread_mutex_unlock(&eventsLock);
-    if(unpauseDMXeit()) {
+    unlockEvents();
+    if(dmxEIT.unpause()) {
       delete[] evtList;
       return;
     }
@@ -670,13 +778,16 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   if(dataLength)
     return;
   dputs("Request of status information");
-  pthread_mutex_lock(&eventsLock);
+  lockEvents();
   unsigned anzEvents=mySIeventsOrderEventID.size();
-  pthread_mutex_unlock(&eventsLock);
-  pthread_mutex_lock(&servicesLock);
+  unsigned anzNVODevents=mySIeventsNVODorderEventID.size();
+  unsigned anzMetaServices=mySIeventIDsMetaOrderServiceID.size();
+  unlockEvents();
+  lockServices();
   unsigned anzServices=mySIservicesOrderServiceID.size();
+  unsigned anzNVODservices=mySIservicesNVODorderServiceID.size();
 //  unsigned anzServices=services.size();
-  pthread_mutex_unlock(&servicesLock);
+  unlockServices();
   struct mallinfo speicherinfo=mallinfo();
   time_t zeit=time(NULL);
   char stati[1024];
@@ -685,11 +796,14 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
     "Number of cached services: %u\n"
+    "Number of cached nvod-services: %u\n"
     "Number of cached events: %u\n"
+    "Number of cached nvod-events: %u\n"
+    "Number of cached meta-services: %u\n"
     "Total size of memory occupied by chunks handed out by malloc: %d\n"
     "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",
     ctime(&zeit),
-    secondsToCache/(60*60L), oldEventsAre/60, anzServices, anzEvents, speicherinfo.uordblks,
+    secondsToCache/(60*60L), oldEventsAre/60, anzServices, anzNVODservices, anzEvents, anzNVODevents, anzMetaServices, speicherinfo.uordblks,
     speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024.)
     );
   struct msgSectionsdResponseHeader responseHeader;
@@ -713,23 +827,19 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
   data[dataLength-1]=0; // to be sure it has an trailing 0
   dprintf("Request of current/next information for '%s'\n", data);
 
-  if(pauseDMXeit())
+  if(dmxEIT.pause()) // -> lock
     return;
-  pthread_mutex_lock(&eventsLock);
-  pthread_mutex_lock(&servicesLock);
-  const SIevent &evt=findActualSIeventForServiceName(data);
-  pthread_mutex_unlock(&servicesLock);
-
-//  readSection(request.Name, &pResultData, &nResultDataSize);
-
+  lockEvents();
+  lockServices();
+  SItime zeitEvt1(0, 0);
+  const SIevent &evt=findActualSIeventForServiceName(data, zeitEvt1);
+  unlockServices();
   if(evt.serviceID!=0) {//Found
     dprintf("current EPG found.\n");
-    SItime siStart = *(evt.times.begin());
-    const SIevent &nextEvt=findNextSIevent(evt.eventID);
-//    const SIevent &nextEvt=findNextSIeventForService(evt.serviceID, siStart.startzeit+siStart.dauer);
+    SItime zeitEvt2(zeitEvt1);
+    const SIevent &nextEvt=findNextSIevent(evt.eventID, zeitEvt2);
     if(nextEvt.serviceID!=0) {
       dprintf("next EPG found.\n");
-
       // Folgendes ist grauenvoll, habs aber einfach kopiert aus epgd
       // und keine Lust das grossartig zu verschoenern
       nResultDataSize=
@@ -741,15 +851,14 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
         3+2+1+					//std:min + del
         4+1+1;					//dauer (mmmm) + del + 0
       pResultData = new char[nResultDataSize];
-      struct tm *pStartZeit = localtime(&siStart.startzeit);
+      struct tm *pStartZeit = localtime(&zeitEvt1.startzeit);
       int nSH(pStartZeit->tm_hour), nSM(pStartZeit->tm_min);
-      unsigned dauer=siStart.dauer/60;
-      unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-siStart.startzeit)/(float)siStart.dauer*100.);
+      unsigned dauer=zeitEvt1.dauer/60;
+      unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-zeitEvt1.startzeit)/(float)zeitEvt1.dauer*100.);
 
-      siStart = *(nextEvt.times.begin());
-      pStartZeit = localtime(&siStart.startzeit);
+      pStartZeit = localtime(&zeitEvt2.startzeit);
       int nSH2(pStartZeit->tm_hour), nSM2(pStartZeit->tm_min);
-      unsigned dauer2=siStart.dauer/60;
+      unsigned dauer2=zeitEvt2.dauer/60;
 
       sprintf(pResultData,
       "%s\n%02d:%02d\n%04u\n%03u\n%s\n%02d:%02d\n%04u\n",
@@ -759,8 +868,8 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
         nSH2, nSM2, dauer2);
     }
   }
-  pthread_mutex_unlock(&eventsLock);
-  unpauseDMXeit();
+  unlockEvents();
+  dmxEIT.unpause(); // -> unlock
 
   // response
   struct msgSectionsdResponseHeader pmResponse;
@@ -786,16 +895,14 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   data[dataLength-1]=0; // to be sure it has an trailing 0
   dprintf("Request of actual EPG for '%s'\n", data);
 
-  if(pauseDMXeit())
+  if(dmxEIT.pause()) // -> lock
     return;
-  pthread_mutex_lock(&eventsLock);
-  pthread_mutex_lock(&servicesLock);
-  const SIevent &evt=findActualSIeventForServiceName(data);
-  pthread_mutex_unlock(&servicesLock);
-
-//  readSection(request.Name, &pResultData, &nResultDataSize);
-
-  if(evt.serviceID!=0) {//Found
+  lockEvents();
+  lockServices();
+  SItime zeitEvt(0,0);
+  const SIevent &evt=findActualSIeventForServiceName(data, zeitEvt);
+  unlockServices();
+  if(evt.serviceID!=0) { //Found
     dprintf("EPG found.\n");
     nResultDataSize=strlen(evt.name.c_str())+1+		//Name + del
       strlen(evt.text.c_str())+1+		//Text + del
@@ -805,16 +912,15 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
       3+2+1+					//std:min+ del
       3+1+1;					//100 + del + 0
     pResultData = new char[nResultDataSize];
-    SItime siStart = *(evt.times.begin());
-    struct tm *pStartZeit = localtime(&siStart.startzeit);
+    struct tm *pStartZeit = localtime(&zeitEvt.startzeit);
     int nSDay(pStartZeit->tm_mday), nSMon(pStartZeit->tm_mon+1), nSYear(pStartZeit->tm_year+1900),
      nSH(pStartZeit->tm_hour), nSM(pStartZeit->tm_min);
 
-    long int uiEndTime(siStart.startzeit+siStart.dauer);
+    long int uiEndTime(zeitEvt.startzeit+zeitEvt.dauer);
     struct tm *pEndeZeit = localtime((time_t*)&uiEndTime);
     int nFH(pEndeZeit->tm_hour), nFM(pEndeZeit->tm_min);
 
-    unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-siStart.startzeit)/(float)siStart.dauer*100.);
+    unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-zeitEvt.startzeit)/(float)zeitEvt.dauer*100.);
 
     sprintf(pResultData, "%s\xFF%s\xFF%s\xFF%02d.%02d.%04d\xFF%02d:%02d\xFF%02d:%02d\xFF%03u\xFF",
       evt.name.c_str(),
@@ -823,8 +929,8 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   }
   else
     dprintf("actual EPG not found!\n");
-  pthread_mutex_unlock(&eventsLock);
-  unpauseDMXeit();
+  unlockEvents();
+  dmxEIT.unpause(); // -> unlock
 
   // response
   struct msgSectionsdResponseHeader pmResponse;
@@ -836,7 +942,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   }
 }
 
-static void sendEventList(struct connectionData *client, unsigned char serviceTyp)
+static void sendEventList(struct connectionData *client, unsigned char serviceTyp1, unsigned char serviceTyp2=0)
 {
   char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
   if(!evtList) {
@@ -844,15 +950,16 @@ static void sendEventList(struct connectionData *client, unsigned char serviceTy
     return;
   }
   *evtList=0;
-  if(pauseDMXeit()) {
+  if(dmxEIT.pause()) { // -> lock
     delete[] evtList;
     return;
   }
-  pthread_mutex_lock(&servicesLock);
-  pthread_mutex_lock(&eventsLock);
+  lockServices();
+  lockEvents();
   for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++)
-    if(s->first->serviceTyp==serviceTyp) {
-      const SIevent &evt=findActualSIeventForServiceID(s->first->serviceID);
+    if(s->first->serviceTyp==serviceTyp1 || (serviceTyp2 && s->first->serviceTyp==serviceTyp2)) {
+      SItime zeit(0, 0);
+      const SIevent &evt=findActualSIeventForServiceID(s->first->serviceID, zeit);
       strcat(evtList, s->first->serviceName.c_str());
       strcat(evtList, "\n");
       if(evt.serviceID!=0)
@@ -860,9 +967,9 @@ static void sendEventList(struct connectionData *client, unsigned char serviceTy
         strcat(evtList, evt.name.c_str());
       strcat(evtList, "\n");
     } // if TV
-  pthread_mutex_unlock(&eventsLock);
-  pthread_mutex_unlock(&servicesLock);
-  unpauseDMXeit();
+  unlockEvents();
+  unlockServices();
+  dmxEIT.unpause(); // -> unlock
   struct msgSectionsdResponseHeader msgResponse;
   msgResponse.dataLength=strlen(evtList)+1;
   if(msgResponse.dataLength==1)
@@ -878,7 +985,7 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
   if(dataLength)
     return;
   dputs("Request of TV event list.\n");
-  sendEventList(client, 0x01);
+  sendEventList(client, 0x01, 0x04);
   return;
 }
 
@@ -932,7 +1039,6 @@ struct connectionData *client=(struct connectionData *)conn;
     else
       dputs("Unknow format or version of request!");
   }
-//  oldDaemonCommands(client);
   close(client->connectionSocket);
   dprintf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
   delete client;
@@ -940,17 +1046,20 @@ struct connectionData *client=(struct connectionData *)conn;
   if(currentNextWasOk) {
     // Damit nach dem umschalten der camd/pzap usw. schneller anlaeuft.
     currentNextWasOk=0;
-    if(pauseDMXeit())
+    if(dmxEIT.pause()) // -> lock
       return 0;
-    if(pauseDMXsdt())
+    if(dmxSDT.pause()) {
+      dmxEIT.unpause(); // -> unlock
       return 0;
+    }
     int rc=5;
     while(rc)
       rc=sleep(rc);
-    if(unpauseDMXsdt())
-      return 0;
-    if(unpauseDMXeit())
-      return 0;
+    dmxSDT.unpause();
+    dmxEIT.unpause(); // -> unlock
+  }
+  else if(dmxEIT.isScheduled) {
+    dmxEIT.change(); // auf present/following umschalten
   }
 #endif
   return 0;
@@ -967,51 +1076,56 @@ char *buf;
 const unsigned timeoutInSeconds=2;
 
   dprintf("sdt-thread started.\n");
-  pthread_mutex_lock(&dmxSDTlock);
-  if(startDMXsdt()) // -> unlock
+  dmxSDT.lock();
+  if(dmxSDT.start()) // -> unlock
     return 0;
   for(;;) {
-    pthread_mutex_lock(&dmxSDTlock);
-    int rc=readNbytes(dmxSDTfd, (char *)&header, sizeof(header), timeoutInSeconds);
+    dmxSDT.lock();
+    int rc=dmxSDT.read((char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
-      pthread_mutex_unlock(&dmxSDTlock);
+      dmxSDT.unlock();
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
-      pthread_mutex_unlock(&dmxSDTlock);
-      break;
+      dmxSDT.unlock();
+      // DMX neu starten
+      dmxSDT.pause(); // -> lock
+      dmxSDT.unpause(); // -> unlock
+      continue;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
-      pthread_mutex_unlock(&dmxSDTlock);
+      dmxSDT.unlock();
       fprintf(stderr, "Not enough memory!\n");
       break;
     }
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
-    rc=readNbytes(dmxSDTfd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
-    pthread_mutex_unlock(&dmxSDTlock);
+    rc=dmxSDT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    dmxSDT.unlock();
     if(!rc) {
       delete[] buf;
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
       delete[] buf;
-      break;
+      // DMX neu starten
+      dmxSDT.pause(); // -> lock
+      dmxSDT.unpause(); // -> unlock
+      continue;
     }
     if(header.current_next_indicator) {
       // Wir wollen nur aktuelle sections
       SIsectionSDT sdt(SIsection(sizeof(header)+header.section_length-5, buf));
-      pthread_mutex_lock(&servicesLock);
+      lockServices();
       for(SIservices::iterator s=sdt.services().begin(); s!=sdt.services().end(); s++)
         addService(*s);
-      pthread_mutex_unlock(&servicesLock);
+      unlockServices();
     } // if
     else
       delete[] buf;
   } // for
-  close(dmxSDTfd);
-  dmxSDTfd=0;
+  dmxSDT.closefd();
   dprintf("sdt-thread ended\n");
   return 0;
 }
@@ -1112,6 +1226,7 @@ struct dmxSctFilterParams flt;
 const unsigned timeoutInSeconds=31;
 char *buf;
 
+//  pthread_detach(pthread_self());
   dprintf("time-thread started.\n");
   memset (&flt.filter, 0, sizeof (struct dmxFilter));
   flt.pid              = 0x14;
@@ -1122,12 +1237,12 @@ char *buf;
 
   // Zuerst per TDT (schneller)
   if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
+    perror ("[sectionsd] /dev/ost/demux0");
     return 0;
   }
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
     close(fd);
-    perror ("DMX_SET_FILTER");
+    perror ("[sectionsd] DMX_SET_FILTER");
     return 0;
   }
   {
@@ -1137,7 +1252,7 @@ char *buf;
     time_t tim=changeUTCtoCtime(((const unsigned char *)&tdt_header)+3);
     if(tim) {
       if(stime(&tim)< 0) {
-        perror("cannot set date");
+        perror("[sectionsd] cannot set date");
 	close(fd);
 	return 0;
       }
@@ -1149,33 +1264,33 @@ char *buf;
   }
   if (ioctl (fd, DMX_STOP, 0) == -1) {
     close(fd);
-    perror ("DMX_STOP");
+    perror ("[sectionsd] DMX_STOP");
     return 0;
   }
   flt.filter.filter[0] = 0x73; // TOT
   flt.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
     close(fd);
-    perror ("DMX_SET_FILTER");
+    perror ("[sectionsd] DMX_SET_FILTER");
     return 0;
   }
   // Jetzt wird die Uhrzeit nur noch per TOT gesetzt (CRC)
   for(;;) {
     if(!fd) {
       if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-        perror ("/dev/ost/demux0");
+        perror ("[sectionsd] /dev/ost/demux0");
         return 0;
       }
       if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
         close(fd);
-        perror ("DMX_SET_FILTER");
+        perror ("[sectionsd] DMX_SET_FILTER");
         return 0;
       }
     }
     struct SI_section_TOT_header header;
     int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
-      continue; // timeout -> kein EPG
+      continue; // timeout -> keine Zeit
     }
     else if(rc<0) {
       close(fd);
@@ -1208,7 +1323,7 @@ char *buf;
 //      if(timeOffsetFound)
 //        tim+=timeOffsetMinutes*60L;
       if(stime(&tim)< 0) {
-        perror("cannot set date");
+        perror("[sectionsd] cannot set date");
 	break;
       }
       timeset=1;
@@ -1231,7 +1346,7 @@ char *buf;
 
 //*********************************************************************
 //			EIT-thread
-// reads EPG-datas (scheduled)
+// reads EPG-datas
 //*********************************************************************
 static void *eitThread(void *)
 {
@@ -1240,159 +1355,89 @@ char *buf;
 const unsigned timeoutInSeconds=2;
 
   dprintf("eit-thread started.\n");
-  pthread_mutex_lock(&dmxEITlock);
-  if(startDMXeit()) // -> unlock
+  dmxEIT.lock();
+  if(dmxEIT.start()) // -> unlock
     return 0;
   for(;;) {
-    pthread_mutex_lock(&dmxEITlock);
-    int rc=readNbytes(dmxEITfd, (char *)&header, sizeof(header), timeoutInSeconds);
+    dmxEIT.lock();
+    int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
-      pthread_mutex_unlock(&dmxEITlock);
+      dmxEIT.unlock();
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
-      close(dmxEITfd);
-      dmxEITfd=0;
-      pthread_mutex_unlock(&dmxEITlock);
-      break;
+      dmxEIT.unlock();
+      // DMX neu starten
+      dmxEIT.pause();
+      dmxEIT.unpause();
+      continue;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
-      close(dmxEITfd);
-      dmxEITfd=0;
-      pthread_mutex_unlock(&dmxEITlock);
+      dmxEIT.closefd();
+      dmxEIT.unlock();
       fprintf(stderr, "Not enough memory!\n");
       break;
     }
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
-    rc=readNbytes(dmxEITfd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
-    pthread_mutex_unlock(&dmxEITlock);
+    rc=dmxEIT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    dmxEIT.unlock();
     if(!rc) {
       delete[] buf;
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
-      close(dmxEITfd);
-      dmxEITfd=0;
       delete[] buf;
-      break;
+      // DMX neu starten
+      dmxEIT.pause(); // -> lock
+      dmxEIT.unpause(); // -> unlock
+      continue;
     }
     if(header.current_next_indicator) {
       // Wir wollen nur aktuelle sections
       SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
       time_t zeit=time(NULL);
+      if(dmxEIT.isScheduled) {
+        if(zeit>dmxEIT.lastChanged+TIME_EIT_SCHEDULED)
+          dmxEIT.change(); // -> lock, unlock
+      }
+      else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
+        dmxEIT.change(); // -> lock, unlock
       // Nicht alle Events speichern
       for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
         if(e->times.size()>0) {
-	  if(e->times.begin()->startzeit < zeit+secondsToCache &&
-	    e->times.begin()->startzeit+(long)e->times.begin()->dauer > zeit-oldEventsAre
-	  ) {
-            pthread_mutex_lock(&eventsLock);
-	    addEvent(*e);
-            pthread_mutex_unlock(&eventsLock);
+          if(e->times.begin()->startzeit < zeit+secondsToCache &&
+            e->times.begin()->startzeit+(long)e->times.begin()->dauer > zeit-oldEventsAre
+            ) {
+            lockEvents();
+            addEvent(*e);
+            unlockEvents();
           }
-	}
-    } // if
-    else
-      delete[] buf;
-  } // for
-
-  dprintf("eit-thread ended\n");
-  return 0;
-}
-
-//*********************************************************************
-//			EIT-nvod-thread
-// reads EPG-datas (nvod)
-//*********************************************************************
-/*
-static void *eitNVODthread(void *)
-{
-struct SI_section_header header;
-struct dmxSctFilterParams flt;
-char *buf;
-const unsigned timeoutInSeconds=2;
-
-  dprintf("eit-thread (nvod) started.\n");
-  memset (&flt.filter, 0, sizeof (struct dmxFilter));
-  flt.pid              = 0x12;
-  flt.filter.filter[0] = 0x4f; // present/following
-  flt.filter.mask[0]   = 0xff;
-  flt.timeout          = 0;
-  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-
-  if ((dmxEITfd2 = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
-    return 0;
-//    return 1;
-  }
-  if (ioctl (dmxEITfd2, DMX_SET_FILTER, &flt) == -1) {
-    close(dmxEITfd2);
-    dmxEITfd2=0;
-    perror ("DMX_SET_FILTER");
-    return 0;
-//    return 2;
-  }
-  for(;;) {
-    pthread_mutex_lock(&dmxEITnvodLock);
-    int rc=readNbytes(dmxEITfd2, (char *)&header, sizeof(header), timeoutInSeconds);
-    if(!rc) {
-      pthread_mutex_unlock(&dmxEITnvodLock);
-      continue; // timeout -> kein EPG
-    }
-    else if(rc<0) {
-      close(dmxEITfd2);
-      dmxEITfd2=0;
-      pthread_mutex_unlock(&dmxEITnvodLock);
-      break;
-    }
-    buf=new char[sizeof(header)+header.section_length-5];
-    if(!buf) {
-      close(dmxEITfd2);
-      dmxEITfd2=0;
-      pthread_mutex_unlock(&dmxEITnvodLock);
-      fprintf(stderr, "Not enough memory!\n");
-      break;
-    }
-    // Den Header kopieren
-    memcpy(buf, &header, sizeof(header));
-    rc=readNbytes(dmxEITfd2, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
-    pthread_mutex_unlock(&dmxEITnvodLock);
-    if(!rc) {
-      delete[] buf;
-      continue; // timeout -> kein EPG
-    }
-    else if(rc<0) {
-      close(dmxEITfd2);
-      dmxEITfd2=0;
-      delete[] buf;
-      break;
-    }
-    if(header.current_next_indicator) {
-      // Wir wollen nur aktuelle sections
-      SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
-      time_t zeit=time(NULL);
-      // Nicht alle Events speichern
-      // nur mit nvod und im Zeitrahmen
-      for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
-        if(isNVODevent(*e)) {
-          if(e->times.size()>0) { // Geht schief bei nvods
-            if(e->times.begin()->startzeit<zeit+(long)HOURS_TO_CACHE*60L*60L) {
-              pthread_mutex_lock(&eventsLock);
-	      addEvent(*e);
-              pthread_mutex_unlock(&eventsLock);
-            }
-	  }
+        }
+        else {
+          // pruefen ob nvod event
+          lockServices();
+          MySIservicesNVODorderServiceID::iterator si=mySIservicesNVODorderServiceID.find(e->serviceID);
+          if(si!=mySIservicesNVODorderServiceID.end()) {
+            // Ist ein nvod-event
+            lockEvents();
+            for(SInvodReferences::iterator i=si->second->nvods.begin(); i!=si->second->nvods.end(); i++)
+              mySIeventIDsMetaOrderServiceID.insert(std::make_pair(i->serviceID, e->eventID));
+            unlockServices();
+            addNVODevent(*e);
+            unlockEvents();
+          }
+          else
+            unlockServices();
         }
     } // if
     else
       delete[] buf;
   } // for
-  dprintf("eit-thread (nvod) ended\n");
+  dprintf("eit-thread ended\n");
   return 0;
 }
-*/
 
 //*********************************************************************
 //			housekeeping-thread
@@ -1406,24 +1451,24 @@ static void *houseKeepingThread(void *)
     while(rc)
       rc=sleep(rc);
     dprintf("housekeeping.\n");
+/*
     if(stopDMXeit())
       return 0;
     if(stopDMXsdt())
       return 0;
-//    if(stopDMXeitNVOD())
-//      return 0;
+*/
     if(debug) {
       // Speicher-Info abfragen
       struct mallinfo speicherinfo=mallinfo();
       dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
-      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
+      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
     }
-    pthread_mutex_lock(&eventsLock);
+    lockEvents();
 //    unsigned anzEventsAlt=events.size();
 /*
-    pthread_mutex_lock(&servicesLock);
+    lockServices();
     events.mergeAndRemoveTimeShiftedEvents(services);
-    pthread_mutex_unlock(&servicesLock);
+    unlockServices();
     if(events.size()!=anzEventsAlt)
       printf("Removed %d time-shifted events.\n", anzEventsAlt-events.size());
 */
@@ -1434,24 +1479,27 @@ static void *houseKeepingThread(void *)
     dprintf("Number of sptr events (event-ID): %u\n", mySIeventsOrderEventID.size());
     dprintf("Number of sptr events (service-id, start time, event-id): %u\n", mySIeventsOrderServiceIDFirstStartTimeEventID.size());
     dprintf("Number of sptr events (end time, service-id, event-id): %u\n", mySIeventsOrderFirstEndTimeServiceIDEventID.size());
-    pthread_mutex_unlock(&eventsLock);
+    dprintf("Number of sptr nvod events (event-ID): %u\n", mySIeventsNVODorderEventID.size());
+    dprintf("Number of cached meta-services: %u\n", mySIeventIDsMetaOrderServiceID.size());
+    unlockEvents();
     if(debug) {
-      pthread_mutex_lock(&servicesLock);
+      lockServices();
       dprintf("Number of services: %u\n", mySIservicesOrderServiceID.size());
+      dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderServiceID.size());
 //      dprintf("Number of services: %u\n", services.size());
-      pthread_mutex_unlock(&servicesLock);
+      unlockServices();
     }
-    if(startDMXeit())
-      return 0;
+/*
     if(startDMXsdt())
       return 0;
-//    if(startDMXeitNVOD())
-//      return 0;
+    if(startDMXeit())
+      return 0;
+*/
     if(debug) {
       // Speicher-Info abfragen
       struct mallinfo speicherinfo=mallinfo();
       dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
-      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
+      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
     }
   } // for endlos
 }
@@ -1463,12 +1511,12 @@ static void printHelp(void)
 
 int main(int argc, char **argv)
 {
-pthread_t threadTOT, threadEIT, threadEITnvod, threadSDT, threadHouseKeeping;
+pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.28 2001/07/20 00:02:47 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.29 2001/07/23 00:22:15 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
@@ -1520,14 +1568,6 @@ struct sockaddr_in serverAddr;
     fprintf(stderr, "failed to create eit-thread (rc=%d)\n", rc);
     return 1;
   }
-
-  // EIT-Thread (NVOD) starten
-//  rc=pthread_create(&threadEITnvod, 0, eitNVODthread, 0);
-//  if(rc) {
-//    fprintf(stderr, "failed to create eit-thread (rc=%d)\n", rc);
-//    return 1;
-//  }
-
   // time-Thread starten
   rc=pthread_create(&threadTOT, 0, timeThread, 0);
   if(rc) {
