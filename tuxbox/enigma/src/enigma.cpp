@@ -333,7 +333,10 @@ void eZap::reconfigureHTTPServer()
 	}
 
 	if ( tts_fd != -1)
+	{
 		::close(tts_fd);
+		tts_fd=-1;
+	}
 
 #if 1
 	logOutputConsole=1;
