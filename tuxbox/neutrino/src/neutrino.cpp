@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.86 2001/12/01 23:13:50 Simplex Exp $
+        $Id: neutrino.cpp,v 1.87 2001/12/02 11:59:26 waldi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.87  2001/12/02 11:59:26  waldi
+  - add config.h include
+  - change dir for icons
+
   Revision 1.86  2001/12/01 23:13:50  Simplex
   new video format option: autodetect 16:9
 
@@ -267,6 +271,9 @@
 
 
 */
+
+#include <config.h>
+
 #include "neutrino.h"
 #include "include/debug.h"
 
@@ -312,7 +319,7 @@ static void initGlobals(void)
 CNeutrinoApp::CNeutrinoApp()
 {
     g_FrameBuffer = new CFrameBuffer;
-	g_FrameBuffer->setIconBasePath("/usr/lib/icons/");
+	g_FrameBuffer->setIconBasePath(DATADIR "/neutrino/icons/");
 
 	g_fontRenderer = new fontRenderClass;
 	SetupFrameBuffer();
@@ -1997,7 +2004,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.86 2001/12/01 23:13:50 Simplex Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.87 2001/12/02 11:59:26 waldi Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
