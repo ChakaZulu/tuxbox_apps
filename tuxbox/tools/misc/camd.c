@@ -168,7 +168,7 @@ int find_emmpid(int ca_system_id) {
   int fd, r=1000,emm_pid=0,count;
   struct dmxSctFilterParams flt;
 
-  fd=open("/dev/ost/demux0", O_RDONLY);
+  fd=open("/dev/ost/demux0", O_RDWR);
   if (fd<0)
   {
     perror("/dev/ost/demux0");
@@ -243,7 +243,7 @@ int find_ecmpid(int pid,int ca_system_id) {
   int fd, r=1000,ecm_pid=0;
   struct dmxSctFilterParams flt;
 
-  fd=open("/dev/ost/demux0", O_RDONLY);
+  fd=open("/dev/ost/demux0", O_RDWR);
   if (fd<0)
   {
     perror("/dev/ost/demux0");

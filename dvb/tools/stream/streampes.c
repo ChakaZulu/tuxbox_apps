@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 	}
 	fflush(stdout);
 	
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/ost/demux0", O_RDWR);
 	if (fd<0)
 	{
 		perror("/dev/ost/demux0");
