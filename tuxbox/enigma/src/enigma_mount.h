@@ -29,7 +29,7 @@ public:
 	int wsize;		//write size
 
 	eMountPoint(CConfigFile *, int);
-	eMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int);
+	eMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int, int);
 	~eMountPoint();
 	
 	void save(FILE *, int);
@@ -46,9 +46,9 @@ private:
 public:
 	eString listMountPoints(eString);
 	void removeMountPoint(int);
-	void addMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString);
-	void changeMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int);
-	void getMountPointData(eString *, int *, eString *, eString *, eString *, int *, int *, int *, eString *, eString *, int);
+	void addMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int);
+	void changeMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int, int);
+	void getMountPointData(eString *, int *, eString *, eString *, eString *, int *, int *, int *, eString *, eString *, int *, int *, int *, int *, int);
 	int mountMountPoint(int);
 	int unmountMountPoint(int);
 	void save();

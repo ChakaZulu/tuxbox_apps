@@ -39,11 +39,13 @@ eMountPoint::eMountPoint(CConfigFile *config, int i)
 	wsize      = config->getInt32(eString().sprintf("wsize_%d",i), 4096);
 	options    = config->getString(eString().sprintf("options_%d", i));
 	ownOptions = config->getString(eString().sprintf("ownoptions_%d", i));
+	eString sip = config->getString(eString().sprintf("ip_%d", i));
+	sscanf(sip.c_str(), "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]);
 	mounted    = false;
 	id         = i;
 }
 
-eMountPoint::eMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pid)
+eMountPoint::eMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pip0, int pip1, int pip2, int pip3, int pid)
 {
 	localDir   = plocalDir;
 	fstype     = pfstype;
@@ -56,6 +58,10 @@ eMountPoint::eMountPoint(eString plocalDir, int pfstype, eString ppassword, eStr
 	options    = poptions;
 	ownOptions = pownOptions;
 	mounted    = false;
+	ip[0]      = pip0;
+	ip[1]      = pip1;
+	ip[2]      = pip2;
+	ip[3]      = pip3;
 	id         = pid;
 }
 
@@ -100,13 +106,13 @@ bool eMountPoint::in_proc_filesystems(eString fsname)
 		system("insmod lockd");
 		system("insmod nfs");
 #endif
-	} 
-	else 
-	if (fsname == "cifs") 
+	}
+	else
+	if (fsname == "cifs")
 	{
 		system("insmod cifs");
 		system("insmod /lib/modules/`uname -r`/kernel/fs/cifs/cifs.ko");
-	} 
+	}
 	else
 		eDebug("[enigma_mount] filesystem %s not supported.", fsname.c_str());
 
@@ -159,7 +165,7 @@ int eMountPoint::mount()
 				system(eString("mkdir" + localDir).c_str());
 			if (access(localDir.c_str(), R_OK))
 			{
-				
+
 				useoptions = options + ownOptions;
 				if (useoptions[useoptions.length() - 1] == ',') //remove?
 					useoptions = useoptions.left(useoptions.length() - 1); //remove?
@@ -191,7 +197,7 @@ int eMountPoint::mount()
 							cmd += ",unc=//" + ip + "/" + mountDir;
 							if (useoptions != "")
 								cmd += "," + useoptions;
-						}																													
+						}
 						else
 							rc = -3; //CIFS filesystem not supported
 						break;
@@ -227,7 +233,7 @@ int eMountPoint::mount()
 		else
 			rc = -2; //local dir is already a mountpoint
 	}
-	else 
+	else
 		rc = -1; //mount point is already mounted
 	return rc;
 /*
@@ -249,7 +255,7 @@ eMountMgr::eMountMgr()
 {
 	if (!instance)
 		instance = this;
-	
+
 	init();
 }
 
@@ -259,14 +265,14 @@ eMountMgr::~eMountMgr()
 	mountPoints.clear();
 }
 
-void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions)
+void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pip0, int pip1, int pip2, int pip3)
 {
 	int pid = mountPoints.size();
-	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pid));
+	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pip0, pip1, pip2, pip3, pid));
 	save();
 }
 
-void eMountMgr::getMountPointData(eString *plocalDir, int *pfstype, eString *ppassword, eString *puserName, eString *pmountDir, int *pautomount, int *prsize, int *pwsize, eString *poptions, eString *pownOptions, int pid)
+void eMountMgr::getMountPointData(eString *plocalDir, int *pfstype, eString *ppassword, eString *puserName, eString *pmountDir, int *pautomount, int *prsize, int *pwsize, eString *poptions, eString *pownOptions, int *pip0, int *pip1, int *pip2, int *pip3, int pid)
 {
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 	{
@@ -282,12 +288,16 @@ void eMountMgr::getMountPointData(eString *plocalDir, int *pfstype, eString *ppa
 			*pwsize = mp_it->wsize;
 			*poptions = mp_it->options;
 			*pownOptions = mp_it->ownOptions;
+			*pip0 = mp_it->ip[0];
+			*pip1 = mp_it->ip[1];
+			*pip2 = mp_it->ip[2];
+			*pip3 = mp_it->ip[3];
 			break;
 		}
 	}
 }
 
-void eMountMgr::changeMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pid)
+void eMountMgr::changeMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pip0, int pip1, int pip2, int pip3, int pid)
 {
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 	{
@@ -303,6 +313,10 @@ void eMountMgr::changeMountPoint(eString plocalDir, int pfstype, eString ppasswo
 			mp_it->wsize = pwsize;
 			mp_it->options = poptions;
 			mp_it->ownOptions = pownOptions;
+			mp_it->ip[0] = pip0;
+			mp_it->ip[1] = pip1;
+			mp_it->ip[2] = pip2;
+			mp_it->ip[3] = pip3;
 			break;
 		}
 	}
@@ -345,27 +359,31 @@ eString eMountMgr::listMountPoints(eString skelleton)
 			if (mp_it->mounted)
 			{
 				mountStatus = "<img src=\"on.gif\" alt=\"online\" border=0>";
-				action = button(100, "Unmount", RED, "javascript:unmountMountPoint(" + eString().sprintf("%d", mp_it->id) + ")");
+				action = button(75, "Unmount", OCKER, "javascript:unmountMountPoint('" + eString().sprintf("%d", mp_it->id) + "')");
 			}
 			else
 			{
 				mountStatus = "<img src=\"off.gif\" alt=\"offline\" border=0>";
-				action = button(100, "Mount", GREEN, "javascript:mountMountPoint(" + eString().sprintf("%d", mp_it->id) + ")");
+				action = button(75, "Mount", GREEN, "javascript:mountMountPoint('" + eString().sprintf("%d", mp_it->id) + "')");
 			}
 			tmp.strReplace("#ACTIONBUTTON#", action);
-			action = button(100, "Change", BLUE, "javascript:changeMountPoint(" + eString().sprintf("%d", mp_it->id) + ")");
+			action = button(75, "Change", BLUE, "javascript:changeMountPoint('" + eString().sprintf("%d", mp_it->id) + "')");
 			tmp.strReplace("#CHANGEBUTTON#", action);
+			action = button(75, "Delete", RED, "javascript:deleteMountPoint('" + eString().sprintf("%d", mp_it->id) + "')");
+			tmp.strReplace("#DELETEBUTTON#", action);
 			tmp.strReplace("#MOUNTED#", mountStatus);
 			tmp.strReplace("#ID#", eString().sprintf("%d", mp_it->id));
 			tmp.strReplace("#LDIR#", mp_it->localDir);
 			tmp.strReplace("#MDIR#", mp_it->mountDir);
-			tmp.strReplace("#IP#", eString().sprintf("%03d.%03d.%03d.%03d", mp_it->ip[0], mp_it->ip[1], mp_it->ip[2], mp_it->ip[3]));
+			tmp.strReplace("#IP#", eString().sprintf("%3d.%3d.%3d.%3d", mp_it->ip[0], mp_it->ip[1], mp_it->ip[2], mp_it->ip[3]));
 			tmp.strReplace("#USER#", mp_it->userName);
 			tmp.strReplace("#PW#", mp_it->password);
 			tmp.strReplace("#FSTYPE#", (mp_it->fstype == 0) ? "NFS" : "CIFS");
 			tmp.strReplace("#AUTO#", eString().sprintf("%d", mp_it->automount));
-			tmp.strReplace("#OPTIONS#", mp_it->options);
-			tmp.strReplace("#OWNOPTIONS#", mp_it->ownOptions);
+			eString options = mp_it->options;
+			if (mp_it->ownOptions != "")
+				options += ", " + mp_it->ownOptions;
+			tmp.strReplace("#OPTIONS#", options);
 			tmp.strReplace("#RSIZE#", eString().sprintf("%d", mp_it->rsize));
 			tmp.strReplace("#WSIZE#", eString().sprintf("%d", mp_it->wsize));
 			result += tmp + "\n";

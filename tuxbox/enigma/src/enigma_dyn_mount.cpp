@@ -45,9 +45,13 @@ static eString addMountPoint(eString request, eString dirpath, eString opts, eHT
 	eString wsize = opt["wsize"];
 	eString options = opt["options"];
 	eString ownOptions = opt["ownoptions"];
+	eString ip0 = opt["ip0"];
+	eString ip1 = opt["ip1"];
+	eString ip2 = opt["ip2"];
+	eString ip3 = opt["ip3"];
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eMountMgr::getInstance()->addMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions);
+	eMountMgr::getInstance()->addMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()));
 	return "<html><body>Mount point added successfully.</body></html>";
 }
 
@@ -75,10 +79,14 @@ static eString changeMountPoint(eString request, eString dirpath, eString opts, 
 	eString wsize = opt["wsize"];
 	eString options = opt["options"];
 	eString ownOptions = opt["ownoptions"];
+	eString ip0 = opt["ip0"];
+	eString ip1 = opt["ip1"];
+	eString ip2 = opt["ip2"];
+	eString ip3 = opt["ip3"];
 	eString id = opt["id"];
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eMountMgr::getInstance()->changeMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(id.c_str()));
+	eMountMgr::getInstance()->changeMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), atoi(id.c_str()));
 	return "<html><body>Mount point changed successfully.</body></html>";
 }
 

@@ -1,0 +1,19 @@
+<tr>
+	<td rowspan=3>#ID#</td>
+	<td rowspan=3>#MOUNTED#</td>
+	<td rowspan=3>#ACTIONBUTTON#<br>#CHANGEBUTTON#<br>#DELETEBUTTON#</td>
+	<td rowspan=3>#FSTYPE#</td>
+	<td>#LDIR#</td>
+	<td>#MDIR#</td>
+	<td>#AUTO#</td>
+</tr>
+<tr>
+	<td>#USER#</td>
+	<td>#PW#</td>
+	<td>#OPTIONS#</td>
+</tr>
+<tr>
+	<td>#IP#</td>
+	<td>#RSIZE#</td>
+	<td>#WSIZE#</td>
+</tr>
