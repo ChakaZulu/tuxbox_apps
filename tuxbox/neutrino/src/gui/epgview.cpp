@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.34 2002/01/29 17:26:51 field Exp $
+// $Id: epgview.cpp,v 1.35 2002/01/30 11:30:28 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.35  2002/01/30 11:30:28  McClean
+// color-fix
+//
 // Revision 1.34  2002/01/29 17:26:51  field
 // Jede Menge Updates :)
 //
@@ -334,9 +337,9 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 	{
 		int progress = atoi(epgData.done);
 		int pbx = sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1);
-		g_FrameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUHEAD+7);
-		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUHEAD+2);
-		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, progress, height-10, COL_MENUHEAD+5);
+		g_FrameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUCONTENT+6);
+		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUCONTENT);
+		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, progress, height-10, COL_MENUCONTENT+3);
 	}
 
 	GetPrevNextEPGData(current_id, &current_zeit);
