@@ -919,7 +919,7 @@ void eZapNetworkSetup::nfsPressed()
 
 #ifndef DISABLE_NFS
 
-#define MAX_NFS_ENTRIES 4
+#define MAX_NFS_ENTRIES 8
 
 static void errorMessage(const eString message, int type=0)
 {

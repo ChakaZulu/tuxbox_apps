@@ -553,7 +553,7 @@ bool ismounted( eString mountpoint )
 void eDVB::doMounts()
 {
 	eDebug("[eDVB] do nfs/cifs mounts");
-	for(int e=0;e<4;)
+	for(int e=0;e<8;)
 	{
 		int automount=0;
 		eString cmd,sdir,ldir,opt;
