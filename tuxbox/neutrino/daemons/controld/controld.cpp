@@ -77,8 +77,12 @@ bool bNotifyRegistered = false;
 CEventWatchDog* watchDog;
 CControldAspectRatioNotifier* aspectRatioNotifier;
 
-int loadSettings()
+int loadSettings(Ssettings* lsettings=NULL)
 {
+	if(!lsettings)
+	{
+		lsettings = &settings;
+	}
 	int fd;
 	fd = open(CONF_FILE, O_RDONLY );
 
@@ -87,7 +91,7 @@ int loadSettings()
 		printf("[controld] error while loading settings: %s\n", CONF_FILE );
 		return 0;
 	}
-	if(read(fd, &settings, sizeof(settings))!=sizeof(settings))
+	if(read(fd, lsettings, sizeof(Ssettings))!=sizeof(Ssettings))
 	{
 		printf("[controld] error while loading settings: %s - config from old version?\n", CONF_FILE );
 		return 0;
@@ -98,27 +102,46 @@ int loadSettings()
 
 void saveSettings()
 {
-	int fd;
-	fd = open(CONF_FILE, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH );
+	bool tosave = false;
 
-	if (fd==-1)
+	Ssettings tmp;
+	if(loadSettings(&tmp)==1)
 	{
-		printf("[controld] error while saving settings: %s\n", CONF_FILE );
-		return;
+		//compare...
+		if(memcmp(&tmp, &settings, sizeof(Ssettings))!=0)
+		{
+			tosave=true;
+		}
 	}
-	write(fd, &settings,  sizeof(settings) );
-	close(fd);
+	else
+	{
+		tosave=true;
+	}	
+
+	if(tosave)
+	{
+		int fd;
+		fd = open(CONF_FILE, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH );
+
+		if (fd==-1)
+		{
+			printf("[controld] error while saving settings: %s\n", CONF_FILE );
+			return;
+		}
+		write(fd, &settings,  sizeof(Ssettings) );
+		close(fd);
+		printf("[controld] settings saved\n");
+	}
 }
 
 void shutdownBox()
 {
 	lcdd.shutdown();
 
-	sig_catch(1);
-    if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
-    {
-      perror("exec failed - halt\n");
-    }
+	if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
+	{
+		perror("exec failed - halt\n");
+	}
 }
 
 void setvideooutput(int format)
@@ -492,9 +515,7 @@ void parse_command(int connfd, CControldClient::commandHead* rmessage)
 
 void sig_catch(int)
 {
-	printf("[controld] shutdown\n");
 	saveSettings();
-	printf("[controld] data saved\n");
 }
 
 
@@ -532,8 +553,10 @@ int main(int argc, char **argv)
 		exit( -1 );
 	}
 
+	//busyBox 
 	signal(SIGHUP,sig_catch);
-	signal(SIGKILL,sig_catch);
+	signal(SIGINT,sig_catch);
+	signal(SIGQUIT,sig_catch);
 	signal(SIGTERM,sig_catch);
 
 	if (!loadSettings())
