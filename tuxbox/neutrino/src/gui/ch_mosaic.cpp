@@ -1,4 +1,3 @@
-work in progress...  rasc
 
 /*
 	Neutrino-GUI  -   DBoxII-Project
@@ -46,7 +45,7 @@ work in progress...  rasc
 //  -- to be used for calls from Menue
 // 
 
-int CChMosaicHandler::exec(CMenuTarget* parent, string)
+int CChMosaicHandler::exec(CMenuTarget* parent, string actionkey)
 {
 	int       res = menu_return::RETURN_EXIT_ALL;
 	CChMosaic mosaic;
@@ -56,8 +55,7 @@ int CChMosaicHandler::exec(CMenuTarget* parent, string)
 		parent->hide();
 	}
 
-
-	mosaic.doMosaic (void);
+	mosaic.doMosaic ();
 
 	return res;
 }
@@ -74,25 +72,44 @@ int CChMosaicHandler::exec(CMenuTarget* parent, string)
 //  -- do Mosaic
 // 
 
-void CChMosaic::CChMosaic(void)
+CChMosaic::CChMosaic()
 {
-	pig = new ( CPIG(0) );
+//	pig = new CPIG;
+	pig.pigopen (0);
+	current_pig_pos = 0;
 }
 
 
-void CChMosaic::~CChMosaic(void)
+CChMosaic::~CChMosaic()
 {
-	delete pig;
+//	delete pig;
 
 }
 
 
-void CChMosaic::doMosaic(void)
+void CChMosaic::doMosaic()
 {
+  struct PIG_COORD  coord[] = {
+	  	{ 10, 10, 170,100 },
+		{150,110, 170,100 }
+	};
 
+
+
+
+
+  int i;
+
+  for  (i=0; i < (int)(sizeof(coord)/sizeof(coord[0])); i++) {
+	pig.show (coord[i].x,coord[i].y, coord[i].w, coord[i].h);
+
+  }
 
 
 
 }
+
+
+
 
 

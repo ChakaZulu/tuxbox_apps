@@ -26,19 +26,15 @@
 
 #include "widget/menue.h"
 
-#include <driver/framebuffer.h>
-#include <driver/fontrenderer.h>
-#include <system/settings.h>
-
-#include "gui/color.h"
+#include <driver/pig.h>
 
 
 using namespace std;
 
-class CChMosaicHandler
+class CChMosaicHandler : public CMenuTarget
 {
 	public:
-		int  exec( CMenuTarget* parent, string actionKey );	// menu call
+		int  exec( CMenuTarget* parent, string actionKey );
 
 };
 
@@ -46,12 +42,19 @@ class CChMosaicHandler
 class CChMosaic
 {
 	public:
-		void CChMosaic (void);
-		void ~CChMosaic (void);
-		void doMosaic (void);
+		CChMosaic ();
+		~CChMosaic ();
+		void doMosaic ();
 
 	private:
-		CPIG	*pig;
+		CPIG	pig;
+		int	current_pig_pos;
+
+		struct PIG_COORD {
+			int x,y,w,h;
+		};
+
+};
 
 
 #endif
