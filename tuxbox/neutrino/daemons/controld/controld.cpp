@@ -44,7 +44,7 @@
 #include "controldMsg.h"
 #include "dbox/avs_core.h"
 #include "dbox/fp.h"
-#include "saa7126/saa7126_core.h"
+#include "dbox/saa7126_core.h"
 #include "ost/video.h"
 #include "eventwatchdog.h"
 #include "controldclient.h"
@@ -797,7 +797,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.44 2002/03/06 11:17:04 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.45 2002/03/06 14:36:48 McClean Exp $\n\n");
 
 	if (fork() != 0)
 		return 0;
