@@ -4372,7 +4372,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	}
 	else
 	{
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 4; i++)
 		{
 			if (spath == zap[i][ZAPMODECATEGORY])
 			{
