@@ -140,6 +140,7 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (buf[0] != 'i') &&
 			    (buf[0] != 'k') &&
 			    (buf[0] != 'l') &&
+			    (buf[0] != 'm') &&
 			    (buf[0] != 'n') &&
 			    (buf[0] != 'o') &&
 			    (buf[0] != 'p') &&
@@ -151,7 +152,6 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (buf[0] != 'N') &&
 			    (strncmp(buf, "bouqueteditor", 13) != 0) &&
 			    (strncmp(buf, "epgviewer.not", 13) != 0) &&
-			    ((buf[0] != 'm') || (strncmp(buf, "mo", 2) == 0)) &&
 			    (strncmp(buf, "timerl", 6) != 0) &&
 			    (strncmp(buf, "timers", 6) != 0) &&
 			    (strncmp(buf, "timing", 6) != 0) &&

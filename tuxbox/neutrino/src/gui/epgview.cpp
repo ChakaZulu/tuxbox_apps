@@ -269,8 +269,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 
 	if (epgData.title.length() == 0) /* no epg info found */
 	{
-		ShowHintUTF("messagebox.info", g_Locale->getText("epgviewer.notfound"), "info.raw"); // UTF-8
-
+		ShowHintUTF("messagebox.info", g_Locale->getText("epgviewer.notfound")); // UTF-8
 		return res;
 	}
 

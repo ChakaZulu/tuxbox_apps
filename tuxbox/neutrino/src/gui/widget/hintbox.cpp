@@ -38,14 +38,13 @@
 #define borderwidth 4
 
 
-CHintBox::CHintBox(const char * const Caption, std::string Text, std::string Icon, int Width, const bool utf8_encoded)
+CHintBox::CHintBox(const char * const Caption, std::string Text, const int Width, const std::string Icon)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->menu->getHeight();
 	iconfile = Icon;
 	caption = Caption;
-	utf8     = utf8_encoded;
 	Text = Text+ "\n";
 	text.clear();
 
@@ -71,7 +70,7 @@ CHintBox::CHintBox(const char * const Caption, std::string Text, std::string Ico
 
 	for (unsigned int i= 0; i< text.size(); i++)
 	{
-		int nw= g_Fonts->menu->getRenderWidth(text[i], utf8_encoded) + 20; // UTF-8
+		int nw= g_Fonts->menu->getRenderWidth(text[i], true) + 20; // UTF-8
 		if ( nw> width )
 			width= nw;
 	}
@@ -82,7 +81,7 @@ CHintBox::CHintBox(const char * const Caption, std::string Text, std::string Ico
 	pixbuf= NULL;
 }
 
-void CHintBox::paint( bool saveScreen )
+void CHintBox::paint(const bool saveScreen)
 {
 	if (saveScreen)
 	{
@@ -108,7 +107,7 @@ void CHintBox::paint( bool saveScreen )
 
 	frameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
 	for (unsigned int i= 0; i< text.size(); i++)
-		g_Fonts->menu->RenderString(x+10,y+ theight+ (fheight>>1)+ fheight* (i+ 1), width, text[i], COL_MENUCONTENT, 0, utf8); // UTF-8
+		g_Fonts->menu->RenderString(x+10,y+ theight+ (fheight>>1)+ fheight* (i+ 1), width, text[i], COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 void CHintBox::hide()
@@ -123,9 +122,9 @@ void CHintBox::hide()
 		frameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 
-int ShowHintUTF(const char * const Caption, const std::string Text, std::string Icon, int Width, int timeout)
+int ShowHintUTF(const char * const Caption, std::string Text, const int Width, int timeout)
 {
- 	CHintBox* hintBox= new CHintBox(Caption, Text, Icon, Width, true);
+ 	CHintBox * hintBox = new CHintBox(Caption, Text, Width);
 	hintBox->paint();
 
 	if ( timeout == -1 )

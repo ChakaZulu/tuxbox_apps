@@ -538,7 +538,7 @@ void CInfoViewer::showIcon_VTXT() const
 
 void CInfoViewer::showFailure()
 {
-	ShowHintUTF("messagebox.error", g_Locale->getText("infoviewer.notavailable"), "info.raw", 430); // UTF-8
+	ShowHintUTF("messagebox.error", g_Locale->getText("infoviewer.notavailable"), 430); // UTF-8
 }
 
 void CInfoViewer::showMotorMoving(int duration)
@@ -552,7 +552,7 @@ void CInfoViewer::showMotorMoving(int duration)
 	strcat(text, buffer);
 	strcat(text, " s)");
 	
-	ShowHintUTF("messagebox.info", text, "info.raw", g_Fonts->menu->getRenderWidth(text) + 10, duration); // UTF-8
+	ShowHintUTF("messagebox.info", text, g_Fonts->menu->getRenderWidth(text) + 10, duration); // UTF-8
 }
 
 int CInfoViewer::handleMsg(uint msg, uint data)

@@ -111,7 +111,7 @@ int CFavorites::exec(CMenuTarget* parent, std::string)
 	}
 
 
-	CHintBox* hintBox = new CHintBox("favorites.bouquetname", g_Locale->getText("favorites.addchannel"), "info.raw", 380, true); // UTF-8
+	CHintBox* hintBox = new CHintBox("favorites.bouquetname", g_Locale->getText("favorites.addchannel"), 380); // UTF-8
 	hintBox->paint();
 
 	status = addChannelToFavorites();

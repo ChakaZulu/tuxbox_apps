@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.35 2003/09/04 23:25:53 zwen Exp $
+        $Id: movieplayer.cpp,v 1.36 2003/09/07 13:38:35 thegoodguy Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -265,34 +265,32 @@ CURLcode sendGetRequest (std::string url) {
 void *
 ReceiveStreamThread (void *mrl)
 {
-  printf ("[movieplayer.cpp] ReceiveStreamThread started\n");
-  int skt;
-  const char *server;
-  int port;
-  CURLcode httpres;
-  httpres = (CURLcode) 1;
-  int nothingreceived=0;
-
-  // Get Server and Port from Config
-  server = g_settings.streaming_server_ip.c_str ();
-  sscanf (g_settings.streaming_server_port, "%d", &port);
-
-
-  std::string baseurl = "http://" + g_settings.streaming_server_ip + ":" + g_settings.streaming_server_port + "/";
-
-  // empty playlist
-  std::string emptyurl = baseurl + "?control=empty";
-  httpres = sendGetRequest(emptyurl);
-  printf ("[movieplayer.cpp] HTTP Result (emptyurl): %d\n", httpres);
-  if (httpres != 0)
-    {
-      ShowMsg ("messagebox.error",
-	       g_Locale->getText ("movieplayer.nostreamingserver"),
-	       CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw");
-      playstate = STOPPED;
-      pthread_exit (NULL);
-      // Assume safely that all succeeding HTTP requests are successful
-    }
+	printf ("[movieplayer.cpp] ReceiveStreamThread started\n");
+	int skt;
+	const char *server;
+	int port;
+	CURLcode httpres;
+	httpres = (CURLcode) 1;
+	int nothingreceived=0;
+	
+	// Get Server and Port from Config
+	server = g_settings.streaming_server_ip.c_str ();
+	sscanf (g_settings.streaming_server_port, "%d", &port);
+	
+	
+	std::string baseurl = "http://" + g_settings.streaming_server_ip + ":" + g_settings.streaming_server_port + "/";
+	
+	// empty playlist
+	std::string emptyurl = baseurl + "?control=empty";
+	httpres = sendGetRequest(emptyurl);
+	printf ("[movieplayer.cpp] HTTP Result (emptyurl): %d\n", httpres);
+	if (httpres != 0)
+	{
+		ShowMsg("messagebox.error", g_Locale->getText("movieplayer.nostreamingserver"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw", 450, -1, true); // UTF-8
+		playstate = STOPPED;
+		pthread_exit (NULL);
+		// Assume safely that all succeeding HTTP requests are successful
+	}
 
   // add MRL
   /* demo MRLs:
@@ -530,9 +528,7 @@ PlayStreamThread (void *mrl)
   ringbuf = ringbuffer_create (RINGBUFFERSIZE);
   printf ("[movieplayer.cpp] ringbuffer created\n");
 
-  bufferingBox = new CHintBox ("messagebox.info",
-			  g_Locale->getText ("movieplayer.buffering"),
-			  "info.raw", 450);
+  bufferingBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.buffering")); // UTF-8
 
   CURLcode httpres;
   httpres = (CURLcode) 1;
@@ -962,11 +958,8 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	      pthread_join (rct, NULL);
 	    }
 	  //TODO: Add Dialog (Remove Dialog later)
-	  hintBox =
-	    new CHintBox ("messagebox.info",
-			  g_Locale->getText ("movieplayer.pleasewait"),
-			  "info.raw", 450);
-	  hintBox->paint ();
+	  hintBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.pleasewait")); // UTF-8
+	  hintBox->paint();
 	  if (pthread_create (&rct, 0, PlayStreamThread, (void *) mrl) != 0)
 	    {
 	      break;
@@ -1403,21 +1396,21 @@ CMoviePlayerGui::paintFoot ()
 				- 2 * buttonHeight), COL_INFOBAR_SHADOW);
 /*  frameBuffer->paintIcon ("rot.raw", x + 0 * ButtonWidth + 10,
 			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.bookmark").c_str (), COL_INFOBAR, 0, true);	// UTF-8
+  g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.bookmark"), COL_INFOBAR, 0, true);	// UTF-8
 */
   frameBuffer->paintIcon ("rot.raw", x + 0 * ButtonWidth + 10,
 			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamfile").c_str (), COL_INFOBAR, 0, true);	// UTF-8
+  g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamfile"), COL_INFOBAR, 0, true); // UTF-8
 
   frameBuffer->paintIcon ("gruen.raw", x + 1 * ButtonWidth + 10,
 			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 1 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosets").c_str (), COL_INFOBAR, 0, true);	// UTF-8
+  g_Fonts->infobar_small->RenderString (x + 1 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosets"), COL_INFOBAR, 0, true); // UTF-8
   frameBuffer->paintIcon ("gelb.raw", x + 2 * ButtonWidth + 10,
 			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 2 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamdvd").c_str (), COL_INFOBAR, 0, true);	// UTF-8
+  g_Fonts->infobar_small->RenderString (x + 2 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamdvd"), COL_INFOBAR, 0, true); // UTF-8
   frameBuffer->paintIcon ("blau.raw", x + 3 * ButtonWidth + 10,
 			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 3 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamsvcd").c_str (), COL_INFOBAR, 0, true);	// UTF-8
+  g_Fonts->infobar_small->RenderString (x + 3 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamsvcd"), COL_INFOBAR, 0, true); // UTF-8
 }
 
 void

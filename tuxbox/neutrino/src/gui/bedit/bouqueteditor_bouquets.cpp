@@ -511,7 +511,7 @@ void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned 
 
 void CBEBouquetWidget::saveChanges()
 {
-	CHintBox* hintBox= new CHintBox("bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), "info.raw", 480, true); // UTF-8
+	CHintBox* hintBox= new CHintBox("bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), 480); // UTF-8
 	hintBox->paint();
 	g_Zapit->saveBouquets();
 	g_Zapit->commitBouquetChange();
@@ -521,7 +521,7 @@ void CBEBouquetWidget::saveChanges()
 
 void CBEBouquetWidget::discardChanges()
 {
-	CHintBox* hintBox= new CHintBox("bouqueteditor.name", g_Locale->getText("bouqueteditor.discardingchanges"), "info.raw", 480, true); // UTF-8
+	CHintBox* hintBox= new CHintBox("bouqueteditor.name", g_Locale->getText("bouqueteditor.discardingchanges"), 480); // UTF-8
 	hintBox->paint();
 	g_Zapit->restoreBouquets();
 	hintBox->hide();

@@ -3484,7 +3484,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	}
 	else if(actionKey=="savesettings")
 	{
-		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("mainsettings.savesettingsnow_hint"), "info.raw", 450, true); // UTF-8
+		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("mainsettings.savesettingsnow_hint")); // UTF-8
 		hintBox->paint();
 
 		g_Controld->saveSettings();
@@ -3510,7 +3510,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	}
 	else if(actionKey=="reloadchannels")
 	{
-	 	CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("servicemenu.reload_hint"), "info.raw", 450, true); // UTF-8
+	 	CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("servicemenu.reload_hint")); // UTF-8
 		hintBox->paint();
 
 		g_Zapit->reinitChannels();
@@ -3618,7 +3618,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 //	printf("OptionName: %s\n",OptionName.c_str());
 	if(OptionName.substr(0,9).compare("fontsize.") == 0)
 	{
-		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("fontsize.hint"), "info.raw", 450, true); // UTF-8
+		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("fontsize.hint")); // UTF-8
 		hintBox->paint();
 
 		SetupFonts();
