@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.5 2002/08/27 14:23:07 thegoodguy Exp $
+ * $Id: ci.cpp,v 1.6 2002/08/27 20:01:03 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -28,7 +28,7 @@ CCaDescriptor::CCaDescriptor (unsigned char * buffer)
 {
 	descriptor_tag = buffer[0];
 	descriptor_length = buffer[1];
-	CA_system_ID = *(unsigned*)(&(buffer[2]));
+	CA_system_ID = *(unsigned short*)(&(buffer[2]));
 	reserved1 = buffer[4] >> 5;
 	CA_PID = ((buffer[4] & 0x1F) << 8) | buffer[5];
 
