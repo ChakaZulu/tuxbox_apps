@@ -217,8 +217,7 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 									timerNew.stopTime,timerNew.eventRepeat);
 		return menu_return::RETURN_EXIT;
 	}
-	else if ((actionKey.substr(0,4)=="SCT:") ||
-		 (actionKey.substr(0,4)=="SCR:"))
+	else if (actionKey.substr(0,4)=="SC:")
 	{
 		int delta;
 		sscanf(actionKey.substr(4).c_str(),
@@ -795,7 +794,7 @@ int CTimerList::newTimer()
 		{
 			char cChannelId[4+16+1+1];
 			sprintf(cChannelId,
-				"SCT:"
+				"SC:"
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 				",",
 				channel->channel_id);
@@ -810,7 +809,7 @@ int CTimerList::newTimer()
 		{
 			char cChannelId[4+16+1+1];
 			sprintf(cChannelId,
-				"SCR:"
+				"SC:"
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 				",",
 				channel->channel_id);
