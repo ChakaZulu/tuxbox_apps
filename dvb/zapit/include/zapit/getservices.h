@@ -40,6 +40,7 @@ typedef struct apid_struct_2 {
     uint    pid;
     char    desc[30];
     int     is_ac3;
+    int     component_tag;
 }apid_struct;
 
 typedef struct pids{
