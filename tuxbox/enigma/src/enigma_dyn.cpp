@@ -1182,6 +1182,7 @@ static eString getMute()
 	return result.str();
 }
 
+#ifndef DISABLE_FILE
 static eString getVideoBar()
 {
 	std::stringstream result;
@@ -1220,6 +1221,7 @@ static eString getVideoBar()
 
 	return result.str();
 }
+#endif
 
 static eString getUpdates()
 {
@@ -1472,7 +1474,7 @@ public:
 			if (evt)
 			{
 				timeMap::const_iterator It;
-				for (It = evt->begin(); (It != evt->end() && short_description == ""); It++)
+				for (It = evt->begin(); (It != evt->end() && short_description == ""); ++It)
 				{
 					EITEvent event(*It->second);
 					time_t now = time(0) + eDVB::getInstance()->time_difference;
@@ -1636,6 +1638,7 @@ static eString getZapContent2(eString mode, eString path)
 	return result;
 }
 
+#ifndef DISABLE_FILE
 static eString getZapContent3(eString mode, eString path)
 {
 	eString result, result1, result2;
@@ -1693,6 +1696,7 @@ static eString getZapContent3(eString mode, eString path)
 	result.strReplace("#ZAPDATA#", tmpFile);
 	return result;
 }
+#endif
 
 static eString getZap(eString mode, eString path)
 {
@@ -2514,7 +2518,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 
 	timeMap::const_iterator It;
 
-	for(It=evt->begin(); It!= evt->end(); It++)
+	for(It=evt->begin(); It!= evt->end(); ++It)
 	{
 		EITEvent event(*It->second);
 		for(ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
@@ -2595,7 +2599,7 @@ public:
 
 					timeMap::const_iterator It;
 
-					for (It = evt->begin(); It != evt->end(); It++)
+					for (It = evt->begin(); It != evt->end(); ++It)
 					{
 						eString ext_description;
 						eString short_description;
@@ -2833,7 +2837,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	{
 		timeMap::const_iterator It;
 
-		for(It=evt->begin(); It!= evt->end(); It++)
+		for(It=evt->begin(); It!= evt->end(); ++It)
 		{
 			ext_description = "";
 			EITEvent event(*It->second);
@@ -3917,12 +3921,15 @@ static eString buildAfterEventOpts(int type)
 		afterOpts << "<option value=\"" << ePlaylistEntry::doGoSleep << "\">";
 	afterOpts << _("Standby")
 		<< "</option>";
-	if ( type & ePlaylistEntry::doShutdown )
-		afterOpts << "<option selected value=\"" << ePlaylistEntry::doShutdown << "\">";
-	else
-		afterOpts << "<option value=\"" << ePlaylistEntry::doShutdown << "\">";
-	afterOpts << _("Shutdown")
+	if ( eSystemInfo::getInstance()->canShutdown() )
+	{
+		if ( type & ePlaylistEntry::doShutdown )
+			afterOpts << "<option selected value=\"" << ePlaylistEntry::doShutdown << "\">";
+		else
+			afterOpts << "<option value=\"" << ePlaylistEntry::doShutdown << "\">";
+		afterOpts << _("Shutdown")
 		<< "</option>";
+	}
 	return afterOpts.str();
 }
 

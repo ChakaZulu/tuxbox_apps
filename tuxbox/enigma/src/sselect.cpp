@@ -1304,9 +1304,13 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 						/*emit*/ copyToBouquetList(this);
 				}
 				else if ( selected.type == eServiceReference::idDVB
+#ifndef DISABLE_FILE
 					|| ( selected.type == eServiceReference::idUser
 						&& ( (selected.data[0] == eMP3Decoder::codecMPG)
 							|| (selected.data[0] == eMP3Decoder::codecMP3) ) ) )
+#else
+					)
+#endif
 				{
 					hide();
 					/*emit*/ addServiceToUserBouquet(&selected, 0);

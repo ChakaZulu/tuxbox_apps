@@ -269,7 +269,7 @@ static eString wapEPG(int page)
 		timeMap::const_iterator It;
 
 		int i = 0;
-		for(It=evt->begin(); It!= evt->end(); It++)
+		for(It=evt->begin(); It!= evt->end(); ++It)
 		{
 			if ((i >= page * 25) && (i < (page + 1) * 25))
 			{
