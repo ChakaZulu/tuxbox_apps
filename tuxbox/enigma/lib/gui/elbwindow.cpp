@@ -4,7 +4,7 @@ eLBWindow::eLBWindow(eString Title, int LBType, int Entrys, int FontSize, int wi
 	: eWindow(0), Entrys(Entrys), width(width)
 {
 	setText(Title);
-	resize(eSize(width, 10+Entrys*(FontSize+4)));
+	cresize(eSize(width, 10+Entrys*(FontSize+4)));
 
 	list=new eListbox(this, LBType, FontSize);
 	list->move(ePoint(10, 5));

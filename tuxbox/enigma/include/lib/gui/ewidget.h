@@ -173,12 +173,29 @@ public:
 	void resize(eSize size);
 	
 	/**
+	 * \brief Resizes clientrect (and the widget).
+	 *
+	 * Sets the clientrect of the widget to the given size. The real size of the widget will be set to met
+	 * these requirement. The event \c changedSize event will be generated.
+	 * \param size The new size of the clientrect, relative to the position.
+	 */
+	void cresize(eSize size);
+	
+	/**
 	 * \brief Moves the widget.
 	 *
 	 * Set the new position of the widget to the given position. The \c changedPosition event will be generated.
 	 * \param position The new position, relative to the parent's \c clientrect.
 	 */
 	void move(ePoint position);
+	
+	/**
+	 * \brief Moves the clientrect (and the widget).
+	 *
+	 * Set the new position of the clientrect to the given position. The \c changedPosition event will be generated.
+	 * \param position The new position, relative to the parent's \c clientrect.
+	 */
+	void cmove(ePoint position);
 	
 	/**
 	 * \brief Returns the current size.
