@@ -12,7 +12,7 @@ static	int				fd = -1;
 		unsigned short	realcode=0xee;
 		unsigned short	actcode=0xee;
 		int				doexit=0;
-		int				debug=0;
+		int				debug=1;
 
 #define Debug	if(debug)printf
 
@@ -215,7 +215,7 @@ void		RcGetActCode( void )
 	unsigned short	code = 0;
 	unsigned char	*p = buf;
 
-	actcode=0xee;
+	realcode=0xee;
 
 	x = read(fd,buf,256);
 	if ( x>0 )
@@ -242,8 +242,13 @@ void		RcGetActCode( void )
 			case 0x0d :
 				actcode=RC_OK;
 				break;
+#if 0
 			case 0x1c :
 				FBPrintScreen();
+				break;
+#endif
+			case '?' :
+				actcode=RC_HELP;
 				break;
 			case 'b' :
 				actcode=RC_BLUE;
@@ -275,8 +280,8 @@ void		RcGetActCode( void )
 				break;
 			}
 		}
+		realcode=actcode;
 	}
-	realcode=actcode;
 }
 
 void	RcClose( void )
