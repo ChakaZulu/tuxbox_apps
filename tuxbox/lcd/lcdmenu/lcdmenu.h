@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.15 2003/02/01 03:38:37 zwen Exp $
+ * $Id: lcdmenu.h,v 1.16 2003/09/02 00:49:49 obi Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -23,7 +23,6 @@
 #define __LCDMENU_H__
 
 #include <crypt.h>
-#include <dbox/fp.h>
 #include <signal.h>
 #include <unistd.h>
 

@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.26 2003/05/21 17:22:49 thegoodguy Exp $
+ * $Id: lcdmenu.cpp,v 1.27 2003/09/02 00:49:49 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
+
+#include <sys/reboot.h>
 
 #include "lcdmenu.h"
 
@@ -461,16 +463,7 @@ bool CLCDMenu::checkPin (std::string title)
 
 void CLCDMenu::poweroff ()
 {
-	int fd = open("/dev/dbox/fp0", O_RDWR);
-	if (fd < 0)
-	{
-		return;
-	}
-
-	if(ioctl(fd, FP_IOCTL_POWEROFF, 0) < 0)
-	{
-		close(fd);
-		return;
-	}
+	reboot(RB_POWER_OFF);
+	exit(0);
 }
 
