@@ -2329,7 +2329,7 @@ eString getConfigSettings(void)
 	result.strReplace("#WEBIFLOCK#", (webLock == 1) ? "checked" : "");
 	int hddti = 24;
 	eConfig::getInstance()->getKey("/extras/hdparm-s", hddti);
-	result.strReplace("#HDDSTANDBY#", eString().sprintf("%d", hddti));
+	result.strReplace("#HDDSTANDBY#", eString().sprintf("%d", hddti / 12));
 	int hddac = 160;
 	eConfig::getInstance()->getKey("/extras/hdparm-m", hddac);
 	result.strReplace("#HDDACOUSTICS#", eString().sprintf("%d", hddac));

@@ -222,8 +222,8 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 	eConfig::getInstance()->setKey("/enigma/timeroffset", atoi(timeroffset.c_str()));
 	eConfig::getInstance()->setKey("/elitedvb/network/maxmtu", atoi(maxmtu.c_str()));
 	system(eString("/sbin/ifconfig eth0 mtu " + maxmtu).c_str());
-	if (atoi(hddti.c_str()) != oldti)
-		eConfig::getInstance()->setKey("/extras/hdparm-s", atoi(hddti.c_str()));
+	if ((atoi(hddti.c_str()) * 12) != oldti)
+		eConfig::getInstance()->setKey("/extras/hdparm-s", atoi(hddti.c_str()) * 12);
 	if (atoi(hddac.c_str()) != oldac)
 		eConfig::getInstance()->setKey("/extras/hdparm-m", atoi(hddac.c_str()));
 	initHDDparms();
