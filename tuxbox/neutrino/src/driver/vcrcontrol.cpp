@@ -238,12 +238,12 @@ bool CVCRControl::CServerDevice::Stop()
 		last_mode != NeutrinoMessages::mode_standby)
 		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
 
-	if(last_mode == NeutrinoMessages::mode_standby &&
+/*	if(last_mode == NeutrinoMessages::mode_standby &&
 		CNeutrinoApp::getInstance()->getMode() == NeutrinoMessages::mode_standby )
 	{
 		//Wenn vorher und jetzt standby, dann die zapit wieder auf sb schalten
 		g_Zapit->setStandby(true);
-	}
+	}*/
 	if(sendCommand(CMD_VCR_STOP))
 		return true;
 	else
@@ -265,10 +265,10 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 				CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_standby);
 		}
 		// Wenn im SB dann müssen wir die zapit aufwecken
-		if(last_mode == NeutrinoMessages::mode_standby)
+/*		if(last_mode == NeutrinoMessages::mode_standby)
 		{
 			g_Zapit->setStandby(false);
-		}
+		}*/
 		if(g_Zapit->getCurrentServiceID() != channel_id)	// und momentan noch nicht getuned ist
 		{
 			g_Zapit->zapTo_serviceID(channel_id);		// dann umschalten
@@ -421,7 +421,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		// super hack :-), der einfachste weg an die apid descriptions ranzukommen
 		g_RemoteControl->current_PIDs = pids;
 		g_RemoteControl->processAPIDnames();
-		bool apidFound=false;
+//		bool apidFound=false;
 		for(unsigned int i= 0; i< pids.APIDs.size(); i++)
 		{
 			sprintf(tmp, "%u",  pids.APIDs[i].pid );

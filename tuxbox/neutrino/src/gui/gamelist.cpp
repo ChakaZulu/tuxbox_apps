@@ -47,6 +47,12 @@
 
 #include "gamelist.h"
 
+#if 0
+ #define AVIA_VBI_START_VTXT	1
+ #define AVIA_VBI_STOP_VTXT	2 
+#endif
+
+
 bool CPlugins::plugin_exists(string filename)
 {
 	for(int i = 0; i < number_of_plugins;i++)
