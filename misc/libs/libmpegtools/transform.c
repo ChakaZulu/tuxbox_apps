@@ -1111,6 +1111,8 @@ int  is_audio_ac3(int fd)
 
 	while ( is_ac3 == -1 ){
 			  count = read(fd, buf, IN_SIZE);
+			  if (count <= 0)
+				  break;
 			  for (i = 0; i < count-7; i++){
 						 if (buf[i] == 0x47){
 									if (buf[i+1] & 0x40){
@@ -1130,7 +1132,6 @@ int  is_audio_ac3(int fd)
 						 }
 						 if (is_ac3 >= 0) break;
 			  }
-			  if(count==0) break;
 	}
 	return is_ac3;
 }
