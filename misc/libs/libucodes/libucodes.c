@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.18 2002/09/03 18:05:11 obi Exp $
+  $Id: libucodes.c,v 1.19 2002/09/03 22:52:01 obi Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.19  2002/09/03 22:52:01  obi
+  another avia600 ucode
+
   Revision 1.18  2002/09/03 18:05:11  obi
   two new ucodes
 
@@ -53,6 +56,7 @@ static struct Sucode ucodes[] =
 	{"108fa2fa0ee84451ea7ea2db9adaa44b","avia500v090"},
 	{"fece1d3324e0917b921d814490d8a824","avia500v093"},
 	{"7373f3934263b3c3ea1d0f500f0044a5","avia500v110"},
+	{"6fd45384d705289a2fc8f212b2855f5c","avia600vb016"},
 	{"da492146ba7e177883feadaa0cf89aa5","avia600vb017"},
 	{"c31dc570cf941afb6fc4813f561aa378","avia600vb018"},
 	{"6a748fb28000738cafeb9e27443ac623","avia600vb022"},
