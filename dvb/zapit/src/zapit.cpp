@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.156 2002/04/21 20:17:43 obi Exp $
+ * $Id: zapit.cpp,v 1.157 2002/04/21 22:06:52 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -305,7 +305,7 @@ int setPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, dvb_pid_t pi
 {
 	dmxPesFilterParams pesFilterParams;
 
-	if ((pid == NONE) || (pid == INVALID))
+	if ((pid == NONE) || (pid >= INVALID))
 	{
 		return fd;
 	}
@@ -1883,7 +1883,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.156 2002/04/21 20:17:43 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.157 2002/04/21 22:06:52 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
