@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.3 2002/09/24 20:59:11 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.4 2002/10/01 17:46:50 Zwen Exp $
 
 	License: GPL
 
@@ -803,7 +803,7 @@ char *buffer = new char[300];
    sprintf(buffer, "<tr><td class=\"%cepg\" colspan=5></td>\n<td class=\"%cepg\" align=\"center\">\n",classname,classname);
    request->SocketWrite(buffer);
    request->SocketWrite("<a href=\"javascript:location.reload()\">\n");
-   request->SocketWrite("<img src=\"../images/reload.gif\" alt=\"neuer Timer\" border=0></a></td>\n");   
+   request->SocketWrite("<img src=\"../images/reload.gif\" alt=\"Aktualisieren\" border=0></a></td>\n");   
 	sprintf(buffer, "<td class=\"%cepg\" align=\"center\">\n",classname);
    request->SocketWrite(buffer);
    request->SocketWrite("<a href=\"/fb/timer.dbox2?action=new-form\">\n");
