@@ -117,6 +117,13 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 			break;
 		case CTimerd::CMD_REMOVETIMER:
 			break;
+
+		case CTimerd::CMD_TIMERDAVAILABLE:
+			CTimerd::responseAvailable rspAvailable;
+			rspAvailable.available = true;
+			write( connfd, &rspAvailable, sizeof(rspAvailable));
+
+			break;
 		default:
 			dprintf("unknown command\n");
 	}

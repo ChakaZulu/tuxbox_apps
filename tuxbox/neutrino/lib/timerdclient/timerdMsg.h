@@ -58,6 +58,7 @@ class CTimerd
 
 			CMD_REGISTEREVENT,
 			CMD_UNREGISTEREVENT,
+			CMD_TIMERDAVAILABLE
 		};
 
 
@@ -81,6 +82,11 @@ class CTimerd
 		struct responseAddTimer
 		{
 			int   eventID;
+		};
+
+		struct responseAvailable
+		{
+			bool available;
 		};
 };
 

@@ -75,12 +75,12 @@ bool CTimerdClient::timerd_close()
 
 bool CTimerdClient::send(char* data, int size)
 {
-	write(sock_fd, data, size);
+	return( write(sock_fd, data, size) == size);
 }
 
 bool CTimerdClient::receive(char* data, int size)
 {
-	read(sock_fd, data, size);
+	return( read(sock_fd, data, size) == size);
 }
 
 void CTimerdClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
@@ -174,3 +174,24 @@ int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0
 void CTimerdClient::removeTimerEvent( int evId)
 {
 }
+
+bool CTimerdClient::isTimerdAvailable()
+{
+	CTimerd::commandHead msg;
+	msg.version=CTimerd::ACTVERSION;
+	msg.cmd=CTimerd::CMD_TIMERDAVAILABLE;
+	timerd_connect();
+	try
+	{
+		send((char*)&msg, sizeof(msg));
+		CTimerd::responseAvailable response;
+		return (receive((char*)&response, sizeof(response)));
+	}
+	catch (...)
+	{
+		printf("[timerdclient] isTimerdAvailable() caught exception");
+		return false;
+	}
+	timerd_close();
+}
+
