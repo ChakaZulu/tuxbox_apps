@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.53 2002/09/25 20:43:33 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.54 2002/09/26 16:20:43 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -62,12 +62,12 @@ void CZapitClient::send(const unsigned char command, char* data = NULL, const un
 /***********************************************/
 
 /* zaps to channel of specified bouquet */
-void CZapitClient::zapTo( unsigned int bouquet, unsigned int channel )
+void CZapitClient::zapTo(const unsigned int bouquet, const unsigned int channel)
 {
 	CZapitMessages::commandZapto msg;
 
-	msg.bouquet = bouquet;
-	msg.channel = channel;
+	msg.bouquet = bouquet - 1;
+	msg.channel = channel - 1;
 
 	send(CZapitMessages::CMD_ZAPTO, (char*)&msg, sizeof(msg));
 
@@ -75,11 +75,11 @@ void CZapitClient::zapTo( unsigned int bouquet, unsigned int channel )
 }
 
 /* zaps to channel by nr */
-void CZapitClient::zapTo( unsigned int channel )
+void CZapitClient::zapTo(const unsigned int channel)
 {
 	CZapitMessages::commandZaptoChannelNr msg;
 
-	msg.channel = channel;
+	msg.channel = channel - 1;
 
 	send(CZapitMessages::CMD_ZAPTO_CHANNELNR, (char*)&msg, sizeof(msg));
 
@@ -121,7 +121,7 @@ void CZapitClient::getLastChannel(unsigned int &channumber, char &mode)
 	zapit_close();
 }
 
-void CZapitClient::setAudioChannel( unsigned channel )
+void CZapitClient::setAudioChannel(const unsigned int channel)
 {
 	CZapitMessages::commandSetAudioChannel msg;
 
@@ -224,7 +224,7 @@ void CZapitClient::getPIDS( responseGetPIDs& pids )
 	responseGetAPIDs responseAPID;
 	pids.APIDs.clear();
 	while ( CBasicClient::receive_data((char*)&responseAPID, sizeof(responseAPID)))
-		pids.APIDs.insert( pids.APIDs.end(), responseAPID );
+		pids.APIDs.push_back(responseAPID );
 	zapit_close();
 }
 
@@ -239,7 +239,7 @@ void CZapitClient::getBouquets( BouquetList& bouquets, bool emptyBouquetsToo)
 
 	responseGetBouquets response;
 	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquets)))
-		bouquets.insert( bouquets.end(), response);
+		bouquets.push_back(response);
 	zapit_close();
 }
 
@@ -255,7 +255,7 @@ void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList&
 
 	responseGetBouquetChannels response;
 	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
-		channels.insert( channels.end(), response);
+		channels.push_back(response);
 	zapit_close();
 }
 
@@ -271,7 +271,7 @@ void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode,
 
 	responseGetBouquetChannels response;
 	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
-		channels.insert( channels.end(), response);
+		channels.push_back(response);
 	zapit_close();
 }
 
@@ -376,7 +376,7 @@ void CZapitClient::getScanSatelliteList( SatelliteList& satelliteList )
 
 	responseGetSatelliteList response;
 	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetSatelliteList)))
-		satelliteList.insert( satelliteList.end(), response);
+		satelliteList.push_back(response);
 
 	zapit_close();
 
@@ -435,12 +435,12 @@ void CZapitClient::addBouquet(std::string name)
 }
 
 /* moves a bouquet from one position to another, bouquet list begins at position=1*/
-void CZapitClient::moveBouquet( unsigned int bouquet, unsigned int newPos)
+void CZapitClient::moveBouquet(const unsigned int bouquet, const unsigned int newPos)
 {
 	CZapitMessages::commandMoveBouquet msg;
 
-	msg.bouquet = bouquet;
-	msg.newPos = newPos;
+	msg.bouquet = bouquet - 1;
+	msg.newPos = newPos - 1;
 
 	send(CZapitMessages::CMD_BQ_MOVE_BOUQUET, (char*)&msg, sizeof(msg));
 	zapit_close();
@@ -461,7 +461,7 @@ unsigned int CZapitClient::existsBouquet(std::string name)
 
 	CBasicClient::receive_data((char* )&response, sizeof(response));
 	zapit_close();
-	return (unsigned int) response.number;
+	return (unsigned int) response.number + 1;
 }
 
 
@@ -474,7 +474,7 @@ bool CZapitClient::existsChannelInBouquet(const unsigned int bouquet, const t_ch
 	CZapitMessages::commandExistsChannelInBouquet msg;
 	CZapitMessages::responseGeneralTrueFalse response;
 
-	msg.bouquet    = bouquet;
+	msg.bouquet    = bouquet - 1;
 	msg.channel_id = channel_id;
 
 	send(CZapitMessages::CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET, (char*)&msg, sizeof(msg));
@@ -491,10 +491,10 @@ void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsig
 {
 	CZapitMessages::commandMoveChannel msg;
 
-	msg.bouquet = bouquet;
-	msg.oldPos = oldPos;
-	msg.newPos = newPos;
-	msg.mode = mode;
+	msg.bouquet = bouquet - 1;
+	msg.oldPos  = oldPos - 1;
+	msg.newPos  = newPos - 1;
+	msg.mode    = mode;
 
 	send(CZapitMessages::CMD_BQ_MOVE_CHANNEL, (char*)&msg, sizeof(msg));
 
@@ -502,11 +502,11 @@ void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsig
 }
 
 /* deletes a bouquet with all its channels*/
-void CZapitClient::deleteBouquet( unsigned int bouquet)
+void CZapitClient::deleteBouquet(const unsigned int bouquet)
 {
 	CZapitMessages::commandDeleteBouquet msg;
 
-	msg.bouquet = bouquet;
+	msg.bouquet = bouquet - 1;
 
 	send(CZapitMessages::CMD_BQ_DELETE_BOUQUET, (char*)&msg, sizeof(msg));
 
@@ -514,11 +514,11 @@ void CZapitClient::deleteBouquet( unsigned int bouquet)
 }
 
 /* assigns new name to bouquet*/
-void CZapitClient::renameBouquet( unsigned int bouquet, std::string newName)
+void CZapitClient::renameBouquet(const unsigned int bouquet, const std::string newName)
 {
 	CZapitMessages::commandRenameBouquet msg;
 
-	msg.bouquet = bouquet;
+	msg.bouquet = bouquet - 1;
 	strncpy( msg.name, newName.c_str(), 30);
 
 	send(CZapitMessages::CMD_BQ_RENAME_BOUQUET, (char*)&msg, sizeof(msg));
@@ -533,7 +533,7 @@ void CZapitClient::addChannelToBouquet(const unsigned int bouquet, const t_chann
 {
 	CZapitMessages::commandAddChannelToBouquet msg;
 
-	msg.bouquet    = bouquet;
+	msg.bouquet    = bouquet - 1;
 	msg.channel_id = channel_id;
 
 	send(CZapitMessages::CMD_BQ_ADD_CHANNEL_TO_BOUQUET, (char*)&msg, sizeof(msg));
@@ -546,7 +546,7 @@ void CZapitClient::removeChannelFromBouquet(const unsigned int bouquet, const t_
 {
 	CZapitMessages::commandRemoveChannelFromBouquet msg;
 
-	msg.bouquet    = bouquet;
+	msg.bouquet    = bouquet - 1;
 	msg.channel_id = channel_id;
 
 	send(CZapitMessages::CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET, (char*)&msg, sizeof(msg));
@@ -555,11 +555,11 @@ void CZapitClient::removeChannelFromBouquet(const unsigned int bouquet, const t_
 }
 
 /* set a bouquet's lock-state*/
-void CZapitClient::setBouquetLock( unsigned int bouquet, bool lock)
+void CZapitClient::setBouquetLock(const unsigned int bouquet, const bool lock)
 {
 	CZapitMessages::commandBouquetState msg;
 
-	msg.bouquet = bouquet;
+	msg.bouquet = bouquet - 1;
 	msg.state   = lock;
 
 	send(CZapitMessages::CMD_BQ_SET_LOCKSTATE, (char*)&msg, sizeof(msg));
@@ -568,11 +568,11 @@ void CZapitClient::setBouquetLock( unsigned int bouquet, bool lock)
 }
 
 /* set a bouquet's hidden-state*/
-void CZapitClient::setBouquetHidden( unsigned int bouquet, bool hidden)
+void CZapitClient::setBouquetHidden(const unsigned int bouquet, const bool hidden)
 {
 	CZapitMessages::commandBouquetState msg;
 
-	msg.bouquet = bouquet;
+	msg.bouquet = bouquet - 1;
 	msg.state   = hidden;
 
 	send(CZapitMessages::CMD_BQ_SET_HIDDENSTATE, (char*)&msg, sizeof(msg));

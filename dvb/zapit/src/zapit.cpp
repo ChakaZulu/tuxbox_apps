@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.242 2002/09/26 14:45:26 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.243 2002/09/26 16:20:43 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -592,15 +592,15 @@ void parse_command (CZapitMessages::commandHead &rmsg)
 			case CZapitMessages::CMD_ZAPTO:
 			{
 				CZapitMessages::commandZapto msgZapto;
-				read(connfd, &msgZapto, sizeof(msgZapto));
-				zapTo(msgZapto.bouquet - 1, msgZapto.channel - 1);
+				read(connfd, &msgZapto, sizeof(msgZapto)); // bouquet & channel number are already starting at 0!
+				zapTo(msgZapto.bouquet, msgZapto.channel);
 				break;
 			}
 			case CZapitMessages::CMD_ZAPTO_CHANNELNR:
 			{
 				CZapitMessages::commandZaptoChannelNr msgZaptoChannelNr;
-				read(connfd, &msgZaptoChannelNr, sizeof(msgZaptoChannelNr));
-				zapTo(msgZaptoChannelNr.channel - 1);
+				read(connfd, &msgZaptoChannelNr, sizeof(msgZaptoChannelNr)); // bouquet & channel number are already starting at 0!
+				zapTo(msgZaptoChannelNr.channel);
 				break;
 			}
 			case CZapitMessages::CMD_ZAPTO_SERVICEID:
@@ -844,61 +844,54 @@ void parse_command (CZapitMessages::commandHead &rmsg)
 			case CZapitMessages::CMD_BQ_DELETE_BOUQUET:
 			{
 				CZapitMessages::commandDeleteBouquet msgDeleteBouquet;
-				read(connfd, &msgDeleteBouquet, sizeof(msgDeleteBouquet));
-				bouquetManager->deleteBouquet(msgDeleteBouquet.bouquet - 1);
+				read(connfd, &msgDeleteBouquet, sizeof(msgDeleteBouquet)); // bouquet & channel number are already starting at 0!
+				bouquetManager->deleteBouquet(msgDeleteBouquet.bouquet);
 				break;
 			}
 			case CZapitMessages::CMD_BQ_RENAME_BOUQUET:
 			{
 				CZapitMessages::commandRenameBouquet msgRenameBouquet;
-				read(connfd, &msgRenameBouquet, sizeof(msgRenameBouquet));
-				msgRenameBouquet.bouquet--;
+				read(connfd, &msgRenameBouquet, sizeof(msgRenameBouquet)); // bouquet & channel number are already starting at 0!
 				if (msgRenameBouquet.bouquet < bouquetManager->Bouquets.size())
 					bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = msgRenameBouquet.name;
 				break;
 			}
-			case CZapitMessages::CMD_BQ_EXISTS_BOUQUET:		// 2002-04-03 rasc
+			case CZapitMessages::CMD_BQ_EXISTS_BOUQUET:
 			{
 				CZapitMessages::commandExistsBouquet msgExistsBouquet;
-				CZapitMessages::responseGeneralInteger responseInteger;		// 2002-04-03 rasc
+				CZapitMessages::responseGeneralInteger responseInteger;
 				read(connfd, &msgExistsBouquet, sizeof(msgExistsBouquet));
-				// -- for some unknown reason BQ-IDs are externally  1..n
-				// -- internally BQ-IDs are 0..n-1, so add 1!!
-				// -- This also means "not found (-1)" get's to zero (0)
-				responseInteger.number = bouquetManager->existsBouquet(msgExistsBouquet.name) + 1;
-				send(connfd, &responseInteger, sizeof(responseInteger), 0);
+				responseInteger.number = bouquetManager->existsBouquet(msgExistsBouquet.name);
+				send(connfd, &responseInteger, sizeof(responseInteger), 0); // bouquet & channel number are already starting at 0!
 				break;
 			}
-			case CZapitMessages::CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET:	// 2002-04-05 rasc
+			case CZapitMessages::CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET:
 			{
 				CZapitMessages::commandExistsChannelInBouquet msgExistsChInBq;
-				CZapitMessages::responseGeneralTrueFalse responseBool;		// 2002-04-05 rasc
-				read(connfd, &msgExistsChInBq, sizeof(msgExistsChInBq));
-				// -- for some unknown reason BQ-IDs are externally  1..n
-				// -- internally BQ-IDs are 0..n-1, so subtract 1!!
-				responseBool.status = bouquetManager->existsChannelInBouquet(msgExistsChInBq.bouquet - 1, msgExistsChInBq.channel_id);
+				CZapitMessages::responseGeneralTrueFalse responseBool;
+				read(connfd, &msgExistsChInBq, sizeof(msgExistsChInBq)); // bouquet & channel number are already starting at 0!
+				responseBool.status = bouquetManager->existsChannelInBouquet(msgExistsChInBq.bouquet, msgExistsChInBq.channel_id);
 				send(connfd, &responseBool, sizeof(responseBool), 0);
 				break;
 			}
 			case CZapitMessages::CMD_BQ_MOVE_BOUQUET:
 			{
 				CZapitMessages::commandMoveBouquet msgMoveBouquet;
-				read(connfd, &msgMoveBouquet, sizeof(msgMoveBouquet));
-				bouquetManager->moveBouquet(msgMoveBouquet.bouquet - 1, msgMoveBouquet.newPos - 1);
+				read(connfd, &msgMoveBouquet, sizeof(msgMoveBouquet)); // bouquet & channel number are already starting at 0!
+				bouquetManager->moveBouquet(msgMoveBouquet.bouquet, msgMoveBouquet.newPos);
 				break;
 			}
 			case CZapitMessages::CMD_BQ_ADD_CHANNEL_TO_BOUQUET:
 			{
 				CZapitMessages::commandAddChannelToBouquet msgAddChannelToBouquet;
-				read(connfd, &msgAddChannelToBouquet, sizeof(msgAddChannelToBouquet));
+				read(connfd, &msgAddChannelToBouquet, sizeof(msgAddChannelToBouquet)); // bouquet & channel number are already starting at 0!
 				addChannelToBouquet(msgAddChannelToBouquet.bouquet, msgAddChannelToBouquet.channel_id);
 				break;
 			}
 			case CZapitMessages::CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET:
 			{
 				CZapitMessages::commandRemoveChannelFromBouquet msgRemoveChannelFromBouquet;
-				read(connfd, &msgRemoveChannelFromBouquet, sizeof(msgRemoveChannelFromBouquet));
-				msgRemoveChannelFromBouquet.bouquet--;
+				read(connfd, &msgRemoveChannelFromBouquet, sizeof(msgRemoveChannelFromBouquet)); // bouquet & channel number are already starting at 0!
 				if (msgRemoveChannelFromBouquet.bouquet < bouquetManager->Bouquets.size())
 					bouquetManager->Bouquets[msgRemoveChannelFromBouquet.bouquet]->removeService(msgRemoveChannelFromBouquet.channel_id);
 				break;
@@ -906,17 +899,15 @@ void parse_command (CZapitMessages::commandHead &rmsg)
 			case CZapitMessages::CMD_BQ_MOVE_CHANNEL:
 			{
 				CZapitMessages::commandMoveChannel msgMoveChannel;
-				read(connfd, &msgMoveChannel, sizeof(msgMoveChannel));
-				msgMoveChannel.bouquet--;
+				read(connfd, &msgMoveChannel, sizeof(msgMoveChannel)); // bouquet & channel number are already starting at 0!
 				if (msgMoveChannel.bouquet < bouquetManager->Bouquets.size())
-					bouquetManager->Bouquets[msgMoveChannel.bouquet]->moveService(msgMoveChannel.oldPos - 1, msgMoveChannel.newPos - 1, (((currentMode & RADIO_MODE) && msgMoveChannel.mode == CZapitClient::MODE_CURRENT) || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1);
+					bouquetManager->Bouquets[msgMoveChannel.bouquet]->moveService(msgMoveChannel.oldPos, msgMoveChannel.newPos, (((currentMode & RADIO_MODE) && msgMoveChannel.mode == CZapitClient::MODE_CURRENT) || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1);
 				break;
 			}
 			case CZapitMessages::CMD_BQ_SET_LOCKSTATE:
 			{
 				CZapitMessages::commandBouquetState msgBouquetLockState;
-				read(connfd, &msgBouquetLockState, sizeof(msgBouquetLockState));
-				msgBouquetLockState.bouquet--;
+				read(connfd, &msgBouquetLockState, sizeof(msgBouquetLockState)); // bouquet & channel number are already starting at 0!
 				if (msgBouquetLockState.bouquet < bouquetManager->Bouquets.size())
 					bouquetManager->Bouquets[msgBouquetLockState.bouquet]->bLocked = msgBouquetLockState.state;
 				break;
@@ -924,8 +915,7 @@ void parse_command (CZapitMessages::commandHead &rmsg)
 			case CZapitMessages::CMD_BQ_SET_HIDDENSTATE:
 			{
 				CZapitMessages::commandBouquetState msgBouquetHiddenState;
-				read(connfd, &msgBouquetHiddenState, sizeof(msgBouquetHiddenState));
-				msgBouquetHiddenState.bouquet--;
+				read(connfd, &msgBouquetHiddenState, sizeof(msgBouquetHiddenState)); // bouquet & channel number are already starting at 0!
 				if (msgBouquetHiddenState.bouquet < bouquetManager->Bouquets.size())
 					bouquetManager->Bouquets[msgBouquetHiddenState.bouquet]->bHidden = msgBouquetHiddenState.state;
 				break;
@@ -1060,7 +1050,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.242 2002/09/26 14:45:26 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.243 2002/09/26 16:20:43 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1248,12 +1238,15 @@ int main (int argc, char **argv)
 /*								*/
 /****************************************************************/
 
-void addChannelToBouquet(unsigned int bouquet, const t_channel_id channel_id)
+void addChannelToBouquet(const unsigned int bouquet, const t_channel_id channel_id)
 {
 	printf("addChannelToBouquet(%d, %d)\n", bouquet, channel_id);
 	CZapitChannel* chan = bouquetManager->findChannelByChannelID(channel_id);
 	if (chan != NULL)
-		bouquetManager->Bouquets[bouquet-1]->addService(chan);
+		if (bouquet < bouquetManager->Bouquets.size())
+			bouquetManager->Bouquets[bouquet]->addService(chan);
+		else
+			printf("bouquet not found!\n");
 	else
 		printf("channel_id not found in channellist!\n");
 }
