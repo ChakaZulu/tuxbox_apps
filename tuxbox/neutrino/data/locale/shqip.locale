@@ -1,0 +1,563 @@
+menu.back mrapa 
+
+options.off e fikun 
+options.on e nezun 
+options.serial seriel 
+options.fb framebuffer 
+options.null zero 
+
+mainmenu.head menu kryesor 
+mainmenu.tvmode tv 
+mainmenu.radiomode radio 
+mainmenu.scartmode av-scart hyrje 
+mainmenu.games lojna 
+mainmenu.sleeptimer koha per mi fik 
+mainmenu.shutdown mi fik 
+mainmenu.settings setingat 
+mainmenu.service servis 
+mainmenu.streaming me inxhizu 
+mainmenu.streaming_start start 
+mainmenu.streaming_stop stop 
+
+servicemenu.head servis 
+servicemenu.update leximi i sofware-s te re 
+servicemenu.scants kerkimi i kanaleve 
+servicemenu.ucodecheck shiqimi ucodese 
+
+cablesetup.provider provider-i 
+satsetup.disqeqc diseqc 
+satsetup.satellite sateliti 
+satsetup.extended mi gadit diseqc-un 
+satsetup.nodiseqc ska diseqca 
+satsetup.minidiseqc mini-diseqc 
+satsetup.diseqc10 diseqc 1.0 
+satsetup.diseqc11 diseqc 1.1 
+satsetup.smatvremote smatv remote tuning 
+satsetup.diseqcrepeat përseritje diseqca 
+
+mainsettings.head mi gadit 
+mainsettings.savesettingsnow gaditjet mi mu 
+mainsettings.language Gjuha 
+mainsettings.audio Zëri 
+mainsettings.video Video 
+mainsettings.network rrjeta 
+mainsettings.streaming streamingserver 
+mainsettings.colors ngjyrat 
+mainsettings.lcd lcd-en mi gadit 
+mainsettings.keybinding gaditje e pullave 
+mainsettings.misc namjestiti gjana tjera 
+mainsettings.scan namjestiti kërkimi i kanaleve 
+
+miscsettings.head mi gadit gjanat tjera 
+miscsettings.shutdown_real gati 
+miscsettings.boxtype tipi dbox2 
+miscsettings.startneutrinodirect starti direkt i neutrino-s 
+miscsettings.general gjeneralisht 
+miscsettings.fb_destination mjeshtrat! boot konsol-it 
+
+languagesetup.head zgjedhe gjuhen 
+languagesetup.select gjuha 
+
+audiomenu.head gaditja e zërit 
+audiomenu.analogout dalje analog 
+audiomenu.monoright mono djatht 
+audiomenu.monoleft mono majt 
+audiomenu.stereo stereo 
+audiomenu.dolbydigital dolby digital 
+
+videomenu.head gaditje video-s 
+videomenu.screensetup gaditje ekran-it 
+videomenu.videosignal lloj video signal-it 
+videomenu.videosignal_rgb rgb 
+videomenu.videosignal_svideo s-video 
+videomenu.videosignal_composite composite 
+videomenu.videoformat formati ekranit 
+videomenu.videoformat_43 4:3 
+videomenu.videoformat_169 16:9 
+videomenu.videoformat_autodetect automatikisht 
+videomenu.vcrswitch automaticni av-scart hyrje 
+
+networkmenu.head gaditje rrjetet 
+networkmenu.test shiqimi i rrjetes 
+networkmenu.show shiqimi gjeneral i rrjetes 
+networkmenu.setupnow tash gadite rrjeten 
+networkmenu.setuponstartup gaditje e rrjetes ne start 
+networkmenu.ipaddress ip adresa 
+networkmenu.netmask netmask 
+networkmenu.broadcast broadcast 
+networkmenu.gateway standard gateway 
+networkmenu.nameserver nameserver 
+
+streamingmenu.head gadite streamingserver 
+streamingmenu.usestreamserver perdore streamingserver 
+streamingmenu.streamingserver streamingserver 
+streamingmenu.streamingserverport port 
+streamingmenu.stopplayback ndaloje playback-un 
+streamingmenu.stopsectionsd ndaloje sectionsd 
+
+ping.ok dakord (ping) 
+ping.unreachable nuk është dakord (unreachable) 
+ping.protocol nuk është e mundur (host or protocol error) 
+ping.socket nuk është e mundur (socket error) 
+
+ipsetup.hint_1 perdore 0..9 ose nalt/posht 
+ipsetup.hint_2 ok memoria, home ndalo 
+
+colormenu.head gaditi ngjyrat 
+colormenu.statusbar vija statusi 
+colormenu.themeselect zgjidhi temat 
+colormenu.font mallsia e shkonjave 
+colormenu.menucolors zgjidhi ngjyrat 
+colormenu.background ngjyra mrapa 
+colormenu.background_head ngjyra ne fund 
+colormenu.textcolor ngjyra teksit 
+colormenu.textcolor_head ngjyra teksit 
+colormenu.fade pak ngjyra 
+
+colorthememenu.head mi shi temat 
+colorthememenu.neutrino_theme neutrino tema 
+colorthememenu.classic_temat klasik 
+
+colormenusetup.head zgjedhj ngjyren 
+colormenusetup.menuhead zgjedhje kryesore 
+colormenusetup.menucontent përberje e dritares 
+colormenusetup.menucontent_inactive deaktiviran përberje e dritares 
+colormenusetup.menucontent_selected e ke zgjedh përberjen e dritares 
+colorstatusbar.head ngjyra e trakes statute 
+colorstatusbar.text traka statute 
+
+repeatblocker.hint_1 koha (u ms) midis 2 shumje e pullave 
+repeatblocker.hint_2 0 fike bllokerin (e kuqe është " ") 
+
+keybindingmenu.RC remote kontrolli 
+keybindingmenu.repeatblock perseritje pullave te bllokerit 
+keybindingmenu.repeatblock pritje per perseritje 
+keybindingmenu.repeatblockgeneric pritje fillimtare 
+keybindingmenu.head gadite pullen 
+keybindingmenu.modechange mi nrru statusin 
+keybindingmenu.channellist lista kanaleve 
+keybindingmenu.quickzap nrrimi i shpejt i kanaleve 
+keybindingmenu.tvradiomode tv/radio 
+keybindingmenu.tvradiomode_head tv/radio 
+keybindingmenu.pageup faqe nalt 
+keybindingmenu.pageup_head faqe posht 
+keybindingmenu.pagedown faqe posht 
+keybindingmenu.pagedown_head faqe posht 
+keybindingmenu.cancel mylle listen e kanaleve 
+keybindingmenu.cancel_head mylle listen e kanaleve 
+keybindingmenu.channelup kanalin nalt 
+keybindingmenu.channelup_head pulla për kanalin nalt 
+keybindingmenu.channeldown kanalin posht 
+keybindingmenu.channeldown_head pulla për kanal posht 
+keybindingmenu.bouquetup buketin përpara 
+keybindingmenu.bouquetup_head pulla për buketin përpara 
+keybindingmenu.bouquetdown buketin mrapa 
+keybindingmenu.bouquetdown_head pulla për buketin mrapa 
+keybindingmenu.bouquethandling ok-pulla ok 
+keybindingmenu.bouquetchannels_on_ok buketi kanaleve 
+keybindingmenu.bouquetlist_on_ok lista buketit 
+keybindingmenu.allchannels_on_ok lista kanalit 
+keybindingmenu.subchannelup nën kanal përpara 
+keybindingmenu.subchannelup_head nën kanal përpara 
+keybindingmenu.subchanneldown nën kanal mrapa 
+keybindingmenu.subchanneldown_head nën kanal mrapa 
+
+colorchooser.red e kuqe 
+colorchooser.green e jeshile 
+colorchooser.blue e kaltërt 
+colorchooser.alpha alfa 
+
+lcdmenu.head mi gadit LCD 
+lcdmenu.inverse mi invertu 
+lcdmenu.power rryma 
+lcdmenu.lcdcontroler kontrasti / drita 
+
+lcdcontroler.head mi gadit LCD 
+lcdcontroler.contrast kontrasti 
+lcdcontroler.brightness drita normal 
+lcdcontroler.brightnessstandby drita ne standby 
+
+keychoosermenu.setnew gadite pullen e re 
+keychoosermenu.setnone asnji pull 
+keychoosermenu.currentkey pulla e deri tashme 
+
+keychooser.head gadite pullen e re 
+keychooser.text1 mshoje pullen 
+keychooser.text2 prit per ndalje... 
+
+screensetup.upperleft e kuqe = ekranin nalt, djathtas 
+screensetup.lowerright jeshile = ekranin posht,djathtas 
+
+channellist.head gjith kanalet 
+channellist.nonefound Nuk është gjet asnji kanal!\ Mshoje për kërkimin e kanaleve (dbox2-pulla -> serviset) 
+channellist.since od %02d:%02d 
+
+infoviewer.epgnotload infirmacionet nuk jan ende... 
+infoviewer.epgwait pritet për epg informacionet... 
+infoviewer.streaminfo iformacionet stream 
+infoviewer.eventlist programi 
+infoviewer.languages zgjedhje e zërit 
+infoviewer.notavailable kanali ende nuk është 
+infoviewer.cantdecode kanali nuk munet mu decodu 
+infoviewer.selecttime fillimi 
+infoviewer.nocurrent ska informacione në kët kanal 
+infoviewer.noepg nema EPG informacionet 
+infoviewer.subservice regjia slikes 
+infoviewer.waittime pritret per kohë ... 
+
+epgviewer.notfound nuk jan gjet informacionet në kanal (EPG) 
+epgviewer.nodetailed ska informacione të gjëra 
+epgviewer.More_Screenings terminet tjer në ket kanal 
+epglist.head shiqimi i EPG - %s 
+epglist.noevents nuk ka informacione për EPG. 
+
+streaminfo.head informacionet 
+streaminfo.resolution rezultimi 
+streaminfo.bitrate bitrate 
+streaminfo.aratio si duket 
+streaminfo.aratio_unknown dukurija e pa njohtun 
+streaminfo.framerate framerate 
+streaminfo.framerate_unknown framerate pa njohtun 
+streaminfo.audiotype lloj zërit 
+streaminfo.audiotype_unknown lloja e zërit e pa njohtun 
+streaminfo.not_crypted nuk eshte e shifrum 
+streaminfo.ecm_invalid sistemi qe nuk punan 
+streaminfo.not_available nuk është e lejumun 
+
+streamfeatures.head gjanat e stream-it 
+streamfeatures.info informacionet e stream-it 
+
+apidselector.head zgjedhe gjuhen 
+
+nvodselector.head zgjidhe fillimin 
+nvodselector.subservice perspektivat 
+nvodselector.directormode regjia e slikes 
+
+ucodecheck.head shiqimi i ucode-ve 
+ucodecheck.avia500 avia 500 
+ucodecheck.avia600 avia 600 
+ucodecheck.ucode ucode 
+ucodecheck.cam-alpha cam-alpha 
+
+date.Mon Han 
+date.Tue Mar 
+date.Wed Mer 
+date.Thu Ejt 
+date.Fri Pre 
+date.Sat Sht 
+date.Sun Dil 
+
+date.Jan Jan 
+date.Feb Shk 
+date.Mar Mar 
+date.Apr Pri 
+date.May Maj 
+date.Jun Qer 
+date.Jul Kor 
+date.Aug Gus 
+date.Sep Sht 
+date.Oct Tet 
+date.Nov Nan 
+date.Dec Dhj 
+
+nvod.starting (fillimi per %d minuta) 
+nvod.proz (%d%% ka kalu) 
+
+scants.head kërkimi i kanaleve 
+scants.startnow prap mi kërku kanalet 
+scants.actsatellite satelit: 
+scants.astra astra 
+scants.hotbird hotbird 
+scants.kopernikus kopernikus 
+scants.sirius sirius 
+scants.thor thor 
+scants.digituerk digituerk 
+scants.tuerksat tuerksat 
+scants.transponders transponder-at: 
+scants.services serviset: 
+scants.bouquet buketat 
+scants.bouquet_leave mas e nrra 
+scants.bouquet_create mi ba bashkë 
+scants.bouquet_erase mi fshi 
+scants.finished kërkimi i kanaleve pozitiv! 
+
+flashupdate.head mi gadit 
+flashupdate.action akcioni: 
+flashupdate.globalprogress statusi kryesor: 
+flashupdate.getinfofile lexohet informacioni i verzionit 
+flashupdate.getinfofileerror nuk munet mu lexu infoja i verzionit 
+flashupdate.getupdatefile lexohet verzioni ma i ri 
+flashupdate.getupdatefileerror nuk munet mu fitu software ma i ri 
+flashupdate.cantopenfile nuk munet mu çil datoteka 
+flashupdate.fileis0bytes madhsia datoteke është 0 bajt 
+flashupdate.eraseingflash shihet flash-i 
+flashupdate.programmingflash programohet flash-i 
+flashupdate.cantopenmtd nuk munet mu çil MTD 
+flashupdate.ready Gati 
+flashupdate.reboot fillan dbox2 përseri 
+flashupdate.updatemode software përseritet 
+flashupdate.updatemode_manual manuall (ftp) 
+flashupdate.updatemode_internet prej interneti 
+flashupdate.currentversion_sep verzia e instaluar 
+flashupdate.currentversiondate data 
+flashupdate.currentversiontime koha 
+flashupdate.currentversionbaseversion image kryesor 
+flashupdate.currentversionsnapshot lloj image 
+flashupdate.checkupdate kerkoje verzionin të ri 
+flashupdate.versioncheck check-ovate verzionin 
+flashupdate.nonewversion ska verzion të ri 
+flashupdate.md5check check-ovate image 
+flashupdate.md5sumerror image ka gabime 
+flashupdate.proxyserver_sep proxyserver 
+flashupdate.proxyserver proxyname 
+flashupdate.proxyserver_hint1 shkruje emnin e proxy-it ose IP adresen (host:port) 
+flashupdate.proxyserver_hint2 ska gja d.m.th nuk ka proxy 
+flashupdate.proxyusername e përdor 
+flashupdate.proxyusername_hint1 shkruje emnin kush e përdor proxy 
+flashupdate.proxyusername_hint2 ska gja ne proxy 
+flashupdate.proxypassword proxypassword 
+flashupdate.proxypassword_hint1 shkruje password për proxy 
+flashupdate.proxypassword_hint2 
+flashupdate.msgbox është gjet image i ri:\nData: %s, %s\nImage kryesor: %s\nLloji image: %s\n\nA doni mi marr verzionin e ri prej interneti\nprej interneti mi instalu? 
+flashupdate.msgbox_manual Ështëgjet image i ri:\nData: %s, %s\nImage kryesor: %s\nLloji image: %s\n\na doni mi instalu verzionin e ri tash? 
+flashupdate.expertfunctions funkcionet për mjeshtra 
+flashupdate.readflash mi lexu tan flashimage 
+flashupdate.writeflash mi shkru tan flashimage 
+flashupdate.readflashmtd mi lexu nji kapitel 
+flashupdate.writeflashmtd mi shkru nji kapitel 
+flashupdate.savesuccess image është memoro me sukses \nnën emnin %s. 
+flashupdate.mtdselector zgjedhje e kapitelit 
+flashupdate.titlereadflash lexoje flash 
+flashupdate.actionreadflash lexohet flash 
+flashupdate.fileselector zgjedhje datoteka 
+flashupdate.titlewriteflash shkruje flesh 
+flashupdate.actionwriteflash shkruhet flash 
+flashupdate.flashreadyreboot image është flash-u me sukses.\nDbox2 juaj starton përseri. 
+flashupdate.reallyflashmtd Adoni pernjimen mi vazhdu flash?\n\nNëse ka gabim e image nuk\nështë në regull ather nuk starton ma dboxi.\n\nEmni i image: %s\nPozicioni: %s 
+
+bouqueteditor.name mi regullu buketin 
+bouqueteditor.delete fshije 
+bouqueteditor.add vune 
+bouqueteditor.move nrroje diku tjeter 
+bouqueteditor.rename nrroje emnin 
+bouqueteditor.hide mshehe 
+bouqueteditor.lock ndaloje 
+bouqueteditor.newbouquetname emni i ri i buketit 
+bouqueteditor.bouquetname emni i buketit 
+bouqueteditor.savechanges? a doni mi marr nrrimet? 
+bouqueteditor.savingchanges Nrrimet merren. Pritni ju lutem ... 
+bouqueteditor.discardingchanges Bëhen nrrimet. Pritni ju lutem ... 
+bouqueteditor.switch merre/hjeke kanalin 
+bouqueteditor.switchmode tv/radio 
+bouqueteditor.return Gati-OK 
+
+messagebox.yes Pa 
+messagebox.no Ja 
+messagebox.cancel ndalje 
+messagebox.back mrapa 
+messagebox.error gabim 
+messagebox.discard a doni mi hjek nrrimet? 
+messagebox.info informacionet 
+settings.noconffile Datat e neutrino nuk jan gjet.\nVuhen datat standart. 
+settings.missingoptionsconffile Neutrino është i zgjedhuar.\nNrrimet jan nrru në datat standarte. 
+
+cam.wrong Ndalu, cam_alpha.bin juaj nuk përpjeket\nme smartcarten e juaj!!!\n\nA doni mi pa kët edhe njiher? 
+ucodes.failure Ndalo! nuk jan gjet ucodesi!\n\nVetem me ftp-n (ose dbox-bootmanager)\nmi vu, edhe dbox-in prap mi startu! 
+
+stringinput.caps të medha/të vogla shkronjat 
+
+streamingserver.noconnect Ska lidhje me streamingserver-in.\nNdalje e inxhizimit. 
+
+GENRE.MOVIE.0 film artistik / dramë 
+GENRE.MOVIE.1 film kriminal/ triler 
+GENRE.MOVIE.2 avantur/kauboj/film lufte 
+GENRE.MOVIE.3 fantastikë/fantazi/horor 
+GENRE.MOVIE.4 komedi 
+GENRE.MOVIE.5 soap/melodramë/folklor 
+GENRE.MOVIE.6 romantik 
+GENRE.MOVIE.7 serie/klasik/religioze/historifilm/dramë 
+GENRE.MOVIE.8 film për të rritun/dramë 
+
+GENRE.NEWS.0 lajmet 
+GENRE.NEWS.1 lajmet/koha 
+GENRE.NEWS.2 magazin 
+GENRE.NEWS.3 dokumantacion 
+GENRE.NEWS.4 diskusion/lang/debatë 
+
+GENRE.SHOW.0 show / gameshow 
+GENRE.SHOW.1 gameshow / kviz 
+GENRE.SHOW.2 variete 
+GENRE.SHOW.3 talkshow 
+
+GENRE.SPORTS.0 sport 
+GENRE.SPORTS.1 exclusive (olimpiada, takimi botëror e.m.gj.) 
+GENRE.SPORTS.2 sport magazin 
+GENRE.SPORTS.3 fudball 
+GENRE.SPORTS.4 tenis 
+GENRE.SPORTS.5 sport ekipe 
+GENRE.SPORTS.6 atletik 
+GENRE.SPORTS.7 motorsport 
+GENRE.SPORTS.8 sport në uj 
+GENRE.SPORTS.9 sport dimri 
+GENRE.SPORTS.10 me kuvel 
+GENRE.SPORTS.11 sportet aziate 
+
+GENRE.CHILDRENs_PROGRAMMES.0 program për fmi / të mdhaj 
+GENRE.CHILDRENs_PROGRAMMES.1 program për fmi deri 6 vjet 
+GENRE.CHILDRENs_PROGRAMMES.2 program për 6-vj. deri 14-vj. 
+GENRE.CHILDRENs_PROGRAMMES.3 program për 10-vj. deri 16-vj. 
+GENRE.CHILDRENs_PROGRAMMES.4 program informativ 
+GENRE.CHILDRENs_PROGRAMMES.5 cartoon 
+
+GENRE.MUSIC_DANCE.0 muzik/balet/këcim 
+GENRE.MUSIC_DANCE.1 rok/pop 
+GENRE.MUSIC_DANCE.2 musika serioze/klasik 
+GENRE.MUSIC_DANCE.3 muzik popullore 
+GENRE.MUSIC_DANCE.4 jazz 
+GENRE.MUSIC_DANCE.5 musical/opera 
+GENRE.MUSIC_DANCE.6 balet 
+
+GENRE.ARTS.0 art / kultur 
+GENRE.ARTS.1 art 
+GENRE.ARTS.2 art 
+GENRE.ARTS.3 religion 
+GENRE.ARTS.4 art 
+GENRE.ARTS.5 literatur 
+GENRE.ARTS.6 film/kino 
+GENRE.ARTS.7 film eksperimental/video 
+GENRE.ARTS.8 rtv/shtypi 
+GENRE.ARTS.9 media-t ereja 
+GENRE.ARTS.10 magazin për art / kultur 
+GENRE.ARTS.11 moda 
+
+GENRE.SOZIAL_POLITICAL.0 ngjarjet politike & sociale / ekonomia 
+GENRE.SOZIAL_POLITICAL.1 magazin/reporti/dokumentacioni 
+GENRE.SOZIAL_POLITICAL.2 ekonomia dhe social 
+GENRE.SOZIAL_POLITICAL.3 njerzet e shquar 
+
+GENRE.DOCUS_MAGAZINES.0 dokumentacioni/magazin 
+GENRE.DOCUS_MAGAZINES.1 natyra/kafshët/rrethina 
+GENRE.DOCUS_MAGAZINES.2 tehnika 
+GENRE.DOCUS_MAGAZINES.3 medicina/fisiologia/psihologia 
+GENRE.DOCUS_MAGAZINES.4 internacional/ekspedicionet 
+GENRE.DOCUS_MAGAZINES.5 art 
+GENRE.DOCUS_MAGAZINES.6 art 
+GENRE.DOCUS_MAGAZINES.7 gjuhet 
+
+GENRE.TRAVEL_HOBBIES.0 pushimi 
+GENRE.TRAVEL_HOBBIES.1 pushimi edhe turizmi 
+GENRE.TRAVEL_HOBBIES.2 me dorë 
+GENRE.TRAVEL_HOBBIES.3 motor 
+GENRE.TRAVEL_HOBBIES.4 shnetësia 
+GENRE.TRAVEL_HOBBIES.5 kuzhina 
+GENRE.TRAVEL_HOBBIES.6 blerje 
+GENRE.TRAVEL_HOBBIES.7 kopshti 
+
+GENRE.UNKNOWN e panjohtun 
+
+parentallock.parentallock madhështija e rinis 
+
+parentallock.prompt shkruje për pin-numrin 
+parentallock.never asnjiher 
+parentallock.onstart në start 
+parentallock.changetolocked te buketat e ndaluar 
+parentallock.onsignal nese ka danji ndalim ne kanal ma par 
+parentallock.lockedsender nese është kanali i ndalum 
+parentallock.lockedprogram kanali i ndalum (prej %d vjet) 
+parentallock.head pin-numri për rinin 
+parentallock.lockage emisionet 
+parentallock.lockage12 ndalohet deri 12 vjet 
+parentallock.lockage16 ndalohet deri 16 vjet 
+parentallock.lockage18 ndalohet deri 18 vjet 
+
+parentallock.changepin zgjedhe pin-numrin 
+parentallock.changepin_hint1 Shkrujr pin-numrin e ri! 
+
+pinprotection.wrongcode Shkruje pin-numrin përseri! 
+pinprotection.head kontrollimi pin-numrit 
+
+favorites.bouquetname favoritat e mi 
+favorites.nobouquets favoritat e mi jan vetem në bouquet-at e pranishem 
+favorites.addchannel Vuhet kanali i tanishëm\nBouquet-i"favoritat e mi".\nShkrimi venan pak... 
+favorites.menueadd vuje nji kanal te favoritat e mi 
+favorites.bqcreated është vu bouquet-i"favoritat e mi"...\n 
+favorites.chadded kanali i tanishëm është vu në favoritat e mi...\n 
+favorites.chalreadyinbq kanali i tanishëm është veç në favoritat e mi...\n 
+favorites.finalhint \nKanalet munen mu fshi\nkur i nrroni bouquet-at.\n 
+
+sleeptimerbox.title sleeptimer-in për mi fik 
+sleeptimerbox.hint1 mi fik për XXX minuta. (000=është fik) 
+sleeptimerbox.hint2 Dbox2 fiket në at kohë. 
+sleeptimerbox.announce sleeptimer-ri fiket për 1 minut 
+
+zaptotimer.announce për 1 minut nrran kanalin dbox-i 
+recordtimer.announce inxhizimi fillan për 1 minut 
+shutdowntimer.announce Dbox2 fiket për 1 minut.\nNdaloje mas mu fik? 
+
+timerbar.channelswitch mi nrru 
+timerbar.recordevent mi inxhizu 
+timer.eventtimed.title përkujtoje emisionin 
+timer.eventtimed.msg Emisioni është përkujtu.\nDbox2 nezet automatikisht dhe do tëkaloj në kët emision. 
+timer.eventrecord.title përkujtoje inxhizimin 
+timer.eventrecord.msg emisioni është përkujtu për inxhizim 
+timerlist.name lista e timerlist-it 
+timerlist.delete mi fshi 
+timerlist.empty nuk ka timerlist 
+timerlist.type.shutdown mi fik 
+timerlist.type.nextprogram program tjeter 
+timerlist.type.zapto mi nrru 
+timerlist.type.standby mu ba gati 
+timerlist.type.record inxhizu 
+timerlist.type.remind mu përkujtu 
+timerlist.type.sleeptimer timerlist-in mi fik 
+timerlist.type.unknown panjohtun 
+timerlist.repeat.once njiher 
+timerlist.repeat.daily përdit 
+timerlist.repeat.weekly në jav 
+timerlist.repeat.biweekly dy her në jav 
+timerlist.repeat.fourweekly kater her n5 jav 
+timerlist.repeat.monthly në muj 
+timerlist.repeat.byeventdescription shikoje timer 
+timerlist.repeat.unknown panjohtun 
+timerlist.program.unknown programi panjohtun 
+timerlist.standby.off fike timerlist-in 
+timerlist.standby.on vune standby timerlist-in 
+timerlist.alarmtime koha për alarm 
+timerlist.stoptime koha mi ndalu 
+timerlist.new timerlist i ri 
+timerlist.menumodify përpunimi i timerlist-it 
+timerlist.type lloji i timerlist-it 
+timerlist.repeat përseritje 
+timerlist.save timerlist mi memory 
+timerlist.standby me qen gati 
+timerlist.channel kanali 
+timerlist.menunew timerlist i ri 
+timerlist.reload përseritje 
+timerlist.modify parashkrimi 
+
+fontsize.menu teksi në zgjedhje 
+fontsize.menu_title titulli i zgjedhjes 
+fontsize.menu_info zgjedhje për informacion 
+fontsize.epg_title titulli i EPG-s 
+fontsize.epg_info1 epg informacioni 1 
+fontsize.epg_info2 epg informacioni 2 
+fontsize.epg_date epg data 
+fontsize.alert mas gaba ik (uzbun) 
+fontsize.eventlist_title titulli i ngjarjeve të listave 
+fontsize.eventlist_itemlarge lista e madhe e ngjarjeve 
+fontsize.eventlist_itemsmall lista e vogel e ngjarjeve 
+fontsize.eventlist_datetime lista e ngjarjeve për daten / kohen 
+fontsize.channellist lista kanaleve 
+fontsize.channellist_descr përshkrimi 
+fontsize.channellist_number numri 
+fontsize.channel_num_zap skam lidhje 
+fontsize.infobar_number traka informative për numer 
+fontsize.infobar_channame traka informative për kanal 
+fontsize.infobar_info traka informative për informacion 
+fontsize.infobar_small mala traka informative 
+
+fontmenu.head vurje e germave për madhsi 
+fontmenu.channellist lista e kanal-eve 
+fontmenu.eventlist lista e ngjarjeve 
+fontmenu.epg epg 
+fontmenu.infobar traka informative 
