@@ -121,7 +121,7 @@ int eAVSwitchNokia::setColorFormat(eAVColorFormat c)
 int eAVSwitchNokia::setAspectRatio(eAVAspectRatio as)
 {
 	aspect=as;
-	return setTVPin8(active?0:((aspect==r169)?6:12));
+	return setTVPin8(active?((aspect==r169)?6:12):0);
 }
 
 int eAVSwitchNokia::isVCRActive()
@@ -132,7 +132,7 @@ int eAVSwitchNokia::isVCRActive()
 int eAVSwitchNokia::setActive(int a)
 {
 	active=a;
-	return setTVPin8(active?0:((aspect==r169)?6:12));
+	return setTVPin8(active?((aspect==r169)?6:12):0);
 }
 
 int eAVSwitchNokia::setInput(int v)
@@ -236,7 +236,7 @@ int eAVSwitchPhilips::setColorFormat(eAVColorFormat c)
 int eAVSwitchPhilips::setAspectRatio(eAVAspectRatio as)
 {
 	aspect=as;
-	return setTVPin8(active?0:((aspect==r169)?6:12));
+	return setTVPin8(active?((aspect==r169)?6:12):0);
 }
 
 int eAVSwitchPhilips::isVCRActive()
@@ -247,7 +247,7 @@ int eAVSwitchPhilips::isVCRActive()
 int eAVSwitchPhilips::setActive(int a)
 {
 	active=a;
-	return setTVPin8(active?0:((aspect==r169)?6:12));
+	return setTVPin8(active?((aspect==r169)?6:12):0);
 }
 
 int eAVSwitchPhilips::setInput(int v)
@@ -348,7 +348,7 @@ int eAVSwitchSagem::setColorFormat(eAVColorFormat c)
 int eAVSwitchSagem::setAspectRatio(eAVAspectRatio as)
 {
 	aspect=as;
-	return setTVPin8(active?0:((aspect==r169)?6:12));
+	return setTVPin8(active?((aspect==r169)?6:12):0);
 }
 
 int eAVSwitchSagem::isVCRActive()
@@ -359,12 +359,11 @@ int eAVSwitchSagem::isVCRActive()
 int eAVSwitchSagem::setActive(int a)
 {
 	active=a;
-	return setTVPin8(active?0:((aspect==r169)?6:12));
+	return setTVPin8(active?((aspect==r169)?6:12):0);
 }
 
 int eAVSwitchSagem::setInput(int v)
 {
-	qDebug("setInput %d, fd=%d", v, fd);
 	switch (v)
 	{
 	case 0:
