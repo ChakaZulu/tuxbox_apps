@@ -1,3 +1,5 @@
+SUBDIRS = font
+
 INCLUDES = -I$(DRIVER)/include -I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = tuxtxt.la
