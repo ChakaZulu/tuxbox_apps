@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.14 2002/05/21 13:07:01 dirch Exp $
+	$Id: timermanager.cpp,v 1.15 2002/05/30 19:44:02 dirch Exp $
 
 	License: GPL
 
@@ -63,7 +63,7 @@ void* CTimerManager::timerThread(void *arg)
 	while (1)
 	{
 		time_t now = time(NULL);
-		dprintf("Timer Thread time: %d\n", now);
+		dprintf("Timer Thread time: %u\n", now);
 
 		// fire events who's time has come
 		CTimerEvent *event;
@@ -171,6 +171,37 @@ bool CTimerManager::listEvents(CTimerEventMap &Events)
 	else
 		return false;
 }
+
+int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime)
+{
+	if(events[eventID])
+	{
+		CTimerEvent *event = events[eventID];
+		event->announceTime = announceTime;
+		event->alarmTime = alarmTime;
+		event->stopTime = stopTime;
+		event->eventState = CTimerEvent::TIMERSTATE_SCHEDULED;
+	}
+	return eventID;
+}
+
+int CTimerManager::rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime)
+{
+	if(events[eventID])
+	{
+		CTimerEvent *event = events[eventID];
+		if(event->announceTime > 0)
+			event->announceTime += announceTime;
+		if(event->alarmTime > 0)
+			event->alarmTime += alarmTime;
+		if(event->stopTime > 0)
+			event->stopTime += stopTime;
+		event->eventState = CTimerEvent::TIMERSTATE_SCHEDULED;
+	}
+	return eventID;
+}
+
+
 //------------------------------------------------------------
 //=============================================================
 // event functions
@@ -207,6 +238,7 @@ void CTimerEvent::Reschedule()
 {
 	int diff = 0;
 	int TAG = 60 * 60 * 24;	// sek * min * std
+	printf("Reschedule\n");
 	switch(eventRepeat)
 	{
 		case TIMERREPEAT_ONCE :
@@ -254,9 +286,12 @@ void CTimerEvent::Reschedule()
 //------------------------------------------------------------
 void CTimerEvent::printEvent(void)
 {
-	struct tm *alarmtime;
+	struct tm *alarmtime, *announcetime;
+	dprintf("eventID: %03d type: %d state: %d repeat: %d ",eventID,eventType,eventState,eventRepeat);
+	announcetime = localtime(&announceTime);
+	dprintf("announce: %u %02d.%02d. %02d:%02d:%02d ",announceTime,announcetime->tm_mday,announcetime->tm_mon+1,announcetime->tm_hour,announcetime->tm_min,announcetime->tm_sec);
 	alarmtime = localtime(&alarmTime);
-	dprintf("eventID: %03d type: %d state: %d repeat: %d time:%ld (%02d.%02d. %02d:%02d) ",eventID,eventType,eventState,eventRepeat,alarmTime,alarmtime->tm_mday,alarmtime->tm_mon+1,alarmtime->tm_hour,alarmtime->tm_min)
+	dprintf("alarm: %u %02d.%02d. %02d:%02d:%02d ",alarmTime,alarmtime->tm_mday,alarmtime->tm_mon+1,alarmtime->tm_hour,alarmtime->tm_min,alarmtime->tm_sec);
 	switch(eventType)
 	{		
 		case CTimerEvent::TIMER_ZAPTO :

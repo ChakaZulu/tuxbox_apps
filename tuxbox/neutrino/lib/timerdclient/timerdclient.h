@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.12 2002/05/21 13:07:01 dirch Exp $
+	$Id: timerdclient.h,v 1.13 2002/05/30 19:44:02 dirch Exp $
 
 	License: GPL
 
@@ -104,8 +104,10 @@ class CTimerdClient
 		// returns remaining mins, -1 if no sleeptimer exists
 		int getSleepTimerRemaining();
 
+
 		// add diff to existing timer event
 		bool rescheduleTimerEvent(int eventid, time_t diff);
+
 		// add diff to existing timer event
 		bool rescheduleTimerEvent(int eventid, time_t announcediff, time_t alarmdiff, time_t stoptime);
 
@@ -119,28 +121,25 @@ class CTimerdClient
 
 		// adds new record timer event
 		int addRecordTimerEvent(time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
-			{return addTimerEvent(CTimerEvent::TIMER_RECORD, NULL, true, announcetime, alarmtime, stoptime);};
+			{return addTimerEvent(CTimerEvent::TIMER_RECORD,true, NULL,  announcetime, alarmtime, stoptime);};
+
+		// adds new standby timer event
+		int addStandbyTimerEvent(bool standby_on,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
+			{return addTimerEvent(CTimerEvent::TIMER_STANDBY, true, &standby_on,  announcetime, alarmtime, stoptime);};
+
+		// adds new zapto timer event
+		int addZaptoTimerEvent(unsigned onidSid,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
+		{
+			CTimerEvent::EventInfo eventInfo;
+			eventInfo.onidSid = onidSid;
+			return addTimerEvent(CTimerEvent::TIMER_ZAPTO, &eventInfo, true, announcetime, alarmtime, stoptime);
+		};
 
 		int addNextProgramTimerEvent(CTimerEvent::EventInfo eventInfo,int min, int hour, int day = 0, int month = 0)
 		{
 			// mal auf verdacht eingebaut
 			// keine ahnung ob / was hier noch fehlt
 			return addTimerEvent(CTimerEvent::TIMER_NEXTPROGRAM, &eventInfo, min, hour, day, month);
-		};
-		// adds new zapto event
-		int addZaptoTimerEvent(unsigned onidSid,int min, int hour, int day = 0, int month = 0)
-		{
-			CTimerEvent::EventInfo eventInfo;
-			eventInfo.onidSid = onidSid;
-			return addTimerEvent(CTimerEvent::TIMER_ZAPTO, &eventInfo, min, hour, day, month);
-		};
-
-		// adds new standby event
-		int addStandbyTimerEvent(bool standby_on,int min, int hour, int day = 0, int month = 0)
-		{
-			CTimerd::commandSetStandby standby;
-			standby.standby_on =standby_on;
-			return addTimerEvent(CTimerEvent::TIMER_STANDBY, &standby, min, hour, day, month);
 		};
 };
 

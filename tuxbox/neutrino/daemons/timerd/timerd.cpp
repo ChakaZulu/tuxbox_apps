@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.10 2002/05/21 13:07:01 dirch Exp $
+	$Id: timerd.cpp,v 1.11 2002/05/30 19:44:02 dirch Exp $
 
 	License: GPL
 
@@ -70,32 +70,41 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 		break;
 
 		case CTimerd::CMD_GETSLEEPTIMER:
-			for(pos = events.begin();(pos != events.end()) && (pos->second->eventType == CTimerEvent::TIMER_SLEEPTIMER) ;pos++)
-				;
-			if(pos->second->eventType == CTimerEvent::TIMER_SLEEPTIMER)
-				rspGetSleeptimer.eventID = pos->second->eventID;
-			else
-				rspGetSleeptimer.eventID = 0;
+			printf("CMD_SLEEPTIMER\n");
+			rspGetSleeptimer.eventID = 0;
+			printf("anzahl events: %d\n",events.size());
+			if(CTimerManager::getInstance()->listEvents(events))
+			{
+				if(events.size() > 0)
+				{
+					for(pos = events.begin();(pos != events.end()) && (pos->second->eventType != CTimerEvent::TIMER_SLEEPTIMER) ;pos++)
+						printf("ID: %u type: %u\n",pos->second->eventID,pos->second->eventType);
+					if(pos->second->eventType == CTimerEvent::TIMER_SLEEPTIMER)
+						rspGetSleeptimer.eventID = pos->second->eventID;
+				}
+			}
 			write( connfd, &rspGetSleeptimer, sizeof(rspGetSleeptimer));
 		break;
 
 		case CTimerd::CMD_GETTIMER:						// timer daten abfragen
 			CTimerd::commandGetTimer msgGetTimer;
+			CTimerd::responseGetTimer resp;
 			read(connfd,&msgGetTimer, sizeof(msgGetTimer));
-			if(events[msgGetTimer.eventID])
+			if(CTimerManager::getInstance()->listEvents(events))
 			{
-				CTimerd::responseGetTimer resp;
-				CTimerEvent *event = events[msgGetTimer.eventID];
-				resp.eventID = event->eventID;
-				resp.eventState = event->eventState;
-				resp.eventType = event->eventType;
-				resp.eventRepeat = event->eventRepeat;
-				resp.announceTime = event->announceTime;
-				resp.alarmTime = event->alarmTime;
-				resp.stopTime = event->stopTime;
-				write( connfd, &resp, sizeof(CTimerd::responseGetTimer));
+				if(events[msgGetTimer.eventID])
+				{
+					CTimerEvent *event = events[msgGetTimer.eventID];
+					resp.eventID = event->eventID;
+					resp.eventState = event->eventState;
+					resp.eventType = event->eventType;
+					resp.eventRepeat = event->eventRepeat;
+					resp.announceTime = event->announceTime;
+					resp.alarmTime = event->alarmTime;
+					resp.stopTime = event->stopTime;
+				}
 			}
-
+			write( connfd, &resp, sizeof(CTimerd::responseGetTimer));
 		break;
 
 		case CTimerd::CMD_GETTIMERLIST:				// liste aller timer 
@@ -120,29 +129,12 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 
 		case CTimerd::CMD_RESCHEDULETIMER:			// event nach vorne oder hinten schieben
 			read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
-			if(events[msgModifyTimer.eventID])
-			{
-				CTimerEvent *event = events[msgModifyTimer.eventID];
-				if(event->announceTime > 0)
-					event->announceTime += msgModifyTimer.announceTime;
-				if(event->alarmTime > 0)
-					event->alarmTime += msgModifyTimer.alarmTime;
-				if(event->stopTime > 0)
-					event->stopTime += msgModifyTimer.stopTime;
-				event->eventState = CTimerEvent::TIMERSTATE_SCHEDULED;
-			}
+			CTimerManager::getInstance()->rescheduleEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime);
 		break;
 
 		case CTimerd::CMD_MODIFYTIMER:				// neue zeiten setzen
 			read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
-			if(events[msgModifyTimer.eventID])
-			{
-				CTimerEvent *event = events[msgModifyTimer.eventID];
-				event->announceTime = msgModifyTimer.announceTime;
-				event->alarmTime = msgModifyTimer.alarmTime;
-				event->stopTime = msgModifyTimer.stopTime;
-				event->eventState = CTimerEvent::TIMERSTATE_SCHEDULED;
-			}
+			CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime);
 		break;
 
 		case CTimerd::CMD_ADDTIMER:						// neuen timer hinzufügen

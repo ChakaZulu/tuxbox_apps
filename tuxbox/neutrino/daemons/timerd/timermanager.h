@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.10 2002/05/21 13:07:01 dirch Exp $
+	$Id: timermanager.h,v 1.11 2002/05/30 19:44:02 dirch Exp $
 
 	License: GPL
 
@@ -64,6 +64,9 @@ class CTimerManager
 		bool removeEvent(int eventID);
 		CTimerEvent* getNextEvent();
 		bool listEvents(CTimerEventMap &Events);
+		int modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
+		int rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
+
 };
 
 
