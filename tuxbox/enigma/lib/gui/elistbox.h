@@ -13,16 +13,11 @@ class eListboxEntry: public /*Q*/Object
 {
 //	Q_OBJECT
 	friend class eListbox;
+protected:
 	eListbox *listbox;
-	eListboxEntry *listboxentry;
-	QSortedList<eListboxEntry> childs;
-/*signals:
-	void selected(eListboxEntry *lbe);*/
 public:
 	Signal1<void, eListboxEntry*> selected;
-	eListbox *parent;
 	void *data;
-	eListboxEntry(eListboxEntry *listboxentry, void *data=0);
 	eListboxEntry(eListbox *listbox, void *data=0);
 	
 	virtual int operator<(const eListboxEntry &) const;
@@ -90,6 +85,36 @@ public:
 	void setActiveColor(gColor active);
 };
 
+inline eListboxEntry::eListboxEntry(eListbox *listbox, void *data)
+:listbox(listbox), data(data)
+{
+	if (listbox)
+		listbox->append(this);
+}
+
+inline eListboxEntry::~eListboxEntry()
+{
+	if (listbox)
+		listbox->childs.remove(this);
+}
+
+inline int eListboxEntry::operator<(const eListboxEntry &o) const
+{
+	return qstricmp(getText(-1), o.getText(-1))<0;
+}
+
+inline int eListboxEntry::operator==(const eListboxEntry &o) const
+{
+	return !qstricmp(getText(-1), o.getText(-1));
+}
+
+inline void eListboxEntry::renderInto(gPainter *rc, QRect area) const
+{
+	rc->setFont(listbox->entryFnt);
+	rc->renderText(area, getText(0));
+	rc->flush();
+}
+
 inline eListboxEntryText::eListboxEntryText(eListbox *listbox, QString text, QString sort, void *data)
 :eListboxEntry(listbox, data) , text(text), sort(sort)
 {
@@ -110,54 +135,6 @@ inline QString eListboxEntryText::getText(int col) const
 		default:
 			return 0;
 	}
-}
-
-inline eListboxEntry::eListboxEntry(eListboxEntry *listboxentry, void *data)
-:listboxentry(listboxentry), data(data)
-{
-	parent=listboxentry->parent;
-	listboxentry->childs.append(this);
-	listbox=0;
-}
-
-inline eListboxEntry::eListboxEntry(eListbox *listbox, void *data)
-:listbox(listbox), data(data)
-{
-	if (listbox)
-	{
-		parent=listbox;
-		listboxentry=0;
-		listbox->append(this);
-	}
-}
-
-inline eListboxEntry *eListbox::goNext()
-{
-	keyDown(eRCInput::RC_DOWN);
-	return current?current->current():0;
-}
-
-inline eListboxEntry *eListbox::goPrev()
-{
-	keyDown(eRCInput::RC_UP);
-	return current?current->current():0;
-}
-
-inline int eListboxEntry::operator<(const eListboxEntry &o) const
-{
-	return qstricmp(getText(-1), o.getText(-1))<0;
-}
-
-inline int eListboxEntry::operator==(const eListboxEntry &o) const
-{
-	return !qstricmp(getText(-1), o.getText(-1));
-}
-
-inline void eListboxEntry::renderInto(gPainter *rc, QRect area) const
-{
-	rc->setFont(listbox->entryFnt);
-	rc->renderText(area, getText(0));
-	rc->flush();
 }
 
 inline void eListbox::append(eListboxEntry *entry)
@@ -234,6 +211,18 @@ inline void eListbox::setActiveColor(gColor active)
 
 	if (current && current->current())
 		invalidateEntry(active);		/* das ist ja wohl buggy hier */
+}
+
+inline eListboxEntry *eListbox::goNext()
+{
+	keyDown(eRCInput::RC_DOWN);
+	return current?current->current():0;
+}
+
+inline eListboxEntry *eListbox::goPrev()
+{
+	keyDown(eRCInput::RC_UP);
+	return current?current->current():0;
 }
 
 #endif

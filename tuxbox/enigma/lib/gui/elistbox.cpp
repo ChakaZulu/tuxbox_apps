@@ -227,16 +227,6 @@ void eListbox::setCurrent(eListboxEntry *c)
 	}
 }
 
-eListboxEntry::~eListboxEntry()
-{
-	if (listboxentry)
-		listboxentry->childs.remove(this);
-	if (listbox)
-		listbox->childs.remove(this);
-	for (QListIterator<eListboxEntry> c(childs); c.current(); ++c)
-		delete c.current();
-}
-
 static eWidget *create_eListbox(eWidget *parent)
 {
 	return new eListbox(parent);
