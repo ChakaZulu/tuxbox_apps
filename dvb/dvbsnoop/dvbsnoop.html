@@ -21,7 +21,10 @@
 	 <P><B><A
 		HREF="http://dvbsnoop.sourceforge.net/">http://dvbsnoop.sourceforge.net/</A></B><BR>Get
 		the latest source at: <A
-		HREF="http://cvs.tuxbox.org/">http://cvs.tuxbox.org/</A><BR><BR><BR></P> 
+		HREF="http://cvs.tuxbox.org/">http://cvs.tuxbox.org/</A><BR>Get tarballs at:
+		<A
+		 HREF="http://sourceforge.net/projects/dvbsnoop">http://sourceforge.net/projects/dvbsnoop</A><BR><BR><BR></P>
+	 
 	 <H2>What is dvbsnoop?</H2> 
 	 <P>dvbsnoop is a DVB / MPEG stream analyzer program. <BR><BR>Its purpose is
 		to debug, dump or view stream information (e.g. digital television broadcasts)
@@ -71,9 +74,20 @@ License:
 	 <P>dvbsnoop is based on the <A HREF="http://www.linuxtv.org">linux dvb
 		api</A>. You need to have the dvb driver installed on your computer to use
 		dvbsnoop. dvbsnoop is text-based, so it should work on any unix based system,
-		which offers you shell access.</P> 
-	 <H3> cross compiling for the dbox2 (ppc)</H3> 
-	 <P>dvbsnoop is part of the dbox2 cdk. The dbox2 is a powerful digital
+		which offers you shell access and dvb support installed.</P>
+	 <H3> Getting the Source</H3>
+	 <P>Download a tarball for dvbsnoop at:
+		<A
+		 HREF="http://sourceforge.net/projects/dvbsnoop">http://sourceforge.net/projects/dvbsnoop</A>.<BR>Unpack
+		the tar archive using the '<I>gzip -d</I> ...' and '<I>tar xvf ...</I>'
+		commands.</P>
+	 <P>Or get the latest source from the cvs at:
+		<A HREF="http://cvs.tuxbox.org/">http://cvs.tuxbox.org/</A>:<BR><I>cvs
+		-d:pserver:anonymous@cvs.tuxbox.org:/cvs/tuxbox login</I><BR><I>cvs
+		-d:pserver:anonymous@cvs.tuxbox.org:/cvs/tuxbox -z3 co -ddvbsnoop-cvs -P
+		apps/dvb/dvbsnoop </I></P> 
+	 <H3> Cross Compiling for the dbox2 (ppc)</H3> 
+	 <P>dvbsnoop is part of the dbox2 cdk. The dbox2 is a powerfull digital
 		satellite receiver (set top box) with a network interface.<BR> Just follow the
 		installation instructions of the dbox2 cdk:</P> 
 	 <TABLE CELLPADDING="10"> 
@@ -87,12 +101,10 @@ make .dvbsnoop
 </PRE></TD> 
 		</TR> 
 	 </TABLE> 
-	 <H3> native compilation</H3> 
-	 <P>Check out dvbsnoop from the cvs or download a tarball. You will find the
-		cvs and checkout instructions on <A
-		HREF="http://cvs.tuxbox.org">http://cvs.tuxbox.org</A>. If your distribution
-		still uses Linux kernel 2.4, then you probably need to set the path to your DVB
-		API header files by appending </P> 
+	 <H3> Native Compilation (e.g. i386 linux)</H3> 
+	 <P>Check out dvbsnoop from the cvs or download a tarball. If your
+		distribution still uses Linux kernel 2.4, then you probably need to set the
+		path to your DVB API header files by appending </P> 
 	 <PRE>CPPFLAGS=-I/path/to/dvb-kernel/linux/include</PRE> 
 	 <P>to the configure command.</P> 
 	 <TABLE CELLPADDING="10"> 
@@ -648,6 +660,12 @@ CRC: 3952000829 (0xeb8ebf3d)
 			 HREF="http://www.linuxdvb.tv/">http://www.linuxdvb.tv/</A></TD> 
 		  <TD>&nbsp;</TD> 
 		  <TD>... just have a look</TD> 
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"><A
+			 HREF="http://www.dbox2.info">http://www.dbox2.info</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>a portal site about the dbox2 set top box.</TD>
 		</TR> 
 		<TR> 
 		  <TD VALIGN="TOP"><A
@@ -655,7 +673,7 @@ CRC: 3952000829 (0xeb8ebf3d)
 		  
 		  <TD>&nbsp;</TD> 
 		  <TD>... not directly related with dvbsnoop, but mui mucho cool! a DVB
-			 personal video recorder... </TD> 
+			 personal video recorder running on Unix... </TD> 
 		</TR> 
 	 </TABLE> 
 	 <P><B>Remark:</B><BR>In 2003 the development <B>CVS has been moved</B> from
@@ -664,21 +682,21 @@ CRC: 3952000829 (0xeb8ebf3d)
 		uptime problems at <A HREF="http://www.berlios.de">berlios.de</A>.</P> 
 	 <P><BR><BR></P> 
 	 <H2>Authors, Co-Authors, Thanks, ...</H2> 
-	 <TABLE>
-		<TR>
-		  <TD COLSPAN="3"><B>Authors are:</B></TD>
-		</TR>
-		<TR>
-		  <TD>&nbsp;Rainer Scherg &nbsp;</TD>
-		  <TD>&nbsp;(rasc)&nbsp; </TD>
-		  <TD>&nbsp;&lt;rasc@users.sourceforge.net&gt;</TD>
-		</TR>
-		<TR>
-		  <TD>&nbsp;Andreas Oberritter &nbsp;</TD>
-		  <TD>&nbsp;(obi)&nbsp;</TD>
-		  <TD>&nbsp;&lt;obi@saftware.de&gt;&nbsp;</TD>
-		</TR>
-	 </TABLE>
+	 <TABLE> 
+		<TR> 
+		  <TD COLSPAN="3"><B>Authors are:</B></TD> 
+		</TR> 
+		<TR> 
+		  <TD>&nbsp;Rainer Scherg &nbsp;</TD> 
+		  <TD>&nbsp;(rasc)&nbsp; </TD> 
+		  <TD>&nbsp;&lt;rasc@users.sourceforge.net&gt;</TD> 
+		</TR> 
+		<TR> 
+		  <TD>&nbsp;Andreas Oberritter &nbsp;</TD> 
+		  <TD>&nbsp;(obi)&nbsp;</TD> 
+		  <TD>&nbsp;&lt;obi@saftware.de&gt;&nbsp;</TD> 
+		</TR> 
+	 </TABLE> 
 	 <P><B>Thanks</B> a lot to all the members and developers of the
 		tuxbox@dbox2 project!!!<BR>These heros ;-) do great support and also bugfixing
 		- see also the history information in the source!!<BR><BR></P> 
