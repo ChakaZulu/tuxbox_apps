@@ -83,7 +83,7 @@ class CLCD
 
 		std::string			servicename;
 		char				volume;
-		char				percentOver;
+		unsigned char			percentOver;
 		bool				muted;
 		bool				showclock;
 		CConfigFile			configfile;
