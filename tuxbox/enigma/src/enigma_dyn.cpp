@@ -256,6 +256,11 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 			result += "OFF";
 	result += "</td></tr>\n";
 	result += "<tr><td>Mode:</td><td>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</td></tr>";
+	
+	eString sRef;
+	if (eServiceInterface::getInstance()->service)
+		sRef = eServiceInterface::getInstance()->service.toString();
+	result += "<tr><td>Current service reference:</td><td>" + sRef + "</td></tr>\n";
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
