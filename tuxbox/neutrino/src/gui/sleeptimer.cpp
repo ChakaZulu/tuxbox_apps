@@ -53,11 +53,10 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, string)
 		if(timerdclient->getSleeptimerID() > 0)
 		{
 			timerdclient->removeTimerEvent(timerdclient->getSleeptimerID());
-			printf("removed\n");
 		}
 	}
-	else							// set the sleeptimer to actual time + shutdown mins
-		timerdclient->setSleeptimer(time(NULL) + ((shutdown_min -2) * 60),time(NULL) + shutdown_min * 60,0);
+	else							// set the sleeptimer to actual time + shutdown mins and announce 1 min before
+		timerdclient->setSleeptimer(time(NULL) + ((shutdown_min -1) * 60),time(NULL) + shutdown_min * 60,0);
 	delete timerdclient;
 	return res;
 }
