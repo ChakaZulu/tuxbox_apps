@@ -37,17 +37,17 @@
 #include "widget/hintbox.h"
 #include "widget/messagebox.h"
 
-
 CEpgData::CEpgData()
 {
+	bigFonts = false;
 	frameBuffer = CFrameBuffer::getInstance();
 }
 
 void CEpgData::start()
 {
 	ox = 540;
-    sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
-    oy = 320;
+	sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
+	oy = 320;
 	topheight= g_Fonts->epg_title->getHeight();
 	topboxheight=topheight+6;
 	botheight=g_Fonts->epg_date->getHeight();
@@ -153,7 +153,6 @@ void CEpgData::showText( int startPos, int ypos )
 	int sbs= (startPos+ 1)/ linecount;
 
 	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
-
 }
 
 string GetGenre( char contentClassification )
@@ -300,14 +299,14 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 	string text1 = epgData.title;
 	string text2 = "";
 	if ( g_Fonts->epg_title->getRenderWidth(text1.c_str())> 520 )
-    {
-    	do
-    	{
+	{
+		do
+	    	{
 			pos = text1.find_last_of("[ .]+");
 			if ( pos!=-1 )
 				text1 = text1.substr( 0, pos );
 		} while ( ( pos != -1 ) && ( g_Fonts->epg_title->getRenderWidth(text1.c_str())> 520 ) );
-        text2 = epgData.title.substr(text1.length()+ 1, uint(-1) );
+		text2 = epgData.title.substr(text1.length()+ 1, uint(-1) );
 	}
 
 	int oldtoph= toph;
@@ -316,7 +315,6 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 		toph = 2* topboxheight;
 	else
 		toph = topboxheight;
-
 
 	if ( (oldtoph> toph) && (!doLoop) )
 	{
@@ -478,7 +476,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 						}
 						else
 							printf("timerd not available\n");
-					}					
+					}
 					break;
 
 				// 31.05.2002 dirch		zapto timer
@@ -492,7 +490,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 							mode = CTimerd::MODE_RADIO;
 						else
 							mode = CTimerd::MODE_TV;
-						timerdclient.addZaptoTimerEvent(channel_id, 
+						timerdclient.addZaptoTimerEvent(channel_id,
 																  epgData.epg_times.startzeit,
 																  epgData.epg_times.startzeit - ANNOUNCETIME, 0,
 																  epgData.eventID, epgData.epg_times.startzeit,
@@ -504,8 +502,21 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 					break;
 				}
 
-				case CRCInput::RC_ok:
 				case CRCInput::RC_help:
+					bigFonts = bigFonts ? false : true;
+					if(bigFonts)
+					{
+						g_Fonts->epg_info1->setSize((int)(g_Fonts->epg_info1->getSize() * BIG_FONT_FAKTOR));
+						g_Fonts->epg_info2->setSize((int)(g_Fonts->epg_info2->getSize() * BIG_FONT_FAKTOR));
+					}else
+					{
+						g_Fonts->epg_info1->setSize((int)(g_Fonts->epg_info1->getSize() / BIG_FONT_FAKTOR));
+						g_Fonts->epg_info2->setSize((int)(g_Fonts->epg_info2->getSize() / BIG_FONT_FAKTOR));
+					}
+					show(channel_id, id, startzeit, false);
+					break;
+
+				case CRCInput::RC_ok:
 				case CRCInput::RC_timeout:
 					loop = false;
 					break;
@@ -696,8 +707,8 @@ void CEpgData::showTimerEventBar (bool show)
 
 
 
-    // Button: Timer Record & Channelswitch 
-	if(g_settings.recording_type)		
+    // Button: Timer Record & Channelswitch
+	if(g_settings.recording_type)
 	{			// display record button only if recording to server or vcr
 		pos = 0;
 		frameBuffer->paintIcon("rot.raw", x+8+cellwidth*pos, y+h_offset );

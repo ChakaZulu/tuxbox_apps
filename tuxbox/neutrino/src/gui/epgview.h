@@ -44,7 +44,7 @@
 #include <system/settings.h>
 
 #include "color.h"
-
+#define BIG_FONT_FAKTOR 1.5
 
 using namespace std;
 
@@ -72,6 +72,7 @@ class CEpgData
 		int			topheight,topboxheight;
 		int			botheight,botboxheight;
 		int			medlineheight,medlinecount;
+		bool			bigFonts;
 
 		void GetEPGData(const t_channel_id channel_id, unsigned long long id, time_t* startzeit );
 		void GetPrevNextEPGData( unsigned long long id, time_t* startzeit );

@@ -46,13 +46,13 @@ class Font
 	FBFontRenderClass *renderer;
 	FT_Face		face;
 	FT_Size		size;
-	
+
 	FT_Error getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit);
-	
+
 	// these are HACKED values, because the font metrics were unusable.
 	int height,ascender,descender,upper,lower;
 	int fontwidth;
-	
+
  public:
 	enum fontmodifier
 		{
@@ -63,11 +63,13 @@ class Font
 
 	void RenderString(int x, int y, const int width, const char *      text, const unsigned char color, const int boxheight = 0, const bool utf8_encoded = false);
 	void RenderString(int x, int y, const int width, const std::string text, const unsigned char color, const int boxheight = 0, const bool utf8_encoded = false);
-	
+
 	int getRenderWidth(const char *      text, const bool utf8_encoded = false);
 	int getRenderWidth(const std::string text, const bool utf8_encoded = false);
 	int getHeight(void);
-	
+	int getSize(){return font.font.pix_width;}
+	int setSize(int isize){int temp = font.font.pix_width; font.font.pix_width = font.font.pix_height = isize; return temp;}
+
 	Font(FBFontRenderClass *render, FTC_FaceID faceid, const int isize, const fontmodifier _stylemodifier);
 	~Font(){}
 };
