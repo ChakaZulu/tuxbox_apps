@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
-$Id: gamelist.cpp,v 1.24 2002/01/08 03:08:20 McClean Exp $
+$Id: gamelist.cpp,v 1.25 2002/01/15 23:17:59 McClean Exp $
  
 $Log: gamelist.cpp,v $
+Revision 1.25  2002/01/15 23:17:59  McClean
+cleanup
+
 Revision 1.24  2002/01/08 03:08:20  McClean
 improve input-handling
 
@@ -344,6 +347,10 @@ void CGameList::runGame(int selected )
 	int				i;
 	char			depstring[129];
 
+	#ifdef USEACTIONLOG
+		g_ActionLog->println("mode: game, " + gamelist[selected]->name);
+	#endif 
+
 	string pluginname = gamelist[selected]->filename;
 
 	strcpy(depstring, gamelist[selected]->depend.c_str());
@@ -421,5 +428,16 @@ void CGameList::runGame(int selected )
 		else
 			break;
 	}
+	#ifdef USEACTIONLOG
+		if(NeutrinoMode==1)
+		{
+			g_ActionLog->println("mode: tv");
+		}
+		else
+		{
+			g_ActionLog->println("mode: radio");
+		}
+	#endif 
+
 }
 

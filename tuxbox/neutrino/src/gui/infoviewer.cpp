@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.58 2002/01/03 20:03:20 McClean Exp $
+// $Id: infoviewer.cpp,v 1.59 2002/01/15 23:17:59 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.59  2002/01/15 23:17:59  McClean
+// cleanup
+//
 // Revision 1.58  2002/01/03 20:03:20  McClean
 // cleanup
 //
@@ -586,9 +589,19 @@ void CInfoViewer::showButtonAudio()
 
 			string  disp_text;
 			if ( ( g_RemoteControl->GetECMPID()== 0 ) && ( g_RemoteControl->audio_chans.count_apids!= 0 ) )
+			{
+				#ifdef USEACTIONLOG
+					g_ActionLog->println("cannot decode");
+				#endif
 				disp_text= g_Locale->getText("infoviewer.cantdecode");
+			}
 			else
+			{
+				#ifdef USEACTIONLOG
+					g_ActionLog->println("not available");
+				#endif
 				disp_text= g_Locale->getText("infoviewer.notavailable");
+			}
 
 			g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
 			g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text.c_str(), COL_INFOBAR);
@@ -601,8 +614,8 @@ void CInfoViewer::showButtonAudio()
 		{
 			g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 			g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
-		};
-	};
+		}
+	}
 }
 
 void CInfoViewer::showWarte()

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.31 2002/01/15 22:08:13 McClean Exp $
+// $Id: epgview.cpp,v 1.32 2002/01/15 23:17:59 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.32  2002/01/15 23:17:59  McClean
+// cleanup
+//
 // Revision 1.31  2002/01/15 22:08:13  McClean
 // cleanups
 //
@@ -514,7 +517,17 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 
 			#ifdef USEACTIONLOG
 				char buf[1000];
-				sprintf((char*) buf, "epg: %08x \"%s\" %02d.%02d.%04d, %02d:%02d - \"%s\"", onid_tsid, channelName.c_str(), nSDay, nSMon, nSYear, nSH, nSM, epgData.title );
+				static string channelName2 = 0; 
+				static unsigned int onid_tsid2 = 0;
+				if(channelName!="")
+				{
+					channelName2=channelName;
+				}
+				if(onid_tsid!=0)
+				{
+					onid_tsid2=onid_tsid;
+				}
+				sprintf((char*) buf, "epg: %08x \"%s\" %02d.%02d.%04d, %02d:%02d - \"%s\"", onid_tsid2, channelName2.c_str(), nSDay, nSMon, nSYear, nSH, nSM, epgData.title );
 				g_ActionLog->println(buf);
 			#endif
 

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.19 2002/01/15 20:12:15 McClean Exp $
+// $Id: global.h,v 1.20 2002/01/15 23:17:59 McClean Exp $
 //
 // $Log: global.h,v $
+// Revision 1.20  2002/01/15 23:17:59  McClean
+// cleanup
+//
 // Revision 1.19  2002/01/15 20:12:15  McClean
 // cleanups
 //
@@ -81,6 +84,7 @@
 // inserted id and log.
 //
 //
+
 #include "neutrino.h"
 #include "controldclient.h"
 #include "lcddclient.h"
@@ -107,32 +111,34 @@
 #define NEUTRINO_CPP extern
 #endif
 
+NEUTRINO_CPP int		NeutrinoMode;
 
 NEUTRINO_CPP  CNeutrinoApp        *neutrino;
 NEUTRINO_CPP  SNeutrinoSettings   g_settings;
 
-NEUTRINO_CPP  CLcddClient     *g_lcdd;
-NEUTRINO_CPP  CControldClient *g_Controld;
-NEUTRINO_CPP  CRemoteControl  *g_RemoteControl;
+NEUTRINO_CPP  CLcddClient		*g_lcdd;
+NEUTRINO_CPP  CControldClient	*g_Controld;
+NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
 
-NEUTRINO_CPP  fontRenderClass *g_fontRenderer;
-NEUTRINO_CPP  FontsDef        *g_Fonts;
-NEUTRINO_CPP  CRCInput        *g_RCInput;
-NEUTRINO_CPP  CFrameBuffer    *g_FrameBuffer;
+NEUTRINO_CPP  fontRenderClass	*g_fontRenderer;
+NEUTRINO_CPP  FontsDef			*g_Fonts;
+NEUTRINO_CPP  CRCInput			*g_RCInput;
+NEUTRINO_CPP  CFrameBuffer		*g_FrameBuffer;
 
-NEUTRINO_CPP  CEpgData        *g_EpgData;
-NEUTRINO_CPP  CInfoViewer     *g_InfoViewer;
-NEUTRINO_CPP  EventList       *g_EventList;
-NEUTRINO_CPP  CStreamInfo     *g_StreamInfo;
-NEUTRINO_CPP  CUCodeCheck     *g_UcodeCheck;
-NEUTRINO_CPP  CScanTs         *g_ScanTS;
-NEUTRINO_CPP  CFlashUpdate    *g_Update;
+NEUTRINO_CPP  CEpgData			*g_EpgData;
+NEUTRINO_CPP  CInfoViewer		*g_InfoViewer;
+NEUTRINO_CPP  EventList			*g_EventList;
+NEUTRINO_CPP  CStreamInfo		*g_StreamInfo;
+NEUTRINO_CPP  CUCodeCheck		*g_UcodeCheck;
+NEUTRINO_CPP  CScanTs			*g_ScanTS;
+NEUTRINO_CPP  CFlashUpdate		*g_Update;
 
-NEUTRINO_CPP  CScreenSetup    *g_ScreenSetup;
+NEUTRINO_CPP  CScreenSetup		*g_ScreenSetup;
 
-NEUTRINO_CPP CLocaleManager   *g_Locale;
+NEUTRINO_CPP CLocaleManager		*g_Locale;
 
-NEUTRINO_CPP CBouquetList	  *bouquetList;
+NEUTRINO_CPP CBouquetList		*bouquetList;
+
 
 
 #ifdef USEACTIONLOG
