@@ -2440,7 +2440,6 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			else
 				g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
 		}
-		delete (unsigned char*) data;
 		return messages_return::handled | messages_return::cancel_info;
 	}
 	else if( msg == CRCInput::RC_standby )
@@ -3251,7 +3250,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.361 2002/11/18 14:13:39 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.362 2002/11/20 17:57:14 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
