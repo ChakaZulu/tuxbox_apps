@@ -3,6 +3,7 @@
 #include <lib/gui/echeckbox.h>
 #include <lib/gui/eskin.h>
 #include <lib/system/econfig.h>
+#include <tuxbox/tuxbox.h>
 #include <lib/base/i18n.h>
 #include <lib/gdi/gfbdc.h>
 
@@ -30,8 +31,9 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	showConsoleOnFB->move(ePoint(20, 65));
 	showConsoleOnFB->resize(eSize(fd+4+300, fd+4));
 	showConsoleOnFB->setHelpText(_("shows the linux console on TV"));
-	
-	showConsoleOnFB->hide();
+                                
+	if ( tuxbox_get_model() != TUXBOX_MODEL_DBOX2 )
+		showConsoleOnFB->hide();
 
 	alpha = gFBDC::getInstance()->getAlpha();
 	eLabel* l = new eLabel(this);
@@ -102,6 +104,11 @@ eZapOsdSetup::~eZapOsdSetup()
 {
 }
 
+void eZapOsdSetup::consoleStateChanged( int i )
+{
+	fbClass::getInstance()->showConsole( i );
+}
+
 void eZapOsdSetup::alphaChanged( int i )
 {
 	alpha = i;
@@ -137,6 +144,11 @@ void eZapOsdSetup::okPressed()
 
 void eZapOsdSetup::abortPressed()
 {
+// restore old settings..
+	int state=0;
+	eConfig::getInstance()->getKey("/ezap/osd/showConsoleOnFB", state);
+	fbClass::getInstance()->showConsole(state);
 	gFBDC::getInstance()->reloadSettings();
+
 	close(0);
 }

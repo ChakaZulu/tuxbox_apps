@@ -2557,8 +2557,9 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 #if 1
 			if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM5600)
 			{
+				eDebug("write number to led-display");
 				int fd=::open("/dev/dbox/fp0",O_RDWR);
-				::ioctl(fd,4,(unsigned char*)num);
+				::ioctl(fd,4,&num);
 				::close(fd);
 			}
 #endif

@@ -18,6 +18,7 @@ class eZapOsdSetup: public eWindow
 	eButton *ok, *abort;
 	int alpha, brightness, gamma;
 private:
+	void consoleStateChanged( int );
 	void alphaChanged( int );
 	void brightnessChanged( int );
 	void gammaChanged( int );

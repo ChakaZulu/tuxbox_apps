@@ -414,7 +414,7 @@ public:
 	 *
 	 * \param label The text to assign to the widget.
 	 */
-	void setText(const eString &label, bool inv=true);
+	virtual void setText(const eString &label, bool inv=true);
 	
 	const	eString& getText() const { return text; }
 	void setBackgroundColor(const gColor& color, bool inv=true);
