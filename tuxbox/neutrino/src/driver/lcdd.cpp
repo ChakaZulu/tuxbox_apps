@@ -83,6 +83,7 @@ void CLCD::loadConfig()
 		lcd_contrast = 0x0F;
 		lcd_power = 0x01;
 		lcd_inverse = 0x00;
+		saveConfig();
 		return;
 	}
 
@@ -105,7 +106,6 @@ void* CLCD::TimeThread(void *)
 
 void CLCD::init()
 {
-	printf("Doing LCD-Init\n");
 	InitNewClock();
 
 	loadConfig();
@@ -122,7 +122,6 @@ void CLCD::init()
 		perror("[lcdd]: pthread_create(TimeThread)");
 		return ;
 	}
-	printf("exit LCD-Init\n");
 }
 
 bool CLCD::lcdInit()
@@ -303,7 +302,7 @@ void CLCD::showVolume(char vol)
 
 void CLCD::showMenuText(const int position, const std::string text, const int highlight, const bool utf_encoded)
 {
-	if (mode != MODE_MENU)
+	if ( (mode != MODE_MENU) && (mode != MODE_MENU_UTF8) )
 	{
 		return;
 	}
