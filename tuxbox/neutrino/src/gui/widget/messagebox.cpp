@@ -63,7 +63,6 @@ void CMessageBox::paintButtons()
 {
 	uint8_t    color;
 	fb_pixel_t bgcolor;
-	printf("messagebox: myHeight: %d\n",m_height);
 
 	m_window->paintBoxRel(0, m_height - (m_fheight << 1), m_width, (m_fheight << 1), (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0);
 

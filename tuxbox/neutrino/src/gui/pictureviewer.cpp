@@ -725,8 +725,7 @@ void CPictureViewerGui::showHelp()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP22));
 
-	helpbox.addLine("Version: $Revision: 1.56 $");
+	helpbox.addLine("Version: $Revision: 1.57 $");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
-	printf("help vorbei\n");
 }

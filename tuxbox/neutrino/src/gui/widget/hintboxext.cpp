@@ -138,7 +138,6 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 			maxWidth = lineWidth;
 		m_height += maxHeight;
 		if (m_height > HINTBOXEXT_MAX_HEIGHT || pagebreak) {
-			printf("pushing back %d because %d > %d\n",line,m_height,HINTBOXEXT_MAX_HEIGHT);
 			if (m_height-maxHeight > maxOverallHeight)
 				maxOverallHeight = m_height - maxHeight;
 			m_height = m_theight + m_fheight + maxHeight;
@@ -241,7 +240,6 @@ void CHintBoxExt::refresh(void)
 		m_window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE], 10, m_theight, m_width - 10, g_Locale->getText(m_caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
 
 	// background of text panel
-	printf("height of background: %d\n",(m_maxEntriesPerPage+1)*m_fheight);
 	m_window->paintBoxRel(0, m_theight, m_width, (m_maxEntriesPerPage + 1) * m_fheight, (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0);
 
 	int yPos  = m_theight + (m_fheight >> 1);
