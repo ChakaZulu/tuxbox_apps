@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.138 2002/04/19 01:14:24 obi Exp $
+ * $Id: zapit.cpp,v 1.139 2002/04/19 02:34:17 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -390,7 +390,7 @@ bool setAudioBypassMode (bool isAc3)
 
 int zapit (uint32_t onid_sid, bool in_nvod)
 {
-#ifndef SELECT_VIDEO_SOURCE
+#ifndef FLUSH_PCR
 	videoStatus video_status;
 #endif
 	std::map <uint, CZapitChannel>::iterator cit;
@@ -447,6 +447,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 	}
 
+#ifdef FLUSH_PCR
 	/* close video device */
 	if (video_fd != -1)
 	{
@@ -464,6 +465,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	{
 		debug("[zapit] video device already closed\n");
 	}
+#endif
 
 	/* stop demux filters */
 	dmx_video_fd = unsetPesFilter(dmx_video_fd);
@@ -610,7 +612,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		return -3;
 	}
 
-#ifndef SELECT_VIDEO_SOURCE
+#ifndef FLUSH_PCR
 	/* get video status */
 	if (ioctl(video_fd, VIDEO_GET_STATUS, &video_status) < 0)
 	{
@@ -619,7 +621,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	}
 
 	/* select video source */
-	if (video_status.streamSource != VIDEO_SOURCE_DEMUX)
+	if ((video_status.streamSource != VIDEO_SOURCE_DEMUX) && (video_status.playState == VIDEO_STOPPED))
 #endif
 	{
 		if (ioctl(video_fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX) < 0)
@@ -887,7 +889,17 @@ int start_scan (unsigned short do_diseqc)
 
 	while (scan_runs == 0)
 	{
-		// do nothing
+		/*
+		 * this stupid line of code is here just 
+		 * to workaround a stupid behaviour because
+		 * the scan thread won't recognize that scan_runs
+		 * changes. maybe it is the compiler's fault.
+		 * or maybe i do not know enough about pthreads
+		 * to fix this in a better way.
+		 * - obi -
+		 */
+
+		printf("[zapit] something sucks here.\n");
 	}
 
 	return 0;
@@ -1962,7 +1974,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.138 2002/04/19 01:14:24 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.139 2002/04/19 02:34:17 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

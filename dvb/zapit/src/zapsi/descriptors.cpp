@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.21 2002/04/14 06:06:31 obi Exp $
+ * $Id: descriptors.cpp,v 1.22 2002/04/19 02:34:17 obi Exp $
  */
 
 #include <stdio.h>
@@ -126,14 +126,13 @@ uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, u
 
 	feparams.Frequency =
 	(
-		((buffer[2] >> 4)	* 100000000) +
-		((buffer[2] & 0x0F)	* 10000000) +
-		((buffer[3] >> 4)	* 1000000) +
-		((buffer[3] & 0x0F)	* 100000) +
-		((buffer[4] >> 4)	* 10000) +
-		((buffer[4] & 0x0F)	* 1000) +
-		((buffer[5] >> 4)	* 100) +
-		((buffer[5] & 0x0F)	* 10)
+		((buffer[2] >> 4)	* 1000000) +
+		((buffer[2] & 0x0F)	* 100000) +
+		((buffer[3] >> 4)	* 10000) +
+		((buffer[3] & 0x0F)	* 1000) +
+		((buffer[4] >> 4)	* 100) +
+		((buffer[4] & 0x0F)	* 10) +
+		((buffer[5] >> 4)	* 1)
 	);
 
 	feparams.Inversion = INVERSION_AUTO;

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.42 2002/04/19 01:14:24 obi Exp $
+ * $Id: scan.cpp,v 1.43 2002/04/19 02:34:17 obi Exp $
  */
 
 #include "scan.h"
@@ -156,9 +156,9 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original
 {
 	stiterator tI = scantransponders.find((transport_stream_id << 16) | original_network_id);
 
-	/* cable */
-	if (diseqc == 0xFF)
+	switch (frontend->getInfo()->type)
 	{
+	case FE_QAM: /* cable */
 		fprintf(fd,
 			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" symbol_rate=\"%u\" fec_inner=\"%hhu\" modulation=\"%hhu\">\n",
 			tI->second.transport_stream_id,
@@ -167,11 +167,9 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original
 			tI->second.feparams.u.qam.SymbolRate,
 			tI->second.feparams.u.qam.FEC_inner,
 			tI->second.feparams.u.qam.QAM);
-	}
+		break;
 
-	/* satellite */
-	else
-	{
+	case FE_QPSK: /* satellite */
 		fprintf(fd,
 			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" symbol_rate=\"%u\" fec_inner=\"%hhu\" polarization=\"%hhu\">\n",
 			tI->second.transport_stream_id,
@@ -180,6 +178,10 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original
 			tI->second.feparams.u.qpsk.SymbolRate,
 			tI->second.feparams.u.qpsk.FEC_inner,
 			tI->second.polarization);
+		break;
+
+	default:
+		return;
 	}
 
 	for (sciterator cI = scanchannels.begin(); cI != scanchannels.end(); cI++)
@@ -306,12 +308,16 @@ void *start_scanthread(void *param)
 
 	std::map <uint8_t, std::string>::iterator spI;
 
-	/* notify client about start */
-	scan_runs = 1;
-
 	/* read all sat or cable sections */
 	while ((search) && (!strcmp(search->GetType(), type)))
 	{
+		/*
+		 * notify client about start - yes should be outside
+		 * of this loop but fuckig pthread doesn't recognize 
+		 * it
+		 */
+		scan_runs = 1;
+
 		/* get name of current satellite oder cable provider */
 		strcpy(providerName, search->GetAttributeValue("name"));
 
