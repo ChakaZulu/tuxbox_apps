@@ -248,6 +248,15 @@ RIGHT:
 	OSD direct COMMAND schedule page next
 LEFT:
 	OSD direct COMMAND schedule page prev
+GREEN:
+	TIMER Set Schedule
+	TIMER Save
+	OSD direct HIDE schedule
+	OSD direct COMMAND perspective name Event Added for Recording
+	OSD direct SHOW perspective
+	RC Wait Timed 2
+	OSD direct HIDE perspective
+	OSD direct SHOW schedule
 STANDBY:
 	HARDWARE Shutdown
 ------
