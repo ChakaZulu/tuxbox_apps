@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.14 2001/07/17 12:39:18 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.15 2001/07/23 00:21:23 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.15  2001/07/23 00:21:23  fnbrd
+// removed using namespace std.
+//
 // Revision 1.14  2001/07/17 12:39:18  fnbrd
 // Neue Kommandos
 //
@@ -128,9 +131,9 @@ void SIsectionEIT::parseContentDescriptor(const char *buf, SIevent &e)
   struct descr_generic_header *cont=(struct descr_generic_header *)buf;
   const char *classification=buf+sizeof(struct descr_generic_header);
   while(classification<=buf+sizeof(struct descr_generic_header)+cont->descriptor_length-2) {
-    e.contentClassification+=string(classification, 1);
+    e.contentClassification+=std::string(classification, 1);
 //    printf("Content: 0x%02hhx\n", *classification);
-    e.userClassification+=string(classification+1, 1);
+    e.userClassification+=std::string(classification+1, 1);
 //    printf("User: 0x%02hhx\n", *(classification+1));
     classification+=2;
   }
@@ -141,7 +144,7 @@ void SIsectionEIT::parseParentalRatingDescriptor(const char *buf, SIevent &e)
   struct descr_generic_header *cont=(struct descr_generic_header *)buf;
   const char *s=buf+sizeof(struct descr_generic_header);
   while(s<buf+sizeof(struct descr_generic_header)+cont->descriptor_length-4) {
-    e.ratings.insert(SIparentalRating(string(s, 3), *(s+3)));
+    e.ratings.insert(SIparentalRating(std::string(s, 3), *(s+3)));
     s+=4;
   }
 }
@@ -153,23 +156,23 @@ void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e)
   while(items<(unsigned char *)(buf+sizeof(struct descr_extended_event_header)+evt->length_of_items)) {
     if(*items) {
       if(*(items+1) < 0x06) // other code table
-        e.itemDescription=string((const char *)(items+2), (*items)-1);
+        e.itemDescription=std::string((const char *)(items+2), (*items)-1);
       else
-        e.itemDescription=string((const char *)(items+1), *items);
+        e.itemDescription=std::string((const char *)(items+1), *items);
 //      printf("Item Description: %s\n", e.itemDescription.c_str());
     }
     items+=1+*items;
     if(*items) {
-      e.item=string((const char *)(items+1), *items);
+      e.item=std::string((const char *)(items+1), *items);
 //      printf("Item: %s\n", e.item.c_str());
     }
     items+=1+*items;
   }
   if(*items) {
     if(*(items+1) < 0x06) // other code table
-      e.extendedText+=string((const char *)(items+2), (*items)-1);
+      e.extendedText+=std::string((const char *)(items+2), (*items)-1);
     else
-      e.extendedText+=string((const char *)(items+1), *items);
+      e.extendedText+=std::string((const char *)(items+1), *items);
 //    printf("Extended Text: %s\n", e.extendedText.c_str());
   }
 }
@@ -180,17 +183,17 @@ void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e)
   buf+=sizeof(struct descr_short_event_header);
   if(evt->event_name_length) {
     if(*buf < 0x06) // other code table
-      e.name=string(buf+1, evt->event_name_length-1);
+      e.name=std::string(buf+1, evt->event_name_length-1);
     else
-      e.name=string(buf, evt->event_name_length);
+      e.name=std::string(buf, evt->event_name_length);
   }
   buf+=evt->event_name_length;
   unsigned char textlength=*((unsigned char *)buf);
   if(textlength) {
     if(*(buf+1) < 0x06) // other code table
-      e.text=string((++buf)+1, textlength-1);
+      e.text=std::string((++buf)+1, textlength-1);
     else
-      e.text=string(++buf, textlength);
+      e.text=std::string(++buf, textlength);
   }
 //  printf("Name: %s\n", e.name.c_str());
 //  printf("Text: %s\n", e.text.c_str());
@@ -256,17 +259,17 @@ void SIsectionSDT::parseServiceDescriptor(const char *buf, SIservice &s)
   s.serviceTyp=sv->service_typ;
   if(sv->service_provider_name_length) {
     if(*(buf+1) < 0x06) // other code table
-      s.providerName=string(buf+1, sv->service_provider_name_length-1);
+      s.providerName=std::string(buf+1, sv->service_provider_name_length-1);
     else
-      s.providerName=string(buf, sv->service_provider_name_length);
+      s.providerName=std::string(buf, sv->service_provider_name_length);
   }
   buf+=sv->service_provider_name_length;
   unsigned char servicenamelength=*((unsigned char *)buf);
   if(servicenamelength) {
     if(*(buf+1) < 0x06) // other code table
-      s.serviceName=string((++buf)+1, servicenamelength-1);
+      s.serviceName=std::string((++buf)+1, servicenamelength-1);
     else
-      s.serviceName=string(++buf, servicenamelength);
+      s.serviceName=std::string(++buf, servicenamelength);
   }
 //  printf("Provider-Name: %s\n", s.providerName.c_str());
 //  printf("Service-Name: %s\n", s.serviceName.c_str());

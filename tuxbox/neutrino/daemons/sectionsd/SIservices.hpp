@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.4 2001/06/27 11:59:44 fnbrd Exp $
+// $Id: SIservices.hpp,v 1.5 2001/07/23 00:21:23 fnbrd Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIservices.hpp,v $
+// Revision 1.5  2001/07/23 00:21:23  fnbrd
+// removed using namespace std.
+//
 // Revision 1.4  2001/06/27 11:59:44  fnbrd
 // Angepasst an gcc 3.0
 //
@@ -41,9 +44,6 @@
 // forward references
 class SIservice;
 class SIevent;
-
-// needed for gcc 3.0
-using namespace std;
 
 struct sdt_service {
   unsigned short service_id : 16;
@@ -85,13 +85,12 @@ class SInvodReference
 };
 
 // Fuer for_each
-struct printSInvodReference : public unary_function<class SInvodReference, void>
-//struct printSInvodReference : public ::std::unary_function<class SInvodReference, void>
+struct printSInvodReference : public std::unary_function<class SInvodReference, void>
 {
   void operator() (const SInvodReference &ref) { ref.dump();}
 };
 
-typedef set <SInvodReference, less<SInvodReference> > SInvodReferences;
+typedef std::set <SInvodReference, std::less<SInvodReference> > SInvodReferences;
 
 class SIservice {
   public:
@@ -121,8 +120,8 @@ class SIservice {
     unsigned short serviceID;
     unsigned char serviceTyp;
     SInvodReferences nvods;
-    string serviceName; // Name aus dem Service-Descriptor
-    string providerName; // Name aus dem Service-Descriptor
+    std::string serviceName; // Name aus dem Service-Descriptor
+    std::string providerName; // Name aus dem Service-Descriptor
     int eitScheduleFlag(void) {return (int)flags.EIT_schedule_flag;}
     int eitPresentFollowingFlag(void) {return (int)flags.EIT_present_following_flag;}
     int runningStatus(void) {return (int)flags.running_status;}
@@ -152,14 +151,13 @@ class SIservice {
 };
 
 // Fuer for_each
-struct printSIservice : public unary_function<SIservice, void>
+struct printSIservice : public std::unary_function<SIservice, void>
 {
   void operator() (const SIservice &s) { s.dump();}
 };
 
-//typedef set <SIservice, less<SIservice> > SIservices;
-// Als Klasse, da ich nicht weiss, wie man eine Forward-Refernez auf ein typedef macht
-class SIservices : public set <SIservice, less<SIservice> >
+// Als Klasse, da ich nicht weiss, wie man eine Forward-Referenz auf ein typedef macht
+class SIservices : public std::set <SIservice, std::less<SIservice> >
 {
 };
 

@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-// $Id: SIsections.hpp,v 1.7 2001/06/27 11:59:44 fnbrd Exp $
+// $Id: SIsections.hpp,v 1.8 2001/07/23 00:21:23 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.hpp,v $
+// Revision 1.8  2001/07/23 00:21:23  fnbrd
+// removed using namespace std.
+//
 // Revision 1.7  2001/06/27 11:59:44  fnbrd
 // Angepasst an gcc 3.0
 //
@@ -49,9 +52,6 @@
 //
 
 // #pragma pack(1) // fnbrd: geht anscheinend nicht beim gcc
-
-// needed for gcc 3.0
-using namespace std;
 
 struct SI_section_SDT_header {
       unsigned char table_id : 8;
@@ -310,18 +310,18 @@ class SIsection {
 };
 
 // Fuer for_each
-struct printSIsection : public unary_function<SIsection, void>
+struct printSIsection : public std::unary_function<SIsection, void>
 {
   void operator() (const SIsection &s) { s.dump();}
 };
 
 // Fuer for_each
-struct printSmallSIsectionHeader : public unary_function<SIsection, void>
+struct printSmallSIsectionHeader : public std::unary_function<SIsection, void>
 {
   void operator() (const SIsection &s) { s.dumpSmallSectionHeader();}
 };
 
-class SIsections : public set <SIsection, less<SIsection> >
+class SIsections : public std::set <SIsection, std::less<SIsection> >
 {
   public:
     // Liefert 0 falls kein Fehler
@@ -390,21 +390,21 @@ class SIsectionEIT : public SIsection
 };
 
 // Fuer for_each
-struct printSIsectionEIT : public unary_function<SIsectionEIT, void>
+struct printSIsectionEIT : public std::unary_function<SIsectionEIT, void>
 {
   void operator() (const SIsectionEIT &s) { s.dump();}
 };
 
 /*
 // Fuer for_each
-struct parseSIsectionEIT : public unary_function<SIsectionEIT, void>
+struct parseSIsectionEIT : public std::unary_function<SIsectionEIT, void>
 {
   void operator() (const SIsectionEIT &s) { s.parse();}
 };
 */
 
 // Menge aller present/following EITs (actual TS)
-class SIsectionsEIT : public set <SIsectionEIT, less<SIsectionEIT> >
+class SIsectionsEIT : public std::set <SIsectionEIT, std::less<SIsectionEIT> >
 {
   public:
     int readSections(void) {
@@ -417,7 +417,7 @@ class SIsectionsEIT : public set <SIsectionEIT, less<SIsectionEIT> >
 };
 
 // Menge aller schedule EITs (actual TS)
-class SIsectionsEITschedule : public set <SIsectionEIT, less<SIsectionEIT> >
+class SIsectionsEITschedule : public std::set <SIsectionEIT, std::less<SIsectionEIT> >
 {
   public:
     int readSections(void) {
@@ -476,13 +476,13 @@ class SIsectionSDT : public SIsection
 };
 
 // Fuer for_each
-struct printSIsectionSDT : public unary_function<SIsectionSDT, void>
+struct printSIsectionSDT : public std::unary_function<SIsectionSDT, void>
 {
   void operator() (const SIsectionSDT &s) { s.dump();}
 };
 
 // Menge aller SDTs (actual TS)
-class SIsectionsSDT : public set <SIsectionSDT, less<SIsectionSDT> >
+class SIsectionsSDT : public std::set <SIsectionSDT, std::less<SIsectionSDT> >
 {
   public:
     int readSections(void) {
@@ -519,13 +519,13 @@ class SIsectionBAT : public SIsection
 };
 
 // Fuer for_each
-struct printSIsectionBAT : public unary_function<SIsectionBAT, void>
+struct printSIsectionBAT : public std::unary_function<SIsectionBAT, void>
 {
   void operator() (const SIsectionBAT &s) { s.dump();}
 };
 
 // Menge aller BATs
-class SIsectionsBAT : public set <SIsectionBAT, less<SIsectionBAT> >
+class SIsectionsBAT : public std::set <SIsectionBAT, std::less<SIsectionBAT> >
 {
   public:
     int readSections(void) {
@@ -562,13 +562,13 @@ class SIsectionNIT : public SIsection
 };
 
 // Fuer for_each
-struct printSIsectionNIT : public unary_function<SIsectionNIT, void>
+struct printSIsectionNIT : public std::unary_function<SIsectionNIT, void>
 {
   void operator() (const SIsectionNIT &s) { s.dump();}
 };
 
 // Menge aller NITs (actual network)
-class SIsectionsNIT : public set <SIsectionNIT, less<SIsectionNIT> >
+class SIsectionsNIT : public std::set <SIsectionNIT, std::less<SIsectionNIT> >
 {
   public:
     int readSections(void) {

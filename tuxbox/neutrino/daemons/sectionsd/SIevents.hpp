@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.12 2001/07/16 13:33:40 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.13 2001/07/23 00:21:23 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.13  2001/07/23 00:21:23  fnbrd
+// removed using namespace std.
+//
 // Revision 1.12  2001/07/16 13:33:40  fnbrd
 // removeOldEvents geaendert.
 //
@@ -67,9 +70,6 @@
 class SIservice;
 class SIservices;
 
-// needed for gcc 3.0
-using namespace std;
-
 struct eit_event {
   unsigned short event_id : 16;
   unsigned long long start_time : 40;
@@ -97,7 +97,7 @@ class SIcomponent {
       componentType=comp->component_type;
       componentTag=comp->component_tag;
       if(comp->descriptor_length>sizeof(struct descr_component_header)-2)
-        component=string(((const char *)comp)+sizeof(struct descr_component_header), comp->descriptor_length-(sizeof(struct descr_component_header)-2));
+        component=std::string(((const char *)comp)+sizeof(struct descr_component_header), comp->descriptor_length-(sizeof(struct descr_component_header)-2));
     }
     // Std-copy
     SIcomponent(const SIcomponent &c) {
@@ -123,31 +123,31 @@ class SIcomponent {
         return 1;
       return 0;
     }
-    string component; // Text aus dem Component Descriptor
+    std::string component; // Text aus dem Component Descriptor
     unsigned char componentType; // Component Descriptor
     unsigned char componentTag; // Component Descriptor
     unsigned char streamContent; // Component Descriptor
 };
 
 // Fuer for_each
-struct printSIcomponent : public unary_function<class SIcomponent, void>
+struct printSIcomponent : public std::unary_function<class SIcomponent, void>
 {
   void operator() (const SIcomponent &c) { c.dump();}
 };
 
 // Fuer for_each
-struct saveSIcomponentXML : public unary_function<class SIcomponent, void>
+struct saveSIcomponentXML : public std::unary_function<class SIcomponent, void>
 {
   FILE *f;
   saveSIcomponentXML(FILE *fi) { f=fi;}
   void operator() (const SIcomponent &c) { c.saveXML(f);}
 };
 
-typedef multiset <SIcomponent, less<SIcomponent> > SIcomponents;
+typedef std::multiset <SIcomponent, std::less<SIcomponent> > SIcomponents;
 
 class SIparentalRating {
   public:
-    SIparentalRating(const string &cc, unsigned char rate) {
+    SIparentalRating(const std::string &cc, unsigned char rate) {
       rating=rate;
       countryCode=cc;
     }
@@ -168,25 +168,25 @@ class SIparentalRating {
         return 1;
       return 0;
     }
-    string countryCode;
+    std::string countryCode;
     unsigned char rating; // Bei 1-16 -> Minumim Alter = rating +3
 };
 
 // Fuer for_each
-struct printSIparentalRating : public unary_function<SIparentalRating, void>
+struct printSIparentalRating : public std::unary_function<SIparentalRating, void>
 {
   void operator() (const SIparentalRating &r) { r.dump();}
 };
 
 // Fuer for_each
-struct saveSIparentalRatingXML : public unary_function<SIparentalRating, void>
+struct saveSIparentalRatingXML : public std::unary_function<SIparentalRating, void>
 {
   FILE *f;
   saveSIparentalRatingXML(FILE *fi) { f=fi;}
   void operator() (const SIparentalRating &r) { r.saveXML(f);}
 };
 
-typedef set <SIparentalRating, less<SIparentalRating> > SIparentalRatings;
+typedef std::set <SIparentalRating, std::less<SIparentalRating> > SIparentalRatings;
 
 class SItime {
   public:
@@ -221,16 +221,16 @@ class SItime {
     unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
 };
 
-typedef set <SItime, less<SItime> > SItimes;
+typedef std::set <SItime, std::less<SItime> > SItimes;
 
 // Fuer for_each
-struct printSItime : public unary_function<SItime, void>
+struct printSItime : public std::unary_function<SItime, void>
 {
   void operator() (const SItime &t) { t.dump();}
 };
 
 // Fuer for_each
-struct saveSItimeXML : public unary_function<SItime, void>
+struct saveSItimeXML : public std::unary_function<SItime, void>
 {
   FILE *f;
   saveSItimeXML(FILE *fi) { f=fi;}
@@ -248,13 +248,13 @@ class SIevent {
 //      startzeit=0;
     }
     unsigned short eventID;
-    string name; // Name aus dem Short-Event-Descriptor
-    string text; // Text aus dem Short-Event-Descriptor
-    string itemDescription; // Aus dem Extended Descriptor
-    string item; // Aus dem Extended Descriptor
-    string extendedText; // Aus dem Extended Descriptor
-    string contentClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
-    string userClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
+    std::string name; // Name aus dem Short-Event-Descriptor
+    std::string text; // Text aus dem Short-Event-Descriptor
+    std::string itemDescription; // Aus dem Extended Descriptor
+    std::string item; // Aus dem Extended Descriptor
+    std::string extendedText; // Aus dem Extended Descriptor
+    std::string contentClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
+    std::string userClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
 //    time_t startzeit; // lokale Zeit, 0 -> time shifted (cinedoms)
 //    unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
     unsigned short serviceID;
@@ -281,13 +281,13 @@ class SIevent {
 };
 
 // Fuer for_each
-struct printSIevent : public unary_function<SIevent, void>
+struct printSIevent : public std::unary_function<SIevent, void>
 {
   void operator() (const SIevent &e) { e.dump();}
 };
 
 // Fuer for_each
-struct saveSIeventXML : public unary_function<SIevent, void>
+struct saveSIeventXML : public std::unary_function<SIevent, void>
 {
   FILE *f;
   saveSIeventXML(FILE *fi) { f=fi;}
@@ -295,7 +295,7 @@ struct saveSIeventXML : public unary_function<SIevent, void>
 };
 
 // Fuer for_each
-struct saveSIeventXMLwithServiceName : public unary_function<SIevent, void>
+struct saveSIeventXMLwithServiceName : public std::unary_function<SIevent, void>
 {
   FILE *f;
   const SIservices *s;
@@ -312,7 +312,7 @@ struct saveSIeventXMLwithServiceName : public unary_function<SIevent, void>
 };
 
 // Fuer for_each
-struct printSIeventWithService : public unary_function<SIevent, void>
+struct printSIeventWithService : public std::unary_function<SIevent, void>
 {
   printSIeventWithService(const SIservices &svs) { s=&svs;}
   void operator() (const SIevent &e) {
@@ -332,9 +332,7 @@ struct printSIeventWithService : public unary_function<SIevent, void>
   const SIservices *s;
 };
 
-//typedef set <SIevent, less<SIevent> > SIevents;
-
-class SIevents : public set <SIevent, less<SIevent> >
+class SIevents : public std::set <SIevent, std::less<SIevent> >
 {
   public:
     // Entfernt anhand der Services alle time shifted events (Service-Typ 0)
