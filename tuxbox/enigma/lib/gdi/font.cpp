@@ -54,7 +54,8 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID	face_id, FT_Face* aface)
 	fontListEntry *font=(fontListEntry *)face_id;
 	if (!font)
 		return -1;
-	printf("[FONT] FTC_Face_Requester (%s)\n", font->face);
+	
+	eDebug("[FONT] FTC_Face_Requester (%s)", font->face);
 
 	int error;
 	if ((error=FT_New_Face(library, font->filename, 0, aface)))
@@ -84,7 +85,7 @@ FT_Error fontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_in
 
 int fontRenderClass::AddFont(const char *filename)
 {
-	printf("[FONT] adding font %s...", filename);
+	eDebug("[FONT] adding font %s...", filename);
 	fflush(stdout);
 	int error;
 	fontListEntry *n=new fontListEntry;
@@ -105,7 +106,7 @@ int fontRenderClass::AddFont(const char *filename)
 	FT_Done_Face(face);
 
 	n->next=font;
-	printf("OK (%s)\n", n->face);
+	eDebug("OK (%s)\n", n->face);
 	font=n;
 	return 0;
 }
@@ -119,40 +120,40 @@ fontRenderClass::fontListEntry::~fontListEntry()
 fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 {
 	instance=this;
-	printf("[FONT] initializing core...");
+	eDebug("[FONT] initializing core...");
 	{
 		if (FT_Init_FreeType(&library))
 		{
-			printf("failed.\n");
+			printf("[FONT] initializing failed.\n");
 			return;
 		}
 	}
-	printf("\n[FONT] loading fonts...\n");
+	eDebug("\n[FONT] loading fonts...\n");
 	fflush(stdout);
 	font=0;
 	
 	int maxbytes=4*1024*1024;
-	printf("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
+	eDebug("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
 	fflush(stdout);
 	{
 		if (FTC_Manager_New(library, 0, 0, maxbytes, myFTC_Face_Requester, this, &cacheManager))
 		{
-			printf(" manager failed!\n");
+			printf("[FONT] initializing font cache failed!\n");
 			return;
 		}
 		if (!cacheManager)
 		{
-			printf(" error.\n");
+			printf("[FONT] initializing font cache manager error.\n");
 			return;
 		}
 		if (FTC_SBit_Cache_New(cacheManager, &sbitsCache))
 		{
-			printf(" sbit failed!\n");
+			printf("[FONT] initializing font cache sbit failed!\n");
 			return;
 		}
 		if (FTC_Image_Cache_New(cacheManager, &imageCache))
 		{
-			printf(" imagecache failed!\n");
+			printf("[FONT] initializing font cache imagecache failed!\n");
 		}
 	}
 	printf("\n");

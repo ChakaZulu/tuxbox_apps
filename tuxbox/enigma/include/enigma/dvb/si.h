@@ -1,18 +1,19 @@
 #ifndef __si_h
 #define __si_h
 
-#include "esection.h"
-#include <estring.h>
-#include <eerror.h>
-#include <eptrlist.h>
 #include <vector>
-#include "lowlevel/sdt.h"
-#include "lowlevel/descr.h"
-#include "lowlevel/ca.h"
-#include "lowlevel/pmt.h"
-#include "lowlevel/nit.h"
-#include "lowlevel/eit.h"
-#include "lowlevel/bat.h"
+
+#include <core/dvb/esection.h>
+#include <core/base/estring.h>
+#include <core/base/eerror.h>
+#include <core/base/eptrlist.h>
+#include <core/dvb/lowlevel/sdt.h>
+#include <core/dvb/lowlevel/descr.h>
+#include <core/dvb/lowlevel/ca.h>
+#include <core/dvb/lowlevel/pmt.h>
+#include <core/dvb/lowlevel/nit.h>
+#include <core/dvb/lowlevel/eit.h>
+#include <core/dvb/lowlevel/bat.h>
 
 time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5);
 int fromBCD(int bcd);

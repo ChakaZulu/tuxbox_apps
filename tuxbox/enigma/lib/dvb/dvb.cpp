@@ -87,7 +87,7 @@ void eTransponder::cable::set(const CableDeliverySystemDescriptor *descriptor)
 
 int eTransponder::cable::tune(eTransponder *trans)
 {
-	printf("[TUNE] tuning to %d/%d\n", frequency, symbol_rate);
+	eDebug("[TUNE] tuning to %d/%d", frequency, symbol_rate);
 	int inv=0;
 	return eFrontend::fe()->tune_qam(trans, frequency, symbol_rate, fec_inner, inv, modulation);
 }
@@ -105,7 +105,7 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 
 int eTransponder::satellite::tune(eTransponder *trans)
 {
-	printf("[TUNE] tuning to %d/%d/%s/%d@%d\n", frequency, symbol_rate, polarisation?"V":"H", fec, lnb);
+	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d\n", frequency, symbol_rate, polarisation?"V":"H", fec, lnb);
 	int inv=0;
 	return eFrontend::fe()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, lnb);
 }
@@ -196,7 +196,7 @@ void eService::update(SDTEntry *sdtentry)
 {
 	if (sdtentry->service_id != service_id)
 	{
-		printf("tried to update sid %x with sdt-sid %x", service_id, sdtentry->service_id);
+		eDebug("tried to update sid %x with sdt-sid %x", service_id, sdtentry->service_id);
 		return;
 	}
 	service_name="unknown";

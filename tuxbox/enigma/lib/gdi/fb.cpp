@@ -47,7 +47,7 @@ fbClass::fbClass(const char *fb)
 	}
 
 	available=fix.smem_len;
-	printf("%dk video mem\n", available/1024);
+	eDebug("%dk video mem", available/1024);
 	lfb=(unsigned char*)mmap(0, available, PROT_WRITE|PROT_READ, MAP_SHARED, fd, 0);
 	if (!lfb)
 	{
@@ -75,7 +75,7 @@ int fbClass::SetMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
 	}
 	if ((screeninfo.xres!=nxRes) && (screeninfo.yres!=nyRes) && (screeninfo.bits_per_pixel!=nbpp))
 	{
-		printf("SetMode failed: wanted: %dx%dx%d, got %dx%dx%d\n",
+		eDebug("SetMode failed: wanted: %dx%dx%d, got %dx%dx%d",
 			nxRes, nyRes, nbpp,
 			screeninfo.xres, screeninfo.yres, screeninfo.bits_per_pixel);
 	}

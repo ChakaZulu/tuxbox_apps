@@ -1,4 +1,5 @@
-#include <ebase.h>
+#include "frontend.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,11 +8,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "edvb.h"
-#include "esection.h"
-#include "frontend.h"
-#include "decoder.h"
-
+#include <core/base/ebase.h>
+#include <core/dvb/edvb.h>
+#include <core/dvb/esection.h>
+#include <core/dvb/decoder.h>
 #include <core/system/econfig.h>
 
 eFrontend* eFrontend::frontend;
@@ -45,8 +45,8 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 		eConfig::getInstance()->setKey("/elitedvb/frontend/freqOffset", freq_offset);
 	}
 
-	printf("FreqOffset = %d\n", freq_offset);
-	
+	eDebug("FreqOffset = %d", freq_offset);
+
 	if (type==feCable)
 	{
 		lnbfreq_low=lnbfreq_hi=threshold=do_sec=0;
@@ -63,20 +63,20 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 
 void eFrontend::timeout()
 {
-	printf("status %x lock %d\n", Status(), Locked());
+	eDebug("status %x lock %d", Status(), Locked());
 	if (Locked())
 	{
-		printf("+\n");
+	  eDebug("+");
 		state=stateIdle;
 		/*emit*/ tunedIn(transponder, 0);
 	} else
 		if (--tries)
 		{
-			printf("-: %x\n", Status());
+			eDebug("-: %x", Status());
 			timer->start(100, true);
 		} else
 		{
-			printf("couldn't lock. (state: %x)\n", Status());
+			eDebug("couldn't lock. (state: %x)", Status());
 			state=stateIdle;
 			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
 		}
@@ -239,7 +239,7 @@ int eFrontend::tune(eTransponder *trans,
 		diseqc.params[0]|=2;
 		seq.voltage=SEC_VOLTAGE_18;
 	} else
-		printf("BLA was ist dass denn fuer eine pol.\n");
+		eDebug("BLA was ist dass denn fuer eine pol.");
 	
 	if (hi)
 		diseqc.params[0]|=1;
@@ -291,19 +291,19 @@ int eFrontend::tune(eTransponder *trans,
 		front.u.qpsk.FEC_inner=FEC_inner;
 		break;
 	}
-	printf("IF: %d %d\n", front.Frequency, seq.continuousTone);
+	eDebug("IF: %d %d", front.Frequency, seq.continuousTone);
 
-	printf("ok, sec etc. done\n");
+	eDebug("ok, sec etc. done");
 	if (ioctl(fd, FE_SET_FRONTEND, &front)<0)
 	{
 		perror("FE_SET_FRONTEND");
 		return -1;
 	}
-	printf("<--- FE_SET_FRONTEND\n");
+	eDebug("<--- FE_SET_FRONTEND");
 	state=stateTuning;
 	tries=10; // 1.0 second timeout
 	timer->start(50, true);
-	printf("<-- tuned\n");
+	eDebug("<-- tuned");
 	return 0;
 }
 

@@ -1,9 +1,5 @@
-#ifdef DBOX
-#define DEMUX "/dev/ost/demux0"
-#else
-#define DEMUX "/dev/demuxapi0"
-#endif
-#include <ebase.h>
+#include "esection.h"
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,15 +7,26 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/ioctl.h>
+
+#include <core/base/ebase.h>
+#include <core/base/eerror.h>
+
 #ifdef DBOX
-#include <ost/dmx.h>
+	#define DEMUX "/dev/ost/demux0"
 #else
-extern "C"
-{
-#include <xp/xp_osd_user.h>
-}
+	#define DEMUX "/dev/demuxapi0"
 #endif
-#include "esection.h"
+
+#ifdef DBOX
+	#include <ost/dmx.h>
+#else
+	extern "C"
+	{
+		#include <xp/xp_osd_user.h>
+	}
+#endif
+
+
 
 ePtrList<eSection> eSection::active;
 
@@ -52,11 +59,11 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 	close();
 
 	handle=::open(DEMUX, O_RDWR|O_NONBLOCK);
-	printf("opened handle %d\n", handle);
+	eDebug("opened handle %d", handle);
 	if (handle<0)
 	{
 		perror(DEMUX);
-		printf("DEMUX OPEN FAILED\n");
+		eDebug("DEMUX OPEN FAILED");
 		return -errno;
 	}
 
@@ -77,17 +84,18 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 	}
 
 #ifdef ESECTION_DEBUG
-	printf("%02x: ", pid);
+	eDebugNoNewLine("%02x: ", pid);
 	for (int i=0; i<DMX_FILTER_SIZE; i++)
-		printf("%02x ", secFilterParams.filter.filter[i]);
-	printf(" (napi)\n    ");
+		eDebugNoNewLine("%02x ", secFilterParams.filter.filter[i]);
+	eDebugNoNewLine(" (napi)\n    ");
 	for (int i=0; i<DMX_FILTER_SIZE; i++)
-		printf("%02x ", secFilterParams.filter.mask[i]);
-	printf("\n");
+		eDebugNoNewLine("%02x ", secFilterParams.filter.mask[i]);
+	eDebug("");
 #endif
 
 	if (ioctl(handle, DMX_SET_FILTER, &secFilterParams) < 0)
-	{
+	{	
+		perror("DMX_SET_FILTER\n");
 		::close(handle);
 		return -1;
 	}
@@ -110,20 +118,22 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 		len+=2;
 
 	secFilterParams.filter_length=len;
-	printf("%02x: ", pid);
+	eDebugNoNewLine("%02x: ", pid);
 	for (int i=0; i<len; i++)
-		printf("%02x ", secFilterParams.filter[i]);
-	printf("\n    ");
+		eDebugNoNewLine("%02x ", secFilterParams.filter[i]);
+	eDebugNoNewLine("\n    ");
 	for (int i=0; i<len; i++)
-		printf("%02x ", secFilterParams.mask[i]);
-	printf("\n");
+		eDebugNoNewLine("%02x ", secFilterParams.mask[i]);
+	eDebug("");
 	if (ioctl(handle, DEMUX_FILTER_SET, &secFilterParams))
 	{
+		perror("DEMUX_FILTER_SET\n");
 		::close(handle);
 		return -1;
 	}
 	if (ioctl(handle, DEMUX_START, 0))
 	{
+		perror("DEMUX_START\n");
 		::close(handle);
 		return -1;
 	}
@@ -180,7 +190,7 @@ eSection::~eSection()
 {
 	closeFilter();
 	if (lockcount)
-		printf("deleted still locked table\n");
+		eDebug("deleted still locked table");
 }
 
 int eSection::start()
@@ -239,7 +249,7 @@ void eSection::data(int socket)
 	while (max--)
 	{
 		if (lockcount)
-			printf("eSection::data on locked section!\n");
+			eDebug("eSection::data on locked section!\n");
 		timer->start(10000, true);
 		if (reader.read(buf))
 			break;
@@ -316,7 +326,7 @@ int eSection::unlock()
 	if (lockcount)
 		return lockcount--;
 	else
-		printf("unlocking while not locked\n");
+		eDebug("unlocking while not locked");
 	return 0;
 }
 

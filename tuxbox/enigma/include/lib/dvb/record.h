@@ -1,10 +1,11 @@
 #ifndef __record_h
 #define __record_h
 
+#include <include/libsig_comp.h>
 #include <core/base/ebase.h>
 #include <core/base/message.h>
 #include <core/base/thread.h>
-#include <libsig_comp.h>
+#include <core/base/eerror.h>
 
 /**
  * \brief The DVBRecorder

@@ -9,8 +9,6 @@
 #define AUDIO_DEV_AC3  "/dev/adec_ac3"
 #endif
 
-
-//#include <qobject.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -34,6 +32,7 @@ typedef unsigned char __u8;
 #endif
 
 #include "decoder.h"
+#include <core/base/eerror.h>
 
 decoderParameters Decoder::current;
 decoderParameters Decoder::parms;
@@ -75,7 +74,7 @@ static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int c
 	switch (lastpid=fork())
 	{
 	case -1:
-		printf("fork failed!\n");
+		eDebug("fork failed!");
 		return;
 	case 0:
 	{ 
@@ -86,7 +85,7 @@ static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int c
 #endif
 #ifdef USE_CAMD
 		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[4], descriptor, 0)<0)
-			perror("camd");
+			eDebug("camd");
 #endif
 
 		exit(0);
@@ -145,7 +144,7 @@ int Decoder::Set()
 #else
 	demux_pes_para pes_filter;
 #endif
-	 
+	
 	if (parms.vpid != current.vpid)
 		changed|=1;
 	if (parms.apid != current.apid)
@@ -167,13 +166,13 @@ int Decoder::Set()
 	if (parms.recordmode != current.recordmode)
 		changed|=0xF;
 
-	printf(" ------------> changed! %x\n", changed);
+	eDebug(" ------------> changed! %x", changed);
 
 	if (changed&9)													// stop decoding
 		if (fd.video!=-1)
 		{
 #ifdef DBOX
-			printf("VIDEO_STOP\n");
+			eDebug("VIDEO_STOP");
 			if (ioctl(fd.video, VIDEO_STOP, 1)<0)
 				perror("VIDEO_STOP\n");
 #else
@@ -207,7 +206,7 @@ int Decoder::Set()
 			close(fd.demux_pcr);
 		fd.demux_pcr=open(DEMUX_DEV, O_RDWR);
 		if (fd.demux_pcr<0)
-			perror(DEMUX_DEV);
+			eDebug(DEMUX_DEV);
 		else
 		{
 			pes_filter.pid=parms.pcrpid;
@@ -217,22 +216,22 @@ int Decoder::Set()
 			pes_filter.pesType=DMX_PES_PCR;
 			pes_filter.flags=0;
 			if (ioctl(fd.demux_pcr, DMX_SET_PES_FILTER, &pes_filter)<0)
-				perror("DMX_SET_PES_FILTER - PCR");
+				perror("DMX_SET_PES_FILTER - PCR\n");
 #else
 			pes_filter.output=OUT_DECODER;
 			pes_filter.pesType=DMX_PES_PCR;
 			if (ioctl(fd.demux_pcr, DEMUX_FILTER_PES_SET, &pes_filter)<0)
-				perror("DEMUX_FILTER_PES_SET - PCR");
+				perror("DEMUX_FILTER_PES_SET - PCR\n");
 #endif
 		}
 	}
 
 	if (changed&9)													// open decoder
-		if ((parms.vpid!=-1) || (parms.apid!=-1)) 
+		if ((parms.vpid!=-1) || (parms.apid!=-1))
 		{
 			fd.video=open(VIDEO_DEV, O_RDWR);
 			if (fd.video<0)
-				perror(VIDEO_DEV);
+				eDebug(VIDEO_DEV);
 		}
 
 	if (changed&9)													// start decoding
@@ -240,18 +239,18 @@ int Decoder::Set()
 		{
 #ifdef DBOX
 			videoStatus status;
-			printf("VIDEO_GET_STATUS, VIDEO_SELECT_SOURCE, VIDEO_PLAY\n");
+			eDebug("VIDEO_GET_STATUS, VIDEO_SELECT_SOURCE, VIDEO_PLAY");
 			if (ioctl(fd.video, VIDEO_GET_STATUS, &status)<0)
-				perror("VIDEO_GET_STATUS");
+				perror("VIDEO_GET_STATUS\n");
 //			if (status.streamSource != (videoStreamSource_t)VIDEO_SOURCE_DEMUX)//
 				if (ioctl(fd.video, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX)<0)
-					perror("VIDEO_SELECT_SOURCE");
+					perror("VIDEO_SELECT_SOURCE\n");
 			if (ioctl(fd.video, VIDEO_PLAY, 0)<0)
-				perror("VIDEO_PLAY");
+				perror("VIDEO_PLAY\n");
 #else
-			printf("VIDEO_SELECT_SOURCE, VIDEO_PLAY\n");
+			eDebug("VIDEO_SELECT_SOURCE, VIDEO_PLAY");
 			if (ioctl(fd.video, MPEG_VID_SELECT_SOURCE, 0)<0)
-				perror("MPEG_VID_SELECT_SOURCE");
+				perror("MPEG_VID_SELECT_SOURCE\n");
 			if (ioctl(fd.video, MPEG_VID_PLAY, 0)<0)
 				perror("MPEG_VID_PLAY");
 #endif
@@ -262,10 +261,10 @@ int Decoder::Set()
 	{
 		int fd=open(AUDIO_DEV, O_RDWR);
 		if (fd<0)
-			printf("couldn't set audio mode (%s) - maybe old driver?\n", strerror(errno));
+			eDebug("couldn't set audio mode (%s) - maybe old driver?", strerror(errno));
 		else
 		{
-			printf(" ----------------------------- setting audiomode to %d\n", (parms.audio_type==DECODE_AUDIO_MPEG)?1:0);
+			eDebug(" ----------------------------- setting audiomode to %d", (parms.audio_type==DECODE_AUDIO_MPEG)?1:0);
 			ioctl(fd, AUDIO_SET_BYPASS_MODE, (parms.audio_type==DECODE_AUDIO_MPEG)?1:0);
 			close(fd);
 		}
@@ -273,25 +272,25 @@ int Decoder::Set()
 #else
 	if (changed&0x102)
 	{	
-		printf("closing old (%d)\n", fd.audio);
+		eDebug("closing old (%d)", fd.audio);
 		if (fd.audio!=-1)
 			close(fd.audio);
 		if (parms.apid!=-1)
 		{
-			printf("opening new %s\n", (parms.audio_type==DECODE_AUDIO_MPEG)?AUDIO_DEV_MPEG:AUDIO_DEV_AC3);
+			eDebug("opening new %s", (parms.audio_type==DECODE_AUDIO_MPEG)?AUDIO_DEV_MPEG:AUDIO_DEV_AC3);
 			if (parms.audio_type==DECODE_AUDIO_MPEG)
 				fd.audio=open(AUDIO_DEV_MPEG, O_RDWR);
 			else
 				fd.audio=open(AUDIO_DEV_AC3, O_RDWR);
-			printf("it's you (%d)\n", fd.audio);
+			eDebug("it's you (%d)", fd.audio);
 			if (fd.audio<0)
-				perror((parms.audio_type==DECODE_AUDIO_MPEG)?AUDIO_DEV_MPEG:AUDIO_DEV_AC3);
+				eDebug((parms.audio_type==DECODE_AUDIO_MPEG)?AUDIO_DEV_MPEG:AUDIO_DEV_AC3);
 			if (ioctl(fd.audio, MPEG_AUD_SELECT_SOURCE, 0)<0)
-				perror("MPEG_AUD_SELECT_SOURCE");
+				perror("MPEG_AUD_SELECT_SOURCE\n");
 			if (ioctl(fd.audio, MPEG_AUD_SET_STREAM_TYPE, AUD_STREAM_TYPE_PES) < 0)
 				perror("MPEG_AUD_SET_STREAM_TYPE\n");
 			if (ioctl(fd.audio, MPEG_AUD_PLAY, 0)<0)
-				perror("MPEG_AUD_PLAY");
+				perror("MPEG_AUD_PLAY\n");
 		}
 	}
 #endif
@@ -300,7 +299,7 @@ int Decoder::Set()
 		if ((!parms.recordmode) && parms.vpid != -1)
 		{
 			fd.demux_video=open(DEMUX_DEV, O_RDWR);
-			printf("open pid %x -> video (%d)\n", parms.vpid, fd.demux_video);
+			eDebug("open pid %x -> video (%d)", parms.vpid, fd.demux_video);
 			pes_filter.pid		 = parms.vpid;
 #ifdef DBOX
 			pes_filter.input	 = DMX_IN_FRONTEND;
@@ -308,12 +307,12 @@ int Decoder::Set()
 			pes_filter.pesType = DMX_PES_VIDEO;
 			pes_filter.flags	 = 0;
 			if (ioctl(fd.demux_video, DMX_SET_PES_FILTER, &pes_filter)<0)
-				perror("DMX_SET_PES_FILTER - video");
+				perror("DMX_SET_PES_FILTER - video\n");
 #else
 			pes_filter.output  = OUT_DECODER;
 			pes_filter.pesType = DMX_PES_VIDEO;		// ok, es ist *KEIN* zufall :)
 			if (ioctl(fd.demux_video, DEMUX_FILTER_PES_SET, &pes_filter)<0)
-				perror("DMX_FILTER_PES_SET - video");
+				perror("DMX_FILTER_PES_SET - video\n");
 #endif
 		}
 
@@ -321,7 +320,7 @@ int Decoder::Set()
 		if ((!parms.recordmode) && parms.apid != -1)
 		{
 			fd.demux_audio=open(DEMUX_DEV, O_RDWR);
-			printf("open pid %x -> audio (%d)\n", parms.apid, fd.demux_audio);
+			eDebug("open pid %x -> audio (%d)", parms.apid, fd.demux_audio);
 			pes_filter.pid		 = parms.apid;
 #ifdef DBOX
 			pes_filter.input	 = DMX_IN_FRONTEND;
@@ -329,12 +328,12 @@ int Decoder::Set()
 			pes_filter.pesType = DMX_PES_AUDIO;
 			pes_filter.flags	 = 0;
 			if (ioctl(fd.demux_audio, DMX_SET_PES_FILTER, &pes_filter)<0)
-				perror("DMX_SET_PES_FILTER - audio");
+				perror("DMX_SET_PES_FILTER - audio\n");
 #else
 			pes_filter.output  = OUT_DECODER;
 			pes_filter.pesType = DMX_PES_AUDIO;
 			if (ioctl(fd.demux_audio, DEMUX_FILTER_PES_SET, &pes_filter)<0)
-				perror("DMX_FILTER_PES_SET - audio");
+				perror("DMX_FILTER_PES_SET - audio\n");
 #endif
 		}
 
@@ -351,39 +350,39 @@ int Decoder::Set()
   if (changed&8)
   	if ((!parms.recordmode) && (parms.pcrpid!=-1))
   	{
-			printf("start pcr\n");
+			eDebug("start pcr");
 #ifdef DBOX
 			if (ioctl(fd.demux_pcr, DMX_START,0)<0)	
-				perror("DMX_START");
+				perror("DMX_START\n");
 #else
 			if (ioctl(fd.demux_pcr, DEMUX_START,0)<0)
-				perror("DEMUX_START");
+				perror("DEMUX_START\n");
 #endif
 		}
 
   if (changed&1)
   	if ((!parms.recordmode) && (parms.vpid!=-1))
   	{
-			printf("start video\n");
+			eDebug("start video");
 #ifdef DBOX
 			if (ioctl(fd.demux_video, DMX_START,0)<0)
-				perror("DMX_START");
+				perror("DMX_START\n");
 #else
 			if (ioctl(fd.demux_video, DEMUX_START,0)<0)
-				perror("DEMUX_START");
+				perror("DEMUX_START\n");
 #endif
 		}
 
   if (changed&2)
   	if ((!parms.recordmode) && (parms.apid!=-1))
   	{
-			printf("start audio\n");
+			eDebug("start audio");
 #ifdef DBOX
 			if (ioctl(fd.demux_audio, DMX_START,0)<0)
-				perror("DMX_START");
+				perror("DMX_START\n");
 #else
 			if (ioctl(fd.demux_audio, DEMUX_START,0)<0)
-				perror("DEMUX_START");
+				perror("DEMUX_START\n");
 #endif
 		}
 

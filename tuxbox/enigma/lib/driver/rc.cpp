@@ -1,10 +1,13 @@
-#include <asm/types.h>
 #include "rc.h"
+
+#include <asm/types.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "init.h"
+
+#include <core/system/init.h>
 #include <core/system/econfig.h>
+#include <core/base/eerror.h>
 
 int eRCDevice::getKeyCompatibleCode(const eRCKey &) const
 {
@@ -51,7 +54,7 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 	handle=open(filename, O_RDONLY|O_NONBLOCK);
 	if (handle<0)
 	{
-		printf("failed to open %s\n", filename);
+		eDebug("failed to open %s\n", filename);
 		sn=0;
 	} else
 	{

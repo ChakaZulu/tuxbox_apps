@@ -1,8 +1,9 @@
-#include <time.h>
 #include "epgcache.h"
-#include "init.h"
-#include "lowlevel/dvb.h"
-#include "si.h"
+
+#include <time.h>
+#include <core/system/init.h>
+#include <core/dvb/lowlevel/dvb.h>
+#include <core/dvb/si.h>
 
 int eventData::CacheSize=0;
 
@@ -13,7 +14,7 @@ eEPGCache::eEPGCache():CleanTimer(eApp), zapTimer(eApp),
 			eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
 //eEPGCache::eEPGCache():eSection(0x12, 0x40, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xC0)
 {
-	printf("[EPGC] Initialized EPGCache\n");
+	eDebug("[EPGC] Initialized EPGCache");
 	isRunning=0;
 
 	CONNECT(eDVB::getInstance()->switchedService, eEPGCache::enterService);
@@ -60,7 +61,7 @@ int eEPGCache::sectionRead(__u8 *data)
 		{
 			stopEPG();
 			zapTimer.start(UPDATE_INTERVAL, 1);
-			printf("[EPGC] next update in %i min\n", UPDATE_INTERVAL / 60000);
+			eDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
 			
 			It = temp.begin();
 
@@ -109,7 +110,7 @@ void eEPGCache::cleanLoop()
 {
 	if (!eventDB.empty())
 	{
-		printf("[EPGC] start cleanloop\n");
+		eDebug("[EPGC] start cleanloop");
 		const eit_event_struct* cur_event;
 		int duration;
 		time_t TM;
@@ -124,7 +125,7 @@ void eEPGCache::cleanLoop()
 
 				if ( (time(0)+eDVB::getInstance()->time_difference) > (TM+duration))  // outdated entry ?
 				{
-					printf("[EPGC] delete old event\n");
+					eDebug("[EPGC] delete old event");
 					delete It->second;				// release Heap Memory for this entry   (new ....)
 					DBIt->second.erase(It);   // remove entry from map
 					It=DBIt->second.begin();  // start at begin
@@ -133,8 +134,8 @@ void eEPGCache::cleanLoop()
 					It=DBIt->second.end();  // ends this clean loop
 			}
 
-		printf("[EPGC] stop cleanloop\n");
-		printf("[EPGC] %i bytes for cache used\n", eventData::CacheSize);
+		eDebug("[EPGC] stop cleanloop");
+		eDebug("[EPGC] %i bytes for cache used", eventData::CacheSize);
 	}
 }
 

@@ -1,5 +1,6 @@
 #include "thread.h"
 #include <stdio.h>
+#include <core/base/eerror.h>
 
 void *eThread::wrapper(void *ptr)
 {
@@ -18,7 +19,7 @@ void eThread::run()
 
 eThread::~eThread()
 {
-	printf("waiting for thread shutdown\n");
+	printf("waiting for thread shutdown");
 	pthread_join(the_thread, 0);
 	printf("ok\n");
 }

@@ -2,9 +2,9 @@
 
 void eDVBRecorder::thread()
 {
-	printf("enter thread\n");
+	eDebug("enter thread");	
 	enter_loop();
-	printf("leave recording thread\n");
+	eDebug("leave recording thread");
 }
 
 void eDVBRecorder::gotMessage(const eDVBRecorderMessage &msg)
@@ -33,44 +33,44 @@ void eDVBRecorder::gotMessage(const eDVBRecorderMessage &msg)
 		s_exit();
 		break;
 	default:
-		printf("received unknown message!\n");
+		eDebug("received unknown message!");
 	}
 }
 
 void eDVBRecorder::s_open(const char *filename)
 {
-	printf("eDVBRecorder::s_open(%s)\n", filename);
+	eDebug("eDVBRecorder::s_open(%s)", filename);
 	delete[] filename;
 }
 
 void eDVBRecorder::s_addPID(int pid)
 {
-	printf("eDVBRecorder::s_addPID(0x%x)\n", pid);
+	eDebug("eDVBRecorder::s_addPID(0x%x)", pid);
 }
 
 void eDVBRecorder::s_removePID(int pid)
 {
-	printf("eDVBRecorder::s_removePID(0x%x)\n", pid);
+	eDebug("eDVBRecorder::s_removePID(0x%x)", pid);
 }
 
 void eDVBRecorder::s_start()
 {
-	printf("eDVBRecorder::s_start();\n");
+	eDebug("eDVBRecorder::s_start();");
 }
 
 void eDVBRecorder::s_stop()
 {
-	printf("eDVBRecorder::s_start();\n");
+	eDebug("eDVBRecorder::s_start();");
 }
 
 void eDVBRecorder::s_close()
 {
-	printf("eDVBRecorder::s_close\n");
+	eDebug("eDVBRecorder::s_close");
 }
 
 void eDVBRecorder::s_exit()
 {
-	printf("eDVBRecorder::s_exit()\n");
+	eDebug("eDVBRecorder::s_exit()");
 	exit_loop(); 
 }
 

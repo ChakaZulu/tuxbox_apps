@@ -2,6 +2,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <core/base/eerror.h>
 
 eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested, bool startnow): context(*context), fd(fd), state(0), requested(requested)
 {
@@ -139,7 +140,7 @@ void eMainloop::processOneEvent()
 		}
 	}
 	else if (ret<0)
-		printf("poll made error\n");
+		eDebug("poll made error\n");
 
 		// check Timers...
 	while ( TimerList && timeout_usec( TimerList.begin()->getNextActivation() ) <= 0 )

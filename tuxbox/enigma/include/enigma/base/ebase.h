@@ -2,13 +2,14 @@
 #define __ebase_h
 
 #include <vector>
-#include <eptrlist.h>
 #include <map>
-#include <libsig_comp.h>
 #include <sys/poll.h>
 #include <sys/time.h>
 #include <asm/types.h>
 #include <time.h>
+
+#include <include/libsig_comp.h>
+#include <core/base/eptrlist.h>
 
 class eApplication;
 

@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define __DEBUG__
-
 void eFatal(const char* fmt, ...)
 {
 	char buf[1024];
@@ -16,16 +14,25 @@ void eFatal(const char* fmt, ...)
 	exit(0);
 }
 
+#ifdef __DEBUG__
 void eDebug(const char* fmt, ...)
 {
-#ifdef __DEBUG__
 	char buf[1024];
 	va_list ap;
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
 	fprintf(stderr, "%s\n",buf );
-#endif //__DEBUG__
+}
+
+void eDebugNoNewLine(const char* fmt, ...)
+{
+	char buf[1024];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(buf, 1024, fmt, ap);
+	va_end(ap);
+	fprintf(stderr, "%s" ,buf );
 }
 
 void eWarning(const char* fmt, ...)
@@ -37,3 +44,4 @@ void eWarning(const char* fmt, ...)
 	va_end(ap);
 	fprintf(stderr, "%s\n",buf );
 }
+#endif // __DEBUG__

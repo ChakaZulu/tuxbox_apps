@@ -247,9 +247,9 @@ int eRCDeviceDBoxNew::getKeyCompatibleCode(const eRCKey &key) const
 		case 17: return eRCInput::RC_GREEN;
 		case 18: return eRCInput::RC_YELLOW;
 		case 19: return eRCInput::RC_RED;
+		case 21: return eRCInput::RC_PLUS;
 		case 20: return eRCInput::RC_BLUE;
 		case 22: return eRCInput::RC_MINUS;
-		case 21: return eRCInput::RC_PLUS;
 		case 23: return eRCInput::RC_HELP;
 		case 24: return eRCInput::RC_DBOX;
 		case 31: return eRCInput::RC_HOME;

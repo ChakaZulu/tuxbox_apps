@@ -1,19 +1,19 @@
 #include "si.h"
+
 #include <stdio.h>
 #include <time.h>
+#include <sstream>
+#include <iomanip>
 
 extern "C"
 {
 	time_t my_mktime (struct tm *tp);
 }
 #define HILO(x) (x##_hi << 8 | x##_lo) 
-#include "lowlevel/decode.h"
-#include "lowlevel/dvb.h"
-#include "lowlevel/pat.h"
-#include "lowlevel/sdt.h"
-#include "lowlevel/tdt.h"
-#include <sstream>
-#include <iomanip>
+#include <core/dvb/lowlevel/decode.h>
+#include <core/dvb/lowlevel/dvb.h>
+#include <core/dvb/lowlevel/pat.h>
+#include <core/dvb/lowlevel/tdt.h>
 
 static eString qHex(int v)
 {
@@ -1018,7 +1018,7 @@ int MHWEIT::sectionRead(__u8 *data)
 		return -1;
 		break;
 	default:
-		printf("bla falsche flags (%x)\n", HILO(table->flags));
+		eDebug("bla falsche flags (%x)", HILO(table->flags));
 		return -1;
 	}
 	available|=nownext?1:2;
