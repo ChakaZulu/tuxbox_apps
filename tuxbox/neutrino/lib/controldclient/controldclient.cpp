@@ -85,6 +85,19 @@ void CControldClient::setBoxType(char type)
 	send(true);
 }
 
+char CControldClient::getBoxType()
+{
+	char boxtype = 0;
+	int sockfd = -1;
+
+	remotemsg.version=1;
+	remotemsg.cmd=132;
+	sockfd = send(false);
+	read(sockfd, &boxtype, sizeof(boxtype));
+	close(sockfd);
+	return boxtype;
+}
+
 void CControldClient::setScartMode(char mode)
 {
 	remotemsg.version=1;
@@ -94,6 +107,21 @@ void CControldClient::setScartMode(char mode)
 
 	send(true);
 }
+
+/*
+char CControldClient::getScartMode()
+{
+	char scartmode = 0;
+	int sockfd = -1;
+
+	remotemsg.version=1;
+	remotemsg.cmd=132;
+	sockfd = send(false);
+	read(sockfd, &scartmode, sizeof(scartmode));
+	close(sockfd);
+	return scartmode;
+}
+*/
 
 void CControldClient::setVolume(char volume )
 {
@@ -129,6 +157,19 @@ void CControldClient::setVideoFormat(char format)
 
 }
 
+char CControldClient::getVideoFormat()
+{
+	char videoformat = 0;
+	int sockfd = -1;
+
+	remotemsg.version=1;
+	remotemsg.cmd=130;
+	sockfd = send(false);
+	read(sockfd, &videoformat, sizeof(videoformat));
+	close(sockfd);
+	return videoformat;
+}
+
 void CControldClient::setVideoOutput(char format)
 {
 	remotemsg.version=1;
@@ -137,6 +178,19 @@ void CControldClient::setVideoOutput(char format)
 	printf("sending VideoOutput: %d \n", format);
 
 	send(true);
+}
+
+char CControldClient::getVideoOutput()
+{
+	char videooutput = 0;
+	int sockfd = -1;
+
+	remotemsg.version=1;
+	remotemsg.cmd=130;
+	sockfd = send(false);
+	read(sockfd, &videooutput, sizeof(videooutput));
+	close(sockfd);
+	return videooutput;
 }
 
 

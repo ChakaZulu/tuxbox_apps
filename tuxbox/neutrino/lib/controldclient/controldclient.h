@@ -67,19 +67,99 @@ class CControldClient
 
 	public:
 
+		//VideoFormat
+		static const char VIDEOFORMAT_AUTO = 0;
+		static const char VIDEOFORMAT_4_3  = 1;
+		static const char VIDEOFORMAT_16_9 = 2;
+
+		//VideoOutput
+		static const char VIDEOOUTPUT_COMPOSITE = 0;
+		static const char VIDEOOUTPUT_SVIDEO    = 2;
+		static const char VIDEOOUTPUT_RGB       = 1;
+	
+		//mute
+		static const bool VOLUME_MUTE = true;
+		static const bool VOLUME_UNMUTE = false;
+
+		//BoxType
+		static const char BOXTYPE_NOKIA   = 1;
+		static const char BOXTYPE_SAGEM   = 2;
+		static const char BOXTYPE_PHILIPS = 3;
+	
+		//scartmode
+		static const char SCARTMODE_ON  = 1;
+		static const char SCARTMODE_OFF = 0;
+
+		/*
+			Konstruktor
+		*/
 		CControldClient();
+
+		/*
+			setVolume(char) : Setzten der Lautstärke
+			Parameter: 0..100 - 0=leise 100=laut
+		*/
 		void setVolume(char volume );
 		char getVolume();
-		void setVideoFormat(char);
-		void setVideoOutput(char);
-		void setBoxType(char);
-		void setScartMode(char);
 
-		void Mute();
-		void UnMute();
+		/*
+			setMute(bool) : setzen von Mute
+			Parameter: VOLUME_MUTE   = ton aus
+			           VOLUME_UNMUTE = ton an
+		*/
 		void setMute( bool );
 		char getMute();
 
+		/*
+			Mute() : Ton ausschalten
+		*/
+		void Mute();
+
+		/*
+			UnMute() : Ton wieder einschalten
+		*/
+		void UnMute();
+
+		/*
+			setVideoFormat(char) : Setzten des Bildformates ( 4:3 / 16:9 )
+			Parameter: VIDEOFORMAT_AUTO = auto
+			           VIDEOFORMAT_4_3  = 4:3
+			           VIDEOFORMAT_16_9 = 16:9
+		*/
+		void setVideoFormat(char);
+		char getVideoFormat();
+
+		/*
+			setVideoOutput(char) : Setzten des Videooutputs ( composite / svhs / rgb )
+			Parameter: VIDEOOUTPUT_COMPOSITE = composite video
+			           VIDEOOUTPUT_SVIDEO    = svhs video
+			           VIDEOOUTPUT_RGB       = rgb
+		*/
+		void setVideoOutput(char);
+		char getVideoOutput();
+
+		/*
+			setVideoOutput(char) : Setzten des Boxentyps ( nokia / sagem / philips )
+			Parameter: BOXTYPE_NOKIA   = nokia dbox
+			           BOXTYPE_SAGEM   = sagem
+			           BOXTYPE_PHILIPS = philips
+	
+		*/
+		void setBoxType(char);
+		char getBoxType();
+
+		/*
+			setVideoOutput(char) : Scartmode ( an / aus )
+			Parameter: SCARTMODE_ON  = auf scartinput schalten
+			           SCARTMODE_OFF = wieder dvb anzeigen
+
+	
+		*/
+		void setScartMode(char);
+
+		/*
+			die Dbox herunterfahren
+		*/
 		void shutdown();
 };
 
