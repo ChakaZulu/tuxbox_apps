@@ -117,7 +117,7 @@ void eTimerManager::actionHandler()
 				break;	
 
 				case ePlaylistEntry::RecTimerEntry:
-					nextAction = toggleRecording;
+					nextAction = startRecording;
 					actionHandler();
 				break;
 			}
@@ -161,7 +161,7 @@ void eTimerManager::actionHandler()
 					nextStartingEvent->type |= ePlaylistEntry::stateFinished;  // when no ErrorCode is set the we set the state to finished
 				if ( nextStartingEvent->type & ePlaylistEntry::RecTimerEntry )
 				{
-					nextAction=toggleRecording;
+					nextAction=stopRecording;
 					actionHandler();
 				}
 			}
@@ -228,8 +228,11 @@ void eTimerManager::actionHandler()
 		}
 		break;
 
-		case toggleRecording:
-			eZapMain::getInstance()->recordDVR(0);
+		case startRecording:
+			eZapMain::getInstance()->recordDVR(1, 0);
+		break;
+		case stopRecording:
+			eZapMain::getInstance()->recordDVR(0, 0);
 		break;
 
 		case restartRecording:

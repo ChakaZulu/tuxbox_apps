@@ -162,7 +162,9 @@ class eZapMain: public eWidget
 {
 public:
 	enum { modeTV, modeRadio, modeFile, modePlaylist, modeEnd };
-	enum { stateNormal, stateSleeping, stateInTimerMode, stateRecording, recDVR=8, recVCR=16 };
+	enum { stateNormal, stateSleeping, stateInTimerMode, stateRecording, 
+		stateMask=7,
+		recDVR=8, recVCR=16 };
 
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext,
@@ -222,7 +224,7 @@ private:
 	void handleNVODService(SDTEntry *sdtentry);
 	
 	// actions
-	void showServiceSelector(int dir);
+	void showServiceSelector(int dir, int selcurrent);
 	void nextService(int add=0);
 	void prevService();
 	void playlistNextService();
@@ -270,7 +272,7 @@ private:
 	static eZapMain *instance;
 	
 	eServicePath modeLast[modeEnd];
-	int mode, last_mode, state;
+	int mode, last_mode, state, oldstate;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
@@ -291,7 +293,7 @@ private:
 	void updateProgress();
 	void getPlaylistPosition();
 	void setPlaylistPosition();
-	bool handleState();
+	bool handleState(int notimer);
 public:
 	void postMessage(const eZapMessage &message, int clear=0);
 	void gotMessage(const int &);
@@ -309,7 +311,7 @@ public:
 		psDontAdd=8, // just play
 	};
 	void playService(const eServiceReference &service, int flags);
-	void recordDVR(int user);	// starts recording
+	int recordDVR(int onoff, int user, eString name="");	// starts recording
 //////////////////////////////
 
 	void setMode(int mode, int user=0); // user made change?

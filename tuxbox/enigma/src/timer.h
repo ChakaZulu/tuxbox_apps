@@ -15,7 +15,7 @@ class eTimerManager: public Object
 	{
 		zap, showMessage, startCountdown, setNextEvent,
 		startEvent, pauseEvent, restartEvent, stopEvent,
-		toggleRecording, restartRecording, pauseRecording
+		startRecording, stopRecording, restartRecording, pauseRecording
 	};
 	int nextAction;
 

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.6 2002/10/15 23:31:29 Ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.7 2002/10/31 16:00:43 tmbinc Exp $
  */
 
 #include <enigma_info.h>
@@ -75,9 +75,34 @@ void eZapInfo::sel_bnversion()
 	show();
 }
 
+static eString getVersionInfo(const char *info)
+{
+	FILE *f=fopen("/.version", "rt");
+	if (!f)
+		return "";
+	eString result;
+	while (1)
+	{
+		char buffer[128];
+		if (!fgets(buffer, 128, f))
+			break;
+		if (strlen(buffer))
+			buffer[strlen(buffer)-1]=0;
+		if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)]=='=')))
+		{
+			int i = strlen(info)+1;
+			result = eString(buffer).mid(i, strlen(buffer)-i);
+			break;
+		}
+	}	
+	fclose(f);
+	return result;
+}
+
+
 class eAboutScreen: public eWindow
 {
-	eLabel *machine, *processor, *frontend, *harddisks, *vendor, *dreamlogo;
+	eLabel *machine, *processor, *frontend, *harddisks, *vendor, *dreamlogo, *version;
 	eButton *okButton;
 public:
 	eAboutScreen()
@@ -104,6 +129,9 @@ public:
 		
 		dreamlogo=new eLabel(this);
 		dreamlogo->setName("dreamlogo");
+
+		version=new eLabel(this);
+		version->setName("version");
 
 		if (eSkin::getActive()->build(this, "eAboutScreen"))
 			eFatal("skin load of \"eAboutScreen\" failed");
@@ -229,8 +257,28 @@ public:
 		}
 		
 		if (sharddisks == "")
-			sharddisks="keine";
+			sharddisks=_("keine");
 		harddisks->setText(sharddisks);
+		
+		{
+			eString verid=getVersionInfo("version");
+			if (!verid)
+				version->setText(_("unknown"));
+			else
+			{
+				int type=atoi(verid.left(1).c_str());
+				char *typea[3];
+				typea[0]=_("release");
+				typea[1]=_("beta");
+				typea[2]=_("internal");
+				eString ver=verid.mid(1, 3);
+				eString date=verid.mid(4, 8);
+//				eString time=verid.mid(12, 4);
+				version->setText(
+					eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]
+						+ ", " + date.mid(6, 2) + "." + date.mid(4,2) + "." + date.left(4));
+			}
+		}
 
 		CONNECT(okButton->selected, eWidget::accept);
 	}

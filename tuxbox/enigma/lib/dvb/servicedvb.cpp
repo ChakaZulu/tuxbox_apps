@@ -33,6 +33,7 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 	
 	slice=0;
 	struct stat s;
+	filelength=0;
 	while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
 	{
 		filelength+=s.st_size/1880;
@@ -418,7 +419,7 @@ int eServiceHandlerDVB::play(const eServiceReference &service)
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (service.type != eServiceReference::idDVB)
 		return -1;
-	int oldflags=flags;
+//	int oldflags=flags;
 	if (service.path.length())
 	{
 		decoder=new eDVRPlayerThread(service.path.c_str(), this);

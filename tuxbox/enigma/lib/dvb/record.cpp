@@ -8,13 +8,22 @@ void eDVBRecorder::dataAvailable(int what)
 {
 	const int BSIZE=16*1024;
 	char buffer[BSIZE];
+	int res;
 	int r=::read(dvrfd, buffer, BSIZE);
 	if (r<=0)
 	{
 		eDebug("reading failed..(err %d)", -r);
 		return;
 	}
-	size+=::write(outfd, buffer, r);
+	res=::write(outfd, buffer, r);
+	if (res <= 0)
+	{
+		eDebug("recording write error, maybe disk full");
+		s_close();
+		rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
+		return;
+	}
+	size+=res;
 	if (size > splitsize)
 		openFile(++splits);
 }
@@ -24,6 +33,18 @@ void eDVBRecorder::thread()
 	messagepump.start();
 	enter_loop();
 	lock.unlock();
+}
+
+void eDVBRecorder::gotBackMessage(const eDVBRecorderMessage &msg)
+{
+	switch (msg.code)
+	{
+	case eDVBRecorderMessage::rWriteError:
+		recMessage(recWriteError);
+		break;
+	default:
+		break;
+	}
 }
 
 void eDVBRecorder::gotMessage(const eDVBRecorderMessage &msg)
@@ -195,9 +216,10 @@ void eDVBRecorder::s_exit()
 	exit_loop(); 
 }
 
-eDVBRecorder::eDVBRecorder(): messagepump(this, 1)
+eDVBRecorder::eDVBRecorder(): messagepump(this, 1), rmessagepump(this, 1)
 {
 	CONNECT(messagepump.recv_msg, eDVBRecorder::gotMessage);
+	CONNECT(rmessagepump.recv_msg, eDVBRecorder::gotBackMessage);
 	lock.lock();
 	run();
 }

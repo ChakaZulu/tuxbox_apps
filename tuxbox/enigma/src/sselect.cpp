@@ -851,7 +851,6 @@ const eServiceReference *eServiceSelector::choose(int irc)
 {
 	ASSERT(this);
 	services->beginAtomic();
-	selectService( eServiceInterface::getInstance()->service );
 	result=0;
 
 	switch (irc)

@@ -48,7 +48,8 @@ public:
 	int type;
 	enum
 	{
-		eventTunedIn, 
+		eventTunedIn,
+		eventRecordWriteError,
 		eventUser,
 	};
 	int err;
@@ -91,6 +92,8 @@ public:
 class eDVB: public Object
 {
 	static eDVB *instance;
+
+	void recMessage(int);
 public:
 		/** tables for current service/transponder */
 	eAUTable<PAT> tPAT;

@@ -70,26 +70,25 @@ void eLabel::setAlign(int align)
 
 void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 {
-	eRect area;
+	eRect area=eRect(ePoint(0, 0), ePoint(width(), height()));
 
 	if (deco_selected && have_focus)
 	{
 		deco_selected.drawDecoration(target, ePoint(width(), height()));
 		area=crect_selected;
-	}
-	else if (deco)
+	} else if (deco)
 	{
 		deco.drawDecoration(target, ePoint(width(), height()));
 		area=crect;
 	}
-	else
-		area = rc;
 
 	if (text.length())
 	{
 		if ( area.size().height() < size.height() || area.size().width() < size.width() )  // then deco is drawed
-			validate( &area.size() );
-		else
+		{
+			eSize s=area.size();
+			validate( &s );
+		} else
 			validate();
 
 		if (flags & flagVCenter)
@@ -103,7 +102,7 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 		target->renderPara(*para, ePoint( area.left(), area.top()+yOffs) );
 	}
 	if (pixmap)
-		target->blit(*pixmap, pixmap_position, eRect(), (blitFlags & BF_ALPHATEST) ? gPixmap::blitAlphaTest : 0);
+		target->blit(*pixmap, pixmap_position, area, (blitFlags & BF_ALPHATEST) ? gPixmap::blitAlphaTest : 0);
 }
 
 int eLabel::eventHandler(const eWidgetEvent &event)

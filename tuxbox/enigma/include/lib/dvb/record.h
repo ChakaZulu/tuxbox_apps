@@ -24,7 +24,8 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 	{
 		enum eCode
 		{
-			mOpen, mAddPID, mRemovePID, mRemoveAllPIDs, mClose, mStart, mStop, mExit
+			mOpen, mAddPID, mRemovePID, mRemoveAllPIDs, mClose, mStart, mStop, mExit,
+			rWriteError, // disk full etc.
 		} code;
 		union
 		{
@@ -36,7 +37,6 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 		eDVBRecorderMessage(eCode code, const char *filename): code(code), filename(filename) { }
 		eDVBRecorderMessage(eCode code, int pid): code(code), pid(pid) { }
 	};
-	
 	struct pid_t
 	{
 		int pid;
@@ -63,8 +63,10 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 	void dataAvailable(int what);
 
 	eFixedMessagePump<eDVBRecorderMessage> messagepump;
+	eFixedMessagePump<eDVBRecorderMessage> rmessagepump;
 	void thread();
 	void gotMessage(const eDVBRecorderMessage &msg);
+	void gotBackMessage(const eDVBRecorderMessage &msg);
 
 	void s_open(const char *filename);
 	void s_addPID(int pid);
@@ -151,6 +153,9 @@ public:
 	{
 		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mClose));
 	}
+
+	enum { recWriteError };
+	Signal1<void,int> recMessage;
 };
 
 #endif

@@ -150,6 +150,16 @@ eDVB::~eDVB()
 	instance=0;
 }
 
+void eDVB::recMessage(int msg)
+{
+	switch (msg)
+	{
+	case eDVBRecorder::recWriteError:
+		event(eDVBEvent(eDVBEvent::eventRecordWriteError));
+		break;
+	}
+}
+
 eString eDVB::getInfo(const char *info)
 {
 	FILE *f=fopen("/proc/bus/dbox", "rt");
@@ -245,6 +255,7 @@ void eDVB::recBegin(const char *filename)
 		recEnd();
 	recorder=new eDVBRecorder();
 	recorder->open(filename);
+	CONNECT(recorder->recMessage, eDVB::recMessage);
 	if (Decoder::parms.apid != -1)		// todo! get pids from PMT
 		recorder->addPID(Decoder::parms.apid);
 	if (Decoder::parms.vpid != -1)

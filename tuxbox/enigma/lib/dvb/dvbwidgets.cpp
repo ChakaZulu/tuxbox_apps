@@ -42,7 +42,7 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	l = new eLabel(this);
 	l->setName( "lFreq" );
 
-	int init[5]={1,2,3,4,5};
+	int init[5]={0,0,0,0,0};
 	frequency=new eNumber(this, 5, 0, 9, 1, init, 0, l, edit);
 	frequency->setName("frequency");
 	
@@ -144,9 +144,10 @@ struct selectSat: public std::unary_function<eListBoxEntryText&, void>
 
 	bool operator()(eListBoxEntryText& e)
 	{
+		eDebug("we have %d, we want %d",((eSatellite*)e.getKey())->getOrbitalPosition(), t->satellite.orbital_position );
 		if ( ((eSatellite*)e.getKey())->getOrbitalPosition() == t->satellite.orbital_position )
 		{
-	 		l->setCurrent(&e);
+			l->setCurrent(&e);
 			return 1;
 		}
 		return 0;
@@ -183,12 +184,14 @@ int eTransponderWidget::setTransponder(const eTransponder *transponder)
 		symbolrate->setNumber(transponder->satellite.symbol_rate/1000);
 		
 		inversion->setCheck(transponder->satellite.inversion);
+		eDebug("sat check !!!");
 
 		if ( sat->forEachEntry(selectSat(transponder, sat)) != eListBoxBase::OK )
     {
       eDebug("bla");
 			sat->setCurrent(0);
     }
+    eDebug("ok");
 
 		break;
 	}
@@ -218,12 +221,18 @@ int eTransponderWidget::getTransponder(eTransponder *transponder)
 
 int eFEStatusWidget::eventHandler(const eWidgetEvent &event)
 {
+	eDebug("fe status widget: event %d", event.type);
 	switch (event.type)
 	{
+	case eWidgetEvent::gotFocus:
+		if (!isVisible())
+			break;
+		// fall through
 	case eWidgetEvent::willShow:
 		updatetimer.start(500);
 		update();
 		break;
+	case eWidgetEvent::lostFocus:
 	case eWidgetEvent::willHide:
 		updatetimer.stop();
 		break;

@@ -101,6 +101,8 @@
 			<action name="repeatSkipR" key="red" flags="r" />
 			<action name="stopSkipR" key="red" flags="b" />
 			
+			<action name="stop" key="tv" flags="m" />
+
 			<action name="showBouquets" key="bouqup" flags="m" />
 			<action name="showFavourites" key="bouqdown" flags="m" />
 

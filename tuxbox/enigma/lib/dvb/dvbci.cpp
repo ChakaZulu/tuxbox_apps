@@ -55,7 +55,7 @@ eDVBCI::eDVBCI():pollTimer(this),messages(this, 1)
 	
 	memset(appName,0,sizeof(appName));
 
-  run();
+//  run();
 }
 
 void eDVBCI::thread()
@@ -135,12 +135,13 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		CAPMTlen+=5;
 		break;
 	case eDVBCIMessage::go:
-		eDebug("[DVBCI] got go message..");
+		eDebug("[DVBCI] got go message.. cadescrpos %d", CAPMTdescrpos);
 		CAPMT[7]=CAPMTlen-8;
 		CAPMT[CAPMTdescrpos]=(CAPMTdescrlen >> 8);
 		CAPMT[CAPMTdescrpos+1]=(CAPMTdescrlen & 0xff);
 		if(ci_state)
 			sendCAPMT();
+		eDebug("go ok");
 		break;
 	case eDVBCIMessage::exit:
 		eDebug("[DVBCI] got exit message..");
