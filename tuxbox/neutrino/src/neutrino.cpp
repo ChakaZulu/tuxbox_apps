@@ -45,7 +45,7 @@
 
 #include <sys/socket.h>
 
-#include <tuxbox.h>
+#include <libtuxbox.h>
 
 #include <iostream>
 #include <fstream>
@@ -3368,7 +3368,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.414 2003/02/17 14:37:25 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.415 2003/02/19 14:44:37 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
