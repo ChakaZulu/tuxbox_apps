@@ -58,11 +58,16 @@
 			<action name="right" key="right" flags="mr" />
 		</actionmap>
 
-		<actionmap name="list">
+		<actionmap name="list" style="default" descr="Default (Enigma)" >
 			<action name="pagedown" key="right" flags="mr" />
 			<action name="pageup" key="left" flags="mr" />
 		</actionmap>
 
+		<actionmap name="list" style="classic" descr="Classic (Neutrino)" >
+			<action name="pagedown" key="-" flags="mr" />
+			<action name="pageup" key="+" flags="mr" />
+		</actionmap>
+				
 		<actionmap name="mainmenu">
 			<action name="close" key="d-box" flags="mr" />
 			<action name="prev" key="left" flags="mr" />
@@ -131,11 +136,16 @@
 			<action name="showExtendedInfo" key="?" flags="m" />
 		</actionmap>
 
-		<actionmap name="serviceSelector">
+		<actionmap name="serviceSelector" style="default" descr="Default (Enigma)" >
 			<action name="nextBouquet" key="+" flags="mr" />
 			<action name="prevBouquet" key="-" flags="mr" />
 		</actionmap>
 
+		<actionmap name="serviceSelector" style="classic" descr="Classic (Neutrino)" >
+			<action name="nextBouquet" key="right" flags="mr" />
+			<action name="prevBouquet" key="left" flags="mr" />
+		</actionmap>
+		
 		<actionmap name="serviceSelector" style="sselect_default">
 			<action name="toggleStyle" key="mute" flags="m" />
 			<action name="showEPGSelector" key="?" flags="m" />
