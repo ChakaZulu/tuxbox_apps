@@ -60,22 +60,19 @@ int CRCLock::exec(CMenuTarget* parent, const std::string &actionKey)
 		return menu_return::RETURN_EXIT_ALL;
 
 	// -- Lockup Box	
-	lockBox(parent != NULL);
+	lockBox();
 
 	ShowLocalizedMessage(LOCALE_RCLOCK_TITLE, LOCALE_RCLOCK_UNLOCKMSG, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO,450, no_input ? 5 : -1);
 	return  menu_return::RETURN_EXIT_ALL;
 }
 
-void CRCLock::lockBox(bool set_tvmode)
+void CRCLock::lockBox()
 {
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
 
 	unsigned long long timeoutEnd;
 
-	// if called by menu restore LCD
-	if (set_tvmode)
-		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	// -- Loop until release key pressed
 	// -- Key sequence:  <RED> <DBOX> within 5 secs
 	while  (1) {
@@ -101,7 +98,7 @@ void CRCLock::lockBox(bool set_tvmode)
 		if (msg >  CRCInput::RC_MaxRC) {
 			CNeutrinoApp::getInstance()->handleMsg(msg, data); 
 		} else {
-			CLCD::getInstance()->showRCLock(set_tvmode);
+			CLCD::getInstance()->showRCLock();
 			// Since showRCLock blocks 2secs for each key we eat all
 			// messages created during this time. Hopefully this ok...
 			g_RCInput->clearRCMsg();
