@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.18 2004/05/01 09:03:49 ghostrider Exp $
+ * $Id: setupskin.cpp,v 1.19 2004/06/12 14:06:53 ghostrider Exp $
  */
 
 #include <setupskin.h>
@@ -117,7 +117,7 @@ eSkinSetup::eSkinSetup()
 	baccept->setName("accept");
 	lskins=new eListBox<eListBoxEntrySkin>(this);
 	lskins->setName("skins");
-	lskins->setFlags(eListBoxBase::flagNoPageMovement);
+	lskins->setFlags(eListBoxBase::flagLostFocusOnLast);
 	statusbar=new eStatusBar(this);
 	statusbar->setName("statusbar");
 

@@ -451,7 +451,9 @@ eZapNetworkSetup::eZapNetworkSetup():
 	combo_type->loadDeco();
 	combo_type->setHelpText(_("press ok to change connection type"));
 	((eZapNetworkSetup*)combo_type)->setProperty("showEntryHelp", "");
+#ifdef ENABLE_PPPOE
 	if ( !connectionType )
+#endif
 	{
 		sel = new eListBoxEntryText( *combo_type, _("LAN"), (void*)0, 0, _("communicate to Local Area Network"));
 #ifdef ENABLE_PPPOE

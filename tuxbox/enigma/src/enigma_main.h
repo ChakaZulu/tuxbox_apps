@@ -187,7 +187,7 @@ class eAudioSelector: public eListBoxWindow<AudioStream>
 	void selected(AudioStream *);
 	eAudioDynamicConfig *m_dyncfg;
 	int eventHandler(const eWidgetEvent &);
-	eListBox<eListBoxEntryText> *m_subtitles;
+	eListBox<eListBoxEntryText> *m_subtitles, *m_stereo_mono;
 	void subtitleSelected(eListBoxEntryText *entry);
 public:
 	eAudioSelector();
@@ -200,6 +200,9 @@ public:
 class ePSAudioSelector: public eListBoxWindow<eListBoxEntryText>
 {
 	void selected(eListBoxEntryText *);
+	int eventHandler(const eWidgetEvent &);	
+	eAudioDynamicConfig *m_dyncfg;
+	eListBox<eListBoxEntryText> *m_stereo_mono;
 public:
 	int getCount() { return list.getCount(); }
 	ePSAudioSelector();

@@ -74,7 +74,7 @@ RotorConfig::RotorConfig(eLNB *lnb )
 	new eListBoxEntryText( *LaDirection, _("South"), (void*)eDiSEqC::SOUTH, 0, _("South") );
 
 	positions = new eListBox< eListBoxEntryText >( this );
-	positions->setFlags( eListBoxBase::flagNoPageMovement );
+	positions->setFlags( eListBoxBase::flagLostFocusOnFirst|eListBoxBase::flagLostFocusOnLast );
 	positions->setName("positions");
 	positions->hide();
 
@@ -255,7 +255,7 @@ void RotorConfig::setLNBData( eLNB *lnb )
 	if ( lnb )
 	{
 		for ( std::map<int, int>::iterator it ( DiSEqC.RotorTable.begin() ); it != DiSEqC.RotorTable.end(); it++ )
-			new eListBoxEntryText( positions, eString().sprintf(" %d / %03d %c", it->second, abs(it->first), it->first > 0 ? 'E' : 'W'), (void*) it->first );
+			new eListBoxEntryText( positions, eString().sprintf(" %d / %d.%d%c", it->second, abs(it->first)/10, abs(it->first)%10, it->first > 0 ? 'E' : 'W'), (void*) it->first );
 
 		useGotoXX->setCheck( (int) (lnb->getDiSEqC().useGotoXX & 1 ? 1 : 0) );
 		gotoXXChanged( (int) lnb->getDiSEqC().useGotoXX & 1 );
@@ -328,9 +328,10 @@ void RotorConfig::onAdd()
 {
 	positions->beginAtomic();
 
-	new eListBoxEntryText( positions,eString().sprintf(" %d / %03d %c",
+	new eListBoxEntryText( positions,eString().sprintf(" %d / %d.%d%c",
 																											number->getNumber(),
-																											orbital_position->getNumber(),
+																											orbital_position->getNumber()/10,
+																											orbital_position->getNumber()%10,
 																											direction->getCurrent()->getKey() ? 'W':'E'
 																										),
 													(void*) ( direction->getCurrent()->getKey()

@@ -533,26 +533,21 @@ void eVideoSelector::add(PMTEntry *stream)
 
 struct updateAudioStream
 {
-	int cnt;
 	std::list<eDVBServiceController::audioStream> &astreams;
 	updateAudioStream(std::list<eDVBServiceController::audioStream> &astreams)
-		:cnt(0), astreams(astreams)
+		:astreams(astreams)
 	{
 	}
 
 	bool operator()(AudioStream& stream)
 	{
-		++cnt;
-		if ( cnt>2 )
+		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin()); it != astreams.end(); ++it )
 		{
-			for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin()); it != astreams.end(); ++it )
+			if (it->pmtentry->elementary_PID == stream.stream.pmtentry->elementary_PID )
 			{
-				if (it->pmtentry->elementary_PID == stream.stream.pmtentry->elementary_PID )
-				{
-					stream.stream.text = it->text;
-					stream.update();
-					break;
-				}
+				stream.stream.text = it->text;
+				stream.update();
+				break;
 			}
 		}
 		return false;
@@ -563,16 +558,35 @@ struct selectCurAudioStream
 {
 	int pid;
 	eListBox<AudioStream> &lb;
-	int cnt;
 	selectCurAudioStream( int pid, eListBox<AudioStream> &lb )
-		:pid(pid), lb(lb), cnt(0)
+		:pid(pid), lb(lb)
 	{
 	}
 
 	bool operator()(AudioStream& stream)
 	{
-		++cnt;
-		if ( cnt>2 && stream.stream.pmtentry->elementary_PID == pid )
+		if ( stream.stream.pmtentry->elementary_PID == pid )
+		{
+			lb.setCurrent( &stream );
+			return true;
+		}
+		return false;
+	}
+};
+
+struct selectCurSubtitleStream
+{
+	int pid;
+	eListBox<eListBoxEntryText> &lb;
+	selectCurSubtitleStream( int pid, eListBox<eListBoxEntryText> &lb )
+		:pid(pid), lb(lb)
+	{
+	}
+
+	bool operator()(eListBoxEntryText& stream)
+	{
+		PMTEntry *e = (PMTEntry*)stream.getKey();
+		if ( (e && e->elementary_PID == pid) || (!e && pid == -1) )
 		{
 			lb.setCurrent( &stream );
 			return true;
@@ -618,7 +632,7 @@ void ePSAudioSelector::selected(eListBoxEntryText*l)
 		close(0);
 }
 
-void AudioChannelSelectionChanged1( eListBoxEntryText *e )
+void AudioChannelSelectionChanged( eListBoxEntryText *e )
 {
 	int sel=-1;
 	if ( e )
@@ -640,30 +654,46 @@ void AudioChannelSelectionChanged1( eListBoxEntryText *e )
 		eAVSwitch::getInstance()->selectAudioChannel(sel);
 }
 
-void AudioChannelSelectionChanged2( AudioStream *e )
-{
-	AudioChannelSelectionChanged1((eListBoxEntryText*)e);
-}
-
 ePSAudioSelector::ePSAudioSelector()
 	:eListBoxWindow<eListBoxEntryText>(_("Audio"), 10, 330)
 {
 	move(ePoint(200, 120));
-	list.selchanged.connect( slot(AudioChannelSelectionChanged1) );
 	CONNECT(list.selected, ePSAudioSelector::selected);
+
+	list.setFlags( eListBoxBase::flagLostFocusOnFirst );
+	m_stereo_mono = new eListBox<eListBoxEntryText>(this);
+	m_stereo_mono->loadDeco();
+	m_stereo_mono->move(list.getPosition());
+	m_stereo_mono->resize(eSize(getClientSize().width()-20, 35));
+	m_stereo_mono->setFlags( eListBoxBase::flagNoUpDownMovement );
+
+	ePtrList<eWidget> *focuslist = getTLW()->focusList();
+	focuslist->remove(m_stereo_mono);
+	focuslist->push_front(m_stereo_mono);
+
+	new eListBoxEntryText(m_stereo_mono, _("   Left Mono  >"), (void*) -1, (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("<  Stereo  >"), (void*) -3 , (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("<  Right Mono  "), (void*) -2, (int)eTextPara::dirCenter );
+	m_stereo_mono->selchanged.connect( slot( AudioChannelSelectionChanged ) );
+	ePoint p(0,40);
+	list.move(m_stereo_mono->getPosition()+p);
+
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	{
+		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-105));
+		m_dyncfg = new eAudioDynamicConfig(this);
+		m_dyncfg->move(ePoint(10, getClientSize().height()-60));
+		m_dyncfg->resize(eSize(getClientSize().width()-20, 50));
+	}
+	else
+		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-40));
 }
 
 void ePSAudioSelector::clear()
 {
-	list.beginAtomic();
 	list.clearList();
-	eListBoxEntryMulti *e = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("press left or right to change") );
-	e->add( _("   Left Mono  >"), -1 );
-	e->add( _("<  Stereo  >"), -3 );
-	e->add( _("<  Right Mono  "), -2 );
-	e->setCurrent(-3);
-	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
-	list.endAtomic();
+	m_stereo_mono->moveSelection(eListBoxBase::dirFirst,false);
+	m_stereo_mono->goNext();
 }
 
 void ePSAudioSelector::add(unsigned int id)
@@ -673,6 +703,19 @@ void ePSAudioSelector::add(unsigned int id)
 	new eListBoxEntryText(&list, (id&0xFF)==0xBD ?
 		_("Audiotrack(AC3)") : _("Audiotrack"), (void*)id );
 	list.endAtomic();
+}
+
+int ePSAudioSelector::eventHandler(const eWidgetEvent &e)
+{
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			setFocus(&list);
+			return 1;
+		default:
+			break;
+	}
+	return eWindow::eventHandler(e);
 }
 
 void eAudioSelector::subtitleSelected(eListBoxEntryText *entry)
@@ -693,6 +736,7 @@ void eAudioSelector::subtitleSelected(eListBoxEntryText *entry)
 		} else
 			i->stop();
 	}
+	close(0);
 }
 
 void eAudioSelector::update(std::list<eDVBServiceController::audioStream>& lst)
@@ -705,7 +749,8 @@ extern eString getISO639Description(char *iso);
 void eAudioSelector::addSubtitle(const PMTEntry *entry)
 {
 	m_subtitles->show();
-	
+	list.setFlags( eListBoxBase::flagLostFocusOnLast );
+
 	eString description;
 	description.sprintf("PID %04x", entry->elementary_PID);
 
@@ -734,7 +779,7 @@ void eAudioSelector::addSubtitle(const PMTEntry *entry)
 		
 	}
 end:
-	new eListBoxEntryText(m_subtitles, description, (void*)entry );
+	new eListBoxEntryText(m_subtitles, description, (void*)entry, eTextPara::dirCenter );
 }
 
 int eAudioSelector::eventHandler(const eWidgetEvent &e)
@@ -743,6 +788,8 @@ int eAudioSelector::eventHandler(const eWidgetEvent &e)
 	{
 		case eWidgetEvent::execBegin:
 			list.forEachEntry(selectCurAudioStream(Decoder::current.apid, list));
+			m_subtitles->forEachEntry(selectCurSubtitleStream(eSubtitleWidget::getInstance()->getCurPid(), *m_subtitles ));
+			setFocus(&list);
 			return 1;
 		default:
 			break;
@@ -771,30 +818,44 @@ eAudioSelector::eAudioSelector()
 {
 	move(ePoint(200, 120));
 	CONNECT(list.selected, eAudioSelector::selected);
-	list.selchanged.connect( slot( AudioChannelSelectionChanged2 ) );
-	list.setFlags( eListBoxBase::flagNoPageMovement );
-	
+
+	list.setFlags( eListBoxBase::flagLostFocusOnFirst );
+	m_stereo_mono = new eListBox<eListBoxEntryText>(this);
+	m_stereo_mono->loadDeco();
+	m_stereo_mono->move(list.getPosition());
+	m_stereo_mono->resize(eSize(getClientSize().width()-20, 35));
+	m_stereo_mono->setFlags( eListBoxBase::flagNoUpDownMovement );
+
+	ePtrList<eWidget> *focuslist = getTLW()->focusList();
+	focuslist->remove(m_stereo_mono);
+	focuslist->push_front(m_stereo_mono);
+
+	new eListBoxEntryText(m_stereo_mono, _("   Left Mono  >"), (void*) -1, (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("<  Stereo  >"), (void*) -3 , (int)eTextPara::dirCenter );
+	new eListBoxEntryText(m_stereo_mono, _("<  Right Mono  "), (void*) -2, (int)eTextPara::dirCenter );
+	m_stereo_mono->selchanged.connect( slot( AudioChannelSelectionChanged ) );
+	ePoint p(0,40);
+	list.move(m_stereo_mono->getPosition()+p);
+
 	m_subtitles = new eListBox<eListBoxEntryText>(this);
 	m_subtitles->loadDeco();
-	
 	CONNECT(m_subtitles->selected, eAudioSelector::subtitleSelected);
 
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 	{
-		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-115));
+		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-140));
 		m_dyncfg = new eAudioDynamicConfig(this);
-		m_dyncfg->move(ePoint(10, getClientSize().height()-65));
+		m_dyncfg->move(ePoint(10, getClientSize().height()-60));
 		m_dyncfg->resize(eSize(getClientSize().width()-20, 50));
-		m_subtitles->move(ePoint(10, getClientSize().height()-105));
+		m_subtitles->move(ePoint(10, getClientSize().height()-100));
 	}
 	else
 	{
-		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-40));
-		m_subtitles->move(ePoint(10, getClientSize().height()-35));
+		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-80));
+		m_subtitles->move(ePoint(10, getClientSize().height()-40));
 	}
-	
+
 	m_subtitles->resize(eSize(getClientSize().width()-20, 35));
-	
 	m_subtitles->setShortcut("green");
 	m_subtitles->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 }
@@ -802,18 +863,12 @@ eAudioSelector::eAudioSelector()
 void eAudioSelector::clear()
 {
 	list.clearList();
-	list.beginAtomic();
-	eListBoxEntryMulti *e = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("press left or right to change") );
-	e->add( _("   Left Mono  >"), -1 );
-	e->add( _("<  Stereo  >"), -3 );
-	e->add( _("<  Right Mono  "), -2 );
-	e->setCurrent(-3);
-	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
-	list.endAtomic();
-	
+	m_stereo_mono->moveSelection(eListBoxBase::dirFirst,false);
+	m_stereo_mono->goNext();
 	m_subtitles->clearList();
 	m_subtitles->hide();
-	new eListBoxEntryText(m_subtitles, _("no subtitles"), 0);
+	list.removeFlags( eListBoxBase::flagLostFocusOnLast );
+	new eListBoxEntryText(m_subtitles, _("no subtitles"), 0, eTextPara::dirCenter );
 }
 
 void eAudioSelector::add(eDVBServiceController::audioStream &pmt)
