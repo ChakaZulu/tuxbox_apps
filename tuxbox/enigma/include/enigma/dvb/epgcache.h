@@ -93,19 +93,21 @@ signals:
 
 inline void eEPGCache::enterService(eService* service, int err)
 {
-	if (err)
-		return;
+	if (!err)
+		zapTimer.start(5000, 1);
 
-	zapTimer.start(5000, 1);
+	eventMap &s=eventDB[sref(service->original_network_id,service->service_id)];
+	eventMap::iterator event=s.begin();
 
-	if (eventDB.find(sref(service->original_network_id,service->service_id)) != eventDB.end())
+	if (event != s.end())
 	{
 		qDebug("Service has EPG");
 		emit EPGAvail(1);
-		current_service = 0;
+		current_service = 0;	
 	}
 	else
 	{
+		qDebug("Service has no EPG");
 		current_service = service;
 		emit EPGAvail(0);
 	}
