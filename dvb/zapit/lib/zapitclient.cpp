@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.78 2003/02/25 21:01:10 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.79 2003/02/26 11:21:54 thegoodguy Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -349,6 +349,7 @@ bool CZapitClient::receive_channel_list(BouquetChannelList& channels, const bool
 			channels.push_back(response);
 		}
 	}
+	return true;
 }
 
 
