@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.11 2002/10/16 10:30:47 dirch Exp $
+	$Id: controlapi.cpp,v 1.12 2002/10/23 19:03:19 Zwen Exp $
 
 	License: GPL
 
@@ -731,6 +731,11 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
                sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
             }
             break;
+			case CTimerd::TIMER_REMIND :
+			{
+				strncpy(zAddData, timer->message, 20);
+				zAddData[20]=0;
+			}
          default:{}
 		}
 		request->printf("%d %d %d %d %d %d %s\n",timer->eventID,(int)timer->eventType,

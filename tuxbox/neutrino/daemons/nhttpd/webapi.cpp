@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.13 2002/10/16 10:30:47 dirch Exp $
+	$Id: webapi.cpp,v 1.14 2002/10/23 19:03:19 Zwen Exp $
 
 	License: GPL
 
@@ -682,13 +682,13 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 	CZapitClient::BouquetChannelList channellist;     
 	channellist.clear();
 
-	request->SendHTMLHeader("TIMERLIST");
+	request->SendHTMLHeader("TIMERLISTE");
 	request->SocketWrite("<center>\n<TABLE border=0>\n<TR>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Alarm Time</TD>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Stop Time</TD>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Repeat</TD>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Type</TD>\n");
-	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Add. Data</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Alarm-Zeit</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Stop-Zeit</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Wiederholung</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Typ</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Beschreibung</TD>\n");
 	request->SocketWrite("<TD CLASS=\"cepg\"><TD CLASS=\"cepg\"></TR>\n");
 
 	int i = 1;
@@ -746,12 +746,12 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 					}
 				}
 				if(channel == channellist.end())
-					strcpy(zAddData,"Unknown");
+					strcpy(zAddData,"Unbekannt");
 			}
 			break;
 			case CTimerd::TIMER_STANDBY :
 			{
-				sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
+				sprintf(zAddData,"Standby: %s",(timer->standby_on ? "An" : "Aus"));
 			}
 			break;
 			case CTimerd::TIMER_REMIND :
@@ -793,55 +793,86 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	char zType[20+1];
 	Parent->timerEventType2Str(timer.eventType,zType,20);
 
-	request->SendHTMLHeader("MODIFY TIMER");
+	request->SendHTMLHeader("TIMER BEARBEITEN");
+	// Javascript
+	request->SocketWrite("<script language =\"javascript\">\n");
+	request->SocketWrite("function my_show(id) {document.getElementById(id).style.visibility=\"visible\";}\n");
+	request->SocketWrite("function my_hide(id) {document.getElementById(id).style.visibility=\"hidden\";}\n");
+	request->SocketWrite("function focusNMark() { document.modify.wd.select();\n");
+	request->SocketWrite("                        document.modify.wd.focus();}\n");
+	request->SocketWrite("function onEventChange() { tType=document.modify.rep.value;\n");
+	request->printf("  if (tType == \"%d\") my_show(\"WeekdaysRow\"); else my_hide(\"WeekdaysRow\");\n",
+		  (int)CTimerd::TIMERREPEAT_WEEKDAYS);
+	request->SocketWrite("  focusNMark();}\n");
+	request->SocketWrite("</script>\n");
+	
 	request->SocketWrite("<center>");
 	request->SocketWrite("<TABLE border=2 ><tr CLASS=\"a\"><TD>\n");
 	request->SocketWrite("<form method=\"GET\" name=\"modify\" action=\"/fb/timer.dbox2\">\n");
 	request->SocketWrite("<INPUT TYPE=\"hidden\" name=\"action\" value=\"modify\">\n");
 	request->printf("<INPUT name=\"id\" TYPE=\"hidden\" value=\"%d\">\n",timerId);
 	request->SocketWrite("<TABLE border=0 >\n");
-	request->printf("<tr CLASS=\"c\"><TD colspan=\"2\" align=\"center\">MODIFY TIMER %d - %s</TD></TR>\n",
+	request->printf("<tr CLASS=\"c\"><TD colspan=\"2\" align=\"center\">TIMER %d BEARBEITEN (%s)</TD></TR>\n",
 		  timerId,zType);
 
 	struct tm *alarmTime = localtime(&(timer.alarmTime));
-	request->printf("<TR><TD align=\"center\"><NOBR>alarm date: <INPUT TYPE=\"text\" name=\"ad\" value=\"%02d\" size=2 maxlength=2>. ",
+	request->printf("<TR><TD align=\"center\"><NOBR>Alarm-Datum <INPUT TYPE=\"text\" name=\"ad\" value=\"%02d\" size=2 maxlength=2>. ",
 		  alarmTime->tm_mday );
 	request->printf("<INPUT TYPE=\"text\" name=\"amo\" value=\"%02d\" size=2 maxlength=2>.&nbsp",
 		  alarmTime->tm_mon +1);
 	request->printf("<INPUT TYPE=\"text\" name=\"ay\" value=\"%04d\" size=4 maxlength=4></TD>\n",
 		  alarmTime->tm_year + 1900);
-	request->printf("<TD align=\"center\"><NOBR>time:&nbsp;<INPUT TYPE=\"text\" name=\"ah\" value=\"%02d\" size=2 maxlength=2>&nbsp;:&nbsp;",
+	request->printf("<TD align=\"center\"><NOBR>Zeit&nbsp;<INPUT TYPE=\"text\" name=\"ah\" value=\"%02d\" size=2 maxlength=2>&nbsp;:&nbsp;",
 		  alarmTime->tm_hour );
 	request->printf("<INPUT TYPE=\"text\" name=\"ami\" value=\"%02d\" size=2 maxlength=2></TD></TR>\n",
 		  alarmTime->tm_min);
 	if(timer.stopTime > 0)
 	{
 		struct tm *stopTime = localtime(&(timer.stopTime));
-		request->printf("<TR><NOBR><TD align=\"center\"><NOBR>stop&nbsp;date:&nbsp;<INPUT TYPE=\"text\" name=\"sd\" value=\"%02d\" size=2 maxlength=2>.&nbsp;",
+		request->printf("<TR><NOBR><TD align=\"center\"><NOBR>Stop-Datum&nbsp;<INPUT TYPE=\"text\" name=\"sd\" value=\"%02d\" size=2 maxlength=2>.&nbsp;",
 			 stopTime->tm_mday );
 		request->printf("<INPUT TYPE=\"text\" name=\"smo\" value=\"%02d\" size=2 maxlength=2>.&nbsp;",
 			 stopTime->tm_mon +1);
 		request->printf("<INPUT TYPE=\"text\" name=\"sy\" value=\"%04d\" size=4 maxlength=4></TD>\n",
 			 stopTime->tm_year + 1900);
-		request->printf("<TD align=\"center\"><NOBR>time:&nbsp;<INPUT TYPE=\"text\" name=\"sh\" value=\"%02d\" size=2 maxlength=2>&nbsp;:&nbsp;",
+		request->printf("<TD align=\"center\"><NOBR>Zeit&nbsp;<INPUT TYPE=\"text\" name=\"sh\" value=\"%02d\" size=2 maxlength=2>&nbsp;:&nbsp;",
 			 stopTime->tm_hour );
 		request->printf("<INPUT TYPE=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></TD></TR>\n",
 			 stopTime->tm_min);
 	}
-	request->SocketWrite("<TR><TD align=\"center\">repeat\n");
-	request->SocketWrite("<select name=\"rep\">\n");
+	request->SocketWrite("<TR><TD align=\"center\">Wiederholung\n");
+	request->SocketWrite("<select name=\"rep\" onchange=\"onEventChange();\">\n");
+	char zRep[21];
+	string visibility;
 	for(int i=0; i<=6;i++)
 	{
-		char zRep[21];
-		Parent->timerEventRepeat2Str((CTimerd::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
-		request->printf("<option value=\"%d\"",i);
-		if(((int)timer.eventRepeat) == i)
+		if(i!=(int)CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION)
 		{
-			request->SocketWrite(" selected");
+			Parent->timerEventRepeat2Str((CTimerd::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
+			request->printf("<option value=\"%d\"",i);
+			if(((int)timer.eventRepeat) == i)
+				request->SocketWrite(" selected");
+			request->printf(">%s\n",zRep);
 		}
-		request->printf(">%s\n",zRep);
 	}
+	request->printf("<option value=\"%d\"",(int)CTimerd::TIMERREPEAT_WEEKDAYS);
+	Parent->timerEventRepeat2Str(CTimerd::TIMERREPEAT_WEEKDAYS, zRep, sizeof(zRep)-1);
+	if(timer.eventRepeat >= CTimerd::TIMERREPEAT_WEEKDAYS)
+	{
+		request->SocketWrite(" selected");
+		visibility="visible";
+	}
+	else
+		visibility="hidden";
+	request->printf(">%s\n",zRep);
 	request->SocketWrite("</select></TD></TR>\n");
+	// Weekdays
+	char weekdays[8];
+	Parent->Timerd->setWeekdaysToStr(timer.eventRepeat, weekdays);
+	request->printf("<tr id=\"WeekdaysRow\" style=\"visibility:%s\"><TD align=\"center\">\n",
+								visibility.c_str());
+	request->printf("Wochentage <INPUT TYPE=\"text\" name=\"wd\" value=\"%s\" size=7 maxlength=7> (Mo-So, X=Timer)</TD></TR>\n",
+		 weekdays);
 
 	request->SocketWrite("<TR><TD colspan=2 height=10></TR>\n");
 	request->SocketWrite("<TR><TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form></TD>\n");
@@ -910,14 +941,15 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 
 	CTimerd::CTimerEventRepeat rep = 
 	(CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
-
+	if(((int)rep) >= ((int)CTimerd::TIMERREPEAT_WEEKDAYS) && request->ParameterList["wd"] != "")
+		Parent->Timerd->getWeekdaysFromStr((int*)&rep, request->ParameterList["wd"].c_str());
 	Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep);
 }
 
 //-------------------------------------------------------------------------
 void CWebAPI::newTimerForm(CWebserverRequest *request)
 {
-	request->SendHTMLHeader("NEW TIMER");
+	request->SendHTMLHeader("NEUER TIMER");
 	// Javascript
 	request->SocketWrite("<script language =\"javascript\">\n");
 	request->SocketWrite("function my_show(id) {document.getElementById(id).style.visibility=\"visible\";}\n");
@@ -936,6 +968,10 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->printf("  if (tType == \"%d\") my_show(\"MessageRow\"); else my_hide(\"MessageRow\");\n",
 		  (int)CTimerd::TIMER_REMIND);
 	request->SocketWrite("  focusNMark();}\n");
+	request->SocketWrite("function onEventChange2() { tType=document.NewTimerForm.rep.value;\n");
+	request->printf("  if (tType == \"%d\") my_show(\"WeekdaysRow\"); else my_hide(\"WeekdaysRow\");\n",
+		  (int)CTimerd::TIMERREPEAT_WEEKDAYS);
+	request->SocketWrite("}\n");
 	request->SocketWrite("</script>\n");
 	// head of TABLE
 	request->SocketWrite("<center><TABLE border=2 width=\"70%\"><tr CLASS=\"a\"><TD>\n");
@@ -943,33 +979,41 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite("<form method=\"GET\" action=\"/fb/timer.dbox2\" name=\"NewTimerForm\">\n");
 	request->SocketWrite("<INPUT TYPE=\"hidden\" name=\"action\" value=\"new\">\n");
 	request->SocketWrite("<TABLE border=0 width=\"100%%\">\n");
-	request->SocketWrite("<tr CLASS=\"c\"><TD colspan=\"2\" align=\"center\">NEW TIMER</TD></TR>\n");
+	request->SocketWrite("<tr CLASS=\"c\"><TD colspan=\"2\" align=\"center\">NEUER TIMER</TD></TR>\n");
 	// Timer type
-	request->SocketWrite("<TR><TD align=\"center\">timer type\n");
+	request->SocketWrite("<TR><TD align=\"center\">Timer-Typ\n");
 	request->SocketWrite("<select name=\"type\" onchange=\"onEventChange();\">\n");
 	for(int i=1; i<=7;i++)
 	{
-		char zType[21];
-		Parent->timerEventType2Str((CTimerd::CTimerEventTypes) i, zType, sizeof(zType)-1);
-		request->printf("<option value=\"%d\">%s\n",i,zType);
+		if(i!=(int)CTimerd::TIMER_NEXTPROGRAM)
+		{
+			char zType[21];
+			Parent->timerEventType2Str((CTimerd::CTimerEventTypes) i, zType, sizeof(zType)-1);
+			request->printf("<option value=\"%d\">%s\n",i,zType);
+		}
 	}
 	request->SocketWrite("</select>\n");
 	// timer repeat
-	request->SocketWrite("<TD align=\"center\">repeat\n");
-	request->SocketWrite("<select name=\"rep\" onchange=\"focusNMark();\">\n");
+	request->SocketWrite("<TD align=\"center\">Wiederholung\n");
+	request->SocketWrite("<select name=\"rep\" onchange=\"onEventChange2();\">\n");
+	char zRep[21];
 	for(int i=0; i<=6;i++)
 	{
-		char zRep[21];
-		Parent->timerEventRepeat2Str((CTimerd::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
-		request->printf("<option value=\"%d\">%s\n",i,zRep);
+		if(i!=(int)CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION)
+		{
+			Parent->timerEventRepeat2Str((CTimerd::CTimerEventRepeat) i, zRep, sizeof(zRep)-1);
+			request->printf("<option value=\"%d\">%s\n",i,zRep);
+		}
 	}
+	Parent->timerEventRepeat2Str(CTimerd::TIMERREPEAT_WEEKDAYS, zRep, sizeof(zRep)-1);
+	request->printf("<option value=\"%d\">%s\n",(int)CTimerd::TIMERREPEAT_WEEKDAYS, zRep);
 	request->SocketWrite("</select>\n");
-
+	
 	time_t now_t = time(NULL);
 	struct tm *now=localtime(&now_t);
 	// alarm day
 	request->SocketWrite("<TR><TD align=\"center\">\n<NOBR>");
-	request->printf("alarm date: <INPUT TYPE=\"text\" name=\"ad\" value=\"%02d\" size=2 maxlength=2>. \n",
+	request->printf("Alarm-Datum <INPUT TYPE=\"text\" name=\"ad\" value=\"%02d\" size=2 maxlength=2>. \n",
 		  now->tm_mday);
 	// alarm month
 	request->printf("<INPUT TYPE=\"text\" name=\"amo\" value=\"%02d\" size=2 maxlength=2>. \n",
@@ -979,13 +1023,13 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 		  now->tm_year+1900);
 	// alarm time
 	request->SocketWrite("</NOBR></TD><TD align=\"center\"><NOBR>\n");
-	request->printf("time: <INPUT TYPE=\"text\" name=\"ah\" value=\"%02d\" size=2 maxlength=2> : \n",
+	request->printf("Zeit <INPUT TYPE=\"text\" name=\"ah\" value=\"%02d\" size=2 maxlength=2> : \n",
 		  now->tm_hour);
 	request->printf("<INPUT TYPE=\"text\" name=\"ami\" value=\"%02d\" size=2 maxlength=2></NOBR></TD>\n",
 		  now->tm_min);
 	// stop day
 	request->printf("</TR><tr id=\"StopDateRow\" style=\"visibility:hidden\"><TD align=\"center\"><NOBR>\n");
-	request->printf("stop date: <INPUT TYPE=\"text\" name=\"sd\" value=\"%02d\" size=2 maxlength=2>. \n",
+	request->printf("Stop-Datum <INPUT TYPE=\"text\" name=\"sd\" value=\"%02d\" size=2 maxlength=2>. \n",
 		  now->tm_mday);
 	// stop month
 	request->printf("<INPUT TYPE=\"text\" name=\"smo\" value=\"%02d\" size=2 maxlength=2>. \n",
@@ -995,7 +1039,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 		  now->tm_year+1900);
 	request->SocketWrite("</NOBR></TD><TD align=\"center\"><NOBR>\n");
 	// stop time
-	request->printf("time: <INPUT TYPE=\"text\" name=\"sh\" value=\"%02d\" size=2 maxlength=2> : \n",
+	request->printf("Zeit <INPUT TYPE=\"text\" name=\"sh\" value=\"%02d\" size=2 maxlength=2> : \n",
 		  now->tm_hour);
 	request->printf("<INPUT TYPE=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></NOBR></TD></TR>\n",
 		  now->tm_min);
@@ -1016,12 +1060,15 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	}
 	request->SocketWrite("</selected></TR>\n");
 	//standby
-	request->SocketWrite("<tr id=\"StandbyRow\" style=\"visibility:hidden\"><TD colspan=2>\n");
-	request->SocketWrite("Standby <INPUT TYPE=\"radio\" name=\"sbon\" value=\"1\">On\n");
-	request->SocketWrite("<INPUT TYPE=\"radio\" name=\"sbon\" value=\"0\" checked>Off</TD></TR>\n");
+	request->SocketWrite("<tr><TD id=\"StandbyRow\" style=\"visibility:hidden\">\n");
+	request->SocketWrite("Standby <INPUT TYPE=\"radio\" name=\"sbon\" value=\"1\">An\n");
+	request->SocketWrite("<INPUT TYPE=\"radio\" name=\"sbon\" value=\"0\" checked>Aus</TD>\n");
+	// weekdays
+	request->SocketWrite("<TD id=\"WeekdaysRow\" style=\"visibility:hidden\" align=\"center\">\n");
+	request->SocketWrite("Wochentage <INPUT TYPE=\"text\" name=\"wd\" value=\"-------\" size=7 maxlength=7> (Mo-So,X=Ja)</TD></TR>\n");
 	//message
 	request->SocketWrite("<tr id=\"MessageRow\" style=\"visibility:hidden\"><TD colspan=2>\n");
-	request->printf("Message <INPUT TYPE=\"text\" name=\"msg\" value=\"\" size=20 maxlength=%d>\n",REMINDER_MESSAGE_MAXLEN-1);
+	request->printf("Nachricht <INPUT TYPE=\"text\" name=\"msg\" value=\"\" size=20 maxlength=%d> ('/'=NL)\n",REMINDER_MESSAGE_MAXLEN-1);
 	request->SocketWrite("</TD></TR>\n");
 	// Buttons
 	request->SocketWrite("<TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form>\n");
@@ -1104,6 +1151,8 @@ time_t	announceTimeT = 0,
 	(CTimerd::CTimerEventTypes) atoi(request->ParameterList["type"].c_str());
 	CTimerd::CTimerEventRepeat rep = 
 	(CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
+	if(((int)rep) >= ((int)CTimerd::TIMERREPEAT_WEEKDAYS) && request->ParameterList["wd"] != "")
+		Parent->Timerd->getWeekdaysFromStr((int*)&rep, request->ParameterList["wd"].c_str());
 	bool standby_on = (request->ParameterList["sbon"]=="1");
 	CTimerd::EventInfo eventinfo;
 	eventinfo.epgID      = 0;

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.35 2002/10/22 22:33:55 Zwen Exp $
+	$Id: timerdclient.cpp,v 1.36 2002/10/23 19:03:19 Zwen Exp $
 
 	License: GPL
 
@@ -305,7 +305,7 @@ void CTimerdClient::modifyTimerAPid(int eventid, uint apid)
 }
 
 //-------------------------------------------------------------------------
-void CTimerdClient::getWeekdaysFromStr(int *rep, char* str)
+void CTimerdClient::getWeekdaysFromStr(int *rep, const char* str)
 {
 	if(*rep >= (int)CTimerd::TIMERREPEAT_WEEKDAYS)
 	{

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.42 2002/10/16 10:30:47 dirch Exp $
+	$Id: webdbox.cpp,v 1.43 2002/10/23 19:03:19 Zwen Exp $
 
 	License: GPL
 
@@ -230,19 +230,19 @@ void CWebDbox::timerEventType2Str(CTimerd::CTimerEventTypes type, char *str,int 
    {
       case CTimerd::TIMER_SHUTDOWN : strncpy(str, "Shutdown",len);
          break;
-      case CTimerd::TIMER_NEXTPROGRAM : strncpy(str, "Next Program", len);
+      case CTimerd::TIMER_NEXTPROGRAM : strncpy(str, "Nächstes Programm", len);
          break;
-      case CTimerd::TIMER_ZAPTO : strncpy(str, "Zap to", len);
+      case CTimerd::TIMER_ZAPTO : strncpy(str, "Umschalten", len);
          break;
       case CTimerd::TIMER_STANDBY : strncpy(str, "Standby", len);
          break;
-      case CTimerd::TIMER_RECORD : strncpy(str, "Record", len);
+      case CTimerd::TIMER_RECORD : strncpy(str, "Aufnahme", len);
          break;
-      case CTimerd::TIMER_REMIND : strncpy(str, "Remind", len);
+      case CTimerd::TIMER_REMIND : strncpy(str, "Erinnerung", len);
          break;
       case CTimerd::TIMER_SLEEPTIMER: strncpy(str, "Sleeptimer", len);
          break;
-      default: strncpy(str, "Unknown", len);
+      default: strncpy(str, "Unbekannt", len);
    }
    str[len]=0;
 }
@@ -251,22 +251,43 @@ void CWebDbox::timerEventRepeat2Str(CTimerd::CTimerEventRepeat rep, char *str,in
 {
    switch(rep)
    {
-      case CTimerd::TIMERREPEAT_ONCE : strncpy(str, "Once",len);
+      case CTimerd::TIMERREPEAT_ONCE : strncpy(str, "einmal",len);
          break;
-      case CTimerd::TIMERREPEAT_DAILY : strncpy(str, "Daily",len);
+      case CTimerd::TIMERREPEAT_DAILY : strncpy(str, "täglich",len);
          break;
-      case CTimerd::TIMERREPEAT_WEEKLY : strncpy(str, "Weekly",len);
+      case CTimerd::TIMERREPEAT_WEEKLY : strncpy(str, "wöchentlich",len);
          break;
-      case CTimerd::TIMERREPEAT_BIWEEKLY : strncpy(str, "Biweekly",len);
+      case CTimerd::TIMERREPEAT_BIWEEKLY : strncpy(str, "2-wöchentlich",len);
          break;
-      case CTimerd::TIMERREPEAT_FOURWEEKLY : strncpy(str, "Fourweekly",len);
+      case CTimerd::TIMERREPEAT_FOURWEEKLY : strncpy(str, "4-wöchentlich",len);
          break;
-      case CTimerd::TIMERREPEAT_MONTHLY : strncpy(str, "Monthly",len);
+      case CTimerd::TIMERREPEAT_MONTHLY : strncpy(str, "monatlich",len);
          break;
-      case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION : strncpy(str, "By event desc.",len);
+      case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION : strncpy(str, "siehe event",len);
          break;
-
-      default: strncpy(str, "Unknown", len);
+      case CTimerd::TIMERREPEAT_WEEKDAYS : strncpy(str, "wochentage",len);
+         break;
+		default: 
+			if(rep > CTimerd::TIMERREPEAT_WEEKDAYS)
+			{
+				str[0]=0;
+				if(rep & 0x200)
+					strcat(str,"Mo ");
+				if(rep & 0x400)
+					strcat(str,"Di ");
+				if(rep & 0x800)
+					strcat(str,"Mi ");
+				if(rep & 0x1000)
+					strcat(str,"Do ");
+				if(rep & 0x2000)
+					strcat(str,"Fr ");
+				if(rep & 0x4000)
+					strcat(str,"Sa ");
+				if(rep & 0x8000)
+					strcat(str,"So ");
+			}
+			else
+				strncpy(str, "Unbekannt", len);
    }
    str[len]=0;
 }
