@@ -286,7 +286,9 @@ void CGameList::runGame(int selected )
 	{
 		string libname = argv[i];
 		printf("try load shared lib : %s\n",argv[i]);
-		libhandle[i] = dlopen ( ("/lib/"+libname).c_str(), RTLD_NOW | RTLD_GLOBAL );
+		libhandle[i] = dlopen ( *argv[i] == '/' ? 
+			argv[i] : ("/lib/"+libname).c_str(),
+			RTLD_NOW | RTLD_GLOBAL );
 		if ( !libhandle )
 		{
 			fputs (dlerror(), stderr);
