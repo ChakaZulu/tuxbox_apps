@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.9 2001/08/20 13:07:10 tw-74 Exp $
+// $Id: infoviewer.cpp,v 1.10 2001/08/22 11:29:31 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.10  2001/08/22 11:29:31  McClean
+// infoviewer designfix
+//
 // Revision 1.9  2001/08/20 13:07:10  tw-74
 // cosmetic changes and changes for variable font size
 //
@@ -40,7 +43,9 @@ void CInfoViewer::start(CFrameBuffer *FrameBuffer, FontsDef *Fonts, SNeutrinoSet
 	fonts = Fonts;
 	settings = Settings;
 
-	InfoHeightY = fonts->infobar_number->getHeight()*9/8 + 10 + 2*fonts->infobar_info->getHeight(); //170
+	//InfoHeightY = fonts->infobar_number->getHeight()*9/8 + 10 + 2*fonts->infobar_info->getHeight(); //170
+	InfoHeightY = fonts->infobar_number->getHeight()*9/8 + 2*fonts->infobar_info->getHeight() + 25;
+//	printf("infoh %d", InfoHeightY);
 
 	if (pthread_create (&thrViewer, NULL, InfoViewerThread, (void *) this) != 0 )
 	{
@@ -69,6 +74,11 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool reshow )
 	BoxEndY   = settings->screen_EndY-20;
 	BoxStartY = BoxEndY-InfoHeightY;
 
+	//frameBuffer->paintVLine(settings->screen_StartX,0,576, 3);
+	//frameBuffer->paintVLine(settings->screen_EndX,0,576, 3);
+	//frameBuffer->paintHLine(0,719, settings->screen_EndY,3);
+
+
 	//number box
 	int ChanWidth = fonts->infobar_number->getRenderWidth("000")+10;
 	int ChanHeight = fonts->infobar_number->getHeight()*9/8;
@@ -82,8 +92,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool reshow )
 
 	//infobox
 	int ChanNameX = BoxStartX + ChanWidth + 10;
-	int ChanNameY = BoxStartY + (ChanHeight>>1);
+	int ChanNameY = BoxStartY + (ChanHeight>>1)   + 5; //oberkante schatten?
 	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndY, COL_INFOBAR);
+	
 	// ... with channel name
 	int height=fonts->infobar_channame->getHeight();
 	fonts->infobar_channame->RenderString(ChanNameX+15, ChanNameY+height, BoxEndX-ChanNameX-135, Channel.c_str(), COL_INFOBAR);
@@ -110,14 +121,15 @@ void CInfoViewer::showData()
 	int ChanNameY = BoxStartY + (ChanHeight>>1);
 
 	int ChanInfoX = BoxStartX + (ChanWidth >>1);
-	int ChanInfoY = BoxStartY + ChanHeight+10;
+	int ChanInfoY = BoxStartY + ChanHeight+15; //+10
 	
 
 	//percent
 	height=fonts->infobar_channame->getHeight()/3;
-	frameBuffer->paintBoxRel(BoxEndX-114,                ChanNameY+height,   2+100+2, height, COL_INFOBAR+7);
-        frameBuffer->paintBoxRel(BoxEndX-112,                ChanNameY+height+2, runningPercent+2, height-4, COL_INFOBAR+5);
-	frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, ChanNameY+height+2, 100-runningPercent, height-4, COL_INFOBAR+2);
+	int height2= int( fonts->infobar_channame->getHeight()/1.5);
+	frameBuffer->paintBoxRel(BoxEndX-114, ChanNameY+height,   2+100+2, height2, COL_INFOBAR+7);
+    frameBuffer->paintBoxRel(BoxEndX-112, ChanNameY+height+2, runningPercent+2, height2-4, COL_INFOBAR+5);
+	frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, ChanNameY+height+2, 100-runningPercent, height2-4, COL_INFOBAR+2);
 
 	//info running
 	int start1width      = fonts->infobar_info->getRenderWidth(runningStart);
