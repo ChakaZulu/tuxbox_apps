@@ -314,7 +314,7 @@ int main(int argc, char **argv)
 				osd.addCommand("COMMAND proginfo set_teletext true");
 				
 				txtfd = open("/dev/dbox/vbi0", O_RDWR);
-				ioctl(txtfd, VBI_START_VTXT, channels.getCurrentTXT());
+				ioctl(txtfd, AVIA_VBI_START_VTXT, channels.getCurrentTXT());
 
 				close(txtfd);
 			}
