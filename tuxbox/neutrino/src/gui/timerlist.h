@@ -78,8 +78,8 @@ class CTimerList : public CMenuTarget
 		void paintHead();
 		void paintFoot();
 		void hide();
-		void modifyTimer();
-		void newTimer();
+		int modifyTimer();
+		int newTimer();
 
 	public:
 		CTimerList();

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.23 2002/12/09 17:59:27 dirch Exp $
+	$Id: webapi.cpp,v 1.24 2002/12/24 12:34:17 Zwen Exp $
 
 	License: GPL
 
@@ -1179,6 +1179,7 @@ time_t	announceTimeT = 0,
 	bool standby_on = (request->ParameterList["sbon"]=="1");
 	CTimerd::EventInfo eventinfo;
 	eventinfo.epgID      = 0;
+	eventinfo.epg_starttime = 0;
 	if(request->ParameterList["channel_id"].substr(0,1)=="R")
 		eventinfo.mode = CTimerd::MODE_RADIO;
 	else

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.8 2002/12/03 11:15:11 thegoodguy Exp $
+	$Id: timerdtypes.h,v 1.9 2002/12/24 12:34:18 Zwen Exp $
 
 	License: GPL
 
@@ -77,6 +77,7 @@ class CTimerd
 		struct EventInfo
 		{
 			unsigned long long epgID;
+			time_t             epg_starttime;
 			t_channel_id       channel_id;
 			uint               apid;
 			CChannelMode       mode;
@@ -90,6 +91,7 @@ class CTimerd
 					apid = e.apid;
 					channel_id = e.channel_id;
 					epgID = e.epgID;
+					epg_starttime = e.epg_starttime;
 					mode = e.mode;
 				};
 				RecordingInfo& operator = (EventInfo& e)
@@ -97,6 +99,7 @@ class CTimerd
 					apid = e.apid;
 					channel_id = e.channel_id;
 					epgID = e.epgID;
+					epg_starttime = e.epg_starttime;
 					mode = e.mode;
 					return *this;
 				}
@@ -120,6 +123,7 @@ class CTimerd
 			time_t							stopTime;
 			t_channel_id channel_id; //only filled if applicable
 			unsigned long long epgID; //only filled if applicable
+			time_t epg_starttime; //only filled if applicable
 			uint apid; //only filled if applicable
 			CChannelMode mode; //only filled if applicable
 			bool standby_on; //only filled if applicable

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.58 2002/12/09 20:07:53 thegoodguy Exp $
+   $Id: timermanager.cpp,v 1.59 2002/12/24 12:34:17 Zwen Exp $
 
 	License: GPL
 
@@ -850,12 +850,13 @@ void CTimerEvent_Standby::saveToConfig(CConfigFile *config)
 // Record Event
 //=============================================================
 CTimerEvent_Record::CTimerEvent_Record( time_t announceTime, time_t alarmTime, time_t stopTime, 
-													 t_channel_id channel_id, unsigned long long epgID, uint apid,
-													 CTimerd::CChannelMode mode,
+													 t_channel_id channel_id, unsigned long long epgID, 
+													 time_t epg_starttime, uint apid, CTimerd::CChannelMode mode,
 													 CTimerd::CTimerEventRepeat evrepeat) :
 CTimerEvent(CTimerd::TIMER_RECORD, announceTime, alarmTime, stopTime, evrepeat)
 {
 	eventInfo.epgID = epgID;
+	eventInfo.epg_starttime = epg_starttime;
 	eventInfo.channel_id = channel_id;
 	eventInfo.apid = apid;
 	eventInfo.mode = mode;
@@ -868,6 +869,7 @@ CTimerEvent(CTimerd::TIMER_RECORD, config, iId)
 	ostr << iId;
 	string id=ostr.str();
 	eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
+	eventInfo.epg_starttime = config->getInt64("EVENT_INFO_EPG_STARTTIME_"+id);
 	eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 	eventInfo.apid = config->getInt32("EVENT_INFO_APID_"+id);
 	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
@@ -899,14 +901,8 @@ void CTimerEvent_Record::fireEvent()
 {
 	// Set EPG-ID if not set
 	if(eventInfo.epgID == 0)
-	{
-		dprintf("EPG-ID not set, trying now\n");
-		CSectionsdClient* sdc = new CSectionsdClient();
-		CEPGData e;
-		sdc->getActualEPGServiceKey(eventInfo.channel_id, &e );
-		dprintf("EPG-ID found %llu:%d(%s)\n",e.eventID,(int)e.epg_times.startzeit,e.title.c_str());     
-		eventInfo.epgID = e.eventID ;
-	}
+		getEpgId();
+ 	
 	CTimerd::RecordingInfo ri=eventInfo;
 	ri.eventID=eventID;
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
@@ -923,9 +919,10 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
 	stringstream ostr;
 	ostr << eventID;
 	string id=ostr.str();
-	config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
-	config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
-	config->setInt32("EVENT_INFO_APID_"+id,eventInfo.apid);
+	config->setInt64("EVENT_INFO_EPG_ID_"+id, eventInfo.epgID);
+	config->setInt64("EVENT_INFO_EPG_STARTTIME_"+id, eventInfo.epg_starttime);
+	config->setInt32("EVENT_INFO_ONID_SID_"+id, eventInfo.channel_id);
+	config->setInt32("EVENT_INFO_APID_"+id, eventInfo.apid);
 	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
 }
 //------------------------------------------------------------
@@ -933,18 +930,37 @@ void CTimerEvent_Record::Reschedule()
 {
 	// clear eogId on reschedule
 	eventInfo.epgID = 0;
+	eventInfo.epg_starttime = 0;
 	CTimerEvent::Reschedule();
+}
+//------------------------------------------------------------
+void CTimerEvent_Record::getEpgId()
+{
+	CSectionsdClient sdc;
+	CChannelEventList evtlist = sdc.getEventsServiceKey(eventInfo.channel_id);
+	// we check for a time in the middle of the recording
+	time_t check_time=(alarmTime + stopTime) / 2;
+	for ( CChannelEventList::iterator e= evtlist.begin(); e != evtlist.end(); ++e )
+	{
+    	if ( e->startTime <= check_time && (e->startTime + (int)e->duration) >= check_time)
+		{
+			eventInfo.epgID = e->eventID;
+			eventInfo.epg_starttime = e->startTime;
+			break;
+		}
+	}
 }
 //=============================================================
 // Zapto Event
 //=============================================================
 CTimerEvent_Zapto::CTimerEvent_Zapto( time_t announceTime, time_t alarmTime, 
 												  t_channel_id channel_id, unsigned long long epgID, 
-												  CTimerd::CChannelMode mode,
+												  time_t epg_starttime, CTimerd::CChannelMode mode,
 												  CTimerd::CTimerEventRepeat evrepeat) :
 CTimerEvent(CTimerd::TIMER_ZAPTO, announceTime, alarmTime, (time_t) 0, evrepeat)
 {
 	eventInfo.epgID = epgID;
+	eventInfo.epg_starttime = epg_starttime;
 	eventInfo.channel_id = channel_id;
 	eventInfo.mode = mode;
 	eventInfo.apid = 0;
@@ -957,6 +973,7 @@ CTimerEvent(CTimerd::TIMER_ZAPTO, config, iId)
 	ostr << iId;
 	string id=ostr.str();
 	eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
+	eventInfo.epg_starttime = config->getInt64("EVENT_INFO_EPG_STARTTIME_"+id);
 	eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 	eventInfo.apid = config->getInt32("EVENT_INFO_APID_"+id);
 	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
@@ -988,27 +1005,47 @@ void CTimerEvent_Zapto::saveToConfig(CConfigFile *config)
 	stringstream ostr;
 	ostr << eventID;
 	string id=ostr.str();
-	config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
-	config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
+	config->setInt64("EVENT_INFO_EPG_ID_"+id, eventInfo.epgID);
+	config->setInt64("EVENT_INFO_EPG_STARTTIME_"+id, eventInfo.epg_starttime);
+	config->setInt32("EVENT_INFO_ONID_SID_"+id, eventInfo.channel_id);
 	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
-	config->setInt32("EVENT_INFO_APID_"+id,eventInfo.apid);
+	config->setInt32("EVENT_INFO_APID_"+id, eventInfo.apid);
 }
 //------------------------------------------------------------
 void CTimerEvent_Zapto::Reschedule()
 {
 	// clear eogId on reschedule
 	eventInfo.epgID = 0;
+	eventInfo.epg_starttime = 0;
 	CTimerEvent::Reschedule();
+}
+//------------------------------------------------------------
+void CTimerEvent_Zapto::getEpgId()
+{
+	CSectionsdClient sdc;
+	CChannelEventList evtlist = sdc.getEventsServiceKey(eventInfo.channel_id);
+	// we check for a time 5 min after zap
+	time_t check_time=alarmTime + 300;
+	for ( CChannelEventList::iterator e= evtlist.begin(); e != evtlist.end(); ++e )
+	{
+    	if ( e->startTime < check_time && (e->startTime + (int)e->duration) > check_time)
+		{
+			eventInfo.epgID = e->eventID;
+			eventInfo.epg_starttime = e->startTime;
+			break;
+		}
+	}
 }
 //=============================================================
 // NextProgram Event
 //=============================================================
 CTimerEvent_NextProgram::CTimerEvent_NextProgram( time_t announceTime, time_t alarmTime, time_t stopTime, 
 																  t_channel_id channel_id, unsigned long long epgID, 
-																  CTimerd::CTimerEventRepeat evrepeat) :
+																  time_t epg_starttime, CTimerd::CTimerEventRepeat evrepeat) :
 CTimerEvent(CTimerd::TIMER_NEXTPROGRAM, announceTime, alarmTime, stopTime, evrepeat)
 {
 	eventInfo.epgID = epgID;
+	eventInfo.epg_starttime = epg_starttime;
 	eventInfo.channel_id = channel_id;
 }
 //------------------------------------------------------------
@@ -1019,6 +1056,7 @@ CTimerEvent(CTimerd::TIMER_NEXTPROGRAM, config, iId)
 	ostr << iId;
 	string id=ostr.str();
 	eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
+	eventInfo.epg_starttime = config->getInt64("EVENT_INFO_EPG_STARTTIME_"+id);
 	eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 	eventInfo.apid = config->getInt32("EVENT_INFO_APID_"+id);
 	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
@@ -1054,6 +1092,7 @@ void CTimerEvent_NextProgram::saveToConfig(CConfigFile *config)
 	ostr << eventID;
 	string id=ostr.str();
 	config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
+	config->setInt64("EVENT_INFO_EPG_STARTTIME_"+id,eventInfo.epg_starttime);
 	config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
 	config->setInt32("EVENT_INFO_APID_"+id,eventInfo.apid);
 	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
@@ -1063,6 +1102,7 @@ void CTimerEvent_NextProgram::Reschedule()
 {
 	// clear eogId on reschedule
 	eventInfo.epgID = 0;
+	eventInfo.epg_starttime = 0;
 	CTimerEvent::Reschedule();
 }
 //=============================================================

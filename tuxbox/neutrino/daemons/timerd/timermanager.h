@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.30 2002/12/02 22:39:54 Zwen Exp $
+	$Id: timermanager.h,v 1.31 2002/12/24 12:34:17 Zwen Exp $
 
 	License: GPL
 
@@ -120,7 +120,7 @@ class CTimerEvent_Record : public CTimerEvent
 		CTimerd::EventInfo eventInfo;
 
 		CTimerEvent_Record( time_t announceTime, time_t alarmTime, time_t stopTime, 
-                          t_channel_id channel_id, unsigned long long epgID=0, 
+                          t_channel_id channel_id, unsigned long long epgID=0, time_t epg_starttime=0, 
                           uint apid = 0, CTimerd::CChannelMode mode = CTimerd::MODE_TV,
 								  CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 		CTimerEvent_Record(CConfigFile *config, int iId);
@@ -129,6 +129,7 @@ class CTimerEvent_Record : public CTimerEvent
 		virtual void stopEvent();
 		virtual void saveToConfig(CConfigFile *config);
 		virtual void Reschedule();
+		void getEpgId();
 };
 
 class CTimerEvent_Zapto : public CTimerEvent
@@ -138,7 +139,7 @@ class CTimerEvent_Zapto : public CTimerEvent
 		CTimerd::EventInfo eventInfo;
 
 		CTimerEvent_Zapto( time_t announceTime, time_t alarmTime, 
-								 t_channel_id channel_id, unsigned long long epgID=0, 
+								 t_channel_id channel_id, unsigned long long epgID=0, time_t egp_starttime=0, 
 								 CTimerd::CChannelMode mode = CTimerd::MODE_TV,
 								 CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 		CTimerEvent_Zapto(CConfigFile *config, int iId);
@@ -147,6 +148,7 @@ class CTimerEvent_Zapto : public CTimerEvent
 		virtual void stopEvent();
 		virtual void saveToConfig(CConfigFile *config);
 		virtual void Reschedule();
+		void getEpgId();
 };
 
 class CTimerEvent_NextProgram : public CTimerEvent
@@ -155,7 +157,7 @@ class CTimerEvent_NextProgram : public CTimerEvent
 		CTimerd::EventInfo eventInfo;
 
 		CTimerEvent_NextProgram( time_t announceTime, time_t alarmTime, time_t stopTime, 
-										 t_channel_id channel_id, unsigned long long epgID=0, 
+										 t_channel_id channel_id, unsigned long long epgID=0, time_t epg_starttime=0,
 										 CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 		CTimerEvent_NextProgram(CConfigFile *config, int iId);
 		virtual void fireEvent();

@@ -410,7 +410,6 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 
 		uint msg; uint data;
 		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
-		CTimerdClient * timerdclient;
 		while(loop)
 		{
 			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
@@ -461,49 +460,49 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 				case CRCInput::RC_red:
 					if(g_settings.recording_type > 0)
 					{
-						timerdclient = new CTimerdClient;
-						if(timerdclient->isTimerdAvailable())
+						CTimerdClient timerdclient;
+						if(timerdclient.isTimerdAvailable())
 						{
 							CTimerd::CChannelMode mode;
 							if(CNeutrinoApp::getInstance()->getMode()==NeutrinoMessages::mode_radio)
 								mode = CTimerd::MODE_RADIO;
 							else
 								mode = CTimerd::MODE_TV;
-							timerdclient->addRecordTimerEvent(channel_id, epgData.eventID, 
-																		 epgData.epg_times.startzeit - (atoi(g_settings.record_safety_time_before)*60),
-																		 epgData.epg_times.startzeit - (ANNOUNCETIME + (atoi(g_settings.record_safety_time_before)*60)),
-																		 epgData.epg_times.startzeit + epgData.epg_times.dauer + (atoi(g_settings.record_safety_time_after)*60),
-																		 0, mode );
+							timerdclient.addRecordTimerEvent(channel_id,
+																		epgData.epg_times.startzeit - (atoi(g_settings.record_safety_time_before)*60),
+																		epgData.epg_times.startzeit + epgData.epg_times.dauer + (atoi(g_settings.record_safety_time_after)*60),
+																		epgData.eventID, epgData.epg_times.startzeit,
+																		epgData.epg_times.startzeit - (ANNOUNCETIME + (atoi(g_settings.record_safety_time_before)*60)),
+																		0, mode );
 							ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 						}
 						else
 							printf("timerd not available\n");
-						delete timerdclient;
 					}					
 					break;
 
 				// 31.05.2002 dirch		zapto timer
 				case CRCInput::RC_yellow:
-					timerdclient = new CTimerdClient;
-					if(timerdclient->isTimerdAvailable())
+				{
+					CTimerdClient timerdclient;
+					if(timerdclient.isTimerdAvailable())
 					{
 						CTimerd::CChannelMode mode;
 						if(CNeutrinoApp::getInstance()->getMode()==NeutrinoMessages::mode_radio)
 							mode = CTimerd::MODE_RADIO;
 						else
 							mode = CTimerd::MODE_TV;
-						timerdclient->addZaptoTimerEvent(channel_id, epgData.eventID, 
-																	epgData.epg_times.startzeit,
-																	epgData.epg_times.startzeit - ANNOUNCETIME, 
-																	0, mode);
-						printf("Added ZaptoTimerEvent for channel_id: %08x epgID: %llu\n", channel_id, epgData.eventID);
+						timerdclient.addZaptoTimerEvent(channel_id, 
+																  epgData.epg_times.startzeit,
+																  epgData.epg_times.startzeit - ANNOUNCETIME, 0,
+																  epgData.eventID, epgData.epg_times.startzeit,
+																  0, mode);
 						ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					}
 					else
 						printf("timerd not available\n");
-					delete timerdclient;
 					break;
-
+				}
 
 				case CRCInput::RC_ok:
 				case CRCInput::RC_help:

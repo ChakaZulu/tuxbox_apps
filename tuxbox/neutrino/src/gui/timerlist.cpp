@@ -140,7 +140,10 @@ CTimerList::CTimerList()
 	frameBuffer = CFrameBuffer::getInstance();
 	visible = false;
 	selected = 0;
-	width = 505;
+	// Max
+	width = 720;
+	if(g_settings.screen_EndX-g_settings.screen_StartX < width)
+		width=g_settings.screen_EndX-g_settings.screen_StartX-10;
 	buttonHeight = 25;
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->menu->getHeight();
@@ -179,6 +182,7 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 		timerNew.announceTime=timerNew.alarmTime-60;
 		CTimerd::EventInfo eventinfo;
 		eventinfo.epgID=0;
+		eventinfo.epg_starttime=0;
 		eventinfo.channel_id=timerNew.channel_id;
 		eventinfo.mode = timerNew.mode;
 		eventinfo.apid=0;
@@ -231,6 +235,8 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 	channellist_radio.clear();
 	int ret = show();
 
+	return ret;
+/*
 	if( ret > -1)
 	{
 		return menu_return::RETURN_REPAINT;
@@ -244,7 +250,7 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 	{
 		// -2 bedeutet EXIT_ALL
 		return menu_return::RETURN_EXIT_ALL;
-	}
+	}*/
 }
 
 void CTimerList::updateEvents(void)
@@ -283,7 +289,7 @@ void CTimerList::updateEvents(void)
 
 int CTimerList::show()
 {
-	int res = -1;
+	int res = menu_return::RETURN_REPAINT;
 
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 	uint msg; uint data;
@@ -354,9 +360,13 @@ int CTimerList::show()
 		}
 		else if( msg == CRCInput::RC_ok && timerlist.size() > 0)
 		{
-			// OK button
-			modifyTimer();  
-			update=true;
+			if (modifyTimer()==menu_return::RETURN_EXIT_ALL)
+			{
+				res=menu_return::RETURN_EXIT_ALL;
+				loop=false;
+			}
+			else
+				update=true;
 		}
 		else if(msg==CRCInput::RC_red && timerlist.size() > 0)
 		{
@@ -366,23 +376,45 @@ int CTimerList::show()
 		}
 		else if(msg==CRCInput::RC_green)
 		{
-			newTimer();
-			update=true;
+			if (newTimer()==menu_return::RETURN_EXIT_ALL)
+			{
+				res=menu_return::RETURN_EXIT_ALL;
+				loop=false;
+			}
+			else
+				update=true;
 		}
 		else if(msg==CRCInput::RC_yellow)
 		{
 			update=true;
 		}
 		else if((msg==CRCInput::RC_blue)||
-				  (msg==CRCInput::RC_setup) ||
 				  (CRCInput::isNumeric(msg)) )
 		{
 			//pushback key if...
 			g_RCInput->postMsg( msg, data );
 			loop=false;
 		}
+		else if(msg==CRCInput::RC_setup)
+		{
+			res=menu_return::RETURN_EXIT_ALL;
+			loop=false;
+		}
 		else if( msg == CRCInput::RC_help )
 		{
+			CTimerd::responseGetTimer* timer=&timerlist[selected];
+			if(timer!=NULL)
+			{
+				if(timer->eventType == CTimerd::TIMER_RECORD || timer->eventType == CTimerd::TIMER_ZAPTO)
+				{
+					hide();
+					res = g_EpgData->show(timer->channel_id, timer->epgID, &timer->epg_starttime);
+					if(res==menu_return::RETURN_EXIT_ALL)
+						loop=false;
+					else
+						paint();
+				}
+			}
 			// help key
 		}
 		else
@@ -390,7 +422,7 @@ int CTimerList::show()
 			if( CNeutrinoApp::getInstance()->handleMsg( msg, data ) == messages_return::cancel_all )
 			{
 				loop = false;
-				res = - 2;
+				res = menu_return::RETURN_EXIT_ALL;
 			}
 		}
 	}
@@ -422,7 +454,13 @@ void CTimerList::paintItem(int pos)
 		color = COL_MENUCONTENTSELECTED;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width-15, 2*fheight, color);
+	int real_width=width;
+	if(timerlist.size()>listmaxshow)
+	{
+		real_width-=15; //scrollbar
+	}
+	
+	frameBuffer->paintBoxRel(x,ypos, real_width, 2*fheight, color);
 	if(liststart+pos<timerlist.size())
 	{
 		CTimerd::responseGetTimer & timer = timerlist[liststart+pos];
@@ -432,13 +470,13 @@ void CTimerList::paintItem(int pos)
 		char zStopTime[25] = {0};
 		struct tm *stopTime = localtime(&(timer.stopTime));
 		strftime(zStopTime,20,"%d.%m. %H:%M",stopTime);
-		g_Fonts->menu->RenderString(x+10,ypos+fheight, 160, zAlarmTime, color, fheight);
+		g_Fonts->menu->RenderString(x+10,ypos+fheight, 150, zAlarmTime, color, fheight);
 		if(timer.stopTime != 0)
 		{
-			g_Fonts->menu->RenderString(x+10,ypos+2*fheight, 160, zStopTime, color, fheight);
+			g_Fonts->menu->RenderString(x+10,ypos+2*fheight, 150, zStopTime, color, fheight);
 		}
-		g_Fonts->menu->RenderString(x+160,ypos+fheight, 175, convertTimerRepeat2String(timer.eventRepeat), color, fheight);
-		g_Fonts->menu->RenderString(x+335,ypos+fheight, 155, convertTimerType2String(timer.eventType), color, fheight);
+		g_Fonts->menu->RenderString(x+160,ypos+fheight, (real_width-160)/2-5, convertTimerRepeat2String(timer.eventRepeat), color, fheight);
+		g_Fonts->menu->RenderString(x+160+(real_width-160)/2,ypos+fheight, (real_width-160)/2-5, convertTimerType2String(timer.eventType), color, fheight);
 		string zAddData("");
 		switch(timer.eventType)
 		{
@@ -452,6 +490,14 @@ void CTimerList::paintItem(int pos)
 						char capid[20];
 						sprintf(capid, "%04x", timer.apid);
 						zAddData+= " ("+string(capid)+")";
+					}
+					if(timer.epgID!=0)
+					{
+						CEPGData epgdata;
+						if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
+						{
+							zAddData+= " : " + epgdata.title;
+						}
 					}
 				}
 				break;
@@ -470,7 +516,7 @@ void CTimerList::paintItem(int pos)
 				break;
 			default:{}
 		}
-		g_Fonts->menu->RenderString(x+160,ypos+2*fheight, 330, zAddData, color, fheight);
+		g_Fonts->menu->RenderString(x+160,ypos+2*fheight, real_width-165, zAddData, color, fheight);
 		// LCD Display
 		if(liststart+pos==selected)
 		{
@@ -507,46 +553,37 @@ void CTimerList::paintItem(int pos)
 void CTimerList::paintHead()
 {
 	string strCaption = g_Locale->getText("timerlist.name");
-	int real_width=width;
-	if(timerlist.size()<=listmaxshow)
-	{
-		real_width-=15; //no scrollbar
-	}
-	frameBuffer->paintBoxRel(x,y, real_width,theight+0, COL_MENUHEAD);
-	frameBuffer->paintIcon("timer.raw",x+5,y+4);
-	g_Fonts->menu_title->RenderString(x+35,y+theight+0, real_width- 45, strCaption.c_str(), COL_MENUHEAD);
 
-/*	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
-	if (bouquetList!=NULL)
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintIcon("timer.raw",x+5,y+4);
+	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, strCaption.c_str(), COL_MENUHEAD);
+
+	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
+/*	if (bouquetList!=NULL)
 		frameBuffer->paintIcon("dbox.raw", x+ width- 60, y+ 5 );*/
 }
 
 void CTimerList::paintFoot()
 {
-	int real_width=width;
-	if(timerlist.size()<=listmaxshow)
-	{
-		real_width-=15; //no scrollbar
-	}
-	int ButtonWidth = (real_width-28) / 4;
-	frameBuffer->paintBoxRel(x,y+height, real_width,buttonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+real_width,  y, COL_INFOBAR_SHADOW);
+	int ButtonWidth = (width-28) / 4;
+	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_MENUHEAD);
+	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
 	if(timerlist.size()>0)
 	{
-		frameBuffer->paintIcon("rot.raw", x+real_width- 4* ButtonWidth - 20, y+height+4);
-		g_Fonts->infobar_small->RenderString(x+real_width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR);
+		frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
+		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR);
 
-		frameBuffer->paintIcon("ok.raw", x+real_width- 1* ButtonWidth - 30, y+height);
-		g_Fonts->infobar_small->RenderString(x+real_width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR);
+		frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
+		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR);
 
 	}
 
-	frameBuffer->paintIcon("gruen.raw", x+real_width- 3* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+real_width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new").c_str(), COL_INFOBAR);
+	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new").c_str(), COL_INFOBAR);
 
-	frameBuffer->paintIcon("gelb.raw", x+real_width- 2* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+real_width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload").c_str(), COL_INFOBAR);
+	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload").c_str(), COL_INFOBAR);
 
 }
 
@@ -677,7 +714,7 @@ string CTimerList::convertChannelId2String(t_channel_id id, CTimerd::CChannelMod
 	return name;
 }
 
-void CTimerList::modifyTimer()
+int CTimerList::modifyTimer()
 {
 	CTimerd::responseGetTimer* timer=&timerlist[selected];
 	CMenuWidget timerSettings("timerlist.menumodify", "settings.raw");
@@ -729,11 +766,10 @@ void CTimerList::modifyTimer()
 	}
 	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, NULL, this, "modifytimer") );
 
-	if(timerSettings.exec(this,"")==menu_return::RETURN_EXIT_ALL)
-		g_RCInput->postMsg( CRCInput::RC_setup, 0 );
+	return timerSettings.exec(this,"");
 }
 
-void CTimerList::newTimer()
+int CTimerList::newTimer()
 {
 	// Defaults
 	timerNew.eventType = CTimerd::TIMER_SHUTDOWN ;
@@ -840,6 +876,6 @@ void CTimerList::newTimer()
 	timerSettings.addItem( m7);
 	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, NULL, this, "newtimer") );
 	strcpy(timerSettings_stopTime->getValue (), "                ");
-	if(timerSettings.exec(this,"")==menu_return::RETURN_EXIT_ALL)
-		g_RCInput->postMsg( CRCInput::RC_setup, 0 );
+	
+	return timerSettings.exec(this,"");
 }
