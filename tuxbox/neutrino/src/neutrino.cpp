@@ -1041,7 +1041,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
-	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser("scants.bouquet", &((int)(scanSettings.bouquetMode)), true );
+	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser("scants.bouquet", (int *)&scanSettings.bouquetMode, true );
 	ojBouquets->addOption( CZapitClient::BM_DELETEBOUQUETS, "scants.bouquet_erase");
 	ojBouquets->addOption( CZapitClient::BM_CREATEBOUQUETS, "scants.bouquet_create");
 	ojBouquets->addOption( CZapitClient::BM_DONTTOUCHBOUQUETS, "scants.bouquet_leave");
@@ -1062,7 +1062,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			dprintf(DEBUG_DEBUG, "got scanprovider (sat): %s\n", satList[i].satName );
 		}
 
-		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", &((int)(scanSettings.diseqcRepeat)), (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0)/*, new CSatelliteNotifier*/, NULL, false);
+		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", (int *)&scanSettings.diseqcRepeat, (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0)/*, new CSatelliteNotifier*/, NULL, false);
 		for( uint i=0; i<=2; i++)
 		{
 			char ii[1 + 1];
@@ -1110,7 +1110,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			extMotorSettings->addItem(oj);
 		}
 
-		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.disqeqc", &((int)(scanSettings.diseqcMode)), true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojExtMotorSettings, ojExtMotorControl, ojDiseqcRepeats));
+		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.disqeqc", (int *)&scanSettings.diseqcMode, true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojExtMotorSettings, ojExtMotorControl, ojDiseqcRepeats));
 		ojDiseqc->addOption( NO_DISEQC,   "satsetup.nodiseqc");
 		ojDiseqc->addOption( MINI_DISEQC, "satsetup.minidiseqc");
 		ojDiseqc->addOption( DISEQC_1_0,  "satsetup.diseqc10");
@@ -3400,7 +3400,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.456 2003/05/25 08:42:06 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.457 2003/05/25 23:56:19 woglinde Exp $\n\n");
 
 	tzset();
 	initGlobals();
