@@ -277,6 +277,21 @@ eTimerManager::eTimerManager()
 			deepstandbywakeup=0;
 	}
 
+	if (eSystemInfo::getInstance()->hasStandbyWakeupTimer())
+	{
+		int fd = open("/dev/dbox/fp0", O_RDWR);
+		if ( fd >= 0 )
+		{
+			if ( ::ioctl(fd, FP_IOCTL_CLEAR_WAKEUP_TIMER) < 0 )
+				eDebug("FP_IOCTL_CLEAR_WAKEUP failed(%m)");
+			else
+				eDebug("FP_IOCTL_CLEAR_WAKEUP_TIMER okay");
+			close(fd);
+		}
+		else
+			eDebug("couldn't open FP to clear wakeup timer !!");
+	}
+
 	if (!deepstandbywakeup)
 	{
 		eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
@@ -1222,10 +1237,6 @@ eTimerManager::~eTimerManager()
 					eDebug("no support for wakeup on this platform... ");
 			}
 		}
-		else if ( ::ioctl(fd, FP_IOCTL_CLEAR_WAKEUP_TIMER) < 0 )
-			eDebug("FP_IOCTL_CLEAR_WAKEUP_TIMER failed (%m)");
-		else
-			eDebug("FP_IOCTL_CLEAR_WAKEUP_TIMER okay");
 	}
 	if ( setWakeupKey )
 		eConfig::getInstance()->setKey("/ezap/timer/deepstandbywakeupset", 1);
