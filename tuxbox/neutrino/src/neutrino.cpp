@@ -535,26 +535,25 @@ int CNeutrinoApp::loadSetup()
 	g_settings.gtx_alpha2 = configfile.getInt32( "gtx_alpha2", 1);
 
 	//misc
-	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", true );
-	g_settings.shutdown_real_rcdelay = configfile.getInt32( "shutdown_real_rcdelay", true );
-	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
-	g_settings.infobar_sat_display = configfile.getBool("infobar_sat_display", true);
+	g_settings.shutdown_real         = configfile.getBool("shutdown_real"        , true );
+	g_settings.shutdown_real_rcdelay = configfile.getBool("shutdown_real_rcdelay", true );
+	g_settings.infobar_sat_display   = configfile.getBool("infobar_sat_display"  , true );
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
-	g_settings.audio_DolbyDigital = configfile.getInt32( "audio_DolbyDigital", 0 );
+	g_settings.audio_DolbyDigital    = configfile.getBool("audio_DolbyDigital"   , false);
 	g_settings.audio_avs_Control = configfile.getInt32( "audio_avs_Control", CControld::TYPE_AVS );
 	strcpy( g_settings.audio_PCMOffset, configfile.getString( "audio_PCMOffset", "0" ).c_str() );
 
 
 	//vcr
-	g_settings.vcr_AutoSwitch = configfile.getInt32( "vcr_AutoSwitch", 1 );
+	g_settings.vcr_AutoSwitch        = configfile.getBool("vcr_AutoSwitch"       , true );
 
 	//language
 	strcpy(g_settings.language, configfile.getString("language", "").c_str());
 
 	//widget settings
-	g_settings.widget_fade = configfile.getInt32( "widget_fade", 1 );
+	g_settings.widget_fade           = configfile.getBool("widget_fade"          , true );
 
 	//colors (neutrino defaultcolors)
 	g_settings.menu_Head_alpha = configfile.getInt32( "menu_Head_alpha", 0x00 );
@@ -851,25 +850,24 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "gtx_alpha2", g_settings.gtx_alpha2 );
 
 	//misc
-	configfile.setInt32( "shutdown_real", g_settings.shutdown_real );
-	configfile.setInt32( "shutdown_real_rcdelay", g_settings.shutdown_real_rcdelay );
-	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock);
-	configfile.setBool("infobar_sat_display", g_settings.infobar_sat_display);
+	configfile.setBool("shutdown_real"        , g_settings.shutdown_real        );
+	configfile.setBool("shutdown_real_rcdelay", g_settings.shutdown_real_rcdelay);
+	configfile.setBool("infobar_sat_display"  , g_settings.infobar_sat_display  );
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
-	configfile.setInt32( "audio_DolbyDigital", g_settings.audio_DolbyDigital );
+	configfile.setBool("audio_DolbyDigital"   , g_settings.audio_DolbyDigital   );
 	configfile.setInt32( "audio_avs_Control", g_settings.audio_avs_Control );
 	configfile.setString( "audio_PCMOffset", g_settings.audio_PCMOffset );
 
 	//vcr
-	configfile.setInt32( "vcr_AutoSwitch", g_settings.vcr_AutoSwitch );
+	configfile.setBool("vcr_AutoSwitch"       , g_settings.vcr_AutoSwitch       );
 
 	//language
 	configfile.setString("language", g_settings.language);
 
 	//widget settings
-	configfile.setInt32( "widget_fade", g_settings.widget_fade );
+	configfile.setBool("widget_fade"          , g_settings.widget_fade          );
 
 	//colors
 	configfile.setInt32( "menu_Head_alpha", g_settings.menu_Head_alpha );
@@ -1850,6 +1848,11 @@ public:
 			}
 
 			addItem(oj);
+			
+			addItem(new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSWITCH, &g_settings.vcr_AutoSwitch, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
+
+			addItem(GenericMenuSeparatorLine);
+			addItem(new CMenuForwarder(LOCALE_VIDEOMENU_SCREENSETUP, true, NULL, new CScreenSetup()));
 		};
 
 	virtual void paint()
@@ -1863,15 +1866,6 @@ public:
 			CMenuWidget::paint();
 		};
 };
-
-void CNeutrinoApp::InitVideoSettings(CMenuWidget & videoSettings)
-{
-	CMenuOptionChooser * oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSWITCH, &g_settings.vcr_AutoSwitch, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
-	videoSettings.addItem(oj);
-
-	videoSettings.addItem(GenericMenuSeparatorLine);
-	videoSettings.addItem(new CMenuForwarder(LOCALE_VIDEOMENU_SCREENSETUP, true, NULL, new CScreenSetup()));
-}
 
 #if 1
 #define PARENTALLOCK_PROMPT_OPTION_COUNT 3
@@ -2854,9 +2848,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//audio Setup
 	InitAudioSettings(audioSettings, audioSetupNotifier);
 
-	//video Setup
-	InitVideoSettings(videoSettings);
-
 	// Parentallock settings
 	InitParentalLockSettings(parentallockSettings);
 
@@ -3164,7 +3155,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 	if( msg == NeutrinoMessages::EVT_VCRCHANGED )
 	{
-		if( g_settings.vcr_AutoSwitch == 1 )
+		if (g_settings.vcr_AutoSwitch)
 		{
 			if( data != VCR_STATUS_OFF )
 				g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );

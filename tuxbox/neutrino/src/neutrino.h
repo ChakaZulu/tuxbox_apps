@@ -175,7 +175,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitMiscSettings(CMenuWidget &);
 		void InitScanSettings(CMenuWidget &);
 		void InitParentalLockSettings(CMenuWidget &);
-		void InitVideoSettings(CMenuWidget &videoSettings);
 		void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings,
 		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings, CMenuWidget &networkSettings,
 		                  CMenuWidget &colorSettings, CMenuWidget &lcdSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
