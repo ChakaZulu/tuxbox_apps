@@ -70,10 +70,11 @@ EventList::EventList()
 	//width  = 580;
 	// //height = 440;
 	//height = 480;
-	width  = w_max (580, 40);
-	height = h_max (480, 20);
+	width  = w_max (580, 20);
+	height = h_max (480, 20); 
 
 
+	iheight = 30;	// info bar height (see below, hard coded at this time)
 	theight  = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->getHeight();
 	fheight1 = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMLARGE]->getHeight();
 	{
@@ -86,8 +87,8 @@ EventList::EventList()
 	fwidth2 = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMSMALL]->getRenderWidth("[999 min] ");
 
 
-	listmaxshow = (height-theight-0)/fheight;
-	height = theight+0+listmaxshow*fheight; // recalc height
+	listmaxshow = (height-theight-iheight-0)/fheight;
+	height = theight+iheight+0+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
@@ -104,7 +105,7 @@ void EventList::readEvents(const t_channel_id channel_id)
 {
 	current_event = (unsigned int)-1;
 	evtlist = g_Sectionsd->getEventsServiceKey(channel_id);
-    time_t azeit=time(NULL);
+	time_t azeit=time(NULL);
 
 	for ( CChannelEventList::iterator e= evtlist.begin(); e != evtlist.end(); ++e )
 	{
@@ -142,6 +143,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 	paintHead();
 	readEvents(channel_id);
 	paint();
+	showFunctionBar(true);
 
 	int oldselected = selected;
 
@@ -205,6 +207,8 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			hide();
 			paintHead();
 			paint();
+			showFunctionBar(true);
+
 		}
 
 //  -- I commented out the following part (code is working)
@@ -323,6 +327,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 
 					paintHead();
 					paint();
+					showFunctionBar(true);
 				}
 			}
 		}
@@ -348,6 +353,8 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 void EventList::hide()
 {
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	showFunctionBar (false);
+
 }
 
 void EventList::paintItem(unsigned int pos)
@@ -450,6 +457,66 @@ void EventList::paint()
 	int sbs= (selected/listmaxshow);
 
 	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT_PLUS_3);
+
+}
+
+
+
+
+
+//
+// -- Just display/hide function bar
+// -- 2004-04-12 rasc
+//
+
+void  EventList::showFunctionBar (bool show)
+{
+  int  bx,by,bw,bh;
+  int  cellwidth;		// 4 cells
+  int  h_offset, pos;
+  int  bdx;
+
+  bw = width;
+  bh = iheight;
+  bx = x;
+  by = y + height-iheight;
+  h_offset = 5;
+  cellwidth = bw / 4;
+  bdx = iheight-1;
+
+
+    frameBuffer->paintBackgroundBoxRel(bx,by,bw,bh);
+    // -- hide only?
+    if (! show) return;
+
+    // -- frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW_PLUS_1);
+    frameBuffer->paintBoxRel(bx,by,bw,bh, COL_MENUHEAD_PLUS_0);
+
+
+    // -- Button: Timer Record & Channelswitch
+    if(g_settings.recording_type) {
+	// display record button only if recording to server or vcr
+	pos = 0;
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, bx+8+cellwidth*pos, by+h_offset );
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos,
+		by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.recordevent"),
+		COL_INFOBAR, 0, true); // UTF-8
+    }
+
+    // Button: Timer Channelswitch
+    pos = 2;
+    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, bx+8+cellwidth*pos, by+h_offset );
+    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos,
+		by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.channelswitch"),
+		COL_INFOBAR, 0, true); // UTF-8
+
+    // Button: Event Re-Sort
+    pos = 3;
+    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, bx+8+cellwidth*pos, by+h_offset );
+    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos,
+		by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.eventsort"),
+		COL_INFOBAR, 0, true); // UTF-8
+
 }
 
 

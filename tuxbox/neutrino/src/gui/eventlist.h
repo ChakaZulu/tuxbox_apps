@@ -63,6 +63,7 @@ class EventList
 		int		fheight1,fheight2;
 		int		fwidth1,fwidth2;
 		int		theight; // Fonthoehe Channellist-Titel
+		int		iheight; // Height info bar
 
 		int		key;
 		std::string	name;
@@ -77,6 +78,7 @@ class EventList
 		void paint();
 		void paintHead();
 		void hide();
+		void showFunctionBar(bool show);
 
 	public:
 		EventList();

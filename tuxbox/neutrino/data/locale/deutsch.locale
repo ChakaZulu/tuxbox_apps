@@ -827,3 +827,8 @@ EPGPlus.refresh_epg Aktualisieren
 EPGPlus.remind Vormerken
 EPGPlus.scroll_mode Scroll Mode
 EPGPlus.stretch_mode Stretch Mode
+
+eventlistbar.channelswitch Umschalten
+eventlistbar.recordevent Aufnehmen
+eventlistbar.eventsort Sortieren
+
