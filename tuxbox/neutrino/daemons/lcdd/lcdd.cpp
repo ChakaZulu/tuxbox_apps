@@ -66,8 +66,6 @@ void set_mode(lcdd_mode, char *title);
 void set_poweroff();
 
 void parse_command(lcdd_msg rmsg) {
-	//byteorder!!!!!!
-	rmsg.param2 = ntohs(rmsg.param2);
 
 	if(rmsg.version > LCDD_VERSION)
 	{
@@ -76,7 +74,7 @@ void parse_command(lcdd_msg rmsg) {
 		return;
 	}
 
-	//printf("[LCDD] received cmd=%i param=%i\n", rmsg.cmd, rmsg.param);
+	//printf("[LCDD] received cmd=%i param=%i param2=%i\n", rmsg.cmd, rmsg.param, rmsg.param2);
 	switch (rmsg.cmd)
 	{
 	case LC_CHANNEL:
@@ -196,7 +194,7 @@ void show_menu(lcdd_msg msg) {
 	i = msg.param;
 	display.draw_fill_rect(-1,21+14*i,120,36+14*i, CLCDDisplay::PIXEL_OFF);
 	fonts.menu->RenderString(0,33+14*i, 140, msg.param3,
-	    CLCDDisplay::PIXEL_ON);
+	    CLCDDisplay::PIXEL_INV, msg.param2);
 	display.update();
 }
 

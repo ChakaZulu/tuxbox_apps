@@ -76,7 +76,7 @@ struct lcdd_msg {
   unsigned char version;
   unsigned char cmd;
   unsigned char param;
-  unsigned short param2;
+  char param2;
   char param3[30];
   // XXX +++ WARNING +++ XXX
   // changed interface
