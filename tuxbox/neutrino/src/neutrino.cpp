@@ -3590,7 +3590,6 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	}
 	else if (msg == NeutrinoMessages::EVT_START_PLUGIN)
 	{
-		g_PluginList->setvtxtpid(g_RemoteControl->current_PIDs.PIDs.vtxtpid);
 		g_PluginList->startPlugin((const char *)data);
 		delete (unsigned char*) data;
 		return messages_return::handled;

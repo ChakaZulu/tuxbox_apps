@@ -41,8 +41,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
-
 
 class CPlugins
 {
@@ -84,8 +82,6 @@ class CPlugins
 		bool plugin_exists(const std::string & filename);
 		int find_plugin(const std::string & filename);
 
-
-		std::map<std::string, std::string> params;
 	public:
 
 		~CPlugins();
@@ -94,16 +90,8 @@ class CPlugins
 
 		void setPluginDir(const std::string & dir) { plugin_dir = dir; }
 
-		PluginParam* makeParam(const std::string & id, PluginParam *next);
-
-		void addParm(const std::string & cmd, int value);
-		void addParm(const std::string & cmd, const std::string & value);
-
-		void setfb(int fd);
-		void setrc(int fd);
-		void setlcd(int fd);
-		void setvtxtpid(int fd);
-
+		PluginParam * makeParam(const char * const id, const char * const value, PluginParam * const next);
+		PluginParam * makeParam(const char * const id, const int          value, PluginParam * const next);
 
 		int getNumberOfPlugins() { return plugin_list.size(); }
 		const char * getName(int number) { return plugin_list[number].name.c_str(); }

@@ -128,39 +128,6 @@ CPlugins::~CPlugins()
 	plugin_list.clear();
 }
 
-void CPlugins::addParm(const std::string & cmd, const std::string & value)
-{
-	params[cmd] = value;
-}
-
-void CPlugins::addParm(const std::string & cmd, int value)
-{
-	char aval[10];
-	sprintf( aval, "%d", value );
-
-	addParm(cmd, aval);
-}
-
-void CPlugins::setfb(int fd)
-{
-	addParm(P_ID_FBUFFER, fd);
-}
-
-void CPlugins::setrc(int fd)
-{
-	addParm(P_ID_RCINPUT, fd);
-}
-
-void CPlugins::setlcd(int fd)
-{
-	addParm(P_ID_LCD, fd);
-}
-
-void CPlugins::setvtxtpid(int fd)
-{
-	addParm(P_ID_VTXTPID, fd);
-}
-
 void CPlugins::parseCfg(plugin *plugin_data)
 {
 //	FILE *fd;
@@ -239,17 +206,24 @@ void CPlugins::parseCfg(plugin *plugin_data)
 	inFile.close();
 }
 
-PluginParam* CPlugins::makeParam(const std::string & id, PluginParam *next)
+PluginParam * CPlugins::makeParam(const char * const id, const char * const value, PluginParam * const next)
 {
-	PluginParam *startparam = new PluginParam;
+	PluginParam * startparam = new PluginParam;
 
 	startparam->next = next;
-	startparam->id = new char[id.length() + 2];
-	startparam->val = new char[params.find(id)->second.length() + 2];
-	strcpy(startparam->id, id.c_str());
-	strcpy(startparam->val, params.find(id)->second.c_str());
+	startparam->id   = strdup(id   );
+	startparam->val  = strdup(value);
 
 	return startparam;
+}
+
+PluginParam * CPlugins::makeParam(const char * const id, const int value, PluginParam * const next)
+{
+	char aval[10];
+
+	sprintf(aval, "%d", value);
+
+	return makeParam(id, aval, next);
 }
 
 void CPlugins::startPlugin(const char * const name)
@@ -269,34 +243,19 @@ void CPlugins::startPlugin(int number)
 	char			*p;
 	char			*np;
 	void			*handle;
-	char			*error;
-
-	PluginParam *startparam;
-	PluginParam *tmpparam;
-
-	startparam = 0;
-	tmpparam = startparam;
-
-
-	setfb( frameBuffer->getFileHandle() );
+	char *        error;
+	int           vtpid      =  0;
+	PluginParam * startparam =  0;
 
 	if (plugin_list[number].fb)
 	{
-		// std::cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<std::endl;
-		startparam = makeParam(P_ID_FBUFFER, startparam);
-		//std::cout << "New Startparam: " << startparam << std::endl;
-		//std::cout << "New Tmpparam: " << tmpparam << std::endl;
+		startparam = makeParam(P_ID_FBUFFER  , frameBuffer->getFileHandle()    , startparam);
 	}
 	if (plugin_list[number].rc)
 	{
-		setrc( g_RCInput->getFileHandle() );
-		addParm(P_ID_RCBLK_ANF, g_settings.repeat_genericblocker);
-		addParm(P_ID_RCBLK_REP, g_settings.repeat_blocker);
-
-		// std::cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << std::endl;
-		startparam = makeParam(P_ID_RCINPUT, startparam);
-		startparam = makeParam(P_ID_RCBLK_ANF, startparam);
-		startparam = makeParam(P_ID_RCBLK_REP, startparam);
+		startparam = makeParam(P_ID_RCINPUT  , g_RCInput->getFileHandle()      , startparam);
+		startparam = makeParam(P_ID_RCBLK_ANF, g_settings.repeat_genericblocker, startparam);
+		startparam = makeParam(P_ID_RCBLK_REP, g_settings.repeat_blocker       , startparam);
 	}
 	else
 	{
@@ -304,52 +263,38 @@ void CPlugins::startPlugin(int number)
 	}
 	if (plugin_list[number].lcd)
 	{
-		// std::cout << "With LCD " << std::endl;
 		CLCD::getInstance()->pause();
-		if( (lcd_fd=open("/dev/dbox/lcd0", O_RDWR)) < 0 )
-			setlcd( 0 );
-		else
-			setlcd( lcd_fd );
 
-		startparam = makeParam(P_ID_LCD, startparam);
+		lcd_fd = open("/dev/dbox/lcd0", O_RDWR);
+
+		startparam = makeParam(P_ID_LCD      , lcd_fd                          , startparam);
 	}
 	if (plugin_list[number].vtxtpid)
 	{
-		// std::cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << std::endl;
-		// versuche, den gtx/enx_vbi zu stoppen
+		vtpid = g_RemoteControl->current_PIDs.PIDs.vtxtpid;
 #ifdef USE_VBI_INTERFACE
-
-        int fd = open("/dev/dbox/vbi0", O_RDWR);
+		int fd = open("/dev/dbox/vbi0", O_RDWR);
 		if (fd > 0)
 		{
 			ioctl(fd, AVIA_VBI_STOP_VTXT, 0);
 			close(fd);
 		}
 #endif
-		startparam = makeParam(P_ID_VTXTPID, startparam);
+		startparam = makeParam(P_ID_VTXTPID, vtpid, startparam);
 	}
 	if (plugin_list[number].needoffset)
 	{
-		addParm(P_ID_VFORMAT, g_settings.video_Format);
-		addParm(P_ID_OFF_X, g_settings.screen_StartX);
-		addParm(P_ID_OFF_Y, g_settings.screen_StartY);
-		addParm(P_ID_END_X, g_settings.screen_EndX);
-		addParm(P_ID_END_Y, g_settings.screen_EndY);
-
-		// std::cout << "With OFFSETS " << params.find(P_ID_OFF_X)->second.c_str() << ":" << params.find(P_ID_OFF_Y)->second.c_str() << std::endl;
-
-		startparam = makeParam(P_ID_VFORMAT, startparam);
-		startparam = makeParam(P_ID_OFF_X, startparam);
-		startparam = makeParam(P_ID_OFF_Y, startparam);
-		startparam = makeParam(P_ID_END_X, startparam);
-		startparam = makeParam(P_ID_END_Y, startparam);
+		startparam = makeParam(P_ID_VFORMAT  , g_settings.video_Format         , startparam);
+		startparam = makeParam(P_ID_OFF_X    , g_settings.screen_StartX        , startparam);
+		startparam = makeParam(P_ID_OFF_Y    , g_settings.screen_StartY        , startparam);
+		startparam = makeParam(P_ID_END_X    , g_settings.screen_EndX          , startparam);
+		startparam = makeParam(P_ID_END_Y    , g_settings.screen_EndY          , startparam);
 	}
 
 	PluginParam *par = startparam;
 	for( ; par; par=par->next )
 	{
-		// printf ("id: %s - val: %s\n", par->id, par->val);
-		// printf("%d\n", par->next);
+		printf("[gamelist.cpp] (id,val):(%s,%s)\n", par->id, par->val);
 	}
 
 	std::string pluginname = plugin_list[number].filename;
@@ -432,8 +377,7 @@ void CPlugins::startPlugin(int number)
 #ifdef USE_VBI_INTERFACE
 		if (plugin_list[number].vtxtpid)
 		{
-			int vtpid= atoi(params.find(P_ID_VTXTPID)->second.c_str());
-			if (vtpid!=0)
+			if (vtpid != 0)
 			{
 				// versuche, den gtx/enx_vbi wieder zu starten
 				int fd = open("/dev/dbox/vbi0", O_RDWR);
@@ -456,6 +400,15 @@ void CPlugins::startPlugin(int number)
 			dlclose(libhandle[i]);
 		else
 			break;
+	}
+
+	for(par = startparam ; par; )
+	{
+		free(par->id);
+		free(par->val);
+		PluginParam * tmp = par;
+		par = par->next;
+		delete tmp;
 	}
 }
 
@@ -729,7 +682,6 @@ void CGameList::runGame(int selected )
 		g_ActionLog->println("mode: game, " + gamelist[selected]->name);
 	#endif
 
-	g_PluginList->setvtxtpid( g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 	g_PluginList->startPlugin( gamelist[selected]->number );
 
     //redraw menue...
