@@ -4,7 +4,7 @@ all:: yahtzee.so
 CC=$(PREF)gcc
 STRIP=$(PREF)strip
 CDEBUGFLAGS=-g -O2 -Wall -pedantic -DUSEX
-INCLUDES=-I. -I../lib -I../../include
+INCLUDES=-I. -I../lib -I../../include -I../..
 OBJS=yahtzee.o
 
 SingleProgramTarget(yahtzee,main.o $(OBJS),,-L../lib -lfx2 -lX11)
