@@ -11,6 +11,7 @@
 #include <libmd5sum.h>
 #include <lib/dvb/edvb.h>
 #include <sys/mman.h>
+
 #include <tuxbox.h>
 
 #define TMP_IMAGE "/var/tmp/root.cramfs"
@@ -222,7 +223,9 @@ void eUpgrade::catalogTransferDone(int err)
 	if ((!err) && http && (http->code == 200) && datacatalog && !datacatalog->error)
 	{
 		XMLTreeNode *root=catalog->RootNode();
-		eString mytarget=eDVB::getInstance()->getInfo("mID").right(1);
+		// FIXME
+		eString mytarget("");
+		// eString mytarget=eDVB::getInstance()->getInfo("mID").right(1);
 
 		images->beginAtomic();
 		for (XMLTreeNode *r=root->GetChild(); r; r=r->GetNext())
@@ -333,7 +336,9 @@ void eUpgrade::changelogTransferDone(int err)
 			}
 			fclose(f);
 		}
-		displayChangelog(ourversion.mid(4), selectedversion.mid(4), eDVB::getInstance()->getInfo("mID").right(1));
+		// FIXME
+		displayChangelog(ourversion.mid(4), selectedversion.mid(4), "");
+		// displayChangelog(ourversion.mid(4), selectedversion.mid(4), eDVB::getInstance()->getInfo("mID").right(1));
 	}
 	changelog=0;
 }
@@ -356,7 +361,9 @@ void eUpgrade::imageSelected(eListBoxEntryImage *img)
 void eUpgrade::imageSelchanged(eListBoxEntryImage *img)
 {
 	selectedversion=img->version;
-	displayChangelog(ourversion.mid(4), selectedversion.mid(4), eDVB::getInstance()->getInfo("mID").right(1));
+	// FIXME
+	displayChangelog(ourversion.mid(4), selectedversion.mid(4), "");
+	// displayChangelog(ourversion.mid(4), selectedversion.mid(4), eDVB::getInstance()->getInfo("mID").right(1));
 }
 
 void eUpgrade::setStatus(const eString &string)
@@ -502,7 +509,8 @@ void eUpgrade::flashImage(int checkmd5)
 				sync();
 				Decoder::Flush();
 				eString mtd;
-				switch ( tuxbox_get_model() )
+
+				switch (tuxbox_get_model())
 				{
 				case TUXBOX_MODEL_DBOX2:
 					mtd="2";
@@ -516,6 +524,7 @@ void eUpgrade::flashImage(int checkmd5)
 					mtd="../null";
 					mtdsize=0;
 				}
+
 				{
 					int fd=open(eString("/dev/mtdblock/" + mtd).c_str(), O_RDONLY);
 					void *ptr;

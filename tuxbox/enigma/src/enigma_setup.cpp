@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.36 2003/02/19 19:46:40 obi Exp $
+ * $Id: enigma_setup.cpp,v 1.37 2003/03/05 10:28:49 waldi Exp $
  */
 
 #include <enigma_setup.h>
@@ -41,8 +41,9 @@
 #include <lib/dvb/edvb.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/elabel.h>
-#include <tuxbox.h>
 #include "upgrade.h"
+
+#include <tuxbox.h>
 
 eZapSetup::eZapSetup()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 8, 450, true)

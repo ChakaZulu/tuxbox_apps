@@ -1,4 +1,3 @@
-#include <lib/dvb/edvb.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -7,13 +6,13 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <dbox/info.h>
-#include <tuxbox.h>
 #include <algorithm>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+
+#include <tuxbox.h>
 
 #ifdef PROFILE
 	#include <sys/time.h>
@@ -22,6 +21,7 @@
 #include <lib/driver/eavswitch.h>
 #include <lib/driver/streamwd.h>
 #include <lib/driver/rfmod.h>
+#include <lib/dvb/edvb.h>
 #include <lib/dvb/esection.h>
 #include <lib/dvb/si.h>
 #include <lib/dvb/frontend.h>
@@ -32,7 +32,6 @@
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 #include <lib/dvb/dvbci.h>
-
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvbscan.h>
 
@@ -76,30 +75,7 @@ eDVB::eDVB()
 	DVBCI2=new eDVBCI();
 	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
 
-		// initialize frontend (koennte auch nochmal raus)
-	eString frontend=getInfo("fe");
-	int fe;
-	if (!frontend.length())
-	{
-		eDebug("WARNING: couldn't determine frontend-type, assuming satellite...");
-		fe=eFrontend::feSatellite;
-	} else
-	{
-		switch(atoi(frontend.c_str()))
-		{
-		case DBOX_FE_CABLE:
-			fe=eFrontend::feCable;
-			break;
-		case DBOX_FE_SAT:
-			fe=eFrontend::feSatellite;
-			break;
-		default:
-			eDebug("COOL: dvb-t is out. less cool: eDVB doesn't support it yet...");
-			fe=eFrontend::feCable;
-			break;
-		}
-	}
-	if (eFrontend::open(fe)<0)
+	if (eFrontend::open()<0)
 		eFatal("couldn't open frontend");
 
 	settings = new eDVBSettings(*this);
@@ -132,10 +108,9 @@ eDVB::eDVB()
 			new eAVSwitchSagem;
 			break;
 		default:
-			new eAVSwitchNokia;
 			break;
 		}
-	break;
+		break;
 	case TUXBOX_MODEL_DREAMBOX:
 		switch (tuxbox_get_submodel())
 		{
@@ -146,9 +121,11 @@ eDVB::eDVB()
 			new eAVSwitchNokia;
 			break;
 		default:
-			new eAVSwitchNokia;
 			break;
 		}
+		break;
+	default:
+		break;
 	}
 
 	// init stream watchdog
@@ -188,30 +165,6 @@ void eDVB::recMessage(int msg)
 		event(eDVBEvent(eDVBEvent::eventRecordWriteError));
 		break;
 	}
-}
-
-eString eDVB::getInfo(const char *info)
-{
-	FILE *f=fopen("/proc/bus/dbox", "rt");
-	if (!f)
-		return "";
-	eString result;
-	while (1)
-	{
-		char buffer[128];
-		if (!fgets(buffer, 128, f))
-			break;
-		if (strlen(buffer))
-			buffer[strlen(buffer)-1]=0;
-		if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)]=='=')))
-		{
-			int i = strlen(info)+1;
-			result = eString(buffer).mid(i, strlen(buffer)-i);
-			break;
-		}
-	}	
-	fclose(f);
-	return result;
 }
 
 		// for external access only

@@ -34,10 +34,7 @@ enigma_LDADD = \
 	@XMLTREE_LIBS@ \
 	-ldl -lpthread -lcrypt -lresolv
 
-#\
-#	/dbox2/cdkroot/lib/libmpatrolmt.a -lbfd -liberty
-
 enigma$(EXEEXT): $(enigma_OBJECTS) $(enigma_DEPENDENCIES) $(enigma_LDADD_WHOLE)
 	@rm -f enigma$(EXEEXT)
-	$(CXXLINK) $(enigma_LDFLAGS) $(enigma_OBJECTS) -Wl,--whole-archive $(enigma_LDADD_WHOLE) -Wl,--export-dynamic -Wl,--no-whole-archive $(enigma_LDADD) $(LIBS)
+	$(CXXLINK) $(enigma_LDFLAGS) $(enigma_OBJECTS) -Wl,--whole-archive $(enigma_LDADD_WHOLE) -Wl,--no-whole-archive $(enigma_LDADD) $(LIBS)
 

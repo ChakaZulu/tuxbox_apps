@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.20 2003/02/19 21:00:10 obi Exp $
+ * $Id: enigma_info.cpp,v 1.21 2003/03/05 10:28:49 waldi Exp $
  */
 
 #include <enigma_info.h>
@@ -196,6 +196,7 @@ public:
 		
 		machine->setText(tuxbox_get_model_str());
 		
+#if 0
 		int fe=atoi(eDVB::getInstance()->getInfo("fe").c_str());
 		switch (fe)
 		{
@@ -212,6 +213,7 @@ public:
 			frontend->setText(_("Frontend: Simulator"));
 			break;
 		}
+#endif
 		
 		eString sharddisks;
 		

@@ -20,8 +20,8 @@
 
 eFrontend* eFrontend::frontend;
 
-eFrontend::eFrontend(int type, const char *demod)
-:type(type), curRotorPos( 1000 ), timer2(eApp), noRotorCmd(0)
+eFrontend::eFrontend(const char *demod)
+:curRotorPos( 1000 ), timer2(eApp), noRotorCmd(0)
 {
 	state=stateIdle;
 	timer=new eTimer(eApp);
@@ -33,6 +33,30 @@ eFrontend::eFrontend(int type, const char *demod)
 		perror(demod);
 		return;
 	}
+
+	if (ioctl (fd, FE_GET_INFO, &info))
+	{
+		perror ("ioctl");
+		::close (fd);
+		fd = -1;
+	}
+
+	switch (info.type) {
+	case FE_QPSK:
+		type = feSatellite;
+		break;
+	case FE_QAM:
+		type = feCable;
+		break;
+	case FE_OFDM:
+		eDebug("COOL: dvb-t is out. less cool: eDVB doesn't support it yet...");
+		type = feCable;
+		break;
+	default:
+		::close (fd);
+		fd = -1;
+	}
+
 	if (type==feSatellite)
 	{
 		// reset all diseqc devices

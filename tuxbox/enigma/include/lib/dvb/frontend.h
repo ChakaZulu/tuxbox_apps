@@ -25,6 +25,7 @@ class eSwitchParameter;
  */
 class eFrontend: public Object
 {
+	dvb_frontend_info info;
 	int type;
 	int fd;
 
@@ -37,7 +38,7 @@ class eFrontend: public Object
 	enum { stateIdle, stateTuning };
 	int state;
 	eTransponder *transponder;
-	eFrontend(int type, const char *demod="/dev/dvb/adapter0/frontend0");
+	eFrontend(const char *demod="/dev/dvb/adapter0/frontend0");
 	static eFrontend *frontend;
 	eTimer *timer, timer2;
 	int tries, noRotorCmd;
@@ -66,7 +67,7 @@ public:
 		feSatellite=0, feCable, feTerrestrical
 	};
 
-	static int open(int type) { if (!frontend) frontend=new eFrontend(type); if (frontend->fd<0) { close(); return frontend->fd; } return 0; }
+	static int open() { if (!frontend) frontend=new eFrontend(); if (frontend->fd<0) { close(); return frontend->fd; } return 0; }
 	static void close() { delete frontend; }
 	static eFrontend *getInstance() { return frontend; }
 

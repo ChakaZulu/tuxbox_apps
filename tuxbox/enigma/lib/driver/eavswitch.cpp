@@ -219,7 +219,7 @@ void eAVSwitch::toggleMute()
 	if (mute)
 	{
 //		setVolume(63);
-		if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
+		if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
 			muteOstAudio(1);
 		else
 			muteAvsAudio(1);
@@ -227,7 +227,7 @@ void eAVSwitch::toggleMute()
 	else
 	{
 //		changeVolume(1,volume);
-		if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
+		if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
 			muteOstAudio(0);
 		else
 			muteAvsAudio(0);
@@ -313,7 +313,7 @@ int eAVSwitch::setInput(int v)
 		changeVolume(1, volume);  // set Volume to TV Volume
 		if (mute)
 		{
-			if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
+			if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
 				muteOstAudio(1);
 			else
 				muteAvsAudio(1);
@@ -332,7 +332,7 @@ int eAVSwitch::setInput(int v)
 		ioctl(avsfd, AVSIOSASW3, scart+5);
 		if (mute)
 		{
-			if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
+			if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX)
 				muteOstAudio(0);
 			else
 				muteAvsAudio(0);

@@ -12,6 +12,7 @@
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbwidgets.h>
 #include <lib/dvb/edvb.h>
+
 #include <tuxbox.h>
 
 RotorConfig::RotorConfig(eLNB *lnb )
@@ -142,7 +143,7 @@ RotorConfig::RotorConfig(eLNB *lnb )
 	if (lnb)
 		setLNBData(lnb);
 
-	if ( tuxbox_get_model() == TUXBOX_MODEL_DBOX2 )
+	if (tuxbox_get_model() == TUXBOX_MODEL_DBOX2)
 	{
 		eDebug("useRotorInputPower can only used on dreambox");
 		useRotorInPower->hide();
