@@ -16,7 +16,7 @@
 // 3 = for DBox
 // 2 = for Dreambox with new Freetype
 // 1 = for Dreambox with old Freetype
-#define TUXCOM_DBOX_VERSION 3
+#define TUXCOM_DBOX_VERSION 3 
 
 #if TUXCOM_DBOX_VERSION == 3
 #include "config.h"
@@ -34,9 +34,14 @@
 #include <sys/mman.h>
 #include <sys/dir.h>
 #include <sys/stat.h>
-
 #include <plugin.h>
 
+/*
+#include <netinet/in.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+*/
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_CACHE_H
@@ -51,6 +56,7 @@
 #include <linux/input.h>
 #endif
 
+
 #define MENUROWS      10
 #define MENUITEMS     10
 #define MENUSIZE       59
@@ -63,11 +69,11 @@
 #define RIGHTFRAME   1
 
 #define DEFAULT_PATH "/"
-#define charset " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@!#$%&?/\()=<>+-_,.;:"
+#define charset " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#!$%&?*()@\\/=<>+-_,.;:"
 
 #define FILEBUFFER_SIZE 100 * 1024 // Edit files up to 100k
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.2"
+#define MSG_VERSION    "Tuxbox Commander Version 1.2a\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004"
 //rc codes
 
@@ -153,9 +159,10 @@ FT_UInt			prev_glyphindex;
 FT_Bool			use_kerning;
 
 
+
 enum {OK, OKCANCEL, OKHIDDENCANCEL,YESNOCANCEL,NOBUTTON,OVERWRITECANCEL,OVERWRITESKIPCANCEL};
-enum {YES, NO, HIDDEN,CANCEL, OVERWRITE, SKIP, OVERWRITEALL,SKIPALL};
-enum {GZIP,BZIP2,COMPRESS,TAR};
+enum {YES, NO, HIDDEN,CANCEL, OVERWRITE, SKIP, OVERWRITEALL,SKIPALL,EDIT};
+enum {GZIP,BZIP2,COMPRESS,TAR,FTP};
 
 #define FONTHEIGHT_VERY_SMALL 20
 #define FONTHEIGHT_SMALL      24
@@ -227,12 +234,17 @@ int language;
 #define ACTION_MKFILE   9
 #define ACTION_MKLINK   10
 
-#define ACTION_EXEC     1;
-#define ACTION_MARKER   2;
-#define ACTION_SORT     3;
-#define ACTION_REFRESH  4;
-#define ACTION_DELLINE  5;
-#define ACTION_INSLINE  6;
+#define ACTION_EXEC      1
+#define ACTION_MARKER    2
+#define ACTION_SORT      3
+#define ACTION_REFRESH   4
+#define ACTION_DELLINE   5
+#define ACTION_INSLINE   6
+#define ACTION_CLEAR     7
+#define ACTION_UPPERCASE 8
+#define ACTION_LOWERCASE 9
+
+
 
 
 #define BTN_OK            0
@@ -281,14 +293,18 @@ enum {MSG_EXEC              ,
       MSG_LINE              ,
       MSG_READ_ZIP_DIR      ,
       MSG_EXTRACT           };
+//      MSG_FTP_NOCONN        ,
+//      MSG_FTP_CONN          ,
+//      MSG_FTP_ERROR         };
 
 enum {INFO_COPY   ,
       INFO_MOVE   ,
       INFO_EXEC   ,
       INFO_MARKER };
 
-char *numberchars[] = { "0@!#$%&?/\() ",
-                 		 "1<>+-_,.;:=" ,
+
+char *numberchars[] = {  "0#!$%&?*()@\\",
+                 		 "1/=<>+-_,.;:" ,
                  		 "abc2",
                  		 "def3",
                  		 "ghi4",
@@ -325,6 +341,9 @@ char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen 
 				  "line %d of %d"                              ,"Zeile %d von %d"                                 ,
 				  "reading archive directory..."               ,"Lese Archiv-Verzeichnis..."                      ,
 				  "extracting from file '%s'..."               ,"Entpacke aus Datei '%s'"                         };
+//				  "no connection to"                           ,"Keine Verbindung zu"                             ,
+//				  "connecting to"                              ,"Verbinde mit"                                    ,
+//				  "error in ftp command"                       ,"Fehler bei FTP-Kommando"                         };
 
 char *menuline[]  = { ""      , ""           ,
                       "rights", "Rechte"     ,
@@ -343,7 +362,10 @@ char *colorline[] = { ""               , "" ,
                       "sort directory" , "Verzeichnis sortieren"    ,
                       "refresh view"   , "Ansicht aktualisieren"    ,
                       "delete line"    , "Zeile löschen"            ,
-                      "insert line"    , "Zeile einfügen"           };
+                      "insert line"    , "Zeile einfügen"           ,
+                      "clear input"    , "Eingabe löschen"          ,
+                      "set uppercase"  , "Grossbuchstaben"          ,
+                      "set lowercase"  , "Kleinbuchstaben"          };
 char *mbox[]     = { "OK"           , "OK"                ,
                      "Cancel"       , "Abbrechen"         ,
                      "Hidden"       , "Versteckt"         ,
@@ -392,6 +414,7 @@ struct frameinfo
 	char           			zipfile[FILENAME_MAX];
 	char           			zippath[FILENAME_MAX];
 	struct zipfileentry*	allziplist;
+//	FILE*                   ftpconn;
 
 };
 
@@ -434,4 +457,6 @@ void 			  	ShowFile(FILE* pipe, char* szAction);
 void 			  	ReadZip(int typ);
 int					CheckZip(char* szName);
 FILE*				OpenPipe(char* szAction);
-
+//void 				OpenFTP();
+//void 				ReadFTPDir();
+//int					FTPcmd(const char *s1, const char *s2, FILE *stream, char *buf);
