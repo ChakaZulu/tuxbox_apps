@@ -64,7 +64,7 @@ CChannelList::CChannel::CChannel(const int _key, const int _number, const std::s
 	name                = _name;
 	satellitePosition   = _satellitePosition;
 	channel_id          = ids;
-	bAlwaysLocked       = true;
+	bAlwaysLocked       = false;
 	last_unlocked_EPGid = 0;
 }
 

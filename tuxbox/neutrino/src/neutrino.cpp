@@ -972,11 +972,22 @@ void CNeutrinoApp::channelsInit()
 		for(uint j=0; j<zapitChannels.size(); j++)
 		{
 			CChannelList::CChannel* channel = channelList->getChannel(zapitChannels[j].nr);
-
 			bouquetList->Bouquets[i]->channelList->addChannel(channel);
-			if( !bouquetList->Bouquets[i]->bLocked)
+		}
+	}
+	// reload zapit bouquets including hidden , for pre-lock settings
+	zapitBouquets.clear();
+	g_Zapit->getBouquets(zapitBouquets, true, true); // UTF-8
+	for( uint i=0; i< zapitBouquets.size(); i++ )
+	{
+		CZapitClient::BouquetChannelList zapitChannels;
+		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr , zapitChannels, CZapitClient::MODE_CURRENT, true); // UTF-8
+		for(uint j=0; j<zapitChannels.size(); j++)
+		{								 
+			CChannelList::CChannel* channel = channelList->getChannel(zapitChannels[j].nr);
+			if( zapitBouquets[i].locked)
 			{
-				channel->bAlwaysLocked = false;
+				channel->bAlwaysLocked = true;
 			}
 		}
 	}
