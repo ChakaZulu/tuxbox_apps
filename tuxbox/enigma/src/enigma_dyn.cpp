@@ -1799,7 +1799,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 	}
 
 	eDebug("current service: %s", current.c_str());
-	eServiceReference current_service(current);
+	eServiceReference current_service(string2ref(current));
 
 	eString res;
 
