@@ -1,5 +1,5 @@
 /*
-$Id: biop_modinfo.c,v 1.3 2004/02/24 23:03:04 rasc Exp $
+$Id: biop_modinfo.c,v 1.4 2004/02/29 23:49:28 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: biop_modinfo.c,v 1.3 2004/02/24 23:03:04 rasc Exp $
 
 
 $Log: biop_modinfo.c,v $
+Revision 1.4  2004/02/29 23:49:28  rasc
+no message
+
 Revision 1.3  2004/02/24 23:03:04  rasc
 private data of DSMCC::DSI
 BIOP::ServiceGatewayInformation()
@@ -60,10 +63,22 @@ some minor changes...
  */
 
 
-int BIOP_ModuleInfo (int v, u_char *b, u_int len)
+int BIOP_ModuleInfo (int v, u_char *b, u_int len_org)
 {
-   int   	len_org = len;
-   int 		n1;
+   int   	len = len_org;
+   int 		n1, i;
+
+
+   	// -- due to some misbehavior of some service providers
+   	// -- we do a simple plausi check for tap_counts_min_bytes > len
+	i = getBits (b, 0, 96, 8);	// tap_counts
+	i = i * 7;
+
+	if (i > len_org) {	// this is no ModuleInfo
+		print_databytes (v,"Data Bytes (non-standard):", b, len_org);
+		return len_org;
+	}
+
 
 
 
@@ -84,6 +99,10 @@ int BIOP_ModuleInfo (int v, u_char *b, u_int len)
 		int n2;
 
 		out_NL (v);
+		if (len <= 0) {
+			out_nl (4, "... => strange len <= 0  and still tapcount > 0  (abort)");
+			break;
+		}
 
 		outBit_Sx_NL (v,"Id: ",				b,  0, 16);
 		outBit_S2x_NL(v,"Use: ",			b, 16, 16,
