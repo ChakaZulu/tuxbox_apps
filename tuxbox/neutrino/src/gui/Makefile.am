@@ -19,7 +19,7 @@ libneutrino_gui_a_SOURCES = \
 	filebrowser.cpp mp3player.cpp nfs.cpp pictureviewer.cpp
 
 libneutrino_gui2_a_SOURCES = \
-	streaminfo.cpp alphasetup.cpp
+	streaminfo.cpp alphasetup.cpp motorcontrol.cpp
 
 libtimerlist_a_SOURCES = \
 	timerlist.cpp
