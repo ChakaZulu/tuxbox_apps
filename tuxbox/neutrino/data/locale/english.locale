@@ -635,6 +635,7 @@ colormenu.gtx_alpha Transparency (GTX)
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
 
+mp3player.name MP3 Player
 mp3player.head Mp3 Playlist
 mp3player.play Play
 mp3player.add Add

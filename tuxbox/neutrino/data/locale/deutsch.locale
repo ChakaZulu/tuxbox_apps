@@ -17,8 +17,8 @@ mainmenu.shutdown Ausschalten
 mainmenu.settings Einstellungen
 mainmenu.service Service
 mainmenu.recording Aufnehmen
-mainmenu.recording_start start
-mainmenu.recording_stop stop
+mainmenu.recording_start Start
+mainmenu.recording_stop Stopp
 
 servicemenu.head Service
 servicemenu.update Software-Aktualisierung
@@ -635,12 +635,13 @@ colormenu.gtx_alpha Transparenz (GTX)
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
 
+mp3player.name MP3 Player
 mp3player.head Mp3 Playlist
-mp3player.play abspielen
-mp3player.add hinzufuegen
-mp3player.delete loeschen
-mp3player.stop stop
-mp3player.playall alle abspielen
+mp3player.play Abspielen
+mp3player.add Hinzufügen
+mp3player.delete Löschen
+mp3player.stop Stopp
+mp3player.playall Alle abspielen
 
 filebrowser.head Filebrowser
 filebrowser.filter Filter

@@ -629,6 +629,7 @@ colormenu.gtx_alpha providnost (gtx)
 gtxalpha.alpha1 alpha 1
 gtxalpha.alpha2 alpha 2
 
+mp3player.name MP3 Player
 mp3player.head Mp3
 mp3player.play unset
 mp3player.add unset

@@ -628,6 +628,7 @@ colormenu.gtx_alpha unset
 gtxalpha.alpha1 tr1
 gtxalpha.alpha2 tr2
 
+mp3player.name MP3 Player
 mp3player.head Mp3
 mp3player.play unset
 mp3player.add unset
