@@ -80,6 +80,9 @@ CPictureViewer::CFormathandler * CPictureViewer::fh_getsize(const char *name,int
 bool CPictureViewer::DecodeImage(std::string name, int startx, int endx, int starty, int endy, bool showBusySign)
 {
 //   dbout("DecodeImage {\n"); 
+   if(name==m_Pic_Name)
+		return true;
+
 	int x,y,xs,ys,imx,imy;
 	getCurrentRes(&xs,&ys);
 	
@@ -183,11 +186,7 @@ bool CPictureViewer::DecodeImage(std::string name, int startx, int endx, int sta
 bool CPictureViewer::ShowImage(std::string filename, int startx, int endx, int starty, int endy)
 {
 //	dbout("Show Image {\n");
-   if(filename!=m_Pic_Name)
-   {
-      // Picture not yet decoded
-      DecodeImage(filename,startx,endx,starty,endy,false);
-   }
+	DecodeImage(filename,startx,endx,starty,endy,false);
    DisplayImage();
 //	dbout("Show Image }\n");
    return true;

@@ -69,7 +69,6 @@ CPictureViewerGui::CPictureViewerGui()
 
 	m_sort = FILENAME;
 	m_viewer = new CPictureViewer();
-	m_viewer->SetAspectRatio(4.0/3);
 	m_filebrowser = new CFileBrowser();
 	m_filebrowser->Multi_Select = true;
 	m_filebrowser->Dirs_Selectable = true;
@@ -111,7 +110,17 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height)/ 2) + g_settings.screen_StartY;
 
 	m_viewer->SetScaling((CPictureViewer::ScalingMode)g_settings.picviewer_scaling);
-	
+	if(g_settings.video_Format==1)
+		m_viewer->SetAspectRatio(16.0/9);
+	else if(g_settings.video_Format==0)
+	{
+		CControldClient cdc;
+		cdc.setVideoFormat(CControldClient::VIDEOFORMAT_4_3);
+		m_viewer->SetAspectRatio(4.0/3);
+	}
+	else
+		m_viewer->SetAspectRatio(4.0/3);
+
 	if(parent)
 	{
 		parent->hide();

@@ -88,7 +88,7 @@ CMP3PlayerGui::~CMP3PlayerGui()
 }
 
 //------------------------------------------------------------------------
-int CMP3PlayerGui::exec(CMenuTarget* parent, std::string actionKey)
+int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 {
 	m_state=STOP;
 	current=-1;
@@ -396,7 +396,7 @@ int CMP3PlayerGui::show()
 		{ //numeric zap
 			int x1=(g_settings.screen_EndX- g_settings.screen_StartX)/2 + g_settings.screen_StartX-50;
 			int y1=(g_settings.screen_EndY- g_settings.screen_StartY)/2 + g_settings.screen_StartY;
-			std::string num;
+			string num;
 			int val=0;
 			char str[11];
 			do
@@ -427,6 +427,8 @@ int CMP3PlayerGui::show()
 		{
 			CNFSSmallMenu nfsMenu;
 			nfsMenu.exec(this, "");
+			CLCD::getInstance()->setMode(CLCD::MODE_MP3);
+			paintLCD();
 			update=true;
 			//pushback key if...
 			//g_RCInput->postMsg( msg, data );
@@ -504,7 +506,7 @@ void CMP3PlayerGui::paintItem(int pos)
 	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, color);
 	if(liststart+pos<playlist.size())
 	{
-		if (playlist[liststart+pos].Title.empty())
+		if(playlist[liststart+pos].Title == "")
 		{
 			// id3tag noch nicht geholt
 			get_id3(&playlist[liststart+pos]);
@@ -514,37 +516,36 @@ void CMP3PlayerGui::paintItem(int pos)
 		}
 		char sNr[20];
 		sprintf(sNr, "%2d : ", liststart+pos+1);
-		std::string tmp=sNr;
- 		if ((!playlist[liststart+pos].Artist.empty()) &&
-		    (!playlist[liststart+pos].Album.empty()) &&
-		    (!playlist[liststart+pos].Title.empty()))
-			tmp +=  playlist[liststart+pos].Title  + ", " +
-				playlist[liststart+pos].Artist + " (" +
-				playlist[liststart+pos].Album  + ")";
+		string tmp=sNr;
+ 		if(playlist[liststart+pos].Artist != "" && playlist[liststart+pos].Album  != "" &&
+			playlist[liststart+pos].Title  != "")
+			tmp += playlist[liststart+pos].Title  + ", " + playlist[liststart+pos].Artist + " (" +
+			playlist[liststart+pos].Album  + ")";
 
 		else
 		{
-			if (playlist[liststart+pos].Title.empty())
-				tmp += "Title?";
-			else
+			if(playlist[liststart+pos].Title != "")
 				tmp += playlist[liststart+pos].Title;
-			tmp += ", "; 
- 			if (playlist[liststart+pos].Artist.empty())
-				tmp += "Artist?";
 			else
+				tmp += "Title?";
+			tmp += ", "; 
+ 			if(playlist[liststart+pos].Artist != "")
 				tmp += playlist[liststart+pos].Artist;
-			if (!(playlist[liststart+pos].Album.empty()))
+			else
+				tmp += "Artist?"; 
+			if(playlist[liststart+pos].Album != "")
 				tmp += " (" + playlist[liststart+pos].Album + ")";
  		}  
 		int w=g_Fonts->menu->getRenderWidth(playlist[liststart+pos].Duration)+5;
-		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30-w, tmp.c_str(), color, fheight, true); // UTF-8
+		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30-w, tmp.c_str(), color, fheight);
 		g_Fonts->menu->RenderString(x+width-15-w,ypos+fheight, w, playlist[liststart+pos].Duration, color, fheight);
 
 		if(liststart+pos==selected)
 			paintItemID3DetailsLine(pos);
 		
 		if(liststart+pos==selected && m_state==STOP)
-			CLCD::getInstance()->showMP3(playlist[liststart+pos].Artist, playlist[liststart+pos].Title, playlist[liststart+pos].Album);
+			CLCD::getInstance()->showMP3(playlist[liststart+pos].Artist, playlist[liststart+pos].Title, 
+												  playlist[liststart+pos].Album);
 
 	}
 //	printf("paintItem}\n");
@@ -555,7 +556,7 @@ void CMP3PlayerGui::paintItem(int pos)
 void CMP3PlayerGui::paintHead()
 {
 //	printf("paintHead{\n");
-	std::string strCaption = g_Locale->getText("mp3player.head");
+	string strCaption = g_Locale->getText("mp3player.head");
 	frameBuffer->paintBoxRel(x,y+title_height, width,theight, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+title_height+10);
 	g_Fonts->menu_title->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption.c_str(), COL_MENUHEAD, 0, true); // UTF-8
@@ -653,21 +654,21 @@ void CMP3PlayerGui::paintInfo()
 		frameBuffer->paintBoxRel(x+2, y +2 , width-4, title_height-14, COL_MENUCONTENTSELECTED);
 		char sNr[20];
 		sprintf(sNr, ": %2d", current+1);
-		std::string tmp=g_Locale->getText("mp3player.playing") + sNr ;
+		string tmp=g_Locale->getText("mp3player.playing") + sNr ;
 		int w=g_Fonts->menu->getRenderWidth(tmp, true); // UTF-8
 		int xstart=(width-w)/2;
 		if(xstart < 10)
 			xstart=10;
 		g_Fonts->menu->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
-		if (playlist[current].Title.empty() || playlist[current].Artist.empty())
-			tmp=playlist[current].Title + playlist[current].Artist;
-		else
+		if(playlist[current].Title!="" && playlist[current].Artist!="")
 			tmp=playlist[current].Title + " / " + playlist[current].Artist;
-		w=g_Fonts->menu->getRenderWidth(tmp, true); // UTF-8
+		else
+			tmp=playlist[current].Title + playlist[current].Artist;
+		w=g_Fonts->menu->getRenderWidth(tmp);
 		xstart=(width-w)/2;
 		if(xstart < 10)
 			xstart=10;
-		g_Fonts->menu->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
+		g_Fonts->menu->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED);
 		tmp = playlist[current].Bitrate + " / " + playlist[current].Samplerate + " / " + playlist[current].ChannelMode + 
 			" / " + playlist[current].Layer;
 		updateMP3Infos();
@@ -800,36 +801,13 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 			break;
 	}
 }
-
-
-
-std::string Latin1_to_UTF8(const std::string s)
-{
-	std::string r;
-	
-	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
-	{
-		unsigned char c = *it;
-		if (c < 0x80)
-			r += c;
-		else
-		{
-			unsigned char d = 0xc0 | (c >> 6);
-			r += d;
-			d = 0x80 | (c & 0x3f);
-			r += d;
-		}
-	}		
-	return r;
-}
-
 //------------------------------------------------------------------------
 void CMP3PlayerGui::get_id3(CMP3 *mp3)
 {
 	unsigned int i;
 	struct id3_frame const *frame;
 	id3_ucs4_t const *ucs4;
-	id3_utf8_t *utf8;
+	id3_latin1_t *latin1;
 	char const spaces[] = "          ";
 
 	struct 
@@ -891,22 +869,22 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 					if(strcmp(info[i].id, ID3_FRAME_GENRE) == 0)
 						ucs4 = id3_genre_name(ucs4);
 
-					utf8 = id3_ucs4_utf8duplicate(ucs4);
-					if (utf8 == NULL)
+					latin1 = id3_ucs4_latin1duplicate(ucs4);
+					if(latin1 == 0)
 						goto fail;
 
-					if (j == 0 && name)
+					if(j == 0 && name)
 					{
 						if(strcmp(name,"Title") == 0)
-							mp3->Title = (char *) utf8;
+							mp3->Title = (char *) latin1;
 						if(strcmp(name,"Artist") == 0)
-							mp3->Artist = (char *) utf8;
+							mp3->Artist = (char *) latin1;
 						if(strcmp(name,"Year") == 0)
-							mp3->Year = (char *) utf8;
+							mp3->Year = (char *) latin1;
 						if(strcmp(name,"Album") == 0)
-							mp3->Album = (char *) utf8;
+							mp3->Album = (char *) latin1;
 						if(strcmp(name,"Genre") == 0)
-							mp3->Genre = (char *) utf8;
+							mp3->Genre = (char *) latin1;
 						//printf("%s%s: %s\n", &spaces[namelen], name, latin1);
 					}
 					else
@@ -919,7 +897,7 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 						//printf("%s  %s\n", spaces, latin1);
 					}
 
-					free(utf8);
+					free(latin1);
 				}
 			}
 
@@ -928,7 +906,7 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 			i = 0;
 			while((frame = id3_tag_findframe(tag, ID3_FRAME_COMMENT, i++)))
 			{
-				id3_utf8_t *ptr, *newline;
+				id3_latin1_t *ptr, *newline;
 				int first = 1;
 
 				ucs4 = id3_field_getstring(&frame->fields[2]);
@@ -940,20 +918,20 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 				ucs4 = id3_field_getfullstring(&frame->fields[3]);
 				assert(ucs4);
 
-				utf8 = id3_ucs4_utf8duplicate(ucs4);
-				if (utf8 == 0)
+				latin1 = id3_ucs4_latin1duplicate(ucs4);
+				if(latin1 == 0)
 					goto fail;
 
-				ptr = utf8;
+				ptr = latin1;
 				while(*ptr)
 				{
-					newline = (id3_utf8_t *) strchr((char*)ptr, '\n');
+					newline = (id3_latin1_t *) strchr((char*)ptr, '\n');
 					if(newline)
 						*newline = 0;
 
 					if(strlen((char *)ptr) > 66)
 					{
-						id3_utf8_t *linebreak;
+						id3_latin1_t *linebreak;
 
 						linebreak = ptr + 66;
 
@@ -988,7 +966,7 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 						ptr += strlen((char *) ptr) + (newline ? 1 : 0);
 				}
 
-				free(utf8);
+				free(latin1);
 				break;
 			}
 			id3_tag_delete(tag);
@@ -999,13 +977,13 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 		id3_file_close(id3file);
 	}
 
-	if (mp3->Artist.empty() && mp3->Title.empty())
+	if(mp3->Artist == "" && mp3->Title=="")
 	{
 		//Set from Filename
-		std::string tmp = mp3->Filename.substr(mp3->Filename.rfind("/")+1);
+		string tmp = mp3->Filename.substr(mp3->Filename.rfind("/")+1);
 		tmp = tmp.substr(0,tmp.length()-4);	//remove .mp3
 		unsigned int i = tmp.rfind(" - ");
-		if(i != std::string::npos)
+		if(i != string::npos)
 		{ // Trennzeiche " - " gefunden
 			mp3->Artist = tmp.substr(0, i);
 			mp3->Title = tmp.substr(i+3);
@@ -1013,7 +991,7 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 		else
 		{
 			i = tmp.rfind("-");
-			if(i != std::string::npos)
+			if(i != string::npos)
 			{ //Trennzeichen "-"
 				mp3->Artist = tmp.substr(0, i);
 				mp3->Title = tmp.substr(i+1);
@@ -1021,8 +999,6 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 			else
 				mp3->Title	= tmp;
 		}
-		mp3->Artist = Latin1_to_UTF8(mp3->Artist);
-		mp3->Title = Latin1_to_UTF8(mp3->Title);
 	}
 	if(0)
 	{
@@ -1077,18 +1053,18 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 			frameBuffer->paintBoxRel(x,         ypos2, width ,info_height, col1);
 			// paint id3 infobox 
 			frameBuffer->paintBoxRel(x+2, ypos2 +2 , width-4, info_height-4, COL_MENUCONTENTDARK);
-			g_Fonts->menu->RenderString(x+10, ypos2 + 2 + 1*fheight, width- 80, playlist[selected].Title.c_str(), COL_MENUCONTENTDARK, 0, true); // UTF-8
-			std::string tmp;
-			if (playlist[selected].Genre.empty() || playlist[selected].Year.empty())
-				tmp = playlist[selected].Genre + playlist[selected].Year;
-			else
+			g_Fonts->menu->RenderString(x+10, ypos2 + 2 + 1*fheight, width- 80, playlist[selected].Title.c_str(), COL_MENUCONTENTDARK);
+			string tmp;
+			if(playlist[selected].Genre != "" && playlist[selected].Year!="")
 				tmp = playlist[selected].Genre + " / " + playlist[selected].Year;
-			int w=g_Fonts->menu->getRenderWidth(tmp, true) + 10; // UTF-8
-			g_Fonts->menu->RenderString(x+width-w-5, ypos2 + 2 + 1*fheight, w, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
+			else 
+				tmp = playlist[selected].Genre + playlist[selected].Year;
+			int w=g_Fonts->menu->getRenderWidth(tmp)+10;
+			g_Fonts->menu->RenderString(x+width-w-5, ypos2 + 2 + 1*fheight, w, tmp, COL_MENUCONTENTDARK);
  			tmp = playlist[selected].Artist;
-			if (!(playlist[selected].Album.empty()))
+			if(playlist[selected].Album!="")
 				tmp += " (" + playlist[selected].Album + ")";
-			g_Fonts->menu->RenderString(x+10, ypos2 + 2*fheight-2, width- 20, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
+			g_Fonts->menu->RenderString(x+10, ypos2 + 2*fheight-2, width- 20, tmp, COL_MENUCONTENTDARK);
 		}
 }
 
@@ -1163,7 +1139,7 @@ void CMP3PlayerGui::play(int pos)
 	if(pos - liststart >=0 && pos - liststart < listmaxshow)
 		paintItem(pos - liststart);
 	
-	if (playlist[pos].Artist.empty())
+	if(playlist[pos].Artist == "")
 	{
 		// id3tag noch nicht geholt
 		get_id3(&playlist[pos]);
@@ -1223,7 +1199,7 @@ void CMP3PlayerGui::updateTimes(bool force)
 			m_time_played=CMP3Player::getInstance()->getTimePlayed();
 			updatePlayed=true;
 		}
-		std::string time_tmp=m_time_played.substr(0,m_time_played.find(":")+1) + "00";
+		string time_tmp=m_time_played.substr(0,m_time_played.find(":")+1) + "00";
 		int w1=g_Fonts->menu->getRenderWidth(" / " + m_time_total);
 		int w2=g_Fonts->menu->getRenderWidth(time_tmp);
 
