@@ -5,6 +5,7 @@ bin_PROGRAMS = \
 	setvoltage \
 	setpid \
 	video \
+	test_clip \
 	test_sections \
 	test_sec_ne \
 	test_pes \
@@ -18,6 +19,7 @@ sendburst_SOURCES = sendburst.c
 setvoltage_SOURCES = setvoltage.c
 setpid_SOURCES = setpid.c
 video_SOURCES = video.c
+test_clip_SOURCES = test_clip.c
 test_sections_SOURCES = test_sections.c hex_dump.c
 test_sec_ne_SOURCES = test_sec_ne.c hex_dump.c
 test_pes_SOURCES = test_pes.c hex_dump.c
