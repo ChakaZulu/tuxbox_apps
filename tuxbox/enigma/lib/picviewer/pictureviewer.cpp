@@ -1,4 +1,5 @@
 #include <config.h>
+#include <lib/driver/streamwd.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
@@ -123,7 +124,8 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	unsigned int v_pin8 = 0;
 	eConfig::getInstance()->getKey("/elitedvb/video/pin8", v_pin8);
 	switchto43 = false;
-	if ((v_pin8 > 1) && (eServiceInterface::getInstance()->getService()->getAspectRatio() == 1))
+	if ((v_pin8 == 3) || // always 16:9
+		((v_pin8 > 1) && (eServiceInterface::getInstance()->getService()->getAspectRatio() == 1)))
 	{
 		m_aspect = 16.0 / 9;
 	}
@@ -168,6 +170,8 @@ ePictureViewer::~ePictureViewer()
 		fh_root = fh_root->next;
 		delete tmp;
 	}
+// restore original screen size
+	eStreamWatchdog::getInstance()->reloadSettings(); 
 }
 
 void ePictureViewer::add_format(int (*picsize)(const char *, int *, int *, int, int ), int (*picread)(const char *, unsigned char *, int, int), int (*id)(const char*))
