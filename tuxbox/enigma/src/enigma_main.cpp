@@ -201,12 +201,21 @@ void eZapSeekIndices::load(const eString &filename)
 
 void eZapSeekIndices::save()
 {
+	if (!changed)
+		return;
+	
+	if (!index.size())
+	{
+		unlink(filename.c_str());
+		return;
+	}
+		
 	FILE *f=fopen(filename.c_str(), "wt");
 	if (!f)
 		return;
 
 	for (std::map<int,int>::const_iterator i(index.begin()); i != index.end(); ++i)
-		fprintf(f, "%d %d", i->first, i->second);
+		fprintf(f, "%d %d\n", i->first, i->second);
 	fclose(f);
 	changed=0;
 }
@@ -214,16 +223,19 @@ void eZapSeekIndices::save()
 void eZapSeekIndices::add(int real, int time)
 {
 	index.insert(std::pair<int,int>(real,time));
+	changed = 1;
 }
 
 void eZapSeekIndices::remove(int real)
 {
 	index.erase(real);
+	changed = 1;
 }
 
 void eZapSeekIndices::clear()
 {
 	index.clear();
+	changed = 1;
 }
 
 int eZapSeekIndices::getNext(int real, int dir)
@@ -1324,9 +1336,10 @@ eZapMain::eZapMain()
 	Progress=new eProgressWithIndices(this);
 	Progress->setName("progress_bar");
 	Progress->setIndices(&indices);
+	indices_enabled = 0;
 #else
 	Progress=new eProgress(this);
-	Progress->setName("progress-bar");
+	Progress->setName("progress_bar");
 #endif
 
 	isVT=0;
@@ -4739,6 +4752,15 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 		return;
 
 	eService *service=eServiceInterface::getInstance()->addRef(_serviceref);
+	
+			/* enable indices when we have something to store them. */
+	if (_serviceref.path.size())
+	{
+		indices.clear();
+		indices.load(_serviceref.path + ".indexmarks");
+		indices_enabled = 1;
+	} else
+		indices_enabled = 0;
 
 	if (_serviceref.type == eServiceReference::idDVB )
 	{
@@ -5111,7 +5133,14 @@ void eZapMain::leaveService()
 
 	Progress->hide();
 #ifndef DISABLE_FILE
-	indices.clear();
+	if (indices_enabled)
+	{
+			/* this will delete the index file if no index is left: */
+			/* the filename is the one from the load()-call */
+		indices.save();
+		indices.clear();
+		indices_enabled = 0;
+	}
 #endif
 }
 
@@ -5605,9 +5634,12 @@ void eZapMain::moveService(const eServiceReference &path, const eServiceReferenc
 #ifndef DISABLE_FILE
 void eZapMain::toggleIndexmark()
 {
+	if (!indices_enabled)
+		return;
+	
 	if (!(serviceFlags & eServiceHandler::flagIsSeekable))
 		return;
-
+	
 	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 	if (!handler)
 		return;
@@ -5626,6 +5658,9 @@ void eZapMain::toggleIndexmark()
 
 void eZapMain::indexSeek(int dir)
 {
+	if (!indices_enabled)
+		return;
+
 	if (!(serviceFlags & eServiceHandler::flagIsSeekable))
 		return;
 
@@ -5637,10 +5672,10 @@ void eZapMain::indexSeek(int dir)
 			time=handler->getPosition(eServiceHandler::posQueryCurrent);
 
 	int nearest=indices.getNext(real, dir);
-	if ((nearest != -1) && (dir == -1)) // when seeking backward, check if
+	if ((nearest != -1) && (dir == -1)) // when seeking backward, check if...
 	{
 		int nearestt=indices.getTime(nearest);
-		if ((time - nearestt) < 5)  // when less than 5 seconds, seek to prev
+		if ((time - nearestt) < 5)  // ... less than 5 seconds, then seek to prev
 			nearest = indices.getNext(nearest, -1);
 	}
 	if (nearest == -1)

@@ -5,7 +5,7 @@
 #include <lib/gui/listbox.h>
 #include <lib/gui/statusbar.h>
 #include <lib/dvb/epgcache.h>
-#include <channelinfo.h>
+#include <src/channelinfo.h>
 
 #include <lib/dvb/service.h>
 

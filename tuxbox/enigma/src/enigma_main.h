@@ -1,9 +1,9 @@
 #ifndef __enigma_main_h
 #define __enigma_main_h
 
-#include <sselect.h>
-#include <enigma_lcd.h>
-#include <engrab.h>
+#include <src/sselect.h>
+#include <src/enigma_lcd.h>
+#include <src/engrab.h>
 #include <lib/base/message.h>
 #include <lib/dvb/si.h>
 #include <lib/dvb/dvb.h>
@@ -488,6 +488,7 @@ private:
 	void toggleIndexmark();
 	void indexSeek(int dir);
 	eZapSeekIndices indices;
+	int  indices_enabled;
 	void redrawIndexmarks();
 	void deleteFile(eServiceSelector *);
 	void renameFile(eServiceSelector *);

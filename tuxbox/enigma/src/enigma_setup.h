@@ -1,7 +1,7 @@
 #ifndef __enigma_setup_h
 #define __enigma_setup_h
 
-#include <setup_window.h>
+#include <src/setup_window.h>
 
 class eZapSetup: public eSetupWindow
 {
