@@ -212,7 +212,14 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 
 //	eConfig::getInstance()->setKey("/extras/fastshutdown", (fastshutdown == "on" ? 1 : 0));
 	eConfig::getInstance()->setKey("/elitedvb/network/samba", (samba == "on" ? 1 : 0));
+	
+	int webLock1 = 0;
+	eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", webLock1);
 	eConfig::getInstance()->setKey("/ezap/webif/lockWebIf", (webiflock == "on" ? 1 : 0));
+	int webLock2 = 0;
+	eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", webLock2);
+	if (webLock1 != webLock2)
+		eZap::getInstance()->reconfigureHTTPServer();
 	eConfig::getInstance()->setKey("/extras/showSatPos", (showsatpos == "on" ? 1 : 0));
 	eConfig::getInstance()->setKey("/enigma/timeroffset", atoi(timeroffset.c_str()));
 	eConfig::getInstance()->setKey("/elitedvb/network/maxmtu", atoi(maxmtu.c_str()));
