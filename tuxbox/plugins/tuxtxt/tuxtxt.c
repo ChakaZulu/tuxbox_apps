@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.c,v $
+ * Revision 1.52  2003/12/29 00:09:44  mws
+ * if a byte is bitwise and'ed with 0x0111 it is impossible to get values higher than 7 :)
+ *
  * Revision 1.51  2003/11/03 04:52:45  carjay
  * small fix for v4l2
  *
@@ -46,7 +49,7 @@
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.51 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.52 $", versioninfo[16];
 
 	//show versioninfo
 
@@ -3585,7 +3588,7 @@ void *CacheThread(void *arg)
 								b1 &= 3;
 								b3 &= 7;
 
-								if(b1 != 0 || b2 != 0 || b3 > 7 || b4 > 9)
+								if(b1 != 0 || b2 != 0 || b4 > 9)
 								{
 									current_subpage[magazine] = -1;
 									continue;
