@@ -466,33 +466,37 @@ void eTextPara::blit(gPixmapDC &dc, const QPoint &offset)
 
 void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 {
-	QListIterator<pGlyph> begin(glyphs), c(begin);
+	QListIterator<pGlyph> begin(glyphs), c(begin), end(begin);
 	pGlyph *last;
 	if (dir==dirLeft)
 		return;
-	do
+	while (c.current())
 	{
 		int linelength=0;
-		int numspaces=0, num=0, lastisspace=0;
-		c=begin;
-		++c;
-		for (; c.current() && (!(c.current()->flags&GS_ISFIRST)); ++c)
+		int numspaces=0, num=0;
+		begin=end;
+		
+			// zeilenende suchen
+		do {
+			last=end.current();
+			++end;
+		} while (end.current() && (!(end.current()->flags&GS_ISFIRST)));
+			// end zeigt jetzt auf begin der naechsten zeile
+			
+		for (c=begin; c!=end; ++c)
 		{
-			linelength+=c.current()->w;
-			num++;
+				// space am zeilenende skippen
+			if ((c.current()==last) && (c.current()->flags&GS_ISSPACE))
+				continue;
+
 			if (c.current()->flags&GS_ISSPACE)
-			{
-				lastisspace=1;
 				numspaces++;
-			} else
-				lastisspace=0;
+			linelength+=c.current()->w;;
+			num++;
 		}
-		if (!num)
-		{
-			++begin;
+		if (!num)		// line mit nur einem space
 			continue;
-		}
-		last=c.current();
+
 		switch (dir)
 		{
 		case dirRight:
@@ -501,7 +505,7 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 			int offset=area.width()-linelength;
 			if (dir==dirCenter)
 				offset/=2;
-			while (begin.current() != last)
+			while (begin != end)
 			{
 				begin.current()->x+=offset;
 				++begin;
@@ -510,24 +514,23 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 		}
 		case dirBlock:
 		{
-			if (!lastisspace)
-			{
-				++begin;
+			if (!end.current())		// letzte zeile linksbuendig lassen
 				continue;
-			}
 			int spacemode;
 			if (numspaces)
 				spacemode=1;
 			else
 				spacemode=0;
-			int off=(area.width()-linelength)/(spacemode?numspaces:num);
+			if ((!spacemode) && (num<2))
+				break;
+			int off=(area.width()-linelength)*256/(spacemode?numspaces:(num-1));
 			int curoff=0;
-			while (begin.current() != last)
+			while (begin != end)
 			{
 				int doadd=0;
 				if ((!spacemode) || (begin.current()->flags&GS_ISSPACE))
 					doadd=1;
-				begin.current()->x+=curoff;
+				begin.current()->x+=curoff>>8;
 				if (doadd)
 					curoff+=off;
 				++begin;
@@ -535,7 +538,7 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 			break;
 		}
 		}
-	} while (c.current());
+	}
 }
 
 void eTextPara::clear()
