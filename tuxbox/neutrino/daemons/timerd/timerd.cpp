@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.12 2002/05/31 20:27:38 dirch Exp $
+	$Id: timerd.cpp,v 1.13 2002/06/11 21:18:19 dirch Exp $
 
 	License: GPL
 
@@ -179,11 +179,14 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 				break;
 
 				case CTimerEvent::TIMER_RECORD :
+					read( connfd, &evInfo, sizeof(CTimerEvent::EventInfo));
 					event = new CTimerEvent_Record(
 						msgAddTimer.announceTime,
 						msgAddTimer.alarmTime,
 						msgAddTimer.stopTime,
 						msgAddTimer.eventRepeat);
+					static_cast<CTimerEvent_Record*>(event)->eventInfo.onidSid = evInfo.onidSid;
+					static_cast<CTimerEvent_Record*>(event)->eventInfo.epgID = evInfo.epgID;
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
 				break;
 
@@ -197,6 +200,7 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 							msgAddTimer.stopTime,
 							msgAddTimer.eventRepeat);
 						static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.onidSid = evInfo.onidSid;
+						static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID = evInfo.epgID;
 						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
 					}
 				break;

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: timerdclient.cpp,v 1.12 2002/05/31 20:27:38 dirch Exp $
+	$Id: timerdclient.cpp,v 1.13 2002/06/11 21:15:37 dirch Exp $
 
 	License: GPL
 
@@ -280,11 +280,11 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 	msgAddTimer.eventRepeat = evrepeat;
 
 	int length;
-	if ( evType == CTimerEvent::TIMER_SHUTDOWN || evType == CTimerEvent::TIMER_RECORD || evType == CTimerEvent::TIMER_SLEEPTIMER )
+	if ( evType == CTimerEvent::TIMER_SHUTDOWN || evType == CTimerEvent::TIMER_SLEEPTIMER )
 	{
 		length = 0;
 	}
-	else if (evType == CTimerEvent::TIMER_NEXTPROGRAM || evType == CTimerEvent::TIMER_ZAPTO)
+	else if (evType == CTimerEvent::TIMER_NEXTPROGRAM || evType == CTimerEvent::TIMER_ZAPTO || evType == CTimerEvent::TIMER_RECORD )
 	{
 		length = sizeof( CTimerEvent::EventInfo);
 	}
