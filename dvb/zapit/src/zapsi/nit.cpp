@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.21 2002/08/24 11:10:53 obi Exp $
+ * $Id: nit.cpp,v 1.22 2002/09/03 11:02:23 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -137,7 +137,7 @@ int parse_nit (unsigned char DiSEqC)
 			original_network_id = (buffer[pos + 2] << 8) | buffer[pos + 3];
 			transport_descriptors_length = ((buffer[pos + 4] & 0x0F) << 8) | buffer[pos + 5];
 
-			if (transponders.count((transport_stream_id << 16) | original_network_id) == 0)
+			if (transponders.find((transport_stream_id << 16) | original_network_id) == transponders.end())
 			{
 				for (pos2 = pos + 6; pos2 < pos + transport_descriptors_length + 6; pos2 += buffer[pos2 + 1] + 2)
 				{

@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.31 2002/06/27 19:46:00 Homar Exp $
+ * $Id: descriptors.cpp,v 1.32 2002/09/03 11:02:23 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -323,7 +323,7 @@ uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transpor
 	feparams.u.qpsk.FEC_inner = CFrontend::getFEC(buffer[12] & 0x0F);
 	polarization = (buffer[8] >> 5) & 0x03;
 
-	if (scantransponders.count((transport_stream_id << 16) | original_network_id) == 0)
+	if (scantransponders.find((transport_stream_id << 16) | original_network_id) == scantransponders.end())
 	{
 		found_transponders++;
 
@@ -389,7 +389,7 @@ uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_st
 	feparams.u.qam.FEC_inner = CFrontend::getFEC(buffer[12] & 0x0F);
 	feparams.u.qam.QAM = CFrontend::getModulation(buffer[8]);
 
-	if (scantransponders.count((transport_stream_id << 16) | original_network_id) == 0)
+	if (scantransponders.find((transport_stream_id << 16) | original_network_id) == scantransponders.end())
 	{
 		found_transponders++;
 
@@ -446,7 +446,7 @@ uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t trans
 
 	std::string providerName;
 	std::string serviceName;
-	std::map <uint32_t, scanchannel>::iterator I = scanchannels.find((transport_stream_id << 16) | service_id);
+	sciterator I = scanchannels.find((transport_stream_id << 16) | service_id);
 
 	for (pos = 4; pos < service_provider_name_length + 4; pos++)
 	{
@@ -458,7 +458,7 @@ uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t trans
 		serviceName += charToXML(buffer[pos]);
 	}
 
-	if (scanchannels.count((transport_stream_id << 16) | service_id) != 0)
+	if (I != scanchannels.end())
 	{
 		I->second.name = serviceName;
 		I->second.onid = original_network_id;

@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.28 2002/08/24 11:10:53 obi Exp $
+ * $Id: pat.cpp,v 1.29 2002/09/03 11:02:23 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -37,8 +37,9 @@ static int status = 0;
 
 int fake_pat (uint32_t TsidOnid, FrontendParameters feparams, uint8_t polarity, uint8_t DiSEqC)
 {
-	if ((status = scantransponders.count(TsidOnid)) == 0)
+	if (scantransponders.find(TsidOnid) == scantransponders.end())
 	{
+		status = 0;
 		found_transponders++;
 
 		eventServer->sendEvent
@@ -65,7 +66,8 @@ int fake_pat (uint32_t TsidOnid, FrontendParameters feparams, uint8_t polarity, 
 			)
 		);
 	}
-
+	else
+		status = 1;
 	return status;
 }
 

@@ -1,5 +1,5 @@
 /*
- *  $Id: scan.h,v 1.16 2002/08/21 09:59:23 obi Exp $
+ *  $Id: scan.h,v 1.17 2002/09/03 11:02:22 thegoodguy Exp $
  */
 
 #ifndef __scan_h__
@@ -94,6 +94,10 @@ struct bouquet_mulmap
 		onid = Onid;
 	}
 };
+
+typedef std::map <uint32_t, scanchannel>::iterator sciterator;
+typedef std::map <uint32_t, transpondermap>::iterator stiterator;
+typedef std::multimap <std::string, bouquet_mulmap>::iterator sbiterator;
 
 extern std::map <uint32_t, transpondermap> scantransponders;
 extern std::map <uint32_t, scanchannel> scanchannels;

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.58 2002/09/03 08:39:47 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.59 2002/09/03 11:02:22 thegoodguy Exp $
  */
 
 #include <clientlib/zapitclient.h>
@@ -18,10 +18,6 @@
 #else
 #define CONFIGDIR "/var/tuxbox/config"
 #endif
-
-typedef std::map <uint32_t, scanchannel>::iterator sciterator;
-typedef std::map <uint32_t, transpondermap>::iterator stiterator;
-typedef std::multimap <std::string, bouquet_mulmap>::iterator sbiterator;
 
 short scan_runs;
 short curr_sat;

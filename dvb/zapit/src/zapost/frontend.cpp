@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.24 2002/08/27 20:01:38 obi Exp $
+ * $Id: frontend.cpp,v 1.25 2002/09/03 11:02:23 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -506,7 +506,7 @@ const bool CFrontend::tuneChannel (CZapitChannel *channel)
 {
 	bool noNit = false;
 
-	if (transponders.count(channel->getTsidOnid()) == 0)
+	if (transponders.find(channel->getTsidOnid()) == transponders.end())
 	{
 		/* if not found, look up in nit */
 		if ((parse_nit(channel->getDiSEqC()) < 0))
@@ -514,7 +514,7 @@ const bool CFrontend::tuneChannel (CZapitChannel *channel)
 			currentTsidOnid = get_sdt_TsidOnid();
 			noNit = true;
 		}
-		else if (transponders.count(channel->getTsidOnid()) == 0)
+		else if (transponders.find(channel->getTsidOnid()) == transponders.end())
 		{
 			return false;
 		}
