@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.19 2002/07/16 22:47:45 obi Exp $
+ * $Id: frontend.cpp,v 1.20 2002/07/17 03:06:16 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -355,7 +355,7 @@ const bool CFrontend::getEvent ()
 
 	failed = true;
 
-	switch (poll(pfd, 1, 500))
+	switch (poll(pfd, 1, 750))
 	{
 	case -1:
 		perror("[CFrontend::getEvent] poll");
@@ -608,6 +608,7 @@ const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polari
 		{
 			// unknown state
 			currentFrequency = 0;
+			currentTsidOnid = 0;
 		}
 	}
 
