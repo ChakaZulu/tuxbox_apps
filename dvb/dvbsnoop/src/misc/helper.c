@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.6 2003/02/09 23:02:47 rasc Exp $
+$Id: helper.c,v 1.7 2003/02/09 23:11:07 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -9,6 +9,9 @@ $Id: helper.c,v 1.6 2003/02/09 23:02:47 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.7  2003/02/09 23:11:07  rasc
+no message
+
 Revision 1.6  2003/02/09 23:02:47  rasc
 -- endian check (bug fix)
 
@@ -68,6 +71,7 @@ void setEndianArch (void)
 
 /* 
   -- get bits out of buffer
+  -- (getting more than 24 bits is not save)
   -- return: value
 */
 
