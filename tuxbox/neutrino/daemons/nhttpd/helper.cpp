@@ -154,9 +154,7 @@ string b64decode(char *s)
         x++;                                // Increment word byte.
     }
 
-//    b64stats(p, b, false);                  // Display some decoding stats.
 	string b_str = string(b);
-    printf("Base64 decoding complete: '%s'\n",b);
     free(b);                                // De-allocate decoding buffer.
     return b_str;                            // Return to caller with success.
 }

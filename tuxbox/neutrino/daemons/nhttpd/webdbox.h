@@ -54,12 +54,11 @@ public:
 
 	CChannelEventList eList;
 
-	bool ExecuteCGI(CWebserverRequest* request);
 
 // get functions to collect data
 	void GetChannelEvents();
-	void GetEventList(CWebserverRequest* request, unsigned onidSid, bool cgi = false);
-	char* GetServiceName(int onid_sid);
+
+	string GetServiceName(int onid_sid);
 
 	bool GetBouquets(void)
 	{
@@ -82,12 +81,9 @@ public:
 		return true;
 	};
 
-	void Authenticate(CWebserverRequest* request);
-	bool CheckAuth(CWebserverRequest* request);
-
-
-
+	bool ExecuteCGI(CWebserverRequest* request);
 // send functions for ExecuteCGI (controld api)
+	void SendEventList(CWebserverRequest *request,unsigned onidSid);
 	void SendcurrentVAPid(CWebserverRequest* request);
 	void SendSettings(CWebserverRequest* request);
 	void SendStreaminfo(CWebserverRequest* request);
@@ -98,16 +94,18 @@ public:
 
 	bool Execute(CWebserverRequest* request);
 // show functions for Execute (web api)
-//	void ShowChannelList(CWebserverRequest* request,int BouquetNr = -1);
+	void ShowEventList(CWebserverRequest* request, unsigned onidSid);
 	void ShowBouquet(CWebserverRequest *request,int BouquetNr = -1);
 	void ShowBouquets(CWebserverRequest *request);
-	void ShowControlpanel(CWebserverRequest* request);
+	bool ShowControlpanel(CWebserverRequest* request);
 	void ShowSettings(CWebserverRequest *request);
 
 // support functions
-	void ZapTo(char* target);
+	void ZapTo(string target);
 	void UpdateBouquets(void);
 
+	bool Authenticate(CWebserverRequest* request);
+	bool CheckAuth(CWebserverRequest* request);
 
 // alt
 	void GetEPG(CWebserverRequest *request,unsigned long long epgid, time_t *,bool cgi=false);

@@ -47,12 +47,13 @@ class TWebserver
 public:
 	bool			DEBUG;
 	bool			VERBOSE;
+	bool			MustAuthenticate;
 	TWebDbox		*WebDbox;
 
 	TWebserver();
 	~TWebserver();
 
-	bool Init(int port,string publicdocumentroot,bool debug, bool verbose,bool threads);
+	bool Init(int port,string publicdocumentroot,bool debug, bool verbose,bool threads,bool auth);
 	bool Start();
 	void DoLoop();
 	void Stop();

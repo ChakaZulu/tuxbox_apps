@@ -67,8 +67,10 @@ int main(int argc, char **argv)
 {
 	bool debug = false;
 	bool verbose = false;
-	bool threads = false;
+	bool threads = true;
 	bool do_fork = true;
+	bool auth = false;
+
 	int i;
 
 	if (argc > 1)
@@ -90,7 +92,11 @@ int main(int argc, char **argv)
 			}
 			else if (strncmp(argv[i], "-t", 2) == 0)
 			{
-				threads = true;
+				threads = false;
+			}
+			else if (strncmp(argv[i], "-a", 2) == 0)
+			{
+				auth = true;
 			}
 			else if (strncmp(argv[i],"--version", 9) == 0) 
 			{
@@ -101,6 +107,7 @@ int main(int argc, char **argv)
 			else if ((strncmp(argv[i], "--help", 6) == 0) || (strncmp(argv[i], "-h", 2) == 0))
 			{
 				printf("nhttpd parameters:\n");
+				printf("-a\t\tauthenticatoin mode\n");
 				printf("-d\t\tdebug\n");
 				printf("-v\t\tverbose\n");
 				printf("-t\t\trun multi-threaded\n");
@@ -145,7 +152,7 @@ int main(int argc, char **argv)
 
 	if ((ws = new TWebserver()) != NULL)
 	{
-		if (ws->Init(80, DATADIR "/neutrino/httpd", debug, verbose, threads))
+		if (ws->Init(80, DATADIR "/neutrino/httpd", debug, verbose, threads, auth))
 		{
 			if (ws->Start())
 			{

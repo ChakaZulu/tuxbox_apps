@@ -54,12 +54,13 @@ TWebserver::~TWebserver()
 		delete TimerList;
 }
 //-------------------------------------------------------------------------
-bool TWebserver::Init(int port,string publicdocumentroot,bool debug,bool verbose,bool threads)
+bool TWebserver::Init(int port,string publicdocumentroot,bool debug,bool verbose,bool threads, bool auth)
 {
 	Port=port;
 	DEBUG = debug;
 	THREADS = threads;
 	VERBOSE = verbose;
+	MustAuthenticate = auth;
 	PrivateDocumentRoot = PRIVATEDOCUMENTROOT;
 	PublicDocumentRoot = publicdocumentroot;
 	WebDbox = new TWebDbox(this);
@@ -162,15 +163,14 @@ pthread_t Threads[10];
                 continue;
         }
         if(DEBUG) printf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
-            
 		req = new CWebserverRequest(this);
 		memcpy(&(req->cliaddr),&cliaddr,sizeof(cliaddr));
-		if(req->GetRawRequest(sock_connect))
+		req->Socket = sock_connect;
+		if(req->GetRawRequest())
 		{
 
 			if(THREADS)
 			{
-				if(DEBUG) printf("Create Thread\n");
 				if (pthread_create (&Threads[thread_num++], NULL, WebThread, (void *)req) != 0 )
 					perror("[nhttpd]: pthread_create(WebThread)");
 				if(thread_num == 10)
@@ -180,8 +180,8 @@ pthread_t Threads[10];
 			{
 				if(req->ParseRequest())
 				{
+				
 					req->SendResponse();
-					if(DEBUG) printf("Response gesendet\n");
 					req->PrintRequest();
 				}
 				else

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.21 2002/04/18 12:27:14 field Exp $
+	$Id: webdbox.cpp,v 1.22 2002/04/20 16:43:31 dirch Exp $
 
 	License: GPL
 
@@ -59,6 +59,7 @@ TWebDbox::~TWebDbox()
 {
 }
 //-------------------------------------------------------------------------
+
 
 //-------------------------------------------------------------------------
 // ExecuteCGI und Execute
@@ -117,7 +118,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 	if(request->Filename.compare("getservices") == 0)		// sendet die datei services.xml
 	{
 		request->SendPlainHeader();
-		request->SendFile("/var/tuxbox/config/zapit","services.xml");
+		request->SendFile("/var/tuxbox/config","services.xml");
 		return true;
 	}
 
@@ -296,7 +297,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			else
 			{	//eventlist for a chan
 				unsigned id = atol( request->ParameterList["1"].c_str());
-				GetEventList( request, id, true);
+				SendEventList( request, id);
 			}
 
 		}
@@ -369,7 +370,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			}
 			else
 			{
-				ZapTo( (char *)request->ParameterList["1"].c_str() );
+				ZapTo(request->ParameterList["1"]);
 				request->SocketWrite("ok");
 			}
 		}
@@ -381,14 +382,31 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 	}
 	return true;
 }
+//-------------------------------------------------------------------------
 
-void TWebDbox::Authenticate(CWebserverRequest* request)
+bool TWebDbox::Authenticate(CWebserverRequest* request)
 {
-	printf("Authenticate\n");
-	request->SocketWriteLn("HTTP/1.0 401 Unauthorized");
-	request->SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\n\n");
+	if(Parent->MustAuthenticate)
+	{
+		if(!CheckAuth(request))
+		{
+			if(Parent->DEBUG) printf("Authenticate\n");
+			request->SocketWriteLn("HTTP/1.0 401 Unauthorized");
+			request->SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\n\n");
+			return false;
+		}
+		else
+		{
+			if(Parent->DEBUG) printf("Zugriff ok\n");
+			return true;
+		}
+	}
+	else
+		return true;
+//	request->SocketWriteLn("Keiner da :)\n");
 }
 
+//-------------------------------------------------------------------------
 bool TWebDbox::CheckAuth(CWebserverRequest* request)
 {
 	if(request->HeaderList["Authorization"] == "")
@@ -401,6 +419,7 @@ bool TWebDbox::CheckAuth(CWebserverRequest* request)
 	string user = decodet.substr(0,pos);
 	string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
 	if(Parent->DEBUG) printf("user: '%s' passwd: '%s'\n",user.c_str(),passwd.c_str());
+
 	if(user.compare("test") == 0 && passwd.compare("test1") == 0)
 	{
 		printf("passwort ok\n");
@@ -420,15 +439,6 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 	if(Parent->DEBUG) printf("Executing %s\n",request->Filename.c_str());
 	if(request->Filename.compare("test.dbox2") == 0)
 	{
-		if(!CheckAuth(request))
-		{
-			Authenticate(request);
-			return false;
-		}
-		else
-			request->SocketWriteLn("Zugriff ok\n");
-
-
 //		request->SocketWrite("HTTP/1.1 401 Unauthorized\n\n");
 		printf("Teste nun\n");
 //		request->SendPlainHeader("text/html");
@@ -502,9 +512,9 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 	else
 	{
 		if (request->Filename.compare("controlpanel.dbox2") == 0)
-		{	//funktionen für controlpanel links
+		{	
 			request->SendPlainHeader("text/html");
-			ShowControlpanel(request);
+			ShowControlpanel(request);					//funktionen für controlpanel links
 			return true;
 
 		}
@@ -515,7 +525,6 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 				request->SendHTMLHeader("EPG");
 
 				request->SocketWriteLn("<html>\n<head><title>DBOX2-Neutrino EPG</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\"></head>");
-				//request->println("<script> function openWindow(theURL) { window.open(theURL,'Neutrino-EPG','scrollbars=no,width=100,height=100');}</script>");
 				request->SocketWriteLn("<body>");
 
 				if(request->ParameterList["eventid"] != "")
@@ -566,9 +575,21 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 
 				if(request->ParameterList["zapto"] != "")
 				{
-					ZapTo((char *) request->ParameterList["zapto"].c_str() );
+					string t;
+					if(!Authenticate(request))
+					{
+						return false;
+					}
+					ZapTo(request->ParameterList["zapto"]);
 					request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily");
-					request->SocketWriteLn("Location: channellist.dbox2#akt");
+
+					if(request->ParameterList["bouquet"] != "")
+					{
+						t = "Location: channellist.dbox2?bouquet="+request->ParameterList["bouquet"]+"#akt";
+					}
+					else
+						t = "Location: channellist.dbox2#akt";
+					request->SocketWriteLn(t);
 					return true;
 				}
 
@@ -576,12 +597,14 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 				{
 					request->SendPlainHeader("text/html");
 					unsigned id = atol( request->ParameterList["eventlist"].c_str() );
-					GetEventList( request, id );
+					ShowEventList( request, id );
 					return true;
 				}
 
 				if(request->ParameterList["1"] == "shutdown")
 				{
+					if(!Authenticate(request))
+						return false;
 					request->SendPlainHeader("text/html");
 					request->SendFile(request->Parent->PrivateDocumentRoot,"/shutdown.include");
 					request->EndRequest();
@@ -592,6 +615,8 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 
 				if(request->ParameterList["1"] == "tvmode")
 				{
+					if(!Authenticate(request))
+						return false;
 					zapit.setMode(CZapitClient::MODE_TV);
 					if(request->Parent->DEBUG) printf("switched to tvmode");
 					sleep(1);
@@ -603,6 +628,8 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 
 				if(request->ParameterList["1"] == "radiomode")
 				{
+					if(!Authenticate(request))
+						return false;
 					zapit.setMode(CZapitClient::MODE_RADIO);
 					if(request->Parent->DEBUG) printf("switched to radiomode");
 					sleep(1);
@@ -638,136 +665,11 @@ void TWebDbox::GetChannelEvents()
 	eList = sectionsd.getChannelEvents();
 	CChannelEventList::iterator eventIterator;
 
-//    for( eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++ )
-//		ChannelListEvents[(*eventIterator).serviceID] = &(*eventIterator);
-}
-//-------------------------------------------------------------------------
-
-void TWebDbox::GetEventList(CWebserverRequest *request,unsigned onidSid, bool cgi = false)
-{
-
-char *epgID,*edate,*etime,*eduration,*ename;
-
-char *actPos=NULL;
-int pos;
-char classname;
-int sock_fd;
-Tmconnect con;
-
-/*	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
-	{
-		sectionsd::msgRequestHeader req;
-		req.version = 2;
-		req.command = sectionsd::allEventsChannelID;
-		req.dataLength = 4;
-		write(sock_fd, &req, sizeof(req));
-		write(sock_fd, &onidSid, req.dataLength);
-
-		sectionsd::msgResponseHeader resp;
-		memset(&resp, 0, sizeof(resp));
-		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-		{
-			close(sock_fd);
-			return;
-		}
-		if ( resp.dataLength>0 )
-		{
-			char* buffer = new char[resp.dataLength] ;
-
-			if( read(sock_fd, buffer, resp.dataLength) <= 0)
-			{
-				delete[] buffer;
-				close(sock_fd);
-				printf("EventList::readEvents - read from socket failed!\n,");
-				return;
-			}
-			if(!cgi)
-			{
-				request->SendHTMLHeader("DBOX2-Neutrino Channellist");
-
-				//search channame...
-				request->SocketWrite("<h3>Programmvorschau: ");
-				request->SocketWrite(GetServiceName(onidSid));
-				request->SocketWriteLn("</h3>");
-
-				request->SocketWrite("<table cellspacing=\"0\">\n");
-			}
-			pos=1;
-			actPos=buffer;
-
-			while(*actPos && actPos<buffer+resp.dataLength)
-			{
-				epgID = actPos;
-				for(;actPos<buffer+resp.dataLength && (*actPos != ' ');actPos++)
-				;
-				*actPos=0;
-				edate = ++actPos;
-				for(;actPos<buffer+resp.dataLength && (*actPos != ' ');actPos++)
-				;
-				*actPos=0;
-				etime = ++actPos;
-				for(;actPos<buffer+resp.dataLength && (*actPos != ' ');actPos++)
-				;
-				*actPos=0;
-				eduration = ++actPos;
-				for(;actPos<buffer+resp.dataLength && (*actPos != ' ');actPos++)
-				;
-				*actPos=0;
-				ename = ++actPos;
-				for(;actPos<buffer+resp.dataLength && (*actPos != '\n');actPos++)
-				;
-				*actPos=0;
-				actPos++;
-
-				char *buf = new char[1400];
-				struct  tm *tmzeit;
-				time_t  tZeit  = time(NULL),zeit;
-
-				tmzeit = localtime(&tZeit);
-				int tag = 0,monat=0;
-				int stunde=0,minute=0;
-
-				sscanf(edate,"%i.%i",&tag,&monat);
-				sscanf(etime,"%i:%i",&stunde,&minute);
-
-				tmzeit->tm_min = minute;
-				tmzeit->tm_hour = stunde;
-				tmzeit->tm_mday = tag;
-				tmzeit->tm_mon = monat -1;
-				tmzeit->tm_sec = 0;
-				zeit = mktime(tmzeit);
-				if((zeit + (atoi(eduration) * 60)) >= time(NULL))
-				{
-					if(cgi)
-					{
-						sprintf(buf, "%s %s %s %s %s\n", epgID, edate, etime, eduration, ename);
-					}
-					else
-					{
-						classname = (pos&1)?'a':'b';
-
-						sprintf(buf, "<tr><td class=\"%c\">%s, %s <small>(%smin)</small></tr></td>\n", classname, edate, etime, eduration,zeit,onidSid);
-						sprintf(&buf[strlen(buf)], "<tr><td class=\"%c\"><a href=epg.dbox2?eventid=%s>%s</a></td></tr>\n", classname,epgID, ename);
-					}
-					request->SocketWrite(buf);
-					pos++;
-				}
-				delete[] buf;
-			}
-
-			delete[] buffer;
-		}
-		close(sock_fd);
-		if(!cgi)
-		{
-			request->SocketWriteLn("</table>");
-			request->SendHTMLFooter();
-		}
-	}
-*/
+    for( eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++ )
+		ChannelListEvents[(*eventIterator).serviceID()] = &(*eventIterator);
 }
 
-char* TWebDbox::GetServiceName(int onid_sid)
+string TWebDbox::GetServiceName(int onid_sid)
 {
 	for(int i = 0; i < ChannelList.size();i++)
 		if( ChannelList[i].onid_sid == onid_sid)
@@ -776,6 +678,22 @@ char* TWebDbox::GetServiceName(int onid_sid)
 }
 //-------------------------------------------------------------------------
 // Send functions (for ExecuteCGI)
+//-------------------------------------------------------------------------
+
+void TWebDbox::SendEventList(CWebserverRequest *request,unsigned onidSid)
+{
+int pos;
+char *buf = new char[400];
+
+	eList = sectionsd.getEventsServiceKey(onidSid);
+	CChannelEventList::iterator eventIterator;
+    for( eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++, pos++ )
+	{
+		sprintf(buf, "%llu %ld %d %s\n", eventIterator->eventID, eventIterator->startTime, eventIterator->duration, eventIterator->description.c_str());
+		request->SocketWrite(buf);
+	}
+	delete[] buf;
+}
 //-------------------------------------------------------------------------
 
 void TWebDbox::SendBouquets(CWebserverRequest *request)
@@ -848,7 +766,7 @@ void TWebDbox::SendStreaminfo(CWebserverRequest* request)
 	request->SocketWrite(buf); //Resolution x y
 	sprintf((char*) buf, "%d\n", bitInfo[4]*50);
 	request->SocketWrite(buf); //Bitrate bit/sec
-
+	
 	switch ( bitInfo[2] ) //format
 	{
 		case 2: request->SocketWrite("4:3\n"); break;
@@ -910,6 +828,39 @@ void TWebDbox::SendSettings(CWebserverRequest* request)
 //-------------------------------------------------------------------------
 // Show funtions (Execute)
 //-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+void TWebDbox::ShowEventList(CWebserverRequest *request,unsigned onidSid)
+{
+char *buf = new char[1400];
+char classname;
+int pos = 0;
+	
+	eList = sectionsd.getEventsServiceKey(onidSid);
+	CChannelEventList::iterator eventIterator;
+	request->SendHTMLHeader("DBOX2-Neutrino Channellist");
+
+
+	request->SocketWrite("<h3>Programmvorschau: ");
+	request->SocketWrite(GetServiceName(onidSid)); 	//search channelname...
+	request->SocketWriteLn("</h3>");
+
+	request->SocketWrite("<table cellspacing=\"0\">\n");
+
+    for( eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++, pos++ )
+	{
+		classname = (pos&1)?'a':'b';
+		char zbuffer[25] = {0};
+		struct tm *mtime = localtime(&eventIterator->startTime); //(const time_t*)eventIterator->startTime);
+		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
+		sprintf(buf, "<tr><td class=\"%c\">%s<small> (%d min)</small></tr></td>\n", classname, zbuffer, eventIterator->duration / 60);
+		sprintf(&buf[strlen(buf)], "<tr><td class=\"%c\"><a href=epg.dbox2?eventid=%llx>%s</a></td></tr>\n", classname,eventIterator->eventID, eventIterator->description.c_str());
+		request->SocketWrite(buf);
+	}
+	delete[] buf;
+	request->SocketWriteLn("</table>");
+	request->SendHTMLFooter();
+}
+//-------------------------------------------------------------------------
 
 void TWebDbox::ShowSettings(CWebserverRequest *request)
 {
@@ -945,7 +896,7 @@ void TWebDbox::ShowBouquet(CWebserverRequest* request,int BouquetNr = -1)
 {
 	if(Parent->DEBUG) printf("ShowBouquet\n");
 	CZapitClient::BouquetChannelList channellist;
-	if(BouquetNr >= 0)
+	if(BouquetNr > 0)
 		channellist = BouquetsList[BouquetNr];
 	else
 		channellist = ChannelList;
@@ -969,9 +920,6 @@ void TWebDbox::ShowBouquet(CWebserverRequest* request,int BouquetNr = -1)
 		char bouquetstr[20]="\0";
 		if(BouquetNr >=0)
 			sprintf(bouquetstr,"&bouquet=%d",BouquetNr);
-//		else
-//			sprintf(bouquetstr,"\0");
-//		printf("bouquetstr: '%s'\n",bouquetstr);
 		sprintf(buffer,"<tr><td class=\"%c\">%s<a href=\"switch.dbox2?zapto=%d%s\">%d. %s</a>&nbsp;<a href=\"switch.dbox2?eventlist=%u\">%s</a></td></tr>",classname[0],((channellist[i].onid_sid == current_channel)?"<a name=akt></a>":" "),channellist[i].onid_sid,bouquetstr,i + 1,channellist[i].name,channellist[i].onid_sid,((ChannelListEvents[channellist[i].onid_sid])?"<img src=\"../images/elist.gif\" border=\"0\" alt=\"Programmvorschau\">":" "));
 		request->SocketWrite(buffer);
 
@@ -992,18 +940,22 @@ void TWebDbox::ShowBouquet(CWebserverRequest* request,int BouquetNr = -1)
 }
 //-------------------------------------------------------------------------
 
-void TWebDbox::ShowControlpanel(CWebserverRequest* request)
+bool TWebDbox::ShowControlpanel(CWebserverRequest* request)
 {
 	if (request->ParameterList.size() > 0)
 	{
 		if( request->ParameterList["1"] == "volumemute")
 		{
+			if(!Authenticate(request))
+				return false;
 			bool mute = controld.getMute();
 			controld.setMute( !mute );
 			if(request->Parent->DEBUG) printf("mute\n");
 		}
 		else if( request->ParameterList["1"] == "volumeplus")
 		{
+			if(!Authenticate(request))
+				return false;
 			char vol = controld.getVolume();
 			vol+=5;
 			if (vol>100)
@@ -1013,6 +965,8 @@ void TWebDbox::ShowControlpanel(CWebserverRequest* request)
 		}
 		else if( request->ParameterList["1"] == "volumeminus")
 		{
+			if(!Authenticate(request))
+				return false;
 			char vol = controld.getVolume();
 			if (vol>0)
 				vol-=5;
@@ -1049,6 +1003,7 @@ void TWebDbox::ShowControlpanel(CWebserverRequest* request)
 	request->SocketWrite(" height=10 border=0><br></td>\n");
 	request->SendFile(request->Parent->PrivateDocumentRoot.c_str(),"/controlpanel.include3");
 	delete[] mutestr;
+	return true;
 }
 
 
@@ -1063,12 +1018,12 @@ void TWebDbox::UpdateBouquets(void)
 }
 //-------------------------------------------------------------------------
 
-void TWebDbox::ZapTo(char *target)
+void TWebDbox::ZapTo(string target)
 {
 int sock_fd;
 Tmconnect con;
 
-	int sidonid = atol(target);
+	int sidonid = atol(target.c_str());
 	if(sidonid == zapit.getCurrentServiceID())
 	{
 		if(Parent->DEBUG) printf("Kanal ist aktuell\n");

@@ -31,14 +31,14 @@ class CWebserverRequest
 {
 
 private:
-	char * rawbuffer;
+	string rawbuffer;
 	int rawbuffer_len;
 
 	void SplitParameter(string param_str);
 
 	void RewriteURL();
 
-	int OpenFile(const char *path, const char *filename);
+	int OpenFile(string path, string filename);
 	void SendOpenFile(int );
 //	TString *Boundary;
 
@@ -75,7 +75,7 @@ public:
 
 	CWebserverRequest(TWebserver *server);
 	~CWebserverRequest();
-	bool GetRawRequest(int socket);
+	bool GetRawRequest();
 	bool ParseRequest();
 	bool ParseParams(string param_string);
 	bool ParseFirstLine(string zeile);
