@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.294 2003/02/25 19:55:50 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.295 2003/02/25 21:01:10 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1060,8 +1060,23 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo)
 	}
 }
 
+bool send_data_count(int connfd, int data_count)
+{
+	CZapitMessages::responseGeneralInteger responseInteger;
+	responseInteger.number = data_count;
+	if (CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger)) == false)
+	{
+		ERROR("could not send any return");
+		return false;
+	}
+	return true;
+}
+
 void internalSendChannels(int connfd, ChannelList* channels, const unsigned int first_channel_nr)
 {
+	if (!send_data_count(connfd, channels->size()))
+		return;
+
 	for (uint32_t i = 0; i < channels->size();i++)
 	{
 		if ((currentMode & RECORD_MODE) && ((*channels)[i]->getTsidOnid() != channel->getTsidOnid()))
@@ -1082,13 +1097,8 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 
 void sendAPIDs(int connfd)
 {
-	CZapitMessages::responseGeneralInteger responseInteger;
-	responseInteger.number = channel->getAudioChannelCount();
-	if (CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger)) == false)
-	{
-		ERROR("could not send any return");
+	if (!send_data_count(connfd, channel->getAudioChannelCount()))
 		return;
-	}
 
 	for (uint32_t i = 0; i < channel->getAudioChannelCount(); i++)
 	{
@@ -1399,7 +1409,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.294 2003/02/25 19:55:50 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.295 2003/02/25 21:01:10 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.77 2003/02/25 19:55:50 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.78 2003/02/25 21:01:10 thegoodguy Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -321,59 +321,66 @@ void CZapitClient::getBouquets(BouquetList& bouquets, const bool emptyBouquetsTo
 	close_connection();
 }
 
+
+bool CZapitClient::receive_channel_list(BouquetChannelList& channels, const bool utf_encoded)
+{
+	CZapitMessages::responseGeneralInteger responseInteger;
+	responseGetBouquetChannels             response;
+	char                                   buffer[30 + 1];
+	
+	channels.clear();
+
+	if (CBasicClient::receive_data((char* )&responseInteger, sizeof(responseInteger)))
+	{
+		channels.reserve(responseInteger.number);
+
+		while (responseInteger.number-- > 0)
+		{
+			if (!CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
+				return false;
+			
+			response.nr++;
+			if (!utf_encoded)
+			{
+				buffer[30] = (char) 0x00;
+				strncpy(buffer, response.name, 30);
+				strncpy(response.name, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
+			}
+			channels.push_back(response);
+		}
+	}
+}
+
+
 /* gets all channels that are in specified bouquet */
 /* bouquets are numbered starting at 0 */
-void CZapitClient::getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, channelsMode mode, const bool utf_encoded)
+bool CZapitClient::getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, channelsMode mode, const bool utf_encoded)
 {
-	char buffer[30 + 1];
-
+	bool                                      return_value;
 	CZapitMessages::commandGetBouquetChannels msg;
 
 	msg.bouquet = bouquet;
 	msg.mode = mode;
 
-	send(CZapitMessages::CMD_GET_BOUQUET_CHANNELS, (char*)&msg, sizeof(msg));
+	return_value = (send(CZapitMessages::CMD_GET_BOUQUET_CHANNELS, (char*)&msg, sizeof(msg))) ? receive_channel_list(channels, utf_encoded) : false;
 
-	responseGetBouquetChannels response;
-	while (CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
-	{
-		response.nr++;
-		if (!utf_encoded)
-		{
-			buffer[30] = (char) 0x00;
-			strncpy(buffer, response.name, 30);
-			strncpy(response.name, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
-		}
-		channels.push_back(response);
-	}
 	close_connection();
+	return return_value;
 }
 
 /* gets all channels */
-void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode, channelsOrder order, const bool utf_encoded)
+bool CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode, channelsOrder order, const bool utf_encoded)
 {
-	char buffer[30 + 1];
-
+	bool                               return_value;
 	CZapitMessages::commandGetChannels msg;
 
 	msg.mode = mode;
 	msg.order = order;
 
-	send(CZapitMessages::CMD_GET_CHANNELS, (char*)&msg, sizeof(msg));
+	return_value = (send(CZapitMessages::CMD_GET_CHANNELS, (char*)&msg, sizeof(msg))) ? receive_channel_list(channels, utf_encoded) : false;
 
-	responseGetBouquetChannels response;
-	while (CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
-	{
-		response.nr++;
-		if (!utf_encoded)
-		{
-			buffer[30] = (char) 0x00;
-			strncpy(buffer, response.name, 30);
-			strncpy(response.name, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
-		}
-		channels.push_back(response);
-	}
 	close_connection();
+	return return_value;
 }
 
 /* restore bouquets so as if they where just loaded*/

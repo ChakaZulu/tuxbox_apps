@@ -230,12 +230,16 @@ class CZapitClient:public CBasicClient
 	/* bouquets are numbered starting at 0 */
 	void getBouquets( BouquetList& bouquets, const bool emptyBouquetsToo = false, const bool utf_encoded = false);
 
+ private:
+	bool receive_channel_list(BouquetChannelList& channels, const bool utf_encoded);
+
+ public:
 	/* gets all channels that are in specified bouquet */
 	/* bouquets are numbered starting at 0 */
-	void getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, const channelsMode mode = MODE_CURRENT, const bool utf_encoded = false);
+	bool getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, const channelsMode mode = MODE_CURRENT, const bool utf_encoded = false);
 
 	/* gets all channels */
-	void getChannels( BouquetChannelList& channels, const channelsMode mode = MODE_CURRENT, const channelsOrder order = SORT_BOUQUET, const bool utf_encoded = false);
+	bool getChannels(BouquetChannelList& channels, const channelsMode mode = MODE_CURRENT, const channelsOrder order = SORT_BOUQUET, const bool utf_encoded = false);
 
 	/* restore bouquets so as if they where just loaded*/
 	void restoreBouquets();
