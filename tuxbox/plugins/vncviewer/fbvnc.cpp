@@ -487,7 +487,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
                iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN ||
                iev.code == KEY_LEFT || iev.code == KEY_RIGHT)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                
                // ignore curser events older than 350 ms
@@ -639,13 +639,13 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             // codes
             else if(iev.code == KEY_HOME)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                retval = FBVNC_EVENT_QUIT;
             }
             else if(iev.code == KEY_HELP)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                if(mouse_button > 0)
                {
@@ -660,7 +660,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             }
             else if(iev.code == KEY_MUTE)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                ev->key = hbtn.pan;
                if(rc_pan)
@@ -671,21 +671,21 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             }
             else if(iev.code == KEY_VOLUMEDOWN)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
                retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_OUT | FBVNC_EVENT_TS_MOVE);
             }
             else if(iev.code == KEY_VOLUMEUP)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
                retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_IN | FBVNC_EVENT_TS_MOVE);
             }
             else if(iev.code == KEY_OK)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                nextev.x =global_framebuffer.mouse_x;
                nextev.y =global_framebuffer.mouse_y;  
@@ -696,13 +696,13 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             }
             else if(iev.code == KEY_RED)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                retval=FBVNC_EVENT_DCLICK;				
             }
             else if(iev.code == KEY_GREEN)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                nextev.x =global_framebuffer.mouse_x;
                nextev.y =global_framebuffer.mouse_y;  
@@ -713,7 +713,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             }
             else if(iev.code == KEY_YELLOW)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                nextev.x =global_framebuffer.mouse_x;
                nextev.y =global_framebuffer.mouse_y;  
@@ -724,13 +724,13 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             }
             else if(iev.code == KEY_BLUE)
             {
-               if(!iev.value)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                toggle_keyboard();
             }
             else if(iev.code == BTN_LEFT)
             {
-               if(!iev.value) // key pressed event
+               if(iev.value==1) // key pressed event
 					{
                   mouse_button |= 1;
                   retval=FBVNC_EVENT_TS_DOWN;
@@ -743,7 +743,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             }
             else if(iev.code == BTN_RIGHT)
             {
-               if(!iev.value) // key pressed event
+               if(iev.value==1) // key pressed event
 					{
                   mouse_button |= 4;
 					}
@@ -755,7 +755,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             }
             else if(iev.code == BTN_MIDDLE)
             {
-               if(!iev.value) // key pressed event
+               if(iev.value==1) // key pressed event
 					{
                   mouse_button |= 2;
 					}
@@ -768,7 +768,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             else
             {
                ev->key = iev.code;
-               if(iev.value == 0) //KEY RELEASE
+               if(iev.value == 1) //KEY RELEASE
                   retval = FBVNC_EVENT_BTN_UP;
                else // KEY PRESS
                   retval=FBVNC_EVENT_BTN_DOWN;
