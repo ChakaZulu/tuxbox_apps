@@ -24,6 +24,7 @@
 #include <enigma_plugins.h>
 #include <enigma_standby.h>
 #include <sselect.h>
+#include <upgrade.h>
 
 #include <lib/driver/eavswitch.h>
 #include <lib/dvb/dvb.h>
@@ -49,8 +50,6 @@ using namespace std;
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 
-#define DELETE(WHAT) result.strReplace(#WHAT, "")
-
 #define BLUE "#12259E"
 #define RED "#CB0303"
 #define GREEN "#1FCB12"
@@ -61,43 +60,63 @@ using namespace std;
 #define TOPNAVICOLOR "#D9E0E7"
 #define OCKER "#FFCC33"
 
+#define WEBXFACEVERSION "0.8"
+
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 
-eString read_file(eString filename)
+eString getAttribute(eString filename, eString attribute)
+{
+	eString result;
+
+	ifstream infile(filename.c_str());
+	if (infile)
+	{
+		eString buffer;
+		while (getline(infile, buffer, '\n'))
+		{
+			if (buffer.find(attribute + "=") == 0)
+			{
+				result = getRight(buffer, '=');
+				break;
+			}
+		}	
+	}
+	return result;
+}
+
+eString readFile(eString filename)
 {
 	eString result;
 	eString line;
 
 	ifstream infile(filename.c_str());
-	while (getline(infile, line, '\n'))
-		result += line + "\n";
+	if (infile)
+		while (getline(infile, line, '\n'))
+			result += line + "\n";
 
 	return result;
 }
 
-static eString getVersionInfo(const char *info)
+eString firmwareLevel(eString verid)
 {
-	eString result;
-	FILE *f=fopen("/.version", "rt");
-	if (f)
+	eString result = "unknown";
+	
+	if (verid)
 	{
-		while (1)
-		{
-			char buffer[128];
-			if (!fgets(buffer, 128, f))
-				break;
-			if (strlen(buffer))
-				buffer[strlen(buffer) -1 ] = 0;
-			if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)] == '=')))
-			{
-				int i = strlen(info) + 1;
-				result = eString(buffer).mid(i, strlen(buffer)-i);
-				break;
-			}
-		}
-		fclose(f);
+		int type = atoi(verid.left(1).c_str());
+		char *typea[3];
+		typea[0] = "release";
+		typea[1] = "beta";
+		typea[2] = "internal";
+		eString ver = verid.mid(1, 3);
+		eString date = verid.mid(4, 8);
+//		eString time = verid.mid(12, 4);
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+			result = eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]+ ", " + date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4);
+		else
+			result = eString().sprintf("%s %c.%d. %s", typea[type%3], ver[0], atoi(eString().sprintf("%c%c", ver[1], ver[2]).c_str()), (date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4)).c_str());
 	}
 	return result;
 }
@@ -107,7 +126,7 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 	eString ref1, ref2;
 
 	std::stringstream result;
-	if (buttonRef.find("javascript") != 0)
+	if (buttonRef.find("javascript") == eString::npos)
 	{
 		ref1 = "\"self.location.href='";
 		ref2 = "'\"";
@@ -131,14 +150,22 @@ eString getTitle(eString title)
 	return result.str();
 }
 
+eString getMsgWindow(eString title, eString msg)
+{
+	eString result = readFile(TEMPLATE_DIR + "msgWindow.tmp");
+	result.strReplace("#TITLE#", title);
+	result.strReplace("#MSG#", msg);
+	return result;
+}
+
 static int getHex(int c)
 {
-	c=toupper(c);
-	c-='0';
-	if (c<0)
+	c = toupper(c);
+	c -= '0';
+	if (c < 0)
 		return -1;
 	if (c > 9)
-		c-='A'-'0'-10;
+		c -= 'A' - '0' - 10;
 	if (c > 0xF)
 		return -1;
 	return c;
@@ -146,87 +173,118 @@ static int getHex(int c)
 
 eString httpUnescape(const eString &string)
 {
-	eString ret;
-	for (unsigned int i=0; i<string.length(); ++i)
+	eString result;
+	for (unsigned int i = 0; i < string.length(); ++i)
 	{
-		int c=string[i];
+		int c = string[i];
 		switch (c)
 		{
 		case '%':
 		{
-			int val='%';
-			if ((i+1) < string.length())
-				val=getHex(string[++i]);
-			if ((i+1) < string.length())
+			int value = '%';
+			if ((i + 1) < string.length())
+				value = getHex(string[++i]);
+			if ((i + 1) < string.length())
 			{
-				val<<=4;
-				val+=getHex(string[++i]);
+				value <<= 4;
+				value += getHex(string[++i]);
 			}
-			ret+=val;
+			result += value;
 			break;
 		}
 		case '+':
-			ret+=' ';
+			result += ' ';
 			break;
 		default:
-			ret+=c;
+			result += c;
 			break;
 		}
 	}
-	return ret;
+	return result;
 }
 
 eString httpEscape(const eString &string)
 {
-	eString ret;
-	for (unsigned int i=0; i<string.length(); ++i)
+	eString result;
+	for (unsigned int i = 0; i < string.length(); ++i)
 	{
-		int c=string[i];
-		int valid=0;
+		int c = string[i];
+		int valid = 0;
 		if ((c >= 'a') && (c <= 'z'))
-			valid=1;
+			valid = 1;
 		else if ((c >= 'A') && (c <= 'Z'))
-			valid=1;
+			valid = 1;
 		else if (c == ':')
-			valid=1;
+			valid = 1;
 		else if ((c >= '0') && (c <= '9'))
-			valid=1;
-		else
-			valid=0;
+			valid = 1;
 
 		if (valid)
-			ret+=c;
+			result += c;
 		else
-			ret+=eString().sprintf("%%%x", c);
+			result += eString().sprintf("%%%x", c);
 	}
-	return ret;
+	return result;
 }
 
-std::map<eString,eString> getRequestOptions(eString opt)
+std::map<eString, eString> getRequestOptions(eString opt)
 {
-	std::map<eString,eString> result;
+	std::map<eString, eString> result;
 
-	if (opt[0]=='?')
-		opt=opt.mid(1);
+	if (opt[0] == '?')
+		opt = opt.mid(1);
 
 	while (opt.length())
 	{
-		unsigned int e=opt.find("=");
-		if (e==eString::npos)
-			e=opt.length();
-		unsigned int a=opt.find("&", e);
-		if (a==eString::npos)
-			a=opt.length();
-		eString n=opt.left(e);
+		unsigned int e = opt.find("=");
+		if (e == eString::npos)
+			e = opt.length();
+		unsigned int a = opt.find("&", e);
+		if (a == eString::npos)
+			a = opt.length();
+		eString n = opt.left(e);
 
-		unsigned int b=opt.find("&", e+1);
-		if (b==eString::npos)
-			b=(unsigned)-1;
-		eString r=httpUnescape(opt.mid(e+1, b-e-1));
+		unsigned int b = opt.find("&", e + 1);
+		if (b == eString::npos)
+			b = (unsigned)-1;
+		eString r = httpUnescape(opt.mid(e + 1, b - e - 1));
 		result.insert(std::pair<eString, eString>(n, r));
-		opt=opt.mid(a+1);
+		opt = opt.mid(a + 1);
 	}
 	return result;
+}
+
+static eString getControlMessage(void)
+{
+	return readFile(TEMPLATE_DIR + "sendMessage.tmp");
+}
+
+static eString getControlPlugins(void)
+{
+	std::stringstream result;
+	result << "<table width=100% border=1 cellspacing=0 cellpadding=0>";
+	system("ls /lib/tuxbox/plugins/*.cfg > /tmp/plugins.tmp");
+	eString line;
+	ifstream pluginsFile("/tmp/plugins.tmp");
+	while (getline(pluginsFile, line, '\n'))
+	{
+		result  << "<tr>"
+			<< "<td width=100>"
+			<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".so')")
+			<< "</td>"
+			<< "<td>"
+			<< getAttribute(line, "name")
+			<< "</td>"
+			<< "<td>"
+			<< getAttribute(line, "desc")
+			<< "</td>"
+			<< "</tr>";
+	}
+	system("rm /tmp/plugins.tmp");
+	result << "</table>";
+	result << "<br>";
+	result << button(100, "Stop", RED, "javascript:stopPlugin()");
+	return result.str();
 }
 
 static int getOSDShot(eString mode)
@@ -266,7 +324,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	eString result;
 	time_t atime;
 	time(&atime);
-	atime+=eDVB::getInstance()->time_difference;
+	atime += eDVB::getInstance()->time_difference;
 	result="<html>\n"
 		CHARSETMETA
 		"<head>\n"
@@ -306,8 +364,8 @@ static eString stop(eString request, eString dirpath, eString opt, eHTTPConnecti
 
 static eString record(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString,eString> opt=getRequestOptions(opts);
-	eString command=opt["command"];
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString command = opt["command"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	if (command == "start")
 	{
@@ -323,30 +381,28 @@ static eString record(eString request, eString dirpath, eString opts, eHTTPConne
 
 static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eDebug("[ENIGMA_DYN] switchService...");
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	int service_id=-1, dvb_namespace=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
-	unsigned int optval=opt.find("=");
-	if (optval!=eString::npos)
-		opt=opt.mid(optval+1);
+	int service_id = -1, dvb_namespace = -1, original_network_id = -1, transport_stream_id = -1, service_type = -1;
+	unsigned int optval = opt.find("=");
+	if (optval != eString::npos)
+		opt = opt.mid(optval + 1);
 	if (opt.length())
 		sscanf(opt.c_str(), "%x:%x:%x:%x:%x", &service_id, &dvb_namespace, &transport_stream_id, &original_network_id, &service_type);
 
 	eString result;
 
-	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
+	if ((service_id != -1) && (original_network_id != -1) && (transport_stream_id != -1) && (service_type != -1))
 	{
-		eServiceInterface *iface=eServiceInterface::getInstance();
+		eServiceInterface *iface = eServiceInterface::getInstance();
 		if (!iface)
 			return "-1";
-		eServiceReferenceDVB *ref=new eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
+		eServiceReferenceDVB *ref = new eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
 #ifndef DISABLE_FILE
 		if (eDVB::getInstance()->recorder && !ref->path)
 		{
-			int canHandleTwoScrambledServices=0;
-			eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices",
-				canHandleTwoScrambledServices);
+			int canHandleTwoScrambledServices = 0;
+			eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices", canHandleTwoScrambledServices);
 
 			if (!canHandleTwoScrambledServices && eDVB::getInstance()->recorder->scrambled)
 			{
@@ -362,10 +418,10 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 #endif
 		eZapMain::getInstance()->playService(*ref, eZapMain::psSetMode|eZapMain::psDontAdd);
 		delete ref;
-		result="0";
+		result = "0";
 	}
 	else
-		result+="-1";
+		result = "-1";
 
 	return result;
 }
@@ -373,12 +429,12 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 static eString admin(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt=getRequestOptions(opts);
-	eString command=opt["command"];
-	eString requester=opt["requester"];
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString command = opt["command"];
+	eString requester = opt["requester"];
 	if (command)
 	{
-		if (command=="shutdown")
+		if (command == "shutdown")
 		{
 			if (eSystemInfo::getInstance()->canShutdown())
 			{
@@ -389,7 +445,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 					return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated.</body></html>";
 			}
 		}
-		else if (command=="reboot")
+		else if (command == "reboot")
 		{
 			eZap::getInstance()->quit(4);
 			if (requester == "webif")
@@ -397,7 +453,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 			else
 				return "<html>" CHARSETMETA "<head><title>Reboot</title></head><body>Reboot initiated.</body></html>";
 		}
-		else if (command=="restart")
+		else if (command == "restart")
 		{
 			eZap::getInstance()->quit(2);
 			if (requester == "webif")
@@ -405,7 +461,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 			else
 				return "<html>" CHARSETMETA "<head><title>Restart of enigma is initiated.</title></head><body>Restart initiated</body></html>";
 		}
-		else if (command=="wakeup")
+		else if (command == "wakeup")
 		{
 			if (eZapStandby::getInstance())
 			{
@@ -420,7 +476,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 			else
 				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma doesn't sleep :)</body></html>";
 		}
-		else if (command=="standby")
+		else if (command == "standby")
 		{
 			if (eZapStandby::getInstance())
 				if (requester == "webif")
@@ -440,7 +496,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 static eString videocontrol(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString command = opt["command"];
 	if (command == "rewind")
 	{
@@ -475,7 +531,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString result;
 	eString volume = opt["volume"];
 	if (volume)
@@ -497,7 +553,7 @@ static eString audio(eString request, eString dirpath, eString opts, eHTTPConnec
 static eString setAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString audioChannel = opt["channel"];
 
 	// set audio channel here...
@@ -513,7 +569,7 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 	// add some fake entries for the time being...
 	eString audioChannels = "<option>German</option><option>English</option>";
 
-	eString result = read_file(TEMPLATE_DIR + "audioSelection.tmp");
+	eString result = readFile(TEMPLATE_DIR + "audioSelection.tmp");
 	result.strReplace("#AUDIOCHANS#", audioChannels);
 
 	return result;
@@ -523,62 +579,62 @@ static eString getPMT(eString request, eString dirpath, eString opt, eHTTPConnec
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	//"x-application/PMT";
-	PMT *pmt=eDVB::getInstance()->getPMT();
+	PMT *pmt = eDVB::getInstance()->getPMT();
 	if (!pmt)
 		return "result=ERROR\n";
-	eString res="result=+ok";
-	res+="PMT"+eString().sprintf("(%04x)\n", pmt->pid);
-	res+="program_number="+eString().sprintf("%04x\n", pmt->program_number);
-	res+="PCR_PID="+eString().sprintf("%04x\n", pmt->PCR_PID);
-	res+="program_info\n";
+	eString result = "result=+ok";
+	result += "PMT" + eString().sprintf("(%04x)\n", pmt->pid);
+	result += "program_number=" + eString().sprintf("%04x\n", pmt->program_number);
+	result += "PCR_PID=" + eString().sprintf("%04x\n", pmt->PCR_PID);
+	result += "program_info\n";
 	for (ePtrList<Descriptor>::iterator d(pmt->program_info); d != pmt->program_info.end(); ++d)
-		res+=d->toString();
+		result += d->toString();
 	for (ePtrList<PMTEntry>::iterator s(pmt->streams); s != pmt->streams.end(); ++s)
 	{
-		res+="PMTEntry\n";
-		res+="stream_type="+eString().sprintf("%02x\n", s->stream_type);
-		res+="elementary_PID="+eString().sprintf("%04x\n", s->elementary_PID);
-		res+="ES_info\n";
+		result += "PMTEntry\n";
+		result += "stream_type=" + eString().sprintf("%02x\n", s->stream_type);
+		result += "elementary_PID=" + eString().sprintf("%04x\n", s->elementary_PID);
+		result += "ES_info\n";
 		for (ePtrList<Descriptor>::iterator d(s->ES_info); d != s->ES_info.end(); ++d)
-			res+=d->toString();
+			result += d->toString();
 	}
 	pmt->unlock();
-	return res;
+	return result;
 }
 
 static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	//"x-application/PMT";
-	EIT *eit=eDVB::getInstance()->getEIT();
+	EIT *eit = eDVB::getInstance()->getEIT();
 	if (!eit)
 		return "result=ERROR\n";
-	eString res="result=+ok";
-	res+="EIT"+eString().sprintf("(%04x)\n", eit->service_id);
-	res+="original_network_id="+eString().sprintf("%04x\n", eit->original_network_id);
-	res+="transport_stream_id="+eString().sprintf("%04x\n", eit->transport_stream_id);
-	res+="events\n";
+	eString result = "result=+ok";
+	result += "EIT" + eString().sprintf("(%04x)\n", eit->service_id);
+	result += "original_network_id=" + eString().sprintf("%04x\n", eit->original_network_id);
+	result += "transport_stream_id=" + eString().sprintf("%04x\n", eit->transport_stream_id);
+	result += "events\n";
 	for (ePtrList<EITEvent>::iterator s(eit->events); s != eit->events.end(); ++s)
 	{
-		res+="EITEvent\n";
-		res+="event_id="+eString().sprintf("%04x\n", s->event_id);
-		res+="start_time="+eString().sprintf("%04x\n", s->start_time);
-		res+="duration="+eString().sprintf("%04x\n", s->duration);
-		res+="running_status="+eString().sprintf("%d\n", s->running_status);
-		res+="free_CA_mode="+eString().sprintf("%d\n", s->free_CA_mode);
-		res+="descriptors\n";
+		result += "EITEvent\n";
+		result += "event_id=" + eString().sprintf("%04x\n", s->event_id);
+		result += "start_time=" + eString().sprintf("%04x\n", s->start_time);
+		result += "duration=" + eString().sprintf("%04x\n", s->duration);
+		result += "running_status=" + eString().sprintf("%d\n", s->running_status);
+		result += "free_CA_mode=" + eString().sprintf("%d\n", s->free_CA_mode);
+		result += "descriptors\n";
 		for (ePtrList<Descriptor>::iterator d(s->descriptor); d != s->descriptor.end(); ++d)
-			res+=d->toString();
+			result += d->toString();
 	}
 	eit->unlock();
-	return res;
+	return result;
 }
 
 static eString version(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain";
 	eString result;
-	result.sprintf("enigma");
+	result = "enigma";
 //	result.sprintf("EliteDVB Version : %s\r\n, eZap Version : doof\r\n",eDVB::getInstance()->getVersion().c_str());
 	return result;
 }
@@ -609,24 +665,19 @@ static eString getVolume()
 static eString setVolume(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt = getRequestOptions(opts);
-	eString mute;
-	eString volume;
-	eString result;
-	int vol = 0;
+	eString mute = opt["mute"];
+	eString volume = opt["volume"];
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-
-	mute = opt["mute"];
-	volume = opt["volume"];
 
 	if (mute)
 		eAVSwitch::getInstance()->toggleMute();
 
 	if (volume)
 	{
-		vol = atoi(volume.c_str());
+		int vol = atoi(volume.c_str());
 		if (vol > 10) vol = 10;
-		if (vol < 0) vol = 0;
+		if (vol < 1) vol = 1;
 
 		float temp = (float)vol;
 		temp = temp * 6.3;
@@ -635,27 +686,21 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 		eAVSwitch::getInstance()->changeVolume(1, 63 - vol);
 	}
 
-	result += "<script language=\"javascript\">window.close();</script>";
-
-	return result;
+	return "<script language=\"javascript\">window.close();</script>";
 }
 
 static eString setVideo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt = getRequestOptions(opts);
-	eString video;
-	eString result;
-	int vid = 0;
+	eString video = opt["position"];
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	video = opt["position"];
-
 	if (video)
 	{
-		vid = atoi(video.c_str());
+		int vid = atoi(video.c_str());
 		if (vid > 10) vid = 10;
-		if (vid < 0) vid = 0;
+		if (vid < 1) vid = 1;
 
 		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		if (handler)
@@ -669,9 +714,7 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 		}
 	}
 
-	result += "<script language=\"javascript\">window.close();</script>";
-
-	return result;
+	return "<script language=\"javascript\">window.close();</script>";
 }
 
 eString ref2string(const eServiceReference &r)
@@ -681,7 +724,7 @@ eString ref2string(const eServiceReference &r)
 
 eServiceReference string2ref(const eString &service)
 {
-	eString str=httpUnescape(service);
+	eString str = httpUnescape(service);
 	return eServiceReference(str);
 }
 
@@ -700,8 +743,7 @@ static eString getIP()
 		return "?.?.?.?-ioctl-error";
 	close(sd);
 
-	tmp.sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
-	return tmp;
+	return eString().sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
 }
 
 eString filter_string(eString string)
@@ -712,7 +754,7 @@ eString filter_string(eString string)
 	return string;
 }
 
-static eString getNavi(eString mode, eString path)
+static eString getLeftNavi(eString mode, eString path)
 {
 	eString result;
 	if (mode.find("zap") == 0)
@@ -732,7 +774,7 @@ static eString getNavi(eString mode, eString path)
 #endif
 	}
 	else
-	if (mode.find("menu") == 0)
+	if (mode.find("control") == 0)
 	{
 		if (eSystemInfo::getInstance()->canShutdown())
 		{
@@ -747,39 +789,47 @@ static eString getNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "Wakeup", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=wakeup\')");
 		result += "<br>";
-		result += button(110, "OSDshot", LEFTNAVICOLOR, "?mode=menuFBShot");
+		result += button(110, "OSDshot", LEFTNAVICOLOR, "?mode=controlFBShot");
 #ifndef DISABLE_LCD
 		result += "<br>";
-		result += button(110, "LCDshot", LEFTNAVICOLOR, "?mode=menuLCDShot");
+		result += button(110, "LCDshot", LEFTNAVICOLOR, "?mode=controlLCDShot");
 #endif
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
 		{
 			result += "<br>";
-			result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=menuScreenShot");
+			result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=controlScreenShot");
 		}
 		result += "<br>";
-		result += button(110, "Timer List", LEFTNAVICOLOR, "?mode=menuTimerList");
+		result += button(110, "Message", LEFTNAVICOLOR, "?mode=controlMessage");
+		result += "<br>";
+		result += button(110, "Plugins", LEFTNAVICOLOR, "?mode=controlPlugins");
+		result += "<br>";
+		result += button(110, "Timer List", LEFTNAVICOLOR, "?mode=controlTimerList");
 	}
 	else
-	if (mode.find("links") == 0)
+	if (mode.find("config") == 0)
 	{
-		result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=linksOfficialSites");
+		result += button(110, "HDD", LEFTNAVICOLOR, "?mode=configHDD");
 		result += "<br>";
-		result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=linksOtherSites");
-		result += "<br>";
-		result += button(110, "Forums", LEFTNAVICOLOR, "?mode=linksForums");
+		result += button(110, "USB", LEFTNAVICOLOR, "?mode=configUSB");
 		result += "<br>";
 	}
 	else
 	if (mode.find("updates") == 0)
 	{
+		result += button(110, "Internet", LEFTNAVICOLOR, "?mode=updatesInternet");
 	}
 	else
-	if (mode.find("about") == 0)
+	if (mode.find("help") == 0)
 	{
-		result += button(110, "Receiver", LEFTNAVICOLOR, "?mode=aboutDreambox");
+		result += button(110, "DMM", LEFTNAVICOLOR, "?mode=helpDMM");
 		result += "<br>";
-		result += button(110, "DMM", LEFTNAVICOLOR, "?mode=aboutDMM");
+		result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=helpOfficialSites");
+		result += "<br>";
+		result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=helpOtherSites");
+		result += "<br>";
+		result += button(110, "Forums", LEFTNAVICOLOR, "?mode=helpForums");
+		result += "<br>";
 	}
 
 	return result;
@@ -789,10 +839,10 @@ static eString getTopNavi(eString mode, eString path)
 {
 	eString result;
 	result += button(100, "ZAP", TOPNAVICOLOR, "?mode=zap");
-	result += button(100, "CONTROL", TOPNAVICOLOR, "?mode=menu");
-	result += button(100, "LINKS", TOPNAVICOLOR, "?mode=links");
+	result += button(100, "CONTROL", TOPNAVICOLOR, "?mode=control");
+	result += button(100, "CONFIG", TOPNAVICOLOR, "?mode=config");
 	result += button(100, "UPDATES", TOPNAVICOLOR, "?mode=updates");
-	result += button(100, "ABOUT", TOPNAVICOLOR, "?mode=about");
+	result += button(100, "HELP", TOPNAVICOLOR, "?mode=help");
 
 	return result;
 }
@@ -835,7 +885,7 @@ static eString getStats()
 	result += getDiskSpace();
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 #endif
-	int sec = atoi(read_file("/proc/uptime").c_str());
+	int sec = atoi(readFile("/proc/uptime").c_str());
 	result += eString().sprintf("%d:%02d h up", sec/3600, (sec%3600)/60);
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
@@ -888,6 +938,120 @@ static eString getRecordingStat()
 		result << "&nbsp;";
 		
 	return result.str();
+}
+
+static eString getCurService()
+{
+	eString result = "n/a";
+
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+		if (current)
+			result = current->service_name.c_str();
+	}
+	return result;
+}
+
+static eString getEITC()
+{
+	eString result;
+
+	EIT *eit = eDVB::getInstance()->getEIT();
+
+	if (eit)
+	{
+		eString now_time, now_duration, now_text, now_longtext;
+		eString next_time, next_duration, next_text, next_longtext;
+
+		int p = 0;
+
+		for(ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
+		{
+			if (*event)
+			{
+				if (p == 0)
+				{
+					if (event->start_time != 0) 
+					{
+						now_time.sprintf("%s", ctime(&event->start_time));
+						now_time=now_time.mid(10, 6);
+					} 
+					else 
+						now_time = "";
+
+					now_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
+				}
+				if (p == 1)
+				{
+					if (event->start_time != 0) 
+					{
+ 						next_time.sprintf("%s", ctime(&event->start_time));
+						next_time=next_time.mid(10,6);
+						next_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
+					}
+					else 
+						next_time="";
+
+				}
+				for (ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
+				{
+					if (descriptor->Tag() == DESCR_SHORT_EVENT)
+					{
+						ShortEventDescriptor *ss =(ShortEventDescriptor*)*descriptor;
+						switch(p)
+						{
+							case 0:
+								now_text=ss->event_name;
+								break;
+							case 1:
+								next_text=ss->event_name;
+								break;
+						}
+					}
+					if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
+					{
+						ExtendedEventDescriptor *ss =(ExtendedEventDescriptor*)*descriptor;
+						switch(p)
+						{
+							case 0:
+								now_longtext+=ss->item_description;
+								break;
+							case 1:
+								next_longtext+=ss->item_description;
+								break;
+						}
+					}
+				}
+				p++;
+		 	}
+		}
+
+		if (now_time != "")
+		{
+			result = readFile(TEMPLATE_DIR + "eit.tmp");
+			result.strReplace("#NOWT#", now_time);
+			result.strReplace("#NOWD#", now_duration);
+			result.strReplace("#NOWST#", now_text);
+			result.strReplace("#NOWLT#", filter_string(now_longtext));
+			result.strReplace("#NEXTT#", next_time);
+			result.strReplace("#NEXTD#", next_duration);
+			result.strReplace("#NEXTST#", next_text);
+			result.strReplace("#NEXTLT#", filter_string(next_longtext));
+		}
+		else
+		{
+			result = "eit undefined";
+		}
+		eit->unlock();
+	}
+	else
+	{
+		result = "";
+	}
+
+	return result;
 }
 
 static eString getVolBar()
@@ -963,9 +1127,88 @@ static eString getVideoBar()
 	return result.str();
 }
 
+static eString getUpdates()
+{
+	std::stringstream result;
+	
+	eString myVersion = getAttribute("/.version", "version");
+	eString myCatalogURL = getAttribute("/.version", "catalog");
+	eString myComment = getAttribute("/.version", "comment");
+	eString myImageURL = getAttribute("/.version", "url");
+	
+	result << "<h2>Installed Image Information</h2>";
+	result << "<table width=100% border=1 cellpadding=0 cellspacing=0>";
+	result << "<tr><td>Version</td><td>" << firmwareLevel(myVersion) << "</td></tr>";
+	result << "<tr><td>URL</td><td>" << myImageURL << "</td></tr>";
+	result << "<tr><td>Comment</td><td>" << myComment << "</td></tr>";
+	result << "<tr><td>Catalog</td><td>" << myCatalogURL << "</td></tr>";
+	result << "</table>";
+	result << "<br>";
+	result << "For information about available updates select one of the categories on the left.";
+	
+	return result.str();
+}
+
+static eString getUpdatesInternet()
+{
+	std::stringstream result;
+	eString imageName, imageVersion, imageURL, imageCreator, imageMD5;
+	eString myCatalogURL = getAttribute("/.version", "catalog");
+	
+	result << "<h2>Available Images</h2>";
+	result << "<table width=100% border=1 cellpadding=0 cellspacing=0>";
+
+	if (myCatalogURL.length())
+	{
+		system(eString("wget -q -O /tmp/catalog.xml " + myCatalogURL).c_str());
+		eString line;
+		ifstream catalogFile("/tmp/catalog.xml");
+		if (catalogFile)
+		{
+			while (getline(catalogFile, line, '\n'))
+			{
+				if (line.find("<image ") != eString::npos)
+				{
+					if (imageVersion)
+					{
+						result  << "<tr><td>" << imageVersion 
+							<< "</td><td>" << imageName 
+							<< "</td></tr>";
+					}
+					imageName = "&nbsp;";
+					imageVersion = "&nbsp;";
+					imageURL = "&nbsp;";
+					imageCreator = "&nbsp;";
+					imageMD5 = "&nbsp;";
+				}
+				else
+				if (line.find("version=") != eString::npos)
+				{
+					imageName = getRight(line, '"');
+					imageName = getLeft(imageName, '"');
+				}
+				else
+				if (line.find("name=") != eString::npos)
+				{
+					imageName = getRight(line, '"');
+					imageName = getLeft(imageName, '"');	
+				}
+			}
+		}
+		else
+			result << "<tr><td>No image information available</td></tr>";
+	}
+	else
+		result << "<tr><td>No image information available</td></tr>";
+		
+	result << "</table>";
+	
+	return result.str();
+}
+
 static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString sref;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -1037,7 +1280,7 @@ public:
 	eWebNavigatorListDirectory(eString &result, eString origpath, eString path, eServiceInterface &iface): result(result), origpath(origpath), path(path), iface(iface)
 	{
 		eDebug("path: %s", path.c_str());
-		num=0;
+		num = 0;
 	}
 	void addEntry(const eServiceReference &e)
 	{
@@ -1049,10 +1292,7 @@ public:
 		}
 #endif
 		result += "<tr bgcolor=\"";
-		if (num & 1)
-			result += LIGHTGREY;
-		else
-			result += DARKGREY;
+		result += (num & 1) ? LIGHTGREY : DARKGREY;
 		result += "\"><td width=50 align=center>";
 
 		eString serviceRef = ref2string(e);
@@ -1060,11 +1300,12 @@ public:
 		{
 			if (!e.path)
 				result += button(50, "EPG", GREEN, "javascript:openEPG('" + serviceRef + "')");
-			else if (serviceRef.find("%2fhdd%2fmovie%2f") != eString::npos)
+			else 
+			if (serviceRef.find("%2fhdd%2fmovie%2f") != eString::npos)
 			{
 				result += "<a href=\"javascript:deleteMovie('";
 				result += serviceRef;
-				result += "')\"><img src=\"trash.gif\" height=20 border=0></a>";
+				result += "')\"><img src=\"trash.gif\" height=22 border=0></a>";
 			}
 			else
 				result += "&#160;";
@@ -1072,7 +1313,7 @@ public:
 		}
 		else
 		{
-			int count=0;
+			int count = 0;
 			countDVBServices bla(e, count);
 			if (count)
 				result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + serviceRef + "')");
@@ -1081,7 +1322,7 @@ public:
 			result += eString("</td><td><a href=\"/")+ "?path=" + serviceRef + "\">";
 		}
 
-		eService *service=iface.addRef(e);
+		eService *service = iface.addRef(e);
 		if (!service)
 			result += "N/A";
 		else
@@ -1092,6 +1333,79 @@ public:
 
 		result += "</a>";
 		result += "</td></tr>\n";
+		num++;
+	}
+};
+
+class eWebNavigatorListDirectory2: public Object
+{
+	eString &result1;
+	eString &result2;
+	eString origpath;
+	eString path;
+	eServiceInterface &iface;
+	int num;
+public:
+	eWebNavigatorListDirectory2(eString &result1, eString &result2, eString origpath, eString path, eServiceInterface &iface): result1(result1), result2(result2), origpath(origpath), path(path), iface(iface)
+	{
+		eDebug("path: %s", path.c_str());
+		num = 0;
+	}
+	void addEntry(const eServiceReference &e)
+	{
+#ifndef DISABLE_FILE
+		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
+		{
+			if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
+					 return;
+		}
+#endif
+		result1 += "<tr bgcolor=\"";
+		result1 += (num & 1) ? LIGHTGREY : DARKGREY;
+		result1 += "\"><td width=50 align=center>";
+
+		eString serviceRef = ref2string(e);
+		if (!(e.flags & eServiceReference::isDirectory))
+		{
+			if (!e.path)
+				result1 += button(50, "EPG", GREEN, "javascript:openEPG('" + serviceRef + "')");
+			else 
+			if (serviceRef.find("%2fhdd%2fmovie%2f") != eString::npos)
+			{
+				result1 += "<a href=\"javascript:deleteMovie('";
+				result1 += serviceRef;
+				result1 += "')\"><img src=\"trash.gif\" height=22 border=0></a>";
+			}
+			else
+				result1 += "&#160;";
+			result1 += "</td><td><a href=\'javascript:switchChannel(\"" + serviceRef + "\")\'>";
+			eService *service = iface.addRef(e);
+			if (service)
+			{
+				result1 += filter_string(service->service_name);
+				iface.removeRef(e);
+			}
+		}
+		else
+		{
+			int count = 0;
+			countDVBServices bla(e, count);
+			if (count)
+				result1 += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + serviceRef + "')");
+			else
+				result1 += "&#160;";
+			result1 += eString("</td><td><a href=\"/")+ "?path=" + serviceRef + "\">";
+			eService *service = iface.addRef(e);
+			if (service)
+			{
+				result1 += filter_string(service->service_name);
+				iface.removeRef(e);
+			}
+		}
+
+
+		result1 += "</a>";
+		result1 += "</td></tr>\n";
 		num++;
 	}
 };
@@ -1120,17 +1434,16 @@ static eString getZapContent(eString mode, eString path)
 		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 		{
 			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
-//			iface->play(current_service);
 			result += "<script language=\"javascript\">window.close();</script>";
 		}
 		else
 		{
 			eWebNavigatorListDirectory navlist(result, path, tpath, *iface);
-			Signal1<void,const eServiceReference&> signal;
+			Signal1<void, const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
-				result+="<table width=\"100%\" cellspacing=\"2\" cellpadding=\"1\" border=\"0\">\n";
+			result += "<table width=\"100%\" cellspacing=\"2\" cellpadding=\"1\" border=\"0\">\n";
 			iface->enterDirectory(current_service, signal);
-				result+="</table>\n";
+			result += "</table>\n";
 			eDebug("entered");
 			iface->leaveDirectory(current_service);
 			eDebug("exited");
@@ -1140,109 +1453,213 @@ static eString getZapContent(eString mode, eString path)
 	return result;
 }
 
-static eString aboutDreambox(void)
+static eString getZapContent2(eString mode, eString path)
 {
-	eString result="<table border=0>";
+	eString result, result1, result2;
+	eString tpath;
 
-	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
-		result += "<img src=\"dm7000.jpg\" width=\"650\" border=\"0\"><br>";
+	unsigned int pos = 0, lastpos = 0, temp = 0;
 
-	result+=eString().sprintf(
-		"<tr><td>Model:</td><td>&nbsp;</td><td>%s</td></tr>"
-		"<tr><td>Manufacturer:</td><td>&nbsp;</td><td>%s</td></tr>"
-		"<tr><td>Processor:</td><td>&nbsp;</td><td>%s</td></tr>",
-		eSystemInfo::getInstance()->getModel(),
-		eSystemInfo::getInstance()->getManufacturer(),
-		eSystemInfo::getInstance()->getCPUInfo());
+	if ((path.find(";", 0)) == eString::npos)
+		path = ";" + path;
 
-	eString sharddisks;
-#ifndef DISABLE_FILE
-	if (eSystemInfo::getInstance()->hasHDD())
+	while ((pos = path.find(";", lastpos)) != eString::npos)
 	{
-		for (int c='a'; c<'h'; c++)
-		{
-			char line[1024];
-			int ok=1;
-			FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/media", c).c_str(), "r");
-			if (!f)
-				continue;
-			if ((!fgets(line, 1024, f)) || strcmp(line, "disk\n"))
-				ok=0;
-			fclose(f);
-			if (ok)
-			{
-				FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/model", c).c_str(), "r");
-				if (!f)
-					continue;
-				*line=0;
-				fgets(line, 1024, f);
-				fclose(f);
-				if (!*line)
-					continue;
-				line[strlen(line)-1]=0;
-				sharddisks+=line;
-				f=fopen(eString().sprintf("/proc/ide/hd%c/capacity", c).c_str(), "r");
-				if (!f)
-					continue;
-				int capacity=0;
-				fscanf(f, "%d", &capacity);
-				fclose(f);
-				sharddisks+=" (";
-				if (c&1)
-					sharddisks+="master";
-				else
-					sharddisks+="slave";
-				if (capacity)
-					sharddisks+=eString().sprintf(", %d MB", capacity/2048);
-				sharddisks+=")";
-			}
-		}
-		result += "<tr><td>Harddisk:</td><td>&nbsp;</td><td>";
-		if (sharddisks == "")
-			sharddisks="none</td></tr>";
-		result += sharddisks;
-	}
-#endif //DISABLE_FILE
-
-	result += "<tr><td>Firmware:</td><td>&nbsp;</td><td>";
-	eString verid=getVersionInfo("version");
-	if (!verid)
-	{
-		result += "unknown</td></tr>";
-	}
-	else
-	{
-		int type=atoi(verid.left(1).c_str());
-		char *typea[3];
-		typea[0]="release";
-		typea[1]="beta";
-		typea[2]="internal";
-		eString ver=verid.mid(1, 3);
-		eString date=verid.mid(4, 8);
-//		eString time=verid.mid(12, 4);
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
-			result += eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]+ ", " + date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4);
+		lastpos = pos + 1;
+		if ((temp = path.find(";", lastpos)) != eString::npos)
+			tpath = path.mid(lastpos, temp - lastpos);
 		else
-			result += eString().sprintf("%s %c.%d. %s", typea[type%3], ver[0], atoi(eString().sprintf("%c%c", ver[1], ver[2]).c_str()	), (date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4)).c_str());
-		result += "</td></tr>";
+			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
+
+		eServiceReference current_service=string2ref(tpath);
+		eServiceInterface *iface = eServiceInterface::getInstance();
+
+		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
+		{
+			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
+			result += "<script language=\"javascript\">window.close();</script>";
+		}
+		else
+		{
+			eString tmpFile = readFile(TEMPLATE_DIR + "zap.tmp");
+			eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
+			Signal1<void, const eServiceReference&> signal;
+			signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
+			result += "<table width=\"100%\" cellspacing=\"2\" cellpadding=\"1\" border=\"0\">\n";
+			iface->enterDirectory(current_service, signal);
+			result += "</table>\n";
+			eDebug("entered");
+			iface->leaveDirectory(current_service);
+			eDebug("exited");
+		}
 	}
-	result += "</table>";
 
 	return result;
 }
 
-static eString getCurService()
+static eString getZap(eString mode, eString path)
 {
-	eString result = "n/a";
-
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (sapi)
+	eString result;
+	eString zap_result;
+	
+#ifndef DISABLE_FILE
+	if (path == ";4097:7:0:1:0:0:0:0:0:0:")
 	{
-		eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
-		if (current)
-			result = current->service_name.c_str();
+		eString tmpFile = readFile(TEMPLATE_DIR + "videocontrols.tmp");
+		tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
+		result += tmpFile;
+	}
+#endif
+	zap_result += getZapContent(mode, path);
+	result += getEITC();
+	result.strReplace("#SERVICENAME#", filter_string(getCurService()));
+
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+
+	if (sapi && sapi->service)
+	{
+		eString buttons = button(100, "AUDIO", OCKER, "javascript:selectAudio()");
+		buttons += button(100, "EPG", GREEN, "javascript:openEPG()");
+		buttons += button(100, "Info", YELLOW, "javascript:openSI()");
+#ifndef DISABLE_FILE
+		buttons += button(100, "Record", RED, "javascript:DVRrecord('start')");
+		buttons += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
+#endif
+		result.strReplace("#OPS#", buttons);
+	}
+	else
+		result.strReplace("#OPS#", "");
+
+	result += zap_result;
+
+	return result;
+}
+
+#ifndef DISABLE_FILE
+static eString getDiskInfo(void)
+{
+	eString result;
+	eString sharddisks = "none";
+	if (eSystemInfo::getInstance()->hasHDD())
+	{
+		for (int c = 'a'; c < 'h'; c++)
+		{
+			char line[1024];
+			int ok = 1;
+			FILE *f = fopen(eString().sprintf("/proc/ide/hd%c/media", c).c_str(), "r");
+			if (!f)
+				continue;
+			if ((!fgets(line, 1024, f)) || strcmp(line, "disk\n"))
+				ok = 0;
+			fclose(f);
+			if (ok)
+			{
+				FILE *f = fopen(eString().sprintf("/proc/ide/hd%c/model", c).c_str(), "r");
+				if (!f)
+					continue;
+				*line = 0;
+				fgets(line, 1024, f);
+				fclose(f);
+				if (!*line)
+					continue;
+				line[strlen(line) - 1] = 0;
+				sharddisks = line;
+				f = fopen(eString().sprintf("/proc/ide/hd%c/capacity", c).c_str(), "r");
+				if (!f)
+					continue;
+				int capacity = 0;
+				fscanf(f, "%d", &capacity);
+				fclose(f);
+				sharddisks += " (";
+				if (c & 1)
+					sharddisks += "master";
+				else
+					sharddisks += "slave";
+				if (capacity)
+					sharddisks += eString().sprintf(", %d MB", capacity / 2048);
+				sharddisks += ")";
+			}
+		}
+		result += "<tr>";
+		result += "<td>Harddisk:</td>";
+		result += "<td>" + sharddisks + "</td>";
+		result += "</tr>";
 	}
 	return result;
+}
+#endif //DISABLE_FILE	
+
+#ifndef DISABLE_FILE
+static eString getConfigHDD(void)
+{
+	eString result = getDiskInfo();
+	result += "<br><br>";
+	result += readFile(TEMPLATE_DIR + "configUSB.tmp");
+	return result;
+}
+#endif
+
+static eString getConfigUSB(void)
+{
+	return readFile(TEMPLATE_DIR + "configUSB.tmp");
+}
+
+static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString swapUSB = opt["swapUSB"];
+	eString swapUSBFile = opt["swapUSBFile"];
+	eString bootUSB = opt["bootUSB"];
+	eString bootUSBImage = opt["bootUSBImage"];
+	
+	return getMsgWindow("Info", "Function is not supported by installed flash image.");
+//	return "<script language=\"javascript\">window.close();</script>";
+}
+
+static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString swapHDD = opt["swapHDD"];
+	eString swapHDDFile = opt["swapHDDFile"];
+	eString bootHDD = opt["bootHDD"];
+	eString bootHDDImage = opt["bootHDDImage"];
+
+	return getMsgWindow("Info", "Function is not supported by installed flash image.");
+//	return "<script language=\"javascript\">window.close();</script>";
+}
+
+static eString msgWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString title = opt["title"];
+	eString msg = opt["msg"];
+	return getMsgWindow(title, msg);
+}
+
+static eString aboutDreambox(void)
+{
+	std::stringstream result;
+	result << "<table border=0 cellspacing=0 cellpadding=0>";
+
+	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+		result << "<img src=\"dm7000.jpg\" width=\"650\" border=\"0\"><br>";
+
+	result  << "<tr><td>Model:</td><td>" << eSystemInfo::getInstance()->getModel() << "</td></tr>"
+		<< "<tr><td>Manufacturer:</td><td>" << eSystemInfo::getInstance()->getManufacturer() << "</td></tr>"
+		<< "<tr><td>Processor:</td><td>" << eSystemInfo::getInstance()->getCPUInfo() << "</td></tr>";
+
+#ifndef DISABLE_FILE
+	result << getDiskInfo();
+#endif
+
+	result  << "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>"
+		<< "<tr><td>Web Interface:</td><td>" << WEBXFACEVERSION << "</td></tr>"
+		<< "</table>";
+
+	return result.str();
 }
 
 struct countTimer
@@ -1253,15 +1670,15 @@ struct countTimer
 		:count(count), repeating(repeating)
 	{
 	}
+	
 	void operator()(ePlaylistEntry *se)
 	{
 		if (se->type&ePlaylistEntry::isRepeating)
-		{
 			if (repeating)
 				++count;
-		}
-		else if (!repeating)
-			++count;
+		else 
+			if (!repeating)
+				++count;
 	}
 };
 
@@ -1289,9 +1706,9 @@ struct getEntryString
 		eString channel = getLeft(description, '/');
 		if (!channel)
 		{
-			eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(se->service);
+			eService *service = eDVB::getInstance()->settings->getTransponders()->searchService(se->service);
 			if (service)
-				channel=filter_string(service->service_name);
+				channel = filter_string(service->service_name);
 		}
 		if (!channel)
 			channel = _("No channel available");
@@ -1299,14 +1716,37 @@ struct getEntryString
 		description = getRight(description, '/');
 		if (!description)
 			description = _("No description available");
+		
+		result << "<tr>";
+		if (!se->type & ePlaylistEntry::isRepeating)
+		{
+			result  << "<td><a href=\"javascript:deleteTimerEvent(\'"
+				<< "ref=" << ref2string(se->service)
+				<< "&ID=" << std::hex << se->event_id << std::dec
+				<< "&start=" << se->time_begin 
+				<< "&duration=" << se->duration 
+				<< "\')\"><img src=\"trash.gif\" border=0 height=20></a></td>";
+				
+			result << "<td><a href=\"javascript:editTimerEvent(\'"
+				<< "ref=" << ref2string(se->service)
+				<< "start=" << se->time_begin
+				<< "&duration=" << se->duration
+				<< "&ID=" << std::hex << se->event_id << std::dec
+				<< "&channel=" << channel
+				<< "&descr=" << description
+				<< "\')\"><img src=\"edit.gif\" border=0 height=20></a></td>";
+		}
+		else
+			result << "<td>&nbsp;</td><td>&nbsp;</td>";
 
 		if (se->type & ePlaylistEntry::stateFinished)
-			result << "<tr><td align=center><img src=\"on.gif\"></td><td>";
+			result << "<td align=center><img src=\"on.gif\"></td>";
 		else if (se->type & ePlaylistEntry::stateError)
-			result << "<tr><td align=center><img src=\"off.gif\"></td><td>";
+			result << "<td align=center><img src=\"off.gif\"></td>";
 		else
-			result << "<tr><td>&nbsp;</td><td>";
-
+			result << "<td>&nbsp;</td>";
+		
+		result << "<td>";
 		if (se->type & ePlaylistEntry::isRepeating)
 		{
 			if (se->type & ePlaylistEntry::Su)
@@ -1323,199 +1763,91 @@ struct getEntryString
 				result << "Fr ";
 			if (se->type & ePlaylistEntry::Sa)
 				result << "Sa";
-			result << "</td><td>"
-							<< std::setw(2) << startTime.tm_hour << ':'
-							<< std::setw(2) << startTime.tm_min << " - ";
+			result  << "</td><td>"
+				<< std::setw(2) << startTime.tm_hour << ':'
+				<< std::setw(2) << startTime.tm_min << " - ";
 		}
 		else
 		{
 			result 	<< std::setw(2) << startTime.tm_mday << '.'
-							<< std::setw(2) << startTime.tm_mon+1 << " - "
-							<< std::setw(2) << startTime.tm_hour << ':'
-							<< std::setw(2) << startTime.tm_min
-							<< "</td><td>"
-							<< std::setw(2) << endTime.tm_mday << '.'
-							<< std::setw(2) << endTime.tm_mon+1 << " - ";
+				<< std::setw(2) << startTime.tm_mon+1 << " - "
+				<< std::setw(2) << startTime.tm_hour << ':'
+				<< std::setw(2) << startTime.tm_min
+				<< "</td><td>"
+				<< std::setw(2) << endTime.tm_mday << '.'
+				<< std::setw(2) << endTime.tm_mon+1 << " - ";
 		}
 
 		result 	<< std::setw(2) << endTime.tm_hour << ':'
-							<< std::setw(2) << endTime.tm_min
-							<< "</td><td>" << channel
-							<< "</td><td>" << description
-							<< "</td></tr>";
+			<< std::setw(2) << endTime.tm_min
+			<< "</td><td>" << channel
+			<< "</td><td>" << description
+			<< "</td></tr>";
 	}
 };
 
-static eString genTimerListBody(int type)
+static eString genTimerListTableBody(int type)
 {
 	std::stringstream result;
 	result << std::setfill('0');
 	if (!eTimerManager::getInstance()->getTimerCount())
-		result << _("No timer events available") << ".<br>";
+		result << "<tr><td>" << eString(_("No timer events available")) << "</td></tr>";
 	else
-	{
-		result << "<table width=100% border=1 rules=all>"
-							"<thead>"
-							"<th align=\"left\">"
-							"State"
-							"</th>"
-							"<th align=\"left\">"
-							<< (type ? "Days" : "Start Time")
-							<< "</th>"
-							"<th align=\"left\">"
-							<< (type ? "From - To" : "End Time")
-							<< "</th>"
-							"<th align=\"left\">"
-							"Channel"
-							"</th>"
-							"<th align=\"left\">"
-							"Description"
-							"</th>"
-							"</thead>"
-							"<tbody>";
-		eTimerManager::getInstance()->forEachEntry(getEntryString(result,type));
-		result << "</tbody>"
-							"</table>";
-	}
+		eTimerManager::getInstance()->forEachEntry(getEntryString(result, type));
+
 	return result.str();
 }
 
-// for what is this needed?
-// this is needed for standalone programs (like dreamTV) to be able to display the timer list
-static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getControlTimerList()
 {
-	eString tmpFile;
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	tmpFile += read_file(TEMPLATE_DIR + "timerList.tmp");
-	int count=0;
-	eTimerManager::getInstance()->forEachEntry(countTimer(count,false));
+	eString tableBody;
+	eString result = readFile(TEMPLATE_DIR + "timerListBody.tmp");
+	
+	// regular timers
+	int count = 0;
+	eTimerManager::getInstance()->forEachEntry(countTimer(count, false));
 	if (count)
-	{
-		count=0;
-		tmpFile.strReplace("#BODY_NORMAL#", genTimerListBody(0));
-		tmpFile += "<br>";
-	}
-	else
-		tmpFile.strReplace("#BODY_NORMAL#", "&nbsp;");
-	eTimerManager::getInstance()->forEachEntry(countTimer(count,false));
+		tableBody = genTimerListTableBody(0);
+	else 
+		tableBody = "<tr><td>" + eString(_("No regular timer events available")) + "</td></tr>";
+	result.strReplace("#TIMER_REGULAR#", tableBody);
+	
+	// repeated timers
+	count = 0;
+	eTimerManager::getInstance()->forEachEntry(countTimer(count, true));
 	if (count)
-	{
-		tmpFile.strReplace("#BODY_REPEATED#", genTimerListBody(1));
-		tmpFile += "<br>";
-	}
+		tableBody = genTimerListTableBody(1);
 	else
-		tmpFile.strReplace("#BODY_REPEATED#", "&nbsp;");
-	return tmpFile;
-}
-
-static eString getEITC()
-{
-	eString result;
-
-	EIT *eit=eDVB::getInstance()->getEIT();
-
-	if (eit)
-	{
-		eString now_time, now_duration, now_text, now_longtext;
-		eString next_time, next_duration, next_text, next_longtext;
-
-		int p=0;
-
-		for(ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
-		{
-			if (*event)
-			{
-				if (p==0)
-				{
-					if (event->start_time!=0) {
-						now_time.sprintf("%s", ctime(&event->start_time));
-						now_time=now_time.mid(10, 6);
-					} else {
-						now_time="";
-					}
-					now_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
-				}
-				if (p==1)
-				{
-					if (event->start_time!=0) {
- 						next_time.sprintf("%s", ctime(&event->start_time));
-						next_time=next_time.mid(10,6);
-						next_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
-					} else {
-						next_time="";
-					}
-				}
-				for(ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
-				{
-					if (descriptor->Tag()==DESCR_SHORT_EVENT)
-					{
-						ShortEventDescriptor *ss=(ShortEventDescriptor*)*descriptor;
-						switch(p)
-						{
-							case 0:
-								now_text=ss->event_name;
-								break;
-							case 1:
-								next_text=ss->event_name;
-								break;
-						}
-					}
-					if (descriptor->Tag()==DESCR_EXTENDED_EVENT)
-					{
-						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*descriptor;
-						switch(p)
-						{
-							case 0:
-								now_longtext+=ss->item_description;
-								break;
-							case 1:
-								next_longtext+=ss->item_description;
-								break;
-						}
-					}
-				}
-				p++;
-		 	}
-		}
-
-		if (now_time!="")
-		{
-			result=read_file(TEMPLATE_DIR+"eit.tmp");
-			result.strReplace("#NOWT#", now_time);
-			result.strReplace("#NOWD#", now_duration);
-			result.strReplace("#NOWST#", now_text);
-			result.strReplace("#NOWLT#", filter_string(now_longtext));
-			result.strReplace("#NEXTT#", next_time);
-			result.strReplace("#NEXTD#", next_duration);
-			result.strReplace("#NEXTST#", next_text);
-			result.strReplace("#NEXTLT#", filter_string(next_longtext));
-		}
-		else
-		{
-			result="eit undefined";
-		}
-		eit->unlock();
-	}
-	else
-	{
-		result="";
-	}
-
+		tableBody = "<tr><td>" + eString(_("No repeated timer events available")) + "</td></tr>";
+	result.strReplace("#TIMER_REPEATED#", tableBody);
+	
+	// buttons
+	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()"));
+	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()"));
+	
 	return result;
 }
 
-static eString getScreenShot(void)
+static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result;
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	result = readFile(TEMPLATE_DIR + "timerList.tmp");
+	result.strReplace("#BODY#", getControlTimerList());
+	return result;
+}
+
+static eString getControlScreenShot(void)
 {
 	eString result;
 
 	if (access("/dev/grabber", R_OK) == 0)
 	{
-		eString cmd("cat /dev/grabber > /tmp/screenshot.bmp");
-		system(cmd.c_str());
+		system("cat /dev/grabber > /tmp/screenshot.bmp");
 
-		FILE *bitstream=0;
+		FILE *bitstream = 0;
 		int xres = 0, yres = 0, yres2 = 0, aspect = 0, winxres = 650, winyres = 0, rh = 0, rv = 0;
-		if (Decoder::current.vpid!=-1)
+		if (Decoder::current.vpid != -1)
 			bitstream=fopen("/proc/bus/bitstream", "rt");
 		if (bitstream)
 		{
@@ -1567,142 +1899,119 @@ static eString getScreenShot(void)
 static eString getContent(eString mode, eString path)
 {
 	eString result;
-	eString zap_result;
+	
 	if (mode == "zap")
 	{
 		result = getTitle("ZAP");
+		result += getZap(mode, path);
+	}
+	else
+	if (mode == "config")
+	{
+		result = getTitle("CONFIG");
+		result += "Select one of the configuration categories on the left";
+	}
+	else
 #ifndef DISABLE_FILE
-		if (path == ";4097:7:0:1:0:0:0:0:0:0:")
-		{
-			eString tmpFile = read_file(TEMPLATE_DIR + "videocontrols.tmp");
-			tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
-			result += tmpFile;
-		}
+	if (mode == "configHDD")
+	{
+		result = getTitle("CONFIG: HDD");
+		result += getConfigHDD();
+	}
+	else
 #endif
-		zap_result += getZapContent(mode, path);
-		result += getEITC();
-		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
-
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-
-		if (sapi && sapi->service)
-		{
-			eString buttons = button(100, "AUDIO", OCKER, "javascript:selectAudio()");
-			buttons += button(100, "EPG", GREEN, "javascript:openEPG()");
-			buttons += button(100, "Info", YELLOW, "javascript:openSI()");
-#ifndef DISABLE_FILE
-			buttons += button(100, "Record", RED, "javascript:DVRrecord('start')");
-			buttons += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
-#endif
-			result.strReplace("#OPS#", buttons);
-		}
-		else
-		{
-			DELETE(#OPS#);
-		}
-		result += zap_result;
+	if (mode == "configUSB")
+	{
+		result = getTitle("CONFIG: USB");
+		result += getConfigUSB();
 	}
 	else
-	if (mode == "links")
+	if (mode == "help")
 	{
-		result = getTitle("LINKS");
-		result += "Select one of the link categories on the left";
-	}
-	else
-	if (mode == "linksOfficialSites")
-	{
-		result = getTitle("LINKS: Official Sites");
-		result += read_file(TEMPLATE_DIR+"linksOfficialSites.tmp");
-		if (result == "")
-			result = "No links available";
-	}
-	else
-	if (mode == "linksOtherSites")
-	{
-		result = getTitle("LINKS: Other Sites");
-		result += read_file(TEMPLATE_DIR+"linksOtherSites.tmp");
-		if (result == "")
-			result = "No links available";
-	}
-	else
-	if (mode == "linksForums")
-	{
-		result = getTitle("LINKS: Forums");
-		result += read_file(TEMPLATE_DIR+"linksForums.tmp");
-		if (result == "")
-			result = "No links available";
-	}
-	else
-	if (mode == "about")
-	{
-		result = getTitle("ABOUT");
-		result += "Enigma Web Control<br>Version 0.6";
-	}
-	else
-	if (mode == "aboutDreambox")
-	{
-		result = getTitle("ABOUT: Receiver");
+		result = getTitle("HELP");
 		result += aboutDreambox();
 	}
 	else
-	if (mode == "aboutDMM")
+	if (mode == "helpDMM")
 	{
-		result = getTitle("ABOUT: DMM");
-		result += read_file(TEMPLATE_DIR+"aboutDMM.tmp");
+		result = getTitle("HELP: DMM");
+		result += readFile(TEMPLATE_DIR + "helpDMM.tmp");
 	}
 	else
-	if (mode == "menu")
+	if (mode == "helpOfficialSites")
+	{
+		result = getTitle("HELP: Official Sites");
+		result += readFile(TEMPLATE_DIR + "helpOfficialSites.tmp");
+	}
+	else
+	if (mode == "helpOtherSites")
+	{
+		result = getTitle("HELP: Other Sites");
+		result += readFile(TEMPLATE_DIR + "helpOtherSites.tmp");
+	}
+	else
+	if (mode == "helpForums")
+	{
+		result = getTitle("HELP: Forums");
+		result += readFile(TEMPLATE_DIR + "helpForums.tmp");
+	}
+	else
+	if (mode == "control")
 	{
 		result = getTitle("CONTROL");
 		result += "Control your box using the commands on the left";
 	}
 	else
-	if (mode == "menuFBShot")
+	if (mode == "controlFBShot")
 	{
+		result = getTitle("CONTROL: OSDShot");
 		if (!getOSDShot("fb"))
 			result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
 	}
 	else
 #ifndef DISABLE_LCD
-	if (mode == "menuLCDShot")
+	if (mode == "controlLCDShot")
 	{
+		result = getTitle("CONTROL: LCDShot");
 		if (!getOSDShot("lcd"))
 			result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
 	}
 	else
 #endif
-	if (mode == "menuScreenShot")
+	if (mode == "controlScreenShot")
 	{
 		result = getTitle("CONTROL: Screenshot");
-		result += getScreenShot();
+		result += getControlScreenShot();
 	}
 	else
-	if (mode == "menuTimerList")
+	if (mode == "controlTimerList")
 	{
 		result = getTitle("CONTROL: Timer List");
-		int count=0;
-		eTimerManager::getInstance()->forEachEntry(countTimer(count,false));
-		if (count)
-		{
-			result += genTimerListBody(0);
-			count=0;
-			result += "<br>";
-		}
-		eTimerManager::getInstance()->forEachEntry(countTimer(count,true));
-		if (count)
-		{
-			result += genTimerListBody(1);
-			result += "<br>";
-		}
-		result += button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()");
-		result += "&nbsp;&nbsp;&nbsp;";
-		result += button(100, "Clear", RED, "javascript:clearTimerList()");
+		result += getControlTimerList();
+	}
+	else
+	if (mode == "controlMessage")
+	{
+		result = getTitle("CONTROL: Message");
+		result += getControlMessage();
+	}
+	else
+	if (mode == "controlPlugins")
+	{
+		result = getTitle("CONTROL: Plugins");
+		result += getControlPlugins();
 	}
 	else
 	if (mode == "updates")
 	{
 		result = getTitle("UPDATES");
-		result += "is not available yet";
+		result += getUpdates();
+	}
+	else
+	if (mode == "updatesInternet")
+	{
+		result = getTitle("UPDATES: Internet");
+		result += getUpdatesInternet();
 	}
 	else
 	{
@@ -1715,17 +2024,14 @@ static eString getContent(eString mode, eString path)
 
 static eString getEITC2()
 {
-	eString now_time = "&nbsp;", now_duration = "&nbsp;",
-		now_text = "&nbsp;";//, now_longtext = "&nbsp;";
-	eString next_time = "&nbsp;", next_duration = "&nbsp;",
-		next_text = "&nbsp;";//, next_longtext = "&nbsp;";
-	eString result;
+	eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;",
+		next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;",
+		result;
 
-	EIT *eit=eDVB::getInstance()->getEIT();
-
+	EIT *eit = eDVB::getInstance()->getEIT();
 	if (eit)
 	{
-		int p=0;
+		int p = 0;
 
 		for (ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
 		{
@@ -1736,12 +2042,11 @@ static eString getEITC2()
 					if (event->start_time != 0)
 					{
 						now_time.sprintf("%s", ctime(&event->start_time));
-						now_time=now_time.mid(10, 6);
+						now_time = now_time.mid(10, 6);
 					}
 					else
-					{
-						now_time="";
-					}
+						now_time = "";
+						
 					now_duration.sprintf("%d", (int)(event->duration/60));
 				}
 				if (p == 1)
@@ -1749,45 +2054,29 @@ static eString getEITC2()
 					if (event->start_time != 0)
 					{
  						next_time.sprintf("%s", ctime(&event->start_time));
-						next_time=next_time.mid(10,6);
+						next_time = next_time.mid(10,6);
 						next_duration.sprintf("%d", (int)(event->duration/60));
 					}
 					else
-					{
-						now_time="";
-					}
+						now_time = "";
 				}
 				for (ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
 				{
 					if (descriptor->Tag() == DESCR_SHORT_EVENT)
 					{
-						ShortEventDescriptor *ss=(ShortEventDescriptor*)*descriptor;
+						ShortEventDescriptor *ss =(ShortEventDescriptor*)*descriptor;
 						switch(p)
 						{
 							case 0:
-								now_text=ss->event_name;
+								now_text = ss->event_name;
 								break;
 							case 1:
-								next_text=ss->event_name;
+								next_text = ss->event_name;
 								break;
 						}
 						if (p)  // we have all we need
 							break;
 					}
-/*
-					if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
-					{
-						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*descriptor;
-						switch(p)
-						{
-							case 0:
-								now_longtext+=ss->item_description;
-								break;
-							case 1:
-								next_longtext+=ss->item_description;
-								break;
-						}
-					}*/
 				}
 				p++;
 		 	}
@@ -1795,10 +2084,9 @@ static eString getEITC2()
 		eit->unlock();
 	}
 
-
 	now_text = now_text.left(30);
 	next_text = next_text.left(30);
-	result = read_file(TEMPLATE_DIR+"header.tmp");
+	result = readFile(TEMPLATE_DIR + "header.tmp");
 	result.strReplace("#NOWT#", now_time);
 	if (now_duration != "&nbsp;")
 		now_duration += " min";
@@ -1812,7 +2100,7 @@ static eString getEITC2()
 	result.strReplace("#VOLBAR#", getVolBar());
 	eString curService = filter_string(getCurService());
 	if (curService == "n/a")
-		curService = "";
+		curService = "&nbsp;";
 	result.strReplace("#SERVICENAME#", curService);
 	result.strReplace("#STATS#", getStats());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
@@ -1870,14 +2158,14 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 			if (descriptor->Tag()==DESCR_SHORT_EVENT)
 			{
 				tm* t = localtime(&event.start_time);
-				result+=eString().sprintf("<!-- ID: %04x -->", event.event_id);
-				result+=eString().sprintf("<span class=\"epg\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
-				result+=((ShortEventDescriptor*)descriptor)->event_name;
-				result+="</span><br>\n";
+				result += eString().sprintf("<!-- ID: %04x -->", event.event_id);
+				result += eString().sprintf("<span class=\"epg\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
+				result += ((ShortEventDescriptor*)descriptor)->event_name;
+				result += "</span><br>\n";
 			}
 		}
 	}
-	result+="</body></html>";
+	result += "</body></html>";
 	return result;
 }
 
@@ -1973,14 +2261,13 @@ public:
 							result << "<td width=" << colWidth << ">"
 								<< "<span class=\"epg\">";
 #ifndef DISABLE_FILE
-							result << "<a href=\"javascript:record('ref="
-								<< ref2string(ref)
-								<< "&ID="
-								<< std::hex << event.event_id << std::dec
-								<< "&start="
-								<< event.start_time
-								<< "&duration="
-								<< event.duration
+							result << "<a href=\"javascript:record('"
+								<< "ref=" << ref2string(ref)
+								<< "&ID=" << std::hex << event.event_id << std::dec
+								<< "&start=" << event.start_time
+								<< "&duration=" << event.duration
+								<< "&descr=" << short_description
+								<< "&channel=" << filter_string(current->service_name)
 								<< "')\"><img src=\"kalarm.png\" border=0></a>"
 								<< "&nbsp;&nbsp;";
 #endif
@@ -2018,6 +2305,7 @@ public:
 			}
 		}
 	}
+	
 	eMEPG(time_t start, const eServiceReference & bouquetRef)
 		:hours(6)   // horizontally visible hours
 		,d_min(10)  // distance on time scale for 1 minute
@@ -2075,7 +2363,7 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 
 	eMEPG mepg(start, bouquetRef);
 
-	eString result = read_file(TEMPLATE_DIR + "mepg.tmp");
+	eString result = readFile(TEMPLATE_DIR + "mepg.tmp");
 	result.strReplace("#BODY#", mepg.getTimeScale() + mepg.getMultiEPG());
 	return result;
 }
@@ -2096,9 +2384,6 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 		return "sapi is not available.";
 
 	eServiceReference ref = (serviceRef == "undefined") ? sapi->service : string2ref(serviceRef);
-
-	if (serviceRef == "undefined")
-		serviceRef = sapi->service.toString();
 
 	eDebug("[ENIGMA_DYN] getcurepg2: opts = %s, serviceRef = %s", opts.c_str(), serviceRef.c_str());
 
@@ -2124,16 +2409,14 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
 				{
 					tm* t = localtime(&event.start_time);
-					result << "<div class=\"epg\">";
 #ifndef DISABLE_FILE
-					result << "<a href=\"javascript:record('ref="
-						<< ref2string(ref)
-						<< "&ID="
-						<< std::hex << event.event_id << std::dec
-						<< "&start="
-						<< event.start_time
-						<< "&duration="
-						<< event.duration
+					result << "<a href=\"javascript:record('"
+						<< "ref=" << ref2string(ref)
+						<< "&ID=" << std::hex << event.event_id << std::dec
+						<< "&start=" << event.start_time
+						<< "&duration=" << event.duration
+						<< "&descr=" << ((ShortEventDescriptor*)descriptor)->event_name
+						<< "&channel=" << filter_string(current->service_name)
 						<< "')\"><img src=\"kalarm.png\" border=0></a>"
 						<< "&nbsp;&nbsp;";
 #endif
@@ -2141,23 +2424,24 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 						<< std::setw(2) << t->tm_mon+1 << ". - "
 						<< std::setw(2) << t->tm_hour << ':'
 						<< std::setw(2) << t->tm_min << ' '
-						<< "<a href=\'javascript:EPGDetails(\"ref=" << serviceRef
+						<< "<a href=\"javascript:EPGDetails('"
+						<< "ref=" << ref2string(ref)
 						<< "&ID=" << std::hex << event.event_id << std::dec
-						<< "\")\'>"
+						<< "')\">"
 						<< ((ShortEventDescriptor*)descriptor)->event_name
-						<< "</a></div></u><br>\n";
+						<< "</a><br>\n";
 				}
 			}
 		}
 	}
 
-	eString tmp2 = read_file(TEMPLATE_DIR + "epg.tmp");
+	eString tmp2 = readFile(TEMPLATE_DIR + "epg.tmp");
 	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
 	tmp2.strReplace("#BODY#", result.str());
 	return tmp2;
 }
 
-static eString getsi(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getstreaminfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
 	eString name,
@@ -2172,37 +2456,37 @@ static eString getsi(eString request, eString dirpath, eString opts, eHTTPConnec
 		sid,
 		pmt;
 
-	std::map<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt = getRequestOptions(opts);
 	eString requester = opt["requester"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return "not available";
 
 	eServiceDVB *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if (service)
 	{
-		name=filter_string(service->service_name);
-		provider=filter_string(service->service_provider);
+		name = filter_string(service->service_name);
+		provider = filter_string(service->service_provider);
 	}
-	vpid=eString().sprintf("%04xh (%dd)", Decoder::current.vpid, Decoder::current.vpid);
-	apid=eString().sprintf("%04xh (%dd)", Decoder::current.apid, Decoder::current.apid);
-	pcrpid=eString().sprintf("%04xh (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid);
-	tpid=eString().sprintf("%04xh (%dd)", Decoder::current.tpid, Decoder::current.tpid);
-	tsid=eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
-	onid=eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
-	sid=eString().sprintf("%04xh", sapi->service.getServiceID().get());
-	pmt=eString().sprintf("%04xh", Decoder::current.pmtpid);
+	vpid = eString().sprintf("%04xh (%dd)", Decoder::current.vpid, Decoder::current.vpid);
+	apid = eString().sprintf("%04xh (%dd)", Decoder::current.apid, Decoder::current.apid);
+	pcrpid = eString().sprintf("%04xh (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid);
+	tpid = eString().sprintf("%04xh (%dd)", Decoder::current.tpid, Decoder::current.tpid);
+	tsid = eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
+	onid = eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
+	sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
+	pmt = eString().sprintf("%04xh", Decoder::current.pmtpid);
 
-	FILE *bitstream=0;
+	FILE *bitstream = 0;
 
-	if (Decoder::current.vpid!=-1)
-		bitstream=fopen("/proc/bus/bitstream", "rt");
+	if (Decoder::current.vpid != -1)
+		bitstream = fopen("/proc/bus/bitstream", "rt");
 	if (bitstream)
 	{
 		char buffer[100];
-		int xres=0, yres=0, aspect=0;
+		int xres = 0, yres = 0, aspect = 0;
 		while (fgets(buffer, 100, bitstream))
 		{
 			if (!strncmp(buffer, "H_SIZE:  ", 9))
@@ -2216,14 +2500,14 @@ static eString getsi(eString request, eString dirpath, eString opts, eHTTPConnec
 		vidform.sprintf("%dx%d ", xres, yres);
 		switch (aspect)
 		{
-		case 1:
-			vidform += "(square)"; break;
-		case 2:
-			vidform += "(4:3)"; break;
-		case 3:
-			vidform += "(16:9)"; break;
-		case 4:
-			vidform += "(20:9)"; break;
+			case 1:
+				vidform += "(square)"; break;
+			case 2:
+				vidform += "(4:3)"; break;
+			case 3:
+				vidform += "(16:9)"; break;
+			case 4:
+				vidform += "(20:9)"; break;
 		}
 	}
 
@@ -2251,17 +2535,17 @@ static eString getsi(eString request, eString dirpath, eString opts, eHTTPConnec
 		result << "<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>"
 			"<!-- " << sapi->service.toString() << "-->\n"
 			"<table cellspacing=0 cellpadding=0 border=0>"
-			"<tr><td>name:</td><td>"+name+"</td></tr>"
-			"<tr><td>provider:</td><td>"+provider+"</td></tr>"
-			"<tr><td>vpid:</td><td>"+vpid+"</td></tr>"
-			"<tr><td>apid:</td><td>"+apid+"</td></tr>"
-			"<tr><td>pcrpid:</td><td>"+pcrpid+"</td></tr>"
-			"<tr><td>tpid:</td><td>"+tpid+"</td></tr>"
-			"<tr><td>tsid:</td><td>"+tsid+"</td></tr>"
-			"<tr><td>onid:</td><td>"+onid+"</td></tr>"
-			"<tr><td>sid:</td><td>"+sid+"</td></tr>"
-			"<tr><td>pmt:</td><td>"+pmt+"</td></tr>"
-			"<tr><td>vidformat:<td>"+vidform+"</td></tr>"
+			"<tr><td>name:</td><td>" + name + "</td></tr>"
+			"<tr><td>provider:</td><td>" + provider + "</td></tr>"
+			"<tr><td>vpid:</td><td>" + vpid + "</td></tr>"
+			"<tr><td>apid:</td><td>" + apid + "</td></tr>"
+			"<tr><td>pcrpid:</td><td>" + pcrpid + "</td></tr>"
+			"<tr><td>tpid:</td><td>" + tpid + "</td></tr>"
+			"<tr><td>tsid:</td><td>" + tsid + "</td></tr>"
+			"<tr><td>onid:</td><td>" + onid + "</td></tr>"
+			"<tr><td>sid:</td><td>" + sid + "</td></tr>"
+			"<tr><td>pmt:</td><td>" + pmt + "</td></tr>"
+			"<tr><td>vidformat:<td>" + vidform + "</td></tr>"
 			"</table>"
 			"</body></html>";
 	}
@@ -2271,7 +2555,7 @@ static eString getsi(eString request, eString dirpath, eString opts, eHTTPConnec
 
 static eString message(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::map<eString,eString> opts=getRequestOptions(opt);
+	std::map<eString, eString> opts = getRequestOptions(opt);
 	eString msg = opts["msg"];
 	eString result = "-error";
 	if (msg == "")
@@ -2288,9 +2572,11 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 		return "<script language=\"javascript\">window.close();</script>";
 }
 
-static eString start_plugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::map<eString,eString> opts=getRequestOptions(opt);
+	std::map<eString, eString> opts = getRequestOptions(opt);
+	eString requester = opts["requester"];
+	eString result;
 
 /*	if (opts.find("path") == opts.end())
 		return "E: no path set";*/
@@ -2303,29 +2589,42 @@ static eString start_plugin(eString request, eString dirpath, eString opt, eHTTP
 	if (opts.find("path") != opts.end())
 	{
 		path = opts["path"];
-		if (path.length())
-		{
-			if (path[path.length()-1] != '/')
-				path+='/';
-		}
+		if (path.length() && (path[path.length()-1] != '/'))
+			path += '/';
 	}
-	return plugins.execPluginByName((path+opts["name"]).c_str());
+	if (ePluginThread::getInstance())
+		ePluginThread::getInstance()->kill(true);
+		
+	result = plugins.execPluginByName((path + opts["name"]).c_str());
+	if (requester == "webif")
+		result = "<script language=\"javascript\">window.close();</script>";
+		
+	return result;
 }
 
-static eString stop_plugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
+	std::map<eString, eString> opts = getRequestOptions(opt);
+	eString requester = opts["requester"];
+	eString result;
+	
 	if (ePluginThread::getInstance())
 	{
 		ePluginThread::getInstance()->kill(true);
-		return "+ok, plugin is stopped";
+		result = "+ok, plugin is stopped";
 	}
 	else
-		return "E: no plugin is running";
+		result = "E: no plugin is running";
+		
+	if (requester == "webif")
+		result = "<script language=\"javascript\">window.close();</script>";
+		
+	return result;
 }
 
 static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::map<eString,eString> opts=getRequestOptions(opt);
+	std::map<eString, eString> opts = getRequestOptions(opt);
 
 	if (opts.find("timeout") == opts.end())
 		return "E: no timeout set";
@@ -2336,11 +2635,11 @@ static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConn
 	if (opts.find("body") == opts.end())
 		return "E: no body set";
 
-	int type=-1;
+	int type = -1;
 	if (opts.find("type") != opts.end())
 		type=atoi(opts["type"].c_str());
 
-	int timeout=atoi(opts["timeout"].c_str());
+	int timeout = atoi(opts["timeout"].c_str());
 
 	eZapMain::getInstance()->postMessage(eZapMessage(1, opts["caption"], opts["body"], timeout), type != -1);
 
@@ -2372,7 +2671,7 @@ static eString load_recordings(eString request, eString dirpath, eString opt, eH
 static eString save_recordings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eZapMain::getInstance()->saveRecordings();
-	return "+ok";
+	return "+ok";       
 }
 #endif
 
@@ -2424,29 +2723,29 @@ public:
 	eNavigatorListDirectory(eString &result, eString path, eServiceInterface &iface): result(result), path(path), iface(iface)
 	{
 		eDebug("path: %s", path.c_str());
-		num=0;
+		num = 0;
 	}
 	void addEntry(const eServiceReference &e)
 	{
-		result+="<tr><td bgcolor=\"#";
+		result += "<tr><td bgcolor=\"#";
 		if (num & 1)
 			result += "c0c0c0";
 		else
 			result += "d0d0d0";
 		result+="\"><font color=\"#000000\">";
 		if (!(e.flags & eServiceReference::isDirectory))
-			result+="[PLAY] ";
+			result += "[PLAY] ";
 
-		result+=eString("<a href=\"" NAVIGATOR_PATH) + "?path=" + path + ref2string(e) +"\">" ;
+		result += eString("<a href=\"" NAVIGATOR_PATH) + "?path=" + path + ref2string(e) +"\">" ;
 
-		eService *service=iface.addRef(e);
+		eService *service = iface.addRef(e);
 		if (!service)
-			result+="N/A";
+			result += "N/A";
 		else
-			result+=service->service_name;
+			result += service->service_name;
 		iface.removeRef(e);
 
-		result+="</a></font></td></tr>\n";
+		result += "</a></font></td></tr>\n";
 		eDebug("+ok");
 		num++;
 	}
@@ -2454,7 +2753,7 @@ public:
 
 static eString navigator(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::map<eString,eString> opts=getRequestOptions(opt);
+	std::map<eString, eString> opts = getRequestOptions(opt);
 
 	if (opts.find("path") == opts.end())
 	{
@@ -2464,9 +2763,9 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 		return "redirecting..";
 	}
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString spath=opts["path"];
+	eString spath = opts["path"];
 
-	eServiceInterface *iface=eServiceInterface::getInstance();
+	eServiceInterface *iface = eServiceInterface::getInstance();
 	if (!iface)
 		return "n/a\n";
 
@@ -2475,12 +2774,12 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 	unsigned int pos;
 	if ((pos=spath.rfind(';')) != eString::npos)
 	{
-		current=spath.mid(pos+1);
-		spath=spath.left(pos);
+		current = spath.mid(pos + 1);
+		spath = spath.left(pos);
 	} else
 	{
-		current=spath;
-		spath="";
+		current = spath;
+		spath = "";
 	}
 
 	eDebug("current service: %s", current.c_str());
@@ -2494,24 +2793,25 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 		"<body bgcolor=\"#f0f0f0\">\n"
 		"<font color=\"#000000\">\n";
 
-	res+=eString("Current: ") + current + "<br>\n";
-	res+="<hr>\n";
-	res+=eString("path: ") + spath + "<br>\n";
+	res += eString("Current: ") + current + "<br>\n";
+	res += "<hr>\n";
+	res += eString("path: ") + spath + "<br>\n";
 
-	if (! (current_service.flags&eServiceReference::isDirectory))	// is playable
+	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 	{
 		eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
 //		iface->play(current_service);
-		res+="+ok, hear the music..";
-	} else
+		res += "+ok, hear the music..";
+	} 
+	else
 	{
 		eNavigatorListDirectory navlist(res, spath + ";" + current + ";", *iface);
 		Signal1<void,const eServiceReference&> signal;
 		signal.connect(slot(navlist, &eNavigatorListDirectory::addEntry));
 
-		res+="<table width=\"100%\">\n";
+		res += "<table width=\"100%\">\n";
 		iface->enterDirectory(current_service, signal);
-		res+="</table>\n";
+		res += "</table>\n";
 		eDebug("entered");
 		iface->leaveDirectory(current_service);
 		eDebug("exited");
@@ -2540,17 +2840,17 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	eDebug("[ENIGMA_DYN] web_root: mode = %s, spath = %s", mode.c_str(), spath.c_str());
 
 	if (!spath)
-		spath=eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
+		spath = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
 		//ref2string(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0));
 
 	if (!mode)
 		mode = "zap";
 
-	result = read_file(TEMPLATE_DIR+"index.tmp");
-	result.strReplace("#COP#", getContent(mode, spath));
+	result = readFile(TEMPLATE_DIR + "index.tmp");
+	result.strReplace("#CONTENT#", getContent(mode, spath));
 	result.strReplace("#HEADER#", getEITC2());
 	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
-	result.strReplace("#NAVI#", getNavi(mode, spath));
+	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
 
 	return result;
 }
@@ -2562,37 +2862,37 @@ static eString listDirectory(eString request, eString dirpath, eString opt, eHTT
 	answer.sprintf(
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		"<directory path=\"%s\" dircount=\"\" filecount=\"\" linkcount=\"\">\n",
-		opt.length()?opt.c_str():"?");
-	DIR *d=0;
+		opt.length() ? opt.c_str() : "?");
+	DIR *d = 0;
 	if (opt.length())
 	{
-		if (opt[opt.length()-1] != '/')
-			opt+='/';
+		if (opt[opt.length() - 1] != '/')
+			opt += '/';
 		d = opendir(opt.c_str());
 	}
 	if (d)
 	{
 		char buffer[255];
 		int dircount, filecount, linkcount;
-		dircount=filecount=linkcount=0;
-		while (struct dirent *e=readdir(d))
+		dircount = filecount = linkcount = 0;
+		while (struct dirent *e = readdir(d))
 		{
-			eString filename=opt;
-			filename+=e->d_name;
+			eString filename = opt;
+			filename += e->d_name;
 
 			struct stat s;
-			if (lstat(filename.c_str(), &s)<0)
+			if (lstat(filename.c_str(), &s) < 0)
 				continue;
 			if (S_ISLNK(s.st_mode))
 			{
 				int count = readlink(filename.c_str(), buffer, 255);
-				eString dest(buffer,count);
-				answer+=eString().sprintf("\t<object type=\"link\" name=\"%s\" dest=\"%s\"/>\n",e->d_name, dest.c_str());
+				eString dest(buffer, count);
+				answer += eString().sprintf("\t<object type=\"link\" name=\"%s\" dest=\"%s\"/>\n", e->d_name, dest.c_str());
 				++linkcount;
 			}
 			else if (S_ISDIR(s.st_mode))
 			{
-				answer+=eString().sprintf("\t<object type=\"directory\" name=\"%s\"/>\n",e->d_name);
+				answer += eString().sprintf("\t<object type=\"directory\" name=\"%s\"/>\n", e->d_name);
 				++dircount;
 			}
 			else if (S_ISREG(s.st_mode))
@@ -2604,17 +2904,17 @@ static eString listDirectory(eString request, eString dirpath, eString opt, eHTT
 			}
 		}
 		unsigned int pos = answer.find("dircount=\"");
-		answer.insert(pos+10, eString().sprintf("%d", dircount));
+		answer.insert(pos + 10, eString().sprintf("%d", dircount));
 		pos = answer.find("filecount=\"");
-		answer.insert(pos+11, eString().sprintf("%d", filecount));
+		answer.insert(pos + 11, eString().sprintf("%d", filecount));
 		pos = answer.find("linkcount=\"");
-		answer.insert(pos+11, eString().sprintf("%d", linkcount));
+		answer.insert(pos + 11, eString().sprintf("%d", linkcount));
 		closedir(d);
-		answer+="</directory>\n";
+		answer += "</directory>\n";
 		return answer;
 	}
 	else
-		return eString().sprintf("E: couldn't read directory %s", opt.length()?opt.c_str():"?");
+		return eString().sprintf("E: couldn't read directory %s", opt.length() ? opt.c_str() : "?");
 }
 
 static eString makeDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -2684,7 +2984,7 @@ static eString createSymlink(eString request, eString dirpath, eString opt, eHTT
 
 static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	if (opt!="getpids")
+	if (opt != "getpids")
 		return eString("+ok");
 	else
 		return eString().sprintf("%u\n%u\n", Decoder::current.vpid, Decoder::current.apid);
@@ -2756,7 +3056,7 @@ struct appendonidsidnamestr
 	void operator()(eServiceDVB& s)
 	{
 		str += filter_string(eString().sprintf("%d %s\n",
-			(s.original_network_id.get()<<8)|s.service_id.get(),
+			(s.original_network_id.get() << 8) | s.service_id.get(),
 			s.service_name.c_str()));
 	}
 };
@@ -2793,47 +3093,20 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
-	eService *current = NULL;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString serviceRef = opt["ref"];
 	eString eventID = opt["ID"];
-	int eventid;
 	eString eventStartTime = opt["start"];
 	eString eventDuration = opt["duration"];
-	eString description = _("No description available");
+	eString description = httpUnescape(opt["descr"]);
+	if (description == "")
+		description = _("No description available");
 
+	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
 	eDebug("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
-
-	// search for the event... to get the description...
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (sapi)
-	{
-		eServiceReference ref(string2ref(serviceRef));
-		current = eDVB::getInstance()->settings->getTransponders()->searchService((eServiceReferenceDVB&)ref);
-		if (current)
-		{
-			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid);
-			if (event)
-			{
-				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
-				{
-					if (d->Tag() == DESCR_SHORT_EVENT)
-					{
-						// ok, we probably found the event...
-						description = ((ShortEventDescriptor*)*d)->event_name;
-						eDebug("[ENIGMA_DYN] addTimerEvent: found description = %s", description.c_str());
-						break;
-					}
-				}
-				delete event;
-			}
-		}
-	}
-
-	description = filter_string(current->service_name) + "/" + description;
 
 	int timeroffset = 0;
 	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
@@ -2850,7 +3123,134 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
 	else
 		result += _("Timer event was created successfully.");
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	return result;
+}
 
+static eString deleteTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString,eString> opt = getRequestOptions(opts);
+	eString serviceRef = opt["ref"];
+	eString eventID = opt["ID"];
+	eString eventStartTime = opt["start"];
+	eString eventDuration = opt["duration"];
+
+	int eventid;
+	sscanf(eventID.c_str(), "%x", &eventid);
+	eDebug("[ENIGMA_DYN] deleteTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+
+	EITEvent evt;
+	evt.start_time = atoi(eventStartTime.c_str());
+	evt.duration = atoi(eventDuration.c_str());
+	evt.event_id = eventid;
+	eServiceReference ref(string2ref(serviceRef));
+	eTimerManager::getInstance()->deleteEventFromTimerList(&ref, &evt);
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	return "<script language=\"javascript\">window.close();</script>";
+}
+
+static eString genOptions(int start, int end, int delta, int selected)
+{
+	std::stringstream result;
+	for (int i = start; i <= end; i += delta)
+	{
+		if (i == selected)
+			result << "<option selected>";
+		else
+			result << "<option>";
+		result << std::setfill('0') << std::setw(2);
+		result << i;
+		result << "</option>";
+	}
+	return result.str();
+}
+
+static eString changeTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString serviceRef = opt["ref"];
+	eString eventID = opt["ID"];
+	eString sday = opt["sday"];
+	eString smonth = opt["smonth"];
+	eString shour = opt["shour"];
+	eString smin = opt["smin"];
+	eString eday = opt["eday"];
+	eString emonth = opt["emonth"];
+	eString ehour = opt["ehour"];
+	eString emin = opt["emin"];
+	eString description = httpUnescape(opt["descr"]);
+	eString channel = httpUnescape(opt["channel"]);
+	
+	tm start;
+	start.tm_mday = atoi(sday.c_str());
+	start.tm_mon = atoi(smonth.c_str()) - 1;
+	start.tm_hour = atoi(shour.c_str());
+	start.tm_min = atoi(smin.c_str());
+	tm end;
+	end.tm_mday = atoi(eday.c_str());
+	end.tm_mon = atoi(emonth.c_str()) - 1;
+	end.tm_hour = atoi(ehour.c_str());
+	end.tm_min = atoi(emin.c_str());
+	
+	time_t eventStartTime = mktime(&start);
+	time_t eventEndTime = mktime(&end);
+	int duration = eventEndTime - eventStartTime;
+	
+	int eventid;
+	sscanf(eventID.c_str(), "%x", &eventid);
+	
+	EITEvent evt;
+	evt.start_time = eventStartTime;
+	evt.duration = duration;
+	evt.event_id = eventid;
+	eServiceReference ref(string2ref(serviceRef));
+	eTimerManager::getInstance()->modifyEventInTimerList(&ref, &evt, channel + "/" + description);
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	return "<script language=\"javascript\">window.close();</script>";
+}
+
+static eString editTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString serviceRef = opt["ref"];
+	eString eventID = opt["ID"];
+	eString eventStartTime = opt["start"];
+	eString eventDuration = opt["duration"];
+	eString description = httpUnescape(opt["descr"]);
+	eString channel = opt["channel"];
+	
+	time_t eventStart = atoi(eventStartTime.c_str());
+	time_t eventEnd = eventStart + atoi(eventDuration.c_str());
+	tm start = *localtime(&eventStart);
+	tm end = *localtime(&eventEnd);
+
+	eDebug("[ENIGMA_DYN] editTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+
+	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
+	
+	result.strReplace("#EVENTID#", eventID);
+	result.strReplace("#SERVICEREF#", serviceRef);
+	
+	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
+	result.strReplace("#SMONTHOPTS#", genOptions(1, 12, 1, start.tm_mon + 1));
+	result.strReplace("#SHOUROPTS#", genOptions(0, 23, 1, start.tm_hour));
+	result.strReplace("#SMINOPTS#", genOptions(0, 55, 5, (start.tm_min / 5) * 5));
+	
+	result.strReplace("#EDAYOPTS#", genOptions(1, 31, 1, end.tm_mday));
+	result.strReplace("#EMONTHOPTS#", genOptions(1, 12, 1, end.tm_mon + 1));
+	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
+	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
+	
+	result.strReplace("#CHANNEL#", channel);
+	result.strReplace("#DESCRIPTION#", description);
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return result;
 }
 
@@ -2861,7 +3261,7 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	eString ext_description;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString serviceRef = opt["ref"];
 	eString eventID = opt["ID"];
 	int eventid;
@@ -2885,13 +3285,11 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 				{
 					if (d->Tag() == DESCR_SHORT_EVENT)
 					{
-						// ok, we probably found the short description...
 						description = ((ShortEventDescriptor*)*d)->event_name;
 						eDebug("[ENIGMA_DYN] getEPGDetails: found description = %s", description.c_str());
 					}
 					if (d->Tag() == DESCR_EXTENDED_EVENT)
 					{
-						// ok, we probably found the detailed description...
 						ext_description += ((ExtendedEventDescriptor*)*d)->item_description;
 						eDebug("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
 					}
@@ -2937,15 +3335,21 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/setVideo", setVideo);
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, true);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, true);
+	dyn_resolver->addDyn("GET", "/deleteTimerEvent", deleteTimerEvent, true);
+	dyn_resolver->addDyn("GET", "/editTimerEvent", editTimerEvent, true);
+	dyn_resolver->addDyn("GET", "/changeTimerEvent", changeTimerEvent, true);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, true);
 	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList, true);
 	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails);
+	dyn_resolver->addDyn("GET", "/msgWindow", msgWindow);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigHDD", setConfigHDD);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getEIT", getEIT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);
@@ -2957,7 +3361,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG);
-	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
+	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getstreaminfo);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings);
 #ifndef DISABLE_FILE
@@ -2971,8 +3375,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveUserBouquets", save_userBouquets);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadTimerList", load_timerList);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList);
-	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", start_plugin);
-	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stop_plugin);
+	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", startPlugin);
+	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stopPlugin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot);
 	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", osdshot); // for backward compatibility
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef);
