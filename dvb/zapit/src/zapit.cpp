@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.299 2003/03/03 04:03:49 obi Exp $
+ * $Id: zapit.cpp,v 1.300 2003/03/04 02:59:19 mws Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1422,7 +1422,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.299 2003/03/03 04:03:49 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.300 2003/03/04 02:59:19 mws Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1447,7 +1447,7 @@ int main(int argc, char **argv)
 	}
 
 	scan_runs = 0;
-	found_transponders = 0;
+//	found_transponders = 0;
 	found_channels = 0;
 	curr_sat = -1;
 
