@@ -3,12 +3,47 @@ EPGMenu.eventinfo Details current program
 EPGMenu.eventlist Eventlist current programm
 EPGMenu.head EPG - Program Information
 EPGMenu.streaminfo technical information
+EPGPlus.actions Actions
+EPGPlus.bybouquet_mode by bouquet
+EPGPlus.bypage_mode by page
+EPGPlus.change_font_size Change font size
+EPGPlus.change_font_style Change font style
+EPGPlus.change_size Change size
+EPGPlus.channelentry_font Channels
+EPGPlus.channelentry_separationlineheight height of line between entries
+EPGPlus.channelentry_width width of channel names
+EPGPlus.channelevententry_font Program
+EPGPlus.edit_fonts Edit fonts
+EPGPlus.edit_sizes Edit sizes
+EPGPlus.font_style_bold bold
+EPGPlus.font_style_italic italic
+EPGPlus.font_style_regular regular
+EPGPlus.footer_fontbouquetchannelname Selected bouquet-/channel name
+EPGPlus.footer_fontbuttons Buttons
+EPGPlus.footer_fonteventdescription Title 1 selected Prog.
+EPGPlus.footer_fonteventshortdescription Title 2 selected Prog.
 EPGPlus.head Eventlist Overview (EPG Plus)
+EPGPlus.header_font Header
+EPGPlus.horgap1_height height hor. gap 1
+EPGPlus.horgap2_height height hor. gap 2
+EPGPlus.next_bouquet Next bouquet
+EPGPlus.options Options
+EPGPlus.page_down Page down
+EPGPlus.page_up Page up
+EPGPlus.prev_bouquet Previous bouquet
 EPGPlus.record Record
 EPGPlus.refresh_epg Refresh
 EPGPlus.remind Schedule
-EPGPlus.scroll_mode Scroll Mode
-EPGPlus.stretch_mode Stretch Mode
+EPGPlus.reset_settings Reset settings
+EPGPlus.save_settings Save settings
+EPGPlus.scroll_mode Scroll mode
+EPGPlus.select_font_name Font selection
+EPGPlus.settings Settings
+EPGPlus.slider_width slider width
+EPGPlus.stretch_mode Stretch mode
+EPGPlus.vergap1_width width ver. gap 1
+EPGPlus.vergap2_width width ver. gap 2
+EPGPlus.view_mode Mode
 GENRE.ARTS.0 arts / culture
 GENRE.ARTS.1 performing arts
 GENRE.ARTS.10 arts/culture magazines
@@ -530,10 +565,10 @@ nfs.ip Server IP
 nfs.localdir local dir
 nfs.mount Mount Network volume
 nfs.mount_options mount options
-nfs.mountok mount successful
 nfs.mounterror mount error
 nfs.mounterror_notsup filesystem type not supported
 nfs.mountnow mount now
+nfs.mountok mount successful
 nfs.mounttimeout mount error: timeout
 nfs.password password
 nfs.remount remount directories
@@ -658,7 +693,6 @@ satsetup.nodiseqc no DiSEqC
 satsetup.satellite Satellite
 satsetup.savesettingsnow save settings now
 satsetup.smatvremote SMATV Remote Tuning
-scantp.abort_scan Abort Scan
 scantp.fec FEC
 scantp.fec_1_2 1/2
 scantp.fec_2_3 2/3
@@ -672,6 +706,8 @@ scantp.pol_v V
 scantp.rate Symbol rate
 scantp.scan Manual Scan
 scantp.scanmode Fast Scan
+scants.abort_body Should the search really be aborted?
+scants.abort_header Abortion of canal scan
 scants.actcable Cable:
 scants.actsatellite Satellite:
 scants.bouquet Bouquet

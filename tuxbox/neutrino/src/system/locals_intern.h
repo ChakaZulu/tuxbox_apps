@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.39 2005/01/26 20:03:25 zwen Exp $
+ * $Id: locals_intern.h,v 1.40 2005/02/06 15:36:39 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -595,10 +595,10 @@ const char * locale_real_names[] =
 	"nfs.localdir",
 	"nfs.mount",
 	"nfs.mount_options",
-	"nfs.mountok",
 	"nfs.mounterror",
 	"nfs.mounterror_notsup",
 	"nfs.mountnow",
+	"nfs.mountok",
 	"nfs.mounttimeout",
 	"nfs.password",
 	"nfs.remount",
@@ -723,7 +723,6 @@ const char * locale_real_names[] =
 	"satsetup.satellite",
 	"satsetup.savesettingsnow",
 	"satsetup.smatvremote",
-	"scantp.abort_scan",
 	"scantp.fec",
 	"scantp.fec_1_2",
 	"scantp.fec_2_3",
@@ -737,6 +736,8 @@ const char * locale_real_names[] =
 	"scantp.rate",
 	"scantp.scan",
 	"scantp.scanmode",
+	"scants.abort_body",
+	"scants.abort_header",
 	"scants.actcable",
 	"scants.actsatellite",
 	"scants.bouquet",

@@ -696,7 +696,6 @@ satsetup.nodiseqc Kein DiSEqC
 satsetup.satellite Satellit
 satsetup.savesettingsnow Einstellungen jetzt speichern
 satsetup.smatvremote SMATV Remote Tuning
-scantp.abort_scan Breche Scan ab
 scantp.fec FEC
 scantp.fec_1_2 1/2
 scantp.fec_2_3 2/3
@@ -710,6 +709,8 @@ scantp.pol_v V
 scantp.rate Symbol rate
 scantp.scan Manual Scan
 scantp.scanmode Schnell Scan
+scants.abort_body Soll die Suche wirklich abgebrochen werden?
+scants.abort_header Abbruch der Kanalsuche
 scants.actcable Kabel:
 scants.actsatellite Satellit:
 scants.bouquet Bouquets

@@ -161,7 +161,7 @@ if(get_set.TP_scan)
 		while (!(msg == CRCInput::RC_timeout));
 	}
 
-	ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, success ? g_Locale->getText(LOCALE_SCANTS_FINISHED) : g_Locale->getText(LOCALE_SCANTS_FAILED), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+	ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(success ? LOCALE_SCANTS_FINISHED : LOCALE_SCANTS_FAILED), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 
 	hide();
 	
@@ -243,14 +243,10 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 		case CRCInput::RC_home:
 			if(get_set.TP_scan)
 				break;
-			result = ShowMsgUTF ( LOCALE_SCANTP_ABORT_SCAN, "Are you sure ? You can lost your settings.", CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo );//FIXME loclalize
-			if(result == CMessageBox::mbrYes)
+
+			if (ShowMsgUTF(LOCALE_SCANTS_ABORT_HEADER, g_Locale->getText(LOCALE_SCANTS_ABORT_BODY), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo) == CMessageBox::mbrYes)
 			{
-				//success = false;
-				//istheend = true;
-				//msg = CRCInput::RC_timeout;
 				g_Zapit->stopScan();
-				g_Zapit->reinitChannels();
 			}
 			break;
 		default:
