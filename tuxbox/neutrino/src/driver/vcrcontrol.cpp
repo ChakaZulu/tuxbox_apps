@@ -468,8 +468,6 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	time_t t = time(NULL);
 	strftime(&(filename[pos]), sizeof(filename) - pos - 1, "%Y%m%d_%H%M%S", localtime(&t));
 
-printf("start recording on file %s\n", filename);
-
 	if (!(::start_recording(filename, ((unsigned long long)SplitSize) * 1073741824ULL, numpids, pids)))
 	{
 		RestoreNeutrino();
