@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.64 2002/01/23 13:37:08 McClean Exp $
+// $Id: infoviewer.cpp,v 1.65 2002/01/28 19:52:32 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.65  2002/01/28 19:52:32  field
+// Streaminfo ausfuehrlicher
+//
 // Revision 1.64  2002/01/23 13:37:08  McClean
 // final infobar-fix
 //
@@ -253,7 +256,7 @@ CInfoViewer::CInfoViewer()
                 perror("CInfoViewer::CInfoViewer create thrViewer failed\n");
         }
 
-        pthread_cond_init( &lang_cond, NULL );
+        pthread_cond_init( &cond_PIDs_available, NULL );
 
         if (pthread_create (&thrLangViewer, NULL, LangViewerThread, (void *) this) != 0 )
         {
@@ -368,7 +371,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
                 showButtonNVOD(true);
 
-                g_RemoteControl->CopyAPIDs();
+                g_RemoteControl->CopyPIDs();
                 showButtonAudio();
         }
 
@@ -570,7 +573,8 @@ void CInfoViewer::showButtonAudio()
 
         if ( strcmp(g_RemoteControl->audio_chans.name, to_compare.c_str() )== 0 )
         {
-                if ( ( g_RemoteControl->GetECMPID()== 0 ) || ( g_RemoteControl->audio_chans.count_apids== 0 ) )
+                if ( ( g_RemoteControl->ecmpid == invalid_ecmpid_found ) ||
+                     ( ( g_RemoteControl->audio_chans.count_apids == 0 ) && ( g_RemoteControl->vpid == 0 ) ) )
                 {
                         int height = g_Fonts->infobar_info->getHeight();
                         int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
@@ -581,7 +585,7 @@ void CInfoViewer::showButtonAudio()
 
 
                         string  disp_text;
-                        if ( ( g_RemoteControl->GetECMPID()== 0 ) && ( g_RemoteControl->audio_chans.count_apids!= 0 ) )
+                        if ( ( g_RemoteControl->ecmpid == invalid_ecmpid_found ) )
 						{
                                 disp_text= g_Locale->getText("infoviewer.cantdecode");
 								#ifdef USEACTIONLOG
@@ -642,11 +646,11 @@ void * CInfoViewer::LangViewerThread (void *arg)
         while(1)
         {
                 pthread_mutex_lock( &InfoViewer->epg_mutex );
-                pthread_cond_wait( &InfoViewer->lang_cond, &InfoViewer->epg_mutex );
+                pthread_cond_wait( &InfoViewer->cond_PIDs_available, &InfoViewer->epg_mutex );
 
                 if ( ( InfoViewer->is_visible ) && ( InfoViewer->ShowInfo_Info ) )
                 {
-                        g_RemoteControl->CopyAPIDs();
+                        g_RemoteControl->CopyPIDs();
                         InfoViewer->showButtonAudio();
 
                         InfoViewer->showButtonNVOD();
@@ -715,7 +719,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                                         if (repCount> 3)
                                         {
                                                 repCount= 3;
-                                                printf("CInfoViewer::InfoViewerThread epg noch nicht komplett -> repCount decreased to %d\n", repCount);
+                                                //printf("CInfoViewer::InfoViewerThread epg noch nicht komplett -> repCount decreased to %d\n", repCount);
                                         }
                                         else
                                                 if (repCount== 1)

@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.136 2002/01/23 14:03:12 McClean Exp $
+        $Id: neutrino.cpp,v 1.137 2002/01/28 19:52:32 field Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.137  2002/01/28 19:52:32  field
+  Streaminfo ausfuehrlicher
+
   Revision 1.136  2002/01/23 14:03:12  McClean
   save controld-settings on neutrino-savenow
 
@@ -1660,7 +1663,7 @@ void CNeutrinoApp::SelectNVOD()
 
 void CNeutrinoApp::SelectAPID()
 {
-	g_RemoteControl->CopyAPIDs();
+	g_RemoteControl->CopyPIDs();
 
 	char to_compare[50];
 	snprintf( to_compare, 10, "%x", channelList->getActiveChannelOnid_sid() );
@@ -2378,7 +2381,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.136 2002/01/23 14:03:12 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.137 2002/01/28 19:52:32 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

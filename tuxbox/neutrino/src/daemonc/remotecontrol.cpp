@@ -1,38 +1,41 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.37 2002/01/15 22:08:13 McClean Exp $
+// $Id: remotecontrol.cpp,v 1.38 2002/01/28 19:52:32 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.38  2002/01/28 19:52:32  field
+// Streaminfo ausfuehrlicher
+//
 // Revision 1.37  2002/01/15 22:08:13  McClean
 // cleanups
 //
@@ -110,7 +113,12 @@ CRemoteControl::CRemoteControl()
 	memset(&remotemsg, 0, sizeof(remotemsg) );
 	memset(&audio_chans, 0, sizeof(audio_chans));
 	memset(&audio_chans_int, 0, sizeof(audio_chans_int));
-	ecm_pid=0;
+	i_ecmpid = 0;
+    i_vtxtpid = 0;
+    i_vpid = 0;
+    ecmpid = 0;
+    vtxtpid = 0;
+    vpid = 0;
 
 	pthread_cond_init( &send_cond, NULL );
 	pthread_mutex_init( &send_mutex, NULL );
@@ -361,9 +369,9 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 								        ( ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) && (return_buf[2] == 'd') ) ||
 								        (return_buf[2] == 'e') )
 								{
-									// noch immer der gleiche Kanal
+									// noch immer der gleiche Kanal - inzwischen nicht weitergezappt
 
-									if ( (return_buf[2] == 'd') && ( ZapStatus & 0x80 ) )
+									if ( (return_buf[2] == 'd') && ( ZapStatus & zapped_chan_is_nvod ) )
 									{
 										RemoteControl->getNVODs( r_msg.param3 );
 										// send_mutex ist danach wieder locked
@@ -385,7 +393,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 										if (return_buf[2] == 'e')
 											strcpy( RemoteControl->audio_chans_int.name, RemoteControl->subChannels_internal.name.c_str() );
 
-										// Nur dann die Audio-Channels abholen, wenn nicht NVOD-Basechannel
+										// Nur dann die Audio-Channels /PIDs abholen, wenn nicht NVOD-Basechannel
 
 										RemoteControl->audio_chans_int.count_apids = apid_return_buf.count_apids;
 										printf("got apids for: %s - %d apids!\n", RemoteControl->audio_chans_int.name, RemoteControl->audio_chans_int.count_apids);
@@ -396,11 +404,16 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 											strcpy(RemoteControl->audio_chans_int.apids[count].name, apid_return_buf.apids[count].desc);
 											RemoteControl->audio_chans_int.apids[count].ctag= apid_return_buf.apids[count].component_tag;
 											RemoteControl->audio_chans_int.apids[count].is_ac3= apid_return_buf.apids[count].is_ac3;
+											RemoteControl->audio_chans_int.apids[count].pid= apid_return_buf.apids[count].pid;
 										}
-										RemoteControl->ecm_pid= apid_return_buf.ecmpid;
+
+										// und auch noch die PIDs kopieren
+										RemoteControl->i_ecmpid= apid_return_buf.ecmpid;
+										RemoteControl->i_vpid= apid_return_buf.vpid;
+										RemoteControl->i_vtxtpid= apid_return_buf.vtxtpid;
 									}
 
-									pthread_cond_signal( &g_InfoViewer->lang_cond );
+									pthread_cond_signal( &g_InfoViewer->cond_PIDs_available );
 								}
 								if (!do_immediatly)
 									pthread_mutex_unlock( &RemoteControl->send_mutex );
@@ -445,7 +458,6 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 			}
 			if ( !do_immediatly )
 				usleep(100000);
-			//usleep(100);
 
 			close(sock_fd);
 
@@ -458,18 +470,17 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 	return NULL;
 }
 
-unsigned int CRemoteControl::GetECMPID()
-{
-	pthread_mutex_lock( &send_mutex );
-	int ep = ecm_pid;
-	pthread_mutex_unlock( &send_mutex );
-	return ep;
-}
 
-void CRemoteControl::CopyAPIDs()
+void CRemoteControl::CopyPIDs()
 {
 	pthread_mutex_lock( &send_mutex );
+
+	// Copy PIDs with Mutex locked...
 	memcpy(&audio_chans, &audio_chans_int, sizeof(audio_chans));
+	ecmpid = i_ecmpid;
+	vpid = i_vpid;
+	vtxtpid = i_vtxtpid;
+
 	pthread_mutex_unlock( &send_mutex );
 }
 

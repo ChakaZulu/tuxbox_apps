@@ -1,63 +1,66 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-$Id: streaminfo.cpp,v 1.13 2002/01/03 20:03:20 McClean Exp $
- 
+$Id: streaminfo.cpp,v 1.14 2002/01/28 19:52:32 field Exp $
+
 Module StreamInfo
- 
+
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.14  2002/01/28 19:52:32  field
+ Streaminfo ausfuehrlicher
+
  Revision 1.13  2002/01/03 20:03:20  McClean
  cleanup
 
  Revision 1.12  2001/11/26 02:34:04  McClean
  include (.../../stuff) changed - correct unix-formated files now
- 
+
  Revision 1.11  2001/11/15 11:42:41  McClean
  gpl-headers added
- 
+
  Revision 1.10  2001/10/22 15:24:48  McClean
  small designupdate
- 
+
  Revision 1.9  2001/10/09 21:48:37  McClean
  ucode-check
- 
+
  Revision 1.8  2001/09/23 21:34:07  rasc
  - LIFObuffer Module, pushbackKey fuer RCInput,
  - In einige Helper und widget-Module eingebracht
    ==> harmonischeres Menuehandling
  - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
- 
- 
+
+
 */
 
 
@@ -66,12 +69,13 @@ History:
 
 CStreamInfo::CStreamInfo()
 {
-	width = 300;
+	width = 350;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
-	height = hheight+6*mheight;
-	x=((720-width) >> 1) -20;
-	y=(400-height)>>1;
+	height = hheight+10*mheight+ 10;
+
+    x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 }
 
 
@@ -124,7 +128,7 @@ void CStreamInfo::paint()
 
 	int bitInfo[10];
 
-	char *key,*tmpptr,buf[100];
+	char *key,*tmpptr,buf[100], buf2[100];
 	int value, pos=0;
 	fgets(buf,29,fd);//dummy
 	while(!feof(fd))
@@ -211,5 +215,58 @@ void CStreamInfo::paint()
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
+	ypos+= mheight+ 10;
+
+	g_RemoteControl->CopyPIDs();
+
+	if ( g_RemoteControl->vpid == 0 )
+		sprintf((char*) buf, "%s: %s", "vpid", g_Locale->getText("streaminfo.not_available").c_str() );
+	else
+		sprintf((char*) buf, "%s: 0x%x", "vpid", g_RemoteControl->vpid );
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	ypos+= mheight;
+
+	if ( g_RemoteControl->audio_chans.count_apids == 0 )
+		sprintf((char*) buf, "%s: %s", "apid(s)", g_Locale->getText("streaminfo.not_available").c_str() );
+	else
+	{
+		sprintf((char*) buf, "%s: ", "apid(s)" );
+		for (int i= 0; i< g_RemoteControl->audio_chans.count_apids; i++)
+		{
+			sprintf((char*) buf2, " 0x%x",  g_RemoteControl->audio_chans.apids[i].pid );
+
+			if (i > 0)
+			strcat((char*) buf, ",");
+
+			strcat((char*) buf, buf2);
+		}
+	}
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	ypos+= mheight;
+
+	sprintf((char*) buf, "%s: ", "ecm_pid");
+	switch ( g_RemoteControl->ecmpid )
+	{
+		case no_ecmpid_found :
+			strcat((char*) buf, g_Locale->getText("streaminfo.not_crypted").c_str() );
+			break;
+		case invalid_ecmpid_found :
+			strcat((char*) buf, g_Locale->getText("streaminfo.ecm_invalid").c_str() );
+			break;
+		default:
+			if ( g_RemoteControl->ecmpid == 0 )
+				sprintf((char*) buf, "%s: %s", "ecm_pid", g_Locale->getText("streaminfo.not_available").c_str() );
+			else
+				sprintf((char*) buf, "%s: 0x%x", "ecm_pid", g_RemoteControl->ecmpid );
+	}
+
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	ypos+= mheight;
+
+	if ( g_RemoteControl->vtxtpid == 0 )
+        	sprintf((char*) buf, "%s: %s", "vtxt_pid", g_Locale->getText("streaminfo.not_available").c_str() );
+	else
+        	sprintf((char*) buf, "%s: 0x%x", "vtxt_pid", g_RemoteControl->vtxtpid );
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 }
