@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.50 2002/04/14 23:26:21 obi Exp $
+ * $Id: zapit.h,v 1.51 2002/04/17 09:30:49 obi Exp $
  */
 
 #ifndef __zapit_h__
@@ -28,11 +28,8 @@
 #define FRONT_DEV "/dev/ost/frontend0"
 #define VIDEO_DEV "/dev/ost/video0"
 
-typedef struct decode_struct
-{
-	uint32_t tsid_onid;
+typedef struct decode_struct {
 	bool new_tp;
-	pids *chanpids;
 } decode_vals;
 
 int prepare_channels();

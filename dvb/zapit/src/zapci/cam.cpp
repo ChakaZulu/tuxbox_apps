@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.6 2002/04/17 08:03:07 obi Exp $
+ * $Id: cam.cpp,v 1.7 2002/04/17 09:30:49 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -121,7 +121,7 @@ int CCam::sendMessage (uint8_t *data, uint16_t length)
 	return 0;
 }
 
-int CCam::setEcm (uint32_t tsidOnid, pids *decodePids)
+int CCam::setEcm (uint32_t tsidOnid, const pids *decodePids)
 {
 	uint8_t i;
 	uint8_t buffer[12 + (4 * (decodePids->count_vpids + decodePids->count_apids))];

@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.5 2002/04/15 15:31:01 field Exp $
+ * $Id: pmt.cpp,v 1.6 2002/04/17 09:30:49 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -182,7 +182,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 
 			default:
 				{
-					int i;
+					//int i;
 					//printf("stream type %#x descriptor tag: %#x\n", stream_type, descriptor_tag);
 					//printf("data: ");
 					//for (i = 0; i < descriptor_length + 2; i++) printf("%02x ", buffer[descr_pos + i]);

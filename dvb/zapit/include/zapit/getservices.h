@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.34 2002/04/14 06:06:31 obi Exp $
+ * $Id: getservices.h,v 1.35 2002/04/17 09:30:49 obi Exp $
  */
 
 #ifndef __getservices_h__
@@ -114,8 +114,9 @@ class CZapitChannel
 		dvb_pid_t getEmmPid()		{ return chanpids.emmpid; }
 		dvb_pid_t getPcrPid()		{ return chanpids.pcrpid; }
 		dvb_pid_t getPmtPid()		{ return chanpids.pmtpid; }
+		dvb_pid_t getTeletextPid()	{ return chanpids.vtxtpid; }
 		dvb_pid_t getVideoPid()		{ return chanpids.vpid; }
-		pids getPids()			{ return chanpids; }
+		const pids *getPids()		{ return &chanpids; }
 		bool knowsPids()		{ return knowsPidsFlag; }
 		uint16_t getChannelNumber()	{ return channelNumber; }
 
@@ -136,6 +137,7 @@ class CZapitChannel
 		void setEmmPid(dvb_pid_t pEmmPid)		{ chanpids.emmpid = pEmmPid; }
 		void setPcrPid(dvb_pid_t pPcrPid)		{ chanpids.pcrpid = pPcrPid; }
 		void setPmtPid(dvb_pid_t pPmtPid)		{ chanpids.pmtpid = pPmtPid; }
+		void setTeletextPid(dvb_pid_t pTeletextPid)	{ chanpids.vtxtpid = pTeletextPid; }
 		void setVideoPid(dvb_pid_t pVideoPid)		{ chanpids.vpid = pVideoPid; }
 		void setPids(pids pPids)			{ chanpids = pPids; knowsPidsFlag = true; }
 		void setChannelNumber(uint16_t pChannelNumber)	{ channelNumber = pChannelNumber; }
