@@ -624,9 +624,9 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 		{
 			int total = handler->getPosition(eServiceHandler::posQueryLength);
 			int current = handler->getPosition(eServiceHandler::posQueryCurrent);
-			int skipTime = current - (total / 10 * vid);
+			int skipTime = (total / 10 * vid) - current;
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, skipTime));
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, skipTime * 1000));
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
 		}
 	}
