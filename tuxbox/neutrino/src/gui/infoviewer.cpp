@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.62 2002/01/18 23:34:19 McClean Exp $
+// $Id: infoviewer.cpp,v 1.63 2002/01/23 12:45:10 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.63  2002/01/23 12:45:10  McClean
+// fix infobar?
+//
 // Revision 1.62  2002/01/18 23:34:19  McClean
 // repair infobar
 //
@@ -378,6 +381,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
 	if ( !CalledFromNumZap )
 	{
+		printf("in infobar-input\n");
 		key = g_RCInput->getKey( intShowDuration*5 );
 
 		if ( ( key != CRCInput::RC_timeout ) && ( ( key != CRCInput::RC_ok ) || ( CalledFromNumZap ) ) )
