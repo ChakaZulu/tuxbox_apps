@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.10 2002/04/14 23:26:21 obi Exp $
+ * $Id: pzapit.cpp,v 1.11 2002/04/18 18:09:08 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -22,13 +22,16 @@
  */
 
 #include <iostream>
+#include <string.h>
+
 #include "clientlib/zapitclient.h"
 
 int usage (std::string basename)
 {
 	std::cout << "bouquet list: " << basename << std::endl;
 	std::cout << "channel list: " << basename << " [-r] <bouquet-number>" << std::endl;
-	std::cout << "zap: " << basename << " [-r] <bouquet-number> <channel-number>" << std::endl;
+	std::cout << "zap by number: " << basename << " [-r] <bouquet-number> <channel-number>" << std::endl;
+	std::cout << "zap by name: " << basename << "[-r] <channel-name>" << std::endl;
 	std::cout << "-r enables radio mode" << std::endl;
 	std::cout << std::endl;
 	std::cout << "change audio pid: " << basename << " -a <audio-number>" << std::endl;
@@ -43,19 +46,22 @@ int usage (std::string basename)
 
 int main (int argc, char** argv)
 {
-	uint32_t i, j;
+	int i;
+	uint32_t j;
 
 	unsigned int bouquet = 0;
 	unsigned int channel = 0;
 	unsigned int count = 0;
 	int satmask = 0;
 	int audio = 0;
+	char* channelName = NULL;
 
 	bool radio = false;
 	bool reload = false;
 	bool show_satellites = false;
 	bool scan = false;
-	int diseqc[5];
+	bool zapByName = false;
+	uint32_t diseqc[5];
 
 	CZapitClient *zapit;
 	std::vector<CZapitClient::responseGetBouquets> bouquets;
@@ -79,6 +85,19 @@ int main (int argc, char** argv)
 		{
 			reload = true;
 			continue;
+		}
+		else if (!strncmp(argv[i], "-n", 2))
+		{
+			if (i < argc - 1)
+			{
+				zapByName = true;
+				channelName = argv[++i];
+				continue;
+			}
+			else
+			{
+				return usage(argv[0]);
+			}
 		}
 		else if (!strncmp(argv[i], "-r", 2))
 		{
@@ -188,6 +207,7 @@ int main (int argc, char** argv)
 
 		std::vector<CZapitClient::commandSetScanSatelliteList> newSatelliteList;
 		CZapitClient::commandSetScanSatelliteList item;
+
 		for (i = 1, j = 0; j < satelliteList.size(); i = (i << 1), j++)
 		{
 			if ((satmask & i) && (j <= diseqc[0]))
@@ -195,7 +215,7 @@ int main (int argc, char** argv)
 				std::cout << "diseqc " << diseqc[j+1] << ": " << satelliteList[j].satName << std::endl;
 				strcpy(item.satName, satelliteList[j].satName);
 				item.diseqc = diseqc[j+1];
-				//newSatelliteList.insert(item);
+				newSatelliteList.insert(newSatelliteList.end(), item);
 			}
 		}
 
@@ -232,42 +252,68 @@ int main (int argc, char** argv)
 		return 0;
 	}
 
-	/* read bouquet list */
-	zapit->getBouquets(bouquets, true);
-
-	/* read channel list */
-	if (bouquet)
+	if (zapByName)
 	{
-		zapit->getBouquetChannels(bouquet, channels);
-	}
+		zapit->getChannels(channels);
 
-	/* display bouquet list */
-	else
-	{
-		std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
-		for (b_resp = bouquets.begin(); b_resp < bouquets.end(); b_resp++)
-			std::cout << b_resp->bouquet_nr << ": " << b_resp->name << std::endl;
-		delete zapit;
-		return 0;
-	}
-
-	/* display channel list */
-	if (!channel)
-	{
 		std::vector<CZapitClient::responseGetBouquetChannels>::iterator ch_resp;
 		for (ch_resp = channels.begin(), count = 1; ch_resp < channels.end(); ch_resp++, count++)
-			std::cout << count << ": " << ch_resp->name << std::endl;
-		delete zapit;
-		return 0;
+		{
+			if (!strcasecmp(ch_resp->name, channelName))
+			{
+				channel = count;
+			}
+		}
+
+		if (channel == 0)
+		{
+			std::cout << "channel not found." << std::endl;
+			delete zapit;
+			return 0;
+		}
+		else
+		{
+			std::cout << "found channel number: " << channel << std::endl;
+		}
+	}
+	else /* zap by bouquet number and channel number */
+	{
+		/* read channel list */
+		if (bouquet)
+		{
+			zapit->getBouquetChannels(bouquet, channels);
+		}
+
+		/* display bouquet list */
+		else
+		{
+			zapit->getBouquets(bouquets, true);
+
+			std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
+			for (b_resp = bouquets.begin(); b_resp < bouquets.end(); b_resp++)
+				std::cout << b_resp->bouquet_nr << ": " << b_resp->name << std::endl;
+			delete zapit;
+			return 0;
+		}
+
+		/* display channel list */
+		if (!channel)
+		{
+			std::vector<CZapitClient::responseGetBouquetChannels>::iterator ch_resp;
+			for (ch_resp = channels.begin(), count = 1; ch_resp < channels.end(); ch_resp++, count++)
+				std::cout << count << ": " << ch_resp->name << std::endl;
+			delete zapit;
+			return 0;
+		}
 	}
 
 	/* zap */
-	else
 	{
 		CZapitClient::responseGetPIDs pids;
 
-		std::cout << "zapping to bouquet " << bouquets[bouquet-1].name << ", channel " << channels[channel-1].name << "." << std::endl;
-		zapit->zapTo(bouquet, channel);
+		std::cout << "zapping to  channel " << channels[channel-1].name << "." << std::endl;
+
+		zapit->zapTo(channels[channel-1].nr);
 		zapit->getPIDS(pids);
 
 		std::cout << "vpid: 0x" << std::hex << pids.PIDs.vpid << std::endl;
