@@ -226,8 +226,8 @@ keychooser.head Setup new Key
 keychooser.text1 Please press the new key
 keychooser.text2 wait a few seconds for abort
 
-screensetup.upperleft rot = setup upper left
-screensetup.lowerright grün = setup lower right
+screensetup.upperleft red = setup upper left
+screensetup.lowerright green = setup lower right
 
 channellist.head All Services
 channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
