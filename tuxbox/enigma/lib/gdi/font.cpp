@@ -136,7 +136,7 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 	eDebug("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
 	fflush(stdout);
 	{
-		if (FTC_Manager_New(library, 0, 0, maxbytes, myFTC_Face_Requester, this, &cacheManager))
+		if (FTC_Manager_New(library, 8, 8, maxbytes, myFTC_Face_Requester, this, &cacheManager))
 		{
 			printf("[FONT] initializing font cache failed!\n");
 			return;
