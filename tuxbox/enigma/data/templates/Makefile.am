@@ -1,4 +1,4 @@
-EXTRA_DIST = eit.tmp index.tmp helpDMM.tmp helpOfficialSites.tmp helpOtherSites.tmp helpForums.tmp header.tmp timerList.tmp \
+EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tmp header.tmp timerList.tmp \
 	     timerListBody.tmp epg.tmp mepg.tmp videocontrols.tmp audioSelection.tmp editTimerEvent.tmp sendMessage.tmp \
 	     configHDD.tmp configUSB.tmp
 
