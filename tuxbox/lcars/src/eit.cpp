@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -63,7 +66,7 @@ void* eit::start_eitqueue( void * this_ptr )
 		if (time(0) >= next_time)
 			e->addCommand("RECEIVE last");
 		e->executeQueue();
-		next_time = time(0) + 15;
+		next_time = time(0) + 60;
 	}
 }
 
@@ -362,7 +365,7 @@ void eit::setAudioComponent(int comp)
 
 bool eit::isMultiPerspective()
 {
-	return now.number_perspectives > 1; //(now.running_status == 0x4 && now.number_perspectives > 1);
+	return (now.number_perspectives > 1); //(now.running_status == 0x4 && now.number_perspectives > 1);
 }
 
 void eit::beginLinkage()

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -25,7 +28,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <math.h>
 
 #include "osd.h"
-#include "fb.h"
 
 int osd::start_thread()
 {
@@ -59,54 +61,124 @@ void* osd::start_osdqueue( void * this_ptr )
 	}
 }
 
-osd::osd(settings &set, fbClass &fbclass, std::string fontpath = "/usr/lib/fonts/ds9.ttf") :setting(set), fb(fbclass)
+osd::osd(settings &set, fbClass *f) :setting(set)
 {
+	fb = f;
 	proginfo_shown = false;
 	proginfo_hidetime = time(0) + 10000;
 	printf("OSD\n");
-	fb.setMode(720, 576, 16);
-	fb.clearScreen();
-	fb.loadFonts(fontpath);
+	//fb->setMode(720, 576, 16);
+	fb->clearScreen();
+	
+	initPalette();
 
-	if (setting.boxIsGTX())
-	{
-		fb.setFade(1, 22, 5, 57, 63, 63, 63);
-		fb.setFade(2, 24, 5, 59, 63, 63, 63);
-		fb.setFade(0, 1, 1, 1, 60, 60, 0);
-		fb.setFade(3, 0, 0, 63, 0, 0, 0);
-		fb.setFade(4, 0, 0, 63, 63, 63, 63);
-		fb.setFade(5, 22, 5, 57, 60, 60, 0);
-		fb.setFade(6, 22, 5, 57, 0, 60, 0);
-		fb.setFade(7, 1, 1, 1, 63, 63, 63);
-		fb.setFade(8, 60, 60, 0, 1, 1, 1);
-	}
-	else
-	{
-		fb.setFade(1, 62, 5, 18, 63, 63, 63);
-		fb.setFade(2, 64, 5, 20, 63, 63, 63);
-		fb.setFade(0, 1, 1, 1, 0, 60, 60);
-		fb.setFade(3, 63, 0, 0, 1, 1, 1);
-		fb.setFade(4, 63, 0, 0, 63, 63, 63);
-		fb.setFade(5, 62, 5, 18, 1, 1, 1);
-		fb.setFade(6, 62, 5, 18, 0, 60, 0);
-		fb.setFade(7, 1, 1, 1, 63, 63, 63);
-		fb.setFade(8, 0, 60, 60, 1, 1, 1);
-	}
 	for (int i = 0; i <= 17; i++)
 	{
-		circle[i] = 17 - (int) ((sqrt((float)1 - (((float)i/17) * ((float)i / 17)))) * 17);
-		
+		circle[i] = 17 - (int) ((sqrtf((float)1 - (((float)i/(float)17) * ((float)i /(float) 17)))) * (float)17);
 	}
 	for (int i = 0; i <= 10; i++)
 	{
-		circlesmall[i] = 10 - (int) ((sqrt((float)1 - (((float)i/10) * ((float)i / 10)))) * 10);
-		
+		circlesmall[i] = 10 - (int) ((sqrtf((float)1 - (((float)i/10) * ((float)i / 10)))) * 10);
 	}
 	for (int i = 0; i <= 12; i++)
 	{
-		circlemiddle[i] = 12 - (int) ((sqrt((float)1 - (((float)i/12) * ((float)i / 12)))) * 12);
-		
+		circlemiddle[i] = 12 - (int) ((sqrtf((float)1 - (((float)i/12) * ((float)i / 12)))) * 12);
 	}
+}
+
+void osd::initPalette()
+{
+	
+	fb->setFade(1, 88, 20, 228, 255, 255, 255);
+	fb->setFade(2, 96, 20, 236, 255, 255, 255);
+	fb->setFade(0, 1, 1, 1, 240, 240, 0);
+	fb->setFade(3, 0, 0, 255, 0, 0, 0);
+	fb->setFade(4, 0, 0, 255, 255, 255, 255);
+	fb->setFade(5, 88, 20, 228, 240, 240, 0);
+	fb->setFade(6, 88, 20, 228, 0, 240, 0);
+	fb->setFade(7, 1, 1, 1, 255, 255, 255);
+	fb->setFade(8, 240, 240, 0, 1, 1, 1);
+	fb->setFade(9, 255, 255, 255, 255, 0, 0);
+}
+
+void osd::loadSkin(std::string filename)
+{
+	FILE *fd;
+	fd = fopen(filename.c_str(), "r");
+
+	char line[200];
+	while (fgets(line, 200, fd))
+	{
+		if (strncmp(line, "---", 3))
+		{
+			printf("Syntax error in Skin-File\n");
+			exit(0);
+		}
+		
+		command_list list;
+		
+		fgets(line, 200, fd);
+		std::string command(line);
+		
+		do
+		{
+			fgets(line, 200, fd);
+			std::string line_str(line);
+			line_str = line_str.substr(0, line_str.length() - 1);
+			if (line_str != "***")
+				list.insert(list.end(), line_str);
+		} while (strncmp(line, "***", 3));
+		
+		printf("Commando: %s\n", command.c_str());
+		if (command == "general:\n")
+		{
+			for (int i = 0; i < (int) list.size(); i++)
+			{
+				fb->runCommand(list[i]);
+			}
+		}
+		else if (command == "proginfo_show:\n")
+		{
+			printf("Proginfo\n");
+			setProgramCommandListShow(list);
+		}
+		else if (command == "proginfo_hide:\n")
+		{
+			printf("Proginfo2\n");
+			setProgramCommandListHide(list);
+		}
+		else if (command == "proginfo_servicenumber:\n")
+		{
+			setProgramCommandListServiceNumber(list);
+		}
+		else if (command == "proginfo_servicename:\n")
+		{
+			setProgramCommandListServiceName(list);
+		}
+		else if (command == "proginfo_language:\n")
+		{
+			setProgramCommandListLanguage(list);
+		}
+		else if (command == "proginfo_nowtime:\n")
+		{
+			setProgramCommandListNowTime(list);
+		}
+		else if (command == "proginfo_nowdescription:\n")
+		{
+			setProgramCommandListNowDescription(list);
+		}
+		else if (command == "proginfo_nexttime:\n")
+		{
+			setProgramCommandListNextTime(list);
+		}
+		else if (command == "proginfo_nextdescription:\n")
+		{
+			setProgramCommandListNextDescription(list);
+		}
+	}
+
+
+	fclose(fd);
 }
 
 void osd::addCommand(std::string command)
@@ -564,7 +636,7 @@ void osd::executeCommand()
 
 void osd::clearScreen()
 {
-	fb.clearScreen();
+	fb->clearScreen();
 }
 
 void osd::createList()
@@ -595,36 +667,36 @@ void osd::selectNextItem()
 void osd::selectItem(int number)
 {
 	char buffer[100];
-	fb.setTextSize(0.4);
+	fb->setTextSize(0.4);
 	for (int j = 0; j <= 17; j++)
 	{
-		fb.fillBox(33 + circle[17 - j], 85 + selected * 40 + j, 50, 85 + selected * 40 + j + 1, 1);
+		fb->fillBox(33 + circle[17 - j], 85 + selected * 40 + j, 50, 85 + selected * 40 + j + 1, 1);
 	}
 	for (int j = 18; j < 35; j++)
 	{
-		fb.fillBox(33 + circle[j - 18], 85 + selected * 40 + j, 50, 85 + selected * 40 + j + 1, 1);
+		fb->fillBox(33 + circle[j - 18], 85 + selected * 40 + j, 50, 85 + selected * 40 + j + 1, 1);
 	}
-	fb.fillBox(33, 103 + selected * 40, 50, 104 + selected * 40, 1);
-	fb.fillBox(50, 85 + selected * 40, 70, 120 + selected * 40, 1);
-	fb.fillBox(300, 85 + selected * 40, 320, 120 + selected * 40, 1);
-	fb.fillBox(70, 85 + selected * 40, 300, 120 + selected * 40, 0);
+	fb->fillBox(33, 103 + selected * 40, 50, 104 + selected * 40, 1);
+	fb->fillBox(50, 85 + selected * 40, 70, 120 + selected * 40, 1);
+	fb->fillBox(300, 85 + selected * 40, 320, 120 + selected * 40, 1);
+	fb->fillBox(70, 85 + selected * 40, 300, 120 + selected * 40, 0);
 	strcpy(buffer, list[selected].name.c_str());
-	fb.putText(75, 110 + selected * 40, 0, buffer, 225);
+	fb->putText(75, 97 + selected * 40, 0, buffer, 225);
 	selected = number;
 	for (int j = 0; j <= 17; j++)
 	{
-		fb.fillBox(33 + circle[17 - j], 85 + selected * 40 + j, 50, 85 + selected * 40 + j + 1, 0);
+		fb->fillBox(33 + circle[17 - j], 85 + selected * 40 + j, 50, 85 + selected * 40 + j + 1, 0);
 	}
 	for (int j = 18; j < 35; j++)
 	{
-		fb.fillBox(33 + circle[j - 18], 85 + selected * 40 + j, 50, 85 + selected * 40 + j + 1, 0);
+		fb->fillBox(33 + circle[j - 18], 85 + selected * 40 + j, 50, 85 + selected * 40 + j + 1, 0);
 	}
-	fb.fillBox(33, 103 + selected * 40, 50, 104 + selected * 40, 0);
-	fb.fillBox(50, 85 + selected * 40, 70, 120 + selected * 40, 0);
-	fb.fillBox(300, 85 + selected * 40, 320, 120 + selected * 40, 0);
-	fb.fillBox(70, 85 + selected * 40, 300, 120 + selected * 40, 1);
+	fb->fillBox(33, 103 + selected * 40, 50, 104 + selected * 40, 0);
+	fb->fillBox(50, 85 + selected * 40, 70, 120 + selected * 40, 0);
+	fb->fillBox(300, 85 + selected * 40, 320, 120 + selected * 40, 0);
+	fb->fillBox(70, 85 + selected * 40, 300, 120 + selected * 40, 1);
 	strcpy(buffer, list[selected].name.c_str());
-	fb.putText(75, 110 + selected * 40, 1, buffer, 225);
+	fb->putText(75, 97 + selected * 40, 1, buffer, 225);
 }
 
 int osd::selectedItem()
@@ -636,30 +708,30 @@ void osd::showList()
 {
 	char buffer[100];
 
-	fb.setTextSize(0.4);
+	fb->setTextSize(0.4);
 	for (int i = 0; i < numberItems; i++)
 	{
 		for (int j = 0; j <= 17; j++)
 		{
-			fb.fillBox(33 + circle[17 - j], 85 + i * 40 + j, 50, 85 + i * 40 + j + 1, 1);
+			fb->fillBox(33 + circle[17 - j], 85 + i * 40 + j, 50, 85 + i * 40 + j + 1, 1);
 		}
 		for (int j = 18; j < 35; j++)
 		{
-			fb.fillBox(33 + circle[j - 18], 85 + i * 40 + j, 50, 85 + i * 40 + j + 1, 1);
+			fb->fillBox(33 + circle[j - 18], 85 + i * 40 + j, 50, 85 + i * 40 + j + 1, 1);
 		}
-		fb.fillBox(33, 102 + selected * 40, 50, 106 + selected * 40, 1);
-		fb.fillBox(50, 85 + i * 40, 70, 120 + i * 40, 1);
-		fb.fillBox(300, 85 + i * 40, 320, 120 + i * 40, 1);
-		fb.fillBox(323, 85 + i * 40, 330, 120 + i * 40, 2);
-		fb.fillBox(70, 85 + i * 40, 300, 120 + i * 40, 0);
+		fb->fillBox(33, 102 + selected * 40, 50, 106 + selected * 40, 1);
+		fb->fillBox(50, 85 + i * 40, 70, 120 + i * 40, 1);
+		fb->fillBox(300, 85 + i * 40, 320, 120 + i * 40, 1);
+		fb->fillBox(323, 85 + i * 40, 330, 120 + i * 40, 2);
+		fb->fillBox(70, 85 + i * 40, 300, 120 + i * 40, 0);
 		strcpy(buffer, list[i].name.c_str());
-		fb.putText(75, 110 + i * 40, 0, buffer, 225);
+		fb->putText(75, 97 + i * 40, 0, buffer, 225);
 	}
 }
 
 void osd::hideList()
 {
-	fb.fillBox(30, 85, 330, 120 + 9 * 40, -1);
+	fb->fillBox(30, 85, 330, 120 + 9 * 40, -1);
 }
 
 
@@ -683,20 +755,42 @@ void osd::createProgramInfo()
 void osd::setServiceName(std::string  name)
 {
 	serviceName = name;
+	fb->addVariable("%SERVICENAME%", name);
 	if (proginfo_shown)
 	{
-		fb.fillBox(130, 30, 330, 50, 0);
-		fb.putText(135, 47, 0, serviceName, 195);
+		if (prog_com_list_servicename.size() < 1)
+		{
+			fb->fillBox(130, 30, 330, 50, 0);
+			fb->putText(135, 32, 0, serviceName, 195);
+		}
+		else
+		{
+			for (int i = 0; i < (int) prog_com_list_servicename.size(); i++)
+			{
+				fb->runCommand(prog_com_list_servicename[i]);
+			}
+		}
 	}
 }
 
 void osd::setServiceNumber(int number)
 {
 	serviceNumber = number;
+	fb->addVariable("%SERVICENUMBER%", number);
 	if (proginfo_shown)
 	{
-		fb.fillBox(75, 30, 120, 50, 0);
-		fb.putText(77, 45, 0, serviceNumber, 43);
+		if (prog_com_list_servicenumber.size() < 1)
+		{
+			fb->fillBox(75, 30, 120, 50, 0);
+			fb->putText(77, 32, 0, serviceNumber, 43);
+		}
+		else
+		{
+			for (int i = 0; i < (int) prog_com_list_servicenumber.size(); i++)
+			{
+				fb->runCommand(prog_com_list_servicenumber[i]);
+			}
+		}
 	}
 }
 
@@ -712,11 +806,11 @@ void osd::setTeletext(bool available)
 	{
 		if (teletext)
 		{
-			fb.fillBox(80, 401, 120, 419, 0);
-			fb.putText(82, 415, 0, "TXT");
+			fb->fillBox(80, 401, 120, 419, 0);
+			fb->putText(82, 402, 0, "TXT");
 		}
 		else
-			fb.fillBox(80, 401, 120, 419, 1);
+			fb->fillBox(80, 401, 120, 419, 1);
 	}
 }
 
@@ -737,68 +831,121 @@ void osd::setBlueAvailable(bool available)
 
 void osd::setNowTime(time_t starttime)
 {
-	
 	nowTime = starttime;
+	char nowtime[10];
+	struct tm *t;
+	t = localtime(&nowTime);
+	strftime(nowtime, sizeof nowtime, "%H:%M", t);
+	fb->addVariable("%NOWTIME%", nowtime);
+	
 	if (proginfo_shown)
 	{
-		char nowtime[10];
-		struct tm *t;
-		t = localtime(&nowTime);
-		strftime(nowtime, sizeof nowtime, "%H:%M", t);
-		
-		fb.fillBox(65, 425, 125, 445, 0);
-		fb.putText(70, 440, 0, nowtime); // Uhrzeit des laufenden Programms
-
+		if (prog_com_list_nowtime.size() < 1)
+		{
+			fb->fillBox(65, 425, 125, 445, 0);
+			fb->putText(70, 427, 0, nowtime); // Uhrzeit des laufenden Programms
+		}
+		else
+		{
+			for (int i = 0; i < (int) prog_com_list_nowtime.size(); i++)
+			{
+				fb->runCommand(prog_com_list_nowtime[i]);
+			}
+		}
 	}
 }
 
 void osd::setNowDescription(std::string  description)
 {
 	nowDescription = description;
+	fb->addVariable("%NOWDESCRIPTION%", nowDescription);
 	if (proginfo_shown)
 	{
-		fb.fillBox(149, 425, 650, 445, 0);
-		fb.putText(150, 440, 0, nowDescription, 490);
+		if (prog_com_list_nowdescription.size() < 1)
+		{
+			fb->fillBox(149, 425, 650, 445, 0);
+			fb->putText(150, 427, 0, nowDescription, 490);
+		}
+		else
+		{
+			for (int i = 0; i < (int) prog_com_list_nowdescription.size(); i++)
+			{
+				fb->runCommand(prog_com_list_nowdescription[i]);
+			}
+		}
 	}
 }
 
 void osd::setNextTime(time_t starttime)
 {
 	nextTime = starttime;
+	char nexttime[10];
+	struct tm *t;
+	t = localtime(&nextTime);
+	strftime(nexttime, sizeof nexttime, "%H:%M", t);
+	fb->addVariable("%NEXTTIME%", nexttime);
+	
 	if (proginfo_shown)
 	{
-		char nexttime[10];
-		struct tm *t;
-		t = localtime(&nextTime);
-		strftime(nexttime, sizeof nexttime, "%H:%M", t);
-		
-		fb.fillBox(65, 495, 125, 515, 0);
-		fb.putText(70, 510, 0, nexttime); // Uhrzeit des nächsten Programms
+		if (prog_com_list_nexttime.size() < 1)
+		{
+			fb->fillBox(65, 495, 125, 515, 0);
+			fb->putText(70, 497, 0, nexttime); // Uhrzeit des nächsten Programms
+		}
+		else
+		{
+			for (int i = 0; i < (int) prog_com_list_nexttime.size(); i++)
+			{
+				fb->runCommand(prog_com_list_nexttime[i]);
+			}
+		}
 	}
 }
 
 void osd::setNextDescription(std::string  description)
 {
 	nextDescription = description;
+	fb->addVariable("%NEXTDESCRIPTION%", nextDescription);
 	if (proginfo_shown)
 	{
-		fb.fillBox(149, 495, 650, 515, 0);
-		fb.putText(150, 510, 0, nextDescription, 490); // Erste Zeile des nächsten Programms
+		if (prog_com_list_nextdescription.size() < 1)
+		{
+			fb->fillBox(149, 495, 650, 515, 0);
+			fb->putText(150, 497, 0, nextDescription, 490); // Erste Zeile des nächsten Programms
+		}
+		else
+		{
+			for (int i = 0; i < (int) prog_com_list_nextdescription.size(); i++)
+			{
+				fb->runCommand(prog_com_list_nextdescription[i]);
+			}
+		}
 	}
 }
 
-void osd::setLanguage(std::string  language_name)
+void osd::setLanguage(std::string language_name)
 {
 	strcpy(language, language_name.c_str());
+	fb->addVariable("%LANGUAGE%", language);
 	if (proginfo_shown)
 	{
-		if (language_name != "")
+		if (prog_com_list_language.size() < 1)
 		{
-			fb.fillBox(160, 401, 300, 419, 0);
-			fb.putText(165, 415, 0, language);
+			if (language_name != "")
+			{
+				fb->fillBox(160, 401, 300, 419, 0);
+				fb->putText(165, 402, 0, language);
+			}
+			else
+				fb->fillBox(160, 401, 300, 419, 1);
 		}
 		else
-			fb.fillBox(160, 401, 300, 419, 1);
+		{
+			for (int i = 0; i < (int) prog_com_list_language.size(); i++)
+			{
+				fb->runCommand(prog_com_list_language[i]);
+			}
+		}
 	}
 }
 
@@ -809,13 +956,13 @@ void osd::setParentalRating(int rating)
 	{
 		if (par_rating != 0)
 		{
-			fb.fillBox(310, 401, 390, 419, 0);
+			fb->fillBox(310, 401, 390, 419, 0);
 			char rattext[10];
 			sprintf(rattext, "FSK: %d", par_rating + 3);
-			fb.putText(315, 415, 0, rattext);
+			fb->putText(315, 402, 0, rattext);
 		}
 		else
-			fb.fillBox(310, 401, 390, 419, 1);
+			fb->fillBox(310, 401, 390, 419, 1);
 	}
 }
 
@@ -825,119 +972,148 @@ void osd::showProgramInfo()
 		return;
 	proginfo_shown = true;
 
-	printf("%d - %s\n", serviceNumber, serviceName.c_str());
-	printf("Now (%d): %s\n", (int)nowTime, nowDescription.c_str());
-	printf("Next (%d): %s\n", (int)nextTime, nextDescription.c_str());
-	if (redAvailable)
-		printf("Red ");
-	
-	if (yellowAvailable)
-		printf("Yellow ");
-	if (blueAvailable)
-		printf("Blue ");
-	printf("\n");
-
 	char nowtime[10], nexttime[10], acttime[10], number[10];
-	char pname[30], now[200], next[200];
-
-	fb.fillBox(65, 420, 650, 550, 0);
-	for (int j = 0; j <= 10; j++)
-	{
-		fb.fillBox(60 + circlesmall[10 - j], 30 + j, 70, 30 + j + 1, 1);
-		fb.fillBox(60 + circlesmall[10 - j], 400 + j, 70, 400 + j + 1, 1);
-		fb.fillBox(650, 400 + j, 660 - circlesmall[10 - j], 400 + j + 1, 1);
-		fb.fillBox(650 - circlesmall[10 - j], 420 + j, 650, 420 + j + 1, 1);
-		fb.fillBox(130 - circlesmall[10 - j], 490 + j, 130, 490 + j + 1, 1);
-		fb.fillBox(130 - circlesmall[10 - j], 420 + j, 130, 420 + j + 1, 1);
-		fb.fillBox(650 - circlesmall[10 - j], 490 + j, 650, 490 + j + 1, 1);
-		fb.fillBox(650 - circlesmall[j], 470 + j, 650, 470 + j + 1, 1);
-		fb.fillBox(130 - circlesmall[j], 470 + j, 130, 470 + j + 1, 1);
-		fb.fillBox(140, 470 + j, 140 + circlesmall[j], 470 + j + 1, 1);
-		fb.fillBox(140, 490 + j, 140 + circlesmall[10 - j], 490 + j + 1, 1);
-		fb.fillBox(140, 420 + j, 140 + circlesmall[10 - j], 420 + j + 1, 1);
-	}
-	for (int j = 11; j < 20; j++)
-	{
-		fb.fillBox(60 + circlesmall[j - 11], 30 + j, 70, 30 + j + 1, 1);
-		fb.fillBox(60 + circlesmall[j - 11], 400 + j, 70, 400 + j + 1, 1);
-		
-	}
-	fb.fillBox(70, 30, 75, 50, 1);
-	fb.fillBox(75, 30, 120, 50, 0);
-	fb.fillBox(120, 30, 130, 50, 1);
-	fb.fillBox(130, 30, 330, 50, 0);
-	fb.fillBox(330, 30, 550, 50, 1);
-	fb.fillBox(550, 30, 630, 50, 0);
-	fb.fillBox(630, 30, 670, 50, 1);
-
-	fb.fillBox(70, 400, 650, 420, 1);
-	fb.fillBox(650, 410, 660, 550, 1);
-	fb.fillBox(70, 480, 660, 490, 1);
-	fb.fillBox(130, 420, 140, 550, 1);
-	
-	fb.setTextSize(0.4);
-	
-	strcpy(pname, serviceName.c_str());
-	fb.putText(135, 47, 0, pname, 195);
-
-	sprintf(number, "%d", serviceNumber);
-	fb.putText(77, 45, 0, number, 43);
-
 	time_t act_time = time(0);
 	struct tm *t;
 	t = localtime(&act_time);
 	strftime(acttime, sizeof acttime, "%H:%M", t);
-	fb.putText(560, 45, 0, acttime); // aktuelle Uhrzeit
-	
 	t = localtime(&nowTime);
 	strftime(nowtime, sizeof nowtime, "%H:%M", t);
 	t = localtime(&nextTime);
 	strftime(nexttime, sizeof nexttime, "%H:%M", t);
-	fb.putText(70, 440, 0, nowtime); // Uhrzeit des laufenden Programms
-	fb.putText(70, 510, 0, nexttime); // Uhrzeit des nächsten Programms
 
-	strcpy(now, nowDescription.c_str());
-	strcpy(next, nextDescription.c_str());
+	fb->addVariable("%SERVICENAME%", serviceName);
+	fb->addVariable("%SERVICENUMBER%", serviceNumber);
+	fb->addVariable("%NOWTIME%", nowtime);
+	fb->addVariable("%NEXTTIME%", nexttime);
+	fb->addVariable("%ACTTIME%", acttime);
+	fb->addVariable("%NOWDESCRIPTION%", nowDescription);
+	fb->addVariable("%NEXTDESCRIPTION%", nextDescription);
+	fb->addVariable("%LANGUAGE%", language);
 
-	if (strlen(language) > 0)
+	if (prog_com_list_show.size() < 1)
 	{
-		fb.fillBox(160, 401, 300, 419, 0);
-		fb.putText(165, 415, 0, language);
-	}
+		printf("%d - %s\n", serviceNumber, serviceName.c_str());
+		printf("Now (%d): %s\n", (int)nowTime, nowDescription.c_str());
+		printf("Next (%d): %s\n", (int)nextTime, nextDescription.c_str());
+		if (redAvailable)
+			printf("Red ");
+		
+		if (yellowAvailable)
+			printf("Yellow ");
+		if (blueAvailable)
+			printf("Blue ");
+		printf("\n");
+	
+		char pname[30], now[200], next[200];
+	
+		//fb->fillBox(100, 100, 200, 200, 9);
+		fb->fillBox(65, 420, 650, 550, 0);
+		for (int j = 0; j <= 10; j++)
+		{
+			fb->fillBox(60 + circlesmall[10 - j], 30 + j, 70, 30 + j + 1, 1);
+			fb->fillBox(60 + circlesmall[10 - j], 400 + j, 70, 400 + j + 1, 1);
+			fb->fillBox(650, 400 + j, 660 - circlesmall[10 - j], 400 + j + 1, 1);
+			fb->fillBox(650 - circlesmall[10 - j], 420 + j, 650, 420 + j + 1, 1);
+			fb->fillBox(130 - circlesmall[10 - j], 490 + j, 130, 490 + j + 1, 1);
+			fb->fillBox(130 - circlesmall[10 - j], 420 + j, 130, 420 + j + 1, 1);
+			fb->fillBox(650 - circlesmall[10 - j], 490 + j, 650, 490 + j + 1, 1);
+			fb->fillBox(650 - circlesmall[j], 470 + j, 650, 470 + j + 1, 1);
+			fb->fillBox(130 - circlesmall[j], 470 + j, 130, 470 + j + 1, 1);
+			fb->fillBox(140, 470 + j, 140 + circlesmall[j], 470 + j + 1, 1);
+			fb->fillBox(140, 490 + j, 140 + circlesmall[10 - j], 490 + j + 1, 1);
+			fb->fillBox(140, 420 + j, 140 + circlesmall[10 - j], 420 + j + 1, 1);
+		}
+		for (int j = 11; j < 20; j++)
+		{
+			fb->fillBox(60 + circlesmall[j - 11], 30 + j, 70, 30 + j + 1, 1);
+			fb->fillBox(60 + circlesmall[j - 11], 400 + j, 70, 400 + j + 1, 1);
+			
+		}
+		fb->fillBox(70, 30, 75, 50, 1);
+		fb->fillBox(75, 30, 120, 50, 0);
+		fb->fillBox(120, 30, 130, 50, 1);
+		fb->fillBox(130, 30, 330, 50, 0);
+		fb->fillBox(330, 30, 550, 50, 1);
+		fb->fillBox(550, 30, 630, 50, 0);
+		fb->fillBox(630, 30, 670, 50, 1);
 
-	if (teletext)
+		fb->fillBox(70, 400, 650, 420, 1);
+		fb->fillBox(650, 410, 660, 550, 1);
+		fb->fillBox(70, 480, 660, 490, 1);
+		fb->fillBox(130, 420, 140, 550, 1);
+		
+		fb->setTextSize(0.4);
+		
+		strcpy(pname, serviceName.c_str());
+		fb->putText(135, 32, 0, pname, 195);
+
+		sprintf(number, "%d", serviceNumber);
+		fb->putText(77, 32, 0, number, 43);
+
+		fb->putText(560, 32, 0, acttime); // aktuelle Uhrzeit
+		
+		fb->putText(70, 427, 0, nowtime); // Uhrzeit des laufenden Programms
+		fb->putText(70, 497, 0, nexttime); // Uhrzeit des nächsten Programms
+
+		strcpy(now, nowDescription.c_str());
+		strcpy(next, nextDescription.c_str());
+
+		if (strlen(language) > 0)
+		{
+			fb->fillBox(160, 401, 300, 419, 0);
+			fb->putText(165, 402, 0, language);
+		}
+
+		if (teletext)
+		{
+			fb->fillBox(80, 401, 120, 419, 0);
+			fb->putText(82, 402, 0, "TXT");
+		}
+
+		if (par_rating != 0)
+		{
+			fb->fillBox(310, 401, 390, 419, 0);
+			char rattext[10];
+			sprintf(rattext, "FSK: %d", par_rating + 3);
+			fb->putText(315, 402, 0, rattext);
+		}
+		
+		if (greenAvailable)
+			fb->putText(600, 402, 6, "O");
+		
+		fb->putText(150, 427, 0, now, 490); // Erste Zeile des aktuellen Programms
+
+		fb->putText(150, 497, 0, next, 490); // Erste Zeile des nächsten Programms
+		
+		char text[100];
+		sprintf(text, "CAID: %x", setting.getCAID());
+	}
+	else
 	{
-		fb.fillBox(80, 401, 120, 419, 0);
-		fb.putText(82, 415, 0, "TXT");
+		for (int i = 0; i < (int) prog_com_list_show.size(); i++)
+		{
+			fb->runCommand(prog_com_list_show[i]);
+		}
 	}
-
-	if (par_rating != 0)
-	{
-		fb.fillBox(310, 401, 390, 419, 0);
-		char rattext[10];
-		sprintf(rattext, "FSK: %d", par_rating + 3);
-		fb.putText(315, 415, 0, rattext);
-	}
-	
-	if (greenAvailable)
-		fb.putText(600, 415, 6, "O");
-	
-	fb.putText(150, 440, 0, now, 490); // Erste Zeile des aktuellen Programms
-
-	fb.putText(150, 510, 0, next, 490); // Erste Zeile des nächsten Programms
-	
-	char text[100];
-	sprintf(text, "CAID: %x", setting.getCAID());
-
 }
 
 void osd::hideProgramInfo()
 {
 	proginfo_shown = false;
-	printf("Hiding program info\n");
-	fb.fillBox(30, 29, 670, 52, -1);
-	fb.fillBox(30, 380, 730, 670, -1);
-	
+	if (prog_com_list_hide.size() < 1)
+	{
+		printf("Hiding program info\n");
+		fb->fillBox(30, 28, 670, 52, -1);
+		fb->fillBox(30, 380, 719, 575, -1);
+	}
+	else
+	{
+		for (int i = 0; i < (int) prog_com_list_hide.size(); i++)
+		{
+			fb->runCommand(prog_com_list_hide[i]);
+		}
+	}
 }
 
 void osd::createNumberEntry()
@@ -961,71 +1137,71 @@ void osd::showNumberEntry()
 {
 	char buffer[100];
 
-	fb.setTextSize(0.7);
+	fb->setTextSize(0.7);
 	for (int j = 0; j <= 17; j++)
 	{
-		fb.fillBox(33 + circle[17 - j], 30 + j, 50, 30 + j + 1, 1);
-		fb.fillBox(320, 30 + j, 338 - circle[17 - j], 30 + j + 1, 1);
+		fb->fillBox(33 + circle[17 - j], 30 + j, 50, 30 + j + 1, 1);
+		fb->fillBox(320, 30 + j, 338 - circle[17 - j], 30 + j + 1, 1);
 	}
 	for (int j = 18; j < 35; j++)
 	{
-		fb.fillBox(33 + circle[j - 18], 30 + j, 50, 30 + j + 1, 1);
-		fb.fillBox(320, 30 + j, 338 - circle[j - 18], 30 + j + 1, 1);
+		fb->fillBox(33 + circle[j - 18], 30 + j, 50, 30 + j + 1, 1);
+		fb->fillBox(320, 30 + j, 338 - circle[j - 18], 30 + j + 1, 1);
 	}
 	for (int j = 0; j <= 10; j++)
 	{
-		fb.fillBox(33 + circlesmall[10 - j], 75 + j, 43, 75 + j + 1, 1);
-		fb.fillBox(320, 75 + j, 330 - circlesmall[10 - j], 75 + j + 1, 1);
+		fb->fillBox(33 + circlesmall[10 - j], 75 + j, 43, 75 + j + 1, 1);
+		fb->fillBox(320, 75 + j, 330 - circlesmall[10 - j], 75 + j + 1, 1);
 	
 	}
 	for (int j = 11; j < 20; j++)
 	{
-		fb.fillBox(33 + circlesmall[j - 11], 75 + j, 43, 75 + j + 1, 1);
-		fb.fillBox(320, 75 + j, 330 - circlesmall[j - 11], 75 + j + 1, 1);
+		fb->fillBox(33 + circlesmall[j - 11], 75 + j, 43, 75 + j + 1, 1);
+		fb->fillBox(320, 75 + j, 330 - circlesmall[j - 11], 75 + j + 1, 1);
 		
 	}
-	fb.fillBox(50, 30, 75, 65, 1);
-	fb.fillBox(75, 30, 125, 65, 0);
-	fb.fillBox(125, 30, 135, 65, 1);
-	fb.fillBox(135, 30, 185, 65, 0);
-	fb.fillBox(185, 30, 195, 65, 1);
-	fb.fillBox(195, 30, 245, 65, 0);
-	fb.fillBox(245, 30, 255, 65, 1);
-	fb.fillBox(255, 30, 305, 65, 0);
-	fb.fillBox(305, 30, 320, 65, 1);
+	fb->fillBox(50, 30, 75, 65, 1);
+	fb->fillBox(75, 30, 125, 65, 0);
+	fb->fillBox(125, 30, 135, 65, 1);
+	fb->fillBox(135, 30, 185, 65, 0);
+	fb->fillBox(185, 30, 195, 65, 1);
+	fb->fillBox(195, 30, 245, 65, 0);
+	fb->fillBox(245, 30, 255, 65, 1);
+	fb->fillBox(255, 30, 305, 65, 0);
+	fb->fillBox(305, 30, 320, 65, 1);
 
-	fb.fillBox(43, 75, 320, 95, 0);
+	fb->fillBox(43, 75, 320, 95, 0);
 
 	if (number > 999)
 	{
 		sprintf(buffer, "%d", (int) (number / 1000) % 10);
-		fb.putText(90, 60, 0, buffer);
+		fb->putText(90, 35, 0, buffer);
 	}
 	if (number > 99)
 	{
 		sprintf(buffer, "%d", (int) (number / 100) % 10);
-		fb.putText(150, 60, 0, buffer);
+		fb->putText(150, 35, 0, buffer);
 	}
 	if (number > 9)
 	{
 		sprintf(buffer, "%d", (int) (number / 10) % 10);
-		fb.putText(210, 60, 0, buffer);
+		fb->putText(210, 35, 0, buffer);
 	}
 	if (number >= 0)
 	{
 		sprintf(buffer, "%d", (int) (number / 1) % 10);
-		fb.putText(270, 60, 0, buffer);
+		fb->putText(270, 35, 0, buffer);
 	}
 
-	fb.setTextSize(0.4);
+	fb->setTextSize(0.4);
 	strcpy(buffer, numberText.c_str());
-	fb.putText(45, 93, 0, buffer, 275);
+	fb->putText(45, 80, 0, buffer, 275);
 }
 
 void osd::hideNumberEntry()
 {
 	printf("Hiding number entry\n");
-	fb.fillBox(33, 30, 350, 100, -1);
+	fb->fillBox(33, 30, 350, 100, -1);
 }
 
 void osd::createPerspective()
@@ -1042,29 +1218,29 @@ void osd::showPerspective()
 {
 	for (int j = 0; j <= 10; j++)
 	{
-		fb.fillBox(150 + circlesmall[10 - j], 500 + j, 160, 500 + j + 1, 1);
-		fb.fillBox(560, 500 + j, 570 - circlesmall[10 - j], 500 + j + 1, 1);
+		fb->fillBox(150 + circlesmall[10 - j], 500 + j, 160, 500 + j + 1, 1);
+		fb->fillBox(560, 500 + j, 570 - circlesmall[10 - j], 500 + j + 1, 1);
 	
 	}
 	for (int j = 11; j < 20; j++)
 	{
-		fb.fillBox(150 + circlesmall[j - 11], 500 + j, 160, 500 + j + 1, 1);
-		fb.fillBox(560, 500 + j, 570 - circlesmall[j - 11], 500 + j + 1, 1);
+		fb->fillBox(150 + circlesmall[j - 11], 500 + j, 160, 500 + j + 1, 1);
+		fb->fillBox(560, 500 + j, 570 - circlesmall[j - 11], 500 + j + 1, 1);
 		
 	}
-	fb.fillBox(160, 500, 170, 520, 1);
-	fb.fillBox(170, 500, 550, 520, 0);
-	fb.fillBox(550, 500, 560, 520, 1);
+	fb->fillBox(160, 500, 170, 520, 1);
+	fb->fillBox(170, 500, 550, 520, 0);
+	fb->fillBox(550, 500, 560, 520, 1);
 
 	char pname[100];
 	strcpy(pname, perspective_name.c_str());
-	fb.setTextSize(0.4);
-	fb.putText(175, 515, 0, pname, 370);
+	fb->setTextSize(0.4);
+	fb->putText(175, 504, 0, pname, 370);
 }
 
 void osd::hidePerspective()
 {
-	fb.fillBox(150, 500, 580, 520, -1);
+	fb->fillBox(150, 500, 580, 520, -1);
 }
 
 
@@ -1117,54 +1293,54 @@ void osd::showEPG()
 
 	for (int j = 0; j <= 12; j++)
 	{
-		fb.fillBox(88 + circlemiddle[12 - j], 45 + j, 100, 45 +  j + 1, 5);
-		fb.fillBox(88 + circlemiddle[j], 57 + j, 100, 57 +  j + 1, 5);
-		fb.fillBox(600, 45 + j, 612 - circlemiddle[12 - j], 45 +  j + 1, 5);
+		fb->fillBox(88 + circlemiddle[12 - j], 45 + j, 100, 45 +  j + 1, 5);
+		fb->fillBox(88 + circlemiddle[j], 57 + j, 100, 57 +  j + 1, 5);
+		fb->fillBox(600, 45 + j, 612 - circlemiddle[12 - j], 45 +  j + 1, 5);
 		
 	}
-	fb.fillBox(100, 45, 120, 69, 5);
-	fb.fillBox(120, 45, 480, 69, 7);
-	fb.fillBox(480, 45, 490, 69, 5);
-	fb.fillBox(490, 45, 560, 69, 7);
-	fb.fillBox(560, 45, 600, 69, 5);
-	fb.setTextSize(0.45);
-	fb.putText(125, 63, 7, event_name, 350);
+	fb->fillBox(100, 45, 120, 69, 5);
+	fb->fillBox(120, 45, 480, 69, 7);
+	fb->fillBox(480, 45, 490, 69, 5);
+	fb->fillBox(490, 45, 560, 69, 7);
+	fb->fillBox(560, 45, 600, 69, 5);
+	fb->setTextSize(0.45);
+	fb->putText(125, 50, 7, event_name, 350);
 	time_t act_time = time(0);
 	struct tm *t;
 	t = localtime(&act_time);
 	strftime(text, 6, "%H:%M", t);
-	fb.putText(495, 63, 7, text);
+	fb->putText(495, 50, 7, text);
 
-	fb.fillBox(600, 57, 612, 500, 5);
+	fb->fillBox(600, 57, 612, 500, 5);
 
-	fb.setTextSize(0.4);
-	fb.fillBox(100, 75, 120, 99, 5);
-	fb.fillBox(120, 75, 400, 99, 0);
-	fb.fillBox(400, 75, 410, 99, 5);
-	fb.fillBox(410, 75, 480, 99, 0);
-	fb.fillBox(480, 75, 490, 99, 5);
-	fb.fillBox(490, 75, 560, 99, 0);
-	fb.fillBox(560, 75, 580, 99, 5);
-	fb.putText(125, 93, 0, programname, 270);
+	fb->setTextSize(0.4);
+	fb->fillBox(100, 75, 120, 99, 5);
+	fb->fillBox(120, 75, 400, 99, 0);
+	fb->fillBox(400, 75, 410, 99, 5);
+	fb->fillBox(410, 75, 480, 99, 0);
+	fb->fillBox(480, 75, 490, 99, 5);
+	fb->fillBox(490, 75, 560, 99, 0);
+	fb->fillBox(560, 75, 580, 99, 5);
+	fb->putText(125, 80, 0, programname, 270);
 				
 	t = localtime(&starttime);
 	strftime(text, 6, "%H:%M", t);
-	fb.putText(415, 93, 0, text);
+	fb->putText(415, 80, 0, text);
 
 	starttime += duration;
 	t = localtime(&starttime);
 	strftime(text, 6, "%H:%M", t);
-	fb.putText(495, 93, 0, text);
+	fb->putText(495, 80, 0, text);
 
-	fb.setTextSize(0.45);
-	fb.fillBox(100, 105, 120, 129, 5);
-	fb.fillBox(120, 105, 560, 129, 7);
-	fb.fillBox(560, 105, 600, 129, 5);
-	fb.putText(125, 123, 7, event_short_text, 430);
+	fb->setTextSize(0.45);
+	fb->fillBox(100, 105, 120, 129, 5);
+	fb->fillBox(120, 105, 560, 129, 7);
+	fb->fillBox(560, 105, 600, 129, 5);
+	fb->putText(125, 110, 7, event_short_text, 430);
 
-	fb.fillBox(100, 135, 110, 470, 5);
-	fb.fillBox(110, 135, 580, 470, 7);
-	fb.fillBox(580, 135, 590, 470, 5);
+	fb->fillBox(100, 135, 110, 470, 5);
+	fb->fillBox(110, 135, 580, 470, 7);
+	fb->fillBox(580, 135, 590, 470, 5);
 
 	nlcounter = 0;
 	int last = 0;
@@ -1175,7 +1351,7 @@ void osd::showEPG()
 		if (event_extended_text[i] == ' ')
 		{
 			last = i;
-			length += fb.getWidth(event_extended_text[i]);
+			length += fb->getWidth(event_extended_text[i]);
 		}
 		else if (event_extended_text[i] == '\n')
 		{
@@ -1186,7 +1362,7 @@ void osd::showEPG()
 		else
 		{
 			
-			length += fb.getWidth(event_extended_text[i]);
+			length += fb->getWidth(event_extended_text[i]);
 			if (length >= 350)
 			{
 				i = last;
@@ -1196,7 +1372,7 @@ void osd::showEPG()
 		}
 
 	}
-	printf("%d\n", nlcounter);
+	//printf("%d\n", nlcounter);
 
 	last = 0;
 	int i;
@@ -1211,13 +1387,13 @@ void osd::showEPG()
 	}
 	for (i = 0; i < stop; i++)
 	{
-		printf("%d - %d\n", i, newlines[i]);
-		fb.putText(115, 163 + 20 * i, 7, event_extended_text.substr(last, newlines[i] - last));
+		//printf("%d - %d\n", i, newlines[i]);
+		fb->putText(115, 150 + 20 * i, 7, event_extended_text.substr(last, newlines[i] - last));
 		last = newlines[i] + 1;
 	}
 	if (newlines[i - 1] < (int)event_extended_text.length() && nlcounter < 16)
 	{
-		fb.putText(115, 163 + 20 * (i), 7, event_extended_text.substr(newlines[i - 1] + 1));
+		fb->putText(115, 150 + 20 * (i), 7, event_extended_text.substr(newlines[i - 1] + 1));
 	}
 	printf("Ende\n");
 	shown = 0;
@@ -1232,9 +1408,9 @@ void osd::showPrevEPGPage()
 		return;
 	}
 	
-	fb.fillBox(100, 135, 110, 470, 5);
-	fb.fillBox(110, 135, 580, 470, 7);
-	fb.fillBox(580, 135, 590, 470, 5);
+	fb->fillBox(100, 135, 110, 470, 5);
+	fb->fillBox(110, 135, 580, 470, 7);
+	fb->fillBox(580, 135, 590, 470, 5);
 
 	int last = newlines[shown * 15];
 	int i;
@@ -1250,12 +1426,12 @@ void osd::showPrevEPGPage()
 	for (i = shown * 15; i < stop; i++)
 	{
 		printf("%d - %d\n", i, newlines[i]);
-		fb.putText(115, 163 + 20 * (i - shown * 15), 7, event_extended_text.substr(last, newlines[i] - last));
+		fb->putText(115, 150 + 20 * (i - shown * 15), 7, event_extended_text.substr(last, newlines[i] - last));
 		last = newlines[i] + 1;
 	}
 	if (newlines[i - 1] < (int)event_extended_text.length() && nlcounter - (shown * 16) < 16)
 	{
-		fb.putText(115, 163 + 20 * (i - shown * 15), 7, event_extended_text.substr(newlines[i - 1] + 1));
+		fb->putText(115, 150 + 20 * (i - shown * 15), 7, event_extended_text.substr(newlines[i - 1] + 1));
 	}
 }
 
@@ -1268,9 +1444,9 @@ void osd::showNextEPGPage()
 		return;
 	}
 	
-	fb.fillBox(100, 135, 110, 470, 5);
-	fb.fillBox(110, 135, 580, 470, 7);
-	fb.fillBox(580, 135, 590, 470, 5);
+	fb->fillBox(100, 135, 110, 470, 5);
+	fb->fillBox(110, 135, 580, 470, 7);
+	fb->fillBox(580, 135, 590, 470, 5);
 
 	int last = newlines[shown * 15];
 	int i;
@@ -1286,18 +1462,18 @@ void osd::showNextEPGPage()
 	for (i = shown * 15; i < stop; i++)
 	{
 		printf("%d - %d\n", i, newlines[i]);
-		fb.putText(115, 163 + 20 * (i - shown * 15), 7, event_extended_text.substr(last, newlines[i] - last));
+		fb->putText(115, 150 + 20 * (i - shown * 15), 7, event_extended_text.substr(last, newlines[i] - last));
 		last = newlines[i] + 1;
 	}
 	if (newlines[i - 1] < (int)event_extended_text.length() && nlcounter - (shown * 16) < 16)
 	{
-		fb.putText(115, 163 + 20 * (i - shown * 15), 7, event_extended_text.substr(newlines[i - 1] + 1));
+		fb->putText(115, 150 + 20 * (i - shown * 15), 7, event_extended_text.substr(newlines[i - 1] + 1));
 	}
 }
 
 void osd::hideEPG()
 {
-	fb.clearScreen();
+	fb->clearScreen();
 }
 
 void osd::createMenu()
@@ -1395,41 +1571,41 @@ void osd::drawMenuEntry(int number, bool selected = false)
 	}
 	if (menu[number].type != 3)
 	{
-		fb.fillBox(100, 75 + number * 30, 110, 100 + number * 30, color1);
-		fb.fillBox(110, 75 + number * 30, 180, 100 + number * 30, color2);
-		fb.fillBox(180, 75 + number * 30, 440 + menu_size, 100 + number * 30, color1);
-		fb.putText(190, 95 + number * 30, color1, menu[number].caption, 250 + menu_size);
-		fb.putText(125, 95 + number * 30, color2, menu[number].index);
+		fb->fillBox(100, 75 + number * 30, 110, 100 + number * 30, color1);
+		fb->fillBox(110, 75 + number * 30, 180, 100 + number * 30, color2);
+		fb->fillBox(180, 75 + number * 30, 440 + menu_size, 100 + number * 30, color1);
+		fb->putText(190, 80 + number * 30, color1, menu[number].caption, 250 + menu_size);
+		fb->putText(125, 80 + number * 30, color2, menu[number].index);
 		if (menu[number].type == 1)
 		{
-			fb.fillBox(420, 80 + number * 30, 435, 95 + number * 30, color2);
+			fb->fillBox(420, 80 + number * 30, 435, 95 + number * 30, color2);
 			if (!menu[number].selected)
-				fb.fillBox(423, 83 + number * 30, 432, 92 + number * 30, color1);
+				fb->fillBox(423, 83 + number * 30, 432, 92 + number * 30, color1);
 		}
 		if (menu[number].type == 2)
 		{
-			fb.putText(435, 95 + number * 30, color3, menu[number].switches[menu[number].selected], -1, 1);
+			fb->putText(435, 80 + number * 30, color3, menu[number].switches[menu[number].selected], -1, 1);
 		}
 	}
 	else
 	{
-		fb.fillBox(100, 75 + number * 30, 452, 100 + number * 30, color1);
-		fb.putText(130, 95 + number * 30, color1, menu[number].caption);
+		fb->fillBox(100, 75 + number * 30, 452, 100 + number * 30, color1);
+		fb->putText(130, 80 + number * 30, color1, menu[number].caption);
 	}
 }
 
 void osd::showMenu()
 {
-	fb.setTextSize(0.45);
-	fb.fillBox(100, 45, 452 + menu_size, 70, 5);
-	fb.fillBox(452 + menu_size, 57, 464 + menu_size, 75 + number_menu_entries * 30, 5);
-	fb.fillBox(125, 45, 350, 70, 0);
-	fb.putText(130, 65, 0, menu_title);
+	fb->setTextSize(0.45);
+	fb->fillBox(100, 45, 452 + menu_size, 70, 5);
+	fb->fillBox(452 + menu_size, 57, 464 + menu_size, 75 + number_menu_entries * 30, 5);
+	fb->fillBox(125, 45, 350, 70, 0);
+	fb->putText(130, 50, 0, menu_title);
 	for (int j = 0; j <= 12; j++)
 	{
-		fb.fillBox(88 + circlemiddle[12 - j], 45 + j, 100, 45 +  j + 1, 5);
-		fb.fillBox(88 + circlemiddle[j], 57 + j, 100, 57 +  j + 1, 5);
-		fb.fillBox(452 + menu_size, 45 + j, 464 - circlemiddle[12 - j] + menu_size, 45 +  j + 1, 5);
+		fb->fillBox(88 + circlemiddle[12 - j], 45 + j, 100, 45 +  j + 1, 5);
+		fb->fillBox(88 + circlemiddle[j], 57 + j, 100, 57 +  j + 1, 5);
+		fb->fillBox(452 + menu_size, 45 + j, 464 - circlemiddle[12 - j] + menu_size, 45 +  j + 1, 5);
 	}
 
 	for (int i = 0; i < number_menu_entries; i++)
@@ -1440,7 +1616,7 @@ void osd::showMenu()
 
 void osd::hideMenu()
 {
-	fb.fillBox(88, 45, 464 + menu_size, 600, -1);
+	fb->fillBox(88, 45, 464 + menu_size, 575, -1);
 }
 
 void osd::setMute(bool mute)
@@ -1449,20 +1625,20 @@ void osd::setMute(bool mute)
 	{
 		for (int j = 0; j <= 12; j++)
 		{
-			fb.fillBox(500 + circlemiddle[12 - j], 75 + j, 513, 75 +  j + 1, 5);
-			fb.fillBox(500 + circlemiddle[j], 87 + j, 513, 87 +  j + 1, 5);
-			fb.fillBox(585, 75 + j, 598 - circlemiddle[12 - j], 75 +  j + 1, 5);
-			fb.fillBox(585, 87 + j, 598 - circlemiddle[j], 87 +  j + 1, 5);
+			fb->fillBox(500 + circlemiddle[12 - j], 75 + j, 513, 75 +  j + 1, 5);
+			fb->fillBox(500 + circlemiddle[j], 87 + j, 513, 87 +  j + 1, 5);
+			fb->fillBox(585, 75 + j, 598 - circlemiddle[12 - j], 75 +  j + 1, 5);
+			fb->fillBox(585, 87 + j, 598 - circlemiddle[j], 87 +  j + 1, 5);
 
 		}
-		fb.fillBox(513, 75, 585, 99, 0);
-		fb.setTextSize(0.45);
-		fb.putText(515, 93, 0, "Silence");
+		fb->fillBox(513, 75, 585, 99, 0);
+		fb->setTextSize(0.45);
+		fb->putText(515, 80, 0, "Silence");
 		
 	}
 	else
 	{
-		fb.fillBox(500, 75, 598, 100, -1);
+		fb->fillBox(500, 75, 598, 100, -1);
 	}
 }
 
@@ -1470,43 +1646,43 @@ void osd::showVolume()
 {
 	for (int j = 0; j <= 10; j++)
 	{
-		fb.fillBox(500 + circlesmall[10 - j], 110 + j, 510, 110 + j + 1, 5);
-		fb.fillBox(500 + circlesmall[j], 120 + j, 510, 120 + j + 1, 5);
-		fb.fillBox(500 + circlesmall[10 - j], 125 + j, 510, 125 + j + 1, 5);
-		fb.fillBox(500 + circlesmall[j], 135 + j, 510, 135 + j + 1, 5);
+		fb->fillBox(500 + circlesmall[10 - j], 110 + j, 510, 110 + j + 1, 5);
+		fb->fillBox(500 + circlesmall[j], 120 + j, 510, 120 + j + 1, 5);
+		fb->fillBox(500 + circlesmall[10 - j], 125 + j, 510, 125 + j + 1, 5);
+		fb->fillBox(500 + circlesmall[j], 135 + j, 510, 135 + j + 1, 5);
 
-		fb.fillBox(588, 110 + j, 598 - circlesmall[10 - j], 110 + j + 1, 5);
-		fb.fillBox(588, 120 + j, 598 - circlesmall[j], 120 + j + 1, 5);
-		fb.fillBox(588, 125 + j, 598 - circlesmall[10 - j], 125 + j + 1, 5);
-		fb.fillBox(588, 135 + j, 598 - circlesmall[j], 135 + j + 1, 5);
+		fb->fillBox(588, 110 + j, 598 - circlesmall[10 - j], 110 + j + 1, 5);
+		fb->fillBox(588, 120 + j, 598 - circlesmall[j], 120 + j + 1, 5);
+		fb->fillBox(588, 125 + j, 598 - circlesmall[10 - j], 125 + j + 1, 5);
+		fb->fillBox(588, 135 + j, 598 - circlesmall[j], 135 + j + 1, 5);
 	}
-	fb.fillBox(510, 110, 588, 145, 0);
+	fb->fillBox(510, 110, 588, 145, 0);
 
 	int slider = (int) (((float)volume / 63) * 10);
 
 	for (int i = 0; i < slider; i++)
 	{
-		fb.fillBox(515 + i * 7, 115, 519 + i * 7, 125, 8);
-		fb.fillBox(515 + i * 7, 130, 519 + i * 7, 140, 8);
+		fb->fillBox(515 + i * 7, 115, 519 + i * 7, 125, 8);
+		fb->fillBox(515 + i * 7, 130, 519 + i * 7, 140, 8);
 	}
 
 	for (int i = slider + 1; i < 10; i++)
 	{
-		fb.fillBox(515 + i * 7, 115, 519 + i * 7, 125, 0);
-		fb.fillBox(515 + i * 7, 130, 519 + i * 7, 140, 0);
+		fb->fillBox(515 + i * 7, 115, 519 + i * 7, 125, 0);
+		fb->fillBox(515 + i * 7, 130, 519 + i * 7, 140, 0);
 	}
 }
 
 void osd::hideVolume()
 {
-	fb.fillBox(500, 110, 598, 145, -1);
+	fb->fillBox(500, 110, 598, 145, -1);
 }
 
 void osd::createScan()
 {
 	percentage = 0;
 	channel_count = 0;
-	fb.setTextSize(0.5);
+	fb->setTextSize(0.5);
 }
 
 void osd::setScanProgress(int percent)
@@ -1515,12 +1691,12 @@ void osd::setScanProgress(int percent)
 
 	for (int i = 0; i < (int) ((float)percentage / 5); i++)
 	{
-		fb.fillBox(225 + i * 13, 465, 231 + i * 13, 485, 8);
+		fb->fillBox(225 + i * 13, 465, 231 + i * 13, 485, 8);
 	}
 
 	for (int i = (int) ((float)percentage / 5) + 1; i < 20; i++)
 	{
-		fb.fillBox(225 + i * 13, 465, 231 + i * 13, 485, 0);
+		fb->fillBox(225 + i * 13, 465, 231 + i * 13, 485, 0);
 	}
 
 
@@ -1530,8 +1706,8 @@ void osd::setScanProgress(int percent)
 	sprintf(perc, "%d", percentage);
 	strcat(perc, " %");
 
-	fb.fillBox(330, 430, 400, 459, 5);
-	fb.putText(330, 450, 5, perc);
+	fb->fillBox(330, 430, 400, 459, 5);
+	fb->putText(330, 435, 5, perc);
 }
 
 void osd::setScanChannelNumber(int number)
@@ -1539,26 +1715,26 @@ void osd::setScanChannelNumber(int number)
 	channel_count = number;
 
 	
-	fb.fillBox(410, 350, 500, 380, 5);
-	fb.putText(480, 370, 5, channel_count, -1, 1);
+	fb->fillBox(410, 350, 500, 380, 5);
+	fb->putText(480, 355, 5, channel_count, -1, 1);
 
 }
 
 void osd::showScan()
 {
 	printf("+-+-+-+-+ Draw Channelscan\n");
-	fb.fillBox(200, 300, 500, 500, 5);
-	fb.fillBox(210, 460, 490, 490, 0);
-	fb.putText(300, 320, 5, "Channel-Scan");
-	fb.fillBox(200, 325, 500, 327, 0);
-	fb.fillBox(200, 400, 500, 402, 0);
+	fb->fillBox(200, 300, 500, 500, 5);
+	fb->fillBox(210, 460, 490, 490, 0);
+	fb->putText(300, 305, 5, "Channel-Scan");
+	fb->fillBox(200, 325, 500, 327, 0);
+	fb->fillBox(200, 400, 500, 402, 0);
 
-	fb.putText(220, 370, 5, "Found Channels:");
+	fb->putText(220, 355, 5, "Found Channels:");
 }
 
 void osd::hideScan()
 {
-	fb.fillBox(200, 300, 500, 500, -1);
+	fb->fillBox(200, 300, 500, 500, -1);
 }
 
 void osd::createSchedule()
@@ -1593,22 +1769,22 @@ void osd::selectScheduleInformation(int select, bool redraw = true)
 
 	if (redraw)
 	{
-		fb.fillBox(100, 103 + selected_sched * 20, 630, 124 + selected_sched * 20, 5);
+		fb->fillBox(100, 103 + selected_sched * 20, 630, 124 + selected_sched * 20, 5);
 
 		t = localtime(&(sched[shown_page * 15 + selected_sched].starttime));
 		strftime(text, 11, "%a, %H:%M", t);
-		fb.putText(105, 120 + selected_sched * 20, 5, text);
-		fb.putText(210, 120 + selected_sched * 20, 5, sched[shown_page * 15 + selected_sched].description, 410);
+		fb->putText(105, 107 + selected_sched * 20, 5, text);
+		fb->putText(210, 107 + selected_sched * 20, 5, sched[shown_page * 15 + selected_sched].description, 410);
 	}
 
 	selected_sched = select;
 
-	fb.fillBox(103, 104 + selected_sched * 20, 204, 124 + selected_sched * 20, 0);
-	fb.fillBox(207, 104 + selected_sched * 20, 625, 124 + selected_sched * 20, 0);
+	fb->fillBox(103, 104 + selected_sched * 20, 204, 124 + selected_sched * 20, 0);
+	fb->fillBox(207, 104 + selected_sched * 20, 625, 124 + selected_sched * 20, 0);
 	t = localtime(&(sched[shown_page * 15 + selected_sched].starttime));
 	strftime(text, 11, "%a, %H:%M", t);
-	fb.putText(105, 120 + selected_sched * 20, 0, text);
-	fb.putText(210, 120 + selected_sched * 20, 0, sched[shown_page * 15 + selected_sched].description, 410);
+	fb->putText(105, 107 + selected_sched * 20, 0, text);
+	fb->putText(210, 107 + selected_sched * 20, 0, sched[shown_page * 15 + selected_sched].description, 410);
 
 
 }
@@ -1638,13 +1814,13 @@ void osd::showSchedule(int page)
 		return;
 	}
 	
-	fb.fillBox(100, 100, 630, 420, 5);
+	fb->fillBox(100, 100, 630, 420, 5);
 	printf("4\n");
 	int max = 15;
 	if ((page + 1) * 15 > (int)sched.size())
 		max = sched.size() % 15;
 	printf("Page: %d - Sched.size: %d\n", page, sched.size());
-	fb.setTextSize(0.4);
+	fb->setTextSize(0.4);
 	printf("Max: %d\n", max);
 	for (int i = 0; i < max; i++)
 	{
@@ -1653,15 +1829,15 @@ void osd::showSchedule(int page)
 		struct tm *t;
 		t = localtime(&(sched[page * 15 + i].starttime));
 		strftime(text, 11, "%a, %H:%M", t);
-		fb.putText(105, 120 + i * 20, 5, text);
-		fb.putText(210, 120 + i * 20, 5, sched[page * 15 + i].description, 410);
+		fb->putText(105, 107 + i * 20, 5, text);
+		fb->putText(210, 107 + i * 20, 5, sched[page * 15 + i].description, 410);
 	}
 	printf("End showing\n");
 }
 
 void osd::hideSchedule()
 {
-	fb.fillBox(100, 100, 630, 420, -1);
+	fb->fillBox(100, 100, 630, 420, -1);
 }
 
 void osd::selectNextScheduleInformation()
@@ -1747,8 +1923,8 @@ void osd::setIP(unsigned char number)
 
 void osd::drawIPPosition(int position, int color)
 {
-	fb.fillBox(90 + position * 40 + ((int)((float)position / 3)) * 10, 300, 125 + position * 40 + ((int)((float)position / 3)) * 10, 335, color);
-	fb.putText(97 + position * 40 + ((int)((float)position / 3)) * 10, 325, color, ip[position]);
+	fb->fillBox(90 + position * 40 + ((int)((float)position / 3)) * 10, 300, 125 + position * 40 + ((int)((float)position / 3)) * 10, 335, color);
+	fb->putText(97 + position * 40 + ((int)((float)position / 3)) * 10, 310, color, ip[position]);
 }
 
 void osd::setIPPosition(unsigned char position)
@@ -1788,32 +1964,32 @@ void osd::showIP()
 {
 	for (int j = 0; j <= 10; j++)
 	{
-		fb.fillBox(150 + circlesmall[10 - j], 200 + j, 160, 200 + j + 1, 1);
-		fb.fillBox(560, 200 + j, 570 - circlesmall[10 - j], 200 + j + 1, 1);
+		fb->fillBox(150 + circlesmall[10 - j], 200 + j, 160, 200 + j + 1, 1);
+		fb->fillBox(560, 200 + j, 570 - circlesmall[10 - j], 200 + j + 1, 1);
 	}
 	
 	for (int j = 11; j < 20; j++)
 	{
-		fb.fillBox(150 + circlesmall[j - 11], 200 + j, 160, 200 + j + 1, 1);
-		fb.fillBox(560, 200 + j, 570 - circlesmall[j - 11], 200 + j + 1, 1);
+		fb->fillBox(150 + circlesmall[j - 11], 200 + j, 160, 200 + j + 1, 1);
+		fb->fillBox(560, 200 + j, 570 - circlesmall[j - 11], 200 + j + 1, 1);
 	}
-	fb.fillBox(160, 200, 170, 220, 1);
-	fb.fillBox(170, 200, 550, 220, 0);
-	fb.fillBox(550, 200, 560, 220, 1);
+	fb->fillBox(160, 200, 170, 220, 1);
+	fb->fillBox(170, 200, 550, 220, 0);
+	fb->fillBox(550, 200, 560, 220, 1);
 
-	fb.setTextSize(0.4);
-	fb.putText(175, 215, 0, ip_description, 370);
+	fb->setTextSize(0.4);
+	fb->putText(175, 202, 0, ip_description, 370);
 
-	fb.setTextSize(0.6);
+	fb->setTextSize(0.6);
 	for (int j = 0; j <= 17; j++)
 	{
-		fb.fillBox(70 + circle[17 - j], 300 + j, 87, 300 + j + 1, 1);
-		fb.fillBox(600, 300 + j, 618 - circle[17 - j], 300 + j + 1, 1);
+		fb->fillBox(70 + circle[17 - j], 300 + j, 87, 300 + j + 1, 1);
+		fb->fillBox(600, 300 + j, 618 - circle[17 - j], 300 + j + 1, 1);
 	}
 	for (int j = 18; j < 35; j++)
 	{
-		fb.fillBox(70 + circle[j - 18], 300 + j, 87, 300 + j + 1, 1);
-		fb.fillBox(600, 300 + j, 618 - circle[j - 18], 300 + j + 1, 1);
+		fb->fillBox(70 + circle[j - 18], 300 + j, 87, 300 + j + 1, 1);
+		fb->fillBox(600, 300 + j, 618 - circle[j - 18], 300 + j + 1, 1);
 	}
 
 	for (int i = 0; i < 12; i++)
@@ -1824,7 +2000,7 @@ void osd::showIP()
 
 void osd::hideIP()
 {
-	fb.clearScreen();
+	fb->clearScreen();
 }
 
 int osd::getIPPart(int number)
@@ -1834,22 +2010,22 @@ int osd::getIPPart(int number)
 
 void osd::showAbout()
 {
-	fb.fillBox(110, 100, 630, 420, 5);
+	fb->fillBox(110, 100, 630, 420, 5);
 	
-	fb.setTextSize(1);
+	fb->setTextSize(1);
 
-	fb.putText(240, 200, 5, setting.getVersion());
+	fb->putText(240, 200, 5, setting.getVersion());
 
-	fb.setTextSize(0.5);
-	fb.putText(280, 250, 5, "GUI coded by TheDOC");
-	fb.putText(190, 270, 5, "Drivers and stuff by the Tuxbox-Team");
+	fb->setTextSize(0.5);
+	fb->putText(280, 250, 5, "GUI coded by TheDOC");
+	fb->putText(190, 270, 5, "Drivers and stuff by the Tuxbox-Team");
 	
-	fb.setTextSize(0.4);
-	fb.putText(195, 330, 5, "Info's about LCARS: http://www.chatville.de");
-	fb.putText(200, 350, 5, "Info's about tuxbox: http://dbox2.elxsi.de");
+	fb->setTextSize(0.4);
+	fb->putText(195, 330, 5, "Info's about LCARS: http://www.chatville.de");
+	fb->putText(200, 350, 5, "Info's about tuxbox: http://dbox2.elxsi.de");
 }
 
 void osd::hideAbout()
 {
-	fb.fillBox(110, 100, 630, 420, -1);
+	fb->fillBox(110, 100, 630, 420, -1);
 }

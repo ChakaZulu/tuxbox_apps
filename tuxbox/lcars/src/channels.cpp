@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -36,16 +39,20 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "pat.h"
 #include "eit.h"
 
+#include "config.h"
+
 channels::channels(settings &set, pat &p1, pmt &p2) : setting(set), pat_obj(p1), pmt_obj(p2)
 {
 	cur_pos = -1;
 }
 
 
-channels::channels(settings &set, pat &p1, pmt &p2, eit *e) : setting(set), pat_obj(p1), pmt_obj(p2)
+channels::channels(settings &set, pat &p1, pmt &p2, eit *e, cam *c, hardware *h) : setting(set), pat_obj(p1), pmt_obj(p2)
 {
 	cur_pos = -1;
 	eit_obj = e;
+	cam_obj = c;
+	hardware_obj = h;
 }
 
 void channels::zapCurrentChannel(zap *zap_obj, tuner *tuner_obj)
@@ -84,6 +91,11 @@ void channels::zapCurrentChannel(zap *zap_obj, tuner *tuner_obj)
 			{
 				setCurrentTXT(pmt_entry.PID[i]);
 			}	
+			else if (pmt_entry.type[i] == 0x06 && pmt_entry.subtype[i] != 1)
+			{
+				addCurrentAPID(pmt_entry.PID[i], (bool) true);
+				component[number_components++] = pmt_entry.component[i];
+			}
 			
 			printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
 		}
@@ -95,11 +107,14 @@ void channels::zapCurrentChannel(zap *zap_obj, tuner *tuner_obj)
 			printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
 		}
 
+		hardware_obj->useDD(getCurrentDD(0));
 		if (getCurrentAPIDcount() == 1)
 			(*zap_obj).zap_to(getCurrentVPID(), getCurrentAPID(0), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS());
 		else
 			(*zap_obj).zap_to(getCurrentVPID(), getCurrentAPID(0), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS(), getCurrentAPID(1));
 		
+		
+
 		if (getCurrentAPIDcount() > 1)
 			(*eit_obj).setAudioComponent(component[apid]);
 		else
@@ -162,9 +177,15 @@ void channels::setCurrentOSDEvent(osd *osd_obj)
 void channels::zapCurrentAudio(int pid, zap *zap_obj)
 {
 	apid = pid;
+	//hardware_obj->useDD(true);
+	
+	if (basic_channellist[cur_pos].DD[pid])
+		printf("Dolby Digital ON ......................................\n");
+	else
+		printf("Dolby Digital OFF ......................................\n");
+	hardware_obj->useDD(getCurrentDD(apid));
 	(*zap_obj).zap_audio(getCurrentVPID(), getCurrentAPID(apid), ECM, getCurrentSID(), getCurrentONID());
-						
-
+	
 	(*eit_obj).setAudioComponent(component[apid]);
 
 
@@ -344,6 +365,18 @@ void channels::addCurrentAPID(int APID, int number = -1)
 		number = getCurrentAPIDcount();
 	printf("addCurrentAPID %d to %04x\n", number, APID);
 	basic_channellist[cur_pos].APID[number] = APID;
+	basic_channellist[cur_pos].DD[number] = false;
+}
+
+void channels::addCurrentAPID(int APID, bool DD)
+{
+	addCurrentAPID(APID);
+	basic_channellist[cur_pos].DD[getCurrentAPIDcount() - 1] = DD;
+}
+
+bool channels::getCurrentDD(int number = 0)
+{
+	return basic_channellist[cur_pos].DD[number];
 }
 
 void channels::setCurrentPCR(int PCR)
@@ -483,7 +516,7 @@ int channels::getCurrentAPIDcount()
 {
 	int count = 0;
 	while(basic_channellist[cur_pos].APID[count++] != 0)
-		if (count > 2)
+		if (count > 3)
 			break;
 	count--;
 	return count;
@@ -739,7 +772,7 @@ void channels::saveDVBChannels()
 	FILE *fp;
 
 	printf("Save File\n");
-	fp = fopen("/var/dvb2000/lcars.dvb", "wb");
+	fp = fopen(DATADIR "/lcars/lcars.dvb", "wb");
 	for (std::vector<struct channel>::iterator it = basic_channellist.begin(); it != basic_channellist.end(); ++it)
 	{
 		dvbchannel chan;
@@ -790,7 +823,7 @@ void channels::loadDVBChannels()
 	int fd;
 	
 	printf("Loading Channels\n");
-	if ((fd = open("/var/dvb2000/lcars.dvb", O_RDONLY)) < 0)
+	if ((fd = open(DATADIR "/lcars/lcars.dvb", O_RDONLY)) < 0)
 	{
 		printf("No channels available!\n");	
 		return;

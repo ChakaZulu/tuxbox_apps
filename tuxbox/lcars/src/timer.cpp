@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: timer.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -44,6 +47,11 @@ int timer::start_thread()
                            (void *)this );
 	return status;
 
+}
+
+time_t timer::getTime()
+{
+	return (*timer_list.begin()).second.starttime;
 }
 
 void* timer::start_timer( void * this_ptr )
@@ -121,6 +129,8 @@ void timer::runTimer()
 		if (act_timer.duration != 0)
 			addTimer(time(0) + act_timer.duration, 2, 0, last_channel);
 		(*channels_obj).setCurrentOSDProgramInfo(osd_obj);
+		(*hardware_obj).fnc(0);
+		(*hardware_obj).fnc(2);
 					
 		(*channels_obj).receiveCurrentEIT();
 		(*channels_obj).setCurrentOSDProgramEIT(osd_obj);
@@ -171,7 +181,7 @@ void timer::rmTimer(int channel, time_t starttime)
 void timer::saveTimer()
 {
 	int fd;
-	fd = open("/var/lcars/timer.dat", O_WRONLY | O_CREAT | O_TRUNC);
+	fd = open(DATADIR "/lcars/timer.dat", O_WRONLY | O_CREAT | O_TRUNC);
 	if (fd < 0)
 	{
 		perror("Couldn't save timer\n");

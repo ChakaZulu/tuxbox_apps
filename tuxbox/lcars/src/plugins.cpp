@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -27,11 +30,11 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 void plugins::loadPlugins()
 {
 	printf("Checking plugins-directory\n");
-	printf("Dir: %s\n", plugin_dir.c_str());
+	printf("Dir: %s\n", PLUGINDIR "/");
 
 	struct dirent **namelist;
 	
-	int number_of_files = scandir(plugin_dir.c_str(), &namelist, 0, alphasort);
+	int number_of_files = scandir(PLUGINDIR, &namelist, 0, alphasort);
 	
 	number_of_plugins = 0;
 	plugin_list.clear();
@@ -47,10 +50,10 @@ void plugins::loadPlugins()
 
 			plugin new_plugin;
 			new_plugin.filename = filename.substr(0, pos);
-			std::string fname = plugin_dir;
+			std::string fname = PLUGINDIR "/";
 			new_plugin.cfgfile = fname.append(new_plugin.filename);
 			new_plugin.cfgfile.append(".cfg");
-			fname = plugin_dir;
+			fname = PLUGINDIR "/";
 			new_plugin.sofile = fname.append(new_plugin.filename);
 			new_plugin.sofile.append(".so");
 

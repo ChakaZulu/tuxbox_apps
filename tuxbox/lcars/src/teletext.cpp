@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -24,6 +27,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <memory.h>
 #include <stdio.h>
+#include <dbox/avia_vbi.h>
 
 #include <ost/dmx.h>
 
@@ -72,4 +76,12 @@ void teletext::getTXT(int PID)
 	ioctl(fd,DMX_STOP,0);
 
 	close(fd);
+}
+
+void teletext::startReinsertion(int PID)
+{
+	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
+	ioctl(txtfd, AVIA_VBI_START_VTXT, PID);
+
+	close(txtfd);
 }

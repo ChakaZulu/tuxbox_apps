@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.h,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -26,8 +29,10 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <vector>
 #include <queue>
 #include <sstream>
-#include "fb.h"
+#include "fbClass.h"
 #include "settings.h"
+
+typedef std::vector<std::string> command_list;
 
 class osd
 {
@@ -47,7 +52,7 @@ class osd
 	int circlesmall[20];
 	int circlemiddle[20];
 	
-	fbClass fb;
+	fbClass *fb;
 	
 	// ProgramInfo
 	std::string serviceName;
@@ -63,7 +68,16 @@ class osd
 	char language[20];
 	bool teletext;
 	int par_rating;
-
+	command_list prog_com_list_show;
+	command_list prog_com_list_hide;
+	command_list prog_com_list_servicenumber;
+	command_list prog_com_list_servicename;
+	command_list prog_com_list_language;
+	command_list prog_com_list_nowtime;
+	command_list prog_com_list_nowdescription;
+	command_list prog_com_list_nexttime;
+	command_list prog_com_list_nextdescription;
+	
 	// NumberEntry
 	int number;
 	std::string numberText;
@@ -130,7 +144,11 @@ public:
 	bool proginfo_shown;
 	time_t proginfo_hidetime;
 	int start_thread();
-	osd(settings &set, fbClass &fbclass, std::string fontpath = "/usr/lib/fonts/ds9.ttf");
+	osd(settings &set, fbClass *fbclass);
+
+	void initPalette();
+
+	void loadSkin(std::string filename);
 
 	void addCommand(std::string command);
 	void executeCommand();
@@ -164,6 +182,16 @@ public:
 	void setParentalRating(int rating);
 	void showProgramInfo();
 	void hideProgramInfo();
+	void setProgramCommandListShow(command_list list) { prog_com_list_show = list; }
+	void setProgramCommandListHide(command_list list) { prog_com_list_hide = list; }
+	void setProgramCommandListServiceNumber(command_list list) { prog_com_list_servicenumber = list; }
+	void setProgramCommandListServiceName(command_list list) { prog_com_list_servicename = list; }
+	void setProgramCommandListLanguage(command_list list) { prog_com_list_language = list; }
+	void setProgramCommandListNowTime(command_list list) { prog_com_list_nowtime = list; }
+	void setProgramCommandListNowDescription(command_list list) { prog_com_list_nowdescription = list; }
+	void setProgramCommandListNextTime(command_list list) { prog_com_list_nexttime = list; }
+	void setProgramCommandListNextDescription(command_list list) { prog_com_list_nextdescription = list; }
+	
 
 	void createEPG();
 	void setEPGEventName(std::string input);

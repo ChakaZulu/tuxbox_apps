@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: rc.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -102,10 +105,11 @@ int rc::start_thread()
 	int status;
   	
 	pthread_mutex_init(&mutex, NULL);
-	status = pthread_create( &rcThread,
+	/*status = pthread_create( &rcThread,
                            NULL,
                            start_rcqueue,
                            (void *)this );
+						   */
 	return status;
 
 }

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -24,6 +27,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 hardware::hardware(settings &s) : setting(s)
 {
 	vcr_on = false;
+	old_DD_state = true;
 }
 
 void hardware::fnc(int i)
@@ -43,7 +47,7 @@ bool hardware::switch_vcr()
 	if (!vcr_on)
 	{
 		printf("on\n");
-		if (setting.getBox() == 3) // Sagem
+		if (setting.getBox() == SAGEM) // Sagem
 		{
 			i = 2;
 			j = 1;
@@ -53,7 +57,7 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 		}
-		else if (setting.getBox() == 1) // Nokia
+		else if (setting.getBox() == NOKIA) // Nokia
 		{
 			i = 3;
 			j = 2;
@@ -63,7 +67,7 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 		}
-		else if (setting.getBox() == 2) // Philips
+		else if (setting.getBox() == PHILIPS) // Philips
 		{
 			nothing = 3;
 
@@ -77,7 +81,7 @@ bool hardware::switch_vcr()
 	}
 	else
 	{		
-		if (setting.getBox() == 3)
+		if (setting.getBox() == SAGEM)
 		{
 			i = 0;
 			j = 0;
@@ -88,7 +92,7 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSASW1,&j);
 		
 		}
-		else if (setting.getBox() == 1)
+		else if (setting.getBox() == NOKIA)
 		{
 			i = 5;
 			j = 1;
@@ -99,7 +103,7 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 		}
-		else if (setting.getBox() == 2)
+		else if (setting.getBox() == PHILIPS)
 		{
 			i = 1;
 			j = 1;
@@ -164,12 +168,69 @@ int hardware::vol_plus(int value)
 	return i;
 }
 
+void hardware::setOutputMode(int i)
+{
+	int setmode = 0;
+
+	if (setting.getBox() == NOKIA)
+	{
+		if (i == OUTPUT_FBAS)
+			setmode = 0;
+		else
+			setmode = 3;
+	}
+	else if (setting.getBox() == PHILIPS)
+	{
+		if (i == OUTPUT_FBAS)
+			setmode = 0;
+		else
+			setmode = 1;
+	}
+	else if (setting.getBox() == SAGEM)
+	{
+	}
+
+	setfblk(setmode);
+}
+
 void hardware::setfblk(int i)
 {
 	avs = open("/dev/dbox/avs0",O_RDWR);
-	ioctl(avs,AVSIOSFBLK,&fblk);
 	fblk = i;
+	ioctl(avs,AVSIOSFBLK,&fblk);
 	close(avs);
+}
+
+int hardware::getfblk()
+{
+	avs = open("/dev/dbox/avs0",O_RDWR);
+	if (ioctl(avs, AVSIOGFBLK, &fblk)< 0) {
+		perror("AVSIOGFBLK:");
+		exit(0);
+	}
+	close(avs);
+
+	int outputtype = 0;
+	if (setting.getBox() == NOKIA)
+	{
+		if (fblk == 3)
+			outputtype = OUTPUT_RGB;
+		else if (fblk == 0)
+			outputtype = OUTPUT_FBAS;
+	}
+	else if (setting.getBox() == PHILIPS)
+	{
+		if (fblk == 1)
+			outputtype = OUTPUT_RGB;
+		else if (fblk == 0)
+			outputtype = OUTPUT_FBAS;
+
+	}
+	else if (setting.getBox() == SAGEM)
+	{
+
+	}
+	return outputtype;
 }
 
 
@@ -182,4 +243,22 @@ void hardware::reboot()
 {
 	system("/sbin/reboot &");
 }
+
+void hardware::useDD(bool use)
+{
+	if (old_DD_state == use)
+		return;
+	int fd = open("/dev/ost/audio0", O_RDWR);
+	if (use)
+	{
+		ioctl(fd, AUDIO_SET_BYPASS_MODE, 0);
+	}
+	else
+	{
+		ioctl(fd, AUDIO_SET_BYPASS_MODE, 1);
+	}
+	close(fd);
+	old_DD_state = use;
+}
+
 

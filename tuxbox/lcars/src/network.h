@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.h,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -26,14 +29,16 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <pthread.h>
 
 #include "container.h"
+#include "xmlrpc.h"
 
 #define PORT 80
 
 class network
 {
 	pthread_t thread;
-
+	
 public:
+	xmlrpc xmlrpc_obj;
 	container cont;
 	void writetext(std::string text);
 	network(container &container);

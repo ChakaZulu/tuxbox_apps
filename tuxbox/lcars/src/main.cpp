@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.7  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.6  2001/11/15 00:43:45  TheDOC
  added
 
@@ -28,6 +31,7 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include <stdio.h>
 
 #include <dbox/avia_vbi.h>
+#include <dbox/fp.h>
 
 #include "sdt.h"
 #include "zap.h"
@@ -39,6 +43,7 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include "rc.h"
 #include "channels.h"
 #include "osd.h"
+#include "fbClass.h"
 #include "checker.h"
 #include "container.h"
 #include "serial.h"
@@ -51,6 +56,8 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include "pig.h"
 #include "timer.h"
 
+#include "config.h"
+
 // del
 #include <stdio.h>
 // del
@@ -59,11 +66,59 @@ int main(int argc, char **argv)
 {
 	int key = -1;
 	int number = -1;	
-	std::string font = "/usr/lib/fonts/ds9.ttf";
+	std::string font = FONTDIR "/ds9.ttf";
+	std::string vtfont = FONTDIR "/ds9.ttf";
 
+	cout << "Fonts: " << font << endl;
+    
 	plugins plugins;
 	
+
+/*	xmlrpc_value *testvalue = new xmlrpc_value(INT, (void*) 5);
+
+	xmlrpc_value::xmlrpc_array test2;
+	test2.insert(test2.end(), testvalue);
+	testvalue = new xmlrpc_value(STRING, (void*)font.c_str());
 	
+	test2.insert(test2.end(), testvalue);
+
+	xmlrpc_value testvalue2(ARRAY, &test2);
+
+	xmlrpc_params parameter;
+	parameter.addParam(&testvalue2);
+	parameter.addParam(testvalue);
+	
+	//cout << testvalue2.getXML() << endl;
+
+	xmlrpc_value::xmlrpc_struct test_struct;
+	xmlrpc_value *testvalue3 = new xmlrpc_value(INT, (void*) 194);
+	
+	test_struct.insert(xmlrpc_value::xmlrpc_struct_pair("Erster Test", testvalue3));
+
+	xmlrpc_value *testvalue_struct = new xmlrpc_value(STRUCT, &test_struct);
+	//cout << testvalue_struct->getXML() << endl;
+	//cout << testvalue2.getXML() << endl;
+	parameter.addParam(testvalue_struct);
+
+	xmlrpc_response testresponse;
+	testresponse.setParams(&parameter);
+	//cout << testresponse.getXML() << endl;
+
+	xmlrpc_request testrequest;
+	testrequest.setParams(&parameter);
+	testrequest.setMethodName("Kleine.Test.Methode");
+	//cout << testrequest.getXML() << endl;
+
+	xmlrpc_parse test_parse;
+	test_parse.readFile("test.xml");
+	test_parse.parseXML();
+	//printf("%s\n", testvalue_struct->getXML().c_str());
+
+	//std::string teststring = "Hallo";
+	//xmlrpc::xmlrpc_value test2(STRING, (void*)teststring.c_str());
+	//printf("%s\n", test2.string_value.c_str());
+	
+*/
 	FILE *fp;
 	fp = fopen("/var/lcars/dirs.conf", "r");
 	
@@ -75,15 +130,15 @@ int main(int argc, char **argv)
 	else
 	{
 	
-	char pluginpath[100];
-	fgets(pluginpath, 100, fp);
-	printf("Plugins-Pfad: %s\n", pluginpath);
-	fclose(fp);
+		char pluginpath[100];
+		fgets(pluginpath, 100, fp);
+		printf("Plugins-Pfad: %s\n", pluginpath);
+		fclose(fp);
 	
-	std::string ppath(pluginpath);
+		std::string ppath(pluginpath);
 		
-	plugins.setPluginDir(ppath.substr(0, ppath.length() - 1));
-	plugins.loadPlugins();
+		plugins.setPluginDir(ppath.substr(0, ppath.length() - 1));
+		plugins.loadPlugins();
 	}
 	cam cam;
 	sdt sdt;
@@ -92,10 +147,11 @@ int main(int argc, char **argv)
 
 	settings settings(cam);
 
-	settings.setVersion("LCARS V0.13");
+	settings.setVersion("LCARS V0.15");
 
 	hardware hardware(settings);
-
+	hardware.useDD(false);
+	
 	rc rc(&hardware);
 	rc.start_thread();
 	
@@ -128,9 +184,21 @@ int main(int argc, char **argv)
 		font = argv[4];
 	}
 	printf("Starting OSD\n");
-	fbClass fb(settings);
-	osd osd(settings, fb, font);
+	fbClass fb;
+	fb.setPalette(255, 0, 0, 0, 0xff);
+	fb.setTransparent(255);
+	fb.clearScreen();
+	fb.loadFonts(font, vtfont);
+	//fb.setFade(1, 22, 5, 57, 63, 63, 63);
+	//fb.fillBox(100, 100, 200, 200, 1);
+	//sleep(10);
+
+	osd osd(settings, &fb);
 	osd.start_thread();
+	//osd.loadSkin("/home/projekte/lcarsneu/skin.lcars");
+	//command_list list;
+	//list.insert(list.end(), "FILLBOX 100 100 200 200 1");
+	//osd.setProgramCommandList(list);
 	
 	pig pig;
 	pig.hide();
@@ -196,14 +264,14 @@ int main(int argc, char **argv)
 	eit.start_thread();
 
 
-	channels channels(settings, pat, pmt, &eit);
+	channels channels(settings, pat, pmt, &eit, &cam, &hardware);
 	checker checker;
 	
 
 	checker.start_16_9_thread();
 	
 	scan scan(settings, pat, pmt, nit, sdt, &osd, tuner);
-
+	
 	if (rc.command_available())
 	{
 		int com = rc.read_from_rc();
@@ -217,7 +285,8 @@ int main(int argc, char **argv)
 		}
 
 	}
-
+	
+	teletext teletext(&fb, &rc);
 	
 	channels.loadDVBChannels();
 
@@ -291,6 +360,8 @@ int main(int argc, char **argv)
 	char text[20];
 	int txtfd;
 
+	hardware.setOutputMode(OUTPUT_RGB);
+	
 	do
 	{
 		
@@ -316,12 +387,8 @@ int main(int argc, char **argv)
 			schedule_read = false;
 			if (channels.getCurrentTXT() != 0)
 			{
-				osd.addCommand("COMMAND proginfo set_teletext true");
-				
-				txtfd = open("/dev/dbox/vbi0", O_RDWR);
-				ioctl(txtfd, AVIA_VBI_START_VTXT, channels.getCurrentTXT());
-
-				close(txtfd);
+				osd.addCommand("COMMAND proginfo set_teletext true");			
+				//teletext.startReinsertion(channels.getCurrentTXT());
 			}
 			else
 				osd.addCommand("COMMAND proginfo set_teletext false");
@@ -392,7 +459,7 @@ int main(int argc, char **argv)
 			if (key == RC1_DOWN)
 			{
 				old_channel = channelnumber;
-				while (channels.getType(++channelnumber) > 4);
+				while (++channelnumber < channels.numberChannels() && channels.getType(channelnumber) > 4);
 				if (channelnumber >= channels.numberChannels())
 					channelnumber = 0;
 				apid = 0;
@@ -407,7 +474,7 @@ int main(int argc, char **argv)
 			else if (key == RC1_UP)
 			{
 				old_channel = channelnumber;
-				while (channels.getType(--channelnumber) > 4);
+				while (--channelnumber >= 0 && channels.getType(channelnumber) > 4);
 				if (channelnumber < 0 )
 					channelnumber = channels.numberChannels() - 1;
 				apid = 0;
@@ -568,6 +635,8 @@ int main(int argc, char **argv)
 					}
 				}
 			} while (!finish);
+			if (channelnumber > channels.numberChannels() - 1)
+				channelnumber = channels.numberChannels();
 			old_channel = channelnumber;
 			channelnumber = final_number;
 			osd.addCommand("HIDE number");
@@ -817,7 +886,7 @@ int main(int argc, char **argv)
 			{
 				if (pmt_entry.type[i] == 0x02)
 					perspective[curr_perspective].VPID = pmt_entry.PID[i];
-				else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03)
+				else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03 || pmt_entry.type[i] == 0x06)
 				{
 					printf("an APID: %04x\n", pmt_entry.PID[i]);
 					perspective[curr_perspective].APID[perspective[curr_perspective].APIDcount++] = pmt_entry.PID[i];
@@ -882,8 +951,9 @@ int main(int argc, char **argv)
 					if (apid >= APIDcount)
 						apid = 0;
 
+					hardware.useDD(nvods[curr_nvod].DD[apid]);
 					zap.zap_audio(nvods[curr_nvod].VPID, nvods[curr_nvod].APID[apid] , ECM, nvods[curr_nvod].SID, 0x85);
-						
+											
 					for (int i = 0; i < now.number_components; i++)
 					{
 						if (now.component_tag[i] == component[apid])
@@ -901,7 +971,9 @@ int main(int argc, char **argv)
 					if (apid < 0 )
 						apid = APIDcount - 1;
 
+					hardware.useDD(nvods[curr_nvod].DD[apid]);
 					zap.zap_audio(nvods[curr_nvod].VPID, nvods[curr_nvod].APID[apid] , ECM, nvods[curr_nvod].SID, 0x85);
+					
 						
 					for (int i = 0; i < now.number_components; i++)
 					{
@@ -984,7 +1056,15 @@ int main(int argc, char **argv)
 				else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03)
 				{
 					printf("an APID: %04x\n", pmt_entry.PID[i]);
+					nvods[curr_nvod].DD[APIDcount] = false;
 					nvods[curr_nvod].APID[APIDcount++] = pmt_entry.PID[i];
+				}
+				else if (pmt_entry.type[i] == 0x06)
+				{
+					printf("an APID: %04x\n", pmt_entry.PID[i]);
+					nvods[curr_nvod].DD[APIDcount] = true;
+					nvods[curr_nvod].APID[APIDcount++] = pmt_entry.PID[i];
+					
 				}
 				printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
 			}
@@ -999,10 +1079,15 @@ int main(int argc, char **argv)
 
 			}
 			
+			hardware.useDD(nvods[curr_nvod].DD[0]);
 			if (APIDcount == 1)
+			{
 				zap.zap_to(nvods[curr_nvod].VPID, nvods[curr_nvod].APID[apid] , ECM, nvods[curr_nvod].SID, channels.getCurrentONID(), nvods[curr_nvod].TS);
-			else
+			}
+			else if (APIDcount == 2)
 				zap.zap_to(nvods[curr_nvod].VPID, nvods[curr_nvod].APID[0] , ECM, nvods[curr_nvod].SID, channels.getCurrentONID(), nvods[curr_nvod].TS, nvods[curr_nvod].APID[1]);
+			else
+				zap.zap_to(nvods[curr_nvod].VPID, nvods[curr_nvod].APID[0] , ECM, nvods[curr_nvod].SID, channels.getCurrentONID(), nvods[curr_nvod].TS, nvods[curr_nvod].APID[1], nvods[curr_nvod].APID[2]);
 			
 			schedule_read = false;
 
@@ -1012,16 +1097,29 @@ int main(int argc, char **argv)
 
 			strcpy(audio_description, "");
 			
-			for (int i = 0; i < nowref.number_components; i++)
+			for (int i = 0; i < next.number_components; i++)
 			{
 				printf("Component_tag: %x\n", nowref.component_tag[i]);
-				if (nowref.component_tag[i] == video_component)
+				if (next.component_tag[i] == video_component)
 				{
-					printf("Video_component_type: %d\n", nowref.component_type[i]);
+					printf("Video_component_type: %d\n", next.component_type[i]);
 				}
-				else if (nowref.component_tag[i] == component[apid])
+				else if (now.component_tag[i] == component[apid])
 				{
-					strcpy(audio_description, nowref.audio_description[i]);
+					strcpy(audio_description, next.audio_description[i]);
+				}
+			}
+			
+			for (int i = 0; i < now.number_components; i++)
+			{
+				printf("Component_tag: %x\n", nowref.component_tag[i]);
+				if (now.component_tag[i] == video_component)
+				{
+					printf("Video_component_type: %d\n", now.component_type[i]);
+				}
+				else if (now.component_tag[i] == component[apid])
+				{
+					strcpy(audio_description, now.audio_description[i]);
 				}
 			}
 			
@@ -1230,10 +1328,10 @@ int main(int argc, char **argv)
 			osd.addMenuEntry(3, "Scart", 2);
 			osd.addSwitchParameter(2, "FBAS"); // 1
 			osd.addSwitchParameter(2, "RGB"); // 0
-			if (hardware.getfblk() == 0)
-				osd.setSelected(0, 0);
-			else 
+			if (hardware.getfblk() == OUTPUT_FBAS)
 				osd.setSelected(0, 1);
+			else 
+				osd.setSelected(0, 0);
 
 			osd.addMenuEntry(4, "Support old RC", 1);
 			osd.setSelected(1, rc.getSupportOld());
@@ -1295,9 +1393,9 @@ int main(int argc, char **argv)
 							osd.setSelected(2, osd.getSelected(2) + 1);
 						
 						if (osd.getSelected(2) == 0)
-							hardware.setfblk(0);
+							hardware.setOutputMode(OUTPUT_RGB);
 						else if (osd.getSelected(2) == 1)
-							hardware.setfblk(3);
+							hardware.setOutputMode(OUTPUT_FBAS);
 						
 						
 						osd.selectEntry(2);
@@ -1748,6 +1846,7 @@ int main(int argc, char **argv)
 						pig.hide();
 					}
 					rc.restart();
+					osd.initPalette();
 					usleep(400000);
 					fb.clearScreen();
 				
@@ -1843,5 +1942,21 @@ int main(int argc, char **argv)
 		}
 
 	} while (key != RC1_STANDBY);
-	hardware.shutdown();
+	
+	int fpfd = open("/dev/dbox/fp0", O_RDWR);
+	int on_time = (int) ((timer.getTime() - time(0)) / 60);
+	if (on_time < 1)
+		on_time = 1;
+	else
+		on_time--;
+
+	printf("on_time: %d\n", timer.getTime() - time(0));
+	printf("on_time: %d\n", on_time);
+	ioctl(fpfd, FP_IOCTL_SET_WAKEUP_TIMER, &on_time);
+	ioctl(fpfd, FP_IOCTL_GET_WAKEUP_TIMER, &on_time);
+	printf("on_time: %d\n", on_time);
+	sleep(1);
+	ioctl(fpfd,FP_IOCTL_POWEROFF);
+	close(fpfd);
+	//hardware.shutdown();
 }

@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.6  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.5  2001/12/07 19:36:10  rasc
 fix to diseqc Step 2.
 
@@ -166,9 +169,10 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 	}
 
 // $$$ rasc: Debug
-      printf (" Frequ: %ld   ifreq: %ld  Pol: %d  FEC: %d  Sym: %ld  dis: %d  (param: 0x%02x)\n",
-	   (long)frequ,(long)front.iFrequency,(int)polarization ,(int)fec,
-	   (long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
+	printf (" Frequ: %ld   ifreq: %ld  Pol: %d  FEC: %d  Sym: %ld  dis: %d  (param: 0x%02x)\n",
+	(long)frequ,(long)front.iFrequency,(int)polarization ,(int)fec,
+	(long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
+
 
 	printf ("... Tuner-Lock Status: %ld\n",status);
 	long state1,state2;

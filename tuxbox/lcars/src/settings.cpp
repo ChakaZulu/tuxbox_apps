@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -88,13 +91,7 @@ settings::settings(cam &c): ca(c)
 	
 	oldTS = -1;
 	usediseqc = true;
-	timeoffset = 60;
-	
-}
-
-void settings::initme()
-{
-
+	setting.timeoffset = 60;
 	
 }
 
@@ -184,33 +181,27 @@ int settings::getTransparentColor()
 
 void settings::setIP(char n1, char n2, char n3, char n4)
 {
+	setting.ip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
+}
+
+char settings::getIP(char number)
+{
+	return (setting.ip >> (3 - number)) & 0xff;
+}
+
+void settings::saveSettings()
+{
 	int fd = open("/var/lcars/lcars.conf", O_WRONLY|O_TRUNC|O_CREAT, 0666);
 	if (fd < 0)
 	{
 		perror("lcars.conf");
 		return;
 	}
-
-	write(fd, &n1, 1);
-	write(fd, &n2, 1);
-	write(fd, &n3, 1);
-	write(fd, &n4, 1);
-
-	close(fd);
-
+	write(fd, &setting, sizeof(setting_s));
+	close (fd);
 }
 
-char settings::getIP(char number)
+void settings::loadSettings()
 {
-	char ip;
-	int fd = open("/var/lcars/lcars.conf", O_RDONLY);
-
-	if (fd < 0)
-		return 0;
-
-	for (int i = 0; i <= number; i++)
-		read(fd, &ip, 1);
-
-	close(fd);
-	return ip;
 }
+

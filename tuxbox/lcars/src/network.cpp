@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -43,6 +46,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 network::network(container &contain) : cont(contain)
 {
+	xmlrpc_obj.setObjects(&cont);
 }
 
 void network::startThread()
@@ -105,8 +109,8 @@ void *network::startlistening(void *object)
 		address_holder = (unsigned char*) &inbound_address.sin_addr.s_addr;
 		printf("Connection from %d.%d.%d.%d\n", address_holder[0], address_holder[1], address_holder[2], address_holder[3]);
 
-		char command[20][1024];
-		if ((read_size = read(inbound_connection, buffer, 1024)) < 0)
+		char command[20][10000];
+		if ((read_size = read(inbound_connection, buffer, 10000)) < 0)
 		{
 			perror("read()");
 			exit(5);
@@ -147,12 +151,27 @@ void *network::startlistening(void *object)
 		std::string headerok = "HTTP/1.1 200 OK\nConnection: close\nContent-Type: text/html\n\r\n";
 		std::string headerfailed = "HTTP/1.1 404 Not found\nConnection: close\nContent-Type: text/html\n\r\n";
 		char writebuffer[1024];
-
+		bool post = false;
+		std::string postline;
 		for (int i = 0; i < parm_count; i++)
 		{
-			if (!strncmp(command[i], "GET", 3))
+			std::string line(command[i]);
+			std::string parm[20];
+			
+			std::istringstream iss(line);
+			int counter = 0;
+			while(std::getline(iss, parm[counter++], ' '));
+			
+
+			if (parm[0] == "GET")
 			{
-				if (!strncmp(command[i], "GET / ", 6))
+				std::istringstream iss2(parm[1]);
+				std::string path[20];
+				int counter2 = 0;
+				while(std::getline(iss2, path[counter2++], '/'));
+
+				
+				if (path[1] == "" && counter2 == 2)
 				{
 					printf("GET root\n");
 					write(inbound_connection, headerok.c_str(), headerok.length());
@@ -164,117 +183,124 @@ void *network::startlistening(void *object)
 					strcpy(writebuffer, "<br><br><a href=\"/channels/lcars.dvb\">Channellist in DVB2000-format</a>");
 					write(inbound_connection, writebuffer, strlen(writebuffer));
 				}
-				else if (!strncmp(command[i], "GET /version", strlen("GET /version")))
+				else if (path[1] == "version")
 				{
 					write(inbound_connection, headerok.c_str(), headerok.length());
 					write(inbound_connection, (*n->cont.settings_obj).getVersion().c_str(), (*n->cont.settings_obj).getVersion().length());
 				}
-				else if (!strncmp(command[i], "GET /channels/getcurrent", strlen("GET /channels/getcurrent")))
+				else if (path[1] == "channels")
 				{
-					write(inbound_connection, headerok.c_str(), headerok.length());
-					sprintf(writebuffer, "%d", (*n->cont.channels_obj).getCurrentChannelNumber()); 
-					write(inbound_connection, writebuffer, strlen(writebuffer));
-				}
-				else if (!strncmp(command[i], "GET /channels/numberchannels", strlen("GET /channels/numberchannels")))
-				{
-					write(inbound_connection, headerok.c_str(), headerok.length());
-					sprintf(writebuffer, "%d", (*n->cont.channels_obj).numberChannels()); 
-					write(inbound_connection, writebuffer, strlen(writebuffer));
-				}
-				else if (!strncmp(command[i], "GET /channels/gethtmlchannels", strlen("GET /channels/gethtmlchannels")))
-				{
-					write(inbound_connection, headerok.c_str(), headerok.length());
-					write(inbound_connection, "<table>", 7);
-					for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
+					if (path[2] == "getcurrent")
 					{
-						sprintf(writebuffer, "<tr><td>%d</td><td><a href=\"zapto/%d\">%s</a></td></tr>\n", count, count, (*n->cont.channels_obj).getServiceName(count).c_str()); 
+						write(inbound_connection, headerok.c_str(), headerok.length());
+						sprintf(writebuffer, "%d", (*n->cont.channels_obj).getCurrentChannelNumber()); 
 						write(inbound_connection, writebuffer, strlen(writebuffer));
 					}
-					write(inbound_connection, "</table>", 8);
-				}
-				else if (!strncmp(command[i], "GET /channels/getchannels", strlen("GET /channels/getchannels")))
-				{
-					write(inbound_connection, headerok.c_str(), headerok.length());
-					for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
+					else if (path[2] == "numberchannels")
 					{
-						channel tmp_chan = (*n->cont.channels_obj).getChannelByNumber(count);
-						sprintf(writebuffer, "%d %s<br>\n", count, tmp_chan.serviceName); 
+						write(inbound_connection, headerok.c_str(), headerok.length());
+						sprintf(writebuffer, "%d", (*n->cont.channels_obj).numberChannels()); 
+						write(inbound_connection, writebuffer, strlen(writebuffer));
+					}
+					else if (path[2] == "gethtmlchannels")
+					{
+						write(inbound_connection, headerok.c_str(), headerok.length());
+						write(inbound_connection, "<table>", 7);
+						for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
+						{
+							sprintf(writebuffer, "<tr><td>%d</td><td><a href=\"zapto/%d\">%s</a></td></tr>\n", count, count, (*n->cont.channels_obj).getServiceName(count).c_str()); 
+							write(inbound_connection, writebuffer, strlen(writebuffer));
+						}
+						write(inbound_connection, "</table>", 8);
+					}
+					else if (path[2] == "getchannels")
+					{
+						write(inbound_connection, headerok.c_str(), headerok.length());
+						for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
+						{
+							channel tmp_chan = (*n->cont.channels_obj).getChannelByNumber(count);
+							sprintf(writebuffer, "%d %s<br>\n", count, tmp_chan.serviceName); 
+							write(inbound_connection, writebuffer, strlen(writebuffer));
+						}
+					}
+					else if (path[2] == "lcars.dvb")
+					{
+						std::string header = "HTTP/1.1 200 OK\nConnection: close\nAccept-Ranges: bytes\nContent-Type: application/octet-stream\n\r\n";
+						write(inbound_connection, header.c_str(), header.length());
+						for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
+						{
+							dvbchannel tmp_chan = (*n->cont.channels_obj).getDVBChannel(count);
+							write(inbound_connection, &tmp_chan, sizeof(dvbchannel));
+						}
+					}
+					else if (path[2] == "scan")
+					{
+						(*n->cont.scan_obj).scanChannels();
+					}
+					else if (path[2] == "zapto")
+					{
+						int number = atoi(path[3].c_str());
+																	
+						(*n->cont.channels_obj).setCurrentChannel(number);
+	
+						(*n->cont.channels_obj).zapCurrentChannel(n->cont.zap_obj, n->cont.tuner_obj);
+						(*n->cont.channels_obj).setCurrentOSDProgramInfo(n->cont.osd_obj);
+						
+						(*n->cont.channels_obj).receiveCurrentEIT();
+						(*n->cont.channels_obj).setCurrentOSDProgramEIT(n->cont.osd_obj);
+						(*n->cont.channels_obj).updateCurrentOSDProgramAPIDDescr(n->cont.osd_obj);
+	
+						write(inbound_connection, headerok.c_str(), headerok.length());
+						write(inbound_connection, "Done!<br>\n", 10);
+						
+						if ((*n->cont.channels_obj).getCurrentAPIDcount() == 1)
+							sprintf(writebuffer, "VPID: %x APID: %x<br>\n", (*n->cont.channels_obj).getCurrentVPID(), (*n->cont.channels_obj).getCurrentAPID(0));
+						else
+							sprintf(writebuffer, "VPID: %x APID: %x APID: %x<br>\n", (*n->cont.channels_obj).getCurrentVPID(), (*n->cont.channels_obj).getCurrentAPID(0), (*n->cont.channels_obj).getCurrentAPID(1));
+						write(inbound_connection, writebuffer, strlen(writebuffer));
+						
+						n->writetext("<br><hr>\n");
+						event tmp_event;
+						char text[100];
+						for (int i = 0; i < 2; i++)
+						{
+							tmp_event = (i == 0) ? (*n->cont.eit_obj).getNow() : (*n->cont.eit_obj).getNext();
+							
+							sprintf(text, "%s - <a href=/epg/%s>%s</a><br>\n", ctime(&tmp_event.starttime), (i == 0) ? "now" : "next", tmp_event.event_name);
+							n->writetext(text);
+							
+						}
+						n->writetext("<hr><br>\n");
+	
+						strcpy(writebuffer, "<br><a href=\"/video/stop\">Video stop</a>");
 						write(inbound_connection, writebuffer, strlen(writebuffer));
 					}
 				}
-				else if (!strncmp(command[i], "GET /channels/lcars.dvb", strlen("GET /channels/lcars.dvb")))
+				else if (path[1] == "video")
 				{
-					std::string header = "HTTP/1.1 200 OK\nConnection: close\nAccept-Ranges: bytes\nContent-Type: application/octet-stream\n\r\n";
-					write(inbound_connection, header.c_str(), header.length());
-					for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
+					if (path[2] == "stop")
 					{
-						dvbchannel tmp_chan = (*n->cont.channels_obj).getDVBChannel(count);
-						write(inbound_connection, &tmp_chan, sizeof(dvbchannel));
+						(*n->cont.zap_obj).dmx_stop();
+
+						write(inbound_connection, headerok.c_str(), headerok.length());
+						write(inbound_connection, "Done!", 6);
 					}
-				}
-				else if (!strncmp(command[i], "GET /channels/scan", strlen("GET /channels/scan")))
-				{
-					(*n->cont.scan_obj).scanChannels();
-				}
-				else if (!strncmp(command[i], "GET /video/stop", strlen("GET /video/stop")))
-				{
-					(*n->cont.zap_obj).dmx_stop();
-
-					write(inbound_connection, headerok.c_str(), headerok.length());
-					write(inbound_connection, "Done!", 6);
-				}
-				else if (!strncmp(command[i], "GET /video/start", strlen("GET /video/start")))
-				{
-					(*n->cont.zap_obj).dmx_start();
-
-					write(inbound_connection, headerok.c_str(), headerok.length());
-					write(inbound_connection, "Done!", 6);
-				}
-				else if (!strncmp(command[i], "GET /channels/zapto", strlen("GET /channels/zapto")))
-				{
-					int number = 0;
-					sscanf(command[i], "GET /channels/zapto/%d", &number);
-										
-					(*n->cont.channels_obj).setCurrentChannel(number);
-
-					(*n->cont.channels_obj).zapCurrentChannel(n->cont.zap_obj, n->cont.tuner_obj);
-					(*n->cont.channels_obj).setCurrentOSDProgramInfo(n->cont.osd_obj);
-					
-					(*n->cont.channels_obj).receiveCurrentEIT();
-					(*n->cont.channels_obj).setCurrentOSDProgramEIT(n->cont.osd_obj);
-					(*n->cont.channels_obj).updateCurrentOSDProgramAPIDDescr(n->cont.osd_obj);
-
-					write(inbound_connection, headerok.c_str(), headerok.length());
-					write(inbound_connection, "Done!<br>\n", 10);
-					
-					if ((*n->cont.channels_obj).getCurrentAPIDcount() == 1)
-						sprintf(writebuffer, "VPID: %x APID: %x<br>\n", (*n->cont.channels_obj).getCurrentVPID(), (*n->cont.channels_obj).getCurrentAPID(0));
-					else
-						sprintf(writebuffer, "VPID: %x APID: %x APID: %x<br>\n", (*n->cont.channels_obj).getCurrentVPID(), (*n->cont.channels_obj).getCurrentAPID(0), (*n->cont.channels_obj).getCurrentAPID(1));
-					write(inbound_connection, writebuffer, strlen(writebuffer));
-					
-					n->writetext("<br><hr>\n");
-					event tmp_event;
-					char text[100];
-					for (int i = 0; i < 2; i++)
+					else if (path[2] == "start")
 					{
-						tmp_event = (i == 0) ? (*n->cont.eit_obj).getNow() : (*n->cont.eit_obj).getNext();
-						
-						sprintf(text, "%s - <a href=/epg/%s>%s</a><br>\n", ctime(&tmp_event.starttime), (i == 0) ? "now" : "next", tmp_event.event_name);
-						n->writetext(text);
-						
+						(*n->cont.zap_obj).dmx_start();
+	
+						write(inbound_connection, headerok.c_str(), headerok.length());
+						write(inbound_connection, "Done!", 6);
 					}
-					n->writetext("<hr><br>\n");
 
-					strcpy(writebuffer, "<br><a href=\"/video/stop\">Video stop</a>");
-					write(inbound_connection, writebuffer, strlen(writebuffer));
 				}
-				else if ((!strncmp(command[i], "GET /epg/now", strlen("GET /epg/now"))) || (!strncmp(command[i], "GET /epg/next", strlen("GET /epg/next"))))
+				
+				else if (path[1] == "epg")
 				{
 					char text[1000];
 					n->writetext(headerok);
 					event tmp_event;
-					tmp_event = (strncmp(&command[i][9], "now", 3)) ? (*n->cont.eit_obj).getNext() : (*n->cont.eit_obj).getNow();
+					tmp_event = (path[2] == "now") ? (*n->cont.eit_obj).getNext() : (*n->cont.eit_obj).getNow();
 					sprintf(text, "Starttime: %s<br>\n", ctime(&tmp_event.starttime));
 					n->writetext(text);
 					sprintf(text, "Dauer: %d min<br>\n", (int)(tmp_event.duration / 60));
@@ -289,10 +315,62 @@ void *network::startlistening(void *object)
 					n->writetext(text);
 
 				}
+				else if (!strncmp(command[i], "GET /file", strlen("GET /file")))
+				{
+
+
+				}
 				else
 				{
 					write(inbound_connection, headerfailed.c_str(), headerfailed.length());
 				}
+			}
+			else if (parm[0] == "POST")
+			{
+				post = true;
+				postline = command[i];
+			}
+		}
+		if (post)
+		{
+			std::string line(postline);
+			std::string parm[20];
+			
+			std::istringstream iss(line);
+			int counter = 0;
+			while(std::getline(iss, parm[counter++], ' '));
+
+			std::istringstream iss2(parm[1]);
+			std::string path[20];
+			int counter2 = 0;
+			while(std::getline(iss2, path[counter2++], '/'));
+
+			if (path[1] == "SID2")
+			{
+				std::string request(buffer);
+				std::string xml = request.substr(request.find("\r\n\r\n"));
+				cout << "Parsing\n" << endl;
+				n->xmlrpc_obj.setInput(xml);
+				n->xmlrpc_obj.parse();
+				cout << "End Parsing\n" << endl;
+				xml = n->xmlrpc_obj.getOutput();
+				
+				//cout << xml << endl;
+				cout << "Making HTTP\n" << endl;
+				ostrstream ostr;
+				ostr.clear();
+	
+				ostr << "HTTP/1.1 200 OK\r\n";
+				ostr << "Connection: close\r\n";
+				ostr << "Content-Length: " << xml.length() << "\r\n";
+				ostr << "Content-Type: text/xml\r\n";
+				ostr << "Date: Fri, 17 Jul 1998 19:55:08 GMT\r\n";
+				ostr << "Server: LCARS Webserver\r\n\r\n";
+				ostr << xml << ends;
+	
+				std::string send = ostr.str();
+				cout << "Sending now XML\n" << endl;
+				write(inbound_connection, send.c_str(), send.length());
 			}
 		}
 

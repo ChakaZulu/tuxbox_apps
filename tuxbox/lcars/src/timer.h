@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: timer.h,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -34,6 +37,8 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "zap.h"
 #include "tuner.h"
 #include "osd.h"
+
+#include "config.h"
 
 struct timer_entry
 {
@@ -70,6 +75,7 @@ public:
 	bool isEmpty();
 
 	void addTimer(time_t starttime, int type, std::string comment, int duration = 0, int channel = -1);
+	time_t getTime();
 	void dumpTimer();
 	int getDumpedChannel(int i) { return dumped_channels[i]; }
 	time_t getDumpedStarttime(int i) { return dumped_starttimes[i]; }

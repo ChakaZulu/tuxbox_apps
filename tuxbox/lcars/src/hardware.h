@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.h,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -26,8 +29,12 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <dbox/avs_core.h>
+#include <ost/audio.h>
 
 #include "settings.h"
+
+#define OUTPUT_FBAS 0
+#define OUTPUT_RGB 1
 
 class hardware
 {
@@ -36,10 +43,12 @@ class hardware
 	int avs;
 	settings setting;
 	bool vcr_on;
+	bool old_DD_state;
 public:	
 	hardware(settings &s);
+	void hardware::setOutputMode(int i);
 	void setfblk(int i);
-	int getfblk() { return fblk; }
+	int getfblk();
 	bool switch_vcr();
 	void switch_mute();
 	bool isMuted() { return muted; }
@@ -48,6 +57,7 @@ public:
 	void fnc(int i);
 	void shutdown();
 	void reboot();
+	void useDD(bool use);
 };
 
 #endif

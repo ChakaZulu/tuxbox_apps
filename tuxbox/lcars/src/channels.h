@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -33,6 +36,8 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "zap.h"
 #include "osd.h"
 #include "eit.h"
+#include "cam.h"
+#include "hardware.h"
 
 struct channel
 {
@@ -42,7 +47,8 @@ struct channel
 	int SID;
 	int PMT;
 	int VPID;
-	int APID[2];
+	int APID[4];
+	bool DD[4];
 	int PCR;
 	int CAID[5];
 	int ECM[5];
@@ -108,12 +114,14 @@ class channels
 	pat pat_obj;
 	pmt pmt_obj;
 	eit *eit_obj;
+	cam *cam_obj;
+	hardware *hardware_obj;
 	event now, next;
 	char audio_description[20];
 	int ECM, apid;
 	int video_component, component[10], number_components;
 public:	
-	channels(settings &setting, pat &p1, pmt &p2, eit *e);
+	channels(settings &setting, pat &p1, pmt &p2, eit *e, cam *c, hardware *h);
 	channels(settings &setting, pat &p1, pmt &p2);
 
 	void zapCurrentChannel(zap *zap_obj, tuner *tuner_obj);
@@ -140,6 +148,7 @@ public:
 	void setCurrentPMT(int PMT);
 	void setCurrentVPID(int VPID);
 	void addCurrentAPID(int APID, int number = -1);
+	void addCurrentAPID(int APID, bool DD);
 	void deleteCurrentAPIDs();
 	void setCurrentPCR(int PCR);
 	void setCurrentTXT(int TXT);
@@ -174,6 +183,7 @@ public:
 	int getCurrentVPID();
 	int getCurrentAPIDcount();
 	int getCurrentAPID(int number = 0);
+	bool getCurrentDD(int number = 0);
 	int getCurrentPCR();
 	int getCurrentCAcount();
 	int getCurrentCAID(int number = 0);

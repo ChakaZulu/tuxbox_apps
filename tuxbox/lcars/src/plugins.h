@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.h,v $
+Revision 1.3  2001/12/11 13:38:44  TheDOC
+new cdk-path-variables, about 10 new features and stuff
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -28,6 +31,8 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <dlfcn.h> 
 
 #include "gameplugins.h"
+
+#include "config.h"
 
 class plugins
 {
