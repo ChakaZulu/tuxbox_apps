@@ -119,14 +119,7 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 	else  
 		drawEntryRect(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, hilited );
 
-	eString sname;
-	eString sdescr;
 	const eService *pservice=eServiceInterface::getInstance()->addRef(service);
-
-	if (pservice)
-		sname=pservice->service_name;
-	else
-		sname="(removed service)";
 
 	std::map< eServiceReference, int>::iterator it = favourites.find( service );
 	if ( it != favourites.end() )
@@ -136,11 +129,9 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 	{
 		nameXOffs = folder->x + 20;
 		int ypos = (rect.height() - folder->y) / 2;
-		rc->blit( *folder, ePoint(10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);		
+		rc->blit( *folder, ePoint(10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);
 	}
-	else 
-	
-	if (flags & flagShowNumber)
+	else if (flags & flagShowNumber)
 	{
 		int n=-1;
 		if (flags & flagOwnNumber)
@@ -165,6 +156,13 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 
 	if (!namePara)
 	{
+		eString sname;
+
+		if (pservice)
+			sname=pservice->service_name;
+		else
+			sname="(removed service)";
+
 		namePara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
 		namePara->setFont( serviceFont );
 		namePara->renderString( sname );
@@ -173,41 +171,44 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 	// we can always render namePara
 	rc->renderPara(*namePara, ePoint( rect.left() + nameXOffs, rect.top() + nameYOffs ) );
 
-	if ( listbox->getColumns() == 1 && 
-				service.type == eServiceReference::idDVB &&
-				(!(service.flags & eServiceReference::isDirectory)) &&
-				(!service.path.size()) )
+	if ( listbox->getColumns() == 1 )
 	{
-		if (pservice && service.type == eServiceReference::idDVB && !(service.flags & eServiceReference::isDirectory) )
+		if ( !descrPara &&  
+					service.type == eServiceReference::idDVB &&
+					(!(service.flags & eServiceReference::isDirectory)) &&
+					(!service.path.size()) )  // recorded dvb streams
 		{
-			EITEvent *e=eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)service);
-
-			if (e)
+			eString sdescr;
+			if (pservice && service.type == eServiceReference::idDVB && !(service.flags & eServiceReference::isDirectory) )
 			{
-				for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+				EITEvent *e=eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)service);
+				if (e)
 				{
-					Descriptor *descriptor=*d;
-
-					if (descriptor->Tag()==DESCR_SHORT_EVENT)
+					for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
 					{
-						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
-						sdescr='('+ss->event_name+')';
-						break;
+						Descriptor *descriptor=*d;
+						
+						if (descriptor->Tag()==DESCR_SHORT_EVENT)
+						{
+							ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
+							sdescr='('+ss->event_name+')';
+							break;
+						}
 					}
+					delete e;
 				}
-				delete e;
 			}
+			descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
+			descrPara->setFont( descrFont );
+			descrPara->renderString( sdescr );
+			descrXOffs = nameXOffs+namePara->getBoundBox().width();
+			if (numPara)
+				descrXOffs += numPara->getBoundBox().height();
+			descrYOffs = ((rect.height() - descrPara->getBoundBox().height()) / 2 ) - descrPara->getBoundBox().top();
 		}
-		descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
-		descrPara->setFont( descrFont );
-		descrPara->renderString( sdescr );
-		descrXOffs = nameXOffs+namePara->getBoundBox().width();
-		if (numPara)
-			descrXOffs += numPara->getBoundBox().height();
-		descrYOffs = ((rect.height() - descrPara->getBoundBox().height()) / 2 ) - descrPara->getBoundBox().top();
+		if (descrPara)  // only render descr Para, when avail...
+			rc->renderPara(*descrPara, ePoint( rect.left()+descrXOffs, rect.top() + descrYOffs ) );
 	}
-	if (descrPara)  // only render descr Para, when avail...
-		rc->renderPara(*descrPara, ePoint( rect.left()+descrXOffs, rect.top() + descrYOffs ) );
 
 	if (b)
 	{
