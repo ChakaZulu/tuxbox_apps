@@ -493,7 +493,7 @@ int CNeutrinoApp::loadSetup()
 
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
-        g_settings.streaming_server_ip = configfile.getString("streaming_server_ip", "10.10.10.10");
+    g_settings.streaming_server_ip = configfile.getString("streaming_server_ip", "10.10.10.10");
 	strcpy( g_settings.streaming_server_port, configfile.getString( "streaming_server_port", "8080").c_str() );
 	strcpy( g_settings.streaming_server_cddrive, configfile.getString("streaming_server_cddrive", "D:").c_str() );
 	strcpy( g_settings.streaming_videorate,  configfile.getString("streaming_videorate", "1000").c_str() );
@@ -1124,10 +1124,11 @@ void CNeutrinoApp::SetupTiming()
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
 				CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
 				CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings,
-				CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings)
+				CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem(GenericMenuSeparator);
+
 	mainMenu.addItem(new CMenuForwarder("mainmenu.tvmode", true, NULL, this, "tv", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true );
 	mainMenu.addItem(new CMenuForwarder("mainmenu.radiomode", true, NULL, this, "radio", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN) );
 	mainMenu.addItem(new CMenuForwarder("mainmenu.scartmode", true, NULL, this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW) );
@@ -1135,8 +1136,19 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem(GenericMenuSeparatorLine);
 	mainMenu.addItem(new CMenuForwarder("mainmenu.mp3player", true, NULL, new CMP3PlayerGui()));
 
-#if HAVE_DVB_API_VERSION >= 3
-	mainMenu.addItem(new CMenuForwarder("mainmenu.movieplayer", true, NULL, new CMoviePlayerGui()));
+	#if HAVE_DVB_API_VERSION >= 3
+	//mainMenu.addItem(new CMenuForwarder("mainmenu.movieplayer", true, NULL, new CMoviePlayerGui()));
+	mainMenu.addItem(new CMenuForwarder("mainmenu.movieplayer", true, NULL, &moviePlayer));
+
+	moviePlayer.addItem(GenericMenuSeparator);
+	moviePlayer.addItem(GenericMenuBack);
+	moviePlayer.addItem(GenericMenuSeparator);
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.tsplayback", true, NULL, new CMoviePlayerGui(), "tsplayback", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.bookmark", false, NULL, new CMoviePlayerGui(), "bookmarkplayback"));
+	moviePlayer.addItem(GenericMenuSeparator);
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.fileplayback", true, NULL, new CMoviePlayerGui(), "fileplayback", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.dvdplayback", true, NULL, new CMoviePlayerGui(), "dvdplayback", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+	moviePlayer.addItem(new CMenuForwarder("movieplayer.vcdplayback", true, NULL, new CMoviePlayerGui(), "vcdplayback", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 #endif
 
 	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui()));
@@ -1151,8 +1163,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 
 //	mainMenu.addItem(GenericMenuSeparatorLine);
 //	mainMenu.addItem( new CMenuForwarder("mainmenu.info", true, "", new CDBoxInfoWidget, "",true) );
-
-
+	
 	mainSettings.addItem(GenericMenuSeparator);
 	mainSettings.addItem(GenericMenuBack);
 	mainSettings.addItem(GenericMenuSeparatorLine);
@@ -2497,10 +2508,11 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget mp3picSettings("mp3picsettings.general", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget scanSettings("servicemenu.scants", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget service("servicemenu.head", NEUTRINO_ICON_SETTINGS);
-
+    CMenuWidget moviePlayer("movieplayer", "streaming.raw");
+    
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
-					 service, fontSettings, mp3picSettings, streamingSettings);
+					 service, fontSettings, mp3picSettings, streamingSettings, moviePlayer);
 
 	//service
 	InitServiceSettings(service, scanSettings);
