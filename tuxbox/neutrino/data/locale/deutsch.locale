@@ -12,13 +12,20 @@ mainmenu.settings Einstellungen
 
 mainsettings.head Einstellungen
 mainsettings.language Sprache
-mainsettings.screensetup Sichtbaren Bildbereich einstellen
 mainsettings.audio Ton
 mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.colors Farben / Themes
 mainsettings.keybinding Tasten-Einstellungen
-mainsettings.ucodecheck UCodes überprüfen
+mainsettings.misc Diverse Einstellungen
+
+miscsettings.head Diverse Einstellungen
+miscsettings.ucodecheck UCodes überprüfen
+miscsettings.epgold EPG auf alte Art anzeigen
+miscsettings.boxtype DBox Hersteller
+miscsettings.boxtype_nokia Nokia
+miscsettings.boxtype_sagem Sagem
+miscsettings.boxtype_philips Philips
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache
@@ -28,6 +35,7 @@ audiomenu.stereo Stereo
 audiomenu.dolbydigital Dolby Digital
 
 videomenu.head Video-Einstellungen
+videomenu.screensetup Sichtbaren Bildbereich einstellen
 videomenu.videosignal Video Signalart
 videomenu.videosignal_rgb RGB
 videomenu.videosignal_svideo S-Video
@@ -35,7 +43,6 @@ videomenu.videosignal_composite Composite
 videomenu.videoformat Bildschirmformat
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
-videomenu.epgold EPG auf alte Art anzeigen
 
 networkmenu.head Netzwerk Einstellungen
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen

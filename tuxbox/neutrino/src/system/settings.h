@@ -10,6 +10,7 @@ struct SNeutrinoSettings
 
 	//misc
     int epg_byname;
+	int box_Type;
 
 	//audio
 	int audio_Stereo;

@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.25 2001/10/10 01:20:09 McClean Exp $
+//  $Id: neutrino.h,v 1.26 2001/10/14 23:32:15 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.26  2001/10/14 23:32:15  McClean
+//  menu structure - prepared for VCR-Switching
+//
 //  Revision 1.25  2001/10/10 01:20:09  McClean
 //  menue changed
 //
@@ -182,9 +185,10 @@ class CNeutrinoApp : public CMenuTarget
 	void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
 	void InitNetworkSettings(CMenuWidget &networkSettings);
 	void InitScreenSettings(CMenuWidget &);
+	void InitMiscSettings(CMenuWidget &);
 	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
 	void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
-			CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings);
+			CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings);
 	void ClearFrameBuffer();
 	void SetupFonts();
 	void SetupFrameBuffer();

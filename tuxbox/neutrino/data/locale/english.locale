@@ -12,13 +12,20 @@ mainmenu.settings Settings
 
 mainsettings.head Settings
 mainsettings.language Language
-mainsettings.screensetup Screen Setup
 mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Network
 mainsettings.colors Colors
 mainsettings.keybinding Key Setup
-mainsettings.ucodecheck Check ucodes
+mainsettings.misc Misc Settings
+
+miscsettings.head Misc Settings
+miscsettings.ucodecheck Check ucodes
+miscsettings.epgold EPG the old way...
+miscsettings.boxtype DBox type
+miscsettings.boxtype_nokia Nokia
+miscsettings.boxtype_sagem Sagem
+miscsettings.boxtype_philips Philips
 
 languagesetup.head Language Setup
 languagesetup.select Language
@@ -28,6 +35,7 @@ audiomenu.stereo Stereo
 audiomenu.dolbydigital Dolby Digital
 
 videomenu.head Video Settings
+videomenu.screensetup Screen Setup
 videomenu.videosignal VideoOutput
 videomenu.videosignal_rgb RGB
 videomenu.videosignal_svideo S-Video
@@ -35,7 +43,6 @@ videomenu.videosignal_composite Composite
 videomenu.videoformat Format
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
-videomenu.epgold EPG the old way...
 
 networkmenu.head Network Settings
 networkmenu.setupnow setup network now

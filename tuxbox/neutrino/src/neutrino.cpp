@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.62 2001/10/14 14:30:47 rasc Exp $
+        $Id: neutrino.cpp,v 1.63 2001/10/14 23:32:15 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.63  2001/10/14 23:32:15  McClean
+  menu structure - prepared for VCR-Switching
+
   Revision 1.62  2001/10/14 14:30:47  rasc
   -- EventList Darstellung ueberarbeitet
   -- kleiner Aenderungen und kleinere Bugfixes
@@ -407,6 +410,10 @@ void CNeutrinoApp::setupDefaults()
 	//language
 	strcpy(g_settings.language, "english");
 
+	//misc
+	g_settings.box_Type = 1;
+	g_settings.epg_byname = 0;
+
 	//video
 	g_settings.video_Signal = 0; //composite?
 	g_settings.video_Format = 2; //4:3
@@ -757,7 +764,7 @@ void CNeutrinoApp::ClearFrameBuffer()
 }
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &networkSettings,
-				     CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings)
+				     CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings)
 {
 	mainMenu.addItem( new CMenuSeparator() );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv"), true );
@@ -770,15 +777,36 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuSeparator() );
 	mainSettings.addItem( new CMenuForwarder("menu.back") );
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.screensetup", true, "", g_ScreenSetup ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.ucodecheck", true, "", g_UcodeCheck ) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
 }
+
+
+void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
+{
+	miscSettings.addItem( new CMenuSeparator() );
+	miscSettings.addItem( new CMenuForwarder("menu.back") );
+	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.epgold", &g_settings.epg_byname, true);
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
+	miscSettings.addItem( oj );
+	
+	oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, true);
+		oj->addOption(1, "miscsettings.boxtype_nokia");
+		oj->addOption(2, "miscsettings.boxtype_sagem");
+		oj->addOption(3, "miscsettings.boxtype_philips");
+	miscSettings.addItem( oj );
+	
+	miscSettings.addItem( new CMenuForwarder("miscsettings.ucodecheck", true, "", g_UcodeCheck ) );
+}
+
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 {
@@ -842,6 +870,8 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	videoSettings.addItem( new CMenuForwarder("menu.back") );
 	videoSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
+	videoSettings.addItem( new CMenuForwarder("videomenu.screensetup", true, "", g_ScreenSetup ) );
+
 	CMenuOptionChooser* oj = new CMenuOptionChooser("videomenu.videosignal", &g_settings.video_Signal, true, videoSetupNotifier);
 		oj->addOption(1, "videomenu.videosignal_rgb");
 		oj->addOption(2, "videomenu.videosignal_svideo");
@@ -853,11 +883,6 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 		oj->addOption(2, "videomenu.videoformat_43");
 		oj->addOption(1, "videomenu.videoformat_169");
 
-	videoSettings.addItem( oj );
-
-	oj = new CMenuOptionChooser("videomenu.epgold", &g_settings.epg_byname, true);
-		oj->addOption(0, "options.off");
-		oj->addOption(1, "options.on");
 	videoSettings.addItem( oj );
 }
 
@@ -1316,13 +1341,16 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget networkSettings("networkmenu.head", "settings.raw");
 	CMenuWidget colorSettings("colormenu.head", "settings.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "settings.raw");
-//	CMenuWidget screenSettings("",fonts,"");
+	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 
-	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings);
+	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings, miscSettings);
 
 	//language Setup
 	InitLanguageSettings(languageSettings);
-	
+
+	//misc Setup
+	InitMiscSettings(miscSettings);
+
 	//audio Setup
 	InitAudioSettings(audioSettings, audioSetupNotifier);
 
@@ -1529,7 +1557,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.62 2001/10/14 14:30:47 rasc Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.63 2001/10/14 23:32:15 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
