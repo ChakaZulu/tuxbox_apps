@@ -362,7 +362,7 @@ int bouquet_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		if ( strstr(line,"channelNR") )
 		{
 			p=strstr(line,"serviceType");
-			if ( p )
+			if ( p && (*(p+15) == '0') )
 			{
 				p+=16;
 				if ( *p == '1' )
@@ -404,7 +404,7 @@ int bouquet_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			idx=cnum-1;
 
 		p=strstr(line,"serviceType");
-		if ( !p )
+		if ( !p || ( *(p+15) != '0' ) )
 			continue;
 
 		switch( *(p+16) )
