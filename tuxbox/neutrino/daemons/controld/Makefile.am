@@ -15,6 +15,7 @@ controld_LDADD = \
 	@CONNECTION_LIBS@ \
 	@EVENTSERVER_LIBS@ \
 	@ZAPIT_LIBS@ \
+	-ltuxbox \
 	-lpthread
 
 controld_SOURCES = controld.cpp eventwatchdog.cpp
