@@ -1,0 +1,35 @@
+rcsim
+-----
+    Tool that can be used to send remote control commands without using
+    the remote control :)
+
+    It uses the input event-device, so works for all dbox2.
+    
+    Usage: rcsim <keyname> [<time>] [<repeat>]
+    	<keyname> is one of the list below and corresponds to the key on the
+	    dbox2-remote control
+	<time> how long a code is repeatedly sent,
+	    unit is seconds, default is 0 = sent only once
+	<repeat> what time is waited until a new code is sent
+	    (if <time> is greater than 0), unit is milliseconds,
+	    default is 500
+
+    Example: rcsim KEY_1 5 500
+	sends KEY_1 for 5 seconds every 500 milliseconds
+	    
+
+    List of possible keynames:
+	KEY_0,KEY_1,KEY_2,KEY_3,KEY_4,KEY_5,
+	KEY_6,KEY_7,KEY_8,KEY_9,
+	
+	KEY_POWER,KEY_HOME,KEY_HELP,KEY_SETUP,
+	KEY_OK,KEY_MUTE,
+	KEY_RED,KEY_GREEN,KEY_YELLOW,KEY_BLUE,	
+
+	KEY_VOLUMEUP,KEY_VOLUMEDOWN,
+
+	KEY_RIGHT,KEY_LEFT,KEY_UP,KEY_DOWN,
+	KEY_TOPLEFT,KEY_TOPRIGHT,KEY_BOTTOMLEFT,KEY_BOTTOMRIGHT,
+
+	KEY_PAGEDOWN,KEY_PAGEUP,
+
