@@ -113,7 +113,6 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 	do
 	{
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
-		printf("[neutrino] menue: mesage (%x %x)\n", msg, data);
 
 
 		if ( msg <= CRCInput::RC_MaxRC )
@@ -195,9 +194,10 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 								break;
 							case menu_return::RETURN_REPAINT:
 								paint();
+								// recalculate timeout
+								timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 								break;
 						}
-						printf("[neutrino] menue: item execd return is(%x)\n", rv);
 					}
 					break;
 
