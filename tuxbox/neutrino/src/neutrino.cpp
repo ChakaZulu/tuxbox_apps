@@ -1726,9 +1726,10 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CMenuForwarder* mf4 = new CMenuForwarder("streamingmenu.streaming_videorate", (g_settings.streaming_type==1), g_settings.streaming_videorate,streamingSettings_videorate);
 	CMenuForwarder* mf5 = new CMenuForwarder("streamingmenu.streaming_audiorate", (g_settings.streaming_type==1), g_settings.streaming_audiorate,streamingSettings_audiorate);
 	CMenuForwarder* mf6 = new CMenuForwarder("streamingmenu.streaming_server_startdir", (g_settings.streaming_type==1), g_settings.streaming_server_startdir,startdirInput);
-
+	CMenuForwarder* mf7 = new CMenuForwarder("movieplayer.defdir", (g_settings.streaming_type==1), g_settings.network_nfs_moviedir,this,"moviedir");
+	
 	CStreamingNotifier *StreamingNotifier =
-		new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6);
+		new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,mf7);
 
         CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_type", &g_settings.streaming_type,
                                                     true, StreamingNotifier);
@@ -1747,8 +1748,9 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( mf4);
 	streamingSettings.addItem( mf5);
 	streamingSettings.addItem( mf6);
-	streamingSettings.addItem( new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir, 
-															 this, "moviedir"));
+	streamingSettings.addItem( mf7);
+	//streamingSettings.addItem( new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir, 
+	//														 this, "moviedir"));
 
 }
 

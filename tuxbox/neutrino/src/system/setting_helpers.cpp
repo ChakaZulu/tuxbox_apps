@@ -96,7 +96,7 @@ bool CDHCPNotifier::changeNotify(string OptionName, void* data)
 	return true;
 }
 
-CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5, CMenuItem* i6)
+CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5, CMenuItem* i6, CMenuItem* i7)
 {
    toDisable[0]=i1;
    toDisable[1]=i2;
@@ -104,6 +104,7 @@ CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[3]=i4;
    toDisable[4]=i5;
    toDisable[5]=i6;
+   toDisable[6]=i7;
 
 }
 
@@ -117,6 +118,7 @@ bool CStreamingNotifier::changeNotify(string OptionName, void*)
       toDisable[3]->setActive(false);
       toDisable[4]->setActive(false);
       toDisable[5]->setActive(false);
+      toDisable[6]->setActive(false);
    }
    else if(g_settings.streaming_type==1)
    {
@@ -126,6 +128,7 @@ bool CStreamingNotifier::changeNotify(string OptionName, void*)
       toDisable[3]->setActive(true);
       toDisable[4]->setActive(true);
       toDisable[5]->setActive(true);
+      toDisable[6]->setActive(true);
    }
    return true;
 }
