@@ -350,9 +350,9 @@ scants.transponders Transponders:
 scants.freqdata Frequentie
 scants.provider Provider:
 scants.channel Kanaal:
-scants.numberoftvservices aantal TV-kanalen:
-scants.numberofradioservices aantal radio-kanalen:
-scants.numberofdataservices aantal data-kanalen:
+scants.numberoftvservices TV:
+scants.numberofradioservices Radio:
+scants.numberofdataservices Data:
 scants.numberoftotalservices Totaal:
 scants.services Services:
 scants.bouquet Boeket
