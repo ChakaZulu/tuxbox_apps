@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.20 2002/05/13 14:56:51 obi Exp $
+ * $Id: pzapit.cpp,v 1.21 2002/08/13 06:06:41 happydude Exp $
  *
  * simple commandline client for zapit
  *
@@ -454,7 +454,7 @@ int main (int argc, char** argv)
 
 		for (count = 0; count < pids.APIDs.size(); count++)
 		{
-			std::cout << count + 1 << ") " << "pid: 0x" << std::hex << pids.APIDs[count].pid << ", description: " << pids.APIDs[count].desc;
+			std::cout << std::dec << count + 1 << ") " << "pid: 0x" << std::hex << pids.APIDs[count].pid << ", description: " << pids.APIDs[count].desc;
 			if (pids.APIDs[count].is_ac3) std::cout << " (ac3)";
 			std::cout << std::endl;
 		}
