@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.26 2004/05/23 11:35:42 derget Exp $
+  $Id: libucodes.c,v 1.27 2004/08/22 15:37:43 obi Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.27  2004/08/22 15:37:43  obi
+  cam_01_02_106F
+
   Revision 1.26  2004/05/23 11:35:42  derget
   ucode_00F0
 
@@ -112,6 +115,7 @@ static struct Sucode ucodes[] =
 	{"a5984825ff554ea530efc4733ffd7473","cam_01_01_005F"},
 	{"704cb8d9965babbdc7d4e7cae6e5584e","cam_01_02_002F"},
 	{"c51074b2edf6c14e0bb99ee3ed8b9c47","cam_01_02_105F"},
+	{"39ff59d02efc76031a2691ce77d8adf1","cam_01_02_106F"},
 	{"f85070f3545677fc3e74abdeb8b33a42","cam_01_01_005G"},
 	{"16c5e1eba0cfe63f2bbc648e1644c883","cam_NOKIA_PRODTEST2"},
 	{"ff441ce2f3feab815d360e3032d23888","cam_ProdTestImage_2"},
