@@ -1499,7 +1499,7 @@ public:
 
 			result1 += "\"" + ref2string(e) + "\", ";
 			eString tmp = filter_string(service->service_name);
-			if (short_description)
+			if (short_description && (zapSubMode != ZAPMODERECORDINGS))
 				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 			tmp.strReplace("\"", "'");
 			result2 += "\"" + tmp + "\", ";
