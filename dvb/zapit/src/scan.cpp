@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.133 2004/02/01 14:34:28 metallica Exp $
+ * $Id: scan.cpp,v 1.134 2004/02/10 21:01:14 metallica Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -150,6 +150,8 @@ int append_service(char* providerName, TP_params* TP)
 {
 	FILE* fd;
 	FILE* fd1;
+	struct stat buffer; 
+
 	char* frontendType = getFrontendName();
  	t_satellite_position satellitePosition = 0;
 
@@ -161,8 +163,12 @@ int append_service(char* providerName, TP_params* TP)
 			break;
 
 	/* copy services.xml to /tmp directory */
-	cp(SERVICES_XML, SERVICES_TMP);
 
+			if(stat(SERVICES_XML, &buffer) == 0){
+  				 if (buffer.st_size > 0){
+				cp(SERVICES_XML, SERVICES_TMP);
+				}
+			}
 	fd = fopen(SERVICES_XML, "w");
 
 	if ((fd1 = fopen(SERVICES_TMP, "r")))
@@ -635,7 +641,7 @@ void *start_scanthread(void *)
 	char *frontendType = NULL;
 	uint8_t diseqc_pos = 0;
 	int scan_status = -1;
-
+	struct stat buffer; 
 	scanBouquetManager = new CBouquetManager();
 	processed_transponders = 0;
  	found_tv_chans = 0;
@@ -683,8 +689,12 @@ void *start_scanthread(void *)
 			if  (!strcmp(frontendType, "sat"))
 			{
 				/* copy services.xml to /tmp directory */
-				cp(SERVICES_XML, SERVICES_TMP);
-
+		
+		if(stat(SERVICES_XML, &buffer) == 0){
+  				 if (buffer.st_size > 0){
+					cp(SERVICES_XML, SERVICES_TMP);
+					}
+				}
 				if (!(fd = fopen(SERVICES_XML, "w")))
 				{
 					WARN("unable to open %s for writing", SERVICES_XML);
