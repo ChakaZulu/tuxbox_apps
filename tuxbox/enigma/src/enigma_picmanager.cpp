@@ -11,74 +11,6 @@
 #include <lib/system/init_num.h>
 #include "enigma_picmanager.h"
 
-struct PicViewerStyleSelectorActions
-{
-	eActionMap map;
-	eAction infoPressed;
-	PicViewerStyleSelectorActions():
-		map("PicViewerStyleSelector", _("Slide Viewer Actions")),
-		infoPressed(map, "infoPressed", _("open the Slide Viewer with selected style"), eAction::prioDialog)
-	{
-	}
-};
-eAutoInitP0<PicViewerStyleSelectorActions> i_PicViewerStyleSelectorActions(eAutoInitNumbers::actions, "Slide Viewer Style Selector");
-
-ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
-		:eListBoxWindow<eListBoxEntryText>(_("Slide Viewer 1.3 - Modes"), 5, 350, true)
-		,ssel(ssel)
-{
-	eListBoxEntrySeparator *sep;
-	addActionMap(&i_PicViewerStyleSelectorActions->map);
-	cmove(ePoint(100, 100));
-	int last = 0;
-	eConfig::getInstance()->getKey("/picviewer/lastPicViewerStyle", last);
-	eListBoxEntryText *sel[3];
-	sel[0] = new eListBoxEntryText(&list,_("Slide"), (void *)0, 0, _("Show selected slide") );
-	sel[1] = new eListBoxEntryText(&list,_("Slideshow"), (void *)1, 0, _("Show slideshow (of all slides in directory)"));
-	sep = new eListBoxEntrySeparator((eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true);
-	sel[2] = new eListBoxEntryText(&list,_("Slideshow Settings"), (void *)2, 0, _("Customize your slideshow"));
-
-	list.setCurrent(sel[last]);
-	CONNECT(list.selected, ePicViewerStyleSelector::entrySelected);
-}
-
-int ePicViewerStyleSelector::eventHandler( const eWidgetEvent &event )
-{
-	switch (event.type)
-	{
-		case eWidgetEvent::evtAction:
-			if (event.action == &i_PicViewerStyleSelectorActions->infoPressed)
-				entrySelected(list.getCurrent());
-			else
-				break;
-			return 1;
-		default:
-			break;
-	}
-	return eWindow::eventHandler(event);
-}
-
-void ePicViewerStyleSelector::entrySelected( eListBoxEntryText* e )
-{
-	if (e)
-	{
-		if ((int)e->getKey() < 2)
-		{
-			eConfig::getInstance()->setKey("/picviewer/lastPicViewerStyle", (int)e->getKey());
-			close( (int)e->getKey() );
-		}
-		else
-		{
-			ePicViewerSettings s;
-			s.show();
-			s.exec();
-			s.hide();
-		}
-	}
-	else
-		close(-1);
-}
-
 ePicViewerSettings::ePicViewerSettings():eWindow(0)
 {
 	int slideshowtimeout = 5;
@@ -93,10 +25,12 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
 	int showbusysign = 0;
 	eConfig::getInstance()->getKey("/picviewer/showbusysign", showbusysign);
+	int format169 = 0;
+	eConfig::getInstance()->getKey("/picviewer/format169", format169);
 
 	int fd = eSkin::getActive()->queryValue("fontsize", 20);
 
-	setText(_("Slideshow Settings"));
+	setText(_("Slide Viewer Settings"));
 	cmove(ePoint(100, 80));
 
 	int y = 10, dy = 35, h = fd + 6;
@@ -123,12 +57,11 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 
 	y += dy;
 
-
 	sort = new eCheckbox(this, sortpictures, 1);
 	sort->setText(_("Sort slides"));
 	sort->move(ePoint(10, y));
 	sort->resize(eSize(300, h));
-	sort->setHelpText(_("Sort pictures alphabetically"));
+	sort->setHelpText(_("Sort slides alphabetically"));
 
 	y += dy;
 
@@ -161,6 +94,14 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	busy->move(ePoint(10, y));
 	busy->resize(eSize(300, h));
 	busy->setHelpText(_("Show busy sign while preprocessing slide"));
+
+	y += dy;
+
+	format_169 = new eCheckbox(this, format169, 1);
+	format_169->setText(_("Show in 16:9 format"));
+	format_169->move(ePoint(10, y));
+	format_169->resize(eSize(300, h));
+	format_169->setHelpText(_("Always show slides in 16:9 format"));
 
 	y += dy + 20;
 
@@ -210,6 +151,7 @@ void ePicViewerSettings::okPressed()
 	eConfig::getInstance()->setKey("/picviewer/startwithselectedpic", (int)start->isChecked());
 	eConfig::getInstance()->setKey("/picviewer/includesubdirs", (int)subdirs->isChecked());
 	eConfig::getInstance()->setKey("/picviewer/showbusysign", (int)busy->isChecked());
+	eConfig::getInstance()->setKey("/picviewer/format169", (int)format_169->isChecked());
 
 	close(1);
 }

@@ -6,22 +6,13 @@
 #include <lib/gui/listbox.h>
 #include <lib/gui/echeckbox.h>
 
-class ePicViewerStyleSelector: public eListBoxWindow<eListBoxEntryText>
-{
-	int ssel;
-public:
-	ePicViewerStyleSelector(int ssel=0);
-	int eventHandler( const eWidgetEvent &event );
-	void entrySelected( eListBoxEntryText* e );
-};
-
 class ePicViewerSettings: public eWindow
 {
 private:
 
 	eButton *ok, *abort;
 	eStatusBar *statusbar;
-	eCheckbox *sort, *wrap, *start, *subdirs, *busy;
+	eCheckbox *sort, *wrap, *start, *subdirs, *busy, *format_169;
 	eListBox<eListBoxEntryText> *timeout;
 
 	void fieldSelected(int *number);

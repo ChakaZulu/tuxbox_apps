@@ -1131,24 +1131,22 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				hide();
 				if (selected.type == 0x2000)  // Picture
 				{
-					ePicViewerStyleSelector f(1);
+					ePicViewerSettings f;
 #ifndef DISABLE_LCD
 					f.setLCD( LCDTitle, LCDElement );
 #endif
 					f.show();
-					int ret = f.exec();
+					f.exec();
 					f.hide();
 
-					if ( ret != -1 )
-					{
-						ePictureViewer e(selected.path);
+					ePictureViewer e(selected.path);
 #ifndef DISABLE_LCD
-						e.setLCD( LCDTitle, LCDElement );
+					e.setLCD( LCDTitle, LCDElement );
 #endif
-						e.show();
-						e.exec();
-						e.hide();
-					}
+					e.show();
+					e.exec();
+					e.hide();
+
 					show();
 				}
 				else
