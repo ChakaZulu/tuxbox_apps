@@ -66,5 +66,48 @@ and combinations of this -->
 	</sat>
 	<sat name="Tuerksat 42.0E" flags="5" position="420">
 		<transponder frequency="10980000" symbol_rate="4688000" polarization="1" fec_inner="3"/>
+		<transponder frequency="10956000" symbol_rate="5632000" polarization="1" fec_inner="3"/>
+		<transponder frequency="10961000" symbol_rate="3332000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11025000" symbol_rate="6510000" polarization="1" fec_inner="4"/>
+		<transponder frequency="11064000" symbol_rate="3200000" polarization="1" fec_inner="4"/>
+		<transponder frequency="11111000" symbol_rate="4555000" polarization="1" fec_inner="4"/>
+		<transponder frequency="11129000" symbol_rate="4268000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11135000" symbol_rate="4444000" polarization="1" fec_inner="4"/>
+		<transponder frequency="11141000" symbol_rate="4300000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11145000" symbol_rate="2300000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11148000" symbol_rate="2155000" polarization="1" fec_inner="4"/>
+		<transponder frequency="11153000" symbol_rate="4557000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11460000" symbol_rate="5632000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11465000" symbol_rate="5632000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11475000" symbol_rate="5632000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11486000" symbol_rate="6111000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11582000" symbol_rate="3160000" polarization="1" fec_inner="4"/>
+		<transponder frequency="11587000" symbol_rate="3670000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11593000" symbol_rate="4180000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11660000" symbol_rate="3500000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11665000" symbol_rate="3500000" polarization="1" fec_inner="3"/>
+	</sat>
+	<sat name="Eurasiasat 42.0E" flags="5" position="420">
+		<transponder frequency="11858000" symbol_rate="2400000" polarization="1" fec_inner="5"/>
+		<transponder frequency="12525000" symbol_rate="7140000" polarization="0" fec_inner="4"/>
+		<transponder frequency="12537000" symbol_rate="6666000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12548000" symbol_rate="2400000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12552000" symbol_rate="2400000" polarization="0" fec_inner="5"/>
+		<transponder frequency="12581000" symbol_rate="2285000" polarization="0" fec_inner="5"/>
+		<transponder frequency="12613000" symbol_rate="3053000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12619000" symbol_rate="6159000" polarization="1" fec_inner="3"/>
+		<transponder frequency="12621000" symbol_rate="3053000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12629000" symbol_rate="2600000" polarization="0" fec_inner="4"/>
+		<transponder frequency="12634000" symbol_rate="2600000" polarization="0" fec_inner="4"/>
+		<transponder frequency="12652000" symbol_rate="22500000" polarization="0" fec_inner="4"/>
+		<transponder frequency="12672000" symbol_rate="3500000" polarization="1" fec_inner="3"/>
+		<transponder frequency="12680000" symbol_rate="4340000" polarization="1" fec_inner="4"/>
+		<transponder frequency="12681000" symbol_rate="7030000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12700000" symbol_rate="12000000" polarization="1" fec_inner="5"/>
+		<transponder frequency="12723000" symbol_rate="4400000" polarization="0" fec_inner="4"/>
+		<transponder frequency="12730000" symbol_rate="3674000" polarization="1" fec_inner="3"/>
+		<transponder frequency="12732000" symbol_rate="6666000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12736000" symbol_rate="4400000" polarization="1" fec_inner="4"/>
+		<transponder frequency="12744000" symbol_rate="3254000" polarization="0" fec_inner="4"/>
 	</sat>
 </satellites>
