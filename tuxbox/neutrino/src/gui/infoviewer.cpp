@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.41 2001/10/21 13:06:17 field Exp $
+// $Id: infoviewer.cpp,v 1.42 2001/10/25 12:26:09 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.42  2001/10/25 12:26:09  field
+// NVOD-Zeiten im Infoviewer stimmen
+//
 // Revision 1.41  2001/10/21 13:06:17  field
 // nvod-zeiten funktionieren!
 //
@@ -196,6 +199,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
     else
     	BoxStartY = BoxEndY- InfoHeightY;
 
+    KillShowEPG = false;
     pthread_mutex_unlock( &epg_mutex );
 
 
@@ -259,7 +263,6 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
     pthread_mutex_lock( &epg_mutex );
     is_visible = true;
-    KillShowEPG = false;
     pthread_mutex_unlock( &epg_mutex );
 
     pthread_cond_signal( &epg_cond );
@@ -323,6 +326,8 @@ void CInfoViewer::showButtonNVOD()
         {
             g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
             g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR);
+
+            showData();
         };
     };
 }
@@ -369,7 +374,31 @@ void CInfoViewer::showButtonAudio()
 
 void CInfoViewer::showData()
 {
+    int is_nvod= false;
 
+    g_RemoteControl->CopyNVODs();
+    char to_compare[50];
+    if ( g_settings.epg_byname == 0 )
+        snprintf( to_compare, 10, "%x", Current_onid_tsid );
+    else
+        strcpy( to_compare, CurrentChannel.c_str() );
+
+    if ( ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 ) && ( g_RemoteControl->nvods.count_nvods> 0 ) )
+    {
+        // NVOD- Zeiten aus dem aktuell selektierten holen!
+        is_nvod= true;
+
+        int sel= g_RemoteControl->nvods.selected;
+        unsigned    dauer =g_RemoteControl->nvods.nvods[sel].dauer/ 60;
+        sprintf((char*) &runningDuration, "%d min", dauer);
+
+        struct      tm *pStartZeit = localtime(&g_RemoteControl->nvods.nvods[sel].startzeit);
+        sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
+        runningPercent=(unsigned)((float)(time(NULL)-g_RemoteControl->nvods.nvods[sel].startzeit)/(float)g_RemoteControl->nvods.nvods[sel].dauer*100.);
+        if (runningPercent>100)
+            runningPercent=0;
+        //printf("%s %s %d\n", runningDuration, runningStart, runningPercent);
+    }
 	int height = g_Fonts->infobar_channame->getHeight()/3;
 	//int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
 	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
@@ -393,7 +422,11 @@ void CInfoViewer::showData()
 //	int start1width      = g_Fonts->infobar_info->getRenderWidth(runningStart);
 	int duration1Width   = g_Fonts->infobar_info->getRenderWidth(runningDuration);
 	int duration1TextPos = BoxEndX-duration1Width-10;
-	height = g_Fonts->infobar_info->getHeight();
+    height = g_Fonts->infobar_info->getHeight();
+
+    if ( is_nvod )
+        g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+
 	g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, runningStart, COL_INFOBAR);
 	g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 30,  ChanInfoY+height, duration1TextPos- (BoxStartX + ChanWidth + 40)-10, running, COL_INFOBAR);
 	g_Fonts->infobar_info->RenderString(duration1TextPos,            ChanInfoY+height, duration1Width, runningDuration, COL_INFOBAR);
@@ -401,13 +434,16 @@ void CInfoViewer::showData()
 	ChanInfoY += height;
 
 	//info next
-    g_FrameBuffer->paintBox(BoxStartX + ChanWidth + 25, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+    g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
-	int duration2Width   = g_Fonts->infobar_info->getRenderWidth(nextDuration);
-	int duration2TextPos = BoxEndX-duration2Width-10;
-	g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
-	g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 30,  ChanInfoY+height, duration1TextPos- (BoxStartX + ChanWidth + 40)-10, next, COL_INFOBAR);
-	g_Fonts->infobar_info->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
+    if ( ( !is_nvod ) && (strcmp(next, "|")!= 0) )
+    {
+    	int duration2Width   = g_Fonts->infobar_info->getRenderWidth(nextDuration);
+    	int duration2TextPos = BoxEndX-duration2Width-10;
+    	g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
+    	g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 30,  ChanInfoY+height, duration1TextPos- (BoxStartX + ChanWidth + 40)-10, next, COL_INFOBAR);
+    	g_Fonts->infobar_info->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
+    }
 }
 
 void CInfoViewer::showWarte()

@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.26 2001/10/21 13:06:17 field Exp $
+// $Id: remotecontrol.cpp,v 1.27 2001/10/25 12:26:09 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.27  2001/10/25 12:26:09  field
+// NVOD-Zeiten im Infoviewer stimmen
+//
 // Revision 1.26  2001/10/21 13:06:17  field
 // nvod-zeiten funktionieren!
 //
@@ -396,6 +399,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                 }
                 if ( !do_immediatly )
                     usleep(100000);
+                    //usleep(100);
             }
             else
             {
