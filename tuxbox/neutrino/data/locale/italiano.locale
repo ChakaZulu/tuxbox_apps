@@ -267,8 +267,8 @@ keychooser.head Impostazioni per nuovo Tasto
 keychooser.text1 Premere il Tasto
 keychooser.text2 Per interrompere aspettare..
 
-screensetup.upperleft rot = Margine Alto, sinistro
-screensetup.lowerright grÃƒÂ¼n = Margine Basso, destro
+screensetup.upperleft rosso = Margine Alto, sinistro
+screensetup.lowerright verde = Margine Basso, destro
 
 bouquetlist.head Bouquets
 
@@ -458,7 +458,7 @@ settings.noconffile Le Impostazioni-Neutrino non sono stati\ntrovati. Verranno u
 settings.missingoptionsconffile Le Impostazioni-Neutrino sono stati avanzati.\n i Nuovi parametri verrano aggiunti al Standart.
 
 cam.wrong Attenzione la vostra CAM_ALPHA.BIN non e adatta\nper la vostra Smart-Card!!!\n\nVuole rivedere questa informazione?
-ucodes.failure Attenzione non sono stati trovati le �Codes!\nCaricarle via FTP (oppure DBox-BootManager)\ne riavviare il DBox !
+ucodes.failure Attenzione non sono stati trovati le µCodes!\nCaricarle via FTP (oppure DBox-BootManager)\ne riavviare il DBox !
 
 stringinput.caps Caratteri grandi/piccoli
 stringinput.clear Cancellare tutto
