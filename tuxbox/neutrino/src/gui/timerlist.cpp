@@ -89,7 +89,7 @@ public:
 		iType=Type;
 		stopTime=time;
 	}
-	bool changeNotify(const std::string & OptionName, void* dummy)
+	bool changeNotify(const neutrino_locale_t OptionName, void *)
 	{
 		CTimerd::CTimerEventTypes type = (CTimerd::CTimerEventTypes) *iType;
 		if(type == CTimerd::TIMER_RECORD)
@@ -140,7 +140,7 @@ public:
 		m = a;
 		iRepeat=repeat;
 	}
-	bool changeNotify(const std::string & OptionName, void* dummy)
+	bool changeNotify(const neutrino_locale_t OptionName, void *)
 	{
 		if(*iRepeat >= (int)CTimerd::TIMERREPEAT_WEEKDAYS)
 			m->setActive (true);

@@ -1720,7 +1720,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	keySetupNotifier = new CKeySetupNotifier;
 	CStringInput * keySettings_repeat_genericblocker = new CStringInput(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, g_settings.repeat_genericblocker, 3, LOCALE_REPEATBLOCKER_HINT_1, LOCALE_REPEATBLOCKER_HINT_2, "0123456789 ", keySetupNotifier);
 	CStringInput * keySettings_repeatBlocker = new CStringInput(LOCALE_KEYBINDINGMENU_REPEATBLOCK, g_settings.repeat_blocker, 3, LOCALE_REPEATBLOCKER_HINT_1, LOCALE_REPEATBLOCKER_HINT_2, "0123456789 ", keySetupNotifier);
-	keySetupNotifier->changeNotify("initial", NULL);
+	keySetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_RC));
 	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCK, true, g_settings.repeat_blocker, keySettings_repeatBlocker));
@@ -2129,7 +2129,7 @@ protected:
 			return value;
 		}
 
-	virtual bool changeNotify(const std::string & OptionName, void * Data)
+	virtual bool changeNotify(const neutrino_locale_t OptionName, void * Data)
 		{
 			configfile->setInt32(text, atoi(value));
 			return observer->changeNotify(OptionName, Data);
@@ -2817,7 +2817,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	MyIPChanger               = new CIPChangeNotifier;
 	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
 
-	colorSetupNotifier->changeNotify("initial", NULL);
+	colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 
 	CNFSMountGui::automount();
 
@@ -4011,22 +4011,22 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	if(actionKey=="theme_neutrino")
 	{
 		setupColors_neutrino();
-		colorSetupNotifier->changeNotify("initial", NULL);
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
 	else if(actionKey=="theme_classic")
 	{
 		setupColors_classic();
-		colorSetupNotifier->changeNotify("initial", NULL);
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
 	else if(actionKey=="theme_dblue")
 	{
 		setupColors_dblue();
-		colorSetupNotifier->changeNotify("initial", NULL);
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
 	else if(actionKey=="theme_dvb2k")
 	{
 		setupColors_dvb2k();
-		colorSetupNotifier->changeNotify("initial", NULL);
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
 	else if(actionKey=="shutdown")
 	{
@@ -4111,7 +4111,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 					configfile.setInt32(neutrino_font[k].name, neutrino_font[k].defaultsize);
 				}
 		}
-		changeNotify("fontsize.", NULL);
+		changeNotify("fontsize.", NULL); // FIXME
 	}
 	else if(actionKey=="osd.def")
 	{
@@ -4169,12 +4169,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 *          changeNotify - features menu recording start / stop                        *
 *                                                                                     *
 **************************************************************************************/
-bool CNeutrinoApp::changeNotify(const std::string & OptionName, void * data)
-{
-	return changeNotify(OptionName.c_str(), data);
-}
-
-bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
+bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *)
 {
 	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
 	{

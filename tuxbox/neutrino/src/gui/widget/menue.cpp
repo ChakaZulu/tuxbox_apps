@@ -501,7 +501,7 @@ int CMenuOptionChooser::exec(CMenuTarget*)
 	paint(true);
 	if(observ)
 	{
-		observ->changeNotify( optionName, optionValue );
+		observ->changeNotify(optionName, optionValue);
 	}
 	return menu_return::RETURN_NONE;
 }
@@ -609,7 +609,7 @@ int CMenuOptionStringChooser::exec(CMenuTarget*)
 	paint(true);
 	if(observ)
 	{
-		wantsRepaint = observ->changeNotify( optionName, optionValue );
+		wantsRepaint = observ->changeNotify(optionName, optionValue);
 	}
 	if ( wantsRepaint )
 		return menu_return::RETURN_REPAINT;

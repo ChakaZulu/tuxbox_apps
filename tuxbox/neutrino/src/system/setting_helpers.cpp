@@ -56,7 +56,7 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 extern "C" int pinghost( const char *hostname );
 
-bool CSatDiseqcNotifier::changeNotify(const std::string & OptionName, void* Data)
+bool CSatDiseqcNotifier::changeNotify(const neutrino_locale_t OptionName, void * Data)
 {
 	if (*((int*) Data) == NO_DISEQC)
 	{
@@ -93,7 +93,7 @@ CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwa
 }
 
 
-bool CDHCPNotifier::changeNotify(const std::string & OptionName, void* data)
+bool CDHCPNotifier::changeNotify(const neutrino_locale_t OptionName, void * data)
 {
 	CNeutrinoApp::getInstance()->networkConfig.inet_static = ((*(int*)(data)) == 0);
 	for(int x=0;x<5;x++)
@@ -118,7 +118,7 @@ CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
 
 }
 
-bool CStreamingNotifier::changeNotify(const std::string & OptionName, void*)
+bool CStreamingNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
    if(g_settings.streaming_type==0)
    {
@@ -149,7 +149,7 @@ CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[8]=i9;
    toDisable[9]=i10;
 }
-bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
+bool CRecordingNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
    if ((g_settings.recording_type == CNeutrinoApp::RECORDING_OFF) ||
        (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE))
@@ -198,13 +198,13 @@ CRecordingNotifier2::CRecordingNotifier2( CMenuItem* i1)
 {
    toDisable[0]=i1;
 }
-bool CRecordingNotifier2::changeNotify(const std::string & OptionName, void*)
+bool CRecordingNotifier2::changeNotify(const neutrino_locale_t OptionName, void *)
 {
    toDisable[0]->setActive(g_settings.recording_server_wakeup==1);
    return true;
 }
 
-bool CRecordingSafetyNotifier::changeNotify(const std::string & OptionName, void*)
+bool CRecordingSafetyNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
 	g_Timerd->setRecordingSafety(atoi(g_settings.record_safety_time_before)*60, atoi(g_settings.record_safety_time_after)*60);
    return true;
@@ -214,34 +214,34 @@ CMiscNotifier::CMiscNotifier( CMenuItem* i1)
 {
    toDisable[0]=i1;
 }
-bool CMiscNotifier::changeNotify( const std::string & OptionName, void* )
+bool CMiscNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
    toDisable[0]->setActive(!g_settings.shutdown_real);
    return true;
 }
 
-bool CConsoleDestChangeNotifier::changeNotify(const std::string & OptionName, void *Data)
+bool CConsoleDestChangeNotifier::changeNotify(const neutrino_locale_t OptionName, void * Data)
 {
 	g_settings.uboot_console = *(int *)Data;
 
 	return true;
 }
 
-bool CLcdNotifier::changeNotify(const std::string & OptionName, void *Data)
+bool CLcdNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
 	CLCD::getInstance()->setlcdparameter();
 	CLCD::getInstance()->setAutoDimm(g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM]);
 	return true;
 }
 
-bool CPauseSectionsdNotifier::changeNotify(const std::string & OptionName, void* Data)
+bool CPauseSectionsdNotifier::changeNotify(const neutrino_locale_t OptionName, void * Data)
 {
 	g_Sectionsd->setPauseScanning((*((int *)Data)) == 0);
 
 	return true;
 }
 
-bool CTouchFileNotifier::changeNotify(const std::string & OptionName, void * data)
+bool CTouchFileNotifier::changeNotify(const neutrino_locale_t OptionName, void * data)
 {
 	if ((*(int *)data) != 0)
 	{
@@ -256,7 +256,7 @@ bool CTouchFileNotifier::changeNotify(const std::string & OptionName, void * dat
 	return true;
 }
 
-bool CIPChangeNotifier::changeNotify(const std::string & OptionName, void* Data)
+bool CIPChangeNotifier::changeNotify(const neutrino_locale_t OptionName, void * Data)
 {
 	char ip[16];
 	unsigned char _ip[4];
@@ -270,7 +270,7 @@ bool CIPChangeNotifier::changeNotify(const std::string & OptionName, void* Data)
 	return true;
 }
 
-bool CColorSetupNotifier::changeNotify(const std::string & OptionName, void*)
+bool CColorSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
 	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
 //	unsigned char r,g,b;
@@ -323,17 +323,17 @@ bool CColorSetupNotifier::changeNotify(const std::string & OptionName, void*)
 	return false;
 }
 
-bool CAudioSetupNotifier::changeNotify(const std::string & OptionName, void*)
+bool CAudioSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
-	//printf("notify: %s\n", OptionName.c_str() );
+	//printf("notify: %s\n", OptionName);
 
-	if (ARE_LOCALES_EQUAL(OptionName.c_str(), LOCALE_AUDIOMENU_PCMOFFSET))
+	if (ARE_LOCALES_EQUAL(OptionName, LOCALE_AUDIOMENU_PCMOFFSET))
 	{
 		if (g_settings.audio_avs_Control == 2)   //lirc
 			g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), CControld::TYPE_OST);
 	}
 
-	if (ARE_LOCALES_EQUAL(OptionName.c_str(), LOCALE_AUDIOMENU_ANALOGOUT))
+	if (ARE_LOCALES_EQUAL(OptionName, LOCALE_AUDIOMENU_ANALOGOUT))
 	{
 		g_Zapit->setAudioMode(g_settings.audio_AnalogMode);
 	}
@@ -345,7 +345,7 @@ CAudioSetupNotifier2::CAudioSetupNotifier2( CMenuItem* i1)
    toDisable[0]=i1;
 }
 
-bool CAudioSetupNotifier2::changeNotify(const std::string & OptionName, void*)
+bool CAudioSetupNotifier2::changeNotify(const neutrino_locale_t OptionName, void *)
 {
 	toDisable[0]->setActive(g_settings.audio_avs_Control == 2);
 
@@ -362,26 +362,26 @@ CVideoSetupNotifier::CVideoSetupNotifier( CMenuItem* i1)
    toDisable[0]=i1;
 }
 
-bool CVideoSetupNotifier::changeNotify(const std::string & OptionName, void*)
+bool CVideoSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
-	if (ARE_LOCALES_EQUAL(OptionName.c_str(), LOCALE_VIDEOMENU_VIDEOSIGNAL))
+	if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOSIGNAL))
 	{
 		g_Controld->setVideoOutput(g_settings.video_Signal);
 
 		toDisable[0]->setActive((g_settings.video_Signal == 1) || (g_settings.video_Signal == 3) || (g_settings.video_Signal == 4));
 	}
-	else if (ARE_LOCALES_EQUAL(OptionName.c_str(), LOCALE_VIDEOMENU_VIDEOFORMAT))
+	else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOFORMAT))
 	{
 		g_Controld->setVideoFormat( g_settings.video_Format );
 	}
 
-	printf("video notify: %s\n", OptionName.c_str() );
+	printf("video notify: %s\n", OptionName);
 	return false;
 }
 
-bool CKeySetupNotifier::changeNotify(const std::string & OptionName, void*)
+bool CKeySetupNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
-	//    printf("CKeySetupNotifier notify: %s\n", OptionName.c_str() );
+	//    printf("CKeySetupNotifier notify: %s\n", OptionName);
 	g_RCInput->repeat_block = atoi(g_settings.repeat_blocker)* 1000;
 	g_RCInput->repeat_block_generic = atoi(g_settings.repeat_genericblocker)* 1000;
 	return false;

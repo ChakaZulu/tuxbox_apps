@@ -235,7 +235,7 @@ int CExtendedInput::exec( CMenuTarget* parent, const std::string & )
 
 	onAfterExec();
 
-	if ( (observ) && (msg==CRCInput::RC_ok) )
+	if ((observ) && (msg == CRCInput::RC_ok))
 	{
 		observ->changeNotify(name, value);
 	}

@@ -69,7 +69,7 @@ public:
 		m_pass = a4;
 		m_type = type;
 	}
-	bool changeNotify(const std::string & OptionName, void* dummy)
+	bool changeNotify(const neutrino_locale_t OptionName, void *)
 	{
 		if(*m_type == (int)CNFSMountGui::NFS)
 		{

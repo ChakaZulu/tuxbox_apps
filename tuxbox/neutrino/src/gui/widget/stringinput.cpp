@@ -315,7 +315,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 
 	if ( (observ) && (msg==CRCInput::RC_ok) )
 	{
-		observ->changeNotify( name, value );
+	  observ->changeNotify(name.c_str(), value); // FIXME
 	}
 
 	return res;
@@ -631,7 +631,7 @@ int CPINInput::exec( CMenuTarget* parent, const std::string & )
 
 	if ( (observ) && (msg==CRCInput::RC_ok) )
 	{
-		observ->changeNotify( name, value );
+		observ->changeNotify(name.c_str(), value); // FIXME
 	}
 
 	return res;

@@ -55,7 +55,7 @@ class CChangeObserver
 {
 	public:
 		virtual ~CChangeObserver(){}
-		virtual bool changeNotify(const std::string & OptionName, void *Data)
+		virtual bool changeNotify(const neutrino_locale_t OptionName, void *Data)
 		{
 			return false;
 		}
@@ -232,16 +232,15 @@ class CMenuOptionChooser : public CAbstractMenuOptionChooser
 
 class CMenuOptionStringChooser : public CMenuItem
 {
-		std::vector<std::string> options;
+		neutrino_locale_t        optionName;
 		int                      height;
-		std::string              optionName;
 		char *                   optionValue;
+		std::vector<std::string> options;
 		CChangeObserver *        observ;
 		bool                     localizing;
 
 	public:
-		// OptionName: UTF-8 encoded
-		CMenuOptionStringChooser(const char * const OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
+		CMenuOptionStringChooser(const neutrino_locale_t OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionStringChooser();
 
 		void addOption(const char * value);

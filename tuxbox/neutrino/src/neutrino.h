@@ -207,8 +207,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		int exec(CMenuTarget* parent, const std::string & actionKey);
 
 		//onchange
-		bool changeNotify(const std::string & OptionName, void * data);
-		bool changeNotify(const char * const OptionName, void * data);
+		bool changeNotify(const neutrino_locale_t OptionName, void *);
 
 		int handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data);
 

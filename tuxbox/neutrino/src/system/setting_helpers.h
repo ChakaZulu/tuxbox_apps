@@ -51,7 +51,7 @@ class CSatDiseqcNotifier : public CChangeObserver
 	public:
 		CSatDiseqcNotifier( CMenuItem* SatMenu, CMenuItem* ExtMenu, CMenuItem* ExtMotorMenu, CMenuItem* RepeatMenu) : CChangeObserver()
 		{ satMenu = SatMenu; extMenu = ExtMenu; extMotorMenu = ExtMotorMenu; repeatMenu = RepeatMenu;};
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CDHCPNotifier : public CChangeObserver
@@ -60,7 +60,7 @@ class CDHCPNotifier : public CChangeObserver
 		CMenuForwarder* toDisable[5];
 	public:
 		CDHCPNotifier( CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*, CMenuForwarder*);
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 class CStreamingNotifier : public CChangeObserver
 {
@@ -68,7 +68,7 @@ class CStreamingNotifier : public CChangeObserver
 		CMenuItem* toDisable[12];
 	public:
 		CStreamingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 class CRecordingNotifier : public CChangeObserver
 {
@@ -76,13 +76,13 @@ class CRecordingNotifier : public CChangeObserver
 		CMenuItem* toDisable[10];
 	public:
 		CRecordingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CRecordingSafetyNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CRecordingNotifier2 : public CChangeObserver
@@ -91,7 +91,7 @@ class CRecordingNotifier2 : public CChangeObserver
 		CMenuItem* toDisable[1];
 	public:
 		CRecordingNotifier2( CMenuItem* );
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CMiscNotifier : public CChangeObserver
@@ -100,19 +100,19 @@ class CMiscNotifier : public CChangeObserver
 		CMenuItem* toDisable[1];
 	public:
 		CMiscNotifier( CMenuItem* );
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CLcdNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CPauseSectionsdNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CTouchFileNotifier : public CChangeObserver
@@ -123,19 +123,19 @@ class CTouchFileNotifier : public CChangeObserver
 		{
 			filename = file_to_modify;
 		};
-	bool changeNotify(const std::string & OptionName, void *);
+	bool changeNotify(const neutrino_locale_t OptionName, void *);
 };
 
 class CColorSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CAudioSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CAudioSetupNotifier2 : public CChangeObserver
@@ -144,7 +144,7 @@ class CAudioSetupNotifier2 : public CChangeObserver
 		CMenuItem* toDisable[1];
 	public:
 		CAudioSetupNotifier2( CMenuItem* );
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CVideoSetupNotifier : public CChangeObserver
@@ -153,25 +153,25 @@ class CVideoSetupNotifier : public CChangeObserver
 		CMenuItem* toDisable[1];
 	public:
 		CVideoSetupNotifier( CMenuItem* );
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CKeySetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CIPChangeNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CConsoleDestChangeNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(const std::string & OptionName, void*);
+		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
 class CAPIDChangeExec : public CMenuTarget
