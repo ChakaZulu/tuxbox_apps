@@ -1,0 +1,149 @@
+a.mute { color:#ffffff; font-size:8pt; font-family:tahoma, arial; }
+a.audio { color:#000000; font-size:8pt; font-family:Verdana; }
+.white { color:#000000; font-size: 8pt; font-family: Verdana; }
+.black { color:#000000; font-size: 9pt; font-family: Verdana; }
+.button { color:#ffffff; font-size: 10pt; font-weight: bold; font-family: Verdana; }
+.servicename { color:#ffffff; font-size:13pt; font-family: tahoma, arial; }
+.epgzeit { color:#000000; font-size:12pt; font-family: tahoma, arial; }
+.epgdur { color:#000000; font-size:10pt; font-family: tahoma, arial; }
+.epgname { color:#000000; font-size:12pt; font-family: tahoma, arial; }
+.epgdesc { color:#000000; font-size:10pt; font-family: tahoma, arial; }
+td.menu { font-family: Verdana; font-size: 10pt; font-weight: bold}
+.title { color:#000000; font-size:13pt; font-weight: bold; font-family: Verdana; background: #d9e0e7; }
+.epg { color:#000000; font-size:10pt; font-family:tahoma,arial; }
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 13px;
+}
+
+#mainbody {
+	background-image: url(bg.png);
+	background-color: #ffffff;
+}
+
+#headbody {
+	background-image: url(bg.png);
+}
+
+h1 {
+	font-size: 20px;
+}
+
+h2 {
+	font-size: 18px;
+}
+
+td {
+	font-size: 13px;
+}
+
+input {
+	font-weight: bold;
+	color: #ffffff;
+}
+
+a {
+	color: #263971;
+	text-decoration: underline;
+}
+a:hover {
+	color: #A91111;
+}
+
+#contentcell {
+	background-color: #ffffff;
+	padding-left: 10px;
+	padding-top: 10px;
+	padding-right: 10px;
+	padding-bottom: 10px;
+}
+
+#headercell {
+	padding-left: 10px;
+	padding-top: 5px;
+	padding-right: 10px;
+	padding-bottom: 5px;
+}
+
+#statcell {
+	padding-left: 0px;
+	padding-right: 0px;
+	padding-top: 10px;
+	padding-bottom: 0px;
+}
+
+#contentcell TD {
+	color: #333333;
+}
+
+#leftnavi {
+	background-color: #D9E0E7;
+	border-right: 1px solid #98A4B6;
+}
+
+
+#topnavi {
+	padding-left: 120px;
+	background-color: #D9E0E7;
+	border-bottom: 1px solid #98A4B6;
+	border-top: 1px solid #98A4B6;
+	border-left: 0px solid #98A4B6;
+	border-right: 0px solid #98A4B6;
+}
+
+#channavi {
+	padding-left: 120px;
+	background-color: #D9E0E7;
+	border-bottom: 1px solid #98A4B6;
+	border-top: 1px solid #98A4B6;
+	border-left: 0px solid #98A4B6;
+	border-right: 0px solid #98A4B6;
+}
+
+#topnavi input,
+#leftnavi input {
+	color: #000000;
+}
+
+#contentcell .title {
+	font-size:16pt;
+}
+
+#mepg .channel { 
+	font-size: 16px;
+	font-weight: bold; 
+}
+
+#mepg .description {
+	font-size: 8px;
+}	
+
+#mepg TR {
+	background-color: #E0E6EB;
+	border-bottom: 1px solid #000000;
+}
+
+#mepg TABLE {
+	border: 0px solid #000000;
+}
+
+#mepg TH,
+#mepg TD {
+	border-bottom: 1px solid #98A4B6;
+	border-top: 1px solid #BBC8D4;
+	border-left: 0px solid #000000;
+	border-right: 1px solid #ffffff;
+	padding-top:3px;
+	padding-bottom:3px;
+	padding-left:3px;
+	padding-right:3px;
+	vertical-align: top;
+	text-align: left;
+	background-image: url(mepg_grad.png);
+	background-repeat: repeat-x;
+}
+
+#megatable {
+	border: 1px solid #98A4B6;
+}
+
