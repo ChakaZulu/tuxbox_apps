@@ -392,6 +392,70 @@ void CNeutrinoApp::saveSetup(SNeutrinoSettings* settings)
 **************************************************************************************/
 void CNeutrinoApp::channelsInit()
 {
+  if (zapit) 
+  {
+  	int sock_fd;
+	SAI servaddr;
+	char rip[]="127.0.0.1";
+	char *return_buf;
+	
+	sendmessage.version=1;
+	sendmessage.cmd = 5;
+
+	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(1505);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+	#ifdef HAS_SIN_LEN
+ 		servaddr.sin_len = sizeof(servaddr); // needed ???
+	#endif
+
+
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+  		perror("Couldn't connect to server!");
+		exit(-1);
+	}
+
+	write(sock_fd, &sendmessage, sizeof(sendmessage));
+	return_buf = (char*) malloc(4);
+	
+	if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
+		perror("Nothing could be received\n");
+		exit(-1);
+	}
+	
+	printf("That was returned: %s\n", return_buf);
+	
+	if (atoi(return_buf) != 5)
+	{
+		
+		printf("Wrong Command was send for channelsInit(). Exiting.\n");
+		return;
+	}
+	
+	
+	memset(&zapitchannel,0,sizeof(zapitchannel));
+	while (recv(sock_fd, &zapitchannel, sizeof(zapitchannel),0)>0) {
+		char channel_name[30];
+		uint channel_nr = zapitchannel.chan_nr;
+		strncpy(channel_name,zapitchannel.name,30);
+		
+		//printf("Name received: %s\n", channel_name);
+		//printf("Channelnumber received: %d\n", channel_nr);
+		channelList->addChannel(channel_nr, channel_name);
+		memset(&zapitchannel,0,sizeof(zapitchannel));
+	} 
+	printf("All channels received\n");
+	
+			
+	close(sock_fd);
+ }
+ else 
+ {
+ 	
   char buffer[128];
   FILE *fp=popen("pzap --dump", "r");
 
@@ -414,6 +478,7 @@ void CNeutrinoApp::channelsInit()
 	count++;
   }
   pclose(fp);
+  }
 }
 
 
@@ -426,6 +491,21 @@ int CNeutrinoApp::run(int argc, char **argv)
 {
 	printf("neutrino2\n");
 
+	if (argc > 1) {
+		if (! strcmp(argv[1], "-z")) {
+			printf("Using zapit\n");
+			zapit = true;
+		}
+		else {
+			printf("Usage: neutrino [-z]\n");
+			exit(0);
+		}
+	}
+	else {
+		printf("Using nstreamzapd\n");
+	 	zapit = false;
+	}
+	
 	fontRenderer = new fontRenderClass( &frameBuffer);
 	
 	if (frameBuffer.setMode(720, 576, 8))
@@ -693,6 +773,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 
 	//init programm
+	remoteControl.setZapper(zapit);
 	volume = 100;
 	channelsInit();
 	infoViewer.start(&frameBuffer, &fonts, &settings);

@@ -34,12 +34,14 @@ class CRemoteControl
 {
 		st_rmsg	remotemsg;
 		void send();
+		bool zapit_mode;
 
 	public:
 
 		CRemoteControl();
 		void zapTo(int key,  string chnlname );
 		void shutdown();
+		void setZapper (bool zapper);
 	
 };
 

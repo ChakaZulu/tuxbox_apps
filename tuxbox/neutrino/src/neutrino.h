@@ -54,6 +54,8 @@
 #include "widget/stringinput.h"
 #include "widget/screensetup.h"
 
+#include "../../zapit/getservices.h"
+
 #include "daemonc/remotecontrol.h"
 #include "daemonc/controld.h"
 #include "helpers/infoviewer.h"
@@ -83,12 +85,16 @@ class CNeutrinoApp : public CMenuTarget
 	};
 
 		struct SNeutrinoSettings	settings;
-		string						settingsFile;
+		string				settingsFile;
 
 		bool				nRun;
-		int					mode;
+		int				mode;
 		char				volume;
 		bool				mute;
+		
+		st_rmsg				sendmessage;
+		channel_msg			zapitchannel;
+		bool				zapit;
 
 		CRCInput			rcInput;
 		CFrameBuffer		frameBuffer;
