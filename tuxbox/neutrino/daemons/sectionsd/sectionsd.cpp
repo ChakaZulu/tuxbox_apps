@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.53 2001/09/10 02:58:00 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.54 2001/09/18 18:15:27 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.54  2001/09/18 18:15:27  fnbrd
+//  2 new commands.
+//
 //  Revision 1.53  2001/09/10 02:58:00  fnbrd
 //  Cinedom-Hack
 //
@@ -838,6 +841,15 @@ static unsigned findServiceUniqueKeyforServiceName(const char *serviceName)
   return 0;
 }
 
+static const SIevent& findSIeventForEventUniqueKey(const long long& eventUniqueKey)
+{
+  // Event (eventid) suchen
+  MySIeventsOrderUniqueKey::iterator e=mySIeventsOrderUniqueKey.find(eventUniqueKey);
+  if(e!=mySIeventsOrderUniqueKey.end())
+    return *(e->second);
+  return nullEvt;
+}
+
 static const SIevent &findActualSIeventForServiceUniqueKey(const unsigned serviceUniqueKey, SItime& zeit)
 {
   time_t azeit=time(NULL);
@@ -1079,7 +1091,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.53 2001/09/10 02:58:00 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.54 2001/09/18 18:15:27 fnbrd Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1270,17 +1282,23 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
 }
 
 // Sendet ein EPG, unlocked die events, unpaused dmxEIT
-static void sendEPG(struct connectionData *client, const SIevent& e, const SItime& t)
+static void sendEPG(struct connectionData *client, const SIevent& e, const SItime& t, int shortepg=0)
 {
 struct sectionsd::msgResponseHeader responseHeader;
 
-  responseHeader.dataLength=
-    12+1+				// Unique-Key + del
-    strlen(e.name.c_str())+1+		//Name + del
-    strlen(e.text.c_str())+1+		//Text + del
-    strlen(e.extendedText.c_str())+1+	//ext + del
-    8+1+				//start time + del
-    8+1+1;				//duration + del + 0
+  if(!shortepg)
+    responseHeader.dataLength=
+     12+1+				// Unique-Key + del
+     strlen(e.name.c_str())+1+		// Name + del
+     strlen(e.text.c_str())+1+		// Text + del
+     strlen(e.extendedText.c_str())+1+	// ext + del
+     8+1+				// start time + del
+     8+1+1;				// duration + del + 0
+  else 
+    responseHeader.dataLength=
+     strlen(e.name.c_str())+1+		// Name + del
+     strlen(e.text.c_str())+1+		// Text + del
+     strlen(e.extendedText.c_str())+1+1;// ext + del + 0
   char* msgData = new char[responseHeader.dataLength];
   if(!msgData) {
     fprintf(stderr, "low on memory!\n");
@@ -1288,15 +1306,23 @@ struct sectionsd::msgResponseHeader responseHeader;
     dmxEIT.unpause(); // -> unlock
     return;
   }
-  sprintf(msgData,
-    "%012llx\xFF%s\xFF%s\xFF%s\xFF%08lx\xFF%08x\xFF",
-    e.uniqueKey(),
-    e.name.c_str(),
-    e.text.c_str(),
-    e.extendedText.c_str(),
-    t.startzeit,
-    t.dauer
-  );
+  if(!shortepg)
+    sprintf(msgData,
+      "%012llx\xFF%s\xFF%s\xFF%s\xFF%08lx\xFF%08x\xFF",
+      e.uniqueKey(),
+      e.name.c_str(),
+      e.text.c_str(),
+      e.extendedText.c_str(),
+      t.startzeit,
+      t.dauer
+    );
+  else
+    sprintf(msgData,
+      "%s\xFF%s\xFF%s\xFF",
+      e.name.c_str(),
+      e.text.c_str(),
+      e.extendedText.c_str()
+    );
   unlockEvents();
   dmxEIT.unpause(); // -> unlock
 
@@ -1589,6 +1615,73 @@ static void commandEventListRadioIDs(struct connectionData *client, char *data, 
   return;
 }
 
+static void commandEPGepgID(struct connectionData *client, char *data, const unsigned dataLength)
+{
+  if(dataLength!=8+4)
+    return;
+  unsigned long long* epgID=(unsigned long long*)data;
+  time_t* startzeit=(time_t *)(data+8);
+
+  dprintf("Request of actual EPG for 0x%llx 0x%lx\n", *epgID, *startzeit);
+
+  if(dmxEIT.pause()) // -> lock
+    return;
+  lockEvents();
+  const SIevent& evt=findSIeventForEventUniqueKey(*epgID);
+  if(evt.serviceID!=0) { // Event found
+    SItimes::iterator t=evt.times.begin();
+    for(; t!=evt.times.end(); t++)
+      if(t->startzeit==*startzeit)
+	break;
+    if(t==evt.times.end()) {
+      dputs("EPG not found!");
+    }
+    else {
+      dputs("EPG found.");
+      // Sendet ein EPG, unlocked die events, unpaused dmxEIT
+      sendEPG(client, evt, *t);
+    }
+  }
+  else {
+    dputs("EPG not found!");
+    unlockEvents();
+    dmxEIT.unpause(); // -> unlock
+    // response
+    struct sectionsd::msgResponseHeader pmResponse;
+    pmResponse.dataLength=0;
+    if(writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS)<=0)
+      dputs("[sectionsd] Fehler/Timeout bei write");
+  }
+}
+
+static void commandEPGepgIDshort(struct connectionData *client, char *data, const unsigned dataLength)
+{
+  if(dataLength!=8)
+    return;
+  unsigned long long* epgID=(unsigned long long*)data;
+
+  dprintf("Request of actual EPG for 0x%llx\n", *epgID);
+
+  if(dmxEIT.pause()) // -> lock
+    return;
+  lockEvents();
+  const SIevent& evt=findSIeventForEventUniqueKey(*epgID);
+  if(evt.serviceID!=0) { // Event found
+    dputs("EPG found.");
+    sendEPG(client, evt, SItime(0, 0), 1);
+  }
+  else {
+    dputs("EPG not found!");
+    unlockEvents();
+    dmxEIT.unpause(); // -> unlock
+    // response
+    struct sectionsd::msgResponseHeader pmResponse;
+    pmResponse.dataLength=0;
+    if(writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS)<=0)
+      dputs("[sectionsd] Fehler/Timeout bei write");
+  }
+}
+
 //static void (*connectionCommands[NUMBER_OF_SECTIONSD_COMMANDS]) (struct connectionData *, char *, const unsigned)  = {
 static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectionData *, char *, const unsigned)  = {
   commandActualEPGchannelName,
@@ -1607,6 +1700,8 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectio
   commandEventListTVids,
   commandEventListRadioIDs,
   commandCurrentNextInfoChannelID,
+  commandEPGepgID,
+  commandEPGepgIDshort
 };
 
 static void *connectionThread(void *conn)
@@ -2223,7 +2318,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.53 2001/09/10 02:58:00 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.54 2001/09/18 18:15:27 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {

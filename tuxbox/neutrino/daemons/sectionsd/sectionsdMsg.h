@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.14 2001/08/16 13:13:12 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.15 2001/09/18 18:15:28 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.15  2001/09/18 18:15:28  fnbrd
+//  2 new commands.
+//
 //  Revision 1.14  2001/08/16 13:13:12  fnbrd
 //  New commands.
 //
@@ -79,7 +82,7 @@ struct sectionsd {
     unsigned short dataLength;
   } __attribute__ ((packed)) ;
 
-  static const int numberOfCommands=16;
+  static const int numberOfCommands=18;
   enum commands {
     actualEPGchannelName=0,
     actualEventListTVshort,
@@ -96,7 +99,9 @@ struct sectionsd {
     actualEPGchannelID,
     actualEventListTVshortIDs,
     actualEventListRadioShortIDs,
-    currentNextInformationID
+    currentNextInformationID,
+    epgEPGid,
+    epgEPGidShort
   };
 };
 
@@ -197,7 +202,7 @@ struct sectionsd {
 //     is channel ID (4 byte onid<<16+sid)
 //   data of response:
 //     is a string (c-string) describing the EPG:
-//     unique key (long long, hex) 0xff name  0xff text  0xff extended text  0xff start time GMT (ctime, hex ) 0xff duration (seconds, hex)
+//     unique key (long long, hex) 0xff name  0xff text  0xff extended text  0xff start time GMT (ctime, hex ) 0xff duration (seconds, hex) 0xff
 //
 // actualEventListTVshortIDs:
 //   data of request:
@@ -215,9 +220,25 @@ struct sectionsd {
 //
 // currentNextInformationID:
 //   data of request:
-//     is channel ID (4 byte onid<<16+sid)
+//     4 byte channel ID (4 byte onid<<16+sid)
+//     1 byte number of Events (noch nicht implementiert)
 //   data of response:
 //     is a string (c-string) describing the current/next EPGs
 //     every event: 1. line unique key (long long, hex), 2. line name, 3. line start time GMT (ctime, hex ), 4 line  duration (seconds, hex)
+//
+// epgEPGid:
+//   data of request:
+//     unique epg ID (8 byte)
+//     time_t starttime GMT (4 bytes)
+//   data of response:
+//     is a string (c-string) describing the EPG:
+//     name 0xff text 0xff extended text 0xff start time GMT (ctime, hex ) 0xff duration (seconds, hex) 0xff
+//
+// epgEPGidShort:
+//   data of request:
+//     unique epg ID (8 byte)
+//   data of response:
+//     is a string (c-string) describing the EPG:
+//     name  0xff text  0xff extended text 0xff
 //
 #endif // SECTIONSDMSG_H
