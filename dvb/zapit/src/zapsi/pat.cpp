@@ -101,6 +101,8 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
 	struct dmxSctFilterParams flt;
 	int demux, pt;
 	struct pollfd dmx_fd;
+	int section = 0;
+	char buffer[1024];
 	
 	demux=open(DEMUX_DEV, O_RDWR);
   	if (demux<0) {
@@ -135,7 +137,10 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
   	}
   	else
   	{
-*/  		char buffer[1024];
+  	
+*/  	
+	do
+	{
   		int r;
   		int current, sec_len;
   		int tsid;
@@ -192,6 +197,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
 			current = current+4;
 		}
 //	}
+	} while (buffer[7] != section++);
 	close(demux);
 	return 1;
 }

@@ -26,14 +26,10 @@ void nit(int diseqc, FILE *logfd)
   	char buffer[1024];
   	int r;
   	int current, sec_len;
-  	int step = 0;
+  	int section = 0;
   	
   	fprintf(logfd, "Starting NIT\n");
-  	while (step < 10)
-  	{
-  	step++;
-  	printf("Reading NIT step %d\n", step);
-  	fprintf(logfd, "Reading NIT step %d\n", step);
+
   	
 	demux=open(DEMUX_DEV, O_RDWR);
   	if (demux<0) {
@@ -55,27 +51,16 @@ void nit(int diseqc, FILE *logfd)
   		}
   
   	ioctl(demux, DMX_START, 0);
-/*  
-  	dmx_fd.fd = demux;
-  	dmx_fd.events = POLLIN;
-  	dmx_fd.revents = 0;
-	
-  
-  	pt = poll(&dmx_fd, 1, 15000);
-  
-  	if (!pt)
-  	{
-		printf("Poll timeout\n");
-		close(demux);
-		return;
-  	}
-*/  	
-  	
+
+	do
+	{
+		fprintf(logfd, "Reading NIT section %d\n", section);
+		
   	if ((r=read(demux, buffer, 3))<=0)  {
    		perror("[zapit] read NIT.");
    		fprintf(logfd, "Error reading first 3 bytes.\n");
     		close(demux);
-    		continue;
+    		return;
     	}
     	
   	sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
@@ -85,18 +70,9 @@ void nit(int diseqc, FILE *logfd)
     		perror("[zapit] read NIT.");
     		fprintf(logfd, "Error reading %d bytes.\n",sec_len);
     		close(demux);
-    		continue;
+    		return;
 	}
-	ioctl(demux,DMX_STOP,0);
-	close(demux);
-	break;
-	};
 
-	if (step == 10)
-	{
-		fprintf(logfd, "Two many steps reading NIT. Cancelling\n");
-		return;
-	}
 	
 	/*
 	printf("<NIT>\n");
@@ -250,5 +226,9 @@ void nit(int diseqc, FILE *logfd)
 	
 	
 	//printf("</NIT>\n");
+	}
+	while (buffer[7] != section++);
 	fprintf(logfd, "NIT ended\n");
+	ioctl(demux,DMX_STOP,0);
+	close(demux);
 }

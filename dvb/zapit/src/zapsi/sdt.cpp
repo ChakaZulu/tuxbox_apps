@@ -27,14 +27,15 @@ int sdt(uint osid, bool scan_mode, FILE *logfd)
   int r;
   int current_i, sec_len;
   int network_id, tsid;
-  int step = 0;
+//  int step = 0;
+  int section = 0;
   
   fprintf(logfd, "Start reading sdt\n");
-  while (step < 10)
-    {
-      step++;
-      printf("Reading SDT step %d\n", step);
-      fprintf(logfd, "Reading SDT step %d\n", step);
+//  while (step < 10)
+//    {
+//      step++;
+//      printf("Reading SDT step %d\n", step);
+//      fprintf(logfd, "Reading SDT step %d\n", step);
       
       demux=open(DEMUX_DEV, O_RDWR);
       if (demux<0) {
@@ -56,28 +57,16 @@ int sdt(uint osid, bool scan_mode, FILE *logfd)
       }
       
       ioctl(demux, DMX_START, 0);
-/*      
-      dmx_fd.fd = demux;
-      dmx_fd.events = POLLIN;
-      dmx_fd.revents = 0;
-      
-      
-      pt = poll(&dmx_fd, 1, 20000);
-      
-      if (!pt)
-	{
-	  printf("Poll timeout\n");
-	  close(demux);
-	  return -1;
-	}
-      
-*/      
-      
+    
+      do
+      {
+      	fprintf(logfd, "Reading SDT section %d\n", section);
       if ((r=read(demux, buffer, 3))<=0)  {
 	perror("[zapit] read sdt");
 	fprintf(logfd, "Error reading first 3 bytes of SDT\n");
 	close(demux);
-	continue;
+//	continue;
+	return -2; //Give it another try.
 	//exit(0);
       }
       
@@ -90,27 +79,28 @@ int sdt(uint osid, bool scan_mode, FILE *logfd)
 	fprintf(logfd, "Error reading %d bytes of SDT\n", sec_len);
 	close(demux);
 	//exit(0);
-	continue;
+//	continue;
+	return -2; //Give it another try.
       }
-      ioctl(demux, DMX_STOP, 0);
-      close(demux);
-      break;
-    }
+
+//      break;
+//    }
   
-  if (step == 10)
-  {
-  	fprintf(logfd, "To many tries reading SDT. Cancelling.\n");
-    return -1;
-    }
+//  if (step == 10)
+//  {
+//  	fprintf(logfd, "To many tries reading SDT. Cancelling.\n");
+//    return -1;
+//    }
   
   tsid = (buffer[3]<<8) | buffer[4];
   printf("TSid: %04x\n",tsid);
-  if (scan_mode && tsid !=(int) osid)
-    {	
-      printf("We are looking for another TSid.. Why does this happen?\n");
-      fprintf(logfd, "Wrong TSID found: %d. Returning -2\n",tsid);
-      return -2;
-    }
+  fprintf(logfd, "Found tsid %04x\n", tsid);
+//  if (scan_mode && tsid !=(int) osid)
+//    {	
+//      printf("We are looking for another TSid.. Why does this happen?\n");
+//      fprintf(logfd, "Wrong TSID found: %d. Returning -2\n",tsid);
+//      return -2;
+//    }
   
   //printf("section_number: %04x\n",buffer[6]);
   //printf("last_section_number: %04x\n",buffer[7]);
@@ -188,7 +178,9 @@ int sdt(uint osid, bool scan_mode, FILE *logfd)
 	}
       current_i += desc_len;
     }
-
+   } while (buffer[7] != section++);
+   
+ioctl(demux, DMX_STOP, 0);
 close(demux);
 fprintf(logfd, "SDT ended\n");
 return 23;
