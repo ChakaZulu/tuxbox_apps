@@ -70,7 +70,7 @@ class CMP3Player
 
 
 	const char		*MadErrorString(const struct mad_stream *Stream);
-	unsigned short	MadFixedToUshort(mad_fixed_t Fixed);
+	signed short MadFixedToSShort(const mad_fixed_t Fixed);
 	void				CreateInfo();
 	int				MpegAudioDecoder(FILE *InputFp,int OutputFd);
 

@@ -41,7 +41,7 @@
 #include <mad.h>
 
 
-#include "mp3play.h"
+#include <driver/mp3play.h>
 
 // Frames to skip in ff/rev mode
 #define FRAMES_TO_SKIP 75 
@@ -124,10 +124,10 @@ const char *CMP3Player::MadErrorString(const struct mad_stream *Stream)
 #endif
 
 /****************************************************************************
- * Converts a sample from mad's fixed point number format to an unsigned	*
- * short (16 bits).															*
+ * Converts a sample from mad's fixed point number format to a signed       *
+ * short (16 bits).                                                         *
  ****************************************************************************/
-unsigned short CMP3Player::MadFixedToUshort(mad_fixed_t Fixed)
+inline signed short CMP3Player::MadFixedToSShort(const mad_fixed_t Fixed)
 {
 	/* A fixed point number is formed of the following bit pattern:
 	 *
@@ -148,17 +148,15 @@ unsigned short CMP3Player::MadFixedToUshort(mad_fixed_t Fixed)
 	 * the 16-bit number, madplay includes much better algorithms.
 	 */
 	if (Fixed >= MAD_F_ONE)
-		Fixed = MAD_F_ONE - 1;
+		return 32767;
 	else if (Fixed < -MAD_F_ONE)
-		Fixed = -MAD_F_ONE;
+		return -32768;
  
-	Fixed>>=MAD_F_FRACBITS-15;
-
-	return((unsigned short)Fixed);
+	return (signed short)(Fixed >> (MAD_F_FRACBITS + 1 - 16));
 }
 
 /****************************************************************************
- * Print human readable informations about an audio MPEG frame.				*
+ * Print human readable informations about an audio MPEG frame.             *
  ****************************************************************************/
 void CMP3Player::CreateInfo()
 {
@@ -238,7 +236,7 @@ void CMP3Player::CreateInfo()
 }
 
 /****************************************************************************
- * Main decoding loop. This is where mad is used.							*
+ * Main decoding loop. This is where mad is used.                           *
  ****************************************************************************/
 #define INPUT_BUFFER_SIZE	(2*8192)
 #define OUTPUT_BUFFER_SIZE	1022*4 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
@@ -253,7 +251,7 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,int OutputFd)
 						*OutputPtr=OutputBuffer;
 	const unsigned char	*OutputBufferEnd=OutputBuffer+OUTPUT_BUFFER_SIZE;
 	int					Status=0,
-						i,ret;
+						ret;
 	unsigned long		FrameCount=0;
 
 	/* First the structures used by libmad must be initialized. */
@@ -483,53 +481,78 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 
 				
 		// decode 5 frames each 75 frames in ff mode
-      if( state!=FF || FrameCount % 75 < 5)
-      {
-		
-         /* Once decoded the frame is synthesized to PCM samples. No errors
-		    * are reported by mad_synth_frame();
-		    */
-         mad_synth_frame(&Synth,&Frame);
-		
-
-		   /* Synthesized samples must be converted from mad's fixed
-		    * point number to the consumer format. Here we use unsigned
-		    * 16 bit big endian integers on two channels. Integer samples
-		    * are temporarily stored in a buffer that is flushed when
-		    * full.
-		    */
-         for(i=0;i<Synth.pcm.length;i++)
-         {
-            unsigned short	Sample;
-
-            /* Left channel */
-            Sample=MadFixedToUshort(Synth.pcm.samples[0][i]);
-            *(OutputPtr++)=Sample>>8;
-            *(OutputPtr++)=Sample&0xff;
-
-			   /* Right channel. If the decoded stream is monophonic then
-			    * the right output channel is the same as the left one.
-			    */
-            if(MAD_NCHANNELS(&Frame.header)==2)
-               Sample=MadFixedToUshort(Synth.pcm.samples[1][i]);
-            *(OutputPtr++)=Sample>>8;
-            *(OutputPtr++)=Sample&0xff;
-
-			   /* Flush the buffer if it is full. */
-            if(OutputPtr==OutputBufferEnd)
-            {
-               if(write(OutputFd, OutputBuffer, OUTPUT_BUFFER_SIZE)!=OUTPUT_BUFFER_SIZE)
-               {
-                  fprintf(stderr,"%s: PCM write error (%s).\n",
-                          ProgName,strerror(errno));
-                  Status=2;
-                  break;
-               }
+		if( state!=FF || FrameCount % 75 < 5)
+		{
 			
-               OutputPtr=OutputBuffer;
-            }
-         }
-      }
+			/* Once decoded the frame is synthesized to PCM samples. No errors
+			 * are reported by mad_synth_frame();
+			 */
+			mad_synth_frame(&Synth, &Frame);
+			
+			
+			/* Synthesized samples must be converted from mad's fixed
+			 * point number to the consumer format. Here we use signed
+			 * 16 bit native endian integers on two channels. Integer samples
+			 * are temporarily stored in a buffer that is flushed when
+			 * full.
+			 */
+
+			if (MAD_NCHANNELS(&Frame.header) == 2)
+			{
+				mad_fixed_t * leftchannel = Synth.pcm.samples[0];
+				mad_fixed_t * rightchannel = Synth.pcm.samples[1];
+				
+				while (Synth.pcm.length-- > 0)
+				{
+					/* Left channel */
+					*((signed short *)OutputPtr) = MadFixedToSShort(*(leftchannel++));
+					
+					/* Right channel */
+					*(((signed short *)OutputPtr) + 1) = MadFixedToSShort(*(rightchannel++));
+				
+					OutputPtr += 4;
+					
+					/* Flush the buffer if it is full. */
+					if (OutputPtr == OutputBufferEnd)
+					{
+						if (write(OutputFd, OutputBuffer, OUTPUT_BUFFER_SIZE) != OUTPUT_BUFFER_SIZE)
+						{
+							fprintf(stderr,"%s: PCM write error (%s).\n", ProgName, strerror(errno));
+							Status = 2;
+							break;
+						}
+						
+						OutputPtr = OutputBuffer;
+					}
+				}
+			}
+			else
+			{
+				mad_fixed_t * leftchannel = Synth.pcm.samples[0];
+				
+				while (Synth.pcm.length-- > 0)
+				{
+					/* Left channel => copy to right channel */
+
+					*(((signed short *)OutputPtr) + 1) = *((signed short *)OutputPtr) = MadFixedToSShort(*(leftchannel++));
+				
+					OutputPtr += 4;
+					
+					/* Flush the buffer if it is full. */
+					if (OutputPtr == OutputBufferEnd)
+					{
+						if (write(OutputFd, OutputBuffer, OUTPUT_BUFFER_SIZE) != OUTPUT_BUFFER_SIZE)
+						{
+							fprintf(stderr,"%s: PCM write error (%s).\n", ProgName, strerror(errno));
+							Status = 2;
+							break;
+						}
+						
+						OutputPtr = OutputBuffer;
+					}
+				}
+			}
+		}
 	}while(do_loop);
 
 	/* Mad is no longer used, the structures that were initialized must
@@ -588,7 +611,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
  ****************************************************************************/
 bool  CMP3Player::SetDSP(int soundfd, struct mad_header *Header)
 {
-	 int fmt=AFMT_S16_BE;
+	int fmt = AFMT_S16_NE; /* signed 16 bit native endian */
 	 unsigned int dsp_speed;
 	 unsigned int channels;
 	 bool crit_error=false;
