@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.4 2003/02/17 19:15:53 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.5 2003/02/24 21:17:31 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -34,7 +34,7 @@
 #include <string>
 
 
-extern int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds);
+int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds);
 extern void showProfiling(std::string text);
 extern bool timeset;
 
@@ -437,4 +437,70 @@ int DMX::change(const int new_filter_index)
 	pthread_mutex_unlock(&start_stop_mutex);
 
 	return 0;
+}
+
+
+// Liest n Bytes aus einem Socket per read
+// Liefert 0 bei timeout
+// und -1 bei Fehler
+// ansonsten die Anzahl gelesener Bytes
+/* inline */
+int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds)
+{
+	size_t j;
+
+	//	timeoutInSeconds*; // in Millisekunden aendern
+
+	for (j = 0; j < n;)
+	{
+
+		struct pollfd ufds;
+		ufds.fd = fd;
+		ufds.events = POLLIN;
+		ufds.revents = 0;
+		int rc = poll(&ufds, 1, timeoutInMSeconds);
+
+		if (!rc)
+			return 0; // timeout
+		else if (rc < 0 && errno == EINTR)
+			continue; // interuppted
+		else if (rc < 0)
+		{
+			perror ("[sectionsd] poll");
+			//printf("errno: %d\n", errno);
+			return -1;
+		}
+
+		if (!(ufds.revents&POLLIN))
+		{
+			// POLLHUP, beim dmx bedeutet das DMXDEV_STATE_TIMEDOUT
+			// kommt wenn ein Timeout im Filter gesetzt wurde
+			// dprintf("revents: 0x%hx\n", ufds.revents);
+
+			usleep(100*1000UL); // wir warten 100 Millisekunden bevor wir es nochmal probieren
+
+			if (timeoutInMSeconds <= 200000)
+				return 0; // timeout
+
+			timeoutInMSeconds -= 200000;
+
+			continue;
+		}
+
+		int r = read (fd, buf, n - j);
+
+		if (r > 0)
+		{
+			j += r;
+			buf += r;
+		}
+		else if (r <= 0 && errno != EINTR)
+		{
+			//printf("errno: %d\n", errno);
+			perror ("[sectionsd] read");
+			return -1;
+		}
+	}
+
+	return j;
 }
