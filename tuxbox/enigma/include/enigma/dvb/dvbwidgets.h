@@ -16,6 +16,8 @@ class eTransponderWidget: public eWidget
 	eListBoxEntryText *fecEntry[6], *polarityEntry[4];
 	
 	eListBox<eListBoxEntryText> *fec, *polarity;
+	void nextField0(int *);
+	void nextField1(eListBoxEntryText *);
 public:
 	enum type
 	{

@@ -5,11 +5,17 @@
 #include <core/gui/echeckbox.h>
 #include "dvb.h"
 
-eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type): eWidget(parent, edit), edit(edit), type(type)
+eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type): eWidget(parent), edit(edit), type(type)
 {
 	int init[5]={1,2,3,4,5};
 	frequency=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);
 	frequency->setName("frequency");
+
+	polarity=new eListBox<eListBoxEntryText>(this);
+	polarityEntry[0]=new eListBoxEntryText(polarity, _("vertical"), (void*)0);
+	polarityEntry[1]=new eListBoxEntryText(polarity, _("horizontal"), (void*)1);
+	polarity->setName("polarity");
+	polarity->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	
 	fec=new eListBox<eListBoxEntryText>(this);
 	fecEntry[0]=new eListBoxEntryText(fec, "Auto", (void*)0);
@@ -19,11 +25,7 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type): eWi
 	fecEntry[4]=new eListBoxEntryText(fec, "5/6", (void*)4);
 	fecEntry[5]=new eListBoxEntryText(fec, "7/8", (void*)5);
 	fec->setName("fec");
-	
-	polarity=new eListBox<eListBoxEntryText>(this);
-	polarityEntry[0]=new eListBoxEntryText(polarity, _("vertical"), (void*)0);
-	polarityEntry[1]=new eListBoxEntryText(polarity, _("horizontal"), (void*)1);
-	polarity->setName("polarity");
+	fec->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	
 	symbolrate=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);
 	symbolrate->setName("symbolrate");
@@ -33,6 +35,22 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type): eWi
 	
 	lnb=new eNumber(this, 1, 0, 3, 1, init, 0, 0, edit);
 	lnb->setName("lnb");
+	
+	CONNECT(frequency->selected, eTransponderWidget::nextField0);
+	CONNECT(polarity->selected, eTransponderWidget::nextField1);
+	CONNECT(fec->selected, eTransponderWidget::nextField1);
+	CONNECT(symbolrate->selected, eTransponderWidget::nextField0);
+	CONNECT(lnb->selected, eTransponderWidget::nextField0);
+}
+
+void eTransponderWidget::nextField0(int *)
+{
+	focusNext(eWidget::focusDirNext);
+}
+
+void eTransponderWidget::nextField1(eListBoxEntryText *)
+{
+	focusNext(eWidget::focusDirNext);
 }
 
 int eTransponderWidget::load()
