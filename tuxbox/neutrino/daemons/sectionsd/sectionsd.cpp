@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.33 2001/07/24 15:05:31 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.34 2001/07/24 18:19:06 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.34  2001/07/24 18:19:06  fnbrd
+//  Scheint stabil zu laufen, daher cache jetzt 5 Tage (und ein paar kleinere interne Aenderungen).
+//
 //  Revision 1.33  2001/07/24 15:05:31  fnbrd
 //  sectionsd benutzt voruebergehend smart pointers der Boost-Lib.
 //
@@ -144,9 +147,9 @@
 
 #include <ost/dmx.h>
 
-// Loki's SmartPointers benutzen SmallObject zwecks Speicherverwaltung kleiner Objekte,
-// den SmartPointers. Fuer eine Multithreaded Umgebung muss ich erst noch nachlesen
-// wie ich diese SmallObjects anpassen muss
+// Loki's SmartPointers benutzen SmallObjects zwecks Speicherverwaltung kleiner Objekte,
+// den SmartPointers. Das ist eine prima Sache nur fuer eine Multithreaded Umgebung
+// muss ich erst noch nachlesen wie ich diese SmallObjects anpassen muss
 //#include <loki/SmartPtr.h>
 
 // Daher nehmen wir SmartPointers aus der Boost-Lib (www.boost.org)
@@ -166,10 +169,13 @@
 // Zeit die fuer die present/following (und nvods) eit's benutzt wird (in Sekunden)
 #define TIME_EIT_PRESENT 15
 
+// Timeout bei tcp/ip connections in s
+#define TIMEOUT_CONNECTIONS 2
+
 // Wieviele Sekunden EPG gecached werden sollen
-static long secondsToCache=72*60L*60L; // 3 Tage (72h)
+static long secondsToCache=5*24*60L*60L; // 5 Tage
 // Ab wann ein Event als alt gilt (in Sekunden)
-static long oldEventsAre=120*60L; // 2h
+static long oldEventsAre=60*60L; // 1h
 static int debug=0;
 
 #define dprintf(fmt, args...) {if(debug) printf(fmt, ## args);}
@@ -331,7 +337,7 @@ static void addNVODevent(const SIevent &e)
   }
 }
 
-static void removeOldEvents(long seconds)
+static void removeOldEvents(const long seconds)
 {
   // Alte events loeschen
   time_t zeit=time(NULL);
@@ -357,6 +363,8 @@ static MySIservicesOrderServiceID mySIservicesOrderServiceID;
 typedef std::map<unsigned short, SIservicePtr, std::less<unsigned short> > MySIservicesNVODorderServiceID;
 static MySIservicesNVODorderServiceID mySIservicesNVODorderServiceID;
 
+// Hier sollte man die hash-funktion fuer strings der stl benutzen
+// Muss mal schauen ob es die auch fuer 'ignore_case' gibt
 struct OrderServiceName
 {
   bool operator()(const SIservicePtr &p1, const SIservicePtr &p2) {
@@ -403,9 +411,9 @@ static void addService(const SIservice &s)
 // Liefert 0 bei timeout
 // und -1 bei Fehler
 // ansonsten die Anzahl gelesener Bytes
-inline int readNbytes(int fd, char *buf, int n, unsigned timeoutInSeconds)
+inline int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInSeconds)
 {
-int j;
+size_t j;
 
   timeoutInSeconds*=1000; // in Millisekunden aendern
   for(j=0; j<n;) {
@@ -447,6 +455,41 @@ int j;
   return j;
 }
 
+// Schreibt n Bytes in einen Socket per write
+// Liefert 0 bei timeout
+// und -1 bei Fehler
+// ansonsten die Anzahl geschriebener Bytes
+inline int writeNbytes(int fd, const char *buf, size_t n, unsigned timeoutInSeconds)
+{
+  // Timeouthandling usw fehlt noch
+  while(n) {
+    fd_set readfds, writefds, exceptfds;
+    FD_ZERO(&readfds);
+    FD_ZERO(&writefds);
+    FD_ZERO(&exceptfds);
+    FD_SET(fd, &writefds);
+    timeval tv;
+    tv.tv_sec=timeoutInSeconds;
+    tv.tv_usec=0;
+    int f=select(fd+1, &readfds, &writefds, &exceptfds, &tv);
+    if(!f)
+      return 0; // timeout
+    else if(f==-1 || f>0 && fd==-1)
+      return -1; // Fehler
+    int rc=write(fd, buf, n);
+    if(!rc)
+      continue;
+    else if(rc<0) {
+      if(errno==EINTR)
+        continue;
+      else
+        return -1;
+    }
+    else
+      n-=rc;
+  }
+}
+
 //------------------------------------------------------------
 // class DMX<>
 //------------------------------------------------------------
@@ -471,7 +514,7 @@ class DMX {
       pthread_mutex_destroy(&dmxlock); // ist bei Linux ein dummy
     }
     int start(void); // calls unlock at end
-    int read(char *buf, size_t buflength, unsigned timeoutInSeconds) {
+    int read(char *buf, const size_t buflength, unsigned timeoutInSeconds) {
       return readNbytes(fd, buf, buflength, timeoutInSeconds);
     }
     void closefd(void) {
@@ -698,7 +741,7 @@ struct connectionData {
   struct sockaddr_in clientAddr;
 };
 
-static void commandDumpAllServices(struct connectionData *client, char *data, unsigned dataLength)
+static void commandDumpAllServices(struct connectionData *client, char *data, const unsigned dataLength)
 {
   if(dataLength)
     return;
@@ -729,14 +772,14 @@ static void commandDumpAllServices(struct connectionData *client, char *data, un
   msgResponse.dataLength=strlen(serviceList)+1;
   if(msgResponse.dataLength==1)
     msgResponse.dataLength=0;
-  write(client->connectionSocket, &msgResponse, sizeof(msgResponse));
+  writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
   if(msgResponse.dataLength)
-    write(client->connectionSocket, serviceList, msgResponse.dataLength);
+    writeNbytes(client->connectionSocket, serviceList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
   delete[] serviceList;
   return;
 }
 
-static void commandSetEventsAreOldInMinutes(struct connectionData *client, char *data, unsigned dataLength)
+static void commandSetEventsAreOldInMinutes(struct connectionData *client, char *data, const unsigned dataLength)
 {
   if(dataLength!=2)
     return;
@@ -744,11 +787,11 @@ static void commandSetEventsAreOldInMinutes(struct connectionData *client, char 
   oldEventsAre=*((unsigned short*)data)*60L;
   struct msgSectionsdResponseHeader responseHeader;
   responseHeader.dataLength=0;
-  write(client->connectionSocket, &responseHeader, sizeof(responseHeader));
+  writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
   return;
 }
 
-static void commandSetHoursToCache(struct connectionData *client, char *data, unsigned dataLength)
+static void commandSetHoursToCache(struct connectionData *client, char *data, const unsigned dataLength)
 {
   if(dataLength!=2)
     return;
@@ -756,11 +799,11 @@ static void commandSetHoursToCache(struct connectionData *client, char *data, un
   secondsToCache=*((unsigned short*)data)*60L*60L;
   struct msgSectionsdResponseHeader responseHeader;
   responseHeader.dataLength=0;
-  write(client->connectionSocket, &responseHeader, sizeof(responseHeader));
+  writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
   return;
 }
 
-static void commandAllEventsChannelName(struct connectionData *client, char *data, unsigned dataLength)
+static void commandAllEventsChannelName(struct connectionData *client, char *data, const unsigned dataLength)
 {
   data[dataLength-1]=0; // to be sure it has an trailing 0
   dprintf("Request of all events for '%s'\n", data);
@@ -803,14 +846,14 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
   }
   struct msgSectionsdResponseHeader responseHeader;
   responseHeader.dataLength=strlen(evtList)+1;
-  write(client->connectionSocket, &responseHeader, sizeof(responseHeader));
+  writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
   if(responseHeader.dataLength)
-    write(client->connectionSocket, evtList, responseHeader.dataLength);
+    writeNbytes(client->connectionSocket, evtList, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
   delete[] evtList;
   return;
 }
 
-static void commandDumpStatusInformation(struct connectionData *client, char *data, unsigned dataLength)
+static void commandDumpStatusInformation(struct connectionData *client, char *data, const unsigned dataLength)
 {
   if(dataLength)
     return;
@@ -845,9 +888,9 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
     );
   struct msgSectionsdResponseHeader responseHeader;
   responseHeader.dataLength=strlen(stati)+1;
-  write(client->connectionSocket, &responseHeader, sizeof(responseHeader));
+  writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
   if(responseHeader.dataLength)
-    write(client->connectionSocket, stati, responseHeader.dataLength);
+    writeNbytes(client->connectionSocket, stati, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
   return;
 }
 
@@ -856,7 +899,7 @@ static int currentNextWasOk=0;
 #endif
 
 // Mostly copied from epgd (something bugfixed ;) )
-static void commandCurrentNextInfoChannelName(struct connectionData *client, char *data, unsigned dataLength)
+static void commandCurrentNextInfoChannelName(struct connectionData *client, char *data, const unsigned dataLength)
 {
   int nResultDataSize=0;
   char* pResultData=0;
@@ -911,9 +954,9 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
   // response
   struct msgSectionsdResponseHeader pmResponse;
   pmResponse.dataLength=nResultDataSize;
-  write(client->connectionSocket, &pmResponse, sizeof(pmResponse));
+  writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
   if( nResultDataSize > 0 ) {
-    write(client->connectionSocket, pResultData, nResultDataSize);
+    writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
     delete[] pResultData;
 #ifdef NO_ZAPD_NEUTRINO_HACK
     currentNextWasOk=1;
@@ -924,7 +967,7 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
 }
 
 // Mostly copied from epgd (something bugfixed ;) )
-static void commandActualEPGchannelName(struct connectionData *client, char *data, unsigned dataLength)
+static void commandActualEPGchannelName(struct connectionData *client, char *data, const unsigned dataLength)
 {
   int nResultDataSize=0;
   char* pResultData=0;
@@ -972,14 +1015,14 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   // response
   struct msgSectionsdResponseHeader pmResponse;
   pmResponse.dataLength=nResultDataSize;
-  write(client->connectionSocket, &pmResponse, sizeof(pmResponse));
+  writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
   if( nResultDataSize > 0 ) {
-    write(client->connectionSocket, pResultData, nResultDataSize);
+    writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
     delete[] pResultData;
   }
 }
 
-static void sendEventList(struct connectionData *client, unsigned char serviceTyp1, unsigned char serviceTyp2=0)
+static void sendEventList(struct connectionData *client, const unsigned char serviceTyp1, const unsigned char serviceTyp2=0)
 {
   char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
   if(!evtList) {
@@ -1011,13 +1054,13 @@ static void sendEventList(struct connectionData *client, unsigned char serviceTy
   msgResponse.dataLength=strlen(evtList)+1;
   if(msgResponse.dataLength==1)
     msgResponse.dataLength=0;
-  write(client->connectionSocket, &msgResponse, sizeof(msgResponse));
+  writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
   if(msgResponse.dataLength)
-    write(client->connectionSocket, evtList, msgResponse.dataLength);
+    writeNbytes(client->connectionSocket, evtList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
   delete[] evtList;
 }
 
-static void commandEventListTV(struct connectionData *client, char *data, unsigned dataLength)
+static void commandEventListTV(struct connectionData *client, char *data, const unsigned dataLength)
 {
   if(dataLength)
     return;
@@ -1026,7 +1069,7 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
   return;
 }
 
-static void commandEventListRadio(struct connectionData *client, char *data, unsigned dataLength)
+static void commandEventListRadio(struct connectionData *client, char *data, const unsigned dataLength)
 {
   if(dataLength)
     return;
@@ -1035,7 +1078,7 @@ static void commandEventListRadio(struct connectionData *client, char *data, uns
   return;
 }
 
-static void (*connectionCommands[NUMBER_OF_SECTIONSD_COMMANDS]) (struct connectionData *, char *, unsigned)  = {
+static void (*connectionCommands[NUMBER_OF_SECTIONSD_COMMANDS]) (struct connectionData *, char *, const unsigned)  = {
   commandActualEPGchannelName,
   commandEventListTV,
   commandCurrentNextInfoChannelName,
@@ -1055,7 +1098,7 @@ struct connectionData *client=(struct connectionData *)conn;
   struct msgSectionsdRequestHeader header;
   memset(&header, 0, sizeof(header));
 
-  if(readNbytes(client->connectionSocket, (char *)&header, sizeof(header) , 2)>0) {
+  if(readNbytes(client->connectionSocket, (char *)&header, sizeof(header) , TIMEOUT_CONNECTIONS)>0) {
     dprintf("version: %hhd, cmd: %hhd\n", header.version, header.command);
     if(header.version==2 && header.command<NUMBER_OF_SECTIONSD_COMMANDS) {
       dprintf("data length: %hd\n", header.dataLength);
@@ -1065,7 +1108,7 @@ struct connectionData *client=(struct connectionData *)conn;
       else {
         int rc=1;
         if(header.dataLength)
-	  rc=readNbytes(client->connectionSocket, data, header.dataLength, 2);
+	  rc=readNbytes(client->connectionSocket, data, header.dataLength, TIMEOUT_CONNECTIONS);
         if(rc>0) {
           dprintf("Starting command %hhd\n", header.command);
           connectionCommands[header.command](client, data, header.dataLength);
@@ -1537,7 +1580,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.33 2001/07/24 15:05:31 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.34 2001/07/24 18:19:06 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
