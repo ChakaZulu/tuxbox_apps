@@ -491,8 +491,8 @@ const char hotlisttext[][2*5] =
 {
 	{ "dazu entf." },
 	{ " add rem. " },
-	{ "ajout  rem" },
-	{ "toev.entf." },
+	{ "ajoutenlev" },
+	{ "toev.verw." },
 };
 
 const char configmenu[][2*Menu_Height*Menu_Width] =

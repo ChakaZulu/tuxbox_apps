@@ -83,7 +83,7 @@ void FillRect(int x, int y, int w, int h, int color)
 int getIndexOfPageInHotlist()
 {
 	int i;
-	for (i=0; i<=maxhotlist; i++)
+	for (i = 0; i <= maxhotlist; i++)
 	{
 		if (page == hotlist[i])
 			return i;
@@ -152,7 +152,7 @@ void savehotlist()
 	{
 		if ((hl = fopen(line, "wb")) != 0)
 		{
-			for (i=0; i<=maxhotlist; i++)
+			for (i = 0; i <= maxhotlist; i++)
 			{
 				fprintf(hl, "%03x\n", hotlist[i]);
 #if DEBUG
@@ -196,7 +196,7 @@ void decode_btt()
 	int i, current, b1, b2, b3, b4;
 
 	current = 0x100;
-	for (i=0; i<799; i++)
+	for (i = 0; i < 799; i++)
 	{
 		b1 = cachetable[0x1f0][0][40+i];
 		if (b1 == ' ')
@@ -413,7 +413,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.73 $";
+	char cvs_revision[] = "$Revision: 1.74 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -495,7 +495,7 @@ void plugin_exec(PluginParam *par)
 
 					if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 					{
-						for (i=0; i < 6; i++) /* FIXME: FBLK seems to cause troubles */
+						for (i = 0; i < 6; i++) /* FIXME: FBLK seems to cause troubles */
 						{
 							n = avstable_scart[vendor][i];
 							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -510,7 +510,7 @@ void plugin_exec(PluginParam *par)
 						else
 							restoreaudio = 0;
 						
-						for (i=0; i < 6; i += (restoreaudio ? 2 : 1)) /* exit with ?: just restore video, leave audio */
+						for (i = 0; i < 6; i += (restoreaudio ? 2 : 1)) /* exit with ?: just restore video, leave audio */
 						{
 							n = avstable_dvb[vendor][i];
 							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -617,7 +617,6 @@ int Init()
 	maxadippg  = -1;
 	bttok      = 0;
 	maxhotlist = -1;
-	pc_old_row = pc_old_col = 0; /* for page catching */
 
 	page_atrb[32] = transp<<4 | transp;
 	inputcounter  = 2;
@@ -690,6 +689,8 @@ int Init()
 				swapupdown = ival & 1;
 			else if (1 == sscanf(line, "ShowHexPages %d", &ival))
 				showhex = ival & 1;
+			else if (1 == sscanf(line, "OverlayTransparency %x", &ival))
+				tr1[transp2-1] = tr2[transp2-1] = ival & 0xFFFF;
 		}
 		fclose(conf);
 	}
@@ -1053,6 +1054,8 @@ void CleanUp()
 			fprintf(conf, "AutoNational %d\n", auto_national);
 			fprintf(conf, "NationalSubset %d\n", national_subset);
 			fprintf(conf, "SwapUpDown %d\n", swapupdown);
+			fprintf(conf, "ShowHexPages %d\n", showhex);
+			fprintf(conf, "OverlayTransparency %X\n", tr1[transp2-1]);
 			fclose(conf);
 		}
 	}
@@ -1389,7 +1392,7 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 	PosY = Menu_StartY + (MenuLine[M_HOT]+1)*fontheight;
 	j = 2*Menu_Width*(MenuLine[M_HOT]+1) + 6; /* start index in menu */
 
-	for (i=0; i<=maxhotlist+1; i++)
+	for (i = 0; i <= maxhotlist+1; i++)
 	{
 		if (i == maxhotlist+1) /* clear last+1 entry in case it was deleted */
 		{
@@ -1440,11 +1443,7 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 	memcpy(menu, configmenu[menulanguage], 2*Menu_Height*Menu_Width);
 	
 	if (SDT_ready)
-	{
-		memcpy(&menu[MenuLine[M_PID]*2*Menu_Width+3+(24-pid_table[current_pid].service_name_len)/2],
-		       &pid_table[current_pid].service_name,
-		       pid_table[current_pid].service_name_len);
-	}
+		memcpy(&menu[MenuLine[M_PID]*2*Menu_Width+3+(24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
 	else
 		hex2str(&menu[MenuLine[M_PID]*2*Menu_Width + 13 + 3], vtxtpid);
 
@@ -1773,7 +1772,7 @@ void ConfigMenu(int Init)
 					{
 						if (maxhotlist < (sizeof(hotlist)/sizeof(hotlist[0])-1)) /* only if still room left */
 						{
-							for (hotindex=maxhotlist; hotindex>=0; hotindex--) /* move rest of list */
+							for (hotindex = maxhotlist; hotindex >= 0; hotindex--) /* move rest of list */
 							{
 								hotlist[hotindex+1] = hotlist[hotindex];
 							}
@@ -1997,7 +1996,7 @@ void ConfigMenu(int Init)
 					break;
 				case M_HOT: /* show selected page */
 				{
-					if (hotindex>=0) /* not found: ignore */
+					if (hotindex >= 0) /* not found: ignore */
 					{
 						lastpage = page;
 						page = hotlist[hotindex];
@@ -2411,6 +2410,7 @@ void Next100()
 void PageCatching()
 {
 	int val, byte;
+	int oldzoommode = zoommode;
 
 	pagecatching = 1;
 
@@ -2418,15 +2418,18 @@ void PageCatching()
 	inputcounter = 2;
 
 	/* show info line */
+	zoommode = 0;
 	PosX = StartX;
 	PosY = StartY + 24*fontheight;
 	for (byte = 0; byte < 40; byte++)
 		RenderCharFB(catchmenutext[menulanguage][byte], catchmenutext[menulanguage][byte+40]);
+	zoommode = oldzoommode;
 
 	/* check for pagenumber(s) */
 	catch_row    = 1;
 	catch_col    = 0;
 	catched_page = 0;
+	pc_old_row = pc_old_col = 0; /* no inverted page number to restore yet */
 	CatchNextPage(0, 1);
 
 	if (!catched_page)
@@ -2521,15 +2524,17 @@ void CatchNextPage(int firstlineinc, int inc)
 		
 		if (!(a & 1<<8) && /* no mosaic */
 			 (((a & 0xF0) >> 4) != (a & 0x0F)) && /* not hidden */
-			 (*p >= '0' && *p <= '9' &&
+			 (*p >= '1' && *p <= '8' && /* valid page number */
 			  *(p+1) >= '0' && *(p+1) <= '9' &&
 			  *(p+2) >= '0' && *(p+2) <= '9') &&
-			 (catch_row == 0 || (*(p-1) < '0' || *(p-1) > '9')) &&
+			 (catch_row == 0 || (*(p-1) < '0' || *(p-1) > '9')) && /* non-numeric char before and behind */
 			 (catch_row == 37 || (*(p+3) < '0' || *(p+3) > '9')))
 		{
 			tmp_page = ((*p - '0')<<8) | ((*(p+1) - '0')<<4) | (*(p+2) - '0');
 
-			if (tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
+#if 0
+			if (tmp_page != catched_page)	/* confusing to skip identical page numbers - I want to reach what I aim to */
+#endif
 			{
 				catched_page = tmp_page;
 				RenderCatchedPage();
@@ -2609,16 +2614,16 @@ void RenderCatchedPage()
 	if (zoommode)
 		zoom = 1<<10;
 
-	/* restore pagenumber */
-	PosX = StartX + pc_old_col*fontwidth;
-
-	if (zoommode == 2)
-		PosY = StartY + (pc_old_row-12)*fontheight*((zoom>>10)+1);
-	else
-		PosY = StartY + pc_old_row*fontheight*((zoom>>10)+1);
-
-	if (pc_old_row && pc_old_col) /* not at first call */
+	if (pc_old_row || pc_old_col) /* not at first call */
 	{
+		/* restore pagenumber */
+		PosX = StartX + pc_old_col*fontwidth;
+
+		if (zoommode == 2)
+			PosY = StartY + (pc_old_row-12)*fontheight*((zoom>>10)+1);
+		else
+			PosY = StartY + pc_old_row*fontheight*((zoom>>10)+1);
+
 		RenderCharFB(page_char[pc_old_row*40 + pc_old_col    ], page_atrb[pc_old_row*40 + pc_old_col    ]);
 		RenderCharFB(page_char[pc_old_row*40 + pc_old_col + 1], page_atrb[pc_old_row*40 + pc_old_col + 1]);
 		RenderCharFB(page_char[pc_old_row*40 + pc_old_col + 2], page_atrb[pc_old_row*40 + pc_old_col + 2]);
@@ -2936,7 +2941,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 				Char >>= 2;
 			}
 		else
-			for (y=0; y<3; y++)
+			for (y = 0; y < 3; y++)
 			{
 				FillRect(PosX,      PosY + yoffset + ymosaic[y], w1, ymosaic[y+1] - ymosaic[y], (Char & 0x01) ? fgcolor : bgcolor);
 				FillRect(PosX + w1, PosY + yoffset + ymosaic[y], w2, ymosaic[y+1] - ymosaic[y], (Char & 0x02) ? fgcolor : bgcolor);
@@ -3034,7 +3039,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		return;
 	case 0xE8: /* Ii */
 		FillRect(PosX +1, PosY + yoffset, fontwidth -1, fontheight, bgcolor);
-		for (Row=0; Row < fontwidth/2; Row++)
+		for (Row = 0; Row < fontwidth/2; Row++)
 			DrawVLine(PosX + Row, PosY + yoffset + Row, fontheight - Row, fgcolor);
 		PosX += fontwidth;
 		return;
@@ -3050,7 +3055,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		return;
 	case 0xEB: /* ¬ */
 		FillRect(PosX, PosY + yoffset +1, fontwidth, fontheight -1, bgcolor);
-		for (Row=0; Row < fontwidth/2; Row++)
+		for (Row = 0; Row < fontwidth/2; Row++)
 			DrawHLine(PosX + Row, PosY + yoffset + Row, fontwidth - Row, fgcolor);
 		PosX += fontwidth;
 		return;
@@ -3487,20 +3492,20 @@ void RenderMessage(int Message)
 	const char *msg;
 
 
-/*                     0000000000111111111122222222223 */
-/*                     0123456789012345678901234567890 */
-	char message_1[] = "אבבבבבבבבבבב TuxTxt x.xx בבבבבבבבבבבגט";
+	char message_1[] = "אבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט";
 	char message_2[] = "ד                                   הי";
 /* 	char message_3[] = "ד   suche nach Teletext-Anbietern   הי"; */
 	char message_4[] = "ד                                   הי";
-	char message_5[] = "וזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי";
+	char message_5[] = "וזזזזזזז www.tuxtxt.com x.xx זזזזזזזחי";
+/*                     00000000001111111111222222222233333333334 */
+/*                     01234567890123456789012345678901234567890 */
 	char message_6[] = "כללללללללללללללללללללללללללללללללללללך";
 
 /* 	char message_7[] = "ד kein Teletext auf dem Transponder הי"; */
 /* 	char message_8[] = "ד  warte auf Empfang von Seite 100  הי"; */
 /* 	char message_9[] = "ד     Seite 100 existiert nicht!    הי"; */
 
-	memcpy(&message_1[20], versioninfo, 4);
+	memcpy(&message_5[24], versioninfo, 4);
 
 	/* reset zoom */
 	zoommode = 0;
@@ -3560,7 +3565,7 @@ void RenderMessage(int Message)
 	PosX = StartX + fontwidth+5;
 	PosY = StartY + fontheight*16;
 	for (byte = 0; byte < 37; byte++)
-		RenderCharFB(message_1[byte], menucolor<<4 | ((byte >= 13 && byte <= 23) ? yellow : menu2));
+		RenderCharFB(message_1[byte], menucolor<<4 | menu2);
 	RenderCharFB(message_1[37], fbcolor<<4 | menu2);
 
 	PosX = StartX + fontwidth+5;
@@ -3590,7 +3595,7 @@ void RenderMessage(int Message)
 	PosX = StartX + fontwidth+5;
 	PosY = StartY + fontheight*20;
 	for (byte = 0; byte < 37; byte++)
-		RenderCharFB(message_5[byte], menucolor<<4 | menu2);
+		RenderCharFB(message_5[byte], menucolor<<4 | ((byte >= 9 && byte <= 27) ? yellow : menu2));
 	RenderCharFB(message_5[37], fbcolor<<4 | menu2);
 
 	PosX = StartX + fontwidth+5;
@@ -3878,7 +3883,8 @@ void CopyBB2FB()
 	int fillcolor, i, screenwidth;
 
 	/* line 25 */
-	CreateLine25();
+	if (!pagecatching)
+		CreateLine25();
 
 	/* copy backbuffer to framebuffer */
 	if (!zoommode)
@@ -3932,7 +3938,7 @@ void CopyBB2FB()
 		
 		topsrc += screenwidth;
 		topdst += screenwidth;
-		for (i=0; i < 25*fontheight; i++)
+		for (i = 0; i < 25*fontheight; i++)
 		{
 			memcpy(topdst, topsrc, fontwidth_topmenusmall*TOPMENUCHARS);
 			topdst += var_screeninfo.xres;
@@ -3951,7 +3957,8 @@ void CopyBB2FB()
 		src += var_screeninfo.xres;
 	}
 
-	memcpy(dst, lfb + (StartY+24*fontheight)*var_screeninfo.xres, var_screeninfo.xres*fontheight); /* copy line25 in normal height */
+	if (!pagecatching)
+		memcpy(dst, lfb + (StartY+24*fontheight)*var_screeninfo.xres, var_screeninfo.xres*fontheight); /* copy line25 in normal height */
 	memset(dst + var_screeninfo.xres*fontheight, fillcolor, var_screeninfo.xres * (var_screeninfo.yres - StartY - 25*fontheight));
 }
 
