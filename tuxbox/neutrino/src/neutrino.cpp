@@ -1090,7 +1090,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", &((int)(scanSettings.diseqcRepeat)), (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0)/*, new CSatelliteNotifier*/, NULL, false);
 		for( uint i=0; i<=2; i++)
 		{
-			char ii[2];
+			char ii[1 + 1];
 			sprintf( ii, "%d", i);
 			ojDiseqcRepeats->addOption(i, ii);
 		}
@@ -1106,7 +1106,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			oj->addOption( -1, "options.off");
 			for( int j=0; j<=63; j++)
 			{
-				char jj[2];
+				char jj[2 + 1];
 				sprintf( jj, "%d", j + 1);
 				oj->addOption( j, jj);
 			}
@@ -2893,7 +2893,7 @@ void CNeutrinoApp::ExitRun()
 	saveSetup();
 	g_Controld->shutdown();
 
-	sleep(55555);
+	sleep(55);
 
 	if (g_RCInput != NULL)
 		delete g_RCInput;
@@ -3367,7 +3367,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.412 2003/02/17 09:33:05 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.413 2003/02/17 14:28:55 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
