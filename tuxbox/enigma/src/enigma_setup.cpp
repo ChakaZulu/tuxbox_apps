@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.35 2003/02/19 17:07:22 waldi Exp $
+ * $Id: enigma_setup.cpp,v 1.36 2003/02/19 19:46:40 obi Exp $
  */
 
 #include <enigma_setup.h>
@@ -62,7 +62,7 @@ eZapSetup::eZapSetup()
 		havelcd = 1;
 
 	tuxbox_submodel_t submodel = tuxbox_get_submodel ();
-	if (submodel == TUXBOX_SUBMODEL_DREAMBOX_DM7000)
+	if (submodel == TUXBOX_SUBMODEL_DREAMBOX_DM5600)
 		haverfmod=1;
 	
 	list.setColumns(2);
