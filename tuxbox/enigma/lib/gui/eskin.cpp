@@ -259,6 +259,31 @@ int eSkin::parseImages(XMLTreeNode *inode)
 	return 0;
 }
 
+int eSkin::parseValues(XMLTreeNode *xvalues)
+{
+	for (XMLTreeNode *node=xvalues->GetChild(); node; node=node->GetNext())
+	{
+		if (strcmp(node->GetType(), "value"))
+		{
+			qDebug("illegal values entry %s", node->GetType());
+			continue;
+		}
+		const char *name=node->GetAttributeValue("name");
+		if (!name)
+		{
+			qDebug("values entry has no name");
+			continue;
+		}
+		const char *value=node->GetAttributeValue("value");
+		if (!value)
+		{
+			qDebug("values entry has no value");
+			continue;
+		}
+		values.insert(name, new int(atoi(value)));
+	}
+}
+
 gDC *eSkin::getDCbyName(const char *name)
 {
 	gPixmapDC *dc=0;
@@ -372,6 +397,8 @@ int eSkin::load(const char *filename)
 			parseScheme(node);
 		else if (!strcmp(node->GetType(), "images"))
 			parseImages(node);
+		else if (!strcmp(node->GetType(), "values"))
+			parseValues(node);
 
 	return 0;
 }
@@ -450,4 +477,13 @@ gColor eSkin::queryScheme(const QString &name) const
 gPixmap *eSkin::queryImage(const QString &name) const
 {
 	return images[name];
+}
+
+int eSkin::queryValue(const QString &name, int d) const
+{
+	int *v=values[name];
+	if (v)
+		return *v;
+	else
+		return d;
 }

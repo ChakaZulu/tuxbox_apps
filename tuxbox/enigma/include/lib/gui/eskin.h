@@ -29,6 +29,7 @@ class eSkin
 	int parseColors(XMLTreeNode *colors);
 	int parseScheme(XMLTreeNode *scheme);
 	int parseImages(XMLTreeNode *images);
+	int parseValues(XMLTreeNode *values);
 	
 	gDC *getDCbyName(const char *name);
 	
@@ -42,6 +43,8 @@ class eSkin
 	QList<eNamedColor> colors;
 	QDict<gColor> scheme;
 	QDict<gPixmap> images;
+	
+	QDict<int> values;
 	eNamedColor *searchColor(const char *name) const;
 
 	static eSkin *active;
@@ -60,6 +63,7 @@ public:
 	gColor queryColor(const QString &name) const;
 	gColor queryScheme(const QString &name) const;
 	gPixmap *queryImage(const QString &name) const;
+	int queryValue(const QString &name, int d) const;
 	
 	void makeActive();
 	
