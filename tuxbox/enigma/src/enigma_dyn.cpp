@@ -1357,9 +1357,9 @@ static eString getContent(eString mode, eString path)
 		result = getTitle("Control > Timer List");
 		result += genTimerListBody();
 		result += "<br>";
-		result += button(100, "Cleanup", "12259E", "?cleanupTimer");
+		result += button(100, "Cleanup", "12259E", "javascript:cleanupTimerList()");
 		result += "&nbsp;&nbsp;&nbsp;";
-		result += button(100, "Clear", "CB0303", "?ClearTimer");
+		result += button(100, "Clear", "CB0303", "javascript:ClearTimerList()");
 	}
 	else
 	if (mode == "updates")
