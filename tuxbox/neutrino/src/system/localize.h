@@ -37,7 +37,7 @@
 #include <string>
 #include <map>
 
-const char * getISO639Description(const char * iso);
+const char * getISO639Description(const char * const iso);
 
 typedef std::map<std::string, std::string> mapLocaleData;
 
@@ -47,7 +47,7 @@ class CLocaleManager
 		mapLocaleData localeData;
 
 	public:
-		void loadLocale(const std::string & locale);
+		bool loadLocale(const char * const locale); /* return value: real unicode font needed */
 
 		const char * getText(const std::string & keyName) const;
 		const char * getText(const char * const keyName) const;

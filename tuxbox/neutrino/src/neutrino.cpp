@@ -998,12 +998,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 	softupdate = false;
 	fromflash = false;
 
-#define FONTNAME "Micron"
-#define FONTFILE "micron"
-
-	fontName = FONTNAME;
-	fontFile = FONTDIR "/" FONTFILE;
-	fontsSizeOffset = 0;
+	fontName = NULL;
 
 	for(int x=1; x<argc; x++)
 	{
@@ -1068,6 +1063,23 @@ void CNeutrinoApp::SetupFrameBuffer()
 *          CNeutrinoApp -  setup fonts                                                *
 *                                                                                     *
 **************************************************************************************/
+
+typedef struct standard_font
+{
+	const char * const name;
+	const char * const filename;
+	const int          size_offset;
+} standard_font_struct;
+
+#define FONT_STYLE_REGULAR 0
+#define FONT_STYLE_BOLD    1
+#define FONT_STYLE_ITALIC  2
+
+const standard_font_struct predefined_font[2] = 
+{
+	{"Micron",             FONTDIR "/micron",         0},
+	{"MD King KhammuRabi", FONTDIR "/md_khmurabi_10", 0}
+};
 
 void CNeutrinoApp::SetupFonts()
 {
@@ -2432,6 +2444,18 @@ int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
 
+	int loadSettingsErg = loadSetup();
+
+	/* load locales before setting up any fonts to determine whether we need a true unicode font */
+	bool use_true_unicode_font = g_Locale->loadLocale(g_settings.language);
+
+	if (fontName == NULL) /* no font specified in command line */
+	{
+		fontName = predefined_font[use_true_unicode_font].name;
+		fontFile = predefined_font[use_true_unicode_font].filename;
+		fontsSizeOffset = predefined_font[use_true_unicode_font].size_offset;
+	}
+
 	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName, false);
 
 	g_info.box_Type = g_Controld->getBoxType();
@@ -2440,8 +2464,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 
 
-
-	int loadSettingsErg = loadSetup();
 
 	//lcd aktualisieren
 	CLCD::getInstance()->setlcdparameter();
@@ -2474,7 +2496,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 
 	//printf("\nCNeutrinoApp::run - objects initialized...\n\n");
-	g_Locale->loadLocale(g_settings.language);
 
 	colorSetupNotifier   = new CColorSetupNotifier;
 	audioSetupNotifier   = new CAudioSetupNotifier;

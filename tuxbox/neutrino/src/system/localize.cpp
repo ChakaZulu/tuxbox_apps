@@ -64,7 +64,7 @@ void initialize_iso639_map(void)
 		std::cout << "Loading " << iso639filename << " failed." << std::endl;
 }
 
-const char * getISO639Description(const char *iso)
+const char * getISO639Description(const char * const iso)
 {
 	std::map<std::string, std::string>::const_iterator it = iso639.find(std::string(iso));
 	if (it == iso639.end())
@@ -76,7 +76,7 @@ const char * getISO639Description(const char *iso)
 
 const char * path[2] = {"/var/tuxbox/config/locale/", DATADIR "/neutrino/locale/"};
 
-void CLocaleManager::loadLocale(const std::string & locale)
+bool CLocaleManager::loadLocale(const char * const locale)
 {
 	int i;
 	FILE * fd;
@@ -97,7 +97,7 @@ void CLocaleManager::loadLocale(const std::string & locale)
 	if (i == 2)
 	{		
 		perror("cannot read locale");
-		return;
+		return false;
 	}
 
 	localeData.clear();
@@ -144,6 +144,9 @@ void CLocaleManager::loadLocale(const std::string & locale)
 		}
 	}
 	fclose(fd);
+
+#warning TODO: implement real check to determine whether we need a font with more than Basic Latin & Latin-1 Supplement characters
+	return (strcmp(locale, "bosanski") == 0);
 }
 
 const char * CLocaleManager::getText(const char * const keyName) const
