@@ -59,7 +59,7 @@ void* CTimerManager::timerThread(void *arg)
 	while (1)
 	{
 		CTimerEvent eNow = CTimerEvent::now();
-		dprintf("[timerd] our time: %d\n", eNow.time());
+		//dprintf("our time: %d\n", eNow.time());
 		// fire events who's time has come
 		CTimerEventMap::iterator pos = timerManager->events.begin();
 		for(;pos != timerManager->events.end();pos++)
