@@ -53,7 +53,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
-#include <tuxbox/tuxbox.h>
+#include <tuxbox.h>
 
 #include <iostream>
 #include <fstream>
@@ -3367,7 +3367,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.400 2003/02/10 09:18:04 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.401 2003/02/10 11:10:03 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
