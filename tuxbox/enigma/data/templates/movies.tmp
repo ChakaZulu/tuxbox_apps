@@ -36,7 +36,7 @@
 		}
 		</script>
 	</head>
-	<body onLoad="init()" style="padding: 10px; background-color: #F4F4F4F4" leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="contentcell">
+	<body onLoad="init()" style="padding: 10px; background-color: #F4F4F4" leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="contentcell">
 		<map name="ctrl">
 			<area shape="circle" coords="30, 25, 15" href="javascript:video('play')" alt="Play">
 			<area shape="circle" coords="60, 25, 10" href="javascript:video('stop')" alt="Stop">
@@ -102,10 +102,10 @@
 			<table border=0 cellpadding=0 cellspacing=0>
 				<tr>
 					<td>
-						<select style="width: 0px; font-weight: bold; background-color: #F4F4F4F4" onChange=bouquetChange() name="bouquet" size=0></select>
+						<select style="width: 0px; font-weight: bold; background-color: #F4F4F4" onChange=bouquetChange() name="bouquet" size=0></select>
 					</td>
 					<td>
-						<select style="width: 630px; font-weight: bold; background-color: #F4F4F4F4" onChange=channelChange() name="channel" size=#SELSIZE#></select>
+						<select style="width: 630px; font-weight: bold; background-color: #F4F4F4" onChange=channelChange() name="channel" size=#SELSIZE#></select>
 					</td>
 				</tr>
 			</table>

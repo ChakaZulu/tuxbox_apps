@@ -4,7 +4,6 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="dhtml.js"></script>
 		<script language="javascript" type="text/javascript" src="index.js"></script>
-		<script language="javascript" type="text/javascript" src="data2.js"></script>
 		<script>
 			function headerUpdateVolumeBar(volume, mute)
 			{
