@@ -25,6 +25,7 @@ extern	unsigned short	realcode;
 static	int			bx=0;
 static	int			by=0;
 static	int			f[5];
+static	int			of[5];
 
 static	char		bvis=0;
 
@@ -65,6 +66,7 @@ static	void	GenCode( void )
 	for( i=0; i<5; i++ )
 	{
 		f[i]=-1;
+		of[i]=-1;
 		tv.tv_sec=0;
 		tv.tv_usec = myrand(120)*100;
 		select(0,0,0,0,&tv);
@@ -105,6 +107,12 @@ void	MasterInitialize( void )
 	if ( use_double[level] )
 		FBDrawString( 400, 180, 32, "same colors possible", WHITE, 0 );
 	FBDrawString( 400, 210, 32, "1,2,3,4 - change level", WHITE, 0 );
+	FBFillRect( 400, 240+12, 8, 8, RED);
+	FBDrawString( 416, 240, 32, "copy last line", WHITE, 0 );
+	FBFillRect( 400, 270+12, 8, 8, YELLOW);
+	FBDrawString( 416, 270, 32, "switch right", WHITE, 0 );
+	FBFillRect( 400, 300+12, 8, 8, GREEN);
+	FBDrawString( 416, 300, 32, "switch left", WHITE, 0 );
 
 /* board */
 	FBFillRect( 60, 100, 300, 400, GRAY );
@@ -136,6 +144,7 @@ void	Play( void )
 	int				i;
 	int				j;
 	int				mseq[5];
+	int				xof[5];
 static	int	lcount=0;
 
 	lcount++;
@@ -163,6 +172,47 @@ static	int	lcount=0;
 			return;
 		level=actcode-1;
 		doexit=4;
+		return;
+	case RC_RED :
+		memcpy(f,of,sizeof(int)*5);
+		if ( bvis )
+		{
+			FBDrawRect( 65+(bx*34), 110+(by*50), 30, 30, BLACK );
+			FBDrawRect( 66+(bx*34), 111+(by*50), 28, 28, BLACK );
+		}
+		bvis=0;
+		lcount=4;
+		for( i=0; i<5; i++ )
+		{
+			FBFillRect( 67+(i*34), 112+(by*50), 27, 27,
+				f[i] == -1 ? GRAY : cnum[f[i]]);
+		}
+		return;
+	case RC_YELLOW :
+		if ( bx < 4 )
+		{
+			int	o;
+			o = f[bx+1];
+			f[bx+1] = f[bx];
+			f[bx] = o;
+			FBFillRect( 67+((bx+1)*34), 112+(by*50), 27, 27,
+				f[bx+1] == -1 ? GRAY : cnum[f[bx+1]]);
+			FBFillRect( 67+(bx*34), 112+(by*50), 27, 27,
+				f[bx] == -1 ? GRAY : cnum[f[bx]]);
+		}
+		return;
+	case RC_GREEN :
+		if ( bx > 0 )
+		{
+			int	o;
+			o = f[bx-1];
+			f[bx-1] = f[bx];
+			f[bx] = o;
+			FBFillRect( 67+((bx-1)*34), 112+(by*50), 27, 27,
+				f[bx-1] == -1 ? GRAY : cnum[f[bx-1]]);
+			FBFillRect( 67+(bx*34), 112+(by*50), 27, 27,
+				f[bx] == -1 ? GRAY : cnum[f[bx]]);
+		}
 		return;
 	case RC_UP :
 		f[bx]--;
@@ -199,6 +249,7 @@ static	int	lcount=0;
 		bx++;
 		return;
 	case RC_OK :
+		memcpy(xof,f,sizeof(int)*5);
 		for( i=0; i < 5; i++ )
 			if ( f[i] == -1 )
 				return;
@@ -262,10 +313,12 @@ static	int	lcount=0;
 			return;
 		}
 		by++;
+		memcpy(of,xof,sizeof(int)*5);
 
 		bx=0;
 		for( i=0; i < 5; i++ )
 			f[i] = -1;
+
 		return;
 	default :
 		return;
