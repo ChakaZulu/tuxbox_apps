@@ -63,7 +63,7 @@ bool CZapitClient::zapit_connect()
 	return true;
 }
 
-bool CZapitClient::zapit_close()
+void CZapitClient::zapit_close()
 {
 	if(sock_fd!=0)
 	{
@@ -72,7 +72,7 @@ bool CZapitClient::zapit_close()
 	}
 }
 
-bool CZapitClient::send(char* data, int size)
+void CZapitClient::send(char* data, int size)
 {
 	write(sock_fd, data, size);
 }
@@ -295,6 +295,7 @@ void CZapitClient::setMode( channelsMode mode )
 
 void CZapitClient::setSubServices( subServiceList& subServices )
 {
+	unsigned int i;
 	commandHead msgHead;
 	msgHead.version=ACTVERSION;
 	msgHead.cmd=CMD_SETSUBSERVICES;
@@ -302,7 +303,7 @@ void CZapitClient::setSubServices( subServiceList& subServices )
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
 
-	for (int i= 0; i< subServices.size(); i++)
+	for (i = 0; i< subServices.size(); i++)
 		send((char*)&subServices[i], sizeof(subServices[i]));
 
 	zapit_close();
