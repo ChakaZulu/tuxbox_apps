@@ -4266,6 +4266,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 // SHOW PICTURE
 		switch(mode)
 		{
+#ifndef DISABLE_FILE
 			case modeFile:
 				if (ref.type == eServiceReference::idUser &&
 					ref.data[0] == eMP3Decoder::codecMP3 )
@@ -4273,6 +4274,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 					showMP3Pic();
 				}
 				break;
+#endif
 			case modeRadio:
 				if (ref.type == eServiceReference::idDVB &&
 					Decoder::parms.vpid == -1)
@@ -4490,7 +4492,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 			break;
 		case -ENOCASYS:
 		{
-			if (hideerror) break;
+			if (1/*hideerror*/) break;
 
 			int serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
 			if( serviceFlags & eServiceHandler::flagIsScrambled )
