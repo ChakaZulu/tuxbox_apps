@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.33 2004/02/24 16:45:41 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.34 2004/02/24 20:36:09 thegoodguy Exp $
 
 	License: GPL
 
@@ -781,7 +781,10 @@ void CControlAPI::SendChannelList(CWebserverRequest *request)
 	CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
 	
 	for(; channel != channellist->end();channel++)
-		request->printf("%u %s\n",channel->channel_id, channel->name);
+		request->printf(PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				" %s\n",
+				channel->channel_id,
+				channel->name);
 };
 
 //-------------------------------------------------------------------------

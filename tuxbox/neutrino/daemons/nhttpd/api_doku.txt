@@ -1,22 +1,23 @@
 nhttpd /control api doku
--------------------------------------
+------------------------
 
 
-Der Neutrino HTTP-Server läuft auf Port 80. Die Steuerfunktionen für externe Programme sind unter dem Context /control/ zu finden. 
+Der Neutrino HTTP-Server laeuft auf Port 80.
+Die Steuerfunktionen fuer externe Programme sind unter dem Context /control/ zu finden. 
 Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 
 1. Die Kanalliste			http://dbox/control/channellist
 2. EPG-Abfrage				http://dbox/control/epg
 3. Die DBox herunterfahren		http://dbox/control/shutdown
 4. Standby Mode				http://dbox/control/standby
-5. Lautstärke-Steuerung			http://dbox/control/volume
+5. Lautstaerke-Steuerung                http://dbox/control/volume
 6. Programm umschalten / Playback	http://dbox/control/zapto
 7. Radio/TV, Record Mode		http://dbox/control/setmode
 8. Radio/TV Mode Abfrage		http://dbox/control/getmode
 9. Datum von der Box abfragen		http://dbox/control/getdate
 10. Uhrzeit von der Box abfragen	http://dbox/control/gettime
 11. Allgemeine Informationen 		http://dbox/control/info
-12. Aktuellen Kanal abfragen		http://dbox/control/getonidsid
+12. Aktuellen Kanal abfragen		http://dbox/control/getonidsid (DEPRECATED)
 13. services.xml lesen			http://dbox/control/getservicesxml
 14. bouquets.xml auslesen		http://dbox/control/getbouquetsxml
 15. Bouquetlist abfragen		http://dbox/control/getbouquets
@@ -31,22 +32,25 @@ Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 Handler: http://dbox/control/channellist
 
 Parameter: keine
-Rückgabe:
+Rueckgabe:
 
-Es wird die gesamte Kanalliste von Neutrino zurückgegeben. Jede Zeile wird von einem Enter (\n) von der Nächsten getrennt. Eine Zeile enthält ein Programm.
+Es wird die gesamte Kanalliste von Neutrino zurueckgegeben.
+Jede Zeile wird von einem Enter (\n) von der Naechsten getrennt.
+Eine Zeile enthaelt ein Programm.
 
-Rückgabe-Format: ONIDSID Programmname
+Rueckgabe-Format: channel_id Programmname
 
-Die ONIDSID dient als Handle für weitere Operationen wie Zappen oder EPG.
+Die channel_id dient als Handle fuer andere Operationen wie Zappen oder EPG.
+Die channel_id ist eine 64 bit Hexadezimalzahl.
 
 Beispiel:
 
 >>>http://dbox/control/channellist
-82536 AB MOTEURS
-82537 AB 1
-82538 ANIMAUX
-82539 ENCYCLOPEDIA
-82540 ZIK'/XXL
+16dca Das Erste
+16e29 EinsExtra
+16e2a EinsFestival
+16e2b EinsMuXx
+16d66 ZDF
  
  
 
@@ -634,14 +638,17 @@ Beispiel:
 **********************************************************************************************
 12. Aktuellen Kanal abfragen
 *********************************************************************************************
-Handler: http://dbox/control/getonidsid
+Handler: http://dbox/control/getonidsid (DEPRECATED)
 
 Parameter: 
-Rückgabe:
+Rueckgabe:
 
-Es wird die ONIDSID des aktuellen Kanals zurückgegeben.
+Es wird die ONIDSID des aktuellen Kanals zurueckgegeben.
 
-Rückgabe-Format: ONIDSID
+Diese Funktion sollte NICHT mehr verwendet werden und ist durch folgenden Aufruf ersetzt:
+http://dbox/control/zapto
+
+Rueckgabe-Format: ONIDSID
 
 Beispiel:
 
