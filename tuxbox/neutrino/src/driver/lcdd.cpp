@@ -22,8 +22,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
 #include <global.h>
 #include <system/settings.h>
 
@@ -63,7 +65,7 @@ void* CLCD::TimeThread(void *)
 	return NULL;
 }
 
-void CLCD::init(char * fontfile, char * fontname)
+void CLCD::init(const char * fontfile, const char * fontname)
 {
 	InitNewClock();
 
@@ -80,7 +82,7 @@ void CLCD::init(char * fontfile, char * fontname)
 	}
 }
 
-bool CLCD::lcdInit(char * fontfile, char * fontname)
+bool CLCD::lcdInit(const char * fontfile, const char * fontname)
 {
 	fontRenderer = new LcdFontRenderClass(&display);
 	fontRenderer->AddFont(fontfile);
