@@ -159,16 +159,7 @@ void set_mode(lcdd_mode m) {
 	//raw_display_t s;
 	switch (m) {
 	case LCDM_TV:
-		/*display.dump_screen(&s);
-		for (t=0; t<23; t++) {
-			for (y=0; y<27-t; y++) {
-				memcpy(s[y], icon_lcd[y+t], LCD_COLS);
-			}
-			memset(s[27-t], 0, LCD_COLS);
-			display.load_screen(&s);
-			display.update();
-			usleep(10*1000);
-		}*/
+		mode = m;
 		display.load_screen(&icon_lcd);
 		show_volume(volume);
 		show_channelname(channelname);
@@ -176,10 +167,12 @@ void set_mode(lcdd_mode m) {
 		display.update();
 		break;
 	case LCDM_MENU:
+		mode = m;
 		display.load_screen(&icon_setup);
 		display.update();
 		break;
 	case LCDM_POWEROFF:
+		mode = m;
 		display.load_screen(&icon_power);
 		display.update();
 		break;
@@ -187,7 +180,6 @@ void set_mode(lcdd_mode m) {
 		printf("[lcdd] Unknown mode: %i\n", m);
 		return;
 	}
-	mode = m;
 } 
 
 
