@@ -193,6 +193,7 @@ int Font::getHeight(void)
 
 void Font::RenderString(int x, int y, int width, const char *string, unsigned char color, int boxheight)
 {
+    pthread_mutex_lock( &renderer->render_mutex );
 
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
@@ -200,7 +201,6 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 		return;
 	}
 
-    pthread_mutex_lock( &renderer->render_mutex );
 
 	int use_kerning=FT_HAS_KERNING(face);
 	
@@ -308,14 +308,14 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 
 int Font::getRenderWidth(const char *string)
 {
+    pthread_mutex_lock( &renderer->render_mutex );
+
 	int use_kerning=FT_HAS_KERNING(face);
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return -1;
 	}
-
-    pthread_mutex_lock( &renderer->render_mutex );
 
 	int x=0;
         int lastindex=0; // 0==missing glyph (never has kerning)
