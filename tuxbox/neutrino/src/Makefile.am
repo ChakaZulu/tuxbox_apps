@@ -35,7 +35,6 @@ neutrino_LDADD = \
 	@CRAMFS_LIBS@ \
 	@CURL_LIBS@ \
 	@FREETYPE_LIBS@ \
-	@MD5SUM_LIBS@ \
 	@NET_LIBS@ \
 	@UCODES_LIBS@ \
 	@ZAPIT_LIBS@ \
