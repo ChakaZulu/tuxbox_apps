@@ -54,27 +54,4 @@ public:
 	~eZap();
 };
 
-class eListBoxEntry;
-
-class eMainMenu: public QObject
-{
-	Q_OBJECT;
-	eLBWindow* window;
-private slots:
-	void sel_close(eListboxEntry *);
-	void sel_vcr(eListboxEntry *);
-	void sel_scan(eListboxEntry *);
-	void sel_setup(eListboxEntry *);
-	void sel_streaminfo(eListboxEntry *);
-	void sel_quit(eListboxEntry *);
-	void sel_bnversion(eListboxEntry *);
-	void sel_record(eListboxEntry *);
-	void sel_plugins(eListboxEntry *);
-	void sel_about(eListboxEntry *);
-public:
-	eMainMenu(eWidget* lcdTitle=0, eWidget* lcdElement=0);
-	~eMainMenu();
-	int exec();
-};
-
 #endif /* __enigma_h */

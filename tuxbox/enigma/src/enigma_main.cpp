@@ -4,7 +4,7 @@
 #include "elistbox.h"
 #include "iso639.h"
 #include "edvb.h"
-#include "enigma.h"
+#include "enigma_mainmenu.h"
 #include "elabel.h"
 #include "eprogress.h"
 #include "enigma_event.h"
@@ -13,6 +13,8 @@
 #include "eskin.h"
 #include "streamwd.h"
 #include "font.h"
+#include "rc.h"
+#include "enigma.h"
 #include "enigma_lcd.h"
 
 static QString getISO639Description(char *iso)
@@ -238,8 +240,8 @@ void eServiceNumberWidget::timeout()
 	close(chnum);
 }
 
-eServiceNumberWidget::eServiceNumberWidget(int initial, eWidget* lcdTitle, eWidget* lcdElement)
-										:eWindow(0, lcdTitle, lcdElement)
+eServiceNumberWidget::eServiceNumberWidget(int initial)
+										:eWindow(0)
 {
 	setText("Channel");
 	move(QPoint(200, 140));
@@ -611,8 +613,8 @@ void eZapMain::keyDown(int code)
 			hide();
 
 		eZapLCD* pLCD = eZapLCD::getInstance();				
-		eServiceNumberWidget *w=new eServiceNumberWidget(code-eRCInput::RC_0, pLCD->lcdMenu->Title, pLCD->lcdMenu->Element );
-
+		eServiceNumberWidget *w=new eServiceNumberWidget(code-eRCInput::RC_0);
+		w->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
 
@@ -651,7 +653,8 @@ void eZapMain::keyUp(int code)
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
-		eMainMenu mm(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+		eMainMenu mm;
+		mm.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		if (mm.exec())
 			eZap::getInstance()->quit();
 		pLCD->lcdMenu->hide();

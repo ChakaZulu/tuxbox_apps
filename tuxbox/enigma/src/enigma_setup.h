@@ -6,10 +6,9 @@
 
 class eListboxEntry;
 
-class eZapSetup: public eWidget
+class eZapSetup: public eLBWindow
 {
 	Q_OBJECT
-	eLBWindow *window;
 private slots:
 	void sel_close(eListboxEntry *);
 	void sel_bouquet(eListboxEntry *);
@@ -17,9 +16,8 @@ private slots:
 	void sel_sound(eListboxEntry *);
 	void sel_video(eListboxEntry *);
 public:
-	eZapSetup(eWidget* lcdTitle = 0, eWidget* lcdElement = 0);
+	eZapSetup();
 	~eZapSetup();
-	int exec();
 };
 
 #endif /* __enigma_setup_h */
