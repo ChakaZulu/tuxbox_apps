@@ -296,6 +296,7 @@ eString convertDVBUTF8(const unsigned char *data, int len, int table)
 		{
 //			eDebug("(0x10)text encoded in ISO-8859-%d",n);			
 			int n=(data[++i]<<8)|(data[++i]);
+			++i;
 			switch(n)
 			{
 				case 2:
@@ -312,14 +313,17 @@ eString convertDVBUTF8(const unsigned char *data, int len, int table)
 		}
 		case 0x11:
 			eDebug("unsup. ISO/IEC 10646-1 enc.");
+			++i;
 			break;
 		case 0x12:
+			++i;
 			eDebug("unsup. KSC 5601 enc.");
 			break;
 		case 0x0:
 		case 0x6 ... 0xF:
 		case 0x13 ... 0x1F:
 			eDebug("reserved");
+			++i;
 			break;
 	}
 	int bytesneeded=0, t=0, s=i;
