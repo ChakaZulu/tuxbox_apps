@@ -762,7 +762,7 @@ data ist die onid des Senders.
 
 Beispiel:
 
->>>http://dbox/control/message?timer
+>>>http://dbox/control/timer
 1 1 0 1034309516 1034309576 1034284376 555089
 
 d.h. event 1, SHUTDOWN, ONCE , announcezeit, alarm/startzeit, stopzeit, kanal/daten
@@ -784,7 +784,7 @@ a/sy  = Jahr
 a/sh  = Stunde
 a/smi = Minute
 
-Channel_id ist onid des Senders
+Channel_id ist onid des Senders mit dem Prefix "R" für Radiokanäle und "T" für TV-Kanäle
 msg ist die Massage die bei REMIND gesendet wird
 
 siehe dazu auch:
@@ -794,5 +794,5 @@ Rückgabe-Format: ok / error
 
 Beispiel:
 
->>>http://dbox/control/message?action=new&alarm=1034309576&stop=1034284376&announce=1034309576&type=1&rep=1&channel_id=555089
+>>>http://dbox/control/timer?action=new&alarm=1034309576&stop=1034284376&announce=1034309576&type=1&rep=1&channel_id=T555089
 ok
