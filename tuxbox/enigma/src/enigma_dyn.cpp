@@ -30,16 +30,21 @@ static QMap<eString,eString> getRequestOptions(eString opt)
 	
 	if (opt[0]=='?')
 		opt=opt.mid(1);
+
 	while (opt.length())
 	{
 		int e=opt.find("=");
-		if (e==-1)
+		if (e==eString::npos)
 			e=opt.length();
 		int a=opt.find("&", e);
-		if (a==-1)
+		if (a==eString::npos)
 			a=opt.length();
 		eString n=opt.left(e);
-		eString r=opt.mid(e+1, opt.find("&", e+1)-e-1);
+
+		int b=opt.find("&", e+1);
+		if(b==eString::npos)
+			b=-1;
+		eString r=opt.mid(e+1, b-e-1);
 		result.insert(n, r);
 		opt=opt.mid(a+1);
 	}
@@ -55,11 +60,11 @@ static eString doStatus(eString request, eString path, eString opt, eHTTPConnect
 	atime+=eDVB::getInstance()->time_difference;
 	result="<html>\n"
 		"<head>\n"
-		"  <title>elitedvb status</title>\n"
+		"  <title>enigma status</title>\n"
 		"  <link rel=stylesheet type=\"text/css\" href=\"/index.css\">\n"
 		"</head>\n"
 		"<body>\n"
-		"<h1>EliteDVB status</h1>\n"
+		"<h1>Enigma status</h1>\n"
 		"<table>\n"
 		"<tr><td>current time:</td><td>" + eString(ctime(&atime)) + "</td></tr>\n"
 		"</table>\n"
@@ -72,8 +77,9 @@ static eString switchService(eString request, eString path, eString opt, eHTTPCo
 {
 	content->local_header["Content-Type"]="text/html";
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
-	if (opt.find("="))
-		opt=opt.mid(opt.find("=")+1);
+	int optval=opt.find("=");
+	if (optval!=eString::npos)
+		opt=opt.mid(optval+1);
 	if (opt.length())
 		sscanf(opt.c_str(), "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
 	eString result="";
@@ -103,7 +109,7 @@ struct listService: public std::unary_function<std::pair<sref,eService>&,void>
 	}
 	void operator()(eService &service)
 	{
-		if (search && (service.service_name.find(search)==-1))
+		if (search && (service.service_name.find(search)==eString::npos))
 			return;
 		eString sc;
 		sc.sprintf("%x:%x:%x:%x", service.service_id, service.transport_stream_id, service.original_network_id, service.service_type);
@@ -120,11 +126,11 @@ static eString listServices(eString request, eString path, eString opts, eHTTPCo
 	eString search=opt["search"];
 	result="<html>\n"
 		"<head>\n"
-		"  <title>elitedvb service list</title>\n"
+		"  <title>enigma service list</title>\n"
 		"  <link rel=stylesheet type=\"text/css\" href=\"/index.css\">\n"
 		"</head>\n"
 		"<body>\n"
-		"<h1>EliteDVB channel list</h1>\n"
+		"<h1>Enigma channel list</h1>\n"
 		"<table>\n";
 		
 	eDVB::getInstance()->getTransponders()->forEachService(listService(result, search));
@@ -325,8 +331,8 @@ eBouquet *getBouquet(int bouquet_id)
 	b=eDVB::getInstance()->getBouquets();
 
 	for (ePtrList<eBouquet>::iterator It(*b); It != b->end(); It++)
-    if (It->bouquet_id == bouquet_id)
-       return *It;
+		if (It->bouquet_id == bouquet_id)
+			return *It;
 	
 	return 0;
 }
@@ -371,24 +377,21 @@ static eString getVolBar()
 
 static eString getContent(eString mode, int bouquetid)
 {
-	eString result="";
-	eString tmp="";
+	eString result("");
+	eString tmp("");
 	ePtrList<eBouquet>* bouquets;
 	std::list<eServiceReference> esref;
 	eService *es;
 
 	bouquets=eDVB::getInstance()->getBouquets();
-
-	bouquets->sort();
-
 	if(mode=="tv")
 	{
 		result+="<form action=\"/?mode=tv\" method=\"get\" name=\"bouquetsel\">";
 		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageTV(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
 		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
 		{
-			tmp=filter_string(i->bouquet_name.c_str());
-			if(tmp.find("[TV]")>-1)
+			tmp=eString(filter_string(i->bouquet_name.c_str()));
+			if(tmp.find("[TV]")!=eString::npos)
 			{
 				result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
 				if(i->bouquet_id==bouquetid)
@@ -423,8 +426,8 @@ static eString getContent(eString mode, int bouquetid)
 		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageRadio(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
 		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
 		{
-			tmp=filter_string(i->bouquet_name.c_str());
-			if(tmp.find("[RADIO]")>-1)
+			tmp=eString(filter_string(i->bouquet_name.c_str()));
+			if(tmp.find("[Radio]")!=eString::npos)
 			{
 				result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
 				if(i->bouquet_id==bouquetid)
@@ -433,24 +436,24 @@ static eString getContent(eString mode, int bouquetid)
 				}
 				result+=">" + eString(i->bouquet_name.c_str()) + "</option>";
 			}
-			result+="</select>";
-			result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
-			eBouquet *act;
-			act=getBouquet(bouquetid);
-			esref=act->list;
-			for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
-			{
-				es=j->service;
-				result+="<option value=\"";
-				tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
-				result+=tmp;
-				result+="\">";
-				result+=filter_string(es->service_name.c_str());
-				result+="</option>";
-			}
-			result+="</select>";
-			result+="</form>";
 		}
+		result+="</select>";
+		result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
+		eBouquet *act;
+		act=getBouquet(bouquetid);
+		esref=act->list;
+		for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
+		{
+			es=j->service;
+			result+="<option value=\"";
+			tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
+			result+=tmp;
+			result+="\">";
+			result+=filter_string(es->service_name.c_str());
+			result+="</option>";
+		}
+		result+="</select>";
+		result+="</form>";
 	}
 	if(result.length()<3)
 		result="not ready yet";
@@ -499,7 +502,7 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 	stats+="</span> | ";
 
 	tmp=read_file("/proc/mounts");
-	if(!tmp.find("cramfs"))
+	if(tmp.find("cramfs")==eString::npos)
 	{
 		stats+="<span class=\"white\">running from flash</span>";
 	}
@@ -517,7 +520,7 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
 	stats+=tmp;
 
-	tmp.sprintf("<span class=\"white\">vpid: 0x%x</span> | <a class=\"audio\" href=\"/audio.pls\">apid: 0x%x</a>", Decoder::parms.vpid, Decoder::parms.apid);
+	tmp.sprintf("<span class=\"white\">vpid: 0x%x</span> | <a class=\"audio\" href=\"/audio.m3u\">apid: 0x%x</a>", Decoder::parms.vpid, Decoder::parms.apid);
 	stats+=tmp;
 	tvc="normal";
 	radioc="normal";
@@ -591,7 +594,7 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 					}
 				}
 				for(ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
-        {
+				{
 					if(descriptor->Tag()==DESCR_SHORT_EVENT)
 					{
 						ShortEventDescriptor *ss=(ShortEventDescriptor*)*descriptor;
@@ -664,8 +667,9 @@ static eString switchServiceWeb(eString request, eString path, eString opt, eHTT
 {
 	content->local_header["Content-Type"]="text/html";
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
-	if (opt.find("="))
-		opt=opt.mid(opt.find("=")+1);
+	int optval=opt.find("=");
+	if (optval!=eString::npos)
+		opt=opt.mid(optval+1);
 	if(opt)
 		sscanf(opt.c_str(), "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
 	eString result="";
@@ -688,17 +692,41 @@ static eString switchServiceWeb(eString request, eString path, eString opt, eHTT
 	return result;
 }
 
-static eString audiopls(eString request, eString path, eString opt, eHTTPConnection *content)
+static eString audiom3u(eString request, eString path, eString opt, eHTTPConnection *content)
 {
 	eString result;
 	eString tmp;
 
-	content->local_header["Content-Type"]="audio/x-scpls";
-	result="[playlist]\n";
-	result+="NumberOfEntries=1\n";
-	result+="File1=http://"+getIP()+":31338/";
+	content->local_header["Content-Type"]="audio/mpegfile";
+	result="http://"+getIP()+":31338/";
         tmp.sprintf("%02x\n", Decoder::parms.apid);
  	result+=tmp;
+	return result;
+}
+
+
+static eString getbouq(eString request, eString path, eString opt, eHTTPConnection *content)
+{
+ 	eString result;
+	eString tmp;
+
+	ePtrList<eBouquet>* bouquets;
+	std::list<eServiceReference> esref;
+	eService *es;
+
+
+	content->local_header["Content-Type"]="text/html";
+
+	bouquets=eDVB::getInstance()->getBouquets();
+	result=eString("");
+
+	for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
+	{
+			tmp=eString(i->bouquet_name.c_str());
+			result+=eString(i->bouquet_name.c_str());
+	}
+
+	
 	return result;
 }
 
@@ -715,8 +743,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
 
-	dyn_resolver->addDyn("GET", "/audio.pls", audiopls);
+	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getbouquets", getbouq);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
 /*	dyn_resolver->addDyn("GET", "/channels/numberchannels", channels_numberchannels);
 	dyn_resolver->addDyn("GET", "/channels/gethtmlchannels", channels_gethtmlchannels);
