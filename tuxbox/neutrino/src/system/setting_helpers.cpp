@@ -35,6 +35,7 @@
 
 bool CColorSetupNotifier::changeNotify(string OptionName)
 {
+	unsigned char r,g,b;
 	//setting colors-..
 	g_FrameBuffer->paletteGenFade(COL_MENUHEAD,
 	                              convertSetupColor2RGB(g_settings.menu_Head_red, g_settings.menu_Head_green, g_settings.menu_Head_blue),
@@ -43,6 +44,12 @@ bool CColorSetupNotifier::changeNotify(string OptionName)
 
 	g_FrameBuffer->paletteGenFade(COL_MENUCONTENT,
 	                              convertSetupColor2RGB(g_settings.menu_Content_red, g_settings.menu_Content_green, g_settings.menu_Content_blue),
+	                              convertSetupColor2RGB(g_settings.menu_Content_Text_red, g_settings.menu_Content_Text_green, g_settings.menu_Content_Text_blue),
+	                              8, convertSetupAlpha2Alpha(g_settings.menu_Content_alpha) );
+
+
+	g_FrameBuffer->paletteGenFade(COL_MENUCONTENTDARK,
+	                              convertSetupColor2RGB(int(g_settings.menu_Content_red*0.6), int(g_settings.menu_Content_green*0.6), int(g_settings.menu_Content_blue*0.6)),
 	                              convertSetupColor2RGB(g_settings.menu_Content_Text_red, g_settings.menu_Content_Text_green, g_settings.menu_Content_Text_blue),
 	                              8, convertSetupAlpha2Alpha(g_settings.menu_Content_alpha) );
 
@@ -67,6 +74,7 @@ bool CColorSetupNotifier::changeNotify(string OptionName)
 	                                    int(g_settings.infobar_green*0.4),
 	                                    int(g_settings.infobar_blue*0.4)),
 	                                g_settings.infobar_alpha);
+
 
 	g_FrameBuffer->paletteSet();
 	return false;
