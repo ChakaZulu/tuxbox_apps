@@ -14,6 +14,11 @@
 #include <sys/time.h>
 #include <sys/mman.h>
 
+static	int							clip_x1=0;
+static	int							clip_y1=0;
+static	int							clip_x2=0;
+static	int							clip_y2=0;
+
 #ifndef USEX
 
 #ifdef __i386__
@@ -166,6 +171,19 @@ unsigned char	FBGetPixel( int x, int y )
 	return *(lfb + stride*y + x);
 }
 
+void	FBGetImage( int x1, int y1, int width, int height, unsigned char *to )
+{
+	int				y;
+	unsigned char	*p=lfb + stride*y1 + x1;
+
+	for( y=0; y<height; y++ )
+	{
+		memcpy(to,p,width);
+		to+=width;
+		p+=stride;
+	}
+}
+
 void	FBDrawLine( int xa, int ya, int xb, int yb, unsigned char farbe )
 {
 	int dx = abs (xa - xb);
@@ -288,6 +306,91 @@ void	FBCopyImage( int x, int y, int dx, int dy, unsigned char *src )
 		return;
 	for( i=0; i < dy; i++ )
 		memcpy(lfb+(y+i)*stride+x,src+dx*i,dx);
+}
+
+/* paint double size */
+void	FB2CopyImage( int x1, int y1, int dx, int dy, unsigned char *src, int dbl )
+{
+	int				x;
+	int				y;
+	unsigned char	*d;
+	unsigned char	*d1;
+	unsigned char	*d2;
+	unsigned char	*s;
+
+	if ( !dx || !dy )
+		return;
+	if ( !dbl )
+	{
+		if ( clip_x1 || clip_x2 || clip_y1 || clip_y2 )
+		{
+			if ( x1+dx <= clip_x1 )
+				return;
+			if ( x1 >= clip_x2 )
+				return;
+			if ( y1+dy <= clip_y1 )
+				return;
+			if ( y1 >= clip_y2 )
+				return;
+		}
+		for( y=0; (y < dy) && (y+y1<screeninfo.yres); y++ )
+		{
+			for( x=0; (x < dx) && (x+x1<688) && (y+y1>=0); x++ )
+			{
+				if (( clip_x1 || clip_x2 || clip_y1 || clip_y2 ) &&
+					(( x1+x < clip_x1 ) || ( x1+x >= clip_x2 ) ||
+					 ( y1+y < clip_y1 ) || ( y1+y >= clip_y2 )) )
+						continue;
+				if ( ( x+x1>=0 ) && *(src+dx*y+x) )
+					*(lfb+(y1+y)*stride+x1+x) = *(src+dx*y+x);
+			}
+		}
+		return;
+	}
+	if ( clip_x1 || clip_x2 || clip_y1 || clip_y2 )
+	{
+		if ( x1+dx <= clip_x1 )
+			return;
+		if ( x1 >= clip_x2 )
+			return;
+		if ( y1+dy <= clip_y1 )
+			return;
+		if ( y1 >= clip_y2 )
+			return;
+	}
+	s=src;
+	for( y=0; (y < dy) && (y+y1+y<screeninfo.yres); y++ )
+	{
+		if ( y+y1+y<0 )
+			continue;
+		d=lfb+(y1+y+y)*stride+x1;
+		d2=d+stride;
+		d1=d-x1+688;
+		for( x=0; (x < dx) && (d<d1); x++, s++ )
+		{
+			if (( clip_x1 || clip_x2 || clip_y1 || clip_y2 ) &&
+				(( x1+x+x < clip_x1 ) || ( x1+x+x >= clip_x2 ) ||
+				 ( y1+y+y < clip_y1 ) || ( y1+y+y >= clip_y2 )) )
+			{
+				d+=2;
+				continue;
+			}
+			if ( (x+x1>=0) && *s )
+			{
+				*d=*s;
+				d++;
+				*d=*s;
+				d++;
+			}
+			else
+			{
+				d+=2;
+			}
+		}
+		// line 2
+		if ( x )
+			memcpy(d2,d-x-x,x+x);
+	}
 }
 
 void	FBCopyImageCol( int x, int y, int dx, int dy, unsigned char col,
@@ -685,6 +788,30 @@ unsigned char	FBGetPixel( int x, int y )
 	return 0;
 }
 
+void	FBGetImage( int x1, int y1, int width, int height, unsigned char *to )
+{
+	XImage			*image;
+	unsigned long	c;
+	int				i;
+	int				x;
+	int				y;
+
+	image=XGetImage(dpy,window,x1,y1,width,height,-1,ZPixmap);
+
+	for( y=0; y<height; y++ )
+	{
+		for( x=0; x<width; x++, to++ )
+		{
+			c=XGetPixel(image,x,y);
+			for(i=0;i<256;i++)
+				if (colors[i]==c)
+					break;
+			*to=(unsigned char)(i&0xff);
+		}
+	}
+	XDestroyImage(image);
+}
+
 void	FBDrawLine( int xa, int ya, int xb, int yb, unsigned char col )
 {
 	XSetForeground(dpy,gc,colors[col]);
@@ -723,6 +850,76 @@ void	FBCopyImage( int x, int y, int dx, int dy, unsigned char *src )
 	for( k=0; k < dy; k++ )
 		for( i=0; i < dx; i++, src++ )
 			FBPaintPixel(i+x,k+y,*src);
+}
+
+void	FB2CopyImage( int x, int y, int dx, int dy, unsigned char *src, int dbl )
+{
+	int				i;
+	int				k;
+
+	if ( !dx || !dy )
+		return;
+	if( !dbl )
+	{
+		if ( clip_x1 || clip_x2 || clip_y1 || clip_y2 )
+		{
+			if ( x+dx <= clip_x1 )
+				return;
+			if ( x >= clip_x2 )
+				return;
+			if ( y+dy <= clip_y1 )
+				return;
+			if ( y >= clip_y2 )
+				return;
+		}
+		for( k=0; k < dy; k++ )
+		{
+			for( i=0; i < dx; i++, src++ )
+			{
+				if (( clip_x1 || clip_x2 || clip_y1 || clip_y2 ) &&
+					(( i+x < clip_x1 ) || ( i+x >= clip_x2 ) ||
+					 ( k+y < clip_y1 ) || ( k+y >= clip_y2 )) )
+						continue;
+				if ( *src && ( i+x < 688 ) )
+					FBPaintPixel(i+x,k+y,*src);
+			}
+		}
+		return;
+	}
+	if ( clip_x1 || clip_x2 || clip_y1 || clip_y2 )
+	{
+		if ( x+dx+dx <= clip_x1 )
+			return;
+		if ( x >= clip_x2 )
+			return;
+		if ( y+dy+dy <= clip_y1 )
+			return;
+		if ( y >= clip_y2 )
+			return;
+	}
+	for( k=0; k < dy+dy; k+=2 )
+	{
+		for( i=0; i < dx+dx; i++, src++ )
+		{
+			if (( clip_x1 || clip_x2 || clip_y1 || clip_y2 ) &&
+				(( i+x < clip_x1 ) || ( i+x >= clip_x2 ) ||
+				 ( k+y < clip_y1 ) || ( k+y >= clip_y2 )) )
+			{
+				i++;
+				continue;
+			}
+			if ( *src && ( i+x < 688 ) )
+			{
+				FBPaintPixel(i+x,k+y,*src);
+				FBPaintPixel(i+x,k+y+1,*src);
+				i++;
+				FBPaintPixel(i+x,k+y,*src);
+				FBPaintPixel(i+x,k+y+1,*src);
+			}
+			else
+				i++;
+		}
+	}
 }
 
 void	FBOverlayImage(int x, int y, int dx, int dy, int relx, int rely,
@@ -2136,4 +2333,12 @@ char	*FBEnterWord( int xpos, int ypos, int height,int len,unsigned char col)
 	}
 	FBFillRect( xoffs,yoffs, 3*52+3,4*52+4+2,BLACK);
 	return( text );
+}
+
+void	FBSetClip( int x1, int y1, int x2, int y2 )
+{
+	clip_x1=x1;
+	clip_y1=y1;
+	clip_x2=x2;
+	clip_y2=y2;
 }

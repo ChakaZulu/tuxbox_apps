@@ -15,6 +15,8 @@ extern	void	FBDrawVLine( int x, int y, int dy, unsigned char col );
 extern	void	FBFillRect( int x, int y, int dx, int dy, unsigned char col );
 extern	void	FBDrawRect( int x, int y, int dx, int dy, unsigned char col );
 extern	void	FBCopyImage( int x, int y, int dx, int dy, unsigned char *src );
+extern	void	FB2CopyImage( int x, int y, int dx, int dy, unsigned char *src,
+					int dbl );
 extern	void	FBOverlayImage(int x, int y, int dx, int dy, int relx, int rely,
 					unsigned char c1,
 					unsigned char *src,
@@ -33,6 +35,9 @@ extern	int		FBDrawString( int xpos, int ypos, int height, char *msg,
 extern	void	FBDrawFx2Logo( int x, int y );
 extern	char	*FBEnterWord( int xpos, int ypos, int height,int len,
 					unsigned char col);
+extern	void	FBGetImage( int x1, int y1, int width, int height,
+					unsigned char *to );
+extern	void	FBSetClip( int x1, int y1, int x2, int y2 );
 #ifdef USEX
 extern	void	FBFlushGrafic( void );
 #endif
