@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.10 2003/03/03 03:43:58 obi Exp $
+// $Id: SIservices.hpp,v 1.11 2004/02/13 14:40:00 thegoodguy Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -120,8 +120,9 @@ typedef std::set <SInvodReference, std::less<SInvodReference> > SInvodReferences
 class SIservice {
 public:
 	SIservice(const struct sdt_service *s) {
-		serviceID = (s->service_id_hi << 8) | s->service_id_lo;
-		originalNetworkID = 0;
+		service_id          = (s->service_id_hi << 8) | s->service_id_lo;
+		original_network_id = 0;
+		transport_stream_id = 0;
 		serviceTyp = 0;
 		flags.EIT_schedule_flag = s->EIT_schedule_flag;
 		flags.EIT_present_following_flag = s->EIT_present_following_flag;
@@ -129,24 +130,28 @@ public:
 		flags.free_CA_mode = s->free_CA_mode;
 	}
 	// Um einen service zum Suchen zu erstellen
-	SIservice(const t_service_id sid, const t_original_network_id onid) {
-		serviceID=sid;
-		originalNetworkID=onid;
+	SIservice(const t_service_id _service_id, const t_original_network_id _original_network_id, const t_transport_stream_id _transport_stream_id)
+	{
+		service_id          = _service_id;
+		original_network_id = _original_network_id;
+		transport_stream_id = _transport_stream_id;
 		serviceTyp=0;
 		memset(&flags, 0, sizeof(flags));
 	}
 	// Std-Copy
 	SIservice(const SIservice &s) {
-		serviceID=s.serviceID;
-		originalNetworkID=s.originalNetworkID;
+		service_id          = s.service_id;
+		original_network_id = s.original_network_id;
+		transport_stream_id = s.transport_stream_id;
 		serviceTyp=s.serviceTyp;
 		providerName=s.providerName;
 		serviceName=s.serviceName;
 		flags=s.flags;
 		nvods=s.nvods;
 	}
-	t_service_id          serviceID;
-	t_original_network_id originalNetworkID; // Ist innerhalb einer section unnoetig
+	t_service_id          service_id;
+	t_original_network_id original_network_id; // Ist innerhalb einer section unnoetig
+	t_transport_stream_id transport_stream_id;
 	unsigned char serviceTyp;
 	SInvodReferences nvods;
 	std::string serviceName; // Name aus dem Service-Descriptor
@@ -160,17 +165,13 @@ public:
 		return uniqueKey() < s.uniqueKey();
 	}
 
-	static t_channel_id makeUniqueKey(t_original_network_id original_network_id, t_service_id service_id) {
-		return CREATE_CHANNEL_ID; // cf. zapittypes.h
-	}
-
 	t_channel_id uniqueKey(void) const {
-		return makeUniqueKey(originalNetworkID, serviceID);
+		return CREATE_CHANNEL_ID;
 	}
 
 	void dump(void) const {
-		printf("Original-Network-ID: %hu\n", originalNetworkID);
-		printf("Service-ID: %hu\n", serviceID);
+		printf("Original-Network-ID: %hu\n", original_network_id);
+		printf("Service-ID: %hu\n", service_id);
 		printf("Service-Typ: %hhu\n", serviceTyp);
 		if(providerName.length())
 			printf("Provider-Name: %s\n", providerName.c_str());

@@ -1,5 +1,5 @@
 //
-// $Id: epgMini.cpp,v 1.2 2001/06/10 15:21:22 fnbrd Exp $
+// $Id: epgMini.cpp,v 1.3 2004/02/13 14:40:00 thegoodguy Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epgMini.cpp,v $
+// Revision 1.3  2004/02/13 14:40:00  thegoodguy
+// further usage of event_id_t, t_service_id and friends (hopefully without breaking anything
+//
 // Revision 1.2  2001/06/10 15:21:22  fnbrd
 // mit XML-Ausgabe
 //
@@ -70,8 +73,8 @@ int main(int argc, char **argv)
 //      printf("Servicename: '%s'\n", servicename);
       if(!strcmp(servicename, argv[1])) {
         // Event (serviceid) suchen
-        SIevent evt=SIevent::readActualEvent(ks->serviceID);
-	if(evt.serviceID!=0)
+        SIevent evt=SIevent::readActualEvent(ks->service_id);
+	if(evt.service_id != 0)
 	  evt.saveXML(stdout); // gefunden
 //	  evt.dump(); // gefunden
         else

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.168 2004/02/08 15:38:57 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.169 2004/02/13 14:40:00 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -179,7 +179,6 @@ static const SIevent nullEvt; // Null-Event
 typedef boost::shared_ptr<class SIevent>
 SIeventPtr;
 
-// Mengen mit SIeventPtr sortiert nach UniqueKey
 typedef std::map<event_id_t, SIeventPtr, std::less<event_id_t> > MySIeventsOrderUniqueKey;
 static MySIeventsOrderUniqueKey mySIeventsOrderUniqueKey;
 
@@ -191,10 +190,10 @@ struct OrderServiceUniqueKeyFirstStartTimeEventUniqueKey
 	bool operator()(const SIeventPtr &p1, const SIeventPtr &p2)
 	{
 		return
-		    SIservice::makeUniqueKey(p1->originalNetworkID, p1->serviceID) == SIservice::makeUniqueKey(p2->originalNetworkID, p2->serviceID) ?
+		    (p1->get_channel_id() == p2->get_channel_id()) ?
 		    (p1->times.begin()->startzeit == p2->times.begin()->startzeit ? p1->eventID < p2->eventID : p1->times.begin()->startzeit < p2->times.begin()->startzeit )
-				    :
-				    (SIservice::makeUniqueKey(p1->originalNetworkID, p1->serviceID) < SIservice::makeUniqueKey(p2->originalNetworkID, p2->serviceID) );
+		    :
+		    (p1->get_channel_id() < p2->get_channel_id());
 	}
 };
 
@@ -208,7 +207,7 @@ struct OrderFirstEndTimeServiceIDEventUniqueKey
 		return
 		    p1->times.begin()->startzeit + (long)p1->times.begin()->dauer == p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ?
 		    //      ( p1->serviceID == p2->serviceID ? p1->uniqueKey() < p2->uniqueKey() : p1->serviceID < p2->serviceID )
-		    ( p1->serviceID == p2->serviceID ? p1->uniqueKey() > p2->uniqueKey() : p1->serviceID < p2->serviceID )
+		    (p1->service_id == p2->service_id ? p1->uniqueKey() > p2->uniqueKey() : p1->service_id < p2->service_id)
 				    :
 				    ( p1->times.begin()->startzeit + (long)p1->times.begin()->dauer < p2->times.begin()->startzeit + (long)p2->times.begin()->dauer ) ;
 	}
@@ -287,7 +286,7 @@ static void addEvent(const SIevent &evt)
 	deleteEvent(e->uniqueKey());
 
 	// Pruefen ob es ein Meta-Event ist
-	MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i = mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(SIservice::makeUniqueKey(e->originalNetworkID, e->serviceID));
+	MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i = mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(e->get_channel_id());
 
 	if (i != mySIeventUniqueKeysMetaOrderServiceUniqueKey.end())
 	{
@@ -401,11 +400,9 @@ static void removeOldEvents(const long seconds)
 typedef boost::shared_ptr<class SIservice>
 SIservicePtr;
 
-// Key ist unsigned  (Unique Service-ID), data ist ein SIservicePtr
 typedef std::map<t_channel_id, SIservicePtr, std::less<t_channel_id> > MySIservicesOrderUniqueKey;
 static MySIservicesOrderUniqueKey mySIservicesOrderUniqueKey;
 
-// Key ist unsigned (Unique Sevice-ID), data ist ein SIservicePtr
 typedef std::map<t_channel_id, SIservicePtr, std::less<t_channel_id> > MySIservicesNVODorderUniqueKey;
 static MySIservicesNVODorderUniqueKey mySIservicesNVODorderUniqueKey;
 
@@ -494,7 +491,7 @@ static DMX dmxSDT(0x11, 256);
 
 static t_channel_id findServiceUniqueKeyforServiceName(const char * const serviceName)
 {
-	SIservice *sp = new SIservice((unsigned short)0, (unsigned short)0);
+	SIservice *sp = new SIservice(0, 0, 0);
 
 	if (!sp)
 	{
@@ -537,7 +534,7 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id se
 		*flag = 0;
 
 	for (MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
-		if (SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID) == serviceUniqueKey)
+		if (e->first->get_channel_id() == serviceUniqueKey)
 		{
 			if (flag != 0)
 				*flag |= CSectionsdClient::epgflags::has_anything; // überhaupt was da...
@@ -570,7 +567,7 @@ static const SIevent& findNextSIeventForServiceUniqueKey(const t_channel_id serv
 	time_t azeit = time(NULL);
 
 	for (MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
-		if (SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID) == serviceUniqueKey)
+		if (e->first->get_channel_id() == serviceUniqueKey)
 		{
 			for (SItimes::iterator t = e->first->times.begin(); t != e->first->times.end(); t++)
 				if ((long)(azeit) < (long)(t->startzeit + t->dauer))
@@ -628,7 +625,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 
 		if (eNext != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end())
 		{
-			if (SIservice::makeUniqueKey(eNext->second->originalNetworkID, eNext->second->serviceID) == SIservice::makeUniqueKey(eFirst->second->originalNetworkID, eFirst->second->serviceID))
+			if (eNext->second->get_channel_id() == eFirst->second->get_channel_id())
 			{
 				zeit = *(eNext->second->times.begin());
 				return *(eNext->second);
@@ -692,7 +689,7 @@ static void findPrevNextSIevent(const event_id_t uniqueKey, SItime &zeit, SIeven
 		{
 			eNext--;
 
-			if (SIservice::makeUniqueKey(eNext->second->originalNetworkID, eNext->second->serviceID) == SIservice::makeUniqueKey(eFirst->second->originalNetworkID, eFirst->second->serviceID))
+			if (eNext->second->get_channel_id() == eFirst->second->get_channel_id())
 			{
 				prev_zeit = *(eNext->second->times.begin());
 				prev = *(eNext->second);
@@ -705,7 +702,7 @@ static void findPrevNextSIevent(const event_id_t uniqueKey, SItime &zeit, SIeven
 
 		if ( (!next_ok) && (eNext != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end()) )
 		{
-			if (SIservice::makeUniqueKey(eNext->second->originalNetworkID, eNext->second->serviceID) == SIservice::makeUniqueKey(eFirst->second->originalNetworkID, eFirst->second->serviceID))
+			if (eNext->second->get_channel_id() == eFirst->second->get_channel_id())
 			{
 				next_zeit = *(eNext->second->times.begin());
 				next = *(eNext->second);
@@ -822,7 +819,7 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 	{
 		sprintf(daten, "%08x %hu %hhu %d %d %d %d %u ",
 		        s->first->uniqueKey(),
-		        s->first->serviceID, s->first->serviceTyp,
+		        s->first->service_id, s->first->serviceTyp,
 		        s->first->eitScheduleFlag(), s->first->eitPresentFollowingFlag(),
 		        s->first->runningStatus(), s->first->freeCAmode(),
 		        s->first->nvods.size());
@@ -920,7 +917,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 		for (MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++)
 		{
-			if (SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID) == serviceUniqueKey)
+			if (e->first->get_channel_id() == serviceUniqueKey)
 			{
 				serviceIDfound = 1;
 
@@ -1060,7 +1057,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.168 2004/02/08 15:38:57 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.169 2004/02/13 14:40:00 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1115,13 +1112,13 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 
 	unlockServices();
 
-	if (evt.serviceID != 0)
+	if (evt.service_id != 0)
 	{ //Found
 		dprintf("current EPG found.\n");
 		SItime zeitEvt2(zeitEvt1);
 		const SIevent &nextEvt = findNextSIevent(evt.uniqueKey(), zeitEvt2);
 
-		if (nextEvt.serviceID != 0)
+		if (nextEvt.service_id != 0)
 		{
 			dprintf("next EPG found.\n");
 			// Folgendes ist grauenvoll, habs aber einfach kopiert aus epgd
@@ -1527,7 +1524,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 
 	const SIevent &evt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1, 0, &flag);
 
-	if (evt.serviceID == 0)
+	if (evt.service_id == 0)
 	{
 		MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
 		si = mySIservicesOrderUniqueKey.find(*uniqueServiceKey);
@@ -1552,7 +1549,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 
 	SItime zeitEvt2(zeitEvt1);
 
-	if (evt.serviceID != 0)
+	if (evt.service_id != 0)
 	{ //Found
 		dprintf("[sectionsd] current EPG found.\n");
 
@@ -1572,7 +1569,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 
 			nextEvt = findNextSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt2);
 
-			if (nextEvt.serviceID != 0)
+			if (nextEvt.service_id != 0)
 			{
 				MySIeventsOrderUniqueKey::iterator eFirst = mySIeventsOrderUniqueKey.find(*uniqueServiceKey);
 
@@ -1592,7 +1589,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 			}
 		}
 
-	if (nextEvt.serviceID != 0)
+	if (nextEvt.service_id != 0)
 	{
 		dprintf("[sectionsd] next EPG found.\n");
 		flag |= CSectionsdClient::epgflags::has_next;
@@ -1773,7 +1770,7 @@ static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 
 	const SIevent &nextEvt = findNextSIevent(*uniqueEventKey, zeit);
 
-	if (nextEvt.serviceID != 0)
+	if (nextEvt.service_id != 0)
 	{
 		dprintf("next epg found.\n");
 		sendEPG(connfd, nextEvt, zeit);
@@ -1810,7 +1807,7 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 
 	const SIevent &evt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeit);
 
-	if (evt.serviceID != 0)
+	if (evt.service_id != 0)
 	{
 		dprintf("EPG found.\n");
 		sendEPG(connfd, evt, zeit);
@@ -1919,7 +1916,7 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 
 	unlockServices();
 
-	if (evt.serviceID != 0)
+	if (evt.service_id != 0)
 	{ //Found
 		dprintf("EPG found.\n");
 		nResultDataSize =
@@ -2015,15 +2012,15 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	lockServices();
 	lockEvents();
 
-	unsigned uniqueNow = 0;
-	unsigned uniqueOld = 0;
+	t_channel_id uniqueNow = 0;
+	t_channel_id uniqueOld = 0;
 	bool found_already = false;
 	time_t azeit = time(NULL);
 	std::string sname;
 
 	for (MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++)
 	{
-		uniqueNow = SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID);
+		uniqueNow = e->first->get_channel_id();
 
 		if ( uniqueNow != uniqueOld )
 		{
@@ -2193,7 +2190,7 @@ static void commandGetNextShort(int connfd, char *data, const unsigned dataLengt
 
 	const SIevent &nextEvt = findNextSIevent(*uniqueEventKey, zeit);
 
-	if (nextEvt.serviceID != 0)
+	if (nextEvt.service_id != 0)
 	{
 		dprintf("next short found.\n");
 		sendShort(connfd, nextEvt, zeit);
@@ -2252,7 +2249,7 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 
 	const SIevent& evt = findSIeventForEventUniqueKey(*epgID);
 
-	if (evt.serviceID != 0)
+	if (evt.service_id != 0)
 	{ // Event found
 		SItimes::iterator t = evt.times.begin();
 
@@ -2303,7 +2300,7 @@ static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLeng
 
 	const SIevent& evt = findSIeventForEventUniqueKey(*epgID);
 
-	if (evt.serviceID != 0)
+	if (evt.service_id != 0)
 	{ // Event found
 		dputs("EPG found.");
 		sendEPG(connfd, evt, SItime(0, 0), 1);
@@ -2737,8 +2734,8 @@ static void *sdtThread(void *)
 							}
 						dprintf("[sdtThread] now msg_index 0x%llx / skipsize %d\n", _id, messaging_sdt_skipped_sections_ID[msg_index].size());
 
-						if ( ( messaging_sdt_sections_max_ID[msg_index] == _id ) &&
-						        ( messaging_sdt_skipped_sections_ID[msg_index].size() == 0 ) )
+						if ((messaging_sdt_sections_max_ID[msg_index] == _id) &&
+						    (messaging_sdt_skipped_sections_ID[msg_index].empty()))
 						{
 							// alle pakete für den ServiceKey da!
 							dprintf("[sdtThread] got all packages for table_id 0x%x (%d)\n", header.table_id, msg_index);
@@ -3203,7 +3200,7 @@ static void *eitThread(void *)
 
 					for (SIevents::iterator e = eit.events().begin(); e != eit.events().end(); e++)
 					{
-						if (e->times.size() > 0)
+						if (!(e->times.empty()))
 						{
 							if ( ( e->times.begin()->startzeit < zeit + secondsToCache ) &&
 							        ( ( e->times.begin()->startzeit + (long)e->times.begin()->dauer ) > zeit - oldEventsAre ) )
@@ -3217,7 +3214,7 @@ static void *eitThread(void *)
 						{
 							// pruefen ob nvod event
 							lockServices();
-							MySIservicesNVODorderUniqueKey::iterator si = mySIservicesNVODorderUniqueKey.find(SIservice::makeUniqueKey(e->originalNetworkID, e->serviceID));
+							MySIservicesNVODorderUniqueKey::iterator si = mySIservicesNVODorderUniqueKey.find(e->get_channel_id());
 
 							if (si != mySIservicesNVODorderUniqueKey.end())
 							{
@@ -3272,8 +3269,8 @@ static void *eitThread(void *)
 										break;
 									}
 
-								if ( ( messaging_sections_max_ID[header.table_id - 0x4e] == _id ) &&
-								        ( messaging_skipped_sections_ID[header.table_id - 0x4e].size() == 0 ) )
+								if ((messaging_sections_max_ID[header.table_id - 0x4e] == _id) &&
+								    (messaging_skipped_sections_ID[header.table_id - 0x4e].empty()))
 								{
 									// alle pakete für den ServiceKey da!
 									dprintf("[eitThread] got all packages for table_id 0x%x\n", header.table_id);
@@ -3469,7 +3466,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.168 2004/02/08 15:38:57 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.169 2004/02/13 14:40:00 thegoodguy Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {

@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.20 2003/03/03 03:43:58 obi Exp $
+// $Id: SIevents.hpp,v 1.21 2004/02/13 14:39:59 thegoodguy Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -23,76 +23,11 @@
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
-// $Log: SIevents.hpp,v $
-// Revision 1.20  2003/03/03 03:43:58  obi
-// - fixed lots of endian issues due to casting of char* to struct*
-// - fixed bat struct last section number entry
-// - fixed some dvb data return types in si section classes
-// - indented lots of code to make it readable
-//
-// sectionsd runs on little endian machines now, too :-)
-//
-// Revision 1.19  2002/02/28 01:52:21  field
-// Verbessertes Umschalt-Handling
-//
-// Revision 1.18  2002/02/23 20:23:23  McClean
-// fix up
-//
-// Revision 1.17  2002/02/23 14:53:18  McClean
-// add fsk
-//
-// Revision 1.16  2001/11/05 17:12:05  field
-// Versuch zu Wiederholungen
-//
-// Revision 1.15  2001/11/03 03:13:52  field
-// Auf Perspektiven vorbereitet
-//
-// Revision 1.14  2001/07/25 11:39:17  fnbrd
-// Added unique keys to Events and Services
-//
-// Revision 1.13  2001/07/23 00:21:23  fnbrd
-// removed using namespace std.
-//
-// Revision 1.12  2001/07/16 13:33:40  fnbrd
-// removeOldEvents geaendert.
-//
-// Revision 1.11  2001/07/14 22:59:58  fnbrd
-// removeOldEvents() in SIevents
-//
-// Revision 1.10  2001/06/27 11:59:44  fnbrd
-// Angepasst an gcc 3.0
-//
-// Revision 1.9  2001/06/11 19:22:54  fnbrd
-// Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
-//
-// Revision 1.8  2001/06/11 01:15:16  fnbrd
-// NVOD reference descriptors und Service-Typ
-//
-// Revision 1.7  2001/06/10 14:55:51  fnbrd
-// Kleiner Aenderungen und Ergaenzungen (epgMini).
-//
-// Revision 1.6  2001/05/20 14:40:15  fnbrd
-// Mit parental_rating
-//
-// Revision 1.5  2001/05/19 20:15:08  fnbrd
-// Kleine Aenderungen (und epgXML).
-//
-// Revision 1.4  2001/05/18 20:31:04  fnbrd
-// Aenderungen fuer -Wall
-//
-// Revision 1.3  2001/05/18 13:11:46  fnbrd
-// Fast komplett, fehlt nur noch die Auswertung der time-shifted events
-// (Startzeit und Dauer der Cinedoms).
-//
-// Revision 1.2  2001/05/17 01:53:35  fnbrd
-// Jetzt mit lokaler Zeit.
-//
-// Revision 1.1  2001/05/16 15:23:47  fnbrd
-// Alles neu macht der Mai.
-//
 
 #include <endian.h>
 #include <vector>
+
+#include <sectionsdclient/sectionsdtypes.h>
 
 // forward references
 class SIservice;
@@ -193,9 +128,9 @@ public:
 
 	unsigned char linkageType; // Linkage Descriptor
 	std::string name; // Text aus dem Linkage Descriptor
-	unsigned short transportStreamId; // Linkage Descriptor
-	unsigned short originalNetworkId; // Linkage Descriptor
-	unsigned short serviceId; // Linkage Descriptor
+	t_transport_stream_id transportStreamId; // Linkage Descriptor
+	t_original_network_id originalNetworkId; // Linkage Descriptor
+	t_service_id          serviceId;         // Linkage Descriptor
 };
 
 // Fuer for_each
@@ -363,15 +298,22 @@ struct saveSItimeXML : public std::unary_function<SItime, void>
 };
 
 class SIevent {
-  public:
-    SIevent(const struct eit_event *);
-    // Std-Copy
-    SIevent(const SIevent &);
-    SIevent(void) {
-      serviceID=eventID=originalNetworkID=0;
+public:
+	t_service_id          service_id;
+	t_original_network_id original_network_id;
+	t_transport_stream_id transport_stream_id;
+	
+	SIevent(const struct eit_event *);
+	// Std-Copy
+	SIevent(const SIevent &);
+	SIevent(void) {
+		service_id = 0;
+		original_network_id = 0;
+		transport_stream_id = 0;
+		eventID    = 0;
 //      dauer=0;
 //      startzeit=0;
-    }
+	}
     unsigned short eventID;
     std::string name; // Name aus dem Short-Event-Descriptor
     std::string text; // Text aus dem Short-Event-Descriptor
@@ -382,14 +324,14 @@ class SIevent {
     std::string userClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
 //    time_t startzeit; // lokale Zeit, 0 -> time shifted (cinedoms)
 //    unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
-    unsigned short serviceID;
-    unsigned short originalNetworkID; // braucht man, wenn man events mehrerer Networks in einer Menge speichert, innerhalb einer section ist das unnoetig
-    static unsigned long long makeUniqueKey(unsigned short onID, unsigned short sID, unsigned short eID) {
-      return (((unsigned long long)onID)<<32) + (((unsigned)sID)<<16) + eID;
-    }
-    unsigned long long uniqueKey(void) const {
-      return makeUniqueKey(originalNetworkID, serviceID, eventID);
-    }
+	
+	t_channel_id get_channel_id(void) const {
+		return CREATE_CHANNEL_ID;
+	}
+
+	event_id_t uniqueKey(void) const {
+		return CREATE_EVENT_ID(CREATE_CHANNEL_ID, eventID);
+	}
     SIcomponents components;
     SIparentalRatings ratings;
     SIlinkage_descs linkage_descs;
@@ -406,7 +348,7 @@ class SIevent {
     void dumpSmall(void) const; // dumps the event to stdout (not all information)
     // Liefert das aktuelle EPG des senders mit der uebergebenen serviceID,
     // bei Fehler ist die serviceID des zurueckgelieferten Events 0
-    static SIevent readActualEvent(unsigned short serviceID, unsigned timeoutInSeconds=2);
+    static SIevent readActualEvent(t_service_id serviceID, unsigned timeoutInSeconds=2);
 
     char getFSK() const;
  protected:
@@ -435,7 +377,7 @@ struct saveSIeventXMLwithServiceName : public std::unary_function<SIevent, void>
   const SIservices *s;
   saveSIeventXMLwithServiceName(FILE *fi, const SIservices &svs) {f=fi; s=&svs;}
   void operator() (const SIevent &e) {
-    SIservices::iterator k=s->find(SIservice(e.serviceID, e.originalNetworkID));
+    SIservices::iterator k=s->find(SIservice(e.service_id, e.original_network_id, e.transport_stream_id));
     if(k!=s->end()) {
       if(k->serviceName.length())
       e.saveXML(f, k->serviceName.c_str());
@@ -450,7 +392,7 @@ struct printSIeventWithService : public std::unary_function<SIevent, void>
 {
   printSIeventWithService(const SIservices &svs) { s=&svs;}
   void operator() (const SIevent &e) {
-    SIservices::iterator k=s->find(SIservice(e.serviceID, e.originalNetworkID));
+    SIservices::iterator k=s->find(SIservice(e.service_id, e.original_network_id, e.transport_stream_id));
     if(k!=s->end()) {
       char servicename[50];
       strncpy(servicename, k->serviceName.c_str(), sizeof(servicename)-1);

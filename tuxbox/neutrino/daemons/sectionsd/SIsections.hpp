@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.15 2003/03/03 03:43:58 obi Exp $
+//    $Id: SIsections.hpp,v 1.16 2004/02/13 14:40:00 thegoodguy Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -426,14 +426,19 @@ public:
 		parsed = s.parsed;
 	}
 
-	unsigned short serviceID(void) const {
+	t_service_id service_id(void) const {
 		return buffer ? ((((struct SI_section_EIT_header *)buffer)->service_id_hi << 8) |
-				((struct SI_section_EIT_header *)buffer)->service_id_lo): (unsigned short) -1;
+				((struct SI_section_EIT_header *)buffer)->service_id_lo): 0;
 	}
 
-	unsigned short originalNetworkID(void) const {
+	t_original_network_id original_network_id(void) const {
 		return buffer ? ((((struct SI_section_EIT_header *)buffer)->original_network_id_hi << 8) |
-				((struct SI_section_EIT_header *)buffer)->original_network_id_lo) : (unsigned short) -1;
+				((struct SI_section_EIT_header *)buffer)->original_network_id_lo) : 0;
+	}
+
+	t_transport_stream_id transport_stream_id(void) const {
+		return buffer ? ((((struct SI_section_EIT_header *)buffer)->transport_stream_id_hi << 8) |
+				((struct SI_section_EIT_header *)buffer)->transport_stream_id_lo) : 0;
 	}
 
 	struct SI_section_EIT_header const *header(void) const {
@@ -539,18 +544,18 @@ public:
 		parsed = s.parsed;
 	}
 
-	unsigned short transportStreamID(void) const {
+	t_transport_stream_id transport_stream_id(void) const {
 		return buffer ? ((((struct SI_section_SDT_header *)buffer)->transport_stream_id_hi << 8) |
-				((struct SI_section_SDT_header *)buffer)->transport_stream_id_lo) : (unsigned short) -1;
+				((struct SI_section_SDT_header *)buffer)->transport_stream_id_lo) : 0;
 	}
 
 	struct SI_section_SDT_header const *header(void) const {
 		return (struct SI_section_SDT_header *)buffer;
 	}
 
-	unsigned short originalNetworkID(void) const {
+	t_original_network_id original_network_id(void) const {
 		return buffer ? ((((struct SI_section_SDT_header *)buffer)->original_network_id_hi << 8) |
-				((struct SI_section_SDT_header *)buffer)->original_network_id_lo) : (unsigned short) -1;
+				((struct SI_section_SDT_header *)buffer)->original_network_id_lo) : 0;
 	}
 
 	static void dump(const struct SI_section_SDT_header *header) {

@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.25 2003/06/01 16:13:04 woglinde Exp $
+// $Id: SIevents.cpp,v 1.26 2004/02/13 14:39:59 thegoodguy Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -56,7 +56,9 @@ SIevent::SIevent(const struct eit_event *e)
 	if (start_time && duration)
 		times.insert(SItime(start_time, duration));
 
-	serviceID = originalNetworkID = 0;
+	service_id = 0;
+	original_network_id = 0;
+	transport_stream_id = 0;
 }
 
 // Std-Copy
@@ -68,8 +70,9 @@ SIevent::SIevent(const SIevent &e)
 //  startzeit=e.startzeit;
 //  dauer=e.dauer;
 	times=e.times;
-	serviceID=e.serviceID;
-	originalNetworkID=e.originalNetworkID;
+	service_id          = e.service_id;
+	original_network_id = e.original_network_id;
+	transport_stream_id = e.transport_stream_id;
 	itemDescription=e.itemDescription;
 	item=e.item;
 	extendedText=e.extendedText;
@@ -119,7 +122,7 @@ char SIevent::getFSK() const
 
 int SIevent::saveXML0(FILE *file) const
 {
-	if(fprintf(file, "  <event service_id=\"%hd\" event_id=\"%hd\">\n", serviceID, eventID)<0)
+	if(fprintf(file, "  <event service_id=\"%hd\" event_id=\"%hd\">\n", service_id, eventID)<0)
 		return 1;
 	return 0;
 }
@@ -175,10 +178,10 @@ int SIevent::saveXML2(FILE *file) const
 void SIevent::dump(void) const
 {
 	printf("Unique key: %llx\n", uniqueKey());
-	if(originalNetworkID)
-		printf("Original-Network-ID: %hu\n", originalNetworkID);
-	if(serviceID)
-		printf("Service-ID: %hu\n", serviceID);
+	if(original_network_id)
+		printf("Original-Network-ID: %hu\n", original_network_id);
+	if (service_id)
+		printf("Service-ID: %hu\n", service_id);
 	printf("Event-ID: %hu\n", eventID);
 	if(item.length())
 		printf("Item: %s\n", item.c_str());
@@ -281,7 +284,7 @@ inline int readNbytes(int fd, char *buf, int n, unsigned timeoutInSeconds)
 	return j;
 }
 
-SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSeconds)
+SIevent SIevent::readActualEvent(t_service_id serviceID, unsigned timeoutInSeconds)
 {
 	int fd;
 	SIevent evt; // Std-Event das bei Fehler zurueckgeliefert wird
@@ -345,7 +348,7 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
 			SIsectionEIT e(SIsection(sizeof(header) + section_length - 5, buf));
 			time_t zeit = time(NULL);
 			for (SIevents::iterator k = e.events().begin(); k != e.events().end(); k++)
-				if (k->serviceID == serviceID)
+				if (k->service_id == serviceID)
 					for (SItimes::iterator t = k->times.begin(); t != k->times.end(); t++)
 						if ((t->startzeit <= zeit) && (zeit <= (long)(t->startzeit+t->dauer))) {
 							close(fd);
@@ -429,7 +432,7 @@ void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
 //      iterator e;
 			iterator e;
 			for(e=begin(); e!=end(); e++)
-				if(e->serviceID==k->serviceID)
+				if(e->service_id == k->service_id)
 					break;
 			if(e!=end()) {
 				// *e == event mit dem Text
@@ -438,7 +441,7 @@ void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
 				for(SInvodReferences::iterator n=k->nvods.begin(); n!=k->nvods.end(); n++) {
 					// Alle druchgehen und deren Events suchen
 					for(iterator en=begin(); en!=end(); en++) {
-						if(en->serviceID==n->getServiceID()) {
+						if(en->service_id==n->getServiceID()) {
 							newEvent.times.insert(en->times.begin(), en->times.end());
 //              newEvent.times.insert(SItime(en->startzeit, en->dauer));
 //	      eventsToDelete.insert(SIevent(*en));
@@ -455,7 +458,7 @@ void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
 	//
 	for (iterator it = begin(); it != end(); )
 	{
-		SIservices::iterator s = services.find(SIservice(it->serviceID, it->originalNetworkID));
+		SIservices::iterator s = services.find(SIservice(it->service_id, it->original_network_id, it->transport_stream_id));
 		if ((s != services.end()) && (s->serviceTyp == 0))
 		{
 			// Set is a Sorted Associative Container
