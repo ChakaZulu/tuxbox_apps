@@ -701,28 +701,20 @@ int CAudioPlayerGui::show()
 			if (m_select_title_by_name)
 			{
 				//printf("select by name\n");
-				unsigned char smsKey = 0;
-				time_t actTime = time(NULL);
-				
-				neutrino_msg_t      newMsg = msg;
-				neutrino_msg_data_t newData;
-				
-				int x1=(g_settings.screen_EndX- g_settings.screen_StartX)/2 + g_settings.screen_StartX-50;
-				int y1=(g_settings.screen_EndY- g_settings.screen_StartY)/2 + g_settings.screen_StartY;
-				int h = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight();
-				
+				unsigned char smsKey = 0;				
 				do 
 				{
-					smsKey = m_SMSKeyInput.handleMsg(newMsg);
-					//printf("  new key: %c", keySelectedBySMSInput);
-					actTime = time(NULL);
-					g_RCInput->getMsg_ms(&newMsg,&newData,AUDIOPLAYERGUI_SMSKEY_TIMEOUT-100);
+					smsKey = m_SMSKeyInput.handleMsg(msg);
+					//printf("  new key: %c", smsKey);
+					g_RCInput->getMsg_ms(&msg,&data,AUDIOPLAYERGUI_SMSKEY_TIMEOUT-100);
 					
 
 					/* show a hint box with current char (too slow at the moment)*/
 // 					char selectedKey[1];
 // 					sprintf(selectedKey,"%c",smsKey);
-					
+// 					int x1=(g_settings.screen_EndX- g_settings.screen_StartX)/2 + g_settings.screen_StartX-50;
+// 					int y1=(g_settings.screen_EndY- g_settings.screen_StartY)/2 + g_settings.screen_StartY;
+// 					int h = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight();
 // 					int w = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getRenderWidth(selectedKey);
 // 					frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT_PLUS_6);
 // 					frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED_PLUS_0);
@@ -730,17 +722,15 @@ int CAudioPlayerGui::show()
 // 						->RenderString(x1,y1,w+1,selectedKey,COL_MENUCONTENTSELECTED,0);
 
 
-				} while ((newMsg != CRCInput::RC_timeout) 
-					 && ((newMsg >= CRCInput::RC_1) && (newMsg <= CRCInput::RC_9) && !(playlist.empty())));
-				if (newMsg == CRCInput::RC_timeout
-				    || newMsg == CRCInput::RC_nokey)
+				} while ((msg >= CRCInput::RC_1) && (msg <= CRCInput::RC_9) && !(playlist.empty()));
+				
+				if (msg == CRCInput::RC_timeout
+				    || msg == CRCInput::RC_nokey)
 				{
 					//printf("selected key: %c\n",smsKey);
 					selectTitle(smsKey);
 					update=true;
 				}
-				msg = newMsg;
-				data = newData; // necessary?
 				m_SMSKeyInput.resetOldKey();
 			} else 
 			{
@@ -1656,9 +1646,9 @@ void CAudioPlayerGui::selectTitle(unsigned char selectionChar)
 	//printf("before loop\n");
 	for(i=(selected+1) % playlist.size(); i != selected ; i= (i+1) % playlist.size())
 	{	
-		if (m_state == CAudioPlayerGui::PLAY
-		    && i%10==0) 
-			usleep(10*1000); // do not disturb decoding
+// 		if (m_state == CAudioPlayerGui::PLAY
+// 		    && i%10==0) 
+// 			usleep(10*1000); // do not disturb decoding
 		std::string fName = "";
 		getFileInfoToDisplay(fName,i,true);
 		char firstCharOfTitle = fName[0];
