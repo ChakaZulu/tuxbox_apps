@@ -4,6 +4,29 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.h,v $
+ * Revision 1.40  2004/08/31 10:34:02  alexw
+ * Top-Text Support, many thanks to Roland Meier
+ *
+ * Changes:
+ * - Sofort Anzeige des zugehrigen Videotextes, falls vorhanden; Scan erst bei erstem Aufruf des Konfigmenues
+ * - TOP-Text
+ *   - Anzeige Klartext-Bezeichnung fr farbige Navigationstasten
+ *   - neue Belegung: letzter Block, nchste Gruppe(/Block), bernchste Gruppe(/Block), nchster Block
+ *   - Strukturbersicht in geteilter 4:3-Darstellung
+ *   - dafr Textfenster-Breite vergrert, TV-Bild verkleinert und besser proportioniert
+ * - Favoritenliste
+ *   - Taste 9 an erster Stelle luft sequentiell durch Favoritenliste (vorbelegt mit 100-303, max. 10 Eintrge)
+ *   - Taste 0 an erster Stelle ruft jetzt die letzte Seite auf (wie bei zapit)
+ *   - Favoritenliste Liste in Konfigurationsmenue editierbar: <> Auswahl, +- verschieben, ? Anzeige, OK lschen / aktuelle hinzufgen
+ *   - Favoritenliste wird bei nderung unter der aktuellen vtxtpid gespeichert und beim Start/pid-Wechsel geladen
+ *   - Konfigurationsmenue auch mit Taste dbox zu verlassen
+ *   - Konfigurationsmenue wartbarer
+ * - Transparent-Darstellung
+ *   - Reihenfolge umgekehrt: Mute wechselt sofort zu TV-Bild, auch aus Split-Darstellung
+ *   - Hintergrund Transparent-Darstellung weniger transparent (-> Text lesbar)
+ *   - TV-Darstellung wird mit jeder Nav-Taste verlassen
+ * - Standby beendet wie Home tuxtxt
+ *
  * Revision 1.39  2004/02/06 01:59:45  ghostrider
  * tuxtxt is now ready for old and new dvb api
  *
@@ -31,7 +54,6 @@
  * port rel to head
  *
  ******************************************************************************/
-
 #include <config.h>
 #include <fcntl.h>
 #include <pthread.h>
@@ -68,10 +90,13 @@
 
 #include "config.h"
 
+#define DEBUG 0
+#define DEBUG_ADIP 0            /* printf to console is _really_ slow :< */
+#define DEBUG_BTT 0
+
 #define PAGESIZE (40*24)
 
-//devices
-
+/* devices */
 #define AVS "/dev/dbox/avs0"
 #define SAA "/dev/dbox/saa0"
 #if HAVE_DVB_API_VERSION < 3
@@ -82,129 +107,166 @@
 #define PIG "/dev/v4l/video0"
 #endif
 
-//fonts
-
-#define TUXTXT0	FONTDIR "/tuxtxt0.fon"	/* G0 */
-#define TUXTXT1	FONTDIR "/tuxtxt1.fon"	/* G1 */
-#define TUXTXT2	FONTDIR "/tuxtxt2.fon"	/* NS */
-
-#define fixfontheight 21
-
-//colortable
-
-#define black	0x01
-#define red		0x02
-#define green	0x03
-#define yellow	0x04
-#define blue	0x05
-#define magenta	0x06
-#define cyan	0x07
-#define white	0x08
-#define transp	0x09
-#define menu1	0x0A
-#define menu2	0x0B
-#define menu3	0x0C
-
-//spacing attributes
-
-#define alpha_black			0x00
-#define alpha_red			0x01
-#define alpha_green			0x02
-#define alpha_yellow		0x03
-#define alpha_blue			0x04
-#define alpha_magenta		0x05
-#define alpha_cyan			0x06
-#define alpha_white			0x07
-#define flash				0x08
-#define steady				0x09
-#define end_box				0x0A
-#define start_box			0x0B
-#define normal_size			0x0C
-#define double_height		0x0D
-#define double_width		0x0E
-#define double_size			0x0F
-#define mosaic_black		0x10
-#define mosaic_red			0x11
-#define mosaic_green		0x12
-#define mosaic_yellow		0x13
-#define mosaic_blue			0x14
-#define mosaic_magenta		0x15
-#define mosaic_cyan			0x16
-#define mosaic_white		0x17
-#define conceal				0x18
-#define contiguous_mosaic	0x19
-#define separated_mosaic	0x1A
-#define esc					0x1B
-#define black_background	0x1C
-#define new_background		0x1D
-#define hold_mosaic			0x1E
-#define release_mosaic		0x1F
-
-//rc codes
-#if HAVE_DVB_API_VERSION < 3
-#define KEY_0		0x5C00
-#define KEY_1		0x5C01
-#define KEY_2		0x5C02
-#define KEY_3		0x5C03
-#define KEY_4		0x5C04
-#define KEY_5		0x5C05
-#define KEY_6		0x5C06
-#define KEY_7		0x5C07
-#define KEY_8		0x5C08
-#define KEY_9		0x5C09
-#define KEY_POWER	0x5C0C
-#define KEY_UP		0x5C0E
-#define KEY_DOWN	0x5C0F
-#define KEY_VOLUMEUP	0x5C16
-#define KEY_VOLUMEDOWN	0x5C17
-#define KEY_HOME	0x5C20
-#define KEY_SETUP	0x5C27
-#define KEY_MUTE	0x5C28
-#define KEY_RED		0x5C2D
-#define KEY_RIGHT	0x5C2E
-#define KEY_LEFT	0x5C2F
-#define KEY_OK		0x5C30
-#define KEY_BLUE	0x5C3B
-#define KEY_YELLOW	0x5C52
-#define KEY_GREEN	0x5C55
-#define KEY_HELP	0x5C82
+/* fonts */
+#define TUXTXT0 FONTDIR "/tuxtxt0.fon"  /* G0 8+16pt */
+#define TUXTXT1 FONTDIR "/tuxtxt1.fon"  /* G1 8+16pt */
+#define TUXTXT2 FONTDIR "/tuxtxt2.fon"  /* NS 8+16pt */
+#if 0
+#define TUXTXT0R "/var/tuxtxt/tuxtxt0r.fon" /* G0 12pt */
+#define TUXTXT1R "/var/tuxtxt/tuxtxt1r.fon" /* G1 12pt */
+#define TUXTXT2R "/var/tuxtxt/tuxtxt2r.fon" /* NS 12pt */
+#else
+#define TUXTXT0R FONTDIR "/tuxtxt0r.fon" /* G0 12pt */
+#define TUXTXT1R FONTDIR "/tuxtxt1r.fon" /* G1 12pt */
+#define TUXTXT2R FONTDIR "/tuxtxt2r.fon" /* NS 12pt */
 #endif
-#define	RC_0		0x00
-#define	RC_1		0x01
-#define	RC_2		0x02
-#define	RC_3		0x03
-#define	RC_4		0x04
-#define	RC_5		0x05
-#define	RC_6		0x06
-#define	RC_7		0x07
-#define	RC_8		0x08
-#define	RC_9		0x09
-#define	RC_RIGHT	0x0A
-#define	RC_LEFT		0x0B
-#define	RC_UP		0x0C
-#define	RC_DOWN		0x0D
-#define	RC_OK		0x0E
-#define	RC_MUTE		0x0F
-#define	RC_STANDBY	0x10
-#define	RC_GREEN	0x11
-#define	RC_YELLOW	0x12
-#define	RC_RED		0x13
-#define	RC_BLUE		0x14
-#define	RC_PLUS		0x15
-#define	RC_MINUS	0x16
-#define	RC_HELP		0x17
-#define	RC_DBOX		0x18
-#define	RC_HOME		0x1F
 
-//messages
+#define FONTHEIGHT_NORMAL 21
+#define fixfontheight FONTHEIGHT_NORMAL
+#define FONTWIDTH_NORMAL 16
+#define FONTWIDTH_SMALL 8
+#define FONTWIDTH_TOPMENUMAIN 12
+#define FONTWIDTH_TOPMENU 8
 
-#define ShowInfoBar		0
-#define PageNotFound	1
-#define ShowServiceName	2
+#define TOPMENU169 0	/* TOP-menu present in 16:9 mode (or TV picture in full height) */
+
+#define TVSTARTX (StartX + 40*FONTWIDTH_TOPMENUMAIN)
+#define TVENDX (StartX + 40*FONTWIDTH_NORMAL)
+#define TVWIDTH (TVENDX-TVSTARTX-8)
+#define TV43STARTY (TVENDY - TVWIDTH*3/4-20)
+#define TV169STARTY (TVENDY - TVWIDTH)
+#define TVENDY (StartY + 25*FONTHEIGHT_NORMAL)
+#define TV43HEIGHT (TVENDY-TV43STARTY-12) /* <=-31: double height, >=-32: half height :< */
+#define TV169HEIGHT (TVENDY-TV169STARTY)
+
+#define TOPMENUSTARTX (TVSTARTX)
+#define TOPMENUENDX TVENDX
+#define TOPMENUSTARTY StartY
+#define TOPMENU43ENDY TV43STARTY
+#define TOPMENU169ENDY TV169STARTY
+
+#define TOPMENULINEWIDTH ((TOPMENUENDX-TOPMENUSTARTX+FONTWIDTH_TOPMENU-1)/FONTWIDTH_TOPMENU)
+#define TOPMENUINDENTBLK 0
+#define TOPMENUINDENTGRP 1
+#define TOPMENUINDENTDEF 2
+#define TOPMENUSPC 0
+
+/*  1: blk-1, grp-1, grp+1, blk+1 */
+/*  2: blk-1, grp+1, grp+2, blk+1 */
+#define LINE25MODE 2
+
+/* colortable */
+#define black   0x01
+#define red     0x02
+#define green   0x03
+#define yellow  0x04
+#define blue    0x05
+#define magenta 0x06
+#define cyan    0x07
+#define white   0x08
+#define transp  0x09
+#define menu1   0x0A
+#define menu2   0x0B
+#define menu3   0x0C
+#define transp2 0x0D
+
+/* spacing attributes */
+#define alpha_black         0x00
+#define alpha_red           0x01
+#define alpha_green         0x02
+#define alpha_yellow        0x03
+#define alpha_blue          0x04
+#define alpha_magenta       0x05
+#define alpha_cyan          0x06
+#define alpha_white         0x07
+#define flash               0x08
+#define steady              0x09
+#define end_box             0x0A
+#define start_box           0x0B
+#define normal_size         0x0C
+#define double_height       0x0D
+#define double_width        0x0E
+#define double_size         0x0F
+#define mosaic_black        0x10
+#define mosaic_red          0x11
+#define mosaic_green        0x12
+#define mosaic_yellow       0x13
+#define mosaic_blue         0x14
+#define mosaic_magenta      0x15
+#define mosaic_cyan         0x16
+#define mosaic_white        0x17
+#define conceal             0x18
+#define contiguous_mosaic   0x19
+#define separated_mosaic    0x1A
+#define esc                 0x1B
+#define black_background    0x1C
+#define new_background      0x1D
+#define hold_mosaic         0x1E
+#define release_mosaic      0x1F
+
+/* rc codes */
+#if HAVE_DVB_API_VERSION < 3
+#define KEY_0       0x5C00
+#define KEY_1       0x5C01
+#define KEY_2       0x5C02
+#define KEY_3       0x5C03
+#define KEY_4       0x5C04
+#define KEY_5       0x5C05
+#define KEY_6       0x5C06
+#define KEY_7       0x5C07
+#define KEY_8       0x5C08
+#define KEY_9       0x5C09
+#define KEY_POWER   0x5C0C
+#define KEY_UP      0x5C0E
+#define KEY_DOWN    0x5C0F
+#define KEY_VOLUMEUP    0x5C16
+#define KEY_VOLUMEDOWN  0x5C17
+#define KEY_HOME    0x5C20
+#define KEY_SETUP   0x5C27
+#define KEY_MUTE    0x5C28
+#define KEY_RED     0x5C2D
+#define KEY_RIGHT   0x5C2E
+#define KEY_LEFT    0x5C2F
+#define KEY_OK      0x5C30
+#define KEY_BLUE    0x5C3B
+#define KEY_YELLOW  0x5C52
+#define KEY_GREEN   0x5C55
+#define KEY_HELP    0x5C82
+#endif
+#define RC_0        0x00
+#define RC_1        0x01
+#define RC_2        0x02
+#define RC_3        0x03
+#define RC_4        0x04
+#define RC_5        0x05
+#define RC_6        0x06
+#define RC_7        0x07
+#define RC_8        0x08
+#define RC_9        0x09
+#define RC_RIGHT    0x0A
+#define RC_LEFT     0x0B
+#define RC_UP       0x0C
+#define RC_DOWN     0x0D
+#define RC_OK       0x0E
+#define RC_MUTE     0x0F
+#define RC_STANDBY  0x10
+#define RC_GREEN    0x11
+#define RC_YELLOW   0x12
+#define RC_RED      0x13
+#define RC_BLUE     0x14
+#define RC_PLUS     0x15
+#define RC_MINUS    0x16
+#define RC_HELP     0x17
+#define RC_DBOX     0x18
+#define RC_HOME     0x1F
+
+/* messages */
+#define ShowInfoBar     0
+#define PageNotFound    1
+#define ShowServiceName 2
 #define NoServicesFound 3
 
-//functions
-
+/* functions */
 void ConfigMenu(int Init);
 void CleanUp();
 void PageInput(int Number);
@@ -239,26 +301,33 @@ int  GetNationalSubset(char *country_code);
 int  GetTeletextPIDs();
 int  GetRCCode();
 
-//framebuffer stuff
-
+/* framebuffer stuff */
 unsigned char *lfb = 0;
 struct fb_var_screeninfo var_screeninfo;
 struct fb_fix_screeninfo fix_screeninfo;
 
-//freetype stuff
-
-FT_Library		library;
-FTC_Manager		manager;
-FTC_SBitCache	cache;
-FTC_SBit		sbit;
+/* freetype stuff */
+FT_Library      library;
+FTC_Manager     manager;
+FTC_SBitCache   cache;
+FTC_SBit        sbit;
 #if HAVE_DVB_API_VERSION < 3
-FTC_Image_Desc		type0, type1, type2;
+#define FONTTYPE FTC_Image_Desc
 #else
-FTC_ImageTypeRec	type0, type1, type2;
+#define FONTTYPE FTC_ImageTypeRec
 #endif
-FT_Face			face0, face1, face2;
 
-//some data
+FONTTYPE type0, type1, type2;
+FONTTYPE type0r, type1r, type2r;
+
+/* some data */
+unsigned char basictop[0x900];
+unsigned char adip[0x900][13];  /* FIXME: pointers and malloc? */
+char bttok;
+int adippg[10];
+int maxadippg;
+int hotlist[10];
+int maxhotlist;
 
 int dmx, pig, avs, saa, rc, fb, lcd;
 int sx, ex, sy, ey;
@@ -272,8 +341,9 @@ int catch_row, catch_col, catched_page, pagecatching;
 int prev_100, prev_10, next_10, next_100;
 int fnc_old, saa_old, screen_mode1, screen_mode2, screen_old1, screen_old2, color_mode, color_old, national_subset, national_subset_old, auto_national, auto_national_old;
 int clear_page, clear_subpage;
-int pids_found, current_service;
+int pids_found, current_service, getpidsdone;
 int SDT_ready;
+int pc_old_row, pc_old_col;     /* for page catching */
 
 int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
 int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
@@ -287,61 +357,57 @@ unsigned short RCCode;
 
 struct _pid_table
 {
-	int	 vtxt_pid;
-	int	 service_id;
-	int	 service_name_len;
-	char	 service_name[24];
-	char	 country_code[4];
+	int  vtxt_pid;
+	int  service_id;
+	int  service_name_len;
+	char     service_name[24];
+	char     country_code[4];
 }pid_table[128];
 
-//national subsets
-
-char countrystring[] =	"  CS/SK  (#$@[\\]^_`{|}~)  "	/* czech, slovak */
-						"    EN (#$@[\\]^_`{|}~)    "	/* english */
-						"    ET (#$@[\\]^_`{|}~)    "	/* estonian */
-						"    FR (#$@[\\]^_`{|}~)    "	/* french */
-						"    DE (#$@[\\]^_`{|}~)    "	/* german */
-						"    IT (#$@[\\]^_`{|}~)    "	/* italian */
-						"  LV/LT  (#$@[\\]^_`{|}~)  "	/* latvian, lithuanian */
-						"    PL (#$@[\\]^_`{|}~)    "	/* polish */
-						"  PT/ES  (#$@[\\]^_`{|}~)  "	/* portuguese, spanish */
-						"    RO (#$@[\\]^_`{|}~)    "	/* romanian */
-						" SR/HR/SL (#$@[\\]^_`{|}~) "	/* serbian, croatian, slovenian */
-						" SV/FI/HU (#$@[\\]^_`{|}~) "	/* swedish, finnish, hungarian */
-						"    TR (#$@[\\]^_`{|}~)    ";	/* turkish */
+/* national subsets */
+char countrystring[] =
+"  CS/SK  (#$@[\\]^_`{|}~)  "   /* czech, slovak */
+"    EN (#$@[\\]^_`{|}~)    "   /* english */
+"    ET (#$@[\\]^_`{|}~)    "   /* estonian */
+"    FR (#$@[\\]^_`{|}~)    "   /* french */
+"    DE (#$@[\\]^_`{|}~)    "   /* german */
+"    IT (#$@[\\]^_`{|}~)    "   /* italian */
+"  LV/LT  (#$@[\\]^_`{|}~)  "   /* latvian, lithuanian */
+"    PL (#$@[\\]^_`{|}~)    "   /* polish */
+"  PT/ES  (#$@[\\]^_`{|}~)  "   /* portuguese, spanish */
+"    RO (#$@[\\]^_`{|}~)    "   /* romanian */
+" SR/HR/SL (#$@[\\]^_`{|}~) "   /* serbian, croatian, slovenian */
+" SV/FI/HU (#$@[\\]^_`{|}~) "   /* swedish, finnish, hungarian */
+"    TR (#$@[\\]^_`{|}~)    ";  /* turkish */
 
 unsigned char countryconverstiontable[] = { 1, 4, 11, 5, 3, 8, 0, 9 };
 
-//buffers
-
+/* buffers */
 unsigned char  backbuffer[720*576];
 unsigned char  lcd_backbuffer[120*64 / 8];
 unsigned char  timestring[8];
 unsigned char  page_char[PAGESIZE];
-unsigned short page_atrb[PAGESIZE];	// ?????:h:cc:bbbb:ffff -> ?=reserved, h=double height, c=charset (0:G0 / 1:G1c / 2:G1s), b=background, f=foreground
+unsigned short page_atrb[PAGESIZE]; /*  ?????:h:cc:bbbb:ffff -> ?=reserved, h=double height, c=charset (0:G0 / 1:G1c / 2:G1s), b=background, f=foreground */
 
-//cachetables
-
+/* cachetables */
 unsigned char *cachetable[0x900][0x80];
 unsigned char subpagetable[0x900];
 unsigned char countrycontrolbitstable[0x900][0x80];
 
-//colormaps
+/* colormaps */
+unsigned short rd1[] = {0x01<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8};
+unsigned short gn1[] = {0x01<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x20<<8, 0x10<<8, 0x20<<8, 0x00<<8};
+unsigned short bl1[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x40<<8, 0x20<<8, 0x40<<8, 0x00<<8};
+unsigned short tr1[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 , 0x0A00 , 0x3000 };
+struct fb_cmap colormap_1 = {1, 13, rd1, gn1, bl1, tr1};
 
-unsigned short rd1[] = {0x01<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8};
-unsigned short gn1[] = {0x01<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x20<<8, 0x10<<8, 0x20<<8};
-unsigned short bl1[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x40<<8, 0x20<<8, 0x40<<8};
-unsigned short tr1[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 , 0x0A00 };
-struct fb_cmap colormap_1 = {1, 12, rd1, gn1, bl1, tr1};
+unsigned short rd2[] = {0x01<<8, 0xA8<<8, 0x00<<8, 0xA8<<8, 0x00<<8, 0xA8<<8, 0x00<<8, 0xA8<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8};
+unsigned short gn2[] = {0x01<<8, 0x00<<8, 0xA8<<8, 0xA8<<8, 0x00<<8, 0x00<<8, 0xA8<<8, 0xA8<<8, 0x00<<8, 0x20<<8, 0x10<<8, 0x20<<8, 0x00<<8};
+unsigned short bl2[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xA8<<8, 0xA8<<8, 0xA8<<8, 0xA8<<8, 0x00<<8, 0x40<<8, 0x20<<8, 0x40<<8, 0x00<<8};
+unsigned short tr2[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 , 0x0A00 , 0x3000 };
+struct fb_cmap colormap_2 = {1, 13, rd2, gn2, bl2, tr2};
 
-unsigned short rd2[] = {0x01<<8, 0xA8<<8, 0x00<<8, 0xA8<<8, 0x00<<8, 0xA8<<8, 0x00<<8, 0xA8<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8};
-unsigned short gn2[] = {0x01<<8, 0x00<<8, 0xA8<<8, 0xA8<<8, 0x00<<8, 0x00<<8, 0xA8<<8, 0xA8<<8, 0x00<<8, 0x20<<8, 0x10<<8, 0x20<<8};
-unsigned short bl2[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xA8<<8, 0xA8<<8, 0xA8<<8, 0xA8<<8, 0x00<<8, 0x40<<8, 0x20<<8, 0x40<<8};
-unsigned short tr2[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 , 0x0A00 };
-struct fb_cmap colormap_2 = {1, 12, rd2, gn2, bl2, tr2};
-
-//hamming table
-
+/* hamming table */
 unsigned char dehamming[] =
 {
 	0x01, 0xFF, 0x01, 0x01, 0xFF, 0x00, 0x01, 0xFF, 0xFF, 0x02, 0x01, 0xFF, 0x0A, 0xFF, 0xFF, 0x07,
@@ -362,9 +428,8 @@ unsigned char dehamming[] =
 	0x08, 0xFF, 0xFF, 0x05, 0xFF, 0x0E, 0x0D, 0xFF, 0xFF, 0x0E, 0x0F, 0xFF, 0x0E, 0x0E, 0xFF, 0x0E
 };
 
-//lcd layout
-
-char lcd_layout[] = 
+/* lcd layout */
+char lcd_layout[] =
 {
 	0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
 	0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,
@@ -432,8 +497,7 @@ char lcd_layout[] =
 	0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
 };
 
-//lcd digits
-
+/* lcd digits */
 char lcd_digits[] =
 {
 	0,1,1,1,1,1,1,1,1,0,
@@ -660,3 +724,12 @@ char lcd_digits[] =
 	0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,
 };
+/* Local Variables: */
+/* indent-tabs-mode:t */
+/* tab-width:3 */
+/* c-basic-offset:3 */
+/* comment-column:0 */
+/* fill-column:120 */
+/* time-stamp-line-limit:30 */
+/* time-stamp-format:"%02d.%02m.%:y %02H:%02M:%02S %u@%s" */
+/* End: */
