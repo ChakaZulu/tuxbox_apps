@@ -189,10 +189,23 @@ Font::Font(FBFontRenderClass *render, FTC_FaceID faceid, const int isize, const 
 	font.image_type 	= ftc_image_grays;
 	font.image_type 	|= ftc_image_flag_autohinted;
 
+	setSize(isize);
+}
+
+FT_Error Font::getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit)
+{
+	return renderer->getGlyphBitmap(&font, glyph_index, sbit);
+}
+
+int Font::setSize(int isize)
+{
+	int temp = font.font.pix_width; 
+	font.font.pix_width = font.font.pix_height = isize; 
+
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{
 		dprintf(DEBUG_NORMAL, "FTC_Manager_Lookup_Size failed!\n");
-		return;
+		return 0;
 	}
 	// hack begin (this is a hack to get correct font metrics, didn't find any other way which gave correct values)
 	FTC_SBit glyph;
@@ -219,11 +232,7 @@ Font::Font(FBFontRenderClass *render, FTC_FaceID faceid, const int isize, const 
 	//printf("glyph: hM=%d tM=%d hg=%d tg=%d ascender=%d descender=%d height=%d linegap/2=%d upper=%d lower=%d\n",
 	//       hM,tM,hg,tg,ascender,descender,height,halflinegap,upper,lower);
 	//printf("font metrics: height=%ld\n", (size->metrics.height+32) >> 6);
-}
-
-FT_Error Font::getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit)
-{
-	return renderer->getGlyphBitmap(&font, glyph_index, sbit);
+	return temp;
 }
 
 int Font::getHeight(void)

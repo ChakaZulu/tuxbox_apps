@@ -68,7 +68,7 @@ class Font
 	int getRenderWidth(const std::string text, const bool utf8_encoded = false);
 	int getHeight(void);
 	int getSize(){return font.font.pix_width;}
-	int setSize(int isize){int temp = font.font.pix_width; font.font.pix_width = font.font.pix_height = isize; return temp;}
+	int setSize(int isize);
 
 	Font(FBFontRenderClass *render, FTC_FaceID faceid, const int isize, const fontmodifier _stylemodifier);
 	~Font(){}
