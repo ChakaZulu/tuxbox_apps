@@ -671,7 +671,7 @@ int eServiceSelector::getServiceNum( const eServiceReference &ref )
 
 void eServiceSelector::gotoChar(char c)
 {
-	eDebug("gotoChar %d", c);
+//	eDebug("gotoChar %d", c);
 	switch(c)
 	{
 		case 2:// A,B,C
