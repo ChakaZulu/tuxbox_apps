@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.11 2003/10/24 22:17:14 rasc Exp $
+$Id: descriptor.c,v 1.12 2003/10/24 22:45:04 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -13,6 +13,9 @@ $Id: descriptor.c,v 1.11 2003/10/24 22:17:14 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.12  2003/10/24 22:45:04  rasc
+code reorg...
+
 Revision 1.11  2003/10/24 22:17:14  rasc
 code reorg...
 
@@ -45,7 +48,8 @@ kleiner Fehler
 #include "descriptor.h"
 #include "mpeg_descriptor.h"
 #include "dvb_descriptor.h"
-#include "helper/hexprint.h"
+#include "misc/hexprint.h"
+#include "misc/output.h"
 
 
 

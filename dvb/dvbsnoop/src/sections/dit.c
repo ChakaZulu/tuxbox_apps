@@ -9,6 +9,9 @@ $Id $
 
 
 $Log: dit.c,v $
+Revision 1.4  2003/10/24 22:45:06  rasc
+code reorg...
+
 Revision 1.3  2003/10/24 22:17:20  rasc
 code reorg...
 
@@ -28,7 +31,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvbsnoop.h"
 #include "dit.h"
 #include "strings/dvb_str.h"
-#include "misc/output.h
+#include "misc/output.h"
 
 
 

@@ -9,6 +9,9 @@ $Id :
 
 
 $Log: eit.c,v $
+Revision 1.6  2003/10/24 22:45:07  rasc
+code reorg...
+
 Revision 1.5  2003/10/24 22:17:20  rasc
 code reorg...
 
@@ -37,7 +40,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "eit.h"
 #include "descriptors/descriptor.h"
 #include "strings/dvb_str.h"
-#include "misc/output.h
+#include "misc/output.h"
 
 
 

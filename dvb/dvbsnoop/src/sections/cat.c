@@ -1,11 +1,14 @@
 /*
-$Id: cat.c,v 1.4 2003/10/24 22:17:20 rasc Exp $
+$Id: cat.c,v 1.5 2003/10/24 22:45:06 rasc Exp $
 
  -- CAT Section
  -- rasc
    (c) rasc
 
 $Log: cat.c,v $
+Revision 1.5  2003/10/24 22:45:06  rasc
+code reorg...
+
 Revision 1.4  2003/10/24 22:17:20  rasc
 code reorg...
 
@@ -26,7 +29,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "cat.h"
 #include "descriptors/descriptor.h"
 #include "strings/dvb_str.h"
-#include "misc/output.h
+#include "misc/output.h"
 
 
 void decode_CAT (u_char *b, int len)
