@@ -44,20 +44,10 @@
 #include <lib/system/info.h>
 #include <lib/system/dmfp.h>
 #include <enigma_dyn.h>
+#include <enigma_dyn_utils.h>
 #include <enigma_dyn_mount.h>
 
 using namespace std;
-
-extern int smallScreen;
-
-extern eString getRight(const eString&, char); // implemented in timer.cpp
-extern eString getLeft(const eString&, char);  // implemented in timer.cpp
-extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
-extern eString button(int width, eString buttonText, eString buttonColor, eString buttonRef);
-extern eString httpUnescape(const eString &string);
-extern eString filter_string(eString string);
-extern eString httpEscape(const eString &string);
-extern std::map<eString, eString> getRequestOptions(eString, char);
 
 static eString addMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -120,7 +110,7 @@ void ezapMountInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/control/removeMountPoint", removeMountPoint, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/addMountPointWindow", addMountPointWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/editMountPoint", editMountPoint, lockWeb);
-	dyn_resolver->addDyn("GET", "/control/editMountPointWindow", addMountPointWindow, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/editMountPointWindow", editMountPointWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/showMountPoints", showMountPoints, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/mountMountPoint", mountMountPoint, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/unmountMountPoint", unmountMountPoint, lockWeb);

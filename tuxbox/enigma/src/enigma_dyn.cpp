@@ -44,66 +44,30 @@
 #include <lib/system/info.h>
 #include <lib/system/dmfp.h>
 #include <enigma_dyn.h>
+#include <enigma_dyn_utils.h>
 #include <enigma_dyn_mount.h>
 
 using namespace std;
 
 #define WEBXFACEVERSION "1.3.2"
 
-static int smallScreen = 0;
+int smallScreen = 0;
 
-static int currentBouquet = 0;
-static int currentChannel = -1;
+int currentBouquet = 0;
+int currentChannel = -1;
 
-static int zapMode = ZAPMODETV;
-static int zapSubMode = ZAPSUBMODEBOUQUETS;
+int zapMode = ZAPMODETV;
+int zapSubMode = ZAPSUBMODEBOUQUETS;
 
-static eString zap[4][5] =
+extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
+
+eString zap[4][5] =
 {
 	{"TV", ";0:7:1:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:6:0:0:0:0:0:0:"},
 	{"Radio", ";0:7:2:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:4:0:0:0:0:0:0:"},
 	{"Data", ";0:7:6:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ ""},
 	{"Recordings", ";4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""}
 };
-
-extern eString getRight(const eString&, char); // implemented in timer.cpp
-extern eString getLeft(const eString&, char);  // implemented in timer.cpp
-extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
-
-eString getAttribute(eString filename, eString attribute)
-{
-	eString result = "&nbsp;";
-
-	ifstream infile(filename.c_str());
-	if (infile)
-	{
-		eString buffer;
-		while (getline(infile, buffer, '\n'))
-		{
-			if (buffer.find(attribute + "=") == 0)
-			{
-				result = getRight(buffer, '=');
-				if (result == "")
-					result = "&nbsp;";
-				break;
-			}
-		}
-	}
-	return result;
-}
-
-eString readFile(eString filename)
-{
-	eString result;
-	eString line;
-
-	ifstream infile(filename.c_str());
-	if (infile)
-		while (getline(infile, line, '\n'))
-			result += line + "\n";
-
-	return result;
-}
 
 eString firmwareLevel(eString verid)
 {
@@ -127,148 +91,11 @@ eString firmwareLevel(eString verid)
 	return result;
 }
 
-eString button(int width, eString buttonText, eString buttonColor, eString buttonRef)
-{
-	eString ref1, ref2;
-
-	std::stringstream result;
-	int height = 22;
-	if (smallScreen == 1)
-	{
-		width = width / 2;
-		height = 14;
-	}
-
-	if (buttonRef.find("javascript") == eString::npos)
-	{
-		ref1 = "\"self.location.href='";
-		ref2 = "'\"";
-	}
-	result << "<input name=\"" << buttonText << "\""
-		"type=\"button\" style='width: " << width << "px;"
-		"height:" << height << "px;";
-	if (buttonColor != "")
-		result << "background-color: " << buttonColor;
-	result << "' value=\"" << buttonText <<
-		"\" onclick=" << ref1 << buttonRef <<
-		ref2 << ">";
-	return result.str();
-}
-
-eString getTitle(eString title)
-{
-	return "<h1>" + title + "</h1>";
-}
-
 eString getMsgWindow(eString title, eString msg)
 {
 	eString result = readFile(TEMPLATE_DIR + "msgWindow.tmp");
 	result.strReplace("#TITLE#", title);
 	result.strReplace("#MSG#", msg);
-	return result;
-}
-
-static int getHex(int c)
-{
-	c = toupper(c);
-	c -= '0';
-	if (c < 0)
-		return -1;
-	if (c > 9)
-		c -= 'A' - '0' - 10;
-	if (c > 0xF)
-		return -1;
-	return c;
-}
-
-eString httpUnescape(const eString &string)
-{
-	eString result;
-	for (unsigned int i = 0; i < string.length(); ++i)
-	{
-		int c = string[i];
-		switch (c)
-		{
-		case '%':
-		{
-			int value = '%';
-			if ((i + 1) < string.length())
-				value = getHex(string[++i]);
-			if ((i + 1) < string.length())
-			{
-				value <<= 4;
-				value += getHex(string[++i]);
-			}
-			result += value;
-			break;
-		}
-		case '+':
-			result += ' ';
-			break;
-		default:
-			result += c;
-			break;
-		}
-	}
-	return result;
-}
-
-eString filter_string(eString string)
-{
-	string.strReplace("\xc2\x86","");
-	string.strReplace("\xc2\x87","");
-	string.strReplace("\xc2\x8a"," ");
-	return string;
-}
-
-eString httpEscape(const eString &string)
-{
-	eString result;
-	for (unsigned int i = 0; i < string.length(); ++i)
-	{
-		int c = string[i];
-		int valid = 0;
-		if ((c >= 'a') && (c <= 'z'))
-			valid = 1;
-		else if ((c >= 'A') && (c <= 'Z'))
-			valid = 1;
-		else if (c == ':')
-			valid = 1;
-		else if ((c >= '0') && (c <= '9'))
-			valid = 1;
-
-		if (valid)
-			result += c;
-		else
-			result += eString().sprintf("%%%x", c);
-	}
-	return result;
-}
-
-std::map<eString, eString> getRequestOptions(eString opt, char delimiter = '&')
-{
-	std::map<eString, eString> result;
-
-	if (opt[0] == '?')
-		opt = opt.mid(1);
-
-	while (opt.length())
-	{
-		unsigned int e = opt.find("=");
-		if (e == eString::npos)
-			e = opt.length();
-		unsigned int a = opt.find(delimiter, e);
-		if (a == eString::npos)
-			a = opt.length();
-		eString n = opt.left(e);
-
-		unsigned int b = opt.find(delimiter, e + 1);
-		if (b == eString::npos)
-			b = (unsigned)-1;
-		eString r = httpUnescape(opt.mid(e + 1, b - e - 1));
-		result.insert(std::pair<eString, eString>(n, r));
-		opt = opt.mid(a + 1);
-	}
 	return result;
 }
 
@@ -332,7 +159,7 @@ static int getOSDShot(eString mode)
 
 static eString osdshot(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt=getRequestOptions(opts, '&');
 
 	if (getOSDShot(opt["mode"]) == 0)
 	{
@@ -391,7 +218,7 @@ static eString stop(eString request, eString dirpath, eString opt, eHTTPConnecti
 
 static eString record(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	if (command == "start")
@@ -457,7 +284,7 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 static eString admin(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
 	eString requester = opt["requester"];
 	if (command)
@@ -549,7 +376,7 @@ static eString admin2(eString command)
 static eString videocontrol(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
 	if (command == "rewind")
 	{
@@ -587,7 +414,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString result;
 	eString volume = opt["volume"];
 	if (volume)
@@ -608,7 +435,7 @@ static eString audio(eString request, eString dirpath, eString opts, eHTTPConnec
 
 static eString setAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	int apid = -1;
 	sscanf(opt["audio"].c_str(), "0x%04x", &apid);
 
@@ -632,7 +459,7 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 
 static eString setScreen(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	smallScreen = 0;
 	if (opt["size"] == "0")
 	 	smallScreen = 1;
@@ -644,7 +471,7 @@ static eString setScreen(eString request, eString dirpath, eString opts, eHTTPCo
 
 static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString requester = opt["requester"];
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -946,7 +773,7 @@ static eString getVolume()
 
 static eString setVolume(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eString mute = opt["mute"];
 	eString volume = opt["volume"];
 
@@ -973,7 +800,7 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 
 static eString setVideo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eString video = opt["position"];
 
 	if (video)
@@ -1372,7 +1199,7 @@ static eString getUpdatesInternet()
 #ifndef DISABLE_FILE
 static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString sref;
 
 	sref = opt["ref"];
@@ -1973,7 +1800,7 @@ static eString getConfigUSB(void)
 
 static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString swapUSB = opt["swapusb"];
 	eString swapUSBFile = opt["swapusbfile"];
 	eString bootUSB = opt["bootUSB"];
@@ -1986,7 +1813,7 @@ static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTT
 
 static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString swapHDD = opt["swaphdd"];
 	eString swapHDDFile = opt["swaphddfile"];
 	eString bootHDD = opt["bootHDD"];
@@ -2001,7 +1828,7 @@ static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTT
 static eString msgWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString title = opt["title"];
 	eString msg = opt["msg"];
 	return getMsgWindow(title, msg);
@@ -2865,7 +2692,7 @@ public:
 static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString>opt = getRequestOptions(opts);
+	std::map<eString, eString>opt = getRequestOptions(opts, '&');
 	eString refs = opt["ref"];
 	eServiceReference bouquetRef = string2ref(refs);
 
@@ -2890,7 +2717,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	eServiceReference ref;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt=getRequestOptions(opts, '&');
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
@@ -3064,7 +2891,7 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 		sid,
 		pmt;
 
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eString requester = opt["requester"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
@@ -3172,7 +2999,7 @@ static eString getchannelinfo(eString request, eString dirpath, eString opts, eH
 
 static eString message(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::map<eString, eString> opts = getRequestOptions(opt);
+	std::map<eString, eString> opts = getRequestOptions(opt, '&');
 	eString msg = opts["msg"];
 	eString result = "-error";
 	if (msg == "")
@@ -3191,7 +3018,7 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 
 static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::map<eString, eString> opts = getRequestOptions(opt);
+	std::map<eString, eString> opts = getRequestOptions(opt, '&');
 	eString requester = opts["requester"];
 	eString result;
 
@@ -3225,7 +3052,7 @@ static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPC
 
 static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::map<eString, eString> opts = getRequestOptions(opt);
+	std::map<eString, eString> opts = getRequestOptions(opt, '&');
 	eString requester = opts["requester"];
 	eString result;
 	
@@ -3249,7 +3076,7 @@ static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPCo
 
 static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::map<eString, eString> opts = getRequestOptions(opt);
+	std::map<eString, eString> opts = getRequestOptions(opt, '&');
 
 	if (opts.find("timeout") == opts.end())
 		return "E: no timeout set";
@@ -3338,7 +3165,7 @@ static eString save_userBouquets(eString request, eString dirpath, eString opt, 
 
 static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 
 	eString mode = opt["mode"];
 	eString spath = opt["path"];
@@ -3404,7 +3231,7 @@ public:
 
 static eString navigator(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::map<eString, eString> opts = getRequestOptions(opt);
+	std::map<eString, eString> opts = getRequestOptions(opt, '&');
 
 	if (opts.find("path") == opts.end())
 	{
@@ -3484,7 +3311,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 {
 	eString result;
 
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	if (opts.find("screenWidth") != eString::npos)
@@ -3642,7 +3469,7 @@ static eString moveFile(eString request, eString dirpath, eString opt, eHTTPConn
 {
 	if (opt.find("&&") == eString::npos)
 	{
-		std::map<eString,eString> opts=getRequestOptions(opt);
+		std::map<eString,eString> opts=getRequestOptions(opt, '&');
 		if (opts.find("source") == opts.end() || !opts["source"].length())
 			return "E: option source missing or empty source given";
 		if (opts.find("dest") == opts.end() || !opts["dest"].length())
@@ -3658,7 +3485,7 @@ static eString createSymlink(eString request, eString dirpath, eString opt, eHTT
 {
 	if (opt.find("&&") == eString::npos)
 	{
-		std::map<eString,eString> opts=getRequestOptions(opt);
+		std::map<eString,eString> opts=getRequestOptions(opt, '&');
 		if (opts.find("source") == opts.end() || !opts["source"].length())
 			return "E: option source missing or empty source given";
 		if (opts.find("dest") == opts.end() || !opts["dest"].length())
@@ -3788,7 +3615,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString result;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString serviceRef = opt["ref"];
 	eString eventID = opt["ID"];
 	eString eventStartTime = opt["start"];
@@ -3857,7 +3684,7 @@ static eString wapAddTimerEvent(eString opts)
 
 static eString deleteTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString serviceRef = opt["ref"];
 	eString eventType = opt["type"];
 	eString eventStartTime = opt["start"];
@@ -3916,7 +3743,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	eString result;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 
 	// to find old event in timerlist..
 	eString serviceRef = opt["ref"];
@@ -4017,7 +3844,7 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	eString result;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString serviceRef = opt["ref"];
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
@@ -4100,7 +3927,7 @@ static eString buildAfterEventOpts(int type)
 static eString editTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString serviceRef = opt["ref"];
 	eString eventID = opt["ID"];
 	eString eventStartTime = opt["start"];
@@ -4154,7 +3981,7 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 static eString showAddTimerEventWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
@@ -4187,7 +4014,7 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	eString ext_description;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString serviceRef = opt["ref"];
 	eString eventID = opt["ID"];
 	int eventid;
@@ -4327,7 +4154,7 @@ static eString header(eString request, eString dirpath, eString opt, eHTTPConnec
 static eString body(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
-	std::map<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt=getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	eString mode = opt["mode"];
