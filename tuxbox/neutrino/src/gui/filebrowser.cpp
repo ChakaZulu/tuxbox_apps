@@ -310,7 +310,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 	/* error handling */
 	char error[CURL_ERROR_SIZE];
 	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error);
-	curl_easy_setopt(curl_handle, CURLOPT_USERPWD, "admin:admin"); /* !!! make me custmoizable */
+	curl_easy_setopt(curl_handle, CURLOPT_USERPWD, "admin:admin"); /* !!! make me customizable */
 	/* get it! */
 	httpres = curl_easy_perform(curl_handle);
 	/* cleanup curl stuff */
@@ -327,7 +327,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 		{
 			CFile file;
 			std::string entry = answer.substr(start, pos-start);
-			if (entry.find("DIR:")==0)
+			if (entry.find("DIR:")!=-1) 
 				file.Mode = S_IFDIR + 0777 ;
 			else
 				file.Mode = S_IFREG + 0777 ;
