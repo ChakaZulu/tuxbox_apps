@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.30 2002/03/18 15:08:50 field Exp $
+//  $Id: sectionsdMsg.h,v 1.31 2002/03/22 14:33:53 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.31  2002/03/22 14:33:53  field
+//  weitere Updates :)
+//
 //  Revision 1.30  2002/03/18 15:08:50  field
 //  Updates...
 //
@@ -105,16 +108,27 @@
 //
 //
 
+#include <string>
+#include <vector>
+
+using namespace std;
+
 struct sectionsd
 {
 	static const unsigned short portNumber=1600;
 
-	static const unsigned char epg_has_anything= 0x01;
-	static const unsigned char epg_has_later= 0x02;
-	static const unsigned char epg_has_current= 0x04;
-	static const unsigned char epg_not_broadcast= 0x08;
-	static const unsigned char epg_has_next= 0x10;
-	static const unsigned char epg_has_no_current= 0x20;
+	struct epgflags {
+		enum
+		{
+			has_anything = 0x01,
+			has_later = 0x02,
+			has_current = 0x04,
+			not_broadcast = 0x08,
+			has_next = 0x10,
+			has_no_current= 0x20,
+			current_has_linkagedescriptors= 0x40
+		};
+	};
 
 	struct msgRequestHeader
 	{
@@ -134,7 +148,7 @@ struct sectionsd
 		unsigned dauer;
 	} __attribute__ ((packed)) ;
 
-	static const int numberOfCommands=24;
+	static const int numberOfCommands=25;
 	enum commands
 	{
 		actualEPGchannelName=0,
@@ -155,12 +169,13 @@ struct sectionsd
 		currentNextInformationID,
 		epgEPGid,
 		epgEPGidShort,
-		CurrentComponentTagsChannelID,
+		ComponentTagsUniqueKey,
 		allEventsChannelID,
 		timesNVODservice,
 		getEPGPrevNext,
 		getIsTimeSet,
-		serviceChanged
+		serviceChanged,
+		LinkageDescriptorsUniqueKey
 	};
 
 	static const int numberOfCommands_v3=2;
@@ -170,10 +185,45 @@ struct sectionsd
 		CMD_unregisterEvents
 	};
 
-	struct responseIsTimeSet
+    struct responseIsTimeSet
 	{
 		bool IsTimeSet;
 	};
+
+
+	struct responseGetComponentTags
+	{
+		std::string component; 			// Text aus dem Component Descriptor
+    	unsigned char componentType; 	// Component Descriptor
+		unsigned char componentTag; 	// Component Descriptor
+		unsigned char streamContent; 	// Component Descriptor
+	};
+
+    typedef std::vector<responseGetComponentTags> ComponentTagList;
+
+	struct responseGetLinkageDescriptors
+	{
+		std::string name;
+    	unsigned short transportStreamId;
+		unsigned short originalNetworkId;
+		unsigned short serviceId;
+	};
+
+    typedef std::vector<responseGetLinkageDescriptors> LinkageDescriptorList;
+
+    struct responseGetCurrentNextInfoChannelID
+	{
+		unsigned long long 			current_uniqueKey;
+		sectionsd::sectionsdTime 	current_zeit;
+		std::string					current_name;
+		unsigned long long 			next_uniqueKey;
+		sectionsd::sectionsdTime 	next_zeit;
+		std::string					next_name;
+		unsigned					flags;
+	};
+
+	struct CurrentNextInfo : public responseGetCurrentNextInfoChannelID
+	{};
 };
 
 //

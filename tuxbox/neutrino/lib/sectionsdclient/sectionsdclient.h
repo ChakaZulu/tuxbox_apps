@@ -55,6 +55,12 @@ class CSectionsdClient
 			EVT_GOT_CN_EPG
 		};
 
+		bool getComponentTagsUniqueKey( unsigned long long uniqueKey, sectionsd::ComponentTagList& tags );
+
+		bool getLinkageDescriptorsUniqueKey( unsigned long long uniqueKey, sectionsd::LinkageDescriptorList& descriptors );
+
+		bool getCurrentNextServiceKey( unsigned serviceKey, sectionsd::responseGetCurrentNextInfoChannelID& current_next );
+
 		bool getIsTimeSet();
 
 		void setPauseScanning( bool doPause );

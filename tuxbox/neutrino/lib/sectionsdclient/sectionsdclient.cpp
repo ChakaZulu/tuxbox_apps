@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.6 2002/03/20 21:42:30 McClean Exp $
+  $Id: sectionsdclient.cpp,v 1.7 2002/03/22 14:33:53 field Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.7  2002/03/22 14:33:53  field
+  weitere Updates :)
+
   Revision 1.6  2002/03/20 21:42:30  McClean
   add channel-event functionality
 
@@ -205,6 +208,142 @@ void CSectionsdClient::setServiceChanged( unsigned ServiceKey, bool requestEvent
 }
 
 
+bool CSectionsdClient::getComponentTagsUniqueKey( unsigned long long uniqueKey, sectionsd::ComponentTagList& tags )
+{
+	sectionsd::msgRequestHeader msg;
+
+	msg.version = 2;
+	msg.command = sectionsd::ComponentTagsUniqueKey;
+	msg.dataLength = sizeof(uniqueKey);
+
+	if ( sectionsd_connect() )
+	{
+        tags.clear();
+
+		send((char*)&msg, sizeof(msg));
+		send((char*)&uniqueKey, sizeof(uniqueKey));
+
+		int nBufSize = readResponse();
+
+		char* pData = new char[nBufSize];
+		receive(pData, nBufSize);
+        char* dp = pData;
+
+        int	count= *(int *) pData;
+        dp+= sizeof(int);
+
+		sectionsd::responseGetComponentTags response;
+		for (int i= 0; i<count; i++)
+		{
+			response.component = dp;
+			dp+= strlen(dp)+1;
+			response.componentType = *(unsigned char *) dp;
+			dp+=sizeof(unsigned char);
+			response.componentTag = *(unsigned char *) dp;
+			dp+=sizeof(unsigned char);
+			response.streamContent = *(unsigned char *) dp;
+			dp+=sizeof(unsigned char);
+
+			tags.insert( tags.end(), response);
+		}
+		sectionsd_close();
+
+		return true;
+	}
+	else
+		return false;
+}
+
+bool CSectionsdClient::getLinkageDescriptorsUniqueKey( unsigned long long uniqueKey, sectionsd::LinkageDescriptorList& descriptors )
+{
+	sectionsd::msgRequestHeader msg;
+
+	msg.version = 2;
+	msg.command = sectionsd::LinkageDescriptorsUniqueKey;
+	msg.dataLength = sizeof(uniqueKey);
+
+	if ( sectionsd_connect() )
+	{
+        descriptors.clear();
+
+		send((char*)&msg, sizeof(msg));
+		send((char*)&uniqueKey, sizeof(uniqueKey));
+
+		int nBufSize = readResponse();
+
+		char* pData = new char[nBufSize];
+		receive(pData, nBufSize);
+        char* dp = pData;
+
+        int	count= *(int *) pData;
+        dp+= sizeof(int);
+
+		sectionsd::responseGetLinkageDescriptors response;
+		for (int i= 0; i<count; i++)
+		{
+			response.name = dp;
+			dp+= strlen(dp)+1;
+			response.transportStreamId = *(unsigned short *) dp;
+			dp+=sizeof(unsigned short);
+			response.originalNetworkId = *(unsigned short *) dp;
+			dp+=sizeof(unsigned short);
+			response.serviceId = *(unsigned short *) dp;
+			dp+=sizeof(unsigned short);
+
+			descriptors.insert( descriptors.end(), response);
+		}
+		sectionsd_close();
+		return true;
+	}
+	else
+		return false;
+}
+
+bool CSectionsdClient::getCurrentNextServiceKey( unsigned serviceKey, sectionsd::responseGetCurrentNextInfoChannelID& current_next )
+{
+	sectionsd::msgRequestHeader msg;
+
+	msg.version = 2;
+	msg.command = sectionsd::currentNextInformationID;
+	msg.dataLength = sizeof(serviceKey);
+
+	if ( sectionsd_connect() )
+	{
+		send((char*)&msg, sizeof(msg));
+		send((char*)&serviceKey, sizeof(serviceKey));
+
+		int nBufSize = readResponse();
+
+		char* pData = new char[nBufSize];
+		receive(pData, nBufSize);
+        char* dp = pData;
+
+		// current
+		current_next.current_uniqueKey = *((unsigned long long *)dp);
+		dp+= sizeof(unsigned long long);
+		current_next.current_zeit = *(sectionsd::sectionsdTime*) dp;
+		dp+= sizeof(sectionsd::sectionsdTime);
+		current_next.current_name = dp;
+		dp+=strlen(dp)+1;
+
+		// next
+		current_next.next_uniqueKey = *((unsigned long long *)dp);
+		dp+= sizeof(unsigned long long);
+		current_next.next_zeit = *(sectionsd::sectionsdTime*) dp;
+		dp+= sizeof(sectionsd::sectionsdTime);
+		current_next.next_name = dp;
+		dp+=strlen(dp)+1;
+
+		current_next.flags = *(unsigned*) dp;
+		dp+= sizeof(unsigned);
+
+		sectionsd_close();
+		return true;
+	}
+	else
+		return false;
+}
+
 CChannelEventList CSectionsdClient::getChannelEvents()
 {
 	CChannelEventList eList;
@@ -269,4 +408,5 @@ CChannelEventList CSectionsdClient::getChannelEvents()
 	delete[] pData;
 	return eList;
 }
+
 
