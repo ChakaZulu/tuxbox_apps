@@ -2,37 +2,27 @@
 #EPG# #SI# </SPAN>
 </P>
 <TABLE WIDTH=100% BORDER=0 CELLPADDING=0 CELLSPACING=0>
-	<COL WIDTH=128*>
-	<COL WIDTH=128*>
 	<TR>
-		<TD COLSPAN=2 WIDTH=100%>
+		<TD WIDTH=100%>
 			<P>#NOWT# #NOWD#min <B>#NOWST#</B> 
 			</P>
 		</TD>
 	</TR>
 	<TR>
-		<TD WIDTH=75%>
+		<TD WIDTH=100%>
 			<P>#NOWLT#<BR><BR>
-			</P>
-		</TD>
-		<TD WIDTH=25%>
-			<P><BR>
 			</P>
 		</TD>
 	</TR>
 	<TR>
-		<TD COLSPAN=2 WIDTH=100%>
+		<TD WIDTH=100%>
 			<P>#NEXTT# #NEXTD#min <B>#NEXTST#</B> 
 			</P>
 		</TD>
 	</TR>
 	<TR>
-		<TD WIDTH=75%>
+		<TD WIDTH=100%>
 			<P>#NEXTLT#<BR><BR>
-			</P>
-		</TD>
-		<TD WIDTH=25%>
-			<P><BR>
 			</P>
 		</TD>
 	</TR>
