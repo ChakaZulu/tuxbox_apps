@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.40 2002/01/31 16:59:54 field Exp $
+// $Id: remotecontrol.cpp,v 1.41 2002/02/04 06:15:30 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.41  2002/02/04 06:15:30  field
+// sectionsd interface verbessert (bug beseitigt)
+//
 // Revision 1.40  2002/01/31 16:59:54  field
 // Kleinigkeiten
 //
@@ -217,7 +220,7 @@ void CRemoteControl::getAPID_Names()
 				unsigned char componentTag, componentType, streamContent;
 
 				char* pData = new char[nBufSize+1] ;
-				read(sock_fd, pData, nBufSize);
+				recv(sock_fd, pData, nBufSize, MSG_WAITALL);
 
 				char *actPos=pData;
 
@@ -321,7 +324,7 @@ void CRemoteControl::getNVODs( char *channel_name )
 			if(resp.dataLength)
 			{
 				char* pData = new char[resp.dataLength] ;
-				if(read(sock_fd, pData, resp.dataLength)>0)
+				if(recv(sock_fd, pData,  resp.dataLength, MSG_WAITALL)==  resp.dataLength)
 				{
 					//printf("dataLength: %u\n", resp.dataLength);
 					char *p=pData;
@@ -493,7 +496,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 							struct  pids    apid_return_buf;
 							memset(&apid_return_buf, 0, sizeof(apid_return_buf));
 
-							if ( read(sock_fd, &apid_return_buf, sizeof(apid_return_buf)) > 0 )
+							if ( recv(sock_fd,  &apid_return_buf,  sizeof(apid_return_buf), MSG_WAITALL)==  sizeof(apid_return_buf) )
 							{
 								// PIDs emfangen...
 

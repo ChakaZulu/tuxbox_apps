@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.34 2002/01/31 12:41:02 field Exp $
+// $Id: eventlist.cpp,v 1.35 2002/02/04 06:15:30 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.35  2002/02/04 06:15:30  field
+// sectionsd interface verbessert (bug beseitigt)
+//
 // Revision 1.34  2002/01/31 12:41:02  field
 // dd-availibility, eventlist-beginnt in...
 //
@@ -194,7 +197,7 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
 	if ( resp.dataLength>0 )
 	{
 		char* pData = new char[resp.dataLength] ;
-		if(read(sock_fd, pData, resp.dataLength)<=0)
+		if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
 		{
 			delete[] pData;
 			close(sock_fd);
@@ -500,7 +503,7 @@ void EventList::paintItem(unsigned int pos)
 		        evt->datetime2_str.c_str(), color);
 
 		int seit = ( evt->epg.startzeit - time(NULL) ) / 60;
-		if ( (seit> 0) && (seit<100) )
+		if ( (seit> 0) && (seit<100) && (evt->duration_str.length()!=0) )
 		{
 			char beginnt[100];
 			sprintf((char*) &beginnt, "in %d min", seit);

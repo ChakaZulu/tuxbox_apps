@@ -914,7 +914,9 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                 {
 
                         char* pData = new char[nBufSize+1] ;
-                        read(sock_fd, pData, nBufSize);
+                        //read(sock_fd, pData, nBufSize);
+                        recv(sock_fd, pData, nBufSize, MSG_WAITALL);
+
                         unsigned long long          tmp_id;
                         sectionsd::sectionsdTime*   epg_times;
                         char* dp = pData;

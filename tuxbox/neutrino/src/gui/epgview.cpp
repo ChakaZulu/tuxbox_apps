@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.35 2002/01/30 11:30:28 McClean Exp $
+// $Id: epgview.cpp,v 1.36 2002/02/04 06:15:30 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.36  2002/02/04 06:15:30  field
+// sectionsd interface verbessert (bug beseitigt)
+//
 // Revision 1.35  2002/01/30 11:30:28  McClean
 // color-fix
 //
@@ -578,7 +581,7 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 	if(nBufSize>0)
 	{
 		char* pData = new char[nBufSize] ;
-		read(sock_fd, pData, nBufSize);
+		recv(sock_fd, pData, nBufSize, MSG_WAITALL);
 
 		char* dp = pData;
 		//printf("%s \n", dp);

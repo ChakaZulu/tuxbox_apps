@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.62 2002/01/31 16:59:55 field Exp $
+// $Id: channellist.cpp,v 1.63 2002/02/04 06:15:30 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.63  2002/02/04 06:15:30  field
+// sectionsd interface verbessert (bug beseitigt)
+//
 // Revision 1.62  2002/01/31 16:59:55  field
 // Kleinigkeiten
 //
@@ -303,7 +306,7 @@ void CChannelList::updateEvents(void)
 	}
 
 	char* pData = new char[resp.dataLength] ;
-	if ( read(sock_fd, pData, resp.dataLength)<=0 )
+	if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
 	{
 		delete[] pData;
 		close(sock_fd);
@@ -314,12 +317,18 @@ void CChannelList::updateEvents(void)
 
 	char *actPos = pData;
 
+/*	FILE *file=fopen("channellist.list", "wb");
+        if(file) {
+            fwrite(pData,  resp.dataLength, 1, file);
+            fclose(file);
+        }
+*/
 	for(unsigned int count=0;count<chanlist.size();count++)
 		chanlist[count]->currentEvent.description="";
 
 	//printf("\n read finished CChannelList::updateEvents \n\n");
 
-	//printf("data length: %u\n", resp.dataLength);
+//	printf("data length: 0x%x\n", resp.dataLength);
 	while(actPos<pData+resp.dataLength)
 	{
 		unsigned* serviceID = (unsigned*) actPos;
