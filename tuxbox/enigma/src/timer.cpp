@@ -205,7 +205,7 @@ void eTimerManager::writeToLogfile( const char *str )
 		tm now = *localtime( &tmp );
 		eString str2;
 		str2.sprintf("%02d.%02d, %02d:%02d - %s\n", now.tm_mday, now.tm_mon+1, now.tm_hour, now.tm_min, str );
-		logfilesize+=fwrite(str2.c_str(), str2.size(), 1, logfile);
+		logfilesize += (fwrite(str2.c_str(), str2.size(), 1, logfile) * str2.size());
 	}
 }
 
@@ -227,7 +227,6 @@ void eTimerManager::writeToLogfile( eString str )
 #ifndef FP_IOCTL_CLEAR_WAKEUP_TIMER
 #define FP_IOCTL_CLEAR_WAKEUP_TIMER 10
 #endif
-
 
 eTimerManager::eTimerManager()
 	:actionTimer(eApp), timer(eApp)
@@ -279,7 +278,10 @@ eTimerManager::eTimerManager()
 	}
 
 	if (!deepstandbywakeup)
+	{
 		eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
+		eConfig::getInstance()->flush();
+	}
 
 	logfile = fopen(TIMER_LOGFILE, "a" );
 	writeToLogfile("Timer is comming up");
@@ -725,7 +727,7 @@ void eTimerManager::actionHandler()
 					char buf[32768];
 					int rbytes=0;
 					if( ( rbytes = fread( buf, 1, 32768, old ) ) )
-						fwrite( buf, 1, rbytes, logfile );
+						fwrite( buf, rbytes, 1, logfile );
 					fclose(old);
 					unlink("/var/timer.old");
 					logfilesize=32768;

@@ -2478,7 +2478,7 @@ void eZapMain::nextService(int add)
 					int ret = 0;
 					do
 					{
-						ret = switchToNum( num );
+						ret = switchToNum( num, true );
 						if ( ret == -1 )
 							++num;
 						else if ( ret )  // last service in bouquet(s)... wrap around
@@ -2537,7 +2537,7 @@ void eZapMain::prevService()
 					{
 						newNum-=1;
 						if ( !newNum ) // end of bouquet
-							newNum=INT_MAX - switchToNum(INT_MAX);  // fake call for get last service in last bouquet
+							newNum=INT_MAX - switchToNum(INT_MAX, true);  // fake call for get last service in last bouquet
 						ret = switchToNum(newNum);
 						if ( ret == -1 )  // parental locked.. try next..
 							continue;
@@ -3042,6 +3042,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 		{
 //			eDebug("we have servicename... sname + \" - \" + descr(%s)",descr.c_str());
 			filename = servicename + " - " + descr;
+			filename = filename.left(100);
 		}
 		else
 		{
@@ -4969,8 +4970,9 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 	return eWidget::eventHandler(event);
 }
 
-int eZapMain::switchToNum( int num )
+int eZapMain::switchToNum( int num, bool onlyBouquets )
 {
+	int orgnum=num;
 	if (num != -1)
 	{
 		eServicePath path;
@@ -5056,8 +5058,8 @@ int eZapMain::switchToNum( int num )
 		else
 #endif
 		{
-			eServiceReferenceDVB s=eDVB::getInstance()->settings->getTransponders()->searchServiceByNumber(num);
-			if (s)
+			eServiceReferenceDVB s=eDVB::getInstance()->settings->getTransponders()->searchServiceByNumber(orgnum);
+			if (s && !onlyBouquets)
 			{
 				eServicePath path(getRoot(listAll));  // All Services
 				path.down(s); // current service
@@ -6462,7 +6464,6 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 			prev = new eListBoxEntryText(&list, _("copy to bouquet list"), (void*)8, 0, _("copy the selected provider to the bouquet list"));
 			b=false;
 		}
-#ifndef DISABLE_FILE
 		else if ( ref.flags & eServiceReference::flagDirectory )
 		{
 			if ( ref.data[0] != -1 )
@@ -6474,6 +6475,7 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
 			b=false;
 		}
+#ifndef DISABLE_FILE
 		if ( b && (ref.type == eServiceReference::idDVB && ref.path)
 			|| ( ref.type == eServiceReference::idUser
 				&& ( (ref.data[0] == eMP3Decoder::codecMPG)
@@ -6615,12 +6617,11 @@ eSleepTimer::eSleepTimer()
 	if (eSkin::getActive()->build(this, "sleeptimer"))
 		eFatal("skin load of \"sleeptimer\" failed");
 	CONNECT( set->selected, eSleepTimer::setPressed );
-	if ( eSystemInfo::getInstance()->canShutdown() )
-	{
+
+	if ( !eSystemInfo::getInstance()->canShutdown() )
 		Shutdown->hide();
-		Standby->hide();
-		Standby->setCheck(1);
-	}
+
+	Standby->setCheck(1);
 	setHelpID(51);
 }
 

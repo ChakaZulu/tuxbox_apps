@@ -403,13 +403,13 @@ nextEvent:
 
 eEPGCache::~eEPGCache()
 {
+	messages.send(Message::quit);
+	kill(); // waiting for thread shutdown
 	Lock();
 	for (eventCache::iterator evIt = eventDB.begin(); evIt != eventDB.end(); evIt++)
 		for (eventMap::iterator It = evIt->second.first.begin(); It != evIt->second.first.end(); It++)
 			delete It->second;
 	Unlock();
-	messages.send(Message::quit);
-	kill(); // waiting for thread shutdown
 }
 
 EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_id, bool plain)

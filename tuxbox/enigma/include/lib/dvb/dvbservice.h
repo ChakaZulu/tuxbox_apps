@@ -118,6 +118,7 @@ class eDVBServiceController
 // for linkage handling	
 	eServiceReferenceDVB parentservice,prevservice;
 	MHWEIT *tMHWEIT;
+	eTimer updateTDTTimer;
 public:
 	int service_state;
 		/* current service */

@@ -606,7 +606,7 @@ public:
 	void handleMMIMessage( const eMMIMessage &msg );
 #endif
 
-	int switchToNum( int num );
+	int switchToNum( int num, bool onlyBouquets=false );
 
 	eZapMain();
 	~eZapMain();

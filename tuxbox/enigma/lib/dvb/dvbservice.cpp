@@ -43,11 +43,13 @@ eString getISO639Description(char *iso)
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
 : eDVBController(dvb)
+, updateTDTTimer(eApp)
 #ifndef DISABLE_CI
 , DVBCI(dvb.DVBCI)
 , DVBCI2(dvb.DVBCI2)
 #endif
 {
+	CONNECT(updateTDTTimer.timeout, eDVBServiceController::startTDT);
 	CONNECT(dvb.tPAT.tableReady, eDVBServiceController::PATready);
 	CONNECT(dvb.tPMT.tableReady, eDVBServiceController::PMTready);
 	CONNECT(dvb.tSDT.tableReady, eDVBServiceController::SDTready);
@@ -545,12 +547,14 @@ void eDVBServiceController::EITready(int error)
 void eDVBServiceController::TDTready(int error)
 {
 	eDebug("TDTready %d", error);
+	// receive new TDT every 10 minutes
+	updateTDTTimer.start(10*60*1000,true);
 	if (!error && transponder)
 	{
 		std::map<tsref,int> &tOffsMap = eTransponderList::getInstance()->TimeOffsetMap;
 		std::map< tsref, int >::iterator it( tOffsMap.find( *transponder ) );
 
-		time_t nowTime=time(0);
+		time_t nowTime=time(0)+dvb.time_difference;
 		int enigma_diff = tdt->UTC_time-nowTime;
 
 		if ( dvb.time_difference )  // ref time ready?
@@ -558,9 +562,10 @@ void eDVBServiceController::TDTready(int error)
 			// curTime is our current reference time....
 			time_t TPTime = nowTime+enigma_diff;
 
-			// difference between reference time and
-			// the transponder time
+			// difference between reference time (current enigma time) 
+			// and the transponder time
 			int diff = nowTime-TPTime;
+			eDebug("[TIME] diff is %d", diff);
 
 			if ( abs(diff) < 120 )
 			{
@@ -570,13 +575,14 @@ void eDVBServiceController::TDTready(int error)
 			}
 			else if ( it != tOffsMap.end() ) // correction saved?
 			{
-				eDebug("[TIME] we have correction");
+				eDebug("[TIME] we have correction %d", it->second);
 				time_t CorrectedTpTime = TPTime+it->second;
 				int ddiff = nowTime-CorrectedTpTime;
+				eDebug("[TIME] diff after add correction is %d", ddiff);
 				if ( abs(ddiff) < 120 )
 				{
 					eDebug("[TIME] diff < 120 sek.. update time");
-					eDebug("[TIME] update stored correction");
+					eDebug("[TIME] update stored correction to %d", diff);
 					tOffsMap[*transponder] = diff;
 					dvb.time_difference = enigma_diff + diff;
 				}
