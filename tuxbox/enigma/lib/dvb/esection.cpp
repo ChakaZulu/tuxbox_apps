@@ -93,11 +93,21 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 #else
 	if (len>FILTER_LENGTH)
 		len=FILTER_LENGTH;
-	memset(secFilterParams.filter, 0, 6);
-	memset(secFilterParams.mask, 0, 6);
-	memcpy(secFilterParams.filter, data, len);
-	memcpy(secFilterParams.mask, mask, len);
-	len=6;
+	memset(secFilterParams.filter, 0, FILTER_LENGTH);
+	memset(secFilterParams.mask, 0, FILTER_LENGTH);
+	for (int i=0; i<len; i++)
+	{
+		int src=i;
+		int dst=i;
+		if (dst)
+			dst+=2;
+		secFilterParams.filter[dst]=data[src];
+		secFilterParams.mask[dst]=mask[src];
+	}
+
+	if (len>1)
+		len+=2;
+
 	secFilterParams.filter_length=len;
 	printf("%02x: ", pid);
 	for (int i=0; i<len; i++)
