@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.251 2002/04/26 10:28:36 field Exp $
+        $Id: neutrino.cpp,v 1.252 2002/04/27 03:46:19 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -435,46 +435,39 @@ void CNeutrinoApp::setupDefaults()
 **************************************************************************************/
 bool CNeutrinoApp::loadSetup(SNeutrinoSettings* load2)
 {
-	char tmp[0xFFFF];
-
 	bool loadSuccessfull = true;
 	if(!load2)
 	{
 		load2 = &g_settings;
 	}
-	int fd;
-	fd = open(settingsFile.c_str(), O_RDONLY );
 
-	if (fd==-1)
+	int fd = open(settingsFile.c_str(), O_RDONLY );
+	if (fd>0)
+	{
+		if(read(fd, load2, sizeof(SNeutrinoSettings))!=sizeof(SNeutrinoSettings))
+		{
+			printf("error while loading settings: %s - config from old version?\n", settingsFile.c_str() );
+			loadSuccessfull = false;
+		}
+		close(fd);
+	}
+	else
 	{
 		printf("error while loading settings: %s\n", settingsFile.c_str() );
 		loadSuccessfull = false;
 	}
-	else if(read(fd, tmp, sizeof(tmp))!=sizeof(SNeutrinoSettings))
+
+	ifstream is( scanSettingsFile.c_str());
+	if ( !is.is_open())
 	{
-		printf("error while loading settings: %s - config from old version?\n", settingsFile.c_str() );
-		loadSuccessfull = false;
+		cout << "error while loading scan-settings!" << endl;
+		scanSettings.useDefaults();
 	}
 	else
 	{
-		memcpy(load2, &tmp, sizeof(SNeutrinoSettings));
-
-		close(fd);
+		is >> scanSettings;
 	}
 
-	if ((!load2) || (load2 == &g_settings))
-	{
-		ifstream is( scanSettingsFile.c_str());
-		if ( !is.is_open())
-		{
-			cout << "error while loading scan-settings!" << endl;
-			scanSettings.useDefaults();
-		}
-		else
-		{
-			is >> scanSettings;
-		}
-	}
 	return loadSuccessfull;
 }
 
@@ -2358,7 +2351,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.251 2002/04/26 10:28:36 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.252 2002/04/27 03:46:19 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
