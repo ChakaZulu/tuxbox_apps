@@ -13,12 +13,16 @@ mainmenu.splayback Stream Playback
 mainmenu.info Info
 mainmenu.streaminfo Streaminfo
 mainmenu.settings Settings
+mainmenu.language Language
 mainmenu.screensetup Screen Setup
 mainmenu.audio Audio
 mainmenu.video Video
 mainmenu.network Network
 mainmenu.colors Colors
 mainmenu.keybinding Keybinding
+
+languagesetup.head Language Setup
+languagesetup.select Language
 
 audiomenu.head Audio Settings
 audiomenu.stereo Stereo
