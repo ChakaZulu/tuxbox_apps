@@ -1707,9 +1707,8 @@ public:
 				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 			tmp.strReplace("\"", "'");
 
-			if (!((zapSubMode == ZAPSUBMODESATELLITES) && (tmp.find("Provider") != eString::npos)))
+			if (!(e.data[0] == -1 && e.data[2] != 0xFFFFFFFF))
 				myList.push_back(myService(ref2string(e), tmp));
-
 			iface.removeRef(e);
 		}
 	}
