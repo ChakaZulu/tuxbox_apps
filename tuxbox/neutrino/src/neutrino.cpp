@@ -183,8 +183,9 @@ CNeutrinoApp::CNeutrinoApp()
 	SetupFrameBuffer();
 
 	mode = mode_unknown;
-	channelList = NULL;
-	bouquetList = NULL;
+	channelList       = NULL;
+	bouquetList       = NULL;
+	nextRecordingInfo = NULL;
 	skipShutdownTimer=false;
 }
 
@@ -3189,57 +3190,57 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 		return messages_return::handled;
 	}
-	else if(msg == NeutrinoMessages::RECORD_START)
+	else if (msg == NeutrinoMessages::RECORD_START)
 	{
-		if(recordingstatus == 0)
-		{
-			if(CVCRControl::getInstance()->isDeviceRegistered())
-			{
-				recording_id = ((CTimerd::RecordingInfo *) data)->eventID;
-				if(CVCRControl::getInstance()->Record((CTimerd::RecordingInfo *) data))
-					recordingstatus = 1;
-				else
-					recordingstatus = 0;
-			}
-			else
-				printf("Keine vcr Devices registriert\n");
-			delete (unsigned char*) data;
-		}
-		else
-		{
-			// Es läuft bereits eine Aufnahme
-			if(nextRecordingInfo!=NULL)
-			{
-				delete nextRecordingInfo;
-				nextRecordingInfo=NULL;
-			}
-			nextRecordingInfo=((CTimerd::RecordingInfo*)data);
-		}
+		/* set nextRecordingInfo to current event (replace other scheduled recording if available) */
+
+		/*
+		 * Note: CTimerd::RecordingInfo is a class!
+		 * What a brilliant idea to sent classes via the eventserver!
+		 * => typecast to avoid destructor call
+		 */
+		if (nextRecordingInfo != NULL)
+			delete (unsigned char *) nextRecordingInfo;
+
+		nextRecordingInfo = (CTimerd::RecordingInfo *) data;
+
+		startNextRecording();
+
 		return messages_return::handled | messages_return::cancel_all;
 	}
 	else if( msg == NeutrinoMessages::RECORD_STOP)
 	{
 		if(((CTimerd::RecordingStopInfo*)data)->eventID==recording_id)
 		{ // passendes stop zur Aufnahme
-			if(CVCRControl::getInstance()->isDeviceRegistered())
+			CVCRControl * vcr_control = CVCRControl::getInstance();
+			if (vcr_control->isDeviceRegistered())
 			{
-				if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE)
+				if ((vcr_control->getDeviceState() == CVCRControl::CMD_VCR_RECORD) ||
+				    (vcr_control->getDeviceState() == CVCRControl::CMD_VCR_PAUSE ))
 				{
-					CVCRControl::getInstance()->Stop();
-					recordingstatus=0;
+					vcr_control->Stop();
+					recordingstatus = 0;
 				}
 				else
 					printf("falscher state\n");
 			}
 			else
-				printf("Keine vcr Devices registriert\n");
+				puts("[neutrino.cpp] no recording devices");
+
 			startNextRecording();
 		}
 		else if(nextRecordingInfo!=NULL)
 		{
 			if(((CTimerd::RecordingStopInfo*)data)->eventID == nextRecordingInfo->eventID)
 			{
-				delete nextRecordingInfo;
+
+				/*
+				 * Note: CTimerd::RecordingInfo is a class!
+				 * What a brilliant idea to sent classes via the eventserver!
+				 * => typecast to avoid destructor call
+				 */
+				delete (unsigned char *) nextRecordingInfo;
+
 				nextRecordingInfo=NULL;
 			}
 		}
@@ -3850,9 +3851,10 @@ void CNeutrinoApp::radioMode( bool rezap)
 
 void CNeutrinoApp::startNextRecording()
 {
-	if(recordingstatus==0 && nextRecordingInfo!=NULL)
+	if ((recordingstatus   == 0   ) &&
+	    (nextRecordingInfo != NULL))
 	{
-		if(CVCRControl::getInstance()->isDeviceRegistered())
+		if (CVCRControl::getInstance()->isDeviceRegistered())
 		{
 			recording_id = nextRecordingInfo->eventID;
 			if(CVCRControl::getInstance()->Record(nextRecordingInfo))
@@ -3860,8 +3862,17 @@ void CNeutrinoApp::startNextRecording()
 			else
 				recordingstatus = 0;
 		}
-		delete nextRecordingInfo;
-		nextRecordingInfo=NULL;
+		else
+			puts("[neutrino.cpp] no recording devices");
+
+		/*
+		 * Note: CTimerd::RecordingInfo is a class!
+		 * What a brilliant idea to sent classes via the eventserver!
+		 * => typecast to avoid destructor call
+		 */
+		delete (unsigned char *) nextRecordingInfo;
+
+		nextRecordingInfo = NULL;
 	}
 }
 /**************************************************************************************

@@ -223,11 +223,10 @@ class CVCRControl
 		bool registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo);
 		void unregisterDevice();
 
-//		int registeredDevices(){return Devices.size();};
-		bool isDeviceRegistered(){return Device != NULL;};
+		inline bool isDeviceRegistered(void) const { return (Device != NULL); };
 		void setDeviceOptions(CDeviceInfo *deviceInfo);
 
-		int getDeviceState(){return Device->deviceState;};
+		inline CVCRStates getDeviceState(void) const { return Device->deviceState; };
 		bool Stop(){return Device->Stop();};
 		bool Record(const CTimerd::RecordingInfo * const eventinfo);
 		bool Pause(){return Device->Pause();};
