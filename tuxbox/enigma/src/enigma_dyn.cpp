@@ -1624,10 +1624,10 @@ public:
 
 			result1 += "\"" + ref2string(e) + "\", ";
 			eString tmp = filter_string(service->service_name);
-			tmp.strReplace("\"", "'");
 			if (short_description)
-				short_description = " - " + event_start + " (" + event_duration + ") " + short_description;
-			result2 += "\"" + tmp + short_description + "\", ";
+				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
+			tmp.strReplace("\"", "'");
+			result2 += "\"" + tmp + "\", ";
 			iface.removeRef(e);
 		}
 	}
