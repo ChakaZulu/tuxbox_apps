@@ -13,7 +13,7 @@ EXTRA_DIST = \
 	topbalk4_small.png genre00.png genre01.png genre02.png genre03.png \
 	genre04.png genre05.png genre06.png genre07.png genre08.png genre09.png \
 	genre10.png genre11.png genre12.png genre13.png genre14.png genre15.png \
-	genre16.png
+	genre16.png locked.png unlocked.png
 
 install-data-local:
 	install -d $(DESTDIR)$(DATADIR)/enigma/htdocs
