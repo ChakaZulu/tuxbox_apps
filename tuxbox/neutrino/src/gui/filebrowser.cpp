@@ -237,7 +237,8 @@ void CFileBrowser::ChangeDir(std::string filename)
 	{
 		newpath=filename;
 	}
-	if(newpath.rfind("/") != newpath.length()-1)
+	if(newpath.rfind("/") != newpath.length()-1 ||
+		newpath.length() == strlen(VLC_URI))
 	{
 		newpath = newpath + "/";
 	}
@@ -329,20 +330,28 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 		{
 			CFile file;
 			std::string entry = answer.substr(start, pos-start);
+			//cout << "Entry" << entry << endl;
 			if (entry.find("DIR:")==0) 
 				file.Mode = S_IFDIR + 0777 ;
 			else
 				file.Mode = S_IFREG + 0777 ;
-			file.Name = dirname + entry.substr(entry.rfind("/")+1);
-			file.Size = 0;
-			file.Time = 0;
-			flist->push_back(file);
+			unsigned int spos = entry.rfind("/");
+			if(spos!=std::string::npos)
+			{
+				file.Name = dirname + entry.substr(spos+1);
+				file.Size = 0;
+				file.Time = 0;
+				flist->push_back(file);
+			}
+			else
+				cout << "Error misformed path " << entry << endl;
 			start=pos+1;
 		}
 		return true;
 	}
 	else
 	{
+		cout << "Error reading vlc dir" << endl;
       ShowMsg ( "messagebox.error", error, CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
 		CFile file;
 		file.Name = dirname + "..";
