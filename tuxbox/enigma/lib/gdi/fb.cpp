@@ -9,6 +9,7 @@
 
 #include <lib/system/econfig.h>
 #include <lib/gdi/fb.h>
+#include <lib/gdi/grc.h>
 
 fbClass *fbClass::instance;
 
@@ -178,6 +179,8 @@ int fbClass::lock()
 {
 	if (locked)
 		return -1;
+	while (gRC::getInstance().mustDraw())
+		usleep(1000);
 	locked=1;
 	return fd;
 }

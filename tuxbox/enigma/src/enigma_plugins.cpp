@@ -371,9 +371,6 @@ void ePluginThread::start()
 				if ( wasVisible )
 					wnd->hide();
 
-				while ( gRC::getInstance().mustDraw() )
-					usleep(1000);
-
 				if (needfb)
 					MakeParam(P_ID_FBUFFER, fbClass::getInstance()->lock());
 
