@@ -23,7 +23,7 @@
 	<td width=5>&nbsp;</td>
 	<td width=320 align=left><span class="epgname">#NEXTST#</b></td>
 	<td width=5>&nbsp;</td>
-	<td width=180 align=right>&nbsp;</td>
+	<td width=180 align=right>#RECORDING#&nbsp;#CHANSTATS#</td>
 	<td width=10>&nbsp;</td>
 </tr>
 </table>
