@@ -3308,6 +3308,8 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	eString result;
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eServiceReference streamingRef;
+	std::stringstream audiochannels;
+	eString audiochannel;
 
 	eString mode = opt["mode"];
 	eString path = opt["path"];
@@ -3324,6 +3326,43 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	{
 		streamingActive = eStreamer::getInstance()->getServiceReference(streamingRef);
 		playService(current_service);
+
+		// audio channel priority handling
+		char *audiochannelspriority;
+		if (eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority))
+			audiochannelspriority = "";
+
+		if (audiochannelspriority)
+		{
+			std::stringstream audiochannels;
+			audiochannels.str(eString(audiochannelspriority));
+			eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+			if (sapi)
+			{
+				std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
+				for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
+					;it != astreams.end(); ++it)
+				{
+					audiochannels.str(eString(audiochannelspriority));
+					while (audiochannels)
+					{
+						audiochannels >> audiochannel;
+						if (audiochannel == it->text)
+						{
+							if (it->pmtentry->elementary_PID != Decoder::current.apid)
+							{
+								eServiceHandler *service=eServiceInterface::getInstance()->getService();
+								if (service)
+									service->setPID(it->pmtentry);
+							}
+							break;
+						}
+					}
+					audiochannels.clear();
+				}
+			}
+		}
+
 		result = closeWindow(content, "Please wait...", 3000);
 	}
 	return result;
