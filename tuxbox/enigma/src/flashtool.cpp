@@ -1,6 +1,6 @@
 /**********************************************
 *
-*	$Revision: 1.5 $
+*	$Revision: 1.6 $
 *
 **********************************************/
 
@@ -234,7 +234,7 @@ void eFlashtool::programm(char filename[])
 			}
 		}
 
-		eMessageBox mb(_("Please wait... do NOT switch off the receiver!"),_("flashing in progress"), eMessageBox::iconInfo);
+		eMessageBox mb(_("Please wait... do NOT switch off the receiver!"),_("flashing in progress"), eMessageBox::iconWarning);
 		mb.show();
 
 		sync();
