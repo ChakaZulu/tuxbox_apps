@@ -282,6 +282,7 @@ bouqueteditor.bouquetname Name of bouquets
 bouqueteditor.savechanges? Do you want to save the changes?
 bouqueteditor.savingchanges Saving changes. Please wait ...
 bouqueteditor.discardingchanges Discarding changes. Please wait ..
+bouqueteditor.switch channel add/remove
 
 messagebox.yes Yes
 messagebox.no No

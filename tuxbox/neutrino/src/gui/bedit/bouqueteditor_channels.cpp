@@ -1,4 +1,5 @@
 #include "bouqueteditor_channels.h"
+#include "bouqueteditor_chanselect.h"
 #include "../global.h"
 
 CBEChannelWidget::CBEChannelWidget(string Caption, unsigned int Bouquet)
@@ -241,7 +242,21 @@ void CBEChannelWidget::deleteChannel()
 
 void CBEChannelWidget::addChannel()
 {
-
+	printf("new\n");
+	CBEChannelSelectWidget* channelSelectWidget = new CBEChannelSelectWidget(caption, bouquet);
+	printf("exec\n");
+	channelSelectWidget->exec(this, "");
+	printf("exec done\n");
+	if (channelSelectWidget->hasChanged())
+	{
+		channelsChanged = true;
+		Channels.clear();
+		g_Zapit->getBouquetChannels( bouquet, Channels);
+	}
+	delete channelSelectWidget;
+	paintHead();
+	paint();
+	paintFoot();
 }
 
 void CBEChannelWidget::beginMoveChannel()
