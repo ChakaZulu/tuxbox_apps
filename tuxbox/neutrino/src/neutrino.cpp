@@ -1476,8 +1476,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 			fclose(fd);
 		}
 		oj = new CMenuOptionChooser("miscsettings.bootinfo", &dummy, true, new CShowBootInfoNotifier );
-		oj->addOption(0, "options.off");
-		oj->addOption(1, "options.on");
+		oj->addOption(0, "options.on");
+		oj->addOption(1, "options.off");
 		miscSettings.addItem( oj );
 
 #if HAVE_DVB_API_VERSION == 1
