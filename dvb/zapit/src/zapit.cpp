@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.110 2002/03/28 18:07:34 obi Exp $
+  $Id: zapit.cpp,v 1.111 2002/03/29 15:09:14 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -207,7 +207,9 @@ void termination_handler (int signum)
 		waitpid(camdpid, 0, 0);
 	}
 #endif
-	close(connfd);
+	if (connfd != -1)
+		close(connfd);
+
 	system("cp /tmp/zapit_last_chan " CONFIGDIR "/zapit/last_chan");
 	exit(0);
 }
@@ -2834,7 +2836,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.110 2002/03/28 18:07:34 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.111 2002/03/29 15:09:14 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2848,6 +2850,19 @@ int main (int argc, char **argv)
 			{
 				offset = atoi(argv[++i]);
 			}
+			else if (!strcmp(argv[i], "-q"))
+			{
+				/* don't say anything */
+				int fd;
+
+				close(STDOUT_FILENO);
+				if ((fd = open("/dev/null", O_WRONLY)) != STDOUT_FILENO)
+					close(fd);
+
+				close(STDERR_FILENO);
+				if ((fd = open("/dev/null", O_WRONLY)) != STDERR_FILENO)
+					close(fd);
+			}
 			else if (!strcmp(argv[i], "-v"))
 			{
 				printf("[zapit] using vtxtd\n");
@@ -2855,7 +2870,7 @@ int main (int argc, char **argv)
 			}
 			else
 			{
-				printf("Usage: zapit [-d] [-o offset in Hz] [-v]\n");
+				printf("Usage: zapit [-d] [-o offset in Hz] [-q] [-v]\n");
 				exit(0);
 			}
 		}
@@ -2977,6 +2992,7 @@ int main (int argc, char **argv)
 		read(connfd, &rmsg, sizeof(rmsg));
 		parse_command();
 		close(connfd);
+		connfd = -1;
 	}
 
 	return 0;
