@@ -88,6 +88,8 @@ class CPlugins
 		void parseCfg(plugin *plugin_data);
 		void scanDir(const char *dir);
 		bool plugin_exists(string filename);
+		int find_plugin(string filename);
+
 
 		std::map<std::string, std::string> params;
 	public:
@@ -121,6 +123,8 @@ class CPlugins
 		int getType(int number) { return plugin_list[number].type; }
 
 		void startPlugin(int number);
+
+		void startPlugin(string filename); // start plugins also by name
 };
 
 

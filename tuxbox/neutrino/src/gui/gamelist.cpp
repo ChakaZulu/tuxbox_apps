@@ -59,10 +59,17 @@
 
 bool CPlugins::plugin_exists(string filename)
 {
-	for(int i = 0; i < number_of_plugins;i++)
-		if(filename.compare(plugin_list[i].filename) == 0)
-			return true;
-	return false;
+	return (find_plugin(filename) >= 0);
+}
+
+int CPlugins::find_plugin(string filename)
+{
+	for(int i = 0; i <  (int) plugin_list.size();i++)
+	{
+		if( (filename.compare(plugin_list[i].filename) == 0) || (filename.compare(plugin_list[i].filename + ".cfg") == 0) )
+			return i;
+	}
+	return -1;
 }
 
 void CPlugins::scanDir(const char *dir)
@@ -105,7 +112,7 @@ void CPlugins::loadPlugins()
 
 	scanDir("/var/tuxbox/plugins");
 	scanDir(PLUGINDIR);
-   sort(plugin_list.begin(), plugin_list.end());
+	sort(plugin_list.begin(), plugin_list.end());
 }
 
 CPlugins::~CPlugins()
@@ -226,17 +233,22 @@ void CPlugins::parseCfg(plugin *plugin_data)
 
 PluginParam* CPlugins::makeParam(std::string id, PluginParam *next)
 {
-	// cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << endl;
-
 	PluginParam *startparam = new PluginParam;
+
 	startparam->next = next;
 	startparam->id = new char[id.length() + 2];
 	startparam->val = new char[params.find(id)->second.length() + 2];
 	strcpy(startparam->id, id.c_str());
 	strcpy(startparam->val, params.find(id)->second.c_str());
 
-	// cout << "Startparam: " << (int) startparam << endl;
 	return startparam;
+}
+
+void CPlugins::startPlugin(string name)
+{
+	int pluginnr = find_plugin(name);
+	if( pluginnr > -1)
+		startPlugin( pluginnr );
 }
 
 void CPlugins::startPlugin(int number)
@@ -256,6 +268,7 @@ void CPlugins::startPlugin(int number)
 
 	startparam = 0;
 	tmpparam = startparam;
+
 
 	setfb( frameBuffer->getFileHandle() );
 
@@ -281,7 +294,6 @@ void CPlugins::startPlugin(int number)
 	{
 		g_RCInput->stopInput();
 	}
-
 	if (plugin_list[number].lcd)
 	{
 		// cout << "With LCD " << endl;
@@ -298,6 +310,7 @@ void CPlugins::startPlugin(int number)
 		// cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
 		// versuche, den gtx/enx_vbi zu stoppen
 #ifdef USE_VBI_INTERFACE
+
         int fd = open("/dev/dbox/vbi0", O_RDWR);
 		if (fd > 0)
 		{

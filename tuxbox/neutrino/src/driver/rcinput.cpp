@@ -770,6 +770,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*msg = NeutrinoMessages::STANDBY_OFF;
 									*data = 0;
 								break;
+							case NeutrinoMessages::EVT_START_PLUGIN :
+									*msg = NeutrinoMessages::EVT_START_PLUGIN;
+									*data = (unsigned) p;
+									dont_delete_p = true;
+								break;
 							default:
 								printf("[neutrino] event INITID_HTTPD - unknown eventID 0x%x\n",  emsg.eventID );
 						}

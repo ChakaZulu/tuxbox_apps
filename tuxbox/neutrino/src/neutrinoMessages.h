@@ -109,7 +109,8 @@ struct NeutrinoMessages {
 		EVT_NEXTEPG 		=	CRCInput::RC_WithData + 4,
 		EVT_TIMESET 		=	CRCInput::RC_WithData + 5,
 		EVT_POPUP			=	CRCInput::RC_WithData + 6,
-		EVT_EXTMSG			=	CRCInput::RC_WithData + 7
+		EVT_EXTMSG			=	CRCInput::RC_WithData + 7,
+		EVT_START_PLUGIN	=	CRCInput::RC_WithData + 8
 	};
 	enum
 	{
