@@ -1,0 +1,527 @@
+menu.back Nazad 
+
+options.off ugaseno 
+options.on upaljeno 
+options.serial serijski 
+options.fb framebuffer 
+options.null null 
+
+mainmenu.head Glavni izbor 
+mainmenu.tvmode TV modus 
+mainmenu.radiomode Radio modus 
+mainmenu.scartmode AV-Scart ulaz 
+mainmenu.games Igre 
+mainmenu.sleeptimer SleepTimer 
+mainmenu.shutdown Ugasiti 
+mainmenu.settings Stelovanje 
+mainmenu.service Servis 
+mainmenu.streaming Streaming (snimati) 
+mainmenu.streaming_start start 
+mainmenu.streaming_stop stop 
+
+servicemenu.head Servis 
+servicemenu.update Software aktualizirati 
+servicemenu.scants Traziti kanale 
+servicemenu.ucodecheck UCodese provjeriti 
+
+cablesetup.provider Snabdjevac CATVa 
+
+satsetup.disqeqc DiSEqC 
+satsetup.satellite Satelit 
+satsetup.extended DiSEqC stelovanje 
+satsetup.nodiseqc Nema DiSEqCa 
+satsetup.minidiseqc Mini-DiSEqC 
+satsetup.diseqc10 DiSEqC 1.0 
+satsetup.diseqc11 DiSEqC 1.1 
+satsetup.smatvremote SMATV Remote Tuning 
+satsetup.diseqcrepeat DiSEqC ponavljanje 
+
+mainsettings.head Stelovanje 
+mainsettings.savesettingsnow Stelovanje sada memorisati 
+mainsettings.language Jezik 
+mainsettings.audio Audio 
+mainsettings.video Video 
+mainsettings.network Mreza 
+mainsettings.streaming Streamingserver 
+mainsettings.colors Boje / teme 
+mainsettings.lcd LC-Display 
+mainsettings.keybinding Stelovanje tipke 
+mainsettings.misc Razno stelovanje 
+mainsettings.scan Stelovanje traznje kanala 
+
+miscsettings.head Razno stelovanje 
+miscsettings.shutdown_real Standbymodus 
+miscsettings.boxtype DBox proizvodac 
+miscsettings.startneutrinodirect Neutrino direktno startovati 
+miscsettings.general Generalno 
+miscsettings.fb_destination EXPERT! Boot konsola 
+
+languagesetup.head Jezik izabrati 
+languagesetup.select Jezik 
+
+audiomenu.head Audio stelovanje 
+audiomenu.analogout Analogni izlaz 
+audiomenu.monoright mono desno 
+audiomenu.monoleft mono lijevo 
+audiomenu.stereo stereo 
+audiomenu.dolbydigital Dolby Digital 
+
+videomenu.head Video-stelovanje 
+videomenu.screensetup Ekran stelovati 
+videomenu.videosignal Vrsta video signala 
+videomenu.videosignal_rgb RGB 
+videomenu.videosignal_svideo S-Video 
+videomenu.videosignal_composite Composite 
+videomenu.videoformat Format ekrana 
+videomenu.videoformat_43 4:3 
+videomenu.videoformat_169 16:9 
+videomenu.videoformat_autodetect automaticno 
+videomenu.vcrswitch automaticni AV-Scart ulaz 
+
+networkmenu.head Stelovanje mreze 
+networkmenu.test Mrezu provjeriti 
+networkmenu.show Pokazati aktivno stelovanje mreze 
+networkmenu.setupnow Stelovanje mreze sada namjestiti 
+networkmenu.setuponstartup Pri startu mrezu namjestiti 
+networkmenu.ipaddress IP adresa 
+networkmenu.netmask Netmask 
+networkmenu.broadcast Broadcast 
+networkmenu.gateway Standard Gateway 
+networkmenu.nameserver Nameserver 
+
+streamingmenu.head Streamingserver stelovanje 
+streamingmenu.usestreamserver Streamingserver upotrijebiti 
+streamingmenu.streamingserver Streamingserver 
+streamingmenu.streamingserverport Port 
+streamingmenu.stopplayback Playback zaustaviti 
+streamingmenu.stopsectionsd Sectionsd zaustaviti 
+
+ping.ok pristupan (ping) 
+ping.unreachable nije pristupan (unreachable) 
+ping.pcrvenoocol nije pristupan (Host or pcrvenoocol error) 
+ping.socket nije pristupan (Socket error) 
+
+ipsetup.hint_1 Upotrijebite 0..9 ili gore/dole 
+ipsetup.hint_2 OK memorisa, Home prekida 
+
+colormenu.head Stelovanje boje 
+colormenu.statusbar Statusna traka 
+colormenu.themeselect Izabrati teme 
+colormenu.menucolors Boja izbora 
+colormenu.background Boja pozadine 
+colormenu.background_head Boja pozadine 
+colormenu.textcolor Boja teksta 
+colormenu.textcolor_head Boja teksta 
+colormenu.fade Izbore izblijediti 
+
+colorthememenu.head Teme izabrati 
+colorthememenu.neutrino_theme Neutrino tema 
+colorthememenu.classic_theme Klasicno 
+
+colormenusetup.head Boja izbora 
+colormenusetup.menuhead Izborna traka 
+colormenusetup.menucontent Sadrzaj prozora 
+colormenusetup.menucontent_inactive Deaktiviran sadrzaj prozora 
+colormenusetup.menucontent_selected Izabran sadrzaj prozora 
+
+colorstatusbar.head Boja statusne trake 
+colorstatusbar.text statusna traka 
+
+repeatblocker.hint_1 Vrijeme (u ms) izmedu 2 pritiska tipke 
+repeatblocker.hint_2 0 ugasi blokera (crveno je " ") 
+
+keybindingmenu.RC Daljinska 
+keybindingmenu.repeatblock bloker tipaljke ponavljanje 
+keybindingmenu.repeatblock Cekanje pri ponavljanju 
+keybindingmenu.repeatblockgeneric Pocetni cekanje 
+keybindingmenu.head stelovanje tipaljke 
+keybindingmenu.modechange Modus promijeniti 
+keybindingmenu.channellist Listu kanala 
+keybindingmenu.quickzap Brzo saltovanje 
+keybindingmenu.tvradiomode TV/Radio modus 
+keybindingmenu.tvradiomode_head TV/Radio modus 
+keybindingmenu.pageup Stranu gore 
+keybindingmenu.pageup_head Stranu gore 
+keybindingmenu.pagedown Stranu dole 
+keybindingmenu.pagedown_head Stranu dole 
+keybindingmenu.cancel Listu kanala zatvoriti 
+keybindingmenu.cancel_head Listu kanala zatvoriti 
+keybindingmenu.channelup Kanal gore 
+keybindingmenu.channelup_head Kanal gore tipka 
+keybindingmenu.channeldown Kanal dole 
+keybindingmenu.channeldown_head Kanal dole tipka 
+keybindingmenu.bouquetup Buket dalje 
+keybindingmenu.bouquetup_head Buket dalje tipka 
+keybindingmenu.bouquetdown Buket nazad 
+keybindingmenu.bouquetdown_head Buket nazad tipka 
+keybindingmenu.bouquethandling OK-tipka za 
+keybindingmenu.bouquetchannels_on_ok Buket kanali 
+keybindingmenu.bouquetlist_on_ok Lista Buketa 
+keybindingmenu.allchannels_on_ok Lista kanala 
+keybindingmenu.subchannelup Podkanal dalje 
+keybindingmenu.subchannelup_head Podkanal dalje 
+keybindingmenu.subchanneldown Podkanal nazad 
+keybindingmenu.subchanneldown_head Podkanal nazad 
+
+colorchooser.red crveno 
+colorchooser.green zeleno 
+colorchooser.blue plavo 
+colorchooser.alpha alfa 
+
+lcdmenu.head LCD stelovanje 
+lcdmenu.inverse Invertirati 
+lcdmenu.power Power 
+lcdmenu.lcdcontroler Kontrast / svjetlost 
+
+lcdcontroler.head LCD stelovanje 
+lcdcontroler.contrast Kontrast 
+lcdcontroler.brightness normalna svjetlost 
+lcdcontroler.brightnessstandby Standby svjetlost 
+
+keychoosermenu.setnew Novu tipku stelovati 
+keychoosermenu.setnone Nijedna tipka 
+keychoosermenu.currentkey Sadasnja tipka 
+
+keychooser.head Novu tipku stelovati 
+keychooser.text1 Pritisnite tipku 
+keychooser.text2 Za prekid cekati.. 
+
+screensetup.upperleft crveno = Ekran gore, lijevo 
+screensetup.lowerright zeleno = Ekran dole, desno 
+
+channellist.head Svi kanali 
+channellist.nonefound Nije naden nijedan kanal!\nNapravite traznju kanala\n(dbox-tipka -> Servis) 
+channellist.since od %02d:%02d 
+
+infoviewer.epgnotload Informacije jos nisu pristupacne... 
+infoviewer.epgwait Cekam na EPG informacije... 
+infoviewer.streaminfo Features 
+infoviewer.eventlist Program 
+infoviewer.languages Izbor tona 
+infoviewer.notavailable Kanal (trenutacno) nije pristupan 
+infoviewer.cantdecode Kanal se ne moze otkljucati 
+infoviewer.selecttime Pocetno vrijeme 
+infoviewer.nocurrent Nema informacije za ovaj program 
+infoviewer.noepg Nema EPG informacije 
+infoviewer.subservice Rezija slike 
+infoviewer.waittime Cekam na vrijem... 
+
+epgviewer.notfound nisam nasao informacije o programu (EPG) 
+epgviewer.nodetailed Nema opsirne informacije 
+epgviewer.More_Screenings drugi termini na ovom kanalu 
+epglist.head Predgled - %s 
+epglist.noevents Nema EPG informacije. 
+
+streaminfo.head Informacije 
+streaminfo.resolution Resolucija 
+streaminfo.bitrate Bitrate 
+streaminfo.aratio Ratio 
+streaminfo.aratio_unknown Ratio: nepoznato 
+streaminfo.framerate framerate 
+streaminfo.framerate_unknown Bildrate: nepoznato 
+streaminfo.audiotype Audio vrsta 
+streaminfo.audiotype_unknown Audio vrsta: nepoznata 
+streaminfo.not_crypted nije zakljucano 
+streaminfo.ecm_invalid nevazeci CA sistem 
+streaminfo.not_available nije pristupno 
+
+streamfeatures.head Features 
+streamfeatures.info Stream informacija 
+
+apidselector.head Izbor jezika 
+
+nvodselector.head Izabrati pocetak 
+nvodselector.subservice Perspektive 
+nvodselector.directormode Modus rezija slike 
+
+ucodecheck.head Provjera UCodea 
+ucodecheck.avia500 Avia 500 
+ucodecheck.avia600 Avia 600 
+ucodecheck.ucode UCode 
+ucodecheck.cam-alpha Cam-Alpha 
+
+date.Mon  Pon 
+date.Tue  Uto 
+date.Wed  Sri 
+date.Thu  Cet 
+date.Fri  Pet 
+date.Sat  Sub 
+date.Sun  Ned 
+
+date.Jan  Jan 
+date.Feb  Feb 
+date.Mar  Mar 
+date.Apr  Apr 
+date.May  Maj 
+date.Jun  Jun 
+date.Jul  Jul 
+date.Aug  Aug 
+date.Sep  Sep 
+date.Oct  Okt 
+date.Nov  Nov 
+date.Dec  Dec 
+
+nvod.starting (Pocetak za %d min) 
+nvod.proz (%d%% proslo) 
+
+scants.head Trazenje kanala 
+scants.startnow Poceti trazenje kanala 
+scants.actsatellite Satelit: 
+scants.astra Astra 
+scants.hotbird Hotbird 
+scants.kopernikus Kopernikus 
+scants.sirius Sirius 
+scants.thor Thor 
+scants.digituerk Digituerk 
+scants.tuerksat Tuerksat 
+scants.transponders Transponder: 
+scants.services Services: 
+scants.bouquet Bukete 
+scants.bouquet_leave ne promijeniti 
+scants.bouquet_create novo sastaviti 
+scants.bouquet_erase izbrisati 
+scants.finished Uspjesno izvrseno trazenje kanala! 
+
+flashupdate.head Aktualiziranje 
+flashupdate.action Akcija: 
+flashupdate.globalprogress Glavni status: 
+flashupdate.getinfofile lade Informacija o verziji 
+flashupdate.getinfofileerror nemogu dobiti informaciju o verzij 
+flashupdate.getupdatefile lade Update 
+flashupdate.getupdatefileerror nemogu dobiti Update 
+flashupdate.cantopenfile nemogu otvoriti fajla 
+flashupdate.fileis0bytes velicina fajla je 0 Byte 
+flashupdate.eraseingflash brisem Flash 
+flashupdate.programmingflash programiram Flash 
+flashupdate.cantopenmtd nemogu otvoriti MTD-Device 
+flashupdate.ready gotovo 
+flashupdate.reboot Startujem DBox ponovno 
+flashupdate.updatemode Updatemodus 
+flashupdate.updatemode_manual rucno (ftp) 
+flashupdate.updatemode_internet internet 
+flashupdate.currentversion_sep Instalirana versija 
+flashupdate.currentversiondate Datum 
+flashupdate.currentversiontime Vrijeme 
+flashupdate.currentversionbaseversion Basisimage 
+flashupdate.currentversionsnapshot Vrsta Imagea 
+flashupdate.checkupdate traziti novu  verziju 
+flashupdate.versioncheck Provjeriti verziju 
+flashupdate.nonewversion nema nove verzije 
+flashupdate.md5check Provjera Imagea 
+flashupdate.md5sumerror Image ima greski 
+flashupdate.proxyserver_sep Proxyserver 
+flashupdate.proxyserver Proxyname 
+flashupdate.proxyserver_hint1 Utipkajte ime Proxya ili IP adresu (Host:Port) 
+flashupdate.proxyserver_hint2 Prazno znaci da nema Proxya 
+flashupdate.proxyusername Ime 
+flashupdate.proxyusername_hint1 Utipkajte ime za Proxy 
+flashupdate.proxyusername_hint2 Prazno znaci da nema provjere 
+flashupdate.proxypassword Lozinka 
+flashupdate.proxypassword_hint1 Utipkajte Proxy-lozinku 
+flashupdate.proxypassword_hint2 
+flashupdate.msgbox Nasao sam novi Image:\nDatum: %s, %s\nBasisImage: %s\nVrsta Imagea: %s\n\nHocete li ovu verziju sada skinuti\n i instalirati? 
+flashupdate.msgbox_manual Nasao sam novi Image:\nDatum: %s, %s\nBasisImage: %s\nVrsta Imagea: %s\n\nHocete li ovu verziju sada instalirati? 
+flashupdate.expertfunctions Funkcije za majstore 
+flashupdate.readflash citav Flashimage citati 
+flashupdate.writeflash citav Flashimage pisati 
+flashupdate.readflashmtd jednu particiju citati 
+flashupdate.writeflashmtd jednu particiju pisati 
+flashupdate.savesuccess Image je uspjesno pod\nimenom %s memorisan. 
+flashupdate.mtdselector Izbor particije 
+flashupdate.titlereadflash Flash citati 
+flashupdate.actionreadflash citam flash 
+flashupdate.fileselector Izbor fajla 
+flashupdate.titlewriteflash Flash pisati 
+flashupdate.actionwriteflash pisem flash 
+flashupdate.flashreadyreboot Image je uspjesno flashovan.\nVas DBox startuje sada ponovno. 
+flashupdate.reallyflashmtd Hocete li stvarno nastaviti flashovanje?\n\nAko se desi greska ili Image nije\nu redu, onda vas dBox nece vise raditi.\n\nIme Imagea: %s\nKuda: %s 
+
+bouqueteditor.name Buket stelovanje 
+bouqueteditor.delete Izbrisati 
+bouqueteditor.add Dodati 
+bouqueteditor.move Pomaknuti 
+bouqueteditor.rename Promijeniti ime 
+bouqueteditor.hide Sakriti 
+bouqueteditor.lock Sperovati 
+bouqueteditor.newbouquetname Novo ime buketa 
+bouqueteditor.bouquetname Ime buketa 
+bouqueteditor.savechanges? Hocete li memorisati promjene? 
+bouqueteditor.savingchanges Memorisam promjene. Molim cekajte ... 
+bouqueteditor.discardingchanges Pobacujem promjene. Molim cekajte ... 
+bouqueteditor.switch Kanal preuzeti/izbaciti 
+bouqueteditor.switchmode TV/Radio 
+bouqueteditor.return Gotovo 
+
+messagebox.yes Ja 
+messagebox.no Ne 
+messagebox.cancel Prekid 
+messagebox.back Nazad 
+messagebox.error Greska 
+messagebox.discard Hocete li pobaciti promijenuto? 
+messagebox.info Informacija 
+
+settings.noconffile Neutrino stelovanje nisu nadeni.\n Uzimam standardno stelovanje. 
+settings.missingoptionsconffile Neutrino stelovanje je sada opsirnije.\nNove stvari su namjestene na standard. 
+
+cam.wrong Paznja, vas CAM_ALPHA.BIN ne pase\nuz vasu Smart-Card!!!\n\nHocete li vidjeti ovo upzorenje opet? 
+ucodes.failure Paznja, nisam nasao µCodese!\n\nMolim sa FTPeom (ili DBox-BootManagerom)\nuploadovati, i DBox ponovno startovati! 
+
+stringinput.caps Velika/mala slova 
+
+streamingserver.noconnect Nemam veze sa Streamingserverom.\nPrekid snimke. 
+
+GENRE.MOVIE.0 Igrani film / Drama 
+GENRE.MOVIE.1 Kriminalni film/ Triler 
+GENRE.MOVIE.2 Avanturni film/Kaubojski/Ratni film 
+GENRE.MOVIE.3 Naucna fantastika/Fantasija/Strava 
+GENRE.MOVIE.4 Komedija 
+GENRE.MOVIE.5 Soap/Melodramatika/Folklora 
+GENRE.MOVIE.6 Romantika 
+GENRE.MOVIE.7 ozbiljno/klasicno/vjerno/povijesni film/drama 
+GENRE.MOVIE.8 Film za odrasle/Drama 
+
+GENRE.NEWS.0 Vijesti 
+GENRE.NEWS.1 Vijesti/Vrijeme 
+GENRE.NEWS.2 Vijesni magazin 
+GENRE.NEWS.3 Dokumantacija 
+GENRE.NEWS.4 Diskusija/Ispit/Debata 
+
+GENRE.SHOW.0 Show / Gameshow 
+GENRE.SHOW.1 Gameshow/Kviz 
+GENRE.SHOW.2 varietee 
+GENRE.SHOW.3 Talkshow 
+
+GENRE.SPORTS.0 Sport 
+GENRE.SPORTS.1 Veledogadaji (Olimpijada, svjetsko prvenstvo itd.) 
+GENRE.SPORTS.2 Sport magazin 
+GENRE.SPORTS.3 Nogomet 
+GENRE.SPORTS.4 Tenis 
+GENRE.SPORTS.5 Sport u ekipama 
+GENRE.SPORTS.6 Atletika 
+GENRE.SPORTS.7 Motorni sport 
+GENRE.SPORTS.8 Vodeni sport 
+GENRE.SPORTS.9 Zimski sport 
+GENRE.SPORTS.10 equestrian 
+GENRE.SPORTS.11 martial sports 
+
+GENRE.CHILDRENs_PROGRAMMES.0 Program za djecu / mlade 
+GENRE.CHILDRENs_PROGRAMMES.1 Program za predskolsku djecu 
+GENRE.CHILDRENs_PROGRAMMES.2 Program za 6 do 14 godisnjake 
+GENRE.CHILDRENs_PROGRAMMES.3 Program za 10 do 16 godisnjake 
+GENRE.CHILDRENs_PROGRAMMES.4 Informativni i naucni program 
+GENRE.CHILDRENs_PROGRAMMES.5 Crtani film 
+
+GENRE.MUSIC_DANCE.0 Muzika/Balet/Ples 
+GENRE.MUSIC_DANCE.1 Rock/Pop 
+GENRE.MUSIC_DANCE.2 ozbiljna musika/Klasika 
+GENRE.MUSIC_DANCE.3 Narodna musika 
+GENRE.MUSIC_DANCE.4 Jazz 
+GENRE.MUSIC_DANCE.5 Musical/Opera 
+GENRE.MUSIC_DANCE.6 Balet 
+
+GENRE.ARTS.0 Umjetnost / Kultura 
+GENRE.ARTS.1 Umjetnost 
+GENRE.ARTS.2 fine arts 
+GENRE.ARTS.3 Vjera 
+GENRE.ARTS.4 Umjetnost 
+GENRE.ARTS.5 Literatura 
+GENRE.ARTS.6 Film/Kino 
+GENRE.ARTS.7 experimental film/video 
+GENRE.ARTS.8 Rundfunk/Presse 
+GENRE.ARTS.9 Nove medije 
+GENRE.ARTS.10 Magazin za Umjetnost / Kulturu 
+GENRE.ARTS.11 Moda 
+
+GENRE.SOZIAL_POLITICAL.0 Sozialni & politicki dokadaji / privreda 
+GENRE.SOZIAL_POLITICAL.1 Magazin/Report/Dokumentacija 
+GENRE.SOZIAL_POLITICAL.2 Privreda i sozialno 
+GENRE.SOZIAL_POLITICAL.3 Narociti ljudi 
+
+GENRE.DOCUS_MAGAZINES.0 Doku/Magazin 
+GENRE.DOCUS_MAGAZINES.1 Priroda/Zivotinje/Okolnosr 
+GENRE.DOCUS_MAGAZINES.2 Nauka i tehnika 
+GENRE.DOCUS_MAGAZINES.3 Medicina/Pisiologija/Psihologija 
+GENRE.DOCUS_MAGAZINES.4 Inozemstvo/Ekspedicije 
+GENRE.DOCUS_MAGAZINES.5 Nauka 
+GENRE.DOCUS_MAGAZINES.6 Nauka 
+GENRE.DOCUS_MAGAZINES.7 Jezici 
+
+GENRE.TRAVEL_HOBBIES.0 Odmor 
+GENRE.TRAVEL_HOBBIES.1 Odmor i turizam 
+GENRE.TRAVEL_HOBBIES.2 handicraft 
+GENRE.TRAVEL_HOBBIES.3 Motor 
+GENRE.TRAVEL_HOBBIES.4 Fitnes i zdravlje 
+GENRE.TRAVEL_HOBBIES.5 Kuhanje 
+GENRE.TRAVEL_HOBBIES.6 Kupovina 
+GENRE.TRAVEL_HOBBIES.7 Vrt 
+
+GENRE.UNKNOWN Nepoznato 
+
+parentallock.parentallock Sticenje omladine 
+
+parentallock.prompt Za PIN pitati 
+parentallock.never nikada 
+parentallock.onstart pri startu 
+parentallock.changetolocked kod sperovanih buketa 
+parentallock.onsignal ako ima privremena spera na kanalu 
+parentallock.lockedsender ako je kanal sperovan 
+parentallock.lockedprogram Sperovan program (od %d godina) 
+parentallock.head PIN za sticenje omladine 
+
+parentallock.lockage Emisije 
+parentallock.lockage12 od 12 godina sperovati 
+parentallock.lockage16 od 16 godina sperovati 
+parentallock.lockage18 od 18 godina sperovati 
+
+parentallock.changepin PIN broj izabrati 
+parentallock.changepin_hint1 Utipkajte novi PIN broj! 
+
+pinpcrvenoection.wrongcode Utipkajte PIN broj ponovno! 
+pinpcrvenoection.head Kontrola PINa 
+
+favorites.bouquetname Moji favoriti 
+favorites.nobouquets Favoriti su samo u aktiviranim buketima moguci 
+favorites.addchannel Dodajem trenutacni kanal\nbuketu"Moji favoriti".\nMemorisanje treba trenutak... 
+favorites.menueadd Kanal favoritima dodati 
+favorites.bqcreated Buket "Moji favoriti" je stvoren...\n 
+favorites.chadded Trenutacni kanal je dodan vasim favoritima...\n 
+favorites.chalreadyinbq Trenutacni kanal je vec u vasim favoritima...\n 
+favorites.finalhint \nSlucajno dodati kanali mogu se\n izbrisati u buketnom stelovanju.\n 
+
+sleeptimerbox.title Sleeptimer 
+sleeptimerbox.hint1 Ugasiti za min. (000=ugaseno) 
+sleeptimerbox.hint2 dbox2 ce se ugasiti za to vrijeme. 
+sleeptimerbox.announce Sleeptimer za 1 min 
+
+zaptotimer.announce Za jednu minutu cu prisaltati 
+recordtimer.announce Snimanje pocinje za jednu minutu 
+
+timerbar.channelswitch Prisaltati 
+timerbar.recordevent Snimati 
+timer.eventtimed.title zapamtiti emisiju 
+timer.eventtimed.msg Emisija je zapamcenje.\ndbox2 ce se automaticno upaliti i prisalatati na emisiju. 
+timer.eventrecord.title Snimajne zapamtiti 
+timer.eventrecord.msg   Emisija je zapamcenja za snimanje 
+timerlist.name Timer lista 
+timerlist.delete Izbrisati 
+timerlist.empty Trenutacno nema Timera 
+timerlist.deleting brisem Timer 
+timerlist.type.shutdown Shutdown 
+timerlist.type.nextprogramm Drugi program 
+timerlist.type.zapto Prisaltati 
+timerlist.type.standby Standby 
+timerlist.type.record Snimanje 
+timerlist.type.remind Sjecanje 
+timerlist.type.sleeptimer Sleeptimer 
+timerlist.type.unknown Nepoznato 
+timerlist.repeat.once jedanput 
+timerlist.repeat.daily dnevno 
+timerlist.repeat.weekly sedmicno 
+timerlist.repeat.biweekly dvosedmnicno 
+timerlist.repeat.fourweekly cetvorosedmicno 
+timerlist.repeat.monthly mjesecno 
+timerlist.repeat.byeventdescription vidi timer 
+timerlist.repeat.unknown nepoznato 
+timerlist.program.unknown Program nepoznat 
+timerlist.standby.on Budenje iz Standbya 
+timerlist.standby.off Idi u Standby 

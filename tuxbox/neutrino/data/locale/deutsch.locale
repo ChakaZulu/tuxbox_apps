@@ -499,7 +499,7 @@ recordtimer.announce Die Aufnahme beginnt in einer Minute
 timerbar.channelswitch Umschalten
 timerbar.recordevent Aufnehmen
 timer.eventtimed.title Sendung vormerken
-timer.eventtimed.msg Die Sendung wurde vorgemerkt.\nDie dbox2 wird sich zum Startzeitpunkt automatisch auf die Sendung umschalten.
+timer.eventtimed.msg Die Sendung wurde vorgemerkt
 timer.eventrecord.title Aufnahme vormerken
 timer.eventrecord.msg   Die Sendung wurde zur Aufnahme vergemerkt
 timerlist.name Timerliste
