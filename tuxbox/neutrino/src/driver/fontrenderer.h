@@ -1,8 +1,11 @@
 /*
-$Id: fontrenderer.h,v 1.11 2001/09/26 16:24:17 rasc Exp $
+$Id: fontrenderer.h,v 1.12 2001/09/27 11:23:50 field Exp $
 
 
 $Log: fontrenderer.h,v $
+Revision 1.12  2001/09/27 11:23:50  field
+Numzap gefixt, kleiner Bugfixes
+
 Revision 1.11  2001/09/26 16:24:17  rasc
 - kleinere Aenderungen: Channel Num Zap fuer >999 Channels (Eutelsat/Astra) und eigener Font
 
@@ -13,6 +16,7 @@ Revision 1.11  2001/09/26 16:24:17  rasc
 #define __FONTRENDERER__
 
 #include "framebuffer.h"
+#include "pthread.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -53,6 +57,8 @@ class fontRenderClass
 	FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
 
 	public:
+        pthread_mutex_t     render_mutex;
+
 		FT_Error FTC_Face_Requester(FTC_FaceID face_id, FT_Face* aface);
 
 

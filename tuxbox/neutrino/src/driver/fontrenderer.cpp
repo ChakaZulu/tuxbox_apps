@@ -59,6 +59,8 @@ fontRenderClass::fontRenderClass()
 	{
 		printf(" imagecache failed!\n");
 	}
+
+    pthread_mutex_init( &render_mutex, NULL );
   
 	printf("\n");
 }
@@ -191,11 +193,15 @@ int Font::getHeight(void)
 
 void Font::RenderString(int x, int y, int width, const char *string, unsigned char color, int boxheight)
 {
+
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return;
 	}
+
+    pthread_mutex_lock( &renderer->render_mutex );
+
 	int use_kerning=FT_HAS_KERNING(face);
 	
 	int left=x;
@@ -260,7 +266,10 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
     
 		// width clip
 		if(x+glyph->xadvance > left+width)
+        {
+            pthread_mutex_unlock( &renderer->render_mutex );
 			return;
+        }
 
 		//kerning
 		if(use_kerning)
@@ -294,6 +303,7 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 		pen1=x;
 		lastindex=index;
 	}
+    pthread_mutex_unlock( &renderer->render_mutex );
 }
 
 int Font::getRenderWidth(const char *string)
@@ -304,6 +314,9 @@ int Font::getRenderWidth(const char *string)
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return -1;
 	}
+
+    pthread_mutex_lock( &renderer->render_mutex );
+
 	int x=0;
         int lastindex=0; // 0==missing glyph (never has kerning)
         FT_Vector kerning;
@@ -332,6 +345,8 @@ int Font::getRenderWidth(const char *string)
 		pen1=x;
 		lastindex=index;
 	}
+    pthread_mutex_unlock( &renderer->render_mutex );
+
 	return x;
 }
 

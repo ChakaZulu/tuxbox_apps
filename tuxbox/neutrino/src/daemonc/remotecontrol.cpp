@@ -105,7 +105,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                     case -2: printf("zapit could not be killed\n");
                             break;
                     case 3: {
-                                printf("Zapping by name returned successful\n");
+                                // printf("Zapping by name returned successful\n");
 
                                 // Überprüfen, ob wir die Audio-PIDs holen sollen...
 //                                printf("Checking for Audio-PIDs %s - %s - %d\n", RemoteControl->remotemsg.param3, r_msg.param3, RemoteControl->remotemsg.cmd);

@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.26 2001/09/26 22:11:08 rasc Exp $
+// $Id: channellist.cpp,v 1.27 2001/09/27 11:23:51 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.27  2001/09/27 11:23:51  field
+// Numzap gefixt, kleiner Bugfixes
+//
 // Revision 1.26  2001/09/26 22:11:08  rasc
 // - kleiner Bugfix bei Abort NumericChannelzap
 //
@@ -416,16 +419,15 @@ void CChannelList::numericZap(int key)
 
         showInfo(chn- 1);
 
-		if ((key=g_RCInput->getKey(30))==CRCInput::RC_timeout)
+		if ( ( key=g_RCInput->getKey(30) ) == CRCInput::RC_timeout )
+        {
+            if ( ( chn > (int)chanlist.size() ) || (chn == 0) )
+            {
+                chn = tuned + 1;
     			break;
-		// Abbruch ohne Channel zu wechseln
-		if (key==CRCInput::RC_left || key==CRCInput::RC_right) {
-			chn = tuned + 1;
-			break;
-		}
-
-
-		if ( (key>=0) && (key<=9) )
+            }
+        }
+		else if ( (key>=0) && (key<=9) )
 		{ //numeric
             if ( pos==4 )
             {
@@ -449,17 +451,25 @@ void CChannelList::numericZap(int key)
 		{
 			if ( chn == 1 )
 				chn = chanlist.size();
-			else {
+			else
+            {
 				chn--;
-			      if (chn > (int)chanlist.size()) chn = (int)chanlist.size();
+
+                if (chn > (int)chanlist.size())
+                    chn = (int)chanlist.size();
 			}
 		}
 		else if (key==g_settings.key_quickzap_up)
 		{
-			chn = ( chn )%( chanlist.size() ) + 1;
+			chn++;
+
+            if (chn > (int)chanlist.size())
+                chn = 1;
         }
-        else if (key==CRCInput::RC_home)
+        else if (key==CRCInput::RC_home || key==CRCInput::RC_left || key==CRCInput::RC_right)
         {
+            // Abbruch ohne Channel zu wechseln
+
             chn = tuned + 1;
             break;
 		};
@@ -481,7 +491,7 @@ void CChannelList::quickZap(int key)
         return;
     }
  
-	printf("quickzap start\n");
+//	printf("quickzap start\n");
     if (key==g_settings.key_quickzap_down)
     {
         if(selected==0)

@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.30 2001/09/26 15:02:34 field Exp $
+// $Id: infoviewer.cpp,v 1.31 2001/09/27 11:23:50 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.31  2001/09/27 11:23:50  field
+// Numzap gefixt, kleiner Bugfixes
+//
 // Revision 1.30  2001/09/26 15:02:34  field
 // Anzeige zu verschluesselten Sendern
 //
@@ -275,7 +278,7 @@ void CInfoViewer::showButtons()
     	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
 
         string  disp_text;
-        if ( g_RemoteControl->GetECMPID()== 0 )
+        if ( ( g_RemoteControl->GetECMPID()== 0 ) && ( g_RemoteControl->audio_chans.count_apids!= 0 ) )
             disp_text= g_Locale->getText("infoviewer.cantdecode");
         else
             disp_text= g_Locale->getText("infoviewer.notavailable");
@@ -623,7 +626,7 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
         	}
         }
 
-    	printf("exit epg-get\n\n");
+    	// printf("exit epg-get\n\n");
     	close(sock_fd);
     	return retval;
 	#endif
