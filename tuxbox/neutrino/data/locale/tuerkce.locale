@@ -19,6 +19,10 @@ servicemenu.head Service
 servicemenu.update Software Update
 servicemenu.scants Servicescan
 servicemenu.ucodecheck Check ucodes
+servicemenu.cablesetup Cable settings
+
+cablesetup.spectralInversion use spectral inversion
+cablesetup.spectralInversionWarning You have to reboot to activate changes
 
 mainsettings.head AYARLAR
 mainsettings.savesettingsnow save settings now

@@ -19,6 +19,10 @@ servicemenu.head Service
 servicemenu.update Software-Aktualisierung
 servicemenu.scants Transponderscan
 servicemenu.ucodecheck UCodes überprüfen
+servicemenu.cablesetup Kabel-Einstellungen
+
+cablesetup.spectralInversion Spectrale Inversion
+cablesetup.spectralInversionWarning Sie müssen rebooten um die Änderungen zu aktivieren
 
 mainsettings.head Einstellungen
 mainsettings.savesettingsnow Einstellung jetzt speichern

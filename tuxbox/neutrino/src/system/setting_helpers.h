@@ -37,6 +37,12 @@
 #include "libucodes/libucodes.h"
 
 
+class CCableSpectalInversionNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(string OptionName, void*);
+};
+
 class CStartNeutrinoDirectNotifier : public CChangeObserver
 {
 	public:

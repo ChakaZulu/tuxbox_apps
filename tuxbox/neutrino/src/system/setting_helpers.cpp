@@ -34,6 +34,30 @@
 
 extern "C" int pinghost( const char *hostname );
 
+bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
+{
+	static bool messageShowed = false;
+
+	if (!messageShowed)
+	{
+		ShowMsg ( "messagebox.error", g_Locale->getText("cablesetup.spectralInversionWarning"), CMessageBox::mbrYes, CMessageBox::mbYes);
+		messageShowed = true;
+	}
+	
+	if( *((int*) Data)!=0)
+	{	//file anlegen (direktstart)
+		FILE* fd = fopen("/var/etc/.specinv", "w");
+		if(fd)
+		{
+			fclose(fd);
+		}
+	}
+	else
+	{
+		remove("/var/etc/.specinv");
+	}
+}
+
 bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
 {
 	if( *((int*) Data)!=0)

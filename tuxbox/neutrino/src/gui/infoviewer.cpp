@@ -160,8 +160,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
         int timewidth = g_Fonts->infobar_channame->getRenderWidth(timestr);
 
-        if ( gotTime )
-        	g_Fonts->infobar_channame->RenderString(BoxEndX-timewidth-10, ChanNameY+height, timewidth+ 5, timestr, COL_INFOBAR);
+      	g_Fonts->infobar_channame->RenderString(BoxEndX-timewidth-10, ChanNameY+height, timewidth+ 5, timestr, COL_INFOBAR);
 
 		// ... with channel name
         g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+height, BoxEndX- (ChanNameX+ 20)- timewidth- 15, Channel.c_str(), COL_INFOBAR);
