@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.279 2002/12/22 16:59:36 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.280 2002/12/22 18:23:56 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -326,10 +326,14 @@ int changeapid (uint8_t index)
 	channel->setAudioChannel(index);
 
 	/* set bypass mode */
-	if (channel->getAudioChannel()->isAc3)
-		audio->enableBypass();
+	CZapitAudioChannel * currentAudioChannel = channel->getAudioChannel();
+	if (currentAudioChannel == NULL)
+		WARN("No current audio channel");
 	else
-		audio->disableBypass();
+		if (channel->getAudioChannel()->isAc3)
+			audio->enableBypass();
+		else
+			audio->disableBypass();
 
 	/* set demux filter */
 	if (setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid()) < 0)
@@ -1398,7 +1402,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	fprintf(stdout, "$Id: zapit.cpp,v 1.279 2002/12/22 16:59:36 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.280 2002/12/22 18:23:56 thegoodguy Exp $\n");
 
 	if (argc > 1)
 	{
