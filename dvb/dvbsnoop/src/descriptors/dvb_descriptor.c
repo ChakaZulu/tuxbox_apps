@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.33 2004/07/25 20:12:58 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.34 2004/08/01 21:33:08 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.33 2004/07/25 20:12:58 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.34  2004/08/01 21:33:08  rasc
+minor TVA stuff (TS 102 323)
+
 Revision 1.33  2004/07/25 20:12:58  rasc
  - New: content_identifier_descriptor (TS 102 323)
  - New: TVA_id_descriptor (TS 102 323)
@@ -3799,7 +3802,7 @@ void descriptorDVB_DefaultAuthority (u_char *b)
   // tag	 = b[0];
   len       	 = b[1];
 
-  print_std_ascii (4, "Default_authority: ", b+2, len);  // a DNS name
+  print_databytes (4, "Default_authority: ", b+2, len);  // a DNS name
 }
 
 
@@ -3880,7 +3883,7 @@ void descriptorDVB_ContentIdentifier (u_char *b)
 		int clen;
 
   		clen = outBit_Sx_NL (4,"crid_len: ",	b,  0,  8);
-  		print_std_ascii (4, "crid_bytes: ", 	b+1, clen);
+  		print_databytes (4, "crid_bytes: ", 	b+1, clen);
 		b   += clen+1;
 		len -= clen+1;
 	}

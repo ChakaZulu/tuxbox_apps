@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.23 2004/07/25 20:12:59 rasc Exp $
+$Id: sectables.c,v 1.24 2004/08/01 21:33:09 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: sectables.c,v 1.23 2004/07/25 20:12:59 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.24  2004/08/01 21:33:09  rasc
+minor TVA stuff (TS 102 323)
+
 Revision 1.23  2004/07/25 20:12:59  rasc
  - New: content_identifier_descriptor (TS 102 323)
  - New: TVA_id_descriptor (TS 102 323)
@@ -295,6 +298,9 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x01, 0x01,  decode_CAT	},
      {  0x02, 0x02,  decode_PMT	},
      {  0x03, 0x03,  decode_TSDT },
+// $$$ TODO     {  0x04, 0x04,  decode_14496_SCT },
+// $$$ TODO     {  0x05, 0x05,  decode_14496_OCT },
+// $$$ TODO     {  0x06, 0x06,  decode_MT },	// Metadata section
      /* res. */
      {  0x3a, 0x3d,  decode_DSMCC_section },
      {  0x3e, 0x3e,  decode_DSMCC_DATAGRAM },

@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.22 2004/07/26 20:58:03 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.23 2004/08/01 21:33:08 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.22 2004/07/26 20:58:03 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.23  2004/08/01 21:33:08  rasc
+minor TVA stuff (TS 102 323)
+
 Revision 1.22  2004/07/26 20:58:03  rasc
 RNT completed..  (TS 102 323)
 
@@ -194,11 +197,12 @@ int  descriptorMPEG  (u_char *b)
      case 0x21:  descriptorMPEG_MuxCode (b);  break; 
      case 0x22:  descriptorMPEG_FMXBufferSize (b);  break; 
      case 0x23:  descriptorMPEG_MultiplexBuffer (b);  break; 
-     case 0x24:  descriptorMPEG_FlexMuxTiming (b);  break; 
+     case 0x24:  descriptorMPEG_FlexMuxTiming (b);  break;  // $$$ TODO collision with content_labeling desc.
 
      /* TV ANYTIME, TS 102 323 */
      case 0x25:  descriptorMPEG_TVA_metadata_pointer (b);  break; 
      case 0x26:  descriptorMPEG_TVA_metadata (b);  break; 
+     case 0x27:  descriptorMPEG_TVA_metadata_STD (b);  break; 
 
      default: 
 	if (b[0] < 0x80) {
@@ -1626,7 +1630,7 @@ void descriptorMPEG_TVA_metadata_pointer (u_char *b)
 
 
 /*
-  0x26  TVA metadata pointer descriptor
+  0x26  TVA metadata descriptor
   TS 102 323  TV ANYTIME 
 */
 
@@ -1641,6 +1645,28 @@ void descriptorMPEG_TVA_metadata (u_char *b)
 
   indent (+1);
   printhex_buf (4, b+2, len);  // $$$ TODO TS 102 323, where defined?
+  indent (-1);
+}
+
+
+
+
+/*
+  0x27  TVA metadata STD descriptor
+  ISO/IEC 13818-1:2000/DAM-1:2001(E)
+*/
+
+void descriptorMPEG_TVA_metadata_STD (u_char *b)
+
+{
+  int  len;
+
+  // tag	= b[0];
+  len		= b[1];
+
+
+  indent (+1);
+  printhex_buf (4, b+2, len);  // $$$ TODO 
   indent (-1);
 }
 

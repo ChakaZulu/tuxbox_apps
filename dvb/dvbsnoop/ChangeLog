@@ -1,5 +1,6 @@
 
-[- New: resolution_authority/provider_notification_section (TS 102 323)]
+ - Update: misc. tables
+ - New: resolution_authority/provider_notification_section (TS 102 323)
  - New: content_identifier_descriptor (TS 102 323)
  - New: TVA_id_descriptor (TS 102 323)
  - New: related_content_descriptor (TS 102 323)

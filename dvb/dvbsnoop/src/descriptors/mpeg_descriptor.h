@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.h,v 1.9 2004/07/25 20:12:58 rasc Exp $ 
+$Id: mpeg_descriptor.h,v 1.10 2004/08/01 21:33:08 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: mpeg_descriptor.h,v 1.9 2004/07/25 20:12:58 rasc Exp $
 
 
 $Log: mpeg_descriptor.h,v $
+Revision 1.10  2004/08/01 21:33:08  rasc
+minor TVA stuff (TS 102 323)
+
 Revision 1.9  2004/07/25 20:12:58  rasc
  - New: content_identifier_descriptor (TS 102 323)
  - New: TVA_id_descriptor (TS 102 323)
@@ -104,6 +107,7 @@ void  descriptorMPEG_FlexMuxTiming (u_char *b);
      /* TV ANYTIME, TS 102 323 */
 void descriptorMPEG_TVA_metadata_pointer (u_char *b);
 void descriptorMPEG_TVA_metadata (u_char *b);
+void descriptorMPEG_TVA_metadata_STD (u_char *b);
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.54 2004/07/26 20:58:03 rasc Exp $
+$Id: dvb_str.c,v 1.55 2004/08/01 21:33:09 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.54 2004/07/26 20:58:03 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.55  2004/08/01 21:33:09  rasc
+minor TVA stuff (TS 102 323)
+
 Revision 1.54  2004/07/26 20:58:03  rasc
 RNT completed..  (TS 102 323)
 
@@ -238,6 +241,7 @@ char *dvbstrTableID (u_int id)
   STR_TABLE  TableIDs[] = {
 
  	// updated -- 2003-11-04
+	// -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
 	// ATSC Table IDs could be included...
      {  0x00, 0x00,  "Program Association Table (PAT)" },
      {  0x01, 0x01,  "Conditional Access Table (CAT)" },
@@ -245,7 +249,8 @@ char *dvbstrTableID (u_int id)
      {  0x03, 0x03,  "Transport Stream Description Table (TSDT)" },
      {  0x04, 0x04,  "ISO_IEC_14496_scene_description_section" },	/* $$$ TODO */
      {  0x05, 0x05,  "ISO_IEC_14496_object_description_section" },	/* $$$ TODO */
-     {  0x06, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
+     {  0x06, 0x07,  "Metadata_section" },				// $$$ TODO H.222.0 AMD1
+     {  0x07, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
      {  0x38, 0x39,  "ISO/IEC 13818-6 reserved" },
      {  0x3a, 0x3a,  "DSM-CC - multiprotocol encapsulated data" },
      {  0x3b, 0x3b,  "DSM-CC - U-N messages (DSI or DII)" },
@@ -304,6 +309,7 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
 {
   STR_TABLE  Tags[] = {
 	// ISO 13818-1
+	// -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
      {  0x00, 0x01,  "Reserved" },
      {  0x02, 0x02,  "video_stream_descriptor" },
      {  0x03, 0x03,  "audio_stream_descriptor" },
@@ -342,12 +348,13 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x21, 0x21,  "MuxCode_descriptor" },
      {  0x22, 0x22,  "FMXBufferSize_descriptor" },
      {  0x23, 0x23,  "MultiplexBuffer_descriptor" },
-     {  0x24, 0x24,  "FlexMuxTiming_descriptor" },
-     	/* TV ANYTIME TS 102 323 descriptors */
+     {  0x24, 0x24,  "FlexMuxTiming_descriptor" }, // $$$ TODO collision with ContentLabeling descr.
+     	/* TV ANYTIME TS 102 323 descriptors, ISO 13818-1 */
      {  0x25, 0x25,  "metadata_pointer_descriptor" },
      {  0x26, 0x26,  "metadata_descriptor" },
+     {  0x27, 0x27,  "metadata_STD_descriptor" },
 
-     {  0x27, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
+     {  0x28, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
 
      {  0x40, 0xFF,  "Forbidden descriptor in MPEG context" },	// DVB Context
      {  0,0, NULL }
@@ -367,6 +374,7 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x00, 0x3F,  "Forbidden descriptor in DVB context" },   // MPEG Context
 
 	// ETSI 300 468
+	// updated EN 302 192 v 1.4.1
      {  0x40, 0x40,  "network_name_descriptor" },
      {  0x41, 0x41,  "service_list_descriptor" },
      {  0x42, 0x42,  "stuffing_descriptor" },
@@ -676,6 +684,7 @@ char *dvbstrStream_TYPE (u_int flag)
   STR_TABLE  Table[] = {
 	  // -- updated 2003-10-17  from H.220
 	  // -- updated 2003-11-04  from ATSC / ISO13818-6AMD1-2000
+	  // -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
      {  0x00, 0x00,  "ITU-T | ISO-IE Reserved" },
      {  0x01, 0x01,  "ISO/IEC 11172 Video" },
      {  0x02, 0x02,  "ITU-T Rec. H.262 | ISO/IEC 13818-2 Video | ISO/IEC 11172-2 constr. parameter video stream" },
@@ -697,8 +706,14 @@ char *dvbstrStream_TYPE (u_int flag)
      {  0x12, 0x12,  "ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in PES packets" },
      {  0x13, 0x13,  "ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in ISO/IEC 14496 sections" },
      {  0x14, 0x14,  "ISO/IEC 13818-6 DSM-CC synchronized download protocol" },
+     // Update 2004-07
+     {  0x15, 0x15,  "Metadata carried in PES packets using the Metadata Access Unit Wrapper" },
+     {  0x16, 0x16,  "Metadata carried in metadata_sections" },
+     {  0x17, 0x17,  "Metadata carried in ISO/IEC 13818-6 (DSM-CC) Data Carousel" },
+     {  0x18, 0x18,  "Metadata carried in ISO/IEC 13818-6 (DSM-CC) Object Carousel" },
+     {  0x19, 0x19,  "Metadata carried in ISO/IEC 13818-6 Synchronized Download Protocol using the Metadata Access Unit Wrapper" },
+     {  0x1A, 0x7F,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 reserved" },
 
-     {  0x15, 0x7F,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 reserved" },
      // $$$ ATSC ID Names could be includes...
      // $$$ streamtype == 0x90 at MPE_FEC , see EN 301192 v1.4.1 s9.5
      {  0x80, 0xFF,  "User private" },
@@ -1996,6 +2011,8 @@ char *dvbstrPESstream_ID (u_int i)
 
 {
   STR_TABLE  Table[] = {
+	// -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
+	//
      // on changes:  adapt dmx_pes.c!!! etc. (search for PESstream_ID)
      {  0x00, 0xB8,  "!!!unknown or PES stream not in sync... (!!!)" },
      // special PS_stream_IDs (these are not PES stream IDs)
@@ -2019,9 +2036,13 @@ char *dvbstrPESstream_ID (u_int i)
      {  0xF7, 0xF7,  "ITU-T Rec. H.222.1 type D" },
      {  0xF8, 0xF8,  "ITU-T Rec. H.222.1 type E" },
      {  0xF9, 0xF9,  "ancillary_stream" },
-     {  0xFA, 0xFE,  "reserved data stream" },
+     {  0xFA, 0xFA,  "ISO/IEC14496-1_SL-packetized_stream" },
+     {  0xFB, 0xFB,  "ISO/IEC14496-1_FlexMux_stream" },
+     {  0xFC, 0xFC,  "metadata stream" },
+     {  0xFD, 0xFE,  "reserved data stream" },
      {  0xFF, 0xFF,  "program_stream_directory" },
      {  0,0, NULL }
+
   };
 
 
