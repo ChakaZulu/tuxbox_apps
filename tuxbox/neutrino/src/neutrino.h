@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.23 2001/10/07 12:17:22 McClean Exp $
+//  $Id: neutrino.h,v 1.24 2001/10/08 00:17:28 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.24  2001/10/08 00:17:28  McClean
+//  ucode-check - not rumnning
+//
 //  Revision 1.23  2001/10/07 12:17:22  McClean
 //  video mode setup (pre)
 //
@@ -104,6 +107,7 @@
 #include "helpers/settings.h"
 #include "helpers/streaminfo.h"
 #include "helpers/locale.h"
+#include "helpers/ucodecheck.h"
 
 #include <string>
 #include <vector>
