@@ -124,7 +124,7 @@ void eSubtitleWidget::processNext()
 		return;
 	}
 
-	unsigned long long fpts;
+	unsigned long long fpts=0;
 	int first = 1;
 	while (!queue.empty())
 	{
