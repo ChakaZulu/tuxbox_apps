@@ -267,7 +267,15 @@ CInfoViewer::CInfoViewer()
         CurrentChannel = "";
 
         pthread_cond_init( &epg_cond, NULL );
-        pthread_mutex_init( &epg_mutex, NULL );
+        pthread_mutexattr_t   mta;
+
+	    if (pthread_mutexattr_init(&mta) != 0 )
+    		perror("CInfoViewer: pthread_mutexattr_init failed\n");
+    	if (pthread_mutexattr_settype( &mta, PTHREAD_MUTEX_ERRORCHECK ) != 0 )
+			perror("CInfoViewer: pthread_mutexattr_settype failed\n");
+		if (pthread_mutex_init( &epg_mutex, &mta ) != 0)
+			perror("CInfoViewer: pthread_mutex_init failed\n");
+
 
         if (pthread_create (&thrViewer, NULL, InfoViewerThread, (void *) this) != 0 )
         {
@@ -716,7 +724,8 @@ void CInfoViewer::showWarte()
         int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
         int xStart= BoxStartX + ChanWidth + 30;
 
-        pthread_mutex_trylock( &epg_mutex );
+        //pthread_mutex_trylock( &epg_mutex );
+        pthread_mutex_lock( &epg_mutex );
         if ( ( !KillShowEPG ) && ( is_visible ) )
                 g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, EPG_NotFound_Text, COL_INFOBAR);
         pthread_mutex_unlock( &epg_mutex );
@@ -788,7 +797,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                                         TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
                                         abs_wait.tv_sec += 1;
 
-                                        pthread_mutex_trylock( &InfoViewer->epg_mutex );
+                                        pthread_mutex_lock( &InfoViewer->epg_mutex );
                                         pthread_cond_timedwait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex, &abs_wait );
 
                                         //                    printf("CInfoViewer::InfoViewerThread after waiting long\n");
@@ -796,7 +805,8 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                                         repCount--;
                                 }
 
-                                pthread_mutex_trylock( &InfoViewer->epg_mutex );
+                                //pthread_mutex_trylock( &InfoViewer->epg_mutex );
+                                pthread_mutex_lock( &InfoViewer->epg_mutex );
                                 query = InfoViewer->CurrentChannel;
                                 query_onid_tsid = InfoViewer->Current_onid_tsid;
                                 pthread_mutex_unlock( &InfoViewer->epg_mutex );
@@ -805,8 +815,11 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                                 //                printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
 
                                 gotEPG = InfoViewer->getEPGData(query, query_onid_tsid);
-                                // gotEPG = gotEPG || ( InfoViewer->Flag & sectionsd::epg_not_broadcast );
-                                gotEPG = gotEPG && ( InfoViewer->Flag & sectionsd::epg_has_current ) && ( InfoViewer->Flag & sectionsd::epg_has_next ) ;
+
+								/*if ( InfoViewer->Flag & sectionsd::epg_not_broadcast )
+                                	printf("not broadcast 1: - %sgotEPG...\n", gotEPG?"":"not " );
+                                */
+                                gotEPG =  gotEPG && ( InfoViewer->Flag & sectionsd::epg_has_current ) && ( InfoViewer->Flag & sectionsd::epg_has_next ) ;
 
                                 if ( ( InfoViewer->Flag & ( sectionsd::epg_has_later | sectionsd::epg_has_current ) ) && (!gotEPG) )
                                 {
@@ -819,12 +832,23 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                                                 if (repCount== 1)
                                                         gotEPG= true;
                                 }
+                                else
+                                {
+                                	gotEPG= gotEPG || ( InfoViewer->Flag & sectionsd::epg_not_broadcast );
+                                	/*if ( InfoViewer->Flag & sectionsd::epg_not_broadcast )
+                                		printf("not broadcast 1.5: - %sgotEPG...\n", gotEPG?"":"not " );
+                                    */
+                                }
 
-
-                                pthread_mutex_trylock( &InfoViewer->epg_mutex );
+                                //pthread_mutex_trylock( &InfoViewer->epg_mutex );
+                                pthread_mutex_lock( &InfoViewer->epg_mutex );
 
                                 requeryEPG = ( ( (!gotEPG) || (query!=InfoViewer->CurrentChannel) ) &&
                                                ( InfoViewer->is_visible ) );
+
+                                /*if ( InfoViewer->Flag & sectionsd::epg_not_broadcast )
+                                	printf("not broadcast 2: %srequery - %sgotEPG...\n", requeryEPG?"":"no ", gotEPG?"":"not " );
+                                */
 
                                 if (query!=InfoViewer->CurrentChannel)
                                         repCount = 10;

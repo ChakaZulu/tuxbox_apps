@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.41 2002/02/04 06:15:30 field Exp $
+// $Id: remotecontrol.cpp,v 1.42 2002/02/04 14:40:29 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
-// Revision 1.41  2002/02/04 06:15:30  field
-// sectionsd interface verbessert (bug beseitigt)
+// Revision 1.42  2002/02/04 14:40:29  field
+// Boeser Threading-Bug behoben ;)
 //
 // Revision 1.40  2002/01/31 16:59:54  field
 // Kleinigkeiten
@@ -130,7 +130,14 @@ CRemoteControl::CRemoteControl()
     vpid = 0;
 
 	pthread_cond_init( &send_cond, NULL );
-	pthread_mutex_init( &send_mutex, NULL );
+
+	pthread_mutexattr_t   mta;
+    if (pthread_mutexattr_init(&mta) != 0 )
+    	perror("CRemoteControl: pthread_mutexattr_init failed\n");
+    if (pthread_mutexattr_settype( &mta, PTHREAD_MUTEX_ERRORCHECK ) != 0 )
+		perror("CRemoteControl: pthread_mutexattr_settype failed\n");
+	if (pthread_mutex_init( &send_mutex, &mta ) != 0)
+		perror("CRemoteControl: pthread_mutex_init failed\n");
 
 	if (pthread_create (&thrSender, NULL, RemoteControlThread, (void *) this) != 0 )
 	{
@@ -355,7 +362,8 @@ void CRemoteControl::getNVODs( char *channel_name )
 
 			close(sock_fd);
 		}
-		pthread_mutex_trylock( &send_mutex );
+		//pthread_mutex_trylock( &send_mutex );
+		pthread_mutex_lock( &send_mutex );
 
 	}
 	while ( ( nvod_list.size()== 0 ) && ( rep_cnt< max_retry ) && ( strcmp(remotemsg.param3, channel_name )== 0 ) );
@@ -379,7 +387,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 	{
 		//        printf("CRemoteControl: before pthread_cond_wait\n");
 
-		pthread_mutex_trylock( &RemoteControl->send_mutex );
+		//pthread_mutex_trylock( &RemoteControl->send_mutex );
+		pthread_mutex_lock( &RemoteControl->send_mutex );
 		pthread_cond_wait( &RemoteControl->send_cond, &RemoteControl->send_mutex );
 
 		//        printf("CRemoteControl: after pthread_cond_wait for %s\n", RemoteControl->remotemsg.param3);
@@ -388,7 +397,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
 		do
 		{
-			pthread_mutex_trylock( &RemoteControl->send_mutex );
+			//pthread_mutex_trylock( &RemoteControl->send_mutex );
+			pthread_mutex_lock( &RemoteControl->send_mutex );
 			memcpy( &r_msg, &RemoteControl->remotemsg, sizeof(r_msg) );
 			pthread_mutex_unlock( &RemoteControl->send_mutex );
 
@@ -459,7 +469,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
 							// ueberpruefen, ob wir die Audio-PIDs holen sollen...
 							// printf("Checking for Audio-PIDs %s - %s - %d\n", RemoteControl->remotemsg.param3, r_msg.param3, RemoteControl->remotemsg.cmd);
-							pthread_mutex_trylock( &RemoteControl->send_mutex );
+							//pthread_mutex_trylock( &RemoteControl->send_mutex );
+							pthread_mutex_lock( &RemoteControl->send_mutex );
 							if ( ( RemoteControl->remotemsg.cmd== 3 ) &&
 							        ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) )
 							{
@@ -500,7 +511,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 							{
 								// PIDs emfangen...
 
-								pthread_mutex_trylock( &RemoteControl->send_mutex );
+								//pthread_mutex_trylock( &RemoteControl->send_mutex );
+								pthread_mutex_lock( &RemoteControl->send_mutex );
 								if ( ( strlen( RemoteControl->audio_chans_int.name )!= 0 ) ||
 								        ( ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) && (return_buf[2] == 'd') ) ||
 								        (return_buf[2] == 'e') )
@@ -563,7 +575,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 						}
 						case 'i':
 						{
-							pthread_mutex_trylock( &RemoteControl->send_mutex );
+							//pthread_mutex_trylock( &RemoteControl->send_mutex );
+							pthread_mutex_lock( &RemoteControl->send_mutex );
 							unsigned short nvodcount= RemoteControl->subChannels_internal.list.size();
 							write(sock_fd, &nvodcount, 2);
 
@@ -600,7 +613,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
 			close(sock_fd);
 
-			pthread_mutex_trylock( &RemoteControl->send_mutex );
+			//pthread_mutex_trylock( &RemoteControl->send_mutex );
+			pthread_mutex_lock( &RemoteControl->send_mutex );
 			redo= memcmp(&r_msg, &RemoteControl->remotemsg, sizeof(r_msg)) != 0;
 
 		}
