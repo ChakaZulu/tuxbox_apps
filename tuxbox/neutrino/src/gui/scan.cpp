@@ -98,6 +98,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 	uint msg;
 	uint data;
+	uint found_transponder = 0;
 	bool istheend = !success;
 
 	while (!istheend)
@@ -133,6 +134,15 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			{
 				char cb[10];
 				sprintf(cb, "%d", data);
+				frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
+				g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
+				found_transponder = data;
+			}
+			else
+			if ( msg == NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS )
+			{
+				char cb[21];
+				sprintf(cb, "%d/%d", data,found_transponder);
 				frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
 			}

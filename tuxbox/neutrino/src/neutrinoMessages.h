@@ -101,6 +101,7 @@ struct NeutrinoMessages {
 		EVT_ZAP_CA_FTA		=	CRCInput::RC_Events + 28,
 #endif
 		EVT_SCAN_FAILED           = CRCInput::RC_Events + 29,
+		EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS = CRCInput::RC_Events + 30,
 
 		EVT_CURRENTEPG 		=	CRCInput::RC_WithData + 1,
 		EVT_SCAN_SATELLITE	=	CRCInput::RC_WithData + 2,
