@@ -68,6 +68,7 @@ struct SNeutrinoSettings
 	int scan_sirius;
 	int scan_thor;
 	int scan_digituerk;
+	int scan_tuerksat;
 	int scan_bouquet;
 
 	//colors

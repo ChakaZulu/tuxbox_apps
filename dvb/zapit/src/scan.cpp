@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.37 2002/04/07 09:20:37 obi Exp $
+ * $Id: scan.cpp,v 1.38 2002/04/08 00:10:49 flfs Exp $
  */
 
 #include "scan.h"
@@ -447,7 +447,7 @@ void *start_scanthread(void *param)
 		{
 			diseqc_pos = 3;
 			curr_sat = 8;
-			strcpy(satName, "Tuerksat 42.0E");
+			strcpy(satName, "Tuerksat 31.3E");
 			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
 			printf("[scan.cpp] scanning %s\n", satName);
@@ -584,6 +584,85 @@ void *start_scanthread(void *param)
 			get_nits(12456000, 28000000, FEC_3_4, 1, diseqc_pos); // 39
 			get_nits(12476000, 27800000, FEC_3_4, 0, diseqc_pos); // 40
 			get_sdts();
+			fd = write_sat(fd, satName, diseqc_pos);
+		}
+
+		if (do_diseqc & 64)
+		{
+			diseqc_pos = 3;
+			curr_sat = 64;
+			strcpy(satName, "Tuerksat 42.0E");
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
+
+			printf("[scan.cpp] scanning %s\n", satName);
+			get_nits(10980000,  4688000, FEC_3_4, 1, diseqc_pos); // 4
+			get_nits(10982000,  3332000, FEC_3_4, 0, diseqc_pos); // 12
+			get_nits(10986000,  3332000, FEC_3_4, 1, diseqc_pos); // 4
+			get_nits(10986000,  2342000, FEC_3_4, 0, diseqc_pos); // 12
+			get_nits(11014000,  3332000, FEC_3_4, 0, diseqc_pos); // 13L empty
+			get_nits(11019000,  3332000, FEC_3_4, 1, diseqc_pos); // 5U empty
+			get_nits(11025000,  6510000, FEC_5_6, 1, diseqc_pos); // 5U
+			get_nits(11041000,  4000000, FEC_3_4, 0, diseqc_pos); // 13
+			get_nits(11047000,  3000000, FEC_3_4, 0, diseqc_pos); // 13
+			get_nits(11066000,  3200000, FEC_5_6, 1, diseqc_pos); // 6U
+			get_nits(11111000,  4557000, FEC_5_6, 1, diseqc_pos); // 7
+			get_nits(11129000,  4268000, FEC_3_4, 1, diseqc_pos); // 8
+			get_nits(11135000,  4444000, FEC_5_6, 1, diseqc_pos); // 8
+			get_nits(11138000,  3332000, FEC_3_4, 0, diseqc_pos); // 15U empty
+			get_nits(11141000,  4300000, FEC_3_4, 1, diseqc_pos); // 8
+			get_nits(11144000,  3332000, FEC_3_4, 0, diseqc_pos); // 15U empty
+			get_nits(11145000,  2300000, FEC_3_4, 1, diseqc_pos); // 8
+			get_nits(11148000,  2155000, FEC_5_6, 1, diseqc_pos); // 8
+			get_nits(11154000,  4557000, FEC_3_4, 1, diseqc_pos); // 8
+			get_nits(11162000,  3332000, FEC_3_4, 1, diseqc_pos); // 8 empty
+			get_nits(11457000,  5632000, FEC_3_4, 1, diseqc_pos); // 1
+			get_nits(11465000,  5632000, FEC_3_4, 1, diseqc_pos); // 1
+			get_nits(11475000,  5632000, FEC_3_4, 1, diseqc_pos); // 1
+			get_nits(11486000,  6110000, FEC_3_4, 1, diseqc_pos); // 1
+			get_nits(11504000,  3332000, FEC_3_4, 1, diseqc_pos); // 1 empty
+			get_nits(11507000,  3332000, FEC_3_4, 1, diseqc_pos); // 1 empty
+			get_nits(11511000,  3332000, FEC_3_4, 1, diseqc_pos); // 1 empty
+			get_nits(11515000,  3332000, FEC_3_4, 1, diseqc_pos); // 1 empty
+			get_nits(11523000,  3332000, FEC_3_4, 1, diseqc_pos); // 1 empty
+			get_nits(11582000,  3160000, FEC_5_6, 1, diseqc_pos); // 2
+			get_nits(11585000,  3332000, FEC_3_4, 0, diseqc_pos); // 10 empty
+			get_nits(11587000,  3670000, FEC_3_4, 1, diseqc_pos); // 2
+			get_nits(11593000,  4180000, FEC_3_4, 1, diseqc_pos); // 2
+			get_nits(11600000,  3150000, FEC_5_6, 0, diseqc_pos); // 10
+			get_nits(11607000,  3750000, FEC_2_3, 0, diseqc_pos); // 10
+			get_nits(11618000,  3222000, FEC_3_4, 1, diseqc_pos); // 2 empty
+			get_nits(11623000,  3222000, FEC_3_4, 1, diseqc_pos); // 2 empty
+			get_nits(11660000,  3500000, FEC_3_4, 1, diseqc_pos); // 3
+			get_nits(11665000,  3500000, FEC_3_4, 1, diseqc_pos); // 3
+			get_nits(11672000,  3222000, FEC_3_4, 1, diseqc_pos); // 3 empty
+			get_nits(11683000,  3222000, FEC_3_4, 1, diseqc_pos); // 3 empty
+			get_nits(11725000,  3222000, FEC_3_4, 1, diseqc_pos); // 1 empty
+			get_nits(11804000,  3222000, FEC_3_4, 1, diseqc_pos); // 5 empty
+			get_nits(12527000,  7140000, FEC_5_6, 0, diseqc_pos); // 23
+			get_nits(12537000,  6666000, FEC_3_4, 0, diseqc_pos); // 23
+			get_nits(12548000,  2400000, FEC_3_4, 0, diseqc_pos); // 25
+			get_nits(12552000,  2400000, FEC_7_8, 0, diseqc_pos); // 25
+			get_nits(12581000,  2285000, FEC_7_8, 0, diseqc_pos); // 25
+			get_nits(12606000,  3222000, FEC_3_4, 1, diseqc_pos); // 28 empty
+			get_nits(12616000,  3053000, FEC_3_4, 0, diseqc_pos); // 27
+			get_nits(12621000,  3053000, FEC_5_6, 0, diseqc_pos); // 27
+			get_nits(12632000,  2600000, FEC_5_6, 0, diseqc_pos); // 29
+			get_nits(12634000,  3222000, FEC_3_4, 1, diseqc_pos); // 30 empty
+			get_nits(12648000,  3222000, FEC_3_4, 1, diseqc_pos); // 30 empty
+			get_nits(12652000, 22500000, FEC_5_6, 0, diseqc_pos); // 29
+			get_nits(12659000,  3222000, FEC_3_4, 1, diseqc_pos); // 30 empty
+			get_nits(12673000,  3500000, FEC_3_4, 1, diseqc_pos); // 32
+			get_nits(12690000,  3222000, FEC_3_4, 0, diseqc_pos); // 31 empty
+			get_nits(12715000,  3222000, FEC_3_4, 0, diseqc_pos); // 33 empty
+			get_nits(12722000,  3222000, FEC_3_4, 1, diseqc_pos); // 34 empty
+			get_nits(12723000,  4400000, FEC_5_6, 0, diseqc_pos); // 33
+			get_nits(12728000,  3674000, FEC_3_4, 1, diseqc_pos); // 34
+			get_nits(12732000,  6666000, FEC_3_4, 0, diseqc_pos); // 33
+			get_nits(12736000,  4400000, FEC_5_6, 1, diseqc_pos); // 34
+			get_nits(12739000,  3222000, FEC_3_4, 0, diseqc_pos); // 33 empty
+			get_nits(12744000,  3254000, FEC_5_6, 0, diseqc_pos); // 33
+			get_nits(12746000,  3222000, FEC_3_4, 1, diseqc_pos); // 34
+                        get_sdts();
 			fd = write_sat(fd, satName, diseqc_pos);
 		}
 	}
