@@ -55,12 +55,12 @@ dist=true
 install=false
 type=HEADER
 [Workspace_1]
-openfiles=Unbenannt.h,Unbenannt.cpp,/home/ghost/tuxbox-cvs/apps/enigma/src/apps/enigma/timer.h,/home/ghost/tuxbox-cvs/apps/enigma/src/apps/enigma/timer.cpp,/home/ghost/tuxbox-cvs/apps/enigma/src/core/base/eptrlist.h,/home/ghost/tuxbox-cvs/apps/enigma/src/core/base/ebase.h,/home/ghost/tuxbox-cvs/apps/enigma/src/core/base/thread.h,/home/ghost/tuxbox-cvs/apps/enigma/src/core/base/ebase.cpp,/dbox2/cdkroot/include/sigc++-1.2/sigc++/connection.h,
+openfiles=Unbenannt.h,Unbenannt.cpp,/home/ghost/tuxbox-cvs/apps/enigma/src/core/dvb/decoder.h,/home/ghost/tuxbox-cvs/apps/enigma/src/core/dvb/decoder.cpp,/home/ghost/tuxbox-cvs/apps/enigma/src/apps/enigma/enigma_plugins.h,/home/ghost/tuxbox-cvs/apps/enigma/src/apps/enigma/enigma_plugins.cpp,
 show_outputview=true
 show_treeview=true
-header_file=/dbox2/cdkroot/include/sigc++-1.2/sigc++/connection.h
-cpp_file=/home/ghost/tuxbox-cvs/apps/enigma/src/core/base/ebase.cpp
-browser_file=file:/opt/kde/share/doc/HTML/default/kdevelop/reference/C/FUNCTIONS/funcref.htm#time
+header_file=/home/ghost/tuxbox-cvs/apps/enigma/src/apps/enigma/enigma_plugins.h
+cpp_file=/home/ghost/tuxbox-cvs/apps/enigma/src/core/dvb/decoder.cpp
+browser_file=file:/opt/kde/share/doc/HTML/default/kdevelop/reference/C/master_index.html#f
 [src/core/dvb/frontend.h]
 install_location=
 dist=true
@@ -181,7 +181,7 @@ install=false
 type=HEADER
 [src/core/gui/Makefile.am]
 install_location=
-files=src/core/gui/actions.cpp,src/core/gui/actions.h,src/core/gui/combobox.cpp,src/core/gui/combobox.h,src/core/gui/decoration.cpp,src/core/gui/decoration.h,src/core/gui/ebutton.cpp,src/core/gui/ebutton.h,src/core/gui/echeckbox.cpp,src/core/gui/echeckbox.h,src/core/gui/elabel.cpp,src/core/gui/elabel.h,src/core/gui/emessage.cpp,src/core/gui/emessage.h,src/core/gui/enumber.cpp,src/core/gui/enumber.h,src/core/gui/epixmap.cpp,src/core/gui/epixmap.h,src/core/gui/eprogress.cpp,src/core/gui/eprogress.h,src/core/gui/eservicegrid.cpp,src/core/gui/eservicegrid.h,src/core/gui/eskin.cpp,src/core/gui/eskin.h,src/core/gui/eskin_register.cpp,src/core/gui/eskin_register.h,src/core/gui/ewidget.cpp,src/core/gui/ewidget.h,src/core/gui/ewindow.cpp,src/core/gui/ewindow.h,src/core/gui/guiactions.cpp,src/core/gui/guiactions.h,src/core/gui/listbox.cpp,src/core/gui/listbox.h,src/core/gui/multipage.cpp,src/core/gui/multipage.h,src/core/gui/numberactions.cpp,src/core/gui/numberactions.h,src/core/gui/slider.cpp,src/core/gui/slider.h,src/core/gui/statusbar.cpp,src/core/gui/statusbar.h,src/core/gui/Makefile.am,
+files=src/core/gui/actions.cpp,src/core/gui/actions.h,src/core/gui/combobox.cpp,src/core/gui/combobox.h,src/core/gui/decoration.cpp,src/core/gui/decoration.h,src/core/gui/ebutton.cpp,src/core/gui/ebutton.h,src/core/gui/echeckbox.cpp,src/core/gui/echeckbox.h,src/core/gui/elabel.cpp,src/core/gui/elabel.h,src/core/gui/emessage.cpp,src/core/gui/emessage.h,src/core/gui/enumber.cpp,src/core/gui/enumber.h,src/core/gui/epixmap.cpp,src/core/gui/epixmap.h,src/core/gui/eprogress.cpp,src/core/gui/eprogress.h,src/core/gui/eservicegrid.cpp,src/core/gui/eservicegrid.h,src/core/gui/eskin.cpp,src/core/gui/eskin.h,src/core/gui/eskin_register.cpp,src/core/gui/eskin_register.h,src/core/gui/ewidget.cpp,src/core/gui/ewidget.h,src/core/gui/ewindow.cpp,src/core/gui/ewindow.h,src/core/gui/guiactions.cpp,src/core/gui/guiactions.h,src/core/gui/listbox.cpp,src/core/gui/listbox.h,src/core/gui/multipage.cpp,src/core/gui/multipage.h,src/core/gui/numberactions.cpp,src/core/gui/numberactions.h,src/core/gui/slider.cpp,src/core/gui/slider.h,src/core/gui/statusbar.cpp,src/core/gui/statusbar.h,src/core/gui/Makefile.am,src/core/gui/calendar.h,
 dist=true
 install=false
 type=DATA
@@ -934,6 +934,11 @@ install_location=
 dist=true
 install=false
 type=SOURCE
+[src/core/gui/calendar.h]
+install_location=
+dist=true
+install=false
+type=HEADER
 [src/apps/enigma/timer.cpp]
 install_location=
 dist=true
@@ -1026,7 +1031,7 @@ version_control=None
 project_type=normal_empty
 author=
 sub_dir=enigma/
-lfv_open_groups=XML Files,
+lfv_open_groups=
 workspace=1
 project_name=Enigma
 version=0.1

@@ -247,7 +247,6 @@ private:
 	void stop();
 	void pause();
 	int recording;
-	void record();
 	enum { skipForward, skipReverse };
 	int skipcounter;
 	int skipping;
@@ -258,13 +257,6 @@ private:
 	void showServiceMenu(eServiceSelector*);
 	void showFavourite(eServiceSelector*);
 	
-	enum { 
-		psAdd=1,	// just add, to not change current
-		psRemove=2, // remove before add
-		psActivate=4, // use existing entry if available
-		psDontAdd=8, // just play
-	};
-	void playService(const eServiceReference &service, int flags);
 	void addService(const eServiceReference &service);
 	
 	void doPlaylistAdd(const eServiceReference &service);
@@ -302,7 +294,18 @@ public:
 	void pauseMessages();
 	void nextMessage();
 	static eZapMain *getInstance() { return instance; }
-	
+
+// methods used from the timer
+	enum {
+		psAdd=1,	// just add, to not change current
+		psRemove=2, // remove before add
+		psActivate=4, // use existing entry if available
+		psDontAdd=8, // just play
+	};
+	void playService(const eServiceReference &service, int flags);
+	void record();	// starts recording
+//////////////////////////////
+
 	void setMode(int mode, int user=0); // user made change?
 	void setModeD(int mode);
 	int getRealMode() { return last_mode==-1 ? mode : last_mode; }

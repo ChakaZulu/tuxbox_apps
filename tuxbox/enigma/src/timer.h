@@ -7,30 +7,43 @@
 class eTimerManager: public Object
 {
 	static eTimerManager *instance;
-	eTimer timer;
+
+// eTimerManager actionHandler stuff
+	enum
+	{
+		zap, showMessage, startCountdown, setNextEvent,
+		startEvent, pauseEvent, restartEvent, stopEvent,
+		startRecording, restartRecording, pauseRecording, stopRecording
+	};
+	int nextAction;
+
+	eTimer actionTimer;  // to start timer related actions
+	void actionHandler(); // the action Handler
+///////////////////////////
+
+// for multiple use timer and connection objects..
+	eTimer timer;					
+	Connection conn, conn2;
+
+// the timerlist self...
 	ePlaylist *timerlist;
 	eServiceReference timerlistref;
+
+// nextStarting event, or the current running Event
 	std::list<ePlaylistEntry>::iterator nextStartingEvent;
-	Connection conn, conn2; // connection object for timer.. to disconnect...
+
+// both methods are NOT always connected to the eDVB Signals
+	void serviceChanged( const eServiceReferenceDVB& );
+	void leaveService( const eServiceReferenceDVB& );
 
 	long getSecondsToBegin();
 	long getSecondsToEnd();
-//	eAUTable<EIT> tEIT;
+
+// this Method is called multiple at the start of the eTimerManager....
 	void waitClock();
-	void setNextEvent();
-	void viewTimerMessage();
-	void zapToChannel();
-	void startActiveTimerMode();
-	void startEvent();
-	void pauseEvent();
-	void stopEvent( int state );
-	void restartEvent();
-	void serviceChanged( const eServiceReferenceDVB&, int );
 
-	void EITready(int);  // handle all eit related timer stuff
-	void restartRecording();
-
-	void leaveService( const eServiceReferenceDVB& );
+// handle all eit related timer stuff ( for smart Timers)
+	void EITready(int);
 public:
 	eTimerManager();
 	~eTimerManager();
