@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.22 2001/10/25 17:20:50 field Exp $
+  $Id: zapit.cpp,v 1.23 2001/10/30 19:49:59 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.23  2001/10/30 19:49:59  field
+  caid wird neu gelesen, wenn noch nicht vorhanden
+
   Revision 1.22  2001/10/25 17:20:50  field
   Umlaute gefixt! (unbedingt make clean)
 
@@ -861,6 +864,8 @@ else
 	else
 	  pat(cit->second.onid,&allchans_tv);
     }
+  if (caid==0)
+     caid = get_caid();
  
   memset(&parse_pmt_pids,0,sizeof(parse_pmt_pids));
   parse_pmt_pids = parse_pmt(cit->second.pmt, caid);
@@ -912,6 +917,7 @@ else
       
       //        descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
       cam_reset();
+
       if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
 	{
 	  descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid, &parse_pmt_pids);
@@ -1855,7 +1861,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.22 2001/10/25 17:20:50 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.23 2001/10/30 19:49:59 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
