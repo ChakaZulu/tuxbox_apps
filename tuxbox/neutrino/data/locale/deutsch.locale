@@ -43,7 +43,7 @@ audiomenu.stereo Stereo
 audiomenu.dolbydigital Dolby Digital
 
 videomenu.head Video-Einstellungen
-videomenu.screensetup Sichtbaren Bildbereich einstellen
+videomenu.screensetup Bildbereich einstellen
 videomenu.videosignal Video Signalart
 videomenu.videosignal_rgb RGB
 videomenu.videosignal_svideo S-Video
@@ -52,7 +52,7 @@ videomenu.videoformat Bildschirmformat
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect automatisch
-videomenu.vcrswitch VCR Scart-Eingang automatisch
+videomenu.vcrswitch Scart-Eingang automatisch
 
 networkmenu.head Netzwerk Einstellungen
 networkmenu.test Netzwerk testen
@@ -66,6 +66,11 @@ networkmenu.nameserver Nameserver
 networkmenu.usestreamserver Streamingserver benutzen
 networkmenu.streamingserver Streamingserver
 networkmenu.streamingserverport Port
+
+ping.ok ist erreichbar (ping)
+ping.unreachable ist nicht erreichbar (unreachable)
+ping.protocol ist nicht erreichbar (Host or protocol error)
+ping.socket ist nicht erreichbar (Socket error)
 
 ipsetup.hint_1 Benutzen Sie "0"-"9", Rot ist " ", Grün "."
 ipsetup.hint_2 oder Up/Down, OK speichert, Home bricht ab
@@ -288,6 +293,7 @@ messagebox.no Nein
 messagebox.cancel Abbruch
 messagebox.back Zurück
 messagebox.error Fehler
+messagebox.discard Wollen Sie die Änderungen verwerfen?
 
 cam.wrong Achtung, Ihre CAM_ALPHA.BIN passt\nnicht zu Ihrer Smart-Card!!!\n\nWollen Sie diese Warnung wieder sehen?
 

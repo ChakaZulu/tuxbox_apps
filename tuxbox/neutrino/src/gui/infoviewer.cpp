@@ -421,8 +421,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         		{
         			g_FrameBuffer->paintIcon((GetVideoFormat() == 3)?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
+					int to=intShowDuration>>1; // weil Intervall in 500ms angegeben ist
 
-					g_RCInput->getMsg( &msg, &data, intShowDuration>>1 ); // weil Intervall in 500ms angegeben ist
+					g_RCInput->getMsg( &msg, &data, to );
 
 					if ( msg != CRCInput::RC_timeout )
 						break;
@@ -436,7 +437,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 				else if ( ( msg != CRCInput::RC_timeout ) &&
 					 	  ( msg != CRCInput::RC_ok ) )
 				{
-            		if ( neutrino->handleMsg( msg, data ) ==  messages_return::unhandled )
+            		if ( neutrino->handleMsg( msg, data ) &  messages_return::unhandled )
             			g_RCInput->pushbackMsg( msg, data );
 				}
 

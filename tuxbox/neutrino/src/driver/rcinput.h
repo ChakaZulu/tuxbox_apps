@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.22 2002/03/05 17:33:07 field Exp $
+$Id: rcinput.h,v 1.23 2002/03/06 11:18:39 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.23  2002/03/06 11:18:39  field
+ Fixes & Updates
+
  Revision 1.22  2002/03/05 17:33:07  field
  Events worken (so halbwegs :)
 
@@ -184,8 +187,8 @@ class CRCInput
 
 		static string getKeyName(int);
 
-		void getMsg(uint *msg, uint* data, int Timeout=-1, bool bAllowRepeatLR= false);     //get message :) (calls _getKey at the moment)
-		void pushbackMsg(uint msg, uint data);     // push message back into buffer - (calls _pushbackKey at the moment)
+		void getMsg(uint *msg, uint* data, int Timeout=-1, bool bAllowRepeatLR= false);     //get message :)
+		void pushbackMsg(uint msg, uint data);     // push message back into buffer
 		void insertMsgAtTop(uint msg, uint data);
 		void clearMsg(uint min = 0, uint max = 0xFFFFFFFF );	// bestimmte Msgs aus der Schleife löschen - löscht zZ ALLES :(
 };

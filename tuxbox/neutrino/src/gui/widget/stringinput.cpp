@@ -149,8 +149,6 @@ int CStringInput::exec( CMenuTarget* parent, string )
 	int res = menu_return::RETURN_REPAINT;
 	char oldval[size];
 
-	strcpy(oldval, value);
-
 	if (parent)
 	{
 		parent->hide();
@@ -158,6 +156,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 
 	for(int count=strlen(value)-1;count<size-1;count++)
 		strcat(value, " ");
+	strcpy(oldval, value);
 
 	paint();
 
@@ -210,10 +209,14 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		}
 		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
 		{
+			if ( ( strcmp(value, oldval) != 0) &&
+			     ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, 380 ) == CMessageBox::mbrCancel ) )
+				continue;
+
 			strcpy(value, oldval);
 			loop=false;
 		}
-		else if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
 		{
 			loop = false;
 			res = menu_return::RETURN_EXIT_ALL;

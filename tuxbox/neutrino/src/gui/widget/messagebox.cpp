@@ -144,7 +144,6 @@ void CMessageBox::hide()
 
 int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 {
-
 	int res = menu_return::RETURN_REPAINT;
     unsigned char pixbuf[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
 	g_FrameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
@@ -246,7 +245,7 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 			}
 			loop=false;
 		}
-		else if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
 		{
 			loop = false;
 			res = menu_return::RETURN_EXIT_ALL;
@@ -258,9 +257,9 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 	return res;
 }
 
-int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons )
+int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, int Width )
 {
-   	CMessageBox* messageBox = new CMessageBox( Caption, Text, NULL, 450, Default, ShowButtons );
+   	CMessageBox* messageBox = new CMessageBox( Caption, Text, NULL, Width, Default, ShowButtons );
 	messageBox->exec( NULL, "");
 	int res= messageBox->result;
 	delete messageBox;

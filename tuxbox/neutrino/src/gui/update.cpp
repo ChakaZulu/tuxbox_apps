@@ -414,13 +414,15 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 			doLoop = false;
 		else
 		{
-			switch ( neutrino->handleMsg( msg, data ) )
+			int mr = neutrino->handleMsg( msg, data );
+
+			if ( mr & messages_return::cancel_all )
 			{
-				case messages_return::cancel_all:
-					res = menu_return::RETURN_EXIT_ALL;
-				case messages_return::unhandled:
-					doLoop = false;
+				res = menu_return::RETURN_EXIT_ALL;
+				doLoop = false;
 			}
+			else if ( mr & messages_return::unhandled )
+				doLoop = false;
 		}
 
 	}

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.44 2002/03/03 11:25:34 chrissi Exp $
+// $Id: epgview.cpp,v 1.45 2002/03/06 11:18:39 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.45  2002/03/06 11:18:39  field
+// Fixes & Updates
+//
 // Revision 1.44  2002/03/03 11:25:34  chrissi
 // add FSK output to CEpgData::show
 //
@@ -444,11 +447,11 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 
 	char _tfsk[5];
 	if (epgData.fsk)
-		sprintf (_tfsk, "FSK: ab %d", epgData.fsk );	
+		sprintf (_tfsk, "FSK: ab %d", epgData.fsk );
 	else
-		sprintf (_tfsk, "FSK: keine" );	
+		sprintf (_tfsk, "FSK: keine" );
 	processTextToArray( _tfsk );
-		
+
 	if (epgData.contentClassification.length()> 0)
 		processTextToArray( GetGenre(epgData.contentClassification[0]) );
 //	processTextToArray( epgData.userClassification.c_str() );
@@ -561,7 +564,7 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 						loop = false;
 					else
 					{
-						if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+						if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
 						{
 							loop = false;
 							res = menu_return::RETURN_EXIT_ALL;

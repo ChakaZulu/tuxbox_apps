@@ -234,7 +234,11 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 				break;
 
 			case CRCInput::RC_home:
-				// abbruch...
+				if ( ( (*r != r_alt) || (*g != g_alt) || (*b != b_alt) || ( (alpha) && (*alpha != a_alt) ) ) &&
+			    	 ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, 380 ) == CMessageBox::mbrCancel ) )
+					break;
+
+				// sonst abbruch...
 				*r = r_alt;
 				*g = g_alt;
 				*b = b_alt;
@@ -247,7 +251,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 				break;
 
 			default:
-				if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+				if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;

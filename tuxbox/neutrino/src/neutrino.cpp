@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.188 2002/03/05 20:46:21 field Exp $
+        $Id: neutrino.cpp,v 1.189 2002/03/06 11:18:38 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -293,8 +293,8 @@ void CNeutrinoApp::setupDefaults()
 	strcpy(g_settings.network_ip, "10.10.10.100");
 	strcpy(g_settings.network_netmask, "255.255.255.0");
 	strcpy(g_settings.network_broadcast, "10.10.10.255");
-	strcpy(g_settings.network_defaultgateway, "10.10.10.10");
-	strcpy(g_settings.network_nameserver, "10.10.10.10");
+	strcpy(g_settings.network_defaultgateway, "");
+	strcpy(g_settings.network_nameserver, "");
 
 	g_settings.network_streaming_use = 0;
 	strcpy(g_settings.network_streamingserver, "10.10.10.10");
@@ -534,7 +534,6 @@ void CNeutrinoApp::isCamValid()
 	if  ( (ca_verid != 33 && ca_verid != 18 && ca_verid != 68) )
 	{
 		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-		//ShowMsg ( "messagebox.error", g_Locale->getText("cam.wrong"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
 
 		if (g_settings.show_camwarning)
 		{
@@ -1106,7 +1105,7 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	videoSettings.addItem( new CMenuForwarder("menu.back") );
 	videoSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	videoSettings.addItem( new CMenuForwarder("videomenu.screensetup", true, "", g_ScreenSetup ) );
+
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("videomenu.videosignal", &g_settings.video_Signal, true, videoSetupNotifier);
 	oj->addOption(1, "videomenu.videosignal_rgb");
@@ -1131,6 +1130,9 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	videoSettings.addItem( oj );
+
+	videoSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	videoSettings.addItem( new CMenuForwarder("videomenu.screensetup", true, "", g_ScreenSetup ) );
 }
 
 void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
@@ -1161,18 +1163,18 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( new CMenuSeparator() );
 	networkSettings.addItem( new CMenuForwarder("menu.back") );
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, "", this, "networktest") );
-	networkSettings.addItem( new CMenuForwarder("networkmenu.setupnow", true, "", this, "network") );
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("networkmenu.setuponstartup", &g_settings.networkSetOnStartup, true);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 
 	networkSettings.addItem( oj );
+	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, "", this, "networktest") );
+	networkSettings.addItem( new CMenuForwarder("networkmenu.setupnow", true, "", this, "network") );
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CStringInput*	networkSettings_NetworkIP= new CStringInput("networkmenu.ipaddress", g_settings.network_ip, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput*	networkSettings_NetworkIP= new CStringInput("networkmenu.ipaddress", g_settings.network_ip, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789. ", MyIPChanger);
 	CStringInput*	networkSettings_NetMask= new CStringInput("networkmenu.netmask", g_settings.network_netmask, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
 	CStringInput*	networkSettings_Broadcast= new CStringInput("networkmenu.broadcast", g_settings.network_broadcast, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
 	CStringInput*	networkSettings_Gateway= new CStringInput("networkmenu.gateway", g_settings.network_defaultgateway, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
@@ -1523,13 +1525,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//printf("\nCNeutrinoApp::run - objects initialized...\n\n");
 	g_Locale->loadLocale(g_settings.language);
 
-	colorSetupNotifier = new CColorSetupNotifier;
-	audioSetupNotifier = new CAudioSetupNotifier;
-	videoSetupNotifier = new CVideoSetupNotifier;
-	APIDChanger        = new CAPIDChangeExec;
-	UCodeChecker	   = new CUCodeCheckExec;
-	NVODChanger        = new CNVODChangeExec;
+	colorSetupNotifier	= new CColorSetupNotifier;
+	audioSetupNotifier	= new CAudioSetupNotifier;
+	videoSetupNotifier	= new CVideoSetupNotifier;
+	APIDChanger			= new CAPIDChangeExec;
+	UCodeChecker		= new CUCodeCheckExec;
+	NVODChanger			= new CNVODChangeExec;
 	StreamFeaturesChanger = new CStreamFeaturesChangeExec;
+	MyIPChanger			= new CIPChangeNotifier;
 
 	colorSetupNotifier->changeNotify("initial", NULL);
 
@@ -1547,7 +1550,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
-	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw",400,520);
+	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400, 520);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
 
@@ -1795,12 +1798,12 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		if ( g_settings.vcr_AutoSwitch == 1 )
 		{
-			if ( (bool) data )
+			if ( data != VCR_STATUS_OFF )
 				g_RCInput->pushbackMsg( messages::VCR_ON, 0 );
 			else
 				g_RCInput->pushbackMsg( messages::VCR_OFF, 0 );
 		}
-		return messages_return::handled;
+		return messages_return::handled | messages_return::cancel_info;
 	}
 	else
 	if ( msg == CRCInput::RC_standby )
@@ -1849,7 +1852,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
         {
         	g_RCInput->insertMsgAtTop( messages::SHUTDOWN, 0 );
 		}
-		return messages_return::cancel_all;
+		return messages_return::cancel_all | messages_return::handled;
 	}
 	else if ( msg == CRCInput::RC_standby_release )
 	{
@@ -1860,7 +1863,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		if ( diff >= 10 )
 		{
         	g_RCInput->insertMsgAtTop( messages::SHUTDOWN, 0 );
-        	return messages_return::cancel_all;
+        	return messages_return::cancel_all | messages_return::handled;
         }
 	}
 	else if ( ( msg == CRCInput::RC_plus ) ||
@@ -2001,7 +2004,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		{
 			if ( (msg!=CRCInput::RC_ok) || (msg!=CRCInput::RC_home) )
 			{
-				if ( neutrino->handleMsg( msg, data ) == messages_return::unhandled )
+				if ( neutrino->handleMsg( msg, data ) & messages_return::unhandled )
 				{
 					g_RCInput->pushbackMsg( msg, data );
 
@@ -2296,7 +2299,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.188 2002/03/05 20:46:21 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.189 2002/03/06 11:18:38 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -278,7 +278,7 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 					if (emsg.eventID==CControldClient::EVT_VCRCHANGED)
 					{
                         *msg = messages::EVT_VCRCHANGED;
-						bool VCRState;
+						int VCRState;
 						recv(fd_eventclient, &VCRState, sizeof(VCRState), MSG_WAITALL);
 						*data = VCRState;
 					}

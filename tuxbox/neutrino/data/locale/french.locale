@@ -52,7 +52,7 @@ videomenu.videoformat Format de Télévision
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect autodetect
-videomenu.vcrswitch VCR Switch Scart automatically
+videomenu.vcrswitch Switch Scart automatically
 
 networkmenu.head Ajuster un Réseau
 networkmenu.test test network now
@@ -66,6 +66,11 @@ networkmenu.nameserver Nameserver
 networkmenu.usestreamserver use streamserver
 networkmenu.streamingserver Streamingserver
 networkmenu.streamingserverport Port
+
+ping.ok is reachable (ping)
+ping.unreachable is unreachable
+ping.protocol is unreachable (host or protocol error)
+ping.socket is unreachable (socket error)
 
 ipsetup.hint_1 Utilisez "0"-"9", Rouge est " ", Vert "."
 ipsetup.hint_2 ou Up/Down, OK stocke , Home interrompre
@@ -292,6 +297,7 @@ messagebox.no Non
 messagebox.cancel Cancel
 messagebox.back Back
 messagebox.error Error
+messagebox.discard Discard changes?
 
 cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish to get this warning again?
 

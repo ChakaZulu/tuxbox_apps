@@ -276,7 +276,7 @@ int CBouquetList::show()
 		}
 		else
 		{
-			if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+			if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				loop = false;
 				res = -2;

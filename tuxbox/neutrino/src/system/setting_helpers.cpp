@@ -50,6 +50,12 @@ bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
 	}
 }
 
+bool CIPChangeNotifier::changeNotify(string OptionName, void* Data)
+{
+	int ip_1, ip_2, ip_3, ip_4;
+	sscanf( (char*) Data, "%d.%d.%d.%d", &ip_1, &ip_2, &ip_3, &ip_4 );
+	sprintf( g_settings.network_broadcast, "%d.%d.%d.255", ip_1, ip_2, ip_3 );
+}
 
 bool CColorSetupNotifier::changeNotify(string OptionName, void*)
 {
@@ -264,16 +270,16 @@ void setNameServer(char* ip)
 	}
 }
 
-char* mypinghost(char* host)
+string mypinghost(char* host)
 	{
 	int retvalue=0;
 	retvalue = pinghost(host);
 	switch (retvalue)
 		{
-		case 1: return ("ist erreichbar (ping)");
-		case 0: return ("ist nicht erreichbar (unreachable)");
-		case -1: return ("ist nicht erreichbar (Host or protocol error)");
-		case -2: return ("ist nicht erreichbar (Socket error)");
+		case 1: return ( g_Locale->getText("ping.ok") );
+		case 0: return ( g_Locale->getText("ping.unreachable") );
+		case -1: return ( g_Locale->getText("ping.protocol") );
+		case -2: return ( g_Locale->getText("ping.socket") );
 		}
 	}
 
@@ -288,16 +294,16 @@ void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway
 	string 	text;
 	char _text[100];
 
-	sprintf(_text, "%s %s\n", ip, mypinghost(ip) );
+	sprintf(_text, "%s %s\n", ip, mypinghost(ip).c_str() );
 	text= _text;
 
-	sprintf(_text, "Gateway %s %s\n", gateway, mypinghost(gateway) );
+	sprintf(_text, "Gateway %s %s\n", gateway, mypinghost(gateway).c_str() );
 	text= text+ _text;
 
-	sprintf(_text, "Nameserver %s %s\n", nameserver, mypinghost(nameserver) );
+	sprintf(_text, "Nameserver %s %s\n", nameserver, mypinghost(nameserver).c_str() );
 	text= text+ _text;
 
-	sprintf(_text, "dboxupdate.berlios.de %s\n",mypinghost("195.37.77.138") );
+	sprintf(_text, "dboxupdate.berlios.de %s\n",mypinghost("195.37.77.138").c_str() );
 	text= text+ _text;
 
 	ShowMsg( "networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack );

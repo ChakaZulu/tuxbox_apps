@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: streaminfo.cpp,v 1.19 2002/02/27 22:51:13 field Exp $
+$Id: streaminfo.cpp,v 1.20 2002/03/06 11:18:39 field Exp $
 
 Module StreamInfo
 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.20  2002/03/06 11:18:39  field
+ Fixes & Updates
+
  Revision 1.19  2002/02/27 22:51:13  field
  Tasten kaputt gefixt - sollte wieder gehen :)
 
@@ -115,13 +118,15 @@ int CStreamInfo::exec(CMenuTarget* parent, string)
 			doLoop = false;
 		else
 		{
-			switch ( neutrino->handleMsg( msg, data ) )
+			int mr = neutrino->handleMsg( msg, data );
+
+			if ( mr & messages_return::cancel_all )
 			{
-				case messages_return::cancel_all:
-					res = menu_return::RETURN_EXIT_ALL;
-				case messages_return::unhandled:
-					doLoop = false;
+				res = menu_return::RETURN_EXIT_ALL;
+				doLoop = false;
 			}
+			else if ( mr & messages_return::unhandled )
+				doLoop = false;
 		}
 
 	}

@@ -73,6 +73,12 @@ class CKeySetupNotifier : public CChangeObserver
 		bool changeNotify(string OptionName, void*);
 };
 
+class CIPChangeNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(string OptionName, void*);
+};
+
 class CAPIDChangeExec : public CMenuTarget
 {
 	public:

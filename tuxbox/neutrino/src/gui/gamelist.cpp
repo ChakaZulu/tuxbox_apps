@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.37 2002/02/28 15:03:55 field Exp $
+$Id: gamelist.cpp,v 1.38 2002/03/06 11:18:39 field Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.38  2002/03/06 11:18:39  field
+Fixes & Updates
+
 Revision 1.37  2002/02/28 15:03:55  field
 Weiter Updates :)
 
@@ -599,7 +602,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			g_RCInput->pushbackMsg( msg, data );
 			loop=false;
 		}
-		else if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
 		{
 			loop = false;
 			res = menu_return::RETURN_EXIT_ALL;

@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.40 2002/02/28 15:03:55 field Exp $
+// $Id: eventlist.cpp,v 1.41 2002/03/06 11:18:39 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.41  2002/03/06 11:18:39  field
+// Fixes & Updates
+//
 // Revision 1.40  2002/02/28 15:03:55  field
 // Weiter Updates :)
 //
@@ -479,7 +482,7 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 		}
 		else
 		{
-			if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+			if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				loop = false;
 				res = menu_return::RETURN_EXIT_ALL;

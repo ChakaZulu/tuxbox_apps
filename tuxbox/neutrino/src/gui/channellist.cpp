@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.69 2002/02/28 15:03:55 field Exp $
+// $Id: channellist.cpp,v 1.70 2002/03/06 11:18:39 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.70  2002/03/06 11:18:39  field
+// Fixes & Updates
+//
 // Revision 1.69  2002/02/28 15:03:55  field
 // Weiter Updates :)
 //
@@ -758,7 +761,7 @@ int CChannelList::numericZap(int key)
 			doZap = false;
 			break;
 		}
-		else if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
 		{
 			doZap = false;
 			res = menu_return::RETURN_EXIT_ALL;

@@ -62,6 +62,6 @@ using namespace std;
 
 	};
 
-int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons );
+int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, int Width = 450 );
 
 #endif

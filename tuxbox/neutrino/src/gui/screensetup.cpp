@@ -64,9 +64,18 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
     			g_settings.screen_EndX = x_coord[1];
     			g_settings.screen_StartY = y_coord[0];
     			g_settings.screen_EndY = y_coord[1];
+				loop = false;
+				break;
+
+			case CRCInput::RC_home:
+				if ( ( ( g_settings.screen_StartX != x_coord[0] ) ||
+    				   ( g_settings.screen_EndX != x_coord[1] ) ||
+    				   ( g_settings.screen_StartY != y_coord[0] ) ||
+    				   ( g_settings.screen_EndY != y_coord[1] ) ) &&
+			         ( ShowMsg("videomenu.screensetup", g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, 450 ) == CMessageBox::mbrCancel ) )
+					break;
 
 			case CRCInput::RC_timeout:
-			case CRCInput::RC_home:
 				loop = false;
 				break;
 
@@ -128,7 +137,7 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 				}
 
 			default:
-				if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
+				if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;

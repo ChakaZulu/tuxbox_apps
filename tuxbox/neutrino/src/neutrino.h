@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.60 2002/03/05 20:46:21 field Exp $
+//  $Id: neutrino.h,v 1.61 2002/03/06 11:18:38 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.61  2002/03/06 11:18:38  field
+//  Fixes & Updates
+//
 //  Revision 1.60  2002/03/05 20:46:21  field
 //  VCR-Scart umschalten funktioniert automatisch :) (ein/aus-schaltbar)
 //
@@ -250,7 +253,8 @@ struct messages_return {
 			none 		= 0x00,
 			handled		= 0x01,
 			unhandled	= 0x02,
-			cancel_all	= 0x04
+			cancel_all	= 0x04,
+			cancel_info = 0x08
 		};
 };
 
@@ -321,6 +325,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CNVODChangeExec         *NVODChanger;
 		CUCodeCheckExec			*UCodeChecker;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
+		CIPChangeNotifier		*MyIPChanger;
 
 		CChannelList		*channelList;
 
