@@ -465,3 +465,6 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 		}
 	}
 }
+
+
+

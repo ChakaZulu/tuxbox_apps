@@ -81,3 +81,4 @@ void CKeyChooserItem::paint(CFrameBuffer* frameBuffer)
 	fonts->menu->RenderString(x+10,y+hheight+mheight*2, width, "wait a few seconds for cancel", COL_MENUCONTENT);
 }
 
+

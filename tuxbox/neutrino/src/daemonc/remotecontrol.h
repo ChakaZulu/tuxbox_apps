@@ -14,6 +14,11 @@
 
 #include <string>
 
+#include "pthread.h"
+#include "semaphore.h"
+#include <sys/wait.h>
+#include <signal.h>
+
 using namespace std;
 
 #define SA struct sockaddr
@@ -36,6 +41,12 @@ class CRemoteControl
 		void send();
 		bool zapit_mode;
 
+        pthread_t       thrSender;
+        pthread_cond_t  send_cond;
+        pthread_mutex_t send_mutex;
+
+        static void * RemoteControlThread (void *arg);
+
 	public:
 
 		CRemoteControl();
@@ -49,3 +60,6 @@ class CRemoteControl
 
 
 #endif
+
+
+

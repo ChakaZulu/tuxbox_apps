@@ -21,7 +21,14 @@ int CStreamInfo::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget*
 	}
 	paint(frameBuffer);
 
-	rcInput->getKey(130); 
+	int key = rcInput->getKey(130);
+
+    if ( (key==CRCInput::RC_spkr) ||
+	     (key==CRCInput::RC_plus) ||
+         (key==CRCInput::RC_minus) )
+    {
+        rcInput->addKey2Buffer(key);
+    }
 
 	hide(frameBuffer);
 	return CMenuTarget::RETURN_REPAINT;
@@ -73,11 +80,13 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 	//paint msg...
 	sprintf((char*) buf, "Resolution: %dx%d", bitInfo[0], bitInfo[1] );
 	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
-	ypos+=mheight;
+
+	ypos+=mheight;
 
 	sprintf((char*) buf, "Bitrate: %d bit/sec", bitInfo[4]*50);
 	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
-	ypos+=mheight;
+
+	ypos+=mheight;
 
 
 	switch ( bitInfo[2] )
@@ -88,7 +97,8 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 		default: strcpy(buf, "Aspect Ratio: unknown");
 	}
 	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
-	ypos+=mheight;
+
+	ypos+=mheight;
 
 
 	switch ( bitInfo[3] )
@@ -98,7 +108,8 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 		default: strcpy(buf, "Framerate: unknown");
 	}
 	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
-	ypos+=mheight;
+
+	ypos+=mheight;
 
 
 	switch ( bitInfo[6] )
@@ -110,6 +121,9 @@ void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 		default: strcpy(buf, "Audiotype: unknown");
 	}
 	fonts->menu->RenderString(x+10,ypos+mheight, width, buf, COL_MENUCONTENT);
-	ypos+=mheight;
+
+	ypos+=mheight;
 }
+
+
 

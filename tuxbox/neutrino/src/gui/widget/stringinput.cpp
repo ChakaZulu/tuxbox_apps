@@ -8,8 +8,10 @@ CStringInput::CStringInput(string Name, FontsDef *Fonts, char* Value, int Size)
 	fonts = Fonts;
 	size = Size;
 	width = 400;
-	hheight = fonts->menu_title->getHeight();
-	mheight = fonts->menu->getHeight();
+	hheight = fonts->menu_title
+->getHeight();
+	mheight = fonts->menu
+->getHeight();
 	height = hheight+mheight+50;
 	x=((720-width) >> 1) -50;
 	y=((500-height)>>1);
@@ -142,3 +144,5 @@ void CStringInput::paintChar(CFrameBuffer* frameBuffer, int pos)
 
 	fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
 }
+
+

@@ -41,3 +41,5 @@ class CStringInput : public CMenuTarget
 
 
 #endif
+
+

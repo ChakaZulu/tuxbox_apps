@@ -27,7 +27,8 @@ class CColorChooser : public CMenuTarget
 	unsigned char *alpha;
 
 	string	name;
-	FontsDef *fonts;
+
+	FontsDef *fonts;
 
 	CChangeObserver* observer;
 
@@ -44,4 +45,6 @@ class CColorChooser : public CMenuTarget
 
 };
 
-#endif
+
+#endif
+

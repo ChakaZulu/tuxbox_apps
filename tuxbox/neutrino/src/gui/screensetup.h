@@ -35,3 +35,4 @@ class CScreenSetup : public CMenuTarget
 
 
 #endif
+

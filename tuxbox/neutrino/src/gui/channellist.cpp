@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.14 2001/09/06 19:13:21 McClean Exp $
+// $Id: channellist.cpp,v 1.15 2001/09/13 10:12:41 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.15  2001/09/13 10:12:41  field
+// Major update! Beschleunigtes zappen & EPG uvm...
+//
 // Revision 1.14  2001/09/06 19:13:21  McClean
 // no changes
 //
@@ -276,29 +279,34 @@ bool CChannelList::showInfo(CInfoViewer *infoViewer, int pos)
 	}
 	selected=pos;
 	channel* chan = chanlist[selected];
-	infoViewer->showTitle(selected+1, chan->name);
+	infoViewer->showTitle(selected+1, chan->name, true);
 	return true;
 }
 
 void CChannelList::zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer, int pos)
 {
-	if((pos >= (signed int) chanlist.size()) || (pos<0) || (pos==(int)tuned))
+	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
+    {
+        return;
+    }
+
+    selected= pos;
+  	channel* chan = chanlist[selected];
+    if ( pos!=(int)tuned )
 	{
-		return;
-	}
-	tuned = pos;
-	showInfo(infoViewer, pos);
-	channel* chan = chanlist[selected];
-	remoteControl->zapTo(chan->key, chan->name);
+        tuned = pos;
+    	remoteControl->zapTo(chan->key, chan->name);
+    }
+    infoViewer->showTitle(selected+ 1, chan->name);
 }
 
-void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, int key)
+void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key)
 {
-        if(chanlist.size()==0)
-        {
-                //evtl. anzeige dass keine kanalliste....
-                return;
-        }
+    if(chanlist.size()==0)
+    {
+        //evtl. anzeige dass keine kanalliste....
+        return;
+    }
  
 	int ox=300, oy=200;
 	int sx=fonts->channellist->getRenderWidth("000")+14, sy=fonts->channellist->getHeight()+6;
@@ -308,40 +316,65 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRem
 
 	while(1)
 	{
-		sprintf((char*) &valstr, "%d",chn);
+		sprintf((char*) &valstr, "%d", chn);
 		while(strlen(valstr)<3)
 		{
  			strcat(valstr,"-");
 		}
 		frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
 		fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
-		if(!showInfo(infoViewer, chn-1))
+/*		if(!showInfo(infoViewer, chn-1))
 		{	//channelnumber out of bounds
 			infoViewer->killTitle(); //warum tut das net?
 			usleep(100000);		
 			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
 			return;
 		}
-	
+*/
+        showInfo(infoViewer, chn- 1);
+
 		if ((key=rcInput->getKey(30))==-1)
-		break;
+    		break;
 
 		if ((key>=0) && (key<=9))
 		{ //numeric
-			chn=chn*10+key;
+            if ( pos==3 )
+            {
+                chn = key;
+                pos = 0;
+            }
+            else
+    			chn = chn* 10 + key;
+
 			pos++;
-			if(pos==3)
-			{
-				break;
-			}
 		}
 		else if (key==CRCInput::RC_ok)
 		{
+            if ( ( chn > (signed int) chanlist.size() ) || ( chn == 0 ) )
+            {
+        		chn = tuned + 1;
+	        }
 			break;
 		}
+        else if (key==settings->key_quickzap_down)
+		{
+			if ( chn == 1 )
+				chn = chanlist.size();
+			else
+				chn--;
+		}
+		else if (key==settings->key_quickzap_up)
+		{
+			chn = ( chn + 1 )%( chanlist.size() + 1 );
+        }
+        else if (key==CRCInput::RC_home)
+        {
+            chn = tuned + 1;
+            break;
+		};
 	}
 	//channel selected - show+go
-	frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
+/*	frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
 	sprintf((char*) &valstr, "%d",chn);
 	while(strlen(valstr)<3)
 	{
@@ -349,7 +382,9 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRem
 	}
 	fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
 	usleep(100000);
+*/
 	frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
+
 	chn--;
 	if (chn<0)
 		chn=0;
@@ -365,7 +400,7 @@ void CChannelList::quickZap(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemot
         }
  
 	printf("quickzap start\n");
-	while(1)
+/*	while(1)
 	{
 		if (key==settings->key_quickzap_down)
 		{
@@ -389,6 +424,23 @@ void CChannelList::quickZap(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemot
 		}
 		key = rcInput->getKey(7); 
 	}
+*/
+        if (key==settings->key_quickzap_down)
+		{
+			if(selected==0)
+					selected = chanlist.size()-1;
+				else
+					selected--;
+//				channel* chan = chanlist[selected];
+		}
+		else if (key==settings->key_quickzap_up)
+		{
+			selected = (selected+1)%chanlist.size();
+//			channel* chan = chanlist[selected];
+		};
+
+        zapTo(remoteControl, infoViewer,  selected);
+
 }
 
 void CChannelList::paintItem(CFrameBuffer* frameBuffer, int pos)
@@ -449,3 +501,4 @@ void CChannelList::paint(CFrameBuffer* frameBuffer)
 		paintItem(frameBuffer, count);
 	}
 }
+

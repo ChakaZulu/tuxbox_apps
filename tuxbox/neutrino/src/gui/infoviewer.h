@@ -1,13 +1,19 @@
 #ifndef __infoview__
 #define __infoview__
 
+#include "../driver/rcinput.h"
 #include "../driver/framebuffer.h"
 #include "../driver/fontrenderer.h"
 #include "../widget/color.h"
 #include "../helpers/settings.h"
 #include "../options.h"
+#include "streaminfo.h"
 
 #include "pthread.h"
+#include "semaphore.h"
+#include <sys/wait.h>
+#include <signal.h>
+
 #include "sectionsdMsg.h"
 
 #include <sys/socket.h>
@@ -40,19 +46,25 @@ class CInfoViewer
 		FontsDef			*fonts;
 		SNeutrinoSettings	*settings;
 
-		int					intTimer;
 		int					intShowDuration;
-		pthread_t			thrViewer;
 
-		
+		pthread_t			thrViewer;
+        pthread_cond_t      epg_cond;
+        pthread_mutex_t     epg_mutex;
+
+        CRCInput		    *rcInput;
+        CStreamInfo         *StreamInfo;
+
 		int					InfoHeightY;
 		int					BoxEndX;
 		int					BoxEndY;
 		int					BoxStartX;
 		int					BoxStartY;
 
+        int                 ChanWidth;
+        int                 ChanHeight;
+
 		string				CurrentChannel;
-		bool				epgReady;
 
 		char				running[50];
 		char				next[50];
@@ -61,23 +73,28 @@ class CInfoViewer
 		char				runningDuration[10];
 		char				nextDuration[10];
 		char				runningPercent;
-		
+
 		static void * InfoViewerThread (void *arg);
 		bool getEPGData( string channelName );
 		void showData();
+        void showWarte();
 	public:
+
+        bool                is_visible;
 
         CInfoViewer();
 
-        void start(CFrameBuffer *FrameBuffer, FontsDef *Fonts, SNeutrinoSettings *Settings );
+        void start( CFrameBuffer *FrameBuffer, FontsDef *Fonts, SNeutrinoSettings *Settings,
+                    CRCInput *AInput );
 
-        void showTitle( int ChanNum, string Channel, bool reshow=false );
+        void showTitle( int ChanNum, string Channel, bool CalledFromNumZap = false );
         void killTitle();
 
-	bool isActive();	
-
         void setDuration( int Duration );
+        void setStreamInfo( CStreamInfo *Info );
 };
 
 
 #endif
+
+

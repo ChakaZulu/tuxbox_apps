@@ -18,6 +18,8 @@ CRCInput::CRCInput()
 	timeout=-1;
 	prevrccode = 0xffff;
 	start();
+
+    tv_prev.tv_sec = 0;
 }
 
 /**************************************************************************
@@ -68,12 +70,12 @@ void CRCInput::addKey2Buffer(int key)
 **************************************************************************/
 int CRCInput::getKeyInt()
 {
+    struct timeval tv;
 	__u16 rccode;
 	bool repeat = true;
 	int	erg = RC_nokey;
 	while (repeat)
 	{
-
 		if (read(fd, &rccode, 2)!=2)
 		{
 			printf("key: empty\n");
@@ -81,29 +83,46 @@ int CRCInput::getKeyInt()
 		}
 		else
 		{
-			//printf("got key native key: %04x\n", rccode);
-			if(prevrccode==rccode)
-			{
-				//key-repeat - cursors and volume are ok
-				int tkey = translate(rccode);
-				if((tkey==RC_up) || (tkey==RC_down) || (tkey==RC_left) || (tkey==RC_right) ||
-					(tkey==RC_plus) || (tkey==RC_minus))
-				{//repeat is ok!
-					erg = tkey;
-					repeat = false;
-				}
-			}
-			else
-			{
-				erg = translate(rccode);
-				prevrccode=rccode;
-				if(erg!=RC_nokey)
-				{
-					repeat=false;
-					//printf("native key: %04x   tr: %04x   name: %s\n", rccode, erg, getKeyName(erg).c_str() );
-				}
-			}
+            gettimeofday( &tv, NULL );
+
+            // 100 ms wird als Untergrenze für 2 getrennte Tastendrücke angenommen..?
+
+            if ( ( tv_prev.tv_sec == 0 ) ||
+                 ( ( tv.tv_usec - tv_prev.tv_usec) > 100000 ) ||
+                 ( ( tv.tv_sec - tv_prev.tv_sec) > 0 ))
+            {
+                tv_prev = tv;
+
+//              printf("got key native key: %04x %d\n", rccode, tv.tv_sec );
+
+    			if( prevrccode==rccode )
+    			{
+    				//key-repeat - cursors and volume are ok
+				    int tkey = translate(rccode);
+    				if ((tkey==RC_up) || (tkey==RC_down) || (tkey==RC_left) || (tkey==RC_right) ||
+				        (tkey==RC_plus) || (tkey==RC_minus))
+    				{//repeat is ok!
+				    	erg = tkey;
+    					repeat = false;
+				    }
+    			}
+    			else
+    			{
+				    erg = translate(rccode);
+    				prevrccode=rccode;
+				    if(erg!=RC_nokey)
+    				{
+				    	repeat=false;
+    					//printf("native key: %04x   tr: %04x   name: %s\n", rccode, erg, getKeyName(erg).c_str() );
+				    }
+    			}
+            }
+            else
+            {
+//                printf("key ignored %d", tv.tv_sec);
+            }
 		}
+
 	}
 	return erg;
 }
@@ -262,3 +281,6 @@ void * CRCInput::InputThread (void *arg)
         }
         return NULL;
 }
+
+
+

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.23 2001/09/09 23:53:46 fnbrd Exp $
+        $Id: neutrino.cpp,v 1.24 2001/09/13 10:12:41 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.24  2001/09/13 10:12:41  field
+  Major update! Beschleunigtes zappen & EPG uvm...
+
   Revision 1.23  2001/09/09 23:53:46  fnbrd
   Fixed some bugs, only shown compiling with -Os.
   Conclusion: use -Os ;)
@@ -87,6 +90,7 @@
 #include "neutrino.h"
 
 #include "include/debug.h"
+
 
 class CColorSetupNotifier : public CChangeObserver
 {
@@ -221,6 +225,7 @@ CNeutrinoApp::CNeutrinoApp()
 	frameBuffer.setIconBasePath("/usr/lib/icons/");
 	settingsFile = "/var/neutrino.conf";
 	mode = mode_tv;
+
 }
 
 /*-------------------------------------------------------------------------------------
@@ -665,36 +670,39 @@ void CNeutrinoApp::SetupFonts()
 {
 	fonts = new FontsDef();
 	fonts->menu=fontRenderer->getFont("Arial", "Regular", 20); // was "Arial" "Bold" 20
-	fonts->menu->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->menu->RenderString( 10, 100, 500, "DEMO!", 0 );
 	fonts->menu_title=fontRenderer->getFont("Arial", "Regular", 30); // was: "Arial Black", "Regular", 30
 	                                                              // but this font has wrong metric! (getHeight())
-	fonts->menu_title->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->menu_title->RenderString( 10, 100, 500, "DEMO!", 0 );
 	fonts->epg_title=fontRenderer->getFont("Arial", "Regular", 30);
-	fonts->epg_title->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->epg_title->RenderString( 10, 100, 500, "DEMO!", 0 );
 	
 	fonts->epg_info1=fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
-	fonts->epg_info1->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->epg_info1->RenderString( 10, 100, 500, "DEMO!", 0 );
 	fonts->epg_info2=fontRenderer->getFont("Arial", "Regular", 17);
-	fonts->epg_info2->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->epg_info2->RenderString( 10, 100, 500, "DEMO!", 0 );
 
 	fonts->epg_date=fontRenderer->getFont("Arial", "Regular", 15);
-	fonts->epg_date->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->epg_date->RenderString( 10, 100, 500, "DEMO!", 0 );
 	fonts->alert=fontRenderer->getFont("Arial", "Regular", 100);
 
 	fonts->channellist=fontRenderer->getFont("Arial", "Regular", 20);
-	fonts->channellist->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->channellist->RenderString( 10, 100, 500, "DEMO!", 0 );
 	fonts->channellist_number=fontRenderer->getFont("Arial", "Regular", 14);
-	fonts->channellist_number->RenderString( 10,100, 500, "DEMO!", 0);
+	fonts->channellist_number->RenderString( 10, 100, 500, "DEMO!", 0);
 	
 	fonts->infobar_number=fontRenderer->getFont("Arial", "Regular", 50);
-	fonts->infobar_number->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->infobar_number->RenderString( 10, 100, 500, "DEMO!", 0 );
 	fonts->infobar_channame=fontRenderer->getFont("Arial", "Regular", 30);
-	fonts->infobar_channame->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->infobar_channame->RenderString( 10, 100, 500, "DEMO!", 0 );
 	fonts->infobar_info=fontRenderer->getFont("Arial", "Regular", 20);
-	fonts->infobar_info->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->infobar_info->RenderString( 10, 100, 500, "DEMO!", 0 );
+
+    fonts->infobar_small=fontRenderer->getFont("Arial", "Regular", 14);
+	fonts->infobar_small->RenderString( 10, 100, 500, "DEMO!", 0 );
 
 	fonts->fixedabr20=fontRenderer->getFont("Arial Black", "Regular", 20);
-	fonts->fixedabr20->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->fixedabr20->RenderString( 10, 100, 500, "DEMO!", 0 );
 }
 
 void CNeutrinoApp::ClearFrameBuffer()
@@ -739,17 +747,20 @@ void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audi
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Run mode", fonts) );
 	mainSettings.addItem( new CMenuForwarder("Shutdown", fonts, true, "", this, "shutdown") );
 	mainSettings.addItem( new CMenuForwarder("TV-Mode", fonts, true, "", this, "tv"), true );
-	mainSettings.addItem( new CMenuForwarder("Radio-Mode", fonts, true, "", this, "radio") );
+	mainSettings.addItem( new CMenuForwarder("Radio-Mode", fonts, (zapit), "", this, "radio") );
 	mainSettings.addItem( new CMenuForwarder("MP3-Player", fonts, false, "", this, "mp3") );
 	mainSettings.addItem( new CMenuForwarder("Stream playback", fonts, false, "", this, "playback") );
 
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Info", fonts) );
-		CStreamInfo* StreamInfo = new CStreamInfo(fonts);
+
+	CStreamInfo* StreamInfo = new CStreamInfo(fonts);
+    infoViewer.setStreamInfo(StreamInfo);
 	mainSettings.addItem( new CMenuForwarder("Stream Info", fonts, true, "", StreamInfo) );
 
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Settings", fonts) );
 	mainSettings.addItem( new CMenuForwarder("Video", fonts, true, "", &videoSettings) );
-		CScreenSetup* screenSettings= new CScreenSetup("Screen setup", fonts, &settings);
+
+	CScreenSetup* screenSettings= new CScreenSetup("Screen setup", fonts, &settings);
 	mainSettings.addItem( new CMenuForwarder("Screen Setup", fonts, true, "", screenSettings) );
 	mainSettings.addItem( new CMenuForwarder("Audio", fonts, true, "", &audioSettings) );
 	mainSettings.addItem( new CMenuForwarder("Network", fonts, true, "", &networkSettings) );
@@ -908,7 +919,7 @@ void CNeutrinoApp::InitZapper()
 	if (!zapit)
 		channelsInit();
 		
-	infoViewer.start(&frameBuffer, fonts, &settings);
+	infoViewer.start(&frameBuffer, fonts, &settings, &rcInput);
 	epgData.start(&frameBuffer, fonts, &rcInput, &settings);	
 		
 	if (zapit) 
@@ -938,13 +949,10 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 
 		if (key==CRCInput::RC_setup)
 		{
-			infoViewer.killTitle();
 			mainSettings.exec(&frameBuffer, &rcInput, NULL, "");
 		}
 		else if (key==CRCInput::RC_standby)
 		{
-			//exit
-			infoViewer.killTitle();
 			nRun=false;
 		}
 
@@ -952,7 +960,6 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 		{
 			if (key==CRCInput::RC_ok)
 			{	//channellist
-				infoViewer.killTitle();
 				channelList->exec(&frameBuffer, &rcInput, &remoteControl, &infoViewer, &settings);
 			}
 			else if ((key==settings.key_quickzap_up) || (key==settings.key_quickzap_down))
@@ -962,35 +969,27 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 			}
 			else if (key==CRCInput::RC_help)
 			{	//epg
-				if(infoViewer.isActive())
+				if ( infoViewer.is_visible )
 				{
-					infoViewer.killTitle();
+                    infoViewer.killTitle();
 					epgData.show( channelList->getActiveChannelName() );
 				}
 				else
 				{
-					infoViewer.showTitle(   channelList->getActiveChannelNumber(), 
-							channelList->getActiveChannelName(), true );
+					infoViewer.showTitle(  channelList->getActiveChannelNumber(),
+					                       channelList->getActiveChannelName() );
 				}
 			}
 			else if ((key>=0) && (key<=9))
 			{ //numeric zap
-				channelList->numericZap( &frameBuffer, &rcInput, &remoteControl, &infoViewer, key);
+				channelList->numericZap( &frameBuffer, &rcInput, &remoteControl, &infoViewer, &settings, key);
 			}
 			else if (key==CRCInput::RC_spkr)
 			{	//mute
-				if(mute)
-				{
-					AudioUnMute();
-				}
-				else
-				{
-					AudioMute();
-				}
+				AudioMuteToggle();
 			}
 			else if ((key==CRCInput::RC_plus) || (key==CRCInput::RC_minus))
 			{	//volume
-				infoViewer.killTitle();
 				setVolume( key );
 			}
 		}
@@ -1002,13 +1001,15 @@ void CNeutrinoApp::ExitRun()
 	saveSetup(&settings);
 	printf("neutrino exit\n");
 	//shutdown screen
-	infoViewer.killTitle();
+
 	//memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
 	for(int x=0;x<256;x++)
 		frameBuffer.paletteSetColor(x, 0x000000, 0xffff); 
+
 	frameBuffer.paletteSet();
 	frameBuffer.paintIcon8("shutdown.raw",0,0);
 	frameBuffer.loadPal("shutdown.pal");
+
 	Controld.shutdown();
 	sleep(55555);
 }
@@ -1094,27 +1095,24 @@ int CNeutrinoApp::run(int argc, char **argv)
 	return 0;
 }
 
-void CNeutrinoApp::AudioUnMute()
+void CNeutrinoApp::AudioMuteToggle()
 {
 	int dx = 40;
 	int dy = 40;
 	int x = settings.screen_EndX-dx;
 	int y = settings.screen_StartY;
-	frameBuffer.paintBoxRel(x, y, dx, dy, COL_BACKGROUND);
-	Controld.UnMute();
-	mute = false;
-}
-
-void CNeutrinoApp::AudioMute()
-{
-	int dx = 40;
-	int dy = 40;
-	int x = settings.screen_EndX-dx;
-	int y = settings.screen_StartY;
-	frameBuffer.paintBoxRel(x, y, dx, dy, COL_INFOBAR);
-	frameBuffer.paintIcon("mute.raw",x+5,y+5);
-	Controld.Mute();
-	mute = true;
+    if ( !mute )
+    {
+    	frameBuffer.paintBoxRel(x, y, dx, dy, COL_INFOBAR);
+    	frameBuffer.paintIcon("mute.raw", x+5, y+5);
+    	Controld.Mute();
+    }
+    else
+    {
+        frameBuffer.paintBoxRel(x, y, dx, dy, COL_BACKGROUND);
+    	Controld.UnMute();
+    }
+	mute = !mute;
 }
 
 void CNeutrinoApp::setVolume(int key)
@@ -1123,26 +1121,16 @@ void CNeutrinoApp::setVolume(int key)
 	int dy = 40;
 	int x = (((settings.screen_EndX-settings.screen_StartX)-dx) / 2) + settings.screen_StartX;
 	int y = settings.screen_EndY-100;
+
 	frameBuffer.paintIcon("volume.raw",x,y, COL_INFOBAR);
-	frameBuffer.paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
-	int vol = volume<<1;
-	frameBuffer.paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
-	bool nRun=true;
-	bool paint = false;
-	while(nRun)
+
+    do
 	{
-		paint = false;
-		if (key==CRCInput::RC_timeout)
-		{
-			nRun=false;
-			break;
-		}
-		else if (key==CRCInput::RC_plus)
+        if (key==CRCInput::RC_plus)
 		{
 			if (volume<100)
 			{
 				volume += 5;
-				paint = true;
 			}
 		}
 		else if (key==CRCInput::RC_minus)
@@ -1150,38 +1138,35 @@ void CNeutrinoApp::setVolume(int key)
 			if (volume>0)
 			{
 				volume -= 5;
-				paint = true;
 			}
 		}
-		else if (key==CRCInput::RC_spkr)
-		{	//mute
-			if(mute)
-			{
-				AudioUnMute();
-			}
-			else
-			{
-				AudioMute();
-			}
-			break;
-		}
-		if (paint)
-		{
-			Controld.setVolume(volume);
-			int vol = volume<<1;
-			frameBuffer.paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
-			frameBuffer.paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
-		}
+        else 
+        {
+            rcInput.addKey2Buffer(key);
+            key= CRCInput::RC_timeout;
+        }
 
-		key = rcInput.getKey(30); 
-	}
+		Controld.setVolume(volume);
+
+		int vol = volume<<1;
+		frameBuffer.paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
+		frameBuffer.paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
+
+        if ( key != CRCInput::RC_timeout )
+        {
+    		key = rcInput.getKey(30);
+        }
+
+	} while ( key != CRCInput::RC_timeout );
+
 	frameBuffer.paintBoxRel(x, y, dx, dy, COL_BACKGROUND);
 }
 
 void CNeutrinoApp::tvMode()
 {
 	mode = mode_tv;
-	infoViewer.killTitle();
+//	infoViewer.killTitle();
+
 	memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
 	frameBuffer.useBackground(false);
 
@@ -1196,7 +1181,8 @@ void CNeutrinoApp::tvMode()
 void CNeutrinoApp::radioMode()
 {
 	mode = mode_radio;
-	infoViewer.killTitle();
+//	infoViewer.killTitle();
+
 	frameBuffer.loadPal("dboxradio.pal", 18, 199);
 	frameBuffer.paintIcon8("dboxradio.raw",0,0, 18);
 	frameBuffer.loadBackground("dboxradio.raw", 18);
@@ -1267,4 +1253,7 @@ int main(int argc, char **argv)
 	CNeutrinoApp neutrino;
 	return neutrino.run(argc, argv);
 }
+
+
+
 

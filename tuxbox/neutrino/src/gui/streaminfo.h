@@ -37,3 +37,4 @@ class CStreamInfo : public CMenuTarget
 
 
 #endif
+

@@ -46,6 +46,7 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
+// #include "widget/window.h"
 #include "widget/color.h"
 #include "widget/menue.h"
 #include "widget/channellist.h"
@@ -68,7 +69,6 @@
 #include <map>
 
 using namespace std;
-
 
 
 /**************************************************************************************
@@ -126,8 +126,7 @@ class CNeutrinoApp : public CMenuTarget
 	void tvMode();
 	void radioMode();
 	void setVolume(int key);
-	void AudioMute();
-	void AudioUnMute();
+	void AudioMuteToggle();
 
 	void ExitRun();
 	void RealRun(CMenuWidget &mainSettings);
@@ -159,3 +158,6 @@ class CNeutrinoApp : public CMenuTarget
 };
 
 #endif
+
+
+

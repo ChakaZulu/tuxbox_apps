@@ -14,3 +14,4 @@ int convertSetupAlpha2Alpha(unsigned char alpha)
 {
 	return int( float(0x7777/100.)*float(alpha) );
 }
+

@@ -28,46 +28,38 @@ void CMenuWidget::addItem(CMenuItem* menuItem, bool defaultselected)
 
 int CMenuWidget::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent, string)
 {
+    int pos;
+    int key;
 
-	if(parent)
+	if ( parent )
 		parent->hide(frameBuffer);
 
 	paint(frameBuffer);
-	bool loop = true;
 	int retval = CMenuItem::RETURN_REPAINT;
-	while(loop)
+
+    do
 	{
-		int key = rcInput->getKey(300); 
-		if(key==-1)
-		{//timeout, close 
-			loop = false;
-		}
-		else if (key==CRCInput::RC_up)
-		{//search next selectable item
-			for(unsigned int count=1;count<items.size();count++)
+		key = rcInput->getKey(300);
+
+		if ( (key==CRCInput::RC_up) || (key==CRCInput::RC_down) )
+		{
+            //search next / prev selectable item
+			for (unsigned int count=1; count< items.size(); count++)
 			{
-				int pos = selected-count;
-				if(pos<0)
-					pos = items.size()-1;
+                if (key==CRCInput::RC_up)
+                {
+				    pos = selected- count;
+				    if ( pos<0 )
+    					pos = items.size()-1;
+                }
+                else
+                {
+                    pos = (selected+ count)%items.size();
+                }
+
 				CMenuItem* item = items[pos];
-				if( item->isSelectable())
-				{
-					//clear prev. selected
-					items[selected]->paint(frameBuffer, false);
-					//select new
-					item->paint(frameBuffer, true);
-					selected = pos;
-					break;
-				}
-			}			
-		}
-		else if (key==CRCInput::RC_down)
-		{//search next selectable item
-			for(unsigned int count=1;count<items.size();count++)
-			{
-				int pos = (selected+count)%items.size();
-				CMenuItem* item = items[pos];
-				if( item->isSelectable())
+
+				if ( item->isSelectable() )
 				{
 					//clear prev. selected
 					items[selected]->paint(frameBuffer, false);
@@ -79,28 +71,36 @@ int CMenuWidget::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget*
 			}			
 		}
 		else if (key==CRCInput::RC_ok)
-		{//exec this item...
+		{
+            //exec this item...
 			CMenuItem* item = items[selected];
-			int ret = item->exec(frameBuffer, rcInput, this);			
+			int ret = item->exec(frameBuffer, rcInput, this);
+		
 			if(ret==CMenuItem::RETURN_EXIT)
 			{
-				loop = false;
+                key = CRCInput::RC_timeout;
 			}
 			else if(ret==CMenuItem::RETURN_EXIT_ALL)
 			{
-				ret = CMenuItem::RETURN_EXIT_ALL;
-				loop = false;
+				retval = CMenuItem::RETURN_EXIT_ALL;
+                key = CRCInput::RC_timeout;
 			}
 			else if(ret==CMenuItem::RETURN_REPAINT)
 			{
 				paint(frameBuffer);
 			}
 		}
-	}
+        else if (key==CRCInput::RC_home)
+		{
+//            retval = CMenuItem::RETURN_EXIT;
+            key = CRCInput::RC_timeout;
+        }
+	} while ( key!=CRCInput::RC_timeout );
+
 	hide(frameBuffer);
 
-        CLCDD lcdd;
-        lcdd.setMode(LCDM_TV, name);
+    CLCDD lcdd;
+    lcdd.setMode(LCDM_TV, name);
 
 	return retval;
 }
@@ -348,3 +348,5 @@ int CMenuSeparator::paint(CFrameBuffer*	frameBuffer, bool selected)
 	}
 	return y+height;
 }
+
+

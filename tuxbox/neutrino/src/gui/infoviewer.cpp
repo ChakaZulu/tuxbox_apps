@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.12 2001/09/09 23:53:46 fnbrd Exp $
+// $Id: infoviewer.cpp,v 1.13 2001/09/13 10:12:41 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.13  2001/09/13 10:12:41  field
+// Major update! Beschleunigtes zappen & EPG uvm...
+//
 // Revision 1.12  2001/09/09 23:53:46  fnbrd
 // Fixed some bugs, only shown compiling with -Os.
 // Conclusion: use -Os ;)
@@ -25,14 +28,12 @@
 
 #include "infoviewer.h"
 
-
 CInfoViewer::CInfoViewer()
 {
-	intTimer = 0;
 	intShowDuration = 15; //7,5 sec
 	frameBuffer = NULL;
 	fonts = NULL;
-        BoxStartX=BoxStartY=BoxEndX=BoxEndY=0;
+    BoxStartX=BoxStartY=BoxEndX=BoxEndY=0;
 
 	strcpy( running, "");
 	strcpy( next, "");
@@ -42,23 +43,33 @@ CInfoViewer::CInfoViewer()
 	strcpy( nextDuration, "");
 	runningPercent = 0;
 	CurrentChannel = "";
-	epgReady = true;
+
+    pthread_cond_init( &epg_cond, NULL );
+    pthread_mutex_init( &epg_mutex, NULL );
+
+    if (pthread_create (&thrViewer, NULL, InfoViewerThread, (void *) this) != 0 )
+	{
+		perror("create failed\n");
+	}
 }
 
-void CInfoViewer::start(CFrameBuffer *FrameBuffer, FontsDef *Fonts, SNeutrinoSettings *Settings )
+void CInfoViewer::start(CFrameBuffer *FrameBuffer, FontsDef *Fonts, SNeutrinoSettings *Settings, CRCInput *AInput )
 {
 	frameBuffer = FrameBuffer;
 	fonts = Fonts;
 	settings = Settings;
+    rcInput = AInput;
 
-	//InfoHeightY = fonts->infobar_number->getHeight()*9/8 + 10 + 2*fonts->infobar_info->getHeight(); //170
-	InfoHeightY = fonts->infobar_number->getHeight()*9/8 + 2*fonts->infobar_info->getHeight() + 25;
+	InfoHeightY = fonts->infobar_number->getHeight()*9/8 +
+                  2*fonts->infobar_info->getHeight() +
+//                  fonts->infobar_small->getHeight() +
+                  25;
+
 //	printf("infoh %d", InfoHeightY);
 
-	if (pthread_create (&thrViewer, NULL, InfoViewerThread, (void *) this) != 0 )
-	{
-		perror("create failed\n");
-	}
+    ChanWidth = fonts->infobar_number->getRenderWidth("000") + 10;
+	ChanHeight = fonts->infobar_number->getHeight()*9/8;
+
 }
 
 void CInfoViewer::setDuration( int Duration )
@@ -66,21 +77,21 @@ void CInfoViewer::setDuration( int Duration )
 	intShowDuration = Duration;
 }
 
-void CInfoViewer::showTitle( int ChanNum, string Channel, bool reshow )
+void CInfoViewer::setStreamInfo( CStreamInfo *Info )
 {
-	if (reshow)
-		CurrentChannel = "";
-	if (CurrentChannel==Channel)
-	{
-		intTimer = intShowDuration;
-		return;
-	}
-	CurrentChannel = Channel;
+    StreamInfo = Info;
+}
 
-	BoxStartX = settings->screen_StartX+20;
-	BoxEndX   = settings->screen_EndX-20;
-	BoxEndY   = settings->screen_EndY-20;
-	BoxStartY = BoxEndY-InfoHeightY;
+void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap )
+{
+    pthread_mutex_lock( &epg_mutex );
+	CurrentChannel = Channel;
+    pthread_mutex_unlock( &epg_mutex );
+
+	BoxStartX = settings->screen_StartX+ 20;
+	BoxEndX   = settings->screen_EndX- 20;
+	BoxEndY   = settings->screen_EndY- 20;
+	BoxStartY = BoxEndY- InfoHeightY;
 
 	//frameBuffer->paintVLine(settings->screen_StartX,0,576, 3);
 	//frameBuffer->paintVLine(settings->screen_EndX,0,576, 3);
@@ -88,10 +99,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool reshow )
 
 
 	//number box
-	int ChanWidth = fonts->infobar_number->getRenderWidth("000")+10;
-	int ChanHeight = fonts->infobar_number->getHeight()*9/8;
 	frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW);
 	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR);
+
 	//channel number
 	char strChanNum[10];
 	sprintf( (char*) strChanNum, "%d", ChanNum);
@@ -111,25 +121,49 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool reshow )
 	int ChanInfoY = BoxStartY + ChanHeight+10;
 	frameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndY, COL_INFOBAR);
 
-	//epg-data?
-	intTimer = intShowDuration;
-	epgReady = false;
-/*
-	if (getEPGData( Channel.c_str() ))
-		showData();
-*/
+    is_visible = true;
+    pthread_cond_signal( &epg_cond );
+
+    usleep(50);
+
+    int key;
+
+    do
+    {
+        key = rcInput->getKey( intShowDuration* 5 );
+        if ( key == CRCInput::RC_blue )
+        {
+            StreamInfo->exec(frameBuffer, rcInput, NULL, "");
+            key = -1;
+        }
+
+    } while (false);
+
+    if ( ( key != CRCInput::RC_timeout ) &&
+         ( ( key != CRCInput::RC_ok ) || ( CalledFromNumZap ) ) &&
+         ( ( key != CRCInput::RC_home ) || ( CalledFromNumZap ) ) &&
+         ( key != -1 ) )
+    {
+        rcInput->addKey2Buffer(key);
+    };
+
+    if ( ( key != settings->key_quickzap_up ) &&
+         ( key != settings->key_quickzap_down ) &&
+         ( key != CRCInput::RC_help ) &&
+         ( !CalledFromNumZap ) )
+    {
+        killTitle();
+    };
 }
 
 void CInfoViewer::showData()
 {
 	int height;
-	int ChanWidth = fonts->infobar_number->getRenderWidth("000")+10;
-	int ChanHeight = fonts->infobar_number->getHeight()*9/8;
 
 	int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
 
 	int ChanInfoX = BoxStartX + (ChanWidth >>1);
-	int ChanInfoY = BoxStartY + ChanHeight+15; //+10
+	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
 	
 
 	//percent
@@ -151,6 +185,7 @@ void CInfoViewer::showData()
 	ChanInfoY += height;
 
 	//info next
+    frameBuffer->paintBox(BoxStartX + ChanWidth + 25, ChanInfoY, BoxStartX + ChanWidth+ 225, ChanInfoY+ height , COL_INFOBAR);
 	int start2width      = fonts->infobar_info->getRenderWidth(nextStart);
 	int duration2Width   = fonts->infobar_info->getRenderWidth(nextDuration); 
 	int duration2TextPos = BoxEndX-duration2Width-10;
@@ -159,47 +194,86 @@ void CInfoViewer::showData()
 	fonts->infobar_info->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
 }
 
-void CInfoViewer::killTitle()
+void CInfoViewer::showWarte()
 {
-	intTimer = 0;
-	frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
+	int height=fonts->infobar_info->getHeight();
+    int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
+	fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 25, ChanInfoY,  200, "Warte auf EPG...", COL_INFOBAR);
 }
 
-bool CInfoViewer::isActive()
+void CInfoViewer::killTitle()
 {
-	if(intTimer!=0)
-		return true;
-	else
-		return false;
+	frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
+    is_visible = false;
 }
+
 
 void * CInfoViewer::InfoViewerThread (void *arg)
 {
+    int repCount;
+    string query = "";
+    bool gotEPG, requeryEPG;
+
 	CInfoViewer* InfoViewer = (CInfoViewer*) arg;
 	while(1)
 	{
-		usleep(500000);
-		if(InfoViewer->intTimer>0)
-		{
-			InfoViewer->intTimer--;
-			if(InfoViewer->intTimer==0)
-			{
-				InfoViewer->killTitle();
-			}
-			else
-			{
-				//epg
-				if((!InfoViewer->epgReady) && (InfoViewer->intTimer&1))
+        pthread_mutex_lock( &InfoViewer->epg_mutex );
+        pthread_cond_wait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex );
+
+//        printf("CInfoViewer::InfoViewerThread after pthread_cond_wait\n");
+
+        if ( ( InfoViewer->is_visible ) )
+        {
+            gotEPG = true;
+            repCount = 10;
+
+            do
+            {
+                if ( !gotEPG )
+                {
+                    if ( repCount > 0 )
+                        InfoViewer->showWarte();
+
+//                    printf("CInfoViewer::InfoViewerThread before waiting long\n");
+                    usleep( 1000000 );
+//                    printf("CInfoViewer::InfoViewerThread after waiting long\n");
+
+                    repCount--;
+                }
+
+                pthread_mutex_trylock( &InfoViewer->epg_mutex );
+                query = InfoViewer->CurrentChannel;
+                pthread_mutex_unlock( &InfoViewer->epg_mutex );
+
+
+//                printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
+
+                gotEPG = InfoViewer->getEPGData(query);
+
+                pthread_mutex_trylock( &InfoViewer->epg_mutex );
+
+                requeryEPG = ( ( (!gotEPG) || (query!=InfoViewer->CurrentChannel) ) &&
+                               ( InfoViewer->is_visible ) );
+
+                if (query!=InfoViewer->CurrentChannel)
+                    repCount = 10;
+
+                pthread_mutex_unlock( &InfoViewer->epg_mutex );
+
+                if ( ( !requeryEPG) && ( InfoViewer->is_visible ) )
 				{
-					string query = InfoViewer->CurrentChannel;
-					if( (InfoViewer->getEPGData(query)) && (query==InfoViewer->CurrentChannel))
-					{
-						InfoViewer->epgReady = true;
-						InfoViewer->showData();
-					}
+//                    printf("CInfoViewer::InfoViewerThread success\n");
+					InfoViewer->showData();
 				}
-			}
-		}
+                else
+                {
+//                    printf("CInfoViewer::InfoViewerThread unsuccessful\n");
+                }
+
+
+            } while ( ( requeryEPG ) && (repCount > 0) );
+        }
+
 	}
 	return NULL;
 }
@@ -320,3 +394,5 @@ bool CInfoViewer::getEPGData( string channelName )
 		return true;
 	#endif
 }
+
+

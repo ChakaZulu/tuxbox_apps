@@ -101,8 +101,12 @@ class FontsDef
 			*infobar_number,
 			*infobar_channame,
 			*infobar_info,
+            *infobar_small,
 			
 			*fixedabr20; // fixed arial black 20
 };
 
 #endif
+
+
+

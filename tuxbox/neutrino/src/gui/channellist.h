@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.8 2001/08/20 13:10:27 tw-74 Exp $
+// $Id: channellist.h,v 1.9 2001/09/13 10:12:41 field Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.9  2001/09/13 10:12:41  field
+// Major update! Beschleunigtes zappen & EPG uvm...
+//
 // Revision 1.8  2001/08/20 13:10:27  tw-74
 // cosmetic changes and changes for variable font size
 //
@@ -82,10 +85,11 @@ class CChannelList
 	void zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer, int pos);
 	bool showInfo(CInfoViewer *infoViewer, int pos);
 	void updateEvents(void);
-	void numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, int key);
+	void numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key);
 	void exec(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings);
 	void quickZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key);
 };
 
 
 #endif
+

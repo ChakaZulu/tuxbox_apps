@@ -240,3 +240,4 @@ void CColorChooser::paintSlider(CFrameBuffer* frameBuffer, int x, int y, unsigne
 
 	fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT);
 }
+

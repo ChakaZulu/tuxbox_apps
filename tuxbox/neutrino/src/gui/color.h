@@ -15,3 +15,4 @@ int convertSetupAlpha2Alpha(unsigned char alpha);
 
 
 #endif
+

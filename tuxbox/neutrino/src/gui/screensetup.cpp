@@ -207,3 +207,4 @@ void CScreenSetup::paint(CFrameBuffer* frameBuffer)
 	paintBorderLR( frameBuffer );
 }
 
+

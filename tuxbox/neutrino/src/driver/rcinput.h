@@ -6,6 +6,8 @@
 #include <asm/types.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <sys/time.h>
+
 #include <utime.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -29,6 +31,8 @@ class CRCInput
 		pthread_t       thrTimer;
 		sem_t			waitforkey;
 		int				timeout;
+
+        struct timeval  tv_prev;
 
 		__u16			prevrccode;
 
@@ -64,3 +68,6 @@ class CRCInput
 };
 
 #endif
+
+
+
