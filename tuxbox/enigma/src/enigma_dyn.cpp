@@ -2336,15 +2336,9 @@ static eString getEITC2(eString result)
 	now_text = now_text.left(30);
 	next_text = next_text.left(30);
 	result.strReplace("#NOWT#", now_time);
-	if (now_duration != "&nbsp;")
-		if (atoi(now_duration.c_str()) < 1000)
-			now_duration += " min";
 	result.strReplace("#NOWD#", now_duration);
 	result.strReplace("#NOWST#", now_text);
 	result.strReplace("#NEXTT#", next_time);
-	if (next_duration != "&nbsp;")
-		if (atoi(next_duration.c_str()) < 1000)
-			next_duration += " min";
 	result.strReplace("#NEXTD#", next_duration);
 	result.strReplace("#NEXTST#", next_text);
 	result.strReplace("#VOLBAR#", getVolBar());
