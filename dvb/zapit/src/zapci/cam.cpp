@@ -324,7 +324,7 @@ int writecam (uint8_t *data, uint8_t len)
 	return _writecamnu(0x23, data, len);
 }
 
-int descramble (uint16_t original_network_id, uint16_t service_id, uint16_t unknown, uint16_t ca_system_id, dvb_pid_t ecm_pid, pids *decode_pids)
+int descramble (uint16_t original_network_id, uint16_t service_id, uint16_t unknown, uint16_t ca_system_id, pids *decode_pids)
 {
 	uint8_t buffer[100];
 	uint8_t i;
@@ -339,8 +339,8 @@ int descramble (uint16_t original_network_id, uint16_t service_id, uint16_t unkn
 	buffer[6] = unknown & 0xFF;
 	buffer[7] = ca_system_id >> 8;
 	buffer[8] = ca_system_id & 0xFF;
-	buffer[9] = ecm_pid >> 8;
-	buffer[10] = ecm_pid & 0xFF;
+	buffer[9] = decode_pids->ecmpid >> 8;
+	buffer[10] = decode_pids->ecmpid & 0xFF;
 	buffer[11] = decode_pids->count_vpids + decode_pids->count_apids;
 
 	p = 12;

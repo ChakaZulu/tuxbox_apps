@@ -1,195 +1,245 @@
-#include "xml/xmltree.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-#include <ctype.h>
-#include <map>
-#include <string>
+/*
+ * $Id: getservices.cpp,v 1.32 2002/04/10 18:36:21 obi Exp $
+ */
 
 #include "getservices.h"
-#include "descriptors.h"
 
-void ParseTransponder(XMLTreeNode *xmltransponder);
-void ParseRoot(XMLTreeNode *root);
-void FindTransponder(XMLTreeNode *root);
-void LoadSortList(void);
-int LoadServices(void);
+uint8_t curr_diseqc = 0;
 
-uint16_t curr_tsid = 0;
-uint16_t curr_diseqc = 0;
-
-void nameinsert (std::string name, uint32_t onid_sid, uint sm)
+void nameinsert (std::string name, uint16_t original_network_id, uint16_t service_id, uint8_t service_type)
 {
 	int number = 0;
 	char cnumber[3];
 	std::string newname = name;
 
-	if (sm == 2)
+	switch (service_type)
 	{
-		while (namechans_radio.count(newname) != 0)
-		{
-			sprintf(cnumber, "%2d", ++number);
-			newname = name + cnumber;
-		}
-		namechans_radio.insert(std::pair<std::string, uint32_t>(newname, onid_sid));
-		allchans_radio.find(onid_sid)->second.name = newname;
-	}
-	else
-	{
+	case DIGITAL_TELEVISION_SERVICE:
+	case NVOD_REFERENCE_SERVICE:
 		while (namechans_tv.count(newname) != 0)
 		{
 			sprintf(cnumber, "%2d", ++number);
 			newname = name + cnumber;
 		}
-		namechans_tv.insert(std::pair<std::string, uint32_t>(newname, onid_sid));
-		allchans_tv.find(onid_sid)->second.name = newname;
+
+		namechans_tv.insert
+		(
+			std::pair <std::string, uint32_t>
+			(
+				newname,
+				(original_network_id << 16) | service_id
+			)
+		);
+
+		allchans_tv.find((original_network_id << 16) | service_id)->second.setName(newname);
+		break;
+
+	case DIGITAL_RADIO_SOUND_SERVICE:
+		while (namechans_radio.count(newname) != 0)
+		{
+			sprintf(cnumber, "%2d", ++number);
+			newname = name + cnumber;
+		}
+
+		namechans_radio.insert
+		(
+			std::pair <std::string, uint32_t>
+			(
+				newname,
+				(original_network_id << 16) | service_id
+			)
+		);
+
+		allchans_radio.find((original_network_id << 16) | service_id)->second.setName(newname);
+		break;
+		
+	default:
+		break;
 	}
 }
 
-void ParseTransponder (XMLTreeNode *xmltransponder)
+void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 {
-	XMLTreeNode *services;
+	uint16_t transport_stream_id;
+	uint16_t original_network_id;
+	FrontendParameters feparams;
+	uint8_t polarization = 0;
+	uint8_t tmp;
 
-	char *type;
-	uint16_t tmp;
-
-	int sm;
-	std::string name;
-	uint16_t cnr;
-	uint16_t sid;
-	uint16_t onid;
-
-	for (services = xmltransponder->GetChild(); services != NULL; services = services->GetNext())
+	/* read all transponders */
+	while ((node != NULL) && (!strcmp(node->GetType(), "transponder")))
 	{
-		type = services->GetType();
+		/* common */
+		sscanf(node->GetAttributeValue("id"), "%hx", &transport_stream_id);
+		sscanf(node->GetAttributeValue("onid"), "%hx", &original_network_id);
+		sscanf(node->GetAttributeValue("frequency"), "%u", &feparams.Frequency);
 
-		if (!strcmp("cable", type))
+		/* cable */
+		if (DiSEqC == 0xFF)
 		{
-			if (transponders.count(curr_tsid) == 0)
-			{
-				printf("[getservices.cpp] no transponder with that tsid found\n");
-				return;
-			}
-
-			std::map<uint, transponder>::iterator trans = transponders.find(curr_tsid);
-			sscanf(services->GetAttributeValue("frequency"),"%u", &trans->second.feparams.Frequency);
-			sscanf(services->GetAttributeValue("symbolRate"), "%u", &trans->second.feparams.u.qam.SymbolRate);
-			sscanf(services->GetAttributeValue("fec"), "%hu", &tmp);
-			trans->second.feparams.u.qam.FEC_inner = getFEC(tmp);
-			sscanf(services->GetAttributeValue("modulation"), "%hu", &tmp);
-			trans->second.feparams.u.qam.QAM = getModulation(tmp);
+			sscanf(node->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qam.SymbolRate);
+			sscanf(node->GetAttributeValue("fec_inner"), "%hhu", &tmp);
+			feparams.u.qam.FEC_inner = getFEC(tmp);
+			sscanf(node->GetAttributeValue("modulation"), "%hhu", &tmp);
+			feparams.u.qam.QAM = getModulation(tmp);
 		}
-		else if (!strcmp("sat", type))
-		{
-			if (transponders.count(curr_tsid) == 0)
-			{
-				printf("[getservices.cpp] no transponder with that tsid found\n");
-				return;
-			}
 
-			std::map<uint, transponder>::iterator trans = transponders.find(curr_tsid);
-			sscanf(services->GetAttributeValue("frequency"),"%u", &trans->second.feparams.Frequency);
-			sscanf(services->GetAttributeValue("symbolRate"), "%u", &trans->second.feparams.u.qpsk.SymbolRate);
-			sscanf(services->GetAttributeValue("fec"), "%hu", &tmp);
-			trans->second.feparams.u.qam.FEC_inner = getFEC(tmp);
-			sscanf(services->GetAttributeValue("Polarity"), "%hu", &tmp);
-			trans->second.polarization = tmp;
-			trans->second.DiSEqC = curr_diseqc;
-		}
-		else if (!strcmp("channel", type))
-		{
-			sm = atoi(services->GetAttributeValue("serviceType"));
-
-			if ((sm == 1) || (sm == 2) || (sm == 4))
-			{
-				name = services->GetAttributeValue("Name");
-				sscanf(services->GetAttributeValue("channelNR"), "%hd", &cnr);
-				sscanf(services->GetAttributeValue("serviceID"), "%hx", &sid);
-				sscanf(services->GetAttributeValue("onid"), "%hx", &onid);
-
-				if (sm == 2)
-				{
-					allchans_radio.insert(std::pair<uint32_t, channel>((onid<<16) | sid, channel(name, 0, 0, 0, 0, 0, sid, curr_tsid, onid, sm, cnr)));
-
-					if (cnr > 0)
-						numchans_radio.insert(std::pair<uint16_t, uint32_t>(cnr, (onid<<16) | sid));
-					else
-						nameinsert(name, (onid<<16) | sid, sm);
-				}
-				else
-				{
-					allchans_tv.insert(std::pair<uint32_t, channel>((onid<<16) | sid, channel(name, 0, 0, 0, 0, 0, sid, curr_tsid, onid, sm, cnr)));
-
-					if (cnr > 0)
-						numchans_tv.insert(std::pair<uint16_t, uint32_t>(cnr, (onid<<16) | sid));
-					else
-						nameinsert(name, (onid<<16) | sid, sm);
-				}
-			}
-		}
+		/* satellite */
 		else
 		{
-			printf("[getservices.cpp] not known. skipping %s\n", services->GetType());
+			sscanf(node->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qpsk.SymbolRate);
+			sscanf(node->GetAttributeValue("fec_inner"), "%hhu", &tmp);
+			feparams.u.qam.FEC_inner = getFEC(tmp);
+			sscanf(node->GetAttributeValue("polarization"), "%hhu", &polarization);
 		}
+
+		/* add current transponder to list */
+		transponders.insert
+		(
+			std::pair <uint16_t, transponder>
+			(
+				transport_stream_id,
+				transponder
+				(
+					transport_stream_id,
+					feparams,
+					polarization,
+					DiSEqC,
+					original_network_id
+				)
+			)
+		);
+
+		/* read channels that belong to the current transponder */
+		ParseChannels(node->GetChild(), transport_stream_id, original_network_id);
+
+		/* hop to next transponder */
+		node = node->GetNext();
 	}
+
 	return;
 }
 
-void ParseRoot (XMLTreeNode *root)
+void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t original_network_id)
 {
-	FrontendParameters feparams;
+	uint16_t service_id;
+	std::string name;
+	uint16_t service_type;
+	uint16_t channel_number;
 
-	for (XMLTreeNode *c=root; c; c=c->GetNext())
+	while ((node != NULL) && (!strcmp(node->GetType(), "channel")))
 	{
-		if (!strcasecmp(c->GetType(), "transponder"))
+		sscanf(node->GetAttributeValue("service_id"), "%hx", &service_id);
+		name = node->GetAttributeValue("name");
+		sscanf(node->GetAttributeValue("service_type"), "%hd", &service_type);
+		sscanf(node->GetAttributeValue("channel_nr"), "%hd", &channel_number);
+
+		switch (service_type)
 		{
-			sscanf(c->GetAttributeValue("transportID"), "%hx", &curr_tsid);
-			transponders.insert(std::pair<uint, transponder>(curr_tsid, transponder(curr_tsid, feparams)));
-			ParseTransponder(c);
+		case DIGITAL_TELEVISION_SERVICE:
+		case NVOD_REFERENCE_SERVICE:
+			allchans_tv.insert
+			(
+				std::pair <uint32_t, CZapitChannel>
+				(
+					(original_network_id << 16) | service_id,
+					CZapitChannel
+					(
+						name,
+						service_id,
+						transport_stream_id,
+						original_network_id,
+						service_type,
+						channel_number
+					)
+				)
+			);
+
+			if (channel_number != 0)
+			{
+				numchans_tv.insert
+				(
+					std::pair <uint16_t, uint32_t>
+					(
+						channel_number,
+						(original_network_id << 16) | service_id
+					)
+				);
+			}
+			else
+			{
+				nameinsert(name, original_network_id, service_id, service_type);
+			}
+
+			break;
+			
+		case DIGITAL_RADIO_SOUND_SERVICE:
+			allchans_radio.insert
+			(
+				std::pair <uint32_t, CZapitChannel>
+				(
+					(original_network_id << 16) | service_id,
+					CZapitChannel
+					(
+						name,
+						service_id,
+						transport_stream_id,
+						original_network_id,
+						service_type,
+						channel_number
+					)
+				)
+			);
+
+			if (channel_number != 0)
+			{
+				numchans_radio.insert
+				(
+					std::pair <uint16_t, uint32_t>
+					(
+						channel_number,
+						(original_network_id << 16) | service_id
+					)
+				);
+			}
+			else
+			{
+				nameinsert(name, original_network_id, service_id, service_type);
+			}
+			break;
+
+		default:
+			break;
 		}
-		else
-		{
-			printf("[getservices.cpp] ignoring %s\n", c->GetType());
-		}
+
+		node = node->GetNext();
 	}
+
+	return;
 }
 
-void FindTransponder (XMLTreeNode *root)
+void FindTransponder (XMLTreeNode *search)
 {
-	XMLTreeNode *search = root->GetChild();
-
-	while ((strcmp(search->GetType(), "cable")) && (strcmp(search->GetType(), "satellite")))
-		search = search->GetChild();
+	uint8_t DiSEqC;
 
 	while (search)
 	{
+		/* cable */
 		if (!(strcmp(search->GetType(), "cable")))
 		{
-			printf("[getservices.cpp] scanning a cable section\n");
-
-			while (strcmp(search->GetType(), "transponder"))
-				search = search->GetChild();
-
-			ParseRoot(search);
-			search = search->GetParent();
+			printf("[getservices.cpp] going to parse cable %s\n", search->GetAttributeValue("name"));
+			ParseTransponders(search->GetChild(), 0xFF);
 		}
-		else if (!(strcmp(search->GetType(), "satellite")))
+
+		/* satellite */
+		else if (!(strcmp(search->GetType(), "sat")))
 		{
-			printf("[getservices.cpp] scanning a satellite section\n");
-
-			while (!(strcmp(search->GetType(), "satellite")))
-			{
-				sscanf(search->GetAttributeValue("diseqc"), "%hu", &curr_diseqc);
-				printf("[getservices.cpp] going to parse satellite %s\n", search->GetAttributeValue("name"));
-				search = search->GetChild();
-				ParseRoot(search);
-				search = search->GetParent()->GetNext();
-
-				if (!search)
-					return;
-			}
+			printf("[getservices.cpp] going to parse satellite %s\n", search->GetAttributeValue("name"));
+			sscanf(search->GetAttributeValue("diseqc"), "%hhu", &DiSEqC);
+			ParseTransponders(search->GetChild(), DiSEqC);
 		}
+
+		/* hop to next satellite */
 		search = search->GetNext();
 	}
 }
@@ -197,17 +247,15 @@ void FindTransponder (XMLTreeNode *root)
 int LoadServices(void)
 {
 	char buf[2048];
-	XMLTreeParser *parser;
-	FILE *in;
-	int done;
+	bool done;
 	size_t len;
 
-	parser = new XMLTreeParser("ISO-8859-1");
-	in = fopen(CONFIGDIR "/zapit/services.xml", "r");
+	XMLTreeParser *parser = new XMLTreeParser("ISO-8859-1");
+	FILE *in = fopen(CONFIGDIR "/services.xml", "r");
 
 	if (!in)
 	{
-		perror("[getservices.cpp] " CONFIGDIR "/zapit/services.xml");
+		perror("[getservices.cpp] " CONFIGDIR "/services.xml");
 		return -23;
 	}
 
@@ -227,7 +275,9 @@ int LoadServices(void)
 	while (!done);
 
 	if (parser->RootNode())
-		FindTransponder(parser->RootNode());
+	{
+		FindTransponder(parser->RootNode()->GetChild());
+	}
 
 	fclose(in);
 	delete parser;

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.15 2002/04/06 11:26:11 obi Exp $
+ * $Id: bouquets.h,v 1.16 2002/04/10 18:36:21 obi Exp $
  */
 
 #ifndef __bouquets_h__
@@ -21,23 +21,23 @@
 
 using namespace std;
 
-typedef vector<channel*> ChannelList;
+typedef vector<CZapitChannel*> ChannelList;
 
 /* struct for comparing channels by channel number*/
-struct CmpChannelByChNr: public binary_function< channel* , channel* , bool>
+struct CmpChannelByChNr: public binary_function <CZapitChannel* , CZapitChannel* , bool>
 {
-	bool operator()(channel*  c1, channel*  c2)
+	bool operator() (CZapitChannel* c1, CZapitChannel* c2)
 	{
-		return (c1->chan_nr < c2->chan_nr);
+		return (c1->getChannelNumber() < c2->getChannelNumber());
 	};
 };
 
 /* struct for comparing channels by channel name*/
-struct CmpChannelByChName: public binary_function< channel* , channel* , bool>
+struct CmpChannelByChName: public binary_function <CZapitChannel* , CZapitChannel* , bool>
 {
-	bool operator()(channel*  c1, channel*  c2)
+	bool operator() (CZapitChannel*  c1, CZapitChannel*  c2)
 	{
-		return (c1->name < c2->name);
+		return (c1->getName() < c2->getName());
 	};
 };
 
@@ -45,7 +45,7 @@ struct CmpChannelByChName: public binary_function< channel* , channel* , bool>
 class CBouquet
 {
 	private:
-		channel* getChannelByName(char* serviceName, uint serviceType = 0);
+		CZapitChannel* getChannelByName(char* serviceName, uint8_t serviceType = 0);
 
 	public:
 		string Name;
@@ -55,22 +55,22 @@ class CBouquet
 		ChannelList radioChannels;
 		ChannelList tvChannels;
 
-		CBouquet( string name) { Name=name; bHidden = false; bLocked = false;}
-		CBouquet( const CBouquet& bouquet);
+		CBouquet(string name) { Name=name; bHidden = false; bLocked = false; }
+		CBouquet(const CBouquet& bouquet);
 
 		~CBouquet();
 
-		void addService( channel* newChannel);
+		void addService (CZapitChannel* newChannel);
 
-		void removeService( channel* oldChannel);
-		void removeService( char* serviceName, uint serviceType = 0)	{removeService( getChannelByName( serviceName, serviceType));}
-		void removeService( uint onidSid, uint serviceType = 0)			{removeService( getChannelByOnidSid( onidSid, serviceType));}
+		void removeService (CZapitChannel* oldChannel);
+		void removeService (char* serviceName, uint8_t serviceType = 0)	{removeService( getChannelByName( serviceName, serviceType));}
+		void removeService (uint32_t onidSid, uint8_t serviceType = 0)			{removeService( getChannelByOnidSid( onidSid, serviceType));}
 
-		void moveService(  char* serviceName, uint newPosition, uint serviceType);
-//		void moveService(  uint onidSid, uint newPosition);
-		void moveService(  uint oldPosition, uint newPosition, uint serviceType);
+		void moveService (char* serviceName, uint newPosition, uint8_t serviceType);
+//		void moveService (uint onidSid, uint newPosition);
+		void moveService (uint oldPosition, uint newPosition, uint8_t serviceType);
 
-		channel* getChannelByOnidSid(uint onidSid, uint serviceType = 0);
+		CZapitChannel* getChannelByOnidSid(uint32_t onidSid, uint8_t serviceType = 0);
 };
 
 typedef vector<CBouquet*> BouquetList;
@@ -95,13 +95,13 @@ class CBouquetManager
 				tvChannelIterator operator ++(int);
 				bool operator != (const tvChannelIterator& it) const;
 				bool operator == (const tvChannelIterator& it) const;
-				channel* operator *();
+				CZapitChannel* operator *();
 			friend class CBouquetManager;
 		};
 
 		tvChannelIterator tvChannelsBegin();
 		tvChannelIterator tvChannelsEnd(){ return tvChannelIterator(this, -1, -1);};
-		tvChannelIterator tvChannelsFind( unsigned int onid_sid);
+		tvChannelIterator tvChannelsFind(uint32_t onid_sid);
 
 		class radioChannelIterator
 		{
@@ -114,13 +114,13 @@ class CBouquetManager
 				radioChannelIterator operator ++(int);
 				bool operator != (const radioChannelIterator& it) const;
 				bool operator == (const radioChannelIterator& it) const;
-				channel* operator *();
+				CZapitChannel* operator *();
 			friend class CBouquetManager;
 		};
 
 		radioChannelIterator radioChannelsBegin();
 		radioChannelIterator radioChannelsEnd(){ return radioChannelIterator(this, -1, -1);};
-		radioChannelIterator radioChannelsFind( unsigned int onid_sid);
+		radioChannelIterator radioChannelsFind(uint32_t onid_sid);
 
 		BouquetList Bouquets;
 		BouquetList storedBouquets;
@@ -143,7 +143,7 @@ class CBouquetManager
 		void onTermination();
 		void onStart();
 
-		channel* copyChannelByOnidSid( unsigned int onid_sid);
+		CZapitChannel* copyChannelByOnidSid(uint32_t onid_sid);
 
 };
 

@@ -1,20 +1,6 @@
 /*
-$Id: sdt.cpp,v 1.16 2002/04/06 11:26:11 obi Exp $
-
-
-$Log: sdt.cpp,v $
-Revision 1.16  2002/04/06 11:26:11  obi
-lots of changes, bugs and fixes, including:
-- anti-randomness fixes
-- unused code
-- probably something else
-
-Revision 1.15  2002/04/04 14:54:34  rasc
-- timeout increase
-
-
-
-*/
+ * $Id: sdt.cpp,v 1.17 2002/04/10 18:36:21 obi Exp $
+ */
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -35,9 +21,9 @@ Revision 1.15  2002/04/04 14:54:34  rasc
 #define DEMUX_DEV "/dev/ost/demux0"
 
 extern std::string curr_chan_name;
-extern map<uint, channel> nvodchannels;
+extern std::map <uint, CZapitChannel> nvodchannels;
 
-int sdt(uint16_t oservice_id, bool scan_mode)
+int sdt (uint16_t oservice_id, bool scan_mode)
 {
 	struct dmxSctFilterParams flt;
 	int demux_fd;
@@ -89,8 +75,8 @@ int sdt(uint16_t oservice_id, bool scan_mode)
 		transport_stream_id = (buffer[3] << 8) | buffer[4];
 		original_network_id = (buffer[8] << 8) | buffer[9];
 
-		printf("[sdt.cpp] transport_stream_id: %04x\n",transport_stream_id);
-		printf("[sdt.cpp] original_network_id: %04x\n",original_network_id);
+		printf("[sdt.cpp] transport_stream_id: %04x\n", transport_stream_id);
+		printf("[sdt.cpp] original_network_id: %04x\n", original_network_id);
 
 		for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5)
 		{

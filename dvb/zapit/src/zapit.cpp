@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.123 2002/04/08 20:51:58 Simplex Exp $
+ * $Id: zapit.cpp,v 1.124 2002/04/10 18:36:21 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -68,7 +68,7 @@ uint32_t curr_onid_sid = 0;
 bool OldAC3 = false;
 
 /* near video on demand */
-extern map<uint, channel> nvodchannels;
+extern map <uint, CZapitChannel> nvodchannels;
 bool current_is_nvod;
 std::string nvodname;
 
@@ -86,15 +86,17 @@ std::map<std::string, uint> allnamechannels_tv;
 std::map<std::string, uint> allnamechannels_radio;
 
 extern std::map<uint, transponder>transponders;
-std::map<uint, channel> allchans_tv;
+
+std::map <uint, CZapitChannel> allchans_tv;
 std::map<uint, uint> numchans_tv;
 std::map<std::string, uint> namechans_tv;
-std::map<uint, channel> allchans_radio;
+
+std::map<uint, CZapitChannel> allchans_radio;
 std::map<uint, uint> numchans_radio;
 std::map<std::string, uint> namechans_radio;
 
 bool Radiomode_on = false;
-pids pids_desc;
+pids chanpids;
 
 /* transponder scan */
 pthread_t scan_thread;
@@ -234,7 +236,7 @@ int save_settings()
 		if (cit != g_BouquetMan->radioChannelsEnd())
 		{
 			lastChannel.mode = 'r';
-			lastChannel.radio = (*cit)->chan_nr;
+			lastChannel.radio = (*cit)->getChannelNumber();
 		}
 	}
 	else
@@ -243,7 +245,7 @@ int save_settings()
 		if (cit != g_BouquetMan->tvChannelsEnd())
 		{
 			lastChannel.mode = 't';
-			lastChannel.tv = (*cit)->chan_nr;
+			lastChannel.tv = (*cit)->getChannelNumber();
 		}
 	}
 	if (fwrite(&lastChannel, sizeof(lastChannel), 1, channel_settings) != 1)
@@ -293,35 +295,32 @@ channel_msg load_settings()
 #ifndef USE_EXTERNAL_CAMD
 void *decode_thread(void *ptr)
 {
-	decode_vals *vals;
-	vals = (decode_vals *) ptr;
-	dvb_pid_t emmpid = 0x0000;
+	decode_vals *vals = (decode_vals *) ptr;
 
 	debug("[zapit] starting decode_thread\n");
 
-	if (vals->do_cam_reset)
+	if (vals->new_tsid == true)
 	{
+		debug("[zapit] resetting cam\n");
 		cam_reset();
 	}
 
-	descramble(vals->onid, vals->tsid, 0x104, caid, vals->ecmpid, vals->parse_pmt_pids);
-
-	if (vals->do_search_emmpids)
+	if ((vals->chanpids->ecmpid != NONE) && (vals->chanpids->ecmpid != INVALID))
 	{
-		if(parse_cat(caid, &emmpid) == 0)
-		{
-			debug("[zapit] emmpid %04x found for caid %04x\n", emmpid, caid);
-			setemm(0x104, caid, emmpid);
-		}
-		else
-		{
-			debug("[zapit] no emmpid found...\n");
-		}
+		debug("[zapit] setting ecm pid %04x\n", vals->chanpids->ecmpid);
+		descramble(vals->onid, vals->tsid, 0x104, caid, vals->chanpids);
 	}
 
-	free(vals);
+	if ((vals->new_tsid == true) && (vals->chanpids->emmpid != NONE) && (vals->chanpids->emmpid != INVALID))
+	{
+		debug("[zapit] setting emm pid %04x\n", vals->chanpids->emmpid);
+		setemm(0x104, caid, vals->chanpids->emmpid);
+	}
+
+	delete vals;
+
 	debug("[zapit] ending decode_thread\n");
-	dec_thread= 0;
+	dec_thread = 0;
 	pthread_exit(0);
 }
 #endif /* USE_EXTERNAL_CAMD */
@@ -330,11 +329,10 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 {
 	dmxPesFilterParams pes_filter;
 	videoStatus video_status;
-	pids parse_pmt_pids;
-	std::map<uint, channel>::iterator cit;
-	bool do_search_emmpid;
+	std::map <uint, CZapitChannel>::iterator cit;
+	uint16_t transport_stream_id;
 #ifndef USE_EXTERNAL_CAMD
-	bool do_cam_reset = false;
+	bool new_transport_stream_id;
 #else
 	char *vpidbuf;
 	char *apidbuf;
@@ -377,7 +375,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 			if (allchans_tv.count(onid_sid) > 0)
 			{
 				cit = allchans_tv.find(onid_sid);
-				nvodname = cit->second.name;
+				nvodname = cit->second.getName();
 			}
 			else
 			{
@@ -434,28 +432,29 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		debug("[zapit] demux device already closed (audio)\n");
 	}
 
-	/* Tune to new transponder if necessary */
-	if (cit->second.tsid != old_tsid)
-	{
-#ifndef USE_EXTERNAL_CAMD
-		do_cam_reset = true;
-#endif /* USE_EXTERNAL_CAMD */
-		debug("[zapit] tunig to tsid %04x\n", cit->second.tsid);
+	transport_stream_id = cit->second.getTransportStreamId();
 
-		if (tune(cit->second.tsid) != 0)
+	/* Tune to new transponder if necessary */
+	if (transport_stream_id != old_tsid)
+	{
+		old_tsid = transport_stream_id;
+
+		debug("[zapit] tunig to tsid %04x\n", transport_stream_id);
+
+		if (tune(transport_stream_id) != 0)
 		{
-			debug("[zapit] no transponder with tsid %04x found\nHave to look it up in nit\n", cit->second.tsid);
+			debug("[zapit] no transponder with tsid %04x found\n", transport_stream_id);
 			return -3;
 		}
 
-		do_search_emmpid = true;
+		new_transport_stream_id = true;
 	}
 	else
 	{
-		do_search_emmpid = false;
+		new_transport_stream_id = false;
 	}
 
-	if (cit->second.service_type == 4)
+	if (cit->second.getServiceType() == NVOD_REFERENCE_SERVICE)
 	{
 		current_is_nvod = true;
 		curr_onid_sid = onid_sid;
@@ -481,217 +480,189 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	}
 #endif /* USE_EXTERNAL_CAMD */
 
-	if ((cit->second.pmt == 0) && (cit->second.service_type != 4))
+	/* search pids if they are unknown */
+	if (cit->second.knowsPids() == false)
 	{
-		debug("[zapit] trying to find pmt for sid %04x, onid %04x\n", cit->second.sid, cit->second.onid);
-
-		if (in_nvod)
+		/* get program map table pid from program association table */
+		if (!current_is_nvod)
 		{
-			pat(cit->second.onid, &nvodchannels);
+			debug("[zapit] trying to find pmt for sid %04x, onid %04x\n", cit->second.getServiceId(), cit->second.getOriginalNetworkId());
+
+			if (in_nvod)
+			{
+				parse_pat(cit->second.getOriginalNetworkId(), &nvodchannels);
+			}
+			else if (Radiomode_on)
+			{
+				parse_pat(cit->second.getOriginalNetworkId(), &allchans_radio);
+			}
+			else
+			{
+				parse_pat(cit->second.getOriginalNetworkId(), &allchans_tv);
+			}
 		}
-		else if (Radiomode_on)
+
+		/* parse program map table and store pids */
+		cit->second.setPids(parse_pmt(cit->second.getPmtPid(), caid, cit->second.getServiceId()));
+
+		/* parse conditional access table and store emm pid */
+		cit->second.setEmmPid(parse_cat(caid));
+
+		if ((cit->second.getAudioPid() == NONE) && (cit->second.getVideoPid() == NONE))
 		{
-			pat(cit->second.onid, &allchans_radio);
-		}
-		else
-		{
-			pat(cit->second.onid, &allchans_tv);
+			debug("[zapit] not a channel. Won´t zap\n");
+			cit->second.resetPids();
+			return -3;
 		}
 	}
-
-	memset(&parse_pmt_pids, 0, sizeof(parse_pmt_pids));
-	parse_pmt_pids = parse_pmt(cit->second.pmt, caid, cit->second.sid);
-
-	if (parse_pmt_pids.count_vpids > 0)
-	{
-		cit->second.vpid = parse_pmt_pids.vpid;
-	}
-	else
-	{
-		cit->second.vpid = 0x1fff;
-	}
-
-	if (parse_pmt_pids.pcrpid > 0)
-	{
-		cit->second.pcrpid = parse_pmt_pids.pcrpid;
-	}
-	else
-	{
-		cit->second.pcrpid = 0x1fff;
-	}
-
-	if (parse_pmt_pids.count_apids > 0)
-	{
-		cit->second.apid = parse_pmt_pids.apids[0].pid;
-	}
-	else
-	{
-		cit->second.apid = 0x1fff;
-	}
-
-	cit->second.ecmpid = parse_pmt_pids.ecmpid;
 
 #ifndef DVBS
 	if (in_nvod)
+	{
 		lcdd.setServiceName(nvodname);
+	}
 	else
-		lcdd.setServiceName(cit->second.name);
+	{
+		lcdd.setServiceName(cit->second.getName());
+	}
 #endif /* DVBS */
 
-	if ((cit->second.vpid != 0x1fff) || (cit->second.apid != 0x1fff))
-	{
-		pids_desc = parse_pmt_pids;
-
-		debug("[zapit] zapping to sid: %04x %s. VPID: 0x%04x. APID: 0x%04x, PCRPID: 0x%04x, PMT: 0x%04x\n", cit->second.sid, cit->second.name.c_str(), cit->second.vpid, cit->second.apid, cit->second.pcrpid, cit->second.pmt);
+	chanpids = cit->second.getPids();
 
 #ifdef USE_EXTERNAL_CAMD
-		switch ((camdpid = fork()))
+	switch ((camdpid = fork()))
+	{
+	case -1:
+		perror("[zapit] fork");
+		break;
+	case 0:
+		vpidbuf = (char*) malloc(5);
+		sprintf(vpidbuf, "%x", chanpids.vpid);
+		apidbuf = (char*) malloc(5);
+		sprintf(apidbuf, "%x", cit->second.getAudioPid());
+		pmtpidbuf = (char*) malloc(5);
+		sprintf(pmtpidbuf, "%x", chanpids.pmtpid);
+		if ((chanpids.ecmpid != NONE) && (chanpids.ecmpid != INVALID))
 		{
-		case -1:
-			perror("[zapit] unable to fork() for camd");
-			break;
-		case 0:
-			vpidbuf = (char*) malloc(5);
-			sprintf(vpidbuf, "%x", cit->second.vpid);
-			apidbuf = (char*) malloc(5);
-			sprintf(apidbuf, "%x", cit->second.apid);
-			pmtpidbuf = (char*) malloc(5);
-			sprintf(pmtpidbuf, "%x", cit->second.pmt);
-			if ((cit->second.ecmpid > 0x0000) && (cit->second.ecmpid < 0x1FFF))
-			{
-				cadescrbuf = (char*) malloc(13);
-				sprintf(cadescrbuf, "0904%04x%04x", caid, cit->second.ecmpid);
-			}
-			else
-			{
-				cadescrbuf = NULL;
-			}
-
-			if (execlp("/bin/camd", "camd", vpidbuf, apidbuf, pmtpidbuf, cadescrbuf, NULL) < 0)
-			{
-				perror("[zapit] execlp");
-				exit(0);
-			}
-			break;
-		default:
-			debug("[zapit] camd pid: %d\n", camdpid);
-			break;
+			cadescrbuf = (char*) malloc(13);
+			sprintf(cadescrbuf, "0904%04x%04x", caid, chanpids.ecmpid);
 		}
+		else
+		{
+			cadescrbuf = NULL;
+		}
+
+		if (execlp("/bin/camd", "camd", vpidbuf, apidbuf, pmtpidbuf, cadescrbuf, NULL) < 0)
+		{
+			perror("[zapit] execlp");
+			exit(0);
+		}
+		break;
+	}
 #else
-		if ((cit->second.ecmpid > 0x0000) && (cit->second.ecmpid < 0x1FFF))
-		{
-			decode_vals *vals = (decode_vals*) malloc(sizeof(decode_vals));
-			vals->onid = cit->second.onid;
-			vals->tsid = cit->second.tsid;
-			vals->ecmpid = cit->second.ecmpid;
-			vals->parse_pmt_pids = &parse_pmt_pids;
-			vals->do_search_emmpids = do_search_emmpid;
-			vals->do_cam_reset = do_cam_reset;
+	decode_vals *vals = (decode_vals*) malloc(sizeof(decode_vals));
+	vals->onid = onid_sid >> 16;
+	vals->tsid = transport_stream_id;
+	vals->new_tsid = new_transport_stream_id;
+	vals->chanpids = &chanpids;
 
-			if (dec_thread!= 0)
-			{
-				debug("[zapit] waiting for decode_thread\n");
-				pthread_join(dec_thread,0);
-			}
+	if (dec_thread != 0)
+	{
+		debug("[zapit] waiting for decode_thread\n");
+		pthread_join(dec_thread, 0);
+	}
 
-			pthread_create(&dec_thread, 0,decode_thread, (void*) vals);
-		}
+	pthread_create(&dec_thread, 0, decode_thread, (void*) vals);
 #endif /* USE_EXTERNAL_CAMD */
 
-		/* Open video device */
-		if (video_fd == -1)
+	/* Open video device */
+	if (video_fd == -1)
+	{
+		if ((video_fd = open(VIDEO_DEV, O_RDWR)) < 0)
 		{
-			if ((video_fd = open(VIDEO_DEV, O_RDWR)) < 0)
-			{
-				perror("[zapit] unable to open video device");
-				return -3;
-			}
-			else
-			{
-				debug("[zapit] opened video device\n");
-			}
+			perror("[zapit] unable to open video device");
+			return -3;
 		}
 		else
 		{
-			debug("[zapit] video device already open\n");
-		}
-
-		/* get video status */
-		if (ioctl(video_fd, VIDEO_GET_STATUS, &video_status) < 0)
-		{
-			perror("[zapit] VIDEO_GET_STATUS");
-		}
-
-		/* select video source */
-		if (video_status.streamSource != VIDEO_SOURCE_DEMUX)
-		{
-			if (ioctl(video_fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX) < 0)
-			{
-				perror("[zapit] VIDEO_SELECT_SOURCE");
-			}
-			else
-			{
-				debug("[zapit] selected video source\n");
-			}
-		}
-		else
-		{
-			debug("[zepit] video source already demux\n");
-		}
-
-		/* start video play */
-		if (ioctl(video_fd, VIDEO_PLAY) < 0)
-		{
-			perror("[zapit] VIDEO_PLAY");
-		}
-		else
-		{
-			debug("[zapit] video playing\n");
-		}
-
-		/* Set audio ac3 mode */
-		if (parse_pmt_pids.apids[0].is_ac3 != OldAC3)
-		{
-			OldAC3 = parse_pmt_pids.apids[0].is_ac3;
-
-			if (audio_fd != -1)
-			{
-				debug("[zapit] closing open audio device.\n");
-				close(audio_fd);
-			}
-			else
-			{
-				debug("[zapit] audio device already closed.\n");
-			}
-
-			if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
-			{
-				perror("[zapit] unable to open audio device");
-				return -3;
-			}
-			else
-			{
-				debug("[zapit] opened audio device\n");
-			}
-
-			if(ioctl(audio_fd, AUDIO_SET_BYPASS_MODE, OldAC3 ? 0 : 1) < 0)
-			{
-				perror("[zapit] AUDIO_SET_BYPASS_MODE");
-			}
-			else
-			{
-				debug("[zapit] audio bypass mode set\n");
-			}
+			debug("[zapit] opened video device\n");
 		}
 	}
 	else
 	{
-		debug("[zapit] not a channel. Won´t zap\n");
-		return -3;
+		debug("[zapit] video device already open\n");
+	}
+
+	/* get video status */
+	if (ioctl(video_fd, VIDEO_GET_STATUS, &video_status) < 0)
+	{
+		perror("[zapit] VIDEO_GET_STATUS");
+	}
+
+	/* select video source */
+	if (video_status.streamSource != VIDEO_SOURCE_DEMUX)
+	{
+		if (ioctl(video_fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX) < 0)
+		{
+			perror("[zapit] VIDEO_SELECT_SOURCE");
+		}
+		else
+		{
+			debug("[zapit] selected video source\n");
+		}
+	}
+	else
+	{
+		debug("[zepit] video source already demux\n");
+	}
+
+	/* start video play */
+	if (ioctl(video_fd, VIDEO_PLAY) < 0)
+	{
+		perror("[zapit] VIDEO_PLAY");
+	}
+	else
+	{
+		debug("[zapit] video playing\n");
+	}
+
+	/* Set audio ac3 mode */
+	if (chanpids.apids[cit->second.getAudioChannel()].is_ac3 != OldAC3)
+	{
+		OldAC3 = chanpids.apids[cit->second.getAudioChannel()].is_ac3;
+
+		if (audio_fd != -1)
+		{
+			debug("[zapit] closing open audio device.\n");
+			close(audio_fd);
+		}
+		else
+		{
+			debug("[zapit] audio device already closed.\n");
+		}
+
+		if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
+		{
+			perror("[zapit] unable to open audio device");
+			return -3;
+		}
+		else
+		{
+			debug("[zapit] opened audio device\n");
+		}
+
+		if(ioctl(audio_fd, AUDIO_SET_BYPASS_MODE, OldAC3 ? 0 : 1) < 0)
+		{
+			perror("[zapit] AUDIO_SET_BYPASS_MODE");
+		}
+		else
+		{
+			debug("[zapit] audio bypass mode set\n");
+		}
 	}
 
 
-	if (cit->second.vpid != 0x1fff)
+	if (chanpids.vpid != NONE)
 	{
 		/* Open demux device (video) */
 		if (dmx_video_fd == -1)
@@ -712,7 +683,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 
 		/* setup vpid */
-		pes_filter.pid = cit->second.vpid;
+		pes_filter.pid = chanpids.vpid;
 		pes_filter.input = DMX_IN_FRONTEND;
 		pes_filter.output = DMX_OUT_DECODER;
 		pes_filter.pesType = DMX_PES_VIDEO;
@@ -725,11 +696,11 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 		else
 		{
-			debug("[zapit] video pid set to %04x\n", cit->second.vpid);
+			debug("[zapit] video pid set to %04x\n", chanpids.vpid);
 		}
 	}
 
-	if (cit->second.pcrpid != 0x1fff)
+	if (chanpids.pcrpid != NONE)
 	{
 		/* Open demux device (pcr) */
 		if (dmx_pcr_fd == -1)
@@ -750,7 +721,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 
 		/* setup pcrpid and start demuxing */
-		pes_filter.pid = cit->second.pcrpid;
+		pes_filter.pid = chanpids.pcrpid;
 		pes_filter.input = DMX_IN_FRONTEND;
 		pes_filter.output = DMX_OUT_DECODER;
 		pes_filter.pesType = DMX_PES_PCR;
@@ -763,11 +734,11 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 		else
 		{
-			debug("[zapit] pcr pid set to %04x and demux started\n", cit->second.pcrpid);
+			debug("[zapit] pcr pid set to %04x and demux started\n", chanpids.pcrpid);
 		}
 	}
 
-	if (cit->second.apid != 0x1FFF)
+	if (cit->second.getAudioPid() != NONE)
 	{
 		/* Open demux device (audio) */
 		if (dmx_audio_fd == -1)
@@ -788,7 +759,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 
 		/* setup apid and start demuxing */
-		pes_filter.pid     = cit->second.apid;
+		pes_filter.pid     = cit->second.getAudioPid();
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
 		pes_filter.pesType = DMX_PES_AUDIO;
@@ -801,11 +772,11 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 		else
 		{
-			debug("[zapit] audio pid set to %04x and demux started\n", cit->second.apid);
+			debug("[zapit] audio pid set to %04x and demux started\n", cit->second.getAudioPid());
 		}
 	}
 
-	if (cit->second.vpid != 0x1FFF)
+	if (chanpids.vpid != NONE)
 	{
 		/* start demux (video) */
 		if (ioctl(dmx_video_fd, DMX_START, 0) < 0)
@@ -820,7 +791,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 
 #ifndef DVBS
 	debug("[zapit] setting vtxt\n");
-	set_vtxt(parse_pmt_pids.vtxtpid);
+	set_vtxt(chanpids.vtxtpid);
 #endif /* DVBS */
 
 	debug("[zapit] saving settings\n");
@@ -905,7 +876,7 @@ int namezap(std::string channel_name)
 int changeapid(uint8_t pid_nr)
 {
 	struct dmxPesFilterParams pes_filter;
-	std::map<uint,channel>::iterator cit;
+	std::map<uint, CZapitChannel>::iterator cit;
 
 	if (current_is_nvod)
 	{
@@ -923,7 +894,7 @@ int changeapid(uint8_t pid_nr)
 		}
 	}
 
-	if (pid_nr <= pids_desc.count_apids)
+	if (pid_nr <= chanpids.count_apids)
 	{
 		if (dmx_audio_fd == -1)
 		{
@@ -945,9 +916,9 @@ int changeapid(uint8_t pid_nr)
 		}
 
 		/* Set audio ac3 mode */
-		if (pids_desc.apids[pid_nr].is_ac3 != OldAC3)
+		if (chanpids.apids[pid_nr].is_ac3 != OldAC3)
 		{
-			OldAC3 = pids_desc.apids[pid_nr].is_ac3;
+			OldAC3 = chanpids.apids[pid_nr].is_ac3;
 
 			if (audio_fd == -1)
 			{
@@ -978,7 +949,7 @@ int changeapid(uint8_t pid_nr)
 		}
 
 		/* apid */
-		pes_filter.pid = pids_desc.apids[pid_nr].pid;
+		pes_filter.pid = chanpids.apids[pid_nr].pid;
 		pes_filter.input = DMX_IN_FRONTEND;
 		pes_filter.output = DMX_OUT_DECODER;
 		pes_filter.pesType = DMX_PES_AUDIO;
@@ -991,7 +962,8 @@ int changeapid(uint8_t pid_nr)
 		}
 		else
 		{
-			debug("[zapit] apid changed to %04x\n", pids_desc.apids[pid_nr].pid);
+			debug("[zapit] apid changed to %04x\n", chanpids.apids[pid_nr].pid);
+			cit->second.setAudioChannel(pid_nr);
 			return 8;
 		}
 	}
@@ -1157,7 +1129,6 @@ int prepare_channels()
 	//found_channels = 0;
 
 	g_BouquetMan->clearAll();
-
 	ls = LoadServices();
 	g_BouquetMan->loadBouquets();
 	g_BouquetMan->renumServices();
@@ -1244,8 +1215,8 @@ void parse_command()
 	char *status;
 	short carsten; // who the fuck is short carsten? :)
 
-	std::map<uint,uint>::iterator sit;
-	std::map<uint,channel>::iterator cit;
+	std::map<uint, uint>::iterator sit;
+	std::map<uint, CZapitChannel>::iterator cit;
 	int number = 0;
 	int caid_ver = 0;
 
@@ -1332,7 +1303,7 @@ void parse_command()
 					{
 						cit = allchans_radio.find(sit->second);
 						channel_msg chanmsg;
-						strncpy(chanmsg.name, cit->second.name.c_str(), 29);
+						strncpy(chanmsg.name, cit->second.getName().c_str(), 29);
 						chanmsg.chan_nr = sit->first;
 						chanmsg.mode = 'r';
 						if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
@@ -1367,7 +1338,7 @@ void parse_command()
 					{
 						cit = allchans_tv.find(sit->second);
 						channel_msg chanmsg;
-						strncpy(chanmsg.name, cit->second.name.c_str(),29);
+						strncpy(chanmsg.name, cit->second.getName().c_str(),29);
 						chanmsg.chan_nr = sit->first;
 						chanmsg.mode = 't';
 						if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
@@ -1419,7 +1390,7 @@ void parse_command()
 				perror("[zapit] send");
 				return;
 			}
-			if (send(connfd, &pids_desc, sizeof(pids), 0) == -1)
+			if (send(connfd, &chanpids, sizeof(pids), 0) == -1)
 			{
 				perror("[zapit] send");
 				return;
@@ -1490,14 +1461,14 @@ void parse_command()
 				return;
 			}
 
-			carsten = (short) cit->second.vpid;
+			carsten = (short) cit->second.getVideoPid();
 			if (send(connfd, &carsten, 2, 0) == -1)
 			{
 				perror("[zapit] send");
 				return;
 			}
 
-			carsten = (short) cit->second.apid;
+			carsten = (short) cit->second.getAudioPid();
 			if (send(connfd, &carsten, 2, 0) == -1)
 			{
 				perror("[zapit] send");
@@ -1520,9 +1491,9 @@ void parse_command()
 					{
 						channel_msg_2 chanmsg;
 
-						strncpy(chanmsg.name, (*radiocit)->name.c_str(),30);
-						chanmsg.chan_nr = (*radiocit)->chan_nr;
-						chanmsg.onid_tsid = (*radiocit)->OnidSid();
+						strncpy(chanmsg.name, (*radiocit)->getName().c_str(),30);
+						chanmsg.chan_nr = (*radiocit)->getChannelNumber();
+						chanmsg.onid_tsid = (*radiocit)->getOnidSid();
 
 						if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
 						{
@@ -1555,9 +1526,9 @@ void parse_command()
 					for (CBouquetManager::tvChannelIterator tvcit = g_BouquetMan->tvChannelsBegin(); tvcit != g_BouquetMan->tvChannelsEnd(); tvcit++)
 					{
 						channel_msg_2 chanmsg;
-						strncpy(chanmsg.name, (*tvcit)->name.c_str(),30);
-						chanmsg.chan_nr = (*tvcit)->chan_nr;
-						chanmsg.onid_tsid = (*tvcit)->OnidSid();
+						strncpy(chanmsg.name, (*tvcit)->getName().c_str(),30);
+						chanmsg.chan_nr = (*tvcit)->getChannelNumber();
+						chanmsg.onid_tsid = (*tvcit)->getOnidSid();
 						if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
 						{
 							perror("[zapit] send");
@@ -1587,7 +1558,7 @@ void parse_command()
 			if (zapit(number, false) > 0)
 			{
 				strcpy(m_status, "00d");
-				m_status[1] = pids_desc.count_apids & 0x0f;
+				m_status[1] = chanpids.count_apids & 0x0f;
 
 				if (current_is_nvod)
 				{
@@ -1604,7 +1575,7 @@ void parse_command()
 				perror("[zapit] send");
 				return;
 			}
-			if (send(connfd, &pids_desc, sizeof(pids), 0) == -1)
+			if (send(connfd, &chanpids, sizeof(pids), 0) == -1)
 			{
 				perror("[zapit] send");
 				return;
@@ -1618,7 +1589,7 @@ void parse_command()
 			if (zapit(number,true) > 0)
 			{
 				strcpy(m_status, "00e");
-				m_status[1] = pids_desc.count_apids & 0x0f;
+				m_status[1] = chanpids.count_apids & 0x0f;
 
 				if (current_is_nvod)
 				{
@@ -1635,7 +1606,7 @@ void parse_command()
 				perror("[zapit] send");
 				return;
 			}
-			if (send(connfd, &pids_desc, sizeof(pids), 0) == -1)
+			if (send(connfd, &chanpids, sizeof(pids), 0) == -1)
 			{
 				perror("[zapit] send");
 				return;
@@ -1663,9 +1634,9 @@ void parse_command()
 				for (cit = nvodchannels.begin(); cit != nvodchannels.end(); cit++)
 				{
 					channel_msg_2 chanmsg;
-					strncpy(chanmsg.name, cit->second.name.c_str(),30);
+					strncpy(chanmsg.name, cit->second.getName().c_str(),30);
 					chanmsg.chan_nr = number++;
-					chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
+					chanmsg.onid_tsid = cit->second.getOnidSid();
 
 					if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
 					{
@@ -1763,8 +1734,7 @@ void parse_command()
 						perror("[zapit] recv");
 						return;
 					}
-					//printf("Received onid_sid %x. tsid: %x, sid: %x, onid: %x\n", nvod_onidsid, nvod_tsid, (nvod_onidsid&0xFFFF), (nvod_onidsid>>16));
-					nvodchannels.insert(std::pair<int,channel>(nvod_onidsid,channel("NVOD",0,0,0,0,0,(nvod_onidsid&0xFFFF),nvod_tsid,(nvod_onidsid>>16),1)));
+					nvodchannels.insert(std::pair<int, CZapitChannel>(nvod_onidsid,CZapitChannel("NVOD",(nvod_onidsid&0xFFFF),nvod_tsid,(nvod_onidsid>>16),1)));
 				}
 			}
 			break;
@@ -2086,10 +2056,10 @@ void parse_command()
 
 			case CZapitClient::CMD_GETPIDS :
 				CZapitClient::responseGetOtherPIDs responseGetOtherPIDs;
-				responseGetOtherPIDs.vpid = pids_desc.vpid;
-				responseGetOtherPIDs.ecmpid = pids_desc.ecmpid;
-				responseGetOtherPIDs.vtxtpid = pids_desc.vtxtpid;
-				responseGetOtherPIDs.pcrpid = pids_desc.pcrpid;
+				responseGetOtherPIDs.vpid = chanpids.vpid;
+				responseGetOtherPIDs.ecmpid = chanpids.ecmpid;
+				responseGetOtherPIDs.vtxtpid = chanpids.vtxtpid;
+				responseGetOtherPIDs.pcrpid = chanpids.pcrpid;
 				send( connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs),0);
 				sendAPIDs();
 			break;
@@ -2100,7 +2070,21 @@ void parse_command()
 				while ( read( connfd, &msgAddSubService, sizeof(msgAddSubService)))
 				{
 					//printf("got subchan %x %x\n", msgAddSubService.onidsid, msgAddSubService.tsid);
-                	nvodchannels.insert(std::pair<int,channel>(msgAddSubService.onidsid,channel("NVOD",0,0,0,0,0,(msgAddSubService.onidsid&0xFFFF),msgAddSubService.tsid,(msgAddSubService.onidsid>>16),1)));
+					nvodchannels.insert
+					(
+						std::pair <int, CZapitChannel>
+						(
+							msgAddSubService.onidsid,
+							CZapitChannel
+							(
+								"NVOD",
+								(msgAddSubService.onidsid&0xFFFF),
+								msgAddSubService.tsid,
+								(msgAddSubService.onidsid>>16),
+								1
+							)
+						)
+					);
 				}
 
 				current_is_nvod = true;
@@ -2195,7 +2179,7 @@ void sendChannelListOfBouquet(uint nBouquet)
 		return;
 	}
 
-	std::vector<channel*> channels;
+	std::vector<CZapitChannel*> channels;
 	if (Radiomode_on)
 		channels = g_BouquetMan->Bouquets[nBouquet]->radioChannels;
 	else
@@ -2206,9 +2190,9 @@ void sendChannelListOfBouquet(uint nBouquet)
 		for (uint i = 0; i < channels.size();i++)
 		{
 			channel_msg_2 chanmsg;
-			strncpy(chanmsg.name, channels[i]->name.c_str(),30);
-			chanmsg.onid_tsid = (channels[i]->onid<<16)|channels[i]->sid;
-			chanmsg.chan_nr = channels[i]->chan_nr;
+			strncpy(chanmsg.name, channels[i]->getName().c_str(),30);
+			chanmsg.onid_tsid = channels[i]->getOnidSid();
+			chanmsg.chan_nr = channels[i]->getChannelNumber();
 
 			if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
 			{
@@ -2241,7 +2225,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.123 2002/04/08 20:51:58 Simplex Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.124 2002/04/10 18:36:21 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2306,7 +2290,7 @@ int main (int argc, char **argv)
 	caid = get_caid();
 #endif /* USE_EXTERNAL_CAMD */
 
-	memset(&pids_desc, 0, sizeof(pids));
+	memset(&chanpids, 0, sizeof(pids));
 
 	if (prepare_channels() < 0)
 	{
@@ -2385,11 +2369,11 @@ int main (int argc, char **argv)
 
 #ifndef USE_EXTERNAL_CAMD
 	pids _pids;
-	_pids.count_vpids= 1;
-	_pids.vpid= 0xffff;
-	_pids.count_apids= 1;
-	_pids.apids[0].pid= 0xffff;
-	descramble(0xffff,0xffff,0xffff,0xffff,0xffff, &_pids);
+	_pids.count_vpids = 1;
+	_pids.vpid = 0xffff;
+	_pids.count_apids = 1;
+	_pids.apids[0].pid = 0xffff;
+	descramble(0xffff, 0xffff, 0xffff, 0xffff, &_pids);
 #endif /* USE_EXTERNAL_CAMD */
 
 	// create eventServer
@@ -2419,7 +2403,7 @@ int main (int argc, char **argv)
 void addChannelToBouquet(unsigned int bouquet, unsigned int onid_sid)
 {
 	printf("addChannelToBouquet(%d, %d)\n", bouquet, onid_sid);
-	channel* chan = g_BouquetMan->copyChannelByOnidSid( onid_sid);
+	CZapitChannel* chan = g_BouquetMan->copyChannelByOnidSid( onid_sid);
 	if (chan != NULL)
 		g_BouquetMan->Bouquets[bouquet-1]->addService( chan);
 	else
@@ -2461,9 +2445,9 @@ void internalSendChannels(ChannelList* channels)
 	for (uint i = 0; i < channels->size();i++)
 	{
 		CZapitClient::responseGetBouquetChannels response;
-		strncpy(response.name, (*channels)[i]->name.c_str(),30);
-		response.onid_sid = (*channels)[i]->OnidSid();
-		response.nr = (*channels)[i]->chan_nr;
+		strncpy(response.name, (*channels)[i]->getName().c_str(),30);
+		response.onid_sid = (*channels)[i]->getOnidSid();
+		response.nr = (*channels)[i]->getChannelNumber();
 
 		if (send(connfd, &response, sizeof(response),0) == -1)
 		{
@@ -2475,13 +2459,13 @@ void internalSendChannels(ChannelList* channels)
 
 void sendAPIDs()
 {
-	for (uint i = 0; i < pids_desc.count_apids; i++)
+	for (uint i = 0; i < chanpids.count_apids; i++)
 	{
 		CZapitClient::responseGetAPIDs response;
-		response.pid= pids_desc.apids[i].pid;
-		strncpy(response.desc, pids_desc.apids[i].desc, 25);
-		response.is_ac3= pids_desc.apids[i].is_ac3;
-		response.component_tag= pids_desc.apids[i].component_tag;
+		response.pid= chanpids.apids[i].pid;
+		strncpy(response.desc, chanpids.apids[i].desc, 25);
+		response.is_ac3= chanpids.apids[i].is_ac3;
+		response.component_tag= chanpids.apids[i].component_tag;
 
 		if (send(connfd, &response, sizeof(response),0) == -1)
 		{
@@ -2536,14 +2520,14 @@ void sendChannels( CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT,
 	{
 		if ((Radiomode_on && mode == CZapitClient::MODE_CURRENT ) || (mode==CZapitClient::MODE_RADIO))
 		{
-			for ( map<uint, channel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
+			for ( map<uint, CZapitChannel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
 			{
 				channels.insert( channels.end(), &(it->second));
 			}
 		}
 		else
 		{
-			for ( map<uint, channel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
+			for ( map<uint, CZapitChannel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
 			{
 				channels.insert( channels.end(), &(it->second));
 			}
@@ -2591,7 +2575,7 @@ unsigned zapTo(unsigned int bouquet, unsigned int channel)
 	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
 
 
-	result = zapTo_ServiceID ( channels[channel-1]->OnidSid(), false );
+	result = zapTo_ServiceID ( channels[channel-1]->getOnidSid(), false );
 
     return ( result );
 }
@@ -2643,7 +2627,7 @@ unsigned zapTo (unsigned int channel)
 		}
 	//	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
 		if (radiocit != g_BouquetMan->radioChannelsEnd())
-			result = zapTo_ServiceID ( (*radiocit)->OnidSid(), false );
+			result = zapTo_ServiceID ( (*radiocit)->getOnidSid(), false );
 	}
 	else
 	{
@@ -2655,7 +2639,7 @@ unsigned zapTo (unsigned int channel)
 		}
 	//	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
 		if (tvcit != g_BouquetMan->tvChannelsEnd())
-			result = zapTo_ServiceID ( (*tvcit)->OnidSid(), false );
+			result = zapTo_ServiceID ( (*tvcit)->getOnidSid(), false );
 	}
 
 	return result;

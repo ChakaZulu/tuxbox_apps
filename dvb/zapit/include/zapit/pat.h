@@ -1,5 +1,5 @@
 /*
- * $Id: pat.h,v 1.4 2002/04/07 14:50:36 obi Exp $
+ * $Id: pat.h,v 1.5 2002/04/10 18:36:21 obi Exp $
  */
 
 #ifndef __pat_h__
@@ -8,6 +8,6 @@
 #include "getservices.h"
 #include "scan.h"
 
-int pat(uint oonid,std::map<uint, channel> *cmap);
+int parse_pat (uint16_t original_network_id, std::map <uint, CZapitChannel> *cmap);
 
 #endif /* __pat_h__ */

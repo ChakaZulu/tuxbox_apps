@@ -1,9 +1,22 @@
 /*
- $Id: scan.h,v 1.10 2002/04/06 11:26:11 obi Exp $
+ $Id: scan.h,v 1.11 2002/04/10 18:36:21 obi Exp $
 
 
 
  $Log: scan.h,v $
+ Revision 1.11  2002/04/10 18:36:21  obi
+ EXPERIMENTAL VERSION
+ - rewrote scan, is now configurable through xml files
+   (currently limited (hardcoded) to Astra and Telekom cable until zapitclient offers full support)
+ - moved services.xml to from CONFIGDIR/zapit to CONFIGDIR
+ - restructured services lists
+ - cache pids
+ - replaced channel struct by CZapitChannel class
+ - fixed emmpid bug
+ - restructured pids
+ - changed and added some defines to increase readability
+ - added more features to pzapit
+
  Revision 1.10  2002/04/06 11:26:11  obi
  lots of changes, bugs and fixes, including:
  - anti-randomness fixes
@@ -33,12 +46,14 @@ struct transpondermap;
 #include "pat.h"
 #include "sdt.h"
 #include "tune.h"
+#include "xml/xmltree.h"
+#include "zapit.h"
 #include "zapitclient.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #else
-#define CONFIGDIR "/var/tuxbox/config/zapit"
+#define CONFIGDIR "/var/tuxbox/config"
 #endif
 
 struct scanchannel
@@ -82,21 +97,24 @@ struct scanchannel
 struct transpondermap
 {
 	uint16_t transport_stream_id;
+	uint16_t original_network_id;
 	FrontendParameters feparams;
 	uint8_t polarization;
 	uint8_t DiSEqC;
 
-	transpondermap(uint16_t p_transport_stream_id, FrontendParameters p_feparams)
+	transpondermap(uint16_t p_transport_stream_id, uint16_t p_original_network_id, FrontendParameters p_feparams)
 	{
 		transport_stream_id = p_transport_stream_id;
+		original_network_id = p_original_network_id;
 		feparams = p_feparams;
 		polarization = 0;
 		DiSEqC = 0;
 	}
 
-	transpondermap(uint16_t p_transport_stream_id, FrontendParameters p_feparams, uint8_t p_polarization, uint8_t p_DiSEqC)
+	transpondermap(uint16_t p_transport_stream_id, uint16_t p_original_network_id, FrontendParameters p_feparams, uint8_t p_polarization, uint8_t p_DiSEqC)
 	{
 		transport_stream_id = p_transport_stream_id;
+		original_network_id = p_original_network_id;
 		feparams = p_feparams;
 		polarization = p_polarization;
 		DiSEqC = p_DiSEqC;

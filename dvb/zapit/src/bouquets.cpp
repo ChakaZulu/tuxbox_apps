@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.22 2002/04/06 11:26:11 obi Exp $
+ * $Id: bouquets.cpp,v 1.23 2002/04/10 18:36:21 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -25,15 +25,15 @@
 #include "bouquets.h"
 
 /**** class CBouquet ********************************************************/
-CBouquet::CBouquet( const CBouquet& bouquet)
+CBouquet::CBouquet (const CBouquet& bouquet)
 {
 	Name = bouquet.Name;
 	bHidden = bouquet.bHidden;
 	bLocked = bouquet.bLocked;
 	for (unsigned int i=0; i< bouquet.tvChannels.size(); i++)
-		addService( new channel(*(bouquet.tvChannels[i])));
+		addService( new CZapitChannel(*(bouquet.tvChannels[i])));
 	for (unsigned int i=0; i< bouquet.radioChannels.size(); i++)
-		addService( new channel(*(bouquet.radioChannels[i])));
+		addService( new CZapitChannel(*(bouquet.radioChannels[i])));
 }
 
 CBouquet::~CBouquet()
@@ -44,9 +44,9 @@ CBouquet::~CBouquet()
 		delete radioChannels[i];
 }
 
-channel* CBouquet::getChannelByName(char* serviceName, uint serviceType)
+CZapitChannel* CBouquet::getChannelByName (char* serviceName, uint8_t serviceType)
 {
-	channel* result = NULL;
+	CZapitChannel* result = NULL;
 
 	ChannelList* channels = &tvChannels;
 	switch (serviceType)
@@ -58,7 +58,7 @@ channel* CBouquet::getChannelByName(char* serviceName, uint serviceType)
 	}
 
 	uint i;
-	for (i=0; i<channels->size(), (*channels)[i]->name != string(serviceName); i++);
+	for (i=0; i<channels->size(), (*channels)[i]->getName() != string(serviceName); i++);
 
 	if (i<channels->size())
 		result = (*channels)[i];
@@ -73,9 +73,9 @@ channel* CBouquet::getChannelByName(char* serviceName, uint serviceType)
 // -- servicetype 0 queries TV and Radio Channels
 //
 
-channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType = 0)
+CZapitChannel* CBouquet::getChannelByOnidSid (uint32_t onidSid, uint8_t serviceType = 0)
 {
-	channel* result = NULL;
+	CZapitChannel* result = NULL;
 
 	ChannelList* channels = &tvChannels;
 	switch (serviceType)
@@ -87,7 +87,7 @@ channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType = 0)
 	}
 
 	uint i;
-	for (i=0; (i<channels->size()) && ((*channels)[i]->OnidSid() != onidSid); i++);
+	for (i=0; (i<channels->size()) && ((*channels)[i]->getOnidSid() != onidSid); i++);
 
 	if (i<channels->size())
 		result = (*channels)[i];
@@ -100,9 +100,9 @@ channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType = 0)
 	return( result);
 }
 
-void CBouquet::addService( channel* newChannel)
+void CBouquet::addService (CZapitChannel* newChannel)
 {
-	switch (newChannel->service_type)
+	switch (newChannel->getServiceType())
 	{
 		case 1:
 		case 4:
@@ -114,12 +114,12 @@ void CBouquet::addService( channel* newChannel)
 	}
 }
 
-void CBouquet::removeService( channel* oldChannel)
+void CBouquet::removeService (CZapitChannel* oldChannel)
 {
 	if (oldChannel != NULL)
 	{
 		ChannelList* channels = &tvChannels;
-		switch (oldChannel->service_type)
+		switch (oldChannel->getServiceType())
 		{
 			case 1:
 			case 4: channels = &tvChannels; break;
@@ -137,7 +137,7 @@ void CBouquet::removeService( channel* oldChannel)
 	}
 }
 
-void CBouquet::moveService(  char* serviceName, uint newPosition, uint serviceType)
+void CBouquet::moveService (char* serviceName, uint newPosition, uint8_t serviceType)
 {
 	ChannelList* channels = &tvChannels;
 	switch (serviceType)
@@ -149,7 +149,7 @@ void CBouquet::moveService(  char* serviceName, uint newPosition, uint serviceTy
 
 	uint i=0;
 	ChannelList::iterator it = channels->begin();
-	while ((it<=channels->end()) && ((*it)->name != string(serviceName)))
+	while ((it<=channels->end()) && ((*it)->getName() != string(serviceName)))
 	{
 		it++;
 		i++;
@@ -167,7 +167,7 @@ void CBouquet::moveService(  uint onidSid, uint newPosition)
 }
 */
 
-void CBouquet::moveService(  uint oldPosition, uint newPosition, uint serviceType)
+void CBouquet::moveService (uint oldPosition, uint newPosition, uint8_t serviceType)
 {
 	ChannelList* channels = &tvChannels;
 	switch (serviceType)
@@ -183,7 +183,7 @@ void CBouquet::moveService(  uint oldPosition, uint newPosition, uint serviceTyp
 		for (i=0, itOld = channels->begin(); i<oldPosition; i++, itOld++);
 		for (i=0, itNew = channels->begin(); i<newPosition; i++, itNew++);
 
-		channel* tmp = (*channels)[oldPosition];
+		CZapitChannel* tmp = (*channels)[oldPosition];
 		channels->erase( itOld);
 		channels->insert( itNew, tmp);
 	}
@@ -247,16 +247,16 @@ void CBouquetManager::saveBouquets()
 			for ( uint j=0; j<Bouquets[i]->tvChannels.size(); j++)
 			{
 				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
-						Bouquets[i]->tvChannels[j]->sid,
-						convertForXML(Bouquets[i]->tvChannels[j]->name).c_str(),
-						Bouquets[i]->tvChannels[j]->onid);
+						Bouquets[i]->tvChannels[j]->getServiceId(),
+						convertForXML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
+						Bouquets[i]->tvChannels[j]->getOriginalNetworkId());
 			}
 			for ( uint j=0; j<Bouquets[i]->radioChannels.size(); j++)
 			{
 				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
-						Bouquets[i]->radioChannels[j]->sid,
-						convertForXML(Bouquets[i]->radioChannels[j]->name).c_str(),
-						Bouquets[i]->radioChannels[j]->onid);
+						Bouquets[i]->radioChannels[j]->getServiceId(),
+						convertForXML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
+						Bouquets[i]->radioChannels[j]->getOriginalNetworkId());
 			}
 			fprintf(bouq_fd, "\t</Bouquet>\n");
 		}
@@ -300,21 +300,21 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 				sscanf(channel_node->GetAttributeValue("serviceID"), "%x", &sid);
 				sscanf(channel_node->GetAttributeValue("onid"), "%x", &onid);
 
-				channel* chan = copyChannelByOnidSid( (onid << 16) + sid);
+				CZapitChannel* chan = copyChannelByOnidSid( (onid << 16) + sid);
 
 				if ( chan != NULL)
 				{
-					switch (chan->service_type)
+					switch (chan->getServiceType())
 					{
 						case 1:
 						case 4:
-							chan->chan_nr = nChNrTV;
-							newBouquet->addService( chan);
+							chan->setChannelNumber(nChNrTV);
+							newBouquet->addService(chan);
 							numchans_tv.insert(std::pair<uint, uint>(nChNrTV++, (onid<<16)+sid));
 						break;
 						case 2:
-							chan->chan_nr = nChNrRadio;
-							newBouquet->addService( chan);
+							chan->setChannelNumber(nChNrRadio);
+							newBouquet->addService(chan);
 							numchans_radio.insert(std::pair<uint, uint>(nChNrRadio++, (onid<<16)+sid));
 						break;
 					}
@@ -427,9 +427,9 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 	}
 	remainChannels = addBouquet(strTitle);
 
-	for ( map<uint, channel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
+	for ( map<uint, CZapitChannel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
 	{
-		if (it->second.chan_nr > 0)
+		if (it->second.getChannelNumber() > 0)
 			numberedChannels.insert( numberedChannels.end(), &(it->second));
 		else
 			unnumberedChannels.insert( unnumberedChannels.end(), &(it->second));
@@ -448,10 +448,10 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 
 	for ( uint i=0; i<allChannels.size(); i++)
 	{
-		if (tvChannelsFind( allChannels[i]->OnidSid()) == tvChannelsEnd())
+		if (tvChannelsFind( allChannels[i]->getOnidSid()) == tvChannelsEnd())
 		{
-			channel* chan = copyChannelByOnidSid( allChannels[i]->OnidSid());
-			chan->chan_nr = tvChanNr++;
+			CZapitChannel* chan = copyChannelByOnidSid( allChannels[i]->getOnidSid());
+			chan->setChannelNumber(tvChanNr++);
 			remainChannels->addService( chan);
 		}
 	}
@@ -460,9 +460,9 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 	numberedChannels.clear();
 	unnumberedChannels.clear();
 
-	for ( map<uint, channel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
+	for ( map<uint, CZapitChannel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
 	{
-		if (it->second.chan_nr > 0)
+		if (it->second.getChannelNumber() > 0)
 			numberedChannels.insert( numberedChannels.end(), &(it->second));
 		else
 			unnumberedChannels.insert( unnumberedChannels.end(), &(it->second));
@@ -481,20 +481,20 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 
 	for ( uint i=0; i<allChannels.size(); i++)
 	{
-		if (radioChannelsFind( allChannels[i]->OnidSid()) == radioChannelsEnd())
+		if (radioChannelsFind( allChannels[i]->getOnidSid()) == radioChannelsEnd())
 		{
-			channel* chan = copyChannelByOnidSid( allChannels[i]->OnidSid());
-			chan->chan_nr = radioChanNr++;
+			CZapitChannel* chan = copyChannelByOnidSid( allChannels[i]->getOnidSid());
+			chan->setChannelNumber(radioChanNr++);
 			remainChannels->addService( chan);
 		}
 	}
 
-	for ( map<uint, channel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
+	for ( map<uint, CZapitChannel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
 	{
-		if (radioChannelsFind( it->second.OnidSid()) == radioChannelsEnd())
+		if (radioChannelsFind( it->second.getOnidSid()) == radioChannelsEnd())
 		{
-			channel* chan = copyChannelByOnidSid( it->second.OnidSid());
-			chan->chan_nr = radioChanNr++;
+			CZapitChannel* chan = copyChannelByOnidSid( it->second.getOnidSid());
+			chan->setChannelNumber(radioChanNr++);
 			remainChannels->addService( chan);
 		}
 	}
@@ -518,19 +518,19 @@ void CBouquetManager::renumServices()
 	{
 		for (uint j=0; j<Bouquets[i]->tvChannels.size(); j++)
 		{
-			Bouquets[i]->tvChannels[j]->chan_nr = nChNrTV;
-			numchans_tv.insert(std::pair<uint, uint>(nChNrTV++, Bouquets[i]->tvChannels[j]->OnidSid()));
+			Bouquets[i]->tvChannels[j]->setChannelNumber(nChNrTV);
+			numchans_tv.insert(std::pair<uint, uint>(nChNrTV++, Bouquets[i]->tvChannels[j]->getOnidSid()));
 		}
 		for (uint j=0; j<Bouquets[i]->radioChannels.size(); j++)
 		{
-			Bouquets[i]->radioChannels[j]->chan_nr = nChNrRadio;
-			numchans_radio.insert(std::pair<uint, uint>(nChNrRadio++, Bouquets[i]->radioChannels[j]->OnidSid()));
+			Bouquets[i]->radioChannels[j]->setChannelNumber(nChNrRadio);
+			numchans_radio.insert(std::pair<uint, uint>(nChNrRadio++, Bouquets[i]->radioChannels[j]->getOnidSid()));
 		}
 	}
 
 	map<uint, uint>::iterator        numit;
 	map<std::string, uint>::iterator nameit;
-	map<uint, channel>::iterator     cit;
+	map<uint, CZapitChannel>::iterator     cit;
 
 	extern map<uint, uint> allnumchannels_tv;
 	extern map<uint, uint> allnumchannels_radio;
@@ -546,18 +546,18 @@ void CBouquetManager::renumServices()
 	for (numit = numchans_tv.begin(); numit != numchans_tv.end(); numit++)
 	{
 		cit = allchans_tv.find(numit->second);
-		cit->second.chan_nr = number;
-		allnumchannels_tv.insert(std::pair<uint,uint>(number++, (cit->second.onid<<16)+cit->second.sid));
-		allnamechannels_tv.insert(std::pair<std::string, uint>(cit->second.name, (cit->second.onid<<16)+cit->second.sid));
+		cit->second.setChannelNumber(number);
+		allnumchannels_tv.insert(std::pair<uint,uint>(number++, cit->second.getOnidSid()));
+		allnamechannels_tv.insert(std::pair<std::string, uint>(cit->second.getName(), cit->second.getOnidSid()));
 	}
 	numchans_tv.clear();
 
 	for (nameit = namechans_tv.begin(); nameit != namechans_tv.end(); nameit++)
 	{
 		cit = allchans_tv.find(nameit->second);
-		cit->second.chan_nr = number;
-		allnumchannels_tv.insert(std::pair<uint, uint>(number++, (cit->second.onid<<16)+cit->second.sid));
-		allnamechannels_tv.insert(std::pair<std::string, uint>(nameit->first, (cit->second.onid<<16)+cit->second.sid));
+		cit->second.setChannelNumber(number);
+		allnumchannels_tv.insert(std::pair<uint, uint>(number++, cit->second.getOnidSid()));
+		allnamechannels_tv.insert(std::pair<std::string, uint>(nameit->first, cit->second.getOnidSid()));
 	}
 	namechans_tv.clear();
 
@@ -565,18 +565,18 @@ void CBouquetManager::renumServices()
 	for (numit = numchans_radio.begin(); numit != numchans_radio.end(); numit++)
 	{
 		cit = allchans_radio.find(numit->second);
-		cit->second.chan_nr = number;
-		allnumchannels_radio.insert(std::pair<uint,uint>(number++, (cit->second.onid<<16)+cit->second.sid));
-		allnamechannels_radio.insert(std::pair<std::string, uint>(cit->second.name, (cit->second.onid<<16)+cit->second.sid));
+		cit->second.setChannelNumber(number);
+		allnumchannels_radio.insert(std::pair<uint,uint>(number++, cit->second.getOnidSid()));
+		allnamechannels_radio.insert(std::pair<std::string, uint>(cit->second.getName(), cit->second.getOnidSid()));
 	}
 	numchans_radio.clear();
 
 	for (nameit = namechans_radio.begin(); nameit != namechans_radio.end(); nameit++)
 	{
 		cit = allchans_radio.find(nameit->second);
-		cit->second.chan_nr = number;
-		allnumchannels_radio.insert(std::pair<uint, uint>(number++, (cit->second.onid<<16)+cit->second.sid));
-		allnamechannels_radio.insert(std::pair<std::string, uint>(nameit->first, (cit->second.onid<<16)+cit->second.sid));
+		cit->second.setChannelNumber(number);
+		allnumchannels_radio.insert(std::pair<uint, uint>(number++, cit->second.getOnidSid()));
+		allnamechannels_radio.insert(std::pair<std::string, uint>(nameit->first, cit->second.getOnidSid()));
 	}
 	namechans_radio.clear();
 
@@ -637,7 +637,7 @@ int CBouquetManager::existsBouquet( string name)
 bool CBouquetManager::existsChannelInBouquet( unsigned int bq_id, unsigned int onid_sid)
 {
 	bool     status = false;
-	channel  *ch = NULL;
+	CZapitChannel  *ch = NULL;
 
 	if (bq_id >= 0 && bq_id <= Bouquets.size()) {
 		// query TV-Channels  && Radio channels
@@ -715,20 +715,20 @@ void CBouquetManager::onStart()
 	system("cp " CONFIGDIR "/zapit/last_bouq /tmp/zapit_last_bouq");
 }
 
-channel* CBouquetManager::copyChannelByOnidSid( unsigned int onid_sid)
+CZapitChannel* CBouquetManager::copyChannelByOnidSid( unsigned int onid_sid)
 {
-	channel* chan = NULL;
-	map<uint,channel>::iterator itChannel = allchans_tv.find(onid_sid);
+	CZapitChannel* chan = NULL;
+	map<uint, CZapitChannel>::iterator itChannel = allchans_tv.find(onid_sid);
 	if (itChannel != allchans_tv.end())
 	{
-		chan = new channel(itChannel->second);
+		chan = new CZapitChannel(itChannel->second);
 	}
 	else
 	{
 		itChannel = allchans_radio.find( onid_sid);
 		if (itChannel != allchans_radio.end())
 		{
-			chan = new channel(itChannel->second);
+			chan = new CZapitChannel(itChannel->second);
 		}
 	}
 	return( chan);
@@ -747,7 +747,7 @@ CBouquetManager::tvChannelIterator CBouquetManager::tvChannelsBegin()
 CBouquetManager::tvChannelIterator CBouquetManager::tvChannelsFind( unsigned int onid_sid)
 {
 	tvChannelIterator it = tvChannelsBegin();
-	while ((it != tvChannelsEnd()) && ((*it)->OnidSid() != onid_sid))
+	while ((it != tvChannelsEnd()) && ((*it)->getOnidSid() != onid_sid))
 		it++;
 	return( it);
 }
@@ -772,7 +772,7 @@ CBouquetManager::tvChannelIterator CBouquetManager::tvChannelIterator::operator 
 	return(*this);
 }
 
-channel* CBouquetManager::tvChannelIterator::operator *()
+CZapitChannel* CBouquetManager::tvChannelIterator::operator *()
 {
 	return( Owner->Bouquets[b]->tvChannels[c]);
 }
@@ -800,7 +800,7 @@ CBouquetManager::radioChannelIterator CBouquetManager::radioChannelsBegin()
 CBouquetManager::radioChannelIterator CBouquetManager::radioChannelsFind( unsigned int onid_sid)
 {
 	radioChannelIterator it = radioChannelsBegin();
-	while ((it != radioChannelsEnd()) && ((*it)->OnidSid() != onid_sid))
+	while ((it != radioChannelsEnd()) && ((*it)->getOnidSid() != onid_sid))
 	{
 		it++;
 	}
@@ -827,7 +827,7 @@ CBouquetManager::radioChannelIterator CBouquetManager::radioChannelIterator::ope
 	return(*this);
 }
 
-channel* CBouquetManager::radioChannelIterator::operator *()
+CZapitChannel* CBouquetManager::radioChannelIterator::operator *()
 {
 	return( Owner->Bouquets[b]->radioChannels[c]);
 }

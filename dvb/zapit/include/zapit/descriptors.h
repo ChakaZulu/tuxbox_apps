@@ -1,5 +1,9 @@
-#ifndef __descriptors__
-#define __descriptors__
+/*
+ * $Id: descriptors.h,v 1.9 2002/04/10 18:36:21 obi Exp $
+ */
+
+#ifndef __descriptors_h__
+#define __descriptors_h__
 
 #include <stdint.h>
 #include <ost/frontend.h>
@@ -13,8 +17,8 @@ uint8_t linkage_desc(uint8_t *buffer);
 uint8_t priv_data_desc(uint8_t *buffer);
 uint8_t network_name_desc(uint8_t *buffer);
 uint8_t service_list_desc(uint8_t *buffer);
-uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id);
-uint8_t sat_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, int diseqc);
+uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id);
+uint8_t sat_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC);
 uint8_t terr_deliv_system_desc(uint8_t *buffer);
 uint8_t multilingual_network_name_desc(uint8_t *buffer);
 uint8_t freq_list_desc(uint8_t *buffer);
@@ -33,5 +37,4 @@ uint8_t data_broadcast_desc(uint8_t *buffer);
 uint8_t network_name_desc(uint8_t *buffer);
 uint8_t cell_freq_list_desc(uint8_t *buffer);
 
-
-#endif
+#endif /* __descriptors_h__ */

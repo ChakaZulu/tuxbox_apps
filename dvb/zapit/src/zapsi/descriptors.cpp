@@ -61,7 +61,7 @@ uint8_t ca_descriptor(uint8_t *buffer, uint16_t ca_system_id, uint16_t* ca_pid)
 	}
 	else
 	{
-		*ca_pid = 0x1FFF;
+		*ca_pid = INVALID;
 	}
 
 	return buffer[1];
@@ -116,7 +116,7 @@ uint8_t service_list_desc(uint8_t *buffer)
 	return descriptor_length;
 }
 
-uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id)
+uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id)
 {
 	FrontendParameters feparams;
 
@@ -141,13 +141,13 @@ uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id)
 		printf("[descriptor.cpp] new transponder - transport_stream_id: %04x\n", transport_stream_id);
 		found_transponders++;
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, CEventServer::INITID_ZAPIT, &found_transponders, sizeof(found_transponders));
-		scantransponders.insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, feparams)));
+		scantransponders.insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, original_network_id, feparams)));
 	}
 
 	return buffer[1];
 }
 
-uint8_t sat_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, int DiSEqC)
+uint8_t sat_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC)
 {
 	FrontendParameters feparams;
 	uint8_t polarization;
@@ -166,7 +166,7 @@ uint8_t sat_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, int
 		printf("[descriptor.cpp] new transponder - transport_stream_id: %04x\n", transport_stream_id);
 		found_transponders++;
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, CEventServer::INITID_ZAPIT, &found_transponders, sizeof(found_transponders) );
-		scantransponders.insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, feparams, polarization, DiSEqC)));
+		scantransponders.insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, original_network_id, feparams, polarization, DiSEqC)));
 	}
 
 	return buffer[1];

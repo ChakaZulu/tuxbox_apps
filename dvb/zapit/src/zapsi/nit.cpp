@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.12 2002/04/06 11:26:11 obi Exp $
+ * $Id: nit.cpp,v 1.13 2002/04/10 18:36:21 obi Exp $
  */
 
 #include "nit.h"
@@ -20,7 +20,7 @@ int nit (uint8_t DiSEqC)
 	uint16_t network_descriptors_length;
 	uint16_t transport_descriptors_length;
 	uint16_t transport_stream_loop_length;
-	uint16_t transport_stream_id = 0;
+	uint16_t transport_stream_id;
 	uint16_t original_network_id;
   
   	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
@@ -58,6 +58,7 @@ int nit (uint8_t DiSEqC)
 		{
 			switch (buffer[pos])
 			{
+#if 0
 			case 0x40: /* network_name_descriptor */
 				break;
 			case 0x41: /* service_list_descriptor */
@@ -65,10 +66,10 @@ int nit (uint8_t DiSEqC)
 			case 0x42: /* stuffing_descriptor */
 				break;
 			case 0x43: /* satellite_delivery_system_descriptor */
-				sat_deliv_system_desc(&buffer[pos], transport_stream_id, DiSEqC);
+				sat_deliv_system_desc(&buffer[pos], transport_stream_id, original_network_id, DiSEqC);
 				break;
 			case 0x44: /* cable_delivery_system_descriptor */
-				cable_deliv_system_desc(&buffer[pos], transport_stream_id);
+				cable_deliv_system_desc(&buffer[pos], transport_stream_id, original_network_id);
 				break;
 			case 0x4A: /* linkage_descriptor */
 				break;
@@ -86,6 +87,7 @@ int nit (uint8_t DiSEqC)
 				break;
 			case 0x6E: /* announcement_support_descriptor */
 				break;
+#endif
 			default:
 				printf("[nit.cpp] descriptor_tag: %02x\n", buffer[pos]);
 				break;
@@ -116,10 +118,10 @@ int nit (uint8_t DiSEqC)
 					case 0x42: /* stuffing_descriptor */
 						break;
 					case 0x43: /* satellite_delivery_system_descriptor */
-						sat_deliv_system_desc(&buffer[pos2], transport_stream_id, DiSEqC);
+						sat_deliv_system_desc(&buffer[pos2], transport_stream_id, original_network_id, DiSEqC);
 						break;
 					case 0x44: /* cable_delivery_system_descriptor */
-						cable_deliv_system_desc(&buffer[pos2], transport_stream_id);
+						cable_deliv_system_desc(&buffer[pos2], transport_stream_id, original_network_id);
 						break;
 					case 0x4A: /* linkage_descriptor */
 						break;

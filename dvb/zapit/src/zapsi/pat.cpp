@@ -1,3 +1,7 @@
+/*
+ * $Id: pat.cpp,v 1.17 2002/04/10 18:36:21 obi Exp $
+ */
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -19,13 +23,12 @@
 #define DEMUX_DEV	"/dev/ost/demux0"
 #define PAT_LENGTH	1024
 
-using namespace std;
+std::map <uint, CZapitChannel> nvodchannels;
+std::map <uint, CZapitChannel>::iterator cI;
 
-map<uint,channel> nvodchannels;
-map<uint,channel>::iterator cI;
 extern int found_transponders;
 
-int pat(uint oonid, std::map<uint, channel> *cmap)
+int parse_pat (uint16_t original_network_id, std::map<uint, CZapitChannel> *cmap)
 {
 	struct dmxSctFilterParams flt;
 	int demux_fd;
@@ -85,10 +88,10 @@ int pat(uint oonid, std::map<uint, channel> *cmap)
 #ifdef DEBUG
 			printf("[pat.cpp] program_number: %04x, program_map_PID: %04x\n", program_number, program_map_PID);
 #endif
-			if ((*cmap).count((oonid << 16) + program_number) > 0)
+			if ((*cmap).count((original_network_id << 16) + program_number) > 0)
 			{
-				cI = (*cmap).find((oonid << 16) + program_number);
-				cI->second.pmt = program_map_PID;
+				cI = (*cmap).find((original_network_id << 16) + program_number);
+				cI->second.setPmtPid(program_map_PID);
 			}
 		}
 	}

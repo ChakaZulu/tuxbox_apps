@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.7 2002/04/07 12:54:11 obi Exp $
+ * $Id: pzapit.cpp,v 1.8 2002/04/10 18:36:21 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -24,30 +24,22 @@
 #include "clientlib/zapitclient.h"
 #include <iostream>
 
-int usage(char *basename)
+int usage (std::string basename)
 {
-	printf("\n");
-	printf("usage:\n");
-	printf("\n");
-	printf("start a transponderscan\n");
-	printf("\t%s -s <sat-mask>\n", basename);
-	printf("\n");
-	printf("list bouquets\n");
-	printf("\t%s\n", basename);
-	printf("\n");
-	printf("list channels of one bouquet\n");
-	printf("\t%s [-r] <bouquet-number>\n", basename);
-	printf("\n");
-	printf("zap to a channel\n");
-	printf("\t%s [-r] <bouquet-number> <channel-number>\n", basename);
-	printf("\n");
-	printf("\t-r enables radio mode\n");
-	printf("\n");
-	printf("\tto get your satmask, simply add your supported satellites:\n");
-	printf("\tastra = 1, hotbird = 2, kopernikus = 4,\n");
-	printf("\tdigiturk = 8, sirius = 16, thor = 32\n");
-	printf("\tleave bouquets untouched = 256\n");
-
+	std::cout << "bouquet list: " << basename << std::endl;
+	std::cout << "channel list: " << basename << " [-r] <bouquet-number>" << std::endl;
+	std::cout << "zap: " << basename << " [-r] <bouquet-number> <channel-number>" << std::endl;
+	std::cout << "-r enables radio mode" << std::endl;
+	std::cout << std::endl;
+	std::cout << "change audio pid: " << basename << " -a <audio-number>" << std::endl;
+	std::cout << std::endl;
+	std::cout << "reload channels bouquets: " << basename << " -c" << std::endl;
+	std::cout << std::endl;
+	std::cout << "transponderscan: " << basename << " -s <sat-mask>" << std::endl;
+	std::cout << "to get your satmask, simply add your supported satellites:" << std::endl;
+	std::cout << "astra19 = 1, hotbird = 2, kopernikus = 4" << std::endl;
+	std::cout << "astra28 = 8, sirius = 16, thor = 32, tuerksat = 64" << std::endl;
+	std::cout << "leave bouquets untouched = 256" << std::cout;
 	return -1;
 }
 
@@ -59,8 +51,10 @@ int main (int argc, char** argv)
 	unsigned int channel = 0;
 	unsigned int count = 0;
 	int satmask = 0;
+	int audio = 0;
 
 	bool radio = false;
+	bool reload = false;
 
 	CZapitClient *zapit;
 	std::vector<CZapitClient::responseGetBouquets> bouquets;
@@ -69,7 +63,23 @@ int main (int argc, char** argv)
 	/* command line */
 	for (i = 1; i < argc; i++)
 	{
-		if (!strncmp(argv[i], "-r", 2))
+		if (!strncmp(argv[i], "-a", 2))
+		{
+			if (i < argc - 1)
+			{
+				sscanf(argv[++i], "%d", &audio);
+			}
+			else
+			{
+				return usage(argv[0]);
+			}
+		}
+		else if (!strncmp(argv[i], "-c", 2))
+		{
+			reload = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-r", 2))
 		{
 			if (i < argc - 1)
 			{
@@ -97,6 +107,7 @@ int main (int argc, char** argv)
 		{
 			if ((sscanf(argv[i], "%d", &bouquet) > 0) && (sscanf(argv[++i], "%d", &channel) > 0))
 			{
+				cout << "bouquet: " << bouquet << ", channel: " << channel << std::endl;
 				continue;
 			}
 			else
@@ -115,7 +126,7 @@ int main (int argc, char** argv)
 		}
 	}
 
-	/* zap it */
+	/* create zapit client */
 	zapit = new (nothrow) CZapitClient();
 
 	if (zapit == NULL)
@@ -124,6 +135,16 @@ int main (int argc, char** argv)
 		return -1;
 	}
 
+	/* reload services */
+	if (reload)
+	{
+		std::cout << "reloading channels" << std::endl;
+		zapit->reinitChannels();
+		delete zapit;
+		return 0;
+	}
+
+	/* choose source mode */
 	if (radio)
 	{
 		zapit->setMode(CZapitClient::MODE_RADIO);
@@ -133,41 +154,85 @@ int main (int argc, char** argv)
 		zapit->setMode(CZapitClient::MODE_TV);
 	}
 
+	/* transponderscan */
 	if (satmask)
 	{
+		unsigned int satellite;
+		unsigned int transponder;
+		unsigned int services;
+
 		zapit->startScan(satmask);
-	}
-	else
-	{
-		zapit->getBouquets(bouquets, true);
+
+		while (zapit->isScanReady(satellite, transponder, services) == false)
+		{
+			std::cout << "satellite: " << satellite << ", transponder: " << transponder << ", services: " << services << std::endl;
+			sleep(1);
+		}
+
+		delete zapit;
+		return 0;
 	}
 
+	/* set audio channel */
+	if (audio)
+	{
+		zapit->setAudioChannel(audio - 1);
+		delete zapit;
+		return 0;
+	}
+
+	/* read bouquet list */
+	zapit->getBouquets(bouquets, true);
+
+	/* read channel list */
 	if (bouquet)
 	{
 		zapit->getBouquetChannels(bouquet, channels);
 	}
 
-	if (!channel)
-	{
-		if (!bouquet)
-		{
-			std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
-			for (b_resp = bouquets.begin(); b_resp < bouquets.end(); b_resp++)
-				std::cout << b_resp->bouquet_nr << ": " << b_resp->name << std::endl;
-		}
-		else
-		{
-			std::vector<CZapitClient::responseGetBouquetChannels>::iterator ch_resp;
-			for (ch_resp = channels.begin(), count = 1; ch_resp < channels.end(); ch_resp++, count++)
-				cout << count << ": " << ch_resp->name << endl;
-		}
-	}
+	/* display bouquet list */
 	else
 	{
-		std::cout << "zapping to bouquet " << bouquets[bouquet-1].name << ", channel " << channels[channel-1].name << "." << endl;
-		zapit->zapTo(bouquet, channel);
+		std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
+		for (b_resp = bouquets.begin(); b_resp < bouquets.end(); b_resp++)
+			std::cout << b_resp->bouquet_nr << ": " << b_resp->name << std::endl;
+		delete zapit;
+		return 0;
 	}
 
+	/* display channel list */
+	if (!channel)
+	{
+		std::vector<CZapitClient::responseGetBouquetChannels>::iterator ch_resp;
+		for (ch_resp = channels.begin(), count = 1; ch_resp < channels.end(); ch_resp++, count++)
+			std::cout << count << ": " << ch_resp->name << std::endl;
+		delete zapit;
+		return 0;
+	}
+
+	/* zap */
+	else
+	{
+		CZapitClient::responseGetPIDs pids;
+
+		std::cout << "zapping to bouquet " << bouquets[bouquet-1].name << ", channel " << channels[channel-1].name << "." << std::endl;
+		zapit->zapTo(bouquet, channel);
+		zapit->getPIDS(pids);
+
+		std::cout << "vpid: 0x" << std::hex << pids.PIDs.vpid << std::endl;
+		std::cout << "vtxtpid: 0x" << std::hex << pids.PIDs.vtxtpid << std::endl;
+		std::cout << "pcrpid: 0x" << std::hex << pids.PIDs.pcrpid << std::endl;
+		std::cout << "audio channels:" << std::endl;
+
+		for (count = 0; count < pids.APIDs.size(); count++)
+		{
+			std::cout << count + 1 << ") " << "pid: 0x" << std::hex << pids.APIDs[count].pid << ", description: " << pids.APIDs[count].desc;
+			if (pids.APIDs[count].is_ac3) std::cout << " (ac3)";
+			std::cout << std::endl;
+		}
+	}
+
+	/* cleanup and exit */
 	delete zapit;
 	return 0;
 }

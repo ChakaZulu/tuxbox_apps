@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.3 2002/04/07 11:14:47 obi Exp $
+ * $Id: pmt.cpp,v 1.4 2002/04/10 18:36:21 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -83,7 +83,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 				break;
 
 			case 0x09: /* CA_descriptor */
-				if ((ecm_pid == 0x0000) || (ecm_pid == 0x1FFFF))
+				if ((ecm_pid == NONE) || (ecm_pid == INVALID))
 					ca_descriptor(buffer + descr_pos, ca_system_id, &ecm_pid);
 				break;
 
@@ -304,6 +304,8 @@ pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, uint16_t program_numbe
 
 	memset(&ret_pids, 0, sizeof(ret_pids));
 
+	ret_pids.pmtpid = pmt_pid;
+
 	if ((fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[pmt.cpp] open");
@@ -342,7 +344,7 @@ pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, uint16_t program_numbe
 	section_length = ((buffer[1] & 0xF) << 8) + buffer[2];
 	ret_pids.pcrpid = ((buffer[8] & 0x1f) << 8) + buffer[9];
 	program_info_length = ((buffer[10] & 0xF) << 8) | buffer[11];
-	ret_pids.ecmpid = 0x0000;
+	ret_pids.ecmpid = NONE;
 
 	if (program_info_length > 0)
 	{
@@ -355,7 +357,7 @@ pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, uint16_t program_numbe
 				break;
 			}
 
-			if ((ret_pids.ecmpid != 0x0000) && (ret_pids.ecmpid != 0x1FFF))
+			if ((ret_pids.ecmpid != NONE) && (ret_pids.ecmpid != INVALID))
 				break;
 		}
 	}
