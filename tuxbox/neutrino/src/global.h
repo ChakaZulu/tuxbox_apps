@@ -1,7 +1,10 @@
 // 
-// $Id: global.h,v 1.8 2001/10/09 21:48:37 McClean Exp $
+// $Id: global.h,v 1.9 2001/10/30 22:18:09 McClean Exp $
 //
 // $Log: global.h,v $
+// Revision 1.9  2001/10/30 22:18:09  McClean
+// add ts-scan mask
+//
 // Revision 1.8  2001/10/09 21:48:37  McClean
 // ucode-check
 //
@@ -31,6 +34,7 @@
 
 #include "widget/screensetup.h"
 #include "helpers/settings.h"
+#include "helpers/scan.h"
 #include "widget/eventlist.hpp"
 #include "helpers/locale.h"
 
@@ -57,6 +61,7 @@ NEUTRINO_CPP  CInfoViewer     *g_InfoViewer;
 NEUTRINO_CPP  EventList       *g_EventList;
 NEUTRINO_CPP  CStreamInfo     *g_StreamInfo;
 NEUTRINO_CPP  CUCodeCheck     *g_UcodeCheck;
+NEUTRINO_CPP  CScanTs         *g_ScanTS;
 
 NEUTRINO_CPP  CScreenSetup    *g_ScreenSetup;
 

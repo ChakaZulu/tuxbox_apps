@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.71 2001/10/29 16:49:00 field Exp $
+        $Id: neutrino.cpp,v 1.72 2001/10/30 22:18:09 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.72  2001/10/30 22:18:09  McClean
+  add ts-scan mask
+
   Revision 1.71  2001/10/29 16:49:00  field
   Kleinere Bug-Fixes (key-input usw.)
 
@@ -804,6 +807,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuSeparator() );
 	mainSettings.addItem( new CMenuForwarder("menu.back") );
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.scants", true, "", g_ScanTS) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
@@ -1404,6 +1408,7 @@ int CNeutrinoApp::run(int argc, char **argv)
     g_EpgData = new CEpgData;
     g_InfoViewer = new CInfoViewer;
     g_StreamInfo = new CStreamInfo;
+	g_ScanTS = new CScanTs;
 	g_UcodeCheck = new CUCodeCheck;
     g_ScreenSetup = new CScreenSetup;
     g_EventList = new EventList;
@@ -1650,7 +1655,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.71 2001/10/29 16:49:00 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.72 2001/10/30 22:18:09 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
