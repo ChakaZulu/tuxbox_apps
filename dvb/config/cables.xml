@@ -146,4 +146,19 @@
 		<transponder frequency="450000000" symbol_rate="6900000" fec_inner="9" modulation="3"/> 
 		<transponder frequency="458000000" symbol_rate="6900000" fec_inner="9" modulation="3"/> 
 	</cable>
+	<cable name="LIWEST" satfeed="true">
+		<transponder frequency="402000000" symbol_rate="6900000" fec_inner="0" modulation="4"/>
+		<transponder frequency="410000000" symbol_rate="6875000" fec_inner="0" modulation="3" />
+		<transponder frequency="418000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="426000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="434000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="442000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="498000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="506000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="514000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="522000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="530000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="538000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+		<transponder frequency="546000000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+	</cable> 
 </cables>
