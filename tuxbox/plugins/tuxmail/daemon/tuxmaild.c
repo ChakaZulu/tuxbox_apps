@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.11  2005/03/14 17:45:27  lazyt
+ * simple base64 & quotedprintable decoding
+ *
  * Revision 1.10  2005/02/26 10:23:49  lazyt
  * workaround for corrupt mail-db
  * add ADMIN=Y/N to conf (N to disable mail deletion via plugin)
@@ -301,9 +304,9 @@ int ReadConf()
 
 		if(accounts)
 		{
-			if(pop3log == 'N') printf("TuxMailD <check %d Accounts every %d min without Logging>\n", accounts, intervall);
-			else if(logmode == 'A') printf("TuxMailD <check %d Accounts every %d min with Logging in Append-Mode>\n", accounts, intervall);
-			else printf("TuxMailD <check %d Accounts every %d min with Logging in Single-Mode>\n", accounts, intervall);
+			if(pop3log == 'N') printf("TuxMailD <check %d Account(s) every %dmin without Logging>\n", accounts, intervall);
+			else if(logmode == 'A') printf("TuxMailD <check %d Account(s) every %dmin with Logging in Append-Mode>\n", accounts, intervall);
+			else printf("TuxMailD <check %d Account(s) every %dmin with Logging in Single-Mode>\n", accounts, intervall);
 			return 1;
 		}
 		else
@@ -417,51 +420,103 @@ void *InterfaceThread(void *arg)
 }
 
 /******************************************************************************
- * ConvertHeader
+ * DecodeBase64
  ******************************************************************************/
 
-int ConvertHeader(char *string)
+void DecodeBase64(char *encodedstring, int encodedlen)
 {
-	char tempbuffer[1024], conversion[3];
-	char *ptr;
-	int value, len;
+	int src_index, dst_index;
+	char decodingtable[] = {62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51};
 
-	//check for encoded string
+	memset(decodedstring, 0, sizeof(decodedstring));
 
-		if((ptr = strstr(string, "?=")))
+	for(src_index = dst_index = 0; src_index < encodedlen; src_index += 4, dst_index += 3)
+	{
+		decodedstring[dst_index] = decodingtable[encodedstring[src_index] - 43] << 2 | ((decodingtable[encodedstring[1 + src_index] - 43] >> 4) & 3);
+
+		if(encodedstring[2 + src_index] == '=')
+			break;
+
+		decodedstring[1 + dst_index] = decodingtable[encodedstring[1 + src_index] - 43] << 4 | ((decodingtable[encodedstring[2 + src_index] - 43] >> 2) & 15);
+
+		if(encodedstring[3 + src_index] == '=')
+			break;
+
+		decodedstring[2 + dst_index] = decodingtable[encodedstring[2 + src_index] - 43] << 6 | decodingtable[encodedstring[3 + src_index] - 43];
+	}
+
+	memcpy(&header[stringindex], decodedstring, strlen(decodedstring));
+
+	stringindex += strlen(decodedstring);
+}
+
+/******************************************************************************
+ * DecodeQuotedPrintable
+ ******************************************************************************/
+
+void DecodeQuotedPrintable(char *encodedstring, int encodedlen)
+{
+	int src_index = 0, dst_index = 0;
+
+	memset(decodedstring, 0, sizeof(decodedstring));
+
+	while(src_index < encodedlen)
+	{
+		if(encodedstring[src_index] == '_')
+			decodedstring[dst_index++] = ' ';
+
+		else if(encodedstring[src_index] == '=')
 		{
-			if(*(ptr - 2) == '?') ptr = strstr(ptr + 2, "?=");
+			int value;
 
-			len = ptr+2 - string;
-			memset(tempbuffer, 0, sizeof(tempbuffer));
-			memcpy(tempbuffer, string, len);
+			sscanf(&encodedstring[++src_index], "%2X", &value);
+			src_index++;
 
-		//convert
-
-			strtok(tempbuffer, "?");
-			strtok(NULL, "?");
-			strtok(NULL, "?");
-			ptr = strtok(NULL, "?");
-
-			while(*ptr != '\0')
-			{
-				if(*ptr == '_') header[stringindex++] = ' ';
-				else if(*ptr == '=')
-				{
-					memcpy(conversion, ++ptr, 2);
-					ptr++;
-					conversion[2] = 0;
-					sscanf(conversion, "%X", &value);
-					sprintf(&header[stringindex++], "%c", value);
-				}
-				else header[stringindex++] = *ptr;
-
-				ptr++;
-			}
+			sprintf(&decodedstring[dst_index++], "%c", value);
 		}
-		else return 1;
+		else
+			decodedstring[dst_index++] = encodedstring[src_index];
 
-	return len;
+		src_index++;
+	}
+
+	memcpy(&header[stringindex], decodedstring, strlen(decodedstring));
+
+	stringindex += strlen(decodedstring);
+}
+
+/******************************************************************************
+ * DecodeHeader
+ ******************************************************************************/
+ 
+int DecodeHeader(char *encodedstring)
+{
+	char *ptrS, *ptrE;
+
+	if((ptrS = strstr(encodedstring, "?B?")))
+	{
+		ptrS += 3;
+
+		if((ptrE = strstr(ptrS, "?=")))
+		{
+			DecodeBase64(ptrS, ptrE - ptrS);
+
+			return ptrE+2 - encodedstring;
+		}
+	}
+	else if((ptrS = strstr(encodedstring, "?Q?")))
+	{
+		ptrS += 3;
+
+		if((ptrE = strstr(ptrS, "?=")))
+		{
+			DecodeQuotedPrintable(ptrS, ptrE - ptrS);
+
+			return ptrE+2 - encodedstring;
+		}
+	}
+
+	return 1;
 }
 
 /******************************************************************************
@@ -474,7 +529,7 @@ int SendPOPCommand(int command, char *param)
 	struct sockaddr_in SockAddr;
 	FILE *fd_log;
 	char send_buffer[128], recv_buffer[4096], month[4];
-	char *ptr, *ptr1;
+	char *ptr, *ptr1, *ptr2;
 	int loop, day, hour, minute;
 
 	//build commandstring
@@ -624,8 +679,22 @@ int SendPOPCommand(int command, char *param)
 
 							while(*ptr != '\r')
 							{
-								if(*ptr == '=' && *(ptr + 1) == '?') ptr += ConvertHeader(ptr);
-								else memcpy(&header[stringindex++], ptr++, 1);
+								if(*ptr == '=' && *(ptr + 1) == '?')
+								{
+								    ptr += DecodeHeader(ptr);
+
+								    /* skip space(s) between encoded words */
+
+								    ptr2 = ptr;
+
+								    while(*ptr2 == ' ')
+									ptr2++;
+
+								    if(*ptr2 == '?' && *(ptr2 + 1) == '=')
+									ptr = ptr2;
+								}
+								else
+								    memcpy(&header[stringindex++], ptr++, 1);
 							}
 
 							if(use_spamfilter)
@@ -659,8 +728,22 @@ int SendPOPCommand(int command, char *param)
 
 							while(*ptr != '\r')
 							{
-								if(*ptr == '=' && *(ptr + 1) == '?') ptr += ConvertHeader(ptr);
-								else memcpy(&header[stringindex++], ptr++, 1);
+								if(*ptr == '=' && *(ptr + 1) == '?')
+								{
+								    ptr += DecodeHeader(ptr);
+
+								    /* skip space(s) between encoded words */
+
+								    ptr2 = ptr;
+
+								    while(*ptr2 == ' ')
+									ptr2++;
+
+								    if(*ptr2 == '?' && *(ptr2 + 1) == '=')
+									ptr = ptr2;
+								}
+								else
+								    memcpy(&header[stringindex++], ptr++, 1);
 							}
 
 							header[stringindex++] = '|';
@@ -1045,7 +1128,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.10 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.11 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;

@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.8  2005/03/14 17:45:27  lazyt
+ * simple base64 & quotedprintable decoding
+ *
  * Revision 1.7  2005/02/26 10:23:49  lazyt
  * workaround for corrupt mail-db
  * add ADMIN=Y/N to conf (N to disable mail deletion via plugin)
@@ -90,6 +93,7 @@ int pid;
 int webport;
 char webuser[32], webpass[32];
 char plainstring[64], encodedstring[64];
+char decodedstring[512];
 int startdelay, intervall;
 char pop3log, logmode, audio, savedb;
 int video;
