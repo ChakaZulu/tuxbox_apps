@@ -573,12 +573,13 @@ void eTimerManager::actionHandler()
 					writeToLogfile("must stop running recording :(");
 					eZapMain::getInstance()->recordDVR(0,0);
 				}
-				eServiceHandler *handler=eServiceInterface::getInstance()->getService();		
+				eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		// workaround for start recording in background when a playback
 		// is running or the service is on the same transponder and satellite
 				if ( (nextStartingEvent->type & ePlaylistEntry::recDVR)
 					&& handler && handler->getState() != eServiceHandler::stateStopped
-					&& rec && ( rec.path || ( canHandleTwoServices && onSameTP(rec,Ref) ) ) )
+					&& rec && ((rec.path && rec.type != eServiceReference::idDVB || eSystemInfo::getInstance()->canTimeshift())
+					|| (canHandleTwoServices && onSameTP(rec,Ref)) ) )
 				{
 					eDebug("[eTimerManager] change to service in background :)");
 					writeToLogfile("zap to correct service in background :)");
