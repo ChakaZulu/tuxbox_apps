@@ -139,6 +139,7 @@ streamingmenu.streaming_server_cddrive dvd
 streamingmenu.streaming_server_startdir direktorij (VLC)
 streamingmenu.streaming_videorate brzina videa
 streamingmenu.streaming_audiorate brzina audia
+streamingmenu.streaming_ac3_enabled unset
 streamingmenu.off ugaseno
 streamingmenu.on upaljeno
 
@@ -711,9 +712,10 @@ movieplayer.bookmark oznaka
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.choosestreamfile unset
-movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...\nunset
+movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...
 movieplayer.nostreamingserver Nije bilo moguce\nuspostaviti vezu sa streamingserverom.
 movieplayer.defdir pocetni direktorij
+movieplayer.buffering unset
 
 filebrowser.head pretraživač datoteka
 filebrowser.filter.active upaljen filter
@@ -741,6 +743,7 @@ nfs.type_nfs NFS
 nfs.type_cifs CIFS
 nfs.username ime korisnika za cifs
 nfs.password lozinka za cifs
+nfs.mounterror_notsup unset
 nfsmenu.head namješćenje nfsa/cifsa
 
 apids.hint_1 Utipkajte heksadecimalne apids

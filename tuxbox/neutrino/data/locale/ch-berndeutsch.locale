@@ -139,6 +139,7 @@ streamingmenu.streaming_server_cddrive DVD Loufw㱣h
 streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate Daterate Video
 streamingmenu.streaming_audiorate Daterate Audio
+streamingmenu.streaming_ac3_enabled unset
 streamingmenu.off Deaktiviert
 streamingmenu.on Aktiviert
 
@@ -711,9 +712,10 @@ movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.choosestreamfile unset
-movieplayer.pleasewait Bitte warte.\nd'Verbindig zum Streamingsörver wird härgschtöut.\nunset
+movieplayer.pleasewait Bitte warte.\nd'Verbindig zum Streamingsörver wird härgschtöut.
 movieplayer.nostreamingserver Verbindig zum\n Streamingsörver fäugschlage.
 movieplayer.defdir Schtart-Verz.
+movieplayer.buffering unset
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Föuter a
@@ -741,6 +743,7 @@ nfs.type_nfs NFS
 nfs.type_cifs CIFS
 nfs.username CIFS Benutzername
 nfs.password CIFS Passwort
+nfs.mounterror_notsup unset
 nfsmenu.head NFS/CIFS Ischtöuige
 
 apids.hint_1 Gib diä z'streamende APIDs i,

@@ -136,9 +136,10 @@ streamingmenu.streaming_type Typ serwera
 streamingmenu.server_ip IP serwera
 streamingmenu.server_port Port serwera
 streamingmenu.streaming_server_cddrive Naped DVD
-streamingmenu.streaming_server_startdir volumin (VLC)
+streamingmenu.streaming_server_startdir Volumin (VLC)
 streamingmenu.streaming_videorate Obraz-przeplywnosc
 streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
+streamingmenu.streaming_ac3_enabled unset
 streamingmenu.off Wyl
 streamingmenu.on Wl
 
@@ -366,7 +367,7 @@ flashupdate.getupdatefileerror nie moge pobrac aktualizacji
 flashupdate.cantopenfile nie moge otworzyc pliku
 flashupdate.fileis0bytes rozmiar pliku 0 Bajtow
 flashupdate.eraseingflash kasuje flash
-flashupdate.erasefailed unset
+flashupdate.erasefailed kasowanie nie udane
 flashupdate.programmingflash programuje flash
 flashupdate.cantopenmtd nie moge otworzyc urzadzenia Mtd
 flashupdate.ready gotowy
@@ -705,15 +706,16 @@ movieplayer.head Odtwarzacz filmów
 movieplayer.play Start
 movieplayer.choosets Odtwarzaj TS
 movieplayer.chooseps Odtwarzaj PS
-movieplayer.choosestream unset
+movieplayer.choosestream strumien
 movieplayer.choosepes Odtwarzaj PES
 movieplayer.bookmark Ulubione
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile unset
-movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...\nunset
+movieplayer.choosestreamfile plik z VLC
+movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...
 movieplayer.nostreamingserver Sreaming serwer nieosiagalny.
 movieplayer.defdir folder startowy
+movieplayer.buffering Buforuje...
 
 filebrowser.head Przegladarka
 filebrowser.filter.active Filtr wlaczony
@@ -741,6 +743,7 @@ nfs.type_nfs NFS
 nfs.type_cifs CIFS
 nfs.username CIFS uzytkownik
 nfs.password CIFS haslo
+nfs.mounterror_notsup nie prawidlowy sytem plik򵉮fsmenu.head ustawienia NFS/CIFS
 nfsmenu.head ustawienia NFS/CIFS
 
 apids.hint_1 Podaj APIDy do odbioru w
