@@ -845,7 +845,9 @@ FILE *f_open(const char *filename, const char *acctype)
 			 
 			 /* if we didn't get a station number, query the shoutcast database */
 			 /* and look in the reply for the station number */
-			 if(atoi(url.host) == 0)
+			 char *endptr;
+			 strtol(url.host, &endptr, 10);
+			 if((endptr-url.host) < (int)strlen(url.host))
 			 {
 			   char buf[32768], *ptr;
 			   FILE *fd;
