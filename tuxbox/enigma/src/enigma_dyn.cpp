@@ -4355,19 +4355,15 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	eString mode = opt["mode"];
-	eString spath = opt["path"];
-	eString curBouquet = opt["curBouquet"];
-	eString curChannel = opt["curChannel"];
-	if (opts.find("curBouquet") != eString::npos)
-		currentBouquet = atoi(curBouquet.c_str());
-	if (opts.find("curChannel") != eString::npos)
-		currentChannel = atoi(curChannel.c_str());
-
-	eDebug("[ENIGMA_DYN] body: mode = %s, spath = %s", mode.c_str(), spath.c_str());
-
 	if (!mode)
 		mode = "zap";
-
+	eString curBouquet = opt["curBouquet"];
+	if (curBouquet)
+		currentBouquet = atoi(curBouquet.c_str());
+	eString curChannel = opt["curChannel"];
+	if (curChannel)
+		currentChannel = atoi(curChannel.c_str());
+	eString spath = opt["path"];
 	if (!spath)
 	{
 		zapMode = ZAPMODETV;
@@ -4395,13 +4391,6 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 				currentChannel = -1;
 				break;
 			}
-		}
-
-		if ((spath == ";4097:7:0:1:0:0:0:0:0:0:") && (zapMode != ZAPMODERECORDINGS)) // recordings
-		{
-			zapMode = ZAPMODERECORDINGS;
-			currentBouquet = 0;
-			currentChannel = -1;
 		}
 
 		for (int i = 2; i < 5; i++)
