@@ -49,9 +49,9 @@ bool isDigit(const char ch)
 	else return false;
 }
 
-bool isNumber(const string& str)
+bool isNumber(const std::string& str)
 {
-	for (string::const_iterator i = str.begin(); i != str.end(); i++)
+	for (std::string::const_iterator i = str.begin(); i != str.end(); i++)
 	{
 		if (!isDigit(*i)) return false;
 	}
@@ -59,7 +59,7 @@ bool isNumber(const string& str)
 }
 
 
-CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight, bool Localizing)
+CMenuWidget::CMenuWidget(std::string Name, std::string Icon, int mwidth, int mheight, bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	onPaintNotifier = NULL;
@@ -98,7 +98,7 @@ void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
 	onPaintNotifier = nf;
 }
 
-int CMenuWidget::exec(CMenuTarget* parent, string)
+int CMenuWidget::exec(CMenuTarget* parent, std::string)
 {
 	int pos;
 
@@ -269,7 +269,7 @@ void CMenuWidget::hide()
 
 void CMenuWidget::paint()
 {
-	string  l_name = name;
+	std::string  l_name = name;
 	if(localizing)
 	{
 		l_name = g_Locale->getText(name);
@@ -386,7 +386,7 @@ void CMenuWidget::paintItems()
 
 
 
-CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing, uint DirectKey, string IconName)
+CMenuOptionChooser::CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const bool Localizing, const uint DirectKey, const std::string IconName)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	height= g_Fonts->menu->getHeight();
@@ -428,7 +428,7 @@ void CMenuOptionChooser::setOptionValue(int val)
 	*optionValue = val;
 }
 
-int CMenuOptionChooser::getOptionValue()
+int CMenuOptionChooser::getOptionValue(void) const
 {
 	return *optionValue;
 }
@@ -463,7 +463,7 @@ int CMenuOptionChooser::paint( bool selected )
 
 	frameBuffer->paintBoxRel(x,y, dx, height, color );
 
-	string option = "error";
+	std::string option = "error";
 
 	for(unsigned int count=0;count<options.size();count++)
 	{
@@ -489,8 +489,8 @@ int CMenuOptionChooser::paint( bool selected )
 	}
 
 
-	string  l_optionName = g_Locale->getText(optionName);
-	string  l_option;
+	std::string l_optionName = g_Locale->getText(optionName);
+	std::string l_option;
 	if ( localizing && !isNumber(option))
 		l_option = g_Locale->getText(option);
 	else
@@ -500,13 +500,13 @@ int CMenuOptionChooser::paint( bool selected )
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
-	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
 	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color, 0, true); // UTF-8
 
-	if(selected)
+	if (selected)
 	{
-		CLCD::getInstance()->showMenuText(0, l_optionName);
-		CLCD::getInstance()->showMenuText(1, l_option);
+		CLCD::getInstance()->showMenuText(0, l_optionName, -1, true); // UTF-8
+		CLCD::getInstance()->showMenuText(1, l_option, -1, true); // UTF-8
 	}
 
 	return y+height;
@@ -515,7 +515,7 @@ int CMenuOptionChooser::paint( bool selected )
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
-CMenuOptionStringChooser::CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
+CMenuOptionStringChooser::CMenuOptionStringChooser(std::string OptionName, char* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	height= g_Fonts->menu->getHeight();
@@ -535,7 +535,7 @@ CMenuOptionStringChooser::~CMenuOptionStringChooser()
 	options.clear();
 }
 
-void CMenuOptionStringChooser::addOption( string value)
+void CMenuOptionStringChooser::addOption( std::string value)
 {
 	options.insert(options.end(), value);
 }
@@ -546,7 +546,7 @@ int CMenuOptionStringChooser::exec(CMenuTarget*)
 	//select next value
 	for(unsigned int count=0;count<options.size();count++)
 	{
-		string actOption = options[count];
+		std::string actOption = options[count];
 		if(!strcmp( actOption.c_str(), optionValue))
 		{
 			strcpy(optionValue, options[ (count+1)%options.size() ].c_str());
@@ -575,8 +575,8 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 	frameBuffer->paintBoxRel(x,y, dx, height, color );
 
-	string  l_optionName = g_Locale->getText(optionName);
-	string  l_option;
+	std::string  l_optionName = g_Locale->getText(optionName);
+	std::string  l_option;
 	if ( localizing )
 		l_option = g_Locale->getText(optionValue);
 	else
@@ -601,7 +601,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(string Text, bool Active, const char * const Option, CMenuTarget* Target, string ActionKey, bool Localizing, uint DirectKey, string IconName)
+CMenuForwarder::CMenuForwarder(std::string Text, bool Active, const char * const Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	height=g_Fonts->menu->getHeight();
@@ -616,7 +616,7 @@ CMenuForwarder::CMenuForwarder(string Text, bool Active, const char * const Opti
 	iconName = IconName;
 }
 
-CMenuForwarder::CMenuForwarder(string Text, bool Active, const std::string &Option, CMenuTarget* Target, string ActionKey, bool Localizing, uint DirectKey, string IconName)
+CMenuForwarder::CMenuForwarder(std::string Text, bool Active, const std::string &Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	height=g_Fonts->menu->getHeight();
@@ -646,7 +646,7 @@ int CMenuForwarder::exec(CMenuTarget* parent)
 
 int CMenuForwarder::paint(bool selected)
 {
-	string  l_text;
+	std::string  l_text;
 
 	if ( localizing )
 		l_text = g_Locale->getText(text);
@@ -709,7 +709,7 @@ int CMenuForwarder::paint(bool selected)
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuSeparator::CMenuSeparator(int Type, string Text)
+CMenuSeparator::CMenuSeparator(int Type, std::string Text)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	directKey = CRCInput::RC_nokey;
@@ -743,7 +743,7 @@ int CMenuSeparator::paint(bool selected)
 	}
 	if(type&STRING)
 	{
-		string  l_text = g_Locale->getText(text);
+		std::string  l_text = g_Locale->getText(text);
 		int stringwidth = g_Fonts->menu->getRenderWidth(l_text.c_str());
 		int stringstartposX = 0;
 
@@ -784,7 +784,7 @@ bool CPINProtection::check()
 		PINInput->exec( getParent(), "");
 		delete PINInput;
 		strcpy( hint, "pinprotection.wrongcode");
-	} while ((strncmp(cPIN,validPIN,4) != 0) && ( string(cPIN) != ""));
+	} while ((strncmp(cPIN,validPIN,4) != 0) && ( std::string(cPIN) != ""));
 	return ( strncmp(cPIN,validPIN,4) == 0);
 }
 
@@ -794,7 +794,7 @@ bool CZapProtection::check()
 
 	int res;
 	char cPIN[5] = "";
-	string hint2;
+	std::string hint2;
 	do
 	{
 		strcpy( cPIN, "" );
@@ -806,7 +806,7 @@ bool CZapProtection::check()
 
 		hint2= "pinprotection.wrongcode";
 	} while ( (strncmp(cPIN,validPIN,4) != 0) &&
-			  ( string(cPIN) != "" ) &&
+			  ( std::string(cPIN) != "" ) &&
 			  ( res == menu_return::RETURN_REPAINT ) &&
 			  ( fsk >= g_settings.parentallock_lockage ) );
 	return ( ( strncmp(cPIN,validPIN,4) == 0 ) ||

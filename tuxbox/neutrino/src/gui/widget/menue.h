@@ -33,14 +33,11 @@
 #ifndef __MENU__
 #define __MENU__
 
-#include <string>
-#include <vector>
-
 #include <driver/framebuffer.h>
 #include <driver/rcinput.h>
 
-
-using namespace std;
+#include <string>
+#include <vector>
 
 struct menu_return
 {
@@ -57,7 +54,7 @@ class CChangeObserver
 {
 	public:
 		virtual ~CChangeObserver(){}
-		virtual bool changeNotify(string OptionName, void *Data)
+		virtual bool changeNotify(std::string OptionName, void *Data)
 		{
 			return false;
 		}
@@ -67,7 +64,7 @@ class COnPaintNotifier
 {
 	public:
 		virtual ~COnPaintNotifier(){}
-		virtual bool onPaintNotify(string MenuName)
+		virtual bool onPaintNotify(std::string MenuName)
 		{
 			return false;
 		}
@@ -80,7 +77,7 @@ class CMenuTarget
 		CMenuTarget(){}
 		virtual ~CMenuTarget(){}
 		virtual void hide(){}
-		virtual int exec(CMenuTarget* parent, string actionKey)
+		virtual int exec(CMenuTarget* parent, std::string actionKey)
 		{
 			return 0;
 		}
@@ -95,7 +92,7 @@ class CMenuItem
 		bool		active;
 	public:
 		int		directKey;
-		string	iconName;
+		std::string	iconName;
 
 		CMenuItem()
 		{
@@ -139,7 +136,7 @@ class CMenuSeparator : public CMenuItem
 {
 		int		height;
 		int		type;
-		string		text;
+		std::string	text;
 
 	public:
 		enum
@@ -153,7 +150,7 @@ class CMenuSeparator : public CMenuItem
 		};
 
 
-		CMenuSeparator(int Type=0, string Text="");
+		CMenuSeparator(int Type=0, std::string Text="");
 
 		int paint(bool selected=false);
 		int getHeight()
@@ -165,16 +162,16 @@ class CMenuSeparator : public CMenuItem
 class CMenuForwarder : public CMenuItem
 {
 		int		height;
-		string		text;
+		std::string         text;
 		const char *        option;
 		const std::string * option_string;
 		CMenuTarget*	jumpTarget;
-		string		actionKey;
+		std::string         actionKey;
 		bool		localizing;
 	public:
 
-		CMenuForwarder(string Text, bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, string IconName= "");
-		CMenuForwarder(string Text, bool Active, const std::string &Option, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, string IconName= "");
+		CMenuForwarder(std::string Text, bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
+		CMenuForwarder(std::string Text, bool Active, const std::string &Option, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
 		int paint(bool selected=false);
 		int getHeight()
 		{
@@ -195,30 +192,29 @@ class CMenuOptionChooser : public CMenuItem
 			std::string value;
 		};
 
-		vector<keyval*>    options;
-		int                height;
-		string             optionName;
-		int*               optionValue;
-		CChangeObserver*   observ;
-		bool               localizing;
+		std::vector<keyval *> options;
+		int                   height;
+		std::string           optionName;
+		int *                 optionValue;
+		CChangeObserver *     observ;
+		bool                  localizing;
 
 	public:
-		CMenuOptionChooser(){}
-		CMenuOptionChooser(string OptionName, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, string IconName= "");
+		CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active = false, CChangeObserver * const Observ = NULL, const bool Localizing = true, const uint DirectKey = CRCInput::RC_nokey, const std::string IconName= ""); // UTF-8
 		~CMenuOptionChooser();
 
 
 		void addOption(const int key, const char * const value_utf8_encoded); // UTF-8
 		void removeAllOptions();
 		void setOptionValue(int val);
-		int getOptionValue();
+		int getOptionValue(void) const;
 
 		int paint(bool selected);
-		int getHeight()
+		int getHeight(void) const
 		{
 			return height;
 		}
-		bool isSelectable()
+		bool isSelectable(void) const
 		{
 			return active;
 		}
@@ -228,19 +224,18 @@ class CMenuOptionChooser : public CMenuItem
 
 class CMenuOptionStringChooser : public CMenuItem
 {
-		vector<string>	options;
-		int				height;
-		string			optionName;
-		char*			optionValue;
-		CChangeObserver*	observ;
-		bool               localizing;
+		std::vector<std::string> options;
+		int                      height;
+		std::string              optionName;
+		char *                   optionValue;
+		CChangeObserver *        observ;
+		bool                     localizing;
 
 	public:
-		CMenuOptionStringChooser(){}
-		CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
+		CMenuOptionStringChooser(std::string OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionStringChooser();
 
-		void addOption( string value);
+		void addOption(std::string value);
 		int paint(bool selected);
 		int getHeight()
 		{
@@ -260,11 +255,11 @@ class CMenuWidget : public CMenuTarget
 	protected:
 		CFrameBuffer		*frameBuffer;
 		COnPaintNotifier*	onPaintNotifier;
-		vector<CMenuItem*>	items;
-		vector<unsigned int> page_start;
-		vector<unsigned int> page_end;
-		string			name;
-		string			iconfile;
+		std::vector<CMenuItem*>	items;
+		std::vector<unsigned int> page_start;
+		std::vector<unsigned int> page_end;
+		std::string			name;
+		std::string			iconfile;
 		bool			localizing;
 
 		int			width;
@@ -288,20 +283,20 @@ class CMenuWidget : public CMenuTarget
 			onPaintNotifier=NULL;
 			iconOffset= 0;
 		};
-		CMenuWidget(string Name, string Icon="", int mwidth=400, int mheight=576, bool Localizing=true);
+		CMenuWidget(std::string Name, std::string Icon="", int mwidth=400, int mheight=576, bool Localizing=true);
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, bool defaultselected=false);
 		virtual void paint();
 		virtual void hide();
-		virtual int exec(CMenuTarget* parent, string actionKey);
+		virtual int exec(CMenuTarget* parent, std::string actionKey);
 
 		void setOnPaintNotifier( COnPaintNotifier* );
-		void setName(string Name)
+		void setName(std::string Name)
 		{
 			name=Name;
 		}
-		void setIcon(string Icon)
+		void setIcon(std::string Icon)
 		{
 			iconfile=Icon;
 		}
@@ -336,9 +331,9 @@ class CLockedMenuForwarder : public CMenuForwarder, public CPINProtection
 	protected:
 		virtual CMenuTarget* getParent(){ return Parent;};
 	public:
-		CLockedMenuForwarder(string Text, char* validPIN, bool alwaysAsk=false, bool Active=true, char *Option=NULL,
-		                     CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true,
-		                     uint DirectKey= CRCInput::RC_nokey, string IconName= "")
+		CLockedMenuForwarder(std::string Text, char* validPIN, bool alwaysAsk=false, bool Active=true, char *Option=NULL,
+		                     CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true,
+		                     uint DirectKey= CRCInput::RC_nokey, std::string IconName= "")
 
 		                     : CMenuForwarder(Text, Active, Option, Target, ActionKey, Localizing,
 		                     DirectKey, IconName) ,

@@ -2964,7 +2964,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			text.replace(pos,1,"\n");
 		}
 		if( mode != mode_scart )
-			ShowMsg ( "timerlist.type.remind", text , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw",0 );
+			ShowMsg("timerlist.type.remind", text, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 0, -1, true); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}

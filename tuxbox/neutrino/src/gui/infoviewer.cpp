@@ -458,7 +458,7 @@ void CInfoViewer::showSubchan()
 
 		if ( g_RemoteControl->director_mode )
 		{
-			int w= 20+ g_Fonts->infobar_small->getRenderWidth(g_Locale->getText("nvodselector.directormode").c_str())+ 20;
+			int w= 20+ g_Fonts->infobar_small->getRenderWidth(g_Locale->getText("nvodselector.directormode"), true) + 20; // UTF-8
 			if ( w> dx )
 				dx= w;
 			dy= dy* 2;
@@ -484,7 +484,7 @@ void CInfoViewer::showSubchan()
 		if ( g_RemoteControl->director_mode )
 		{
 			frameBuffer->paintIcon("gelb.raw", x+ 8, y+ dy- 20 );
-			g_Fonts->infobar_small->RenderString(x+ 30, y+ dy- 2, dx- 40, g_Locale->getText("nvodselector.directormode").c_str(), COL_MENUCONTENT);
+			g_Fonts->infobar_small->RenderString(x+ 30, y+ dy- 2, dx- 40, g_Locale->getText("nvodselector.directormode"), COL_MENUCONTENT, 0, true); // UTF-8
         }
 
 
