@@ -445,22 +445,6 @@ int main(int argc, char **argv)
 			eTimerManager::getInstance()->disableDeepstandbyWakeup();
 	}
 
-	int cnt=0;
-	printf("start waiting for running childs\n");
-	while (1)  // wait for running childs (movie deletion in background)
-	{
-		int ret=waitpid(-1,NULL,WNOHANG);
-		if ( ret == -1 && errno == ECHILD )
-			break;
-		if (!((++cnt)%80))
-		    printf(".\n");
-		else
-		    printf(".");
-		fflush(stdout);
-		usleep(1000*500);
-	}
-	printf("wait finished\n");
-
 	Decoder::Flush();
 	exit(res);
 //	mcheck_check_all();

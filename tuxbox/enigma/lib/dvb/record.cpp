@@ -6,7 +6,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <lib/dvb/dvbservice.h>
+#include <lib/system/file_eraser.h>
 #include <signal.h>
 
 #ifndef DMX_LOW_BITRATE
@@ -234,7 +236,12 @@ int eDVBRecorder::openFile(int suffix)
 	if (outfd >= 0)
 		::close(outfd);
 
-	::unlink(tfilename.c_str());
+	struct stat s;
+	if ( !stat(tfilename.c_str(), &s) )
+	{
+		rename(tfilename.c_str(), (tfilename+".$$$").c_str() );
+		eBackgroundFileEraser::getInstance()->erase((tfilename+".$$$").c_str());
+	}
 	outfd=::open(tfilename.c_str(), O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
 
 	if (outfd < 0)

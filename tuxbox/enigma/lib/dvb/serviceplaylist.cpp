@@ -3,9 +3,9 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
+#include <lib/system/file_eraser.h>
 #include <lib/base/i18n.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 /*
 		eServicePlaylistHandler hooks into the file handler eServiceFileHandler
@@ -225,19 +225,7 @@ int ePlaylist::deleteService(std::list<ePlaylistEntry>::iterator it)
 				struct stat s;
 				if (::stat(filename.c_str(), &s) < 0)
 					break;
-				if ( fork() == 0 )
-				{
-					char *fname = strdup(filename.c_str());
-					for (unsigned int i=3; i < 90; ++i )
-						close(i);
-					struct stat s;
-					if ( ::unlink(fname) < 0 )
-						eDebug("remove File %s failed (%m)", fname );
-					free(fname);
-					_exit(0);
-				}
-				else
-					usleep(20*1000);  // 20msek wait for strdup
+				eBackgroundFileEraser::getInstance()->erase(filename.c_str());
 			}
 		}
 		list.erase(it);

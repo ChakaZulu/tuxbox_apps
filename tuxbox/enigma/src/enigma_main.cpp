@@ -30,6 +30,7 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
+#include <lib/system/file_eraser.h>
 #include <lib/dvb/servicedvb.h>
 #include <lib/dvb/dvbci.h>
 #include <lib/dvb/epgcache.h>
@@ -3843,7 +3844,6 @@ void eZapMain::deleteService( eServiceSelector *sel )
 				eString fname=it->service.path;
 				fname.erase(fname.length()-2,2);
 				fname+="eit";
-				eDebug("unlink %s", fname.c_str());
 				::unlink(fname.c_str());
 				::unlink((it->service.path+".indexmarks").c_str());
 			}
@@ -3921,7 +3921,10 @@ void eZapMain::deleteFile( eServiceSelector *sel )
 
 	if (removeEntry)
 	{
-		if ( ref.path.right(3).upper() == ".TS" )
+		bool isTS = (ref.path.right(3).upper() == ".TS");
+		int slice=0;
+		eString filename=ref.path;
+		if ( isTS )
 		{
 			for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
 				it != recordings->getList().end(); ++it )
@@ -3933,38 +3936,25 @@ void eZapMain::deleteFile( eServiceSelector *sel )
 					break;
 				}
 			}
-			int slice=0;
-			eString filename;
-			while (1)
-			{
-				filename=ref.path;
-				if (slice)
-					filename+=eString().sprintf(".%03d", slice);
-				slice++;
-				struct stat s;
-				if (::stat(filename.c_str(), &s) < 0)
-					break;
-				if ( fork() == 0 )
-				{
-					char *fname = strdup(filename.c_str());
-					for (unsigned int i=3; i < 90; ++i )
-						close(i);
-					if ( ::unlink(fname) < 0 )
-						eDebug("remove File %s failed (%m)", fname );
-					free(fname);
-					_exit(0);
-				}
-				else
-					usleep(20*1000);  // 20msek wait for strdup
-			}
-			filename=ref.path;
 			filename.erase(filename.length()-2,2);
 			filename+="eit";
 			::unlink(filename.c_str());
 			::unlink((ref.path+".indexmarks").c_str());
 		}
-		else if ( ::unlink(ref.path.c_str() ) < 0 )
-			eDebug("remove File %s failed (%m)", ref.path.c_str() );
+		while (1)
+		{
+			filename=ref.path;
+			if ( isTS )
+			{
+				if (slice)
+					filename+=eString().sprintf(".%03d", slice);
+				slice++;
+			}
+			struct stat s;
+			if (::stat(filename.c_str(), &s) < 0)
+				break;
+			eBackgroundFileEraser::getInstance()->erase(filename.c_str());
+		}
 		sel->removeCurrent(false);
 	}
 }

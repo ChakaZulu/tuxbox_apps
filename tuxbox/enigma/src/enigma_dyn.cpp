@@ -46,6 +46,7 @@
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
 #include <lib/system/dmfp.h>
+#include <lib/system/file_eraser.h>
 #include <enigma_dyn.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_mount.h>
@@ -1228,33 +1229,35 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 	eString sref = opt["ref"];
 	eServiceReference ref = string2ref(sref);
 	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
-	if (::unlink(ref.path.c_str()) < 0)
-	{
-		eDebug("remove File %s failed (%m)", ref.path.c_str());
-	}
-	else
-	{
-		if (ref.path.right(3).upper() == ".TS")
-		{
-			for (std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
-				it != recordings->getList().end(); ++it)
-			{
-				if (it->service.path == ref.path)
-				{
-					recordings->getList().erase(it);
-					recordings->save();
-					break;
-				}
-			}
-			int ret = 0;
-			int cnt = 1;
-			do
-			{
-				ret = ::unlink(eString().sprintf("%s.%03d", ref.path.c_str(), cnt++).c_str());
-			}
-			while(!ret);
 
-			::unlink(eString().sprintf("%s.eit", getLeft(ref.path, '.').c_str()).c_str());
+	if (ref.path.right(3).upper() == ".TS")
+	{
+		int slice=0;
+		eString filename=ref.path;
+		for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
+			it != recordings->getList().end(); ++it )
+		{
+			if ( it->service.path == ref.path )
+			{
+				recordings->getList().erase(it);
+				recordings->save();
+				break;
+			}
+		}
+		filename.erase(filename.length()-2,2);
+		filename+="eit";
+		::unlink(filename.c_str());
+		::unlink((ref.path+".indexmarks").c_str());
+		while (1)
+		{
+			filename=ref.path;
+			if (slice)
+				filename+=eString().sprintf(".%03d", slice);
+			slice++;
+			struct stat s;
+			if (::stat(filename.c_str(), &s) < 0)
+				break;
+			eBackgroundFileEraser::getInstance()->erase(filename.c_str());
 		}
 	}
 	return closeWindow(content, "Please wait...", 2000);
