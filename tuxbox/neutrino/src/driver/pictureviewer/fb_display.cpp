@@ -146,7 +146,9 @@ void blit2FB(void *fbbuff,
 {
     int i, xc, yc;
     unsigned char *cp; unsigned short *sp; unsigned int *ip;
-    cp = (unsigned char *) sp = (unsigned short *) ip = (unsigned int *) fbbuff;
+    ip = (unsigned int *) fbbuff;
+    sp = (unsigned short *) ip;
+    cp = (unsigned char *) sp;
 
     xc = (pic_xs > scr_xs) ? scr_xs : pic_xs;
     yc = (pic_ys > scr_ys) ? scr_ys : pic_ys;

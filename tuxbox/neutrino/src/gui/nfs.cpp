@@ -48,6 +48,8 @@
 #include <global.h>
 #include <pthread.h>
 
+#include <asm/errno.h>
+
 #include <zapit/client/zapittools.h>
 
 pthread_mutex_t g_mut;

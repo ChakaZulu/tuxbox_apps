@@ -54,13 +54,13 @@ typedef vector<CEventWatchdogNotifier*> EventWatchdogNotifiers;
 class CAspectRatioNotifier : public CEventWatchdogNotifier
 {
 	public:
-		virtual void aspectRatioChanged( int newAspectRatio ) = NULL;
+		virtual void aspectRatioChanged( int newAspectRatio ) = 0;
 };
 
 class CVCRModeNotifier : public CEventWatchdogNotifier
 {
 	public:
-		virtual void VCRModeChanged( int newVCRMode ) = NULL;
+		virtual void VCRModeChanged( int newVCRMode ) = 0;
 };
 
 class CEventWatchDog
