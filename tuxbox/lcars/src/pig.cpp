@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pig.cpp,v $
+Revision 1.3  2001/11/19 10:08:10  TheDOC
+pig fixed
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -43,12 +46,12 @@ void pig::hide()
 
 void pig::setSize(int x, int y)
 {
-	avia_pig_set_size(fd, y, x);
+	avia_pig_set_size(fd, x, y);
 }
 
 void pig::setPosition(int x, int y)
 {
-	avia_pig_set_pos(fd, y, x);
+	avia_pig_set_pos(fd, x, y);
 }
 
 void pig::setStack(int i)
