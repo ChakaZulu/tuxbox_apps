@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.151 2003/02/06 15:37:34 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.152 2003/02/06 16:42:04 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -53,8 +53,6 @@
 #include <map>
 #include <algorithm>
 #include <string>
-
-#include <linux/dvb/dmx.h>
 
 #include <sys/wait.h>
 #include <sys/time.h>
@@ -1149,7 +1147,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.151 2003/02/06 15:37:34 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.152 2003/02/06 16:42:04 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3763,7 +3761,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.151 2003/02/06 15:37:34 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.152 2003/02/06 16:42:04 thegoodguy Exp $\n");
 
 	try
 	{
