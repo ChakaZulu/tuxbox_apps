@@ -149,6 +149,20 @@ void eZapEPG::entry::redrawWidget(gPainter *target, const eRect &area)
 
 void eZapEPG::entry::gotFocus()
 {
+#ifndef DISABLE_LCD
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	int pos = 0;
+	for (int i=0; i < 4; ++i)
+		pos = helptext.find(' ', pos+1);
+	if ( pos != eString::npos && (pos+1) < helptext.length() )
+	{
+		eString title =
+			helptext.left(pos);
+		title.removeChars(' ');
+		pLCD->lcdMenu->Title->setText(title);
+		pLCD->lcdMenu->Element->setText(helptext.mid(pos+1));
+	}
+#endif
 	sbar->setText( helptext );
 	setBackgroundColor(entryColorSelected);
 }

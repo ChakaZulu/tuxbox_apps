@@ -4755,7 +4755,14 @@ void eZapMain::showCurrentStyleEPG()
 void eZapMain::showMultiEPG()
 {
 	eZapEPG epg;
-	
+#ifndef DISABLE_LCD
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	bool bMain = pLCD->lcdMain->isVisible();
+	bool bMenu = pLCD->lcdMenu->isVisible();
+	pLCD->lcdMain->hide();
+	pLCD->lcdMenu->show();
+	epg.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+#endif
 	int direction = 2;
 	hide();
 	epg.show();
@@ -4766,6 +4773,12 @@ void eZapMain::showMultiEPG()
 	}
 	while ( direction > 0 );
 	epg.hide();
+#ifndef DISABLE_LCD
+	if (!bMenu)
+		pLCD->lcdMenu->hide();
+	if ( bMain )
+		pLCD->lcdMain->show();
+#endif
 	if ( !direction ) // switch to service requested...
 		playService(epg.getCurSelected()->service, psDontAdd|psSeekPos|psSetMode);
 	if (!doHideInfobar())
