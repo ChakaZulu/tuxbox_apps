@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.13  2003/01/05 06:49:59  TheDOC
+lcars should work now with the new drivers more properly
+
 Revision 1.12  2002/11/26 20:03:14  TheDOC
 some debug-output and small fixes
 
@@ -88,7 +91,7 @@ void teletext::startReinsertion(int PID)
 		txtfd = open("/dev/dvb/adapter0/demux0", O_RDWR);
 	
 	if (ioctl(txtfd, DMX_SET_PES_FILTER, &pesFilterParams) < 0)
-		perror("DMX_SET_PES_FILTER");
+		perror("[teletext.cpp]DMX_SET_PES_FILTER");
 
 }
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.12  2003/01/05 06:49:59  TheDOC
+lcars should work now with the new drivers more properly
+
 Revision 1.11  2002/11/26 20:03:14  TheDOC
 some debug-output and small fixes
 
@@ -59,9 +62,9 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/video.h>
-#include <linux/dvb/frontend.h>
+//#include <linux/dvb/frontend.h>
 #include <linux/dvb/audio.h>
-#include <linux/dvb/ca.h>
+//#include <linux/dvb/ca.h>
 #include <dbox/avs_core.h>
 #include <dbox/fp.h>
 
@@ -85,20 +88,21 @@ zap::zap(settings &set, osd &o, tuner &t, cam &c) : setting(set), osdd(o), tune(
 {
 	//printf("Initializing zapper...\n");
 
-	vid = open("/dev/dvb/adapter0/video0", O_RDWR);
+	/*vid = open(VIDEO_DEV, O_RDWR);
 	if((video = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
 		//printf("Cannot open demux device \n");
 		exit(1);
 	}
 
-	if((audio = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
+	if((audio = open(DEMUX_DEV, O_RDWR)) < 0) {
 		//printf("Cannot open demux device\n");
 		exit(1);
 	}
-	aud = open("/dev/dvb/adapter0/audio0", O_RDWR);
-	ioctl(vid, VIDEO_SELECT_SOURCE, (video_stream_source_t)VIDEO_SOURCE_DEMUX);
+	aud = open(AUDIO_DEV, O_RDWR);
+	ioctl(vid, VIDEO_SELECT_SOURCE, (video_stream_source_t)VIDEO_SOURCE_DEMUX);*/
 	old_frequ = 0;
 	old_TS = -1;
+	usevideo = false, useaudio = false, usepcr = false;
 }
 
 zap::~zap()
@@ -121,111 +125,210 @@ void zap::close_dev()
 
 void zap::zap_allstop()
 {
-	ioctl(video,DMX_STOP, 0);
-	ioctl(audio,DMX_STOP, 0);
-	ioctl(pcr,DMX_STOP, 0);
-	ioctl(vid, VIDEO_STOP, 0);
-	ioctl(aud, AUDIO_STOP, 0);
+	if (usepcr)
+		if (ioctl(pcr,DMX_STOP) < 0)
+			perror("[zap.cpp]DMX_STOP pcr zap_allstop");
+
+	do
+	{
+		if (ioctl(aud, AUDIO_GET_STATUS, &astatus) < 0)
+			perror ("[zap.cpp]AUDIO_GET_STATUS");
+		if (astatus.play_state != AUDIO_STOPPED)
+		{
+			std::cout << "[zap.cpp]Stopping audio-device" << std::endl;
+			if (ioctl(audio, DMX_STOP) < 0)
+				perror("[zap.cpp]DMX_STOP audio");
+			if (ioctl(aud, AUDIO_STOP) < 0)
+				perror("[zap.cpp]AUDIO_STOP");
+		}
+	} while (astatus.play_state != AUDIO_STOPPED);
+	
+	do
+	{
+		if (ioctl(vid, VIDEO_GET_STATUS, &vstatus) < 0)
+			perror ("[zap.cpp]VIDEO_GET_STATUS");
+		if (vstatus.play_state != VIDEO_STOPPED)
+		{
+			std::cout << "[zap.cpp]Stopping video-device" << std::endl;
+			if (ioctl(video, DMX_STOP) < 0)
+				perror("[zap.cpp]DMX_STOP video");
+			if (ioctl(vid, VIDEO_STOP) < 0)
+				perror("[zap.cpp]VIDEO_STOP");
+		}
+	} while (vstatus.play_state != VIDEO_STOPPED);
 }
 
 void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS, int PID1, int PID2)
 {
-	std::cout << "Start Zapping" << std::endl;
-	zap_allstop();
-
-	close(vid);
-	close(aud);
-	close(video);
-	close(audio);
-	close(pcr);
-
-	vid = open("/dev/dvb/adapter0/video0", O_RDWR);
-	if (vid < 0)
-		perror("/dev/dvb/adapter0/video0");
-
-	if((video = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
-		perror("/dev/dvb/adapter0/demux0");
-		exit(1);
-	}
-
-	if((pcr = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
-		perror("/dev/dvb/adapter0/demux0");
-		exit(1);
-	}
-
-	aud = open("/dev/dvb/adapter0/audio0", O_RDWR);
-	if (aud < 0)
-		perror("/dev/dvb/adapter0/audio0");
-
-	if((audio = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
-		perror("/dev/dvb/adapter0/demux0");
-		exit(1);
-	}
-	struct dmx_pes_filter_params pes_filter;
-
 	if (VPID == 0)
 		VPID = 0x1fff;
+	if (APID == 0)
+		APID = 0x1fff;
+	if (PCR == 0)
+		PCR = 0x1fff;
 
-	//printf("Zappe auf\nSID: %04x\nVPID: %04x\nAPID: %04x\nECM: %04x\nONID: %04x\n\n", SID, VPID, APID, ECM, ONID);
+	std::cout << "Start Zapping" << std::endl;
+	zap_allstop();
+	if (usevideo)
+	{
+		close(vid);
+		close(video);
+	}
+	if (useaudio)
+	{
+		close(aud);
+		close(audio);
+	}
+	if (usepcr)
+		close(pcr);
 
-	bool usevideo = false, useaudio = false, usepcr = false;
-	//ioctl(audio,AUDIO_SET_BYPASS_MODE, 0);
 	if ((VPID >= 0x20) && (VPID <= 0x1FFB))
 	{
+		usevideo = true;
+	}
+	if ((PCR >= 0x20) && (PCR <= 0x1FFB))
+	{
+		usepcr = true;
+	}
+	if ((APID >= 0x20) && (APID <= 0x1FFB))
+	{
+		useaudio = true;
+	}
+
+	if (usevideo)
+	{
+		std::cout << "[zap.cpp]Open video" << std::endl;
+		if ((vid = open(VIDEO_DEV, O_RDWR)) < 0)
+		{
+			perror("/dev/dvb/adapter0/video0");
+			exit(1);
+		}
+
+		std::cout << "[zap.cpp]Open video demux" << std::endl;
+		if((video = open(DEMUX_DEV, O_RDWR)) < 0) {
+			perror("/dev/dvb/adapter0/demux0");
+			exit(1);
+		}
+	}
+
+	if (usepcr)
+	{
+		std::cout << "[zap.cpp]Open pcr demux" << std::endl;
+		if((pcr = open(DEMUX_DEV, O_RDWR)) < 0) {
+			perror("/dev/dvb/adapter0/demux0");
+			exit(1);
+		}
+	}
+
+	if (useaudio)
+	{
+		std::cout << "[zap.cpp]Open audio" << std::endl;
+		if ((aud = open(AUDIO_DEV, O_RDWR)) < 0)
+		{	
+			perror("/dev/dvb/adapter0/audio0");
+			exit(1);
+		}
+
+		std::cout << "[zap.cpp]Open audio demux" << std::endl;
+		if((audio = open(DEMUX_DEV, O_RDWR)) < 0) {
+			perror("/dev/dvb/adapter0/demux0");
+			exit(1);
+		}
+	}
+
+	struct dmx_pes_filter_params pes_filter;
+
+	printf("Zappe auf\nSID: %04x\nVPID: %04x\nAPID: %04x\nECM: %04x\nONID: %04x\n\n", SID, VPID, APID, ECM, ONID);
+
+	
+	//ioctl(audio,AUDIO_SET_BYPASS_MODE, 0);
+	if (usevideo)
+	{
+		if (vstatus.stream_source != VIDEO_SOURCE_DEMUX)
+		{
+			if (ioctl(vid, VIDEO_SELECT_SOURCE, (video_stream_source_t)VIDEO_SOURCE_DEMUX) < 0)
+				perror ("[zap.cpp]VIDEO_SELECT_SOURCE");
+		}
+
 		/* vpid */
 		pes_filter.pid     = VPID;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
 		pes_filter.pes_type = DMX_PES_VIDEO;
 		pes_filter.flags   = 0;
-		ioctl(video,DMX_SET_PES_FILTER,&pes_filter);
+		if (ioctl(video,DMX_SET_PES_FILTER,&pes_filter) < 0)
+			perror("[zap.cpp]DMX_SET_PES_FILTER video");
 		usevideo = true;
 	}
 
-	/* apid */
-	if ((APID >= 0x20) && (APID <= 0x1FFB))
-	{
-		pes_filter.pid     = APID;
-		pes_filter.input   = DMX_IN_FRONTEND;
-		pes_filter.output  = DMX_OUT_DECODER;
-		pes_filter.pes_type = DMX_PES_AUDIO;
-		pes_filter.flags   = 0;
-		ioctl(audio,DMX_SET_PES_FILTER,&pes_filter);
-		useaudio = true;
-	}
-
-	/* apid */
-	if ((PCR >= 0x20) && (PCR <= 0x1FFB))
+	/* pcr */
+	if (usepcr)
 	{
 		pes_filter.pid     = PCR;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
 		pes_filter.pes_type = DMX_PES_PCR;
 		pes_filter.flags   = 0;
-		ioctl(pcr,DMX_SET_PES_FILTER,&pes_filter);
+		if (ioctl(pcr,DMX_SET_PES_FILTER,&pes_filter)< 0 )
+			perror("[zap.cpp]DMX_SET_PES_FILTER pcr");
 		usepcr = true;
 	}
 
-	if (usevideo)
-		ioctl(vid, VIDEO_PLAY);
-
+	/* apid */
 	if (useaudio)
-		ioctl(aud, AUDIO_PLAY);
+	{
+		if (astatus.stream_source != AUDIO_SOURCE_DEMUX)
+		{
+			if (ioctl(aud, AUDIO_SELECT_SOURCE, (audio_stream_source_t)AUDIO_SOURCE_DEMUX) < 0)
+				perror("[zap.cpp]AUDIO_SELECT_SOURCE");
+		}
 
+		pes_filter.pid     = APID;
+		pes_filter.input   = DMX_IN_FRONTEND;
+		pes_filter.output  = DMX_OUT_DECODER;
+		pes_filter.pes_type = DMX_PES_AUDIO;
+		pes_filter.flags   = 0;
+		if (ioctl(audio,DMX_SET_PES_FILTER,&pes_filter) < 0)
+			perror("[zap.cpp]DMX_SET_PES_FILTER audio");
+		useaudio = true;
+	}
+	
 	if (usepcr)
-		ioctl(pcr, DMX_START);
+	{
+		if (ioctl(pcr, DMX_START) < 0)
+			perror("[zap.cpp]DMX_START pcr");
+	}
 
 	if (useaudio)
-		ioctl(audio,DMX_START);
-	if (usevideo)
-		ioctl(video,DMX_START);
+	{
+		ioctl(audio, DMX_START);
+			perror("[zap.cpp]DMX_START audio");
+	}
 
+	if (usevideo)
+	{	
+		ioctl(video,DMX_START);
+			perror("[zap.cpp]DMX_START video");
+	}
+
+	if (usevideo)
+	{	
+		ioctl(vid, VIDEO_PLAY);
+			perror("[zap.cpp]VIDEO_PLAY");
+	}
+
+	if (useaudio)
+	{	
+		ioctl(aud, AUDIO_PLAY);
+			perror("[zap.cpp]AUDIO_PLAY");
+	}
 
 	//ioctl(audio,AUDIO_SET_BYPASS_MODE, 1);
 
 	//printf("Zapping...\n");
 	if (ECM != 0)
 	{
+		std::cout << "Doing CA" << std::endl;
 		ca.initialize();
 		if (VPID != 0x1fff)
 		{
@@ -297,3 +400,4 @@ void zap::dmx_stop()
 	ioctl(audio,DMX_STOP,0);
 	ioctl(vid, VIDEO_STOP);
 }
+

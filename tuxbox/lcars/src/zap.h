@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.h,v $
+Revision 1.6  2003/01/05 06:49:59  TheDOC
+lcars should work now with the new drivers more properly
+
 Revision 1.5  2002/06/08 20:21:09  TheDOC
 adding the cam-sources with slight interface-changes
 
@@ -39,6 +42,10 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "tuner.h"
 #include "cam.h"
 
+#define VIDEO_DEV "/dev/dvb/adapter0/video0"
+#define AUDIO_DEV "/dev/dvb/adapter0/audio0"
+#define DEMUX_DEV "/dev/dvb/adapter0/demux0"
+
 class zap
 {
 	int vid, aud, frontend, video, audio, pcr;
@@ -48,6 +55,9 @@ class zap
 	tuner tune;
 	cam ca;
 	int old_TS;
+	bool usevideo, useaudio, usepcr;
+	audio_status astatus;
+	video_status vstatus;
 public:
 	zap(settings &set, osd &o, tuner &t, cam &c);
 	~zap();
@@ -60,3 +70,4 @@ public:
 	void dmx_stop();
 };
 #endif // ZAP_H
+

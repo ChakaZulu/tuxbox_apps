@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.21  2003/01/05 06:49:59  TheDOC
+lcars should work now with the new drivers more properly
+
 Revision 1.20  2002/11/26 20:03:14  TheDOC
 some debug-output and small fixes
 
@@ -330,7 +333,7 @@ std::string channels::getPerspectiveName(int number)
 
 void channels::zapCurrentChannel()
 {
-	zap_obj->zap_allstop();
+	//zap_obj->zap_allstop();
 
 	linkage_perspectives.clear();
 
