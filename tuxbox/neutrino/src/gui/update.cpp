@@ -39,7 +39,6 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
-#include <libmd5sum.h>
 #include <libcramfs.h>
 
 #include <global.h>
