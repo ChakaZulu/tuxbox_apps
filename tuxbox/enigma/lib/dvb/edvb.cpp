@@ -509,6 +509,7 @@ void eDVB::serviceEvent(int event)
 		break;
 	}	
 	case eventServiceGotPMT:
+		printf("eventServiceGotPMT\n");
 		service_state=0;
 		scanPMT();
 		{
@@ -519,7 +520,6 @@ void eDVB::serviceEvent(int event)
 				pmt->unlock();
 			}
 		}
-		printf("eventServiceSwitched\n");
 		if (state==stateServiceGetPMT)
 			serviceEvent(eventServiceSwitched);
 		else
