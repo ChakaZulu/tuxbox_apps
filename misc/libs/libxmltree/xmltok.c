@@ -81,19 +81,23 @@ We need 8 bits to index into pages, 3 bits to add to that index and
 static
 int isNever(const ENCODING *enc, const char *p)
 {
-  return 0;
+	(void)enc;
+	(void)p;
+	return 0;
 }
 
 static
 int utf8_isName2(const ENCODING *enc, const char *p)
 {
-  return UTF8_GET_NAMING2(namePages, (const unsigned char *)p);
+	(void)enc;
+	return UTF8_GET_NAMING2(namePages, (const unsigned char *)p);
 }
 
 static
 int utf8_isName3(const ENCODING *enc, const char *p)
 {
-  return UTF8_GET_NAMING3(namePages, (const unsigned char *)p);
+	(void)enc;
+	return UTF8_GET_NAMING3(namePages, (const unsigned char *)p);
 }
 
 #define utf8_isName4 isNever
@@ -101,13 +105,15 @@ int utf8_isName3(const ENCODING *enc, const char *p)
 static
 int utf8_isNmstrt2(const ENCODING *enc, const char *p)
 {
-  return UTF8_GET_NAMING2(nmstrtPages, (const unsigned char *)p);
+	(void)enc;
+	return UTF8_GET_NAMING2(nmstrtPages, (const unsigned char *)p);
 }
 
 static
 int utf8_isNmstrt3(const ENCODING *enc, const char *p)
 {
-  return UTF8_GET_NAMING3(nmstrtPages, (const unsigned char *)p);
+	(void)enc;
+	return UTF8_GET_NAMING3(nmstrtPages, (const unsigned char *)p);
 }
 
 #define utf8_isNmstrt4 isNever
@@ -117,13 +123,15 @@ int utf8_isNmstrt3(const ENCODING *enc, const char *p)
 static
 int utf8_isInvalid3(const ENCODING *enc, const char *p)
 {
-  return UTF8_INVALID3((const unsigned char *)p);
+	(void)enc;
+	return UTF8_INVALID3((const unsigned char *)p);
 }
 
 static
 int utf8_isInvalid4(const ENCODING *enc, const char *p)
 {
-  return UTF8_INVALID4((const unsigned char *)p);
+	(void)enc;
+	return UTF8_INVALID4((const unsigned char *)p);
 }
 
 struct normal_encoding {
@@ -201,6 +209,7 @@ void utf8_toUtf8(const ENCODING *enc,
 {
   char *to;
   const char *from;
+	(void)enc;
   if (fromLim - *fromP > toLim - *toP) {
     /* Avoid copying partial characters. */
     for (fromLim = *fromP + (toLim - *toP); fromLim > *fromP; fromLim--)
@@ -275,6 +284,7 @@ void latin1_toUtf8(const ENCODING *enc,
 		   const char **fromP, const char *fromLim,
 		   char **toP, const char *toLim)
 {
+	(void)enc;
   for (;;) {
     unsigned char c;
     if (*fromP == fromLim)
@@ -300,6 +310,7 @@ void latin1_toUtf16(const ENCODING *enc,
 		    const char **fromP, const char *fromLim,
 		    unsigned short **toP, const unsigned short *toLim)
 {
+	(void)enc;
   while (*fromP != fromLim && *toP != toLim)
     *(*toP)++ = (unsigned char)*(*fromP)++;
 }
@@ -309,7 +320,8 @@ static const struct normal_encoding latin1_encoding = {
   {
 #include "asciitab.h"
 #include "latin1tab.h"
-  }
+  },
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
 static
@@ -317,6 +329,7 @@ void ascii_toUtf8(const ENCODING *enc,
 		  const char **fromP, const char *fromLim,
 		  char **toP, const char *toLim)
 {
+	(void)enc;
   while (*fromP != fromLim && *toP != toLim)
     *(*toP)++ = *(*fromP)++;
 }
@@ -326,7 +339,8 @@ static const struct normal_encoding ascii_encoding = {
   {
 #include "asciitab.h"
 /* BT_NONXML == 0 */
-  }
+  },
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
 #undef PREFIX
@@ -355,6 +369,7 @@ void PREFIX(toUtf8)(const ENCODING *enc, \
 		    const char **fromP, const char *fromLim, \
 		    char **toP, const char *toLim) \
 { \
+  (void)enc; \
   const char *from; \
   for (from = *fromP; from != fromLim; from += 2) { \
     int plane; \
@@ -418,6 +433,7 @@ void PREFIX(toUtf16)(const ENCODING *enc, \
 		     const char **fromP, const char *fromLim, \
 		     unsigned short **toP, const unsigned short *toLim) \
 { \
+  (void)enc; \
   /* Avoid copying first half only of surrogate */ \
   if (fromLim - *fromP > ((toLim - *toP) << 1) \
       && (GET_HI(fromLim - 2) & 0xF8) == 0xD8) \
@@ -475,7 +491,8 @@ static const struct normal_encoding little2_encoding = {
   {
 #include "asciitab.h"
 #include "latin1tab.h"
-  }
+  },
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
 #if BYTE_ORDER != 21
@@ -485,7 +502,8 @@ static const struct normal_encoding internal_little2_encoding = {
   {
 #include "iasctab.h"
 #include "latin1tab.h"
-  }
+  },
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
 #endif
@@ -542,7 +560,8 @@ static const struct normal_encoding big2_encoding = {
   {
 #include "asciitab.h"
 #include "latin1tab.h"
-  }
+  },
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
 #if BYTE_ORDER != 12
@@ -552,7 +571,8 @@ static const struct normal_encoding internal_big2_encoding = {
   {
 #include "iasctab.h"
 #include "latin1tab.h"
-  }
+  },
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
 #endif
@@ -635,6 +655,7 @@ static
 void initUpdatePosition(const ENCODING *enc, const char *ptr,
 			const char *end, POSITION *pos)
 {
+	(void)enc;
   normal_updatePosition(&utf8_encoding.enc, ptr, end, pos);
 }
 
@@ -1069,9 +1090,9 @@ XmlInitUnknownEncoding(void *mem,
 		       int (*convert)(void *userData, const char *p),
 		       void *userData)
 {
-  unsigned int i;
+  int i;
   struct unknown_encoding *e = (unknown_encoding*)mem;
-  for (i = 0; i < sizeof(struct normal_encoding); i++)
+  for (i = 0; i < (int)sizeof(struct normal_encoding); i++)
     ((char *)mem)[i] = ((char *)&latin1_encoding)[i];
   for (i = 0; i < 128; i++)
     if (latin1_encoding.type[i] != BT_OTHER

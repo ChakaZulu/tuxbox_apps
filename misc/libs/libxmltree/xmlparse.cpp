@@ -22,6 +22,9 @@ Contributor(s):
 ChangeLog:
 
   $Log: xmlparse.cpp,v $
+  Revision 1.3  2003/03/14 05:13:04  obi
+  compileable with -W -Werror
+
   Revision 1.2  2003/02/26 22:21:24  obi
   Mismatched free() / delete / delete []
 
@@ -1890,7 +1893,7 @@ enum XML_Error epilogProcessor(void *parser, const char *s, const char *end, con
   };
 };
 
-enum XML_Error errorProcessor(void *parser, const char *s, const char *end, const char **nextPtr)
+enum XML_Error errorProcessor(void *parser, const char* /*s*/, const char* /*end*/, const char** /*nextPtr*/)
 {
   XML_Parser *p=(XML_Parser *) parser;
 

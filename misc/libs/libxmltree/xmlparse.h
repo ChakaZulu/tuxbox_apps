@@ -22,6 +22,9 @@ Contributor(s):
 ChangeLog:
 
   $Log: xmlparse.h,v $
+  Revision 1.2  2003/03/14 05:13:04  obi
+  compileable with -W -Werror
+
   Revision 1.1  2002/01/18 20:22:39  tmbinc
   initial checkin
 
@@ -278,15 +281,15 @@ class XML_Parser
     virtual int setOpenEntityNames(const XML_Char *openEntityNames);
     virtual void normalizePublicId(XML_Char *s);
 
-    virtual void StartElementHandler(const XML_Char *name, const XML_Char **atts) {};
-    virtual void EndElementHandler(const XML_Char *name) {};
-    virtual void CharacterDataHandler(const XML_Char *s, int len) {};
-    virtual void ProcessingInstructionHandler(const XML_Char *target, const XML_Char *data) {};
-    virtual void DefaultHandler(const XML_Char *s, int len) {};
-    virtual void UnparsedEntityDeclHandler(const XML_Char *entityName, const XML_Char *base, const XML_Char *systemId, const XML_Char *publicId, const XML_Char *notationName) {};
-    virtual void NotationDeclHandler(const XML_Char *notationName, const XML_Char *base, const XML_Char *systemId, const XML_Char *publicId) {};
-    virtual int ExternalEntityRefHandler(const XML_Char *openEntityNames, const XML_Char *base, const XML_Char *systemId, const XML_Char *publicId) {return 0;};
-    virtual int UnknownEncodingHandler(void *encodingHandlerData, const XML_Char *name, XML_Encoding *info) {return 0;};
+    virtual void StartElementHandler(const XML_Char* /*name*/, const XML_Char** /*atts*/) {};
+    virtual void EndElementHandler(const XML_Char* /*name*/) {};
+    virtual void CharacterDataHandler(const XML_Char* /*s*/, int /*len*/) {};
+    virtual void ProcessingInstructionHandler(const XML_Char* /*target*/, const XML_Char* /*data*/) {};
+    virtual void DefaultHandler(const XML_Char* /*s*/, int /*len*/) {};
+    virtual void UnparsedEntityDeclHandler(const XML_Char* /*entityName*/, const XML_Char* /*base*/, const XML_Char* /*systemId*/, const XML_Char* /*publicId*/, const XML_Char* /*notationName*/) {};
+    virtual void NotationDeclHandler(const XML_Char* /*notationName*/, const XML_Char* /*base*/, const XML_Char* /*systemId*/, const XML_Char* /*publicId*/) {};
+    virtual int ExternalEntityRefHandler(const XML_Char* /*openEntityNames*/, const XML_Char* /*base*/, const XML_Char* /*systemId*/, const XML_Char* /*publicId*/) {return 0;};
+    virtual int UnknownEncodingHandler(void* /*encodingHandlerData*/, const XML_Char* /*name*/, XML_Encoding* /*info*/) {return 0;};
 
     virtual void DefaultCurrent();
 

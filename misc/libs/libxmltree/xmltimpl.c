@@ -190,6 +190,8 @@ int PREFIX(scanDecl)(const ENCODING *enc, const char *ptr, const char *end,
 static
 int PREFIX(checkPiTarget)(const ENCODING *enc, const char *ptr, const char *end, int *tokPtr)
 {
+	(void)enc;
+
   int upper = 0;
   *tokPtr = XML_TOK_PI;
   if (end - ptr != MINBPC*3)
@@ -298,6 +300,8 @@ static
 int PREFIX(scanCdataSection)(const ENCODING *enc, const char *ptr, const char *end,
 			     const char **nextTokPtr)
 {
+	(void)enc;
+
   int i;
   /* CDATA[ */
   if (end - ptr < 6 * MINBPC)
@@ -1394,6 +1398,7 @@ static
 int PREFIX(charRefNumber)(const ENCODING *enc, const char *ptr)
 {
   int result = 0;
+	(void)enc;
   /* skip &# */
   ptr += 2*MINBPC;
   if (CHAR_MATCHES(enc, ptr, 'x')) {
@@ -1433,6 +1438,7 @@ int PREFIX(charRefNumber)(const ENCODING *enc, const char *ptr)
 static
 int PREFIX(predefinedEntityName)(const ENCODING *enc, const char *ptr, const char *end)
 {
+	(void)enc;
   switch (end - ptr) {
   case 2 * MINBPC:
     if (CHAR_MATCHES(enc, ptr + MINBPC, 't')) {
