@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.169 2004/02/13 14:40:00 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.170 2004/02/15 20:25:34 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -197,7 +197,7 @@ struct OrderServiceUniqueKeyFirstStartTimeEventUniqueKey
 	}
 };
 
-typedef std::map<const SIeventPtr, SIeventPtr, OrderServiceUniqueKeyFirstStartTimeEventUniqueKey > MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey;
+typedef std::set<SIeventPtr, OrderServiceUniqueKeyFirstStartTimeEventUniqueKey > MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey;
 static MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey;
 
 struct OrderFirstEndTimeServiceIDEventUniqueKey
@@ -213,7 +213,7 @@ struct OrderFirstEndTimeServiceIDEventUniqueKey
 	}
 };
 
-typedef std::map<const SIeventPtr, SIeventPtr, OrderFirstEndTimeServiceIDEventUniqueKey > MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey;
+typedef std::set<SIeventPtr, OrderFirstEndTimeServiceIDEventUniqueKey > MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey;
 static MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey;
 
 // Hier landen alle Service-Ids von Meta-Events inkl. der zugehoerigen Event-ID (nvod)
@@ -307,8 +307,8 @@ static void addEvent(const SIevent &evt)
 				if (i2 == mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end())
 				{
 					// nicht vorhanden -> einfuegen
-					mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(ie->second, ie->second));
-					mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(ie->second, ie->second));
+					mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(ie->second);
+					mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(ie->second);
 
 				}
 
@@ -324,8 +324,8 @@ static void addEvent(const SIevent &evt)
 	if (e->times.size())
 	{
 		// diese beiden Mengen enthalten nur Events mit Zeiten
-		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(e, e));
-		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
+		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e);
+		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
 
 	}
 }
@@ -361,8 +361,8 @@ static void addNVODevent(const SIevent &evt)
 	if (e->times.size())
 	{
 		// diese beiden Mengen enthalten nur Events mit Zeiten
-		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(e, e));
-		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
+		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e);
+		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
 	}
 }
 
@@ -375,8 +375,8 @@ static void removeNewEvents(void)
 	// Mal umgekehrt wandern
 
 	for (MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
-		if (e->first->times.begin()->startzeit > zeit + secondsToCache)
-			deleteEvent(e->first->uniqueKey());
+		if ((*e)->times.begin()->startzeit > zeit + secondsToCache)
+			deleteEvent((*e)->uniqueKey());
 
 	return ;
 }
@@ -388,8 +388,8 @@ static void removeOldEvents(const long seconds)
 	time_t zeit = time(NULL);
 
 	for (MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
-		if (e->first->times.begin()->startzeit + (long)e->first->times.begin()->dauer < zeit - seconds)
-			deleteEvent(e->first->uniqueKey());
+		if ((*e)->times.begin()->startzeit + (long)(*e)->times.begin()->dauer < zeit - seconds)
+			deleteEvent((*e)->uniqueKey());
 		else
 			break; // sortiert nach Endzeit, daher weiteres Suchen unnoetig
 
@@ -417,7 +417,7 @@ struct OrderServiceName
 	}
 };
 
-typedef std::map<const SIservicePtr, SIservicePtr, OrderServiceName > MySIservicesOrderServiceName;
+typedef std::set<SIservicePtr, OrderServiceName > MySIservicesOrderServiceName;
 static MySIservicesOrderServiceName mySIservicesOrderServiceName;
 
 // Fuegt ein Service in alle Mengen ein
@@ -450,7 +450,7 @@ static void addService(const SIservice &s)
 		mySIservicesNVODorderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
 
 	//  if(sptr->serviceID==0x01 || sptr->serviceID==0x02 || sptr->serviceID==0x04)
-	mySIservicesOrderServiceName.insert(std::make_pair(sptr, sptr));
+	mySIservicesOrderServiceName.insert(sptr);
 }
 
 /*
@@ -508,7 +508,7 @@ static t_channel_id findServiceUniqueKeyforServiceName(const char * const servic
 	MySIservicesOrderServiceName::iterator si = mySIservicesOrderServiceName.find(s);
 
 	if (si != mySIservicesOrderServiceName.end())
-		return si->first->uniqueKey();
+		return (*si)->uniqueKey();
 
 	dputs("Service not found");
 
@@ -534,12 +534,12 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id se
 		*flag = 0;
 
 	for (MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
-		if (e->first->get_channel_id() == serviceUniqueKey)
+		if ((*e)->get_channel_id() == serviceUniqueKey)
 		{
 			if (flag != 0)
 				*flag |= CSectionsdClient::epgflags::has_anything; // überhaupt was da...
 
-			for (SItimes::reverse_iterator t = e->first->times.rend(); t != e->first->times.rbegin(); t--)
+			for (SItimes::reverse_iterator t = (*e)->times.rend(); t != (*e)->times.rbegin(); t--)
 				if ((long)(azeit + plusminus) < (long)(t->startzeit + t->dauer))
 				{
 					if (flag != 0)
@@ -554,7 +554,7 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id se
 
 						zeit = *t;
 
-						return *(e->first);
+						return *(*e);
 					}
 				}
 		}
@@ -567,13 +567,13 @@ static const SIevent& findNextSIeventForServiceUniqueKey(const t_channel_id serv
 	time_t azeit = time(NULL);
 
 	for (MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
-		if (e->first->get_channel_id() == serviceUniqueKey)
+		if ((*e)->get_channel_id() == serviceUniqueKey)
 		{
-			for (SItimes::iterator t = e->first->times.begin(); t != e->first->times.end(); t++)
+			for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); t++)
 				if ((long)(azeit) < (long)(t->startzeit + t->dauer))
 				{
 					zeit = *t;
-					return *(e->first);
+					return *(*e);
 				}
 		}
 
@@ -625,10 +625,10 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 
 		if (eNext != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end())
 		{
-			if (eNext->second->get_channel_id() == eFirst->second->get_channel_id())
+			if ((*eNext)->get_channel_id() == eFirst->second->get_channel_id())
 			{
-				zeit = *(eNext->second->times.begin());
-				return *(eNext->second);
+				zeit = *((*eNext)->times.begin());
+				return *(*eNext);
 			}
 			else
 				return nullEvt;
@@ -689,10 +689,10 @@ static void findPrevNextSIevent(const event_id_t uniqueKey, SItime &zeit, SIeven
 		{
 			eNext--;
 
-			if (eNext->second->get_channel_id() == eFirst->second->get_channel_id())
+			if ((*eNext)->get_channel_id() == eFirst->second->get_channel_id())
 			{
-				prev_zeit = *(eNext->second->times.begin());
-				prev = *(eNext->second);
+				prev_zeit = *((*eNext)->times.begin());
+				prev = *(*eNext);
 			}
 
 			eNext++;
@@ -702,10 +702,10 @@ static void findPrevNextSIevent(const event_id_t uniqueKey, SItime &zeit, SIeven
 
 		if ( (!next_ok) && (eNext != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end()) )
 		{
-			if (eNext->second->get_channel_id() == eFirst->second->get_channel_id())
+			if ((*eNext)->get_channel_id() == eFirst->second->get_channel_id())
 			{
-				next_zeit = *(eNext->second->times.begin());
-				next = *(eNext->second);
+				next_zeit = *((*eNext)->times.begin());
+				next = *(*eNext);
 			}
 		}
 
@@ -818,16 +818,16 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 	for (MySIservicesOrderServiceName::iterator s = mySIservicesOrderServiceName.begin(); s != mySIservicesOrderServiceName.end(); s++)
 	{
 		sprintf(daten, "%08x %hu %hhu %d %d %d %d %u ",
-		        s->first->uniqueKey(),
-		        s->first->service_id, s->first->serviceTyp,
-		        s->first->eitScheduleFlag(), s->first->eitPresentFollowingFlag(),
-		        s->first->runningStatus(), s->first->freeCAmode(),
-		        s->first->nvods.size());
+		        (*s)->uniqueKey(),
+		        (*s)->service_id, (*s)->serviceTyp,
+		        (*s)->eitScheduleFlag(), (*s)->eitPresentFollowingFlag(),
+		        (*s)->runningStatus(), (*s)->freeCAmode(),
+		        (*s)->nvods.size());
 		strcat(serviceList, daten);
 		strcat(serviceList, "\n");
-		strcat(serviceList, s->first->serviceName.c_str());
+		strcat(serviceList, (*s)->serviceName.c_str());
 		strcat(serviceList, "\n");
-		strcat(serviceList, s->first->providerName.c_str());
+		strcat(serviceList, (*s)->providerName.c_str());
 		strcat(serviceList, "\n");
 	}
 
@@ -917,46 +917,46 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 		for (MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++)
 		{
-			if (e->first->get_channel_id() == serviceUniqueKey)
+			if ((*e)->get_channel_id() == serviceUniqueKey)
 			{
 				serviceIDfound = 1;
 
-				for (SItimes::iterator t = e->first->times.begin(); t != e->first->times.end(); t++)
+				for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); t++)
 				{
 					if ( oldFormat )
 					{
 						char strZeit[50];
-						sprintf(strZeit, "%012llx ", e->first->uniqueKey());
+						sprintf(strZeit, "%012llx ", (*e)->uniqueKey());
 						strcat(liste, strZeit);
 
 						struct tm *tmZeit;
 						tmZeit = localtime(&(t->startzeit));
 						sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
-						        tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, e->first->times.begin()->dauer / 60);
+						        tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, (*e)->times.begin()->dauer / 60);
 						strcat(liste, strZeit);
-						strcat(liste, e->first->name.c_str());
+						strcat(liste, (*e)->name.c_str());
 						strcat(liste, "\n");
 					}
 					else
 					{
-						*((event_id_t *)liste) = e->first->uniqueKey();
+						*((event_id_t *)liste) = (*e)->uniqueKey();
 						liste += sizeof(event_id_t);
 						*((unsigned *)liste) = t->startzeit;
 						liste += 4;
 						*((unsigned *)liste) = t->dauer;
 						liste += 4;
-						strcpy(liste, e->first->name.c_str());
+						strcpy(liste, (*e)->name.c_str());
 						liste += strlen(liste);
 						liste++;
 
-						if (e->first->text == "" )
+						if (((*e)->text).empty())
 						{
-							strcpy(liste, e->first->extendedText.substr(0, 40).c_str());
+							strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
 							liste += strlen(liste);
 						}
 						else
 						{
-							strcpy(liste, e->first->text.c_str());
+							strcpy(liste, (*e)->text.c_str());
 							liste += strlen(liste);
 						}
 
@@ -1057,7 +1057,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.169 2004/02/13 14:40:00 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.170 2004/02/15 20:25:34 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2020,7 +2020,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 
 	for (MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++)
 	{
-		uniqueNow = e->first->get_channel_id();
+		uniqueNow = (*e)->get_channel_id();
 
 		if ( uniqueNow != uniqueOld )
 		{
@@ -2049,42 +2049,42 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 
 		if ( !found_already )
 		{
-			for (SItimes::iterator t = e->first->times.begin(); t != e->first->times.end(); t++)
+			for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); t++)
 				if (t->startzeit <= azeit && azeit <= (long)(t->startzeit + t->dauer))
 				{
 					if (sendServiceName)
 					{
-						sprintf(liste, "%012llx\n", e->first->uniqueKey());
+						sprintf(liste, "%012llx\n", (*e)->uniqueKey());
 						liste += 13;
 						strcpy(liste, sname.c_str());
 						liste += strlen(sname.c_str());
 						*liste = '\n';
 						liste++;
-						strcpy(liste, e->first->name.c_str());
-						liste += strlen(e->first->name.c_str());
+						strcpy(liste, (*e)->name.c_str());
+						liste += strlen((*e)->name.c_str());
 						*liste = '\n';
 						liste++;
 					} // if sendServiceName
 					else
 					{
-						*((event_id_t *)liste) = e->first->uniqueKey();
+						*((event_id_t *)liste) = (*e)->uniqueKey();
 						liste += sizeof(event_id_t);
 						*((unsigned *)liste) = t->startzeit;
 						liste += 4;
 						*((unsigned *)liste) = t->dauer;
 						liste += 4;
-						strcpy(liste, e->first->name.c_str());
+						strcpy(liste, (*e)->name.c_str());
 						liste += strlen(liste);
 						liste++;
 
-						if (e->first->text == "" )
+						if (((*e)->text).empty())
 						{
-							strcpy(liste, e->first->extendedText.substr(0, 40).c_str());
+							strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
 							liste += strlen(liste);
 						}
 						else
 						{
-							strcpy(liste, e->first->text.c_str());
+							strcpy(liste, (*e)->text.c_str());
 							liste += strlen(liste);
 						}
 
@@ -3466,7 +3466,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.169 2004/02/13 14:40:00 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.170 2004/02/15 20:25:34 thegoodguy Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
