@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.56 2002/01/30 14:11:27 field Exp $
+// $Id: channellist.cpp,v 1.57 2002/01/30 14:25:56 field Exp $
 //
 // $Log: channellist.cpp,v $
-// Revision 1.56  2002/01/30 14:11:27  field
-// Anzeigeverbesserungen :)
+// Revision 1.57  2002/01/30 14:25:56  field
+// Abstandsfix
 //
 // Revision 1.55  2002/01/29 23:23:06  field
 // Mehr Details in Channellist (sectionsd updaten)
@@ -755,7 +755,7 @@ void CChannelList::paintDetails(int index)
 			if ( text2 != "" )
 				text3= text3+ " · ";
 
-			xstart+= g_Fonts->channellist->getRenderWidth(text3.c_str())+ 5;
+			xstart+= g_Fonts->channellist->getRenderWidth(text3.c_str());
 			g_Fonts->channellist->RenderString(x+ 10, y+ height+ 10+ 2* fheight, width - 30- noch_len, text3.c_str(), COL_MENUCONTENT);
 		}
 
@@ -764,7 +764,7 @@ void CChannelList::paintDetails(int index)
 			while ( text2.find_first_of("[ -.+*#?=!$%&/]+") == 0 )
 				text2 = text2.substr( 1, -1 );
 			text2 = text2.substr( 0, text2.find("\n") );
-			g_Fonts->channellist_descr->RenderString(x+ xstart, y+ height+ 10+ 2* fheight, width- xstart- 10- noch_len, text2.c_str(), COL_MENUCONTENT);
+			g_Fonts->channellist_descr->RenderString(x+ xstart, y+ height+ 10+ 2* fheight, width- xstart- 20- noch_len, text2.c_str(), COL_MENUCONTENT);
 		}
 
 		g_Fonts->channellist->RenderString(x+ 10, y+ height+ 10+ fheight, width - 30 - seit_len, text1.c_str(), COL_MENUCONTENT);
@@ -772,7 +772,6 @@ void CChannelList::paintDetails(int index)
 
 		g_Fonts->channellist_number->RenderString(x+ width- 10- noch_len, y+ height+ 10+ 2* fheight- 2, noch_len, cNoch, COL_MENUCONTENT);
 	}
-
 }
 
 void CChannelList::paintItem(int pos)
