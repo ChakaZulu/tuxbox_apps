@@ -31,6 +31,8 @@
 
 #include "lcdd.h"
 #include "newclock.h"
+#include <lcddisplay/lcddisplay.h>
+
 #include <dbox/fp.h>
 #include <sys/timeb.h>
 #include <time.h>

@@ -1,3 +1,5 @@
+#ifndef __lcddisplay__
+#define __lcddisplay__
 /*
 	LCD-Daemon  -   DBoxII-Project
 
@@ -24,44 +26,29 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __lcddisplay__
-#define __lcddisplay__
-
-#include <sys/ioctl.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <time.h>
-#include <unistd.h>
-#include <math.h>
-#include <string>
-
 #include <dbox/lcd-ks0713.h>
 
-using namespace std;
+#include <string>
 
 typedef unsigned char raw_display_t[LCD_ROWS*8][LCD_COLS];
 
 class CLCDDisplay
 {
-	private:
-		raw_display_t raw;
-		unsigned char lcd[LCD_ROWS][LCD_COLS];
-		int	fd, paused;
-		string	iconBasePath;
-		bool	available;
-
-	public:
-		
-		enum
+ private:
+	raw_display_t raw;
+	unsigned char lcd[LCD_ROWS][LCD_COLS];
+	int           fd, paused;
+	std::string   iconBasePath;
+	bool          available;
+	
+ public:
+	enum
 		{
 			PIXEL_ON  = LCD_PIXEL_ON,
 			PIXEL_OFF = LCD_PIXEL_OFF,
 			PIXEL_INV = LCD_PIXEL_INV
 		};
-		
+	
 		CLCDDisplay();
 		~CLCDDisplay();
 
@@ -70,7 +57,7 @@ class CLCDDisplay
 
 		void convert_data();
 		int sgn(int arg);
-		void setIconBasePath(string bp){iconBasePath=bp;};
+		void setIconBasePath(std::string bp){iconBasePath=bp;};
 		bool isAvailable();
 
 		void update();
@@ -81,13 +68,10 @@ class CLCDDisplay
 		void draw_rectangle (int left,int top, int right, int bottom, int linestate,int fillstate);
 		void draw_polygon(int num_vertices, int *vertices, int state);
 
-		bool paintIcon(string filename, int x, int y, bool invert);
+		bool paintIcon(std::string filename, int x, int y, bool invert);
 		void dump_screen(raw_display_t *screen);
 		void load_screen(raw_display_t *screen);
 };
-
-
-
 
 
 #endif

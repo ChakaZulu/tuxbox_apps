@@ -29,7 +29,6 @@
 #include <configfile.h>
 #include <pthread.h>
 
-#include <lcddisplay/lcddisplay.h>
 #include <lcddisplay/fontrenderer.h>
 
 

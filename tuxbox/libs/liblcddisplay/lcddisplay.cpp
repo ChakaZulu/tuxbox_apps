@@ -26,6 +26,13 @@
 
 #include "lcddisplay.h"
 
+#include <fcntl.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 
 CLCDDisplay::CLCDDisplay()
 {
@@ -232,7 +239,7 @@ void CLCDDisplay::draw_polygon(int num_vertices, int *vertices, int state)
 
 
 
-bool CLCDDisplay::paintIcon(string filename, int x, int y, bool invert)
+bool CLCDDisplay::paintIcon(std::string filename, int x, int y, bool invert)
 {
 	short width, height;
 	unsigned char tr;
