@@ -13,12 +13,16 @@ mainmenu.splayback Stream Wiedergabe
 mainmenu.info Informationen
 mainmenu.streaminfo Sender/Kanal
 mainmenu.settings Einstellungen
+mainmenu.language Sprache
 mainmenu.screensetup Sichtbaren Bildbereich einstellen
 mainmenu.audio Ton
 mainmenu.video Video
 mainmenu.network Netzwerk
 mainmenu.colors Farben/Themes
 mainmenu.keybinding Tastenbelegung
+
+languagesetup.head Spracheinstellungen
+languagesetup.select Sprache
 
 audiomenu.head Ton-Einstellungen
 audiomenu.stereo Stereo
@@ -102,6 +106,8 @@ channellist.head Alle Kanäle
 
 infoviewer.epgnotload EPG noch nicht geladen...
 infoviewer.epgwait Warte auf EPG...
+
+epgviewer.notfound keine EPG-Informationen gefunden
 
 streaminfo.head Informationen
 streaminfo.resolution Auflösung

@@ -1,0 +1,116 @@
+menu.back back
+
+options.off off
+options.on on
+
+mainmenu.head Main menue
+mainmenu.runmode Mode
+mainmenu.shutdown Shutdown
+mainmenu.tvmode TV-Mode
+mainmenu.radiomode Radio-Mode
+mainmenu.mp3player MP3-Player
+mainmenu.splayback Stream Playback
+mainmenu.info Info
+mainmenu.streaminfo Streaminfo
+mainmenu.settings Settings
+mainmenu.screensetup Screen Setup
+mainmenu.audio Audio
+mainmenu.video Video
+mainmenu.network Network
+mainmenu.colors Colors
+mainmenu.keybinding Keybinding
+
+audiomenu.head Audio Settings
+audiomenu.stereo Stereo
+audiomenu.dolbydigital Dolby Digital
+
+videomenu.head Video Settings
+videomenu.videosignal VideoOutput
+videomenu.videosignal_rgb RGB
+videomenu.videosignal_svideo S-Video
+videomenu.videosignal_composite Composite
+videomenu.videoformat Format
+videomenu.videoformat_43 4:3
+videomenu.videoformat_169 16:9
+
+networkmenu.head Network Settings
+networkmenu.setupnow setup network now
+networkmenu.setuponstartup setup network on startup
+networkmenu.ipaddress IP-Address
+networkmenu.netmask Netmask
+networkmenu.broadcast Broadcast
+networkmenu.gateway Default Gateway
+networkmenu.nameserver Nameserver
+
+colormenu.head Color Settings
+colormenu.statusbar Infobar
+colormenu.themeselect select theme
+colormenu.menucolors Menucolor
+colormenu.background Background
+colormenu.background_head Background
+colormenu.textcolor Textcolor
+colormenu.textcolor_head Textcolor
+
+colorthememenu.head Theme Selector
+colorthememenu.neutrino_theme Neutrino Theme
+colorthememenu.classic_theme Classic Theme
+
+
+colormenusetup.head Menu Colors
+colormenusetup.menuhead Menu Header
+colormenusetup.menucontent Window-Content
+colormenusetup.menucontent_inactive Window-Content inactive
+colormenusetup.menucontent_selected Window-Content selected
+
+colorstatusbar.head Infobar
+colorstatusbar.text Infobar
+
+keybindingmenu.head Keybinding Setup
+keybindingmenu.modechange Modechange
+keybindingmenu.channellist Channellist
+keybindingmenu.quickzap Quickzap
+keybindingmenu.tvradiomode TV/Radio-mode
+keybindingmenu.tvradiomode_head TV/Radio-mode
+keybindingmenu.pageup page up
+keybindingmenu.pageup_head Keysetup page up 
+keybindingmenu.pagedown page down
+keybindingmenu.pagedown_head Keysetup page down
+keybindingmenu.cancel close channellist
+keybindingmenu.cancel_head channellist close
+keybindingmenu.channelup channel up
+keybindingmenu.channelup_head Keysetup channel up
+keybindingmenu.channeldown channel down
+keybindingmenu.channeldown_head Keysetup channel down
+
+colorchooser.red red
+colorchooser.green green
+colorchooser.blue blue
+colorchooser.alpha alpha
+
+keychoosermenu.setnew setup new key
+keychoosermenu.setnone no key
+keychoosermenu.currentkey current key
+
+keychooser.head Setup new Key
+keychooser.text1 Please press the new key
+keychooser.text2 wait a few seconds for abort
+
+screensetup.upperleft rot = setup upper left 
+screensetup.lowerright grün = setup lower right
+
+channellist.head All Services
+
+infoviewer.epgnotload EPG not loaded....
+infoviewer.epgwait waiting for EPG...
+
+epgviewer.notfound no epg found
+
+streaminfo.head Stream-Information
+streaminfo.resolution Resulution
+streaminfo.bitrate Bitrate
+streaminfo.aratio Aspect Radio
+streaminfo.aratio_unknown Aspect Radio: unknown
+streaminfo.framerate Framerate
+streaminfo.framerate_unknown Framerate: unknown
+streaminfo.audiotype Audiotype
+streaminfo.audiotype_unknown Audiotype: unknown
