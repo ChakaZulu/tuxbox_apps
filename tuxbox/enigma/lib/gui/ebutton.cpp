@@ -62,7 +62,7 @@ void eButton::lostFocus()
 			parent->LCDElement->setText("");	
 	}
 	setBackgroundColor(normalB);
-	setBackgroundColor(normalF);
+	setForegroundColor(normalF);
 	invalidate();
 }
 
