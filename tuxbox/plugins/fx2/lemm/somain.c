@@ -44,6 +44,7 @@ static	void	setup_colors( void )
 	FBSetColor( BLUE, 30, 30, 220 );
 	FBSetColor( GRAY, 130, 130, 130 );
 	FBSetColor( DARK, 60, 60, 60 );
+	FBSetColor( 150, 0, 0, 51 );		// blocker
 
 	PicSetupColors();
 
@@ -76,8 +77,7 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		{
 			tv.tv_sec = 0;
 			tv.tv_usec = 100000;
-			x = select( 0, 0, 0, 0, &tv );		/* 10ms pause */
-
+			x = select( 0, 0, 0, 0, &tv );		/* 50ms pause */
 			RcGetActCode( );
 			RunKey();
 
@@ -87,6 +87,8 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			FBFlushGrafic();
 #endif
 		}
+
+		rc=doexit;
 
 		FreeSprites();
 
@@ -105,15 +107,10 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 				RcGetActCode( );
 			}
 		}
-	}
 
-#if 0
-	ModifyColor( 15, 14, 6 );
-	ModifyColor( 16, 14, 6 );
-	ModifyColor( 17, 14, 6 );
-	ModifyColor( 18, 14, 6 );
-	WritePics();
-#endif
+		if ( rc == 2 )
+			break;
+	}
 
 	SoundPlay(-2);	// stop thread
 

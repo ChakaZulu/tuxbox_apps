@@ -59,6 +59,8 @@ Sprite *CreateSprite( int picid, int ani, int x, int y )
 	s=malloc(sizeof(Sprite));
 	memset(s,0,sizeof(Sprite));
 	s->countdown = 5;
+	s->counter1 = 0;
+	s->counter2 = 0;
 	s->type = TYP_WALKER;
 	s->x = x;
 	s->y = y;

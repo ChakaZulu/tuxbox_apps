@@ -21,7 +21,6 @@ static	void	_run_sound( void *ptr )
 {
 	int				sz;
 	int				i;
-	int				fd2;
 	unsigned char	*data;
 	struct timeval	tv;
 
@@ -54,12 +53,16 @@ void	SoundStart( void )
 	int					rc;
 
 	if ( sound_fd == -1 )
-		sound_fd=open("/dev/dsp",O_WRONLY);
+		sound_fd=open("/dev/audio",O_WRONLY);
 	if ( sound_fd == -1 )
 		sound_fd = -2;
 
 	if ( sound_fd == -2 )
 		return;
+
+	rc=AFMT_U8;
+	ioctl(sound_fd,SNDCTL_DSP_SETFMT,&rc);
+
 	memset(&pth,0,sizeof(pth));
 	pthread_cond_init (&cond, NULL);
 	pthread_mutex_init (&mutex, NULL);

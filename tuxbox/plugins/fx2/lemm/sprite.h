@@ -12,6 +12,7 @@ typedef struct _Sprite
 	int				y;
 	int				sz;
 	int				countdown;
+	int				counter1;
 	int				counter2;
 	struct _Sprite	*next;
 	struct _Sprite	*pre;
@@ -22,6 +23,7 @@ typedef struct _Sprite
 	char			dir;
 	char			ani;
 	char			maxani;
+	char			partikel;
 } Sprite;
 
 extern	int		SpriteCollide( Sprite *s, int x, int y );

@@ -177,37 +177,6 @@ static	int		piccolors[] = {
 
 int	LoadPics( void )
 {
-#if 0
-	int				i;
-	gzFile			fd;
-	unsigned char	*data;
-	int				sz;
-int				fd2;
-unsigned char	*data2;
-unsigned long	dstl;
-
-	fd=gzopen( "pics.img.gz", "r" );
-	data = malloc(UNZSIZE);
-	if ( gzread( fd, data, UNZSIZE ) != UNZSIZE )
-		return -1;
-
-data2=malloc(UNZSIZE*2);
-dstl=UNZSIZE*2;
-printf("compress:%d\n",compress(data2,&dstl,data,UNZSIZE));
-fd2=open("ml.img.gz",O_CREAT|O_WRONLY,0666);
-write(fd2,data2,dstl);
-close(fd2);
-
-	pics[0].pic_data=data;
-	sz=pics[0].width*pics[0].height*pics[0].ani;
-	for( i=1; i<31; i++ )
-	{
-		data+=sz;
-		pics[i].pic_data=data;
-		sz=pics[i].width*pics[i].height*pics[i].ani;
-	}
-#endif
-#if 1
 	unsigned long	i;
 	unsigned char	*data;
 	int				sz;
@@ -228,7 +197,6 @@ close(fd2);
 		pics[i].pic_data=data;
 		sz=pics[i].width*pics[i].height*pics[i].ani;
 	}
-#endif
 	return 0;
 }
 
