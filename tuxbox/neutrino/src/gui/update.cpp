@@ -213,12 +213,12 @@ bool CFlashUpdate::checkVersion4Update()
 		msg_body = "flashupdate.msgbox_manual";
 	}
 	sprintf((char*) &msg, g_Locale->getText(msg_body).c_str(), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getBaseImageVersion(), versionInfo->getType());
-	delete versionInfo;
 	if (strcmp("1.6", versionInfo->getBaseImageVersion()))
 	{
 		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.wrongbase")); // UTF-8
 		return false;
 	}
+	delete versionInfo;
 	return (ShowMsg("messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw", 450, -1, true) == CMessageBox::mbrYes); // UTF-8
 }
 
