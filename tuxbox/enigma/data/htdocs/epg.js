@@ -1,6 +1,6 @@
 function record(xy)
 {
-	NewWindow('/addTimerEvent?'+xy, 'record', '200', '200', 'no');
+	NewWindow('/addTimerEvent?'+xy, 'record', '200', '200', 'no', '5000');
 }
 
 function EPGDetails(xy)
