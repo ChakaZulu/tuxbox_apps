@@ -1,5 +1,5 @@
 /*
-$Id: fe_misc.c,v 1.5 2004/08/22 22:07:48 rasc Exp $
+$Id: fe_misc.c,v 1.6 2004/08/22 22:11:57 rasc Exp $
 
 
  DVBSNOOP
@@ -17,8 +17,12 @@ $Id: fe_misc.c,v 1.5 2004/08/22 22:07:48 rasc Exp $
 
 
 $Log: fe_misc.c,v $
+Revision 1.6  2004/08/22 22:11:57  rasc
+no message
+
 Revision 1.5  2004/08/22 22:07:48  rasc
 - Fix: nit.h got lost in Makefile
+  ifdefs for special DVB-API parameters 
 
 Revision 1.4  2004/04/01 23:02:10  rasc
 clear structures in cases these are not completly filled...
