@@ -1,21 +1,22 @@
 #include "screensetup.h"
 
 
-CScreenSetup::CScreenSetup(string Name, SNeutrinoSettings* Settings)
+CScreenSetup::CScreenSetup(string Name, FontsDef *Fonts, SNeutrinoSettings* Settings)
 {
 	name = Name;
 	settings = Settings;
+	fonts = Fonts;
 }
 
 
-int CScreenSetup::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcInput,CMenuTarget* parent, string)
+int CScreenSetup::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget* parent, string)
 {
 	if (parent)
 	{
 		parent->hide(frameBuffer);
 	}
 	
-	paint( frameBuffer, fonts );
+	paint( frameBuffer );
 
 	bool loop = true;
 	selected = 1;
@@ -50,7 +51,7 @@ int CScreenSetup::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 					settings->screen_StartY=0;
 				}
 				else
-					paintBorderUL( frameBuffer, fonts);
+					paintBorderUL( frameBuffer);
 			}
 			else if (key==CRCInput::RC_down)
 			{
@@ -60,7 +61,7 @@ int CScreenSetup::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 					settings->screen_StartY=200;
 				}
 				else
-					paintBorderUL( frameBuffer, fonts);
+					paintBorderUL( frameBuffer );
 			}
 			else if (key==CRCInput::RC_left)
 			{
@@ -70,7 +71,7 @@ int CScreenSetup::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 					settings->screen_StartX=0;
 				}
 				else
-					paintBorderUL( frameBuffer, fonts);
+					paintBorderUL( frameBuffer );
 			}
 			else if (key==CRCInput::RC_right)
 			{
@@ -80,7 +81,7 @@ int CScreenSetup::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 					settings->screen_StartX=200;
 				}
 				else
-					paintBorderUL( frameBuffer, fonts);
+					paintBorderUL( frameBuffer );
 			}
 		}
 		else if(selected==2)
@@ -93,7 +94,7 @@ int CScreenSetup::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 					settings->screen_EndY=400;
 				}
 				else
-					paintBorderLR( frameBuffer, fonts);
+					paintBorderLR( frameBuffer );
 			}
 			else if (key==CRCInput::RC_down)
 			{
@@ -103,7 +104,7 @@ int CScreenSetup::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 					settings->screen_EndY=575;
 				}
 				else
-					paintBorderLR( frameBuffer, fonts);
+					paintBorderLR( frameBuffer );
 			}
 			else if (key==CRCInput::RC_left)
 			{
@@ -113,7 +114,7 @@ int CScreenSetup::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 					settings->screen_EndX=400;
 				}
 				else
-					paintBorderLR( frameBuffer, fonts);
+					paintBorderLR( frameBuffer );
 			}
 			else if (key==CRCInput::RC_right)
 			{
@@ -123,7 +124,7 @@ int CScreenSetup::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 					settings->screen_EndX=719;
 				}
 				else
-					paintBorderLR( frameBuffer, fonts);
+					paintBorderLR( frameBuffer );
 			}
 		}
 		
@@ -139,7 +140,7 @@ void CScreenSetup::hide(CFrameBuffer* frameBuffer)
 	memset(frameBuffer->lfb, COL_BACKGROUND, frameBuffer->Stride()*576);
 }
 
-void CScreenSetup::paintBorderUL(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CScreenSetup::paintBorderUL(CFrameBuffer* frameBuffer)
 {
 	frameBuffer->paintIcon("border_ul.raw", settings->screen_StartX, settings->screen_StartY);
 	int x=15*19;
@@ -161,7 +162,7 @@ void CScreenSetup::paintBorderUL(CFrameBuffer* frameBuffer, FontsDef *fonts)
 	fonts->menu_title->RenderString(x+10,y+83, 200, yepos, COL_MENUHEAD);
 }
 
-void CScreenSetup::paintBorderLR(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CScreenSetup::paintBorderLR(CFrameBuffer* frameBuffer)
 {
 	frameBuffer->paintIcon("border_lr.raw", settings->screen_EndX-96, settings->screen_EndY-96);
 	int x=15*19;
@@ -183,7 +184,7 @@ void CScreenSetup::paintBorderLR(CFrameBuffer* frameBuffer, FontsDef *fonts)
 	fonts->menu_title->RenderString(x+10,y+83, 200, yepos, COL_MENUHEAD);
 }
 
-void CScreenSetup::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CScreenSetup::paint(CFrameBuffer* frameBuffer)
 {
 	memset(frameBuffer->lfb, 7, frameBuffer->Stride()*576);
 
@@ -203,7 +204,7 @@ void CScreenSetup::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
 	fonts->menu->RenderString(x+30,y+46, 15*23, "green = setup lower right", COL_MENUHEAD);
 
 
-	paintBorderUL( frameBuffer, fonts);
-	paintBorderLR( frameBuffer, fonts);
+	paintBorderUL( frameBuffer );
+	paintBorderLR( frameBuffer );
 }
 

@@ -7,9 +7,9 @@
 	Kommentar:
 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumöglichkeiten gut aussehen. Neutrino basiert
+	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons übernommen.
+	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
 
 	License: GPL
@@ -88,76 +88,74 @@ class CNeutrinoApp : public CMenuTarget
 		mode_radio = 1
 	};
 
-		struct SNeutrinoSettings	settings;
-		string				settingsFile;
+	struct SNeutrinoSettings	settings;
+	string				settingsFile;
 
-		bool				nRun;
-		int				mode;
-		char				volume;
-		bool				mute;
+	bool				nRun;
+	int				mode;
+	char				volume;
+	bool				mute;
 		
-		st_rmsg				sendmessage;
-		channel_msg			zapitchannel;
-		channel_msg			firstchannel;
-		bool				zapit;
+	st_rmsg				sendmessage;
+	channel_msg			zapitchannel;
+	channel_msg			firstchannel;
+	bool				zapit;
 
-		CRCInput			rcInput;
-		CFrameBuffer		frameBuffer;
-		fontRenderClass		*fontRenderer;
-		FontsDef			fonts;
+	CRCInput			rcInput;
+	CFrameBuffer		frameBuffer;
+	fontRenderClass		*fontRenderer;
+	FontsDef			*fonts;
 
-		CColorSetupNotifier* colorSetupNotifier;
+	CColorSetupNotifier* colorSetupNotifier;
 
-		CChannelList		*channelList;
-		CRemoteControl		remoteControl;
-		CControld			Controld;
-		CInfoViewer			infoViewer;
-		CEpgData			epgData;
+	CChannelList		*channelList;
+	CRemoteControl		remoteControl;
+	CControld			Controld;
+	CInfoViewer			infoViewer;
+	CEpgData			epgData;
 
-		void firstChannel();
-		void channelsInit();
-		void setupDefaults(SNeutrinoSettings* settings);
-		void setupColors_classic(SNeutrinoSettings* settings);
-		void setupColors_neutrino(SNeutrinoSettings* settings);
-		void setupNetwork(SNeutrinoSettings* settings, bool force=false);
-		void saveSetup(SNeutrinoSettings* settings);
-		bool loadSetup(SNeutrinoSettings* settings);
+	void firstChannel();
+	void channelsInit();
+	void setupDefaults(SNeutrinoSettings* settings);
+	void setupColors_classic(SNeutrinoSettings* settings);
+	void setupColors_neutrino(SNeutrinoSettings* settings);
+	void setupNetwork(SNeutrinoSettings* settings, bool force=false);
+	void saveSetup(SNeutrinoSettings* settings);
+	bool loadSetup(SNeutrinoSettings* settings);
 
-		void tvMode();
-		void radioMode();
-		void setVolume(int key);
-		void AudioMute();
-		void AudioUnMute();
+	void tvMode();
+	void radioMode();
+	void setVolume(int key);
+	void AudioMute();
+	void AudioUnMute();
 
-		void ExitRun();
-		void RealRun(CMenuWidget &mainSettings);
-		void InitZapper();
-		void InitKeySettings(CMenuWidget &);
-		void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
-		void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier);
-		void InitColorSettings(CMenuWidget &);
-		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
-		void InitNetworkSettings(CMenuWidget &networkSettings);
-		void InitScreenSettings(CMenuWidget &);
-		void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier);
-		void InitAudioThemesSettings(CMenuWidget &);
-		void InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings);
-		void ClearFrameBuffer();
-		void SetupFonts();
-		void SetupFrameBuffer();
-		void CmdParser(int argc, char **argv);
+	void ExitRun();
+	void RealRun(CMenuWidget &mainSettings);
+	void InitZapper();
+	void InitKeySettings(CMenuWidget &);
+	void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
+	void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier);
+	void InitColorSettings(CMenuWidget &);
+	void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
+	void InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier &networkSetupNotifier);
+	void InitScreenSettings(CMenuWidget &);
+	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier);
+	void InitAudioThemesSettings(CMenuWidget &);
+	void InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings);
+	void ClearFrameBuffer();
+	void SetupFonts();
+	void SetupFrameBuffer();
+	void CmdParser(int argc, char **argv);
 
 
 	public:
 
-		CNeutrinoApp();
-		~CNeutrinoApp();
+	CNeutrinoApp();
+	~CNeutrinoApp();
 
-		int run(int argc, char **argv);
-		//callback stuff only....
-		int exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rcInput, CMenuTarget* parent, string actionKey);
+	int run(int argc, char **argv);
+	//callback stuff only....
+	int exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CMenuTarget* parent, string actionKey);
 };
-
-
 
 #endif

@@ -1,10 +1,11 @@
 #include "stringinput.h"
 
 
-CStringInput::CStringInput(string Name, char* Value, int Size)
+CStringInput::CStringInput(string Name, FontsDef *Fonts, char* Value, int Size)
 {
 	name = Name;
 	value = Value;
+	fonts = Fonts;
 	size = Size;
 	width = 400;
 	height = 110;
@@ -14,7 +15,7 @@ CStringInput::CStringInput(string Name, char* Value, int Size)
 }
 
 
-int CStringInput::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcInput,CMenuTarget* parent, string)
+int CStringInput::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget* parent, string)
 {
 	if (parent)
 	{
@@ -24,7 +25,7 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 	for(int count=strlen(value)-1;count<size-1;count++)
 		strcat(value, " ");
 	
-	paint( frameBuffer, fonts );
+	paint( frameBuffer);
 
 	bool loop = true;
 	char validchars[] = "0123456789. ";
@@ -42,8 +43,8 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 			if(selected>0)
 			{
 				selected--;
-				paintChar(frameBuffer, fonts, selected+1);
-				paintChar(frameBuffer, fonts, selected);
+				paintChar(frameBuffer, selected+1);
+				paintChar(frameBuffer, selected);
 			}
 		}
 		else if (key==CRCInput::RC_right)
@@ -51,8 +52,8 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 			if(selected<(int)strlen(value)-1)
 			{
 				selected++;
-				paintChar(frameBuffer, fonts, selected-1);
-				paintChar(frameBuffer, fonts, selected);
+				paintChar(frameBuffer, selected-1);
+				paintChar(frameBuffer, selected);
 			}
 		}
 		else if (key==CRCInput::RC_up)
@@ -65,7 +66,7 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 			if(npos>=(int)strlen(validchars))
 				npos = 0;
 			value[selected]=validchars[npos];
-			paintChar(frameBuffer, fonts, selected);
+			paintChar(frameBuffer, selected);
 		}
 		else if (key==CRCInput::RC_down)
 		{
@@ -77,7 +78,7 @@ int CStringInput::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcI
 			if(npos<0)
 				npos = strlen(validchars)-1;
 			value[selected]=validchars[npos];
-			paintChar(frameBuffer, fonts, selected);
+			paintChar(frameBuffer, selected);
 		}
 		else if (key==CRCInput::RC_ok)
 		{
@@ -106,7 +107,7 @@ void CStringInput::hide(CFrameBuffer* frameBuffer)
 	frameBuffer->paintBoxRel(x,y, width,height, COL_BACKGROUND);
 }
 
-void CStringInput::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CStringInput::paint(CFrameBuffer* frameBuffer)
 {
 
 	frameBuffer->paintBoxRel(x,y, width,30, COL_MENUHEAD);
@@ -114,11 +115,11 @@ void CStringInput::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
 	frameBuffer->paintBoxRel(x,y+30, width,height-30, COL_MENUCONTENT);
 
 	for (int count=0;count<size;count++)
-		paintChar(frameBuffer, fonts, count);
+		paintChar(frameBuffer, count);
 
 }
 
-void CStringInput::paintChar(CFrameBuffer* frameBuffer, FontsDef *fonts, int pos)
+void CStringInput::paintChar(CFrameBuffer* frameBuffer, int pos)
 {
 	int xs = 20;
 	int ys = 30;

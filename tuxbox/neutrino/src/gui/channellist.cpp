@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.9 2001/08/20 01:51:12 McClean Exp $
+// $Id: channellist.cpp,v 1.10 2001/08/20 13:10:27 tw-74 Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.10  2001/08/20 13:10:27  tw-74
+// cosmetic changes and changes for variable font size
+//
 // Revision 1.9  2001/08/20 01:51:12  McClean
 // channellist bug fixed - faster channellist response
 //
@@ -20,7 +23,7 @@
 //
 
 #include "channellist.h"
-
+#include "../include/debug.h"
 
 static char* copyStringto(const char* from, char* to, int len)
 {
@@ -32,32 +35,6 @@ static char* copyStringto(const char* from, char* to, int len)
 	*to=0;
 	return (char *)++from;
 }
-
-
-CChannelList::CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="")
-{
-	key = Key;
-	name = Name;
-	selected = 0;
-	width = 500;
-	height = 440;
-	x=(((settings->screen_EndX-settings->screen_StartX)-width) / 2) + settings->screen_StartX;
-	y=(((settings->screen_EndY-settings->screen_StartY)-height) / 2) + settings->screen_StartY;
-	listmaxshow = 20;
-	liststart = 0;
-	tuned=0xfffffff;
-}
-
-CChannelList::~CChannelList()
-{
-	for(unsigned int count=0;count<chanlist.size();count++)
-	{
-		delete chanlist[count];
-	}
-	chanlist.clear();
-}
-
-
 
 // quick'n dirty
 void CChannelList::updateEvents(void)
@@ -129,6 +106,33 @@ void CChannelList::updateEvents(void)
   return;
 }
 
+CChannelList::CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="", FontsDef *Fonts)
+{
+	fonts = Fonts;
+	key = Key;
+	name = Name;
+	selected = 0;
+	width = 500;
+	height = 440;
+	theight=fonts->menu->getHeight();
+	fheight=fonts->channellist->getHeight();
+	listmaxshow = (height-theight-10)/fheight;
+	height = theight+10+listmaxshow*fheight; // recalc height
+	x=(((settings->screen_EndX-settings->screen_StartX)-width) / 2) + settings->screen_StartX;
+	y=(((settings->screen_EndY-settings->screen_StartY)-height) / 2) + settings->screen_StartY;
+	liststart = 0;
+	tuned=0xfffffff;
+}
+
+CChannelList::~CChannelList()
+{
+	for(unsigned int count=0;count<chanlist.size();count++)
+	{
+		delete chanlist[count];
+	}
+	chanlist.clear();
+}
+
 void CChannelList::addChannel(int key, int number, string name)
 {
 	channel* tmp = new channel();
@@ -158,11 +162,12 @@ int CChannelList::getActiveChannelNumber()
 	return selected+1;
 }
 
-void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings)
+
+void CChannelList::exec(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings)
 {
-	paintHead(frameBuffer, fonts);
+	paintHead(frameBuffer);
 	updateEvents();
-	paint(frameBuffer, fonts);
+	paint(frameBuffer);
 	
 	int oldselected = selected;
 	int zapOnExit = false;
@@ -181,7 +186,7 @@ void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rc
 			if (selected>chanlist.size()-1)
 				selected=0;
 			liststart = (selected/listmaxshow)*listmaxshow;
-			paint(frameBuffer, fonts);
+			paint(frameBuffer);
 		}
 		else if (key==settings->key_channelList_pagedown)
 		{
@@ -190,7 +195,7 @@ void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rc
 			else
 				selected -= listmaxshow;
 			liststart = (selected/listmaxshow)*listmaxshow;
-			paint(frameBuffer, fonts);
+			paint(frameBuffer);
 		}
 		else if (key==CRCInput::RC_up)
 		{
@@ -200,32 +205,32 @@ void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rc
 				selected = chanlist.size()-1;
 			}
 			else selected--;
-			paintItem(frameBuffer, fonts, prevselected - liststart);
+			paintItem(frameBuffer, prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
 			{
-				paint(frameBuffer, fonts);
+				paint(frameBuffer);
 			}
 			else
 			{
-				paintItem(frameBuffer, fonts, selected - liststart);
+				paintItem(frameBuffer, selected - liststart);
 			}
 		}
 		else if (key==CRCInput::RC_down)
 		{
 			int prevselected=selected;
 			selected = (selected+1)%chanlist.size();
-			paintItem(frameBuffer, fonts, prevselected - liststart);
+			paintItem(frameBuffer, prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
 			{
-				paint(frameBuffer, fonts);
+				paint(frameBuffer);
 			}
 			else
 			{
-				paintItem(frameBuffer, fonts, selected - liststart);
+				paintItem(frameBuffer, selected - liststart);
 			}
 		}
 		else if (key==CRCInput::RC_ok)
@@ -244,36 +249,6 @@ void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rc
 void CChannelList::hide(CFrameBuffer* frameBuffer)
 {
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
-}
-
-void CChannelList::paintItem(CFrameBuffer* frameBuffer, FontsDef *fonts, int pos)
-{
-	int ypos = y+ 35 + pos*20;
-	int color = COL_MENUCONTENT;
-	if (liststart+pos==selected)
-	{
-		color = COL_MENUCONTENTSELECTED;
-	}
-
-	frameBuffer->paintBoxRel(x,ypos, width,20, color);
-	if(liststart+pos<chanlist.size())
-	{
-		channel* chan = chanlist[liststart+pos];
-		//number
-                char tmp[10];
-                sprintf((char*) tmp, "%d", chan->number);
-		int numpos = x+5+numwidth-fonts->menu_number->getRenderWidth(tmp);
-		fonts->menu_number->RenderString(numpos,ypos+16, numwidth+5, tmp, color);
-		if(strlen(chan->currentEvent.c_str())) {
-    		  // name + description
-		  char nameAndDescription[100];
-		  snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
-		  fonts->menu->RenderString(x+5+numwidth+5,ypos+17, width-numwidth-20, nameAndDescription, color);
-                }
-		else
-		  //name
-		  fonts->menu->RenderString(x+5+numwidth+5,ypos+17, width-numwidth-20, chan->name.c_str(), color);
-	}
 }
 
 bool CChannelList::showInfo(CInfoViewer *infoViewer, int pos)
@@ -300,15 +275,16 @@ void CChannelList::zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer,
 	remoteControl->zapTo(chan->key, chan->name);
 }
 
-void CChannelList::numericZap(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, int key)
+void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, int key)
 {
   int ox=300, oy=200, sx=50, sy=22;
-  char valstr[10];
+//  char valstr[10];
   int chn=key;
   int pos=1;
 
   while(1)
   {
+/*
     sprintf((char*) &valstr, "%d",chn);
     while(strlen(valstr)<3)
     {
@@ -316,6 +292,7 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInp
     }
     frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
     fonts->channellist->RenderString(ox+7, oy+18, sx, valstr, COL_INFOBAR);
+*/
 	if(!showInfo(infoViewer, chn-1))
 	{	//channelnumber out of bounds
 		infoViewer->killTitle(); //warum tut das net?
@@ -323,7 +300,7 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInp
 		frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
 		return;
 	}
-
+	
     if ((key=rcInput->getKey(30))==-1)
       break;
 
@@ -342,6 +319,7 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInp
     }
   }
   //channel selected - show+go
+/*
   frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
   sprintf((char*) &valstr, "%d",chn);
   while(strlen(valstr)<3)
@@ -351,13 +329,14 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInp
   fonts->channellist->RenderString(ox+7, oy+18, sx, valstr, COL_INFOBAR);
   usleep(100000);
   frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
+*/
   chn--;
   if (chn<0)
     chn=0;
   zapTo( remoteControl, infoViewer, chn);
 }
 
-void CChannelList::quickZap(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key)
+void CChannelList::quickZap(CFrameBuffer* frameBuffer, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key)
 {
 	printf("quickzap start\n");
 	while(1)
@@ -386,27 +365,60 @@ void CChannelList::quickZap(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput
 	}
 }
 
-void CChannelList::paintHead(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CChannelList::paintItem(CFrameBuffer* frameBuffer, int pos)
 {
-	frameBuffer->paintBoxRel(x,y, width,30, COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x,y+30, width,5, COL_MENUCONTENT);
-	fonts->menu_title->RenderString(x+10,y+23, width, name.c_str(), COL_MENUHEAD);
+	int ypos = y+ theight+10 + pos*fheight;
+	int color = COL_MENUCONTENT;
+	if (liststart+pos==selected)
+	{
+		color = COL_MENUCONTENTSELECTED;
+	}
+
+	frameBuffer->paintBoxRel(x,ypos, width, fheight, color);
+	if(liststart+pos<chanlist.size())
+	{
+		channel* chan = chanlist[liststart+pos];
+		//number
+                char tmp[10];
+                sprintf((char*) tmp, "%d", chan->number);
+		int numpos = x+5+numwidth-fonts->menu->getRenderWidth(tmp);
+		fonts->menu->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color);
+		if(strlen(chan->currentEvent.c_str())) {
+    		  // name + description
+		  char nameAndDescription[100];
+		  snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
+		  fonts->menu->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
+                }
+		else
+		  //name
+		  fonts->menu->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, chan->name.c_str(), color);
+	}
 }
 
-void CChannelList::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CChannelList::paintHead(CFrameBuffer* frameBuffer)
+{
+	frameBuffer->paintBoxRel(x,y, width,theight+10, COL_MENUHEAD);
+	fonts->menu_title->RenderString(x+10,y+theight+5, width, name.c_str(), COL_MENUHEAD);
+}
+
+void CChannelList::paint(CFrameBuffer* frameBuffer)
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
 	int lastnum =  chanlist[liststart]->number + listmaxshow;
-	string map = "";
-	while(lastnum>0)
-	{
-		map += "0";
-		lastnum = lastnum/10;
-	}
-	numwidth = fonts->menu_number->getRenderWidth(map.c_str());
+
+	if(lastnum<10)
+	    numwidth = fonts->menu->getRenderWidth("0");
+	else if(lastnum<100)
+	    numwidth = fonts->menu->getRenderWidth("00");
+	else if(lastnum<1000)
+	    numwidth = fonts->menu->getRenderWidth("000");
+	else if(lastnum<10000)
+	    numwidth = fonts->menu->getRenderWidth("0000");
+	else // if(lastnum<100000)
+	    numwidth = fonts->menu->getRenderWidth("00000");
 	
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
-		paintItem(frameBuffer, fonts, count );
+		paintItem(frameBuffer, count);
 	}
 }

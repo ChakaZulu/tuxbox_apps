@@ -51,19 +51,22 @@ class CEpgData
 {
 	private:
 		CFrameBuffer		*frameBuffer;
-		FontsDef			*fonts;
-		CRCInput			*rcInput;
-		EPGData				epgData;
+		FontsDef		*fonts;
+		CRCInput		*rcInput;
+		EPGData			epgData;
 		SNeutrinoSettings	*settings;
 
-		int				ox, oy, sx, sy;
-		int				emptyLineCount;
-		vector<string>	epgText;
+		int			ox, oy, sx, sy;
+		int			emptyLineCount;
+		vector<string>		epgText;
+		int			topheight,topboxheight;
+		int			botheight,botboxheight;
+		int			medlineheight,medlinecount;
 
 		void GetEPGData( string channelName );
 		void addTextToArray( string text );
 		void processTextToArray( char* text );
-		void showText( int startPos);
+		void showText( int startPos, int ypos );
 
 	public:
 

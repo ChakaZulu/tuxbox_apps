@@ -24,16 +24,17 @@ class CStringInput : public CMenuTarget
 	char*	value;
 	int		size;
 	int		selected;
+	FontsDef *fonts;
 
-		void paint(CFrameBuffer* frameBuffer, FontsDef *fonts);
-		void paintChar(CFrameBuffer* frameBuffer, FontsDef *fonts, int pos);
+		void paint(CFrameBuffer* frameBuffer);
+		void paintChar(CFrameBuffer* frameBuffer, int pos);
 
 	public:
 
-		CStringInput(string Name, char* Value, int Size);
+		CStringInput(string Name, FontsDef *Fonts, char* Value, int Size);
 
 		void hide(CFrameBuffer* frameBuffer);
-		int exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcInput, CMenuTarget* parent, string actionKey );
+		int exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string actionKey );
 
 };
 

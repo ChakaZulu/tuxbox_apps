@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.7 2001/08/20 01:51:12 McClean Exp $
+// $Id: channellist.h,v 1.8 2001/08/20 13:10:27 tw-74 Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.8  2001/08/20 13:10:27  tw-74
+// cosmetic changes and changes for variable font size
+//
 // Revision 1.7  2001/08/20 01:51:12  McClean
 // channellist bug fixed - faster channellist response
 //
@@ -44,44 +47,44 @@ class CChannelList
 	};
 
 
-		unsigned int		selected;
-		unsigned int		tuned;
-		unsigned int		liststart;
-		unsigned int		listmaxshow;
-		unsigned int		numwidth;
+	unsigned int		selected;
+	unsigned int		tuned;
+	unsigned int		liststart;
+	unsigned int		listmaxshow;
+	unsigned int		numwidth;
+	FontsDef		*fonts;
+	int			fheight; // Fonthoehe Channellist-Inhalt
+	int			theight; // Fonthoehe Channellist-Titel
 
-		int					key;
-		string				name;
-		vector<channel*>	chanlist;
+	int			key;
+	string			name;
+	vector<channel*>	chanlist;
 
-		int width;
-		int height;
-		int x;
-		int y;
+	int 			width;
+	int 			height;
+	int 			x;
+	int 			y;
 
-		void paintItem(CFrameBuffer* fb, FontsDef *Fonts, int pos );
-		void paint(CFrameBuffer* fb, FontsDef *Fonts);
-		void paintHead(CFrameBuffer* fb, FontsDef *Fonts);
-		void hide(CFrameBuffer* fb);
+	void paintItem(CFrameBuffer* fb, int pos);
+	void paint(CFrameBuffer* fb);
+	void paintHead(CFrameBuffer* fb);
+	void hide(CFrameBuffer* fb);
 
 	public:
+	CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="", FontsDef *cfont=NULL);
+	~CChannelList();
+	void addChannel(int key, int number, string name);
+	void setName(string Name);
+	int getKey(int);
+	string getActiveChannelName();
+	int getActiveChannelNumber();
 
-		CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="");
-		~CChannelList();
-
-		void addChannel(int key, int number, string name);
-		void setName(string Name);
-		int getKey(int);
-		string getActiveChannelName();
-		int getActiveChannelNumber();
-
-		void zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer, int pos);
-		bool showInfo(CInfoViewer *infoViewer, int pos);
-		void updateEvents(void);
-		void numericZap(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, int key);
-		void exec(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings);
-		void quickZap(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key);
-
+	void zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer, int pos);
+	bool showInfo(CInfoViewer *infoViewer, int pos);
+	void updateEvents(void);
+	void numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, int key);
+	void exec(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings);
+	void quickZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key);
 };
 
 

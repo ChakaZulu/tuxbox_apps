@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.5 2001/08/16 00:19:44 fnbrd Exp $
+// $Id: epgview.cpp,v 1.6 2001/08/20 13:07:10 tw-74 Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.6  2001/08/20 13:07:10  tw-74
+// cosmetic changes and changes for variable font size
+//
 // Revision 1.5  2001/08/16 00:19:44  fnbrd
 // Removed debug output.
 //
@@ -10,14 +13,11 @@
 #include "epgdata.h"
 
 
-
 static char* ocopyStringto(const char* from, char* to, int len)
 {
 	const char *fromend=from+len;
 	while(*from!='\xff' && from<fromend)
-	{
 		*(to++)=*(from++);
-	}
 	*to=0;
 	return (char *)++from;
 }
@@ -35,6 +35,15 @@ void CEpgData::start(CFrameBuffer *FrameBuffer, FontsDef *Fonts, CRCInput* RcInp
 
 	ox = 500;
 	oy = 290;
+
+	topheight=fonts->epg_title->getHeight();
+	topboxheight=topheight+10;
+	botheight=fonts->epg_date->getHeight();
+	botboxheight=botheight+6;
+	medlineheight=fonts->epg_info->getHeight();
+	medlinecount=(oy-topboxheight-botboxheight)/medlineheight;
+
+	oy=topboxheight+botboxheight+medlinecount*medlineheight; // recalculate
 
 	sx = (((settings->screen_EndX-settings->screen_StartX)-ox) / 2) + settings->screen_StartX;
 	sy = (((settings->screen_EndY-settings->screen_StartY)-oy) / 2) + settings->screen_StartY;
@@ -63,7 +72,7 @@ void CEpgData::processTextToArray( char* text  )
 {
 	string	aktLine = "";
 	string	aktWord = "";
-	int		aktWidth = 0;
+	int	aktWidth = 0;
 
 	//printf("orginaltext:\n%s\n\n", text);
 	while(*text!=0)
@@ -72,7 +81,7 @@ void CEpgData::processTextToArray( char* text  )
 		{
 			//check the wordwidth - add to this line if size ok
 			aktWord += ' ';
-			int aktWordWidth = fonts->epg_info2->getRenderWidth(aktWord.c_str());
+			int aktWordWidth = fonts->epg_info->getRenderWidth(aktWord.c_str());
 			if((aktWordWidth+aktWidth)<(ox-20))
 			{//space ok, add
 				aktWidth += aktWordWidth;
@@ -103,52 +112,51 @@ void CEpgData::processTextToArray( char* text  )
 	addTextToArray( aktLine + aktWord );
 }
 
-void CEpgData::showText( int startPos)
+void CEpgData::showText( int startPos, int ypos )
 {
-	int ypos = sy+70;
 	int textCount = epgText.size();
-	frameBuffer->paintBoxRel(sx, sy+45, ox, oy-65, COL_MENUCONTENT);
-	if(startPos==0)
-	{
-		fonts->epg_info1->RenderString(sx+10, ypos, ox-15, epgData.info1, COL_MENUCONTENT);
-		ypos += 25;
+	int y=ypos;
+	int linecount=medlinecount;
+	string t;
+	frameBuffer->paintBoxRel(sx, y, ox, linecount*medlineheight, COL_MENUCONTENT);
+	if(startPos==0){
+		t=epgData.info1;
+		fonts->epg_info->RenderString(sx+10,y+medlineheight,ox-15,t.c_str(),COL_MENUCONTENT);
+		y+=medlineheight;
+		linecount--;
 	}
-	while (ypos<oy+sy-25)
+	for(int i=startPos; i<textCount && i<startPos+linecount; i++,y+=medlineheight)
 	{
-		string text="";
-		if(startPos<textCount)
-		{
-			text = epgText[startPos];
-		}
-		fonts->epg_info2->RenderString(sx+10, ypos, ox, text.c_str(), COL_MENUCONTENT);
-		ypos +=20;	
-		startPos++;
+		t=epgText[i];
+		fonts->epg_info->RenderString(sx+10, y+medlineheight, ox-15, t.c_str(), COL_MENUCONTENT);
 	}
 }
 
-void CEpgData::show( string channelName  )
+void CEpgData::show( string channelName )
 {
-	frameBuffer->paintBoxRel(settings->screen_StartX, settings->screen_StartY, 50, 30, COL_INFOBAR);
-	fonts->epg_date->RenderString(settings->screen_StartX+10, settings->screen_StartY+20, 40, "-@-", COL_INFOBAR);
+	int height;
+	height=fonts->epg_date->getHeight();
+	frameBuffer->paintBoxRel(settings->screen_StartX, settings->screen_StartY, 50, height+5, COL_INFOBAR);
+	fonts->epg_date->RenderString(settings->screen_StartX+10, settings->screen_StartY+height, 40, "-@-", COL_INFOBAR);
 
 	GetEPGData( channelName );
-	frameBuffer->paintBoxRel(settings->screen_StartX, settings->screen_StartY, 50, 30, COL_BACKGROUND);
+	frameBuffer->paintBoxRel(settings->screen_StartX, settings->screen_StartY, 50, height+5, COL_BACKGROUND);
 
 	if(strlen(epgData.title)==0)
 	{
 		//no epg-data found :(
 		char *text = "no epg found";
 		int oy = 30;
-		int ox = fonts->epg_info2->getRenderWidth(text)+30;
+		int ox = fonts->epg_info->getRenderWidth(text)+30;
 		int sx = (((settings->screen_EndX-settings->screen_StartX)-ox) / 2) + settings->screen_StartX;
 		int sy = (((settings->screen_EndY-settings->screen_StartY)-oy) / 2) + settings->screen_StartY;
-		frameBuffer->paintBoxRel(sx, sy, ox, 30, COL_MENUHEAD);
-		fonts->epg_info2->RenderString(sx+15, sy+20, ox-15, "no epg found", COL_MENUHEAD);
+		height=fonts->epg_info->getHeight();
+		frameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_MENUHEAD);
+		fonts->epg_info->RenderString(sx+15, sy+height+5, ox-15, text, COL_MENUHEAD);
 		rcInput->getKey(20); 
-		frameBuffer->paintBoxRel(sx, sy, ox, 30, COL_BACKGROUND);
+		frameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_BACKGROUND);
 		return;
 	}
-
 
 	//scan epg-data - sort to list
 	if(strlen(epgData.info2)!=0)
@@ -157,50 +165,48 @@ void CEpgData::show( string channelName  )
 	}
 
 	//show the epg
-	frameBuffer->paintBoxRel(sx, sy, ox, 45, COL_MENUHEAD);
-	frameBuffer->paintBoxRel(sx, sy+oy-20, ox, 20, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(sx, sy, ox, topboxheight, COL_MENUHEAD);
+	fonts->epg_title->RenderString(sx+10, sy+topheight+5, ox-15, epgData.title, COL_MENUHEAD);
 
-	fonts->epg_title->RenderString(sx+10, sy+35, ox-15, epgData.title, COL_MENUHEAD);
+	//show date-time....
+	frameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);
+	char fromto[40];
+	int widthl,widthr;
+	strcpy(fromto,epgData.start); strcat(fromto," - "); strcat(fromto,epgData.end);
+	widthl=fonts->epg_date->getRenderWidth(fromto);
+	fonts->epg_date->RenderString(sx+10,  sy+oy-3, widthl, fromto, COL_MENUHEAD);
+	widthr=fonts->epg_date->getRenderWidth(epgData.date);
+	fonts->epg_date->RenderString(sx+ox-10-widthr,  sy+oy-3, widthr, epgData.date, COL_MENUHEAD);
 
 	int showPos = 0;
 	int textCount = epgText.size();
-	showText(showPos);
+	int textypos = sy+topboxheight;
+	showText(showPos,textypos);
 
-	//show date-time....
-	char fromto[40];
-	strcpy( fromto, epgData.start );
-	strcat( fromto, " - " );
-	strcat( fromto, epgData.end);
-	fonts->epg_date->RenderString(sx+10,  sy+oy-4, 380, fromto, COL_MENUHEAD);
-	fonts->epg_date->RenderString(sx+ox-110,  sy+oy-4, 110, epgData.date, COL_MENUHEAD);
-
-	//show progessbar
+	//show progressbar
 	int progress = atoi(epgData.done);
 	printf("prog: %d\n", progress);
-	frameBuffer->paintBoxRel(sx+200, sy+oy-15, 102, 9, COL_MENUHEAD+7);
-	frameBuffer->paintBoxRel(sx+201, sy+oy-14, 100, 7, COL_MENUHEAD+2);
-	frameBuffer->paintBoxRel(sx+201, sy+oy-14, progress, 7, COL_MENUHEAD+5);
-
-
+	int pbx = sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1);
+	frameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUHEAD+7);
+	frameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUHEAD+2);
+	frameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, progress, height-10, COL_MENUHEAD+5);
 
 	bool loop=true;
 	int scrollCount;
 	while(loop)
 	{
 		int key = rcInput->getKey(40); 
-		if(showPos==0)
-		{	//titleinfo exists
-			scrollCount = 9;
-		}
-		else
-			scrollCount = 10;
+
+		scrollCount = medlinecount;
+		if(showPos==0)	//titleinfo exists
+			scrollCount--;
 
 		if (key==CRCInput::RC_down)
 		{
 			if(showPos+scrollCount<textCount)
 			{
 				showPos += scrollCount;
-				showText(showPos);
+				showText(showPos,textypos);
 			}
 		}
 		else if (key==CRCInput::RC_up)
@@ -212,12 +218,12 @@ void CEpgData::show( string channelName  )
 				showPos = 0;
 				toShow = false;
 			}
-			if((showPos==0) && (scrollCount==10))
+			if((showPos==0) && (scrollCount==medlinecount))
 			{
 				toShow = true;
 			}
 			if (toShow)
-				showText(showPos);
+				showText(showPos,textypos);
 		}
 		else if ((key==CRCInput::RC_ok) || (key==CRCInput::RC_help))
 		{

@@ -19,16 +19,17 @@ class CScreenSetup : public CMenuTarget
 	string				name;
 	SNeutrinoSettings	*settings;
 	int					selected;
-
-		void paint(CFrameBuffer* frameBuffer, FontsDef *fonts);
-		void paintBorderUL(CFrameBuffer* frameBuffer, FontsDef *fonts);
-		void paintBorderLR(CFrameBuffer* frameBuffer, FontsDef *fonts);
+	FontsDef		*fonts;
+	
+		void paint(CFrameBuffer* frameBuffer);
+		void paintBorderUL(CFrameBuffer* frameBuffer);
+		void paintBorderLR(CFrameBuffer* frameBuffer);
 	public:
 
-		CScreenSetup(string Name, SNeutrinoSettings* Settings);
+		CScreenSetup(string Name, FontsDef *Fonts, SNeutrinoSettings* Settings);
 
 		void hide(CFrameBuffer* frameBuffer);
-		int exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcInput, CMenuTarget* parent, string actionKey );
+		int exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string actionKey );
 
 };
 

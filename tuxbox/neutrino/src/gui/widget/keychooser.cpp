@@ -1,18 +1,18 @@
 #include "keychooser.h"
 
-CKeyChooser::CKeyChooser( int* Key, string title, string Icon )
-	: CMenuWidget(title, Icon)
+CKeyChooser::CKeyChooser( int* Key, string title, FontsDef *Fonts, string Icon )
+	: CMenuWidget(title, Fonts, Icon)
 {
 	key = Key;
-	keyChooser = new CKeyChooserItem("key setup", key);
+	keyChooser = new CKeyChooserItem("key setup", fonts, key);
 	keyDeleter = new CKeyChooserItemNoKey(key);
 
-	addItem( new CMenuSeparator(60) );
-	addItem( new CMenuSeparator(11, CMenuSeparator::LINE) );
-	addItem( new CMenuForwarder("back") );
-	addItem( new CMenuSeparator(11, CMenuSeparator::LINE) );
-	addItem( new CMenuForwarder("setup new", true, "", keyChooser) );
-	addItem( new CMenuForwarder("set none", true, "", keyDeleter) );
+	addItem( new CMenuSeparator() );
+	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	addItem( new CMenuForwarder("back", fonts) );
+	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	addItem( new CMenuForwarder("setup new", fonts, true, "", keyChooser) );
+	addItem( new CMenuForwarder("set none", fonts, true, "", keyDeleter) );
 }
 
 
@@ -23,18 +23,19 @@ CKeyChooser::~CKeyChooser()
 }
 
 
-void CKeyChooser::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CKeyChooser::paint(CFrameBuffer* frameBuffer)
 {
-	CMenuWidget::paint(frameBuffer,fonts);
+	CMenuWidget::paint(frameBuffer);
 	
 	string text = "current key: " + CRCInput::getKeyName(*key);
 	fonts->menu->RenderString(x+10,y+70, width, text.c_str(), COL_MENUCONTENT);
 }
 
 //*****************************
-CKeyChooserItem::CKeyChooserItem(string Name, int *Key)
+CKeyChooserItem::CKeyChooserItem(string Name, FontsDef *Fonts, int *Key)
 {
 	name = Name;
+	fonts = Fonts;
 	key = Key;
 	width = 300;
 	height = 105;
@@ -43,13 +44,13 @@ CKeyChooserItem::CKeyChooserItem(string Name, int *Key)
 }
 
 
-int CKeyChooserItem::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcInput,CMenuTarget* parent, string)
+int CKeyChooserItem::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput,CMenuTarget* parent, string)
 {
 	if (parent)
 	{
 		parent->hide(frameBuffer);
 	}
-	paint( frameBuffer, fonts );
+	paint( frameBuffer );
 
 	int rckey = rcInput->getKey(100); 
 	if(rckey!=-1)
@@ -66,7 +67,7 @@ void CKeyChooserItem::hide(CFrameBuffer* frameBuffer)
 	frameBuffer->paintBoxRel(x,y, width,height, COL_BACKGROUND);
 }
 
-void CKeyChooserItem::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CKeyChooserItem::paint(CFrameBuffer* frameBuffer)
 {
 
 	frameBuffer->paintBoxRel(x,y, width,30, COL_MENUHEAD);
@@ -75,6 +76,6 @@ void CKeyChooserItem::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
 
 	//paint msg...
 	fonts->menu->RenderString(x+10,y+60, width, "please press the new key", COL_MENUCONTENT);
-	fonts->epg_info2->RenderString(x+10,y+90, width, "wait a few seconds for cancel", COL_MENUCONTENT);
+	fonts->epg_info->RenderString(x+10,y+90, width, "wait a few seconds for cancel", COL_MENUCONTENT);
 }
 

@@ -1,8 +1,9 @@
 #include "streaminfo.h"
 
 
-CStreamInfo::CStreamInfo()
+CStreamInfo::CStreamInfo(FontsDef *Fonts)
 {
+	fonts = Fonts;
 	width = 250;
 	height = 150;
 	x=((720-width) >> 1) -20;
@@ -10,13 +11,13 @@ CStreamInfo::CStreamInfo()
 }
 
 
-int CStreamInfo::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput *rcInput,CMenuTarget* parent, string)
+int CStreamInfo::exec(CFrameBuffer* frameBuffer, CRCInput *rcInput, CMenuTarget* parent, string)
 {
 	if (parent)
 	{
 		parent->hide(frameBuffer);
 	}
-	paint( frameBuffer, fonts );
+	paint(frameBuffer);
 
 	rcInput->getKey(130); 
 
@@ -29,7 +30,7 @@ void CStreamInfo::hide(CFrameBuffer* frameBuffer)
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
-void CStreamInfo::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CStreamInfo::paint(CFrameBuffer* frameBuffer)
 {
 
 	frameBuffer->paintBoxRel(x,y, width,30, COL_MENUHEAD);
