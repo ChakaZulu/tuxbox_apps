@@ -1192,11 +1192,6 @@ void CAudioPlayerGui::updateMetaData()
 		}
 		if (CAudioPlayer::getInstance()->getScBuffered()!=0)
 		{
-			char perc[4];
-			snprintf(perc,3,"%d",(int)CAudioPlayer::getInstance()->getScBuffered() * 100 / 65535);
-			curr_audiofile.Album = perc;
-			curr_audiofile.Album += "% ";
-			curr_audiofile.Album += metaData.sc_station;
 			updateLcd=true;
 		}
 		if(updateLcd)
@@ -1275,7 +1270,7 @@ void CAudioPlayerGui::paintLCD()
 	{
 	case CAudioPlayerGui::STOP:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_STOP);
-	   CLCD::getInstance()->showAudioProgress(0, CNeutrinoApp::getInstance()->isMuted());
+		CLCD::getInstance()->showAudioProgress(0, CNeutrinoApp::getInstance()->isMuted());
 		break;
 	case CAudioPlayerGui::PLAY:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PLAY);
@@ -1283,7 +1278,7 @@ void CAudioPlayerGui::paintLCD()
 		if(m_time_total!=0)
 			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total), CNeutrinoApp::getInstance()->isMuted());
 		else
-			CLCD::getInstance()->showAudioProgress(0, CNeutrinoApp::getInstance()->isMuted());
+			CLCD::getInstance()->showAudioProgress((int)(100.0 * CAudioPlayer::getInstance()->getScBuffered() / 65536), CNeutrinoApp::getInstance()->isMuted());
 		break;
 	case CAudioPlayerGui::PAUSE:
 		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PAUSE);
