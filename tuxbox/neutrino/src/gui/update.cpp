@@ -349,6 +349,15 @@ void CFlashUpdate::hide()
 void CFlashUpdate::showGlobalStatus(int prog)
 {
 	static int lastprog = -1;
+
+	if(prog>100)
+	{
+		prog = 100;
+	}
+	if(prog<0)
+	{
+		prog=0;
+	}
 	if(lastprog==prog)
 	{
 		return;
@@ -365,6 +374,16 @@ void CFlashUpdate::showGlobalStatus(int prog)
 void CFlashUpdate::showLocalStatus(int prog)
 {
 	static int lastprog = -1;
+
+	if(prog>100)
+	{
+		prog = 100;
+	}
+	if(prog<0)
+	{
+		prog=0;
+	}
+
 	if(lastprog==prog)
 	{
 		return;
