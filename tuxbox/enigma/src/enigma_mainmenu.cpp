@@ -10,12 +10,11 @@
 #include "enigma_lcd.h"
 #include "elabel.h"
 #include "epgcache.h"
-#include "epixmap.h"
 
 eMainMenu::eMainMenu()
 {
 	eZapLCD *pLCD=eZapLCD::getInstance();
-	window=new eLBWindow("enigma 0.1" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 240);
+	window=new eLBWindow("enigma" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 400);
 	window->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	window->move(ePoint(70, 150));
 	CONNECT((new eListboxEntryText(window->list, "TV Mode"))->selected, eMainMenu::sel_close);
