@@ -174,7 +174,7 @@ eSystemInfo::eSystemInfo()
 					modelstr="DM7020";
 					cpustr="STB04500, 252MHz";
 					haskeyboard = hasrfmod = hashdd = haslcd = canmeasurelnbcurrent = hasci
-					= canrecordts = 1;
+					= canrecordts = hasstandbywakeuptimer = 1;
 					hwtype = DM7020;
 					caids.insert(0x4a70);
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
