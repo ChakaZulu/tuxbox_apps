@@ -24,22 +24,12 @@
 #ifndef __controldclient__
 #define __controldclient__
 
-#include <stdio.h>
-#include <unistd.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
 #include <string>
 
-#include "controldMsg.h"
 #include "eventserver.h"
 
 using namespace std;
 
-
-#define CONTROLD_UDS_NAME "/tmp/controld.sock"
 
 #define VCR_STATUS_OFF 0
 #define VCR_STATUS_ON 1
@@ -50,9 +40,10 @@ class CControldClient
 		int sock_fd;
 
 		bool controld_connect();
-		bool send(char* data, int size);
+		bool send_data(char* data, int size);
 		bool receive(char* data, int size);
 		bool controld_close();
+		void send(const unsigned char command, char* data, const unsigned int size);
 
 	public:
 
@@ -100,22 +91,28 @@ class CControldClient
 		char getVolume();
 
 		/*
-			setMute(bool) : setzen von Mute
+			setMute(bool, bool) : setzen von Mute
 			Parameter: VOLUME_MUTE   = ton aus
 			           VOLUME_UNMUTE = ton an
+			           avs == true : mute avs device
+			           avs == false: mute audio device
 		*/
-		void setMute( bool );
-		bool getMute();
+		void setMute(const bool mute, const bool avs = true);
+		bool getMute(const bool avs = true);
 
 		/*
-			Mute() : Ton ausschalten
+			Mute(bool) : Ton ausschalten
+			Parameter: avs == true : mute avs device
+			           avs == false: mute audio device
 		*/
-		void Mute();
+		void Mute(const bool avs = true);
 
 		/*
-			UnMute() : Ton wieder einschalten
+			UnMute(bool) : Ton wieder einschalten
+			Parameter: avs == true : mute avs device
+			           avs == false: mute audio device
 		*/
-		void UnMute();
+		void UnMute(const bool avs = true);
 
 		/*
 			Setzen des AnalogOutputs (0 = stereo, 1 = mono left, 2 = mono right)

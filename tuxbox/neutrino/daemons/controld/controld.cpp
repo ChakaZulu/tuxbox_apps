@@ -66,6 +66,7 @@ struct Ssettings
 {
 	char volume;
 	bool mute;
+	bool mute_avs;
 	char videooutput;
 	char videoformat;
 
@@ -642,17 +643,27 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			eventServer->sendEvent( CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD, &msg.volume, sizeof(msg.volume) );
 			break;
 		case CControld::CMD_MUTE:
-			//printf("[controld] mute\n");
-			settings.mute = 1;
-			audioControl::setMute(true);
+			settings.mute = true;
+			zapit.muteAudio(true);
 			lcdd.setMute(true);
 			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 			break;
+		case CControld::CMD_MUTE_AVS:
+			settings.mute_avs = true;
+			audioControl::setMute(true);
+			lcdd.setMute(true);
+			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
+			break;
 		case CControld::CMD_UNMUTE:
-			//printf("[controld] unmute\n");
-			settings.mute = 0;
+			settings.mute = false;
+			zapit.muteAudio(false);
+			lcdd.setMute(settings.mute_avs);
+			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
+			break;
+		case CControld::CMD_UNMUTE_AVS:
+			settings.mute_avs = false;
 			audioControl::setMute(false);
-			lcdd.setMute(false);
+			lcdd.setMute(settings.mute);
 			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 			break;
 		case CControld::CMD_SETANALOGMODE:
@@ -701,10 +712,14 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			write(connfd,&msg6,sizeof(msg6));
 			break;
 		case CControld::CMD_GETMUTESTATUS:
-			//printf("[controld] get mute\n");
 			CControld::responseMute msg7;
 			msg7.mute = settings.mute;
 			write(connfd,&msg7,sizeof(msg7));
+			break;
+		case CControld::CMD_GETMUTESTATUS_AVS:
+			CControld::responseMute msg_7;
+			msg_7.mute = settings.mute_avs;
+			write(connfd,&msg_7,sizeof(msg_7));
 			break;
 		case CControld::CMD_GETVIDEOFORMAT:
 			//printf("[controld] get videoformat (fnc)\n");
@@ -760,7 +775,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.64 2002/10/05 20:46:20 dirch Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.65 2002/10/10 18:34:38 thegoodguy Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())
@@ -819,11 +834,12 @@ int main(int argc, char **argv)
 	if (!loadSettings())
 	{
 		printf("[controld] using defaults\n");
-		settings.volume = 100;
-		settings.mute = 0;
+		settings.volume      = 100;
+		settings.mute        = false;
+		settings.mute_avs    = false;
 		settings.videooutput = 1; // fblk1 - rgb
 		settings.videoformat = 2; // fnc2 - 4:3
-		settings.boxtype = 1; //nokia
+		settings.boxtype     = 1; //nokia
 	}
 
 	setBoxType(); // dummy set - liest den aktuellen Wert aus!
@@ -836,16 +852,9 @@ int main(int argc, char **argv)
 	audioControl::setVolume(settings.volume);
 	lcdd.setVolume(settings.volume);
 
-	if (settings.mute== 1)
-	{
-		audioControl::setMute(true);
-		lcdd.setMute(true);
-	}
-	else
-	{
-		audioControl::setMute(false);
-		lcdd.setMute(false);
-	}
+	audioControl::setMute(settings.mute_avs);
+	zapit.muteAudio(settings.mute);
+	lcdd.setMute(settings.mute || settings.mute_avs);
 
 	setvideooutput(settings.videooutput);
 	setVideoFormat(settings.videoformat, false);
@@ -854,7 +863,7 @@ int main(int argc, char **argv)
     try
     {
 		struct CControld::commandHead rmessage;
-		while(1)
+		while(true)
 		{
 			connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
 			memset(&rmessage, 0, sizeof(rmessage));
