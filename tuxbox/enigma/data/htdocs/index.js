@@ -48,7 +48,7 @@ function openEPG(xy)
 
 function openMultiEPG(xy)
 {
-	NewWindow('/cgi-bin/getMultiEPG?ref='+xy, 'MultiEPG', '1000', '800', 'yes');
+	NewWindow('/getMultiEPG?ref='+xy, 'MultiEPG', screen.width, screen.height, 'yes');
 }
 
 function admin(xy)
