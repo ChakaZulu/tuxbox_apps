@@ -331,7 +331,7 @@ void CNeutrinoApp::setupColors_classic()
 
 /**************************************************************************************
 *                                                                                     *
-*          CNeutrinoApp -  setup Color Sheme (darkblue)	                       *
+*          CNeutrinoApp -  setup Color Sheme (darkblue)                               *
 *                                                                                     *
 **************************************************************************************/
 void CNeutrinoApp::setupColors_dblue()
@@ -389,7 +389,7 @@ void CNeutrinoApp::setupColors_dblue()
 
 /**************************************************************************************
 *                                                                                     *
-*          CNeutrinoApp -  setup Color Sheme (dvb2000)	                               *
+*          CNeutrinoApp -  setup Color Sheme (dvb2000)                                *
 *                                                                                     *
 **************************************************************************************/
 void CNeutrinoApp::setupColors_dvb2k()
