@@ -66,47 +66,47 @@
 			</tr>
 			<tr>
 				<td>sync: </td>
-				<td><input type="checkbox" name="sync" value="#SYNC#"></td>
+				<td><input type="checkbox" name="sync" value="on" #SYNC#></td>
 			</tr>
 			<tr>
 				<td>atime: </td>
-				<td><input type="checkbox" name="atime" value="#ATIME#"></td>
+				<td><input type="checkbox" name="atime" value="on" #ATIME#></td>
 			</tr>
 			<tr>
 				<td>execm: </td>
-				<td><input type="checkbox" name="execm" value="#EXECM#"></td>
+				<td><input type="checkbox" name="execm" value="on" #EXECM#></td>
 			</tr>
 			<tr>
 				<td>noexec: </td>
-				<td><input type="checkbox" name="noexec" value="#NOEXEC#"></td>
+				<td><input type="checkbox" name="noexec" value="on" #NOEXEC#></td>
 			</tr>
 			<tr>
 				<td>ro: </td>
-				<td><input type="checkbox" name="ro" value="#RO#"></td>
+				<td><input type="checkbox" name="ro" value="on" #RO#></td>
 			</tr>
 			<tr>
 				<td>rw: </td>
-				<td><input type="checkbox" name="rw" value="#RW#"></td>
+				<td><input type="checkbox" name="rw" value="on" #RW#></td>
 			</tr>
 			<tr>
 				<td>users: </td>
-				<td><input type="checkbox" name="users" value="#USERS#"></td>
+				<td><input type="checkbox" name="users" value="on" #USERS#></td>
 			</tr>
 			<tr>
 				<td>nolock: </td>
-				<td><input type="checkbox" name="nolock" value="#NOLOCK#"></td>
+				<td><input type="checkbox" name="nolock" value="on" #NOLOCK#></td>
 			</tr>
 			<tr>
 				<td>intr: </td>
-				<td><input type="checkbox" name="intr" value="#INTR#"></td>
+				<td><input type="checkbox" name="intr" value="on" #INTR#></td>
 			</tr>
 			<tr>
 				<td>soft: </td>
-				<td><input type="checkbox" name="soft" value="#SOFT#"></td>
+				<td><input type="checkbox" name="soft" value="on" #SOFT#></td>
 			</tr>
 			<tr>
 				<td>udp: </td>
-				<td><input type="checkbox" name="udp" value="#UDP#"></td>
+				<td><input type="checkbox" name="udp" value="on" #UDP#></td>
 			</tr>
 			</table>
 		</td>
