@@ -35,9 +35,12 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <linux/soundcard.h>
+
 
 FILE* soundfd;
 
@@ -138,6 +141,9 @@ void CMP3Player::play(){
 	}
 
 	soundfd = fopen("/dev/sound/dsp", "w");
+	::ioctl(fileno(soundfd), SNDCTL_DSP_SPEED, 44100);
+	::ioctl(fileno(soundfd), SNDCTL_DSP_CHANNELS, 2);
+	::ioctl(fileno(soundfd), SNDCTL_DSP_SETFMT, AFMT_S16_BE);
 
 	mad_decoder_init(&decoder, &buffer,
 		   input, 0 /* header */, 0 /* filter */, output,
@@ -159,6 +165,7 @@ void CMP3Player::play(){
 	}
 
 	close(fd);
+	::ioctl(fileno(soundfd), SNDCTL_DSP_RESET);
 	fclose(soundfd);
 }
 
