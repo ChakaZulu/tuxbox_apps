@@ -17,11 +17,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: x509.hpp,v 1.2 2002/03/12 19:37:03 waldi Exp $
+ * $Id: x509.hpp,v 1.3 2002/05/30 11:43:18 waldi Exp $
  */
 
 #ifndef __LIBCRYPTO__X509_HPP
 #define __LIBCRYPTO__X509_HPP
+
+#define INLINE
 
 #include <iostream>
 
@@ -47,45 +49,46 @@ namespace Crypto
     class cert
     {
       public:
-        cert ( libcrypto::X509 * = NULL ) throw ();
-        cert ( const cert & );
+        cert () throw ( std::bad_alloc );
+        cert ( std::istream & );
+        cert ( libcrypto::X509 * ) throw ();
+        cert ( const cert & ) throw ( std::bad_alloc );
         ~cert () throw ();
         cert & operator = ( const cert & );
-
-        void new_empty ();
 
         void read ( std::istream & );
         void write ( std::ostream & ) const;
         void print ( std::ostream & ) const;
 
-        long get_version () const throw ( Crypto::exception::no_item );
-        void set_version ( long ) throw ( Crypto::exception::no_item );
+        long get_version () const throw ();
+        void set_version ( long ) throw ();
 
-        long get_serialNumber () const throw ( Crypto::exception::no_item );
-        void set_serialNumber ( long ) throw ( Crypto::exception::no_item );
+        long get_serialNumber () const throw ();
+        void set_serialNumber ( long ) throw ();
 
-        name get_issuer_name () const throw ( Crypto::exception::no_item );
-        void set_issuer_name ( name & ) throw ( Crypto::exception::no_item );
-        name get_subject_name () const throw ( Crypto::exception::no_item );
-        void set_subject_name ( name & ) throw ( Crypto::exception::no_item );
+        name get_issuer_name () const throw ();
+        void set_issuer_name ( name & ) throw ();
+        name get_subject_name () const throw ();
+        void set_subject_name ( name & ) throw ();
 
-        std::string get_notBefore () const throw ( Crypto::exception::no_item );
-        void set_notBefore ( const std::string & ) throw ( Crypto::exception::no_item );
-        void set_notBefore ( const long ) throw ( Crypto::exception::no_item );
-        std::string get_notAfter () const throw ( Crypto::exception::no_item );
-        void set_notAfter ( const std::string & ) throw ( Crypto::exception::no_item );
-        void set_notAfter ( const long ) throw ( Crypto::exception::no_item );
+        std::string get_notBefore () const throw ();
+        void set_notBefore ( const std::string & ) throw ();
+        void set_notBefore ( const long ) throw ();
+        std::string get_notAfter () const throw ();
+        void set_notAfter ( const std::string & ) throw ();
+        void set_notAfter ( const long ) throw ();
 
-        Crypto::evp::key::key get_publickey () const throw ( Crypto::exception::no_item );
-        void set_publickey ( Crypto::evp::key::key & ) throw ( Crypto::exception::no_item );
+        Crypto::evp::key::key get_publickey () const throw ( std::bad_alloc );
+        void set_publickey ( Crypto::evp::key::key & ) throw ();
 
-        void add_extension ( extension & ) throw ( Crypto::exception::no_item );
+        void add_extension ( extension & ) throw ();
 
-        void sign ( Crypto::evp::key::privatekey &, Crypto::evp::md::md & ) throw ( Crypto::exception::no_item );
-        int verify ( store &, int (*) ( int, libcrypto::X509_STORE_CTX * ) = verify_callback ) throw ( std::bad_alloc, Crypto::exception::no_item );
+        void sign ( Crypto::evp::key::privatekey &, Crypto::evp::md::md & ) throw ();
+        int verify ( store &, int (*) ( int, libcrypto::X509_STORE_CTX * ) = verify_callback ) throw ( std::bad_alloc );
 
       protected:
-        operator libcrypto::X509 * () throw ( Crypto::exception::no_item );
+        operator libcrypto::X509 * () throw ();
+
         static int verify_callback ( int ok, libcrypto::X509_STORE_CTX * ctx ) throw ();
 
         libcrypto::X509 * _cert;
@@ -100,11 +103,11 @@ namespace Crypto
         crl () throw ();
         ~crl () throw ();
 
-        void sign ( Crypto::evp::key::privatekey & ) throw ( Crypto::exception::no_item );
-        bool verify ( Crypto::evp::key::key & ) throw ( Crypto::exception::no_item );
+        void sign ( Crypto::evp::key::privatekey & ) throw ();
+        bool verify ( Crypto::evp::key::key & ) throw ();
 
       protected:
-        operator libcrypto::X509_CRL * () throw ( Crypto::exception::no_item );
+        operator libcrypto::X509_CRL * () throw ();
 
         libcrypto::X509_CRL * _crl;
 
@@ -114,12 +117,12 @@ namespace Crypto
     class ctx
     {
       public:
-        void set ( cert & ) throw ();
-        void set ( cert &, cert & ) throw ();
-        void set ( cert &, cert &, req & ) throw ();
-        void set ( req & ) throw ();
-        void set ( crl & ) throw ();
-        void set ( cert &, crl & ) throw ();
+        ctx ( cert & ) throw ();
+        ctx ( cert &, cert & ) throw ();
+        ctx ( cert &, cert &, req & ) throw ();
+        ctx ( req & ) throw ();
+        ctx ( crl & ) throw ();
+        ctx ( cert &, crl & ) throw ();
 
       protected:
         operator libcrypto::X509V3_CTX * () throw ();
@@ -132,16 +135,14 @@ namespace Crypto
     class extension
     {
       public:
-        extension () throw ();
+        extension ( ctx &, const std::string &, const std::string & ) throw ( Crypto::exception::undefined_libcrypto_error );
+        extension ( const std::string &, const std::string & ) throw ( Crypto::exception::undefined_libcrypto_error );
+        extension ( ctx &, int, const std::string & ) throw ( Crypto::exception::undefined_libcrypto_error );
+        extension ( int, const std::string & ) throw ( Crypto::exception::undefined_libcrypto_error );
         ~extension () throw ();
 
-        void create ( ctx &, const std::string &, const std::string & );
-        void create ( const std::string &, const std::string & );
-        void create ( ctx &, int, const std::string & );
-        void create ( int, const std::string & );
-
       protected:
-        operator libcrypto::X509_EXTENSION * () throw ( Crypto::exception::no_item );
+        operator libcrypto::X509_EXTENSION * () throw ();
 
         libcrypto::X509_EXTENSION * _extension;
 
@@ -153,22 +154,21 @@ namespace Crypto
     class name
     {
       public:
-        name ( libcrypto::X509_NAME * = NULL ) throw ();
-        name ( const name & );
+        name () throw ( std::bad_alloc );
+        name ( libcrypto::X509_NAME * ) throw ();
+        name ( const name & ) throw ( std::bad_alloc );
         ~name () throw ();
-        name & operator = ( const name & ) throw ( Crypto::exception::no_item, std::bad_alloc );
+        name & operator = ( const name & ) throw ( std::bad_alloc );
 
-        void new_empty () throw ( std::bad_alloc );
+        void print ( std::ostream & ) const throw ();
 
-        void print ( std::ostream & ) const throw ( Crypto::exception::no_item );
-
-        void add ( const std::string &, const std::string & ) throw ( Crypto::exception::no_item );
-        void add ( int, const std::string & ) throw ( Crypto::exception::no_item );
-        std::string get ( const std::string & ) throw ( Crypto::exception::no_item );
-        std::string get ( int ) throw ( Crypto::exception::no_item );
+        void add ( const std::string &, const std::string & ) throw ();
+        void add ( int, const std::string & ) throw ();
+        std::string get ( const std::string & ) throw ();
+        std::string get ( int ) throw ();
 
       protected:
-        operator libcrypto::X509_NAME * () throw ( Crypto::exception::no_item );
+        operator libcrypto::X509_NAME * () throw ();
         int text2nid ( const std::string & ) throw ();
 
         libcrypto::X509_NAME * _name;
@@ -182,11 +182,11 @@ namespace Crypto
         req () throw ();
         ~req () throw ();
 
-        void sign ( Crypto::evp::key::privatekey & ) throw ( Crypto::exception::no_item );
-        bool verify ( Crypto::evp::key::key & ) throw ( Crypto::exception::no_item );
+        void sign ( Crypto::evp::key::privatekey & ) throw ();
+        bool verify ( Crypto::evp::key::key & ) throw ();
 
       protected:
-        operator libcrypto::X509_REQ * () throw ( Crypto::exception::no_item );
+        operator libcrypto::X509_REQ * () throw ();
 
         libcrypto::X509_REQ * _req;
 
@@ -200,22 +200,24 @@ namespace Crypto
         ~revoked () throw ();
 
       protected:
+        operator libcrypto::X509_REVOKED * () throw ();
+
         libcrypto::X509_REVOKED * _revoked;
     };
 
     class store
     {
       public:
-        store ( libcrypto::X509_STORE * = NULL ) throw ();
+        store () throw ( std::bad_alloc );
+        store ( libcrypto::X509_STORE * ) throw ();
         ~store () throw ();
 
-        void new_empty () throw ( std::bad_alloc );
-
-        void add ( cert & ) throw ( Crypto::exception::no_item );
-        void add ( crl & ) throw ( Crypto::exception::no_item );
+        void add ( cert & ) throw ();
+        void add ( crl & ) throw ();
+        void add_file ( const std::string & );
 
       protected:
-        operator libcrypto::X509_STORE * () throw ( Crypto::exception::no_item );
+        operator libcrypto::X509_STORE * () throw ();
 
         libcrypto::X509_STORE * _store;
 
@@ -226,5 +228,9 @@ namespace Crypto
     };
   };
 };
+
+#ifdef INLINE
+#include <libcrypto++/x509.ipp>
+#endif
 
 #endif

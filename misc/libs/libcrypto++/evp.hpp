@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: evp.hpp,v 1.2 2002/03/12 19:37:03 waldi Exp $
+ * $Id: evp.hpp,v 1.3 2002/05/30 11:43:18 waldi Exp $
  */
 
 #ifndef __LIBCRYPTO__EVP_HPP
@@ -107,7 +107,8 @@ namespace Crypto
           };
 
         public:
-          key ( libcrypto::EVP_PKEY * = NULL );
+          key ();
+          key ( libcrypto::EVP_PKEY * );
           key ( const key & );
           virtual ~key ();
           key & operator = ( const key & );

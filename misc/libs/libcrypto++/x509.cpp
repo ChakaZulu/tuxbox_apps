@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: x509.cpp,v 1.3 2002/05/24 16:33:33 waldi Exp $
+ * $Id: x509.cpp,v 1.4 2002/05/30 11:43:18 waldi Exp $
  */
 
 #include <main.hpp>
@@ -32,19 +32,20 @@ namespace libcrypto
   #include <openssl/pem.h>
 }
 
-Crypto::x509::cert::cert ( libcrypto::X509 * _cert ) throw ()
-: _cert ( _cert )
-{ }
-
-Crypto::x509::cert::cert ( const cert & orig )
+Crypto::x509::cert::cert () throw ( std::bad_alloc )
 {
-  _cert = libcrypto::X509_dup ( orig._cert );
+  _cert = libcrypto::X509_new ();
+
+  if ( ! _cert )
+    throw std::bad_alloc ();
 }
 
-Crypto::x509::cert::~cert () throw ()
+Crypto::x509::cert::cert ( const cert & orig ) throw ( std::bad_alloc )
 {
-  if ( _cert )
-    libcrypto::X509_free ( _cert );
+  _cert = libcrypto::X509_dup ( orig._cert );
+
+  if ( ! _cert )
+    throw std::bad_alloc ();
 }
 
 Crypto::x509::cert & Crypto::x509::cert::operator = ( const cert & orig )
@@ -53,8 +54,6 @@ Crypto::x509::cert & Crypto::x509::cert::operator = ( const cert & orig )
   {
     if ( _cert )
       libcrypto::X509_free ( _cert );
-    if ( ! orig._cert )
-      throw Crypto::exception::no_item ( "Crypto::x509::cert" );
 
     _cert = libcrypto::X509_dup ( orig._cert );
 
@@ -65,21 +64,10 @@ Crypto::x509::cert & Crypto::x509::cert::operator = ( const cert & orig )
   return * this;
 }
 
-void Crypto::x509::cert::new_empty ()
-{
-  if ( _cert )
-    libcrypto::X509_free ( _cert );
-
-  _cert = libcrypto::X509_new ();
-}
-
 void Crypto::x509::cert::read ( std::istream & stream )
 {
-  if ( _cert )
-  {
-    libcrypto::X509_free ( _cert );
-    _cert = NULL;
-  }
+  libcrypto::X509_free ( _cert );
+  _cert = NULL;
 
   Crypto::bio::istream bio ( stream );
   _cert = libcrypto::PEM_read_bio_X509 ( bio, NULL, NULL, NULL );
@@ -90,147 +78,18 @@ void Crypto::x509::cert::read ( std::istream & stream )
 
 void Crypto::x509::cert::write ( std::ostream & stream ) const
 {
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
   Crypto::bio::ostream bio ( stream );
   libcrypto::PEM_write_bio_X509 ( bio, _cert );
 }
 
 void Crypto::x509::cert::print ( std::ostream & stream ) const
 {
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
   Crypto::bio::ostream bio ( stream );
   libcrypto::X509_print ( bio, _cert );
 }
 
-long Crypto::x509::cert::get_version () const throw ( Crypto::exception::no_item )
+int Crypto::x509::cert::verify ( store & store, int ( * callback ) ( int, libcrypto::X509_STORE_CTX * ) ) throw ( std::bad_alloc )
 {
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  return libcrypto::X509_get_version ( _cert );
-}
-
-void Crypto::x509::cert::set_version ( long version ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  libcrypto::X509_set_version ( _cert, version );
-}
-
-long Crypto::x509::cert::get_serialNumber () const throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  return libcrypto::ASN1_INTEGER_get ( libcrypto::X509_get_serialNumber ( _cert ) );
-}
-
-void Crypto::x509::cert::set_serialNumber ( long serial ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  libcrypto::ASN1_INTEGER_set ( libcrypto::X509_get_serialNumber ( _cert ), serial );
-}
-
-Crypto::x509::name Crypto::x509::cert::get_issuer_name () const throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  return name ( libcrypto::X509_NAME_dup ( libcrypto::X509_get_issuer_name ( _cert ) ) );
-}
-
-void Crypto::x509::cert::set_issuer_name ( Crypto::x509::name & name ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  X509_set_issuer_name ( _cert, name );
-}
-
-Crypto::x509::name Crypto::x509::cert::get_subject_name () const throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  return name ( X509_NAME_dup ( X509_get_subject_name ( _cert ) ) );
-}
-
-void Crypto::x509::cert::set_subject_name ( Crypto::x509::name & name ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  X509_set_subject_name ( _cert, name );
-}
-
-//std::string Crypto::x509::cert::get_notBefore () const
-
-//void Crypto::x509::cert::set_notBefore ( const std::string & )
-
-void Crypto::x509::cert::set_notBefore ( const long time ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  libcrypto::X509_gmtime_adj ( _cert -> cert_info -> validity -> notBefore, time );
-}
-
-//std::string Crypto::x509::cert::get_notAfter () const
-
-//void Crypto::x509::cert::set_notAfter ( const std::string & )
-
-void Crypto::x509::cert::set_notAfter ( const long time ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  libcrypto::X509_gmtime_adj ( _cert -> cert_info -> validity -> notAfter, time );
-}
-
-Crypto::evp::key::key Crypto::x509::cert::get_publickey () const throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  return Crypto::evp::key::key ( libcrypto::X509_get_pubkey ( _cert ) );
-}
-
-void Crypto::x509::cert::set_publickey ( Crypto::evp::key::key & key ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  libcrypto::X509_set_pubkey ( _cert, key );
-}
-
-void Crypto::x509::cert::add_extension ( extension & extension ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  libcrypto::X509_add_ext ( _cert, extension, 0 );
-}
-
-void Crypto::x509::cert::sign ( Crypto::evp::key::privatekey & key, Crypto::evp::md::md & md ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  libcrypto::X509_sign ( _cert, key, md );
-}
-  
-int Crypto::x509::cert::verify ( store & store, int ( * callback ) ( int, libcrypto::X509_STORE_CTX * ) ) throw ( std::bad_alloc, Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
   libcrypto::X509_STORE * _store = store;
   libcrypto::X509_STORE_CTX * ctx = libcrypto::X509_STORE_CTX_new();
 
@@ -250,14 +109,6 @@ int Crypto::x509::cert::verify ( store & store, int ( * callback ) ( int, libcry
     return -ctx -> error;
 }
 
-Crypto::x509::cert::operator libcrypto::X509 * () throw ( Crypto::exception::no_item )
-{
-  if ( ! _cert )
-    throw Crypto::exception::no_item ( "Crypto::x509::cert" );
-
-  return _cert;
-}
-
 int Crypto::x509::cert::verify_callback ( int ok, libcrypto::X509_STORE_CTX * ctx ) throw ()
 {
   if ( ! ok )
@@ -265,149 +116,74 @@ int Crypto::x509::cert::verify_callback ( int ok, libcrypto::X509_STORE_CTX * ct
     std::cerr << "error " << ctx -> error << " at " << ctx -> error_depth
       << " depth lookup: " << libcrypto::X509_verify_cert_error_string ( ctx -> error ) << std::endl;
 
-    if ( ctx -> error == X509_V_ERR_CERT_HAS_EXPIRED ) 
-      return 1;
-    if ( ctx -> error == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT ) 
-      return 1;
-    if ( ctx -> error == X509_V_ERR_INVALID_CA )
-      return 1;
-    if ( ctx -> error == X509_V_ERR_PATH_LENGTH_EXCEEDED )
-      return 1;
-    if ( ctx -> error == X509_V_ERR_INVALID_PURPOSE )
-      return 1;
+    switch ( ctx -> error )
+    {
+      case X509_V_ERR_CERT_HAS_EXPIRED:
+      case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+      case X509_V_ERR_INVALID_CA:
+      case X509_V_ERR_PATH_LENGTH_EXCEEDED:
+      case X509_V_ERR_INVALID_PURPOSE:
+        return 1;
+    }
   }
 
   return 0;
 }
 
-Crypto::x509::crl::operator libcrypto::X509_CRL * () throw ( Crypto::exception::no_item )
+Crypto::x509::extension::extension ( ctx & ctx, const std::string & name, const std::string & value ) throw ( Crypto::exception::undefined_libcrypto_error )
 {
-  if ( ! _crl )
-    throw Crypto::exception::no_item ( "Crypto::x509::crl" );
-
-  return _crl;
-}
-
-void Crypto::x509::ctx::set ( cert & issuer ) throw ()
-{
-  libcrypto::X509V3_set_ctx ( &_ctx, issuer, NULL, NULL, NULL, 0 );
-}
-
-void Crypto::x509::ctx::set ( cert & issuer, cert & subject ) throw ()
-{
-  libcrypto::X509V3_set_ctx ( &_ctx, issuer, subject, NULL, NULL, 0 );
-}
-
-void Crypto::x509::ctx::set ( cert & issuer, cert & subject, req & req ) throw ()
-{
-  libcrypto::X509V3_set_ctx ( &_ctx, issuer, subject, req, NULL, 0 );
-}
-
-void Crypto::x509::ctx::set ( req & req ) throw ()
-{
-  libcrypto::X509V3_set_ctx ( &_ctx, NULL, NULL, req, NULL, 0 );
-}
-
-void Crypto::x509::ctx::set ( crl & crl ) throw ()
-{
-  libcrypto::X509V3_set_ctx ( &_ctx, NULL, NULL, NULL, crl, 0 );
-}
-
-void Crypto::x509::ctx::set ( cert & issuer, crl & crl ) throw ()
-{
-  libcrypto::X509V3_set_ctx ( &_ctx, issuer, NULL, NULL, crl, 0 );
-}
-
-Crypto::x509::ctx::operator libcrypto::X509V3_CTX * () throw ()
-{
-  return &_ctx;
-}
-
-Crypto::x509::extension::extension () throw ()
-: _extension ( NULL )
-{ }
-
-Crypto::x509::extension::~extension () throw ()
-{
-  if ( _extension )
-    libcrypto::X509_EXTENSION_free ( _extension );
-}
-
-void Crypto::x509::extension::create ( ctx & ctx, const std::string & name, const std::string & value )
-{
-  if ( _extension )
-    libcrypto::X509_EXTENSION_free ( _extension );
-
   _extension = libcrypto::X509V3_EXT_conf ( NULL, ctx, ( char * ) name.c_str (), ( char * ) value.c_str () );
 
   if ( ! _extension )
     throw Crypto::exception::undefined_libcrypto_error ();
 }
 
-void Crypto::x509::extension::create ( const std::string & name, const std::string & value )
+Crypto::x509::extension::extension ( const std::string & name, const std::string & value ) throw ( Crypto::exception::undefined_libcrypto_error )
 {
-  if ( _extension )
-    libcrypto::X509_EXTENSION_free ( _extension );
-
   _extension = libcrypto::X509V3_EXT_conf ( NULL, NULL, ( char * ) name.c_str (), ( char * ) value.c_str () );
 
   if ( ! _extension )
     throw Crypto::exception::undefined_libcrypto_error ();
 }
 
-void Crypto::x509::extension::create ( ctx & ctx, int nid, const std::string & value )
+Crypto::x509::extension::extension ( ctx & ctx, int nid, const std::string & value ) throw ( Crypto::exception::undefined_libcrypto_error )
 {
-  if ( _extension )
-    libcrypto::X509_EXTENSION_free ( _extension );
-
   _extension = libcrypto::X509V3_EXT_conf_nid ( NULL, ctx, nid, ( char * ) value.c_str () );
 
   if ( ! _extension )
     throw Crypto::exception::undefined_libcrypto_error ();
 }
 
-void Crypto::x509::extension::create ( int nid, const std::string & value )
+Crypto::x509::extension::extension ( int nid, const std::string & value ) throw ( Crypto::exception::undefined_libcrypto_error )
 {
-  if ( _extension )
-    libcrypto::X509_EXTENSION_free ( _extension );
-
   _extension = libcrypto::X509V3_EXT_conf_nid ( NULL, NULL, nid, ( char * ) value.c_str () );
 
   if ( ! _extension )
     throw Crypto::exception::undefined_libcrypto_error ();
 }
 
-Crypto::x509::extension::operator libcrypto::X509_EXTENSION * () throw ( Crypto::exception::no_item )
+Crypto::x509::name::name () throw ( std::bad_alloc )
 {
-  if ( ! _extension )
-    throw Crypto::exception::no_item ( "Crypto::x509::extension" );
+  _name = libcrypto::X509_NAME_new ();
 
-  return _extension;
+  if ( ! _name )
+    throw std::bad_alloc ();
 }
 
-Crypto::x509::name::name ( libcrypto::X509_NAME * _name ) throw ()
-: _name ( _name )
-{ }
-
-Crypto::x509::name::name ( const name & orig )
+Crypto::x509::name::name ( const name & orig ) throw ( std::bad_alloc )
 {
   _name = libcrypto::X509_NAME_dup ( orig._name );
+
+  if ( ! _name )
+    throw std::bad_alloc ();
 }
 
-Crypto::x509::name::~name () throw ()
-{
-  if ( _name )
-    libcrypto::X509_NAME_free ( _name );
-}
-
-Crypto::x509::name & Crypto::x509::name::operator = ( const name & orig ) throw ( Crypto::exception::no_item, std::bad_alloc )
+Crypto::x509::name & Crypto::x509::name::operator = ( const name & orig ) throw ( std::bad_alloc )
 {
   if ( this != &orig )
   {
     if ( _name )
       libcrypto::X509_NAME_free ( _name );
-    if ( ! orig._name )
-      throw Crypto::exception::no_item ( "Crypto::x509::name" );
 
     _name = libcrypto::X509_NAME_dup ( orig._name );
 
@@ -421,60 +197,20 @@ Crypto::x509::name & Crypto::x509::name::operator = ( const name & orig ) throw 
   return * this;
 }
 
-void Crypto::x509::name::new_empty () throw ( std::bad_alloc )
+void Crypto::x509::name::print ( std::ostream & stream ) const throw ()
 {
-  if ( _name )
-    libcrypto::X509_NAME_free ( _name );
-
-  _name = libcrypto::X509_NAME_new ();
-}
-
-void Crypto::x509::name::print ( std::ostream & stream ) const throw ( Crypto::exception::no_item )
-{
-  if ( ! _name )
-    throw Crypto::exception::no_item ( "Crypto::x509::name" );
-
   char * buf = libcrypto::X509_NAME_oneline ( _name, NULL, 0 );
   stream << buf;
   free ( buf );
 }
 
-void Crypto::x509::name::add ( const std::string & text, const std::string & entry ) throw ( Crypto::exception::no_item )
+std::string Crypto::x509::name::get ( int nid ) throw ()
 {
-  add ( text2nid ( text ), entry );
-}
-
-void Crypto::x509::name::add ( int nid, const std::string & entry ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _name )
-    throw Crypto::exception::no_item ( "Crypto::x509::name" );
-
-  libcrypto::X509_NAME_add_entry_by_NID ( _name, nid, MBSTRING_ASC, ( unsigned char * ) entry.c_str (), -1, -1, 0 );
-}
-
-std::string Crypto::x509::name::get ( const std::string & text ) throw ( Crypto::exception::no_item )
-{
-  return get ( text2nid ( text ) );
-}
-
-std::string Crypto::x509::name::get ( int nid ) throw ( Crypto::exception::no_item )
-{
-  if ( ! _name )
-    throw Crypto::exception::no_item ( "Crypto::x509::name" );
-
   char * buf = new char[256];
   libcrypto::X509_NAME_get_text_by_NID ( _name, nid, buf, 256 );
   std::string ret ( buf );
   delete [] buf;
   return ret;
-}
-
-Crypto::x509::name::operator libcrypto::X509_NAME * () throw ( Crypto::exception::no_item )
-{
-  if ( ! _name )
-    throw Crypto::exception::no_item ( "Crypto::x509::name" );
-
-  return _name;
 }
 
 int Crypto::x509::name::text2nid ( const std::string & text ) throw ()
@@ -496,46 +232,26 @@ int Crypto::x509::name::text2nid ( const std::string & text ) throw ()
   throw;
 }
 
-Crypto::x509::req::operator libcrypto::X509_REQ * () throw ( Crypto::exception::no_item )
+Crypto::x509::store::store () throw ( std::bad_alloc )
 {
-  if ( ! _req )
-    throw Crypto::exception::no_item ( "Crypto::x509::req" );
-
-  return _req;
-}
-
-Crypto::x509::store::store ( libcrypto::X509_STORE * _store ) throw ()
-: _store ( _store )
-{ }
-
-Crypto::x509::store::~store () throw ()
-{
-  if ( _store )
-    libcrypto::X509_STORE_free ( _store );
-}
-
-void Crypto::x509::store::new_empty () throw ( std::bad_alloc )
-{
-  if ( _store )
-    libcrypto::X509_STORE_free ( _store );
-
   _store = libcrypto::X509_STORE_new ();
-}
 
-void Crypto::x509::store::add ( cert & cert ) throw ( Crypto::exception::no_item )
-{
   if ( ! _store )
-    throw Crypto::exception::no_item ( "Crypto::x509::store" );
-
-  libcrypto::X509_STORE_add_cert ( _store, cert );
+    throw std::bad_alloc ();
 }
 
-Crypto::x509::store::operator libcrypto::X509_STORE * () throw ( Crypto::exception::no_item )
+void Crypto::x509::store::add_file ( const std::string & name )
 {
-  if ( ! _store )
-    throw Crypto::exception::no_item ( "Crypto::x509::store" );
+  libcrypto::X509_LOOKUP * lookup = libcrypto::X509_STORE_add_lookup ( _store, libcrypto::X509_LOOKUP_file () );
 
-  return _store;
+  if ( ! lookup )
+    throw std::bad_alloc ();
+
+  if ( ! libcrypto::X509_LOOKUP_load_file ( lookup, name.c_str (), X509_FILETYPE_PEM ) )
+    throw Crypto::exception::undefined_libcrypto_error ();
 }
 
+#ifndef INLINE
+#include <x509.ipp>
+#endif
 

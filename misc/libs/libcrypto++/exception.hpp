@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: exception.hpp,v 1.2 2002/03/12 19:37:03 waldi Exp $
+ * $Id: exception.hpp,v 1.3 2002/05/30 11:43:18 waldi Exp $
  */
 
 #ifndef __LIBCRYPTO__EXCEPTION_HPP
@@ -31,14 +31,6 @@ namespace Crypto
 {
   namespace exception
   {
-    class no_item : public std::domain_error
-    {
-      public:
-        no_item ( const std::string & what )
-        : domain_error ( what )
-        { }
-    };
-
     namespace evp
     {
       class bad_decrypt : public std::runtime_error
