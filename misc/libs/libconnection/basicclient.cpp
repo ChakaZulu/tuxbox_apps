@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.13 2003/02/24 21:14:15 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.14 2003/02/24 22:58:56 thegoodguy Exp $
  *
  * Basic Client Class - The Tuxbox Project
  *
@@ -32,7 +32,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#define TIMEOUT_SEC  2
+#define TIMEOUT_SEC  7
 #define TIMEOUT_USEC 0
 
 CBasicClient::CBasicClient()
