@@ -178,10 +178,18 @@ eString setConfigMultiBoot(eString request, eString dirpath, eString opts, eHTTP
 	return closeWindow(content, "", 500);
 }
 
+eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+
+	return closeWindow(content, "", 500);
+}
+
 void ezapConfInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigSwapFile", setConfigSwapFile, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigMultiBoot", setConfigMultiBoot, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigSettings", setConfigSettings, lockWeb);
 }
 #endif
 #endif

@@ -927,6 +927,8 @@ static eString getLeftNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "Multi-Boot", LEFTNAVICOLOR, "?mode=configMultiBoot");
 		result += "<br>";
+		result += button(110, "Settings", LEFTNAVICOLOR, "?mode=configSettings");
+		result += "<br>";
 #endif
 #endif
 	}
@@ -2043,9 +2045,9 @@ static eString recoverRecordings(eString request, eString dirpath, eString opt, 
 {
 	eString result;
 	if (rec_movies())
-		result = closeWindow(content, "Movies recovered successfully.", 500);
+		result = "<html><head><title>Info</title></head><body>Movies recovered successfully.</body></html>";
 	else
-		result = closeWindow(content, "Movies could not be recoverd.", 500);
+		result = "<html><head><title>Info</title></head><body>Movies could not be recovered.</body></html>";
 	return result;
 }
 #endif
@@ -2287,6 +2289,12 @@ eString getConfigMultiBoot(void)
 
 	return result;
 }
+
+eString getConfigSettings(void)
+{
+	eString result = readFile(TEMPLATE_DIR + "configSettings.tmp");
+	return result;
+}
 #endif
 #endif
 
@@ -2427,6 +2435,12 @@ static eString getContent(eString mode, eString path)
 	{
 		result = getTitle("CONFIG: Multi-Boot");
 		result += getConfigMultiBoot();
+	}
+	else
+	if (mode == "configSettings")
+	{
+		result = getTitle("CONFIG: Settings");
+		result += getConfigSettings();
 	}
 	else
 #endif
