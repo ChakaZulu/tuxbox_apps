@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.108 2003/05/06 07:59:37 digi_casi Exp $
+ * $Id: scan.cpp,v 1.109 2003/05/06 13:09:08 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -42,7 +42,6 @@ uint processed_transponders;
 uint32_t actual_freq;
 uint actual_polarisation;
 
-
 CBouquetManager* scanBouquetManager;
 
 extern tallchans allchans;   //  defined in zapit.cpp
@@ -60,7 +59,22 @@ extern std::map <uint8_t, std::string> scanProviders;
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 
+char *getFrontendName(void)
+{
+	if (!frontend)
+		return NULL;
 
+	switch (frontend->getInfo()->type) {
+	case FE_QPSK:   /* satellite frontend */
+		return "sat";
+	case FE_QAM:    /* cable frontend */
+		return "cable";
+	case FE_OFDM:   /* terrestrial frontend */
+		return "terrestrial";
+	default:        /* unsupported frontend */
+		return NULL;
+	}
+}
 
 void stop_scan(const bool success)
 {
@@ -80,7 +94,6 @@ void stop_scan(const bool success)
 		delete scanBouquetManager;
 	}
 }
-
 
 int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(uint32_t TsidOnid, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
 {
@@ -115,9 +128,9 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(uint32_t TsidOnid, struct
 		return 0;
 	}
 
+
 	return 1;
 }
-
 
 /* build transponder for cable-users with sat-feed*/
 int build_bf_transponder(struct dvb_frontend_parameters *feparams)
@@ -139,7 +152,6 @@ int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, uin
 
 	return status;
 }
-
 
 int get_sdts(void)
 {
@@ -315,7 +327,7 @@ FILE *write_provider(FILE *fd, const char *type, const char *provider_name, cons
 	return fd;
 }
 
-int scan_transponder(xmlNodePtr transponder, bool satfeed, uint8_t diseqc_pos, char * type)
+int scan_transponder(xmlNodePtr transponder, bool satfeed, uint8_t diseqc_pos)
 {
 	uint8_t polarization = 0;
 	dvb_frontend_parameters feparams;
@@ -351,19 +363,21 @@ int scan_transponder(xmlNodePtr transponder, bool satfeed, uint8_t diseqc_pos, c
 		feparams.u.ofdm.hierarchy_information = HIERARCHY_AUTO;
 	}
 
-	/* build special transponder for cable with satfeed */
-	if (!strcmp(type,"cable") && satfeed) {
+	if ((frontend->getInfo()->type == FE_QAM) && satfeed) 
+	{
+		/* build special transponder for cable with satfeed */
 		status = build_bf_transponder(&feparams);
 	}
-
-	/* read network information table */
-	else {
+	else 
+	{
+		/* read network information table */
 		status = get_nits(&feparams, polarization, diseqc_pos);
 	}
+	
 	return 0;
 }
 
-void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t diseqc_pos, char * type)
+void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t diseqc_pos)
 {
 	xmlNodePtr transponder = NULL;
 	char myprovider[32];
@@ -378,7 +392,7 @@ void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t
 	/* read all transponders */
 	while ((transponder = xmlGetNextOccurence(transponder, "transponder")) != NULL)
 	{
-		scan_transponder(transponder, satfeed, diseqc_pos, type);
+		scan_transponder(transponder, satfeed, diseqc_pos);
 
 		/* next transponder */
 		transponder = transponder->xmlNextNode;
@@ -421,12 +435,9 @@ void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t
 void *start_scanthread(void *)
 {
 	FILE *fd = NULL;
-
-	char providerName[32];
-	char *type;
-
+	char providerName[32] = "";
+	char *type = NULL;
 	uint8_t diseqc_pos = 0;
-
 	bool satfeed = false;
 
 	scanBouquetManager = new CBouquetManager();
@@ -480,7 +491,7 @@ void *start_scanthread(void *)
 			if (frontend->getInfo()->type == FE_QPSK)
 				diseqc_pos = spI->first;
 			
-			scan_provider(search, providerName, satfeed, diseqc_pos, type);
+			scan_provider(search, providerName, satfeed, diseqc_pos);
 		
 			/* write services */
 			fd = write_provider(fd, type, providerName, diseqc_pos);
@@ -512,20 +523,4 @@ void *start_scanthread(void *)
 	pthread_exit(0);
 }
 
-char *getFrontendName(void)
-{
-	if (!frontend)
-		return NULL;
-
-	switch (frontend->getInfo()->type) {
-	case FE_QPSK:   /* satellite frontend */
-		return "sat";
-	case FE_QAM:    /* cable frontend */
-		return "cable";
-	case FE_OFDM:   /* terrestrial frontend */
-		return "terrestrial";
-	default:        /* unsupported frontend */
-		return NULL;
-	}
-}
 
