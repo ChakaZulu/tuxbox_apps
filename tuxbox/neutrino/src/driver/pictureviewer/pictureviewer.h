@@ -57,12 +57,14 @@ public:
 	bool DecodeImage(std::string name, int startx, int endx, int starty, int endy, bool showBusySign=false);
    bool DisplayImage();
 	void SetScaling(ScalingMode s){m_scaling=s;}
+	void SetAspectRatio(float aspect_ratio) {m_aspect=aspect_ratio;}
 	void showBusy(int sx, int sy, int width, char r, char g, char b);
 	void hideBusy();
 	
 private:
 	CFormathandler *fh_root;
 	ScalingMode m_scaling;
+	float m_aspect;
    std::string m_Pic_Name;
    unsigned char* m_Pic_Buffer;
    int m_Pic_X;

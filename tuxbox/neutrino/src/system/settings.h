@@ -232,6 +232,7 @@ struct SNeutrinoSettings
 
 	// pictureviewer
 	char   picviewer_slide_time[3];
+	int    picviewer_scaling;
 };
 
 struct SglobalInfo

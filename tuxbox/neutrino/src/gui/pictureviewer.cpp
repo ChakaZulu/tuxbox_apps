@@ -69,7 +69,7 @@ CPictureViewerGui::CPictureViewerGui()
 
 	m_sort = FILENAME;
 	m_viewer = new CPictureViewer();
-	m_viewer->SetScaling(CPictureViewer::SIMPLE);
+	m_viewer->SetAspectRatio(4.0/3);
 	m_filebrowser = new CFileBrowser();
 	m_filebrowser->Multi_Select = true;
 	m_filebrowser->Dirs_Selectable = true;
@@ -110,6 +110,8 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height)/ 2) + g_settings.screen_StartY;
 
+	m_viewer->SetScaling((CPictureViewer::ScalingMode)g_settings.picviewer_scaling);
+	
 	if(parent)
 	{
 		parent->hide();
@@ -164,7 +166,7 @@ int CPictureViewerGui::show()
 {
 	int res = -1;
 
-	//CLCD::getInstance()->setMode(CLCD::MODE_MP3);
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU, g_Locale->getText("pictureviewer.head") );
 	m_state=MENU;
 
 	uint msg; uint data;
@@ -406,7 +408,7 @@ int CPictureViewerGui::show()
 		}
 		else if(msg == NeutrinoMessages::CHANGEMODE)
 		{
-			if((data & NeutrinoMessages::mode_mask) !=NeutrinoMessages::mode_mp3)
+			if((data & NeutrinoMessages::mode_mask) !=NeutrinoMessages::mode_pic)
 			{
 				loop = false;
 				m_LastMode=data;
@@ -570,6 +572,12 @@ void CPictureViewerGui::paint()
 void CPictureViewerGui::view(unsigned int index)
 {
 	selected=index;
+	
+	CLCD::getInstance()->showMenuText(0, playlist[index].Name );
+	char timestring[19];
+	strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&playlist[index].Date));
+	CLCD::getInstance()->showMenuText(1, timestring );
+	
 	if(m_state == MENU)
 		frameBuffer->setMode(720,576,16);
 	m_viewer->ShowImage(playlist[index].Filename,g_settings.screen_StartX, g_settings.screen_EndX,

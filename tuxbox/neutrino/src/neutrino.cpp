@@ -541,17 +541,18 @@ int CNeutrinoApp::loadSetup()
 	g_settings.lcd_inverse = configfile.getInt32("lcd_inverse", 0x00);
 
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
+	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
 	
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
 		erg = 2;
 	}
 
-	if (!scanSettings.loadSettings(scanSettingsFile, (g_info.delivery_system = g_Zapit->getDeliverySystem())))
+/*	if (!scanSettings.loadSettings(scanSettingsFile, (g_info.delivery_system = g_Zapit->getDeliverySystem())))
 	{
 		dprintf(DEBUG_NORMAL, "Loading of scan settings failed. Using defaults.\n");
-	}
-	
+	}*/
+
 	return erg;
 }
 
@@ -767,6 +768,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "lcd_inverse", g_settings.lcd_inverse );
 
 	configfile.setString( "picviewer_slide_time", g_settings.picviewer_slide_time );
+	configfile.setInt32( "picviewer_scaling", g_settings.picviewer_scaling );
 
 	if(configfile.getModifiedFlag())
 	{
@@ -1337,8 +1339,12 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
  	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
 	
+	oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
+	oj->addOption((int)CPictureViewer::SIMPLE, "SIMPLE");
+	oj->addOption((int)CPictureViewer::COLOR, "COLOR AVERAGE");
 	CStringInput*  pic_timeout= new CStringInput("pictureviewer.slide_time", g_settings.picviewer_slide_time, 2, "", "", "0123456789 ");
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
+	miscSettings.addItem( oj );
 	miscSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
 }
 
@@ -3362,7 +3368,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.410 2003/02/14 16:30:11 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.411 2003/02/15 01:42:31 zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

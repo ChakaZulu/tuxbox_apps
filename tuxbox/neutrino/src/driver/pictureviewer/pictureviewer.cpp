@@ -107,14 +107,15 @@ bool CPictureViewer::DecodeImage(std::string name, int startx, int endx, int sta
 //			dbout("---Decoding Done\n");
 			if((x>(endx-startx) || y>(endy-starty)) && m_scaling!=NONE)
 			{
-				if( (y*(endx-startx)/x) <= (endy-starty))
+				double aspect_ratio_correction = m_aspect / ((double)xs/ys); 
+				if( (aspect_ratio_correction*y*(endx-startx)/x) <= (endy-starty))
 				{
 					imx=(endx-startx);
-					imy=y*(endx-startx)/x;
+					imy=(int)(aspect_ratio_correction*y*(endx-startx)/x);
 				}
 				else
 				{
-					imx=x*(endy-starty)/y;
+					imx=(int)((1.0/aspect_ratio_correction)*x*(endy-starty)/y);
 					imy=(endy-starty);
 				}
 				if(m_scaling==SIMPLE)
@@ -203,6 +204,7 @@ CPictureViewer::CPictureViewer()
 {
 	fh_root=NULL;
 	m_scaling=NONE;
+	m_aspect=4.0 / 3;
    m_Pic_Name="";
    m_Pic_Buffer=NULL;
    m_Pic_X=0;
