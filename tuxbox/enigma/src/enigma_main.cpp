@@ -297,24 +297,41 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ASSIGN(VolumeBar, eProgress, "volume_bar");
 	ASSIGN(Progress, eProgress, "progress_bar");
 	
-	ASSIGN(ButtonRed, eLabel, "button_red");
-	ASSIGN(ButtonGreen, eLabel, "button_green");
-	ASSIGN(ButtonYellow, eLabel, "button_yellow");
-	ASSIGN(ButtonBlue, eLabel, "button_blue");
+	ASSIGN(ButtonRedEn, eLabel, "button_red_enabled");
+	ASSIGN(ButtonGreenEn, eLabel, "button_green_enabled");
+	ASSIGN(ButtonYellowEn, eLabel, "button_yellow_enabled");
+	ASSIGN(ButtonBlueEn, eLabel, "button_blue_enabled");
+	ASSIGN(ButtonRedDis, eLabel, "button_red_disabled");
+	ASSIGN(ButtonGreenDis, eLabel, "button_green_disabled");
+	ASSIGN(ButtonYellowDis, eLabel, "button_yellow_disabled");
+	ASSIGN(ButtonBlueDis, eLabel, "button_blue_disabled");
 	
-	ButtonRed->setFlags(RS_DIRECT);
-	ButtonRed->setText("\x19");
-	ButtonGreen->setFlags(RS_DIRECT);
-	ButtonGreen->setText("\x19");
-	ButtonYellow->setFlags(RS_DIRECT);
-	ButtonYellow->setText("\x19");
-	ButtonBlue->setFlags(RS_DIRECT);
-	ButtonBlue->setText("\x19");
+	ButtonRedEn->setFlags(RS_DIRECT);
+	ButtonRedEn->setText("\x19");
+	ButtonGreenEn->setFlags(RS_DIRECT);
+	ButtonGreenEn->setText("\x19");
+	ButtonYellowEn->setFlags(RS_DIRECT);
+	ButtonYellowEn->setText("\x19");
+	ButtonBlueEn->setFlags(RS_DIRECT);
+	ButtonBlueEn->setText("\x19");
+
+	ButtonRedDis->setFlags(RS_DIRECT);
+	ButtonRedDis->setText("\x19");
+	ButtonGreenDis->setFlags(RS_DIRECT);
+	ButtonGreenDis->setText("\x19");
+	ButtonYellowDis->setFlags(RS_DIRECT);
+	ButtonYellowDis->setText("\x19");
+	ButtonBlueDis->setFlags(RS_DIRECT);
+	ButtonBlueDis->setText("\x19");
 	
-	ButtonRed->hide();
-	ButtonGreen->hide();
-	ButtonYellow->hide();
-	ButtonBlue->hide();
+	ButtonRedEn->hide();
+	ButtonRedDis->show();
+	ButtonGreenEn->hide();
+	ButtonGreenDis->show();
+	ButtonYellowEn->hide();
+	ButtonYellowDis->show();
+	ButtonBlueEn->hide();
+	ButtonBlueDis->show();
 
 	Clock=new eLabel(this);
 	ASSIGN(Clock, eLabel, "time");
@@ -455,10 +472,10 @@ void eZapMain::setEIT(EIT *eit)
 	{
 		flags|=ENIGMA_SUBSERVICES;
 	}
-	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
+/*	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
 		ButtonGreen->show();
 	else
-		ButtonGreen->hide();
+		ButtonGreen->hide();*/
 	QList<EITEvent> dummy;
 	if (actual_eventDisplay)
 		actual_eventDisplay->setList(eit?eit->events:dummy);
@@ -689,14 +706,27 @@ void eZapMain::serviceChanged(eService *service, int err)
 	ChannelNumber->setText(QString().sprintf("%d", service->service_number));
 	
 	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
-		ButtonGreen->show();
+	{
+		ButtonGreenDis->hide();
+		ButtonGreenEn->show();
+	}
 	else
-		ButtonGreen->hide();
+	{
+		ButtonGreenEn->hide();
+		ButtonGreenDis->show();	
+	}
+
 
 	if (flags&ENIGMA_AUDIO)
-		ButtonYellow->show();
+	{
+		ButtonYellowDis->hide();
+		ButtonYellowEn->show();
+	}
 	else
-		ButtonYellow->hide();
+	{
+		ButtonYellowEn->hide();
+		ButtonYellowDis->show();
+	}
 
 	if (!eZap::getInstance()->focus)
 		show();

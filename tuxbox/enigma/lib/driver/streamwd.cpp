@@ -18,7 +18,7 @@ eStreamWatchdog::eStreamWatchdog()
 	connect(&timer, SIGNAL(timeout()), SLOT(checkstate()));
 	timer.start(1000);
 	last=-1;
-
+	
 	if (!instance)
 		instance=this;
 
@@ -57,10 +57,16 @@ void eStreamWatchdog::checkstate()
 
 	if (last != isanamorph)
 	{
-	    last=isanamorph;
- 	
 	    emit AspectRatioChanged(isanamorph);
-	
+	    
+	    if (last == -1)
+	    {
+		last=isanamorph;	
+		return;
+	    }
+	    else
+	        last=isanamorph;
+
 	    int fd;
 	    if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
 	    {
@@ -73,7 +79,6 @@ void eStreamWatchdog::checkstate()
     
 	    unsigned int pin8;
 	    eDVB::getInstance()->config.getKey("/elitedvb/video/pin8", pin8);
-        
     
 	    switch (pin8)
 	    {

@@ -119,11 +119,13 @@ class eZapMain: public eWidget
 {
 	Q_OBJECT;
 	
-	eLabel *ChannelNumber, *ChannelName, *ButtonRed, *ButtonGreen, 
-		*ButtonYellow, *ButtonBlue, *Clock, *EINow, *EINext, 
-		*EINowDuration, *EINextDuration, 
-		*EINowTime, *EINextTime,
-		*Description;
+	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext, 
+		*EINowDuration, *EINextDuration, *EINowTime, *EINextTime,
+		*Description,
+		*ButtonRedEn, *ButtonRedDis, 
+		*ButtonGreenEn, *ButtonGreenDis, 
+		*ButtonYellowEn, *ButtonYellowDis,
+		*ButtonBlueEn, *ButtonBlueDis;
 	
 	eProgress *Progress, *VolumeBar;
 

@@ -36,8 +36,13 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 		secfd=-1;
 		
 	if (eDVB::getInstance()->config.getKey("/elitedvb/frontend/freqOffset", freq_offset))
-		freq_offset=0;
+	{
+		freq_offset = 0;
+		eDVB::getInstance()->config.setKey("/elitedvb/frontend/freqOffset", freq_offset);
+	}
 
+	qDebug("FreqOffset = %d", freq_offset);
+	
 	if (type==feCable)
 	{
 		lnbfreq_low=lnbfreq_hi=threshold=do_sec=0;

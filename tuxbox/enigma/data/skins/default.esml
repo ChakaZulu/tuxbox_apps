@@ -22,19 +22,18 @@
 		<color name="content" color="#33030F60" end="#ffffff" size="16" />
 		<color name="content_selected" color="#90A0FF" end="#000F33" size="16" />
 
-
 		<color name="osd_normal" color="#000F9A" end="#ffffff" size="16" />
 		<color name="osd_epg" color="#000F9A" end="#a0a0f0" size="16" />
 		<color name="osd_shadowcol" color="#030320" />
 		<color name="osd_shadow" color="#030320" end="#B1B2D9" size="16" />
 		<color name="osd_timebar" color="#1010AA"/>
 		<color name="osd_timebarborder" color="#ffffff"/>
-		
+
 		<color name="shadow_red" color="#030320" end="#ff0303" size="16" />
 		<color name="shadow_green" color="#030320" end="#03ff03" size="16" />
 		<color name="shadow_yellow" color="#030320" end="#ffff03" size="16" />
 		<color name="shadow_blue" color="#030320" end="#0303ff" size="16" />
-
+		<color name="shadow_gray" color="#030320" end="#282828" size="16" />
 	</colors>
 	
 	<colorscheme>
@@ -101,9 +100,10 @@
 
 	<object name="enigma_lcd">
 		<eZapLCDMain position="0:0" size="120:64">
-			<eLabel position="0:0" size="70:16" font="NimbusSansL-Regular Sans L Regular;16" text="Enigma" />
-			<eLabel position="0:18" size="120:30" font="NimbusSansL-Regular Sans L Regular;15" wrap="on" name="service_name" />
-			<eLabel position="78:48" size="42:16" font="NimbusSansL-Regular Sans L Regular;16" name="clock" />
+			<eLabel position="0:0" size="70:18" font="NimbusSansL-Regular Sans L Regular;16" text="Enigma" />
+			<eLabel position="0:20" size="120:30" font="NimbusSansL-Regular Sans L Regular;15" wrap="on" name="service_name" />
+			<eLabel position="74:48" size="46:16" font="NimbusSansL-Regular Sans L Regular;16" name="clock" />
+			<eProgress position="0:57" size="64:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0"/>
 		</eZapLCDMain>
 	</object> 
 	
@@ -162,10 +162,15 @@
 
 			<eLabel name="description" />
 			
-			<eLabel name="button_red" position="230:21" size="24:24" font="Marlett Regular;24" backgroundColor="shadow_red" />
-			<eLabel name="button_green" position="260:21" size="24:24" font="Marlett Regular;24" backgroundColor="shadow_green"  />
-			<eLabel name="button_yellow" position="290:21" size="24:24" font="Marlett Regular;24" backgroundColor="shadow_yellow"  />
-			<eLabel name="button_blue" position="320:21" size="24:24" font="Marlett Regular;24" backgroundColor="shadow_blue"  />
+			<eLabel name="button_red_enabled" position="240:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_red" />
+			<eLabel name="button_green_enabled" position="260:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_green"  />
+			<eLabel name="button_yellow_enabled" position="280:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_yellow"  />
+			<eLabel name="button_blue_enabled" position="300:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_blue" />
+
+			<eLabel name="button_red_disabled" position="240:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_green_disabled" position="260:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_yellow_disabled" position="280:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_blue_disabled" position="300:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
 	
 		</eZapMain>
 	</object>

@@ -21,6 +21,7 @@ class eZapLCDMain: public eWidget
 {
 	Q_OBJECT
 	eLabel *Clock, *ServiceName;
+	eProgress *Volume;
 	QTimer clocktimer;
 private slots:
 	void clockUpdate();

@@ -42,6 +42,7 @@ void eZapLCDMain::clockUpdate()
 
 void eZapLCDMain::volumeUpdate(int vol)
 {
+    Volume->setPerc((63-vol)*100/63);
 }
 
 void eZapLCDMain::serviceChanged(eService *service, int)
@@ -59,7 +60,9 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0)
 
 	ASSIGN(ServiceName, eLabel, "service_name");
 	ASSIGN(Clock, eLabel, "clock");
-
+	ASSIGN(Volume, eProgress, "volume_bar");
+	Volume->show();
+	
 	connect(&clocktimer, SIGNAL(timeout()), SLOT(clockUpdate()));
 	connect(eDVB::getInstance(), SIGNAL(volumeChanged(int)), SLOT(volumeUpdate(int)));
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));
