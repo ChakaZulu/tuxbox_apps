@@ -18,10 +18,16 @@ TUXBOX_APPS_LIB_PKGCONFIG(MD5SUM,tuxbox-md5sum)
 TUXBOX_APPS_LIB_PKGCONFIG(PLUGINS,tuxbox-plugins)
 TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
 TUXBOX_APPS_LIB_PKGCONFIG(SIGC,sigc++-1.2)
-TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)
 
-AC_CHECK_HEADERS(tuxbox.h)
+AC_ARG_WITH(tuxbox,
+	    AC_HELP_STRING([--without-tuxbox],[don't use libtuxbox]),
+	    [],[with_tuxbox=yes])
+
+if test "$with_tuxbox" = yes; then
+	TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
+	AC_CHECK_HEADERS(tuxbox.h)
+fi
 
 CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti"
 CPPFLAGS="$CPPFLAGS $FREETYPE_CFLAGS $ID3TAG_CFLAGS $MAD_CFLAGS $MD5SUM_CFLAGS"
