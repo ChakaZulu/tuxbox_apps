@@ -179,7 +179,7 @@ s2aa_pixel(Pixel *src)
 	    + RGBC(p1&0xffff) + RGBC(p1>>16);
 
 //	return (rgb>>3 & 0x1f) | (rgb>>7 & 0x7e0) | (rgb>>12 & 0xf800);
-	return (rgb>>2 & 0x1f) | (rgb>>7 & 0x7e0) | (rgb>>12 & 0x7C00) | 0x8000;
+	return (rgb>>2 & 0x1f) | (rgb>>7 & 0x7e0) | (rgb>>12 & 0x7C00);
 }
 
 void s2_3aa_line(Pixel *src, Pixel *dst, int wp)
@@ -240,7 +240,7 @@ s4aa_pixel(Pixel *src)
 		     + RGBC(p1&0xffff) + RGBC(p1>>16);
 	}
 
-	return (rgb>>4 & 0x1f) | (rgb>>9 & 0x7e0) | (rgb>>14 & 0x7c00) | 0x8000;
+	return (rgb>>4 & 0x1f) | (rgb>>9 & 0x7e0) | (rgb>>14 & 0x7c00);
 
 }
 
@@ -298,7 +298,7 @@ s3aa_line(Pixel *src, Pixel *dst, int wp)
 		p2=RGBC(*(src+2*xs))+RGBC(*(src+1+2*xs))+RGBC(*(src+2+2*xs));
 
 		p = p0 + p1 + p2;
-		*dst = pix_b[CB(p)] | pix_g[CG(p)] | pix_r[CR(p)] | 0x8000;
+		*dst = pix_b[CB(p)] | pix_g[CG(p)] | pix_r[CR(p)];
 
 		src += 3;
 		dst++;
@@ -330,9 +330,7 @@ draw_border(int xp, int yp, int wp, int hp,
 	buf = p_buf + (yp+p_yoff)*p_xsize + xp + p_xoff;
 
 	for (j=0; j<hp; j++) {
-		for(k=0 ; k < wp ; k++)
-			buf[k] = 0x8000;
-		//		memset(buf, 0, wp*sizeof(Pixel));
+		memset(buf, 0, wp*sizeof(Pixel));
 		buf += p_xsize;
 	}
 }

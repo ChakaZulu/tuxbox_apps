@@ -1,6 +1,5 @@
 TODO: 
 - beautify virtual keyboard / convert to german keyboard
-- fix missing keyboard keys (orig. ir keyboard)
 - support for samsung keyboard
 
 lots more;-)
@@ -16,5 +15,6 @@ DONE:
 - server side scaling
 - automatic panning of screen when cursor reaches screen borders
 - support for IR keyboard
-
+- fix missing keyboard keys (orig. ir keyboard)
+- mouse support
 

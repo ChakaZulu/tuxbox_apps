@@ -15,6 +15,8 @@
 #include <sys/mman.h>
 #include <linux/fb.h>
 #include <linux/input.h>
+#include <dbox/fb.h>
+
 #ifndef KEY_TOPLEFT
 	#define KEY_TOPLEFT      0x1a2
 #endif
@@ -43,6 +45,7 @@ extern "C" {
 fbvnc_framebuffer_t global_framebuffer;
 int fb_fd;
 int rc_fd;
+int blev;
 char terminate;
 int gScale,sx,sy,ex,ey;
 void fbvnc_close(void);
@@ -150,10 +153,19 @@ fbvnc_init() {
 	{
 		cleanup_and_exit("Get fixed screen settings failed", EXIT_ERROR);
 	}
+	if (ioctl(global_framebuffer.framebuf_fds,AVIA_GT_GV_GET_BLEV, &blev) == -1)
+	{
+		printf("Error get blev\n");
+	}
 	vinf.bits_per_pixel = 16;
 	if(ioctl(global_framebuffer.framebuf_fds,FBIOPUT_VSCREENINFO, &vinf) == -1 )
 	{
 		cleanup_and_exit("Put variable screen settings failed", EXIT_ERROR);
+	}
+	unsigned int c=0;
+	if (ioctl(global_framebuffer.framebuf_fds,AVIA_GT_GV_SET_BLEV, c) == -1)
+	{
+		printf("Error set blev\n");
 	}
 	/* Map fb into memory */
 	global_framebuffer.smem_len = finf.smem_len;
@@ -186,25 +198,10 @@ fbvnc_close() {
 	{
 		printf("Put variable screen settings failed\n");
 	}
-#if 0
-	if(global_framebuffer.p_framebuf)
+	if (ioctl(global_framebuffer.framebuf_fds,AVIA_GT_GV_SET_BLEV, blev) == -1)
 	{
-		FBclose(global_framebuffer.p_framebuf);
-		global_framebuffer.p_framebuf = 0;
+		printf("Error set blev\n");
 	}
-
-	if(global_framebuffer.ts_fd != -1)
-	{
-		close(global_framebuffer.ts_fd);
-		global_framebuffer.ts_fd = -1;
-	}
-
-	if(global_framebuffer.kb_fd != -1)
-	{
-		close(global_framebuffer.kb_fd);
-		global_framebuffer.kb_fd = -1;
-	}
-#endif
 	if(global_framebuffer.v_buf)
 	{
 		free(global_framebuffer.v_buf);
@@ -475,302 +472,451 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 		{
 			dprintf("Input event: \ntime: %d.%d\ntype: %d\ncode: %d\nvalue: %d\n",
 				(int)iev.time.tv_sec,(int)iev.time.tv_usec,iev.type,iev.code,iev.value);
-			retval=FBVNC_EVENT_NULL;
+         
+         if(iev.type == EV_KEY)
+         {
+            retval=FBVNC_EVENT_NULL;
 
-			// count events for speedup
-			if(iev.value == 2) // REPEAT
-				countevt++;
-			else
-				countevt=0;			
-			
-			if(iev.code == KEY_TOPLEFT || iev.code == KEY_TOPRIGHT || iev.code == KEY_UP ||
-				iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN ||
-				iev.code == KEY_LEFT || iev.code == KEY_RIGHT)
-			{
-				// ignore curser events older than 350 ms
-				struct timeval now;
-				gettimeofday(&now,NULL);
-				if((now.tv_sec > iev.time.tv_sec+1) ||
-					((now.tv_sec == iev.time.tv_sec+1) && ((now.tv_usec+1000000) - iev.time.tv_usec) > 350000) ||
-					((now.tv_sec == iev.time.tv_sec) && ((now.tv_usec) - iev.time.tv_usec) > 350000))
-				{
-					dprintf("Ignoring old cursor event\n");
-					RetEvent(FBVNC_EVENT_NULL);
-				}
+            // count events for speedup
+            if(iev.value == 2) // REPEAT
+               countevt++;
+            else
+               countevt=0;			
 
-				if(rc_pan)
-					step=STEP_PAN;
-				else
-				{
-					dprintf("count %d\n", countevt);
-					if(countevt>20)
-						step=80;
-					else if(countevt>15)
-						step=40;
-					else if(countevt>10)
-						step=20;
-					else if(countevt >5)
-						step=10;
+            if(iev.code == KEY_TOPLEFT || iev.code == KEY_TOPRIGHT || iev.code == KEY_UP ||
+               iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN ||
+               iev.code == KEY_LEFT || iev.code == KEY_RIGHT)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               
+               // ignore curser events older than 350 ms
+               struct timeval now;
+               gettimeofday(&now,NULL);
+               if((now.tv_sec > iev.time.tv_sec+1) ||
+                  ((now.tv_sec == iev.time.tv_sec+1) && ((now.tv_usec+1000000) - iev.time.tv_usec) > 350000) ||
+                  ((now.tv_sec == iev.time.tv_sec) && ((now.tv_usec) - iev.time.tv_usec) > 350000))
+               {
+                  dprintf("Ignoring old cursor event\n");
+                  RetEvent(FBVNC_EVENT_NULL);
+               }
+
+               if(rc_pan)
+                  step=STEP_PAN;
+               else
+               {
+                  if(countevt>20) step=80;
+                  else if(countevt>15) step=40;
+                  else if(countevt>10) step=20;
+                  else if(countevt >5) step=10;
+                  else step=5;
+               }
+               retval=FBVNC_EVENT_TS_MOVE;
+               if(iev.code == KEY_TOPLEFT || iev.code == KEY_TOPRIGHT || iev.code == KEY_UP)
+               {
+                  if(global_framebuffer.mouse_y == 0 && global_framebuffer.v_y0==0)
+                  {
+                     RetEvent(FBVNC_EVENT_NULL);
+                  }
+                  if(!rc_pan)
+                  {
+                     global_framebuffer.mouse_y -= step;
+                     if(global_framebuffer.mouse_y <0)
+                     {
+                        if(step < STEP_PAN)
+                           step=STEP_PAN;
+                        if(global_framebuffer.v_y0<step)
+                           step=global_framebuffer.v_y0;
+                        global_framebuffer.mouse_y = 0;
+                        rc_dy = step;
+                        ev->key = hbtn.pan;
+                        retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+
+                        nextev.key = hbtn.pan;
+                        nextev.x = global_framebuffer.mouse_x;
+                        nextev.y = global_framebuffer.mouse_y;
+                        nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+                     }
+                  }
+                  else
+                     rc_dy	= step;
+               }
+               if(iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN)
+               {
+                  if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize &&
+                     global_framebuffer.v_y0 + global_framebuffer.pv_ysize >= global_framebuffer.v_ysize)
+                  {
+                     RetEvent(FBVNC_EVENT_NULL);
+                  }
+                  if(!rc_pan)
+                  {
+                     global_framebuffer.mouse_y += step;
+                     if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize)
+                     {
+                        if(step < STEP_PAN)
+                           step=STEP_PAN;
+                        if((global_framebuffer.v_ysize - global_framebuffer.v_y0 - global_framebuffer.pv_ysize) < step)
+                           step=(global_framebuffer.v_ysize - global_framebuffer.v_y0 - global_framebuffer.pv_ysize);
+                        global_framebuffer.mouse_y = global_framebuffer.pv_ysize - 1;
+                        rc_dy = -step;
+                        ev->key = hbtn.pan;
+                        retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+
+                        nextev.key = hbtn.pan;
+                        nextev.x = global_framebuffer.mouse_x;
+                        nextev.y = global_framebuffer.mouse_y;
+                        nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+                     }
+                  }
+                  else
+                     rc_dy	=-step;
+               }
+               if(iev.code == KEY_TOPLEFT || iev.code == KEY_BOTTOMLEFT || iev.code == KEY_LEFT)
+               {
+                  if(global_framebuffer.mouse_x == 0 && global_framebuffer.v_x0==0)
+                  {
+                     RetEvent(FBVNC_EVENT_NULL);
+                  }
+                  if(!rc_pan)
+                  {
+                     global_framebuffer.mouse_x -= step;
+                     if(global_framebuffer.mouse_x <0)
+                     {
+                        if(step < STEP_PAN)
+                           step=STEP_PAN;
+                        if(global_framebuffer.v_x0<step)
+                           step=global_framebuffer.v_x0;
+                        global_framebuffer.mouse_x = 0;
+                        rc_dx = step;
+                        ev->key = hbtn.pan;
+                        retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+
+                        nextev.key = hbtn.pan;
+                        nextev.x = global_framebuffer.mouse_x;
+                        nextev.y = global_framebuffer.mouse_y;
+                        nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+                     }
+                  }
+                  else
+                     rc_dx	=step;
+               }
+               if(iev.code == KEY_TOPRIGHT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_RIGHT)
+               {
+                  if(global_framebuffer.mouse_x >= global_framebuffer.pv_xsize &&
+                     global_framebuffer.v_x0 + global_framebuffer.pv_xsize >= global_framebuffer.v_xsize)
+                  {
+                     RetEvent(FBVNC_EVENT_NULL);
+                  }
+                  if(!rc_pan)
+                  {
+                     global_framebuffer.mouse_x += step;
+                     if(global_framebuffer.mouse_x >= global_framebuffer.pv_xsize)
+                     {
+                        if(step < STEP_PAN)
+                           step=STEP_PAN;
+                        if((global_framebuffer.v_xsize - global_framebuffer.v_x0 - global_framebuffer.pv_xsize) < step)
+                           step=(global_framebuffer.v_xsize - global_framebuffer.v_x0 - global_framebuffer.pv_xsize);
+                        global_framebuffer.mouse_x = global_framebuffer.pv_xsize - 1;
+                        rc_dx = -step;
+                        ev->key = hbtn.pan;
+                        retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+
+                        nextev.key = hbtn.pan;
+                        nextev.x = global_framebuffer.mouse_x;
+                        nextev.y = global_framebuffer.mouse_y;
+                        nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+                     }
+                  }
+                  else
+                     rc_dx	=-step;
+               }
+            }
+            else if(countevt>0)
+            {
+               // for othe rkeys reject because of prelling
+               RetEvent(FBVNC_EVENT_NULL);
+            }
+            // codes
+            else if(iev.code == KEY_HOME)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               retval = FBVNC_EVENT_QUIT;
+            }
+            else if(iev.code == KEY_HELP)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               if(mouse_button > 0)
+               {
+                  mouse_button=0;
+                  retval=FBVNC_EVENT_TS_UP;
+               }
+               else
+               {
+                  mouse_button=1;
+                  retval=FBVNC_EVENT_TS_DOWN;
+               }
+            }
+            else if(iev.code == KEY_MUTE)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               ev->key = hbtn.pan;
+               if(rc_pan)
+                  retval=FBVNC_EVENT_BTN_UP;
+               else
+                  retval=FBVNC_EVENT_BTN_DOWN;
+               rc_pan=!rc_pan;
+            }
+            else if(iev.code == KEY_VOLUMEDOWN)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
+               retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_OUT | FBVNC_EVENT_TS_MOVE);
+            }
+            else if(iev.code == KEY_VOLUMEUP)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
+               retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_IN | FBVNC_EVENT_TS_MOVE);
+            }
+            else if(iev.code == KEY_OK)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               nextev.x =global_framebuffer.mouse_x;
+               nextev.y =global_framebuffer.mouse_y;  
+               nextev.evtype = FBVNC_EVENT_TS_UP;
+               next_mb=0;
+               mouse_button=1;
+               retval=FBVNC_EVENT_TS_DOWN;
+            }
+            else if(iev.code == KEY_RED)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               retval=FBVNC_EVENT_DCLICK;				
+            }
+            else if(iev.code == KEY_GREEN)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               nextev.x =global_framebuffer.mouse_x;
+               nextev.y =global_framebuffer.mouse_y;  
+               nextev.evtype = FBVNC_EVENT_TS_UP;
+               next_mb=0;
+               mouse_button=2;
+               retval=FBVNC_EVENT_TS_DOWN;
+            }
+            else if(iev.code == KEY_YELLOW)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               nextev.x =global_framebuffer.mouse_x;
+               nextev.y =global_framebuffer.mouse_y;  
+               nextev.evtype = FBVNC_EVENT_TS_UP;
+               next_mb=0;
+               mouse_button=4;
+               retval=FBVNC_EVENT_TS_DOWN;
+            }
+            else if(iev.code == KEY_BLUE)
+            {
+               if(!iev.value)
+                  RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
+               toggle_keyboard();
+            }
+            else if(iev.code == BTN_LEFT)
+            {
+               if(!iev.value) // key pressed event
+					{
+                  mouse_button |= 1;
+                  retval=FBVNC_EVENT_TS_DOWN;
+					}
 					else
-						step=5;
-				}
-			}
-			else
-			{
-				if(countevt>0)
-				{
-					// for othe rkeys reject because of prelling
-					RetEvent(FBVNC_EVENT_NULL);
-				}
-			}
-			// codes
-			if(iev.code == KEY_HOME)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				retval = FBVNC_EVENT_QUIT;
-			}
-			if(iev.code == KEY_TOPLEFT || iev.code == KEY_TOPRIGHT || iev.code == KEY_UP)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				if(global_framebuffer.mouse_y == 0 && global_framebuffer.v_y0==0)
-				{
-					RetEvent(FBVNC_EVENT_NULL);
-				}
-				if(!rc_pan)
-					global_framebuffer.mouse_y -= step;
-				else
-					rc_dy	= step;
-				if(global_framebuffer.mouse_y <0)
-				{
-					if(step < STEP_PAN)
-						step=STEP_PAN;
-					if(global_framebuffer.v_y0<step)
-						step=global_framebuffer.v_y0;
-					global_framebuffer.mouse_y = 0;
-					rc_dy = step;
-					ev->key = hbtn.pan;
-					retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
-
-					nextev.key = hbtn.pan;
-					nextev.x = global_framebuffer.mouse_x;
-					nextev.y = global_framebuffer.mouse_y;
-					nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
-				}
-				else
+					{
+						mouse_button &= ~1;
+                  retval=FBVNC_EVENT_TS_UP;
+               }
+            }
+            else if(iev.code == BTN_RIGHT)
+            {
+               if(!iev.value) // key pressed event
+					{
+                  mouse_button |= 2;
+					}
+					else
+					{
+						mouse_button &= ~2;
+               }
 					retval=FBVNC_EVENT_TS_MOVE;
-			}
-			if(iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize &&
-					global_framebuffer.v_y0 + global_framebuffer.pv_ysize >= global_framebuffer.v_ysize)
-				{
-					RetEvent(FBVNC_EVENT_NULL);
-				}
-				if(!rc_pan)
-					global_framebuffer.mouse_y += step;
-				else
-					rc_dy	=-step;
-				if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize)
-				{
-					if(step < STEP_PAN)
-						step=STEP_PAN;
-					if((global_framebuffer.v_ysize - global_framebuffer.v_y0 - global_framebuffer.pv_ysize) < step)
-						step=(global_framebuffer.v_ysize - global_framebuffer.v_y0 - global_framebuffer.pv_ysize);
-					global_framebuffer.mouse_y = global_framebuffer.pv_ysize - 1;
-					rc_dy = -step;
-					ev->key = hbtn.pan;
-					retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
-
-					nextev.key = hbtn.pan;
-					nextev.x = global_framebuffer.mouse_x;
-					nextev.y = global_framebuffer.mouse_y;
-					nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
-				}
-				else
+            }
+            else if(iev.code == BTN_MIDDLE)
+            {
+               if(!iev.value) // key pressed event
+					{
+                  mouse_button |= 4;
+					}
+					else
+					{
+						mouse_button &= ~4;
+               }
 					retval=FBVNC_EVENT_TS_MOVE;
-			}
-			if(iev.code == KEY_TOPLEFT || iev.code == KEY_BOTTOMLEFT || iev.code == KEY_LEFT)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				if(global_framebuffer.mouse_x == 0 && global_framebuffer.v_x0==0)
-				{
-					RetEvent(FBVNC_EVENT_NULL);
-				}
-				if(!rc_pan)
-					global_framebuffer.mouse_x -= step;
-				else
-					rc_dx	=step;
-				if(global_framebuffer.mouse_x <0)
-				{
-					if(step < STEP_PAN)
-						step=STEP_PAN;
-					if(global_framebuffer.v_x0<step)
-						step=global_framebuffer.v_x0;
-					global_framebuffer.mouse_x = 0;
-					rc_dx = step;
-					ev->key = hbtn.pan;
-					retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+            }
+            else
+            {
+               ev->key = iev.code;
+               if(iev.value == 0) //KEY RELEASE
+                  retval = FBVNC_EVENT_BTN_UP;
+               else // KEY PRESS
+                  retval=FBVNC_EVENT_BTN_DOWN;
+            }
 
-					nextev.key = hbtn.pan;
-					nextev.x = global_framebuffer.mouse_x;
-					nextev.y = global_framebuffer.mouse_y;
-					nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
-				}
-				else
-					retval=FBVNC_EVENT_TS_MOVE;
-			}
-			if(iev.code == KEY_TOPRIGHT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_RIGHT)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				if(global_framebuffer.mouse_x >= global_framebuffer.pv_xsize &&
-					global_framebuffer.v_x0 + global_framebuffer.pv_xsize >= global_framebuffer.v_xsize)
-				{
-					RetEvent(FBVNC_EVENT_NULL);
-				}
-				if(!rc_pan)
-					global_framebuffer.mouse_x += step;
-				else
-					rc_dx	=-step;
-				if(global_framebuffer.mouse_x >= global_framebuffer.pv_xsize)
-				{
-					if(step < STEP_PAN)
-						step=STEP_PAN;
-					if((global_framebuffer.v_xsize - global_framebuffer.v_x0 - global_framebuffer.pv_xsize) < step)
-						step=(global_framebuffer.v_xsize - global_framebuffer.v_x0 - global_framebuffer.pv_xsize);
-					global_framebuffer.mouse_x = global_framebuffer.pv_xsize - 1;
-					rc_dx = -step;
-					ev->key = hbtn.pan;
-					retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+            // action
+            ev->x =global_framebuffer.mouse_x;
+            ev->y =global_framebuffer.mouse_y;
+            ev->dx=rc_dx;
+            ev->dy=rc_dy;
+            rc_dx = rc_dy = 0;
+            dprintf("Event x:%d/y:%d (%d) dx:%d/dy:%d [%d]\n",ev->x,ev->y,mouse_button,ev->dx,ev->dy,countevt);
+            RetEvent(retval);
+         }
+         else if(iev.type == EV_REL)
+         {
+            retval=FBVNC_EVENT_TS_MOVE;
+            if(iev.code == REL_X)
+            {
+               if (iev.value < 0) //Up
+               {
+						if(global_framebuffer.mouse_y == 0 && global_framebuffer.v_y0==0)
+                  {
+                     RetEvent(FBVNC_EVENT_NULL);
+                  }
+                  if(!rc_pan)
+                  {
+							global_framebuffer.mouse_y += iev.value;
+							if(global_framebuffer.mouse_y <0)
+                     {
+                        if(global_framebuffer.v_y0< (int)(-iev.value))
+                           rc_dy=global_framebuffer.v_y0;
+                        else
+                           rc_dy=(-iev.value);
+                        global_framebuffer.mouse_y = 0;
+                        ev->key = hbtn.pan;
+                        retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
 
-					nextev.key = hbtn.pan;
-					nextev.x = global_framebuffer.mouse_x;
-					nextev.y = global_framebuffer.mouse_y;
-					nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
-				}
-				else
-					retval=FBVNC_EVENT_TS_MOVE;
-			}
-			else if(iev.code == KEY_HELP)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				if(mouse_button > 0)
-				{
-					mouse_button=0;
-					retval=FBVNC_EVENT_TS_UP;
-				}
-				else
-				{
-					mouse_button=1;
-					retval=FBVNC_EVENT_TS_DOWN;
-				}
-			}
-			else if(iev.code == KEY_MUTE)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				ev->key = hbtn.pan;
-				if(rc_pan)
-					retval=FBVNC_EVENT_BTN_UP;
-				else
-					retval=FBVNC_EVENT_BTN_DOWN;
-				rc_pan=!rc_pan;
-			}
-			else if(iev.code == KEY_VOLUMEDOWN)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
-				retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_OUT | FBVNC_EVENT_TS_MOVE);
-			}
-			else if(iev.code == KEY_VOLUMEUP)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
-				retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_IN | FBVNC_EVENT_TS_MOVE);
-			}
-			else if(iev.code == KEY_OK)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				nextev.x =global_framebuffer.mouse_x;
-				nextev.y =global_framebuffer.mouse_y;  
-				nextev.evtype = FBVNC_EVENT_TS_UP;
-				next_mb=0;
-				mouse_button=1;
-				retval=FBVNC_EVENT_TS_DOWN;
-			}
-			else if(iev.code == KEY_RED)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				retval=FBVNC_EVENT_DCLICK;				
-			}
-			else if(iev.code == KEY_GREEN)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				nextev.x =global_framebuffer.mouse_x;
-				nextev.y =global_framebuffer.mouse_y;  
-				nextev.evtype = FBVNC_EVENT_TS_UP;
-				next_mb=0;
-				mouse_button=2;
-				retval=FBVNC_EVENT_TS_DOWN;
-			}
-			else if(iev.code == KEY_YELLOW)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				nextev.x =global_framebuffer.mouse_x;
-				nextev.y =global_framebuffer.mouse_y;  
-				nextev.evtype = FBVNC_EVENT_TS_UP;
-				next_mb=0;
-				mouse_button=4;
-				retval=FBVNC_EVENT_TS_DOWN;
-			}
-			else if(iev.code == KEY_BLUE)
-			{
-				if(!iev.value)
-					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
-				toggle_keyboard();
-			}
-			else if (iev.code != KEY_TOPLEFT && iev.code != KEY_TOPRIGHT && iev.code != KEY_UP &&
-						iev.code != KEY_BOTTOMLEFT && iev.code != KEY_BOTTOMRIGHT && iev.code != KEY_DOWN &&
-						iev.code != KEY_LEFT && iev.code != KEY_RIGHT && iev.code != KEY_HOME)
+                        nextev.key = hbtn.pan;
+                        nextev.x = global_framebuffer.mouse_x;
+                        nextev.y = global_framebuffer.mouse_y;
+                        nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+                     }
+                  }
+                  else
+                     rc_dy	= (-iev.value);
+               }
+               else //Down
+               {
+                  if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize &&
+                     global_framebuffer.v_y0 + global_framebuffer.pv_ysize >= global_framebuffer.v_ysize)
+                  {
+                     RetEvent(FBVNC_EVENT_NULL);
+                  }
+                  if(!rc_pan)
+                  {
+                     global_framebuffer.mouse_y += iev.value;
+                     if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize)
+                     {
+                        if((global_framebuffer.v_ysize - global_framebuffer.v_y0 - global_framebuffer.pv_ysize) < (int) iev.value)
+                           rc_dy=-(global_framebuffer.v_ysize - global_framebuffer.v_y0 - global_framebuffer.pv_ysize);
+                        else
+                           rc_dy=-(iev.value);
+                        global_framebuffer.mouse_y = global_framebuffer.pv_ysize - 1;
+                        ev->key = hbtn.pan;
+                        retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
 
-			{
-				ev->key = iev.code;
-				if(iev.value == 0) //KEY RELEASE
-				{
-					retval = FBVNC_EVENT_BTN_UP;
-					if(!btn_state[iev.code])
-						retval = (fbvnc_event) (retval | FBVNC_EVENT_BTN_DOWN);
+                        nextev.key = hbtn.pan;
+                        nextev.x = global_framebuffer.mouse_x;
+                        nextev.y = global_framebuffer.mouse_y;
+                        nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+                     }
+                  }
+                  else
+                     rc_dy	= iev.value;
+               }
+            }
+            else if(iev.code == REL_Y)
+            {
+               if (iev.value < 0) //Left
+					{
+						if(global_framebuffer.mouse_x == 0 && global_framebuffer.v_x0==0)
+						{
+							RetEvent(FBVNC_EVENT_NULL);
+						}
+						if(!rc_pan)
+						{
+							global_framebuffer.mouse_x += iev.value;
+							if(global_framebuffer.mouse_x <0)
+							{
+								if(global_framebuffer.v_x0< (-(int)iev.value))
+									rc_dx=global_framebuffer.v_x0;
+								else
+									rc_dx = (-iev.value);
+								global_framebuffer.mouse_x = 0;
+								ev->key = hbtn.pan;
+								retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
 
+								nextev.key = hbtn.pan;
+								nextev.x = global_framebuffer.mouse_x;
+								nextev.y = global_framebuffer.mouse_y;
+								nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+							}
+						}
+						else
+							rc_dx	=step;
+					}
+					else /* Right */
+					{
+						if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize &&
+							global_framebuffer.v_y0 + global_framebuffer.pv_ysize >= global_framebuffer.v_ysize)
+						{
+							RetEvent(FBVNC_EVENT_NULL);
+						}
+						if(!rc_pan)
+						{
+							global_framebuffer.mouse_x += iev.value;
+							if(global_framebuffer.mouse_x >= global_framebuffer.pv_xsize)
+							{
+								if((global_framebuffer.v_xsize - global_framebuffer.v_x0 - global_framebuffer.pv_xsize) < (int)iev.value)
+									rc_dx=-(global_framebuffer.v_xsize - global_framebuffer.v_x0 - global_framebuffer.pv_xsize);
+								else
+									rc_dx=-(iev.value);
+								global_framebuffer.mouse_x = global_framebuffer.pv_xsize - 1;
+								ev->key = hbtn.pan;
+								retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+								
+								nextev.key = hbtn.pan;
+								nextev.x = global_framebuffer.mouse_x;
+								nextev.y = global_framebuffer.mouse_y;
+								nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+							}
+						}
+						else
+							rc_dy	= iev.value;
+					}
 				}
-				else // KEY PRESS
-					retval=FBVNC_EVENT_BTN_DOWN;
-			}
+            else
+               retval=FBVNC_EVENT_NULL;
 
-			// action
-			ev->x =global_framebuffer.mouse_x;
-			ev->y =global_framebuffer.mouse_y;
-			ev->dx=rc_dx;
-			ev->dy=rc_dy;
-
-			if(retval & FBVNC_EVENT_TS_MOVE)
-				rc_dx = rc_dy = 0;
-			dprintf("Event x:%d/y:%d (%d) dx:%d/dy:%d [%d]\n",ev->x,ev->y,mouse_button,ev->dx,ev->dy,countevt);
-			RetEvent(retval);
-		}
-		else
-			RetEvent(FBVNC_EVENT_NULL);
+            ev->x =global_framebuffer.mouse_x;
+            ev->y =global_framebuffer.mouse_y;
+            ev->dx = rc_dx;
+            ev->dy = rc_dy;
+         }
+      }
+      else
+         RetEvent(FBVNC_EVENT_NULL);
 	}
 	for(i=0; i<num_write_fds; i++)
 	{
