@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.1 2002/04/04 19:36:49 obi Exp $
+ * $Id: pmt.cpp,v 1.2 2002/04/04 21:26:08 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -60,7 +60,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 
 	if ((stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06) && ap_count < max_num_apids)
 	{
-		ret_pids->apids[ap_count].component_tag = -1;
+		ret_pids->apids[ap_count].component_tag = 0;
 		ret_pids->apids[ap_count].is_ac3 = false;
 		ret_pids->apids[ap_count].desc[0] = 0;
 	}

@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.116 2002/04/04 19:36:49 obi Exp $
+  $Id: zapit.cpp,v 1.117 2002/04/04 21:26:08 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -93,6 +93,9 @@
 
 
 $Log: zapit.cpp,v $
+Revision 1.117  2002/04/04 21:26:08  obi
+some more code sorting
+
 Revision 1.116  2002/04/04 19:36:49  obi
 some code sorting
 
@@ -193,11 +196,10 @@ extern short curr_sat;
 extern short scan_runs;
 
 /* videotext */
-boolean use_vtxtd = false;
+bool use_vtxtd = false;
 int vtxt_pid;
 
 void start_scan();
-volatile sig_atomic_t keep_going = 1; /* controls program termination */
 
 void sendBouquetList();
 void sendChannelListOfBouquet( uint nBouquet);
@@ -305,166 +307,6 @@ int set_vtxt (uint16_t teletext_pid)
 	return 0;
 }
 #endif /* DVBS */
-
-#ifndef USE_EXTERNAL_CAMD
-int _writecamnu (uint8_t cmd, uint8_t *data, uint8_t len)
-{
-	int camfd;
-	uint8_t buffer[256];
-	int csum = 0;
-	int i;
-	int pt;
-	struct pollfd cam_pfd;
-	bool output = false;
-
-	if((camfd = open(CAM_DEV, O_RDWR)) < 0)
-	{
-		perror("[zapit] " CAM_DEV);
-		close(camfd);
-		return -1;
-	}
-
-	buffer[0] = 0x6E;
-	buffer[1] = 0x50;
-	buffer[2] = (len + 1) | ((cmd != 0x23) ? 0x80 : 0);
-	buffer[3] = cmd;
-
-	memcpy(buffer + 4, data, len);
-
-	len += 4;
-
-	for (i = 0; i < len; i++)
-		csum ^= buffer[i];
-
-	buffer[len++]=csum;
-
-	if (write(camfd, buffer + 1, len - 1) <= 0)
-	{
-		perror("[zapit] cam write");
-		close(camfd);
-		return -1;
-	}
-
-	if (buffer[4] == 0x03)
-	{
-		close(camfd);
-		return 0; // Let get_caid read the caid;
-	}
-
-#if 0
-	if (buffer[4] == 0x84)
-	{
-  		close(camfd);
-		return; //Setting emmpid. No answer expected.
-	}
-#endif
-
-	if (buffer[4] == 0x0d)
-		output = true;
-
-	if ((output) && (debug))
-	{
-		printf("[zapit] sending to cam: ");
-		for (i = 0; i < len; i++) printf("%02X ", buffer[i]);
-		printf("\n");
-	}
-
-	cam_pfd.fd = camfd;
-	cam_pfd.events = POLLIN;
-	cam_pfd.revents = 0;
-
-	pt = poll(&cam_pfd, 1, 2000);
-
-	if (!pt)
-	{
-		debug("[zapit] Read cam. Poll timeout\n");
-		close(camfd);
-		return -1;
-	}
-
-	if (read(camfd, &buffer, sizeof(buffer)) < 0)
-	{
-		perror("[zapit] cam read");
-		close(camfd);
-		return -1;
-	}
-
-	if ((output) && (debug))
-	{
-		printf("[zapit] cam returned: ");
-		for (i = 0; i < buffer[2] + 4; i++) printf("%02X ", buffer[i]);
-		printf("\n");
-	}
-
-	close(camfd);
-	return 0;
-}
-
-int writecam (uint8_t *data, uint8_t len)
-{
-	return _writecamnu(0x23, data, len);
-}
-
-int descramble (uint16_t original_network_id, uint16_t service_id, uint16_t unknown, uint16_t ca_system_id, uint16_t ecm_pid, pids *decode_pids)
-{
-	uint8_t buffer[100];
-	uint8_t i;
-	uint8_t p;
-
-	buffer[0] = 0x0D;
-	buffer[1] = original_network_id >> 8;
-	buffer[2] = original_network_id & 0xFF;
-	buffer[3] = service_id >> 8;
-	buffer[4] = service_id & 0xFF;
-	buffer[5] = unknown >> 8;
-	buffer[6] = unknown & 0xFF;
-	buffer[7] = ca_system_id >> 8;
-	buffer[8] = ca_system_id & 0xFF;
-	buffer[9] = ecm_pid >> 8;
-	buffer[10] = ecm_pid & 0xFF;
-	buffer[11] = decode_pids->count_vpids + decode_pids->count_apids;
-
-	p = 12;
-
-	for(i = 0; i < decode_pids->count_vpids; i++)
-  	{
-		buffer[p++] = decode_pids->vpid >> 8;
-		buffer[p++] = decode_pids->vpid & 0xFF;
-		buffer[p++] = 0x80;
-		buffer[p++] = 0;
-	}
-
-	for(i = 0; i < decode_pids->count_apids; i++)
-	{
-		buffer[p++] = decode_pids->apids[i].pid >> 8;
-		buffer[p++] = decode_pids->apids[i].pid & 0xFF;
-		buffer[p++] = 0x80;
-		buffer[p++] = 0;
-	}
-
-	return writecam(buffer, p);
-}
-
-int cam_reset ()
-{
-	uint8_t buffer[1];
-	buffer[0] = 0x9;
-	return writecam(buffer, sizeof(buffer));
-}
-
-int setemm (uint16_t unknown, uint16_t ca_system_id, uint16_t emm_pid)
-{
-	uint8_t buffer[7];
-	buffer[0] = 0x84;
-	buffer[1] = unknown >> 8;
-	buffer[2] = unknown & 0xFF;
-	buffer[3] = ca_system_id >> 8;
-	buffer[4] = ca_system_id & 0xFF;
-	buffer[5] = emm_pid >> 8;
-	buffer[6] = emm_pid & 0xFF;
-	return writecam(buffer, sizeof(buffer));
-}
-#endif /* USE_EXTERNAL_CAMD */
 
 int save_settings()
 {
@@ -808,9 +650,9 @@ int zapit (uint onid_sid, bool in_nvod)
 			sprintf(vpidbuf, "%x", Vpid);
 			sprintf(apidbuf, "%x", Apid);
 			sprintf(pmtpidbuf, "%x", Pmt);
-			if (execlp("camd", "camd", vpidbuf, apidbuf, pmtpidbuf, NULL) < 0)
+			if (execlp("/bin/camd", "camd", vpidbuf, apidbuf, pmtpidbuf, NULL) < 0)
 			{
-				perror("[zapit] camd");
+				perror("[zapit] execlp");
 				exit(0);
 			}
 			break;
@@ -819,7 +661,7 @@ int zapit (uint onid_sid, bool in_nvod)
 			break;
 		}
 #else
-		if ((cit->second.ecmpid > 0) && (cit->second.ecmpid < no_ecmpid_found))
+		if ((cit->second.ecmpid > 0x0000) && (cit->second.ecmpid < 0x1FFF))
 		{
 			decode_vals *vals = (decode_vals*) malloc(sizeof(decode_vals));
 			vals->onid = cit->second.onid;
@@ -1333,9 +1175,9 @@ void endzap()
 
 int shutdownBox()
 {
-	if (execlp("/sbin/halt", "/sbin/halt", 0) < 0)
+	if (execlp("/sbin/halt", "halt", NULL) < 0)
 	{
-		perror("[zapit] unable to execute halt");
+		perror("[zapit] execlp");
 		return -1;
 	}
 	return 0;
@@ -1346,21 +1188,16 @@ int sleepBox()
 	int device;
 	if((device = open(FRONT_DEV, O_RDWR)) < 0)
 	{
-		perror("[zapit] unable to open frontend device");
+		perror("[zapit] " FRONT_DEV);
 		return -4;
 	}
 
-#ifdef OLD_TUNER_API
-	if (ioctl(device, OST_SET_POWER_STATE, OST_POWER_SUSPEND) != 0)
-#else
 	if (ioctl(device, FE_SET_POWER_STATE, FE_POWER_SUSPEND) != 0)
-#endif
 	{
-		perror("[zapit] unable to set suspend-mode");
+		perror("[zapit] FE_SET_POWER_STATE");
 		return -4;
 	}
 
-	// why 4 or -4? - obi
 	return(4);
 }
 
@@ -2466,7 +2303,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.116 2002/04/04 19:36:49 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.117 2002/04/04 21:26:08 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2619,7 +2456,7 @@ int main (int argc, char **argv)
 	// create eventServer
 	eventServer = new CEventServer;
 
-	while (keep_going)
+	while (true)
 	{
 		connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
 		memset(&rmsg, 0, sizeof(rmsg));
