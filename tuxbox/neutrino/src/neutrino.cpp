@@ -86,6 +86,7 @@
 #include "gui/scan.h"
 #include "gui/favorites.h"
 #include "gui/sleeptimer.h"
+#include "gui/rc_lock.h"
 #include "gui/dboxinfo.h"
 #include "gui/timerlist.h"
 #include "gui/alphasetup.h"
@@ -2349,6 +2350,9 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	// -- Add Channel to favorites
 	StreamFeatureSelector.addItem(new CMenuForwarder("favorites.menueadd", true, NULL, new CFavorites, id, true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
+
+	// --  Lock remote control
+	StreamFeatureSelector.addItem(new CMenuForwarder("rclock.menueadd", true, NULL, new CRCLock, id, true, CRCInput::RC_nokey, ""), false);
 
 	// start/stop recording
 	if(g_settings.recording_type > 0)
