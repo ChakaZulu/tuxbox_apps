@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.102 2003/04/30 17:01:36 digi_casi Exp $
+ * $Id: scan.cpp,v 1.103 2003/05/05 08:22:59 mws Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -39,6 +39,8 @@ short scan_runs;
 short curr_sat;
 static int status = 0;
 uint processed_transponders;
+uint32_t actual_freq;
+uint8_t actual_polarisation;
 
 
 CBouquetManager* scanBouquetManager;
@@ -149,6 +151,11 @@ int get_sdts(void)
 			continue;
 
 		INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
+
+			actual_freq = tI->second.feparams.frequency;
+ 			eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &actual_freq,sizeof(actual_freq));
+ 			actual_polarisation = tI->second.polarization;
+ 			eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCYP,CEventServer::INITID_ZAPIT,&actual_polarisation,sizeof(actual_polarisation));
 
 		parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
 	}
@@ -312,7 +319,7 @@ void *start_scanthread(void *)
 
 	char providerName[32];
 	char *type;
-	
+
 	uint8_t diseqc_pos = 0;
 	uint8_t polarization = 0;
 
@@ -320,6 +327,11 @@ void *start_scanthread(void *)
 
 	scanBouquetManager = new CBouquetManager();
 	processed_transponders = 0;
+ 	found_tv_chans = 0;
+ 	found_radio_chans = 0;
+ 	found_data_chans = 0;
+
+
 	curr_sat = 0;
 
         if ((type = getFrontendName()) == NULL)
