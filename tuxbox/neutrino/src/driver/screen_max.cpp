@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/screen_max.cpp,v 1.2 2004/03/17 22:41:44 rasc Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/screen_max.cpp,v 1.3 2004/03/17 22:56:08 rasc Exp $
  *
  * -- some odd module to calc max. screen usage of an menue
  * -- this should be somewhere else (neutrino needs redesign)
@@ -24,6 +24,8 @@
 // usage:  e.g.  try to paint menue h: 500 w, 400  (but screen is limited
 //         to (450 x 420)), functions will return 450 and 400
 //         the _add factor is for boundary...
+//
+//         16:9 Zoom-Mode on a Thomson TV set will e.g. be 625x415
 //
 //  2004-03-17 rasc
 

@@ -81,8 +81,6 @@ CChannelList::CChannelList( const std::string &Name )
 	selected = 0;
 	// width = 560;
 	// height = 420 + (1 + 3 + 16 + 3);
-	width  = w_max (560, 0);
-	height = h_max (420 + (1+3+16+3), 60);
 	
 	liststart = 0;
 	tuned=0xfffffff;
@@ -207,6 +205,10 @@ int CChannelList::show()
 	neutrino_msg_data_t data;
 
 	int res = -1;
+
+	width  = w_max (560, 0);
+	height = h_max (420 + (1+3+16+3), 60);
+
 
 	if (chanlist.empty())
 	{

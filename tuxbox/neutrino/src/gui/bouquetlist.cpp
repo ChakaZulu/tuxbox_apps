@@ -57,8 +57,7 @@ CBouquetList::CBouquetList()
 	selected    =   0;
 	//width       = 500;
 	//height      = 440;
-	width  = w_max (500, 0);
-	height = h_max (440, 40);
+
 	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
@@ -172,6 +171,11 @@ int CBouquetList::show()
 	neutrino_msg_data_t data;
 
 	int res = -1;
+
+	width  = w_max (500, 0);
+	height = h_max (440, 40);
+
+
 	if(Bouquets.size()==0)
 	{
 		return res;
