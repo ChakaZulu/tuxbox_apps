@@ -1,0 +1,11 @@
+<form name="swapfileconfig">
+	<table border=0 cellspacing=5 cellpadding=0>
+		<tr>
+			<td><input type="checkbox" name="swap" value="on" #SWAP#></td>
+			<td>Use Swap File:</td>
+			<td><input style="color: #000000" name="swapfile" type="text" size="50" maxlength="50" value="#SWAPFILE#"></td>
+		</tr>
+	</table>
+	<br>
+	<input type="button" style="width:100px; height:22px; color:#000000;" value="Configure" onClick="javascript:configSwapFile()">
+</form>

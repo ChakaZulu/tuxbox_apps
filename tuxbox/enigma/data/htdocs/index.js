@@ -118,12 +118,12 @@ function selectSubChannel()
 	NewWindow("/cgi-bin/selectSubChannel", "subchannel", "200", "100", "no");
 }
 
-function configUSB()
+function configSwapFile()
 {
-	document.location = "/cgi-bin/setConfigUSB?swapusb="+usbconfig.swapusb.value+"&swapusbfile="+usbconfig.swapusbfile.value;
+	document.location = "/cgi-bin/setConfigSwapFile?swap="+swapfileconfig.swap.value+"&swapfile="+swapfileconfig.swapfile.value;
 }
 
-function configHDD()
+function selectImage(Image)
 {
-	document.location = "/cgi-bin/setConfigHDD?swaphdd="+hddconfig.swaphdd.value+"&swaphddfile="+hddconfig.swaphddfile.value;	
+	document.location = "/cgi-bin/setConfigMultiBoot?image="+image;	
 }

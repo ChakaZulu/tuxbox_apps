@@ -52,7 +52,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.4.1"
+#define WEBXFACEVERSION "1.4.2"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -823,9 +823,9 @@ static eString getLeftNavi(eString mode, eString path)
 	{
 		result += button(110, "Mount Manager", LEFTNAVICOLOR, "?mode=configMountMgr");
 		result += "<br>";
-		result += button(110, "HDD", LEFTNAVICOLOR, "?mode=configHDD");
+		result += button(110, "Swap File", LEFTNAVICOLOR, "?mode=configSwapFile");
 		result += "<br>";
-		result += button(110, "USB", LEFTNAVICOLOR, "?mode=configUSB");
+		result += button(110, "Multi-Boot", LEFTNAVICOLOR, "?mode=configMultiBoot");
 		result += "<br>";
 	}
 	else
@@ -2087,41 +2087,37 @@ static eString showTimerList(eString request, eString dirpath, eString opt, eHTT
 #endif
 
 #ifndef DISABLE_FILE
-eString getConfigUSB(void)
+eString getConfigSwapFile(void)
 {
 	eString result;
-	result = "<table border=0 cellspacing=0 cellpadding=0>"
-		 + getUSBInfo()
-		 + "</table>"
-		 + "<br>"
-		 + readFile(TEMPLATE_DIR + "configUSB.tmp");
+	result = readFile(TEMPLATE_DIR + "configSwapFile.tmp");
 
 	int swapfile = 0;
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
 	char *swapfilename;
 	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
 		swapfilename = "";
-	result.strReplace("#SWAPUSB#", (swapfile == 1) ? "checked" : "");
-	result.strReplace("#USBSWAPFILE#", (swapfile == 1) ? eString(swapfilename) : "none");
+	result.strReplace("#SWAP#", (swapfile == 1) ? "checked" : "");
+	result.strReplace("#SWAPFILE#", (swapfile == 1) ? eString(swapfilename) : "none");
 	return result;
 }
 
-eString getConfigHDD(void)
+eString getConfigMultiBoot(void)
 {
 	eString result;
-	result = "<table border=0 cellspacing=0 cellpadding=0>"
-		 + getDiskInfo()
-		 + "</table>"
-		 + "<br>"
-		 + readFile(TEMPLATE_DIR + "configHDD.tmp");
+	if (dreamFlashIsInstalled())
+	{
+		result = readFile(TEMPLATE_DIR + "configMultiBoot.tmp");
+		eString dreamFlashVersion = getAttribute("/var/mnt/usb/lcdmenu.conf", "version");
+		if (dreamFlashVersion == "&nbsp;")
+			dreamFlashVersion = "not installed";
+		result.strReplace("#DREAMFLASHVERSION#", dreamFlashVersion);
+		result.strReplace("#IMAGES#", getInstalledImages());
+		result.strReplace("#REBOOTBUTTON#", button(110, "Reboot", RED, "javascript:admin(\'/cgi-bin/admin?command=reboot\')"));
+	}
+	else
+		result = "DreamFlash plugin is required for this function but not installed.";
 
-	int swapfile = 0;
-	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
-	char *swapfilename;
-	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
-		swapfilename = "";
-	result.strReplace("#SWAPHDD#", (swapfile == 2) ? "checked" : "");
-	result.strReplace("#HDDSWAPFILE#", (swapfile == 2) ? eString(swapfilename) : "none");
 	return result;
 }
 #endif
@@ -2245,16 +2241,16 @@ static eString getContent(eString mode, eString path)
 	else
 #endif
 #ifdef ENABLE_DYN_CONF
-	if (mode == "configHDD")
+	if (mode == "configSwapFile")
 	{
-		result = getTitle("CONFIG: HDD");
-		result += getConfigHDD();
+		result = getTitle("CONFIG: Swap File");
+		result += getConfigSwapFile();
 	}
 	else
-	if (mode == "configUSB")
+	if (mode == "configMultiBoot")
 	{
-		result = getTitle("CONFIG: USB");
-		result += getConfigUSB();
+		result = getTitle("CONFIG: Multi-Boot");
+		result += getConfigMultiBoot();
 	}
 	else
 #endif

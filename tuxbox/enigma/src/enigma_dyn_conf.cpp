@@ -40,8 +40,56 @@
 #include <enigma_dyn.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_conf.h>
+#include <configfile.h>
 
 using namespace std;
+
+bool dreamFlashIsInstalled(void)
+{
+	return ((access("/var/mnt/usb/tools/lcdmenu.conf", R_OK) == 0)
+		&& (access("/var/mnt/usb/tools/lcdmenu", X_OK) == 0)
+		&& (access("/var/mnt/usb/tools/menu", X_OK) == 0)
+		);	
+}
+
+eString getInstalledImages(void)
+{
+	eString result;
+	eString image;
+	unsigned int pos = 0;
+	int i = 0;
+	eString dreamFlashImages = getAttribute("/var/mnt/usb/lcdmenu.conf", "menu_items");
+	eString activeImage = getAttribute("/var/mnt/usb/lcdmenu.conf", "default_entry");
+	if (dreamFlashImages.length() > 0)
+		dreamFlashImages = dreamFlashImages.substr(0, dreamFlashImages.length() - 1); //remove last comma
+	while (dreamFlashImages.length() > 0)
+	{
+		if ((pos = dreamFlashImages.find(",")) != eString::npos)
+		{
+			image = dreamFlashImages.substr(0, pos);
+			dreamFlashImages = dreamFlashImages.substr(pos + 1);
+		}
+		else
+		{
+			image = dreamFlashImages;
+			dreamFlashImages = "";
+		}
+		result += "<tr>";
+		result += "<td>";
+		if (i == atoi(activeImage.c_str()))
+			result += "<img src=\"on.gif\" alt=\"online\" border=0>";
+		else
+			result += "<img src=\"off.gif\" alt=\"offline\" border=0>";
+		result += "</td>";
+		result += "<td>";
+		result += button(100, "Select", GREEN, "javascript:selectImage('" + eString().sprintf("%d", i) + "')");
+		result += "</td>";
+		result += "</tr>";
+		i++;
+	}
+	
+	return result;
+}
 
 void activateSwapFile(eString swapFile)
 {
@@ -61,68 +109,40 @@ void deactivateSwapFile(eString swapFile)
 
 void setSwapFile(int nextswapfile, eString nextswapfilename)
 {
-	int curswapfile = 0;
-	eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
-	char *curswapfilename;
-	if (eConfig::getInstance()->getKey("/extras/swapfilename", curswapfilename))
-		curswapfilename = "";
-
-	if (curswapfile != nextswapfile)
+	eConfig::getInstance()->setKey("/extras/swapfile", nextswapfile);
+	if (nextswapfile == 1)
 	{
-		if (curswapfile != 0)
-			deactivateSwapFile(eString(curswapfilename));
-
-		if (nextswapfile != 0)
-			activateSwapFile(nextswapfilename);
-		else
-			deactivateSwapFile(nextswapfilename);
-
-		eConfig::getInstance()->setKey("/extras/swapfile", nextswapfile);
 		eConfig::getInstance()->setKey("/extras/swapfilename", nextswapfilename.c_str());
-	}
-}
-
-eString setConfigUSB(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString swapUSB = opt["swapusb"];
-	eString swapUSBFile = opt["swapusbfile"];
-	eString bootUSB = opt["bootUSB"];
-	eString bootUSBImage = opt["bootusbimage"];
-
-	if (swapUSB == "on")
-	{
-		setSwapFile(1, swapUSBFile);
+		activateSwapFile(nextswapfilename);
 	}
 	else
-	{
-		int curswapfile = 0;
-		eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
-		if (curswapfile == 1)
-			setSwapFile(0, swapUSBFile);
-	}
+		deactivateSwapFile(nextswapfilename);
+}
+
+eString setConfigSwapFile(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString swap = opt["swap"];
+	eString swapFile = opt["swapfile"];
+
+	setSwapFile((swap == "on") ? 1 : 0, swapFile);
 
 	return closeWindow(content, "", 500);
 }
 
-eString setConfigHDD(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+eString setConfigMultiBoot(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString swapHDD = opt["swaphdd"];
-	eString swapHDDFile = opt["swaphddfile"];
-	eString bootHDD = opt["bootHDD"];
-	eString bootHDDImage = opt["boothddimage"];
+	eString imageNumber = opt["image"];
+	
+	CConfigFile *config = new CConfigFile(',');
+	if (config->loadConfig("/var/mnt/usb/tools/lcdmenu.conf"))
+	{
+		config->setString("default_entry", imageNumber);
+		config->setModifiedFlag(true);
+		config->saveConfig("/var/mnt/usb/tools/lcdmenu.conf");
 
-	if (swapHDD == "on")
-	{
-		setSwapFile(2, swapHDDFile);
-	}
-	else
-	{
-		int curswapfile = 0;
-		eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
-		if (curswapfile == 2)
-			setSwapFile(0, swapHDDFile);
+		delete(config);
 	}
 
 	return closeWindow(content, "", 500);
@@ -130,8 +150,8 @@ eString setConfigHDD(eString request, eString dirpath, eString opts, eHTTPConnec
 
 void ezapConfInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigHDD", setConfigHDD, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigSwapFile", setConfigSwapFile, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigMultiBoot", setConfigMultiBoot, lockWeb);
 }
 #endif
 #endif
