@@ -1,14 +1,14 @@
 ## iso-639.tab
 ##
-## Copyright (C) Alastair McKinstry   <mckinstry@computer.org> 
+## Copyright (C) 2004 Alastair McKinstry   <mckinstry@computer.org> 
 ## Released under the GNU License; see file COPYING for details
 ##
-## Last update: 2003-02-28
+## Last update: 2004-03-29
 ##
 ## This file gives a list of all languages in the ISO-639
 ## standard, and is used to provide translations (via gettext)
 ##
-## Status: ISO 639-2:1998 + additions and changes until 2003-02-25
+## Status: ISO 639-2:1998 + additions and changes until 2003-03-05
 ## Source: http://lcweb.loc.gov/standards/iso639-2/englangn.html
 ##
 ## Columns:
@@ -17,11 +17,16 @@
 ##   iso-639-1 code (XX if none exists)
 ##   Name (English)
 ##
+## Notes to translators:
+## Please translate Bøkmal using a-ring (U+00E5)
+## Please translate Proveçal using c-cedilla (U+00E7)
+##
 aar	aar	aa	Afar
 abk	abk	ab	Abkhazian
 ace	ace	XX	Achinese
 ach	ach	XX	Acoli
 ada	ada	XX	Adangme
+ady	ady	XX	Adyghe; Adygei
 afa	afa	XX	Afro-Asiatic (Other)
 afh	afh	XX	Afrihili
 afr	afr	af	Afrikaans
@@ -51,7 +56,7 @@ awa	awa	XX	Awadhi
 aym	aym	ay	Aymara
 aze	aze	az	Azerbaijani
 bad	bad	XX	Banda
-bai	bai	XX	Bamileke languages		
+bai	bai	XX	Bamileke languages
 bak	bak	ba	Bashkir
 bal	bal	XX	Baluchi
 bam	bam	bm	Bambara
@@ -79,6 +84,7 @@ bua	bua	XX	Buriat
 bug	bug	XX	Buginese
 bul	bul	bg	Bulgarian
 bur	mya	my	Burmese
+byn	byn	XX	Blin; Bilin
 cad	cad	XX	Caddo
 cai	cai	XX	Central American Indian (Other)
 car	car	XX	Carib
@@ -108,12 +114,16 @@ cpe	cpe	XX	English-based (Other)
 cpf	cpf	XX	French-based (Other)
 cpp	cpp	XX	Portuguese-based (Other)
 cre	cre	cr	Cree
+crh	crh	XX	Crimean Turkish; Crimean Tatar
 crp	crp	XX	Creoles and pidgins (Other)
+csb	csb	XX	Kashubian
 cus	cus	XX	Cushitic (Other)
 cus	cus	XX	Portuguese-based (Other)
 cze	ces	cs	Czech
-dak	dak	XX	Dakota	
+dak	dak	XX	Dakota
 dan	dan	da	Danish
+dar	dar	XX	Dargwa
+dsb	dsb	XX	Lower Sorbian
 del	del	XX	Delaware
 den	den	XX	Slave (Athapascan)
 dgr	dgr	XX	Dogrib
@@ -123,7 +133,7 @@ doi	doi	XX	Dogri
 dra	dra	XX	Dravidian (Other)
 dua	dua	XX	Duala
 dum	dum	XX	Dutch, Middle (ca. 1050-1350)
-dut	nld	nl	Dravidian (Other)
+dut	nld	nl	Dutch
 dyu	dyu	XX	Dyula
 dzo	dzo	dz	Dzongkha
 efi	efi	XX	Efik
@@ -173,16 +183,18 @@ grn	grn	gn	Guarani
 guj	guj	gu	Gujarati
 gwi	gwi	XX	Gwichin
 hai	hai	XX	Haida
+hat	hat	ht	Haitian; Haitian Creole
 hau	hau	ha	Hausa
 haw	haw	XX	Hawaiian
 heb	heb	he	Hebrew
-her	her	he	Herero
+her	her	hz	Herero
 hil	hil	XX	Hiligaynon
 him	him	XX	Himachali
 hin	hin	hi	Hindi
 hit	hit	XX	Hittite
 hmn	hmn	XX	Hmong
 hmo	hmo	ho	Hiri
+hsb	hsb	XX	Upper Sorbian
 hun	hun	hu	Hungarian
 hup	hup	XX	Hupa
 iba	iba	XX	Iban
@@ -204,6 +216,7 @@ ira	ira	XX	Iranian (Other)
 iro	iro	XX	Iroquoian languages
 ita	ita	it	Italian
 jav	jav	jv	Javanese
+jbo	jbo	XX	Lojban
 jpn	jpn	ja	Japanese
 jpr	jpr	XX	Judeo-Persian
 jrb	jrb	XX	Judeo-Arabic
@@ -233,6 +246,7 @@ kon	kon	kg	Kongo
 kor	kor	ko	Korean
 kos	kos	XX	Kosraean
 kpe	kpe	XX	Kpelle
+krc	krc	XX	Karachay-Balkar
 kro	kro	XX	Kru
 kru	kru	XX	Kurukh
 kua	kua	kj	Kuanyama
@@ -272,6 +286,7 @@ map	map	XX	Austronesian (Other)
 mar	mar	mr	Marathi
 mas	mas	XX	Masai
 may	msa	ms	Malay
+mdf	mdf	XX	Moksha
 mdr	mdr	XX	Mandar
 men	men	XX	Mende
 mga	mga	XX	Irish, Middle (900-1200)
@@ -292,13 +307,13 @@ mun	mun	XX	Munda languages
 mus	mus	XX	Creek
 mwr	mwr	XX	Marwari
 myn	myn	XX	Mayan languages
+myv	myv	XX	Erzya
 nah	nah	XX	Nahuatl
 nai	nai	XX	North American Indian (Other)
 nap	nap	XX	Neapolitan
 nau	nau	na	Nauru
 nav	nav	nv	Navaho
 nbl	nbl	nr	Ndebele, South
-nbl	nbl	nr	Soth Ndebele
 nde	nde	nd	Ndebele, North
 ndo	ndo	ng	Ndonga
 nds	nds	XX	German, Low
@@ -307,13 +322,14 @@ new	new	XX	Newari
 nia	nia	XX	Nias
 nic	nic	XX	Niger-Kordofanian (Other)
 niu	niu	XX	Niuean
-nno	nno	no	Norwegian Nyorsk
-nob	nob	nb	Bokmal, Norwegian
-nob	nob	nb	Norwegian Bokmal
+nno	nno	nn	Norwegian Nynorsk
+nob	nob	nb	Bøkmal, Norwegian
+nog	nog	XX	Nogai
 non	non	XX	Norse, Old
 nor	nor	no	Norwegian
 nso	nso	XX	Sotho, Northern
 nub	nub	XX	Nubian languages
+nwc	nwc	XX	Classical Newari; Old Newari
 nya	nya	ny	Chewa; Chichewa; Nyanja
 nym	nym	XX	Nyankole
 nyo	nyo	XX	Nyoro
@@ -339,9 +355,10 @@ phi	phi	XX	Philippine (Other)
 phn	phn	XX	Phoenician
 pli	pli	pi	Pali
 pol	pol	pl	Polish
+por	por	pt	Portuguese
 pon	pon	XX	Pohnpeian
 pra	pra	XX	Prakrit languages
-pro	pro	XX	Provencal, Old (to 1500)
+pro	pro	XX	Proveçal, Old (to 1500)
 pus	pus	ps	Pushto
 que	que	qu	Quechua
 raj	raj	XX	Rajasthani
@@ -350,7 +367,7 @@ rar	rar	XX	Rarotongan
 roa	roa	XX	Romance (Other)
 roh	roh	rm	Raeto-Romance
 rom	rom	XX	Romany
-rum	ron	ro	ROmanian
+rum	ron	ro	Romanian
 run	run	rn	Rundi
 rus	rus	ru	Russian
 sad	sad	XX	Sandawe
@@ -420,6 +437,7 @@ tig	tig	XX	Tigre
 tir	tir	ti	Tigrinya
 tiv	tiv	XX	Tiv
 tkl	tkl	XX	Tokelau
+tlh	tlh	XX	Klingon; tlhIngan-Hol
 tli	tli	XX	Tlinglit
 tmh	tmh	XX	Tamashek
 tog	tog	XX	Tonga (Nyasa)
@@ -435,12 +453,13 @@ tut	tut	XX	Altaic (Other)
 tvl	tvl	XX	Tuvalu
 twi	twi	tw	Twi
 tyv	tyv	XX	Tuvinian
+udm	udm	XX	Udmurt
 uga	uga	XX	Ugaritic
 uig	uig	ug	Uighur
 ukr	ukr	uk	Ukrainian
 umb	umb	XX	Umbundu
 und	und	XX	Undetermined
-urd	urd	XX	Urdu
+urd	urd	ur	Urdu
 uzb	uzb	uz	Uzbek
 vai	vai	XX	Vai
 ven	ven	ve	Venda
@@ -455,6 +474,7 @@ wel	cym	cy	Welsh
 wen	wen	XX	Sorbian languages
 wln	wln	wa	Walloon
 wol	wol	wo	Wolof
+xal	xal	XX	Kalmyk
 xho	xho	xh	Xhosa
 yao	yao	XX	Yao
 yap	yap	XX	Yapese
