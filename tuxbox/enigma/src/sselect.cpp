@@ -10,15 +10,16 @@
 #include "epgwindow.h"
 #include <list>
 
-eListboxEntryService::eListboxEntryService(eService &service, eListbox *listbox): eListboxEntry(listbox), service(service)
+eListboxEntryService::eListboxEntryService(eService *service, eListbox *listbox): eListboxEntry(listbox), service(service)
 {
+	bouquet=0;
 #if 0
-	sort=QString().sprintf("%06d", service.service_number);
+	sort=QString().sprintf("%06d", service->service_number);
 #else
 	sort="";
-	for (unsigned p=0; p<service.service_name.length(); p++)
+	for (unsigned p=0; p<service->service_name.length(); p++)
 	{
-		QChar ch=service.service_name[p];
+		QChar ch=service->service_name[p];
 		if (ch.unicode()<32)
 			continue;
 		if (ch.unicode()==0x86)
@@ -28,6 +29,12 @@ eListboxEntryService::eListboxEntryService(eService &service, eListbox *listbox)
 		sort+=ch;
 	}
 #endif
+}
+
+eListboxEntryService::eListboxEntryService(eBouquet *service, eListbox *listbox): eListboxEntry(listbox), bouquet(bouquet)
+{
+	service=0;
+	sort="";
 }
 
 eListboxEntryService::~eListboxEntryService()
@@ -42,38 +49,44 @@ QString eListboxEntryService::getText(int col=0) const
 		return sort;
 	case 0:
 	{
-		QString sname;
-		for (unsigned p=0; p<service.service_name.length(); p++)
+		if (service)
 		{
-			QChar ch=service.service_name[p];
-			if (ch.unicode()<32)
-				continue;
-			if (ch.unicode()==0x86)
-				continue;
-			if (ch.unicode()==0x87)
-				continue;
-			sname+=ch;
-		}
-		if (col==-1)
-			return sname;
-		EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service.original_network_id, service.service_id);
-		if (e)
-		{
-			for (QListIterator<Descriptor> d(e->descriptor); d.current(); ++d)
+			QString sname;
+			for (unsigned p=0; p<service->service_name.length(); p++)
 			{
-				Descriptor *descriptor=d.current();
-				if (descriptor->Tag()==DESCR_SHORT_EVENT)
-				{
-					ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
-					sname+=" (";
-					sname+=ss->event_name;
-					sname+=")";
-					break;
-				}
+				QChar ch=service->service_name[p];
+				if (ch.unicode()<32)
+					continue;
+				if (ch.unicode()==0x86)
+					continue;
+				if (ch.unicode()==0x87)
+					continue;
+				sname+=ch;
 			}
-			delete e;
+			EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service->original_network_id, service->service_id);
+			if (e)
+			{
+				for (QListIterator<Descriptor> d(e->descriptor); d.current(); ++d)
+				{
+					Descriptor *descriptor=d.current();
+					if (descriptor->Tag()==DESCR_SHORT_EVENT)
+					{
+						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
+						sname+=" (";
+						sname+=ss->event_name;
+						sname+=")";
+						break;
+					}
+				}
+				delete e;
+			}
+			return sname;
 		}
-		return sname;
+		if (bouquet)
+		{
+			return bouquet->bouquet_name.c_str();
+		}
+		return 0;
 	}
 	default:
 		return 0;
@@ -91,7 +104,7 @@ struct eServiceSelector_addService: public std::unary_function<eService&,void>
 	{
 		if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
 			return;
-		eListboxEntry *l=new eListboxEntryService(c, list);
+		eListboxEntry *l=new eListboxEntryService(&c, list);
 		if (&c==result)
 			list->setCurrent(l);
 	}
@@ -107,18 +120,22 @@ void eServiceSelector::fillServiceList()
 	list->invalidate();
 }
 
-void eServiceSelector::entrySelected(eListboxEntry *entry)
+void eServiceSelector::entrySelected(eListboxEntry *e)
 {
-	if (entry)
-		result=&(((eListboxEntryService*)entry)->service);
-	else
+	eListboxEntryService *entry=(eListboxEntryService*)e;
+	if (!entry)
 		result=0;
-	close(1);
+	else if (entry->service)
+	{
+		result=((eListboxEntryService*)entry)->service;
+		close(1);
+	} else if (entry->bouquet)
+		useBouquet(entry->bouquet);
 }
 
 void eServiceSelector::selchanged(eListboxEntry *entry)
 {
-	selected = &(((eListboxEntryService*)entry)->service);
+	selected = (((eListboxEntryService*)entry)->service);
 }
 
 int eServiceSelector::eventFilter(const eWidgetEvent &event)
@@ -214,12 +231,14 @@ void eServiceSelector::useBouquet(eBouquet *bouquet)
 	if (bouquet)
 	{
 		setText(bouquet->bouquet_name.c_str());
-		for (std::list<eServiceReference*>::iterator i = bouquet->list.begin(); i != bouquet->list.end(); i++)
+		for (std::list<eServiceReference>::iterator i = bouquet->list.begin(); i != bouquet->list.end(); i++)
 		{
-			eService &c = *(*i)->service;
+			if (!i->service)
+				continue;
+			eService &c = *i->service;
 			if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
-				return;
-			eListboxEntry *l=new eListboxEntryService(c, list);
+				continue;
+			eListboxEntry *l=new eListboxEntryService(&c, list);
 			if (&c==result)
 				list->setCurrent(l);
 		}
@@ -248,7 +267,7 @@ eService *eServiceSelector::next()
 {
 	eListboxEntry *s=list->goNext();
 	if (s)
-		return &(((eListboxEntryService*)s)->service);
+		return (((eListboxEntryService*)s)->service);
 	else
 		return 0;
 }
@@ -257,7 +276,7 @@ eService *eServiceSelector::prev()
 {
 	eListboxEntry *s=list->goPrev();
 	if (s)
-		return &(((eListboxEntryService*)s)->service);
+		return (((eListboxEntryService*)s)->service);
 	else
 		return 0;
 }

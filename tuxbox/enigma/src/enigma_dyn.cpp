@@ -361,7 +361,7 @@ static QString getContent(QString mode, int bouquetid)
 	QString result="";
 	QString tmp="";
 	std::list<eBouquet*>* bouquets;
-	std::list<eServiceReference*> esref;
+	std::list<eServiceReference> esref;
 	eService *es;
 
 	bouquets=eDVB::getInstance()->getBouquets();
@@ -390,9 +390,9 @@ static QString getContent(QString mode, int bouquetid)
 		eBouquet *act;
 		act=getBouquet(bouquetid);
 		esref=act->list;
-		for(std::list<eServiceReference*>::iterator j = esref.begin(); j != esref.end() ; j++)
+		for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
 		{
-			es=(*j)->service;
+			es=j->service;
 			result+="<option value=\"";
 			tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
 			result+=tmp;
@@ -425,9 +425,9 @@ static QString getContent(QString mode, int bouquetid)
 			eBouquet *act;
 			act=getBouquet(bouquetid);
 			esref=act->list;
-			for(std::list<eServiceReference*>::iterator j = esref.begin(); j != esref.end() ; j++)
+			for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
 			{
-				es=(*j)->service;
+				es=j->service;
 				result+="<option value=\"";
 				tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
 				result+=tmp;

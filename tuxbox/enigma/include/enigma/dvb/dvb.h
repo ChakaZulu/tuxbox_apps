@@ -15,7 +15,7 @@ class eDVB;
 #include <functional>
 #include <string>
 
-#define ServiceReferenceIterator std::list<eServiceReference*>::iterator
+#define ServiceReferenceIterator std::list<eServiceReference>::iterator
 
 struct tsref: public std::pair<int,int>
 {
@@ -135,28 +135,27 @@ struct eServiceReference
 	{
 		service=0;
 	}
+	bool operator==(const eServiceReference &c) const
+	{
+		return (transport_stream_id==c.transport_stream_id) && (original_network_id==c.original_network_id) && (service_id==c.service_id);
+	}
 };
 
 class eBouquet
 {
 public:
-	inline eBouquet(int bouquet_id, std::string bouquet_name): bouquet_id(bouquet_id), bouquet_name(bouquet_name) { }
-	inline ~eBouquet();
+	inline eBouquet(const eBouquet *parent, int bouquet_id, std::string bouquet_name): parent(parent), bouquet_id(bouquet_id), bouquet_name(bouquet_name) { }
 	void add(int transport_stream_id, int original_network_id, int service_id);
 	int remove(int transport_stream_id, int original_network_id, int service_id);
 	int bouquet_id;
 	std::string bouquet_name;
-	std::list<eServiceReference*> list;
-};
-
-eBouquet::~eBouquet()
-{
-	while (!list.empty())
+	std::list<eServiceReference> list;
+	const eBouquet *parent;
+	bool operator == (const eBouquet &c) const
 	{
-		delete *list.begin();
-		list.erase(list.begin());		
+		return bouquet_id==c.bouquet_id;
 	}
-}
+};
 
 class eTransponderList
 {

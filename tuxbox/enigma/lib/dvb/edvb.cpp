@@ -59,7 +59,7 @@ void eDVB::addDVBBouquet(BAT *bat)
 		if (d->Tag()==DESCR_BOUQUET_NAME)
 			bouquet_name=((BouquetNameDescriptor*)d)->name;
 	}
-	eBouquet *bouquet=createBouquet(bat->bouquet_id, bouquet_name);
+	eBouquet *bouquet=createBouquet(0, bat->bouquet_id, bouquet_name);
 	
 	for (QListIterator<BATEntry> be(bat->entries); be.current(); ++be)
 		for (QListIterator<Descriptor> i(be.current()->transport_descriptors); i.current(); ++i)
@@ -104,21 +104,21 @@ eBouquet *eDVB::getBouquet(std::string bouquet_name)
 	return 0;
 }
 
-eBouquet* eDVB::createBouquet(int bouquet_id, std::string bouquet_name)
+eBouquet* eDVB::createBouquet(const eBouquet *parent, int bouquet_id, std::string bouquet_name)
 {
 	eBouquet *n=getBouquet(bouquet_id);
 	if (!n)
-		bouquets.push_back(n=new eBouquet(bouquet_id, bouquet_name));
+		bouquets.push_back(n=new eBouquet(parent, bouquet_id, bouquet_name));
 	return n;
 }
 
-eBouquet *eDVB::createBouquet(std::string bouquet_name)
+eBouquet *eDVB::createBouquet(const eBouquet *parent, std::string bouquet_name)
 {
 	eBouquet *n=getBouquet(bouquet_name);
 	if (!n)
 	{
 		int bouquet_id=getUnusedBouquetID(0);
-		bouquets.push_back(n=new eBouquet(bouquet_id, bouquet_name));
+		bouquets.push_back(n=new eBouquet(parent, bouquet_id, bouquet_name));
 	}
 	return n;
 }
@@ -140,7 +140,7 @@ void eDVB::revalidateBouquets()
 	if (transponderlist)
 		for (BouquetIterator i = bouquets.begin(); i != bouquets.end(); i++)
 			for (ServiceReferenceIterator service = (*i)->list.begin(); service != (*i)->list.end(); service++)
-				(*service)->service=transponderlist->searchService((*service)->original_network_id, (*service)->service_id);
+				service->service=transponderlist->searchService(service->original_network_id, service->service_id);
 	/*emit*/ bouquetListChanged();
 	printf("ok\n");
 }
@@ -1140,7 +1140,7 @@ struct sortinChannel: public std::unary_function<const eService&, void>
 		default:
 			add=" [Data]";
 		}
-		eBouquet *b = edvb.createBouquet(beautifyBouquetName(service.service_provider.c_str())+add);
+		eBouquet *b = edvb.createBouquet(0, beautifyBouquetName(service.service_provider.c_str())+add);
 		b->add(service.transport_stream_id, service.original_network_id, service.service_id);
 	}
 };
@@ -1312,7 +1312,7 @@ void eDVB::saveBouquets()
 		fprintf(f, "%0d\n", b->bouquet_id);
 		fprintf(f, "%s\n", b->bouquet_name.c_str());
 		for (ServiceReferenceIterator s = b->list.begin(); s != b->list.end(); s++)
-			fprintf(f, "%04x:%04x:%04x\n", (*s)->service_id, (*s)->transport_stream_id, (*s)->original_network_id);
+			fprintf(f, "%04x:%04x:%04x\n", s->service_id, s->transport_stream_id, s->original_network_id);
 		fprintf(f, "/\n");
 	}
 	fprintf(f, "end\n");
@@ -1343,16 +1343,19 @@ void eDVB::loadBouquets()
 
 	while (!feof(f))
 	{
+		eBouquet *parent=0;
 		if (!fgets(line, 256, f))
 			break;
 		if (!strcmp(line, "end\n"))
 			break;
-		int bouquet_id=-1;
-		sscanf(line, "%d", &bouquet_id);
+		int bouquet_id=-1, parent_id=-1;
+		sscanf(line, "%d:%d", &bouquet_id, &parent_id);
 		if (!fgets(line, 256, f))
 			break;
+		if (parent_id != -1)
+			parent=getBouquet(parent_id); 
 		line[strlen(line)-1]=0;
-		eBouquet *bouquet=createBouquet(bouquet_id, line);
+		eBouquet *bouquet=createBouquet(parent, bouquet_id, line);
 		while (!feof(f))
 		{
 			fgets(line, 256, f);

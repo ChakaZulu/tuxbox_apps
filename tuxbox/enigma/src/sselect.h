@@ -12,9 +12,11 @@ class eListboxEntryService: public eListboxEntry
 {
 	QString sort;
 public:
-	eService &service;
+	eService *service;
+	eBouquet *bouquet;
 	QString getText(int col=0) const;
-	eListboxEntryService(eService &service, eListbox *listbox);
+	eListboxEntryService(eService *service, eListbox *listbox);
+	eListboxEntryService(eBouquet *bouquet, eListbox *listbox);
 	~eListboxEntryService();
 };
 

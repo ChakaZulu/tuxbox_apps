@@ -92,9 +92,9 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		{
 			QList<eXMLRPCVariant> l;
 
-			for (std::list<eServiceReference*>::iterator s = b->list.begin(); s != b->list.end(); s++)
+			for (std::list<eServiceReference>::iterator s = b->list.begin(); s != b->list.end(); s++)
 			{
-				eService *service=(*s)->service;
+				eService *service=s->service;
 				if (!service)
 					continue;
 				QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;

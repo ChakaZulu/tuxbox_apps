@@ -123,22 +123,12 @@ eService::eService(int transport_stream_id, int original_network_id, SDTEntry *s
 
 void eBouquet::add(int transport_stream_id, int original_network_id, int service_id)
 {
-	remove(transport_stream_id, original_network_id, service_id);
-	list.push_back(new eServiceReference(transport_stream_id, original_network_id, service_id));
+	list.push_back(eServiceReference(transport_stream_id, original_network_id, service_id));
 }
 
 int eBouquet::remove(int transport_stream_id, int original_network_id, int service_id)
 {
-	for (ServiceReferenceIterator i = list.begin(); i != list.end(); i++)
-		if (((*i)->transport_stream_id==transport_stream_id) &&
-		    ((*i)->original_network_id==original_network_id) &&
-		    ((*i)->service_id==service_id))
-		{
-			delete *i;
-			list.erase(i);
-			return 0;
-		}
-	return -ENOENT;
+	list.remove(eServiceReference(transport_stream_id, original_network_id, service_id));
 }
 
 eTransponder::eTransponder(int transport_stream_id, int original_network_id):

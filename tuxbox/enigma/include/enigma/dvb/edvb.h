@@ -64,8 +64,8 @@ protected:
 	void addDVBBouquet(BAT *bat);
 	eBouquet *getBouquet(int bouquet_id);
 	eBouquet *getBouquet(std::string bouquet_name);
-	eBouquet *createBouquet(int bouquet_id, std::string bouquet_name);
-	eBouquet *createBouquet(std::string bouquet_name);
+	eBouquet *createBouquet(const eBouquet *parent, int bouquet_id, std::string bouquet_name);
+	eBouquet *createBouquet(const eBouquet *parent, std::string bouquet_name);
 	int getUnusedBouquetID(int range);
 	
 	void revalidateBouquets();
