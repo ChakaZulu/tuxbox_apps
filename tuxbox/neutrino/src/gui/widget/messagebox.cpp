@@ -27,13 +27,13 @@ void CMessageBox::paint()
 	g_FrameBuffer->paintHLine(x, x+width, y+height-fheight, COL_INFOBAR_SHADOW);
 	g_FrameBuffer->paintBoxRel(x,y+height-fheight, width,fheight+0, COL_MENUHEAD);
 
-	g_FrameBuffer->paintIcon("rot.raw", x+width- 3* ButtonWidth+ 8, y+height+4-fheight);
+	g_FrameBuffer->paintIcon("ok.raw", x+width- 3* ButtonWidth+ 8, y+height+4-fheight);
 	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24-fheight - 2, ButtonWidth- 26, g_Locale->getText("messagebox.yes").c_str(), COL_INFOBAR);
 
 	g_FrameBuffer->paintIcon("rot.raw", x+width- 2* ButtonWidth+ 8, y+height+4-fheight);
 	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24-fheight - 2, ButtonWidth- 26, g_Locale->getText("messagebox.no").c_str(), COL_INFOBAR);
 
-	g_FrameBuffer->paintIcon("rot.raw", x+width- ButtonWidth+ 8, y+height+4-fheight);
+	g_FrameBuffer->paintIcon("home.raw", x+width- ButtonWidth+ 8, y+height+4-fheight);
 	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 29, y+height+24-fheight - 2, ButtonWidth- 26, g_Locale->getText("messagebox.cancel").c_str(), COL_INFOBAR);
 
 }
