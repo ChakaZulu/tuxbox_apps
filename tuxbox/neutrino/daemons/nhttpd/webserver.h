@@ -13,7 +13,6 @@
 #include <string>
 
 #include "pthread.h"
-#include "timer.h"
 #include "config.h"
 #include "../../libconfigfile/configfile.h"
 #include "../neutrinoNG/neutrinoMessages.h"
