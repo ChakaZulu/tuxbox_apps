@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.289 2003/01/30 19:15:49 obi Exp $
+ * $Id: zapit.cpp,v 1.290 2003/02/17 14:31:42 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -660,7 +660,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	}
 	
 	case CZapitMessages::CMD_SCANSTART:
-		start_scan();
+		if (start_scan() == -1)
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_FAILED, CEventServer::INITID_ZAPIT);
 		break;
 
 	case CZapitMessages::CMD_SCANREADY:
@@ -1386,7 +1387,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.289 2003/01/30 19:15:49 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.290 2003/02/17 14:31:42 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

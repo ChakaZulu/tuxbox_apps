@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.95 2003/01/30 17:21:16 obi Exp $
+ * $Id: scan.cpp,v 1.96 2003/02/17 14:31:42 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -55,11 +55,11 @@ extern std::map <uint8_t, std::string> scanProviders;
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 
-void stop_scan(void)
+void stop_scan(const bool success)
 {
 	/* notify client about end of scan */
 	scan_runs = 0;
-	eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT);
+	eventServer->sendEvent(success ? CZapitClient::EVT_SCAN_COMPLETE : CZapitClient::EVT_SCAN_FAILED, CEventServer::INITID_ZAPIT);
 	if (scanBouquetManager)
 	{
 		for (vector<CBouquet*>::iterator it = scanBouquetManager->Bouquets.begin(); it != scanBouquetManager->Bouquets.end(); it++)
@@ -158,7 +158,7 @@ FILE *write_xml_header(const char *filename)
 	if (fd == NULL)
 	{
 		ERROR(filename);
-		stop_scan();
+		stop_scan(false);
 		pthread_exit(0);
 	}
 
@@ -319,7 +319,7 @@ void *start_scanthread(void *param)
         if ((type = getFrontendName()) == NULL)
 	{
 		WARN("unable to scan without a supported frontend");
-		stop_scan();
+		stop_scan(false);
 		pthread_exit(0);
 	}
 
@@ -474,7 +474,7 @@ void *start_scanthread(void *param)
 	CZapitClient myZapitClient;
 	myZapitClient.reinitChannels();
 
-	stop_scan();
+	stop_scan(true);
 	pthread_exit(0);
 }
 
