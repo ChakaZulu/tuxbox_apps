@@ -43,8 +43,8 @@ function addTimerEvent()
 	var emin = document.channelselector.emin.options[currentEmin].text;
 	var descr = document.channelselector.descr.value;
 
-	var url = '/addTimerEvent2?ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&month=' + emonth + '&hour=' + ehour + '&emin=' + emin + '&descr=' + descr;
-	NewWindow(url, 'add', '200', '200', 'no');
+	var url = '/addTimerEvent2?ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr;
+	NewWindow(url, 'add', '200', '200', 'no', '5000');
 }
 
 function showAddTimerEventWindow()
