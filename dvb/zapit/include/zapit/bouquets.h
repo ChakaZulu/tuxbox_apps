@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.56 2004/08/02 08:09:43 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.57 2004/08/02 08:13:45 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -109,7 +109,6 @@ class CBouquetManager
 		ChannelIterator radioChannelsBegin() { return ChannelIterator(this, false); };
 
 		BouquetList Bouquets;
-		BouquetList storedBouquets;
 
 		void saveBouquets(void);
 		void saveBouquets(const CZapitClient::bouquetMode bouquetMode, const char * const providerName);
