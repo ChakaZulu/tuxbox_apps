@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.30 2002/05/21 14:20:33 dirch Exp $
+	$Id: webdbox.cpp,v 1.31 2002/05/30 19:48:17 dirch Exp $
 
 	License: GPL
 
@@ -113,7 +113,8 @@ TWebDbox::TWebDbox(CWebserver *server)
 	TimerEventStateNames[CTimerEvent::TIMERSTATE_SCHEDULED]="wartet";
 	TimerEventStateNames[CTimerEvent::TIMERSTATE_PREANNOUNCE]="announced";
 	TimerEventStateNames[CTimerEvent::TIMERSTATE_ISRUNNING]="aktiv";
-	TimerEventStateNames[CTimerEvent::TIMERSTATE_TERMINATED]="beendet";
+	TimerEventStateNames[CTimerEvent::TIMERSTATE_HASFINISHED]= "beendet";
+	TimerEventStateNames[CTimerEvent::TIMERSTATE_TERMINATED]= "beendet";
 
 }
 //-------------------------------------------------------------------------
