@@ -299,6 +299,8 @@ void CRemoteControl::getSubChannels()
 								      linkedServices[i].serviceId,
 								      linkedServices[i].transportStreamId,
 								      linkedServices[i].name));
+					if (subChannels[i].getChannelID() == current_channel_id)
+						selected_subchannel = i;
 				}
 				copySubChannelsToZapit();
 				g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, current_channel_id, false );
