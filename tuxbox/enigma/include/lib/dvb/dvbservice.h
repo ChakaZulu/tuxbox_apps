@@ -57,7 +57,7 @@ public:
 		int casysid, ecmpid, emmpid;
 	};
 	
-	std::list<int> availableCASystems;
+	std::set<int> availableCASystems, usedCASystems;
 	ePtrList<CA> calist;		/** currently used ca-systems */
 	
 	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors);
@@ -85,6 +85,8 @@ public:
 	void handleEvent(const eDVBEvent &event);
 
 	int switchService(const eServiceReferenceDVB &service); /** -> eventServiceSwitched */
+	
+	void initCAlist();
 };
 
 #endif

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.16 2003/01/12 00:49:03 Ghostrider Exp $
+ * $Id: setup_language.cpp,v 1.17 2003/02/16 01:03:45 waldi Exp $
  */
 
 #include <setup_language.h>
@@ -28,7 +28,7 @@
 
 eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 {
-	setText(_("Language Setup"));
+	setText(_("Language Selector"));
 	move(ePoint(150, 136));
 	cresize(eSize(390, 160));
 
@@ -84,7 +84,7 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 	ok->setShortcutPixmap("green");
 	ok->move(ePoint(20, 80));
 	ok->resize(eSize(170, 40));
-	ok->setHelpText(_("save changes and close window"));
+	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapLanguageSetup::okPressed);
 
@@ -92,7 +92,7 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 	abort->setText(_("abort"));
 	abort->move(ePoint(210, 80));
 	abort->resize(eSize(170, 40));
-	abort->setHelpText(_("leave language setup (no changes are saved)"));
+	abort->setHelpText(_("ignore changes and return"));
 	abort->loadDeco();
 	CONNECT(abort->selected, eZapLanguageSetup::abortPressed);
 

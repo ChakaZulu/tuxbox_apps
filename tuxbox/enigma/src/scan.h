@@ -26,15 +26,6 @@ public:
 	tsSelectType(eWidget *parent);
 };
 
-class tpPacket
-{
-public:
-	std::string name;
-	int scanflags;
-	int orbital_position;
-	std::list<eTransponder> possibleTransponders;
-};
-
 class tsManual: public eWidget
 {
 	eTransponder transponder;
@@ -42,25 +33,17 @@ class tsManual: public eWidget
 	eTransponderWidget *transponder_widget;
 	eFEStatusWidget *festatus_widget;
 	eCheckbox *c_clearlist, *c_searchnit, *c_useonit, *c_usebat;
+	eTimer updateTimer;
 	void start();
 	void abort();
 	void retune();
+	void update();
 	int eventHandler(const eWidgetEvent &event);
 public:
 	tsManual(eWidget *parent, const eTransponder &transponder, eWidget* LCDTitle, eWidget* LCDElement);
 };
 
-class existNetworks
-{
-protected:
-	int fetype;
-	existNetworks();
-	std::list<tpPacket> networks;
-	int parseNetworks();
-	int addNetwork(tpPacket &p, XMLTreeNode *node, int type);
-};
-
-class tsAutomatic: public existNetworks, public eWidget
+class tsAutomatic: public eWidget
 {
 	eButton *b_start, *b_abort;
 	eComboBox *l_network;
@@ -117,9 +100,10 @@ class TransponderScan
 	eWidget *select_type, *manual_scan, *automatic_scan, *LCDElement, *LCDTitle;
 
 public:
+	enum { initialMenu, initialAutomatic };
 	TransponderScan( eWidget* LCDTitle, eWidget* LCDElement);
 	~TransponderScan();
-	int exec();
+	int exec(int initial=initialMenu);
 };
 
 #endif

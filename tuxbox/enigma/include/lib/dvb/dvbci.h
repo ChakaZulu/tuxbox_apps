@@ -6,6 +6,7 @@
 #include <lib/base/thread.h>
 #include <lib/base/message.h>
 #include <lib/system/elock.h>
+#include <set>
 
 #define PMT_ENTRYS  256
 

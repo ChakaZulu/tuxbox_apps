@@ -75,6 +75,10 @@ void eDVBRecorder::gotMessage(const eDVBRecorderMessage &msg)
 	case eDVBRecorderMessage::mExit:
 		s_exit();
 		break;
+	case eDVBRecorderMessage::mWrite:
+		::write(outfd, msg.write.data, msg.write.len);
+		::free(msg.write.data);
+		break;
 	default:
 		eDebug("received unknown message!");
 	}
@@ -220,6 +224,7 @@ void eDVBRecorder::s_exit()
 	exit_loop(); 
 }
 
+
 eDVBRecorder::eDVBRecorder(): messagepump(this, 1), rmessagepump(this, 1)
 {
 	CONNECT(messagepump.recv_msg, eDVBRecorder::gotMessage);
@@ -232,4 +237,43 @@ eDVBRecorder::~eDVBRecorder()
 {
 	messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mExit));
 	lock.lock();
+}
+
+void eDVBRecorder::writeSection(void *data, int pid)
+{
+	__u8 *table=(__u8*)data;
+	int len=(table[1]<<8)&0x1F;
+	len|=table[2];
+	
+	eDebug("len: %d", len);
+	
+	len+=3;
+	
+	int first=1;
+	int cc=0;
+	
+	while (len)
+	{
+		// generate header:
+		__u8 *packet=(__u8*)malloc(188); // yes, malloc
+		int pos=0;
+		packet[pos++]=0x47;        // sync_byte
+		packet[pos]=pid>>8;        // pid
+		if (first)
+			packet[pos]|=1<<6;       // PUSI
+		pos++;
+		packet[pos++]=pid&0xFF;    // pid
+		packet[pos++]=cc++|0x10;   // continuity counter, adaption_field_control
+		if (first)
+			packet[pos++]=0;
+		int tc=len;
+		if (tc > (188-pos))
+			tc=188-pos;
+		memcpy(packet+pos, table, tc);
+		len-=tc;
+		pos+=tc;
+		memset(packet+pos, 0xFF, 188-pos);
+		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mWrite, packet, 188));
+		first=0;
+	}
 }

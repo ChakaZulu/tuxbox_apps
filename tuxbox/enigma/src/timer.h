@@ -64,7 +64,7 @@ public:
 	void forEachEntry(Z ob)
 	{
 		if (timerlist)
-			for (std::list<ePlaylistEntry>::iterator i(timerlist->list.begin()); i != timerlist->list.end(); ++i)
+			for (std::list<ePlaylistEntry>::iterator i(timerlist->getList().begin()); i != timerlist->getList().end(); ++i)
 				ob(&*i);
 	}
 };

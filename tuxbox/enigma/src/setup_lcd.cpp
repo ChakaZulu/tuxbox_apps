@@ -99,7 +99,7 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	inverted->resize(eSize(150, fd+4));
 	inverted->setText(_("Inverted: "));
 	inverted->setCheck(lcdinverted);
-	inverted->setHelpText(_("enable/disable inverted lcd (ok)"));
+	inverted->setHelpText(_("enable/disable inverted LCD (ok)"));
 	CONNECT( inverted->checked, eZapLCDSetup::invertedChanged );
 
 	ok=new eButton(this);
@@ -108,7 +108,7 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	ok->setShortcutPixmap("green");
 	ok->move(ePoint(20, 195));
 	ok->resize(eSize(170, 40));
-	ok->setHelpText(_("close window and save changes"));
+	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapLCDSetup::okPressed);
 
@@ -116,7 +116,7 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	abort->setText(_("abort"));
 	abort->move(ePoint(210, 195));
 	abort->resize(eSize(170, 40));
-	abort->setHelpText(_("close window (no changes are saved)"));
+	abort->setHelpText(_("ignore changes and return"));
 	abort->loadDeco();
 	CONNECT(abort->selected, eZapLCDSetup::abortPressed);
 

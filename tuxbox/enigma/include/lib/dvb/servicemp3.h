@@ -34,14 +34,15 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	eServiceHandlerMP3 *handler;
 	eAudioDecoder *audiodecoder;
 	eIOBuffer input;
-	eIOBuffer output;
+	eIOBuffer output, output2;
 	enum
 	{
 		stateInit, stateError, stateBuffering, stateBufferFull, statePlaying, statePause, stateFileEnd
 	};
 
 	int state;
-	int dspfd;
+	int dspfd[2];
+	int type;
 
 	int sourcefd;
 	eHTTPStream *stream;
@@ -53,17 +54,18 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	
 	int error;
 	int outputbr;
-	eSocketNotifier *inputsn, *outputsn;
+	eSocketNotifier *inputsn, *outputsn[2];
 	void streamingDone(int err);
 	void decodeMoreHTTP();
 	void decodeMore(int what);
 	void outputReady(int what);
+	void outputReady2(int what);
 	void checkFlow(int last);
 	
 	void recalcPosition();
 	eHTTPDataSource *createStreamSink(eHTTPConnection *conn);
 	
-	int maxOutputBufferSize;
+	int maxOutputBufferSize, minOutputBufferSize;
 	
 	eAudioDecoder::pcmSettings pcmsettings;
 	
@@ -95,8 +97,10 @@ public:
 	
 	void gotMessage(const eMP3DecoderMessage &message);
 	eString getInfo(int id);
+
+	enum { codecMP3, codecMPG, codecOGG };
 	
-	eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler);
+	eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *handler);
 	~eMP3Decoder();
 	
 	int getPosition(int);

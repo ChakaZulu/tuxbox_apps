@@ -2,6 +2,7 @@
 
 #include <lib/gui/actions.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/driver/eavswitch.h>
 
 struct enigmaVCRActions
@@ -16,7 +17,7 @@ struct enigmaVCRActions
 	}
 };
 
-eAutoInitP0<enigmaVCRActions> i_enigmaVCRActions(5, "enigma vcr actions");
+eAutoInitP0<enigmaVCRActions> i_enigmaVCRActions(eAutoInitNumbers::actions, "enigma vcr actions");
 
 enigmaVCR::enigmaVCR(eString string, eString caption)
 	:eMessageBox(string,caption)

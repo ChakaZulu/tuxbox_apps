@@ -4,5 +4,5 @@ INCLUDES = \
 noinst_LIBRARIES = libenigma_codecs.a
 
 libenigma_codecs_a_SOURCES = \
-	codecmp3.cpp codec.cpp pic.cpp
+	codecmp3.cpp codec.cpp pic.cpp codecmpg.cpp
 

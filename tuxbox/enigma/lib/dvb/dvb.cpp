@@ -4,6 +4,7 @@
 #include <set>
 
 #include <lib/dvb/dvb.h>
+#include <lib/dvb/edvb.h>
 #include <lib/dvb/si.h>
 #include <lib/dvb/frontend.h>
 #include <lib/system/econfig.h>
@@ -52,7 +53,6 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 int eTransponder::satellite::tune(eTransponder *trans)
 {
 	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d", frequency, symbol_rate, polarisation?"V":"H", fec, orbital_position);
-	int inv=0;
 
 	std::multimap< int, eSatellite* >::iterator it ( trans->tplist.begin() );
 
@@ -65,7 +65,7 @@ int eTransponder::satellite::tune(eTransponder *trans)
 		return -ENOENT;
 	}
 
-	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, *it->second );
+	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inversion, *it->second );
 }
 
 eService::eService(const eString &service_name)
@@ -77,8 +77,8 @@ eService::~eService()
 {
 }
 
-eServiceDVB::eServiceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number):
-		eService(""), transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_number(service_number), dxflags(0)
+eServiceDVB::eServiceDVB(eDVBNamespace dvb_namespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number):
+		eService(""), dvb_namespace(dvb_namespace), transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_number(service_number), dxflags(0)
 {
 	dvb=this;
 	clearCache();
@@ -91,8 +91,8 @@ eServiceDVB::eServiceDVB(eServiceID service_id, const char *name)
 	clearCache();
 }
 
-eServiceDVB::eServiceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number):
-		eService(""), transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_number(service_number), dxflags(0)
+eServiceDVB::eServiceDVB(eDVBNamespace dvb_namespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number):
+		eService(""), dvb_namespace(dvb_namespace), transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_number(service_number), dxflags(0)
 {
 	dvb=this;
 	clearCache();
@@ -105,6 +105,7 @@ eServiceDVB::eServiceDVB(const eServiceDVB &c):
 {
 	transport_stream_id=c.transport_stream_id;
 	original_network_id=c.original_network_id;
+	dvb_namespace=c.dvb_namespace;
 	service_id=c.service_id;
 	service_type=c.service_type;
 	service_provider=c.service_provider;
@@ -125,15 +126,15 @@ int eBouquet::remove(const eServiceReferenceDVB &service)
 	return 0;
 }
 
-eTransponder::eTransponder(eTransponderList &tplist, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id):
-	tplist(tplist), transport_stream_id(transport_stream_id), original_network_id(original_network_id)
+eTransponder::eTransponder(eTransponderList &tplist, eDVBNamespace dvb_namespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id):
+	tplist(tplist), dvb_namespace(dvb_namespace), transport_stream_id(transport_stream_id), original_network_id(original_network_id)
 {
 	cable.valid=0;
 	satellite.valid=0;
 	state=stateToScan;
 }
 
-eTransponder::eTransponder(eTransponderList &tplist): tplist(tplist), transport_stream_id(-1), original_network_id(-1)
+eTransponder::eTransponder(eTransponderList &tplist): tplist(tplist), dvb_namespace(-1), transport_stream_id(-1), original_network_id(-1)
 {
 	cable.valid=satellite.valid=0;
 	state=stateToScan;
@@ -262,6 +263,190 @@ void eLNB::deleteSatellite(eSatellite *satellite)
 	satellites.remove(satellite);
 }
 
+existNetworks::existNetworks()
+:networksLoaded(false), fetype( eFrontend::getInstance()->Type() )
+{
+
+}
+
+const std::list<tpPacket>& existNetworks::getNetworks()
+{
+	if (!networksLoaded)
+	{
+		reloadNetworks();
+		networksLoaded=true;
+	}
+	return networks;
+}
+
+const std::map<int,tpPacket>& existNetworks::getNetworkNameMap()
+{
+	if (!networksLoaded)
+	{
+		reloadNetworks();
+		networksLoaded=true;
+	}
+	return names;
+}
+
+int existNetworks::reloadNetworks()
+{
+	names.clear();
+	networks.clear();
+	XMLTreeParser parser("ISO-8859-1");
+
+	int done=0;
+	const char *filename=0;
+
+	switch (fetype)
+	{
+	case eFrontend::feSatellite:
+		filename=DATADIR "/satellites.xml";
+		break;
+	case eFrontend::feCable:
+		filename=DATADIR "/cables.xml";
+		break;
+	default:
+		break;
+	}
+
+	if (!filename)
+		return -1;
+
+	FILE *in=fopen(filename, "rt");
+	if (!in)
+	{
+		eWarning("unable to open %s", filename);
+		return -1;
+	}
+
+	do
+	{
+		char buf[2048];
+		unsigned int len=fread(buf, 1, sizeof(buf), in);
+		done=len<sizeof(buf);
+		if (!parser.Parse(buf, len, done))
+		{
+			eDebug("parse error: %s at line %d",
+				parser.ErrorString(parser.GetErrorCode()),
+				parser.GetCurrentLineNumber());
+			fclose(in);
+			return -1;
+		}
+	} while (!done);
+
+	fclose(in);
+
+	XMLTreeNode *root=parser.RootNode();
+
+	if (!root)
+		return -1;
+
+	for (XMLTreeNode *node = root->GetChild(); node; node = node->GetNext())
+		if (!strcmp(node->GetType(), "cable"))
+		{
+			tpPacket pkt;
+			if (!addNetwork(pkt, node, eFrontend::feCable))
+				networks.push_back(pkt);
+		} else if (!strcmp(node->GetType(), "sat"))
+		{
+			tpPacket pkt;
+			if (!addNetwork(pkt, node, eFrontend::feSatellite))
+			{
+				networks.push_back(pkt);
+				names[pkt.orbital_position]=networks.back();
+			}
+		} else
+			eFatal("unknown packet %s", node->GetType());
+
+	return 0;
+}
+
+int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
+{
+	const char *name=node->GetAttributeValue("name");
+	if (!name)
+	{
+		eFatal("no name");
+		return -1;
+	}
+	packet.name=name;
+
+	const char *flags=node->GetAttributeValue("flags");
+	if (flags)
+	{
+		packet.scanflags=atoi(flags);
+//		eDebug("name = %s, scanflags = %i", name, packet.scanflags );
+	}
+	else
+	{
+		packet.scanflags=1; // default use Network ??
+//		eDebug("packet has no scanflags... we use default scanflags (1)");
+	}
+
+	const char *position=node->GetAttributeValue("position");
+	if (!position)
+		position="0";
+
+	int orbital_position=atoi(position);
+	packet.orbital_position = orbital_position;
+
+	for (node=node->GetChild(); node; node=node->GetNext())
+	{
+		eTransponder t(*eDVB::getInstance()->settings->getTransponders());
+		switch (type)
+		{
+		case eFrontend::feCable:
+		{
+			const char *afrequency=node->GetAttributeValue("frequency"),
+					*asymbol_rate=node->GetAttributeValue("symbol_rate"),
+					*ainversion=node->GetAttributeValue("inversion"),
+					*amodulation=node->GetAttributeValue("modulation");
+			if (!afrequency)
+				continue;
+			if (!asymbol_rate)
+				asymbol_rate="6900000";
+			if (!ainversion)
+				ainversion="0";
+			if (!amodulation)
+				amodulation="3";
+			int frequency=atoi(afrequency)/1000,
+					symbol_rate=atoi(asymbol_rate),
+					inversion=atoi(ainversion),
+					modulation=atoi(amodulation);
+			t.setCable(frequency, symbol_rate, inversion, modulation );
+			break;
+		}
+		case eFrontend::feSatellite:
+		{
+			const char *afrequency=node->GetAttributeValue("frequency"),
+					*asymbol_rate=node->GetAttributeValue("symbol_rate"),
+					*apolarisation=node->GetAttributeValue("polarization"),
+					*afec_inner=node->GetAttributeValue("fec_inner"),
+					*ainversion=node->GetAttributeValue("inversion");
+			if (!afrequency)
+				continue;
+			if (!asymbol_rate)
+				continue;
+			if (!apolarisation)
+				continue;
+			if (!afec_inner)
+				continue;
+			if (!ainversion)
+				ainversion="0";
+			int frequency=atoi(afrequency), symbol_rate=atoi(asymbol_rate),
+					polarisation=atoi(apolarisation), fec_inner=atoi(afec_inner), inversion=atoi(ainversion);
+			t.setSatellite(frequency, symbol_rate, polarisation, fec_inner, orbital_position, inversion);
+			break;
+		}
+		default:
+			continue;
+		}
+		packet.possibleTransponders.push_back(t);
+	}
+	return 0;
+}
+
 eTransponderList::eTransponderList()
 {
 	if (!instance)
@@ -287,8 +472,9 @@ void eTransponderList::removeOrbitalPosition(int orbital_position)
 			{
 				eDebug("removing transponder");
 				// delete this transponder (including services)
-				eTransportStreamID tsid=it->first.first;
-				eOriginalNetworkID onid=it->first.second;
+				eTransportStreamID tsid=it->first.tsid;
+				eOriginalNetworkID onid=it->first.onid;
+				eDVBNamespace dvbnamespace=it->first.dvbnamespace;
 				std::map<tsref,eTransponder>::iterator i=it;
 				++it;
 				transponders.erase(i); // remove transponder from list
@@ -299,7 +485,8 @@ void eTransponderList::removeOrbitalPosition(int orbital_position)
 					const eServiceReferenceDVB &ref=sit->first;
 						// service on this transponder?
 					if ((ref.getOriginalNetworkID() == onid) &&
-							(ref.getTransportStreamID() == tsid))
+							(ref.getTransportStreamID() == tsid) &&
+							(ref.getDVBNamespace() == dvbnamespace))
 					{
 						eDebug("removing service");
 						std::map<eServiceReferenceDVB,eServiceDVB>::iterator i=sit;
@@ -316,15 +503,15 @@ void eTransponderList::removeOrbitalPosition(int orbital_position)
 	}
 }
 
-eTransponder &eTransponderList::createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)
+eTransponder &eTransponderList::createTransponder(eDVBNamespace dvb_namespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)
 {
-	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(transport_stream_id, original_network_id));
+	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(dvb_namespace, transport_stream_id, original_network_id));
 	if (i==transponders.end())
 	{
 		i=transponders.insert(
 				std::pair<tsref,eTransponder>
-					(tsref(transport_stream_id, original_network_id),
-						eTransponder(*this, transport_stream_id, original_network_id)
+					(tsref(dvb_namespace, transport_stream_id, original_network_id),
+						eTransponder(*this, dvb_namespace, transport_stream_id, original_network_id)
 					)
 			).first;
 		/*emit*/ transponder_added(&(*i).second);
@@ -366,7 +553,7 @@ eServiceDVB &eTransponderList::createService(const eServiceReferenceDVB &service
 		eServiceDVB *n=&services.insert(
 					std::pair<eServiceReferenceDVB,eServiceDVB>
 						(service,
-						eServiceDVB(service.getTransportStreamID(), service.getOriginalNetworkID(), service.getServiceID(), chnum))
+						eServiceDVB(service.getDVBNamespace(), service.getTransportStreamID(), service.getOriginalNetworkID(), service.getServiceID(), chnum))
 					).first->second;
 
 		channel_number.insert(std::pair<int,eServiceReferenceDVB>(chnum,service));
@@ -376,7 +563,7 @@ eServiceDVB &eTransponderList::createService(const eServiceReferenceDVB &service
 	return (*i).second;
 }
 
-int eTransponderList::handleSDT(const SDT *sdt, eOriginalNetworkID onid, eTransportStreamID tsid)
+int eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOriginalNetworkID onid, eTransportStreamID tsid)
 {
 	eDebug("TransponderList handleSDT");
 	std::set<eServiceID> s;
@@ -404,6 +591,7 @@ int eTransponderList::handleSDT(const SDT *sdt, eOriginalNetworkID onid, eTransp
 		
 		eServiceReferenceDVB sref=
 				eServiceReferenceDVB(
+					eDVBNamespace(dvbnamespace),
 					eTransportStreamID(tsid), 
 					eOriginalNetworkID(onid), 
 					eServiceID(i->service_id),
@@ -421,6 +609,7 @@ int eTransponderList::handleSDT(const SDT *sdt, eOriginalNetworkID onid, eTransp
 		if ((!(i->second.dxflags & eServiceDVB::dxNoDVB)) &&  // never ever touch non-dvb services
 				(i->first.getOriginalNetworkID() == onid)	&& // if service on this on
 				(i->first.getTransportStreamID() == tsid) && 	// and on this transponder (war das "first" hier wichtig?)
+				(i->first.getDVBNamespace() == dvbnamespace) && // and in this namespace
 				(!s.count(i->first.getServiceID()))) // but does not exist
 			{
 				for (std::map<int,eServiceReferenceDVB>::iterator m(channel_number.begin()); m != channel_number.end(); ++m)
@@ -436,12 +625,12 @@ int eTransponderList::handleSDT(const SDT *sdt, eOriginalNetworkID onid, eTransp
 	return changed;
 }
 
-eTransponder *eTransponderList::searchTS(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)
+eTransponder *eTransponderList::searchTS(eDVBNamespace dvbnamespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)
 {
-	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(transport_stream_id, original_network_id));
+	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(dvbnamespace, transport_stream_id, original_network_id));
 	if (i==transponders.end())
 		return 0;
-		return &i->second;
+	return &i->second;
 }
 
 eServiceDVB *eTransponderList::searchService(const eServiceReference &service)
@@ -455,10 +644,11 @@ eServiceDVB *eTransponderList::searchService(const eServiceReference &service)
 	return &i->second;
 }
 
-const eServiceReferenceDVB *eTransponderList::searchService(eOriginalNetworkID original_network_id, eServiceID service_id)
+const eServiceReferenceDVB *eTransponderList::searchService(eDVBNamespace dvb_namespace, eOriginalNetworkID original_network_id, eServiceID service_id)
 {
 	for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator i(services.begin()); i != services.end(); ++i)
-		if ((i->first.getOriginalNetworkID() == original_network_id) &&
+		if ((i->first.getDVBNamespace() == dvb_namespace) &&
+				(i->first.getOriginalNetworkID() == original_network_id) &&
 				(i->first.getServiceID() == service_id))
 					return &i->first;
 	return 0;
@@ -482,7 +672,6 @@ eTransponder *eTransponderList::getFirstTransponder(int state)
 
 eSatellite *eTransponderList::findSatellite(int orbital_position)
 {
-	eDebug("findSatellite: %d items", satellites.size());
 	std::multimap<int,eSatellite*>::iterator i=satellites.find(orbital_position);
 	if (i == satellites.end())
 		return 0;
@@ -737,7 +926,13 @@ eServiceReference::eServiceReference(const eString &string)
 	const char *c=string.c_str();
 	int pathl=-1;
 	
-	sscanf(c, "%d:%d:%x:%x:%x:%x:%n", &type, &flags, &data[0], &data[1], &data[2], &data[3], &pathl);
+	if ( sscanf(c, "%d:%d:%x:%x:%x:%x:%x:%x:%x:%x:%n", &type, &flags, &data[0], &data[1], &data[2], &data[3], &data[4], &data[5], &data[6], &data[7], &pathl) < 8 )
+	{
+		memset( data, 0, sizeof(data) );
+		eDebug("find old format eServiceReference string");
+		sscanf(c, "%d:%d:%x:%x:%x:%x:%n", &type, &flags, &data[0], &data[1], &data[2], &data[3], &pathl);
+	}
+
 	if (pathl)
 		path=c+pathl;
 }

@@ -10,6 +10,7 @@
 #include <lib/gui/ewidget.h>
 #include <lib/gui/guiactions.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 
 eWidget *eWidget::root;
 
@@ -710,7 +711,10 @@ void eWidget::setFocus(eWidget *newfocus)
 		return getTLW()->setFocus(newfocus);
 
 	if (focus == newfocus)
+	{
+		/* emit */ focusChanged(focus);
 		return;
+	}
 
 	if (focus)
 		focus->event(eWidgetEvent(eWidgetEvent::lostFocus));
@@ -1039,9 +1043,11 @@ void eWidget::zOrderRaise()
 
 void eWidget::setShortcut(const eString &shortcutname)
 {
-	if (!shortcut)
-		getTLW()->actionListener.push_back(this);
+	if (shortcut)
+		getTLW()->actionListener.remove(this);
 	shortcut=i_shortcutActions->map.findAction(shortcutname.c_str());
+	if (shortcut)
+		getTLW()->actionListener.push_back(this);
 }
 
 void eWidget::setShortcutFocus(eWidget *focus)
@@ -1117,4 +1123,4 @@ void eDecoWidget::loadDeco()
 		event( eWidgetEvent::changedSize );
 }
 
-eAutoInitP0<eWidgetSkinInit> init_eWidgetSkinInit(3, "eWidget");
+eAutoInitP0<eWidgetSkinInit> init_eWidgetSkinInit(eAutoInitNumbers::guiobject, "eWidget");

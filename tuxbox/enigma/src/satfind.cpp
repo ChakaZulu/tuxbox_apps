@@ -50,7 +50,7 @@ int eSatfind::eventHandler( const eWidgetEvent& e)
 	switch (e.type)
 	{
 		case eWidgetEvent::execBegin:
-			updateTimer.start(500, false);
+			updateTimer.start(1000, false);
 		break;
 		case eWidgetEvent::execDone:
 			updateTimer.stop();

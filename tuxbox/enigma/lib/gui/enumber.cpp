@@ -7,6 +7,19 @@
 #include <lib/gdi/font.h>
 #include <lib/gui/guiactions.h>
 
+void eNumber::unpack(__u32 l, int *t)
+{
+	for (int i=0; i<4; i++)
+		*t++=(l>>((3-i)*8))&0xFF;
+}
+
+void eNumber::pack(__u32 &l, int *t)
+{
+	l=0;
+	for (int i=0; i<4; i++)
+		l|=(*t++)<<((3-i)*8);
+}
+
 eRect eNumber::getNumberRect(int n)
 {
 	if (deco_selected && have_focus)

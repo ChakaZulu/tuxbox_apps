@@ -9,6 +9,7 @@
 
 #include <lib/base/esize.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/gdi/glcddc.h>
 #include <lib/system/econfig.h>
 
@@ -202,4 +203,4 @@ public:
 	}
 };
 
-eAutoInitP0<eDBoxLCDHardware> init_eDBoxLCDHardware(1, "d-Box LCD Hardware");
+eAutoInitP0<eDBoxLCDHardware> init_eDBoxLCDHardware(eAutoInitNumbers::lowlevel, "d-Box LCD Hardware");

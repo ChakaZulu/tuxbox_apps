@@ -1,8 +1,11 @@
 #include <lib/dvb/servicemp3.h>
 #include <lib/dvb/servicefile.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/base/i18n.h>
 #include <lib/codecs/codecmp3.h>
+#include <lib/codecs/codecmpg.h>
+#include <lib/dvb/decoder.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -109,7 +112,7 @@ void eHTTPStream::haveData(void *vdata, int len)
 	dataAvailable();
 }
 
-eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): handler(handler), input(8*1024), output(256*1024), messages(this, 1)
+eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *handler): handler(handler), input(8*1024), output(256*1024), output2(256*1024), type(type), messages(this, 1)
 {
 	state=stateInit;
 	
@@ -165,23 +168,66 @@ eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): han
 	
 	length=-1;
 
-	audiodecoder=new eAudioDecoderMP3(input, output);
-	pcmsettings.reconfigure=1;
-	
-	dspfd=::open("/dev/sound/dsp", O_WRONLY|O_NONBLOCK);
-	if (dspfd<0)
+	switch (type)
 	{
-		eDebug("output failed! (%m)");
-		error=errno;
-		state=stateError;
+	case codecMP3:
+		audiodecoder=new eAudioDecoderMP3(input, output);
+		break;
+	case codecMPG:
+		audiodecoder=new eMPEGDemux(input, output, output2);
+		break;
 	}
 	
-	if (dspfd >= 0)
+	if (type != codecMPG)
 	{
-		outputsn=new eSocketNotifier(this, dspfd, eSocketNotifier::Write, 0);
-		CONNECT(outputsn->activated, eMP3Decoder::outputReady);
+		pcmsettings.reconfigure=1;
+	
+		dspfd[0]=::open("/dev/sound/dsp", O_WRONLY|O_NONBLOCK);
+		if (dspfd[0]<0)
+		{
+			eDebug("output failed! (%m)");
+			error=errno;
+			state=stateError;
+		}
+	
+		if (dspfd[0] >= 0)
+		{
+			outputsn[0]=new eSocketNotifier(this, dspfd[0], eSocketNotifier::Write, 0);
+			CONNECT(outputsn[0]->activated, eMP3Decoder::outputReady);
+		} else
+			outputsn[0]=0;
+		outputsn[1]=0;
+		Decoder::displayIFrameFromFile("/iframe");
 	} else
-		outputsn=0;
+	{
+		Decoder::parms.vpid=0x1fff;
+		Decoder::parms.apid=0x1fff;
+		Decoder::parms.pcrpid=-1;
+		Decoder::parms.audio_type=DECODE_AUDIO_MPEG;
+		Decoder::Set();
+		
+		dspfd[0]=::open("/dev/video", O_WRONLY|O_NONBLOCK);
+		dspfd[1]=::open("/dev/sound/dsp1", O_WRONLY|O_NONBLOCK);
+		
+		if ((dspfd[0]<0) || (dspfd[1]<0))
+		{
+			if (dspfd[0]>=0)
+				::close(dspfd[0]);
+			if (dspfd[1]>=0)
+				::close(dspfd[1]);
+			eDebug("output failed! (%m)");
+			error=errno;
+			state=stateError;
+			outputsn[0]=0;
+			outputsn[1]=0;
+		} else
+		{
+			outputsn[0]=new eSocketNotifier(this, dspfd[0], eSocketNotifier::Write, 0);
+			CONNECT(outputsn[0]->activated, eMP3Decoder::outputReady);
+			outputsn[1]=new eSocketNotifier(this, dspfd[1], eSocketNotifier::Write, 0);
+			CONNECT(outputsn[1]->activated, eMP3Decoder::outputReady2);
+		}
+	}
 	
 	if (sourcefd >= 0)
 	{
@@ -192,7 +238,15 @@ eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): han
 	
 	CONNECT(messages.recv_msg, eMP3Decoder::gotMessage);
 	
-	maxOutputBufferSize=256*1024;
+	if (type == codecMPG)
+	{
+		maxOutputBufferSize=1024*1024*4;
+		minOutputBufferSize=64*1024;
+	} else
+	{
+		maxOutputBufferSize=256*1024;
+		minOutputBufferSize=8*1024;
+	}
 	
 	run();
 }
@@ -206,7 +260,7 @@ void eMP3Decoder::metaDataUpdated(eString meta)
 		if (meta.left(6) == "Stream")
 			while (!meta.empty())
 			{
-				int eq=meta.find('=');
+				unsigned int eq=meta.find('=');
 				if (eq == eString::npos)
 						break;
 				eString left=meta.left(eq);
@@ -259,7 +313,9 @@ void eMP3Decoder::streamingDone(int err)
 	} else
 	{
 		state=stateFileEnd;
-		outputsn->start();
+		outputsn[0]->start();
+		if (outputsn[1])
+			outputsn[1]->start();
 		eDebug("streaming vorbei!");
 	}
 	http=0;
@@ -283,43 +339,59 @@ void eMP3Decoder::thread()
 
 void eMP3Decoder::outputReady(int what)
 {
-	if ( ( pcmsettings.reconfigure 
-			|| (pcmsettings.samplerate != audiodecoder->pcmsettings.samplerate) 
-			|| (pcmsettings.channels != audiodecoder->pcmsettings.channels)))
+	if (type != codecMPG)
 	{
-		pcmsettings=audiodecoder->pcmsettings;
-		
-		outputbr=pcmsettings.samplerate*pcmsettings.channels*16;
-		::ioctl(dspfd, SNDCTL_DSP_SPEED, &pcmsettings.samplerate);
-		::ioctl(dspfd, SNDCTL_DSP_CHANNELS, &pcmsettings.channels);
-		::ioctl(dspfd, SNDCTL_DSP_SETFMT, &pcmsettings.format);
-		eDebug("reconfigured audio interface...");
+		if ( ( pcmsettings.reconfigure 
+				|| (pcmsettings.samplerate != audiodecoder->pcmsettings.samplerate) 
+				|| (pcmsettings.channels != audiodecoder->pcmsettings.channels)))
+		{
+			pcmsettings=audiodecoder->pcmsettings;
+			
+			outputbr=pcmsettings.samplerate*pcmsettings.channels*16;
+			::ioctl(dspfd[0], SNDCTL_DSP_SPEED, &pcmsettings.samplerate);
+			::ioctl(dspfd[0], SNDCTL_DSP_CHANNELS, &pcmsettings.channels);
+			::ioctl(dspfd[0], SNDCTL_DSP_SETFMT, &pcmsettings.format);
+//			eDebug("reconfigured audio interface...");
+		}
 	}
 	
-	output.tofile(dspfd, 65536);
+	output.tofile(dspfd[0], 65536);
 	
+	checkFlow(0);
+}
+
+void eMP3Decoder::outputReady2(int what)
+{
+	output2.tofile(dspfd[1], 65536);
 	checkFlow(0);
 }
 
 void eMP3Decoder::checkFlow(int last)
 {
-//	eDebug("I: %d O: %d S: %d", input.size(), output.size(), state);
+// 	eDebug("I: %d O: %d S: %d", input.size(), output.size(), state);
 
 	if (state == statePause)
 		return;
 
-	int i=input.size(), o=output.size();
+	int i=input.size(), o[2];
+	o[0]=output.size();
+	if (outputsn[1])
+		o[1]=output2.size();
+	else
+		o[1]=0;
+		
+//	eDebug("input: %d  video %d   audio %d", input.size(), output.size(), output2.size());
 	
 	// states:
 	// buffering  -> output is stopped (since queue is empty)
 	// playing    -> input queue (almost) empty, output queue filled
 	// bufferFull -> input queue full, reading disabled, output enabled
 	
-	if (!o)
+	if (!o[0])
 	{
 		if (state == stateFileEnd)
 		{
-			outputsn->stop();
+			outputsn[0]->stop();
 			eDebug("ok, everything played..");
 			handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::done));
 			return;
@@ -327,18 +399,19 @@ void eMP3Decoder::checkFlow(int last)
 		{
 //			eDebug("stateBuffering");
 			state=stateBuffering;
-			outputsn->stop();
+			outputsn[0]->stop();
 		}
 	}
-	
-	if ((state == stateBuffering) && o > 64*1024)
+
+	if (outputsn[1])
 	{
-//		eDebug("statePlaying...");
-		state=statePlaying;
-		outputsn->start();
+		if (!o[1])
+			outputsn[1]->stop();
+		else if (o[1] > 16384)
+			outputsn[1]->start();
 	}
 	
-	if (o > maxOutputBufferSize)
+	if ((o[0] > maxOutputBufferSize) || (o[1] > maxOutputBufferSize))
 	{
 		if (state != stateBufferFull)
 		{
@@ -351,30 +424,40 @@ void eMP3Decoder::checkFlow(int last)
 		}
 	}
 	
-	if (o < maxOutputBufferSize)
+	if ((o[0] < maxOutputBufferSize) && ((!outputsn[1]) || (o[1] < maxOutputBufferSize)))
 	{
-	
-		int samples=audiodecoder->decodeMore(last, 16384);
+		int samples=0;
+		if (last || (i >= audiodecoder->getMinimumFramelength()))
+			samples=audiodecoder->decodeMore(last, 16384);
 		if (samples < 0)
 		{
 			state=stateFileEnd;
 			eDebug("datei TOTAL kaputt");
 		}
 		
-		if (!samples)
+		if ((o[0] + samples) < maxOutputBufferSize)
 		{
 			if (state == stateBufferFull)
 			{
 //				eDebug("stateBufferFull -> statePlaying");
 				state=statePlaying;
 			}
-//			eDebug("anyway, we need input.");
 			if (inputsn)
 				inputsn->start();
 			else if (http)
 				http->enableRead();
 		}
 	}
+
+	if ((state == stateBuffering) && (o[0] > minOutputBufferSize))
+	{
+//		eDebug("statePlaying...");
+		state=statePlaying;
+		outputsn[0]->start();
+		if (outputsn[1])
+			outputsn[1]->start();
+	}
+	
 }
 
 void eMP3Decoder::recalcPosition()
@@ -400,8 +483,8 @@ void eMP3Decoder::recalcPosition()
 
 void eMP3Decoder::dspSync()
 {
-	if (dspfd >= 0)
-		::ioctl(dspfd, SNDCTL_DSP_RESET);
+	if (dspfd[0] >= 0)
+		::ioctl(dspfd[0], SNDCTL_DSP_RESET);
 }
 
 void eMP3Decoder::decodeMoreHTTP()
@@ -412,6 +495,12 @@ void eMP3Decoder::decodeMoreHTTP()
 void eMP3Decoder::decodeMore(int what)
 {
 	int flushbuffer=0;
+	
+	if (state == stateFileEnd)
+	{
+		inputsn->stop();
+		return;
+	}
 
 	if (input.size() < audiodecoder->getMinimumFramelength())
 	{
@@ -426,7 +515,9 @@ void eMP3Decoder::decodeMore(int what)
 		eDebug("end of file...");
 		state=stateFileEnd;
 		inputsn->stop();
-		outputsn->start();
+		outputsn[0]->start();
+		if (outputsn[1])
+			outputsn[1]->start();
 	}
 }
 
@@ -436,10 +527,14 @@ eMP3Decoder::~eMP3Decoder()
 
 	if (inputsn)
 		delete inputsn;
-	if (outputsn)
-		delete outputsn;
-	if (dspfd >= 0)
-		close(dspfd);
+	if (outputsn[0])
+		delete outputsn[0];
+	if (outputsn[1])
+		delete outputsn[1];
+	if (dspfd[0] >= 0)
+		close(dspfd[0]);
+	if (dspfd[1] >= 0)
+		close(dspfd[1]);
 	if (sourcefd >= 0)
 		close(sourcefd);
 	if (http)
@@ -478,14 +573,18 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			if ((state==stateBuffering) || (state==stateBufferFull) || (statePlaying))
 			{
 				inputsn->stop();
-				outputsn->stop();
+				outputsn[0]->stop();
+				if (outputsn[1])
+					outputsn[1]->stop();
 				state=statePause;
 				dspSync();
 			}
 		} else if (state == statePause)
 		{
 			inputsn->start();
-			outputsn->start();
+			outputsn[0]->start();
+			if (outputsn[1])
+				outputsn[1]->start();
 //			speed=message.parm;
 			state=stateBuffering;
 		} else
@@ -502,13 +601,16 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			break;
 		if (!inputsn)
 			break;
+		if (audiodecoder->getAverageBitrate() <= 0)
+			break;
+			
+		eDebug("seek/seekreal/skip, %d", message.parm);
+		
 		int offset=0;
 		
 		if (message.type != eMP3DecoderMessage::seekreal)
 		{
 			int br=audiodecoder->getAverageBitrate();
-			if (br <= 0)
-				br=192000;
 			br/=8;
 		
 			br*=message.parm;
@@ -520,6 +622,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 				offset+=::lseek(sourcefd, 0, SEEK_CUR);
 			if (offset<0)
 				offset=0;
+			eDebug("so final offset is %d", offset);
 		} else
 		{
 			input.clear();
@@ -530,8 +633,8 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		dspSync();
 		output.clear();
 		audiodecoder->resync();
-		
-		checkFlow(0);
+
+		decodeMore(0);
 		
 		break;
 	}
@@ -593,7 +696,7 @@ eService *eServiceHandlerMP3::createService(const eServiceReference &service)
 
 int eServiceHandlerMP3::play(const eServiceReference &service)
 {
-	decoder=new eMP3Decoder(service.path.c_str(), this);
+	decoder=new eMP3Decoder(service.data[0], service.path.c_str(), this);
 	decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::start));
 	
 	if (!decoder->getError())
@@ -674,7 +777,17 @@ void eServiceHandlerMP3::addFile(void *node, const eString &filename)
 		struct stat s;
 		if (::stat(filename.c_str(), &s))
 			return;
+		eServiceReference ref(id, 0, filename);
+		ref.data[0]=eMP3Decoder::codecMP3;
 		eServiceFileHandler::getInstance()->addReference(node, eServiceReference(id, 0, filename));
+	} else if ((filename.right(4).upper()==".MPG") || (filename.right(4).upper()==".VOB"))
+	{
+		struct stat s;
+		if (::stat(filename.c_str(), &s))
+			return;
+		eServiceReference ref(id, 0, filename);
+		ref.data[0]=eMP3Decoder::codecMPG;
+		eServiceFileHandler::getInstance()->addReference(node, ref);
 	}
 }
 
@@ -690,7 +803,7 @@ void eServiceHandlerMP3::removeRef(const eServiceReference &service)
 
 int eServiceHandlerMP3::getFlags()
 {
-	return flagIsSeekable|flagSupportPosition;
+	return flagIsSeekable|flagSupportPosition|flagIsTrack;
 }
 
 int eServiceHandlerMP3::getState()
@@ -878,4 +991,4 @@ eServiceMP3::eServiceMP3(const eServiceMP3 &c): eService(c)
 	id3=&id3tags;
 }
 
-eAutoInitP0<eServiceHandlerMP3> i_eServiceHandlerMP3(7, "eServiceHandlerMP3");
+eAutoInitP0<eServiceHandlerMP3> i_eServiceHandlerMP3(eAutoInitNumbers::service+2, "eServiceHandlerMP3");

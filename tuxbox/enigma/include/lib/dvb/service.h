@@ -78,8 +78,9 @@ public:
 		flagIsScrambled=1, 
 		flagHaveSubservices=2, 
 		flagHaveMultipleAudioStreams=4,
-		flagIsSeekable=8,
-		flagSupportPosition=16
+		flagIsSeekable=8,                // supports seek commands
+		flagSupportPosition=16,          // supports position read
+		flagIsTrack=32                   // behaves like an audio track
 	};
 	enum
 	{

@@ -2,6 +2,7 @@
 #include <lib/gdi/grc.h>
 #include <lib/gui/eskin.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/gdi/epng.h>
 #include <lib/gui/elabel.h>
 #include <lib/gui/guiactions.h>
@@ -141,4 +142,4 @@ public:
 	}
 };
 
-eAutoInitP0<eWindowSkinInit> init_eWindowSkinInit(3, "eWindow");
+eAutoInitP0<eWindowSkinInit> init_eWindowSkinInit(eAutoInitNumbers::guiobject, "eWindow");

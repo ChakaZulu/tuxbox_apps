@@ -103,7 +103,7 @@ public:
 	eAUTable<NIT> tNIT, tONIT;
 	eAUTable<EIT> tEIT;
 	eAUTable<BAT> tBAT;
-	EIT *nvodEIT;
+	EIT *parentEIT;
 
 	eDVBRecorder *recorder;
 	eDVBCI *DVBCI;
@@ -163,7 +163,7 @@ public:
 	
 			// recording
 		/// starts a new recording
-	void recBegin(const char *filename); 
+	void recBegin(const char *filename, eServiceReferenceDVB service);
 		/// pauses a recording
 	void recPause();
 		/// resumes a recording

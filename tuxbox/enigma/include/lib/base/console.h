@@ -7,12 +7,13 @@ class eString;
 
 class eConsoleAppContainer: public Object
 {
-	int fd[2];
+	int fd[3];
 	int pid;
 	int killstate;
 	char *outbuf;
-	eSocketNotifier *in, *out;
+	eSocketNotifier *in, *out, *err;
 	void readyRead(int what);
+	void readyErrRead(int what);
 	void readyWrite(int what);
 	void closePipes();
 public:

@@ -38,7 +38,7 @@ public:
 	RotorConfig( eLNB *lnb );
 };
 
-class eRotorManual: public eWindow, public existNetworks
+class eRotorManual: public eWindow
 {
 	eLabel *lSat, *lTransponder, *lDirection, *lMode, *lCounter
 							, *Counter, *lRecaclParams;

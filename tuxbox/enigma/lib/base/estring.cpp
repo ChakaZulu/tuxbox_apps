@@ -116,7 +116,6 @@ int eString::icompare(const eString& s)
 }
 
 		// 8859-x to dvb coding tables. taken from www.unicode.org/Public/MAPPINGS/ISO8859/
-
 static unsigned long c88595[128]={
 0x0080, 0x0081, 0x0082, 0x0083, 0x0084, 0x0085, 0x0086, 0x0087, 0x0088, 0x0089, 0x008a, 0x008b, 0x008c, 0x008d, 0x008e, 0x008f, 
 0x0090, 0x0091, 0x0092, 0x0093, 0x0094, 0x0095, 0x0096, 0x0097, 0x0098, 0x0099, 0x009a, 0x009b, 0x009c, 0x009d, 0x009e, 0x009f, 
@@ -167,6 +166,58 @@ static unsigned long c88599[128]={
 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x00e4, 0x00e5, 0x00e6, 0x00e7, 0x00e8, 0x00e9, 0x00ea, 0x00eb, 0x00ec, 0x00ed, 0x00ee, 0x00ef, 
 0x011f, 0x00f1, 0x00f2, 0x00f3, 0x00f4, 0x00f5, 0x00f6, 0x00f7, 0x00f8, 0x00f9, 0x00fa, 0x00fb, 0x00fc, 0x0131, 0x015f, 0x00ff};
 
+		// UPC Direct / HBO strange two-character encoding. 0xC2 means acute, 0xCF caron.
+		// many thanks to the czechs who helped me while solving this.
+unsigned int doCzech(int c1, int c2)
+{
+	switch (c1)
+	{
+	case 0xC2: // acute
+		switch (c2)
+		{
+		case 'A': return 0x00C1;
+		case 'a': return 0x00E1;
+		case 'E': return 0x00C9;
+		case 'e': return 0x00E9;
+		case 'I': return 0x00CD;
+		case 'i': return 0x00ED;
+		case 'O': return 0x00D3;
+		case 'o': return 0x00E3;
+		case 'U': return 0x00DA;
+		case 'u': return 0x00FA;
+		case 'Y': return 0x00DD;
+		case 'y': return 0x00FD;
+		default:
+			return 0;
+		}
+	case 0xCF: // caron
+		switch (c2)
+		{
+		case 'C': return 0x010C;
+		case 'c': return 0x010D;
+		case 'D': return 0x010E;
+		case 'd': return 0x010F;
+		case 'E': return 0x011A;
+		case 'e': return 0x011B;
+		case 'L': return 0x013D;	// not sure if they really exist.
+		case 'l': return 0x013E;
+		case 'N': return 0x0147;
+		case 'n': return 0x0148;
+		case 'R': return 0x0158;
+		case 'r': return 0x0159;
+		case 'S': return 0x0160;
+		case 's': return 0x0161;
+		case 'T': return 0x0164;
+		case 't': return 0x0165;
+		case 'Z': return 0x017D;
+		case 'z': return 0x017E;
+		default:
+			return 0;
+		}
+	default:
+		return 0;
+	}
+}
 
 unsigned int recode(unsigned char d, int cp)
 {
@@ -208,7 +259,13 @@ eString convertDVBUTF8(unsigned char *data, int len)
 	
 	for (; i<len; ++i)
 	{
-		unsigned long code=recode(data[i], table);
+		unsigned long code=0;
+		if ((table == 5) && ((data[i] == 0xC2) || (data[i] == 0xCF)) && (i+1 < len))
+				// braindead czech encoding...
+			if ((code=doCzech(data[i], data[i+1])))
+				++i;
+		if (!code)
+			code=recode(data[i], table);
 		if (!code)
 			continue;
 		if (code >= 0x10000)
@@ -226,11 +283,17 @@ eString convertDVBUTF8(unsigned char *data, int len)
 	
 	while (i < len)
 	{
-		unsigned long code=recode(data[i++], table);
+		unsigned long code=0;
+		if ((table == 5) && ((data[i] == 0xC2) || (data[i] == 0xCF)) && (i+1 < len))
+				// braindead czech encoding...
+			if ((code=doCzech(data[i], data[i+1])))
+				i+=2;
+		if (!code)
+			code=recode(data[i++], table);
 		if (!code)
 			continue;
 				// Unicode->UTF8 encoding
-		if (code < 0x80) // identity latin <-> utf8 mapping
+		if (code < 0x80) // identity ascii <-> utf8 mapping
 			res[t++]=char(code);
 		else if (code < 0x800) // two byte mapping
 		{
@@ -256,37 +319,50 @@ eString convertDVBUTF8(unsigned char *data, int len)
 
 eString convertLatin1UTF8(const eString &string)
 {
-	unsigned int i;
-	unsigned int bytesneeded=0, t=0, s=i;
+	unsigned int bytesneeded=0, t=0, i;
 	
 	unsigned int len=string.size();
 	
-	for (; i<len; ++i)
+	for (i=0; i<len; ++i)
 	{
 		unsigned long code=string[i];
 		if (!code)
 			continue;
+		if (code >= 0x10000)
+			bytesneeded++;
+		if (code >= 0x800)
+			bytesneeded++;
 		if (code >= 0x80)
 			bytesneeded++;
 		bytesneeded++;
 	}
 	
-	i=s;
+	i=0;
 	
 	unsigned char res[bytesneeded];
 	
 	while (i < len)
 	{
-		unsigned long code=string[i];
+		unsigned long code=string[i++];
 				// Unicode->UTF8 encoding
 		if (code < 0x80) // identity latin <-> utf8 mapping
-			res[t++]=code;
-		else // two byte mapping
+			res[t++]=char(code);
+		else if (code < 0x800) // two byte mapping
 		{
 			res[t++]=(code>>6)|0xC0;
 			res[t++]=(code&0x3F)|0x80;
+		} else if (code < 0x10000) // three bytes mapping
+		{
+			res[t++]=(code>>12)|0xE0;
+			res[t++]=((code>>6)&0x3F)|0x80;
+			res[t++]=(code&0x3F)|0x80;
+		} else
+		{
+			res[t++]=(code>>18)|0xF0;
+			res[t++]=((code>>12)&0x3F)|0x80;
+			res[t++]=((code>>6)&0x3F)|0x80;
+			res[t++]=(code&0x3F)|0x80;
 		}
-		i++;
 	}
 	if ( t != bytesneeded)
 		eFatal("t: %d, bytesneeded: %d", t, bytesneeded);

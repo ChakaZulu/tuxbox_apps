@@ -2,6 +2,7 @@
 #include <dbox/fp.h>
 
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/base/eerror.h>
 #include <sys/time.h>
 
@@ -19,7 +20,16 @@
 	/* ----------------------- dreambox fernbedienung ---------------------- */
 void eRCDeviceDreambox2::handleCode(int rccode)
 {
-	timeout.start(150, 1);
+	if (rccode == 0x00FF) // break code
+	{
+		timeout.stop();
+		repeattimer.stop();
+		timeOut();
+		ccode=rccode;
+		return;
+	}
+	
+	timeout.start(1500, 1);
 	int old=ccode;
 	ccode=rccode;
 	if ((old!=-1) && ( ((old&0x7FFF)!=(rccode&0x7FFF)) || !(rccode&0x8000)) )
@@ -160,11 +170,9 @@ void eRCDeviceDreamboxButton::handleCode(int code)
 	for (int i=0; i<4; i++)
 		if ((last&~code) & (1<<i))
 		{
-			eDebug("up %d", i);
 			/*emit*/ input->keyPressed(eRCKey(this, i, eRCKey::flagBreak));
 		} else if ((~last&code)&(1<<i))
 		{
-			eDebug("down %d", i);
 			/*emit*/ input->keyPressed(eRCKey(this, i, 0));
 		}
 	if (code)
@@ -231,4 +239,4 @@ public:
 	}
 };
 
-eAutoInitP0<eDreamboxRCHardware2> init_rcdreambox2(2, "DreamBox RC Hardware 2");
+eAutoInitP0<eDreamboxRCHardware2> init_rcdreambox2(eAutoInitNumbers::rc+1, "DreamBox RC Hardware 2");

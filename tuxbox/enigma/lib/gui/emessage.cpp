@@ -120,10 +120,8 @@ eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): 
 			}
 	}
 	else
-	{
 		cresize( ext );
-		zOrderRaise();
-	}
+	zOrderRaise();
 }
 
 eMessageBox::~eMessageBox()

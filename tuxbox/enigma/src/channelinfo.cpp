@@ -1,6 +1,7 @@
 #include <channelinfo.h>
 #include <lib/base/i18n.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/gui/eskin.h>
 #include <lib/gdi/font.h>
 #include <lib/dvb/epgcache.h>
@@ -10,7 +11,7 @@
 
 eChannelInfo::eChannelInfo( eWidget* parent, const char *deco)
 	:eDecoWidget(parent, 0, deco),
-	ctime(this), cname(this), cdescr(this),
+	ctime(this), cname(this), copos(this), cdescr(this),
 	cgenre(this), cdolby(this), cstereo(this),
 	cformat(this), cscrambled(this), eit(0)
 {
@@ -29,12 +30,19 @@ eChannelInfo::eChannelInfo( eWidget* parent, const char *deco)
 	cgenre.setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
 	cgenre.setFlags( RS_FADE | eLabel::flagVCenter );
 
+	fn.pointSize = 28;
+	copos.setFont( fn );
+	copos.setAlign( eTextPara::dirRight );
+	copos.setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
+	copos.setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
+	copos.setFlags( RS_FADE );
+
 	fn.pointSize = 30;
 	cname.setFont( fn );
 	cname.setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
 	cname.setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
 	cname.setFlags( RS_FADE );
-	
+
 	ctime.setFont( fn );
 	ctime.setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
 	ctime.setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
@@ -207,8 +215,12 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 	
 	// eService *service=eServiceInterface::getInstance()->addRef(service);
 	
-	if (! service.path.size())
+	if (!service.path.size())
 	{
+		cname.setFlags(RS_FADE);
+		cname.resize( eSize(clientrect.width() - (clientrect.width() / 8 + 4), (clientrect.height()/3)-2 ));
+		int opos=service.getDVBNamespace().get()>>16;
+		copos.setText(eString().sprintf(" (%d.%d°%c)", abs(opos / 10), abs(opos % 10), opos>0?'E':'W') );
 		EITEvent *e = 0;
 		e = eEPGCache::getInstance()->lookupEvent(service);
 	//	eDebug(" e = %p", e);	
@@ -245,8 +257,12 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 			filelength+=s.st_size/1024;
 			slice++;
 		}
-		
-		cname.setText(eString(_("Filesize: ")) + eString().sprintf("%d MB", filelength/1024));
+		int i = service.path.rfind("/");
+		i++;
+		cgenre.setText(eString(_("Filesize: ")) + eString().sprintf("%d MB", filelength/1024));
+		cname.setFlags(RS_WRAP);
+		cname.resize( eSize(clientrect.width() - (clientrect.width() / 8 + 4), (clientrect.height()/3)*2-2 ));
+		cname.setText(eString(_("Filename: "))+ service.path.mid( i, service.path.length()-i ) );
 	}
 }
 	
@@ -282,6 +298,7 @@ void eChannelInfo::clear()
 	cdescr.setText("");
 	cgenre.setText("");
 	ctime.setText("");
+	copos.setText("");
 	cdolby.hide();
 	cstereo.hide();
 	cformat.hide();
@@ -344,12 +361,19 @@ int eChannelInfo::eventHandler(const eWidgetEvent &event)
 
 			ctime.move( ePoint(0,0) );
 			ctime.resize( eSize(clientrect.width() / 8, 36 ));
-			cname.move( ePoint(clientrect.width() / 8 + 4, 0 ));
-			cname.resize( eSize(clientrect.width() - (clientrect.width() / 8 + 4), clientrect.height()/3+2));
+
+			cname.move( ePoint( clientrect.width() / 8 + 4, 0 ) );
+			cname.resize( eSize( clientrect.width() - (clientrect.width() / 8 + 4), clientrect.height()/3+2) );
+
 			cdescr.move( ePoint(clientrect.width() / 8 + 4, clientrect.height() / 3 + 2 ));
 			cdescr.resize( eSize(clientrect.width() - (clientrect.width() / 8 + 4), (clientrect.height()/3)-2 ));
+
 			cgenre.move( ePoint(clientrect.width() / 8 + 4, cdescr.getPosition().y() + cdescr.getSize().height()) );
-			cgenre.resize( eSize( clientrect.width() - (clientrect.width() / 8 + 4), (clientrect.height()/3)-2 ));
+			cgenre.resize( eSize( clientrect.width() - (clientrect.width() / 8 + 4)*2, (clientrect.height()/3)-2 ));
+
+			copos.move( ePoint( clientrect.width() - (clientrect.width() / 8 + 4), cgenre.getPosition().y() ));
+			copos.resize( eSize(clientrect.width()/8+4, clientrect.height()/3-2) );
+
 			cdolby.resize( eSize(25,15) );
 			cstereo.resize( eSize(25,15) );
 			cformat.resize( eSize(25,15) );
@@ -381,4 +405,4 @@ public:
 	}
 };
 
-eAutoInitP0<eChannelInfoSkinInit> init_eChannelInfoSkinInit(3, "eChannelInfo");
+eAutoInitP0<eChannelInfoSkinInit> init_eChannelInfoSkinInit(eAutoInitNumbers::guiobject, "eChannelInfo");

@@ -7,6 +7,7 @@
 #include <lib/gdi/lcd.h>
 #include <lib/gui/eskin.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 
 eProgress::eProgress(eWidget *parent, int takefocus)
 	: eWidget(parent, takefocus)
@@ -132,4 +133,4 @@ public:
 	}
 };
 
-eAutoInitP0<eProgressSkinInit> init_eProgressSkinInit(3, "eProgress");
+eAutoInitP0<eProgressSkinInit> init_eProgressSkinInit(eAutoInitNumbers::guiobject, "eProgress");

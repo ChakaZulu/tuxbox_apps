@@ -2,6 +2,7 @@
 
 #include <lib/gdi/font.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/gui/eskin.h>
 
 eCheckbox::eCheckbox(eWidget *parent, int checked, int takefocus, bool swapTxtPixmap, const char *deco)
@@ -125,4 +126,4 @@ public:
 	}
 };
 
-eAutoInitP0<eCheckboxSkinInit> init_eCheckboxSkinInit(3, "eCheckbox");
+eAutoInitP0<eCheckboxSkinInit> init_eCheckboxSkinInit(eAutoInitNumbers::guiobject, "eCheckbox");

@@ -29,7 +29,8 @@ class fontRenderClass
 	fbClass *fb;
 	struct fontListEntry
 	{
-		char *filename, *face;
+		eString filename, face;
+		int scale; // 100 is 1:1
 		fontListEntry *next;
 		~fontListEntry();
 	} *font;
@@ -39,16 +40,16 @@ class fontRenderClass
 	FTC_Image_Cache	imageCache;					/* the glyph image cache					 */
 	FTC_SBit_Cache	 sbitsCache;				/* the glyph small bitmaps cache	 */
 
-	FTC_FaceID getFaceID(const char *face);
+	FTC_FaceID getFaceID(const eString &face);
 	FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
 	static fontRenderClass *instance;
 public:
 	float getLineHeight(const gFont& font);
-	const char* AddFont(const char *filename);
+	eString AddFont(const eString &filename, const eString &name, int scale);
 	static fontRenderClass *getInstance();
 	FT_Error FTC_Face_Requester(FTC_FaceID	face_id,
 															FT_Face*		aface);
-	Font *getFont(const char *face, int size, int tabwidth=-1);
+	Font *getFont(const eString &face, int size, int tabwidth=-1);
 	fontRenderClass();
 	~fontRenderClass();
 };
@@ -79,10 +80,11 @@ class eLCD;
 
 class eTextPara
 {
-	Font *current_font;
-	FT_Face current_face;
+	Font *current_font, *replacement_font;
+	FT_Face current_face, replacement_face;
 	int use_kerning;
 	int previous;
+	static eString replacement_facename;
 
 	eRect area;
 	ePoint cursor;
@@ -91,18 +93,21 @@ class eTextPara
 	glyphString glyphs;
 	int refcnt;
 
-	int appendGlyph(FT_UInt glyphIndex, int flags, int rflags);
+	int appendGlyph(Font *current_font, FT_Face current_face, FT_UInt glyphIndex, int flags, int rflags);
 	void newLine(int flags);
-	void setFont(Font *font);
+	void setFont(Font *font, Font *replacement_font);
 	eRect boundBox;
 	void calc_bbox();
 	int bboxValid;
 public:
 	eTextPara(eRect area, ePoint start=ePoint(-1, -1))
-		: current_font(0), current_face(0), area(area), cursor(start), maximum(0, 0), left(start.x()), refcnt(0), bboxValid(0)
+		: current_font(0), replacement_font(0), current_face(0), replacement_face(0),
+			area(area), cursor(start), maximum(0, 0), left(start.x()), refcnt(0), bboxValid(0)
 	{
 	}
 	~eTextPara();
+	
+	static void setReplacementFont(eString font) { replacement_facename=font; }
 
 	void destroy();
 	eTextPara *grab();
@@ -127,6 +132,11 @@ public:
 			calc_bbox();
 
 		return boundBox;
+	}
+
+	const eRect& getGlyphBBox(int num) const
+	{
+		return *glyphs[num].bbox;
 	}
 };
 

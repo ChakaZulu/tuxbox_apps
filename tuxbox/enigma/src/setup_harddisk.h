@@ -2,8 +2,11 @@
 #define __lib_apps_enigma_setup_harddisk_h
 
 #include <lib/gui/listbox.h>
-#include <lib/gui/ebutton.h>
 #include <lib/base/console.h>
+
+class eButton;
+class eComboBox;
+class eStatusBar;
 
 class eHarddiskSetup: public eListBoxWindow<eListBoxEntryText>
 {
@@ -16,11 +19,14 @@ public:
 
 class eHarddiskMenu: public eWindow
 {
-	eButton *close, *format, *bcheck;
-	eLabel *status, *model, *capacity, *bus;
+	eButton *ext, *format, *bcheck;
+	eLabel *status, *model, *capacity, *bus, *lfs;
+	eComboBox *fs;
+	eStatusBar *sbar;
 	int dev;
 	int numpart;
 	void s_format();
+	void extPressed();
 	void check();
 	void readStatus();
 public:

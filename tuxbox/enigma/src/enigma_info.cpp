@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.16 2003/01/12 00:49:03 Ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.17 2003/02/16 01:03:45 waldi Exp $
  */
 
 #include <enigma_info.h>
@@ -41,7 +41,7 @@ eZapInfo::eZapInfo()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Infos"), 8, 220)
 {
 	move(ePoint(150, 136));
-	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("go back to mainmenu")))->selected, eZapInfo::sel_close);
+	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("back to mainmenu")))->selected, eZapInfo::sel_close);
 	CONNECT((new eListBoxEntryMenu(&list, _("Streaminfo"), _("open the Streaminfo")))->selected, eZapInfo::sel_streaminfo);
 	if (tuxbox_get_model() == TUXBOX_MODEL_DBOX2)
 		CONNECT((new eListBoxEntryMenu(&list, _("Show BN version"),_("show the Current Version of the Betanova FW")))->selected, eZapInfo::sel_bnversion);
@@ -117,11 +117,27 @@ static eString getVersionInfo(const char *info)
 
 class eAboutScreen: public eWindow
 {
-	eLabel *machine, *processor, *frontend, *harddisks, *vendor, *dreamlogo, *version;
+	eLabel *machine, *processor, *frontend, *harddisks, *vendor, *dreamlogo, *version, *translation;
 	eButton *okButton;
 public:
 	eAboutScreen()
 	{
+		const char *magic="";
+		
+		eString translation_info=gettext(magic);
+		unsigned int i;
+		i=translation_info.find("Language-Team:");
+		if (i != eString::npos)
+		{
+			translation_info=translation_info.mid(i+15);
+			translation_info=translation_info.left(translation_info.find('\n'));
+			if (translation_info.find(" <") != eString::npos)
+				translation_info=translation_info.left(translation_info.find(" <"));
+			if (translation_info.find("/") != eString::npos)
+				translation_info[translation_info.find("/")]=':';
+		} else
+			translation_info="";
+		
 		machine=new eLabel(this);
 		machine->setName("machine");
 
@@ -145,6 +161,10 @@ public:
 
 		version=new eLabel(this);
 		version->setName("version");
+		
+		translation=new eLabel(this);
+		translation->setName("translation");
+		translation->setText(translation_info);
 
 		if (eSkin::getActive()->build(this, "eAboutScreen"))
 			eFatal("skin load of \"eAboutScreen\" failed");
@@ -186,7 +206,7 @@ public:
 			frontend->setText(_("Frontend: Cable"));
 			break;
 		case 3:
-			frontend->setText(_("Frontend: Terrestric"));
+			frontend->setText(_("Frontend: Terrestrial"));
 			break;
 		case 4:
 			frontend->setText(_("Frontend: Simulator"));

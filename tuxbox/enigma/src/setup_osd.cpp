@@ -80,7 +80,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	ok->setShortcutPixmap("green");
 	ok->move(ePoint(20, 250));
 	ok->resize(eSize(170, 40));
-	ok->setHelpText(_("close window and save changes"));
+	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	
 	CONNECT(ok->selected, eZapOsdSetup::okPressed);
@@ -89,7 +89,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	abort->setText(_("abort"));
 	abort->move(ePoint(210, 250));
 	abort->resize(eSize(170, 40));
-	abort->setHelpText(_("close window (no changes are saved)"));
+	abort->setHelpText(_("ignore changes and return"));
 	abort->loadDeco();
 
 	CONNECT(abort->selected, eZapOsdSetup::abortPressed);

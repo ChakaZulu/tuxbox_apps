@@ -10,13 +10,13 @@ class eInit
 {
 	static std::list<std::pair<int,eAutoInit*> > *cl;
 	friend class eAutoInit;
-	static void add(int trl, eAutoInit *c);
-	static void remove(int trl, eAutoInit *c);
 	static int rl;
 public:
 	eInit();
 	~eInit();
 	static void setRunlevel(int rlev);
+	static void add(int trl, eAutoInit *c);
+	static void remove(int trl, eAutoInit *c);
 };
 
 class eAutoInit
@@ -30,12 +30,8 @@ protected:
 public:
 	eAutoInit(int rl, char *description): rl(rl), description(description)
 	{
-		eInit::add(rl, this);
 	}
-	virtual ~eAutoInit()
-	{
-		eInit::remove(rl, this);
-	}
+	virtual ~eAutoInit();
 	const char *getDescription() const { return description; };
 };
 
@@ -59,6 +55,11 @@ public:
 	}
 	eAutoInitP1(const T2 &arg, int runl, char *description): eAutoInit(runl, description), arg(arg)
 	{
+		eInit::add(rl, this);
+	}
+	~eAutoInitP1()
+	{
+		eInit::remove(rl, this);
 	}
 };
 
@@ -85,6 +86,11 @@ public:
 	}
 	eAutoInitP0(int runl, char *description): eAutoInit(runl, description)
 	{
+		eInit::add(rl, this);
+	}
+	~eAutoInitP0()
+	{
+		eInit::remove(rl, this);
 	}
 };
 

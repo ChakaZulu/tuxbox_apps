@@ -26,9 +26,6 @@ eFrontend::eFrontend(int type, const char *demod)
 	state=stateIdle;
 	timer=new eTimer(eApp);
 
-/*	CONNECT(timer2.timeout, eFrontend::readInputPower);
-	timer2.start(250);*/
-  
 	CONNECT(timer->timeout, eFrontend::timeout);
 	fd=::open(demod, O_RDWR);
 	if (fd<0)
@@ -46,7 +43,7 @@ eFrontend::eFrontend(int type, const char *demod)
 	lastRotorCmd=-1;
 }
 
-void eFrontend::Reset()
+void eFrontend::InitDiSEqC()
 {
 	lastRotorCmd = -1;
 	sendDiSEqCCmd( 0, 0 );
@@ -59,6 +56,32 @@ void eFrontend::timeout()
 	{
 		eDebug("+");
 		state=stateIdle;
+
+		if ( transponder->satellite.valid )
+		{
+			dvb_frontend_event front;
+			if (ioctl(fd, FE_GET_FRONTEND, &front)<0)
+				perror("FE_GET_FRONTEND");
+			else
+			{
+				eDebug("FE_GET_FRONTEND OK");
+/*				eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
+				if (sat)
+				{
+					eLNB *lnb = sat->getLNB();
+					if (lnb)
+					{
+						transponder->satellite.frequency = transponder->satellite.frequency > lnb->getLOFThreshold() ?
+								front.Frequency + lnb->getLOFHi() :
+								front.Frequency + lnb->getLOFLo();
+					}
+				}
+				transponder->satellite.fec = front.u.qpsk.FEC_inner;
+				transponder->satellite.symbol_rate = front.u.qpsk.SymbolRate;*/
+				transponder->satellite.inversion = front.parameters.inversion;
+			}
+		}
+
 		/*emit*/ tunedIn(transponder, 0);
 	}
 	else
@@ -71,7 +94,13 @@ void eFrontend::timeout()
 		{
 			eDebug("couldn't lock. (state: %x)", Status());
 			state=stateIdle;
-			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
+//			if ( transponder->satellite.inversion )
+				/*emit*/ tunedIn(transponder, -ETIMEDOUT);
+/*			else
+			{
+				transponder->satellite.inversion = 1;
+				transponder->tune();
+			}*/
 		}
 }
 
@@ -522,8 +551,7 @@ int eFrontend::tune(eTransponder *trans,
     		// Variables to detect if DiSEqC must sent .. or not
 		int csw = lnb->getDiSEqC().DiSEqCParam,
 		    ToneBurst = lnb->getDiSEqC().MiniDiSEqCParam,
-		    RotorCmd = -1,
-		    SmatvFreq = -1;
+		    RotorCmd = -1;
 
 		int cmdCount=0;
 		
@@ -831,8 +859,12 @@ int eFrontend::tune(eTransponder *trans,
 		return -1;
  	}
 	eDebug("FE_SET_FRONTEND OK");
+	eDebug("Symbolrate = %d", SymbolRate );
 	state=stateTuning;
-	tries=10; // 1.0 second timeout
+//	tries=30000000*2 / SymbolRate; // 1.0 second timeout
+//	tries=tries<5?5:tries;
+	tries=30;
+	eDebug("tries=%d", tries);
 	timer->start(50, true);
 
 	return 0;

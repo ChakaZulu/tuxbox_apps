@@ -1,6 +1,7 @@
 #include <rotorconfig.h>
 
 #include <lib/base/i18n.h>
+#include <lib/system/init_num.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/emessage.h>
@@ -409,7 +410,7 @@ struct rotorMenuActions
 	}
 };
 
-eAutoInitP0<rotorMenuActions> i_rotorMenuActions(3, "rotor menu actions");
+eAutoInitP0<rotorMenuActions> i_rotorMenuActions(eAutoInitNumbers::actions, "rotor menu actions");
 
 eRotorManual::eRotorManual(eLNB *lnb)
 	:lnb(lnb), retuneTimer(new eTimer(eApp)), transponder(0), changed(0)
@@ -450,7 +451,7 @@ eRotorManual::eRotorManual(eLNB *lnb)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 			new eListBoxEntryText(*Sat, s->getDescription().c_str(), (void*) *s);
 	CONNECT(Sat->selchanged, eRotorManual::satChanged );
-	parseNetworks();
+	eTransponderList::getInstance()->reloadNetworks();
 	Sat->setCurrent(0);
 
 	Transponder = new eComboBox(this, 5 );
@@ -521,15 +522,15 @@ void eRotorManual::modeChanged( eListBoxEntryText *e)
 	{
 		default:
 		case 0:
-			helptext=_("store current pos in rotor");
+			helptext=_("store current pos in motor");
 			buttonText=_("store");
 		break;
 		case 1:
-			helptext=_("drive rotor to stored pos");
+			helptext=_("drive motor to stored pos");
 			buttonText=_("go");
 		break;
 		case 2:
-			helptext=_("driver rotor to reference position");
+			helptext=_("drive motor to reference position");
 			buttonText=_("go");
 		break;
 		case 3:
@@ -553,7 +554,7 @@ void eRotorManual::modeChanged( eListBoxEntryText *e)
 			buttonText=_("do it");
 		break;
 		case 8:
-			helptext=_("drive rotor to satellite");
+			helptext=_("drive motor to satellite");
 			buttonText=_("go");
 		break;
 	}
@@ -640,9 +641,9 @@ void eRotorManual::satChanged( eListBoxEntryText *sat)
 	if (sat && sat->getKey())
 	{
 		eSatellite *Sat = (eSatellite*) (sat->getKey());
-		for ( std::list<tpPacket>::iterator i( networks.begin() ); i != networks.end(); i++ )
+		for ( std::list<tpPacket>::const_iterator i( eTransponderList::getInstance()->getNetworks().begin() ); i != eTransponderList::getInstance()->getNetworks().end(); i++ )
 			if ( i->orbital_position == Sat->getOrbitalPosition() )
-				for (std::list<eTransponder>::iterator it( i->possibleTransponders.begin() ); it != i->possibleTransponders.end(); it++)
+				for (std::list<eTransponder>::const_iterator it( i->possibleTransponders.begin() ); it != i->possibleTransponders.end(); it++)
 					new eListBoxEntryText( *Transponder, eString().sprintf("%d / %d / %c", it->satellite.frequency/1000, it->satellite.symbol_rate/1000, it->satellite.polarisation?'V':'H' ), (void*)&(*it) );
 
 		if (Transponder->getCount())
@@ -692,7 +693,8 @@ void eRotorManual::onButtonPressed()
 		break;
 		case 3: //recalculate all stored positions
 		{
-			eMessageBox mb( _("In the case of wrong use you can falsify all stored sat positions.\nDo you really want to use this function?"), _("Warning"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
+			eMessageBox mb( _("Wrong use of this function can corrupt all stored sat positions.\n"
+				"Are you sure you want to use this function?"), _("Warning"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
 			hide();
 			mb.show();
 			switch( mb.exec() )
@@ -799,6 +801,7 @@ int eRotorManual::eventHandler( const eWidgetEvent& e)
 				{
 					if (running && timeout_usec(begTime) <= 0 )
 					{
+							eDebug("send stop");
 							eFrontend::getInstance()->sendDiSEqCCmd( 0x31, 0x60 );
 							running=false;
 							retuneTimer->stop();
@@ -892,7 +895,7 @@ void eStoreWindow::onStorePressed()
 	std::map<int,int>::iterator it = lnb->getDiSEqC().RotorTable.find( orbital_pos );
 	if ( it != lnb->getDiSEqC().RotorTable.end() )
 	{
-		eMessageBox mb( eString().sprintf(_("%d.%d°%c is currently stored at location %d!\nWhen you store this now at Location %d, we must remove the old Location.\nDo you really want to do this?"),abs(orbital_pos)/10, abs(orbital_pos)%10, orbital_pos>0?'E':'W', it->second, StorageLoc->getNumber() ), _("Warning"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
+		eMessageBox mb( eString().sprintf(_("%d.%d°%c is currently stored at location %d!\nWhen you store this now at Location %d, we must remove the old Location.\nAre you sure you want to do this?"),abs(orbital_pos)/10, abs(orbital_pos)%10, orbital_pos>0?'E':'W', it->second, StorageLoc->getNumber() ), _("Warning"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
 		hide();
 		mb.show();
 		switch( mb.exec() )
@@ -914,7 +917,9 @@ void eStoreWindow::onStorePressed()
 	}
 	else
 	{
-		eMessageBox mb( eString().sprintf(_("Store %d.%d°%c at location %d.\nIf you want another location, then say no and change the location manually.\nDo you really want to store at this location?"),abs(orbital_pos)/10, abs(orbital_pos)%10, orbital_pos>0?'E':'W', StorageLoc->getNumber() ), _("Information"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
+		eMessageBox mb( eString().sprintf(_("Store %d.%d°%c at location %d.\n"
+			"If you want another location, then say no and change the location manually.\n"
+			"Are you sure you want to store at this location?"),abs(orbital_pos)/10, abs(orbital_pos)%10, orbital_pos>0?'E':'W', StorageLoc->getNumber() ), _("Information"), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo );
 		hide();
 		mb.show();
 		switch( mb.exec() )

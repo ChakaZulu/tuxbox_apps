@@ -16,6 +16,7 @@
 #include <lib/gdi/grc.h>
 #include <lib/system/elock.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 
 #include <map>
 
@@ -78,10 +79,10 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID	face_id, FT_Face* aface)
 	if (!font)
 		return -1;
 	
-	eDebug("[FONT] FTC_Face_Requester (%s)", font->face);
+//	eDebug("[FONT] FTC_Face_Requester (%s)", font->face.c_str());
 
 	int error;
-	if ((error=FT_New_Face(library, font->filename, 0, aface)))
+	if ((error=FT_New_Face(library, font->filename.c_str(), 0, aface)))
 	{
 		eDebug(" failed: %s", strerror(error));
 		return error;
@@ -90,11 +91,11 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID	face_id, FT_Face* aface)
 	return 0;
 }																																																																
 
-FTC_FaceID fontRenderClass::getFaceID(const char *face)
+FTC_FaceID fontRenderClass::getFaceID(const eString &face)
 {
 	for (fontListEntry *f=font; f; f=f->next)
 	{
-		if (!strcmp(f->face, face))
+		if (f->face == face)
 			return (FTC_FaceID)f;
 	}
 	return 0;
@@ -106,28 +107,26 @@ FT_Error fontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_in
 	return res;
 }
 
-const char* fontRenderClass::AddFont(const char *filename)
+eString fontRenderClass::AddFont(const eString &filename, const eString &name, int scale)
 {
-	eDebugNoNewLine("[FONT] adding font %s...", filename);
+	eDebugNoNewLine("[FONT] adding font %s...", filename.c_str());
 	fflush(stdout);
 	int error;
 	fontListEntry *n=new fontListEntry;
 
+	n->scale=scale;
 	FT_Face face;
 	eLocker lock(ftlock);
 
-	if ((error=FT_New_Face(library, filename, 0, &face)))
+	if ((error=FT_New_Face(library, filename.c_str(), 0, &face)))
 		eFatal(" failed: %s", strerror(error));
 
-	strcpy(n->filename=new char[strlen(filename)+1], filename);
-	strcpy(n->face=new char[strlen(face->family_name)+strlen(face->style_name)+2], face->family_name);
-	if (face->style_name[0]!=' ')
-		strcat(n->face, " ");
-	strcat(n->face, face->style_name);
+	n->filename=filename;
+	n->face=name;
 	FT_Done_Face(face);
 
 	n->next=font;
-	eDebug("OK (%s)", n->face);
+	eDebug("OK (%s)", n->face.c_str());
 	font=n;
 
 	return n->face;
@@ -135,8 +134,6 @@ const char* fontRenderClass::AddFont(const char *filename)
 
 fontRenderClass::fontListEntry::~fontListEntry()
 {
-	delete[] filename;
-	delete[] face;
 }
 
 fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
@@ -210,14 +207,12 @@ fontRenderClass::~fontRenderClass()
 //	FT_Done_FreeType(library);
 }
 
-Font *fontRenderClass::getFont(const char *face, int size, int tabwidth)
+Font *fontRenderClass::getFont(const eString &face, int size, int tabwidth)
 {
 	FTC_FaceID id=getFaceID(face);
 	if (!id)
-		eDebug("face %s does not exist!", face);
-	if (!id)
 		return 0;
-	return new Font(this, id, size, tabwidth);
+	return new Font(this, id, size * ((fontListEntry*)id)->scale / 100, tabwidth);
 }
 
 Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize, int tw): tabwidth(tw)
@@ -255,7 +250,7 @@ void Font::unlock()
 		delete this;
 }
 
-int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags, int rflags)
+int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt glyphIndex, int flags, int rflags)
 {
 	FTC_SBit glyph;
 	if (current_font->getGlyphBitmap(glyphIndex, &glyph))
@@ -431,10 +426,16 @@ void eTextPara::setFont(const gFont &font)
 {
 	if (refcnt)
 		eFatal("mod. after lock");
-	setFont(fontRenderClass::getInstance()->getFont(font.family.c_str(), font.pointSize));
+	Font *fnt=fontRenderClass::getInstance()->getFont(font.family.c_str(), font.pointSize);
+	if (!fnt)
+		eWarning("FONT '%s' MISSING!", font.family.c_str());
+	setFont(fnt,
+		fontRenderClass::getInstance()->getFont(replacement_facename.c_str(), font.pointSize));
 }
 
-void eTextPara::setFont(Font *fnt)
+eString eTextPara::replacement_facename;
+
+void eTextPara::setFont(Font *fnt, Font *replacement)
 {
 	if (refcnt)
 		eFatal("mod. after lock");
@@ -443,12 +444,27 @@ void eTextPara::setFont(Font *fnt)
 	if (current_font && !current_font->ref)
 		delete current_font;
 	current_font=fnt;
+	replacement_font=replacement;
 	eLocker lock(ftlock);
 
-	if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
+			// we ask for replacment_font first becauseof the cache
+	if (replacement_font)
 	{
-		eDebug("FTC_Manager_Lookup_Size failed!");
-		return;
+		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, 
+				&replacement_font->font.font, &replacement_face, 
+				&replacement_font->size)<0)
+		{
+			eDebug("FTC_Manager_Lookup_Size failed!");
+			return;
+		}
+	}
+	if (current_font)
+	{
+		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
+		{
+			eDebug("FTC_Manager_Lookup_Size failed!");
+			return;
+		}
 	}
 	cache_current_font=&current_font->font.font;
 	previous=0;
@@ -572,9 +588,16 @@ int eTextPara::renderString(const eString &string, int rflags)
 			index=(rflags&RS_DIRECT)? unicode : FT_Get_Char_Index(current_face, unicode);
 
 			if (!index)
-				eDebug("unicode %d ('%c') not present", unicode, unicode);
-			else
-				appendGlyph(index, flags, rflags);
+			{
+				if (replacement_face)
+					index=(rflags&RS_DIRECT)? unicode : FT_Get_Char_Index(replacement_face, unicode);
+
+				if (!index)
+					eDebug("unicode %d ('%c') not present", unicode, unicode);
+				else
+					appendGlyph(replacement_font, replacement_face, index, flags, rflags);
+			} else
+				appendGlyph(current_font, current_face, index, flags, rflags);
 		}
 	}
 	bboxValid=false;
@@ -585,6 +608,9 @@ int eTextPara::renderString(const eString &string, int rflags)
 void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background, const gRGB &foreground)
 {
 	eLocker lock(ftlock);
+	
+	if (!current_font)
+		return;
 
 	if (&current_font->font.font != cache_current_font)
 	{
@@ -802,4 +828,4 @@ void eTextPara::clear()
 	glyphs.clear();
 }
 
-eAutoInitP0<fontRenderClass> init_fontRenderClass(1, "Font Render Class");
+eAutoInitP0<fontRenderClass> init_fontRenderClass(eAutoInitNumbers::graphic-1, "Font Render Class");

@@ -11,7 +11,7 @@ static inline unsigned short MadFixedToUshort(mad_fixed_t Fixed)
 }
 
 eAudioDecoderMP3::eAudioDecoderMP3(eIOBuffer &input, eIOBuffer &output): 
-		eAudioDecoder(input, output), avgbr(-1), framecnt(0)
+		avgbr(-1), framecnt(0), input(input), output(output)
 {
 	mad_stream_init(&stream);
 	mad_frame_init(&frame);
@@ -38,7 +38,7 @@ int eAudioDecoderMP3::decodeMore(int last, int maxsamples)
 		{
 			size_t read_size, remaining;
 			unsigned char *read_start;
-	
+			
 			if (stream.next_frame)
 			{
 				remaining=stream.bufend-stream.next_frame;
@@ -49,7 +49,7 @@ int eAudioDecoderMP3::decodeMore(int last, int maxsamples)
 				read_size=INPUT_BUFFER_SIZE,
 				read_start=input_buffer,
 				remaining=0;
-		
+				
 			read_size=input.read(read_start, read_size);
 			
 			if (!read_size)
@@ -58,7 +58,7 @@ int eAudioDecoderMP3::decodeMore(int last, int maxsamples)
 			mad_stream_buffer(&stream, input_buffer, read_size+remaining);
 			stream.error=(mad_error)0;
 		}
-
+		
 		if (mad_frame_decode(&frame, &stream))
 			if (MAD_RECOVERABLE(stream.error))
 			{
@@ -67,7 +67,7 @@ int eAudioDecoderMP3::decodeMore(int last, int maxsamples)
 			} else
 				if (stream.error == MAD_ERROR_BUFLEN)
 				{
-				//	eDebug("MAD_ERROR_BUFLEN");
+//					eDebug("MAD_ERROR_BUFLEN");
 					continue;
 				} else
 				{
@@ -86,7 +86,10 @@ int eAudioDecoderMP3::decodeMore(int last, int maxsamples)
 		}
 
 		if (++framecnt < speed)
+		{
+			eDebug("SPEED");
 			continue;
+		}
 		framecnt=0;
 
 		mad_synth_frame(&synth, &frame);

@@ -7,6 +7,7 @@
 #include <linux/input.h>
 
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 #include <lib/base/eerror.h>
 
@@ -241,4 +242,4 @@ std::map<eString,eRCDevice*,eRCInput::lstr> &eRCInput::getDevices()
 	return devices;
 }
 
-eAutoInitP0<eRCInput> init_rcinput(1, "RC Input layer");
+eAutoInitP0<eRCInput> init_rcinput(eAutoInitNumbers::rc, "RC Input layer");

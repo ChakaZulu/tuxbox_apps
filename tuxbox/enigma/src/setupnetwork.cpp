@@ -164,7 +164,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ok->setShortcutPixmap("green");
 	ok->move(ePoint(10, 220));
 	ok->resize(eSize(170, 40));
-	ok->setHelpText(_("close window and save changes"));
+	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
@@ -174,7 +174,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	abort->setText(_("abort"));
 	abort->move(ePoint(200, 220));
 	abort->resize(eSize(170, 40));
-	abort->setHelpText(_("close window (no changes are saved)"));
+	abort->setHelpText(_("ignore changes and return"));
 
 	CONNECT(abort->selected, eZapNetworkSetup::abortPressed);
 

@@ -167,12 +167,12 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
-	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
+	int service_id=-1, dvb_namespace=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
 	unsigned int optval=opt.find("=");
 	if (optval!=eString::npos)
 		opt=opt.mid(optval+1);
 	if (opt.length())
-		sscanf(opt.c_str(), "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
+		sscanf(opt.c_str(), "%x:%x:%x:%x:%x", &service_id, &dvb_namespace, &transport_stream_id, &original_network_id, &service_type);
 	eString result="";
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
@@ -180,7 +180,7 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 		eServiceInterface *iface=eServiceInterface::getInstance();
 		if(!iface)
 			return "-1";
-		eServiceReferenceDVB *ref=new eServiceReferenceDVB(eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
+		eServiceReferenceDVB *ref=new eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
 		iface->play(*ref);
 		result="0";
 	} else

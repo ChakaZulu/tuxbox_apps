@@ -79,10 +79,10 @@ enigmaCImmi::enigmaCImmi(eDVBCI *DVBCI): eWindow(0), mmi(0)
 	abort=new eButton(this);
 	abort->setText(_("abort"));
 
-	abort->move(ePoint(310, 280));
-	abort->resize(eSize(150, 30));
+	abort->move(ePoint(450, 280));
+	abort->resize(eSize(90, fd+4));
 
-	abort->setHelpText(_("leave ci mmi"));
+	abort->setHelpText(_("leave CI mmi"));
 	abort->loadDeco();
 
 	CONNECT(abort->selected, enigmaCImmi::abortPressed);		
@@ -224,7 +224,7 @@ void enigmaCImmi::getmmi(const char *data)
 		ok->setText(_("OK"));
 		ok->move(ePoint(235, 70));
 		ok->resize(eSize(90, fd+4));
-		ok->setHelpText(_("send data to ci"));
+		ok->setHelpText(_("send data to CI"));
 		ok->loadDeco();
 		ok->show();
 
@@ -416,7 +416,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 	reset->setText(_("Reset"));
 	reset->move(ePoint(10, 13));
 	reset->resize(eSize(330, fd+10));
-	reset->setHelpText(_("reset the common interface module"));
+	reset->setHelpText(_("reset the Common Interface module"));
 	reset->loadDeco();
 
 	CONNECT(reset->selected, enigmaCI::resetPressed);		
@@ -425,7 +425,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 	init->setText(_("Init"));
 	init->move(ePoint(10, 53));
 	init->resize(eSize(330, fd+10));
-	init->setHelpText(_("send the ca-pmt to ci"));
+	init->setHelpText(_("send the ca-pmt to CI"));
 	init->loadDeco();
 
 	CONNECT(init->selected, enigmaCI::initPressed);		
@@ -434,17 +434,10 @@ enigmaCI::enigmaCI(): eWindow(0)
 	app->setText(_("waiting for module"));
 	app->move(ePoint(10, 93));
 	app->resize(eSize(330, fd+10));
-	app->setHelpText(_("enter ci menu (mmi)"));
+	app->setHelpText(_("enter Common Interface menu (mmi)"));
 	app->loadDeco();
 
 	CONNECT(app->selected, enigmaCI::appPressed);		
-
-	ok=new eButton(this);
-	ok->setText(_("ok"));
-	ok->move(ePoint(20, 150));
-	ok->resize(eSize(90, fd+4));
-	ok->setHelpText(_("leave common interface menu"));
-	ok->loadDeco();
 
 	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM5600)
 	{
@@ -452,7 +445,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 		reset2->setText(_("Reset"));
 		reset2->move(ePoint(10, 143));
 		reset2->resize(eSize(330, fd+10));
-		reset2->setHelpText(_("reset the common interface module"));
+		reset2->setHelpText(_("reset the Common Interface module"));
 		reset2->loadDeco();
 
 		CONNECT(reset2->selected, enigmaCI::reset2Pressed);		
@@ -461,7 +454,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 		init2->setText(_("Init"));
 		init2->move(ePoint(10, 183));
 		init2->resize(eSize(330, fd+10));
-		init2->setHelpText(_("send the ca-pmt to ci"));
+		init2->setHelpText(_("send the ca-pmt to CI"));
 		init2->loadDeco();
 
 		CONNECT(init2->selected, enigmaCI::init2Pressed);		
@@ -470,7 +463,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 		app2->setText(_("waiting for module"));
 		app2->move(ePoint(10, 223));
 		app2->resize(eSize(330, fd+10));
-		app2->setHelpText(_("enter ci menu (mmi)"));
+		app2->setHelpText(_("enter Common Interface menu (mmi)"));
 		app2->loadDeco();
 
 		CONNECT(app2->selected, enigmaCI::app2Pressed);		
@@ -479,7 +472,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 		ok->setText(_("ok"));
 		ok->move(ePoint(20, 273));
 		ok->resize(eSize(90, fd+4));
-		ok->setHelpText(_("leave common interface menu"));
+		ok->setHelpText(_("leave Common Interface menu"));
 		ok->loadDeco();
 	}
 	else
@@ -488,7 +481,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 		ok->setText(_("ok"));
 		ok->move(ePoint(20, 150));
 		ok->resize(eSize(90, fd+4));
-		ok->setHelpText(_("leave common interface menu"));
+		ok->setHelpText(_("leave Common Interface menu"));
 		ok->loadDeco();
 	}
 	

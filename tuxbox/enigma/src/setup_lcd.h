@@ -14,13 +14,13 @@ class eZapLCDSetup: public eWindow
 	eSlider *p_brightness, *p_contrast, *p_standby;
 	eLabel *bbrightness, *bcontrast, *bstandby;
 	eStatusBar* statusbar;
-	eCheckbox* inverted;
+	eCheckbox* inverted, *shortnames;
 	
 	int lcdbrightness;
 	int lcdcontrast;
 	int lcdstandby;
 	unsigned char lcdinverted;
-	                	
+
 	eButton *ok, *abort;
 	void okPressed();
 	void abortPressed();

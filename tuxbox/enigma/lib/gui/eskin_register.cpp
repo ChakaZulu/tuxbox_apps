@@ -2,6 +2,7 @@
 #include <lib/gui/eskin.h>
 #include <lib/gdi/gfbdc.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 
 #define DEFAULTSKIN "stone.esml"
@@ -40,4 +41,4 @@ public:
 	}
 };
 
-eAutoInitP0<eSkinInit> init_skin(2, "skin subsystem");
+eAutoInitP0<eSkinInit> init_skin(eAutoInitNumbers::skin, "skin subsystem");

@@ -585,3 +585,48 @@ void Decoder::addCADescriptor(__u8 *descriptor)
 	memcpy(parms.descriptors+parms.descriptor_length, descriptor, descriptor[1]+2);
 	parms.descriptor_length+=descriptor[1]+2;
 }
+
+int Decoder::displayIFrame(const char *frame, int len)
+{
+/*	int fd=::open("/dev/video", O_WRONLY);
+	eDebug("opening /dev/video: %d", fd);
+	if (fd < 0)
+		return -1;
+	
+	write(fd, frame, len);
+	write(fd, frame, len);
+	write(fd, frame, len);
+	write(fd, frame, len);
+	parms.vpid=0x1fff;
+	parms.pcrpid=-1;
+	Set();
+	startTrickmode();
+	write(fd, frame, len);
+	write(fd, frame, len);
+	write(fd, frame, len);
+	write(fd, frame, len);
+
+	close(fd); */
+	return 0;
+}
+
+int Decoder::displayIFrameFromFile(const char *filename)
+{
+	int fd=::open(filename, O_RDONLY);
+	if (fd < 0)
+		return -1;
+	int size=::lseek(fd, 0, SEEK_END);
+	::lseek(fd, 0, SEEK_SET);
+	if (size < 0)
+	{
+		::close(fd);
+		return -1;
+	}
+	char *buffer=new char[size];
+	::read(fd, buffer, size);
+
+	::close(fd);
+	int res=displayIFrame(buffer, size);
+	delete[] buffer;
+	return res;
+}

@@ -8,7 +8,7 @@
 struct cursorActions
 {
 	eActionMap map;
-	eAction up, down, left, right, ok, cancel;
+	eAction up, down, left, right, ok, cancel, help;
 	cursorActions(): 
 		map("cursor", "Cursor"),
 		up(map, "up", _("up"), eAction::prioWidget),
@@ -16,7 +16,8 @@ struct cursorActions
 		left(map, "left", _("left"), eAction::prioWidget),
 		right(map, "right", _("right"), eAction::prioWidget),
 		ok(map, "ok", _("ok"), eAction::prioWidget),
-		cancel(map, "cancel", _("cancel"), eAction::prioDialog)
+		cancel(map, "cancel", _("cancel"), eAction::prioDialog),
+		help(map, "help", _("show the window help"), eAction::prioGlobal)
 	{
 	}
 };

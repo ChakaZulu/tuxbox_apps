@@ -1,6 +1,7 @@
 #include <lib/gui/ebutton.h>
 #include <lib/gui/eskin.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/guiactions.h>
 
@@ -80,13 +81,13 @@ int eButton::eventHandler(const eWidgetEvent &event)
 				/*emit*/ selected();
 				/*emit*/ selected_id(this);
 		
-				if (parent && parent->LCDElement)
+/*				if (parent && parent->LCDElement)
 				{
 					if (LCDTmp)
 						LCDTmp->setText(text);
 					else
 						parent->LCDElement->setText(text);
-				}
+				}*/
 			}
 			else
 				return eLabel::eventHandler(event);
@@ -121,4 +122,4 @@ public:
 	}
 };
 
-eAutoInitP0<eButtonSkinInit> init_eButtonSkinInit(3, "eButton");
+eAutoInitP0<eButtonSkinInit> init_eButtonSkinInit(eAutoInitNumbers::guiobject, "eButton");

@@ -23,11 +23,10 @@ protected:
 	gColor colorActiveB, colorActiveF;
 	eRect crect, crect_selected;
 	enum  { arNothing, arCurrentOld, arAll};
-	int MaxEntries, item_height, flags, columns, in_atomic, atomic_redraw, atomic_old, atomic_new;
+	int movemode, MaxEntries, item_height, flags, columns, in_atomic, atomic_redraw, atomic_old, atomic_new;
 	bool atomic_selchanged;
-	int movemode;
 public:
-	enum	{		flagNoUpDownMovement=1,		flagNoPageMovement=2,		flagShowEntryHelp=4, flagGrabCancel = 8 };
+	enum	{		flagNoUpDownMovement=1,		flagNoPageMovement=2,		flagShowEntryHelp=4, flagShowPartial=8 };
 	enum	{		OK = 0,		ERROR=1,		E_ALLREADY_SELECTED = 2,		E_COULDNT_FIND = 4,		E_INVALID_ENTRY = 8,	 E_NOT_VISIBLE = 16		};
 	void setFlags(int);
 	void removeFlags(int);
@@ -115,7 +114,7 @@ public:
   
 	enum
 	{
-		dirPageDown, dirPageUp, dirDown, dirUp, dirFirst
+		dirPageDown, dirPageUp, dirDown, dirUp, dirFirst, dirLast
 	};
 
 	int moveSelection(int dir);
@@ -132,7 +131,7 @@ protected:
 	eListBox<eListBoxEntry>* listbox;
 	eString helptext;
 public:
-	eListBoxEntry(eListBox<eListBoxEntry>* parent, const char *hlptxt=0)
+	eListBoxEntry(eListBox<eListBoxEntry>* parent, eString hlptxt=0)
 		:listbox(parent), helptext(hlptxt?hlptxt:_("no description avail"))
 	{	
 		if (listbox)
@@ -163,13 +162,13 @@ public:
 	enum { value, ptr };
 	static int getEntryHeight();
 
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0, const char* hlptxt=0, int keytype = value )
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0, const eString &hlptxt="", int keytype = value )
 		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb, hlptxt ), text(txt),
 		 key(key), align(align), para(0), keytype(keytype)
 	{
 	}
 
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0, const char* hlptxt=0, int keytype = value )
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0, const eString &hlptxt="", int keytype = value )
 		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb, hlptxt ), text(txt),
 		 key(key), align(align), para(0), keytype(keytype)
 	{
@@ -221,7 +220,7 @@ class eListBoxEntryMenu: public eListBoxEntryText
 public:
 	Signal0<void> selected;
 
-	eListBoxEntryMenu(eListBox<eListBoxEntryMenu>* lb, const char* txt, const char* hlptxt=0, int align=0 )
+	eListBoxEntryMenu(eListBox<eListBoxEntryMenu>* lb, const char* txt, const eString &hlptxt="", int align=0 )
 		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, txt, 0, align, hlptxt)
 	{
 		if (listbox)
@@ -340,15 +339,15 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 	// rc wird in eListBoxBase ggf auf den neuen Client Bereich ohne Rand verkleinert
 
 	int i=0;
-	for (ePtrList_T_iterator entry(top); (entry != bottom) && (entry != childs.end()); ++entry)
+	for (ePtrList_T_iterator entry(top); ((flags & flagShowPartial) || (entry != bottom)) && (entry != childs.end()); ++entry)
 	{
 		eRect rect = getEntryRect(i);
 
 		eString s;
 
-		if ( rc.contains(rect) )
+		if ( rc.intersects(rect) )
 		{
-			target->clip(rect);
+			target->clip(rect & rc);
 			if ( entry == current )
 			{
 				if ( LCDTmp ) // LCDTmp is only valid, when we have the focus
@@ -362,6 +361,11 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 				entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), 0 /*( have_focus ? 0 : ( MaxEntries > 1 ? 2 : 0 ) )*/	);
 			target->clippop();
 		}
+				// special case for "showPartial": as bottom is set to the 
+				// last, half visible entry we want to redraw this, too.
+		if (flags & flagShowPartial) 
+			if (entry == bottom)
+				break;
 
 		i++;
 	}
@@ -547,6 +551,17 @@ inline int eListBox<T>::moveSelection(int dir)
 				if ( bottom == childs.end() )
 					break;
 			break;
+		case dirLast:
+			direction=1;
+			top=bottom=current=childs.end();
+			if (current == childs.begin())
+				break;	// empty.
+			
+			for (int i = 0; i < MaxEntries * columns; ++i)
+				if (top != childs.begin())
+					--top;
+			--current;
+			break;
 		default:
 			return 0;
 	}
@@ -587,12 +602,12 @@ inline int eListBox<T>::moveSelection(int dir)
 			
 			*curi=old;
 		}
-
-		if (!in_atomic)
-			selchanged(*current);
-		else
-			atomic_selchanged=1;
 	}
+
+	if (!in_atomic)
+		selchanged(*current);
+	else
+		atomic_selchanged=1;
 
 	if (flags & flagShowEntryHelp)
 	{
@@ -680,8 +695,11 @@ inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 template <class T>
 inline int eListBox<T>::setCurrent(const T *c)
 {
-	if (childs.empty() || ((current != childs.end()) && (*current == c)))  // no entries or current is equal the entry to search
-		return E_ALLREADY_SELECTED;	// do nothing
+/*	if (childs.empty() || ((current != childs.end()) && (*current == c)))  // no entries or current is equal the entry to search
+		return E_ALLREADY_SELECTED;	// do nothing*/
+
+	if ( childs.empty() )
+		return E_COULDNT_FIND;
 
 	ePtrList_T_iterator item(childs.begin()), it(childs.begin());
 

@@ -39,6 +39,8 @@ public:
 	static void startTrickmode();
 	static void stopTrickmode();
 	static void setVideoFormat( int format );
+	static int  displayIFrame(const char *frame, int len);
+	static int  displayIFrameFromFile(const char *filename);
 };
 
 #endif

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.2 2003/01/12 00:48:57 Ghostrider Exp $
+ * $Id: console.cpp,v 1.3 2003/02/16 01:02:57 waldi Exp $
  */
 
 #include <lib/base/console.h>
@@ -32,33 +32,36 @@ inline int bidirpipe(int pfd[], char *cmd , char *argv[])
 {
 	int pfdin[2];  /* from child to parent */
 	int pfdout[2]; /* from parent to child */
+	int pfderr[2]; /* stderr from child to parent */
 	int pid;       /* child's pid */
 
-	if ( pipe(pfdin) == -1 || pipe(pfdout) == -1)
+	if ( pipe(pfdin) == -1 || pipe(pfdout) == -1 || pipe(pfderr) == -1)
 		return(-1);
 
 	if ( ( pid = fork() ) == -1 )
 		return(-1);
 	else if (pid == 0) /* child process */
 	{
-		if ( close(0) == -1 || close(1) == -1 )
+		if ( close(0) == -1 || close(1) == -1 || close(2) == -1 )
 			_exit(0);
 
-		if (dup(pfdout[0]) != 0 || dup(pfdin[1]) != 1)
+		if (dup(pfdout[0]) != 0 || dup(pfdin[1]) != 1 || dup(pfderr[1]) != 2 )
 			_exit(0);
 
 		if (close(pfdout[0]) == -1 || close(pfdout[1]) == -1 ||
-				close(pfdin[0]) == -1 || close(pfdin[1]) == -1)
+				close(pfdin[0]) == -1 || close(pfdin[1]) == -1 ||
+				close(pfderr[0]) == -1 || close(pfderr[1]) == -1 )
 			_exit(0);
 
 		execv(cmd,argv);
 		_exit(0);
 	}
-	if (close(pfdout[0]) == -1 || close(pfdin[1]) == -1)
+	if (close(pfdout[0]) == -1 || close(pfdin[1]) == -1 || close(pfderr[1]) == -1)
 			return(-1);
 
 	pfd[0] = pfdin[0];
 	pfd[1] = pfdout[1];
+	pfd[2] = pfderr[0];
 
 	return(pid);
 }
@@ -125,7 +128,7 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 		strcpy( argv[cnt], cmds.c_str() );
 	}
 
-  // get on read and one write pipe to the prog..
+  // get one read ,one write and the err pipe to the prog..
   
 	if ( (pid = bidirpipe(fd, argv[0], argv)) == -1 )
 	{
@@ -139,12 +142,14 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 		delete [] argv[cnt];
 	delete [] argv;
 
-	eDebug("pipe in = %d, out = %d", fd[0], fd[1]);
+	eDebug("pipe in = %d, out = %d, err = %d", fd[0], fd[1], fd[2]);
 
-	in = new eSocketNotifier(eApp, fd[0], 17 );  // 17 = POLLIN, POLLPRI, POLLHUP
+	in = new eSocketNotifier(eApp, fd[0], 19 );  // 19 = POLLIN, POLLPRI, POLLHUP
 	out = new eSocketNotifier(eApp, fd[1], eSocketNotifier::Write);  // POLLOUT
+	err = new eSocketNotifier(eApp, fd[2], 19 );  // 19 = POLLIN, POLLPRI, POLLHUP
 	CONNECT(in->activated, eConsoleAppContainer::readyRead);
 	CONNECT(out->activated, eConsoleAppContainer::readyWrite);
+	CONNECT(err->activated, eConsoleAppContainer::readyErrRead);
 	signal(SIGCHLD, SIG_IGN);   // no zombie when child killed
 }
 
@@ -170,10 +175,13 @@ void eConsoleAppContainer::closePipes()
 {
 	in->stop();
 	out->stop();
+	err->stop();
 	::close(fd[0]);
 	fd[0]=0;
 	::close(fd[1]);
 	fd[1]=0;
+	::close(fd[2]);
+	fd[2]=0;
 	eDebug("pipes closed");
 }
 
@@ -195,6 +203,21 @@ void eConsoleAppContainer::readyRead(int what)
 		eDebug("child has terminated");
 		closePipes();
 		/*emit*/ appClosed(killstate);
+	}
+}
+
+void eConsoleAppContainer::readyErrRead(int what)
+{
+	if (what & POLLPRI|POLLIN)
+	{
+		eDebug("what = %d");
+		char buf[2048];
+		int readed = read(fd[2], buf, 2048);
+		eDebug("%d bytes read", readed);
+		if ( readed != -1 && readed )
+			/*emit*/ dataAvail( eString( buf ) );
+		else if (readed == -1)
+			eDebug("readerror %d", errno);
 	}
 }
 

@@ -77,8 +77,10 @@ void ShowBNVersion::willShow()
 		text->setText("Service system unavailable");
 		return;
 	}
-	
-	if (sapi->switchService(eServiceReferenceDVB(eTransportStreamID(0x0001), eOriginalNetworkID(0x0085), eServiceID(0x0F03), -1)))
+
+			// try astra 19.2 and cable.
+	if (sapi->switchService(eServiceReferenceDVB(eDVBNamespace(192<<16), eTransportStreamID(0x0001), eOriginalNetworkID(0x0085), eServiceID(0x0F03), -1)) &&
+			sapi->switchService(eServiceReferenceDVB(eDVBNamespace(0), eTransportStreamID(0x0001), eOriginalNetworkID(0x0085), eServiceID(0x0F03), -1)))
 		text->setText("Transponder not found. Do a channelsearch first.");
 	else
 		text->setText("Tuning in transponder...");

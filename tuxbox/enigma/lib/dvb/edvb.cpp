@@ -29,6 +29,7 @@
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/record.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 #include <lib/dvb/dvbci.h>
 
@@ -59,7 +60,7 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 }
 
 eDVB::eDVB()
-	: state(eDVBState::stateIdle), nvodEIT(0)
+	: state(eDVBState::stateIdle), parentEIT(0)
 {
 	settings=0;
 	time_difference=0;
@@ -105,8 +106,8 @@ eDVB::eDVB()
 		// tuned-in handling
 	CONNECT(eFrontend::getInstance()->tunedIn, eDVB::tunedIn);
 
-		// decoder init
-	Decoder::Initialize();
+		// decoder init .... already done!
+//	Decoder::Initialize();
 	
 		// set to idle state
 	controller=0;
@@ -219,10 +220,10 @@ EIT *eDVB::getEIT()
 {
 	if ( tEIT.ready() )
 		return tEIT.getCurrent();
-	else if ( nvodEIT )
+	else if ( parentEIT )
 	{
-		nvodEIT->lock();
-		return nvodEIT;
+		parentEIT->lock();
+		return parentEIT;
 	}
 	else
 		return 0;
@@ -291,7 +292,7 @@ void eDVB::configureNetwork()
 	}
 }
 
-void eDVB::recBegin(const char *filename)
+void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 {
 	if (recorder)
 		recEnd();
@@ -321,6 +322,94 @@ void eDVB::recBegin(const char *filename)
 	recorder->addPID(0);	// PAT
 	if (Decoder::parms.pmtpid != -1)
 		recorder->addPID(Decoder::parms.pmtpid);
+		
+	// build SMI table.
+	
+	// build SIT:
+	__u8 sit[4096];
+	int pos=0;
+	sit[pos++]=0x7F;              // TID
+	sit[pos++]=0x80;              // section_syntax_indicator, length
+	sit[pos++]=0;                 // length
+	sit[pos++]=0; sit[pos++]=0;   // reserved
+	sit[pos++]=1;                 // reserved, version number, current/next indicator
+	sit[pos++]=0;                 // section number
+	sit[pos++]=0;                 // last section number
+	sit[pos++]=0;                 // loop length
+	sit[pos++]=0;                 // "    "
+	int loop_pos=pos;
+		// TODO: build Partitial Transport Stream descriptor containing valid values about rate
+	sit[loop_pos-2]|=(pos-loop_pos)>>8;
+	sit[loop_pos-1]|=(pos-loop_pos)&0xFF;
+	
+	// create one single entry: our service...
+	sit[pos++]=service.getServiceID().get()>>8;
+	sit[pos++]=service.getServiceID().get()&0xFF;
+	sit[pos++]=3<<4;              // running state
+	sit[pos++]=0;
+	loop_pos=pos;
+
+	// create our special descriptor:
+	sit[pos++]=0x80;              // private	
+	sit[pos++]=0;
+	int descr_pos=pos;
+	memcpy(sit+pos, "ENIGMA", 6);
+	pos+=6;
+
+	if (Decoder::parms.vpid != -1)
+	{
+		sit[pos++]=eServiceDVB::cVPID;
+		sit[pos++]=2;
+		sit[pos++]=Decoder::parms.vpid>>8;
+		sit[pos++]=Decoder::parms.vpid&0xFF;
+	}
+
+	if (Decoder::parms.apid != -1)
+	{
+		sit[pos++]=eServiceDVB::cAPID;
+		sit[pos++]=3;
+		sit[pos++]=Decoder::parms.apid>>8;
+		sit[pos++]=Decoder::parms.apid&0xFF;
+		sit[pos++]=Decoder::parms.audio_type;
+	}
+	
+	if (Decoder::parms.tpid != -1)
+	{
+		sit[pos++]=eServiceDVB::cTPID;
+		sit[pos++]=2;
+		sit[pos++]=Decoder::parms.tpid>>8;
+		sit[pos++]=Decoder::parms.tpid&0xFF;
+	}
+
+	if (Decoder::parms.pcrpid != -1)
+	{
+		sit[pos++]=eServiceDVB::cPCRPID;
+		sit[pos++]=2;
+		sit[pos++]=Decoder::parms.pcrpid>>8;
+		sit[pos++]=Decoder::parms.pcrpid&0xFF;
+	}
+
+	sit[descr_pos-2]|=(pos-descr_pos)>>8;
+	sit[descr_pos-1]|=(pos-descr_pos)&0xFF;
+
+		// fix lengths
+	sit[loop_pos-2]|=(pos-loop_pos)>>8;
+	sit[loop_pos-1]|=(pos-loop_pos)&0xFF;
+	
+		// add CRC (calculate later)
+	sit[pos++]=0;
+	sit[pos++]=0;
+	sit[pos++]=0;
+	sit[pos++]=0;
+
+		// fix length
+	sit[1]|=(pos-3)>>8;
+	sit[2]|=(pos-3)&0xFF;
+
+	// generate CRC :)
+	
+	// write section.
+	recorder->writeSection(sit, 0x1f);
 }
 
 void eDVB::recPause()
@@ -375,4 +464,4 @@ eDVBScanController *eDVB::getScanAPI()
 	return (eDVBScanController*)controller;
 }
 
-eAutoInitP0<eDVB> init_dvb(4, "eDVB lib");
+eAutoInitP0<eDVB> init_dvb(eAutoInitNumbers::dvb, "eDVB lib");

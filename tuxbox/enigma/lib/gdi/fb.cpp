@@ -7,7 +7,6 @@
 #include <memory.h>
 #include <linux/kd.h>
 
-#include <tuxbox/tuxbox.h>
 #include <lib/system/econfig.h>
 #include <lib/gdi/fb.h>
 
@@ -73,17 +72,14 @@ nolfb:
 
 int fbClass::showConsole(int state)
 {
-//	if ( tuxbox_get_model() == TUXBOX_MODEL_DBOX2 )
+	int fd=open("/dev/vc/0", O_RDWR);
+	if(fd>=0)
 	{
-		int fd=open("/dev/vc/0", O_RDWR);
-		if(fd>=0)
+		if(ioctl(fd, KDSETMODE, state?KD_TEXT:KD_GRAPHICS)<0)
 		{
-			if(ioctl(fd, KDSETMODE, state?KD_TEXT:KD_GRAPHICS)<0)
-			{
-				eDebug("setting /dev/vc/0 status failed.");
-			}
-			close(fd);
+			eDebug("setting /dev/vc/0 status failed.");
 		}
+		close(fd);
 	}
 	return 0;
 }

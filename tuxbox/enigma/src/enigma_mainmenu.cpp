@@ -14,6 +14,21 @@
 #include <lib/dvb/epgcache.h>
 #include <lib/base/i18n.h>
 #include <lib/gui/guiactions.h>
+#include <lib/system/init_num.h>
+
+struct enigmaMainmenuActions
+{
+	eActionMap map;
+	eAction close;
+	enigmaMainmenuActions():
+		map("mainmenu", _("enigma mainmenu")),
+		close(map, "close", _("close the mainmenu"), eAction::prioDialog)
+	{
+	}
+};
+
+eAutoInitP0<enigmaMainmenuActions> i_mainmenuActions(eAutoInitNumbers::actions, "enigma mainmenu actions");
+
 
 void eMainMenu::setActive(int i)
 {
@@ -29,33 +44,33 @@ void eMainMenu::setActive(int i)
 	switch (i)
 	{
 	case 0:
-		description->setText(_("TV mode"));
+		description->setText(eString("(1) ") + eString(_("TV mode")));
 		break;
 	case 1:
-		description->setText(_("Radio mode"));
+		description->setText(eString("(2) ") + eString(_("Radio mode")));
 		break;
 	case 2:
-		description->setText(_("File mode"));
+		description->setText(eString("(3) ") + eString(_("File mode")));
 		break;
 	case 3:
-		description->setText(_("information"));
+		description->setText(eString("(4) ") + eString(_("Information")));
 		break;
 	case 4:
-		description->setText(_("shutdown"));
+		description->setText(eString("(5) ") + eString(_("Shutdown")));
 		break;
 	case 5:
-		description->setText(_("setup"));
+		description->setText(eString("(6) ") + eString(_("Setup")));
 		break;
 	case 6:
-		description->setText(_("games"));
+		description->setText(eString("(7) ") + eString(_("Games")));
 		break;
 	case 7:
-		description->setText(_("VCR"));
+		description->setText(eString("(8) ") + eString(_("VCR")));
 		break;
 	case 8:
-		description->setText(_("Timer"));
+		description->setText(eString("(9) ") + eString(_("Timer")));
 	}
-
+	
 	if (LCDTitle)
 		LCDTitle->setText(_("Mainmenu"));
 
@@ -66,6 +81,7 @@ void eMainMenu::setActive(int i)
 eMainMenu::eMainMenu()
 	: eWidget(0, 1)
 {
+	addActionMap(&i_mainmenuActions->map);
 	addActionMap(&i_cursorActions->map);
 	addActionMap(&i_shortcutActions->map);
 	eLabel *background=new eLabel(this);
@@ -104,7 +120,7 @@ eMainMenu::eMainMenu()
 			eFatal("error, mainmenu bug, mainmenu.%s.sel not defined", pixmap_name[i]);
 	}
 
-	setActive(active=eZapMain::getInstance()->getRealMode());		
+	setActive(active=eZapMain::getInstance()->getMode());		
 }
 
 void eMainMenu::sel_tv()
@@ -204,7 +220,9 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 			LCDElement->setText( description->getText() );
 		break;
 	case eWidgetEvent::evtAction:
-		if (event.action == &i_cursorActions->left)
+		if (event.action == &i_mainmenuActions->close)
+			close(0);
+		else if (event.action == &i_cursorActions->left)
 		{
 			active+=MENU_ENTRIES-1;
 			active%=MENU_ENTRIES;

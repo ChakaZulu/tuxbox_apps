@@ -8,6 +8,7 @@
 #include <lib/gui/eskin.h>
 #include <lib/gui/eprogress.h>
 #include <lib/gui/guiactions.h>
+#include <lib/system/init_num.h>
 
 struct enigmaEventViewActions
 {
@@ -19,7 +20,8 @@ struct enigmaEventViewActions
 	{
 	}
 };
-eAutoInitP0<enigmaEventViewActions> i_enigmaEventViewActions(5, "enigma event view actions");
+
+eAutoInitP0<enigmaEventViewActions> i_enigmaEventViewActions(eAutoInitNumbers::actions, "enigma event view actions");
 
 void eEventDisplay::nextEvent()
 {
@@ -142,8 +144,8 @@ eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEv
 	// try to recalc long description label... ( no broken text lines.. )
 	float lineheight=fontRenderClass::getInstance()->getLineHeight( long_description->getFont() );
 	int lines = descr->getSize().height() / (int)lineheight;
-	int newheight = lines * (int)lineheight + (round(lineheight) - (int)lineheight);
-	descr->resize( eSize( descr->getSize().width(), newheight + lineheight/6 ) );
+	int newheight = lines * (int)lineheight + (int)(round(lineheight) - (int)lineheight);
+	descr->resize( eSize( descr->getSize().width(), newheight + (int)lineheight/6 ) );
 	long_description->resize(eSize(descr->getSize().width(), descr->getSize().height()*4));
 
 	if (e)
@@ -224,7 +226,7 @@ void eEventDisplay::setEvent(EITEvent *event)
 		}
 
 		if (!_title)
-			_title = _("no info available");
+			_title = _("no information is available");
 
 		eventTime->setText(_eventTime);
 		eventDate->setText(_eventDate);
@@ -232,7 +234,7 @@ void eEventDisplay::setEvent(EITEvent *event)
 		setText(_title);
 
 		if (!_long_description)
-			long_description->setText(_("no description available"));
+			long_description->setText(_("no description is available"));
 		else
 			long_description->setText(_long_description);
 
@@ -241,7 +243,7 @@ void eEventDisplay::setEvent(EITEvent *event)
 	else
 	{
 		setText(service);
-		long_description->setText(_("no description available"));
+		long_description->setText(_("no description is available"));
 	}
 	updateScrollbar();
 	long_description->show();

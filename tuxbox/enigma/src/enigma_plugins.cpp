@@ -289,7 +289,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		{
 			if (isVisible())
 				hide();
-			eMessageBox msg("The symbol " + plugin->pluginname + "_exec" + " was not found. sorry.", "plugin executing failed");
+			eMessageBox msg("The symbol plugin_exec was not found. sorry.", "plugin executing failed");
 			msg.show();
 			msg.exec();
 			msg.hide();
@@ -306,13 +306,12 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 			dlclose(libhandle[i]);
 	}
 
-	do  // Parameter Liste freigegeben
+	while (first)  // Parameter Liste freigegeben
 	{
 		tmp = first->next;
 		delete first;
 		first = tmp;
 	}
-	while (first);
 
 	if (plugin->needfb)
 		fbClass::getInstance()->unlock();

@@ -1,6 +1,7 @@
 #include <lib/dvb/service.h>
 #include <lib/dvb/dvb.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 
 eServiceHandler::eServiceHandler(int id): id(id)
 {
@@ -221,4 +222,4 @@ void eServiceInterface::removeRef(const eServiceReference &service)
 		return handler->removeRef(service);
 }
 
-eAutoInitP0<eServiceInterface> i_eServiceInteface(5, "eServiceInterface");
+eAutoInitP0<eServiceInterface> i_eServiceInteface(eAutoInitNumbers::service, "eServiceInterface");

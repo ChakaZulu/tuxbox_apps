@@ -23,7 +23,6 @@ class eListBoxEntryService: public eListBoxEntry
 	friend struct updateEPGChangedService;
 	friend struct renumber;
 	eString sort;
-	eString short_name;
 	static gFont serviceFont, descrFont, numberFont;
 	static int maxNumSize;
 	static gPixmap *folder;
@@ -33,19 +32,23 @@ class eListBoxEntryService: public eListBoxEntry
 	int num;
 public:
 	static eListBoxEntryService *selectedToMove;
-	static std::map< eServiceReference, int> favourites;
+	static std::set<eServiceReference> hilitedEntrys;
 	int getNum() const { return num; }
 	void invalidate();
 	void invalidateDescr();
 	static int getEntryHeight();
 	eServiceReference service;
-	enum { flagShowNumber=1, flagOwnNumber=2 };
+	enum { flagShowNumber=1, flagOwnNumber=2, flagIsReturn=4 };
 	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num=-1);
 	~eListBoxEntryService();
 
 	bool operator<(const eListBoxEntryService &r) const
 	{
-		if (service.getSortKey() == r.service.getSortKey())
+		if (flags & flagIsReturn)
+			return 1;
+		else if (r.flags & flagIsReturn)
+			return 0;
+		else if (service.getSortKey() == r.service.getSortKey())
 			return sort < r.sort;
 		else
 			return service.getSortKey() > r.service.getSortKey();		// sort andersrum
@@ -73,9 +76,11 @@ class eServiceSelector: public eWindow
 	eTimer BrowseTimer;
 	eTimer ciDelay;
 
+	eListBoxEntryService *goUpEntry;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
+	void pathUp();
 	void fillServiceList(const eServiceReference &ref);
 	void fillBouquetList(const eServiceReference &ref);
 	void serviceSelected(eListBoxEntryService *entry);
@@ -88,17 +93,24 @@ private:
 	void updateCi();
 public:
 	int movemode;
-	int FavouriteMode;
+	int editMode;
 	enum { styleInvalid, styleCombiColumn, styleSingleColumn, styleMultiColumn };
 	enum { dirNo, dirUp, dirDown };
 
 	eServiceSelector();
 	~eServiceSelector();
 
-	Signal1<void,const eServiceReference &> addServiceToList, removeServiceFromFavourite;
-	Signal2<void,eServiceSelector*,int> addServiceToFavourite;
-	Signal1<void,eServiceSelector*> showFavourite, showMenu, toggleStyle;
-	Signal1<void,int> setMode;
+	Signal0<void> rotateRoot;
+
+	Signal1<void,const eServiceReference &> addServiceToPlaylist; // add service to the Playlist
+	Signal2<void,eServiceSelector*,int> addServiceToUserBouquet;  // add current service to selected User Bouquet
+
+	Signal1<void,int> setMode;        // set TV, Radio or File
+
+	Signal1<void,eServiceSelector*>	removeServiceFromUserBouquet, // remove service from selected User Bouquet
+																	showMenu, // shows the contextmenu
+																	toggleStyle; // switch service selector style
+
 	Signal3<void,
 		const eServiceReference &, 		// path
 		const eServiceReference &, 		// service to move
@@ -109,7 +121,7 @@ public:
 	void setPath(const eServicePath &path, const eServiceReference &select=eServiceReference());
 
 	int getStyle()	{ return style; }
-	void setStyle(int newStyle=-1);	
+	void setStyle(int newStyle=-1);
 	void actualize();
 	bool selectService(const eServiceReference &ref);
 	bool selectService(int num);	
@@ -122,8 +134,8 @@ public:
 	const eServiceReference *next();
 	const eServiceReference *prev();
 
-	void toggleMoveMode();
-	void toggleFavouriteMode();
+	int toggleMoveMode();  // enable / disable move entry Mode ( only in userBouquets )
+	int toggleEditMode();  // enable / disable edit UserBouquet Mode
 };
 
 #endif

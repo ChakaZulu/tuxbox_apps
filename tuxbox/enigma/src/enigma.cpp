@@ -23,6 +23,7 @@
 #include <lib/system/http_file.h>
 #include <lib/system/http_dyn.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/actions.h>
 #include <lib/driver/rc.h>
@@ -75,30 +76,7 @@ eZap::eZap(int argc, char **argv)
 	instance = this;
 
 	init = new eInit();
-	init->setRunlevel(8);
-#if 0
-	if(0)
-	{
-		gDC &dc=*gFBDC::getInstance();
-
-		gPainter p(dc);
-		
-		p.clear();
-		p.flush();
-		p.setForegroundColor(gColor(0x13));
-		p.fill(eRect(0, 0, 720, 576));
-		
-		eRect x(10, 10, 100, 50);
-		p.setFont(gFont("NimbusSansL-Regular Sans L Regular", 30));
-		for (int i=0; i<100; i++)
-		{
-			x.moveBy(5, 5);
-//			gPainter p(dc);
-			p.setForegroundColor(gColor(0x13^i));
-			p.renderText(x, "Hello world dies ist ein ganz langer text der auf den screen gepinselt wird du lieber mensch bla keine ahnung hallo was soll das");
-		}
-	}
-#endif
+	init->setRunlevel(eAutoInitNumbers::osd);
 
 	focus = 0;
 	CONNECT(eRCInput::getInstance()->keyEvent, eZap::keyEvent);
@@ -125,9 +103,6 @@ eZap::eZap(int argc, char **argv)
 
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdbox.xml") )
 		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdbox.xml");
-
-	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxbuttons.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
 
 	eDebug("[ENIGMA] loading default keymaps...");
 	for(std::map<eString,eRCDevice*>::iterator i(eRCInput::getInstance()->getDevices().begin());
@@ -199,34 +174,26 @@ eZap::eZap(int argc, char **argv)
 	httpd->addResolver(fileresolver);
 
 	eDebug("[ENIGMA] ok, beginning mainloop");
-	
-/*
-	{
-		eMessageBox msg("Warning:\nThis version of enigma contains incomplete code.\n"
-			"Not working are:\n - Satconfig\n - Cablescan (will be back soon)\n"
-			" - some other stuff", "Enigma *pre*");
-		msg.show();
-		msg.exec();
-		msg.hide();
-	}*/
 
 	if (eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount))
 	{
 		bootcount = 1;
+#if 0
 		eMessageBox msg(_("Welcome to enigma.\n\n"
-											"Please do a transponderscan first.\n(mainmenu > setup > channels > transponder scan)"),
+											"Please do a transponder scan first.\n(mainmenu > setup > channels > transponder scan)"),
 										_("First start of enigma"),
 										eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK );
 		msg.show();
 		msg.exec();
 		msg.hide();
+#endif
 	}
 	else
 		bootcount++;
 
 	eConfig::getInstance()->setKey("/elitedvb/system/bootCount", bootcount);
 
-	init->setRunlevel(10);
+	init->setRunlevel(eAutoInitNumbers::main);
 }
 
 eZap::~eZap()
@@ -269,6 +236,9 @@ int main(int argc, char **argv)
 	bindtextdomain ("tuxbox-enigma", "/share/locale");
 	bind_textdomain_codeset("tuxbox-enigma", "UTF8");
 	textdomain ("tuxbox-enigma");
+
+	Decoder::Initialize();	
+	Decoder::displayIFrameFromFile("/iframe");
 	
 //	mtrace();
 //	mcheck(0);
@@ -277,6 +247,8 @@ int main(int argc, char **argv)
 		eZap ezap(argc, argv);
 		res=ezap.exec();
 	}
+	
+	Decoder::Flush();
 	exit(res);
 //	mcheck_check_all();
 //	muntrace();

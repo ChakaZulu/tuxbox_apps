@@ -87,7 +87,7 @@ void eTransponderWidget::nextField0(int *)
 
 void eTransponderWidget::updated1(eListBoxEntryText *)
 {
-	updated();
+ updated();
 }
 
 void eTransponderWidget::updated2(int)

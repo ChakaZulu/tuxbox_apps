@@ -24,18 +24,24 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 	{
 		enum eCode
 		{
-			mOpen, mAddPID, mRemovePID, mRemoveAllPIDs, mClose, mStart, mStop, mExit,
+			mOpen, mAddPID, mRemovePID, mRemoveAllPIDs, mClose, mStart, mStop, mExit, mWrite,
 			rWriteError, // disk full etc.
 		} code;
 		union
 		{
 			const char *filename;
 			int pid;
+			struct
+			{
+				void *data;
+				int len;
+			} write;
 		};
 		eDVBRecorderMessage() { }
 		eDVBRecorderMessage(eCode code): code(code) { }
 		eDVBRecorderMessage(eCode code, const char *filename): code(code), filename(filename) { }
 		eDVBRecorderMessage(eCode code, int pid): code(code), pid(pid) { }
+		eDVBRecorderMessage(eCode code, void *data, int len): code(code) { write.data=data; write.len=len; }
 	};
 	struct pid_t
 	{
@@ -153,6 +159,15 @@ public:
 	{
 		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mClose));
 	}
+	
+	/**
+	 * \brief Writes a section into the stream.
+	 *
+	 * This will generate aligned ts packets and thus write a section to the stream. CRC must be calculated by caller.
+	 * File must be already opened.
+	 * Len will be fetched out of table.
+	 */
+	void writeSection(void *data, int pid);
 
 	enum { recWriteError };
 	Signal1<void,int> recMessage;

@@ -21,7 +21,7 @@ struct SatelliteEntry
 	eButton *lnb;
 };
 
-class eSatelliteConfigurationManager: public eWindow, public existNetworks
+class eSatelliteConfigurationManager: public eWindow
 {
 	eTimer* refresh;
 	eWidget *buttonWidget;
@@ -44,6 +44,7 @@ class eSatelliteConfigurationManager: public eWindow, public existNetworks
 	void addSatellite(eSatellite* sat);
 	void updateButtons(int comp);
 	void cleanupWidgets();
+	void setComplexity(int complexity);
 	void repositionWidgets();
 	void closePressed();
 	void erasePressed();
@@ -59,7 +60,6 @@ class eSatelliteConfigurationManager: public eWindow, public existNetworks
 	void deleteSatellite(eSatellite *s);
 	
 	void typeChanged(eListBoxEntryText* newtype);
-	void setComplexity(int complexity);
 	int checkComplexity(); // check overall complexity
 	int checkDiseqcComplexity(eSatellite *s);
 	void deleteSatellitesAbove(int nr);
@@ -67,6 +67,7 @@ class eSatelliteConfigurationManager: public eWindow, public existNetworks
 		// according to "complexity" (works only for complexity <= 2, of course)
 	void setSimpleDiseqc(eSatellite *s, int diseqcnr);
 public:
+	void extSetComplexity(int complexity);
 	eSatelliteConfigurationManager();
 	~eSatelliteConfigurationManager();
 };

@@ -5,13 +5,17 @@
 #include <lib/gui/statusbar.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/eprogress.h>
+#include <lib/gui/eskin.h>
 #include <lib/dvb/decoder.h>
+#include <lib/gdi/font.h>
 #include <libmd5sum.h>
 #include <lib/dvb/edvb.h>
 #include <sys/mman.h>
 #include <tuxbox/tuxbox.h>
 
 #define TMP_IMAGE "/var/tmp/root.cramfs"
+#define TMP_IMAGE_ALT "/var/tmp/cdk.cramfs"
+#define TMP_CHANGELOG "/var/tmp/changelog"
 
 static eString getVersionInfo(const char *info)
 {
@@ -96,52 +100,53 @@ void eHTTPDownloadXML::haveData(void *data, int len)
 }
 
 eUpgrade::eUpgrade()
+:http(0), changelog(0)
 {
-	cmove(ePoint(100, 100));
-	cresize(eSize(500, 340));
-	setText(_("Software upgrade.."));
-	
 	status = new eStatusBar(this);
 	status->setFlags(eStatusBar::flagOwnerDraw);
-	status->move( ePoint(0, clientrect.height()-30) );
-	status->resize( eSize( clientrect.width(), 30) );
 	status->loadDeco();
+	status->setName("status");
 
 	images=new eListBox<eListBoxEntryImage>(this);
-	images->move(ePoint(10, 70));
-	images->resize(eSize(480, 190));
-	images->loadDeco();
+	images->setName("images");
 	CONNECT(images->selected, eUpgrade::imageSelected);
+	CONNECT(images->selchanged, eUpgrade::imageSelchanged);
 	
 	imagehelp=new eLabel(this);
-	imagehelp->move(ePoint(10, 0));
-	imagehelp->resize(eSize(460, 30));
-	imagehelp->setText(_("Please select software version to upgrade to:"));
+	imagehelp->setName("imagehelp");
+	imagehelp->setText(_("Please select the software version to upgrade to:"));
 
 	progress=new eProgress(this);
-	progress->move(ePoint(10, 265));
-	progress->resize(eSize(250, 30));
+	progress->setName("progress");
 	progress->hide();
 	
 	progresstext=new eLabel(this);
-	progresstext->move(ePoint(270, 275));
-	progresstext->resize(eSize(210, 30));
+	progresstext->setName("progresstext");
 	progresstext->hide();
 	
+	changes=new eLabel(this, RS_WRAP);
+	changes->setName("changes");
+	
 	abort=new eButton(this);
-	abort->move(ePoint(40, 40));
-	abort->resize(eSize(150, 50));
-	abort->setText(_("abort"));
-	abort->loadDeco();
+	abort->setName("abort");
 	CONNECT(abort->selected, eUpgrade::abortDownload);
 	abort->hide();
 
+	if (eSkin::getActive()->build(this, "eUpgrade"))
+		eFatal("skin load of \"eUpgrade\" failed");
+
 	catalog=0;
+	changelog=0;
+	
 	eString caturl=getVersionInfo("catalog");
 	if (caturl.length())
 		loadCatalog(caturl.c_str());
+		
+	ourversion=getVersionInfo("version");
 	
 	struct stat s;
+	if (!stat(TMP_IMAGE_ALT, &s))
+		rename(TMP_IMAGE_ALT, TMP_IMAGE);
 	if (!stat(TMP_IMAGE, &s))
 		new eListBoxEntryImage(images, _("manual upload"), "", "", "", "", 0);
 }
@@ -164,6 +169,26 @@ void eUpgrade::loadCatalog(const char *url)
 		CONNECT(http->createDataSource, eUpgrade::createCatalogDataSink);
 		http->local_header["User-Agent"]="enigma-upgrade/1.0.0";
 		http->start();
+	}
+}
+
+void eUpgrade::loadChangelog(const char *url)
+{
+	current_url=url;
+	int error;
+	if (changelog)
+		delete changelog;
+	changelog=eHTTPConnection::doRequest(url, eApp, &error);
+	if (!changelog)
+	{
+		changelogTransferDone(error);
+	} else
+	{
+		setStatus(_("downloading changelog..."));
+		CONNECT(changelog->transferDone, eUpgrade::changelogTransferDone);
+		CONNECT(changelog->createDataSource, eUpgrade::createChangelogDataSink);
+		changelog->local_header["User-Agent"]="enigma-upgrade/1.0.0";
+		changelog->start();
 	}
 }
 
@@ -202,42 +227,50 @@ void eUpgrade::catalogTransferDone(int err)
 		images->beginAtomic();
 		for (XMLTreeNode *r=root->GetChild(); r; r=r->GetNext())
 		{
-			if (strcmp(r->GetType(), "image"))
-				continue;
-			const char *name=r->GetAttributeValue("name");
-			const char *url=r->GetAttributeValue("url");
-			const char *version=r->GetAttributeValue("version");
-			const char *target=r->GetAttributeValue("target");
-			const char *creator=r->GetAttributeValue("creator");
-			const char *amd5=r->GetAttributeValue("md5");
-			unsigned char md5[16];
-			if (!creator)
-				creator=_("unknown");
-			if (!amd5)
-				continue;
-			for (int i=0; i<32; i+=2)
+			if (!strcmp(r->GetType(), "image"))
 			{
-				char x[3];
-				x[0]=amd5[i];
-				if (!x[0])
-					break;
-				x[1]=amd5[i+1];
-				if (!x[1])
-					break;
-				int v=0;
-				if (sscanf(x, "%02x", &v) != 1)
-					break;
-				md5[i/2]=v;
+				const char *name=r->GetAttributeValue("name");
+				const char *url=r->GetAttributeValue("url");
+				const char *version=r->GetAttributeValue("version");
+				const char *target=r->GetAttributeValue("target");
+				const char *creator=r->GetAttributeValue("creator");
+				const char *amd5=r->GetAttributeValue("md5");
+				unsigned char md5[16];
+				if (!creator)
+					creator=_("unknown");
+				if (!amd5)
+					continue;
+				for (int i=0; i<32; i+=2)
+				{
+					char x[3];
+					x[0]=amd5[i];
+					if (!x[0])
+						break;
+					x[1]=amd5[i+1];
+					if (!x[1])
+						break;
+					int v=0;
+					if (sscanf(x, "%02x", &v) != 1)
+						break;
+					md5[i/2]=v;
+				}
+				if (!(name && url && version && target))
+					continue;
+				if (!strstr(target, mytarget.c_str()))
+					continue;
+				new eListBoxEntryImage(images, name, target, url, version, creator, md5);
+			} else if (!strcmp(r->GetType(), "changelog"))
+			{
+				const char *changelog=r->GetAttributeValue("url");
+				if (changelog)
+					loadChangelog(changelog);
 			}
-			if (!(name && url && version && target))
-				continue;
-			if (!strstr(target, mytarget.c_str()))
-				continue;
-			new eListBoxEntryImage(images, name, target, url, version, creator, md5);
 		}
 		setFocus(images);
 		images->endAtomic();
-		setStatus("Please select version to upgrade or LAME! to abort");
+		setStatus(_("Please select version to upgrade or LAME! to abort"));
+		if (images->getCurrent())
+			imageSelchanged(images->getCurrent());
 	} else
 	{
 		if (err || http->code !=200)
@@ -268,6 +301,43 @@ void eUpgrade::imageTransferDone(int err)
 	imagehelp->show();
 }
 
+void eUpgrade::changelogTransferDone(int err)
+{
+	if (err || !changelog || changelog->code != 200)
+	{
+		setError(err);
+	} else
+	{
+		FILE *f=fopen(TMP_CHANGELOG, "rt");
+		if (f)
+		{
+			char temp[1024];
+			while (fgets(temp, 1024, f))
+			{
+				if (*temp)	
+					temp[strlen(temp)-1]=0; // remove trailng \n
+				eString str(temp);
+				changelogEntry entry;
+				
+				entry.date=str.left(12);
+				entry.priority=str[13]-'0';
+				entry.text=str.mid(15);
+				unsigned int in=entry.text.find(' ');
+				entry.machines="*";
+				if (in != eString::npos)
+				{
+					entry.machines=entry.text.left(in);
+					entry.text=entry.text.mid(in+1);
+				}
+				changelogentries.push_back(entry);
+			}
+			fclose(f);
+		}
+		displayChangelog(ourversion.mid(4), selectedversion.mid(4), eDVB::getInstance()->getInfo("mID").right(1));
+	}
+	changelog=0;
+}
+
 void eUpgrade::imageSelected(eListBoxEntryImage *img)
 {
 	if (img)
@@ -281,6 +351,12 @@ void eUpgrade::imageSelected(eListBoxEntryImage *img)
 			flashImage(0);
 	} else
 		close(0); // aborted
+}
+
+void eUpgrade::imageSelchanged(eListBoxEntryImage *img)
+{
+	selectedversion=img->version;
+	displayChangelog(ourversion.mid(4), selectedversion.mid(4), eDVB::getInstance()->getInfo("mID").right(1));
 }
 
 void eUpgrade::setStatus(const eString &string)
@@ -331,6 +407,14 @@ eHTTPDataSource *eUpgrade::createImageDataSink(eHTTPConnection *conn)
 	return image;
 }
 
+eHTTPDataSource *eUpgrade::createChangelogDataSink(eHTTPConnection *conn)
+{
+	changelogdownload=new eHTTPDownload(conn, TMP_CHANGELOG);
+	lasttime=0;
+	CONNECT(changelogdownload->progress, eUpgrade::downloadProgress);
+	return changelogdownload;
+}
+
 void eUpgrade::downloadProgress(int received, int total)
 {
 	if ((time(0) == lasttime) && (received != total))
@@ -359,6 +443,7 @@ void eUpgrade::abortDownload()
 		delete http;
 		http=0;
 	}
+	setStatus(_("Download aborted."));
 	progress->hide();
 	progresstext->hide();
 	abort->hide();
@@ -400,9 +485,10 @@ void eUpgrade::flashImage(int checkmd5)
 		{
 			setStatus(_("Checksum OK. Ready to upgrade."));
 			eMessageBox mb(
-				_("Do you really want to upgrade to the new version?"),
+				_("Are you sure you want to upgrade to this new version?"),
 				_("Ready to upgrade"),
 				eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion);
+			int mtdsize;
 			hide();
 			mb.show();
 			int res=mb.exec();
@@ -410,7 +496,7 @@ void eUpgrade::flashImage(int checkmd5)
 			if (res == eMessageBox::btYes)
 			{
 				eMessageBox mb(
-					_("Erasing...\nPlease do not switch off box now!"),
+					_("Erasing...\nPlease wait... do NOT switch off the receiver!"),
 					_("upgrade in progress"), eMessageBox::iconInfo);
 				mb.show();
 				sync();
@@ -420,19 +506,23 @@ void eUpgrade::flashImage(int checkmd5)
 				{
 				case TUXBOX_MODEL_DBOX2:		// d-box2
 					mtd="2";
+					mtdsize=0x6e0000;
 					break;
 				case TUXBOX_MODEL_DREAMBOX_DM5600:// dreambox
 				case TUXBOX_MODEL_DREAMBOX_DM7000:
 					mtd="0";
+					mtdsize=0x700000;
 					break;
 				default:
 					mtd="../null";
+					mtdsize=0;
 				}
 				{
 					int fd=open(eString("/dev/mtdblock/" + mtd).c_str(), O_RDONLY);
 					void *ptr;
 					volatile int a;
-					if ((fd < 0) || !(ptr=mmap(0, 0x600000, PROT_READ, MAP_SHARED|MAP_LOCKED, fd, 0)))
+					if ((fd < 0) || !(ptr=mmap(0, mtdsize, PROT_READ, MAP_SHARED|MAP_LOCKED, fd, 0)))
+
 					{
 						eMessageBox mb(
 							_("upgrade failed with errorcode UD0"),
@@ -443,7 +533,7 @@ void eUpgrade::flashImage(int checkmd5)
 						mb.hide();
 						return;
 					}
-					for (int i=0; i<0x600000; ++i)
+					for (int i=0; i<mtdsize; i+=4096) // page size
 						a=((__u8*)ptr)[i];
 				}
 				int res=system(eString("/bin/eraseall /dev/mtd/" + mtd).c_str())>>8;
@@ -451,7 +541,7 @@ void eUpgrade::flashImage(int checkmd5)
 				if (!res)
 				{
 					eMessageBox mb(
-						_("Writing software to flash...\nPlease do not switch off box now!"),
+						_("Writing software to flash...\nPlease wait... do NOT switch off the receiver!"),
 						_("upgrade in progress"), eMessageBox::iconInfo);
 					mb.show();
 					res=system(eString("cat " TMP_IMAGE " > /dev/mtd/" + mtd).c_str())>>8;
@@ -484,4 +574,52 @@ void eUpgrade::flashImage(int checkmd5)
 				close(0);
 		}
 	}
+}
+
+void eUpgrade::displayChangelog(eString oldversion, eString newversion, eString mid)
+{
+	eString changetext;
+	if (newversion.empty())
+	{
+		changetext="";
+	} else if (oldversion == newversion)
+	{
+		changetext=_("This is the currently installed release.");
+	} else if (oldversion > newversion)
+	{
+		changetext=_("This is an older release.");
+	} else if (changelogentries.empty())
+	{
+		changetext=_("No changelog data available.");
+	} else
+	{
+		// build list of changetext
+		
+		std::multimap<int,eString> pchanges;
+		for (std::list<changelogEntry>::const_iterator i(changelogentries.begin());
+				i != changelogentries.end(); ++i)
+		{
+					// check if change is new for this version
+			if ((i->date > oldversion) && (i->date <= newversion) && ((i->machines=="*") || (i->machines.find(mid) != eString::npos)))
+				pchanges.insert(std::pair<int,eString>(i->priority, i->text));
+		}
+		if (pchanges.empty())
+			changetext=_("No new features were added in this release.");
+		else
+		{
+			changetext=_("The following new features were added in this release:\n");
+			for (std::map<int,eString>::const_iterator i(pchanges.begin());
+					i != pchanges.end(); ++i)
+				changetext+=" * " + i->second + "\n";
+		}
+	}
+	changes->setText(changetext);
+}
+
+eUpgrade::~eUpgrade()
+{
+	if (http)
+		delete http;
+	if (changelog)
+		delete changelog;
 }

@@ -1,6 +1,7 @@
 #include <lib/gui/statusbar.h>
 
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/gui/eskin.h>
 #include <lib/gdi/font.h>
 
@@ -71,4 +72,4 @@ public:
 	}
 };
 
-eAutoInitP0<eStatusBarSkinInit> init_eStatusBarSkinInit(3, "eStatusBar");
+eAutoInitP0<eStatusBarSkinInit> init_eStatusBarSkinInit(eAutoInitNumbers::guiobject, "eStatusBar");

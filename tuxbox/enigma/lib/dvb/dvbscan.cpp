@@ -1,16 +1,26 @@
 #include <lib/dvb/dvbscan.h>
 
-		// work around for buggy transponders on hotbird (and maybe others)
-static void fakeONIDSID(eOriginalNetworkID &onid, eTransportStreamID &tsid, int freq)
+int isValidONIDTSID(eOriginalNetworkID onid, eTransportStreamID tsid)
 {
-		// do nothing on valid ONIDs
-	if ((onid != 1) && (onid != 0xFFFF) && (onid != 0))
-		return;
-		// onid 1 is astra, don't mess with it.
-	if (tsid > 1)
-		return;
-		// fake together an onid.
-	onid=freq&0xFFFF;
+	if ((onid == 1) && (tsid > 1))
+		return 1;
+	if (onid == 1)
+		return 0;
+	if (onid == 0)
+		return 0;
+	if (onid == 0xFFFF)
+		return 0;
+	return 1;
+}
+
+		// work around for buggy transponders on hotbird (and maybe others)
+eDVBNamespace eTransponder::buildNamespace(eOriginalNetworkID onid, eTransportStreamID tsid, int orbital_position, int freq)
+{
+	int dvb_namespace=orbital_position<<16;
+		// on invalid ONIDs, build hash from frequency.
+	if (!isValidONIDTSID(onid, tsid))
+		dvb_namespace|=freq&0xFFFF;
+	return eDVBNamespace(dvb_namespace);
 }
 
 eDVBScanController::eDVBScanController(eDVB &dvb): eDVBController(dvb)
@@ -183,13 +193,14 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 				{
 					eOriginalNetworkID onid=i->original_network_id;
 					eTransportStreamID tsid=i->transport_stream_id;
+					eDVBNamespace dvb_namespace=-1;
 					// eTransponder &transponder=dvb.settings->transponderlist->createTransponder(tsid, onid);
 
 					// schon bekannte transponder nicht nochmal scannen
-					if (dvb.settings->transponderlist->searchTS(tsid, onid))
+					if (dvb.settings->transponderlist->searchTS(dvb_namespace, tsid, onid))
 						continue;
 
-					eTransponder tp(*dvb.settings->transponderlist, tsid, onid);
+					eTransponder tp(*dvb.settings->transponderlist, -1, tsid, onid);
 					
 					for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
 					{
@@ -223,7 +234,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		BAT *bat=dvb.tBAT.ready()?dvb.tBAT.getCurrent():0;
 		if (bat)
 		{
-			dvb.settings->addDVBBouquet(bat);
+			dvb.settings->addDVBBouquet(transponder->dvb_namespace, bat);
 			bat->unlock();
 		}
 		scanOK|=4;
@@ -323,11 +334,18 @@ int eDVBScanController::handleSDT(eTransponder *&transponder, const SDT *sdt)
 		old = transponder;
 	}
 	
+	eDVBNamespace dvb_namespace;
+	
+		// build "namespace" to work around buggy satellites
 	if (transponder->satellite.valid)
-		fakeONIDSID(onid, tsid, transponder->satellite.frequency);
+		dvb_namespace=eTransponder::buildNamespace(onid, tsid, transponder->satellite.orbital_position, transponder->satellite.frequency);
+	else
+		dvb_namespace=0;
+	
+	transponder->dvb_namespace=dvb_namespace;
 
 		// ok we found the transponder, it seems to be valid
-	eTransponder &real=dvb.settings->transponderlist->createTransponder(tsid, onid);
+	eTransponder &real=dvb.settings->transponderlist->createTransponder(dvb_namespace, tsid, onid);
 	real=*transponder;
 
 		// and we continue working on that
@@ -350,10 +368,9 @@ int eDVBScanController::handleSDT(eTransponder *&transponder, const SDT *sdt)
 		known=1;
 
 		// insert the services
-	dvb.settings->transponderlist->handleSDT(sdt, onid, tsid);
+	dvb.settings->transponderlist->handleSDT(sdt, dvb_namespace, onid, tsid);
 	
 	return known;
-
 }
 
 bool eDVBScanController::addTransponder(const eTransponder &transponder)

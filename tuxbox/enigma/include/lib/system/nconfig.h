@@ -110,7 +110,7 @@ public:
 		 * write protection when leaving library
 		 */
 		NConfig(int protect = FALSE);
-		~NConfig();
+		virtual ~NConfig();
 		
 		/*
 		 * Set file name (prior to open)

@@ -63,7 +63,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	CONNECT( srrate->changed, eZapRCSetup::repeatChanged );
 
 	srdelay=new eSlider(this, lrdelay, 0, 1000 );
-	srdelay->setName("contrast");
+	srdelay->setName("rdelay");
 	srdelay->move(ePoint(200, 60));
 	srdelay->resize(eSize(220, fd+4));
 	srdelay->setHelpText(_("set RC repeat delay ( left / right )"));
@@ -76,7 +76,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	rcStyle=new eComboBox(this, 4, lrcStyle);
 	rcStyle->move(ePoint(20, 140));
 	rcStyle->resize(eSize(220, 35));
-	rcStyle->setHelpText(_("select your favourite rc style (ok)"));
+	rcStyle->setHelpText(_("select your favourite RC style (ok)"));
 	rcStyle->loadDeco();
 	CONNECT( rcStyle->selchanged, eZapRCSetup::styleChanged );
 	eListBoxEntryText *current=0;
@@ -95,7 +95,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	ok->setShortcutPixmap("green");
 	ok->move(ePoint(20, clientrect.height()-80));
 	ok->resize(eSize(170, 40));
-	ok->setHelpText(_("close window and save changes"));
+	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapRCSetup::okPressed);
 
@@ -103,7 +103,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	abort->setText(_("abort"));
 	abort->move(ePoint(210, clientrect.height()-80));
 	abort->resize(eSize(170, 40));
-	abort->setHelpText(_("close window (no changes are saved)"));
+	abort->setHelpText(_("ignore changes and return"));
 	abort->loadDeco();
 	CONNECT(abort->selected, eZapRCSetup::abortPressed);
 

@@ -110,20 +110,34 @@ int eAVSwitch::setVolume(int vol)
 
 	if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
 	{
-		audio_mixer_t mix;
-		mix.volume_left=(vol*vol)/64;
-		mix.volume_right=(vol*vol)/64;
+		if ((vol == 63) && !mute)
+		{
+			mute = 1;
+			muteOstAudio(1);
+		}
+		else
+		{
+			if (mute)
+			{
+				mute = 0;
+				muteOstAudio(0);
+			}
 
-		int fd = Decoder::getAudioDevice();
+			audio_mixer_t mix;
+			mix.volume_left=(vol*vol)/64;
+			mix.volume_right=(vol*vol)/64;
 
-		if ( fd == -1 )
-			fd = open( AUDIO_DEV, O_RDWR );
+			int fd = Decoder::getAudioDevice();
+
+			if ( fd == -1 )
+				fd = open( AUDIO_DEV, O_RDWR );
 	
-		if(ioctl(fd, AUDIO_SET_MIXER, &mix))
-			perror("AUDIO_SET_MIXER");
-		
-		if (Decoder::getAudioDevice() == -1)
-			close(fd);
+			if(ioctl(fd, AUDIO_SET_MIXER, &mix))
+				perror("AUDIO_SET_MIXER");
+			
+			if (Decoder::getAudioDevice() == -1)
+				close(fd);
+		}
 	}
 	return ioctl(avsfd, AVSIOSVOL, &vol);
 }

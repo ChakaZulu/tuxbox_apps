@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.14 2003/01/12 23:50:59 Ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.15 2003/02/16 01:03:45 waldi Exp $
  */
 
 #include <enigma_scan.h>
@@ -37,13 +37,13 @@ eZapScan::eZapScan()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Channels"), 5, 300, true)
 {
 	move(ePoint(150, 136));
-	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("back to mainmenu")))->selected, eZapScan::sel_close);
+	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("back to main menu")))->selected, eZapScan::sel_close);
 	CONNECT((new eListBoxEntryMenu(&list, _("Transponder scan"), _("goto transponder scan")))->selected, eZapScan::sel_scan);	
-/*	if ( eFrontend::getInstance()->Type() == eFrontend::feSatellite )  // only when a sat box is avail we shows a satellite config
+	if ( eFrontend::getInstance()->Type() == eFrontend::feSatellite )  // only when a sat box is avail we shows a satellite config
 	{
 		CONNECT((new eListBoxEntryMenu(&list, _("Satellites..."), _("goto satellite config")))->selected, eZapScan::sel_satconfig);
-		CONNECT((new eListBoxEntryMenu(&list, _("Rotor Setup..."), _("goto Rotor Setup")))->selected, eZapScan::sel_rotorConfig);
-	}*/
+		//CONNECT((new eListBoxEntryMenu(&list, _("Motor Setup..."), _("goto Motor Setup")))->selected, eZapScan::sel_rotorConfig);
+	}
 	CONNECT((new eListBoxEntryMenu(&list, _("SID...")))->selected, eZapScan::sel_bouquet);
 }
 
@@ -111,7 +111,7 @@ eLNB* eZapScan::getRotorLNB()
 	if ( c > 1 )  // we have more than one LNBs with DiSEqC 1.2
 	{
 		hide();
-		eMessageBox mb( _("More than one LNB have DiSEqC 1.2 enabled, please select the LNB where the rotor is plugged"), _("Info"), eMessageBox::iconWarning|eMessageBox::btOK );
+		eMessageBox mb( _("More than one LNB have DiSEqC 1.2 enabled, please select the LNB where the motor is connected"), _("Info"), eMessageBox::iconWarning|eMessageBox::btOK );
 		mb.show();
 		mb.exec();
 		mb.hide();
@@ -160,7 +160,7 @@ eLNBSelector::eLNBSelector()
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin()); it != eTransponderList::getInstance()->getLNBs().end(); it++, cnt++ )
 	{
 		if ( it->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 )
-			new eListBoxEntryText( &list, eString().sprintf("LNB %d", cnt), (void*)&(*it), 0, eString().sprintf(_("use LNB %d for Rotor"), cnt ).c_str());
+			new eListBoxEntryText( &list, eString().sprintf("LNB %d", cnt), (void*)&(*it), 0, eString().sprintf(_("use LNB %d for Motor"), cnt ).c_str());
 	}
 	CONNECT( list.selected, eLNBSelector::selected );
 }

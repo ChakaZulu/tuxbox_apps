@@ -1,6 +1,7 @@
 #include <lib/dvb/servicefile.h>
 #include <lib/dvb/servicestructure.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -146,4 +147,4 @@ int eServiceFileHandler::lookupService(eServiceReference &ref, const char *filen
 	return 0;
 }
 
-eAutoInitP0<eServiceFileHandler> i_eServiceFileHandler(6, "eServiceFileHandler");
+eAutoInitP0<eServiceFileHandler> i_eServiceFileHandler(eAutoInitNumbers::service+1, "eServiceFileHandler");

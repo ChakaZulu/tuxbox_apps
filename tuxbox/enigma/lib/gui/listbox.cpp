@@ -15,11 +15,11 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, int takefocus,
 		tmpDescr(0),
 		colorActiveB(eSkin::getActive()->queryScheme("global.selected.background")),
 		colorActiveF(eSkin::getActive()->queryScheme("global.selected.foreground")),
+		movemode(0),
+		MaxEntries(0),
 		flags(0),
 		columns(1),
-		in_atomic(0),
-		movemode(0),
-		MaxEntries(0)
+		in_atomic(0)
 {
 }
 
@@ -37,23 +37,30 @@ void eListBoxBase::recalcMaxEntries()
 {
 		// MaxEntries is PER COLUMN
 	if (deco_selected && have_focus)
-		MaxEntries = ( crect_selected.height() / item_height );
+		MaxEntries = crect_selected.height();
 	else if (deco)
-		MaxEntries = (crect.height() / item_height);
+		MaxEntries = crect.height();
 	else
-		MaxEntries = (height() / item_height);
+		MaxEntries = height();
+	MaxEntries /= item_height;
 }
 
 eRect eListBoxBase::getEntryRect(int pos)
 {
+	int lme=MaxEntries;
+			// in case we show partial last lines (which only works in single-column),
+			// we increase MaxEntries by one since we don't want the last line
+			// one the next (invisible) column
+	if ( (columns == 1) && (flags & flagShowPartial))
+		lme++;
 	if ( deco_selected && have_focus )
-		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / MaxEntries) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % MaxEntries) * item_height ), eSize( crect_selected.width() / columns , item_height ) );
+		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / lme) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % lme) * item_height ), eSize( crect_selected.width() / columns , item_height ) );
 	else if (deco)
-		return eRect( ePoint( deco.borderLeft + ( ( pos / MaxEntries ) * ( crect.width() / columns ) ) , deco.borderTop + ( pos % MaxEntries) * item_height ), eSize( crect.width() / columns , item_height ) );
+		return eRect( ePoint( deco.borderLeft + ( ( pos / lme ) * ( crect.width() / columns ) ) , deco.borderTop + ( pos % lme) * item_height ), eSize( crect.width() / columns , item_height ) );
 	else if ( deco_selected )
-		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / MaxEntries) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % MaxEntries) * item_height ), eSize( crect_selected.width() / columns , item_height ) );
+		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / lme) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % lme) * item_height ), eSize( crect_selected.width() / columns , item_height ) );
 	else
-		return eRect( ePoint( ( ( pos / MaxEntries ) * ( size.width() / columns ) ) , ( pos % MaxEntries) * item_height ), eSize( size.width() / columns , item_height ) );
+		return eRect( ePoint( ( ( pos / lme ) * ( size.width() / columns ) ) , ( pos % lme) * item_height ), eSize( size.width() / columns , item_height ) );
 }
 
 void eListBoxBase::setColumns(int col)

@@ -241,14 +241,14 @@ int eHTTPConnection::processLocalState()
 		switch (localstate)
 		{
 		case stateWait:
-#if 1
+#if 0
 			eDebug("local wait");
 #endif
 			done=1;
 			break;
 		case stateRequest:
 		{
-#if 1
+#if 0
 			eDebug("local request");
 #endif
 			eString req=request+" "+requestpath+" "+httpversion+"\r\n";
@@ -259,7 +259,7 @@ int eHTTPConnection::processLocalState()
 		}
 		case stateResponse:
 		{
-#if 1
+#if 0
 			eDebug("local Response");
 #endif
 			writeString( (httpversion + " " + eString().setNum(code)+" " + code_descr + "\r\n").c_str() );
@@ -268,7 +268,7 @@ int eHTTPConnection::processLocalState()
 			break;
 		}
 		case stateHeader:
-#if 1
+#if 0
 			eDebug("local header");
 #endif
 			for (std::map<std::string,std::string>::iterator cur=local_header.begin(); cur!=local_header.end(); ++cur)
@@ -340,7 +340,7 @@ int eHTTPConnection::processRemoteState()
 		case stateWait:
 		{
 			int i=0;
-#if 1
+#if 0
 			eDebug("remote stateWait");
 #endif
 			char buffer[1024];
@@ -410,7 +410,7 @@ int eHTTPConnection::processRemoteState()
 				abort=1;
 				break;
 			}
-			eDebug("line: %s", line.c_str());
+//			eDebug("line: %s", line.c_str());
 
 			int del[2];
 			del[0]=line.find(" ");
@@ -432,7 +432,7 @@ int eHTTPConnection::processRemoteState()
 		}
 		case stateHeader:
 		{
-#if 1
+#if 0
 			eDebug("remote stateHeader");
 #endif
 			eString line;

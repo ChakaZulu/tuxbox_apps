@@ -1,6 +1,7 @@
 #include <lib/dvb/serviceplaylist.h>
 #include <lib/dvb/servicefile.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/base/i18n.h>
 #include <unistd.h>
 
@@ -15,9 +16,14 @@
 		structure (ePlaylist)
 */
 
-ePlaylist::ePlaylist(): eService("playlist")
+ePlaylist::ePlaylist(): eService("playlist"), changed(-1)
 {
 	current=list.end();
+}
+
+ePlaylist::~ePlaylist()
+{
+	eDebug("destroy %s", filename.c_str() );
 }
 
 int ePlaylist::load(const char *filename)
@@ -109,38 +115,45 @@ int ePlaylist::load(const char *filename)
 	if (!service_name_set)
 		service_name += eString().sprintf(_(" (%d entries)"), entries);
 	fclose(fp);
+
+	if (changed != -1)
+		changed=0;
 	return 0;
 }
 
 int ePlaylist::save(const char *filename)
 {
-	if (!filename)
-		filename=this->filename.c_str();
-	FILE *f=fopen(filename, "wt");
-	if (!f)
-		return -1;
-	fprintf(f, "#NAME %s\r\n", service_name.c_str());
-	for (std::list<ePlaylistEntry>::iterator i(list.begin()); i != list.end(); ++i)
+	if (changed)
 	{
-		fprintf(f, "#SERVICE: %s\r\n", i->service.toString().c_str());
-		if (i->service.descr)
-			fprintf(f, "#DESCRIPTION: %s\r\n", i->service.descr.c_str());
-		if (i->type & ePlaylistEntry::PlaylistEntry && i->current_position != -1)
-			fprintf(f, "#CURRENT_POSITION %d\r\n", i->current_position);
-		else if (i->event_id != -1)
-			fprintf(f, "#EVENT_ID %d\r\n", i->event_id);
-		if ((int)i->type != ePlaylistEntry::PlaylistEntry)
-			fprintf(f, "#TYPE %d\r\n", i->type);
-		if ((int)i->time_begin != -1)
-			fprintf(f, "#TIME_BEGIN %d\r\n", (int)i->time_begin);
-		if ((int)i->duration != -1)
-			fprintf(f, "#DURATION %d\r\n", (int)i->duration);
-		if (current == i)
-			fprintf(f, "#CURRENT\n");
-		if (i->service.path.size())
-			fprintf(f, "%s\r\n", i->service.path.c_str());
+		if (!filename)
+			filename=this->filename.c_str();
+		FILE *f=fopen(filename, "wt");
+		if (!f)
+			return -1;
+		fprintf(f, "#NAME %s\r\n", service_name.c_str());
+		for (std::list<ePlaylistEntry>::iterator i(list.begin()); i != list.end(); ++i)
+		{
+			fprintf(f, "#SERVICE: %s\r\n", i->service.toString().c_str());
+			if (i->service.descr)
+				fprintf(f, "#DESCRIPTION: %s\r\n", i->service.descr.c_str());
+			if (i->type & ePlaylistEntry::PlaylistEntry && i->current_position != -1)
+				fprintf(f, "#CURRENT_POSITION %d\r\n", i->current_position);
+			else if (i->event_id != -1)
+				fprintf(f, "#EVENT_ID %d\r\n", i->event_id);
+			if ((int)i->type != ePlaylistEntry::PlaylistEntry)
+				fprintf(f, "#TYPE %d\r\n", i->type);
+			if ((int)i->time_begin != -1)
+				fprintf(f, "#TIME_BEGIN %d\r\n", (int)i->time_begin);
+			if ((int)i->duration != -1)
+				fprintf(f, "#DURATION %d\r\n", (int)i->duration);
+			if (current == i)
+				fprintf(f, "#CURRENT\n");
+			if (i->service.path.size())
+				fprintf(f, "%s\r\n", i->service.path.c_str());
+		}
+		fclose(f);
+		changed=0;
 	}
-	fclose(f);
 	return 0;
 }
 
@@ -162,6 +175,7 @@ int ePlaylist::deleteService(std::list<ePlaylistEntry>::iterator it)
 			}
 		}
 		list.erase(it);
+		changed=1;
 		return 0;
 	}
 	return -1;
@@ -174,6 +188,7 @@ int ePlaylist::moveService(std::list<ePlaylistEntry>::iterator it, std::list<ePl
 	else
 		list.insert(before, *it);
 	list.erase(it);
+	changed=1;
 	return 0;
 }
 
@@ -229,7 +244,7 @@ void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signa
 		if (!service)
 			return;
 	
-		for (std::list<ePlaylistEntry>::iterator i(service->list.begin()); i != service->list.end(); ++i)
+		for (std::list<ePlaylistEntry>::const_iterator i(service->getConstList().begin()); i != service->getConstList().end(); ++i)
 			callback(*i);
 	
 		removeRef(dir);
@@ -247,11 +262,34 @@ void eServicePlaylistHandler::leaveDirectory(const eServiceReference &dir)
 {
 }
 
+int eServicePlaylistHandler::addNum( int uniqueID )
+{
+	if ( usedUniqueIDs.find( uniqueID ) != usedUniqueIDs.end() )
+		return -1;
+	usedUniqueIDs.insert(uniqueID);
+	return 0;
+}
+
 eServiceReference eServicePlaylistHandler::newPlaylist(const eServiceReference &parent, const eServiceReference &ref)
 {
-	ASSERT(ref);
-	playlists.insert(std::pair<eServiceReference,eServiceReference>(parent, ref));
-	return ref;
+	if (parent)
+	{
+		playlists.insert(std::pair<eServiceReference,eServiceReference>(parent, ref));
+		return ref;
+	}
+	else
+	{
+		int uniqueNum=0;
+		do
+		{
+			timeval now;
+			gettimeofday(&now,0);
+			uniqueNum = now.tv_usec;
+		}
+		while( usedUniqueIDs.find( uniqueNum ) != usedUniqueIDs.end() );
+		usedUniqueIDs.insert(uniqueNum);
+		return eServiceReference( ID, eServiceReference::flagDirectory, 0, uniqueNum );
+	}
 }
 
 void eServicePlaylistHandler::removePlaylist(const eServiceReference &service)
@@ -261,7 +299,7 @@ void eServicePlaylistHandler::removePlaylist(const eServiceReference &service)
 	while (found)
 	{
 		found=0;
-		for (std::multimap<eServiceReference,eServiceReference>::iterator i(playlists.begin()); i != playlists.end();)
+		for (std::multimap<eServiceReference,eServiceReference>::iterator i(playlists.begin()); i != playlists.end(); i++)
 			if (i->second == service)
 			{
 				found=1;
@@ -271,4 +309,4 @@ void eServicePlaylistHandler::removePlaylist(const eServiceReference &service)
 	}
 }
 
-eAutoInitP0<eServicePlaylistHandler> i_eServicePlaylistHandler(7, "eServicePlaylistHandler");
+eAutoInitP0<eServicePlaylistHandler> i_eServicePlaylistHandler(eAutoInitNumbers::service+2, "eServicePlaylistHandler");

@@ -6,10 +6,9 @@ class eIOBuffer;
 class eAudioDecoder
 {
 protected:
-	eIOBuffer &input, &output;
 	int speed;
 public:
-	eAudioDecoder(eIOBuffer &input, eIOBuffer &output);
+	eAudioDecoder();
 	virtual ~eAudioDecoder();
 	
 	virtual int decodeMore(int last, int maxsamples)=0; // returns number of samples(!) written to IOBuffer (out)

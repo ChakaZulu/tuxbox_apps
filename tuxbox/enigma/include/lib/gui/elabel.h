@@ -32,6 +32,7 @@ public:
 	void setAlign(int align);
 	void setShortcutPixmap(const eString &shortcut);
 	int setProperty(const eString &prop, const eString &value);
+	void setPixmapPosition( const ePoint &p );
 
 	eSize getExtend();
 	ePoint getLeftTop();

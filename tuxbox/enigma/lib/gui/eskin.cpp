@@ -358,12 +358,20 @@ int eSkin::parseFonts(XMLTreeNode *xfonts)
 			name = file;
 		}
 		std::map<eString, eString>::iterator it = fonts.find(name);
+		const char *ascale=node->GetAttributeValue("scale");
+		int scale=0;
+		if (ascale)
+			scale=atoi(ascale);
+		if (!scale)
+			scale=100;
 		if (it != fonts.end())
 		{
 			eDebug("Font with name %s already loaded, skip %s", name, file);
 			continue;
 		}
-		fonts[name]=fontRenderClass::getInstance()->AddFont((basepath+eString(file)).c_str());
+		fonts[name]=fontRenderClass::getInstance()->AddFont(basepath+eString(file), name, scale);
+		if (node->GetAttributeValue("replacement"))
+			eTextPara::setReplacementFont(name);
 	}
 	return 0;
 }

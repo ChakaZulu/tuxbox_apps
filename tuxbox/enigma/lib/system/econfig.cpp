@@ -1,6 +1,7 @@
 #include <lib/base/eerror.h>
 #include <lib/system/econfig.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <sys/stat.h>
 
 eConfig *eConfig::instance;
@@ -9,12 +10,12 @@ eConfig::eConfig()
 {
 	if (!instance)
 		instance=this;
-
+		
 	setName(CONFIGDIR "/enigma/registry");
 	int e=open();
 	if (e == NC_ERR_CORRUPT)
 	{
-		eFatal("CORRUTPED REGISTRY!");
+		eWarning("CORRUTPED REGISTRY!");
 		::remove(CONFIGDIR "/enigma/registry");
 	}
 	if (e)
@@ -34,7 +35,6 @@ eConfig::~eConfig()
 {
 	if (instance==this)
 		instance=0;
-	close();
 }
 
-eAutoInitP0<eConfig> init_eRCConfig(0, "Configuration");
+eAutoInitP0<eConfig> init_eRCConfig(eAutoInitNumbers::configuration, "Configuration");

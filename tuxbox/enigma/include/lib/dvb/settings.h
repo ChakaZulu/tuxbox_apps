@@ -15,7 +15,7 @@ public:
 
 	ePtrList<eBouquet> bouquets;
 	void removeDVBBouquets();
-	void addDVBBouquet(const BAT *bat);
+	void addDVBBouquet(eDVBNamespace origin, const BAT *bat);
 	eBouquet *getBouquet(int bouquet_id);
 	eBouquet *getBouquet(eString bouquet_name);
 	eBouquet *createBouquet(int bouquet_id, eString bouquet_name);
@@ -33,7 +33,7 @@ public:
 
 	void saveBouquets();
 	void loadBouquets();
-	
+
 	void clearList();
 	void removeOrbitalPosition(int orbital_position);
 	int importSatcoDX(eString line);

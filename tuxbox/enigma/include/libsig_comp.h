@@ -28,4 +28,6 @@ using namespace SigC;
 
 #define CONNECT_2_0(SENDER, EMPFAENGER, PARAM1, PARAM2) SENDER.connect( bind( slot(*this, &EMPFAENGER) ,PARAM1, PARAM2 ) )
 
+#define CONNECT_2_1(SENDER, EMPFAENGER, PARAM) SENDER.connect( bind( slot(*this, &EMPFAENGER) ,PARAM ) )
+
 #endif // __LIBSIG_COMP_H

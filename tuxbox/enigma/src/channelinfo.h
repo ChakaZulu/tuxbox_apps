@@ -9,7 +9,7 @@
 
 class eChannelInfo : public eDecoWidget
 {	
-	eLabel ctime, cname, cdescr, cgenre, cdolby, cstereo, cformat, cscrambled;
+	eLabel ctime, cname, copos, cdescr, cgenre, cdolby, cstereo, cformat, cscrambled;
 
   eString name, descr, genre, starttime;
 	int cflags;

@@ -136,6 +136,7 @@ public:
 
 	void loadNode(eServiceCache<eServiceHandlerDVB>::eNode &node, const eServiceReference &ref);
 	eService *createService(const eServiceReference &node);
+	void addFile(void *node, const eString &filename);
 
 	void enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback);
 	void leaveDirectory(const eServiceReference &dir);

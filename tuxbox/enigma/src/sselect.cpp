@@ -17,6 +17,7 @@
 #include <lib/dvb/epgcache.h>
 #include <lib/driver/rc.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/dvb/service.h>
 #include <lib/gui/numberactions.h>
 #include <lib/dvb/serviceplaylist.h>
@@ -26,44 +27,58 @@ gFont eListBoxEntryService::descrFont;
 gFont eListBoxEntryService::numberFont;
 gPixmap *eListBoxEntryService::folder=0;
 int eListBoxEntryService::maxNumSize=0;
-std::map< eServiceReference, int> eListBoxEntryService::favourites;
+std::set<eServiceReference> eListBoxEntryService::hilitedEntrys;
 eListBoxEntryService *eListBoxEntryService::selectedToMove=0;
 
 struct serviceSelectorActions
 {
 	eActionMap map;
-	eAction nextBouquet, prevBouquet, pathUp, showEPGSelector, showMenu, showFavourite, addService, addServiceToFavourite, modeTV, modeRadio, modeFile, toggleStyle, toggleFocus;
+	eAction nextBouquet, prevBouquet, pathUp, showEPGSelector, showMenu, 
+			toggleRoot, addService, addServiceToUserBouquet, modeTV, modeRadio, 
+			modeFile, toggleStyle, toggleFocus, gotoFirstService, gotoLastService;
 	serviceSelectorActions():
 		map("serviceSelector", _("service selector")),
 		nextBouquet(map, "nextBouquet", _("switch to next bouquet"), eAction::prioDialogHi),
 		prevBouquet(map, "prevBouquet", _("switch to previous bouquet"), eAction::prioDialogHi),
-		pathUp(map, "pathUp", _("go one dir path up"), eAction::prioDialog),
+		pathUp(map, "pathUp", _("go up a directory"), eAction::prioDialog),
 		showEPGSelector(map, "showEPGSelector", _("shows the EPG selector for the highlighted channel"), eAction::prioDialog),
 		showMenu(map, "showMenu", _("show service selector menu"), eAction::prioDialog),
-		showFavourite(map, "showFavourite", _("showFavourite"), eAction::prioDialog),
+		toggleRoot(map, "toggleRoot", _("toggle between user bouquets, normal bouquets and Playlist"), eAction::prioDialog),
 		addService(map, "addService", _("add Service"), eAction::prioDialog),
-		addServiceToFavourite(map, "addServiceToFavourite", _("add Service to Favourite"), eAction::prioDialog),
+		addServiceToUserBouquet(map, "addServiceToUserBouquet", _("add Service to a specific user bouquet"), eAction::prioDialog),
 		modeTV(map, "modeTV", _("switch to TV mode"), eAction::prioDialog),
 		modeRadio(map, "modeRadio", _("switch to Radio mode"), eAction::prioDialog),
 		modeFile(map, "modeFile", _("switch to File mode"), eAction::prioDialog),
 		toggleStyle(map, "toggleStyle", _("toggle between classic and multi column style"), eAction::prioDialog),
-		toggleFocus(map, "toggleFocus", _("toggle focus between service and bouquet list"), eAction::prioDialog)
+		toggleFocus(map, "toggleFocus", _("toggle focus between service and bouquet list"), eAction::prioDialog),
+		gotoFirstService(map, "gotoFirstService", _("go to first service"), eAction::prioDialogHi),
+		gotoLastService(map, "gotoLastService", _("go to last service"), eAction::prioDialogHi)
 	{
 	}
 };
-eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(5, "service selector actions");
+eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(eAutoInitNumbers::actions, "service selector actions");
 
 eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num)
 	:eListBoxEntry((eListBox<eListBoxEntry>*)lb),	numPara(0), namePara(0), descrPara(0), nameXOffs(0), flags(flags), num(num), service(service)
 {
+	static char strfilter[4] = { 0xC2, 0x87, 0x86, 0x00 };
+	if (!(flags & flagIsReturn))
+	{
 #if 0
-	sort=eString().sprintf("%06d", service->service_number);
+		sort=eString().sprintf("%06d", service->service_number);
 #else
-	const eService *pservice=eServiceInterface::getInstance()->addRef(service);
-	sort=pservice?pservice->service_name:"";
-	sort.upper();
-	eServiceInterface::getInstance()->removeRef(service);
+		const eService *pservice=eServiceInterface::getInstance()->addRef(service);
+		sort=pservice?pservice->service_name:"";
+		sort.upper();
+
+		// filter short name brakets...
+		for (eString::iterator it(sort.begin()); it != sort.end();)
+			strchr( strfilter, *it ) ? it = sort.erase(it) : it++;
+
+		eServiceInterface::getInstance()->removeRef(service);
 #endif
+	} else
+		sort="";
 }
 
 eListBoxEntryService::~eListBoxEntryService()
@@ -121,9 +136,9 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 
 	const eService *pservice=eServiceInterface::getInstance()->addRef(service);
 
-	std::map< eServiceReference, int>::iterator it = favourites.find( service );
-	if ( it != favourites.end() )
-		rc->setForegroundColor( eSkin::getActive()->queryColor("eServiceSelector.entryInFavourite") );
+	std::set<eServiceReference>::iterator it = hilitedEntrys.find( service );
+	if ( it != hilitedEntrys.end() )
+		rc->setForegroundColor( eSkin::getActive()->queryColor("eServiceSelector.entryHilited") );
 
 	if ( service.flags & eServiceReference::isDirectory && folder )  // we draw the folder pixmap
 	{
@@ -160,12 +175,16 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 
 		if (pservice)
 			sname=pservice->service_name;
+		else if (flags & flagIsReturn)
+			sname=_("[GO UP]");
 		else
-			sname="(removed service)";
+			sname=_("(removed service)");
 
 		namePara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
 		namePara->setFont( serviceFont );
 		namePara->renderString( sname );
+		if (flags & flagIsReturn)
+			namePara->realign(eTextPara::dirCenter);
 		nameYOffs = ((rect.height() - namePara->getBoundBox().height()) / 2 ) - namePara->getBoundBox().top();	
 	}
 	// we can always render namePara
@@ -238,6 +257,7 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 void eServiceSelector::addService(const eServiceReference &ref)
 {
 	int flags=serviceentryflags;
+
 	if ( ref.flags & eServiceReference::isDirectory)
 		flags &= ~ eListBoxEntryService::flagShowNumber;
 	
@@ -248,6 +268,7 @@ void eServiceSelector::addBouquet(const eServiceReference &ref)
 {
 	new eListBoxEntryService(bouquets, ref, serviceentryflags);
 }
+
 struct renumber: public std::unary_function<const eListBoxEntryService&, void>
 {
 	int &num;
@@ -257,7 +278,9 @@ struct renumber: public std::unary_function<const eListBoxEntryService&, void>
 
 	bool operator()(eListBoxEntryService& s)
 	{
-		if ( !(s.service.flags & eServiceReference::isDirectory) )
+		if (!s.service)
+			return 0;
+		if ( !(s.service.flags & (eServiceReference::isDirectory)) )
 	 		s.num = ++num;
 		return 0;
 	}
@@ -269,6 +292,8 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	eServicePath p = path;
 
 	eServiceReference ref;
+
+	// build complete path ... for window titlebar..
 	do
 	{
 		eServiceReference b=p.current();
@@ -286,6 +311,14 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	services->beginAtomic();
 	services->clearList();
 
+	if (!movemode)
+	{
+		if (path.size() > 1)
+			goUpEntry = new eListBoxEntryService(services, eServiceReference(), eListBoxEntryService::flagIsReturn);
+		else
+			goUpEntry = 0;
+	}
+	
 	eServiceInterface *iface=eServiceInterface::getInstance();
 	ASSERT(iface);
 	
@@ -294,6 +327,7 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	
 	ref=_ref;
 	serviceentryflags=eListBoxEntryService::flagShowNumber;
+
 	if (ref.type == eServicePlaylistHandler::ID) // playlists have own numbers
 		serviceentryflags|=eListBoxEntryService::flagOwnNumber;
 	
@@ -386,7 +420,7 @@ struct moveServiceNum: public std::unary_function<const eListBoxEntryService&, v
 
 bool eServiceSelector::selectService(int num)
 {
-	return services->forEachEntry( moveServiceNum( num ) ) == eListBoxBase::OK;
+ return services->forEachEntry( moveServiceNum( num ) ) == eListBoxBase::OK;
 }
 
 struct findServiceNum: public std::unary_function<const eListBoxEntryService&, void>
@@ -418,62 +452,64 @@ int eServiceSelector::getServiceNum( const eServiceReference &ref )
 
 void eServiceSelector::gotoChar(char c)
 {
+	eDebug("gotoChar %d", c);
 	switch(c)
 	{
-		case 2:	// A,B,C
-			if (BrowseChar == 'A' || BrowseChar == 'B')
+		case 2:// A,B,C
+			if (BrowseChar >= 'A' && BrowseChar < 'C')
 				BrowseChar++;
 			else
 				BrowseChar = 'A';
-		break;
+			break;
 
-		case 3:	// D,E,F
-			if (BrowseChar == 'D' || BrowseChar == 'E')
+		case 3:// D,E,F
+			if (BrowseChar >= 'D' && BrowseChar < 'F')
 				BrowseChar++;
 			else
 				BrowseChar = 'D';
-		break;
+			break;
 
-		case 4:	// G,H,I
-			if (BrowseChar == 'G' || BrowseChar == 'H')
+		case 4:// G,H,I
+			if (BrowseChar >= 'G' && BrowseChar < 'I')
 				BrowseChar++;
 			else
 				BrowseChar = 'G';
 		break;
-		case 5:	// J,K,L
-			if (BrowseChar == 'J' || BrowseChar == 'M')
+
+		case 5:// J,K,L
+			if (BrowseChar >= 'J' && BrowseChar < 'L')
 				BrowseChar++;
 			else
 				BrowseChar = 'J';
-		break;
+			break;
 
-		case 6:	// M,N,O
-			if (BrowseChar == 'M' || BrowseChar == 'N')
+		case 6:// M,N,O
+			if (BrowseChar >= 'M' && BrowseChar < 'O')
 				BrowseChar++;
 			else
 				BrowseChar = 'M';
-		break;
+			break;
 
-		case 7:	// P,Q,R,S
-			if (BrowseChar >= 'P' && BrowseChar <= 'R')
+		case 7:// P,Q,R,S
+			if (BrowseChar >= 'P' && BrowseChar < 'S')
 				BrowseChar++;
 			else
 				BrowseChar = 'P';
-		break;
+			break;
 
-		case 8:	// T,U,V
-			if (BrowseChar == 'T' || BrowseChar == 'U')
+		case 8:// T,U,V
+			if (BrowseChar >= 'T' && BrowseChar < 'V')
 				BrowseChar++;
 			else
 				BrowseChar = 'T';
-		break;
+			break;
 
-		case 9:	// W,X,Y,Z
-			if (BrowseChar >= 'W' && BrowseChar <= 'Y')
+		case 9:// W,X,Y,Z
+			if (BrowseChar >= 'W' && BrowseChar < 'Z')
 				BrowseChar++;
 			else
 				BrowseChar = 'W';
-		break;
+			break;
 	}
 	if (BrowseChar != 0)
 	{
@@ -517,10 +553,32 @@ void eServiceSelector::EPGUpdated( const tmpMap *m)
 	services->forEachEntry( updateEPGChangedService( m ) );
 }
 
+void eServiceSelector::pathUp()
+{
+	if (!movemode)
+	{
+		if (path.size() > ( (style == styleCombiColumn) ? 2 : 1) )
+		{
+			services->beginAtomic();
+			eServiceReference last=path.current();
+			path.up();
+			actualize();
+			selectService( last );
+			services->endAtomic();
+		} else if (style == styleCombiColumn)
+			setFocus(bouquets);
+	}
+}
+
 void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 {
-	if (entry && entry->service)
+	if (entry)
 	{
+		if (entry->flags & eListBoxEntryService::flagIsReturn)
+		{
+			pathUp();
+			return;
+		}
 		eServiceReference ref=entry->service;
 
 		if (movemode)
@@ -548,19 +606,19 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 
 		if (ref.flags & eServiceReference::isDirectory)
 			enterDirectory(ref);
-		else if (FavouriteMode)
+		else if (editMode) // edit user bouquet mode
 		{
 			eServiceReference &ref = services->getCurrent()->service;
-			std::map<eServiceReference, int>::iterator it = eListBoxEntryService::favourites.find( ref );
-			if ( it == eListBoxEntryService::favourites.end() )
+			std::set<eServiceReference>::iterator it = eListBoxEntryService::hilitedEntrys.find( ref );
+			if ( it == eListBoxEntryService::hilitedEntrys.end() )
 			{
-				/*emit*/ addServiceToFavourite(this, 1);
-				eListBoxEntryService::favourites[ref] = 1;
+				/*emit*/ addServiceToUserBouquet(this, 1);
+				eListBoxEntryService::hilitedEntrys.insert(ref);
 			}
 			else
 			{
-				/*emit*/ removeServiceFromFavourite( ref );
-				eListBoxEntryService::favourites.erase( ref );
+				/*emit*/ removeServiceFromUserBouquet( this );
+				eListBoxEntryService::hilitedEntrys.erase(ref);
 			}
 			services->invalidateCurrent();
 			return;
@@ -583,7 +641,7 @@ void eServiceSelector::serviceSelChanged(eListBoxEntryService *entry)
 	if (entry)
 	{
 		selected = (((eListBoxEntryService*)entry)->service);
-		if (ci->isVisible())				
+//		if (ci->isVisible())
 		{
 			ci->clear();
 			if ( selected.type == eServiceReference::idDVB &&
@@ -619,18 +677,22 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				gotoChar(8);
 			else if (event.action == &i_numberActions->key9 && !movemode)
 				gotoChar(9);
-			else if (event.action == &i_serviceSelectorActions->prevBouquet && !movemode)
+			else if (event.action == &i_serviceSelectorActions->prevBouquet && !movemode && path.size() > 1)
 			{
 				services->beginAtomic();
 				if (style == styleCombiColumn)
-					bouquets->goPrev();
-				else
+				{
+					if (bouquets->goNext()->flags & eListBoxEntryService::flagIsReturn)
+						bouquets->goPrev();
+				} else
 				{
 					eServiceReference last=path.current();
 					path.up();
 					fillServiceList(path.current());
 					selectService( last );
 					eListBoxEntryService* p = services->goPrev();
+					if (p && (p->flags&eListBoxEntryService::flagIsReturn))
+						p=services->goPrev();
 					if (p)
 					{
 						path.down( p->service );
@@ -644,14 +706,18 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			{
 				services->beginAtomic();
 				if (style == styleCombiColumn)
-					bouquets->goNext();
-				else
+				{
+					if (bouquets->goNext()->flags & eListBoxEntryService::flagIsReturn)
+						bouquets->goNext();
+				} else
 				{
 					eServiceReference last=path.current();
 					path.up();
 					fillServiceList(path.current());
 					selectService( last );
 					eListBoxEntryService* p = services->goNext();
+					if (p && (p->flags&eListBoxEntryService::flagIsReturn))
+						p=services->goNext();
 					if (p)
 					{
 						path.down( p->service );
@@ -680,19 +746,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					show();
 				}
 			}
-			else if (event.action == &i_serviceSelectorActions->pathUp && !movemode)
-			{
-				if (path.size() > ( (style == styleCombiColumn) ? 2 : 1) )
-				{
-					services->beginAtomic();
-					eServiceReference last=path.current();
-					path.up();
-					actualize();
-					selectService( last );
-					services->endAtomic();
-				} else if (style == styleCombiColumn)
-					setFocus(bouquets);
-			}
+			else if (event.action == &i_serviceSelectorActions->pathUp)
+				pathUp();
 			else if (event.action == &i_serviceSelectorActions->toggleStyle && !movemode)
 			{
 				int newStyle = style;
@@ -700,9 +755,9 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					newStyle = styleCombiColumn;
 				else
 					newStyle++;
-				setStyle(newStyle);			
+				setStyle(newStyle);
 			}
-			else if (event.action == &i_serviceSelectorActions->toggleFocus && !movemode)
+			else if (event.action == &i_serviceSelectorActions->toggleFocus && !movemode && path.size() > 1)
 			{
 				if ( style == styleCombiColumn )
 					if (focus == services)
@@ -712,20 +767,24 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			}
 			else if (event.action == &i_serviceSelectorActions->showMenu)
 				/*emit*/ showMenu(this);
-			else if (event.action == &i_serviceSelectorActions->showFavourite && !movemode && !FavouriteMode)
-				/*emit*/ showFavourite(this);
+			else if (event.action == &i_serviceSelectorActions->toggleRoot && !movemode && !editMode)
+			  /*emit*/ rotateRoot();
 			else if (event.action == &i_serviceSelectorActions->addService && !movemode)
-				/*emit*/ addServiceToList(selected);
-			else if (event.action == &i_serviceSelectorActions->addServiceToFavourite && !movemode)
-				/*emit*/ addServiceToFavourite(this, 0);
+				/*emit*/ addServiceToPlaylist(selected);
+			else if (event.action == &i_serviceSelectorActions->addServiceToUserBouquet && !movemode)
+				/*emit*/ addServiceToUserBouquet(this, 0);
 			else if (event.action == &i_serviceSelectorActions->modeTV && !movemode)
 				/*emit*/ setMode(eZapMain::modeTV);
 			else if (event.action == &i_serviceSelectorActions->modeRadio && !movemode)
 				/*emit*/ setMode(eZapMain::modeRadio);
 			else if (event.action == &i_serviceSelectorActions->modeFile && !movemode)
 				/*emit*/ setMode(eZapMain::modeFile);
+			else if (event.action == &i_serviceSelectorActions->gotoFirstService)
+				services->moveSelection(services->dirFirst);
+			else if (event.action == &i_serviceSelectorActions->gotoLastService)
+				services->moveSelection(services->dirLast);
 			else if (event.action == &i_cursorActions->cancel)
-			{	
+			{
 				if (movemode)
 				{
 					toggleMoveMode();
@@ -734,17 +793,13 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					selectService(selected);
 					services->endAtomic();
 				}
-				if (FavouriteMode)
-				{
-					FavouriteMode=0;
-					if (eListBoxEntryService::favourites.size())
-						eListBoxEntryService::favourites.clear();
-				}
+				if (editMode) // only when a playlist is showed...
+					toggleEditMode();
 				break;
 			}
 			else
 				break;
-        
+
 			return 1;
 		default:
 			break;
@@ -837,78 +892,78 @@ bool eServiceSelector::selectService(const eServiceReference &ref)
 
 void eServiceSelector::setStyle(int newStyle)
 {
-	ci->hide();
 	eServicePath p = path;
 	eServiceReference currentService;
 	if (style != newStyle)
 	{
-			if ( services )
-			{
-				// safe currentSelected Service
-				if ( services->getCount() )
-					currentService = services->getCurrent()->service;
+		ci->hide();
+		if ( services )
+		{
+			// safe currentSelected Service
+			if ( services->getCount() )
+				currentService = services->getCurrent()->service;
 
-				services->hide();
-				delete services;
-			}
-			if ( bouquets )
-			{
-				bouquets->hide();
-				delete bouquets;
-			}
-			if (newStyle == styleSingleColumn)
-			{
-				eListBoxEntryService::folder = eSkin::getActive()->queryImage("sselect_folder");
-				eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Number");
-				eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Name");
-			}
-			else if (style == styleMultiColumn)
-			{
-				eListBoxEntryService::folder = 0;	
-				eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Number");
-				eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Name");
-			}
-			else
-			{
-				eListBoxEntryService::folder = 0;	
-				eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Number");
-				eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Name");
-			}
-			services = new eListBox<eListBoxEntryService>(this);
-			services->setName("services");
-			services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 			services->hide();
-
-			bouquets = new eListBox<eListBoxEntryService>(this);
-			bouquets->setName("bouquets");
-			bouquets->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
+			delete services;
+		}
+		if ( bouquets )
+		{
 			bouquets->hide();
+			delete bouquets;
+		}
+		if (newStyle == styleSingleColumn)
+		{
+			eListBoxEntryService::folder = eSkin::getActive()->queryImage("sselect_folder");
+			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Number");
+			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Name");
+		}
+		else if (style == styleMultiColumn)
+		{
+			eListBoxEntryService::folder = 0;
+			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Number");
+			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Name");
+		}
+		else
+		{
+			eListBoxEntryService::folder = 0;
+			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Number");
+			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Name");
+		}
+		services = new eListBox<eListBoxEntryService>(this);
+		services->setName("services");
+		services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
+		services->hide();
 
-			if ( newStyle == styleSingleColumn )
-			{
-				if (eSkin::getActive()->build(this, "eServiceSelector_singleColumn"))
-					eFatal("Service selector widget build failed!");
-			}
-			else if ( newStyle == styleMultiColumn )
-			{
-				if (eSkin::getActive()->build(this, "eServiceSelector_multiColumn"))
-					eFatal("Service selector widget build failed!");
-			}
-			else
-			{
-				if (eSkin::getActive()->build(this, "eServiceSelector_combiColumn"))
-					eFatal("Service selector widget build failed!");
-				CONNECT( bouquets->selchanged, eServiceSelector::bouquetSelChanged );
-				CONNECT( bouquets->selected, eServiceSelector::bouquetSelected );
-				bouquets->show();
-			}
-			style = newStyle;
-			actualize();
-			selectService( currentService );  // select the old service
-			CONNECT(services->selected, eServiceSelector::serviceSelected);
-			CONNECT(services->selchanged, eServiceSelector::serviceSelChanged);
-			services->show();
-			setFocus(services);
+		bouquets = new eListBox<eListBoxEntryService>(this);
+		bouquets->setName("bouquets");
+		bouquets->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
+		bouquets->hide();
+
+		if ( newStyle == styleSingleColumn )
+		{
+			if (eSkin::getActive()->build(this, "eServiceSelector_singleColumn"))
+				eFatal("Service selector widget build failed!");
+		}
+		else if ( newStyle == styleMultiColumn )
+		{
+			if (eSkin::getActive()->build(this, "eServiceSelector_multiColumn"))
+				eFatal("Service selector widget build failed!");
+		}
+		else
+		{
+			if (eSkin::getActive()->build(this, "eServiceSelector_combiColumn"))
+				eFatal("Service selector widget build failed!");
+			CONNECT( bouquets->selchanged, eServiceSelector::bouquetSelChanged );
+			CONNECT( bouquets->selected, eServiceSelector::bouquetSelected );
+			bouquets->show();
+		}
+		style = newStyle;
+		CONNECT(services->selected, eServiceSelector::serviceSelected);
+		CONNECT(services->selchanged, eServiceSelector::serviceSelChanged);
+		actualize();
+		selectService( currentService );  // select the old service
+		services->show();
+		setFocus(services);
 	}
 	ci->show();
 }
@@ -931,24 +986,32 @@ void eServiceSelector::actualize()
 {
 	if (style == styleCombiColumn)
 	{
-		eServiceReference currentBouquet = path.current();
-		path.up();
-		eServiceReference allBouquets = path.current();
-		path.down( currentBouquet );
-		bouquets->beginAtomic();
-		fillBouquetList( allBouquets );
-
-		if ( bouquets->forEachEntry( _selectService( currentBouquet ) ) )
-			bouquets->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
-
-		bouquets->endAtomic();
+		if ( path.size() > 1 )
+		{
+			eServiceReference currentBouquet = path.current();
+			path.up();
+			eServiceReference allBouquets = path.current();
+			path.down( currentBouquet );
+			bouquets->beginAtomic();
+			fillBouquetList( allBouquets );
+			
+			if ( bouquets->forEachEntry( _selectService( currentBouquet ) ) )
+				bouquets->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
+			
+			bouquets->endAtomic();
+		}
+		else
+		{
+			bouquets->clearList();
+			fillServiceList(path.current());
+		}
 	}
 	else
 		fillServiceList(path.current());
 }
 
 eServiceSelector::eServiceSelector()
-	:eWindow(0), result(0), services(0), bouquets(0), style(styleInvalid), BrowseChar(0), BrowseTimer(eApp), ciDelay(eApp), movemode(0), FavouriteMode(0)
+	:eWindow(0), result(0), services(0), bouquets(0), style(styleInvalid), BrowseChar(0), BrowseTimer(eApp), ciDelay(eApp), movemode(0), editMode(0)
 {
 	ci = new eChannelInfo(this);
 	ci->setName("channelinfo");
@@ -1014,7 +1077,11 @@ const eServiceReference *eServiceSelector::next()
 	services->beginAtomic();
 	selectService(eServiceInterface::getInstance()->service);
 
-	eListBoxEntryService *s=services->goNext();
+	eListBoxEntryService *s=0;
+	do
+		s=services->goNext();
+	while ( s && s->flags & eListBoxEntryService::flagIsReturn );
+
 	services->endAtomic();
 	if (s)
 		return &s->service;
@@ -1026,8 +1093,11 @@ const eServiceReference *eServiceSelector::prev()
 {
 	services->beginAtomic();
 	selectService(eServiceInterface::getInstance()->service);
-
-	eListBoxEntryService *s=services->goPrev();
+	eListBoxEntryService *s=0;
+	do
+		s=services->goPrev();
+	while ( s && s->flags & eListBoxEntryService::flagIsReturn );
+	
 	services->endAtomic();
 	if (s)
 		return &s->service;
@@ -1047,17 +1117,29 @@ void eServiceSelector::setPath(const eServicePath &newpath, const eServiceRefere
 	}
 }
 
-void eServiceSelector::toggleMoveMode()
+int eServiceSelector::toggleMoveMode()
 {
+	services->beginAtomic();
+
 	movemode^=1;
 	if (!movemode)
 	{
 		eListBoxEntryService::selectedToMove=0;
 		services->setMoveMode(0);
+		if ( goUpEntry )
+			services->append( goUpEntry, true );
 	}
+	else if ( goUpEntry )
+		services->remove(goUpEntry, true);
+
+	services->endAtomic();
+	return movemode;
 }
 
-void eServiceSelector::toggleFavouriteMode()
+int eServiceSelector::toggleEditMode()
 {
-	FavouriteMode^=1;
+	editMode^=1;
+	if (!editMode)
+		eListBoxEntryService::hilitedEntrys.clear();
+	return editMode;
 }

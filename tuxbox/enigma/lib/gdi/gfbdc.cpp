@@ -2,6 +2,7 @@
 
 #include <lib/dvb/edvb.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 
 gFBDC *gFBDC::instance;
@@ -28,6 +29,7 @@ gFBDC::gFBDC()
 	
 	pixmap->clut.colors=256;
 	pixmap->clut.data=new gRGB[pixmap->clut.colors];
+	memset(pixmap->clut.data, 0, sizeof(*pixmap->clut.data)*pixmap->clut.colors);
 	reloadSettings();
 }
 
@@ -162,4 +164,4 @@ void gFBDC::reloadSettings()
 	setPalette();
 }
 
-eAutoInitP0<gFBDC> init_gFBDC(1, "GFBDC");
+eAutoInitP0<gFBDC> init_gFBDC(eAutoInitNumbers::graphic+1, "GFBDC");

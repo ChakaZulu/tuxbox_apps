@@ -4,6 +4,7 @@
 #include <lib/base/eerror.h>
 #include <lib/dvb/edvb.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/system/nconfig.h>
 
 eAction::eAction(eActionMap &map, char *identifier, char *description, int priority)
@@ -254,7 +255,7 @@ int eActionMapList::loadXML(const char *filename)
 		return -1;
 	if (strcmp(root->GetType(), "rcdefaults"))
 	{
-		eFatal("not an rcdefaults file.");
+		eFatal("not a rcdefaults file.");
 		return -1;
 	}
 	
@@ -368,4 +369,4 @@ eActionMap *eActionMapList::findActionMap(const char *id) const
 	return i->second;
 }
 
-eAutoInitP0<eActionMapList> init_eActionMapList(1, "eActionMapList");
+eAutoInitP0<eActionMapList> init_eActionMapList(eAutoInitNumbers::lowlevel, "eActionMapList");

@@ -3,6 +3,7 @@
 #include <time.h>
 #include <unistd.h>  // for usleep
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/dvb/lowlevel/dvb.h>
 #include <lib/dvb/si.h>
 #include <lib/dvb/service.h>
@@ -233,7 +234,17 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_
 	{
 		eventMap::iterator i( It->second.find( event_id ));
 		if ( i != It->second.end() )
-			return new EITEvent( *i->second );
+		{
+			if ( service.getServiceType() == 4 ) // nvod ref
+			{
+				EITEvent *evt = new EITEvent( *i->second );
+				int start_time = evt->start_time;
+				delete evt;
+				return lookupEvent( service, start_time );
+			}
+			else
+				return new EITEvent( *i->second );
+		}
 		else
 			eDebug("event %04x not found in epgcache", event_id);
 	}
@@ -408,5 +419,5 @@ void eEPGCache::abortEPG(const eServiceReferenceDVB&)
 }
 
 
-eAutoInitP0<eEPGCache> init_eEPGCacheInit(5, "EPG cache");
+eAutoInitP0<eEPGCache> init_eEPGCacheInit(eAutoInitNumbers::dvb+1, "EPG cache");
 

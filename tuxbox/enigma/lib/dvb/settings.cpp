@@ -29,7 +29,7 @@ void eDVBSettings::removeDVBBouquets()
 	}
 }
 
-void eDVBSettings::addDVBBouquet(const BAT *bat)
+void eDVBSettings::addDVBBouquet(eDVBNamespace origin, const BAT *bat )
 {
 	eDebug("wir haben da eine bat, id %x", bat->bouquet_id);
 	eString bouquet_name="Weiteres Bouquet";
@@ -48,6 +48,7 @@ void eDVBSettings::addDVBBouquet(const BAT *bat)
 				for (ePtrList<ServiceListDescriptorEntry>::const_iterator a(s->entries); a != s->entries.end(); ++a)
 					bouquet->add(
 						eServiceReferenceDVB(
+							origin,
 							eTransportStreamID(be->transport_stream_id), 
 							eOriginalNetworkID(be->original_network_id), 
 							eServiceID(a->service_id), -1));
@@ -64,14 +65,14 @@ eBouquet *eDVBSettings::getBouquet(int bouquet_id)
 
 static eString beautifyBouquetName(eString bouquet_name)
 {
-	if ( (bouquet_name.find("ARD") != eString::npos)
+/*	if ( (bouquet_name.find("ARD") != eString::npos)
 		  || (bouquet_name.find("ZDF") != eString::npos)
 			|| (bouquet_name.find("RTL") != eString::npos)
 			|| (bouquet_name.find("n-tv") != eString::npos)
 			|| (bouquet_name.find("ProSieben") != eString::npos)
 			|| (bouquet_name.find("VIVA") != eString::npos) )
 		bouquet_name="German Free";		
-	else if (bouquet_name.find("POLSAT") != eString::npos)
+	else*/ if (bouquet_name.find("POLSAT") != eString::npos)
 		bouquet_name="POLSAT";
 	else if (bouquet_name.find("HRT") != eString::npos)
 		bouquet_name="HRT Zagreb";
@@ -176,7 +177,7 @@ struct sortinChannel: public std::unary_function<const eServiceDVB&, void>
 	void operator()(eServiceDVB &service)
 	{
 		eBouquet *b = edvb.createBouquet(beautifyBouquetName(service.service_provider) );
-		b->add(eServiceReferenceDVB(service.transport_stream_id, service.original_network_id, service.service_id, service.service_type));
+		b->add(eServiceReferenceDVB(service.dvb_namespace, service.transport_stream_id, service.original_network_id, service.service_id, service.service_type));
 	}
 };
 
@@ -198,7 +199,7 @@ struct saveService: public std::unary_function<const eServiceDVB&, void>
 	}
 	void operator()(eServiceDVB& s)
 	{
-		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id.get(), s.transport_stream_id.get(), s.original_network_id.get(), s.service_type, s.service_number);
+		fprintf(f, "%04x:%08x:%04x:%04x:%d:%d\n", s.service_id.get(), s.dvb_namespace.get(), s.transport_stream_id.get(), s.original_network_id.get(), s.service_type, s.service_number);
 		fprintf(f, "%s\n", s.service_name.c_str());
 		if (s.dxflags)
 			fprintf(f, "f:%x,", s.dxflags);
@@ -232,7 +233,7 @@ struct saveTransponder: public std::unary_function<const eTransponder&, void>
 	{
 		if (t.state!=eTransponder::stateOK)
 			return;
-		fprintf(f, "%04x:%04x %d\n", t.transport_stream_id.get(), t.original_network_id.get(), t.state);
+		fprintf(f, "%08x:%04x:%04x\n", t.dvb_namespace.get(), t.transport_stream_id.get(), t.original_network_id.get());
 		if (t.cable.valid)
 			fprintf(f, "\tc %d:%d:%d:%d\n", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion, t.cable.modulation);
 		if (t.satellite.valid)
@@ -250,7 +251,7 @@ void eDVBSettings::saveServices()
 	FILE *f=fopen(CONFIGDIR "/enigma/services", "wt");
 	if (!f)
 		eFatal("couldn't open servicefile - create " CONFIGDIR "/enigma!");
-	fprintf(f, "eDVB services /1/\n");
+	fprintf(f, "eDVB services /2/\n");
 
 	getTransponders()->forEachTransponder(saveTransponder(f));
 	getTransponders()->forEachService(saveService(f));
@@ -287,10 +288,12 @@ void eDVBSettings::loadServices()
 			break;
 		if (!strcmp(line, "end\n"))
 			break;
-		int transport_stream_id=-1, original_network_id=-1, state=-1;
-		sscanf(line, "%04x:%04x %d", &transport_stream_id, &original_network_id, &state);
-		eTransponder &t=transponderlist->createTransponder(eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id));
-		t.state=state;
+		int dvb_namespace=-1, transport_stream_id=-1, original_network_id=-1;
+		sscanf(line, "%x:%x:%x", &dvb_namespace, &transport_stream_id, &original_network_id);
+		if (original_network_id == -1)
+			continue;
+		eTransponder &t=transponderlist->createTransponder(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id));
+		t.state=eTransponder::stateOK;
 		while (!feof(f))
 		{
 			fgets(line, 256, f);
@@ -329,10 +332,13 @@ void eDVBSettings::loadServices()
 		if (!strcmp(line, "end\n"))
 			break;
 
-		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1, service_number=-1;
-		sscanf(line, "%04x:%04x:%04x:%d:%d", &service_id, &transport_stream_id, &original_network_id, &service_type, &service_number);
+		int service_id=-1, dvb_namespace, transport_stream_id=-1, original_network_id=-1, service_type=-1, service_number=-1;
+		sscanf(line, "%x:%x:%x:%x:%d:%d", &service_id, &dvb_namespace, &transport_stream_id, &original_network_id, &service_type, &service_number);
+		if (service_number == -1)
+			continue;
 		eServiceDVB &s=transponderlist->createService(
 				eServiceReferenceDVB(
+						eDVBNamespace(dvb_namespace),
 						eTransportStreamID(transport_stream_id), 
 						eOriginalNetworkID(original_network_id), 
 						eServiceID(service_id),
@@ -395,7 +401,7 @@ void eDVBSettings::saveBouquets()
 	FILE *f=fopen(CONFIGDIR "/enigma/bouquets", "wt");
 	if (!f)
 		eFatal("couldn't open bouquetfile - create " CONFIGDIR "/enigma!");
-	fprintf(f, "eDVB bouquets /1/\n");
+	fprintf(f, "eDVB bouquets /2/\n");
 	fprintf(f, "bouquets\n");
 	for (ePtrList<eBouquet>::iterator i(*getBouquets()); i != getBouquets()->end(); ++i)
 	{
@@ -403,7 +409,7 @@ void eDVBSettings::saveBouquets()
 		fprintf(f, "%0d\n", b->bouquet_id);
 		fprintf(f, "%s\n", b->bouquet_name.c_str());
 		for (ServiceReferenceDVBIterator s = b->list.begin(); s != b->list.end(); s++)
-			fprintf(f, "%04x:%04x:%04x:%d\n", s->getServiceID().get(), s->getTransportStreamID().get(), s->getOriginalNetworkID().get(), s->getServiceType());
+			fprintf(f, "%04x:%08x:%04x:%04x:%d\n", s->getServiceID().get(), s->getDVBNamespace().get(), s->getTransportStreamID().get(), s->getOriginalNetworkID().get(), s->getServiceType());
 		fprintf(f, "/\n");
 	}
 	fprintf(f, "end\n");
@@ -449,10 +455,13 @@ void eDVBSettings::loadBouquets()
 			fgets(line, 256, f);
 			if (!strcmp(line, "/\n"))
 				break;
-			int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1;
-			sscanf(line, "%04x:%04x:%04x:%d", &service_id, &transport_stream_id, &original_network_id, &service_type);
+			int service_id=-1, dvb_namespace=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1;
+			sscanf(line, "%x:%x:%x:%x:%d", &service_id, &dvb_namespace, &transport_stream_id, &original_network_id, &service_type);
+			if (service_type == -1)
+				continue;
 			bouquet->add(
 				eServiceReferenceDVB(
+					eDVBNamespace(dvb_namespace),
 					eTransportStreamID(transport_stream_id), 
 					eOriginalNetworkID(original_network_id), 
 					eServiceID(service_id), 
@@ -585,9 +594,20 @@ int eDVBSettings::importSatcoDX(eString line)
 		service_type=1;
 	else if (type == "R")
 		service_type=2;
+	
+	eDVBNamespace dvb_namespace;
+
+	// create transponder.
+	
+	int my_orbital_position=atoi(orbital_position.c_str());
+	if (my_orbital_position >= 1800) // convert 0..3599 to -1800..1799
+		my_orbital_position-=3600;
+		
+	dvb_namespace=eDVBNamespace(orbital_position << 16);
 
 	eServiceDVB &dvbservice=transponderlist->createService(
 		eServiceReferenceDVB(
+			dvb_namespace,
 			eTransportStreamID(atoi(tsid.c_str())), eOriginalNetworkID(atoi(onid.c_str())), eServiceID(atoi(sid.c_str())),
 			service_type)
 		);
@@ -602,14 +622,7 @@ int eDVBSettings::importSatcoDX(eString line)
 	if (pcrpid[0] != '_')
 	dvbservice.set(eServiceDVB::cPCRPID, atoi(pcrpid.c_str()));
 	
-	
-	// create transponder.
-	
-	int my_orbital_position=atoi(orbital_position.c_str());
-	if (my_orbital_position >= 1800) // convert 0..3599 to -1800..1799
-		my_orbital_position-=3600;
-
-	eTransponder &t=transponderlist->createTransponder(eTransportStreamID(atoi(tsid.c_str())), eOriginalNetworkID(atoi(onid.c_str())));
+	eTransponder &t=transponderlist->createTransponder(dvb_namespace, eTransportStreamID(atoi(tsid.c_str())), eOriginalNetworkID(atoi(onid.c_str())));
 	t.state=eTransponder::stateOK;
 
 	int myfec;

@@ -10,6 +10,7 @@
 #include <lib/gdi/font.h>
 #include <lib/gui/eprogress.h>
 #include <lib/dvb/edvb.h>
+#include <lib/dvb/decoder.h>
 #include <lib/driver/rc.h>
 #include <lib/gui/echeckbox.h>
 #include <lib/gui/combobox.h>
@@ -56,14 +57,14 @@ int tsSelectType::eventHandler( const eWidgetEvent &e )
 
 void tsSelectType::selected(eListBoxEntryText *entry)
 {
-	if (!entry)
-		close(0);
-	else
+	if (entry && entry->getKey())
 		close((int)entry->getKey());
+	else
+		close(0);
 }
 
 tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LCDTitle, eWidget *LCDElement)
-:eWidget(parent), transponder(transponder)
+:eWidget(parent), transponder(transponder), updateTimer(eApp)
 {
 	addActionMap(&i_cursorActions->map);
 	setLCD(LCDTitle, LCDElement);
@@ -115,6 +116,17 @@ tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LC
 	CONNECT(b_start->selected, tsManual::start);
 	CONNECT(b_abort->selected, tsManual::abort);
 	CONNECT(transponder_widget->updated, tsManual::retune);
+//	CONNECT(updateTimer.timeout, tsManual::update );
+}
+
+void tsManual::update()
+{
+	int status=eFrontend::getInstance()->Status();
+	if (!(status & FE_HAS_LOCK))
+	{
+		if (!transponder_widget->getTransponder(&transponder))
+			transponder.tune();
+	}
 }
 
 void tsManual::start()
@@ -158,8 +170,10 @@ int tsManual::eventHandler(const eWidgetEvent &event)
 			break;
 		return 1;
 	case eWidgetEvent::execBegin:
-//			retune();
+		updateTimer.start(1000);
 		break;
+	case eWidgetEvent::execDone:
+		updateTimer.stop();
 	default:
 		break;
 	}
@@ -211,16 +225,7 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 	if (skin->build(this, "tsAutomatic"))
 		eFatal("skin load of \"tsAutomatic\" failed");
 
-	l_network->setCurrent(new eListBoxEntryText(*l_network, _("automatic"), (void*)0, eTextPara::dirCenter) );
-
-#if 0
-	new eListBoxEntryText(l_network, "Astra 19.2°E fake", (void*)"astra192");
-	new eListBoxEntryText(l_network, "Astra 19.3°E (bei schiefer Antenne)", (void*)"astra193");
-	new eListBoxEntryText(l_network, "Hotbird 11.0°E fuck", (void*)"hb11");
-	new eListBoxEntryText(l_network, "Hotbird 13.5°E", (void*)"hbemu135");
-	new eListBoxEntryText(l_network, "Hotbird XP", (void*)"hbxp");
-	new eListBoxEntryText(l_network, "Sirius -139.2°N", (void*)"sirius-1395");
-#endif
+//	l_network->setCurrent(new eListBoxEntryText(*l_network, _("automatic"), (void*)0, eTextPara::dirCenter) );
 
 	CONNECT(b_start->selected, tsAutomatic::start);
 	CONNECT(b_abort->selected, tsAutomatic::abort);
@@ -236,10 +241,10 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 	switch (eFrontend::getInstance()->Type())
 	{
 		case eFrontend::feSatellite:
-			l_status->setText(_("To begin searching for a valid satellite press OK, or choose your wished satellite manually and press OK"));
+			l_status->setText(_("To begin searching for a valid satellite press OK, or choose your desired satellite manually and press OK"));
 		break;
 		case eFrontend::feCable:
-			l_status->setText(_("To begin searching for a valid cable provider press OK, or choose your wished cable provider manually and press OK"));
+			l_status->setText(_("To begin searching for a valid cable provider press OK, or choose your desired cable provider manually and press OK"));
 		break;
 	}
 	
@@ -281,12 +286,13 @@ void tsAutomatic::abort()
 
 void tsAutomatic::networkSelected(eListBoxEntryText *l)
 {
-	if (nextNetwork(-1))		// if "automatic" selected,
+	if (nextNetwork(-1)) // if "automatic" selected,
 	{
 		automatic=1;
-		nextNetwork();				// begin with first
+		nextNetwork();  // begin with first
 	} else
 		automatic=0;
+
 	tuneNext(0);
 }
 
@@ -313,176 +319,17 @@ void tsAutomatic::dvbEvent(const eDVBEvent &event)
 	}
 }
 
-existNetworks::existNetworks()
-:fetype( eFrontend::getInstance()->Type() )
-{
-
-}
-
-int existNetworks::parseNetworks()
-{
-	XMLTreeParser parser("ISO-8859-1");
-	
-	int done=0;
-	const char *filename=0;
-	
-	switch (fetype)
-	{
-	case eFrontend::feSatellite:
-		filename=DATADIR "/satellites.xml";
-		break;
-	case eFrontend::feCable:
-		filename=DATADIR "/cables.xml";
-		break;
-	default:
-		break;
-	}
-	
-	if (!filename)
-		return -1;
-		
-	FILE *in=fopen(filename, "rt");
-	if (!in)
-	{
-		eWarning("unable to open %s", filename);
-		return -1;
-	}
-	
-	do
-	{
-		char buf[2048];
-		unsigned int len=fread(buf, 1, sizeof(buf), in);
-		done=len<sizeof(buf);
-		if (!parser.Parse(buf, len, done))
-		{
-			eDebug("parse error: %s at line %d",
-				parser.ErrorString(parser.GetErrorCode()),
-				parser.GetCurrentLineNumber());
-			fclose(in);
-			return -1;
-		}
-	} while (!done);
-	
-	fclose(in);
-	
-	XMLTreeNode *root=parser.RootNode();
-	
-	if (!root)
-		return -1;
-	
-	for (XMLTreeNode *node = root->GetChild(); node; node = node->GetNext())
-		if (!strcmp(node->GetType(), "cable"))
-		{
-			tpPacket pkt;
-			if (!addNetwork(pkt, node, eFrontend::feCable))
-				networks.push_back(pkt);
-		} else if (!strcmp(node->GetType(), "sat"))
-		{
-			tpPacket pkt;
-			if (!addNetwork(pkt, node, eFrontend::feSatellite))
-				networks.push_back(pkt);
-		} else
-			eFatal("unknown packet %s", node->GetType());
-
-	return 0;
-}
-
-int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
-{
-	const char *name=node->GetAttributeValue("name");
-	if (!name)
-	{
-		eFatal("no name");
-		return -1;
-	}
-	packet.name=name;
-
-	const char *flags=node->GetAttributeValue("flags");
-	if (flags)
-	{
-		packet.scanflags=atoi(flags);
-		eDebug("name = %s, scanflags = %i", name, packet.scanflags );
-	}
-	else
-	{
-		packet.scanflags=1; // default use Network ??
-		eDebug("packet has no scanflags... we use default scanflags (1)");
-	}
-	
-	const char *position=node->GetAttributeValue("position");
-	if (!position)
-		position="0";
-
-	int orbital_position=atoi(position);
-	packet.orbital_position = orbital_position;
-	
-	for (node=node->GetChild(); node; node=node->GetNext())
-	{
-		eTransponder t(*eDVB::getInstance()->settings->getTransponders());
-		switch (type)
-		{
-		case eFrontend::feCable:
-		{
-			const char *afrequency=node->GetAttributeValue("frequency"),
-					*asymbol_rate=node->GetAttributeValue("symbol_rate"),
-					*ainversion=node->GetAttributeValue("inversion"),
-					*amodulation=node->GetAttributeValue("modulation");
-			if (!afrequency)
-				continue;
-			if (!asymbol_rate)
-				asymbol_rate="6900000";
-			if (!ainversion)
-				ainversion="0";
-			if (!amodulation)
-				amodulation="3";
-			int frequency=atoi(afrequency)/1000,
-					symbol_rate=atoi(asymbol_rate),
-					inversion=atoi(ainversion),
-					modulation=atoi(amodulation);
-			t.setCable(frequency, symbol_rate, inversion, modulation );
-			break;
-		}
-		case eFrontend::feSatellite:
-		{
-			const char *afrequency=node->GetAttributeValue("frequency"),
-					*asymbol_rate=node->GetAttributeValue("symbol_rate"),
-					*apolarisation=node->GetAttributeValue("polarization"),
-					*afec_inner=node->GetAttributeValue("fec_inner"),
-					*ainversion=node->GetAttributeValue("inversion");
-			if (!afrequency)
-				continue;
-			if (!asymbol_rate)
-				continue;
-			if (!apolarisation)
-				continue;
-			if (!afec_inner)
-				continue;
-			if (!ainversion)
-				ainversion="0";
-			int frequency=atoi(afrequency), symbol_rate=atoi(asymbol_rate),
-					polarisation=atoi(apolarisation), fec_inner=atoi(afec_inner), inversion=atoi(ainversion);
-			t.setSatellite(frequency, symbol_rate, polarisation, fec_inner, orbital_position, inversion);
-			break;
-		}
-		default:
-			continue;
-		}
-		packet.possibleTransponders.push_back(t);
-	}
-	return 0;
-}
-
 int tsAutomatic::loadNetworks()
 {
 	int err;
 
-	if(	(err = existNetworks::parseNetworks()) )
+	if(	(err = eTransponderList::getInstance()->reloadNetworks()) )
 		return err;
 
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-			for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
-				if ( ( i->orbital_position == s->getOrbitalPosition() ) || (fetype == eFrontend::feCable) )
+			for ( std::list<tpPacket>::const_iterator i(eTransponderList::getInstance()->getNetworks().begin()); i != eTransponderList::getInstance()->getNetworks().end(); ++i)
+				if ( ( i->orbital_position == s->getOrbitalPosition() ) || (eFrontend::getInstance()->Type() == eFrontend::feCable) )
 					new eListBoxEntryText(*l_network, i->name, (void*)&*i, eTextPara::dirCenter);
 
 	return 0;
@@ -497,7 +344,7 @@ int tsAutomatic::nextNetwork(int first)
 		
 	tpPacket *pkt=(tpPacket*)(l_network->getCurrent() -> getKey());
 	
-//	eDebug("pkt: %p", pkt);
+	eDebug("pkt: %p", pkt);
 
 	if (!pkt)
 		return -1;
@@ -531,7 +378,8 @@ int tsAutomatic::tuneNext(int next)
 					"if its some obscure satellite/network."));
 				return -1;
 			}
-		} else
+		}
+		else
 		{
 			l_status->setText(_("All known transponders have been tried,"
 				" but no lock was possible. Verify antenna-/cable-setup or try another satellite/network."));
@@ -554,7 +402,7 @@ tsText::tsText(eString sheadline, eString sbody, eWidget *parent): eWidget(paren
 	addActionMap(&i_cursorActions->map);
 	headline=new eLabel(this);
 	headline->setText(sheadline);
-	headline->setFont(gFont("NimbusSansL-Regular Sans L Regular", 32));
+	headline->setFont(eSkin::getActive()->queryFont("head"));
 	body=new eLabel(this, RS_WRAP);
 	body->setText(sbody);
 }
@@ -762,9 +610,10 @@ TransponderScan::~TransponderScan()
 	delete window;
 }
 
-int TransponderScan::exec()
+int TransponderScan::exec(int initial)
 {
 	eSize size=eSize(window->getClientSize().width(), window->getClientSize().height()-30);
+	int scanok=0;
 
 	eString text;
 
@@ -776,9 +625,15 @@ int TransponderScan::exec()
 		stateScan,
 		stateDone,
 		stateEnd
-	} state=stateMenu;
+	} state;
+	
+	if (initial == initialMenu)
+		state=stateMenu;
+	else if (initial == initialAutomatic)
+		state=stateAutomatic;
 
 	window->show();
+	Decoder::displayIFrameFromFile(DATADIR "/pictures/scan.mvi");
 
 	while (state != stateEnd)
 	{
@@ -876,13 +731,15 @@ int TransponderScan::exec()
 			scan.exec();
 			scan.hide();
 
-			text.sprintf(_("The transponderscan has finished and found %i new Transponders, %i new TV Services, %i new Radio Services and %i new Data Services. %i Transponders within %i Services scanned."), scan.newTransponders, scan.newTVServices, scan.newRadioServices, scan.newDataServices, scan.tpScanned, scan.servicesScanned );
+			text.sprintf(_("The transponder scan has finished and found %i new Transponders, %i new TV Services, %i new Radio Services and %i new Data Services. %i Transponders within %i Services scanned."), scan.newTransponders, scan.newTVServices, scan.newRadioServices, scan.newDataServices, scan.tpScanned, scan.servicesScanned );
+			scanok=1;
 			
 			state=stateDone;
 			break;
 		}
 		case stateDone:
 		{
+			eDVB::getInstance()->setMode(eDVB::controllerService);  
 			tsText finish(_("Done."), text, window);
   		finish.setLCD( LCDTitle, LCDElement);
   		finish.move(ePoint(0, 0));
@@ -902,6 +759,8 @@ int TransponderScan::exec()
 
 	eDVB::getInstance()->setMode(eDVB::controllerService);  
 	window->hide();
+	
+	Decoder::Flush();
 
-	return 0;
+	return scanok;
 }

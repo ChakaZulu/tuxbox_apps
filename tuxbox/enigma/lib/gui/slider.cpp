@@ -4,6 +4,7 @@
 #include <lib/gui/elabel.h>
 #include <lib/gui/guiactions.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 
 inline void swap( gColor& a, gColor& b )
 {
@@ -178,4 +179,4 @@ public:
 	}
 };
 
-eAutoInitP0<eSliderSkinInit> init_eSliderSkinInit(3, "eSlider");
+eAutoInitP0<eSliderSkinInit> init_eSliderSkinInit(eAutoInitNumbers::guiobject, "eSlider");

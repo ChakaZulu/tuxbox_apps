@@ -23,12 +23,12 @@ static eServiceReferenceDVB getServiceByID(const char *id)
 	eTransponderList *tl=eDVB::getInstance()->settings->getTransponders();
 	if (!tl)
 		return eServiceReferenceDVB();
-	int original_network_id, transport_stream_id, service_id, service_type;
-	if (sscanf(id, "S:%x:%x:%x:%x", &original_network_id, &transport_stream_id, &service_id, &service_type)!=4)
-		if (sscanf(id, "E:%x:%x:%x:%x", &original_network_id, &transport_stream_id, &service_id, &service_type)!=4)
+	int dvb_namespace, original_network_id, transport_stream_id, service_id, service_type;
+	if (sscanf(id, "S:%x:%x:%x:%x:%x", &dvb_namespace, &original_network_id, &transport_stream_id, &service_id, &service_type)!=4)
+		if (sscanf(id, "E:%x:%x:%x:%x:%x", &dvb_namespace, &original_network_id, &transport_stream_id, &service_id, &service_type)!=4)
 			return eServiceReferenceDVB();
 
-	return eServiceReferenceDVB(eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
+	return eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
 }
 
 static int testrpc(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &result)
@@ -117,6 +117,8 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 				sm->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 				static eString bs("S:");
 				eString handle=bs;
+				handle+=eString().setNum(s->getDVBNamespace().get(), 16);
+				handle+=':';
 				handle+=eString().setNum(s->getOriginalNetworkID().get(), 16);
 				handle+=':';
 				handle+=eString().setNum(s->getTransportStreamID().get(), 16);
@@ -183,6 +185,8 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 			s->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 			static eString bs("E:");
 			eString handle=bs;
+			handle+=eString().setNum(service.getDVBNamespace().get(), 16);
+			handle+=':';
 			handle+=eString().setNum(service.getOriginalNetworkID().get(), 16);
 			handle+=':';
 			handle+=eString().setNum(service.getTransportStreamID().get(), 16);

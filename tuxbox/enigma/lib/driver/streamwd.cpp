@@ -12,6 +12,7 @@
 #include <lib/base/eerror.h>
 #include <lib/dvb/edvb.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 
 #define EVENT_DEVICE "/dev/dbox/event0"
@@ -134,4 +135,4 @@ eStreamWatchdog::~eStreamWatchdog()
 		delete sn;
 }
 
-eAutoInitP0<eStreamWatchdog> eStreamWatchdog_init(3, "stream watchdog");
+eAutoInitP0<eStreamWatchdog> eStreamWatchdog_init(eAutoInitNumbers::dvb-1, "stream watchdog");

@@ -1,5 +1,5 @@
 // for debugging use:
-//#define SYNC_PAINT
+// #define SYNC_PAINT
 #include <unistd.h>
 #ifndef SYNC_PAINT
 #include <pthread.h>
@@ -8,6 +8,7 @@
 #include <lib/gdi/grc.h>
 #include <lib/gdi/font.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 
 #define MAXSIZE 1024
 
@@ -373,4 +374,4 @@ gRGB gPixmapDC::getRGB(gColor col)
 	return pixmap->clut.data[col];
 }
 
-eAutoInitP0<gRC> init_grc(1, "gRC");
+eAutoInitP0<gRC> init_grc(eAutoInitNumbers::graphic, "gRC");

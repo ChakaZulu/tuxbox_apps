@@ -434,7 +434,7 @@ public:
 	int width() { return getSize().width(); }
 	int height() { return getSize().height(); }
 	
-	gPainter *getPainter(eRect area=eRect());
+	gPainter *getPainter(eRect area);
 
 	const eString& getHelpText() const	{	return helptext;	}
 

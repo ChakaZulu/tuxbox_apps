@@ -4,6 +4,7 @@
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbci.h>
 #include <tuxbox/tuxbox.h>
+#include <lib/dvb/eaudio.h>
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
 : eDVBController(dvb)
@@ -12,14 +13,8 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb)
 	CONNECT(dvb.tPMT.tableReady, eDVBServiceController::PMTready);
 	CONNECT(dvb.tSDT.tableReady, eDVBServiceController::SDTready);
 	CONNECT(dvb.tEIT.tableReady, eDVBServiceController::EITready);
-
-	if (tuxbox_get_vendor() != TUXBOX_VENDOR_DREAM_MM)  // no dreambox
-	{
-		eDebug("add CAs");
-		availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
-		availableCASystems.push_back(0x1722);	// BetaCrypt D (cable)
-		availableCASystems.push_back(0x1762);	// BetaCrypt F (ORF)
-	}
+	
+	initCAlist();
 
 	transponder=0;
 	tdt=0;
@@ -79,7 +74,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
 				return;
 			}
-			eTransponder *n=dvb.settings->transponderlist->searchTS(service.getTransportStreamID(), service.getOriginalNetworkID());
+			eTransponder *n=dvb.settings->transponderlist->searchTS(service.getDVBNamespace(), service.getTransportStreamID(), service.getOriginalNetworkID());
 			if (!n)
 			{
 				eDebug("no transponder %x %x", service.getOriginalNetworkID().get(), service.getTransportStreamID().get());
@@ -88,7 +83,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			}
 			if (n->state!=eTransponder::stateOK)
 			{
-				eDebug("couldn't tune");
+				eDebug("couldn't tune (state is %x)", n->state);
 				service_state=ENOENT;
 				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
 				return;
@@ -103,10 +98,8 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				/*emit*/ dvb.leaveTransponder(transponder);
 				transponder=n;
 				if (n->tune())
-				{
-					eDebug("tune failed");
 					dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneFailed));
-				} else
+				else
 					dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceTune));
 			}
 			eDebug("<-- tuned");
@@ -296,7 +289,7 @@ void eDVBServiceController::SDTready(int error)
 		SDT *sdt=dvb.tSDT.ready()?dvb.tSDT.getCurrent():0;
 		if (sdt)
 		{
-			if (dvb.settings->transponderlist->handleSDT(sdt))
+			if (dvb.settings->transponderlist->handleSDT(sdt, service.getDVBNamespace()))
 				dvb.serviceListChanged();
 
 			sdt->unlock();
@@ -315,11 +308,30 @@ void eDVBServiceController::EITready(int error)
 	if (!error)
 	{
 		EIT *eit=dvb.getEIT();
+
+		for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
+		{
+			EITEvent *event=*i;
+			if ( event->running_status >= 2 )
+			{
+				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
+					if (d->Tag()==DESCR_LINKAGE)
+					{
+						LinkageDescriptor *ld=(LinkageDescriptor*)*d;
+						//eDebug("linkage descriptor avail.. type = %d", ld->linkage_type );
+						if (ld->linkage_type!=0xB0)
+							continue;
+						//eDebug("Linkage found");
+						goto bla;
+					}
+			}
+		}
 		if ( service.getServiceType() == 4 ) // NVOD Service
 		{
-			delete dvb.nvodEIT;
-			dvb.nvodEIT = new EIT( eit );
-			dvb.nvodEIT->events.setAutoDelete(true);
+bla:
+			delete dvb.parentEIT;
+			dvb.parentEIT = new EIT( eit );
+			dvb.parentEIT->events.setAutoDelete(true);
 			eit->events.setAutoDelete(false);
 		}
 		/*emit*/ dvb.gotEIT(eit, 0);
@@ -362,14 +374,16 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 	switch(newservice.getServiceType())
 	{
-		case 1:
-		case 2:
-			delete dvb.nvodEIT;
-			dvb.nvodEIT = 0;
+		case 1:  // tv service
+		case 2:  // radio service
+		case 4:  // nvod parent service
+			delete dvb.parentEIT;
+			dvb.parentEIT = 0;
 		break;
-		case 5:
-			eDebug("NVOD EIT Fake");
-			dvb.gotEIT(0,0);   // eit for nvod reference services
+		case 5:  // nvod ref service
+		case 6:  // linkage ref service
+			// send Parent EIT .. for osd text..
+			dvb.gotEIT(0,0); 
 		break;
 	}
 	return 1;
@@ -396,6 +410,8 @@ void eDVBServiceController::scanPMT()
 	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM7000)
 		calist.clear();
 
+	usedCASystems.clear();
+
 	Decoder::parms.descriptor_length=0;
 	
 	DVBCI=eDVB::getInstance()->DVBCI;
@@ -406,7 +422,11 @@ void eDVBServiceController::scanPMT()
 
 	isca+=checkCA(calist, pmt->program_info);
 	
-	PMTEntry *audio=0, *video=0, *teletext=0;
+	PMTEntry *audio=0, *ac3_audio=0, *video=0, *teletext=0;
+
+	int sac3default = 0;
+
+	sac3default=eAudio::getInstance()->getAC3default();
 
 	int audiopid=-1, videopid=-1;
 
@@ -436,7 +456,7 @@ void eDVBServiceController::scanPMT()
 		case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
 			if ((!video) || (pe->elementary_PID == videopid))
 			{
-  			video=pe;
+				video=pe;
 			}
 			isca+=checkCA(calist, pe->ES_info);
 			break;
@@ -453,9 +473,9 @@ void eDVBServiceController::scanPMT()
 			isca+=checkCA(calist, pe->ES_info);
 			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 			{
-				if ((i->Tag()==DESCR_AC3) && (pe->elementary_PID == audiopid))
+				if ((i->Tag()==DESCR_AC3) && ((!ac3_audio) || (pe->elementary_PID == audiopid)))
 				{
-					audio=pe;
+					ac3_audio=pe;
 				}
 				if (i->Tag()==DESCR_TELETEXT)
 					teletext=pe;
@@ -487,7 +507,10 @@ void eDVBServiceController::scanPMT()
 
   DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
   DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
-  
+
+	if (sac3default && ac3_audio)
+ 		audio=ac3_audio;
+
 	setPID(video);
 	setPID(audio);
 	setPID(teletext);
@@ -653,14 +676,10 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
       DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf2));
 
 			int avail=0;
-			for (std::list<int>::iterator i = availableCASystems.begin(); i != availableCASystems.end() && !avail; i++)
-			{
-				eDebug("ca id %d == %d", *i, ca->CA_system_ID );
-				if (*i == ca->CA_system_ID)
-				{
+			if (availableCASystems.find(ca->CA_system_ID) != availableCASystems.end())
 					avail++;
-				}
-			}
+			
+			usedCASystems.insert(ca->CA_system_ID);
 
 			if (avail)
 			{
@@ -686,3 +705,16 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 	return found;
 }
 
+void eDVBServiceController::initCAlist()
+{
+	availableCASystems.clear();
+	if (tuxbox_get_vendor() != TUXBOX_VENDOR_DREAM_MM)  // no dreambox
+	{
+		availableCASystems.insert(0x1702);	// BetaCrypt C (sat)
+		availableCASystems.insert(0x1722);	// BetaCrypt D (cable)
+		availableCASystems.insert(0x1762);	// BetaCrypt F (ORF)
+	} else
+	{
+		availableCASystems.insert(0x4A70);	// DreamCrypt
+	}
+}

@@ -47,7 +47,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	entrys[1]=new eListBoxEntryText(colorformat, _("RGB"), (void*)2);
 	entrys[2]=new eListBoxEntryText(colorformat, _("SVideo"), (void*)3);
 	colorformat->setCurrent(entrys[v_colorformat-1]);
-	colorformat->setHelpText(_("choose colorformat ( left, right )"));
+	colorformat->setHelpText(_("choose colour format ( left, right )"));
 
   l=new eLabel(this);
 	l->setText("Aspect Ratio:");
@@ -72,7 +72,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	ok->setShortcutPixmap("green");
 	ok->move(ePoint(20, 120));
 	ok->resize(eSize(170, 40));
-	ok->setHelpText(_("save settings and leave video setup"));
+	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 
 	CONNECT(ok->selected, eZapVideoSetup::okPressed);		
@@ -81,7 +81,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	abort->setText(_("abort"));
 	abort->move(ePoint(210, 120));
 	abort->resize(eSize(170, 40));
-	abort->setHelpText(_("leave video setup (no changes are saved)"));
+	abort->setHelpText(_("ignore changes and return"));
 	abort->loadDeco();
 
 	CONNECT(abort->selected, eZapVideoSetup::abortPressed);

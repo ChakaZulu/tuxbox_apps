@@ -32,6 +32,8 @@ protected:
 	void gotFocus();
 	void lostFocus();
 public:
+	static void unpack(__u32 l, int *t);
+	static void pack(__u32 &l, int *t);
 	void invalidateNum();
 	Signal1<void, int*> selected;
 	Signal0<void> numberChanged;

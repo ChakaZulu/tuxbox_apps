@@ -20,6 +20,10 @@ private:
 	void sel_ci();
 	void sel_upgrade();
 	void sel_rfmod();
+	void sel_num(int n);
+	void sel_engrab();
+protected:
+	int eventHandler(const eWidgetEvent &event);
 public:
 	eZapSetup();
 	~eZapSetup();

@@ -61,3 +61,7 @@ void eInit::setRunlevel(int nrl)
 	}
 	printf("reached rl %d\n", rl);
 }
+
+eAutoInit::~eAutoInit()
+{
+}
