@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.87 2003/05/15 20:09:55 digi_casi Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.88 2003/05/18 11:34:34 digi_casi Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -460,13 +460,13 @@ delivery_system_t CZapitClient::getDeliverySystem(void)
 }
 
 /* sends diseqc 1.2 motor command */
-void CZapitClient::sendMotorCommand(uint8_t cmdtype, uint8_t cmd, uint8_t address, uint8_t num_parameters, uint8_t param1, uint8_t param2)
+void CZapitClient::sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t cmd, uint8_t num_parameters, uint8_t param1, uint8_t param2)
 {
 	CZapitMessages::commandMotor msg;
 
 	msg.cmdtype = cmdtype;
-	msg.cmd = cmd;
 	msg.address = address;
+	msg.cmd = cmd;
 	msg.num_parameters = num_parameters;
 	msg.param1 = param1;
 	msg.param2 = param2;
