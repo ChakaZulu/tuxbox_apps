@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.64 2001/10/14 23:39:55 McClean Exp $
+        $Id: neutrino.cpp,v 1.65 2001/10/15 12:08:31 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.65  2001/10/15 12:08:31  field
+  nstreamzapd-support (mccleans patch gepatcht :)
+
   Revision 1.64  2001/10/14 23:39:55  McClean
   VCR-Mode prepared
 
@@ -416,6 +419,8 @@ void CNeutrinoApp::setupDefaults()
 	//misc
 	g_settings.box_Type = 1;
 	g_settings.epg_byname = 0;
+    if ( !zapit )
+        g_settings.epg_byname = 1;
 
 	//video
 	g_settings.video_Signal = 0; //composite?
@@ -476,6 +481,9 @@ bool CNeutrinoApp::loadSetup()
 		return false;
 	}
 	close(fd);
+
+    if ( !zapit )
+        g_settings.epg_byname = 1;
 
 	return true;
 }
@@ -797,7 +805,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuForwarder("menu.back") );
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.epgold", &g_settings.epg_byname, true);
+	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.epgold", &g_settings.epg_byname, zapit);
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 	miscSettings.addItem( oj );
@@ -1561,7 +1569,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.64 2001/10/14 23:39:55 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.65 2001/10/15 12:08:31 field Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
