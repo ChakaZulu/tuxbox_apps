@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.6 2002/04/21 21:18:32 obi Exp $
+ * $Id: frontend.cpp,v 1.7 2002/04/22 02:47:02 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -612,6 +612,8 @@ const bool CFrontend::sendMiniDiseqcCommand (secToneMode toneMode, secVoltage vo
 const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t repeats)
 {
 	secCmdSequence *sequence = new secCmdSequence();
+	sequence->commands = new secCommand[(repeats * 2) + 1];
+
 	sequence->miniCommand = SEC_MINI_NONE;
 	sequence->continuousTone = toneMode;
 	sequence->voltage = voltage;
@@ -662,6 +664,7 @@ const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltag
 #endif
 	secSendSequence(sequence);
 
+	delete sequence->commands;
 	delete sequence;
 
 	if (failed == false)
@@ -678,6 +681,8 @@ const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltag
 const bool CFrontend::sendSmatvRemoteTuningCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t frequency)
 {
 	secCmdSequence *sequence = new secCmdSequence();
+	sequence->commands = new secCommand[2];
+
 	sequence->miniCommand = SEC_MINI_NONE;
 	sequence->continuousTone = toneMode;
 	sequence->voltage = voltage;
@@ -698,6 +703,7 @@ const bool CFrontend::sendSmatvRemoteTuningCommand (secToneMode toneMode, secVol
 
 	secSendSequence(sequence);
 
+	delete sequence->commands;
 	delete sequence;
 
 	if (failed == false)
