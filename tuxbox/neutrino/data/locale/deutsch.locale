@@ -232,7 +232,6 @@ lcdmenu.lcdcontroler Kontrast / Helligkeit
 lcdmenu.statusline Statuszeile
 lcdmenu.statusline.volume Lautstärke
 lcdmenu.statusline.playtime Sendungsfortschritt
-lcdmenu.statusline.both Lautstärke / Fortschritt
 
 lcdcontroler.head LCD Einstellungen
 lcdcontroler.contrast Kontrast
@@ -266,6 +265,7 @@ infoviewer.nocurrent Keine Info zu laufendem Programm
 infoviewer.noepg Keine EPG-Information verfügbar
 infoviewer.subservice Bildregie
 infoviewer.waittime Warte auf Uhrzeit...
+infoviewer.motor_moving Antennenpositionierung
 
 epgviewer.notfound keine Programminformationen (EPG) gefunden
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
@@ -692,7 +692,6 @@ movieplayer.head Movieplayer
 movieplayer.play Abspielen
 movieplayer.choosets TS Abspielen
 movieplayer.chooseps PS Abspielen
-movieplayer.choosepes PES Abspielen
 movieplayer.bookmark Bookmarks
 
 filebrowser.head Filebrowser
