@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.185 2002/03/03 17:24:22 Simplex Exp $
+        $Id: neutrino.cpp,v 1.186 2002/03/03 20:38:18 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -607,7 +607,7 @@ void CNeutrinoApp::channelsInit()
 	}
 	printf("All channels received\n");
 	close(sock_fd);
-
+/*
 	bouquet_msg   zapitbouquet;
 	//deleting old bouquetList for mode-switching.
 	delete bouquetList;
@@ -661,8 +661,20 @@ void CNeutrinoApp::channelsInit()
 		bouquet = bouquetList->addBouquet( zapitbouquet.name, zapitbouquet.bouquet_nr );
 		//			printf("%s\n", zapitbouquet.name);
 	}
+
 	printf("All bouquets received (%d). Receiving channels... \n", nBouquetCount);
 	close(sock_fd);
+*/
+
+	delete bouquetList;
+	bouquetList = new CBouquetList( "bouquetlist.head" );
+	bouquetList->orgChannelList = channelList;
+	CZapitClient::BouquetList zapitBouquets;
+	g_Zapit->getBouquets(zapitBouquets, false);
+	for (uint i=0; i<zapitBouquets.size(); i++)
+	{
+		bouquetList->addBouquet( zapitBouquets[i].name, zapitBouquets[i].bouquet_nr);
+	}
 
 	printf("receiving channels for bouquets");
 	for ( uint i=0; i< bouquetList->Bouquets.size(); i++ )
@@ -2253,7 +2265,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.185 2002/03/03 17:24:22 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.186 2002/03/03 20:38:18 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
