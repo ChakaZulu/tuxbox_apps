@@ -19,12 +19,12 @@ libneutrino_gui_a_SOURCES = \
 	epgview.cpp infoviewer.cpp scan.cpp update.cpp dboxinfo.cpp \
 	filebrowser.cpp audioplayer.cpp nfs.cpp pictureviewer.cpp \
 	movieplayer.cpp rc_lock.cpp bookmarkmanager.cpp \
-	timeosd.cpp epgplus.cpp epg_menu.cpp 
+	timeosd.cpp epgplus.cpp epg_menu.cpp \
+	streaminfo2.cpp
 #	ch_mosaic.cpp
 
 libneutrino_gui2_a_SOURCES = \
-	streaminfo.cpp alphasetup.cpp motorcontrol.cpp \
-	streaminfo2.cpp
+	streaminfo.cpp alphasetup.cpp motorcontrol.cpp 
 
 libtimerlist_a_SOURCES = \
 	timerlist.cpp
