@@ -205,13 +205,10 @@ void	MoveSnake( void )
 		}
 	}
 
-printf("last.x=%d last.y=%d\n",last.x,last.y);
 	FBFillRect( last.x*16, last.y*16, 16, 16, BLACK );
 	FBFillRect( snake[0].x*16, snake[0].y*16, 16, 16, GREEN2 );
 	FBFillRect( snake[1].x*16, snake[1].y*16, 16, 16, GREEN );
-printf("copynow\n");
 	memcpy(&last,snake+snake_len-1,sizeof(snake_ele));
-printf("copydone\n");
 	if ( maze[ snake[0].y*MAZEW+snake[0].x ] == '#' )
 	{
 		doexit=1;
