@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title>Edit Timer Event</title>
-		<link rel="stylesheet" type="text/css" href="webif.css">
+		<link rel="stylesheet" type="text/css" href="#CSS#">
 	</head>
 	<body>
 		<form action="/changeTimerEvent">
