@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.36 2004/02/24 23:34:51 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.37 2004/02/26 16:55:58 dirch Exp $
 
 	License: GPL
 
@@ -620,6 +620,24 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 				request->SocketWriteLn(epg.info2);
 				return true;
 			}
+		}
+		else if (request->ParameterList["eventid2fsk"] != "")
+		{
+			if (request->ParameterList["starttime"] != "")
+			{
+				unsigned long long epgid;
+				time_t starttime;
+				sscanf( request->ParameterList["fskid"].c_str(), "%llu", &epgid);
+				sscanf( request->ParameterList["starttime"].c_str(), "%lu", &starttime);
+				CEPGData longepg;
+				if(Parent->Sectionsd->getEPGid(epgid, starttime, &longepg))
+				{
+					request->printf("%c\n", longepg.fsk);
+					return true;
+				}
+			}
+			request->SendError();
+			return false;
 		}
 		else if (!(request->ParameterList["id"].empty()))
 		{
