@@ -9,7 +9,9 @@ inline int isValidONIDTSID(eOriginalNetworkID onid, eTransportStreamID tsid)
 		case 0x1111:
 			return 0;
 		case 1:
-			return tsid>1;
+			return tsid>1
+	// on Hispasat 30.0W 11615Mhz and 11931Mhz have same tsid(0x14)/onid(0x01) :(
+				&& tsid != 0x0014;
 		case 0x00B1:
 			return tsid != 0x00B0;
 		case 0x0002:
