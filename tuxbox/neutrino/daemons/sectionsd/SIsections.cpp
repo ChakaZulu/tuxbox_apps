@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.26 2001/11/03 15:39:57 field Exp $
+// $Id: SIsections.cpp,v 1.27 2001/11/05 17:12:05 field Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.27  2001/11/05 17:12:05  field
+// Versuch zu Wiederholungen
+//
 // Revision 1.26  2001/11/03 15:39:57  field
 // Deadlock behoben, Perspektiven
 //
@@ -170,7 +173,7 @@ void SIsectionEIT::parseLinkageDescriptor(const char *buf, SIevent &e, unsigned 
   if(maxlen>=sizeof(struct descr_linkage_header))
   {
     SIlinkage l((const struct descr_linkage_header *)buf);
-    e.linkage_descs.insert(l);
+    e.linkage_descs.insert(e.linkage_descs.end(), l);
 //    printf("LinkName: %s\n", l.name.c_str());
   }
 }

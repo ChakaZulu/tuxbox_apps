@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.81 2001/11/03 15:39:57 field Exp $
+//  $Id: sectionsd.cpp,v 1.82 2001/11/05 17:12:05 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.82  2001/11/05 17:12:05  field
+//  Versuch zu Wiederholungen
+//
 //  Revision 1.81  2001/11/03 15:39:57  field
 //  Deadlock behoben, Perspektiven
 //
@@ -1363,7 +1366,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.81 2001/11/03 15:39:57 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.82 2001/11/05 17:12:05 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1596,12 +1599,12 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
             sizeof(int);    // num. Component-Tags
         // current ComponentTags ...
         int countDescs= 0;
-        for(SIlinkage_descs::iterator link=evt.linkage_descs.begin(); link!=evt.linkage_descs.end(); link++)
+        for(unsigned int i=0; i< evt.linkage_descs.size(); i++)
         {
-            if (link->linkageType== 0xB0)
+            if (evt.linkage_descs[i].linkageType== 0xB0)
             {
                 countDescs++;
-                nResultDataSize+= strlen(link->name.c_str())+1+ // name
+                nResultDataSize+= strlen(evt.linkage_descs[i].name.c_str())+1+ // name
                                   sizeof(unsigned short)+ //transportStreamId
                                   sizeof(unsigned short)+ //originalNetworkId
                                   sizeof(unsigned short); //serviceId
@@ -1639,17 +1642,17 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         *((unsigned short *)p)= countDescs;
         p+=sizeof(unsigned short);
 
-        for(SIlinkage_descs::iterator link=evt.linkage_descs.begin(); link!=evt.linkage_descs.end(); link++)
+        for(unsigned int i=0; i< evt.linkage_descs.size(); i++)
         {
-            if (link->linkageType== 0xB0)
+            if (evt.linkage_descs[i].linkageType== 0xB0)
             {
-                strcpy(p, link->name.c_str());
-                p+=strlen(link->name.c_str())+1;
-                *((unsigned short *)p)=link->transportStreamId;
+                strcpy(p, evt.linkage_descs[i].name.c_str());
+                p+=strlen(evt.linkage_descs[i].name.c_str())+1;
+                *((unsigned short *)p)=evt.linkage_descs[i].transportStreamId;
                 p+=sizeof(unsigned short);
-                *((unsigned short *)p)=link->originalNetworkId;
+                *((unsigned short *)p)=evt.linkage_descs[i].originalNetworkId;
                 p+=sizeof(unsigned short);
-                *((unsigned short *)p)=link->serviceId;
+                *((unsigned short *)p)=evt.linkage_descs[i].serviceId;
                 p+=sizeof(unsigned short);
             }
         }
@@ -1692,6 +1695,7 @@ static void sendEPG(struct connectionData *client, const SIevent& e, const SItim
 struct sectionsd::msgResponseHeader responseHeader;
 
   if(!shortepg)
+  {
     responseHeader.dataLength=
      12+1+				// Unique-Key + del
      strlen(e.name.c_str())+1+		// Name + del
@@ -1699,6 +1703,17 @@ struct sectionsd::msgResponseHeader responseHeader;
      strlen(e.extendedText.c_str())+1+	// ext + del
      8+1+				// start time + del
      8+1+1;				// duration + del + 0
+
+/*    unsigned wh= 0;
+    for(SItimes::iterator tm=e.times.begin(); tm!=e.times.end(); tm++)
+      if (tm->startzeit> t.startzeit )
+      {
+        wh+= 8;
+        if (wh== 4*8)
+            break;
+      }
+    responseHeader.dataLength+= wh+ 1; */
+  }
   else 
     responseHeader.dataLength=
      strlen(e.name.c_str())+1+		// Name + del
@@ -1712,6 +1727,32 @@ struct sectionsd::msgResponseHeader responseHeader;
     return;
   }
   if(!shortepg)
+  {
+/*    std::string  whs;
+    for(SItimes::iterator tm=e.times.begin(); tm!=e.times.end(); tm++)
+      if (tm->startzeit> t.startzeit )
+      {
+        char wht[10];
+        sprintf(wht, "%08lx", tm->startzeit);
+         printf("sec: wh: %s\n", wht);
+        whs+= wht;
+        if (whs.size()== 4*8)
+            break;
+      }
+    whs+= "\xFF";
+    printf("sec: whs: %s\n", whs.c_str());
+
+    sprintf(msgData,
+      "%012llx\xFF%s\xFF%s\xFF%s\xFF%s\xFF%08lx\xFF%08x\xFF",
+      e.uniqueKey(),
+      e.name.c_str(),
+      e.text.c_str(),
+      e.extendedText.c_str(),
+      whs.c_str(),
+      t.startzeit,
+      t.dauer
+    );
+*/
     sprintf(msgData,
       "%012llx\xFF%s\xFF%s\xFF%s\xFF%08lx\xFF%08x\xFF",
       e.uniqueKey(),
@@ -1721,6 +1762,7 @@ struct sectionsd::msgResponseHeader responseHeader;
       t.startzeit,
       t.dauer
     );
+  }
   else
     sprintf(msgData,
       "%s\xFF%s\xFF%s\xFF",
@@ -3017,7 +3059,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.81 2001/11/03 15:39:57 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.82 2001/11/05 17:12:05 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {

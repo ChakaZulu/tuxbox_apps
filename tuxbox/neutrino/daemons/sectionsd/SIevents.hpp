@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.15 2001/11/03 03:13:52 field Exp $
+// $Id: SIevents.hpp,v 1.16 2001/11/05 17:12:05 field Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.16  2001/11/05 17:12:05  field
+// Versuch zu Wiederholungen
+//
 // Revision 1.15  2001/11/03 03:13:52  field
 // Auf Perspektiven vorbereitet
 //
@@ -70,7 +73,8 @@
 // Revision 1.1  2001/05/16 15:23:47  fnbrd
 // Alles neu macht der Mai.
 //
-//
+
+#include <vector>
 
 // forward references
 class SIservice;
@@ -128,6 +132,7 @@ class SIlinkage {
       return name < l.name;
 //      return component < c.component;
     }
+
     void dump(void) const {
       printf("Linakge Type: 0x%02hhx\n", linkageType);
       if(name.length())
@@ -162,7 +167,8 @@ struct saveSIlinkageXML : public std::unary_function<class SIlinkage, void>
   void operator() (const SIlinkage &l) { l.saveXML(f);}
 };
 
-typedef std::multiset <SIlinkage, std::less<SIlinkage> > SIlinkage_descs;
+//typedef std::multiset <SIlinkage, std::less<SIlinkage> > SIlinkage_descs;
+typedef std::vector<class SIlinkage> SIlinkage_descs;
 
 class SIcomponent {
   public:
