@@ -40,7 +40,7 @@
 #include <map>
 #include <string>
 
-static const char * iso639filename = "/usr/share/iso-codes/iso-639.tab";
+static const char * iso639filename = "/share/iso-codes/iso-639.tab";
 static std::map<std::string, std::string> iso639;
 
 void initialize_iso639_map(void)

@@ -1,1 +1,1 @@
-SUBDIRS = fonts icons locale lcd
+SUBDIRS = fonts icons iso-codes lcd locale
