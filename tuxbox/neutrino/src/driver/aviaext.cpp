@@ -59,7 +59,7 @@ void CAViAExt::iecOn()
 			return;
 	        }
 	}
-	res = ioctl(fd, AVIA_EXT_IEC_SET, 0);
+	res = ioctl(fd, AVIA_EXT_IEC_SET, 1);
 	if (res<0)
 		perror("aviaext: ioctl");
 }
@@ -78,7 +78,7 @@ void CAViAExt::iecOff()
 			return;
 	        }
 	}
-	res = ioctl(fd, AVIA_EXT_IEC_SET, 1);
+	res = ioctl(fd, AVIA_EXT_IEC_SET, 0);
 	if (res<0)
 		perror("aviaext: ioctl");
 }
