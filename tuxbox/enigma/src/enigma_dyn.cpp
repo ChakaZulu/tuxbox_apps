@@ -1563,6 +1563,9 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 
 	eServiceReference ref = (serviceRef == "undefined") ? sapi->service : string2ref(serviceRef);
 
+	if ( serviceRef == "undefined" )
+		serviceRef = sapi->service.toString();
+
 	eDebug("[ENIGMA_DYN] getcurepg2: opts = %s, serviceRef = %s", opts.c_str(), serviceRef.c_str());
 
 	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
