@@ -1599,7 +1599,12 @@ eZapMain::eZapMain()
 #ifndef DISABLE_CI
 void eZapMain::receiveMMIMessageCI1( const char* data, int len )
 {
-	if ( eApp->looplevel() == 1 )
+	if ( eApp->looplevel() == 1 &&
+			(
+				!eZap::getInstance()->focus ||
+				eZap::getInstance()->focus == this
+			)
+		 )
 	{
 		char *dest = new char[len];
 		memcpy( dest, data, len );
@@ -1611,7 +1616,12 @@ void eZapMain::receiveMMIMessageCI1( const char* data, int len )
 
 void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 {
-	if ( eApp->looplevel() == 1 )
+	if ( eApp->looplevel() == 1 &&
+			(
+				!eZap::getInstance()->focus ||
+				eZap::getInstance()->focus == this
+			)
+		 )
 	{
 		char *dest = new char[len];
 		memcpy( dest, data, len );
@@ -2416,7 +2426,7 @@ void eZapMain::showInfobar()
 				eZap::getInstance()->focus == this
 			)
 		 )
-		show();
+  show();
 
 	if (doHideInfobar())
 		timeout.start(6000, 1);
