@@ -95,6 +95,8 @@
 #include "system/debug.h"
 #include "system/flashtool.h"
 
+#include <string.h>
+
 
 // Globale Variablen - to use import global.h
 
@@ -3360,7 +3362,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.432 2003/03/28 09:27:03 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.433 2003/04/01 17:30:24 thegoodguy Exp $\n\n");
 
 	tzset();
 	initGlobals();
