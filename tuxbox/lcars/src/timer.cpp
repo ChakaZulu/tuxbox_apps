@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: timer.cpp,v $
+Revision 1.4  2001/12/16 18:45:35  waldi
+- move all configfiles to CONFIGDIR
+- make CONFIGDIR in install-data-local
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -181,7 +185,7 @@ void timer::rmTimer(int channel, time_t starttime)
 void timer::saveTimer()
 {
 	int fd;
-	fd = open(DATADIR "/lcars/timer.dat", O_WRONLY | O_CREAT | O_TRUNC);
+	fd = open(CONFIGDIR "/lcars/timer.dat", O_WRONLY | O_CREAT | O_TRUNC);
 	if (fd < 0)
 	{
 		perror("Couldn't save timer\n");
@@ -203,7 +207,7 @@ void timer::saveTimer()
 
 void timer::loadTimer()
 {
-	int fd = open("/var/lcars/timer.dat", O_RDONLY);
+	int fd = open(CONFIGDIR "/lcars/timer.dat", O_RDONLY);
 	if (fd < 0)
 	{
 		perror("Couldn't load timer\n");

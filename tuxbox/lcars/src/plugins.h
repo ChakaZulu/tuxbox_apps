@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: plugins.h,v $
+Revision 1.4  2001/12/16 18:45:35  waldi
+- move all configfiles to CONFIGDIR
+- make CONFIGDIR in install-data-local
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -32,7 +36,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include "gameplugins.h"
 
-#include "config.h"
+#include <config.h>
 
 class plugins
 {

@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.4  2001/12/16 18:45:35  waldi
+- move all configfiles to CONFIGDIR
+- make CONFIGDIR in install-data-local
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -36,6 +40,8 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <ost/sec.h>
 #include <ost/ca.h>
 #include <memory.h>
+
+#include <config.h>
 
 #include "settings.h"
 #include "help.h"
@@ -191,7 +197,7 @@ char settings::getIP(char number)
 
 void settings::saveSettings()
 {
-	int fd = open("/var/lcars/lcars.conf", O_WRONLY|O_TRUNC|O_CREAT, 0666);
+	int fd = open(CONFIGDIR "/lcars/lcars.conf", O_WRONLY|O_TRUNC|O_CREAT, 0666);
 	if (fd < 0)
 	{
 		perror("lcars.conf");

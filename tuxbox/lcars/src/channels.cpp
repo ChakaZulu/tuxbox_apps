@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.5  2001/12/16 18:45:35  waldi
+- move all configfiles to CONFIGDIR
+- make CONFIGDIR in install-data-local
+
 Revision 1.4  2001/12/12 15:23:55  TheDOC
 Segfault after Scan-Bug fixed
 
@@ -42,7 +46,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "pat.h"
 #include "eit.h"
 
-#include "config.h"
+#include <config.h>
 
 channels::channels(settings &set, pat &p1, pmt &p2) : setting(set), pat_obj(p1), pmt_obj(p2)
 {
@@ -759,7 +763,7 @@ void channels::saveChannels()
 {
 	int fd;
 	printf("Writing\n");
-	fd = open("/var/channels.dat", O_WRONLY|O_TRUNC|O_CREAT, 0666);
+	fd = open(CONFIGDIR "/lcars/channels.dat", O_WRONLY|O_TRUNC|O_CREAT, 0666);
 	for (std::vector<struct channel>::iterator it = basic_channellist.begin(); it != basic_channellist.end(); ++it)
 	{
 		channel test;
@@ -767,7 +771,7 @@ void channels::saveChannels()
 		write(fd, &test, sizeof(channel));
 	}
 	close(fd);
-	fd = open("/var/transponders.dat", O_WRONLY|O_TRUNC|O_CREAT, 0666);
+	fd = open(CONFIGDIR "/lcars/transponders.dat", O_WRONLY|O_TRUNC|O_CREAT, 0666);
 	for (std::multimap<int, struct transportstream>::iterator it = basic_TSlist.begin(); it != basic_TSlist.end(); ++it)
 	{
 		printf("%d\n", (*it).second.TS);
@@ -782,7 +786,7 @@ void channels::saveDVBChannels()
 	FILE *fp;
 
 	printf("Save File\n");
-	fp = fopen(DATADIR "/lcars/lcars.dvb", "wb");
+	fp = fopen(CONFIGDIR "/lcars/lcars.dvb", "wb");
 	for (std::vector<struct channel>::iterator it = basic_channellist.begin(); it != basic_channellist.end(); ++it)
 	{
 		dvbchannel chan;
@@ -833,7 +837,7 @@ void channels::loadDVBChannels()
 	int fd;
 	
 	printf("Loading Channels\n");
-	if ((fd = open(DATADIR "/lcars/lcars.dvb", O_RDONLY)) < 0)
+	if ((fd = open(CONFIGDIR "/lcars/lcars.dvb", O_RDONLY)) < 0)
 	{
 		printf("No channels available!\n");	
 		return;
@@ -885,7 +889,7 @@ void channels::loadDVBChannels()
 void channels::loadChannels()
 {
 	int fd;
-	fd = open("/var/channels.dat", O_RDONLY);
+	fd = open(CONFIGDIR "/lcars/channels.dat", O_RDONLY);
 		
 	int size = lseek(fd, 0, SEEK_END);
 	lseek(fd, 0, 0);
@@ -902,7 +906,7 @@ void channels::loadChannels()
 	}
 	close(fd);
 
-	fd = open("/var/transponders.dat", O_RDONLY);
+	fd = open(CONFIGDIR "/lcars/transponders.dat", O_RDONLY);
 	size = lseek(fd, 0, SEEK_END);
 	lseek(fd, 0, 0);
 

@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.11  2001/12/16 18:45:35  waldi
+- move all configfiles to CONFIGDIR
+- make CONFIGDIR in install-data-local
+
 Revision 1.10  2001/12/12 15:48:35  TheDOC
 Segfault with too big numbers fixed (perhaps the oldest bug in lcars *g*)
 
@@ -126,11 +130,11 @@ int main(int argc, char **argv)
 	
 */
 	FILE *fp;
-	fp = fopen("/var/lcars/dirs.conf", "r");
+	fp = fopen(CONFIGDIR "/lcars/dirs.conf", "r");
 	
 	if (fp == NULL)
 	{
-		printf("File /var/lcars/dirs.conf not found!");
+		printf("File " CONFIGDIR "/lcars/dirs.conf not found!");
 		//exit(0);
 	}
 	else
