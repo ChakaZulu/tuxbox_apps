@@ -122,7 +122,7 @@ static eString removeMountPoint(eString request, eString dirpath, eString opts, 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eMountMgr::getInstance()->removeMountPoint(atoi(id.c_str()));
 
-	return "<html><body>Mount point removed successfully.</body></html>";
+	return "<html><body onUnload=\"parent.window.opener.location.reload(true)\">Mount point deleted successfully.</body></html>";
 }
 
 static eString mountPointWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -283,7 +283,7 @@ static eString mountMountPoint(eString request, eString dirpath, eString opts, e
 			break;
 	}
 
-	return "<html><body>" + result + "</body></html>";
+	return "<html><body onUnload=\"parent.window.opener.location.reload(true)\">" + result + "</body></html>";
 }
 
 static eString unmountMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -297,10 +297,11 @@ static eString unmountMountPoint(eString request, eString dirpath, eString opts,
 	int rc = eMountMgr::getInstance()->unmountMountPoint(atoi(id.c_str()));
 
 	if (rc > 0)
-		result = "<html><body>Mount point unmounted successfully.</body></html>";
+		result = "Mount point unmounted successfully.";
 	else
-		result = "<html><body>Mount point unmount failed.</body></html>";
-	return result;
+		result = "Mount point unmount failed.";
+
+	return "<html><body onUnload=\"parent.window.opener.location.reload(true)\">" + result + "</body></html>";
 }
 
 void ezapMountInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
