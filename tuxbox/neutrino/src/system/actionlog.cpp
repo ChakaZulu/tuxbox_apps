@@ -30,6 +30,7 @@
 */
 
 #include "actionlog.h"
+#include "../global.h"
 
 
 #ifdef USEACTIONLOG

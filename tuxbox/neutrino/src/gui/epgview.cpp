@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.30 2002/01/03 20:03:20 McClean Exp $
+// $Id: epgview.cpp,v 1.31 2002/01/15 22:08:13 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.31  2002/01/15 22:08:13  McClean
+// cleanups
+//
 // Revision 1.30  2002/01/03 20:03:20  McClean
 // cleanup
 //
@@ -408,7 +411,7 @@ void CEpgData::hide()
 	g_FrameBuffer->paintBackgroundBoxRel (sx, sy, ox+10, oy+10);
 }
 
-void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
+void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
 {
 	int sock_fd;
 	SAI servaddr;
@@ -508,6 +511,12 @@ void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned 
 				if (nProcentagePassed<= 100)
 					sprintf( epgData.done, "%03u", nProcentagePassed );
 			}
+
+			#ifdef USEACTIONLOG
+				char buf[1000];
+				sprintf((char*) buf, "epg: %08x \"%s\" %02d.%02d.%04d, %02d:%02d - \"%s\"", onid_tsid, channelName.c_str(), nSDay, nSMon, nSYear, nSH, nSM, epgData.title );
+				g_ActionLog->println(buf);
+			#endif
 
 			delete[] pData;
 		}

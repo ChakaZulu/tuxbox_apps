@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.36 2002/01/15 20:55:59 McClean Exp $
+// $Id: remotecontrol.cpp,v 1.37 2002/01/15 22:08:13 McClean Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.37  2002/01/15 22:08:13  McClean
+// cleanups
+//
 // Revision 1.36  2002/01/15 20:55:59  McClean
 // new zapto-interface
 //
@@ -548,7 +551,7 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 	subChannels_internal.clear();
 	#ifdef USEACTIONLOG
 		char buf[1000];
-		sprintf((char*) buf, "zapto: %u \"%s\"", onid_sid, channame.c_str() );
+		sprintf((char*) buf, "zapto: %08x \"%s\"", onid_sid, channame.c_str() );
 		g_ActionLog->println(buf);
 	#endif
 	pthread_mutex_unlock( &send_mutex );

@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.29 2002/01/03 20:03:20 McClean Exp $
+// $Id: eventlist.cpp,v 1.30 2002/01/15 22:08:13 McClean Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.30  2002/01/15 22:08:13  McClean
+// cleanups
+//
 // Revision 1.29  2002/01/03 20:03:20  McClean
 // cleanup
 //
@@ -342,6 +345,13 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 
 	int oldselected = selected;
 	bool loop=true;
+
+	#ifdef USEACTIONLOG
+		char buf[1000];
+		sprintf((char*) buf, "epg-Eventlist: %08x \"%s\"", onidSid, channelname.c_str() );
+		g_ActionLog->println(buf);
+	#endif
+
 	while (loop)
 	{
 		key = g_RCInput->getKey(g_settings.timing_chanlist);

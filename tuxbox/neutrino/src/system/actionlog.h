@@ -43,23 +43,23 @@
 
 using namespace std;
 
-#ifdef USEACTIONLOG
-	#define BAUDRATE B115200
-	#define SERIALDEVICE "/dev/tts/0"
 
-	class CActionLog
-	{
-			int fd;
-			struct termios oldtio, newtio;
-		public:
+#define BAUDRATE B115200
+#define SERIALDEVICE "/dev/tts/0"
+
+class CActionLog
+{
+		int fd;
+		struct termios oldtio, newtio;
+	public:
 			
-			CActionLog();
-			~CActionLog();
+		CActionLog();
+		~CActionLog();
 
-			void print(string text);
-			void println(string text);
-	};
-#endif
+		void print(string text);
+		void println(string text);
+};
+
 
 
 #endif
