@@ -108,11 +108,11 @@ void eFrontend::checkRotorLock()
 		if (sat)
 		{
 			eLNB *lnb = sat->getLNB();
-			if (lnb && lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && curRotorPos>=10000 )
+			if (lnb && lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && curRotorPos>=11000 )
 			{
 				int snr = SNR();
-				eDebug("[FE] checkRotorLock SNR is %d... old was %d", snr, curRotorPos-=10000 );
-				if ( Locked() && abs(curRotorPos - snr) < 2000 )
+				eDebug("[FE] checkRotorLock SNR is %d... old was %d", snr, curRotorPos-=11000 );
+				if ( Locked() && abs(curRotorPos - snr) < 5000 )
 				{
 					eDebug("[FE] rotor has stopped..");
 					curRotorPos=newPos;
@@ -131,7 +131,7 @@ void eFrontend::checkRotorLock()
 				else
 				{
 					eDebug("[FE] rotor already running");
-					curRotorPos=10000;
+					curRotorPos=11000;
 					if ( eDVB::getInstance()->getScanAPI() )
 					{
 //						eDebug("!!!!!!!!!!!!!!!! TUNED IN EAGAIN 1 !!!!!!!!!!!!!!!!");
@@ -198,7 +198,7 @@ void eFrontend::tuneOK()
 					eDebug("[FE] ignore .. rotor is running");
 					return;
 				}
-				if (curRotorPos==10000)
+				if (curRotorPos==11000)
 				{
 					curRotorPos+=SNR();
 					checkRotorLockTimer.start(2000,true);   // check SNR in 2 sek
@@ -234,7 +234,7 @@ void eFrontend::tuneFailed()
 					eDebug("[FE] ignore .. rotor is running");
 					return;
 				}
-				if ( curRotorPos==10000 )
+				if ( curRotorPos==11000 )
 				{
 					eDebug("[FE] RotorPos uninitialized (%d)", tries);
 					// check every transponder two times..
@@ -1475,8 +1475,8 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 	checkRotorLockTimer.stop();
 	checkLockTimer.stop();
 
-	if ( curRotorPos > 10000 )
-		curRotorPos = 10000;
+	if ( curRotorPos > 11000 )
+		curRotorPos = 11000;
 
 //	eDebug("ROTOR STOPPED 1");
 	/* emit */ s_RotorStopped();
@@ -1639,7 +1639,7 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 			eDebug("RotorCmd = %04x", RotorCmd);
 		}
 
-		if ( RotorCmd != lastRotorCmd || curRotorPos >= 5000 )  // rotorCmd must sent?
+		if ( RotorCmd != lastRotorCmd || (RotorCmd && curRotorPos == 10000) )  // rotorCmd must sent?
 		{
 			cmdCount=1; // this is the RotorCmd
 			if ( ucsw != lastucsw )
@@ -1909,13 +1909,13 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 		}
 		else
 		{
-			curRotorPos=10000;
 			if ( !eDVB::getInstance()->getScanAPI() )
 			{
 				eDebug("ROTOR RUNNING EMIT");
 				/* emit */ s_RotorRunning( newPos );
 			}
 			RotorUseTimeout(seq, lnb );
+			curRotorPos=11000;  // Rotor cmd sent
 		}
 	}
 	else if ( lastucsw != ucsw || ( ToneBurst && lastToneBurst != ToneBurst) )
@@ -1994,7 +1994,7 @@ int eFrontend::tune_qam(eTransponder *trans,
 #else
 	front.inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
-	front.frequency = Frequency * 1000;
+	front.frequency = Frequency;
 	front.u.qam.modulation=getModulation(QAM);
 	front.u.qam.fec_inner=getFEC(FEC_inner);
 	front.u.qam.symbol_rate=SymbolRate;
