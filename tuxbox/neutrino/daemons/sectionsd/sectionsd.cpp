@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.43 2001/07/26 01:38:35 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.44 2001/07/26 21:36:59 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.44  2001/07/26 21:36:59  fnbrd
+//  Ein paar Absicherungen gegen defekte EIT-Packete.
+//
 //  Revision 1.43  2001/07/26 01:38:35  fnbrd
 //  All events shows now all nvod-times.
 //
@@ -939,7 +942,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.43 2001/07/26 01:38:35 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.44 2001/07/26 21:36:59 fnbrd Exp $\n"
     "Current time: %s\n"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1711,6 +1714,22 @@ const unsigned timeoutInSeconds=2;
     }
     if(header.current_next_indicator) {
       // Wir wollen nur aktuelle sections
+/*
+      // Zum debuggen
+      if(dmxEIT.isScheduled) {
+        printf("%hhx\n", header.section_number);
+	if(header.section_number==0xb1) {
+          printf("length: %hd\n", header.section_length);
+          dmxEIT.pause();
+	  FILE *file=fopen("eit.debug", "wb");
+	  if(file) {
+	    fwrite(buf, sizeof(header)+header.section_length-5, 1, file);
+	    fclose(file);
+	  }
+          dmxEIT.unpause();
+        }
+      }
+*/
       SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
       zeit=time(NULL);
       // Nicht alle Events speichern
@@ -1843,7 +1862,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.43 2001/07/26 01:38:35 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.44 2001/07/26 21:36:59 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {

@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.16 2001/07/25 11:39:17 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.17 2001/07/26 21:36:59 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.17  2001/07/26 21:36:59  fnbrd
+// Ein paar Absicherungen gegen defekte EIT-Packete.
+//
 // Revision 1.16  2001/07/25 11:39:17  fnbrd
 // Added unique keys to Events and Services
 //
@@ -124,14 +127,28 @@ struct descr_extended_event_header {
 
 //#pragma pack()
 
-void SIsectionEIT::parseComponentDescriptor(const char *buf, SIevent &e)
+inline unsigned min(unsigned a, unsigned b)
 {
-  e.components.insert(SIcomponent((const struct descr_component_header *)buf));
+  return b<a ? b : a;
 }
 
-void SIsectionEIT::parseContentDescriptor(const char *buf, SIevent &e)
+
+//-----------------------------------------------------------------------
+// Da es vorkommen kann das defekte Packete empfangen werden
+// sollte hier alles ueberprueft werden.
+// Leider ist das noch nicht bei allen Descriptoren so.
+//-----------------------------------------------------------------------
+void SIsectionEIT::parseComponentDescriptor(const char *buf, SIevent &e, unsigned maxlen)
+{
+  if(maxlen>=sizeof(struct descr_component_header))
+    e.components.insert(SIcomponent((const struct descr_component_header *)buf));
+}
+
+void SIsectionEIT::parseContentDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_generic_header *cont=(struct descr_generic_header *)buf;
+  if(buf+cont->descriptor_length+sizeof(struct descr_generic_header)>=buf+maxlen)
+    return; // defekt
   const char *classification=buf+sizeof(struct descr_generic_header);
   while(classification<=buf+sizeof(struct descr_generic_header)+cont->descriptor_length-2) {
     e.contentClassification+=std::string(classification, 1);
@@ -142,9 +159,11 @@ void SIsectionEIT::parseContentDescriptor(const char *buf, SIevent &e)
   }
 }
 
-void SIsectionEIT::parseParentalRatingDescriptor(const char *buf, SIevent &e)
+void SIsectionEIT::parseParentalRatingDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_generic_header *cont=(struct descr_generic_header *)buf;
+  if(buf+cont->descriptor_length+sizeof(struct descr_generic_header)>=buf+maxlen)
+    return; // defekt
   const char *s=buf+sizeof(struct descr_generic_header);
   while(s<buf+sizeof(struct descr_generic_header)+cont->descriptor_length-4) {
     e.ratings.insert(SIparentalRating(std::string(s, 3), *(s+3)));
@@ -152,37 +171,41 @@ void SIsectionEIT::parseParentalRatingDescriptor(const char *buf, SIevent &e)
   }
 }
 
-void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e)
+void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_extended_event_header *evt=(struct descr_extended_event_header *)buf;
+  if(buf+evt->descriptor_length+sizeof(struct descr_extended_event_header)>=buf+maxlen)
+    return; // defekt
   unsigned char *items=(unsigned char *)(buf+sizeof(struct descr_extended_event_header));
   while(items<(unsigned char *)(buf+sizeof(struct descr_extended_event_header)+evt->length_of_items)) {
     if(*items) {
       if(*(items+1) < 0x06) // other code table
-        e.itemDescription=std::string((const char *)(items+2), (*items)-1);
+        e.itemDescription=std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1));
       else
-        e.itemDescription=std::string((const char *)(items+1), *items);
+        e.itemDescription=std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items));
 //      printf("Item Description: %s\n", e.itemDescription.c_str());
     }
     items+=1+*items;
     if(*items) {
-      e.item=std::string((const char *)(items+1), *items);
+      e.item=std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items));
 //      printf("Item: %s\n", e.item.c_str());
     }
     items+=1+*items;
   }
   if(*items) {
     if(*(items+1) < 0x06) // other code table
-      e.extendedText+=std::string((const char *)(items+2), (*items)-1);
+      e.extendedText+=std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1));
     else
-      e.extendedText+=std::string((const char *)(items+1), *items);
+      e.extendedText+=std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items));
 //    printf("Extended Text: %s\n", e.extendedText.c_str());
   }
 }
 
-void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e)
+void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_short_event_header *evt=(struct descr_short_event_header *)buf;
+  if(buf+evt->descriptor_length+sizeof(struct descr_short_event_header)>=buf+maxlen)
+    return; // defekt
   buf+=sizeof(struct descr_short_event_header);
   if(evt->event_name_length) {
     if(*buf < 0x06) // other code table
@@ -210,15 +233,17 @@ void SIsectionEIT::parseDescriptors(const char *des, unsigned len, SIevent &e)
     desc=(struct descr_generic_header *)des;
 //    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
     if(desc->descriptor_tag==0x4D)
-      parseShortEventDescriptor((const char *)desc, e);
+      parseShortEventDescriptor((const char *)desc, e, len);
     else if(desc->descriptor_tag==0x4E)
-      parseExtendedEventDescriptor((const char *)desc, e);
+      parseExtendedEventDescriptor((const char *)desc, e, len);
     else if(desc->descriptor_tag==0x54)
-      parseContentDescriptor((const char *)desc, e);
+      parseContentDescriptor((const char *)desc, e, len);
     else if(desc->descriptor_tag==0x50)
-      parseComponentDescriptor((const char *)desc, e);
+      parseComponentDescriptor((const char *)desc, e, len);
     else if(desc->descriptor_tag==0x55)
-      parseParentalRatingDescriptor((const char *)desc, e);
+      parseParentalRatingDescriptor((const char *)desc, e, len);
+    if((unsigned)(desc->descriptor_length+2)>len)
+      break;
     len-=desc->descriptor_length+2;
     des+=desc->descriptor_length+2;
   }
@@ -237,7 +262,7 @@ void SIsectionEIT::parse(void)
     e.serviceID=serviceID();
     e.originalNetworkID=originalNetworkID();
 //    printf("actpos: %p buf+bl: %p evtid: %hu desclen: %hu\n", actPos, buffer+bufferLength, evt->event_id, evt->descriptors_loop_length);
-    parseDescriptors(((const char *)evt)+sizeof(struct eit_event), evt->descriptors_loop_length, e);
+    parseDescriptors(((const char *)evt)+sizeof(struct eit_event), min((unsigned)(buffer+bufferLength-actPos), evt->descriptors_loop_length), e);
     evts.insert(e);
     actPos+=sizeof(struct eit_event)+evt->descriptors_loop_length;
   }
