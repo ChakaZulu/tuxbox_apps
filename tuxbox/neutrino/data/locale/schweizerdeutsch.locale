@@ -19,6 +19,7 @@ mainmenu.service Sörvis
 mainmenu.recording Sdreaming (ufnehh)
 mainmenu.recording_start un los
 mainmenu.recording_stop hald
+mainmenu.pictureviewer Bildbedrachder
 
 servicemenu.head Sörvis
 servicemenu.update Software-Öbdaede
@@ -710,7 +711,6 @@ nfsmenu.head NFS Iischdellige
 apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,
 apids.hint_2 abdrennd durch ' ' in hexadezimaler Form
 
-mainmenu.pictureviewer Bildbedrachder
 pictureviewer.head Bildbedrachder
 pictureviewer.sortorder Sort.reihenf. äändere
 pictureviewer.sortorder.date (Datum)

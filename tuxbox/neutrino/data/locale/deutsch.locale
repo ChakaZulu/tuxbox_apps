@@ -19,6 +19,7 @@ mainmenu.service Service
 mainmenu.recording Aufnehmen
 mainmenu.recording_start Start
 mainmenu.recording_stop Stopp
+mainmenu.pictureviewer Bildbetrachter
 
 servicemenu.head Service
 servicemenu.update Software-Aktualisierung
@@ -710,7 +711,6 @@ nfsmenu.head NFS Einstellungen
 apids.hint_1 Geben Sie die zu streamenden APIDs ein,
 apids.hint_2 getrennt durch ' ' in hexadezimaler Form
 
-mainmenu.pictureviewer Bildbetrachter
 pictureviewer.head Bildbetrachter
 pictureviewer.sortorder Sort.reihenf. ändern
 pictureviewer.sortorder.date (Datum)

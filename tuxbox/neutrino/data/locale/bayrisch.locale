@@ -19,6 +19,7 @@ mainmenu.service Service
 mainmenu.recording Streaming (aufnemma)
 mainmenu.recording_start ofanga
 mainmenu.recording_stop aufhearn
+mainmenu.pictureviewer Buidlschauga
 
 servicemenu.head Service
 servicemenu.update Software-aktualisiern
@@ -710,7 +711,6 @@ nfsmenu.head NFS Eistellunga
 apids.hint_1 Gems de APIDs zu streama getrend
 apids.hint_2 mid ' ' in hexadezimol ei
 
-mainmenu.pictureviewer Buidlschauga
 pictureviewer.head Buidlschauga
 pictureviewer.sortorder andre Reihenfoign
 pictureviewer.sortorder.date (Datum)

@@ -19,6 +19,7 @@ mainmenu.service Servizio
 mainmenu.recording Streaming (Registrazione)
 mainmenu.recording_start start
 mainmenu.recording_stop stop
+mainmenu.pictureviewer Lettore immaggini
 
 servicemenu.head Service
 servicemenu.update Aggiornamento-Software
@@ -30,8 +31,8 @@ cablesetup.provider Gestore
 satsetup.disqeqc DiSEqC
 satsetup.satellite Satellite
 satsetup.extended DiSEqC-Controllo
-satsetup.extended_lnb unset
-satsetup.extended_motor unset
+satsetup.extended_lnb Impostazioni-LNB
+satsetup.extended_motor Impostazioni-Motore
 satsetup.nodiseqc nessun DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
@@ -39,8 +40,8 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-Ripetizioni
-satsetup.savesettingsnow unset
-satsetup.motorcontrol unset
+satsetup.savesettingsnow Salvare le impostazioni
+satsetup.motorcontrol Setup-Motore
 
 mainsettings.head Impostazioni
 mainsettings.savesettingsnow Salvare le Impostazioni
@@ -62,7 +63,7 @@ miscsettings.head Altre Impostazioni
 miscsettings.shutdown_real Modo Standby
 miscsettings.boxtype DBox Costruttore
 miscsettings.startneutrinodirect Esecuzione diretta Neutrino
-miscsettings.startbhdriver unset
+miscsettings.startbhdriver Carica Driver BH-Mode
 miscsettings.general Generale
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.infobar_sat_display Infobar Display Satellite
@@ -344,7 +345,7 @@ scants.bouquet_erase Cancellare
 scants.failed Ricerca Canali fallita!
 scants.finished Ricerca Canali finita con Successo!
 
-motorcontrol.head unset
+motorcontrol.head Setup-Motore
 
 flashupdate.head Aggiornamento
 flashupdate.action in Azione:
@@ -710,7 +711,6 @@ nfsmenu.head Impostazioni NFS
 apids.hint_1 Inoltrare i dati APIDs per Streamen,
 apids.hint_2 Diviso con ' ' in Formato hexadecimale
 
-mainmenu.pictureviewer Lettore immaggini
 pictureviewer.head Lettore immaggini
 pictureviewer.sortorder cambiamento ordine
 pictureviewer.show vedi immaggine

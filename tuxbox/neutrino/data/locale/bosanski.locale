@@ -19,6 +19,7 @@ mainmenu.service servis
 mainmenu.recording snimanje
 mainmenu.recording_start start
 mainmenu.recording_stop stop
+mainmenu.pictureviewer promatrac slika
 
 servicemenu.head servis
 servicemenu.update obnoviti softver
@@ -30,8 +31,8 @@ cablesetup.provider snabdjevac
 satsetup.disqeqc diseqc
 satsetup.satellite satelit
 satsetup.extended diseqc namjestiti
-satsetup.extended_lnb unset
-satsetup.extended_motor unset
+satsetup.extended_lnb namjescenje lnb-ea
+satsetup.extended_motor namjescenje motora
 satsetup.nodiseqc nema diseqca
 satsetup.minidiseqc mini-diseqc
 satsetup.diseqc10 diseqc 1.0
@@ -39,8 +40,8 @@ satsetup.diseqc11 diseqc 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote smatv remote tuning
 satsetup.diseqcrepeat ponavljanje diseqca
-satsetup.savesettingsnow unset
-satsetup.motorcontrol unset
+satsetup.savesettingsnow namjescenje sada memorisati
+satsetup.motorcontrol namjescenje motora
 
 mainsettings.head namjescenje
 mainsettings.savesettingsnow namjescenje sada memorisati
@@ -62,7 +63,7 @@ miscsettings.head namjestiti razne stvari
 miscsettings.shutdown_real pripravnost
 miscsettings.boxtype proizvodjac dbox2
 miscsettings.startneutrinodirect direktni start neutrina
-miscsettings.startbhdriver unset
+miscsettings.startbhdriver startovati bh-mode driver
 miscsettings.general generalno
 miscsettings.fb_destination majstori! boot konsola
 miscsettings.infobar_sat_display informativna traka sateliti
@@ -344,7 +345,7 @@ scants.failed Neuspjesno trazenje kanala!
 scants.bouquet_erase izbrisati
 scants.finished Uspjesno izvrseno trazenje kanala!
 
-motorcontrol.head unset
+motorcontrol.head namjescenje motora
 
 flashupdate.head obnavljanje
 flashupdate.action akcija:
@@ -710,7 +711,6 @@ nfsmenu.head namjescenje nfsa
 apids.hint_1 Utipkajte heksadecimalne apids
 apids.hint_2 za streaming razdvojene sa ' '.
 
-mainmenu.pictureviewer promatrac slika
 pictureviewer.head promatrac slika
 pictureviewer.sortorder promijeniti smjer sortiranja
 pictureviewer.sortorder.date (datum)

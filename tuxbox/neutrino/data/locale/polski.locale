@@ -19,6 +19,7 @@ mainmenu.service Serwis
 mainmenu.recording Nagrywanie
 mainmenu.recording_start rozpocznij
 mainmenu.recording_stop zatrzymaj
+mainmenu.pictureviewer Przegladarka obrazów
 
 servicemenu.head Ustawienia
 servicemenu.update Aktualizacja oprogramowania
@@ -710,7 +711,6 @@ nfsmenu.head ustawienia NFS
 apids.hint_1 Podaj APIDy do odbioru w
 apids.hint_2 formacie hex rozdzielone przez ' '
 
-mainmenu.pictureviewer Przegladarka obrazów
 pictureviewer.head Przegladarka obrazów
 pictureviewer.sortorder zmien kolejnosc sortowania
 pictureviewer.sortorder.date (data)
