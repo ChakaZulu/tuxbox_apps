@@ -20,6 +20,7 @@ pm(0), entries(OpenEntries), current(0)
 	CONNECT( selected, eComboBox::onOkPressed );
 	CONNECT( listbox.selected, eComboBox::onEntrySelected );
 	CONNECT( listbox.selchanged, eComboBox::onSelChanged );
+	CONNECT( getTLW()->focusChanged, eComboBox::lbLostFocus );
 	listbox.zOrderRaise();
 	addActionMap(&i_cursorActions->map);
 }
@@ -27,12 +28,7 @@ pm(0), entries(OpenEntries), current(0)
 eComboBox::~eComboBox()
 {
 	if ( listbox.isVisible() )
-	{
-		eDebug("KILL COMBOBOX WITH OPEN LISTBOX");
-		listbox.hide();
 		setFocus(this);
-		eWindow::globalCancel( eWindow::ON );
-	}
 }
 
 void eComboBox::onOkPressed()
@@ -128,8 +124,6 @@ void eComboBox::onEntrySelected( eListBoxEntryText* e)
 	if ( parent->getFocus() == &listbox && (flags & flagShowEntryHelp) )
 		setHelpText( oldHelpText );
 
-	listbox.hide();
-
 	if (e)
 	{
 		setText(e->getText());
@@ -144,8 +138,6 @@ void eComboBox::onEntrySelected( eListBoxEntryText* e)
 	}
 	else
 		setFocus( this );
-
-	eWindow::globalCancel( eWindow::ON );
 }
 
 void eComboBox::onSelChanged(eListBoxEntryText* le)
@@ -264,6 +256,15 @@ struct selectEntryByKey
 		return 0;
 	}
 };
+
+void eComboBox::lbLostFocus( const eWidget *w )
+{
+	if ( w != &listbox && listbox.isVisible() )
+	{
+		listbox.hide();
+		eWindow::globalCancel( eWindow::ON );
+	}
+}
 
 int eComboBox::setCurrent( void* key, bool sendSelChanged )
 {
