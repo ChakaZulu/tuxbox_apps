@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.4 2002/09/30 12:58:04 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.5 2002/10/02 22:03:01 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -32,7 +32,7 @@ std::string convertForXML(const std::string s)
 	unsigned int i;
 	for (i = 0; i < s.length(); i++)
 	{
-		switch (s[i])          // cf. xmltimpl.c: PREFIX(predefinedEntityName)
+		switch (s[i])          // cf. http://www.w3.org/TR/xhtml1/dtds.html
 		{
 		case '<':           
 			r += "&lt;";
@@ -53,11 +53,16 @@ std::string convertForXML(const std::string s)
 #ifdef MASK_SPECIAL_CHARACTERS
 			if ((((unsigned char)s[i]) >= 32) && (((unsigned char)s[i]) < 128))
 #else
-			if (((unsigned char)s[i]) >= 32)    // skip strange characters
+			if ((((unsigned char)s[i]) >= 32) &&
+			    ((((unsigned char)s[i]) < 128) || (((unsigned char)s[i]) >= 160)))
+			    // skip characters which are not part of ISO-8859-1
+			    // cf. http://czyborra.com/charsets/iso8859.html
+			    //
+			    // reason: sender name contain 0x86, 0x87 and characters below 0x20
 #endif
 				r += s[i];
 #ifdef MASK_SPECIAL_CHARACTERS
-			else if (((unsigned char)s[i]) >= 128)
+			else if (((unsigned char)s[i]) >= 160)
 			{
 				char val[5];
 				sprintf(val, "%d", (unsigned char)s[i]);
