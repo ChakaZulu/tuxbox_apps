@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: bio.cpp,v 1.1 2002/03/02 21:53:26 waldi Exp $
+ * $Id: bio.cpp,v 1.2 2002/03/03 13:41:05 waldi Exp $
  */
 
 #include <main.hpp>
@@ -168,7 +168,8 @@ int Crypto::bio::istream::bio_read ( libcrypto::BIO * b, char * buf, int size )
 {
   TRACE_FUNCTION;
   Crypto::bio::istream * thiz = reinterpret_cast < Crypto::bio::istream * > ( b -> ptr );
-  return thiz -> is.readsome ( buf, size );
+  thiz -> is.get ( buf, size );
+  return thiz -> is.gcount ();
 }
 
 int Crypto::bio::ostream::bio_puts ( libcrypto::BIO * b, const char * buf )

@@ -18,13 +18,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: bio.hpp,v 1.1 2002/03/02 21:53:26 waldi Exp $
+ * $Id: bio.hpp,v 1.2 2002/03/03 13:41:05 waldi Exp $
  */
 
 #ifndef __LIBCRYPTO__BIO_HPP
 #define __LIBCRYPTO__BIO_HPP
 
 #include <iostream>
+#include <string>
 
 namespace libcrypto
 {
