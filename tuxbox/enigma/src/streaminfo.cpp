@@ -347,7 +347,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	sid[0]=new eLabel(this);
 	sid[0]->setText("Service ID:");
 	sid[0]->move(ePoint(10, yOffs));
-	sid[0]->resize(eSize(280, fs+5));
+	sid[0]->resize(eSize(185, fs+5));
 
 	sid[1]=new eLabel(this);
 	sid[1]->setText(eString().sprintf("%04xh", sapi->service.getServiceID().get()));
@@ -359,7 +359,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	eLabel *l=new eLabel(this);
 	l->setText("Namespace:");
 	l->move(ePoint(10, yOffs));
-	l->resize(eSize(185, fs+5));
+	l->resize(eSize(280, fs+5));
 	
 	l=new eLabel(this);
 	l->setText(eString().sprintf("%04xh", sapi->service.getDVBNamespace().get()));
