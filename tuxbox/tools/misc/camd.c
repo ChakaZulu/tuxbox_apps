@@ -185,7 +185,7 @@ int find_emmpid(int ca_system_id) {
   flt.timeout=10000;
   flt.flags=DMX_ONESHOT;
 
-  flt.flags=0;
+  //flt.flags=0;
   if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
   {
     perror("DMX_SET_FILTER");
@@ -258,7 +258,7 @@ int find_ecmpid(int pid,int ca_system_id) {
   flt.timeout=10000;
   flt.flags=DMX_ONESHOT;
 
-  flt.flags=0;
+  //flt.flags=0;
   if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
   {
     perror("DMX_SET_FILTER");
@@ -431,7 +431,7 @@ int main(int argc, char **argv)
 	      printf("no EMM-pid found for ca_system_ID %04X\n",caid);
 	      printf("press enter to exit\n");
 	      getchar();
-	    exit(0);
+	      exit(0);
 	    }
 	    else
 	      printf("EMM-pid found: %04X\n",EMMPID);
