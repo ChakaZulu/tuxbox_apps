@@ -9,7 +9,7 @@ bin_PROGRAMS = controld
 
 controld_LDADD = \
 	driver/libcontrold_driver.a \
-	$(top_builddir)/libs/liblcddclient/liblcddclient.la
+	$(top_builddir)/lib/lcddclient/liblcddclient.la
 	@EVENTSERVER_LIBS@ \
 	@ZAPITCLIENT_LIBS@ \
 	-lpthread
