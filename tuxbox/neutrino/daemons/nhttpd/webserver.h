@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.17 2002/10/16 10:30:47 dirch Exp $
+        $Id: webserver.h,v 1.18 2002/10/18 12:35:52 thegoodguy Exp $
 
         License: GPL
 
@@ -28,15 +28,10 @@
 #define __webserver__
 
 #include <unistd.h>
-#include <fcntl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
 #include <config.h>
 #include <string>
-#include <pthread.h>
 
 #include <configfile.h>
 
