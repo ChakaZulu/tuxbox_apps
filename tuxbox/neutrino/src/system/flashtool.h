@@ -75,7 +75,7 @@ class CFlashVersionInfo
 		string	date;
 		string	time;
 		string	baseImageVersion;
-		bool	snapshot;
+		char	snapshot;
 
 	public:
 		CFlashVersionInfo(string versionString);
@@ -83,7 +83,7 @@ class CFlashVersionInfo
 		string getDate();
 		string getTime();
 		string getBaseImageVersion();
-		bool isSnapShot();
+		string getType();
 };
 
 

@@ -198,7 +198,7 @@ bool CFlashUpdate::checkVersion4Update()
 
 		char msg[400];
 		sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox_manual").c_str(), versionInfo.getDate().c_str(), 
-				versionInfo.getTime().c_str(), versionInfo.getBaseImageVersion().c_str(), versionInfo.isSnapShot()?"Snapshot":"Release" );
+				versionInfo.getTime().c_str(), versionInfo.getBaseImageVersion().c_str(), versionInfo.getType().c_str() );
 		if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
 		{
 			return false;
@@ -216,7 +216,7 @@ bool CFlashUpdate::checkVersion4Update()
 	
 	char msg[250];
 	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), versionInfo.getDate().c_str(), 
-				versionInfo.getTime().c_str(), versionInfo.getBaseImageVersion().c_str(), versionInfo.isSnapShot()?"Snapshot":"Release" );
+				versionInfo.getTime().c_str(), versionInfo.getBaseImageVersion().c_str(), versionInfo.getType().c_str() );
     if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
     {
 		return false;

@@ -339,7 +339,7 @@ CFlashVersionInfo::CFlashVersionInfo(string versionString)
 	char tmp[100];
 
 	//snapshot erfragen
-	snapshot = versionString[0]=='1';
+	snapshot = versionString[0];
 
 	//Baseimage Version ermitteln
 	int baseMayor = atoi( versionString.substr(1,1).c_str() );
@@ -369,9 +369,26 @@ string CFlashVersionInfo::getBaseImageVersion()
 	return baseImageVersion;
 }
 
-bool CFlashVersionInfo::isSnapShot()
+string CFlashVersionInfo::getType()
 {
-	return snapshot;
+	char type[10];
+
+	switch ( snapshot )
+	{
+		case '0':
+			strcpy( type, "Release" );
+			break;
+		case '1':
+			strcpy( type, "Snapshot" );
+			break;
+		case '2':
+			strcpy( type, "Intern" );
+			break;
+		default:
+			strcpy( type, "Unknown" );
+	}
+
+	return type;
 }
 
 
