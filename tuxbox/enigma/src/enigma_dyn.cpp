@@ -4491,13 +4491,6 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	return result;
 }
 
-static eString blank(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString result = readFile(TEMPLATE_DIR + "blank.tmp");
-	return result;
-}
-
 static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -4769,7 +4762,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
 	dyn_resolver->addDyn("GET", "/videodata", videodata, lockWeb);
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
-	dyn_resolver->addDyn("GET", "/blank", blank, lockWeb);
 	dyn_resolver->addDyn("GET", "/leftnavi", leftnavi, lockWeb);
 	dyn_resolver->addDyn("GET", "/channavi", channavi, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg, lockWeb);
