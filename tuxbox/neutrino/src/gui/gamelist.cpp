@@ -320,9 +320,10 @@ void CGameList::runGame(int selected )
 		dlclose(handle);
 		printf("exec done...\n");
 		g_RCInput->restartInput();
+		while(g_RCInput->getKey(1)!=-1);
 		//restore framebuffer...
 		g_FrameBuffer->paletteSet();
-		memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+		g_FrameBuffer->paintBackgroundBox(0,0,720,576);		
 		//redraw menue...
 		paintHead();
 		paint();
