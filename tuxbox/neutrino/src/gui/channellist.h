@@ -1,5 +1,13 @@
 #ifndef __channellist__
 #define __channellist__
+//
+// $Id: channellist.h,v 1.4 2001/08/15 17:01:56 fnbrd Exp $
+//
+// $Log: channellist.h,v $
+// Revision 1.4  2001/08/15 17:01:56  fnbrd
+// Added id and log
+//
+//
 
 #include "../driver/framebuffer.h"
 #include "../driver/fontrenderer.h"
