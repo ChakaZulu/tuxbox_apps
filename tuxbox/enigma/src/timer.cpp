@@ -774,7 +774,9 @@ void eTimerManager::actionHandler()
 			{
 				writeToLogfile("call ELirc::getNew()->sendstop()");
 				eDebug("[eTimerManager] stop VCR-Lirc-Recording");
+#ifndef DISABLE_LIRC
 				ELirc::getNew()->sendstop();
+#endif
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d stopRecording", calldepth--));
 			break;
