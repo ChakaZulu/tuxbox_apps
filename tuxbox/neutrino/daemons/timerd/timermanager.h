@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.17 2002/08/31 22:30:28 obi Exp $
+	$Id: timermanager.h,v 1.18 2002/09/05 22:35:54 dirch Exp $
 
 	License: GPL
 
@@ -45,33 +45,6 @@ class CTimerEvent;
 typedef map<int, CTimerEvent*> CTimerEventMap;
 
 
-class CTimerManager
-{
-	//singleton
-	private:
-		int					eventID;
-		CEventServer		*eventServer;
-		CTimerEventMap		events;
-		pthread_t			thrTimer;
-
-		CTimerManager();
-		static void* timerThread(void *arg);
-		CTimerEvent			*nextEvent();
-
-	public:
-
-
-		static CTimerManager* getInstance();
-
-		CEventServer* getEventServer() {return eventServer;};
-		int addEvent(CTimerEvent*,bool save = true);
-		bool removeEvent(int eventID);
-		CTimerEvent* getNextEvent();
-		bool listEvents(CTimerEventMap &Events);
-		int modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
-		int rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
-		void saveEventsToConfig();
-};
 
 
 class CTimerEvent
@@ -225,5 +198,32 @@ class CTimerEvent_Zapto : public CTimerEvent
                 virtual void saveToConfig(CConfigFile *config);
 };
 
+class CTimerManager
+{
+	//singleton
+	private:
+		int					eventID;
+		CEventServer		*eventServer;
+		CTimerEventMap		events;
+		pthread_t			thrTimer;
+
+		CTimerManager();
+		static void* timerThread(void *arg);
+		CTimerEvent			*nextEvent();
+
+	public:
+
+
+		static CTimerManager* getInstance();
+
+		CEventServer* getEventServer() {return eventServer;};
+		int addEvent(CTimerEvent*,bool save = true);
+		bool removeEvent(int eventID);
+		CTimerEvent* getNextEvent();
+		bool listEvents(CTimerEventMap &Events);
+		int modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEvent::CTimerEventRepeat evrepeat = CTimerEvent::TIMERREPEAT_ONCE);
+		int rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
+		void saveEventsToConfig();
+};
 
 #endif

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.15 2002/08/30 18:07:54 dirch Exp $
+	$Id: timerdclient.h,v 1.16 2002/09/05 22:31:24 dirch Exp $
 
 	License: GPL
 
@@ -95,7 +95,7 @@ class CTimerdClient
 		void getTimer( CTimerd::responseGetTimer &timer, unsigned timerID);		// returns specified timer
 
 		// modify existing timer event
-		bool modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime);
+		bool modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerEvent::CTimerEventRepeat evrepeat = CTimerEvent::TIMERREPEAT_ONCE);
 
 		// set existing sleeptimer to new times or create new sleeptimer with these times
 		int setSleeptimer(time_t announcetime, time_t alarmtime, int timerid = 0);		

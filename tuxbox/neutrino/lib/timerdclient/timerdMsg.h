@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 
-	$Id: timerdMsg.h,v 1.13 2002/08/30 18:07:54 dirch Exp $
+	$Id: timerdMsg.h,v 1.14 2002/09/05 22:31:24 dirch Exp $
 
 	License: GPL
 
@@ -122,6 +122,7 @@ class CTimerd
 			time_t		announceTime;
 			time_t		alarmTime;
 			time_t		stopTime;
+			CTimerEvent::CTimerEventRepeat	eventRepeat;
 		};
 
 		struct responseGetTimer
