@@ -15,7 +15,7 @@ extern	char	*netGetDomainname( void );
 extern	void	netSetDomainname( char *dom );
 extern	char	*netGetHostname( void );
 extern	void	netSetHostname( char *host );
-extern	void	netSetNameserver( char *ip );
+extern	void	netSetNameserver(const char *ip);
 extern  void	netGetNameserver( char *ip );
 
 
