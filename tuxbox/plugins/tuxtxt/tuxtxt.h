@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.h,v $
+ * Revision 1.35  2003/03/06 18:14:43  lazyt
+ * fix error-detection and configmenu
+ *
  * Revision 1.34  2003/02/21 19:18:24  happydude
  * implement parallel transmission reception - fixes some channels
  * improve auto detection of national subset
@@ -110,32 +113,6 @@
 
 //rc codes
 
-#define	RC1_0		0x5C00
-#define	RC1_1		0x5C01
-#define	RC1_2		0x5C02
-#define	RC1_3		0x5C03
-#define	RC1_4		0x5C04
-#define	RC1_5		0x5C05
-#define	RC1_6		0x5C06
-#define	RC1_7		0x5C07
-#define	RC1_8		0x5C08
-#define	RC1_9		0x5C09
-#define	RC1_STANDBY	0x5C0C
-#define	RC1_UP		0x5C0E
-#define	RC1_DOWN	0x5C0F
-#define	RC1_PLUS	0x5C16
-#define	RC1_MINUS	0x5C17
-#define	RC1_HOME	0x5C20
-#define	RC1_DBOX	0x5C27
-#define	RC1_MUTE	0x5C28
-#define	RC1_RED		0x5C2D
-#define	RC1_RIGHT	0x5C2E
-#define	RC1_LEFT	0x5C2F
-#define	RC1_OK		0x5C30
-#define	RC1_BLUE	0x5C3B
-#define	RC1_YELLOW	0x5C52
-#define	RC1_GREEN	0x5C55
-#define	RC1_HELP	0x5C82
 #define	RC_0		0x00
 #define	RC_1		0x01
 #define	RC_2		0x02

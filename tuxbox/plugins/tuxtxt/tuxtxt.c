@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.c,v $
+ * Revision 1.46  2003/03/06 18:14:43  lazyt
+ * fix error-detection and configmenu
+ *
  * Revision 1.45  2003/03/02 23:50:47  obi
  * fixed "warning: comparison is always false due to limited range of data type"
  *
@@ -26,9 +29,12 @@
 
 void plugin_exec(PluginParam *par)
 {
+	char cvs_revision[] = "$Revision: 1.46 $", versioninfo[16];
+
 	//show versioninfo
 
-		printf("TuxTxt $Revision: 1.45 $\n");
+		sscanf(cvs_revision, "%*s %s", versioninfo);
+		printf("TuxTxt %s\n", versioninfo);
 
 	//get params
 
@@ -859,7 +865,7 @@ void ConfigMenu(int Init)
 					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
 					"ã   nationaler Zeichensatz   äéËÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
 					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
-					"ã automatische Auswahl = aus äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+					"ãautomatische Erkennung = ausäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
 					"ãí    DE (#$@[\\]^_`{|}~)    îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
 					"åææææææææææææææææææææææææææææçéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
 					"ëìììììììììììììììììììììììììììììê›››››››››››››››››››››››››››››››";
@@ -888,14 +894,14 @@ void ConfigMenu(int Init)
 		if(screen_mode1) memcpy(&menu[10*62 + 26], "ein", 3);
 		if(!screen_mode2) memcpy(&menu[12*62 + 26], "aus", 3);
 		if(color_mode) memcpy(&menu[16*62 + 26], "ein", 3);
-		if(auto_national) memcpy(&menu[20*62 + 25], "ein", 3);
+		if(auto_national) memcpy(&menu[20*62 + 26], "ein", 3);
 		if(national_subset != 4)
 		{
 			memcpy(&menu[62*21 + 2], &countrystring[national_subset*26], 26);
 		}
 
-		if(national_subset == 0  || auto_national) menu[20*62 +  1] = ' ';
-		if(national_subset == 12 || auto_national) menu[20*62 + 28] = ' ';
+		if(national_subset == 0  || auto_national) menu[21*62 +  1] = ' ';
+		if(national_subset == 12 || auto_national) menu[21*62 + 28] = ' ';
 
 	//clear framebuffer
 
@@ -1425,13 +1431,13 @@ void ConfigMenu(int Init)
 
 											if(auto_national)
 											{
-												memcpy(&menu[62*20 + 25], "ein", 3);
+												memcpy(&menu[62*20 + 26], "ein", 3);
                 										menu[21*62 +  1] = ' ';
 										                menu[21*62 + 28] = ' ';
 											}
 											else
 											{
-												memcpy(&menu[62*20 + 25], "aus", 3);
+												memcpy(&menu[62*20 + 26], "aus", 3);
 												if (national_subset != 0)  menu[21*62 +  1] = 'í';
 												if (national_subset != 12) menu[21*62 + 28] = 'î';
 											}
@@ -3446,7 +3452,7 @@ void *CacheThread(void *arg)
 
 					//get packet number
 
-						b1 = dehamming[vtxt_row[4]] & 8;
+						b1 = dehamming[vtxt_row[4]];
 						b2 = dehamming[vtxt_row[5]];
 
 						if(b1 == 0xFF || b2 == 0xFF)
@@ -3454,6 +3460,8 @@ void *CacheThread(void *arg)
 							printf("TuxTxt <Biterror in Packet>\n");
 							continue;
 						}
+
+						b1 &= 8;
 
 						packet_number = b1>>3 | b2<<1;
 
@@ -3507,9 +3515,9 @@ void *CacheThread(void *arg)
 
 							//get subpagenumber
 
-								b1 = dehamming[vtxt_row[11]] & 3;
+								b1 = dehamming[vtxt_row[11]];
 								b2 = dehamming[vtxt_row[10]];
-								b3 = dehamming[vtxt_row[9]] & 7;
+								b3 = dehamming[vtxt_row[9]];
 								b4 = dehamming[vtxt_row[8]];
 
 								if(b1 == 0xFF || b2 == 0xFF || b3 == 0xFF || b4 == 0xFF)
@@ -3518,6 +3526,9 @@ void *CacheThread(void *arg)
 									printf("TuxTxt <Biterror in SubPage>\n");
 									continue;
 								}
+
+								b1 &= 3;
+								b3 &= 7;
 
 								if(b1 != 0 || b2 != 0 || b3 > 7 || b4 > 9)
 								{
