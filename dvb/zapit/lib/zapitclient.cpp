@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.7 2002/02/09 01:29:24 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.8 2002/02/09 16:11:04 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.8  2002/02/09 16:11:04  Simplex
+  extended the getchannels functions, bug fix
+
   Revision 1.7  2002/02/09 01:29:24  Simplex
   command for send all channels
 
@@ -155,7 +158,7 @@ void CZapitClient::getBouquets( BouquetList& bouquets, bool emptyBouquetsToo = f
 }
 
 /* gets all channels that are in specified bouquet */
-void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList& channels)
+void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList& channels, channelsMode mode = MODE_CURRENT)
 {
 	commandHead msgHead;
 	commandGetBouquetChannels msg;
@@ -163,6 +166,7 @@ void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList&
 	msgHead.cmd=CMD_GET_BOUQUET_CHANNELS;
 
 	msg.bouquet = bouquet;
+	msg.mode = mode;
 
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
@@ -175,14 +179,18 @@ void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList&
 }
 
 /* gets all channels */
-void CZapitClient::getChannels( BouquetChannelList& channels)
+void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode = MODE_CURRENT, channelsOrder order = SORT_BOUQUET)
 {
 	commandHead msgHead;
+	commandGetChannels msg;
 	msgHead.version=ACTVERSION;
 	msgHead.cmd=CMD_GET_CHANNELS;
 
+	msg.mode = mode;
+	msg.order = order;
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
 
 	responseGetBouquetChannels response;
 	while ( receive((char*)&response, sizeof(responseGetBouquetChannels)))
@@ -245,7 +253,7 @@ void CZapitClient::moveBouquet( unsigned int bouquet, unsigned int newPos)
 }
 
 /* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
-void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsigned int newPos)
+void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsigned int newPos, channelsMode mode = MODE_CURRENT)
 {
 	commandHead msgHead;
 	commandMoveChannel msg;
@@ -255,6 +263,7 @@ void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsig
 	msg.bouquet = bouquet;
 	msg.oldPos = oldPos;
 	msg.newPos = newPos;
+	msg.mode = mode;
 
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));

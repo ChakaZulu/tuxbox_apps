@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.74 2002/02/09 01:28:20 Simplex Exp $
+  $Id: zapit.cpp,v 1.75 2002/02/09 16:12:38 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.75  2002/02/09 16:12:38  Simplex
+  extended the getchannels functions, bug fix
+
   Revision 1.74  2002/02/09 01:28:20  Simplex
   command for send all channels
 
@@ -351,7 +354,6 @@
 #include "zapit.h"
 #include "lcddclient.h"
 
-#include <zapitclient.h>
 
 
 CLcddClient lcdd;
@@ -2250,11 +2252,13 @@ void parse_command()
 			case CZapitClient::CMD_GET_BOUQUET_CHANNELS :
 				CZapitClient::commandGetBouquetChannels msgGetBouquetChannels;
 				read( connfd, &msgGetBouquetChannels, sizeof(msgGetBouquetChannels));
-				sendBouquetChannels(msgGetBouquetChannels.bouquet);
+				sendBouquetChannels(msgGetBouquetChannels.bouquet, msgGetBouquetChannels.mode);
 			break;
 
 			case CZapitClient::CMD_GET_CHANNELS :
-				sendChannels();
+				CZapitClient::commandGetChannels msgGetChannels;
+				read( connfd, &msgGetChannels, sizeof(msgGetChannels));
+				sendChannels( msgGetChannels.mode, msgGetChannels.order);
 			break;
 
 			case CZapitClient::CMD_REINIT_CHANNELS :
@@ -2305,7 +2309,7 @@ void parse_command()
 				g_BouquetMan->Bouquets[ msgMoveChannel.bouquet-1]->moveService(
 					msgMoveChannel.oldPos-1,
 					msgMoveChannel.newPos-1,
-					Radiomode_on ? 2 : 1);
+					((Radiomode_on && msgMoveChannel.mode == CZapitClient::MODE_CURRENT ) || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1);
 			break;
 
 			case CZapitClient::CMD_BQ_RENUM_CHANNELLIST :
@@ -2497,7 +2501,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.74 2002/02/09 01:28:20 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.75 2002/02/09 16:12:38 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2629,8 +2633,26 @@ void sendBouquets(bool emptyBouquetsToo)
 	}
 }
 
-void sendBouquetChannels(unsigned int bouquet)
+void internalSendChannels( ChannelList* channels)
 {
+	for (uint i = 0; i < channels->size();i++)
+	{
+		CZapitClient::responseGetBouquetChannels response;
+		strncpy(response.name, (*channels)[i]->name.c_str(),30);
+		response.onid_sid = (*channels)[i]->OnidSid();
+		response.nr = (*channels)[i]->chan_nr;
+
+		if (send(connfd, &response, sizeof(response),0) == -1)
+		{
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+	}
+}
+
+void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT)
+{
+
 	bouquet--;
 	if (bouquet < 0 || bouquet>g_BouquetMan->Bouquets.size())
 	{
@@ -2639,20 +2661,26 @@ void sendBouquetChannels(unsigned int bouquet)
 	}
 
 	ChannelList channels;
-	if (Radiomode_on)
+
+	if ((Radiomode_on && mode == CZapitClient::MODE_CURRENT ) || (mode==CZapitClient::MODE_RADIO))
 		channels = g_BouquetMan->Bouquets[bouquet]->radioChannels;
-	else
+	else //if ((tvmode_on && mode == CZapitClient::MODE_CURRENT ) || (mode==CZapitClient::MODE_TV))
 		channels = g_BouquetMan->Bouquets[bouquet]->tvChannels;
 
-	if (!channels.empty())
+		internalSendChannels( &channels);
+}
+
+void sendChannels( CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT, CZapitClient::channelsOrder order = CZapitClient::SORT_BOUQUET)
+{
+	ChannelList channels;
+	if ((Radiomode_on && mode == CZapitClient::MODE_CURRENT ) || (mode==CZapitClient::MODE_RADIO))
 	{
-		for (uint i = 0; i < channels.size();i++)
+		for ( CBouquetManager::radioChannelIterator radiocit = g_BouquetMan->radioChannelsBegin(); radiocit != g_BouquetMan->radioChannelsEnd(); radiocit++)
 		{
 			CZapitClient::responseGetBouquetChannels response;
-			strncpy(response.name, channels[i]->name.c_str(),30);
-			response.onid_sid = (channels[i]->onid<<16)|channels[i]->sid;
-			response.nr = channels[i]->chan_nr;
-
+			strncpy(response.name, (*radiocit)->name.c_str(),30);
+			response.onid_sid = (*radiocit)->OnidSid();
+			response.nr = (*radiocit)->chan_nr;
 			if (send(connfd, &response, sizeof(response),0) == -1)
 			{
 				perror("[zapit] could not send any return\n");
@@ -2662,56 +2690,17 @@ void sendBouquetChannels(unsigned int bouquet)
 	}
 	else
 	{
-		printf("[zapit] channel list of bouquet %d is empty\n", bouquet + 1);
-		return;
-	}
-}
-
-void sendChannels()
-{
-	ChannelList channels;
-	if (Radiomode_on)
-	{
-		if (!allchans_radio.empty())
+		for ( CBouquetManager::tvChannelIterator tvcit = g_BouquetMan->tvChannelsBegin(); tvcit != g_BouquetMan->tvChannelsEnd(); tvcit++)
 		{
-			for ( CBouquetManager::radioChannelIterator radiocit = g_BouquetMan->radioChannelsBegin(); radiocit != g_BouquetMan->radioChannelsEnd(); radiocit++)
+			CZapitClient::responseGetBouquetChannels response;
+			strncpy(response.name, (*tvcit)->name.c_str(),30);
+			response.onid_sid = (*tvcit)->OnidSid();
+			response.nr = (*tvcit)->chan_nr;
+			if (send(connfd, &response, sizeof(response),0) == -1)
 			{
-				CZapitClient::responseGetBouquetChannels response;
-				strncpy(response.name, (*radiocit)->name.c_str(),30);
-				response.onid_sid = (*radiocit)->OnidSid();
-				response.nr = (*radiocit)->chan_nr;
-				if (send(connfd, &response, sizeof(response),0) == -1)
-				{
-					perror("[zapit] could not send any return\n");
-					return;
-				}
+				perror("[zapit] could not send any return\n");
+				return;
 			}
-		}
-		else
-		{
-			printf("[zapit] tv_channellist is empty\n");
-		}
-	}
-	else
-	{
-		if (!allchans_tv.empty())
-		{
-			for ( CBouquetManager::tvChannelIterator tvcit = g_BouquetMan->tvChannelsBegin(); tvcit != g_BouquetMan->tvChannelsEnd(); tvcit++)
-			{
-				CZapitClient::responseGetBouquetChannels response;
-				strncpy(response.name, (*tvcit)->name.c_str(),30);
-				response.onid_sid = (*tvcit)->OnidSid();
-				response.nr = (*tvcit)->chan_nr;
-				if (send(connfd, &response, sizeof(response),0) == -1)
-				{
-					perror("[zapit] could not send any return\n");
-					return;
-				}
-			}
-		}
-		else
-		{
-			printf("tv_channellist is empty\n");
 		}
 	}
 }

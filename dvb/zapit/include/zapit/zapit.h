@@ -52,6 +52,8 @@ int dvb_device;
 
 #include <config.h>
 
+#include <zapitclient.h>
+
 int listenfd, connfd;
 socklen_t clilen;
 SAI cliaddr, servaddr;
@@ -97,8 +99,9 @@ int get_caver();
 void addChannelToBouquet(unsigned int bouquet, unsigned int onid_sid);
 void removeChannelFromBouquet(unsigned int bouquet, unsigned int onid_sid);
 void sendBouquets(bool emptyBouquetsToo);
-void sendBouquetChannels(unsigned int bouquet);
-void sendChannels();
+void internalSendChannels( ChannelList* channels);
+void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT);
+void sendChannels(CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT, CZapitClient::channelsOrder order = CZapitClient::SORT_BOUQUET);
 void startPlayBack();
 void stopPlayBack();
 void zapTo(unsigned int channel);
