@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.57 2003/10/12 16:30:42 gagga Exp $
+  $Id: movieplayer.cpp,v 1.58 2003/11/18 22:05:54 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -135,7 +135,7 @@ CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 
 //------------------------------------------------------------------------
 
-CMoviePlayerGui::CMoviePlayerGui ()
+CMoviePlayerGui::CMoviePlayerGui() : bookmarkfile('\t')
 {
 	frameBuffer = CFrameBuffer::getInstance ();
 
@@ -148,8 +148,8 @@ CMoviePlayerGui::CMoviePlayerGui ()
 	videofilefilter.addFilter ("ts");
 	videofilefilter.addFilter ("ps");
 	videofilefilter.addFilter ("mpg");
-  videofilefilter.addFilter ("mpeg");
-  videofilefilter.addFilter ("m2p");
+    videofilefilter.addFilter ("mpeg");
+    videofilefilter.addFilter ("m2p");
 	videofilefilter.addFilter ("avi");
 	filebrowser->Filter = &videofilefilter;
 	if (strlen (g_settings.network_nfs_moviedir) != 0)
@@ -172,9 +172,34 @@ CMoviePlayerGui::~CMoviePlayerGui ()
 int
 CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 {
-	current = -1;
+	// read Bookmarkfile
+	int bookmarkCount=0;
+	if(bookmarkfile.loadConfig("/var/tuxbox/config/bookmarks")) {
+        bookmarkCount = bookmarkfile.getInt32( "bookmarkcount", 0 );
+        printf("bookmarkcount:%d\n",bookmarkCount);
+        for (int i=0;i<bookmarkCount;i++) {
+            char counterstring[4];
+            sprintf(counterstring, "%d",(i+1));
+            std::string bookmarkstring = "bookmark";
+            bookmarkstring += counterstring;
+            std::string bookmarknamestring = bookmarkstring + ".name";
+            std::string bookmarkurlstring = bookmarkstring + ".url";
+            std::string bookmarktimestring = bookmarkstring + ".time";
+            bookmarkname[i] = bookmarkfile.getString(bookmarknamestring,"name");
+            printf("bookmarkname: %s\n",bookmarkname[i].c_str());
+            bookmarkurl[i] = bookmarkfile.getString(bookmarkurlstring,"url");
+            printf("bookmarkurl: %s\n",bookmarkurl[i].c_str());
+            bookmarktime[i] = bookmarkfile.getString(bookmarktimestring,"time");
+            printf("bookmarktime: %s\n",bookmarktime[i].c_str());
+        }
+    }
+    
+    current = -1;
 	selected = 0;
 
+	printf("actionKey=%s\n",actionKey.c_str());
+	//CMenuForwarder* mf7 = new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir,this,"moviedir");
+	//parent.addItem(mf7);
 	//define screen width
 	width = 710;
 	if ((g_settings.screen_EndX - g_settings.screen_StartX) <
@@ -226,7 +251,19 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	g_Sectionsd->setPauseScanning (true);
 
 
-	show ();
+	if (actionKey=="fileplayback") {
+        PlayStream (STREAMTYPE_FILE);	
+	}
+	else if (actionKey=="dvdplayback") {
+        PlayStream (STREAMTYPE_DVD);
+	}
+	else if (actionKey=="svcdplayback") {
+        PlayStream (STREAMTYPE_SVCD);
+	}
+	else if (actionKey=="tsplayback") {
+        PlayFile();
+	}
+	
 
 	//stop();
 	hide ();
@@ -693,6 +730,12 @@ PlayStreamThread (void *mrl)
 
 				speed = 1;
 				break;
+			case CMoviePlayerGui::RESYNC:
+			    printf ("[movieplayer.cpp] Resyncing\n");
+				ioctl (dmxa, DMX_STOP);
+				ioctl (dmxa, DMX_START);
+				playstate = CMoviePlayerGui::PLAY;
+				break;
 			case CMoviePlayerGui::PLAY:
 				if (len < MINREADSIZE)
 				{
@@ -1088,6 +1131,10 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		{
 			update_info = true;
 			playstate = (playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::SOFTRESET : CMoviePlayerGui::PAUSE;
+		}
+		else if (msg == CRCInput::RC_green)
+		{
+			if (playstate == CMoviePlayerGui::PLAY) playstate = CMoviePlayerGui::RESYNC;
 		}
 		else
 			if (msg == NeutrinoMessages::RECORD_START

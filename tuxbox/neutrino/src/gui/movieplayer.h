@@ -33,6 +33,7 @@
 #define __movieplayergui__
 
 #include <config.h>
+#include <configfile.h>
 #if HAVE_DVB_API_VERSION >= 3
 #include "driver/framebuffer.h"
 #include "gui/filebrowser.h"
@@ -66,6 +67,7 @@ class CMoviePlayerGui : public CMenuTarget
 		    PAUSE       =  4,
 		    FF          =  5,
 		    REW         =  6,
+		    RESYNC      =  7,
 		    SOFTRESET   = 99
 		};
 
@@ -94,6 +96,10 @@ class CMoviePlayerGui : public CMenuTarget
 
 	std::string Path;
 	CFileBrowser * filebrowser;
+	CConfigFile	bookmarkfile;
+	std::string bookmarkname[10];
+	std::string bookmarkurl[10];
+	std::string bookmarktime[10];
 
 	void PlayStream(int streamtype);
 	void PlayFile();
