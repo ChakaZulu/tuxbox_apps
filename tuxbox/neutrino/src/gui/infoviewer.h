@@ -94,7 +94,8 @@ class CInfoViewer
 	void showRecordIcon(const bool show);
 	
 	void showFailure();
-   void showLcdPercentOver();
+	void showMotorMoving(int duration);
+   	void showLcdPercentOver();
 
  public:
 	bool	is_visible;
