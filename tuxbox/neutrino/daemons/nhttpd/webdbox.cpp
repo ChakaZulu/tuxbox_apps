@@ -145,6 +145,18 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 			request->SocketWrite("error");
 	}
 
+	if(strcmp(request->Filename->c_str(),"getservices") == 0)		// sendet die datei services.xml
+	{
+		request->SendPlainHeader();
+		request->SendFile("/var/tuxbox/config/zapit","services.xml");
+	}
+
+	if(strcmp(request->Filename->c_str(),"getbouquets") == 0)		// sendet die datei bouquets.xml
+	{
+		request->SendPlainHeader();
+		request->SendFile("/var/tuxbox/config/zapit","bouquets.xml");
+	}
+	
 	if(strcmp(request->Filename->c_str(),"gettime") == 0)
 	{
 		request->SendPlainHeader();          // Standard httpd header senden
@@ -614,8 +626,6 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 				if(request->ParameterList->GetIndex("settings") != -1)
 				{
 					if(request->Parent->DEBUG) printf("settings\n");
-					request->SocketWriteLn("HTTP/1.0 200 OK");
-					request->SocketWriteLn("Content-Type: text/html\n");
 					SendSettings(request);
 					return true;
 				}
