@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.72 2002/10/30 14:07:39 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.73 2002/11/18 00:27:56 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -30,6 +30,7 @@
 #include <configfile.h>
 
 #include <zapit/bouquets.h>
+#include <zapit/debug.h>
 #include <zapit/sdt.h>
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
@@ -168,12 +169,12 @@ int CBouquet::recModeTVSize( unsigned int tsid)
 /**** class CBouquetManager *************************************************/
 void CBouquetManager::saveBouquets()
 {
-	printf("[zapit] creating new bouquets.xml\n");
+	INFO("creating new bouquets.xml");
 	FILE* bouq_fd = fopen(BOUQUETS_XML, "w");
 
 	if (bouq_fd == NULL)
 	{
-		perror("fopen " BOUQUETS_XML);
+		ERROR(BOUQUETS_XML);
 		return;
 	}
 
@@ -222,7 +223,8 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 
 		unsigned int original_network_id, service_id;
 
-		printf("[zapit] reading Bouquets ");
+		INFO("reading bouquets");
+
 		while ((search) && (!(strcmp(search->GetType(), "Bouquet"))))
 		{
 			CBouquet* newBouquet = addBouquet(search->GetAttributeValue("name"));
@@ -244,17 +246,13 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 
 				channel_node = channel_node->GetNext();
 			}
-			printf(".");
-/*		printf(
-			"[zapit] Bouquet %s with %d tv- and %d radio-channels.\n",
-			newBouquet->Name.c_str(),
-			newBouquet->tvChannels.size(),
-			newBouquet->radioChannels.size());
-*/
+
 			search = search->GetNext();
 		}
+	
+		INFO("found %d bouquets", Bouquets.size());
 	}
-	printf("\n[zapit] Found %d bouquets.\n", Bouquets.size());
+
 }
 
 void CBouquetManager::loadBouquets(bool ignoreBouquetFile)

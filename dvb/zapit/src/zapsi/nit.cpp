@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.29 2002/10/12 20:19:45 obi Exp $
+ * $Id: nit.cpp,v 1.30 2002/11/18 00:27:57 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -32,6 +32,7 @@
 /* zapit */
 #include <zapit/descriptors.h>
 #include <zapit/dmx.h>
+#include <zapit/debug.h>
 #include <zapit/getservices.h>
 #include <zapit/nit.h>
 #include <zapit/settings.h>  // DEMUX_DEVICE
@@ -70,7 +71,7 @@ int parse_nit (unsigned char DiSEqC)
 
 	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
-		perror("[nit.cpp] " DEMUX_DEVICE);
+		ERROR(DEMUX_DEVICE);
 		return -1;
 	}
 
@@ -84,7 +85,7 @@ int parse_nit (unsigned char DiSEqC)
 
 		if (read(demux_fd, buffer, NIT_SIZE) < 0)
 		{
-			perror("[nit.cpp] read");
+			ERROR("read");
 			close(demux_fd);
 			return -1;
 		}
@@ -119,18 +120,19 @@ int parse_nit (unsigned char DiSEqC)
 				break;
 
 			default:
-				printf("[nit.cpp] descriptor_tag (a): %02x\n", buffer[pos]);
+				DBG("descriptor_tag: %02x", buffer[pos]);
 				break;
 			}
 		}
 
-		if ( !(transport_stream_loop_length = (((buffer[pos] & 0x0F) << 8) | buffer[pos + 1])))
+		if (!(transport_stream_loop_length = (((buffer[pos] & 0x0F) << 8) | buffer[pos + 1])))
 		{
-			/* Falls NIT leer, verlasse Auswertung */
-			printf("[nit.cpp] NIT-Table Auswertung fehlgeschlagen \n");
+			/* WTF? */
+			WARN("nit parsing failed");
 			close(demux_fd);
 			return -3;
 		}
+
 		transport_stream_loop_length = ((buffer[pos] & 0x0F) << 8) | buffer[pos + 1];
 
 		for (pos += 2; pos < section_length - 3; pos += transport_descriptors_length + 6)
@@ -165,7 +167,7 @@ int parse_nit (unsigned char DiSEqC)
 						break;
 
 					default:
-						printf("[nit.cpp] descriptor_tag (b): %02x\n", buffer[pos2]);
+						DBG("descriptor_tag: %02x", buffer[pos2]);
 						break;
 					}
 				}

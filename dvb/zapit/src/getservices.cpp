@@ -1,11 +1,12 @@
 /*
- * $Id: getservices.cpp,v 1.56 2002/11/02 17:21:15 obi Exp $
+ * $Id: getservices.cpp,v 1.57 2002/11/18 00:27:56 obi Exp $
  */
 
 #include <stdio.h>
 
 #include <zapit/bouquets.h>
 #include <zapit/channel.h>
+#include <zapit/debug.h>
 #include <zapit/frontend.h>
 #include <zapit/getservices.h>
 #include <zapit/settings.h>
@@ -153,14 +154,14 @@ void FindTransponder (XMLTreeNode *search)
 		/* cable */
 		if (!(strcmp(search->GetType(), "cable")))
 		{
-			printf("[getservices.cpp] going to parse cable %s\n", search->GetAttributeValue("name"));
+			INFO("going to parse cable %s", search->GetAttributeValue("name"));
 			ParseTransponders(search->GetChild(), 0xFF);
 		}
 
 		/* satellite */
 		else if (!(strcmp(search->GetType(), "sat")))
 		{
-			printf("[getservices.cpp] going to parse satellite %s\n", search->GetAttributeValue("name"));
+			INFO("going to parse satellite %s", search->GetAttributeValue("name"));
 			GET_ATTR(search, "diseqc", "%hhu", DiSEqC);
 			ParseTransponders(search->GetChild(), DiSEqC);
 		}

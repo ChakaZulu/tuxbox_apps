@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.34 2002/10/12 20:19:45 obi Exp $
+ * $Id: sdt.cpp,v 1.35 2002/11/18 00:27:57 obi Exp $
  */
 
 /* system c */
@@ -13,6 +13,7 @@
 /* zapit */
 #include <zapit/descriptors.h>
 #include <zapit/dmx.h>
+#include <zapit/debug.h>
 #include <zapit/sdt.h>
 #include <zapit/settings.h>  // DEMUX_DEVICE
 #include <zapit/types.h>
@@ -40,7 +41,7 @@ uint32_t get_sdt_TsidOnid ()
 	
 	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
-		perror("[sdt.cpp] " DEMUX_DEVICE);
+		ERROR(DEMUX_DEVICE);
 		return 0;
 	}
 
@@ -52,7 +53,7 @@ uint32_t get_sdt_TsidOnid ()
 
 	if (read(demux_fd, buffer, SDT_SIZE) < 0)
 	{
-		perror("[sdt.cpp] read");
+		ERROR("read");
 		close(demux_fd);
 		return 0;
 	}
@@ -94,7 +95,7 @@ int parse_sdt(const uint8_t DiSEqC)
 
 	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
-		perror("[sdt.cpp] " DEMUX_DEVICE);
+		ERROR(DEMUX_DEVICE);
 		return -1;
 	}
 
@@ -108,7 +109,7 @@ int parse_sdt(const uint8_t DiSEqC)
 
 		if (read(demux_fd, buffer, SDT_SIZE) < 0)
 		{
-			perror("[sdt.cpp] read");
+			ERROR("read");
 			close(demux_fd);
 			return -1;
 		}
@@ -211,7 +212,7 @@ int parse_sdt(const uint8_t DiSEqC)
 					break;
 
 				default:
-					printf("[sdt.cpp] descriptor_tag: %02x\n", buffer[pos2]);
+					DBG("descriptor_tag: %02x", buffer[pos2]);
 					generic_descriptor(buffer + pos2);
 					break;
 				}

@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.5 2002/11/02 17:21:15 obi Exp $
+ * $Id: video.cpp,v 1.6 2002/11/18 00:27:57 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -26,8 +26,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <zapit/debug.h>
 #include <zapit/settings.h>
 #include <zapit/video.h>
+
 
 CVideo::CVideo ()
 {
@@ -37,15 +39,16 @@ CVideo::CVideo ()
 
 	if ((fd = open(VIDEO_DEVICE, O_RDWR)) < 0)
 	{
-		perror(VIDEO_DEVICE);
+		ERROR(VIDEO_DEVICE);
 	}
 	else if (ioctl(fd, VIDEO_GET_STATUS, &status) < 0)
 	{
-		perror("VIDEO_GET_STATUS");
+		ERROR("VIDEO_GET_STATUS");
 		close(fd);
 	}
 	else
 	{
+		setBlank(true);
 		initialized = true;
 	}
 }
@@ -53,21 +56,17 @@ CVideo::CVideo ()
 CVideo::~CVideo ()
 {
 	if (initialized)
-	{
 		close(fd);
-	}
 }
 
 int CVideo::setAspectRatio (video_format_t format)
 {
 	if (status.video_format == format)
-	{
 		return 0;
-	}
 
 	if (ioctl(fd, VIDEO_SET_FORMAT, format) < 0)
 	{
-		perror("VIDEO_SET_FORMAT");
+		ERROR("VIDEO_SET_FORMAT");
 		return -1;
 	}
 
@@ -78,13 +77,11 @@ int CVideo::setAspectRatio (video_format_t format)
 int CVideo::setCroppingMode (video_displayformat_t format)
 {
 	if (status.display_format == format)
-	{
 		return 0;
-	}
 
 	if (ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, format) < 0)
 	{
-		perror("VIDEO_SET_DISPLAY_FORMAT");
+		ERROR("VIDEO_SET_DISPLAY_FORMAT");
 		return -1;
 	}
 
@@ -96,18 +93,14 @@ int CVideo::setSource (video_stream_source_t source)
 {
 #ifndef ALWAYS_DO_VIDEO_SELECT_SOURCE
 	if (status.stream_source == source)
-	{
 		return 0;
-	}
 #endif
 	if (status.play_state != VIDEO_STOPPED)
-	{
 		return -1;
-	}
 
 	if (ioctl(fd, VIDEO_SELECT_SOURCE, source) < 0)
 	{
-		perror("VIDEO_SELECT_SOURCE");
+		ERROR("VIDEO_SELECT_SOURCE");
 		return -1;
 	}
 
@@ -119,13 +112,11 @@ int CVideo::setSource (video_stream_source_t source)
 int CVideo::start ()
 {
 	if (status.play_state == VIDEO_PLAYING)
-	{
 		return 0;
-	}
 
 	if (ioctl(fd, VIDEO_PLAY) < 0)
 	{
-		perror("VIDEO_PLAY");
+		ERROR("VIDEO_PLAY");
 		return -1;
 	}
 
@@ -137,13 +128,11 @@ int CVideo::start ()
 int CVideo::stop ()
 {
 	if (status.play_state == VIDEO_STOPPED)
-	{
 		return 0;
-	}
 
 	if (ioctl(fd, VIDEO_STOP, status.video_blank) < 0)
 	{
-		perror("VIDEO_STOP");
+		ERROR("VIDEO_STOP");
 		return -1;
 	}
 
@@ -155,13 +144,11 @@ int CVideo::stop ()
 int CVideo::setBlank (bool blank)
 {
 	if (status.video_blank == blank)
-	{
 		return 0;
-	}
 
 	if (ioctl(fd, VIDEO_SET_BLANK, blank) < 0)
 	{
-		perror("VIDEO_SET_BLANK");
+		ERROR("VIDEO_SET_BLANK");
 		return -1;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.10 2002/11/02 17:21:15 obi Exp $
+ * $Id: audio.cpp,v 1.11 2002/11/18 00:27:57 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -28,30 +28,22 @@
 #include <unistd.h>
 
 #include <zapit/audio.h>
+#include <zapit/debug.h>
 #include <zapit/settings.h>
+
+
 
 CAudio::CAudio()
 {
 	initialized = false;
 
-	mixer.volume_left = 0;
-	mixer.volume_right = 0;
-	status.bypass_mode = false;
-	status.play_state = AUDIO_STOPPED;
-	status.stream_source = AUDIO_SOURCE_MEMORY;
-
 	if ((fd = open(AUDIO_DEVICE, O_RDWR)) < 0)
 	{
-		perror(AUDIO_DEVICE);
+		ERROR(AUDIO_DEVICE);
 	}
 	else if (ioctl(fd, AUDIO_GET_STATUS, &status) < 0)
 	{
-		perror("AUDIO_GET_STATUS");
-		close(fd);
-	}
-	else if (ioctl(fd, AUDIO_SET_MIXER, &mixer) < 0)
-	{
-		perror("AUDIO_SET_MIXER");
+		ERROR("AUDIO_GET_STATUS");
 		close(fd);
 	}
 	else
@@ -63,16 +55,14 @@ CAudio::CAudio()
 CAudio::~CAudio()
 {
 	if (initialized)
-	{
 		close(fd);
-	}
 }
 
 int CAudio::setBypassMode (bool enable)
 {
 	if (ioctl(fd, AUDIO_SET_BYPASS_MODE, enable ? 0 : 1) < 0)
 	{
-		perror("AUDIO_SET_BYPASS_MODE");
+		ERROR("AUDIO_SET_BYPASS_MODE");
 		return -1;
 	}
 
@@ -85,7 +75,7 @@ int CAudio::setMute (bool enable)
 {
 	if (ioctl(fd, AUDIO_SET_MUTE, enable) < 0)
 	{
-		perror("AUDIO_SET_MUTE");
+		ERROR("AUDIO_SET_MUTE");
 		return -1;
 	}
 
@@ -97,65 +87,47 @@ int CAudio::setMute (bool enable)
 int CAudio::mute ()
 {
 	if (status.mute_state == false)
-	{
 		return setMute(true);
-	}
-	else
-	{
-		return -1;
-	}
+
+	return -1;
 
 }
 
 int CAudio::unmute ()
 {
 	if (status.mute_state == true)
-	{
 		return setMute(false);
-	}
-	else
-	{
-		return -1;
-	}
+
+	return -1;
 }
 
 int CAudio::enableBypass ()
 {
 	if (status.bypass_mode == false)
-	{
 		return setBypassMode(true);
-	}
-	else
-	{
-		return -1;
-	}
+
+	return -1;
 }
 
 int CAudio::disableBypass ()
 {
 	if (status.bypass_mode == true)
-	{
 		return setBypassMode(false);
-	}
-	else
-	{
-		return -1;
-	}
+
+	return -1;
 }
 
 int CAudio::setVolume (unsigned char left, unsigned char right)
 {
-	if ((mixer.volume_left == left) && (mixer.volume_right == right))
-	{
+	if ((status.mixer_state.volume_left == left) && (status.mixer_state.volume_right == right))
 		return 0;
-	}
 
-	mixer.volume_left = left;
-	mixer.volume_right = right;
+	status.mixer_state.volume_left = left;
+	status.mixer_state.volume_right = right;
 
-	if (ioctl(fd, AUDIO_SET_MIXER, &mixer) < 0)
+	if (ioctl(fd, AUDIO_SET_MIXER, &status.mixer_state) < 0)
 	{
-		perror("AUDIO_SET_MIXER");
+		ERROR("AUDIO_SET_MIXER");
 		return -1;
 	}
 
@@ -172,7 +144,7 @@ int CAudio::setSource (audio_stream_source_t source)
 
 	if (ioctl(fd, AUDIO_SELECT_SOURCE, source) < 0)
 	{
-		perror("AUDIO_SELECT_SOURCE");
+		ERROR("AUDIO_SELECT_SOURCE");
 		return -1;
 	}
 
@@ -183,13 +155,11 @@ int CAudio::setSource (audio_stream_source_t source)
 int CAudio::start ()
 {
 	if (status.play_state == AUDIO_PLAYING)
-	{
 		return 0;
-	}
 
 	if (ioctl(fd, AUDIO_PLAY) < 0)
 	{
-		perror("AUDIO_PLAY");
+		ERROR("AUDIO_PLAY");
 		return -1;
 	}
 
@@ -201,13 +171,11 @@ int CAudio::start ()
 int CAudio::stop ()
 {
 	if (status.play_state == AUDIO_STOPPED)
-	{
 		return 0;
-	}
 
 	if (ioctl(fd, AUDIO_STOP) < 0)
 	{
-		perror("AUDIO_STOP");
+		ERROR("AUDIO_STOP");
 		return -1;
 	}
 
@@ -220,7 +188,7 @@ int CAudio::selectChannel (audio_channel_select_t sel)
 {
 	if (ioctl(fd, AUDIO_CHANNEL_SELECT, &sel) < 0)
 	{
-		perror("AUDIO_CHANNEL_SELECT");
+		ERROR("AUDIO_CHANNEL_SELECT");
 		return -1;
 	}
 

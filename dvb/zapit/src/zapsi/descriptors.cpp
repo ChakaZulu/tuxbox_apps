@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.51 2002/11/02 17:31:59 obi Exp $
+ * $Id: descriptors.cpp,v 1.52 2002/11/18 00:27:57 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -47,15 +47,12 @@ extern CEventServer *eventServer;
 
 uint8_t generic_descriptor (uint8_t *buffer)
 {
-	int i;
-
-	printf("[descriptors.cpp] generic descriptor dump:\n");
-	for (i = 0; i < buffer[1] + 2; i++)
-	{
+#if 0
+	DBG("generic descriptor dump:");
+	for (unsigned short i = 0; i < buffer[1] + 2; i++)
 		printf(" %02x", buffer[i]);
-	}
 	printf("\n");
-
+#endif
 	return buffer[1];
 }
 

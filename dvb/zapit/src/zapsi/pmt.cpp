@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.27 2002/10/12 20:19:45 obi Exp $
+ * $Id: pmt.cpp,v 1.28 2002/11/18 00:27:57 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -30,6 +30,7 @@
 /* zapit */
 #include <zapit/descriptors.h>
 #include <zapit/dmx.h>
+#include <zapit/debug.h>
 #include <zapit/pmt.h>
 
 #define PMT_SIZE 1024
@@ -158,23 +159,19 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 				break;
 
 			case 0xC2: /* User Private descriptor - Canal+ */
-				printf("[pmt.cpp] 0xC2 dump:\n");
-				for (i = 0; i < descriptor_length; i++)
-				{
+#if 0
+				DBG("0xC2 dump:");
+				for (i = 0; i < descriptor_length; i++) {
 					printf("%c", buffer[pos + 2 + i]);
-
 					if (((i+1) % 8) == 0)
-					{
 						printf("\n");
-					}
 				}
+#endif
 				break;
 
 			case 0xC5: /* User Private descriptor - Canal+ Radio */
 				for (i = 0; i < 24; i++)
-				{
 					description += buffer[pos + i + 3];
-				}
 				break;
 
 			case 0xC6: /* unknown, Astra 19.2E */
@@ -187,7 +184,7 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 				break;
 
 			default:
-				printf("[pmt.cpp] descriptor_tag (b): %02x\n", descriptor_tag);
+				DBG("descriptor_tag: %02x", descriptor_tag);
 				break;
 		}
 	}
@@ -242,7 +239,7 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 		break;
 
 	default:
-		printf("[pmt.cpp] stream_type: %02x\n", esInfo->stream_type);
+		DBG("stream_type: %02x", esInfo->stream_type);
 		break;
 	}
 
@@ -290,7 +287,7 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 
 	if (read(demux_fd, buffer, PMT_SIZE) < 0)
 	{
-		perror("[pmt.cpp] read");
+		ERROR("read");
 		return -1;
 	}
 
@@ -319,7 +316,7 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 				break;
 
 			default:
-				printf("[pmt.cpp] decriptor_tag (a): %02x\n", buffer[i]);
+				DBG("decriptor_tag: %02x", buffer[i]);
 				break;
 			}
 		}

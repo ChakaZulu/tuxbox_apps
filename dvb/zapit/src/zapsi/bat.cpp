@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.9 2002/10/12 20:19:45 obi Exp $
+ * $Id: bat.cpp,v 1.10 2002/11/18 00:27:57 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -33,6 +33,7 @@
 #include <zapit/bat.h>
 #include <zapit/descriptors.h>
 #include <zapit/dmx.h>
+#include <zapit/debug.h>
 
 #define BAT_SIZE 1024
 
@@ -68,13 +69,11 @@ int parse_bat (int demux_fd)
 	do
 	{
 		if (setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0)
-		{
 			return -1;
-		}
 
 		if (read(demux_fd, buffer, BAT_SIZE) < 0)
 		{
-			perror("[bat.cpp] read");
+			ERROR("read");
 			return -1;
 		}
 
@@ -108,7 +107,7 @@ int parse_bat (int demux_fd)
 				break;
 
 			default:
-				printf("[bat.cpp] descriptor_tag (a): %02x\n", buffer[pos]);
+				DBG("descriptor_tag: %02x", buffer[pos]);
 				generic_descriptor(buffer + pos);
 				break;
 			}
@@ -147,7 +146,7 @@ int parse_bat (int demux_fd)
 					break;
 
 				default:
-					printf("[bat.cpp] descriptor_tag (b): %02x\n", buffer[pos3]);
+					DBG("descriptor_tag: %02x", buffer[pos3]);
 					generic_descriptor(buffer + pos3);
 					break;
 				}

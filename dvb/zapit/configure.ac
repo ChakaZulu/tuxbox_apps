@@ -21,10 +21,6 @@ AC_ARG_ENABLE(pid-cache,
 	[  --enable-pid-cache      do not read pids after every channel change],
 	[AC_DEFINE(USE_PID_CACHE,1,[do not read pids after every channel change])])
 
-AC_ARG_ENABLE(tunning-retries,
-	[  --enable-tuning-retries  retry tuning on failure],
-	[AC_DEFINE(EXCESSIVE_TUNING_RETRIES,1,[retry tuning on failure])])
-
 AC_ARG_WITH(neutrino-source,
 	[  --with-neutrino-source=PATH  where to find the neutrino sources (workaround for circular reference)],
 	[NEUTRINO_SOURCE="$withval"])

@@ -1,5 +1,5 @@
 /*
- * $Id: audio.h,v 1.10 2002/11/02 17:21:15 obi Exp $
+ * $Id: audio.h,v 1.11 2002/11/18 00:27:56 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -34,7 +34,6 @@ class CAudio
 
 		/* current audio settings */
 		struct audio_status status;
-		struct audio_mixer mixer;
 
 		/* internal methods */
 		int setMute (bool mute);

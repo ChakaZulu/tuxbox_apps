@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.269 2002/11/02 17:21:15 obi Exp $
+ * $Id: zapit.cpp,v 1.270 2002/11/18 00:27:56 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -45,6 +45,7 @@
 #include <zapit/cam.h>
 #include <zapit/client/msgtypes.h>
 #include <zapit/dmx.h>
+#include <zapit/debug.h>
 #include <zapit/frontend.h>
 #include <zapit/getservices.h>
 #include <zapit/pat.h>
@@ -54,8 +55,6 @@
 #include <zapit/xmlinterface.h>
 #include <zapit/zapit.h>
 
-
-#define debug(fmt, args...) { if (debug) { printf(fmt, ## args); fflush(stdout); } }
 
 /* the conditional access module */
 CCam * cam = NULL;
@@ -95,7 +94,7 @@ CLcddClient lcdd;
 
 bool playbackStopForced = false;
 
-bool debug = false;
+int debug = 0;
 
 /* near video on demand */
 tallchans nvodchannels;         //  tallchans defined in "bouquets.h"
@@ -134,13 +133,6 @@ void CZapitDestructor()
 
 	save_settings(true);
 
-	/*
-	if (connfd != -1)
-	{
-		close(connfd);
-	}
-	*/
-
 	stopPlayBack();
 
 	if (dmx_audio_fd != -1)
@@ -167,14 +159,13 @@ void CZapitDestructor()
 
 void signal_handler (int signum)
 {
-	switch (signum)
-	{
-		case SIGUSR1:
-			debug = (debug ? false : true);
-			break;
-
-		default:
-			CZapitDestructor();
+	switch (signum) {
+	case SIGUSR1:
+		debug = !debug;
+		break;
+	default:
+		CZapitDestructor();
+		break;
 	}
 }
 
@@ -186,6 +177,7 @@ void save_settings (bool write)
 
 		// now save the lowest channel number with the current channel_id
 		int c = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).getLowestChannelNumberWithChannelID(channel->getChannelID());
+
 		if (c >= 0)
 			config.setInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", c);
 	}
@@ -235,9 +227,10 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		current_is_nvod = true;
 
 		cit = nvodchannels.find(channel_id);
+
 		if (cit == nvodchannels.end())
 		{
-			debug("[zapit] channel_id " PRINTF_CHANNEL_ID_TYPE " not found\n", channel_id);
+			DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
 			return -1;
 		}
 	}
@@ -251,7 +244,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		{
 			if ((cit == allchans.end()) || (cit->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE))
 			{
-				debug("[zapit] channel_id " PRINTF_CHANNEL_ID_TYPE " not found\n", channel_id);
+				DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
 				return -1;
 			}
 		}
@@ -259,9 +252,10 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		{
 			if (cit == allchans.end() || (cit->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE))
 			{
-				debug("[zapit] channel_id " PRINTF_CHANNEL_ID_TYPE " not found\n", channel_id);
+				DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
 				return -1;
 			}
+
 			nvodname = cit->second.getName();
 		}
 	}
@@ -269,48 +263,23 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 	stopPlayBack();
 
 	/* store the new channel */
-	if ((channel == NULL) || (channel_id != channel->getChannelID()))
-	{
+	if ((!channel) || (channel_id != channel->getChannelID()))
 		channel = &(cit->second);
-	}
 
 	/* if channel's transponder does not match frontend's tuned transponder ... */
 	if (channel->getTsidOnid() != frontend->getTsidOnid())
 	{
 		/* ... tune to it if not in record mode ... */
 		if (currentMode & RECORD_MODE)
-		{
 			return -1;
-		}
 
-		if (frontend->tuneChannel(channel) == false)
-		{
-#ifdef EXCESSIVE_TUNING_RETRIES
-			unsigned char retries;
-
-			for (retries = 0; retries < 5; retries++)
-			{
-				printf("[zapit] tune retry %d\n", retries);
-
-				if (frontend->tuneChannel(channel) == true)
-				{
-					break;
-				}
-			}
-
-			if (retries == 5)
-			{
-				return -1;
-			}
-#else
+		if (!frontend->tuneChannel(channel))
 			return -1;
-#endif
-		}
 		
 		if (channel->getTsidOnid() != frontend->getTsidOnid())
 		{
-			printf("[zapit] zigzag tuning probably failed:\n");
-			printf("[zapit] requested tsid/onid %08x but frontend is at tsid/onid %08x\n", channel->getTsidOnid(), frontend->getTsidOnid());
+			WARN("zigzag tuning probably failed");
+			DBG("requested tsid/onid %08x but frontend is at tsid/onid %08x", channel->getTsidOnid(), frontend->getTsidOnid());
 			return -1;
 		}
 
@@ -337,12 +306,12 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		bool failed = false;
 		int dmx_sct_fd;
 
-		debug("[zapit] looking up pids for channel_id " PRINTF_CHANNEL_ID_TYPE "\n", channel->getChannelID());
+		DBG("looking up pids for channel_id " PRINTF_CHANNEL_ID_TYPE, channel->getChannelID());
 
 		/* open demux device */
 		if ((dmx_sct_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 		{
-			perror("[zapit] " DEMUX_DEVICE);
+			ERROR(DEMUX_DEVICE);
 			return -1;
 		}
 
@@ -351,7 +320,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		{
 			if (parse_pat(dmx_sct_fd, channel) < 0)
 			{
-				debug("[zapit] pat parsing failed\n");
+				WARN("pat parsing failed");
 				failed = true;
 			}
 		}
@@ -359,13 +328,13 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		/* parse program map table and store pids */
 		if ((!failed) && (parse_pmt(dmx_sct_fd, channel) < 0))
 		{
-			debug("[zapit] pmt parsing failed\n");
+			WARN("pmt parsing failed");
 			failed = true;
 		}
 
 		if ((!failed) && (channel->getAudioPid() == NONE) && (channel->getVideoPid() == NONE))
 		{
-			debug("[zapit] neither audio nor video pid found.\n");
+			WARN("neither audio nor video pid found");
 			failed = true;
 		}
 
@@ -398,7 +367,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 	}
 #endif /* DBOX2 */
 
-	debug("[zapit] setting ca pmt\n");
+	DBG("setting ca pmt");
+
 	cam->setCaPmt(channel->getCaPmt());
 
 	startPlayBack();
@@ -438,6 +408,7 @@ int changeapid (uint8_t index)
 	//audio->start();
 
 	/* start demux filter */
+	INFO("audio dmx start");
 	if (startDmxFilter(dmx_audio_fd) < 0)
 		return -1;
 
@@ -493,7 +464,7 @@ int prepare_channels ()
 	if (LoadServices() < 0)
 		return -1;
 
-	printf("[zapit] LoadServices: success\n");
+	INFO("LoadServices: success");
 
 	bouquetManager->loadBouquets();
 
@@ -503,8 +474,7 @@ int prepare_channels ()
 
 void parseScanInputXml()
 {
-	switch (frontend->getInfo()->type)
-	{
+	switch (frontend->getInfo()->type) {
 	case FE_QPSK:
 		scanInputParser = parseXmlFile(string(SATELLITES_XML));
 		break;
@@ -514,7 +484,7 @@ void parseScanInputXml()
 		break;
 		
 	default:
-		printf("Unknown type %d\n", frontend->getInfo()->type);
+		WARN("Unknown type %d", frontend->getInfo()->type);
 		return;
 	}
 }
@@ -528,9 +498,10 @@ int start_scan ()
 	if (scanInputParser == NULL)
 	{
 		parseScanInputXml();
+
 		if (scanInputParser == NULL)
 		{
-			printf("[zapit] scan not configured. won't scan.\n");
+			WARN("scan not configured");
 			return -1;
 		}
 	}
@@ -548,7 +519,7 @@ int start_scan ()
 
 	if (pthread_create(&scan_thread, 0, start_scanthread, NULL))
 	{
-		perror("[zapit] pthread_create: scan_thread");
+		ERROR("pthread_create");
 		scan_runs = 0;
 		return -1;
 	}
@@ -558,10 +529,8 @@ int start_scan ()
 
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
-	debug("[zapit] cmd %d (version %d) received\n", rmsg.cmd, rmsg.version);
+	DBG("cmd %d (version %d) received", rmsg.cmd, rmsg.version);
 
-//	if (rmsg.version == CZapitMessages::ACTVERSION) // check now done by basicserver
-//	{
 		switch (rmsg.cmd)
 		{
 			case CZapitMessages::CMD_SHUTDOWN:
@@ -760,7 +729,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				scanProviders.clear();
 				while (read(connfd, &sat, sizeof(sat)))
 				{
-					printf("[zapit] adding %s (diseqc %d)\n", sat.satName, sat.diseqc);
+					INFO("adding %s (diseqc %d)", sat.satName, sat.diseqc);
 					scanProviders[sat.diseqc] = sat.satName;
 				}
 				break;
@@ -770,7 +739,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				diseqc_t diseqc;
 				read(connfd, &diseqc, sizeof(diseqc));
 				frontend->setDiseqcType(diseqc);
-				printf("[zapit] set diseqc type %d\n", diseqc);
+				INFO("set diseqc type %d", diseqc);
 				break;
 			}
 			case CZapitMessages::CMD_SCANSETDISEQCREPEAT:
@@ -778,7 +747,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				uint32_t repeats;
 				read(connfd, &repeats, sizeof(repeats));
 				frontend->setDiseqcRepeats(repeats);
-				printf("[zapit] set diseqc repeats to %d\n", repeats);
+				INFO("set diseqc repeats to %d", repeats);
 				break;
 			}
 			case CZapitMessages::CMD_SCANSETBOUQUETMODE:
@@ -1015,11 +984,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				break;
 			}
 			default:
-				printf("[zapit] unknown command %d (version %d)\n", rmsg.cmd, CZapitMessages::ACTVERSION);
+				WARN("unknown command %d (version %d)", rmsg.cmd, CZapitMessages::ACTVERSION);
 				break;
 		}
-		debug("[zapit] cmd %d processed\n", rmsg.cmd);
-//	}
+
+	DBG("cmd %d processed", rmsg.cmd);
 
 	return true;
 }
@@ -1029,7 +998,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.269 2002/11/02 17:21:15 obi Exp $\n\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.270 2002/11/18 00:27:56 obi Exp $\n");
 
 	if (argc > 1)
 	{
@@ -1054,7 +1023,7 @@ int main (int argc, char **argv)
 			}
 			else
 			{
-				printf("Usage: zapit [-d] [-q]\n");
+				fprintf(stdout, "Usage: %s [-d] [-q]\n", argv[0]);
 				exit(0);
 			}
 		}
@@ -1065,12 +1034,9 @@ int main (int argc, char **argv)
 	found_channels = 0;
 	curr_sat = -1;
 
-	/* load configuration */
+	/* load configuration or set defaults if no configuration file exists */
 	if (!config.loadConfig(CONFIGFILE))
-	{
-		/* set defaults if no configuration file exists */
-		printf("[zapit] %s not found\n", CONFIGFILE);
-	}
+		WARN("%s not found", CONFIGFILE);
 
 	/* create bouquet manager */
 	bouquetManager = new CBouquetManager();
@@ -1083,16 +1049,16 @@ int main (int argc, char **argv)
 		setTVMode();
 
 	if (prepare_channels() < 0)
-		printf("[zapit] error parsing services!\n");
+		WARN("error parsing services");
 	else
-		printf("[zapit] channels have been loaded succesfully\n");
+		INFO("channels have been loaded succesfully");
 
 	/* initialize frontend */
 	frontend = new CFrontend();
 
 	if (!frontend->isInitialized())
 	{
-		printf("[zapit] unable to open frontend devices. bye.\n");
+		WARN("unable to initialize frontend device");
 		CZapitDestructor();
 	}
 	else
@@ -1116,26 +1082,12 @@ int main (int argc, char **argv)
 	audio = new CAudio();
 
 	if (!audio->isInitialized())
-	{
-		printf("[zapit] unable to initialize audio device\n");
-		//CZapitDestructor();
-	}
-	else
-	{
-		audio->setVolume(222, 222);
-	}
+		WARN("unable to initialize audio device");
 
 	video = new CVideo();
 
 	if (!video->isInitialized())
-	{
-		printf("[zapit] unable to initialize video device\n");
-		//CZapitDestructor();
-	}
-	else
-	{
-		video->setBlank(true);
-	}
+		WARN("unable to initialize video device");
 
 	/* initialize cam */
 	cam = new CCam();
@@ -1145,6 +1097,7 @@ int main (int argc, char **argv)
 	signal(SIGUSR1, signal_handler);
 
 	CBasicServer zapit_server;
+
 	if (!zapit_server.prepare(ZAPIT_UDS_NAME))
 		return -1;
 
@@ -1153,13 +1106,13 @@ int main (int argc, char **argv)
 		switch (fork())
 		{
 			case -1: /* can't fork */
-				perror("[zapit] fork");
+				ERROR("fork");
 				return -1;
 
 			case 0: /* child, process becomes a daemon */
 				if (setsid() == -1)
 				{
-					perror("[zapit] setsid");
+					ERROR("setsid");
 					return -1;
 				}
 				break;
@@ -1191,15 +1144,17 @@ int main (int argc, char **argv)
 
 void addChannelToBouquet(const unsigned int bouquet, const t_channel_id channel_id)
 {
-	printf("addChannelToBouquet(%d, %d)\n", bouquet, channel_id);
+	DBG("addChannelToBouquet(%d, %d)", bouquet, channel_id);
+
 	CZapitChannel* chan = bouquetManager->findChannelByChannelID(channel_id);
+
 	if (chan != NULL)
 		if (bouquet < bouquetManager->Bouquets.size())
 			bouquetManager->Bouquets[bouquet]->addService(chan);
 		else
-			printf("bouquet not found!\n");
+			WARN("bouquet not found");
 	else
-		printf("channel_id not found in channellist!\n");
+		WARN("channel_id not found in channellist");
 }
 
 void sendBouquets(int connfd, const bool emptyBouquetsToo)
@@ -1223,7 +1178,7 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo)
 				msgBouquet.hidden     = bouquetManager->Bouquets[i]->bHidden;
 				if (send(connfd, &msgBouquet, sizeof(msgBouquet),0) == -1)
 				{
-					perror("[zapit] could not send any return\n");
+					ERROR("could not send any return");
 					return;
 				}
 			}
@@ -1245,7 +1200,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 
 		if (send(connfd, &response, sizeof(response),0) == -1)
 		{
-			perror("[zapit] could not send any return\n");
+			ERROR("could not send any return");
 			return;
 		}
 	}
@@ -1263,7 +1218,7 @@ void sendAPIDs(int connfd)
 
 		if (send(connfd, &response, sizeof(response),0) == -1)
 		{
-			perror("[zapit] could not send any return\n");
+			ERROR("could not send any return");
 			return;
 		}
 	}
@@ -1274,7 +1229,7 @@ void sendBouquetChannels(int connfd, const unsigned int bouquet, const CZapitCli
 {
 	if (bouquet >= bouquetManager->Bouquets.size())
 	{
-		printf("[zapit] invalid bouquet number: %d", bouquet);
+		WARN("invalid bouquet number: %d", bouquet);
 		return;
 	}
 
@@ -1325,19 +1280,19 @@ int startPlayBack()
 		return -1;
 
 	if ((dmx_pcr_fd == -1) && (dmx_pcr_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
-		perror("[zapit] " DEMUX_DEVICE);
+		ERROR(DEMUX_DEVICE);
 		return -1;
 	}
 	if ((dmx_audio_fd == -1) && (dmx_audio_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
-		perror("[zapit] " DEMUX_DEVICE);
+		ERROR(DEMUX_DEVICE);
 		return -1;
 	}
 	if ((dmx_video_fd == -1) && (dmx_video_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
-		perror("[zapit] " DEMUX_DEVICE);
+		ERROR(DEMUX_DEVICE);
 		return -1;
 	}
 	if ((dmx_teletext_fd == -1) && (dmx_teletext_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
-		perror("[zapit] " DEMUX_DEVICE);
+		ERROR(DEMUX_DEVICE);
 		return -1;
 	}
 
@@ -1386,18 +1341,26 @@ int startPlayBack()
 	}
 
 	/* start demux filters */
-	if (have_pcr)
+	if (have_pcr) {
+		INFO("pcr dmx start");
 		if (startDmxFilter(dmx_pcr_fd) < 0)
 			return -1;
-	if (have_audio)
+	}
+	if (have_audio) {
+		INFO("audio dmx start");
 		if (startDmxFilter(dmx_audio_fd) < 0)
 			return -1;
-	if (have_video)
+	}
+	if (have_video) {
+		INFO("video dmx start");
 		if (startDmxFilter(dmx_video_fd) < 0)
 			return -1;
-	if (have_teletext)
+	}
+	if (have_teletext) {
+		INFO("teletext dmx start");
 		if (startDmxFilter(dmx_teletext_fd) < 0)
 			return -1;
+	}
 
 	return 0;
 }
@@ -1422,7 +1385,7 @@ unsigned zapTo(const unsigned int bouquet, const unsigned int channel)
 {
 	if (bouquet >= bouquetManager->Bouquets.size())
 	{
-		printf("[zapit] Invalid bouquet %d\n", bouquet);
+		WARN("Invalid bouquet %d", bouquet);
 		return CZapitClient::ZAP_INVALID_PARAM;
 	}
 
@@ -1435,7 +1398,7 @@ unsigned zapTo(const unsigned int bouquet, const unsigned int channel)
 
 	if (channel >= channels->size())
 	{
-		printf("[zapit] Invalid channel %d in bouquet %d\n", channel, bouquet);
+		WARN("Invalid channel %d in bouquet %d", channel, bouquet);
 		return CZapitClient::ZAP_INVALID_PARAM;
 	}
 

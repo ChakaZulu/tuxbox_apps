@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.40 2002/11/02 17:21:16 obi Exp $
+ * $Id: pat.cpp,v 1.41 2002/11/18 00:27:57 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -29,6 +29,7 @@
 
 #include <zapit/client/zapitclient.h>
 #include <zapit/dmx.h>
+#include <zapit/debug.h>
 #include <zapit/pat.h>
 #include <zapit/scan.h>
 
@@ -104,7 +105,7 @@ int parse_pat (const int demux_fd, CZapitChannel * channel, const t_original_net
 		/* read section */
 		if ((status = read(demux_fd, buffer, PAT_SIZE)) < 0)
 		{
-			perror("[pat.cpp] read");
+			ERROR("read");
 			return status;
 		}
 

@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.11 2002/11/02 17:21:15 obi Exp $
+ * $Id: dmx.cpp,v 1.12 2002/11/18 00:27:57 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -24,6 +24,7 @@
 #include <sys/ioctl.h>
 
 #include <zapit/dmx.h>
+#include <zapit/debug.h>
 
 int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigned char * mask)
 {
@@ -213,7 +214,7 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 
 	if (ioctl(fd, DMX_SET_FILTER, &sctFilterParams) < 0)
 	{
-		perror("[dmx.cpp] DMX_SET_FILTER");
+		ERROR("DMX_SET_FILTER");
 		return -1;
 	}
 
@@ -244,7 +245,7 @@ int setDmxPesFilter (int fd, dmx_output_t output, dmx_pes_type_t pes_type, unsig
 
 	if (ioctl(fd, DMX_SET_PES_FILTER, &pesFilterParams) < 0)
 	{
-		perror("[dmx.cpp] DMX_SET_PES_FILTER");
+		ERROR("DMX_SET_PES_FILTER");
 		return -1;
 	}
 
@@ -258,7 +259,7 @@ int startDmxFilter (int fd)
 
 	if (ioctl(fd, DMX_START) < 0)
 	{
-		perror("[dmx.cpp] DMX_START");
+		ERROR("DMX_START");
 		return -1;
 	}
 
@@ -272,7 +273,7 @@ int stopDmxFilter (int fd)
 
 	if (ioctl(fd, DMX_STOP) < 0)
 	{
-		perror("[dmx.cpp] DMX_STOP");
+		ERROR("DMX_STOP");
 		return -1;
 	}
 

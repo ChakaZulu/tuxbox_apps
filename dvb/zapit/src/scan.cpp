@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.82 2002/11/02 17:21:15 obi Exp $
+ * $Id: scan.cpp,v 1.83 2002/11/18 00:27:56 obi Exp $
  */
 
 #include <fcntl.h>
@@ -13,6 +13,7 @@
 #include <zapit/bat.h>
 #include <zapit/bouquets.h>
 #include <zapit/client/zapitclient.h>
+#include <zapit/debug.h>
 #include <zapit/frontend.h>
 #include <zapit/nit.h>
 #include <zapit/pat.h>
@@ -125,7 +126,8 @@ int get_sdts()
 		if (!frontend->tuneFrequency(&tI->second.feparams, tI->second.polarization, tI->second.DiSEqC))
 			continue;
 
-		printf("[scan.cpp] parsing SDT (tsid:onid %04x:%04x)\n", tI->second.transport_stream_id, tI->second.original_network_id);
+		INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
+
 		parse_sdt(tI->second.DiSEqC);
 	}
 
@@ -138,7 +140,7 @@ FILE *write_xml_header (const char *filename)
 
 	if (fd == NULL)
 	{
-		perror("[scan.cpp] fopen");
+		ERROR(filename);
 		stop_scan();
 		pthread_exit(0);
 	}
@@ -161,12 +163,12 @@ int write_xml_footer(FILE *fd)
 void write_bouquets()
 {
 	if (bouquetMode == CZapitClient::BM_DELETEBOUQUETS) {
-		printf("[zapit] removing existing bouquets.\n");
+		INFO("removing existing bouquets");
 		unlink(BOUQUETS_XML);
 	}
 
 	else if ((bouquetMode == CZapitClient::BM_DONTTOUCHBOUQUETS))
-		printf("[zapit] leaving bouquets untouched.\n");
+		INFO("leaving bouquets untouched");
 
 	else
 		scanBouquetManager->saveBouquets();
@@ -286,15 +288,15 @@ void *start_scanthread(void *param)
 	scanBouquetManager = new CBouquetManager();
 
 	curr_sat = 0;
+
 	if ((frontend == NULL) || (frontend->isInitialized() == false))
 	{
-		printf("[scan.cpp] unable not scan without a frontend \n");
+		WARN("unable to scan without a frontend");
 		stop_scan();
 		pthread_exit(0);
 	}
 
-	switch (frontend->getInfo()->type)
-	{
+	switch (frontend->getInfo()->type) {
 	case FE_QPSK:	/* satellite frontend */
 		strcpy(type, "sat");
 		modulation = 0;
@@ -326,9 +328,7 @@ void *start_scanthread(void *param)
 		for (spI = scanProviders.begin(); spI != scanProviders.end(); spI++)
 		{
 			if (!strcmp(spI->second.c_str(), providerName))
-			{
 				break;
-			}
 		}
 
 		/* provider is not wanted - jump to the next one */
@@ -408,7 +408,7 @@ void *start_scanthread(void *param)
 			{
 				if (scI->second.getServiceType() != stI->second)
 				{
-					printf("[scan.cpp] setting service_type of channel_id " PRINTF_CHANNEL_ID_TYPE " from %02x to %02x\n",
+					INFO("setting service_type of channel_id " PRINTF_CHANNEL_ID_TYPE " from %02x to %02x",
 							stI->first,
 							scI->second.getServiceType(),
 							stI->second);
@@ -437,7 +437,7 @@ void *start_scanthread(void *param)
 	}
 
 	/* report status */
-	printf("[scan.cpp] found %d transponders and %d channels\n", found_transponders, found_channels);
+	INFO("found %d transponders and %d channels", found_transponders, found_channels);
 
 	/* load new services */
 	CZapitClient myZapitClient;

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.33 2002/11/05 21:33:43 obi Exp $
+ * $Id: frontend.cpp,v 1.34 2002/11/18 00:27:57 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -34,6 +34,7 @@
 #include <iostream>
 
 /* zapit */
+#include <zapit/debug.h>
 #include <zapit/frontend.h>
 #include <zapit/getservices.h>
 #include <zapit/nit.h>
@@ -44,7 +45,7 @@
 #define DVB_IOCTL(cmd, arg)				\
 	do { 						\
 		if (ioctl(fd, cmd, arg) < 0) {		\
-			perror(__PRETTY_FUNCTION__);	\
+			ERROR("ioctl");			\
 			failed = true;			\
 		}					\
 		else {					\
@@ -75,11 +76,11 @@ CFrontend::CFrontend ()
 	info = new dvb_frontend_info();
 
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0) {
-		perror(FRONTEND_DEVICE);
+		ERROR(FRONTEND_DEVICE);
 		initialized = false;
 	}
 	else if (ioctl(fd, FE_GET_INFO, info) < 0) {
-		perror("FE_GET_INFO");
+		ERROR("FE_GET_INFO");
 		initialized = false;
 	}
 	else {
@@ -239,7 +240,7 @@ void CFrontend::setFrontend (dvb_frontend_parameters *feparams)
 {
 	tuned = false;
 
-	std::cout << __PRETTY_FUNCTION__ << ": freq " << feparams->frequency << std::endl;
+	INFO("freq %u", feparams->frequency);
 
 	discardEvents();
 
@@ -256,7 +257,7 @@ const dvb_frontend_parameters *CFrontend::getFrontend ()
 	return feparams;
 }
 
-#define TIMEOUT_MAX_MS 3000
+#define TIMEOUT_MAX_MS 5000
 
 struct dvb_frontend_event CFrontend::getEvent ()
 {
@@ -285,24 +286,24 @@ struct dvb_frontend_event CFrontend::getEvent ()
 
 		if (pfd.revents & POLLIN) {
 
-			std::cout << __PRETTY_FUNCTION__ << ": event after " << TIMEOUT_MAX_MS - msec << " milliseconds:" << std::endl;
+			INFO("event after %d milliseconds", TIMEOUT_MAX_MS - msec);
 
 			DVB_IOCTL(FE_GET_EVENT, &event);
 
 			if (event.status & FE_HAS_LOCK) {
 				currentFrequency = event.parameters.frequency;
-				std::cout << __PRETTY_FUNCTION__ << ": FE_HAS_LOCK: freq " << currentFrequency << std::endl;
+				INFO("FE_HAS_LOCK: freq %u", currentFrequency);
 				tuned = true;
 				break;
 			}
 
 			else {
-				std::cout << __PRETTY_FUNCTION__ << ": NO LOCK: " << event.status << std::endl;
+				WARN("NO LOCK: %x", event.status);
 			}
 		}
 
 		else {
-			std::cerr << __PRETTY_FUNCTION__ << ": pfd[0].revents: " << pfd.revents << std::endl;
+			WARN("pfd[0].revents %d", pfd.revents);
 		}
 
 	}
@@ -421,7 +422,7 @@ CFrontend::receiveDiseqcReply (int timeout_ms)
 
 	}
 
-	std::cout << __PRETTY_FUNCTION__ << ": " << status << std::endl;
+	INFO("status: %s", status.c_str());
 
 	return ret;
 }
@@ -432,10 +433,6 @@ CFrontend::sendToneBurst (fe_sec_mini_cmd_t burst)
 {
 	DVB_IOCTL(FE_DISEQC_SEND_BURST, burst);
 	usleep(15 * 1000);
-
-	if (!failed)
-		currentDiseqc = (burst == SEC_MINI_A) ? 0x00 : 0x01;
-
 	return !failed;
 }
 
@@ -583,7 +580,6 @@ CFrontend::tuneFrequency (dvb_frontend_parameters *feparams, uint8_t polarizatio
 	if (info->type == FE_QPSK)
 		feparams->frequency += freq_offset;
 
-
 	return tuned;
 }
 
@@ -602,7 +598,7 @@ CFrontend::setSec (uint8_t sat_no, uint8_t pol, bool high_band, uint32_t frequen
 
 	fe_sec_voltage_t v = pol ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18;
 	fe_sec_tone_mode_t t = high_band ? SEC_TONE_ON : SEC_TONE_OFF;
-	fe_sec_mini_cmd_t b = (sat_no % 2) ? SEC_MINI_B : SEC_MINI_A;
+	fe_sec_mini_cmd_t b = ((sat_no / 4) % 2) ? SEC_MINI_B : SEC_MINI_A;
 
 	/*
 	 * [0] from master, no reply, 1st transmission
@@ -672,6 +668,8 @@ CFrontend::setSec (uint8_t sat_no, uint8_t pol, bool high_band, uint32_t frequen
 		sendToneBurst(b);
 
 	secSetTone(t);
+
+	currentDiseqc = sat_no;
 }
 
 
