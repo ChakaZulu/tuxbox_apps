@@ -71,6 +71,13 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		    mode_standby = 4
 		};
 
+		enum 
+		{
+			streaming_start = 1,
+			streaming_stop = 2,
+			streaming_pause = 3,
+			streaming_resume = 4,
+		};
 
 		struct streaming_commandhead
 		{
@@ -131,6 +138,8 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void standbyMode( bool bOnOff );
 		void setVolume(int key, bool bDoPaint = true);
 		void AudioMute( bool newValue, bool isEvent= false );
+		bool setExternalRecording( int nstreamstatus );
+
 
 		void ExitRun();
 		void RealRun(CMenuWidget &mainSettings);

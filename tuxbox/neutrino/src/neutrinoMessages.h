@@ -51,13 +51,20 @@ struct messages_return
 struct NeutrinoMessages {
 	enum
 	{
-		SHOW_EPG	= CRCInput::RC_Messages + 1,
-		SHOW_INFOBAR= CRCInput::RC_Messages + 2,
-		VCR_ON		= CRCInput::RC_Messages + 3,
-		VCR_OFF		= CRCInput::RC_Messages + 4,
-		STANDBY_ON	= CRCInput::RC_Messages + 5,
-		STANDBY_OFF	= CRCInput::RC_Messages + 6,
-		SHUTDOWN	= CRCInput::RC_Messages + 7,
+		SHOW_EPG	=				CRCInput::RC_Messages + 1,
+		SHOW_INFOBAR=				CRCInput::RC_Messages + 2,
+		VCR_ON		=				CRCInput::RC_Messages + 3,
+		VCR_OFF		=				CRCInput::RC_Messages + 4,
+		STANDBY_ON	=				CRCInput::RC_Messages + 5,
+		STANDBY_OFF	=				CRCInput::RC_Messages + 6,
+		SHUTDOWN	=				CRCInput::RC_Messages + 7,
+		ANNOUNCE_SHUTDOWN =			CRCInput::RC_Messages + 8,
+		ANNOUNCE_ZAPTO =			CRCInput::RC_Messages + 8,
+		ZAPTO =						CRCInput::RC_Messages + 9,
+		ANNUNCE_RECORD =			CRCInput::RC_Messages + 10,
+		RECORD_START =				CRCInput::RC_Messages + 11,
+		RECORD_STOP	=				CRCInput::RC_Messages + 12,
+
 
 		EVT_VOLCHANGED 	= 			CRCInput::RC_Events + 1,
 		EVT_MUTECHANGED	=	 		CRCInput::RC_Events + 2,
