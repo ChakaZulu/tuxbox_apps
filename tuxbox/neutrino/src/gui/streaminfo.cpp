@@ -44,7 +44,7 @@ CStreamInfo::CStreamInfo()
 	width = 350;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
-	height = hheight+10*mheight+ 10;
+	height = hheight+12*mheight+ 10;
 
     x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
@@ -175,21 +175,39 @@ void CStreamInfo::paint()
 			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.audiotype_unknown").c_str());
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
-
 	ypos+= mheight+ 10;
 
-	if ( g_RemoteControl->current_PIDs.PIDs.vpid == 0 )
-		sprintf((char*) buf, "%s: %s", "v_pid", g_Locale->getText("streaminfo.not_available").c_str() );
-	else
-		sprintf((char*) buf, "%s: 0x%x", "v_pid", g_RemoteControl->current_PIDs.PIDs.vpid );
+	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
+
+	//onid
+	sprintf((char*) buf, "%s: 0x%x", "onid", si.onid);
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
+	//sid
+	sprintf((char*) buf, "%s: 0x%x", "sid", si.sid);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	ypos+= mheight;
+
+	//tsid
+	sprintf((char*) buf, "%s: 0x%x", "tsid", si.tsid);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	ypos+= mheight;
+
+	//vpid
+	if ( g_RemoteControl->current_PIDs.PIDs.vpid == 0 )
+		sprintf((char*) buf, "%s: %s", "vpid", g_Locale->getText("streaminfo.not_available").c_str() );
+	else
+		sprintf((char*) buf, "%s: 0x%x", "vpid", g_RemoteControl->current_PIDs.PIDs.vpid );
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	ypos+= mheight;
+
+	//apid	
 	if ( g_RemoteControl->current_PIDs.APIDs.size() == 0 )
-		sprintf((char*) buf, "%s: %s", "a_pid(s)", g_Locale->getText("streaminfo.not_available").c_str() );
+		sprintf((char*) buf, "%s: %s", "apid(s)", g_Locale->getText("streaminfo.not_available").c_str() );
 	else
 	{
-		sprintf((char*) buf, "%s: ", "a_pid(s)" );
+		sprintf((char*) buf, "%s: ", "apid(s)" );
 		for (int i= 0; i< g_RemoteControl->current_PIDs.APIDs.size(); i++)
 		{
 			sprintf((char*) buf2, " 0x%x",  g_RemoteControl->current_PIDs.APIDs[i].pid );
@@ -203,29 +221,11 @@ void CStreamInfo::paint()
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
-	sprintf((char*) buf, "%s: ", "ecm_pid");
-	switch ( g_RemoteControl->current_PIDs.PIDs.ecmpid )
-	{
-		case NONE :
-			strcat((char*) buf, g_Locale->getText("streaminfo.not_crypted").c_str() );
-			break;
-		case INVALID :
-			strcat((char*) buf, g_Locale->getText("streaminfo.ecm_invalid").c_str() );
-			break;
-		default:
-			if ( g_RemoteControl->current_PIDs.PIDs.ecmpid == 0 )
-				sprintf((char*) buf, "%s: %s", "ecm_pid", g_Locale->getText("streaminfo.not_available").c_str() );
-			else
-				sprintf((char*) buf, "%s: 0x%x", "ecm_pid", g_RemoteControl->current_PIDs.PIDs.ecmpid );
-	}
-
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
-	ypos+= mheight;
-
+	//vtxtpid
 	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid == 0 )
-        	sprintf((char*) buf, "%s: %s", "vtxt_pid", g_Locale->getText("streaminfo.not_available").c_str() );
+        	sprintf((char*) buf, "%s: %s", "vtxtpid", g_Locale->getText("streaminfo.not_available").c_str() );
 	else
-        	sprintf((char*) buf, "%s: 0x%x", "vtxt_pid", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
+        	sprintf((char*) buf, "%s: 0x%x", "vtxtpid", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 }
