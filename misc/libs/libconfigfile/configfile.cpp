@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.8 2002/08/30 18:09:48 dirch Exp $
+ * $Id: configfile.cpp,v 1.9 2002/08/31 00:23:38 dirch Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -146,38 +146,6 @@ void CConfigFile::setInt (string p_keyName, int p_keyValue)
 		modifiedFlag = true;
 		char * configDataChar = (char *) malloc(sizeof(p_keyValue));
 		sprintf(configDataChar, "%d", p_keyValue);
-		configData[p_keyName] = string(configDataChar);
-		free(configDataChar);
-	}
-
-	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
-}
-
-long CConfigFile::getLong (string p_keyName, const long int defaultValue)
-{
-	if (configData.find(p_keyName) == configData.end())
-	{
-		unknownKeyQueryedFlag = true;
-		char * configDataChar = (char *) malloc(sizeof(defaultValue));
-		sprintf(configDataChar, "%ld", defaultValue);
-		configData[p_keyName] = string(configDataChar);
-		free(configDataChar);
-	}
-
-	return atol(configData[p_keyName].c_str());
-}
-
-void CConfigFile::setLong (string p_keyName, const long p_keyValue)
-{
-	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
-	unknownKeyQueryedFlag = false;
-	long oldValue = getLong(p_keyName);
-
-	if ((oldValue != p_keyValue) || (unknownKeyQueryedFlag))
-	{
-		modifiedFlag = true;
-		char * configDataChar = (char *) malloc(sizeof(p_keyValue));
-		sprintf(configDataChar, "%ld", p_keyValue);
 		configData[p_keyName] = string(configDataChar);
 		free(configDataChar);
 	}

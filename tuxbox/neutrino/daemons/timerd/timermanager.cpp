@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.23 2002/08/30 19:11:03 dirch Exp $
+	$Id: timermanager.cpp,v 1.24 2002/08/31 00:24:55 dirch Exp $
 
 	License: GPL
 
@@ -267,9 +267,9 @@ CTimerEvent::CTimerEvent(CTimerEventTypes evtype,CConfigFile *config, int iId)
    stringstream ostr;
    ostr << iId;
    string id=ostr.str();
-   time_t announcetime=config->getLong("ANNOUNCE_TIME_"+id);
-   time_t alarmtime=config->getLong("ALARM_TIME_"+id);
-   time_t stoptime=config->getLong("STOP_TIME_"+id);
+   time_t announcetime=config->getInt("ANNOUNCE_TIME_"+id);
+   time_t alarmtime=config->getInt("ALARM_TIME_"+id);
+   time_t stoptime=config->getInt("STOP_TIME_"+id);
    CTimerEventRepeat evrepeat=(CTimerEventRepeat)config->getInt("EVENT_REPEAT_"+id);
    eventRepeat = evrepeat;
    eventState = TIMERSTATE_SCHEDULED; 
@@ -381,9 +381,9 @@ void CTimerEvent::saveToConfig(CConfigFile *config)
    config->setInt("EVENT_STATE_"+id, eventState);
    config->setInt("PREVIOUS_STATE_"+id, previousState);
    config->setInt("EVENT_REPEAT_"+id, eventRepeat);
-   config->setLong("ANNOUNCE_TIME_"+id, announceTime);
-   config->setLong("ALARM_TIME_"+id, alarmTime);
-   config->setLong("STOP_TIME_"+id, stopTime);
+   config->setInt("ANNOUNCE_TIME_"+id, announceTime);
+   config->setInt("ALARM_TIME_"+id, alarmTime);
+   config->setInt("STOP_TIME_"+id, stopTime);
 
 }
 
