@@ -176,7 +176,7 @@ void enigmaCI::app2Pressed()
 
 enigmaMMI::enigmaMMI(eDVBCI *ci)
 	:eWindow(1), ci(ci), mmi_messages(eApp, 1), open(0),
-	responseTimer(eApp), delayTimer(eApp)
+	responseTimer(eApp), delayTimer(eApp), closeTimer(eApp)
 {
 	eDebug("[enigmaMMI] created successfully");
 	cmove( ePoint(150,140) );
@@ -193,6 +193,7 @@ enigmaMMI::enigmaMMI(eDVBCI *ci)
 	CONNECT( mmi_messages.recv_msg, enigmaMMI::handleMessage );
 	CONNECT(responseTimer.timeout, eWidget::reject);
 	CONNECT(delayTimer.timeout, enigmaMMI::haveScheduledData );
+	CONNECT(closeTimer.timeout, enigmaMMI::closeMMI );
 }
 
 void enigmaMMI::handleMessage( const eMMIMsg &msg )
@@ -272,7 +273,7 @@ void enigmaMMI::showWaitForCIAnswer(int ret)
 		if ( conn.connected() )
 		{
 			show();
-			responseTimer.start(10000);
+			responseTimer.start(10000,true);
 		}
 	}
 }
@@ -294,8 +295,30 @@ void enigmaMMI::haveScheduledData()
 		delete [] data;
 }
 
+void enigmaMMI::closeMMI()
+{
+//	eDebug("closeMMI");
+	if ( open )
+	{
+		open->hide();
+		open->close(-2);
+//		eDebug("open->hide()\nopen->close(-2)");
+		if ( conn.connected() )
+		{
+//			eDebug("conn is connected... start closeTimer");
+			closeTimer.start(2,true);
+		}
+	}
+	else if ( conn.connected() )
+	{
+//		eDebug("close(0)");
+		close(0);
+	}
+}
+
 bool enigmaMMI::handleMMIMessage(const char *data)
 {
+	const unsigned char TAG_MMI_CLOSE[]={0x9F,0x88,0x00};
 	const unsigned char TAG_MMI_DISPLAY_CONTROL[]={0x9F,0x88,0x01};
 	const unsigned char TAG_MMI_TEXT_LAST[]={0x9F,0x88,0x03};
 	const unsigned char TAG_MMI_TEXT_MORE[]={0x9F,0x88,0x04};
@@ -313,24 +336,38 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 	while ( data[rp] != 0x9F || data[rp+1] != 0x88 )
 		rp++;
 
-	if ( open )
+	if( !memcmp(data+rp,TAG_MMI_CLOSE,TAG_LENGTH) )
 	{
-		open->hide();
-		open->close(-2);
-
-		// we must delay executing of the next mmi window while
-		// the open mmi window is still executed... open->close()
-		// set only the app_exit_loop boolean in the mainloop... but
-		// this takes not effect while the mainloop is busy...
-		scheduledData = data;
-		delayTimer.start(1,true);
-
-		return false;
+		rp += 3;
+		if ( *(data+rp) ) // timeout is set
+		{
+			int delay = *(data+rp+1);
+			delay = delay ? delay * 1000 : 1;
+//			eDebug("start closeTimer %d", delay );
+			closeTimer.start( delay, true );
+		}
+		else
+			closeMMI();
 	}
-
-	if( !memcmp(data+rp,TAG_MMI_ENQ,TAG_LENGTH) )
+	else if( !memcmp(data+rp,TAG_MMI_ENQ,TAG_LENGTH) )
 	{
 		eDebug("mmi_enq_last");
+		closeTimer.stop();
+
+		if ( open )
+		{
+			open->hide();
+			open->close(-2);
+			// we must delay executing of the next mmi window while
+			// the open mmi window is still executed... open->close()
+			// set only the app_exit_loop boolean in the mainloop... but
+			// this takes not effect while the mainloop is busy...
+
+			scheduledData = data;
+			delayTimer.start(2,true);
+			return false;
+		}
+
 		rp+=3;
 
 		int LengthBytes;
@@ -352,7 +389,9 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		eDebug("TEXT:%s",text);
 
 		eMMIEnqWindow wnd(text, nrcount, blind );
+		open = &wnd;
 		int ret = wnd.exec();
+		open = 0;
 
 		unsigned char buf[ret == -1 ? 2 : 2 + nrcount];
 		buf[1] = ret == -1 ? 0 : 1; // answer ok.. or user canceled
@@ -366,9 +405,6 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 
 		ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_enqansw, buf));
 
-		if ( conn.connected() && ret == -1 )
-			close(0);
-
 		showWaitForCIAnswer(ret);
 
 		rp+=size;
@@ -377,6 +413,20 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		 memcmp(data+rp,TAG_MMI_LIST_LAST,TAG_LENGTH)==0)
 	{
 		eDebug("mmi_menu_last");
+		closeTimer.stop();
+		if ( open )
+		{
+			open->hide();
+			open->close(-2);
+			// we must delay executing of the next mmi window while
+			// the open mmi window is still executed... open->close()
+			// set only the app_exit_loop boolean in the mainloop... but
+			// this takes not effect while the mainloop is busy...
+
+			scheduledData = data;
+			delayTimer.start(2,true);
+			return false;
+		}
 
 		rp+=3;
 
@@ -447,18 +497,11 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		open = &wnd;
 		int ret = wnd.exec();
 		open = 0;
+		eDebug("ret = %d",ret);
 		if ( ret > -2 )
 		{
 			if ( ret == -1 )
-			{
-				eDebug("ret = -1 this = %p",this);
 				ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,0));
-				if ( conn.connected() )
-				{
-					eDebug("do close");
-					close(0);
-				}
-			}
 			else
 				ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,wnd.getSelected()));
 			showWaitForCIAnswer(ret);
@@ -473,8 +516,8 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 	else
 	{
 		eDebug("unknown MMI_TAG:%02x%02x%02x",data[rp],data[rp+1],data[rp+2]);
-		if ( conn.connected() )
-			close(0);
+		eDebug("CLOSE");
+		closeMMI();
 	}
 
 	return true;

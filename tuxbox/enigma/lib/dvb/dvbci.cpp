@@ -175,8 +175,8 @@ void eDVBCI::mmi_end()
 	unsigned char buffer[10];
 
 //	eDebug("stop mmi");
-	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x00\x1\x0",9);
-	sendTPDU(0xA0,9,1,buffer);
+	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x00\x00",8);
+	sendTPDU(0xA0,8,1,buffer);
 }
 
 void eDVBCI::mmi_enqansw(unsigned char *buf)
@@ -1097,8 +1097,8 @@ void eDVBCI::dataAvailable(int what)
 		memset(appName,0,sizeof(appName));
 		ci_progress(_("no module"));
 
-		char *buf="\x9f\x88\x00";
-		ci_mmi_progress(buf,3);
+		char *buf="\x9f\x88\x00\x00";
+		ci_mmi_progress(buf,4);
 
 		for(int i=0;i<MAX_SESSIONS;i++)
 			sessions[i].state=STATE_FREE;

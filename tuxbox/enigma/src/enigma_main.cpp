@@ -1600,8 +1600,7 @@ eZapMain::eZapMain()
 #ifndef DISABLE_CI
 void eZapMain::receiveMMIMessageCI1( const char* data, int len )
 {
-	if ( !enigmaMMI::getInstance(
-		eDVB::getInstance()->DVBCI)->connected() )
+	if ( !enigmaMMI::getInstance( eDVB::getInstance()->DVBCI)->connected() )
 	{
 		char *dest = new char[len];
 		memcpy( dest, data, len );
@@ -1613,8 +1612,7 @@ void eZapMain::receiveMMIMessageCI1( const char* data, int len )
 
 void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 {
-	if ( !enigmaMMI::getInstance(
-		eDVB::getInstance()->DVBCI2)->connected() )
+	if ( !enigmaMMI::getInstance( eDVB::getInstance()->DVBCI2)->connected() )
 	{
 		char *dest = new char[len];
 		memcpy( dest, data, len );
@@ -1626,14 +1624,17 @@ void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 
 void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 {
+	eDebug("eZapMain::handleMMIMessage");
 	enigmaMMI *p = enigmaMMI::getInstance(msg.from);
 
-	if ( p->connected() && !memcmp( msg.data, "\x9f\x88\x00", 3 ) )
+	if ( !memcmp( msg.data, "\x9f\x88\x00", 3 ) )
 		postMessage(eZapMessage(0), 1);
 
 	if ( !strncmp( msg.data, "INIT", 4 ) )
 	{
-		if ( !p->connected() )  // enigma ci menu open?
+		if ( eApp->looplevel() == 1 && (
+				!eZap::getInstance()->focus ||
+				eZap::getInstance()->focus == this ) )
 			postMessage(eZapMessage(0,"Common Interface",_("please wait while initializing Common Interface ..."),8),0);
 	}
 	else if ( !p->handleMMIMessage( msg.data ) )

@@ -55,9 +55,10 @@ class enigmaMMI : public eWindow
 	eWidget *open;
 	Connection conn;
 	eLabel *lText;
-	eTimer responseTimer, delayTimer;
+	eTimer responseTimer, delayTimer, closeTimer;
 	const char *scheduledData;
 	static std::map<eDVBCI*,enigmaMMI*> exist;
+	void closeMMI();
 public:
 	enigmaMMI(eDVBCI *ci);
 	bool connected() { return conn.connected(); }
