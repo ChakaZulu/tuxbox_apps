@@ -227,7 +227,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, const t_channel_id new
        		frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS);
 		}
 
-		if ( !( info_CurrentNext.flags & ( sectionsd::epgflags::has_later | sectionsd::epgflags::has_current |  sectionsd::epgflags::not_broadcast ) ) )
+		if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_later | CSectionsdClient::epgflags::has_current |  CSectionsdClient::epgflags::not_broadcast ) ) )
 		{
 			// nicht gefunden / noch nicht geladen
 			g_Fonts->infobar_info->RenderString(ChanNameX+ 10, ChanInfoY+ 2* g_Fonts->infobar_info->getHeight()+ 5, BoxEndX- (ChanNameX+ 20), g_Locale->getText(gotTime?(showButtonBar?"infoviewer.epgwait":"infoviewer.epgnotload"):"infoviewer.waittime").c_str(), COL_INFOBAR);
@@ -250,9 +250,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, const t_channel_id new
         }
 
         if ( ( g_RemoteControl->current_channel_id == channel_id) &&
-             !( ( ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) &&
-				    ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_no_current ) ) ) ||
-				    ( info_CurrentNext.flags & sectionsd::epgflags::not_broadcast ) ) )
+             !( ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next ) &&
+				    ( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_no_current ) ) ) ||
+				    ( info_CurrentNext.flags & CSectionsdClient::epgflags::not_broadcast ) ) )
 
         {
 			// EVENT anfordern!
@@ -519,7 +519,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
     if ( ( msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG ) ||
 		 ( msg == NeutrinoMessages::EVT_NEXTPROGRAM ) )
 	{
-		sectionsd::CurrentNextInfo info = getEPG( data );
+		CSectionsdClient::CurrentNextInfo info = getEPG( data );
 
 		if ( ( is_visible ) && ( data == channel_id) )
 		{
@@ -639,17 +639,17 @@ void CInfoViewer::showButton_SubServices()
 	}
 }
 
-sectionsd::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_channel_id)
+CSectionsdClient::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_channel_id)
 {
-	sectionsd::CurrentNextInfo info;
+	CSectionsdClient::CurrentNextInfo info;
 
 	g_Sectionsd->getCurrentNextServiceKey(for_channel_id, info );
 
-	if ( info.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_next ) )
+	if ( info.flags & ( CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_next ) )
 	{
-		sectionsd::CurrentNextInfo*	_info = new sectionsd::CurrentNextInfo;
+		CSectionsdClient::CurrentNextInfo*	_info = new CSectionsdClient::CurrentNextInfo;
 		*_info = info;
-		g_RCInput->postMsg( ( info.flags & ( sectionsd::epgflags::has_current ) )? NeutrinoMessages::EVT_CURRENTEPG : NeutrinoMessages::EVT_NEXTEPG, (unsigned) _info, false );
+		g_RCInput->postMsg( ( info.flags & ( CSectionsdClient::epgflags::has_current ) )? NeutrinoMessages::EVT_CURRENTEPG : NeutrinoMessages::EVT_NEXTEPG, (unsigned) _info, false );
 	}
 	else
 		g_RCInput->postMsg( NeutrinoMessages::EVT_NOEPG_YET, for_channel_id, false );
@@ -681,8 +681,8 @@ void CInfoViewer::show_Data( bool calledFromEvent)
         }
         else
         {
-        	if ( ( info_CurrentNext.flags & sectionsd::epgflags::has_current) &&
-        		 ( info_CurrentNext.flags & sectionsd::epgflags::has_next) &&
+        	if ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current) &&
+        		 ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next) &&
         		 ( showButtonBar ) )
         	{
         		if ( (uint) info_CurrentNext.next_zeit.startzeit < ( info_CurrentNext.current_zeit.startzeit+ info_CurrentNext.current_zeit.dauer ) )
@@ -694,7 +694,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 
 		time_t jetzt=time(NULL);
 
-		if ( info_CurrentNext.flags & sectionsd::epgflags::has_current)
+		if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 		{
 			int rest = ( (info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer) - jetzt ) / 60;
 
@@ -716,7 +716,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 
 		}
 
-		if ( info_CurrentNext.flags & sectionsd::epgflags::has_next)
+		if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next)
 		{
 			unsigned dauer = info_CurrentNext.next_zeit.dauer/ 60;
 			sprintf( (char*)&nextDuration, "%d min", dauer);
@@ -733,7 +733,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 			int posy = BoxStartY+12;
 			int height2= 20;
         	//percent
-			if ( info_CurrentNext.flags & sectionsd::epgflags::has_current)
+			if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 			{
 				frameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
 				frameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
@@ -742,7 +742,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 			else
 				frameBuffer->paintBackgroundBoxRel(BoxEndX-114, posy,   2+100+2, height2);
 
-			if ( info_CurrentNext.flags & sectionsd::epgflags::has_anything )
+			if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_anything )
 			{
 				frameBuffer->paintIcon("rot.raw", BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 				g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR_BUTTONS);
@@ -754,8 +754,8 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 
 		frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
-		if ( ( info_CurrentNext.flags & sectionsd::epgflags::not_broadcast ) ||
-			 ( ( calledFromEvent ) && !( info_CurrentNext.flags & ( sectionsd::epgflags::has_next | sectionsd::epgflags::has_current ) ) ) )
+		if ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::not_broadcast ) ||
+			 ( ( calledFromEvent ) && !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_next | CSectionsdClient::epgflags::has_current ) ) ) )
 		{
 			// kein EPG verfügbar
 			ChanInfoY += height;
@@ -771,7 +771,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 			int duration2Width   = g_Fonts->infobar_info->getRenderWidth(nextDuration);
 			int duration2TextPos = BoxEndX- duration2Width- 10;
 
-			if ( ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) && ( !( info_CurrentNext.flags & sectionsd::epgflags::has_current )) )
+			if ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next ) && ( !( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current )) )
 			{
 				// spätere Events da, aber kein aktuelles...
 				g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, BoxEndX- xStart, g_Locale->getText("infoviewer.nocurrent").c_str(), COL_INFOBAR);
@@ -796,7 +796,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 				//info next
 				frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
-				if ( ( !is_nvod ) && ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) )
+				if ( ( !is_nvod ) && ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next ) )
 				{
 					g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
 					g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, duration2TextPos- xStart- 5, info_CurrentNext.next_name, COL_INFOBAR);

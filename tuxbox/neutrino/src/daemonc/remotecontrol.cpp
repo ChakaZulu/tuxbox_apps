@@ -127,7 +127,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 
     if ( msg == NeutrinoMessages::EVT_CURRENTEPG )
 	{
-		sectionsd::CurrentNextInfo* info_CN = (sectionsd::CurrentNextInfo*) data;
+		CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
 
 		if ( ( info_CN->current_uniqueKey >> 16) == current_channel_id )
 		{
@@ -151,7 +151,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 				if ( has_unresolved_ctags )
 					processAPIDnames();
 
-				if ( info_CN->flags & sectionsd::epgflags::current_has_linkagedescriptors )
+				if ( info_CN->flags & CSectionsdClient::epgflags::current_has_linkagedescriptors )
 					getSubChannels();
 
 				if ( needs_nvods )
@@ -173,7 +173,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 	}
 	else if ( msg == NeutrinoMessages::EVT_NEXTEPG )
 	{
-		sectionsd::CurrentNextInfo* info_CN = (sectionsd::CurrentNextInfo*) data;
+		CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
 
 		if ( ( info_CN->next_uniqueKey >> 16) == current_channel_id )
 		{
@@ -250,7 +250,7 @@ void CRemoteControl::getSubChannels()
 {
 	if ( subChannels.size() == 0 )
 	{
-		sectionsd::LinkageDescriptorList	linkedServices;
+		CSectionsdClient::LinkageDescriptorList	linkedServices;
 		if ( g_Sectionsd->getLinkageDescriptorsUniqueKey( current_EPGid, linkedServices ) )
 		{
 			if ( linkedServices.size()> 1 )
@@ -274,7 +274,7 @@ void CRemoteControl::getNVODs()
 {
 	if ( subChannels.size() == 0 )
 	{
-		sectionsd::NVODTimesList	NVODs;
+		CSectionsdClient::NVODTimesList	NVODs;
 		if ( g_Sectionsd->getNVODTimesServiceKey( current_channel_id, NVODs ) )
 		{
 			are_subchannels = false;
@@ -345,7 +345,7 @@ void CRemoteControl::processAPIDnames()
 	{
 		if ( current_EPGid != 0 )
 		{
-			sectionsd::ComponentTagList tags;
+			CSectionsdClient::ComponentTagList tags;
 			if ( g_Sectionsd->getComponentTagsUniqueKey( current_EPGid, tags ) )
 			{
 				has_unresolved_ctags = false;

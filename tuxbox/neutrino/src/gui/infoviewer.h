@@ -33,7 +33,7 @@
 #ifndef __infoview__
 #define __infoview__
 
-#include <sectionsdclient/sectionsdMsg.h>
+#include <sectionsdclient/sectionsdclient.h>
 
 #include <driver/rcinput.h>
 #include <driver/framebuffer.h>
@@ -69,7 +69,7 @@ class CInfoViewer
 		int		ChanInfoX;
 
 		string	CurrentChannel;
-		sectionsd::CurrentNextInfo	info_CurrentNext;
+		CSectionsdClient::CurrentNextInfo	info_CurrentNext;
         t_channel_id	channel_id;
 
 		char	aspectRatio;
@@ -100,7 +100,7 @@ class CInfoViewer
 
 		void	showTitle( int ChanNum, string Channel, const t_channel_id new_channel_id = 0, bool calledFromNumZap = false );
 		void	killTitle();
-		sectionsd::CurrentNextInfo	getEPG(const t_channel_id for_channel_id);
+		CSectionsdClient::CurrentNextInfo	getEPG(const t_channel_id for_channel_id);
 
 		void	showSubchan();
 		void	Set_CA_Status(int Status);

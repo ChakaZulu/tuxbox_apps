@@ -382,7 +382,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		}
 
 		CSectionsdClient sections;
-		sectionsd::responseGetCurrentNextInfoChannelID current_next;
+		CSectionsdClient::responseGetCurrentNextInfoChannelID current_next;
 		if(sections.getCurrentNextServiceKey(channel_id, current_next))
 		{
 			extEPGTitle=current_next.current_name;

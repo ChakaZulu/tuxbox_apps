@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.30 2002/12/08 10:46:11 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.31 2002/12/09 20:07:52 thegoodguy Exp $
 
   License: GPL
 
@@ -23,16 +23,10 @@
 
 #include <stdio.h>
 
-//#include <netinet/in.h>
-//#include <netinet/in_systm.h>
-//#include <netinet/ip.h>
-//#include <netdb.h>
-//#include <arpa/inet.h>
-
-
 #include <eventserver.h>
-#include <sectionsdclient/sectionsdMsg.h>
+
 #include <sectionsdclient/sectionsdclient.h>
+#include <sectionsdclient/sectionsdMsg.h>
 
 
 const unsigned char   CSectionsdClient::getVersion   () const
@@ -81,7 +75,7 @@ bool CSectionsdClient::send(const unsigned char command, const char* data, const
         return true;
 }
 
-void CSectionsdClient::registerEvent(const unsigned int eventID, const unsigned int clientID, const string udsName)
+void CSectionsdClient::registerEvent(const unsigned int eventID, const unsigned int clientID, const std::string udsName)
 {
 	CEventServer::commandRegisterEvent msg2;
 
@@ -168,7 +162,7 @@ void CSectionsdClient::setServiceChanged(const t_channel_id channel_id, const bo
 }
 
 
-bool CSectionsdClient::getComponentTagsUniqueKey( unsigned long long uniqueKey, sectionsd::ComponentTagList& tags )
+bool CSectionsdClient::getComponentTagsUniqueKey(const unsigned long long uniqueKey, CSectionsdClient::ComponentTagList& tags)
 {
 	if (send(sectionsd::ComponentTagsUniqueKey, (char*)&uniqueKey, sizeof(uniqueKey)))
 	{
@@ -183,7 +177,7 @@ bool CSectionsdClient::getComponentTagsUniqueKey( unsigned long long uniqueKey, 
 		int	count= *(int *) pData;
 		dp+= sizeof(int);
 
-		sectionsd::responseGetComponentTags response;
+		CSectionsdClient::responseGetComponentTags response;
 		for (int i= 0; i<count; i++)
 		{
 			response.component = dp;
@@ -208,7 +202,7 @@ bool CSectionsdClient::getComponentTagsUniqueKey( unsigned long long uniqueKey, 
 	}
 }
 
-bool CSectionsdClient::getLinkageDescriptorsUniqueKey( unsigned long long uniqueKey, sectionsd::LinkageDescriptorList& descriptors )
+bool CSectionsdClient::getLinkageDescriptorsUniqueKey(const unsigned long long uniqueKey, CSectionsdClient::LinkageDescriptorList& descriptors)
 {
 	if (send(sectionsd::LinkageDescriptorsUniqueKey, (char*)&uniqueKey, sizeof(uniqueKey)))
 	{
@@ -223,7 +217,7 @@ bool CSectionsdClient::getLinkageDescriptorsUniqueKey( unsigned long long unique
 		int	count= *(int *) pData;
 		dp+= sizeof(int);
 
-		sectionsd::responseGetLinkageDescriptors response;
+		CSectionsdClient::responseGetLinkageDescriptors response;
 		for (int i= 0; i<count; i++)
 		{
 			response.name = dp;
@@ -247,7 +241,7 @@ bool CSectionsdClient::getLinkageDescriptorsUniqueKey( unsigned long long unique
 	}
 }
 
-bool CSectionsdClient::getNVODTimesServiceKey(const t_channel_id channel_id, sectionsd::NVODTimesList& nvod_list )
+bool CSectionsdClient::getNVODTimesServiceKey(const t_channel_id channel_id, CSectionsdClient::NVODTimesList& nvod_list)
 {
 	if (send(sectionsd::timesNVODservice, (char*)&channel_id, sizeof(channel_id)))
 	{
@@ -259,14 +253,14 @@ bool CSectionsdClient::getNVODTimesServiceKey(const t_channel_id channel_id, sec
 		receive_data(pData, nBufSize);
 		char* dp = pData;
 
-		sectionsd::responseGetNVODTimes response;
+		CSectionsdClient::responseGetNVODTimes response;
 
 		while( dp< pData+ nBufSize )
 		{
 			response.service_id = *(t_service_id *) dp;			dp += sizeof(t_service_id);
 			response.original_network_id = *(t_original_network_id *) dp;	dp += sizeof(t_original_network_id);
 			response.transport_stream_id = *(t_transport_stream_id *) dp;	dp += sizeof(t_transport_stream_id);
-			response.zeit = *(sectionsd::sectionsdTime*) dp;		dp += sizeof(sectionsd::sectionsdTime);
+			response.zeit = *(CSectionsdClient::sectionsdTime*) dp;		dp += sizeof(CSectionsdClient::sectionsdTime);
 
 			nvod_list.insert( nvod_list.end(), response);
 		}
@@ -281,7 +275,7 @@ bool CSectionsdClient::getNVODTimesServiceKey(const t_channel_id channel_id, sec
 }
 
 
-bool CSectionsdClient::getCurrentNextServiceKey(const t_channel_id channel_id, sectionsd::responseGetCurrentNextInfoChannelID& current_next )
+bool CSectionsdClient::getCurrentNextServiceKey(const t_channel_id channel_id, CSectionsdClient::responseGetCurrentNextInfoChannelID& current_next)
 {
 	if (send(sectionsd::currentNextInformationID, (char*)&channel_id, sizeof(channel_id)))
 	{
@@ -294,16 +288,16 @@ bool CSectionsdClient::getCurrentNextServiceKey(const t_channel_id channel_id, s
 		// current
 		current_next.current_uniqueKey = *((unsigned long long *)dp);
 		dp+= sizeof(unsigned long long);
-		current_next.current_zeit = *(sectionsd::sectionsdTime*) dp;
-		dp+= sizeof(sectionsd::sectionsdTime);
+		current_next.current_zeit = *(CSectionsdClient::sectionsdTime*) dp;
+		dp+= sizeof(CSectionsdClient::sectionsdTime);
 		current_next.current_name = dp;
 		dp+=strlen(dp)+1;
 
 		// next
 		current_next.next_uniqueKey = *((unsigned long long *)dp);
 		dp+= sizeof(unsigned long long);
-		current_next.next_zeit = *(sectionsd::sectionsdTime*) dp;
-		dp+= sizeof(sectionsd::sectionsdTime);
+		current_next.next_zeit = *(CSectionsdClient::sectionsdTime*) dp;
+		dp+= sizeof(CSectionsdClient::sectionsdTime);
 		current_next.next_name = dp;
 		dp+=strlen(dp)+1;
 
@@ -443,9 +437,9 @@ bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEP
 			dp+=strlen(dp)+1;
 			epgdata->fsk = *dp++;
 
-			epgdata->epg_times.startzeit = ((sectionsd::sectionsdTime *) dp)->startzeit;
-			epgdata->epg_times.dauer = ((sectionsd::sectionsdTime *) dp)->dauer;
-			dp+= sizeof(sectionsd::sectionsdTime);
+			epgdata->epg_times.startzeit = ((CSectionsdClient::sectionsdTime *) dp)->startzeit;
+			epgdata->epg_times.dauer = ((CSectionsdClient::sectionsdTime *) dp)->dauer;
+			dp+= sizeof(CSectionsdClient::sectionsdTime);
 
 			delete[] pData;
 			return true;
@@ -494,9 +488,9 @@ bool CSectionsdClient::getEPGid(const unsigned long long eventid, const time_t s
 			dp+=strlen(dp)+1;
 			epgdata->fsk = *dp++;
 
-			epgdata->epg_times.startzeit = ((sectionsd::sectionsdTime *) dp)->startzeit;
-			epgdata->epg_times.dauer = ((sectionsd::sectionsdTime *) dp)->dauer;
-			dp+= sizeof(sectionsd::sectionsdTime);
+			epgdata->epg_times.startzeit = ((CSectionsdClient::sectionsdTime *) dp)->startzeit;
+			epgdata->epg_times.dauer = ((CSectionsdClient::sectionsdTime *) dp)->dauer;
+			dp+= sizeof(CSectionsdClient::sectionsdTime);
 
 			delete[] pData;
 			return true;

@@ -39,8 +39,6 @@
 
 #include <zapit/client/zapitclient.h>
 
-#include <sectionsdclient/sectionsdMsg.h>
-
 
 using namespace std;
 

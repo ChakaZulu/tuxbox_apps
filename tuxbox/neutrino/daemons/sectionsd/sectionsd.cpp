@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.147 2002/12/08 17:40:53 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.148 2002/12/09 20:07:52 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -148,7 +148,7 @@ inline void unlockEvents(void)
 
 static long long last_profile_call;
 
-void showProfiling( string text )
+void showProfiling( std::string text )
 {
 
 	struct timeval tv;
@@ -1110,20 +1110,20 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id se
 		if (SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID) == serviceUniqueKey)
 		{
 			if (flag != 0)
-				*flag |= sectionsd::epgflags::has_anything; // überhaupt was da...
+				*flag |= CSectionsdClient::epgflags::has_anything; // überhaupt was da...
 
 			for (SItimes::reverse_iterator t = e->first->times.rend(); t != e->first->times.rbegin(); t--)
 				if ((long)(azeit + plusminus) < (long)(t->startzeit + t->dauer))
 				{
 					if (flag != 0)
-						*flag |= sectionsd::epgflags::has_later; // spätere events da...
+						*flag |= CSectionsdClient::epgflags::has_later; // spätere events da...
 
 					if (t->startzeit <= (long)(azeit + plusminus))
 					{
 						//printf("azeit %d, startzeit+t->dauer %d \n", azeit, (long)(t->startzeit+t->dauer) );
 
 						if (flag != 0)
-							*flag |= sectionsd::epgflags::has_current; // aktuelles event da...
+							*flag |= CSectionsdClient::epgflags::has_current; // aktuelles event da...
 
 						zeit = *t;
 
@@ -1624,7 +1624,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.147 2002/12/08 17:40:53 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.148 2002/12/09 20:07:52 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2103,7 +2103,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 			if ( /*( !si->second->eitScheduleFlag() ) || */
 			    ( !si->second->eitPresentFollowingFlag() ) )
 			{
-				flag |= sectionsd::epgflags::not_broadcast;
+				flag |= CSectionsdClient::epgflags::not_broadcast;
 			}
 		}
 	}
@@ -2123,7 +2123,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 		for (unsigned int i = 0; i < evt.linkage_descs.size(); i++)
 			if (evt.linkage_descs[i].linkageType == 0xB0)
 			{
-				flag |= sectionsd::epgflags::current_has_linkagedescriptors;
+				flag |= CSectionsdClient::epgflags::current_has_linkagedescriptors;
 				break;
 			}
 
@@ -2131,7 +2131,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 		nextEvt = findNextSIevent(evt.uniqueKey(), zeitEvt2);
 	}
 	else
-		if ( flag & sectionsd::epgflags::has_anything )
+		if ( flag & CSectionsdClient::epgflags::has_anything )
 		{
 
 			nextEvt = findNextSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt2);
@@ -2150,7 +2150,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 
 						if ( ( eFirst->second->times.begin()->startzeit < azeit ) &&
 						        ( eFirst->second->uniqueKey() == (nextEvt.uniqueKey() - 1) ) )
-							flag |= sectionsd::epgflags::has_no_current;
+							flag |= CSectionsdClient::epgflags::has_no_current;
 					}
 				}
 			}
@@ -2159,18 +2159,18 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	if (nextEvt.serviceID != 0)
 	{
 		dprintf("[sectionsd] next EPG found.\n");
-		flag |= sectionsd::epgflags::has_next;
+		flag |= CSectionsdClient::epgflags::has_next;
 	}
 
 	nResultDataSize =
 	    sizeof(unsigned long long) +        	// Unique-Key
-	    sizeof(sectionsd::sectionsdTime) +  	// zeit
-	    strlen(evt.name.c_str()) + 1 + 	  		// name + 0
+	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
+	    strlen(evt.name.c_str()) + 1 + 		// name + 0
 	    sizeof(unsigned long long) +        	// Unique-Key
-	    sizeof(sectionsd::sectionsdTime) +  	// zeit
+	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
 	    strlen(nextEvt.name.c_str()) + 1 +    	// name + 0
-	    sizeof(unsigned) + 					// flags
-	    1									// CurrentFSK
+	    sizeof(unsigned) + 				// flags
+	    1						// CurrentFSK
 	    ;
 
 	pResultData = new char[nResultDataSize];
@@ -2186,19 +2186,19 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	char *p = pResultData;
 	*((unsigned long long *)p) = evt.uniqueKey();
 	p += sizeof(unsigned long long);
-	sectionsd::sectionsdTime zeit;
+	CSectionsdClient::sectionsdTime zeit;
 	zeit.startzeit = zeitEvt1.startzeit;
 	zeit.dauer = zeitEvt1.dauer;
-	*((sectionsd::sectionsdTime *)p) = zeit;
-	p += sizeof(sectionsd::sectionsdTime);
+	*((CSectionsdClient::sectionsdTime *)p) = zeit;
+	p += sizeof(CSectionsdClient::sectionsdTime);
 	strcpy(p, evt.name.c_str());
 	p += strlen(evt.name.c_str()) + 1;
 	*((unsigned long long *)p) = nextEvt.uniqueKey();
 	p += sizeof(unsigned long long);
 	zeit.startzeit = zeitEvt2.startzeit;
 	zeit.dauer = zeitEvt2.dauer;
-	*((sectionsd::sectionsdTime *)p) = zeit;
-	p += sizeof(sectionsd::sectionsdTime);
+	*((CSectionsdClient::sectionsdTime *)p) = zeit;
+	p += sizeof(CSectionsdClient::sectionsdTime);
 	strcpy(p, nextEvt.name.c_str());
 	p += strlen(nextEvt.name.c_str()) + 1;
 	*((unsigned*)p) = flag;
@@ -2251,7 +2251,7 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 		    strlen(e.contentClassification.c_str()) + 1 + 		// Text + del
 		    strlen(e.userClassification.c_str()) + 1 + 	// ext + del
 		    1 +                                   // fsk
-		    sizeof(sectionsd::sectionsdTime); // zeit
+		    sizeof(CSectionsdClient::sectionsdTime); // zeit
 	}
 	else
 		responseHeader.dataLength =
@@ -2288,11 +2288,11 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 		*p = e.getFSK();
 		p++;
 
-		sectionsd::sectionsdTime zeit;
+		CSectionsdClient::sectionsdTime zeit;
 		zeit.startzeit = t.startzeit;
 		zeit.dauer = t.dauer;
-		*((sectionsd::sectionsdTime *)p) = zeit;
-		p += sizeof(sectionsd::sectionsdTime);
+		*((CSectionsdClient::sectionsdTime *)p) = zeit;
+		p += sizeof(CSectionsdClient::sectionsdTime);
 
 	}
 	else
@@ -3281,7 +3281,7 @@ static void *sdtThread(void *)
 				continue;
 
 			// copy the header
-			memcpy(&header, buf, min((unsigned)((SI_section_header*)buf)->section_length + 3, sizeof(header)));
+			memcpy(&header, buf, std::min((unsigned)((SI_section_header*)buf)->section_length + 3, sizeof(header)));
 
 			if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))
 			{
@@ -3936,7 +3936,7 @@ static void *eitThread(void *)
 				continue;
 
 			// copy the header
-			memcpy(&header, buf, min((unsigned)((SI_section_header*)buf)->section_length + 3, sizeof(header)));
+			memcpy(&header, buf, std::min((unsigned)((SI_section_header*)buf)->section_length + 3, sizeof(header)));
 
 			if ((header.current_next_indicator) && (!dmxEIT.pauseCounter ))
 			{
@@ -4238,7 +4238,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.147 2002/12/08 17:40:53 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.148 2002/12/09 20:07:52 thegoodguy Exp $\n");
 
 	try
 	{

@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.4 2002/12/08 10:46:11 thegoodguy Exp $
+//  $Id: sectionsdMsg.h,v 1.5 2002/12/09 20:07:52 thegoodguy Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -27,34 +27,16 @@
 //
 
 
-#include <string>
-#include <vector>
-
-
 #include <connection/basicmessage.h>
-#include <zapit/client/zapittypes.h>  /* t_channel_id, t_service_id, t_original_network_id, t_transport_stream_id; */
+#include <zapit/client/zapittypes.h>  /* t_channel_id */
 
-
-using namespace std;
 
 #define SECTIONSD_UDS_NAME "/tmp/sectionsd.sock"
+
 
 struct sectionsd
 {
 	static const CBasicMessage::t_version ACTVERSION = 4;
-
-	struct epgflags {
-		enum
-		{
-			has_anything = 0x01,
-			has_later = 0x02,
-			has_current = 0x04,
-			not_broadcast = 0x08,
-			has_next = 0x10,
-			has_no_current= 0x20,
-			current_has_linkagedescriptors= 0x40
-		};
-	};
 
 	struct msgRequestHeader
 	{
@@ -66,12 +48,6 @@ struct sectionsd
 	struct msgResponseHeader
 	{
 		unsigned short dataLength;
-	} __attribute__ ((packed)) ;
-
-	struct sectionsdTime
-	{
-		time_t startzeit;
-		unsigned dauer;
 	} __attribute__ ((packed)) ;
 
 	enum commands
@@ -124,51 +100,6 @@ struct sectionsd
 		bool IsTimeSet;
 	};
 
-
-	struct responseGetComponentTags
-	{
-		std::string component; 			// Text aus dem Component Descriptor
-		unsigned char componentType; 	// Component Descriptor
-		unsigned char componentTag; 	// Component Descriptor
-		unsigned char streamContent; 	// Component Descriptor
-	};
-
-    typedef std::vector<responseGetComponentTags> ComponentTagList;
-
-	struct responseGetLinkageDescriptors
-	{
-		std::string name;
-		t_transport_stream_id transportStreamId;
-		t_original_network_id originalNetworkId;
-		t_service_id          serviceId;
-	};
-
-    typedef std::vector<responseGetLinkageDescriptors> LinkageDescriptorList;
-
-	struct responseGetNVODTimes
-	{
-		t_service_id          service_id;
-		t_original_network_id original_network_id;
-		t_transport_stream_id transport_stream_id;
-		sectionsd::sectionsdTime zeit;
-	};
-
-    typedef std::vector<responseGetNVODTimes> NVODTimesList;
-
-    struct responseGetCurrentNextInfoChannelID
-	{
-		unsigned long long 			current_uniqueKey;
-		sectionsd::sectionsdTime 	current_zeit;
-		std::string					current_name;
-		char						current_fsk;
-		unsigned long long 			next_uniqueKey;
-		sectionsd::sectionsdTime 	next_zeit;
-		std::string					next_name;
-		unsigned					flags;
-	};
-
-	struct CurrentNextInfo : public responseGetCurrentNextInfoChannelID
-	{};
 };
 
 //

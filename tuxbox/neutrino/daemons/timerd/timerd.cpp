@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.40 2002/12/09 18:39:51 Zwen Exp $
+	$Id: timerd.cpp,v 1.41 2002/12/09 20:07:53 thegoodguy Exp $
 
 	License: GPL
 
@@ -32,7 +32,6 @@
 #include <configfile.h>
 #include <timermanager.h>
 #include <debug.h>
-#include <sectionsdclient/sectionsdMsg.h>
 #include <sectionsdclient/sectionsdclient.h>
 
 #include <connection/basicserver.h>
