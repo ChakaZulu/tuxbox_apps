@@ -21,7 +21,7 @@ struct channel {
   ushort service_type;
 
   unsigned int OnidSid(){return( (onid << 16)|sid);}
-  channel(std::string Name, time_t Last_update, uint Vpid, uint Apid, uint Pmt, uint Ecmpid, uint Sid, uint Tsid, uint Onid, ushort Service_type)
+  channel(std::string Name, time_t Last_update, uint Vpid, uint Apid, uint Pmt, uint Ecmpid, uint Sid, uint Tsid, uint Onid, ushort Service_type, uint cnr=0)
   {
     name = Name;
     last_update = Last_update;
@@ -33,7 +33,7 @@ struct channel {
     tsid = Tsid;
     onid = Onid;
     service_type = Service_type;
-    chan_nr = 0;
+    chan_nr = cnr;
       }
 };
 

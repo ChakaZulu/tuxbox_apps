@@ -104,7 +104,7 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 
 	      if (sm == 2)
 		{
-		  allchans_radio.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0, 0, 0, pmt, ecmpid, sid, tsid, onid,sm)));
+		  allchans_radio.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0, 0, 0, pmt, ecmpid, sid, tsid, onid,sm, cnr)));
 
 		  if (cnr > 0)
 		    {
@@ -117,7 +117,7 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 		}
 	      else
 		{
-            allchans_tv.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0,0,0, pmt, ecmpid, sid, tsid,onid,sm)));
+            allchans_tv.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0,0,0, pmt, ecmpid, sid, tsid,onid,sm, cnr)));
 
             if (cnr > 0)
                 numchans_tv.insert(std::pair<uint, uint>(cnr, (onid<<16)+sid));

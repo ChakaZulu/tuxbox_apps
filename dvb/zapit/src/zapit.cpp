@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.62 2002/01/15 23:05:54 Simplex Exp $
+  $Id: zapit.cpp,v 1.63 2002/01/16 22:40:17 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.63  2002/01/16 22:40:17  Simplex
+  more adaptions to CBouquetManager
+
   Revision 1.62  2002/01/15 23:05:54  Simplex
   changed method to return service list (not hot yet)
 
@@ -852,31 +855,52 @@ void setemm(int unknown, int caID, int emmpid)
 
 void save_settings()
 {
-  FILE *channel_settings;
-  std::map<uint, channel>::iterator cit;
-  channel_settings = fopen("/tmp/zapit_last_chan", "w");
+	FILE *channel_settings;
+	channel_settings = fopen("/tmp/zapit_last_chan", "w");
 
-  if (channel_settings == NULL)
-    {
-      perror("[zapit] fopen: /tmp/zapit_last_chan");
-    }
+	if (channel_settings == NULL)
+	{
+		perror("[zapit] fopen: /tmp/zapit_last_chan");
+	}
 
-  if (Radiomode_on)
-    {
-    fprintf(channel_settings, "radio\n");
-    cit = allchans_radio.find(curr_onid_sid);
-    }
-  else
-    {
-    fprintf(channel_settings, "tv\n");
-    cit = allchans_tv.find(curr_onid_sid);
-    }
+#ifndef USEBOUQUETMAN
+	std::map<uint, channel>::iterator cit;
+	if (Radiomode_on)
+	{
+		fprintf(channel_settings, "radio\n");
+		cit = allchans_radio.find(curr_onid_sid);
+	}
+	else
+	{
+		fprintf(channel_settings, "tv\n");
+		cit = allchans_tv.find(curr_onid_sid);
+	}
+	fprintf(channel_settings, "%06d\n", cit->second.chan_nr);
+	fprintf(channel_settings, "%s\n", cit->second.name.c_str());
+#else
+	if (Radiomode_on)
+	{
+		CBouquetManager::radioChannelIterator cit = g_BouquetMan->radioChannelsFind(curr_onid_sid);
+		if (cit != g_BouquetMan->radioChannelsEnd())
+		{
+			fprintf(channel_settings, "radio\n");
+			fprintf(channel_settings, "%06d\n", (*cit)->chan_nr);
+			fprintf(channel_settings, "%s\n", (*cit)->name.c_str());
+		}
+	}
+	else
+	{
+		CBouquetManager::tvChannelIterator cit = g_BouquetMan->tvChannelsFind(curr_onid_sid);
+		if (cit != g_BouquetMan->tvChannelsEnd())
+		{
+			fprintf(channel_settings, "tv\n");
+			fprintf(channel_settings, "%06d\n", (*cit)->chan_nr);
+			fprintf(channel_settings, "%s\n", (*cit)->name.c_str());
+		}
+	}
 
-
-  fprintf(channel_settings, "%06d\n", cit->second.chan_nr);
-  fprintf(channel_settings, "%s\n", cit->second.name.c_str());
-
-  fclose(channel_settings);
+#endif
+	fclose(channel_settings);
   //printf("Saved settings\n");
 }
 
@@ -1862,87 +1886,104 @@ void parse_command()
 	return;
       }
       break;
-    case 'c':
-       if (Radiomode_on)
-    	{
-	  if (!allchans_radio.empty())
-	    {
-	      status = "00c";
-	      if (send(connfd, status, strlen(status),0) == -1) {
-		perror("[zapit] could not send any return\n");
-		return;
-	      }
-	      for (sit = allnumchannels_radio.begin(); sit != allnumchannels_radio.end(); sit++)
-		{
-		  cit = allchans_radio.find(sit->second);
-		  channel_msg_2 chanmsg;
-		  strncpy(chanmsg.name, cit->second.name.c_str(),30);
-		  chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
-		  chanmsg.chan_nr = sit->first;
 
-		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
-		    {
-		      perror("[zapit] could not send any return\n");
-		      return;
-		    }
-		}
-	    }
-	  else
-	    {
-	      printf("[zapit] tv_channellist is empty\n");
-	      status = "-0c";
-	      if (send(connfd, status, strlen(status),0) == -1)
-	       {
-		 perror("[zapit] could not send any return\n");
-		 return;
-	       }
-	    }
-      	} else {
-	  if (!allchans_tv.empty())
-	    {
-	    status = "00c";
-	    if (send(connfd, status, strlen(status),0) == -1)
-	      {
-		perror("[zapit] could not send any return\n");
-		return;
-	      }
+	case 'c':
+		if (Radiomode_on)
+		{
+			if (!allchans_radio.empty())
+			{
+				status = "00c";
+				if (send(connfd, status, strlen(status),0) == -1)
+				{
+					perror("[zapit] could not send any return\n");
+					return;
+				}
 #ifndef USEBOUQUETMAN
-	    for (sit = allnumchannels_tv.begin(); sit != allnumchannels_tv.end(); sit++)
-		{
-		  cit = allchans_tv.find(sit->second);
+				for (sit = allnumchannels_radio.begin(); sit != allnumchannels_radio.end(); sit++)
+				{
 #else
-		for ( CBouquetManager::tvChannelIterator tvcit = g_BouquetMan->tvChannelsBegin(); tvcit != g_BouquetMan->tvChannelsEnd(); tvcit++)
-		{
+				for ( CBouquetManager::radioChannelIterator radiocit = g_BouquetMan->radioChannelsBegin(); radiocit != g_BouquetMan->radioChannelsEnd(); radiocit++)
+				{
 #endif
-		  channel_msg_2 chanmsg;
+					channel_msg_2 chanmsg;
+
 #ifndef USEBOUQUETMAN
-		  strncpy(chanmsg.name, cit->second.name.c_str(),30);
-		  chanmsg.chan_nr = sit->first;
-		  chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
+					cit = allchans_radio.find(sit->second);
+					strncpy(chanmsg.name, cit->second.name.c_str(),30);
+					chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
+					chanmsg.chan_nr = sit->first;
 #else
-		  strncpy(chanmsg.name, (*tvcit)->name.c_str(),30);
-		  chanmsg.chan_nr = (*tvcit)->chan_nr;
-		  chanmsg.onid_tsid = (*tvcit)->OnidSid();
+					strncpy(chanmsg.name, (*radiocit)->name.c_str(),30);
+					chanmsg.chan_nr = (*radiocit)->chan_nr;
+					chanmsg.onid_tsid = (*radiocit)->OnidSid();
 #endif
-		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
-		    {
-		      perror("[zapit] could not send any return\n");
-		      return;
-		    }
+
+					if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
+					{
+						perror("[zapit] could not send any return\n");
+						return;
+					}
+				}
+			}
+			else
+			{
+				printf("[zapit] tv_channellist is empty\n");
+				status = "-0c";
+				if (send(connfd, status, strlen(status),0) == -1)
+				{
+					perror("[zapit] could not send any return\n");
+					return;
+				}
+			}
 		}
-	    }
-	  else
-	    {
-	      printf("tv_channellist is empty\n");
-	      status = "-0c";
-	      if (send(connfd, status, strlen(status),0) == -1)
+		else
 		{
-		  perror("[zapit] could not send any return\n");
-		  return;
+			if (!allchans_tv.empty())
+			{
+				status = "00c";
+				if (send(connfd, status, strlen(status),0) == -1)
+				{
+					perror("[zapit] could not send any return\n");
+					return;
+				}
+#ifndef USEBOUQUETMAN
+				for (sit = allnumchannels_tv.begin(); sit != allnumchannels_tv.end(); sit++)
+				{
+					cit = allchans_tv.find(sit->second);
+#else
+				for ( CBouquetManager::tvChannelIterator tvcit = g_BouquetMan->tvChannelsBegin(); tvcit != g_BouquetMan->tvChannelsEnd(); tvcit++)
+				{
+#endif
+					channel_msg_2 chanmsg;
+#ifndef USEBOUQUETMAN
+					strncpy(chanmsg.name, cit->second.name.c_str(),30);
+					chanmsg.chan_nr = sit->first;
+					chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
+#else
+					strncpy(chanmsg.name, (*tvcit)->name.c_str(),30);
+					chanmsg.chan_nr = (*tvcit)->chan_nr;
+					chanmsg.onid_tsid = (*tvcit)->OnidSid();
+#endif
+					if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
+					{
+						perror("[zapit] could not send any return\n");
+						return;
+					}
+				}
+			}
+			else
+			{
+				printf("tv_channellist is empty\n");
+				status = "-0c";
+				if (send(connfd, status, strlen(status),0) == -1)
+				{
+					perror("[zapit] could not send any return\n");
+					return;
+				}
+			}
 		}
-	    }
-	}
-       break;
+	break;
+
     case 'd':
         dprintf("[zapit] zapping by number\n");
         number = 0;
@@ -2440,7 +2481,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.62 2002/01/15 23:05:54 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.63 2002/01/16 22:40:17 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
