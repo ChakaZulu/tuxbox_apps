@@ -3,4 +3,3 @@ SUBDIRS = \
 	lcddclient \
 	sectionsdclient \
 	timerdclient
-

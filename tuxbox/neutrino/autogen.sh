@@ -70,4 +70,3 @@ echo "  autoheader"
 autoheader
 echo "  automake --add-missing"
 automake --add-missing 
-

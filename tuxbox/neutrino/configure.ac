@@ -20,10 +20,15 @@ TUXBOX_APPS_LIB_PKGCONFIG(LCDDISPLAY,tuxbox-lcddisplay)
 TUXBOX_APPS_LIB_PKGCONFIG(MD5SUM,tuxbox-md5sum)
 TUXBOX_APPS_LIB_PKGCONFIG(NET,tuxbox-net)
 TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
-TUXBOX_APPS_LIB_PKGCONFIG(ZAPITCLIENT,tuxbox-zapitclient)
+TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 
 AC_OUTPUT([
 Makefile
+lib/Makefile
+lib/controldclient/Makefile
+lib/lcddclient/Makefile
+lib/sectionsdclient/Makefile
+lib/timerdclient/Makefile
 daemons/Makefile
 daemons/controld/Makefile
 daemons/controld/driver/Makefile
@@ -35,19 +40,16 @@ daemons/lcdd/clock/Makefile
 daemons/lcdd/icons/Makefile
 daemons/sectionsd/Makefile
 daemons/timerd/Makefile
-lib/Makefile
-lib/controldclient/Makefile
-lib/lcddclient/Makefile
-lib/sectionsdclient/Makefile
-lib/timerdclient/Makefile
 src/Makefile
 src/daemonc/Makefile
 src/driver/Makefile
 src/gui/Makefile
 src/gui/bedit/Makefile
 src/gui/widget/Makefile
-src/icons/Makefile
-src/locale/Makefile
 src/system/Makefile
+data/Makefile
+data/fonts/Makefile
+data/icons/Makefile
+data/locale/Makefile
 ])
 

@@ -1,4 +1,4 @@
-SUBDIRS = gui daemonc driver system icons locale
+SUBDIRS = gui daemonc driver system
 
 INCLUDES = \
 	-I$(top_srcdir)/daemons \
