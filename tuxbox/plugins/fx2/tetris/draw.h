@@ -20,6 +20,7 @@ extern	void	FBCopyImageCol( int x, int y, int dx, int dy, unsigned char col,
 					unsigned char *src );
 extern	void	FBBlink( int x, int y, int dx, int dy, int count );
 extern	void	FBMove( int x, int y, int x2, int y2, int dx, int dy );
+extern	void	write_xpm( void );
 
 /* about colors */
 

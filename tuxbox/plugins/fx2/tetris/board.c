@@ -46,13 +46,15 @@ static	int		myrand( int idx )
 
 static	unsigned char	puz_0[] = "    X   XXX     ";
 static	unsigned char	puz_1[] = "     X  XXX     ";
-static	unsigned char	puz_2[] = "    XX   XX     ";
-static	unsigned char	puz_3[] = "     XX XX      ";
-static	unsigned char	puz_4[] = "    XXXX        ";
+static	unsigned char	puz_2[] = "      X XXX     ";
+static	unsigned char	puz_3[] = "    XX   XX     ";
+static	unsigned char	puz_4[] = "     XX XX      ";
+static	unsigned char	puz_5[] = "    XXXX        ";
+static	unsigned char	puz_6[] = "     XX  XX     ";
 
-#define NUMPUZ	5
-static	unsigned char	*puz[] = { puz_0, puz_1, puz_2, puz_3, puz_4 };
-static	unsigned char	puzc[] = { 30, 40, 50, 60, 70 };
+/* magenta, blue, cyan, green, red, yellow, orange */
+static	unsigned char	*puz[] = { puz_0, puz_1, puz_2, puz_3, puz_4, puz_5, puz_6 };
+static	unsigned char	puzc[] = { 30, 80, 50, 60, 40, 70, 90 };
 
 static	void	DrawScore( void )
 {
@@ -192,7 +194,7 @@ int	NextItem( void )
 	puz_x = 6;
 	puz_y = 0;
 	actpuz = nextpuz;
-	nextpuz = myrand(5);
+	nextpuz = myrand(7);
 	if ( !PutPuzIntoBoard() )
 		return 0;
 

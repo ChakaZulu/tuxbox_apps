@@ -123,17 +123,17 @@ int	FBInitialize( int xRes, int yRes, int nbpp, int extfd )
 	SetColor( 47, 109, 119, 192);
 	SetColor( 48, 46, 50, 81);
 	SetColor( 49, 34, 38, 63);
-/* gray */
-	SetColor( 50, 47, 52, 50);
-	SetColor( 51, 62, 67, 65);
-	SetColor( 52, 194, 198, 194);
-	SetColor( 53, 129, 138, 134);
-	SetColor( 54, 182, 187, 184);
-	SetColor( 55, 142, 149, 145);
-	SetColor( 56, 156, 164, 162);
-	SetColor( 57, 110, 119, 117);
-	SetColor( 58, 148, 155, 152);
-	SetColor( 59, 212, 216, 213);
+/* cyan */
+	SetColor( 50, 157, 218, 234);
+	SetColor( 51, 140, 208, 227);
+	SetColor( 52, 108, 186, 211);
+	SetColor( 53, 184, 233, 243);
+	SetColor( 54, 55, 143, 172);
+	SetColor( 55, 92, 171, 197);
+	SetColor( 56, 78, 160, 187);
+	SetColor( 57, 98, 177, 203);
+	SetColor( 58, 7, 98, 120);
+	SetColor( 59, 1, 78, 98);
 /* green */
 	SetColor( 60, 173, 218, 177);
 	SetColor( 61, 158, 209, 165);
@@ -167,6 +167,17 @@ int	FBInitialize( int xRes, int yRes, int nbpp, int extfd )
 	SetColor( 87, 199, 206, 95);
 	SetColor( 88, 88, 93, 34);
 	SetColor( 89, 69, 75, 22);
+/* orange */
+	SetColor( 90, 243, 199, 148);
+	SetColor( 91, 237, 185, 130);
+	SetColor( 92, 220, 159, 99);
+	SetColor( 93, 249, 220, 178);
+	SetColor( 94, 184, 113, 43);
+	SetColor( 95, 208, 144, 81);
+	SetColor( 96, 198, 132, 67);
+	SetColor( 97, 213, 150, 88);
+	SetColor( 98, 127, 63, 1);
+	SetColor( 99, 98, 46, 1);
 
 	if (ioctl(fd, FBIOPUT_VSCREENINFO, &screeninfo)<0)
 		perror("FBSetMode");
@@ -439,8 +450,8 @@ void	write_xpm( void )
 	}
 	fprintf(fp,"/* XPM */\n");
 	fprintf(fp,"static char *pacman[] = {\n");
-	fprintf(fp,"\"  %d    %d    90    1\"",screeninfo.xres,screeninfo.yres);
-	for( i=0; i < 90; i++ )
+	fprintf(fp,"\"  %d    %d   100    1\"",screeninfo.xres,screeninfo.yres);
+	for( i=0; i < 100; i++ )
 		fprintf(fp,",\n\"%c c #%02x%02x%02x\"",i+97,
 			(unsigned char)(red[i]>>8),
 			(unsigned char)(green[i]>>8),
