@@ -135,6 +135,15 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
 	eDebug("[ENIGMA] ok, beginning mainloop");
 
+	{
+		eMessageBox msg("Warning:\nThis version of enigma contains incomplete code.\n"
+			"Not working are:\n - Satconfig\n - Cablescan (will be back soon)\n"
+			" - some other stuff", "Enigma *pre*");
+		msg.show();
+		msg.exec();
+		msg.hide();
+	}
+
 	if (eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount))
 	{
 		bootcount = 1;
