@@ -3,7 +3,7 @@
 
 	Copyright (C) 2004 Sania, Zwen
 	
-	Homepage: http://www.cyberphoria.org/
+	Homepage: http://www.dbox2.info/
 
 	Kommentar:
 
@@ -107,6 +107,8 @@ int COggDec::Decoder(FILE *in, int OutputFd, State* state)
   if (pthread_create (&OutputThread, 0, OutputDsp, (void *) this) != 0 )
   {
 	  fclose(in);
+	  for(int i = 0 ; i < DECODE_SLOTS ; i++)
+		  free(mPcmSlots[i]);
 	  Status=5;
 	  return Status;
   }
