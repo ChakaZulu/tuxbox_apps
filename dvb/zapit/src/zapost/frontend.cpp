@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.12 2002/04/24 16:05:51 field Exp $
+ * $Id: frontend.cpp,v 1.13 2002/04/24 16:11:54 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -324,11 +324,6 @@ const bool CFrontend::getEvent ()
 
 	case 0:
 		std::cerr << "[CFrontend::getEvent] timeout" << std::endl;
-		/*
-		 * users with broken drivers might want to enable this:
-		 */
-		//failed = false;
-		//tuned = true;
 		break;
 
 	default:
@@ -658,11 +653,31 @@ const bool CFrontend::sendDiseqcZeroByteCommand (uint8_t addr, uint8_t cmd)
 	}
 }
 
+/*
+ * this can handle a maximum of 12 LNBs,
+ * connected to 3 cascaded switches.
+ * for up to 64 LNBs, a more complex
+ * setup will be needed.
+ */
 const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t repeats)
 {
-	if (diseqc > (repeats << 1) + 1)
+	/* repeats = number of cascaded switches minus one */
+	if (repeats > 2)
 	{
-		std::cerr << "[CFrontend::sendDiseqcCommand] Not enough repeats (" << repeats << ") for requested DiSEqC position (" << diseqc << ")." << std::endl;
+		std::cerr << "[CFrontend::sendDiseqcCommand] max. 2 repeats allowed." << std::endl;
+		return false;
+	}
+
+	/* diseqc = currently selected lnb */
+	if (diseqc > 11)
+	{
+		std::cerr << "[CFrontend::sendDiseqcCommand] currently only 12 DiSEqC positions are supported." << std::endl;
+		return false;
+	}
+
+	if (diseqc >= (repeats + 1) << 2)
+	{
+		std::cerr << "[CFrontend::sendDiseqcCommand] not enough repeats (" << repeats << ") for requested DiSEqC position (" << diseqc << ")." << std::endl;
 		return false;
 	}
 
@@ -682,7 +697,7 @@ const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltag
 	sequence->commands[0].u.diseqc.addr = 0x10;	/* any lnb switcher or smatv */
 	sequence->commands[0].u.diseqc.cmd = 0x38;	/* write to port group 0 (committed switches) */
 
-	if ((diseqc == 0) || (diseqc == 1))
+	if (diseqc < 4)
 	{
 		sequence->commands[0].u.diseqc.numParams = 1;
 		sequence->commands[0].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
@@ -708,7 +723,7 @@ const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltag
 		sequence->commands[sequence->numCommands + 1].u.diseqc.addr = 0x10;
 		sequence->commands[sequence->numCommands + 1].u.diseqc.cmd = 0x38;
 
-		if ((diseqc == sequence->numCommands + 1) || (diseqc == sequence->numCommands + 2))
+		if (((sequence->numCommands == 1) && (diseqc < 8)) || ((sequence->numCommands == 3) && (diseqc >= 8)))
 		{
 			sequence->commands[sequence->numCommands].u.diseqc.numParams = 1;
 			sequence->commands[sequence->numCommands].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
