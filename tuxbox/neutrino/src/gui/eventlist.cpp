@@ -448,3 +448,36 @@ void EventList::paint()
 
 	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 }
+
+
+
+
+
+
+//
+//  -- EventList Menu Handler Class
+//  -- to be used for calls from Menue
+//  -- (2004-03-06 rasc)
+// 
+
+int CEventListHandler::exec(CMenuTarget* parent, const std::string &actionkey)
+{
+	int           res = menu_return::RETURN_EXIT_ALL;
+	EventList     *e;
+	CChannelList  *channelList;
+
+
+	if (parent) {
+		parent->hide();
+	}
+
+	e = new EventList;
+
+	channelList = CNeutrinoApp::getInstance()->channelList;
+	e->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName()); // UTF-8
+	delete e;
+
+	return res;
+}
+
+

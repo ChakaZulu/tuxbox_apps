@@ -41,6 +41,7 @@
 #include <system/settings.h>
 
 #include "gui/color.h"
+#include "widget/menue.h"
 
 #include <string>
 
@@ -115,6 +116,17 @@ class CInfoViewer
 #endif
 	
 	int     handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data);
+};
+
+
+
+
+class CInfoViewerHandler : public CMenuTarget
+{
+	public:
+		int  exec( CMenuTarget* parent,  const std::string &actionkey);
+		int  doMenu();
+
 };
 
 

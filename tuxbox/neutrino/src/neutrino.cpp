@@ -117,6 +117,7 @@
 
 #include "gui/ch_mosaic.h"
 #include "gui/epgplus.h"
+#include "gui/epg_menu.h"
 
 #endif
 
@@ -2465,7 +2466,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CChMosaicHandler(), id, true, CRCInput::RC_nokey, ""), false);
 
 	// -- there will be a new EPG menue (red button) shown EPG CHANNEL (EPGList) & EPG Overview (PLUS) & INFO (=?)
-	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CEPGplusHandler(), id, true, CRCInput::RC_nokey, ""), false);
+// 	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CEPGplusHandler(), id, true, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CEPGMenuHandler(), id, true, CRCInput::RC_nokey, ""), false);
 
 #endif
 	// ------

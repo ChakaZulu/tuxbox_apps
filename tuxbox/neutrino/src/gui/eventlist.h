@@ -85,4 +85,15 @@ class EventList
 };
 
 
+
+class CEventListHandler : public CMenuTarget
+{
+	public:
+		int  exec( CMenuTarget* parent,  const std::string &actionkey);
+
+};
+
+
 #endif
+
+

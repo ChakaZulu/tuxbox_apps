@@ -983,3 +983,36 @@ void CInfoViewer::showLcdPercentOver()
 		CLCD::getInstance()->showPercentOver(runningPercent);
 	}
 }
+
+
+
+
+
+//
+//  -- InfoViewer Menu Handler Class
+//  -- to be used for calls from Menue
+//  -- (2004-03-06 rasc)
+// 
+
+int CInfoViewerHandler::exec(CMenuTarget* parent, const std::string &actionkey)
+{
+	int           res = menu_return::RETURN_EXIT_ALL;
+	CChannelList  *channelList;
+	CInfoViewer   *i;
+
+
+	if (parent) {
+		parent->hide();
+	}
+
+	i = new CInfoViewer;
+
+	channelList = CNeutrinoApp::getInstance()->channelList;
+	i->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
+	delete i;
+
+
+	return res;
+}
+
+
