@@ -667,7 +667,6 @@ fontsize.eventlist_datetime data / czas
 fontsize.channellist Lista kanalów
 fontsize.channellist_descr Opis
 fontsize.channellist_number Numer
-fontsize.channel_num_zap bez zaplisty
 fontsize.infobar_number Numer
 fontsize.infobar_channame Nazwa kanalu
 fontsize.infobar_info Info

@@ -673,7 +673,7 @@ fontsize.eventlist_datetime date / time
 fontsize.channellist Channellist
 fontsize.channellist_descr Description
 fontsize.channellist_number Number
-fontsize.channel_num_zap keine Ahnung
+fontsize.channel_num_zap direct selection
 fontsize.infobar_number Number
 fontsize.infobar_channame Channel name
 fontsize.infobar_info info

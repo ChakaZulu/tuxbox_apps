@@ -673,7 +673,6 @@ fontsize.eventlist_datetime Lista eventi data/orari
 fontsize.channellist Lista canali
 fontsize.channellist_descr descrizione
 fontsize.channellist_number Nummero
-fontsize.channel_num_zap zap
 fontsize.infobar_number Numeri Infobar
 fontsize.infobar_channame nomi canali infobar
 fontsize.infobar_info info su Infobar

@@ -673,7 +673,6 @@ fontsize.eventlist_datetime datum/tijd
 fontsize.channellist Kanalenlijst
 fontsize.channellist_descr Omschrijving
 fontsize.channellist_number Nummer
-fontsize.channel_num_zap keine Ahnung
 fontsize.infobar_number Nummer
 fontsize.infobar_channame Kanaalnaam
 fontsize.infobar_info info
