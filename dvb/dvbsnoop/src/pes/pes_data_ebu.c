@@ -1,5 +1,5 @@
 /*
-$Id: pes_data_ebu.c,v 1.1 2004/02/02 23:41:23 rasc Exp $
+$Id: pes_data_ebu.c,v 1.2 2004/02/04 22:36:29 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: pes_data_ebu.c,v 1.1 2004/02/02 23:41:23 rasc Exp $
 
 
 $Log: pes_data_ebu.c,v $
+Revision 1.2  2004/02/04 22:36:29  rasc
+more EBU/teletext stuff
+
 Revision 1.1  2004/02/02 23:41:23  rasc
 - output indent changed to avoid \r  (which sucks on logged output)
 - EBU PES data started (teletext, vps, wss, ...)
@@ -36,6 +39,7 @@ Revision 1.1  2004/02/02 23:41:23  rasc
 #include "pes_data_ebu.h"
 #include "strings/dvb_str.h"
 #include "ebu/teletext.h"
+#include "ebu/ebu_misc.h"
 #include "misc/helper.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
@@ -47,7 +51,6 @@ static int vps_data_field (int v, u_char *b, int len);
 static int wss_data_field (int v, u_char *b, int len);
 static int closed_caption_data_field (int v, u_char *b, int len);
 static int monochrome_data_field (int v, u_char *b, int len);
-static void rfl_out (int v, u_char *b);
 
 
 
@@ -141,7 +144,7 @@ static int teletext_data_field (int v, u_char *b, int len)
    out_nl (v,"Teletext data:");
    indent (+1);
 
-   	rfl_out (v1,b);
+   	ebu_rfl_out (v1,b);
    	outBit_S2x_NL (v1,"frame_coding: ", b, 8, 8,
 			(char *(*)(u_long)) dvbstrTELETEXT_framingcode );
 	b += 2;
@@ -177,7 +180,7 @@ static int vps_data_field (int v, u_char *b, int len)
    out_nl (v,"VPS (video programme system) data:");
    indent (+1);
 
-   	rfl_out (v1,b);
+   	ebu_rfl_out (v1,b);
 
 	// $$$ TODO 
 	print_databytes (v1,"data_block:", b+1, 13);
@@ -199,7 +202,7 @@ static int wss_data_field (int v, u_char *b, int len)
    out_nl (v,"WSS (wide screen signalling) data:");
    indent (+1);
 
-   	rfl_out (v1,b);
+   	ebu_rfl_out (v1,b);
 
    	outBit_Sx (v1,"wss_data_block: ",	b, 8,14);
 	  out_nl (v1, "  [= see EN 300 294]");		// $$$ TODO ?
@@ -223,7 +226,7 @@ static int closed_caption_data_field (int v, u_char *b, int len)
    out_nl (v,"WSS (wide screen signalling) data:");
    indent (+1);
 
-   	rfl_out (v1,b);
+   	ebu_rfl_out (v1,b);
 
 	// $$$ TODO
    	outBit_Sx_NL (v1,"closed_caption_data_block: ",	b, 8,16);
@@ -261,18 +264,6 @@ static int monochrome_data_field (int v, u_char *b, int len)
    return 3+n;
 }
 
-
-
-
-// -- output reserved, field_parity, line_offset
-// -- length: 1 byte
-
-static void rfl_out (int v, u_char *b)
-{
-   	outBit_Sx_NL (6,"reserved: ",		b, 0, 2);
-   	outBit_Sx_NL (v,"field_parity: ",	b, 2, 1);
-   	outBit_Sx_NL (v,"line_offset: ",	b, 3, 5);
-}
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.40 2004/02/02 23:34:11 rasc Exp $
+$Id: dvb_str.c,v 1.41 2004/02/04 22:36:29 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.40 2004/02/02 23:34:11 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.41  2004/02/04 22:36:29  rasc
+more EBU/teletext stuff
+
 Revision 1.40  2004/02/02 23:34:11  rasc
 - output indent changed to avoid \r  (which sucks on logged output)
 - EBU PES data started (teletext, vps, wss, ...)
@@ -2550,6 +2553,28 @@ char *dvbstrTELETEXT_packetnr (u_int i)
   return findTableID (Table, i);
 }
 
+
+
+/*
+  -- dvbstrTELETEXT_lang_code
+  -- EN 300 472  and EN 301 775.
+*/
+
+char *dvbstrTELETEXT_lang_code (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "English (?)" },
+	{ 0x01, 0x01,   "French (?)" },
+	{ 0x02, 0x02,   "Swedish/Finnish/Hungarian (?)" },
+	{ 0x03, 0x03,   "Czech/Slovak/Turkish (?)" },
+	{ 0x04, 0x04,   "German (?)" },
+	{ 0x05, 0x05,   "Portuguese/Spanish (?)" },
+	{ 0x06, 0x06,   "Italian (?)" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
 
 
 

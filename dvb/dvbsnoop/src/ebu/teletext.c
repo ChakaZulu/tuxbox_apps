@@ -1,5 +1,5 @@
 /*
-$Id: teletext.c,v 1.2 2004/02/03 00:11:49 rasc Exp $
+$Id: teletext.c,v 1.3 2004/02/04 22:36:27 rasc Exp $
 
 
 
@@ -17,6 +17,9 @@ $Id: teletext.c,v 1.2 2004/02/03 00:11:49 rasc Exp $
 
 
 $Log: teletext.c,v $
+Revision 1.3  2004/02/04 22:36:27  rasc
+more EBU/teletext stuff
+
 Revision 1.2  2004/02/03 00:11:49  rasc
 no message
 
@@ -45,6 +48,7 @@ added EBU module (teletext), providing basic teletext decoding
 // A Teletext packet comprises 360 bits organized as 45 bytes, numbered
 // 1 to 45. In each byte, the bits are numbered 1 to 8 (LSB to MSB), and
 // are normally transmitted LSB first.
+// (against ETSI doc. bytes numbering: -4 diff)
 //
 // ==>
 //  - the first 3 bytes are not part of this module
@@ -66,7 +70,7 @@ added EBU module (teletext), providing basic teletext decoding
 // -- the following two tables and some routines basics
 // -- are from dvbtext (c) Dave Chapman  and 
 // -- originally from Ralph Metzler's vbidecode package. 
-// -- other basic considerations are transfered from tuxtxt (c) LacyT
+// -- other basic considerations are transfered from tuxtxt (c) LazyT
 
 
 // LSb... MSb  -> MSb...LSb
@@ -150,16 +154,30 @@ static u_char unham84tab[256] = {
 
 // FROM vbidecode
 // unham 2 bytes into 1, report 2 bit errors but ignore them
+// -- input byte order:  LSB, MSB
 
-u_char unham84 (u_char a, u_char b)
+u_char unham84 (u_char lsb, u_char msb)
 {
   u_char c1,c2;
   
-  c1=unham84tab[a];
-  c2=unham84tab[b];
+  c1=unham84tab[lsb];
+  c2=unham84tab[msb];
   //  if ((c1 | c2) & 0x40)  bad ham!
   return (c2 << 4) | (c1 & 0x0f);
 }
+
+
+
+// -- simple unham24_18  (3 bytes -> 18 bit)
+// -- teletext data needs to be 'normalized'
+
+u_char unham24_18 (u_char lsb, u_char msb1, u_char msb2)
+{
+	// $$$ TODO
+        u_char x = ' ';
+	return x;
+}
+
 
 
 
@@ -216,8 +234,6 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
   int  mag_nr = -1;
   int  page_nr = -1;
   int  sub_page_nr = -1;
-  int  language = -1;
-  int  control_bits = -1;
 
 
   	// -- buffer starts with magazine_and_packet_addr
@@ -255,20 +271,27 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 	if (packet_nr > 0 && packet_nr <= 25) {
 
 		unParityTeletextData (b+2, len-2);
-		print_databytes (v,"packet data (parity stripped):", b+2, len-2);
+		print_teletext_data_x0_x25 (v,"packet data (parity stripped):", b+2, len-2);
 
 		return len;
 	}
 
 
 	// -- special packets?
+	// -- Packets X/26, X/28 and M/29 can carry data to enhance a basic Level 1
+	// -- Teletext page. The general coding scheme is shown in figure 11. Byte 6
+	// -- is used as an additional address byte (designation code), coded Hamming
+	// -- 8/4. This allows up to 16 versions of each packet type. The remaining
+	// -- 39 bytes are Hamming 24/18 coded, grouped as 13 triplets.
+
 	if (packet_nr > 25) {
 		int  designation;
 
 		designation = unham84tab[*(b+2)]  & 0x0F;
 		out_SB_NL  (v,"designation code: ",designation);
 
-		print_databytes (4,"packet data:", b+3, len-3);
+		// $$$ TODO   hamming24_18 triplets
+		print_databytes (4,"packet data (hamming 24/18):", b+3, len-3);
 		return len;
 	}
 
@@ -325,39 +348,55 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 
 	if (page_nr == 0xFF && sub_page_nr == 0x3F7F) return 8;
 
-
-
-
-	// -- country/language code
-
-	language =  ( unham84(*(b+8),*(b+9) ) >> 5) & 7;
-	out_SB_NL (v,"language code: ",language);
-
-
-
-
-
-
-//     flags=unham84(data[2],data[3])&0x80;
-//     flags|=(c&0x40)|((c>>2)&0x20);
-//     c=unham84(data[6],data[7]);
-//     mag->flags|=((c<<4)&0x10)|((c<<2)&0x08)|(c&0x04)|((c>>1)&0x02)|((c>>4)&0x01);
-//     mag->lang=((c>>5) & 0x07);
-
-
-
-//	b1 = unham84tab[*(b+9)];
-//	if (b1 != 0xFF) {
-//		countryControlBits = ((b1 >> 3) & 0x01) | (((b1 >> 2) & 0x01) << 1) | (((b1 >> 1) & 0x01) << 2);
-//		out_SW_NL (v,"country_control_bits: ",countryControlBits);
-//	}
 	
 
-	// -- control bits
+	// -- Control bits   S. 26 EN 300 706
+	// -- don't do unham, get bits directly
+	
+	{
+	  u_char x;
+	  int    c4,c5,c6,c7,c8,c9,c10,c11;
 
-//	b1 =  unham84tab[*(b+5)] & 8;
-//	// $$$ TODO  S. 26 EN 300 706
-//	out_SB_NL (v,"control_bits: ",control_bits);
+	  c4 = *(b+5) & 0x80;			// bit 8
+	  
+	  x  = *(b+7);
+	  c5 = x & 0x20;			// bit 6
+	  c6 = x & 0x80;			// bit 7
+
+	  x  = *(b+8);
+	  c7 = x & 0x02;			// bit 2
+	  c8 = x & 0x08;			// bit 4
+	  c9 = x & 0x20;			// bit 6
+	  c10= x & 0x80;			// bit 8
+
+	  c11  = *(b+9) & 0x02;			// bit 2
+
+	  if (c4|c5|c6|c7|c8|c9|c10|c11) {
+		  out_nl (v,"Control bits:");
+		  indent (+1);
+			if (c4) out_nl(v,"C4 = Erase page");
+			if (c5) out_nl(v,"C5 = Newsflash");
+			if (c6) out_nl(v,"C6 = Subtitle");
+			if (c7) out_nl(v,"C7 = Suppress header");
+			if (c8) out_nl(v,"C8 = Update indicator");
+			if (c9) out_nl(v,"C9 = Interrupted sequence");
+			if (c10) out_nl(v,"C10 = Inhibit display");
+			if (c11) out_nl(v,"C11 = Magazine serial");
+		  indent (-1);
+	  }
+	  
+	}
+
+
+	// -- country/language code  (c12,c13,c14)
+
+	{
+	  int lang;
+
+	  lang =  (unham84tab[*(b+9)]  >> 1) & 7;	// unhammed bits 4,6,8
+	  out_S2B_NL (v,"Character subset (c12-c14): ",
+			  lang, dvbstrTELETEXT_lang_code(lang) );
+	}
 
 
 
@@ -370,7 +409,7 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 	// -- timestring, etc.
 
 	unParityTeletextData (b+10, len-10);
-	print_databytes (v,"page header display string:", b+10, len-10);
+	print_teletext_data_x0_x25 (v,"page header display string:", b+10, len-10);
 	// out (v,"page header display string: ");
 	// print_std_ascii (v, b+10, len-10);
 	// out_NL (v);
@@ -381,3 +420,22 @@ int  print_teletext_control_decode (int v, u_char *b, int len)
 
 
 
+
+
+// -- display teletext data x0..x24
+
+void print_teletext_data_x0_x25 (int v, char *s, u_char *b, int len)
+{
+
+  // $$$ TODO  -- decode display codes c < 0x20
+  print_databytes (v,s, b, len);
+
+}
+
+
+
+
+
+
+
+// $$$ TODO  Packet 30/8
