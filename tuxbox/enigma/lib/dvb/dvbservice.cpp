@@ -12,7 +12,7 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
 	CONNECT(dvb.tSDT.tableReady, eDVBServiceController::SDTready);
 	CONNECT(dvb.tEIT.tableReady, eDVBServiceController::EITready);
 
-	if (tuxbox_get_manufacturer() != TUXBOX_MANUFACTURER_DREAM_MM)  // no dreambox
+	if (tuxbox_get_vendor() != TUXBOX_VENDOR_DREAM_MM)  // no dreambox
 	{
 		eDebug("add CAs");
 		availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)

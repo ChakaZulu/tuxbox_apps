@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.14 2003/01/02 15:43:01 Jolt Exp $
+ * $Id: enigma_info.cpp,v 1.15 2003/01/03 12:48:23 Jolt Exp $
  */
 
 #include <enigma_info.h>
@@ -159,7 +159,7 @@ public:
 		
 		dreamlogo->hide();
 		
-		vendor->setText(tuxbox_get_manufacturer_str());
+		vendor->setText(tuxbox_get_vendor_str());
 		
 		switch (tuxbox_get_model())
 		{

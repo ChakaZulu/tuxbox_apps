@@ -111,15 +111,15 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 	switch (tuxbox_get_model())
 	{
 	case TUXBOX_MODEL_DBOX2:
-		switch (tuxbox_get_manufacturer())
+		switch (tuxbox_get_vendor())
 		{
-		case TUXBOX_MANUFACTURER_NOKIA:
+		case TUXBOX_VENDOR_NOKIA:
 			new eAVSwitchNokia;
 			break;
-		case TUXBOX_MANUFACTURER_PHILIPS:
+		case TUXBOX_VENDOR_PHILIPS:
 			new eAVSwitchPhilips;
 			break;
-		case TUXBOX_MANUFACTURER_SAGEM:
+		case TUXBOX_VENDOR_SAGEM:
 			new eAVSwitchSagem;
 			break;
 		default:
