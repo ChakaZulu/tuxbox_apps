@@ -456,13 +456,13 @@
 		</eTimerView>
 	</object>
 	
-	<object name="eRecordingStatus">
+<!--	<object name="eRecordingStatus">
 		<eRecordingStatus cposition="140:50" csize="300:100" loadDeco="">
 			<eLabel pixmap="button_red" position="0:0" csize="50:e" />
 			<eLabel text="recording... press shift+record to end!" position="50:0" size="e:30" />
 			<eLabel text="remaining disk space:" position="50:30" size="e:e" />
 		</eRecordingStatus>
-	</object>
+	</object> -->
 	
 	<object name="eAboutScreen">
 		<eAboutScreen text="About..." cposition="140:150" csize="450:350">

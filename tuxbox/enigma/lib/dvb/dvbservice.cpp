@@ -324,7 +324,7 @@ void eDVBServiceController::scanPMT()
 	Decoder::parms.descriptor_length=0;
 	
 	DVBCI=eDVB::getInstance()->DVBCI;
-  DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::flush));
+  DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::flush, pmt->program_number));
 
 	isca+=checkCA(calist, pmt->program_info);
 
@@ -342,7 +342,7 @@ void eDVBServiceController::scanPMT()
 			if (!video)
 			{
   			video=pe;
-        DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addVideo,pe->elementary_PID));
+        DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addVideo, pe->elementary_PID));
 			}
 			isca+=checkCA(calist, pe->ES_info);
 			break;
@@ -351,7 +351,7 @@ void eDVBServiceController::scanPMT()
 			if (!audio)
 			{
 				audio=pe;
-        DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addAudio,pe->elementary_PID));
+        DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addAudio, pe->elementary_PID));
 			}
 			isca+=checkCA(calist, pe->ES_info);
 			break;
@@ -360,8 +360,11 @@ void eDVBServiceController::scanPMT()
 			isca+=checkCA(calist, pe->ES_info);
 			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 			{
-				/* if ((i->Tag()==DESCR_AC3))
-					audio=pe; */
+				if ((i->Tag()==DESCR_AC3))
+				{
+	        DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addAudio, pe->elementary_PID));
+					/* audio=pe; */
+				}
 				if (i->Tag()==DESCR_TELETEXT)
 					teletext=pe;
 			}
@@ -521,7 +524,9 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 			for (std::list<int>::iterator i = availableCASystems.begin(); i != availableCASystems.end() && !avail; i++)
 				if (*i == ca->CA_system_ID)
 				{
-          DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addDescr,ca->data));
+					unsigned  char *buf=new unsigned char[ca->data[1]+2];
+					memcpy(buf, ca->data, ca->data[1]+2);
+          DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addDescr, buf));
 					avail++;
 				}	
 

@@ -462,7 +462,7 @@ eZapMain::eZapMain()
 	,volume( eZap::getInstance()->getDesktop( eZap::desktopFB ) )
 	,VolumeBar( &volume ), pMsg(0), message_notifier(eApp, 0), timeout(eApp)
 	,clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp)
-	,volumeTimer(eApp), state( stateNormal )
+	,volumeTimer(eApp), recStatusBlink(eApp), state( stateNormal )
 {
 	if (!instance)
 		instance=this;
@@ -519,6 +519,10 @@ eZapMain::eZapMain()
 	dvrFunctions->hide();
 	
 	dvrfunctions=0;
+	
+	recstatus=new eLabel(this);
+	recstatus->setName("recStatus");
+	recstatus->hide();
 
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
@@ -599,7 +603,8 @@ eZapMain::eZapMain()
 
 	CONNECT(message_notifier.recv_msg, eZapMain::gotMessage);
 
-	CONNECT( volumeTimer.timeout, eZapMain::hideVolumeSlider );
+	CONNECT(volumeTimer.timeout, eZapMain::hideVolumeSlider );
+	CONNECT(recStatusBlink.timeout, eZapMain::blinkRecord);
 
 	actual_eventDisplay=0;
 
@@ -698,8 +703,8 @@ eZapMain::eZapMain()
 		playService(*curlist->current, psDontAdd);
 	startMessages();
 	
-	recstatus=new eRecordingStatus();
-	recstatus->hide();
+/*	recstatus=new eRecordingStatus();
+	recstatus->hide(); */
 
 }
 
@@ -710,8 +715,8 @@ eZapMain::~eZapMain()
 /*	else if ( state & (stateRecording|recVCR) )
 		recordVCR(0);*/
 	
-	delete recstatus;
-	recstatus=0;
+/*	delete recstatus;
+	recstatus=0; */
 
 	getPlaylistPosition();
 	if (mode != -1)
@@ -1347,6 +1352,7 @@ int eZapMain::recordDVR(int onoff, int user, eString name)
 			oldstate=state; // because of sleeping etc.
 			state=stateRecording|recDVR;
 			recstatus->show();
+			recStatusBlink.start(500, 1);
 		}
 		return 0;
 	} else
@@ -1357,6 +1363,7 @@ int eZapMain::recordDVR(int onoff, int user, eString name)
 		
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordStop));
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordClose));
+		recStatusBlink.stop();
 		recstatus->hide();
 		if (user)
 		{
@@ -1815,7 +1822,7 @@ void eZapMain::showEPG()
 	eServiceInterface::getInstance()->removeRef( eServiceInterface::getInstance()->service );
 }
 
-bool eZapMain::handleState(int notimer)
+bool eZapMain::handleState(int notimer, int justask)
 {
 	eString text, caption;
 //	caption=_("Warning!");
@@ -1861,8 +1868,23 @@ bool eZapMain::handleState(int notimer)
 		b = (box.exec() == eMessageBox::btYes);
 		box.hide();
 	}
+	if ( b && ((state & (stateMask|recDVR)) == (stateRecording|recDVR)) && !justask)
+		recordDVR(0, 0); // stop recording
 	return b;
 //	return true;
+}
+
+void eZapMain::blinkRecord()
+{
+	if ((state & stateMask) == stateRecording)
+	{
+		if (isVisible())
+			if (recstatus->isVisible())
+				recstatus->hide();
+			else
+				recstatus->show();
+		recStatusBlink.start(500, 1);
+	}
 }
 
 int eZapMain::eventHandler(const eWidgetEvent &event)
@@ -1923,24 +1945,27 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			stop();
 		else if (dvrfunctions && event.action == &i_enigmaMainActions->pause)
 			pause();
-		else if (dvrfunctions && event.action == &i_enigmaMainActions->record && handleState(0))
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->record)
 		{
- 			if ((state & stateMask) == stateRecording)
- 				recordDVR(0, 1);
- 			else
- 			{
-				eString name;
-				eServiceReference ref=eServiceInterface::getInstance()->service;
-				eService *service=eServiceInterface::getInstance()->addRef(ref);
-				if (service)
-				{
-					name=service->service_name;
-					eServiceInterface::getInstance()->removeRef(ref);
-				} else
-					name+="record";
-				if (cur_event_text != "")
-					name+=" - " + cur_event_text;
-				recordDVR(1, 1, name);
+			if (handleState(0, 1))
+			{
+	 			if ((state & stateMask) == stateRecording)
+	 				recordDVR(0, 1);
+	 			else
+	 			{
+					eString name;
+					eServiceReference ref=eServiceInterface::getInstance()->service;
+					eService *service=eServiceInterface::getInstance()->addRef(ref);
+					if (service)
+					{
+						name=service->service_name;
+						eServiceInterface::getInstance()->removeRef(ref);
+					} else
+						name+="record";
+					if (cur_event_text != "")
+						name+=" - " + cur_event_text;
+					recordDVR(1, 1, name);
+				}
 			}
 		}
 		else if (dvrfunctions && event.action == &i_enigmaMainActions->startSkipForward)
@@ -2690,9 +2715,11 @@ void eServiceContextMenu::entrySelected(eListBoxEntryText *test)
 		close((int)test->getKey());
 }
 
+/*
 eRecordingStatus::eRecordingStatus()
 {
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eRecordingStatus"))
 		eFatal("skin load of \"eRecordingStatus\" failed");
 }
+*/

@@ -292,7 +292,9 @@
 			<eLabel position="413:117" size="12:12" pixmap="button_gray" name="button_green_disabled" alphatest="on" />
 			<eLabel position="433:117" size="12:12" pixmap="button_gray" name="button_yellow_disabled" alphatest="on" />
 			<eLabel position="453:117" size="12:12" pixmap="button_gray" name="button_blue_disabled" alphatest="on" />
-			
+
+			<eLabel name="recStatus" position="7:42" size="12:12" pixmap="button_red" alphatest="on" />
+
 			<eWidget name="dvrFunctions" position="0:0" size="70:33" backgroundColor="dark">
 				<eLabel position="7:9" size="12:12" pixmap="button_red" alphatest="on" />
 				<eLabel position="22:9" size="12:12" pixmap="button_green" alphatest="on" />

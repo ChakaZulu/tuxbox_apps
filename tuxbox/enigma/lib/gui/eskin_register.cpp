@@ -18,8 +18,7 @@ public:
 		char *temp=DEFAULTSKIN;
 		eConfig::getInstance()->getKey("/ezap/ui/skin", temp);
 
-		eString skinfile=DATADIR "/enigma/skins/";
-		skinfile+=temp;
+		eString skinfile=temp;
 				
 		if (default_skin.load(skinfile.c_str()))
 		{

@@ -260,7 +260,7 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 	new eListBoxEntryText( *c, "H/V", (void*)eSwitchParameter::HV, 0, _("Voltage is automaticaly changed") );
   new eListBoxEntryText( *c, "14V", (void*)eSwitchParameter::_14V, 0, _("Voltage is always 14V (vertical)") );
 	new eListBoxEntryText( *c, "18V", (void*)eSwitchParameter::_18V, 0, _("Voltage is always 18V (horizontal") );
-	new eListBoxEntryText( *c, "14V", (void*)eSwitchParameter::_0V, 0, _("Voltage is always 14V (vertical)") );
+	new eListBoxEntryText( *c, "off", (void*)eSwitchParameter::_0V, 0, _("Voltage is always off") );
   c->setCurrent( (void*) (int) s->getSwitchParams().VoltageMode );
 	CONNECT( c->selchanged_id, eSatelliteConfigurationManager::voltageChanged);
 	entryMap.insert( std::pair <eSatellite*, SatelliteEntry> ( s, sat ) );

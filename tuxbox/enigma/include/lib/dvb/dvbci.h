@@ -87,8 +87,8 @@ public:
 		};	
 		eDVBCIMessage() { }
 		eDVBCIMessage(int type): type(type) { }
-		eDVBCIMessage(int type,unsigned char *data): type(type),data(data) { }
-		eDVBCIMessage(int type,int pid): type(type),pid(pid) { }
+		eDVBCIMessage(int type, unsigned char *data): type(type), data(data) { }
+		eDVBCIMessage(int type, int pid): type(type),pid(pid) { }
 
 	};
 	eFixedMessagePump<eDVBCIMessage> messages;

@@ -44,7 +44,7 @@ struct session_struct
 
 struct session_struct sessions[32];
 
-eDVBCI::eDVBCI():pollTimer(this),messages(this, 1)
+eDVBCI::eDVBCI(): pollTimer(this), messages(this, 1)
 {
 	state=stateInit;
 
@@ -112,11 +112,12 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::flush:
 		eDebug("[DVBCI] got flush message..");
-		createCAPMT(0,0);		
+		createCAPMT(0, (unsigned char*)message.pid); // sid in this case
 		break;
 	case eDVBCIMessage::addDescr:
 		eDebug("[DVBCI] got addDescr message..");
-		createCAPMT(1,message.data);		
+		createCAPMT(1, message.data);
+		delete[] message.data;
 		break;
 	case eDVBCIMessage::es:
 		eDebug("[DVBCI] got es message..");
@@ -165,7 +166,7 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::mmi_answ:
 		eDebug("[DVBCI] got mmi_answ message..");
-		mmi_answ(message.data,0);
+		mmi_answ(message.data, 0);
 		break;
 	case eDVBCIMessage::mmi_menuansw:
 		eDebug("[DVBCI] got mmi_menu_answ message..");
@@ -209,7 +210,7 @@ void eDVBCI::mmi_menuansw(int val)
 	sendTPDU(0xA0,9,1,buffer);
 }
 
-void eDVBCI::createCAPMT(int type,unsigned char *data)
+void eDVBCI::createCAPMT(int type, unsigned char *data)
 {
 	switch(type)
 	{
@@ -224,6 +225,8 @@ void eDVBCI::createCAPMT(int type,unsigned char *data)
 			memcpy(CAPMT,"\x90\x2\x0\x3\x9f\x80\x32\x0\x3\x0\x0\x0",12);
 			
 			CAPMT[3]=i;
+			CAPMT[9]=((int)data)>>8;
+			CAPMT[10]=((int)data);
 			CAPMTlen=14;
 			CAPMTpos=14;
 			CAPMT[7]=0;
@@ -569,6 +572,7 @@ void eDVBCI::handle_spdu(unsigned int tpdu_tc_id,unsigned char *data,int len)
 				buffer[3]=data[2];
 				buffer[4]=data[3];
 				sendTPDU(0xA0,5,tpdu_tc_id,buffer);
+				break;
 			}										
 		default:
 			eDebug("[DVBCI] unknown SPDU-TAG:%x",data[0]);		

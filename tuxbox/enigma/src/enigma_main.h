@@ -178,13 +178,13 @@ private:
 		*ButtonYellowEn, *ButtonYellowDis,
 		*ButtonBlueEn, *ButtonBlueDis;
 	
-	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff;
+	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff, *recstatus;
 	eLabel mute, volume;
 	
 	eWidget *dvrFunctions;
 	int dvrfunctions;
 	
-	eRecordingStatus *recstatus;
+	// eRecordingStatus *recstatus;
 	
 	eProgress *Progress, VolumeBar;
 	eMessageBox *pMsg;
@@ -193,7 +193,7 @@ private:
 	std::list<eZapMessage> messages;
 	eFixedMessagePump<int> message_notifier;
 
-	eTimer timeout, clocktimer, messagetimeout, progresstimer, volumeTimer;
+	eTimer timeout, clocktimer, messagetimeout, progresstimer, volumeTimer, recStatusBlink;
 
 	int cur_start, cur_duration, cur_event_id;
 	eString cur_event_text;
@@ -301,7 +301,9 @@ private:
 	void updateProgress();
 	void getPlaylistPosition();
 	void setPlaylistPosition();
-	bool handleState(int notimer);
+	bool handleState(int notimer, int justask=0);
+	
+	void blinkRecord();
 public:
 	void postMessage(const eZapMessage &message, int clear=0);
 	void gotMessage(const int &);
@@ -345,10 +347,11 @@ public:
 	eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path);
 };
 
+/*
 class eRecordingStatus: public eDecoWidget
 {
 public:
 	eRecordingStatus();
-};
+}; */
 
 #endif /* __enigma_main_h */

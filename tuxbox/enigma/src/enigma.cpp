@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <termios.h>
+
 
 #include <lib/base/i18n.h>
 #include <lib/driver/rc.h>
@@ -160,6 +162,7 @@ eZap::eZap(int argc, char **argv)
 	httpd = new eHTTPD(80);
 
 	serialhttpd=0;
+#if 0
   if ( atoi(eDVB::getInstance()->getInfo("mID").c_str()) > 4 )
   {
   	eDebug("[ENIGMA] starting httpd on serial port...");
@@ -168,12 +171,25 @@ eZap::eZap(int argc, char **argv)
 			eDebug("[ENIGMA] serial port error (%m)");
 		else
 		{
+			struct termios tio;
+			bzero(&tio, sizeof(tio));
+			tio.c_cflag = B115200 /*| CRTSCTS*/ | CS8 | CLOCAL | CREAD;
+			tio.c_iflag = IGNPAR;
+			tio.c_oflag = 0;
+			tio.c_lflag = 0;
+			tio.c_cc[VTIME] = 0;
+			tio.c_cc[VMIN] = 1;
+			tcflush(fd, TCIFLUSH);
+			tcsetattr(fd, TCSANOW, &tio); 
+
 			char *banner="Welcome to the enigma serial access.\r\n"
 					"you may start a HTTP session now.\r\n";
 			write(fd, banner, strlen(banner));
 			serialhttpd = new eHTTPConnection(fd, 0, httpd, 1);
 		}
 	}
+#endif
+
 	ezapInitializeXMLRPC(httpd);
 	httpd->addResolver(dyn_resolver);
 	httpd->addResolver(fileresolver);
