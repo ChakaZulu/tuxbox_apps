@@ -1187,13 +1187,14 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				    selected.path.right(4).upper() == ".BMP" ||
 				    selected.path.right(4).upper() == ".GIF") 
 				{
-					ePicViewerStyleSelector e(1);
+					ePicViewerStyleSelector f(1);
 #ifndef DISABLE_LCD
-					e.setLCD( LCDTitle, LCDElement );
+					f.setLCD( LCDTitle, LCDElement );
 #endif
-					e.show();
-					int ret = e.exec();
-					e.hide();
+					f.show();
+					printf("[SSELECT] calling exec() now...\n");
+					int ret = f.exec();
+					f.hide();
 					switch (ret)
 					{
 						case 0:
