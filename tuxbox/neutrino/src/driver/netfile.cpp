@@ -1255,13 +1255,12 @@ int f_status(FILE *stream, void (*cb)(void*))
   if(!stream)
   {
     strcpy(err_txt, "NULL pointer as stream id\n");
-    printf("NULL pointer as stream id\n");
     return -1;
   }
   
   /* lookup the stream ID in the cache table */
   i = getCacheSlot(stream);
-  printf("Slot %d\n",i);
+
   if(cache[i].fd == stream)
   {
     /* hook the users function into the steam filter */
@@ -1289,18 +1288,24 @@ void ShoutCAST_ParseMetaData(char *md, CSTATE *state)
 #define SKIP(a) for(;(a && !isalnum(*a)); ++a);
   char *ptr;
 
+  dprintf(stderr, "ShoutCAST_ParseMetaData(%s, %x)\n", md, state);
+  
   ptr = strstr(md, "StreamTitle=");
 
   if(ptr)
   {
-    /* look if there is a dash that separates artist and title */
+    /* look if there is a dash or a comma that separates artist and title */
     ptr = strstr(md, " - ");
+
+    if(!ptr)
+     ptr = strstr(md, ", ");
+    
      
-    /* no dash, simply copy everything into the 'title' field */
+    /* no separator, simply copy everything into the 'title' field */
     if(!ptr)
     {
-      ptr = strchr(ptr, '\'');
-      strncpy(state->title, ptr + 1, 4096);
+      ptr = strchr(md, '=');
+      strncpy(state->title, ptr + 2, 4096);
       ptr = strchr(state->title, ';');      
       if(ptr) *(ptr - 1) = 0;
       state->artist[0] = 0;
@@ -1316,6 +1321,9 @@ void ShoutCAST_ParseMetaData(char *md, CSTATE *state)
       ptr = strchr(ptr, '\'');
       strncpy(state->artist, ptr + 1, 4096);
       ptr = strstr(state->artist, " - ");
+      if(!ptr)
+        ptr = strstr(state->artist, ", ");
+
       if(ptr) *ptr = 0;
     }
     state->state = RUNNING;
