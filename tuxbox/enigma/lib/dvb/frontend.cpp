@@ -516,10 +516,10 @@ TransmitMode getTransmitMode( int mode )
 {
 	switch(mode)  // !! IS THIS CORRECT ?? 
 	{
-		case 2:
-			return TRANSMISSION_MODE_8K;
-		case 1:
+		case 0:
 			return TRANSMISSION_MODE_2K;
+		case 1:
+			return TRANSMISSION_MODE_8K;
 	}
 	return (TransmitMode)TRANSMISSION_MODE_AUTO;
 }
