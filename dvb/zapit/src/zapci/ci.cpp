@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.4 2002/08/27 12:31:34 thegoodguy Exp $
+ * $Id: ci.cpp,v 1.5 2002/08/27 14:23:07 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,27 +22,40 @@
 #include "ci.h"
 
 /*
+ * conditional access descriptors
+ */
+CCaDescriptor::CCaDescriptor (unsigned char * buffer)
+{
+	descriptor_tag = buffer[0];
+	descriptor_length = buffer[1];
+	CA_system_ID = *(unsigned*)(&(buffer[2]));
+	reserved1 = buffer[4] >> 5;
+	CA_PID = ((buffer[4] & 0x1F) << 8) | buffer[5];
+
+	private_data_byte = std::vector<unsigned char>(&(buffer[6]), &(buffer[descriptor_length + 2]));
+}
+
+unsigned int CCaDescriptor::writeToBuffer (unsigned char * buffer) // returns number of bytes written
+{
+	buffer[0] = descriptor_tag;
+	buffer[1] = descriptor_length;
+	*(unsigned short*)(&(buffer[2])) = CA_system_ID;
+	buffer[4] = (reserved1 << 5) | (CA_PID >> 8);
+	buffer[5] = CA_PID;
+
+	std::copy(private_data_byte.begin(), private_data_byte.end(), &(buffer[6]));
+
+	return descriptor_length + 2;
+}
+
+
+/*
  * generic table containing conditional access descriptors
  */
 
 void CCaTable::addCaDescriptor (unsigned char * buffer)
 {
-	unsigned char i;
-
-	CCaDescriptor * descriptor = new CCaDescriptor();
-
-	descriptor->descriptor_tag = buffer[0];
-	descriptor->descriptor_length = buffer[1];
-	descriptor->CA_system_ID = *(unsigned*)(&(buffer[2]));
-	descriptor->reserved1 = buffer[4] >> 5;
-	descriptor->CA_PID = ((buffer[4] & 0x1F) << 8) | buffer[5];
-
-	for (i = 0; i < descriptor->descriptor_length - 4; i++)
-	{
-		descriptor->private_data_byte.insert(descriptor->private_data_byte.end(), buffer[i + 6]);
-	}
-
-	ca_descriptor.insert(ca_descriptor.end(), descriptor);
+	ca_descriptor.push_back(new CCaDescriptor(buffer));
 }
 
 /*

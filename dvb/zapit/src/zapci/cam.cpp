@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.18 2002/08/27 12:31:34 thegoodguy Exp $
+ * $Id: cam.cpp,v 1.19 2002/08/27 14:23:07 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -125,7 +125,6 @@ int CCam::setCaPmt (CCaPmt * caPmt)
 	unsigned short pos2;
 	unsigned short i;
 	unsigned short j;
-	unsigned short k;
 
 	buffer[0] = caPmt->ca_pmt_tag >> 16;
 	buffer[1] = caPmt->ca_pmt_tag >> 8;
@@ -149,19 +148,8 @@ int CCam::setCaPmt (CCaPmt * caPmt)
 	{
 		buffer[offset + 10] = caPmt->ca_pmt_cmd_id;
 
-		for (pos = offset + 11, i = 0; pos < caPmt->program_info_length + offset + 10; pos += caPmt->ca_descriptor[i]->descriptor_length + 2, i++)
-		{
-			buffer[pos] = caPmt->ca_descriptor[i]->descriptor_tag;
-			buffer[pos + 1] = caPmt->ca_descriptor[i]->descriptor_length;
-			*(unsigned short*)(&(buffer[pos + 2])) = caPmt->ca_descriptor[i]->CA_system_ID;
-			buffer[pos + 4] = (caPmt->ca_descriptor[i]->reserved1 << 5) | (caPmt->ca_descriptor[i]->CA_PID >> 8);
-			buffer[pos + 5] = caPmt->ca_descriptor[i]->CA_PID;
-
-			for (j = 0; j < caPmt->ca_descriptor[i]->descriptor_length - 4; j++)
-			{
-				buffer[pos + 6 + j] = caPmt->ca_descriptor[i]->private_data_byte[j];
-			}
-		}
+		for (pos = offset + 11, i = 0; pos < caPmt->program_info_length + offset + 10; i++)
+			pos += caPmt->ca_descriptor[i]->writeToBuffer(&(buffer[pos]));
 	}
 
 	for (pos = caPmt->program_info_length + offset + 10, i = 0; pos < caPmt->getLength(); pos += caPmt->es_info[i]->ES_info_length + 5, i++)
@@ -176,19 +164,8 @@ int CCam::setCaPmt (CCaPmt * caPmt)
 		{
 			buffer[pos + 5] = caPmt->es_info[i]->ca_pmt_cmd_id;
 
-			for (pos2 = pos + 6, j = 0; pos2 < pos + caPmt->es_info[i]->ES_info_length + 5; pos2 += caPmt->es_info[i]->ca_descriptor[j]->descriptor_length + 2, j++)
-			{
-				buffer[pos2] = caPmt->es_info[i]->ca_descriptor[j]->descriptor_tag;
-				buffer[pos2 + 1] = caPmt->es_info[i]->ca_descriptor[j]->descriptor_length;
-				*(unsigned short*)(&(buffer[pos2 + 2])) = caPmt->es_info[i]->ca_descriptor[j]->CA_system_ID;
-				buffer[pos2 + 4] = (caPmt->es_info[i]->ca_descriptor[j]->reserved1 << 5) | (caPmt->es_info[i]->ca_descriptor[j]->CA_PID >> 8);
-				buffer[pos2 + 5] = caPmt->es_info[i]->ca_descriptor[j]->CA_PID;
-
-				for (k = 0; k < caPmt->es_info[i]->ca_descriptor[j]->descriptor_length - 4; k++)
-				{
-					buffer[pos2 + 6 + k] = caPmt->es_info[i]->ca_descriptor[j]->private_data_byte[k];
-				}
-			}
+			for (pos2 = pos + 6, j = 0; pos2 < pos + caPmt->es_info[i]->ES_info_length + 5; j++)
+				pos2 += caPmt->es_info[i]->ca_descriptor[j]->writeToBuffer(&(buffer[pos2]));
 		}
 	}
 

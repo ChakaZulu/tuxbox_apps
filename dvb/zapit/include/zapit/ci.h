@@ -1,5 +1,5 @@
 /*
- * $Id: ci.h,v 1.2 2002/07/17 02:16:50 obi Exp $
+ * $Id: ci.h,v 1.3 2002/08/27 14:23:07 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -26,15 +26,17 @@
 
 class CCaDescriptor
 {
-	public:
+	private:
 		unsigned char	descriptor_tag		: 8;
 		unsigned char	descriptor_length	: 8;
 		unsigned short	CA_system_ID		: 16;
 		unsigned char	reserved1		: 3;
 		unsigned short	CA_PID			: 13;
-
-		/* for (i = 0; i < n; i++) */
 		std::vector <unsigned char> private_data_byte;
+
+	public:
+		CCaDescriptor (unsigned char * buffer);
+		unsigned int writeToBuffer (unsigned char * buffer); // returns number of bytes written
 };
 
 /*
