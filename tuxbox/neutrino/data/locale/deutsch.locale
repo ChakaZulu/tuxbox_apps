@@ -79,8 +79,8 @@ ping.unreachable ist nicht erreichbar (unreachable)
 ping.protocol ist nicht erreichbar (Host or protocol error)
 ping.socket ist nicht erreichbar (Socket error)
 
-ipsetup.hint_1 Benutzen Sie "0"-"9", Rot ist " ", Grün "."
-ipsetup.hint_2 oder Up/Down, OK speichert, Home bricht ab
+ipsetup.hint_1 Benutzen Sie 0..9 oder hoch/runter
+ipsetup.hint_2 OK speichert, Home bricht ab
 
 colormenu.head Farb-Einstellungen
 colormenu.statusbar Statusbalken

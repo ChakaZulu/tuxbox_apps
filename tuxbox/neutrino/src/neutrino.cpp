@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.209 2002/03/30 13:25:55 Simplex Exp $
+        $Id: neutrino.cpp,v 1.210 2002/04/01 21:46:01 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -109,8 +109,14 @@ void CNeutrinoApp::setupNetwork(bool force)
 		printf("doing network setup...\n");
 		//setup network
 		setNetworkAddress(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast);
-		setNameServer(g_settings.network_nameserver);
-		setDefaultGateway(g_settings.network_defaultgateway);
+		if(strcmp(g_settings.network_nameserver, "000.000.000.000")!=0)
+		{
+			setNameServer(g_settings.network_nameserver);
+		}
+		if(strcmp(g_settings.network_defaultgateway, "000.000.000.000")!=0)
+		{
+			setDefaultGateway(g_settings.network_defaultgateway);
+		}
 	}
 }
 void CNeutrinoApp::testNetwork( )
@@ -289,8 +295,8 @@ void CNeutrinoApp::setupDefaults()
 
 
 	//network
-	strcpy(g_settings.network_netmask, "255.255.255.0");
-	strcpy(g_settings.network_defaultgateway, "");
+	strcpy(g_settings.network_netmask, "255.255.255.000");
+	strcpy(g_settings.network_defaultgateway, "000.000.000.000");
 	strcpy(g_settings.network_nameserver, "");
 
 	FILE* fd = fopen("/var/tuxbox/config/ip", "r");
@@ -298,20 +304,20 @@ void CNeutrinoApp::setupDefaults()
 	{
 		char _ip[4];
 		fread(_ip, 4, 4, fd);
-		sprintf( g_settings.network_ip, "%d.%d.%d.%d", _ip[0], _ip[1], _ip[2], _ip[3] );
-		sprintf( g_settings.network_broadcast, "%d.%d.%d.255", _ip[0], _ip[1], _ip[2] );
+		sprintf( g_settings.network_ip, "%3d.%3d.%3d.%3d", _ip[0], _ip[1], _ip[2], _ip[3] );
+		sprintf( g_settings.network_broadcast, "%3d.%3d.%3d.255", _ip[0], _ip[1], _ip[2] );
 		fclose(fd);
 		g_settings.networkSetOnStartup = 1;
 	}
 	else
 	{
-		strcpy(g_settings.network_ip, "10.10.10.100");
-		strcpy(g_settings.network_broadcast, "10.10.10.255");
+		strcpy(g_settings.network_ip, "010.010.010.100");
+		strcpy(g_settings.network_broadcast, "010.010.010.255");
 		g_settings.networkSetOnStartup = 0;
 	}
 
 	g_settings.network_streaming_use = 0;
-	strcpy(g_settings.network_streamingserver, "10.10.10.10");
+	strcpy(g_settings.network_streamingserver, "010.010.010.010");
 	strcpy(g_settings.network_streamingserverport, "4000");
 
 
@@ -1049,11 +1055,11 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CStringInput*	networkSettings_NetworkIP= new CStringInput("networkmenu.ipaddress", g_settings.network_ip, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789. ", MyIPChanger);
-	CStringInput*	networkSettings_NetMask= new CStringInput("networkmenu.netmask", g_settings.network_netmask, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
-	CStringInput*	networkSettings_Broadcast= new CStringInput("networkmenu.broadcast", g_settings.network_broadcast, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
-	CStringInput*	networkSettings_Gateway= new CStringInput("networkmenu.gateway", g_settings.network_defaultgateway, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
-	CStringInput*	networkSettings_NameServer= new CStringInput("networkmenu.nameserver", g_settings.network_nameserver, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput*	networkSettings_NetworkIP= new CIPInput("networkmenu.ipaddress", g_settings.network_ip, "ipsetup.hint_1", "ipsetup.hint_2", MyIPChanger);
+	CIPInput*	networkSettings_NetMask= new CIPInput("networkmenu.netmask", g_settings.network_netmask, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput*	networkSettings_Broadcast= new CIPInput("networkmenu.broadcast", g_settings.network_broadcast, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput*	networkSettings_Gateway= new CIPInput("networkmenu.gateway", g_settings.network_defaultgateway, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput*	networkSettings_NameServer= new CIPInput("networkmenu.nameserver", g_settings.network_nameserver, "ipsetup.hint_1", "ipsetup.hint_2");
 
 	networkSettings.addItem( new CMenuForwarder("networkmenu.ipaddress", true, g_settings.network_ip, networkSettings_NetworkIP ));
 	networkSettings.addItem( new CMenuForwarder("networkmenu.netmask", true, g_settings.network_netmask, networkSettings_NetMask ));
@@ -2207,7 +2213,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.209 2002/03/30 13:25:55 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.210 2002/04/01 21:46:01 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

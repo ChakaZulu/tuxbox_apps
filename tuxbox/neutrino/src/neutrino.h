@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.69 2002/03/24 14:59:40 field Exp $
+//  $Id: neutrino.h,v 1.70 2002/04/01 21:46:01 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -65,6 +65,7 @@
 #include "widget/colorchooser.h"
 #include "widget/keychooser.h"
 #include "widget/stringinput.h"
+#include "widget/stringinput_ext.h"
 #include "widget/screensetup.h"
 #include "widget/gamelist.h"
 #include "widget/bouqueteditor_bouquets.h"

@@ -81,8 +81,8 @@ ping.unreachable is unreachable
 ping.protocol is unreachable (host or protocol error)
 ping.socket is unreachable (socket error)
 
-ipsetup.hint_1 Use "0"-"9", red is space, green is "."
-ipsetup.hint_2 or use Up/Down, OK saves, Home aborts
+ipsetup.hint_1 Use 0..9, or use Up/Down,
+ipsetup.hint_2 OK saves, Home aborts
 
 colormenu.head Color Settings
 colormenu.statusbar Infobar
