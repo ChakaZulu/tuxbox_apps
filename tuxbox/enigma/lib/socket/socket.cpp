@@ -204,7 +204,9 @@ int eSocket::writeBlock(const char *data, unsigned int len)
 	{
 		int tw=::send(getDescriptor(), data, len, MSG_NOSIGNAL);
 		if ((tw < 0) && (errno != EWOULDBLOCK))
-			eDebug("write: %m");
+	// don't use eDebug here because of a adaptive mutex in the eDebug call..
+	// and eDebug self can cause a call of writeBlock !!
+			printf("write: %m\n");
 		if (tw < 0)
 			tw = 0;
 		data+=tw;

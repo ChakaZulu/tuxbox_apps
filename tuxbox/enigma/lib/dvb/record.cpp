@@ -23,7 +23,8 @@
 #define DEMUX1_DEV "/dev/dvb/adapter0/demux1"
 #endif
 
-static pthread_mutex_t PMTLock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+static pthread_mutex_t PMTLock =
+	PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 static int section_length(const unsigned char *buf)
 {

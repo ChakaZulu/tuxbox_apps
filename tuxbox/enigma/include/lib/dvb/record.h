@@ -64,8 +64,6 @@ class eDVBRecorder: private eThread, public Object
 
 	int splits, splitsize, size, dvrfd, outfd;
 
-	pthread_mutex_t bufferLock;
-
 	eString filename;
 
 	char buf[65424]; 

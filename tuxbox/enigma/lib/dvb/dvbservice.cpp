@@ -27,7 +27,9 @@
 #endif
 
 std::set<eDVBCaPMTClient*> eDVBCaPMTClientHandler::capmtclients;
-eLock eDVBServiceController::availCALock;
+
+pthread_mutex_t eDVBServiceController::availCALock =
+	PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 eString getISO639Description(char *iso)
 {
@@ -1180,7 +1182,7 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 
 			int avail=0;
 			{
-				eLocker s(availCALock);
+				singleLock s(availCALock);
 				if (availableCASystems.find(ca->CA_system_ID) != availableCASystems.end())
 					avail++;
 			}
@@ -1214,14 +1216,14 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 
 void eDVBServiceController::initCAlist()
 {
-	eLocker s(availCALock);
+	singleLock s(availCALock);
 	availableCASystems=eSystemInfo::getInstance()->getCAIDs();
 }
 
 void eDVBServiceController::clearCAlist()
 {
 	{
-		eLocker s(availCALock);
+		singleLock s(availCALock);
 		availableCASystems.clear();
 	}
 	initCAlist();

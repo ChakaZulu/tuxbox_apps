@@ -481,7 +481,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 
 	int numsys=0;
 	{
-		eLocker s(eDVBServiceController::availCALock);
+		singleLock s(eDVBServiceController::availCALock);
 		std::set<int>& availCA = sapi->availableCASystems;
 		for (std::set<int>::iterator i(availCA.begin()); i != availCA.end(); ++i)
 		{

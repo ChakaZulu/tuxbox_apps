@@ -126,7 +126,7 @@ public:
 	eTransponder *transponder;
 	TDT *tdt;
 
-	static eLock availCALock;
+	static pthread_mutex_t availCALock;
 
 	struct CA
 	{

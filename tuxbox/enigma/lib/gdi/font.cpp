@@ -29,8 +29,8 @@
 
 fontRenderClass *fontRenderClass::instance;
 
-static pthread_mutex_t ftlock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
-static pthread_mutex_t refcntlck=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+static pthread_mutex_t ftlock = 
+	PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;   // RECURSIVE
 
 static FTC_Font cache_current_font=0;
 
@@ -86,11 +86,11 @@ FT_Error myFTC_Face_Requester(FTC_FaceID	face_id,
 FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID	face_id, FT_Face* aface)
 {
 	fontListEntry *font=(fontListEntry *)face_id;
+
 	if (!font)
 		return -1;
-	
-//	eDebug("[FONT] FTC_Face_Requester (%s)", font->face.c_str());
 
+//	eDebug("[FONT] FTC_Face_Requester (%s)", font->face.c_str());
 	int error;
 	if ((error=FT_New_Face(library, font->filename.c_str(), 0, aface)))
 	{
@@ -99,7 +99,7 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID	face_id, FT_Face* aface)
 	}
 	FT_Select_Charmap(*aface, ft_encoding_unicode);
 	return 0;
-}																																																																
+}
 
 FTC_FaceID fontRenderClass::getFaceID(const eString &face)
 {
@@ -121,22 +121,22 @@ eString fontRenderClass::AddFont(const eString &filename, const eString &name, i
 {
 	eDebugNoNewLine("[FONT] adding font %s...", filename.c_str());
 	int error;
+
+	{
+		FT_Face face;
+		singleLock s(ftlock);
+		if ((error=FT_New_Face(library, filename.c_str(), 0, &face)))
+			eFatal(" failed: %s", strerror(error));
+		FT_Done_Face(face);
+	}
+
 	fontListEntry *n=new fontListEntry;
-
 	n->scale=scale;
-	FT_Face face;
-	singleLock s(ftlock);
-
-	if ((error=FT_New_Face(library, filename.c_str(), 0, &face)))
-		eFatal(" failed: %s", strerror(error));
-
 	n->filename=filename;
 	n->face=name;
-	FT_Done_Face(face);
-
 	n->next=font;
-	eDebug("OK (%s)", n->face.c_str());
 	font=n;
+	eDebug("OK (%s)", n->face.c_str());
 
 	return n->face;
 }
@@ -145,44 +145,43 @@ fontRenderClass::fontListEntry::~fontListEntry()
 {
 }
 
-fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
+fontRenderClass::fontRenderClass()
+	:fb(fbClass::getInstance())
 {
 	instance=this;
 	eDebug("[FONT] initializing lib...");
+
+	if (FT_Init_FreeType(&library))
 	{
-		if (FT_Init_FreeType(&library))
-		{
-			eDebug("[FONT] initializing failed.");
-			return;
-		}
+		eDebug("[FONT] initializing failed.");
+		return;
 	}
+
 	eDebug("[FONT] loading fonts...");
 	font=0;
-	
 	int maxbytes=4*1024*1024;
 	eDebug("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
+
+	if (FTC_Manager_New(library, 8, 8, maxbytes, myFTC_Face_Requester, this, &cacheManager))
 	{
-		if (FTC_Manager_New(library, 8, 8, maxbytes, myFTC_Face_Requester, this, &cacheManager))
-		{
-			eDebug("[FONT] initializing font cache failed!");
-			return;
-		}
-		if (!cacheManager)
-		{
-			eDebug("[FONT] initializing font cache manager error.");
-			return;
-		}
-		if (FTC_SBit_Cache_New(cacheManager, &sbitsCache))
-		{
-			eDebug("[FONT] initializing font cache sbit failed!");
-			return;
-		}
-		if (FTC_Image_Cache_New(cacheManager, &imageCache))
-		{
-			eDebug("[FONT] initializing font cache imagecache failed!");
-		}
+		eDebug("[FONT] initializing font cache failed!");
+		return;
 	}
-	return;
+
+	if (!cacheManager)
+	{
+		eDebug("[FONT] initializing font cache manager error.");
+		return;
+	}
+
+	if (FTC_SBit_Cache_New(cacheManager, &sbitsCache))
+	{
+		eDebug("[FONT] initializing font cache sbit failed!");
+		return;
+	}
+
+	if (FTC_Image_Cache_New(cacheManager, &imageCache))
+		eDebug("[FONT] initializing font cache imagecache failed!");
 }
 
 float fontRenderClass::getLineHeight(const gFont& font)
@@ -192,13 +191,16 @@ float fontRenderClass::getLineHeight(const gFont& font)
 	Font *fnt = getFont( font.family.c_str(), font.pointSize);
 	if (!fnt)
 		return 0;
-	singleLock s(ftlock);
+
 	FT_Face current_face;
-	if (FTC_Manager_Lookup_Size(cacheManager, &fnt->font.font, &current_face, &fnt->size)<0)
 	{
-		delete fnt;
-		eDebug("FTC_Manager_Lookup_Size failed!");
-		return 0;
+		singleLock s(ftlock);
+		if (FTC_Manager_Lookup_Size(cacheManager, &fnt->font.font, &current_face, &fnt->size)<0)
+		{
+			delete fnt;
+			eDebug("FTC_Manager_Lookup_Size failed!");
+			return 0;
+		}
 	}
 	int linegap=current_face->size->metrics.height-(current_face->size->metrics.ascender+current_face->size->metrics.descender);
 	float height=(current_face->size->metrics.ascender+current_face->size->metrics.descender+linegap/2.0)/64;
@@ -209,7 +211,6 @@ float fontRenderClass::getLineHeight(const gFont& font)
 
 fontRenderClass::~fontRenderClass()
 {
-	singleLock s(ftlock);
 	while(font)
 	{
 		fontListEntry *f=font;
@@ -229,17 +230,15 @@ Font *fontRenderClass::getFont(const eString &face, int size, int tabwidth)
 	return new Font(this, id, size * ((fontListEntry*)id)->scale / 100, tabwidth);
 }
 
-Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize, int tw): tabwidth(tw)
+Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize, int tw)
+	:renderer(render), ref(0), tabwidth(tw),  height(isize)
 {
-	renderer=render;
 	font.font.face_id=faceid;
 	font.font.pix_width	= isize;
 	font.font.pix_height = isize;
 	font.image_type = ftc_image_grays;
-	height=isize;
 	if (tabwidth==-1)
 		tabwidth=8*isize;
-	ref=0;
 //	font.image_type |= ftc_image_flag_autohinted;
 }
 
@@ -341,6 +340,7 @@ int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt gly
 	ng.font->lock();
 	ng.glyph_index=glyphIndex;
 	ng.flags=flags;
+
 	glyphs.push_back(ng);
 
 	cursor+=ePoint(xadvance, 0);
@@ -396,16 +396,12 @@ eTextPara::~eTextPara()
 
 void eTextPara::destroy()
 {
-	singleLock s(refcntlck);
-
 	if (!refcnt--)
 		delete this;
 }
 
 eTextPara *eTextPara::grab()
 {
-	singleLock s(refcntlck);
-
 	refcnt++;
 	return this;
 }
@@ -414,6 +410,7 @@ void eTextPara::setFont(const gFont &font)
 {
 	if (refcnt)
 		eFatal("mod. after lock");
+
 	Font *fnt=fontRenderClass::getInstance()->getFont(font.family.c_str(), font.pointSize);
 	if (!fnt)
 		eWarning("FONT '%s' MISSING!", font.family.c_str());
@@ -427,8 +424,10 @@ void eTextPara::setFont(Font *fnt, Font *replacement)
 {
 	if (refcnt)
 		eFatal("mod. after lock");
+
 	if (!fnt)
 		return;
+
 	if (current_font)
 	{
 		if ( !current_font->ref )
@@ -441,11 +440,10 @@ void eTextPara::setFont(Font *fnt, Font *replacement)
 			delete replacement_font;
 	}
 	replacement_font=replacement;
-	singleLock s(ftlock);
-
 			// we ask for replacment_font first becauseof the cache
 	if (replacement_font)
 	{
+		singleLock s(ftlock);
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, 
 				&replacement_font->font.font, &replacement_face, 
 				&replacement_font->size)<0)
@@ -456,6 +454,7 @@ void eTextPara::setFont(Font *fnt, Font *replacement)
 	}
 	if (current_font)
 	{
+		singleLock s(ftlock);
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 		{
 			eDebug("FTC_Manager_Lookup_Size failed!");
@@ -472,14 +471,12 @@ shape (std::vector<unsigned long> &string, const std::vector<unsigned long> &tex
 
 int eTextPara::renderString(const eString &string, int rflags)
 {
-	singleLock s(ftlock);
-	
 	if (refcnt)
 		eFatal("mod. after lock");
 
 	if (!current_font)
 		return -1;
-		
+
 	if (cursor.y()==-1)
 	{
 		cursor=ePoint(area.x(), area.y()+(current_face->size->metrics.ascender>>6));
@@ -488,6 +485,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 		
 	if (&current_font->font.font != cache_current_font)
 	{
+		singleLock s(ftlock);
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 		{
 			eDebug("FTC_Manager_Lookup_Size failed!");
@@ -561,7 +559,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 #endif
 
 	glyphs.reserve(uc_visual.size());
-	
+
 	int nextflags = 0;
 	
 	for (std::vector<unsigned long>::const_iterator i(uc_visual.begin());
@@ -618,8 +616,8 @@ nprint:	isprintable=0;
 		}
 		if (isprintable)
 		{
+			singleLock s(ftlock);
 			FT_UInt index;
-
 			index=(rflags&RS_DIRECT)? *i : FT_Get_Char_Index(current_face, *i);
 
 			if (!index)
@@ -646,13 +644,12 @@ nprint:	isprintable=0;
 
 void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background, const gRGB &foreground)
 {
-	singleLock s(ftlock);
-	
 	if (!current_font)
 		return;
 
 	if (&current_font->font.font != cache_current_font)
 	{
+		singleLock s(ftlock);
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 		{
 			eDebug("FTC_Manager_Lookup_Size failed!");
@@ -778,9 +775,13 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background
 
 void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 {
-	glyphString::iterator begin(glyphs.begin()), c(glyphs.begin()), end(glyphs.begin()), last;
+	if (refcnt)
+		eFatal("mod. after lock");
+
 	if (dir==dirLeft)
 		return;
+
+	glyphString::iterator begin(glyphs.begin()), c(glyphs.begin()), end(glyphs.begin()), last;
 	while (c != glyphs.end())
 	{
 		int linelength=0;
@@ -863,8 +864,6 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 
 void eTextPara::clear()
 {
-	singleLock s(ftlock);
-
 	if ( current_font && !current_font->ref )
 		delete current_font;
 

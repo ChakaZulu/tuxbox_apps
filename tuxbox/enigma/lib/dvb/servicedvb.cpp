@@ -33,9 +33,11 @@
 
 eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *handler, int livemode )
 	:handler(handler), buffer(65424), livemode(livemode), liveupdatetimer(this)
-	,inputsn(0), outputsn(0), lock(), messages(this, 1)
+	,inputsn(0), outputsn(0), messages(this, 1)
 {
 	state=stateInit;
+
+	pthread_mutex_init(&poslock,0);
 
 	int count=0;
 	seekbusy=0;
@@ -154,9 +156,7 @@ int eDVRPlayerThread::openFile(int slice)
 
 void eDVRPlayerThread::thread()
 {
-	lock.lock();
 	exec();
-	lock.unlock();
 }
 
 void eDVRPlayerThread::outputReady(int what)
@@ -283,7 +283,6 @@ void eDVRPlayerThread::readMore(int what)
 eDVRPlayerThread::~eDVRPlayerThread()
 {
 	messages.send(eDVRPlayerThreadMessage(eDVRPlayerThreadMessage::exit));
-	lock.lock();	// wait for message loop exit
 	kill(); 			// join the thread
 
 	int fd = Decoder::getAudioDevice();
@@ -306,7 +305,7 @@ eDVRPlayerThread::~eDVRPlayerThread()
 void eDVRPlayerThread::updatePosition()
 {
 	{
-		eLocker l(poslock);
+		singleLock l(poslock);
 		int slice=0;
 		struct stat s;
 		filelength=0;
@@ -319,7 +318,7 @@ void eDVRPlayerThread::updatePosition()
 	
 	if (state == stateFileEnd)
 	{
-		printf("file end reached, retrying..\n");
+		eDebug("file end reached, retrying..");
 		state = stateBuffering;
 		if (inputsn)
 			inputsn->start();
@@ -328,7 +327,7 @@ void eDVRPlayerThread::updatePosition()
 
 int eDVRPlayerThread::getPosition(int real)
 {
-	eLocker l(poslock);
+	singleLock l(poslock);
 	if (real)
 		return ((::lseek(sourcefd, 0, SEEK_CUR)-buffer.size()) / 1880) + slice*(slicesize/1880);
 	return (((::lseek(sourcefd, 0, SEEK_CUR)-buffer.size()) / 1880) + slice*(slicesize/1880)) / 250;
@@ -336,7 +335,7 @@ int eDVRPlayerThread::getPosition(int real)
 
 int eDVRPlayerThread::getLength(int real)
 {
-	eLocker l(poslock);
+	singleLock l(poslock);
 	if (real)
 		return filelength;
 	return filelength/250;

@@ -510,7 +510,7 @@ void eDVBCI::pushCAIDs()
 		return;
 
 //	eDebug("count for caids: %d",caidcount);
-	eLocker s(eDVBServiceController::availCALock);
+	singleLock s(eDVBServiceController::availCALock);
 	for(unsigned int i=0;i<caidcount;i++)
 		sapi->availableCASystems.insert(caids[i]);
 }

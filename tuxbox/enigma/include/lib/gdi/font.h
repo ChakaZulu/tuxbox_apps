@@ -90,13 +90,14 @@ class eTextPara
 	int left;
 	glyphString glyphs;
 	int refcnt;
+	eRect boundBox;
+	int bboxValid;
 
 	int appendGlyph(Font *current_font, FT_Face current_face, FT_UInt glyphIndex, int flags, int rflags);
 	void newLine(int flags);
 	void setFont(Font *font, Font *replacement_font);
-	eRect boundBox;
 	void calc_bbox();
-	int bboxValid;
+	void clear();
 public:
 	eTextPara(eRect area, ePoint start=ePoint(-1, -1))
 		: current_font(0), replacement_font(0), current_face(0), replacement_face(0),
@@ -113,8 +114,6 @@ public:
 	void setFont(const gFont &font);
 	int renderString(const eString &string, int flags=0);
 
-	void clear();
-
 	void blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background, const gRGB &foreground);
 
 	enum
@@ -128,7 +127,6 @@ public:
 	{
 		if (!bboxValid)
 			calc_bbox();
-
 		return boundBox;
 	}
 

@@ -33,7 +33,7 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 
 	int filelength; // in 1880 packets
 	int position;
-	eLock poslock;
+	pthread_mutex_t poslock;
 
 	off64_t slicesize;
 	eString filename;
@@ -42,8 +42,7 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	void outputReady(int what);
 	int maxBufferSize;
 	int seekbusy, seeking;
-	eLock lock;
-	
+
 	void dvrFlush();
 	int openFile(int slice=0);
 public:
