@@ -444,6 +444,7 @@ flashupdate.flashreadyreboot The image was successfully flashed.\nThe DBox will 
 flashupdate.reallyflashmtd Do you really want to flash?\n\nIf a error occurs or the image is not\nvalid, the box will not boot after flashing.\n\nImagename: %s\nTarget: %s
 flashupdate.wrongbase Your Release cycle differs, unable to update\nwithout having installed the right version!
 flashupdate.experimentalimage The image you have selected is an untested version, this means\nyour box maybe fail to boot after update.\n\nDo you really want to update to this version?
+flashupdate.squashfs.noversion SquashFS version checks are currently only supported when updating over the web.\nAre you sure that you wish to install this image?
 
 bouqueteditor.name Bouquet-editor
 bouqueteditor.delete Delete

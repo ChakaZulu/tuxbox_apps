@@ -52,7 +52,9 @@
 #include <system/flashtool.h>
 #include <system/httptool.h>
 
+#ifndef SQUASHFS
 #include <libcramfs.h>
+#endif
 
 #include <curl/curl.h>
 #include <curl/types.h>
@@ -234,6 +236,25 @@ bool CFlashUpdate::checkVersion4Update()
 		versionInfo = new CFlashVersionInfo(newVersion);
 
 		msg_body = "flashupdate.msgbox";
+#ifdef SQUASHFS
+		sprintf(msg, g_Locale->getText(msg_body), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getReleaseCycle(), versionInfo->getType());
+
+		if (strcmp(RELEASE_CYCLE, versionInfo->getReleaseCycle()))
+		{
+			delete versionInfo;
+			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.wrongbase")); // UTF-8
+			return false;
+		}
+
+		if ((strcmp("Release", versionInfo->getType()) != 0) &&
+		    (ShowMsgUTF("messagebox.info", g_Locale->getText("flashupdate.experimentalimage"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes)) // UTF-8
+		{
+			delete versionInfo;
+			return false;
+		}
+
+		delete versionInfo;
+#endif
 	}
 	else
 	{
@@ -289,14 +310,20 @@ bool CFlashUpdate::checkVersion4Update()
 		}
 		hide();
 		
+#ifdef SQUASHFS
+#warning no squash filesystem version check in non-internet update mode
+		strcpy(msg, g_Locale->getText("flashupdate.squashfs.noversion"));
+#else
 		//bestimmung der CramfsDaten
 		char cramfsName[30];
 		cramfs_name((char *) filename.c_str(), (char *) &cramfsName);
 
 		versionInfo = new CFlashVersionInfo(cramfsName);
+#endif
 
 		msg_body = "flashupdate.msgbox_manual";
 	}
+#ifndef SQUASHFS
 	sprintf(msg, g_Locale->getText(msg_body), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getReleaseCycle(), versionInfo->getType());
 
 	if (strcmp(RELEASE_CYCLE, versionInfo->getReleaseCycle()))
@@ -314,6 +341,7 @@ bool CFlashUpdate::checkVersion4Update()
 	}
 
 	delete versionInfo;
+#endif
 	return (ShowMsgUTF("messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") == CMessageBox::mbrYes); // UTF-8
 }
 
