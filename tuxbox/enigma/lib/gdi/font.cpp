@@ -26,6 +26,7 @@
 
 fontRenderClass *fontRenderClass::instance;
 static eLock ftlock;
+static FTC_Font cache_current_font=0;
 
 fontRenderClass *fontRenderClass::getInstance()
 {
@@ -325,6 +326,7 @@ void eTextPara::setFont(Font *fnt)
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return;
 	}
+	cache_current_font=&current_font->font.font;
 	previous=0;
 	if (cursor.y()==-1)
 	{
@@ -345,10 +347,14 @@ int eTextPara::renderString(const eString &string, int rflags)
 
 	glyphs.reserve(glyphs.size()+string.length());
 
-	if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
+	if (&current_font->font.font != cache_current_font)
 	{
-		printf("FTC_Manager_Lookup_Size failed!\n");
-		return -1;
+		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
+		{
+			printf("FTC_Manager_Lookup_Size failed!\n");
+			return -1;
+		}
+		cache_current_font=&current_font->font.font;
 	}
 
 	for (	eString::const_iterator it = string.begin(); it != string.end(); it++)
@@ -400,6 +406,16 @@ int eTextPara::renderString(const eString &string, int rflags)
 void eTextPara::blit(gPixmapDC &dc, const ePoint &offset)
 {
 	eLocker lock(ftlock);
+
+	if (&current_font->font.font != cache_current_font)
+	{
+		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
+		{
+			printf("FTC_Manager_Lookup_Size failed!\n");
+			return;
+		}
+		cache_current_font=&current_font->font.font;
+	}
 
 	gPixmap &target=dc.getPixmap();
 
