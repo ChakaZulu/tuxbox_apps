@@ -53,8 +53,9 @@
 
 */
 
-#include <global.h>
+#include <config.h>
 #if HAVE_DVB_API_VERSION >= 3
+#include <global.h>
 #include <neutrino.h>
 #include <zapit/debug.h>
 
@@ -214,7 +215,6 @@ int CMoviePlayerGui::show()
 	CLCD::getInstance()->setMode(CLCD::MODE_MP3);
 
 	uint msg; uint data;
-	uint msg2;
 
 	bool loop=true;
 	bool update=true;
