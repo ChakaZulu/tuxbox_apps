@@ -139,7 +139,6 @@ bouqueteditor.switch dodaj/usun kanal
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bukiety
 cablesetup.provider provider kablowy
-cam.wrong UWAGA, TWOJA KARTA \nJEST NIEZGODNA  Z CAMALPHA.BIN!!\n\Czy ponawiac to ostrzezenie?
 channellist.head Wszystkie Kanaly
 channellist.nonefound Brak listy kanalow!\nUruchom strojenie\n(ustawienia -> strojenie)
 channellist.since od %02d:%02d
@@ -196,7 +195,7 @@ epgviewer.notfound EPG-Informacje nie znalezione
 eventlistbar.channelswitch Przelaczyc
 eventlistbar.eventsort Ulozyc
 eventlistbar.recordevent Nagrac
-favorites.addchannel Biezacy kanal zostanie dodany \ndo bukietu "Moje Ulubione". \n To moze potrwac kilka sekund...
+favorites.addchannel Biezacy kanal zostanie dodany\ndo bukietu "Moje Ulubione".\nTo moze potrwac kilka sekund...
 favorites.bouquetname Moje Ulubione
 favorites.bqcreated Bukiuet "Moje Ulubione" zostal utworzony...\n
 favorites.chadded Biezacy kanal zostal dodany do ulubionych...\n
@@ -266,7 +265,7 @@ flashupdate.readflashmtd Czytaj jedna partycje
 flashupdate.ready gotowy
 flashupdate.reallyflashmtd Napewno chcesz aktualizowac?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
 flashupdate.reboot restartuje....
-flashupdate.savesuccess Image zapisany poprawnie \njako %s.
+flashupdate.savesuccess Image zapisany poprawnie\njako %s.
 flashupdate.selectimage Dostepne Image
 flashupdate.squashfs.noversion Przy SquashFS aktualizacji sprawdzana jest wersja tylko przy aktualizacji prze WEB.\nCzy jestes pewny ze chcesz aktualizowac ?
 flashupdate.titlereadflash Czytam Flash
@@ -278,7 +277,7 @@ flashupdate.url_file plik konfiguracyjny
 flashupdate.versioncheck Sprawdzam wersje
 flashupdate.writeflash Zapisz caly image
 flashupdate.writeflashmtd Zapisz jedna partycje
-flashupdate.wrongbase Ta wersja Release cycle jest zbyt stara, \nprosze wgrac nowsza wersje!
+flashupdate.wrongbase Ta wersja Release cycle jest zbyt stara,\nprosze wgrac nowsza wersje!
 fontmenu.channellist Lista kan.
 fontmenu.epg EPG
 fontmenu.eventlist Lista event
@@ -525,7 +524,7 @@ pinprotection.wrongcode Bledny PIN-kod! Popraw.
 rclock.lockmsg Pilot d-boxa zablokowany.\n Aby zwolnic blokade\n <CZERW.> i <DBOX> na Pilocie\n nacisnac.
 rclock.menueadd Blokada pilota
 rclock.title zablokowac Pilota
-rclock.unlockmsg DBOX2 Pilot odblokowany...
+rclock.unlockmsg Pilot odblokowany...
 recordingmenu.defdir Folder do nagrywania
 recordingmenu.file bezposrednio (Plik)
 recordingmenu.filesettingsseparator filesettingsseparator
@@ -612,7 +611,7 @@ streaminfo.head Informacje
 streaminfo.not_available nie dostepny
 streaminfo.not_crypted nie kodowany
 streaminfo.resolution Rozdzielczosc
-streaming.buffer_overflow Nagrywanie zostalo przerwane,\nponiewarz plik nie mogl byc wystarczajaco \nszybko zapisany.
+streaming.buffer_overflow Nagrywanie zostalo przerwane,\nponiewarz plik nie mogl byc wystarczajaco\nszybko zapisany.
 streaming.busy Pzrynalmniej jeden proces nagrywania jest aktywny.\nJesli nagrywanie jest zakonczone,\npowinien ponowny start pomoc.
 streaming.dir_not_writable Nie moge pisac w podanym folderze.\nNagrywanie jest przez to nie mozliwe.
 streaming.success Nagranie zostalo pomyslnie zakonczone.

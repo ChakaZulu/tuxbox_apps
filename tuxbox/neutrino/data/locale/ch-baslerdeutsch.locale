@@ -138,7 +138,6 @@ bouqueteditor.switch Kanal uffneh/entferne
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bouquets
 cablesetup.provider Kabelabieder
-cam.wrong Achtig, Ihr CAM_ALPHA.BIN basst\nnidd zu Ihrer Smart-Card!!!\n\nWänn Sie die Warnig widder seh?
 channellist.head Alle Kanäle
 channellist.nonefound M'r hänn keine Kanäl g'funde!\nMach e Kanalsüchi\n(dbox-Taste -> Service)
 channellist.since sidd %02d:%02d
@@ -516,10 +515,10 @@ ping.socket isch nidd erreichbar (Socket error)
 ping.unreachable isch nidd erreichbar (unreachable)
 pinprotection.head PIN-Abfroog
 pinprotection.wrongcode Gib de Code nonemol ii!
-rclock.lockmsg D'Fernbedienig der dbox2 wird gsperrt.\n Um'd Sperre uufz'hebe, bitte\n <ROT> und <DBOX> uff dr Fernbedienig\n drucke.
+rclock.lockmsg D'Fernbedienig der dbox2 wird gsperrt.\nUm'd Sperre uufz'hebe, bitte\n<ROT> und <DBOX> uff dr Fernbedienig\ndrucke.
 rclock.menueadd FB sperre
 rclock.title Fernbedienung sperre
-rclock.unlockmsg DBOX2 Fernbedienig reaktiviert...
+rclock.unlockmsg Fernbedienig reaktiviert...
 recordingmenu.head Streamingserver Iischdellige
 recordingmenu.no_scart  Scart-Umschaldig underdrugge
 recordingmenu.off uss

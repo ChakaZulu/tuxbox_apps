@@ -180,7 +180,6 @@ bouqueteditor.switch Kanau ufnä/entfärne
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bouquets
 cablesetup.provider Kabuabiäter
-cam.wrong Achtung, d' CAM_ALPHA.BIN passt\nnid zu dinere Smart-Card!!!\n\nWosch diä Warnig wider gsee?
 channellist.head Aui Kanäu
 channellist.nonefound äs si kei Kanäu gfungä wordä!\nBitte füär ä Kanausuächi dürä\n(dbox-Taschtä -> Service)
 channellist.since sit %02d:%02d
@@ -484,7 +483,7 @@ movieplayer.goto Schpringe zu ...
 movieplayer.goto.h1 = -> absolute Schprung
 movieplayer.goto.h2 +,- -> relative Schprung
 movieplayer.head Movieplayer
-movieplayer.nostreamingserver Verbindig zum\n Streamingsörver fäugschlage.
+movieplayer.nostreamingserver Verbindig zum\nStreamingsörver fäugschlage.
 movieplayer.pesplayback PES Abschpile (Experimentell)
 movieplayer.pleasewait Bitte warte.\nd'Verbindig zum Streamingsörver wird härgschtöut.
 movieplayer.toomanybookmarks Du hesch scho zviu Bookmarks aagleit.\nEs muess zersch äs Angers glöscht wärde.
@@ -568,10 +567,10 @@ ping.socket isch nid erreichbar (Socket error)
 ping.unreachable isch nid erreichbar (unreachable)
 pinprotection.head PIN-Abfroog
 pinprotection.wrongcode Gib dä Code nomou i!
-rclock.lockmsg d'Färnbedienig vo de DBOX2 wird gschperrt.\n um d'Schperri ufzhebe, bitte\n <ROT> u <DBOX> uf dr Färnbedienig\n druecke.
+rclock.lockmsg d'Färnbedienig vo de DBOX2 wird gschperrt.\num d'Schperri ufzhebe, bitte\n<ROT> u <DBOX> uf dr Färnbedienig\ndruecke.
 rclock.menueadd FB schperre 
 rclock.title Färnbedienig schperre
-rclock.unlockmsg DBOX2 Färnbedienig reaktiviert...
+rclock.unlockmsg Färnbedienig reaktiviert...
 recordingmenu.defdir Ufnahmeverzeichnis
 recordingmenu.file Diräkt (Datei)
 recordingmenu.filesettingsseparator Diräktufnahm

@@ -138,7 +138,6 @@ bouqueteditor.switch preuzeti/izbaciti kanal
 bouqueteditor.switchmode tv/radio
 bouquetlist.head buketi
 cablesetup.provider snabdjevač
-cam.wrong Pažnja, vaš cam_alpha.bin ne paše\nuz vašu smart-karticu!!!\n\nHoćete li da vidite ovo upozorenje opet?
 channellist.head svi kanali
 channellist.nonefound Nije nađen nijedan kanal!\nNapravite traženje kanala\n(dbox2-tipka -> servis)
 channellist.since od %02d:%02d
@@ -519,7 +518,7 @@ pinprotection.wrongcode Utipkajte pin-broj ponovno!
 rclock.lockmsg Speruje se daljinska dbox2.\n Za prekid spere, molim\n<crveno> i <dbox> na daljinskoj\n pretisnuti.
 rclock.menueadd fb sperovati
 rclock.title daljinsku sperovati
-rclock.unlockmsg dbox2 daljinska je reaktivirana...
+rclock.unlockmsg daljinska je reaktivirana...
 recordingmenu.head namjestiti snimanje
 recordingmenu.no_scart nema mijenjanja scarta
 recordingmenu.off ugašeno

@@ -256,12 +256,12 @@ epgviewer.notfound Нет доступа к программе передач
 eventlistbar.channelswitch вид сортировки
 eventlistbar.eventsort сортировать
 eventlistbar.recordevent записать
-favorites.addchannel Этот канал будет добавлен \nв пакет каналов "Избранное". \n Это займет несколько секунд...
+favorites.addchannel Этот канал будет добавлен \nв пакет каналов "Избранное".\nЭто займет несколько секунд...
 favorites.bouquetname Избранное
 favorites.bqcreated Пакет каналов "Избранное" создан...\n
 favorites.chadded Этот канал добавлен в список избранных...\n
 favorites.chalreadyinbq Этот канал уже есть в списке избранных...\n
-favorites.finalhint \nВоспользуйтесь редактором пакетов\n для изменения списка ваших избранных каналов.\n
+favorites.finalhint \nВоспользуйтесь редактором пакетов\nдля изменения списка ваших избранных каналов.\n
 favorites.menueadd Добавить канал в избранное
 favorites.nobouquets Избранное доступно только из активных пакетов.
 filebrowser.delete удалить
@@ -307,7 +307,7 @@ flashupdate.head Обновление софта
 flashupdate.md5check проверка прошивки
 flashupdate.md5sumerror прошивка без ошибок
 flashupdate.msgbox Найдена следующая новая прошивка:\nДата: %s, %s\nбазовый имидж: %s\nтип имиджа: %s\n\nХотите загрузить и установить эту версию сейчас? 
-flashupdate.msgbox_manual Найдена новая прошивка:\nДата: %s, %s\nБазовый имидж: %s\nТип имиджа: %s\n\n Хотите загрузить и установить эту версию сейчас? 
+flashupdate.msgbox_manual Найдена новая прошивка:\nДата: %s, %s\nБазовый имидж: %s\nТип имиджа: %s\n\nХотите загрузить и установить эту версию сейчас? 
 flashupdate.mtdselector Выбор раздела
 flashupdate.programmingflash программирование флешь
 flashupdate.proxypassword Пароль
@@ -326,7 +326,7 @@ flashupdate.ready готов
 flashupdate.reallyflashmtd Уверены что хотите записать?\n\nЕсли произойдет ошибка или прошивка не\nправильная тюнер не перегрузится.\n\nимя имиджа: %s\nЦель: %s
 flashupdate.savesuccess Прошивка успешно сохранена\nв %s.
 flashupdate.selectimage Доступные прошивки
-flashupdate.squashfs.noversion Проверка обновлений для SquashFS-версии возможна только по интернету.\n Вы уверены в своем желании установить эту прошивку?
+flashupdate.squashfs.noversion Проверка обновлений для SquashFS-версии возможна только по интернету.\nВы уверены в своем желании установить эту прошивку?
 flashupdate.titlereadflash Чтение флешь
 flashupdate.titlewriteflash Записываю флешь
 flashupdate.updatemode Режим обновления
@@ -510,7 +510,7 @@ movieplayer.head Видеоплеер
 movieplayer.nostreamingserver Стрим-сервер недоступен.
 movieplayer.pesplayback Просмотр PES-файлов
 movieplayer.pleasewait Подождите пожалуйста.\nСоединение со стрим-сервером...
-movieplayer.toomanybookmarks Слишком много закладок.\n Удалите одну из уже существующих.
+movieplayer.toomanybookmarks Слишком много закладок.\nУдалите одну из уже существующих.
 movieplayer.tshelp КРАСНАЯ/Home Стоп\nЗЕЛЕНАЯ Выбор звук.дорожки\nЖЕЛТАЯ Пауза/Продолжить\nСИНЯЯ Добавить закладку\nd-box время\n1 примерно на 1 мин. назад\n3 пропустить около 1 мин.\n4 примерно на 5 мин. назад \n6 пропустить около 5 мин.\n7 примерно на 10 мин. назад\n9 пропустить около 10 мин.\nПодробнее смотри на http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.tsplayback Просмотр TS-файлов
 movieplayer.vcdplayback Просмотр (S)VCD (VLC)
@@ -591,7 +591,7 @@ ping.socket недоступен (ошибка сокета)
 ping.unreachable недоступен
 pinprotection.head Введите PIN-код
 pinprotection.wrongcode Неверный PIN-код! Повторите ввод.
-rclock.lockmsg Ваш пульт управления заблокирован.\n Для разблокирования, нажмите <КРАСНУЮ> \n и <DBOX> на вашем пульте управления.
+rclock.lockmsg Ваш пульт управления заблокирован.\nДля разблокирования, нажмите <КРАСНУЮ>\nи <DBOX> на вашем пульте управления.
 rclock.menueadd Заблокировать Пульт управления 
 rclock.title Заблокировать Пульт управления
 rclock.unlockmsg Пульт управления активирован.
@@ -680,12 +680,12 @@ streaminfo.head Информация о потоке
 streaminfo.not_available не представлен
 streaminfo.resolution Resolution
 streaminfo.signal сигнал
-streaming.buffer_overflow Запись прервана,\n скорость получения данных низкая.
-streaming.busy Идет запись!\n Если запись не включена, а Вы получили это сообщение, то пожалуйста перегрузите Neutrino.
+streaming.buffer_overflow Запись прервана,\nскорость получения данных низкая.
+streaming.busy Идет запись!\nЕсли запись не включена, а Вы получили это сообщение, то пожалуйста перегрузите Neutrino.
 streaming.dir_not_writable Нет доступа в папку для записи.\nЗапись не возможна.
 streaming.success Запись прошла успешно.
-streaming.write_error Запись прервана,\n ошибка в процессе самой записи.
-streaming.write_error_open Запись прервана,\n файл для записи не может быть открыт.
+streaming.write_error Запись прервана,\nошибка в процессе самой записи.
+streaming.write_error_open Запись прервана,\nфайл для записи не может быть открыт.
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576

@@ -138,7 +138,6 @@ bouqueteditor.switch Accettare Canale/Cancellare
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bouquets
 cablesetup.provider Gestore Cavo
-cam.wrong Attenzione la vostra CAM_ALPHA.BIN non e adatta\nper la vostra Smart-Card!!!\n\nVuole rivedere questa informazione?
 channellist.head Tutti i Canali
 channellist.nonefound Non e stato trovato nessun Canale!\nEseguire una nuova Ricerca Canali\n(dbox-Taste -> Servizio)
 channellist.since dal %02d:%02d
@@ -516,10 +515,10 @@ ping.socket non e raggiungibile (Socket error)
 ping.unreachable non e raggiungibile (unreachable)
 pinprotection.head Richiesta-PIN
 pinprotection.wrongcode Ripetere il PIN Code!
-rclock.lockmsg Il Telecomando viene Bloccato.\n per sbloccarlo, premete\n<Rosso> ed <DBOX> sul vostro Telecomando.
+rclock.lockmsg Il Telecomando viene Bloccato.\nper sbloccarlo, premete\n<Rosso> ed <DBOX> sul vostro Telecomando.
 rclock.menueadd Blocco Telecomando 
 rclock.title Blocco Telecomando 
-rclock.unlockmsg Telecomando DBOX2 Riattivato...
+rclock.unlockmsg Telecomando Riattivato...
 recordingmenu.head Streamingserver Impostazioni
 recordingmenu.no_scart no scart
 recordingmenu.off Menu off
@@ -580,7 +579,7 @@ servicemenu.reload_hint Nuona lettura lista Canali,\nPrego attendere
 servicemenu.scants Ricerca Canali
 servicemenu.ucodecheck Controllo UCodes
 servicemenu.update Aggiornamento-Software
-settings.missingoptionsconffile Le Impostazioni-Neutrino sono stati avanzati.\n i Nuovi parametri verrano aggiunti al Standart.
+settings.missingoptionsconffile Le Impostazioni-Neutrino sono stati avanzati.\ni Nuovi parametri verrano aggiunti al Standart.
 settings.noconffile Le Impostazioni-Neutrino non sono stati\ntrovati. Verranno usati i parametri Standart.
 shutdowntimer.announce Il Suo D-Box verra spento in 1 Minuto.\Cancellare lo spegnimento?
 sleeptimerbox.announce Sleeptimer in 1 min

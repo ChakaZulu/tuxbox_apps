@@ -142,7 +142,6 @@ bouqueteditor.switch Toevoegen/verwijderen
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Boeket
 cablesetup.provider Kabelprovider
-cam.wrong AANDACHT, UW KAART \n PAST NIET IN DE CAMALPHA.BIN!!\n\nWilt u deze waarschuwing weer krijgen?
 channellist.head Alle Services
 channellist.nonefound Geen kanalen gevonden!\nVoer aub een scan uit\n(dbox-toets -> service)
 channellist.since sinds %02d:%02d
@@ -201,7 +200,7 @@ epgviewer.notfound Geen EPG gevonden
 eventlistbar.channelswitch Planning
 eventlistbar.eventsort Sorteren
 eventlistbar.recordevent Opnemen
-favorites.addchannel Huidig kanaal zal toegevoegd worden \naan het boeket "mijn favorieten". \n Dit zal enkele seconden durens...
+favorites.addchannel Huidig kanaal zal toegevoegd worden\naan het boeket "mijn favorieten".\nDit zal enkele seconden durens...
 favorites.bouquetname Mijn favorieten
 favorites.bqcreated Bouquet "Mijn favorieten" is gemaakt...\n
 favorites.chadded Huidig kanaal is aan de favorieten toegevoegd...\n
@@ -529,10 +528,10 @@ ping.socket Niet bereikbaar (socketfout)
 ping.unreachable Onbereikbaar door Ping
 pinprotection.head Voer PIN-code in
 pinprotection.wrongcode Foute PIN-Code! Probeer opnieuw
-rclock.lockmsg Uw afstandsbediening van de DBox2 zal vergrendeld worden.\nOm de DBox2 vrij te geven druk op <ROOD> \n en <DBOX> op uw afstandsbediening.
+rclock.lockmsg Uw afstandsbediening van de DBox2 zal vergrendeld worden.\nOm de DBox2 vrij te geven druk op <ROOD>\nen <DBOX> op uw afstandsbediening.
 rclock.menueadd Vergrendelen afstandsbediening
 rclock.title Vergrendel afstandsbediening
-rclock.unlockmsg Afstandsbediening van de DBOX2 in werking.
+rclock.unlockmsg Afstandsbediening in werking.
 recordingmenu.defdir Opnamefolder
 recordingmenu.file Direct (file)
 recordingmenu.filesettingsseparator Direct opnemen
@@ -597,7 +596,7 @@ servicemenu.ucodecheck Controle ucodes
 servicemenu.update Software Update
 settings.missingoptionsconffile De neutrino-settings zijn geupdate.\nNew Opties worden standaard gezet.
 settings.noconffile Geen neutrino-settings gevonden.\nStandaart in gebruik.
-shutdowntimer.announce Box zal uitschakelen in 1 min.\n Uitschakelen aflassen?
+shutdowntimer.announce Box zal uitschakelen in 1 min.\nUitschakelen aflassen?
 sleeptimerbox.announce Sleeptimer in 1 min
 sleeptimerbox.hint1 Schakel uit in ...minuten. (000=uit)
 sleeptimerbox.hint2 dbox2 zal uitgaan na deze tijd.

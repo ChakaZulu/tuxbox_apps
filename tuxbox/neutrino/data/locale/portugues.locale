@@ -256,7 +256,7 @@ epgviewer.notfound epg não encontrada
 eventlistbar.channelswitch Programar gravação
 eventlistbar.eventsort dispor
 eventlistbar.recordevent gravar
-favorites.addchannel O actual canal será adicionado \npara o bouquet "Os meus favoritos". \n Irá demorar alguns segundos...
+favorites.addchannel O actual canal será adicionado\npara o bouquet "Os meus favoritos".\nIrá demorar alguns segundos...
 favorites.bouquetname Meus favoritos
 favorites.bqcreated Bouquet "Meus favoritos" criado com sucesso...\n
 favorites.chadded O actual canal foi adicionado aos seus favoritos...\n
@@ -324,7 +324,7 @@ flashupdate.readflash Ler a imagem toda
 flashupdate.readflashmtd Ler uma partição
 flashupdate.ready pronto
 flashupdate.reallyflashmtd Tem a certeza que deseja fazer gravar a imagem?\n\nSe ocorre algum erro ou a imagem não é\nválida, o receptor pode não reiniciar após o processo.\n\nNome da Imagem: %s\nLocalização: %s
-flashupdate.savesuccess Imagem guardada com sucesso \nsobre %s.
+flashupdate.savesuccess Imagem guardada com sucesso\nsobre %s.
 flashupdate.selectimage Imagens Disponíveis
 flashupdate.squashfs.noversion A versão de SquashFS presente é actualmente apenas suportada quando actualizada via web.\nTem a certeza que deseja instalar esta imagem?
 flashupdate.titlereadflash A ler Flash
@@ -591,15 +591,15 @@ ping.socket não localizável! (socket error)
 ping.unreachable não localizável!
 pinprotection.head Introduzir código PIN
 pinprotection.wrongcode Código PIN errado! Tende de novo.
-rclock.lockmsg O comando da sua dbox será bloqueado.\n Para desbloquear a sua dbox, prima <VERMELHO> \n e <DBOX> no seu telecomando.
+rclock.lockmsg O comando da sua dbox será bloqueado.\nPara desbloquear a sua dbox, prima <VERMELHO>\ne <DBOX> no seu telecomando.
 rclock.menueadd Bloquear RC 
 rclock.title Bloquear Telecomando
-rclock.unlockmsg Comando da Dbox reactivado.
+rclock.unlockmsg Telecomando reactivado.
 recordingmenu.defdir Directório a Gravar
 recordingmenu.file directo (ficheiro)
 recordingmenu.filesettingsseparator Gravação directa
 recordingmenu.head Configurações de gravação
-recordingmenu.help Modo de Gravação:\nserver: usando software de transmissão de dados num PC\nVcr: usando vcr \ndirect (ficheiro): directamente num directório de NFS montado \nou num Dísco Rígido Interno\n\nMax. Tamanho do Ficheiro:\nNFS V2: 2 GB (2048 MB)\nNFS V3: Não limitado (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
+recordingmenu.help Modo de Gravação:\nserver: usando software de transmissão de dados num PC\nVcr: usando vcr\ndirect (ficheiro): directamente num directório de NFS montado\nou num Dísco Rígido Interno\n\nMax. Tamanho do Ficheiro:\nNFS V2: 2 GB (2048 MB)\nNFS V3: Não limitado (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
 recordingmenu.no_scart Não alternar para scart mode
 recordingmenu.off off
 recordingmenu.recording_type recording device
@@ -712,7 +712,7 @@ stringinput.caps maiúsculas / minúsculas
 stringinput.clear limpar tudo
 timer.eventrecord.msg   ... Realizar ou não???
 timer.eventrecord.title Lista de Gravações
-timer.eventtimed.msg O evento está programado.\nA Dbox será ligada e \npermanecerá no canal durante a gravação.
+timer.eventtimed.msg O evento está programado.\nA Dbox será ligada e\npermanecerá no canal durante a gravação.
 timer.eventtimed.title Eventos programados
 timerbar.channelswitch Programar gravação
 timerbar.recordevent Gravar

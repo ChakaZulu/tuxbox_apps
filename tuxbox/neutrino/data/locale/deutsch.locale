@@ -198,7 +198,6 @@ bouqueteditor.switch Kanal aufnehmen/entfernen
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bouquets
 cablesetup.provider Kabelanbieter
-cam.wrong Achtung, Ihre CAM_ALPHA.BIN passt\nnicht zu Ihrer Smart-Card!!!\n\nWollen Sie diese Warnung wieder sehen?
 channellist.head Alle Kanäle
 channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte eine Kanalsuche durch\n(dbox-Taste -> Service)
 channellist.since seit %02d:%02d
@@ -592,10 +591,10 @@ ping.socket ist nicht erreichbar (Socket error)
 ping.unreachable ist nicht erreichbar (unreachable)
 pinprotection.head PIN-Abfrage
 pinprotection.wrongcode Geben Sie den Code nocheinmal ein!
-rclock.lockmsg Die Fernbedienung der dbox2 wird gesperrt.\n Um die Sperre aufzuheben, bitte\n <ROT> und <DBOX> auf der Fernbedienung\n druecken.
+rclock.lockmsg Die Fernbedienung der dbox2 wird gesperrt.\nUm die Sperre aufzuheben, bitte\n<ROT> und <DBOX> auf der Fernbedienung\ndrücken.
 rclock.menueadd FB sperren 
 rclock.title Fernbedienung sperren
-rclock.unlockmsg DBOX2 Fernbedienung reaktiviert...
+rclock.unlockmsg Fernbedienung reaktiviert...
 recordingmenu.defdir Aufnahmeverzeichnis
 recordingmenu.file Direkt (Datei)
 recordingmenu.filesettingsseparator Direktaufnahme

@@ -160,7 +160,6 @@ bouqueteditor.switch add/remove
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bouquets
 cablesetup.provider cable provider
-cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish to get this warning again?
 channellist.head All Services
 channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
 channellist.since since %02d:%02d
@@ -219,7 +218,7 @@ epgviewer.notfound no epg found
 eventlistbar.channelswitch schedule
 eventlistbar.eventsort sorting
 eventlistbar.recordevent record
-favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds...
+favorites.addchannel The current channel will be added \nto the bouquet "My Favorites".\nThis will take a few seconds...
 favorites.bouquetname My Favorites
 favorites.bqcreated Bouquet "My Favorites" has been created...\n
 favorites.chadded The current channel has been added to your favorites...\n
@@ -554,10 +553,10 @@ ping.socket is unreachable (socket error)
 ping.unreachable is unreachable
 pinprotection.head Enter PIN code
 pinprotection.wrongcode PIN-Code was wrong! Try again.
-rclock.lockmsg Your DBOX2 remote control will be locked.\n To unlock the dbox2, press <RED> \n and <DBOX> on your remote control.
+rclock.lockmsg Your DBOX2 remote control will be locked.\nTo unlock it, press <RED>\nand <DBOX> on your remote control.
 rclock.menueadd Lock RC 
 rclock.title Lock Remote Control
-rclock.unlockmsg DBOX2 remote control reactivated.
+rclock.unlockmsg Remote control reactivated.
 recordingmenu.defdir recording directory
 recordingmenu.file direct (file)
 recordingmenu.filesettingsseparator direct recording

@@ -139,7 +139,6 @@ bouqueteditor.switch Senda dazuadoa/wegmacha
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bouquets
 cablesetup.provider Kabiobieta
-cam.wrong Obacht, Eana CAM_ALPHA.BIN passt\nned zu Eanara Smart-Card!!!\n\nWoins de Warnung numoi seagn?
 channellist.head Olle Senda
 channellist.nonefound Es san koane Senda gfundn worn!\nMachas bittschön a Sendersuach\n(dbox-Taste -> Service)
 channellist.since seid %02d:%02d
@@ -229,7 +228,7 @@ flashupdate.currentversionsnapshot ImageTyp
 flashupdate.currentversiontime Uhrzeit
 flashupdate.erasefailed Flash löschn is schiafganga
 flashupdate.erasing lösch des Flash
-flashupdate.experimentalimage Sie ham an Schnappshuss ausgwaiht,\nbitte bedenkens, dass de Version ned durchprobiert is.\n Wenns bled laft, geht Ihr Box danoch nimma.\n\nWoins de Version wirklich hernemma?
+flashupdate.experimentalimage Sie ham an Schnappshuss ausgwaiht,\nbitte bedenkens, dass de Version ned durchprobiert is.\nWenns bled laft, geht Ihr Box danoch nimma.\n\nWoins de Version wirklich hernemma?
 flashupdate.expertfunctions Experten-Funktionen
 flashupdate.fileis0bytes de Datei hod 0 Byte
 flashupdate.fileselector Datei auswähn
@@ -509,10 +508,10 @@ ping.socket kumt nix (Socket error)
 ping.unreachable kumt nix (unreachable)
 pinprotection.head PIN-Abfrage
 pinprotection.wrongcode Gems den Code nomoi ei!
-rclock.lockmsg D Fernbedienung von da dbox2 werd gsperrt.\n Um die Sperrn aufzhem, bitte\n <ROT> und <DBOX> auf da Fernbedienung\ndrucka. 
+rclock.lockmsg D Fernbedienung von da dbox2 werd gsperrt.\nUm die Sperrn aufzhem, bitte\n<ROT> und <DBOX> auf da Fernbedienung\ndrucka. 
 rclock.menueadd FB sperrn 
 rclock.title Fernbedienung sperrn
-rclock.unlockmsg DBOX2 Fernbedienung reaktiviert...
+rclock.unlockmsg Fernbedienung reaktiviert...
 recordingmenu.head Streamingserva Eistellunga
 recordingmenu.no_scart Scart Umschoita untadrucka
 recordingmenu.off aus
@@ -566,13 +565,13 @@ screensetup.lowerright grün = Buidlrand untn, rechts
 screensetup.upperleft rot = Buidlrand om, links
 servicemenu.head Service
 servicemenu.reload Sendalistn nei loan
-servicemenu.reload_hint Sendalistn wern nei glon,\n oan Moment...
+servicemenu.reload_hint Sendalistn wern nei glon,\noan Moment...
 servicemenu.scants Senda suacha
 servicemenu.ucodecheck UCodes obcheckn
 servicemenu.update Software-aktualisiern
 settings.missingoptionsconffile Es gibt neie Eistellunga.\nDe stenga jetz erstmoi auf Standard.
 settings.noconffile De Eistellunga von Neutrino san ned\ngfundn worn. Mia nemma de Standardwerte.
-shutdowntimer.announce De Box werd in oana Minutn runtagfahrn.\n Obbrecha?
+shutdowntimer.announce De Box werd in oana Minutn runtagfahrn.\nObbrecha?
 sleeptimerbox.announce Eischloftimer in min
 sleeptimerbox.hint1 Einschlofzeit in Min. (000=aus)
 sleeptimerbox.hint2 De Box schoit si noch der Zeid aus.
