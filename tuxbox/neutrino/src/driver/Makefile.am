@@ -25,6 +25,7 @@ libneutrino_driver_a_SOURCES = \
 	pig.cpp \
 	stream2file.cpp \
 	screen_max.cpp \
-	netfile.cpp
+	netfile.cpp \
+	slotbuffer.c
 
 AM_CPPFLAGS = -DSKIP_CA_STATUS
