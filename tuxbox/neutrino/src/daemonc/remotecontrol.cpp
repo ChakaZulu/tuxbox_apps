@@ -501,7 +501,11 @@ void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::s
 {
 	current_channel_id = channel_id;
 	current_channel_name = channame;
-	is_video_started= start_video;
+
+	if (start_video)
+	    startvideo();
+	else
+	    is_video_started = false;
 
 	current_sub_channel_id = 0;
 	current_EPGid = 0;

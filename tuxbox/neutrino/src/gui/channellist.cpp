@@ -52,11 +52,12 @@ int info_height = 0;
 
 CChannelList::CChannel::CChannel(const int _key, const int _number, const std::string& _name, const t_channel_id ids)
 {
-	key           = _key;
-	number        = _number;
-	name          = _name;
-	channel_id    = ids;
-	bAlwaysLocked = false;
+	key                 = _key;
+	number              = _number;
+	name                = _name;
+	channel_id          = ids;
+	bAlwaysLocked       = false;
+	last_unlocked_EPGid = 0;
 }
 
 
@@ -78,7 +79,7 @@ CChannelList::CChannelList( const std::string &Name )
 */
 	liststart = 0;
 	tuned=0xfffffff;
-	zapProtection= NULL;;
+	zapProtection = NULL;
 }
 
 CChannelList::~CChannelList()
