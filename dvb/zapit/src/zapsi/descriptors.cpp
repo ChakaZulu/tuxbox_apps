@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.50 2002/11/02 17:21:16 obi Exp $
+ * $Id: descriptors.cpp,v 1.51 2002/11/02 17:31:59 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -338,7 +338,7 @@ uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_st
 		((buffer[4] >> 4)	* 100000) +
 		((buffer[4] & 0x0F)	* 10000) +
 		((buffer[5] >> 4)	* 1000) +
-		((buffer[6] & 0x0F)	* 100)
+		((buffer[5] & 0x0F)	* 100)
 	);
 
 	feparams.inversion = INVERSION_AUTO;
