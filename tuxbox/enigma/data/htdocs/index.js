@@ -8,7 +8,7 @@ function setVid(xy)
 {
 	document.location = "/setVideo?position="+xy;
 	setTimeout("reload()", 100);
-}	
+}
 
 function Mute(xy)
 {
@@ -79,7 +79,7 @@ function stopPlugin()
 
 function sendMessage2TV()
 {
-	NewWindow("/tvMessageWindow", "msg", "650", "150", "no");
+	NewWindow("/tvMessageWindow", "msg", "780", "150", "no");
 }
 
 function selectAudio()

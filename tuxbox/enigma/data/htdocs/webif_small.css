@@ -1,13 +1,8 @@
-a.mute { color:#ffffff; font-size:8pt; font-family:tahoma, arial; }
-a.audio { color:#000000; font-size:8pt; font-family:Verdana; }
 .white { color:#000000; font-size: 8pt; font-family: Verdana; }
-.black { color:#000000; font-size: 9pt; font-family: Verdana; }
-.servicename { color:#ffffff; font-size:13pt; font-family: tahoma, arial; }
 .epgzeit { color:#000000; font-size:12pt; font-family: tahoma, arial; }
 .epgdur { color:#000000; font-size:10pt; font-family: tahoma, arial; }
 .epgname { color:#000000; font-size:12pt; font-family: tahoma, arial; }
 .epgdesc { color:#000000; font-size:10pt; font-family: tahoma, arial; }
-td.menu { font-family: Verdana; font-size: 10pt; font-weight: bold}
 .epg { color:#000000; font-size:10pt; font-family:tahoma,arial; }
 body {
 	font-family: Arial, Helvetica, sans-serif;
@@ -17,22 +12,30 @@ body {
 #mainbody {
 	background-image: url(bg.png);
 	background-color: #ffffff;
+	font-size: 8px;
 }
 
 h1 {
 	font-size: 10px;
+	font-weight: bold;
 	margin-top: 1px;
 	margin-bottom: 1px;
 }
 
 h2 {
 	font-size: 8px;
+	font-weight: bold;
 	margin-top: 1px;
 	margin-bottom: 1px;
 }
 
 td {
 	font-size: 8px;
+}
+
+th {
+	font-size: 8px;
+	font-weight: bold;
 }
 
 input {
@@ -45,6 +48,7 @@ a {
 	color: #263971;
 	text-decoration: underline;
 }
+
 a:hover {
 	color: #A91111;
 }
@@ -55,10 +59,7 @@ a:hover {
 	padding-top: 5px;
 	padding-right: 5px;
 	padding-bottom: 5px;
-}
-
-#contentcell TD {
-	color: #333333;
+	font-size: 8px;
 }
 
 #leftnavi {
@@ -127,4 +128,5 @@ a:hover {
 #megatable {
 	border: 1px solid #98A4B6;
 }
+
 
