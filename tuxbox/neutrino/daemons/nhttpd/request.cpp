@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.15 2002/05/17 20:59:35 dirch Exp $
+	$Id: request.cpp,v 1.16 2002/05/21 14:20:33 dirch Exp $
 
 	License: GPL
 
@@ -445,7 +445,7 @@ void CWebserverRequest::Send500Error()
 {
 	SocketWrite("HTTP/1.0 500 InternalError\n");		//500 - internal error
 	SocketWrite("Content-Type: text/plain\n\n");
-	SocketWrite("500 : InternalError\n\n");
+	SocketWrite("500 : InternalError\n\nPerhaps some parameters missing ? ;)");
 	HttpStatus = 500;
 	if(Parent->DEBUG) printf("500 : InternalError\n");
 }
@@ -543,27 +543,27 @@ bool CWebserverRequest::SendResponse()
 
 	RewriteURL();		// Erst mal die URL umschreiben
 
-	if(Path.compare("/control/") == 0)
+	if(Path.compare("/control/") == 0)						// api for external programs
 	{
 		if(Parent->DEBUG) printf("Web api\n");
 		Parent->WebDbox->ExecuteCGI(this);
 		return true;
 	}
-	else if(Path.compare("/bouquetedit/") == 0)
+	else if(Path.compare("/bouquetedit/") == 0)				// bouquetedit api
 	{
 		if(Parent->DEBUG) printf("Bouqueteditor api\n");
 		Parent->WebDbox->ExecuteBouquetEditor(this);
 		return true;
 	}
-	else if(Path.compare("/fb/") == 0)
+	else if(Path.compare("/fb/") == 0)						// webbrowser api
 	{
-		if(Parent->DEBUG) printf("Browser api\n");
+		if(Parent->DEBUG) printf("Browser api\n");		
 		Parent->WebDbox->Execute(this);
 		return true;
 	}
 	else
 	{
-	// Normale Datei
+	// Normale Datei										//normal file
 		if(Parent->DEBUG) printf("Normale Datei\n");
 		if( (tmpint = OpenFile(Path,Filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
 		{											// Wenn Datei geöffnet werden konnte

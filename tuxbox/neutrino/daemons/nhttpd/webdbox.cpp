@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.29 2002/05/17 18:13:16 dirch Exp $
+	$Id: webdbox.cpp,v 1.30 2002/05/21 14:20:33 dirch Exp $
 
 	License: GPL
 
@@ -104,11 +104,16 @@ TWebDbox::TWebDbox(CWebserver *server)
 	audiotype_names[3] = "joint stereo";
 	audiotype_names[4] = "stereo";
 
-	TimerEventNames[CTimerdClient::TIMER_NEXTPROGRAM] = "Umschalten";
-	TimerEventNames[CTimerdClient::TIMER_SHUTDOWN] = "Shutdown";
-	TimerEventNames[CTimerdClient::TIMER_STANDBY] = "Standby";
-	TimerEventNames[CTimerdClient::TIMER_RECORD] = "Record";
+	TimerEventNames[CTimerEvent::TIMER_NEXTPROGRAM] = "Umschalten";
+	TimerEventNames[CTimerEvent::TIMER_SHUTDOWN] = "Shutdown";
+	TimerEventNames[CTimerEvent::TIMER_STANDBY] = "Standby";
+	TimerEventNames[CTimerEvent::TIMER_RECORD] = "Record";
+	TimerEventNames[CTimerEvent::TIMER_ZAPTO] = "Zapto";
 
+	TimerEventStateNames[CTimerEvent::TIMERSTATE_SCHEDULED]="wartet";
+	TimerEventStateNames[CTimerEvent::TIMERSTATE_PREANNOUNCE]="announced";
+	TimerEventStateNames[CTimerEvent::TIMERSTATE_ISRUNNING]="aktiv";
+	TimerEventStateNames[CTimerEvent::TIMERSTATE_TERMINATED]="beendet";
 
 }
 //-------------------------------------------------------------------------

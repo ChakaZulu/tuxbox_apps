@@ -59,7 +59,8 @@ class TWebDbox
 	string videooutput_names[3];
 	string videoformat_names[3];
 	string audiotype_names[5];
-	map<unsigned, string> TimerEventNames;							
+	map<unsigned, string> TimerEventNames;		
+	map<unsigned, string> TimerEventStateNames;
 
 
 
