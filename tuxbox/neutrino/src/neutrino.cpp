@@ -114,13 +114,14 @@ CRemoteControl * g_RemoteControl;
 
 // I don't like globals, I would have hidden them in classes,
 // but if you wanna do it so... ;)
+static bool parentallocked = false;
 
 CZapitClient::SatelliteList satList;
 CZapitClient::SatelliteList::iterator satList_it;
 
-#define NEUTRINO_SETTINGS_FILE      CONFIGDIR "/neutrino.conf"
-#define NEUTRINO_SCAN_SETTINGS_FILE CONFIGDIR "/scan.conf"
-
+#define NEUTRINO_SETTINGS_FILE			CONFIGDIR "/neutrino.conf"
+#define NEUTRINO_SCAN_SETTINGS_FILE		CONFIGDIR "/scan.conf"
+#define NEUTRINO_PARENTALLOCKED_FILE	DATADIR   "/neutrino/.plocked"
 static void initGlobals(void)
 {
 	g_fontRenderer  = NULL;
@@ -314,7 +315,7 @@ typedef struct font_sizes
 #define FONT_STYLE_BOLD    1
 #define FONT_STYLE_ITALIC  2
 
-const font_sizes_struct neutrino_font[FONT_TYPE_COUNT] = 
+const font_sizes_struct neutrino_font[FONT_TYPE_COUNT] =
 {
 	{"fontsize.menu"               ,  20, FONT_STYLE_BOLD   , 0},
 	{"fontsize.menu_title"         ,  30, FONT_STYLE_BOLD   , 0},
@@ -355,6 +356,12 @@ int CNeutrinoApp::loadSetup()
 	{
 		//file existiert nicht
 		erg = 1;
+	}
+	std::ifstream checkParentallocked(NEUTRINO_PARENTALLOCKED_FILE);
+	if(checkParentallocked)
+	{
+		parentallocked = true;
+		checkParentallocked.close();
 	}
 
 	//video
@@ -493,7 +500,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.streaming_audiorate, configfile.getString("streaming_audiorate", "192").c_str() );
 	strcpy( g_settings.streaming_server_startdir, configfile.getString("streaming_server_startdir", "C:/Movies").c_str() );
 	g_settings.streaming_ac3_enabled = configfile.getInt32( "streaming_ac3_enabled", 0 );
-	
+
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
 
@@ -531,8 +538,16 @@ int CNeutrinoApp::loadSetup()
 	g_settings.bouquetlist_mode = configfile.getInt32( "bouquetlist_mode", 0 );
 
 	// parentallock
+if(!parentallocked)
+{
 	g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
 	g_settings.parentallock_lockage = configfile.getInt32( "parentallock_lockage", 12 );
+}
+else
+{
+	g_settings.parentallock_prompt = 3;
+	g_settings.parentallock_lockage = 18;
+}
 	strcpy( g_settings.parentallock_pincode, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
 
 	//timing  (Einheit= 1 sec )
@@ -574,12 +589,12 @@ int CNeutrinoApp::loadSetup()
 		g_settings.uboot_console	= 0;
 		g_settings.uboot_lcd_inverse	= -1;
 		g_settings.uboot_lcd_contrast	= -1;
-	
+
 		FILE* fd = fopen("/var/tuxbox/boot/ppcboot.conf", "r");
 		if(fd)
 		{
 			char buffer[100];
-	
+
 			while(fgets(buffer, 99, fd) != NULL)
 			{
 				if(strncmp(buffer,"console=",8) == 0)
@@ -602,7 +617,7 @@ int CNeutrinoApp::loadSetup()
 				else
 					printf("unknown entry found in ppcboot.conf\n");
 			}
-	
+
 			fclose(fd);
 		}
 		g_settings.uboot_console_bak = g_settings.uboot_console;
@@ -798,7 +813,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString ( "streaming_audiorate", g_settings.streaming_audiorate );
 	configfile.setString( "streaming_server_startdir", g_settings.streaming_server_startdir );
 	configfile.setInt32 ( "streaming_ac3_enabled", g_settings.streaming_ac3_enabled );
-	
+
 	//rc-key configuration
 	configfile.setInt32( "key_tvradio_mode", g_settings.key_tvradio_mode );
 
@@ -1109,11 +1124,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 
 	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui()));
 	mainMenu.addItem(GenericMenuSeparatorLine);
-	
+
 	mainMenu.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &mainSettings));
 	mainMenu.addItem(new CLockedMenuForwarder("mainmenu.service", g_settings.parentallock_pincode, false, true, NULL, &service) );
 	mainMenu.addItem(GenericMenuSeparatorLine);
-	
+
 	mainMenu.addItem(new CMenuForwarder("mainmenu.sleeptimer", true, NULL, new CSleepTimerWidget));
 	mainMenu.addItem(new CMenuForwarder("mainmenu.shutdown", true, NULL, this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
 //	mainMenu.addItem(GenericMenuSeparatorLine);
@@ -1127,7 +1142,12 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem(GenericMenuSeparatorLine);
 	mainSettings.addItem(new CMenuForwarder("mainsettings.video", true, NULL, &videoSettings));
 	mainSettings.addItem(new CMenuForwarder("mainsettings.audio", true, NULL, &audioSettings));
+
+if(g_settings.parentallock_prompt)
 	mainSettings.addItem(new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings));
+else
+	mainSettings.addItem(new CMenuForwarder("parentallock.parentallock", true, NULL, &parentallockSettings));
+
 	mainSettings.addItem(new CMenuForwarder("mainsettings.network", true, NULL, &networkSettings));
 	mainSettings.addItem(new CMenuForwarder("mainsettings.recording", true, NULL, &recordingSettings));
 	mainSettings.addItem(new CMenuForwarder("mainsettings.streaming", true, NULL, &streamingSettings));
@@ -1372,7 +1392,7 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 
 	mp3PicSettings.addItem(GenericMenuSeparator);
 	mp3PicSettings.addItem(GenericMenuBack);
-	
+
 	CMenuOptionChooser *oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
 	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
 	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
@@ -1381,7 +1401,7 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
 	mp3PicSettings.addItem( oj );
 	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
-	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.defdir", true, g_settings.network_nfs_picturedir, 
+	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.defdir", true, g_settings.network_nfs_picturedir,
 															 this, "picturedir"));
 
 	oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
@@ -1582,14 +1602,14 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	parentallockSettings.addItem(GenericMenuBack);
 	parentallockSettings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, true);
+	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, !parentallocked);
 	oj->addOption(PARENTALLOCK_PROMPT_NEVER         , "parentallock.never");
 //	oj->addOption(PARENTALLOCK_PROMPT_ONSTART       , "parentallock.onstart");
 	oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, "parentallock.changetolocked");
 	oj->addOption(PARENTALLOCK_PROMPT_ONSIGNAL      , "parentallock.onsignal");
 	parentallockSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("parentallock.lockage", &g_settings.parentallock_lockage, true);
+	oj = new CMenuOptionChooser("parentallock.lockage", &g_settings.parentallock_lockage, !parentallocked);
 	oj->addOption(12, "parentallock.lockage12");
 	oj->addOption(16, "parentallock.lockage16");
 	oj->addOption(18, "parentallock.lockage18");
@@ -1736,17 +1756,17 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CMenuForwarder* mf6 = new CMenuForwarder("streamingmenu.streaming_server_startdir", (g_settings.streaming_type==1), g_settings.streaming_server_startdir,startdirInput);
 
 	CMenuForwarder* mf7 = new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir,this,"moviedir");
-	
+
 	CMenuOptionChooser* oj0 = new CMenuOptionChooser("streamingmenu.streaming_ac3_enabled", &g_settings.streaming_ac3_enabled);
 	oj0->addOption(0, "streamingmenu.off");
 	oj0->addOption(1, "streamingmenu.on");
-                                              
+
 	CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,oj0);
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_type", &g_settings.streaming_type, true, StreamingNotifier);
 	oj1->addOption(0, "streamingmenu.off");
 	oj1->addOption(1, "streamingmenu.on");
 
-      
+
 
 
 	streamingSettings.addItem(GenericMenuSeparator);
@@ -1763,7 +1783,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( oj0);
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf7);
-	//streamingSettings.addItem( new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir, 
+	//streamingSettings.addItem( new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir,
 	//														 this, "moviedir"));
 
 }
@@ -1790,7 +1810,7 @@ protected:
 			configfile->setInt32(text, atoi(value));
 			return observer->changeNotify(OptionName, Data);
 		}
-  
+
 
 public:
 	CMenuNumberInput(const char * const Text, const int32_t DefaultValue, CChangeObserver * const _observer, CConfigFile * const _configfile) : CMenuForwarder(Text, true, NULL, this)
