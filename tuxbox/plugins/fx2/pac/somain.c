@@ -83,6 +83,7 @@ int	pacman_getInfo( struct SPluginInfo *info )
 	info->pluginversion = 1;
 	strcpy(info->name,"Pacman");
 	strcpy(info->desc,"The good old pacman in new dboxII generation");
+	*info->depend = 0;
 	info->type=1;
 	info->needfb=1;
 	info->needrc=1;
