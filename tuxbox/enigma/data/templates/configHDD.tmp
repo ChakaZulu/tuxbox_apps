@@ -1,4 +1,4 @@
-<form action="/cgi-bin/setConfigHDD">
+<form name="hddconfig">
 	<table border=0 cellspacing=0 cellpadding=0>
 		<tr>
 			<td><input type="checkbox" name="swaphdd" value="on"></td>
@@ -18,5 +18,5 @@
 		</tr>
 	</table>
 	<br>
-	<input type="submit" value="  Configure  ">
+	<input type="button" style="width:100px; height:22px; color:#000000;" value="Configure" onClick="javascript:configHDD()">
 </form>

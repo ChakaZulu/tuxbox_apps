@@ -8,7 +8,7 @@ function setVid(xy)
 {
 	document.location = "/setVideo?position="+xy;
 	setTimeout("reload()", 100);
-}
+}	
 
 function Mute(xy)
 {
@@ -36,7 +36,7 @@ function deleteMovie(xy)
 
 function openEPG(xy)
 {
-	NewWindow('/getcurrentepg2?ref='+xy, 'EPG', '600', '700', 'yes');
+	NewWindow('/getcurrentepg2?ref='+xy, 'EPG', '780', '700', 'yes');
 }
 
 function openMultiEPG(xy)
@@ -88,4 +88,14 @@ function sendMessage2TV()
 function selectAudio()
 {
 	NewWindow("/cgi-bin/selectAudio?requester=webif", "audio", "200", "100", "no");
+}
+
+function configUSB()
+{
+	alert("This function is not working yet...");
+}
+
+function configHDD()
+{
+	alert("This function is not working yet...");
 }
