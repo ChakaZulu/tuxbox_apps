@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.34 2002/10/03 12:24:20 Zwen Exp $
+	$Id: timermanager.cpp,v 1.35 2002/10/03 13:00:36 Zwen Exp $
 
 	License: GPL
 
@@ -249,6 +249,8 @@ void CTimerManager::saveEventsToConfig()
 //------------------------------------------------------------
 bool CTimerManager::shutdown()
 {
+// leider funktioniert der wakeup nicht richtig
+/*
 	time_t nextAnnounceTime=0;
 	CTimerEventMap::iterator pos = events.begin();
 	for(;pos != events.end();pos++)
@@ -290,6 +292,7 @@ bool CTimerManager::shutdown()
            dprintf("wakeup in %d min. programmed\n",minutes);
            return true;
         }
+*/        
 }
 
 //------------------------------------------------------------
