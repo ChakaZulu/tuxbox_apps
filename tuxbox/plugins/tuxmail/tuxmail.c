@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.3  2003/06/23 15:16:45  alexw
+ * rc fixed
+ *
  * Revision 1.2  2003/05/16 15:07:23  lazyt
  * skip unused accounts via "plus/minus", add mailaddress to spamlist via "blue"
  *
@@ -69,12 +72,17 @@ int ControlDaemon(int command)
 
 int GetRCCode()
 {
+	static __u16 rc_last_key = KEY_RESERVED;
 	//get code
 
-		if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
+	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
+	{
+		if(ev.value)
 		{
-			if(ev.value)
+#if HAVE_DVB_API_VERSION == 3
+			if(ev.code != rc_last_key)
 			{
+#endif
 				switch(ev.code)
 				{
 					case KEY_UP:		rccode = RC_UP;
@@ -154,9 +162,18 @@ int GetRCCode()
 
 					case KEY_POWER:		rccode = RC_STANDBY;
 				}
+#if HAVE_DVB_API_VERSION == 3
 			}
-			else rccode = -1;
+#endif
 		}
+		else
+		{
+			rccode = -1;
+#if HAVE_DVB_API_VERSION == 3
+			rc_last_key = KEY_RESERVED;
+#endif
+		}
+	}
 
 		return rccode;
 }
@@ -814,7 +831,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.2 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.3 $", versioninfo[12];
 	int loop, account, mailindex;
 	FILE *fd_run;
 
