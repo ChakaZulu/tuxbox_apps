@@ -123,8 +123,9 @@ static inline timeval timeout_timeval ( const timeval & orig )
 static inline long timeout_usec ( const timeval & orig )
 {
 	timeval now;
-  gettimeofday(&now,0);
-
+	gettimeofday(&now,0);
+	if ( (orig-now).tv_sec > 2000 )
+		return 2000*1000*1000;
 	return (orig-now).tv_sec*1000000 + (orig-now).tv_usec;
 }
 
@@ -205,6 +206,7 @@ public:
 	void stop();
 	void changeInterval(long msek);
 	bool operator<(const eTimer& t) const	{		return nextActivation < t.nextActivation;		}
+	void startLongTimer( int seconds );
 };
 
 			// werden in einer mainloop verarbeitet

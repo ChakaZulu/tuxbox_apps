@@ -6,7 +6,7 @@ class enigmaVCR : public eMessageBox
 	public:
 		static enigmaVCR* getInstance() { return instance; }
 		enigmaVCR(eString string, eString caption);
-		~enigmaVCR() { instance = 0; }
+		~enigmaVCR();
 		int eventHandler(const eWidgetEvent &event);
 		void volumeUp();
 		void volumeDown();

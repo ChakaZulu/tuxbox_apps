@@ -31,6 +31,7 @@ eDVBNamespace eTransponder::buildNamespace(eOriginalNetworkID onid, eTransportSt
 
 eDVBScanController::eDVBScanController(eDVB &dvb): eDVBController(dvb)
 {
+	cancel=0;
 	CONNECT(dvb.tPAT.tableReady, eDVBScanController::PATready);
 	CONNECT(dvb.tSDT.tableReady, eDVBScanController::SDTready);
 	CONNECT(dvb.tNIT.tableReady, eDVBScanController::NITready);
@@ -59,8 +60,11 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 	{
 	case eDVBEvent::eventTunedIn:
 		eDebug("[SCAN] eventTunedIn");
-		if (transponder==event.transponder)
-			dvb.event(eDVBScanEvent(event.err?eDVBScanEvent::eventScanTuneError:eDVBScanEvent::eventScanTuneOK));
+		if (knownTransponder.size())
+		{
+			if (transponder==event.transponder)
+				dvb.event(eDVBScanEvent(event.err?eDVBScanEvent::eventScanTuneError:eDVBScanEvent::eventScanTuneOK));
+		}
 		break;
 	case eDVBScanEvent::eventScanBegin:
 		eDebug("[SCAN] eventScanBegin");
@@ -90,7 +94,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 
 		eTransponder* next = 0;
 
-		while ( current != knownTransponder.end() && !next )
+		while ( !cancel && current != knownTransponder.end() && !next )
 		{
 			if ( current->state == eTransponder::stateToScan )
 				next = &(*current);
@@ -99,7 +103,12 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		}
 
 		if (!next)
+		{
+			if ( cancel )
+				cancel=0;
+			knownNetworks.clear();
 			dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanCompleted));
+		}
 		else
 		{
 			transponder=next;
@@ -142,16 +151,24 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 			nitpid=pe->program_map_PID;
 		pat->unlock();
 		scanOK=0;
-		dvb.tNIT.start(new NIT(nitpid));
+
+		if (flags & flagNetworkSearch)
+			dvb.tNIT.start(new NIT(nitpid));
+		else
+			scanOK|=2;
+			
 		if (flags & flagUseONIT)
 			dvb.tONIT.start(new NIT(nitpid, NIT::typeOther));
 		else
 			scanOK|=8;
+
 		dvb.tSDT.start(new SDT());
+
 		if (flags & flagUseBAT)
 			dvb.tBAT.start(new BAT());
 		else
 			scanOK|=4;
+
 		dvb.setState(eDVBScanState(eDVBScanState::stateScanWait));
 		break;
 	}

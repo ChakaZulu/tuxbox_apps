@@ -1,9 +1,11 @@
 #include <enigma_vcr.h>
 
+#include <enigma_standby.h>
 #include <lib/gui/actions.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/driver/eavswitch.h>
+#include <lib/driver/streamwd.h>
 
 struct enigmaVCRActions
 {
@@ -43,9 +45,6 @@ int enigmaVCR::eventHandler(const eWidgetEvent &event)
 		case eWidgetEvent::execBegin:
 			eAVSwitch::getInstance()->setInput(1);
 			break;
-		case eWidgetEvent::execDone:
-			eAVSwitch::getInstance()->setInput(0);
-			break;
 		case eWidgetEvent::evtAction:
 			if (event.action == &i_enigmaVCRActions->volumeUp)
 				volumeUp();
@@ -58,6 +57,16 @@ int enigmaVCR::eventHandler(const eWidgetEvent &event)
 			break;
 	}
 	return eMessageBox::eventHandler(event);
+}
+
+enigmaVCR::~enigmaVCR()
+{
+	instance=0;
+	eAVSwitch::getInstance()->setInput(0);
+	if ( eZapStandby::getInstance() )
+		eAVSwitch::getInstance()->setTVPin8(0);
+	else
+		eStreamWatchdog::getInstance()->reloadSettings();
 }
 
 void enigmaVCR::volumeUp()

@@ -321,10 +321,10 @@ int existNetworks::saveNetworks()
 	switch (fetype)
 	{
 	case eSystemInfo::feSatellite:
-		filename="/etc/satellites.xml";
+		filename="/var/etc/satellites.xml";
 		break;
 	case eSystemInfo::feCable:
-		filename="/etc/cables.xml";
+		filename="/var/etc/cables.xml";
 		break;
 	default:
 		break;
@@ -386,10 +386,10 @@ int existNetworks::reloadNetworks()
 	switch (fetype)
 	{
 	case eSystemInfo::feSatellite:
-		filename="/etc/satellites.xml";
+		filename="/var/etc/satellites.xml";
 		break;
 	case eSystemInfo::feCable:
-		filename="/etc/cables.xml";
+		filename="/var/etc/cables.xml";
 		break;
 	default:
 		break;
@@ -402,14 +402,20 @@ int existNetworks::reloadNetworks()
 	if (!in)
 	{
 		eWarning("unable to open %s", filename);
-		if ( fetype == eSystemInfo::feSatellite )
+		switch (fetype)
 		{
-			filename="/share/tuxbox/satellites.xml";
-			in = fopen(filename, "rt");
-			if (!in)
-				return -1;
+			case eSystemInfo::feSatellite:
+				filename="/share/satellites.xml";
+				break;
+			case eSystemInfo::feCable:
+				filename="/share/cables.xml";
+				break;
+			default:
+				break;
 		}
-		else
+
+		in = fopen(filename, "rt");
+		if (!in)
 			return -1;
 	}
 

@@ -65,7 +65,8 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	void outputReady(int what);
 	void outputReady2(int what);
 	void checkFlow(int last);
-	
+	void newAudioStreamIDFound( unsigned int id );
+
 	void recalcPosition();
 	eHTTPDataSource *createStreamSink(eHTTPConnection *conn);
 	
@@ -78,9 +79,12 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	int length;
 	int position;
 	eLock poslock;
+	int audio_tracks;
 	
 	void dspSync();
+	void newAudioStreamIdFound( unsigned int );
 public:
+	int getType() { return type; }
 	struct eMP3DecoderMessage
 	{
 		enum
@@ -89,7 +93,8 @@ public:
 			skip,
 			setSpeed, // 0..
 			seek,	// 0..65536
-			seekreal
+			seekreal,
+			setAudioStream
 		};
 		int type;
 		int parm;
@@ -127,18 +132,19 @@ class eServiceHandlerMP3: public eServiceHandler
 		{
 			done,
 			infoUpdated,
-			status
+			status,
+			newAudioStreamFound
 		};
 		int type;
 		int parm;
 		eMP3DecoderMessage() { }
 		eMP3DecoderMessage(int type): type(type) { }
-		eMP3DecoderMessage(int type, int status): type(type), parm(parm) { }
+		eMP3DecoderMessage(int type, int status): type(type), parm(status) { }
 	};
 	eFixedMessagePump<eMP3DecoderMessage> messages;
-	
+
 	void gotMessage(const eMP3DecoderMessage &message);
-	
+
 	int state;
 	eMP3Decoder *decoder;
 public:
@@ -162,6 +168,12 @@ public:
 
 	eService *addRef(const eServiceReference &service);
 	void removeRef(const eServiceReference &service);
+
+	void setAudioStream(unsigned int stream_id)
+	{
+		if ( decoder )
+			decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::setAudioStream, (int)stream_id));
+	}
 };
 
 class eServiceID3

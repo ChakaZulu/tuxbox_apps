@@ -625,7 +625,15 @@ void eZapNetworkSetup::tdslPressed()
 	eTOnlineDialog dlg(login->getText());
 	dlg.show();
 	if ( !dlg.exec() )
+	{
 		login->setText(dlg.getLogin());
+		unsigned int pos =
+			secrets.find("*");
+		eString pw;
+		if ( pos )
+			pw = secrets.mid(pos+1, secrets.length() - pos - 1 );
+		secrets = login->getText()+'*'+pw;
+	}
 	dlg.hide();
 	show();
 	setFocus(tdsl);

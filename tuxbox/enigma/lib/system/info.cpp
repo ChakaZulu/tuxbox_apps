@@ -74,7 +74,6 @@ eSystemInfo::eSystemInfo()
 			caids.insert(0x4a70);
 			break;
 		case TUXBOX_SUBMODEL_DREAMBOX_DM5600:
-			canmeasurelnbcurrent = 1;
 			hwtype = DM5600;
 			caids.insert(0x4a70);
 			hasnetwork=0;
@@ -115,8 +114,9 @@ eSystemInfo::eSystemInfo()
 			break;
 		case 6:
 			hasci = 2;
-			canmeasurelnbcurrent = 1;
-			hwtype = DM5600;
+			hwtype = getInfo("type", true) == "DM5600" ? DM5600 : DM5620;
+			if ( hwtype == DM5620 )
+				hasnetwork=1;
 			caids.insert(0x4a70);
 			break;
 		case 1 ... 3:
@@ -158,9 +158,13 @@ eSystemInfo::eSystemInfo()
 }
 
 #if HAVE_DVB_API_VERSION < 3
-eString eSystemInfo::getInfo(const char *info)
+eString eSystemInfo::getInfo(const char *info, bool dreambox)
 {
-	FILE *f=fopen("/proc/bus/dbox", "rt");
+	FILE *f=0;
+	if ( dreambox )
+		f=fopen("/proc/bus/dreambox", "rt");
+	else
+		f=fopen("/proc/bus/dbox", "rt");
 	if (!f)
 		return "";
 	eString result;

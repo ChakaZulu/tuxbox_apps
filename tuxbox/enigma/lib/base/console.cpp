@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.5 2003/10/03 18:20:29 ghostrider Exp $
+ * $Id: console.cpp,v 1.6 2003/11/27 15:13:54 ghostrider Exp $
  */
 
 #include <lib/base/console.h>
@@ -52,6 +52,9 @@ int bidirpipe(int pfd[], char *cmd , char *argv[])
 				close(pfdin[0]) == -1 || close(pfdin[1]) == -1 ||
 				close(pfderr[0]) == -1 || close(pfderr[1]) == -1 )
 			_exit(0);
+
+		for (unsigned int i=3; i < 90; ++i )
+			close(i);
 
 		execv(cmd,argv);
 		_exit(0);

@@ -22,11 +22,11 @@ public:
 		willShow, willHide,
 		execBegin, execDone,
 		gotFocus, lostFocus,
-		
+
 		changedText, changedFont, changedForegroundColor, changedBackgroundColor,
 		changedSize, changedPosition, changedPixmap, childChangedHelpText,
 
-		evtAction, evtShortcut
+		evtAction, evtShortcut, wantClose
 	} type;
 	union
 	{

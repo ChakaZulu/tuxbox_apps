@@ -22,6 +22,7 @@
 #include <lib/dvb/decoder.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/eskin.h>
+#include <lib/system/info.h>
 
 eString getInfo(const char *file, const char *info)
 {
@@ -114,7 +115,7 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 }
 
 eZapPlugins::eZapPlugins(int type, eWidget* lcdTitle, eWidget* lcdElement)
-	:eListBoxWindow<ePlugin>(type==2?_("Plugins"):_("Games"), 10, 400), type(type)
+	:eListBoxWindow<ePlugin>(type==2?_("Plugins"):_("Games"), 8, 400), type(type)
 {
 	PluginPath[0] = "/var/tuxbox/plugins/";
 	PluginPath[1] = PLUGINDIR "/";
@@ -168,6 +169,10 @@ int eZapPlugins::exec()
 					// EVIL HACK
 					if ( !connType && cfgname.find("dsl") != eString::npos &&
 						cfgname.find("connect") != eString::npos )
+						continue;
+					////////////
+					// EVIL HACK
+					if ( !eSystemInfo::getInstance()->hasNetwork() && cfgname.find("Ngrab") != eString::npos )
 						continue;
 					////////////
 					plg = new ePlugin(&list, cfgname.c_str());

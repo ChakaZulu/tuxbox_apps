@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.24 2003/10/26 00:41:17 ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.25 2003/11/27 15:14:32 ghostrider Exp $
  */
 
 #include <enigma_info.h>
@@ -195,6 +195,12 @@ public:
 				dreamlogo->show();
 				processor->setText(_("Processor: STBx25xx, 252MHz"));
 				break;
+			case eSystemInfo::DM5620:
+				machine->setText("DM5620");
+				vendor->setText("Dream-Multimedia-TV");
+				dreamlogo->show();
+				processor->setText(_("Processor: STBx25xx, 252MHz"));
+				break;
 			case eSystemInfo::DM7000:
 				machine->setText("DM7000");
 				vendor->setText("Dream-Multimedia-TV");
@@ -275,7 +281,9 @@ public:
 				eString ver=verid.mid(1, 3);
 				eString date=verid.mid(4, 8);
 //				eString time=verid.mid(12, 4);
-				if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 )
+				if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+				|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600
+				|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 )
 					version->setText(
 						eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]
 							+ ", " + date.mid(6, 2) + "." + date.mid(4,2) + "." + date.left(4));

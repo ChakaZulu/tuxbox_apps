@@ -15,6 +15,7 @@
 #include <lib/dvb/epgcache.h>
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/serviceplaylist.h>
+#include <lib/dvb/record.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/actions.h>
 #include <lib/gui/eskin.h>
@@ -380,6 +381,17 @@ void eServiceSelector::setKeyDescriptions( bool editMode )
 
 void eServiceSelector::addService(const eServiceReference &ref)
 {
+#ifndef DISABLE_FILE
+	if ( eDVB::getInstance()->recorder && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+	{
+		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
+		eServiceReferenceDVB &rec = (eServiceReferenceDVB&) eDVB::getInstance()->recorder->recRef;
+		if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
+				 rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
+				 rec.getDVBNamespace() != Ref.getDVBNamespace() )
+				 return;
+	}
+#endif
 	if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
 		return;
 
@@ -442,6 +454,8 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 		windowDescr.erase( windowDescr.rfind(">") );
 	setText( windowDescr );
 
+	ref=_ref;
+
 	services->beginAtomic();
 	services->clearList();
 
@@ -460,15 +474,27 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 
 	Signal1<void,const eServiceReference&> signal;
 	CONNECT(signal, eServiceSelector::addService);
-	
-	ref=_ref;
+
 	serviceentryflags=eListBoxEntryService::flagShowNumber;
 
 	if (ref.type == eServicePlaylistHandler::ID) // playlists have own numbers
 		serviceentryflags|=eListBoxEntryService::flagOwnNumber;
 
-	iface->enterDirectory(ref, signal);
-	iface->leaveDirectory(ref);	// we have a copy.
+	if ( eDVB::getInstance()->recorder
+		&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+	{
+		int mask = eZapMain::getInstance()->getMode() == eZapMain::modeTV ? (1<<4)|(1<<1) : ( 1<<2 );
+		eServiceReference bla(eServiceReference::idDVB,
+				eServiceReference::flagDirectory|eServiceReference::shouldSort,
+				-2, mask, 0xFFFFFFFF );
+		iface->enterDirectory(bla, signal);
+		iface->leaveDirectory(bla);
+	}
+	else
+	{
+		iface->enterDirectory(ref, signal);
+		iface->leaveDirectory(ref);	// we have a copy.
+	}
 
 	if (ref.flags & eServiceReference::shouldSort)
 		services->sort();

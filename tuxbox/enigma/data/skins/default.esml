@@ -70,7 +70,7 @@
 		<map name="eUpgradeChanges" font="Nimbus" size="20" />
 		<map name="partitionCheck.status" font="Nimbus" size="20" />
 
-		<map name="head" font="Nimbus" size="40" />
+		<map name="head" font="Nimbus" size="32" />
 		
 		<map name="epg.time" font="Nimbus" size="16" />
 		<map name="epg.title" font="Nimbus" size="18" />
@@ -496,7 +496,7 @@
   
 	<object name="tsSelectType">
 		<tsSelectType cposition="0:0" csize="e:300">
-			<eListbox name="menu" position="0:0" size="e-50:e-10" />
+			<eListbox name="menu" position="10:10" size="e-10:e-10" />
 		</tsSelectType>
 	</object>
 

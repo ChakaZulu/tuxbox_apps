@@ -66,7 +66,15 @@ class eDVBScanController: public eDVBController, public Object
 
 	void freeCheckFinished();
 	Signal0<void> freeCheckFinishedCallback;
+	int cancel;
 public:
+	bool abort()
+	{
+		if (!knownTransponder.size())
+			return false;
+		cancel=1;
+		return true;
+	}
 	enum
 	{
 			// not compatible to xml-flags!
@@ -84,10 +92,11 @@ public:
 	~eDVBScanController();
 
 	void handleEvent(const eDVBEvent &event);
-	
+	unsigned int getOrbitalPosition() { return knownTransponder.front().satellite.orbital_position; }
+
 	bool addTransponder(const eTransponder &transponder);
 	int getknownTransponderSize()	{ return knownTransponder.size(); }
-	
+
 	void setUseONIT(int useonit);
 	void setUseBAT(int usebat);
 	void setNetworkSearch(int networksearch);

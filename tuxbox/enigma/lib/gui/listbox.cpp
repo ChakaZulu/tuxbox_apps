@@ -1,4 +1,5 @@
 #include <lib/gui/listbox.h>
+#include <lib/gui/eprogress.h>
 #include <lib/system/econfig.h>
 #include <lib/gdi/font.h>
 
@@ -16,6 +17,8 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, int takefocus,
 		movemode(0), MaxEntries(0), flags(0), item_height(item_height),
 		columns(1), in_atomic(0), top(childs.end()), bottom(childs.end()), current(childs.end())
 {
+	scrollbar = new eProgress(this);
+	scrollbar->setDirection(1);
 	childs.setAutoDelete(false);	// machen wir selber
 	addActionMap(&i_cursorActions->map);
 	addActionMap(&i_listActions->map);
@@ -54,17 +57,59 @@ void eListBoxBase::removeFlags(int _flags)
 void eListBoxBase::recalcMaxEntries()
 {
 		// MaxEntries is PER COLUMN
+	int decoheight=0;
 	if (deco_selected && have_focus)
+	{
 		MaxEntries = crect_selected.height();
+		decoheight = height() - crect_selected.height();
+	}
 	else if (deco)
+	{
 		MaxEntries = crect.height();
+		decoheight = height() - crect.height();
+	}
 	else
 		MaxEntries = height();
+	int tmp = MaxEntries;
 	MaxEntries /= item_height;
+/*	eDebug("height = %d, MaxEntries = %d, item height = %d",
+		tmp, MaxEntries, item_height);*/
+	// das ist echt mal komischer code hier.. aber funktioniert :)
+	// damit werden listboxen automatisch auf die höhe resized,
+	// die benötigt wird damit alle entrys genau sichtbar sind..
+	// und kein Rand bleibt..
+	if ( tmp - ( MaxEntries*item_height ) > 0 )
+	{
+		if ( !removed_height_pixel )
+		{
+			removed_height_pixel = height() - ((MaxEntries*item_height) + decoheight);
+			resize( eSize( size.width(), height()-removed_height_pixel ) );
+		}
+		else
+		{
+			int newMax = (tmp + removed_height_pixel) / item_height;
+			if ( newMax > MaxEntries )
+			{
+				removed_height_pixel -= (newMax*item_height) - tmp;
+				resize( eSize( size.width(), newMax*item_height+decoheight ) );
+			}
+			else
+			{
+				int tmp = height() - ((MaxEntries*item_height) + decoheight);
+				resize( eSize( size.width(), height() - tmp ) );
+				removed_height_pixel += tmp;
+			}
+		}
+	}
+/*	else
+		eDebug("is ok .. do nothing");*/
 }
 
 eRect eListBoxBase::getEntryRect(int pos)
 {
+	bool sbar =
+		( (int)childs.size() > MaxEntries*columns && MaxEntries*columns > 1 );
+
 	int lme=MaxEntries;
 			// in case we show partial last lines (which only works in single-column),
 			// we increase MaxEntries by one since we don't want the last line
@@ -72,13 +117,13 @@ eRect eListBoxBase::getEntryRect(int pos)
 	if ( (columns == 1) && (flags & flagShowPartial))
 		++lme;
 	if ( deco_selected && have_focus )
-		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / lme) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % lme) * item_height ), eSize( crect_selected.width() / columns , item_height ) );
+		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / lme) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % lme) * item_height ), eSize( (crect_selected.width() / columns) - (sbar?scrollbar->width()+5:columns>1?5:0), item_height ) );
 	else if (deco)
-		return eRect( ePoint( deco.borderLeft + ( ( pos / lme ) * ( crect.width() / columns ) ) , deco.borderTop + ( pos % lme) * item_height ), eSize( crect.width() / columns , item_height ) );
+		return eRect( ePoint( deco.borderLeft + ( ( pos / lme ) * ( crect.width() / columns ) ) , deco.borderTop + ( pos % lme) * item_height ), eSize( (crect.width() / columns) - (sbar?scrollbar->width()+5:columns>1?5:0), item_height ) );
 	else if ( deco_selected )
-		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / lme) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % lme) * item_height ), eSize( crect_selected.width() / columns , item_height ) );
+		return eRect( ePoint( deco_selected.borderLeft + ( ( pos / lme) * ( crect_selected.width() / columns ) ) , deco_selected.borderTop + ( pos % lme) * item_height ), eSize( (crect_selected.width() / columns) - (sbar?scrollbar->width()+5:columns>1?5:0), item_height ) );
 	else
-		return eRect( ePoint( ( ( pos / lme ) * ( size.width() / columns ) ) , ( pos % lme) * item_height ), eSize( size.width() / columns , item_height ) );
+		return eRect( ePoint( ( ( pos / lme ) * ( size.width() / columns ) ) , ( pos % lme) * item_height ), eSize( (size.width() / columns) - (sbar?scrollbar->width()+5:columns>1?5:0), item_height ) );
 }
 
 void eListBoxBase::setColumns(int col)
@@ -117,6 +162,26 @@ int eListBoxBase::setProperty(const eString &prop, const eString &value)
 	return 0;
 }
 
+void eListBoxBase::recalcScrollBar()
+{
+	int scrollbarwidth=0;
+	eRect rc;
+	if ( have_focus && deco_selected )
+		rc = crect_selected;
+	else if ( deco )
+		rc = crect;
+	else
+		rc = clientrect;
+	scrollbarwidth=rc.width()/16;
+	if ( scrollbarwidth < 18 )
+		scrollbarwidth=18;
+	if ( scrollbarwidth > 22 )
+		scrollbarwidth=22;
+	scrollbar->move( ePoint(rc.right() - scrollbarwidth, rc.top()) );
+	scrollbar->resize( eSize( scrollbarwidth, (MaxEntries*item_height) ) );
+	scrollbar->hide();
+}
+
 void eListBoxBase::recalcClientRect()
 {
 	if (deco)
@@ -133,6 +198,7 @@ void eListBoxBase::recalcClientRect()
 		crect_selected.setRight( width() - deco_selected.borderRight );
 		crect_selected.setBottom( height() - deco_selected.borderBottom );
 	}
+	eWidget::recalcClientRect();
 }
 
 int eListBoxBase::eventHandler(const eWidgetEvent &event)
@@ -140,9 +206,11 @@ int eListBoxBase::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 		case eWidgetEvent::changedSize:
-			recalcClientRect();
+			eWidget::eventHandler(event);
 			recalcMaxEntries();
+			recalcScrollBar();
 			init();
+			return 1;
 		break;
 		case eWidgetEvent::evtAction:
 			if ((event.action == &i_listActions->pageup) && !(flags & flagNoPageMovement))
@@ -186,6 +254,7 @@ int eListBoxBase::newFocus()
 	if (deco && deco_selected)
 	{
 		recalcMaxEntries();
+		recalcScrollBar();
 
 		if (isVisible())
 			invalidate();
@@ -355,6 +424,11 @@ eListBoxEntry* eListBoxBase::goPrev()
 
 void eListBoxBase::redrawWidget(gPainter *target, const eRect &where)
 {
+	// redraw scrollbar only...
+	if ( where.size() == scrollbar->getSize() &&
+		where.topLeft() == scrollbar->getPosition() )
+		return;
+
 	eRect rc;
 
 	if (deco_selected && have_focus)
@@ -370,12 +444,30 @@ void eListBoxBase::redrawWidget(gPainter *target, const eRect &where)
 	else
 		rc = where;
 
+	if ( (int)childs.size() > MaxEntries*columns && MaxEntries*columns > 1 )
+	{
+		int currentPos=0;
+		ePtrList<eListBoxEntry>::iterator it = childs.begin();
+		for (; it != childs.end() ;++it, ++currentPos )
+			if ( it == current )
+				break;
+		int pages = childs.size() / (MaxEntries*columns);
+		if ( pages*MaxEntries*columns < (int)childs.size() )
+			pages++;
+		int start=(currentPos/(MaxEntries*columns)*MaxEntries*columns*100)/(pages*MaxEntries*columns);
+		int vis=MaxEntries*columns*100/(pages*MaxEntries*columns);
+		if (vis < 3)
+			vis=3;
+		scrollbar->setParams(start,vis);
+		scrollbar->show();
+	}
+	else
+		scrollbar->hide();
+
 	int i=0;
 	for (ePtrList<eListBoxEntry>::iterator entry(top); ((flags & flagShowPartial) || (entry != bottom)) && (entry != childs.end()); ++entry)
 	{
 		eRect rect = getEntryRect(i);
-
-		eString s;
 
 		if ( rc.intersects(rect) )
 		{
@@ -427,7 +519,6 @@ void eListBoxBase::gotFocus()
 		}
 #endif
 	++have_focus;
-
 	if (!childs.empty())
 	{
 		if ( newFocus() )   // recalced ?
@@ -460,7 +551,6 @@ void eListBoxBase::lostFocus()
 	}
 #endif
 	--have_focus;
-
 	if (!childs.empty())
 		if ( newFocus() ) //recalced ?
 		{
@@ -522,10 +612,9 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 					for (int i = 0; i < MaxEntries * columns; ++i)
 					{
 						if (bottom != childs.end())
-						{
 							++bottom;
+						if (top != childs.end())
 							++top;
-						}
 					}
 				}
 			}
@@ -563,10 +652,10 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 			if ( current == childs.begin() )				// wrap around?
 			{
 				direction=+1;
-				current = childs.end();					// select last
+				top = bottom = current = childs.end();
 				--current;
-				top = bottom = childs.end();
-				for (int i = 0; i < MaxEntries*columns; ++i, --top)
+				int cnt = childs.size()%(MaxEntries*columns);
+				for (int i = 0; i < (cnt?cnt:MaxEntries*columns); ++i, --top)
 					if (top == childs.begin())
 						break;
 			} else
@@ -623,17 +712,18 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 				current++;
 			break;
 		case dirLast:
+		{
 			direction=1;
-			top=bottom=current=childs.end();
-			if (current == childs.begin())
-				break;	// empty.
-			for (int i = 0; i < MaxEntries * columns; ++i)
-				if (top != childs.begin())
-					--top;
+			top = bottom = current = childs.end();
 			--current;
+			int cnt = childs.size()%(MaxEntries*columns);
+			for (int i = 0; i < (cnt?cnt:MaxEntries*columns); ++i, --top)
+				if (top == childs.begin())
+					break;
 			if( !current->isSelectable() )
 				current--;
 			break;
+		}
 		default:
 			return 0;
 	}

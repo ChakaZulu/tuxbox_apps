@@ -49,6 +49,29 @@ void eTimer::start(long msek, bool singleShot)
 	context.addTimer(this);
 }
 
+void eTimer::startLongTimer( int seconds )
+{
+	if (bActive)
+		stop();
+
+	bActive = bSingleShot = true;
+	interval = 0;
+ 	gettimeofday(&nextActivation, 0);
+//	eDebug("this = %p\nnow sec = %d, usec = %d\nadd %d msec", this, nextActivation.tv_sec, nextActivation.tv_usec, msek);
+	if ( seconds > 0 )
+	{
+		while ( seconds > (LONG_MAX/1000) )
+		{
+			nextActivation += ((LONG_MAX/1000)*1000); 
+			// NO !!! LONG_MAX is not the same
+			seconds -= (LONG_MAX/1000);
+		}
+		nextActivation += seconds*1000;
+	}
+//	eDebug("next Activation sec = %d, usec = %d", nextActivation.tv_sec, nextActivation.tv_usec );
+	context.addTimer(this);
+}
+
 void eTimer::stop()
 {
 	if (bActive)

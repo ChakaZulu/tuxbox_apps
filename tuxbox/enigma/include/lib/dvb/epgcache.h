@@ -207,6 +207,7 @@ private:
 	eTimer zapTimer;
 	bool finishEPG();
 public:
+	void flushEPG(const eServiceReferenceDVB& s=eServiceReferenceDVB());
 	void startEPG();
 	void abortEPG(const eServiceReferenceDVB& s=eServiceReferenceDVB());
 	void enterService(const eServiceReferenceDVB &, int);

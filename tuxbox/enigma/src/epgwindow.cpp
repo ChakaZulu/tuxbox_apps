@@ -333,23 +333,8 @@ int eEPGSelector::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 		case eWidgetEvent::evtAction:
-#ifndef DISABLE_FILE
-			if (event.action == &i_epgSelectorActions->addDVRTimerEvent)
-				addtype = ePlaylistEntry::RecTimerEntry |
-									ePlaylistEntry::recDVR|
-									ePlaylistEntry::stateWaiting;
-			else
-#endif
-#ifndef DISABLE_NETWORK
-			if (event.action == &i_epgSelectorActions->addNGRABTimerEvent)
-				addtype = ePlaylistEntry::RecTimerEntry|
-									ePlaylistEntry::recNgrab|
-									ePlaylistEntry::stateWaiting;
-			else
-#endif
-			if (event.action == &i_epgSelectorActions->addSwitchTimerEvent)
-				addtype = ePlaylistEntry::SwitchTimerEntry|
-									ePlaylistEntry::stateWaiting;
+			if ( (addtype = i_epgSelectorActions->checkTimerActions( event.action )) != -1 )
+				;
 			else if (event.action == &i_epgSelectorActions->removeTimerEvent)
 			{
 				if ( eTimerManager::getInstance()->removeEventFromTimerList( this, &current, &events->getCurrent()->event ) )

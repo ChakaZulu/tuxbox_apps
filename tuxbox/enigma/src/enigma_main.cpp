@@ -17,6 +17,7 @@
 #include <enigma_event.h>
 #include <enigma.h>
 #include <enigma_vcr.h>
+#include <enigma_standby.h>
 #include <enigma_lcd.h>
 #include <enigma_plugins.h>
 #include <enigma_ci.h>
@@ -39,6 +40,7 @@
 #include <lib/dvb/serviceplaylist.h>
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbwidgets.h>
+#include <lib/dvb/record.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/elabel.h>
 #include <lib/gui/eprogress.h>
@@ -61,19 +63,19 @@
 struct enigmaMainActions
 {
 	eActionMap map;
-	eAction showMainMenu, standby_press, standby_nomenu_press, standby_repeat, standby_release, 
+	eAction showMainMenu, standby_press, standby_nomenu_press, standby_repeat, standby_release,
 		showInfobar, hideInfobar, showInfobarEPG, showServiceSelector,
-		showSubservices, showAudio, pluginVTXT, pluginExt, showEPGList, showEPG, 
+		showSubservices, showAudio, pluginVTXT, pluginExt, showEPGList, showEPG,
 		nextSubService, prevSubService, nextService, prevService,
 		playlistNextService, playlistPrevService, serviceListDown,
 		serviceListUp, volumeUp, volumeDown, toggleMute,
-		stop, pause, play, record, 
-		startSkipForward, repeatSkipForward, stopSkipForward, 
+		stop, pause, play, record,
+		startSkipForward, repeatSkipForward, stopSkipForward,
 		startSkipReverse, repeatSkipReverse, stopSkipReverse,
 		showUserBouquets, showDVBBouquets, showRecMovies, showPlaylist,
 		modeTV, modeRadio, modeFile,
 		toggleDVRFunctions, toggleIndexmark, indexSeekNext, indexSeekPrev;
-	enigmaMainActions(): 
+	enigmaMainActions():
 		map("enigmaMain", _("enigma Zapp")),
 		showMainMenu(map, "showMainMenu", _("show main menu"), eAction::prioDialog),
 		standby_press(map, "standby_press", _("go to standby (press)"), eAction::prioDialog),
@@ -98,7 +100,7 @@ struct enigmaMainActions
 
 		playlistNextService(map, "playlistNextService", _("playlist/history next"), eAction::prioDialog),
 		playlistPrevService(map, "playlistPrevService", _("playlist/history prev"), eAction::prioDialog),
-		
+
 		serviceListDown(map, "serviceListDown", _("service list and down"), eAction::prioDialog),
 		serviceListUp(map, "serviceListUp", _("service list and up"), eAction::prioDialog),
 
@@ -110,7 +112,7 @@ struct enigmaMainActions
 		pause(map, "pause", _("pause playback"), eAction::prioWidget),
 		play(map, "play", _("resume playback"), eAction::prioWidget),
 		record(map, "record", _("record"), eAction::prioWidget),
-		
+
 		startSkipForward(map, "startSkipF", _("start skipping forward"), eAction::prioWidget),
 		repeatSkipForward(map, "repeatSkipF", _("repeat skipping forward"), eAction::prioWidget),
 		stopSkipForward(map, "stopSkipF", _("stop skipping forward"), eAction::prioWidget),
@@ -143,7 +145,7 @@ struct enigmaGlobalActions
 {
 	eActionMap map;
 	eAction volumeUp, volumeDown, toggleMute;
-	enigmaGlobalActions(): 
+	enigmaGlobalActions():
 		map("enigmaGlobal", "enigma global"),
 
 		volumeUp(map, "volumeUp", _("volume up"), eAction::prioGlobal),
@@ -159,133 +161,6 @@ struct enigmaGlobalActions
 };
 
 eAutoInitP0<enigmaGlobalActions> i_enigmaGlobalActions(eAutoInitNumbers::actions, "enigma global actions");
-
-struct enigmaStandbyActions
-{
-	eActionMap map;
-	eAction wakeUp;
-	enigmaStandbyActions(): 
-		map("enigmaStandby", _("enigma standby")),
-		wakeUp(map, "wakeUp", _("wake up enigma"), eAction::prioDialog)	{
-	}
-};
-
-eAutoInitP0<enigmaStandbyActions> i_enigmaStandbyActions(eAutoInitNumbers::actions, "enigma standby actions");
-
-eZapStandby* eZapStandby::instance=0;
-
-Signal0<void> eZapStandby::enterStandby, eZapStandby::leaveStandby;
-
-void eZapStandby::wakeUp(int norezap)
-{
-	if (norezap)
-		rezap=0;
-	close(0);  
-}
-
-int eZapStandby::eventHandler(const eWidgetEvent &event)
-{
-	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
-	switch (event.type)
-	{
-	case eWidgetEvent::evtAction:
-		if (event.action == &i_enigmaStandbyActions->wakeUp)
-			close(0);
-		else
-			break;
-		return 0;
-	case eWidgetEvent::execBegin:
-	{
-		/*emit*/ enterStandby();
-#ifndef DISABLE_LCD
-		eDBoxLCD::getInstance()->switchLCD(0);
-		eZapLCD *pLCD=eZapLCD::getInstance();
-		pLCD->lcdMain->hide();
-		pLCD->lcdStandby->show();
-#endif
-		rezap = 0;
-		if (handler)
-		{
-			ref = eServiceInterface::getInstance()->service;
-			if (handler->getFlags() & eServiceHandler::flagIsSeekable)
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
-			else
-			{
-				rezap=1;
-				eServiceInterface::getInstance()->stop();
-			}
-		}
-		eAVSwitch::getInstance()->setInput(1);
-		eAVSwitch::getInstance()->setTVPin8(0);
-		eFrontend::getInstance()->savePower();
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-		if (sapi)
-			sapi->transponder=0;
-		::sync();
-		system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
-		system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
-
-		if( !eSystemInfo::getInstance()->hasLCD() ) //  in standby
-		{
-			time_t c=time(0)+eDVB::getInstance()->time_difference;
-			tm *t=localtime(&c);
-
-			int num=9999;
-			int stdby=1;
-			if (t && eDVB::getInstance()->time_difference)
-			{
-				num = t->tm_hour*100+t->tm_min;
-			}
-					
-			eDebug("write number to led-display");
-			int fd=::open("/dev/dbox/fp0",O_RDWR);
-			::ioctl(fd,11,&stdby);
-			::ioctl(fd,4,&num);
-			::close(fd);
-		}
-
-		break;
-	}
-	case eWidgetEvent::execDone:
-	{
-#ifndef DISABLE_LCD
-		eZapLCD *pLCD=eZapLCD::getInstance();
-		pLCD->lcdStandby->hide();
-		pLCD->lcdMain->show();
-#endif
-		if (handler)
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
-		if (rezap)
-			eServiceInterface::getInstance()->play(ref);
-		eAVSwitch::getInstance()->setInput(0);
-		eStreamWatchdog::getInstance()->reloadSettings();
-#ifndef DISABLE_LCD
-		eDBoxLCD::getInstance()->switchLCD(1);
-#endif
-		if( !eSystemInfo::getInstance()->hasLCD() ) //  out of standby
-		{
-			int stdby=0;
-			int fd=::open("/dev/dbox/fp0",O_RDWR);
-			::ioctl(fd,11,&stdby);
-			::close(fd);
-		}
-		/*emit*/ leaveStandby();
-		break;
-	}
-	default:
-		break;
-	}
-	return eWidget::eventHandler(event);
-}
-
-eZapStandby::eZapStandby(): eWidget(0, 1)
-{
-	addActionMap(&i_enigmaStandbyActions->map);
-	if (!instance)
-		instance=this;
-	else
-		eFatal("more than ob eZapStandby instance is created!");
-}
 
 eString getISO639Description(char *iso)
 {
@@ -312,7 +187,7 @@ void eZapSeekIndices::load(const eString &filename)
 	FILE *f=fopen(filename.c_str(), "rt");
 	if (!f)
 		return;
-	
+
 	while (1)
 	{
 		int real, time;
@@ -329,7 +204,7 @@ void eZapSeekIndices::save()
 	FILE *f=fopen(filename.c_str(), "wt");
 	if (!f)
 		return;
-		
+
 	for (std::map<int,int>::const_iterator i(index.begin()); i != index.end(); ++i)
 		fprintf(f, "%d %d", i->first, i->second);
 	fclose(f);
@@ -471,7 +346,7 @@ void NVODStream::EITready(int error)
 }
 
 NVODStream::NVODStream(eListBox<NVODStream> *listbox, eDVBNamespace dvb_namespace, const NVODReferenceEntry *ref, int type)
-	: eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox), 
+	: eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox),
 		service(dvb_namespace, eTransportStreamID(ref->transport_stream_id), eOriginalNetworkID(ref->original_network_id),
 			eServiceID(ref->service_id), 5), eit(EIT::typeNowNext, ref->service_id, type)
 {
@@ -526,7 +401,7 @@ struct findNVOD: public std::unary_function<NVODStream&, void>
 {
 	NVODStream **stream;
 	time_t nowTime;
-	
+
 	findNVOD( NVODStream** str )
 		:stream( str ), nowTime( eDVB::getInstance()->time_difference + time(0) )
 	{
@@ -554,8 +429,8 @@ void eNVODSelector::readyCallBack( )
 		{
 			NVODStream *select=0;
 			list.forEachEntry( findNVOD( &select ) );
-			if ( select )
-				eServiceInterface::getInstance()->play( select->service );
+/*			if ( select )
+				eServiceInterface::getInstance()->play( select->service );*/
 		}
 	}
 }
@@ -740,6 +615,38 @@ void AudioStream::EITready(int error)
 	}
 }
 
+void ePSAudioSelector::selected(eListBoxEntryText*l)
+{
+	eServiceHandler *service=eServiceInterface::getInstance()->getService();
+	if (l && service)
+	{
+		eDebug("SET %02x", (int)l->getKey() );
+		service->setAudioStream((int)l->getKey());
+	}
+	close(0);
+}
+
+ePSAudioSelector::ePSAudioSelector()
+	:eListBoxWindow<eListBoxEntryText>(_("Audio"), 10, 330)
+{
+	move(ePoint(200, 120));
+	CONNECT(list.selected, ePSAudioSelector::selected);
+}
+
+void ePSAudioSelector::clear()
+{
+	list.clearList();
+}
+
+void ePSAudioSelector::add(unsigned int id)
+{
+	eDebug("add AUDIO %02x",id);
+	list.beginAtomic();
+	new eListBoxEntryText(&list, (id&0xFF)==0xBD ?
+		_("Audiotrack(AC3)") : _("Audiotrack"), (void*)id );
+	list.endAtomic();
+}
+
 void eAudioSelector::selected(AudioStream *l)
 {
 	eServiceHandler *service=eServiceInterface::getInstance()->getService();
@@ -772,8 +679,8 @@ void eAudioSelector::add(PMTEntry *pmt)
 
 SubService::SubService(eListBox<SubService> *listbox, eDVBNamespace dvb_namespace, const LinkageDescriptor *descr)
 	:eListBoxEntryText((eListBox<eListBoxEntryText>*) listbox),
-		service(dvb_namespace, 
-			eTransportStreamID(descr->transport_stream_id), 
+		service(dvb_namespace,
+			eTransportStreamID(descr->transport_stream_id),
 			eOriginalNetworkID(descr->original_network_id),
 			eServiceID(descr->service_id), 7)
 {
@@ -957,17 +864,17 @@ eServiceNumberWidget::eServiceNumberWidget(int initial)
 	label->setText(_("Channel:"));
 	label->move(ePoint(50, 15));
 	label->resize(eSize(110, eSkin::getActive()->queryValue("fontsize", 20)+4));
-	
+
 	number=new eNumber(this, 1, 1, 9999, 4, 0, 1, label);
 	number->move(ePoint(160, 15));
 	number->resize(eSize(60, eSkin::getActive()->queryValue("fontsize", 20)+4));
 	number->setNumber(initial);
 	CONNECT(number->selected, eServiceNumberWidget::selected);
 	CONNECT(number->numberChanged, eServiceNumberWidget::numberChanged );
-	
+
 	timer=new eTimer(eApp);
 	timer->start(2000,true);
-	CONNECT(timer->timeout, eServiceNumberWidget::timeout);	
+	CONNECT(timer->timeout, eServiceNumberWidget::timeout);
 }
 
 eServiceNumberWidget::~eServiceNumberWidget()
@@ -1171,7 +1078,7 @@ void eZapMain::destroyUserBouquets( bool save )
 		userRadioBouquets->save();
 		saveUserBouquets();
 	}
-	
+
 	for (std::list<ePlaylistEntry>::iterator it(userTVBouquets->getList().begin()); it != userTVBouquets->getList().end(); it++ )
 	{
 		eServicePlaylistHandler::getInstance()->removePlaylist(it->service);
@@ -1387,6 +1294,10 @@ eZapMain::eZapMain()
 	VolumeBar->setRightColor( eSkin::getActive()->queryColor("volume_right") );
 	VolumeBar->setBorder(0);
 
+/*	subtitle = new eSubtitleWidget();
+	std::set<int> pages; pages.insert(-1);
+	subtitle->start(0x3ea, pages);*/
+
 	dvrInfoBar=new eLabel(this);
 	dvrInfoBar->setName("dvrInfoBar");
 	dvrInfoBar->hide();
@@ -1412,14 +1323,14 @@ eZapMain::eZapMain()
 	recstatus->setName("recStatus");
 	recstatus->hide();
 
-#ifndef DISABLE_FILE	
+#ifndef DISABLE_FILE
 	Progress=new eProgressWithIndices(this);
 	Progress->setName("progress_bar");
 	Progress->setIndices(&indices);
 #else
 	Progress=new eProgress(this);
 	Progress->setName("progress-bar");
-#endif	
+#endif
 
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
@@ -1578,11 +1489,6 @@ eZapMain::eZapMain()
 	if ( eConfig::getInstance()->getKey("/ezap/ui/playlistmode", playlistmode ) )
 		playlistmode = 0;  // default TV Mode
 
-	if ( playlist->current != playlist->getConstList().end() )
-		playService( playlist->current->service, psDontAdd|psSeekPos);  // then play the last service
-	else if ( modeLast[mode].current() )
-		playService( modeLast[mode].current() ,0 );  // then play the last service
-
 	startMessages();
 
 	dvrInfoBar->zOrderRaise();
@@ -1597,6 +1503,15 @@ eZapMain::eZapMain()
 	if ( eDVB::getInstance()->DVBCI2 )
 		CONNECT( eDVB::getInstance()->DVBCI2->ci_mmi_progress, eZapMain::receiveMMIMessageCI2 );
 #endif
+	int bootcount=1;
+	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
+	if ( bootcount > 1 )
+	{
+		if ( playlist->current != playlist->getConstList().end() )
+			playService( playlist->current->service, psDontAdd|psSeekPos);  // then play the last service
+		else if ( modeLast[mode].current() )
+			playService( modeLast[mode].current() ,0 );  // then play the last service
+	}
 }
 
 #ifndef DISABLE_CI
@@ -1698,6 +1613,8 @@ eZapMain::~eZapMain()
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 		eDBoxLCD::getInstance()->switchLCD(0);
 #endif
+	delete subtitle;
+
 	eConfig::getInstance()->setKey("/ezap/ui/serviceSelectorStyle", eZap::getInstance()->getServiceSelector()->getStyle() );
 	eConfig::getInstance()->setKey("/ezap/ui/playlistmode", playlistmode);
 	eServiceReference::saveLockedList( (eplPath+"/services.locked").c_str() );
@@ -1888,6 +1805,23 @@ void eZapMain::setEIT(EIT *eit)
 					}
 				}
 			}
+
+			for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
+			{
+				Descriptor *descriptor=*d;
+				if (descriptor->Tag()==DESCR_COMPONENT)
+				{
+					ComponentDescriptor *cd=(ComponentDescriptor*)descriptor;
+
+					switch (cd->component_type)
+					{
+						case 0x10 ... 0x13:
+							eDebug("S E R V I C E  H A V E  S U B T I T L E S");
+							break;
+					}
+				}
+			}
+
 			tm *t=event->start_time!=-1?localtime(&event->start_time):0;
 			eString start="";
 			if (t && event->duration)
@@ -2065,7 +1999,14 @@ void eZapMain::setPlaylistPosition()
 		return;
 	if (playlist->current != playlist->getConstList().end())
 		if (playlist->current->current_position != -1)
+		{
+			eDebug("setPlaylistPosition");
+//			Decoder::startTrickmode();
+			Decoder::Pause();
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, playlist->current->current_position));
+			Decoder::Resume();
+//			Decoder::stopTrickmode();
+		}
 }
 
 void eZapMain::getPlaylistPosition()
@@ -2200,7 +2141,11 @@ void eZapMain::showServiceSelector(int dir, int newTarget )
 	if (*service == eServiceInterface::getInstance()->service)
 		return;
 
+#ifndef DISABLE_FILE
+	if ( eDVB::getInstance()->recorder || handleState() )
+#else
 	if ( handleState() )
+#endif
 	{
 		getServiceSelectorPath(modeLast[mode]);
 
@@ -2373,7 +2318,7 @@ void eZapMain::standbyPress(int n)
 void eZapMain::standbyRepeat()
 {
 	timeval now;
-	gettimeofday(&now,0);	
+	gettimeofday(&now,0);
 	if ( standbyTime < now )
 		standbyRelease();
 }
@@ -2518,9 +2463,10 @@ void eZapMain::pause()
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 	if (handler->getState() == eServiceHandler::statePause)
 	{
-		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
+		eDebug("state = pause");
 		if ( ref.type == eServiceReference::idDVB && ref.path )
 			setPlaylistPosition();
+		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
 	}
 	else
 	{
@@ -2531,16 +2477,17 @@ void eZapMain::pause()
 				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
 				getPlaylistPosition();
 				Decoder::flushBuffer();
+				return;
 			}
+#ifndef DISABLE_FILE
 			else if ( !eDVB::getInstance()->recorder )
 			{
 				record();
-				usleep(200*1000);
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
+				usleep(750*1000);
 			}
+#endif
 		}
-		else
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
+		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
 	}
 }
 
@@ -2778,9 +2725,9 @@ void eZapMain::startSkip(int dir)
 
 void eZapMain::repeatSkip(int dir)
 {
-#if 1
 	if (!skipping)
 	{
+#if 1
 		skipcounter++;
 		int time=5000;
 		if (skipcounter > 10)
@@ -3050,7 +2997,7 @@ void eZapMain::deleteService( eServiceSelector *sel )
 		i++;
 		if ( i == pl->getList().end() )
 		{
-			i=it;  
+			i=it;
 			i--;
 			sel->removeCurrent(false);
 		}
@@ -3064,6 +3011,127 @@ void eZapMain::deleteService( eServiceSelector *sel )
 		// enter new into the current path
 	}
 }
+
+#ifndef DISABLE_FILE
+void eZapMain::deleteFile( eServiceSelector *sel )
+{
+	eServiceReference ref=sel->getSelected();
+
+	int profimode=0;
+	eConfig::getInstance()->getKey("/elitedvb/extra/profimode", profimode);
+
+	bool removeEntry=true;
+
+	if (!profimode)
+	{
+		eString s;
+		s.sprintf(_("You are trying to delete '%s'.\nReally do this?"),ref.path.c_str() );
+		eMessageBox box(s, _("Delete File"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
+		box.show();
+		int r=box.exec();
+		box.hide();
+		if (r != eMessageBox::btYes)
+			removeEntry=false;
+	}
+
+	if (removeEntry)
+	{
+		if ( ::unlink(ref.path.c_str() ) < 0 )
+			eDebug("remove File %s failed (%m)", ref.path.c_str() );
+		else
+		{
+			if ( ref.path.right(3).upper() == ".TS" )
+			{
+				for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
+					it != recordings->getList().end(); ++it )
+				{
+					if ( it->service.path == ref.path )
+					{
+						recordings->getList().erase(it);
+						recordings->save();
+						break;
+					}
+				}
+				int ret = 0;
+				int cnt = 1;
+				do
+				{
+					eString tmp;
+					tmp.sprintf("%s.%03d", ref.path.c_str(), cnt++);
+					ret = ::unlink(tmp.c_str());
+				}
+				while( !ret );
+			}
+			sel->removeCurrent(false);
+		}
+	}
+}
+
+void eZapMain::renameFile( eServiceSelector *sel )
+{
+	eServiceReference ref=sel->getSelected();
+
+	eString fname=ref.path.mid( ref.path.rfind('/')+1 );
+
+	unsigned int b = fname.find('.');
+	if ( b != eString::npos )
+		fname.erase(b);
+
+	TextEditWindow wnd(_("Enter new Filename:"),"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 -_‰ˆ¸ƒ÷‹");
+	wnd.setText(_("Rename File"));
+	wnd.show();
+	wnd.setEditText(fname);
+	wnd.setMaxChars(100);
+	int ret = wnd.exec();
+	wnd.hide();
+	if ( !ret )
+	{
+		// name changed?
+		if ( fname != wnd.getEditText() )
+		{
+			eString oldFilePath = ref.path;
+			eString newFilePath = ref.path.left( ref.path.rfind('/')+1 );
+			newFilePath += wnd.getEditText();
+			unsigned int c = ref.path.rfind('.');
+			if ( c != eString::npos )
+				newFilePath += ref.path.mid( c );
+
+			if ( ::rename( oldFilePath.c_str(), newFilePath.c_str() ) < 0 )
+				eDebug("rename File '%s' to '%s' failed (%m)",
+					ref.path.c_str(), newFilePath.c_str() );
+			else
+			{
+				if ( ref.path.right(3).upper() == ".TS" )
+				{
+					int ret = 0;
+					int cnt = 1;
+					do
+					{
+						eString tmpold, tmpnew;
+						tmpold.sprintf("%s.%03d", ref.path.c_str(), cnt);
+						tmpnew.sprintf("%s.%03d", newFilePath.c_str(), cnt++);
+						ret = ::rename(tmpold.c_str(), tmpnew.c_str());
+					}
+					while( !ret );
+
+					for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
+						it != recordings->getList().end(); ++it )
+					{
+						if ( it->service.path == ref.path )
+						{
+							it->service.path=newFilePath;
+							recordings->save();
+							break;
+						}
+					}
+				}
+				ref.path=newFilePath;
+				sel->invalidateCurrent(ref);
+			}
+		}
+	}
+}
+#endif
 
 void eZapMain::renameBouquet( eServiceSelector *sel)
 {
@@ -3302,6 +3370,15 @@ void eZapMain::showServiceMenu(eServiceSelector *sel)
 	}
 	case 13:
 		createMarker(sel);
+		break;
+#ifndef DISABLE_FILE
+	case 14:
+		deleteFile(sel);
+		break;
+	case 15:
+		renameFile(sel);
+		break;
+#endif
 	default:
 		break;
 	}
@@ -3374,8 +3451,31 @@ void eZapMain::playService(const eServiceReference &service, int flags)
 	int first=0;
 
 	if ( !service || ( service.path && service.path == "/" ) )
-	    return;
+		return;
 
+#ifndef DISABLE_FILE
+	if ( !service.path && eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef != service )
+	{
+		if ( eDVB::getInstance()->recorder->scrambled )
+		{
+			if ( handleState() )
+				goto zap;
+			return;
+		}
+		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&)service;
+		eServiceReferenceDVB &rec = (eServiceReferenceDVB&)eDVB::getInstance()->recorder->recRef;
+
+		if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
+				 rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
+				 rec.getDVBNamespace() != Ref.getDVBNamespace() )
+			if ( handleState() )
+				goto zap;
+			else
+				return;
+	}
+
+zap:
+#endif
 	if (flags&psSetMode)
 	{
 		if ( service.type == eServiceReference::idDVB && !service.path )
@@ -3621,7 +3721,7 @@ void eZapMain::showSubserviceMenu()
 
 void eZapMain::showAudioMenu()
 {
-	if (flags&ENIGMA_AUDIO)
+	if (flags&(ENIGMA_AUDIO|ENIGMA_AUDIO_PS))
 	{
 #ifndef DISABLE_LCD
 		eZapLCD* pLCD = eZapLCD::getInstance();
@@ -3634,11 +3734,23 @@ void eZapMain::showAudioMenu()
 			hide();
 		}
 #ifndef DISABLE_LCD
-		audiosel.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+		if (flags&ENIGMA_AUDIO)
+			audiosel.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+		else
+			audioselps.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 #endif
-		audiosel.show();
-		audiosel.exec();
-		audiosel.hide();
+		if (flags&ENIGMA_AUDIO)
+		{
+			audiosel.show();
+			audiosel.exec();
+			audiosel.hide();
+		}
+		else
+		{
+			audioselps.show();
+			audioselps.exec();
+			audioselps.hide();
+		}
 #ifndef DISABLE_LCD
 		pLCD->lcdMenu->hide();
 		pLCD->lcdMain->show();
@@ -3922,8 +4034,14 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		{
 			int oldmode=mode;
 			showMainMenu();
-			if (mode != oldmode)
+			if (mode != -1 && mode != oldmode && eServiceInterface::getInstance()->service != modeLast[mode].current() )
+			{
+#ifndef DISABLE_FILE
+				if ( eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef == eServiceInterface::getInstance()->service )
+					break;
+#endif
 				showServiceSelector(-1);
+			}
 		}
 		else if (event.action == &i_enigmaMainActions->standby_press)
 		{
@@ -3955,7 +4073,11 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			showServiceSelector(-1);
 		else if (event.action == &i_enigmaMainActions->showSubservices )
 		{
+#ifndef DISABE_FILE
+			if ( eDVB::getInstance()->recorder || handleState() )
+#else
 			if ( handleState() )
+#endif
 				showSubserviceMenu();
 		}
 		else if (event.action == &i_enigmaMainActions->showAudio)
@@ -3975,7 +4097,11 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->nextService)
 		{
+#ifndef DISABE_FILE
+			if ( eDVB::getInstance()->recorder || handleState() )
+#else
 			if ( handleState() )
+#endif
 				nextService();
 		}
 		else if ( subservicesel.quickzapmode() && event.action == &i_enigmaMainActions->prevSubService )
@@ -3985,17 +4111,29 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->prevService)
 		{
+#ifndef DISABE_FILE
+			if ( eDVB::getInstance()->recorder || handleState() )
+#else
 			if ( handleState() )
+#endif
 				prevService();
 		}
 		else if (event.action == &i_enigmaMainActions->playlistNextService)
 		{
+#ifndef DISABE_FILE
+			if ( eDVB::getInstance()->recorder || handleState() )
+#else
 			if ( handleState() )
+#endif
 				playlistNextService();
 		}
 		else if (event.action == &i_enigmaMainActions->playlistPrevService)
 		{
+#ifndef DISABE_FILE
+			if ( eDVB::getInstance()->recorder || handleState() )
+#else
 			if ( handleState() )
+#endif
 				playlistPrevService();
 		}
 		else if (event.action == &i_enigmaMainActions->serviceListDown)
@@ -4115,7 +4253,11 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			showEPG_Streaminfo();
 		else if (event.action == &i_numberActions->key0)
 		{
+#ifndef DISABE_FILE
+			if ( (eDVB::getInstance()->recorder || handleState()) && !playlistmode && playlist->getConstList().size() > 1 )
+#else
 			if ( handleState() && !playlistmode && playlist->getConstList().size() > 1 )
+#endif
 			{
 				std::list<ePlaylistEntry>::iterator prev,last;
 				last = playlist->getList().end();
@@ -4165,25 +4307,45 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 		else if (event.action == &i_enigmaMainActions->modeRadio)
 		{
+#ifndef DISABE_FILE
+			if ( eDVB::getInstance()->recorder || handleState() )
+#else
 			if ( handleState() )
+#endif
 			{
 				if ( mode != modeRadio )
-					setMode(modeRadio, 1);
+					setMode(modeRadio,
+#ifndef DISABLE_FILE
+					eDVB::getInstance()->recorder ? 0 :
+#endif
+					1);
 				showServiceSelector(-1);
 			}
 		}
 		else if (event.action == &i_enigmaMainActions->modeTV)
 		{
+#ifndef DISABE_FILE
+			if ( eDVB::getInstance()->recorder || handleState() )
+#else
 			if ( handleState() )
+#endif
 			{
 				if ( mode != modeTV )
-					setMode(modeTV, 2);
+					setMode(modeTV,
+#ifndef DISABLE_FILE
+					eDVB::getInstance()->recorder ? 0 :
+#endif
+					1);
 				showServiceSelector(-1);
 			}
 		}
 		else if (event.action == &i_enigmaMainActions->modeFile)
 		{
+#ifndef DISABE_FILE
+			if ( eDVB::getInstance()->recorder || handleState() )
+#else
 			if ( handleState() )
+#endif
 			{
 				if ( mode != modeFile )
 					setMode(modeFile, 2);
@@ -4211,7 +4373,11 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		startMessages();
 		if ( mode == modeFile )
 			num=-1;
-		else if ( num && handleState())
+#ifndef DISABLE_FILE
+		else if ( num && (!eDVB::getInstance()->recorder || handleState() ) )
+#else
+		else if ( num && handleState() )
+#endif
 		{
 			hide();
 			eServiceNumberWidget s(num);
@@ -4371,9 +4537,6 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	case eServiceEvent::evtEnd:
 	{
 		int serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
-		if(! (serviceFlags & eServiceHandler::flagIsTrack)  )
-			break;
-
 		if (playlist->current != playlist->getConstList().end())
 		{
 			playlist->current->current_position=-1;
@@ -4385,7 +4548,11 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 			eServiceInterface::getInstance()->play((eServiceReference&)(*playlist->current));
 		}
 		else if (!playlistmode)
+		{
+			if(! (serviceFlags & eServiceHandler::flagIsTrack)  )
+				break;
 			nextService(1);
+		}
 		else
 			eDebug("ende im gelaende.");
 		break;
@@ -4409,6 +4576,13 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		fileinfos->setText(sapi->getInfo(1)+(str.length()>2?"\n"+str:""));
 		break;
 	}
+	case eServiceEvent::evtAddNewAudioStreamId:
+		eDebug("case eServiceEvent::evtAddNewAudioStreamId:.. %02x", event.param );
+		audioselps.add(event.param);
+		ButtonYellowDis->hide();
+		ButtonYellowEn->show();
+		flags|=ENIGMA_AUDIO_PS;
+		break;
 #endif // DISABLE_FILE
 	}
 }
@@ -4438,6 +4612,7 @@ void eZapMain::showEPG_Streaminfo()
 
 void eZapMain::startService(const eServiceReference &_serviceref, int err)
 {
+	audioselps.clear();
 #ifndef DISABLE_FILE
 	skipcounter=0;
 #endif
@@ -4812,7 +4987,7 @@ void eZapMain::leaveService()
 	ButtonYellowDis->show();
 	ButtonYellowEn->hide();
 
-	flags&=~(ENIGMA_NVOD|ENIGMA_SUBSERVICES|ENIGMA_AUDIO|ENIGMA_VIDEO);
+	flags&=~(ENIGMA_NVOD|ENIGMA_SUBSERVICES|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);
 
 	ChannelName->setText("");
 //	ChannelNumber->setText("");
@@ -5041,7 +5216,37 @@ void eZapMain::pauseMessages()
 
 void eZapMain::setMode(int newmode, int user)
 {
+	if ( newmode != -1 )
+	{
+#ifndef DISABLE_FILE
+		eServiceReference cur = modeLast[newmode].current();
+		int recmode = -1;
+		if ( eDVB::getInstance()->recorder && !cur.path )
+		{
+			eServiceReferenceDVB &ref = (eServiceReferenceDVB&) cur;
+			eServiceReferenceDVB &rec = (eServiceReferenceDVB&) eDVB::getInstance()->recorder->recRef;
+			if ( !ref.path && ref.getTransportStreamID() != rec.getTransportStreamID() ||
+				ref.getOriginalNetworkID() != rec.getOriginalNetworkID() ||
+				ref.getDVBNamespace() != rec.getDVBNamespace() )
+				user=0;
+			recmode = rec.data[0] & 1 ? modeTV : modeRadio;
+		}
+
+		if ( recmode != -1 && recmode == newmode )
+		{
+			getServiceSelectorPath(modeLast[mode]);
+			mode = newmode;
+			setServiceSelectorPath(modeLast[mode]);
+			eZap::getInstance()->getServiceSelector()->setKeyDescriptions();
+			if ( user && eServiceInterface::getInstance()->service != eDVB::getInstance()->recorder->recRef )
+				playService(eDVB::getInstance()->recorder->recRef, psDontAdd|psSeekPos);
+			return;
+		}
+	}
+#else
+	}
 	if ( handleState() )
+#endif
 	{
 #ifndef DISABLE_FILE
 		if ( newmode == modeFile )
@@ -5222,7 +5427,7 @@ void eZapMain::toggleIndexmark()
 	if (!handler)
 		return;
 
-	int real=handler->getPosition(eServiceHandler::posQueryRealCurrent), 
+	int real=handler->getPosition(eServiceHandler::posQueryRealCurrent),
 			time=handler->getPosition(eServiceHandler::posQueryCurrent);
 
 	int nearest=indices.getNext(real, 0);
@@ -5230,7 +5435,7 @@ void eZapMain::toggleIndexmark()
 		indices.add(real, time);
 	else
 		indices.remove(nearest);
-	
+
 	Progress->invalidate();
 }
 
@@ -5247,7 +5452,7 @@ void eZapMain::indexSeek(int dir)
 			time=handler->getPosition(eServiceHandler::posQueryCurrent);
 
 	int nearest=indices.getNext(real, dir);
-	if ((nearest != -1) && (dir == -1)) // when seeking backward, check if 
+	if ((nearest != -1) && (dir == -1)) // when seeking backward, check if
 	{
 		int nearestt=indices.getTime(nearest);
 		if ((time - nearestt) < 5)  // when less than 5 seconds, seek to prev
@@ -5311,7 +5516,7 @@ void eZapMain::ShowTimeCorrectionWindow( tsref ref )
 #ifndef DISABLE_NETWORK
 void eZapMain::startNGrabRecord()
 {
-	state |= (stateRecording|recDVR);	
+	state |= (stateRecording|recDVR);
 	ENgrab::getNew()->sendstart();
 }
 
@@ -5403,6 +5608,16 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			}
 		}
+#ifndef DISABLE_FILE
+		else if ( (ref.type == eServiceReference::idDVB && ref.path)
+			|| ( ref.type == eServiceReference::idUser
+				&& ( (ref.data[0] == eMP3Decoder::codecMPG)
+				  || (ref.data[0] == eMP3Decoder::codecMP3) ) ) )
+		{// deleteable file
+			prev = new eListBoxEntryText(&list, _("delete file"), (void*)14, 0, _("delete the selected file (and all corresponding ts files"));
+			prev = new eListBoxEntryText(&list, _("rename file"), (void*)15, 0, _("rename the selected file (and all corresponding ts files"));
+		}
+#endif
 	}
 
 	// not in File mode
@@ -5454,12 +5669,20 @@ eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdE
 	setLCD(lcdTitle, lcdElement);
 #endif
 	move(ePoint(150, 130));
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 )
-		new eListBoxEntryText(&list, _("reboot now"), (void*)1, 0, _("restart your dreambox"));		//use this type to reboot (with complete unmount)
-	else
+	switch( eSystemInfo::getInstance()->getHwType() )
 	{
-		new eListBoxEntryText(&list, _("shutdown now"), (void*)1, 0, _("shutdown your dreambox"));
-		new eListBoxEntryText(&list, _("restart"), (void*)4, 0, _("restart your dreambox"));
+		case eSystemInfo::DM5600:
+		case eSystemInfo::DM5620:
+			new eListBoxEntryText(&list, _("reboot now"), (void*)4, 0, _("restart your dreambox"));
+			break;
+		case eSystemInfo::DM7000:
+			new eListBoxEntryText(&list, _("shutdown now"), (void*)1, 0, _("shutdown your dreambox"));
+			new eListBoxEntryText(&list, _("restart"), (void*)4, 0, _("restart your dreambox"));
+			break;
+		default:
+			new eListBoxEntryText(&list, _("shutdown now"), (void*)1, 0, _("shutdown your dbox-2"));
+			new eListBoxEntryText(&list, _("restart"), (void*)4, 0, _("restart your dbox-2"));
+			break;
 	}
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	new eListBoxEntryText(&list, _("goto standby"), (void*)2, 0, _("goto standby mode") );
@@ -5518,7 +5741,8 @@ eSleepTimer::eSleepTimer()
 	if (eSkin::getActive()->build(this, "sleeptimer"))
 		eFatal("skin load of \"sleeptimer\" failed");
 	CONNECT( set->selected, eSleepTimer::setPressed );
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 )
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600
+    || eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 )
 	{
 		Shutdown->hide();
 		Standby->hide();
@@ -5899,4 +6123,3 @@ void eTimeCorrectionEditWindow::monthChanged( eListBoxEntryText *e )
 		cday->setCurrent( (void*) 1 );
 	}
 }
-

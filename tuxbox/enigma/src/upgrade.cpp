@@ -19,9 +19,9 @@
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 
-#define TMP_IMAGE "/var/tmp/root.cramfs"
-#define TMP_IMAGE_ALT "/var/tmp/cdk.cramfs"
-#define TMP_CHANGELOG "/var/tmp/changelog"
+#define TMP_IMAGE "/tmp/root.cramfs"
+#define TMP_IMAGE_ALT "/tmp/cdk.cramfs"
+#define TMP_CHANGELOG "/tmp/changelog"
 
 class ProgressWindow: public eWindow
 {
@@ -173,6 +173,7 @@ eUpgrade::eUpgrade(bool manual)
 			mIDStr="5";
 			break;
 		case eSystemInfo::DM5600:
+		case eSystemInfo::DM5620:
 			mIDStr="6";
 			break;
 		case eSystemInfo::dbox2Nokia:
@@ -596,9 +597,10 @@ void eUpgrade::flashImage(int checkmd5)
 				// file operations... then the update ist very slow on the
 				// dreambox
 				nice(-10);
-				
+				eEPGCache::getInstance()->pauseEPG();
+
 				system("cp /sbin/rebootSE /tmp/reboot");
-				
+
 				if(!erase(mtd))
 				{
 					mb.hide();
@@ -656,7 +658,7 @@ void eUpgrade::flashImage(int checkmd5)
 				mbend.show();
 				mbend.exec();
 				mbend.hide();
-				eZap::getInstance()->quit(1);
+				eZap::getInstance()->quit(3);
 //				system("/sbin/reboot");
 //				system("/bin/reboot");
 //				exit(0);

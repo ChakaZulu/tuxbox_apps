@@ -80,6 +80,7 @@ void eFrontend::timeout()
 		switch ( eSystemInfo::getInstance()->getHwType() )
 		{
 			case eSystemInfo::DM5600:
+			case eSystemInfo::DM5620:
 			case eSystemInfo::DM7000:
 				updateTransponder=1;
 				break;
@@ -113,7 +114,7 @@ void eFrontend::timeout()
 					eLNB *lnb = sat->getLNB();
 					if (lnb)
 					{
-//						eDebug("oldFreq = %d", transponder->satellite.frequency );
+						eDebug("oldFreq = %d", transponder->satellite.frequency );
 #if HAVE_DVB_API_VERSION < 3
 						transponder->satellite.frequency = transponder->satellite.frequency > lnb->getLOFThreshold() ?
 								front.Frequency + lnb->getLOFHi() :
@@ -123,7 +124,7 @@ void eFrontend::timeout()
 								front.parameters.frequency + lnb->getLOFHi() :
 								front.parameters.frequency + lnb->getLOFLo();
 #endif
-//						eDebug("newFreq = %d", transponder->satellite.frequency );
+						eDebug("newFreq = %d", transponder->satellite.frequency );
 					}
 				}
 /*				transponder->satellite.fec = front.u.qpsk.FEC_inner;
@@ -1183,8 +1184,22 @@ int eFrontend::tune(eTransponder *trans,
 		// Rotor Support
 		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && !noRotorCmd )
 		{           
+			bool useGotoXX=false;
+#define SPECIAL_MODE
+#ifdef SPECIAL_MODE
+			std::map<int,int>::iterator it = lnb->getDiSEqC().RotorTable.find( sat->getOrbitalPosition() );
+
+			if (it != lnb->getDiSEqC().RotorTable.end())  // position for selected sat found ?
+				RotorCmd=it->second;
+			else  // entry not in table found
+#else
 			if ( lnb->getDiSEqC().useGotoXX )
+#endif
 			{
+#ifdef SPECIAL_MODE
+				eDebug("Entry for %d,%d° not in Rotor Table found... i try gotoXX°", sat->getOrbitalPosition() / 10, sat->getOrbitalPosition() % 10 );
+#endif
+				useGotoXX=true;
 				int pos = sat->getOrbitalPosition();
 				int satDir = pos < 0 ? eDiSEqC::WEST : eDiSEqC::EAST;
 
@@ -1218,6 +1233,7 @@ int eFrontend::tune(eTransponder *trans,
 
 				eDebug("RotorCmd = %04x", RotorCmd);
 			}
+#ifndef SPECIAL_MODE
 			else  // we use builtin rotor sat table
 			{
 				std::map<int,int>::iterator it = lnb->getDiSEqC().RotorTable.find( sat->getOrbitalPosition() );
@@ -1227,6 +1243,7 @@ int eFrontend::tune(eTransponder *trans,
 				else  // entry not in table found
 					eDebug("Entry for %d,%d° not in Rotor Table found... please add", sat->getOrbitalPosition() / 10, sat->getOrbitalPosition() % 10 );
 			}
+#endif
 
 			if ( RotorCmd != lastRotorCmd )  // rotorCmd must sent?
 			{
@@ -1248,7 +1265,7 @@ int eFrontend::tune(eTransponder *trans,
 				commands[cmdCount-1].msg[0]=0xE0;
 				commands[cmdCount-1].msg[1]=0x31;
 #endif
-				if ( lnb->getDiSEqC().useGotoXX )
+				if ( useGotoXX )
 				{
 					eDebug("Rotor DiSEqC Param = %04x (useGotoXX)", RotorCmd);
 #if HAVE_DVB_API_VERSION < 3

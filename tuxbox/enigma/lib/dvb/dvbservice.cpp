@@ -292,9 +292,12 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 							if ( buf[cnt] == 0x47 )
 							{
 								int pid = ((buf[cnt+1]&0x3F) << 8) | buf[cnt+2];
+//								eDebug("addpid %d", pid);
 								pids.insert(pid);
 								cnt+=188;
 							}
+							else
+								break;
 						}
 						for( std::set<int>::iterator it(pids.begin()); pmtpid==-1 && it != pids.end(); ++it )
 						{
@@ -329,13 +332,11 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 	case eDVBServiceEvent::eventServiceGotPMT:
 		service_state=0;
 		scanPMT();
+		PMT *pmt=dvb.tPMT.ready()?dvb.tPMT.getCurrent():0;
+		if (pmt)
 		{
-			PMT *pmt=dvb.tPMT.ready()?dvb.tPMT.getCurrent():0;
-			if (pmt)
-			{
-				/*emit*/ dvb.gotPMT(pmt);
-				pmt->unlock();
-			}
+			/*emit*/ dvb.gotPMT(pmt);
+			pmt->unlock();
 		}
 		if (dvb.getState()==eDVBServiceState::stateServiceGetPMT)
 			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitched));

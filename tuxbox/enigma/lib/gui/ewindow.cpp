@@ -30,8 +30,6 @@ eWindow::eWindow(int takefocus)
 	titleFontSize=eSkin::getActive()->queryValue("eWindow.titleFontSize", 20);
 
 	font = eSkin::getActive()->queryFont("eWindow.Childs");
-
-	addActionMap(&i_cursorActions->map);
 }
 
 eWindow::~eWindow()

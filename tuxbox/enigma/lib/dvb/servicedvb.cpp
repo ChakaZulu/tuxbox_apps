@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #ifndef DISABLE_FILE
+#include <lib/dvb/record.h>
 
 eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *handler, int livemode )
 	:handler(handler), buffer(64*1024), livemode(livemode), liveupdatetimer(this), lock(), messages(this, 1)
@@ -83,7 +84,8 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 			fileend = filelength - (TIMESHIFT_GUARD/1880);
 		else
 			fileend = 0;
-		messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::seekreal, fileend));
+		if ( livemode == 1 )
+			messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::seekreal, fileend));
 	}
 
 	CONNECT(messages.recv_msg, eDVRPlayerThread::gotMessage);
@@ -624,7 +626,6 @@ eServiceHandlerDVB::~eServiceHandlerDVB()
 		eFatal("couldn't unregister serviceHandler %d", id);
 }
 
-
 int eServiceHandlerDVB::play(const eServiceReference &service)
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
@@ -644,18 +645,23 @@ int eServiceHandlerDVB::play(const eServiceReference &service)
 			}
 			else
 				fclose(f);
-
-			startPlayback(service.path, 0);
+			if ( eDVB::getInstance()->recorder &&
+				service.path == eDVB::getInstance()->recorder->getFilename() )
+				startPlayback(service.path, 2);
+			else
+ 				startPlayback(service.path, 0);
 	}
 	else
 #endif
+	{
 		flags &= ~(flagIsSeekable|flagSupportPosition);
-
-//	if (oldflags != flags)
-	serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
+//		if (flags != oldflags)
+			serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
+	}
 
 	if (sapi)
 		return sapi->switchService((const eServiceReferenceDVB&)service);
+
 	return -1;
 }
 
@@ -707,30 +713,10 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 		break;
 	case eServiceCommand::cmdSetSpeed:
 	{
-		if (!decoder)
+		if (!decoder && recording)
 		{
-#ifdef TIMESHIFT
-			if (recording)
-			{
-				startPlayback(current_filename, 1);
-				Decoder::showPicture();
-			}
-			else
-#endif
-			if ( state == statePause )
-			{
-				Decoder::Resume();
-				state = statePlaying;
-				return 0;
-			}
-			else if ( !cmd.parm )
-			{
-				Decoder::Pause();
-				state = statePause;
-				return 0;
-			}
-			else
-				return -1;
+			startPlayback(current_filename, 1);
+			Decoder::showPicture();
 		}
 		if ((state == statePlaying) || (state == statePause) || (state == stateStopped) || (state == stateSkipping))
 		{
@@ -743,17 +729,16 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 				state=statePlaying;
 			else
 				state=stateSkipping;
-		} else
-		{
-			return -2;
 		}
+		else
+			return -2;
 		break;
 	}
 	case eServiceCommand::cmdSkip:
 		if (!decoder)
 		{
 #ifdef TIMESHIFT
-			if (recording)
+			if (recording && (cmd.parm < 0) )
 				startPlayback(current_filename, 1);
 			else
 #endif

@@ -191,7 +191,8 @@ eZapOsdSetup::eZapOsdSetup()
 	l->resize(eSize(110, fd+4));
 	sAlpha = new eSlider( this, l, 0, 512 );
 
-	if(eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 ) //fb on vulcan sucks
+	if( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600  //fb on vulcan sucks
+		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 )
 		sAlpha->setIncrement( 25 ); // Percent !
 	else
 		sAlpha->setIncrement( 10 ); // Percent !

@@ -28,6 +28,7 @@
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/service.h>
+#include <lib/dvb/record.h>
 #include <lib/gdi/fb.h>
 #include <lib/gdi/glcddc.h>
 #include <lib/gdi/gfbdc.h>
@@ -182,8 +183,20 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 		if(!iface)
 			return "-1";
 		eServiceReferenceDVB *ref=new eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
+#ifndef DISABLE_FILE
+		if ( eDVB::getInstance()->recorder && !ref->path )
+		{
+			if ( eDVB::getInstance()->recorder->scrambled )
+				return "-1";
+			eServiceReferenceDVB &rec = (eServiceReferenceDVB&) eDVB::getInstance()->recorder->recRef;
+			if ( ref->getTransportStreamID() != rec.getTransportStreamID() ||
+					ref->getOriginalNetworkID() != rec.getOriginalNetworkID() ||
+					ref->getDVBNamespace() != rec.getDVBNamespace() )
+					return "-1";
+		}
+#endif
 		eZapMain::getInstance()->playService(*ref, eZapMain::psSetMode|eZapMain::psDontAdd);
-//		iface->play(*ref);
+		delete ref;
 		result="0";
 	} else
 	{
@@ -439,6 +452,17 @@ public:
 	}
 	void addEntry(const eServiceReference &e)
 	{
+#ifndef DISABLE_FILE
+		if ( eDVB::getInstance()->recorder && !e.path && !e.flags )
+		{
+			eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
+			eServiceReferenceDVB &rec = (eServiceReferenceDVB&)eDVB::getInstance()->recorder->recRef;
+			if ( rec.getTransportStreamID() != ref.getTransportStreamID() ||
+					 rec.getOriginalNetworkID() != ref.getOriginalNetworkID() ||
+					 rec.getDVBNamespace() != ref.getDVBNamespace() )
+					 return;
+		}
+#endif
 		result+="<tr><td bgcolor=\"#";
 		if (num & 1)
 			result += "c0c0c0";
@@ -961,6 +985,7 @@ static eString reload_settings(eString request, eString dirpath, eString opt, eH
 		eDVB::getInstance()->settings->loadServices();
 		eDVB::getInstance()->settings->loadBouquets();
 		eZap::getInstance()->getServiceSelector()->actualize();
+		eServiceReference::loadLockedList( (eZapMain::getInstance()->getEplPath()+"/services.locked").c_str() );
 		return "+ok\n";
 	}
 	return "-no settings to load\n";
@@ -1191,9 +1216,9 @@ static eString screenshot(eString request, eString dirpath, eString opts, eHTTPC
 	if (!p)
 		return "no\n";
 	
-	if (!savePNG("/var/tmp/screenshot.png", p))
+	if (!savePNG("/tmp/screenshot.png", p))
 	{
-		content->local_header["Location"]="/root/var/tmp/screenshot.png";
+		content->local_header["Location"]="/root/tmp/screenshot.png";
 		content->code=307;
 		return "ok\n";
 	}

@@ -68,6 +68,7 @@ public:
 	eTimerManager();
 	~eTimerManager();
 	static eTimerManager *getInstance() { return instance; }
+//	bool updateRunningEvent( eWidget *w, ePlaylistEntry& entry );
 	bool removeEventFromTimerList( eWidget *w, const ePlaylistEntry& entry, int type=erase );
 	bool removeEventFromTimerList( eWidget *w, const eServiceReference *ref, const EITEvent *evt);
 	bool addEventToTimerList( eWidget *w, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR|ePlaylistEntry::stateWaiting, const ePlaylistEntry *exclude=0 );

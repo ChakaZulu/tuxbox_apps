@@ -64,6 +64,7 @@ class tsAutomatic: public eWidget
 	eLabel *l_status;
 	std::list<eTransponder>::iterator current_tp, last_tp;
 	int automatic;
+	int ret;
 	void start();
 	void networkSelected(eListBoxEntryText *l);
 	void dvbEvent(const eDVBEvent &event);
@@ -71,6 +72,8 @@ class tsAutomatic: public eWidget
 	int nextNetwork(int first=0);
 	int nextTransponder(int next);
 	int tuneNext(int next);
+	int inProgress;
+	int eventHandler(const eWidgetEvent &);
 public:
 	void openNetworkCombo();
 	tsAutomatic(eWidget *parent);
@@ -92,6 +95,7 @@ class tsScan: public eWidget
 	eLabel *timeleft, *service_name, *service_provider, *services_scanned, *transponder_scanned;
 	eProgress *progress;
 	int tpLeft, scantime;
+	int ret;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 	void dvbEvent(const eDVBEvent &event);
@@ -141,6 +145,13 @@ class TransponderScan: public eWindow
 	eWidget *LCDElement, *LCDTitle;
 #endif
 	std::list<scanEntry> toScan;
+	eServiceReference service;
+	int ret;
+	eTimer closeTimer;
+	void addService(const eServiceReference &);
+	int eventHandler(const eWidgetEvent &);
+	void Close();
+	unsigned int last_orbital_pos;
 public:
 	enum tState
 	{
@@ -153,11 +164,11 @@ public:
 		stateDone,
 		stateEnd
 	};
-
-	TransponderScan( eWidget* LCDTitle=0, eWidget* LCDElement=0 );
+	TransponderScan( eWidget* LCDTitle=0, eWidget* LCDElement=0, tState initial=stateMenu );
 	~TransponderScan();
-	int exec(tState initial=stateMenu);
-	int eventHandler(const eWidgetEvent&);
+	int Exec();
+private:
+	tState stateInitial;
 };
 
 #endif

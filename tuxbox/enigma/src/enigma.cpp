@@ -273,6 +273,7 @@ eZap::eZap(int argc, char **argv)
 //		eConfig::getInstance()->setKey("/ezap/rc/style", "classic");
 //		eConfig::getInstance()->setKey("/ezap/rc/sselect_style", "sselect_classic" );
 		eConfig::getInstance()->setKey("/ezap/serviceselector/showButtons", 1 );
+		serviceSelector->setStyle( serviceSelector->getStyle(), true );
 	}
 	init->setRunlevel(eAutoInitNumbers::main);
 }

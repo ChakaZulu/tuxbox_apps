@@ -181,6 +181,45 @@ bool eEPGCache::finishEPG()
 	return false;
 }
 
+void eEPGCache::flushEPG(const eServiceReferenceDVB& s)
+{
+	if (s)  // clear only this service
+	{
+		eventCache::iterator it = eventDB.find(s);
+		if ( it != eventDB.end() )
+		{
+			eventMap &evMap = it->second.first;
+			timeMap &tmMap = it->second.second;
+			tmMap.clear();
+			for (eventMap::iterator i = evMap.begin(); i != evMap.end(); ++i)
+				delete i->second;
+			evMap.clear();
+			eventDB.erase(it);
+			updateMap::iterator u = serviceLastUpdated.find(s);
+			if ( u != serviceLastUpdated.end() )
+				serviceLastUpdated.erase(u);
+			startEPG();
+		}
+		return;
+	}
+	else // clear complete EPG Cache
+	{
+		for (eventCache::iterator it(eventDB.begin());
+			it != eventDB.end(); ++it)
+		{
+			eventMap &evMap = it->second.first;
+			timeMap &tmMap = it->second.second;
+			for (eventMap::iterator i = evMap.begin(); i != evMap.end(); ++i)
+				delete i->second;
+			evMap.clear();
+			tmMap.clear();
+			serviceLastUpdated.clear();
+			startEPG();
+		}
+		eventDB.clear();
+	}
+}
+
 void eEPGCache::cleanLoop()
 {
 	if (!eventDB.empty() && !paused )

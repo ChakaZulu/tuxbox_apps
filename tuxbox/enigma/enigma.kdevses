@@ -1,21 +1,33 @@
 <?xml version = '1.0' encoding = 'UTF-8'?><!DOCTYPE KDevPrjSession ><KDevPrjSession>
  <LastCompileConfig>(Default)</LastCompileConfig>
  <Mainframe MaximizeMode="1" />
- <DocsAndViews NumberOfDocuments="5" >
-  <Doc0 CursorPosLine="58" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/scan.h" >
+ <DocsAndViews NumberOfDocuments="9" >
+  <Doc0 CursorPosLine="2" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_vcr.h" >
    <View0 Top="23" Width="400" Attach="1" Height="300" Left="3" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc0>
-  <Doc1 CursorPosLine="403" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="16" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/scan.cpp" >
-   <View0 Top="44" Width="400" Attach="1" Height="300" Left="24" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc1 CursorPosLine="454" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/streaminfo.cpp" >
+   <View0 Top="44" Width="833" Attach="1" Height="468" Left="24" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc1>
-  <Doc2 CursorPosLine="6" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/gui/combobox.h" >
-   <View0 Top="65" Width="789" Attach="1" Height="455" Left="45" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc2 CursorPosLine="43" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/dvb/dvbservice.h" >
+   <View0 Top="65" Width="833" Attach="1" Height="468" Left="45" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc2>
-  <Doc3 CursorPosLine="150" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="7" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/gui/combobox.cpp" >
-   <View0 Top="86" Width="789" Attach="1" Height="455" Left="66" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc3 CursorPosLine="624" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="16" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/dvb/dvbservice.cpp" >
+   <View0 Top="86" Width="833" Attach="1" Height="468" Left="66" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc3>
-  <Doc4 CursorPosLine="2537" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="19" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/src/enigma_main.cpp" >
-   <View0 Top="84" Width="795" Attach="1" Height="481" Left="84" Focus="1" Type="KWriteView" MinMaxMode="2" />
+  <Doc4 CursorPosLine="391" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/dvb/si.h" >
+   <View0 Top="107" Width="833" Attach="1" Height="650" Left="87" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc4>
+  <Doc5 CursorPosLine="30" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="78" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/dvb/dvbci.h" >
+   <View0 Top="128" Width="833" Attach="1" Height="650" Left="108" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  </Doc5>
+  <Doc6 CursorPosLine="357" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="55" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/dvb/dvbci.cpp" >
+   <View0 Top="126" Width="839" Attach="1" Height="676" Left="126" Focus="1" Type="KWriteView" MinMaxMode="2" />
+  </Doc6>
+  <Doc7 CursorPosLine="953" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/lib/dvb/si.cpp" >
+   <View0 Top="170" Width="833" Attach="1" Height="650" Left="150" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  </Doc7>
+  <Doc8 CursorPosLine="64" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/include/lib/dvb/frontend.h" >
+   <View0 Top="191" Width="778" Attach="1" Height="650" Left="171" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  </Doc8>
  </DocsAndViews>
 </KDevPrjSession>

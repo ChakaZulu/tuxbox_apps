@@ -298,14 +298,7 @@ void eWidget::clear()
 
 void eWidget::close(int res)
 {
-	if (in_loop==0)
-		eFatal("attempt to close non-execing widget");
-	if (in_loop==1)	// nur wenn das ne echte loop ist
-	{
-		in_loop=-1;
-		eApp->exit_loop();
-	}
-	result=res;
+	event(eWidgetEvent(eWidgetEvent::wantClose,res));
 }
 
 void eWidget::show()
@@ -501,7 +494,6 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 	case eWidgetEvent::lostFocus:
 		lostFocus();
 		break;
-
 	case eWidgetEvent::changedSize:
 	case eWidgetEvent::changedFont:
 	case eWidgetEvent::changedPosition:
@@ -510,6 +502,16 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 		break;
 	case eWidgetEvent::evtShortcut:
 			setFocus(this);
+		break;
+	case eWidgetEvent::wantClose:
+		if (in_loop==0)
+			eFatal("attempt to close non-execing widget");
+		if (in_loop==1)	// nur wenn das ne echte loop ist
+		{
+			in_loop=-1;
+			eApp->exit_loop();
+		}
+		result=evt.parameter;
 		break;
 	default:
 		break;

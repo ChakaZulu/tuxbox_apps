@@ -69,6 +69,7 @@ eAVSwitch::eAVSwitch()
 
 	useOst =
 		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 ||
+		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 ||
 		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000;
 }
 
@@ -386,7 +387,8 @@ int eAVSwitch::setAspectRatio(eAVAspectRatio as)
 
 	saa = (aspect==r169) ? SAA_WSS_169F :
 		( disableWSS ? SAA_WSS_OFF : SAA_WSS_43F );
-	ioctl(saafd,SAAIOSWSS,&saa);
+	if ( ioctl(saafd,SAAIOSWSS,&saa) < 0 )
+		eDebug("SAAIOSWSS failed (%m)");
 
 	return setTVPin8((active && (!input))?((aspect==r169)?6:12):0);
 }

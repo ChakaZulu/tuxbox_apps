@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.19 2003/11/05 13:33:37 ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.20 2003/11/27 15:14:33 ghostrider Exp $
  */
 
 #include <enigma_scan.h>
@@ -71,36 +71,36 @@ void eZapScan::sel_satfind()
 void eZapScan::sel_autoScan()
 {
 #ifndef DISABLE_LCD
-	TransponderScan setup(LCDTitle, LCDElement);
+	TransponderScan setup(LCDTitle, LCDElement, TransponderScan::stateAutomatic);
 #else
-	TransponderScan setup;
+	TransponderScan setup(0,0,TransponderScan::stateAutomatic);
 #endif
 	hide();
-	setup.exec(TransponderScan::stateAutomatic);
+	setup.exec();
 	show();
 }
 
 void eZapScan::sel_multiScan()
 {
 #ifndef DISABLE_LCD
-	TransponderScan setup(LCDTitle, LCDElement);
+	TransponderScan setup(LCDTitle, LCDElement, TransponderScan::stateMulti);
 #else
-	TransponderScan setup;
+	TransponderScan setup(0,0,TransponderScan::stateMulti);
 #endif
 	hide();
-	setup.exec(TransponderScan::stateMulti);
+	setup.exec();
 	show();
 }
 
 void eZapScan::sel_manualScan()
 {
 #ifndef DISABLE_LCD
-	TransponderScan setup(LCDTitle, LCDElement);
+	TransponderScan setup(LCDTitle, LCDElement, TransponderScan::stateManual);
 #else
-	TransponderScan setup;
+	TransponderScan setup(0,0,TransponderScan::stateManual);
 #endif
 	hide();
-	setup.exec(TransponderScan::stateManual);
+	setup.exec();
 	show();
 }
 

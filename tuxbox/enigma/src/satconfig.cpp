@@ -1,5 +1,6 @@
 #include <satconfig.h>
 
+#include <enigma_main.h>
 #include <lib/base/i18n.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/ebutton.h>
@@ -10,8 +11,6 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbwidgets.h>
-#include <lib/dvb/edvb.h>
-//#include <lib/driver/rc.h>
 
 eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 	:refresh(0)
@@ -69,7 +68,7 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 		eFatal("skin load of \"eSatelliteConfigurationManager\" failed");
 
 	eSize s = buttonWidget->getSize();
-	s.setHeight( s.height()*12 );
+	s.setHeight( s.height()*16 );
 
 	w_buttons = new eWidget(buttonWidget);
 	w_buttons->resize( s );
@@ -82,7 +81,7 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 	eConfig::getInstance()->getKey("/elitedvb/DVB/config/lnbs/type", complexity);
 	combo_type->setCurrent( (void*)complexity, true );
 
-	for ( int i = 0; i < 13; i++ )
+	for ( int i = 0; i < 17; i++ )
 		pageEnds.push_back( i * 200 );
 
 	curScrollPos = pageEnds.begin();
@@ -90,7 +89,7 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 	repositionWidgets();
 
 	CONNECT( eWidget::focusChanged, eSatelliteConfigurationManager::focusChanged );
-	
+
 	setHelpID(66);
 }
 
@@ -746,7 +745,7 @@ eComboBox* eSatelliteConfigurationManager::createSatWidgets( eSatellite *s )
 	sat.fixed->resize(eSize(130, 30));
 
 	sat.description=new eLabel(w_buttons);
-	sat.description->resize(eSize(230, 30));
+	sat.description->resize(eSize(245, 30));
 
 	eComboBox *c = new eComboBox(w_buttons, 3, l22Khz);
 	c->setName("satWidget");
@@ -901,7 +900,7 @@ int eSatelliteConfigurationManager::eventHandler(const eWidgetEvent &event)
 }
 
 eLNBSetup::eLNBSetup( eSatellite* sat, eWidget* lcdTitle, eWidget* lcdElement )
-	:sat(sat)
+	:sat(sat), service(eServiceInterface::getInstance()->service)
 {
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eLNBSetup"))
@@ -977,7 +976,14 @@ void eLNBSetup::onSave()
 	else
 		close(0); // we must not reposition...
 
-	eFrontend::getInstance()->InitDiSEqC();
+	if ( service )
+	{
+		eServiceInterface::getInstance()->stop();
+		eFrontend::getInstance()->savePower();
+		eZapMain::getInstance()->playService(service, eZapMain::psDontAdd|eZapMain::psSetMode );
+	}
+	else
+		eFrontend::getInstance()->InitDiSEqC();
 	eTransponderList::getInstance()->writeLNBData();
 	eConfig::getInstance()->flush();
 }

@@ -3,8 +3,9 @@
 
 		// all kind of decoding-related stuff
 #define DECODE_AUDIO_MPEG	0
-#define DECODE_AUDIO_AC3	1
+#define DECODE_AUDIO_AC3  1
 #define DECODE_AUDIO_DTS  2
+#define DECODE_AUDIO_AC3_VOB  3
 
 #define TYPE_ES 0
 #define TYPE_PES 1
@@ -29,6 +30,7 @@ class Decoder
 	} fd;
 	static decoderParameters current;
 public:
+	static bool locked;
 	static int getAudioDevice()	{ return fd.audio; }
 	static int getVideoDevice()	{ return fd.video; }
 	static decoderParameters parms;

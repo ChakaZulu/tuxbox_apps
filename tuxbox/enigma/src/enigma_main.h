@@ -16,6 +16,8 @@
 #include <lib/gui/emessage.h>
 #include <lib/gui/numberactions.h>
 #include <lib/dvb/service.h>
+#include <lib/gui/eprogress.h>
+#include <lib/dvb/subtitling.h>
 
 class eProgress;
 
@@ -52,24 +54,6 @@ class eRecordingStatus;
 class ePlaylistEntry;
 class eHelpWindow;
 class eEPGWindow;
-
-class eZapStandby: public eWidget
-{
-	static eZapStandby *instance;
-	eServiceReference ref;
-	int rezap;
-protected:
-	int eventHandler(const eWidgetEvent &);
-public:
-	void wakeUp(int norezap);
-	static eZapStandby *getInstance() { return instance; }
-	static Signal0<void> enterStandby, leaveStandby;
-	eZapStandby();
-	~eZapStandby()
-	{
-		instance=0;
-	}
-};
 
 class eZapMessage
 {
@@ -208,6 +192,15 @@ public:
 	void add(PMTEntry *);
 };
 
+class ePSAudioSelector: public eListBoxWindow<eListBoxEntryText>
+{
+	void selected(eListBoxEntryText *);
+public:
+	ePSAudioSelector();
+	void add(unsigned int id);
+	void clear();
+};
+
 class VideoStream: public eListBoxEntryText
 {
 	friend class eListBox<VideoStream>;
@@ -279,6 +272,7 @@ public:
 #define ENIGMA_AUDIO	2
 #define ENIGMA_SUBSERVICES 4
 #define ENIGMA_VIDEO	8
+#define ENIGMA_AUDIO_PS 16
 
 class eEventDisplay;
 class eServiceEvent;
@@ -310,12 +304,13 @@ public:
 class eZapMain: public eWidget
 {
 	friend class eEPGSelector;
+	friend class eWizardScanInit;
 public:
 	enum { modeTV, modeRadio, modeFile, modeEnd };
 	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32, recNgrab=64, statePaused=128 };
 	enum { messageGoSleep=2, messageShutdown, messageNoRecordSpaceLeft };
 	enum { pathBouquets=1, pathProvider=2, pathRecordings=4, pathPlaylist=8, pathAll=16, pathRoot=32, pathSatellites=64 };
-
+	enum { listAll, listSatellites, listProvider, listBouquets };
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock,
 		*EINow, *EINext, *EINowDuration, *EINextDuration,
@@ -329,6 +324,8 @@ private:
 		*DVRSpaceLeft;
 
 	eWidget *dvrInfoBar, *dvbInfoBar, *fileInfoBar;
+	
+	eSubtitleWidget *subtitle;
 	int dvrfunctions;
 	int stateOSD;
 
@@ -360,6 +357,7 @@ private:
 	
 	eNVODSelector nvodsel;
 	eSubServiceSelector subservicesel;
+	ePSAudioSelector audioselps;
 	eAudioSelector audiosel;
 	eVideoSelector videosel;
 	eEventDisplay *actual_eventDisplay;
@@ -407,7 +405,9 @@ private:
 	void handleNVODService(SDTEntry *sdtentry);
 
 	// actions
+public:
 	void showServiceSelector(int dir, int newTarget=0 );
+private:
 	void nextService(int add=0);
 	void prevService();
 	void playlistNextService();
@@ -457,9 +457,6 @@ private:
 	void addServiceToCurUserBouquet(const eServiceReference &ref);
 	void removeServiceFromUserBouquet( eServiceSelector *s );
 
-	enum { listAll, listSatellites, listProvider, listBouquets };
-	eServicePath getRoot(int list);
-
 	void showServiceInfobar(int show);
 
 	static eZapMain *instance;
@@ -504,8 +501,11 @@ private:
 	void indexSeek(int dir);
 	eZapSeekIndices indices;
 	void redrawIndexmarks();
+	void deleteFile(eServiceSelector *);
+	void renameFile(eServiceSelector *);
 #endif // DISABLE_FILE
 public:
+	eServicePath getRoot(int list);
 	void deleteService(eServiceSelector *);
 	void renameBouquet(eServiceSelector *);
 	void renameService(eServiceSelector *);
@@ -565,14 +565,16 @@ public:
 	void clearRecordings();
 #endif
 
+	eString getEplPath() { return eplPath; }
+
 	void loadUserBouquets( bool destroy=true );  // this recreate always all user bouquets...
 
 	void destroyUserBouquets( bool save=false ); 
 
 	void saveUserBouquets();  // only save
-	
+
 	void reloadPaths(int reset=0);
-	
+
 	int doHideInfobar();
 
 #ifndef DISABLE_CI

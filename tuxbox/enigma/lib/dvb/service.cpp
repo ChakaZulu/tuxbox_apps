@@ -84,6 +84,10 @@ int eServiceHandler::getPosition(int)
 	return -1;
 }
 
+void eServiceHandler::setAudioStream( unsigned int )
+{
+}
+
 void eServiceHandler::enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback)
 {
 	(void)dir;

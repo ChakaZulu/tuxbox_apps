@@ -244,7 +244,7 @@ void eDVB::configureNetwork()
 		signal(SIGCHLD, SIG_IGN);
 		if (fork() == 0)
 		{
-			for (unsigned int i=0; i < 60; ++i )
+			for (unsigned int i=0; i < 90; ++i )
 				close(i);
 			execlp("nmbd", "nmbd", "-D", NULL);
 			
@@ -254,7 +254,7 @@ void eDVB::configureNetwork()
 		signal(SIGCHLD, SIG_IGN);
 		if (fork() == 0)
 		{
-			for (unsigned int i=0; i < 60; ++i )
+			for (unsigned int i=0; i < 90; ++i )
 				close(i);
 			execlp("smbd", "smbd", "-D", NULL);
 			_exit(0);

@@ -76,6 +76,7 @@ class eDVBRecorder: private eThread, public Object
 	void openFile(int suffix=0);
 
 public:
+	eString getFilename() { return filename; }
 	eServiceReference recRef;
 	bool scrambled;
 		/// the constructor

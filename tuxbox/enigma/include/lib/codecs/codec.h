@@ -3,6 +3,8 @@
 #ifndef __codec_h
 #define __codec_h
 
+#include <libsig_comp.h>
+
 class eIOBuffer;
 
 class eAudioDecoder
@@ -12,8 +14,8 @@ protected:
 public:
 	eAudioDecoder();
 	virtual ~eAudioDecoder();
-	
-	virtual int decodeMore(int last, int maxsamples)=0; // returns number of samples(!) written to IOBuffer (out)
+
+	virtual int decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*cb=0)=0; // returns number of samples(!) written to IOBuffer (out)
 	virtual void resync()=0; // clear (secondary) decoder buffers
 
 	struct pcmSettings

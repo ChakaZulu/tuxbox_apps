@@ -138,3 +138,15 @@
 200310131345 5 * No more reboot, when try to switch via service number to a locked service
 200310140017 5 * Add ability to play TS files without enigma private descriptor and outside of the recordings.epl but PAT and PMT must exist
 200310141530 5 * Don't hide infobar in radio mode
+200310161225 5 * Improve Satfinder
+200310161225 5 56 Fix no more updating infobar
+200310191730 7 * Show DESCRIPTION field in M3U Files
+200310201030 3 5 Add ability to change service on the same transponder during DVR recording (only FreeTV yet)
+200310201030 3 5 Add ability to play other recorded movies during DVR recording
+200310231500 5 * Improove Textinputfield ( show only useable chars )
+200310231500 5 5 Fix blackscreen bug after hdd scan
+200310301230 5 5 Improve MPEG2/MPEG1/VOB Player (better sync)
+200310301230 5 5 Add ability to select audio tracks in VOB Files 
+200310301230 5 5 Add ability to play AC3 audio in VOB Files.. (only optical out)
+200311041500 5 * Many gui improvements (fixes, scrollbar added)
+

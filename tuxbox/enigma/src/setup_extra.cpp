@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.3 2003/11/05 13:33:37 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.4 2003/11/27 15:14:33 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -26,6 +26,7 @@
 #include <software_update.h>
 #include <setup_rc.h>
 #include <lib/gui/emessage.h>
+#include <lib/system/info.h>
 
 eExpertSetup::eExpertSetup()
 	:eSetupWindow(_("Expert Setup"), 11, 400)
@@ -34,9 +35,12 @@ eExpertSetup::eExpertSetup()
 
 	int entry=0;
 #ifndef DISABLE_NETWORK
-	CONNECT((new eListBoxEntryMenu(&list, _("Communication Setup"), eString().sprintf("(%d) %s", ++entry, _("open communication setup")) ))->selected, eExpertSetup::communication_setup);
-	CONNECT((new eListBoxEntryMenu(&list, _("Ngrab Streaming Setup"), eString().sprintf("(%d) %s", ++entry, _("open ngrab server setup")) ))->selected, eExpertSetup::ngrab_setup);
-	CONNECT((new eListBoxEntryMenu(&list, _("Software Update"), eString().sprintf("(%d) %s", ++entry, _("open software update")) ))->selected, eExpertSetup::software_update);
+	if (eSystemInfo::getInstance()->hasNetwork())
+	{
+		CONNECT((new eListBoxEntryMenu(&list, _("Communication Setup"), eString().sprintf("(%d) %s", ++entry, _("open communication setup")) ))->selected, eExpertSetup::communication_setup);
+		CONNECT((new eListBoxEntryMenu(&list, _("Ngrab Streaming Setup"), eString().sprintf("(%d) %s", ++entry, _("open ngrab server setup")) ))->selected, eExpertSetup::ngrab_setup);
+		CONNECT((new eListBoxEntryMenu(&list, _("Software Update"), eString().sprintf("(%d) %s", ++entry, _("open software update")) ))->selected, eExpertSetup::software_update);
+	}
 #endif
 	CONNECT((new eListBoxEntryMenu(&list, _("Remote Control"), eString().sprintf("(%d) %s", ++entry, _("open remote control setup")) ))->selected, eExpertSetup::rc_setup);
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );

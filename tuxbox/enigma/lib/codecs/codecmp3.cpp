@@ -28,7 +28,7 @@ eAudioDecoderMP3::~eAudioDecoderMP3()
 	mad_stream_finish(&stream);
 }
 
-int eAudioDecoderMP3::decodeMore(int last, int maxsamples)
+int eAudioDecoderMP3::decodeMore(int last, int maxsamples, Signal1<void, unsigned int> *)
 {
 	int written=0;
 	while (last || (written < maxsamples))

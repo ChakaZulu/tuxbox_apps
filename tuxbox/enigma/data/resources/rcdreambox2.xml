@@ -267,10 +267,6 @@
 			<action name="decEndTime" key="bouqdown" flags="mr" />
 		</actionmap>
 		<actionmap name="enigmaEventView">
-			<action name="addDVRTimerEvent" key="green" flags="m" />
-			<action name="addNGRABTimerEvent" key="yellow" flags="m" />
-			<action name="addSwitchTimerEvent" key="blue" flags="m" />
-			<action name="removeTimerEvent" key="red" flags="m" />
 			<action name="close" key="info" flags="m" />
 		</actionmap>
 		<actionmap name="PluginOffsetActions">

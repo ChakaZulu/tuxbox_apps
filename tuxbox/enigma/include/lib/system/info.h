@@ -19,11 +19,11 @@ class eSystemInfo
 	int hashdd, hasci, hasrfmod, haslcd, hasnetwork,
 	canmeasurelnbcurrent, hwtype, fetype, hasnegfilter;
 	std::set<int> caids;
-	eString getInfo(const char *info);
+	eString getInfo(const char *info, bool dreambox=false);
 public:
 	static eSystemInfo *getInstance() { return instance; }
 	eSystemInfo();
-	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM5600, Unknown };
+	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM5600, DM5620, Unknown };
 	enum { feSatellite, feCable, feTerrestrial };
 
 	int hasNegFilter() { return hasnegfilter; }

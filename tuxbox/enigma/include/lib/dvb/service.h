@@ -2,6 +2,7 @@
 #define __lib_dvb_service_h
 
 #include <map>
+#include <set>
 #include <libsig_comp.h>
 #include <lib/dvb/dvb.h>
 
@@ -10,7 +11,10 @@ class eServiceReference;
 class eServiceEvent
 {
 public:
-	eServiceEvent(int type): type(type)
+	eServiceEvent(int type, int param): type(type), param(param)
+	{
+	}
+	eServiceEvent(int type): type(type), param(0)
 	{
 	}
 	enum
@@ -24,18 +28,20 @@ public:
 		evtGotEIT,
 		
 		evtStatus, 		// have (new) status
- 		evtInfoUpdated, // updated info..
-		
+		evtInfoUpdated, // updated info..
+		evtAddNewAudioStreamId,
+
 		evtStateChanged,
 		evtFlagsChanged,
-		
+
 		evtAspectChanged,
-		
+
 		evtEnd,
 
 		evtRecordFailed
 	};
 	int type;
+	int param;
 };
 
 class eServiceCommand
@@ -103,13 +109,16 @@ public:
 		// for DVB audio channels:
 	virtual PMT *getPMT();
 	virtual void setPID(const PMTEntry *);
-	
+
 		// for DVB nvod channels:
 	virtual SDT *getSDT();
 
 		// for DVB events, nvod, audio....
 	virtual EIT *getEIT();
-	
+
+		// for PS MPEG Files
+	virtual void setAudioStream(unsigned int stream_id);
+
 	static int getFlags();
 	virtual int getState();
 	

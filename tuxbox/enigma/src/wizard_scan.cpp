@@ -9,6 +9,7 @@
 #include <satconfig.h>
 #include <scan.h>
 #include <enigma_scan.h>
+#include <enigma_main.h>
 
 class eDiseqcChoice: public eListBoxEntry
 {
@@ -176,11 +177,12 @@ again_satconfig:
 				}
 
 				{
-					TransponderScan scan(0, 0);
-					res=scan.exec(TransponderScan::stateAutomatic);
+					TransponderScan scan(0, 0, TransponderScan::stateMenu);
+					res=scan.exec();
 				}
-				if (!res)
+				if (res)
 					goto again_satconfig;
+				eZapMain::getInstance()->showServiceSelector( eServiceSelector::dirFirst, eZapMain::pathAll );
 			}
 			diseqc=1;
 			eConfig::getInstance()->setKey("/elitedvb/wizards/diseqc", diseqc);

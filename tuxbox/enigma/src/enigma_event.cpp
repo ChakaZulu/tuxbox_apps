@@ -1,5 +1,6 @@
 #include <enigma_event.h>
 
+#include <epgactions.h>
 #include <time.h>
 #include <timer.h>
 #include <lib/base/eerror.h>
@@ -14,13 +15,9 @@
 struct enigmaEventViewActions
 {
 	eActionMap map;
-	eAction addDVRTimerEvent, addNGRABTimerEvent, addSwitchTimerEvent, removeTimerEvent, close;
+	eAction close;
 	enigmaEventViewActions():
 		map("enigmaEventView", _("enigma event view")),
-		addDVRTimerEvent(map, "addDVRTimerEvent", _("add this event as DVR Event to timer list"), eAction::prioDialog ),
-		addNGRABTimerEvent(map, "addNGRABTimerEvent", _("add this event as NGRAB Event to timer list"), eAction::prioDialog ),
-		addSwitchTimerEvent(map, "addSwitchTimerEvent", _("add this event as simple Switch Event to timer list"), eAction::prioDialog ),
-		removeTimerEvent(map, "removeTimerEvent", _("remove this event from timer list"), eAction::prioDialog ),
 		close(map, "close", _("closes the Event View"), eAction::prioDialog)
 	{
 	}
@@ -94,22 +91,9 @@ int eEventDisplay::eventHandler(const eWidgetEvent &event)
 			}
 			else if (event.action == &i_enigmaEventViewActions->close)
 				close(0);
-#ifndef DISABLE_FILE
-			else if (event.action == &i_enigmaEventViewActions->addDVRTimerEvent)
-				addtype = ePlaylistEntry::RecTimerEntry |
-									ePlaylistEntry::recDVR|
-									ePlaylistEntry::stateWaiting;
-#endif
-#ifndef DISABLE_NETWORK
-			else if (event.action == &i_enigmaEventViewActions->addNGRABTimerEvent)
-				addtype = ePlaylistEntry::RecTimerEntry|
-									ePlaylistEntry::recNgrab|
-									ePlaylistEntry::stateWaiting;
-#endif
-			else if (event.action == &i_enigmaEventViewActions->addSwitchTimerEvent)
-				addtype = ePlaylistEntry::SwitchTimerEntry|
-									ePlaylistEntry::stateWaiting;
-			else if ( event.action == &i_enigmaEventViewActions->removeTimerEvent)
+			else if ( (addtype = i_epgSelectorActions->checkTimerActions( event.action )) != -1 )
+				;
+			else if ( event.action == &i_epgSelectorActions->removeTimerEvent)
 			{
 				if ((evt || events) && eTimerManager::getInstance()->removeEventFromTimerList( this, &ref, evt?evt:*events ) )
 					timer_icon->hide();
@@ -174,13 +158,13 @@ eEventDisplay::eEventDisplay(eString service, eServiceReferenceDVB &ref, const e
 	long_description->resize(eSize(descr->getSize().width(), descr->getSize().height()*4));
 
 #ifndef DISABLE_FILE
-	addActionToHelpList( &i_enigmaEventViewActions->addDVRTimerEvent );
+	addActionToHelpList( &i_epgSelectorActions->addDVRTimerEvent );
 #endif
 #ifndef DISABLE_NETWORK
-	addActionToHelpList( &i_enigmaEventViewActions->addNGRABTimerEvent );
+	addActionToHelpList( &i_epgSelectorActions->addNGRABTimerEvent );
 #endif
-	addActionToHelpList( &i_enigmaEventViewActions->addSwitchTimerEvent );
-	addActionToHelpList( &i_enigmaEventViewActions->removeTimerEvent );
+	addActionToHelpList( &i_epgSelectorActions->addSwitchTimerEvent );
+	addActionToHelpList( &i_epgSelectorActions->removeTimerEvent );
 	addActionToHelpList( &i_enigmaEventViewActions->close );
 
 	if (e)
@@ -188,6 +172,7 @@ eEventDisplay::eEventDisplay(eString service, eServiceReferenceDVB &ref, const e
 	else if (evt)
 		setEvent(evt);
 	addActionMap( &i_enigmaEventViewActions->map );
+	addActionMap( &i_epgSelectorActions->map );
 	
 	setHelpID(11);
 }

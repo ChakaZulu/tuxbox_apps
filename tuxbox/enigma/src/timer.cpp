@@ -275,6 +275,7 @@ void eTimerManager::actionHandler()
 	switch( nextAction )
 	{
 		case zap:
+// check if the time to next starting ev
 			eDebug("[eTimerManager] zapToChannel");
 			writeToLogfile(eString().sprintf("--> actionHandler() calldepth=%d zap", ++calldepth));
 			if ( !(nextStartingEvent->type&ePlaylistEntry::doFinishOnly) )
@@ -670,7 +671,7 @@ void eTimerManager::actionHandler()
 						writeToLogfile("nextAction = zap");
 					// set the Timer to eventBegin
 					writeToLogfile(eString().sprintf("   starts in %d seconds", t ));
-					actionTimer.start( t * 1000, true );
+					actionTimer.startLongTimer(t);
 				}
 			}
 			else
@@ -1136,6 +1137,47 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 		}
 	return false;
 }
+/*
+bool eTimerManager::updateRunningTimerEvent( eWidget *sel, const ePlaylistEntry& entry )
+{
+	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
+		if ( *i == entry )
+		{
+			sel->hide();
+			eString str2 = _("Update event in timerlist");
+			eString str3 = _("Really update this event?");
+
+			int ret = eMessageBox::btNo;
+			eMessageBox box(str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
+			box.show();
+			ret=box.exec();
+			box.hide();
+
+			if (ret == eMessageBox::btYes)
+			{
+				timerlist->getList().erase(i);
+				if ( &(*nextStartingEvent) == &entry )
+				{
+					if ( nextStartingEvent->type & ePlaylistEntry::stateRunning )
+					{
+						nextAction=stopEvent;
+						nextStartingEvent->type |= (ePlaylistEntry::stateError | ePlaylistEntry::errorUserAborted);
+						actionHandler();
+					}
+					else if ( !(nextStartingEvent->type & ePlaylistEntry::stateRunning) )
+					{
+						nextAction=setNextEvent;
+						actionHandler();
+					}
+				}
+				sel->show();
+				return true;
+			}
+			sel->show();
+			break;
+		}
+	return false;
+}*/
 
 bool eTimerManager::removeEventFromTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt )
 {

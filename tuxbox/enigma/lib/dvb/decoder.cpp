@@ -61,6 +61,7 @@ int Decoder::fd::demux_video;
 int Decoder::fd::demux_audio;
 int Decoder::fd::demux_pcr;
 int Decoder::fd::demux_vtxt;
+bool Decoder::locked=false;
 
 static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *descriptors)
 {
@@ -106,7 +107,7 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 		close(1);
 		close(2);
 #endif
-		for (unsigned int i=0; i < 60; ++i )
+		for (unsigned int i=0; i < 90; ++i )
 			close(i);
 
 		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[2], descriptor, 0)<0)
@@ -149,21 +150,19 @@ void Decoder::Pause()
 {
 	if (fd.video != -1)
 	{
-		int err=0;
-		if (::ioctl(fd.video, VIDEO_FREEZE)<0)
-		{
+		if ( ::ioctl(fd.video, VIDEO_FREEZE) < 0 )
 			eDebug("VIDEO_FREEZE failed (%m)");
-			err=1;
-		}
-		if ( fd.audio != -1 && ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 0)<0)
-		{
+		if (::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 0)<0)
 			eDebug("AUDIO_SET_AV_SYNC failed (%m)");
-			err=1;
+		if (fd.video == 0x1FFE)
+		{
+			if (::ioctl(fd.audio, AUDIO_SET_MUTE, 1 )<0)
+				eDebug("AUDIO_SET_MUTE failed (%m)");
+			else
+				eDebug("audio_pause (success)");
 		}
-		if (!err)
-			eDebug("video_pause (success)");
 	}
-	if (fd.audio != -1)
+	if ( fd.video != 0x1FFE && fd.audio != -1 )
 	{
 		if (::ioctl(fd.audio, AUDIO_STOP)<0)
 			eDebug("AUDIO_STOP failed(%m)");
@@ -176,21 +175,19 @@ void Decoder::Resume()
 {
 	if (fd.video != -1)
 	{
-		int err=0;
 		if (::ioctl(fd.video, VIDEO_CONTINUE)<0)
-		{
 			eDebug("VIDEO_CONTINUE failed(%m)");
-			err=1;
-		}
-		if ( fd.audio != -1 && ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1)<0)
-		{
+		if (::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1)<0)
 			eDebug("AUDIO_SET_AV_SYNC failed (%m)");
-			err=1;
+		if (fd.video == 0x1FFE)
+		{
+			if (::ioctl(fd.audio, AUDIO_SET_MUTE, 0 )<0)
+				eDebug("AUDIO_SET_MUTE failed (%m)");
+			else
+				eDebug("audio_pause (success)");
 		}
-		if (!err)
-			eDebug("video continue (success)");
 	}
-	if (fd.audio != -1)
+	if ( fd.video != 0x1FFE && fd.audio != -1)
 	{
 		if (::ioctl(fd.audio, AUDIO_PLAY)<0)
 			eDebug("AUDIO_PLAY failed (%m)");
@@ -228,6 +225,8 @@ void Decoder::SetStreamType(int type)
 
 int Decoder::Set()
 {
+	if (locked)
+		return -1;
 	int changed=0;
 
 	dmxPesFilterParams pes_filter;
@@ -531,6 +530,9 @@ int Decoder::Set()
 			break;
 		case DECODE_AUDIO_AC3:
 			bypass=0;
+			break;
+		case DECODE_AUDIO_AC3_VOB:
+			bypass=3;
 			break;
 		case DECODE_AUDIO_DTS:
 			bypass=2;
