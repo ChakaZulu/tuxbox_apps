@@ -1,21 +1,21 @@
 /*
 	Event-Server  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -57,7 +57,7 @@ void CEventServer::sendEvent(unsigned int eventID, unsigned int initiatorID, voi
 	{
 		//allen clients ein event schicken
 		eventClient client = pos->second;
-		printf("send event (%d) to: %d - %s\n", eventID, client.clientID, client.udsName);
+		printf("[eventserver]: send event (%d) to: %d - %s\n", eventID, client.clientID, client.udsName);
 		sendEvent2Client(eventID, initiatorID, &client, eventbody, eventbodysize);
 	}
 }
@@ -71,25 +71,24 @@ bool CEventServer::sendEvent2Client(unsigned int eventID, unsigned int initiator
 	servaddr.sun_family = AF_UNIX;
 	strcpy(servaddr.sun_path, ClientData->udsName);
 	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-	
+
 	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
 		perror("[eventserver]: socket");
 		return false;
-	}	
+	}
 
 	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
   		perror("[eventserver]: connect");
 		return false;
 	}
-	return true;
 
 	eventHead head;
 	head.eventID = eventID;
 	head.initiatorID = initiatorID;
-	write(sock_fd, &head, sizeof(head));
-	
+	//printf ("[eventserver]: sent 0x%x\n", write(sock_fd, &head, sizeof(head)) );
+
 	if(eventbodysize!=0)
 	{
 		write(sock_fd, eventbody, eventbodysize);
