@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.83 2001/11/24 13:48:47 Simplex Exp $
+        $Id: neutrino.cpp,v 1.84 2001/11/24 21:22:07 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.84  2001/11/24 21:22:07  Simplex
+  setting-menuitems for bouquet stuff
+
   Revision 1.83  2001/11/24 13:48:47  Simplex
   fixed "radio-only bouquets"-bug
 
@@ -499,6 +502,8 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.key_channelList_cancel = CRCInput::RC_home;
 	g_settings.key_quickzap_up = CRCInput::RC_up;
 	g_settings.key_quickzap_down = CRCInput::RC_down;
+	g_settings.key_bouquet_up = CRCInput::RC_right;
+	g_settings.key_bouquet_down = CRCInput::RC_left;
 
     strcpy(g_settings.repeat_blocker, "0");
 
@@ -510,6 +515,9 @@ void CNeutrinoApp::setupDefaults()
 
 	//Soft-Update
 	g_settings.softupdate_mode=1; //internet
+
+	//BouquetHandling
+	g_settings.bouquetlist_mode=0; // show channellist of current bouquet
 
 }
 
@@ -1297,6 +1305,8 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	CKeyChooser*	keySettings_channelList_cancel = new CKeyChooser(&g_settings.key_channelList_cancel, "keybindingmenu.cancel_head", "settings.raw");
 	CKeyChooser*	keySettings_quickzap_up = new CKeyChooser(&g_settings.key_quickzap_up, "keybindingmenu.channelup_head",   "settings.raw");
 	CKeyChooser*	keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, "keybindingmenu.channeldown_head", "settings.raw");
+	CKeyChooser*	keySettings_bouquet_up = new CKeyChooser(&g_settings.key_bouquet_up, "keybindingmenu.bouquetup_head",   "settings.raw");
+	CKeyChooser*	keySettings_bouquet_down = new CKeyChooser(&g_settings.key_bouquet_down, "keybindingmenu.bouquetdown_head", "settings.raw");
 
 
     keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
@@ -1304,13 +1314,21 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.modechange") );
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.tvradiomode", true, "", keySettings_tvradio_mode ));
+
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.channellist") );
+	CMenuOptionChooser *oj = new CMenuOptionChooser("keybindingmenu.bouquethandling" , &g_settings.bouquetlist_mode, true);
+		oj->addOption(0, "keybindingmenu.bouquetchannels_on_ok");
+		oj->addOption(1, "keybindingmenu.bouquetlist_on_ok");
+		oj->addOption(2, "keybindingmenu.allchannels_on_ok");
+	keySettings.addItem( oj );
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.pageup", true, "", keySettings_channelList_pageup ));
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.pagedown", true, "", keySettings_channelList_pagedown ));
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.cancel", true, "", keySettings_channelList_cancel ));
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.quickzap") );
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.channelup", true, "", keySettings_quickzap_up ));
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.channeldown", true, "", keySettings_quickzap_down ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetup", true, "", keySettings_bouquet_up ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.bouquetdown", true, "", keySettings_bouquet_down ));
 
 }
 
@@ -1568,24 +1586,19 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		if ((mode==mode_tv) || ((mode==mode_radio) && (zapit)) )
 		{
 			if (key==CRCInput::RC_ok)
-			{	//channellist
-//				channelList->exec();
-//				BouquetSwitchMode bouqMode = bsmBouquets;
-				BouquetSwitchMode bouqMode = bsmChannels;
-//				BouquetSwitchMode bouqMode = bsmAllChannels;
-//				TODO: get Value from options, whether to show bouquetlist
-//				or channellist
+			{
+				int bouqMode = g_settings.bouquetlist_mode;//bsmChannels;
 
 				if ((bouquetList!=NULL) && (bouquetList->Bouquets.size() == 0 ))
 				{
 					printf("bouquets are empty\n");
 					bouqMode = bsmAllChannels;
                 }
-				if ((bouquetList!=NULL) && (bouqMode == bsmBouquets))
+				if ((bouquetList!=NULL) && (bouqMode == 1/*bsmBouquets*/))
 				{
 					bouquetList->exec(true);
 				}
-				else if ((bouquetList!=NULL) && (bouqMode == bsmChannels))
+				else if ((bouquetList!=NULL) && (bouqMode == 0/*bsmChannels*/))
 				{
 					int nNewChannel = bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->show();
 					if (nNewChannel>-1)
@@ -1599,7 +1612,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					channelList->exec();
 				}
 			}
-			else if ((key==CRCInput::RC_right) && (bouquetList!=NULL))
+			else if ((key==g_settings.key_bouquet_up) && (bouquetList!=NULL))
 			{
 				if (bouquetList->Bouquets.size() > 0)
 				{
@@ -1610,7 +1623,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 				}
 			}
-			else if ((key==CRCInput::RC_left) && (bouquetList!=NULL))
+			else if ((key==g_settings.key_bouquet_down) && (bouquetList!=NULL))
 			{
 				if (bouquetList->Bouquets.size() > 0)
 				{
@@ -1754,7 +1767,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
-	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw");
+	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw",400,500);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings, miscSettings);
@@ -1972,7 +1985,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.83 2001/11/24 13:48:47 Simplex Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.84 2001/11/24 21:22:07 Simplex Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -92,7 +92,7 @@ keybindingmenu.quickzap Quickzap
 keybindingmenu.tvradiomode TV/Radio-mode
 keybindingmenu.tvradiomode_head TV/Radio-mode
 keybindingmenu.pageup page up
-keybindingmenu.pageup_head Keysetup page up 
+keybindingmenu.pageup_head Keysetup page up
 keybindingmenu.pagedown page down
 keybindingmenu.pagedown_head Keysetup page down
 keybindingmenu.cancel close channellist
@@ -101,6 +101,14 @@ keybindingmenu.channelup channel up
 keybindingmenu.channelup_head Keysetup channel up
 keybindingmenu.channeldown channel down
 keybindingmenu.channeldown_head Keysetup channel down
+keybindingmenu.bouquetup next bouquet
+keybindingmenu.bouquetup_head keysetup next bouquet
+keybindingmenu.bouquetupdown bouquet back
+keybindingmenu.bouquetupdown_head keysetup bouquet back
+keybindingmenu.bouquethandling Bouquet-control
+keybindingmenu.bouquetchannels_on_ok OK-key shows channel of current bouquet
+keybindingmenu.bouquetlist_on_ok OK-key shows bouquet-list
+keybindingmenu.allchannels_on_ok OK-key shows all-channels-list
 
 colorchooser.red red
 colorchooser.green green
@@ -115,7 +123,7 @@ keychooser.head Setup new Key
 keychooser.text1 Please press the new key
 keychooser.text2 wait a few seconds for abort
 
-screensetup.upperleft rot = setup upper left 
+screensetup.upperleft rot = setup upper left
 screensetup.lowerright grün = setup lower right
 
 channellist.head All Services
@@ -217,5 +225,5 @@ flashupdate.majorversiondiffer2 please install new flashimage
 flashupdate.providerversiondiffer1 the provider id differs
 flashupdate.providerversiondiffer2 please install new flashimage
 flashupdate.nonewversion1 no new version available
-flashupdate.nonewversion2   
+flashupdate.nonewversion2
 flashupdate.md5sumerror image has errors

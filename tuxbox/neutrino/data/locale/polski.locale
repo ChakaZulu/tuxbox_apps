@@ -100,6 +100,14 @@ keybindingmenu.channelup Kanal do gory
 keybindingmenu.channelup_head Klawisz Kanal do gory
 keybindingmenu.channeldown Kanal na dol
 keybindingmenu.channeldown_head Klawisz Kanal na dol
+keybindingmenu.bouquetup next bouquet
+keybindingmenu.bouquetup_head keysetup next bouquet
+keybindingmenu.bouquetupdown bouquet back
+keybindingmenu.bouquetupdown_head keysetup bouquet back
+keybindingmenu.bouquethandling Bouquet-control
+keybindingmenu.bouquetchannels_on_ok OK-key shows channel of current bouquet
+keybindingmenu.bouquetlist_on_ok OK-key shows bouquet-list
+keybindingmenu.allchannels_on_ok OK-key shows all-channels-list
 
 colorchooser.red czerwony
 colorchooser.green zielony
@@ -217,7 +225,7 @@ flashupdate.majorversiondiffer2 please install new flashimage
 flashupdate.providerversiondiffer1 the provider id differs
 flashupdate.providerversiondiffer2 please install new flashimage
 flashupdate.nonewversion1 no new version available
-flashupdate.nonewversion2   
+flashupdate.nonewversion2
 flashupdate.md5sumerror image has errors
 flashupdate.updatemode Updatemode
 flashupdate.updatemode_manual manual (ftp)
@@ -230,5 +238,5 @@ flashupdate.majorversiondiffer2 please install new flashimage
 flashupdate.providerversiondiffer1 the provider id differs
 flashupdate.providerversiondiffer2 please install new flashimage
 flashupdate.nonewversion1 no new version available
-flashupdate.nonewversion2   
+flashupdate.nonewversion2
 flashupdate.md5sumerror image has errors

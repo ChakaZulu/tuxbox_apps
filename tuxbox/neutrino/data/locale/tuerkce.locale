@@ -100,6 +100,14 @@ keybindingmenu.channelup KANAL YUKARI
 keybindingmenu.channelup_head KANAL YUKARI TUSU
 keybindingmenu.channeldown KANAL ASAGI
 keybindingmenu.channeldown_head KANAL ASAGI TUSU
+keybindingmenu.bouquetup next bouquet
+keybindingmenu.bouquetup_head keysetup next bouquet
+keybindingmenu.bouquetupdown bouquet back
+keybindingmenu.bouquetupdown_head keysetup bouquet back
+keybindingmenu.bouquethandling Bouquet-control
+keybindingmenu.bouquetchannels_on_ok OK-key shows channel of current bouquet
+keybindingmenu.bouquetlist_on_ok OK-key shows bouquet-list
+keybindingmenu.allchannels_on_ok OK-key shows all-channels-list
 
 colorchooser.red KIRMIZI
 colorchooser.green YESIL

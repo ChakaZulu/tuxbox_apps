@@ -45,11 +45,11 @@ videomenu.videoformat Format de Télévision
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
 
-networkmenu.head Ajuster un Réseau 
-networkmenu.setupnow utiliser maintenant des réglages de Réseau 
-networkmenu.setuponstartup Lors du démarrage des réglages de réseau commencent 
+networkmenu.head Ajuster un Réseau
+networkmenu.setupnow utiliser maintenant des réglages de Réseau
+networkmenu.setuponstartup Lors du démarrage des réglages de réseau commencent
 networkmenu.ipaddress IP-adresse
-networkmenu.netmask Masque de réseau 
+networkmenu.netmask Masque de réseau
 networkmenu.broadcast Émission
 networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver
@@ -58,8 +58,8 @@ ipsetup.hint_1 Utilisez "0"-"9", Rouge est " ", Vert "."
 ipsetup.hint_2 ou Up/Down, OK stocke , Home interrompre
 
 colormenu.head Ajuster la Couleur
-colormenu.statusbar Poutre de statut 
-colormenu.themeselect choisir un Thème 
+colormenu.statusbar Poutre de statut
+colormenu.themeselect choisir un Thème
 colormenu.menucolors Couleur de menu
 colormenu.background Couleur de Arrière-plan
 colormenu.background_head Couleur de Arrière-plan
@@ -72,52 +72,60 @@ colorthememenu.classic_theme Classic
 
 colormenusetup.head Couleur de Menu
 colormenusetup.menuhead Entête
-colormenusetup.menucontent Contenu de fenêtre 
+colormenusetup.menucontent Contenu de fenêtre
 colormenusetup.menucontent_inactive Contenu de fenêtre désactive
 colormenusetup.menucontent_selected Contenu de fenêtre active
 
 colorstatusbar.head Couleur la Poutre de statut
 colorstatusbar.text Poutre de statut
 
-repeatblocker.hint_1 Temps minimum entre 2 clés dans les millisecondes 
+repeatblocker.hint_1 Temps minimum entre 2 clés dans les millisecondes
 repeatblocker.hint_2 0 met hors circuit l' amortissement  (Rouge est " ")
 
 keybindingmenu.RC Télécommande
-keybindingmenu.repeatblock bloquer des clés doubles 
-keybindingmenu.head Réglage de clé 
+keybindingmenu.repeatblock bloquer des clés doubles
+keybindingmenu.head Réglage de clé
 keybindingmenu.modechange Changez le Mode
-keybindingmenu.channellist Liste d'émetteur 
-keybindingmenu.quickzap commuter rapidement 
+keybindingmenu.channellist Liste d'émetteur
+keybindingmenu.quickzap commuter rapidement
 keybindingmenu.tvradiomode TV-/Radio-Mode
 keybindingmenu.tvradiomode_head TV-/Radio-Mode
 keybindingmenu.pageup couvrir de feuilles haut un côté
 keybindingmenu.pageup_head couvrir de feuilles vers le haut un côté
-keybindingmenu.pagedown couvrir de feuilles vers le bas un côté 
-keybindingmenu.pagedown_head couvrir de feuilles vers le bas un côté 
+keybindingmenu.pagedown couvrir de feuilles vers le bas un côté
+keybindingmenu.pagedown_head couvrir de feuilles vers le bas un côté
 keybindingmenu.cancel fermer la liste d'émetteur
-keybindingmenu.cancel_head fermer la liste d'émetteur 
+keybindingmenu.cancel_head fermer la liste d'émetteur
 keybindingmenu.channelup Canal vers le haut
 keybindingmenu.channelup_head Canal vers le haut clé
 keybindingmenu.channeldown Canal vers le bas
 keybindingmenu.channeldown_head Canal vers le bas clé
+keybindingmenu.bouquetup next bouquet
+keybindingmenu.bouquetup_head keysetup next bouquet
+keybindingmenu.bouquetupdown bouquet back
+keybindingmenu.bouquetupdown_head keysetup bouquet back
+keybindingmenu.bouquethandling Bouquet-control
+keybindingmenu.bouquetchannels_on_ok OK-key shows channel of current bouquet
+keybindingmenu.bouquetlist_on_ok OK-key shows bouquet-list
+keybindingmenu.allchannels_on_ok OK-key shows all-channels-list
 
 colorchooser.red rouge
 colorchooser.green vert
 colorchooser.blue bleu
 colorchooser.alpha alpha
 
-keychoosermenu.setnew À nouveau ajuster la clé 
+keychoosermenu.setnew À nouveau ajuster la clé
 keychoosermenu.setnone Pas de clé
-keychoosermenu.currentkey clé actuelle 
+keychoosermenu.currentkey clé actuelle
 
 keychooser.head À nouveau ajuster la clé
 keychooser.text1 Veuillez appuyer sur la clé
 keychooser.text2 interrompre attendre s'il vous plaît..
 
-screensetup.upperleft rouge = Découpe en haut, à gauche 
-screensetup.lowerright vert = Découpe vers le bas, à droite 
+screensetup.upperleft rouge = Découpe en haut, à gauche
+screensetup.lowerright vert = Découpe vers le bas, à droite
 
-channellist.head tous les canaux 
+channellist.head tous les canaux
 
 infoviewer.epgnotload EPG pas encore non chargé ...
 infoviewer.epgwait attendent EPG...
@@ -137,7 +145,7 @@ epglist.head l' événement énumérerait - %s
 epglist.noevents Pas d'cEpg disponible ...
 
 streaminfo.head Informations
-streaminfo.resolution Qualité d'image 
+streaminfo.resolution Qualité d'image
 streaminfo.bitrate Bitrate
 streaminfo.aratio Taux
 streaminfo.aratio_unknown Taux: inconnu
@@ -217,5 +225,5 @@ flashupdate.majorversiondiffer2 please install new flashimage
 flashupdate.providerversiondiffer1 the provider id differs
 flashupdate.providerversiondiffer2 please install new flashimage
 flashupdate.nonewversion1 no new version available
-flashupdate.nonewversion2   
+flashupdate.nonewversion2
 flashupdate.md5sumerror image has errors

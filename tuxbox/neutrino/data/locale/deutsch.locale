@@ -100,6 +100,14 @@ keybindingmenu.channelup Kanal hoch
 keybindingmenu.channelup_head Kanal hoch Taste
 keybindingmenu.channeldown Kanal runter
 keybindingmenu.channeldown_head Kanal runter Taste
+keybindingmenu.bouquetup Bouquet weiter
+keybindingmenu.bouquetup_head Bouquet weiter Taste
+keybindingmenu.bouquetdown Bouquet zurück
+keybindingmenu.bouquetdown_head Bouquet zurück Taste
+keybindingmenu.bouquethandling OK-Taste für
+keybindingmenu.bouquetchannels_on_ok Bouquet-Kanäle
+keybindingmenu.bouquetlist_on_ok Bouquetliste
+keybindingmenu.allchannels_on_ok Kanalliste
 
 colorchooser.red rot
 colorchooser.green grün
@@ -214,6 +222,6 @@ flashupdate.majorversiondiffer2 Bitte neues Image installieren
 flashupdate.providerversiondiffer1 Die ProviderID weicht ab
 flashupdate.providerversiondiffer2 Bitte neues Image installieren
 flashupdate.nonewversion1 keine neue Version verfügbar
-flashupdate.nonewversion2   
+flashupdate.nonewversion2
 flashupdate.md5sumerror Das Image ist fehlerhaft
 

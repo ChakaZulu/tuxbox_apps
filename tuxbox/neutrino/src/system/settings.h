@@ -10,7 +10,7 @@
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
+
 
 	License: GPL
 
@@ -23,7 +23,7 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -53,52 +53,52 @@ struct SNeutrinoSettings
 	//colors
 	unsigned char menu_Head_alpha;
 	unsigned char menu_Head_red;
-	unsigned char menu_Head_green; 
+	unsigned char menu_Head_green;
 	unsigned char menu_Head_blue;
 
 	unsigned char menu_Head_Text_alpha;
 	unsigned char menu_Head_Text_red;
-	unsigned char menu_Head_Text_green; 
+	unsigned char menu_Head_Text_green;
 	unsigned char menu_Head_Text_blue;
 
 	unsigned char menu_Content_alpha;
 	unsigned char menu_Content_red;
-	unsigned char menu_Content_green; 
+	unsigned char menu_Content_green;
 	unsigned char menu_Content_blue;
 
 	unsigned char menu_Content_Text_alpha;
 	unsigned char menu_Content_Text_red;
-	unsigned char menu_Content_Text_green; 
+	unsigned char menu_Content_Text_green;
 	unsigned char menu_Content_Text_blue;
 
 	unsigned char menu_Content_Selected_alpha;
 	unsigned char menu_Content_Selected_red;
-	unsigned char menu_Content_Selected_green; 
+	unsigned char menu_Content_Selected_green;
 	unsigned char menu_Content_Selected_blue;
 
 	unsigned char menu_Content_Selected_Text_alpha;
 	unsigned char menu_Content_Selected_Text_red;
-	unsigned char menu_Content_Selected_Text_green; 
+	unsigned char menu_Content_Selected_Text_green;
 	unsigned char menu_Content_Selected_Text_blue;
 
 	unsigned char menu_Content_inactive_alpha;
 	unsigned char menu_Content_inactive_red;
-	unsigned char menu_Content_inactive_green; 
+	unsigned char menu_Content_inactive_green;
 	unsigned char menu_Content_inactive_blue;
 
 	unsigned char menu_Content_inactive_Text_alpha;
 	unsigned char menu_Content_inactive_Text_red;
-	unsigned char menu_Content_inactive_Text_green; 
+	unsigned char menu_Content_inactive_Text_green;
 	unsigned char menu_Content_inactive_Text_blue;
 
 	unsigned char infobar_alpha;
 	unsigned char infobar_red;
-	unsigned char infobar_green; 
+	unsigned char infobar_green;
 	unsigned char infobar_blue;
 
 	unsigned char infobar_Text_alpha;
 	unsigned char infobar_Text_red;
-	unsigned char infobar_Text_green; 
+	unsigned char infobar_Text_green;
 	unsigned char infobar_Text_blue;
 
 	//network
@@ -118,6 +118,8 @@ struct SNeutrinoSettings
 
 	int key_quickzap_up;
 	int key_quickzap_down;
+	int key_bouquet_up;
+	int key_bouquet_down;
 
     char repeat_blocker[3];
 
@@ -130,6 +132,9 @@ struct SNeutrinoSettings
 	//Software-update
 	int softupdate_mode;
 	char softupdate_currentversion[20];
+
+	//BouquetHandling
+	int bouquetlist_mode;
 };
 
 #endif
