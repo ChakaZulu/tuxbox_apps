@@ -44,6 +44,7 @@
 #include <lib/system/http_dyn.h>
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
+#include <lib/system/dmfp.h>
 
 using namespace std;
 
@@ -60,6 +61,7 @@ using namespace std;
 #define LEFTNAVICOLOR "#D9E0E7"
 #define TOPNAVICOLOR "#D9E0E7"
 #define OCKER "#FFCC33"
+#define PINK "#95077C"
 
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
 
@@ -940,6 +942,29 @@ static eString getTopNavi(eString mode, eString path)
 	return result;
 }
 
+static eString getChannelNavi(eString mode, eString path)
+{
+	eString result;
+
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+
+	if (sapi && sapi->service)
+	{
+		result = button(100, "AUDIO", OCKER, "javascript:selectAudio()");
+		result += button(100, "EPG", GREEN, "javascript:openEPG()");
+		result += button(100, "Info", PINK, "javascript:openChannelInfo()");
+		result += button(100, "Stream Info", YELLOW, "javascript:openSI()");
+#ifndef DISABLE_FILE
+		result += button(100, "Record", RED, "javascript:DVRrecord('start')");
+		result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
+#endif
+	}
+	else
+		result = "&nbsp;";
+
+	return result;
+}
+
 #ifndef DISABLE_FILE
 extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 
@@ -1653,7 +1678,6 @@ static eString getZapContent3(eString mode, eString path)
 static eString getZap(eString mode, eString path)
 {
 	eString result;
-	eString zap_result;
 
 #ifndef DISABLE_FILE
 	if (path == ";4097:7:0:1:0:0:0:0:0:0:") // recordings
@@ -1661,44 +1685,14 @@ static eString getZap(eString mode, eString path)
 		eString tmpFile = readFile(TEMPLATE_DIR + "videocontrols.tmp");
 		tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
 		result += tmpFile;
-		zap_result += getZapContent3(mode, path);
+		result += getZapContent3(mode, path);
 	}
 	else
 #endif
 	{
 		result += getZapNavi(mode, path);
-		zap_result += getZapContent2(mode, path);
-		result += getEITC();
+		result += getZapContent2(mode, path);
 	}
-
-	eString curService = filter_string(getCurService());
-	if (curService == "n/a")
-		curService =
-#ifndef DISABLE_FILE
-			eZapMain::getInstance()->dvrActive() ?
-				"Digital Video Recorder" :
-#endif
-				"&nbsp;";
-	result.strReplace("#SERVICENAME#", curService);
-
-
-	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-
-	if (sapi && sapi->service)
-	{
-		eString buttons = button(100, "AUDIO", OCKER, "javascript:selectAudio()");
-		buttons += button(100, "EPG", GREEN, "javascript:openEPG()");
-		buttons += button(100, "Info", YELLOW, "javascript:openSI()");
-#ifndef DISABLE_FILE
-		buttons += button(100, "Record", RED, "javascript:DVRrecord('start')");
-		buttons += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
-#endif
-		result.strReplace("#OPS#", buttons);
-	}
-	else
-		result.strReplace("#OPS#", "");
-
-	result += zap_result;
 
 	return result;
 }
@@ -1849,6 +1843,12 @@ static eString msgWindow(eString request, eString dirpath, eString opts, eHTTPCo
 	return getMsgWindow(title, msg);
 }
 
+static eString getLinuxVersion()
+{
+	system("uname -a > /tmp/linux.tmp");
+	return readFile("/tmp/linux.tmp");
+}
+
 static eString aboutDreambox(void)
 {
 	std::stringstream result;
@@ -1865,8 +1865,11 @@ static eString aboutDreambox(void)
 	result << getDiskInfo();
 	result << getUSBInfo();
 #endif
-	result  << "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>"
-		<< "<tr><td>Web Interface:</td><td>" << WEBXFACEVERSION << "</td></tr>"
+	result	<< "<tr><td>Linux:</td><td>" << getLinuxVersion() << "</td></tr>"
+		<< "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>";
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+			result << "<tr><td>FP Firmware:</td><td>" << eString().sprintf(" 1.%02d", eDreamboxFP::getFPVersion()) << "</td></tr>";
+		result << "<tr><td>Web Interface:</td><td>" << WEBXFACEVERSION << "</td></tr>"
 		<< "</table>";
 
 	return result.str();
@@ -3156,6 +3159,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	result = readFile(TEMPLATE_DIR + "index.tmp");
 	result.strReplace("#CONTENT#", getContent(mode, spath));
 	result.strReplace("#HEADER#", getEITC2());
+	result.strReplace("#CHANNAVI#", getChannelNavi(mode, spath));
 	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
