@@ -82,7 +82,7 @@ main(int argc, char **argv)
 
 	if (mode==1) {
 
-	if ( (ioctl(fd,VIDEO_SET_DIPLAY_FORMAT,vdf) < 0)){
+	if ( (ioctl(fd,VIDEO_SET_DISPLAY_FORMAT,vdf) < 0)){
 		perror("VIDEO_SET_DIPLAY_FORMAT: ");
 		return -1;
 	}

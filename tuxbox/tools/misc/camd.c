@@ -51,7 +51,7 @@ void _writecam(int cmd, unsigned char *data, int len)
   buffer[len++]=csum;
 
   /* init ca message */
-  ca_msg.slot_num = 0;
+  ca_msg.index = 0;
   ca_msg.type = 0;
 
   ca_msg.length = len-1;
@@ -334,7 +334,7 @@ int main(int argc, char **argv)
   reset();
 
   /* init ca message */
-  ca_msg.slot_num = 0;
+  ca_msg.index = 0;
   ca_msg.type = 0;
 
 //  msg.length = 0;
