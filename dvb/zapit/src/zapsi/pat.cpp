@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.21 2002/05/09 20:06:16 obi Exp $
+ * $Id: pat.cpp,v 1.22 2002/05/09 20:14:00 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -42,7 +42,7 @@ int fake_pat(uint16_t onid, FrontendParameters feparams)
 	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[pat.cpp] " DEMUX_DEV);
-		return;
+		return -1;
 	}
 
 	/* buffer for program association table */
