@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.34 2003/09/04 22:56:39 zwen Exp $
+        $Id: movieplayer.cpp,v 1.35 2003/09/04 23:25:53 zwen Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -308,7 +308,7 @@ ReceiveStreamThread (void *mrl)
   // Example(ohne transcode zu mpeg1): ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
   //TODO make this nicer :-)
   std::string souturl;
-  if(!memcmp((char*)mrl, "vcd:", 4) || addurl.substr(addurl.length()-4) == ".mpg" || addurl.substr(addurl.length()-4) == ".m2p")
+  if(!memcmp((char*)mrl, "vcd:", 4) || addurl.substr(addurl.length()-3) == "mpg" || addurl.substr(addurl.length()-3) == "m2p")
   {
 	  // no transcode
 	  souturl = baseurl + "?sout=%23duplicate%7Bdst%3Dstd%7Baccess%3Dhttp%2Cmux%3Dts%2Curl%3D%3A" + g_settings.streaming_server_port + "%2Fdboxstream%7D%7D";
