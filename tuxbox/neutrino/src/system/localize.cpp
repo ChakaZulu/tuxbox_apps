@@ -277,6 +277,7 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 #warning TODO: implement real check to determine whether we need a font with more than Basic Latin & Latin-1 Supplement characters
 	return (
 		(strcmp(locale, "bosanski") == 0) ||
+		(strcmp(locale, "ellinika") == 0) ||
 		(strcmp(locale, "russkij") == 0) ||
 		(strcmp(locale, "utf8") == 0)
 		/* utf8.locale is a generic name that can be used for new locales which need characters outside the ISO-8859-1 character set */
