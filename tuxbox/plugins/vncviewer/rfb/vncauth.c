@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
-#include <rfb/vncauth.h>
+#include "vncauth.h"
 #include "d3des.h"
 
 

@@ -14,7 +14,7 @@
 #include <plugin.h>
 #include <sys/mman.h>
 #include <linux/fb.h>
-#include <linux/input.h>
+#include "input_fake.h"
 #include <dbox/fb.h>
 
 #ifndef KEY_TOPLEFT

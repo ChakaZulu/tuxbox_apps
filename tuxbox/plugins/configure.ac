@@ -43,6 +43,7 @@ tuxtxt/Makefile
 tuxtxt/font/Makefile
 tuxcom/Makefile
 vncviewer/Makefile
+vncviewer/rfb/Makefile
 tuxbox-plugins.pc
 ])
 
