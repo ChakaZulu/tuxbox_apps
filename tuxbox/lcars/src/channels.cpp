@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.4  2001/12/12 15:23:55  TheDOC
+Segfault after Scan-Bug fixed
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -50,6 +53,13 @@ channels::channels(settings &set, pat &p1, pmt &p2) : setting(set), pat_obj(p1),
 channels::channels(settings &set, pat &p1, pmt &p2, eit *e, cam *c, hardware *h) : setting(set), pat_obj(p1), pmt_obj(p2)
 {
 	cur_pos = -1;
+	eit_obj = e;
+	cam_obj = c;
+	hardware_obj = h;
+}
+
+void channels::setStuff(eit *e, cam *c, hardware *h)
+{
 	eit_obj = e;
 	cam_obj = c;
 	hardware_obj = h;

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.8  2001/12/12 15:23:55  TheDOC
+Segfault after Scan-Bug fixed
+
 Revision 1.7  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -293,9 +296,10 @@ int main(int argc, char **argv)
 	if (channels.numberChannels() == 0)
 	{
 		channels = scan.scanChannels();
+		printf("Number Channels: %d\n", channels.numberChannels());
+		channels.setStuff(&eit, &cam, &hardware);
 		channels.saveDVBChannels();
 	}
-	
 	container container(&zap, &channels, &fb, &osd, &settings, &tuner, &pat, &pmt, &eit, &scan);
 	
 	channels.setBeginTS();
@@ -382,8 +386,9 @@ int main(int argc, char **argv)
 			
 			osd.addCommand("SHOW proginfo 5");
 			channels.setCurrentOSDProgramInfo(&osd);
+			printf("Startzapping\n");
 			channels.zapCurrentChannel(&zap, &tuner);
-			
+			printf("Enzzapping\n");
 			schedule_read = false;
 			if (channels.getCurrentTXT() != 0)
 			{

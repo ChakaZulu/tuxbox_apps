@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.4  2001/12/12 15:23:55  TheDOC
+Segfault after Scan-Bug fixed
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -123,6 +126,8 @@ class channels
 public:	
 	channels(settings &setting, pat &p1, pmt &p2, eit *e, cam *c, hardware *h);
 	channels(settings &setting, pat &p1, pmt &p2);
+
+	void setStuff(eit *e, cam *c, hardware *h);
 
 	void zapCurrentChannel(zap *zap_obj, tuner *tuner_obj);
 	void setCurrentOSDProgramInfo(osd *osd_obj);
