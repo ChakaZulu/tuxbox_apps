@@ -989,7 +989,8 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 						{
 							case CTimerdClient::EVT_ANNOUNCE_RECORD :
 									*msg = NeutrinoMessages::ANNOUNCE_RECORD;
-									*data = 0;
+									*data = (unsigned) p;
+									dont_delete_p = true;
 								break;
 							case CTimerdClient::EVT_ANNOUNCE_ZAPTO :
 									*msg = NeutrinoMessages::ANNOUNCE_ZAPTO;
@@ -1053,7 +1054,7 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 					else if (emsg.initiatorID == CEventServer::INITID_NEUTRINO)
 					{
 						if ((emsg.eventID == NeutrinoMessages::EVT_RECORDING_ENDED) &&
-						    (read_bytes == sizeof(stream2file_status_t)))
+						    (read_bytes == sizeof(stream2file_status2_t)))
 						{
 							*msg  = NeutrinoMessages::EVT_RECORDING_ENDED;
 							*data = (neutrino_msg_data_t) p;

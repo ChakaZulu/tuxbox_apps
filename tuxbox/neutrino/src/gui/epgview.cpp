@@ -38,6 +38,7 @@
 #include <gui/widget/hintbox.h>
 #include <gui/widget/icons.h>
 #include <gui/widget/messagebox.h>
+#include <gui/widget/mountchooser.h>
 
 #include <global.h>
 #include <neutrino.h>
@@ -534,13 +535,31 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 						CTimerdClient timerdclient;
 						if(timerdclient.isTimerdAvailable())
 						{
-							timerdclient.addRecordTimerEvent(channel_id,
-																		epgData.epg_times.startzeit,
-																		epgData.epg_times.startzeit + epgData.epg_times.dauer,
-																		epgData.eventID, epgData.epg_times.startzeit,
-																		epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
-																		"", true );
-							ShowMsgUTF(LOCALE_TIMER_EVENTRECORD_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTRECORD_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+							
+							char *recDir = g_settings.network_nfs_recordingdir;
+							if (g_settings.recording_choose_direct_rec_dir)
+							{
+								int id = -1;
+								CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
+								hide();
+								recDirs.exec(NULL,"");
+								show(channel_id,a_id,a_startzeit,false);
+
+								if (id != -1)
+									recDir = g_settings.network_nfs_local_dir[id];
+								else 
+									recDir = NULL;
+							}
+							if (recDir != NULL)
+							{
+								timerdclient.addRecordTimerEvent(channel_id,
+												 epgData.epg_times.startzeit,
+												 epgData.epg_times.startzeit + epgData.epg_times.dauer,
+												 epgData.eventID, epgData.epg_times.startzeit,
+												 epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
+												 "", true, recDir);
+								ShowMsgUTF(LOCALE_TIMER_EVENTRECORD_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTRECORD_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+							}
 						}
 						else
 							printf("timerd not available\n");

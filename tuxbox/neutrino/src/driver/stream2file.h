@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.h,v 1.9 2004/12/15 10:56:21 diemade Exp $
+ * $Id: stream2file.h,v 1.10 2005/01/12 20:40:22 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -41,6 +41,12 @@ enum stream2file_status_t
 	STREAM2FILE_STATUS_WRITE_OPEN_FAILURE = -2,
 	STREAM2FILE_STATUS_WRITE_FAILURE      = -3,
 	STREAM2FILE_STATUS_READ_FAILURE = -4
+};
+
+struct stream2file_status2_t
+{
+	stream2file_status_t status;
+	char dir[100];
 };
 
 stream2file_error_msg_t start_recording(const char * const filename,
