@@ -1244,6 +1244,24 @@ bool eTimerManager::eventAlreadyInList( eWidget *w, EITEvent &e, eServiceReferen
 	return false;
 }
 
+int eTimerManager::addEventToTimerList(const ePlaylistEntry& entry)
+{
+	for ( std::list<ePlaylistEntry>::iterator i(timerlist->getList().begin()); i != timerlist->getList().end(); i++)
+	{
+		if (Overlapping(*i, entry))
+			return -1; // event overlaps with an event that is already in the timer list
+	}
+
+	timerlist->getList().push_back(entry);
+	if (nextStartingEvent == timerlist->getList().end() ||
+			!(nextStartingEvent->type & ePlaylistEntry::stateRunning))
+	{
+		nextAction = setNextEvent;
+		actionHandler();
+	}
+	return 1;
+}
+
 bool eTimerManager::addEventToTimerList( eWidget *sel, const ePlaylistEntry& entry, const ePlaylistEntry *exclude )
 {
 	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
