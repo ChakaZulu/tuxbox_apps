@@ -1,4 +1,6 @@
 /*
+$ID: $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -27,6 +29,14 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+$Log: bouqueteditor_bouquets.cpp,v $
+Revision 1.19  2002/04/02 18:34:58  rasc
+-- browsing/page function for bouquet editor list box
+-- This enables quicker moving/sorting of your bouquet favorites.
+-- paging keys: LEFT/RIGHT  (should be improved, read remarks)
+
+
 */
 
 #include "bouqueteditor_bouquets.h"
@@ -196,18 +206,26 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				cancelMoveBouquet();
 			}
 		}
-		else if (msg==CRCInput::RC_up)
+		// 
+		// -- For more convenience: include browsing of list (paging)  (rasc, 2002-04-02)
+		// -- The keys should be configurable. Problem is: red/green key, wich is the
+		// -- default in neutrino is used as a function key here... so use left/right
+		//
+		else if (msg==CRCInput::RC_up || msg==CRCInput::RC_left)
 		{
+			int step = 0;
+			int prev_selected = selected;
+
+			step = (msg == CRCInput::RC_left) ? listmaxshow : 1;  // browse or step 1
+			selected -= step;
+			if((prev_selected-step) < 0)		// because of uint
+			{
+				selected = Bouquets.size()-1;
+			}
+
 			if (state == beDefault)
 			{
-				int prevselected=selected;
-				if(selected==0)
-				{
-					selected = Bouquets.size()-1;
-				}
-				else
-					selected--;
-				paintItem(prevselected - liststart);
+				paintItem(prev_selected - liststart);
 				unsigned int oldliststart = liststart;
 				liststart = (selected/listmaxshow)*listmaxshow;
 				if(oldliststart!=liststart)
@@ -221,16 +239,26 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			}
 			else if (state == beMoving)
 			{
-				internalMoveBouquet(selected, selected - 1);
+				internalMoveBouquet(prev_selected, selected);
 			}
 		}
-		else if (msg==CRCInput::RC_down)
+		else if (msg==CRCInput::RC_down || msg==CRCInput::RC_right) 
 		{
+			int step = 0;
+			int prev_selected = selected;
+
+			step = (msg == CRCInput::RC_right) ? listmaxshow : 1;  // browse or step 1
+			selected += step;
+
+			if(selected >= Bouquets.size())
+			{
+				selected = 0;
+			}
+
+
 			if (state == beDefault)
 			{
-				int prevselected=selected;
-				selected = (selected+1)%Bouquets.size();
-				paintItem(prevselected - liststart);
+				paintItem(prev_selected - liststart);
 				unsigned int oldliststart = liststart;
 				liststart = (selected/listmaxshow)*listmaxshow;
 				if(oldliststart!=liststart)
@@ -244,7 +272,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			}
 			else if (state == beMoving)
 			{
-				internalMoveBouquet(selected, selected + 1);
+				internalMoveBouquet(prev_selected, selected);
 			}
 		}
 		else if(msg==CRCInput::RC_red)
