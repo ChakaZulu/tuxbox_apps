@@ -972,13 +972,11 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 				ret = ::unlink(eString().sprintf("%s.%03d", ref.path.c_str(), cnt++).c_str());
 			}
 			while(!ret);
-			
-//			eString fname = ref.path;
-//			fname.erase(fname.length() - 2, 2);
-//			fname += "eit";
-//			::unlink(fname.c_str());
-			ret = ::unlink(eString().sprintf("%s.eit", ref.path.c_str()).c_str());
-			
+
+			eString fname = ref.path;
+			fname.erase(fname.length() - 2, 2); // remove ts
+			fname += "eit";
+			::unlink(fname.c_str());
 		}
 	}
 	return "<script language=\"javascript\">window.close();</script>";
