@@ -81,6 +81,10 @@
 		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
 		<img name="lcd_scart" src="video.png" nomerge="yes" />
 
+		<img name="eCheckbox.checked" src="checked.png" />
+		<img name="eCheckbox.unchecked" src="unchecked.png" />
+
+
 		<!--
 		<img name="eWindow.top" src="header.png" />
 		<img name="eWindow.topLeft" src="header.png" />
