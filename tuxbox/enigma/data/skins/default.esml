@@ -19,13 +19,13 @@
 		<color name="background" color="#ff000000" />
 
 		<color name="header" color="#030FA4" end="#FFE403" size="16" />
-		<color name="content" color="#33030F60" end="#ffffff" size="16" />
-		<color name="content_selected" color="#90A0FF" end="#000F33" size="16" />
+		<color name="content" color="#22030F60" end="#ffffff" size="16" />
+		<color name="content_selected" color="#2290A0FF" end="#000F33" size="16" />
 
-		<color name="osd_normal" color="#000F9A" end="#ffffff" size="16" />
-		<color name="osd_epg" color="#000F9A" end="#a0a0f0" size="16" />
-		<color name="osd_shadowcol" color="#030320" />
-		<color name="osd_shadow" color="#030320" end="#B1B2D9" size="16" />
+		<color name="osd_normal" color="#11000F9A" end="#ffffff" size="16" />
+		<color name="osd_epg" color="#11000F9A" end="#9090e0" size="16" />
+		<color name="osd_shadowcol" color="#11030320" />
+		<color name="osd_shadow" color="#11030320" end="#B1B2D9" size="16" />
 		<color name="osd_timebar" color="#1010AA"/>
 		<color name="osd_timebarborder" color="#ffffff"/>
 
@@ -112,21 +112,21 @@
 	</object> 
 	
 	<object name="ezap_main">
-		<eZapMain position="35:390" size="710:160">
+		<eZapMain position="50:375" size="670:160">
 
 			<!--kanalnummer-->
 			<eWidget position="4:3" size="113:62" backgroundColor="osd_normal" />
 
 			<!--hauptbox-->
-			<eWidget position="127:40" size="488:35" backgroundColor="osd_normal" />
-			<eWidget position="34:75" size="581:75" backgroundColor="osd_normal" />
+			<eWidget position="127:40" size="468:35" backgroundColor="osd_normal" />
+			<eWidget position="34:75" size="561:75" backgroundColor="osd_normal" />
 
 			<!--schatten-->
 			<eWidget position="14:65" size="113:10" backgroundColor="osd_shadowcol" />
 			<eWidget position="117:15" size="10:60" backgroundColor="osd_shadowcol" />
-			<eWidget position="127:15" size="488:25" backgroundColor="osd_shadowcol" />
-			<eWidget position="44:150" size="579:10" backgroundColor="osd_shadowcol" />
-			<eWidget position="613:15" size="10:135" backgroundColor="osd_shadowcol" />
+			<eWidget position="127:15" size="478:25" backgroundColor="osd_shadowcol" />
+			<eWidget position="44:150" size="561:10" backgroundColor="osd_shadowcol" />
+			<eWidget position="595:15" size="10:135" backgroundColor="osd_shadowcol" />
 
 			<!--
 			<eWidget position="560:49" size="95:20" backgroundColor="osd_timebarborder" />
@@ -137,7 +137,7 @@
 			<eLabel position="10:5" size="100:50" font="NimbusSansL-Regular Sans L Regular;50" name="ch_number" align="center"
 				backgroundColor="osd_normal"/>
 
-			<eLabel position="140:41" size="400:35" font="NimbusSansL-Regular Sans L Regular;35" name="ch_name"
+			<eLabel position="140:41" size="335:35" font="NimbusSansL-Regular Sans L Regular;35" name="ch_name"
 				backgroundColor="osd_normal"/>
 
 			<eLabel position="50:82" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_time"
@@ -145,20 +145,20 @@
 			<eLabel position="50:114" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_time"
 				backgroundColor="osd_epg"/>
 
-			<eLabel position="140:82" size="365:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_title"
+			<eLabel position="140:82" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_title"
 				backgroundColor="osd_epg"/>
-			<eLabel position="140:114" size="365:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_title"
-				backgroundColor="osd_epg"/>
-
-			<eLabel position="505:82" size="95:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_duration" align="right"
-				backgroundColor="osd_epg"/>
-			<eLabel position="505:114" size="95:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_duration" align="right"
+			<eLabel position="140:114" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_title"
 				backgroundColor="osd_epg"/>
 
-			<eLabel position="536:15" size="65:21" font="NimbusSansL-Regular Sans L Regular;21" name="time" align="right"
+			<eLabel position="495:82" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_duration" align="right"
+				backgroundColor="osd_epg"/>
+			<eLabel position="495:114" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_duration" align="right"
+				backgroundColor="osd_epg"/>
+
+			<eLabel position="521:15" size="65:21" font="NimbusSansL-Regular Sans L Regular;21" name="time" align="right"
 				backgroundColor="osd_shadow"/>
 
-			<eProgress position="505:49" size="95:20" name="progress_bar" />
+			<eProgress position="490:49" size="95:20" name="progress_bar" />
 
 			<ePixmap position="127:17" size="104:24" pixmap="osd_crypt_on" name="osd_crypt_on" />
 			<ePixmap position="150:19" size="104:24" pixmap="osd_format_on" name="osd_format_on"/>
