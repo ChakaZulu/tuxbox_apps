@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.32 2001/10/02 17:56:33 McClean Exp $
+// $Id: infoviewer.cpp,v 1.33 2001/10/07 12:17:22 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.33  2001/10/07 12:17:22  McClean
+// video mode setup (pre)
+//
 // Revision 1.32  2001/10/02 17:56:33  McClean
 // time in infobar (thread probs?) and "0" quickzap added
 //
@@ -310,7 +313,7 @@ void CInfoViewer::showData()
 {
 
 	int height = g_Fonts->infobar_channame->getHeight()/3;
-	int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
+	//int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
 	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
 	
 

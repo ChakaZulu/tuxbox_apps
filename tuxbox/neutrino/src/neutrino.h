@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.22 2001/10/04 23:21:13 McClean Exp $
+//  $Id: neutrino.h,v 1.23 2001/10/07 12:17:22 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.23  2001/10/07 12:17:22  McClean
+//  video mode setup (pre)
+//
 //  Revision 1.22  2001/10/04 23:21:13  McClean
 //  cleanup
 //
@@ -89,7 +92,7 @@
 #include "widget/stringinput.h"
 #include "widget/screensetup.h"
 #include "widget/gamelist.h"
-#include "widget/setting_helpers.h"
+#include "helpers/setting_helpers.h"
 
 #include "../zapit/getservices.h"
 
@@ -134,9 +137,9 @@ class CNeutrinoApp : public CMenuTarget
     channel_msg         firstchannel;
 	st_rmsg				sendmessage;
 
-	CColorSetupNotifier    *colorSetupNotifier;
-	CAudioSetupNotifier    *audioSetupNotifier;
-	CVideoSetupNotifier    *videoSetupNotifier;
+	CColorSetupNotifier		*colorSetupNotifier;
+	CAudioSetupNotifier		*audioSetupNotifier;
+	CVideoSetupNotifier		*videoSetupNotifier;
     CLanguageSetupNotifier  *languageSetupNotifier;
     CKeySetupNotifier       *keySetupNotifier;
     CAPIDChangeExec         *APIDChanger;
