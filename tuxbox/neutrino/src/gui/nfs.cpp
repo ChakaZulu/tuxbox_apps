@@ -332,7 +332,7 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 	if (sup == FS_UNSUPPORTED)
 	{
 		printf("FS type %d not supported\n", (int) fstype);
-		ShowHintUTF("messagebox.info", g_Locale->getText("nfs.mounterror_notsup") + ((fstype == NFS) ? " (NFS)" : " (CIFS)")); // UTF-8
+		ShowHintUTF("messagebox.info", (std::string(g_Locale->getText("nfs.mounterror_notsup")) + ((fstype == NFS) ? " (NFS)" : " (CIFS)")).c_str()); // UTF-8
 		return;
 	}
 

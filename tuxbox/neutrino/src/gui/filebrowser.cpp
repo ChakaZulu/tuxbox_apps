@@ -809,7 +809,7 @@ void CFileBrowser::paintHead()
 	snprintf(l_name, sizeof(l_name), "%s %s", CZapitClient::Utf8_to_Latin1(g_Locale->getText("filebrowser.head")).c_str(), name.c_str()); // ISO-8859-1
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD); // ISO-8859-1
 #else
-	snprintf(l_name, sizeof(l_name), "%s %s", (g_Locale->getText("filebrowser.head")).c_str(), name.c_str()); // UTF-8
+	snprintf(l_name, sizeof(l_name), "%s %s", (g_Locale->getText("filebrowser.head")), name.c_str()); // UTF-8
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
 #endif
 }
@@ -834,7 +834,7 @@ void CFileBrowser::paintFoot()
 		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
 		{
 			frameBuffer->paintIcon("ok.raw", x +3 , by -3);
-			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select").c_str(), COL_INFOBAR, 0, true); // UTF-8
+			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select"), COL_INFOBAR, 0, true); // UTF-8
 		}
 
 		frameBuffer->paintIcon("help.raw", x + (1 * dx), by -3);
@@ -847,14 +847,14 @@ void CFileBrowser::paintFoot()
 		if(Multi_Select)
 		{
 			frameBuffer->paintIcon("gelb.raw", x + (2 * dx), by);
-			g_Fonts->infobar_small->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark").c_str(), COL_INFOBAR, 0, true); // UTF-8
+			g_Fonts->infobar_small->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark"), COL_INFOBAR, 0, true); // UTF-8
 			
 		}
 
 		if(Filter != NULL)
 		{
 			frameBuffer->paintIcon("blau.raw", x + (3 * dx), by);
-			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, use_filter?g_Locale->getText("filebrowser.filter.inactive").c_str():g_Locale->getText("filebrowser.filter.active").c_str(), COL_INFOBAR, 0, true); // UTF-8
+			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, use_filter?g_Locale->getText("filebrowser.filter.inactive"):g_Locale->getText("filebrowser.filter.active"), COL_INFOBAR, 0, true); // UTF-8
 		}
 	}
 }

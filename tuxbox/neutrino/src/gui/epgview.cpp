@@ -327,7 +327,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 	// -- display more screenings on the same channel
 	// -- 2002-05-03 rasc
 	processTextToArray("\n"); // UTF-8
-	processTextToArray(g_Locale->getText("epgviewer.More_Screenings")+":"); // UTF-8
+	processTextToArray(std::string(g_Locale->getText("epgviewer.More_Screenings")) + ":"); // UTF-8
 	FollowScreenings(channel_id, epgData.title);
 
 

@@ -103,6 +103,8 @@
 
 #include <string.h>
 
+CPlugins       * g_PluginList;
+CRemoteControl * g_RemoteControl;
 
 // Globale Variablen - to use import global.h
 
@@ -2083,13 +2085,13 @@ void CNeutrinoApp::SelectNVOD()
 				if(e->startzeit > jetzt)
 				{
 					int mins=(e->startzeit- jetzt)/ 60;
-					sprintf(nvod_time_x, g_Locale->getText("nvod.starting").c_str(), mins);
+					sprintf(nvod_time_x, g_Locale->getText("nvod.starting"), mins);
 				}
 				else
 					if( (e->startzeit<= jetzt) && (jetzt < endtime) )
 				{
 					int proz=(jetzt- e->startzeit)*100/ e->dauer;
-					sprintf(nvod_time_x, g_Locale->getText("nvod.proz").c_str(), proz);
+					sprintf(nvod_time_x, g_Locale->getText("nvod.proz"), proz);
 				}
 				else
 					nvod_time_x[0]= 0;
@@ -2970,7 +2972,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if (msg == NeutrinoMessages::EVT_POPUP)
 	{
 		if (mode != mode_scart)
-			ShowHintUTF("messagebox.info", std::string((char *) data)); // UTF-8
+			ShowHintUTF("messagebox.info", (const char *) data); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}

@@ -75,7 +75,7 @@ void CDBoxInfoWidget::paint()
 {
 	int ypos=y;
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight+1, width, g_Locale->getText("dboxinfo.head").c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight+1, width, g_Locale->getText("dboxinfo.head"), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	ypos+= hheight + (mheight >>1);

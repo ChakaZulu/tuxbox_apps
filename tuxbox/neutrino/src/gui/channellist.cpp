@@ -34,7 +34,6 @@
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
-#include <daemonc/remotecontrol.h>
 #include <system/settings.h>
 #include <system/lastchannel.h>
 
@@ -46,6 +45,8 @@
 #include "eventlist.h"
 #include "infoviewer.h"
 
+#include <daemonc/remotecontrol.h>
+extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 int info_height = 0;
 
@@ -719,7 +720,7 @@ void CChannelList::paintDetails(int index)
 
 		struct		tm *pStartZeit = localtime(&chanlist[index]->currentEvent.startTime);
 		unsigned 	seit = ( time(NULL) - chanlist[index]->currentEvent.startTime ) / 60;
-		sprintf( cSeit, g_Locale->getText("channellist.since").c_str(), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
+		sprintf( cSeit, g_Locale->getText("channellist.since"), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
 		int seit_len = g_Fonts->channellist_descr->getRenderWidth(cSeit, true); // UTF-8
 
 		int noch = ( chanlist[index]->currentEvent.startTime + chanlist[index]->currentEvent.duration - time(NULL)   ) / 60;

@@ -355,14 +355,14 @@ void CBouquetList::paintItem(int pos)
 		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
 		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 
-		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, bouq->channelList->getName().c_str(), color, 0, true); // UTF-8
+		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, bouq->channelList->getName(), color, 0, true); // UTF-8
 	}
 }
 
 void CBouquetList::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText("bouquetlist.head").c_str(), COL_MENUHEAD, 0, true); // UTF-8
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText("bouquetlist.head"), COL_MENUHEAD, 0, true); // UTF-8
 }
 
 void CBouquetList::paint()

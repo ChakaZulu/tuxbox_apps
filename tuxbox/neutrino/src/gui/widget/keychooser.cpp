@@ -66,7 +66,9 @@ void CKeyChooser::paint()
 {
 	CMenuWidget::paint();
 
-	std::string text = g_Locale->getText("keychoosermenu.currentkey") + ": " + CRCInput::getKeyName(*key);
+	std::string text = g_Locale->getText("keychoosermenu.currentkey");
+	text += ": ";
+	text += CRCInput::getKeyName(*key);
 	g_Fonts->menu->RenderString(x+ 10, y+ 65, width, text, COL_MENUCONTENT, 0, true); // UTF-8
 }
 

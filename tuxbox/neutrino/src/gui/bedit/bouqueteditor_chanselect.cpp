@@ -129,8 +129,8 @@ void CBEChannelSelectWidget::paintFoot()
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
 	frameBuffer->paintIcon("ok.raw", x+width- 3* ButtonWidth+ 8, y+height+1);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.switch").c_str(), COL_INFOBAR, 0, true); // UTF-8
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.switch"), COL_INFOBAR, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("home.raw", x+width - ButtonWidth+ 8, y+height+1);
-	g_Fonts->infobar_small->RenderString(x+width - ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.return").c_str(), COL_INFOBAR, 0, true); // UTF-8
+	g_Fonts->infobar_small->RenderString(x+width - ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.return"), COL_INFOBAR, 0, true); // UTF-8
 }

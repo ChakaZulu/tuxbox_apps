@@ -37,6 +37,8 @@
 
 #include "streaminfo.h"
 
+#include <daemonc/remotecontrol.h>
+extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 CStreamInfo::CStreamInfo()
 {
@@ -77,7 +79,7 @@ void CStreamInfo::paint()
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("streaminfo.head"));
 
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight+1, width, g_Locale->getText("streaminfo.head").c_str(), COL_MENUHEAD, 0, true); // UTF-8
+	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight+1, width, g_Locale->getText("streaminfo.head"), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	ypos+= hheight + (mheight >>1);
@@ -114,12 +116,12 @@ void CStreamInfo::paint()
 
 
 	//paint msg...
-	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText("streaminfo.resolution").c_str(), bitInfo[0], bitInfo[1] );
+	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText("streaminfo.resolution"), bitInfo[0], bitInfo[1] );
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	ypos+= mheight;
 
-	sprintf((char*) buf, "%s: %d bit/sec", g_Locale->getText("streaminfo.bitrate").c_str(), bitInfo[4]*50);
+	sprintf((char*) buf, "%s: %d bit/sec", g_Locale->getText("streaminfo.bitrate"), bitInfo[4]*50);
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	ypos+= mheight;
@@ -128,16 +130,16 @@ void CStreamInfo::paint()
 	switch ( bitInfo[2] )
 	{
 			case 2:
-			sprintf((char*) buf, "%s: 4:3", g_Locale->getText("streaminfo.aratio").c_str() );
+			sprintf((char*) buf, "%s: 4:3", g_Locale->getText("streaminfo.aratio"));
 			break;
 			case 3:
-			sprintf((char*) buf, "%s: 16:9", g_Locale->getText("streaminfo.aratio").c_str());
+			sprintf((char*) buf, "%s: 16:9", g_Locale->getText("streaminfo.aratio"));
 			break;
 			case 4:
-			sprintf((char*) buf, "%s: 2.21:1", g_Locale->getText("streaminfo.aratio").c_str());
+			sprintf((char*) buf, "%s: 2.21:1", g_Locale->getText("streaminfo.aratio"));
 			break;
 			default:
-			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.aratio_unknown").c_str());
+			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.aratio_unknown"));
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
@@ -147,13 +149,13 @@ void CStreamInfo::paint()
 	switch ( bitInfo[3] )
 	{
 			case 3:
-			sprintf((char*) buf, "%s: 25fps", g_Locale->getText("streaminfo.framerate").c_str());
+			sprintf((char*) buf, "%s: 25fps", g_Locale->getText("streaminfo.framerate"));
 			break;
 			case 6:
-			sprintf((char*) buf, "%s: 50fps", g_Locale->getText("streaminfo.framerate").c_str());
+			sprintf((char*) buf, "%s: 50fps", g_Locale->getText("streaminfo.framerate"));
 			break;
 			default:
-			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.framerate_unknown").c_str());
+			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.framerate_unknown"));
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
@@ -163,19 +165,19 @@ void CStreamInfo::paint()
 	switch ( bitInfo[6] )
 	{
 			case 1:
-			sprintf((char*) buf, "%s: single channel", g_Locale->getText("streaminfo.audiotype").c_str());
+			sprintf((char*) buf, "%s: single channel", g_Locale->getText("streaminfo.audiotype"));
 			break;
 			case 2:
-			sprintf((char*) buf, "%s: dual channel", g_Locale->getText("streaminfo.audiotype").c_str());
+			sprintf((char*) buf, "%s: dual channel", g_Locale->getText("streaminfo.audiotype"));
 			break;
 			case 3:
-			sprintf((char*) buf, "%s: joint stereo", g_Locale->getText("streaminfo.audiotype").c_str());
+			sprintf((char*) buf, "%s: joint stereo", g_Locale->getText("streaminfo.audiotype"));
 			break;
 			case 4:
-			sprintf((char*) buf, "%s: stereo", g_Locale->getText("streaminfo.audiotype").c_str());
+			sprintf((char*) buf, "%s: stereo", g_Locale->getText("streaminfo.audiotype"));
 			break;
 			default:
-			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.audiotype_unknown").c_str());
+			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.audiotype_unknown"));
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 	ypos+= mheight+ 10;
@@ -204,7 +206,7 @@ void CStreamInfo::paint()
 
 	//vpid
 	if ( g_RemoteControl->current_PIDs.PIDs.vpid == 0 )
-		sprintf((char*) buf, "%s: %s", "vpid", g_Locale->getText("streaminfo.not_available").c_str() );
+		sprintf((char*) buf, "%s: %s", "vpid", g_Locale->getText("streaminfo.not_available"));
 	else
 		sprintf((char*) buf, "%s: 0x%04x", "vpid", g_RemoteControl->current_PIDs.PIDs.vpid );
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
@@ -212,7 +214,7 @@ void CStreamInfo::paint()
 
 	//apid	
 	if ( g_RemoteControl->current_PIDs.APIDs.size() == 0 )
-		sprintf((char*) buf, "%s: %s", "apid(s)", g_Locale->getText("streaminfo.not_available").c_str() );
+		sprintf((char*) buf, "%s: %s", "apid(s)", g_Locale->getText("streaminfo.not_available"));
 	else
 	{
 		sprintf((char*) buf, "%s: ", "apid(s)" );
@@ -234,7 +236,7 @@ void CStreamInfo::paint()
 
 	//vtxtpid
 	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid == 0 )
-        	sprintf((char*) buf, "%s: %s", "vtxtpid", g_Locale->getText("streaminfo.not_available").c_str() );
+        	sprintf((char*) buf, "%s: %s", "vtxtpid", g_Locale->getText("streaminfo.not_available"));
 	else
         	sprintf((char*) buf, "%s: 0x%04x", "vtxtpid", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8

@@ -553,7 +553,7 @@ void CTimerList::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	frameBuffer->paintIcon("timer.raw",x+5,y+4);
-	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("timerlist.name").c_str(), COL_MENUHEAD, 0, true); // UTF-8
+	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("timerlist.name"), COL_MENUHEAD, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
 /*	if (bouquetList!=NULL)
@@ -569,18 +569,18 @@ void CTimerList::paintFoot()
 	if(timerlist.size()>0)
 	{
 		frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
-		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR, 0, true); // UTF-8
+		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete"), COL_INFOBAR, 0, true); // UTF-8
 
 		frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
-		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR, 0, true); // UTF-8
+		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify"), COL_INFOBAR, 0, true); // UTF-8
 
 	}
 
 	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new").c_str(), COL_INFOBAR, 0, true); // UTF-8
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new"), COL_INFOBAR, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload").c_str(), COL_INFOBAR, 0, true); // UTF-8
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload"), COL_INFOBAR, 0, true); // UTF-8
 
 }
 

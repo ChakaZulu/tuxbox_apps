@@ -417,7 +417,7 @@ void EventList::paintItem(unsigned int pos)
 void EventList::paintHead()
 {
 	char l_name[100];
-	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head").c_str(), name.c_str()); // UTF-8
+	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head"), name.c_str()); // UTF-8
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD, 0, true); // UTF-8

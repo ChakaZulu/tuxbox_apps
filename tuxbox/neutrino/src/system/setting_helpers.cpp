@@ -49,6 +49,11 @@
 
 #include <gui/widget/messagebox.h>
 
+#include <gui/gamelist.h>
+#include <daemonc/remotecontrol.h>
+extern CPlugins       * g_PluginList;    /* neutrino.cpp */
+extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
+
 extern "C" int pinghost( const char *hostname );
 
 bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)

@@ -601,7 +601,7 @@ int CPLPINInput::exec( CMenuTarget* parent, std::string )
 	else
 	{
 		char hint[100];
-		sprintf(hint, g_Locale->getText("parentallock.lockedprogram").c_str(), fsk );
+		sprintf(hint, g_Locale->getText("parentallock.lockedprogram"), fsk );
 		hint_1 = hint;
 	}
 

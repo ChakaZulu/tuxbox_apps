@@ -56,6 +56,9 @@
  #define AVIA_VBI_STOP_VTXT	2 
 #endif
 
+#include <daemonc/remotecontrol.h>
+extern CPlugins       * g_PluginList;    /* neutrino.cpp */
+extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 bool CPlugins::plugin_exists(string filename)
 {
@@ -453,7 +456,7 @@ void CPlugins::startPlugin(int number)
 
 // CGameList ...
 
-CGameList::CGameList(string Name)
+CGameList::CGameList(const char * const Name)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
@@ -670,7 +673,7 @@ void CGameList::paintHead()
       frameBuffer->paintBoxRel(x,y, width+15,theight, COL_MENUHEAD);
 
 	frameBuffer->paintIcon("games.raw",x+8,y+5);
-	g_Fonts->menu_title->RenderString(x+38,y+theight+1, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+38,y+theight+1, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 }
 
 void CGameList::paint()

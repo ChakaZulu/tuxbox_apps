@@ -59,14 +59,14 @@ class CHintBox
 	
  public:
 	// Caption and Text are UTF-8 encoded
-	CHintBox(const char * const Caption, std::string Text, const int Width = 450, const std::string Icon = "info.raw");
+	CHintBox(const char * const Caption, const char * const Text, const int Width = 450, const std::string Icon = "info.raw");
 
 	void paint(const bool saveScreen = true);
 	void hide();
 };
 
 // Caption and Text are UTF-8 encoded
-int ShowHintUTF(const char * const Caption, std::string Text, const int Width = 450, int timeout = -1);
+int ShowHintUTF(const char * const Caption, const char * const Text, const int Width = 450, int timeout = -1);
 
 
 #endif

@@ -40,6 +40,8 @@
 
 #include "widget/hintbox.h"
 
+#include <daemonc/remotecontrol.h>
+extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 #define COL_INFOBAR_BUTTONS			COL_INFOBAR_SHADOW+ 1
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1
@@ -547,7 +549,7 @@ void CInfoViewer::showMotorMoving(int duration)
 	char buffer[10];
 	
 	sprintf(buffer, "%d", duration);
-	strcpy(text, g_Locale->getText("infoviewer.motor_moving").c_str());
+	strcpy(text, g_Locale->getText("infoviewer.motor_moving"));
 	strcat(text, " (");
 	strcat(text, buffer);
 	strcat(text, " s)");
@@ -698,10 +700,10 @@ void CInfoViewer::showButton_SubServices()
 
 		if ( g_RemoteControl->are_subchannels )
 			// SubServices
-			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.subservice").c_str(), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.subservice"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 		else
 			// NVOD
-			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.selecttime"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	}
 }
 
@@ -917,7 +919,7 @@ void CInfoViewer::showButton_Audio()
 	if ( count > 1 )
 	{
 		frameBuffer->paintIcon("gruen.raw", BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-		g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+		g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.languages"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	};
 
 	if ( ( g_RemoteControl->current_PIDs.PIDs.selected_apid < count ) &&

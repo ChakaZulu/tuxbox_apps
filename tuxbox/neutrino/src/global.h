@@ -37,7 +37,6 @@
 #include <controldclient/controldclient.h>
 #include <sectionsdclient/sectionsdclient.h>
 #include <timerdclient/timerdclient.h>
-#include "daemonc/remotecontrol.h"
 
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
@@ -50,7 +49,6 @@
 #include "gui/infoviewer.h"
 #include "gui/bouquetlist.h"
 #include "gui/eventlist.h"
-#include "gui/gamelist.h"
 
 #ifndef NEUTRINO_CPP
   #define NEUTRINO_CPP extern
@@ -64,7 +62,6 @@ NEUTRINO_CPP  CControldClient	*g_Controld;
 NEUTRINO_CPP  CZapitClient		*g_Zapit;
 NEUTRINO_CPP  CSectionsdClient	*g_Sectionsd;
 NEUTRINO_CPP  CTimerdClient		*g_Timerd;
-NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
 
 NEUTRINO_CPP  FBFontRenderClass	*g_fontRenderer;
 NEUTRINO_CPP  FontsDef			*g_Fonts;
@@ -78,7 +75,6 @@ NEUTRINO_CPP  EventList			*g_EventList;
 NEUTRINO_CPP CLocaleManager		*g_Locale;
 
 NEUTRINO_CPP CBouquetList		*bouquetList;
-NEUTRINO_CPP CPlugins   		*g_PluginList;
 
 
 #ifdef USEACTIONLOG

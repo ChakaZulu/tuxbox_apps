@@ -167,7 +167,7 @@ class CGameList : public CMenuTarget
 
 	public:
 
-		CGameList( string Name );
+		CGameList(const char * const Name);
 		~CGameList();
 
 		void hide();

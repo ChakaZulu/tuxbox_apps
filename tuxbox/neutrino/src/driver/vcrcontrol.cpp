@@ -39,6 +39,9 @@
 #include "neutrino.h"
 #include "irsend.h"
 
+#include <daemonc/remotecontrol.h>
+extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
+
 #include <fstream>
 
 #define SA struct sockaddr
