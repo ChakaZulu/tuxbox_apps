@@ -9,6 +9,8 @@
 
 #include "../../driver/saa7126/saa7126_core.h"
 
+#define SAA7126_DEVICE "/dev/dbox/saa0"
+
 #define VERSION "0.2pre"
 void help(char *prog_name) {
   printf("Version %s\n",VERSION);
@@ -16,8 +18,9 @@ void help(char *prog_name) {
   printf("Switches:\n
       -h, --help            help
       -o, --power-save <X>  power save mode
-                            0 power save off
-                            1 power save on
+                            none get power save state
+                            0    power save off
+                            1    power save on
       -r, --rgb             rgb mode
       -f, --fbas            fbas mode
       -s, --svideo          svideo mode
@@ -46,6 +49,36 @@ int vps()
 
 	/* 0: ??? 1: mono 2: stereo 3: dual sound */
 	data[1] |= 2;
+}
+
+
+/** */
+int read_powersave()
+{
+	int arg=0;
+    int fd;
+
+	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0){
+		perror("SAA DEVICE: ");
+		return -1;
+	}
+
+	if ( (ioctl(fd,SAAIOGPOWERSAVE,&arg) < 0)){
+		perror("IOCTL: ");
+		close(fd);
+		return -1;
+	}
+
+	printf("SAA7126 POWER STATE: ");
+
+	if(arg)
+		printf("ON\n");
+	else
+		printf("OFF\n");
+
+	close(fd);
+
+	return 0;
 }
 
 /** */
@@ -98,19 +131,21 @@ main(int argc, char **argv)
     else if ((strcmp("-o",argv[count]) == 0) || (strcmp("--power-save",argv[count]) == 0)) {
       if(argc<3)
 	  {
-		help(argv[0]);
+		read_powersave();
 		return;
 	  }
-
-	  arg = atoi(argv[count+1]);
-	  mode = SAAIOSPOWERSAVE;
+      else
+	  {
+	  	arg = atoi(argv[count+1]);
+	  	mode = SAAIOSPOWERSAVE;
+	  }
     }
 	else {
       help(argv[0]);
 	  return 0;
 	}
 
-	if((fd = open("/dev/dbox/saa0",O_RDWR|O_NONBLOCK)) < 0){
+	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0){
 		perror("SAA DEVICE: ");
 		return -1;
 	}
