@@ -10,7 +10,7 @@ class eRFmod: public Object
 	static eRFmod *instance;
 
 	int rfmodfd;
-	int channel,soundsubcarrier,soundenable,finetune;
+	int channel,soundsubcarrier,soundenable,finetune,standby;
 
 public:
 	eRFmod();
@@ -25,6 +25,7 @@ public:
 	int setChannel(int channel);
 	int setSoundSubCarrier(int val);
 	int setSoundEnable(int val);
+	int setStandby(int val);
 	int setFinetune(int val);
 	int setTestPattern(int val);
 };
