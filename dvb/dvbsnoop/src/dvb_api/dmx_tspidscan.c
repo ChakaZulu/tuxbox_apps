@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.6 2003/12/14 18:29:56 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.7 2003/12/15 20:09:48 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.6 2003/12/14 18:29:56 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.7  2003/12/15 20:09:48  rasc
+no message
+
 Revision 1.6  2003/12/14 18:29:56  rasc
 no message
 
@@ -53,6 +56,7 @@ pidscan on transponder
 #include "misc/cmdline.h"
 #include "misc/output.h"
 
+#include "dvb_api.h"
 #include "dmx_tspidscan.h"
 
 
@@ -164,7 +168,7 @@ int ts_pidscan (OPTION *opt)
 					break;
 			}
 
-			ioctl (dmxfd[i],DMX_SET_BUFFER_SIZE, sizeof(buf));
+			// ioctl (dmxfd[i],DMX_SET_BUFFER_SIZE, sizeof(buf));
 
 			// -- skip already scanned pids (rescan-mode)
 			while (pidArray[pid] != 0) pid++;
@@ -232,7 +236,7 @@ int ts_pidscan (OPTION *opt)
 		close(pfd.fd);
 
 	} while (rescan);
-   }
+   } // while
 
 
 

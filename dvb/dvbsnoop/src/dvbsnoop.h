@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.16 2003/12/03 20:06:33 obi Exp $
+$Id: dvbsnoop.h,v 1.17 2003/12/15 20:09:48 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvbsnoop.h,v 1.16 2003/12/03 20:06:33 obi Exp $
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.17  2003/12/15 20:09:48  rasc
+no message
+
 Revision 1.16  2003/12/03 20:06:33  obi
 - reduced auto* to minimal required checks, obsoletes acinclude.m4
 - added version number to configure.ac, removed it from version.h
@@ -78,22 +81,6 @@ dvbsnoop v0.7  -- Commit to CVS
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#if defined(HAVE_LINUX_DVB_DMX_H)
-#include <linux/dvb/dmx.h>
-#define DEMUX_DEVICE "/dev/dvb/adapter0/demux0"
-#define DVR_DEVICE   "/dev/dvb/adapter0/dvr0"
-#elif defined(HAVE_OST_DMX_H)
-#include <ost/dmx.h>
-#define DEMUX_DEVICE "/dev/dvb/card0/demux0"
-#define DVR_DEVICE   "/dev/dvb/card0/dvr0"
-#define dmx_pes_filter_params dmxPesFilterParams
-#define dmx_sct_filter_params dmxSctFilterParams
-#define pes_type pesType
-#endif
 
 #include "version.h"
 #include "strings/dvb_str.h"

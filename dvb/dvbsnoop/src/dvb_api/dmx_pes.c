@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.12 2003/12/10 22:54:11 obi Exp $
+$Id: dmx_pes.c,v 1.13 2003/12/15 20:09:48 rasc Exp $
 
  -- PE Streams
  --  For more information please see:
@@ -14,6 +14,9 @@ $Id: dmx_pes.c,v 1.12 2003/12/10 22:54:11 obi Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.13  2003/12/15 20:09:48  rasc
+no message
+
 Revision 1.12  2003/12/10 22:54:11  obi
 more tiny fixes
 
@@ -65,6 +68,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/pkt_time.h" 
 
 #include "pes/pespacket.h"
+#include "dvb_api.h"
 #include "dmx_pes.h"
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.11 2003/12/10 22:54:11 obi Exp $
+$Id: dmx_ts.c,v 1.12 2003/12/15 20:09:48 rasc Exp $
 
  -- Transport Streams
  --  For more information please see:
@@ -13,6 +13,9 @@ $Id: dmx_ts.c,v 1.11 2003/12/10 22:54:11 obi Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.12  2003/12/15 20:09:48  rasc
+no message
+
 Revision 1.11  2003/12/10 22:54:11  obi
 more tiny fixes
 
@@ -60,6 +63,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/pkt_time.h"
 
 #include "ts/tslayer.h"
+#include "dvb_api.h"
 #include "dmx_ts.h"
 
 

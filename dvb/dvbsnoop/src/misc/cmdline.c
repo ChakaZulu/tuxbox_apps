@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.13 2003/12/14 23:38:46 rasc Exp $
+$Id: cmdline.c,v 1.14 2003/12/15 20:09:49 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.13 2003/12/14 23:38:46 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.14  2003/12/15 20:09:49  rasc
+no message
+
 Revision 1.13  2003/12/14 23:38:46  rasc
 - bandwidth reporting for a PID
 
@@ -68,6 +71,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 #include "dvbsnoop.h"
+#include "dvb_api/dvb_api.h"
 #include "cmdline.h"
 
 
@@ -190,19 +194,14 @@ void usage (void)
     printf("         %s  \n",DVBSNOOP_URL);
     printf("         %s  \n",DVBSNOOP_COPYRIGHT);
     printf("\n");
-    printf("This programm was done for learning and understanding\n");
-    printf("DVB/Mpeg2 streams... Tnx to all the guys of the linux-dbox2\n");
-    printf("project for their help.  Please report errors!\n");
-    printf("\n");
     printf("Usage\n");
     printf(" dvbsnoop [opts] pid \n\n");
     printf(" Options:  \n");
     printf("   -demux device: demux device [%s]\n",DEMUX_DEVICE);
     printf("   -dvr device:   dvr device [%s]\n",DVR_DEVICE);
-    printf("   -s [sec|ts|pes|pidscan]:  snoop type  [-s sec]\n");
     printf("   -s [type]:    snoop type  [-s sec]\n");
-    printf("                 type: stream type (sec, pes or ts),\n");
-    printf("                       or special scan:\n");
+    printf("                   type: stream type (sec, pes or ts),\n");
+    printf("                   or special scan type:\n");
     printf("                         pidscan = transponder pid scan,\n");
     printf("                         bandwidth = data rate statistics for pid\n");
     printf("                 stream type or pidscan\n");

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.10 2003/12/10 22:46:34 obi Exp $
+$Id: dmx_sect.c,v 1.11 2003/12/15 20:09:48 rasc Exp $
 
 
 
@@ -22,6 +22,9 @@ $Id: dmx_sect.c,v 1.10 2003/12/10 22:46:34 obi Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.11  2003/12/15 20:09:48  rasc
+no message
+
 Revision 1.10  2003/12/10 22:46:34  obi
 tiny section filter fixes
 
@@ -66,6 +69,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/pkt_time.h"
 
 #include "sections/sectables.h"
+#include "dvb_api.h"
 #include "dmx_sect.h"
 
 
