@@ -116,7 +116,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                     // noch immer der gleiche Kanal, Abfrage 8 starten
                                     RemoteControl->remotemsg.cmd= 8;
 
-                                    strcpy( RemoteControl->apids.name, r_msg.param3 );
+                                    strcpy( RemoteControl->audio_chans_int.name, r_msg.param3 );
                                     do_immediatly = true;
 //                                    printf("Audio-PIDs holen for %s\n", RemoteControl->apids.name);
                                 }
@@ -161,18 +161,19 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
                                     pthread_mutex_trylock( &RemoteControl->send_mutex );
                                     if ( //( remotemsg.cmd== 8 ) &&
-                                         ( strlen( RemoteControl->apids.name )!= 0 ) )
+                                         ( strlen( RemoteControl->audio_chans_int.name )!= 0 ) )
                                     {
                                         // noch immer der gleiche Kanal
 
-                                        RemoteControl->apids.count_apids = apid_return_buf.count_apids;
-                                        printf("got apids for: %s - %d apids!\n", RemoteControl->apids.name, RemoteControl->apids.count_apids);
+                                        RemoteControl->audio_chans_int.count_apids = apid_return_buf.count_apids;
+                                        printf("got apids for: %s - %d apids!\n", RemoteControl->audio_chans_int.name, RemoteControl->audio_chans_int.count_apids);
                                         // printf("%d - %d - %d - %d - %d\n", apid_return_buf.apid[0], apid_return_buf.apid[1], apid_return_buf.apid[2], apid_return_buf.apid[3], apid_return_buf.apid[4] );
                                         for(int count=0;count<apid_return_buf.count_apids;count++)
                                         {
-//                                            printf("%s \n", apid_return_buf.apids[count].desc);
-                                            strcpy(RemoteControl->apids.apid_names[count], apid_return_buf.apids[count].desc);
-                                            RemoteControl->apids.apid_ctags[count]= apid_return_buf.apids[count].component_tag;
+//                                           printf("%s \n", apid_return_buf.apids[count].desc);
+                                            strcpy(RemoteControl->audio_chans_int.apids[count].name, apid_return_buf.apids[count].desc);
+                                            RemoteControl->audio_chans_int.apids[count].ctag= apid_return_buf.apids[count].component_tag;
+                                            RemoteControl->audio_chans_int.apids[count].is_ac3= apid_return_buf.apids[count].is_ac3;
                                         }
 
                                         pthread_cond_signal( &g_InfoViewer->lang_cond );
@@ -221,7 +222,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 void CRemoteControl::CopyAPIDs()
 {
     pthread_mutex_lock( &send_mutex );
-    memcpy(&apid_info, &apids, sizeof(apid_info));
+    memcpy(&audio_chans, &audio_chans_int, sizeof(audio_chans));
     pthread_mutex_unlock( &send_mutex );
 }
 
@@ -243,8 +244,8 @@ void CRemoteControl::setAPID(int APID)
     remotemsg.version=1;
     remotemsg.cmd=9;
     snprintf( (char*) &remotemsg.param, 2, "%.1d", APID);
-    apids.selected = APID;
-    printf("changing APID to %d\n", apids.selected);
+    audio_chans_int.selected = APID;
+    printf("changing APID to %d\n", audio_chans_int.selected);
 
     pthread_mutex_unlock( &send_mutex );
 	send();
@@ -260,7 +261,7 @@ void CRemoteControl::zapTo(int, string chnlname )
     remotemsg.param=0x0100;
     strcpy( remotemsg.param3, chnlname.c_str() );
 
-    memset(&apids, 0, sizeof(apids));
+    memset(&audio_chans_int, 0, sizeof(audio_chans_int));
 
     pthread_mutex_unlock( &send_mutex );
 

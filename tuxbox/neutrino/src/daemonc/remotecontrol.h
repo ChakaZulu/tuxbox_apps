@@ -34,19 +34,25 @@ struct st_rmsg
 	char param3[30];
 };
 
+struct apid_info
+{
+    char    name[50];
+    int     ctag;
+    bool    is_ac3;
+};
+
 struct st_audio_info
 {
-    char    name[100];
-    ushort  count_apids;
-    char    apid_names[10][30];
-    int     apid_ctags[10];
-    int     selected;
+    char        name[100];
+    ushort      count_apids;
+    apid_info   apids[max_num_apids];
+    int         selected;
 };
 
 class CRemoteControl
 {
 		st_rmsg	remotemsg;
-        st_audio_info apids;
+        st_audio_info audio_chans_int;
 
 		void send();
 		bool zapit_mode;
@@ -58,7 +64,7 @@ class CRemoteControl
         static void * RemoteControlThread (void *arg);
 
 	public:
-        st_audio_info   apid_info;
+        st_audio_info   audio_chans;
 
 		CRemoteControl();
 		void zapTo(int key,  string chnlname );

@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.28 2001/09/26 09:57:02 field Exp $
+// $Id: infoviewer.cpp,v 1.29 2001/09/26 11:40:48 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.29  2001/09/26 11:40:48  field
+// Tontraegerauswahl haut hin (bei Kanaelen mit EPG)
+//
 // Revision 1.28  2001/09/26 09:57:02  field
 // Tontraeger-Auswahl ok (bei allen Chans. auf denen EPG geht)
 //
@@ -258,12 +261,12 @@ void CInfoViewer::showButtons()
     };
 
     // grn, wenn mehrere APIDs
-    if ( g_RemoteControl->apid_info.count_apids> 1 )
+    if ( g_RemoteControl->audio_chans.count_apids> 1 )
     {
         g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
     }
-    else if ( g_RemoteControl->apid_info.count_apids== 0 )
+    else if ( g_RemoteControl->audio_chans.count_apids== 0 )
     {
         int height = g_Fonts->infobar_info->getHeight();
         int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
@@ -350,7 +353,7 @@ void * CInfoViewer::LangViewerThread (void *arg)
         if ( ( InfoViewer->is_visible ) && ( InfoViewer->ShowInfo_Info ) )
         {
             g_RemoteControl->CopyAPIDs();
-            if ( strcmp(g_RemoteControl->apid_info.name, InfoViewer->CurrentChannel.c_str() )== 0 )
+            if ( strcmp(g_RemoteControl->audio_chans.name, InfoViewer->CurrentChannel.c_str() )== 0 )
             {
                 InfoViewer->showButtons();
             }

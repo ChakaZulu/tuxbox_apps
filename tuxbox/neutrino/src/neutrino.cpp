@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.46 2001/09/26 09:57:02 field Exp $
+        $Id: neutrino.cpp,v 1.47 2001/09/26 11:40:48 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.46  2001/09/26 09:57:02  field
-  Tontraeger-Auswahl ok (bei allen Chans. auf denen EPG geht)
+  Revision 1.47  2001/09/26 11:40:48  field
+  Tontraegerauswahl haut hin (bei Kanaelen mit EPG)
 
   Revision 1.45  2001/09/23 21:34:07  rasc
   - LIFObuffer Module, pushbackKey fuer RCInput,
@@ -952,8 +952,8 @@ static char* copyStringto(const char* from, char* to, int len, char delim)
 void CNeutrinoApp::SelectAPID()
 {
     g_RemoteControl->CopyAPIDs();
-    if ( ( strcmp(g_RemoteControl->apid_info.name, channelList->getActiveChannelName().c_str() )== 0 ) &&
-         ( g_RemoteControl->apid_info.count_apids> 1 ) )
+    if ( ( strcmp(g_RemoteControl->audio_chans.name, channelList->getActiveChannelName().c_str() )== 0 ) &&
+         ( g_RemoteControl->audio_chans.count_apids> 1 ) )
     {
         // wir haben APIDs fÅr diesen Kanal!
 
@@ -968,13 +968,19 @@ void CNeutrinoApp::SelectAPID()
 	    APIDSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
         bool    has_unresolved_ctags= false;
-        for(int count=0;count<g_RemoteControl->apid_info.count_apids;count++)
+        for(int count=0;count<g_RemoteControl->audio_chans.count_apids;count++)
         {
-            if ( g_RemoteControl->apid_info.apid_ctags[count] != -1 )
-            {
+            if ( g_RemoteControl->audio_chans.apids[count].ctag != -1 )
                 has_unresolved_ctags= true;
-                break;
+
+            if ( strlen( g_RemoteControl->audio_chans.apids[count].name ) == 3 )
+            {
+                // unaufgelˆste Sprache...
+                strcpy( g_RemoteControl->audio_chans.apids[count].name, getISO639Description( g_RemoteControl->audio_chans.apids[count].name ) );
             }
+
+            if ( g_RemoteControl->audio_chans.apids[count].is_ac3 )
+                strcat(g_RemoteControl->audio_chans.apids[count].name, " (AC3)");
         }
 
         unsigned int onid_tsid = channelList->getActiveChannelOnid_sid();
@@ -1036,12 +1042,14 @@ void CNeutrinoApp::SelectAPID()
                         sscanf(TagIDs, "%02hhx %02hhx %02hhx", &componentTag, &componentType, &streamContent);
                         // printf("%s - %d - %s\n", TagIDs, componentTag, TagText);
 
-                        for(int count=0;count<g_RemoteControl->apid_info.count_apids;count++)
+                        for(int count=0;count<g_RemoteControl->audio_chans.count_apids;count++)
                         {
-                            if ( g_RemoteControl->apid_info.apid_ctags[count] == componentTag )
+                            if ( g_RemoteControl->audio_chans.apids[count].ctag == componentTag )
                             {
-                                strcpy(g_RemoteControl->apid_info.apid_names[count], TagText);
-                                g_RemoteControl->apid_info.apid_ctags[count] = -1;
+                                strcpy(g_RemoteControl->audio_chans.apids[count].name, TagText);
+                                if ( g_RemoteControl->audio_chans.apids[count].is_ac3 )
+                                    strcat(g_RemoteControl->audio_chans.apids[count].name, " (AC3)");
+                                g_RemoteControl->audio_chans.apids[count].ctag = -1;
                                 break;
                             }
                         }
@@ -1054,11 +1062,11 @@ void CNeutrinoApp::SelectAPID()
             }
         }
 
-        for(int count=0;count<g_RemoteControl->apid_info.count_apids;count++)
+        for(int count=0;count<g_RemoteControl->audio_chans.count_apids;count++)
         {
             char apid[5];
             sprintf(apid, "%d", count);
-            APIDSelector.addItem( new CMenuForwarder(g_RemoteControl->apid_info.apid_names[count], true, "", APIDChanger, apid, false), (count == g_RemoteControl->apid_info.selected) );
+            APIDSelector.addItem( new CMenuForwarder(g_RemoteControl->audio_chans.apids[count].name, true, "", APIDChanger, apid, false), (count == g_RemoteControl->audio_chans.selected) );
         }
         APIDSelector.exec(NULL, "");
     }
@@ -1451,7 +1459,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.46 2001/09/26 09:57:02 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.47 2001/09/26 11:40:48 field Exp $\n\n");
     tzset();
 
     initGlobals();
