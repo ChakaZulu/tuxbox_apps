@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.2 2004/06/06 22:29:51 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.3 2004/06/06 23:20:41 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -24,7 +24,7 @@
 
 const char * locale_real_names[] =
 {
-	NULL,
+	"INTERNAL ERROR - PLEASE REPORT",
 	"EPGMenu.epgplus",
 	"EPGMenu.eventinfo",
 	"EPGMenu.eventlist",
@@ -126,9 +126,9 @@ const char * locale_real_names[] =
 	"audiomenu.monoright",
 	"audiomenu.ost",
 	"audiomenu.stereo",
-	"audioplayerpicsettings.general",
 	"audioplayer.head",
 	"audioplayer.name",
+	"audioplayerpicsettings.general",
 	"bookmarkmanager.delete",
 	"bookmarkmanager.name",
 	"bookmarkmanager.rename",
@@ -178,10 +178,10 @@ const char * locale_real_names[] =
 	"colorstatusbar.head",
 	"colorstatusbar.text",
 	"colorthememenu.classic_theme",
-	"colorthememenu.head",
-	"colorthememenu.neutrino_theme",
 	"colorthememenu.dblue_theme",
 	"colorthememenu.dvb2k_theme",
+	"colorthememenu.head",
+	"colorthememenu.neutrino_theme",
 	"date.Apr",
 	"date.Aug",
 	"date.Dec",
@@ -548,9 +548,9 @@ const char * locale_real_names[] =
 	"parentallock.prompt",
 	"pictureviewer.defdir",
 	"pictureviewer.head",
-	"pictureviewer.resize.simple",
 	"pictureviewer.resize.color_average",
 	"pictureviewer.resize.none",
+	"pictureviewer.resize.simple",
 	"pictureviewer.scaling",
 	"pictureviewer.show",
 	"pictureviewer.slide_time",

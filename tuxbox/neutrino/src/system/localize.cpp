@@ -74,6 +74,21 @@ const char * getISO639Description(const char * const iso)
 		return it->second.c_str();
 }
 
+CLocaleManager::CLocaleManager()
+{
+	localeData = new char * [sizeof(locale_real_names)/sizeof(const char *)];
+	for (unsigned int i = 0; i < (sizeof(locale_real_names)/sizeof(const char *)); i++)
+		localeData[i] = (char *)locale_real_names[i];
+}
+
+CLocaleManager::~CLocaleManager()
+{
+	for (unsigned j = 0; j < (sizeof(locale_real_names)/sizeof(const char *)); j++)
+		if (localeData[j] != locale_real_names[j])
+			free(localeData[j]);
+
+	delete localeData;
+}
 
 const char * path[2] = {"/var/tuxbox/config/locale/", DATADIR "/neutrino/locale/"};
 
@@ -101,9 +116,16 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 		return NO_SUCH_LOCALE;
 	}
 
-	localeData.clear();
+	for (unsigned j = 0; j < (sizeof(locale_real_names)/sizeof(const char *)); j++)
+		if (localeData[j] != locale_real_names[j])
+		{
+			free(localeData[j]);
+			localeData[j] = (char *)locale_real_names[j];
+		}
 
 	char buf[1000];
+
+	i = 1;
 
 	while(!feof(fd))
 	{
@@ -137,7 +159,29 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 				}
 			} while ( ( pos != -1 ) );
 
-			localeData[buf] = text;
+			int j;
+
+			while (1)
+			{
+				j = strcmp(buf, locale_real_names[i]);
+				if (j > 0)
+				{
+					printf("[%s.locale] missing entry:     %s\n", locale, locale_real_names[i]);
+					i++;
+				}
+				else
+					break;
+			}
+
+			if (j == 0)
+			{
+				localeData[i] = strdup(text.c_str());
+				i++;
+			}
+			else
+			{
+				printf("[%s.locale] superfluous entry: %s\n", locale, buf);
+			}
 		}
 	}
 	fclose(fd);
@@ -153,11 +197,7 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 
 const char * CLocaleManager::getText(const neutrino_locale_t keyName) const
 {
-	mapLocaleData::const_iterator it = localeData.find(locale_real_names[keyName]);
-	if (it == localeData.end())
-		return locale_real_names[keyName];
-	else
-		return (it->second).c_str();
+	return localeData[keyName];
 }
 
 static const neutrino_locale_t locale_weekday[7] =

@@ -36,19 +36,15 @@
 #include <system/locals.h>
 #include_next<locale.h>
 #include <time.h>
-#include <string>
-#include <map>
 
 const char * getISO639Description(const char * const iso);
-
-typedef std::map<std::string, std::string> mapLocaleData;
 
 #define ARE_LOCALES_EQUAL(a,b) (a == b)
 
 class CLocaleManager
 {
 	private:
-		mapLocaleData localeData;
+		char * * localeData;
 		
 	public:
 		enum loadLocale_ret_t
@@ -57,6 +53,9 @@ class CLocaleManager
 				UNICODE_FONT    =  1,
 				NO_SUCH_LOCALE  = -1
 			};
+
+		CLocaleManager();
+		~CLocaleManager();
 
 		loadLocale_ret_t loadLocale(const char * const locale);
 

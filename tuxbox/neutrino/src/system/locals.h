@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.1 2004/06/06 21:52:53 thegoodguy Exp $
+ * $Id: locals.h,v 1.2 2004/06/06 23:20:41 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -126,9 +126,9 @@ typedef enum
 	LOCALE_AUDIOMENU_MONORIGHT                            ,
 	LOCALE_AUDIOMENU_OST                                  ,
 	LOCALE_AUDIOMENU_STEREO                               ,
-	LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL                 ,
 	LOCALE_AUDIOPLAYER_HEAD                               ,
 	LOCALE_AUDIOPLAYER_NAME                               ,
+	LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL                 ,
 	LOCALE_BOOKMARKMANAGER_DELETE                         ,
 	LOCALE_BOOKMARKMANAGER_NAME                           ,
 	LOCALE_BOOKMARKMANAGER_RENAME                         ,
@@ -178,10 +178,10 @@ typedef enum
 	LOCALE_COLORSTATUSBAR_HEAD                            ,
 	LOCALE_COLORSTATUSBAR_TEXT                            ,
 	LOCALE_COLORTHEMEMENU_CLASSIC_THEME                   ,
-	LOCALE_COLORTHEMEMENU_HEAD                            ,
-	LOCALE_COLORTHEMEMENU_NEUTRINO_THEME                  ,
 	LOCALE_COLORTHEMEMENU_DBLUE_THEME                     ,
 	LOCALE_COLORTHEMEMENU_DVB2K_THEME                     ,
+	LOCALE_COLORTHEMEMENU_HEAD                            ,
+	LOCALE_COLORTHEMEMENU_NEUTRINO_THEME                  ,
 	LOCALE_DATE_APR                                       ,
 	LOCALE_DATE_AUG                                       ,
 	LOCALE_DATE_DEC                                       ,
@@ -548,9 +548,9 @@ typedef enum
 	LOCALE_PARENTALLOCK_PROMPT                            ,
 	LOCALE_PICTUREVIEWER_DEFDIR                           ,
 	LOCALE_PICTUREVIEWER_HEAD                             ,
-	LOCALE_PICTUREVIEWER_RESIZE_SIMPLE                    ,
 	LOCALE_PICTUREVIEWER_RESIZE_COLOR_AVERAGE             ,
 	LOCALE_PICTUREVIEWER_RESIZE_NONE                      ,
+	LOCALE_PICTUREVIEWER_RESIZE_SIMPLE                    ,
 	LOCALE_PICTUREVIEWER_SCALING                          ,
 	LOCALE_PICTUREVIEWER_SHOW                             ,
 	LOCALE_PICTUREVIEWER_SLIDE_TIME                       ,
