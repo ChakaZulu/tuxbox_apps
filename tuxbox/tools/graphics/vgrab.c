@@ -1,5 +1,5 @@
 /******************************************************************************
- *	Videocapture - vcapture.c
+ *	Vgrab - vgrab.c
  *                                                                            
  *	Small test application to test the tuxbox Video4Linux-driver
  *
@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  ******************************************************************************
- * $Id: vgrab.c,v 1.1 2003/11/14 00:16:29 carjay Exp $
+ * $Id: vgrab.c,v 1.2 2003/11/14 18:07:28 carjay Exp $
  ******************************************************************************/
 
 #include <stdio.h>

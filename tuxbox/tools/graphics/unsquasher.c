@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  ******************************************************************************
- * $Id: unsquasher.c,v 1.1 2003/11/14 00:16:29 carjay Exp $
+ * $Id: unsquasher.c,v 1.2 2003/11/14 18:07:28 carjay Exp $
  ******************************************************************************/
 
 #include <stdlib.h>
@@ -116,7 +116,7 @@ int main (int argc, char **argv){
 	linelength = temp<<8;
 	read(ifd,&temp,1);
 	linelength |= temp&0xff;
-	lseek (ifd, 2, SEEK_CUR);
+	lseek (ifd, 4, SEEK_CUR);
 	
 	if ((linelength<0)||(linelength>720)){
 		printf ("invalid linelength %d",linelength);

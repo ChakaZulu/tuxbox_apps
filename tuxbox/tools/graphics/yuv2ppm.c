@@ -1,7 +1,7 @@
 /******************************************************************************
- *	yuv2rgb - yuv2rgb.c
+ *	yuv2ppm - yuv2ppm.c
  *                                                                            
- *	Quick and dirty decoder for the yuy2-data
+ *	Quick and dirty transcoder for the yuy2-data to rgb as a ppm-file
  *
  *	(c) 2003 Carsten Juttner (carjay@gmx.net)
  *  									      
@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  ******************************************************************************
- * $Id: yuv2ppm.c,v 1.1 2003/11/14 00:16:29 carjay Exp $
+ * $Id: yuv2ppm.c,v 1.2 2003/11/14 18:07:28 carjay Exp $
  ******************************************************************************/
 
 #include <stdlib.h>
@@ -43,7 +43,7 @@ static inline void matrix(unsigned char y, unsigned char cb, unsigned char cr,
   	| 0.701   -0.587   -0.114| * |G|
   	|-0.299   -0.587    0.886|   |B|
 
-	Rec.601 limits sets a head- and footroom of 
+	Rec.601 limits set a head- and footroom of 
 		16..235 for Y
 		16..240 for Cr/Cb (16=-1.0, 128=0, 240=1.0)
 	The squasher should only produce values in that range (sometimes it doesn't though?!)
@@ -53,7 +53,7 @@ static inline void matrix(unsigned char y, unsigned char cb, unsigned char cr,
   	| 1.000   -0.509   -0.194| * |Cr|
   	| 1.000    0.000    1.000|   |Cb|
 
-	We clearly see that Cr is R-Y and Cb is B-Y. BTW, Cb and Cr and not really U and V
+	We clearly see that Cr is R-Y and Cb is B-Y. BTW, Cb and Cr are not really U and V
 	because for PAL U and V are multiplied by an additional reduction-factor to avoid
 	overmodulating the CVBS-signal.
 	
@@ -142,7 +142,7 @@ int main (int argc, char **argv){
 	fstat (ifd,&finfo);
 	if ((lines*linelength) != (finfo.st_size-sizeof(header))){
 		printf ("header/filesize-mismatch: %dx%d should be %d bytes, not %ld + %d header bytes\n",
-					linelength>>1, lines, linelength>>1*lines, (finfo.st_size-6), sizeof(header));
+					linelength>>1, lines, linelength>>1*lines, (finfo.st_size-sizeof(header)), sizeof(header));
 		close (ifd);
 		close (ofd);
 		return 1;
@@ -162,6 +162,8 @@ int main (int argc, char **argv){
 		write (ofd, outbuf, (linelength*3)/2);
 	}
 	
+	free (inbuf);
+	free (outbuf);
 	close (ofd);
 	close (ifd);
 	return 0;
