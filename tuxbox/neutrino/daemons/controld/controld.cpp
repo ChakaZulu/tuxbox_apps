@@ -99,7 +99,7 @@ int loadSettings()
 void saveSettings()
 {
 	int fd;
-	fd = open(CONF_FILE, O_WRONLY | O_CREAT );
+	fd = open(CONF_FILE, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH );
 
 	if (fd==-1)
 	{
