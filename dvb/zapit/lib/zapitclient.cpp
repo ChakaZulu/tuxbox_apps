@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.55 2002/10/02 10:58:11 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.56 2002/10/02 12:04:10 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -115,7 +115,7 @@ void CZapitClient::getLastChannel(unsigned int &channumber, char &mode)
 
 	CZapitClient::responseGetLastChannel response;
 	CBasicClient::receive_data((char* )&response, sizeof(response));
-	channumber = response.channelNumber;
+	channumber = response.channelNumber + 1;
 	mode = response.mode;
 
 	zapit_close();
