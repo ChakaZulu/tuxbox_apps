@@ -149,6 +149,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	state=stateInit;
 
 	http=0;
+	seekbusy=0;
 
 //	filename="http://205.188.209.193:80/stream/1003";
 
@@ -398,7 +399,9 @@ void eMP3Decoder::outputReady(int what)
 //			eDebug("reconfigured audio interface...");
 		}
 	}
-	output.tofile(dspfd[0], 65536);
+	seekbusy-=output.tofile(dspfd[0], 65536);
+	if (seekbusy < 0)
+		seekbusy=0;
 	checkFlow(0);
 }
 
@@ -768,6 +771,13 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		if (!inputsn)
 			break;
 		eDebug("seek/seekreal/skip, %d", message.parm);
+		if (seekbusy && type == codecMPG)
+		{
+			checkFlow(0);
+			outputsn[0]->start();
+			break;
+		}
+		seekbusy=128*1024; // next seek only after 128k (video) data
 		int offset=0;
 		if (message.type != eMP3DecoderMessage::seekreal)
 		{

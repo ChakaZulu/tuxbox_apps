@@ -79,6 +79,7 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	
 	int length;
 	int position;
+	int seekbusy;
 	eLock poslock;
 	int audio_tracks;
 	

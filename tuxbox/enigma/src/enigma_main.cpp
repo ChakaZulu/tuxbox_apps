@@ -2903,6 +2903,11 @@ void eZapMain::play()
 	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 	if (!handler)
 		return;
+
+	// disable skipping
+	if(skipping) 
+		endSkip();
+
 	switch (handler->getState())
 	{
 		case eServiceHandler::statePause:
@@ -2922,6 +2927,11 @@ void eZapMain::stop()
 	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 	if (!handler)
 		return;
+
+	// disable skipping
+	if(skipping)
+		endSkip();
+
 	handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
 	handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekAbsolute, 0));
 	updateProgress();
@@ -2932,6 +2942,11 @@ void eZapMain::pause()
 	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 	if (!handler)
 		return;
+
+	// disable skipping
+	if(skipping)
+		endSkip();
+
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 	if (handler->getState() == eServiceHandler::statePause)
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
@@ -2955,6 +2970,10 @@ void eZapMain::pause()
 
 void eZapMain::record()
 {
+	// disable skipping
+	if(skipping)
+		endSkip();
+
 	if ( state & stateRecording )
 	{
 		if ( state & stateInTimerMode )
@@ -2979,6 +2998,12 @@ int freeRecordSpace()
 
 int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_descr )
 {
+	eZapLCD *pLCD=eZapLCD::getInstance();
+
+	// disable skipping
+	if(skipping)
+		endSkip();
+
 	if (onoff) //  start recording
 	{
 		if ( freeRecordSpace() < 10) // less than 10MB free (or directory not found)
@@ -3131,6 +3156,14 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 			recstatus->show();
 
 			DVRSpaceLeft->show();
+
+			// if standby enable lcdMain
+			if(state & stateSleeping)
+			{ 
+				pLCD->lcdStandby->hide();
+				pLCD->lcdMain->show();
+			}
+			
 			recStatusBlink.start(500, 1);
 			eZap::getInstance()->getServiceSelector()->actualize();
 
@@ -3194,6 +3227,17 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 		DVRSpaceLeft->hide();
 		recStatusBlink.stop();
 		recstatus->hide();
+
+		// if standby disable lcdMain
+		if(state & stateSleeping)
+		{ 
+			pLCD->lcdMain->hide();
+			pLCD->lcdStandby->show();
+		}
+
+	        // disable lcd-blink
+		pLCD->lcdMain->Clock->show();
+
 		eZap::getInstance()->getServiceSelector()->actualize();
 
 		int profimode=0;
@@ -3217,85 +3261,268 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 
 void eZapMain::startSkip(int dir)
 {
-	(void)dir;
-	skipcounter=0;
-	{
-		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+	eServiceHandler *handler=NULL;
+	
+	if(!skipping) // first call?
+	{ 
+		skipcounter=0;
+		skipspeed=0;
+		handler=eServiceInterface::getInstance()->getService();
 		if (handler)
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
+		{
+			switch (handler->getState())
+			{
+				case eServiceHandler::statePause:
+				case eServiceHandler::stateStopped:
+					return;
+				default:
+					break;
+			}
+
+			if(!eServiceInterface::getInstance()->service.path && (state & stateRecording))
+			{
+				if(dir!=skipForward)
+				{ // necessary to enable skipmode, because file end
+					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+					usleep(100*1000);
+					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+					usleep(100*1000);
+					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,-2000));
+				}
+				timeshift=1;
+			}
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin, 0));
+			seekstart=handler->getPosition(eServiceHandler::posQueryCurrent); // Startpunkt für Zeitausgabe
+			seekpos=seekstart;
+		}
 	}
+
+	if (dir == skipForward)
+		skipspeed++;
+	else
+		skipspeed--; 
+
+	if (skipspeed > 4)
+		skipspeed=4;
+	else if (skipspeed < -4)
+		skipspeed=-4;
+
+	if(!skipping && handler)
+	{ 
+		if(!skipTimer)
+		{ 
+			skipTimer=new eTimer(eApp);
+			skipTimer->start((skipspeed>=0)?250:500,false); // 1/4 sec. forward 1/2 sec. back (but bigger distance)
+			CONNECT(skipTimer->timeout,eZapMain::skipLoop); // enable timer
+		}
+		if(!skipWidget) // enable view
+		{
+			int fsize=eSkin::getActive()->queryValue("fontsize", 20)+4;
+			skipWidget=new eWidget();
+			skipWidget->move(ePoint(0,160));
+			skipWidget->resize(eSize(150, (fsize<<1)+12));
+			skipLabel1=new eLabel(skipWidget);
+			skipLabel1->setAlign(eTextPara::dirRight);
+			skipLabel1->setText((skipspeed<0)?"<<":">>");
+			skipLabel1->move(ePoint(30,4));
+			skipLabel1->resize(eSize(110,fsize));
+			skipLabel2=new eLabel(skipWidget);
+			skipLabel2->setAlign(eTextPara::dirRight);
+			skipLabel2->setText((dir==skipForward)?"+00:00:00":"-00:00:00");
+			skipLabel2->move(ePoint(30,fsize+8));
+			skipLabel2->resize(eSize(110,fsize));
+			skipWidget->show();
+		}
+		skipping=1;
+	}
+
+	if(skipWidget && skipLabel1)
+	{ 
+		eString s;
+		s=(skipspeed<0)?"<<":">>";
+		switch(abs(skipspeed))  
+		{
+			case 1: s=s+"  8x"; break; // very estimate :-)
+			case 2: s=s+" 16x"; break;
+			case 3: s=s+" 32x"; break;
+			case 4: s=s+" 64x"; break;
+		}
+		if(timeshift) 
+			s="(ts) "+s;
+		skipLabel1->setText(s);
+	}
+		
 	showInfobar();
 	timeout.stop();
 }
 
-void eZapMain::repeatSkip(int dir)
+void eZapMain::skipLoop()
 {
-	if (!skipping)
-	{
-#if 1
-		skipcounter++;
-		int time=5000;
-		if (skipcounter > 10)
-			time=20000;
-		else if (skipcounter > 30)
-			time=120000;
-		else if (skipcounter > 60)
-			time=600000;
+	// called from skipTimer (eTimer)
+
+	int time,speed,faktor,pos,diff,ts;
+
+	faktor = (skipspeed<0) ? -1 : 1;
+	speed = skipspeed * faktor;
+
+	switch(speed)
+	{ 
+		case  1: 
+			time = (skipspeed<0) ? 2 : 1; 
+			break; //Seconds
+		case  2: 
+			time = (skipspeed<0) ? 4 : 2; 
+			break; //back must more!
+		case  3: 
+			time = (skipspeed<0) ? 8 : 4; 
+			break;
+		case  4: 
+			time = (skipspeed<0) ? 16 : 8; 
+			break;
+		default: 
+			time =  0;
+	}
+
+	if(time)
+	{	
 		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		if (handler)
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, (dir == skipForward)?time:-time));
-#endif
+		{
+			// view relative skip time
+			pos=handler->getPosition(eServiceHandler::posQueryCurrent);
+			diff=abs(pos-seekstart); 
+			int std=diff/3600;
+			int min=(diff-(std*3600))/60;
+			int sec=diff-(std*3600)-(min*60);
+
+			if(skipLabel2)
+				skipLabel2->setText(eString().sprintf("%c%02d:%02d:%02d",(pos>seekstart)?'+':'-',std,min,sec));
+
+			if(skipspeed<0 && pos < (time<<2) ) //back and begin reached
+			{ 
+				endSkip();
+				updateProgress();
+				return;
+			}
+
+			// correct non-ts (test)
+			eServiceReference &ref = eServiceInterface::getInstance()->service;
+			if( ref.type == eServiceReference::idUser &&
+			    ( 	(ref.data[0] ==  eMP3Decoder::codecMPG) ||
+				(ref.data[0] ==  eMP3Decoder::codecMP3) ) )
+			{ 
+				time <<= (faktor<0) ? 4 : 2; // ermittelt per trial & error (bitrate?)
+				ts=0;
+			}
+			else 
+				ts=1;
+
+			// Skip
+			if(ts && skipspeed==1) 
+				return; // normal trickmode forward (ts only)
+			else
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,(time*1000)*faktor));
+
+			seekpos=pos;
+		}
+		else
+			endSkip();
 		updateProgress();
 	}
+	else
+		endSkip();
+}
+
+void eZapMain::repeatSkip(int dir)
+{
+	static int aktiv;
+
+	if (skipping) 
+		endSkip();	// break skipping, if active
+
+	if(aktiv) 
+		return;		// not more...
+
+	// ts only
+	eServiceReference &ref = eServiceInterface::getInstance()->service;
+
+	if(ref.type == eServiceReference::idUser &&
+		( (ref.data[0] == eMP3Decoder::codecMPG) ||
+		    (ref.data[0] == eMP3Decoder::codecMP3) ) ) 
+		return;
+
+	aktiv=1;
+
+	// Enter distance in minutes
+	SkipEditWindow dlg( (dir == skipForward) ? ">> Min:" : "<< Min:" );
+	dlg.setEditText("6"); // pre value (advertising) :-)
+
+	dlg.show();
+	int ret=dlg.exec();
+	dlg.hide();
+
+	if(!ret)
+	{
+		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+		if (handler)
+		{
+			int time=atoi(dlg.getEditText().c_str())*60; // Seconds
+			
+			if(dir!=skipForward) 
+				time = -time;
+
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*400)); //ca. in TS
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
+
+			updateProgress();
+
+			if (isVisible() && doHideInfobar())
+				timeout.start(2000, 1);
+		}
+	}
+	aktiv=0;
 }
 
 void eZapMain::stopSkip(int dir)
 {
+	// release key doesn't need...
 	(void)dir;
-#if 0
-	if (!skipcounter)
-	{
-		if (dir == skipForward)
-			skipping++;
-		else
-			skipping--;
-
-		if (skipping > 3)
-			skipping=3;
-		else if (skipping < -3)
-			skipping=-3;
-
-		int speed;
-		if (!skipping)
-			speed=1;
-		else if (skipping < 0)
-			speed=-(1<<(-skipping));
-		else
-			speed=1<<skipping;
-
-		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
-		if (handler)
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, speed));
-	}
-#endif
-	{
-		if ( state & stateInTimerMode && state & stateRecording )
-			timeshift=1;
-		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
-		if (handler)
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
-	}
-
-	if (isVisible() && doHideInfobar() )
-		timeout.start(2000, 1);
 }
 
+void eZapMain::endSkip(void)
+{
+	// breaks the timed skipping (eTimer)
+
+	if(skipTimer)
+	{
+		delete skipTimer;
+		skipTimer=0;
+	}
+	
+	if(skipWidget)
+	{ 
+		delete skipWidget;
+		skipWidget=0;
+	}
+	skipspeed=0;
+	skipping=0;
+
+	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+
+	if (handler)
+		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
+		
+	if (isVisible() && doHideInfobar())
+		timeout.start(2000, 1);
+}
 #endif //DISABLE_FILE
 
 int eZapMain::handleStandby(int i)
 {
 	int force=0;
-		if ( i <= 0 )
+
+	if ( i <= 0 )
 	{
 		if ( state & stateSleeping )
 		{
@@ -4734,8 +4961,16 @@ bool eZapMain::handleState(int justask)
 #ifndef DISABLE_FILE
 void eZapMain::blinkRecord()
 {
+	eZapLCD *pLCD=eZapLCD::getInstance();
+
 	if (state & stateRecording)
 	{
+		// handle clock-blinking when record is active..
+		if(pLCD->lcdMain->Clock->isVisible())
+			pLCD->lcdMain->Clock->hide();
+		else
+			pLCD->lcdMain->Clock->show();
+
 		if (isVisible())
 		{
 			if (recstatus->isVisible())
@@ -4795,6 +5030,25 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 	{
 		int num=0;
 		stopMessages();
+
+#ifndef DISABLE_FILE
+		if (	skipping &&
+			event.action != &i_enigmaMainActions->discrete_startSkipForward
+				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipForward && 
+			event.action != &i_enigmaMainActions->discrete_repeatSkipForward
+				&& dvrfunctions && event.action != &i_enigmaMainActions->repeatSkipForward &&
+			event.action != &i_enigmaMainActions->discrete_stopSkipForward
+				&& dvrfunctions && event.action != &i_enigmaMainActions->stopSkipForward &&
+			event.action != &i_enigmaMainActions->discrete_startSkipReverse
+				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipReverse &&
+			event.action != &i_enigmaMainActions->discrete_repeatSkipReverse
+				&& dvrfunctions && event.action != &i_enigmaMainActions->repeatSkipReverse &&
+			event.action != &i_enigmaMainActions->discrete_stopSkipReverse
+				&& dvrfunctions && event.action != &i_enigmaMainActions->stopSkipReverse )
+		{
+			endSkip();
+		}
+#endif
 
 		if (event.action == &i_enigmaMainActions->showMainMenu)
 		{
@@ -5323,7 +5577,14 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		if (serviceFlags & eServiceHandler::flagSupportPosition)
 			progresstimer.start(1000);
 		else
+		{ 
+#ifndef DISABLE_FILE
+			// disable skipping
+			if(skipping) 
+				endSkip();
+#endif
 			progresstimer.stop();
+		}
 		updateProgress();
 		showServiceInfobar(serviceFlags & eServiceHandler::flagIsSeekable);
 		break;
@@ -5408,6 +5669,10 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	}
 	case eServiceEvent::evtEnd:
 	{
+		// disable skipping
+		if(skipping) 
+			endSkip();
+		
 		int serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
 		if (playlist->current != playlist->getConstList().end())
 		{
@@ -5846,7 +6111,14 @@ void eZapMain::timeOut()
 
 void eZapMain::leaveService()
 {
-	timeshift=0;
+	timeshift=0;          
+
+#ifndef DISABLE_FILE
+	// disable skipping
+	if(skipping)
+		endSkip();
+#endif
+
 	cur_start=cur_duration=cur_event_id=-1;
 	
 	ButtonGreenDis->show();
@@ -6114,6 +6386,11 @@ void eZapMain::setMode(int newmode, int user)
 	if ( newmode != -1 )
 	{
 #ifndef DISABLE_FILE
+
+		// disable skipping
+		if(skipping)
+			endSkip();
+
 		eServiceReference cur = modeLast[newmode].current();
 		int recmode = -1;
 		if ( eDVB::getInstance()->recorder && !cur.path )
@@ -7053,3 +7330,46 @@ void UserBouquetSelector::selected( eListBoxEntryText *sel )
 
 	close(0);
 }
+
+#ifndef DISABLE_FILE
+
+SkipEditWindow::SkipEditWindow( const char *InputFieldDescr)
+{
+	int fsize=eSkin::getActive()->queryValue("fontsize", 20)+4;
+	
+	cmove(ePoint(20, 160));
+	cresize(eSize(160, fsize+8));
+
+	description=new eLabel(this);
+	description->setText(InputFieldDescr);
+	description->move(ePoint(20, 4));
+	description->resize(eSize(80,fsize));
+
+	input = new eTextInputField(this);
+	input->move(ePoint(100, 4));
+	input->resize(eSize(50,fsize));
+	input->setMaxChars(3);
+	input->setFlags(eTextInputField::flagCloseParent);
+	input->setUseableChars("0123456789");
+	CONNECT( input->selected, TextEditWindow::accept );
+}
+
+int SkipEditWindow::eventHandler( const eWidgetEvent &e )
+{
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			input->setState(1, 0);
+			return 1;
+		case eWidgetEvent::evtAction:
+			if ( e.action != &i_cursorActions->help )
+				break;
+			else
+				return 1;
+		default:
+			break;
+	}
+	return eWidget::eventHandler(e);
+}
+/*##################################################*/
+#endif //DISABLE_FILE

@@ -290,6 +290,20 @@ public:
 	void setMaxChars( int maxChars ) { input->setMaxChars( maxChars ); }
 };
 
+#ifndef DISABLE_FILE
+class SkipEditWindow: public eWidget
+{
+	eTextInputField *input;
+	eLabel *description;
+	int eventHandler( const eWidgetEvent &e );
+public:
+	SkipEditWindow( const char *InputFieldDescr);
+	const eString& getEditText() { return input->getText(); }
+	void setEditText( const eString& str ) { input->setText( str ); }
+	void setMaxChars( int maxChars ) { input->setMaxChars( maxChars ); }
+};
+#endif
+
 class UserBouquetSelector: public eListBoxWindow<eListBoxEntryText>
 {
 	std::list<ePlaylistEntry> &SourceList;
@@ -419,6 +433,8 @@ public:
 	void startSkip(int dir);
 	void repeatSkip(int dir);
 	void stopSkip(int dir);
+	void endSkip(void);
+	void skipLoop();
 	enum { skipForward, skipReverse };
 	int isRecording() {return state & stateRecording;}
 	void setFakeRecordingState(int on) {if (on) state |= stateRecording; else state &= ~stateRecording;}
@@ -459,6 +475,14 @@ private:
 #ifndef DISABLE_FILE
 	int skipcounter;
 	int skipping;
+	int skipspeed;
+	int seekstart;
+	int seekpos;
+	eTimer *skipTimer;
+	eWidget *skipWidget;
+	eWidget *seekWidget;
+	eLabel *skipLabel1;
+	eLabel *skipLabel2;
 #endif
 
 	void showServiceMenu(eServiceSelector*);
@@ -619,6 +643,7 @@ public:
 	eZapMain();
 	~eZapMain();
 };
+
 
 class eServiceContextMenu: public eListBoxWindow<eListBoxEntryText>
 {
