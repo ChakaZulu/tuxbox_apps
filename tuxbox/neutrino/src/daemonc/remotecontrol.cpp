@@ -169,7 +169,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 				time_t end_program= info_CN->current_zeit.startzeit+ info_CN->current_zeit.dauer;
 				current_programm_timer = g_RCInput->addTimer( &end_program );
 
-				if (((!is_video_started) && (info_CN->current_fsk == 0)) || (g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSTART))
+				if (((!is_video_started) && (info_CN->current_fsk == 0)) || (g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_CHANGETOLOCKED))
 					g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false );
 				else
 					g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, info_CN->current_fsk, false );

@@ -1441,8 +1441,8 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, true);
 	oj->addOption(PARENTALLOCK_PROMPT_NEVER         , "parentallock.never");
-	oj->addOption(PARENTALLOCK_PROMPT_ONSTART       , "parentallock.onstart");
-	//oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, "parentallock.changetolocked");
+//	oj->addOption(PARENTALLOCK_PROMPT_ONSTART       , "parentallock.onstart");
+	oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, "parentallock.changetolocked");
 	oj->addOption(PARENTALLOCK_PROMPT_ONSIGNAL      , "parentallock.onsignal");
 	parentallockSettings.addItem( oj );
 
@@ -3341,7 +3341,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.394 2003/01/26 18:08:51 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.395 2003/01/29 15:04:56 thegoodguy Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

@@ -408,7 +408,7 @@ int CChannelList::handleMsg(uint msg, uint data)
 
 		//printf("program-lock-status: %d\n", data);
 
-		if (g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSIGNAL || g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSTART)
+		if ((g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSIGNAL) || (g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_CHANGETOLOCKED))
 		{
 			if ( zapProtection != NULL )
 				zapProtection->fsk = data;
@@ -426,7 +426,7 @@ int CChannelList::handleMsg(uint msg, uint data)
 						{
 							g_RemoteControl->startvideo();
 
-							// merken fürs nächste hingehen
+							// remember it for the next time
 							chanlist[selected]->last_unlocked_EPGid= g_RemoteControl->current_EPGid;
 						}
 						delete zapProtection;
