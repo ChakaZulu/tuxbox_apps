@@ -100,7 +100,7 @@ int CFile::getType(void) const
 		  (strcasecmp(extension.c_str(),"mpa") == 0) || (strcasecmp(extension.c_str(),"mp2") == 0))
 			return FILE_MP3;
 		if (strcasecmp(extension.c_str(),"m3u") == 0)
-			return FILE_MP3_PLAYLIST;
+			return FILE_PLAYLIST;
 		if (strcasecmp(extension.c_str(),"url") == 0)
 			return STREAM_MP3;
 		if ((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
@@ -110,6 +110,8 @@ int CFile::getType(void) const
 			return FILE_PICTURE;
 		if (strcasecmp(extension.c_str(),"imu") == 0)
 			return STREAM_PICTURE;
+		if (strcasecmp(extension.c_str(),"ogg") == 0)
+			return FILE_OGG;
 	}
 	return FILE_UNKNOWN;
 }
