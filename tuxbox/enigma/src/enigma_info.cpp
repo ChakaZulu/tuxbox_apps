@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.13 2002/12/19 21:17:27 Ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.14 2003/01/02 15:43:01 Jolt Exp $
  */
 
 #include <enigma_info.h>
@@ -35,6 +35,7 @@
 #include <lib/gui/emessage.h>
 #include <lib/gui/ebutton.h>
 #include <lib/base/i18n.h>
+#include <tuxbox/tuxbox.h>
 
 eZapInfo::eZapInfo()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Infos"), 8, 220)
@@ -42,7 +43,7 @@ eZapInfo::eZapInfo()
 	move(ePoint(150, 136));
 	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("go back to mainmenu")))->selected, eZapInfo::sel_close);
 	CONNECT((new eListBoxEntryMenu(&list, _("Streaminfo"), _("open the Streaminfo")))->selected, eZapInfo::sel_streaminfo);
-	if ( eDVB::getInstance()->getInfo("mID") != "05" && eDVB::getInstance()->getInfo("mID") != "06" )
+	if (tuxbox_get_model() == TUXBOX_MODEL_DBOX2)
 		CONNECT((new eListBoxEntryMenu(&list, _("Show BN version"),_("show the Current Version of the Betanova FW")))->selected, eZapInfo::sel_bnversion);
 
 	CONNECT((new eListBoxEntryMenu(&list, _("About..."), _("open the about dialog")))->selected, eZapInfo::sel_about);
@@ -121,8 +122,6 @@ class eAboutScreen: public eWindow
 public:
 	eAboutScreen()
 	{
-		int mID=atoi( eDVB::getInstance()->getInfo("mID").c_str());
-		
 		machine=new eLabel(this);
 		machine->setName("machine");
 
@@ -150,7 +149,7 @@ public:
 		if (eSkin::getActive()->build(this, "eAboutScreen"))
 			eFatal("skin load of \"eAboutScreen\" failed");
 
-		if(mID==6)
+		if(tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM7000)
 		{
 			harddisks->hide();
 			eWidget *h=search("harddisk_label");
@@ -160,65 +159,22 @@ public:
 		
 		dreamlogo->hide();
 		
-		switch (mID)
-		{
-		case 1:
-			vendor->setText("Nokia");
-			break;
-		case 2:
-			vendor->setText("Philips");
-			break;
-		case 3:
-			vendor->setText("Sagem");
-			break;
-		case 4:
-			vendor->setText(_("Unknown"));
-		break;
-		case 5:
-		case 6:
-			vendor->setText("Dream-Multimedia-TV");
-			dreamlogo->show();
-			break;
-		default:
-			vendor->setText(_("my"));
-			break;
-		}
+		vendor->setText(tuxbox_get_manufacturer_str());
 		
-		switch (mID)
+		switch (tuxbox_get_model())
 		{
-		case 1:
-		case 2:
-		case 3:
+		case TUXBOX_MODEL_DBOX2:
 			processor->setText(_("Processor: XPC823, 66MHz"));
 			break;
-		case 4:
-			processor->setText(_("Processor: XPC823, 80MHz"));
-			break;
-		case 5:
+		case TUXBOX_MODEL_DREAMBOX_DM7000:
 			processor->setText(_("Processor: STB04500, 252MHz"));
 			break;
-		case 6:
+		case TUXBOX_MODEL_DREAMBOX_DM5600:
 			processor->setText(_("Processor: STB25xxx, 252MHz"));
 			break;
 		}
 		
-		switch (mID)
-		{
-		case 1:
-		case 2:
-		case 3:
-			machine->setText("d-Box 2");
-			break;
-		case 4:
-			machine->setText("d-Box");
-			break;
-		case 5:
-			machine->setText("DM7000");
-			break;
-		case 6:
-			machine->setText("DM5600");
-			break;
-		}
+		machine->setText(tuxbox_get_model_str());
 		
 		int fe=atoi(eDVB::getInstance()->getInfo("fe").c_str());
 		switch (fe)
