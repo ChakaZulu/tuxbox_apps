@@ -1,5 +1,5 @@
 /*
-$Id: pes_std.c,v 1.3 2004/02/02 23:34:08 rasc Exp $
+$Id: pes_std.c,v 1.4 2004/08/12 22:57:18 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,11 @@ $Id: pes_std.c,v 1.3 2004/02/02 23:34:08 rasc Exp $
 
 
 $Log: pes_std.c,v $
+Revision 1.4  2004/08/12 22:57:18  rasc
+ - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
+ - New: PES update ITU-T H.222.0 AMD2
+H.222.0 AMD3 updates started
+
 Revision 1.3  2004/02/02 23:34:08  rasc
 - output indent changed to avoid \r  (which sucks on logged output)
 - EBU PES data started (teletext, vps, wss, ...)
@@ -51,6 +56,7 @@ PES stream directory, PES restructured
 
 /*
  *  PES  Decoding
+ *  -- updated 2004-08-12  from ITU-T H.222.0 AMD2
  */
 
 void  PES_decode_std (u_char *b, int len, u_int PES_streamID)
@@ -308,12 +314,22 @@ void  PES_decode_std (u_char *b, int len, u_int PES_streamID)
    if (PES_extension_flag2 == 0x01) {
 
 	u_int  PES_extension_field_length;
+	u_int  streamID_extension_flag;
 
    	out_nl (3,"PES_extension_2: ");
 	indent (+1);
 	out_SB_NL  (3,"Marker_bit: ", getBits (b, 0,  0,  1) );
-	PES_extension_field_length =  getBits (b, 0,  1,  7);
-	print_databytes (6,"reserved:", b+1, PES_extension_field_length);
+
+	PES_extension_field_length = outBit_Sx_NL (4,"PES_extension_field_length: ",	b,  1, 7);
+	streamID_extension_flag    = outBit_Sx_NL(4,"stream_id_extension_flag: ",	b,  8, 1);
+
+	if (streamID_extension_flag == 0) {
+	    outBit_S2x_NL(4,"stream_id_extension_flag: ",	b,   9, 7,
+			(char *(*)(u_long)) dvbstrPESstream_ID_Extension);
+	    print_databytes (6,"reserved:", b+2, PES_extension_field_length-1);
+	}
+
+
 	b += PES_extension_field_length + 1;
    	indent (-1);
 

@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.25 2004/08/04 19:54:39 rasc Exp $
+$Id: sectables.c,v 1.26 2004/08/12 22:57:18 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: sectables.c,v 1.25 2004/08/04 19:54:39 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.26  2004/08/12 22:57:18  rasc
+ - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
+ - New: PES update ITU-T H.222.0 AMD2
+H.222.0 AMD3 updates started
+
 Revision 1.25  2004/08/04 19:54:39  rasc
 Bugfix: UNT/INT table mixup  (reported by  Karsten Siebert)
 
@@ -168,94 +173,16 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 
   if (pid != DUMMY_PID) {
   	out_nl (2,"PID:  %u (0x%04x)",pid,pid);
+  	out_nl (2,"PID assignment: %s", dvbstrPID_assignment(pid));
   }
   table_id = buf[0];
 
+
   switch (pid) {
-	  // $$$ TODO ...
-	  // $$$ we should only print what tables are expected and go to guess table...
-
-	case  0x000:		/* PAT  Program Association Table */
-		decode_PAT  (buf, len);
-		break; 
-
-	case  0x001:		/* CAT  Conditional Access Table */
-		decode_CAT  (buf, len);
-		break; 
-
-	case  0x002:		/* TSDT Transport Stream Description Sect */
-		decode_TSDT  (buf, len);	/* Table ID == 0x03 */
-		break; 
-
-	case  0x010:		/* NIT, ST  */
-		if (table_id == 0x72)   decode_ST   (buf,len);
-		else                    decode_NIT  (buf, len);
-		break; 
-
-	case  0x011:		/* SDT, BAT, ST  */
-		if      (table_id == 0x72) decode_ST  (buf,len);
-		else if (table_id == 0x42) decode_SDT (buf,len); 
-		else if (table_id == 0x46) decode_SDT (buf,len); 
-		else                       decode_BAT (buf,len);
-		break; 
-
-	case  0x012:		/* EIT, ST  */
-		if (table_id == 0x72)   decode_ST  (buf,len);
-		else                    decode_EIT (buf,len);
-		// $$$ TODO CIT (TS 102 323 [36])
-		break; 
-
-	case  0x013:		/* RST, ST  */
-		if (table_id == 0x72) decode_ST   (buf,len);
-		else                  decode_RST  (buf,len); 
-		break; 
-
-	case  0x014:		/* TDT, TOT, ST  */
-		if      (table_id == 0x72) decode_ST   (buf,len);
-		else if (table_id == 0x70) decode_TDT  (buf,len); 
-		else                       decode_TOT  (buf,len);
-		break; 
-
-	case  0x015:		/* Net Sync  */
-		// $$$$ TODO
-		out_nl (3,"Network Synchronization Packet");
-		break; 
-
-	case  0x016:		/* resolution notification section (TS102323) */
-		if      (table_id == 0x74) decode_RNT  (buf,len);
-		else 	                   guess_table (buf, len, pid);
-		break; 
-
-	case  0x01C:		/* Inband Signalling  */
-		// $$$$ TODO
-		out_nl (3,"Inband Signalling Packet");
-		break; 
 
 	case  0x01D:		/* Measurement */
 		decode_TESTDATA  (buf, len);
 		break; 
-
-	case  0x01E:		/* DIT */
-		decode_DIT  (buf, len);
-		break; 
-
-	case  0x01F:		/* SIT */
-		decode_SIT  (buf, len);
-		break; 
-
-
-	case  0x1FFC:		/* ATSC SI */
-		out_nl (2,"ATSC SI Packet");
-		break;
-
-	case  0x1FFD:		/* ATSC Master Program Guide */
-		out_nl (2,"ATSC Master Program Guide  Packet");
-		break;
-
-	case  0x1FFF:		/* Null packet */
-		out_nl (2,"Null Packet");
-		break;
-
 
         default:			// multiple PIDs possible
                 guess_table (buf, len, pid);
@@ -304,6 +231,7 @@ static TABLE_ID_FUNC table_id_func[] = {
 // $$$ TODO     {  0x04, 0x04,  decode_14496_SCT },
 // $$$ TODO     {  0x05, 0x05,  decode_14496_OCT },
 // $$$ TODO     {  0x06, 0x06,  decode_MT },	// Metadata section
+// $$$ TODO     {  0x07, 0x07,  decode_IPMP_CIT },	// IPMP_Control_Information_section (defined in ISO/IEC13818-11)
      /* res. */
      {  0x3a, 0x3d,  decode_DSMCC_section },
      {  0x3e, 0x3e,  decode_DSMCC_DATAGRAM },

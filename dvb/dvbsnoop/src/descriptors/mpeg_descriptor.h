@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.h,v 1.10 2004/08/01 21:33:08 rasc Exp $ 
+$Id: mpeg_descriptor.h,v 1.11 2004/08/12 22:57:18 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: mpeg_descriptor.h,v 1.10 2004/08/01 21:33:08 rasc Exp $
 
 
 $Log: mpeg_descriptor.h,v $
+Revision 1.11  2004/08/12 22:57:18  rasc
+ - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
+ - New: PES update ITU-T H.222.0 AMD2
+H.222.0 AMD3 updates started
+
 Revision 1.10  2004/08/01 21:33:08  rasc
 minor TVA stuff (TS 102 323)
 
@@ -101,7 +106,8 @@ void  descriptorMPEG_External_ES_ID (u_char *b);
 void  descriptorMPEG_MuxCode (u_char *b);
 void  descriptorMPEG_FMXBufferSize (u_char *b);
 void  descriptorMPEG_MultiplexBuffer (u_char *b);
-void  descriptorMPEG_FlexMuxTiming (u_char *b);
+// void  descriptorMPEG_FlexMuxTiming (u_char *b);
+void  descriptorMPEG_ContentLabeling (u_char *b);
 
 
      /* TV ANYTIME, TS 102 323 */
@@ -109,6 +115,11 @@ void descriptorMPEG_TVA_metadata_pointer (u_char *b);
 void descriptorMPEG_TVA_metadata (u_char *b);
 void descriptorMPEG_TVA_metadata_STD (u_char *b);
 
+     /* H.222.0 AMD3 */
+
+void descriptorMPEG_AVC_video (u_char *b);
+void descriptorMPEG_IPMP (u_char *b);
+void descriptorMPEG_AVC_timing_and_HRD (u_char *b);
 
 
 #endif

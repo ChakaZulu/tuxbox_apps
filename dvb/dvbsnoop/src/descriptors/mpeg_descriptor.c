@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.23 2004/08/01 21:33:08 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.24 2004/08/12 22:57:18 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: mpeg_descriptor.c,v 1.23 2004/08/01 21:33:08 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.24  2004/08/12 22:57:18  rasc
+ - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
+ - New: PES update ITU-T H.222.0 AMD2
+H.222.0 AMD3 updates started
+
 Revision 1.23  2004/08/01 21:33:08  rasc
 minor TVA stuff (TS 102 323)
 
@@ -131,6 +136,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 /*
   determine MPEG descriptor type and print it...
   return byte length
+  2004-08-11  updated H.222.0 AMD1
 */
 
 int  descriptorMPEG  (u_char *b)
@@ -197,12 +203,18 @@ int  descriptorMPEG  (u_char *b)
      case 0x21:  descriptorMPEG_MuxCode (b);  break; 
      case 0x22:  descriptorMPEG_FMXBufferSize (b);  break; 
      case 0x23:  descriptorMPEG_MultiplexBuffer (b);  break; 
-     case 0x24:  descriptorMPEG_FlexMuxTiming (b);  break;  // $$$ TODO collision with content_labeling desc.
+     // case 0x24:  descriptorMPEG_FlexMuxTiming (b);  break;  // collision with content_labeling desc.  H.222.0 (obsolete??)
+     case 0x24:  descriptorMPEG_ContentLabeling(b);  break;
 
      /* TV ANYTIME, TS 102 323 */
      case 0x25:  descriptorMPEG_TVA_metadata_pointer (b);  break; 
      case 0x26:  descriptorMPEG_TVA_metadata (b);  break; 
      case 0x27:  descriptorMPEG_TVA_metadata_STD (b);  break; 
+
+     /* H.222.0 AMD 3 */
+     case 0x28:  descriptorMPEG_AVC_video (b);  break; 
+     case 0x29:  descriptorMPEG_IPMP (b);  break; 
+     case 0x2A:  descriptorMPEG_AVC_timing_and_HRD (b);  break; 
 
      default: 
 	if (b[0] < 0x80) {
@@ -1582,25 +1594,121 @@ void descriptorMPEG_MultiplexBuffer (u_char *b)
 
 
 
+
+// ---- collision with old H.222.0 draft, obsolete??
+
+// /*
+//   0x24   Flex-Mux-Timing descriptor
+//   ITU-T H.222.0-I-Cor1 
+// */
+// 
+// void descriptorMPEG_FlexMuxTiming (u_char *b)
+// 
+// {
+//   // d.descriptor_tag		 = b[0];
+//   // d.descriptor_length       	 = b[1];
+// 
+// 
+//  outBit_Sx_NL   (4,"FCR_ES_ID: ",  	b,16,16);
+//  outBit_S2Tx_NL (4,"FCRResolution: ",  	b,32,32,"(cycles/s)");
+//  outBit_Sx_NL   (4,"FCRLength: ",  	b,64, 8);
+//  outBit_Sx_NL   (4,"FCRRateLength: ",  	b,72, 8);
+// 
+// }
+
+
+
+
+
 /*
-  0x24   Flex-Mux-Timing descriptor
-  ITU-T H.222.0-I-Cor1 
+  0x24   Content Labeling descriptor
+  ITU-T H.222.0 AMD 1
 */
 
-void descriptorMPEG_FlexMuxTiming (u_char *b)
+void descriptorMPEG_ContentLabeling (u_char *b)
 
 {
-  // d.descriptor_tag		 = b[0];
-  // d.descriptor_length       	 = b[1];
+  int     len;
+  u_int   maf;
+  u_int   crirf;
+  u_int   ctbi;
 
 
- outBit_Sx_NL   (4,"FCR_ES_ID: ",  	b,16,16);
- outBit_S2Tx_NL (4,"FCRResolution: ",  	b,32,32,"(cycles/s)");
- outBit_Sx_NL   (4,"FCRLength: ",  	b,64, 8);
- outBit_Sx_NL   (4,"FCRRateLength: ",  	b,72, 8);
+  // tag	= b[0];
+  len		= b[1];
 
+
+// $$$ TODO 
+  indent (+1);
+  printhex_buf (4, b+2, len);  // $$$ TODO  H.222.0 AMD 1
+  indent (-1);
+
+
+  maf = outBit_Sx_NL   (4,"metadata_application_format: ",  	b, 16, 16);   //$$$ TODO
+  b   += 4;
+  len -= 2;
+  if (maf == 0xFFFF) {
+  	outBit_Sx_NL   (4,"metadata_application_format_identifier: ",  	b,  0, 32);
+	b   += 4;
+	len -= 4;
+  }
+
+
+  crirf = outBit_Sx_NL (4,"content_reference_id_record_flag: ",	b,  0,  1);
+  ctbi  = outBit_Sx_NL   (4,"content_time_base_indicator: ",  	b,  1,  4);
+  outBit_Sx_NL   (6,"reserved: ",  				b,  5,  3);
+  b++;
+  len --;
+
+  if (crirf == 1) {
+	u_int  len2;
+
+  	len2 = outBit_Sx_NL (4,"content_reference_id_record_length: ", b, 0, 8);
+	print_databytes (4,"content_reference_id_byte:", b+1, len2);
+	b   += len2 + 1;
+	len -= len2 + 1;
+  }
+
+
+
+  if ( (ctbi == 1) || (ctbi == 2)) {
+	long long ll;
+
+  	outBit_Sx_NL   (6,"reserved: ",  	b,  0,  7);
+	ll = getBits48 (b, 0,  7, 33);
+	out (4,"content_time_base_value: ");
+	print_timebase90kHz (4, ll);
+	out_NL (4);
+
+  	outBit_Sx_NL   (6,"reserved: ",  	b, 40,  7);
+	ll = getBits48 (b, 0,  47, 33);
+	out (4,"metadata_time_base_value: ");
+	print_timebase90kHz (4, ll);
+	out_NL (4);
+
+	b   += 10;
+	len -= 10;
+  }
+
+  if (ctbi == 2) {
+  	outBit_Sx_NL   (6,"reserved: ",  	b,  0,  1);
+  	outBit_Sx_NL   (4,"contentId: ",  	b,  1,  7);
+	b++;
+	len --;
+  }
+
+  if ( (ctbi >= 3) && (ctbi <= 7)) {
+	u_int  len2;
+
+  	len2 = outBit_Sx_NL (4,"time_base_association_data_length: ", b, 0, 8);
+	print_databytes (6,"reserved:", b+1, len2);
+	b   += len2 + 1;
+	len -= len2 + 1;
+  }
+
+
+  print_private_data (4, b, len);
 }
-
 
 
 
@@ -1669,6 +1777,71 @@ void descriptorMPEG_TVA_metadata_STD (u_char *b)
   printhex_buf (4, b+2, len);  // $$$ TODO 
   indent (-1);
 }
+
+
+
+/*
+  0x28  AVC video descriptor
+  H.222.0 AMD 3
+*/
+
+void descriptorMPEG_AVC_video (u_char *b)
+
+{
+  int  len;
+
+  // tag	= b[0];
+  len		= b[1];
+
+
+  indent (+1);
+  printhex_buf (4, b+2, len);  // $$$ TODO 
+  indent (-1);
+}
+
+
+
+
+/*
+  0x29  IPMP descriptor
+  H.222.0 AMD 3
+*/
+
+void descriptorMPEG_IPMP (u_char *b)
+
+{
+  int  len;
+
+  // tag	= b[0];
+  len		= b[1];
+
+
+  indent (+1);
+  printhex_buf (4, b+2, len);  // $$$ TODO 
+  indent (-1);
+}
+
+
+
+/*
+  0x2A  AVC_timing_and_HRD descriptor
+  H.222.0 AMD 3
+*/
+
+void descriptorMPEG_AVC_timing_and_HRD (u_char *b)
+
+{
+  int  len;
+
+  // tag	= b[0];
+  len		= b[1];
+
+
+  indent (+1);
+  printhex_buf (4, b+2, len);  // $$$ TODO 
+  indent (-1);
+}
+
 
 
 

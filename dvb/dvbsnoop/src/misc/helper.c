@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.32 2004/08/08 17:00:25 rasc Exp $
+$Id: helper.c,v 1.33 2004/08/12 22:57:18 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,11 @@ $Id: helper.c,v 1.32 2004/08/08 17:00:25 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.33  2004/08/12 22:57:18  rasc
+ - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
+ - New: PES update ITU-T H.222.0 AMD2
+H.222.0 AMD3 updates started
+
 Revision 1.32  2004/08/08 17:00:25  rasc
 Bugfix: Cell List descriptor (tnx to Karsten Siebert)
 
@@ -612,6 +617,28 @@ void print_time40 (int v, u_long mjd, u_long utc)
 
 
 
+/*
+ -- print 90kHz timebase
+ -- 33 bit  z.B. xTS
+*/ 
+
+void print_timebase90kHz (int v, long long time90kHz)
+
+{
+   long long ull = time90kHz;
+
+   	int     h,m,s,u;
+	u_long  p = ull/90;
+
+	// -- following lines taken from "dvbtextsubs  Dave Chapman"
+	h=(p/(1000*60*60));
+	m=(p/(1000*60))-(h*60);
+	s=(p/1000)-(h*3600)-(m*60);
+	u=p-(h*1000*60*60)-(m*1000*60)-(s*1000);
+
+    	out (v,"%llu (0x%08llx)", ull,ull);
+	out (v,"  [= 90 kHz-Timestamp: %d:%02d:%02d.%03d]", h,m,s,u);
+}
 
 
 /*

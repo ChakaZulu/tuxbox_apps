@@ -1,4 +1,7 @@
 
+ - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
+ - New: PES update ITU-T H.222.0 AMD2
+ - Bugfix: cell list descriptors (tnx to Karsten Siebert)
  - Bugfix: cable descriptors frequency (tnx to Karsten Siebert)
  - New: TV-Anytime (TS 102 323) RNT descriptors
  - Bugfix: UNT/INT table mixup, misc. descriptor stuff  (tnx to Karsten Siebert)

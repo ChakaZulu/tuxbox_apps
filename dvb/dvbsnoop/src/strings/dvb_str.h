@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.25 2004/08/06 22:21:38 rasc Exp $ 
+$Id: dvb_str.h,v 1.26 2004/08/12 22:57:19 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: dvb_str.h,v 1.25 2004/08/06 22:21:38 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.26  2004/08/12 22:57:19  rasc
+ - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
+ - New: PES update ITU-T H.222.0 AMD2
+H.222.0 AMD3 updates started
+
 Revision 1.25  2004/08/06 22:21:38  rasc
 New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
 
@@ -99,8 +104,8 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 #define __DVB_STR_H 
 
 
-char *dvbstrBouquetTable_ID (u_int i);
-char *dvbstrStreamContent_Component_TYPE (u_int i);
+
+char *dvbstrPID_assignment (u_int id);
 char *dvbstrTableID (u_int id);
 char *dvbstrMPEGDescriptorTAG (u_int tag);
 char *dvbstrDVBDescriptorTAG (u_int tag);
@@ -160,6 +165,7 @@ char *dvbstrTS_ScramblingCtrl_TYPE (u_int id);
 /* -- PES stuff */
 
 char *dvbstrPESstream_ID(u_int id);
+char *dvbstrPESstream_ID_Extension (u_int i);    // 2004-08-11 H.222.0 AMD2
 char *dvbstrPESscrambling_ctrl_TYPE(u_int id);
 char *dvbstrPESTrickModeControl (u_int i);
 char *dvbstrPESDataIdentifier (u_int i);
@@ -190,6 +196,10 @@ char *dvbstrWSS_copy_generation_bit (u_int i);
 
 char *dvbstrCountryCode_ID (u_int i);
 char *dvbstrPrivateDataSpecifier_ID (u_int i);
+
+char *dvbstrBouquetTable_ID (u_int i);
+char *dvbstrStreamContent_Component_TYPE (u_int i);
+
 
 
 /* EN 301 192 v1.4.1 updates */

@@ -14,7 +14,7 @@
 
 
 #ifndef __HELPER_H
-#define __HELPER_H 1
+#define __HELPER_H
 
 
 u_long outBit_Sx (int verbosity, const char *text, u_char *buf, int startbit, int bitlen);
@@ -37,6 +37,8 @@ void print_text_UTF8 (int v, const char *s, u_char *b, u_int len);
 void print_std_ascii (int v, const char *s, u_char *b, u_int len);
 
 void print_time40 (int verbose, u_long mjd, u_long utc);
+void print_timebase90kHz (int v, long long time90kHz);
+
 void print_databytes (int verbose, const char *str, u_char *b, u_int len);
 void print_databytes_line  (int v, const char *str, u_char *b, u_int len);
 void print_private_data (int verbose, u_char *b, u_int len);

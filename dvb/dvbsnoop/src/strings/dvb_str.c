@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.55 2004/08/01 21:33:09 rasc Exp $
+$Id: dvb_str.c,v 1.56 2004/08/12 22:57:19 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,11 @@ $Id: dvb_str.c,v 1.55 2004/08/01 21:33:09 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.56  2004/08/12 22:57:19  rasc
+ - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
+ - New: PES update ITU-T H.222.0 AMD2
+H.222.0 AMD3 updates started
+
 Revision 1.55  2004/08/01 21:33:09  rasc
 minor TVA stuff (TS 102 323)
 
@@ -226,6 +231,42 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 /*
+  --  PID assignment
+*/
+
+char *dvbstrPID_assignment (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+     {  0x0000, 0x0000,  "ISO 13818-1 Program Association Table (PAT)" },
+     {  0x0001, 0x0001,  "ISO 13818-1 Conditional Access Table (CAT)" },
+     {  0x0002, 0x0002,  "ISO 13818-1 Transport Stream Description Table (TSDT)" },
+     {  0x0003, 0x0003,  "ISO 13818-11 IPMP Control Information " },
+     {  0x0010, 0x0010,  "DVB Network Information Table (NIT), Stuffing Table (ST)" },
+     {  0x0011, 0x0011,  "DVB Service Description Table (SDT), Bouquet Association Table (BAT)" },
+     {  0x0012, 0x0012,  "DVB Event Information Table (EIT)" },
+     {  0x0013, 0x0013,  "DVB Running Status Table (RST)" },
+     {  0x0014, 0x0014,  "DVB Time and Date Table (TDT), Time Offset Table (TOT)" },
+     {  0x0015, 0x0015,  "DVB Network Synchronization" },
+     {  0x0016, 0x0016,  "TV ANYTIME Resolution Notification Table (RNT)" },
+     {  0x001C, 0x001C,  "DVB Inband Signalling" },
+     {  0x001D, 0x001D,  "DVB Measurement" },
+     {  0x001E, 0x001E,  "DVB Discontinuity Information Table (DIT)" },
+     {  0x001F, 0x001F,  "DVB Selection Information Table (SIT)" },
+
+     // $$$ TODO  ATSC Pid assignment
+
+     {  0x1FFF, 0x1FFF,  "Null Packet" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
   --  Table IDs (sections)
  ETSI EN 468   5.2
  EN 301 192
@@ -242,6 +283,7 @@ char *dvbstrTableID (u_int id)
 
  	// updated -- 2003-11-04
 	// -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
+	// -- updated 2004-08-12  from ITU-T Rec H.222.0 AMD2
 	// ATSC Table IDs could be included...
      {  0x00, 0x00,  "Program Association Table (PAT)" },
      {  0x01, 0x01,  "Conditional Access Table (CAT)" },
@@ -249,8 +291,9 @@ char *dvbstrTableID (u_int id)
      {  0x03, 0x03,  "Transport Stream Description Table (TSDT)" },
      {  0x04, 0x04,  "ISO_IEC_14496_scene_description_section" },	/* $$$ TODO */
      {  0x05, 0x05,  "ISO_IEC_14496_object_description_section" },	/* $$$ TODO */
-     {  0x06, 0x07,  "Metadata_section" },				// $$$ TODO H.222.0 AMD1
-     {  0x07, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
+     {  0x06, 0x06,  "Metadata_section" },				// $$$ TODO H.222.0 AMD1
+     {  0x07, 0x07,  "IPMP_Control_Information_section (ISO 13818-11)" }, // $$$ TODO H.222.0 AMD1
+     {  0x08, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
      {  0x38, 0x39,  "ISO/IEC 13818-6 reserved" },
      {  0x3a, 0x3a,  "DSM-CC - multiprotocol encapsulated data" },
      {  0x3b, 0x3b,  "DSM-CC - U-N messages (DSI or DII)" },
@@ -302,14 +345,14 @@ char *dvbstrTableID (u_int id)
 /*
   -- ISO Descriptor table tags
   -- ISO 13818-1, etc.
+  -- 2004-08-11 Updated H.222.0 AMD1
+  -- 2004-08-12 Updated H.222.0 AMD3
 */
 
 char *dvbstrMPEGDescriptorTAG (u_int tag)
 
 {
   STR_TABLE  Tags[] = {
-	// ISO 13818-1
-	// -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
      {  0x00, 0x01,  "Reserved" },
      {  0x02, 0x02,  "video_stream_descriptor" },
      {  0x03, 0x03,  "audio_stream_descriptor" },
@@ -348,13 +391,16 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x21, 0x21,  "MuxCode_descriptor" },
      {  0x22, 0x22,  "FMXBufferSize_descriptor" },
      {  0x23, 0x23,  "MultiplexBuffer_descriptor" },
-     {  0x24, 0x24,  "FlexMuxTiming_descriptor" }, // $$$ TODO collision with ContentLabeling descr.
+//     {  0x24, 0x24,  "FlexMuxTiming_descriptor" }, // $$$ TODO collision with ContentLabeling descr.  (obsolete??)
+     {  0x24, 0x24,  "Content_labeling_descriptor" },
      	/* TV ANYTIME TS 102 323 descriptors, ISO 13818-1 */
      {  0x25, 0x25,  "metadata_pointer_descriptor" },
      {  0x26, 0x26,  "metadata_descriptor" },
      {  0x27, 0x27,  "metadata_STD_descriptor" },
-
-     {  0x28, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
+     {  0x28, 0x28,  "AVC_video_descriptor" },
+     {  0x29, 0x29,  "IPMP_descriptor (MPEG-2 IPMP, ISO 13818-11)" },
+     {  0x2A, 0x2A,  "AVC_timing_and_HRD_descriptor" },
+     {  0x2B, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
 
      {  0x40, 0xFF,  "Forbidden descriptor in MPEG context" },	// DVB Context
      {  0,0, NULL }
@@ -363,6 +409,14 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
 
   return findTableID (Tags, tag);
 }
+
+
+
+
+
+
+
+
 /*
   -- Descriptor table tags
 */
@@ -674,17 +728,19 @@ char *dvbstrService_TYPE (u_int flag)
 
 /*
  -- Programm Map Table   Stream Type
+ -- ISO 13818-1 
+ -- 2004-07  updated H.222.0 AMD1
+ -- 2004-08  updated H.222.0 AMD3
 */
 
 char *dvbstrStream_TYPE (u_int flag)
 
 {
-  /* ISO 13818-1  */
-
   STR_TABLE  Table[] = {
 	  // -- updated 2003-10-17  from H.220
 	  // -- updated 2003-11-04  from ATSC / ISO13818-6AMD1-2000
-	  // -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
+	  // -- updated 2004-07-26  from ITU-T Rec H.222.0 AMD1
+	  // -- updated 2004-08-12  from ITU-T Rec H.222.0 AMD3
      {  0x00, 0x00,  "ITU-T | ISO-IE Reserved" },
      {  0x01, 0x01,  "ISO/IEC 11172 Video" },
      {  0x02, 0x02,  "ITU-T Rec. H.262 | ISO/IEC 13818-2 Video | ISO/IEC 11172-2 constr. parameter video stream" },
@@ -712,7 +768,10 @@ char *dvbstrStream_TYPE (u_int flag)
      {  0x17, 0x17,  "Metadata carried in ISO/IEC 13818-6 (DSM-CC) Data Carousel" },
      {  0x18, 0x18,  "Metadata carried in ISO/IEC 13818-6 (DSM-CC) Object Carousel" },
      {  0x19, 0x19,  "Metadata carried in ISO/IEC 13818-6 Synchronized Download Protocol using the Metadata Access Unit Wrapper" },
-     {  0x1A, 0x7F,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 reserved" },
+     {  0x1A, 0x1A,  "IPMP stream (defined in ISO/IEC 13818-11, MPEG-2 IPMP)" },
+     {  0x1B, 0x1B,  "AVC video stream as defined in ITU-T Rec. H.264 | ISO/IEC 14496-10 Video" },
+     {  0x1C, 0x7E,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 reserved" },
+     {  0x7F, 0x7F,  "IPMP stream" },
 
      // $$$ ATSC ID Names could be includes...
      // $$$ streamtype == 0x90 at MPE_FEC , see EN 301192 v1.4.1 s9.5
@@ -2012,6 +2071,7 @@ char *dvbstrPESstream_ID (u_int i)
 {
   STR_TABLE  Table[] = {
 	// -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
+	// -- updated 2004-08-11  from ITU-T Rec H.222.0 AMD3
 	//
      // on changes:  adapt dmx_pes.c!!! etc. (search for PESstream_ID)
      {  0x00, 0xB8,  "!!!unknown or PES stream not in sync... (!!!)" },
@@ -2039,10 +2099,31 @@ char *dvbstrPESstream_ID (u_int i)
      {  0xFA, 0xFA,  "ISO/IEC14496-1_SL-packetized_stream" },
      {  0xFB, 0xFB,  "ISO/IEC14496-1_FlexMux_stream" },
      {  0xFC, 0xFC,  "metadata stream" },
-     {  0xFD, 0xFE,  "reserved data stream" },
+     {  0xFD, 0xFD,  "extended_stream_id" },
+     {  0xFE, 0xFE,  "reserved data stream" },
      {  0xFF, 0xFF,  "program_stream_directory" },
      {  0,0, NULL }
 
+  };
+
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- PES Stream_id  H.222.0 AMD2
+  -- 2004-08-11  ITU-T Rec H.222.0 AMD2
+*/
+
+char *dvbstrPESstream_ID_Extension (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "IPMP Control Information stream" },
+     {  0x01, 0x01,  "IPMP stream" },
+     {  0x02, 0x7F,  "reserved_data_stream" },
+     {  0x80, 0xFF,  "private_stream" },
+     {  0,0, NULL }
   };
 
 

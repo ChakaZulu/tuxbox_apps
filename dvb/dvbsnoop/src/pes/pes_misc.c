@@ -1,5 +1,5 @@
 /*
-$Id: pes_misc.c,v 1.7 2004/02/20 22:18:41 rasc Exp $
+$Id: pes_misc.c,v 1.8 2004/08/12 22:57:18 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,11 @@ $Id: pes_misc.c,v 1.7 2004/02/20 22:18:41 rasc Exp $
 
 
 $Log: pes_misc.c,v $
+Revision 1.8  2004/08/12 22:57:18  rasc
+ - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
+ - New: PES update ITU-T H.222.0 AMD2
+H.222.0 AMD3 updates started
+
 Revision 1.7  2004/02/20 22:18:41  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -87,21 +92,9 @@ void  print_xTS_field (int v, const char *str, u_char *b, int bit_offset)
                 outBit_Sx_NL (v1,"marker_bit: ",	b, bo+35, 1);
 
     ull = (xTS_32_30<<30) + (xTS_29_15<<15) + xTS_14_0;
-    out (v," ==> %s: %llu (0x%08llx)", str, ull,ull);
-
-    // -- display time
-    {
-	int     h,m,s,u;
-	u_long  p = ull/90;
-
-	// -- following lines taken from "dvbtextsubs  Dave Chapman"
-	h=(p/(1000*60*60));
-	m=(p/(1000*60))-(h*60);
-	s=(p/1000)-(h*3600)-(m*60);
-	u=p-(h*1000*60*60)-(m*1000*60)-(s*1000);
-
-	out_nl (v,"  [= 90 kHz-Timestamp: %d:%02d:%02d.%03d]", h,m,s,u);
-    }
+    out (v," ==> %s: ", str);
+    print_timebase90kHz (v, ull);
+    out_NL (v);
 
   indent (-1);
 }
