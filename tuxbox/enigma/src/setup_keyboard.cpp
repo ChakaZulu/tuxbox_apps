@@ -87,13 +87,13 @@ void eZapKeyboardSetup::loadMappings()
 	const char *mapPaths[] =
 	{
 		"/var/keymaps/",
-		"/share/keymaps/",
+		DATADIR "/keymaps/",
 		0
 	};
 
 	char *current_map=0;
 	if ( eConfig::getInstance()->getKey("/ezap/keyboard/mapping", current_map) )
-		current_map = strdup("/share/keymaps/eng.kmap");
+		current_map = strdup(DATADIR "/keymaps/eng.kmap");
 
 	std::set<eString> parsedMaps;
 

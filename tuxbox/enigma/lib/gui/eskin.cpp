@@ -274,7 +274,7 @@ int eSkin::parseImages(XMLTreeNode *inode)
 			// search first in CONFIGDIR
 			image=loadPNG((eString(CONFIGDIR)+filename).c_str());
 			if (!image)
-				image=loadPNG((eString(DATADIR)+filename).c_str());
+				image=loadPNG((eString(TUXBOXDATADIR)+filename).c_str());
 		}
 		else // abs path
 			image=loadPNG(filename.c_str());

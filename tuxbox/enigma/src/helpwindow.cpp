@@ -142,7 +142,7 @@ eHelpWindow::eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID):
 
 eString eHelpWindow::loadHelpText(int helpIDtoLoad)
 {
-	FILE *in=fopen(eString((DATADIR)+eString("/enigma/resources/help.xml")).c_str(), "rt");
+	FILE *in=fopen(TUXBOXDATADIR "/enigma/resources/help.xml", "rt");
 	if (!in)
 	{
 		eDebug("cannot open help.xml");

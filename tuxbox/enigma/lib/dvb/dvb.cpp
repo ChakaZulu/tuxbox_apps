@@ -467,13 +467,13 @@ int existNetworks::reloadNetworks()
 		switch (fetype)
 		{
 			case eSystemInfo::feSatellite:
-				filename="/share/tuxbox/satellites.xml";
+				filename=TUXBOXDATADIR "/satellites.xml";
 				break;
 			case eSystemInfo::feCable:
-				filename="/share/tuxbox/cables.xml";
+				filename=TUXBOXDATADIR "/cables.xml";
 				break;
 			case eSystemInfo::feTerrestrial:
-				filename="/share/tuxbox/terrestrial.xml";
+				filename=TUXBOXDATADIR "/terrestrial.xml";
 				break;
 			default:
 				break;

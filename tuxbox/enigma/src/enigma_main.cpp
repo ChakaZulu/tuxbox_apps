@@ -5560,7 +5560,7 @@ void showMP3Pic()
 		Decoder::displayIFrameFromFile(CONFIGDIR "/enigma/pictures/mp3.mvi" );
 	}
 	else
-		Decoder::displayIFrameFromFile(DATADIR "/enigma/pictures/mp3.mvi" );
+		Decoder::displayIFrameFromFile(TUXBOXDATADIR "/enigma/pictures/mp3.mvi" );
 }
 
 void showRadioPic()
@@ -5572,7 +5572,7 @@ void showRadioPic()
 		Decoder::displayIFrameFromFile(CONFIGDIR "/enigma/pictures/radio.mvi" );
 	}
 	else
-		Decoder::displayIFrameFromFile(DATADIR "/enigma/pictures/radio.mvi" );
+		Decoder::displayIFrameFromFile(TUXBOXDATADIR "/enigma/pictures/radio.mvi" );
 }
 
 void eZapMain::handleServiceEvent(const eServiceEvent &event)

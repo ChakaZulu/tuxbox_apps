@@ -997,11 +997,11 @@ void showScanPic()
 	}
 	else 
 	{
-		FILE *f = fopen(DATADIR "/enigma/pictures/scan.mvi", "r");
+		FILE *f = fopen(TUXBOXDATADIR "/enigma/pictures/scan.mvi", "r");
 		if ( f )
 		{
 			fclose(f);
-			Decoder::displayIFrameFromFile(DATADIR "/enigma/pictures/scan.mvi" );
+			Decoder::displayIFrameFromFile(TUXBOXDATADIR "/enigma/pictures/scan.mvi" );
 		}
 	}
 }

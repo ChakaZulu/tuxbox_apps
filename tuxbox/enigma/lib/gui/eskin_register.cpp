@@ -13,16 +13,16 @@ public:
 	eSkinInit()
 	{
 		if (default_skin.load( CONFIGDIR "/enigma/skins/default.esml"))
-			if (default_skin.load( DATADIR "/enigma/skins/default.esml"))
-				eFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
+			if (default_skin.load( TUXBOXDATADIR "/enigma/skins/default.esml"))
+				eFatal("skin load failed (" TUXBOXDATADIR "/enigma/skins/default.esml)");
 
 		eString defaultSkin =
 			eSystemInfo::getInstance()->getHwType()
 				== eSystemInfo::TR_DVB272S
 			?
-				DATADIR "/enigma/skins/small_red.esml"
+				TUXBOXDATADIR "/enigma/skins/small_red.esml"
 			:
-				DATADIR "/enigma/skins/stone.esml";
+				TUXBOXDATADIR "/enigma/skins/stone.esml";
 
 		eString skinfile=defaultSkin;
 

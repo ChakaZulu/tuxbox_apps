@@ -13,7 +13,7 @@
 #include <enigma_main.h>
 
 #ifndef ZONEINFODIR
-#define ZONEINFODIR "/share/zoneinfo"
+#define ZONEINFODIR DATADIR "/zoneinfo"
 #endif
 
 eZapTimeZoneSetup::eZapTimeZoneSetup(bool showHint)

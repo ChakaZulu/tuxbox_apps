@@ -167,7 +167,7 @@ void eRCInput::loadKeyboardMapping()
 {
 	char *current_map=0;
 	if ( eConfig::getInstance()->getKey("/ezap/keyboard/mapping", current_map) )
-		current_map = strdup("/share/keymaps/eng.kmap");
+		current_map = strdup(DATADIR "/keymaps/eng.kmap");
 	if ( system(eString().sprintf("busybox loadkmap < %s", current_map).c_str()) >> 8 )
 		eDebug("load keyboard mapping failed");
 	free(current_map);

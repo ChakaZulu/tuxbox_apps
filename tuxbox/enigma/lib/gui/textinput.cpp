@@ -64,7 +64,7 @@ void eTextInputField::loadKeyMappings()
 	in=fopen(filename, "rt");
 	if (!in)
 	{
-		char *filename=DATADIR "/enigma/resources/keymappings.xml";
+		char *filename=TUXBOXDATADIR "/enigma/resources/keymappings.xml";
 		in=fopen(filename, "rt");
 	}
 	if (!in)

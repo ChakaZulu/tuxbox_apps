@@ -109,7 +109,7 @@ eWizardLanguage::eWizardLanguage()
 	if (eSkin::getActive()->build(this, "eWizardLanguage"))
 		eFatal("skin load of \"eWizardLanguage\" failed");
 
-	FILE *f=fopen("/share/locale/locales", "rt");
+	FILE *f=fopen(LOCALEDIR "/locale.alias", "rt");
 	if (!f)
 	{
 		eDebug("eWizardLanguage: no languages defined!");
@@ -197,7 +197,7 @@ class eWizardLanguageInit
 public:
 	eWizardLanguageInit()
 	{
-		FILE *f=fopen("/share/locale/locales", "rt");
+		FILE *f=fopen(LOCALEDIR "/locales", "rt");
 			// only run wizzard when language not yet setup'ed
 		char *temp;
 		if (!eConfig::getInstance()->getKey("/elitedvb/language", temp) )
@@ -205,7 +205,7 @@ public:
 		else if ( f )
 			eWizardLanguage::run();
 		else
-			eDebug("no locales found (/share/locale/locales).. do not start language wizard");
+			eDebug("no locales found (" LOCALEDIR "/locale.alias).. do not start language wizard");
 		if (f)
 			fclose(f);
 	}

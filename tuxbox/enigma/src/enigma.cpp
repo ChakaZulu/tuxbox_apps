@@ -166,11 +166,11 @@ eZap::eZap(int argc, char **argv)
 		case eSystemInfo::DM7020:
 			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdm7000.xml") )
 				if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox2.xml") )
-					if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdm7000.xml") )
-						if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox2.xml") )
+					if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdm7000.xml") )
+						if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdreambox2.xml") )
 							eFatal("couldn't load RC Mapping file for DM7000");
 			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox_keyboard.xml") )
-				if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox_keyboard.xml") )
+				if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdreambox_keyboard.xml") )
 					eDebug("couldn't load Dreambox keyboard mapping (rcdreambox_keyboard.xml)");
 			break;
 //		case eSystemInfo::TR_DVB272S:
@@ -178,31 +178,31 @@ eZap::eZap(int argc, char **argv)
 		case eSystemInfo::DM5620:
 		case eSystemInfo::DM500:
 			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdm5xxx.xml") )
-				if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdm5xxx.xml") )
+				if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdm5xxx.xml") )
 					eFatal("couldn't load RC Mapping file for DM5XXX");
 			break;
 		case eSystemInfo::TR_DVB272S:
 			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rctrdvb272.xml") )
-				eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rctrdvb272.xml");
+				eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rctrdvb272.xml");
 		default:
 			break;
 	}
 #endif
 #ifndef DISABLE_DBOX_RC
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxold.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxold.xml");
+		eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdboxold.xml");
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxnew.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxnew.xml");
+		eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdboxnew.xml");
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxbuttons.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
+		eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdboxbuttons.xml");
 #endif
 #else
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdbox_inputdev.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdbox_inputdev.xml");
+		eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdbox_inputdev.xml");
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcgeneric_inputdev.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcgeneric_inputdev.xml");
+		eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcgeneric_inputdev.xml");
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox_inputdev.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox_inputdev.xml");
+		eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdreambox_inputdev.xml");
 #endif // HAVE_DVB_API_VERSION < 3
 
 	for(std::map<eString,eRCDevice*>::iterator i(eRCInput::getInstance()->getDevices().begin());
@@ -298,7 +298,7 @@ void eZap::reconfigureHTTPServer()
 	fileresolver->addTranslation("/var/tuxbox/htdocs", "/www", 2); /* TODO: make user configurable */
 	fileresolver->addTranslation(CONFIGDIR , "/config", 3);
 	fileresolver->addTranslation("/", "/root", 3);
-	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/", 2);
+	fileresolver->addTranslation(TUXBOXDATADIR "/enigma/htdocs", "/", 2);
 
 	logresolver = new eHTTPLogResolver();
 
@@ -418,7 +418,7 @@ int main(int argc, char **argv)
 	eDebug("%s", copyright);
 
 	setlocale (LC_ALL, "");
-	bindtextdomain ("tuxbox-enigma", "/share/locale");
+	bindtextdomain ("tuxbox-enigma", LOCALEDIR);
 	bind_textdomain_codeset("tuxbox-enigma", "UTF8");
 	textdomain ("tuxbox-enigma");
 
