@@ -118,6 +118,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 			switch (msg)
+			{
 				case NeutrinoMessages::EVT_SCAN_SATELLITE:
 					frameBuffer->paintBox(xpos3, ypos+ 2* mheight, x+width-105, ypos+ 2* mheight+mheight, COL_MENUCONTENT);
 					g_Fonts->menu->RenderString(xpos3, ypos+ 3*mheight, width, (char*)data, COL_MENUCONTENT);
@@ -152,9 +153,9 @@ int CScanTs::exec(CMenuTarget* parent, string)
 					msg      = CRCInput::RC_timeout;
 					break;
 				default:
-					if (msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
-					delete (unsigned char*) data;
-					break;:
+					if ((msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) ) delete (unsigned char*) data;
+					break;
+			}
 		}
 	}
 
