@@ -886,8 +886,7 @@ SubService::SubService(eListBox<SubService> *listbox, eDVBNamespace dvb_namespac
 			eOriginalNetworkID(descr->original_network_id),
 			eServiceID(descr->service_id), 7)
 {
-	text=(const char*)descr->private_data;
-	service.descr = text;
+	service.descr=text=convertDVBUTF8(descr->private_data, descr->priv_len);
 }
 
 struct selectCurSubService
