@@ -53,7 +53,7 @@ extern "C" int pinghost( const char *hostname );
 
 bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
 {
-	if( *((int*) Data)==0)   // diseqc off
+	if (*((int*) Data) == NO_DISEQC)
 	{
 		satMenu->setActive(true);
 		extMenu->setActive(false);
@@ -63,7 +63,7 @@ bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
 	{
 		satMenu->setActive(false);
 		extMenu->setActive(true);
-		repeatMenu->setActive(true);
+		repeatMenu->setActive((*((int*) Data) != DISEQC_1_0));
 	}
 	return true;
 }
