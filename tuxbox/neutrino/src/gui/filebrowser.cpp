@@ -197,7 +197,7 @@ CFileBrowser::~CFileBrowser()
 
 CFile *CFileBrowser::getSelectedFile()
 {
-	if(filelist[selected].Name.length() > 0)
+	if ((filelist.size() > 0) && (filelist[selected].Name.length() > 0))
 		return &filelist[selected];
 	else
 		return NULL;
@@ -493,18 +493,17 @@ bool CFileBrowser::exec(std::string Dirname)
 		}
 		else if ( msg == CRCInput::RC_down )
 		{
-			int prevselected=selected;
-			selected = (selected+1)%filelist.size();
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
+			if (filelist.size() != 0)
 			{
-				paint();
-			}
-			else
-			{
-				paintItem(selected - liststart);
+				int prevselected=selected;
+				selected = (selected + 1) % filelist.size();
+				paintItem(prevselected - liststart);
+				unsigned int oldliststart = liststart;
+				liststart = (selected/listmaxshow)*listmaxshow;
+				if(oldliststart!=liststart)
+					paint();
+				else
+					paintItem(selected - liststart);
 			}
 		}
 		else if ( ( msg == CRCInput::RC_timeout ) )
@@ -514,8 +513,9 @@ bool CFileBrowser::exec(std::string Dirname)
 		}
 		else if ( msg == CRCInput::RC_right )
 		{
-			if(S_ISDIR(filelist[selected].Mode) && (filelist[selected].getFileName() != "..") )
+			if (filelist.size() != 0)
 			{
+				if (S_ISDIR(filelist[selected].Mode) && (filelist[selected].getFileName() != ".."))
 					ChangeDir(filelist[selected].Name);
 			}
 		}
@@ -535,27 +535,28 @@ bool CFileBrowser::exec(std::string Dirname)
 		{
 			loop = false;
 		}
-		else if (msg==CRCInput::RC_ok)
+		else if (msg == CRCInput::RC_ok)
 		{
 			
-			if( filelist[selected].getFileName() == "..")
+			if (filelist.size() != 0)
 			{
-				ChangeDir("..");
-			}
-			else
-			{
-				std::string filename = filelist[selected].Name;
-				if ( filename.length() > 1 )
+				if (filelist[selected].getFileName() == "..")
+					ChangeDir("..");
+				else
 				{
-					if((!Multi_Select) && S_ISDIR(filelist[selected].Mode) && !Dir_Mode)
+					std::string filename = filelist[selected].Name;
+					if ( filename.length() > 1 )
 					{
-						ChangeDir(filelist[selected].Name);
-					}
-					else
-					{
-						filelist[selected].Marked = true;
-						loop = false;
-						res = true;
+						if((!Multi_Select) && S_ISDIR(filelist[selected].Mode) && !Dir_Mode)
+						{
+							ChangeDir(filelist[selected].Name);
+						}
+						else
+						{
+							filelist[selected].Marked = true;
+							loop = false;
+							res = true;
+						}
 					}
 				}
 			}
