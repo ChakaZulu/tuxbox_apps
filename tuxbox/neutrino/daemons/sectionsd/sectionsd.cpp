@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.19 2001/07/17 02:38:56 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.20 2001/07/17 12:39:18 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.20  2001/07/17 12:39:18  fnbrd
+//  Neue Kommandos
+//
 //  Revision 1.19  2001/07/17 02:38:56  fnbrd
 //  Fehlertoleranter
 //
@@ -254,16 +257,12 @@ static int stopDMXeitNVOD(void)
   return 0;
 }
 
-static const SIevent &findActualSIeventForServiceName(const char *serviceName)
+// Liefert die ServiceID zu einem Namen
+// 0 bei Misserfolg
+static unsigned short findServiceIDforServiceName(const char *serviceName)
 {
-static SIevent nullEvt; // Null-Event, falls keins gefunden
-
-  // Die for-Schleifen sind laestig,
-  // Evtl. sollte man aus den sets maps machen, damit man den key einfacher aendern
-  // kann und somit find() funktioniert
   for(SIservices::iterator s=services.begin(); s!=services.end(); s++) {
     // Erst mal die Controlcodes entfernen
-//      printf("Servicename: '%s'\n", ks->serviceName.c_str());
     char servicename[50];
     strncpy(servicename, s->serviceName.c_str(), sizeof(servicename)-1);
     servicename[sizeof(servicename)-1]=0;
@@ -271,16 +270,28 @@ static SIevent nullEvt; // Null-Event, falls keins gefunden
       // Jetz pruefen ob der Servicename der gewuenschte ist
 //      printf("Servicename: '%s'\n", servicename);
     dprintf("testing '%s'\n", servicename);
-    if(!strcasecmp(servicename, serviceName)) {
-      // Event (serviceid) suchen
-      time_t zeit=time(NULL);
-      for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
-        if(e->serviceID==s->serviceID)
-          for(SItimes::iterator t=e->times.begin(); t!=e->times.end(); t++)
-            if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer))
-              return *e;
-      break;
-    }
+    if(!strcasecmp(servicename, serviceName))
+      return s->serviceID;
+  }
+  return 0;
+}
+
+static const SIevent &findActualSIeventForServiceName(const char *serviceName)
+{
+static SIevent nullEvt; // Null-Event, falls keins gefunden
+
+  // Die for-Schleifen sind laestig,
+  // Evtl. sollte man aus den sets maps machen, damit man den key einfacher aendern
+  // kann und somit find() funktioniert
+  unsigned short serviceID=findServiceIDforServiceName(serviceName);
+  if(serviceID) {
+    // Event (serviceid) suchen
+    time_t zeit=time(NULL);
+    for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
+      if(e->serviceID==serviceID)
+        for(SItimes::iterator t=e->times.begin(); t!=e->times.end(); t++)
+          if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer))
+            return *e;
   }
   return nullEvt;
 }
@@ -367,6 +378,83 @@ struct connectionData {
   int connectionSocket;
   struct sockaddr_in clientAddr;
 };
+
+static void commandAllEventsChannelName(struct connectionData *client, char *data, unsigned dataLength)
+{
+  data[dataLength-1]=0; // to be sure it has an trailing 0
+  dprintf("Request of all events for '%s'\n", data);
+  pthread_mutex_lock(&servicesLock);
+  unsigned short serviceID=findServiceIDforServiceName(data);
+  pthread_mutex_unlock(&servicesLock);
+  char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
+  if(!evtList) {
+    fprintf(stderr, "low on memory!\n");
+    return;
+  }
+  *evtList=0;
+  if(serviceID!=0) {
+    // service Found
+    if(pauseDMXeit())
+      return;
+    pthread_mutex_lock(&eventsLock);
+    for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
+      if(e->serviceID==serviceID) {
+        if(e->times.size()) { // Nur events mit Zeiten
+	  char strZeit[50];
+	  struct tm *tmZeit;
+          tmZeit=localtime(&(e->times.begin()->startzeit));
+	  sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
+	    tmZeit->tm_mday, tmZeit->tm_mon+1, tmZeit->tm_hour, tmZeit->tm_min, e->times.begin()->dauer/60);
+	  strcat(evtList, strZeit);
+	  strcat(evtList, e->name.c_str());
+	  strcat(evtList, "\n");
+//	  strcat(evtList, ctime(&(e->times.begin()->startzeit)));
+	} // if times.size
+      } // if = serviceID
+    pthread_mutex_unlock(&eventsLock);
+    if(unpauseDMXeit())
+      return;
+  }
+  struct msgSectionsdResponseHeader responseHeader;
+  responseHeader.dataLength=strlen(evtList)+1;
+  write(client->connectionSocket, &responseHeader, sizeof(responseHeader));
+  if(responseHeader.dataLength)
+    write(client->connectionSocket, evtList, responseHeader.dataLength);
+  return;
+}
+
+static void commandDumpStatusInformation(struct connectionData *client, char *data, unsigned dataLength)
+{
+char stati[1024];
+
+  dputs("Request of status information");
+
+  pthread_mutex_lock(&eventsLock);
+  int anzEvents=events.size();
+  pthread_mutex_unlock(&eventsLock);
+  pthread_mutex_lock(&servicesLock);
+  int anzServices=services.size();
+  pthread_mutex_unlock(&servicesLock);
+  struct mallinfo speicherinfo=mallinfo();
+  time_t zeit=time(NULL);
+  sprintf(stati,
+    "Current time: %s"
+    "Hours to cache: %d\n"
+    "Number of cached services: %d\n"
+    "Number of cached Events: %d\n"
+    "Total size of memory occupied by chunks handed out by malloc: %d\n"
+    "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",
+    ctime(&zeit),
+    HOURS_TO_CACHE, anzServices, anzEvents, speicherinfo.uordblks,
+    speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024.)
+    );
+  struct msgSectionsdResponseHeader responseHeader;
+  responseHeader.dataLength=strlen(stati)+1;
+  write(client->connectionSocket, &responseHeader, sizeof(responseHeader));
+  if(responseHeader.dataLength)
+    write(client->connectionSocket, stati, responseHeader.dataLength);
+  return;
+}
 
 // Mostly copied from epgd (something bugfixed ;) )
 static void commandCurrentNextInfoChannelName(struct connectionData *client, char *data, unsigned dataLength)
@@ -499,7 +587,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
 static void commandEventListTV(struct connectionData *client, char *data, unsigned dataLength)
 {
   dputs("Request of TV event list.\n");
-  char *evtList=new char[256*256];
+  char *evtList=new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
   if(!evtList) {
     fprintf(stderr, "low on memory!\n");
     return;
@@ -535,7 +623,9 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
 static void (*connectionCommands[NUMBER_OF_SECTIONSD_COMMANDS]) (struct connectionData *, char *, unsigned)  = {
   commandActualEPGchannelName,
   commandEventListTV,
-  commandCurrentNextInfoChannelName
+  commandCurrentNextInfoChannelName,
+  commandDumpStatusInformation,
+  commandAllEventsChannelName
 };
 
 static void *connectionThread(void *conn)
@@ -1054,19 +1144,23 @@ static void *houseKeepingThread(void *)
       dprintf("Removed %d old events.\n", anzEventsAlt-events.size());
     dprintf("Number of events: %u\n", events.size());
     pthread_mutex_unlock(&eventsLock);
-    pthread_mutex_lock(&servicesLock);
-    dprintf("Number of services: %u\n", services.size());
-    pthread_mutex_unlock(&servicesLock);
+    if(debug) {
+      pthread_mutex_lock(&servicesLock);
+      dprintf("Number of services: %u\n", services.size());
+      pthread_mutex_unlock(&servicesLock);
+    }
     if(startDMXeit())
       return 0;
     if(startDMXsdt())
       return 0;
 //    if(startDMXeitNVOD())
 //      return 0;
-    // Speicher-Info abfragen
-    struct mallinfo speicherinfo=mallinfo();
-    dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
-    dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
+    if(debug) {
+      // Speicher-Info abfragen
+      struct mallinfo speicherinfo=mallinfo();
+      dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
+      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
+    }
   } // for endlos
 }
 
@@ -1082,7 +1176,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.19 2001/07/17 02:38:56 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.20 2001/07/17 12:39:18 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();

@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.13 2001/07/16 11:49:31 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.14 2001/07/17 12:39:18 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.14  2001/07/17 12:39:18  fnbrd
+// Neue Kommandos
+//
 // Revision 1.13  2001/07/16 11:49:31  fnbrd
 // Neuer Befehl, Zeichen fuer codetable aus den Texten entfernt
 //
@@ -251,12 +254,20 @@ void SIsectionSDT::parseServiceDescriptor(const char *buf, SIservice &s)
   struct descr_service_header *sv=(struct descr_service_header *)buf;
   buf+=sizeof(struct descr_service_header);
   s.serviceTyp=sv->service_typ;
-  if(sv->service_provider_name_length)
-    s.providerName=string(buf, sv->service_provider_name_length);
+  if(sv->service_provider_name_length) {
+    if(*(buf+1) < 0x06) // other code table
+      s.providerName=string(buf+1, sv->service_provider_name_length-1);
+    else
+      s.providerName=string(buf, sv->service_provider_name_length);
+  }
   buf+=sv->service_provider_name_length;
   unsigned char servicenamelength=*((unsigned char *)buf);
-  if(servicenamelength)
-    s.serviceName=string(++buf, servicenamelength);
+  if(servicenamelength) {
+    if(*(buf+1) < 0x06) // other code table
+      s.serviceName=string((++buf)+1, servicenamelength-1);
+    else
+      s.serviceName=string(++buf, servicenamelength);
+  }
 //  printf("Provider-Name: %s\n", s.providerName.c_str());
 //  printf("Service-Name: %s\n", s.serviceName.c_str());
 }

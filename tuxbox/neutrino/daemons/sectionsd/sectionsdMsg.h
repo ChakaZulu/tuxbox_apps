@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.4 2001/07/16 12:52:30 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.5 2001/07/17 12:39:18 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.5  2001/07/17 12:39:18  fnbrd
+//  Neue Kommandos
+//
 //  Revision 1.4  2001/07/16 12:52:30  fnbrd
 //  Fehler behoben.
 //
@@ -49,12 +52,14 @@ struct msgSectionsdResponseHeader {
   unsigned short dataLength;
 };
 
-#define NUMBER_OF_SECTIONSD_COMMANDS 3
+#define NUMBER_OF_SECTIONSD_COMMANDS 5
 
 enum sectionsdCommands {
   actualEPGchannelName=0,
   actualEventListTVshort,
-  currentNextInformation
+  currentNextInformation,
+  dumpStatusinformation,
+  allEventsChannelName
 };
 
 //
