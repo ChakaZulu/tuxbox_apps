@@ -47,7 +47,11 @@
 
 #include "gamelist.h"
 
-#if 0
+/* for alexW images with old drivers: 
+ * #define USE_VBI_INTERFACE 1
+ */
+
+#ifdef USE_VBI_INTERFACE
  #define AVIA_VBI_START_VTXT	1
  #define AVIA_VBI_STOP_VTXT	2 
 #endif
@@ -292,7 +296,7 @@ void CPlugins::startPlugin(int number)
 	{
 		// cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
 		// versuche, den gtx/enx_vbi zu stoppen
-#if 0
+#ifdef USE_VBI_INTERFACE
         int fd = open("/dev/dbox/vbi0", O_RDWR);
 		if (fd > 0)
 		{
@@ -405,7 +409,7 @@ void CPlugins::startPlugin(int number)
     		frameBuffer->paintBackgroundBox(0,0,720,576);
     	}
 
-#if 0
+#ifdef USE_VBI_INTERFACE
     	if (plugin_list[number].vtxtpid)
     	{
     		int vtpid= atoi(params.find(P_ID_VTXTPID)->second.c_str());
