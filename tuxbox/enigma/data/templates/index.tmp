@@ -3,13 +3,14 @@
 <TITLE>Dreambox Web Interface</TITLE>
 <link rel="stylesheet" type="text/css" href="/webif.css">
 <script language="javascript">
-function NewWindow(mypage, myname, w, h, scroll)
+function NewWindow(mypage, myname, w, h, scroll, timeout)
 {
 	var winl = (window.width - w) / 2;
 	var wint = (window.height - h) / 2;
 	winprops = 'height='+h+', width='+w+', top='+wint+', left='+winl+', scrollbars='+scroll+', resizable'
 	win = window.open(mypage, myname, winprops)
-	if (parseInt(navigator.appVersion) >= 4) {win.window.focus();}
+	if (parseInt(navigator.appVersion) >= 4) { win.window.focus(); }
+	if (timeout > 0) { win.window.setTimeout("close()", timeout); }
 }
 
 function reload()
@@ -51,12 +52,13 @@ function openEPG(xy)
 }
 
 function openMultiEPG(xy)
-	NewWindwo('/cgi-bin/getMultiEPG?ref='+xy, 'MultiEPG', '1000', '800', 'yes');
+{
+	NewWindow('/cgi-bin/getMultiEPG?ref='+xy, 'MultiEPG', '1000', '800', 'yes');
 }
 
 function admin(xy)
 {
-	NewWindow(xy+'&requester=webif', 'admin', '200', '100', 'no');
+	NewWindow(xy+'&requester=webif', 'admin', '200', '100', 'no', '3000');
 }
 
 function openSI()
