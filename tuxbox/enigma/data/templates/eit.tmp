@@ -1,0 +1,15 @@
+<table width="100%" cellspacing="0" cellpadding="0" border="0"> 
+<tr>
+<td
+width="100%"><span class="epgzeit">#NOWT#</span> <span class="epgdur">#NOWD#min</span> <span class="epgname"><b>#NOWST#</b></span></td>
+</tr>
+<tr>
+<td width="100%"><span class="epgdesc">#NOWLT#</span><br><br><br></td>
+</tr>
+<tr>
+<td width="100%"><span class="epgzeit">#NEXTT#</span> <span class="epgdur">#NEXTD#min</span> <span class="epgname"><b>#NEXTST#</b></span></td>
+</tr>
+<tr>
+<td width="100%"><span class="epgdesc">#NEXTLT#</span><br><br><br></td>
+</tr>
+</table>
