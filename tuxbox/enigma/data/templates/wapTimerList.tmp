@@ -6,6 +6,7 @@
 		<p>
 			<a href="/wap?mode=cleanupTimerList">Cleanup</a><br/>
 			<a href="/wap?mode=clearTimerList">Clear></a>
+		</p>
 		<p>
 			#BODY#	
 		</p>
