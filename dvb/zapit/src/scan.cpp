@@ -244,7 +244,7 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id)
 				transponder += "\" serviceType=\"";
 				transponder += service_type;
 				transponder += "\" channelNR=\"0\"/>\n";
-				transponder += "\"/>\n";
+				//transponder += "\"/>\n";
 			}
 		}
 	}
