@@ -7,7 +7,7 @@
 #include <lib/dvb/servicestructure.h>
 #include <lib/gui/emessage.h>
 #include <lib/gdi/font.h>
-#include <tuxbox/tuxbox.h>
+#include <libtuxbox.h>
 #include <engrab.h>
 
 eTimerManager* eTimerManager::instance=0;

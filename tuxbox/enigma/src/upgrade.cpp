@@ -11,7 +11,7 @@
 #include <libmd5sum.h>
 #include <lib/dvb/edvb.h>
 #include <sys/mman.h>
-#include <tuxbox/tuxbox.h>
+#include <libtuxbox.h>
 
 #define TMP_IMAGE "/var/tmp/root.cramfs"
 #define TMP_IMAGE_ALT "/var/tmp/cdk.cramfs"

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.17 2003/02/16 01:03:45 waldi Exp $
+ * $Id: enigma_info.cpp,v 1.18 2003/02/19 13:50:22 obi Exp $
  */
 
 #include <enigma_info.h>
@@ -35,7 +35,7 @@
 #include <lib/gui/emessage.h>
 #include <lib/gui/ebutton.h>
 #include <lib/base/i18n.h>
-#include <tuxbox/tuxbox.h>
+#include <libtuxbox.h>
 
 eZapInfo::eZapInfo()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Infos"), 8, 220)

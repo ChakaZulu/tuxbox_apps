@@ -3,7 +3,7 @@
 #include <lib/gui/echeckbox.h>
 #include <lib/gui/eskin.h>
 #include <lib/system/econfig.h>
-#include <tuxbox/tuxbox.h>
+#include <libtuxbox.h>
 #include <lib/base/i18n.h>
 #include <lib/gdi/gfbdc.h>
 

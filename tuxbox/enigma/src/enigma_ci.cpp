@@ -12,7 +12,7 @@
 #include <lib/system/econfig.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvbci.h>
-#include <tuxbox/tuxbox.h>
+#include <libtuxbox.h>
 
 eCImmi::eCImmi(eWidget *parent): eWidget(parent)
 {
