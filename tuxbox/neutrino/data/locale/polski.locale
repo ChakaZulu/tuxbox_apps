@@ -31,8 +31,8 @@ cablesetup.provider provider kablowy
 satsetup.disqeqc DiSEqC
 satsetup.satellite Satelity
 satsetup.extended DiSEqC-ustawienia
-satsetup.extended_lnb unset
-satsetup.extended_motor unset
+satsetup.extended_lnb LNB-ustawienia
+satsetup.extended_motor Silownik-ustawienia
 satsetup.nodiseqc bez DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
@@ -40,8 +40,8 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote Strojenie SMATV
 satsetup.diseqcrepeat DiSEqC-powtórzenia
-satsetup.savesettingsnow unset
-satsetup.motorcontrol unset
+satsetup.savesettingsnow Zapisz natychmiast ustawienia
+satsetup.motorcontrol Silownik-konfiguracja
 
 mainsettings.head Glówne ustawienia
 mainsettings.savesettingsnow Zapisz natychmiast ustawienia
@@ -345,7 +345,7 @@ scants.bouquet_erase kasuj wszystkie
 scants.failed Brak transpondera!
 scants.finished Strojenie zakonczone sukcesem!
 
-motorcontrol.head unset
+motorcontrol.head Silownik-konfiguracja
 
 flashupdate.head Aktualizacja oprogramowania
 flashupdate.action Stan:
@@ -459,7 +459,7 @@ GENRE.SHOW.2 variety show
 GENRE.SHOW.3 talk show
 
 GENRE.SPORTS.0 Sport
-GENRE.SPORTS.1 imprezy specjalne(Olimpiada,Puchar siata itd.)
+GENRE.SPORTS.1 imprezy specjalne(Olimpiada,Puchar swiata itd.)
 GENRE.SPORTS.2 magazyny sportowe
 GENRE.SPORTS.3 pilka nozna
 GENRE.SPORTS.4 tenis/squash
