@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.49 2002/04/14 06:06:31 obi Exp $
+ * $Id: zapit.h,v 1.50 2002/04/14 23:26:21 obi Exp $
  */
 
 #ifndef __zapit_h__
@@ -36,6 +36,7 @@ typedef struct decode_struct
 } decode_vals;
 
 int prepare_channels();
+int save_settings (bool write);
 void *start_scanthread(void *);
 void start_scan();
 void sendBouquetList();

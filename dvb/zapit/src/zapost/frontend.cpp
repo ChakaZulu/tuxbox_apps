@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.2 2002/04/14 12:01:31 obi Exp $
+ * $Id: frontend.cpp,v 1.3 2002/04/14 23:26:21 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -418,13 +418,13 @@ const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polari
 		if (feparams.Frequency < 11700000)
 		{
 			/* low band */
-			feparams.Frequency -= 9750000;
+			feparams.Frequency -= lnbOffsetsLow[diseqc];
 			toneMode = SEC_TONE_OFF;
 		}
 		else
 		{
 			/* high band */
-			feparams.Frequency -= 10600000;
+			feparams.Frequency -= lnbOffsetsHigh[diseqc];
 			toneMode = SEC_TONE_ON;
 		}
 

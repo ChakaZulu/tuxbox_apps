@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.129 2002/04/14 10:55:25 obi Exp $
+ * $Id: zapit.cpp,v 1.130 2002/04/14 23:26:21 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -23,14 +23,17 @@
  *
  */
 
-#include "zapit.h"
+#include "configfile.h"
 #include "lcddclient.h"
+#include "zapit.h"
 
 #define debug(fmt, args...) { if (debug) printf(fmt, ## args); }
 #define dputs(str) { if (debug) puts(str); }
 
 #define VBI_DEV	"/dev/dbox/vbi0"
+#define CONFIGFILE CONFIGDIR "/zapit/zapit.conf"
 
+CConfigFile *config = NULL;
 CFrontend *frontend = NULL;
 
 struct rmsg {
@@ -48,10 +51,6 @@ struct {
 } lastChannel;
 
 int connfd;
-
-/* lnb offsets */
-uint32_t lnb_offset_low = 9750000;
-uint32_t lnb_offset_high = 10600000;
 
 /* ca stuff */
 uint16_t caid = 0;
@@ -127,6 +126,7 @@ void signal_handler (int signum)
 		debug = (debug ? false : true);
 		break;
 	default:
+		save_settings(true);
 #ifdef USE_EXTERNAL_CAMD
 		if (camdpid != -1)
 		{
@@ -137,7 +137,6 @@ void signal_handler (int signum)
 		if (connfd != -1)
 			close(connfd);
 
-		system("cp /tmp/zapit_last_chan " CONFIGDIR "/zapit/last_chan");
 		exit(0);
 	}
 }
@@ -221,24 +220,15 @@ int set_vtxt (dvb_pid_t teletext_pid)
 }
 #endif /* DVBS */
 
-int save_settings()
+int save_settings (bool write)
 {
-	FILE *channel_settings;
-	channel_settings = fopen("/tmp/zapit_last_chan", "w");
-
-	if (channel_settings == NULL)
-	{
-		perror("[zapit] fopen: /tmp/zapit_last_chan");
-		return -1;
-	}
-
 	if (Radiomode_on)
 	{
 		CBouquetManager::radioChannelIterator cit = g_BouquetMan->radioChannelsFind(curr_onid_sid);
 		if (cit != g_BouquetMan->radioChannelsEnd())
 		{
-			lastChannel.mode = 'r';
-			lastChannel.radio = (*cit)->getChannelNumber();
+			config->setInt("lastChannel", (*cit)->getChannelNumber());
+			config->setInt("lastChannelMode", 1);
 		}
 	}
 	else
@@ -246,50 +236,33 @@ int save_settings()
 		CBouquetManager::tvChannelIterator cit = g_BouquetMan->tvChannelsFind(curr_onid_sid);
 		if (cit != g_BouquetMan->tvChannelsEnd())
 		{
-			lastChannel.mode = 't';
-			lastChannel.tv = (*cit)->getChannelNumber();
+			config->setInt("lastChannel", (*cit)->getChannelNumber());
+			config->setInt("lastChannelMode", 0);
 		}
 	}
-	if (fwrite(&lastChannel, sizeof(lastChannel), 1, channel_settings) != 1)
+
+	if (write)
 	{
-		printf("[zapit] couldn't write settings correctly\n");
-		fclose(channel_settings);
-		return -1;
+		config->saveConfig(CONFIGFILE);
 	}
 
-	fclose(channel_settings);
 	return 0;
 }
 
 channel_msg load_settings()
 {
-	FILE *channel_settings;
 	channel_msg output_msg;
 
-	memset(&output_msg, 0, sizeof(output_msg));
-
-	channel_settings = fopen("/tmp/zapit_last_chan", "r");
-
-	if (channel_settings == NULL)
+	if (config->getInt("lastChannelMode"))
 	{
-		perror("[zapit] fopen: /tmp/zapit_last_chan");
+		output_msg.mode = 'r';
+	}
+	else
+	{
 		output_msg.mode = 't';
-		output_msg.chan_nr = 1;
-		return output_msg;
 	}
 
-	if (fread(&lastChannel, sizeof(lastChannel), 1, channel_settings) != 1)
-	{
-		printf("[zapit] no valid settings found\n");
-		output_msg.mode = 't';
-		output_msg.chan_nr = 1;
-		return output_msg;
-	}
-
-	output_msg.mode = lastChannel.mode;
-	output_msg.chan_nr = (Radiomode_on) ? lastChannel.radio : lastChannel.tv;
-
-	fclose(channel_settings);
+	output_msg.chan_nr = config->getInt("lastChannel");
 
 	return output_msg;
 }
@@ -461,7 +434,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	{
 		current_is_nvod = true;
 		curr_onid_sid = onid_sid;
-		save_settings();
+		save_settings(false);
 		return 3;
 	}
 
@@ -804,7 +777,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 
 	if (!in_nvod)
 	{
-		save_settings();
+		save_settings(false);
 	}
 
 	return 3;
@@ -2260,7 +2233,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.129 2002/04/14 10:55:25 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.130 2002/04/14 23:26:21 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2269,14 +2242,6 @@ int main (int argc, char **argv)
 			if (!strcmp(argv[i], "-d"))
 			{
 				debug = true;
-			}
-			else if (!strcmp(argv[i], "-lo"))
-			{
-				lnb_offset_low = atoi(argv[++i]) * 1000;
-			}
-			else if (!strcmp(argv[i], "-ho"))
-			{
-				lnb_offset_high = atoi(argv[++i]) * 1000;
 			}
 			else if (!strcmp(argv[i], "-q"))
 			{
@@ -2298,28 +2263,64 @@ int main (int argc, char **argv)
 			}
 			else
 			{
-				printf("Usage: zapit [-d] [-ho <high offset in kHz>] [-lo <low offset in kHz>] [-q] [-v]\n");
+				printf("Usage: zapit [-d] [-q] [-v]\n");
 				exit(0);
 			}
 		}
 	}
-
-	system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
 
 	scan_runs = 0;
 	found_transponders = 0;
 	found_channels = 0;
 	curr_sat = -1;
 
+	/* load configuration */
+	config = new CConfigFile(',');
+
+	char tmp[16];
+
+	if (!config->loadConfig(CONFIGDIR "/zapit/zapit.conf"))
+	{
+		/* set defaults if no configuration file exists */
+		config->setInt("diseqcRepeats", 0);
+		config->setInt("diseqcType", NO_DISEQC);
+		config->setInt("lastChannel", 1);
+		config->setInt("lastChannelMode", 0);
+		for (i = 0; i < MAX_LNBS; i++)
+		{
+			sprintf(tmp, "lnb%d_OffsetHigh", i);
+			config->setInt(tmp, 10600000);
+			sprintf(tmp, "lnb%d_OffsetLow", i);
+			config->setInt(tmp, 9750000);
+		}
+	}
+
+	/* initialize frontend */
 	frontend = new CFrontend();
 
-	if (frontend->isInitialized() == false)
+	if (!frontend->isInitialized())
 	{
 		printf("[zapit] unable to open frontend devices. bye.\n");
 		delete frontend;
 		return -1;
 	}
+	else
+	{
+		frontend->setDiseqcType((diseqc_t) config->getInt("diseqcType"));
+		frontend->setDiseqcRepeats(config->getInt("diseqcRepeats"));
 
+		for (i = 0; i < MAX_LNBS; i++)
+		{
+			/* low offset */
+			sprintf(tmp, "lnb%d_OffsetLow", i);
+			frontend->setLnbOffset(false, i, config->getInt(tmp));
+			/* high offset */
+			sprintf(tmp, "lnb%d_OffsetHigh", i);
+			frontend->setLnbOffset(true, i, config->getInt(tmp));
+		}
+	}
+
+	/* create bouquet manager */
 	g_BouquetMan = new CBouquetManager();
 
 	testmsg = load_settings();
@@ -2393,17 +2394,13 @@ int main (int argc, char **argv)
 		switch (fork())
 		{
 		case -1: /* can't fork */
-			perror ("[zapit] fork()");
-			exit (3);
+			perror("[zapit] fork");
+			exit(3);
 		case 0: /* child, process becomes a daemon */
-			//close (STDIN_FILENO);
-			//close (STDOUT_FILENO);
-			//close (STDERR_FILENO);
-
 			// request a new session (job control)
-			if (setsid () == -1)
+			if (setsid() == -1)
 			{
-				exit (4);
+				exit(4);
 			}
 			break;
 		default: /* parent returns to calling process */
@@ -2655,7 +2652,6 @@ unsigned int zapTo_ServiceID (unsigned int serviceID, bool isSubService )
 
     return result;
 }
-
 
 unsigned zapTo (unsigned int channel)
 {

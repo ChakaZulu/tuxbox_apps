@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.9 2002/04/14 06:06:31 obi Exp $
+ * $Id: pzapit.cpp,v 1.10 2002/04/14 23:26:21 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -21,8 +21,8 @@
  * 
  */
 
-#include "clientlib/zapitclient.h"
 #include <iostream>
+#include "clientlib/zapitclient.h"
 
 int usage (std::string basename)
 {
@@ -35,17 +35,15 @@ int usage (std::string basename)
 	std::cout << std::endl;
 	std::cout << "reload channels bouquets: " << basename << " -c" << std::endl;
 	std::cout << std::endl;
-	std::cout << "transponderscan: " << basename << " -s <sat-mask>" << std::endl;
-	std::cout << "to get your satmask, simply add your supported satellites:" << std::endl;
-	std::cout << "astra19 = 1, hotbird = 2, kopernikus = 4" << std::endl;
-	std::cout << "astra28 = 8, sirius = 16, thor = 32, tuerksat = 64" << std::endl;
-	std::cout << "leave bouquets untouched = 256" << std::endl;
+	std::cout << "show satellites: " << basename << " -sh" << std::endl;
+	std::cout << "select satellites: " << basename << " -se <satmask> <diseqc order>" << std::endl;
+	std::cout << "start transponderscan: " << basename << " -st" << std::endl;
 	return -1;
 }
 
 int main (int argc, char** argv)
 {
-	int i;
+	uint32_t i, j;
 
 	unsigned int bouquet = 0;
 	unsigned int channel = 0;
@@ -55,6 +53,9 @@ int main (int argc, char** argv)
 
 	bool radio = false;
 	bool reload = false;
+	bool show_satellites = false;
+	bool scan = false;
+	int diseqc[5];
 
 	CZapitClient *zapit;
 	std::vector<CZapitClient::responseGetBouquets> bouquets;
@@ -91,17 +92,32 @@ int main (int argc, char** argv)
 				return usage(argv[0]);
 			}
 		}
-		else if (!strncmp(argv[i], "-s", 2))
+		else if (!strncmp(argv[i], "-se", 3))
 		{
-			if (i < argc - 1)
+			if (i < argc - 2)
 			{
 				sscanf(argv[++i], "%d", &satmask);
+				diseqc[0] = strlen(argv[i]);
+				for (i++, j = 0; j <= diseqc[0]; j++)
+				{
+					diseqc[j+1] = argv[i][j] - 48;
+				}
 				continue;
 			}
 			else
 			{
 				return usage(argv[0]);
 			}
+		}
+		else if (!strncmp(argv[i], "-sh", 3))
+		{
+			show_satellites = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-st", 3))
+		{
+			scan = true;
+			continue;
 		}
 		else if (i < argc - 1)
 		{
@@ -117,7 +133,6 @@ int main (int argc, char** argv)
 		}
 		else if (sscanf(argv[i], "%d", &bouquet) > 0)
 		{
-			printf("selecting bouquet %d\n", bouquet);
 			continue;
 		}
 		else
@@ -154,14 +169,50 @@ int main (int argc, char** argv)
 		zapit->setMode(CZapitClient::MODE_TV);
 	}
 
+	if (show_satellites)
+	{
+		std::vector<CZapitClient::responseGetSatelliteList> satelliteList;
+		zapit->getScanSatelliteList(satelliteList);
+
+		std::vector<CZapitClient::responseGetSatelliteList>::iterator rI;
+		for (i = 0, rI = satelliteList.begin(); rI < satelliteList.end(); i++, rI++)
+			std::cout << (1 << i) << ": " << rI->satName << std::endl;
+
+		delete zapit;
+		return 0;
+	}
+	else if (satmask != 0)
+	{
+		std::vector<CZapitClient::responseGetSatelliteList> satelliteList;
+		zapit->getScanSatelliteList(satelliteList);
+
+		std::vector<CZapitClient::commandSetScanSatelliteList> newSatelliteList;
+		CZapitClient::commandSetScanSatelliteList item;
+		for (i = 1, j = 0; j < satelliteList.size(); i = (i << 1), j++)
+		{
+			if ((satmask & i) && (j <= diseqc[0]))
+			{
+				std::cout << "diseqc " << diseqc[j+1] << ": " << satelliteList[j].satName << std::endl;
+				strcpy(item.satName, satelliteList[j].satName);
+				item.diseqc = diseqc[j+1];
+				//newSatelliteList.insert(item);
+			}
+		}
+
+		zapit->setScanSatelliteList(newSatelliteList);
+
+		delete zapit;
+		return 0;
+	}
+
 	/* transponderscan */
-	if (satmask)
+	if (scan)
 	{
 		unsigned int satellite;
 		unsigned int transponder;
 		unsigned int services;
 
-		zapit->startScan(satmask);
+		zapit->startScan(0);
 
 		while (zapit->isScanReady(satellite, transponder, services) == false)
 		{
