@@ -48,7 +48,6 @@ public:
 	void hideBusy();
 	void Zoom(float factor);
 	void Move(int dx, int dy);
-	void Cleanup();
 	void SetVisible(int startx, int endx, int starty, int endy);
 	void slideshowTimeout();
 private:
