@@ -96,10 +96,12 @@
 
 /*
 TODO:
-	- shoutcast database queries, to make 'scast://R1live' working
+	- ICECAST support
 	- follow redirection errors (server error codes 302, 301)
 	- support for automatic playlist processing (shoutcast pls files)
-	- HTTP POST requests
+
+known bugs:
+	- HTTP POST requests - are implemented, but don't work with shoutcast.com !?
 */
 
 #define STATIC /**/
@@ -125,6 +127,8 @@ TODO:
 
 char err_txt[2048];		/* human readable error message */
 static int debug = 0;		/* print debugging output or not */
+static char logfile[255];	/* redirect errors from stderr */
+static int retry_num = 10;	/* number of retries for failed connections */
 static int enable_metadata = 0;	/* allow shoutcast meta data streaming */
 static int cache_size = 196608;/* default cache size; can be overridden at */
 				/* runtime with an option in the options file */
@@ -177,6 +181,15 @@ void getOpts()
   if((ptr = strstr(buf, "cachesize=")))
     cache_size = atoi(strchr(ptr, '=') + 1);
 
+  if((ptr = strstr(buf, "retries=")))
+    retry_num = atoi(strchr(ptr, '=') + 1);
+
+  if((ptr = strstr(buf, "logfile=")))
+  {
+    strcpy(logfile, strchr(ptr, '=') + 1);
+    CRLFCut(logfile);
+    freopen(logfile, "w", stderr);
+  }
 }
 
 /***************************************/
@@ -267,7 +280,6 @@ int request_file(URL *url)
 
   /* send a HTTP/1.1 request */
   case HTTP11:	{
-//findme
   		  sprintf(str, "%s %s HTTP/1.1\r\n", (url->entity[0]) ? "POST" : "GET", url->file);
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
@@ -287,8 +299,7 @@ int request_file(URL *url)
 		    send(url->fd, str, strlen(str), 0);
 		  }
 
-		  sprintf(str, "User-Agent: %s\r\n\r\n%s", "Mozilla/4.0", 
-		  	(url->entity[0]) ? url->entity : "");
+		  sprintf(str, "User-Agent: %s\r\n\r\n%s", "Mozilla/4.0", url->entity);
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
 		  
@@ -687,6 +698,8 @@ FILE *f_open(const char *filename, const char *acctype)
     transport("http",  MODE_HTTP, HTTP11);
     transport("icy",   MODE_HTTP, SHOUTCAST);
     transport("scast", MODE_SCAST, SHOUTCAST);
+//findme
+    transport("icast", MODE_ICAST, SHOUTCAST);
 
     /* if we fetch a playlist file, then set the access mode */
     /* that it will be parsed and processed automatically. If */
@@ -722,18 +735,21 @@ FILE *f_open(const char *filename, const char *acctype)
   	url.url, 
 	(url.access_mode == MODE_HTTP)  ? "HTTP" : 
 	(url.access_mode == MODE_SCAST) ? "SHOUTCAST" :
-	(url.access_mode == MODE_PLS)   ? "PLAYLIST" : "FILE",
-	(url.access_mode != MODE_FILE)  ? (
-	(url.proto_version == 0) ? "/1.0" : 
-	(url.proto_version == 1) ? "/1.1" :
-	(url.proto_version == 2) ? "/SHOUTCAST" : "") : "" );
+	(url.access_mode == MODE_ICAST) ? "ICECAST" :
+	(url.access_mode == MODE_PLS)   ? "PLAYLIST" : 
+					  "FILE",
+	(url.access_mode != MODE_FILE)   ? (
+	(url.proto_version == HTTP10)	 ? "/1.0" : 
+	(url.proto_version == HTTP11)	 ? "/1.1" :
+	(url.proto_version == SHOUTCAST) ? "/SHOUTCAST" :
+					   "") : "" );
 	
   dprintf(stderr, "FILE to open: %s, access mode: %d\n", url.file, url.access_mode);
   
   switch(url.access_mode)
   {
   case MODE_HTTP:	{
-  			   int retries = 10;
+  			   int retries = retry_num;
 			   
 			   do
 			   {
@@ -818,6 +834,7 @@ FILE *f_open(const char *filename, const char *acctype)
 			 }
   			 break;
 			 
+  case MODE_ICAST:
   case MODE_SCAST:	/* pseude transport mode; create the url to fetch the shoutcast */
   			 /* directory playlist, fetch it, parse it and try to open the   */
 			 /* stream url in it until we find one that works. The we open   */
@@ -833,16 +850,27 @@ FILE *f_open(const char *filename, const char *acctype)
 			   char buf[32768], *ptr;
 			   FILE *fd;
 			   
+			   /* convert into shoutcast query format */
 			   for(ptr=url.host; *ptr; ptr++)
 			     *ptr = (*ptr != 32) ? *ptr : '+';
 			   
-			   sprintf(buf, "http://www.shoutcast.com/directory/?orderby=listeners&s=%s", url.host);
+			   CRLFCut(url.host);
+			   
+			   /* create either a shoutcast or an icecast query */
+			   if(url.access_mode == MODE_SCAST)
+			     sprintf(buf, "http://www.shoutcast.com/directory/?orderby=listeners&s=%s", url.host);
+			   else
+			     sprintf(buf, "http://www.icecast.org/streamlist.php?search=%s", url.host);
+			   
+//findme
+			   // ICECAST: it ain't that simple. Icecast doesn't work yet */  
 
 			   fd = f_open(buf, "rc");
 
 			   if(!fd)
 			   {
-			     sprintf(err_txt, "shoutcast database query failed\nfailed action: %s", buf);
+			     sprintf(err_txt, "%s database query failed\nfailed action: %s", 
+			     ((url.access_mode == MODE_SCAST) ? "shoutcast" : "icecast"), buf);
 			     return NULL;
 			   }
 			   
@@ -862,11 +890,12 @@ FILE *f_open(const char *filename, const char *acctype)
 			 } 
 
 			 /* create the correct url from the station number */
+			 CRLFCut(url.host);
 			 sprintf(url.url, "http://www.shoutcast.com/sbin/shoutcast-playlist.pls?rn=%s&file=filename.pls", url.host);
 
   case MODE_PLS:	{
   			    char *ptr=NULL, *ptr2, buf[4096], servers[25][1024];
-			    int rval, i, retries = 15;
+			    int rval, i, retries = retry_num;
 
 			    /* fetch the playlist from the shoutcast directory with our own */
 			    /* url-capable f_open() call. We need the compatibility mode for */
@@ -920,22 +949,41 @@ FILE *f_open(const char *filename, const char *acctype)
 			 break;
 
   case MODE_FILE:	
-  default:	       fd = fopen(url.file, type);
+  default:	       {
+  			   uint32_t magic = 0;
+			   
+			   fd = fopen(url.file, type);
+			   fread(&magic, sizeof(uint32_t), 1, fd);
+			   rewind(fd);
+			   
+			   /* first stage: try to determine the filetype from the file */
+			   /* magic, if there is any */
+			   magic = htonl(magic) & 0xfff00000;
+			   
+			   if( strstr( (char*)&magic, "ID3") )	{ f_type(fd, "audio/mpeg"); magic = 0; }
+			   if( strstr( (char*)&magic, "Ogg") )	{ f_type(fd, "audio/ogg");  magic = 0; }
+			   
+			   if(magic & 0xFFFB0000)		{ f_type(fd, "audio/mpeg"); magic = 0; }
 
-			 /* a smarter solution would be to get this info from /etc/mime.types */
-			 char * ext = strrchr(url.file , '.');
-			 if (ext!=NULL)
-			 {
-  			 	if(strcasecmp(ext+1, "cdr")==0) f_type(fd, "audio/cdr");
-  			 	if(strcasecmp(ext+1, "ogg")==0) f_type(fd, "audio/ogg");
-	  			if(strcasecmp(ext+1, "mp3")==0) f_type(fd, "audio/mpeg");
-	  			if(strcasecmp(ext+1, "mp2")==0) f_type(fd, "audio/mpeg");
-	  			if(strcasecmp(ext+1, "mpa")==0) f_type(fd, "audio/mpeg");
-  				if(strcasecmp(ext+1, "wav")==0) f_type(fd, "audio/wave");
-  				if(strcasecmp(ext+1, "aif")==0) f_type(fd, "audio/aifc");
-  				if(strcasecmp(ext+1, "snd")==0) f_type(fd, "audio/snd");
-  			 }
+			   /* stage two: try to determine the filetype from the file name */
+			   /* a smarter solution would be to get this info from /etc/mime.types */
 
+  			   ptr = strrchr(url.file , '.');
+                         
+			   if((!magic) && (ptr++))
+                           {
+                             if( strcasecmp(ptr, "cdr") == 0) f_type(fd, "audio/cdr");
+                             if( strcasecmp(ptr, "wav") == 0) f_type(fd, "audio/wave");
+                             if( strcasecmp(ptr, "aif") == 0) f_type(fd, "audio/aifc");
+                             if( strcasecmp(ptr, "snd") == 0) f_type(fd, "audio/snd");
+
+			     /* they should be obsolete now due to the file magic detection */
+                             if( strcasecmp(ptr, "ogg") == 0) f_type(fd, "audio/ogg");
+                             if( strcasecmp(ptr, "mp3") == 0) f_type(fd, "audio/mpeg");
+                             if( strcasecmp(ptr, "mp2") == 0) f_type(fd, "audio/mpeg");
+                             if( strcasecmp(ptr, "mpa") == 0) f_type(fd, "audio/mpeg");
+                           }
+			 }
   			 break;
   }
   
@@ -1473,7 +1521,11 @@ void ShoutCAST_ParseMetaData(char *md, CSTATE *state)
 #define SKIP(a) for(;(a && !isalnum(*a)); ++a);
   char *ptr;
 
-  dprintf(stderr, "ShoutCAST_ParseMetaData(%s, %x)\n", md, state);
+  /* abort if we were submitted a NULL pointer */
+  if((!md) || (!state))
+    return;
+
+  dprintf(stderr, "ShoutCAST_ParseMetaData(%x : %s, %x)\n", md, md, state);
   
   ptr = strstr(md, "StreamTitle=");
 
@@ -1550,6 +1602,10 @@ void ShoutCAST_MetaFilter(STREAM_FILTER *arg)
   char    *buf = (char*)arg->buf;
   int meta_start;
 
+  /* bug trap */
+  if(!arg)
+    return;
+
 #if 0
 dprintf(stderr, "filter : cnt      : %d\n", filterdata->cnt);
 dprintf(stderr, "filter : len      : %d\n", filterdata->len);
@@ -1611,7 +1667,7 @@ dprintf(stderr, "filter : meta_int : %d\n", filterdata->meta_int);
     /****************************************************************/
     /* case A: the meta data is completely within the current block */
     /****************************************************************/
-    if((meta_start + filterdata->len) < len)
+    if((meta_start + filterdata->len) <= len)
     {
       int b = meta_start + filterdata->len + 1;
       

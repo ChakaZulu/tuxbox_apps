@@ -53,7 +53,8 @@ extern "C" {
 #define	MODE_FILE  0
 #define MODE_HTTP  1
 #define MODE_SCAST 2	/* pseudo transfer mode; is actually HTTP/SHOUTCAST */
-#define MODE_PLS   3	/* pseudo transfer mode; is actually HTTP/SHOUTCAST */
+#define MODE_ICAST 3	/* pseudo transfer mode; is actually HTTP/SHOUTCAST */
+#define MODE_PLS   4	/* pseudo transfer mode; is actually HTTP/SHOUTCAST */
 
 #define HTTP10		0
 #define HTTP11		1
@@ -174,7 +175,7 @@ typedef struct
 typedef struct
 {
   FILE	*stream;
-  char	type[64+1];
+  char	type[65];
 } STREAM_TYPE;
 
 typedef struct
@@ -194,6 +195,16 @@ typedef  struct
     char flags[3];
     char base[1024];
 } ID3_frame;
+
+#define CRLFCut(a) \
+{ \
+  char *ptr; \
+  ptr = strchr(a, '\r'); \
+  if(ptr) *ptr = 0; \
+  else { \
+  ptr = strchr(a, '\n'); \
+  if(ptr) *ptr = 0; } \
+}
 
 #ifdef __cplusplus
 }

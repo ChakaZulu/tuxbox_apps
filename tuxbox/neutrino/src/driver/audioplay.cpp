@@ -99,7 +99,7 @@ void* CAudioPlayer::PlayThread(void * filename)
          
 			/* Decode stdin to stdout. */
 			CBaseDec::RetCode Status;
-			printf("CAudioPlayer: Decoding %s ", filename);
+			printf("CAudioPlayer: Decoding %s ", (char*) filename);
 			Status = CBaseDec::DecoderBase(fp,soundfd,&getInstance()->state, 
 													 &getInstance()->m_MetaData,
 													 &getInstance()->m_played_time);
