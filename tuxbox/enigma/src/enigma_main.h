@@ -300,9 +300,6 @@ public:
 	enum { messageGoSleep=2, messageShutdown, messageNoRecordSpaceLeft };
 	enum { pathBouquets=1, pathProvider=2, pathRecordings=4, pathPlaylist=8, pathAll=16, pathRoot=32, pathSatellites=64 };
 	enum { listAll, listSatellites, listProvider, listBouquets };
-#ifndef DISABLE_FILE
-	ePlaylist *recordings;
-#endif
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock,
 		*EINow, *EINext, *EINowDuration, *EINextDuration,
@@ -360,7 +357,7 @@ private:
 	eServiceReference playlistref;
 
 #ifndef DISABLE_FILE
-//	ePlaylist *recordings;
+	ePlaylist *recordings;
 	eServiceReference recordingsref;
 #endif
 
@@ -409,7 +406,6 @@ public:
 	void repeatSkip(int dir);
 	void stopSkip(int dir);
 	enum { skipForward, skipReverse };
-	int skipping;
 #endif
 private:
 	void nextService(int add=0);
@@ -441,6 +437,7 @@ private:
 
 #ifndef DISABLE_FILE
 	int skipcounter;
+	int skipping;
 #endif
 
 	void showServiceMenu(eServiceSelector*);
@@ -534,6 +531,11 @@ public:
 #ifndef DISABLE_FILE
 	int recordDVR(int onoff, int user, time_t evtime=0, const char* event_name=0 ); // starts recording
 	const eServiceReference& getRecordingsref() { return recordingsref; }
+	ePlaylist *getRecordings() { return recordings; }
+	void loadRecordings( bool create = false );
+	void saveRecordings( bool destory = false );
+	void clearRecordings();
+	int isSkipping() { return skipping; }
 #endif
 
 #ifndef DISABLE_NETWORK
@@ -556,12 +558,6 @@ public:
 
 	void loadPlaylist( bool create = false );
 	void savePlaylist( bool destory = false );
-
-#ifndef DISABLE_FILE
-	void loadRecordings( bool create = false );
-	void saveRecordings( bool destory = false );
-	void clearRecordings();
-#endif
 
 	eString getEplPath() { return eplPath; }
 

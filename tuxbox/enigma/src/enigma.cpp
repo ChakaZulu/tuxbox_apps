@@ -273,9 +273,9 @@ void eZap::reconfigureHTTPServer()
 		::close(tts_fd);
 
 #if 1
-	int serialDebugOutput=1;
-	eConfig::getInstance()->getKey("/ezap/extra/disableSerialOutput", serialDebugOutput);
-	if ( !SerialConsoleActivated && serialDebugOutput )
+	int disableSerialDebugOutput=0;
+	eConfig::getInstance()->getKey("/ezap/extra/disableSerialOutput", disableSerialDebugOutput);
+	if ( !SerialConsoleActivated && !disableSerialDebugOutput )
 	{
 		eDebug("[ENIGMA] starting httpd on serial port...");
 		tts_fd=::open("/dev/tts/0", O_RDWR);

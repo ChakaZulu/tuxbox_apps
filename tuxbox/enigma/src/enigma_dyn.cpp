@@ -430,7 +430,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eString command = opt["command"];
 	if (command == "rewind")
 	{
-		if (eZapMain::getInstance()->skipping)
+		if (eZapMain::getInstance()->isSkipping())
 		{
 			eZapMain::getInstance()->stopSkip(eZapMain::skipForward);
 			eZapMain::getInstance()->stopSkip(eZapMain::skipReverse);
@@ -440,7 +440,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	else
 	if (command == "forward")
 	{
-		if (eZapMain::getInstance()->skipping)
+		if (eZapMain::getInstance()->isSkipping())
 		{
 			eZapMain::getInstance()->stopSkip(eZapMain::skipForward);
 			eZapMain::getInstance()->stopSkip(eZapMain::skipReverse);
@@ -450,7 +450,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	else
 	if (command == "stop")
 	{
-		if (eZapMain::getInstance()->skipping)
+		if (eZapMain::getInstance()->isSkipping())
 		{
 			eZapMain::getInstance()->stopSkip(eZapMain::skipForward);
 			eZapMain::getInstance()->stopSkip(eZapMain::skipReverse);
@@ -903,7 +903,7 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 
 	sref = opt["ref"];
 	eServiceReference ref = string2ref(sref);
-	ePlaylist *recordings = eZapMain::getInstance()->recordings;
+	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
 	if ( ::unlink(ref.path.c_str() ) < 0 )
 	{
 		eDebug("remove File %s failed (%m)", ref.path.c_str() );

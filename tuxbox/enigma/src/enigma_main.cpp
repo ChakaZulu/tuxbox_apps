@@ -2547,7 +2547,7 @@ void eZapMain::standbyRelease()
 				break;
 			}
 			case 4: // reboot
-					eZap::getInstance()->quit(1);
+					eZap::getInstance()->quit(4);
 					break;
 			case 1: // shutdown
 /*				if (handleState())*/
