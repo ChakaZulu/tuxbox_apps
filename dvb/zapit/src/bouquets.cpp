@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.54 2002/09/11 07:34:18 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.55 2002/09/11 07:45:07 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -106,11 +106,7 @@ void CBouquet::removeService (CZapitChannel* oldChannel)
 				break;
 		}
 
-		ChannelList::iterator it = channels->begin();
-		while ((it<channels->end()) && !(*it == oldChannel))
-			it++;
-		if (it != channels->end())
-			channels->erase(it);
+		remove(channels->begin(), channels->end(), oldChannel);
 	}
 }
 
