@@ -270,8 +270,10 @@ void ParseTransponder(XMLTreeNode *transponder) {
 	sscanf(services->GetAttributeValue("Polarity"), "%hu", &curr_polarity);
 	sscanf(services->GetAttributeValue("Fec"), "%hu", &curr_fec);
       }				
-      else if (!strcmp("channel", type)){
-	if (atoi(services->GetAttributeValue("serviceType")) == serv_mode) {
+      else if (!strcmp("channel", type))
+      {
+        int sm = atoi(services->GetAttributeValue("serviceType"));
+  	   if ( (sm == serv_mode) || ( (sm==4) && (serv_mode==1) ) ) {
 		char *name = services->GetAttributeValue("Name");
 		if (*name != ' ') {
 	  
