@@ -359,6 +359,135 @@ int eFrontend::RotorUseInputPower(secCmdSequence& seq, void *cmds, int SeqRepeat
 }
 #endif
 
+double Radians( double number )
+{
+	return number*M_PI/180;
+}
+
+double Deg( double number )
+{
+	return number*180/M_PI;
+}
+
+double Rev( double number )
+{
+	return number - std::floor( number / 360.0 ) * 360;
+}
+
+double calcElevation( double SatLon, double SiteLat, double SiteLon, int Height_over_ocean = 0 )
+{
+	double  a0=0.58804392,
+					a1=-0.17941557,
+					a2=0.29906946E-1,
+					a3=-0.25187400E-2,
+					a4=0.82622101E-4,
+
+					f = 1.00 / 298.257, // Earth flattning factor
+
+					r_sat=42164.57, // Distance from earth centre to satellite
+
+					r_eq=6378.14,  // Earth radius
+
+					Rstation = r_eq / ( std::sqrt( 1.00 - f*(2.00-f)*std::sin(Radians(SiteLat))*std::sin(Radians(SiteLat)) ) ),
+
+					Ra = (Rstation+Height_over_ocean)*std::cos(Radians(SiteLat)),
+					Rz= Rstation*(1.00-f)*(1.00-f)*std::sin(Radians(SiteLat)),
+//			alfa_r = r_sat - Rstation,
+
+					alfa_rx=r_sat*std::cos(Radians(SatLon-SiteLon)) - Ra,
+					alfa_ry=r_sat*std::sin(Radians(SatLon-SiteLon)),
+					alfa_rz=-Rz,
+
+					alfa_r_north=-alfa_rx*std::sin(Radians(SiteLat)) + alfa_rz*std::cos(Radians(SiteLat)),
+					alfa_r_zenith=alfa_rx*std::cos(Radians(SiteLat)) + alfa_rz*std::sin(Radians(SiteLat)),
+
+					El_geometric=Deg(std::atan2( alfa_r_zenith , std::sqrt(alfa_r_north*alfa_r_north+alfa_ry*alfa_ry))),
+
+
+					x = std::fabs(El_geometric+0.589),
+					refraction=std::fabs(a0+a1*x+a2*x*x+a3*x*x*x+a4*x*x*x*x),
+          El_observed = 0.00;
+
+	if (El_geometric > 10.2)
+		El_observed = El_geometric+0.01617*(std::cos(Radians(std::abs(El_geometric)))/std::sin(Radians(std::abs(El_geometric))) );
+	else
+	{
+		El_observed = El_geometric+refraction ;
+	}
+
+	if (alfa_r_zenith < -3000)
+		El_observed=-99;
+
+	return El_observed;
+}
+
+double calcAzimuth(double SatLon, double SiteLat, double SiteLon, int Height_over_ocean=0)
+{
+	double	f = 1.00 / 298.257, // Earth flattning factor
+
+					r_sat=42164.57, // Distance from earth centre to satellite
+
+					r_eq=6378.14,  // Earth radius
+
+					Rstation = r_eq / ( std::sqrt( 1 - f*(2-f)*std::sin(Radians(SiteLat))*std::sin(Radians(SiteLat)) ) ),
+					Ra = (Rstation+Height_over_ocean)*std::cos(Radians(SiteLat)),
+					Rz = Rstation*(1-f)*(1-f)*std::sin(Radians(SiteLat)),
+//					alfa_r = r_sat-Rstation,
+
+					alfa_rx = r_sat*std::cos(Radians(SatLon-SiteLon)) - Ra,
+					alfa_ry = r_sat*std::sin(Radians(SatLon-SiteLon)),
+					alfa_rz = -Rz,
+
+					alfa_r_north = -alfa_rx*std::sin(Radians(SiteLat)) + alfa_rz*std::cos(Radians(SiteLat)),
+//					alfa_r_zenith = alfa_rx*std::cos(Radians(SiteLat)) + alfa_rz*std::sin(Radians(SiteLat)),
+					Azimuth = 0.00;
+
+					if (alfa_r_north < 0)
+						Azimuth = 180+Deg(std::atan(alfa_ry/alfa_r_north));
+					else
+						Azimuth = Rev(360+Deg(std::atan(alfa_ry/alfa_r_north)));
+
+	return Azimuth;
+}
+
+double calcDeclination( double SiteLat, double Azimuth, double Elevation)
+{
+	return Deg( std::asin(std::sin(Radians(Elevation)) *
+												std::sin(Radians(SiteLat)) +
+												std::cos(Radians(Elevation)) *
+												std::cos(Radians(SiteLat)) *
+												std::cos(Radians(Azimuth))
+												)
+						);
+}
+
+double calcSatHourangle( double Azimuth, double Elevation, double Declination, double Lat )
+{
+	double a = - std::cos(Radians(Elevation)) *
+							 std::sin(Radians(Azimuth)),
+
+				 b = std::sin(Radians(Elevation)) *
+						 std::cos(Radians(Lat)) -
+						 std::cos(Radians(Elevation)) *
+						 std::sin(Radians(Lat)) *
+						 std::cos(Radians(Azimuth)),
+
+// Works for all azimuths (northern & sourhern hemisphere)
+						 returnvalue = 180 + Deg(std::atan2(a,b));
+
+	if ( Azimuth > 270 )
+	{
+		returnvalue = ( (returnvalue-180) + 360 );
+		if (returnvalue>360)
+			returnvalue = 360 - (returnvalue-360);
+  }
+
+	if ( Azimuth < 90 )
+		returnvalue = ( 180 - returnvalue );
+
+	return returnvalue;
+}
+
 int eFrontend::tune(eTransponder *trans,
 		uint32_t Frequency, 		// absolute frequency in kHz
 		int polarisation, 			// polarisation (polHor, polVert, ...)
@@ -412,62 +541,83 @@ int eFrontend::tune(eTransponder *trans,
 
 		eDebug("DiSEqC Switch cmd = %04x", csw);
 
-#if 0
 		// Rotor Support
-		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 )
+		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && !noRotorCmd )
 		{
-			if ( lnb->getDiSEqC().uncommitted_gap ) // the we add 2 * repeats + 1 + 1;
-				cmdCount = ( lnb->getDiSEqC().DiSEqCRepeats << 1 ) + 2;
-			else // then we add repeats + 1 + 1
-				cmdCount = lnb->getDiSEqC().DiSEqCRepeats + 2;
-
-			// allocate memory for all DiSEqC commands
-			commands = new dvb_diseqc_master_cmd[cmdCount];
-
-			commands[cmdCount-1].msg[0]=0xE0;  // no reply... first transmission
-			commands[cmdCount-1].msg[1]=0x31;     // normal positioner
-
-
 			if ( lnb->getDiSEqC().useGotoXX )
 			{
-				int pos = sat->getOrbitalPosition() + lnb->getDiSEqC().rotorOffset;
-				int absPosition = abs(pos);
-				RotorCmd = ( absPosition / 10 * 0x10) + gotoXTable[ absPosition % 10 ];
+				int pos = sat->getOrbitalPosition();
+				int satDir = pos < 0 ? eDiSEqC::WEST : eDiSEqC::EAST;
 
-				// Drive to East ?
-				if ( absPosition == pos )
-					RotorCmd |= 0xE000;  // then add 0xE0
+				double SatLon = abs(pos)/10.00,
+							 SiteLat = lnb->getDiSEqC().gotoXXLatitude,
+							 SiteLon = lnb->getDiSEqC().gotoXXLongitude;
 
-				eDebug("Rotor DiSEqC Param = %04x (useGotoXX)", RotorCmd);
+				if ( lnb->getDiSEqC().gotoXXLaDirection == eDiSEqC::SOUTH )
+					SiteLat = -SiteLat;
 
-				commands[cmdCount-1].msg[2]=0x6E; // gotoXX Drive Motor to Angular Position
-				commands[cmdCount-1].msg[3]=((RotorCmd & 0xFF00) / 0x100);
-				commands[cmdCount-1].msg[4]=RotorCmd & 0xFF;
-				commands[cmdCount-1].msg_len=5;
+				if ( lnb->getDiSEqC().gotoXXLoDirection == eDiSEqC::WEST )
+					SiteLon = 360 - SiteLon;
+
+				if (satDir == eDiSEqC::WEST )
+					SatLon = 360 - SatLon;
+
+				eDebug("siteLatitude = %lf, siteLongitude = %lf, %lf degrees", SiteLat, SiteLon, SatLon );
+				double azimuth=calcAzimuth(SatLon, SiteLat, SiteLon );
+				double elevation=calcElevation( SatLon, SiteLat, SiteLon );
+				double declination=calcDeclination( SiteLat, azimuth, elevation );
+				double satHourAngle=calcSatHourangle( azimuth, elevation, declination, SiteLat );
+				eDebug("azimuth=%lf, elevation=%lf, declination=%lf, PolarmountHourAngle=%lf", azimuth, elevation, declination, satHourAngle );
+
+				int tmp=(int)round( fabs( 180 - satHourAngle ) * 10.0 );
+				RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
+
+				if (satHourAngle < 180)  // the east
+					RotorCmd |= 0xE000;
+				else                     // west
+					RotorCmd |= 0xD000;
 			}
+#if 0
 			else  // we use builtin rotor sat table
 			{
 				std::map<int,int>::iterator it = lnb->getDiSEqC().RotorTable.find( sat->getOrbitalPosition() );
 
 				if (it != lnb->getDiSEqC().RotorTable.end())  // position for selected sat found ?
-				{
-					commands[cmdCount-1].msg[2]=0x6B;  // goto stored sat position
-					commands[cmdCount-1].msg[3]=it->second;
-					commands[cmdCount-1].msg_len=4;
 					RotorCmd=it->second;
-					eDebug("Rotor DiSEqC Param = %02x (use stored position)", RotorCmd);
-				}
 				else  // entry not in table found
+					eDebug("Entry for %d,%d° not in Rotor Table found... please add", sat->getOrbitalPosition() / 10, sat->getOrbitalPosition() % 10 );
+			}
+
+			if ( RotorCmd != lastRotorCmd )  // rotorCmd must sent?
+			{
+				if ( lnb->getDiSEqC().uncommitted_gap ) // the we add 2 * repeats + 1 + 1;
+					cmdCount = ( lnb->getDiSEqC().DiSEqCRepeats << 1 ) + 2;
+				else // then we add repeats + 1 + 1
+					cmdCount = lnb->getDiSEqC().DiSEqCRepeats + 2;
+
+			// allocate memory for all DiSEqC commands
+				commands = new secCommand[cmdCount];
+				commands[cmdCount-1].type = SEC_CMDTYPE_DISEQC_RAW;
+				commands[cmdCount-1].u.diseqc.addr=0x31;     // normal positioner
+				commands[cmdCount-1].u.diseqc.cmdtype=0xE0;  // no replay... first transmission
+
+				if ( lnb->getDiSEqC().useGotoXX )
 				{
-					/*
-					 * FIXME FIXME FIXME FIXME FIXME
-					 * hier geht doch irgendwas schief...
-					 */
-					eDebug("add satellites to RotorTable...");
+					eDebug("Rotor DiSEqC Param = %04x (useGotoXX)", RotorCmd);
+					commands[cmdCount-1].u.diseqc.cmd=0x6E; // gotoXX Drive Motor to Angular Position
+					commands[cmdCount-1].u.diseqc.numParams=2;
+					commands[cmdCount-1].u.diseqc.params[0]=((RotorCmd & 0xFF00) / 0x100);
+					commands[cmdCount-1].u.diseqc.params[1]=RotorCmd & 0xFF;
+				}
+				else
+				{
+					eDebug("Rotor DiSEqC Param = %02x (use stored position)", RotorCmd);
+					commands[cmdCount-1].u.diseqc.cmd=0x6B;  // goto stored sat position
+					commands[cmdCount-1].u.diseqc.numParams=1;
+					commands[cmdCount-1].u.diseqc.params[0]=RotorCmd;
 				}
 			}
-		}
-
+		}  
 		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::SMATV )
 		{
 			if ( uncommitted ) // the we add 2 * repeats + 1 + 1;
@@ -487,8 +637,8 @@ int eFrontend::tune(eTransponder *trans,
 			seq.commands[cmdCount-1].u.diseqc.params[1] = (((Frequency / 100000) << 4) & 0xF0) | ((Frequency / 10000) & 0x0F);
 			seq.commands[cmdCount-1].u.diseqc.params[2] = (((Frequency / 1000) << 4) & 0xF0) | ((Frequency / 100) & 0x0F);
 			SmatvFreq=Frequency;
-		}
 #endif
+		}
 
 		if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_0 )
 		{
