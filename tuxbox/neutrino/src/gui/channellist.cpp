@@ -54,8 +54,12 @@
 int info_height;
 
 
-CChannelList::CChannel::CChannel()
+CChannelList::CChannel::CChannel(const int _key, const int _number, const std::string& _name, const t_channel_id ids)
 {
+	key           = _key;
+	number        = _number;
+	name          = _name;
+	channel_id    = ids;
 	bAlwaysLocked = false;
 }
 
@@ -129,19 +133,13 @@ void CChannelList::updateEvents(void)
 
 void CChannelList::addChannel(int key, int number, const std::string& name, t_channel_id ids)
 {
-	CChannel* tmp = new CChannel();
-	tmp->key=key;
-	tmp->number=number;
-	tmp->name=name;
-	tmp->channel_id = ids;
-	tmp->bAlwaysLocked = false;
-	chanlist.insert(chanlist.end(), tmp);
+	chanlist.push_back(new CChannel(key, number, name, ids));
 }
 
 void CChannelList::addChannel(CChannelList::CChannel* chan)
 {
-	if (chan!=NULL)
-		chanlist.insert(chanlist.end(), chan);
+	if (chan != NULL)
+		chanlist.push_back(chan);
 }
 
 CChannelList::CChannel* CChannelList::getChannel( int number)

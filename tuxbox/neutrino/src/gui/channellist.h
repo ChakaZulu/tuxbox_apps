@@ -50,11 +50,11 @@ class CChannelList
 		{
 			private:
 				unsigned long long	last_unlocked_EPGid;
+				string      	        name;
 
 			public:
 				int         	key;
 				int         	number;
-				string      	name;
 				t_channel_id    channel_id;
 				CChannelEvent	currentEvent;
 
@@ -62,7 +62,7 @@ class CChannelList
 				bool bAlwaysLocked;
 
 				// constructor
-				CChannel();
+				CChannel(const int key, const int number, const std::string& name, const t_channel_id ids);
 
 				friend class CChannelList;
 		};
