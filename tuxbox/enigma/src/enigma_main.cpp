@@ -56,6 +56,7 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/gdi/lcd.h>
 #include <lib/gdi/glcddc.h>
+#include <lib/gdi/fb.h>
 #include <lib/system/info.h>
 #include <src/time_correction.h>
 #include <lib/driver/audiodynamic.h>
@@ -5113,6 +5114,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::evtAction:
 	{
 		int num=0;
+		struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
+		if (screenInfo->bits_per_pixel != 8)
+		{
+			fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 8);
+			fbClass::getInstance()->PutCMAP();
+		}
 		stopMessages();
 
 #ifndef DISABLE_FILE
