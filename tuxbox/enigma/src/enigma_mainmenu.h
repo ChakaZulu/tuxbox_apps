@@ -20,6 +20,7 @@ class eMainMenu: public eWidget
 	void sel_info();	
 	void sel_quit();
 	void sel_plugins();
+	void eraseBackground(gPainter *, const eRect &where);
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:

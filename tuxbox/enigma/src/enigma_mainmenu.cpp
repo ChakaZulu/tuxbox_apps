@@ -211,3 +211,7 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 	}
 	return eWidget::eventHandler(event);
 }
+
+void eMainMenu::eraseBackground(gPainter *, const eRect &where)
+{
+}

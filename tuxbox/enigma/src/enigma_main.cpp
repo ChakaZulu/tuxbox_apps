@@ -527,6 +527,8 @@ eZapMain::eZapMain(): eWidget(0, 1), pMsg(0), message_notifier(eApp), timeout(eA
 	gotPMT();
 	gotSDT();
 	gotEIT();
+	
+	startMessages();
 }
 
 eZapMain::~eZapMain()

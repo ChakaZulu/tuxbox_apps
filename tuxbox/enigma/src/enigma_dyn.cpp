@@ -35,6 +35,51 @@
 
 #define DELETE(WHAT) result.strReplace(#WHAT, "")
 
+static int getHex(int c)
+{
+	c=toupper(c);
+	c-='0';
+	if (c<0)
+		return -1;
+	if (c > 9)
+		c-='A'-10;
+	if (c > 0xF)
+		return -1;
+	return c;
+}
+
+static eString httpUnescape(const eString &string)
+{
+	eString ret;
+	for (unsigned int i=0; i<string.length(); ++i)
+	{
+		int c=string[i];
+		switch (c)
+		{
+		case '%':
+		{
+			int val='%';
+			if ((string.length() - i) > 1)
+				val=getHex(string[++i]);
+			if ((string.length() - i) > 1)
+			{
+				val<<=4;
+				val+=getHex(string[++i]);
+			}
+			ret+=val;
+			break;
+		}
+		case '+':
+			ret+=' ';
+			break;
+		default:
+			ret+=c;
+			break;
+		}
+	}
+	return ret;
+}
+
 static std::map<eString,eString> getRequestOptions(eString opt)
 {
 	std::map<eString,eString> result;
@@ -55,7 +100,7 @@ static std::map<eString,eString> getRequestOptions(eString opt)
 		unsigned int b=opt.find("&", e+1);
 		if(b==eString::npos)
 			b=(unsigned)-1;
-		eString r=opt.mid(e+1, b-e-1);
+		eString r=httpUnescape(opt.mid(e+1, b-e-1));
 		result.insert(std::pair<eString, eString>(n, r));
 		opt=opt.mid(a+1);
 	}
