@@ -144,7 +144,7 @@ public:
 			 << plugin.name
 			 << "</td><td>"
 			 << (plugin.desc ? plugin.desc : "(no description)")
-			 << "</td><td>";
+			 << "</td></tr>";
 		return false; // must return false in order to continue for_each loop
 	}
 };

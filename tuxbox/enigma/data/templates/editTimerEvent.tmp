@@ -28,7 +28,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td>Start:</d>
+					<td>Start:</td>
 					<td>
 						<select name="sday" size="1">
 							#SDAYOPTS#
@@ -48,7 +48,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td>End:</d>
+					<td>End:</td>
 					<td>
 						<select name="eday" size="1">
 							#EDAYOPTS#
@@ -76,7 +76,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td>Days:</d>
+					<td>Days:</td>
 					<td>
 						<input type="checkbox" name="mo" value="on" #MO#>&nbsp;Mo&nbsp;&nbsp;
 						<input type="checkbox" name="tu" value="on" #TU#>&nbsp;Tu&nbsp;&nbsp;
@@ -88,7 +88,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td>After event do:</d>
+					<td>After event do:</td>
 					<td>
 						<select name="after_event" size="1">
 							#AFTEROPTS#
