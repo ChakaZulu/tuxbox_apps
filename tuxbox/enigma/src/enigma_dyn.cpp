@@ -2572,6 +2572,8 @@ public:
 		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
 			return;
 
+		time_t now = time(0) + eDVB::getInstance()->time_difference;
+
 		std::stringstream result;
 		result << std::setfill('0');
 		eService* current;
@@ -2602,17 +2604,33 @@ public:
 					{
 						eString ext_description;
 						eString short_description;
+						eString genre;
+						int genreCategory;
 						EITEvent event(*It->second);
 						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 						{
-							Descriptor *descriptor=*d;
+							Descriptor *descriptor = *d;
 							if (descriptor->Tag() == DESCR_SHORT_EVENT)
+								short_description = ((ShortEventDescriptor *)descriptor)->event_name;
+							else
+							if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
+								ext_description += ((ExtendedEventDescriptor *)descriptor)->text;
+							else
+							if (descriptor->Tag() == DESCR_CONTENT)
 							{
-								short_description = ((ShortEventDescriptor*)descriptor)->event_name;
-							}
-							if (d->Tag() == DESCR_EXTENDED_EVENT)
-							{
-								ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
+								genre = "";
+								ContentDescriptor *cod = (ContentDescriptor *)descriptor;
+
+								for (ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
+								{
+									genreCategory = ce->content_nibble_level_1;
+									if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
+									{
+										if (genre != "")
+											genre += " ";
+										genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
+									}
+								}
 							}
 						}
 
@@ -2678,6 +2696,7 @@ public:
 								<< "<span class=\"duration\">"
 								<< " (" << event.duration / 60 << " min)"
 								<< "</span>"
+								<< "<br>Genre: " << genre
 								<< "<br><b>"
 								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\", \"0\", \"-1\")\'>"
 								<< "<span class=\"event\">"
@@ -2781,7 +2800,8 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
-	eString description, ext_description;
+	eString description, ext_description, genre;
+	int genreCategory;
 	result << std::setfill('0');
 
 	eService* current;
@@ -2824,12 +2844,26 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 			{
 				Descriptor *descriptor = *d;
 				if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
-				{
 					ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
-				}
+				else
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
-				{
 					description = ((ShortEventDescriptor*)descriptor)->event_name;
+				else
+				if (descriptor->Tag() == DESCR_CONTENT)
+				{
+					genre = "";
+					ContentDescriptor *cod = (ContentDescriptor *)descriptor;
+
+					for (ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
+					{
+						genreCategory = ce->content_nibble_level_1;
+						if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
+						{
+							if (genre != "")
+								genre += " ";
+							genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
+						}
+					}
 				}
 			}
 
@@ -2859,6 +2893,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				<< "<span class=\"event\">"
 				<< filter_string(description)
 				<< "</span>"
+				<< "<br>Genre: " << genre
 				<< "<br>"
 				<< "<span class=\"description\">"
 				<< filter_string(ext_description)
