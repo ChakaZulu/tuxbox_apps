@@ -38,6 +38,8 @@
 #include <global.h>
 #include <neutrino.h>
 
+#include <driver/encoding.h>
+
 
 CSubService::CSubService(const t_original_network_id anoriginal_network_id, const t_service_id aservice_id, const t_transport_stream_id atransport_stream_id, const std::string &asubservice_name)
 {
@@ -391,7 +393,7 @@ void CRemoteControl::processAPIDnames()
 
 		if ( current_PIDs.APIDs[count].is_ac3 )
 		{
-			strcat( current_PIDs.APIDs[count].desc, " (AC3)");
+			strncat(current_PIDs.APIDs[count].desc, " (AC3)", 25);
 			has_ac3 = true;
 		}
 	}
@@ -415,9 +417,9 @@ void CRemoteControl::processAPIDnames()
 							// workaround for buggy ZDF ctags / or buggy sectionsd/drivers , who knows...
 							if(!tags[i].component.empty())
 							{
-								strncpy( current_PIDs.APIDs[j].desc, tags[i].component.c_str(), 25 );
-								if ( current_PIDs.APIDs[j].is_ac3 )
-									strncat( current_PIDs.APIDs[j].desc, " (AC3)", 25 );
+								strncpy(current_PIDs.APIDs[j].desc, (Latin1_to_UTF8(tags[i].component)).c_str(), 25);
+								if (current_PIDs.APIDs[j].is_ac3)
+									strncat(current_PIDs.APIDs[j].desc, " (AC3)", 25);
 							}
 							current_PIDs.APIDs[j].component_tag = -1;
 							break;
