@@ -827,10 +827,13 @@ static eString getLeftNavi(eString mode, eString path)
 	else
 	if (mode.find("help") == 0)
 	{
-		result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=helpDMMSites");
-		result += "<br>";
-		result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=helpOtherSites");
-		result += "<br>";
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		{
+			result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=helpDMMSites");
+			result += "<br>";
+			result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=helpOtherSites");
+			result += "<br>";
+		}
 		result += button(110, "Forums", LEFTNAVICOLOR, "?mode=helpForums");
 		result += "<br>";
 	}
@@ -1614,10 +1617,10 @@ static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTT
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
-	eString swapUSB = opt["swapUSB"];
-	eString swapUSBFile = opt["swapUSBFile"];
+	eString swapUSB = opt["swapusb"];
+	eString swapUSBFile = opt["swapusbfile"];
 	eString bootUSB = opt["bootUSB"];
-	eString bootUSBImage = opt["bootUSBImage"];
+	eString bootUSBImage = opt["bootusbimage"];
 	
 	return getMsgWindow("Info", "Function is not supported by installed flash image.");
 //	return "<script language=\"javascript\">window.close();</script>";
@@ -1627,10 +1630,10 @@ static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTT
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
-	eString swapHDD = opt["swapHDD"];
-	eString swapHDDFile = opt["swapHDDFile"];
+	eString swapHDD = opt["swaphdd"];
+	eString swapHDDFile = opt["swaphddfile"];
 	eString bootHDD = opt["bootHDD"];
-	eString bootHDDImage = opt["bootHDDImage"];
+	eString bootHDDImage = opt["boothddimage"];
 
 	return getMsgWindow("Info", "Function is not supported by installed flash image.");
 //	return "<script language=\"javascript\">window.close();</script>";
@@ -1944,7 +1947,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "helpDMMSites")
 	{
-		result = getTitle("HELP: Official Sites");
+		result = getTitle("HELP: DMM Sites");
 		result += readFile(TEMPLATE_DIR + "helpDMMSites.tmp");
 	}
 	else
@@ -2849,6 +2852,10 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	result.strReplace("#HEADER#", getEITC2());
 	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		result.strReplace("#TOPBALK#", "topbalk.png");
+	else
+		result.strReplace("#TOPBALK#", "topbalk2.png");
 
 	return result;
 }
