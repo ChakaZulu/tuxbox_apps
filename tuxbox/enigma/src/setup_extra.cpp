@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.23 2005/02/04 14:59:06 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.24 2005/02/09 12:35:54 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -57,7 +57,7 @@ eExpertSetup::eExpertSetup()
 		CONNECT((new eListBoxEntryMenu(&list, _("Factory reset"), eString().sprintf("(%d) %s", ++entry, _("all settings will set to factory defaults")) ))->selected, eExpertSetup::factory_reset);
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 #ifndef DISABLE_FILE
-	if ( eSystemInfo::getInstance()->canRecordTS() )
+	if ( eSystemInfo::getInstance()->canRecordTS() && !eDVB::getInstance()->recorder )
 	{
 		list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
 		record_split_size = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("record split size (left, right)"));
