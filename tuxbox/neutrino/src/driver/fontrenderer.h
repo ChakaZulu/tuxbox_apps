@@ -101,11 +101,11 @@ class Font
 		int height,ascender,descender,upper,lower;
 
 	public:
-		void RenderString(int x, int y, int width, const char *text, unsigned char color, int boxheight=0, const bool utf8_encoded = false);
-		void RenderString(int x, int y, int width, string text, unsigned char color, int boxheight=0);
+		void RenderString(int x, int y, const int width, const char *      text, const unsigned char color, const int boxheight = 0, const bool utf8_encoded = false);
+		void RenderString(int x, int y, const int width, const std::string text, const unsigned char color, const int boxheight = 0, const bool utf8_encoded = false);
 
-		int getRenderWidth(const char *text);
-		int getRenderWidth(string text);
+                int getRenderWidth(const char *      text, const bool utf8_encoded = false);
+		int getRenderWidth(const std::string text, const bool utf8_encoded = false);
 		int getHeight(void);
 
 		Font(FBFontRenderClass *render, FTC_FaceID faceid, int isize);
