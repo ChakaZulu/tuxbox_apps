@@ -19,9 +19,10 @@ struct channel {
   uint onid;
   uint chan_nr;
   ushort service_type;
+  uint pcrpid;
 
   unsigned int OnidSid(){return( (onid << 16)|sid);}
-  channel(std::string Name, time_t Last_update, uint Vpid, uint Apid, uint Pmt, uint Ecmpid, uint Sid, uint Tsid, uint Onid, ushort Service_type, uint cnr=0)
+  channel(std::string Name, time_t Last_update, uint Vpid, uint Apid, uint Pmt, uint Ecmpid, uint Sid, uint Tsid, uint Onid, ushort Service_type, uint cnr=0, uint Pcrpid=0x1fff)
   {
     name = Name;
     last_update = Last_update;
@@ -34,6 +35,7 @@ struct channel {
     onid = Onid;
     service_type = Service_type;
     chan_nr = cnr;
+    pcrpid = Pcrpid;
       }
 };
 
@@ -97,6 +99,7 @@ typedef struct pids{
         apid_struct apids[max_num_apids];
         uint ecmpid;
         uint vtxtpid;
+	uint pcrpid;
 }pids;
 
 
