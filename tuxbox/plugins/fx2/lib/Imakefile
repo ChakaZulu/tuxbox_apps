@@ -5,7 +5,7 @@ CC=$(PREF)gcc
 STRIP=$(PREF)strip
 CDEBUGFLAGS=-g -O2 -Wall -pedantic -DUSEX
 INCLUDES=-I.
-OBJS=draw.o rcinput.o pig.o
+OBJS=draw.o rcinput.o pig.o math.o
 
 libfx2.so: $(OBJS)
 	$(CC) -o libfx2.so -shared -Wl,-soname,libfx2.so $(OBJS)

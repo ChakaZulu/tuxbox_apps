@@ -14,6 +14,7 @@ static	int			l_x = 0;
 static	int			l_y = 0;
 static	int			l_width = 0;
 static	int			l_height = 0;
+		int			fx2_use_pig = 1;
 
 void	Fx2SetPig( int x, int y, int width, int height )
 {
@@ -41,7 +42,7 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 		Fx2SetPig(x,y,width,height);
 		return;
 	}
-	if ( fd == -1 )
+	if (( fd == -1 ) && fx2_use_pig )
 		fd = open( "/dev/dbox/pig0", O_RDONLY );
 	if ( fd == -1 )
 		return;

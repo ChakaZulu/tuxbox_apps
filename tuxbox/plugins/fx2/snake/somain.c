@@ -14,6 +14,8 @@
 #include <pig.h>
 #include <colors.h>
 #include <snake.h>
+#include <plugin.h>
+#include <fx2math.h>
 
 extern	int	doexit;
 extern	int	debug;
@@ -87,4 +89,21 @@ int snake_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	FBClose();
 
 	return 0;
+}
+
+int plugin_exec( PluginParam *par )
+{
+	int		fd_fb=-1;
+	int		fd_rc=-1;
+
+	for( ; par; par=par->next )
+	{
+		if ( !strcmp(par->id,P_ID_FBUFFER) )
+			fd_fb=_atoi(par->val);
+		else if ( !strcmp(par->id,P_ID_RCINPUT) )
+			fd_rc=_atoi(par->val);
+		else if ( !strcmp(par->id,P_ID_NOPIG) )
+			fx2_use_pig=!_atoi(par->val);
+	}
+	return snake_exec( fd_fb, fd_rc, -1, 0 );
 }
