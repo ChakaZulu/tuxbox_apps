@@ -2,6 +2,9 @@ menu.back retour
 
 options.off outre de
 options.on dessus
+options.serial seriell
+options.fb framebuffer
+options.null null
 
 mainmenu.head Menu principal
 mainmenu.tvmode TV-Mode
@@ -19,7 +22,7 @@ mainmenu.streaming_stop stop
 servicemenu.head Service
 servicemenu.update Software Update
 servicemenu.scants Servicescan
-servicemenu.ucodecheck Check ucodes
+servicemenu.ucodecheck verifier ucodes
 
 cablesetup.provider cable provider
 
@@ -34,29 +37,32 @@ satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-repeats
 
 mainsettings.head Settings
-mainsettings.savesettingsnow save settings now
+mainsettings.savesettingsnow sauvegarder l'arrangement maintenant
 mainsettings.language Langue
 mainsettings.audio Argile
 mainsettings.video Vidéo
 mainsettings.network Réseau
+mainsettings.streaming Streamingserver
 mainsettings.colors  Couleurs / Thèmes
+mainsettings.lcd LC-Display
 mainsettings.keybinding Ajuster des clés
-mainsettings.misc Misc Settings
-mainsettings.scan Scan settings
+mainsettings.misc divers ajustements
+mainsettings.scan Scan ajustements
 
-miscsettings.head Misc Settings
-miscsettings.shutdown_real Enable Standby
+miscsettings.head divers ajustements
+miscsettings.shutdown_real enclenche Standby
 miscsettings.boxtype DBox type
-miscsettings.startneutrinodirect start neutrino directly
+miscsettings.startneutrinodirect commencer Neutrino directement
 miscsettings.general General
+miscsettings.fb_destination EXPERT! Boot-Konsole
 
-languagesetup.head Ajuster un langue
-languagesetup.select Langue
+languagesetup.head Ajuster une langue
+languagesetup.select langue
 
-audiomenu.head ajuster I'argile
-audiomenu.analogout Analog Output
-audiomenu.monoright mono right
-audiomenu.monoleft mono left
+audiomenu.head ajuster le timbre
+audiomenu.analogout analogue interface
+audiomenu.monoright mono a droite
+audiomenu.monoleft mono a gauche
 audiomenu.stereo Stéréo
 audiomenu.dolbydigital Dolby Digital
 
@@ -69,12 +75,12 @@ videomenu.videosignal_composite Composite
 videomenu.videoformat Format de Télévision
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
-videomenu.videoformat_autodetect autodetect
-videomenu.vcrswitch Switch Scart automatically
+videomenu.videoformat_autodetect automatiquement
+videomenu.vcrswitch changer Scart automatiquement
 
-networkmenu.head Ajuster un Réseau
-networkmenu.test test network now
-networkmenu.show show active network settings
+networkmenu.head Ajuster le Réseau
+networkmenu.test controler réseau maintenant
+networkmenu.show annonce les réglages actuels
 networkmenu.setupnow utiliser maintenant des réglages de Réseau
 networkmenu.setuponstartup Lors du démarrage des réglages de réseau commencent
 networkmenu.ipaddress IP-adresse
@@ -82,9 +88,13 @@ networkmenu.netmask Masque de réseau
 networkmenu.broadcast Émission
 networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver
-networkmenu.usestreamserver use streamserver
-networkmenu.streamingserver Streamingserver
-networkmenu.streamingserverport Port
+
+streamingmenu.head Streamingserver réglages
+streamingmenu.usestreamserver utiliser Streamingserver
+streamingmenu.streamingserver Streamingserver
+streamingmenu.streamingserverport Port
+streamingmenu.stopplayback arrêter interprétation
+streamingmenu.stopsectionsd arrêter Sectionsd
 
 ping.ok is reachable (ping)
 ping.unreachable is unreachable
@@ -148,16 +158,25 @@ keybindingmenu.bouquethandling Bouquet-control
 keybindingmenu.bouquetchannels_on_ok current bouquet
 keybindingmenu.bouquetlist_on_ok bouquet-list
 keybindingmenu.allchannels_on_ok all-services
-keybindingmenu.subchannelup subchannel up
-keybindingmenu.subchannelup_head key subchannel up
-keybindingmenu.subchanneldown subchannel down
-keybindingmenu.subchanneldown_head key subchannel down
-
+keybindingmenu.subchannelup subchannel plus loin
+keybindingmenu.subchannelup_head key subchannel plus loin
+keybindingmenu.subchanneldown subchannel de retour
+keybindingmenu.subchanneldown_head key subchannel de retour
 
 colorchooser.red rouge
 colorchooser.green vert
 colorchooser.blue bleu
 colorchooser.alpha alpha
+
+lcdmenu.head LCD réglages 
+lcdmenu.inverse inverser
+lcdmenu.power Power
+lcdmenu.lcdcontroler Contraste / luminosité
+
+lcdcontroler.head LCD réglages
+lcdcontroler.contrast Contraste
+lcdcontroler.brightness luminosité normale
+lcdcontroler.brightnessstandby luminosité en Standby 
 
 keychoosermenu.setnew À nouveau ajuster la clé
 keychoosermenu.setnone Pas de clé
@@ -171,25 +190,25 @@ screensetup.upperleft rouge = Découpe en haut, à gauche
 screensetup.lowerright vert = Découpe vers le bas, à droite
 
 channellist.head tous les canaux
-channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
+channellist.nonefound Aucun canal n'a été trouvé!\nVeuillez commencer une nouvelle recherche!\n(dbox-key -> service)
 channellist.since since %02d:%02d
 
 infoviewer.epgnotload EPG pas encore non chargé ...
 infoviewer.epgwait attendent EPG...
-infoviewer.streaminfo Features
+infoviewer.streaminfo Fonctions
 infoviewer.eventlist l' événement énumérerait
 infoviewer.languages Choix linguistique
-infoviewer.notavailable Channel not available
-infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
-infoviewer.selecttime Timeselection
-infoviewer.nocurrent No info for current program available
+infoviewer.notavailable Canale n'est pas disponible.
+infoviewer.cantdecode Le canal ne peut pas être décodé
+infoviewer.selecttime selection du temps
+infoviewer.nocurrent Pas d'information pour programme actuelle
 infoviewer.noepg EPG not available
 infoviewer.subservice Subservices
-infoviewer.waittime Waiting for time...
+infoviewer.waittime J'attends la date....
 
 epgviewer.notfound pas d' EPG informations trouvé
 epgviewer.nodetailed No detailed informations available
-epgviewer.More_Screenings More Screenings on this Channel
+epgviewer.More_Screenings encore plus d'informations brèves
 epglist.head l' événement énumérerait - %s
 epglist.noevents Pas d'cEpg disponible ...
 
@@ -211,8 +230,8 @@ streamfeatures.info Stream-Information
 
 apidselector.head Choix linguistique
 
-nvodselector.head Select starting-time
-nvodselector.subservice Select subservice
+nvodselector.head choisir temps a commancer
+nvodselector.subservice choisir subservice
 nvodselector.directormode Direct-Mode
 
 ucodecheck.head UCode check
@@ -221,32 +240,32 @@ ucodecheck.avia600 Avia 600
 ucodecheck.ucode UCode
 ucodecheck.cam-alpha Cam-Alpha
 
-date.Mon  Mon
-date.Tue  Tue
-date.Wed  Wed
-date.Thu  Thu
-date.Fri  Fri
-date.Sat  Sat
-date.Sun  Sun
+date.Mon  lun
+date.Tue  mar
+date.Wed  mec
+date.Thu  jeu
+date.Fri  ven
+date.Sat  sam
+date.Sun  dim
 
 date.Jan  Jan
 date.Feb  Feb
 date.Mar  Mar
-date.Apr  Apr
+date.Apr  Avr
 date.May  May
 date.Jun  Jun
 date.Jul  Jul
-date.Aug  Aug
+date.Aug  Aou
 date.Sep  Sep
 date.Oct  Oct
 date.Nov  Nov
 date.Dec  Dec
 
-nvod.starting (starting in %d min)
-nvod.proz (%d%% over)
+nvod.starting (Je commence dans %d min)
+nvod.proz (%d%% passé)
 
 scants.head Scan transponder
-scants.startnow start scan
+scants.startnow commencer scan
 scants.actsatellite Satellite:
 scants.astra astra
 scants.hotbird hotbird
@@ -259,12 +278,9 @@ scants.transponders Transponders:
 scants.services Services:
 scants.bouquet Bouquet
 scants.bouquet_leave leave current
-scants.bouquet_create create new
-scants.bouquet_erase erase all
-scants.finished Transponderscan finished successfully!
-
-flashupdate.head Software Update
-mainsettings.update Software Update
+scants.bouquet_create create nouveau
+scants.bouquet_erase supprimé tous
+scants.finished Transponderscan c'est fini avec succès! gratulation!
 
 flashupdate.head Software Update
 flashupdate.action Action:
@@ -330,8 +346,8 @@ bouqueteditor.lock Lock
 bouqueteditor.newbouquetname New name of bouquets
 bouqueteditor.bouquetname Name of bouquets
 bouqueteditor.savechanges? Do you want to save the changes?
-bouqueteditor.savingchanges Saving changes. Please wait ...
-bouqueteditor.discardingchanges Discarding changes. Please wait ..
+bouqueteditor.savingchanges Saving changes. Un moment...
+bouqueteditor.discardingchanges Discarding changes. Un moment ..
 bouqueteditor.switch channel add/remove
 bouqueteditor.switchmode TV/Radio
 bouqueteditor.return ready
@@ -340,32 +356,34 @@ messagebox.yes Oui
 messagebox.no Non
 messagebox.cancel Cancel
 messagebox.back Back
-messagebox.error Error
-messagebox.discard Discard changes?
+messagebox.error Erreur
+messagebox.discard Jetez les changements?
 messagebox.info Information
 
-settings.noconffile No neutrino-settings found.\nUseing defaults.
+settings.noconffile Il n'y a pas neutrino-réglages du tout.\nInitialisier avec réglages standard.
 settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
 
-cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish to get this warning again?
-ucodes.failure ATTENTION, µCodes could NOT be found!\n\nPlease upload them via FTP (or DBox-BootManager),\nthen restart your DBox!
+cam.wrong ATTENTION, VOTRE CARTE \nN'EST PAS IDENTIQUE AVEC CAMALPHA.BIN!!\n\nVoulez-vous lire cette attention une autre fois?
+ucodes.failure ATTENTION, µCodes n'est pas trouvez!\n\ntransfer avec FTP s'il vous-plaît (ou DBox-BootManager),\net reset votre DBox!
 
-stringinput.caps caps / no caps
+stringinput.caps avec caps / sans caps
 
-GENRE.MOVIE.0 Spielfilm / Drama
+streamingserver.noconnect Streamingserver n'est pas connecter.\nStreaming est interrupter.
+
+GENRE.MOVIE.0 Film / Drama
 GENRE.MOVIE.1 detective/thriller
-GENRE.MOVIE.2 adventure/western/war
+GENRE.MOVIE.2 adventure/western/guerre
 GENRE.MOVIE.3 science fiction/fantasy/horror
 GENRE.MOVIE.4 comedy
 GENRE.MOVIE.5 soap/melodrama/folkloric
 GENRE.MOVIE.6 romance
-GENRE.MOVIE.7 serious/classical/religious/historical movie/drama
-GENRE.MOVIE.8 adult movie/drama
+GENRE.MOVIE.7 serious/classical/religious/film historique/drama
+GENRE.MOVIE.8 film adult/drama
 
-GENRE.NEWS.0 Nachrichten
-GENRE.NEWS.1 news/weather report
+GENRE.NEWS.0 Informations actuelle
+GENRE.NEWS.1 informations/temps
 GENRE.NEWS.2 news magazine
-GENRE.NEWS.3 documentary
+GENRE.NEWS.3 documentation
 GENRE.NEWS.4 discussion/interview/debate
 
 GENRE.SHOW.0 Show / Gameshow
@@ -374,29 +392,29 @@ GENRE.SHOW.2 variety show
 GENRE.SHOW.3 talk show
 
 GENRE.SPORTS.0 Sport
-GENRE.SPORTS.1 special events (Olympic Games,World Cup etc.)
-GENRE.SPORTS.2 sports magazines
+GENRE.SPORTS.1 special events (Olympique Games,Coupe du Monde etc.)
+GENRE.SPORTS.2 magazines sportives
 GENRE.SPORTS.3 football/soccer
 GENRE.SPORTS.4 tennis/squash
-GENRE.SPORTS.5 team sports (excluding football)
-GENRE.SPORTS.6 athletics
-GENRE.SPORTS.7 motor sport
+GENRE.SPORTS.5 team sports (sans football/soccer)
+GENRE.SPORTS.6 athletique
+GENRE.SPORTS.7 Sport automobile
 GENRE.SPORTS.8 water sport
 GENRE.SPORTS.9 winter sports
 GENRE.SPORTS.10 equestrian
 GENRE.SPORTS.11 martial sports
 
-GENRE.CHILDRENs_PROGRAMMES.0 Kinder / Jugendprogramm
-GENRE.CHILDRENs_PROGRAMMES.1 pre-school children's programmes
+GENRE.CHILDRENs_PROGRAMMES.0 Enfants / Programme pour les jeunes
+GENRE.CHILDRENs_PROGRAMMES.1 programme pour les jeunes avant scolaire
 GENRE.CHILDRENs_PROGRAMMES.2 entertainment programmes for 6 to14
 GENRE.CHILDRENs_PROGRAMMES.3 entertainment programmes for 10 to 16
 GENRE.CHILDRENs_PROGRAMMES.4 informational/educational/school programmes
 GENRE.CHILDRENs_PROGRAMMES.5 cartoons/puppets
 
-GENRE.MUSIC_DANCE.0 Musik / Ballet / Tanz
+GENRE.MUSIC_DANCE.0 musique / Ballet / dance
 GENRE.MUSIC_DANCE.1 rock/pop
-GENRE.MUSIC_DANCE.2 serious music/classical music
-GENRE.MUSIC_DANCE.3 folk/traditional music
+GENRE.MUSIC_DANCE.2 serious musique/classical musique
+GENRE.MUSIC_DANCE.3 folk/traditional musique
 GENRE.MUSIC_DANCE.4 jazz
 GENRE.MUSIC_DANCE.5 musical/opera
 GENRE.MUSIC_DANCE.6 ballet
@@ -414,21 +432,21 @@ GENRE.ARTS.9 new media
 GENRE.ARTS.10 arts/culture magazines
 GENRE.ARTS.11 fashion
 
-GENRE.SOZIAL_POLITICAL.0 Sozial & Politikereignisse / Wirtschaft
+GENRE.SOZIAL_POLITICAL.0 Au niveau social et événements politiques / Économie
 GENRE.SOZIAL_POLITICAL.1 magazines/reports/documentary
 GENRE.SOZIAL_POLITICAL.2 economics/social advisory
 GENRE.SOZIAL_POLITICAL.3 remarkable people
 
-GENRE.DOCUS_MAGAZINES.0 Doku / Magazin
-GENRE.DOCUS_MAGAZINES.1 nature/animals/environment
-GENRE.DOCUS_MAGAZINES.2 technology/natural sciences
-GENRE.DOCUS_MAGAZINES.3 medicine/physiology/psychology
-GENRE.DOCUS_MAGAZINES.4 foreign countries/expeditions
-GENRE.DOCUS_MAGAZINES.5 social/spiritual sciences
+GENRE.DOCUS_MAGAZINES.0 documentation / Magazin
+GENRE.DOCUS_MAGAZINES.1 nature/animaux/environment
+GENRE.DOCUS_MAGAZINES.2 technologie/les sciences normales
+GENRE.DOCUS_MAGAZINES.3 médecine/physiologie/psychologie
+GENRE.DOCUS_MAGAZINES.4 pays étrangers/expeditions
+GENRE.DOCUS_MAGAZINES.5 sociale/les sciences spirituelles
 GENRE.DOCUS_MAGAZINES.6 further education
 GENRE.DOCUS_MAGAZINES.7 languages
 
-GENRE.TRAVEL_HOBBIES.0 Reise & Freizeit
+GENRE.TRAVEL_HOBBIES.0 Voyage et loisirs
 GENRE.TRAVEL_HOBBIES.1 tourism/travel
 GENRE.TRAVEL_HOBBIES.2 handicraft
 GENRE.TRAVEL_HOBBIES.3 motoring
@@ -437,40 +455,48 @@ GENRE.TRAVEL_HOBBIES.5 cooking
 GENRE.TRAVEL_HOBBIES.6 advertisement/shopping
 GENRE.TRAVEL_HOBBIES.7 gardening
 
-GENRE.UNKNOWN Unbekannt
+GENRE.UNKNOWN diverses
 
-parentallock.parentallock Youth protection
+parentallock.parentallock protection de la jeunesse
 
 parentallock.prompt prompt for PIN
-parentallock.never never
+parentallock.never pas du tout
 parentallock.onstart on start
-parentallock.changetolocked on locked bouquets
+parentallock.changetolocked de bouquets verrouillé 
 parentallock.onsignal on broadcasted lock
-parentallock.lockedsender Locked sender...
-parentallock.lockedprogram Locked program (from %d years up)
+parentallock.lockedsender verrouillé programme...
+parentallock.lockedprogram programme verrouiller (%d ans plus)
 parentallock.head Enter Parental Lock PIN code
 
 parentallock.lockage lock program
-parentallock.lockage12 from 12 years up
-parentallock.lockage16 from 16 years up
-parentallock.lockage18 from 18 years up
+parentallock.lockage12 d'enfants a 12 ans+
+parentallock.lockage16 d'enfants a 16 ans+
+parentallock.lockage18 d'enfants a 18 ans+
 
-parentallock.changepin change PIN code
-parentallock.changepin_hint1 Enter your new youth protection pin code here!
+parentallock.changepin changer PIN code
+parentallock.changepin_hint1 Écrivez votre nouveau code de protection de la jeunesse ici!
 
-pinprotection.wrongcode PIN-Code was wrong! Try again.
+pinprotection.wrongcode PIN-Code n'est pas correcte! essayez encore.
 pinprotection.head Enter PIN code
 
-favorites.bouquetname My Favorites
-favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds...
-favorites.menueadd add channel to favorites
-favorites.bqcreated Bouquet "My Favorites" has been created...\n
-favorites.chadded The current channel has been added to your favorites...\n
-favorites.chalreadyinbq The current channel is already in your favorites...\n
-favorites.finalhint \nUse the bouqueteditor to modify your favorites.\n
+favorites.bouquetname Mes favoris
+favorites.nobouquets Les favoris ne sont pas possible sans bouquets activé
+favorites.addchannel Ce programme est maintenant ajouté \nen bouquet "Mes favoris". \n un moment s'il vous-plaît...
+favorites.menueadd ajouter canale channel a favoris
+favorites.bqcreated Bouquet "Mes favoris" est créé maintenant...\n
+favorites.chadded Ce programme est maintenant ajouté a votre favoris...\n
+favorites.chalreadyinbq Ce programme est déjà dans le bouquet...\n
+favorites.finalhint \nUtilisez le bouqueteditor pour modifier vos favoris.\n
 
-sleeptimerbox.title Sleeptimer
-sleeptimerbox.hint1 Shutdown time in min.
-sleeptimerbox.hint2 The dbox2 will shutdown after this time.
+sleeptimerbox.title Temporisateur De Sommeil
+sleeptimerbox.hint1 Temps d'arrêt en minutes.
+sleeptimerbox.hint2 La dbox2 est terminé après ce temps.
+sleeptimerbox.announce Temporisateur De Sommeil en minutes 1 
 
-timerbar.channelswitch Timed switch
+timerbar.channelswitch noter
+timerbar.recordevent Aufnahme 
+timer.eventtimed.title noter programme
+timer.eventtimed.msg Die Sendung wurde vorgemerkt.\nDie dbox2 wird sich zum Startzeitpunkt automatisch ein- \nund auf die Sendung umschalten.
+timer.eventrecord.title Aufnahme vormerken
+timer.eventrecord.msg   Die Sendung wurde zur Aufnahme vergemerkt
+
