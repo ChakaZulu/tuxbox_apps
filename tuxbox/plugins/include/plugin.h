@@ -33,4 +33,12 @@ typedef int	(*PluginExec)( PluginParam *par );
 #define	P_ID_RCBLK_ANF	"rcblk_anf"		// Key-Repeatblocker Anfang
 #define	P_ID_RCBLK_REP	"rcblk_rep"     // Key-Repeatblocker Wiederholung
 
+typedef enum plugin_type
+{
+	PLUGIN_TYPE_DISABLED = 0,
+	PLUGIN_TYPE_GAME     = 1,
+	PLUGIN_TYPE_TOOL     = 2,
+}
+plugin_type_t;
+
 #endif
