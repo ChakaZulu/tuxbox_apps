@@ -22,12 +22,14 @@ using namespace std;
 		string					text;
 
 		CMenuWidget*			parent;
+		unsigned char*			pixbuf;
+
 
 	public:
 		CHintBox( CMenuWidget* Parent, string Caption, string Text);
 
-		void paint();
-		void hide( bool showParent=true);
+		void paint( bool saveScreen = true );
+		void hide();
 	};
 
 #endif

@@ -73,7 +73,7 @@ void CColorChooser::setColor()
 
 int CColorChooser::exec(CMenuTarget* parent, string)
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 	if (parent)
 	{
 		parent->hide();
@@ -243,10 +243,10 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 				break;
 
 			default:
-				if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+				if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 				{
 					loop = false;
-					res = CMenuTarget::RETURN_EXIT_ALL;
+					res = menu_return::RETURN_EXIT_ALL;
 				}
 		}
 	}

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.41 2002/02/25 19:32:26 field Exp $
+// $Id: epgview.cpp,v 1.42 2002/02/26 17:24:16 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.42  2002/02/26 17:24:16  field
+// Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
+//
 // Revision 1.41  2002/02/25 19:32:26  field
 // Events <-> Key-Handling umgestellt! SEHR BETA!
 //
@@ -353,9 +356,8 @@ string GetGenre( char contentClassification )
 
 int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit, bool doLoop )
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
-	printf("show-epg...\n");
 	int height;
 	height = g_Fonts->epg_date->getHeight();
 	if (doLoop)
@@ -546,10 +548,10 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 						loop = false;
 					else
 					{
-						if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+						if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 						{
 							loop = false;
-							res = CMenuTarget::RETURN_EXIT_ALL;
+							res = menu_return::RETURN_EXIT_ALL;
 						}
 					}
 			}

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.170 2002/02/25 19:32:26 field Exp $
+        $Id: neutrino.cpp,v 1.171 2002/02/26 17:24:16 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.171  2002/02/26 17:24:16  field
+  Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
+
   Revision 1.170  2002/02/25 19:32:26  field
   Events <-> Key-Handling umgestellt! SEHR BETA!
 
@@ -550,7 +553,7 @@ CNeutrinoApp::CNeutrinoApp()
 
 	settingsFile = CONFIGDIR "/neutrino.conf";
 
-	mode = 0;
+	mode = mode_unknown;
 	channelList = NULL;
 	bouquetList = NULL;
 }
@@ -1987,11 +1990,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//keySettings
 	InitKeySettings(keySettings);
 
-
-	//show messages (cam usw)
-	//CMessageBox messageBox( "bouqueteditor.name", "bouqueteditor.savechanges?", NULL );
-	//messageBox.exec( NULL, "");
-
 	//init programm
 	InitZapper();
 
@@ -2012,96 +2010,81 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 	while(nRun)
 	{
-		int key; uint data;
-		g_RCInput->getMsg( &key, &data );
+		int msg; uint data;
+		g_RCInput->getMsg( &msg, &data );
 
-		if (key==g_settings.key_tvradio_mode)
+
+		if ( msg == messages::STANDBY_ON )
 		{
-			if(mode == mode_tv)
+			if ( mode != mode_standby )
 			{
-				radioMode();
+				// noch nicht im Standby-Mode...
+				standbyMode( true );
 			}
-			else if(mode == mode_radio)
+			g_RCInput->_clear();
+		}
+
+		if ( msg == messages::STANDBY_OFF )
+		{
+			if ( mode == mode_standby )
 			{
-				tvMode();
+				// WAKEUP
+				standbyMode( false );
+			}
+			g_RCInput->_clear();
+		}
+
+		else if ( msg == messages::SHUTDOWN )
+		{
+			// AUSSCHALTEN...
+			ExitRun();
+		}
+
+		else if ( msg == messages::VCR_ON )
+		{
+			if ( mode != mode_scart )
+			{
+				// noch nicht im Scart-Mode...
+				scartMode( true );
 			}
 		}
 
-		if (key==CRCInput::RC_setup)
+		else if ( msg == messages::VCR_OFF )
 		{
-			g_InfoViewer->killTitle();
-			mainMenu.exec(NULL, "");
-		}
-		else if (key==CRCInput::RC_standby)
-		{
-			if(!g_settings.shutdown_real)
+			if ( mode == mode_scart )
 			{
-				int timeout = 5;
-				int timeout1 = 5;
-
-				sscanf(g_settings.repeat_blocker, "%d", &timeout);
-				timeout = int(timeout/100.0) + 5;
-				sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
-				timeout1 = int(timeout1/100.0) + 5;
-				if(timeout1>timeout)
-				{
-					timeout=timeout1;
-				}
-				//printf("standby timeout is %d\n", timeout);
-
-				struct timeval tv;
-				gettimeofday( &tv, NULL );
-				long long starttime = (tv.tv_sec*1000000) + tv.tv_usec;
-				while(g_RCInput->_getKey(timeout)==CRCInput::RC_standby)
-				{
-					gettimeofday( &tv, NULL );
-					long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
-					int diff = int((endtime-starttime)/100000. );
-					//printf("standby diff: %d\n", diff);
-					if(diff>=10) // war 15 - warum so lange? 1 sec reicht (find ich...)
-					{
-						ExitRun();
-					}
-				}
-				#ifdef USEACTIONLOG
-					g_ActionLog->println("mode: standby");
-				#endif
-				g_lcdd->setMode(CLcddClient::MODE_STANDBY);
-				g_Controld->videoPowerDown(true);
-				printf("standby-loop\n");
-				g_RCInput->_clear();
-				while (g_RCInput->_getKey(100)!=CRCInput::RC_standby);
-				printf("standby-loopended\n");
-				g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
-				g_Controld->videoPowerDown(false);
-				#ifdef USEACTIONLOG
-					if(mode==mode_tv)
-					{
-						g_ActionLog->println("mode: tv");
-					}
-					else if(mode==mode_radio)
-					{
-						g_ActionLog->println("mode: radio");
-					}
-
-				#endif
-				g_RCInput->_clear();
-			}
-			else
-			{
-				ExitRun();
+				// noch nicht im Scart-Mode...
+				scartMode( false );
 			}
 		}
-
-		if ((mode==mode_tv) || ((mode==mode_radio)) )
+		else
 		{
-			if (key==CRCInput::RC_ok)
+			if ( ( mode == mode_tv ) || ( ( mode == mode_radio ) ) )
 			{
-				if ( g_InfoViewer->is_visible )
+				if ( msg == messages::SHOW_EPG )
 				{
-					g_InfoViewer->killTitle();
+					// show EPG
+
+					g_EpgData->show( channelList->getActiveChannelName(),
+			        		         channelList->getActiveChannelOnid_sid() );
+
 				}
-				else
+				else if ( msg == g_settings.key_tvradio_mode )
+				{
+					if ( mode == mode_tv )
+					{
+						radioMode();
+					}
+					else if ( mode == mode_radio )
+					{
+						tvMode();
+					}
+				}
+				else if ( msg == CRCInput::RC_setup )
+				{
+					mainMenu.exec(NULL, "");
+				}
+				if ( msg == CRCInput::RC_ok )
 				{
 					int bouqMode = g_settings.bouquetlist_mode;//bsmChannels;
 
@@ -2128,64 +2111,141 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 						channelList->exec();
 					}
 				}
-			}
-			else if (key==CRCInput::RC_red)
-			{	// eventlist
-				g_InfoViewer->killTitle();
-				g_EventList->exec(channelList->getActiveChannelOnid_sid(), channelList->getActiveChannelName());
-			}
-			else if (key==CRCInput::RC_blue)
-			{	// streaminfo
-				ShowStreamFeatures();
-			}
-			else if (key==CRCInput::RC_green)
-			{	// APID
-				SelectAPID();
-			}
-			else if (key==CRCInput::RC_yellow)
-			{	// NVODs
-				SelectNVOD();
-			}
-			else if ((key==g_settings.key_quickzap_up) || (key==g_settings.key_quickzap_down))
-			{
-				//quickzap
-				channelList->quickZap( key );
-			}
-			else if (key==CRCInput::RC_help)
-			{	//epg
-				if ( g_InfoViewer->is_visible )
+				else if ( msg == CRCInput::RC_red )
+				{	// eventlist
+					g_EventList->exec(channelList->getActiveChannelOnid_sid(), channelList->getActiveChannelName());
+				}
+				else if ( msg == CRCInput::RC_blue )
+				{	// streaminfo
+					ShowStreamFeatures();
+				}
+				else if ( msg == CRCInput::RC_green )
+				{	// APID
+					SelectAPID();
+				}
+				else if ( msg == CRCInput::RC_yellow )
+				{	// NVODs
+					SelectNVOD();
+				}
+				else if ( ( msg == g_settings.key_quickzap_up ) || ( msg == g_settings.key_quickzap_down ) )
 				{
-					g_InfoViewer->killTitle();
-					g_EpgData->show( channelList->getActiveChannelName(),
-					                 channelList->getActiveChannelOnid_sid() );
+					//quickzap
+					channelList->quickZap( msg );
+				}
+				else if ( msg == CRCInput::RC_help )
+				{
+					// show Infoviewer
+					g_InfoViewer->showTitle( channelList->getActiveChannelNumber(),
+					                         channelList->getActiveChannelName(),
+				    	                     channelList->getActiveChannelOnid_sid() );
+				}
+				else if ( ( msg >= CRCInput::RC_0 ) && ( msg <= CRCInput::RC_9 ))
+				{ //numeric zap
+					channelList->numericZap( msg );
+				}
+				else if ( msg == g_settings.key_subchannel_up )
+				{
+					g_RemoteControl->subChannelUp();
+				}
+				else if ( msg == g_settings.key_subchannel_down )
+				{
+					g_RemoteControl->subChannelDown();
 				}
 				else
 				{
-					g_InfoViewer->showTitle( channelList->getActiveChannelNumber(),
-					                         channelList->getActiveChannelName(),
-					                         channelList->getActiveChannelOnid_sid() );
+					handleMsg( msg, data );
 				}
-			}
-			else if ((key>=0) && (key<=9))
-			{ //numeric zap
-				channelList->numericZap( key );
-			}
-			else if (key==g_settings.key_subchannel_up)
-			{
-				g_RemoteControl->subChannelUp();
-			}
-			else if (key==g_settings.key_subchannel_down)
-			{
-				g_RemoteControl->subChannelDown();
+
 			}
 			else
 			{
-				handleMsg( key, 0 );
-			}
+				// mode == mode_scart
 
+				handleMsg( msg, data );
+			}
 		}
 	}
 }
+
+int CNeutrinoApp::handleMsg(int msg, uint data)
+{
+
+    if ( msg == CRCInput::RC_spkr )
+	{
+		// NUR PROBEWEISE
+		if ( mode != mode_scart )
+			g_RCInput->pushbackMsg( messages::VCR_ON, 0 );
+		else
+			g_RCInput->pushbackMsg( messages::VCR_OFF, 0 );
+		return messages_return::cancel_all;
+	}
+	else if ( msg == CRCInput::RC_standby )
+	{
+		// trigger StandBy
+		if ( mode == mode_standby )
+		{
+        	g_RCInput->pushbackMsg( messages::STANDBY_OFF, 0 );
+		}
+		else if ( !g_settings.shutdown_real )
+		{
+			int timeout = 5;
+			int timeout1 = 5;
+
+			sscanf(g_settings.repeat_blocker, "%d", &timeout);
+			timeout = int(timeout/100.0) + 5;
+			sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
+			timeout1 = int(timeout1/100.0) + 5;
+			if(timeout1>timeout)
+				timeout=timeout1;
+
+			struct timeval tv;
+			gettimeofday( &tv, NULL );
+			long long starttime = (tv.tv_sec*1000000) + tv.tv_usec;
+
+			int msg; uint data;
+			int diff = 0;
+			long long endtime;
+
+			do
+			{
+				g_RCInput->getMsg( &msg, &data, timeout );
+
+				if ( msg != CRCInput::RC_timeout )
+				{
+					gettimeofday( &tv, NULL );
+					endtime = (tv.tv_sec*1000000) + tv.tv_usec;
+					diff = int((endtime-starttime)/100000. );
+				}
+
+			} while ( ( msg != CRCInput::RC_timeout ) && ( diff < 10 ) );
+
+			g_RCInput->pushbackMsg( ( diff >= 10 ) ? messages::SHUTDOWN : messages::STANDBY_ON, 0 );
+
+        }
+        else
+        {
+        	g_RCInput->pushbackMsg( messages::SHUTDOWN, 0 );
+		}
+		return messages_return::cancel_all;
+	}
+	else if ( ( msg == CRCInput::RC_plus ) ||
+			  ( msg == CRCInput::RC_minus ) )
+	{
+		//volume
+		setVolume( msg, ( mode != mode_scart ) );
+		return messages_return::handled;
+	}
+	else if ( msg == CRCInput::RC_spkr )
+	{
+		//mute
+		AudioMuteToggle( ( mode != mode_scart ) );
+		return messages_return::handled;
+	}
+
+	return messages_return::unhandled;
+}
+
+
 
 void CNeutrinoApp::ExitRun()
 {
@@ -2315,97 +2375,146 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		g_FrameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 }
 
-void CNeutrinoApp::tvMode()
+void CNeutrinoApp::tvMode( bool rezap = true )
 {
-	if(mode==mode_tv)
+	if( mode == mode_tv )
 	{
 		return;
 	}
-	else if(mode==mode_scart)
+	else if( mode == mode_scart )
 	{
 		g_Controld->setScartMode( 0 );
 	}
+	else if( mode == mode_standby )
+	{
+		g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
+		g_Controld->videoPowerDown(false);
+	}
+
 	mode = mode_tv;
 	NeutrinoMode = mode_tv;
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("mode: tv");
 	#endif
 
+printf( "tv-mode\n" );
+
 	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
 	g_FrameBuffer->useBackground(false);
 
-	g_RemoteControl->tvMode();
-	firstChannel();
-	channelsInit();
-	channelList->zapTo( firstchannel.chan_nr -1 );
+    if ( rezap )
+	{
+		g_RemoteControl->tvMode();
+		firstChannel();
+		channelsInit();
+		channelList->zapTo( firstchannel.chan_nr -1 );
+	}
 }
 
-void CNeutrinoApp::scartMode()
+void CNeutrinoApp::scartMode( bool bOnOff )
 {
 	#ifdef USEACTIONLOG
-		g_ActionLog->println("mode: scart");
+		g_ActionLog->println( ( bOnOff ) ? "mode: scart on" : "mode: scart off" );
 	#endif
-	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
-	g_Controld->setScartMode( 1 );
-	g_RCInput->_clear();
-	printf("scartmode-loop\n");
 
-	int key;
-	do
+printf( ( bOnOff ) ? "mode: scart on\n" : "mode: scart off\n" );
+
+	if ( bOnOff )
 	{
-		key = g_RCInput->_getKey(100);
-		if (key==CRCInput::RC_spkr)
-		{	//mute
-			AudioMuteToggle( false );
-		}
-		else if ((key==CRCInput::RC_plus) || (key==CRCInput::RC_minus))
-		{	//volume
-			setVolume( key, false );
-		}
-	} while (key != CRCInput::RC_home);
+		// SCART AN
 
-	printf("scartmode-loopended\n");
-	g_Controld->setScartMode( 0 );
+		memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+		g_Controld->setScartMode( 1 );
 
-	//re-set mode
-	if(mode==mode_radio)
-	{
-		mode = -1;
-		radioMode();
+		lastMode = mode;
+		mode = mode_scart;
 	}
-	else if(mode==mode_tv)
+	else
 	{
-		mode = -1;
-		tvMode();
+	    // SCART AUS
+
+		g_Controld->setScartMode( 0 );
+
+		mode == mode_unknown;
+
+		//re-set mode
+		if ( lastMode == mode_radio )
+		{
+			radioMode( false );
+		}
+		else if ( lastMode == mode_tv )
+		{
+			tvMode( false );
+		}
+		else if ( lastMode == mode_standby )
+		{
+			standbyMode( true );
+		}
 	}
 }
 
-int CNeutrinoApp::handleMsg(int msg, uint data)
+void CNeutrinoApp::standbyMode( bool bOnOff )
 {
-	//printf("[CNeutrinoApp]: handleMsg 0x%x\n", key);
-	if ( ( msg == CRCInput::RC_plus ) || ( msg == CRCInput::RC_minus ) )
-	{	//volume
-		setVolume( msg );
-		return CRCInput::MSG_handled;
+	#ifdef USEACTIONLOG
+		g_ActionLog->println( ( bOnOff ) ? "mode: standby on" : "mode: standby off" );
+	#endif
+
+printf( ( bOnOff ) ? "mode: standby on\n" : "mode: standby off\n" );
+
+	if ( bOnOff )
+	{
+		// STANDBY AN
+
+		if( mode == mode_scart )
+		{
+			g_Controld->setScartMode( 0 );
+		}
+
+		memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+
+		g_lcdd->setMode(CLcddClient::MODE_STANDBY);
+		g_Controld->videoPowerDown(true);
+
+		lastMode = mode;
+		mode = mode_standby;
 	}
-	else if ( msg == CRCInput::RC_spkr )
-	{	//mute
-		AudioMuteToggle();
-		return CRCInput::MSG_handled;
+	else
+	{
+	    // STANDBY AUS
+
+		g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
+		g_Controld->videoPowerDown(false);
+
+		mode == mode_unknown;
+
+		//re-set mode
+		if ( lastMode == mode_radio )
+		{
+			radioMode( false );
+		}
+		else
+		{
+			tvMode( false );
+		}
 	}
-	return CRCInput::MSG_unhandled;
 }
 
-void CNeutrinoApp::radioMode()
+void CNeutrinoApp::radioMode( bool rezap = true )
 {
-	if(mode==mode_radio)
+	if ( mode==mode_radio )
 	{
 		return;
 	}
-	else if(mode==mode_scart)
+	else if( mode == mode_scart )
 	{
 		g_Controld->setScartMode( 0 );
 	}
+	else if( mode == mode_standby )
+	{
+		g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
+		g_Controld->videoPowerDown(false);
+	}
+
 	mode = mode_radio;
 	NeutrinoMode = mode_radio;
 	#ifdef USEACTIONLOG
@@ -2417,11 +2526,14 @@ void CNeutrinoApp::radioMode()
 	g_FrameBuffer->useBackground(true);
 	g_FrameBuffer->paintBackground();
 
-	firstChannel();
-	g_RemoteControl->radioMode();
-	firstChannel();
-	channelsInit();
-	channelList->zapTo( firstchannel.chan_nr -1 );
+	if ( rezap )
+	{
+		firstChannel();
+		g_RemoteControl->radioMode();
+		firstChannel();
+		channelsInit();
+		channelList->zapTo( firstchannel.chan_nr -1 );
+	}
 }
 
 
@@ -2433,7 +2545,7 @@ void CNeutrinoApp::radioMode()
 int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 {
 	//	printf("ac: %s\n", actionKey.c_str());
-	int returnval = CMenuTarget::RETURN_REPAINT;
+	int returnval = menu_return::RETURN_REPAINT;
 
 	if(actionKey=="theme_neutrino")
 	{
@@ -2452,18 +2564,17 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	else if(actionKey=="tv")
 	{
 		tvMode();
-		returnval = CMenuTarget::RETURN_EXIT_ALL;
+		returnval = menu_return::RETURN_EXIT_ALL;
 	}
 	else if(actionKey=="radio")
 	{
 		radioMode();
-		returnval = CMenuTarget::RETURN_EXIT_ALL;
+		returnval = menu_return::RETURN_EXIT_ALL;
 	}
 	else if(actionKey=="scart")
 	{
-		//hmm
-		scartMode();
-		returnval = CMenuTarget::RETURN_EXIT_ALL;
+		g_RCInput->pushbackMsg( messages::VCR_ON, 0 );
+		returnval = menu_return::RETURN_EXIT_ALL;
 	}
 	else if(actionKey=="network")
 	{
@@ -2525,7 +2636,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.170 2002/02/25 19:32:26 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.171 2002/02/26 17:24:16 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

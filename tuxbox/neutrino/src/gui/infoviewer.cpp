@@ -429,15 +429,19 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 				}
 
 
-				if ( ( msg != CRCInput::RC_timeout ) && ( msg != CRCInput::RC_ok ) )
+				if ( msg == CRCInput::RC_help )
 				{
-            		if ( neutrino->handleMsg( msg, data ) ==  CRCInput::MSG_unhandled )
+					g_RCInput->pushbackMsg( messages::SHOW_EPG, 0 );
+				}
+				else if ( ( msg != CRCInput::RC_timeout ) &&
+					 	  ( msg != CRCInput::RC_ok ) )
+				{
+            		if ( neutrino->handleMsg( msg, data ) ==  messages_return::unhandled )
             			g_RCInput->pushbackMsg( msg, data );
 				}
 
 				if ( ( msg != g_settings.key_quickzap_up ) &&
-                	 ( msg != g_settings.key_quickzap_down ) &&
-                	 ( msg != CRCInput::RC_help ) )
+                	 ( msg != g_settings.key_quickzap_down ) )
                 {
                    	killTitle();
                 }

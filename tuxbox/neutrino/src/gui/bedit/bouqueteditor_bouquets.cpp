@@ -107,7 +107,7 @@ void CBEBouquetWidget::hide()
 
 int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
 	{
@@ -257,14 +257,13 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				finishMoveBouquet();
 			}
 		}
-		else if( (msg==CRCInput::RC_standby) ||
-		         (CRCInput::isNumeric(msg)) )
+		else if( CRCInput::isNumeric(msg) )
 		{
 			if (state == beDefault)
 			{
 				//kein pushback - wenn man versehentlich wo draufkommt is die edit-arbeit umsonst
 				//selected = oldselected;
-				//g_RCInput->pushbackKey (key);
+				//g_RCInput->pushbackMsg( msg, data );
 				//loop=false;
 			}
 			else if (state == beMoving)
@@ -393,7 +392,7 @@ void CBEBouquetWidget::saveChanges()
 	hintBox->paint();
 	g_Zapit->saveBouquets();
 	g_Zapit->reinitChannels();
-	hintBox->hide(false);
+	hintBox->hide();
 	delete hintBox;
 	if (eventHandler)
 		eventHandler->onBouquetsChanged();
@@ -404,7 +403,7 @@ void CBEBouquetWidget::discardChanges()
 	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", "bouqueteditor.discardingchanges");
 	hintBox->paint();
 	g_Zapit->restoreBouquets();
-	hintBox->hide(false);
+	hintBox->hide();
 	delete hintBox;
 }
 

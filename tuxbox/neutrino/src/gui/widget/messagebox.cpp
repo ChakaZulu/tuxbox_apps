@@ -86,14 +86,13 @@ void CMessageBox::hide()
 
 int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
+    unsigned char pixbuf[width* height];
+	g_FrameBuffer->SaveScreen(x, y, width, height, pixbuf);
 
-	if (parent)
-	{
-		parent->hide();
-	}
 	paintHead();
 	paintButtons();
+
 	bool loop=true;
 	while (loop)
 	{
@@ -151,14 +150,15 @@ int CMessageBox::exec(CMenuTarget* parent, string actionKey)
 			}
 			loop=false;
 		}
-		else if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+		else if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 		{
 			loop = false;
-			res = CMenuTarget::RETURN_EXIT_ALL;
+			res = menu_return::RETURN_EXIT_ALL;
 		}
 
 	}
-	hide();
+
+	g_FrameBuffer->RestoreScreen(x, y, width, height, pixbuf);
 	return res;
 }
 

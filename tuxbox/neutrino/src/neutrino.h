@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.49 2002/02/25 19:32:26 field Exp $
+//  $Id: neutrino.h,v 1.50 2002/02/26 17:24:16 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.50  2002/02/26 17:24:16  field
+//  Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
+//
 //  Revision 1.49  2002/02/25 19:32:26  field
 //  Events <-> Key-Handling umgestellt! SEHR BETA!
 //
@@ -218,6 +221,28 @@ class CNeutrinoBouquetEditorEvents : public CBouquetEditorEvents
 		void onBouquetsChanged();
 	};
 
+struct messages_return {
+	enum
+		{
+			none 		= 0x00,
+			handled		= 0x01,
+			unhandled	= 0x02,
+			cancel_all	= 0x04
+		};
+};
+
+struct messages {
+	enum
+		{
+			SHOW_EPG	= CRCInput::RC_Messages + 1,
+			VCR_ON		= CRCInput::RC_Messages + 3,
+			VCR_OFF		= CRCInput::RC_Messages + 4,
+			STANDBY_ON	= CRCInput::RC_Messages + 5,
+			STANDBY_OFF	= CRCInput::RC_Messages + 6,
+			SHUTDOWN	= CRCInput::RC_Messages + 7
+		};
+};
+
 /**************************************************************************************
 *                                                                                     *
 *          CNeutrinoApp -  main run-class                                             *
@@ -229,9 +254,11 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 	private:
 		enum
 		{
+			mode_unknown = -1,
 		    mode_tv = 1,
 		    mode_radio = 2,
-		    mode_scart = 3
+		    mode_scart = 3,
+		    mode_standby = 4
 		};
 
 
@@ -246,6 +273,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
 		bool				nRun;
 		int				    mode;
+		int					lastMode;
 		bool				mute;
 		bool				softupdate;
 		bool				fromflash;
@@ -277,9 +305,10 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void saveSetup();
 		bool loadSetup(SNeutrinoSettings* load2=NULL);
 
-		void tvMode();
-		void radioMode();
-		void scartMode();
+		void tvMode( bool rezap = true );
+		void radioMode( bool rezap = true );
+		void scartMode( bool bOnOff );
+		void standbyMode( bool bOnOff );
 		void setVolume(int key, bool bDoPaint = true);
 		void AudioMuteToggle(bool bDoPaint = true);
 

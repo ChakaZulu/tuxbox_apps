@@ -81,7 +81,7 @@ void CBouquetList::adjustToChannel( int nChannelNr)
 
 int CBouquetList::activateBouquet( int id, bool bShowChannelList = false )
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
 	selected = id;
 	if (bShowChannelList)
@@ -95,7 +95,7 @@ int CBouquetList::activateBouquet( int id, bool bShowChannelList = false )
 		else if ( nNewChannel = -2 )
 		{
 			// -2 bedeutet EXIT_ALL
-			res = CMenuTarget::RETURN_EXIT_ALL;
+			res = menu_return::RETURN_EXIT_ALL;
 		}
 	}
 
@@ -113,12 +113,12 @@ int CBouquetList::exec( bool bShowChannelList)
 	else if ( res = -1)
 	{
 		// -1 bedeutet nur REPAINT
-		return CMenuTarget::RETURN_REPAINT;
+		return menu_return::RETURN_REPAINT;
 	}
 	else
 	{
 		// -2 bedeutet EXIT_ALL
-		return CMenuTarget::RETURN_EXIT_ALL;
+		return menu_return::RETURN_EXIT_ALL;
 	}
 
 	return res;
@@ -264,8 +264,7 @@ int CBouquetList::show()
 		else if( (key==CRCInput::RC_red) ||
 				 (key==CRCInput::RC_green) ||
 				 (key==CRCInput::RC_yellow) ||
-				 (key==CRCInput::RC_blue) ||
-				 (key==CRCInput::RC_standby) )
+				 (key==CRCInput::RC_blue) )
 		{
 			selected = oldselected;
 			g_RCInput->pushbackMsg( msg, data );
@@ -273,7 +272,7 @@ int CBouquetList::show()
 		}
 		else
 		{
-			if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+			if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 			{
 				loop = false;
 				res = -2;

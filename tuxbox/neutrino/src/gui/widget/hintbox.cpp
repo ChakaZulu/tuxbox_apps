@@ -12,12 +12,23 @@ CHintBox::CHintBox( CMenuWidget* Parent, string Caption, string Text)
 	caption = Caption;
 	text = Text;
 	parent = Parent;
+	pixbuf= NULL;
 }
 
-void CHintBox::paint()
+void CHintBox::paint( bool saveScreen = true )
 {
-	if (parent)
-		parent->hide();
+	if (!saveScreen)
+	{
+		if (parent)
+			parent->hide();
+	}
+	else
+	{
+		pixbuf= new unsigned char[width* height];
+		if (pixbuf!= NULL)
+			g_FrameBuffer->SaveScreen(x, y, width, height, pixbuf);
+	}
+
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
 
@@ -25,10 +36,15 @@ void CHintBox::paint()
 	g_Fonts->menu_info->RenderString(x+10,y+theight+20+20, width, g_Locale->getText(text).c_str(), COL_MENUCONTENT);
 }
 
-void CHintBox::hide( bool showParent=true)
+void CHintBox::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
-	if (showParent && parent)
-		parent->paint();
+	if (pixbuf!= NULL)
+	{
+		g_FrameBuffer->RestoreScreen(x, y, width, height, pixbuf);
+		delete pixbuf;
+		pixbuf= NULL;
+	}
+	else
+		g_FrameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 

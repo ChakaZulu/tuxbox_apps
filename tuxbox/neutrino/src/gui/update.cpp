@@ -360,7 +360,7 @@ CFlashUpdate::CFlashUpdate()
 
 int CFlashUpdate::exec(CMenuTarget* parent, string)
 {
-		int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
 	{
@@ -381,9 +381,9 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 		{
 			switch ( neutrino->handleMsg( msg, data ) )
 			{
-				case CRCInput::MSG_cancel_all:
-					res = CMenuTarget::RETURN_EXIT_ALL;
-				case CRCInput::MSG_unhandled:
+				case messages_return::cancel_all:
+					res = menu_return::RETURN_EXIT_ALL;
+				case messages_return::unhandled:
 					doLoop = false;
 			}
 		}

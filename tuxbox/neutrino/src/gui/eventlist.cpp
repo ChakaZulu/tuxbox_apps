@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.37 2002/02/25 19:32:26 field Exp $
+// $Id: eventlist.cpp,v 1.38 2002/02/26 17:24:16 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.38  2002/02/26 17:24:16  field
+// Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
+//
 // Revision 1.37  2002/02/25 19:32:26  field
 // Events <-> Key-Handling umgestellt! SEHR BETA!
 //
@@ -352,7 +355,7 @@ EventList::~EventList()
 
 int EventList::exec(unsigned onidSid, const std::string& channelname)
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
 	name = channelname;
 	paintHead();
@@ -449,7 +452,7 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 				hide();
 
 				res = g_EpgData->show(channelname, onidSid, evt->epg.id, &evt->epg.startzeit);
-                if ( res == CMenuTarget::RETURN_EXIT_ALL )
+                if ( res == menu_return::RETURN_EXIT_ALL )
                 {
                 	loop = false;
                 }
@@ -471,10 +474,10 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 		}
 		else
 		{
-			if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+			if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 			{
 				loop = false;
-				res = CMenuTarget::RETURN_EXIT_ALL;
+				res = menu_return::RETURN_EXIT_ALL;
 			}
 		}
 	}

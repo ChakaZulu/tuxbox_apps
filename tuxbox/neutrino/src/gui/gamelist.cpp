@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.34 2002/02/25 19:32:26 field Exp $
+$Id: gamelist.cpp,v 1.35 2002/02/26 17:24:16 field Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.35  2002/02/26 17:24:16  field
+Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
+
 Revision 1.34  2002/02/25 19:32:26  field
 Events <-> Key-Handling umgestellt! SEHR BETA!
 
@@ -470,7 +473,7 @@ CGameList::~CGameList()
 
 int CGameList::exec(CMenuTarget* parent, string actionKey)
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
 	{
@@ -586,16 +589,15 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 				 (msg==CRCInput::RC_green) ||
 				 (msg==CRCInput::RC_yellow) ||
 				 (msg==CRCInput::RC_blue)  ||
-		         (msg==CRCInput::RC_standby) ||
 		         (CRCInput::isNumeric(msg)) )
 		{
 			g_RCInput->pushbackMsg( msg, data );
 			loop=false;
 		}
-		else if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+		else if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 		{
 			loop = false;
-			res = CMenuTarget::RETURN_EXIT_ALL;
+			res = menu_return::RETURN_EXIT_ALL;
 		}
 	}
 	hide();

@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: streaminfo.cpp,v 1.17 2002/02/25 19:32:26 field Exp $
+$Id: streaminfo.cpp,v 1.18 2002/02/26 17:24:16 field Exp $
 
 Module StreamInfo
 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.18  2002/02/26 17:24:16  field
+ Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
+
  Revision 1.17  2002/02/25 19:32:26  field
  Events <-> Key-Handling umgestellt! SEHR BETA!
 
@@ -90,7 +93,7 @@ CStreamInfo::CStreamInfo()
 
 int CStreamInfo::exec(CMenuTarget* parent, string)
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
 	{
@@ -111,9 +114,9 @@ int CStreamInfo::exec(CMenuTarget* parent, string)
 		{
 			switch ( neutrino->handleMsg( msg, data ) )
 			{
-				case CRCInput::MSG_cancel_all:
-					res = CMenuTarget::RETURN_EXIT_ALL;
-				case CRCInput::MSG_unhandled:
+				case messages_return::cancel_all:
+					res = menu_return::RETURN_EXIT_ALL;
+				case messages_return::unhandled:
 					doLoop = false;
 			}
 		}

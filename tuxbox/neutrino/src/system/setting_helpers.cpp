@@ -103,7 +103,7 @@ bool CColorSetupNotifier::changeNotify(string OptionName, void*)
 
 bool CAudioSetupNotifier::changeNotify(string OptionName, void*)
 {
-	printf("notify: %s\n", OptionName.c_str() );
+	//printf("notify: %s\n", OptionName.c_str() );
 	return false;
 }
 
@@ -148,7 +148,7 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 	int sel= atoi(actionKey.c_str());
 	if (g_RemoteControl->audio_chans.selected!= sel )
 		g_RemoteControl->setAPID(atoi(actionKey.c_str()));
-	return RETURN_EXIT;
+	return menu_return::RETURN_EXIT;
 }
 
 int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
@@ -159,7 +159,7 @@ int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 
 	g_RCInput->pushbackMsg( CRCInput::RC_help, 0 );
 
-	return RETURN_EXIT;
+	return menu_return::RETURN_EXIT;
 }
 
 int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, string actionKey)
@@ -179,7 +179,7 @@ int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, string actionKey)
 		g_PluginList->startPlugin( sel );
 	}
 
-	return RETURN_EXIT;
+	return menu_return::RETURN_EXIT;
 }
 
 

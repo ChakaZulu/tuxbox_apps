@@ -106,7 +106,7 @@ void CBEChannelWidget::hide()
 
 int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
 	{
@@ -229,14 +229,13 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 				finishMoveChannel();
 			}
 		}
-		else if( (msg==CRCInput::RC_standby)
-		         || (CRCInput::isNumeric(msg)) )
+		else if( CRCInput::isNumeric(msg) )
 		{
 			if (state == beDefault)
 			{
 				//kein pushback - wenn man versehentlich wo draufkommt is die edit-arbeit umsonst
 				//selected = oldselected;
-				//g_RCInput->pushbackKey (key);
+				//g_RCInput->pushbackMsg( msg, data );
 				//loop=false;
 			}
 			else if (state == beMoving)

@@ -104,7 +104,7 @@ void CBEChannelSelectWidget::hide()
 
 int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 	if (parent)
 	{
 		parent->hide();
@@ -180,21 +180,19 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 		{
 			switchChannel();
 		}
+		//kein pushback - wenn man versehentlich wo draufkommt is die edit-arbeit umsonst
+		/*
+		else if( CRCInput::isNumeric(key) )
+		{
+			selected = oldselected;
+			g_RCInput->pushbackMsg( msg, data );
+			loop=false;
+		}*/
 		else
 		{
 			neutrino->handleMsg( msg, data );
 			// kein canceling...
 		}
-		//kein pushback - wenn man versehentlich wo draufkommt is die edit-arbeit umsonst
-		/*
-		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
-		         || (key==CRCInput::RC_standby)
-		         || (CRCInput::isNumeric(key)) )
-		{
-			selected = oldselected;
-			g_RCInput->pushbackKey (key);
-			loop=false;
-		}*/
 	}
 	hide();
 	return res;

@@ -45,6 +45,16 @@
 
 using namespace std;
 
+struct menu_return
+{
+	enum
+		{
+			RETURN_NONE		= 0,
+		    RETURN_REPAINT 	= 1,
+		    RETURN_EXIT 	= 2,
+		    RETURN_EXIT_ALL = 4
+		};
+};
 
 class CChangeObserver
 {
@@ -69,12 +79,6 @@ class COnPaintNotifier
 class CMenuTarget
 {
 	public:
-		enum
-		{
-		    RETURN_REPAINT = 1,
-		    RETURN_EXIT = 2,
-		    RETURN_EXIT_ALL = 4
-		};
 
 		CMenuTarget(){}
 		virtual ~CMenuTarget(){}
@@ -93,13 +97,6 @@ class CMenuItem
 	public:
     	int		directKey;
 		string	iconName;
-
-		enum
-		{
-		    RETURN_REPAINT = 1,
-		    RETURN_EXIT = 2,
-		    RETURN_EXIT_ALL = 4
-		};
 
 		CMenuItem()
 		{

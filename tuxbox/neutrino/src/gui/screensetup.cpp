@@ -34,7 +34,7 @@
 
 int CScreenSetup::exec( CMenuTarget* parent, string )
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
 	{
@@ -78,8 +78,8 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 					int x=15*5;
 					int y=15*24;
 
-					g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft").c_str(), (selected == 1)?COL_MENUHEAD:COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), (selected == 2)?COL_MENUHEAD:COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft").c_str(), (selected == 0)?COL_MENUHEAD:COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), (selected == 1)?COL_MENUHEAD:COL_MENUCONTENT);
                 	break;
                 }
 			case CRCInput::RC_up:
@@ -128,10 +128,10 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 				}
 
 			default:
-				if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+				if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 				{
 					loop = false;
-					res = CMenuTarget::RETURN_EXIT_ALL;
+					res = menu_return::RETURN_EXIT_ALL;
 				}
 		}
 

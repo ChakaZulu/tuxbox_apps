@@ -146,7 +146,7 @@ void CStringInput::keyRightPressed()
 
 int CStringInput::exec( CMenuTarget* parent, string )
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 	char oldval[size];
 
 	strcpy(oldval, value);
@@ -213,10 +213,10 @@ int CStringInput::exec( CMenuTarget* parent, string )
 			strcpy(value, oldval);
 			loop=false;
 		}
-		else if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+		else if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 		{
 			loop = false;
-			res = CMenuTarget::RETURN_EXIT_ALL;
+			res = menu_return::RETURN_EXIT_ALL;
 		}
 	}
 

@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.40 2002/02/25 19:32:26 field Exp $
+$Id: menue.cpp,v 1.41 2002/02/26 17:24:16 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.41  2002/02/26 17:24:16  field
+ Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
+
  Revision 1.40  2002/02/25 19:32:26  field
  Events <-> Key-Handling umgestellt! SEHR BETA!
 
@@ -164,7 +167,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 		onPaintNotifier->onPaintNotify(name);
 
 	paint();
-	int retval = CMenuItem::RETURN_REPAINT;
+	int retval = menu_return::RETURN_REPAINT;
 	int msg; uint data;
 
 	do
@@ -234,20 +237,18 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 					{
 						//exec this item...
 						CMenuItem* item = items[selected];
-						int ret = item->exec( this );
 
-						if(ret==CMenuItem::RETURN_EXIT)
+						switch ( item->exec( this ) )
 						{
-							msg = CRCInput::RC_timeout;
-						}
-						else if(ret==CMenuItem::RETURN_EXIT_ALL)
-						{
-							retval = CMenuItem::RETURN_EXIT_ALL;
-							msg = CRCInput::RC_timeout;
-						}
-						else if(ret==CMenuItem::RETURN_REPAINT)
-						{
-							paint();
+							case menu_return::RETURN_EXIT_ALL:
+								retval = menu_return::RETURN_EXIT_ALL;
+
+							case menu_return::RETURN_EXIT:
+								msg = CRCInput::RC_timeout;
+								break;
+							case menu_return::RETURN_REPAINT:
+								paint();
+								break;
 						}
 					}
 					break;
@@ -266,11 +267,11 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 				case (CRCInput::RC_timeout):
 					break;
 
-				//close menue on dbox-key
+				//close any menue on dbox-key
 				case (CRCInput::RC_setup):
 					{
 						msg = CRCInput::RC_timeout;
-						retval = CMenuItem::RETURN_EXIT_ALL;
+						retval = menu_return::RETURN_EXIT_ALL;
 					}
 					break;
 
@@ -279,16 +280,15 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 				case (CRCInput::RC_green):
 				case (CRCInput::RC_yellow):
 				case (CRCInput::RC_blue):
-				case (CRCInput::RC_standby):
 					{
 						g_RCInput->pushbackMsg( msg, data );
 						msg = CRCInput::RC_timeout;
 					}
 					break;
 				default:
-					if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+					if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 					{
-						retval = CMenuTarget::RETURN_EXIT_ALL;
+						retval = menu_return::RETURN_EXIT_ALL;
 						msg = CRCInput::RC_timeout;
 					}
 			}
@@ -417,7 +417,7 @@ int CMenuOptionChooser::exec(CMenuTarget*)
 	{
 		observ->changeNotify( optionName, optionValue );
 	}
-	return 0;
+	return menu_return::RETURN_NONE;
 }
 
 int CMenuOptionChooser::paint( bool selected )
@@ -511,10 +511,10 @@ int CMenuOptionStringChooser::exec(CMenuTarget*)
 	{
 		wantsRepaint = observ->changeNotify( optionName, optionValue );
 	}
-	if ( wantsRepaint)
-		return RETURN_REPAINT;
+	if ( wantsRepaint )
+		return menu_return::RETURN_REPAINT;
 	else
-		return 0;
+		return menu_return::RETURN_NONE;
 }
 
 int CMenuOptionStringChooser::paint( bool selected )
@@ -574,7 +574,7 @@ int CMenuForwarder::exec(CMenuTarget* parent)
 	}
 	else
 	{
-		return RETURN_EXIT;
+		return menu_return::RETURN_EXIT;
 	}
 }
 

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.65 2002/02/25 19:32:26 field Exp $
+// $Id: channellist.cpp,v 1.66 2002/02/26 17:24:16 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.66  2002/02/26 17:24:16  field
+// Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
+//
 // Revision 1.65  2002/02/25 19:32:26  field
 // Events <-> Key-Handling umgestellt! SEHR BETA!
 //
@@ -534,7 +537,6 @@ int CChannelList::show()
 				 (msg==CRCInput::RC_green) ||
 				 (msg==CRCInput::RC_yellow) ||
 				 (msg==CRCInput::RC_blue) ||
-		         (msg==CRCInput::RC_standby) ||
 		         (CRCInput::isNumeric(msg)) )
 		{
 			//pushback key if...
@@ -546,7 +548,7 @@ int CChannelList::show()
 		{
 			hide();
 
-			if ( g_EventList->exec(chanlist[selected]->onid_sid, chanlist[selected]->name ) == CMenuTarget::RETURN_EXIT_ALL )
+			if ( g_EventList->exec(chanlist[selected]->onid_sid, chanlist[selected]->name ) == menu_return::RETURN_EXIT_ALL )
 			{
 				res = -2;
 				loop = false;
@@ -569,7 +571,7 @@ int CChannelList::show()
 		}
 		else
 		{
-			if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+			if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 			{
 				loop = false;
 				res = - 2;
@@ -580,7 +582,7 @@ int CChannelList::show()
 
 	if (bShowBouquetList)
 	{
-		if ( bouquetList->exec( true ) == CMenuTarget::RETURN_EXIT_ALL )
+		if ( bouquetList->exec( true ) == menu_return::RETURN_EXIT_ALL )
 			res = -2;
 	}
 
@@ -633,7 +635,7 @@ void CChannelList::zapTo(int pos)
 
 int CChannelList::numericZap(int key)
 {
-	int res = CMenuTarget::RETURN_REPAINT;
+	int res = menu_return::RETURN_REPAINT;
 
 	if(chanlist.size()==0)
 	{
@@ -741,10 +743,10 @@ int CChannelList::numericZap(int key)
 			doZap = false;
 			break;
 		}
-		else if ( neutrino->handleMsg( msg, data ) == CRCInput::MSG_cancel_all )
+		else if ( neutrino->handleMsg( msg, data ) == messages_return::cancel_all )
 		{
 			doZap = false;
-			res = CMenuTarget::RETURN_EXIT_ALL;
+			res = menu_return::RETURN_EXIT_ALL;
 			break;
 		}
 	}
@@ -757,6 +759,10 @@ int CChannelList::numericZap(int key)
 		if (chn<0)
 			chn=0;
 		zapTo( chn );
+	}
+	else
+	{
+		g_InfoViewer->killTitle();
 	}
 
 	return res;
