@@ -8,7 +8,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
-#include <dbox/avia_pig.h>
+#include <dbox/avia_gt_pig.h>
 #include <dbox/fp.h>
 #include <ost/dmx.h>
 #include <plugin.h>
