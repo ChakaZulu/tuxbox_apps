@@ -6,6 +6,9 @@ drivers in path <driversdir> and use the configure-command:
 If you want the old vbi as well, you have to add -DOLD_API in
 src/Makefile.am to the INCLUDES-line.
 
+If you want to compile a version, that runs on dreamboxes, user the -DDREAMBOX flag
+in src/Makefile.am.
+
 Have fun.
 TheDOC
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: checker.cpp,v $
+Revision 1.12  2003/01/06 05:03:11  TheDOC
+dreambox compatible
+
 Revision 1.11  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -58,6 +61,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 #include <iostream>
+#include <dbox/event.h>
 
 #include "devices.h"
 #include "checker.h"

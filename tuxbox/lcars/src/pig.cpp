@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pig.cpp,v $
+Revision 1.8  2003/01/06 05:03:11  TheDOC
+dreambox compatible
+
 Revision 1.7  2003/01/05 20:00:11  TheDOC
 hmpf
 
@@ -81,7 +84,7 @@ void pig::setSource(int x1, int y1, int x2, int y2)
 }
 
 #elif HAVE_OST_DMX_H
-
+#ifndef DREAMBOX
 pig::pig()
 {
 	fd = open(PIG_DEV, O_RDWR);
@@ -120,5 +123,44 @@ void pig::setStack(int i)
 void pig::setSource(int x1, int y1, int x2, int y2)
 {
 }
+#else
+pig::pig()
+{
 
+}
+
+pig::~pig()
+{
+
+}
+
+void pig::show()
+{
+
+}
+
+void pig::hide()
+{
+
+}
+
+void pig::setSize(int x, int y)
+{
+
+}
+
+void pig::setPosition(int x, int y)
+{
+
+}
+
+void pig::setStack(int i)
+{
+
+}
+
+void pig::setSource(int x1, int y1, int x2, int y2)
+{
+}
+#endif
 #endif

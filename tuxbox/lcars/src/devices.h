@@ -26,7 +26,9 @@
 #include <ost/sec.h>
 #include <ost/ca.h>
 
+#ifndef DREAMBOX
 #include <dbox/avia_gt_pig.h>
+#endif
 
 #define VIDEO_DEV "/dev/dvb/card0/video0"
 #define AUDIO_DEV "/dev/dvb/card0/audio0"
@@ -49,7 +51,6 @@
 #include <dbox/avs_core.h>
 #include <dbox/fp.h>
 #include <dbox/info.h>
-#include <dbox/event.h>
 
 #define AVS_DEV "/dev/dbox/avs0"
 

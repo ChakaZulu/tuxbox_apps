@@ -140,12 +140,14 @@ cam::cam()
 	cmdEMM.unknowna = 0x1;
 	cmdEMM.unknownb = 0x4;
 
+#ifndef DREAMBOX
 	camfd = open(CAM_DEV, O_RDWR);
 
 	if (camfd < 0) {
 		perror(CAM_DEV);
 		exit(1);
 	}
+#endif
 }
 
 cam::~cam()

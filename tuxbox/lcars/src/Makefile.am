@@ -4,6 +4,7 @@ INCLUDES = \
 	@PLUGINS_CFLAGS@ \
 	-Werror
 #	-DOLD_VBI
+#	-DDREAMBOX
 
 bin_PROGRAMS = lcars
 
