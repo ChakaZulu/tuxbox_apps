@@ -106,7 +106,11 @@ static eString beautifyBouquetName(eString bouquet_name)
 			|| (bouquet_name.find("ProSieben") != eString::npos)
 			|| (bouquet_name.find("VIVA") != eString::npos) )
 		bouquet_name="German Free";		
-	else*/ if (bouquet_name.find("POLSAT") != eString::npos)
+	else*/ 
+	if ( bouquet_name.upper().find("POLSAT") != eString::npos
+		|| ( bouquet_name.length() == 5 
+			&& (bouquet_name.find("D11") != eString::npos
+				|| bouquet_name.find("D10") != eString::npos ) ) )
 		bouquet_name="POLSAT";
 	else if (bouquet_name.find("HRT") != eString::npos)
 		bouquet_name="HRT Zagreb";
