@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.93 2001/12/12 11:33:57 McClean Exp $
+        $Id: neutrino.cpp,v 1.94 2001/12/12 11:39:04 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.94  2001/12/12 11:39:04  McClean
+  fix timeselect-bug (cinedom)
+
   Revision 1.93  2001/12/12 11:33:57  McClean
   major epg-fixes
 
@@ -1544,6 +1547,113 @@ void CNeutrinoApp::InitZapper()
 		bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
 }
 
+int CNeutrinoApp::run(int argc, char **argv)
+{
+	CmdParser(argc, argv);
+
+	if(!loadSetup())
+	{
+		//setup default if configfile not exists
+		setupDefaults();
+		printf("using defaults...\n\n");
+	}
+
+	g_Fonts = new FontsDef;
+	SetupFonts();
+
+	ClearFrameBuffer();
+
+	g_Locale = new CLocaleManager;
+	g_RCInput = new CRCInput;
+	g_lcdd = new CLCDD;
+	g_Controld = new CControld;
+	g_RemoteControl = new CRemoteControl;
+	g_EpgData = new CEpgData;
+	g_InfoViewer = new CInfoViewer;
+	g_StreamInfo = new CStreamInfo;
+	g_ScanTS = new CScanTs;
+	g_UcodeCheck = new CUCodeCheck;
+	g_ScreenSetup = new CScreenSetup;
+	g_EventList = new EventList;
+	g_Update = new CFlashUpdate;
+	g_WatchDog = new CStreamWatchDog;
+
+	//printf("\nCNeutrinoApp::run - objects initialized...\n\n");
+	g_Locale->loadLocale(g_settings.language);
+
+	colorSetupNotifier = new CColorSetupNotifier;
+	audioSetupNotifier = new CAudioSetupNotifier;
+	videoSetupNotifier = new CVideoSetupNotifier;
+	APIDChanger        = new CAPIDChangeExec;
+	NVODChanger        = new CNVODChangeExec;
+
+	colorSetupNotifier->changeNotify("initial");
+
+	setupNetwork();
+
+	channelList = new CChannelList( 1, "channellist.head" );
+
+
+	//Main settings
+	CMenuWidget mainMenu("mainmenu.head", "mainmenue.raw");
+	CMenuWidget mainSettings("mainsettings.head", "settings.raw");
+	CMenuWidget languageSettings("languagesetup.head", "language.raw");
+	CMenuWidget videoSettings("videomenu.head", "video.raw");
+	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
+	CMenuWidget networkSettings("networkmenu.head", "network.raw");
+	CMenuWidget colorSettings("colormenu.head", "colors.raw");
+	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw",400,500);
+	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
+
+	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings, miscSettings);
+
+	//language Setup
+	InitLanguageSettings(languageSettings);
+
+	//misc Setup
+	InitMiscSettings(miscSettings);
+
+	//audio Setup
+	InitAudioSettings(audioSettings, audioSetupNotifier);
+
+	//video Setup
+	InitVideoSettings(videoSettings, videoSetupNotifier);
+
+	//network Setup
+	InitNetworkSettings(networkSettings);
+
+	//color Setup
+	InitColorSettings(colorSettings);
+
+	CMenuWidget colorSettings_Themes("colorthememenu.head", "settings.raw");
+	InitColorThemesSettings(colorSettings_Themes);
+
+	// Hacking Shit
+	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", &colorSettings_Themes) );
+	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	// Meno
+
+   	CMenuWidget colorSettings_menuColors("colormenusetup.head", "settings.raw");
+	InitColorSettingsMenuColors(colorSettings_menuColors, colorSettings);
+
+	CMenuWidget colorSettings_statusbarColors("colormenu.statusbar", "settings.raw");
+	InitColorSettingsStatusBarColors(colorSettings_statusbarColors, colorSettings);
+
+	//keySettings
+	InitKeySettings(keySettings);
+
+	//init programm
+	InitZapper();
+
+	mute = false;
+	nRun = true;
+
+	RealRun(mainMenu);
+
+	ExitRun();
+	return 0;
+}
+
 void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 {
     // display volume...
@@ -1690,113 +1800,6 @@ void CNeutrinoApp::ExitRun()
 
 	g_Controld->shutdown();
 	sleep(55555);
-}
-
-int CNeutrinoApp::run(int argc, char **argv)
-{
-	CmdParser(argc, argv);
-
-	if(!loadSetup())
-	{
-		//setup default if configfile not exists
-		setupDefaults();
-		printf("using defaults...\n\n");
-	}
-
-	g_Fonts = new FontsDef;
-	SetupFonts();
-
-	ClearFrameBuffer();
-
-	g_Locale = new CLocaleManager;
-	g_RCInput = new CRCInput;
-	g_lcdd = new CLCDD;
-	g_Controld = new CControld;
-	g_RemoteControl = new CRemoteControl;
-	g_EpgData = new CEpgData;
-	g_InfoViewer = new CInfoViewer;
-	g_StreamInfo = new CStreamInfo;
-	g_ScanTS = new CScanTs;
-	g_UcodeCheck = new CUCodeCheck;
-	g_ScreenSetup = new CScreenSetup;
-	g_EventList = new EventList;
-	g_Update = new CFlashUpdate;
-	g_WatchDog = new CStreamWatchDog;
-
-	//printf("\nCNeutrinoApp::run - objects initialized...\n\n");
-	g_Locale->loadLocale(g_settings.language);
-
-	colorSetupNotifier = new CColorSetupNotifier;
-	audioSetupNotifier = new CAudioSetupNotifier;
-	videoSetupNotifier = new CVideoSetupNotifier;
-	APIDChanger        = new CAPIDChangeExec;
-	NVODChanger        = new CNVODChangeExec;
-
-	colorSetupNotifier->changeNotify("initial");
-
-	setupNetwork();
-
-	channelList = new CChannelList( 1, "channellist.head" );
-
-
-	//Main settings
-	CMenuWidget mainMenu("mainmenu.head", "mainmenue.raw");
-	CMenuWidget mainSettings("mainsettings.head", "settings.raw");
-	CMenuWidget languageSettings("languagesetup.head", "language.raw");
-	CMenuWidget videoSettings("videomenu.head", "video.raw");
-	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
-	CMenuWidget networkSettings("networkmenu.head", "network.raw");
-	CMenuWidget colorSettings("colormenu.head", "colors.raw");
-	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw",400,500);
-	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
-
-	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings, miscSettings);
-
-	//language Setup
-	InitLanguageSettings(languageSettings);
-
-	//misc Setup
-	InitMiscSettings(miscSettings);
-
-	//audio Setup
-	InitAudioSettings(audioSettings, audioSetupNotifier);
-
-	//video Setup
-	InitVideoSettings(videoSettings, videoSetupNotifier);
-
-	//network Setup
-	InitNetworkSettings(networkSettings);
-
-	//color Setup
-	InitColorSettings(colorSettings);
-
-	CMenuWidget colorSettings_Themes("colorthememenu.head", "settings.raw");
-	InitColorThemesSettings(colorSettings_Themes);
-
-	// Hacking Shit
-	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", &colorSettings_Themes) );
-	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	// Meno
-
-   	CMenuWidget colorSettings_menuColors("colormenusetup.head", "settings.raw");
-	InitColorSettingsMenuColors(colorSettings_menuColors, colorSettings);
-
-	CMenuWidget colorSettings_statusbarColors("colormenu.statusbar", "settings.raw");
-	InitColorSettingsStatusBarColors(colorSettings_statusbarColors, colorSettings);
-
-	//keySettings
-	InitKeySettings(keySettings);
-
-	//init programm
-	InitZapper();
-
-	mute = false;
-	nRun = true;
-
-	RealRun(mainMenu);
-
-	ExitRun();
-	return 0;
 }
 
 void CNeutrinoApp::AudioMuteToggle()
@@ -1983,7 +1986,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.93 2001/12/12 11:33:57 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.94 2001/12/12 11:39:04 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
