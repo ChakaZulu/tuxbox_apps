@@ -2117,7 +2117,7 @@ static eString getControlScreenShot(void)
 		system("cat /dev/grabber > /tmp/screenshot.bmp");
 
 		FILE *bitstream = 0;
-		int xres = 0, yres = 0, yres2 = 0, aspect = 0, winxres = 650, winyres = 0, rh = 0, rv = 0;
+		int xres = 0, yres = 0, yres2 = 0, aspect = 0, winxres = 620, winyres = 0, rh = 0, rv = 0;
 		if (smallScreen == 1)
 			winxres = 240;
 		if (Decoder::current.vpid != -1)
@@ -2261,7 +2261,7 @@ static eString getContent(eString mode, eString path)
 		result = getTitle("CONTROL: OSDShot");
 		if (!getOSDShot("fb"))
 			if (smallScreen == 0)
-				result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
+				result += "<img width=\"620\" src=\"/root/tmp/osdshot.png\" border=0>";
 			else
 				result += "<img width=\"240\" src=\"/root/tmp/osdshot.png\" border=0>";
 	}
@@ -2272,7 +2272,7 @@ static eString getContent(eString mode, eString path)
 		result = getTitle("CONTROL: LCDShot");
 		if (!getOSDShot("lcd"))
 			if (smallScreen == 0)
-				result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
+				result += "<img width=\"620\" src=\"/root/tmp/osdshot.png\" border=0>";
 			else
 				result += "<img width=\"240\" src=\"/root/tmp/osdshot.png\" border=0>";
 	}
@@ -3207,12 +3207,25 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 {
 	eString result;
 
-	std::map<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt = getRequestOptions(opts);
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	if (opts.find("screenWidth") != eString::npos)
+	{
+		eString sWidth = opt["screenWidth"];
+		int screenWidth = atoi(sWidth.c_str());
+		smallScreen = (screenWidth < 800) ? 1 : 0;
+	}
+	else
+	{
+		if ((opts.find("mode") == eString::npos) && (opts.find("path") == eString::npos))
+			return readFile(TEMPLATE_DIR + "index.tmp");
+	}
+
 
 	if (smallScreen == 0)
 	{
-		result = readFile(TEMPLATE_DIR + "index.tmp");
+		result = readFile(TEMPLATE_DIR + "index_big.tmp");
 
 		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 			result.strReplace("#BOX#", "Dreambox");
