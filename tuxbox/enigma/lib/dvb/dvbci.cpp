@@ -235,7 +235,7 @@ void eDVBCI::PMTaddDescriptor(unsigned char *data)
 void eDVBCI::newService()
 {
 	//eDebug("got new %d PMT entrys",tempPMTentrys);
-	
+	ci_progress(appName);	
 	unsigned char capmt[2048];
 	
 	int i;
@@ -680,7 +680,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 	tc_id=buffer[x++];
 	m_l=buffer[x++];
 
-	if(len<7)
+	if(len<6)
 		return;
 	//the cheapest defrag on earth *g*
 	if(m_l && ml_bufferlen==0)			//first fragment
