@@ -287,10 +287,8 @@ int eAVSwitch::setTVPin8(int vol)
 				fnc=3 -> 12V
 */
 	int fnc;
-	if ( vol != -1 )
-		lastVoltage=vol;
-	else
-		vol=lastVoltage;
+	if ( vol == -1 ) // switch to last aspect
+		vol = aspect == r169?6:12;
 	switch (vol)
 	{
 	case 0:
