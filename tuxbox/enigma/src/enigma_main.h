@@ -142,7 +142,8 @@ class eZapMain: public eWidget
 	eAudioSelector audiosel;
 	eEventDisplay *actual_eventDisplay;
 	int flags;
-	int isVT;	
+	int isVT;
+	int isEPG;	
 	eZapLCD lcdmain;
 	
 	void redrawWidget(gPainter *, const QRect &where);

@@ -78,7 +78,7 @@ public slots:
 	inline void startEPG();
 	inline void stopEPG();
 	inline void enterTransponder();
-	inline void enterService();
+	inline void enterService(eService*, int);
 	void cleanLoop();
 public:
 	eEPGCache();
@@ -87,17 +87,34 @@ public:
 //	EITEvent *lookupEvent(int original_network_id, int service_id, int event_id);
 	EITEvent *lookupCurrentEvent(int original_network_id, int service_id);
 	inline const eventMap& eEPGCache::getEventMap(int original_network_id, int service_id);
+signals:
+	void EPGAvail(bool);
 };
 
-inline void eEPGCache::enterService()
+inline void eEPGCache::enterService(eService* service, int err)
 {
-	zapTimer.start(4000, 1);
+	if (err)
+		return;
+
+	zapTimer.start(5000, 1);
+
+	if (eventDB.find(sref(service->original_network_id,service->service_id)) != eventDB.end())
+	{
+		qDebug("Service has EPG");
+		emit EPGAvail(1);
+		current_service = 0;
+	}
+	else
+	{
+		current_service = service;
+		emit EPGAvail(0);
+	}
 }
 
 inline void eEPGCache::enterTransponder()
 {
 	if (!zapTimer.isActive())
-		zapTimer.start(4000, 1);
+		zapTimer.start(5000, 1);
 }
 
 inline void eEPGCache::startEPG()

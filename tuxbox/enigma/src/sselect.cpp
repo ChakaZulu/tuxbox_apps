@@ -109,61 +109,69 @@ void eServiceSelector::entrySelected(eListboxEntry *entry)
 	close(1);
 }
 
+void eServiceSelector::selchanged(eListboxEntry *entry)
+{
+	selected = &(((eListboxEntryService*)entry)->service);
+}
+
 int eServiceSelector::eventFilter(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::keyDown:
-		switch (event.parameter)
-		{
-		case eRCInput::RC_PLUS:
-		{
-			eBouquet *b;
-			b=pbs->next();
-			if (b)
-				useBouquet(b);
-			return 1;
-		}
-		case eRCInput::RC_MINUS:
-		{
-			eBouquet *b;
-			b=pbs->prev();
-			if (b)
-				useBouquet(b);
-			return 1;
-		}
-		case eRCInput::RC_DBOX:
-		{
-			eBouquet *b;
-			hide();
-			pbs->setLCD(LCDTitle, LCDElement);
-			b=pbs->choose();
-			if (b)
-				useBouquet(b);
-			show();
-			return 1;
-		}
-		case eRCInput::RC_HOME:
-		{
-			fillServiceList();
-			return 1;
-		}
-		case eRCInput::RC_HELP:
-		{
-			eEPGWindow wnd(eDVB::getInstance()->service);
-			hide();
-			wnd.show();
-			wnd.exec();
-			wnd.hide();
-			show();
-			return 1;
-		}
+		case eWidgetEvent::keyDown:
+			switch (event.parameter)
+			{
+			case eRCInput::RC_PLUS:
+			{
+				eBouquet *b;
+				b=pbs->next();
+				if (b)
+					useBouquet(b);
+				return 1;
+			}
+			case eRCInput::RC_MINUS:
+			{
+				eBouquet *b;
+				b=pbs->prev();
+				if (b)
+					useBouquet(b);
+				return 1;
+			}
+			case eRCInput::RC_DBOX:
+			{
+				eBouquet *b;
+				hide();
+				pbs->setLCD(LCDTitle, LCDElement);
+				b=pbs->choose();
+				if (b)
+					useBouquet(b);
+				show();
+				return 1;
+			}
+			case eRCInput::RC_HOME:
+			{
+				fillServiceList();
+				return 1;
+			}
+			case eRCInput::RC_HELP:
+			{
+				if ( eEPGCache::getInstance()->lookupCurrentEvent(selected->original_network_id, selected->service_id ) != 0)
+				{
+					eEPGWindow wnd(selected);
+					hide();
+					wnd.show();
+					wnd.exec();
+					wnd.hide();
+					show();
+				}
+				return 1;
+			}
 		}
 		break;
-	case eWidgetEvent::keyUp:
-		switch (event.parameter)
-		{
-		}
+		case eWidgetEvent::keyUp:
+			switch (event.parameter)
+			{
+			}
 		break;
 	}
 	return 0;
@@ -173,13 +181,11 @@ eServiceSelector::eServiceSelector()
 								:eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
 {
 	pbs = new eBouquetSelector();
-
 	move(QPoint(70, 60));
-	
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
-
-	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
 	fillServiceList();
+	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
+	connect(list, SIGNAL(selchanged(eListboxEntry*)), SLOT(selchanged(eListboxEntry*)));
 	connect(eDVB::getInstance(), SIGNAL(serviceListChanged()), SLOT(fillServiceList()));
 }
 

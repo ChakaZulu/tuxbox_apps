@@ -365,6 +365,7 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	cur_start=cur_duration=-1;
 
 	connect(eStreamWatchdog::getInstance(), SIGNAL(AspectRatioChanged(int)), SLOT(set16_9Logo(int)));
+	connect(eEPGCache::getInstance(), SIGNAL(EPGAvail(bool)), SLOT(setEPGButton(bool)));
 	connect(eDVB::getInstance(), SIGNAL(scrambled(bool)), SLOT(setSmartcardLogo(bool)));
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));
 	connect(eDVB::getInstance(), SIGNAL(gotEIT(EIT*,int)), SLOT(gotEIT(EIT*,int)));
@@ -403,11 +404,13 @@ void eZapMain::setEPGButton(bool b)
 {
 	if (b)
 	{
+		isEPG=1;
 		ButtonRedDis->hide();
 		ButtonRedEn->show();
 	}
 	else
 	{
+		isEPG=0;
 		ButtonRedEn->hide();
 		ButtonRedDis->show();
 	}
@@ -772,17 +775,20 @@ void eZapMain::keyUp(int code)
 	}
 	case eRCInput::RC_RED:
 	{
-		eEPGCache::getInstance()->stopEPG();
-		eEPGWindow wnd(eDVB::getInstance()->service);
-		if (isVisible())
+		if (isEPG)
 		{
-			timeout.stop();
-			hide();
+			eEPGCache::getInstance()->stopEPG();
+			eEPGWindow wnd(eDVB::getInstance()->service);
+			if (isVisible())
+			{
+				timeout.stop();
+				hide();
+			}
+			wnd.show();
+			wnd.exec();
+			wnd.hide();
+			eEPGCache::getInstance()->startEPG();
 		}
-		wnd.show();
-		wnd.exec();
-		wnd.hide();
-		eEPGCache::getInstance()->startEPG();
 		break;
 	}
 	case eRCInput::RC_HELP:

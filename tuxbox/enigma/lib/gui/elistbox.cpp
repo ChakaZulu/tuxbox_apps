@@ -78,6 +78,9 @@ void eListbox::redrawEntry(gPainter *target, int pos, eListboxEntry *entry, cons
 		return;
 
 	gColor color=(have_focus && entry && entry==current->current())?col_active:getBackgroundColor();
+
+	if(	entry && entry==current->current())
+		emit selchanged(*current);
 	
 	if (color != -1)
 	{

@@ -68,6 +68,7 @@ public:
 	void keyUp(int rc);
 signals:
 	void selected(eListboxEntry *lbe);
+	void selchanged(eListboxEntry *lbe);
 public:
 	void append(eListboxEntry *entry);
 	void remove(eListboxEntry *entry);

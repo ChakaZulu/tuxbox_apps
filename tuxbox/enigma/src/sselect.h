@@ -13,7 +13,7 @@ class eListboxEntryService: public eListboxEntry
 	QString sort;
 public:
 	eService &service;
-	QString getText(int col=0) const; 
+	QString getText(int col=0) const;
 	eListboxEntryService(eService &service, eListbox *listbox);
 	~eListboxEntryService();
 };
@@ -21,13 +21,14 @@ public:
 class eServiceSelector: public eLBWindow
 {
 	Q_OBJECT
-	eService *result;
+	eService *result, *selected;
 	eBouquetSelector* pbs;
 protected:
 	int eventFilter(const eWidgetEvent &event);
 private slots:
 	void fillServiceList();
 	void entrySelected(eListboxEntry *entry);
+	void selchanged(eListboxEntry *entry);
 public:
 	eServiceSelector();
 	~eServiceSelector();

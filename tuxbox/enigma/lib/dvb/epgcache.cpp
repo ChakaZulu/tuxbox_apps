@@ -15,11 +15,10 @@ eEPGCache::eEPGCache():eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOU
 	qDebug("[EPGC] Initialized EPGCache");
 	isRunning=0;
 	IdleTimer.start(0);
-	connect(eDVB::getInstance(), SIGNAL(enterService(eService*)), SLOT(enterService()));
+	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*, int)), SLOT(enterService(eService*, int)));
 	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(stopEPG()));
-	connect(eDVB::getInstance(), SIGNAL(enterTransponder(eTransponder*)), SLOT(enterTransponder()));
-	connect(eDVB::getInstance(), SIGNAL(leaveTransponder(eTransponder*)), SLOT(stopEPG()));
-	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(timeUpdated()));	
+//	connect(eDVB::getInstance(), SIGNAL(enterTransponder(eTransponder*)), SLOT(enterTransponder()));
+//	connect(eDVB::getInstance(), SIGNAL(leaveTransponder(eTransponder*)), SLOT(stopEPG()));
 	connect(&zapTimer, SIGNAL(timeout()), SLOT(startEPG()));
 	connect(&IdleTimer, SIGNAL(timeout()), SLOT(cleanLoop()));	
 	instance=this;
@@ -36,6 +35,13 @@ int eEPGCache::sectionRead(__u8 *data)
 		int original_network_id=HILO(eit->original_network_id);
 		int len=HILO(eit->section_length)-1;//+3-4;
 		int ptr=EIT_SIZE;
+
+		if (current_service && current_service->service_id == service_id)
+		{
+   	   current_service=0;
+	  	 emit EPGAvail(1);
+		}
+
 		while (ptr<len)
 		{
 			eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
@@ -139,5 +145,5 @@ EITEvent *eEPGCache::lookupCurrentEvent(int original_network_id, int service_id)
 	return new EITEvent(*event->second);
 }
 
-eAutoInitP0<eEPGCache> init_eEPGCacheInit(6, "EPG cache");
+eAutoInitP0<eEPGCache> init_eEPGCacheInit(5, "EPG cache");
 

@@ -1426,4 +1426,4 @@ void eDVB::configureNetwork()
 	}
 }
 
-eAutoInitP0<eDVB> init_dvb(5, "eDVB core");
+eAutoInitP0<eDVB> init_dvb(4, "eDVB core");
