@@ -1,12 +1,6 @@
-noinst_LTLIBRARIES = liblowlevel.la
+lib_LTLIBRARIES = libenigma_dvb_lowlevel.la
 
-liblowlevel_la_SOURCES = decode.cpp
-
-liblowlevel_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
+libenigma_dvb_lowlevel_la_SOURCES = decode.cpp
 
 AM_FLAGS_CXX = -fno-rtti -fno-exceptions
-
-install-exec-local:
-	install -d $(LIBDIR)/enigma
-	$(LIBTOOL) --mode=install $(INSTALL) liblowlevel.la $(LIBDIR)/enigma
 

@@ -10,18 +10,12 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/include \
 	-I/home/tmbinc/dreambox/CVS/driver/include
 
-noinst_LTLIBRARIES = libdvb.la
+lib_LTLIBRARIES = libenigma_dvb.la
 
-libdvb_la_SOURCES = \
+libenigma_dvb_la_SOURCES = \
 	decoder.cpp dvb.cpp edvb.cpp epgcache.cpp \
 	esection.cpp frontend.cpp si.cpp record.cpp
 
-libdvb_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
-
 AM_CPPFLAGS = -DPROFILE -DDBOX
 AM_CXXFLAGS = $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
-
-install-exec-local:
-	install -d $(LIBDIR)/enigma
-	$(LIBTOOL) --mode=install $(INSTALL) libdvb.la $(LIBDIR)/enigma
 

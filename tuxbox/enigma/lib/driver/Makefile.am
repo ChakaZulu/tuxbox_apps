@@ -8,16 +8,10 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/include
 
 
-noinst_LTLIBRARIES = libdriver.la
+lib_LTLIBRARIES = libenigma_driver.la
 
-libdriver_la_SOURCES = \
+libenigma_driver_la_SOURCES = \
 	eavswitch.cpp rc.cpp rcdbox.cpp rcdreambox.cpp streamwd.cpp
 
-libdriver_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
-
 AM_CXXFLAGS = $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
-
-install-exec-local:
-	install -d $(LIBDIR)/enigma
-	$(LIBTOOL) --mode=install $(INSTALL) libdriver.la $(LIBDIR)/enigma
 
