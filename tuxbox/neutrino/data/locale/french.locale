@@ -245,7 +245,7 @@ infoviewer.waittime J'attends la date....
 epgviewer.notfound pas d' EPG informations trouvé
 epgviewer.nodetailed No detailed informations available
 epgviewer.More_Screenings encore plus d'informations brèves
-epglist.head l' événement énumérerait - %s
+epglist.head l' Ã©vÃ©nement Ã©numÃ©rerait - %s
 epglist.noevents Pas d'cEpg disponible ...
 
 streaminfo.head Informations
