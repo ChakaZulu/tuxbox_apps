@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.28 2002/09/25 18:51:13 thegoodguy Exp $
+ * $Id: pzapit.cpp,v 1.29 2002/10/03 15:10:21 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -398,7 +398,7 @@ int main (int argc, char** argv)
 		/* display bouquet list */
 		else
 		{
-			zapit.getBouquets(bouquets, true);
+			zapit.getBouquets(bouquets, false);
 
 			std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
 			for (b_resp = bouquets.begin(); b_resp < bouquets.end(); b_resp++)
