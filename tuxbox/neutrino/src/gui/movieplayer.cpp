@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.66 2004/02/01 21:18:35 zwen Exp $
+  $Id: movieplayer.cpp,v 1.67 2004/02/05 01:08:39 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -23,21 +23,6 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
-
-/* KNOWN ISSUES:
-   - AC3 handling does not work
-   - TS which are played back from CIFS drives may not work in a good quality.
-*/
-
-
-/* TODOs / Release Plan:
-   - always: fix bugs
-   (currently planned order)
-   - Nicer UI
-   - Chapter support for DVD and (S)VCD
-   - Playing from Bookmarks
-   - MP3 HTTP streaming
 */
 
 #ifdef HAVE_CONFIG_H
@@ -60,6 +45,7 @@
 #include <gui/color.h>
 #include <gui/infoviewer.h>
 #include <gui/nfs.h>
+#include <gui/bookmarkmanager.h>
 
 #include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
@@ -108,15 +94,15 @@
 
 #define MOVIEPLAYER_ConnectLineBox_Width	15
 
-#define RINGBUFFERSIZE 348*188*10
+#define RINGBUFFERSIZE 348*188*3
 #define MAXREADSIZE 348*188
 #define MINREADSIZE 348*188
 
 
 static CMoviePlayerGui::state playstate;
-static bool isTS, isPES;
+static bool isTS, isPES, isBookmark;
 int speed = 1;
-static long fileposition;
+static long long fileposition;
 ringbuffer_t *ringbuf;
 bool bufferfilled;
 int streamingrunning;
@@ -125,6 +111,9 @@ short ac3;
 CHintBox *hintBox;
 CHintBox *bufferingBox;
 bool avpids_found;
+std::string startfilename;
+long long startposition;
+int jumpminutes = 1;
 
 //------------------------------------------------------------------------
 size_t
@@ -135,18 +124,46 @@ CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 
 //------------------------------------------------------------------------
 
-CMoviePlayerGui::CMoviePlayerGui() : bookmarkfile('\t')
+/* 
+  -- get bits out of buffer
+  -- (getting more than 24 bits is not save)
+  -- return: value
+*/
+
+unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
+
 {
-	frameBuffer = CFrameBuffer::getInstance ();
+ u_char *b;
+ unsigned long  v;
+ unsigned long mask;
+ unsigned long tmp_long;
 
-	visible = false;
-	selected = 0;
+ b = &buf[byte_offset + (startbit / 8)];
+ startbit %= 8;
 
+ tmp_long = (unsigned long)( ((*b)<<24) + (*(b+1)<<16) +
+		 (*(b+2)<<8) + *(b+3) );
+
+ startbit = 32 - startbit - bitlen;
+
+ tmp_long = tmp_long >> startbit;
+
+ // ja, das ULL muss so sein (fuer bitlen == 32 z.b.)...
+ mask = (1ULL << bitlen) - 1;
+
+ v = tmp_long & mask;
+
+ return v;
+}
+
+//------------------------------------------------------------------------
+
+CMoviePlayerGui::CMoviePlayerGui()
+{
 	filebrowser = new CFileBrowser ();
 	filebrowser->Multi_Select = false;
 	filebrowser->Dirs_Selectable = false;
 	tsfilefilter.addFilter ("ts");
-	//videofilefilter.addFilter ("ps");
 	vlcfilefilter.addFilter ("mpg");
 	vlcfilefilter.addFilter ("mpeg");
 	vlcfilefilter.addFilter ("m2p");
@@ -174,63 +191,9 @@ CMoviePlayerGui::~CMoviePlayerGui ()
 int
 CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 {
-	// read Bookmarkfile
-	int bookmarkCount=0;
-	if(bookmarkfile.loadConfig("/var/tuxbox/config/bookmarks")) {
-        bookmarkCount = bookmarkfile.getInt32( "bookmarkcount", 0 );
-        printf("bookmarkcount:%d\n",bookmarkCount);
-        for (int i=0;i<bookmarkCount;i++) {
-            char counterstring[4];
-            sprintf(counterstring, "%d",(i+1));
-            std::string bookmarkstring = "bookmark";
-            bookmarkstring += counterstring;
-            std::string bookmarknamestring = bookmarkstring + ".name";
-            std::string bookmarkurlstring = bookmarkstring + ".url";
-            std::string bookmarktimestring = bookmarkstring + ".time";
-            bookmarkname[i] = bookmarkfile.getString(bookmarknamestring,"name");
-            printf("bookmarkname: %s\n",bookmarkname[i].c_str());
-            bookmarkurl[i] = bookmarkfile.getString(bookmarkurlstring,"url");
-            printf("bookmarkurl: %s\n",bookmarkurl[i].c_str());
-            bookmarktime[i] = bookmarkfile.getString(bookmarktimestring,"time");
-            printf("bookmarktime: %s\n",bookmarktime[i].c_str());
-        }
-    }
-    
-    current = -1;
-	selected = 0;
-
 	printf("[movieplayer.cpp] actionKey=%s\n",actionKey.c_str());
 	
-	//define screen width
-	width = 710;
-	if ((g_settings.screen_EndX - g_settings.screen_StartX) <
-	    width + MOVIEPLAYER_ConnectLineBox_Width)
-		width =
-			(g_settings.screen_EndX - g_settings.screen_StartX) -
-			MOVIEPLAYER_ConnectLineBox_Width;
-
-	//define screen height
-	height = 570;
-	if ((g_settings.screen_EndY - g_settings.screen_StartY) < height)
-		height = (g_settings.screen_EndY - g_settings.screen_StartY);
-	sheight      = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
-	buttonHeight = std::min(25, sheight);
-	theight      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
-	fheight      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
-	title_height = fheight * 2 + 20 + sheight + 4;
-	info_height = fheight * 2;
-	listmaxshow =
-		(height - info_height - title_height - theight -
-		 2 * buttonHeight) / (fheight);
-	height = theight + info_height + title_height + 2 * buttonHeight + listmaxshow * fheight;	// recalc height
-
-	x =
-		(((g_settings.screen_EndX - g_settings.screen_StartX) -
-		  (width + MOVIEPLAYER_ConnectLineBox_Width)) / 2) + g_settings.screen_StartX +
-		MOVIEPLAYER_ConnectLineBox_Width;
-	y =
-		(((g_settings.screen_EndY - g_settings.screen_StartY) - height) / 2) +
-		g_settings.screen_StartY;
+	bookmarkmanager = new CBookmarkManager ();
 
 	if (parent)
 	{
@@ -251,7 +214,10 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning (true);
 
-
+    isBookmark=false;
+    isTS=false;
+    isPES=false;
+    
 	if (actionKey=="fileplayback") {
         PlayStream (STREAMTYPE_FILE);	
 	}
@@ -263,18 +229,21 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	}
 	else if (actionKey=="tsplayback") {
         isTS=true;
-        isPES=false;
         PlayFile();
 	}
 	else if (actionKey=="pesplayback") {
-        isTS=false;
         isPES=true;
         PlayFile();
 	}
+	/*else if (actionKey=="bookmarkplayback") {
+        isTS=true;
+        isBookmark = true;
+        startfilename = "/mnt/movies/040130_152723_00.ts";
+        startposition = 8807424;
+        PlayFile();
+	}*/
 	
-
-	//stop();
-	hide ();
+	bookmarkmanager->flush();
 
 	g_Zapit->setStandby (false);
 
@@ -567,6 +536,7 @@ ReceiveStreamThread (void *mrl)
 			}
 			if (!avpids_found)
 			{
+				printf("[movieplayer.cpp] Searching for vpid and apid\n");
 				// find apid and vpid. Easiest way to do that is to write the TS to a file 
 				// and use the usual find_avpids function. This is not even overhead as the
 				// buffer needs to be prefilled anyway
@@ -609,7 +579,9 @@ ReceiveStreamThread (void *mrl)
 
 
 		if ((poller[0].revents & (POLLIN | POLLPRI)) != 0)
+			{
 			len = recv (poller[0].fd, buf, size, 0);
+		    }
 		else
 			len = 0;
 
@@ -794,6 +766,7 @@ PlayStreamThread (void *mrl)
 			
 				}
 				//printf ("[movieplayer.cpp] [%d bytes read from ringbuf]\n", len);
+				
 				done = 0;
 				while (len > 0)
 				{
@@ -833,6 +806,8 @@ PlayStreamThread (void *mrl)
 			case CMoviePlayerGui::STREAMERROR:
 			case CMoviePlayerGui::FF:
 			case CMoviePlayerGui::REW:
+			case CMoviePlayerGui::JF:
+			case CMoviePlayerGui::JB:
 				break;
 			}
 		}
@@ -996,6 +971,8 @@ PlayPESFileThread (void *filename)
 			case CMoviePlayerGui::RESYNC:
 		    case CMoviePlayerGui::FF:
 			case CMoviePlayerGui::REW:
+			case CMoviePlayerGui::JF:
+			case CMoviePlayerGui::JB:
 			case CMoviePlayerGui::SOFTRESET:
                 playstate = CMoviePlayerGui::PLAY;
 				break;
@@ -1134,10 +1111,21 @@ PlayFileThread (void *filename)
 	p.pes_type = DMX_PES_VIDEO;
 	if (ioctl (dmxv, DMX_SET_PES_FILTER, &p) < 0)
 		failed = true;
-	fileposition = 0;
+	
+	//TODO: calculate offset for jumping 1 minute forward/backwards in stream
+	// needs to be a multiplier of 188
+	// do a VERY shitty approximation here...
+	//long long minuteoffset = 557892632/2;
+	//long long minuteoffset = 8807424;
+	long long minuteoffset = 30898176;
+	
+
+	fileposition = startposition;
+	lseek (fd, fileposition, SEEK_SET);
 	if (isTS && !failed)
 	{
 		int mincache_counter = 0;
+		bool skipwriting = false;
 		while ((r = read (fd, buf, cache)) > 0 && playstate >= CMoviePlayerGui::PLAY)
 		{
 			done = 0;
@@ -1163,6 +1151,14 @@ PlayFileThread (void *filename)
                     mincache_counter = 0;
                 }
 				break;
+			case CMoviePlayerGui::JF:
+			case CMoviePlayerGui::JB:
+				ioctl (dmxa, DMX_STOP);
+                lseek (fd, jumpminutes * minuteoffset, SEEK_CUR);
+                fileposition += jumpminutes * minuteoffset;
+                playstate = CMoviePlayerGui::SOFTRESET;
+                skipwriting = true;
+                break;
 			case CMoviePlayerGui::SOFTRESET:
 				ioctl (vdec, VIDEO_STOP);
 				ioctl (adec, AUDIO_STOP);
@@ -1196,15 +1192,18 @@ PlayFileThread (void *filename)
 				break;
 			}
 
-			do
-			{
-				wr = write (dvr, &buf[done], r);
-				if (!done)
-					cache = wr;
-				done += wr;
-				r -= wr;
+			if (!skipwriting) {
+    			do
+    			{
+    				wr = write (dvr, &buf[done], r);
+    				if (!done)
+    					cache = wr;
+    				done += wr;
+    				r -= wr;
+    			}
+    			while (r);
 			}
-			while (r);
+			else skipwriting = false;
 		}
 	}
 	else if (!failed)
@@ -1313,6 +1312,8 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	 * playstate == CMoviePlayerGui::PAUSE           : pause-mode
 	 * playstate == CMoviePlayerGui::FF              : fast-forward
 	 * playstate == CMoviePlayerGui::REW             : rewind
+	 * playstate == CMoviePlayerGui::JF              : jump forward x minutes
+	 * playstate == CMoviePlayerGui::JB              : jump backward x minutes
 	 * playstate == CMoviePlayerGui::SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
 	 */
 	do
@@ -1407,10 +1408,24 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		{
 			if (playstate == CMoviePlayerGui::PLAY) playstate = CMoviePlayerGui::RESYNC;
 		}
+		/*else if (msg == CRCInput::RC_blue)
+		{
+			if (bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount()) {
+    			std::string bookmarkurl = "URL";
+    			std::string bookmarktime = "Time";
+    			bookmarkmanager->createBookmark(bookmarkurl, bookmarktime);
+			}
+			else {
+    			//popup error message
+    			printf("too many bookmarks\n");
+    			DisplayErrorMessage(g_Locale->getText("movieplayer.toomanybookmarks")); // UTF-8
+			}
+		}
+		*/
 		else if (msg == CRCInput::RC_help)
  		{
-     		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.66 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.67 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1449,6 +1464,7 @@ CMoviePlayerGui::PlayFile (void)
 	 * playstate == CMoviePlayerGui::REW             : rewind
 	 * playstate == CMoviePlayerGui::SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
 	 */
+	 
 	do
 	{
 		if (exit)
@@ -1461,6 +1477,17 @@ CMoviePlayerGui::PlayFile (void)
 			}
 		}
 
+		if (isBookmark) 
+		{
+    	    open_filebrowser=false;
+    	    filename = startfilename.c_str();
+    	    sel_filename = startfilename;
+    	    update_lcd = true;
+			start_play = true;
+			isBookmark = false;
+
+    		
+		}
 		if (open_filebrowser)
 		{
 			open_filebrowser = false;
@@ -1512,7 +1539,6 @@ CMoviePlayerGui::PlayFile (void)
 				pthread_join (rct, NULL);
 			}
 
-			printf("Startplay1\n");
 			if (isTS) {
 			    if (pthread_create
 			        (&rct, 0, PlayFileThread, (void *) filename) != 0)
@@ -1522,7 +1548,6 @@ CMoviePlayerGui::PlayFile (void)
 			}
 			    
 			else {
-    			printf("Startplay\n");
 			    if (isPES && pthread_create
 			        (&rct, 0, PlayPESFileThread, (void *) filename) != 0)
 			    {
@@ -1545,18 +1570,27 @@ CMoviePlayerGui::PlayFile (void)
 		}
 		else if (msg == CRCInput::RC_blue)
 		{
-			FILE *bookmarkfile;
-			char bookmarkfilename[] =
-				"/var/tuxbox/config/movieplayer.bookmarks";
-			bookmarkfile = fopen (bookmarkfilename, "a");
-			fprintf (bookmarkfile, "%s\n", filename);
-			fprintf (bookmarkfile, "%ld\n", fileposition);
-			fclose (bookmarkfile);
+			if (bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount()) {
+    			std::string bookmarkurl = filename;
+    			char timerstring[200];
+    			printf("fileposition: %lld\n",fileposition);
+                sprintf(timerstring, "%lld",fileposition);
+                printf("timerstring: %s\n",timerstring);
+                std::string bookmarktime = "";
+                bookmarktime.append(timerstring);
+                printf("bookmarktime: %s\n",bookmarktime.c_str());
+    			bookmarkmanager->createBookmark(bookmarkurl, bookmarktime);
+			}
+			else {
+    			printf("too many bookmarks\n");
+    			DisplayErrorMessage(g_Locale->getText("movieplayer.toomanybookmarks")); // UTF-8
+    			
+			}
 		}
  		else if (msg == CRCInput::RC_help)
  		{
-     		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.66 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string helptext = g_Locale->getText("movieplayer.tshelp");
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.67 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
         else if (msg == CRCInput::RC_left)
@@ -1576,6 +1610,48 @@ CMoviePlayerGui::PlayFile (void)
 				speed = 1;
 			speed *= 2;
 			playstate = CMoviePlayerGui::FF;
+			update_lcd = true;
+		}
+        else if (msg == CRCInput::RC_1)
+		{
+			// Jump Backwards 1 minute
+			jumpminutes = -1;
+			playstate = CMoviePlayerGui::JB;
+			update_lcd = true;
+		}
+		else if (msg == CRCInput::RC_3)
+		{
+			// Jump Forward 1 minute
+			jumpminutes = 1;
+			playstate = CMoviePlayerGui::JF;
+			update_lcd = true;
+		}
+        else if (msg == CRCInput::RC_4)
+		{
+			// Jump Backwards 5 minutes
+			jumpminutes = -5;
+			playstate = CMoviePlayerGui::JB;
+			update_lcd = true;
+		}
+		else if (msg == CRCInput::RC_6)
+		{
+			// Jump Forward 5 minutes
+			jumpminutes = 5;
+			playstate = CMoviePlayerGui::JF;
+			update_lcd = true;
+		}
+        else if (msg == CRCInput::RC_7)
+		{
+			// Jump Backwards 10 minutes
+			jumpminutes = -10;
+			playstate = CMoviePlayerGui::JB;
+			update_lcd = true;
+		}
+		else if (msg == CRCInput::RC_9)
+		{
+			// Jump Forward 10 minutes
+			jumpminutes = 10;
+			playstate = CMoviePlayerGui::JF;
 			update_lcd = true;
 		}
 		else if (msg == CRCInput::RC_up || msg == CRCInput::RC_down)
@@ -1619,236 +1695,5 @@ CMoviePlayerGui::PlayFile (void)
 	pthread_join (rct, NULL);
 }
 
-/* Gui not used at the moment !!! See neutrino.cpp for current GUI (std. menu class) */
-int
-CMoviePlayerGui::show ()
-{
-	uint msg, data;
-	bool loop = true, update = true;
-	while (loop)
-	{
-		if (CNeutrinoApp::getInstance ()->
-		    getMode () != NeutrinoMessages::mode_ts)
-		{
-			// stop if mode was changed in another thread
-			loop = false;
-		}
-
-		if (update)
-		{
-			hide ();
-			update = false;
-			paint ();
-		}
-
-		// Check Remote Control
-
-		g_RCInput->getMsg (&msg, &data, 10);	// 1 sec timeout to update play/stop state display
-		if (msg == CRCInput::RC_home)
-		{			//Exit after cancel key
-    
-			loop = false;
-		}
-		else if (msg == CRCInput::RC_timeout)
-		{
-			// do nothing
-		}
-//------------ RED --------------------
-		else if (msg == CRCInput::RC_red)
-		{
-			hide ();
-			PlayStream (STREAMTYPE_FILE);
-			paint ();
-		}
-//------------ GREEN --------------------
-		else if (msg == CRCInput::RC_green)
-		{
-			hide ();
-			isTS = true;
-			PlayFile ();
-			paint ();
-		}
-/*//------------ YELLOW --------------------
-  else if (msg == CRCInput::RC_yellow)
-  {
-  hide ();
-  isTS = false;
-  PlayFile ();
-  paint ();
-  }
-*/
-//------------ YELLOW --------------------
-		else if (msg == CRCInput::RC_yellow)
-		{
-			hide ();
-			PlayStream (STREAMTYPE_DVD);
-			paint ();
-		}
-//------------ BLUE --------------------
-		else if (msg == CRCInput::RC_blue)
-		{
-			hide ();
-			PlayStream (STREAMTYPE_SVCD);
-			paint ();
-		}
-		else if (msg == NeutrinoMessages::CHANGEMODE)
-		{
-			if ((data & NeutrinoMessages::mode_mask) != NeutrinoMessages::mode_ts)
-			{
-				loop = false;
-				m_LastMode = data;
-			}
-		}
-		else
-			if (msg == NeutrinoMessages::RECORD_START
-			    || msg == NeutrinoMessages::ZAPTO
-			    || msg == NeutrinoMessages::STANDBY_ON
-			    || msg == NeutrinoMessages::SHUTDOWN
-			    || msg == NeutrinoMessages::SLEEPTIMER)
-			{
-				// Exit for Record/Zapto Timers
-				// Add bookmark
-				loop = false;
-				g_RCInput->postMsg (msg, data);
-			}
-			else
-			{
-				if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
-				{
-					loop = false;
-				}
-				// update mute icon
-				paintHead ();
-			}
-	}
-	hide ();
-
-	return -1;
-}
-
-//------------------------------------------------------------------------
-
-void
-CMoviePlayerGui::hide ()
-{
-	if (visible)
-	{
-/* the following 2 paintBackgroundBoxRel calls are superseeded by the ClearFrameBuffer call */
-/*
-		frameBuffer->paintBackgroundBoxRel (x -
-						    MOVIEPLAYER_ConnectLineBox_Width
-						    - 1,
-						    y +
-						    title_height
-						    - 1,
-						    width
-						    +
-						    MOVIEPLAYER_ConnectLineBox_Width
-						    + 2, height + 2 - title_height);
-		frameBuffer->paintBackgroundBoxRel (x, y, width, title_height);
-*/
-		frameBuffer->ClearFrameBuffer();
-		visible = false;
-	}
-}
-
-//------------------------------------------------------------------------
-
-void
-CMoviePlayerGui::paintHead ()
-{
-	frameBuffer->paintBoxRel (x, y + title_height, width, theight, COL_MENUHEAD);
-	frameBuffer->paintIcon ("movie.raw", x + 7, y + title_height + 10);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString (x + 35, y + theight + title_height + 0, width - 45, g_Locale->getText("movieplayer.head"), COL_MENUHEAD, 0, true); // UTF-8
-	int ypos = y + title_height;
-	if (theight > 26)
-		ypos = (theight - 26) / 2 + y + title_height;
-	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_DBOX, x + width - 30, ypos);
-	if (CNeutrinoApp::getInstance ()->isMuted ())
-	{
-		int xpos = x + width - 75;
-		ypos = y + title_height;
-		if (theight > 32)
-			ypos = (theight - 32) / 2 + y + title_height;
-		frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_MUTE, xpos, ypos);
-	}
-	visible = true;
-}
-
-//------------------------------------------------------------------------
-
-void
-CMoviePlayerGui::paintImg ()
-{
-	// TODO: find better image
-	frameBuffer->paintBoxRel (x,
-				  y +
-				  title_height +
-				  theight, width,
-				  height -
-				  info_height -
-				  2 *
-				  buttonHeight -
-				  title_height - theight, COL_BACKGROUND);
-	frameBuffer->paintIcon ("movieplayer.raw",
-				x + 25, y + 15 + title_height + theight);
-}
-
-//------------------------------------------------------------------------
-const struct button_label MoviePlayerButtons[4] =
-{
-/*
-	{ .button = NEUTRINO_ICON_BUTTON_RED   , .locale = "movieplayer.choosestreamfile" },
-	{ .button = NEUTRINO_ICON_BUTTON_GREEN , .locale = "movieplayer.choosets"         },
-	{ .button = NEUTRINO_ICON_BUTTON_YELLOW, .locale = "movieplayer.choosestreamdvd"  },
-	{ .button = NEUTRINO_ICON_BUTTON_BLUE  , .locale = "movieplayer.choosestreamsvcd" }
-*/
-	{ NEUTRINO_ICON_BUTTON_RED   , "movieplayer.choosestreamfile" },
-	{ NEUTRINO_ICON_BUTTON_GREEN , "movieplayer.choosets"         },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, "movieplayer.choosestreamdvd"  },
-	{ NEUTRINO_ICON_BUTTON_BLUE  , "movieplayer.choosestreamsvcd" }
-};
-
-void
-CMoviePlayerGui::paintFoot ()
-{
-	int ButtonWidth = (width - 20) / 4;
-
-	frameBuffer->paintBoxRel (x,
-				  y + (height -
-				       info_height
-				       -
-				       2 *
-				       buttonHeight),
-				  width, 2 * buttonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine (x, x + width - x,
-				 y + (height -
-				      info_height
-				      - 2 * buttonHeight), COL_INFOBAR_SHADOW);
-
-	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, MoviePlayerButtons);
-
-/*  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_RED, x + 0 * ButtonWidth + 10,
-    y + (height - info_height - 2 * buttonHeight) + 4);
-    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText("movieplayer.bookmark"), COL_INFOBAR, 0, true); // UTF-8
-*/
-}
-
-void
-CMoviePlayerGui::paint ()
-{
-	CLCD * lcd = CLCD::getInstance();
-	lcd->setMode(CLCD::MODE_TVRADIO);
-	lcd->showServicename(g_Locale->getText("mainmenu.movieplayer"));
-
-	frameBuffer->loadPal ("radiomode.pal", 18, COL_MAXFREE);
-	frameBuffer->loadBackground ("radiomode.raw");
-	frameBuffer->useBackground (true);
-	frameBuffer->paintBackground ();
-	paintHead ();
-	paintImg ();
-	paintFoot ();
-	visible = true;
-}
 
 #endif

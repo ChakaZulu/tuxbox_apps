@@ -1,7 +1,7 @@
 /*
   Neutrino-GUI  -   DBoxII-Project
 
-  Copyright (C) 2003 giggo
+  Copyright (C) 2003,2004 gagga
   Homepage: http://www.giggo.de/dbox
 
   Kommentar:
@@ -37,6 +37,7 @@
 #if HAVE_DVB_API_VERSION >= 3
 #include "driver/framebuffer.h"
 #include "gui/filebrowser.h"
+#include "gui/bookmarkmanager.h"
 #include "gui/widget/menue.h"
 extern "C" {
            	#include "ringbuffer.h"
@@ -45,15 +46,6 @@ extern "C" {
 
 #include <string>
 #include <vector>
-
-
-/*class CTS
-{
- public:
-	std::string Filename;
-	int Index;
-};
-*/
 
 class CMoviePlayerGui : public CMenuTarget
 {
@@ -68,56 +60,31 @@ class CMoviePlayerGui : public CMenuTarget
 		    FF          =  5,
 		    REW         =  6,
 		    RESYNC      =  7,
+		    JF          =  9,
+		    JB          = 10,
 		    SOFTRESET   = 99
 		};
 
  private:
 	pthread_t      rct;
 	CFrameBuffer * frameBuffer;
-	unsigned int   selected;
-	int            current;
-	unsigned int   liststart;
-	unsigned int   listmaxshow;
-	int            fheight; // Fonthoehe Playlist-Inhalt
-	int            theight; // Fonthoehe Playlist-Titel
-	int            sheight; // Fonthoehe MP Info
-	int            buttonHeight;
-	int            title_height;
-	int            info_height;
-	bool           visible;
-
-	int            width;
-	int            height;
-	int            x;
-	int            y;
-	int            m_title_w;
-	int            m_LastMode;
+	int            m_LastMode;	
 	const char     *filename;
 
 	std::string Path;
 	CFileBrowser * filebrowser;
-	CConfigFile	bookmarkfile;
-	std::string bookmarkname[10];
-	std::string bookmarkurl[10];
-	std::string bookmarktime[10];
+	CBookmarkManager * bookmarkmanager;
 
 	void PlayStream(int streamtype);
 	void PlayFile();
-	void paintItem(int pos);
-	void paint();
-	void paintHead();
-	void paintImg();
-	void paintFoot();
-	void hide();
 
 	CFileFilter tsfilefilter;
-	CFileFilter vlcfilefilter;
 	CFileFilter pesfilefilter;
+	CFileFilter vlcfilefilter;
 
  public:
 	CMoviePlayerGui();
 	~CMoviePlayerGui();
-	int show();
 	int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
