@@ -1,5 +1,6 @@
 Makefile
 diseqc
+getpids
 sendburst
 set22k
 setpid
