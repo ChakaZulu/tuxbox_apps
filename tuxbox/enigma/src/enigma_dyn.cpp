@@ -508,13 +508,13 @@ static eString getVolBar()
 
 	for(int i=1;i<=(volume/10);i++)
 	{
-		result+="<td><a class=\"volgreen\" href=\"javascript:setVol(";
+		result+="<td width=15 height=8><a class=\"volgreen\" href=\"javascript:setVol(";
 		result+=eString().setNum(i, 10);
 		result+=")\">||</a></span></td>";
 	}
 	for(int i=(volume/10)+1;i<=(100/10);i++)
 	{
-		result+="<td><a class=\"volnot\" href=\"javascript:setVol(";
+		result+="<td width=15 height=8><a class=\"volnot\" href=\"javascript:setVol(";
 		result+=eString().setNum(i, 10);
 		result+=")\">||</a></span></td>";
 	}
@@ -523,10 +523,10 @@ static eString getVolBar()
 
 	if(eAVSwitch::getInstance()->getMute()==1) {
 		result+="<a class=\"mute\" href=\"javascript:Mute()\">";
-		result+="mute";
+		result+="<img src=\"speak_off.gif\" border=0>";
 	} else {
 		result+="<a class=\"mute\" href=\"javascript:unMute()\">";
-		result+="unmute";
+		result+="<img src=\"speak_on.gif\" border=0>";
 	}
 	result+="</a></td>";
 	result+="</tr>";
@@ -1056,7 +1056,8 @@ static eString getStats()
 	tmp=read_file("/proc/mounts");
 	if ((tmp.find("cramfs") != eString::npos) || (tmp.find("/dev/root / jffs2") != eString::npos))
 	{
-		result+="<span class=\"white\">running from flash</span>";
+//		result+="<span class=\"white\">running from flash</span>";
+		result+="";
 	}
 	else
 	{

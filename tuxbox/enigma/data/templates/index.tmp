@@ -52,18 +52,17 @@
 
  function Mute()
  {
-  win=window.open("/setVolume?mute=1", "switchStatus","width=50,height=20,left=0,top=0");
+  win=window.open("/setVolume?mute=1", "switchStatus","width=1,height=1,left=0,top=0");
   win.focus();
   parent.setTimeout("reload()", 100);
  }
 
  function unMute()
  {
-  win=window.open("/setVolume?mute=0", "switchStatus","width=50,height=20,left=0,top=0");
+  win=window.open("/setVolume?mute=0", "switchStatus","width=1,height=1,left=0,top=0");
   win.focus();
   parent.setTimeout("reload()", 100);
  }
-
 
  function switchtoChannel(xy)
  {
@@ -103,13 +102,8 @@
 							diskspace = '#DISKSPACE#';
 							document.write(diskspace);
 							volbar = '#VOLBAR#';
-							volbar2 = volbar.replace(/\|\|/g,"<img src=\"trans.gif\" border=0>");
-							volbar2 = volbar2.replace(/<td>/g, "<td width=15 height=8>");
-							volbar2 = volbar2.replace(/>mute/g, "><img src=\"speak_off.gif\" border=0>");
-							volbar2 = volbar2.replace(/>unmute/g, "><img src=\"speak_on.gif\" border=0>");
-							document.write(volbar2);
+							document.write(volbar);
 							var statbar = '#STATS#';
-							statbar = statbar.replace(/\| <span class=\"white\">running from flash<\/span> /g, "");
 							document.write(statbar);
 						</script>
 					</td>
