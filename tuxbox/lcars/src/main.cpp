@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.30  2003/01/05 21:42:30  TheDOC
+small changes
+
 Revision 1.29  2003/01/05 21:07:09  TheDOC
 new version-number and README updated
 
@@ -161,7 +164,7 @@ int main(int argc, char **argv)
 
 	settings settings(&cam);
 
-	settings.setVersion("0.30 cvs");
+	settings.setVersion("0.30");
 
 	hardware hardware(&settings, &variables);
 	hardware.useDD(false);

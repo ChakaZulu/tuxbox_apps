@@ -19,8 +19,6 @@ Entries:
 7 Manual Update
 8 Internet Update
 9 General Setup
-10 Stop Devices
-11 Start Devices
 +++
 Actions:
 1:
@@ -43,11 +41,6 @@ Actions:
 	UPDATE Update Internet
 9:
 	CONTROL Menu Mode 4
-10:
-	ZAP Stop Demux
-	ZAP Stop Devices
-11:
-	CHANNELS Zap Zap
 ------
 +++
 Title:
