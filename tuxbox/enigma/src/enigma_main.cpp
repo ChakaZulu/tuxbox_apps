@@ -307,19 +307,18 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ASSIGN(ButtonBlueDis, eLabel, "button_blue_disabled");
 
 	ASSIGN(DolbyOn, ePixmap, "osd_dolby_on");
-	ASSIGN(DolbyOff, ePixmap, "osd_dolby_off");
 	ASSIGN(CryptOn, ePixmap, "osd_crypt_on");
-	ASSIGN(CryptOff, ePixmap, "osd_crypt_off"); 
 	ASSIGN(WideOn, ePixmap, "osd_format_on");
+	ASSIGN(DolbyOff, ePixmap, "osd_dolby_off");
+	ASSIGN(CryptOff, ePixmap, "osd_crypt_off");
 	ASSIGN(WideOff, ePixmap, "osd_format_off");
-
 	DolbyOn->hide();
-	DolbyOff->show();
 	CryptOn->hide();
-	CryptOff->show();
 	WideOn->hide();
+	DolbyOff->show();
+	CryptOff->show();
 	WideOff->show();
-	
+
 	ButtonRedEn->setFlags(RS_DIRECT);
 	ButtonRedEn->setText("\x19");
 	ButtonGreenEn->setFlags(RS_DIRECT);

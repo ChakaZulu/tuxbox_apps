@@ -14,3 +14,4 @@ void ePixmap::redrawWidget(gPainter *paint, const QRect &area)
 	if (pixmap)
 		paint->blit(*pixmap, position);
 }
+
