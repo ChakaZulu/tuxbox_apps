@@ -619,8 +619,16 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 		if (vid > 10) vid = 10;
 		if (vid < 0) vid = 0;
 
-		// set video position here...
-		// the question is how *ggg*
+		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+		if (handler)
+		{
+			int total = handler->getPosition(eServiceHandler::posQueryLength);
+			int current = handler->getPosition(eServiceHandler::posQueryCurrent);
+			int skipTime = current - (total / 10 * vid);
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, skipTime));
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
+		}
 	}
 
 	result += "<script language=\"javascript\">window.close();</script>";
