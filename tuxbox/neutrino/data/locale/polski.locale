@@ -678,7 +678,7 @@ nfs.mounterror blad montowania
 nfs.umount Odmontuj volumin NFS
 nfs.umounterror blad odmontowania voluminu
 nfs.alreadymounted katalog juz zamontowny
-nfsmenu.head unset
+nfsmenu.head ustawienia NFS
 
 apids.hint_1 Podaj APIDy do odbioru w
 apids.hint_2 formacie hex rozdzielone przez ' '

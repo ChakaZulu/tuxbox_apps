@@ -186,10 +186,10 @@ keybindingmenu.cancel Chiudi Lista Canali
 keybindingmenu.cancel_head Chiudi Lista Canali
 keybindingmenu.sort cambia posti
 keybindingmenu.sort_head cambia posti
-keybindingmenu.addrecord unset
-keybindingmenu.addrecord_head unset
-keybindingmenu.addremind unset
-keybindingmenu.addremind_head unset
+keybindingmenu.addrecord Aggiungi-Timer di Registrazione
+keybindingmenu.addrecord_head Aggiungi-Timer di Registrazione
+keybindingmenu.addremind Aggiungi-Timer di Cambio canale
+keybindingmenu.addremind_head Aggiungi-Timer di Cambio canale
 keybindingmenu.channelup Canale in Alto
 keybindingmenu.channelup_head Tasto Canale in Alto
 keybindingmenu.channeldown Canale verso Basso
@@ -324,7 +324,7 @@ scants.bouquet Bouquets
 scants.bouquet_leave Non Cambiare
 scants.bouquet_create Crea Nuovi
 scants.bouquet_erase Cancellare
-scants.failed unset
+scants.failed Ricerca Canali fallita!
 scants.finished Ricerca Canali finita con Successo!
 
 flashupdate.head Aggiornamento
@@ -680,8 +680,8 @@ nfs.umounterror errore scarica NFS
 nfs.alreadymounted Directory gia caricato
 nfsmenu.head Impostazioni NFS 
 
-apids.hint_1 unset
-apids.hint_2 unset
+apids.hint_1 Inoltrare i dati APIDs per Streamen,
+apids.hint_2 Diviso con ' ' in Formato hexadecimale
 
 mainmenu.pictureviewer Lettore immaggini
 pictureviewer.head Lettore immaggini
@@ -691,4 +691,4 @@ pictureviewer.slideshow vedi immagine in slideshow
 pictureviewer.show Vedi
 pictureviewer.slideshow Vedi tipo Diashow
 pictureviewer.slide_time Diashow-Durata
-pictureviewer.scaling unset
+pictureviewer.scaling Graduazione
