@@ -465,7 +465,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 	pthread_mutex_unlock( &renderer->render_mutex );
 }
 
-void Font::RenderString(int x, int y, const int width, const std::string text, const unsigned char color, const int boxheight, const bool utf8_encoded)
+void Font::RenderString(int x, int y, const int width, const std::string & text, const unsigned char color, const int boxheight, const bool utf8_encoded)
 {
 	RenderString(x, y, width, text.c_str(), color, boxheight, utf8_encoded);
 }
@@ -532,7 +532,7 @@ int Font::getRenderWidth(const char *text, const bool utf8_encoded)
 	return x;
 }
 
-int Font::getRenderWidth(const std::string text, const bool utf8_encoded)
+int Font::getRenderWidth(const std::string & text, const bool utf8_encoded)
 {
 	return getRenderWidth(text.c_str(), utf8_encoded);
 }
