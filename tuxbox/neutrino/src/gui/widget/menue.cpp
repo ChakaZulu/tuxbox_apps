@@ -263,8 +263,9 @@ int CMenuForwarder::paint(CFrameBuffer*	frameBuffer, bool selected)
         {
                 CLCDD lcdd;
                 lcdd.setText(0, text);
-		if(option)
+		if (option)
 			lcdd.setText(1, option);
+		else lcdd.setText(1, "");
         }
 
 	unsigned char color = COL_MENUCONTENT;
@@ -314,6 +315,7 @@ int CMenuSeparator::paint(CFrameBuffer*	frameBuffer, bool selected)
         {
                 CLCDD lcdd;
                 lcdd.setText(0, text);
+		lcdd.setText(1, "");
         }
 
 	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT );
