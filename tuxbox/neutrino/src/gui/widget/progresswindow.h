@@ -26,6 +26,7 @@
 #define __progresswindow__
 
 #include <driver/framebuffer.h>
+#include <system/localize.h>
 
 #include "progressstatus.h"
 #include "menue.h"
@@ -37,7 +38,7 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 	protected:
 
 		CFrameBuffer *frameBuffer;
-		std::string  caption;      // UTF-8
+		neutrino_locale_t caption;
 
 		int x;
 		int y;
@@ -61,7 +62,7 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 	public:
 
 		CProgressWindow();
-		void setTitle(const std::string & title); // UTF-8
+		void setTitle(const neutrino_locale_t title);
 		virtual void hide();
 
 		virtual int exec( CMenuTarget* parent, const std::string & actionKey );

@@ -329,15 +329,15 @@ int CNFSMountGui::menuEntry(int nr)
 	mountMenuEntryW.addItem(GenericMenuBack);
 	mountMenuEntryW.addItem(GenericMenuSeparatorLine);
 	CIPInput ipInput(LOCALE_NFS_IP, g_settings.network_nfs_ip[nr], LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CStringInputSMS dirInput(LOCALE_NFS_DIR, dir, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
+	CStringInputSMS dirInput(LOCALE_NFS_DIR, dir, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuOptionChooser *automountInput= new CMenuOptionChooser(LOCALE_NFS_AUTOMOUNT, automount, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-	CStringInputSMS options1(LOCALE_NFS_MOUNT_OPTIONS, g_settings.network_nfs_mount_options[0], 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
+	CStringInputSMS options1(LOCALE_NFS_MOUNT_OPTIONS, g_settings.network_nfs_mount_options[0], 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
 	CMenuForwarder *options1_fwd = new CMenuForwarder(LOCALE_NFS_MOUNT_OPTIONS, true, g_settings.network_nfs_mount_options[0], &options1);
-	CStringInputSMS options2(LOCALE_NFS_MOUNT_OPTIONS, g_settings.network_nfs_mount_options[1], 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
+	CStringInputSMS options2(LOCALE_NFS_MOUNT_OPTIONS, g_settings.network_nfs_mount_options[1], 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
 	CMenuForwarder *options2_fwd = new CMenuForwarder(LOCALE_NFS_MOUNT_OPTIONS, true, g_settings.network_nfs_mount_options[1], &options2);
-	CStringInputSMS userInput(LOCALE_NFS_USERNAME, username, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
+	CStringInputSMS userInput(LOCALE_NFS_USERNAME, username, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuForwarder *username_fwd = new CMenuForwarder(LOCALE_NFS_USERNAME, *type==CIFS, username, &userInput);
-	CStringInputSMS passInput(LOCALE_NFS_PASSWORD, password, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
+	CStringInputSMS passInput(LOCALE_NFS_PASSWORD, password, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuForwarder *password_fwd = new CMenuForwarder(LOCALE_NFS_PASSWORD, *type==CIFS, NULL, &passInput);
 	CNFSMountGuiNotifier notifier(username_fwd, password_fwd, type);
 

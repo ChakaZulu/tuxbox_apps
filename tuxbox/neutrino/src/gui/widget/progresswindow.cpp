@@ -49,9 +49,11 @@ CProgressWindow::CProgressWindow()
 
 	x= ( ( ( g_settings.screen_EndX- g_settings.screen_StartX ) - width ) >> 1 ) + g_settings.screen_StartX;
 	y=(576-height)>>1;
+
+	caption = NONEXISTANT_LOCALE;
 }
 
-void CProgressWindow::setTitle(const std::string & title)
+void CProgressWindow::setTitle(const neutrino_locale_t title)
 {
 	caption = title;
 }
@@ -124,7 +126,8 @@ void CProgressWindow::paint()
 {
 	int ypos=y;
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText(caption), COL_MENUHEAD, 0, true); // UTF-8
+	if (caption != NONEXISTANT_LOCALE)
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText(caption), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT_PLUS_0);
 
 	ypos+= hheight + (mheight >>1);

@@ -694,7 +694,7 @@ bool CFileBrowser::exec(std::string Dirname)
 	if(res && Multi_Select)
 	{
 		CProgressWindow * progress = new CProgressWindow();
-		progress->setTitle(g_Locale->getText(LOCALE_FILEBROWSER_SCAN));
+		progress->setTitle(LOCALE_FILEBROWSER_SCAN);
 		progress->exec(NULL,"");
 		for(unsigned int i = 0; i < filelist.size();i++)
 			if(filelist[i].Marked)

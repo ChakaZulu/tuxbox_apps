@@ -53,7 +53,7 @@ class CStringInput : public CMenuTarget
 		int iheight;
 
 		std::string name;
-		std::string hint_1, hint_2;
+		neutrino_locale_t hint_1, hint_2;
 		std::string iconfile;
 		const char * validchars;
 		char *       value;
@@ -78,8 +78,8 @@ class CStringInput : public CMenuTarget
 
 	public:
 
-		// Name, Hint_1, Hint_2: UTF-8 encoded
-		CStringInput(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, const char * const Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
+		// Name: UTF-8 encoded
+		CStringInput(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, const char * const Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 
 		void hide();
 		int exec( CMenuTarget* parent, const std::string & actionKey );
@@ -107,7 +107,7 @@ class CStringInputSMS : public CStringInput
 		virtual void paint();
 
 	public:
-		CStringInputSMS(const char * const Name, char* Value, int Size, const char * const Hint_1, const char * const Hint_2, const char * const Valid_Chars, CChangeObserver* Observ = NULL, const char * const Icon = NULL);
+		CStringInputSMS(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 };
 
 class CPINInput : public CStringInput
@@ -115,7 +115,7 @@ class CPINInput : public CStringInput
 	protected:
 		virtual void paintChar(int pos);
 	public:
-		CPINInput(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
+		CPINInput(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, "lock.raw") {};
 
 		 int exec( CMenuTarget* parent, const std::string & actionKey );
@@ -128,7 +128,7 @@ class CPLPINInput : public CPINInput
 
 		virtual int handleOthers(const neutrino_msg_t msg, const neutrino_msg_data_t data);
 	public:
-		CPLPINInput(const char * const Name, char* Value, int Size, const char * const Hint_1, int FSK )
+		CPLPINInput(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1, int FSK )
 		 : CPINInput(Name, Value, Size, " ", Hint_1) { fsk= FSK; };
 
 		int exec( CMenuTarget* parent, const std::string & actionKey );

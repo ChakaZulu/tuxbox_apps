@@ -92,7 +92,7 @@
 CFlashUpdate::CFlashUpdate()
 	:CProgressWindow()
 {
-	setTitle(g_Locale->getText(LOCALE_FLASHUPDATE_HEAD)); // UTF-8
+	setTitle(LOCALE_FLASHUPDATE_HEAD);
 }
 
 
@@ -444,7 +444,7 @@ void CFlashExpert::readmtd(int readmtd)
 		filename = "/tmp/flashimage.img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
 		readmtd = MTD_OF_WHOLE_IMAGE;
 	}
-	setTitle(g_Locale->getText(LOCALE_FLASHUPDATE_TITLEREADFLASH)); // UTF-8
+	setTitle(LOCALE_FLASHUPDATE_TITLEREADFLASH);
 	paint();
 	showGlobalStatus(0);
 	showStatusMessageUTF((std::string(g_Locale->getText(LOCALE_FLASHUPDATE_ACTIONREADFLASH)) + " (" + CMTDInfo::getInstance()->getMTDName(readmtd) + ')')); // UTF-8
@@ -479,7 +479,7 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 	if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, message, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes) // UTF-8
 		return;
 
-	setTitle(g_Locale->getText(LOCALE_FLASHUPDATE_TITLEWRITEFLASH)); // UTF-8
+	setTitle(LOCALE_FLASHUPDATE_TITLEWRITEFLASH);
 	paint();
 	showGlobalStatus(0);
 	CFlashTool ft;

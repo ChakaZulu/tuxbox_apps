@@ -267,7 +267,7 @@ void CMenuWidget::hide()
 
 void CMenuWidget::paint()
 {
-	std::string l_name = localizing ? g_Locale->getText(name) : name;
+	std::string l_name = localizing ? g_Locale->getText(name.c_str()) : name; // FIXME
 
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, l_name.c_str());
 
@@ -714,7 +714,7 @@ int CMenuForwarder::paint(bool selected)
 {
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 	int height = getHeight();
-	const char * l_text = localizing ? g_Locale->getText(text) : text.c_str();
+	const char * l_text = localizing ? g_Locale->getText(text.c_str()) : text.c_str(); // FIXME
 
 	int stringstartposX = x + offx + 10;
 
@@ -798,7 +798,7 @@ int CMenuSeparator::paint(bool selected)
 	if(type&STRING)
 	{
 		int stringstartposX;
-		const char * l_text = g_Locale->getText(text);
+		const char * l_text = g_Locale->getText(text.c_str()); // FIXME
 		int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_text, true); // UTF-8
 
 		/* if no alignment is specified, align centered */

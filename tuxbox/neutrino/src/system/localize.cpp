@@ -163,15 +163,6 @@ const char * CLocaleManager::getText(const neutrino_locale_t keyName) const
 		return (it->second).c_str();
 }
 
-const char * CLocaleManager::getText(const std::string & keyName) const
-{
-	mapLocaleData::const_iterator it = localeData.find(keyName);
-	if (it == localeData.end())
-		return keyName.c_str();
-	else
-		return (it->second).c_str();
-}
-
 static const neutrino_locale_t locale_weekday[7] =
 {
 	LOCALE_DATE_SUN,
