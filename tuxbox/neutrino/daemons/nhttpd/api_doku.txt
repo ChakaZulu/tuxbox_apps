@@ -94,6 +94,20 @@ CDN 1995. Von Tibor Takacs, mit Jay O. Sanders, Matt Craven, Michael Dorn.
  
  
 
+Parameter: ext
+Rückgabe:
+
+Es werden alle verfügbaren EPG's aller Programme, zur aktuellen Zeit zurückgegeben. Jede Zeile wird von einem Enter (\n) von der Nächsten getrennt. Eine Zeile enthält die Information über die aktuell laufende Sendung.
+
+Rückgabe-Format: ONIDSID Startzeit Dauer EVENTID Titel der Sendung
+
+Die EVENTID dient als Handle um genauere Informationen abzufragen.
+
+Beispiel:
+
+>>>http://dbox/control/epg
+69530 21:30 45 4556718105 Planet RTL
+69531 20:00 15 4556783630 News on the Hour
 
 
 3. Die DBox herunterfahren
@@ -341,7 +355,7 @@ Beispiel:
 
 
 
-8. Streaminformationen abfragen
+8. Allgemeine Informationen abfragen
 Handler: http://dbox/control/info
 
 Parameter: streaminfo
@@ -360,6 +374,33 @@ Beispiel:
 4:3
 25
 joint stereo
+
+
+Parameter: version
+Rückgabe:
+
+Aktuelle cramf - Version. Es wird der Inhalt der Datei /.version zurückgegeben. 
+
+Beispiel:
+
+>>>http://dbox/control/info?version
+version: 1.1.27032002-21.8
+md5sum: f1d7d47578bb9040a82085182934ce0e
+Erstellt von alexW
+
+Parameter: settings
+Rückgabe: 
+
+Aktuelle Settings und DBox Typ
+
+Beispiel:
+
+>>>http://dbox/control/info?settings
+Boxtype Nokia
+videooutput RGB
+videoformat 4:3
+
+
 
  9. Aktuellen Kanal abfragen
 Handler: http://dbox/control/getonidsid
@@ -417,7 +458,7 @@ Beispiel:
 ...
 
 
-12 aktuelle cramfs Version auslesen
+12 aktuelle cramfs Version auslesen ( veraltet, bitte /control/info?version benutzen )
 Handler: http://dbox/control/version
 
 Parameter: 
