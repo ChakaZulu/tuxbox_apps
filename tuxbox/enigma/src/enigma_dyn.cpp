@@ -427,6 +427,55 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 	return result;
 }
 
+static eString tuneTransponder(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	int service_id = -1, dvb_namespace = -1, original_network_id = -1, transport_stream_id = -1, service_type = -1;
+	unsigned int optval = opt.find("=");
+	if (optval != eString::npos)
+		opt = opt.mid(optval + 1);
+	if (opt.length())
+		sscanf(opt.c_str(), "%x:%x:%x:%x:%x", &service_id, &dvb_namespace, &transport_stream_id, &original_network_id, &service_type);
+
+	eString result;
+
+	if ((service_id != -1) && (original_network_id != -1) && (transport_stream_id != -1) && (service_type != -1))
+	{
+		eServiceInterface *iface = eServiceInterface::getInstance();
+		if (!iface)
+			return "-1";
+		eServiceReferenceDVB *ref = new eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
+#ifndef DISABLE_FILE
+		if (eDVB::getInstance()->recorder && !ref->path)
+		{
+			int canHandleTwoScrambledServices = 0;
+			eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices", canHandleTwoScrambledServices);
+
+			if (!canHandleTwoScrambledServices && eDVB::getInstance()->recorder->scrambled)
+			{
+				delete ref;
+				return "-1";
+			}
+			if (!onSameTP(*ref,eDVB::getInstance()->recorder->recRef))
+			{
+				delete ref;
+				return "-1";
+			}
+		}
+#endif
+		if ( playService(*ref) )
+			result = "0";
+		else
+			result = "-1";
+		delete ref;
+	}
+	else
+		result = "-1";
+
+	return result;
+}
+
 static eString admin(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -896,9 +945,11 @@ static eString getLeftNavi(eString mode, eString path)
 #ifndef DISABLE_FILE
 		result += "<br>";
 		result += button(110, "Recover Movies", LEFTNAVICOLOR, "javascript:recoverMovies()");
+#endif
+		result += "<br>";
+		result += button(110, "Logging", LEFTNAVICOLOR, "javascript:logging()");
 		result += "<br>";
 		result += button(110, "Satfinder", LEFTNAVICOLOR, "?mode=controlSatFinder");
-#endif
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
 			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		{
@@ -2346,7 +2397,90 @@ eString getConfigSettings(void)
 
 static eString getControlSatFinder(void)
 {
+	eTransponder *tp;
+	eString bouquets, bouquetrefs; // satellites
+	eString channels, channelrefs; // transponders
+	eString chs, chrefs;
+	eString transponder;
+	int currentSatellite = -1, currentTransponder = -1;
+	int j, k;
+
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi && sapi->transponder)
+		tp = sapi->transponder;
+
+	k = 0;
+	for (std::list<eLNB>::iterator it2(eTransponderList::getInstance()->getLNBs().begin()); it2 != eTransponderList::getInstance()->getLNBs().end(); it2++)
+	{
+		// first go thru all satellites...
+		for (ePtrList<eSatellite>::iterator s (it2->getSatelliteList().begin()); s != it2->getSatelliteList().end(); s++)
+		{
+			bouquets += "\"" + s->getDescription() + "\", ";
+			bouquetrefs += "\"" + s->getDescription() + "\", ";
+			if (tp && s->getOrbitalPosition() == tp->satellite.orbital_position )
+			{
+				//this is the current satellite...
+				currentSatellite = k;
+			}
+			// enter sat into satellite list result1...
+			channels += "channels[";
+			channels += eString().sprintf("%d", k);
+			channels += "] = new Array(";
+			channelrefs += "channelRefs[";
+			channelrefs += eString().sprintf("%d", k);
+			channelrefs += "] = new Array(";
+			chs = "";
+			chrefs = "";
+
+			j = 0;
+
+			// then go thru all transponders...
+			for (std::list<tpPacket>::iterator it3(eTransponderList::getInstance()->getNetworks().begin()); it3 != eTransponderList::getInstance()->getNetworks().end(); it3++)
+			{
+				if (it3->orbital_position == s->getOrbitalPosition())
+				{
+					for (std::list<eTransponder>::iterator it(it3->possibleTransponders.begin()); it != it3->possibleTransponders.end(); it++)
+					{
+						if (tp && *tp == *it)
+						{
+							// this is the current transponder
+							currentTransponder = j;
+						}
+						transponder = eString().sprintf("%d / %d / %c", it->satellite.frequency / 1000, it->satellite.symbol_rate / 1000, it->satellite.polarisation ? 'V' : 'H');
+						chs += "\"" + transponder + "\", ";
+						chrefs += "\"" + transponder + "\", ";
+					}
+				}
+				j++;
+			}
+
+			channels += chs.left(chs.length() - 2);
+			channels += ");";
+			channelrefs += chrefs.left(chrefs.length() - 2);
+			channelrefs += ");";
+			k++;
+		}
+	}
+	bouquetrefs = bouquetrefs.left(bouquetrefs.length() - 2);
+	bouquets = bouquets.left(bouquets.length() - 2);
+
+	eString zapdata = readFile(HTDOCS_DIR + "zapdata.js");
+	zapdata.strReplace("#BOUQUETS#", bouquets);
+	zapdata.strReplace("#BOUQUETREFS#", bouquetrefs);
+	zapdata.strReplace("#CHANNELS#", channels);
+	zapdata.strReplace("#CHANNELREFS#", channelrefs);
+	zapdata.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentSatellite));
+	zapdata.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentTransponder));
+	zapdata.strReplace("#AUTOBOUQUETCHANGE#", eString().sprintf("%d", 0)); // not used on client
+	zapdata.strReplace("#ZAPMODE#", eString().sprintf("%d", -1));
+	zapdata.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", 0)); // not used on client
+
 	eString result = readFile(TEMPLATE_DIR + "sat.tmp");
+	result.strReplace("#ZAPDATA#", zapdata);
+	if (screenWidth > 1024)
+		result.strReplace("#SELSIZE#", "30");
+	else
+		result.strReplace("#SELSIZE#", "15");
 
 	return result;
 }
@@ -4717,7 +4851,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	else
 		result = "";
 
-	if (mode == "zap")
+	if (mode == "zap" || mode == "controlSatFinder")
 		result.strReplace("#ONLOAD#", "onLoad=init()");
 	else
 		result.strReplace("#ONLOAD#", "");
@@ -4768,6 +4902,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus, true); //always pw protected for dreamtv
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/tuneTransponder", tuneTransponder, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio, lockWeb);
