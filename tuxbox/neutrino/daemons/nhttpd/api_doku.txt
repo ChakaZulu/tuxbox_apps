@@ -933,7 +933,6 @@ a/sy  = Jahr
 a/sh  = Stunde
 a/smi = Minute
 
-mode ist "R" fuer Radiokanaele und "T" fuer TV-Kanaele.
 channel_id ist die Kennung des Senders (als Hexadezimalzahl ohne '0x'-Prefix).
 msg ist die Message die bei REMIND gesendet wird
 
@@ -947,5 +946,5 @@ Rueckgabe-Format: ok / error
 
 Beispiel:
 
->>>http://dbox/control/timer?action=new&alarm=1034309576&stop=1034284376&announce=1034309576&type=1&rep=1&mode=T&channel_id=16dcb
+>>>http://dbox/control/timer?action=new&alarm=1034309576&stop=1034284376&announce=1034309576&type=1&rep=1&channel_id=16dcb
 ok
