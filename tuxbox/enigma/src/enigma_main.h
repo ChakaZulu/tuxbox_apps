@@ -376,8 +376,8 @@ private:
 	eString eplPath; // where we store Favlists? user changeable...
 
 	ePlaylist *addUserBouquet( ePlaylist*, const eString&, const eString&, eServiceReference &, bool );
-	
-  int wasSleeping;
+
+  	int wasSleeping;
 	int playlistmode; // curlist is a list controlled by the user (not just a history).
 	int entered_playlistmode;
 
@@ -406,6 +406,7 @@ public:
 	void repeatSkip(int dir);
 	void stopSkip(int dir);
 	enum { skipForward, skipReverse };
+	int isRecording() {return state & stateRecording;}
 #endif
 private:
 	void nextService(int add=0);
