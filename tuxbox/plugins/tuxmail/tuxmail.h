@@ -2,11 +2,17 @@
  *                        <<< TuxMail - Mail Plugin >>>
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
- * $LOG$
+ * $Log: tuxmail.h,v $
+ * Revision 1.2  2003/05/16 15:07:23  lazyt
+ * skip unused accounts via "plus/minus", add mailaddress to spamlist via "blue"
+ *
+ * Revision 1.1  2003/04/21 09:24:52  lazyt
+ * add tuxmail, todo: sync (filelocking?) between daemon and plugin
  ******************************************************************************/
 
 #include "config.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
@@ -31,6 +37,8 @@
 
 #define SCKFILE "/tmp/tuxmaild.sock"
 #define RUNFILE "/var/etc/.tuxmaild"
+#define CFGPATH "/var/tuxbox/config/tuxmail/"
+#define SPMFILE "spamlist"
 
 //rc codes
 
@@ -124,6 +132,7 @@ struct mi
 
 struct
 {
+	int inactive;
 	int mails;
 	int mark_red;	/* del all */
 	int mark_green;	/* del new */
@@ -142,13 +151,13 @@ int fb, rc, lcd;
 
 //daemon commands
 
-enum {GET_STATUS, SET_STATUS};
+enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST};
 
 //framebuffer stuff
 
 enum {FILL, GRID};
 enum {TRANSP, WHITE, BLUE0, BLUE1, BLUE2, ORANGE, GREEN, YELLOW, RED};
-enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF};
+enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, ADD2SPAM, SPAMFAIL};
 
 unsigned char *lfb = 0, *lbb = 0;
 
@@ -163,6 +172,12 @@ struct fb_cmap colormap = {1, 8, rd, gn, bl, tr};
 
 int startx, starty, sx, ex, sy, ey;
 char online;
+
+#if HAVE_DVB_API_VERSION == 3
+
+struct input_event ev;
+
+#endif
 
 unsigned short rccode;
 

@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.4  2003/05/16 15:07:23  lazyt
+ * skip unused accounts via "plus/minus", add mailaddress to spamlist via "blue"
+ *
  * Revision 1.3  2003/05/10 08:24:35  lazyt
  * add simple spamfilter, show account details in message/popup
  *
@@ -78,7 +81,7 @@ int accounts;
 int sock;
 int messages, deleted_messages;
 int stringindex;
-int use_spamfilter = 0, spam_entries = 0, spam_detected;
+int use_spamfilter, spam_entries, spam_detected;
 char uid[128];
 char header[1024];
 char timeinfo[22];

@@ -2,7 +2,12 @@
  *                        <<< TuxMail - Mail Plugin >>>
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
- * $LOG$
+ * $Log: tuxmail.c,v $
+ * Revision 1.2  2003/05/16 15:07:23  lazyt
+ * skip unused accounts via "plus/minus", add mailaddress to spamlist via "blue"
+ *
+ * Revision 1.1  2003/04/21 09:24:52  lazyt
+ * add tuxmail, todo: sync (filelocking?) between daemon and plugin
  ******************************************************************************/
 
 #include "tuxmail.h"
@@ -46,6 +51,9 @@ int ControlDaemon(int command)
 
 			case SET_STATUS:	send(fd_sock, "S", 1, 0);
 						send(fd_sock, &online, 1, 0);
+						break;
+
+			case RELOAD_SPAMLIST:	send(fd_sock, "L", 1, 0);
 		}
 
 		close(fd_sock);
@@ -61,8 +69,6 @@ int ControlDaemon(int command)
 
 int GetRCCode()
 {
-	struct input_event ev;
-
 	//get code
 
 		if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
@@ -167,7 +173,7 @@ int GetRCCode()
 
 	//get code
 
-		read(rc, &rccode, 2);
+		read(rc, &rccode, sizeof(rccode));
 
 		if(rccode != LastKey)
 		{
@@ -257,15 +263,9 @@ int GetRCCode()
 						case RC1_STANDBY:	rccode = RC_STANDBY;
 					}
 				}
-				else
-				{
-					rccode &= 0x003F;
-				}
+				else rccode &= 0x003F;
 		}
-		else
-		{
-			rccode = -1;
-		}
+		else rccode = -1;
 
 		return rccode;
 }
@@ -394,10 +394,7 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 					{
 						if(pitch*8 + 7-bit >= sbit->width) break; /* render needed bits only */
 
-						if((sbit->buffer[row * sbit->pitch + pitch]) & 1<<bit)
-						{
-							*(lbb + startx + sx + sbit->left + kerning.x + x + var_screeninfo.xres*(starty + sy - sbit->top + y)) = color;
-						}
+						if((sbit->buffer[row * sbit->pitch + pitch]) & 1<<bit) *(lbb + startx + sx + sbit->left + kerning.x + x + var_screeninfo.xres*(starty + sy - sbit->top + y)) = color;
 
 						x++;
 					}
@@ -585,6 +582,12 @@ void ShowMessage(int message)
 					break;
 
 			case BOOTOFF:	RenderString("Autostart deaktiviert.", 157, 265, 306, CENTER, BIG, WHITE);
+					break;
+
+			case ADD2SPAM:	RenderString("Spamliste wurde erweitert.", 157, 265, 306, CENTER, BIG, WHITE);
+					break;
+
+			case SPAMFAIL:	RenderString("Update fehlgeschlagen!", 157, 265, 306, CENTER, BIG, WHITE);
 		}
 
 		RenderBox(285, 286, 334, 310, FILL, BLUE2);
@@ -682,6 +685,7 @@ void FillDB(int account)
 			memcpy(maildb[account].name, "keine Info verfügbar", 20);
 			memcpy(maildb[account].status, "000/000", 7);
 			maildb[account].mails = 0;
+			maildb[account].inactive = 1;
 			return;
 		}
 
@@ -756,12 +760,61 @@ void UpdateDB(int account)
 }
 
 /******************************************************************************
+ * Add2SpamList (0=fail, 1=done)
+ ******************************************************************************/
+
+int Add2SpamList(int account, int mailindex)
+{
+	FILE *fd_spam;
+	char *ptr1, *ptr2;
+	char mailaddress[256];
+
+	//open or create spamlist
+
+		if(!(fd_spam = fopen(CFGPATH SPMFILE, "a")))
+		{
+			printf("TuxMail <could not create Spamlist: %s>\n", strerror(errno));
+			return 0;
+		}
+
+	//find address
+
+		if((ptr1 = strchr(maildb[account].mailinfo[mailindex].from, '@')))
+		{
+			while(*(ptr1 - 1) != '\0' && *(ptr1 - 1) != '<') ptr1--;
+			ptr2 = ptr1;
+			while(*(ptr2) != '\0' && *(ptr2) != '>') ptr2++;
+
+			strncpy(mailaddress, ptr1, ptr2 - ptr1);
+			mailaddress[ptr2 - ptr1] = '\0';
+		}
+		else
+		{
+			printf("TuxMail <Mailaddress \"%s\" invalid, not added to Spamlist>\n", maildb[account].mailinfo[mailindex].from);
+
+			fclose(fd_spam);
+
+			return 0;
+		}
+
+	//add address to spamlist
+
+		printf("TuxMail <Mailaddress \"%s\" added to Spamlist>\n", mailaddress);
+
+		fprintf(fd_spam, "%s\n", mailaddress);
+
+		fclose(fd_spam);
+
+		return 1;
+}
+
+/******************************************************************************
  * plugin_exec
  ******************************************************************************/
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.1 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.2 $", versioninfo[12];
 	int loop, account, mailindex;
 	FILE *fd_run;
 
@@ -883,7 +936,17 @@ void plugin_exec(PluginParam *par)
 
 		for(loop = 0; loop < 10; loop++) FillDB(loop);
 
-	//set rc to blocking mode
+	//remove last key & set rc to blocking mode
+
+#if HAVE_DVB_API_VERSION == 3
+
+		read(rc, &ev, sizeof(ev));
+
+#else
+
+		read(rc, &rccode, sizeof(rccode));
+
+#endif
 
 		fcntl(rc, F_SETFL, fcntl(rc, F_GETFL) &~ O_NONBLOCK);
 
@@ -947,15 +1010,28 @@ void plugin_exec(PluginParam *par)
 						mailindex = 0;
 						break;
 
-				case RC_MINUS:	if(account > 0) account--;
-						else account = 9;
-						mailindex = 0;
+				case RC_MINUS:	mailindex = 0;
+
+						for(loop = 0; loop < 10; loop++)
+						{
+							if(account > 0) account--;
+							else account = 9;
+
+							if(!maildb[account].inactive) break;
+						}
 						break;
 
-				case RC_PLUS:	if(account < 9) account++;
-						else account = 0;
-						mailindex = 0;
+				case RC_PLUS:	mailindex = 0;
+
+						for(loop = 0; loop < 10; loop++)
+						{
+							if(account < 9) account++;
+							else account = 0;
+
+							if(!maildb[account].inactive) break;
+						}
 						break;
+
 
 				case RC_UP:	if(mailindex > 0) mailindex--;
 						break;
@@ -979,10 +1055,7 @@ void plugin_exec(PluginParam *par)
 
 				case RC_OK:	if(maildb[account].mails)
 						{
-							if(maildb[account].mailinfo[mailindex].type[0] != 'D')
-							{
-								maildb[account].mailinfo[mailindex].type[0] = 'D';
-							}
+							if(maildb[account].mailinfo[mailindex].type[0] != 'D') maildb[account].mailinfo[mailindex].type[0] = 'D';
 							else
 							{
 								maildb[account].mailinfo[mailindex].type[0] = maildb[account].mailinfo[mailindex].save[0];
@@ -1054,6 +1127,15 @@ void plugin_exec(PluginParam *par)
 								if(maildb[account].mailinfo[loop].save[0] == 'O') maildb[account].mailinfo[loop].type[0] = 'O';
 							}
 						}
+						break;
+
+				case RC_BLUE:	if(Add2SpamList(account, mailindex))
+						{
+							maildb[account].mailinfo[mailindex].type[0] = 'D';
+							ControlDaemon(RELOAD_SPAMLIST);
+							ShowMessage(ADD2SPAM);
+						}
+						else ShowMessage(SPAMFAIL);
 						break;
 
 				case RC_MUTE:	if(!ControlDaemon(GET_STATUS))

@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.4  2003/05/16 15:07:23  lazyt
+ * skip unused accounts via "plus/minus", add mailaddress to spamlist via "blue"
+ *
  * Revision 1.3  2003/05/10 08:24:35  lazyt
  * add simple spamfilter, show account details in message/popup
  *
@@ -14,70 +17,6 @@
  ******************************************************************************/
 
 #include "tuxmaild.h"
-
-/******************************************************************************
- * InterfaceThread
- ******************************************************************************/
-
-void *InterfaceThread(void *arg)
-{
-	int fd_sock, fd_conn;
-	struct sockaddr_un srvaddr;
-	socklen_t addrlen;
-	char command;
-
-	//setup connection
-
-		unlink(SCKFILE);
-
-		srvaddr.sun_family = AF_UNIX;
-		strcpy(srvaddr.sun_path, SCKFILE);
-		addrlen = sizeof(srvaddr.sun_family) + strlen(srvaddr.sun_path);
-
-		if((fd_sock = socket(PF_UNIX, SOCK_STREAM, 0)) == -1)
-		{
-			printf("TuxMailD <Socketerror: socket failed>\n");
-			return 0;
-		}
-
-		if(bind(fd_sock, (struct sockaddr*)&srvaddr, addrlen) == -1)
-		{
-			printf("Tux>MailD <Socketerror: bind failed>\n");
-			return 0;
-		}
-
-		if(listen(fd_sock, 0) == -1)
-		{
-			printf("TuxMailD <Socketerror: listen failed>\n");
-			return 0;
-		}
-
-	//communication loop
-
-		while(1)
-		{
-			if((fd_conn = accept(fd_sock, (struct sockaddr*)&srvaddr, &addrlen)) == -1)
-			{
-				printf("TuxMailD <Socketerror: accept failed>\n");
-				continue;
-			}
-
-			recv(fd_conn, &command, 1, 0);
-
-			switch(command)
-			{
-				case 'G':	send(fd_conn, &online, 1, 0);
-						break;
-
-				case 'S':	recv(fd_conn, &online, 1, 0);
-						kill(pid, SIGUSR1);
-			}
-
-			close(fd_conn);
-		}
-
-	return 0;
-}
 
 /******************************************************************************
  * ReadConf (0=fail, 1=done)
@@ -301,6 +240,8 @@ void ReadSpamList()
 	FILE *fd_spam;
 	char line_buffer[64];
 
+	spam_entries = use_spamfilter = 0;
+
 	if(!(fd_spam = fopen(CFGPATH SPMFILE, "r")))
 	{
 		printf("TuxMailD <no Spamlist found, Filter disabled>\n");
@@ -308,6 +249,8 @@ void ReadSpamList()
 	}
 	else
 	{
+		memset(spamfilter, 0, sizeof(spamfilter));
+
 		while(fgets(line_buffer, sizeof(line_buffer), fd_spam) && spam_entries < 100)
 		{
 			if(sscanf(line_buffer, "%s", spamfilter[spam_entries].address) == 1) spam_entries++;
@@ -319,9 +262,76 @@ void ReadSpamList()
 			printf("TuxMailD <Spamlist contains %d Entries, Filter enabled>\n", spam_entries);
 		}
 		else printf("TuxMailD <empty Spamlist, Filter disabled>\n");
-	}
 
-	fclose(fd_spam);
+		fclose(fd_spam);
+	}
+}
+
+/******************************************************************************
+ * InterfaceThread
+ ******************************************************************************/
+
+void *InterfaceThread(void *arg)
+{
+	int fd_sock, fd_conn;
+	struct sockaddr_un srvaddr;
+	socklen_t addrlen;
+	char command;
+
+	//setup connection
+
+		unlink(SCKFILE);
+
+		srvaddr.sun_family = AF_UNIX;
+		strcpy(srvaddr.sun_path, SCKFILE);
+		addrlen = sizeof(srvaddr.sun_family) + strlen(srvaddr.sun_path);
+
+		if((fd_sock = socket(PF_UNIX, SOCK_STREAM, 0)) == -1)
+		{
+			printf("TuxMailD <Socketerror: socket failed>\n");
+			return 0;
+		}
+
+		if(bind(fd_sock, (struct sockaddr*)&srvaddr, addrlen) == -1)
+		{
+			printf("Tux>MailD <Socketerror: bind failed>\n");
+			return 0;
+		}
+
+		if(listen(fd_sock, 0) == -1)
+		{
+			printf("TuxMailD <Socketerror: listen failed>\n");
+			return 0;
+		}
+
+	//communication loop
+
+		while(1)
+		{
+			if((fd_conn = accept(fd_sock, (struct sockaddr*)&srvaddr, &addrlen)) == -1)
+			{
+				printf("TuxMailD <Socketerror: accept failed>\n");
+				continue;
+			}
+
+			recv(fd_conn, &command, 1, 0);
+
+			switch(command)
+			{
+				case 'G':	send(fd_conn, &online, 1, 0);
+						break;
+
+				case 'S':	recv(fd_conn, &online, 1, 0);
+						kill(pid, SIGUSR1);
+						break;
+
+				case 'L':	ReadSpamList();
+			}
+
+			close(fd_conn);
+		}
+
+	return 0;
 }
 
 /******************************************************************************
@@ -915,6 +925,7 @@ void SigHandler(int signal)
 
 		case SIGHUP:	printf("TuxMailD <update>\n");
 				if(!ReadConf()) intervall = 0;
+				ReadSpamList();
 				break;
 
 		case SIGUSR1:	printf("TuxMailD <wakeup>\n");
@@ -927,7 +938,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.3 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.4 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
