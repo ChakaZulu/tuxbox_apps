@@ -44,16 +44,18 @@ eDVBCI::eDVBCI():pollTimer(this),messages(this, 1)
 		eDebug("[DVBCI] error opening /dev/ci");
 		state=stateError;
 	}
-	
-	ci=new eSocketNotifier(this, fd, eSocketNotifier::Read, 0);
-	CONNECT(ci->activated, eDVBCI::dataAvailable);
+  else
+  {
+  	ci=new eSocketNotifier(this, fd, eSocketNotifier::Read, 0);
+  	CONNECT(ci->activated, eDVBCI::dataAvailable);
+  }
+  
 	CONNECT(pollTimer.timeout,eDVBCI::poll);
 	CONNECT(messages.recv_msg, eDVBCI::gotMessage);
 	
 	memset(appName,0,sizeof(appName));
 
-	if (state != stateError)
-		run();
+	run();
 }
 
 void eDVBCI::thread()
@@ -553,7 +555,7 @@ void eDVBCI::dataAvailable(int what)
 	unsigned char buffer[256];
 	int size;
 
-	pollTimer.stop();
+  pollTimer.stop();
 
 	::ioctl(fd,CI_GET_STATUS,&present);	
 
