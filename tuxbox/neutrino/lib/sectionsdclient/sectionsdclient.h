@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.25 2003/06/18 12:19:22 alexw Exp $
+  $Id: sectionsdclient.h,v 1.26 2003/10/03 17:59:21 thegoodguy Exp $
 
   License: GPL
 
@@ -173,7 +173,7 @@ class CSectionsdClient : private CBasicClient
 	/*
 	  ein beliebiges Event anmelden
 	*/
-	void registerEvent(const unsigned int eventID, const unsigned int clientID, const std::string udsName);
+	void registerEvent(const unsigned int eventID, const unsigned int clientID, const char * const udsName);
 
 	/*
 	  ein beliebiges Event abmelden

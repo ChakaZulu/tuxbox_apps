@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.37 2003/01/26 15:07:11 zwen Exp $
+	$Id: timerdclient.h,v 1.38 2003/10/03 17:59:21 thegoodguy Exp $
 
 	License: GPL
 
@@ -58,7 +58,7 @@ class CTimerdClient:private CBasicClient
 			EVT_REMIND
 		};
 
-		void registerEvent(unsigned int eventID, unsigned int clientID, std::string udsName);
+		void registerEvent(unsigned int eventID, unsigned int clientID, const char * const udsName);
 		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
 
 		bool isTimerdAvailable();			// check if timerd is running
