@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.102 2002/03/24 09:12:01 happydude Exp $
+  $Id: zapit.cpp,v 1.103 2002/03/24 14:00:42 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -1801,6 +1801,8 @@ void start_scan(unsigned short do_diseqc)
 
 	if (video_fd != -1)
 	{
+		/* blank screen */
+		ioctl(video_fd, VIDEO_STOP, 1);
 		close(video_fd);
 		video_fd = -1;
 	}
@@ -2796,7 +2798,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.102 2002/03/24 09:12:01 happydude Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.103 2002/03/24 14:00:42 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
