@@ -18,6 +18,7 @@
 #include <lib/gui/enumber.h>
 #include <lib/gui/combobox.h>
 #include <lib/gui/echeckbox.h>
+#include <lib/system/econfig.h>
 
 #define TIMER_LOGFILE CONFIGDIR "/enigma/timer.log"
 
