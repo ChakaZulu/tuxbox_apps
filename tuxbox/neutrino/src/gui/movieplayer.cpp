@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.67 2004/02/05 01:08:39 gagga Exp $
+  $Id: movieplayer.cpp,v 1.68 2004/02/05 01:13:25 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -94,7 +94,7 @@
 
 #define MOVIEPLAYER_ConnectLineBox_Width	15
 
-#define RINGBUFFERSIZE 348*188*3
+#define RINGBUFFERSIZE 348*188*10
 #define MAXREADSIZE 348*188
 #define MINREADSIZE 348*188
 
@@ -120,40 +120,6 @@ size_t
 CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 {
 	return size * nmemb;
-}
-
-//------------------------------------------------------------------------
-
-/* 
-  -- get bits out of buffer
-  -- (getting more than 24 bits is not save)
-  -- return: value
-*/
-
-unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
-
-{
- u_char *b;
- unsigned long  v;
- unsigned long mask;
- unsigned long tmp_long;
-
- b = &buf[byte_offset + (startbit / 8)];
- startbit %= 8;
-
- tmp_long = (unsigned long)( ((*b)<<24) + (*(b+1)<<16) +
-		 (*(b+2)<<8) + *(b+3) );
-
- startbit = 32 - startbit - bitlen;
-
- tmp_long = tmp_long >> startbit;
-
- // ja, das ULL muss so sein (fuer bitlen == 32 z.b.)...
- mask = (1ULL << bitlen) - 1;
-
- v = tmp_long & mask;
-
- return v;
 }
 
 //------------------------------------------------------------------------
@@ -1425,7 +1391,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.67 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.68 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1590,7 +1556,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.tshelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.67 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.68 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
         else if (msg == CRCInput::RC_left)
