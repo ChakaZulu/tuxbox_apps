@@ -386,8 +386,7 @@ void eDVBSettings::loadServices()
 			if (line[1]=='t')
 			{
 				int centre_frequency, code_rate_hp, code_rate_lp, bandwidth, constellation, guard_interval, hierarchy_information, transmission_mode, inversion=INVERSION_OFF;
-				sscanf(line+2, "%d:%d:%d:%d:%d:%d:%d:%d:%d:%d", 
-					&centre_frequency, &code_rate_hp, &code_rate_lp, &bandwidth, &constellation, &guard_interval, &hierarchy_information, &transmission_mode, &inversion );
+				sscanf(line+2, "%d:%d:%d:%d:%d:%d:%d:%d:%d:%d", &centre_frequency, &code_rate_hp, &code_rate_lp, &bandwidth, &constellation, &guard_interval, &hierarchy_information, &transmission_mode, &inversion, &onlyFree );
 				t.setTerrestrial(centre_frequency, bandwidth, constellation, hierarchy_information, code_rate_hp, code_rate_lp, guard_interval, transmission_mode, inversion);
 			}
 			if ( onlyFree )
