@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.28  2003/01/05 19:52:47  TheDOC
+forgot include
+
 Revision 1.27  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -98,13 +101,8 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <dbox/info.h>
 #include <string>
 #include <stdio.h>
-
-#include <dbox/avia_gt_vbi.h>
-#include <dbox/fp.h>
-//#include <dbox/event.h>
 
 #include "devices.h"
 #include "sdt.h"

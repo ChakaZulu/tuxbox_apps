@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pig.cpp,v $
+Revision 1.6  2003/01/05 19:52:47  TheDOC
+forgot include
+
 Revision 1.5  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -32,6 +35,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 */
 #include "pig.h"
+#include "devices.h"
 
 #ifdef HAVE_LINUX_DVB_VERSION_H
 pig::pig()
