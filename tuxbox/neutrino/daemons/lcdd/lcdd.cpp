@@ -23,8 +23,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "lcddisplay.h"
-#include "fontrenderer.h"
+#include <liblcddisplay.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
