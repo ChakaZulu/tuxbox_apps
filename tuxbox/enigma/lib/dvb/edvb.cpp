@@ -1032,7 +1032,7 @@ std::string eDVB::getInfo(const char *info)
 {
 	FILE *f=fopen("/proc/bus/dbox", "rt");
 	if (!f)
-		return 0;
+		return "";
 	std::string result;
 	while (1)
 	{
