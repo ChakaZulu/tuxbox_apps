@@ -143,7 +143,9 @@ void* CEventWatchDog::watchdogThread (void *arg)
 						{
     		           		//printf("(event.event == EVENT_ARATIO_CHANGE)\n");
 							int newVideoMode = WatchDog->getVideoMode();
-							if ( (newVideoMode != WatchDog->VideoMode) && (newVideoMode != -1) )
+							if ((newVideoMode           != WatchDog->VideoMode) &&
+							    (newVideoMode           != -1)                  &&
+							    (WatchDog->getVCRMode() ==  0))
 							{
 								pthread_mutex_lock( &WatchDog->wd_mutex );
 								WatchDog->VideoMode = (uint)newVideoMode;
@@ -158,8 +160,22 @@ void* CEventWatchDog::watchdogThread (void *arg)
 							if ( (newVCRMode != WatchDog->VCRMode) )
 							{
 								pthread_mutex_lock( &WatchDog->wd_mutex );
+
 								WatchDog->VCRMode = newVCRMode;
 								WatchDog->vcrModeChanged( newVCRMode );
+
+								if (newVCRMode > 0) {
+									// Watching "VCR", adjust format accordingly
+									WatchDog->VideoMode = newVCRMode + 1;
+									WatchDog->videoModeChanged(newVCRMode + 1);
+								} else {
+									// going back to DVB, adjust format
+									sleep(2);
+									int newVideoMode = WatchDog->getVideoMode();
+									WatchDog->VideoMode = newVideoMode;
+									WatchDog->videoModeChanged(newVideoMode);
+								}
+
 								pthread_mutex_unlock( &WatchDog->wd_mutex );
 							}
 						}
