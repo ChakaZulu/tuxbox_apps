@@ -79,6 +79,7 @@ class CAPIDChangeExec : public CMenuTarget
 		int exec(CMenuTarget* parent, string actionKey);
 };
 
+void showSubchan(string subChannelName);
 class CNVODChangeExec : public CMenuTarget
 {
 	public:

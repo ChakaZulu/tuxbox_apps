@@ -148,13 +148,40 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 	return menu_return::RETURN_EXIT;
 }
 
+
+void showSubchan(string subChannelName)
+{
+	if(subChannelName!="")
+	{
+		int dx = g_Fonts->infobar_info->getRenderWidth(subChannelName.c_str()) + 20;
+		int dy = 30;
+		int x = g_settings.screen_EndX - dx -10;
+		int y = g_settings.screen_StartY + 10;
+		printf("before paint\n");
+		g_FrameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
+		g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, subChannelName.c_str(), COL_MENUCONTENT);
+		uint msg; uint data;
+		g_RCInput->getMsg( &msg, &data, 25 );
+		g_RCInput->pushbackMsg( msg, data );
+		g_FrameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
+	}
+}
+
 int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
 	//    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
 	unsigned sel= atoi(actionKey.c_str());
-	g_RemoteControl->setSubChannel(sel);
+	string sc = g_RemoteControl->setSubChannel(sel);
 
-	g_RCInput->pushbackMsg( CRCInput::RC_help, 0 );
+	if(sc!="")
+	{	//wenn subchan einen namen hat kurzinfo oben malen
+		parent->hide();
+		showSubchan(sc);
+	}
+	else
+	{	//wenn nicht ganze infobar
+		g_RCInput->pushbackMsg( CRCInput::RC_help, 0 );
+	}
 
 	return menu_return::RETURN_EXIT;
 }
