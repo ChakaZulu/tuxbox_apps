@@ -35,7 +35,7 @@
  * - PS Playback does not work on Nokia Cable as the performance is too bad; I left it in because it might work on other boxes; It will be replaced by a server-side ps2ts conversion anyway
  *
 */
- 
+
 
 /* TODOs / Release Plan:
 
@@ -58,7 +58,7 @@
 #undef _FILE_OFFSET_BITS
 #include <global.h>
 #include <neutrino.h>
-#include <zapit/debug.h>
+#include <system/debug.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
@@ -99,7 +99,7 @@
 
 #define AVIA_AV_STREAM_TYPE_0           0x00
 #define AVIA_AV_STREAM_TYPE_SPTS        0x01 
-#define AVIA_AV_STREAM_TYPE_PES         0x02 
+#define AVIA_AV_STREAM_TYPE_PES         0x02
 #define AVIA_AV_STREAM_TYPE_ES          0x03 
 
 #define ConnectLineBox_Width	15
@@ -124,6 +124,11 @@ CMoviePlayerGui::CMoviePlayerGui()
       		Path = g_settings.network_nfs_local_dir[0];
 	else
       		Path = "/";
+/*
+        if ((debugfile = fopen("/tmp/movieplayer.log","w")) == NULL){
+			fprintf(stdout,"Could not open movieplayer log file");
+		}
+*/
 }
 
 //------------------------------------------------------------------------
@@ -251,7 +256,8 @@ int CMoviePlayerGui::show()
 		if( tsfilename != NULL )
 		{
 		unsigned char buf[384*188];
-		unsigned short pida, pidv;
+		unsigned short pida=0;
+		unsigned short pidv=0;
 		int dmxa, dmxv, dvr, adec, vdec, ts;
 		struct dmx_pes_filter_params p;
 		ssize_t wr;
@@ -264,8 +270,18 @@ int CMoviePlayerGui::show()
 			//handle error
 		}
 		find_avpids(fd, &pidv, &pida);
-		INFO("pida: %i",pida);
-		INFO("pidv: %i",pidv);
+
+//		fprintf(debugfile, "movieplayer: found pida: 0x%04X\n",pida);
+//		fprintf(debugfile, "movieplayer: found pidv: 0x%04X\n",pidv);
+
+                fprintf(stdout, "movieplayer: found pida: 0x%04X\n",pida);
+		fprintf(stdout, "movieplayer: found pidv: 0x%04X\n",pidv);
+		
+		// close and re-open file
+		close(fd);
+                if ((fd = open(tsfilename,O_RDONLY|O_LARGEFILE)) < 0){
+			//handle error
+		}
 
 		if ((dmxa = open(DMX, O_RDWR)) < 0) {
 		 //handle error
@@ -399,8 +415,8 @@ int CMoviePlayerGui::show()
 			//handle error
 		}
 		//find_avpids(fd, &pidv, &pida);
-		INFO("preset pida: %i",pida);
-		INFO("preset pidv: %i",pidv);
+		fprintf(stdout,"movieplayer: preset pida: 0x%04X",pida);
+		fprintf(stdout,"movieplayer: preset pidv: 0x%04X",pidv);
 
 		if ((dmxa = open(DMX, O_RDWR)) < 0) {
 		 //handle error

@@ -38,6 +38,7 @@
 #include "driver/framebuffer.h"
 #include "gui/filebrowser.h"
 #include "gui/widget/menue.h"
+#include <stdio.h>
 
 #include <string>
 #include <vector>
@@ -99,6 +100,7 @@ class CMoviePlayerGui : public CMenuTarget
 	void hide();
 
 	CFileFilter videofilefilter;
+	FILE* debugfile;
 
  public:
 	CMoviePlayerGui();
