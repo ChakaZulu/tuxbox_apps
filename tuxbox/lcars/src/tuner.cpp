@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.5  2001/12/07 19:36:10  rasc
+fix to diseqc Step 2.
+
 Revision 1.4  2001/12/07 14:12:51  rasc
 minor fix.
 
@@ -58,18 +61,11 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 	int frontend;
 	struct secCmdSequence seq;
 	struct secCommand cmd;
-	struct secDiseqcCmd diseqc;
 	struct qpskParameters front;
 
 
 	if (setting.boxIsSat())
 	{
-
-		cmd.type=SEC_CMDTYPE_DISEQC;
-		cmd.u.diseqc=diseqc;
-		seq.miniCommand=SEC_MINI_NONE;
-		seq.numCommands=1;
-		seq.commands=&cmd;
 
 // $$$ rasc
 // Das Verhalten von Sectone (22KHz) sollte konfigurierbar sein.
@@ -118,13 +114,19 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 
 		// diseqc Group Byte  (dis: 0..3)
 		// 2001-12-06 rasc
-		diseqc.addr=0x10;
-		diseqc.cmd=0x38;
-		diseqc.numParams=1;
-		diseqc.params[0]=0xF0 
+
+		cmd.type=SEC_CMDTYPE_DISEQC;
+		cmd.u.diseqc.addr=0x10;
+		cmd.u.diseqc.cmd=0x38;
+		cmd.u.diseqc.numParams=1;
+		cmd.u.diseqc.params[0]=0xF0 
 				| ((dis*4) & 0x0F) 
 				| ((seq.voltage == SEC_VOLTAGE_18)     ? 2 : 0)
 				| ((seq.continuousTone == SEC_TONE_ON) ? 1 : 0);
+
+		seq.miniCommand=SEC_MINI_NONE;
+		seq.numCommands=1;
+		seq.commands=&cmd;
 
 
 
@@ -166,10 +168,10 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 // $$$ rasc: Debug
       printf (" Frequ: %ld   ifreq: %ld  Pol: %d  FEC: %d  Sym: %ld  dis: %d  (param: 0x%02x)\n",
 	   (long)frequ,(long)front.iFrequency,(int)polarization ,(int)fec,
-	   (long)symbol, (int)dis,(int)diseqc.params[0]);
+	   (long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
 
 	printf ("... Tuner-Lock Status: %ld\n",status);
-      long state1,state2;
+	long state1,state2;
 	ioctl(frontend, FE_READ_SNR, &state1); 
 	ioctl(frontend, FE_READ_SIGNAL_STRENGTH, &state2);    
 	printf ("... S/N: %ld  SigStrength: %ld \n",state1,state2);
