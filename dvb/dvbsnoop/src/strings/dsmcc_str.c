@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.25 2004/02/12 21:21:22 rasc Exp $
+$Id: dsmcc_str.c,v 1.26 2004/02/14 01:24:45 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.25 2004/02/12 21:21:22 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.26  2004/02/14 01:24:45  rasc
+DSM-CC started  (DSI/DII, DDB)
+
 Revision 1.25  2004/02/12 21:21:22  rasc
 MHP AIT descriptors
 some smaller changes
@@ -998,9 +1001,93 @@ char *dsmccStrMHP_storage_property (u_int id)
 
 
 
+/*
+  -- DSM-CC Adaptation Type
+  -- ISO/IEC 13816-6
+*/
+
+char *dsmccStr_adaptationType (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "reserved" },
+	{ 0x01, 0x01,   "DSM-CC Conditional Access adaptation format" },
+	{ 0x02, 0x02,   "DSM-CC User ID adaptation format" },
+	{ 0x03, 0x7F,   "reserved" },
+	{ 0x80, 0xFF,   "user defined" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
 
 
 
+
+/*
+  -- DSM-CC dsmcc Type
+  -- ISO/IEC 13816-6
+*/
+
+char *dsmccStr_dsmccType (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "reserved" },
+	{ 0x01, 0x01,   "User-to-Network configuration message" },
+	{ 0x02, 0x02,   "User-to-Network session message" },
+	{ 0x03, 0x03,   "Download message" },
+	{ 0x04, 0x04,   "SDB Channel Change Protocol message" },
+	{ 0x05, 0x05,   "User-to- Network pass-thru message" },
+	{ 0x06, 0x7F,   "reserved" },
+	{ 0x80, 0xFF,   "user defined" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+/*
+  -- DSM-CC Download Message ID
+  -- ISO/IEC 13816-6
+*/
+
+char *dsmccStr_messageID (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x1001, 0x1001,   "DownloadInfoRequest" },
+	{ 0x1002, 0x1002,   "DownloadInfoResponse, DownloadInfoIndication" },
+	{ 0x1003, 0x1003,   "DownloadDataBlock" },
+	{ 0x1004, 0x1004,   "DownloadDataRequest" },
+	{ 0x1005, 0x1005,   "DownloadCancel" },
+	{ 0x1006, 0x1006,   "DownloadServerInitiate" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  -- DSM-CC TransactionID originator
+  -- ISO/IEC 13816-6
+  -- TS 102 812  v1.2.1 B.2.7
+*/
+
+char *dsmccStr_transactionID_originator (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "assigned by the client" },
+	{ 0x01, 0x01,   "assigned by the server" },
+	{ 0x02, 0x02,   "assigned by the network" },
+	{ 0x03, 0x03,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
 
 
 

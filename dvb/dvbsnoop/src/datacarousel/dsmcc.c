@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc.c,v 1.6 2004/01/22 22:26:34 rasc Exp $
+$Id: dsmcc.c,v 1.7 2004/02/14 01:24:44 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsmcc.c,v 1.6 2004/01/22 22:26:34 rasc Exp $
 
 
 $Log: dsmcc.c,v $
+Revision 1.7  2004/02/14 01:24:44  rasc
+DSM-CC started  (DSI/DII, DDB)
+
 Revision 1.6  2004/01/22 22:26:34  rasc
 pes_pack_header
 section read timeout
@@ -51,6 +54,7 @@ dsmcc section tables
 
 #include "dvbsnoop.h"
 #include "dsmcc.h"
+#include "dsmcc_misc.h"
 #include "llc_snap.h"
 
 #include "descriptors/descriptor.h"
@@ -119,18 +123,26 @@ void decode_DSMCC_section (u_char *b, int len)
 
 	// dsmcc_userNetworkMessage()
 	// $$$ TODO
-	out_nl (1,"$$$ TODO...");
+	int x,l, mid, dtyp;
 	indent (+1);
-	printhexdump_buf (4, b, len1);
+	x = dsmcc_MessageHeader (4, b, len1, &l, &mid, &dtyp);
+	b += x;
+	len1 -= x;
+	out_nl (1,"$$$ TODO... len1=%d  y=%d",len1,l);
+	printhexdump_buf (4, b, l);
 	indent (-1);
 
  } else if (table_id == 0x3C) {
 
 	// dsmcc_downloadDataMessage()
 	// $$$ TODO
-	out_nl (1,"$$$ TODO...");
+	int x,l, mid, dtyp;
 	indent (+1);
-	printhexdump_buf (4, b, len1);
+	x = dsmcc_MessageHeader (4, b, len1, &l, &mid, &dtyp);
+	b += x;
+	len1 -= x;
+	out_nl (1,"$$$ TODO... len1=%d  y=%d",len1,l);
+	printhexdump_buf (4, b, l);
 	indent (-1);
 
  } else if (table_id == 0x3D) {
@@ -147,12 +159,9 @@ void decode_DSMCC_section (u_char *b, int len)
  b += len1;
 
 
- if (section_syntax_indicator) {
- 	outBit_Sx_NL (5,"CRC: ",	b,0,32);
- } else {
- 	outBit_Sx_NL (5,"Checksum: ",	b,0,32);
- }
 
+ outBit_Sx_NL (5, (section_syntax_indicator)
+		   ?"CRC: " :"Checksum: ",	b,0,32);
 }
 
 

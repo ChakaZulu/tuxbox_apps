@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.22 2004/02/12 21:21:22 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.23 2004/02/14 01:24:45 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_str.h,v 1.22 2004/02/12 21:21:22 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.23  2004/02/14 01:24:45  rasc
+DSM-CC started  (DSI/DII, DDB)
+
 Revision 1.22  2004/02/12 21:21:22  rasc
 MHP AIT descriptors
 some smaller changes
@@ -147,6 +150,12 @@ char *dsmccStrMHP_visibility_state (u_int id);
 char *dsmccStrMHP_protocol_id (u_int id);
 char *dsmccStrMHP_storage_property (u_int id);
 
+
+
+char *dsmccStr_adaptationType (u_int id);
+char *dsmccStr_dsmccType (u_int id);
+char *dsmccStr_messageID (u_int id);
+char *dsmccStr_transactionID_originator (u_int id);
 
 
 #endif
