@@ -19,7 +19,7 @@ mainmenu.audio Ton
 mainmenu.video Video
 mainmenu.network Netzwerk
 mainmenu.colors Farben/Themes
-mainmenu.keybinding Tastenbelegung
+mainmenu.keybinding Tasten-Einstellungen
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache
@@ -39,12 +39,15 @@ videomenu.videoformat_169 16:9
 
 networkmenu.head Netzwerk Einstellungen
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen
-networkmenu.setuponstartup Beim Starten Netzkerk setzen
+networkmenu.setuponstartup Beim Starten Netzwerk setzen
 networkmenu.ipaddress IP-Adresse
 networkmenu.netmask Netzmaske
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver
+
+ipsetup.hint_1 Benutzen Sie "0"-"9", Rot ist " ", Grün "."
+ipsetup.hint_2 oder Up/Down, OK speichert, Home bricht ab
 
 colormenu.head Farb-Einstellungen
 colormenu.statusbar Statusbalken
@@ -69,6 +72,11 @@ colormenusetup.menucontent_selected Fensterinhalt selektiert
 colorstatusbar.head Statusbalken-Farben
 colorstatusbar.text Statusbalken
 
+repeatblocker.hint_1 Mindestzeit (in ms) zwischen 2 Tastendrücken
+repeatblocker.hint_2 0 schaltet den Blocker aus (Rot ist " ")
+
+keybindingmenu.RC Fernbedienung
+keybindingmenu.repeatblock Tasten-Wiederholblocker
 keybindingmenu.head Tasten-Einstellungen
 keybindingmenu.modechange Modus wechsel
 keybindingmenu.channellist Kanalliste

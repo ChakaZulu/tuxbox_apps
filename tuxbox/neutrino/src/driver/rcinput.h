@@ -56,6 +56,7 @@ class CRCInput
 			RC_timeout=-1, RC_nokey=-2
 		};
 		
+        int repeat_block;
 		//constructor - opens rc-device and starts needed threads
 		CRCInput();
 		//destructor - closes rc-device

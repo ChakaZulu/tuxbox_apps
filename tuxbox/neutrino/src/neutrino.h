@@ -106,6 +106,7 @@ class CNeutrinoApp : public CMenuTarget
 	CVideoSetupNotifier    *videoSetupNotifier;
 	CNetworkSetupNotifier  *networkSetupNotifier;
     CLanguageSetupNotifier  *languageSetupNotifier;
+    CKeySetupNotifier       *keySetupNotifier;
 
 	CChannelList		*channelList;
 

@@ -19,19 +19,22 @@ class CStringInput : public CMenuTarget
 	int y;
 	int width;
 	int height;
-	int hheight, mheight; // head/menu font height
+	int hheight, mheight, iheight; // head/menu font height
 	
 	string	name;
+    string  hint_1, hint_2;
+    char*   validchars;
 	char*	value;
 	int		size;
 	int		selected;
+    CChangeObserver*   observ;
 
     void paint();
     void paintChar(int pos);
 
 	public:
 
-		CStringInput(string Name, char* Value, int Size);
+		CStringInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL);
 
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );

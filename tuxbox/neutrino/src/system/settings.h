@@ -83,6 +83,8 @@ struct SNeutrinoSettings
 	int key_quickzap_up;
 	int key_quickzap_down;
 
+    char repeat_blocker[3];
+
 	//screen configuration
 	int	screen_StartX;
 	int	screen_StartY;

@@ -1,15 +1,29 @@
 #include "stringinput.h"
 #include "../global.h"
 
-CStringInput::CStringInput(string Name, char* Value, int Size)
+CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ)
 {
 	name = Name;
 	value = Value;
 	size = Size;
-	width = 400;
+
+    hint_1 = Hint_1;
+    hint_2 = Hint_2;
+    validchars = Valid_Chars;
+
+    observ = Observ;
+
+	width = 420;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
-	height = hheight+ mheight+ 50;
+    iheight = g_Fonts->menu_info->getHeight();
+
+    height = hheight+ mheight+ 50;
+    if ( hint_1.length()> 0 )
+        height+= iheight;
+    if ( hint_2.length()> 0 )
+        height+= iheight;
+
 	x = ((720-width) >> 1) -50;
 	y = ((500-height)>>1);
 	selected = 0;
@@ -18,6 +32,11 @@ CStringInput::CStringInput(string Name, char* Value, int Size)
 
 int CStringInput::exec( CMenuTarget* parent, string )
 {
+    char oldval[size];
+    int key;
+
+    strcpy(oldval, value);
+
 	if (parent)
 	{
 		parent->hide();
@@ -29,17 +48,12 @@ int CStringInput::exec( CMenuTarget* parent, string )
 	paint();
 
 	bool loop = true;
-	char validchars[] = "0123456789. ";
 
 	//int selected = 0;
 	while(loop)
 	{
-		int key = g_RCInput->getKey(300);
-		if(key==CRCInput::RC_timeout)
-		{//timeout, close 
-			loop = false;
-		}
-		else if (key==CRCInput::RC_left)
+		key = g_RCInput->getKey(300);
+		if (key==CRCInput::RC_left)
 		{
 			if(selected>0)
 			{
@@ -56,6 +70,36 @@ int CStringInput::exec( CMenuTarget* parent, string )
 				paintChar(selected-1);
 				paintChar(selected);
 			}
+		}
+        else if ( ( key>= 0 ) && ( key<= 9) )
+		{
+            value[selected]=validchars[key];
+			paintChar(selected);
+
+            if (selected < (size- 1))
+                selected++;
+            paintChar(selected-1);
+			paintChar(selected);
+		}
+        else if ( (key==CRCInput::RC_red) && ( strstr(validchars, " ")!=NULL ) )
+		{
+            value[selected]=' ';
+			paintChar(selected);
+
+            if (selected < (size- 1))
+                selected++;
+            paintChar(selected-1);
+			paintChar(selected);
+		}
+        else if ( (key==CRCInput::RC_green) && ( strstr(validchars, ".")!=NULL ) )
+		{
+            value[selected]='.';
+			paintChar(selected);
+
+            if (selected < (size- 1))
+                selected++;
+            paintChar(selected-1);
+			paintChar(selected);
 		}
 		else if (key==CRCInput::RC_up)
 		{
@@ -85,6 +129,11 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		{
 			loop=false;
 		}
+        else if ( (key==CRCInput::RC_home) || (key==CRCInput::RC_timeout) )
+		{
+            strcpy(value, oldval);
+			loop=false;
+        }
 
 	}
 	
@@ -100,6 +149,12 @@ int CStringInput::exec( CMenuTarget* parent, string )
 			break;
 	}
 	value[size]=0;
+
+    if ( (observ) && (key==CRCInput::RC_ok) )
+	{
+		observ->changeNotify( value );
+	}
+
 	return CMenuTarget::RETURN_REPAINT;
 }
 
@@ -111,8 +166,15 @@ void CStringInput::hide()
 void CStringInput::paint()
 {
 	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, name.c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
+
+    if ( hint_1.length()> 0 )
+    {
+        g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, g_Locale->getText(hint_1).c_str(), COL_MENUCONTENT);
+        if ( hint_2.length()> 0 )
+            g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2).c_str(), COL_MENUCONTENT);
+    }
 
 	for (int count=0;count<size;count++)
 		paintChar(count);

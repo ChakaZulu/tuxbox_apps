@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.30 2001/09/17 12:45:12 field Exp $
+        $Id: neutrino.cpp,v 1.31 2001/09/17 16:02:35 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.30  2001/09/17 12:45:12  field
-  Sprache online umstellbar, kleine Aufraeumarbeiten
+  Revision 1.31  2001/09/17 16:02:35  field
+  Keyblocker einstellbar, String(Nummern)-Input verbessert
 
   Revision 1.29  2001/09/17 01:07:44  McClean
   i18n selectable from menue - call make install - the .locale-files are needed..
@@ -329,6 +329,8 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.key_quickzap_up = CRCInput::RC_up;
 	g_settings.key_quickzap_down = CRCInput::RC_down;
 
+    strcpy(g_settings.repeat_blocker, "0");
+
 	//screen settings
 	g_settings.screen_StartX=37;
 	g_settings.screen_StartY=23;
@@ -358,6 +360,7 @@ bool CNeutrinoApp::loadSetup()
 		return false;
 	}
 	close(fd);
+
 	return true;
 }
 
@@ -581,40 +584,28 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 void CNeutrinoApp::SetupFonts()
 {
-	g_Fonts->menu=g_fontRenderer->getFont("Arial", "Regular", 20); // was "Arial" "Bold" 20
-//	g_Fonts->menu->RenderString( 10, 100, 500, "DEMO!", 0 );
-	g_Fonts->menu_title=g_fontRenderer->getFont("Arial", "Regular", 30); // was: "Arial Black", "Regular", 30
-	                                                              // but this font has wrong metric! (getHeight())
-//	g_Fonts->menu_title->RenderString( 10, 100, 500, "DEMO!", 0 );
+    g_Fonts->menu=          g_fontRenderer->getFont("Arial", "Regular", 20);
+    g_Fonts->menu_title=    g_fontRenderer->getFont("Arial", "Regular", 30);
+    g_Fonts->menu_info=     g_fontRenderer->getFont("Arial", "Regular", 16);
+
 	g_Fonts->epg_title=g_fontRenderer->getFont("Arial", "Regular", 30);
-//	g_Fonts->epg_title->RenderString( 10, 100, 500, "DEMO!", 0 );
 	
 	g_Fonts->epg_info1=g_fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
-//	g_Fonts->epg_info1->RenderString( 10, 100, 500, "DEMO!", 0 );
 	g_Fonts->epg_info2=g_fontRenderer->getFont("Arial", "Regular", 17);
-//	g_Fonts->epg_info2->RenderString( 10, 100, 500, "DEMO!", 0 );
 
 	g_Fonts->epg_date=g_fontRenderer->getFont("Arial", "Regular", 15);
-//	g_Fonts->epg_date->RenderString( 10, 100, 500, "DEMO!", 0 );
 	g_Fonts->alert=g_fontRenderer->getFont("Arial", "Regular", 100);
 
 	g_Fonts->channellist=g_fontRenderer->getFont("Arial", "Regular", 20);
-//	g_Fonts->channellist->RenderString( 10, 100, 500, "DEMO!", 0 );
 	g_Fonts->channellist_number=g_fontRenderer->getFont("Arial", "Regular", 14);
-//	g_Fonts->channellist_number->RenderString( 10, 100, 500, "DEMO!", 0);
 	
 	g_Fonts->infobar_number=g_fontRenderer->getFont("Arial", "Regular", 50);
-//	g_Fonts->infobar_number->RenderString( 10, 100, 500, "DEMO!", 0 );
 	g_Fonts->infobar_channame=g_fontRenderer->getFont("Arial", "Regular", 30);
-//	g_Fonts->infobar_channame->RenderString( 10, 100, 500, "DEMO!", 0 );
 	g_Fonts->infobar_info=g_fontRenderer->getFont("Arial", "Regular", 20);
-//	g_Fonts->infobar_info->RenderString( 10, 100, 500, "DEMO!", 0 );
 
     g_Fonts->infobar_small=g_fontRenderer->getFont("Arial", "Regular", 14);
-//	g_Fonts->infobar_small->RenderString( 10, 100, 500, "DEMO!", 0 );
 
 	g_Fonts->fixedabr20=g_fontRenderer->getFont("Arial Black", "Regular", 20);
-//	g_Fonts->fixedabr20->RenderString( 10, 100, 500, "DEMO!", 0 );
 }
 
 void CNeutrinoApp::ClearFrameBuffer()
@@ -768,11 +759,11 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSet
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CStringInput*	networkSettings_NetworkIP= new CStringInput("networkmenu.ipaddress", g_settings.network_ip, 3*4+3);
-	CStringInput*	networkSettings_NetMask= new CStringInput("networkmenu.netmask", g_settings.network_netmask, 3*4+3);
-	CStringInput*	networkSettings_Broadcast= new CStringInput("networkmenu.broadcast", g_settings.network_broadcast, 3*4+3);
-	CStringInput*	networkSettings_Gateway= new CStringInput("networkmenu.gateway", g_settings.network_defaultgateway, 3*4+3);
-	CStringInput*	networkSettings_NameServer= new CStringInput("networkmenu.nameserver", g_settings.network_nameserver, 3*4+3);
+	CStringInput*	networkSettings_NetworkIP= new CStringInput("networkmenu.ipaddress", g_settings.network_ip, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput*	networkSettings_NetMask= new CStringInput("networkmenu.netmask", g_settings.network_netmask, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput*	networkSettings_Broadcast= new CStringInput("networkmenu.broadcast", g_settings.network_broadcast, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput*	networkSettings_Gateway= new CStringInput("networkmenu.gateway", g_settings.network_defaultgateway, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput*	networkSettings_NameServer= new CStringInput("networkmenu.nameserver", g_settings.network_nameserver, 3*4+3, "ipsetup.hint_1", "ipsetup.hint_2");
 
 	networkSettings.addItem( new CMenuForwarder("networkmenu.ipaddress", true, g_settings.network_ip, networkSettings_NetworkIP ));
 	networkSettings.addItem( new CMenuForwarder("networkmenu.netmask", true, g_settings.network_netmask, networkSettings_NetMask ));
@@ -860,12 +851,20 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 	keySettings.addItem( new CMenuForwarder("menu.back") );
 
+    keySetupNotifier = new CKeySetupNotifier;
+	CStringInput*	keySettings_repeatBlocker= new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
+    keySetupNotifier->changeNotify("initial");
+
 	CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", "settings.raw");
 	CKeyChooser*	keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, "keybindingmenu.pageup_head", "settings.raw");
 	CKeyChooser*	keySettings_channelList_pagedown = new CKeyChooser(&g_settings.key_channelList_pagedown, "keybindingmenu.pagedown_head", "settings.raw");
 	CKeyChooser*	keySettings_channelList_cancel = new CKeyChooser(&g_settings.key_channelList_cancel, "keybindingmenu.cancel_head", "settings.raw");
 	CKeyChooser*	keySettings_quickzap_up = new CKeyChooser(&g_settings.key_quickzap_up, "keybindingmenu.channelup_head",   "settings.raw");
 	CKeyChooser*	keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, "keybindingmenu.channeldown_head", "settings.raw");
+
+
+    keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.modechange") );
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.tvradiomode", true, "", keySettings_tvradio_mode ));
@@ -1019,7 +1018,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	videoSetupNotifier = new CVideoSetupNotifier;
 	networkSetupNotifier = new CNetworkSetupNotifier;
 	
-	colorSetupNotifier->changeNotify("initial");
+    colorSetupNotifier->changeNotify("initial");
 
 	setupNetwork();
 

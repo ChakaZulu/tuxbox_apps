@@ -19,7 +19,7 @@ mainmenu.audio Audio
 mainmenu.video Video
 mainmenu.network Network
 mainmenu.colors Colors
-mainmenu.keybinding Keybinding
+mainmenu.keybinding Key Setup
 
 languagesetup.head Language Setup
 languagesetup.select Language
@@ -46,6 +46,9 @@ networkmenu.broadcast Broadcast
 networkmenu.gateway Default Gateway
 networkmenu.nameserver Nameserver
 
+ipsetup.hint_1 Use "0"-"9", red is space, green is "."
+ipsetup.hint_2 or use Up/Down, OK saves, Home aborts
+
 colormenu.head Color Settings
 colormenu.statusbar Infobar
 colormenu.themeselect select theme
@@ -69,6 +72,11 @@ colormenusetup.menucontent_selected Window-Content selected
 colorstatusbar.head Infobar
 colorstatusbar.text Infobar
 
+repeatblocker.hint_1 Shortest time (in ms) to recognize 2 keystrokes
+repeatblocker.hint_2 Enter 0 to switch of the blocker (red is space)
+
+keybindingmenu.RC Remote-Control
+keybindingmenu.repeatblock Key repeat-blocker
 keybindingmenu.head Keybinding Setup
 keybindingmenu.modechange Modechange
 keybindingmenu.channellist Channellist

@@ -86,7 +86,8 @@ class FontsDef
         public:
                 Font 
 			*menu, 
-			*menu_title, 
+			*menu_title,
+            *menu_info,
 			*epg_title, 
 			*epg_info1, // epg_info1 should be same size as info2, but italic!
 			*epg_info2, 

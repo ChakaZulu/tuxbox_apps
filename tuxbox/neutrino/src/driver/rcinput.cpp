@@ -19,6 +19,7 @@ CRCInput::CRCInput()
 	start();
 
     tv_prev.tv_sec = 0;
+    repeat_block = 0;
 }
 
 /**************************************************************************
@@ -85,13 +86,15 @@ int CRCInput::getKeyInt()
             gettimeofday( &tv, NULL );
 
             // 100 ms wird als Untergrenze für 2 getrennte Tastendrücke angenommen..?
-/*			// deactivatet - suxx.......
-            if ( ( tv_prev.tv_sec == 0 ) ||
-                 ( ( tv.tv_usec - tv_prev.tv_usec) > 100000 ) ||
-                 ( ( tv.tv_sec - tv_prev.tv_sec) > 0 ))
+			// deactivatet - suxx.......
+            if ( ( repeat_block == 0 ) ||
+                 ( tv_prev.tv_sec == 0 ) ||
+                 ( prevrccode!=rccode ) ||
+                 ( ( tv.tv_usec - tv_prev.tv_usec) > repeat_block ) ||
+                 ( ( tv.tv_sec - tv_prev.tv_sec) > 0 ) )
             {
                 tv_prev = tv;
-*/
+
 //              printf("got key native key: %04x %d\n", rccode, tv.tv_sec );
 
     			if( prevrccode==rccode )
@@ -115,13 +118,13 @@ int CRCInput::getKeyInt()
     					//printf("native key: %04x   tr: %04x   name: %s\n", rccode, erg, getKeyName(erg).c_str() );
 				    }
     			}
-				/*
+
             }
             else
             {
 //                printf("key ignored %d", tv.tv_sec);
             }
-			*/
+
 		}
 
 	}
