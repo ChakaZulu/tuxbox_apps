@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.8  2002/10/05 20:31:10  obi
+napi style teletext
+
 Revision 1.7  2002/06/12 17:46:53  TheDOC
 reinsertion readded
 
@@ -45,7 +48,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <memory.h>
 #include <stdio.h>
-#include <dbox/avia_gt_vbi.h>
 
 #include <ost/dmx.h>
 
@@ -53,24 +55,42 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include "teletext.h"
 
+static int txtfd = -1;
+
 void teletext::getTXT(int PID)
 {
 }
 
 void teletext::startReinsertion(int PID)
 {
-	std::cout << "Start reinsertion on PID " << PID << std::endl;
-	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
-	ioctl(txtfd, AVIA_VBI_START_VTXT, PID);
+	dmxPesFilterParams pesFilterParams;
 
-	close(txtfd);
+	pesFilterParams.pid = PID;
+	pesFilterParams.input = DMX_IN_FRONTEND;
+	pesFilterParams.output = DMX_OUT_DECODER;
+	pesFilterParams.pesType = DMX_PES_TELETEXT;
+	pesFilterParams.flags  = DMX_IMMEDIATE_START;
+
+	std::cout << "Start reinsertion on PID " << PID << std::endl;
+	
+	if (txtfd == -1)
+		txtfd = open("/dev/dvb/card0/demux0", O_RDWR);
+	
+	if (ioctl(txtfd, DMX_SET_PES_FILTER, &pesFilterParams) < 0)
+		perror("DMX_SET_PES_FILTER");
+
 }
 
 void teletext::stopReinsertion()
 {
 	std::cout << "Stop reinsertion" << std::endl;
+	
 	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
-	ioctl(txtfd, AVIA_VBI_STOP_VTXT, true);
+	
+	if (ioctl(txtfd, DMX_STOP) < 0)
+		perror("DMX_STOP");
 
 	close(txtfd);
+	txtfd = -1;
 }
+
