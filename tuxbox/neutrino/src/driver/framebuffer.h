@@ -85,7 +85,7 @@ class CFrameBuffer
 
 		static CFrameBuffer* getInstance();
 
-		void init(std::string fbDevice="/dev/fb/0");
+		void init(const char * const fbDevice = "/dev/fb/0");
 		int setMode(unsigned int xRes, unsigned int yRes, unsigned int bpp);
 
 
@@ -119,20 +119,20 @@ class CFrameBuffer
 		void paintHLineRel(int x, int dx, int y, unsigned char col);
 
 
-		void setIconBasePath(std::string);
+		void setIconBasePath(const std::string & iconPath);
 
-		bool paintIcon (const std::string filename, int x, int y, unsigned char offset=1);
-		bool paintIcon8(const std::string filename, int x, int y, unsigned char offset=0);
-		void loadPal   (const std::string filename, unsigned char offset=0, unsigned char endidx=255 );
+		bool paintIcon (const std::string & filename, const int x, const int y, const unsigned char offset = 1);
+		bool paintIcon8(const std::string & filename, const int x, const int y, const unsigned char offset = 0);
+		void loadPal   (const std::string & filename, const unsigned char offset = 0, const unsigned char endidx = 255);
 
-		bool loadPicture2Mem        (const std::string filename, uint8_t * memp);
-		bool loadPicture2FrameBuffer(const std::string filename);
-		bool loadPictureToMem       (const std::string filename, const uint16_t width, const uint16_t height, const uint16_t stride, uint8_t * memp);
-		bool savePictureFromMem     (const std::string filename, uint8_t * memp);
+		bool loadPicture2Mem        (const std::string & filename, uint8_t * const memp);
+		bool loadPicture2FrameBuffer(const std::string & filename);
+		bool loadPictureToMem       (const std::string & filename, const uint16_t width, const uint16_t height, const uint16_t stride, uint8_t * const memp);
+		bool savePictureFromMem     (const std::string & filename, const uint8_t * const memp);
 
 		int getBackgroundColor() { return backgroundColor;}
 		void setBackgroundColor(int color);
-		bool loadBackground(const std::string filename, const unsigned char col = 0);
+		bool loadBackground(const std::string & filename, const unsigned char col = 0);
 		void useBackground(bool);
 		bool getuseBackground(void);
 

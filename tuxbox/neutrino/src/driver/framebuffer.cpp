@@ -26,6 +26,8 @@
 #include <config.h>
 #endif
 
+#include <driver/framebuffer.h>
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -39,8 +41,7 @@
 #include <stdint.h>
 #include <dbox/fb.h>
 
-#include "framebuffer.h"
-#include "gui/color.h"
+#include <gui/color.h>
 
 #define BACKGROUNDIMAGEWIDTH 720
 
@@ -82,12 +83,12 @@ CFrameBuffer* CFrameBuffer::getInstance()
 	return frameBuffer;
 }
 
-void CFrameBuffer::init(std::string fbDevice)
+void CFrameBuffer::init(const char * const fbDevice)
 {
-	fd=open(fbDevice.c_str(), O_RDWR);
+	fd = open(fbDevice, O_RDWR);
 	if (fd<0)
 	{
-		perror(fbDevice.c_str());
+		perror(fbDevice);
 		goto nolfb;
 	}
 
@@ -393,12 +394,12 @@ void CFrameBuffer::paintHLineRel(int x, int dx, int y, unsigned char col)
 	memset(pos, col, dx);
 }
 
-void CFrameBuffer::setIconBasePath(std::string iconPath)
+void CFrameBuffer::setIconBasePath(const std::string & iconPath)
 {
 	iconBasePath = iconPath;
 }
 
-bool CFrameBuffer::paintIcon8(const std::string filename, int x, int y, unsigned char offset)
+bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const int y, const unsigned char offset)
 {
 	if (!getActive())
 		return false;
@@ -444,7 +445,7 @@ bool CFrameBuffer::paintIcon8(const std::string filename, int x, int y, unsigned
 	return true;
 }
 
-bool CFrameBuffer::paintIcon(const std::string filename, int x, int y, unsigned char offset)
+bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const int y, const unsigned char offset)
 {
 	if (!getActive())
 		return false;
@@ -498,7 +499,7 @@ bool CFrameBuffer::paintIcon(const std::string filename, int x, int y, unsigned 
 	close(fd);
 	return true;
 }
-void CFrameBuffer::loadPal(const std::string filename, unsigned char offset, unsigned char endidx )
+void CFrameBuffer::loadPal(const std::string & filename, const unsigned char offset, const unsigned char endidx)
 {
 	if (!getActive())
 		return;
@@ -530,7 +531,7 @@ void CFrameBuffer::loadPal(const std::string filename, unsigned char offset, uns
 	close(fd);
 }
 
-void CFrameBuffer::paintPixel(int x, int y, unsigned char col)
+void CFrameBuffer::paintPixel(const int x, const int y, const unsigned char col)
 {
 	if (!getActive())
 		return;
@@ -630,7 +631,7 @@ void CFrameBuffer::setBackgroundColor(int color)
 	backgroundColor = color;
 }
 
-bool CFrameBuffer::loadPictureToMem(const std::string filename, const uint16_t width, const uint16_t height, const uint16_t stride, uint8_t * memp)
+bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t width, const uint16_t height, const uint16_t stride, uint8_t * memp)
 {
 	struct rawHeader header;
 	int              fd;
@@ -662,12 +663,12 @@ bool CFrameBuffer::loadPictureToMem(const std::string filename, const uint16_t w
 	return true;
 }
 
-bool CFrameBuffer::loadPicture2Mem(const std::string filename, uint8_t * memp)
+bool CFrameBuffer::loadPicture2Mem(const std::string & filename, uint8_t * memp)
 {
 	return loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, 0, memp);
 }
 
-bool CFrameBuffer::loadPicture2FrameBuffer(const std::string filename)
+bool CFrameBuffer::loadPicture2FrameBuffer(const std::string & filename)
 {
 	if (!getActive())
 		return false;
@@ -675,7 +676,7 @@ bool CFrameBuffer::loadPicture2FrameBuffer(const std::string filename)
 	return loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, getStride(), getFrameBufferPointer());
 }
 
-bool CFrameBuffer::savePictureFromMem(const std::string filename, uint8_t * memp)
+bool CFrameBuffer::savePictureFromMem(const std::string & filename, const uint8_t * const memp)
 {
 	struct rawHeader header;
 	uint16_t         width, height;
@@ -706,7 +707,7 @@ bool CFrameBuffer::savePictureFromMem(const std::string filename, uint8_t * memp
 	return true;
 }
 
-bool CFrameBuffer::loadBackground(const std::string filename, const unsigned char col)
+bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned char col)
 {
 	if ((backgroundFilename == filename) && (background))
 	{
