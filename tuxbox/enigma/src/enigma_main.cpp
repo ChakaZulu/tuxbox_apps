@@ -2954,13 +2954,14 @@ void eZapMain::pause()
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
 	else
 	{
-		if ( ref.type == eServiceReference::idDVB && !ref.path )
+		if ( ref.type == eServiceReference::idDVB && !ref.path && !timeshift )
 		{
 			Decoder::setAutoFlushScreen(0);
 			if ( !eDVB::getInstance()->recorder )
 			{
 				Decoder::Pause(2);  // freeze frame
 				record();
+				timeshift=1;
 				usleep(1000*1000);
 				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, -1));
 			}
@@ -3305,7 +3306,7 @@ void eZapMain::startSkip(int dir)
 					else if (!timeshift)
 						return;
 				}
-				else
+				else if (!timeshift)
 					return;
 			}
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin, 0));
