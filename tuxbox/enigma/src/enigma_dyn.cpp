@@ -2202,6 +2202,81 @@ static eString getControlTimerList()
 	return result;
 }
 
+struct getWapEntryString
+{
+	std::stringstream &result;
+	bool repeating;
+
+	getWapEntryString(std::stringstream &result, bool repeating)
+		:result(result), repeating(repeating)
+	{
+	}
+
+	void operator()(ePlaylistEntry* se)
+	{
+		if (!repeating && se->type & ePlaylistEntry::isRepeating)
+			return;
+		if (repeating && !(se->type & ePlaylistEntry::isRepeating))
+			return;
+		tm startTime = *localtime(&se->time_begin);
+		time_t time_end = se->time_begin + se->duration;
+		tm endTime = *localtime(&time_end);
+
+		eString description = se->service.descr;
+		eString channel = getLeft(description, '/');
+		if (!channel)
+		{
+			eService *service = eDVB::getInstance()->settings->getTransponders()->searchService(se->service);
+			if (service)
+				channel = filter_string(service->service_name);
+		}
+		if (!channel)
+			channel = _("No channel available");
+
+		description = getRight(description, '/');
+		if (!description)
+			description = _("No description available");
+
+		result 	<< std::setw(2) << startTime.tm_mday << '.'
+			<< std::setw(2) << startTime.tm_mon+1 << " - "
+			<< std::setw(2) << startTime.tm_hour << ':'
+			<< std::setw(2) << startTime.tm_min
+			<< " / "
+			<< std::setw(2) << endTime.tm_mday << '.'
+			<< std::setw(2) << endTime.tm_mon+1 << " - "
+		 	<< std::setw(2) << endTime.tm_hour << ':'
+			<< std::setw(2) << endTime.tm_min
+			<< "<br/>"
+			<< channel
+			<< "<br/>"
+			<< description
+			<< "<br/>";
+	}
+};
+
+static eString wapTimerList(void)
+{
+	std::stringstream result;
+	eString tmp = readFile(TEMPLATE_DIR + "wapTimerList.tmp");
+
+	int count = 0;
+	eTimerManager::getInstance()->forEachEntry(countTimer(count, false));
+	if (count)
+	{
+		result << std::setfill('0');
+		if (!eTimerManager::getInstance()->getTimerCount())
+			result << eString(_("No timer events available"));
+		else
+			eTimerManager::getInstance()->forEachEntry(getWapEntryString(result, 0));
+	}
+	else
+		result << eString(_("No timer events available"));
+		
+	tmp.strReplace("#BODY#", result.str());
+
+	return tmp;
+}
+
 static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result;
@@ -2941,22 +3016,13 @@ static eString wapEPG(void)
 				<< std::setw(2) << t->tm_hour << ':'
 				<< std::setw(2) << t->tm_min << ' '
 				<< "<br/>";
-#if 0
-#ifndef DISABLE_FILE
-			result << "<td>"
-				<< "<a href=\"javascript:record('"
-				<< "ref=" << ref2string(ref)
-				<< "&ID=" << std::hex << event.event_id << std::dec
-				<< "&start=" << event.start_time
-				<< "&duration=" << event.duration
-				<< "&descr=" << filter_string(description)
-				<< "&channel=" << filter_string(current->service_name)
-				<< "')\"><img src=\"timer.gif\" border=0></a>"
-				<< "</td>";
-#endif
-#endif
-			result	<< filter_string(description)
-				<< "<br/>\n";
+
+			result << "<a href=\"/wap/mode=epgDetails?"
+						<< "path=" << ref2string(ref)
+						<< "&ID=" << std::hex << event.event_id << std::dec
+						<< "\">"
+						<< filter_string(description)
+						<< "</a><br/>\n";
 		}
 	}
 	eEPGCache::getInstance()->Unlock();
@@ -3461,54 +3527,6 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	return result;
 }
 
-static eString wap_web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	eString result;
-
-	std::map<eString,eString> opt = getRequestOptions(opts);
-	eString mode = opt["mode"];
-	eString spath = opt["path"];
-
-	content->local_header["Content-Type"]="text/vnd.wap.wml";
-
-	if (mode == "admin")
-	{
-		eString command = opt["command"];
-		result = admin2(command);
-	}
-	else
-	if (mode == "zap")
-	{
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODETV][ZAPSUBMODEBOUQUETS];
-		result = readFile(TEMPLATE_DIR + "wapzap.tmp");
-		result.strReplace("#BODY#", getWapZapContent(spath));
-	}
-	else
-	if (mode == "zapto")
-	{
-		eServiceReference current_service = string2ref(spath);
-
-		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
-			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
-
-		result = "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Zap complete.</p></card></wml>";
-	}
-	else
-	if (mode == "epg")
-	{
-		result = wapEPG();
-	}
-	else
-	{
-		result = readFile(TEMPLATE_DIR + "wap.tmp");
-		result = getEITC2(result);
-		result.strReplace("#SERVICE#", getCurService());
-	}
-
-	return result;
-}
-
 static eString listDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString answer;
@@ -3763,6 +3781,41 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	sscanf(eventID.c_str(), "%x", &eventid);
 	eDebug("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
 
+	int timeroffset = 0;
+	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
+		timeroffset = 0;
+
+	int start = atoi(eventStartTime.c_str()) - (timeroffset * 60);
+	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
+
+	ePlaylistEntry entry(string2ref(serviceRef), start, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+	entry.service.descr = channel + "/" + description;
+
+	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
+		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
+	else
+		result += _("Timer event was created successfully.");
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	return result;
+}
+
+static eString wapAddTimerEvent(eString opts)
+{
+	eString result;
+
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString serviceRef = opt["path"];
+	eString eventID = opt["ID"];
+	eString eventStartTime = opt["start"];
+	eString eventDuration = opt["duration"];
+	eString channel = httpUnescape(opt["channel"]);
+	eString description = httpUnescape(opt["descr"]);
+	if (description == "")
+		description = _("No description available");
+
+	int eventid;
+	sscanf(eventID.c_str(), "%x", &eventid);
+	
 	int timeroffset = 0;
 	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
 		timeroffset = 0;
@@ -4050,6 +4103,67 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	return result;
 }
 
+static eString wapEPGDetails(eString serviceRef, eString eventID)
+{
+	eString result;
+	eService *current = NULL;
+	eString ext_description;
+	std::stringstream record;
+	int eventid;
+	eString description = _("No description available");
+
+	sscanf(eventID.c_str(), "%x", &eventid);
+	eDebug("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %04x", serviceRef.c_str(), eventid);
+
+	// search for the event... to get the description...
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		eServiceReference ref(string2ref(serviceRef));
+		current = eDVB::getInstance()->settings->getTransponders()->searchService((eServiceReferenceDVB&)ref);
+		if (current)
+		{
+			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid);
+			if (event)
+			{
+				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
+				{
+					if (d->Tag() == DESCR_SHORT_EVENT)
+					{
+						description = ((ShortEventDescriptor*)*d)->event_name;
+						eDebug("[ENIGMA_DYN] getEPGDetails: found description = %s", description.c_str());
+					}
+					if (d->Tag() == DESCR_EXTENDED_EVENT)
+					{
+						ext_description += ((ExtendedEventDescriptor*)*d)->text;
+						eDebug("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
+					}
+				}
+				if (!ext_description)
+					ext_description = _("No detailed information available");
+#ifndef DISABLE_FILE
+				record << "<a href=\"/wap?mode=addTimerEvent"
+					<< "&path=" << ref2string(ref)
+					<< "&ID=" << std::hex << event->event_id << std::dec
+					<< "&start=" << event->start_time
+					<< "&duration=" << event->duration
+					<< "&descr=" << filter_string(description)
+					<< "&channel=" << filter_string(current->service_name)
+					<< "\">Record</a>";
+#endif	
+				delete event;
+			}
+		}
+	}
+	
+	result = readFile(TEMPLATE_DIR + "wapEPGDetails.tmp");
+	result.strReplace("#EVENT#", filter_string(description));
+	result.strReplace("#RECORD#", record.str());
+	result.strReplace("#BODY#", filter_string(ext_description));
+
+	return result;
+}
+
 static eString blank(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -4144,6 +4258,83 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 
 	if (mode == "zap")
 		result.strReplace("#ONLOAD#", "onLoad=init()");
+
+	return result;
+}
+
+static eString wap_web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+
+	std::map<eString,eString> opt = getRequestOptions(opts);
+	eString mode = opt["mode"];
+	eString spath = opt["path"];
+
+	content->local_header["Content-Type"]="text/vnd.wap.wml";
+
+	if (mode == "admin")
+	{
+		eString command = opt["command"];
+		result = admin2(command);
+	}
+	else
+	if (mode == "zap")
+	{
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODETV][ZAPSUBMODEBOUQUETS];
+		result = readFile(TEMPLATE_DIR + "wapzap.tmp");
+		result.strReplace("#BODY#", getWapZapContent(spath));
+	}
+	else
+	if (mode == "zapto")
+	{
+		eServiceReference current_service = string2ref(spath);
+
+		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
+			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
+
+		result = "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Zap complete.</p></card></wml>";
+	}
+	else
+	if (mode == "epg")
+	{
+		result = wapEPG();
+	}
+	else
+	if (mode == "epgDetails")
+	{
+		eString eventID = opt["ID"];
+		result = wapEPGDetails(spath, eventID);
+	}
+	else
+	if (mode == "addTimerEvent")
+	{
+		result = wapAddTimerEvent(opts);
+		result = "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>" + result + "</p></card></wml>";
+
+	}
+	if (mode == "timer")
+	{
+		result = wapTimerList();
+	}
+	if (mode == "cleanupTimerList")
+	{
+		eTimerManager::getInstance()->cleanupEvents();
+		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		result = "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Timers cleaned up.</p></card></wml>";
+	}
+	if (mode == "clearTimerList")
+	{
+		eTimerManager::getInstance()->clearEvents();
+		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		result = "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Timer list cleared.</p></card></wml>";
+	}
+	else
+	{
+		result = readFile(TEMPLATE_DIR + "wap.tmp");
+		result = getEITC2(result);
+		result.strReplace("#SERVICE#", getCurService());
+	}
 
 	return result;
 }
