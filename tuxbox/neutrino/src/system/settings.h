@@ -261,7 +261,7 @@ class CScanSettings
 	char                      satNameNoDiseqc[30];
 	int                       satDiseqc[MAX_SATELLITES];
 	int	                  satMotorPos[MAX_SATELLITES];
-	char                      satName[30][MAX_SATELLITES];
+	char	                  satName[MAX_SATELLITES][30];
 	delivery_system_t         delivery_system;
 
 	CScanSettings();
