@@ -36,6 +36,7 @@ fx2/tetris/Makefile
 fx2/lcdcirc/Makefile
 fx2/satfind/Makefile
 fx2/vierg/Makefile
+fx2/sol/Makefile
 tuxmail/Makefile
 tuxmail/daemon/Makefile
 tuxtxt/Makefile
