@@ -1,7 +1,10 @@
 // 
-// $Id: global.h,v 1.7 2001/09/20 19:21:37 fnbrd Exp $
+// $Id: global.h,v 1.8 2001/10/09 21:48:37 McClean Exp $
 //
 // $Log: global.h,v $
+// Revision 1.8  2001/10/09 21:48:37  McClean
+// ucode-check
+//
 // Revision 1.7  2001/09/20 19:21:37  fnbrd
 // Channellist mit IDs.
 //
@@ -53,6 +56,7 @@ NEUTRINO_CPP  CEpgData        *g_EpgData;
 NEUTRINO_CPP  CInfoViewer     *g_InfoViewer;
 NEUTRINO_CPP  EventList       *g_EventList;
 NEUTRINO_CPP  CStreamInfo     *g_StreamInfo;
+NEUTRINO_CPP  CUCodeCheck     *g_UcodeCheck;
 
 NEUTRINO_CPP  CScreenSetup    *g_ScreenSetup;
 

@@ -21,6 +21,7 @@ mainmenu.network Siec
 mainmenu.colors Farby/Tematy
 mainmenu.keybinding Ustawienie klawiszy
 mainmenu.games w Gry grac
+mainmenu.ucodecheck Check ucodes
 
 languagesetup.head Ustawienie jezyka
 languagesetup.select Jezyk
@@ -137,3 +138,9 @@ streaminfo.audiotype Typ Dzwieku
 streaminfo.audiotype_unknown Typ Dzwieku: nieznany
 
 apidselector.head Wybor Jezyka
+
+ucodecheck.head UCode check
+ucodecheck.avia500 Avia 500
+ucodecheck.avia600 Avia 600
+ucodecheck.ucode UCode
+ucodecheck.cam-alpha Cam-Alpha

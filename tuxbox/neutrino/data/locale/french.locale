@@ -21,6 +21,7 @@ mainmenu.network Réseau
 mainmenu.colors Couleurs / Thèmes
 mainmenu.keybinding Ajuster des clés
 mainmenu.games Play Games
+mainmenu.ucodecheck Check ucodes
 
 languagesetup.head Ajuster un langue
 languagesetup.select Langue
@@ -138,3 +139,8 @@ streaminfo.audiotype_unknown Argile version: inconnu
 
 apidselector.head Choix linguistique
 
+ucodecheck.head UCode check
+ucodecheck.avia500 Avia 500
+ucodecheck.avia600 Avia 600
+ucodecheck.ucode UCode
+ucodecheck.cam-alpha Cam-Alpha

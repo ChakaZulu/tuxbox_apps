@@ -1,10 +1,13 @@
 /*
-$Id: streaminfo.cpp,v 1.8 2001/09/23 21:34:07 rasc Exp $
+$Id: streaminfo.cpp,v 1.9 2001/10/09 21:48:37 McClean Exp $
 
 Module StreamInfo
 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.9  2001/10/09 21:48:37  McClean
+ ucode-check
+
  Revision 1.8  2001/09/23 21:34:07  rasc
  - LIFObuffer Module, pushbackKey fuer RCInput,
  - In einige Helper und widget-Module eingebracht
@@ -23,9 +26,9 @@ CStreamInfo::CStreamInfo()
 	width = 300;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
-	height = hheight+5*mheight;
+	height = hheight+6*mheight;
 	x=((720-width) >> 1) -20;
-	y=(576-height)>>1;
+	y=(400-height)>>1;
 }
 
 
@@ -66,7 +69,8 @@ void CStreamInfo::paint()
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, g_Locale->getText("streaminfo.head").c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
-	ypos+= hheight;
+	ypos+= hheight + (mheight >>1);
+
 	
 	FILE* fd = fopen("/proc/bus/bitstream", "rt");
 	if (fd==NULL)
@@ -144,6 +148,3 @@ void CStreamInfo::paint()
 
 	ypos+= mheight;
 }
-
-
-

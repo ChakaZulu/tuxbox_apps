@@ -1,11 +1,11 @@
 /*
 
-        $Id: neutrino.cpp,v 1.57 2001/10/07 13:16:57 McClean Exp $
+        $Id: neutrino.cpp,v 1.58 2001/10/09 21:48:37 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://mcclean.cyberphoria.org/
+	Homepage: http://dbox.cyberphoria.org/
 
 	Kommentar:
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.58  2001/10/09 21:48:37  McClean
+  ucode-check
+
   Revision 1.57  2001/10/07 13:16:57  McClean
   rgb/svideo/composite__4:3/16:9 switch
 
@@ -210,75 +213,12 @@ static void initGlobals(void)
   g_EventList = NULL;
   g_StreamInfo = NULL;
   g_ScreenSetup = NULL;
+  g_UcodeCheck = NULL;
 
   g_Locale = NULL;
 
 }
 // Ende globale Variablen
-
-/*
-struct SPluginInfo
-{
-	char name[20];
-	char desc[100];
-	int  type;
-
-	unsigned char needfb;
-	unsigned char needrc;
-	unsigned char needlcd;
-};
-
-//int getInfo(SPluginInfo* Info);
-*/
-void CNeutrinoApp::PluginDemo()
-{
-	/*
-	printf("PLUGINDEMO------------------------------------------------\n\n");
-	void		*handle;
-	//typedef int   (*getInfo)( SPluginInfo * info);//
-	int			(*getInfo) (SPluginInfo*);
-	int			(*execPlugin) (int fb, int rc, int lcd);
-	char		*error;
-	SPluginInfo	info;
-
-	string pluginname = "tetris";
-
-	handle = dlopen ( ("/"+pluginname+".so").c_str(), RTLD_LAZY);
-	if (!handle)
-	{
-		fputs (dlerror(), stderr);
-		return;
-	}
-	
-	getInfo = (int(*)(SPluginInfo*)) dlsym(handle,(pluginname+"_getInfo").c_str());
-	if ((error = dlerror()) != NULL)
-	{
-		fputs(error, stderr);
-		return;
-	}
-	execPlugin = (int(*)(int fb, int rc, int lcd)) dlsym(handle, (pluginname+"_exec").c_str());
-	if ((error = dlerror()) != NULL)
-	{
-		fputs(error, stderr);
-		return;
-	}
-
-
-	(*getInfo)(&info);
-	printf("Plugin Name: %s\n", info.name);
-	printf("Plugin Desc: %s\n", info.desc);
-	printf("try exec...\n");
-
-	g_RCInput->stopInput();
-	(*execPlugin)(g_FrameBuffer->getFileHandle(), g_RCInput->getFileHandle(), -1);
-	printf("exec done...\n");
-	dlclose(handle);
-	g_RCInput->restartInput();
-	//restore framebuffer...
-	g_FrameBuffer->paletteSet();
-	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
-	*/
-}
 
 
 
@@ -803,8 +743,10 @@ void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audi
 	mainSettings.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
 	mainSettings.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv"), true );
 	mainSettings.addItem( new CMenuForwarder("mainmenu.radiomode", (zapit), "", this, "radio") );
+	mainSettings.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
+
 	//mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.mp3player"), false, "", this, "mp3") );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.splayback", false, "", this, "playback") );
+	//mainSettings.addItem( new CMenuForwarder("mainmenu.splayback", false, "", this, "playback") );
 
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mainmenu.info") );
 
@@ -818,7 +760,7 @@ void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audi
 	mainSettings.addItem( new CMenuForwarder("mainmenu.network", true, "", &networkSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainmenu.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainmenu.keybinding", true,"", &keySettings) );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
+	mainSettings.addItem( new CMenuForwarder("mainmenu.ucodecheck", true, "", g_UcodeCheck ) );
 }
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
@@ -1317,6 +1259,7 @@ int CNeutrinoApp::run(int argc, char **argv)
     g_EpgData = new CEpgData;
     g_InfoViewer = new CInfoViewer;
     g_StreamInfo = new CStreamInfo;
+	g_UcodeCheck = new CUCodeCheck;
     g_ScreenSetup = new CScreenSetup;
     g_EventList = new EventList;
 
@@ -1545,11 +1488,6 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	{
 		setupNetwork( true );
 	}
-	else if(actionKey=="pacman")
-	{
-		///plugin demo todo remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		PluginDemo();
-	}
 
 	return returnval;
 }
@@ -1563,7 +1501,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.57 2001/10/07 13:16:57 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.58 2001/10/09 21:48:37 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -21,6 +21,7 @@ mainmenu.network Network
 mainmenu.colors Colors
 mainmenu.keybinding Key Setup
 mainmenu.games Play Games
+mainmenu.ucodecheck Check ucodes
 
 languagesetup.head Language Setup
 languagesetup.select Language
@@ -138,3 +139,10 @@ streaminfo.audiotype Audiotype
 streaminfo.audiotype_unknown Audiotype: unknown
 
 apidselector.head Select language
+
+ucodecheck.head UCode check
+ucodecheck.avia500 Avia 500
+ucodecheck.avia600 Avia 600
+ucodecheck.ucode UCode
+ucodecheck.cam-alpha Cam-Alpha
+

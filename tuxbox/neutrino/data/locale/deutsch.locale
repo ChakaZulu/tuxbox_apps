@@ -21,6 +21,7 @@ mainmenu.network Netzwerk
 mainmenu.colors Farben/Themes
 mainmenu.keybinding Tasten-Einstellungen
 mainmenu.games Spiele spielen
+mainmenu.ucodecheck UCodes überprüfen
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache
@@ -137,3 +138,9 @@ streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: unbekannt
 
 apidselector.head Sprachauswahl
+
+ucodecheck.head UCode Überprüfung
+ucodecheck.avia500 Avia 500
+ucodecheck.avia600 Avia 600
+ucodecheck.ucode UCode
+ucodecheck.cam-alpha Cam-Alpha
