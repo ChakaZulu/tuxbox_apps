@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.44 2004/11/30 21:48:20 chakazulu Exp $
+	$Id: controlapi.cpp,v 1.45 2004/12/03 18:48:05 chakazulu Exp $
 
 	License: GPL
 
@@ -324,9 +324,11 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 	else
 	{
 		printf("No script given\n");
-		request->Send404Error();
 	}
-
+	if (!res)
+	{
+		request->Send404Error();		
+	}
 	return res;
 }
 
