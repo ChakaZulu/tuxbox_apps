@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <lib/dvb/frontend.h>
+#include <errno.h>
 #if HAVE_DVB_API_VERSION == 3
 #include <tuxbox.h>
 #endif
@@ -173,11 +174,13 @@ eSystemInfo::eSystemInfo()
 						if ( fd >=0)
 						{
 #define FP_IOCTL_GET_ID 0
-							__u32 test;
-							if ( ::ioctl( fd, FP_IOCTL_GET_ID) > 0 )
-								hasstandbywakeuptimer=1;
+							int ret = ::ioctl(fd,FP_IOCTL_GET_ID);
+							if ( ret < 0 )
+								eDebug("old fp driver.. no support for wakeup timer");
+							else if ( ret == 0 )
+								eDebug("old fp firmware... no support for wakeup timer");
 							else
-								eDebug("old fp software.. no wakeup timer");
+								hasstandbywakeuptimer=1;
 							close(fd);
 						}
 					}
