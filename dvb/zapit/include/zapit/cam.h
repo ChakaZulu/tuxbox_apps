@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.15 2002/07/14 00:38:23 obi Exp $
+ * $Id: cam.h,v 1.16 2002/08/21 09:59:23 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,11 +22,7 @@
 #ifndef __cam_h__
 #define __cam_h__
 
-#if (DVB_API_VERSION == 1)
 #include <ost/ca.h>
-#else
-#include <linux/dvb/ca.h>
-#endif
 
 #include "ci.h"
 

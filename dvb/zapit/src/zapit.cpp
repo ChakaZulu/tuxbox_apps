@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.193 2002/07/22 01:57:19 Homar Exp $
+ * $Id: zapit.cpp,v 1.194 2002/08/21 09:59:23 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -93,9 +93,9 @@ int currentMode;
 
 int connfd;
 
-#ifndef DVBS
+#ifdef DBOX2
 CLcddClient lcdd;
-#endif /* DVBS */
+#endif /* DBOX2 */
 
 bool debug = false;
 
@@ -1137,7 +1137,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.193 2002/07/22 01:57:19 Homar Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.194 2002/08/21 09:59:23 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

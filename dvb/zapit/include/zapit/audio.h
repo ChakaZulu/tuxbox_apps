@@ -1,5 +1,5 @@
 /*
- * $Id: audio.h,v 1.5 2002/05/16 02:33:26 obi Exp $
+ * $Id: audio.h,v 1.6 2002/08/21 09:59:23 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -24,13 +24,8 @@
 #define __audio_h__
 
 /* nokia api */
-#if (DVB_API_VERSION == 1)
 #include <ost/audio.h>
 #define AUDIO_DEV "/dev/dvb/card0/audio0"
-#else
-#include <linux/dvb/audio.h>
-#define AUDIO_DEV "/dev/dvb/adapter0/audio0"
-#endif
 
 class CAudio
 {

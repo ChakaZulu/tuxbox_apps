@@ -1,5 +1,5 @@
 /*
- * $Id: video.h,v 1.1 2002/05/16 02:33:07 obi Exp $
+ * $Id: video.h,v 1.2 2002/08/21 09:59:23 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -24,13 +24,8 @@
 
 #include <time.h>
 
-#if (DVB_API_VERSION == 1)
 #include <ost/video.h>
 #define VIDEO_DEVICE "/dev/dvb/card0/video0"
-#else
-#include <linux/dvb/video.h>
-#define VIDEO_DEVICE "/dev/dvb/adapter0/video0"
-#endif
 
 class CVideo
 {
