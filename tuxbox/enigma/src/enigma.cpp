@@ -70,13 +70,18 @@ static eAction up(map, "hoch", "selection_up");
 
 void eZap::keyEvent(const eRCKey &key)
 {
-	int c=key.getCompatibleCode();
-	if (c!=-1)
+	int c = key.getCompatibleCode();
+
+	if (c != -1)
 	{
-		if (key.getFlags()&eRCKey::flagBreak)
+		if (key.getFlags() & eRCKey::flagBreak)
+		{
 			keyUp(c);
+		}
 		else
+		{
 			keyDown(c);
+		}
 	}
 }
 
@@ -91,76 +96,84 @@ QString eZap::getVersion()
 
 eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 {
-	instance=this;
-	
-	init=new eInit();
-	
+	int bootcount;
+	int e;
+	__u32 lastchannel;
+
+	eZapLCD *pLCD;
+	eHTTPD *httpd;
+	eHTTPDynPathResolver *dyn_resolver;
+	eHTTPFilePathResolver *fileresolver;
+
+	instance = this;
+
+	init = new eInit();
 	init->setRunlevel(5);
 
-	focus=0;
-	main=0;
+	focus = 0;
 
 	connect(eRCInput::getInstance(), SIGNAL(keyEvent(const eRCKey&)), SLOT(keyEvent(const eRCKey&)));
 
-	serviceSelector=new eServiceSelector;
-	
 	eDVB::getInstance()->configureNetwork();
-	
-	main=0;
 	qDebug("<-- network");
 
-	main=new eZapMain();
+	main = new eZapMain();
 
-	eZapLCD* pLCD = eZapLCD::getInstance();
-	serviceSelector=new eServiceSelector();
+	pLCD = eZapLCD::getInstance();
+	serviceSelector = new eServiceSelector();
 	serviceSelector->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	qDebug("<-- service selector");
-	
-	qDebug("[ENIGMA] starting httpd");
-	eHTTPD *httpd=new eHTTPD(80);
-	eHTTPDynPathResolver *dyn_resolver=new eHTTPDynPathResolver();
-	ezapInitializeDyn(dyn_resolver);
-	ezapInitializeXMLRPC(httpd);
-	httpd->addResolver(dyn_resolver);
 
-	eHTTPFilePathResolver *fileresolver=new eHTTPFilePathResolver();
+	dyn_resolver = new eHTTPDynPathResolver();
+	ezapInitializeDyn(dyn_resolver);
+
+	fileresolver = new eHTTPFilePathResolver();
 	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/");
 	fileresolver->addTranslation("/var/tuxbox/htdocs", "/www"); /* TODO: make user configurable */
+
+	qDebug("[ENIGMA] starting httpd");
+	httpd = new eHTTPD(80);
+	ezapInitializeXMLRPC(httpd);
+	httpd->addResolver(dyn_resolver);
 	httpd->addResolver(fileresolver);
 
 	qDebug("[ENIGMA] ok, beginning mainloop");
-	__u32 lastchannel;
 
-	int bootcount;
 	if (eDVB::getInstance()->config.getKey("/elitedvb/system/bootCount", bootcount))
-		bootcount=0;
-
-	if (!bootcount)
 	{
+		bootcount = 1;
 		eMessageBox msg("Willkommen zu enigma.\n\nBitte führen sie zunächst eine Kanalsuche durch, indem sie die d-Box-Taste drücken um in das "
 			"Hauptmenü zu gelangen. Dort gibt es den Unterpunkt \"Transponder Scan\", der genau das macht, was sie glauben.\n", "enigma - erster Start");
 		msg.show();
 		msg.exec();
 		msg.hide();
 	}
-	
-	bootcount++;
+	else
+	{
+		bootcount++;
+	}
+
 	eDVB::getInstance()->config.setKey("/elitedvb/system/bootCount", bootcount);
 
-	int e;
-	if ((!(e=eDVB::getInstance()->config.getKey("/ezap/ui/lastChannel", lastchannel))) && (eDVB::getInstance()->getTransponders()))
+	if ((!(e = eDVB::getInstance()->config.getKey("/ezap/ui/lastChannel", lastchannel))) && (eDVB::getInstance()->getTransponders()))
 	{
-		eService *t=eDVB::getInstance()->getTransponders()->searchService(lastchannel>>16, lastchannel&0xFFFF);
+		eService *t = eDVB::getInstance()->getTransponders()->searchService(lastchannel >> 16, lastchannel & 0xFFFF);
 		if (t)
+		{
 			eDVB::getInstance()->switchService(t);
+		}
 	}
+
 	init->setRunlevel(10);
 }
 
 eZap::~eZap()
 {
 	if (eDVB::getInstance()->service)
-		eDVB::getInstance()->config.setKey("/ezap/ui/lastChannel", (__u32)((eDVB::getInstance()->original_network_id<<16)|eDVB::getInstance()->service_id));
+	{
+		eDVB::getInstance()->config.setKey("/ezap/ui/lastChannel", (__u32)((eDVB::getInstance()->original_network_id << 16) | eDVB::getInstance()->service_id));
+	}
+
 	qDebug("[ENIGMA] beginning clean shutdown");
 	qDebug("[ENIGMA] main");
 	delete main;
@@ -169,7 +182,7 @@ eZap::~eZap()
 	qDebug("[ENIGMA] fertig");
 	init->setRunlevel(-1);
 	delete init;
-	instance=0;
+	instance = 0;
 }
 
 int main(int argc, char **argv)
