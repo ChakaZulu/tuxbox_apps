@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.45 2003/05/18 11:41:57 digi_casi Exp $
+ * $Id: pzapit.cpp,v 1.46 2003/05/18 13:50:36 digi_casi Exp $
  *
  * simple commandline client for zapit
  *
@@ -56,7 +56,7 @@ int usage (std::string basename)
 	std::cout << "shutdown zapit: " << basename << " -kill" << std::endl;
 	std::cout << "enter standby: " << basename << " -esb" << std::endl;
 	std::cout << "leave standby: " << basename << " -lsb" << std::endl;
-	std::cout << "send diseqc 1.2 motor command: " << basename << "-m <cmdtype> <cmd> <addr> <number of parameters> <parameter 1> <parameter 2>" << std::endl;
+	std::cout << "send diseqc 1.2 motor command: " << basename << "-m <cmdtype> <addr> <cmd> <number of parameters> <parameter 1> <parameter 2>" << std::endl;
 	return -1;
 }
 
