@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.5 2004/04/29 02:10:27 carjay Exp $
+ * $Id: streamfile.c,v 1.6 2004/04/29 07:42:16 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -130,8 +130,8 @@ static void unsetPesFilter (int fd) {
 
 void *FileThread (void *v_arg)
 {
-	char mybuf[RINGBUFFERSIZE];
-	size_t readsize, len, maxreadsize=0;
+	ringbuffer_data_t vec[2];
+	size_t readsize, maxreadsize=0;
 	unsigned long long filesize = 0;
 	unsigned int filecount = 0;
 	unsigned long long splitsize=1024*1024*1024; // 1GB
@@ -145,13 +145,13 @@ void *FileThread (void *v_arg)
 	
 	while (!exit_flag)
 	{
-		readsize=ringbuffer_read_space(ringbuf);
+		ringbuffer_get_read_vector(ringbuf, &(vec[0]));
+		readsize = vec[0].len;
 		if ( readsize ) {
 			if (readsize > maxreadsize) {
 				maxreadsize = readsize;
 			}
-			len = ringbuffer_read (ringbuf, mybuf, (readsize / TS_SIZE) * TS_SIZE);
-			//dprintf("read %d bytes from ringbuffer\n", len);
+			readsize = (readsize / TS_SIZE) * TS_SIZE;
 
 			// Do Splitting if necessary
 			if ((filesize + RINGBUFFERSIZE >= splitsize) || (fd2 == -1)) {
@@ -171,17 +171,20 @@ void *FileThread (void *v_arg)
 
 			if (poll(pfd, 1, 5000)>0) {
 				if (pfd[0].revents & POLLOUT) {
-					ssize_t todo = len;
+					ssize_t todo = readsize;
 					ssize_t written;
 					do {
-						if (((written = write(fd2, mybuf+(len-todo), todo)) < 0)&&(errno!=EAGAIN))
+						if (((written = write(fd2, vec[0].buf+(readsize-todo), todo)) < 0)&&(errno!=EAGAIN))
 							perror("[streamfile]: write");	// CIFS returns EINVAL all the time :S
 						else
-							todo-=written;
+						{
+							todo -= written;
+							ringbuffer_read_advance(ringbuf, written);
+						}
 					} while (todo>0 && !exit_flag);
 					fdatasync(fd2);
-					filesize += (unsigned long long)len;
-					filesize2 += (unsigned long long)len;
+					filesize += (unsigned long long)readsize;
+					filesize2 += (unsigned long long)readsize;
 				}
 			} else {
 				perror ("[streamfile]: poll");	
