@@ -327,7 +327,12 @@ int main(int argc, char **argv)
 	
 //	mtrace();
 //	mcheck(0);
-	
+
+	{
+		eConfigOld c;
+		c.convert("/var/tuxbox/config/enigma/config");
+	}
+
 	{
 		eZap ezap(argc, argv);
 		res=ezap.exec();
