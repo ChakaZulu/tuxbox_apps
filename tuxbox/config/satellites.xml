@@ -8,6 +8,7 @@
 	</sat>
 	<sat name="Astra 19.2E">
 		<transponder frequency="10876000" symbol_rate="22000000" polarization="1" fec_inner="4"/>
+		<transponder frequency="12187500" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12551000" symbol_rate="22000000" polarization="1" fec_inner="4"/>
 	</sat>
 	<sat name="Astra 28.2E">
