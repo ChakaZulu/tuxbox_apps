@@ -62,6 +62,8 @@ void eZapStandby::renewSleep()
 	{
 		::sync();
 		struct stat s;
+		if (!::stat("/var/etc/enigma_enter_idle.sh", &s))
+			system("/var/etc/enigma_enter_idle.sh");
 		if (::stat("/sbin/hdparm", &s))
 			return;
 		system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
@@ -152,6 +154,11 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		struct stat s;
 		if (!::stat("/var/etc/enigma_leave_standby.sh", &s))
 			system("/var/etc/enigma_leave_standby.sh");
+		if ( !eDVB::getInstance()->recorder )
+		{
+			if (!::stat("/var/etc/enigma_leave_idle.sh", &s))
+				system("/var/etc/enigma_leave_idle.sh");
+		}
 		break;
 	}
 	default:

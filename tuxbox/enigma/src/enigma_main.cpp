@@ -3562,6 +3562,12 @@ int eZapMain::handleStandby(int i)
 				// and enigma wakes up
 				eZapStandby::getInstance()->wakeUp(1);
 			}
+			else  // no real wakeup.... dvr timer do wakeup only tuner and hdd...
+			{
+				struct stat s;
+				if (!::stat("/var/etc/enigma_leave_idle.sh", &s))
+					system("/var/etc/enigma_leave_idle.sh");
+			}
 			wasSleeping=3;
 		}
 		return 0;
