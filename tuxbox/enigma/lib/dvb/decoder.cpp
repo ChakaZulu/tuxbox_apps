@@ -125,11 +125,12 @@ void Decoder::Pause()
 	if (fd.video != -1)
 	{
 		::ioctl(fd.video, VIDEO_FREEZE);
+		::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 0);
 		eDebug("video_freeze: %m");
 	}
 	if (fd.audio != -1)
 	{
-		::ioctl(fd.audio, AUDIO_PAUSE);
+		::ioctl(fd.audio, AUDIO_STOP);
 		eDebug("audio_pause: %m");
 	}
 }
@@ -139,11 +140,12 @@ void Decoder::Resume()
 	if (fd.video != -1)
 	{
 		::ioctl(fd.video, VIDEO_CONTINUE);
+		::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1);
 		eDebug("video_continue %m");
 	}
 	if (fd.audio != -1)
 	{
-		::ioctl(fd.audio, AUDIO_CONTINUE);
+  ::ioctl(fd.audio, AUDIO_PLAY);
 		eDebug("audio continue %m");
 	}
 }

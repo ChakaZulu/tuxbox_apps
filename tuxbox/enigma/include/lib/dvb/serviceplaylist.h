@@ -11,9 +11,8 @@ struct ePlaylistEntry
 		PlaylistEntry=1, SwitchTimerEntry=2, RecTimerEntry=4,	recDVR=8, recVCR=16,
 		stateWaiting=32, stateRunning=64,	statePaused=128, stateFinished=256, stateError=512,
 		errorNoSpaceLeft=1024, errorUserAborted=2048, errorZapFailed=4096, errorOutdated=8192,
-		boundFile=16384, typeSmartTimer=32768
+		boundFile=16384, typeSmartTimer=32768, typeShutOffTimer=65536
 	};
-
 	eServiceReference service;
 	union
 	{

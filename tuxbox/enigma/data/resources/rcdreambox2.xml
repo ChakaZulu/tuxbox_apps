@@ -151,6 +151,7 @@
 		<actionmap name="epgSelector">
 			<action name="addTimerEvent" key="green" flags="m" />
 			<action name="removeTimerEvent" key="red" flags="m" />
+			<action name="removeTimerEvent" key="radio" flags="m" />
 		</actionmap>
 		<actionmap name="timerView">
 			<action name="removeTimerEntry" key="red" flags="m" />

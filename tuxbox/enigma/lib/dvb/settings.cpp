@@ -37,7 +37,7 @@ void eDVBSettings::addDVBBouquet(const BAT *bat)
 		if (i->Tag()==DESCR_BOUQUET_NAME)
 			bouquet_name=((BouquetNameDescriptor*)*i)->name;
 	}
-	eBouquet *bouquet=createBouquet(0, bat->bouquet_id, bouquet_name);
+	eBouquet *bouquet=createBouquet(bat->bouquet_id, bouquet_name);
 	
 	for (ePtrList<BATEntry>::const_iterator be(bat->entries); be != bat->entries.end(); ++be)
 		for (ePtrList<Descriptor>::const_iterator i(be->transport_descriptors); i != be->transport_descriptors.end(); ++i)
@@ -99,21 +99,21 @@ eBouquet *eDVBSettings::getBouquet(eString bouquet_name)
 	return 0;
 }
 
-eBouquet* eDVBSettings::createBouquet(const eBouquet *parent, int bouquet_id, eString bouquet_name)
+eBouquet* eDVBSettings::createBouquet(int bouquet_id, eString bouquet_name)
 {
 	eBouquet *n=getBouquet(bouquet_id);
 	if (!n)
-		bouquets.push_back(n=new eBouquet(parent, bouquet_id, bouquet_name));
+		bouquets.push_back(n=new eBouquet(bouquet_id, bouquet_name));
 	return n;
 }
 
-eBouquet *eDVBSettings::createBouquet(const eBouquet *parent, eString bouquet_name)
+eBouquet *eDVBSettings::createBouquet(eString bouquet_name)
 {
 	eBouquet *n=getBouquet(bouquet_name);
 	if (!n)
 	{
 		int bouquet_id=getUnusedBouquetID(0);
-		bouquets.push_back(n=new eBouquet(parent, bouquet_id, bouquet_name));
+		bouquets.push_back(n=new eBouquet(bouquet_id, bouquet_name));
 	}
 	return n;
 }
@@ -174,7 +174,7 @@ struct sortinChannel: public std::unary_function<const eService&, void>
 	}
 	void operator()(eService &service)
 	{
-		eBouquet *b = edvb.createBouquet(0, beautifyBouquetName(service.service_provider) );
+		eBouquet *b = edvb.createBouquet(beautifyBouquetName(service.service_provider) );
 		b->add(eServiceReferenceDVB(service.transport_stream_id, service.original_network_id, service.service_id, service.service_type));
 	}
 };
@@ -197,7 +197,7 @@ struct saveService: public std::unary_function<const eService&, void>
 	}
 	void operator()(eService& s)
 	{
-		fprintf(f, "%04x:%04x:%04x:%d\n", s.service_id.get(), s.transport_stream_id.get(), s.original_network_id.get(), s.service_type/*, s.service_number*/);
+		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id.get(), s.transport_stream_id.get(), s.original_network_id.get(), s.service_type, s.service_number);
 		fprintf(f, "%s\n", s.service_name.c_str());
 		fprintf(f, "%s\n", s.service_provider.c_str());
 	}
@@ -265,7 +265,7 @@ void eDVBSettings::loadServices()
 		delete transponderlist;
 	transponderlist=new eTransponderList;*/
 	if (transponderlist)
-		transponderlist->clearTransponders();
+		transponderlist->clearAllTransponders();
 
 	while (!feof(f))
 	{
@@ -304,7 +304,7 @@ void eDVBSettings::loadServices()
 	}
 
 	if (transponderlist)
-		transponderlist->clearServices();
+		transponderlist->clearAllServices();
 	
 	int count=0;
 
@@ -315,14 +315,14 @@ void eDVBSettings::loadServices()
 		if (!strcmp(line, "end\n"))
 			break;
 
-		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1/*, service_number=-1*/;
-		sscanf(line, "%04x:%04x:%04x:%d", &service_id, &transport_stream_id, &original_network_id, &service_type/*, &service_number*/);
+		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1, service_number=-1;
+		sscanf(line, "%04x:%04x:%04x:%d:%d", &service_id, &transport_stream_id, &original_network_id, &service_type, &service_number);
 		eService &s=transponderlist->createService(
 				eServiceReferenceDVB(
 						eTransportStreamID(transport_stream_id), 
 						eOriginalNetworkID(original_network_id), 
 						eServiceID(service_id),
-						service_type)/*, service_number*/);
+						service_type), service_number);
 		count++;
 		s.service_type=service_type;
 		fgets(line, 256, f);
@@ -386,19 +386,16 @@ void eDVBSettings::loadBouquets()
 
 	while (!feof(f))
 	{
-		eBouquet *parent=0;
 		if (!fgets(line, 256, f))
 			break;
 		if (!strcmp(line, "end\n"))
 			break;
-		int bouquet_id=-1, parent_id=-1;
-		sscanf(line, "%d:%d", &bouquet_id, &parent_id);
+		int bouquet_id=-1;
+		sscanf(line, "%d", &bouquet_id);
 		if (!fgets(line, 256, f))
 			break;
-		if (parent_id != -1)
-			parent=getBouquet(parent_id);
 		line[strlen(line)-1]=0;
-		eBouquet *bouquet=createBouquet(parent, bouquet_id, line);
+		eBouquet *bouquet=createBouquet(bouquet_id, line);
 		while (!feof(f))
 		{
 			fgets(line, 256, f);
@@ -425,16 +422,23 @@ void eDVBSettings::loadBouquets()
 
 void eDVBSettings::clearList()
 {
-/*	if (transponderlist)
-		delete transponderlist;*/
 	if (transponderlist)
 	{
-		transponderlist->clearTransponders();
-		transponderlist->clearServices();
+		transponderlist->clearAllTransponders();
+		transponderlist->clearAllServices();
 		removeDVBBouquets(); // user Bouquets do not delete...
 	}
-	else
-		eDebug("no transponderList");
+
+	/*emit*/ dvb.bouquetListChanged();
+}
+
+void eDVBSettings::removeOrbitalPosition(int orbital_position)
+{
+	if (transponderlist)
+	{
+		transponderlist->removeOrbitalPosition(orbital_position);
+		sortInChannels();
+	}
 
 	/*emit*/ dvb.bouquetListChanged();
 }

@@ -6,6 +6,8 @@
 #include <lib/base/thread.h>
 #include <lib/base/buffer.h>
 #include <lib/base/message.h>
+#include <lib/dvb/edvb.h>
+
 
 class eServiceHandlerDVB;
 
@@ -72,7 +74,6 @@ public:
 
 class eServiceHandlerDVB: public eServiceHandler
 {
-	void addFile(void *node, const eString &filename);
 	friend class eDVRPlayerThread;
 	int recording;
 
@@ -104,6 +105,7 @@ class eServiceHandlerDVB: public eServiceHandler
 	int flags, state, aspect, error;
 
 	eServiceCache<eServiceHandlerDVB> cache;
+	void handleDVBEvent( const eDVBEvent& );
 public:
 	int getID() const;
 	eServiceHandlerDVB();

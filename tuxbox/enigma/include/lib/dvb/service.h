@@ -28,7 +28,9 @@ public:
 		
 		evtAspectChanged,
 		
-		evtEnd
+		evtEnd,
+
+		evtRecordFailed
 	};
 	int type;
 };

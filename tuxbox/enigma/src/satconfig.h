@@ -12,6 +12,7 @@
 #include <lib/dvb/dvb.h>
 
 class eFEStatusWidget;
+class eTransponderWidget;
 
 struct SatelliteEntry
 {
@@ -22,8 +23,10 @@ struct SatelliteEntry
 class eSatelliteConfigurationManager: public eWindow, public existNetworks
 {
 	eTimer* refresh;
+	eWidget *buttonWidget;
 	eWidget *w_buttons;
 	eButton *button_close, *button_new;
+	eMultipage satPages;
 	SatelliteEntry* deleteThisEntry;
 	int eventHandler(const eWidgetEvent &event);
 	std::map< eSatellite*, SatelliteEntry > entryMap;
@@ -40,6 +43,7 @@ class eSatelliteConfigurationManager: public eWindow, public existNetworks
 	void satChanged(eComboBox *who, eListBoxEntryText *le);
 	void hiloChanged(eComboBox *who, eListBoxEntryText *le);
 	void voltageChanged(eComboBox *who, eListBoxEntryText *le);
+	void focusChanged( const eWidget* focus );
 public:
 	eSatelliteConfigurationManager();
 	~eSatelliteConfigurationManager();
@@ -48,13 +52,15 @@ public:
 class eLNBPage;
 class eDiSEqCPage;
 class eRotorPage;
-                 
+class eManuallyRotorPage;
+                  
 class eLNBSetup : public eWindow // Selitor = "Sel"ector + Ed"itor" :-)
 {
 	eMultipage mp;
 	eDiSEqCPage *DiSEqCPage;
 	eLNBPage *LNBPage;
 	eRotorPage *RotorPage;
+	eManuallyRotorPage *ManuallyRotorPage;
 	eSatellite* sat;
 	void onSave();
 	void onNext() { mp.next(); }
@@ -125,6 +131,19 @@ class eRotorPage : public eWidget
 	void posChanged( eListBoxEntryText* );
 public:  
 	eRotorPage( eWidget *parent, eSatellite *sat );
+};
+
+class eManuallyRotorPage : public eWidget
+{
+	friend class eLNBSetup;
+	eTransponderWidget *transponder_widget;
+	eFEStatusWidget *festatus_widget;
+	eButton *prev;
+	void retune();
+	eTransponder transponder;
+	int eventHandler( const eWidgetEvent &event );
+public:
+	eManuallyRotorPage(eWidget *parent);
 };
 
 #endif

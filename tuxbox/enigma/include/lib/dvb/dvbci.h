@@ -42,7 +42,8 @@ class eDVBCI: private eThread, public eMainloop, public Object
 	void PMTaddPID(int pid,int streamtype);
 	void PMTaddDescriptor(unsigned char *data);
 	void newService();
-	
+
+	void sendData(unsigned char tc_id,unsigned char *data,unsigned int len);	
 	void sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data);
 	void help_manager(unsigned int session);
 	void app_manager(unsigned int session);

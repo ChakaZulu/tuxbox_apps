@@ -40,6 +40,7 @@ class eFEStatusWidget: public eWidget
 {
 	eProgress *p_snr, *p_agc;
 	eCheckbox *c_sync, *c_lock;
+	eLabel *lsnr_num, *lsync_num;
 	eFrontend *fe;
 	eTimer updatetimer;
 	void update();

@@ -4,26 +4,19 @@
 #include <lib/gui/ewidget.h>
 #include <lib/gui/elabel.h>
 
-class eStatusBar : public eDecoWidget
+class eStatusBar : public eLabel
 {
-	int flags;
-	eLabel client;
 	void update( const eWidget *);
 	const eWidget* current;
 
-	void redrawWidget(gPainter *, const eRect &);
 	int setProperty(const eString &, const eString &);
-	int eventHandler(const eWidgetEvent &event);
 	void initialize();
 public:
 	enum
 	{
-		flagOwnerDraw = 1,
-		flagVCenter = 2
+		flagOwnerDraw = 128,
 	};
 	eStatusBar( eWidget*, const char* deco="eStatusBar" );
-	int getFlags() const;
-	eLabel &getLabel()	{	return client; }
 	void setFlags( int );
 };
 

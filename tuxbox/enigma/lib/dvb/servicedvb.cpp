@@ -4,6 +4,7 @@
 #include <lib/system/init.h>
 #include <lib/driver/streamwd.h>
 #include <lib/dvb/servicestructure.h>
+#include <lib/dvb/servicefile.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/decoder.h>
 #include <fcntl.h>
@@ -332,6 +333,16 @@ void eServiceHandlerDVB::scrambledStatusChanged(bool scrambled)
 		serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
 }
 
+void eServiceHandlerDVB::handleDVBEvent( const eDVBEvent & e )
+{
+	switch ( e.type )
+	{
+		case eDVBEvent::eventRecordWriteError:
+			serviceEvent(eServiceEvent(eServiceEvent::evtRecordFailed));
+		break;
+	}
+}
+
 void eServiceHandlerDVB::switchedService(const eServiceReferenceDVB &, int err)
 {
 	int oldstate=state;
@@ -384,6 +395,7 @@ eServiceHandlerDVB::eServiceHandlerDVB()
 	CONNECT(eDVB::getInstance()->gotSDT, eServiceHandlerDVB::gotSDT);
 	CONNECT(eDVB::getInstance()->gotPMT, eServiceHandlerDVB::gotPMT);
 	CONNECT(eDVB::getInstance()->leaveService, eServiceHandlerDVB::leaveService);
+	CONNECT(eDVB::getInstance()->eventOccured, eServiceHandlerDVB::handleDVBEvent);
 	CONNECT(eStreamWatchdog::getInstance()->AspectRatioChanged, eServiceHandlerDVB::aspectRatioChanged);
 
 	cache.addPersistentService(
@@ -721,7 +733,7 @@ void eServiceHandlerDVB::loadNode(eServiceCache<eServiceHandlerDVB>::eNode &node
 			{
 				int flags=eServiceReference::mustDescent|eServiceReference::canDescent|eServiceReference::isDirectory;
 
-				if (ref.data[1] >= 0) 		// sort only automatic generated services
+				if (i->bouquet_id >= 0) 		// sort only automatic generated services
 					flags|=eServiceReference::shouldSort;
 
 				int found = 0;
@@ -774,7 +786,9 @@ eService *eServiceHandlerDVB::addRef(const eServiceReference &service)
 void eServiceHandlerDVB::removeRef(const eServiceReference &service)
 {
 	if ((service.data[0] < 0) || (service.path.length()))
+	{
 		cache.removeRef(service);
+	}
 }
 
 void eServiceHandlerDVB::gotMessage(const eDVRPlayerThreadMessage &message)

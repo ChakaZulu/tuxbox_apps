@@ -235,7 +235,10 @@ int eSkin::parseImages(XMLTreeNode *inode)
 	char *abasepath=inode->GetAttributeValue("basepath");
 	if (!abasepath)
 		abasepath="";
-	eString basepath=eString(DATADIR) + eString("/enigma/pictures/") + abasepath;
+	eString basepath=eString(DATADIR) + eString("/enigma/pictures/");
+	if (abasepath[0] == '/') // allow absolute paths
+		basepath="";
+	basepath+=abasepath;
 	if (basepath[basepath.length()-1]!='/')
 		basepath+="/";
 

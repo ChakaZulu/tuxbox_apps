@@ -97,10 +97,17 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 				// oder eine durch [] erzeugte
 				eventMap &servicemap = eventDB[service];
 				
+/* alt: vorhandene items haben vorrang vor neuen.
 				eventMap::iterator It = servicemap.find(TM);
 
 				if (It == servicemap.end())   // event still not cached
+*/
+
+// neu: erst alte events killen...
+				servicemap.erase(TM);
+// ... dann neuen einfuegen.				
 					eventDB[service][TM] = new eventData(eit_event, eit_event_size, source );
+
 			}
 			ptr += eit_event_size;
 			((__u8*)eit_event)+=eit_event_size;
@@ -202,12 +209,17 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t)
 	eventCache::iterator It =	eventDB.find( key );
 	if ( It != eventDB.end() && !It->second.empty() ) // entry in cache found ?
 	{
-		const eit_event_struct* eit_event = It->second.begin()->second->get();
-		int duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
-		time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4,	eit_event->start_time_5);
+		if (!t)
+			t = time(0)+eDVB::getInstance()->time_difference;
 
-		if ( t?t:(time(0)+eDVB::getInstance()->time_difference) <= (TM+duration) )
-			e = new EITEvent( *It->second.begin()->second );	
+		for ( eventMap::iterator i( It->second.begin() ); i != It->second.end(); i++)
+		{
+			const eit_event_struct* eit_event = i->second->get();
+			int duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
+			time_t begTime = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4,	eit_event->start_time_5);					
+			if ( t >= begTime && t <= begTime+duration ) // the we have found
+				return new EITEvent( *i->second );
+		}
 	}
 	return e;
 }

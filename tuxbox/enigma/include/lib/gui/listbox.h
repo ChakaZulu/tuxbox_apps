@@ -825,6 +825,7 @@ protected:
 	int width;
 	eListBox<T> list;
 	eStatusBar *statusbar;
+	int eventHandler( const eWidgetEvent& );
 public:
 	eListBoxWindow(eString Title="", int Entrys=0, int width=400, bool sbar=0);
 };
@@ -846,6 +847,21 @@ inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int width, b
 		statusbar->loadDeco();
 		statusbar->show();
 	}
+}
+
+template <class T>
+inline int eListBoxWindow<T>::eventHandler( const eWidgetEvent& e)
+{
+	switch(e.type)
+	{
+		case eWidgetEvent::execBegin:
+			if (statusbar)
+				statusbar->setText( list.getCurrent()->getHelpText() );
+		break;
+		default:
+			return eWindow::eventHandler( e );
+	}
+	return 1;
 }
 
 #endif

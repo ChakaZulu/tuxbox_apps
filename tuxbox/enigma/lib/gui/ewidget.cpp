@@ -212,7 +212,6 @@ void eWidget::invalidate(eRect area, int force)
 		if (!w->parent)	// spaetestens fuers TLW sollte backgroundcolor aber non-transparent sein
 			break;
 		area.moveBy(w->position.x(), w->position.y());
-
 		w=w->parent;
 		area.moveBy(w->clientrect.x(), w->clientrect.y());
 	}
@@ -444,7 +443,7 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 	case eWidgetEvent::changedForegroundColor:
 	case eWidgetEvent::changedBackgroundColor:
 	case eWidgetEvent::changedPosition:
-  case eWidgetEvent::changedPixmap:
+	case eWidgetEvent::changedPixmap:
 		invalidate();
 		break;
 	default:

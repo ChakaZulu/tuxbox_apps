@@ -40,7 +40,7 @@ void eDVBRecorder::gotBackMessage(const eDVBRecorderMessage &msg)
 	switch (msg.code)
 	{
 	case eDVBRecorderMessage::rWriteError:
-		recMessage(recWriteError);
+		/* emit */ recMessage(recWriteError);
 		break;
 	default:
 		break;

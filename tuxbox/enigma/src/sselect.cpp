@@ -19,6 +19,7 @@
 #include <lib/system/init.h>
 #include <lib/dvb/service.h>
 #include <lib/gui/numberactions.h>
+#include <lib/dvb/serviceplaylist.h>
 
 gFont eListBoxEntryService::serviceFont;
 gFont eListBoxEntryService::descrFont;
@@ -52,8 +53,8 @@ struct serviceSelectorActions
 };
 eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(5, "service selector actions");
 
-eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service)
-	:eListBoxEntry((eListBox<eListBoxEntry>*)lb),	numPara(0), namePara(0), descrPara(0), nameXOffs(0), service(service)
+eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num)
+	:eListBoxEntry((eListBox<eListBoxEntry>*)lb),	numPara(0), namePara(0), descrPara(0), nameXOffs(0), flags(flags), num(num), service(service)
 {
 #if 0
 	sort=eString().sprintf("%06d", service->service_number);
@@ -137,13 +138,20 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 		int ypos = (rect.height() - folder->y) / 2;
 		rc->blit( *folder, ePoint(10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);		
 	}
-	else if (!service.flags & eServiceReference::isDirectory)
+	else 
+	
+	if (flags & flagShowNumber)
 	{
+		int n=-1;
+		if (flags & flagOwnNumber)
+			n=num;
+		else
+			n=pservice->service_number;
 		if (!numPara)
 		{
 			numPara = new eTextPara( eRect( 0, 0, maxNumSize, rect.height() ) );
 			numPara->setFont( numberFont );
-			numPara->renderString( eString().setNum(num) );
+			numPara->renderString( eString().setNum(n) );
 			numPara->realign(eTextPara::dirRight);
 			numYOffs = ((rect.height() - numPara->getBoundBox().height()) / 2 ) - numPara->getBoundBox().top();
 			nameXOffs = maxNumSize+numPara->getBoundBox().height();
@@ -179,18 +187,19 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 					if (descriptor->Tag()==DESCR_SHORT_EVENT)
 					{
 						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
-						sdescr=ss->event_name;
+						sdescr='('+ss->event_name+')';
 						break;
 					}
 				}
 				delete e;
 			}
-			eServiceInterface::getInstance()->removeRef(service);
 		}
 		descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
 		descrPara->setFont( descrFont );
 		descrPara->renderString( sdescr );
-		descrXOffs = nameXOffs+namePara->getBoundBox().width()+numPara->getBoundBox().height();
+		descrXOffs = nameXOffs+namePara->getBoundBox().width();
+		if (numPara)
+			descrXOffs += numPara->getBoundBox().height();
 		descrYOffs = ((rect.height() - descrPara->getBoundBox().height()) / 2 ) - descrPara->getBoundBox().top();
 	}
 	if (descrPara)  // only render descr Para, when avail...
@@ -213,19 +222,24 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 		rc->line( ePoint(rect.right()-3, rect.top()+3), ePoint(rect.right()-3, rect.bottom()-4) );
 	}
 
+	eServiceInterface::getInstance()->removeRef(service);
+
 	return sort;
 }
 
 void eServiceSelector::addService(const eServiceReference &ref)
 {
-	new eListBoxEntryService(services, ref);
+	int flags=serviceentryflags;
+	if ( ref.flags & eServiceReference::isDirectory)
+		flags &= ~ eListBoxEntryService::flagShowNumber;
+	
+	new eListBoxEntryService(services, ref, flags);
 }
 
 void eServiceSelector::addBouquet(const eServiceReference &ref)
 {
-	new eListBoxEntryService(bouquets, ref);
+	new eListBoxEntryService(bouquets, ref, serviceentryflags);
 }
-
 struct renumber: public std::unary_function<const eListBoxEntryService&, void>
 {
 	int &num;
@@ -249,12 +263,13 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	eServiceReference ref;
 	do
 	{
-		const eService *pservice=eServiceInterface::getInstance()->addRef(p.current());
+		eServiceReference b=p.current();
+		const eService *pservice=eServiceInterface::getInstance()->addRef(b);
 	  if (pservice && pservice->service_name.length() )
 			windowDescr=pservice->service_name+" > "+windowDescr;
 		ref = p.current();
 		p.up();
-		eServiceInterface::getInstance()->removeRef	(p.current());
+		eServiceInterface::getInstance()->removeRef(b);
 	}
 	while ( ref != p.current() );
 	windowDescr.erase( windowDescr.rfind(">") );
@@ -270,6 +285,9 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	CONNECT(signal, eServiceSelector::addService);
 	
 	ref=_ref;
+	serviceentryflags=eListBoxEntryService::flagShowNumber;
+	if (ref.type == eServicePlaylistHandler::ID) // playlists have own numbers
+		serviceentryflags|=eListBoxEntryService::flagOwnNumber;
 	
 	iface->enterDirectory(ref, signal);
 	iface->leaveDirectory(ref);	// we have a copy.
@@ -277,10 +295,13 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	if (ref.flags & eServiceReference::shouldSort)
 		services->sort();
 
-	int num=0;
-	services->forEachEntry( renumber(num) );
+	if (serviceentryflags & eListBoxEntryService::flagOwnNumber)
+	{
+		int num=0;
+		services->forEachEntry( renumber(num) );
+	}
 
-	// now we calc the x size of the biggest number we have;
+/*	// now we calc the x size of the biggest number we have;
 	if (num)
 	{
 		eTextPara  *tmp = new eTextPara( eRect(0, 0, 100, 50) );
@@ -289,8 +310,8 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 		eListBoxEntryService::maxNumSize = tmp->getBoundBox().width()+10;
 		tmp->destroy();
 	}
-	else
-		eListBoxEntryService::maxNumSize=10;
+	else */
+		eListBoxEntryService::maxNumSize=45;
 
 	services->endAtomic();
 }
@@ -492,7 +513,7 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 {
 	if (entry && entry->service)
 	{
-		const eServiceReference &ref=entry->service;
+		eServiceReference ref=entry->service;
 
 		if (movemode)
       if (eListBoxEntryService::selectedToMove)
@@ -943,7 +964,8 @@ void eServiceSelector::enterDirectory(const eServiceReference &ref)
 	services->beginAtomic();
 	path.down(ref);
 	actualize();
-	selectService( eServiceInterface::getInstance()->service );
+	if (! selectService( eServiceInterface::getInstance()->service ))
+		services->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
 	services->endAtomic();
 }
 

@@ -29,6 +29,7 @@ class eListBoxEntryService: public eListBoxEntry
 	static gPixmap *folder;
 	eTextPara *numPara, *namePara, *descrPara;
 	int nameXOffs, descrXOffs, numYOffs, nameYOffs, descrYOffs;
+	int flags;
 	int num;
 public:
 	static eListBoxEntryService *selectedToMove;
@@ -38,7 +39,8 @@ public:
 	void invalidateDescr();
 	static int getEntryHeight();
 	eServiceReference service;
-	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service);
+	enum { flagShowNumber=1, flagOwnNumber=2 };
+	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num=-1);
 	~eListBoxEntryService();
 
 	bool operator<(const eListBoxEntryService &r) const
@@ -65,6 +67,7 @@ class eServiceSelector: public eWindow
 	void addService(const eServiceReference &service);
 	void addBouquet(const eServiceReference &service);
 	int style;
+	int serviceentryflags;
 
 	char BrowseChar;
 	eTimer BrowseTimer;

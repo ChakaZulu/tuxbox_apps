@@ -42,7 +42,7 @@ void eCheckbox::gotFocus()
 	}
 	setBackgroundColor(focusB);
 	setForegroundColor(focusF);
-	invalidate();
+//	invalidate();
 }
 
 void eCheckbox::lostFocus()
@@ -64,7 +64,7 @@ void eCheckbox::setCheck(int c)
 	ischecked=c;
 
 	setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked"));
-  
+
 	if (LCDTmp)
 		LCDTmp->setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckboxLCD.checked":"eCheckboxLCD.unchecked"));
 }
@@ -89,7 +89,7 @@ int eCheckbox::eventHandler(const eWidgetEvent &event)
 		if (swapTxtPixmap)
 		{
 			text_position=ePoint(0,0);
-			invalidate();
+			eLabel::invalidate();
 			validate();
 			pixmap_position=ePoint( para->getBoundBox().right()+5, (size.height()-pixmap->y) / 2 );
 		}
@@ -98,10 +98,11 @@ int eCheckbox::eventHandler(const eWidgetEvent &event)
 			pixmap_position=ePoint(0, (size.height()-pixmap->y)/2);
 			text_position=ePoint((int)(pixmap->x*1.25), 0);
 		}
-		return eButton::eventHandler(event); // changed Size must seen by eLabel...
+		//return eButton::eventHandler(event); // changed Size must seen by eLabel...
+		break;
 
 	default:
-		return eButton::eventHandler(event); // changed Size must seen by eLabel...
+		return eButton::eventHandler(event);
 	}
 	return 1;
 }

@@ -32,8 +32,8 @@ protected:
 	void gotFocus();
 	void lostFocus();
 public:
-  void invalidateNum();
-  Signal1<void, int*> selected;
+	void invalidateNum();
+	Signal1<void, int*> selected;
 	Signal0<void> numberChanged;
 	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eWidget* descr=0, int grabfocus=1, const char* deco="eNumber" );
 	~eNumber();
@@ -48,14 +48,15 @@ public:
 		flagDrawBoxes=2,
 		flagFillWithZeros=4,
 		flagTime=8,
-    flagPosNeg=16,
-    flagHideInput=32
+		flagPosNeg=16,
+		flagHideInput=32
 	};
 	void setFlags(int flags);
 	void setBase(int base);
 	
 	void setNumber(int n);
 	int getNumber();
+	void setDescr( eWidget *d ) { descr = d; }
 };
 
 #endif

@@ -14,7 +14,11 @@ eLabel::eLabel(eWidget *parent, int flags, int takefocus, const char *deco ):
 
 eLabel::~eLabel()
 {
-	invalidate();
+	if (para)
+	{
+		para->destroy();
+		para=0;
+	}
 }
 
 void eLabel::validate( const eSize* s )
@@ -70,6 +74,9 @@ void eLabel::setAlign(int align)
 
 void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 {
+//	eDebug("decoStr = %s, text=%s, name=%s, %p left = %d, top = %d, width=%d, height = %d", strDeco?strDeco.c_str():"no", text?text.c_str():"no" , name?name.c_str():"no", this, this->getPosition().x(), this->getPosition().y(), this->getSize().width(), this->getSize().height() );
+//	eDebug("renderContext left = %d, top = %d, width = %d, height = %d", rc.left(), rc.top(), rc.width(), rc.height() );
+
 	eRect area=eRect(ePoint(0, 0), ePoint(width(), height()));
 
 	if (deco_selected && have_focus)
@@ -102,7 +109,11 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 		target->renderPara(*para, ePoint( area.left(), area.top()+yOffs) );
 	}
 	if (pixmap)
+	{
+//		eDebug("blit pixmap area left=%d, top=%d, right=%d, bottom=%d", rc.left(), rc.top(), rc.right(), rc.bottom() );
+//		eDebug("pixmap_pos x = %d, y = %d, xsize=%d, ysize=%d", pixmap_position.x(), pixmap_position.y(), pixmap->x, pixmap->y );
 		target->blit(*pixmap, pixmap_position, area, (blitFlags & BF_ALPHATEST) ? gPixmap::blitAlphaTest : 0);
+	}
 }
 
 int eLabel::eventHandler(const eWidgetEvent &event)
@@ -110,11 +121,24 @@ int eLabel::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
   case eWidgetEvent::changedFont:
-	case eWidgetEvent::changedText:
+		case eWidgetEvent::changedText:
+		if (para)
+		{
+			para->destroy();
+			para=0;
+		}
+		if ( have_focus && deco_selected )
+			eDecoWidget::invalidate( crect_selected );
+		else if ( deco )
+			eDecoWidget::invalidate( crect );
+		else
+			eDecoWidget::invalidate();
+	break;
+
 	case eWidgetEvent::changedSize:
 		invalidate();
 	break;
-	
+
 	default:
 		return eDecoWidget::eventHandler(event);
 		break;

@@ -31,11 +31,27 @@ tsSelectType::tsSelectType(eWidget *parent): eWidget(parent)
 	if (skin->build(this, "tsSelectType"))
 		eFatal("skin load of \"tsSelectType\" failed");
 
-	new eListBoxEntryText(list, _("auto scan"), (void*)1);
-	new eListBoxEntryText(list, _("manual scan.."), (void*)2);
-	list->setCurrent( new eListBoxEntryText(list, _("abort"), (void*)0) );
+	list->setFlags(eListBox<eListBoxEntryText>::flagShowEntryHelp);
+	new eListBoxEntryText(list, _("auto scan"), (void*)1, 0, _("open automatic transponder scan") );
+	new eListBoxEntryText(list, _("manual scan.."), (void*)2, 0, _("open manual transponder scan") );
+	list->setCurrent( new eListBoxEntryText(list, _("abort"), (void*)0, 0, _("leave transponder scan") ) );
 
 	CONNECT(list->selected, tsSelectType::selected);
+}
+
+int tsSelectType::eventHandler( const eWidgetEvent &e )
+{
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			eDebug("execBegin");
+		case eWidgetEvent::childChangedHelpText:
+			parent->focusChanged( list );
+		break;
+		default:
+			return eWidget::eventHandler( e );
+	}
+	return 1;
 }
 
 void tsSelectType::selected(eListBoxEntryText *entry)
@@ -769,12 +785,12 @@ int TransponderScan::exec()
 		{
 			eTransponder transponder(*eDVB::getInstance()->settings->getTransponders());
 
-       eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 
 			if (sapi && sapi->transponder)
-        transponder=*sapi->transponder;
+				transponder=*sapi->transponder;
 			else
-        switch (eFrontend::getInstance()->Type())
+				switch (eFrontend::getInstance()->Type())
 				{
 				case eFrontend::feCable:
 					transponder.setCable(402000, 6900000, 0);	// some cable transponder
@@ -786,7 +802,7 @@ int TransponderScan::exec()
 					break;
 				}
 
-      eDVB::getInstance()->setMode(eDVB::controllerScan);        
+			eDVB::getInstance()->setMode(eDVB::controllerScan);        
 			tsManual manual_scan(window, transponder, LCDTitle, LCDElement);
 			manual_scan.show();
 			switch (manual_scan.exec())
@@ -803,8 +819,8 @@ int TransponderScan::exec()
 		}
 		case stateAutomatic:
 		{
-      eDVB::getInstance()->setMode(eDVB::controllerScan);
-      tsAutomatic automatic_scan(window);
+			eDVB::getInstance()->setMode(eDVB::controllerScan);
+			tsAutomatic automatic_scan(window);
 			automatic_scan.setLCD( LCDTitle, LCDElement);
 			automatic_scan.show();
 			switch (automatic_scan.exec())
@@ -822,12 +838,12 @@ int TransponderScan::exec()
 		case stateScan:
 		{
 			tsScan scan(window);
-  		scan.setLCD( LCDTitle, LCDElement);
+			scan.setLCD( LCDTitle, LCDElement);
 			scan.move(ePoint(0, 0));
 			scan.resize(size);
 			
 			scan.show();
-			statusbar->getLabel().setText(_("Scan is in progress... please wait"));
+			statusbar->setText(_("Scan is in progress... please wait"));
 			scan.exec();
 			scan.hide();
 
@@ -843,7 +859,7 @@ int TransponderScan::exec()
   		finish.move(ePoint(0, 0));
 			finish.resize(size);
 			finish.show();
-			statusbar->getLabel().setText(_("Scan is in finished, press ok to close window"));
+			statusbar->setText(_("Scan is in finished, press ok to close window"));
 			finish.exec();
 			finish.hide();
 			state=stateEnd;
@@ -856,6 +872,7 @@ int TransponderScan::exec()
 	}
 
 	eDVB::getInstance()->setMode(eDVB::controllerService);  
-  window->hide();
+	window->hide();
+
 	return 0;
 }

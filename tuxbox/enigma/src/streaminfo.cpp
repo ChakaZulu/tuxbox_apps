@@ -110,7 +110,7 @@ static eString getCAName(int casysid)
 
 class siPID: public eWidget
 {
-	eLabel *service_name[2], *service_provider[2], *apid[2], *vpid[2], *pcrpid[2], *tpid[2], *vform[2], *tsid[2], *onid[2], *sid[2];
+	eLabel *service_name[2], *service_provider[2], *apid[2], *vpid[2], *pcrpid[2], *pmtpid[2], *tpid[2], *vform[2], *tsid[2], *onid[2], *sid[2];
 public:
 	siPID(decoderParameters parms, eWidget *parent);
 	void redrawWidget();
@@ -185,6 +185,18 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	pcrpid[1]->move(ePoint(185, yOffs+2));
 	pcrpid[1]->resize(eSize(260, fs+5));
 	pcrpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
+	yOffs+=fs+5;
+
+	pmtpid[0]=new eLabel(this);
+	pmtpid[0]->setText("PMT PID:");
+	pmtpid[0]->move(ePoint(10, yOffs));
+	pmtpid[0]->resize(eSize(140, fs+5));
+
+	pmtpid[1]=new eLabel(this);
+	pmtpid[1]->setText((parms.pmtpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.pmtpid, parms.pmtpid));
+	pmtpid[1]->move(ePoint(185, yOffs+2));
+	pmtpid[1]->resize(eSize(260, fs+5));
+	pmtpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	yOffs+=fs+5;
 
 	tpid[0]=new eLabel(this);
@@ -413,14 +425,14 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1), status
 	statusbar.resize( eSize(clientrect.width(), 40) );
 	eRect rect = statusbar.getClientRect();
 
-	lb = new eListBox<eListBoxEntryMenu>( &statusbar.getLabel() );
+	lb = new eListBox<eListBoxEntryMenu>( &statusbar );
 	lb->move( ePoint(rect.width()-50, 2) );
 	lb->resize( eSize(45, rect.height()-5) );
 	lb->setFlags( eListBoxBase::flagNoPageMovement | eListBoxBase::flagNoUpDownMovement );
 	new eListBoxEntryMenu( lb, "1/3", _("Service information (right)"), eTextPara::dirCenter );
 	new eListBoxEntryMenu( lb, "2/3", _("Scramble system information (left, right)"), eTextPara::dirCenter );
 	new eListBoxEntryMenu( lb, "3/3", _("Transponder information (left)"), eTextPara::dirCenter );
-	descr = new eLabel( &statusbar.getLabel() );
+	descr = new eLabel( &statusbar );
 	descr->move( ePoint(0,0) );
 	descr->resize( eSize(rect.width() - 50, rect.height()) );
 	descr->setText( lb->getCurrent()->getHelpText() );

@@ -10,73 +10,6 @@
 #include <lib/dvb/servicestructure.h>
 
 eTransponderList* eTransponderList::instance=0;
-/*
-static struct
-{
-	int original_network_id, service_id, channel_number;
-} defaultChannelNumbers[]=
-	{{0x0001, 0x6dca,  1},		// "Das Erste"
-	 {0x0001, 0x6d66,  2},		// "ZDF"
-	 {0x0001, 0x6e40,  3},		// "N3" *hihi* -> sollte vielleicht raus damit entry #3 nicht blockiert wird.
-	 {0x0001, 0x6d67,  4},		// "3sat"
-	 {0x0085, 0x0383,  5},		// "KABEL1"
-	 {0x0085, 0x002e,  6},		// "Sat.1"
-	 {0x0085, 0x0382,  7}, 		// "ProSieben"
-	 {0x0001, 0x2ee3,  8}, 		// "RTL"
-	 {0x0085, 0x0381,  9},		// "NEUN LIV Television"
-	 {0x0085, 0x0034, 10}, 		// "N24"
-	 {0x0001, 0x31ba, 11},		// "n-tv"
-	 {0x0001, 0x2f1c, 12},		// "VOX"
-	 {0x0001, 0x2f08, 13},		// "Super RTL"
-	 {0x0001, 0x2ef4, 13},		// "RTL2"
-	 {0x0001, 0x31bc, 20},		// "VIVA"
-	 {0x0001, 0x2f58, 21},		// "VIVA ZWEI"
-	 {0x0001, 0x6fe3, 21}			// "MTV Central"
-	};
-
-static int beautifyChannelNumber(int transport_stream_id, int original_network_id, int service_id)
-{
-	for (unsigned int i=0; i<sizeof(defaultChannelNumbers)/sizeof(*defaultChannelNumbers); i++)
-		if ((defaultChannelNumbers[i].original_network_id==original_network_id) &&
-				(defaultChannelNumbers[i].service_id==service_id))
-			return defaultChannelNumbers[i].channel_number;	
-	if ((original_network_id==0x0001) && (service_id>=0x6D80) && (service_id<=0x6F40))		// lame ARD/ZDF heuristic
-		return 30;
-
-	if (original_network_id==0x0085)
-
-//				eigentlich mag ich das ja nicht so gerne, weil auf diese weise der komplette kirch-krams oben steht.
-//				aber anders gehts wohl leider nicht.
-
-		return 100;
-	return -1;
-}*/
-
-#if 0
-static std::string escape(const std::string s)
-{
-	std::string t;
-	for (unsigned int i=0; i<s.length(); i++)
-	{
-		char c = s[i];
-		switch (c)
-		{
-		case '&':
-			t+="&amp;";
-			break;
-		case '\"':
-			t+="&quot;";
-			break;
-		case '<':
-			t+="&lt;";
-			break;
-		default:
-			t+=c;
-		}
-	}
-	return t;
-}
-#endif
 
 void eTransponder::cable::set(const CableDeliverySystemDescriptor *descriptor)
 {
@@ -102,7 +35,7 @@ int eTransponder::cable::tune(eTransponder *trans)
 
 void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descriptor)
 {
-	if (descriptor->frequency < 7000*1000)		// ACHTUNG wegen C-Band
+	if (descriptor->frequency < 3500*1000) // reject < 3.5GHz
 		return;
 	frequency=descriptor->frequency;
 	symbol_rate=descriptor->symbol_rate;
@@ -123,41 +56,31 @@ int eTransponder::satellite::tune(eTransponder *trans)
 
 	std::multimap< int, eSatellite* >::iterator it ( trans->tplist.begin() );
 
-	int not_tuned=1;
-  
-	while( not_tuned )
+	while ( it != trans->tplist.end() && it->second->getOrbitalPosition() != orbital_position )
+		++it;
+		
+	if (it == trans->tplist.end())
 	{
-		while ( it != trans->tplist.end() && it->second->getOrbitalPosition() != orbital_position )
-			it++;
-
-		if ( it->second->getOrbitalPosition() == orbital_position)
-			not_tuned = eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, *it->second );
-
-		if ( !not_tuned ) // the we have tuned *g*
-			return 0;
-		else if ( it == trans->tplist.end() )
-		{
-			eDebug("couldn't tune to sat at orbital_position %d..", orbital_position);
-			return -ENOENT;
-		}
+		eDebug("no such satellite %d", orbital_position);
+		return -ENOENT;
 	}
-  
-  return 0;
+
+	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, *it->second );
 }
 
-eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id/*, int service_number*/):
-		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id)//, service_number(service_number)
+eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number):
+		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_number(service_number)
 {
 	clearCache();
 }
 
 eService::eService(eServiceID service_id, const char *name)
-	: service_id(service_id), service_name(name)
+	: service_id(service_id), service_name(name), service_number(-1)
 {
 }
 
-eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry/*, int service_number*/):
-		transport_stream_id(transport_stream_id), original_network_id(original_network_id)//, service_number(service_number)
+eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number):
+		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_number(service_number)
 {
 	clearCache();
 	service_id=sdtentry->service_id;
@@ -329,6 +252,48 @@ eTransponderList::eTransponderList()
 	readLNBData();
 }
 
+void eTransponderList::removeOrbitalPosition(int orbital_position)
+{
+		// search for all transponders on given orbital_position
+	for (std::map<tsref,eTransponder>::iterator it(transponders.begin());
+		it != transponders.end(); )
+	{
+		eTransponder &t=it->second;
+				// is this transponder on the removed orbital_position ?
+		if (t.satellite.isValid() && t.satellite.orbital_position == orbital_position)
+		{
+			t.satellite.valid=0;
+			if (!t.cable.isValid())
+			{
+				// delete this transponder (including services)
+				eTransportStreamID tsid=it->first.first;
+				eOriginalNetworkID onid=it->first.second;
+				std::map<tsref,eTransponder>::iterator i=it;
+				++it;
+				transponders.erase(i); // remove transponder from list
+
+				for (std::map<eServiceReferenceDVB,eService>::iterator sit=services.begin();
+					sit != services.end(); )
+				{
+					const eServiceReferenceDVB &ref=sit->first;
+						// service on this transponder?
+					if ((ref.getOriginalNetworkID() == onid) &&
+							(ref.getTransportStreamID() == tsid))
+					{
+						std::map<eServiceReferenceDVB,eService>::iterator i=sit;
+						++sit;
+								// if yes, get rid of it.
+						services.erase(i);
+					}
+					else
+						++sit;
+				}
+			}
+		} else
+			++it;
+	}
+}
+
 eTransponder &eTransponderList::createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)
 {
 	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(transport_stream_id, original_network_id));
@@ -345,7 +310,7 @@ eTransponder &eTransponderList::createTransponder(eTransportStreamID transport_s
 	return (*i).second;
 }
 
-eService &eTransponderList::createService(const eServiceReferenceDVB &service/*, int chnum*/, bool *newService)
+eService &eTransponderList::createService(const eServiceReferenceDVB &service, int chnum, bool *newService)
 {
 	std::map<eServiceReferenceDVB,eService>::iterator i=services.find(service);
                                                   	
@@ -355,43 +320,51 @@ eService &eTransponderList::createService(const eServiceReferenceDVB &service/*,
 	if ( i == services.end() )
 	{
 /*		if (chnum==-1)
-			chnum=beautifyChannelNumber(service.getTransportStreamID().get(), service.getOriginalNetworkID().get(), service.getServiceID().get());
+			chnum=beautifyChannelNumber(service.getTransportStreamID().get(), service.getOriginalNetworkID().get(), service.getServiceID().get()); */
 		
-		if (chnum==-1)
+/*		if (chnum==-1)
 		{
 
 			if (channel_number.end()==channel_number.begin())
 				chnum=200;
 			else
 			{
-				std::map<int,eService*>::iterator i=channel_number.end();
+				std::map<int,eServiceReferenceDVB>::iterator i=channel_number.end();
 				--i;
 				chnum=i->first+1;	// letzte kanalnummer +1
 			}
-		}
+		}	*/
+		
+		if (chnum == -1)
+			chnum=200;
 
 		while (channel_number.find(chnum)!=channel_number.end())
-			chnum++;*/
+			chnum++;
 	
 		eService *n=&services.insert(
 					std::pair<eServiceReferenceDVB,eService>
 						(service,
-						eService(service.getTransportStreamID(), service.getOriginalNetworkID(), service.getServiceID()/*, chnum*/))
+						eService(service.getTransportStreamID(), service.getOriginalNetworkID(), service.getServiceID(), chnum))
 					).first->second;
 
-//		channel_number.insert(std::pair<int,eService*>(chnum,n));
+		channel_number.insert(std::pair<int,eServiceReferenceDVB>(chnum,service));
 		
 		return *n;
 	}
 	return (*i).second;
 }
 
-int eTransponderList::handleSDT(const SDT *sdt)
+int eTransponderList::handleSDT(const SDT *sdt, eOriginalNetworkID onid, eTransportStreamID tsid)
 {
 	eDebug("TransponderList handleSDT");
 	std::set<eServiceID> s;
 	int changed=0;
 	bool newAdded;
+
+	if (onid.get() == -1)
+		onid=sdt->original_network_id;
+	if (tsid.get() == -1)
+		tsid=sdt->transport_stream_id;
 
 	for (ePtrList<SDTEntry>::const_iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 	{
@@ -409,12 +382,12 @@ int eTransponderList::handleSDT(const SDT *sdt)
 		
 		eServiceReferenceDVB sref=
 				eServiceReferenceDVB(
-					eTransportStreamID(sdt->transport_stream_id), 
-					eOriginalNetworkID(sdt->original_network_id), 
+					eTransportStreamID(tsid), 
+					eOriginalNetworkID(onid), 
 					eServiceID(i->service_id),
 					service_type);
 
-		eService &service=createService(sref/*, -1*/, &newAdded);
+		eService &service=createService(sref, -1, &newAdded);
 		service.update(*i);
 		s.insert(eServiceID(i->service_id));
 
@@ -423,17 +396,17 @@ int eTransponderList::handleSDT(const SDT *sdt)
 	}
 
 	for (std::map<eServiceReferenceDVB,eService>::iterator i(services.begin()); i != services.end(); ++i)
-		if ((i->first.getOriginalNetworkID() == sdt->original_network_id)	&& // if service on this on
-				(i->first.getTransportStreamID() == sdt->transport_stream_id) && 	// and on this transponder (war das "first" hier wichtig?)
+		if ((i->first.getOriginalNetworkID() == onid)	&& // if service on this on
+				(i->first.getTransportStreamID() == tsid) && 	// and on this transponder (war das "first" hier wichtig?)
 				(!s.count(i->first.getServiceID()))) // but does not exist
 			{
-				services.erase(i->first);
-/*				for (std::map<int,eService*>::iterator m(channel_number.begin()); m != channel_number.end(); ++m)
-					if (m->second == &i->second)
+				for (std::map<int,eServiceReferenceDVB>::iterator m(channel_number.begin()); m != channel_number.end(); ++m)
+					if (i->first == m->second)
 					{
 						channel_number.erase(m);
 						break;
-					}*/
+					}
+				services.erase(i->first);
 				i=services.begin();
 				changed=1;
 			}
@@ -468,13 +441,13 @@ const eServiceReferenceDVB *eTransponderList::searchService(eOriginalNetworkID o
 	return 0;
 }
 
-/*eService *eTransponderList::searchServiceByNumber(int chnum)
+eServiceReferenceDVB eTransponderList::searchServiceByNumber(int chnum)
 {
-	std::map<int,eService*>::iterator i=channel_number.find(chnum);
+	std::map<int,eServiceReferenceDVB>::iterator i=channel_number.find(chnum);
 	if (i==channel_number.end())
-		return 0;
+		return eServiceReferenceDVB();
 	return i->second;
-} */
+}
 
 eTransponder *eTransponderList::getFirstTransponder(int state)
 {

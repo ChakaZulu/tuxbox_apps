@@ -12,6 +12,7 @@ eComboBox::eComboBox( eWidget* parent, int OpenEntries, eLabel* desc, const char
 	listbox.loadDeco();
 	pm=eSkin::getActive()->queryImage("eComboBox.arrow");
 	button.setPixmap(pm);
+	button.zOrderRaise();
 	CONNECT( selected, eComboBox::onOkPressed );
 	CONNECT( listbox.selected, eComboBox::onEntrySelected );
 	CONNECT( listbox.selchanged, eComboBox::onSelChanged );
@@ -28,6 +29,11 @@ void eComboBox::onOkPressed()
 	if ( flags & flagSorted )
 		listbox.sort();
 	parent->setFocus( &listbox );
+	ePoint pt = getAbsolutePosition();
+	if ( pt.y() + getSize().height() + listbox.getSize().height() > 520)
+		listbox.move( ePoint( pt.x(), pt.y()-listbox.getSize().height() ) );
+	else
+		listbox.move( ePoint( pt.x(), pt.y()+getSize().height() ) );
 	listbox.show();
 }
 
@@ -59,19 +65,15 @@ int eComboBox::eventHandler( const eWidgetEvent& event )
 		case eWidgetEvent::changedSize:
 		{
 			eListBoxEntryText* cur = listbox.getCurrent();
-
-			if (deco)
-				button.resize( eSize(25, crect.height()) );
 			listbox.resize( eSize( getSize().width(), eListBoxEntryText::getEntryHeight()*entries+listbox.getDeco().borderBottom+listbox.getDeco().borderTop ) );
-			button.move( ePoint( crect.right()-25, crect.top() ) );		
-			button.pixmap_position = ePoint( (button.getSize().width() - pm->x) / 2, (button.getSize().height() - pm->y) / 2 );
-			ePoint pt = getAbsolutePosition();
-			if ( pt.y() + getSize().height() + listbox.getSize().height() > 520)
-				listbox.move( ePoint( pt.x(), pt.y()-listbox.getSize().height() ) );
-			else
-				listbox.move( ePoint( pt.x(), pt.y()+getSize().height() ) );
-
-      if (cur)
+			if (deco)
+			{
+				button.resize( eSize(25, crect.height()) );
+				button.move( ePoint( crect.right()-25, crect.top() ) );
+				if (pm)
+					button.pixmap_position = ePoint( (button.getSize().width() - pm->x) / 2, (button.getSize().height() - pm->y) / 2 );
+			}
+			if (cur)
 				listbox.setCurrent(cur);
 		}
 		default:

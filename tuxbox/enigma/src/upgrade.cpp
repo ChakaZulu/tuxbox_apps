@@ -5,6 +5,7 @@
 #include <lib/gui/statusbar.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/eprogress.h>
+#include <lib/dvb/decoder.h>
 #include <libmd5sum.h>
 #include <lib/dvb/edvb.h>
 
@@ -242,8 +243,8 @@ void eUpgrade::catalogTransferDone(int err)
 		else if (datacatalog)
 		{
 			eDebug("data error.");
-			eDebug("%s", datacatalog->errorstring.c_str());
-			setStatus(datacatalog->errorstring);
+			// setStatus(datacatalog->errorstring);
+			setStatus("XML parse error.");
 		}
 	}
 	if (catalog)
@@ -282,7 +283,7 @@ void eUpgrade::imageSelected(eListBoxEntryImage *img)
 
 void eUpgrade::setStatus(const eString &string)
 {
-	status->getLabel().setText(string);
+	status->setText(string);
 }
 
 void eUpgrade::setError(int err)
@@ -408,6 +409,7 @@ void eUpgrade::flashImage(int checkmd5)
 					_("upgrade in progress"), eMessageBox::iconInfo);
 				mb.show();
 				sync();
+				Decoder::Flush();
 				int res=system("/bin/eraseall /dev/mtd/0")>>8;
 				mb.hide();
 				if (!res)

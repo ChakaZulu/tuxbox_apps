@@ -42,15 +42,18 @@ class eFrontend: public Object
 	int tries;
 	int tune(eTransponder *transponder, 
 			uint32_t Frequency, int polarisation,
-			uint32_t SymbolRate, fe_code_rate_t FEC_inner,
-			fe_spectral_inversion_t Inversion, eSatellite* sat, fe_modulation_t QAM);
+			uint32_t SymbolRate, CodeRate FEC_inner,
+			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
 
 	void timeout();
-	/*
+/*
 	int RotorUseTimeout(secCmdSequence& seq, int newPos );
 	int RotorUseInputPower(secCmdSequence& seq, void *commands, int seqRepeat );
 	*/
+	int noRotorCmd;
 public:
+	void disableRotor() { noRotorCmd = 1; }  // no more rotor cmd is sent when tune
+	void enableRotor() { noRotorCmd = 0; }  // rotor cmd is sent when tune
 	int sendDiSEqCCmd( int addr, int cmd, eString params="", int frame=0xE0 );
 
 	Signal0<void> rotorRunning, rotorStopped, rotorTimeout;

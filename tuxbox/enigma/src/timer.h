@@ -17,7 +17,8 @@ class eTimerManager: public Object
 	{
 		zap, showMessage, startCountdown, setNextEvent,
 		startEvent, pauseEvent, restartEvent, stopEvent,
-		startRecording, stopRecording, restartRecording, pauseRecording
+		startRecording, stopRecording, restartRecording,
+		pauseRecording, spinUpHarddiscs
 	};
 	int nextAction;
 
@@ -57,6 +58,7 @@ public:
 	bool removeEventFromTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt);
 	bool addEventToTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR|ePlaylistEntry::stateWaiting );
 	bool addEventToTimerList( eWidget *sel, const ePlaylistEntry& entry );
+	void abortEvent(int err);
 	ePlaylistEntry* findEvent( eServiceReference *service, EITEvent *evt );
 	template <class Z>
 	void forEachEntry(Z ob)

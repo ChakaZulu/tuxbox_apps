@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.2 2002/10/15 23:31:29 Ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.3 2002/11/25 22:43:06 Ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -81,7 +81,7 @@ static int numPartitions(int dev)
 	return numpart;
 }
 
-static int freeDiskspace(int dev)
+int freeDiskspace(int dev, eString mp="")
 {
 	FILE *f=fopen("/proc/mounts", "rb");
 	if (!f)
@@ -102,7 +102,9 @@ static int freeDiskspace(int dev)
 			eString mountpoint=line;
 			mountpoint=mountpoint.mid(mountpoint.find(' ')+1);
 			mountpoint=mountpoint.left(mountpoint.find(' '));
-			eDebug("mountpoint: %s", mountpoint.c_str());
+//			eDebug("mountpoint: %s", mountpoint.c_str());
+			if ( mp && mountpoint != mp )
+				return -1;
 			struct statfs s;
 			int free;
 			if (statfs(mountpoint.c_str(), &s)<0)

@@ -21,7 +21,7 @@
 eFrontend* eFrontend::frontend;
 
 eFrontend::eFrontend(int type, const char *demod)
-:type(type), curRotorPos( 1000 ), timer2(eApp)
+:type(type), curRotorPos( 1000 ), timer2(eApp), noRotorCmd(0)
 {
 	state=stateIdle;
 	timer=new eTimer(eApp);
@@ -185,7 +185,7 @@ void eFrontend::readInputPower()
 int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 {
 	struct dvb_diseqc_master_cmd cmd;
-	
+
 	cmd.msg[0]=frame;
 	cmd.msg[1]=addr;
 	cmd.msg[2]=Cmd;
@@ -193,7 +193,7 @@ int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 
 	for (uint8_t i = 0; i < params.length() && i < 12; i += 4)
 		cmd.msg[3 + cmd.msg_len++] = strtol( params.mid(i, 2).c_str(), 0, 16 );
-    
+
 	if (ioctl(fd, FE_SET_TONE, SEC_TONE_OFF) < 0) {
 		perror("FE_SET_TONE");
 		return -1;
@@ -378,7 +378,7 @@ int eFrontend::tune(eTransponder *trans,
 		if (transponder)
 			/*emit*/ tunedIn(transponder, -ECANCELED);
 	}
-	
+
 	if (state==stateTuning)
 		return -EBUSY;
 
@@ -401,22 +401,22 @@ int eFrontend::tune(eTransponder *trans,
 			csw = 0xF0 | ( csw << 2 );
 			if ( polarisation==polHor )
 				csw |= 2;  // Horizontal
-        
+
 			if ( Frequency > lnb->getLOFThreshold() )
 				csw |= 1;   // 22 Khz enabled
 		}
 		//else we sent directly the cmd 0xF0..0xFF
-   
+
 		eDebug("DiSEqC Switch cmd = %04x", csw);
 
 		// Rotor Support
 		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 )
-		{           
+		{
 			if ( lnb->getDiSEqC().uncommitted_gap ) // the we add 2 * repeats + 1 + 1;
 				cmdCount = ( lnb->getDiSEqC().DiSEqCRepeats << 1 ) + 2;
 			else // then we add repeats + 1 + 1
 				cmdCount = lnb->getDiSEqC().DiSEqCRepeats + 2;
-          
+
 			// allocate memory for all DiSEqC commands
 			commands = new dvb_diseqc_master_cmd[cmdCount];
 
@@ -450,11 +450,11 @@ int eFrontend::tune(eTransponder *trans,
 					commands[cmdCount-1].msg[3]=it->second;
 					commands[cmdCount-1].msg_len=4;
 					RotorCmd=it->second;
-					eDebug("Rotor DiSEqC Param = %02x (use stored position)", RotorCmd);          
+					eDebug("Rotor DiSEqC Param = %02x (use stored position)", RotorCmd);
 				}
 				else  // entry not in table found
 				{
-					/* 
+					/*
 					 * FIXME FIXME FIXME FIXME FIXME
 					 * hier geht doch irgendwas schief...
 					 */
@@ -497,7 +497,7 @@ int eFrontend::tune(eTransponder *trans,
 			else // no rotor or smatv
 			{
 				// DiSEqC Repeats and uncommitted switches only when DiSEqC >= V1_1
-				if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_1 )  
+				if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_1 )
 				{
 					if ( lnb->getDiSEqC().uncommitted_gap ) // then we add 2 * repeats + 1;
 						loops = cmdCount = ( lnb->getDiSEqC().DiSEqCRepeats << 1 ) + 1;
@@ -508,7 +508,7 @@ int eFrontend::tune(eTransponder *trans,
 				{
 					loops = cmdCount = 1;
 				}
-          
+
 				// allocate memory for all DiSEqC commands
 				commands = new dvb_diseqc_master_cmd[cmdCount];
 			}
@@ -519,7 +519,7 @@ int eFrontend::tune(eTransponder *trans,
 				commands[i].msg[1]=0x10;
 
 				// when DiSEqC V1.0 is avail then loops is always 1 .. see above
-        
+
 				if ( loops > 1 && lnb->getDiSEqC().uncommitted_switch )
 				{
 					commands[i].msg[2]=0x39;          // uncomitted switch
@@ -528,20 +528,20 @@ int eFrontend::tune(eTransponder *trans,
 				else // DiSEqC < V1.1 do not support repeats
 				{
 					commands[i].msg[2]=0x38;          // comitted switch
-					eDebug("0x38");          
+					eDebug("0x38");
 				}
-          
+
 				commands[i].msg[3]=csw;
 				commands[i].msg_len=4;
 
-				i++;        
+				i++;
 
 				if ( i < loops && lnb->getDiSEqC().uncommitted_gap )
 				{
-					/* FIXME: pointer mess?! */
-					commands[i]=commands[i-1];
+					memcpy( commands[i], commands[i-1], sizeof(commands[i]) );
 					commands[i].msg[0]=0xE1;
-					i++;                
+					commands[i].msg[2]=0x39;
+					i++;
 				}
 			}
 		}
@@ -598,7 +598,7 @@ int eFrontend::tune(eTransponder *trans,
 
 			// drive rotor always with 18V ( is faster )
 			seq.voltage = SEC_VOLTAGE_18;
-	
+
 			RotorUseInputPower(seq, (void*) commands, lnb->getDiSEqC().SeqRepeat );
 			//RotorUseTimeout(seq, sat->getOrbitalPosition() );
 
@@ -655,13 +655,13 @@ int eFrontend::tune(eTransponder *trans,
 		if (cmdCount)
 			delete [] commands;
 	}
-	
+
 	else {
 		// we have only a cable box
 		eDebug("no valid LNB... Cable Box ?");
 	}
 
-	
+
 	front.inversion=Inversion;
 
 

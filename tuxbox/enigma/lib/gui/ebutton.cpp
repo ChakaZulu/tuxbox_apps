@@ -44,7 +44,7 @@ void eButton::gotFocus()
 
 	setBackgroundColor(focusB);
 	setForegroundColor(focusF);
-	invalidate();
+//invalidate();
 }
 
 void eButton::lostFocus()
@@ -67,7 +67,7 @@ void eButton::lostFocus()
 	setBackgroundColor(normalB);
 	setForegroundColor(normalF);
 
-	invalidate();	
+//	invalidate();	
 }
 
 int eButton::eventHandler(const eWidgetEvent &event)

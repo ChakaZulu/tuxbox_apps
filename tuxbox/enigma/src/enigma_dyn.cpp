@@ -1179,7 +1179,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", screenshot);
-
 /*
 	dyn_resolver->addDyn("GET", "/record/on", record_on);
 	dyn_resolver->addDyn("GET", "/record/off", record_off);

@@ -1,5 +1,18 @@
 #include <lib/dvb/dvbscan.h>
 
+		// work around for buggy transponders on hotbird (and maybe others)
+static void fakeONIDSID(eOriginalNetworkID &onid, eTransportStreamID &tsid, int freq)
+{
+		// do nothing on valid ONIDs
+	if ((onid != 1) && (onid != 0xFFFF) && (onid != 0))
+		return;
+		// onid 1 is astra, don't mess with it.
+	if (tsid > 1)
+		return;
+		// fake together a tsid.
+	tsid=freq&0xFFFF;
+}
+
 eDVBScanController::eDVBScanController(eDVB &dvb): eDVBController(dvb)
 {
 	CONNECT(dvb.tPAT.tableReady, eDVBScanController::PATready);
@@ -29,7 +42,12 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		eDebug("[SCAN] eventScanBegin");
 		
 		if (flags & flagClearList)
-			dvb.settings->clearList();
+		{
+			if (knownTransponder.front().satellite.isValid())
+				dvb.settings->removeOrbitalPosition(knownTransponder.front().satellite.orbital_position);
+			else
+				dvb.settings->clearList();
+		}
 
 		if (flags & flagUseBAT)
 			dvb.settings->removeDVBBouquets();
@@ -163,14 +181,15 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 #endif
 				for (ePtrList<NITEntry>::iterator i(nit->entries); i != nit->entries.end(); ++i)
 				{
-					// eTransponder &transponder=dvb.settings->transponderlist->createTransponder(eTransportStreamID(i->transport_stream_id), eOriginalNetworkID(i->original_network_id));
+					eOriginalNetworkID onid=i->original_network_id;
+					eTransportStreamID tsid=i->transport_stream_id;
+					// eTransponder &transponder=dvb.settings->transponderlist->createTransponder(tsid, onid);
 
 					// schon bekannte transponder nicht nochmal scannen
-					if (dvb.settings->transponderlist->searchTS(eTransportStreamID(i->transport_stream_id), eOriginalNetworkID(i->original_network_id)))
+					if (dvb.settings->transponderlist->searchTS(tsid, onid))
 						continue;
 
-					eTransponder tp(*dvb.settings->transponderlist, eTransportStreamID(i->transport_stream_id), eOriginalNetworkID(i->original_network_id));
-//					eDebug("tsid: %d, onid: %d", i->transport_stream_id, i->original_network_id);
+					eTransponder tp(*dvb.settings->transponderlist, tsid, onid);
 					
 					for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
 					{
@@ -291,18 +310,24 @@ int eDVBScanController::handleSDT(eTransponder *&transponder, const SDT *sdt)
 {
 	eTransponder *old=0;
 // update tsid / onid
-	if (transponder->transport_stream_id != sdt->transport_stream_id || transponder->original_network_id != sdt->original_network_id)
+	eTransportStreamID tsid=sdt->transport_stream_id;
+	eOriginalNetworkID onid=sdt->original_network_id;
+	
+	if (transponder->transport_stream_id != tsid.get() || transponder->original_network_id != onid.get())
 	{
 		changedTransponder.push_back(*transponder);
 		
-		transponder->transport_stream_id=sdt->transport_stream_id;
-		transponder->original_network_id=sdt->original_network_id;
+		transponder->transport_stream_id=tsid.get();
+		transponder->original_network_id=onid.get();
 
 		old = transponder;
 	}
+	
+	if (transponder->satellite.valid)
+		fakeONIDSID(onid, tsid, transponder->satellite.frequency);
 
 		// ok we found the transponder, it seems to be valid
-	eTransponder &real=dvb.settings->transponderlist->createTransponder(eTransportStreamID(sdt->transport_stream_id), eOriginalNetworkID(sdt->original_network_id));
+	eTransponder &real=dvb.settings->transponderlist->createTransponder(tsid, onid);
 	real=*transponder;
 
 		// and we continue working on that
@@ -317,15 +342,15 @@ int eDVBScanController::handleSDT(eTransponder *&transponder, const SDT *sdt)
 			it->state=eTransponder::stateError;
 		}
 
-	currentONID=sdt->original_network_id;
+	currentONID=onid.get();
 
 	int known=0;
 
-	if (knownNetworks.count(sdt->original_network_id))
+	if (knownNetworks.count(onid.get()))
 		known=1;
 
 		// insert the services
-	dvb.settings->transponderlist->handleSDT(sdt);
+	dvb.settings->transponderlist->handleSDT(sdt, onid, tsid);
 	
 	return known;
 

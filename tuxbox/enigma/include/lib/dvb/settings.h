@@ -18,8 +18,8 @@ public:
 	void addDVBBouquet(const BAT *bat);
 	eBouquet *getBouquet(int bouquet_id);
 	eBouquet *getBouquet(eString bouquet_name);
-	eBouquet *createBouquet(const eBouquet *parent, int bouquet_id, eString bouquet_name);
-	eBouquet *createBouquet(const eBouquet *parent, eString bouquet_name);
+	eBouquet *createBouquet(int bouquet_id, eString bouquet_name);
+	eBouquet *createBouquet(eString bouquet_name);
 	int getUnusedBouquetID(int range);
 	
 	void revalidateBouquets();
@@ -35,6 +35,7 @@ public:
 	void loadBouquets();
 	
 	void clearList();
+	void removeOrbitalPosition(int orbital_position);
 	
 	eDVBSettings(eDVB &dvb);
 	~eDVBSettings();

@@ -7,7 +7,7 @@ EXTRA_DIST = \
 	3D_border_unselected_corner_lightDark.png 3D_border_unselected_corner_dark.png \
 	3D_border_unselected_ver_light.png 3D_border_unselected_ver_dark.png \
 	3D_border_unselected_hor_light.png 3D_border_unselected_hor_dark.png \
-	combo_arrow.png
+	combo_arrow.png dvr-fs8.png
 
 install-data-local:
 	install -d $(DATADIR)/enigma/pictures/chk_v2

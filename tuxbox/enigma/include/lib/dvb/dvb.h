@@ -227,8 +227,8 @@ public:
 	{
 		cVPID, cAPID, cTPID, cPCRPID, cacheMax
 	};
-	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry/*, int service_number=-1*/);
-	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id/*, int service_number=-1*/);
+	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number=-1);
+	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number=-1);
 	eService(eServiceID service_id, const char *name);
 	void update(const SDTEntry *sdtentry);
 	
@@ -239,7 +239,7 @@ public:
 	
 	std::string service_name, service_provider;
 	
-//	int service_number;		// gleichzeitig sortierkriterium.
+	int service_number;		// nur fuer dvb, gleichzeitig sortierkriterium...
 	
 	int cache[cacheMax];
 	
@@ -434,13 +434,12 @@ struct eServiceReferenceDVB: public eServiceReference
 class eBouquet
 {
 public:
-	const eBouquet *parent;
 	int bouquet_id;
 	eString bouquet_name;
 	std::list<eServiceReferenceDVB> list;
 
-	inline eBouquet(const eBouquet *parent, int bouquet_id, eString& bouquet_name)
-		:parent(parent), bouquet_id(bouquet_id), bouquet_name(bouquet_name)
+	inline eBouquet(int bouquet_id, eString& bouquet_name)
+		: bouquet_id(bouquet_id), bouquet_name(bouquet_name)
 	{
 	}
 
@@ -579,11 +578,14 @@ class eTransponderList
 	
 	std::multimap<int,eSatellite*> satellites;
 	std::list<eLNB> lnbs;
+	std::map<int,eServiceReferenceDVB> channel_number;
 	friend class eLNB;
 	friend class eSatellite;
 public:
-	void clearServices()	{	services.clear(); }
-	void clearTransponders()	{	transponders.clear(); }
+	void clearAllServices()	{	services.clear(); }
+	void clearAllTransponders()	{	transponders.clear(); }
+	
+	void removeOrbitalPosition(int orbital_position);
 
 	static eTransponderList* getInstance()	{ return instance; }
 	eTransponderList();
@@ -600,15 +602,15 @@ public:
 	void writeLNBData();
 
 	eTransponder &createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
-	eService &createService(const eServiceReferenceDVB &service/*, int service_number=-1*/, bool *newService=0);
-	int handleSDT(const SDT *sdt);
+	eService &createService(const eServiceReferenceDVB &service, int service_number=-1, bool *newService=0);
+	int handleSDT(const SDT *sdt, eOriginalNetworkID onid=-1, eTransportStreamID tsid=-1);
 	Signal1<void, eTransponder*> transponder_added;
 	Signal2<void, const eServiceReferenceDVB &, bool> service_found;
 
 	eTransponder *searchTS(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eService *searchService(const eServiceReference &service);
 	const eServiceReferenceDVB *searchService(eOriginalNetworkID original_network_id, eServiceID service_id);
-//	eService *searchServiceByNumber(int channel_number);
+	eServiceReferenceDVB searchServiceByNumber(int channel_number);
 	
 	template <class T> 
 	void forEachService(T ob)

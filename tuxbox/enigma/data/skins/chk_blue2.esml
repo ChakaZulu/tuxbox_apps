@@ -13,6 +13,7 @@
 	</fonts>
 
 	<fontalias>
+		<map name="eServiceSelector.Entry.Description" font="Blue.Regular" size="26" />
 		<map name="eStatusBar" font="Blue.Regular" size="24" />
 		<map name="eWindow.TitleBar" font="Blue.Bold" size="32" />
 		<map name="eWindow.Childs" font="Blue.Regular" size="30" />
@@ -141,6 +142,7 @@
 		<img name="3DBorder.unselected.hor.light" src="3D_border_unselected_hor_light.png" />
 		<img name="3DBorder.unselected.ver.dark" src="3D_border_unselected_ver_dark.png" />		
 		<img name="3DBorder.unselected.ver.light" src="3D_border_unselected_ver_light.png" />
+		<img name="dvrtable" src="dvr-fs8.png" />
 	</images>
 
 	<imagealias>
@@ -237,10 +239,22 @@
 			<eWidget position="558:32" size="17:4" backgroundColor="dark" />
 			<eWidget position="575:0" size="5:36" backgroundColor="dark" />
 
-			<!--Zeilen  -->
-			<eWidget position="87:39" size="493:33" backgroundColor="light" />
-			<eWidget position="87:76" size="493:33" backgroundColor="middle" />
 			<eWidget position="158:113" size="407:21" backgroundColor="dark" />
+
+			<eWidget name="nonDVRfunctions" position="87:39" size="493:70">
+				<!--Zeilen  -->
+				<eWidget position="0:0" size="493:33" backgroundColor="light" />
+				<eWidget position="0:37" size="493:33" backgroundColor="middle" />
+
+				<eLabel position="3:3" size="55:30" font="Nimbus;22" name="e_now_time" backgroundColor="light" foregroundColor="light+15" />
+				<eLabel position="3:40" size="55:30" font="Nimbus;22" name="e_next_time" backgroundColor="middle" foregroundColor="middle+15" />
+
+				<eLabel position="65:3" size="346:30" font="Blue.Regular;29" name="e_now_title" backgroundColor="light" foregroundColor="light+15" />
+				<eLabel position="65:40" size="346:30" font="Blue.Regular;29" name="e_next_title" backgroundColor="middle" foregroundColor="middle+15" />
+
+				<eLabel position="401:5" size="90:26" font="Blue.Regular;26" name="e_now_duration" align="right" backgroundColor="light" foregroundColor="light+15" />
+				<eLabel position="401:44" size="90:26" font="Blue.Regular;26" name="e_next_duration" align="right" backgroundColor="middle" foregroundColor="middle+15" />
+      </eWidget>
                                       
 			<!--schatten
 			<eWidget position="14:85" size="113:10" backgroundColor="osd_shadowcol" />
@@ -259,15 +273,6 @@
 
 			<eLabel position="96:4" size="479:27" font="Blue.Bold;36" name="ch_name" backgroundColor="white" foregroundColor="white+15" vcenter="on" />
                                                       
-			<eLabel position="90:42" size="55:30" font="Nimbus;22" name="e_now_time" backgroundColor="light" foregroundColor="light+15" />
-			<eLabel position="90:79" size="55:30" font="Nimbus;22" name="e_next_time" backgroundColor="middle" foregroundColor="middle+15" />
-
-			<eLabel position="152:42" size="346:30" font="Blue.Regular;29" name="e_now_title" backgroundColor="light" foregroundColor="light+15" />
-			<eLabel position="152:79" size="346:30" font="Blue.Regular;29" name="e_next_title" backgroundColor="middle" foregroundColor="middle+15" />
-
-			<eLabel position="488:44" size="90:26" font="Blue.Regular;26" name="e_now_duration" align="right" backgroundColor="light" foregroundColor="light+15" />
-			<eLabel position="488:83" size="90:26" font="Blue.Regular;26" name="e_next_duration" align="right" backgroundColor="middle" foregroundColor="middle+15" />
-                                                                     
 			<eLabel position="104:113" size="56:21" font="Blue.Regular;24" name="time" align="center" backgroundColor="dark" foregroundColor="dark+15" />
 
 			<eProgress position="160:115" size="150:16" name="progress_bar" foregroundColor="middle" border="1" />
@@ -295,12 +300,15 @@
 
 			<eLabel name="recStatus" position="7:42" size="12:12" pixmap="button_red" alphatest="on" />
 
-			<eWidget name="dvrFunctions" position="0:0" size="70:33" backgroundColor="dark">
-				<eLabel position="7:9" size="12:12" pixmap="button_red" alphatest="on" />
-				<eLabel position="22:9" size="12:12" pixmap="button_green" alphatest="on" />
-				<eLabel position="37:9" size="12:12" pixmap="button_yellow" alphatest="on" />
-				<eLabel position="52:9" size="12:12" pixmap="button_blue" alphatest="on" />
-			</eWidget>
+			<eLabel name="dvrFunctions" position="87:39" size="493:70" pixmap="dvrtable">
+				<eLabel text="FR " position="54:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
+				<eLabel text="Play " position="175:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
+				<eLabel text="Pause " position="280:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
+				<eLabel text="FF " position="405:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
+				<eLabel text="Stop " position="54:35" size="85:30" backgroundColor="light" foregroundColor="light+15" />
+				<eLabel text="Record " position="180:35" size="85:30" backgroundColor="light" foregroundColor="light+15" />
+				<eLabel name="TimeLeft" position="280:35" size="200:30" backgroundColor="light" foregroundColor="light+15" />
+			</eLabel>
 		</eZapMain>
 	</object>
 </eskin>

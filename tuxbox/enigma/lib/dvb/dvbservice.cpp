@@ -18,9 +18,6 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
 		availableCASystems.push_back(0x1762);	// BetaCrypt F (ORF)
 	}
 
-	DVBCI=dvb.DVBCI;
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getcaids));
-
 	transponder=0;
 	tdt=0;
 	tMHWEIT=0;

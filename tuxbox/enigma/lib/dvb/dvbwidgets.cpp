@@ -7,15 +7,6 @@
 #include <lib/gui/echeckbox.h>
 #include <lib/gui/eprogress.h>
 
-
-/*
-  satelliten auswahl in eTransponderwidget fixen,
-
-  beim zappen nicht find( Orbital_position ) verwende...
-  wegen multimap.. komplett durchiterieren.. und all ausprobieren...
-
-  */
-
 eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	:eWidget(parent), type(type), edit(edit)
 {
@@ -231,16 +222,22 @@ eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent
 {
 	p_snr=new eProgress(this);
 	p_snr->setName("snr");
-	
+
 	p_agc=new eProgress(this);
 	p_agc->setName("agc");
-	
+
 	c_sync=new eCheckbox(this, 0, 0);
 	c_sync->setName("sync");
-	
+
 	c_lock=new eCheckbox(this, 0, 0);
 	c_lock->setName("lock");
+
+	lsnr_num=new eLabel(this);
+	lsnr_num->setName("snr_num");
 	
+	lsync_num=new eLabel(this);
+	lsync_num->setName("agc_num");
+
 	CONNECT(updatetimer.timeout, eFEStatusWidget::update);
 
 	if (eSkin::getActive()->build(this, "eFEStatusWidget"))
@@ -249,9 +246,12 @@ eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent
 
 void eFEStatusWidget::update()
 {
-	p_agc->setPerc(fe->SignalStrength()*100/65536);
-	p_snr->setPerc((fe->SNR())*100/65536);
-	eDebug("snr:%d",fe->SNR());
+	int snr=fe->SNR(),
+			agc=fe->SignalStrength();
+	p_agc->setPerc(agc*100/65536);
+	p_snr->setPerc(snr*100/65536);
+	lsnr_num->setText(eString().sprintf("%d",snr));
+	lsync_num->setText(eString().sprintf("%d",agc));	
 	int status=fe->Status();
 	c_lock->setCheck(!!(status & FE_HAS_LOCK));
 	c_sync->setCheck(!!(status & FE_HAS_SYNC));

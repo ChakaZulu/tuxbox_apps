@@ -58,7 +58,11 @@ public:
 	}
 	bool operator == ( const uniqueEvent& e )
 	{
-		return (beginTime == e.beginTime) && (event_id == e.event_id) && (service.sid == e.service.sid) && (service.onid == e.service.onid);
+			/*
+					problem: EIDs repeat. sooner or later.
+					but not within 4 hours.
+			*/
+		return (abs(beginTime-e.beginTime)<4*60*60) && (event_id == e.event_id) && (service.sid == e.service.sid) && (service.onid == e.service.onid);
 	}
 	uniqueEvent& operator = ( const uniqueEvent& e )
 	{

@@ -23,6 +23,8 @@ class SDTEntry;
 class PMT;
 class PMTEntry;
 class eNumber;
+class eCheckbox;
+class eButton;
 class gPainter;
 class NVODReferenceEntry;
 class eServiceSelector;
@@ -166,7 +168,7 @@ class eZapMain: public eWidget
 public:
 	enum { modeTV, modeRadio, modeFile, modePlaylist, modeEnd };
 	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32 };
-	enum { messageGoSleep=2 };
+	enum { messageGoSleep=2, messageShutdown=3 };
 
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext,
@@ -175,12 +177,12 @@ private:
 		*ButtonRedEn, *ButtonRedDis, 
 		*ButtonGreenEn, *ButtonGreenDis, 
 		*ButtonYellowEn, *ButtonYellowDis,
-		*ButtonBlueEn, *ButtonBlueDis;
+		*ButtonBlueEn, *ButtonBlueDis,
+		*DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff, *recstatus,
+		mute, volume,
+		*DVRSpaceLeft;
 
-	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff, *recstatus;
-	eLabel mute, volume;
-
-	eWidget *dvrFunctions;
+	eWidget *dvrFunctions, *nonDVRfunctions;
 	int dvrfunctions;
 
 	// eRecordingStatus *recstatus;
@@ -256,6 +258,7 @@ private:
 	void play();
 	void stop();
 	void pause();
+	void record();
 	enum { skipForward, skipReverse };
 	int skipcounter;
 	int skipping;
@@ -272,7 +275,7 @@ private:
 	void addServiceToFavourite(eServiceSelector *s, int dontask=0);
 	void removeServiceFromFavourite( const eServiceReference &service );
 
-	void showFavourites();
+	void showFavourites(int user);
 	void showBouquetList(int sellast);
 
 	void showDVRFunctions(int show);
@@ -281,6 +284,7 @@ private:
 
 	eServicePath modeLast[modeEnd];
 	int mode, last_mode, state;
+	int hddDev;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
@@ -343,6 +347,44 @@ class eServiceContextMenu: public eListBoxWindow<eListBoxEntryText>
 	void entrySelected(eListBoxEntryText *s);
 public:
 	eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path);
+};
+
+class eRecordContextMenu: public eListBoxWindow<eListBoxEntryText>
+{
+	eServiceReference ref;
+	void entrySelected(eListBoxEntryText *s);
+public:
+	eRecordContextMenu();
+};
+
+class eRecStopWindow: public eWindow
+{
+	eCheckbox *Standby, *Shutdown;
+	eButton *cancel;
+	void StandbyChanged(int);
+	void ShutdownChanged(int);
+	void fieldSelected(int *){focusNext(eWidget::focusDirNext);}
+protected:
+	virtual void setPressed()=0;
+	eButton *set;
+	eNumber *num;
+public:
+	int getCheckboxState();
+	eRecStopWindow( eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eWidget* descr=0, int grabfocus=1, const char* deco="eNumber" );
+};
+
+class eTimerInput: public eRecStopWindow
+{
+	void setPressed();
+public:
+	eTimerInput();
+};
+
+class eRecTimeInput: public eRecStopWindow
+{
+	void setPressed();
+public:
+	eRecTimeInput();
 };
 
 #endif /* __enigma_main_h */

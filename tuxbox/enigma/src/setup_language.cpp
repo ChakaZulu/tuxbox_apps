@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.13 2002/11/18 03:40:12 Ghostrider Exp $
+ * $Id: setup_language.cpp,v 1.14 2002/11/25 22:43:06 Ghostrider Exp $
  */
 
 #include <setup_language.h>

@@ -21,7 +21,7 @@ using namespace SigC;
 // use this for connect with a method
 // void bla::foo(int);
 // to an
-// Signa0<void> testSig;
+// Signal0<void> testSig;
 // CONNECT_1_0(testSig, bla:foo, 0);
 // here the signal has no parameter, but the slot have an int
 // the last parameter of the CONNECT_1_0 makro is the value that given to the paramater of the Slot method

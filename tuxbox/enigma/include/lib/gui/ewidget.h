@@ -417,6 +417,7 @@ public:
 	void setTarget(gDC *target);
 	void setLCD(eWidget *lcdtitle, eWidget *lcdelement);
 	void setName(const char *name);
+	const eString& getName() const { return name; }
 	eWidget*& getParent() { return parent; }
 	const gFont& getFont() const { return font; }
 	

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.29 2002/11/15 06:01:38 tmbinc Exp $
+ * $Id: enigma_setup.cpp,v 1.30 2002/11/25 22:43:06 Ghostrider Exp $
  */
 
 #include <enigma_setup.h>
@@ -41,7 +41,7 @@
 #include "upgrade.h"
 
 eZapSetup::eZapSetup()
-	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 12, 220, true)
+	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 12, 300, true)
 {
 	move(ePoint(150, 90)); 
 	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("back to Mainmenu") ))->selected, eZapSetup::sel_close);
@@ -56,7 +56,7 @@ eZapSetup::eZapSetup()
 	if (eDVB::getInstance()->getInfo("mID") == "05")
 	{
 		CONNECT((new eListBoxEntryMenu(&list, _("Harddisk..."), _("initialize harddisc") ))->selected, eZapSetup::sel_harddisk);
-		CONNECT((new eListBoxEntryMenu(&list, _("Common Interface..."), _("initialize harddisc") ))->selected, eZapSetup::sel_ci);
+		CONNECT((new eListBoxEntryMenu(&list, _("Common Interface..."), _("show CI Menu") ))->selected, eZapSetup::sel_ci);
 		CONNECT((new eListBoxEntryMenu(&list, _("Upgrade..."), _("upgrade firmware") ))->selected, eZapSetup::sel_upgrade);
 	}
 }
