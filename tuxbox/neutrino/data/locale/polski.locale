@@ -157,7 +157,7 @@ tuxnews.size Rozmiar
 tuxnews_size.small Maly
 tuxnews_size.medium Sredni
 tuxnews_size.large Duzy
-tuxnews.speed Prêdko�æ
+tuxnews.speed Prêdkoæ
 tuxnews_speed.slow Wolno
 tuxnews_speed.medium Srednio
 tuxnews_speed.fast Szybko
@@ -673,7 +673,7 @@ nfs.mounterror blad montowania
 nfs.umount Odmontuj volumin NFS
 nfs.umounterror blad odmontowania voluminu
 nfs.alreadymounted katalog juz zamontowny
+nfsmenu.head unset
 
 apids.hint_1 undef
 apids.hint_2 undef
-

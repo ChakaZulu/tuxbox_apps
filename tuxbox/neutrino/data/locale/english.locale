@@ -677,4 +677,3 @@ nfsmenu.head NFS settings
 
 apids.hint_1 Enter APIDs to be streamed
 apids.hint_2 in hex notation seperated by ' '
-

@@ -14,7 +14,7 @@ mainmenu.games Spiele
 mainmenu.mp3player MP3 Player 
 mainmenu.sleeptimer Schloofschalder 
 mainmenu.shutdown Usschalde 
-mainmenu.settings Ischalde 
+mainmenu.settings Iischdellige 
 mainmenu.service Sörvis 
 mainmenu.recording Sdreaming (ufnehh) 
 mainmenu.recording_start un los 
@@ -672,6 +672,7 @@ nfs.mounterror I'häng - Fehler
 nfs.umount NFS Verzeichniss abhänge 
 nfs.umounterror Abhäng-Fehler 
 nfs.alreadymounted Verzeichnis bereits a'ghängt
+nfsmenu.head NFS Iischdellige
 
 apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,
 apids.hint_2 abdrennd durch ' ' in hexadezimaler Form
