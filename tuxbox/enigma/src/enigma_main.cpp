@@ -1137,143 +1137,153 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 
 void eZapMain::startService(const eServiceReference &_serviceref, int err)
 {
-	isVT = Decoder::parms.tpid != -1;
-
-	if (_serviceref.type != eServiceReference::idDVB)
+	eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
+	if (!sapi)
 		return;
+
+	eService *service=eServiceInterface::getInstance()->lookupService(_serviceref);
+
+	if (_serviceref.type == eServiceReference::idDVB)
+	{
+		isVT = Decoder::parms.tpid != -1;
+
+		const eServiceReferenceDVB &serviceref=(const eServiceReferenceDVB&)_serviceref;
+
+		setVTButton(isVT);
+
+			// es wird nur dann versucht einen service als referenz-service zu uebernehmen, wenns den ueberhaupt
+			// gibt.
+
+		if (service)
+			switch (serviceref.getServiceType())
+			{
+			case 1:	// TV
+			case 2: // radio
+			case 4: // nvod ref
+				refservice=serviceref;
+				break;
+			}
+
+		eService *rservice=0;
+		if (refservice != serviceref)
+			rservice=eDVB::getInstance()->settings->getTransponders()->searchService(refservice);
 	
-	const eServiceReferenceDVB &serviceref=(const eServiceReferenceDVB&)_serviceref;
+		if (refservice.getServiceType()==4)
+			flags|=ENIGMA_NVOD;
+		else
+			flags&=~ENIGMA_NVOD;
 
-	setVTButton(isVT);
+		eString name="";
 
-	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(serviceref);
+		if (rservice)
+			name=rservice->service_name + " - ";
+	
+		if (service)
+			name+=service->service_name;
+		else
+			switch (serviceref.getServiceType())
+			{
+			case 5: // nvod stream or linkage subservice ( type faked in SubServiceSelector::selected )
+				name+="NVOD";//serviceref.descr;
+			}
 
-		// es wird nur dann versucht einen service als referenz-service zu uebernehmen, wenns den ueberhaupt
-		// gibt.
+		if (!name.length())
+			name="unknown service";
 
-	if (service)
-		switch (serviceref.getServiceType())
+		ChannelName->setText(name);		
+
+		switch (err)
 		{
-		case 1:	// TV
-		case 2: // radio
-		case 4: // nvod ref
-			refservice=serviceref;
+		case 0:
+			Description->setText(_(""));
+			postMessage(eZapMessage(0), 1);
+			break;
+		case -EAGAIN:
+			Description->setText(_("Einen Moment bitte..."));
+			postMessage(eZapMessage(0, _("switch"), _("One moment please...")), 1);
+			break;
+		case -ENOENT:
+			Description->setText(_("Sender konnte nicht gefunden werden."));
+			postMessage(eZapMessage(0, _("switch"), _("Service could not be found !")), 1);
+			eDebug("Sender konnte nicht gefunden werden.");
+			break;
+		case -ENOCASYS:
+			Description->setText(_("Dieser Sender kann nicht entschlüsselt werden."));
+			postMessage(eZapMessage(0, _("switch"), _("This service could not be descrambled")), 1);
+			eDebug("Dieser Sender kann nicht entschlüsselt werden.");
+			break;
+		case -ENOSTREAM:
+			Description->setText(_("Dieser Sender sendet (momentan) kein Signal."));
+			postMessage(eZapMessage(0, _("switch"), _("This service sends (currently) no signal")), 1);
+			eDebug("Dieser Sender sendet (momentan) kein Signal.");
+			break;
+		case -ENOSYS:
+			Description->setText(_("Dieser Inhalt kann nicht dargestellt werden."));
+			eDebug("Dieser Inhalt kann nicht dargestellt werden.");
+			postMessage(eZapMessage(0, _("switch"), _("This content could not be displayed")), 1);
+			break;
+		case -ENVOD:
+			Description->setText(_("NVOD - Bitte Anfangszeit bestimmen!"));
+			eDebug("NVOD - Bitte Anfangszeit bestimmen!");
+			postMessage(eZapMessage(0, _("switch"), _("NVOD Service - select a starttime, please")), 1);
+			break;
+		default:
+			Description->setText(_("<unbekannter Fehler>"));
+			eDebug("<unbekannter Fehler>");
+			postMessage(eZapMessage(0, _("switch"), _("Unknown error !!")), 1);
 			break;
 		}
 
-	eService *rservice=0;
-	if (refservice != serviceref)
-		rservice=eDVB::getInstance()->settings->getTransponders()->searchService(refservice);
+		int num=-1;
 	
-	if (refservice.getServiceType()==4)
-		flags|=ENIGMA_NVOD;
-	else
-		flags&=~ENIGMA_NVOD;
+		if (rservice)
+			num=rservice->service_number;
+		else if (service)
+			num=service->service_number;
 
-	eString name="";
+		if (num != -1)
+			ChannelNumber->setText(eString().sprintf("%d", num));
+		else
+			ChannelNumber->setText("");
 
-	if (rservice)
-		name=rservice->service_name + " - ";
-	
-	if (service)
-		name+=service->service_name;
-	else
-		switch (serviceref.getServiceType())
+		if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
 		{
-		case 5: // nvod stream or linkage subservice ( type faked in SubServiceSelector::selected )
-			name+="NVOD";//serviceref.descr;
+			ButtonGreenDis->hide();
+			ButtonGreenEn->show();
+		}
+		else
+		{
+			ButtonGreenEn->hide();
+			ButtonGreenDis->show();	
 		}
 
-	if (!name.length())
-		name="unknown service";
-
-	ChannelName->setText(name);		
-
-	switch (err)
+		if (flags&ENIGMA_AUDIO)
+		{
+			ButtonYellowDis->hide();
+			ButtonYellowEn->show();
+		}
+		else
+		{
+			ButtonYellowEn->hide();
+			ButtonYellowDis->show();
+		}
+	} else
 	{
-	case 0:
-		Description->setText(_(""));
+		eString name;
 		postMessage(eZapMessage(0), 1);
-		break;
-	case -EAGAIN:
-		Description->setText(_("Einen Moment bitte..."));
-		postMessage(eZapMessage(0, _("switch"), _("One moment please...")), 1);
-		break;
-	case -ENOENT:
-		Description->setText(_("Sender konnte nicht gefunden werden."));
-		postMessage(eZapMessage(0, _("switch"), _("Service could not be found !")), 1);
-		eDebug("Sender konnte nicht gefunden werden.");
-		break;
-	case -ENOCASYS:
-		Description->setText(_("Dieser Sender kann nicht entschlüsselt werden."));
-		postMessage(eZapMessage(0, _("switch"), _("This service could not be descrambled")), 1);
-		eDebug("Dieser Sender kann nicht entschlüsselt werden.");
-		break;
-	case -ENOSTREAM:
-		Description->setText(_("Dieser Sender sendet (momentan) kein Signal."));
-		postMessage(eZapMessage(0, _("switch"), _("This service sends (currently) no signal")), 1);
-		eDebug("Dieser Sender sendet (momentan) kein Signal.");
-		break;
-	case -ENOSYS:
-		Description->setText(_("Dieser Inhalt kann nicht dargestellt werden."));
-		eDebug("Dieser Inhalt kann nicht dargestellt werden.");
-		postMessage(eZapMessage(0, _("switch"), _("This content could not be displayed")), 1);
-		break;
-	case -ENVOD:
-		Description->setText(_("NVOD - Bitte Anfangszeit bestimmen!"));
-		eDebug("NVOD - Bitte Anfangszeit bestimmen!");
-		postMessage(eZapMessage(0, _("switch"), _("NVOD Service - select a starttime, please")), 1);
-		break;
-	default:
-		Description->setText(_("<unbekannter Fehler>"));
-		eDebug("<unbekannter Fehler>");
-		postMessage(eZapMessage(0, _("switch"), _("Unknown error !!")), 1);
-		break;
+		if (service)
+			name=service->service_name;
+		else
+			name="bla :(";
+
+		ChannelName->setText(name);
 	}
 
-	int num=-1;
-	
-	if (rservice)
-		num=rservice->service_number;
-	else if (service)
-		num=service->service_number;
-
-	if (num != -1)
-		ChannelNumber->setText(eString().sprintf("%d", num));
-	else
-		ChannelNumber->setText("");
-	
-	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
-	{
-		ButtonGreenDis->hide();
-		ButtonGreenEn->show();
-	}
-	else
-	{
-		ButtonGreenEn->hide();
-		ButtonGreenDis->show();	
-	}
-
-	if (flags&ENIGMA_AUDIO)
-	{
-		ButtonYellowDis->hide();
-		ButtonYellowEn->show();
-	}
-	else
-	{
-		ButtonYellowEn->hide();
-		ButtonYellowDis->show();
-	}
-	
 	if (!eZap::getInstance()->focus)
 		show();
 
 // Quick und Dirty ... damit die aktuelle Volume sofort angezeigt wird.
 	eAVSwitch::getInstance()->sendVolumeChanged();
-
-	eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
-	if (!sapi)
-		return;
 
 	timeout.start((sapi->getState() == eServiceHandler::statePlaying)?10000:2000, 1);
 }

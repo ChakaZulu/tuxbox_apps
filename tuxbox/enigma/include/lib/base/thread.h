@@ -7,6 +7,7 @@ class eThread
 {
 	pthread_t the_thread;
 	static void *wrapper(void *ptr);
+	int alive;
 public:
 	eThread();
 	virtual ~eThread();
@@ -14,6 +15,8 @@ public:
 	void run();
 
 	virtual void thread()=0;
+	
+	void kill();
 };
 
 #endif

@@ -30,6 +30,7 @@
 #include <core/dvb/service.h>
 #include <core/gui/emessage.h>
 #include <core/driver/eavswitch.h>
+#include <core/dvb/service.h>
 
 
 // #include <core/dvr/dvrsocket.h>
@@ -45,7 +46,7 @@ static int getHex(int c)
 	if (c<0)
 		return -1;
 	if (c > 9)
-		c-='A'-10;
+		c-='A'-'0'-10;
 	if (c > 0xF)
 		return -1;
 	return c;
@@ -53,7 +54,7 @@ static int getHex(int c)
 
 static eString httpUnescape(const eString &string)
 {
-	eString ret;
+	eString ret="";
 	for (unsigned int i=0; i<string.length(); ++i)
 	{
 		int c=string[i];
@@ -62,9 +63,9 @@ static eString httpUnescape(const eString &string)
 		case '%':
 		{
 			int val='%';
-			if ((string.length() - i) > 1)
+			if ((i+1) < string.length())
 				val=getHex(string[++i]);
-			if ((string.length() - i) > 1)
+			if ((i+1) < string.length())
 			{
 				val<<=4;
 				val+=getHex(string[++i]);
@@ -79,6 +80,32 @@ static eString httpUnescape(const eString &string)
 			ret+=c;
 			break;
 		}
+	}
+	return ret;
+}
+
+static eString httpEscape(const eString &string)
+{
+	eString ret="";
+	for (unsigned int i=0; i<string.length(); ++i)
+	{
+		int c=string[i];
+		int valid=0;
+		if ((c >= 'a') && (c <= 'z'))
+			valid=1;
+		else if ((c >= 'A') && (c <= 'Z'))
+			valid=1;
+		else if (c == ':')
+			valid=1;
+		else if ((c >= '0') && (c <= '9'))
+			valid=1;
+		else
+			valid=0;
+
+		if (valid)
+			ret+=c;
+		else
+			ret+=eString().sprintf("%%%x", c);
 	}
 	return ret;
 }
@@ -1107,6 +1134,134 @@ static eString record_on(eString request, eString path, eString opt, eHTTPConnec
 }
 */
 
+static eString ref2string(const eServiceReference &r)
+{
+	eString ret;
+	ret+=eString().sprintf("%d:", r.type);
+	ret+=eString().sprintf("%d", r.flags);
+	for (unsigned int i=0; i<sizeof(r.data)/sizeof(*r.data); ++i)
+		ret+=":"+eString().sprintf("%x", r.data[i]);
+	ret+=":"+r.path;
+	return httpEscape(ret);
+}
+
+static eServiceReference string2ref(const eString &service)
+{
+	eServiceReference ret;
+	eString str=httpUnescape(service);
+	const char *c=str.c_str();
+	int path=-1;
+	
+	sscanf(c, "%d:%d:%x:%x:%x:%x:%n", &ret.type, &ret.flags, &ret.data[0], &ret.data[1], &ret.data[2], &ret.data[3], &path);
+	if (path)
+		ret.path=c+path;
+	return ret;
+}
+
+#define NAVIGATOR_PATH "/cgi-bin/navigator"
+
+class eNavigatorListDirectory: public Object
+{
+	eString &result;
+	eString path;
+	eServiceInterface &iface;
+	int num;
+public:
+	eNavigatorListDirectory(eString &result, eString path, eServiceInterface &iface): result(result), path(path), iface(iface)
+	{
+		eDebug("path: %s", path.c_str());
+		num=0;
+	}
+	void addEntry(const eServiceReference &e)
+	{
+		result+="<tr><td bgcolor=\"#";
+		if (num & 1)
+			result += "c0c0c0";
+		else
+			result += "d0d0d0";
+		result+="\"><font color=\"#000000\">";
+		if (!(e.flags & eServiceReference::isDirectory))
+			result+="[PLAY] ";
+
+		result+=eString("<a href=\"" NAVIGATOR_PATH ) + "?path=" + path + ref2string(e) +"\">" ;
+
+		eService *service=iface.lookupService(e);
+		if (!service)
+			result+="N/A";
+		else
+			result+=service->service_name;
+
+		result+="</a></font></td></tr>\n";
+		eDebug("ok");
+		num++;
+	}
+};
+
+static eString navigator(eString request, eString path, eString opt, eHTTPConnection *content)
+{
+	std::map<eString,eString> opts=getRequestOptions(opt);
+	
+	if (opts.find("path") == opts.end())
+	{
+		content->code=301;
+		content->code_descr="Moved Permanently";
+		content->local_header["Location"]=eString(NAVIGATOR_PATH) + "?path=" + ref2string(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0));
+		return "redirecting..";
+	}
+	content->local_header["Content-Type"]="text/html";
+	eString spath=opts["path"];
+
+	eServiceInterface *iface=eServiceInterface::getInstance();
+	if (!iface)
+		return "n/a\n";
+
+	eString current;
+
+	unsigned int pos;
+	if ((pos=spath.rfind(';')) != eString::npos)
+	{
+		current=spath.mid(pos+1);
+		spath=spath.left(pos);
+	} else
+	{
+		current=spath;
+		spath="";
+	}
+	
+	eServiceReference current_service=string2ref(current);
+
+	eString res;
+	
+	res="<html>\n"
+		"<head><title>Enigma Navigator</title></head>\n"
+		"<body bgcolor=\"#f0f0f0\">\n"
+		"<font color=\"#000000\">\n";
+
+	res+=eString("Current: ") + current + "<br>\n";
+	res+="<hr>\n";
+	res+=eString("path: ") + spath + "<br>\n";
+
+	if (! (current_service.flags&eServiceReference::isDirectory))	// is playable
+	{
+		iface->play(current_service);
+		res+="ok, hear the music..";
+	} else
+	{
+		eNavigatorListDirectory navlist(res, spath + ";" + current + ";", *iface);
+		Signal1<void,const eServiceReference&> signal;
+		signal.connect(slot(navlist, &eNavigatorListDirectory::addEntry));
+	
+		res+="<table width=\"100%%\">\n";
+		iface->enterDirectory(current_service, signal);
+		res+="</table>\n";
+		eDebug("entered");
+		iface->leaveDirectory(current_service);
+		eDebug("leaved");
+	}
+
+	return res;
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
@@ -1124,6 +1279,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);
 	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage);
+	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator);
 
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);

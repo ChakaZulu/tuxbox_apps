@@ -276,19 +276,61 @@ struct eServiceReference
 		idInvalid=-1,
 		idStructure,	// service_id == 0 is root
 		idDVB,
+		idFile,
 		idUser=0x1000
 	};
 	int type;
+	
+	int flags;
+	enum
+	{
+		isDirectory=1,
+	};
 
 	int data[4];
+	eString path;
 
 	eServiceReference()
-		: type(idInvalid)
+		: type(idInvalid), flags(0)
 	{
 	}
 
-	eServiceReference(int type)
-		: type(type)
+	eServiceReference(int type, int flags)
+		: type(type), flags(flags)
+	{
+		data[0]=data[1]=data[2]=data[3]=0;
+	}
+	eServiceReference(int type, int flags, int data0)
+		: type(type), flags(flags)
+	{
+		data[0]=data0;
+		data[1]=data[2]=data[3]=0;
+	}
+	eServiceReference(int type, int flags, int data0, int data1)
+		: type(type), flags(flags)
+	{
+		data[0]=data0;
+		data[1]=data1;
+		data[2]=data[3]=0;
+	}
+	eServiceReference(int type, int flags, int data0, int data1, int data2)
+		: type(type), flags(flags)
+	{
+		data[0]=data0;
+		data[1]=data1;
+		data[2]=data2;
+		data[3]=0;
+	}
+	eServiceReference(int type, int flags, int data0, int data1, int data2, int data3)
+		: type(type), flags(flags)
+	{
+		data[0]=data0;
+		data[1]=data1;
+		data[2]=data2;
+		data[3]=data3;
+	}
+	eServiceReference(int type, int flags, const eString &path)
+		: type(type), flags(flags), path(path)
 	{
 		data[0]=data[1]=data[2]=data[3]=0;
 	}
@@ -296,13 +338,11 @@ struct eServiceReference
 	{
 		if (type != c.type)
 			return 0;
-		return memcmp(data, c.data, sizeof(int)*4)==0;
+		return (flags == c.flags) && (memcmp(data, c.data, sizeof(int)*4)==0) && (path == c.path);
 	}
 	bool operator!=(const eServiceReference &c) const
 	{
-		if (type != c.type)
-			return 1;
-		return !!memcmp(data, c.data, sizeof(int)*4);
+		return !(*this == c);
 	}
 	bool operator<(const eServiceReference &c) const
 	{
@@ -311,8 +351,16 @@ struct eServiceReference
 
 		if (type > c.type)
 			return 0;
+			
+		if (flags < c.flags)
+			return 1;
+		if (flags > c.flags)
+			return 0;
 
-		return memcmp(data, c.data, sizeof(int)*4)<0;
+		int r=memcmp(data, c.data, sizeof(int)*4);
+		if (r)
+			return r < 0;
+		return path < c.path;
 	}
 	operator bool() const
 	{
@@ -335,7 +383,7 @@ struct eServiceReferenceDVB: public eServiceReference
 	void setOriginalNetworkID(eOriginalNetworkID original_network_id) { data[3]=original_network_id.get(); }
 
 	eServiceReferenceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_type):
-		eServiceReference(eServiceReference::idDVB)
+		eServiceReference(eServiceReference::idDVB, 0)
 	{
 		setTransportStreamID(transport_stream_id);
 		setOriginalNetworkID(original_network_id);

@@ -90,7 +90,7 @@ inline eString eString::right(unsigned int len) const
 //	Returns a substring that contains the len rightmost characters of the string.
 //	The whole string is returned if len exceeds the length of the string.
 	register unsigned int strlen = length();
-	return len >= strlen ? *this : substr(strlen-len-1, len);
+	return len >= strlen ? *this : substr(strlen-len, len);
 }
 
 inline bool eString::isNull() const

@@ -26,7 +26,9 @@ public:
 		evtStateChanged,
 		evtFlagsChanged,
 		
-		evtAspectChanged		
+		evtAspectChanged,
+		
+		evtEnd
 	};
 	int type;
 };
@@ -51,41 +53,46 @@ public:
 	};
 	enum
 	{
-		statePlaying, stateError, stateScrambled
+		statePlaying, stateError, stateScrambled, stateStopped
 	};
 	eServiceHandler(int id);
-	virtual int getID() const =0;
-	virtual ~eServiceHandler()=0;
+	int getID()
+	{
+		return id;
+	}
+	virtual ~eServiceHandler();
 	virtual eService *lookupService(const eServiceReference &service)=0;
 
-	virtual int play(const eServiceReference &service)=0;
+	virtual eService *createService(const eServiceReference &node);
+
+	virtual int play(const eServiceReference &service);
 
 		// current service
 
 		// for DVB audio channels:
-	virtual PMT *getPMT()=0;
-	virtual void setPID(const PMTEntry *)=0;
+	virtual PMT *getPMT();
+	virtual void setPID(const PMTEntry *);
 	
 		// for DVB nvod channels:
-	virtual SDT *getSDT()=0;
+	virtual SDT *getSDT();
 
 		// for DVB events, nvod, audio....
-	virtual EIT *getEIT()=0;
+	virtual EIT *getEIT();
 	
-	virtual int getFlags()=0;
-	virtual int getState()=0;
+	virtual int getFlags();
+	virtual int getState();
 	
 		// get visual flags
-	virtual int getAspectRatio()=0;
+	virtual int getAspectRatio();
 
-	virtual int getErrorInfo()=0;
+	virtual int getErrorInfo();
 	
-	virtual int stop()=0;
+	virtual int stop();
 
 	Signal1<void, const eServiceEvent &> serviceEvent;
 
 		// service list functions
-	virtual void enterDirectory(const eServiceReference &dir, Signal0<void,const eServiceReference&> &callback);
+	virtual void enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback);
 	virtual void leaveDirectory(const eServiceReference &dir);
 };
 
@@ -126,6 +133,10 @@ public:
 	int stop();
 
 	eServiceReference service;
+		
+		// service list functions
+	void enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback);
+	void leaveDirectory(const eServiceReference &dir);
 };
 
 #endif

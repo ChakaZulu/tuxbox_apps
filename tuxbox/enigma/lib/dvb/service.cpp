@@ -10,7 +10,62 @@ eServiceHandler::~eServiceHandler()
 {
 }
 
-void eServiceHandler::enterDirectory(const eServiceReference &dir, Signal0<void,const eServiceReference&> &callback)
+eService *eServiceHandler::createService(const eServiceReference &node)
+{
+	return 0;
+}
+
+int eServiceHandler::play(const eServiceReference &service)
+{
+	return -1;
+}
+
+PMT *eServiceHandler::getPMT()
+{
+	return 0;
+}
+
+void eServiceHandler::setPID(const PMTEntry *)
+{
+	return;
+}
+
+SDT *eServiceHandler::getSDT()
+{
+	return 0;
+}
+
+EIT *eServiceHandler::getEIT()
+{
+	return 0;
+}
+
+int eServiceHandler::getFlags()
+{
+	return 0;
+}
+
+int eServiceHandler::getState()
+{
+	return 0;
+}
+
+int eServiceHandler::getAspectRatio()
+{
+	return 0;
+}
+
+int eServiceHandler::getErrorInfo()
+{
+	return 0;
+}
+
+int eServiceHandler::stop()
+{
+	return 0;
+}
+
+void eServiceHandler::enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback)
 {
 	return;
 }
@@ -35,7 +90,10 @@ void eServiceInterface::handleServiceEvent(const eServiceEvent &evt)
 int eServiceInterface::switchServiceHandler(int id)
 {
 	if (currentServiceHandler && (currentServiceHandler->getID() == id))
+	{
+		currentServiceHandler->stop();
 		return 0;
+	}
 	stop();
 	eServiceHandler *handler=getServiceHandler(id);
 	if (!handler)
@@ -115,6 +173,18 @@ int eServiceInterface::stop()
 	conn.disconnect();
 	currentServiceHandler=0;
 	return res;
+}
+
+void eServiceInterface::enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback)
+{
+	for (std::map<int,eServiceHandler*>::iterator i(handlers.begin()); i != handlers.end(); ++i)
+		i->second->enterDirectory(dir, callback);
+}
+
+void eServiceInterface::leaveDirectory(const eServiceReference &dir)
+{
+	for (std::map<int,eServiceHandler*>::iterator i(handlers.begin()); i != handlers.end(); ++i)
+		i->second->leaveDirectory(dir);
 }
 
 eAutoInitP0<eServiceInterface> i_eServiceInteface(5, "eServiceInterface");

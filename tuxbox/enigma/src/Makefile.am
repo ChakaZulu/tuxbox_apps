@@ -24,7 +24,7 @@ enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/system/libenigma_system.la \
 	$(top_builddir)/enigma/src/core/xml/libenigma_xml.la \
 	$(LIBSIGC_LIBS) $(INTLLIBS) \
-	-ldl -lpthread
+	-ldl -lpthread -lid3tag -lmad
 
 # -lmpatrolmt -lbfd -liberty 
 

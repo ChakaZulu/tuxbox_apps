@@ -6,8 +6,11 @@ eHTTPDyn::eHTTPDyn(eHTTPConnection *c, eString result): eHTTPDataSource(c), resu
 	char buffer[10];
 	snprintf(buffer, 10, "%d", size=result.length());
 	c->local_header["Content-Length"]=std::string(buffer);
-	c->code=200;
-	c->code_descr="OK";
+	if (c->code == -1)
+	{
+		c->code=200;
+		c->code_descr="OK";
+	}
 }
 
 eHTTPDyn::~eHTTPDyn()
@@ -51,6 +54,7 @@ eHTTPDataSource *eHTTPDynPathResolver::getDataSource(eString request, eString pa
 	for (ePtrList<eHTTPDynEntry>::iterator i(dyn); i != dyn.end(); ++i)
 		if ((i->path==p) && (i->request==request))
 		{
+			conn->code=-1;
 			eString s=i->function(request, path, opt, conn);
 
 			if (s)

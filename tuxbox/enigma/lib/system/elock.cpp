@@ -102,3 +102,4 @@ int eSemaphore::value()
 	pthread_mutex_unlock(&mutex);
 	return value_after_op;
 }
+

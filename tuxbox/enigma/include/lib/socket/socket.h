@@ -12,50 +12,15 @@
 #include <core/base/eerror.h>
 #include <core/base/estring.h>
 #include <include/libsig_comp.h>
-
-#include <queue>
-
-/**
- * (Almost) zero-copy io buffer.
- */
-class eSocketBuffer
-{
-	int allocationsize;
-	struct eSocketBufferData
-	{
-		__u8 *data;
-		int len;
-	};
-	std::list<eSocketBufferData> buffer;
-	void removeblock();
-	eSocketBufferData &addblock();
-	int ptr;
-public:
-	eSocketBuffer(int allocationsize): allocationsize(allocationsize), ptr(0)
-	{
-	}
-	~eSocketBuffer();
-	int size() const;
-	int empty() const;
-	void clear();
-	int peek(void *dest, int len) const;
-	void skip(int len);
-	int read(void *dest, int len);
-	void write(const void *source, int len);
-	int readfile(int fd, int len);
-	int sendfile(int fd, int len);
-
-	int searchchr(char ch) const;
-};
-
+#include <core/base/buffer.h>
 
 class eSocket: public Object
 {
 	int mystate;
 private:
 	int socketdesc;
-	eSocketBuffer readbuffer;
-	eSocketBuffer writebuffer;
+	eIOBuffer readbuffer;
+	eIOBuffer writebuffer;
 	int writebusy;
 protected:
 	eSocketNotifier	*rsn;

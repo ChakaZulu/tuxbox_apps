@@ -5,195 +5,6 @@
 
 #include <core/socket/socket.h>
 
-void eSocketBuffer::removeblock()
-{
-	ASSERT(!buffer.empty());
-	eSocketBufferData &b=buffer.front();
-	delete[] b.data;
-	buffer.pop_front();
-	ptr=0;
-}
-
-eSocketBuffer::eSocketBufferData &eSocketBuffer::addblock()
-{
-	eSocketBufferData s;
-	s.data=new __u8[allocationsize];
-	s.len=0;
-	buffer.push_back(s);
-	return buffer.back();
-}
-
-eSocketBuffer::~eSocketBuffer()
-{
-	clear();
-}
-
-void eSocketBuffer::clear()
-{
-	while (!buffer.empty())
-		removeblock();
-}
-
-int eSocketBuffer::size() const
-{
-	int total=0;
-	for (std::list<eSocketBufferData>::const_iterator i(buffer.begin()); i != buffer.end(); ++i)
-		total+=i->len;
-	total-=ptr;
-	return total;
-}
-
-int eSocketBuffer::empty() const
-{
-	return buffer.empty();
-}
-
-int eSocketBuffer::peek(void *dest, int len) const
-{
-	__u8 *dst=(__u8*)dest;
-	std::list<eSocketBufferData>::const_iterator i(buffer.begin());
-	int p=ptr;
-	int written=0;
-	while (len)
-	{	
-		if (i == buffer.end())
-			break;
-		int tc=i->len-p;
-		if (tc > len)
-			tc = len;
-	
-		memcpy(dst, i->data+p, tc);
-		dst+=tc;
-		written+=tc;
-	
-		++i;
-		p=0;
-			
-		len-=tc;
-	}
-	return written;
-}
-
-void eSocketBuffer::skip(int len)
-{
-	while (len)
-	{
-		ASSERT(! buffer.empty());
-		int tn=len;
-		if (tn > (buffer.front().len-ptr))
-			tn=buffer.front().len-ptr;
-
-		ptr+=tn;
-		if (ptr == buffer.front().len)
-			removeblock();
-		len-=tn;
-	}
-}
-
-int eSocketBuffer::read(void *dest, int len)
-{
-	__u8 *dst=(__u8*)dest;
-	len=peek(dst, len);
-	skip(len);
-	return len;
-}
-
-void eSocketBuffer::write(const void *source, int len)
-{
-	const __u8 *src=(const __u8*)source;
-	while (len)
-	{
-		int tc=len;
-		if (buffer.empty() || (allocationsize == buffer.back().len))
-			addblock();
-		if (tc > allocationsize-buffer.back().len)
-			tc=allocationsize-buffer.back().len;
-		memcpy(buffer.back().data+buffer.back().len, src, tc);
-		src+=tc;
-		buffer.back().len+=tc;
-		len-=tc;
-	}
-}
-
-int eSocketBuffer::readfile(int fd, int len)
-{
-	int re=0;
-	while (len)
-	{
-		int tc=len;
-		int r;
-		if (buffer.empty() || (allocationsize == buffer.back().len))
-			addblock();
-		if (tc > allocationsize-buffer.back().len)
-			tc=allocationsize-buffer.back().len;
-		r=::read(fd, buffer.back().data+buffer.back().len, tc);
-		buffer.back().len+=r;
-		len-=r;
-		if (r < 0)
-		{
-			if (errno != EWOULDBLOCK)
-				eDebug("read: %m");
-			r=0;
-		}
-		re+=r;
-		if (r != tc)
-			break;
-	}
-	return re;
-}
-
-int eSocketBuffer::sendfile(int fd, int len)
-{
-	int written=0;
-	int w;
-	while (len && !buffer.empty())
-	{	
-		if (buffer.begin() == buffer.end())
-			break;
-		int tc=buffer.front().len-ptr;
-		if (tc > len)
-			tc = len;
-	
-		w=::write(fd, buffer.front().data+ptr, tc);
-		if (w < 0)
-		{
-			if (errno != EWOULDBLOCK)
-				eDebug("write: %m");
-			w=0;
-		}
-		ptr+=w;
-		if (ptr == buffer.front().len)
-			removeblock();
-		written+=w;	
-
-		len-=w;
-		if (tc != w)
-			break;
-	}
-	return written;
-}
-
-int eSocketBuffer::searchchr(char ch) const
-{
-	std::list<eSocketBufferData>::const_iterator i(buffer.begin());
-	int p=ptr;
-	int c=0;
-	while (1)
-	{	
-		if (i == buffer.end())
-			break;
-		while (p < i->len)
-			if (i->data[p] == ch)
-				return c;
-			else
-				c++, p++;
-
-		++i;
-		p=0;
-	}
-	return -1;
-}
-
 void eSocket::close()
 {
 	if (writebuffer.empty())
@@ -273,15 +84,15 @@ void eSocket::notifier(int what)
 				close();
 				return;
 			}
-			if (readbuffer.readfile(getDescriptor(), bytesavail) != bytesavail)
-				eDebug("readfile failed!");
+			if (readbuffer.fromfile(getDescriptor(), bytesavail) != bytesavail)
+				eDebug("fromfile failed!");
 			readyRead_();
 		}
 	} else if (what & eSocketNotifier::Write)
 	{
 		if (!writebuffer.empty())
 		{
-			bytesWritten_(writebuffer.sendfile(getDescriptor(), 65536));
+			bytesWritten_(writebuffer.tofile(getDescriptor(), 65536));
 			if (writebuffer.empty())
 			{
 				rsn->setRequested(rsn->getRequested()&~eSocketNotifier::Write);

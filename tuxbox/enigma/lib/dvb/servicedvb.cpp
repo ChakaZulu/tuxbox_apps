@@ -60,7 +60,7 @@ void eServiceHandlerDVB::aspectRatioChanged(int isanamorph)
 	serviceEvent(eServiceEvent(eServiceEvent::evtAspectChanged));
 }
 
-eServiceHandlerDVB::eServiceHandlerDVB(): eServiceHandler(eServiceReference::idDVB)
+eServiceHandlerDVB::eServiceHandlerDVB(): eServiceHandler(eServiceReference::idDVB), cache(*this)
 {
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);
@@ -73,10 +73,14 @@ eServiceHandlerDVB::eServiceHandlerDVB(): eServiceHandler(eServiceReference::idD
 	CONNECT(eDVB::getInstance()->leaveService, eServiceHandlerDVB::leaveService);
 	CONNECT(eStreamWatchdog::getInstance()->AspectRatioChanged, eServiceHandlerDVB::aspectRatioChanged);
 
-	// structure[eServiceReference(eServiceReference::idDVB, -1, eServiceID())]=new eService("DVB - bouquets");
-	// structure[eServiceReference(eServiceReference::idDVB, -2, eServiceID())]=new eService("DVB - ALL services");
-	
-	// structure[eServiceReference(eServiceReference::idDVB, -3, eServiceID(bouquet_id))]=new eService("");
+	cache.addPersistentService(
+			eServiceReference(eServiceReference::idDVB, eServiceReference::isDirectory, -1),
+			new eService(eServiceReference::idDVB, "DVB - bouquets")
+		);
+	cache.addPersistentService(
+			eServiceReference(eServiceReference::idDVB, eServiceReference::isDirectory, -2), 
+			new eService(eServiceReference::idDVB, "DVB - all services")
+		);
 }
 
 eServiceHandlerDVB::~eServiceHandlerDVB()
@@ -87,6 +91,9 @@ eServiceHandlerDVB::~eServiceHandlerDVB()
 
 eService *eServiceHandlerDVB::lookupService(const eServiceReference &service)
 {
+	eService *s=cache.lookupService(service);
+	if (s)
+		return s;
 	eTransponderList *tl=eTransponderList::getInstance();
 	if (!tl)
 		return 0;
@@ -160,27 +167,83 @@ int eServiceHandlerDVB::stop()
 
 struct eServiceHandlerDVB_addService
 {
-	Signal0<void,const eServiceReference&> &callback;
-	eServiceHandlerDVB_addService(Signal0<void,const eServiceReference&> &callback): callback(callback)
+	Signal1<void,const eServiceReference&> &callback;
+	eServiceHandlerDVB_addService(Signal1<void,const eServiceReference&> &callback): callback(callback)
 	{
 	}
 	void operator()(const eServiceReference &service)
 	{
-//		callback(service);
+		callback(service);
 	}
 };
 
-void eServiceHandlerDVB::enterDirectory(const eServiceReference &dir, Signal0<void,const eServiceReference&> &callback)
+void eServiceHandlerDVB::enterDirectory(const eServiceReference &ref, Signal1<void,const eServiceReference&> &callback)
 {
-	switch (dir.type)	
+	eDebug("enter directory...");
+	switch (ref.type)
+	{
+	case eServiceReference::idDVB:
+		switch (ref.data[0])
+		{
+		case -2:
+			eDVB::getInstance()->settings->getTransponders()->forEachServiceReference(eServiceHandlerDVB_addService(callback));
+			break;
+		case -3:
+		{
+			eBouquet *b=eDVB::getInstance()->settings->getBouquet(ref.data[1]);
+			if (!b)
+				break;
+			for (std::list<eServiceReferenceDVB>::iterator i(b->list.begin());  i != b->list.end(); ++i)
+				callback(*i);
+			break;
+		}
+		default:
+			break;
+		}
+	default:
+		break;
+	}
+	cache.enterDirectory(ref, callback);
+}
+
+eService *eServiceHandlerDVB::createService(const eServiceReference &node)
+{
+	switch (node.data[0])
+	{
+	case -3:
+	{
+		eBouquet *b=eDVB::getInstance()->settings->getBouquet(node.data[1]);
+		if (!b)
+			return 0;
+		return new eService(eServiceID(0), b->bouquet_name.c_str());
+	}
+	}
+	return 0;
+}
+
+void eServiceHandlerDVB::loadNode(eServiceCache<eServiceHandlerDVB>::eNode &node, const eServiceReference &ref)
+{
+	eDebug("loadNode...");
+	switch (ref.type)
 	{
 	case eServiceReference::idStructure:
-//		callback(eServiceReference(eServiceReference::idDVB, -1, eServiceID(0)));
+		if (!ref.data[0])
+		{
+			eDebug("r00t");
+			cache.addToNode(node, eServiceReference(eServiceReference::idDVB, eServiceReference::isDirectory, -1, 0));
+			cache.addToNode(node, eServiceReference(eServiceReference::idDVB, eServiceReference::isDirectory, -2, 0));
+		}
 		break;
 	case eServiceReference::idDVB:
-		if (dir.data[0] == -1)
+		switch (ref.data[0])
 		{
-
+		case -1:
+		{
+			ePtrList<eBouquet> &list=*eDVB::getInstance()->settings->getBouquets();
+			for (ePtrList<eBouquet>::iterator i(list.begin()); i != list.end(); ++i)
+				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, eServiceReference::isDirectory, -3, i->bouquet_id));
+			break;
+		}
 		}
 		break;
 	}
@@ -188,7 +251,7 @@ void eServiceHandlerDVB::enterDirectory(const eServiceReference &dir, Signal0<vo
 
 void eServiceHandlerDVB::leaveDirectory(const eServiceReference &dir)
 {
-	// noch nix.
+	cache.leaveDirectory(dir);
 }
 
 eAutoInitP0<eServiceHandlerDVB> i_eServiceHandlerDVB(6, "eServiceHandlerDVB");
