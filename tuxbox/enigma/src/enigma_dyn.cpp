@@ -1,7 +1,9 @@
 #include <time.h>
 #include <qmap.h>
-#include <qfile.h>
-#include <qtextstream.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "enigma.h"
 #include "decoder.h"
 #include "enigma_dyn.h"
@@ -259,39 +261,37 @@ static QString setVolume(QString request, QString path, QString opts, eHTTPConne
 	return result;
 }
 
-
 static QString read_file(QString filename)
 {
-	QFile f(filename);
+#define BLOCKSIZE 8192
+	int fd;
+	fd=open(filename, O_RDONLY);
+	if(!fd)
+		return QString("file: "+filename+" not found\n");
+	
+	int size=0;
 
-	if(f.open(IO_ReadOnly))
+	char tempbuf[BLOCKSIZE+200];
+	QString result("");
+
+	while((size=read(fd, tempbuf, BLOCKSIZE))>0)
 	{
-		char buffer[f.size()+1];
-		buffer[f.readBlock(buffer, f.size())]=0;
-		return QString(buffer);
-	} else
-		return "file: "+filename+" not found\n";
+		tempbuf[size]=0;
+		result+=QString(tempbuf);
+	}
+	return result;
 }
 
 static QString getIP()
 {
-#if 0
 	QString tmp;
 	int ip[4];
-	ip[0]=0;
-	ip[1]=0;
-	ip[2]=0;
-	ip[3]=0;
-
-	system("cat /proc/net/tcp | grep -v \": 00000000\"> /tmp/ip_temp");
-	system("cat /tmp/ip_temp | grep \"0050\" > /tmp/ip");
-	tmp=read_file("/tmp/ip");
-	tmp=tmp.mid(5, 9);
+	memset(&ip, 0, sizeof(ip));
+	tmp=read_file("/proc/net/tcp");
 	
-	sscanf(tmp, "%02x%02x%02x%02x", &ip[0], &ip[1], &ip[2], &ip[3]);
-	tmp.sprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-	return tmp;
-#endif
+	if(sscanf(tmp, "%02x%02x%02x%02x:0050", &ip[0], &ip[1], &ip[2], &ip[3])==4) {
+		return QString().sprintf("%d.%d.%d.%d", ip);
+	}
 	return "?.?.?.?";
 }
 
@@ -506,8 +506,8 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
 	stats+=tmp;
 
-	tmp.sprintf("<span class=\"white\">vpid: 0x%x</span> | <a class=\"audio\" href=\"http://"+getIP()+"/audio.pls\">apid: 0x%x</a>", Decoder::parms.vpid, Decoder::parms.apid);
-	stats+=tmp;
+//	tmp.sprintf("<span class=\"white\">vpid: 0x%x</span> | <a class=\"audio\" href=\"/audio.pls\">apid: 0x%x</a>", Decoder::parms.vpid, Decoder::parms.apid);
+//	stats+=tmp;
 	tvc="normal";
 	radioc="normal";
 	aboutc="normal";
@@ -639,7 +639,7 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 	result.replace(QRegExp("#MODE#"), tmp);
 	result.replace(QRegExp("#COP#"), cop);
 	if((mode=="tv")||
-           (mode=="radio")) 
+           (mode=="radio"))
 		result.replace(QRegExp("#SERVICENAME#"), filter_string(getCurService()));
 	else
 		result.replace(QRegExp("#SERVICENAME#"), "");
