@@ -19,7 +19,6 @@
 */
 
 #include <dbox/event.h>
-#include <dbox/saa7126_core.h>
 
 #include <eventserver.h>
 #include <controldclient/controldclient.h>
