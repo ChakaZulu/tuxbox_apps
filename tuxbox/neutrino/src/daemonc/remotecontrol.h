@@ -200,9 +200,9 @@ class CRemoteControl
 		void zapTo_onid_sid( unsigned int onid_sid, string channame );
 		void queryAPIDs();
 		void setAPID(int APID);
-		void setSubChannel(unsigned numSub);
-		void subChannelUp();
-		void subChannelDown();
+		string setSubChannel(unsigned numSub);
+		string subChannelUp();
+		string subChannelDown();
 		void CopySubChannelsToZapit( const CSubChannel_Infos& subChannels );
 		void shutdown();
 		void radioMode();

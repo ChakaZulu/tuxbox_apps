@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.181 2002/03/01 22:30:30 McClean Exp $
+        $Id: neutrino.cpp,v 1.182 2002/03/01 23:38:53 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.182  2002/03/01 23:38:53  McClean
+  f1-subchanswitch (l1)
+
   Revision 1.181  2002/03/01 22:30:30  McClean
   disable the cam-warning (chooseable)
 
@@ -794,8 +797,8 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.key_quickzap_down = CRCInput::RC_down;
 	g_settings.key_bouquet_up = CRCInput::RC_right;
 	g_settings.key_bouquet_down = CRCInput::RC_left;
-	g_settings.key_subchannel_up = CRCInput::RC_nokey;
-	g_settings.key_subchannel_down = CRCInput::RC_nokey;
+	g_settings.key_subchannel_up = CRCInput::RC_right;
+	g_settings.key_subchannel_down = CRCInput::RC_left;
 
 	if ( g_settings.box_Type == 2 )
 	{
@@ -2184,11 +2187,41 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				}
 				else if ( msg == g_settings.key_subchannel_up )
 				{
-					g_RemoteControl->subChannelUp();
+					string sc = g_RemoteControl->subChannelUp();
+					printf("schannel: %s\n", sc.c_str());
+					if(sc!="")
+					{
+						int dx = g_Fonts->infobar_info->getRenderWidth(sc.c_str()) + 20;
+						int dy = 30;
+						int x = g_settings.screen_EndX - dx -10;
+						int y = g_settings.screen_StartY + 10;
+						printf("before paint\n");
+						g_FrameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
+						g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, sc.c_str(), COL_MENUCONTENT);
+						uint msg; uint data;
+						g_RCInput->getMsg( &msg, &data, 20 );
+						g_RCInput->pushbackMsg( msg, data );
+						g_FrameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
+					}
 				}
 				else if ( msg == g_settings.key_subchannel_down )
 				{
-					g_RemoteControl->subChannelDown();
+					string sc = g_RemoteControl->subChannelDown();
+					printf("schannel: %s\n", sc.c_str());
+					if(sc!="")
+					{
+						int dx = g_Fonts->infobar_info->getRenderWidth(sc.c_str()) + 20;
+						int dy = 30;
+						int x = g_settings.screen_EndX - dx-10;
+						int y = g_settings.screen_StartY + 10;
+						printf("before paint\n");
+						g_FrameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
+						g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, sc.c_str(), COL_MENUCONTENT);
+						uint msg; uint data;
+						g_RCInput->getMsg( &msg, &data, 20 );
+						g_RCInput->pushbackMsg( msg, data );
+						g_FrameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
+					}
 				}
 				else
 				{
@@ -2700,7 +2733,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.181 2002/03/01 22:30:30 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.182 2002/03/01 23:38:53 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

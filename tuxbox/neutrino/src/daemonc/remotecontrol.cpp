@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.43 2002/02/17 16:16:23 Simplex Exp $
+// $Id: remotecontrol.cpp,v 1.44 2002/03/01 23:38:53 McClean Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.44  2002/03/01 23:38:53  McClean
+// f1-subchanswitch (l1)
+//
 // Revision 1.43  2002/02/17 16:16:23  Simplex
 // quick updown-zap for subchannels
 //
@@ -687,13 +690,13 @@ void CRemoteControl::setAPID(int APID)
 	send();
 }
 
-void CRemoteControl::setSubChannel(unsigned numSub)
+string CRemoteControl::setSubChannel(unsigned numSub)
 {
 	pthread_mutex_lock( &send_mutex );
 	if ((subChannels_internal.selected== numSub ) || (numSub < 0) || (numSub >= subChannels_internal.list.size()))
 	{
 		pthread_mutex_unlock( &send_mutex );
-		return;
+		return "";
 	}
 	memset(&audio_chans_int, 0, sizeof(audio_chans_int));
 
@@ -704,22 +707,23 @@ void CRemoteControl::setSubChannel(unsigned numSub)
 
 	pthread_mutex_unlock( &send_mutex );
 	send();
+	return subChannels_internal.list[numSub].subservice_name;
 }
 
-void CRemoteControl::subChannelUp()
+string CRemoteControl::subChannelUp()
 {
-	setSubChannel( (subChannels_internal.selected + 1) % subChannels_internal.list.size());
+	return setSubChannel( (subChannels_internal.selected + 1) % subChannels_internal.list.size());
 }
 
-void CRemoteControl::subChannelDown()
+string CRemoteControl::subChannelDown()
 {
 	if (subChannels_internal.selected == 0 )
 	{
-		setSubChannel(subChannels_internal.list.size() - 1);
+		return setSubChannel(subChannels_internal.list.size() - 1);
 	}
 	else
 	{
-		setSubChannel(subChannels_internal.selected - 1);
+		return setSubChannel(subChannels_internal.selected - 1);
 	}
 }
 
