@@ -79,6 +79,10 @@ public:
 	{
 		return t;
 	}
+	T1 *operator->()
+	{
+		return t;
+	}
 	eAutoInitP0(int runl, char *description): eAutoInit(runl, description)
 	{
 	}
