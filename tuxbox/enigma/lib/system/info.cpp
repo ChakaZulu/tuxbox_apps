@@ -5,8 +5,11 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 
-#if HAVE_DVB_API_VERSION == 3
+#ifdef HAVE_TUXBOX_H
 #include <tuxbox.h>
+#endif
+
+#if HAVE_DVB_API_VERSION == 3
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -51,6 +54,20 @@ eSystemInfo::eSystemInfo()
 	else
 		eDebug("open demod failed (%m)");
 
+#else
+	switch (atoi(getInfo("fe").c_str()))
+	{
+		case 0: // DBOX_FE_CABLE
+			fetype=feCable;
+			break;
+		case 1: // DBOX_FE_SATELLITE
+			fetype=feSatellite;
+			break;
+		default:
+			fetype=feSatellite;
+	}
+#endif
+#ifdef HAVE_TUXBOX_H
 	switch (tuxbox_get_submodel())
 	{
 		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
@@ -90,17 +107,6 @@ eSystemInfo::eSystemInfo()
 			break;
 	}
 #else
-	switch (atoi(getInfo("fe").c_str()))
-	{
-		case 0: // DBOX_FE_CABLE
-			fetype=feCable;
-			break;
-		case 1: // DBOX_FE_SATELLITE
-			fetype=feSatellite;
-			break;
-		default:
-			fetype=feSatellite;
-	}
 	int mid = atoi(getInfo("mID").c_str());
 	switch (mid)
 	{

@@ -12,5 +12,3 @@ libenigma_dvb_a_SOURCES = \
 	dvbscan.cpp service.cpp servicecache.cpp servicedvb.cpp servicestructure.cpp \
 	servicefile.cpp servicemp3.cpp serviceplaylist.cpp dvbci.cpp
 
-AM_CPPFLAGS = -DPROFILE
-
