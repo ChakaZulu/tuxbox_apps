@@ -225,7 +225,6 @@ void eService::update(SDTEntry *sdtentry)
 
 eTransponderList::eTransponderList()
 {
-	lowest_channelnum=200;
 }
 
 eTransponder &eTransponderList::createTransponder(int transport_stream_id, int original_network_id)
@@ -247,19 +246,23 @@ eService &eTransponderList::createService(int transport_stream_id, int original_
 	if (i==services.end())
 	{
 		if (chnum==-1)
-		{
 			chnum=beautifyChannelNumber(transport_stream_id, original_network_id, service_id);
-			if (chnum==-1)
-				chnum=lowest_channelnum++;
+			
+		if ((chnum==-1) || (channel_number.find(chnum)!=channel_number.end()))
+		{
+			if (channel_number.end()==channel_number.begin())
+				chnum=200;
 			else
-				while (searchServiceByNumber(chnum))
-					chnum++;
+				chnum=(channel_number.end()--)->first+1;	// letzte kanalnummer +1
 		}
-		return services.insert(
+
+		eService *n=&services.insert(
 					std::pair<sref,eService>
 						(sref(original_network_id,service_id), 
 						eService(transport_stream_id, original_network_id, service_id, chnum))
 					).first->second;
+		channel_number.insert(std::pair<int,eService*>(chnum,n));
+		return *n;
 	}
 	return (*i).second;
 }
@@ -309,9 +312,12 @@ eService *eTransponderList::searchService(int original_network_id, int service_i
 	return &i->second;
 }
 
-eService *eTransponderList::searchServiceByNumber(int channel_number)
+eService *eTransponderList::searchServiceByNumber(int chnum)
 {
-	return 0;
+	std::map<int,eService*>::iterator i=channel_number.find(chnum);
+	if (i==channel_number.end())
+		return 0;
+	return i->second;
 }
 
 eTransponder *eTransponderList::getFirstTransponder(int state)

@@ -152,7 +152,7 @@ class eTransponderList
 {
 	std::map<tsref,eTransponder> transponders;
 	std::map<sref,eService> services;
-	int lowest_channelnum;
+	std::map<int,eService*> channel_number;
 
 public:
 	eTransponderList();
