@@ -103,7 +103,6 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 					aneedlcd=getInfo(cfgfile, "needlcd"),
 					aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
 					aneedoffsets=getInfo(cfgfile, "needoffsets"),
-					aneedvidformat=getInfo(cfgfile, "needvidformat"),
 					apigon=getInfo(cfgfile, "pigon");
 
 	needfb=(aneedfb.isNull()?false:atoi(aneedfb.c_str()));
@@ -111,7 +110,6 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	needrc=(aneedrc.isNull()?false:atoi(aneedrc.c_str()));
 	needvtxtpid=(aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid.c_str()));
 	needoffsets=(aneedoffsets.isNull()?false:atoi(aneedoffsets.c_str()));
-	needvidformat=(aneedvidformat.isNull()?false:atoi(aneedvidformat.c_str()));
 	version=(apluginVersion.isNull()?0:atoi(apluginVersion.c_str()));
 	showpig=(apigon.isNull()?false:atoi(apigon.c_str()));
 
@@ -268,11 +266,6 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 			ioctl(fd, AVIA_VBI_STOP_VTXT, 0);
 			close(fd);
 		}
-	}
-
-	if (plugin->needvidformat)
-	{
-		MakeParam(P_ID_VFORMAT, eStreamWatchdog::getInstance()->isAnamorph()?2:1);
 	}
 
 /*	for(PluginParam *par = first; par; par=par->next )
