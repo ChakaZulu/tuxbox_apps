@@ -183,6 +183,11 @@ bool sortByDate (const CFile& a, const CFile& b)
 	return a.Time < b.Time ;
 }
 
+bool sortBySize (const CFile& a, const CFile& b)
+{
+	return a.Size < b.Size;
+}
+
 //------------------------------------------------------------------------
 
 CFileBrowser::CFileBrowser()
@@ -303,9 +308,11 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 		sort(filelist.begin(), filelist.end(), sortByNameDirsFirst);
 	else if (smode == 2)
 		sort(filelist.begin(), filelist.end(), sortByType);
-	else
+	else if (smode == 3)
 		sort(filelist.begin(), filelist.end(), sortByDate);
-
+	else
+		sort(filelist.begin(), filelist.end(), sortBySize);
+		
 	selected = 0;
 	paintHead();
 	paint();
@@ -600,7 +607,7 @@ bool CFileBrowser::exec(std::string Dirname)
 		else if (msg==CRCInput::RC_help)
 		{
 			smode++;
-			if (smode > 3)
+			if (smode > 4)
 				smode = 0;
 			// sort result
 			if (smode == 0)
@@ -609,9 +616,11 @@ bool CFileBrowser::exec(std::string Dirname)
 				sort(filelist.begin(), filelist.end(), sortByNameDirsFirst);
 			else if (smode == 2)
 				sort(filelist.begin(), filelist.end(), sortByType);
-			else
+			else if (smode == 3)
 				sort(filelist.begin(), filelist.end(), sortByDate);
-
+			else
+				sort(filelist.begin(), filelist.end(), sortBySize);
+				
 			paint();
 		}
 		else if(CRCInput::isNumeric(msg))
@@ -885,7 +894,7 @@ void CFileBrowser::paintFoot()
 	int ty2 = by2 + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
 
 	//Background
-	frameBuffer->paintBoxRel(x, y + height - (2 * foheight ), width - 20, (2 * foheight ), COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y + height - (2 * foheight ), width, (2 * foheight ), COL_MENUHEAD);
 
 	if (!(filelist.empty()))
 	{
@@ -928,8 +937,10 @@ void CFileBrowser::paintFoot()
 			currentsort = g_Locale->getText("filebrowser.sort.namedirsfirst");
 		else if (smode == 2)
 			currentsort = g_Locale->getText("filebrowser.sort.type");
-		else 
+		else if (smode == 3) 
 			currentsort = g_Locale->getText("filebrowser.sort.date");
+		else
+			currentsort = g_Locale->getText("filebrowser.sort.size");
 
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, currentsort, COL_INFOBAR, 0, true); // UTF-8
 

@@ -163,7 +163,7 @@ ipsetup.hint_2 OK speichert, Home bricht ab
 colormenu.head Farb-Einstellungen
 colormenu.statusbar Statusbalken
 colormenu.themeselect Theme auswählen
-colormenu.font Schriftgrösse
+colormenu.font Schriftgröße
 colormenu.menucolors Menüfarben
 colormenu.background Hintergrundfarbe
 colormenu.background_head Hintergrundfarbe
@@ -745,6 +745,7 @@ filebrowser.sort.name (Dateiname)
 filebrowser.sort.namedirsfirst (Dateiname2)
 filebrowser.sort.date (Datum)
 filebrowser.sort.type (Typ)
+filebrowser.sort.size (Größe)
 filebrowser.nextpage Seite vor
 filebrowser.prevpage Seite zurück
 filebrowser.showrights Dateirechte anzeigen
