@@ -606,6 +606,7 @@ TerrestrialDeliverySystemDescriptor::TerrestrialDeliverySystemDescriptor(descr_t
 				(descr->centre_frequency2<<16)|
 				(descr->centre_frequency3<<8)|
 				(descr->centre_frequency4);
+		centre_frequency*=10;
 		bandwidth=descr->bandwidth;
 		constellation=descr->constellation;
 		hierarchy_information=descr->hierarchy_information;

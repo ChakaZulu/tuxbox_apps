@@ -1938,6 +1938,8 @@ int eFrontend::tune_ofdm(eTransponder *trans,
 	tune_all(trans);
 
 #if HAVE_DVB_API_VERSION < 3
+	front.Inversion=(inversion == 2 ? INVERSION_AUTO : 
+		(inversion?INVERSION_ON:INVERSION_OFF) );
 	front.Frequency = centre_frequency;
 	front.u.ofdm.bandWidth=getBandWidth(bandwidth);
 	front.u.ofdm.HP_CodeRate=getCodeRate(code_rate_lp);
@@ -1947,6 +1949,8 @@ int eFrontend::tune_ofdm(eTransponder *trans,
 	front.u.ofdm.guardInterval=getGuardInterval(guard_interval);
 	front.u.ofdm.HierarchyInformation=getHierarchyInformation(hierarchy_information);
 #else
+	front.inversion=(inversion == 2 ? INVERSION_AUTO :
+		(inversion?INVERSION_ON:INVERSION_OFF) );
 	front.frequency = centre_frequency;
 	front.u.ofdm.bandwidth=getBandWidth(bandwidth);
 	front.u.ofdm.code_rate_HP=getCodeRate(code_rate_lp);
