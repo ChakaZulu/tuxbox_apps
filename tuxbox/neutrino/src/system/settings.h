@@ -208,34 +208,33 @@ struct SNeutrinoSettings
 
 
 	// Font sizes
-	char	fontsize_menu[4];
-	char	fontsize_menu_title[4];
-	char	fontsize_menu_info[4];
-
-	char	fontsize_epg_title[4];
-	char	fontsize_epg_info1[4];
-	char	fontsize_epg_info2[4];
-	char	fontsize_epg_date[4];
-	char	fontsize_alert[4];
-	char	fontsize_eventlist_title[4];
-	char	fontsize_eventlist_itemlarge[4];
-	char	fontsize_eventlist_itemsmall[4];
-	char	fontsize_eventlist_datetime[4];
-
-	char	fontsize_gamelist_itemlarge[4];
-	char	fontsize_gamelist_itemsmall[4];
-
-	char	fontsize_channellist[4];
-	char	fontsize_channellist_descr[4];
-	char	fontsize_channellist_number[4];
-	char	fontsize_channel_num_zap[4];
-
-	char	fontsize_infobar_number[4];
-	char	fontsize_infobar_channame[4];
-	char	fontsize_infobar_info[4];
-	char	fontsize_infobar_small[4];
-
-	char	fontsize_filebrowser_item[4];
+#define FONTSIZE_ENTRY_COUNT 23	
+	enum FONTSIZE_ENTRIES {
+		FONTSIZE_MENU                =  0,
+		FONTSIZE_MENU_TITLE          =  1,
+		FONTSIZE_MENU_INFO           =  2,
+		FONTSIZE_EPG_TITLE           =  3,
+		FONTSIZE_EPG_INFO1           =  4,
+		FONTSIZE_EPG_INFO2           =  5,
+		FONTSIZE_EPG_DATE            =  6,
+		FONTSIZE_ALERT               =  7,
+		FONTSIZE_EVENTLIST_TITLE     =  8,
+		FONTSIZE_EVENTLIST_ITEMLARGE =  9,
+		FONTSIZE_EVENTLIST_ITEMSMALL = 10,
+		FONTSIZE_EVENTLIST_DATETIME  = 11,
+		FONTSIZE_GAMELIST_ITEMLARGE  = 12,
+		FONTSIZE_GAMELIST_ITEMSMALL  = 13,
+		FONTSIZE_CHANNELLIST         = 14,
+		FONTSIZE_CHANNELLIST_DESCR   = 15,
+		FONTSIZE_CHANNELLIST_NUMBER  = 16,
+		FONTSIZE_CHANNEL_NUM_ZAP     = 17,
+		FONTSIZE_INFOBAR_NUMBER      = 18,
+		FONTSIZE_INFOBAR_CHANNAME    = 19,
+		FONTSIZE_INFOBAR_INFO        = 20,
+		FONTSIZE_INFOBAR_SMALL       = 21,
+		FONTSIZE_FILEBROWSER_ITEM    = 22
+	};
+	char fontsize[FONTSIZE_ENTRY_COUNT][4];
 
 	// lcdd
 	int lcd_brightness;
