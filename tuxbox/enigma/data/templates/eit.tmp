@@ -1,32 +1,23 @@
-<SPAN STYLE="margin-bottom: 0; width: 100%; background: #ababab">
-<B><FONT SIZE=4 FACE="Verdana">#SERVICENAME#</FONT></B>
-#EPG# #SI# </SPAN>
+<SPAN STYLE="width: 100%; background: #ababab">
+<FONT CLASS="title">#SERVICENAME#</FONT><BR>
+#OPS#
+</SPAN>
 <br>
 <TABLE WIDTH=100% BORDER=0 CELLPADDING=0 CELLSPACING=0>
 	<TR>
-		<TD WIDTH=100%>
-			<P>#NOWT# (#NOWD#&nbsp;min) <B>#NOWST#</B> 
-			</P>
-		</TD>
+		<TD WIDTH=100%>#NOWT# (#NOWD#&nbsp;min) <B>#NOWST#</B></TD>
 	</TR>
 	<TR>
-		<TD WIDTH=100%>
-			<P>#NOWLT#</P>
-		</TD>
+		<TD WIDTH=100%>#NOWLT#</TD>
 	</TR>
 	<TR>
 		<TD>&nbsp;</TD>
 	</TR>
 	<TR>
-		<TD WIDTH=100%>
-			<P>#NEXTT# (#NEXTD#&nbsp;min) <B>#NEXTST#</B> 
-			</P>
-		</TD>
+		<TD WIDTH=100%>#NEXTT# (#NEXTD#&nbsp;min) <B>#NEXTST#</B></TD>
 	</TR>
 	<TR>
-		<TD WIDTH=100%>
-			<P>#NEXTLT#</P>
-		</TD>
+		<TD WIDTH=100%>#NEXTLT#</TD>
 	</TR>
 	<TR>
 		<TD>&nbsp;</TD>
