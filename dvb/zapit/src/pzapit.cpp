@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.22 2002/08/27 23:43:46 obi Exp $
+ * $Id: pzapit.cpp,v 1.23 2002/09/03 09:04:25 thegoodguy Exp $
  *
  * simple commandline client for zapit
  *
@@ -50,6 +50,7 @@ int usage (std::string basename)
 	std::cout << "mute audio: " << basename << " -mute" << std::endl;
 	std::cout << "unmute audio: " << basename << " -unmute" << std::endl;
 	std::cout << "set volume: " << basename << " -vol <0..64>" << std::endl;
+	std::cout << "register neutrino as event client: " << basename << " -cn" << std::endl;
 	return -1;
 }
 
@@ -74,6 +75,7 @@ int main (int argc, char** argv)
 	bool recordmode = false;
 	bool radio = false;
 	bool reload = false;
+	bool register_neutrino = false;
 	bool show_satellites = false;
 	bool scan = false;
 	bool zapByName = false;
@@ -124,6 +126,11 @@ int main (int argc, char** argv)
 		else if (!strncmp(argv[i], "-c", 2))
 		{
 			reload = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-cn", 2))
+		{
+			register_neutrino = true;
 			continue;
 		}
 		else if (!strncmp(argv[i], "-mute", 5))
@@ -254,6 +261,16 @@ int main (int argc, char** argv)
 	{
 		std::cout << "reloading channels" << std::endl;
 		zapit->reinitChannels();
+		delete zapit;
+		return 0;
+	}
+
+	if (register_neutrino)
+	{
+#define NEUTRINO_UDS_NAME "/tmp/neutrino.sock"
+		std::cout << "registering neutrino" << std::endl;
+		for (int i = CZapitClient::EVT_ZAP_FAILED; i <= CZapitClient::EVT_BOUQUETS_CHANGED; i++)
+			zapit->registerEvent(i, 222, NEUTRINO_UDS_NAME);
 		delete zapit;
 		return 0;
 	}
@@ -440,6 +457,13 @@ int main (int argc, char** argv)
 	/* zap */
 	{
 		CZapitClient::responseGetPIDs pids;
+
+		if (channel > channels.size())
+		{
+			std::cout << "Only " << channels.size() << " channels in bouquet " << bouquet << std::endl;
+			delete zapit;
+			return 0;
+		}
 
 		zapit->zapTo(channels[channel-1].nr);
 		zapit->getPIDS(pids);
