@@ -13,6 +13,9 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+$LOG$
+*/
 
 #include <stdio.h>
 #include <fcntl.h>
