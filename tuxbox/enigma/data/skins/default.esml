@@ -72,10 +72,22 @@
 	</object>
 
 	<object name="tsSelectType">
-		<tsSelectType cposition="0:0" csize="400:100">
+		<tsSelectType cposition="0:0" csize="e:300">
 			<eLabel text="Sendersuchlauf" position="0:0" size="400:30" font="NimbusSansL-Regular Sans L Regular;25" />
-			<eListbox name="menu" position="0:30" size="400:0" />
+			<eListbox name="menu" position="20:30" size="e-20:e-10" />
 		</tsSelectType>
+	</object>
+	
+	<object name="tsManual">
+		<tsManual position="0:0" size="e:300">
+			<eButton text="start scan" name="start" position="10:e-40" size="200:30" />
+			<eButton text="abort" name="abort" position="e-100:e-40" size="90:30" />
+			<eCheckbox text="use ONIT" name="useonit" position="10:e-100" size="200:30" />
+			<eCheckbox text="use BAT" name="usebat" position="210:e-100" size="e:30" />
+			<eCheckbox text="clear list before" name="clearlist" position="10:e-70" size="200:30" />
+			<eCheckbox text="network search" name="searchnit" position="210:e-70" size="e:30" />
+			<eTranspondersettings name="transponder" position="0:0" size="400:200" />
+		</tsManual>
 	</object>
 	
 	<object name="setup.skins">
@@ -88,7 +100,7 @@
 	</object>
 	
 	<object name="transpondersettings.satellite">
-		<eTranspondersettings position="0:0" size="e:e" >
+		<eTranspondersettings position="0:0" size="400:200">
 			<eLabel text="Frequency:" position="10:10" size="140:30" />
 			<eNumber name="frequency" position="150:10:" size="e-150:30" />
 			<eLabel text="MHz" position="e-150:10" size="e:30" />
@@ -108,7 +120,6 @@
 			
 			<eLabel text="LNB:" position="190:130" size="100:30" />
 			<eNumber name="lnb" position="290:130" size="50:30" />
-
 		</eTranspondersettings>
 	</object>
 
