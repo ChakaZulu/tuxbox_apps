@@ -353,7 +353,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	// -- 2002-05-03 rasc
 	processTextToArray("\n") ;
 	processTextToArray(g_Locale->getText("epgviewer.More_Screenings")+":");
-	unsigned int i = FollowScreenings(onid_sid, epgData.title);
+	FollowScreenings(onid_sid, epgData.title);
 
 
 	//show the epg

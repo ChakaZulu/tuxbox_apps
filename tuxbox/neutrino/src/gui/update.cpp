@@ -192,7 +192,7 @@ bool CFlashUpdate::checkVersion4Update()
 		
 		//bestimmung der CramfsDaten
 		char cramfsName[30];
-		int retval = cramfs_name( (char*) (string(gTmpPath+ImageFile)).c_str(), (char*) &cramfsName);
+		cramfs_name( (char*) (string(gTmpPath+ImageFile)).c_str(), (char*) &cramfsName);
 
 		CFlashVersionInfo versionInfo(cramfsName);
 

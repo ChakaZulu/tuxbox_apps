@@ -183,7 +183,6 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 	paintFoot();
 
 	bouquetsChanged = false;
-	int oldselected = selected;
 
 	uint msg; uint data;
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );

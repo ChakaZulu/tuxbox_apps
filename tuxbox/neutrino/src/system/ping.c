@@ -129,12 +129,10 @@ send_ping( const char *host, struct sockaddr_in *taddr )
 int 
 recv_ping( struct sockaddr_in *taddr )
 {
-  int response;
   int len;
   int from;
   int nf, cc;
   unsigned char buf[ HDRLEN + DATALEN ];
-  struct ip          *ip;
   struct icmp        *icp;
   struct sockaddr_in faddr;
   struct timeval to;
@@ -181,10 +179,34 @@ recv_ping( struct sockaddr_in *taddr )
   return 0;
 }
 
+/**
+ * elapsed_time
+ * returns an int value for the difference
+ * between now and starttime in milliseconds.
+ */
+int
+elapsed_time( struct timeval *starttime ){
+  struct timeval *newtime;
+  int elapsed;
+  newtime = (struct timeval*)malloc( sizeof(struct timeval));
+  gettimeofday(newtime,NULL);
+  elapsed = 0;
+  if(( newtime->tv_usec - starttime->tv_usec) > 0 ){
+    elapsed += (newtime->tv_usec - starttime->tv_usec)/1000 ;
+  }
+  else{
+    elapsed += ( 1000000 + newtime->tv_usec - starttime->tv_usec ) /1000;
+    newtime->tv_sec--;
+  }
+  if(( newtime->tv_sec - starttime->tv_sec ) > 0 ){
+    elapsed += 1000 * ( newtime->tv_sec - starttime->tv_sec );
+  }
+  return( elapsed );
+} 
+
 int 
 myping( const char *hostname, int t )
 {
-  int to;
   int err;
   struct sockaddr_in sa;
   struct timeval mytime;
@@ -244,28 +266,4 @@ tpingthost( const char *hostname, int t )
     return ret;
 }
 
-/**
- * elapsed_time
- * returns an int value for the difference
- * between now and starttime in milliseconds.
- */
-int
-elapsed_time( struct timeval *starttime ){
-  struct timeval *newtime;
-  int elapsed;
-  newtime = (struct timeval*)malloc( sizeof(struct timeval));
-  gettimeofday(newtime,NULL);
-  elapsed = 0;
-  if(( newtime->tv_usec - starttime->tv_usec) > 0 ){
-    elapsed += (newtime->tv_usec - starttime->tv_usec)/1000 ;
-  }
-  else{
-    elapsed += ( 1000000 + newtime->tv_usec - starttime->tv_usec ) /1000;
-    newtime->tv_sec--;
-  }
-  if(( newtime->tv_sec - starttime->tv_sec ) > 0 ){
-    elapsed += 1000 * ( newtime->tv_sec - starttime->tv_sec );
-  }
-  return( elapsed );
-} 
 

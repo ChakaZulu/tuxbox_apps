@@ -64,6 +64,8 @@ class CWindow : public CComponent
 		CWindow(string title="", string icon="", CDimension clientWindowDimension = CDimension(200,60), 
 				int mode = WINDOW_CENTER, CPoint windowPosition = CPoint(100,50));
 
+		virtual ~CWindow();
+
 		void setClientWindowDimension(CDimension cientWindowSize);
 		void setWindowOrigin(CPoint windowPosition);
 

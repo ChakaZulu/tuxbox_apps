@@ -159,7 +159,6 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 	paintFoot();
 
 	channelsChanged = false;
-	int oldselected = selected;
 	uint msg; uint data;
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
 

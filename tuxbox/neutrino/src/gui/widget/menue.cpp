@@ -96,7 +96,6 @@ void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
 int CMenuWidget::exec(CMenuTarget* parent, string)
 {
 	int pos;
-	unsigned int i;
 
 	if (parent)
 		parent->hide();

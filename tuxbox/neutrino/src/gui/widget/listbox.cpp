@@ -167,7 +167,6 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 	paint();
 	paintFoot();
 
-	int oldselected = selected;
 	bool loop=true;
 	toSave = false;
 	while (loop)

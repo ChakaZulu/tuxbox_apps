@@ -653,9 +653,8 @@ sectionsd::CurrentNextInfo CInfoViewer::getEPG( unsigned int onid_sid )
 void CInfoViewer::show_Data( bool calledFromEvent)
 {
 	char runningStart[10];
-	char runningDuration[10];
 	char runningRest[20];
-	char runningPercent;
+	char runningPercent = 0;
 
 	char nextStart[10];
 	char nextDuration[10];
@@ -689,7 +688,6 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 
 		if ( info_CurrentNext.flags & sectionsd::epgflags::has_current)
 		{
-			unsigned dauer = info_CurrentNext.current_zeit.dauer / 60;
 			int rest = ( (info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer) - jetzt ) / 60;
 
 			int seit = ( jetzt - info_CurrentNext.current_zeit.startzeit ) / 60;

@@ -73,16 +73,6 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 	paint();
 
-	char strServices[100] = "";
-	char strTransponders[100] = "";
-	char strSatellite[100] = "";
-	char strLastServices[100] = "";
-	char strLastTransponders[100] = "";
-	char strLastSatellite[100] = "";
-
-	unsigned int ts = 0;
-	unsigned int services = 0;
-	unsigned int sat = 0;
 	int ypos=y;
 	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 	ypos= y+ hheight + (mheight >>1);
