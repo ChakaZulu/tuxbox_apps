@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.82 2003/10/14 12:48:59 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.83 2003/12/09 19:39:24 thegoodguy Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -207,7 +207,6 @@ int LoadMotorPositions(void)
 			sscanf(buffer, "%d %d", &temp1, &temp2);
 			satellitePosition = (t_satellite_position)temp1;
 			motorPosition = (uint8_t)temp2;
-			motorPositions[satellitePosition]++;
 			motorPositions[satellitePosition] = motorPosition;
 			fgets(buffer, 255, fd);	
 		}
@@ -224,13 +223,6 @@ int LoadMotorPositions(void)
 
 int LoadSatellitePositions(void)
 {
-	string satelliteName;
-	t_satellite_position satellitePosition;
-	
-//	printf("[getservices] loading satellite positions...\n");
-	
-	satellitePositions.clear();
-	
 	xmlDocPtr parser = parseXmlFile(SATELLITES_XML);
 
 	if (parser == NULL)
@@ -239,24 +231,19 @@ int LoadSatellitePositions(void)
 		return -1;
 	}
 
+	satellitePositions.clear();
+	
 	xmlNodePtr search = xmlDocGetRootElement(parser)->xmlChildrenNode;
+
 	while (search)
 	{
 		if (!(strcmp(xmlGetName(search), "sat")))
-		{	
-			satelliteName = xmlGetAttribute(search, "name");
-			satellitePosition = xmlGetSignedNumericAttribute(search, "position", 10);
-			satellitePositions[satelliteName]++;
-			satellitePositions[satelliteName] = satellitePosition;
-		}
+			satellitePositions[xmlGetAttribute(search, "name")] = xmlGetSignedNumericAttribute(search, "position", 10);
 
 		search = search->xmlNextNode;
 	}
 	
 	xmlFreeDoc(parser);
-	
-//	for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
-//		printf("satelliteName = %s, satellitePosition = %d\n", spos_it->first.c_str(), spos_it->second);
 		
 	return 0;
 }
@@ -265,7 +252,6 @@ int LoadServices(fe_type_t frontendType, diseqc_t diseqcType)
 {
 	if (frontendType == FE_QPSK)
 	{
-		//satellite only
 		LoadSatellitePositions();
 	
 		if (diseqcType == DISEQC_1_2)
