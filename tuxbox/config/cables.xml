@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<cables>
+	<cable name="Ish">
+		<transponder frequency="346000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
+	</cable>
+	<cable name="Telekom">
+		<transponder frequency="346000" symbol_rate="6900000" fec_inner="6" modulation="3"/>
+	</cable>
+	<cable name="UEWU Mediendienste">
+		<transponder frequency="314000" symbol_rate="27500000" fec_inner="0" modulation="3"/>
+		<transponder frequency="402000" symbol_rate="27500000" fec_inner="0" modulation="3"/>
+	</cable>
+</cables>
