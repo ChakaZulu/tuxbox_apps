@@ -6,29 +6,32 @@
 #include <lib/gdi/font.h>
 #include <lib/base/i18n.h>
 
-eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): eWindow(0), icon(0)
+eMessageBox::eMessageBox(eString message, eString caption, int flags, int def)
+	:eWindow(0), icon(0), def(0)
 {
-	int fontsize=eSkin::getActive()->queryValue("fontsize", 20);
 	setText(caption);
-	move(ePoint(100, 70));
+	int fontsize=eSkin::getActive()->queryValue("fontsize", 20);
+	int posx = eSkin::getActive()->queryValue("eMessageBox.pos.x", 100);
+	int posy = eSkin::getActive()->queryValue("eMessageBox.pos.y", 70);
+	move(ePoint(posx, posy));
 	resize(eSize(450, 430));
-	
+
 	if ( flags > 15 ) // we have to draw an icon
 	{
 		gPixmap *pm=0;
 		switch ( flags & ~15 )
 		{
 			case iconInfo:
-				pm = eSkin::getActive()->queryImage( "icon_info" );			
+				pm = eSkin::getActive()->queryImage( "icon_info" );
 			break;
 			case iconQuestion:
-				pm = eSkin::getActive()->queryImage( "icon_question" );			
+				pm = eSkin::getActive()->queryImage( "icon_question" );
 			break;
 			case iconWarning:
-				pm = eSkin::getActive()->queryImage( "icon_warning" );			
+				pm = eSkin::getActive()->queryImage( "icon_warning" );
 			break;
 			case iconError:
-				pm = eSkin::getActive()->queryImage( "icon_error" );			
+				pm = eSkin::getActive()->queryImage( "icon_error" );
 			break;
 		}
 		if (pm)
@@ -46,7 +49,7 @@ eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): 
 	text->resize( eSize( clientrect.width(), clientrect.height() ));
 	text->setFlags( RS_WRAP|eLabel::flagVCenter );
 	eSize txtSize=text->getExtend();
-	txtSize+=eSize(8,4);  // the given Size of the Text is okay... but the renderer sucks...
+	txtSize+=eSize(15,10);  // the given Size of the Text is okay... but the renderer sucks...
 	text->resize(txtSize);
 
 	// here the two labels ( icon, text) has the correct size..  now we calc the border
@@ -108,10 +111,10 @@ eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): 
 				b->move( ePoint( xpos, ext.height() ) );
 
 				b->loadDeco();
-			
+
 				if (def == i)
-					setFocus(b);
-			
+					this->def = b;
+
 				xpos += bSize.width()+20;
 				if ( xpos+20 > ext.width() )
 					cresize( eSize( xpos+20, ext.height() + bSize.height() + 20 ) );
@@ -124,8 +127,20 @@ eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): 
 	zOrderRaise();
 }
 
-eMessageBox::~eMessageBox()
+int eMessageBox::eventHandler( const eWidgetEvent &e )
 {
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			if ( def )
+			{
+				setFocus(def);
+				return 1;
+			}
+		default:
+			break;
+	}
+	return eWindow::eventHandler( e );
 }
 
 void eMessageBox::pressedOK()

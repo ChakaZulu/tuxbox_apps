@@ -27,6 +27,8 @@ public:
 		if (id.find('_') != eString::npos)
 			id=id.left(id.find('_'));
 		pixmap=eSkin::getActive()->queryImage(eString("country_") + getCountry(id.c_str()));
+		if (!pixmap)
+			pixmap=eSkin::getActive()->queryImage(eString("country_missing"));
 		if (!font.pointSize)
 			font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");
 		para=0;
@@ -47,7 +49,7 @@ protected:
 	{
 		return 50;
 	}
-	
+
 	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state )
 	{
 		drawEntryRect( rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state );
@@ -76,13 +78,11 @@ static struct
 	char *language, *country;
 } language2country[]={
 		{"C", "en"},
-		{"hu", "missing"},
-		{"sk", "missing"},
+		{"ar", "ae"},
 		{"cs", "cz"},
 		{"el", "gr"},
-		{"hr", "missing"},
-		{"sl", "missing"},
-		{"sv", "se"}};
+		{"sv", "se"},
+		{"uk", "ua"}};
 
 static const char * getCountry(const char *language)
 {
@@ -140,6 +140,8 @@ eWizardLanguage::eWizardLanguage()
 	if (current)
 		free(current);
 	fclose(f);
+	
+	setHelpID(89);
 
 //	selchanged(cur);
 }

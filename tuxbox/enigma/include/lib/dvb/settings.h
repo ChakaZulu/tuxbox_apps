@@ -8,23 +8,24 @@ class eDVB;
 class eDVBSettings
 {
 	eDVB &dvb;
+	ePtrList<eBouquet> bouquets;
+	eTransponderList *transponderlist;
+	int bouquetsChanged;
 public:
 	friend class sortinChannel;
-		/** the main transponder/servicelist */
-	eTransponderList *transponderlist;
-
-	ePtrList<eBouquet> bouquets;
 	void removeDVBBouquets();
+	void removeDVBBouquet(int bouquet_id);
+	void renameDVBBouquet(int bouquet_id, eString& new_name);
 	void addDVBBouquet(eDVBNamespace origin, const BAT *bat);
 	eBouquet *getBouquet(int bouquet_id);
-	eBouquet *getBouquet(eString bouquet_name);
+	eBouquet *getBouquet(eString& bouquet_name);
 	eBouquet *createBouquet(int bouquet_id, eString bouquet_name);
 	eBouquet *createBouquet(eString bouquet_name);
 	int getUnusedBouquetID(int range);
 	
 	void revalidateBouquets();
-	eTransponderList *getTransponders();
-	ePtrList<eBouquet> *getBouquets();
+	eTransponderList *getTransponders() { return transponderlist; }
+	ePtrList<eBouquet> *getBouquets() { return &bouquets; }
 	void setTransponders(eTransponderList *tlist);
 	void sortInChannels();
 

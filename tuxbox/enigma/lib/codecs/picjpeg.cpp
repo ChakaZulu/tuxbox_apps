@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #include <lib/codecs/picjpeg.h>
 #include <lib/base/eerror.h>
 #include <lib/base/esize.h>
@@ -130,3 +132,5 @@ int ePictureDecoderJPEG::decodeMore(int maxscanlines)
 	}
 	return 0;
 }
+
+#endif //DISABLE_FILE

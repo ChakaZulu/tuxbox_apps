@@ -27,6 +27,31 @@ struct tempPMT_t
 };
 
 
+
+#define MAXTRANSPORTSESSIONS 32
+#define PCMCIABUFLEN 255
+#define LPDUHEADERLEN 2
+#define LPDUPAYLOADLEN (PCMCIABUFLEN - LPDUHEADERLEN)
+
+typedef struct _lpduQueueElem lpduQueueElem;
+typedef struct _lpduQueueElem * ptrlpduQueueElem;
+
+typedef struct _lpduQueueHeader lpduQueueHeader;
+
+struct _lpduQueueElem
+{
+	unsigned char lpduLen;
+	unsigned char lpdu[PCMCIABUFLEN];
+	ptrlpduQueueElem nextElem;
+};
+			
+struct _lpduQueueHeader
+{
+	long numLPDUS;
+	ptrlpduQueueElem firstLPDU;
+};
+
+
 class eDVBCI: private eThread, public eMainloop, public Object
 {
 	static int instance_count;
@@ -42,7 +67,7 @@ protected:
 	int ci_state;
 	int buffersize;	
 		
-	eTimer pollTimer;
+	eTimer pollTimer, deadTimer;
 	eLock lock;
 
 	int tempPMTentrys;
@@ -57,6 +82,17 @@ protected:
 	unsigned char ml_buffer[1024];
 	int ml_bufferlen;
 	int ml_buffersize;
+
+	//----------------------
+	lpduQueueHeader lpduSendQueues[MAXTRANSPORTSESSIONS];
+	lpduQueueHeader lpduReceiveQueues[MAXTRANSPORTSESSIONS];
+
+
+	ptrlpduQueueElem eDVBCI::AllocLpduQueueElem(unsigned char t_c_id);
+	int eDVBCI::lpduQueueElemIsMore(ptrlpduQueueElem curElem);
+	
+	
+	//----------------------
 
 	void clearCAIDs();
 	void addCAID(int caid);	
@@ -80,11 +116,14 @@ protected:
 	void incoming(unsigned char *buffer,int len);
 	void dataAvailable(int what);
 	void poll();
+	void startTimer(bool onlyDead=false);
+	void stopTimer();
+	void deadReset();
 	void updateCIinfo(unsigned char *buffer);
 
 	void mmi_begin();
 	void mmi_end();
-	void mmi_answ(unsigned char *answ,int len);
+	void mmi_enqansw(unsigned char *answ);
 	void mmi_menuansw(int);
 
 public:
@@ -107,9 +146,11 @@ public:
 			PMTaddDescriptor,
 			mmi_begin,
 			mmi_end,
-			mmi_answ,
+			mmi_enqansw,
 			mmi_menuansw,
 			getcaids,
+			suspendPoll,
+			restartPoll
 		};
 		int type;
 		unsigned char *data;
@@ -132,7 +173,7 @@ public:
 	
 	void thread();
 	Signal1<void, const char*> ci_progress;
-	Signal1<void, const char*> ci_mmi_progress;
+	Signal2<void, const char*, int> ci_mmi_progress;
 
 };
 #endif

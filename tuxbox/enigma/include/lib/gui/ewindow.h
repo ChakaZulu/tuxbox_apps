@@ -28,10 +28,6 @@ protected:
 	void willShow();
 	void willHide();
 public:
-	void setText(const eString &label, bool inv=false)
-	{
-		eWidget::setText(label, inv);
-	}
 	enum { OFF, ON };
 	static void globalCancel(int mode) { globCancel=mode; }
 	eRect getTitleBarRect();

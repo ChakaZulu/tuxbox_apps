@@ -1,12 +1,13 @@
 #ifndef __rc_h
 #define __rc_h
 
+#include <config.h>
 #include <list>
 #include <map>
 
 #include <lib/base/ebase.h>
-#include <libsig_comp.h>
 #include <lib/base/estring.h>
+#include <libsig_comp.h>
 
 class eRCInput;
 class eRCDriver;
@@ -30,7 +31,7 @@ public:
 	 * \param id The identifier of the RC, for use in settings.
 	 * \param input The \ref eRCDriver where this remote gets its codes from.
 	 */
-	eRCDevice(eString id, eRCDriver *input);
+	eRCDevice(const eString &id, eRCDriver *input);
 	~eRCDevice();
 	/**
 	 * \brief Handles a device specific code.
@@ -45,11 +46,15 @@ public:
 	 * \result The description.
 	 */
 	virtual const char *getDescription() const=0;
-	const eString getIdentifier() const { return id; }
 	/**
 	 * \brief Get a description for a specific key.
 	 * \param key The key to get the description for.
 	 * \result User readable description of given key.
+	 */
+	const eString getIdentifier() const { return id; }
+	/**
+	 * \brief Get the identifier for this device.
+	 * \result User readable identifier of device.
 	 */
 	virtual const char *getKeyDescription(const eRCKey &key) const=0;
 	/**
@@ -98,6 +103,7 @@ public:
 	void enable(int en) { enabled=en; }
 };
 
+#if HAVE_DVB_API_VERSION < 3
 class eRCShortDriver: public eRCDriver
 {
 protected:
@@ -108,7 +114,7 @@ public:
 	eRCShortDriver(const char *filename);
 	~eRCShortDriver();
 };
-
+#else
 class eRCInputEventDriver: public eRCDriver
 {
 protected:
@@ -120,15 +126,17 @@ public:
 	eRCInputEventDriver(const char *filename);
 	~eRCInputEventDriver();
 };
+#endif
 
 class eRCKey
 {
 public:
 	eRCDevice *producer;
 	int code, flags;
+	eString picture;
 
-	eRCKey(eRCDevice *producer, int code, int flags): 
-		producer(producer), code(code), flags(flags)
+	eRCKey(eRCDevice *producer, int code, int flags, eString picture=""):
+		producer(producer), code(code), flags(flags), picture(picture)
 	{
 	}
 	enum
@@ -181,9 +189,10 @@ public:
 	{
 		bool operator()(const eString &a, const eString &b) const
 		{
-			return a<b;
+			return a<b; 
 		}
 	};
+
 protected:
 	std::map<eString,eRCDevice*,lstr> devices;
 public:
@@ -213,11 +222,11 @@ public:
 		/*emit*/ keyEvent(key);
 	}
 	
-	void addDevice(const eString &id, eRCDevice *dev);
+	void addDevice(const eString&, eRCDevice *dev);
 	void removeDevice(const eString &id);
 	eRCDevice *getDevice(const eString &id);
 	std::map<eString,eRCDevice*,lstr> &getDevices();
-	
+
 	static eRCInput *getInstance() { return instance; }
 	
 	eRCConfig config;

@@ -4,13 +4,16 @@ INCLUDES = \
 bin_PROGRAMS = enigma
 
 enigma_SOURCES = \
-	enigma.cpp enigma_dyn.cpp enigma_event.cpp enigma_lcd.cpp \
+	enigma.cpp enigma_dyn.cpp enigma_event.cpp enigma_lcd.cpp parentallock.cpp \
 	enigma_main.cpp enigma_plugins.cpp enigma_setup.cpp enigma_xmlrpc.cpp scan.cpp \
-	setupnetwork.cpp setup_audio.cpp setupvideo.cpp showbnversion.cpp sselect.cpp streaminfo.cpp \
-	enigma_mainmenu.cpp satconfig.cpp epgwindow.cpp setup_language.cpp enigma_info.cpp \
+	setupnetwork.cpp setupvideo.cpp showbnversion.cpp sselect.cpp streaminfo.cpp \
+	enigma_mainmenu.cpp satconfig.cpp epgwindow.cpp setup_timezone.cpp enigma_info.cpp \
 	enigma_scan.cpp setupskin.cpp setup_osd.cpp timer.cpp setup_lcd.cpp enigma_vcr.cpp \
-	setup_rc.cpp channelinfo.cpp setup_harddisk.cpp enigma_ci.cpp upgrade.cpp satfind.cpp \
-	rotorconfig.cpp setup_rfmod.cpp wizard_language.cpp wizard_scan.cpp engrab.cpp setupengrab.cpp
+	channelinfo.cpp setup_harddisk.cpp enigma_ci.cpp upgrade.cpp satfind.cpp setup_rc.cpp \
+	setup_extra.cpp rotorconfig.cpp setup_rfmod.cpp wizard_language.cpp wizard_scan.cpp \
+	engrab.cpp setupengrab.cpp helpwindow.cpp tpeditwindow.cpp enigma_web.cpp enigma_epg.cpp \
+	wizard_timezone.cpp elirc.cpp hotplug.cpp enigma_bouquet.cpp setup_window.cpp \
+	system_settings.cpp time_settings.cpp software_update.cpp
 
 enigma_LDADD_WHOLE = \
 	$(top_builddir)/lib/driver/libenigma_driver.a \
@@ -35,5 +38,4 @@ enigma_LDADD = \
 
 enigma$(EXEEXT): $(enigma_OBJECTS) $(enigma_DEPENDENCIES) $(enigma_LDADD_WHOLE)
 	@rm -f enigma$(EXEEXT)
-	$(CXXLINK) $(enigma_LDFLAGS) $(enigma_OBJECTS) -Wl,--whole-archive $(enigma_LDADD_WHOLE) -Wl,--no-whole-archive $(enigma_LDADD) $(LIBS)
-
+	$(CXXLINK) -Wl,--export-dynamic $(enigma_LDFLAGS) $(enigma_OBJECTS) -Wl,--whole-archive $(enigma_LDADD_WHOLE) -Wl,--no-whole-archive $(enigma_LDADD) $(LIBS)

@@ -13,7 +13,7 @@ install_DATA = \
 	crypt_on.png dolby_off.png dolby_on.png dvr-fs8.png format_off.png format_on.png\
 	green-button.png info-bg.png lbarrow_down.png lbarrow_left.png lbarrow.png\
 	lbarrow_right.png lbarrow_up.png lcdmenu.png logo.png l.png no-button.png\
-	png.png red-button.png r.png speaker.png tl.png t.png tr.png unchecked.png\
+	red-button.png r.png tl.png t.png tr.png unchecked.png\
 	yellow-button.png folder.png rec_symbol-fs8.png\
 	status-big-b-break.png status-big-b-left.png status-big-b-middle.png\
 	status-big-break.png status-big-b-right.png status-big-left.png status-big-middle.png\

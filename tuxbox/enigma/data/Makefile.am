@@ -4,5 +4,6 @@ SUBDIRS = \
 	pictures \
 	resources \
 	skins \
-	templates
+	templates \
+	lirc
 

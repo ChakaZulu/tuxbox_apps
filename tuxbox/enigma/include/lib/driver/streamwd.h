@@ -14,6 +14,7 @@ class eStreamWatchdog: public Object
 	static eStreamWatchdog *instance;
 private:
 	void check(int);
+	int getVCRActivity();
 public:
 	void reloadSettings();
 	eStreamWatchdog();
@@ -21,6 +22,7 @@ public:
 	static eStreamWatchdog *getInstance();
 	int isAnamorph();
 	Signal1<void, int> AspectRatioChanged;
+	Signal1<void, int> VCRActivityChanged;
 };
 
 #endif

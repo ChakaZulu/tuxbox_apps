@@ -42,7 +42,7 @@ void eTimer::start(long msek, bool singleShot)
 	bActive = true;
 	bSingleShot = singleShot;
 	interval = msek;
- 	gettimeofday(&nextActivation, 0);		
+ 	gettimeofday(&nextActivation, 0);
 //	eDebug("this = %p\nnow sec = %d, usec = %d\nadd %d msec", this, nextActivation.tv_sec, nextActivation.tv_usec, msek);
 	nextActivation += (msek<0 ? 0 : msek);
 //	eDebug("next Activation sec = %d, usec = %d", nextActivation.tv_sec, nextActivation.tv_usec );
@@ -95,6 +95,12 @@ void eTimer::activate()   // Internal Funktion... called from eApplication
 
 // mainloop
 
+void eMainloop::recalcAllTimers( int difference )
+{
+	for ( ePtrList<eTimer>::iterator it(TimerList.begin()); it != TimerList.end(); it++ )
+		it->recalc( difference );
+}
+
 void eMainloop::addSocketNotifier(eSocketNotifier *sn)
 {
 	notifiers.insert(std::pair<int,eSocketNotifier*> (sn->getFD(), sn));
@@ -114,7 +120,7 @@ void eMainloop::processOneEvent()
 		TimerList.begin()->activate();
 
 	int fdAnz = notifiers.size();
-	pollfd* pfd = new pollfd[fdAnz];  // make new pollfd array
+	pollfd pfd[fdAnz];
 
 // fill pfd array
 	std::map<int,eSocketNotifier*>::iterator it(notifiers.begin());
@@ -126,9 +132,14 @@ void eMainloop::processOneEvent()
 
 	int ret=poll(pfd, fdAnz, TimerList ? usec / 1000 : -1);  // milli .. not micro seks
 
-	if (ret>0)
+	if (!ret) // timeouted leave poll .. immediate check all timers
 	{
-//		eDebug("bin aussem poll raus und da war was");
+		while ( TimerList && timeout_usec( TimerList.begin()->getNextActivation() ) <= 0 )
+			TimerList.begin()->activate();
+	}
+	else if (ret>0)
+	{
+	//		eDebug("bin aussem poll raus und da war was");
 		for (int i=0; i < fdAnz ; i++)
 		{
 			if( notifiers.find(pfd[i].fd) == notifiers.end())
@@ -142,63 +153,63 @@ void eMainloop::processOneEvent()
 
 				if (!--ret)
 					break;
-			} else if (pfd[i].revents & (POLLERR|POLLHUP|POLLNVAL))
+				else
+				{
+					while ( TimerList && timeout_usec( TimerList.begin()->getNextActivation() ) <= 0 )
+						TimerList.begin()->activate();
+				}
+			}
+			else if (pfd[i].revents & (POLLERR|POLLHUP|POLLNVAL))
 				eDebug("poll: unhandled POLLERR/HUP/NVAL for fd %d(%d)", pfd[i].fd,pfd[i].revents);
 		}
 	}
 	else if (ret<0)
+	{
 		eDebug("poll made error");
-
-		// check Timers...
-	while ( TimerList && timeout_usec( TimerList.begin()->getNextActivation() ) <= 0 )
-		TimerList.begin()->activate();
-
-	delete [] pfd;
+	}
 }
-
 
 int eMainloop::exec()
 {
 	if (!loop_level)
 	{
 		app_quit_now = false;
+		app_exit_loop = false;
 		enter_loop();
 	}
-	return 0;
+	return retval;
 }
 
 void eMainloop::enter_loop()
 {
 	loop_level++;
-
 	// Status der vorhandenen Loop merken
 	bool old_exit_loop = app_exit_loop;
-	
+
 	app_exit_loop = false;
 
 	while (!app_exit_loop && !app_quit_now)
-	{
 		processOneEvent();
-	}	
 
 	// wiederherstellen der vorherigen app_exit_loop
 	app_exit_loop = old_exit_loop;
 
-	loop_level--;
+	--loop_level;
 
 	if (!loop_level)
 	{
-			// do something here on exit the last loop
+		// do something here on exit the last loop
 	}
 }
 
 void eMainloop::exit_loop()  // call this to leave the current loop
 {
-	app_exit_loop = true;	
+	app_exit_loop = true;
 }
 
-void eMainloop::quit()   // call this to leave all loops
+void eMainloop::quit( int ret )   // call this to leave all loops
 {
+	retval=ret;
 	app_quit_now = true;
 }
 

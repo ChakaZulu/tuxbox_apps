@@ -9,24 +9,30 @@ class eButton;
 class eSlider;
 class eComboBox;
 class eListBoxEntryText;
+class eCheckbox;
+class eNumber;
 
 class eZapRCSetup: public eWindow
 {
 	eSlider *srrate, *srdelay;
-	eLabel *lrrate, *lrdelay, *lrcStyle;
+	eLabel *lrrate, *lrdelay, *lrcStyle, *lNextCharTimeout;
+	eNumber *NextCharTimeout;
 	eStatusBar* statusbar;
 	eComboBox* rcStyle;
+	eString curstyle;
 
 	int rdelay;
 	int rrate;
-	                	
-	eButton *ok, *abort;
+	           
+	eButton *ok;
 	void okPressed();
-	void abortPressed();
+	int eventHandler( const eWidgetEvent& );
 	void repeatChanged( int );
 	void delayChanged( int );
 	void styleChanged( eListBoxEntryText* );
 	void update();
+	void setStyle();
+	void nextField(int *);
 public:
 	eZapRCSetup();
 	~eZapRCSetup();

@@ -1,22 +1,44 @@
 #include "upgrade.h"
-#include <lib/gui/ebutton.h>
 #include <unistd.h>
 #include <xmltree.h>
+#include <enigma.h>
+#include <lib/gui/ebutton.h>
 #include <lib/gui/statusbar.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/eprogress.h>
 #include <lib/gui/eskin.h>
 #include <lib/dvb/decoder.h>
+#include <lib/dvb/edvb.h>
+#include <lib/system/info.h>
 #include <lib/gdi/font.h>
 #include <libmd5sum.h>
-#include <lib/dvb/edvb.h>
+
 #include <sys/mman.h>
 
-#include <lib/system/info.h>
+#include <linux/mtd/mtd.h>
+#include <sys/ioctl.h>
+#include <sys/mount.h>
 
 #define TMP_IMAGE "/var/tmp/root.cramfs"
 #define TMP_IMAGE_ALT "/var/tmp/cdk.cramfs"
 #define TMP_CHANGELOG "/var/tmp/changelog"
+
+class ProgressWindow: public eWindow
+{
+public:
+	eProgress progress;
+	ProgressWindow( const char * );
+};
+
+ProgressWindow::ProgressWindow( const char *wtext )
+	:eWindow(0), progress(this)
+{
+	move(ePoint(100,250));
+	cresize(eSize(470,50));
+	setText(wtext);
+	progress.move(ePoint(10,10));
+	progress.resize(eSize(450,30));
+}
 
 static eString getVersionInfo(const char *info)
 {
@@ -138,11 +160,32 @@ eUpgrade::eUpgrade()
 
 	catalog=0;
 	changelog=0;
-	
+
+	switch ( eSystemInfo::getInstance()->getHwType() )
+	{
+		case eSystemInfo::dbox2Philips:
+			mIDStr="2";
+			break;
+		case eSystemInfo::dbox2Sagem:
+			mIDStr="3";
+			break;
+		case eSystemInfo::DM7000:
+			mIDStr="5";
+			break;
+		case eSystemInfo::DM5600:
+			mIDStr="6";
+			break;
+		case eSystemInfo::dbox2Nokia:
+		default:
+			mIDStr="1";
+			break;
+	}
+
 	eString caturl=getVersionInfo("catalog");
+
 	if (caturl.length())
 		loadCatalog(caturl.c_str());
-		
+
 	ourversion=getVersionInfo("version");
 	
 	struct stat s;
@@ -150,6 +193,8 @@ eUpgrade::eUpgrade()
 		rename(TMP_IMAGE_ALT, TMP_IMAGE);
 	if (!stat(TMP_IMAGE, &s))
 		new eListBoxEntryImage(images, _("manual upload"), "", "", "", "", 0);
+
+	setHelpID(94);
 }
 
 void eUpgrade::loadCatalog(const char *url)
@@ -223,10 +268,7 @@ void eUpgrade::catalogTransferDone(int err)
 	if ((!err) && http && (http->code == 200) && datacatalog && !datacatalog->error)
 	{
 		XMLTreeNode *root=catalog->RootNode();
-		// FIXME
-		eString mytarget("");
-		// eString mytarget=eDVB::getInstance()->getInfo("mID").right(1);
-
+		eString mytarget=mIDStr;
 		images->beginAtomic();
 		for (XMLTreeNode *r=root->GetChild(); r; r=r->GetNext())
 		{
@@ -336,9 +378,7 @@ void eUpgrade::changelogTransferDone(int err)
 			}
 			fclose(f);
 		}
-		// FIXME
-		displayChangelog(ourversion.mid(4), selectedversion.mid(4), "");
-		// displayChangelog(ourversion.mid(4), selectedversion.mid(4), eDVB::getInstance()->getInfo("mID").right(1));
+		displayChangelog(ourversion.mid(4), selectedversion.mid(4), mIDStr);
 	}
 	changelog=0;
 }
@@ -361,9 +401,7 @@ void eUpgrade::imageSelected(eListBoxEntryImage *img)
 void eUpgrade::imageSelchanged(eListBoxEntryImage *img)
 {
 	selectedversion=img->version;
-	// FIXME
-	displayChangelog(ourversion.mid(4), selectedversion.mid(4), "");
-	// displayChangelog(ourversion.mid(4), selectedversion.mid(4), eDVB::getInstance()->getInfo("mID").right(1));
+	displayChangelog(ourversion.mid(4), selectedversion.mid(4), mIDStr);
 }
 
 void eUpgrade::setStatus(const eString &string)
@@ -503,88 +541,165 @@ void eUpgrade::flashImage(int checkmd5)
 			if (res == eMessageBox::btYes)
 			{
 				eMessageBox mb(
-					_("Erasing...\nPlease wait... do NOT switch off the receiver!"),
+					_("Please wait... do NOT switch off the receiver!"),
 					_("upgrade in progress"), eMessageBox::iconInfo);
 				mb.show();
-				sync();
+				::sync();
 				Decoder::Flush();
-				eString mtd;
-				
-				eFatal("ADD MTD INFO TO SYSINFO!");
-#if 0
-				switch (tuxbox_get_model())
+				char mtd[20];
+				int mID = atoi(mIDStr.c_str());
+				switch (mID)
 				{
-				case TUXBOX_MODEL_DBOX2:
-					mtd="2";
+				case 1:   // d-box2
+				case 2:
+				case 3:
+					strcpy(mtd,"/dev/mtd/2");
 					mtdsize=0x6e0000;
 					break;
-				case TUXBOX_MODEL_DREAMBOX:
-					mtd="0";
-					mtdsize=0x700000;
+				case 5:   // dreambox
+				case 6:
+					strcpy(mtd,"/dev/mtd/0");
+					mtdsize=0x600000;
 					break;
 				default:
-					mtd="../null";
+					strcpy(mtd,"/dev/null");
 					mtdsize=0;
 				}
-#endif
+				int fd1=0,fd2=0;
 
+				if( (fd1 = open( TMP_IMAGE, O_RDONLY )) < 0 )
 				{
-					int fd=open(eString("/dev/mtdblock/" + mtd).c_str(), O_RDONLY);
-					void *ptr;
-					volatile int a;
-					if ((fd < 0) || !(ptr=mmap(0, mtdsize, PROT_READ, MAP_SHARED|MAP_LOCKED, fd, 0)))
-
-					{
-						eMessageBox mb(
-							_("upgrade failed with errorcode UD0"),
-							_("upgrade failed"),
-							eMessageBox::btOK|eMessageBox::iconError);
-						mb.show();
-						mb.exec();
-						mb.hide();
-						return;
-					}
-					for (int i=0; i<mtdsize; i+=4096) // page size
-						a=((__u8*)ptr)[i];
+					mb.hide();
+					eMessageBox box(_("Can't read flashimage.img!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+					box.show();
+					box.exec();
+					box.hide();
+					close(0);
+					return;
 				}
-				int res=system(eString("/bin/eraseall /dev/mtd/" + mtd).c_str())>>8;
+
+				int filesize = lseek( fd1, 0, SEEK_END);
+				lseek( fd1, 0, SEEK_SET);
+
+				if(filesize==0)
+				{
+					mb.hide();
+					eMessageBox box(_("flashimage.img has filesize of 0byte!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+					box.show();
+					box.exec();
+					box.hide();
+					close(0);
+					return;
+				}
+
+				// without this nice we have not enough priority for
+				// file operations... then the update ist very slow on the
+				// dreambox
+				nice(-10);
+
+				if(!erase(mtd))
+				{
+					mb.hide();
+					eMessageBox box(_("Erase error!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+					box.show();
+					box.exec();
+					box.hide();
+					close(0);
+					return;
+				}
+
+				if( (fd2 = open(mtd, O_RDWR )) < 0 )
+				{
+					mb.hide();
+					eMessageBox box(_("Can't open mtd!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
+					box.show();
+					box.exec();
+					box.hide();
+					close(0);
+					return;
+				}
+
+				mtd_info_t meminfo;
+				if( ioctl( fd2, MEMGETINFO, &meminfo ) != 0 )
+				{
+					close(0);
+					return;
+				}
+
+				ProgressWindow wnd(_("Writing Software to Flash..."));
+				wnd.show();
+
+				char buf[meminfo.erasesize];
+
+				int fsize=filesize;
+
+				eDebug("flashing now...");
+
+				int rbytes=0;
+				while( ( rbytes = read( fd1, buf, sizeof(buf) ) ) )
+				{
+					fsize -= write( fd2, buf, rbytes );
+					wnd.progress.setPerc( ((filesize-fsize)*100)/filesize );
+				}
+
+				nice(0);
+
 				mb.hide();
-				if (!res)
-				{
-					eMessageBox mb(
-						_("Writing software to flash...\nPlease wait... do NOT switch off the receiver!"),
-						_("upgrade in progress"), eMessageBox::iconInfo);
-					mb.show();
-					res=system(eString("cat " TMP_IMAGE " > /dev/mtd/" + mtd).c_str())>>8;
-					mb.hide();
-					if (!res)
-					{
-						eMessageBox mb(
-							_("upgrade successful!\nrestarting..."),
-							_("upgrade ok"),
-						eMessageBox::btOK|eMessageBox::iconInfo);
-						mb.show();
-						mb.exec();
-						mb.hide();
-						system("/sbin/reboot");
-						system("/bin/reboot");
-						exit(0);
-					}
-				}
-				if (res)
-				{
-					eMessageBox mb(
-						_("upgrade failed with errorcode UA15"),
-						_("upgrade failed"),
-						eMessageBox::btOK|eMessageBox::iconError);
-					mb.show();
-					mb.exec();
-					mb.hide();
-				}
+				wnd.hide();
+
+				eMessageBox mbend(
+					_("upgrade successful!\nrestarting..."),
+					_("upgrade ok"),
+				eMessageBox::btOK|eMessageBox::iconInfo);
+				mbend.show();
+				mbend.exec();
+				mbend.hide();
+				eZap::getInstance()->quit(1);
+//				system("/sbin/reboot");
+//				system("/bin/reboot");
+//				exit(0);
 			} else
 				close(0);
 		}
 	}
+}
+
+bool eUpgrade::erase(char mtd[30])
+{
+	int fd;
+	mtd_info_t meminfo;
+	erase_info_t erase;
+
+	if( (fd = open( mtd, O_RDWR )) < 0 )
+		return false;
+
+	if( ioctl( fd, MEMGETINFO, &meminfo ) != 0 )
+		return false;
+
+	ProgressWindow wnd(_("Erasing Flash..."));
+	wnd.show();
+
+	erase.length = meminfo.erasesize;
+	for (erase.start = 0; erase.start < meminfo.size; erase.start += meminfo.erasesize )
+	{
+		eDebugNoNewLine("\rErasing %u Kibyte @ %x -- %2u %% complete",
+			meminfo.erasesize/1024, erase.start,
+			erase.start*100/meminfo.size );
+
+		wnd.progress.setPerc( erase.start*100/meminfo.size );
+
+		if(ioctl( fd, MEMERASE, &erase) != 0)
+		{
+			close(fd);
+			wnd.hide();
+			return false;
+		}
+	}
+	wnd.hide();
+
+	close(fd);
+
+	return true;
 }
 
 void eUpgrade::displayChangelog(eString oldversion, eString newversion, eString mid)

@@ -1,3 +1,5 @@
+#ifdef ENABLE_RFMOD
+
 #include <setup_rfmod.h>
 
 #include <lib/base/i18n.h>
@@ -12,11 +14,12 @@
 #include <lib/gdi/font.h>
 #include <lib/system/econfig.h>
 
-eZapRFmodSetup::eZapRFmodSetup(): eWindow(0)
+eZapRFmodSetup::eZapRFmodSetup()
+	:eWindow(0)
 {
-	int fd=eSkin::getActive()->queryValue("fontsize", 20);
+//	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
-	setText(_("RF-Modulator Setup"));
+	setText(_("UHF-Modulator Setup"));
 	move(ePoint(150, 86));
 	cresize(eSize(390, 320));
 		
@@ -28,15 +31,15 @@ eZapRFmodSetup::eZapRFmodSetup(): eWindow(0)
 	TestPatternEnable->loadDeco();
 	CONNECT(TestPatternEnable->selected, eZapRFmodSetup::TestPatternEnable_selected);		
 
-	SO=0;
-	eConfig::getInstance()->getKey("/elitedvb/rfmod/so",SO);
+	soundenable=0;
+	eConfig::getInstance()->getKey("/elitedvb/rfmod/so",soundenable);
 	SoundEnable=new eCheckbox(this);
 	SoundEnable->setText(_("Sound enable"));
 	SoundEnable->move(ePoint(80, 60));
 	SoundEnable->resize(eSize(200, 40));
 	SoundEnable->setHelpText(_("enable Sound"));
 	SoundEnable->loadDeco();
-	if(!SO)
+	if(!soundenable)
 		SoundEnable->setCheck(1);
 	CONNECT(SoundEnable->selected, eZapRFmodSetup::SoundEnable_selected);		
 		
@@ -45,8 +48,8 @@ eZapRFmodSetup::eZapRFmodSetup(): eWindow(0)
 	sscl->move(ePoint(40,105));
 	sscl->resize(eSize(200,40));
 
-	SFD=5500;
-	eConfig::getInstance()->getKey("/elitedvb/rfmod/sfd",SFD);
+	ssc=5500;
+	eConfig::getInstance()->getKey("/elitedvb/rfmod/ssc",ssc);
 	SoundSubcarrier=new eListBox<eListBoxEntryText>(this,sscl);
 	SoundSubcarrier->loadDeco();
 	SoundSubcarrier->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
@@ -60,7 +63,7 @@ eZapRFmodSetup::eZapRFmodSetup(): eWindow(0)
 
 	for(int i=0;i<4;i++)
 	{
-		if((int)sscentrys[i]->getKey() == SFD)
+		if((int)sscentrys[i]->getKey() == ssc)
 		{
 			SoundSubcarrier->setCurrent(sscentrys[i]);
 			break;
@@ -74,8 +77,7 @@ eZapRFmodSetup::eZapRFmodSetup(): eWindow(0)
 	cl->move(ePoint(40,145));
 	cl->resize(eSize(200,40));
 
-	DIV=2080;
-	eConfig::getInstance()->getKey("/elitedvb/rfmod/div",DIV);
+	eConfig::getInstance()->getKey("/elitedvb/rfmod/channel",chan);
 	Channel=new eListBox<eListBoxEntryText>(this,cl);
 	Channel->loadDeco();
 	Channel->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
@@ -86,17 +88,19 @@ eZapRFmodSetup::eZapRFmodSetup(): eWindow(0)
 
 	for(int i=21;i<70;i++)
 	{
-		clentrys[i]=new eListBoxEntryText(Channel,eString().sprintf("%d",i),(void*)i,eTextPara::dirCenter);
+		clentrys[i-21]=new eListBoxEntryText(Channel,eString().sprintf("%d",i),(void*)i,eTextPara::dirCenter);
 	}
 
-	Channel->setCurrent(clentrys[0]);
+	Channel->setCurrent(clentrys[chan-21]);
 	Channel->setHelpText(_("change channel"));
+	CONNECT(Channel->selchanged, eZapRFmodSetup::Channel_selected);		
 
 	eLabel *fl=new eLabel(this);
 	fl->setText("Fine Tune:");
 	fl->move(ePoint(40,185));
 	fl->resize(eSize(200,40));
-	
+
+	eConfig::getInstance()->getKey("/elitedvb/rfmod/finetune",finetune);
 	FineTune=new eListBox<eListBoxEntryText>(this,fl);
 	FineTune->loadDeco();
 	FineTune->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
@@ -108,12 +112,12 @@ eZapRFmodSetup::eZapRFmodSetup(): eWindow(0)
 	for(int i=-40;i<41;i++)
 	{
 		if(i>0)
-			flentrys[i]=new eListBoxEntryText(FineTune,eString().sprintf("+%d",i),(void*)i,eTextPara::dirCenter);
+			flentrys[i+40]=new eListBoxEntryText(FineTune,eString().sprintf("+%d",i),(void*)i,eTextPara::dirCenter);
 		else
-			flentrys[i]=new eListBoxEntryText(FineTune,eString().sprintf("%d",i),(void*)i,eTextPara::dirCenter);
+			flentrys[i+40]=new eListBoxEntryText(FineTune,eString().sprintf("%d",i),(void*)i,eTextPara::dirCenter);
 	}
 
-	FineTune->setCurrent(flentrys[0]);
+	FineTune->setCurrent(flentrys[finetune+40]);
 	FineTune->setHelpText(_("250Khz steps"));
 	CONNECT(FineTune->selchanged, eZapRFmodSetup::FineTune_selected);		
 	
@@ -123,18 +127,10 @@ eZapRFmodSetup::eZapRFmodSetup(): eWindow(0)
 	ok->setShortcutPixmap("green");
 
 	ok->move(ePoint(20, 230));
-	ok->resize(eSize(170, 40));
+	ok->resize(eSize(220, 40));
 	ok->setHelpText(_("save settings and leave rf setup"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapRFmodSetup::okPressed);		
-
-	abort=new eButton(this);
-	abort->setText(_("abort"));
-	abort->move(ePoint(210, 230));
-	abort->resize(eSize(170, 40));
-	abort->setHelpText(_("leave rf setup (no changes are saved)"));
-	abort->loadDeco();
-	CONNECT(abort->selected, eZapRFmodSetup::abortPressed);
 
 	status = new eStatusBar(this);	
 	status->move( ePoint(0, clientrect.height()-30) );
@@ -144,23 +140,17 @@ eZapRFmodSetup::eZapRFmodSetup(): eWindow(0)
 
 eZapRFmodSetup::~eZapRFmodSetup()
 {
-	if (status)
-		delete status;
 }
 
 void eZapRFmodSetup::okPressed()
 {
-	close(1);
-}
-
-void eZapRFmodSetup::abortPressed()
-{
+	eRFmod::getInstance()->save();
 	close(0);
 }
 
 void eZapRFmodSetup::TestPatternEnable_selected()
 {
-	eRFmod::getInstance()->setTPEN((int)1);		
+	eRFmod::getInstance()->setTestPattern((int)1);		
 
 	eMessageBox box(_("if you can read this your rfmod will not work."),_("Test Pattern"),eMessageBox::iconWarning|eMessageBox::btOK);
 
@@ -169,7 +159,7 @@ void eZapRFmodSetup::TestPatternEnable_selected()
 	box.hide();
 
 	TestPatternEnable->setCheck(0);
-	eRFmod::getInstance()->setTPEN((int)0);		
+	eRFmod::getInstance()->setTestPattern((int)0);		
 }
 
 void eZapRFmodSetup::SoundEnable_selected()
@@ -181,24 +171,22 @@ void eZapRFmodSetup::SoundEnable_selected()
 	else
 		val=1;		
 		
-	eRFmod::getInstance()->setSO(val);		
-
+	eRFmod::getInstance()->setSoundEnable(val);		
 }
 
 void eZapRFmodSetup::SoundSubcarrier_selected(eListBoxEntryText* entry)
 {
-	eRFmod::getInstance()->setSFD((int)SoundSubcarrier->getCurrent()->getKey());
+	eRFmod::getInstance()->setSoundSubCarrier((int)SoundSubcarrier->getCurrent()->getKey());
 }
 
 void eZapRFmodSetup::Channel_selected(eListBoxEntryText* entry)
 {
-	eRFmod::getInstance()->setSO((int)entry->getKey());
+	eRFmod::getInstance()->setChannel((int)Channel->getCurrent()->getKey());
 }
 
 void eZapRFmodSetup::FineTune_selected(eListBoxEntryText* entry)
 {
-	int tempDIV=DIV+(int)FineTune->getCurrent()->getKey();
-	//DIV+=(int)FineTune->getCurrent()->getKey();
-	eDebug("DIV:%d val:%d\n",DIV,(int)FineTune->getCurrent()->getKey());
-	eRFmod::getInstance()->setDivider(tempDIV);
+	eRFmod::getInstance()->setFinetune((int)FineTune->getCurrent()->getKey());
 }
+
+#endif //ENABLE_RFMOD

@@ -1,60 +1,69 @@
+#ifndef DISABLE_CI
+
 #ifndef __enigmaci_h
 #define __enigmaci_h
 
-#include <lib/gui/ewindow.h>
-#include <lib/gui/enumber.h>
 #include <lib/gui/listbox.h>
-#include <lib/gui/statusbar.h>
+#include <lib/base/message.h>
 
 class eNumber;
 class eButton;
 class eDVBCI;
+class eTextInputField;
+class eWindow;
+class eStatusBar;
 
-class eCImmi: public eWidget
+struct eMMIMsg
 {
-public:
-	eNumber *answer;
-	eCImmi(eWidget *parent);
-};	
-
-class eListBoxMenuEntry: public eListBoxEntryText
-{
-	friend class eListBox<eListBoxMenuEntry>;
-	int entry;
-public:
-	eListBoxMenuEntry(eListBox<eListBoxMenuEntry> *parent, eString name, int entry)
-	:eListBoxEntryText((eListBox<eListBoxEntryText>*)parent, name),entry(entry)
+	char *data;
+	int len;
+	eMMIMsg()
 	{
 	}
-	
-	const int &getEntry() const {return entry;};
-};	
+	eMMIMsg(char* data, int len)
+		: data(data), len(len)
+	{
+	}
+};
 
-class enigmaCImmi: public eWindow
+class eMMIEnqWindow : public eWindow
 {
-	eButton *ok,*abort,*answok;
-	eListBox<eListBoxMenuEntry> *lentrys;
-	eStatusBar *status;
-	eLabel *tt,*stt,*bt,*cistate,*headansw;
-	eNumber *answ;
-	eDVBCI *DVBCI;
-	eCImmi *mmi;
-
-private:
-	void okPressed();
-	void abortPressed();
-	void entrySelected(eListBoxMenuEntry *choice);
-	void getmmi(const char *buffer);
-	long LengthField(unsigned char *lengthfield,long maxlength,int *fieldlen);
-	void answokPressed();
-
-	int ci_state;
-
+	eLabel *title;
+	eNumber *input;
+	int num;
+	int eventHandler( const eWidgetEvent &e );
+	void okPressed(int*);
 public:
-	enigmaCImmi(eDVBCI *DVBCI);
-	~enigmaCImmi();
+	eMMIEnqWindow( eString windowText, int num, bool blind );
+	eString getAnswer();
+};
 
+class eMMIListWindow : public eListBoxWindow<eListBoxEntryText>
+{
+	eLabel *title, *subtitle, *bottomText;
+	int eventHandler( const eWidgetEvent &e );
+public:
+	void entrySelected( eListBoxEntryText* e );
+	eMMIListWindow(eString title, eString subtitle, eString bottomText, std::list< std::pair< eString, int> > &entrys );
+	int getSelected() { return (int) list.getCurrent()->getKey(); }
+};
 
+class enigmaMMI : public eWindow
+{
+	eDVBCI *ci;
+	eFixedMessagePump<eMMIMsg> mmi_messages;
+public:
+	Connection conn;
+	eLabel *lText;
+	eTimer responseTimer;
+	enigmaMMI(eDVBCI *ci);
+	int eventHandler( const eWidgetEvent &e );
+	void handleMMIMessage(const char *data);
+	void gotMMIData(const char* data, int);
+	void handleMessage( const eMMIMsg &msg );
+	void showWaitForCIAnswer(int ret);
+	void hideWaitForCIAnswer();
+	~enigmaMMI();
 };
 
 class enigmaCI: public eWindow
@@ -68,7 +77,6 @@ class enigmaCI: public eWindow
 
 private:
 	void okPressed();
-	void abortPressed();
 	void resetPressed();
 	void initPressed();
 	void appPressed();
@@ -77,10 +85,11 @@ private:
 	void app2Pressed();
 	void updateCIinfo(const char*);
 	void updateCI2info(const char*);
-
 public:
 	enigmaCI();
 	~enigmaCI();
 };
 
 #endif
+
+#endif // DISABLE_CI

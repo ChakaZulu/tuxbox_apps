@@ -13,14 +13,6 @@ eRect::eRect( const ePoint &topLeft, const ePoint &bottomRight )
 	y2 = bottomRight.y();
 }
 
-eRect::eRect( const ePoint &topLeft, const eSize &size )
-{
-	x1 = topLeft.x();
-	y1 = topLeft.y();
-	x2 = (x1+size.width());
-	y2 = (y1+size.height());
-}
-
 eRect eRect::normalize() const
 {
 	eRect r;
@@ -99,14 +91,6 @@ void eRect::moveCenter( const ePoint &p )
 	y2 = y1 + h;
 }
 
-void eRect::moveBy( int dx, int dy )
-{
-	x1 += dx;
-	y1 += dy;
-	x2 += dx;
-	y2 += dy;
-}
-
 void eRect::setRect( int x, int y, int w, int h )
 {
 	x1 = x;
@@ -147,7 +131,10 @@ bool eRect::contains( const ePoint &p) const
 
 bool eRect::contains( const eRect &r) const
 {
-	return r.x1 >= x1 && r.x2 <= x2 && r.y1 >= y1 && r.y2 <= y2;
+	return r.x1 >= x1 &&
+				 r.x2 <= x2 &&
+				 r.y1 >= y1 &&
+				 r.y2 <= y2;
 }
 
 eRect& eRect::operator|=(const eRect &r)

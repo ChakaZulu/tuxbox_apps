@@ -1,12 +1,20 @@
 #ifndef __E_ERROR__
 #define __E_ERROR__
 
-#include "config.h"
 #include <string>
 #include <map>       
 #include <new>
+#include <libsig_comp.h>
+#include <config.h>
 
 void eFatal(const char* fmt, ...);
+
+class eString;
+
+enum { lvlDebug=1, lvlWarning=2, lvlFatal=4 };
+
+extern Signal2<void, int, const eString&> logOutput;
+extern int logOutputConsole;
 
 #ifdef ASSERT
 #undef ASSERT

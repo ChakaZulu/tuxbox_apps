@@ -1,32 +1,24 @@
 #ifndef __enigma_setup_h
 #define __enigma_setup_h
 
-#include <lib/gui/listbox.h>
+#include <setup_window.h>
 
-class eZapSetup: public eListBoxWindow<eListBoxEntryMenu>
+class eZapSetup: public eSetupWindow
 {
 private:
-	void sel_close();
-	void sel_channels();	
-	void sel_network();
-	void sel_sound();
-	void sel_video();
-	void sel_language();
-	void sel_skin();
-	void sel_osd();
-	void sel_lcd();
-	void sel_rc();
-	void sel_harddisk();
-	void sel_ci();
-	void sel_upgrade();
-	void sel_rfmod();
-	void sel_num(int n);
-	void sel_engrab();
-protected:
-	int eventHandler(const eWidgetEvent &event);
+	void system_settings();
+	void service_organising();
+	void service_searching();
+#ifndef DISABLE_CI
+	void common_interface();
+#endif
+#ifndef DISABLE_FILE
+	void harddisc_setup();
+#endif
+	void expert_setup();
+	void parental_lock();
 public:
 	eZapSetup();
-	~eZapSetup();
 };
 
 #endif /* __enigma_setup_h */

@@ -22,20 +22,28 @@ class eServiceReferenceDVB;
 
 struct uniqueEPGKey
 {
-	int sid, onid;
-	uniqueEPGKey()
-		:sid(0), onid(0)
+	int sid, onid, opos;
+	uniqueEPGKey( const eServiceReferenceDVB &ref )
+	    :sid( ref.data[1] ), onid( ref.data[3] ), opos( (ref.data[4]&0x00FF0000) >> 16 )
 	{
 	}
-	uniqueEPGKey( int sid, int onid )
-		:sid(sid), onid(onid)
+	uniqueEPGKey()
+		:sid(0), onid(0), opos(0)
 	{
+	}
+	uniqueEPGKey( int sid, int onid, int opos )
+		:sid(sid), onid(onid), opos(opos)
+	{
+	}
+	bool operator <(const uniqueEPGKey &a) const
+	{
+		return memcmp( &sid, &a.sid, sizeof(int)*3)<0;
 	}
 	struct equal
 	{
 		bool operator()(const uniqueEPGKey &a, const uniqueEPGKey &b) const
 		{
-			return (a.sid == b.sid && a.onid == b.onid);
+			return !memcmp( &a.sid, &b.sid, sizeof(int)*3);
 		}
 	};
 };
@@ -75,19 +83,21 @@ public:
 	}
 };
 
+//eventMap is sorted by event_id
 #define eventMap std::map<__u16, eventData*>
+//timeMap is sorted by beginTime
+#define timeMap std::map<time_t, eventData*>
+
+#define tmpMap std::map<uniqueEPGKey, std::pair<time_t, int> >
+#define nvodMap std::map<uniqueEPGKey, std::list<NVODReferenceEntry> >
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && __GNUC_MINOR__ >= 1  // check if gcc version >= 3.1
-	#define eventCache __gnu_cxx::hash_map<uniqueEPGKey, eventMap, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal>
+	#define eventCache __gnu_cxx::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal>
 	#define updateMap __gnu_cxx::hash_map<uniqueEPGKey, time_t, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal >
-	#define tmpMap __gnu_cxx::hash_map<uniqueEPGKey, std::pair<time_t, int>, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal >
-	#define nvodMap __gnu_cxx::hash_map<uniqueEPGKey, std::list<NVODReferenceEntry>, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal >
 	namespace __gnu_cxx
 #else // for older gcc use following
-	#define eventCache std::hash_map<uniqueEPGKey, eventMap, std::hash<uniqueEPGKey>, uniqueEPGKey::equal >
-	#define updateMap __gnu_cxx::hash_map<uniqueEPGKey, time_t, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal >
-	#define tmpMap std::hash_map<uniqueEPGKey, std::pair<time_t, int>, std::hash<uniqueEPGKey>, uniqueEPGKey::equal >
-	#define nvodMap std::hash_map<uniqueEPGKey, std::list<NVODReferenceEntry>, std::hash<uniqueEPGKey>, uniqueEPGKey::equal >
+	#define eventCache std::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, std::hash<uniqueEPGKey>, uniqueEPGKey::equal >
+	#define updateMap std::hash_map<uniqueEPGKey, time_t, std::hash<uniqueEPGKey>, uniqueEPGKey::equal >
 	namespace std
 #endif
 {
@@ -134,6 +144,15 @@ public:
 	{
 		return HILO( ((const eit_event_struct*) EITdata)->event_id );
 	}
+	time_t getStartTime()
+	{
+		return parseDVBtime(
+			((const eit_event_struct*)EITdata)->start_time_1,
+			((const eit_event_struct*)EITdata)->start_time_2,
+			((const eit_event_struct*)EITdata)->start_time_3,
+			((const eit_event_struct*)EITdata)->start_time_4,
+			((const eit_event_struct*)EITdata)->start_time_5);
+	}
 };
 
 class eEPGCache;
@@ -171,13 +190,11 @@ public:
 	friend class eNowNext;
 private:
 	uniqueEPGKey current_service;
-	int current_sid;
 	uniqueEvent firstScheduleEvent,
 							firstNowNextEvent;
-	int isRunning;
 	int paused;
+	__u8 isRunning, firstStart;
 	int sectionRead(__u8 *data, int source);
-	void SDTReady(int err);
 	static eEPGCache *instance;
 
 	eventCache eventDB;
@@ -203,15 +220,17 @@ public:
 	EITEvent *lookupEvent(const eServiceReferenceDVB &service, int event_id);
 	EITEvent *lookupEvent(const eServiceReferenceDVB &service, time_t=0);
 	const eventMap* getEventMap(const eServiceReferenceDVB &service);
+	const timeMap* getTimeMap(const eServiceReferenceDVB &service);
 	const std::list<NVODReferenceEntry>* getNVODRefList(const eServiceReferenceDVB &service);
 
 	Signal1<void, bool> EPGAvail;
 	Signal1<void, const tmpMap*> EPGUpdated;
+	Signal1<void, tsref> timeNotValid;
 };
 
 inline const std::list<NVODReferenceEntry>* eEPGCache::getNVODRefList(const eServiceReferenceDVB &service)
 {
-	nvodMap::iterator It = NVOD.find( uniqueEPGKey( service.getServiceID().get(), service.getOriginalNetworkID().get() ) );
+	nvodMap::iterator It = NVOD.find( service );
 	if ( It != NVOD.end() && It->second.size() )
 		return &(It->second);
 	else
@@ -220,9 +239,18 @@ inline const std::list<NVODReferenceEntry>* eEPGCache::getNVODRefList(const eSer
 
 inline const eventMap* eEPGCache::getEventMap(const eServiceReferenceDVB &service)
 {
-	eventCache::iterator It = eventDB.find( uniqueEPGKey( service.getServiceID().get(), service.getOriginalNetworkID().get() ) );
-	if ( It != eventDB.end() && It->second.size() )
-		return &(It->second);
+	eventCache::iterator It = eventDB.find( service );
+	if ( It != eventDB.end() && It->second.first.size() )
+		return &(It->second.first);
+	else
+		return 0;
+}
+
+inline const timeMap* eEPGCache::getTimeMap(const eServiceReferenceDVB &service)
+{
+	eventCache::iterator It = eventDB.find( service );
+	if ( It != eventDB.end() && It->second.second.size() )
+		return &(It->second.second);
 	else
 		return 0;
 }

@@ -5,7 +5,7 @@
 
 enum eAVAspectRatio
 {
-	rUnknown, r43, r169, r169c
+	rUnknown, r43, r169
 };
 
 enum eAVColorFormat
@@ -13,15 +13,23 @@ enum eAVColorFormat
 	cfNull,
 	cfCVBS, 	// "FBAS"
 	cfRGB,
-	cfYC			// "SVideo"
+	cfYC,			// "SVideo"
+	cfYPbPr		// "Component"
+};
+
+enum eVSystem
+{
+	vsPAL,
+	vsNTSC,
 };
 
 class eAVSwitch
 {
 	static eAVSwitch *instance;
-	int volume, VCRVolume, mute;
+	int volume, VCRVolume, mute, useOst;
 
 	int avsfd, saafd;
+	eVSystem system;
 	eAVAspectRatio aspect;
 	eAVColorFormat colorformat;
 
@@ -33,13 +41,12 @@ protected:
 	enum {NOKIA, SAGEM, PHILIPS} Type;
 	int scart[6];
 	int dvb[6];
-	int active;
-	int useost;
+	int active, input;
 	void init();
 public:
 	eAVSwitch();
 	~eAVSwitch();
-	Signal1<void, int> volumeChanged;
+	Signal2<void, int, int> volumeChanged;
 
 	static eAVSwitch *getInstance();
 	int getVolume() { return volume; }
@@ -61,6 +68,8 @@ public:
 	int setTVPin8(int vol);
 	int setColorFormat(eAVColorFormat cf);
 	int setAspectRatio(eAVAspectRatio as);
+	void setVSystem(eVSystem system);
+	eVSystem getVSystem() { return system; }
 	int setActive(int active);
 	int setInput(int v);	// 0: dbox, 1: vcr
 	void changeVCRVolume(int abs, int vol);
@@ -87,15 +96,6 @@ public:
 		dvb[4] = 1;
 		dvb[5] = 1;
 		init();
-	}
-};
-
-class eAVSwitchDreambox: public eAVSwitchNokia
-{
-public:
-	eAVSwitchDreambox()
-	{
-		useost=1;
 	}
 };
 

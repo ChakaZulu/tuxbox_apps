@@ -1,5 +1,1 @@
-Makefile
-POTFILES
-tuxbox-enigma.pot
-*.gmo
-*.po
+.po

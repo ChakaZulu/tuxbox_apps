@@ -72,6 +72,7 @@ class eServiceHandler: public Object
 {
 protected:
 	int id;
+	static int flags;
 public:
 	enum
 	{
@@ -109,7 +110,7 @@ public:
 		// for DVB events, nvod, audio....
 	virtual EIT *getEIT();
 	
-	virtual int getFlags();
+	static int getFlags();
 	virtual int getState();
 	
 		// get visual flags

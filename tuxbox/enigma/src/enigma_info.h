@@ -7,12 +7,10 @@
 class eZapInfo: public eListBoxWindow<eListBoxEntryMenu>
 {
 private:
-	void sel_close();
 	void sel_satfind();
 	void sel_streaminfo();
 	void sel_bnversion();
 	void sel_about();	
-
 public:
 	eZapInfo();
 	~eZapInfo();

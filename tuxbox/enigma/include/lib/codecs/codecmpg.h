@@ -1,6 +1,7 @@
+#ifndef DISABLE_FILE
+
 #ifndef __lib_codecs_codecmpg_h
 #define __lib_codecs_codecmpg_h
-
 
 #include <lib/base/buffer.h>
 #include <lib/codecs/codec.h>
@@ -9,6 +10,9 @@
 class eMPEGDemux: public eAudioDecoder
 {
 	eIOBuffer &input, &video, &audio;
+	int minFrameLength;
+	int mpegtype;
+
 	unsigned long last, remaining;
 	unsigned long getLong();
 	void refill();
@@ -23,3 +27,5 @@ public:
 };
 
 #endif
+
+#endif //DISABLE_FILE

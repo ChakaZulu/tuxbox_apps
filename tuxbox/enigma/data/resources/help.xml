@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE enigmahelp[
+<!ELEMENT enigmahelp (version, author, help)>
+<!ELEMENT version (imageversion, date, previous?)>
+<!ELEMENT imageversion (#PCDATA)>
+<!ELEMENT date (#PCDATA)>
+<!ELEMENT previous (#PCDATA)>
+<!ELEMENT author (name?, email)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT email (#PCDATA)>
+<!ELEMENT help (helptext)+>
+<!ELEMENT helptext EMPTY>
+<!ATTLIST helptext
+	id			ID	#REQUIRED
+	device		(Dbox2|Dreambox|DVBs|all)	#IMPLIED
+	helptext	CDATA	#REQUIRED
+	name		NMTOKEN	#IMPLIED
+	pic			CDATA	#IMPLIED
+	desc_file	CDATA	#IMPLIED
+	usage_file	CDATA	#IMPLIED>
+<!ENTITY lt "<">
+<!ENTITY gt ">">
+<!ENTITY auml "&#228;">
+<!ENTITY ouml "&#246;">
+<!ENTITY uuml "&#252;">
+<!ENTITY Auml "&#196;">
+<!ENTITY Ouml "&#214;">
+<!ENTITY Uuml "&#220;">
+<!ENTITY szlig "&#223;">
+<!ENTITY RT "->[DBOX] ->">
+<!ENTITY EA "ein/aus">
+<!ENTITY Z "[ZIFFERN]">
+<!ENTITY Es "Einstellungen">
+<!ENTITY FB "Fernbedienung">
+<!ENTITY LR "[LINKS]/[RECHTS]">
+<!ENTITY OU "[OBEN]/[UNTEN]">
+<!ENTITY HkS "Hier k&#246;nnen Sie ">
+<!ENTITY VN "vorheriger/n&#228;chster">
+<!ENTITY Gsave "(GR&#220;N)/speichern:[OK]">
+<!ENTITY sLa "speichern\n\nabbrechen">
+<!ENTITY X "\n     * ">
+<!ENTITY LN "\n. . . . . . . . . .\n\n">
+<!ENTITY LN2 "&LN;Bedienung:\n\n">
+<!ENTITY OUsel "&OU;&X;Eingabefeld oder Button w&#228;hlen\n\n" >
+<!ENTITY Fos "[HOME]&X;Fenster ohne &#196;nderungen schliessen" >
+<!ENTITY Fs "[HOME]&X;Fenster schliessen" >
+<!ENTITY na "\n\nz.Zt. keine Hilfe verf&#252;gbar\n\n">
+]>
+<enigmahelp>
+ <version>
+ <imageversion>1.6 19052003</imageversion>
+ <date>200306061111</date>
+ <previous>200306050930</previous>
+ </version>
+ <author>
+ <name>EssU</name>
+ <email>essu@no-enigma.de</email>
+ </author>
+
+ <help>
+<!-- helpIDs ab hier nochmal vergleichen -->
+ <helptext id="10" text="(10)\tHauptmenü\n\n&RT;&LN;Über das Hauptmenü haben Sie direkten Zugriff auf die Hauptbereiche von ENIGMA:\n\n(1)TV- (2)Radio-, (3)Datei-Modus, (Informationen, (5)Herunterfahren, (6)&Es;, (7)Spiele, (8)Videorecorder-Modus und (9)Timer&LN2;&LR;&X;&VN; Menüpunkt\n\n&Z;&X;Menüpunkt direkt anwählen\n\n[HOME]/[DBOX]&X;Menü schliessen" />
+ <helptext id="11" text="(11)\tEPG Eintrag\n\n->[?]&LN;Im EPG (Electronic Programme Guide) sehen Sie Informationen über einzelne Sendungen.\n\nNicht alle Anbieter senden verwertbare EPG-Daten.&LN2;&LR;&X;&VN; Event\n\n[ROT]&X;Timer löschen\n\n[GRÜN]&X;DVR-Aufnahme-Timer setzen\n\n[GELB]&X;Ngrab-Timer setzen\n\n[BLAU]&X;Umschalt-Timer setzen\n\n&Fs;" />
+ <helptext id="12" text="(12)\tEPG Liste\n\n->[ROT];&LN;In der EPG-Liste sehen Sie die Titel und Anfangszeiten der aktuellen und nachfolgenden Sendungen\n\nDer Umfang der EPG-Liste ist vom Anbieter abhängig&LN2;&OU;&X;&VN; Event\n\n&LR;&X;&VN; Event\n\n[OK]&X;(ROT)EPG-Eintrag ansehen&X;Timer löschen\n\n[GRÜN]&X;DVR-Aufnahme-Timer setzen\n\n[GELB]&X;Ngrab-Timer setzen\n\n[BLAU]&X;Umschalt-Timer setzen\n\n&Fs;" />
+ <helptext id="13" text="(13)\tXtended EPG\n\n->&OU; ->[?]&LN;Im erweiterten EPG sehen Sie Titel und Anfangszeiten der aktuellen und nachfolgenden Sendungen mehrerer Sender eines Bouquets.\n\nDer Umfang des erweiterten EPG ist von den zum Aufrufzeitpunkt eingelesenen EPG-Daten abhängig.&LN2;&OU;&X;&VN; Event\n\n&LR;&X;&VN; Kanal\n\n[OK]&X;(ROT)EPG-Eintrag ansehen&X;Timer löschen\n\n[GRÜN]&X;DVR-Aufnahme-Timer setzen\n\n[GELB]&X;Ngrab-Timer setzen\n\n[BLAU]&X;Umschalt-Timer setzen\n\n&Fs;" />
+
+ <helptext id="31" text="(31)\tMP3 Abspielsteuerung\n\n&RT; ->(3)Datei-Modus&LN;Um unter ENIGMA mp3-Dateien abzuspielen, können wir einen Rechner als File-Server zu nutzen.\n\nVorausetzung ist eine funktionierende Netzwerkverbindung zwischen Rechner und dbox.&LN2;&LR;&X;&VN; Track der Playlist\n\n&OU;&X;Browser öffnen\n\n[ROT]&X;schnell rückwärts spulen\n\n[GRÜN]&X;Abspiel starten\n\n[GELB]&X;Pause &EA;\n\n[BLAU]&X;schnell vorwärts spulen\n\n[HOME]&X;zum Anfang\n\n[PLUS]/[MINUS]&X;Lautstärke regeln\n\n[MUTE]&X;Ton &EA;\n\n[DBOX]&X;Fenster schliessen" />
+ <helptext id="33" text="(33)\tService-Selector\n\n->&OU;&LN;Der Service Selector ist die zentrale Schaltstelle in ENIGMA.\n\nSie können zwischen Service- und Bouquet-Listen, und ein-, zwei- und dreispaltiger Ansicht wählen&LN2;&OU;&X;&VN; Eintrag\n\n[OK]&X;Eintrag auswählen\n\n[ROT]&X;Service-Menü öffnen\n\n[GRÜN]&X;ein-,zwei- oder dreispaltiges Fenster\n\n[GELB]&X;Verzeichnis-Ebene wechseln\n\n[BLAU]&X;zu Services, Bouquets, Playlist, Browser wechseln\n\n&Fs;" />
+
+ <helptext id="41" text="(41)\tStreaminfo\n\n&RT; ->(4)Informationen ->Streaminformation&LN;Streaminfo(auch ->[?][?]) bietet eine Übersicht über Sender-,Verschlüsselungs- und Transponderdaten&LN2;Seite 1&X;Service-Informationen\n\nSeite 2&X;Verschlüsselungs-Informationen\n\nSeite 3&X;Transponder-Informationen\n\n&LR;&X;vorherige/nächste Seite\n\n[OK]/&Fs;" />
+ <helptext id="42" text="(42)\tShow current BN version\n\n&RT; ->(4)Informationen ->BN Version anzeigen&LN;zeigt die aktuelle BN Version&LN2;aktuelle BN-Version\n\n(GRÜN)[OK]/&Fs;" />
+ <helptext id="43" text="(43)\tÜber...\n\n&RT; ->(4)Informationen ->Über...&LN;Daten Ihrer Hard- und Software&LN2;Receiver- und Software-Information\n\n(GRÜN)[OK]/&Fs;" />
+ <helptext id="44" text="(44)\tSatelliten Finder\n\n&RT; ->(4)Informationen ->Satelliten Finder&LN;Hier sehen Sie Werte, die die Qualität des Empfangssignals des aktuellen Senders beschreiben &LN2;SNR&X;Signalqualität\n\nAGC&X;Signalstärke\n\nBER&X;Bit Error Rate\n\n[OK]/&Fs;" />
+
+ <helptext id="50" text="(50)\tShutdown/Standby Menu\n\n->(>3 sec)[POWER]&LN;Das Shutdown/Standby Menu bietet die Auswahl zwischen verschiedenen Ausschalt-Modi&LN2;shutdown now&X;schaltet in den Deep-Standby(minimaler Stromverbrauch)\n\nrestart&X;Neustart des Betriebssystems\n\ngoto standby&X;schaltet in Standby(erhöhter Stromverbrauch)\n\nset sleeptimer&X;öffnet Sleeptimer-&Es;\n\n&Fs; " />
+ <helptext id="51" text="(51)\tSet Sleeptimer\n\n->(>3 sec)[POWER] ->set sleeptimer&LN;Im Sleeptimer bestimmen Sie einen Zeit nach der ausgeschaltet wird.&LN2;&LR;/&OU;&X;&VN; Menüpunkt\n\nduration:&Z;&X;Zeit nach der ausgeschaltet wird\n\nherunterfahren[OK]&X;schaltet in den Deep-Standby\n\nStandby[OK]&X;schaltet in den Standby\n\nsetzen:[GRÜN]&X;&Es; &sLa; &Fos;" />
+
+ <helptext id="61" text="(61)\tAutomatische Kanalsuche\n\n&RT;(6)&Es; ->(2)Kanäle ->Kanalsuche ->Automatischer Suchlauf&LN;Bei der automatischen Kanalsuche scant ENIGMA den ausgewählten Satelliten. Wenn ein gültiger Transponder gefunden wurde, müssen Sie nur noch den Suchlauf starten. Sollten einzelne Sender nicht gefunden werden, verwenden Sie bitte die (62)manuelle Kanalsuche/&LN2;&OUsel;Netzwerk:[OK],&OU;,[OK]&X;Satelliten auswählen und Auswahl bestätigen\n\nalle löschen:[OK]&X;alle Services und Bouquets überschreiben\n\nSuchlauf starten:[OK]&X;Transponderscan beginnen(dauert einige Minuten)\n\nno circ. polariz.:[OK]&X;zwischen linear und circular wechselnder Polarisationsebene wechseln\n\nabbrechen&Fos;" />
+ <helptext id="62" text="(62)\tManuelle Kanalsuche\n\n&RT;(6)&Es; ->(2)Kanäle ->Kanalsuche ->Manueller Suchlauf&LN;Die manuelle Kanalsuche erfordert Kenntnisse der technischen Daten der gesuchten Services, Transponder und Satelliten. Diese finden Sie zum Beispiel im Internet unter http://www1.digitalfernsehen.de/frequenzen/&LN2;&OUsel;Satellite:[OK],&OU;,[OK]&X;Satelliten auswählen und Auswahl bestätigen\n\nFrequenz, Polarität, FFC, Symbolrate:&Z;&X;Senderdaten des gewünschten Senders\n\nInv.:[OK]&X;Inversion ein-/ausschalten\n\nONIT:[OK]&X;ONIT-Prüfung auf dem Transponder ein-/ausschalten\n\nverwende BAT:[OK]&X;BAT-Verwendung auf dem Transponder (wenn verfügbar) ein-/ausschalten\n\nListe vorher löschen:[OK]&X;löscht die Service-Liste vor dem Suchlauf\n\nNetzwerksuche:[OK]&X;scannt alle Transponder des Netzwerks\n\nSuchlauf starten:[OK]&X;Scan beginnen\n\nabbrechen&Fos;" />
+ <helptext id="63" text="(63)\tTransponders\n\n&RT;(6)&Es; ->Transponders...&LN;&HkS;manuell Transponder in die Transponderliste einfügen&LN2;&LR;,[OK]&X;Option wählen und bestätigen\n\nsat:[OK]&X;in die Satellitenauswahl wechseln\n\nneu:[OK]&X;neuen Transponder eingeben\n\nedit:[OK]&X;Daten für den gewähltenen Transponder verändern\n\nentfernen:[OK]&X;den gewähltenen Transponder löschen\n\n&Fos;" />
+ <helptext id="64" text="(64)\tTransponder Edit\n\n&RT;(6)&Es; ->Transponders... ->edit&LN;&HkS;einzelne Transponderdaten ändern&LN2;&OU;&X;&VN; Menüpunkt\n\nFrequenz, Polarität, FEC, Symbolrate:&Z;&X;Senderdaten des Senders\n\nspeichern&X;eingegebene Werte übernehmen\n\n&Fos;" />
+ <helptext id="66" text="(66)\tSatelliten-Konfiguration\n\n&RT;(6)&Es; ->Satelliten&LN;Hier wählen Sie Ihre DiSEqC-, LNB- und Satellitenkonfigurations-&Es;&LN2;&OUsel;Satellitenkonfiguration:&OU;&X;voreingestellte Satellitenkonfiguration auswählen oder 'nicht Standard - benutzerdefinierte Konfiguration'\n\nSat Position:&OU;&X;Satelliten auswählen\n\nOK:[OK]&X;Satellitenkonfiguration speichern\n\n&Fos;\n\nBenutzerdefinierte Konfiguration\n\nLNB:[OK]&X;LNB-&Es;\n\n22kHz:[OK],&OU;,[OK]&X;22kHz-Signal an/aus\n\nSpannung:[OK],&OU;,[OK]&X;zwischen 14V und 18V wählen\n\n(GRÜN)neu&X;neuen Satelliten hinzufügen\n\n(ROT)löschen&X;gewählten Satelliten löschen\n\n[OK]&X;Satellitenkonfiguration speichern\n\n&Fos;\n\n=LNB-Konfiguration\n\nLNB:&OU;&X;LNB auswählen, neu für hinzufügen\n\nLOF/L,LOF/H:&Z;&X;Low- bzw. Highband-Grundfrequenz einstellen\n\nSpannung erhöhen:[OK]&X;LNB-Spannung um 0,5V erhöhen(wg. langer Kabel)\n\n&Gsave;&X;LNB-&Es; &sLa;&Fos;\n\n(BLAU)nächste Seite&X;zu den DiSEqC-&Es;\n\nDiSEqC-&Es;\n\n(1)MiniDiSEqC Parameter:&OU;&X;MiniDiSEqC Parameter einstellen\n\n(2)DiSEqC Version:&OU;&X;DiSEqC Version einstellen\n\n(3)DiSEqC Parameter:&OU;&X;DiSEqC Parameter einstellen\n\n(6)Sequenz wiederholen:[OK]&X;DiSEqC-Signal zweimal senden an/aus\n\n(7)Fast DiSEqC:[OK]&X;DiSEqC-Signal nur bei Spannungs- oder Polarizationsebenenwechsel\n\n(GELB)vorherige Seite&X;zu den LNB-&Es;\n\n&Gsave;&X;DiSEqC-&Es; &sLa;&Fos;" />
+
+ <helptext id="68" text="(68)\tRotor-Konfiguration\n\n&RT;(6)&Es; ->Rotor &Es;&LN;&HkS;die &Es; für den Rotor-Support vornehmen&LN2;&OUsel;Geschwindigkeit:&Z;&X;Gradzahl des Rotors/Sekunde\n\ngotoXX function:[OK]&X;gotoXX Funktion des Rotors einstellen\n\nSatellitenposition:&OU;&X;zu bearbeitende Satellitenposition wählen\n\n(GRÜN)neu&X;neue Position in die Liste einfügen\n\n(ROT)entfernen&X; löscht die igewählte Satellitenposition\n\nNummer im Rotor:&Z;&X;Speicherplatznummer im Rotor\n\nOrbital Position:&Z;&X;Gradangabe(in Zehntel-Grad) zur gewählten Satellitenposition\n\nRichtung:[OK],&OU;,[OK]&X;Abweichung in östlicher oder westlicher Richtung\n\n(BLAU)nächste Seite&X;zu den erweiterten Rotor-&Es;\n\n&Gsave;&X;Änderungen &sLa;&Fos;\n\nErweiterte Rotor-&Es;\n\nModus:[OK],&OU;,[OK]&X;freie Position, gespeicherte Position, Satelliten-Position, Null-Grad-Position ansteuern\n\nSatellit:&OU;&X;gewünschter Satellit\n\nTransponder:&Z;&X; vorgesehenen oder anderen Transponder auf dem Satelliten wählen\n\nRichtung:&LR;&X;Rotor bewegen\n\n(GELB)vorherige Seite&X;zu den Rotor-&Es;\n\n(BLAU)Suche&X;Kanalsuche starten\n\n[GRÜN]speichern&X;Änderungen &sLa;&Fos;\n\ngotoXX function\n\ngeogr. Länge:&Z;&X;Längengrad Ihres Standorts in Minuten\n\ngeogr. Breite:&Z;&X;Breitengrad Ihres Standorts in Minuten\n\nRichtung&LR;&X;Abweichungsrichtung Ost/West" />
+<!-- so könnte es mit 'device' und 'desc_file' aussehen siehe auch 'ATTLIST helptext'.
+Weitere Attribute:
+	name		um Hilfe mit internen Namen z.B. eEPGSelector zu verbinden (Alternative zu 'id')
+	pic			Aufmachergrafik
+	desc_file	einleitende Beschreibung als externe Date
+	usage_file	Bedienungsanleitung als externe Date -->
+ <helptext id="72" device="Dreambox" desc_file="harddisk.txt" text="(72)\tFestplatte&na;&Fs;" />
+ <helptext id="73" text="(73)\tCommon Interface&na;&Fs;" />
+ <helptext id="74" text="(74)\tCommon Interface Module&na;&Fs;" />
+ <helptext id="75" text="(75)\tRF Modulator&na;&Fs;" />
+ <helptext id="76" text="(76)\tLIRC-&Es;&na;&Fs;" />
+
+ <helptext id="80" text="(80)\tScart&na;&Fs;" />
+ <helptext id="82" text="(82)\tNetzwerk-&Es;\n\n&RT;(6)&Es; ->(3)Netzwerk&LN;Um über Netzwerk z.B. per FTP, HTTP oder Telnet auf Ihren Receiver zuzugreifen, das Programm aufzunehmen oder den Video/Audiostream auf dem Computer zu hören, müssen Sie die Netzwerk-&Es; anpassen&LN2;&OUsel;&Z;&X;Zahlen-Eingabe\n\n&LR;&X;zum nächsten Zahlenblock\n\nIP:&Z;&X;IP-Adresse der DBox(im selben Bereich wie PC-Netzwerkkarte)\n\nNetmask:&Z;&X;Netzmaske des Netzwerks(meist 255.255.255.0)\n\nNameserver:&Z;&X;IP-Adresse eines Nameservers(oder des Gateways)\n\nGateway:&Z;&X;IP-Adresse des Standard Gateways\n\nconfigure Network:[OK]Netzwerk-&Es; aktivieren\n\nspeichern:[OK]&X;Netzwerk-&Es; &sLa;&Fos;" />
+ <helptext id="83" text="(83)\tOSD-Setup\n\n&RT;(6)&Es; ->(4)OSD&LN;&Es; der Bildschirmanzeige&LN2;&OUsel;Programmwechsel einblenden:[OK]&X;bei Programmwechsel die Infobar einblenden\n\nShow event remaining time:[OK]&X;Restlaufzeit des aktuellen Programms in der Infobar anzeigen\n\nTransparenz, Helligkeit, Kontrast:&LR;&X;regelt Transparenz, Helligkeit, Kontrast des OSD\n\nPlugin offset[GELB]&X;Einstellung des Anzeige-Versatzes der Plugins und Spiele\n\n&Gsave;&X;OSD-&Es; &sLa;&Fos;" />
+ <helptext id="84" text="(84)\tLC-Display-&Es;\n\n&RT;(6)&Es; ->(5)LCD&LN;&Es; des Liquid Cristal Displays&LN2;&OUsel;Helligkeit, Kontrast:&LR;&X;regelt Helligkeit bzw. Kontrast des LCD\n\nStandby:&LR;&X;regelt Helligkeit des LCD im Standby\n\nInverted:[OK]&X;kehrt die LC-Anzeige um\n\n&Gsave;&X;LCD-&Es; &sLa;&Fos;" />
+ <helptext id="85" text="(85)\t&FB;s-&Es;\n\n&RT;(6)&Es; ->(6)&FB;&LN;&Es; der zum Receiver gehörigen &FB;&LN2;&OUsel;Wiederholrate, Verzögerungsrate:&LR;&X;Wiederholrate bzw. Verzögerungsrate der Tastatur der &FB; verändern\n\nRemotecontrol Style:&OU;&X;zwischen Standard-ENIGMA-und Neutrino-Tastaturbelegung wählen\n\nandere Bouquet Auswahltasten[OK]&X;...\n\nNext Char Timeout:&Z;&X;Tastaturverzögerung bei Texteingaben in Millisekunden\n\n&Gsave;&X;&FB;s-&Es; &sLa;&Fos;" />
+ <helptext id="86" text="(86)\tVideo-&Es;\n\n&RT;(6)&Es; ->(7)Video&LN;&HkS;die Farbsignalart und das Seitenverhältnis des Videosignal einstellen.&LN2;&OUsel;Colorformat :&LR;&X;zwischen CVBS(Composite), SVideo(Y/C) und RGB(Component) wählen\n\nAspect Ratio:&LR;&X;zwischen 4:3 Panscan, 4:3 Letterbox und 16:9 wählen\n\n&Gsave;&X;Video-&Es; &sLa;&Fos;"/>
+ <helptext id="87" text="(87)\tAudio-&Es;\n\n&RT;(6)&Es; ->(8)Audio&LN;&HkS;DolbyDigital als Audiosignal einstellen&LN2;&OUsel;AC3 default output:[OK]&X;DolbyDigital als Standardaudiosignal &EA;\n\n&Gsave;&X;Audio-&Es; &sLa;&Fos;"/>
+ <helptext id="88" text="(88)\tSkinauswahl\n\n&RT;(6)&Es; ->(9)Skin&LN;ENIGMA bietet Ihnen verschiedene Designs zur Auswahl an.\n\nDarüber hinaus sind auch Skins von Drittanbietern erhältlich.\n\nWenn Sie neue Skins laden wollen, können sie diese als '*.esml' und '*.info' Datei unter '/var/tuxbox/config/enigma/skins' installieren.&LN2;&OUsel;Skins:&OU;,[OK]&X;zwischen verschiedenen GUI-Designs wählen\n\n&Gsave;&X;Skin-Wahl &sLa;&Fos;" />
+ <helptext id="89" text="(89)\tIhre Sprache\n\n&RT;(6)&Es; ->Sprache&LN;Choose your language\nVotre language\nselezionare lingua\nSu idioma\nUw taal\nLisan secimini yapin\nVelk sprag\nidioma&LN2;&OU;&X;Sprache wählen\n\n[OK]&X;Sprach-Wahl speichern\n\n&Fos;" />
+
+ <helptext id="90" text="(90)\tTime Zone Setup\n\n&RT;(6)&Es; ->Time Zone&LN;&HkS;Ihre Zeitzone, sowie die automatische Sommer-/Winterzeitumstellung einstellen&LN2;&OUsel;Time Zone:&OU;,[OK]&X;Zeitzone wählen\n\nuse automatically daylight saving time:[OK]&X;automatische Sommer-/Winterzeiteinstellung &EA;\n\n&Gsave;&X;Zeitzonen-Wahl &sLa;&Fos;" />
+ <helptext id="91" text="(91)\tNgrab Server\n\n&RT;(6)&Es; ->Ngrab&LN;Wenn Sie mit Ngrab Sendungen auf dem Rechner aufzeichnen müssen Sie hier die entsprechenden Netzwerkdaten eintragen.&LN2;&OUsel;Srv IP:&Z;&X;IP-Adresse des Computers(dbox-IP im selben Bereich wie PC-Netzwerkkarte)\n\nSrv Port:&Z;&X;Netzwerkport den nGrab verwendet(meist 4000)\n\n&Gsave;&X;Ngrab-&Es; &sLa;[ROT]/&Fos;" />
+ <helptext id="92" text="(92)\tExtra &Es;\n\n&RT;(6)&Es; ->Extra &Es;&LN;&HkS;&Es; über Fehlermeldungen und Eingabebestätigungen von ENIGMA vornehmen&LN2;&OUsel;Skip Confirmations:[OK]&X;Bestätigungsabfragen anzeigen/unterdrücken\n\nAdvanced zap mode:[OK]&X;Bouquetgrenzen beim Zappen überspringen/einhalten\n\nHide error windows:[OK]&X; Fehlerhinweise unterdrücken/anzeigen\n\n&Gsave;&X;Extra-&Es; &sLa;&Fos;" />
+ <helptext id="93" text="(93)\tParental Setup\n\n&RT;(6)&Es; ->(6)&Es; ->Parental settings&LN;&HkS;Ihre &Es; oder Sender mit Passwort vor unbefugtem Zugriff zu schützen.\n\nGeschützte Sender bleiben nach einem Neustart unsichtbar, Sie können die Sperre mit dem PIN aber auch zeitweise aufheben.&LN2;&OUsel;Parental lock:[OK] &X;Zugangsbeschränkung für TV-Programm &EA;\n\nSetup lock:[OK]&X;Zugangsbeschränkung für Setup-&Es; &EA;\n\nchange PIN:[OK]&X;neuen PIN eingeben\n\n&Gsave;&X;Parental-&Es; &sLa;&Fos;" />
+ <helptext id="94" text="(94)\tSoftware Update\n\n&RT;(6)&Es; ->Update&LN;ENIGMA wird ständig verbessert und weiter entwickelt.\n\n&HkS;eine neue Version von ENIGMA installieren, die Sie per FTP ins Verzeichnis '/var/tmp/' geladen haben&LN2;Version:&OU;,[OK]&X;zwischen verschiedenen Software-Versionen wählen\n\n[OK]&X;Update starten\n\n&Fos;" />
+ <helptext id="95" text="(95)\tCalibration Pictures\n\n&RT;(6)&Es; ->Video Kalibration&LN;Testtafeln mit denen Sie Ihr TV-Gerät abstimmen können.\n\nNicht für den kommerziellen Gebrauch geeignet!&LN2;[OK]&X;Warnhinweis bestätigen\n\n&Z;&X;Testtafeln aufrufen\n\n[1]&X;Rot\n\n[2]&X;Grün\n\n[3]&X;Blau\n\n[4]&X;Colorbars\n\n[5]&X;Weiss\n\n[6]&X;Testbild\n\n[7]&X;Grautafel\n\n[8]&X;Schwarz\n\n&Fs;" />
+ <helptext id="96" text="(96)\tPlugin-Offset\n\n&RT;(6)&Es; ->(4)OSD ->Plugin Offset&LN;&HkS;horizontale und vertikale Verschiebungen einstellen, denn TV-Geräte zeigen unterschiedliche Bildausschnitte, um trotzdem Plugins und Spiele vollständig zu sehen.&LN2;[ROT]&X;Bildrandmarkierung links oben\n\n[GRÜN]&X;Bildrandmarkierung rechts unten\n\n&LR;/&OU;&X;gewählte Markierung verschieben\n\n[OK]&X;Plugin-Offset speichern\n\n&Fos;" />
+ <helptext id="97" text="(97)\tTimerliste\n\n&RT;(9)Timer&LN;&HkS;Umschalt- und Aufnahme-Timer einstellen&LN2;&OUsel;Timerliste:&OU;,[OK]&X;zwischen verschiedenen Timer-Einträgen wählen\n\n(GRÜN)neu:[OK]&X;neuen Timer-Eintrag erstellen\n\n(ROT)/entfernen:[OK]&X;gewählten Timer löschen\n\n&Fos;" />
+ <helptext id="98" text="(98)\tTimer Edit\n\n&RT;(9)Timer&LN;&HkS;regelmässig wiederkehrende Umschalt- und Aufnahme-Timer einstellen&LN2;Repeated Timer:[OK]&Es; für regelmässige Timer\n\nAnfangs- ,Endzeit:[OK],&OU;/&Z;&X;Jahr, Monat, Tag, Anfangs-, Endzeit des Timers\n\nTimerart:[OK],&OU;&X;zwischen Umschaltung, nGrab-, DVR-Aufnahme wählen\n\nProgrammauswahl:[OK]Service Selector öffnen:&OU;,[OK]\n\n(GELB)apply&X;Änderungen im gewählten Timer übernehmen\n\n(BLAU)Scan EPG:[OK]&X;EPG-Eintrag des gewählten Senders und der gewählten Anfangszeit als Timerbeschreibung übernehmen\n\nTimer Edit - Repeated Timer\n\nWochentag[OK]&X;wiederkehrender Wochentag &EA;\n\n&Fos;" />
+
+ <helptext id="100" text="(100)\tHilfe Übersicht\n\n&RT;[?] ->[?]&LN;Für die Richtigkeit der Hilfe kann keine Gewähr übernommen werden.\n\nDie Hilfe befindet sich permanent in der Weiterentwicklung. Kommentare, Anmerkungen und Ergänzungen, Fehlerberichtigungen sind herzlich willkommen. Weitere Informationen finden Sie unter http://its.no-enigma.de/de&LN;Legende:\n\nLinks von '*' stehen die Bedienmöglichkeiten, rechts davon die Erläuterungen\n\n'[Buttonname]'&X;bezeichnet die entsprechende Taste auf der &FB;\n\n'Menütext':[Buttonname]&X;bezeichnet die bei einem Menüpunkt mögliche Tastatur-Eingabe\n\n'[Buttonname]/[Buttonname]'&X;bezeichnet alternative Tastatur-Eingaben'\n\n'[Buttonname],[Buttonname]'&X;bezeichnet aufeinander folgende Tastatur-Eingaben'\n\n'(Farbe/Ziffer)Menütext'&X;bezeichnet den Shortcut für den nachstehenden Menüpunkt'\n\nUm ein anderes Hilfethema zu wählen:\n\n&OU;,[OK]&X;Hilfethema wählen\n\n&Fs;" />
+<!-- helpIDs bis hier nochmal vergleichen -->
+</help>
+</enigmahelp>

@@ -13,41 +13,43 @@
 #include <lib/system/init_num.h>
 
 eWidget *eWidget::root;
+Signal2< void, ePtrList<eAction>*, int >eWidget::showHelp;
+eWidget::actionMapList eWidget::globalActions;
 
-eWidget::eWidget(eWidget *_parent, int takefocus):
-	parent(_parent ? _parent : root),
+eWidget::eWidget(eWidget *_parent, int takefocus)
+	:helpID(0), parent(_parent ? _parent : root),
 	shortcut(0), shortcutFocusWidget(0),
-	focus(0), takefocus(takefocus),
+	focus(0), TLW(0), takefocus(takefocus),
+	state( parent && !(parent->state&stateVisible) ? stateShow : 0 ),
+	target(0), in_loop(0), have_focus(0), just_showing(0),
 	font( parent ? parent->font : eSkin::getActive()->queryFont("global.normal") ),
 	backgroundColor(_parent?gColor(-1):gColor(eSkin::getActive()->queryScheme("global.normal.background"))),
-	foregroundColor(_parent?parent->foregroundColor:gColor(eSkin::getActive()->queryScheme("global.normal.foreground")))
+	foregroundColor(_parent?parent->foregroundColor:gColor(eSkin::getActive()->queryScheme("global.normal.foreground"))),
+	pixmap(0)
+#ifndef DISABLE_LCD
+	,LCDTitle(0)
+	,LCDElement(0)
+	,LCDTmp(0)
+#endif
 {
-	LCDTitle=0;
-	LCDElement=0;
-	LCDTmp=0;
-	target=0;
-	in_loop=0;
-	if (parent && !(parent->state&stateVisible))
-		state=stateShow;
-	else
-		state=0;
-
- 	have_focus=0;
- 	pixmap=0;
 	if (takefocus)
 		getTLW()->focusList()->push_back(this);
 
 	if (parent)
 		parent->childlist.push_back(this);
-		
-	just_showing=0;
+
+	addActionMap(&i_cursorActions->map);
 }
 
 eWidget::~eWidget()
 {
 	hide();
 	if (takefocus)
+	{
 		getTLW()->focusList()->remove(this);
+		if (getTLW()->focus == this)
+			eFatal("focus still held.");
+	}
 		
 	if (shortcut)
 		getTLW()->actionListener.remove(this);
@@ -77,7 +79,7 @@ void eWidget::takeFocus()
 		} */
 		addActionMap(&i_focusActions->map);
 	}
-	have_focus++;
+	++have_focus;
 }
 
 void eWidget::releaseFocus()
@@ -90,7 +92,7 @@ void eWidget::releaseFocus()
 
 	if (have_focus)
 	{
-	 	have_focus--;
+	 	--have_focus;
 		if (!have_focus)
 		{
 			removeActionMap(&i_focusActions->map);
@@ -145,11 +147,19 @@ void eWidget::resize(const eSize& nsize)
 	recalcClip();
 }
 
+void eWidget::recalcAbsolutePosition()
+{
+	absPosition = (parent?(parent->getAbsolutePosition()+parent->clientrect.topLeft()+position):position);
+	for (ePtrList<eWidget>::iterator it( childlist ); it != childlist.end(); ++it )
+		it->recalcAbsolutePosition();
+}
+
 void eWidget::move(const ePoint& nposition)
 {
 	position=nposition;
-	event(eWidgetEvent(eWidgetEvent::changedPosition));
 	recalcClip();
+	recalcAbsolutePosition();
+	event(eWidgetEvent(eWidgetEvent::changedPosition));
 }
 
 void eWidget::cresize(const eSize& nsize)
@@ -195,7 +205,7 @@ void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 					cr.moveBy(-It->position.x(), -It->position.y());
 					It->redraw(cr);
 				}
-				It++;
+				++It;
 			}
 		}
 	}
@@ -257,8 +267,7 @@ int eWidget::exec()
 
 	in_loop=-1;	// hey, exec hat angefangen aber noch nicht in der mainloop
 
-	event(eWidgetEvent(eWidgetEvent::execBegin));	// hat jemand was dagegen einzuwenden?
-
+	event(eWidgetEvent(eWidgetEvent::execBegin)); // hat jemand was dagegen einzuwenden?
 	if (in_loop)	// hatte wohl jemand.
 	{
 		in_loop=1;		// wir betreten die mainloop
@@ -266,7 +275,6 @@ int eWidget::exec()
 		in_loop=0; // nu sind wir jedenfalls draussen.
 	}
 	event(eWidgetEvent(eWidgetEvent::execDone));
-	
 	return result;
 }
 
@@ -287,7 +295,10 @@ void eWidget::close(int res)
 	if (in_loop==0)
 		eFatal("attempt to close non-execing widget");
 	if (in_loop==1)	// nur wenn das ne echte loop ist
+	{
+		in_loop=-1;
 		eApp->exit_loop();
+	}
 	result=res;
 }
 
@@ -302,11 +313,11 @@ void eWidget::show()
 	
 	if (!parent || (parent->state&stateVisible))
 	{
-		getTLW()->just_showing++;
+		++getTLW()->just_showing;
 		willShowChildren();
 
 		checkFocus();
-		getTLW()->just_showing--;
+		--getTLW()->just_showing;
 		redraw();
 	}
 }
@@ -333,7 +344,7 @@ void eWidget::willShowChildren()
 		while(It != childlist.end())
 		{
 			It->willShowChildren();
-			It++;
+			++It;
 		}
 	}
 }
@@ -346,11 +357,10 @@ void eWidget::hide()
 	if (state&stateVisible)
 	{
 		willHideChildren();
-
 		clear();	// hide -> immer erasen. dieses Hide ist IMMER explizit.
-		checkFocus();
 	}
 	state&=~stateShow; 
+	checkFocus();
 }
 
 void eWidget::willHideChildren()
@@ -364,7 +374,7 @@ void eWidget::willHideChildren()
 		while(It != childlist.end())
 		{
 			It->willHideChildren();
-			It++;
+			++It;
 		}
 	}
 }
@@ -373,8 +383,9 @@ void eWidget::findAction(eActionPrioritySet &prio, const eRCKey &key, eWidget *c
 {
 	for (actionMapList::iterator i = actionmaps.begin(); i != actionmaps.end(); ++i)
 	{
-		(*i)->findAction(prio, key, context, eActionMapList::getInstance()->getCurrentStyle());
-		(*i)->findAction(prio, key, context, "");
+		const std::set<eString> &styles=eActionMapList::getInstance()->getCurrentStyles();
+		for (std::set<eString>::const_iterator si(styles.begin()); si != styles.end(); ++si)
+			(*i)->findAction(prio, key, context, *si);
 	}
 
 	for(ePtrList<eWidget>::iterator w(actionListener.begin()); w != actionListener.end(); ++w)
@@ -387,6 +398,21 @@ void eWidget::findAction(eActionPrioritySet &prio, const eRCKey &key, eWidget *c
 int eWidget::eventFilter(const eWidgetEvent &event)
 {
 	return 0;
+}
+
+void eWidget::addActionToHelpList(eAction *action)
+{
+	actionHelpList.push_back( action );
+}
+
+void eWidget::clearHelpList()
+{
+ actionHelpList.clear();
+}
+
+void eWidget::setHelpID(int fHelpID)
+{
+	helpID=fHelpID;
 }
 
 int eWidget::eventHandler(const eWidgetEvent &evt)
@@ -408,7 +434,15 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 			focusNext(focusDirPrev);
 		else if (evt.action == &i_focusActions->right)
 			focusNext(focusDirNext);
-		else
+		else if (evt.action == &i_cursorActions->help)
+		{
+			int wasvisible=state&stateShow;
+			if (wasvisible)
+				hide();
+			/* emit */ showHelp( &actionHelpList, helpID );
+			if (wasvisible)
+				show();
+		} else
 			return 0;
 		return 1;
 	case eWidgetEvent::evtKey:
@@ -420,7 +454,12 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 		if (focus && (focus != this))
 			focus->findAction(prio, *evt.key, focus);
 
-		// and look at global ones. NOT YET.
+		for (actionMapList::iterator i = globalActions.begin(); i != globalActions.end(); ++i)
+		{
+			const std::set<eString> &styles=eActionMapList::getInstance()->getCurrentStyles();
+			for (std::set<eString>::const_iterator si(styles.begin()); si != styles.end(); ++si)
+				(*i)->findAction(prio, *evt.key, 0, *si);
+		}
 		
 		for (eActionPrioritySet::iterator i(prio.begin()); i != prio.end(); ++i)
 		{
@@ -430,7 +469,7 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 					break;
 			} else
 			{
-				(const_cast<eAction*>(evt.action))->handler();	// only useful for global actions
+				(const_cast<eAction*>(i->second))->handler();	// only useful for global actions
 				break;
 			}
 		}
@@ -464,7 +503,7 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 		invalidate();
 		break;
 	case eWidgetEvent::evtShortcut:
-		setFocus(this);
+			setFocus(this);
 		break;
 	default:
 		break;
@@ -534,13 +573,23 @@ void eWidget::removeActionMap(eActionMap *map)
 	actionmaps.remove(map);
 }
 
+void eWidget::addGlobalActionMap(eActionMap *map)
+{
+	globalActions.push_back(map);
+}
+
+void eWidget::removeGlobalActionMap(eActionMap *map)
+{
+	globalActions.remove(map);
+}
+
 void eWidget::redrawWidget(gPainter *target, const eRect &clip)
 {
 }
 
 void eWidget::eraseBackground(gPainter *target, const eRect &clip)
 {
-	if (((int)getBackgroundColor())!=-1)
+	if (((int)getBackgroundColor()) >= 0)
 		target->clear();
 }
 
@@ -571,14 +620,14 @@ void eWidget::focusNext(int dir)
 				if (!_focusList.current())
 				{
 					_focusList.first();
-					tries--;
+					--tries;
 				}
 			} else if (dir == focusDirPrev)
 			{
 				if (_focusList.current() == _focusList.begin())
 				{
 					_focusList.last();
-					tries--;
+					--tries;
 				} else
 					_focusList.prev();
 			}
@@ -711,10 +760,7 @@ void eWidget::setFocus(eWidget *newfocus)
 		return getTLW()->setFocus(newfocus);
 
 	if (focus == newfocus)
-	{
-		/* emit */ focusChanged(focus);
 		return;
-	}
 
 	if (focus)
 		focus->event(eWidgetEvent(eWidgetEvent::lostFocus));
@@ -742,14 +788,12 @@ void eWidget::setFont(const gFont &fnt)
 	event(eWidgetEvent(eWidgetEvent::changedFont));
 }
 
-void eWidget::setText(const eString &label, bool inv)
+void eWidget::setText(const eString &label)
 {
 	if (label != text)	// ein compare ist immer weniger arbeit als ein unnoetiges redraw
 	{
 		text=label;
 		event(eWidgetEvent(eWidgetEvent::changedText));
-		if (inv)
-			invalidate();
 	}
 }
 
@@ -789,11 +833,13 @@ void eWidget::setTarget(gDC *newtarget)
 	target=newtarget;
 }
 
+#ifndef DISABLE_LCD
 void eWidget::setLCD(eWidget *_lcdtitle, eWidget *_lcdelement)
 {
 	LCDTitle=_lcdtitle;
 	LCDElement=_lcdelement;
 }
+#endif
 
 void eWidget::setName(const char *_name)
 {
@@ -834,7 +880,7 @@ static int parse(const char* p, int *v, int *e, int max)
 
 		if (*p=='e')
 		{
-			p++;
+			++p;
 			ea=1;
 		}
 
@@ -846,12 +892,12 @@ static int parse(const char* p, int *v, int *e, int max)
 			 return -3;
 
 		if (*p==':')
-			p++;
+			++p;
 
 		if (ea)
 			v[i]+=e[i];
 
-		i++;
+		++i;
 	}
 
 	if (*p)
@@ -998,7 +1044,7 @@ eWidget *eWidget::search(const eString &sname)
 			eWidget* p = (*It)->search(sname);
 			if (p)
 				return p;
-			It++;
+			++It;
 		}
 	}
 	return 0;
@@ -1098,15 +1144,15 @@ int eDecoWidget::eventFilter( const eWidgetEvent &evt )
 		{
 			crect.setLeft( deco.borderLeft );
 			crect.setTop( deco.borderTop );
-			crect.setRight( width() - deco.borderRight );
-			crect.setBottom( height() - deco.borderBottom );
+			crect.setWidth( width() - (deco.borderRight + deco.borderLeft) );
+			crect.setHeight( height() - (deco.borderBottom + deco.borderTop ) );
 		}
 		if (deco_selected)
 		{
 			crect_selected.setLeft( deco_selected.borderLeft );
 			crect_selected.setTop( deco_selected.borderTop );
-			crect_selected.setRight( width() - deco.borderRight );
-			crect_selected.setBottom( height() - deco.borderBottom );
+			crect_selected.setWidth( width() - (deco_selected.borderRight + deco_selected.borderLeft) );
+			crect_selected.setHeight( height() - (deco_selected.borderBottom + deco_selected.borderTop ) );
 		}
 	}
 	return 0; //always return 0... the eventHandler must been called...

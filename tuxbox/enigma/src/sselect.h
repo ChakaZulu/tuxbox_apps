@@ -5,9 +5,8 @@
 #include <lib/gui/listbox.h>
 #include <lib/gui/statusbar.h>
 #include <lib/dvb/epgcache.h>
-#include <src/channelinfo.h>
+#include <channelinfo.h>
 
-#include <stack>
 #include <lib/dvb/service.h>
 
 class eService;
@@ -25,11 +24,12 @@ class eListBoxEntryService: public eListBoxEntry
 	eString sort;
 	static gFont serviceFont, descrFont, numberFont;
 	static int maxNumSize;
-	static gPixmap *folder;
+	static gPixmap *folder, *marker, *locked;
 	eTextPara *numPara, *namePara, *descrPara;
 	int nameXOffs, descrXOffs, numYOffs, nameYOffs, descrYOffs;
 	int flags;
 	int num;
+	int curEventId;
 public:
 	static eListBoxEntryService *selectedToMove;
 	static std::set<eServiceReference> hilitedEntrys;
@@ -42,19 +42,19 @@ public:
 	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num=-1);
 	~eListBoxEntryService();
 
-	bool operator<(const eListBoxEntryService &r) const
+	bool operator<(const eListBoxEntry &r) const
 	{
 		if (flags & flagIsReturn)
 			return 1;
-		else if (r.flags & flagIsReturn)
+		else if (((eListBoxEntryService&)r).flags & flagIsReturn)
 			return 0;
-		else if (service.getSortKey() == r.service.getSortKey())
-			return sort < r.sort;
-		else
-			return service.getSortKey() > r.service.getSortKey();		// sort andersrum
+		else if (service.getSortKey() == ((eListBoxEntryService&)r).service.getSortKey())
+			return sort < ((eListBoxEntryService&)r).sort;
+		else // sort andersrum
+			return service.getSortKey() > ((eListBoxEntryService&)r).service.getSortKey();
 	}
 protected:
-	eString redraw(gPainter *rc, const eRect &rect, gColor, gColor, gColor, gColor, int hilited);
+	const eString &redraw(gPainter *rc, const eRect &rect, gColor, gColor, gColor, gColor, int hilited);
 };
 
 class eServiceSelector: public eWindow
@@ -63,13 +63,16 @@ class eServiceSelector: public eWindow
 	eServiceReference *result;
 	eListBox<eListBoxEntryService> *services, *bouquets;
 
+	eLabel *key[4];
+	const eWidget *rfocus;
+
 	eChannelInfo* ci;
 
 	eServicePath path;
 
 	void addService(const eServiceReference &service);
 	void addBouquet(const eServiceReference &service);
-	int style;
+	int style, lastSelectedStyle;
 	int serviceentryflags;
 
 	char BrowseChar;
@@ -91,25 +94,32 @@ private:
 	void gotoChar(char c);
 	void EPGUpdated( const tmpMap* );
 	void updateCi();
+	void doSPFlags(const eServiceReference &ref);
 public:
+	void setKeyDescriptions(bool editMode=false);
+	void forEachServiceRef( Signal1<void,const eServiceReference&>, bool );
 	int movemode;
 	int editMode;
+	int plockmode;
 	enum { styleInvalid, styleCombiColumn, styleSingleColumn, styleMultiColumn };
-	enum { dirNo, dirUp, dirDown };
+	enum { dirNo, dirUp, dirDown, dirFirst, dirLast };
 
 	eServiceSelector();
 	~eServiceSelector();
 
-	Signal0<void> rotateRoot;
+	enum { listAll, listSatellites, listProvider, listBouquets };
+	Signal1<eServicePath,int> getRoot;
 
 	Signal1<void,const eServiceReference &> addServiceToPlaylist; // add service to the Playlist
-	Signal2<void,eServiceSelector*,int> addServiceToUserBouquet;  // add current service to selected User Bouquet
+	Signal2<void,eServiceReference*,int> addServiceToUserBouquet;  // add current service to selected User Bouquet
 
 	Signal1<void,int> setMode;        // set TV, Radio or File
 
 	Signal1<void,eServiceSelector*>	removeServiceFromUserBouquet, // remove service from selected User Bouquet
 																	showMenu, // shows the contextmenu
-																	toggleStyle; // switch service selector style
+																	toggleStyle, // switch service selector style
+																	renameService, renameBouquet,
+																	deletePressed, newMarkerPressed;
 
 	Signal3<void,
 		const eServiceReference &, 		// path
@@ -117,14 +127,16 @@ public:
 		const eServiceReference &			// service AFTER moved service
 		> moveEntry;
 
-	const eServicePath &getPath()	{	return path; }
+	Signal1<void,eServiceReferenceDVB>showEPGList;
+
+	const eServicePath &getPath() { return path; }
 	void setPath(const eServicePath &path, const eServiceReference &select=eServiceReference());
 
 	int getStyle()	{ return style; }
-	void setStyle(int newStyle=-1);
+	void setStyle(int newStyle=-1, bool force=false);
 	void actualize();
 	bool selectService(const eServiceReference &ref);
-	bool selectService(int num);	
+	bool selectService(int num);
 	bool selectServiceRecursive( eServiceReference &ref );
 	bool selServiceRec( eServiceReference &ref );
 	int getServiceNum( const eServiceReference &ref);
@@ -133,6 +145,10 @@ public:
 	const eServiceReference *choose(int irc=-1);
 	const eServiceReference *next();
 	const eServiceReference *prev();
+	void removeCurrent(bool=false);
+	void invalidateCurrent(eServiceReference ref=eServiceReference());
+	void updateNumbers();
+	void showMultiEPG();
 
 	int toggleMoveMode();  // enable / disable move entry Mode ( only in userBouquets )
 	int toggleEditMode();  // enable / disable edit UserBouquet Mode

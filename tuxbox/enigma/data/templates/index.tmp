@@ -144,19 +144,19 @@
 			<!--menubar-->
 			<script language="javascript">
 			if('#MODE#'.indexOf("ZAP")>-1) {
-			 document.write("<a href=\"?path=;1:15:fffffffe:ffffffff:0:0:\">all services</a><br><a href=\"?path=;1:15:fffffffe:12:0:0:\">TV services</a><br><a href=\"?path=;1:15:fffffffe:4:0:0:\">Radio services</a><br><a href=\"?path=;1:15:ffffffff:ffffffff:0:0:\">all bouquets</a><br><a href=\"?path=;1:15:ffffffff:12:0:0:\">TV bouquets</a><br><a href=\"?path=;1:15:ffffffff:4:0:0:\">Radio bouquets</a><br><a href=\"?path=;2:47:0:0:0:0:%2f\">Root</a><br><a href=\"?path=;2:47:0:0:0:0:%2fhdd%2f\">Harddisk</a>");
+				document.write("<a href=\"?path=;0:7:1:0:0:0:0:0:0:0:\">TV</a><br><a href=\"?path=;0:7:2:0:0:0:0:0:0:0:\">Radio</a><br><a href=\"?path=;0:7:6:0:0:0:0:0:0:0:\">Data</a><br><a href=\"?path=;2:47:0:0:0:0:%2f\">Root</a><br><a href=\"?path=;2:47:0:0:0:0:%2fhdd%2f\">Harddisk</a><br><a href=\"?path=;4097:7:0:1:0:0:0:0:0:0:\">Recordings</a><br>");
 			}
 			if('#MODE#'.indexOf("MENU")>-1) {
-			 document.write("TV mode<br>Radio mode<br>File mode<br>Info<br>Shutdown<br>Setup<br>Games<br>VCR<br>Timer");
+				document.write("TV mode<br>Radio mode<br>File mode<br>Info<br>Shutdown<br>Setup<br>Games<br>VCR<br>Timer");
 			}
 			if('#MODE#'.indexOf("LINKS")>-1) {
-			 document.write("Official sites<br>Other sites<br>Forums");
+				document.write("Official sites<br>Other sites<br>Forums");
 			}
 			if('#MODE#'.indexOf("UPDATES")>-1) {
-			 document.write("");
+				document.write("");
 			}
 			if('#MODE#'.indexOf("ABOUT")>-1) {
-			 document.write("About Dreambox<br>Dream Multimedia");
+				document.write("About Dreambox<br>Dream Multimedia");
 			}
 			</script>
 			</td>

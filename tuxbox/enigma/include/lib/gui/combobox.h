@@ -17,8 +17,8 @@ class eComboBox: public eButton
 	int eventHandler( const eWidgetEvent& );
 	eString oldHelpText;
 	int setProperty( const eString&, const eString& );
-	void redrawWidget(gPainter *target, const eRect &rc);
 public:
+	~eComboBox();
 	void setOpenWidth( int w ) { listbox.resize( eSize(w, listbox.getSize().height()) ); }
 	enum	{		OK = 0,		ERROR=1,		E_ALLREADY_SELECTED = 2,		E_COULDNT_FIND = 4,		E_INVALID_ENTRY = 8	};
 	Signal1< void, eListBoxEntryText* > selchanged;	
@@ -29,11 +29,11 @@ public:
 	void removeEntry( int );
 	void removeEntry( void* );
 	void sort() { listbox.sort(); }
-	int setCurrent( eListBoxEntryText* );
-	int setCurrent( int );
-	int setCurrent( void* );
+	int setCurrent( const eListBoxEntryText*, bool=false );
+	int setCurrent( int, bool=false );
+	int setCurrent( void*, bool=false );
 	int getCount() { return listbox.getCount(); }
-	int moveSelection ( int dir );
+	int moveSelection ( int dir, bool=false );
 	void clear() { listbox.clearList(); }
 	eListBoxEntryText* getCurrent();
 	operator eListBox<eListBoxEntryText>*()	{	return &listbox; }

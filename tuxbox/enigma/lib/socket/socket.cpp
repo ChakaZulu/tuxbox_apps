@@ -36,6 +36,13 @@ void eSocket::disableRead()
 		rsn->setRequested(rsn->getRequested()&~eSocketNotifier::Read);
 }
 
+void eSocket::inject(const char *data, int len)
+{
+	readbuffer.write(data, len);
+	if (mystate == Connection)
+		readyRead_();
+}
+
 eString eSocket::readLine()
 {
 	int size=readbuffer.searchchr('\n');
@@ -78,6 +85,7 @@ int eSocket::setSocket(int s, int iss, eMainloop *ml)
 	socketdesc=s;
 	issocket=iss;
 	fcntl(socketdesc, F_SETFL, O_NONBLOCK);
+	last_break = 0xFFFFFFFF;
 
 	if (rsn)
 		delete rsn;
@@ -91,19 +99,50 @@ void eSocket::notifier(int what)
 {
 	if ((what & eSocketNotifier::Read) && (mystate == Connection))
 	{
-		int bytesavail;
-		if (ioctl(getDescriptor(), FIONREAD, &bytesavail)<0)
-			eDebug("FIONREAD failed.\n");
-		else
+		int bytesavail=256;
+		if (issocket)
+			if (ioctl(getDescriptor(), FIONREAD, &bytesavail)<0)
+				eDebug("FIONREAD failed.\n");
+
 		{
-			if (!bytesavail)  // does the REMOTE END has closed the connection? (no Hungup here!)
+			if (issocket)
 			{
-				writebuffer.clear();
-				close();
-				return;
+				if (!bytesavail)  // does the REMOTE END has closed the connection? (no Hungup here!)
+				{
+					writebuffer.clear();
+					close();
+					return;
+				}
+			} else		// when operating on terminals, check for break
+			{
+					// where is this struct defined?
+				struct async_icount {
+					unsigned long cts, dsr, rng, dcd, tx, rx;
+					unsigned long frame, parity, overrun, brk;
+					unsigned long buf_overrun;
+				} icount;
+
+				if (!ioctl(getDescriptor(), TIOCGICOUNT, &icount))
+				{
+					if (last_break == 0xFFFFFFFF)
+						last_break = icount.brk;
+					else if (last_break != icount.brk)
+					{
+						last_break = icount.brk;
+						readbuffer.fromfile(getDescriptor(), bytesavail);
+						readbuffer.clear();
+						writebuffer.clear();
+						rsn->setRequested(rsn->getRequested()&~eSocketNotifier::Write);
+						write(getDescriptor(), "BREAK!", 6);
+						hangup();
+						return;
+					}
+				}
 			}
-			if (readbuffer.fromfile(getDescriptor(), bytesavail) != bytesavail)
-				eDebug("fromfile failed!");
+			int r;
+			if ((r=readbuffer.fromfile(getDescriptor(), bytesavail)) != bytesavail)
+				if (issocket)
+					eDebug("fromfile failed!");
 			readyRead_();
 		}
 	} else if (what & eSocketNotifier::Write)
@@ -188,7 +227,7 @@ int eSocket::getDescriptor()
 
 int eSocket::connectToHost(eString hostname, int port)
 {
-	struct hostent		*server;
+	struct hostent *server;
 	int res;
 
 	if(!socketdesc){

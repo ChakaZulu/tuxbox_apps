@@ -8,26 +8,25 @@ class eString;
 class eSystemInfo
 {
 	static eSystemInfo *instance;
+	int hashdd, hasci, hasrfmod, haslcd, hasnetwork,
+	canmeasurelnbcurrent, hwtype, fetype;
+	std::set<int> caids;
+	eString getInfo(const char *info);
 public:
 	static eSystemInfo *getInstance() { return instance; }
 	eSystemInfo();
+	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM5600, Unknown };
+	enum { feSatellite, feCable, feTerrestrial };
 
-	int hasHDD();
-	int hasCI();
-	int hasRFMod();
-	int hasLCD();
-	int hasNetwork();
-	int canMeasureLNBCurrent();
-	
-	std::set<int> getCAIDs();
-	
-	eString getVendorString();
-	eString getMachineString();
-	eString getProcessorString();
-	
-	int isRelease();
-	enum { avsNokia, avsSagem, avsPhilips, avsDM7000, avsDM5600 };
-	int getAVS();
+	int hasHDD() { return hashdd; }
+	int hasCI() { return hasci; }
+	int hasRFMod() { return hasrfmod; }
+	int hasLCD() { return haslcd; }
+	int hasNetwork() { return hasnetwork; }
+	int canMeasureLNBCurrent() { return canmeasurelnbcurrent; }
+	int getHwType() { return hwtype; }
+	int getFEType() { return fetype; }
+	const std::set<int> &getCAIDs() { return caids; }
 };
 
 #endif

@@ -3,6 +3,21 @@
 
 #include <pthread.h>
 
+class singleLock
+{
+	pthread_mutex_t &lock;
+public:
+	singleLock( pthread_mutex_t &m )
+		:lock(m)
+	{
+		pthread_mutex_lock(&lock);
+	}
+	~singleLock()
+	{
+		pthread_mutex_unlock(&lock);
+	}
+};
+
 class eLock
 {
 	pthread_mutex_t mutex;

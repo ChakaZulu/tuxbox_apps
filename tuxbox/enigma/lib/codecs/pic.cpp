@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #include <lib/codecs/pic.h>
 #include <lib/gdi/gpixmap.h>
 
@@ -18,3 +20,5 @@ gImage *ePictureDecoder::fetchResult()
 	result=0;
 	return r;
 }
+
+#endif //DISABLE_FILE

@@ -1,7 +1,12 @@
 #include <lib/dvb/service.h>
+
+#include <lib/base/i18n.h>
 #include <lib/dvb/dvb.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
+#include <lib/system/econfig.h>
+
+int eServiceHandler::flags=0;
 
 eServiceHandler::eServiceHandler(int id): id(id)
 {
@@ -13,16 +18,19 @@ eServiceHandler::~eServiceHandler()
 
 eService *eServiceHandler::createService(const eServiceReference &node)
 {
+	(void)node;
 	return 0;
 }
 
 int eServiceHandler::play(const eServiceReference &service)
 {
+	(void)service;
 	return -1;
 }
 
 int eServiceHandler::serviceCommand(const eServiceCommand &cmd)
 {
+	(void)cmd;
 	return -1;
 }
 
@@ -48,7 +56,7 @@ EIT *eServiceHandler::getEIT()
 
 int eServiceHandler::getFlags()
 {
-	return 0;
+	return flags;
 }
 
 int eServiceHandler::getState()
@@ -78,25 +86,31 @@ int eServiceHandler::getPosition(int)
 
 void eServiceHandler::enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback)
 {
+	(void)dir;
+	(void)callback;
 	return;
 }
 
 void eServiceHandler::leaveDirectory(const eServiceReference &dir)
 {
+	(void)dir;
 	return;
 }
 
 eService *eServiceHandler::addRef(const eServiceReference &service)
 {
+	(void)service;
 	return 0;
 }
 
 void eServiceHandler::removeRef(const eServiceReference &service)
 {
+	(void)service;
 }
 
 eString eServiceHandler::getInfo(int id)
 {
+	(void)id;
 	return "";
 }
 
@@ -170,11 +184,19 @@ eServiceHandler *eServiceInterface::getServiceHandler(int id)
 	return i->second;
 }
 
+extern bool checkPin( int pin, const char * text );
+
 int eServiceInterface::play(const eServiceReference &s)
 {
+	int pLockActive = eConfig::getInstance()->pLockActive();
+	if ( s.isLocked() && pLockActive && !checkPin( eConfig::getInstance()->getParentalPin(), _("parental") ) )
+	{
+		eWarning("service is parentallocked... don't play");
+		return -1;
+	}
 	if (switchServiceHandler(s.type))
 	{
-		eWarning("couldn't play service type %d\n", s.type);
+		eWarning("couldn't play service type %d", s.type);
 		return -1;
 	}
 	service=s;
@@ -196,6 +218,12 @@ int eServiceInterface::stop()
 
 void eServiceInterface::enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback)
 {
+	int pLockActive = eConfig::getInstance()->pLockActive();
+	if ( dir.isLocked() && pLockActive && !checkPin( eConfig::getInstance()->getParentalPin(), _("parental") ) )
+	{
+		eWarning("directory is parentallocked... don't enter");
+		return;
+	}
 	for (std::map<int,eServiceHandler*>::iterator i(handlers.begin()); i != handlers.end(); ++i)
 		i->second->enterDirectory(dir, callback);
 }

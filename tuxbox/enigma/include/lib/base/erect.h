@@ -12,7 +12,16 @@ class eRect // rectangle class
 public:
 	eRect()	{ x1 = y1 = x2 = y2 = 0; }
 	eRect( const ePoint &topleft, const ePoint &bottomright );
-	eRect( const ePoint &topleft, const eSize &size );
+
+	// we use this contructor very often... do it inline...
+	eRect( const ePoint &topleft, const eSize &size )
+	{
+		x1 = topleft.x();
+		y1 = topleft.y();
+		x2 = (x1+size.width());
+		y2 = (y1+size.height());
+	}
+
 	eRect( int left, int top, int width, int height );
 
 	bool isNull()	const;
@@ -52,7 +61,14 @@ public:
 	void moveTopRight( const ePoint &p );
 	void moveBottomLeft( const ePoint &p );
 	void moveCenter( const ePoint &p );
-	void moveBy( int dx, int dy );
+
+	void moveBy( int dx, int dy )
+	{
+		x1 += dx;
+		y1 += dy;
+		x2 += dx;
+		y2 += dy;
+	}
 
 	void setRect( int x, int y, int w, int h );
 	void setCoords( int x1, int y1, int x2, int y2 );
@@ -66,8 +82,8 @@ public:
 
 	eRect operator|(const eRect &r) const;
 	eRect operator&(const eRect &r) const;
-	eRect& operator|=(const eRect &r);
-	eRect& operator&=(const eRect &r);
+ 	eRect& operator|=(const eRect &r);
+ 	eRect& operator&=(const eRect &r);
 
 	bool contains( const ePoint &p) const;
 	bool contains( int x, int y) const;
@@ -128,7 +144,7 @@ inline bool eRect::isNull() const
 { return x2 == x1 && y2 == y1; }
 
 inline bool eRect::isEmpty() const
-{ return x1 > x2 || y1 > y2; }
+{ return x1 >= x2 || y1 >= y2; }
 
 inline bool eRect::isValid() const
 { return x1 <= x2 && y1 <= y2; }

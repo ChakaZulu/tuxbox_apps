@@ -43,6 +43,7 @@ typedef struct descr_gen_struct descr_gen_t;
 #define get_descr(x) (((descr_gen_t *) x)->descriptor_tag)
 #define get_descr_len(x) (((descr_gen_t *) x)->descriptor_length)
 
+#define DESCR_REGISTRATION 0x05
 #define DESCR_ISO639_LANGUAGE	0x0A
 
 #define DESCR_NW_NAME		0x40

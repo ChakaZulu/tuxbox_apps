@@ -1,3 +1,5 @@
+#ifndef DISABLE_NETWORK
+
 #ifndef __setupengrab_h
 #define __setupengrab_h
 
@@ -7,19 +9,23 @@
 class eNumber;
 class eButton;
 class eCheckbox;
+class eTextInputField;
 
-  class ENgrabSetup: public eWindow
+class ENgrabSetup: public eWindow
 {
 	eButton *type;
 	eNumber *inet_address, *srvport;
-	eButton *ok, *abort;
+	eButton *ok, *bServerMAC;
 	eStatusBar *statusbar;
+	eTextInputField *serverMAC;
 private:
 	void fieldSelected(int *number);
 	void okPressed();
-	void abortPressed();
+	void detectMAC();
 public:
 	ENgrabSetup();
 	~ENgrabSetup();
 };
 #endif
+
+#endif // DISABLE_NETWORK

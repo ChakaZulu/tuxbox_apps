@@ -56,9 +56,10 @@ public:
 	~eFixedMessagePump()
 	{
 		delete sn;
+		sn=0;
 	}
-	void start() { sn->start(); }
-	void stop() { sn->stop(); }
+	void start() { if (sn) sn->start(); }
+	void stop() { if (sn) sn->stop(); }
 };
 
 #endif

@@ -10,7 +10,7 @@ eConfig::eConfig()
 {
 	if (!instance)
 		instance=this;
-		
+
 	setName(CONFIGDIR "/enigma/registry");
 	int e=open();
 	if (e == NC_ERR_CORRUPT)
@@ -29,6 +29,9 @@ eConfig::eConfig()
 		if (open())
 			eFatal("still can't open configfile");
 	}
+	locked=1;
+	ppin=0;
+	getKey("/elitedvb/pins/parentallock", ppin );
 }
 
 eConfig::~eConfig()

@@ -1,3 +1,8 @@
+#include <config.h>
+#if HAVE_DVB_API_VERSION < 3
+
+#ifndef DISABLE_DREAMBOX_RC
+
 #ifndef __rcdreambox2_h
 #define __rcdreambox2_h
 
@@ -45,3 +50,7 @@ public:
 	eRCDreamboxButtonDriver();
 };
 #endif
+
+#endif // DISABLE_DREAMBOX_RC
+
+#endif // API_V3

@@ -1,8 +1,8 @@
 #ifndef __enigma_scan_h
 #define __enigma_scan_h
 
+#include <setup_window.h>
 #include <lib/gui/ewidget.h>
-#include <lib/gui/listbox.h>
 
 class eLNB;
 class eListboxEntry;
@@ -15,18 +15,17 @@ class eLNBSelector: public eListBoxWindow<eListBoxEntryText>
 		eLNBSelector();
 };
 
-class eZapScan: public eListBoxWindow<eListBoxEntryMenu>
+class eZapScan: public eSetupWindow
 {
 private:
-	void sel_close();
-	void sel_scan();
-	void sel_bouquet();
 	void sel_satconfig();
 	void sel_rotorConfig();
-	eLNB* getRotorLNB();
+	void sel_transponderEdit();
+	void sel_autoScan();
+	void sel_manualScan();
 public:
+	static eLNB* getRotorLNB(int silent);
 	eZapScan();
-	~eZapScan();
 };
 
 #endif /* __enigma_scan_h */

@@ -1,3 +1,6 @@
+#include <config.h>
+#if HAVE_DVB_API_VERSION == 3
+
 #ifndef __rcdbox_h
 #define __rcdbox_h
 
@@ -14,4 +17,6 @@ public:
 	int getKeyCompatibleCode(const eRCKey &key) const;
 };
 
-#endif
+#endif // __rcdbox_h
+
+#endif // API_V3

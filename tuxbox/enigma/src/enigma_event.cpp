@@ -1,6 +1,7 @@
 #include <enigma_event.h>
 
 #include <time.h>
+#include <timer.h>
 #include <lib/base/eerror.h>
 #include <lib/driver/rc.h>
 #include <lib/gdi/font.h>
@@ -13,9 +14,13 @@
 struct enigmaEventViewActions
 {
 	eActionMap map;
-	eAction close;
+	eAction addDVRTimerEvent, addNGRABTimerEvent, addSwitchTimerEvent, removeTimerEvent, close;
 	enigmaEventViewActions():
 		map("enigmaEventView", _("enigma event view")),
+		addDVRTimerEvent(map, "addDVRTimerEvent", _("add this event as DVR Event to timer list"), eAction::prioDialog ),
+		addNGRABTimerEvent(map, "addNGRABTimerEvent", _("add this event as NGRAB Event to timer list"), eAction::prioDialog ),
+		addSwitchTimerEvent(map, "addSwitchTimerEvent", _("add this event as simple Switch Event to timer list"), eAction::prioDialog ),
+		removeTimerEvent(map, "removeTimerEvent", _("remove this event from timer list"), eAction::prioDialog ),
 		close(map, "close", _("closes the Event View"), eAction::prioDialog)
 	{
 	}
@@ -40,9 +45,9 @@ void eEventDisplay::prevEvent()
 {
 	if (*events == eventlist->begin())
 		*events = --eventlist->end();
- 	else
+	else
 		--(*events);	
-  	
+
 	if (*events != eventlist->end())
 		setEvent(**events);
 	else
@@ -51,6 +56,7 @@ void eEventDisplay::prevEvent()
 
 int eEventDisplay::eventHandler(const eWidgetEvent &event)
 {
+	int addtype=-1;
 	switch (event.type)
 	{
 		case eWidgetEvent::evtAction:
@@ -88,8 +94,38 @@ int eEventDisplay::eventHandler(const eWidgetEvent &event)
 			}
 			else if (event.action == &i_enigmaEventViewActions->close)
 				close(0);
+#ifndef DISABLE_FILE
+			else if (event.action == &i_enigmaEventViewActions->addDVRTimerEvent)
+				addtype = ePlaylistEntry::RecTimerEntry |
+									ePlaylistEntry::recDVR|
+									ePlaylistEntry::stateWaiting;
+#endif
+#ifndef DISABLE_NETWORK
+			else if (event.action == &i_enigmaEventViewActions->addNGRABTimerEvent)
+				addtype = ePlaylistEntry::RecTimerEntry|
+									ePlaylistEntry::recNgrab|
+									ePlaylistEntry::stateWaiting;
+#endif
+			else if (event.action == &i_enigmaEventViewActions->addSwitchTimerEvent)
+				addtype = ePlaylistEntry::SwitchTimerEntry|
+									ePlaylistEntry::stateWaiting;
+			else if ( event.action == &i_enigmaEventViewActions->removeTimerEvent)
+			{
+				if ((evt || events) && eTimerManager::getInstance()->removeEventFromTimerList( this, &ref, evt?evt:*events ) )
+					timer_icon->hide();
+			}
 			else
 				break;
+			if ( valid >= 7 && addtype != -1 && (evt || events) && !eTimerManager::getInstance()->eventAlreadyInList(this, evt?*evt:*events, ref) )
+			{
+				hide();
+				eTimerEditView v( evt?*evt:*events, addtype, ref );
+				v.show();
+				v.exec();
+				v.hide();
+				checkTimerIcon(evt?evt:*events);
+				show();
+			}
 		return 1;
 		default:
 			break;
@@ -97,22 +133,8 @@ int eEventDisplay::eventHandler(const eWidgetEvent &event)
 	return eWindow::eventHandler(event);
 }
 
-eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEvent* evt)
-: eWindow(1), service(service)
-	/*
-			kleine anmerkung:
-			
-			(liste mit) pointer übergeben ist scheisse, weil dazu THEORETISCH die eit gelockt werden MÜSSTE (wird sie aber nicht,
-			weil "wenn lock dann kein exec"), wenn sich die eit ändert während wir hier im exec sind gibts nen CRASH.
-			
-			have fun.
-			
-			korrekterweise müsste man hier ne au-eit übergeben kriegen, sich auf dessen update connecten. das wiederrum suckt für
-			senderübergreifendes EI.
-			
-			durch das "setList" wurde das Problem zwar nicht gefixt, aber wenigstens crasht es jetzt nicht mehr, was aber nur funktioniert
-			weil wir single-threading benutzen.
-	*/
+eEventDisplay::eEventDisplay(eString service, eServiceReferenceDVB &ref, const ePtrList<EITEvent>* e, EITEvent* evt )
+: eWindow(1), service(service), ref(ref), evt(evt)
 {
 	eventlist=0;
 	events=0;
@@ -134,6 +156,9 @@ eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEv
 	channel = new eLabel(this);
 	channel->setName("channel");
 
+	timer_icon = new eLabel(this);
+	timer_icon->setName("timer_icon");
+
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eventview"))
 		eFatal("skin load of \"eventview\" failed");
@@ -148,11 +173,23 @@ eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEv
 	descr->resize( eSize( descr->getSize().width(), newheight + (int)lineheight/6 ) );
 	long_description->resize(eSize(descr->getSize().width(), descr->getSize().height()*4));
 
+#ifndef DISABLE_FILE
+	addActionToHelpList( &i_enigmaEventViewActions->addDVRTimerEvent );
+#endif
+#ifndef DISABLE_NETWORK
+	addActionToHelpList( &i_enigmaEventViewActions->addNGRABTimerEvent );
+#endif
+	addActionToHelpList( &i_enigmaEventViewActions->addSwitchTimerEvent );
+	addActionToHelpList( &i_enigmaEventViewActions->removeTimerEvent );
+	addActionToHelpList( &i_enigmaEventViewActions->close );
+
 	if (e)
 		setList(*e);
 	else if (evt)
 		setEvent(evt);
 	addActionMap( &i_enigmaEventViewActions->map );
+	
+	setHelpID(11);
 }
 
 eEventDisplay::~eEventDisplay()
@@ -182,6 +219,11 @@ void eEventDisplay::updateScrollbar()
 
 void eEventDisplay::setEvent(EITEvent *event)
 {
+	valid=0;
+	// update evt.. when setEvent is called from outside..
+	if ( evt )  
+		evt = event;
+
 	long_description->hide();
 	long_description->move( ePoint(0,0) );
 	if (event)
@@ -193,6 +235,7 @@ void eEventDisplay::setEvent(EITEvent *event)
 		tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
 		if (begin)
 		{
+			valid |= 1;
 			_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
 			_eventDate=eString().sprintf("%02d.%02d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
 		}
@@ -200,6 +243,7 @@ void eEventDisplay::setEvent(EITEvent *event)
 		tm *end=event->start_time!=-1?localtime(&endtime):0;
 		if (end)
 		{
+			valid |= 2;
 			_eventTime+=eString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
 		}
 
@@ -208,18 +252,21 @@ void eEventDisplay::setEvent(EITEvent *event)
 			if (d->Tag()==DESCR_SHORT_EVENT)
 			{
 				ShortEventDescriptor *s=(ShortEventDescriptor*)*d;
+				valid |= 4;
 				_title=s->event_name;
-	
+#ifndef DISABLE_LCD	
 				if (LCDElement)
 					LCDElement->setText(s->text);
-
+#endif
 				if ((s->text.length() > 0) && (s->text!=_title))
 				{
+					valid |= 8;
 					_long_description+=s->text;
 					_long_description+="\n\n";
 				}
 			} else if (d->Tag()==DESCR_EXTENDED_EVENT)
 			{
+				valid |= 16;
 				ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*d;
 				_long_description+=ss->item_description;
 			}
@@ -239,6 +286,8 @@ void eEventDisplay::setEvent(EITEvent *event)
 			long_description->setText(_long_description);
 
 		channel->setText(service);
+
+		checkTimerIcon(event);
 	} 
 	else
 	{
@@ -249,12 +298,36 @@ void eEventDisplay::setEvent(EITEvent *event)
 	long_description->show();
 }
 
+void eEventDisplay::checkTimerIcon( EITEvent *event )
+{
+	ePlaylistEntry* p;
+	if ( event && (p = eTimerManager::getInstance()->findEvent( &ref, event )) )
+	{
+		if ( p->type & ePlaylistEntry::SwitchTimerEntry )
+		{
+			gPixmap *pmap = eSkin::getActive()->queryImage("timer_symbol");
+			if (!pmap)
+				return;
+			timer_icon->setPixmap(pmap);
+			timer_icon->show();
+		}
+		else if ( p->type & ePlaylistEntry::RecTimerEntry )
+		{
+			gPixmap *pmap = eSkin::getActive()->queryImage("timer_rec_symbol");
+			if (!pmap)
+				return;
+			timer_icon->setPixmap(pmap);
+			timer_icon->show();
+		}
+	}
+	else
+		timer_icon->hide();
+}
+
 void eEventDisplay::setList(const ePtrList<EITEvent> &e)
 {
-	if (eventlist)
-		delete eventlist;
-	if (events)
-		delete events;
+	delete eventlist;
+	delete events;
 	eventlist=new ePtrList<EITEvent>(e);
 	events=new ePtrList<EITEvent>::iterator(*eventlist);
 	if (*events != eventlist->end())

@@ -1,417 +1,44 @@
+#ifndef DISABLE_CI
+
 #include <enigma_ci.h>
-
+#include <enigma.h>
 #include <lib/base/i18n.h>
-
 #include <lib/driver/rc.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/dvbci.h>
 #include <lib/gui/elabel.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/enumber.h>
+#include <lib/gui/textinput.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/statusbar.h>
 #include <lib/gui/eskin.h>
 #include <lib/gdi/font.h>
-
 #include <lib/system/econfig.h>
-#include <lib/dvb/dvbservice.h>
-#include <lib/dvb/dvbci.h>
 #include <lib/system/info.h>
+#include <lib/system/init.h>
+#include <lib/system/init_num.h>
 
-eCImmi::eCImmi(eWidget *parent): eWidget(parent)
-{
-}
-
-void enigmaCImmi::entrySelected(eListBoxMenuEntry *choice)
-{
-	if(!choice)
-	{
-		eDebug("no selection");
-		return;
-	}
-	eDebug("menu_answ: %d",choice->getEntry());	
-
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,choice->getEntry()));
-}
-
-void enigmaCImmi::answokPressed()
-{
-	eDebug("Answer Ok pressed");
-	int x;
-	
-	x=mmi->answer->getNumber();
-	eDebug("Answer Ok pressed val:%d",x);
-	
-
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_answ,0));
-}
-
-enigmaCImmi::enigmaCImmi(eDVBCI *DVBCI): eWindow(0), mmi(0)
-{
-	int fd=eSkin::getActive()->queryValue("fontsize", 8); //20
-
-	//DVBCI=eDVB::getInstance()->DVBCI;
-
-	setText(_("Common Interface Module - mmi"));
-	move(ePoint(50, 70));
-	resize(eSize(600, 420));
-
-	tt=new eLabel(this);
-	tt->setAlign(eTextPara::dirCenter);
-	tt->setText("");
-	tt->move(ePoint(20,10));
-	tt->resize(eSize(560,fd+4));
-
-	stt=new eLabel(this);
-	stt->setFlags(RS_WRAP);
-	stt->setAlign(eTextPara::dirCenter);
-	stt->setText("");
-	stt->move(ePoint(5,40));
-	stt->resize(eSize(590,(fd+4)*2));
-			
-	bt=new eLabel(this);
-	bt->setAlign(eTextPara::dirCenter);
-	bt->setText("");
-	bt->move(ePoint(20,250));
-	bt->resize(eSize(560,fd+4));
-
-	cistate=new eLabel(this);
-	cistate->setText("ci-status: waitung for module");
-	cistate->move(ePoint(20,280));
-	cistate->resize(eSize(460,fd+4));
-	
-	abort=new eButton(this);
-	abort->setText(_("abort"));
-
-	abort->move(ePoint(450, 280));
-	abort->resize(eSize(90, fd+4));
-
-	abort->setHelpText(_("leave CI mmi"));
-	abort->loadDeco();
-
-	CONNECT(abort->selected, enigmaCImmi::abortPressed);		
-
-	lentrys=new eListBox<eListBoxMenuEntry>(this);
-	lentrys->setName("MenuEntrys");
-	lentrys->move(ePoint(20, 100));
-	lentrys->resize(eSize(getClientSize().width()-40, (fd+4)*6));
-	lentrys->setFlags(eListBoxBase::flagNoPageMovement);
-	lentrys->hide();
-	CONNECT(lentrys->selected, enigmaCImmi::entrySelected);		
-
-	status = new eStatusBar(this);	
-	status->move( ePoint(0, clientrect.height()-30) );
-	status->resize( eSize( clientrect.width(), 30) );
-	status->loadDeco();
-	
-	CONNECT(DVBCI->ci_mmi_progress, enigmaCImmi::getmmi);		
-
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_begin));
-}
-
-enigmaCImmi::~enigmaCImmi()
-{
-
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_end));
-
-	if (status)
-		delete status;
-}
-
-void enigmaCImmi::abortPressed()
-{
-	close(0);
-}
-
-long enigmaCImmi::LengthField(unsigned char *lengthfield,long maxlength,int *fieldlen)
-{
-	int ByteCount = (int)(lengthfield[0]&0x7f);
-	long Length	= (long)ByteCount;
-	int indexField, indexVar;
-	unsigned char *tmp;
-	
-	if(lengthfield[0] & 0x80)
-	{
-		*fieldlen = ByteCount + 1;
-		if(ByteCount > maxlength - 1)
-			return -1;
-		
-		Length = 0;	
-		tmp = (unsigned char *) &Length;
-		indexField = ByteCount;
-		
-		for(indexVar = 0; indexVar < ByteCount; indexVar++)
-		{
-			tmp[3-indexVar]=lengthfield[indexField--];
-		}
-	}
-	else
-		*fieldlen = 1;
-	
-	return Length;				
-}
-
-#if 1
-void enigmaCImmi::getmmi(const char *data)
-{
-#define TAG_LENGTH	3
-#define MAX_LENGTH_BYTES	4
-	int fd=eSkin::getActive()->queryValue("fontsize", 8); //20
-
-	const unsigned char TAG_MMI_MENU_LAST[]={0x9F,0x88,0x09};
-	const unsigned char TAG_MMI_MENU_MORE[]={0x9F,0x88,0x0A};
-	const unsigned char TAG_MMI_LIST_LAST[]={0x9F,0x88,0x0C};
-	const unsigned char TAG_MMI_LIST_MORE[]={0x9F,0x88,0x0D};
-	const unsigned char TAG_MMI_MENU_ANSW[]={0x9F,0x88,0x0B};
-	const unsigned char TAG_MMI_TEXT_LAST[]={0x9F,0x88,0x03};
-	const unsigned char TAG_MMI_TEXT_MORE[]={0x9F,0x88,0x04};
-	const unsigned char TAG_MMI_ENQ[]      ={0x9F,0x88,0x07};
-
-	int rp=5;
-	eDebug("new mmi message received");
-	for(int i=0;i<data[0];i++)
-		printf("%02x ",data[i]);
-	printf("\n");
-
-	lentrys->clearList();		
-	lentrys->hide();
-	
-	if(mmi)
-		delete mmi;
-
-	mmi=new eCImmi(this);
-	mmi->move(ePoint(20, 100));
-	mmi->resize(eSize(560,(fd+4)*6));
-	mmi->show();
-
-	if(memcmp(data+rp,TAG_MMI_ENQ,TAG_LENGTH)==0)
-	{
-		eDebug("mmi_enq_last");
-		rp+=3;
-		int LengthBytes;
-		int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
-		rp += LengthBytes;
-
-		int blind=data[rp++] & 1;		//blind_answer
-		
-		int nrcount=data[rp];
-		if(nrcount>8)
-			nrcount=8;
-		
-		int valinit[nrcount];
-		memset(valinit,0,sizeof(valinit));		
-		mmi->answer=new eNumber(mmi,nrcount,0,9,1,valinit,0,0);
-		mmi->answer->move(ePoint(((560/2)-(20*(nrcount)/2)),30));
-		mmi->answer->resize(eSize(20*(nrcount),fd+6));
-		mmi->answer->setHelpText(_("mmi input field"));
-		mmi->answer->loadDeco();
-		if(blind)
-			mmi->answer->setFlags(eNumber::flagHideInput);
-		mmi->answer->show();
-		rp++;		//answer text len
-
-		char text[size-1];
-		memset(text,0,size-1);
-		memcpy(text,data+rp,size-2);
-		eDebug("TEXT:%s",text);
-
-		eLabel *answertext;
-		answertext=new eLabel(mmi);
-		answertext->setAlign(eTextPara::dirCenter);
-		answertext->move(ePoint(20,0));
-		answertext->resize(eSize(520,fd+4));
-		answertext->setText(text);
-		answertext->show();
-		
-		eButton *ok;
-		ok=new eButton(mmi);
-		ok->setText(_("OK"));
-		ok->move(ePoint(235, 70));
-		ok->resize(eSize(90, fd+4));
-		ok->setHelpText(_("send data to CI"));
-		ok->loadDeco();
-		ok->show();
-
-		CONNECT(ok->selected, enigmaCImmi::answokPressed);		
-
-		rp+=size;
-	}
-	else
-	
-	if(memcmp(data+rp,TAG_MMI_MENU_LAST,TAG_LENGTH)==0 ||
-		 memcmp(data+rp,TAG_MMI_LIST_LAST,TAG_LENGTH)==0)	
-	{	
-		eDebug("mmi_menu_last");
-		lentrys->show();
-
-		rp+=3;
-		
-		int LengthBytes;
-		int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
-		
-		rp += LengthBytes;
-			
-		unsigned char choices=data[rp++];
-		eDebug("Size: %x Choices: %d",size,choices);
-		
-		int currElement=0;
-		int endpos=rp+size;
-		
-		while(rp<endpos)	
-		{
-			if(memcmp(data+rp,TAG_MMI_TEXT_LAST,TAG_LENGTH)==0)	
-			{
-				eDebug("MMI_TEXT_LAST");	
-				rp+=3;
-				int LengthBytes;
-				int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
-				rp += LengthBytes;
-				
-				char text[size+2];
-				memset(text,0,size+2);
-				memcpy(text+1,data+rp,size);
-				text[0]=0x20;
-				eDebug("TEXT:%s",text);
-				currElement++;
-				
-				if(currElement==1)
-					tt->setText(text);					
-				if(currElement==2)
-					stt->setText(text);					
-				if(currElement==3)
-					bt->setText(text);					
-				
-				if(currElement>3)
-				{
-					lentrys->beginAtomic();	
-					new eListBoxMenuEntry(lentrys,text,currElement-3);
-					lentrys->endAtomic();	
-				}
-				rp += size;
-			}
-			else	
-			{
-				eDebug("unknown MMI_TAG:%02x%02x%02x",data[rp],data[rp+1],data[rp+2]);
-				rp+=3;
-				int LengthBytes;
-				int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
-		
-				rp += LengthBytes + size;
-			}
-			if(rp>endpos)
-				break;
-		}
-	}
-	else if(memcmp(data+rp,TAG_MMI_MENU_MORE,TAG_LENGTH)==0)	
-	{	
-		eDebug("mmi_menu_more");
-	}
-}
-#else
-void enigmaCImmi::getmmi(const char *data)
-{
-	int entry=1;
-	eDebug("new mmi message received");
-
-	lentrys->clearList();		
-	lentrys->hide();
-	answ->hide();
-	answok->hide();
-	headansw->hide();
-	
-	for(int i=1;i<data[0];i++)
-		printf("%02x ",data[i]);
-	printf("\n");
-
-	if(data[5] == 0x9F && data[6] == 0x88)
-	{
-		int menupos=0;
-		if(data[7]== 0x07)		//t_enq
-		{
-			int len=data[8];
-			int blind=data[9]&1;
-			int answerlen=data[10];
-			char buf[len-2];
-			answ->show();
-			answok->show();						
-			headansw->show();
-			memcpy(buf,data+11,len-2);
-			buf[len-2]=0;			
-
-			headansw->setText(buf);
-	
-		}
-		else if(data[7]== 0x09 || data[7]==0xC)		//t_menu_last
-		{
-			int pos=10;
-			int len=data[8];
-			int choice=data[8];
-			
-			lentrys->show();
-			
-			if(len&0x80)
-			{
-				if((len&0x7f)==2)
-				{
-					len=data[10];
-					pos=12;
-				}
-				else if((len&0x7f)==1)
-				{
-					len=data[9];
-					pos=11;
-				}
-			}
-			
-			eDebug("entering t_menu_last len=%d",len);
-			
-			while(pos<len)
-			{
-				if(data[pos++]==0x9f && data[pos++]==0x88 && data[pos++]==0x03) //fixed lines
-				{
-					int len=data[pos++];
-					char buffer[len+1];
-					eDebug("entering text_last len=%d",len);
-
-					memcpy(buffer,data+pos,len);
-					buffer[len]=0;
-					pos+=len;
-					
-					if(menupos==0)
-						tt->setText(buffer);					
-					if(menupos==1)
-						stt->setText(buffer);					
-					if(menupos==2)
-						bt->setText(buffer);					
-					if(menupos>2)
-					{
-						lentrys->beginAtomic();	
-						eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,buffer,entry++);
-						lentrys->endAtomic();	
-					}							
-					menupos++;
-				}	
-			}	
-		}	
-	}	
-}
-#endif
-enigmaCI::enigmaCI(): eWindow(0)
+enigmaCI::enigmaCI()
 {
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	DVBCI=eDVB::getInstance()->DVBCI;
 	
-	if (eSystemInfo::getInstance()->hasCI() == 2)
+	if( eSystemInfo::getInstance()->hasCI() > 1 )
 	{
 		setText(_("Common Interface Modules"));
-		move(ePoint(150, 80));
-		cresize(eSize(350, 340));
+		move(ePoint(160, 80));
+		cresize(eSize(350, 310));
 		DVBCI2=eDVB::getInstance()->DVBCI2;
 	}
 	else
-	{	
+	{
 		setText(_("Common Interface Module"));
-		move(ePoint(150, 136));
-		cresize(eSize(350, 220));
+		move(ePoint(160, 136));
+		cresize(eSize(350, 180));
 	}
-	
+
 	reset=new eButton(this);
 	reset->setText(_("Reset"));
 	reset->move(ePoint(10, 13));
@@ -419,7 +46,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 	reset->setHelpText(_("reset the Common Interface module"));
 	reset->loadDeco();
 
-	CONNECT(reset->selected, enigmaCI::resetPressed);		
+	CONNECT(reset->selected, enigmaCI::resetPressed);
 
 	init=new eButton(this);
 	init->setText(_("Init"));
@@ -439,7 +66,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 
 	CONNECT(app->selected, enigmaCI::appPressed);		
 
-	if (eSystemInfo::getInstance()->hasCI() == 2)
+	if( eSystemInfo::getInstance()->hasCI() > 1 )
 	{
 		reset2=new eButton(this);
 		reset2->setText(_("Reset"));
@@ -467,40 +94,21 @@ enigmaCI::enigmaCI(): eWindow(0)
 		app2->loadDeco();
 
 		CONNECT(app2->selected, enigmaCI::app2Pressed);		
-
-		ok=new eButton(this);
-		ok->setText(_("ok"));
-		ok->move(ePoint(20, 273));
-		ok->resize(eSize(90, fd+4));
-		ok->setHelpText(_("leave Common Interface menu"));
-		ok->loadDeco();
 	}
-	else
-	{
-		ok=new eButton(this);
-		ok->setText(_("ok"));
-		ok->move(ePoint(20, 150));
-		ok->resize(eSize(90, fd+4));
-		ok->setHelpText(_("leave Common Interface menu"));
-		ok->loadDeco();
-	}
-	
-	CONNECT(ok->selected, enigmaCI::okPressed);		
 
 	status = new eStatusBar(this);	
 	status->move( ePoint(0, clientrect.height()-30) );
 	status->resize( eSize( clientrect.width(), 30) );
 	status->loadDeco();
-	
-	CONNECT(DVBCI->ci_progress, enigmaCI::updateCIinfo);		
+
+	CONNECT(DVBCI->ci_progress, enigmaCI::updateCIinfo);
 	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
 
-	if (eSystemInfo::getInstance()->hasCI() == 2)
+	if( eSystemInfo::getInstance()->hasCI() > 1 )
 	{
-		CONNECT(DVBCI2->ci_progress, enigmaCI::updateCI2info);		
+		CONNECT(DVBCI2->ci_progress, enigmaCI::updateCI2info);
 		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
 	}
-	
 }
 
 enigmaCI::~enigmaCI()
@@ -512,18 +120,13 @@ enigmaCI::~enigmaCI()
 void enigmaCI::updateCIinfo(const char *buffer)
 {
 	eDebug("new info %s",buffer);
-	app->setText(_(buffer));
+	app->setText(buffer);
 }
 
 void enigmaCI::updateCI2info(const char *buffer)
 {
 	eDebug("new info %s",buffer);
-	app2->setText(_(buffer));
-}
-
-void enigmaCI::okPressed()
-{
-	close(1);
+	app2->setText(buffer);
 }
 
 void enigmaCI::resetPressed()
@@ -551,20 +154,466 @@ void enigmaCI::init2Pressed()
 void enigmaCI::appPressed()
 {
 	hide();
-	enigmaCImmi mmi(DVBCI);
-	mmi.show();
-	mmi.exec();
-	mmi.hide();
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_begin));
+	enigmaMMI( DVBCI ).exec();
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_end));
 	show();
 }
 
 void enigmaCI::app2Pressed()
 {
 	hide();
-	enigmaCImmi mmi(DVBCI2);
-	mmi.show();
-	mmi.exec();
-	mmi.hide();
+	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_begin));
+	enigmaMMI( DVBCI2 ).exec();
+	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_end));
 	show();
 }
 
+#define TAG_LENGTH 3
+#define MAX_LENGTH_BYTES 4
+
+enigmaMMI::enigmaMMI(eDVBCI *ci)
+	:eWindow(0), ci(ci), mmi_messages(eApp, 1), responseTimer(eApp)
+{
+	eDebug("[enigmaMMI] created successfully");
+	cmove( ePoint(150,140) );
+	cresize( eSize(450,100) );
+	setText(_("Common Interface Module - mmi"));
+	eSize csize = getClientSize();
+	lText = new eLabel(this);
+	lText->move(ePoint(10,10));
+	lText->resize(eSize( csize.width(), 180 ));
+	lText->setText(_("waiting for CI answer..."));
+	lText->setAlign(eTextPara::dirCenter);
+	int newHeight = size.height() - getClientSize().height() + lText->getExtend().height() + 10 + 20;
+	resize( eSize( size.width(), newHeight ) );
+}
+
+void enigmaMMI::handleMessage( const eMMIMsg &msg )
+{
+	handleMMIMessage( msg.data );
+	delete [] msg.data;
+}
+
+void enigmaMMI::gotMMIData( const char* data, int len )
+{
+	char *dest = new char[len];
+	memcpy( dest, data, len );
+	mmi_messages.send( eMMIMsg( dest, len ) );
+}
+
+int enigmaMMI::eventHandler( const eWidgetEvent &e )
+{
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			show();
+			responseTimer.start(10000);
+			mmi_messages.start();
+			conn = CONNECT(ci->ci_mmi_progress, enigmaMMI::gotMMIData );
+			CONNECT( mmi_messages.recv_msg, enigmaMMI::handleMessage );
+			CONNECT(responseTimer.timeout, eWidget::reject);
+			return 1;
+		case eWidgetEvent::execDone:
+			hide();
+			conn.disconnect();
+			responseTimer.stop();
+			return 1;
+		default:
+			break;
+	}
+	return eWindow::eventHandler(e);
+}
+
+enigmaMMI::~enigmaMMI()
+{
+}
+
+long LengthField(unsigned char *lengthfield,long maxlength,int *fieldlen)
+{
+	int ByteCount = (int)(lengthfield[0]&0x7f);
+	long Length	= (long)ByteCount;
+	int indexField, indexVar;
+	unsigned char *tmp;
+
+	if(lengthfield[0] & 0x80)
+	{
+		*fieldlen = ByteCount + 1;
+		if(ByteCount > maxlength - 1)
+			return -1;
+
+		Length = 0;
+		tmp = (unsigned char *) &Length;
+		indexField = ByteCount;
+
+		for(indexVar = 0; indexVar < ByteCount; indexVar++)
+		{
+			tmp[3-indexVar]=lengthfield[indexField--];
+		}
+	}
+	else
+		*fieldlen = 1;
+
+	return Length;
+}
+
+void enigmaMMI::showWaitForCIAnswer(int ret)
+{
+	if ( ret != -1 )
+	{
+		if ( conn.connected() )
+		{
+			show();
+			responseTimer.start(10000);
+		}
+	}
+}
+
+void enigmaMMI::hideWaitForCIAnswer()
+{
+	if ( conn.connected() )
+	{
+		hide();
+		responseTimer.stop();
+	}
+}
+
+void enigmaMMI::handleMMIMessage(const char *data)
+{
+	const unsigned char TAG_MMI_TEXT_LAST[]={0x9F,0x88,0x03};
+	const unsigned char TAG_MMI_TEXT_MORE[]={0x9F,0x88,0x04};
+
+	const unsigned char TAG_MMI_ENQ[]      ={0x9F,0x88,0x07};
+
+	const unsigned char TAG_MMI_MENU_LAST[]={0x9F,0x88,0x09};
+	const unsigned char TAG_MMI_MENU_MORE[]={0x9F,0x88,0x0A};
+
+	const unsigned char TAG_MMI_LIST_LAST[]={0x9F,0x88,0x0C};
+	const unsigned char TAG_MMI_LIST_MORE[]={0x9F,0x88,0x0D};
+
+	int rp=0;
+	while ( data[rp] != 0x9F || data[rp+1] != 0x88 )
+		rp++;
+
+	if( !memcmp(data+rp,TAG_MMI_ENQ,TAG_LENGTH) )
+	{
+		eDebug("mmi_enq_last");
+		rp+=3;
+
+		int LengthBytes;
+		int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
+
+		rp+=LengthBytes;
+
+		int blind=data[rp++] & 1;  //blind_answer
+		eDebug("blind = %d", blind );
+
+		uint nrcount=data[rp++];
+		if ( nrcount > 32 )
+			nrcount = 32;
+
+		char text[size-1];
+		memset(text,0,size-1);
+		memcpy(text,data+rp,size-2);
+
+		eDebug("TEXT:%s",text);
+
+		eMMIEnqWindow wnd(text, nrcount, blind );
+		int ret = wnd.exec();
+		unsigned char buf[2+nrcount];
+		buf[0] = 1+nrcount;  // length
+		buf[1] = ret == -1 ? 0 : 1; // answer ok.. or user canceled
+
+		eString atext = wnd.getAnswer();  // get Answer from number
+
+		for (uint i=0; i < nrcount; ++i )  // copy user input to answer
+			buf[2+i] = atext[i];
+
+		ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_enqansw, buf));
+
+		if ( conn.connected() && ret == -1 )
+			close(0);
+
+		showWaitForCIAnswer(ret);
+//		send_to_sock( buf, 5+nrcount );  // send to socket
+
+		rp+=size;
+	}
+	else if(memcmp(data+rp,TAG_MMI_MENU_LAST,TAG_LENGTH)==0 ||
+		 memcmp(data+rp,TAG_MMI_LIST_LAST,TAG_LENGTH)==0)
+	{
+		eDebug("mmi_menu_last");
+
+		rp+=3;
+
+		int LengthBytes;
+		int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
+
+		rp += LengthBytes;
+
+		unsigned char choices=data[rp++];
+
+		eDebug("Size: %x Choices: %d",size,choices);
+
+		int currElement=0;
+		int endpos=rp+size;
+
+		eString titleText, subTitleText, bottomText;
+		std::list< std::pair<eString, int> > entrys;
+		while(rp<endpos)
+		{
+			if(memcmp(data+rp,TAG_MMI_TEXT_LAST,TAG_LENGTH)==0)
+			{
+				eDebug("MMI_TEXT_LAST");
+				rp+=3;
+				int LengthBytes;
+				int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
+				rp += LengthBytes;
+
+				char text[size+2];
+				memset(text,0,size+2);
+				memcpy(text+1,data+rp,size);
+				text[0]=0x20;
+				eDebug("TEXT:%s",text);
+				currElement++;
+
+				if(currElement==1)
+					titleText=text;
+				if(currElement==2)
+					subTitleText=text;
+				if(currElement==3)
+					bottomText=text;
+
+				if(currElement>3)
+				{
+					eDebug("new entry text %s", text);
+					entrys.push_back( std::pair<eString, int>( text, currElement-3 ) );
+				}
+				rp += size;
+			}
+			else if(memcmp(data+rp,TAG_MMI_TEXT_MORE,TAG_LENGTH)==0)
+				eDebug("mmi_text_more.. unhandled yet");
+			else
+			{
+				eDebug("unknown MMI_TAG:%02x%02x%02x",data[rp],data[rp+1],data[rp+2]);
+
+				rp+=3;
+
+				int LengthBytes;
+				int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
+
+				rp += LengthBytes + size;
+			}
+
+			if(rp>endpos)
+				break;
+		}
+		hideWaitForCIAnswer();
+		eMMIListWindow wnd(titleText, subTitleText, bottomText, entrys );
+		int ret = wnd.exec();
+		if ( ret == -1 )
+		{
+			ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,0));
+			if ( conn.connected() )
+				close(0);
+		}
+		else
+			ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,wnd.getSelected()));
+		showWaitForCIAnswer(ret);
+/*			char buf[5];
+			memcpy(buf, "\x9f\x88\x0B\x1", 4);
+			buf[4] = ret == -1 ? 0 : wnd.getSelected();
+			send_to_sock( buf, 5 ); */
+	}
+	else if(memcmp(data+rp,TAG_MMI_MENU_MORE,TAG_LENGTH)==0)
+		eDebug("mmi_menu_more.. unhandled yet");
+	else if(memcmp(data+rp,TAG_MMI_LIST_MORE,TAG_LENGTH)==0)
+		eDebug("mmi_list_more.. unhandled yet");
+	else
+		eDebug("unknown MMI_TAG:%02x%02x%02x",data[rp],data[rp+1],data[rp+2]);
+}
+
+eString &removeSpaces( eString &s )
+{
+	unsigned int length = s.length();
+	while ( length && s[0] == 32 )
+	{
+		s.erase(0,1);
+		--length;
+	}
+	while ( length && s[length-1] == 32 )
+		s.erase(--length,1);
+	return s;
+}
+
+eMMIEnqWindow::eMMIEnqWindow( eString text, int num, bool blind )
+	:num(num)
+{
+	cmove( ePoint(120,140) );
+	cresize( eSize(520,250) );
+	setText(_("Common Interface Module - mmi"));
+
+	int valinit[num];
+	memset(valinit,0,sizeof(valinit));
+	input=new eNumber(this,num,0,9,1,valinit,0,0);
+	input->move(ePoint(((520/2)-(15*(num)/2)),10));
+	input->resize(eSize(15*(num),35));
+	input->setHelpText(_("input all digits or press ok to send data"));
+	input->loadDeco();
+	if(blind)
+		input->setFlags(eNumber::flagHideInput);
+
+	int newHeight = size.height() - getClientSize().height() + 100;
+
+	if ( removeSpaces(text) )
+	{
+		newHeight+=10;
+		title = new eLabel(this);
+		title->setAlign(eTextPara::dirCenter);
+		title->move(ePoint(0,10));
+		title->resize(eSize(getClientSize().width(), 100));
+		title->setText(text);
+		eSize size = title->getSize();
+		size.setHeight( title->getExtend().height()+10) ;
+		title->resize( size );
+		newHeight += size.height();
+
+		ePoint pos = input->getPosition();
+		pos += ePoint( 0, 10 + size.height() );
+		input->move( pos );
+	}
+
+	resize( eSize( getSize().width(), newHeight ) );
+
+	eStatusBar *statusbar=new eStatusBar(this);
+	statusbar->move( ePoint(0, clientrect.height()-30 ) );
+	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->loadDeco();
+	CONNECT( input->selected, eMMIEnqWindow::okPressed );
+}
+
+void eMMIEnqWindow::okPressed(int*)
+{
+	accept();
+}
+
+int eMMIEnqWindow::eventHandler( const eWidgetEvent &e )
+{
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			show();
+			return 1;
+		case eWidgetEvent::execDone:
+			hide();
+			return 1;
+		default:
+			break;
+	}
+	return eWindow::eventHandler(e);
+}
+
+eString eMMIEnqWindow::getAnswer()
+{
+	static eString ret;
+	ret="";
+	for ( int i=0; i < num; i++ )
+		ret += (char)(input->getNumber( i )+0x30);
+	return ret;
+}
+
+eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eString bottomTextT, std::list< std::pair< eString, int> > &entrys )
+	:eListBoxWindow<eListBoxEntryText>(_("Common Interface Module - mmi"), entrys.size(), 520, false)
+{
+	cmove(ePoint(120, 130));
+
+	for ( std::list< std::pair<eString,int> >::iterator it( entrys.begin() ); it != entrys.end(); ++it )
+		new eListBoxEntryText( &list, removeSpaces(it->first), (void*) it->second );
+
+	int newHeight = height();
+
+	if ( removeSpaces(titleTextT) )
+	{
+		newHeight+=10;
+		title = new eLabel(this);
+		title->setAlign(eTextPara::dirCenter);
+		title->move(ePoint(0,10));
+		title->resize(eSize(getClientSize().width(), 100));
+		title->setText(titleTextT);
+		eSize size = title->getSize();
+		size.setHeight( title->getExtend().height()+10) ;
+		title->resize( size );
+		newHeight += size.height();
+
+		ePoint pos = list.getPosition();
+		pos += ePoint( 0, 10 + size.height() );
+		list.move( pos );
+	}
+
+	if ( removeSpaces(subtitleTextT) )
+	{
+		newHeight+=10;
+		subtitle = new eLabel(this);
+		subtitle->setAlign(eTextPara::dirCenter);
+		if ( title )
+		{
+			ePoint pos = title->getPosition();
+			pos+=ePoint(0,title->getSize().height() );
+			subtitle->move(pos);
+		}
+		else
+			subtitle->move(ePoint(0,10));
+		subtitle->resize(eSize(getClientSize().width(), 100));
+		subtitle->setText(subtitleTextT);
+		eSize size = subtitle->getSize();
+		size.setHeight( subtitle->getExtend().height()+10) ;
+		subtitle->resize( size );
+		newHeight += size.height();
+
+		ePoint pos = list.getPosition();
+		pos += ePoint( 0, 10 + size.height() );
+		list.move( pos );
+	}
+
+	if ( removeSpaces(bottomTextT) )
+	{
+		newHeight += 10;
+		bottomText = new eLabel(this);
+		bottomText->setAlign(eTextPara::dirCenter);
+		bottomText->move(ePoint(0,list.getPosition().y()+list.getSize().height()+10));
+		bottomText->resize(eSize(getClientSize().width(), 100));
+		bottomText->setText(bottomTextT);
+		eSize size = bottomText->getSize();
+		size.setHeight( bottomText->getExtend().height()+10 ) ;
+		bottomText->resize( size );
+		newHeight+=size.height();
+	}
+
+	if ( titleTextT || bottomTextT || subtitleTextT )
+		resize( eSize( width, newHeight + 10 ));
+
+	CONNECT( list.selected, eMMIListWindow::entrySelected );
+}
+
+void eMMIListWindow::entrySelected( eListBoxEntryText *e )
+{
+	close(e?0:-1);
+}
+
+int eMMIListWindow::eventHandler( const eWidgetEvent &e )
+{
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			show();
+			return 1;
+		case eWidgetEvent::execDone:
+			hide();
+			return 1;
+		default:
+			break;
+	}
+	return eWindow::eventHandler(e);
+}
+
+#endif // DISABLE_CI

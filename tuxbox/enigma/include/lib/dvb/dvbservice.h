@@ -3,7 +3,9 @@
 
 #include <lib/dvb/edvb.h>
 
+#ifndef DISABLE_CI
 class eDVBCI;
+#endif
 
 class eDVBServiceEvent: public eDVBEvent
 {
@@ -43,14 +45,13 @@ class eDVBServiceController: public eDVBController, public Object
 {
 public:
 		/* current service */
-	eServiceReferenceDVB service;	// meta-service
+	eServiceReferenceDVB service,  // meta-service
+			     parentservice,prevservice;	// for linkage handling
 	eTransponder *transponder;
 	int pmtpid;
 	int service_state;
 	MHWEIT *tMHWEIT;
 	TDT *tdt;
-
-//	void MHWEITready(int error);
 
 	struct CA
 	{
@@ -59,11 +60,13 @@ public:
 	
 	std::set<int> availableCASystems, usedCASystems;
 	ePtrList<CA> calist;		/** currently used ca-systems */
-	
+
 	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors);
 	
+#ifndef DISABLE_CI
 	eDVBCI *DVBCI;
 	eDVBCI *DVBCI2;
+#endif
 
 	void scanPMT();
 
@@ -87,6 +90,7 @@ public:
 	int switchService(const eServiceReferenceDVB &service); /** -> eventServiceSwitched */
 	
 	void initCAlist();
+	void clearCAlist();
 };
 
 #endif

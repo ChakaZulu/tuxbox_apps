@@ -1,5 +1,5 @@
 DOMAIN = $(PACKAGE)
-XGETTEXT_OPTIONS = --keyword=_ --keyword=N_
+XGETTEXT_OPTIONS = --keyword=_ --keyword=N_ --from-code=utf-8
 COPYRIGHT_HOLDER = tuxbox project
 EXTRA_LOCALE_CATEGORIES =
 
@@ -21,7 +21,7 @@ SUFFIXES = .po .gmo .mo .sed .sin .nop .po-update
 	@lang=`echo $* | sed -e 's,.*/,,'`; \
 	test "$(srcdir)" = . && cdcmd="" || cdcmd="cd $(srcdir) && "; \
 	echo "$${cdcmd}rm -f $${lang}.gmo && @GMSGFMT@ -c --statistics -o $${lang}.gmo $${lang}.po"; \
-	cd $(srcdir) && rm -f $${lang}.gmo && @GMSGFMT@ -c --statistics -o t-$${lang}.gmo $${lang}.po && (mv t-$${lang}.gmo $${lang}.gmo || /bin/true)
+	cd $(srcdir) && rm -f $${lang}.gmo && @GMSGFMT@ -c --statistics -o t-$${lang}.gmo $${lang}.po && mv t-$${lang}.gmo $${lang}.gmo
 
 .nop.po-update:
 	@lang=`echo $@ | sed -e 's/\.po-update$$//'`; \
@@ -63,7 +63,6 @@ $(DOMAIN).pot-update: $(POTFILES) $(srcdir)/POTFILES.in
 	  --add-comments=TRANSLATORS: $(XGETTEXT_OPTIONS) \
 	  --files-from=$(srcdir)/POTFILES.in \
 	  --copyright-holder='$(COPYRIGHT_HOLDER)' \
-	  --from-code=utf-8 \
 	  --join-existing
 	test ! -f $(DOMAIN).po || { \
 	  if test -f $(srcdir)/$(DOMAIN).pot; then \

@@ -1,22 +1,38 @@
 #ifndef __enigma_main_h
 #define __enigma_main_h
 
-#include <epgwindow.h>
+#include <sselect.h>
 #include <enigma_lcd.h>
+#include <engrab.h>
+#include <lib/base/message.h>
 #include <lib/dvb/si.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/edvb.h>
+#include <lib/gui/combobox.h>
 #include <lib/gui/ewindow.h>
 #include <lib/gui/listbox.h>
 #include <lib/gui/multipage.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/numberactions.h>
 #include <lib/gui/textinput.h>
-#include <lib/base/message.h>
 #include <lib/dvb/service.h>
+#include <lib/gui/eprogress.h>
+
+struct eMMIMessage
+{
+	eDVBCI *from;
+	char *data;
+	int len;
+	eMMIMessage()
+	{
+	}
+	eMMIMessage(eDVBCI *from, char* data, int len)
+		: from(from), data(data), len(len)
+	{
+	}
+};
 
 class eLabel;
-class eProgress;
 class EIT;
 class SDT;
 class SDTEntry;
@@ -27,9 +43,30 @@ class eCheckbox;
 class eButton;
 class gPainter;
 class NVODReferenceEntry;
+class LinkageDescriptor;
 class eServiceSelector;
 class eRecordingStatus;
 class ePlaylistEntry;
+class eHelpWindow;
+class eEPGWindow;
+
+class eZapStandby: public eWidget
+{
+	static eZapStandby *instance;
+	eServiceReference ref;
+	int rezap;
+protected:
+	int eventHandler(const eWidgetEvent &);
+public:
+	void wakeUp(int norezap);
+	static eZapStandby *getInstance() { return instance; }
+	static Signal0<void> enterStandby, leaveStandby;
+	eZapStandby();
+	~eZapStandby()
+	{
+		instance=0;
+	}
+};
 
 class eZapMessage
 {
@@ -71,17 +108,22 @@ public:
 	}
 };
 
+#ifndef DISABLE_FILE
+
 class eZapSeekIndices
 {
 private:
 	eString filename;
 	std::map<int,int> index;
 	int changed;
+	int length;
 public:
+	eZapSeekIndices();
 	void load(const eString &filename);
 	void save();
 	void add(int real, int time);
 	void remove(int real);
+	void clear();
 	/**
 	 * \brief retrieves next index.
 	 * \param dir 0 for nearest, <0 for prev or >0 for next. returns -1 if nothing found.
@@ -90,28 +132,50 @@ public:
 	int getTime(int real);
 		// you don't need that.
 	std::map<int,int> &getIndices();
+	
+	void setTotalLength(int length);
+	int  getTotalLength();
 };
+
+class eProgressWithIndices: public eProgress
+{
+	eZapSeekIndices *indices;
+	gColor indexmarkcolor;
+public:
+	eProgressWithIndices(eWidget *parent);
+	void redrawWidget(gPainter *target, const eRect &area);
+	void setIndices(eZapSeekIndices *indices);
+};
+
+#endif
 
 class NVODStream: public eListBoxEntryTextStream
 {
 	friend class eListBox<NVODStream>;
 	friend class eNVODSelector;
-	int valid;
-	eString redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
+	int begTime;
+	const eString &redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
 	void EITready(int error);
 	int validate();
+	void selfDestroy();
+	Signal0<void> ready;
+	bool operator<( const eListBoxEntry& e ) const
+	{
+		return begTime < ((NVODStream&)e).begTime;
+	}
 public:
+	int getBegTime() const { return begTime; }
 	NVODStream(eListBox<NVODStream> *listbox, eDVBNamespace dvb_namespace, const NVODReferenceEntry *ref, int type);
 	eServiceReferenceDVB service;
 	EIT eit;
 };
 
-class NVODReferenceEntry;
-
 class eNVODSelector: public eListBoxWindow<NVODStream>
 {
-private:
+	int count;
 	void selected(NVODStream *);
+	Signal0<void> clearEntrys;
+	void readyCallBack();
 public:
 	eNVODSelector();
 	void clear();
@@ -122,15 +186,11 @@ class AudioStream: public eListBoxEntryText
 {
 	friend class eListBox<AudioStream>;
 	friend class eAudioSelector;
-	int isAC3;
+	int isAC3, isDTS;
 	int component_tag;
 	void EITready(int error);
 	void parseEIT(EIT* eit);
 public:
-	enum
-	{
-		audioMPEG, audioAC3
-	};
 	AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream);
 	PMTEntry *stream;
 	bool operator < ( const AudioStream& e) const	{	return 0;	}
@@ -145,7 +205,27 @@ public:
 	void add(PMTEntry *);
 };
 
-class LinkageDescriptor;
+class VideoStream: public eListBoxEntryText
+{
+	friend class eListBox<VideoStream>;
+	friend class eVideoSelector;
+	int component_tag;
+	void EITready(int error);
+	void parseEIT(EIT* eit);
+public:
+	VideoStream(eListBox<VideoStream> *listbox, PMTEntry *stream);
+	PMTEntry *stream;
+	bool operator < ( const VideoStream& e) const	{	return 0;	}
+};
+
+class eVideoSelector: public eListBoxWindow<VideoStream>
+{
+	void selected(VideoStream *);
+public:
+	eVideoSelector();
+	void clear();
+	void add(PMTEntry *);
+};
 
 class SubService: public eListBoxEntryText
 {
@@ -156,12 +236,25 @@ public:
 	eServiceReferenceDVB service;
 };
 
-class eSubServiceSelector: public eListBoxWindow<SubService>
+class eSubServiceSelector
+: public eListBoxWindow<SubService>
 {
+	int quickzap;
 	void selected(SubService *);
+	eButton *bAddToUserBouquet, *bToggleQuickZap;
+	virtual void willShow();
+	void addPressed();
+	void quickZapPressed();
 public:
-	eSubServiceSelector();
+	Signal2<void, eServiceReference*, int> addToUserBouquet;
+	bool quickzapmode();
+	void prev();
+	void next();
+	eSubServiceSelector(bool showbuttons=true);
+	eServiceReferenceDVB *getSelected() { return list.getCount()?&list.getCurrent()->service:0; }
 	void clear();
+	void selectCurrent();
+	void disableQuickZap();
 	void add(eDVBNamespace dvb_namespace, const LinkageDescriptor *ref);
 };
 
@@ -182,6 +275,7 @@ public:
 #define ENIGMA_NVOD		1	
 #define ENIGMA_AUDIO	2
 #define ENIGMA_SUBSERVICES 4
+#define ENIGMA_VIDEO	8
 
 class eEventDisplay;
 class eServiceEvent;
@@ -192,7 +286,7 @@ class TextEditWindow: public eWindow
 {
 	eTextInputField *input;
 	eLabel *descr, *image;
-	eButton *save, *cancel;
+	eButton *save;
 public:
 	TextEditWindow( const char *InputFieldDescr, const char* useableChar=0 );
 	const eString& getEditText() { return input->getText(); }
@@ -214,13 +308,13 @@ class eZapMain: public eWidget
 	friend class eEPGSelector;
 public:
 	enum { modeTV, modeRadio, modeFile, modeEnd };
-	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32, recNgrab=64 };
-	enum { messageGoSleep=2, messageShutdown=3 };
+	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32, recNgrab=64, statePaused=128 };
+	enum { messageGoSleep=2, messageShutdown, messageNoRecordSpaceLeft };
 
 private:
-	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext,
-		*EINowDuration, *EINextDuration, *EINowTime, *EINextTime,
-		*Description,
+	eLabel 	*ChannelNumber, *ChannelName, *Clock,
+		*EINow, *EINext, *EINowDuration, *EINextDuration,
+		*EINowTime, *EINextTime, *Description, *fileinfos,
 		*ButtonRedEn, *ButtonRedDis, 
 		*ButtonGreenEn, *ButtonGreenDis, 
 		*ButtonYellowEn, *ButtonYellowDis,
@@ -229,19 +323,32 @@ private:
 		mute, volume,
 		*DVRSpaceLeft;
 
-	eWidget *dvrFunctions, *nonDVRfunctions;
+	eWidget *dvrInfoBar, *dvbInfoBar, *fileInfoBar;
 	int dvrfunctions;
+	int stateOSD;
 
 	// eRecordingStatus *recstatus;
 
-	eProgress *Progress, VolumeBar;
+#ifndef DISABLE_FILE
+	eProgressWithIndices *Progress;
+#else
+	eProgress *Progress;
+#endif
+	eProgress *VolumeBar;
 	eMessageBox *pMsg, *pRotorMsg;
 
 	eLock messagelock;
 	std::list<eZapMessage> messages;
 	eFixedMessagePump<int> message_notifier;
+#ifndef DISABLE_CI
+	eFixedMessagePump<eMMIMessage> mmi_messages;
+#endif
 
-	eTimer timeout, clocktimer, messagetimeout, progresstimer, volumeTimer, recStatusBlink;
+	eTimer timeout, clocktimer, messagetimeout,
+					progresstimer, volumeTimer, recStatusBlink,
+					doubleklickTimer, delayedStandbyTimer;
+
+	Connection doubleklickTimerConnection;
 
 	int cur_start, cur_duration, cur_event_id;
 	eString cur_event_text;
@@ -249,14 +356,17 @@ private:
 	eNVODSelector nvodsel;
 	eSubServiceSelector subservicesel;
 	eAudioSelector audiosel;
+	eVideoSelector videosel;
 	eEventDisplay *actual_eventDisplay;
 	eServiceReferenceDVB refservice;
 	
 	ePlaylist *playlist; // history / current playlist entries
 	eServiceReference playlistref;
 
+#ifndef DISABLE_FILE
 	ePlaylist *recordings;
 	eServiceReference recordingsref;
+#endif 
 
 	ePlaylist *userTVBouquets;
 	eServiceReference userTVBouquetsRef;
@@ -284,37 +394,43 @@ private:
 	int showOSDOnEITUpdate;
 	int serviceFlags;
 	int isSeekable() const { return serviceFlags & eServiceHandler::flagIsSeekable; }
+#ifndef DISABLE_LCD
 	eZapLCD lcdmain;
-
+#endif
 	void eraseBackground(gPainter *, const eRect &where);
 	void setEIT(EIT *);
 	void handleNVODService(SDTEntry *sdtentry);
 
 	// actions
-	void showServiceSelector(int dir, int selcurrent);
+	void showServiceSelector(int dir, eServiceReference root=eServiceReference(), eServiceReference path=eServiceReference(), int newmode=-1 );
 	void nextService(int add=0);
 	void prevService();
 	void playlistNextService();
-	void playlistPrevService();
 	void volumeUp();
 	void volumeDown();
 	void hideVolumeSlider();
 	void toggleMute();
 	void showMainMenu();
 
-	time_t standbyTime;
+	timeval standbyTime;
+	int standby_nomenu;
 
-	void standbyPress();
+	void delayedStandby();
+	void standbyPress(int nomenu);
 	void standbyRepeat();
 	void standbyRelease();
 	void showSubserviceMenu();
 	void showAudioMenu();
 	void runVTXT();
-	void showEPGList();
+	void runPluginExt();
+	void showEPGList(eServiceReferenceDVB ref);
 	void showEPG();
+	void showEPG_Streaminfo();	
 	void showInfobar();
 	void hideInfobar();
+	void showHelp( ePtrList<eAction>*, int );
 
+#ifndef DISABLE_FILE
 	void play();
 	void stop();
 	void pause();
@@ -325,34 +441,36 @@ private:
 	void startSkip(int dir);
 	void repeatSkip(int dir);
 	void stopSkip(int dir);
+#endif
 
 	void showServiceMenu(eServiceSelector*);
 
 	void addService(const eServiceReference &service);
 
 	void doPlaylistAdd(const eServiceReference &service);
-	void addServiceToUserBouquet(eServiceSelector *s, int dontask=0);
+	void addServiceToUserBouquet(eServiceReference *s, int dontask=0);
 	void addServiceToCurUserBouquet(const eServiceReference &ref);
 	void removeServiceFromUserBouquet( eServiceSelector *s );
 
-	void showBouquetList(int sellast);
+	enum { listAll, listSatellites, listProvider, listBouquets };
+	eServicePath getRoot(int list);
 
-	void showDVRFunctions(int show);
+	void showServiceInfobar(int show);
 
 	static eZapMain *instance;
 
-	eServicePath modeLast[modeEnd][3];
-	
+	eServicePath modeLast[modeEnd];
+
 	int mode,             // current mode .. TV, Radio, File
-			currentRoot,      // normal, user, playlist ( the one and only )
 			state;
-	int hddDev;
 	void onRotorStart( int newPos );
 	void onRotorStop();
 	void onRotorTimeout();
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
+	void ShowTimeCorrectionWindow( tsref ref );
+	bool CheckService(const eServiceReference &ref );
 	void handleServiceEvent(const eServiceEvent &event);
 	void startService(const eServiceReference &, int);
 	void gotEIT();
@@ -361,23 +479,35 @@ private:
 	void timeOut();
 	void leaveService();
 	void clockUpdate();
-	void updateVolume(int vol);
+	void updateVolume(int mute_state, int vol);
+	void prepareDVRHelp();
+	void prepareNonDVRHelp();
 	void set16_9Logo(int aspect);
 	void setSmartcardLogo(bool b);
 	void setAC3Logo(bool b);
 	void setVTButton(bool b);
 	void setEPGButton(bool b);
 	void updateProgress();
+	void updateServiceNum( const eServiceReference& );
 	void getPlaylistPosition();
 	void setPlaylistPosition();
 	bool handleState(int justask=0);
-	void blinkRecord();
 
+#ifndef DISABLE_FILE
+	void blinkRecord();
 	void toggleIndexmark();
+	void indexSeek(int dir);
 	eZapSeekIndices indices;
-	ePtrList<eLabel> indexmarks;
 	void redrawIndexmarks();
+#endif // DISABLE_FILE
 public:
+	void deleteService(eServiceSelector *);
+	void renameBouquet(eServiceSelector *);
+	void renameService(eServiceSelector *);
+	void createMarker(eServiceSelector *);
+	void createEmptyBouquet(int mode);
+	void copyProviderToBouquets(eServiceSelector *);
+	void toggleScart( int state );
 	void postMessage(const eZapMessage &message, int clear=0);
 	void gotMessage(const int &);
 	void startMessages();
@@ -386,35 +516,65 @@ public:
 	void nextMessage();
 	static eZapMain *getInstance() { return instance; }
 
-// methods used from the timer
 	enum {
 		psAdd=1,      // just add, to not change current
 		psRemove=2,   // remove before add
 		psActivate=4, // use existing entry if available
 		psDontAdd=8,  // just play
+		psSeekPos=16, //
+		psSetMode=32
 	};
+
 	void playService(const eServiceReference &service, int flags);
-	int recordDVR(int onoff, int user, int eventid=-1 ); // starts recording
-//////////////////////////////
+	void playlistPrevService();
+
+#ifndef DISABLE_FILE
+	int recordDVR(int onoff, int user, const char* event_name=0 ); // starts recording
+	const eServiceReference& getRecordingsref() { return recordingsref; }
+#endif
+
+#ifndef DISABLE_NETWORK
+	void startNGrabRecord();
+	void stopNGrabRecord();
+#endif
 
 	void setMode(int mode, int user=0); // user made change?
 	int getMode() { return mode; }
-	void rotateRoot()
-	{
-		getServiceSelectorPath(modeLast[mode][0]); // save current path
-		eServicePath tmp=modeLast[mode][0];
-		modeLast[mode][0]=modeLast[mode][1];
-		modeLast[mode][1]=modeLast[mode][2];
-		modeLast[mode][2]=tmp;
-		setServiceSelectorPath(modeLast[mode][0]); // set new path
-	}
+
 	void toggleTimerMode();
-	void handleStandby();
+	int toggleEditMode(eServiceSelector *, int mode=-1);
+	void toggleMoveMode(eServiceSelector *);
+	void handleStandby(int i=0);
 
 	void setServiceSelectorPath(eServicePath path);
 	void getServiceSelectorPath(eServicePath &path);
 
 	void moveService(const eServiceReference &path, const eServiceReference &ref, const eServiceReference &after);
+
+	void loadPlaylist( bool create = false );
+	void savePlaylist( bool destory = false );
+
+#ifndef DISABLE_FILE
+	void loadRecordings( bool create = false );
+	void saveRecordings( bool destory = false );
+	void clearRecordings();
+#endif
+
+	void loadUserBouquets( bool destroy=true );  // this recreate always all user bouquets...
+
+	void destroyUserBouquets( bool save=false ); 
+
+	void saveUserBouquets();  // only save
+	
+	void reloadPaths(int reset=0);
+	
+	int doHideInfobar();
+
+#ifndef DISABLE_CI
+	void receiveMMIMessageCI1( const char* data, int len );
+	void receiveMMIMessageCI2( const char* data, int len );
+	void handleMMIMessage( const eMMIMessage &msg );
+#endif
 
 	eZapMain();
 	~eZapMain();
@@ -425,45 +585,83 @@ class eServiceContextMenu: public eListBoxWindow<eListBoxEntryText>
 	eServiceReference ref;
 	void entrySelected(eListBoxEntryText *s);
 public:
-	eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path);
+	int getCount() { return list.getCount(); }
+	eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *LCDTitle=0, eWidget *LCDElement=0);
 };
+
+class eSleepTimerContextMenu: public eListBoxWindow<eListBoxEntryText>
+{
+	eServiceReference ref;
+	void entrySelected(eListBoxEntryText *s);
+public:
+	eSleepTimerContextMenu(eWidget *LCDTitle=0, eWidget *LCDElement=0);
+};
+
+class eShutdownStandbySelWindow: public eWindow
+{
+protected:
+	eCheckbox *Standby, *Shutdown;
+	void StandbyChanged(int);
+	void ShutdownChanged(int);
+	void fieldSelected(int *){focusNext(eWidget::focusDirNext);}
+	virtual void setPressed()=0;
+	eButton *set;
+	eNumber *num;
+public:
+	int getCheckboxState();
+	eShutdownStandbySelWindow( eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eWidget* descr=0, int grabfocus=1, const char* deco="eNumber" );
+};
+
+class eSleepTimer: public eShutdownStandbySelWindow
+{
+	void setPressed();
+public:
+	eSleepTimer();
+};
+
+#ifndef DISABLE_FILE
 
 class eRecordContextMenu: public eListBoxWindow<eListBoxEntryText>
 {
 	eServiceReference ref;
 	void entrySelected(eListBoxEntryText *s);
 public:
-	eRecordContextMenu();
+	eRecordContextMenu(eWidget *LCDTitle=0, eWidget *LCDElement=0);
 };
 
-class eRecStopWindow: public eWindow
+class eRecTimeInput: public eShutdownStandbySelWindow
 {
-	eCheckbox *Standby, *Shutdown;
-	eButton *cancel;
-	void StandbyChanged(int);
-	void ShutdownChanged(int);
-	void fieldSelected(int *){focusNext(eWidget::focusDirNext);}
-protected:
-	virtual void setPressed()=0;
-	eButton *set;
-	eNumber *num;
+	void setPressed();
 public:
-	int getCheckboxState();
-	eRecStopWindow( eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eWidget* descr=0, int grabfocus=1, const char* deco="eNumber" );
+	eRecTimeInput();
 };
 
-class eTimerInput: public eRecStopWindow
+class eTimerInput: public eShutdownStandbySelWindow
 {
 	void setPressed();
 public:
 	eTimerInput();
 };
 
-class eRecTimeInput: public eRecStopWindow
+#endif //DISABLE_FILE
+
+class eTimeCorrectionEditWindow: public eWindow
 {
-	void setPressed();
+	eTimer updateTimer;
+	eLabel *lCurTransponderTime, *lCurTransponderDate;
+	eComboBox *cday, *cmonth, *cyear;
+	eButton *bSet, *bReject;
+	eNumber *nTime;
+	eStatusBar *sbar;
+	tsref transponder;
+	int eventHandler( const eWidgetEvent &e );
+	void savePressed();
+	void updateTPTimeDate();
+	void monthChanged( eListBoxEntryText* );
+	void yearChanged( eListBoxEntryText* );
+	void fieldSelected(int *){focusNext(eWidget::focusDirNext);}
 public:
-	eRecTimeInput();
+	eTimeCorrectionEditWindow( tsref tp );
 };
 
 #endif /* __enigma_main_h */

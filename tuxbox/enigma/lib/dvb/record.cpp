@@ -1,8 +1,20 @@
+#ifndef DISABLE_FILE
+
 #include <lib/dvb/record.h>
+#include <config.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <linux/dvb/dmx.h>
 #include <sys/ioctl.h>
+
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/dmx.h>
+#define DVR_DEV "/dev/dvb/card0/dvr1"
+#define DEMUX1_DEV "/dev/dvb/card0/demux1"
+#else
+#include <linux/dvb/dmx.h>
+#define DVR_DEV "/dev/dvb/adapter0/dvr1"
+#define DEMUX1_DEV "/dev/dvb/adapter0/demux1"
+#endif
 
 void eDVBRecorder::dataAvailable(int what)
 {
@@ -10,6 +22,7 @@ void eDVBRecorder::dataAvailable(int what)
 	char buffer[BSIZE];
 	int res;
 	int r=::read(dvrfd, buffer, BSIZE);
+	(void)what;
 	if (r<=0)
 	{
 		eDebug("reading failed..(err %d)", -r);
@@ -19,7 +32,7 @@ void eDVBRecorder::dataAvailable(int what)
 	if (res <= 0)
 	{
 		eDebug("recording write error, maybe disk full");
-		s_close();
+//		s_close();
 		rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
 		return;
 	}
@@ -113,15 +126,15 @@ void eDVBRecorder::s_open(const char *_filename)
 	outfd=-1;
 	openFile(splits=0);
 
-	dvrfd=::open("/dev/dvb/adapter0/dvr1", O_RDONLY|O_NONBLOCK);
+	dvrfd=::open(DVR_DEV, O_RDONLY|O_NONBLOCK);
 	if (dvrfd < 0)
 	{
-		eDebug("failed to open /dev/dvb/adapter0/dvr1 (%m)");
+		eDebug("failed to open "DVR_DEV" (%m)");
 		::close(outfd);
 		outfd=-1;
 		return;
 	}
-	::ioctl(dvrfd, DMX_SET_BUFFER_SIZE, 256 * 1024);
+	::ioctl(dvrfd, DMX_SET_BUFFER_SIZE, 1024*1024);
 
 	eDebug("eDVBRecorder::s_start();");	
 	if (outfd >= 0)
@@ -137,17 +150,23 @@ void eDVBRecorder::s_addPID(int pid)
 {
 	pid_t p;
 	p.pid=pid;
-	p.fd=::open("/dev/dvb/adapter0/demux1", O_RDWR);
+	p.fd=::open(DEMUX1_DEV, O_RDWR);
 	if (p.fd < 0)
 	{
 		eDebug("failed to open demux1");
 		return;
 	}
+#if HAVE_DVB_API_VERSION < 3
+	dmxPesFilterParams flt;
+	flt.pesType=DMX_PES_OTHER;
+#else
 	dmx_pes_filter_params flt;
+	flt.pes_type=DMX_PES_OTHER;
+#endif
 	flt.pid=p.pid;
 	flt.input=DMX_IN_FRONTEND;
 	flt.output=DMX_OUT_TS_TAP;
-	flt.pes_type=DMX_PES_OTHER;
+
 	flt.flags=0;
 
 	if (::ioctl(p.fd, DMX_SET_PES_FILTER, &flt)<0)
@@ -277,3 +296,5 @@ void eDVBRecorder::writeSection(void *data, int pid)
 		first=0;
 	}
 }
+
+#endif //DISABLE_FILE

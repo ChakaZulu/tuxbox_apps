@@ -26,6 +26,7 @@ void eCheckbox::sel()
 
 void eCheckbox::gotFocus()
 {
+#ifndef DISABLE_LCD
 	if (parent && parent->LCDElement)
 	{
 		LCDTmp = new eLabel(parent->LCDElement);
@@ -41,6 +42,7 @@ void eCheckbox::gotFocus()
 		LCDTmp->setText(text);
 		LCDTmp->show();
 	}
+#endif
 	setForegroundColor(focusF, false);
 	setBackgroundColor(focusB);
 //	invalidate();
@@ -48,11 +50,13 @@ void eCheckbox::gotFocus()
 
 void eCheckbox::lostFocus()
 {
+#ifndef DISABLE_LCD
 	if (LCDTmp)
 	{
 		delete LCDTmp;
 		LCDTmp = 0;
 	}
+#endif
 	eButton::lostFocus();
 }
 
@@ -65,9 +69,10 @@ void eCheckbox::setCheck(int c)
 	ischecked=c;
 
 	setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked"));
-
+#ifndef DISABLE_LCD
 	if (LCDTmp)
 		LCDTmp->setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckboxLCD.checked":"eCheckboxLCD.unchecked"));
+#endif
 }
 
 int eCheckbox::setProperty(const eString &prop, const eString &value)

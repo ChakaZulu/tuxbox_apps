@@ -14,6 +14,7 @@ class eComboBox;
 
 class eTransponderWidget: public eWidget
 {
+	eLabel *lsat;
 	eNumber *frequency, *symbolrate;
 	eCheckbox *inversion;
 	int type, edit;
@@ -27,7 +28,7 @@ class eTransponderWidget: public eWidget
 public:
 	enum type
 	{
-		deliveryCable, deliverySatellite
+		deliveryCable=1, deliverySatellite=2, flagNoSat=4, flagNoInv=8
 	};
 	Signal0<void> updated;
 	eTransponderWidget(eWidget *parent, int edit, int type);

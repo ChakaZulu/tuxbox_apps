@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #ifndef __record_h
 #define __record_h
 
@@ -174,3 +176,5 @@ public:
 };
 
 #endif
+
+#endif //DISABLE_FILE

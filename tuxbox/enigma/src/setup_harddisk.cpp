@@ -1,3 +1,4 @@
+#ifndef DISABLE_FILE
 /*
  * setup_harddisk.cpp
  *
@@ -17,11 +18,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.6 2003/02/16 01:03:45 waldi Exp $
+ * $Id: setup_harddisk.cpp,v 1.7 2003/09/07 00:03:58 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
 #include <enigma.h>
+#include <enigma_main.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/combobox.h>
@@ -171,14 +173,14 @@ eString getPartFS(int dev, eString mp="")
 }
 
 eHarddiskSetup::eHarddiskSetup()
-: eListBoxWindow<eListBoxEntryText>(_("harddisk setup..."), 5, 420, true)
+: eListBoxWindow<eListBoxEntryText>(_("Harddisk Setup"), 5, 420)
 {
 	nr=0;
 	
 	move(ePoint(150, 136));
 	
 	new eListBoxEntryText(&list, _("back"), (void*)-1);
-	
+	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	for (int host=0; host<1; host++)
 		for (int bus=0; bus<1; bus++)
 			for (int target=0; target<1; target++)
@@ -255,7 +257,6 @@ void eHarddiskMenu::check()
 
 void eHarddiskMenu::extPressed()
 {
-	static int visible = 0;
 	if ( visible )
 	{
 		gPixmap *pm = eSkin::getActive()->queryImage("arrow_down");
@@ -347,31 +348,35 @@ void eHarddiskMenu::s_format()
 
 		if ( !fs->getCurrent()->getKey() )  // reiserfs
 		{
-			if ((system("sync") >> 8)
-				||(system( eString().sprintf(
-					"/sbin/mkreiserfs -f -f /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8 )
-				||(system("sync") >> 8)
-				||(system(eString().sprintf(
-					"/bin/mount -t reiserfs /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8 )
-				||(system("mkdir /hdd/movie")>>8 )
-				||(system("sync") >> 8))
+			::sync();
+			if ( system( eString().sprintf(
+					"/sbin/mkreiserfs -f -f /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8)
 				goto err;
-			else
-				goto noerr;
+			::sync();
+			if ( system( eString().sprintf(
+					"/bin/mount -t reiserfs /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8)
+				goto err;
+			::sync();
+			if ( system("mkdir /hdd/movie")>>8 )
+				goto err;
+			::sync();
+			goto noerr;
 		}
 		else  // ext3
 		{
-			if ((system("sync") >> 8)
-				||(system( eString().sprintf(
-					"/sbin/mkfs.ext3 /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8 )
-				||(system("sync") >> 8)
-				||(system(eString().sprintf(
-				"/bin/mount -t ext3 /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8 )
-				||(system("mkdir /hdd/movie")>>8 )
-				||(system("sync") >> 8))
+			::sync();
+			if ( system( eString().sprintf(
+					"/sbin/mkfs.ext3 -T largefile4 /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8)
 				goto err;
-			else
-				goto noerr;
+			::sync();
+			if ( system(eString().sprintf(
+				"/bin/mount -t ext3 /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8)
+				goto err;
+			::sync();
+			if ( system("mkdir /hdd/movie")>>8 )
+				goto err;
+			::sync();
+			goto noerr;
 		}
 err:
 		{
@@ -386,6 +391,7 @@ err:
 		}
 noerr:
 		{
+			eZapMain::getInstance()->clearRecordings();
 			eMessageBox msg(
 				_("successfully formatted your disk!"),
 				_("formatting harddisk..."),
@@ -414,7 +420,7 @@ void eHarddiskMenu::readStatus()
 	int cap=getCapacity(dev)/1000*512/1000;
 	
 	if (cap != -1)
-		capacity->setText(eString().sprintf("%d.%03d GB", cap/1000, cap%1000));
+		capacity->setText(eString().sprintf("%d.%03d GB", cap/1024, cap%1024));
 		
 	numpart=numPartitions(dev);
 	int fds;
@@ -424,13 +430,14 @@ void eHarddiskMenu::readStatus()
 	else if (!numpart)
 		status->setText(_("uninitialized - format it to use!"));
 	else if ((fds=freeDiskspace(dev)) != -1)
-		status->setText(eString().sprintf(_("in use, %d.%03d GB (~%d minutes) free"), fds/1000, fds%1000, fds/33 ));
+		status->setText(eString().sprintf(_("in use, %d.%03d GB (~%d minutes) free"), fds/1024, fds%1024, fds/33 ));
 	else
 		status->setText(_("initialized, but unknown filesystem"));
 }
 
 eHarddiskMenu::eHarddiskMenu(int dev): dev(dev)
 {
+	visible=0;
 	status=new eLabel(this); status->setName("status");
 	model=new eLabel(this); model->setName("model");
 	capacity=new eLabel(this); capacity->setName("capacity");
@@ -446,7 +453,7 @@ eHarddiskMenu::eHarddiskMenu(int dev): dev(dev)
 
 	new eListBoxEntryText( *fs, ("reiserfs"), (void*) 0 );
 	new eListBoxEntryText( *fs, ("ext3"), (void*) 1 );
-	fs->setCurrent((void*)0);
+	fs->setCurrent((void*)1);
   
 	if (eSkin::getActive()->build(this, "eHarddiskMenu"))
 		eFatal("skin load of \"eHarddiskMenu\" failed");
@@ -471,11 +478,8 @@ ePartitionCheck::ePartitionCheck( int dev )
 {
 	lState = new eLabel(this);
 	lState->setName("state");
-	bCancel = new eButton(this);
-	bCancel->setName("cancel");
 	bClose = new eButton(this);
 	bClose->setName("close");
-	CONNECT( bCancel->selected, ePartitionCheck::onCancel );
 	CONNECT( bClose->selected, ePartitionCheck::accept );
 	if (eSkin::getActive()->build(this, "ePartitionCheck"))
 		eFatal("skin load of \"ePartitionCheck\" failed");
@@ -616,3 +620,5 @@ void ePartitionCheck::getData( eString str )
 	else if ( str.find("[N/Yes]") != eString::npos )
 		fsck->write("Yes");
 }
+
+#endif // DISABLE_FILE

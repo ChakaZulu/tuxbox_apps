@@ -19,7 +19,7 @@ class RotorConfig: public eWindow
 	eListBox<eListBoxEntryText> *positions;
 	eLabel *lLatitude, *lLongitude, *lOrbitalPosition, *lStoredRotorNo, *lDirection, *lDegPerSec, *lDeltaA;
 	eNumber *orbital_position, *number, *Latitude, *Longitude, *DegPerSec, *DeltaA;
-	eButton *add, *remove, *save, *cancel, *next;
+	eButton *add, *remove, *save, *next;
 	eCheckbox *useGotoXX, *useRotorInPower;
 	eComboBox *direction, *LaDirection, *LoDirection;
 	eStatusBar* statusbar;
@@ -33,7 +33,6 @@ class RotorConfig: public eWindow
 	void gotoXXChanged( int );
 	void useRotorInPowerChanged( int );
 	void setLNBData( eLNB *lnb );
-	int eventHandler( const eWidgetEvent& e);
 public:
 	RotorConfig( eLNB *lnb );
 };
@@ -50,6 +49,7 @@ class eRotorManual: public eWindow
 	eLNB *lnb;
 	eTimer *retuneTimer;
 	eTransponder* transponder;
+	bool running;
 	int eventHandler( const eWidgetEvent& e);
 	void retune();
 	void onButtonPressed();

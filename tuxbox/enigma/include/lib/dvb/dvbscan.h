@@ -45,17 +45,6 @@ class eDVBScanController: public eDVBController, public Object
 {
 	int flags;
 	
-	enum
-	{
-			// not compatible to xml-flags!
-		flagUseONIT=1,
-		flagUseBAT=2,
-		flagNetworkSearch=4,
-		flagSkipKnownNIT=8,
-		flagClearList=16,
-		flagSkipOtherOrbitalPositions=32
-	};
-	
 	int scanOK;	// 1 SDT, 2 NIT, 4 BAT, 8 oNIT
 	int currentONID, scanflags;
 			// der aktuelle gescannte transponder
@@ -70,10 +59,23 @@ class eDVBScanController: public eDVBController, public Object
 	
 	std::list<eTransponder> knownTransponder;
 	std::list<eTransponder> changedTransponder;
+	std::list<eTransponder>::iterator current;
 
-	int handleSDT(eTransponder *&transponder, const SDT *sdt);
+	int handleSDT(const SDT *sdt);
 
 public:
+	enum
+	{
+			// not compatible to xml-flags!
+		flagNetworkSearch=1,
+		flagUseBAT=2,
+		flagUseONIT=4,
+		flagSkipKnownNIT=8,
+		flagClearList=16,
+		flagSkipOtherOrbitalPositions=32,
+		flagNoCircularPolarization=64
+	};
+
 	eDVBScanController(eDVB &dvb);
 	~eDVBScanController();
 
@@ -88,6 +90,7 @@ public:
 	void setClearList(int clearlist);
 	void setSkipKnownNIT(int skip);
 	void setSkipOtherOrbitalPositions(int skipOtherOP);
+	void setNoCircularPolarization(int nocircular);
 	
 	void start();
 };

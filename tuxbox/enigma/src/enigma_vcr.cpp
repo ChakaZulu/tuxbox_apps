@@ -19,26 +19,43 @@ struct enigmaVCRActions
 
 eAutoInitP0<enigmaVCRActions> i_enigmaVCRActions(eAutoInitNumbers::actions, "enigma vcr actions");
 
+enigmaVCR* enigmaVCR::instance = 0;
+
 enigmaVCR::enigmaVCR(eString string, eString caption)
 	:eMessageBox(string,caption)
 {
+	if ( !instance )
+		instance = this;
+	else
+		eFatal("create more than one enigmaVCR instances");
 	addActionMap(&i_enigmaVCRActions->map);
+}
+
+void enigmaVCR::switchBack()
+{
+	close(0);
 }
 
 int enigmaVCR::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::evtAction:
-		if (event.action == &i_enigmaVCRActions->volumeUp)
-			volumeUp();
-		else if (event.action == &i_enigmaVCRActions->volumeDown)
-			volumeDown();
-		else
+		case eWidgetEvent::execBegin:
+			eAVSwitch::getInstance()->setInput(1);
 			break;
-		return 1;
-	default:
-		break;
+		case eWidgetEvent::execDone:
+			eAVSwitch::getInstance()->setInput(0);
+			break;
+		case eWidgetEvent::evtAction:
+			if (event.action == &i_enigmaVCRActions->volumeUp)
+				volumeUp();
+			else if (event.action == &i_enigmaVCRActions->volumeDown)
+				volumeDown();
+			else
+				break;
+			return 1;
+		default:
+			break;
 	}
 	return eMessageBox::eventHandler(event);
 }

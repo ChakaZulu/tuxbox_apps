@@ -8,16 +8,45 @@ struct ePlaylistEntry
 {
 	enum
 	{
-		PlaylistEntry=1, SwitchTimerEntry=2, RecTimerEntry=4,	recDVR=8, recVCR=16,
-		stateWaiting=32, stateRunning=64,	statePaused=128, stateFinished=256, stateError=512,
-		errorNoSpaceLeft=1024, errorUserAborted=2048, errorZapFailed=4096, errorOutdated=8192,
-		boundFile=16384, typeSmartTimer=32768, typeShutOffTimer=65536, recNgrab=131072
+// PlaylistEntry types
+		PlaylistEntry=1,       // normal PlaylistEntry (no Timerlist entry)
+		SwitchTimerEntry=2,    // simple service switch timer
+		RecTimerEntry=4,       // timer do recording
+// Recording subtypes
+		recDVR=8,              // timer do DVR recording
+		recVCR=16,             // timer do VCR recording (LIRC) not used yet
+		recNgrab=131072,       // timer do record via Ngrab Server
+// Timer States
+		stateWaiting=32,       // timer is waiting
+		stateRunning=64,       // timer is running
+		statePaused=128,       // timer is paused
+		stateFinished=256,     // timer is finished
+		stateError=512,        // timer has error state(s)
+// Timer Error states
+		errorNoSpaceLeft=1024, // HDD no space Left ( recDVR )
+		errorUserAborted=2048, // User Action aborts this event
+		errorZapFailed=4096,   // Zap to service failed
+		errorOutdated=8192,    // Outdated event
+													 // box was switched off during the event
+//  advanced entry propertys
+		boundFile=16384,        // Playlistentry have an bounded file
+		isSmartTimer=32768,     // this is a smart timer (EIT related) not uses Yet
+		isRepeating=262144,     // this timer is repeating
+		doFinishOnly=65536,     // Finish an running event/action
+														// this events are automatically removed
+														// from the timerlist after finish
+		doShutdown=67108864,    // timer shutdown the box
+		doGoSleep=134217728,    // timer set box to standby
+//  Repeated Timer Days
+		Su=524288, Mo=1048576, Tue=2097152,
+		Wed=4194304, Thu=8388608, Fr=16777216, Sa=33554432
 	};
 	eServiceReference service;
 	union
 	{
 		int current_position;
 		int event_id;
+		int last_activation;
 	};
 	time_t time_begin;
 	int duration,
@@ -59,6 +88,7 @@ public:
 
 	std::list<ePlaylistEntry>::iterator current;
 
+	void clear();
 	const std::list<ePlaylistEntry>& getConstList() const { return list; }
 	std::list<ePlaylistEntry>& getList() { changed=1;return list; }
 

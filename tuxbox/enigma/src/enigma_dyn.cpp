@@ -15,25 +15,26 @@
 #include <linux/if_ether.h>
 
 #include <enigma.h>
+#include <timer.h>
 #include <enigma_main.h>
+#include <enigma_plugins.h>
 #include <sselect.h>
 
-#include <lib/system/http_dyn.h>
+#include <lib/driver/eavswitch.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/epgcache.h>
-#include <lib/system/econfig.h>
-#include <lib/gdi/fb.h>
-#include <lib/gdi/glcddc.h>
-#include <lib/gdi/gfbdc.h>
+#include <lib/dvb/servicestructure.h>
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/service.h>
-#include <lib/gui/emessage.h>
+#include <lib/gdi/fb.h>
+#include <lib/gdi/glcddc.h>
+#include <lib/gdi/gfbdc.h>
 #include <lib/gdi/epng.h>
-#include <lib/driver/eavswitch.h>
-#include <lib/dvb/service.h>
-
+#include <lib/gui/emessage.h>
+#include <lib/system/http_dyn.h>
+#include <lib/system/econfig.h>
 
 // #include <lib/dvr/dvrsocket.h>
 
@@ -55,7 +56,7 @@ static int getHex(int c)
 	return c;
 }
 
-static eString httpUnescape(const eString &string)
+eString httpUnescape(const eString &string)
 {
 	eString ret="";
 	for (unsigned int i=0; i<string.length(); ++i)
@@ -87,7 +88,7 @@ static eString httpUnescape(const eString &string)
 	return ret;
 }
 
-static eString httpEscape(const eString &string)
+eString httpEscape(const eString &string)
 {
 	eString ret="";
 	for (unsigned int i=0; i<string.length(); ++i)
@@ -113,7 +114,7 @@ static eString httpEscape(const eString &string)
 	return ret;
 }
 
-static std::map<eString,eString> getRequestOptions(eString opt)
+std::map<eString,eString> getRequestOptions(eString opt)
 {
 	std::map<eString,eString> result;
 	
@@ -181,7 +182,8 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 		if(!iface)
 			return "-1";
 		eServiceReferenceDVB *ref=new eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
-		iface->play(*ref);
+		eZapMain::getInstance()->playService(*ref, eZapMain::psSetMode|eZapMain::psDontAdd);
+//		iface->play(*ref);
 		result="0";
 	} else
 	{
@@ -342,12 +344,12 @@ static eString read_file(eString filename)
 	return result;
 }
 
-static eString ref2string(const eServiceReference &r)
+eString ref2string(const eServiceReference &r)
 {
 	return httpEscape(r.toString());
 }
 
-static eServiceReference string2ref(const eString &service)
+eServiceReference string2ref(const eString &service)
 {
 	eString str=httpUnescape(service);
 	return eServiceReference(str);
@@ -378,7 +380,11 @@ static eString getIP()
 
 static eString filter_string(eString string)
 {
-	return string.removeChars('\x86').removeChars('\x87').removeChars('\x05');
+	return string.
+		removeChars('\x86').
+		removeChars('\x87').
+		removeChars('\xC2').
+		removeChars('\x05');
 }
 
 static eString getVolBar()
@@ -406,11 +412,11 @@ static eString getVolBar()
 	result+="<td>";
 
 	if(eAVSwitch::getInstance()->getMute()==1) {
-		result+="<a class=\"mute\" href=\"javascript:unMute()\">";
-		result+="unmute";
-	} else {
 		result+="<a class=\"mute\" href=\"javascript:Mute()\">";
 		result+="mute";
+	} else {
+		result+="<a class=\"mute\" href=\"javascript:unMute()\">";
+		result+="unmute";
 	}
 	result+="</a></td>";
 	result+="</tr>";
@@ -448,8 +454,10 @@ public:
 		if (!service)
 			result+="N/A";
 		else
-			result+=service->service_name;
-		iface.removeRef(e);
+		{
+			result+=filter_string(service->service_name);
+			iface.removeRef(e);
+		}
 
 		result+="</a></font></td></tr>\n";
 		num++;
@@ -486,8 +494,9 @@ static eString getWatchContent(eString mode, eString path)
 
 		if (! (current_service.flags&eServiceReference::isDirectory))	// is playable
 		{
-			iface->play(current_service);
-			result+="ok, hear the music..";
+			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
+//			iface->play(current_service);
+//			result+="ok, hear the music..";
 		} else
 		{
 			eWebNavigatorListDirectory navlist(result, path, tpath, *iface);
@@ -745,15 +754,15 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 
 	result+=eString("<html>" CHARSETMETA "<head><title>epgview</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/epgview.css\"></head><body bgcolor=#000000>");
 	result+=eString("<span class=\"title\">");
-	result+=eString(current->service_name);
+	result+=filter_string(current->service_name);
 	result+=eString("</span>");
 	result+=eString("<br>\n");
 
-	const eventMap* evt=eEPGCache::getInstance()->getEventMap(sapi->service);
+	const timeMap* evt=eEPGCache::getInstance()->getTimeMap(sapi->service);
 	if(!evt)
 		return eString("epg not ready yet");
 
-	eventMap::const_iterator It;
+	timeMap::const_iterator It;
 
 	for(It=evt->begin(); It!= evt->end(); It++)
 	{
@@ -789,6 +798,7 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	eString tsid("");
 	eString onid("");
 	eString sid("");
+	eString pmt("");
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
@@ -799,8 +809,8 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	eServiceDVB *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if (service)
 	{
-		name=service->service_name.c_str();
-		provider=service->service_provider.c_str();
+		name=filter_string(service->service_name);
+		provider=filter_string(service->service_provider);
 	}
 	vpid=eString().sprintf("%04xh (%dd)", Decoder::parms.vpid, Decoder::parms.vpid);
 	apid=eString().sprintf("%04xh (%dd)", Decoder::parms.apid, Decoder::parms.apid);
@@ -809,6 +819,7 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	tsid=eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
 	onid=eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
 	sid=eString().sprintf("%04xh", sapi->service.getServiceID().get());
+	pmt=eString().sprintf("%04xh", Decoder::parms.pmtpid);
 
 	FILE *bitstream=0;
 	
@@ -842,7 +853,6 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 		}
 	}
 
-
 	result+=eString("<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>");
 	result+=eString("<table cellspacing=0 cellpadding=0 border=0>");
 	result+=eString("<tr><td>name:</td><td>"+name+"</td></tr>");
@@ -854,6 +864,7 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	result+=eString("<tr><td>tsid:</td><td>"+tsid+"</td></tr>");
 	result+=eString("<tr><td>onid:</td><td>"+onid+"</td></tr>");
 	result+=eString("<tr><td>sid:</td><td>"+sid+"</td></tr>");
+	result+=eString("<tr><td>pmt:</td><td>"+pmt+"</td></tr>");
 	result+=eString("<tr><td>vidformat:<td>"+vidform+"</td></tr>");
 	result+=eString("</table>");
 	result+=eString("</body></html>");
@@ -872,11 +883,35 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 {
 	if (opt.length())
 	{
-		opt.strReplace("%20", " ");
+		opt = httpUnescape(opt);
 		eZapMain::getInstance()->postMessage(eZapMessage(1, "external message", opt, 10), 0);
 		return eString("ok\n");
 	} else
 		return eString("error\n");
+}
+
+static eString start_plugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	std::map<eString,eString> opts=getRequestOptions(opt);
+
+/*	if (opts.find("path") == opts.end())
+		return "E: no path set";*/
+
+	if (opts.find("name") == opts.end())
+		return "E: no plugin name given";
+
+	eZapPlugins plugins(-1);
+	eString path;
+	if ( opts.find("path") != opts.end() )
+	{
+		path = opts["path"];
+		if ( path.length() )
+		{
+			if ( path[path.length()-1] != '/' )
+				path+='/';
+		}
+	}
+	return plugins.execPluginByName( (path+opts["name"]).c_str() );
 }
 
 static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -930,9 +965,60 @@ static eString reload_settings(eString request, eString dirpath, eString opt, eH
 	{
 		eDVB::getInstance()->settings->loadServices();
 		eDVB::getInstance()->settings->loadBouquets();
+		eZap::getInstance()->getServiceSelector()->actualize();
 		return "+ok\n";
 	}
 	return "-no settings to load\n";
+}
+
+#ifndef DISABLE_FILE
+static eString load_recordings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eZapMain::getInstance()->loadRecordings();
+	return "+ok\n";
+}
+
+static eString save_recordings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eZapMain::getInstance()->saveRecordings();
+	return "+ok\n";
+}
+#endif
+
+static eString load_timerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eTimerManager::getInstance()->loadTimerList();
+	return "+ok\n";
+}
+
+static eString save_timerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eTimerManager::getInstance()->saveTimerList();
+	return "+ok\n";
+}
+
+static eString load_playlist(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eZapMain::getInstance()->loadPlaylist();
+	return "+ok\n";
+}
+
+static eString save_playlist(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eZapMain::getInstance()->savePlaylist();
+	return "+ok\n";
+}
+
+static eString load_userBouquets(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eZapMain::getInstance()->loadUserBouquets();
+	return "+ok\n";
+}
+
+static eString save_userBouquets(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eZapMain::getInstance()->saveUserBouquets();
+	return "+ok\n";
 }
 
 #define NAVIGATOR_PATH "/cgi-bin/navigator"
@@ -1023,7 +1109,8 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 
 	if (! (current_service.flags&eServiceReference::isDirectory))	// is playable
 	{
-		iface->play(current_service);
+		eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
+//		iface->play(current_service);
 		res+="ok, hear the music..";
 	} else
 	{
@@ -1052,7 +1139,8 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	eString spath=opt["path"];
 
 	if(!spath)
-		spath=ref2string(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0));
+		spath=eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
+		//ref2string(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0));
 
 	if(!mode)
 		mode="zap";
@@ -1098,9 +1186,11 @@ static eString screenshot(eString request, eString dirpath, eString opts, eHTTPC
 {
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	gPixmap *p=0;
+#ifndef DISABLE_LCD
 	if (opt["mode"]=="lcd")
 		p=&gLCDDC::getInstance()->getPixmap();
 	else
+#endif
 		p=&gFBDC::getInstance()->getPixmap();
 	
 	if (!p)
@@ -1109,7 +1199,7 @@ static eString screenshot(eString request, eString dirpath, eString opts, eHTTPC
 	if (!savePNG("/var/tmp/screenshot.png", p))
 	{
 		content->local_header["Location"]="/root/var/tmp/screenshot.png";
-		content->code=302;
+		content->code=307;
 		return "ok\n";
 	}
 	
@@ -1119,8 +1209,9 @@ static eString screenshot(eString request, eString dirpath, eString opts, eHTTPC
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
-	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
+	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator);
 
+	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
@@ -1130,15 +1221,24 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/control/message", message);
 	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage);
 
-	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator);
-
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings);
-
+#ifndef DISABLE_FILE
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadRecordings", load_recordings);
+	dyn_resolver->addDyn("GET", "/cgi-bin/saveRecordings", save_recordings);
+#endif
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadPlaylist", load_playlist);
+	dyn_resolver->addDyn("GET", "/cgi-bin/savePlaylist", save_playlist);
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadUserBouquets", load_userBouquets);
+	dyn_resolver->addDyn("GET", "/cgi-bin/saveUserBouquets", save_userBouquets);
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadTimerList", load_timerList);
+	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList);
+	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", start_plugin);
+	
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", screenshot);
 /*

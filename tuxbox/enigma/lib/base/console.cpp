@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.3 2003/02/16 01:02:57 waldi Exp $
+ * $Id: console.cpp,v 1.4 2003/09/07 00:03:35 ghostrider Exp $
  */
 
 #include <lib/base/console.h>
@@ -28,7 +28,7 @@
 #include <signal.h>
 #include <errno.h>
 
-inline int bidirpipe(int pfd[], char *cmd , char *argv[])
+int bidirpipe(int pfd[], char *cmd , char *argv[])
 {
 	int pfdin[2];  /* from child to parent */
 	int pfdout[2]; /* from parent to child */
@@ -189,12 +189,16 @@ void eConsoleAppContainer::readyRead(int what)
 {
 	if (what & POLLPRI|POLLIN)
 	{
-		eDebug("what = %d");
+//		eDebug("what = %d");
 		char buf[2048];
 		int readed = read(fd[0], buf, 2048);
 		eDebug("%d bytes read", readed);
 		if ( readed != -1 && readed )
-			/*emit*/ dataAvail( eString( buf ) );
+		{
+/*			for ( int i = 0; i < readed; i++ )
+				eDebug("%d = %c (%02x)", i, buf[i], buf[i] );*/
+			/*emit*/ dataAvail( eString( buf, readed ) );
+		}
 		else if (readed == -1)
 			eDebug("readerror %d", errno);
 	}
@@ -210,12 +214,16 @@ void eConsoleAppContainer::readyErrRead(int what)
 {
 	if (what & POLLPRI|POLLIN)
 	{
-		eDebug("what = %d");
+//		eDebug("what = %d");
 		char buf[2048];
 		int readed = read(fd[2], buf, 2048);
 		eDebug("%d bytes read", readed);
 		if ( readed != -1 && readed )
-			/*emit*/ dataAvail( eString( buf ) );
+		{
+/*			for ( int i = 0; i < readed; i++ )
+				eDebug("%d = %c (%02x)", i, buf[i], buf[i] );*/
+			/*emit*/ dataAvail( eString( buf, readed ) );
+		}
 		else if (readed == -1)
 			eDebug("readerror %d", errno);
 	}

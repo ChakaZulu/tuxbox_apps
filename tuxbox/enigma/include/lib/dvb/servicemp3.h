@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #ifndef __lib_dvb_servicemp3_h
 #define __lib_dvb_servicemp3_h
 
@@ -51,6 +53,8 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	eString metadata[2];
 	
 	void metaDataUpdated(eString metadata);
+	int getOutputDelay(int i); // in bytes
+	int getOutputRate(int i); // in bytes/s
 	
 	int error;
 	int outputbr;
@@ -148,7 +152,6 @@ public:
 	
 	eString getInfo(int id);
 
-	int getFlags();
 	int getState();
 	int getErrorInfo();
 
@@ -163,9 +166,25 @@ public:
 
 class eServiceID3
 {
-public:
 		// tags are according to ID3v2
 	std::map<eString, eString> tags;
+
+	eString filename;
+
+	enum
+	{
+		NOTPARSED,
+		PARSED,
+		NOTEXIST
+	}state;
+public:
+	eServiceID3( const char *filename )
+		:filename(filename), state( NOTPARSED )
+	{
+	}
+	eServiceID3( const eServiceID3 &ref );
+	
+	std::map<eString, eString> &getID3Tags();
 };
 
 class eServiceMP3: public eService
@@ -177,3 +196,5 @@ public:
 };
 
 #endif
+
+#endif //DISABLE_FILE

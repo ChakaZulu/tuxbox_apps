@@ -1,4 +1,5 @@
 #include <lib/dvb/esection.h>
+#include <config.h>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -10,11 +11,15 @@
 
 #include <lib/base/ebase.h>
 #include <lib/base/eerror.h>
+#include <lib/system/elock.h>
 
-#define DEMUX "/dev/dvb/adapter0/demux0"
-
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/dmx.h>
+#else
 #include <linux/dvb/dmx.h>
+#endif
 
+static pthread_mutex_t slock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 ePtrList<eSection> eSection::active;
 
 eSectionReader::eSectionReader()
@@ -34,25 +39,40 @@ void eSectionReader::close()
 	handle=-1;
 }
 
-int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
+int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags, const char* dmxdev)
 {
-	flags=flags;
+	flags=_flags;
+#if HAVE_DVB_API_VERSION < 3
+	dmxSctFilterParams secFilterParams;
+#endif
 	dmx_sct_filter_params secFilterParams;
+
 	close();
 
-	handle=::open(DEMUX, O_RDWR|O_NONBLOCK);
+	handle=::open(dmxdev, O_RDWR|O_NONBLOCK);
 	eDebug("opened handle %d", handle);
 	if (handle<0)
 	{
-		perror(DEMUX);
+		perror(dmxdev);
 		return -errno;
 	}
+#if HAVE_DVB_API_VERSION == 3
 	else
-	  ioctl (handle,DMX_SET_BUFFER_SIZE, 128*1024);
+	{
+		if (::ioctl(handle, DMX_SET_BUFFER_SIZE, 128*1024) < 0 )
+			eDebug("DMX_SET_BUFFER_SIZE failed (%m)");
+	}
+#endif
 
 	secFilterParams.pid=pid;
 
+#if HAVE_DVB_API_VERSION < 3
+	const int maxsize=DMX_FILTER_SIZE;
+	memset(secFilterParams.filter.filter, 0, maxsize);
+	memset(secFilterParams.filter.mask, 0, maxsize);
+#else
 	memset(&secFilterParams.filter, 0, sizeof(struct dmx_filter));
+#endif
 
 	secFilterParams.timeout=0;
 	secFilterParams.flags=DMX_IMMEDIATE_START;
@@ -100,16 +120,18 @@ int eSectionReader::read(__u8 *buf)
 	return 0;
 }
 
-eSection::eSection(int _pid, int _tableid, int _tableidext, int _version, int _flags, int _tableidmask): pid(_pid), tableid(_tableid), tableidext(_tableidext), tableidmask(_tableidmask), flags(_flags), version(_version)
+eSection::eSection(int _pid, int _tableid, int _tableidext, int _version, int _flags, int _tableidmask)
+	:context(eApp), pid(_pid), tableid(_tableid), tableidext(_tableidext), tableidmask(_tableidmask), flags(_flags), version(_version)
 {
 	notifier=0;
 	section=0;
 	lockcount=0;
-	timer=new eTimer(eApp);
+	timer=new eTimer(context);
 	CONNECT(timer->timeout, eSection::timeout);
 }
 
 eSection::eSection()
+	:context(eApp)
 {
 	timer=0;
 	notifier=0;
@@ -119,22 +141,21 @@ eSection::eSection()
 
 eSection::~eSection()
 {
-	if (timer)
-		delete timer;
+	delete timer;
 	timer=0;
 	closeFilter();
 	if (lockcount)
 		eDebug("deleted still locked table");
 }
 
-	int eSection::start()
+	int eSection::start( const char* dmxdev )
 {
 	if (timer && (version==-1) && !(flags&SECREAD_NOTIMEOUT))
-		timer->start((pid==0x14)?60000:10000, true);
-	return setFilter(pid, tableid, tableidext, version);
+		timer->start((pid==0x14)?90000:10000, true);
+	return setFilter(pid, tableid, tableidext, version, dmxdev);
 }
 
-int eSection::setFilter(int pid, int tableid, int tableidext, int version)
+int eSection::setFilter(int pid, int tableid, int tableidext, int version, const char *dmxdev)
 {
 	closeFilter();
 	__u8 data[4], mask[4];
@@ -152,17 +173,20 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 		data[3]=version; mask[3]=0xFF;
 	}
 
-	reader.open(pid, data, mask, 4, flags);
+	reader.open(pid, data, mask, 4, flags, dmxdev);
 	if (reader.getHandle() < 0)
 		return -ENOENT;
 
 	if (!(flags&SECREAD_NOABORT))
+	{
+		singleLock s(slock);
 		active.push_back(this);
-	
+	}
+
 	if (notifier)
 		delete notifier;
 
-	notifier=new eSocketNotifier(eApp, reader.getHandle(), eSocketNotifier::Read);
+	notifier=new eSocketNotifier(context, reader.getHandle(), eSocketNotifier::Read);
 
 	CONNECT(notifier->activated, eSection::data);
 
@@ -174,7 +198,10 @@ void eSection::closeFilter()
 	if (reader.getHandle()>0)
 	{
 		if (!(flags&SECREAD_NOABORT))
+		{
+			singleLock s(slock);
 			active.remove(this);
+		}
 		delete notifier;
 		notifier=0;
 		if (timer)
@@ -185,7 +212,9 @@ void eSection::closeFilter()
 
 void eSection::data(int socket)
 {
-	int max = 100;
+	int max = 200;
+	(void)socket;
+
 	while (max--)
 	{
 		if (lockcount)
@@ -196,7 +225,7 @@ void eSection::data(int socket)
 			break;
 		maxsec=buf[7];
 
-//		printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
+		//  printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
 
 		if (flags&SECREAD_INORDER)
 			version=buf[5];
@@ -251,6 +280,7 @@ int eSection::abortAll()
 
 int eSection::sectionRead(__u8 *data)
 {
+	(void)data;
 	return -1;
 }
 
@@ -280,7 +310,8 @@ void eTable::sectionFinish(int err)
 	/*emit*/ tableReady(error);
 }
 
-eTable::eTable(int pid, int tableid, int tableidext, int version): eSection(pid, tableid, tableidext, version, (pid==0x14)?0:(SECREAD_INORDER|SECREAD_CRC))
+eTable::eTable(int pid, int tableid, int tableidext, int version)
+	:eSection(pid, tableid, tableidext, version, (pid==0x14)?0:(SECREAD_INORDER|SECREAD_CRC))
 {
 	error=0;
 	ready=0;

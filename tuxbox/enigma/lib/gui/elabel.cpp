@@ -8,9 +8,9 @@
 #include <lib/system/init_num.h>
 
 eLabel::eLabel(eWidget *parent, int flags, int takefocus, const char *deco ):
-	eDecoWidget(parent, takefocus, deco), blitFlags(0), flags(flags), para(0), align( eTextPara::dirLeft ), shortcutPixmap(0)
+	eDecoWidget(parent, takefocus, deco), blitFlags(0), flags(flags),
+	para(0), align( eTextPara::dirLeft ), shortcutPixmap(0)
 {
-	setForegroundColor(eSkin::getActive()->queryScheme("global.normal.foreground"));
 }
 
 eLabel::~eLabel()
@@ -31,15 +31,16 @@ void eLabel::setPixmapPosition( const ePoint &p )
 void eLabel::validate( const eSize* s )
 {
 	if (!para)
-  {
+	{
 		if (s)
-			para=new eTextPara( eRect(text_position.x(), text_position.y(), s->width() - text_position.x(), s->height() - text_position.y()));		
+			para=new eTextPara( eRect(text_position.x(), text_position.y(), s->width() - text_position.x(), s->height() - text_position.y()));
 		else
 			para=new eTextPara( eRect(text_position.x(), text_position.y(), size.width() - text_position.x(), size.height() - text_position.y()));
+
 		para->setFont(font);
 		para->renderString(text, flags);
 		para->realign(align);
-  }
+	}
 }
 
 void eLabel::invalidate()
@@ -49,7 +50,6 @@ void eLabel::invalidate()
 		para->destroy();
 		para=0;
 	}
-
 	if (isVisible())
 		eDecoWidget::invalidate();  // we must redraw...
 }
@@ -84,7 +84,11 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 /*	eDebug("decoStr = %s, text=%s, name=%s, %p left = %d, top = %d, width=%d, height = %d", strDeco?strDeco.c_str():"no", text?text.c_str():"no" , name?name.c_str():"no", this, this->getPosition().x(), this->getPosition().y(), this->getSize().width(), this->getSize().height() ); 
 	eDebug("renderContext left = %d, top = %d, width = %d, height = %d", rc.left(), rc.top(), rc.width(), rc.height() );*/
 
-	eRect area=eRect(ePoint(0, 0), ePoint(width(), height()));
+	target->clip( rc );
+	eRect area=clientrect;
+/*	eDebug("area left = %d, top = %d, width = %d, height = %d",
+		area.left(), area.top(),
+		area.width(), area.height() );*/
 
 	if (deco_selected && have_focus)
 	{
@@ -95,7 +99,8 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 		deco.drawDecoration(target, ePoint(width(), height()));
 		area=crect;
 	}
-	
+	target->clippop();
+	target->clip( area );
 	if (shortcutPixmap)
 	{
 		//area.setWidth(area.width()-area.height());
@@ -104,8 +109,10 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 
 	if (text.length())
 	{
-		if ( area.size().height() < size.height() || area.size().width() < size.width() )  // then deco is drawed
+		if ( area.size().height() < size.height() ||
+				area.size().width() < size.width() )
 		{
+		// then deco is drawed
 			eSize s=area.size();
 			validate( &s );
 		} else
@@ -115,9 +122,9 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 			yOffs = ( (area.height() - para->getBoundBox().height() ) / 2 + 0) - para->getBoundBox().top();
 		else
 			yOffs = 0;
-			
+
 		eWidget *w;
-		if ((blitFlags & BF_ALPHATEST) && (transparentBackgroundColor != -1))
+		if ((blitFlags & BF_ALPHATEST) && (transparentBackgroundColor >= 0))
 		{
 			w=this;
 			target->setBackgroundColor(transparentBackgroundColor);
@@ -127,22 +134,20 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 			target->setBackgroundColor(w->getBackgroundColor());
 		}
 		target->setFont(font);
-		target->clip( area );
-
 		target->renderPara(*para, ePoint( area.left(), area.top()+yOffs) );
-		target->clippop();
 	}
 	if (pixmap)
 	{
 //		eDebug("blit pixmap area left=%d, top=%d, right=%d, bottom=%d", rc.left(), rc.top(), rc.right(), rc.bottom() );
 //		eDebug("pixmap_pos x = %d, y = %d, xsize=%d, ysize=%d", pixmap_position.x(), pixmap_position.y(), pixmap->x, pixmap->y );
-		target->blit(*pixmap, pixmap_position, area, (blitFlags & BF_ALPHATEST) ? gPixmap::blitAlphaTest : 0);
+		target->blit(*pixmap, shortcutPixmap?pixmap_position+ePoint( area.left(), 0):pixmap_position, area, (blitFlags & BF_ALPHATEST) ? gPixmap::blitAlphaTest : 0);
 	}
 	if (shortcutPixmap)
 		target->blit(*shortcutPixmap, 
 				ePoint((area.height()-shortcutPixmap->x)/2, area.top()+(area.height()-shortcutPixmap->y)/2),
 				eRect(),
 				gPixmap::blitAlphaTest);
+	target->clippop();
 }
 
 int eLabel::eventHandler(const eWidgetEvent &event)

@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #ifndef __codec_h
 #define __codec_h
 
@@ -27,3 +29,5 @@ public:
 };
 
 #endif
+
+#endif //DISABLE_FILE

@@ -37,12 +37,14 @@ eSatfind::eSatfind(eFrontend *fe)
 
 	ok=new eButton(this);
 	ok->setName("ok");
+	CONNECT(ok->selected, eWidget::accept);
 
-	CONNECT(ok->selected, eWidget::reject );
 	CONNECT(updateTimer.timeout, eSatfind::update);
 
 	if (eSkin::getActive()->build(this, "eSatfind"))
 		return;
+
+	setHelpID(44);
 }
 
 int eSatfind::eventHandler( const eWidgetEvent& e)

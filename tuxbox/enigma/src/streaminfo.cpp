@@ -18,7 +18,7 @@
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/service.h>
-
+#include <lib/system/info.h>
 
 int eStreaminfo::eventHandler(const eWidgetEvent &event)
 {
@@ -63,52 +63,60 @@ static struct
 	const char *description;
 	int flag;
 } caids[]=
-	{{0x0100, 0xFF00, "Seca/Mediaguard (Canal+)"},
-	{0x0200, 0xFF00, "CCETT"}, 
-	{0x0300, 0xFF00, "MSG"}, 
-	{0x0400, 0xFF00, "Eurodec"}, 
-	{0x0500, 0xFF00, "Viaccess (France Telekom)"}, 
-	{0x0600, 0xFF00, "Irdeto"}, 
-	{0x0700, 0xFF00, "Jerrold/GI/Motorola"}, 
-	{0x0800, 0xFF00, "Matra"}, 
-	{0x0900, 0xFF00, "Videoguard (NDS)"}, 
-	{0x0A00, 0xFF00, "Nokia"}, 
-	{0x0B00, 0xFF00, "Conax (Norwegian Telekom)"}, 
-	{0x0C00, 0xFF00, "NTL"}, 
-	{0x0D00, 0xFF00, "Cryptoworks (Philips)"}, 
-	{0x0E00, 0xFF00, "Power VU (Scientific Atlanta)"}, 
-	{0x0F00, 0xFF00, "Sony"}, 
-	{0x1000, 0xFF00, "Tandberg Television"}, 
-	{0x1100, 0xFF00, "Thomson"}, 
-	{0x1200, 0xFF00, "TV/Com"}, 
-	{0x1300, 0xFF00, "HPT"}, 
-	{0x1400, 0xFF00, "HRT"}, 
-	{0x1500, 0xFF00, "IBM"}, 
-	{0x1600, 0xFF00, "Nera"}, 
-	{0x1702, 0xFFFF, "Betacrypt (Beta Technik) (C)"}, 
-	{0x1722, 0xFFFF, "Betacrypt (Beta Technik) (D)"}, 
-	{0x1762, 0xFFFF, "Betacrypt (Beta Technik) (F)"}, 
-	{0x1700, 0xFF00, "Betacrypt (Beta Technik)"},
-	{0x1800, 0xFF00, "Kudelski SA"}, 
-	{0x1900, 0xFF00, "Titan Information Systems"}, 
-	{0x2000, 0xFF00, "Telefonica"}, 
-	{0x2100, 0xFF00, "STENTOR"}, 
-	{0x2200, 0xFF00, "Tadiran Scopus"}, 
-	{0x2300, 0xFF00, "BARCO AS"}, 
-	{0x2400, 0xFF00, "Starguide Digital Networks"}, 
-	{0x2500, 0xFF00, "Mentor Data Systems, Inc."}, 
-	{0x2600, 0xFF00, "EBU"}, 
-	{0x4700, 0xFF00, "General Instruments"}, 
-	{0x4800, 0xFF00, "Telemann"}, 
-	{0x4900, 0xFF00, "Digital TV Industry Alliance of China"}, 
-	{0x4A60, 0xFFFF, "Tsinghua TongFang"}, 
-	{0x4A70, 0xFFFF, "Dream Multimedia TV (DreamCrypt)"},
-	{0x4A71, 0xFFFF, "Dream Multimedia TV (High security, 4096bit RSA)"},
-	{0x4A72, 0xFFFF, "Dream Multimedia TV (Consumer, 48bit)"},
-	{0x4A73, 0xFFFF, "Dream Multimedia TV (non-DVB)"},
-	{0x4A74, 0xFFFF, "Dream Multimedia TV (export)"},
-	{0x4A70, 0xFFF0, "Dream Multimedia TV (other)"},
-	{0x0000, 0x0000, "other/unknown"}};
+	{{0x0100, 0xFF00, "Seca/Mediaguard (Canal+)", 0},
+	{0x0200, 0xFF00, "CCETT", 0}, 
+	{0x0300, 0xFF00, "MSG", 0}, 
+	{0x0400, 0xFF00, "Eurodec", 0}, 
+	{0x0500, 0xFF00, "Viaccess (France Telekom)", 0}, 
+	{0x0600, 0xFF00, "Irdeto", 0}, 
+	{0x0700, 0xFF00, "Jerrold/GI/Motorola", 0}, 
+	{0x0800, 0xFF00, "Matra", 0}, 
+	{0x0900, 0xFF00, "Videoguard (NDS)", 0}, 
+	{0x0A00, 0xFF00, "Nokia", 0}, 
+	{0x0B00, 0xFF00, "Conax (Norwegian Telekom)", 0}, 
+	{0x0C00, 0xFF00, "NTL", 0}, 
+	{0x0D00, 0xFF00, "Cryptoworks (Philips)", 0}, 
+	{0x0E00, 0xFF00, "Power VU (Scientific Atlanta)", 0}, 
+	{0x0F00, 0xFF00, "Sony", 0}, 
+	{0x1000, 0xFF00, "Tandberg Television", 0}, 
+	{0x1100, 0xFF00, "Thomson", 0}, 
+	{0x1200, 0xFF00, "TV/Com", 0}, 
+	{0x1300, 0xFF00, "HPT", 0}, 
+	{0x1400, 0xFF00, "HRT", 0}, 
+	{0x1500, 0xFF00, "IBM", 0}, 
+	{0x1600, 0xFF00, "Nera", 0}, 
+	{0x1702, 0xFFFF, "Betacrypt (Beta Technik) (C)", 0}, 
+	{0x1708, 0xFFFF, "Betacrypt 2 (Beta Technik)", 0}, 
+	{0x1722, 0xFFFF, "Betacrypt (Beta Technik) (D)", 0}, 
+	{0x1762, 0xFFFF, "Betacrypt (Beta Technik) (F)", 0}, 
+	{0x1700, 0xFF00, "Betacrypt (Beta Technik)", 0},
+	{0x1800, 0xFF00, "Kudelski SA", 0}, 
+	{0x1900, 0xFF00, "Titan Information Systems", 0}, 
+	{0x2000, 0xFF00, "Telefonica", 0}, 
+	{0x2100, 0xFF00, "STENTOR", 0}, 
+	{0x2200, 0xFF00, "Tadiran Scopus", 0}, 
+	{0x2300, 0xFF00, "BARCO AS", 0}, 
+	{0x2400, 0xFF00, "Starguide Digital Networks", 0}, 
+	{0x2500, 0xFF00, "Mentor Data Systems, Inc.", 0}, 
+	{0x2600, 0xFF00, "EBU", 0}, 
+	{0x4700, 0xFF00, "General Instruments", 0}, 
+	{0x4800, 0xFF00, "Telemann", 0}, 
+	{0x4900, 0xFF00, "Digital TV Industry Alliance of China", 0}, 
+	{0x4A00, 0xFFF0, "Tsinghua TongFang", 0}, 
+	{0x4A10, 0xFFF0, "Easycas", 0},
+	{0x4A20, 0xFFF0, "Alphacrypt", 0},
+	{0x4A30, 0xFFF0, "DVN Holdings", 0},
+	{0x4A40, 0xFFF0, "Shanghai Advanced Digital Technology Co. Ltd.", 0},
+	{0x4A50, 0xFFF0, "Shenzhen Kingsky Company (China) Ltd.", 0},
+	{0x4A60, 0xFFF0, "@Sky", 0},
+	{0x4A70, 0xFFFF, "Dream Multimedia TV (DreamCrypt)", 0},
+	{0x4A71, 0xFFFF, "Dream Multimedia TV (High security, 4096bit RSA)", 0},
+	{0x4A72, 0xFFFF, "Dream Multimedia TV (Consumer, 48bit)", 0},
+	{0x4A73, 0xFFFF, "Dream Multimedia TV (non-DVB)", 0},
+	{0x4A74, 0xFFFF, "Dream Multimedia TV (export)", 0},
+	{0x4A70, 0xFFF0, "Dream Multimedia TV (other)", 0},
+	{0x4A80, 0xFFF0, "THALESCrypt", 0},
+	{0x0000, 0x0000, "other/unknown", 0}};
 
 static void clearCA()
 {
@@ -139,8 +147,13 @@ static eString getCAName(int casysid, int always)
 	return "";
 }
 
-class siTags: public eLabel
+#ifndef DISABLE_FILE
+class siTags: public eWidget
 {
+	void willShow();
+	eString tagString, descrString;
+	bool ok;
+	eLabel *tags, *descr;
 public:
 	siTags(const eService *service, eWidget *parent);
 };
@@ -157,21 +170,53 @@ static eString getDescription(eString tag)
 		return _("genre");
 	else if (tag == "TDRC")
 		return _("year");
+	else if (tag == "TCOM")
+		return _("composer");
+	else if (tag == "TRCK")
+		return _("track");
+	else if (tag == "TLEN")
+		return _("length");
 	else
 		return tag;
 }
 
-siTags::siTags(const eService *service, eWidget *parent): eLabel(parent)
+siTags::siTags(const eService *service, eWidget *parent)
+: eWidget(parent), ok(false)
 {
 	if (!service->id3)
 		return;
-	eString description;
-	
-	for (std::map<eString,eString>::const_iterator i(service->id3->tags.begin());
-			i != service->id3->tags.end(); ++i)
-		description+=getDescription(i->first) + ":\t" + i->second+"\n";
-	setText(description);
+
+	tags = new eLabel(this);
+	descr = new eLabel(this);
+	for (std::map<eString,eString>::const_iterator i(service->id3->getID3Tags().begin());
+			i != service->id3->getID3Tags().end(); ++i)
+	{
+		tagString+=getDescription(i->first)+'\n';
+		if ( i->first.find("TLEN") != eString::npos )
+		{
+			int len = atoi( i->second.c_str() ) / 1000;
+			descrString+=eString().sprintf("%d:%02d", len/60, len%60)+'\n';
+		}
+		else
+			descrString+=i->second+'\n';
+	}
 }
+
+void siTags::willShow()
+{
+	if ( !ok )
+	{
+		ok=true;
+		tags->move(ePoint(0,0));
+		tags->resize( eSize(width()/3, height()) );
+		descr->move( ePoint(width()/3, 0) );
+		descr->resize( eSize((width()/3)*2, height()) );
+		tags->setText(tagString);
+		descr->setText(descrString);
+	}
+	eWidget::willShow();
+}
+#endif
 
 class siPID: public eWidget
 {
@@ -199,7 +244,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	service_name[1]=new eLabel(this);
 	service_name[1]->setText(cservice?(cservice->service_name.c_str()):"--");
 	service_name[1]->setFont(fontfixed);
-	service_name[1]->move(ePoint(280, yOffs+2));
+	service_name[1]->move(ePoint(240, yOffs+2));
 	service_name[1]->resize(eSize(260, fs+5));
 	yOffs+=fs+5;
 
@@ -211,7 +256,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	service_provider[1]=new eLabel(this);
 	service_provider[1]->setText((cservice && cservice->dvb)?cservice->dvb->service_provider.c_str():"--");
 	service_provider[1]->setFont(fontfixed);
-	service_provider[1]->move(ePoint(280, yOffs+2));
+	service_provider[1]->move(ePoint(240, yOffs+2));
 	service_provider[1]->resize(eSize(260, fs+5));
 	yOffs+=fs+5;
 
@@ -223,7 +268,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	vpid[1]=new eLabel(this);
 	vpid[1]->setFont(fontfixed);
 	vpid[1]->setText((parms.vpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.vpid, parms.vpid));
-	vpid[1]->move(ePoint(280, yOffs+2));
+	vpid[1]->move(ePoint(240, yOffs+2));
 	vpid[1]->resize(eSize(260, fs+5));
 	yOffs+=fs+5;
 
@@ -234,7 +279,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	
 	apid[1]=new eLabel(this);
 	apid[1]->setText((parms.apid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.apid, parms.apid));
-	apid[1]->move(ePoint(280, yOffs+2));
+	apid[1]->move(ePoint(240, yOffs+2));
 	apid[1]->resize(eSize(260, fs+5));
 	apid[1]->setFont(fontfixed);
 	yOffs+=fs+5;
@@ -246,7 +291,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	
 	pcrpid[1]=new eLabel(this);
 	pcrpid[1]->setText((parms.pcrpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.pcrpid, parms.pcrpid));
-	pcrpid[1]->move(ePoint(280, yOffs+2));
+	pcrpid[1]->move(ePoint(240, yOffs+2));
 	pcrpid[1]->resize(eSize(260, fs+5));
 	pcrpid[1]->setFont(fontfixed);
 	yOffs+=fs+5;
@@ -258,7 +303,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 
 	pmtpid[1]=new eLabel(this);
 	pmtpid[1]->setText((parms.pmtpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.pmtpid, parms.pmtpid));
-	pmtpid[1]->move(ePoint(280, yOffs+2));
+	pmtpid[1]->move(ePoint(240, yOffs+2));
 	pmtpid[1]->resize(eSize(260, fs+5));
 	pmtpid[1]->setFont(fontfixed);
 	yOffs+=fs+5;
@@ -270,7 +315,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	
 	tpid[1]=new eLabel(this);
 	tpid[1]->setText((parms.tpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.tpid, parms.tpid));
-	tpid[1]->move(ePoint(280, yOffs+2));
+	tpid[1]->move(ePoint(240, yOffs+2));
 	tpid[1]->resize(eSize(260, fs+5));
 	tpid[1]->setFont(fontfixed);
 	yOffs+=fs+5;
@@ -283,7 +328,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	if (bitstream)
 	{
 		char buffer[100];
-		int xres=0, yres=0, aspect=0;
+		int xres=0, yres=0, aspect=0, framerate=0;
 		while (fgets(buffer, 100, bitstream))
 		{
 			if (!strncmp(buffer, "H_SIZE:  ", 9))
@@ -292,6 +337,8 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 				yres=atoi(buffer+9);
 			if (!strncmp(buffer, "A_RATIO: ", 9))
 				aspect=atoi(buffer+9);
+			if (!strncmp(buffer, "F_RATE: ", 8))
+				framerate=atoi(buffer+8);
 		}
 		fclose(bitstream);
 		vformat.sprintf("%dx%d ", xres, yres);
@@ -306,6 +353,32 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 		case 4:
 			vformat+="20:9"; break;
 		}
+		switch(framerate)
+		{
+		case 1:
+			vformat+=", 23.976 fps";
+			break;
+		case 2:
+			vformat+=", 24 fps";
+			break;
+		case 3:
+			vformat+=", 25 fps";
+			break;
+		case 4:
+			vformat+=", 29.97 fps";
+			break;
+		case 5:
+			vformat+=", 30 fps";
+			break;
+		case 6:
+			vformat+=", 50 fps";
+			break;
+		case 7:
+			vformat+=", 59.94 fps";
+			break;
+		case 8:
+			vformat+=", 80 fps";
+		}
 	}
 	
 	vform[0]=new eLabel(this);
@@ -315,7 +388,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	
 	vform[1]=new eLabel(this);
 	vform[1]->setText(vformat);
-	vform[1]->move(ePoint(280, yOffs));
+	vform[1]->move(ePoint(240, yOffs));
 	vform[1]->resize(eSize(260, fs));
 	vform[1]->setFont(fontfixed);
 	yOffs+=fs+5;
@@ -327,7 +400,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 
 	tsid[1]=new eLabel(this);
 	tsid[1]->setText(eString().sprintf("%04xh", sapi->service.getTransportStreamID().get()));
-	tsid[1]->move(ePoint(280, yOffs));
+	tsid[1]->move(ePoint(240, yOffs));
 	tsid[1]->resize(eSize(130, fs+5));
 	tsid[1]->setFont(fontfixed);
 	yOffs+=fs+5;
@@ -339,7 +412,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 
 	onid[1]=new eLabel(this);
 	onid[1]->setText(eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get()));
-	onid[1]->move(ePoint(280, yOffs));
+	onid[1]->move(ePoint(240, yOffs));
 	onid[1]->resize(eSize(130, fs+5));
 	onid[1]->setFont(fontfixed);
 	yOffs+=fs+5;
@@ -351,7 +424,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 
 	sid[1]=new eLabel(this);
 	sid[1]->setText(eString().sprintf("%04xh", sapi->service.getServiceID().get()));
-	sid[1]->move(ePoint(280, yOffs));
+	sid[1]->move(ePoint(240, yOffs));
 	sid[1]->resize(eSize(130, fs+5));
 	sid[1]->setFont(fontfixed);
 	yOffs+=fs+5;
@@ -359,11 +432,11 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	eLabel *l=new eLabel(this);
 	l->setText("Namespace:");
 	l->move(ePoint(10, yOffs));
-	l->resize(eSize(280, fs+5));
+	l->resize(eSize(185, fs+5));
 	
 	l=new eLabel(this);
 	l->setText(eString().sprintf("%04xh", sapi->service.getDVBNamespace().get()));
-	l->move(ePoint(280, yOffs));
+	l->move(ePoint(240, yOffs));
 	l->resize(eSize(130, fs+5));
 	l->setFont(fontfixed);
 }
@@ -459,11 +532,13 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 
 eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParameters *parms): eWindow(1), statusbar(this)
 {
-	setText(mode?"Record mode - read manual":"Streaminfo");
-	cmove(ePoint(100, 80));
-	cresize(eSize(450, 450));
+	setText(mode?_("Record mode - read manual"):_("Streaminfo"));
+	cmove(ePoint(140, 100));
+	cresize(eSize(470, 420));
 	eSize s(clientrect.size());
 	s.setHeight( s.height() - 40 );
+	
+	setHelpID(41);
 
 	eService *service=eServiceInterface::getInstance()->addRef(ref);
 	
@@ -475,13 +550,17 @@ eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParamete
 		w->move(ePoint(0, 0));
 		w->resize( s );
 		w->hide();
-	} else if (service && service->id3)
+	}
+#ifndef DISABLE_FILE
+	else if (service && service->id3)
 	{
 		w=new siTags(service, this);
 		w->move(ePoint(0, 0));
 		w->resize( s );
 		w->hide();
-	} else
+	}
+#endif
+	else
 	{
 		w=new eLabel(this);
 		w->setText(_("no information is available"));
@@ -494,21 +573,30 @@ eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParamete
 
 	mp.addPage(w);
 
-	w=new siCA(this);
-	w->move(ePoint(0, 0));
-	w->resize( s );
-	w->hide();
-
-	mp.addPage(w);
-	
 	if ((ref.type == eServiceReference::idDVB) && (!ref.path))
 	{
+		w=new siCA(this);
+		w->move(ePoint(0, 0));
+		w->resize( s );
+		w->hide();
+		mp.addPage(w);
+
 		w=new eWidget(this);
 		w->move(ePoint(0, 0));
 		w->resize( s );
 		w->hide();
 
-		eTransponderWidget *t=new eTransponderWidget(w, 0, eTransponderWidget::deliverySatellite);
+		eTransponderWidget *t = 0;
+		switch ( eSystemInfo::getInstance()->getFEType() )
+		{
+			case eSystemInfo::feSatellite:
+				t = new eTransponderWidget(w, 0, eTransponderWidget::deliverySatellite);
+				break;
+			case eSystemInfo::feCable:
+			default:
+				t = new eTransponderWidget(w, 0, eTransponderWidget::deliveryCable);
+				break;
+		}
 		t->move(ePoint(0, 0));
 		t->resize(eSize(clientrect.width(), 200));
 		t->load();
@@ -519,18 +607,23 @@ eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParamete
 		eWidget *fe=new eFEStatusWidget(w, eFrontend::getInstance());
 		fe->move(ePoint(0, 200));
 		fe->resize(eSize(clientrect.width(), 100));
+		mp.addPage(w);
+		
 	} else
 	{
-		w=new eLabel(this);
-		w->setText(_("no information is available"));
-		((eLabel*)w)->setFlags(eLabel::flagVCenter);
-		((eLabel*)w)->setAlign(eTextPara::dirCenter);
-		w->move(ePoint(0, 0));
-		w->resize( s );
-		w->hide();
+		for ( int i = 0; i < 2; i++ )
+		{
+			w=new eLabel(this);
+			w->setText(_("no information is available"));
+			((eLabel*)w)->setFlags(eLabel::flagVCenter);
+			((eLabel*)w)->setAlign(eTextPara::dirCenter);
+			w->move(ePoint(0, 0));
+			w->resize( s );
+			w->hide();
+			mp.addPage(w);
+		}
 	}
 	
-	mp.addPage(w);
 	mp.first();
 
 	statusbar.loadDeco();

@@ -14,6 +14,7 @@
 	<fontalias>
 		<map name="eServiceSelector.Entry.Description" font="Blue.Regular" size="26" />
 		<map name="eStatusBar" font="Blue.Regular" size="24" />
+		<map name="eChannelInfo" font="Blue.Regular" size="28" />
 		<map name="eWindow.TitleBar" font="Blue.Bold" size="32" />
 		<map name="eWindow.Childs" font="Blue.Regular" size="30" />
 
@@ -245,6 +246,8 @@
 		<map name="global.normal.background" color="content" />
 		<map name="global.normal.foreground" color="white" />
 
+		<map name="button.normal.background" color="content" />
+
 		<map name="global.selected.background" color="selected" />
 		<map name="global.selected.foreground" color="white" />
 
@@ -300,7 +303,8 @@
 		<img name="lcd_enigma_logo" src="logo.png" nomerge="yes" />
 		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
 		<img name="lcd_scart" src="../video.png" nomerge="yes" />
-		<img name="speaker" src="speaker.png" nomerge="yes" />
+		<img name="speaker" src="../lcd-speaker.png" nomerge="yes" />
+		<img name="lcd-clock" src="../lcd-clock.png" nomerge="yes" />
 
 		<img name="eListBox.arrow.updown" src="lbarrow.png" />
 		<img name="eListBox.arrow.left" src="lbarrow_left.png" />
@@ -388,26 +392,23 @@
 
 	
 	<object name="eZapMainMenu">
-		<eWidget position="0:306" size="720:270" backgroundColor="-1" >
-			<eLabel pixmap="mainmenu.background" position="0:0" size="e:e" name="background" />
+		<eWidget position="0:306" size="720:270" backgroundColor="-2" >
+			<eLabel pixmap="mainmenu.background" position="0:0" size="e:e" name="background" backgroundColor="-1" />
 			<eLabel position="22:54" size="70:70" name="l3" alphatest="on" />
 			<eLabel position="114:34" size="70:70" name="l2" alphatest="on" />
 			<eLabel position="208:22" size="70:70" name="l1" alphatest="on" />
 			<eLabel position="312:5" size="100:100" name="m" alphatest="on" />
 			<eLabel position="443:22" size="70:70" name="r1" alphatest="on" />
 			<eLabel position="537:34" size="70:70" name="r2" alphatest="on" />
-
 			<eLabel position="629:54" size="70:70" name="r3" alphatest="on" />
-			<eLabel position="200:200" size="320:48" align="center" font="eWindow.TitleBar"	foregroundColor="white"  name="description" alphatest="on" />
+			<eLabel position="200:200" size="320:48" align="center" alphatest="on" font="eWindow.TitleBar" foregroundColor="white" name="description" />
 		</eWidget>
 	</object>
 	
-	
-	
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
-			<eLabel position="0:0" size="120:45" font="lcd.main.service_name" wrap="on" name="service_name" />
-			<eLabel position="74:44" size="46:23" font="lcd.main.clock" name="clock" align="right" />
+			<eLabel position="0:0" size="120:44" font="lcd.main.service_name" wrap="on" name="service_name" />
+			<eLabel position="74:45" size="46:23" font="lcd.main.clock" name="clock" align="right" />
 			<eLabel position="0:53" size="9:13" pixmap="speaker" />
 			<eLabel position="0:46" size="7:7" pixmap="lcd-clock" />
 			<eProgress position="9:56" size="64:8" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
@@ -458,18 +459,18 @@
 			<eLabel position="433:131" size="27:12" pixmap="button_gray" name="button_yellow_disabled" alphatest="on" />
 			<eLabel position="540:131" size="27:12" pixmap="button_gray" name="button_blue_disabled" alphatest="on" />
 
-			<eLabel text="EPG" position="246:129" font="Blue.Bold;17" size="80:15" foregroundColor="white" />
-			<eLabel text="Bildregie" position="353:129" font="Blue.Bold;17" size="80:15" foregroundColor="white" />
-			<eLabel text="Tonwahl" position="462:129" font="Blue.Bold;17" size="80:15" foregroundColor="white" />
-			<eLabel text="Videotext" position="569:129" font="Blue.Bold;17" size="80:15" foregroundColor="white" />
+			<eLabel text="EPG" position="246:129" font="Blue.Bold;17" size="78:15" foregroundColor="white" />
+			<eLabel text="subservices" position="353:129" font="Blue.Bold;17" size="80:15" foregroundColor="white" />
+			<eLabel text="audio track" position="462:129" font="Blue.Bold;17" size="78:15" foregroundColor="white" />
+			<eLabel text="plugins" position="569:129" font="Blue.Bold;17" size="80:15" foregroundColor="white" />
 
 			<eLabel name="recStatus" position="476:34" size="18:18" pixmap="rec_symbol" alphatest="on" />
 
-			<eLabel name="dvrFunctions" position="210:68" size="433:62" pixmap="dvrtable">
+			<eLabel name="dvrInfoBar" position="210:68" size="433:62" pixmap="dvrtable" alphatest="on" >
 				<eLabel name="TimeLeft" position="316:0" size="150:57" backgroundColor="content" foregroundColor="white" wrap="on" />
 			</eLabel>
-			
-			<eWidget name="nonDVRfunctions" position="210:68" size="433:57">
+
+			<eWidget name="dvbInfoBar" position="210:68" size="433:57">
 				<!--Zeilen  -->
 				<eLabel position="0:0" size="55:30" font="Nimbus;22" name="e_now_time" backgroundColor="content" foregroundColor="white" />
 				<eLabel position="0:30" size="55:30" font="Nimbus;22" name="e_next_time" backgroundColor="content" foregroundColor="white" />
@@ -480,20 +481,11 @@
 				<eLabel position="345:0" size="70:26" font="Blue.Regular;26" name="e_now_duration" align="right" backgroundColor="content" foregroundColor="white" />
 				<eLabel position="345:30" size="70:26" font="Blue.Regular;26" name="e_next_duration" align="right" backgroundColor="content" foregroundColor="white" />
 			</eWidget>
+
+			<eWidget name="fileInfoBar" position="210:68" size="433:57">
+				<eLabel position="0:0" size="e:e" font="Blue.Regular;29" name="fileinfos" backgroundColor="content" foregroundColor="white" wrap="on" />
+			</eWidget>
   
-			<eLabel name="dvrFunctions" position="210:68" size="433:62" pixmap="dvrtable">
-				<!--
-				<eLabel text="FR " position="54:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
-				<eLabel text="Play " position="175:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
-				<eLabel text="Pause " position="280:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
-				<eLabel text="FF " position="405:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
-				<eLabel text="Stop " position="54:35" size="85:30" backgroundColor="light" foregroundColor="light+15" />
-				<eLabel text="Record " position="180:35" size="85:30" backgroundColor="light" foregroundColor="light+15" />
-				<eLabel name="TimeLeft" position="280:35" size="200:30" backgroundColor="light" foregroundColor="light+15" />
-			-->
-			</eLabel>
-			
-			
 		</eZapMain>
 	</object>
 

@@ -1,3 +1,5 @@
+#ifndef DISABLE_NETWORK
+
 #ifndef __engrab_h
 #define __engrab_h
 
@@ -8,7 +10,7 @@
 class ENgrab: public Object
 {
 	eString sendStr;
-	eString startxml();
+	eString startxml( const char * descr=0 );
 	eString stopxml();
 	void sending();
 	void connected();
@@ -21,18 +23,10 @@ class ENgrab: public Object
 	~ENgrab();
 public:
 	static ENgrab *getNew() { return new ENgrab(); }
-	void sendstart();
+	void sendstart( const char* descr=0 );
 	void sendstop();
 };
 
-class ENgrabWnd:public eWindow
-{
-	eListBox<eListBoxEntryMenu> lb;	
-	void onBackSelected();
-	void manualStart() { ENgrab::getNew()->sendstart(); }
-	void manualStop() { ENgrab::getNew()->sendstop(); }
-public:
-	ENgrabWnd();
-};
-
 #endif
+
+#endif // DISABLE_NETWORK

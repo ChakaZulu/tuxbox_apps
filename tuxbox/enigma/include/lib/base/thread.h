@@ -9,6 +9,7 @@ class eThread
 	static void *wrapper(void *ptr);
 	int alive;
 public:
+	bool thread_running() { return alive; }
 	eThread();
 	virtual ~eThread();
 	

@@ -19,7 +19,6 @@ class eDVBState;
 class tsSelectType: public eWidget
 {
 	eListBox<eListBoxEntryText> *list;
-	
 	void selected(eListBoxEntryText *entry);
 	int eventHandler( const eWidgetEvent &e );
 public:
@@ -29,7 +28,7 @@ public:
 class tsManual: public eWidget
 {
 	eTransponder transponder;
-	eButton *b_start, *b_abort;
+	eButton *b_start;
 	eTransponderWidget *transponder_widget;
 	eFEStatusWidget *festatus_widget;
 	eCheckbox *c_clearlist, *c_searchnit, *c_useonit, *c_usebat;
@@ -40,26 +39,26 @@ class tsManual: public eWidget
 	void update();
 	int eventHandler(const eWidgetEvent &event);
 public:
-	tsManual(eWidget *parent, const eTransponder &transponder, eWidget* LCDTitle, eWidget* LCDElement);
+	tsManual(eWidget *parent, const eTransponder &transponder, eWidget* LCDTitle=0, eWidget* LCDElement=0);
+	eTransponder &getTransponder() { return transponder; }
 };
 
 class tsAutomatic: public eWidget
 {
-	eButton *b_start, *b_abort;
+	eButton *b_start;
 	eComboBox *l_network;
 	eCheckbox *c_eraseall;
+	eCheckbox *c_nocircular;
 	eLabel *l_status;
 	std::list<eTransponder>::iterator current_tp, last_tp;
 	int automatic;
 	void start();
-	void abort();
 	void networkSelected(eListBoxEntryText *l);
 	void dvbEvent(const eDVBEvent &event);
 	int loadNetworks();
 	int nextNetwork(int first=0);
 	int nextTransponder(int next);
 	int tuneNext(int next);
-	int eventHandler(const eWidgetEvent &event);
 public:
 	tsAutomatic(eWidget *parent);
 };
@@ -78,7 +77,7 @@ class tsScan: public eWidget
 	eTimer timer;
 	eLabel *timeleft, *service_name, *service_provider, *services_scanned, *transponder_scanned;
 	eProgress *progress;
-	int tpLeft;
+	int tpLeft, scantime;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 	void dvbEvent(const eDVBEvent &event);
@@ -91,19 +90,30 @@ public:
 	tsScan(eWidget *parent);
 };
 
-class TransponderScan
+class TransponderScan: public eWindow
 {
-	eWindow *window;
 	eProgress *progress;
 	eLabel *progress_text;
 	eStatusBar *statusbar;	
-	eWidget *select_type, *manual_scan, *automatic_scan, *LCDElement, *LCDTitle;
-
+	eWidget *current;
+#ifndef DISABLE_LCD
+	eWidget *LCDElement, *LCDTitle;
+#endif
 public:
-	enum { initialMenu, initialAutomatic };
-	TransponderScan( eWidget* LCDTitle, eWidget* LCDElement);
+	enum tState
+	{
+		stateMenu,
+		stateManual,
+		stateAutomatic,
+		stateScan,
+		stateDone,
+		stateEnd
+	};
+
+	TransponderScan( eWidget* LCDTitle=0, eWidget* LCDElement=0 );
 	~TransponderScan();
-	int exec(int initial=initialMenu);
+	int exec(tState initial=stateMenu);
+	int eventHandler(const eWidgetEvent&);
 };
 
 #endif

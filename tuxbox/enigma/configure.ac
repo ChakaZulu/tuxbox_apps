@@ -30,6 +30,7 @@ Makefile
 data/Makefile
 data/fonts/Makefile
 data/htdocs/Makefile
+data/htdocs/stylesheets/Makefile
 data/pictures/Makefile
 data/pictures/chk_stone/Makefile
 data/pictures/chk_stone/mainmenu/Makefile
@@ -40,9 +41,12 @@ data/pictures/countries/Makefile
 data/pictures/neutrino/Makefile
 data/pictures/mainmenu/Makefile
 data/pictures/shortcut/Makefile
+data/pictures/keypics/Makefile
+data/pictures/small/Makefile
 data/resources/Makefile
 data/skins/Makefile
 data/templates/Makefile
+data/lirc/Makefile
 doc/Makefile
 include/Makefile
 include/lib/Makefile

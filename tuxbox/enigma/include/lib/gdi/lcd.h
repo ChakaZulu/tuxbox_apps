@@ -1,3 +1,5 @@
+#ifndef DISABLE_LCD
+
 #ifndef __lcd_h
 #define __lcd_h
 
@@ -46,5 +48,6 @@ public:
 	void update();
 };
 
-
 #endif
+
+#endif //DISABLE_LCD

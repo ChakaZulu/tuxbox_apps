@@ -17,14 +17,15 @@ class eListBoxEntryEPG:public eListBoxEntry
 	EITEvent event;
 	tm start_time;
 	eString descr;
-	eString redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited);
+	eString hlp;
+	const eString &redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited);
 	static int getEntryHeight();
 	eServiceReference service;
 	void build();
 public:
-	bool operator<(const eListBoxEntryEPG& ref) const
+	bool operator<(const eListBoxEntry& ref) const
 	{
-		return event.start_time < ref.event.start_time;
+		return event.start_time < ((eListBoxEntryEPG&)ref).event.start_time;
 	}
 	eListBoxEntryEPG(EITEvent& evt, eListBox<eListBoxEntryEPG> *listbox, eServiceReference &ref);
 	eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox, eServiceReference &ref);
@@ -39,7 +40,6 @@ private:
 	void fillEPGList();
 	void entrySelected(eListBoxEntryEPG *entry);
 	int eventHandler(const eWidgetEvent &event);
-	void invalidateEntry( eListBoxEntryEPG*);
 public:
 	eEPGSelector(const eServiceReferenceDVB &service);
 	inline ~eEPGSelector(){};

@@ -1,4 +1,5 @@
 #include <lib/driver/streamwd.h>
+#include <config.h>
 #include <lib/driver/eavswitch.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +7,12 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include <linux/dvb/video.h>
+#if HAVE_DVB_API_VERSION < 3
+#include "ost/video.h"
+#else
+#include "linux/dvb/video.h"
+#endif
+
 #include <dbox/event.h>
 
 #include <lib/base/eerror.h>
@@ -17,7 +23,11 @@
 
 #define EVENT_DEVICE "/dev/dbox/event0"
 #define WDE_VIDEOMODE 		(uint)1
-#define WDE_VCRONOFF 			(uint)2
+#define WDE_VCRONOFF 		(uint)2
+
+#ifndef EVENT_FRATE_CHANGE
+#define EVENT_FRATE_CHANGE  64  /* framerate has changed */
+#endif
 
 eStreamWatchdog *eStreamWatchdog::instance;
 
@@ -33,7 +43,7 @@ eStreamWatchdog::eStreamWatchdog()
 	}
 	else
 	{
-		if ( ioctl(handle, EVENT_SET_FILTER, EVENT_ARATIO_CHANGE) < 0 )
+		if ( ioctl(handle, EVENT_SET_FILTER, EVENT_ARATIO_CHANGE | EVENT_VCR_CHANGED | EVENT_FRATE_CHANGE ) < 0 )
 		{
 			perror("ioctl");
 			close(handle);
@@ -60,15 +70,34 @@ void eStreamWatchdog::check(int)
 	struct event_t event;
 	int eventSize = sizeof (event);
 	int status;
-	while ((status = read(handle, &event, eventSize)) == eventSize)
-		if (event.event == EVENT_ARATIO_CHANGE)
+	while ( (status = read(handle, &event, eventSize)) == eventSize )
+	{
+		if (event.event & (EVENT_ARATIO_CHANGE|EVENT_FRATE_CHANGE))
 			reloadSettings();
+
+		if (event.event & EVENT_VCR_CHANGED)
+				/*emit*/VCRActivityChanged( getVCRActivity() );
+	}
+}
+
+#define FP_IOCTL_GET_VCR 7
+
+int eStreamWatchdog::getVCRActivity()
+{
+	int val;
+	int fp = open("/dev/dbox/fp0",O_RDWR);
+
+	ioctl(fp, FP_IOCTL_GET_VCR, &val);
+
+	close(fp);
+
+	return val;
 }
 
 void eStreamWatchdog::reloadSettings()
 {
 	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
-	eAVAspectRatio aratio = rUnknown;
+	int frate=0;
 	if (bitstream)
 	{
 		char buffer[100];
@@ -77,6 +106,8 @@ void eStreamWatchdog::reloadSettings()
 		{
 			if (!strncmp(buffer, "A_RATIO: ", 9))
 				aspect=atoi(buffer+9);
+			if (!strncmp(buffer, "F_RATE: ", 8))
+				frate=atoi(buffer+8);
 		}
 		fclose(bitstream);
 		switch (aspect)
@@ -91,47 +122,47 @@ void eStreamWatchdog::reloadSettings()
 		}
 	}
 	
-	eDebug("Aratio changed");			
-		/*emit*/ AspectRatioChanged(isanamorph);
+	/*emit*/ AspectRatioChanged(isanamorph);
 
 	int videoDisplayFormat=VIDEO_LETTER_BOX;
-	unsigned int pin8;
+	int doanamorph=0;
+	unsigned int pin8; // Letterbox
 	eConfig::getInstance()->getKey("/elitedvb/video/pin8", pin8);
 	switch (pin8)
 	{
 	case 0:
-		if (isanamorph)
-		{
-			aratio=r169c;
-			videoDisplayFormat=VIDEO_LETTER_BOX;
-		}
-		else
-		{
-			aratio=r43;
-			videoDisplayFormat=VIDEO_PAN_SCAN;
-		}
+		doanamorph=0;
+		videoDisplayFormat=isanamorph?VIDEO_LETTER_BOX:VIDEO_PAN_SCAN;
 		break;
 	case 1:
+		doanamorph=0;
 		videoDisplayFormat=VIDEO_PAN_SCAN;
-		aratio=r43;
  		break;
 	case 2:
-		if (isanamorph)
-		{
-			aratio=r169;
-			videoDisplayFormat = VIDEO_CENTER_CUT_OUT;
-		}
-		else
-		{
-			aratio=r43;
-			videoDisplayFormat = VIDEO_PAN_SCAN;
-		}
+		doanamorph=isanamorph;
+		videoDisplayFormat=isanamorph?VIDEO_CENTER_CUT_OUT:VIDEO_PAN_SCAN;
 		break;
 	}
 
 	eAVSwitch::getInstance()->setVideoFormat( videoDisplayFormat );
 
-	eAVSwitch::getInstance()->setAspectRatio(aratio);
+	eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
+	
+	switch (frate)
+	{
+	case 1:
+	case 2:
+	case 3:
+	case 6:
+		eAVSwitch::getInstance()->setVSystem(vsPAL);
+		break;
+	case 4:
+	case 5:
+	case 7:
+	case 8:
+		eAVSwitch::getInstance()->setVSystem(vsNTSC);
+		break;
+	}
 }
 
 int eStreamWatchdog::isAnamorph()

@@ -6,17 +6,56 @@
 	 sec etc.
 */
 
+#include <config.h>
 #include <stdlib.h>
+
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/dmx.h>
+#include <ost/frontend.h>
+#include <ost/sec.h>
+#include <ost/video.h>
+#define DEMOD_DEV "/dev/dvb/card0/frontend0"
+#define SEC_DEV "/dev/dvb/card0/sec0"
+#else
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/frontend.h>
 #include <linux/dvb/video.h>
+#define DEMOD_DEV "/dev/dvb/adapter0/frontend0"
+#define SEC_DEV "/dev/dvb/adapter0/sec0"
+#define CodeRate fe_code_rate_t
+#define SpectralInversion fe_spectral_inversion_t
+#define Modulation fe_modulation_t
+#endif
 
 #include <lib/base/ebase.h>
 #include <lib/base/estring.h>
 
+class eLNB;
 class eTransponder;
 class eSatellite;
 class eSwitchParameter;
+
+// DiSEqC Command Sequence Wrapper... for Multi API compatibility
+
+struct eSecCmdSequence
+{
+	enum { TONE_OFF=SEC_TONE_OFF, TONE_ON=SEC_TONE_ON };
+
+#if HAVE_DVB_API_VERSION < 3
+	enum { VOLTAGE_OFF=SEC_VOLTAGE_OFF, VOLTAGE_13=SEC_VOLTAGE_13, VOLTAGE_18=SEC_VOLTAGE_18 };
+	enum { NONE=SEC_MINI_NONE, TONEBURST_A=SEC_MINI_A, TONEBURST_B=SEC_MINI_B, NONE };
+	secCommand *commands;
+#else
+	enum {VOLTAGE_13=SEC_VOLTAGE_13, VOLTAGE_18=SEC_VOLTAGE_18, VOLTAGE_OFF };
+	enum {TONEBURST_A=SEC_MINI_A, TONEBURST_B=SEC_MINI_B, NONE };
+	dvb_diseqc_master_cmd *commands;
+#endif
+	int numCommands;
+	int toneBurst;
+	int voltage;
+	int continuousTone;
+	bool increasedVoltage;
+};
 
 /**
  * \brief A frontend, delivering TS.
@@ -25,59 +64,86 @@ class eSwitchParameter;
  */
 class eFrontend: public Object
 {
-	dvb_frontend_info info;
-	int type;
-	int fd;
-
-	int lastcsw,
+	int type,
+			fd,
+#if HAVE_DVB_API_VERSION < 3
+			secfd,
+#else
+			curContTone,
+			curVoltage,
+#endif
+			needreset,
+			lastcsw,
+			lastucsw,
 			lastToneBurst,
 			lastRotorCmd,
 			lastSmatvFreq,
 			curRotorPos;    // current Orbital Position
-      
-	enum { stateIdle, stateTuning };
-	int state;
+
+	eLNB *lastLNB;
+         
+	enum { stateIdle, stateTuning } state;
 	eTransponder *transponder;
-	eFrontend(const char *demod="/dev/dvb/adapter0/frontend0");
+	eFrontend(int type, const char *demod=DEMOD_DEV, const char *sec=SEC_DEV);
 	static eFrontend *frontend;
-	eTimer *timer, timer2;
+	eTimer *timer, timer2, rotorTimer1, rotorTimer2;
 	int tries, noRotorCmd;
 	int tune(eTransponder *transponder, 
 			uint32_t Frequency, int polarisation,
-			uint32_t SymbolRate, fe_code_rate_t FEC_inner,
-			fe_spectral_inversion_t Inversion, eSatellite* sat, fe_modulation_t QAM);
+			uint32_t SymbolRate,
+			CodeRate FEC_inner,
+			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
 	Signal1<void, eTransponder*> tpChanged;
+// ROTOR INPUTPOWER
+	timeval rotorTimeout;
+	int idlePowerInput;
+	int runningPowerInput;
+	int newPos;
+// Non blocking rotor turning
+	int DeltaA,
+			voltage,
+			increased;
+///////////////////
 	void timeout();
-	/*
-	int RotorUseTimeout(dvb_diseqc_master_cmd& seq, int newPos, double DegPerSec);
-	int RotorUseInputPower(dvb_diseqc_master_cmd& seq, void *commands, int seqRepeat, int DeltaA, int newPos );
-	*/
+	int RotorUseTimeout(eSecCmdSequence& seq, eLNB *lnb);
+	int RotorUseInputPower(eSecCmdSequence& seq, eLNB *lnb);
+	void RotorStartLoop();
+	void RotorRunningLoop();
+	void RotorFinish(bool tune=true);
+	int SendSequence( const eSecCmdSequence &seq );
 public:
-	void disableRotor() { noRotorCmd = 1, lastcsw=0, lastRotorCmd=0; }  // no more rotor cmd is sent when tune
-	void enableRotor() { noRotorCmd = 0, lastcsw=0, lastRotorCmd=0; }  // rotor cmd is sent when tune
+	void disableRotor() { noRotorCmd = 1, lastRotorCmd=-1; } // no more rotor cmd is sent when tune
+	void enableRotor() { noRotorCmd = 0, lastRotorCmd=-1; }  // rotor cmd is sent when tune
 	int sendDiSEqCCmd( int addr, int cmd, eString params="", int frame=0xE0 );
 
-	Signal1<void, int> rotorRunning;
-	Signal0<void> rotorStopped, rotorTimeout;
+	Signal1<void, int> s_RotorRunning;
+	Signal0<void> s_RotorStopped, s_RotorTimeout;
 	Signal2<void, eTransponder*, int> tunedIn;
 	~eFrontend();
 
-	enum
+	static int open(int type)
 	{
-		feSatellite=0, feCable, feTerrestrical
-	};
+		if (!frontend)
+			frontend=new eFrontend(type);
+		if (frontend->fd<0)
+		{
+			close();
+			return frontend->fd;
+		}
+		return 0;
+	}
 
-	static int open() { if (!frontend) frontend=new eFrontend(); if (frontend->fd<0) { close(); return frontend->fd; } return 0; }
-	static void close() { delete frontend; }
+	static void close()	{		delete frontend;	}
+
 	static eFrontend *getInstance() { return frontend; }
 
 	int Type() { return type; }
-	
+
 	int Status();
 	int Locked() { return Status()&FE_HAS_LOCK; }
 	void InitDiSEqC();
 	void readInputPower();
-     	
+  
 	uint32_t BER();
 	/**
 	 * \brief Returns the signal strength (or AGC).
@@ -92,7 +158,6 @@ public:
 	 */
 	int SNR();
 	uint32_t UncorrectedBlocks();
-	uint32_t NextFrequency();
 	enum
 	{
 		polHor=0, polVert, polLeft, polRight
@@ -113,7 +178,8 @@ public:
 			int inversion,					// spectral inversion on(1)/off(0)
 			int QAM);								// Modulation according to etsi (1=QAM16, ...)
 
-	int freq_offset;
+		// switches of as much as possible.
+	int savePower();
 };
 
 

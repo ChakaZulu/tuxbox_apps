@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #include <lib/codecs/codec.h>
 
 eAudioDecoder::eAudioDecoder()
@@ -8,3 +10,5 @@ eAudioDecoder::eAudioDecoder()
 eAudioDecoder::~eAudioDecoder()
 {
 }
+
+#endif //DISABLE_FILE

@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #ifndef __lib_codecs_codecmp3_h
 #define __lib_codecs_codecmp3_h
 
@@ -28,3 +30,5 @@ public:
 };
 
 #endif
+
+#endif //DISABLE_FILE

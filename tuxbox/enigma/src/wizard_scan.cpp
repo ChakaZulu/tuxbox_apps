@@ -1,10 +1,14 @@
-#include <src/wizard_scan.h>
+#include <wizard_scan.h>
+#include <rotorconfig.h>
+#include <lib/dvb/frontend.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/listbox.h>
 #include <lib/system/init_num.h>
+#include <lib/system/info.h>
 #include <lib/system/econfig.h>
-#include <src/satconfig.h>
-#include <src/scan.h>
+#include <satconfig.h>
+#include <scan.h>
+#include <enigma_scan.h>
 
 class eDiseqcChoice: public eListBoxEntry
 {
@@ -35,7 +39,6 @@ public:
 	{
 		return choice;
 	}
-	
 protected:
 	static int getEntryHeight()
 	{
@@ -126,11 +129,15 @@ public:
 	eWizardScanInit()
 	{
 		int diseqc=0;
+		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable )
+			return;
 again: // gotos considered harmless.. :)
 		eConfig::getInstance()->getKey("/elitedvb/wizards/diseqc", diseqc);
 		if (diseqc < 1)
 		{
-			int res=eWizardSelectDiseqc::run();
+			int res = 0;
+
+			res=eWizardSelectDiseqc::run();
 			
 			if (res >= 0)
 			{
@@ -145,11 +152,11 @@ again: // gotos considered harmless.. :)
 					satconfig.extSetComplexity(1); // diseqc 1.0
 					break;
 				case 2:
-					satconfig.extSetComplexity(3); // diseqc 1.0
+					satconfig.extSetComplexity(3); // diseqc 1.2
 					break;
 				}
 
-again_satconfig:				
+again_satconfig:
 				satconfig.show();
 				res=satconfig.exec();
 				satconfig.hide();
@@ -158,8 +165,19 @@ again_satconfig:
 					goto again;
 
 				{
+					eLNB *l=eZapScan::getRotorLNB(1);
+					if (l)
+					{
+						RotorConfig c(l);
+						c.show();
+						c.exec();
+						c.hide();
+					}
+				}
+
+				{
 					TransponderScan scan(0, 0);
-					res=scan.exec(TransponderScan::initialAutomatic);
+					res=scan.exec(TransponderScan::stateAutomatic);
 				}
 				if (!res)
 					goto again_satconfig;

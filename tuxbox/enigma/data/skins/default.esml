@@ -16,7 +16,9 @@
 	</fonts>
 
 	<values>
-		  <value name="mute.pos.x" value="100" />
+			<value name="eMessageBox.pos.x" value="100" />
+			<value name="eMessageBox.pos.y" value="70" />
+			<value name="mute.pos.x" value="100" />
 			<value name="mute.pos.y" value="50" />
 			<value name="volume.grafik.pos.x" value="450" />
 			<value name="volume.grafik.pos.y" value="50" />
@@ -28,6 +30,7 @@
 
 	<fontalias>
 		<map name="eStatusBar" font="Nimbus" size="16" />
+		<map name="eChannelInfo" font="Nimbus" size="16" />
 		<map name="global.normal" font="Nimbus" size="24" />
 		<map name="global.30" font="Nimbus" size="30" />
 		<map name="global.fixed" font="Nimbus" size="24" />
@@ -67,9 +70,14 @@
 		<map name="partitionCheck.status" font="Nimbus" size="20" />
 
 		<map name="head" font="Nimbus" size="40" />
+		
+		<map name="epg.time" font="Nimbus" size="16" />
+		<map name="epg.title" font="Nimbus" size="18" />
+		<map name="epg.description" font="Nimbus" size="16" />
 	</fontalias>
 
 	<images basepath="" target="fb">
+		<img name="listbox.separator" src="separator-fs8.png" />
 		<img name="arrow_up" src="arrow_up.png"/>
 		<img name="arrow_down" src="arrow_down.png"/>
 		<img name="eCheckbox.checked" src="checked.png" />
@@ -115,6 +123,10 @@
 		<img name="icon_error" src="icon-error-fs8.png" />
 		<img name="icon_warning" src="icon-warning-fs8.png" />
 		<img name="sselect_folder" src="folder-fs8.png" />
+		<img name="sselect_marker" src="marker-fs8.png" />
+		<img name="sselect_marker_small" src="marker_small-fs8.png" />
+		<img name="sselect_locked" src="padlock-fs8.png" />
+		<img name="sselect_locked_small" src="padlock_small-fs8.png" />
 		<img name="timer_symbol" src="clock-fs8.png" />
 		<img name="timer_rec_symbol" src="clock_rec-fs8.png" />
 		<img name="ok_symbol" src="event_ok-fs8.png" />
@@ -125,21 +137,28 @@
 		<img name="diseqc_0" src="diseqc_0-fs8.png" />
 		<img name="diseqc_1" src="diseqc_1-fs8.png" />
 		<img name="diseqc_2" src="diseqc_2-fs8.png" />
+		<img name="eListBoxEntryCheck" src="check-fs8.png" />
 	</images>
 	
 	<images basepath="countries">
+		<img name="country_hu" src="hu.png" />
+		<img name="country_ae" src="ae.png" />
 		<img name="country_de" src="de.png" />
 		<img name="country_es" src="es.png" />
 		<img name="country_en" src="en.png" />
+		<img name="country_fi" src="fi.png" />
 		<img name="country_no" src="no.png" />
 		<img name="country_se" src="se.png" />
 		<img name="country_cz" src="cz.png" />
 		<img name="country_gr" src="gr.png" />
+		<img name="country_hr" src="hr.png" />
 		<img name="country_fr" src="fr.png" />
 		<img name="country_it" src="it.png" />
 		<img name="country_nl" src="nl.png" />
 		<img name="country_pl" src="pl.png" />
+		<img name="country_pt" src="pt.png" />
 		<img name="country_tr" src="tr.png" />
+		<img name="country_ru" src="ru.png" />
 		<img name="country_missing" src="missing.png" />
 	</images>
 
@@ -161,10 +180,60 @@
 		<img name="shortcut.escape" src="escape.png" />
 	</images>
 
+	<images basepath="keypics">
+		<img name="key.0" src="button_0.png" />
+		<img name="key.1" src="button_1.png" />
+		<img name="key.2" src="button_2.png" />
+		<img name="key.3" src="button_3.png" />
+		<img name="key.4" src="button_4.png" />
+		<img name="key.5" src="button_5.png" />
+		<img name="key.6" src="button_6.png" />
+		<img name="key.7" src="button_7.png" />
+		<img name="key.8" src="button_8.png" />
+		<img name="key.9" src="button_9.png" />
+		<img name="key.10" src="button_audio.png" />
+		<img name="key.11" src="button_video.png" />
+		<img name="key.12" src="button_info.png" />
+		<img name="key.13" src="button_dream.png" />
+		<img name="key.14" src="button_lame.png" />
+		<img name="key.15" src="button_tv.png" />
+		<img name="key.16" src="button_radio.png" />
+		<img name="key.17" src="button_red.png" />
+		<img name="key.18" src="button_green.png" />
+		<img name="key.19" src="button_yellow.png" />
+		<img name="key.20" src="button_blue.png" />
+		<img name="key.21" src="button_lame.png" />
+		<img name="key.22" src="button_text.png" />
+		<img name="key.23" src="button_help.png" />
+		<img name="key.24" src="button_arrow_left.png" />
+		<img name="key.25" src="button_arrow_right.png" />
+		<img name="key.26" src="button_+.png" />
+		<img name="key.27" src="button_-.png" />
+		<img name="key.28" src="button_?.png" />
+		<img name="key.29" src="button_dbox.png" />
+		<img name="key.30" src="button_home.png" />
+		<img name="key.31" src="button_mute.png" />
+	</images>
+
 	<colors>
 		<color name="background" color="#ff000000" />
+		<color name="eWindow.border" color="#000000" />
 		<color name="white_trans" color="#1effffff" />
-		<color name="white_blue" color="#1effffff" end="#1e0003f80" size="16" />
+		<color name="white_blue" color="#1effffff" end="#1e003f80" size="8" />
+
+		<color name="std_red"    color="#ff0000" />
+		<color name="std_green"  color="#00ff00" />
+		<color name="std_blue"   color="#0000ff" />
+
+		<color name="std_dyellow"  color="#c0c000" />
+		<color name="std_dcyan"    color="#00c0c0" />
+		<color name="std_dgreen"   color="#00c000" />
+		<color name="std_dmagenta" color="#c000c0" />
+		<color name="std_dred"     color="#c00000" />
+		<color name="std_dblue"    color="#0000c0" />
+
+		<color name="std_gray"     color="#000000" end="#ffffff" size="8" />
+
 		<color name="blue_nontrans" color="#1e003f80" end="#00003f80" size="4" />
 		<color name="icons1" color="#1eeeeeee" end="#1e7b7b7b" size="4" />
 		<color name="icons2" color="#1eafafee" end="#1e0000ff" size="4" />		
@@ -185,10 +254,15 @@
 	<colorscheme>
 		<map name="volume_left" color="volume4" />
 		<map name="volume_right" color="volume2" />
+		<map name="std_black" color="std_gray" />
+		<map name="std_white" color="std_gray+7" />
+		<map name="epg.entry.background.selected" color="std_gray+4" />
+		<map name="epg.entry.background" color="volume3" />
+		<map name="indexmark" color="std_red" />
 	</colorscheme>
 
 	<object name="eZapMainMenu">
-		<eWidget position="0:300" size="720:270" backgroundColor="-1" >
+		<eWidget position="0:300" size="720:270" backgroundColor="-2" >
 			<eLabel pixmap="mainmenu.background" position="0:0" size="e:e" name="background" />
 			<eLabel position="22:54" size="70:70" name="l3" alphatest="on" />
 			<eLabel position="114:34" size="70:70" name="l2" alphatest="on" />
@@ -197,28 +271,39 @@
 			<eLabel position="443:22" size="70:70" name="r1" alphatest="on" />
 			<eLabel position="537:34" size="70:70" name="r2" alphatest="on" />
 			<eLabel position="629:54" size="70:70" name="r3" alphatest="on" />
-			<eLabel position="200:200" size="320:48" align="center" font="eWindow.TitleBar" foregroundColor="eWindow.titleBar" backgroundColor="white_trans" name="description" />
+			<eLabel position="200:200" size="320:48" align="center" font="eWindow.TitleBar" foregroundColor="eWindow.titleBar" name="description" alphatest="on" />
 		</eWidget>
 	</object>
  
 	<object name="eventview">
 		<eWindow cposition="100:100" csize="520:380" >
 			<eWidget position="10:5" size="e-40:e-45" name="epg_description" font="eventview.description" />
-			<eLabel position="10:e-35" size="150:e-10" name="date" font="eventview.date" />
-			<eLabel position="130:e-35" size="150:e-10" name="time" font="eventview.time" />
-			<eLabel position="e-250:e-35" size="240:e-10" name="channel" font="eventview.channel" align="right" />
+			<eLabel position="10:e-35" size="120:e-10" name="date" font="eventview.date" />
+			<eLabel position="130:e-35" size="140:30" name="time" font="eventview.time" />
+			<eLabel position="280:e-35" size="30:30" name="timer_icon" alphatest="on" />
+			<eLabel position="320:e-35" size="e:30" name="channel" font="eventview.channel" align="right" />
 			<eProgress name="scrollbar" position="e-30:5" size="20:e-45" direction="1" />
 		</eWindow>
 	</object>
 
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
-			<eLabel position="0:0" size="120:17" pixmap="lcd_enigma_logo" />
-			<eLabel position="0:17" size="120:34" font="lcd.main.service_name" wrap="on" name="service_name" />
-			<eLabel position="74:51" size="46:13" font="lcd.main.clock" name="clock" align="right" />
-			<eProgress position="0:56" size="70:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
+			<eLabel position="0:0" size="120:45" font="lcd.main.service_name" wrap="on" name="service_name" />
+			<eLabel position="74:44" size="46:23" font="lcd.main.clock" name="clock" align="right" />
+			<eLabel position="0:53" size="9:13" pixmap="speaker" />
+			<eLabel position="0:46" size="7:7" pixmap="lcd-clock" />
+			<eProgress position="9:56" size="64:8" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
+			<eProgress position="9:46" size="64:9" name="progress_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
 		</eZapLCDMain>
-	</object> 
+	</object>
+
+	<object name="enigma_lcd_scart">
+		<eZapLCDScart position="0:0" size="120:64">
+			<eProgress position="7:2" size="65:6" name="volume_bar" foregroundColor="0" leftColor="0" rightColor="255" border="1" />
+			<eLabel position="0:0" size="120:17" pixmap="lcd_enigma_logo" />
+		  <eLabel position="4:20" size="112:38" pixmap="lcd_scart" />
+		</eZapLCDScart>
+	</object>
 
 	<object name="enigma_lcd_menu">
 		<eZapLCDMenu position="0:0" size="120:64">
@@ -228,24 +313,10 @@
 		</eZapLCDMenu>
 	</object>
 
-	<object name="enigma_lcd_scart">
-		<eZapLCDScart position="0:0" size="120:64">
-			<eLabel position="0:0" size="120:17" pixmap="lcd_enigma_logo" />
-			<eLabel position="4:24" size="112:38" pixmap="lcd_scart" />	
-		</eZapLCDScart>
-	</object>
-
-<!--
-	<object name="enigma_lcd_standby">
-		<eZapLCDScart position="0:0" size="120:64">
-		  <eLabel position="0:0" size="e:e" pixmap="lcd_standby" />	
-		</eZapLCDScart>
-	</object>
--->
 	<object name="enigma_lcd_standby">
 		<eZapLCDStandby position="0:0" size="120:64">
-			<eLabel position="25:15" size="e:e" font="lcd.standby.clock" name="clock" />	
-			<eLabel position="0:0" size="e:e" pixmap="lcd_standby" />	
+			<eLabel position="0:10" size="e:e" font="lcd.standby.clock" name="clock" />
+			<!-- <eLabel position="0:0" size="e:e" pixmap="lcd_standby" /> -->
 		</eZapLCDStandby>
 	</object>
 
@@ -262,7 +333,7 @@
 	</object>
 
 	<object name="eSatelliteConfigurationManager">
-		<eSatelliteConfigurationManager cposition="80:80" csize="570:450" text="Satellite Configuration">
+		<eSatelliteConfigurationManager cposition="80:100" csize="570:410" text="Satellite Configuration">
 			<eComboBox name="type" position="10:10" size="500:35" loadDeco="" />
 			<eLabel text="Sat/Position" name="lSatPos" position="10:55" size="250:30" align="center"/>
 			<eLabel text="LNB" name="lLnb" position="270:55" size="60:30" align="center"/>
@@ -278,60 +349,69 @@
 	</object>
 
 	<object name="eLNBSetup">
-		<eLNBSetup text="LNB Configuration" position="75:50" csize="550:400">
+		<eLNBSetup text="LNB Configuration" position="70:60" csize="550:400">
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eLNBSetup>
 	</object>
   
 	<object name="eLNBPage">
 		<eLNBPage position="0:0" size="550:400" >
-			<eListbox name="lnblist" helptext="choose the LNB you wish to apply or edit" position="10:10" size="100:e-95" loadDeco="" />
-			<eNumber name="lofL" position="350:10" size="e-10:35" helptext="enter LNB lowband offset frequency (0..9, ok)" loadDeco="" />
-			<eLabel text="LOF/L:" name="lLofL" position="130:10" size="200:35" vcenter="on" />
-			<eNumber name="lofH" position="350:55" size="e-10:35" helptext="enter LNB highband offset frequency (0..9, ok)" loadDeco="" />
-			<eLabel text="LOF/H:" name="lLofH" position="130:55" size="200:35" vcenter="on" />
-			<eLabel text="Threshold:" name="lThreshold" position="130:100" size="200:35" vcenter="on"/>
-			<eNumber name="threshold" position="350:100" size="e-10:35" helptext="enter LNB threshold frequency (0..9, ok)" loadDeco="" />
-			<eCheckbox name="increased_voltage" text="increased voltage" position="130:145" size="e-10:30" helptext="0,5V higher LNB Voltage (for long cables) (ok)" loadDeco="" />
-			<eButton name="save" text="save" position="10:e-80" size="170:40" helptext="save changes and use current selected LNB for the chosen satellite" loadDeco="" shortcut="green" />
-			<eButton name="cancel" text="cancel" position="190:e-80" size="170:40" helptext="ignore changes and return" loadDeco="" shortcut="escape" />
-			<eButton name="next" text="next page" position="370:e-80" size="170:40" helptext="goto next page (DiSEqC)" loadDeco="" shortcut="blue" />
+			<eLabel text="Sat/LNB mapping:" position="10:10" size="240:35" vcenter="on" />
+			<eComboBox name="lnblist" position="260:10" size="150:35" helptext="here you can change your sat/lnb mapping" loadDeco="" />
+			<eNumber name="lofL" position="260:55" size="e-100:35" helptext="enter LNB lowband offset frequency (0..9, ok)" loadDeco="" />
+			<eLabel text="LOF/L:" name="lLofL" position="10:55" size="240:35" vcenter="on" />
+			<eNumber name="lofH" position="260:100" size="e-100:35" helptext="enter LNB highband offset frequency (0..9, ok)" loadDeco="" />
+			<eLabel text="LOF/H:" name="lLofH" position="10:100" size="240:35" vcenter="on" />
+			<eLabel text="Threshold:" name="lThreshold" position="10:145" size="240:35" vcenter="on"/>
+			<eNumber name="threshold" position="260:145" size="e-100:35" helptext="enter LNB threshold frequency (0..9, ok)" loadDeco="" />
+			<eCheckbox name="increased_voltage" text="increased voltage" position="10:190" size="e-10:30" helptext="0,5V higher LNB Voltage (for long cables) (ok)" loadDeco="" />
+			<eButton name="save" text="save" position="10:e-80" size="220:40" helptext="save changes and use current selected LNB for the chosen satellite" loadDeco="" shortcut="green" />
+			<eButton name="next" text="next page" position="240:e-80" size="220:40" helptext="goto next page (DiSEqC)" loadDeco="" shortcut="blue" />
 		</eLNBPage>
 	</object>
 
 	<object name="eDiSEqCPage">
 		<eDiSEqCPage position="0:0" size="550:400" >
 			<eComboBox name="MiniDiSEqCParam" position="310:10" size="e-10:35" helptext="select MiniDiSEqC parameter (ok)" loadDeco="" />
-			<eLabel text="MiniDiSEqC Parameter:" name="lMiniDiSEqCPara" position="10:10" size="290:35" vcenter="on" shortcut="1" shortcutFocus="MiniDiSEqCParam" />
+			<eLabel text="Toneburst:" name="lMiniDiSEqCPara" position="10:10" size="290:35" vcenter="on" shortcut="1" shortcutFocus="MiniDiSEqCParam" />
 			<eComboBox name="DiSEqCMode" position="310:55" size="e-10:35" helptext="select DiSEqC mode (ok)" loadDeco="" />
 			<eLabel text="DiSEqC Mode:" name="lDiSEqCMode" position="10:55" size="290:35" vcenter="on" shortcut="2" shortcutFocus="DiSEqCMode" />
 			<eComboBox name="DiSEqCParam" position="310:100" size="e-10:35" helptext="select DiSEqC parameter (ok)" loadDeco="" />
 			<eLabel text="DiSEqC Parameter:" name="lDiSEqCParam" position="10:100" size="290:35" vcenter="on" shortcut="3" shortcutFocus="DiSEqCParam" />
 			<eComboBox name="DiSEqCRepeats" position="310:145" size="e-10:35" helptext="select DiSEqC repeats (ok)" loadDeco="" />
 			<eLabel text="DiSEqC Repeats:" name="lDiSEqCRepeats" position="10:145" size="290:35" vcenter="on" shortcut="4" shortcutFocus="DiSEqCRepeats" />
-			<eCheckbox text="Sequence repeat" name="SeqRepeat" position="10:190" size="290:30" helptext="send the complete DiSEqC sequence dupe" /> <!--  shortcut="5" swaptxtpixmap="on" -->
-			<eCheckbox text="Uncommitted switch" name="uncommitted" position="10:230" size="290:30" helptext="send to an uncommitted DiSEqC switch" /> <!-- shortcut="6" swaptxtpixmap="on" /-->
-			<eCheckbox text="Uncommitted gap" name="uncommitted_gap" position="310:230" size="e-10:30" helptext="fill DiSEqC repeat gap with uncommitted command" /> <!-- shortcut="7" swaptxtpixmap="on" /-->
-			<!--eButton name="next" text="Motor Setup" position="10:270" size="e-10:40" helptext="opens the motor setup" loadDeco="" shortcut="blue" /-->
-			<eButton name="prev" text="prev. page" position="10:e-80" size="170:40" helptext="goto prev page (LNB)" loadDeco="" shortcut="yellow" />
-			<eButton name="save" text="save" position="190:e-80" size="170:40" helptext="save changes and use the selected LNB (in first page) for the choosen satellite" loadDeco="" shortcut="green" />
-			<eButton name="cancel" text="cancel" position="370:e-80" size="170:40" helptext="ignore changes and return" loadDeco="" shortcut="escape" />
+			<eComboBox name="ucInput" position="310:190" size="e-10:35" helptext="select uncommitted input" loadDeco="" />
+			<eLabel name="lucInput" text="Uncommitted Switch:" position="10:190" size="290:35" vcenter="on" shortcut="5" shortcutFocus="ucInput" />
+			<eCheckbox text="Sequence repeat" name="SeqRepeat" position="10:240" size="290:30" helptext="send the complete DiSEqC sequence twice" shortcut="6" />
+			<eCheckbox text="Swap Commands" name="SwapCmds" position="310:240" size="e-10:30" helptext="swaps normal and opt.Switch DiSEqC Cmds" shortcut="8" />
+			<eCheckbox text="Fast DiSEqC" name="FastDiSEqC" position="10:280" size="290:30" helptext="send no DiSEqC when only Hi/Lo or H/V changes" shortcut="7" />
+			<!--eComboBox name="uSwitch1" position="170:230" size="90:35" helptext="select Uncommitted Switch 1 option" loadDeco="" />
+			<eLabel name="luSwitch1" text="U-Switch 1:" position="10:230" size="150:35" vcenter="on" shortcut="7" shortcutFocus="uSwitch1" />
+			<eComboBox name="uSwitch2" position="450:230" size="90:35" helptext="select Uncommitted Switch 2 option" loadDeco="" />
+			<eLabel name="luSwitch2" text="U-Switch 2:" position="290:230" size="150:35" vcenter="on" shortcut="8" shortcutFocus="uSwitch2" />
+			<eComboBox name="uSwitch3" position="170:275" size="90:35" helptext="select Uncommitted Switch 3 option" loadDeco="" />
+			<eLabel name="luSwitch3" text="U-Switch 3:" position="10:275" size="150:35" vcenter="on" shortcut="9" shortcutFocus="uSwitch3" />
+			<eComboBox name="uSwitch4" position="450:275" size="90:35" helptext="select Uncommitted Switch 4 option" loadDeco="" />
+			<eLabel name="luSwitch4" text="U-Switch 4:" position="290:275" size="150:35" vcenter="on" shortcut="0" shortcutFocus="uSwitch4" />
+			<eButton name="next" text="Motor Setup" position="10:270" size="e-10:40" helptext="opens the motor setup" loadDeco="" shortcut="blue" /-->
+			<eButton name="prev" text="prev. page" position="10:e-80" size="220:40" helptext="goto prev page (LNB)" loadDeco="" shortcut="yellow" />
+			<eButton name="save" text="save" position="240:e-80" size="220:40" helptext="save changes" loadDeco="" shortcut="green" />
 		</eDiSEqCPage>
 	</object>
 
-	<object name="eSatfind">
-		<eSatfind cposition="100:80" csize="550:420">
+	<object name="eSatfind" >
+		<eSatfind cposition="120:120" csize="500:380" text="Satfind" >
 			<eLabel text="SNR:" position="10:10" size="190:50" font="eSatfind" vcenter="on" />
 			<eLabel name="snr_num" position="210:10" size="150:50" font="eSatfind" vcenter="on" />
-			<eProgress name="snr" position="10:70" size="e-10:50" />
+			<eProgress name="snr" position="10:60" size="e-10:40" />
 
-			<eLabel text="AGC:" position="10:130" size="190:50" font="eSatfind" vcenter="on" />
-			<eLabel name="agc_num" position="210:130" size="150:50" font="eSatfind" vcenter="on" />
-			<eProgress name="agc" position="20:190" size="e-10:50" />
+			<eLabel text="AGC:" position="10:110" size="190:50" font="eSatfind" vcenter="on" />
+			<eLabel name="agc_num" position="210:110" size="150:50" font="eSatfind" vcenter="on" />
+			<eProgress name="agc" position="10:160" size="e-10:40" />
 
-			<eLabel text="BER" position="10:250" size="190:50" font="eSatfind" vcenter="on" />
-			<eLabel name="ber_num" position="210:250" size="150:50" font="eSatfind" vcenter="on" />
-			<eProgress name="ber" position="20:310" size="e-10:50" />
+			<eLabel text="BER" position="10:210" size="190:50" font="eSatfind" vcenter="on" />
+			<eLabel name="ber_num" position="210:210" size="150:50" font="eSatfind" vcenter="on" />
+			<eProgress name="ber" position="10:260" size="e-10:40" />
 
 			<eButton name="ok" position="e-90:e-50" size="80:40" text="ok" vcenter="on" loadDeco="" shortcut="green" />
 			<eCheckbox text="LOCK" name="lock" position="10:e-50" size="140:40" font="eSatfind" vcenter="on" />
@@ -340,10 +420,10 @@
 	</object>
 	
 	<object name="RotorConfig">
-		<RotorConfig text="Motor Config" cposition="100:80" csize="550:400" >
+		<RotorConfig text="Motor Config" cposition="80:100" csize="550:400" >
 			<eCheckbox text="Use Motor Input Power" name="useRotorInPower" position="10:10" size="300:35" helptext="Use motor input power for running detection.. else use timeout" />
 			<eNumber name="DegPerSec" position="320:10" size="100:35" helptext="motor drive speed, in degrees per second" loadDeco="" />
-			<eLabel name="lDegPerSec" text="°/sec" position="430:10" size="e-10:35" vcenter="on" />
+			<eLabel name="lDegPerSec" text="&#175;/sec" position="430:10" size="e-10:35" vcenter="on" />
 			<eNumber name="DeltaA" position="320:10" size="60:35" helptext="motor power input difference between running and not running" loadDeco="" />
 			<eLabel name="lDeltaA" text="mA" position="390:10" size="e-10:35" vcenter="on" />
 
@@ -362,23 +442,22 @@
 			<eNumber name="StoredRotorNo" position="e-100:100" size="e-10:35" helptext="enter where this orbital position is (to) stored in motor" loadDeco="" />
 
 			<eLabel name="lOrbitalPosition" text="Orbital Position:" position="190:150" size="e-110:35" vcenter="on" />
-			<eNumber name="OrbitalPosition" position="e-100:150" size="e-10:35" helptext="enter orbital position without dot (19.2° = 192)" loadDeco="" />
+			<eNumber name="OrbitalPosition" position="e-100:150" size="e-10:35" helptext="enter orbital position without dot (19.2&#175; = 192)" loadDeco="" />
 
 			<eLabel name="lDirection" text="Direction:" position="190:195" size="e-150:35" vcenter="on" />
 			<eComboBox name="Direction" position="e-140:195" size="e-10:35" helptext="choose direction" loadDeco="" />
 
-			<eButton name="add" text="add" position="190:240" size="170:40" helptext="add to table/existing is overwritten" loadDeco="" shortcut="yellow" />
+			<eButton name="add" text="add" position="190:240" size="170:40" helptext="add to table/existing will be overwritten" loadDeco="" shortcut="yellow" />
 			<eButton name="remove" text="remove" position="370:240" size="170:40" helptext="remove selected entry" loadDeco="" shortcut="red" />
 
-			<eButton name="save" text="save" position="10:e-80" size="170:40" helptext="save changes and use the selected LNB (in first page) for the choosen satellite" loadDeco="" shortcut="green" />
-			<eButton name="cancel" text="cancel" position="190:e-80" size="170:40" helptext="ignore changes and return" loadDeco="" />
-			<eButton name="next" text="next page" position="370:e-80" size="170:40" helptext="goto advanced motor setup" loadDeco="" shortcut="blue" />
+			<eButton name="save" text="save" position="10:e-80" size="220:40" helptext="save changes and use the selected LNB (in first page) for the choosen satellite" loadDeco="" shortcut="green" />
+			<eButton name="next" text="next page" position="240:e-80" size="220:40" helptext="goto advanced motor setup" loadDeco="" shortcut="blue" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</RotorConfig>
 	</object>
 
 	<object name="RotorManual">
-		<RotorManual text="Motor Config" cposition="90:90" csize="540:410" >
+		<RotorManual text="Motor Config" cposition="80:100" csize="540:410" >
 			<eLabel name="lMode" text="Mode:" position="10:10" size="250:35" vcenter="on" />
 			<eComboBox name="Mode" position="270:10" size="e-10:35" helptext="choose what you want to do" loadDeco="" />
 			<eLabel name="lSat" text="Satellite:" position="10:55" size="250:35" vcenter="on" />
@@ -404,33 +483,40 @@
   
 	<object name="tsSelectType">
 		<tsSelectType cposition="0:0" csize="e:300">
-			<eLabel text="transponder scan" position="0:0" size="400:30" />
-			<eListbox name="menu" position="20:30" size="e-20:e-10" />
+			<eListbox name="menu" position="0:0" size="e-20:e-10" />
 		</tsSelectType>
 	</object>
 
 	<object name="tsManual">
 		<tsManual position="0:0" size="e:360">
-			<eTranspondersettings name="transponder" position="0:0" size="400:160" />
+			<eTranspondersettings name="transponder" position="0:0" size="456:160" />
 			<eFEStatus name="festatus" position="0:165" size="400:85" />
-			<eCheckbox text="use ONIT" name="useonit" position="10:e-110" size="220:30" helptext="enable/disable check ONIT on any transponder" />
-			<eCheckbox text="use BAT" name="usebat" position="230:e-110" size="200:30" helptext="enable/disable use BAT for scan (if exists)" />
-			<eCheckbox text="clear list before" name="clearlist" position="10:e-80" size="220:30" helptext="remove all services before scan" />
-			<eCheckbox text="network search" name="searchnit" position="230:e-80" size="200:30" helptext="enable/disable initiate network search" />
-			<eButton text="start scan" name="start" position="10:e-40" size="200:40" helptext="start the transponder scan" loadDeco="" vcenter="on" />
-			<eButton text="abort" name="abort" position="230:e-40" size="200:40" helptext="close window and do not scan" loadDeco="" vcenter="on" shortcut="escape" />
+			<eCheckbox text="use ONIT" name="useonit" position="10:e-110" size="230:30" helptext="enable/disable check ONIT on any transponder" />
+			<eCheckbox text="use BAT" name="usebat" position="240:e-110" size="200:30" helptext="enable/disable use BAT for scan (if exists)" />
+			<eCheckbox text="clear list before" name="clearlist" position="10:e-80" size="230:30" helptext="remove all services before scan" />
+			<eCheckbox text="network search" name="searchnit" position="240:e-80" size="200:30" helptext="enable/disable initiate network search" />
+			<eButton text="start scan" name="start" position="10:e-40" size="260:40" helptext="start the transponder scan" loadDeco="" vcenter="on" shortcut="green" />
 		</tsManual>
 	</object>
 
-	<object name="tsAutomatic">
+	<object name="tsAutomatic_sat">
 		<tsAutomatic position="0:0" size="e:360">
 			<eLabel name="lNet" position="10:40" size="150:30" text="Network:" />
 			<eComboBox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satellite/cable provider (ok)" />
 			<eLabel name="status" position="10:90" size="e-10:90" />
 			<eFEStatus name="festatus" position="0:190" size="400:85" />
-			<eCheckBox name="eraseall" text="erase all" position="10:e-80" size="150:30" helptext="erase bouquets and services before scan" />
-  		<eButton text="start scan" name="start" position="10:e-40" size="200:40" align="center" helptext="starts the transponder scan" loadDeco="" />
-			<eButton text="abort" name="abort" position="230:e-40" size="200:40" helptext="close window and do not scan" loadDeco="" shortcut="escape" />
+			<eCheckbox name="nocircular" text="no circ polariz." position="4:e-80" size="250:30" helptext="change circular to linear polarization" />
+  		<eButton text="start scan" name="start" position="10:e-40" size="260:40" align="center" helptext="starts the transponder scan" loadDeco="" shortcut="green" />
+		</tsAutomatic>
+	</object>
+
+	<object name="tsAutomatic_cable">
+		<tsAutomatic position="0:0" size="e:360">
+			<eLabel name="lNet" position="10:40" size="150:30" text="Network:" />
+			<eComboBox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satellite/cable provider (ok)" />
+			<eLabel name="status" position="10:90" size="e-10:90" />
+			<eFEStatus name="festatus" position="0:190" size="400:85" />
+			<eButton text="start scan" name="start" position="10:e-40" size="260:40" align="center" helptext="starts the transponder scan" loadDeco="" shortcut="green" />
 		</tsAutomatic>
 	</object>
 
@@ -450,53 +536,47 @@
 	</object>
 	
 	<object name="setup.skins">
-		<eSkinSetup cposition="100:100" csize="400:300" text="Skin Selector">
+		<eSkinSetup cposition="160:150" csize="400:300" text="Skin Selector">
 			<eLabel text="Skins:" position="20:10" size="100:30"/> <!-- shortcut="1" shortcutFocus="skins" -->
 			<eListbox name="skins" position="120:10" size="e-20:e-90" helptext="select skin and press ok or choose save" loadDeco="" />
-			<eButton text="save" name="accept" position="20:e-80" size="170:40" helptext="save changes and return" loadDeco="" shortcut="green" />
-			<eButton text="abort" name="reject" position="210:e-80" size="170:40" helptext="ignore changes and return" loadDeco="" shortcut="escape" />
+			<eButton text="save" name="accept" position="20:e-80" size="220:40" helptext="save changes and return" loadDeco="" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eSkinSetup>
 	</object>
 
 	<object name="transpondersettings.satellite">
-		<eTranspondersettings position="0:0" size="400:160">
-			<eLabel text="Satellite:" name="lSat" position="10:10" size="140:34" vcenter="on" />
-			<eComboBox name="sat" position="150:10" size="e-10:35" helptext="choose wished satellite (ok)" loadDeco=""  />
+		<eTranspondersettings position="0:0" size="454:160">
+			<eLabel text="Satellite:" name="lSat" position="10:10" size="150:34" vcenter="on" />
+			<eComboBox name="sat" position="164:10" size="e-10:35" helptext="choose wished satellite (ok)" loadDeco=""  />
 
-			<eLabel  name="lFreq" text="Frequency:" position="10:50" size="140:32" vcenter="on" />
-			<eNumber name="frequency" position="150:50" size="e-150:32" helptext="enter transponder frequeny (0..9, left, right)" loadDeco="" />
-			<eLabel text="MHz" position="e-145:50" size="40:32" vcenter="on" />
+			<eLabel  name="lFreq" text="Frequency:" position="10:50" size="150:32" vcenter="on" />
+			<eNumber name="frequency" position="164:50" size="e-150:32" helptext="enter transponder frequeny (0..9, left, right)" loadDeco="" />
+			<eLabel text="MHz" position="e-145:50" size="44:32" vcenter="on" />
+			<eCheckbox text="Inv:" name="inversion" position="e-84:50" size="e-10:32" helptext="enable/disable inversion here (ok)" swaptxtpixmap="on" />
 
-			<eCheckbox text="Inv:" name="inversion" position="330:50" size="e-10:32" helptext="enable/disable inversion here (ok)" swaptxtpixmap="on" />
+			<eLabel name="lPol" text="Polarity:" position="10:85" size="152:34" vcenter="on" />
+			<eListbox name="polarity" position="164:85" size="e-100:34" loadDeco="" helptext="choose polarity (left, right)" noUpDownMovement="on" />
+			<eLabel name="lFec" text="FEC:" position="e-96:85" size="38:34" vcenter="on" />
+			<eListbox name="fec" position="e-54:85" size="e-10:34" loadDeco="" helptext="choose the FEC (left, right)" noUpDownMovement="on" />
 
-			<eLabel name="lPol" text="Polarity:" position="10:85" size="140:34" vcenter="on" />
-			<eListbox name="polarity" position="150:85" size="e-140:34" loadDeco="" helptext="choose polarity (left, right)" noUpDownMovement="on" />
-
-			<eLabel name="lFec" text="FEC:" position="e-120:85" size="50:34" vcenter="on" />
-			<eListbox name="fec" position="e-70:85" size="e-10:34" loadDeco="" helptext="choose the FEC (left, right)" noUpDownMovement="on" />
-
-			<eLabel name="lSymb" text="Symbol Rate:" position="10:124" size="140:32" vcenter="on" />
-			<eNumber name="symbolrate" position="150:124:" size="e-150:32" helptext="enter symbol rate (0..9, left, right)" loadDeco="" />
+			<eLabel name="lSymb" text="Symbol Rate:" position="10:124" size="150:32" vcenter="on" />
+			<eNumber name="symbolrate" position="164:124:" size="e-150:32" helptext="enter symbol rate (0..9, left, right)" loadDeco="" />
 			<eLabel text="KSymb/s" position="e-145:125" size="e:32" vcenter="on" />
 		</eTranspondersettings>
 	</object>
 
 	<object name="transpondersettings.cable">
-		<eTranspondersettings position="0:0" size="400:160">
-			<eLabel name="lFreq" text="Frequency:" position="10:10" size="140:32" vcenter="on" />
-			<eNumber name="frequency" position="150:10:" size="e-150:32" helptext="enter frequency (0..9, left, right)" loadDeco="" />
-			<eLabel text="MHz" position="e-150:10" size="e:32" vcenter="on" />
+		<eTranspondersettings position="0:0" size="454:160">
+			<eLabel name="lFreq" text="Frequency:" position="10:10" size="150:32" vcenter="on" />
+			<eNumber name="frequency" position="164:10:" size="e-150:32" helptext="enter frequency (0..9, left, right)" loadDeco="" />
+			<eLabel text="MHz" position="e-145:10" size="e:32" vcenter="on" />
 
-			<eLabel name="lSymb" text="Symbolrate:" position="10:52" size="140:32" vcenter="on" />
-			<eNumber name="symbolrate" position="150:52" size="e-150:32" helptext="enter symbol rate (0..9, left, right)" loadDeco="" />
-			<eLabel text="KSymb/s" position="e-150:52" size="e:32" vcenter="on" />
+			<eLabel name="lSymb" text="Symbolrate:" position="10:52" size="150:32" vcenter="on" />
+			<eNumber name="symbolrate" position="164:52" size="e-150:32" helptext="enter symbol rate (0..9, left, right)" loadDeco="" />
+			<eLabel text="KSymb/s" position="e-145:52" size="e:32" vcenter="on" />
 
-			<eLabel name="lMod" text="Modulation:" position="10:52" size="140:35" vcenter="on" />
-			<eComboBox name="mod" position="150:52" size="e-10:35" helptext="choose wished modulation (ok)" loadDeco=""  />
-      
-			<eLabel text="Inversion:" position="10:130" size="140:32" vcenter="on" />
-			<eCheckbox name="inversion" position="150:130" size="30:32" helptext="enable/disable inversion (ok)" />
+			<eLabel text="Inversion:" position="10:130" size="150:32" vcenter="on" />
+			<eCheckbox name="inversion" position="164:130" size="30:32" helptext="enable/disable inversion (ok)" />
 		</eTranspondersettings>
 	</object>
 
@@ -516,24 +596,65 @@
 		</eFEStatusWidget>
 	</object>
 
+	<object name="eHelpWindow">
+		<eHelpWindow cposition="90:100" csize="560:420" text="Help">
+			<eProgress name="scrollbar" position="e-30:5" size="20:e-10" direction="1" />
+			<eWidget name="visible" position="10:10" size="e-40:e-10" />
+		</eHelpWindow>
+	</object>
+
 	<object name="eServiceSelector_singleColumn">
-		<eServiceSelector cposition="70:90" csize="590:450" text="Services">
+		<eServiceSelector cposition="90:100" csize="560:420" text="Services">
 			<eListbox name="services" position="0:0" size="e:e-80" />
 			<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
 		</eServiceSelector>
 	</object>
 
 	<object name="eServiceSelector_multiColumn">
-		<eServiceSelector cposition="70:90" csize="590:450" text="Services">
+		<eServiceSelector cposition="90:100" csize="560:420" text="Services">
 			<eListbox name="services" columns="3" position="0:0" size="e:e-80" />
 			<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
 		</eServiceSelector>
 	</object>
 
 	<object name="eServiceSelector_combiColumn">
-		<eServiceSelector cposition="70:90" csize="590:450" text="Services">
-			<eListbox name="bouquets" position="5:5" size="150:e-85" loadDeco="" />
-			<eListbox name="services" columns="2" position="155:5" size="e-5:e-85" loadDeco="" />
+		<eServiceSelector cposition="90:100" csize="560:420" text="Services">
+			<eListbox name="bouquets" position="5:0" size="150:e-85" loadDeco="" />
+			<eListbox name="services" columns="2" position="155:0" size="e-5:e-85" loadDeco="" />
+			<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
+		</eServiceSelector>
+	</object>
+
+	<object name="eServiceSelector_singleColumn_buttons">
+		<eServiceSelector cposition="90:100" csize="560:420" text="Services">
+			<eButton name="key_red" position="0:0" size="140:40" backgroundColor="std_dred" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eButton name="key_green" position="140:0" size="140:40" backgroundColor="std_dgreen" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eButton name="key_yellow" position="280:0" size="140:40" backgroundColor="std_dyellow" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eButton name="key_blue" position="420:0" size="140:40" backgroundColor="std_dblue" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eListbox name="services" position="0:50" size="e:e-80" />
+			<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
+		</eServiceSelector>
+	</object>
+
+	<object name="eServiceSelector_multiColumn_buttons">
+		<eServiceSelector cposition="90:100" csize="560:420" text="Services">
+			<eButton name="key_red" position="0:0" size="140:40" backgroundColor="std_dred" loadDeco="" font="epg.title" align="center" vcenter="on" />
+			<eButton name="key_green" position="140:0" size="140:40" backgroundColor="std_dgreen" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eButton name="key_yellow" position="280:0" size="140:40" backgroundColor="std_dyellow" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eButton name="key_blue" position="420:0" size="140:40" backgroundColor="std_dblue" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eListbox name="services" columns="3" position="0:40" size="e:e-80" />
+			<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
+		</eServiceSelector>
+	</object>
+
+	<object name="eServiceSelector_combiColumn_buttons">
+		<eServiceSelector cposition="90:100" csize="560:420" text="Services">
+			<eButton name="key_red" position="0:0" size="140:40" backgroundColor="std_dred" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eButton name="key_green" position="140:0" size="140:40" backgroundColor="std_dgreen" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eButton name="key_yellow" position="280:0" size="140:40" backgroundColor="std_dyellow" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eButton name="key_blue" position="420:0" size="140:40" backgroundColor="std_dblue" loadDeco="" font="epg.title" align="center" vcenter="on"/>
+			<eListbox name="bouquets" position="5:45" size="150:e-85" loadDeco="" />
+			<eListbox name="services" columns="2" position="155:45" size="e-5:e-85" loadDeco="" />
 			<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
 		</eServiceSelector>
 	</object>
@@ -550,38 +671,55 @@
 		</eBouquetSelector>
 	</object>
 
-	<object name="eTimerView">
-		<eTimerView cposition="70:100" csize="590:420" text="EPG">
-			<eListbox name="events" position="10:10" size="e-10:e-220" loadDeco="" helptext="press ok to edit the selected event" />
-			<eComboBox name="b_year" openEntries="5" position="10:e-210" size="90:35" helptext="select year (ok)" loadDeco="" />
-			<eComboBox name="b_month" openEntries="6" position="110:e-210" size="150:35" helptext="select month (ok)" loadDeco="" />
-			<eComboBox name="b_day" openEntries="10" position="270:e-210" size="e-92:35" helptext="select day (ok)" loadDeco="" />
-			<eNumber name="b_time" position="e-82:e-210" size="72:35" helptext="edit the start time (0..9, left, right)" loadDeco="" />
-			<eComboBox name="e_year" openEntries="5" position="10:e-165" size="90:35" helptext="select year (ok)" loadDeco="" />
-			<eComboBox name="e_month" openEntries="6" position="110:e-165" size="150:35" helptext="select month (ok)" loadDeco="" />
-			<eComboBox name="e_day" openEntries="10" position="270:e-165" size="e-92:35" helptext="select day (ok)" loadDeco="" />
-			<eNumber name="e_time" position="e-82:e-165" size="72:35" helptext="edit the end time (0..9, left, right)" loadDeco="" />
-			<eComboBox name="type" openEntries="3" position="10:e-120" size="250:35" helptext="select the timer type (ok)" loadDeco="" />
-			<eButton name="select_service" position="270:e-120" size="e-10:35" helptext="to change service press ok" loadDeco="" />
-			<eButton name="close" text="close" position="10:e-75" size="150:35" helptext="close timer menu (ok)" loadDeco="" shortcut="escape" />
-			<eButton name="update" text="update" position="170:e-75" size="150:35" helptext="update the current selected timer (ok)" loadDeco="" shortcut="green" />
-			<eButton name="add" text="add" position="e-260:e-75" size="115:35" helptext="add new Timer (ok)" loadDeco="" shortcut="yellow" />
-			<eButton name="remove" text="remove" position="e-135:e-75" size="125:35" helptext="delete the current selected timer (ok)" loadDeco="" shortcut="red" />
+	<object name="eTimerListView">
+		<eTimerListView cposition="70:100" csize="580:395" text="EPG">
+			<eListbox name="events" position="10:10" size="e-10:e-90" loadDeco="" helptext="press ok to select another event" />
+			<eButton name="add" text="add" position="10:e-80" size="200:40" helptext="add new Timer (ok)" loadDeco="" shortcut="green" />
+			<eButton name="remove" text="remove" position="220:e-80" size="200:40" helptext="delete the current selected timer (ok)" loadDeco="" shortcut="red" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
-		</eTimerView>
+		</eTimerListView>
+	</object>
+
+	<object name="eTimerEditView">
+		<eTimerEditView cposition="70:100" csize="590:310" text="Timer Edit">
+			<eTextInputField name="event_name" position="10:10" size="e-10:40" loadDeco="eNumber" helptext="press ok to change event name manually" />
+			<eLabel name="lBegin" text="Starttime" position="405:102" size="103:30" />
+			<eLabel name="lEnd" text="Endtime" position="405:148" size="103:30" />
+			<eCheckbox name="multiple" position="10:60" size="280:30" text="Repeated timer" helptext="for a multiple event enable this" loadDeco="" />
+			<eCheckbox name="Mo" position="300:60" size="280:30" text="Mo" helptext="Monday" loadDeco="" />
+			<eCheckbox name="Tue" position="10:100" size="125:30" text="Tue" helptext="Tuesday" loadDeco="" />
+			<eCheckbox name="Wed" position="145:100" size="145:30" text="Wed" helptext="Wednesday" loadDeco="" />
+			<eCheckbox name="Thu" position="300:100" size="90:30" text="Thu" helptext="Thursday" loadDeco="" />
+			<eCheckbox name="Fr" position="10:145" size="125:30" text="Fr" helptext="Friday" loadDeco="" />
+			<eCheckbox name="Sa" position="145:145" size="145:30" text="Sa" helptext="Saturday" loadDeco="" />
+			<eCheckbox name="Su" position="300:145" size="90:30" text="Su" helptext="Sunday" loadDeco="" />
+			<eComboBox name="b_year" openEntries="5" position="10:100" size="90:35" helptext="select year (ok)" loadDeco="" />
+			<eComboBox name="b_month" openEntries="6" position="110:100" size="150:35" helptext="select month (ok)" loadDeco="" />
+			<eComboBox name="b_day" openEntries="8" position="270:100" size="e-92:35" helptext="select day (ok)" loadDeco="" />
+			<eNumber name="b_time" position="e-82:100" size="72:35" helptext="edit the start time (0..9, left, right)" loadDeco="" />
+			<eComboBox name="e_year" openEntries="5" position="10:145" size="90:35" helptext="select year (ok)" loadDeco="" />
+			<eComboBox name="e_month" openEntries="6" position="110:145" size="150:35" helptext="select month (ok)" loadDeco="" />
+			<eComboBox name="e_day" openEntries="8" position="270:145" size="e-92:35" helptext="select day (ok)" loadDeco="" />
+			<eNumber name="e_time" position="e-82:145" size="72:35" helptext="edit the end time (0..9, left, right)" loadDeco="" />
+			<eComboBox name="type" openEntries="3" position="10:190" size="250:35" helptext="select the timer type (ok)" loadDeco="" />
+			<eButton name="select_service" position="270:190" size="e-10:35" helptext="to change service press ok" loadDeco="" />
+			<eButton name="apply" text="apply" position="10:235" size="250:35" shortcut="green" helptext="save data and close window" loadDeco="" />
+			<eButton name="scanEPG" text="scan EPG" position="270:235" size="e-10:35" shortcut="blue" helptext="search event name for this beg-/end time in epg" loadDeco="" />
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+		</eTimerEditView>
 	</object>
 
 	<object name="eAboutScreen">
-		<eAboutScreen text="About..." cposition="125:150" csize="450:380">
+		<eAboutScreen text="About..." cposition="125:105" csize="450:410">
 			<eLabel name="vendor" position="10:0" csize="e:25"/>
 			<eLabel name="machine" position="30:25" font="eAboutScreen.machine" csize="e:50"/>
 			<eLabel name="processor" text="processor: " position="10:80" csize="e:30" />
 			<eLabel name="frontend" text="frontend: " position="10:110" csize="e:30" />
 			<eLabel name="translation" position="10:140" csize="e:30" />
-			<eLabel text="harddisk: " position="10:170" csize="e:30" />
+			<eLabel name="harddisk_label" text="harddisk: " position="10:170" csize="e:30" />
 			<eLabel name="harddisks" position="10:200" csize="e:60" />
 			<eLabel text="Software Version:" position="10:260" csize="e:30" />
-			<eLabel name="version" position="10:290" csize="e:30" />
+			<eLabel name="version" position="10:290" csize="e:60" />
 			<eButton name="okButton" position="20:e-50" csize="100:30" text="ok" loadDeco="" shortcut="green" />
 			<eLabel name="dreamlogo" pixmap="dreamlogo" position="e-160:e-95" csize="143:75" alphatest="on" />
 		</eAboutScreen>
@@ -594,10 +732,21 @@
 			<eLabel text="min" position="266:10" size="e-10:35" vcenter="on"/>
 			<eCheckbox name="shutdown" text="shutdown  " position="10:55" size="170:35" helptext="shutdown the box after recording (ok)" swaptxtpixmap="on" vcenter="on" />
 			<eCheckbox name="standby" text="standby  " position="210:55" size="170:35" helptext="goto standby after recording (ok)"  swaptxtpixmap="on" vcenter="on" />
-			<eButton text="set" name="set" position="10:95" size="170:40" helptext="set recording end time and close window (ok)" loadDeco="" shortcut="green" />
-			<eButton text="abort" name="abort" position="210:95" size="170:40" helptext="close window and use no record timer (ok)" loadDeco="" shortcut="escape" />
+			<eButton text="set" name="set" position="10:95" size="220:40" helptext="set recording end time and close window (ok)" loadDeco="" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</recording_duration>
+	</object>
+
+	<object name="sleeptimer">
+		<sleeptimer text="Set Sleeptimer" cposition="140:200" csize="390:180" >
+			<eLabel name="l_duration" text="duration:" position="10:10" size="200:35" vcenter="on"/>
+			<eNumber name="duration" position="210:10" size="46:35" loadDeco="" helptext="(0..9, left, right, ok)" />
+			<eLabel text="min" position="266:10" size="e-10:35" vcenter="on"/>
+			<eCheckbox name="shutdown" text="shutdown  " position="10:55" size="170:35" helptext="shutdown the box to deepstandby (ok)" swaptxtpixmap="on" vcenter="on" />
+			<eCheckbox name="standby" text="standby  " position="210:55" size="170:35" helptext="goto standby (ok)"  swaptxtpixmap="on" vcenter="on" />
+			<eButton text="set" name="set" position="10:95" size="220:40" helptext="set sleeptimer and close window (ok)" loadDeco="" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+		</sleeptimer>
 	</object>
 
 	<object name="recording_end_time">
@@ -607,14 +756,13 @@
 			<eLabel text="o'clock" position="290:10" size="e-10:35" vcenter="on"/>
 			<eCheckbox name="shutdown" text="shutdown  " position="10:55" size="170:35" helptext="shutdown the box after recording (ok)" swaptxtpixmap="on" vcenter="on" />
 			<eCheckbox name="standby" text="standby  " position="210:55" size="170:35" helptext="goto standby after recording (ok)"  swaptxtpixmap="on" vcenter="on" />
-			<eButton name="set" text="set" position="10:95" size="170:40" helptext="set recording end time and close window (ok)" loadDeco="" shortcut="green" />
-			<eButton name="abort" text="abort"  position="210:95" size="170:40" helptext="close window and use no record timer (ok)" loadDeco="" />
+			<eButton name="set" text="set" position="10:95" size="220:40" helptext="set recording end time and close window (ok)" loadDeco="" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</recording_end_time>
 	</object>
 
 	<object name="eHarddiskMenu">
-		<eHarddiskMenu text="Harddisk" cposition="80:100" csize="550:250">
+		<eHarddiskMenu text="Harddisk" cposition="90:160" csize="550:250">
 			<eLabel text="model:" position="10:10" size="150:30" />
 			<eLabel name="model" position="160:10" size="e:30" />
 			<eLabel text="capacity:" position="10:40" size="150:30" />
@@ -632,10 +780,9 @@
 	</object>
 
 	<object name="ePartitionCheck">
-		<ePartitionCheck text="Partition Check" cposition="80:100" csize="550:400" >
+		<ePartitionCheck text="Partition Check" cposition="90:120" csize="550:400" >
 			<eLabel text="status output:" position="10:10" size="e-10:30" />
 			<eLabel name="state" position="10:50" size="e-10:e-100" loadDeco="eNumber" wrap="on" font="partitionCheck.status" />
-			<eButton name="cancel" text="cancel" position="e-180:e-80" size="170:40" helptext="cancel partition check" loadDeco="" />
 			<eButton name="close" text="close" position="e-360:e-80" size="170:40" helptext="close window" loadDeco="" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</ePartitionCheck>
@@ -648,7 +795,7 @@
 			<eLabel name="imagehelp" position="10:0" size="460:30" />
 			<eProgress name="progress" position="10:160" size="250:30" />
 			<eLabel name="progresstext" position="270:165" size="210:30" />
-			<eButton name="abort" position="40:40" size="150:50" text="abort" loadDeco="" />
+			<!--eButton name="abort" position="40:40" size="150:50" text="abort" loadDeco="" /-->
 			<eLabel name="changes" position="10:200" size="e-10:e-30" font="eUpgradeChanges" />
 		</eUpgrade>
 	</object>
@@ -658,14 +805,13 @@
 			<eLabel name="descr" position="10:10" size="e-10:30" />
 			<eTextInputField name="inputfield" position="10:50" size="e-10:40" loadDeco="eNumber" helptext="press ok to enter the name" />
 			<eLabel name="image" pixmap="textinput_white" position="10:105" size="367:178" alphatest="on" />
-			<eButton name="save" text="save" position="10:e-80" size="170:40" loadDeco="" helptext="save changes and close window" shortcut="green" />
-			<eButton name="cancel" text="cancel" position="190:e-80" size="170:40" helptext="ignore changes and return" loadDeco="" />
+			<eButton name="save" text="save" position="10:e-80" size="220:40" loadDeco="" helptext="save changes and close window" shortcut="green" />
 			<eStatusbar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</TextEditWindow>
 	</object>
 
 	<object name="eWizardLanguage">
-		<eWizardLanguage cposition="120:100" csize="500:400" text="Your language">
+		<eWizardLanguage cposition="120:110" csize="500:400" text="OSD Language">
 			<eLabel name="head" position="40:50" size="e:50" font="head" />
 			<eLabel name="help" position="0:100" size="e:30" align="center" />
 			<eListbox name="list" position="50:140" size="e-50:e-50" loadDeco="" />
@@ -680,4 +826,17 @@
 			<eLabel name="description" position="10:320" size="e-10:30" />
 		</eWizardDiseqc>
 	</object>
+
+	<object name="TransponderWindow">
+		<TransponderWindow cposition="80:100" csize="550:390" text="Transponders">
+			<eListbox name="satlist" position="10:10" size="305:e-90" loadDeco="" />
+			<eListbox name="transponderlist" position="335:10" size="205:e-90" loadDeco="" />
+			<eButton name="sat" text="sat" position="10:e-80" size="125:40" loadDeco="" helptext="select sat(up/down), ok(edit), green(add new), red(delete)" />
+			<eButton name="add" text="add" position="145:e-80" size="125:40" loadDeco="" helptext="add new Transponder to selected sat (ok)" />
+			<eButton name="edit" text="edit" position="280:e-80" size="125:40" loadDeco="" helptext="edit selected transponder (ok)" />
+			<eButton name="remove" text="remove" position="415:e-80" size="125:40" loadDeco="" helptext="remove selected satellite" />
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+		</TransponderWindow>
+	</object>
+
 </eskin>

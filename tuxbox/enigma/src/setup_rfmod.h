@@ -1,3 +1,5 @@
+#ifdef ENABLE_RFMOD
+
 #ifndef __setuprfmod_h
 #define __setuprfmod_h
 
@@ -30,11 +32,13 @@ private:
 	void Channel_selected(eListBoxEntryText* entry);
 	void FineTune_selected(eListBoxEntryText* entry);
 
-	int SFD,SO,DIV;
+	int chan,soundenable,ssc,finetune;
 
 public:
 	eZapRFmodSetup();
 	~eZapRFmodSetup();
 };
+
+#endif
 
 #endif

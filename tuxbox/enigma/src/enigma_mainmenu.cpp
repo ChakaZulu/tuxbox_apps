@@ -4,8 +4,8 @@
 #include <enigma_setup.h>
 #include <enigma_plugins.h>
 #include <enigma_info.h>
-#include <enigma_lcd.h>
 #include <enigma_vcr.h>
+#include <enigma_lcd.h>
 #include <timer.h>
 
 #include <lib/gui/eskin.h>
@@ -49,6 +49,7 @@ void eMainMenu::setActive(int i)
 	case 1:
 		description->setText(eString("(2) ") + eString(_("Radio mode")));
 		break;
+#ifndef DISABLE_FILE
 	case 2:
 		description->setText(eString("(3) ") + eString(_("File mode")));
 		break;
@@ -69,13 +70,32 @@ void eMainMenu::setActive(int i)
 		break;
 	case 8:
 		description->setText(eString("(9) ") + eString(_("Timer")));
+#else
+	case 2:
+		description->setText(eString("(3) ") + eString(_("Information")));
+		break;
+//	case 3:
+//		description->setText(eString("(4) ") + eString(_("Shutdown")));
+//		break;
+	case 3:
+		description->setText(eString("(5) ") + eString(_("Setup")));
+		break;
+//	case 4:
+//		description->setText(eString("(6) ") + eString(_("Games")));
+//		break;
+	case 4:
+		description->setText(eString("(7) ") + eString(_("VCR")));
+		break;
+	case 5:
+		description->setText(eString("(8) ") + eString(_("Timer")));
+#endif
 	}
-	
+#ifndef DISABLE_LCD
 	if (LCDTitle)
 		LCDTitle->setText(_("Mainmenu"));
-
 	if (LCDElement)
 		LCDElement->setText( description->getText() );
+#endif
 }
 
 eMainMenu::eMainMenu()
@@ -107,8 +127,23 @@ eMainMenu::eMainMenu()
 
 	if (eSkin::getActive()->build(this, "eZapMainMenu"))
 		eFatal("unable to load main menu");
-	
-	char *pixmap_name[]={"tv", "radio", "file", "info", "shutdown", "setup", "games", "scart", "timer"};
+
+	char *pixmap_name[]={
+		"tv",
+		"radio",
+#ifndef DISABLE_FILE
+		"file",
+#endif
+		"info",
+#ifndef DISABLE_FILE
+		"shutdown",
+#endif
+		"setup",
+#ifndef DISABLE_FILE
+		"games",
+#endif
+		"scart",
+		"timer"};
 
 	for (int i=0; i<MENU_ENTRIES; i++)
 	{
@@ -121,6 +156,7 @@ eMainMenu::eMainMenu()
 	}
 
 	setActive(active=eZapMain::getInstance()->getMode());		
+	setHelpID(10);
 }
 
 void eMainMenu::sel_tv()
@@ -135,34 +171,27 @@ void eMainMenu::sel_radio()
 	close(0);
 }
 
+#ifndef DISABLE_FILE
 void eMainMenu::sel_file()
 {
   eZapMain::getInstance()->setMode(eZapMain::modeFile, 1);
 	close(0);
 }
+#endif
 
 void eMainMenu::sel_vcr()
 {
 	hide();
-	eAVSwitch::getInstance()->setInput(1);
-	enigmaVCR mb("If you can read this, your scartswitch doesn't work", "VCR");
-	mb.show();
-	eZapLCD *pLCD=eZapLCD::getInstance();
-	pLCD->lcdMenu->hide();
-	pLCD->lcdScart->show();
-	mb.exec();
-	pLCD->lcdScart->hide();
-	pLCD->lcdMenu->show();
-	mb.hide();
-	eAVSwitch::getInstance()->setInput(0);
+	eZapMain::getInstance()->toggleScart(1);
 	show();
 }
 
 void eMainMenu::sel_info()
 {
-	eZapLCD *pLCD=eZapLCD::getInstance();
 	eZapInfo info;
-	info.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+#ifndef DISABLE_LCD
+	info.setLCD(LCDTitle, LCDElement);
+#endif
 	hide();
 	info.show();
 	info.exec();
@@ -170,22 +199,39 @@ void eMainMenu::sel_info()
 	show();
 }
 
+extern bool checkPin( int, const char* );
+
 void eMainMenu::sel_setup()
 {
-	eZapLCD *pLCD=eZapLCD::getInstance();
-	eZapSetup setup;
-	setup.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-	hide();
-	setup.show();
-	setup.exec();
-	setup.hide();
-	show();
+	int setuppin=0;
+	eConfig::getInstance()->getKey("/elitedvb/pins/setuplock", setuppin);
+
+	if ( checkPin( setuppin, _("setup") ) )
+	{
+		hide();
+		int i=0;
+		do
+		{
+			eZapSetup setup;
+#ifndef DISABLE_LCD
+			setup.setLCD(LCDTitle, LCDElement);
+#endif
+			setup.show();
+			i=setup.exec();
+			setup.hide();
+		}while(i==-1);      // to redisplay Setup after language change
+		setActive(active);  // --"--
+		show();
+	}
 }
 
 void eMainMenu::sel_plugins()
 {
-	eZapLCD *pLCD=eZapLCD::getInstance();
-	eZapPlugins plugins(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+#ifndef DISABLE_LCD
+	eZapPlugins plugins(1, LCDTitle, LCDElement);
+#else
+	eZapPlugins plugins(1);
+#endif
 	hide();
 	plugins.exec();
 	show();
@@ -193,10 +239,11 @@ void eMainMenu::sel_plugins()
 
 void eMainMenu::sel_timer()
 {
-	eZapLCD *pLCD=eZapLCD::getInstance();
 	hide();
-	eTimerView setup;
-	setup.setLCD(pLCD->LCDTitle, pLCD->LCDElement);
+	eTimerListView setup;
+#ifndef DISABLE_LCD
+	setup.setLCD(LCDTitle, LCDElement);
+#endif
 	setup.show();
 	setup.exec();
 	setup.hide();
@@ -214,10 +261,12 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::willShow:
+#ifndef DISABLE_LCD
 		if (LCDTitle)
 			LCDTitle->setText(_("Mainmenu"));
 		if (LCDElement)
 			LCDElement->setText( description->getText() );
+#endif
 		break;
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_mainmenuActions->close)
@@ -283,6 +332,7 @@ void eMainMenu::selected(int i)
 	case 1:
 		sel_radio();
 		break;
+#ifndef DISABLE_FILE
 	case 2:
 		sel_file();
 		break;
@@ -304,6 +354,26 @@ void eMainMenu::selected(int i)
 	case 8:
 		sel_timer();
 		break;
+#else
+	case 2:
+		sel_info();
+		break;
+//	case 3:
+//		sel_quit();
+//		break;
+	case 3:
+		sel_setup();
+		break;
+//	case 4:
+//		sel_plugins();
+//		break;
+	case 4:
+		sel_vcr();
+		break;
+	case 5:
+		sel_timer();
+		break;
+#endif
 	}
 }
 

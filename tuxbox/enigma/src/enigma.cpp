@@ -1,3 +1,4 @@
+#include <config.h>
 #include <errno.h>
 #include <time.h>
 #include <malloc.h>
@@ -7,7 +8,8 @@
 #include <stdlib.h>
 #include <termios.h>
 #include <signal.h>
-#include <dirent.h>
+#include <sys/klog.h>
+#include <dlfcn.h>
 
 #include <lib/base/i18n.h>
 #include <lib/driver/rc.h>
@@ -31,7 +33,6 @@
 #include <lib/dvb/decoder.h>
 
 #include <lib/system/xmlrpc.h>
-#include <lib/system/info.h>
 #include <enigma.h>
 #include <enigma_dyn.h>
 #include <enigma_xmlrpc.h>
@@ -65,20 +66,46 @@ void eZap::status()
 {
 }
 
+#include <lib/base/ringbuffer.h>
+
+extern void ezapInitializeWeb(eHTTPD *httpd, eHTTPDynPathResolver *dyn_resolver);
+// extern void ezapInitializeNetCMD(eHTTPD *httpd, eHTTPDynPathResolver *dyn_resolver);
+
 eZap::eZap(int argc, char **argv)
 	: eApplication(/*argc, argv, 0*/)
 {
 	int bootcount;
-	
-	new eSystemInfo();
 
+#ifndef DISABLE_LCD
 	eZapLCD *pLCD;
+#endif
 	eHTTPDynPathResolver *dyn_resolver;
 	eHTTPFilePathResolver *fileresolver;
 
 	instance = this;
-
+	
 	init = new eInit();
+
+	FILE *pluginlist = fopen(CONFIGDIR "/enigma/plugins", "rb");
+	if (pluginlist)
+	{
+		char filename[128];
+		while (1)
+		{
+			if (!fgets(filename, 127, pluginlist))
+				break;
+			if (!filename)
+				break;
+			eDebug("%s", filename);
+			void *handle=dlopen(filename, RTLD_NOW);
+			if (!handle)
+				eWarning("[PLUGIN] load(%s) failed: %s", filename, dlerror());
+			else
+				plugins.push_back(handle);
+		}
+		fclose(pluginlist);
+	}
+	
 	init->setRunlevel(eAutoInitNumbers::osd);
 
 	focus = 0;
@@ -92,7 +119,7 @@ eZap::eZap(int argc, char **argv)
 	desktop_fb->makeRoot();
 	desktop_fb->setBackgroundColor(gColor(0));
 	desktop_fb->show();
-	
+#ifndef DISABLE_LCD
 	desktop_lcd=new eWidget();
 	desktop_lcd->setName("desktop_lcd");
 	desktop_lcd->move(ePoint(0, 0));
@@ -100,20 +127,35 @@ eZap::eZap(int argc, char **argv)
 	desktop_lcd->setTarget(gLCDDC::getInstance());
 	desktop_lcd->setBackgroundColor(gColor(0));
 	desktop_lcd->show();
+#endif
+	eDebug("[ENIGMA] loading default keymaps...");
 
+#ifndef DISABLE_DREAMBOX_RC
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox2.xml") )
 		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox2.xml");
+#endif
 
-	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdbox.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdbox.xml");
+#if HAVE_DVB_API_VERSION < 3
+#ifndef DISABLE_DBOX_RC
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxold.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxold.xml");
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxnew.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxnew.xml");
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxbuttons.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
+#endif
+#else
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdbox_inputdev.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdbox_inputdev.xml");
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcgeneric_inputdev.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcgeneric_inputdev.xml");
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox_inputdev.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox_inputdev.xml");
+#endif // HAVE_DVB_API_VERSION < 3
 
-	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcgeneric.xml") )
-		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcgeneric.xml");
-
-	eDebug("[ENIGMA] loading default keymaps...");
 	for(std::map<eString,eRCDevice*>::iterator i(eRCInput::getInstance()->getDevices().begin());
-			i != eRCInput::getInstance()->getDevices().end(); ++i)
-		eActionMapList::getInstance()->loadDevice(i->second);
+		i != eRCInput::getInstance()->getDevices().end(); ++i)
+			eActionMapList::getInstance()->loadDevice(i->second);
 
 	char *language=0;
 	if (eConfig::getInstance()->getKey("/elitedvb/language", language))
@@ -121,24 +163,24 @@ eZap::eZap(int argc, char **argv)
 	setlocale(LC_ALL, language);
 	free(language);
 
+	eDVB::getInstance()->configureNetwork();
+
 	// build Service Selector
 	serviceSelector = new eServiceSelector();
-	eDebug("<-- service selector");	
 
 	main = new eZapMain();
-	eDebug("<-- eZapMain");
 
+#ifndef DISABLE_LCD
 	pLCD = eZapLCD::getInstance();
-	eDebug("<-- pLCD");
 
 	serviceSelector->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-	eDebug("..");
+#endif
 
 	dyn_resolver = new eHTTPDynPathResolver();
 	ezapInitializeDyn(dyn_resolver);
 
 	fileresolver = new eHTTPFilePathResolver();
-  fileresolver->addTranslation("/var/tuxbox/htdocs", "/www", 2); /* TODO: make user configurable */
+	fileresolver->addTranslation("/var/tuxbox/htdocs", "/www", 2); /* TODO: make user configurable */
 	fileresolver->addTranslation(CONFIGDIR , "/config", 3);
 	fileresolver->addTranslation("/", "/root", 3);
 	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/", 2);
@@ -146,12 +188,35 @@ eZap::eZap(int argc, char **argv)
 	eDebug("[ENIGMA] starting httpd");
 	httpd = new eHTTPD(80, eApp);
 
+#ifndef DISABLE_NETWORK
+	ezapInitializeXMLRPC(httpd);
+#endif
+	ezapInitializeWeb(httpd, dyn_resolver);
+	httpd->addResolver(dyn_resolver);
+	httpd->addResolver(fileresolver);
+
 	serialhttpd=0;
-#if 0
-	if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
-  {
-  	eDebug("[ENIGMA] starting httpd on serial port...");
-    int fd=::open("/dev/tts/0", O_RDWR);
+	bool SerialConsoleActivated=false;
+	FILE *f=fopen("/proc/cmdline", "rt");
+	if (f)
+	{
+		char *cmdline=NULL;
+		size_t len = 0;
+		getline( &cmdline, &len, f );
+		SerialConsoleActivated = strstr( cmdline, "console=ttyS0" ) != NULL;
+		fclose(f);
+		free(cmdline);
+		if ( SerialConsoleActivated )
+			eDebug("console=ttyS0 detected...disable enigma serial http interface");
+		else
+			eDebug("activate enigma serial http interface");
+	}
+
+	if ( !SerialConsoleActivated )
+	{
+		eDebug("[ENIGMA] starting httpd on serial port...");
+		int fd=::open("/dev/tts/0", O_RDWR);
+
 		if (fd < 0)
 			eDebug("[ENIGMA] serial port error (%m)");
 		else
@@ -167,17 +232,19 @@ eZap::eZap(int argc, char **argv)
 			tcflush(fd, TCIFLUSH);
 			tcsetattr(fd, TCSANOW, &tio); 
 
+			logOutputConsole=0; // disable enigma logging to console
+			klogctl(8, 0, 1); // disable kernel log to serial
+
 			char *banner="Welcome to the enigma serial access.\r\n"
-					"you may start a HTTP session now.\r\n";
+					"you may start a HTTP session now if you send a \"break\".\r\n";
 			write(fd, banner, strlen(banner));
 			serialhttpd = new eHTTPConnection(fd, 0, httpd, 1);
+//			char *i="GET /version HTTP/1.0\n\n";
+//			char *i="GET /menu.cr HTTP/1.0\n\n";
+			char *i="GET /log/debug HTTP/1.0\n\n";
+			serialhttpd->inject(i, strlen(i));
 		}
 	}
-#endif
-
-	ezapInitializeXMLRPC(httpd);
-	httpd->addResolver(dyn_resolver);
-	httpd->addResolver(fileresolver);
 
 	eDebug("[ENIGMA] ok, beginning mainloop");
 
@@ -199,6 +266,12 @@ eZap::eZap(int argc, char **argv)
 
 	eConfig::getInstance()->setKey("/elitedvb/system/bootCount", bootcount);
 
+	if ( bootcount == 1 )
+	{
+//		eConfig::getInstance()->setKey("/ezap/rc/style", "classic");
+//		eConfig::getInstance()->setKey("/ezap/rc/sselect_style", "sselect_classic" );
+		eConfig::getInstance()->setKey("/ezap/serviceselector/showButtons", 1 );
+	}
 	init->setRunlevel(eAutoInitNumbers::main);
 }
 
@@ -212,8 +285,11 @@ eZap::~eZap()
 	eDebug("[ENIGMA] fertig");
 	init->setRunlevel(-1);
 
-  if (serialhttpd)
-    delete serialhttpd;
+	for (std::list<void*>::iterator i(plugins.begin()); i != plugins.end(); ++i)
+		dlclose(*i);
+
+	if (serialhttpd)
+		delete serialhttpd;
     
 	delete httpd;
 	delete init;
@@ -253,12 +329,12 @@ int main(int argc, char **argv)
 		eZap ezap(argc, argv);
 		res=ezap.exec();
 	}
-	
+
 	Decoder::Flush();
+
 	exit(res);
 //	mcheck_check_all();
 //	muntrace();
-	// system("/sbin/halt &");
 }
 
 extern "C" void mkstemps();

@@ -413,8 +413,10 @@ gDC *eSkin::getDCbyName(const char *name)
 	gPixmapDC *dc=0;
 	if (!strcmp(name, "fb"))
 		dc=gFBDC::getInstance();
+#ifndef DISABLE_LCD
 	else if (!strcmp(name, "lcd"))
 		dc=gLCDDC::getInstance();
+#endif
 	return dc;
 }
 
@@ -448,7 +450,7 @@ int eSkin::build(eWidget *widget, XMLTreeNode *node)
 
 			if ( it == widget_creator.end() )
 			{
-				eDebug("widget class %s does not exist", c->GetType());
+				eWarning("widget class %s does not exist", c->GetType());
 				return -ENOENT;
 			}
 			w = (it->second)(widget);
@@ -668,7 +670,7 @@ gColor eSkin::queryScheme(const eString& name) const
 	if (it != scheme.end())
 		return it->second + offset;
 
-	eDebug("%s does not exist", name.c_str());
+//	eWarning("%s does not exist", name.c_str());
 	
 	return gColor(0);
 }

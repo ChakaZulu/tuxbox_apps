@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <lib/system/init.h>
+#include <lib/base/eerror.h>
 
 int eInit::rl=-1;
 std::list<std::pair<int,eAutoInit*> > *eInit::cl;
@@ -43,7 +44,7 @@ void eInit::setRunlevel(int nrl)
 		{
 			if ((*i).first == rl)
 			{
-				printf("+ (%d) %s\n", rl, (*i).second->getDescription());
+				eDebug("+ (%d) %s", rl, (*i).second->getDescription());
 				(*i).second->initNow();
 			}
 		}
@@ -54,12 +55,12 @@ void eInit::setRunlevel(int nrl)
 		for (std::list<std::pair<int,eAutoInit*> >::iterator i(cl->begin()); i!=cl->end(); ++i)
 			if ((*i).first == rl)
 			{
-				printf("- (%d) %s\n", rl, (*i).second->getDescription());
+				eDebug("- (%d) %s", rl, (*i).second->getDescription());
 				(*i).second->closeNow();
 			}
 		rl--;
 	}
-	printf("reached rl %d\n", rl);
+	eDebug("reached rl %d", rl);
 }
 
 eAutoInit::~eAutoInit()

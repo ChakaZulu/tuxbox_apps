@@ -1,172 +1,488 @@
+#ifndef DISABLE_NETWORK
+
 #include <setupnetwork.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include <netinet/in.h>
 
 #include <lib/base/i18n.h>
-
 #include <lib/dvb/edvb.h>
 #include <lib/gui/elabel.h>
 #include <lib/gui/enumber.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/echeckbox.h>
+#include <lib/gui/textinput.h>
+#include <lib/gui/combobox.h>
 #include <lib/gui/eskin.h>
 #include <lib/driver/rc.h>
 #include <lib/system/econfig.h>
 
-// convert a netmask (255.255.255.0) into the length (24)
-static int inet_ntom (const void *src, int *dst)
+#ifdef ENABLE_PPPOE
+
+class eTOnlineDialog: public eWindow
 {
-	struct in_addr *addr = (struct in_addr*) src;
-	in_addr_t mask, num;
-
-	mask = ntohl(addr->s_addr);
-
-	for (num = mask; num & 1; num >>= 1);
-
-	if (num != 0 && mask != 0)
+	eTextInputField *Kennung, *tOnlineNummer, *Mitbenutzer;
+	eButton *ok;
+	eStatusBar *sbar;
+public:
+	eTOnlineDialog( eString Login )
 	{
-		for (num = ~mask; num & 1; num >>= 1);
-		if (num)
-			return 0;
+		setText("T - Online");
+		cmove(ePoint(140,150));
+		cresize(eSize(450,240));
+
+		eLabel *l = new eLabel(this);
+		l->move(ePoint(10,10));
+		l->resize(eSize(220,30));
+		l->setText("Anschlusskennung:");
+
+		Kennung = new eTextInputField(this,l);
+		Kennung->move(ePoint(230,10));
+		Kennung->resize(eSize(200,35));
+		Kennung->setMaxChars(12);
+		Kennung->setUseableChars("1234567890");
+		Kennung->loadDeco();
+		Kennung->setHelpText("Anschlusskennung eingeben mit OK (12 Stellen)");
+		Kennung->setEditHelpText("Anschlusskennung eingeben (0..9, ok)");
+
+		l = new eLabel(this);
+		l->move(ePoint(10,60));
+		l->resize(eSize(220,30));
+		l->setText("T-Online Nummer:");
+
+		tOnlineNummer = new eTextInputField(this,l);
+		tOnlineNummer->move(ePoint(230,60));
+		tOnlineNummer->resize(eSize(200,35));
+		tOnlineNummer->setMaxChars(12);
+		tOnlineNummer->setUseableChars("1234567890");
+		tOnlineNummer->loadDeco();
+		tOnlineNummer->setHelpText("T-Online Nummer eingeben mit OK (12 Stellen)");
+		tOnlineNummer->setEditHelpText("T-Online Nummer eingeben (0..9, ok)");
+
+		l = new eLabel(this);
+		l->move(ePoint(10,110));
+		l->resize(eSize(220,30));
+		l->setText("Mitbenutzernummer:");
+
+		Mitbenutzer = new eTextInputField(this,l);
+		Mitbenutzer->move(ePoint(230,110));
+		Mitbenutzer->resize(eSize(70,35));
+		Mitbenutzer->setMaxChars(4);
+		Mitbenutzer->setUseableChars("1234567890");
+		Mitbenutzer->loadDeco();
+		Mitbenutzer->setHelpText("Mitbenutzernummer eingeben mit OK (4 Stellen)");
+		Mitbenutzer->setEditHelpText("Mitbenutzernummer eingeben (0..9, ok)");
+
+		ok = new eButton(this);
+		ok->move(ePoint(10,160));
+		ok->resize(eSize(170,40));
+		ok->setShortcut("green");
+		ok->setShortcutPixmap("green");
+		ok->setText("speichern");
+		ok->setHelpText("Daten übernehmen und Fenster schliessen");
+		ok->loadDeco();
+		CONNECT(ok->selected, eWidget::accept);
+
+		sbar = new eStatusBar(this);
+		sbar->move( ePoint(0, clientrect.height()-30) );
+		sbar->resize( eSize( clientrect.width(), 30) );
+		sbar->loadDeco();
+
+		if (Login)
+		{
+			unsigned int pos1 = Login.find("#"),
+									pos2 = Login.find("@");
+			if ( pos1 != eString::npos && pos2 != eString::npos )
+			{
+				Kennung->setText(Login.left(12));
+				tOnlineNummer->setText(Login.mid(12,12));
+				Mitbenutzer->setText(Login.mid(pos1+1,4));
+			}
+		}
+	}
+	eString getLogin()
+	{
+		eString tmp =
+			Kennung->getText() +
+			tOnlineNummer->getText() + '#' +
+			Mitbenutzer->getText() +
+			"@t-online.de";
+		return tmp;
+	}
+};
+
+bool readSecretString( eString &str )
+{
+	FILE *f = fopen("/etc/ppp/pap-secrets", "r");
+	if (!f)
+		return false;
+
+	char buf[100];
+
+	size_t readed=
+		fread(buf, 1, sizeof(buf), f );
+	if ( !readed )
+		return false;
+
+	fclose(f);
+	str.assign( buf, readed );
+	str.removeChars(' ');
+	str.removeChars('\t');
+	str.removeChars('\n');
+	str.removeChars('\"');
+	return true;
+}
+
+void writeSecretString( const eString &str )
+{
+	FILE *f = fopen("/etc/ppp/pap-secrets", "w");
+	if (!f)
+		eFatal("couldn't create /etc/ppp/pap-secrets");
+	eString tmp;
+	unsigned int pos =
+		str.find('*');
+	if ( pos != eString::npos )
+	{
+		tmp = '\"' + str.left(pos) + "\"\t*\t\"" +
+			str.mid(pos+1, str.length()-pos ) + "\"\n";
+	}
+	fwrite( tmp.c_str(), 1, tmp.length(), f );
+
+	fclose(f);
+}
+
+void helper( char *&source, char *&dest, uint &spos, uint &dpos, const char* option, const char* value )
+{
+	char *p = strstr( source+spos, option );
+	if( !p )
+		eDebug("couldn't find '%s' Option", option);
+	else
+	{
+		p+=strlen(option);
+		int cnt = p - (source+spos);
+		memcpy( dest+dpos, source+spos, cnt );
+		dpos += cnt;
+		spos += cnt;
+		cnt = strlen(value);
+		memcpy( dest+dpos, value, cnt );
+		dpos+=cnt;
+		p = strchr( source+spos, '\n' );
+		if ( p )
+		{
+			spos = p - source;
+			++spos;
+		}
+	}
+}
+
+char *getOptionString( char *buf, const char *option )
+{
+	char *p = strstr( buf, option );
+	if( !p )
+		eDebug("couldn't find '%s' Option", option);
+	else
+		p+=strlen(option);
+	return p;
+}
+
+int getRejectFlags()
+{
+	char buf[8192];
+	FILE *f = fopen("/etc/ppp/pppoe.conf", "r" );
+	if ( !f )
+	{
+		eDebug("couldn't open '/etc/ppp/pppoe.conf' for read");
+		return 0;
+	}
+	size_t readed = fread(buf, 1, sizeof(buf), f );
+	if ( !readed )
+	{
+		eDebug("couldn't read '/etc/ppp/pppoe.conf'");
+		return 0;
+	}
+	int flags=0;
+	char *p = getOptionString(buf, "REJECT_WWW=");
+	if ( p && !strnicmp(p,"yes",3) )
+		flags|=1;
+	p = getOptionString(buf, "REJECT_TELNET=");
+	if ( p && !strnicmp(p,"yes",3) )
+		flags|=2;
+	p = getOptionString(buf, "REJECT_SAMBA=");
+	if ( p && !strnicmp(p,"yes",3) )
+		flags|=4;
+	p = getOptionString(buf, "REJECT_FTP=");
+	if ( p && !strnicmp(p,"yes",3) )
+		flags|=8;
+	fclose(f);
+	return flags;
+}
+
+void updatePPPConfig( const eString &secrets, int flags )
+{
+	char sourceA[8192];  // source buffer
+	char destA[8192]; // dest buffer
+	char *source = sourceA;
+	char *dest = destA;
+
+	FILE *f = fopen("/etc/ppp/pppoe.conf", "r" );
+	if ( !f )
+	{
+		eDebug("couldn't open '/etc/ppp/pppoe.conf' for read");
+		return;
+	}
+	size_t readed = fread(source, 1, sizeof(sourceA), f );
+	if ( !readed )
+	{
+		eDebug("couldn't read '/etc/ppp/pppoe.conf'");
+		return;
 	}
 
-	for (num = 0; mask; mask <<= 1)
-		num++;
+	uint spos = 0;
+	uint dpos = 0;
+	uint ppos = secrets.find('*');
 
-	*dst = num;
+	if ( ppos != eString::npos )
+	{
+		eString strUser = '\'' + secrets.left(ppos) + "\'\n";
+		helper( source, dest, spos, dpos, "USER=", strUser.c_str() );
+	}
+	helper( source, dest, spos, dpos, "REJECT_WWW=", flags&1?"yes\n":"no\n" );
+	helper( source, dest, spos, dpos, "REJECT_TELNET=", flags&2?"yes\n":"no\n" );
+	helper( source, dest, spos, dpos, "REJECT_SAMBA=", flags&4?"yes\n":"no\n" );
+	helper( source, dest, spos, dpos, "REJECT_FTP=", flags&8?"yes\n":"no\n" );
 
-	return 1;
+	memcpy( dest+dpos, source+spos, readed - spos );
+	dpos += readed-spos;
+
+	fclose(f);
+	f = fopen("/etc/ppp/pppoe.conf", "w");
+	if ( !f )
+	{
+		eDebug("couldn't open '/etc/ppp/pppoe.conf' for write");
+		return;
+	}
+	unsigned int written;
+	if ( (written = fwrite( dest, 1, dpos, f )) != dpos )
+		eDebug("couldn't write correct count of bytes...\n%d bytes written %d should be written", written, dpos );
+	fclose(f);
 }
 
-// convert a length (24) into the netmask (255.255.255.0)
-static int inet_mton (int src, void *dst)
-{
-	struct in_addr *addr = (struct in_addr*) dst;
-	in_addr_t mask = 0;
-
-	for(; src; src--)
-		mask |= 1 << (32 - src);
-
-	addr->s_addr = htonl(mask);
-
-	return 1;
-}
+#endif
 
 eZapNetworkSetup::eZapNetworkSetup():
 	eWindow(0)
 {
-	setText(_("Network setup"));
-	cmove(ePoint(150, 136));
-	cresize(eSize(390, 300));
+	setText(_("Communication setup"));
+	cmove(ePoint(130, 110));
+	cresize(eSize(450, 400));
 
-	int type = 0;
-	struct in_addr sinet_address, sinet_netmask_addr, snameserver, sinet_gateway;
-	inet_pton(AF_INET, "10.0.0.42", &sinet_address);
-	int sinet_netmask = 24;
-	inet_pton(AF_INET, "10.0.0.1", &snameserver);
-	inet_pton(AF_INET, "10.0.0.1", &sinet_gateway);
-
+	__u32 sip=ntohl(0x0a000061), snetmask=ntohl(0xFF000000), sdns=ntohl(0x7f000001), sgateway=ntohl(0x7f000001);
 	int de[4];
 	int sdosetup=0;
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
+	int connectionType=0;
 
-	eConfig::getInstance()->getKey("/elitedvb/network/type", type);
-	eConfig::getInstance()->getKey("/elitedvb/network/inet/address", sinet_address.s_addr);
-	eConfig::getInstance()->getKey("/elitedvb/network/inet/netmask", sinet_netmask);
-	eConfig::getInstance()->getKey("/elitedvb/network/inet/gateway", sinet_gateway.s_addr);
-	eConfig::getInstance()->getKey("/elitedvb/network/nameserver", snameserver.s_addr);
+	eConfig::getInstance()->getKey("/elitedvb/network/ip", sip);
+	eConfig::getInstance()->getKey("/elitedvb/network/netmask", snetmask);
+	eConfig::getInstance()->getKey("/elitedvb/network/dns", sdns);
+	eConfig::getInstance()->getKey("/elitedvb/network/gateway", sgateway);
 	eConfig::getInstance()->getKey("/elitedvb/network/dosetup", sdosetup);
-
-	inet_mton(sinet_netmask, &sinet_netmask_addr);
+	eConfig::getInstance()->getKey("/elitedvb/network/connectionType", connectionType);
 
 	eLabel *l=new eLabel(this);
 	l->setText("IP:");
-	l->move(ePoint(10, 20));
+	l->move(ePoint(20, 20));
 	l->resize(eSize(150, fd+4));
 
-	eNumber::unpack(sinet_address, de);
-	inet_address=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	inet_address->move(ePoint(160, 20));
-	inet_address->resize(eSize(200, fd+10));
-	inet_address->setFlags(eNumber::flagDrawPoints);
-	inet_address->setHelpText(_("enter IP Adress of the box (0..9, left, right)"));
-	inet_address->loadDeco();
-	CONNECT(inet_address->selected, eZapNetworkSetup::fieldSelected);
+	eNumber::unpack(sip, de);
+	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l);
+	ip->move(ePoint(160, 20));
+	ip->resize(eSize(200, fd+10));
+	ip->setFlags(eNumber::flagDrawPoints);
+	ip->setHelpText(_("enter IP Address of the box (0..9, left, right)"));
+	ip->loadDeco();
+	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
 	l=new eLabel(this);
 	l->setText("Netmask:");
-	l->move(ePoint(10, 60));
+	l->move(ePoint(20, 60));
 	l->resize(eSize(150, fd+4));
 
-	eNumber::unpack(sinet_netmask_addr, de);
-	inet_netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	inet_netmask->move(ePoint(160, 60));
-	inet_netmask->resize(eSize(200, fd+10));
-	inet_netmask->setFlags(eNumber::flagDrawPoints);
-	inet_netmask->setHelpText(_("enter netmask of your network (0..9, left, right)"));
-	inet_netmask->loadDeco();
-	CONNECT(inet_netmask->selected, eZapNetworkSetup::fieldSelected);
-	
-	l=new eLabel(this);
-	l->setText("Nameserver:");
-	l->move(ePoint(10, 100));
-	l->resize(eSize(150, fd+4));
-
-	eNumber::unpack(snameserver, de);
-	nameserver=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	nameserver->move(ePoint(160, 100));
-	nameserver->resize(eSize(200, fd+10));
-	nameserver->setFlags(eNumber::flagDrawPoints);
-	nameserver->setHelpText(_("enter your domain name server (0..9, left, right)"));
-	nameserver->loadDeco();
-	CONNECT(nameserver->selected, eZapNetworkSetup::fieldSelected);
+	eNumber::unpack(snetmask, de);
+	netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l);
+	netmask->move(ePoint(160, 60));
+	netmask->resize(eSize(200, fd+10));
+	netmask->setFlags(eNumber::flagDrawPoints);
+	netmask->setHelpText(_("enter netmask of your network (0..9, left, right)"));
+	netmask->loadDeco();
+	CONNECT(netmask->selected, eZapNetworkSetup::fieldSelected);
 
 	l=new eLabel(this);
-	l->setText("Gateway:");
-	l->move(ePoint(10, 140));
-	l->resize(eSize(150, fd+4));
+	l->setText("Type:");
+	l->move(ePoint(20, 100));
+	l->resize(eSize(140, fd+4));
 
-	eNumber::unpack(sinet_gateway, de);
-	inet_gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	inet_gateway->move(ePoint(160, 140));
-	inet_gateway->resize(eSize(200, fd+10));
-	inet_gateway->setFlags(eNumber::flagDrawPoints);
-	inet_gateway->setHelpText(_("enter ip of your gateway (0..9, left, right)"));
-	inet_gateway->loadDeco();
-	CONNECT(inet_gateway->selected, eZapNetworkSetup::fieldSelected);
+	eListBoxEntryText *sel=0;
+	combo_type=new eComboBox(this, 3, l);
+	combo_type->move(ePoint(160,100));
+	combo_type->resize(eSize(200, fd+10));
+	combo_type->loadDeco();
+	combo_type->setHelpText(_("press ok to change connection type"));
+	if ( !connectionType )
+	{
+		sel = new eListBoxEntryText( *combo_type, _("LAN"), (void*)0, 0, _("Communicate to Local Area Network"));
+#ifdef ENABLE_PPPOE
+		new eListBoxEntryText( *combo_type, _("WAN(PPPoE)"), (void*)1, 0, _("Communicate to the Internet via DSL"));		
+#endif
+	}
+#ifdef ENABLE_PPPOE
+	else
+	{
+		new eListBoxEntryText( *combo_type, _("LAN"), (void*)0, 0, _("Communicate to Local Area Network"));
+		sel = new eListBoxEntryText( *combo_type, _("WAN(PPPoE)"), (void*)1, 0, _("Communicate to the Internet via DSL"));
+	}
+	CONNECT(combo_type->selchanged, eZapNetworkSetup::typeChanged);
+	tdsl = new eButton(this);
+	tdsl->move(ePoint(370,100));
+	tdsl->resize(eSize(70, fd+10));
+	tdsl->setText("T-DSL");
+	tdsl->loadDeco();
+	tdsl->hide();
+	tdsl->setHelpText(_("T-Online User press ok here"));
+	CONNECT( tdsl->selected, eZapNetworkSetup::tdslPressed );
+#endif
+
+	lNameserver=new eLabel(this);
+	lNameserver->setText("Nameserver:");
+	lNameserver->move(ePoint(20, 140));
+	lNameserver->resize(eSize(140, fd+4));
+
+	eNumber::unpack(sdns, de);
+	dns=new eNumber(this, 4, 0, 255, 3, de, 0, lNameserver);
+	dns->move(ePoint(160, 140));
+	dns->resize(eSize(200, fd+10));
+	dns->setFlags(eNumber::flagDrawPoints);
+	dns->setHelpText(_("enter your domain name server (0..9, left, right)"));
+	dns->loadDeco();
+	CONNECT(dns->selected, eZapNetworkSetup::fieldSelected);
+
+#ifdef ENABLE_PPPOE
+	lLogin=new eLabel(this);
+	lLogin->setText(_("Login:"));
+	lLogin->move(ePoint(20, 140));
+	lLogin->resize(eSize(140, fd+4));
+	lLogin->hide();
+
+	char *strLogin=0;
+	eConfig::getInstance()->getKey("/elitedvb/network/login", strLogin);
+	login=new eTextInputField(this,lLogin);
+	login->move(ePoint(160, 140));
+	login->resize(eSize(280, fd+10));
+	login->setMaxChars(100);
+	login->loadDeco();
+	login->setHelpText(_("press ok to edit your provider login name"));
+	if ( strLogin )
+		login->setText(strLogin);
+	login->hide();
+	CONNECT(login->selected, eZapNetworkSetup::loginSelected );
+#endif
+
+	lGateway=new eLabel(this);
+	lGateway->setText("Gateway:");
+	lGateway->move(ePoint(20, 180));
+	lGateway->resize(eSize(140, fd+4));
+
+	eNumber::unpack(sgateway, de);
+	gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l);
+	gateway->move(ePoint(160, 180));
+	gateway->resize(eSize(200, fd+10));
+	gateway->setFlags(eNumber::flagDrawPoints);
+	gateway->setHelpText(_("enter your gateways IP Address (0..9, left, right)"));
+	gateway->loadDeco();
+	CONNECT(gateway->selected, eZapNetworkSetup::fieldSelected);
+
+#ifdef ENABLE_PPPOE
+	lPassword=new eLabel(this);
+	lPassword->setText(_("Password:"));
+	lPassword->move(ePoint(20, 180));
+	lPassword->resize(eSize(150, fd+4));
+
+	password=new eTextInputField(this,lPassword);
+	password->move(ePoint(160, 180));
+	password->resize(eSize(280, fd+10));
+	password->setMaxChars(30);
+	password->loadDeco();
+	password->setHelpText(_("press ok to edit your provider password"));
+	password->hide();
+	CONNECT(password->selected, eZapNetworkSetup::passwordSelected);
+#endif
 
 	dosetup=new eCheckbox(this, sdosetup, 1);
-	dosetup->setText("Configure Network");
-	dosetup->move(ePoint(100, 183));
+	dosetup->setText(_("Configure Network"));
+	dosetup->move(ePoint(100, 223));
 	dosetup->resize(eSize(fd+4+240, fd+4));
 	dosetup->setHelpText(_("enable/disable network config (ok)"));
+
+#ifdef ENABLE_PPPOE
+	int flags = getRejectFlags();
+	rejectWWW=new eCheckbox(this, flags&1, 1);
+	rejectWWW->setText("WWW");
+	rejectWWW->move(ePoint(20,260));
+	rejectWWW->resize(eSize(90, fd+4));
+	rejectWWW->setHelpText(_("reject incoming connections on port 80"));
+	rejectWWW->hide();
+
+	rejectTelnet=new eCheckbox(this, flags&2, 1);
+	rejectTelnet->setText("Telnet");
+	rejectTelnet->move(ePoint(130,260));
+	rejectTelnet->resize(eSize(90, fd+4));
+	rejectTelnet->setHelpText(_("reject incoming connections on port 23"));
+	rejectTelnet->hide();
+
+	rejectSamba=new eCheckbox(this, flags&4, 1);
+	rejectSamba->setText("Samba");
+	rejectSamba->move(ePoint(240,260));
+	rejectSamba->resize(eSize(100, fd+4));
+	rejectSamba->setHelpText(_("reject incoming connections on ports 137,138,139"));
+	rejectSamba->hide();
+
+	rejectFTP=new eCheckbox(this, flags&8, 1);
+	rejectFTP->setText("FTP");
+	rejectFTP->move(ePoint(360,260));
+	rejectFTP->resize(eSize(70, fd+4));
+	rejectFTP->setHelpText(_("reject incoming connections on ports 21"));
+	rejectFTP->hide();
+#endif
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
-	ok->move(ePoint(10, 220));
-	ok->resize(eSize(170, 40));
+	ok->move(ePoint(20, 310));
+	ok->resize(eSize(220, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
 
-	abort=new eButton(this);
-	abort->loadDeco();
-	abort->setText(_("abort"));
-	abort->move(ePoint(200, 220));
-	abort->resize(eSize(170, 40));
-	abort->setHelpText(_("ignore changes and return"));
-
-	CONNECT(abort->selected, eZapNetworkSetup::abortPressed);
-
 	statusbar=new eStatusBar(this);
 	statusbar->move( ePoint(0, clientrect.height()-30 ) );
 	statusbar->resize( eSize( clientrect.width(), 30) );
 	statusbar->loadDeco();
+	setHelpID(82);
+
+	combo_type->setCurrent(sel,true);
+
+#ifdef ENABLE_PPPOE
+	if ( readSecretString( secrets ) && secrets )
+	{
+		unsigned int pos = secrets.find("*");
+		if ( pos != eString::npos )
+		{
+			login->setText( secrets.left(pos) );
+			password->setText("******");
+		}
+	}
+#endif
 }
 
 eZapNetworkSetup::~eZapNetworkSetup()
@@ -178,48 +494,142 @@ void eZapNetworkSetup::fieldSelected(int *number)
 	focusNext(eWidget::focusDirNext);
 }
 
-
 void eZapNetworkSetup::okPressed()
 {
-	int type = 0;
-	int einet_address[4], einet_netmask_addr[4], enameserver[4], einet_gateway[4];
-	struct in_addr sinet_address, sinet_netmask_addr, snameserver, sinet_gateway;
-	int sinet_netmask;
+	int eIP[4], eMask[4], eDNS[4], eGateway[4];
+	__u32 sip, snetmask, sdns, sgateway;
 	for (int i=0; i<4; i++)
 	{
-		einet_address[i]	= inet_address->getNumber(i);
-		einet_netmask_addr[i]	= inet_netmask->getNumber(i);
-		enameserver[i]		= nameserver->getNumber(i);
-		einet_gateway[i]	= inet_gateway->getNumber(i);
+		eIP[i]=ip->getNumber(i);
+		eMask[i]=netmask->getNumber(i);
+		eGateway[i]=gateway->getNumber(i);
+		eDNS[i]=dns->getNumber(i);
 	}
-	eNumber::pack(sinet_address, einet_address);
-	eNumber::pack(sinet_netmask_addr, einet_netmask_addr);
-	eNumber::pack(snameserver, enameserver);
-	eNumber::pack(sinet_gateway, einet_gateway);
-	inet_ntom(&sinet_netmask_addr, &sinet_netmask);
+	eNumber::pack(sip, eIP);
+	eNumber::pack(snetmask, eMask);
+	eNumber::pack(sdns, eDNS);
+	eNumber::pack(sgateway, eGateway);
 
 	eDebug("IP: %d.%d.%d.%d, Netmask: %d.%d.%d.%d, gateway %d.%d.%d.%d, DNS: %d.%d.%d.%d",
-		einet_address[0], einet_address[1],  einet_address[2], einet_address[3],
-		einet_netmask_addr[0], einet_netmask_addr[1],  einet_netmask_addr[2], einet_netmask_addr[3],
-		einet_gateway[0], einet_gateway[1], einet_gateway[2], einet_gateway[3],
-		enameserver[0], enameserver[1],  enameserver[2], enameserver[3]);
+		eIP[0], eIP[1],  eIP[2], eIP[3],
+		eMask[0], eMask[1],  eMask[2], eMask[3],
+		eGateway[0], eGateway[1], eGateway[2], eGateway[3],
+		eDNS[0], eDNS[1],  eDNS[2], eDNS[3]);
 
 	int sdosetup=dosetup->isChecked();
-	
-	eConfig::getInstance()->setKey("/elitedvb/network/type", type);
-	eConfig::getInstance()->setKey("/elitedvb/network/inet/address", sinet_address.s_addr);
-	eConfig::getInstance()->setKey("/elitedvb/network/inet/netmask", sinet_netmask);
-	eConfig::getInstance()->setKey("/elitedvb/network/inet/gateway", sinet_gateway.s_addr);
-	eConfig::getInstance()->setKey("/elitedvb/network/nameserver", snameserver.s_addr);
-	eConfig::getInstance()->setKey("/elitedvb/network/dosetup", sdosetup);
-	eConfig::getInstance()->flush();
-	
-	eDVB::getInstance()->configureNetwork();
-	close(1);
-}
+	int type = (int) combo_type->getCurrent()->getKey();
 
-void eZapNetworkSetup::abortPressed()
-{
+	eConfig::getInstance()->setKey("/elitedvb/network/ip", sip);
+	eConfig::getInstance()->setKey("/elitedvb/network/netmask", snetmask);
+	eConfig::getInstance()->setKey("/elitedvb/network/dns", sdns);
+	eConfig::getInstance()->setKey("/elitedvb/network/gateway", sgateway);
+	eConfig::getInstance()->setKey("/elitedvb/network/dosetup", sdosetup);
+	eConfig::getInstance()->setKey("/elitedvb/network/connectionType", type );
+	eConfig::getInstance()->flush();
+
+#ifdef ENABLE_PPPOE
+	if (type)
+	{
+		int flags=0;
+		if ( rejectWWW->isChecked() )
+			flags |= 1;
+		if ( rejectTelnet->isChecked() )
+			flags |= 2;
+		if ( rejectSamba->isChecked() )
+			flags |= 4;
+		if ( rejectFTP->isChecked() )
+			flags |= 8;
+		writeSecretString( secrets );
+		updatePPPConfig( secrets,flags );
+	}
+#endif
+
+	if ( sdosetup )
+		eDVB::getInstance()->configureNetwork();
+
 	close(0);
 }
 
+#ifdef ENABLE_PPPOE
+void eZapNetworkSetup::typeChanged(eListBoxEntryText *le)
+{
+	if ( le )
+	{
+		if ( le->getKey() )
+		{
+			rejectWWW->show();
+			rejectFTP->show();
+			rejectTelnet->show();
+			rejectSamba->show();
+			tdsl->show();
+			lNameserver->hide();
+			lGateway->hide();
+			dns->hide();
+			gateway->hide();
+			lLogin->show();
+			lPassword->show();
+			login->show();
+			password->show();
+		}
+		else
+		{
+			rejectWWW->hide();
+			rejectFTP->hide();
+			rejectTelnet->hide();
+			rejectSamba->hide();
+			tdsl->hide();
+			lLogin->hide();
+			lPassword->hide();
+			login->hide();
+			password->hide();
+			lNameserver->show();
+			lGateway->show();
+			dns->show();
+			gateway->show();
+		}
+	}
+}
+
+void eZapNetworkSetup::loginSelected()
+{
+	if ( !login->inEditMode() )
+	{
+		unsigned int pos =
+			secrets.find("*");
+		eString pw;
+		if ( pos )
+			pw = secrets.mid(pos+1, secrets.length() - pos - 1 );
+		secrets = login->getText()+'*'+pw;
+	}
+}
+
+void eZapNetworkSetup::passwordSelected()
+{
+	if ( password->inEditMode() )
+	{
+		unsigned int pos = secrets.find("*");
+		if ( pos != eString::npos )
+			password->setText( secrets.mid( pos+1, secrets.length() - pos - 1 ) );
+	}
+	else
+	{
+		secrets=login->getText()+'*'+password->getText();
+		password->setText("******");
+	}
+}
+
+void eZapNetworkSetup::tdslPressed()
+{
+	hide();
+	eTOnlineDialog dlg(login->getText());
+	dlg.show();
+	if ( !dlg.exec() )
+		login->setText(dlg.getLogin());
+	dlg.hide();
+	show();
+	setFocus(tdsl);
+}
+#endif // ENABLE_PPPOE
+
+
+#endif // DISABLE_NETWORK

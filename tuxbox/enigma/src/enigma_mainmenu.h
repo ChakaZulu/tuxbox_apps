@@ -7,7 +7,11 @@
 class gPixmap;
 class eLabel;
 
-#define MENU_ENTRIES	9
+#ifndef DISABLE_FILE
+#define MENU_ENTRIES 9
+#else
+#define MENU_ENTRIES 6
+#endif
 
 class eMainMenu: public eWidget
 {
@@ -17,7 +21,9 @@ class eMainMenu: public eWidget
 	void setActive(int i);
 	void sel_tv();
 	void sel_radio();
+#ifndef DISABLE_FILE
 	void sel_file();
+#endif
 	void sel_vcr();
 	void sel_setup();
 	void sel_info();	

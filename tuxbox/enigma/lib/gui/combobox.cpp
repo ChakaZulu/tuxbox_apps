@@ -2,12 +2,16 @@
 #include <lib/gdi/font.h>
 
 eComboBox::eComboBox( eWidget* parent, int OpenEntries, eLabel* desc, int takefocus, const char *deco )
-:eButton(parent, desc, takefocus, deco), listbox(0, 0, takefocus), button( this, 0, 0, eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0)?"eButton":""), pm(0), entries(OpenEntries)
+:eButton(parent, desc, takefocus, deco),
+listbox(0, 0, takefocus),
+button( this, 0, 0, eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0)?"eButton":""),
+pm(0), entries(OpenEntries), current(0)
 {
 	align=eTextPara::dirLeft;
 	if ( eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0) )
 		button.loadDeco();
 	button.setBlitFlags(BF_ALPHATEST);
+
 	pm=eSkin::getActive()->queryImage("eComboBox.arrow");
 	button.setPixmap(pm);
 	listbox.hide();
@@ -16,16 +20,19 @@ eComboBox::eComboBox( eWidget* parent, int OpenEntries, eLabel* desc, int takefo
 	CONNECT( selected, eComboBox::onOkPressed );
 	CONNECT( listbox.selected, eComboBox::onEntrySelected );
 	CONNECT( listbox.selchanged, eComboBox::onSelChanged );
-	this->zOrderRaise();
 	listbox.zOrderRaise();
 	addActionMap(&i_cursorActions->map);
 }
 
-void eComboBox::redrawWidget(gPainter *target, const eRect &rc)
+eComboBox::~eComboBox()
 {
-//	target->clip( eRect( rc.left(), rc.top(), rc.width()-button.width(), rc.bottom() ) );
-	eLabel::redrawWidget(target, rc);
-//	target->clippop();
+	if ( listbox.isVisible() )
+	{
+		eDebug("KILL COMBOBOX WITH OPEN LISTBOX");
+		listbox.hide();
+		setFocus(this);
+		eWindow::globalCancel( eWindow::ON );
+	}
 }
 
 void eComboBox::onOkPressed()
@@ -60,7 +67,7 @@ int eComboBox::setProperty( const eString& prop, const eString& val )
 	{
 		int width=listbox.getSize().width();
 		width = atoi(val.c_str());
-  setOpenWidth( width );
+		setOpenWidth( width );
 	}
 	else
 		return eButton::setProperty( prop, val);
@@ -77,7 +84,7 @@ int eComboBox::eventHandler( const eWidgetEvent& event )
 		case eWidgetEvent::changedPosition:
 		case eWidgetEvent::changedSize:
 		{
-			eListBoxEntryText* cur = listbox.getCurrent();
+			eListBoxEntryText* cur = listbox.getCount()?listbox.getCurrent():0;
 			listbox.resize( eSize( getSize().width(), eListBoxEntryText::getEntryHeight()*entries+listbox.getDeco().borderBottom+listbox.getDeco().borderTop ) );
 			int smButtonDeco = eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth", pm?pm->x:0 );
 			if (deco)
@@ -101,9 +108,9 @@ int eComboBox::eventHandler( const eWidgetEvent& event )
 	return 1;
 }
 
-int eComboBox::moveSelection ( int dir )
+int eComboBox::moveSelection ( int dir, bool sendSelChanged )
 {
-	int ret = listbox.moveSelection( dir );
+	int ret = listbox.moveSelection( dir, sendSelChanged );
 	eListBoxEntryText *cur = listbox.getCurrent();
 	if ( cur )
 	{
@@ -113,7 +120,6 @@ int eComboBox::moveSelection ( int dir )
 	return ret;
 }
 
-
 void eComboBox::onEntrySelected( eListBoxEntryText* e)
 {
 	listbox.hide();
@@ -122,10 +128,12 @@ void eComboBox::onEntrySelected( eListBoxEntryText* e)
 
 	if (e && button.getText() != e->getText() )
 	{
-		setText( e->getText(), false );
+		setText(e->getText());
 		setFocus( this );
+#ifndef DISABLE_LCD
 		if ( parent->LCDElement )
 			parent->LCDElement->setText("");
+#endif
 		current = e;
 		/* emit */ selchanged_id(this, current);
 		/* emit */ selchanged(current);
@@ -140,6 +148,7 @@ void eComboBox::onSelChanged(eListBoxEntryText* le)
 {
 	if (flags & flagShowEntryHelp )
 		setHelpText( le->getHelpText() );
+#ifndef DISABLE_LCD
 	if ( parent->getFocus() == &listbox )
 	{
 		if ( LCDTmp )
@@ -147,6 +156,7 @@ void eComboBox::onSelChanged(eListBoxEntryText* le)
 		else if ( parent->LCDElement )
 			parent->LCDElement->setText( le->getText() );
 	}
+#endif
 }
 
 void eComboBox::removeEntry( eListBoxEntryText* le )
@@ -181,12 +191,12 @@ void eComboBox::removeEntry( void* key )
 	}
 }
 
-int eComboBox::setCurrent( eListBoxEntryText* le )
+int eComboBox::setCurrent( const eListBoxEntryText* le, bool sendSelChanged )
 {
 	if (!le)
 		return E_INVALID_ENTRY;
 
-	int err = listbox.setCurrent( le );
+	int err = listbox.setCurrent( le, sendSelChanged );
 	if( err && err != E_ALLREADY_SELECTED )
 		return err;
 
@@ -200,8 +210,9 @@ struct selectEntryByNum: public std::unary_function<const eListBoxEntryText&, vo
 {
 	int num;
 	eListBox<eListBoxEntryText>* lb;
+	bool sendSelChanged;
 
-	selectEntryByNum(int num, eListBox<eListBoxEntryText> *lb): num(num), lb(lb)
+	selectEntryByNum(int num, eListBox<eListBoxEntryText> *lb, bool sendSelChanged=false): num(num), lb(lb), sendSelChanged(sendSelChanged)
 	{
 	}
 
@@ -209,19 +220,19 @@ struct selectEntryByNum: public std::unary_function<const eListBoxEntryText&, vo
 	{
 		if (!num--)
 		{
-			lb->setCurrent(&le);
+			lb->setCurrent(&le, sendSelChanged);
 	 		return 1;
 		}
 		return 0;
 	}
 };
 
-int eComboBox::setCurrent( int num )
+int eComboBox::setCurrent( int num, bool sendSelChanged )
 {
 	if ( num > listbox.getCount() )
 		return E_INVALID_ENTRY;
 
-	int err = listbox.forEachEntry( selectEntryByNum(num, &listbox ) );
+	int err = listbox.forEachEntry( selectEntryByNum(num, &listbox, sendSelChanged ) );
 	if ( err )
 		return E_COULDNT_FIND;
 
@@ -235,8 +246,9 @@ struct selectEntryByKey: public std::unary_function<const eListBoxEntryText&, vo
 {
 	void* key;
 	eListBox<eListBoxEntryText>* lb;
+	bool sendSelChanged;
 
-	selectEntryByKey(void *key, eListBox<eListBoxEntryText> *lb):key(key), lb(lb)
+	selectEntryByKey(void *key, eListBox<eListBoxEntryText> *lb, bool sendSelChanged=false):key(key), lb(lb), sendSelChanged(sendSelChanged)
 	{
 	}
 
@@ -244,26 +256,25 @@ struct selectEntryByKey: public std::unary_function<const eListBoxEntryText&, vo
 	{
 		if ( le.getKey() == key )
 		{
-			lb->setCurrent(&le);
+			lb->setCurrent(&le, sendSelChanged );
 			return 1;
 		}
-
 		return 0;
 	}
 };
 
-int eComboBox::setCurrent( void* key )
+int eComboBox::setCurrent( void* key, bool sendSelChanged )
 {
 	if (!listbox.getCount())
-		return E_INVALID_ENTRY;
+		return E_COULDNT_FIND;
 
 	eListBoxEntryText* cur = listbox.getCurrent();
 
-  if ( cur && cur->getKey() == key )
+	if ( cur && cur->getKey() == key )
 		goto ok;
-	
+
 	int err;
-	if ( (err=listbox.forEachEntry( selectEntryByKey(key, &listbox ) ) ) )
+	if ( (err=listbox.forEachEntry( selectEntryByKey(key, &listbox, sendSelChanged ) ) ) )
 		return E_COULDNT_FIND;
 
 ok:

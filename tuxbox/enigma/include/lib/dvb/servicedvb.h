@@ -11,6 +11,8 @@
 
 class eServiceHandlerDVB;
 
+#ifndef DISABLE_FILE
+
 class eDVRPlayerThread: public eThread, public eMainloop, public Object
 {
 	eServiceHandlerDVB *handler;
@@ -24,6 +26,10 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	int sourcefd;
 	int speed;
 	int slice;
+	
+	int livemode; 		// used in timeshift where end-of-file is only temporary
+	eTimer liveupdatetimer;
+	void updatePosition();
 
 	int filelength; // in 1880 packets
 	int position;
@@ -62,7 +68,7 @@ public:
 	
 	void gotMessage(const eDVRPlayerThreadMessage &message);
 	
-	eDVRPlayerThread(const char *filename, eServiceHandlerDVB *handler);
+	eDVRPlayerThread(const char *filename, eServiceHandlerDVB *handler, int livemode);
 	~eDVRPlayerThread();
 
 	int getPosition(int);
@@ -71,9 +77,11 @@ public:
 	void thread();
 };
 
+#endif //DISABLE_FILE
 
 class eServiceHandlerDVB: public eServiceHandler
 {
+#ifndef DISABLE_FILE
 	friend class eDVRPlayerThread;
 	int recording;
 
@@ -82,6 +90,7 @@ class eServiceHandlerDVB: public eServiceHandler
 		enum
 		{
 			done,
+			liveeof,
 			status
 		};
 		int type;
@@ -92,8 +101,15 @@ class eServiceHandlerDVB: public eServiceHandler
 	};
 	eFixedMessagePump<eDVRPlayerThreadMessage> messages;
 	eDVRPlayerThread *decoder;
-	
+	eString current_filename;
+
+			// (u.a.) timeshift:
+	void startPlayback(const eString &file, int livemode);
+	void stopPlayback(int waslivemode=0);
+
 	void gotMessage(const eDVRPlayerThreadMessage &message);
+	void handleDVBEvent( const eDVBEvent& );
+#endif //DISABLE_FILE
 
 	void scrambledStatusChanged(bool);
 	void switchedService(const eServiceReferenceDVB &, int);
@@ -102,10 +118,11 @@ class eServiceHandlerDVB: public eServiceHandler
 	void gotPMT(PMT *pmt);
 	void leaveService(const eServiceReferenceDVB &);
 	void aspectRatioChanged(int ratio);
-	int flags, state, aspect, error;
+	int state, aspect, error;
+	
+	int pcrpid;
 
 	eServiceCache<eServiceHandlerDVB> cache;
-	void handleDVBEvent( const eDVBEvent& );
 public:
 	int getID() const;
 	eServiceHandlerDVB();
@@ -127,7 +144,6 @@ public:
 		// for DVB events, nvod, audio....
 	EIT *getEIT();
 	
-	int getFlags();
 	int getAspectRatio();
 	int getState();
 	int getErrorInfo();
@@ -136,7 +152,9 @@ public:
 
 	void loadNode(eServiceCache<eServiceHandlerDVB>::eNode &node, const eServiceReference &ref);
 	eService *createService(const eServiceReference &node);
+#ifndef DISABLE_FILE
 	void addFile(void *node, const eString &filename);
+#endif
 
 	void enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback);
 	void leaveDirectory(const eServiceReference &dir);

@@ -18,10 +18,20 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 
+//#define HAVE_FRIBIDI
+// until we have it in the cdk
+
+#ifdef HAVE_FRIBIDI
+#include <fribidi/fribidi.h>
+#endif
+
 #include <map>
 
 fontRenderClass *fontRenderClass::instance;
-static eLock ftlock;
+
+static pthread_mutex_t ftlock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+static pthread_mutex_t refcntlck=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+
 static FTC_Font cache_current_font=0;
 
 struct fntColorCacheKey
@@ -116,7 +126,7 @@ eString fontRenderClass::AddFont(const eString &filename, const eString &name, i
 
 	n->scale=scale;
 	FT_Face face;
-	eLocker lock(ftlock);
+	singleLock s(ftlock);
 
 	if ((error=FT_New_Face(library, filename.c_str(), 0, &face)))
 		eFatal(" failed: %s", strerror(error));
@@ -185,7 +195,7 @@ float fontRenderClass::getLineHeight(const gFont& font)
 	Font *fnt = getFont( font.family.c_str(), font.pointSize);
 	if (!fnt)
 		return 0;
-	eLocker lock(ftlock);
+	singleLock s(ftlock);
 	FT_Face current_face;
 	if (FTC_Manager_Lookup_Size(cacheManager, &fnt->font.font, &current_face, &fnt->size)<0)
 	{
@@ -201,7 +211,7 @@ float fontRenderClass::getLineHeight(const gFont& font)
 
 fontRenderClass::~fontRenderClass()
 {
-	ftlock.lock();
+	singleLock s(ftlock);
 //	auskommentiert weil freetype und enigma die kritische masse des suckens ueberschreiten. 
 //	FTC_Manager_Done(cacheManager);
 //	FT_Done_FreeType(library);
@@ -258,23 +268,12 @@ int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt gly
 
 	int nx=cursor.x();
 
-	if (! (rflags & RS_RTL))
-		nx+=glyph->xadvance;
-	else
-	{
-		eDebug("RTL: glyph->xadvance: %d", glyph->xadvance);
-		nx-=glyph->xadvance;
-	}
+	nx+=glyph->xadvance;
 	
 	if (
 			(rflags&RS_WRAP) && 
-			(
-				(!(rflags & RS_RTL)) 
-					? 
-					(nx >= area.right()) : 
-					(nx < area.left())
-				)
-			)
+			(nx >= area.right())
+		)
 	{
 		int cnt = 0;
 		glyphString::iterator i(glyphs.end());
@@ -289,7 +288,6 @@ int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt gly
 		if (i != glyphs.begin() && ((i->flags&(GS_ISSPACE|GS_ISFIRST))==GS_ISSPACE) && (++i != glyphs.end()))		// skip space
 		{
 			int linelength=cursor.x()-i->x;
-				// RTL: linelength is negative
 			i->flags|=GS_ISFIRST;
 			ePoint offset=ePoint(i->x, i->y);
 			newLine(rflags);
@@ -298,7 +296,7 @@ int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt gly
 			{
 				i->x-=offset.x();
 				i->y-=offset.y();
-				i->bbox->moveBy(-offset.x(), -offset.y());
+				i->bbox.moveBy(-offset.x(), -offset.y());
 				++i;
 			}
 			cursor+=ePoint(linelength, 0);	// put the cursor after that line
@@ -321,20 +319,16 @@ int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt gly
 		kern=delta.x>>6;
 	}
 
-  eRect* bbox = new eRect();
-	bbox->setLeft( (flags&GS_ISFIRST|glyphs.empty()?cursor.x():cursor.x()-1) + glyph->left );
-	bbox->setTop( cursor.y() - glyph->top );
-	bbox->setWidth( glyph->width );
-	bbox->setHeight( glyph->height );
-
 	pGlyph ng;
+
+	ng.bbox.setLeft( (flags&GS_ISFIRST | /*glyphs.empty() ? cursor.x() : */cursor.x() - 1 ) + glyph->left );
+	ng.bbox.setTop( cursor.y() - glyph->top );
+	ng.bbox.setWidth( glyph->width );
+	ng.bbox.setHeight( glyph->height );
 
 	xadvance+=kern;
 
-	if (!(rflags & RS_RTL))
-		ng.x=cursor.x()+kern;
-	else
-		ng.x=cursor.x()-xadvance;
+	ng.x=cursor.x()+kern;
 
 	ng.y=cursor.y();
 	ng.w=xadvance;
@@ -342,13 +336,9 @@ int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt gly
 	ng.font->lock();
 	ng.glyph_index=glyphIndex;
 	ng.flags=flags;
-	ng.bbox=bbox;
 	glyphs.push_back(ng);
 
-	if (!(rflags & RS_RTL))
-		cursor+=ePoint(xadvance, 0);
-	else
-		cursor-=ePoint(xadvance, 0);
+	cursor+=ePoint(xadvance, 0);
 	previous=glyphIndex;
 	return 0;
 }
@@ -363,14 +353,14 @@ void eTextPara::calc_bbox()
 
 	for (	glyphString::iterator i(glyphs.begin()); i != glyphs.end(); ++i)
 	{
-		if ( i->bbox->left() < boundBox.left() )
-			boundBox.setLeft( i->bbox->left() );
-		if ( i->bbox->top() < boundBox.top() )
-			boundBox.setTop( i->bbox->top() );
-		if ( i->bbox->right() > boundBox.right() )
-			boundBox.setRight( i->bbox->right() );
-		if ( i->bbox->bottom() > boundBox.bottom() )
-			boundBox.setBottom( i->bbox->bottom() );
+		if ( i->bbox.left() < boundBox.left() )
+			boundBox.setLeft( i->bbox.left() );
+		if ( i->bbox.top() < boundBox.top() )
+			boundBox.setTop( i->bbox.top() );
+		if ( i->bbox.right() > boundBox.right() )
+			boundBox.setRight( i->bbox.right() );
+		if ( i->bbox.bottom() > boundBox.bottom() )
+			boundBox.setBottom( i->bbox.bottom() );
 	}
 //	eDebug("boundBox left = %i, top = %i, right = %i, bottom = %i", boundBox.left(), boundBox.top(), boundBox.right(), boundBox.bottom() );
 	bboxValid=1;
@@ -378,26 +368,16 @@ void eTextPara::calc_bbox()
 
 void eTextPara::newLine(int flags)
 {
-	if (!(flags & RS_RTL))
-	{
-		if (maximum.width()<cursor.x())
-			maximum.setWidth(cursor.x());
-		cursor.setX(left);
-		previous=0;
-	} else
-	{
-		if (maximum.width()<(area.right()-cursor.x()))
-			maximum.setWidth(area.right()-cursor.x());
-		cursor.setX(area.right());
-	}
+	if (maximum.width()<cursor.x())
+		maximum.setWidth(cursor.x());
+	cursor.setX(left);
+	previous=0;
 	int linegap=current_face->size->metrics.height-(current_face->size->metrics.ascender+current_face->size->metrics.descender);
 	cursor+=ePoint(0, (current_face->size->metrics.ascender+current_face->size->metrics.descender+linegap*1/2)>>6);
 	if (maximum.height()<cursor.y())
 		maximum.setHeight(cursor.y());
 	previous=0;
 }
-
-static eLock refcntlck;
 
 eTextPara::~eTextPara()
 {
@@ -408,7 +388,7 @@ eTextPara::~eTextPara()
 
 void eTextPara::destroy()
 {
-	eLocker lock(refcntlck);
+	singleLock s(refcntlck);
 
 	if (!refcnt--)
 		delete this;
@@ -416,7 +396,7 @@ void eTextPara::destroy()
 
 eTextPara *eTextPara::grab()
 {
-	eLocker lock(refcntlck);
+	singleLock s(refcntlck);
 
 	refcnt++;
 	return this;
@@ -445,7 +425,7 @@ void eTextPara::setFont(Font *fnt, Font *replacement)
 		delete current_font;
 	current_font=fnt;
 	replacement_font=replacement;
-	eLocker lock(ftlock);
+	singleLock s(ftlock);
 
 			// we ask for replacment_font first becauseof the cache
 	if (replacement_font)
@@ -471,30 +451,25 @@ void eTextPara::setFont(Font *fnt, Font *replacement)
 	use_kerning=FT_HAS_KERNING(current_face);
 }
 
+void
+shape (std::vector<unsigned long> &string, const std::vector<unsigned long> &text);
+
 int eTextPara::renderString(const eString &string, int rflags)
 {
-	eLocker lock(ftlock);
+	singleLock s(ftlock);
 	
 	if (refcnt)
 		eFatal("mod. after lock");
 
 	if (!current_font)
 		return -1;
-
+		
 	if (cursor.y()==-1)
 	{
-		if (!(rflags & RS_RTL))
-		{
-			cursor=ePoint(area.x(), area.y()+(current_face->size->metrics.ascender>>6));
-		} else
-		{
-			cursor=ePoint(area.right(), area.y()+(current_face->size->metrics.ascender>>6));
-		}
+		cursor=ePoint(area.x(), area.y()+(current_face->size->metrics.ascender>>6));
 		left=cursor.x();
 	}
 		
-	glyphs.reserve(glyphs.size()+string.length());
-
 	if (&current_font->font.font != cache_current_font)
 	{
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
@@ -505,13 +480,13 @@ int eTextPara::renderString(const eString &string, int rflags)
 		cache_current_font=&current_font->font.font;
 	}
 	
+	std::vector<unsigned long> uc_string, uc_visual;
+	uc_string.reserve(string.length());
+	
 	std::string::const_iterator p(string.begin());
 
 	while(p != string.end())
 	{
-		int isprintable=1;
-		int flags=0;
-		
 		unsigned int unicode=*p++;
 
 		if (unicode & 0x80) // we have (hopefully) UTF8 here, and we assume that the encoding is VALID
@@ -545,35 +520,76 @@ int eTextPara::renderString(const eString &string, int rflags)
 					unicode|=(*p++)&0x3F;
 			}
 		}
+		uc_string.push_back(unicode);
+	}
 
+	std::vector<unsigned long> uc_shape;
+
+		// character -> glyph conversion
+	shape(uc_shape, uc_string);
+	
+		// now do the usual logical->visual reordering
+#ifdef HAVE_FRIBIDI	
+	FriBidiCharType dir=FRIBIDI_TYPE_ON;
+	{
+		int size=uc_shape.size();
+		uc_visual.resize(size);
+		// gaaanz lahm, aber anders geht das leider nicht, sorry.
+		FriBidiChar array[size], target[size];
+		std::copy(uc_shape.begin(), uc_shape.end(), array);
+		fribidi_log2vis(array, size, &dir, target, 0, 0, 0);
+		uc_visual.assign(target, target+size);
+	}
+#else
+	uc_visual=uc_shape;
+#endif
+
+	glyphs.reserve(uc_visual.size());
+	
+	for (std::vector<unsigned long>::const_iterator i(uc_visual.begin());
+		i != uc_visual.end(); ++i)
+	{
+		int isprintable=1;
+		int flags=0;
 		if (!(rflags&RS_DIRECT))
 		{
-			switch (unicode)
+			switch (*i)
 			{
-			case '\t':
-				isprintable=0;
-				if (!(rflags & RS_RTL))
+			case '\\':
+			{
+				unsigned long c = *(i+1);
+				switch (c)
 				{
-					cursor+=ePoint(current_font->tabwidth, 0);
-					cursor-=ePoint(cursor.x()%current_font->tabwidth, 0);
-				} else
-				{
-						// does this work?
-					cursor-=ePoint(current_font->tabwidth, 0);
-					cursor+=ePoint(cursor.x()%current_font->tabwidth, 0);
+					case 'n':
+						i++;
+						goto newline;
+					case 't':
+						i++;
+						goto tab;
+					case 'r':
+						i++;
+						goto nprint;
+					default:
+					;
 				}
+				break;
+			}
+			case '\t':
+tab:		isprintable=0;
+				cursor+=ePoint(current_font->tabwidth, 0);
+				cursor-=ePoint(cursor.x()%current_font->tabwidth, 0);
 				break;
 			case 0x8A:
 			case 0xE08A:
 			case '\n':
-				isprintable=0;
+newline:isprintable=0;
 				newLine(rflags);
 				flags|=GS_ISFIRST;
 				break;
 			case '\r':
 			case 0x86: case 0xE086:
 			case 0x87: case 0xE087:
-				isprintable=0;
+nprint:	isprintable=0;
 				break;
 			case ' ':
 				flags|=GS_ISSPACE;
@@ -585,15 +601,15 @@ int eTextPara::renderString(const eString &string, int rflags)
 		{
 			FT_UInt index;
 
-			index=(rflags&RS_DIRECT)? unicode : FT_Get_Char_Index(current_face, unicode);
+			index=(rflags&RS_DIRECT)? *i : FT_Get_Char_Index(current_face, *i);
 
 			if (!index)
 			{
 				if (replacement_face)
-					index=(rflags&RS_DIRECT)? unicode : FT_Get_Char_Index(replacement_face, unicode);
+					index=(rflags&RS_DIRECT)? *i : FT_Get_Char_Index(replacement_face, *i);
 
 				if (!index)
-					eDebug("unicode %d ('%c') not present", unicode, unicode);
+					eDebug("unicode %d ('%c') not present", *i, *i);
 				else
 					appendGlyph(replacement_font, replacement_face, index, flags, rflags);
 			} else
@@ -602,12 +618,16 @@ int eTextPara::renderString(const eString &string, int rflags)
 	}
 	bboxValid=false;
 	calc_bbox();
+#ifdef HAVE_FRIBIDI
+	if (dir & FRIBIDI_MASK_RTL)
+		realign(dirRight);
+#endif
 	return 0;
 }
 
 void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background, const gRGB &foreground)
 {
-	eLocker lock(ftlock);
+	singleLock s(ftlock);
 	
 	if (!current_font)
 		return;
@@ -748,13 +768,15 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 		int numspaces=0, num=0;
 		begin=end;
 		
+		ASSERT( end != glyphs.end());
+		
 			// zeilenende suchen
 		do {
 			last=end;
 			++end;
 		} while ((end != glyphs.end()) && (!(end->flags&GS_ISFIRST)));
 			// end zeigt jetzt auf begin der naechsten zeile
-			
+		
 		for (c=begin; c!=end; ++c)
 		{
 				// space am zeilenende skippen
@@ -763,7 +785,7 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 
 			if (c->flags&GS_ISSPACE)
 				numspaces++;
-			linelength+=c->w;;
+			linelength+=c->w;
 			num++;
 		}
 		if (!num)		// line mit nur einem space
@@ -777,10 +799,12 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 			int offset=area.width()-linelength;
 			if (dir==dirCenter)
 				offset/=2;
+			offset+=area.left();
 			while (begin != end)
 			{
-				begin->x+=offset;
-				begin->bbox->moveBy(offset,0);
+				begin->bbox.moveBy(offset-begin->x,0);
+				begin->x=offset;
+				offset+=begin->w;
 				++begin;
 			}
 			break;
@@ -804,7 +828,7 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 				if ((!spacemode) || (begin->flags&GS_ISSPACE))
 					doadd=1;
 				begin->x+=curoff>>8;
-				begin->bbox->moveBy(curoff>>8,0);
+				begin->bbox.moveBy(curoff>>8,0);
 				if (doadd)
 					curoff+=off;
 				++begin;
@@ -814,17 +838,16 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 		}
 	}
 	bboxValid=false;
+	calc_bbox();
 }
 
 void eTextPara::clear()
 {
-	eLocker lock(ftlock);
+	singleLock s(ftlock);
 
 	for (glyphString::iterator i(glyphs.begin()); i!=glyphs.end(); ++i)
-	{
 		i->font->unlock();
-		delete i->bbox;
-	}
+
 	glyphs.clear();
 }
 

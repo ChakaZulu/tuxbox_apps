@@ -14,6 +14,7 @@
 	<fontalias>
 		<map name="eServiceSelector.Entry.Description" font="Blue.Regular" size="26" />
 		<map name="eStatusBar" font="Blue.Regular" size="24" />
+		<map name="eChannelInfo" font="Blue.Regular" size="28" />
 		<map name="eWindow.TitleBar" font="Blue.Bold" size="32" />
 		<map name="eWindow.Childs" font="Blue.Regular" size="30" />
 
@@ -65,6 +66,8 @@
 
 		<map name="global.normal.background" color="content" />
 		<map name="global.normal.foreground" color="content+15" />
+
+		<map name="button.normal.background" color="content" />
 
 		<map name="global.selected.background" color="dark" />
 		<map name="global.selected.foreground" color="dark+15" />
@@ -119,7 +122,8 @@
 		<img name="lcd_enigma_logo" src="logo.png" nomerge="yes" />
 		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
 		<img name="lcd_scart" src="../video.png" nomerge="yes" />
-		<img name="speaker" src="speaker.png" nomerge="yes" />
+		<img name="speaker" src="../lcd-speaker.png" nomerge="yes" />
+		<img name="lcd-clock" src="../lcd-clock.png" nomerge="yes" />
 
 		<img name="eListBox.arrow.updown" src="lbarrow.png" />
 		<img name="eListBox.arrow.left" src="lbarrow_left.png" />
@@ -222,7 +226,7 @@
 	</object>
 
 	<object name="ezap_main">
-		<eZapMain position="70:382" size="580:134">
+		<eZapMain position="70:382" size="580:134" >
                         
 			<eLabel position="89:113" size="15:21" pixmap="bl" name="bl" />
 			<eLabel position="565:113" size="15:21" pixmap="br" name="br" />
@@ -242,7 +246,7 @@
 
 			<eWidget position="158:113" size="407:21" backgroundColor="dark" />
 
-			<eWidget name="nonDVRfunctions" position="87:39" size="493:70">
+			<eWidget name="dvbInfoBar" position="87:39" size="493:70">
 				<!--Zeilen  -->
 				<eWidget position="0:0" size="493:33" backgroundColor="light" />
 				<eWidget position="0:37" size="493:33" backgroundColor="middle" />
@@ -255,8 +259,12 @@
 
 				<eLabel position="401:5" size="90:26" font="Blue.Regular;26" name="e_now_duration" align="right" backgroundColor="light" foregroundColor="light+15" />
 				<eLabel position="401:44" size="90:26" font="Blue.Regular;26" name="e_next_duration" align="right" backgroundColor="middle" foregroundColor="middle+15" />
-      </eWidget>
-                                      
+			</eWidget>
+
+			<eWidget name="fileInfoBar" position="87:39" size="493:70">
+				<eLabel position="0:0" size="e:e" font="Blue.Regular;29" name="fileinfos" backgroundColor="middle" foregroundColor="middle+15" wrap="on" />
+			</eWidget>
+                                                                            
 			<!--schatten
 			<eWidget position="14:85" size="113:10" backgroundColor="osd_shadowcol" />
 			<eWidget position="117:15" size="10:80" backgroundColor="osd_shadowcol" />
@@ -301,7 +309,7 @@
 
 			<eLabel name="recStatus" position="7:42" size="12:12" pixmap="button_red" alphatest="on" />
 
-			<eLabel name="dvrFunctions" position="87:39" size="493:70" pixmap="dvrtable">
+			<eLabel name="dvrInfoBar" position="87:39" size="493:70" pixmap="dvrtable">
 				<eLabel text="FR " position="54:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
 				<eLabel text="Play " position="175:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />
 				<eLabel text="Pause " position="280:5" size="85:30" backgroundColor="light" foregroundColor="light+15" />

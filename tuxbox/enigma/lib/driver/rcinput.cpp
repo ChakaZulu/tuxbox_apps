@@ -1,3 +1,6 @@
+#include <config.h>
+#if HAVE_DVB_API_VERSION == 3
+
 #include <lib/driver/rcinput.h>
 
 #include <sys/ioctl.h>
@@ -14,7 +17,7 @@ void eRCDeviceInputDev::handleCode(int rccode)
 	struct input_event *ev = (struct input_event *)rccode;
 	if (ev->type!=EV_KEY)
 		return;
-	eDebug("%x %x %x", ev->value, ev->code, ev->type);
+//	eDebug("%x %x %x", ev->value, ev->code, ev->type);
 	switch (ev->value)
 	{
 	case 0:
@@ -29,7 +32,8 @@ void eRCDeviceInputDev::handleCode(int rccode)
 	}
 }
 
-eRCDeviceInputDev::eRCDeviceInputDev(eRCInputEventDriver *driver): eRCDevice(driver->getDeviceName(), driver)
+eRCDeviceInputDev::eRCDeviceInputDev(eRCInputEventDriver *driver)
+: eRCDevice(driver->getDeviceName(), driver)
 {
 }
 
@@ -112,7 +116,6 @@ int eRCDeviceInputDev::getKeyCompatibleCode(const eRCKey &key) const
 	return -1;
 }
 
-
 class eInputDeviceInit
 {
 	eRCInputEventDriver driver;
@@ -124,3 +127,5 @@ public:
 };
 
 eAutoInitP0<eInputDeviceInit> init_rcinputdev(eAutoInitNumbers::rc+1, "input device driver");
+
+#endif // HAVE_DVB_API_VERSION == 3

@@ -167,6 +167,8 @@ ShowBNVersion::ShowBNVersion(): eWindow(1)
 	CONNECT(eDVB::getInstance()->eventOccured, ShowBNVersion::eventOccured);
 	bnd[0]=0;
 	bnd[1]=0;
+	
+	setHelpID(42);
 }
 
 ShowBNVersion::~ShowBNVersion()

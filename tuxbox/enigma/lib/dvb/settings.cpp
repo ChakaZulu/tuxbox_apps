@@ -20,12 +20,44 @@ void eDVBSettings::removeDVBBouquets()
 		{
 			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
 			i = bouquets.erase(i);
+			bouquetsChanged=1;
 		}
 		else
 		{
 			eDebug("leaving bouquet '%s'", i->bouquet_name.c_str());
 			i++;
 		}
+	}
+}
+
+void eDVBSettings::removeDVBBouquet(int bouquet_id)
+{
+	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end();)
+	{
+		if ( i->bouquet_id == bouquet_id)
+		{
+			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
+			i = bouquets.erase(i);
+			bouquetsChanged=1;
+		}
+		else
+		{
+			i++;
+		}
+	}
+}
+
+void eDVBSettings::renameDVBBouquet(int bouquet_id, eString& new_name)
+{
+	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end();)
+	{
+		if ( i->bouquet_id == bouquet_id)
+		{
+			eDebug("renaming bouquet '%s' to '%s'", i->bouquet_name.c_str(), new_name.c_str());
+			i->bouquet_name=new_name;
+			bouquetsChanged=1;
+		}
+		i++;
 	}
 }
 
@@ -93,7 +125,7 @@ static eString beautifyBouquetName(eString bouquet_name)
 	return bouquet_name;
 }
 
-eBouquet *eDVBSettings::getBouquet(eString bouquet_name)
+eBouquet *eDVBSettings::getBouquet(eString& bouquet_name)
 {
 	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
 		if (!i->bouquet_name.icompare(bouquet_name))
@@ -105,7 +137,10 @@ eBouquet* eDVBSettings::createBouquet(int bouquet_id, eString bouquet_name)
 {
 	eBouquet *n=getBouquet(bouquet_id);
 	if (!n)
+	{
 		bouquets.push_back(n=new eBouquet(bouquet_id, bouquet_name));
+		bouquetsChanged=1;
+	}
 	return n;
 }
 
@@ -116,6 +151,7 @@ eBouquet *eDVBSettings::createBouquet(eString bouquet_name)
 	{
 		int bouquet_id=getUnusedBouquetID(0);
 		bouquets.push_back(n=new eBouquet(bouquet_id, bouquet_name));
+		bouquetsChanged=1;
 	}
 	return n;
 }
@@ -150,16 +186,6 @@ void eDVBSettings::revalidateBouquets()
 	/*emit*/ dvb.bouquetListChanged();
 }
 
-eTransponderList *eDVBSettings::getTransponders()
-{
-	return transponderlist;
-}
-
-ePtrList<eBouquet>* eDVBSettings::getBouquets()
-{
-	return &bouquets;
-}
-
 void eDVBSettings::setTransponders(eTransponderList *tlist)
 {
 	if (transponderlist)
@@ -187,7 +213,6 @@ void eDVBSettings::sortInChannels()
 	removeDVBBouquets();
 	getTransponders()->forEachService(sortinChannel(*this));
 	revalidateBouquets();
-	saveBouquets();
 }
 
 struct saveService: public std::unary_function<const eServiceDVB&, void>
@@ -301,13 +326,13 @@ void eDVBSettings::loadServices()
 				break;
 			if (line[1]=='s')
 			{
-				int frequency, symbol_rate, polarisation, fec, sat, inversion=0;
+				int frequency, symbol_rate, polarisation, fec, sat, inversion=INVERSION_OFF;
 				sscanf(line+2, "%d:%d:%d:%d:%d:%d", &frequency, &symbol_rate, &polarisation, &fec, &sat, &inversion);
 				t.setSatellite(frequency, symbol_rate, polarisation, fec, sat, inversion);
 			}
 			if (line[1]=='c')
 			{
-				int frequency, symbol_rate, inversion=0, modulation=3;
+				int frequency, symbol_rate, inversion=INVERSION_OFF, modulation=3;
 				sscanf(line+2, "%d:%d:%d:%d", &frequency, &symbol_rate, &inversion, &modulation);
 				t.setCable(frequency, symbol_rate, inversion, modulation);
 			}
@@ -337,10 +362,10 @@ void eDVBSettings::loadServices()
 		if (service_number == -1)
 			continue;
 		eServiceDVB &s=transponderlist->createService(
-				eServiceReferenceDVB(
+					eServiceReferenceDVB(
 						eDVBNamespace(dvb_namespace),
-						eTransportStreamID(transport_stream_id), 
-						eOriginalNetworkID(original_network_id), 
+						eTransportStreamID(transport_stream_id),
+						eOriginalNetworkID(original_network_id),
 						eServiceID(service_id),
 						service_type), service_number);
 		count++;
@@ -354,7 +379,7 @@ void eDVBSettings::loadServices()
 			line[strlen(line)-1]=0;
 
 		eString str=line;
-		
+
 		if (str[1]!=':')	// old ... (only service_provider)
 		{
 			s.service_provider=line;
@@ -388,7 +413,7 @@ void eDVBSettings::loadServices()
 				}
 			}
 	}
-	
+
 	eDebug("loaded %d services", count);
 	
 	fclose(f);
@@ -396,7 +421,11 @@ void eDVBSettings::loadServices()
 
 void eDVBSettings::saveBouquets()
 {
+	if ( !bouquetsChanged )
+		return;
+
 	eDebug("saving bouquets...");
+	bouquetsChanged=0;
 	
 	FILE *f=fopen(CONFIGDIR "/enigma/bouquets", "wt");
 	if (!f)
@@ -423,6 +452,7 @@ void eDVBSettings::loadBouquets()
 	FILE *f=fopen(CONFIGDIR "/enigma/bouquets", "rt");
 	if (!f)
 		return;
+	bouquetsChanged=0;
 	char line[256];
 	if ((!fgets(line, 256, f)) || strncmp(line, "eDVB bouquets", 13))
 	{
@@ -584,7 +614,7 @@ int eDVBSettings::importSatcoDX(eString line)
 		return -6;
 	}
 	
-	if (type == '_')
+	if (type[0] == '_')
 		return 0;
 	if (system.left(3) != "MPG")
 		return 0;
@@ -659,6 +689,7 @@ int eDVBSettings::importSatcoDX(eString line)
 eDVBSettings::~eDVBSettings()
 {
 	saveServices();
+	saveBouquets();
 	if (transponderlist)
 		delete transponderlist;
 }

@@ -18,6 +18,7 @@ class eSocket: public Object
 {
 	int mystate;
 	int issocket;
+	unsigned int last_break;
 private:
 	int socketdesc;
 	eIOBuffer readbuffer;
@@ -45,6 +46,8 @@ public:
 	void enableRead();
 	void disableRead();
 	
+	void inject(const char *data, int len);
+	
 	enum State {	Idle, HostLookup, Connecting,
 			Listening, Connection, Closing };
 	int state();
@@ -52,6 +55,7 @@ public:
 	Signal0<void> connectionClosed_;
 	Signal0<void> connected_;
 	Signal0<void> readyRead_;
+	Signal0<void> hangup;
 	Signal1<void,int> bytesWritten_;
 	Signal1<void,int> error_;
 };

@@ -12,6 +12,8 @@
 #include <lib/base/estring.h>
 #include <lib/driver/rc.h>
 
+typedef std::set<eRCKey> keylist;
+
 class eActionMap;
 class eActionMapList;
 
@@ -22,14 +24,13 @@ class eActionMapList;
  */
 class eAction
 {
-	typedef std::set<eRCKey> keylist;
 	char *description, *identifier;
 	eActionMap *map;
 	friend struct priorityComperator;
-	std::map<eString, keylist> keys;
 	int priority;
 public:
 	typedef std::pair<void*,eAction*> directedAction;
+	std::map<eString, keylist> keys;
 	/**
 	 * \brief Functor to compare by priority.
 	 *
@@ -70,6 +71,8 @@ public:
 
 typedef std::multiset<eAction::directedAction,eAction::priorityComperator> eActionPrioritySet;
 
+typedef std::map<std::string, std::pair<int, std::string> > eKeymap;
+
 class XMLTreeNode;
 class XMLTreeParser;
 
@@ -93,9 +96,7 @@ public:
 	eAction *findAction(const char *id) const;
 	const char *getDescription() const { return description; }
 	const char *getIdentifier() const { return identifier; }
-	void reloadConfig();
-	void loadXML(eRCDevice *device, std::map<std::string,int> &keymap, const XMLTreeNode *node, const eString& s="");
-	void saveConfig();
+	void loadXML(eRCDevice *device, eKeymap &keymap, const XMLTreeNode *node, const eString& s="");
 };
 
 class eActionMapList
@@ -112,8 +113,7 @@ class eActionMapList
 	actionMapList actionmaps;
 
 	std::map<eString, eString> existingStyles;
-	eString currentStyle;
-	
+	std::set<eString> currentStyles;
 	ePtrList<XMLTreeParser> xmlfiles;
 	XMLTreeNode *searchDevice(const eString &id);
 
@@ -121,8 +121,9 @@ class eActionMapList
 public:
 	eActionMapList();
 	~eActionMapList();
-	const eString &getCurrentStyle() const { return currentStyle; }
-	void setCurrentStyle( const eString& style ) { currentStyle = style; }
+	const std::set<eString> &getCurrentStyles() const { return currentStyles; }
+	void activateStyle( const eString& style ) { currentStyles.insert(style); }
+	void deactivateStyle( const eString& style ) { currentStyles.erase(style); }
 	eString getStyleDescription(const eString &style) const { std::map<eString, eString>::const_iterator i=existingStyles.find(style); if (i==existingStyles.end()) return ""; else return i->second; }
 	const std::map<eString, eString> &getExistingStyles() const { return existingStyles; }
 	void addActionMap(const char *, eActionMap * );

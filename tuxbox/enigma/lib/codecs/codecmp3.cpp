@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #include <lib/codecs/codecmp3.h>
 #include <lib/base/eerror.h>
 #include <lib/base/buffer.h>
@@ -150,3 +152,5 @@ int eAudioDecoderMP3::getAverageBitrate()
 {
 	return avgbr;
 }
+
+#endif //DISABLE_FILE

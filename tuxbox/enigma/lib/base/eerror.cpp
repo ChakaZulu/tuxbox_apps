@@ -8,6 +8,9 @@
 
 int infatal=0;
 
+Signal2<void, int, const eString&> logOutput;
+int logOutputConsole=1;
+
 void eFatal(const char* fmt, ...)
 {
 	char buf[1024];
@@ -15,6 +18,7 @@ void eFatal(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
+	logOutput(lvlFatal, buf);
 	fprintf(stderr, "%s\n",buf );
 	if (!infatal)
 	{
@@ -34,7 +38,9 @@ void eDebug(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
-	fprintf(stderr, "%s\n",buf );
+	logOutput(lvlDebug, eString(buf) + "\n");
+	if (logOutputConsole)
+		fprintf(stderr, "%s\n", buf);
 }
 
 void eDebugNoNewLine(const char* fmt, ...)
@@ -44,7 +50,9 @@ void eDebugNoNewLine(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
-	fprintf(stderr, "%s" ,buf );
+	logOutput(lvlDebug, buf);
+	if (logOutputConsole)
+		fprintf(stderr, "%s", buf);
 }
 
 void eWarning(const char* fmt, ...)
@@ -54,6 +62,8 @@ void eWarning(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
-	fprintf(stderr, "%s\n",buf );
+	logOutput(lvlWarning, eString(buf) + "\n");
+	if (logOutputConsole)
+		fprintf(stderr, "%s\n", buf);
 }
 #endif // DEBUG

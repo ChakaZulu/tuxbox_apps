@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #ifndef __include_lib_codecs_pic_h
 #define __include_lib_codecs_pic_h
 
@@ -17,3 +19,5 @@ public:
 };
 
 #endif
+
+#endif //DISABLE_FILE

@@ -11,6 +11,7 @@ class eStatusBar : public eLabel
 
 	int setProperty(const eString &, const eString &);
 	void initialize();
+	Connection conn;
 public:
 	enum
 	{

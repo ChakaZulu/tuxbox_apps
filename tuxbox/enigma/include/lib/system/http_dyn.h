@@ -20,7 +20,8 @@ class eHTTPDynPathResolver: public eHTTPPathResolver
 		eString request, path;
 		eString (*function)(eString request, eString path, eString opt, eHTTPConnection *content);
 		
-		eHTTPDynEntry(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection *)): request(request), path(path), function(function)
+		eHTTPDynEntry(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection *))
+			: request(request), path(path), function(function)
 		{
 		}
 	};

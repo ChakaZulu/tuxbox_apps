@@ -12,7 +12,6 @@
 #include <lib/driver/rc.h>
 #include <lib/gui/actions.h>
 #include <lib/gui/decoration.h>
-#include <list>
 
 class eWidgetEvent
 {
@@ -101,13 +100,17 @@ public:
 	 * \sa eWidget::focusChanged
 	 */
 	Signal1<void, const eWidget*> focusChanged;
+	static Signal2< void, ePtrList<eAction>*, int > showHelp;
 protected:
+	ePtrList<eAction> actionHelpList;
+	int helpID;
 	ePtrList<eWidget> childlist;
 	static eWidget *root;
 	eWidget *parent;
 	eString name;
 	eString helptext;
 	ePoint position;
+	ePoint absPosition;
 	eSize size;
 	eRect clientrect;
 	eRect clientclip;
@@ -118,7 +121,7 @@ protected:
 	ePtrList<eWidget> _focusList;
 	
 	ePtrList<eWidget> actionListener;
-	eWidget *focus;
+	eWidget *focus, *TLW;
 
 		/// old top-level focus
 	eWidget *oldTLfocus;
@@ -127,9 +130,9 @@ protected:
 	
 	gDC *target;
 
-	inline eWidget *getTLW()		// pseudoTLW !!
+	inline eWidget *getTLW() // pseudoTLW !!
 	{
-		return (parent && parent->parent)?parent->getTLW():this;
+		return TLW ? TLW : (TLW = (parent && parent->parent) ? parent->getTLW() : this );
 	}
 	int result, in_loop, have_focus, just_showing;
 	void takeFocus();
@@ -161,24 +164,24 @@ protected:
 	 * not processed by the widget.
 	 * \return 1 if the event was processed, 0 if ignored. it might be forwarded to other widgets then.
 	 */
-	virtual int eventHandler(const eWidgetEvent &event);
-	
+
 	virtual int keyDown(int rc);
 	virtual int keyUp(int rc);
-	
+
 	virtual void gotFocus();
 	virtual void lostFocus();
 	
 	virtual void recalcClientRect();
 	void recalcClip();
 	void checkFocus();
-	
+
 	typedef ePtrList<eActionMap> actionMapList;
 
 	void findAction(eActionPrioritySet &prio, const eRCKey &key, eWidget *context);
 	void addActionMap(eActionMap *map);
 	void removeActionMap(eActionMap *map);
 	actionMapList actionmaps;
+	static actionMapList globalActions;
 
 			// generic properties
 	gFont font;
@@ -190,20 +193,27 @@ protected:
 	eString descr;
 
 public:
+	virtual int eventHandler(const eWidgetEvent &event);
+	static void addGlobalActionMap(eActionMap *map);
+	static void removeGlobalActionMap(eActionMap *map);
 	inline eWidget *getNonTransparentBackground()
 	{
-		if (backgroundColor != -1)
+		if (backgroundColor >= 0)
 			return this;
 		return parent?parent->getNonTransparentBackground():this;
 	}
 
+#ifndef DISABLE_LCD
 	eWidget *LCDTitle;
 	eWidget *LCDElement;
 	eWidget *LCDTmp;
+#endif
 
-	inline ePoint getAbsolutePosition() const
+	void recalcAbsolutePosition();
+
+	inline const ePoint &getAbsolutePosition() const
 	{
-		return (parent?(parent->getAbsolutePosition()+parent->clientrect.topLeft()+position):position);
+		return absPosition;
 	}
 
 	inline ePoint getRelativePosition(eWidget *e) const
@@ -414,15 +424,19 @@ public:
 	 *
 	 * \param label The text to assign to the widget.
 	 */
-	virtual void setText(const eString &label, bool inv=true);
+	void setText(const eString &label);
 	
-	const	eString& getText() const { return text; }
+	const eString& getText() const { return text; }
 	void setBackgroundColor(const gColor& color, bool inv=true);
 	void setForegroundColor(const gColor& color, bool inv=true);
 	void setPixmap(gPixmap *pmap);
 	void setTarget(gDC *target);
 	gDC *getTarget() { return target; }
+
+#ifndef DISABLE_LCD
 	void setLCD(eWidget *lcdtitle, eWidget *lcdelement);
+#endif
+
 	void setName(const char *name);
 	const eString& getName() const { return name; }
 	eWidget*& getParent() { return parent; }
@@ -476,6 +490,10 @@ public:
 	 */
 	void setShortcut(const eString &shortcut);
 	void setShortcutFocus(eWidget *focus);
+	
+	void addActionToHelpList(eAction *action);
+	void clearHelpList();
+	void setHelpID(int fHelpID);
 };
 
 class eDecoWidget:public eWidget

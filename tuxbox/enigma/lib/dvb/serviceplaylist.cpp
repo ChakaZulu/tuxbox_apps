@@ -2,6 +2,7 @@
 #include <lib/dvb/servicefile.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
+#include <lib/system/econfig.h>
 #include <lib/base/i18n.h>
 #include <unistd.h>
 
@@ -16,7 +17,7 @@
 		structure (ePlaylist)
 */
 
-ePlaylist::ePlaylist(): eService("playlist"), changed(-1)
+ePlaylist::ePlaylist(): eService("playlist"), changed(255)
 {
 	current=list.end();
 }
@@ -26,9 +27,17 @@ ePlaylist::~ePlaylist()
 	eDebug("destroy %s", filename.c_str() );
 }
 
+void ePlaylist::clear()
+{
+	changed=1;
+	list.clear();
+	current = list.end();
+}
+
 int ePlaylist::load(const char *filename)
 {
 	eDebug("loading playlist... %s", filename);
+	list.clear();
 	this->filename=filename;
 	FILE *fp=fopen(filename, "rt");
 	eString path=filename;
@@ -44,9 +53,9 @@ int ePlaylist::load(const char *filename)
 		return -1;
 	}
 	int ignore_next=0;
+	char line[256];
 	while (1)
 	{
-		char line[256];
 		if (!fgets(line, 256, fp))
 			break;
 		line[strlen(line)-1]=0;
@@ -71,6 +80,8 @@ int ePlaylist::load(const char *filename)
 				current=list.end();
 				current--;
 			}
+			if (!strncmp(line, "#LAST_ACTIVATION ", 17))
+				list.back().last_activation=atoi(line+17);
 			if (!strncmp(line, "#CURRENT_POSITION ", 18))
 				list.back().current_position=atoi(line+18);
 			if (!strncmp(line, "#TYPE ", 6))
@@ -116,7 +127,7 @@ int ePlaylist::load(const char *filename)
 		service_name += eString().sprintf(_(" (%d entries)"), entries);
 	fclose(fp);
 
-	if (changed != -1)
+	if (changed != 255)
 		changed=0;
 	return 0;
 }
@@ -130,7 +141,7 @@ int ePlaylist::save(const char *filename)
 		FILE *f=fopen(filename, "wt");
 		if (!f)
 			return -1;
-		fprintf(f, "#NAME %s\r\n", service_name.c_str());
+		fprintf(f, "#NAME %s\r\n", service_name.c_str());		
 		for (std::list<ePlaylistEntry>::iterator i(list.begin()); i != list.end(); ++i)
 		{
 			fprintf(f, "#SERVICE: %s\r\n", i->service.toString().c_str());
@@ -138,7 +149,9 @@ int ePlaylist::save(const char *filename)
 				fprintf(f, "#DESCRIPTION: %s\r\n", i->service.descr.c_str());
 			if (i->type & ePlaylistEntry::PlaylistEntry && i->current_position != -1)
 				fprintf(f, "#CURRENT_POSITION %d\r\n", i->current_position);
-			else if (i->event_id != -1)
+			else if ( i->type & ePlaylistEntry::isRepeating && i->last_activation != -1 )
+				fprintf(f, "#LAST_ACTIVATION %d\r\n", i->last_activation);
+			else if ( i->event_id != -1)
 				fprintf(f, "#EVENT_ID %d\r\n", i->event_id);
 			if ((int)i->type != ePlaylistEntry::PlaylistEntry)
 				fprintf(f, "#TYPE %d\r\n", i->type);
@@ -195,7 +208,10 @@ int ePlaylist::moveService(std::list<ePlaylistEntry>::iterator it, std::list<ePl
 void eServicePlaylistHandler::addFile(void *node, const eString &filename)
 {
 	if (filename.right(4).upper()==".M3U")
-		eServiceFileHandler::getInstance()->addReference(node, eServiceReference(id, eServiceReference::mustDescent|eServiceReference::canDescent|eServiceReference::sort1, filename));
+		eServiceFileHandler::getInstance()->addReference(node, eServiceReference(id,
+			eServiceReference::mustDescent|
+			eServiceReference::canDescent|
+			eServiceReference::sort1, filename));
 }
 
 eService *eServicePlaylistHandler::createService(const eServiceReference &node)
@@ -238,6 +254,8 @@ void eServicePlaylistHandler::removeRef(const eServiceReference &service)
 
 void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback)
 {
+//	int pLockActive = eConfig::getInstance()->pLockActive();
+
 	if (dir.type == id)
 	{
 		ePlaylist *service=(ePlaylist*)addRef(dir);
@@ -245,14 +263,20 @@ void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signa
 			return;
 	
 		for (std::list<ePlaylistEntry>::const_iterator i(service->getConstList().begin()); i != service->getConstList().end(); ++i)
+		{
+/*			if ( (pLockActive & 2) && i->service.isLocked() )
+				continue;*/
 			callback(*i);
+		}
 	
 		removeRef(dir);
 	}
 	std::pair<std::multimap<eServiceReference,eServiceReference>::const_iterator,std::multimap<eServiceReference,eServiceReference>::const_iterator>
-			range=playlists.equal_range(dir);
+		range=playlists.equal_range(dir);
 	while (range.first != range.second)
 	{
+/*		if ( (pLockActive & 2) && range.first->second.isLocked() )
+			continue;*/
 		callback(range.first->second);
 		++range.first;
 	}
@@ -260,6 +284,7 @@ void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signa
 
 void eServicePlaylistHandler::leaveDirectory(const eServiceReference &dir)
 {
+	(void)dir;
 }
 
 int eServicePlaylistHandler::addNum( int uniqueID )
@@ -285,6 +310,8 @@ eServiceReference eServicePlaylistHandler::newPlaylist(const eServiceReference &
 			timeval now;
 			gettimeofday(&now,0);
 			uniqueNum = now.tv_usec;
+			if ( uniqueNum < 21 && uniqueNum >=0 )
+				continue;
 		}
 		while( usedUniqueIDs.find( uniqueNum ) != usedUniqueIDs.end() );
 		usedUniqueIDs.insert(uniqueNum);
@@ -302,9 +329,9 @@ void eServicePlaylistHandler::removePlaylist(const eServiceReference &service)
 		for (std::multimap<eServiceReference,eServiceReference>::iterator i(playlists.begin()); i != playlists.end(); i++)
 			if (i->second == service)
 			{
+				usedUniqueIDs.erase( service.data[1] );
 				found=1;
 				playlists.erase(i);
-				break;
 			}
 	}
 }

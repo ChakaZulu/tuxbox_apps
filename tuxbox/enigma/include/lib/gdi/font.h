@@ -58,7 +58,6 @@ public:
 #define RS_DOT		2
 #define RS_DIRECT	4
 #define RS_FADE		8
-#define RS_RTL		16
 
 #define GS_ISSPACE  1
 #define GS_ISFIRST  2
@@ -70,7 +69,7 @@ struct pGlyph
 	Font *font;
 	FT_ULong glyph_index;
 	int flags;
-	eRect *bbox;
+	eRect bbox;
 };
 
 typedef std::vector<pGlyph> glyphString;
@@ -136,7 +135,7 @@ public:
 
 	const eRect& getGlyphBBox(int num) const
 	{
-		return *glyphs[num].bbox;
+		return glyphs[num].bbox;
 	}
 };
 

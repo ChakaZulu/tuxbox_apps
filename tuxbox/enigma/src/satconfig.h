@@ -32,6 +32,8 @@ class eSatelliteConfigurationManager: public eWindow
 	eComboBox *combo_type;
 	eMultipage satPages;
 	std::list<SatelliteEntry*> deleteEntryList;
+	std::list<int> pageEnds;
+	std::list<int>::iterator curScrollPos;
 
 	int complexity;
  	int eventHandler(const eWidgetEvent &event);
@@ -41,7 +43,8 @@ class eSatelliteConfigurationManager: public eWindow
 	eSatellite *getSat4VoltageCombo( const eComboBox* );
 	eSatellite *getSat4LnbButton( const eButton* );
 	void createControlElements();
-	void addSatellite(eSatellite* sat);
+	eComboBox *createSatWidgets(eSatellite* sat);
+	eSatellite *createSatellite();
 	void updateButtons(int comp);
 	void cleanupWidgets();
 	void setComplexity(int complexity);
@@ -51,12 +54,12 @@ class eSatelliteConfigurationManager: public eWindow
 	void newPressed();
 	void updateScrollbar(int show);
 	void lnbSelected(eButton *who);
-	void delSatellite( eSatellite* sat, bool redraw=true );
+	void delSatellite( eSatellite* sat, bool redraw=true, bool atomic=false );
 	void satChanged(eComboBox *who, eListBoxEntryText *le);
 	void hiloChanged(eComboBox *who, eListBoxEntryText *le);
 	void voltageChanged(eComboBox *who, eListBoxEntryText *le);
 	void focusChanged( const eWidget* focus );
-	
+	void addSatellitesToCombo( eButton*);
 	void deleteSatellite(eSatellite *s);
 	
 	void typeChanged(eListBoxEntryText* newtype);
@@ -86,7 +89,7 @@ class eLNBSetup : public eWindow // Selitor = "Sel"ector + Ed"itor" :-)
 	void onPrev() { mp.prev(); }  
 	int eventHandler(const eWidgetEvent &event);
 public:
-	eLNBSetup( eSatellite *sat, eWidget* lcdTitle, eWidget* lcdElement );
+	eLNBSetup( eSatellite *sat, eWidget* lcdTitle=0, eWidget* lcdElement=0 );
 };
 
 class eLNBPage : public eWidget
@@ -94,17 +97,17 @@ class eLNBPage : public eWidget
 	friend class eLNBSetup;
 	struct selectlnb;
 	eSatellite *sat;
-	eListBox<eListBoxEntryText> *lnb_list;
+	eLabel *lMapping;
+	eComboBox *lnb_list;
+//	eListBox<eListBoxEntryText> *lnb_list;
 	eNumber *lofH, *lofL, *threshold;
 	eButton *save; 	 // use this LNB for Satelite and close LNBSelitor
-	eButton *cancel; // close the window without apply changes
 	eButton *next; // shows the DiSEqC Configuration Dialog
 	eCheckbox *increased_voltage;
 	eStatusBar *statusbar;
     
 	void numSelected(int*);
 	void lnbChanged( eListBoxEntryText* );
-	void lnbSelected(eListBoxEntryText*);
 public:
 	eLNBPage( eWidget *parent, eSatellite *sat );
 };
@@ -113,13 +116,14 @@ class eDiSEqCPage : public eWidget
 {
 	friend class eLNBSetup;
 	eSatellite *sat;
-	eComboBox *DiSEqCMode, *DiSEqCParam, *MiniDiSEqCParam, *DiSEqCRepeats;
-	eCheckbox *SeqRepeat, *uncommitted, *uncommitted_gap;
+	eComboBox *DiSEqCMode, *DiSEqCParam, *MiniDiSEqCParam, *DiSEqCRepeats,
+						*ucInput;
 	eButton *save; 	 // use this LNB for Satelite and close LNBSelitor
-	eButton *cancel; // close the window without apply changes
 	eButton *prev; // shows the LNB Configuration Dialog
 //	eButton *next; // shows the Rotor Setup (for non GotoXX Rotors)
-	eLabel *lDiSEqCRepeats, *lDiSEqCParam;
+	eCheckbox *SeqRepeat, *SwapCmds,
+						*FastDiSEqC; // sends no DiSEqC when only hi/lo or H/V Changed
+	eLabel *lDiSEqCRepeats, *lDiSEqCParam, *lucInput;
 	eStatusBar *statusbar;
          
 	void lnbChanged( eListBoxEntryText* );

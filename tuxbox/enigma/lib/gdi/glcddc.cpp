@@ -1,3 +1,5 @@
+#ifndef DISABLE_LCD
+
 #include <lib/gdi/glcddc.h>
 #include <lib/gdi/lcd.h>
 
@@ -50,3 +52,5 @@ void gLCDDC::setUpdate(int u)
 {
 	update=u;
 }
+
+#endif //DISABLE_LCD

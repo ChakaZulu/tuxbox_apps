@@ -1,8 +1,6 @@
 #ifndef __enumber_h
 #define __enumber_h
 
-#include <netinet/in.h>
-
 #include <lib/gui/ewidget.h>
 
 class eLabel;
@@ -18,9 +16,10 @@ private:
 	void redrawWidget(gPainter *, const eRect &rect);
 	eRect getNumberRect(int n);
 	int eventHandler(const eWidgetEvent &event);
-	int number[24];
+	int number[32];
 	int len, dspace, space_selected, active;
 	gColor cursorB, cursorF, normalB, normalF;
+	int oldmax;	
 	int have_focus;
 	int min, max, digit, maxdigits, isactive;
 	int flags;
@@ -34,8 +33,8 @@ protected:
 	void gotFocus();
 	void lostFocus();
 public:
-	static void unpack(const struct in_addr &l, int *t);
-	static void pack(struct in_addr &l, const int *const t);
+	static void unpack(__u32 l, int *t);
+	static void pack(__u32 &l, int *t);
 	void invalidateNum();
 	Signal1<void, int*> selected;
 	Signal0<void> numberChanged;

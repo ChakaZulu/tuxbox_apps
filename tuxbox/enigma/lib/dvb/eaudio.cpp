@@ -38,6 +38,7 @@ void eAudio::setAC3default(int a)
 void eAudio::saveSettings()
 {
 	eConfig::getInstance()->setKey("/elitedvb/audio/ac3default", ac3default);
+	eConfig::getInstance()->flush();
 }
 
 void eAudio::reloadSettings()

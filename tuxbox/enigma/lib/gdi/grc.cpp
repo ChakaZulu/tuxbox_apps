@@ -15,14 +15,14 @@
 #ifndef SYNC_PAINT
 void *gRC::thread_wrapper(void *ptr)
 {
-	nice(0);
+	nice(3);
 	return ((gRC*)ptr)->thread();
 }
 #endif
 
 gRC *gRC::instance=0;
 
-gRC::gRC(): queuelock(MAXSIZE)
+gRC::gRC(): queuelock(MAXSIZE), queue(2048)
 {
 	ASSERT(!instance);
 	instance=this;
@@ -50,11 +50,11 @@ void *gRC::thread()
 #endif
 	{
 		queuelock.lock(1);
-		gOpcode &o(queue.front());
+		gOpcode& o(queue.current());
 		if (o.opcode==gOpcode::shutdown)
 			break;
 		o.dc->exec(&o);
-		queue.pop_front();
+		queue.dequeue();
 	}
 #ifndef SYNC_PAINT
 	pthread_exit(0);
@@ -65,21 +65,6 @@ void *gRC::thread()
 gRC &gRC::getInstance()
 {
 	return *instance;
-}
-
-void gRC::submit(const gOpcode &o)
-{
-	static int collected=0;
-	queue.push_back(o);
-	collected++;
-	if (o.opcode==gOpcode::end)
-	{
-		queuelock.unlock(collected);
-#ifdef SYNC_PAINT
-		thread();
-#endif
-		collected=0;
-	}
 }
 
 static int gPainter_instances;
@@ -106,7 +91,7 @@ void gPainter::begin(const eRect &rect)
 	o.dc=&dc;
 	o.opcode=gOpcode::begin;
 	o.parm.begin=new gOpcode::para::pbegin(rect);
-	
+//	cliparea=std::stack<eRect, std::list<eRect> >();
 	cliparea=std::stack<eRect>();
 	cliparea.push(rect);
 	setLogicalZero(cliparea.top().topLeft());
@@ -160,18 +145,6 @@ void gPainter::fill(const eRect &area)
 	a&=cliparea.top();
 	
 	o.parm.fill=new gOpcode::para::pfill(a, foregroundColor);
-	rc.submit(o);
-}
-
-void gPainter::blit(gPixmap &pixmap, ePoint pos, eRect clip, int flags)
-{
-	gOpcode o;
-	o.dc=&dc;
-	o.opcode=gOpcode::blit;
-	pos+=logicalZero;
-	clip.moveBy(logicalZero.x(), logicalZero.y());
-	o.parm.blit=new gOpcode::para::pblit(pixmap.lock(), pos, clip);
-	o.flags=flags;
 	rc.submit(o);
 }
 

@@ -1,8 +1,8 @@
 installdir = $(DATADIR)/enigma/pictures/countries
 
 install_DATA = \
-	de.png es.png en.png no.png se.png cz.png gr.png fr.png \
-	it.png nl.png pl.png tr.png missing.png
+	ae.png de.png es.png en.png fi.png no.png se.png cz.png gr.png fr.png \
+	hr.png it.png nl.png pl.png pt.png tr.png missing.png ru.png hu.png
 
-# still missing: hu ? sk ? hr ? sl ?
+# still missing: hu ? sk ? sl ?
 

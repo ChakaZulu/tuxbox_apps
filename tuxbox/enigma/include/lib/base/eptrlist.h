@@ -167,13 +167,20 @@ public:
 	std::vector<T>* getVector()
 	{
 		// Creates an vector and copys all elements to this vector
-		// returns a pointer to this new vector ( the reserved memory must deletes from the receiver !! )
+		// returns a pointer to this new vector ( the reserved memory must deletet from the receiver !! )
 		std::vector<T>* v=new std::vector<T>();
 		v->reserve( size() );
     for ( std_list_T_iterator it( std::list<T*>::begin() ); it != std::list<T*>::end(); it++)
 			v->push_back( **it );
 
 		return v;
+	}
+
+	inline iterator insert_in_order( T* e )
+	{
+		// added a new item to the list... in order
+		// returns a iterator to the new item
+		return insert( std::lower_bound( std::list<T*>::begin(), std::list<T*>::end(), e ), e );
 	}
 
 };
@@ -201,6 +208,28 @@ public:
 	{
 		return operator->();
 	}
+
+	iterator& operator++()
+	{
+		std::list<T*>::iterator::operator++();
+		return *this;
+	}
+
+	iterator operator++(int)
+	{
+		return std::list<T*>::iterator::operator++(0);
+	}
+
+	iterator& operator--()
+	{
+		std::list<T*>::iterator::operator--();
+		return *this;
+	}
+
+	iterator operator--(int)
+	{
+		return std::list<T*>::iterator::operator--(0);
+	}
 };
 
 /////////////////// const_iterator class /////////////////////////////
@@ -225,6 +254,28 @@ public:
 	operator T*() const
 	{
 		return operator->();
+	}
+
+	const_iterator& operator++()
+	{
+		std::list<T*>::const_iterator::operator++();
+		return *this;
+	}
+
+	const_iterator operator++(int)
+	{
+		return std::list<T*>::const_iterator::operator++(0);
+	}
+
+	const_iterator& operator--()
+	{
+		std::list<T*>::const_iterator::operator--();
+		return *this;
+	}
+
+	const_iterator operator--(int)
+	{
+		return std::list<T*>::const_iterator::operator--(0);
 	}
 };
 
@@ -251,6 +302,28 @@ public:
 	{
 		return operator->();
 	}
+
+	reverse_iterator& operator++()
+	{
+		std::list<T*>::reverse_iterator::operator++();
+		return *this;
+	}
+
+	reverse_iterator operator++(int)
+	{
+		return std::list<T*>::reverse_iterator::operator++(0);
+	}
+
+	reverse_iterator& operator--()
+	{
+		std::list<T*>::reverse_iterator::operator--();
+		return *this;
+	}
+
+	reverse_iterator operator--(int)
+	{
+		return std::list<T*>::reverse_iterator::operator--(0);
+	}
 };
 
 /////////////////// const_reverse_iterator class /////////////////////////////
@@ -275,6 +348,28 @@ public:
 	operator T*() const
 	{
 		return operator->();
+	}
+
+	const_reverse_iterator& operator++()
+	{
+		std::list<T*>::const_reverse_iterator::operator++();
+		return *this;
+	}
+
+	const_reverse_iterator operator++(int)
+	{
+		return std::list<T*>::const_reverse_iterator::operator++(0);
+	}
+
+	const_reverse_iterator& operator--()
+	{
+		std::list<T*>::const_reverse_iterator::operator--();
+		return *this;
+	}
+
+	const_reverse_iterator operator--(int)
+	{
+		return std::list<T*>::const_reverse_iterator::operator--(0);
 	}
 };
 
@@ -478,7 +573,7 @@ template <class T>
 inline T* ePtrList<T>::last()
 {
 //	Returns a pointer to the last item in the list and makes this the current list item, or null if the list is empty.
-	return *(cur = --end());	
+	return *(cur = --end());
 }
 
 /////////////////// const ePtrList current() ////////////////////
@@ -529,7 +624,7 @@ template <class T>
 inline const T* ePtrList<T>::last() const
 {
 //	Returns a pointer to the last item in the list and makes this the current list item, or null if the list is empty.
-	return *(cur = --end());	
+	return *(cur = --end());
 }
 
 ////////////////// struct less //////////////////////////////
@@ -568,10 +663,10 @@ void ePtrList<T>::setAutoDelete(bool b)
 }
 
 template <class T>
-bool ePtrList<T>::isAutoDelete()	
-{		
+bool ePtrList<T>::isAutoDelete()
+{
 // returns a bool that contains the state of autoDelete
-	return autoDelete;	
+	return autoDelete;
 }
 
 #endif // _E_PTRLIST

@@ -18,8 +18,16 @@ eStatusBar::eStatusBar( eWidget* parent, const char *deco)
 
 void eStatusBar::initialize()
 {
-	if ( !(flags & flagOwnerDraw) && parent )
-			CONNECT( parent->focusChanged, eStatusBar::update );
+	if ( parent )
+	{
+		if ( flags & flagOwnerDraw )
+		{
+			if ( conn.connected() )
+				conn.disconnect();
+		}
+		else
+			conn = CONNECT( parent->focusChanged, eStatusBar::update );
+	}
 }
 
 void eStatusBar::update( const eWidget* p )

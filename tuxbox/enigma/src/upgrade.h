@@ -48,9 +48,10 @@ class eUpgrade: public eWindow
 	{
 		eString date;
 		eString machines;
-		int priority;		
+		int priority;
 		eString text;
 	};
+	eString mIDStr;
 	std::list<changelogEntry> changelogentries;
 	eHTTPConnection *http, *changelog;
 	int lasttime;
@@ -90,7 +91,8 @@ class eUpgrade: public eWindow
 	
 	void downloadProgress(int received, int total);
 	void flashImage(int checkmd5);
-	
+	bool erase(char mtd[30]);
+
 	void displayChangelog(eString oldversion, eString newversion, eString mid);
 public:
 	eUpgrade();

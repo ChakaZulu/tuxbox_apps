@@ -4,6 +4,11 @@
 		// all kind of decoding-related stuff
 #define DECODE_AUDIO_MPEG	0
 #define DECODE_AUDIO_AC3	1
+#define DECODE_AUDIO_DTS  2
+
+#define TYPE_ES 0
+#define TYPE_PES 1
+#define TYPE_MPEG1 2
 
 struct decoderParameters
 {
@@ -38,6 +43,7 @@ public:
 	static void flushBuffer();
 	static void startTrickmode();
 	static void stopTrickmode();
+	static void SetStreamType(int type);
 	static void setVideoFormat( int format );
 	static int  displayIFrame(const char *frame, int len);
 	static int  displayIFrameFromFile(const char *filename);

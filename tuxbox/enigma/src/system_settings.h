@@ -1,0 +1,25 @@
+#ifndef __system_settings_h
+#define __system_settings_h
+
+#include <setup_window.h>
+
+class eSystemSettings: public eSetupWindow
+{
+private:
+	void osd_settings();
+	void osd_language();
+	void time_settings();
+	void av_settings();
+	void harddisc_setup();
+#ifdef ENABLE_RFMOD
+	void uhf_modulator();
+#endif
+#ifndef DISABLE_LCD
+	void lcd_settings();
+#endif
+public:
+	eSystemSettings();
+};
+
+#endif /* __system_settings_h */
+

@@ -36,6 +36,7 @@ public:
 
 	eSize getExtend();
 	ePoint getLeftTop();
+	const eTextPara* getPara() const { return para; }
 
 	ePoint pixmap_position, text_position;
 };

@@ -22,7 +22,7 @@ public:
 
 class eSkinSetup: public eWindow
 {
-	eButton *baccept, *breject;
+	eButton *baccept;
 	eListBox<eListBoxEntrySkin> *lskins;
 	eStatusBar* statusbar;
 	void loadSkins();

@@ -11,6 +11,7 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/gdi/font.h>
 #include <lib/system/init_num.h>
+#include "epgactions.h"
 
 gFont eListBoxEntryEPG::TimeFont;
 gFont eListBoxEntryEPG::DescrFont;
@@ -18,18 +19,6 @@ gPixmap *eListBoxEntryEPG::inTimer=0;
 gPixmap *eListBoxEntryEPG::inTimerRec=0;
 int eListBoxEntryEPG::timeXSize=0;
 int eListBoxEntryEPG::dateXSize=0;
-
-struct epgSelectorActions
-{
-  eActionMap map;
-	eAction addTimerEvent, removeTimerEvent;
-	epgSelectorActions():
-		map("epgSelector", _("EPG selector")),
-		addTimerEvent(map, "addTimerEvent", _("add this event to timer list"), eAction::prioDialog ),
-		removeTimerEvent(map, "removeTimerEvent", _("remove this event from timer list"), eAction::prioDialog )
-	{
-	}
-};
 
 eAutoInitP0<epgSelectorActions> i_epgSelectorActions(eAutoInitNumbers::actions, "epg selector actions");
 
@@ -91,13 +80,14 @@ void eListBoxEntryEPG::build()
 			{
 				for (ePtrList<Descriptor>::iterator d(evt->descriptor); d != evt->descriptor.end(); ++d)
 				{
-					Descriptor *descriptor=*d;
-					if (descriptor->Tag()==DESCR_SHORT_EVENT)
+					if (d->Tag()==DESCR_SHORT_EVENT)
 					{
 						descr = ((ShortEventDescriptor*)descriptor)->event_name;
-						return;
+						break;
 					}
 				}
+				delete evt;
+				return;
 			}
 		}
 	}
@@ -116,24 +106,25 @@ eListBoxEntryEPG::eListBoxEntryEPG(EITEvent& evt, eListBox<eListBoxEntryEPG> *li
 	build();
 }
 
-extern const char *dayStrShort[];
+/* extern const char *dayStrShort[]; bug fix - at localization, 
+   macro the type _ ("xxxxx") for a constant does not work, 
+   if it is declared outside of the function */
 
-eString eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
+const eString &eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
+	const char *dayStrShort[7] = { _("Sun"), _("Mon"), _("Tue"), _("Wed"), _("Thu"), _("Fri"), _("Sat") };
+
 	drawEntryRect(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, hilited);
-	
-	eString hlp;
+
 	int xpos=rect.left()+10;
 	if (!paraDate)
 	{
 		paraDate = new eTextPara( eRect( 0, 0, dateXSize, rect.height()) );
 		paraDate->setFont( TimeFont );
-		eString tmp;
-		tmp.sprintf("%s %02d.%02d,", dayStrShort[start_time.tm_wday], start_time.tm_mday, start_time.tm_mon+1);
-		paraDate->renderString( tmp );
+		hlp.sprintf("%02d.%02d,", start_time.tm_mday, start_time.tm_mon+1);
+		paraDate->renderString( eString(dayStrShort[start_time.tm_wday])+' '+hlp );
 		paraDate->realign( eTextPara::dirRight );
 		TimeYOffs = ((rect.height() - paraDate->getBoundBox().height()) / 2 ) - paraDate->getBoundBox().top();
-		hlp+=tmp;
 	}
 	rc->renderPara(*paraDate, ePoint( xpos, rect.top() + TimeYOffs ) );
 	xpos+=dateXSize+paraDate->getBoundBox().height();
@@ -151,7 +142,7 @@ eString eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiv
 	rc->renderPara(*paraTime, ePoint( xpos, rect.top() + TimeYOffs ) );
 	xpos+=timeXSize+paraTime->getBoundBox().height();
 
-	ePlaylistEntry* p;
+	ePlaylistEntry* p=0;
 	if ( (p = eTimerManager::getInstance()->findEvent( &service, &event )) )
 		if ( p->type & ePlaylistEntry::SwitchTimerEntry )
 		{
@@ -172,21 +163,22 @@ eString eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiv
 		paraDescr->setFont( DescrFont );
 		paraDescr->renderString(descr);
 		DescrYOffs = 0; // ((rect.height() - paraDescr->getBoundBox().height()) / 2 ) - paraDescr->getBoundBox().top();
+		hlp=hlp+' '+descr;
 	}
 	rc->renderPara(*paraDescr, ePoint( xpos, rect.top() + DescrYOffs ) );
 
-	return hlp+" "+descr;
+	return hlp;
 }
 
 void eEPGSelector::fillEPGList()
 {
   eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
   if (service)
-		setText(eString("EPG - ")+service->service_name);
+		setText(eString(_("EPG - "))+service->service_name);
  	eDebug("get EventMap for onid: %02x, sid: %02x", current.getOriginalNetworkID().get(), current.getServiceID().get());
 
-	const eventMap* evt = eEPGCache::getInstance()->getEventMap(current);
-	eventMap::const_iterator It;
+	const timeMap* evt = eEPGCache::getInstance()->getTimeMap(current);
+	timeMap::const_iterator It;
 	if (evt)
 		It = evt->begin();
 
@@ -203,8 +195,8 @@ void eEPGSelector::fillEPGList()
 				{
 					TimeShiftedEventDescriptor *descriptor = (TimeShiftedEventDescriptor*) descr;
 //					eServiceReferenceDVB ref( current.getTransportStreamID().get(), current.getOriginalNetworkID().get(), descriptor->reference_event_id, 4 );
-					const eventMap *parent = eEPGCache::getInstance()->getEventMap(eZapMain::getInstance()->refservice);
-					eventMap::const_iterator pIt;
+					const timeMap *parent = eEPGCache::getInstance()->getTimeMap(eZapMain::getInstance()->refservice);
+					timeMap::const_iterator pIt;
 					if ( parent )
 					{
 						pIt = parent->find( descriptor->reference_event_id );
@@ -239,10 +231,10 @@ void eEPGSelector::fillEPGList()
 				for (std::list<NVODReferenceEntry>::const_iterator it( RefList->begin() ); it != RefList->end(); it++ )
 				{
 					eServiceReferenceDVB ref( ((eServiceReferenceDVB&)current).getDVBNamespace(), it->transport_stream_id, it->original_network_id, it->service_id, 5 );
-					const eventMap *eMap = eEPGCache::getInstance()->getEventMap( ref );
+					const timeMap *eMap = eEPGCache::getInstance()->getTimeMap( ref );
 					if (eMap)
 					{
-						for ( eventMap::const_iterator refIt( eMap->begin() ); refIt != eMap->end(); refIt++)
+						for ( timeMap::const_iterator refIt( eMap->begin() ); refIt != eMap->end(); refIt++)
 						{
 							EITEvent refEvt(*refIt->second);
 							for (ePtrList<Descriptor>::iterator d(refEvt.descriptor); d != refEvt.descriptor.end(); ++d)
@@ -274,9 +266,6 @@ void eEPGSelector::fillEPGList()
 	}
 	else for (It = evt->begin(); It != evt->end(); It++)
 		new eListBoxEntryEPG(*It->second, events, current);
-
-// sort Events..
-	((eListBox<eListBoxEntryEPG>*)events)->sort();		
 }
 
 void eEPGSelector::entrySelected(eListBoxEntryEPG *entry)
@@ -289,12 +278,11 @@ void eEPGSelector::entrySelected(eListBoxEntryEPG *entry)
 	{	
 		int ret;
 		hide();
-		eZapLCD* pLCD = eZapLCD::getInstance();
-		pLCD->lcdMain->hide();
-		pLCD->lcdMenu->show();
-	  eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
-		eEventDisplay ei(service ? service->service_name.c_str() : "", 0, &entry->event);
-		ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+		eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
+		eEventDisplay ei(service ? service->service_name.c_str() : "", current, 0, &entry->event);
+#ifndef DISABLE_LCD
+		ei.setLCD(LCDTitle, LCDElement);
+#endif
 		ei.show();
 		while((ret = ei.exec()))
 		{
@@ -308,11 +296,9 @@ void eEPGSelector::entrySelected(eListBoxEntryEPG *entry)
 				break; // close EventDisplay
 
 			if (tmp)
-				ei.setEvent(&tmp->event);					
+				ei.setEvent(&tmp->event);
 		}
 		ei.hide();
-		pLCD->lcdMenu->hide();
-		pLCD->lcdMain->show();
 		show();
 	}
 }
@@ -330,19 +316,53 @@ eEPGSelector::eEPGSelector(const eServiceReferenceDVB &service)
 	CONNECT(events->selected, eEPGSelector::entrySelected);
 	fillEPGList();
 	addActionMap( &i_epgSelectorActions->map );
+#ifndef DISABLE_FILE
+	addActionToHelpList( &i_epgSelectorActions->addDVRTimerEvent );
+#endif
+#ifndef DISABLE_NETWORK
+	addActionToHelpList( &i_epgSelectorActions->addNGRABTimerEvent );
+#endif
+	addActionToHelpList( &i_epgSelectorActions->addSwitchTimerEvent );
+	addActionToHelpList( &i_epgSelectorActions->removeTimerEvent );
+	setHelpID(12);
 }
 
 int eEPGSelector::eventHandler(const eWidgetEvent &event)
 {
+	int addtype=-1;
 	switch (event.type)
 	{
 		case eWidgetEvent::evtAction:
-			if (event.action == &i_epgSelectorActions->addTimerEvent)
+#ifndef DISABLE_FILE
+			if (event.action == &i_epgSelectorActions->addDVRTimerEvent)
+				addtype = ePlaylistEntry::RecTimerEntry |
+									ePlaylistEntry::recDVR|
+									ePlaylistEntry::stateWaiting;
+			else
+#endif
+#ifndef DISABLE_NETWORK
+			if (event.action == &i_epgSelectorActions->addNGRABTimerEvent)
+				addtype = ePlaylistEntry::RecTimerEntry|
+									ePlaylistEntry::recNgrab|
+									ePlaylistEntry::stateWaiting;
+			else
+#endif
+			if (event.action == &i_epgSelectorActions->addSwitchTimerEvent)
+				addtype = ePlaylistEntry::SwitchTimerEntry|
+									ePlaylistEntry::stateWaiting;
+			else if (event.action == &i_epgSelectorActions->removeTimerEvent)
 			{
-				if ( eTimerManager::getInstance()->addEventToTimerList( this, &events->getCurrent()->service, &events->getCurrent()->event ) )
+				if ( eTimerManager::getInstance()->removeEventFromTimerList( this, &current, &events->getCurrent()->event ) )
+					events->invalidateCurrent();
+			}
+			else
+				break;
+			if (addtype != -1)
+			{
+				if ( !eTimerManager::getInstance()->eventAlreadyInList( this, events->getCurrent()->event, events->getCurrent()->service) )
 				{
 					hide();
-					eTimerView v( eTimerManager::getInstance()->findEvent( &events->getCurrent()->service, &events->getCurrent()->event ) );
+					eTimerEditView v( events->getCurrent()->event, addtype, events->getCurrent()->service);
 					v.show();
 					v.exec();
 					v.hide();
@@ -350,42 +370,9 @@ int eEPGSelector::eventHandler(const eWidgetEvent &event)
 					show();
 				}
 			}
-			else if (event.action == &i_epgSelectorActions->removeTimerEvent)
-			{
-				if ( eTimerManager::getInstance()->removeEventFromTimerList( this, &current, &events->getCurrent()->event ) )
-					invalidateEntry( events->getCurrent() );
-			}
-			else
-				break;
 			return 1;
 		default:
 			break;
 	}
 	return eWindow::eventHandler(event);
-}
-
-struct findEvent: public std::unary_function<const eListBoxEntry&, void>
-{
-	const eListBoxEntry& entry;
-	int& cnt;
-
-	findEvent(const eListBoxEntry& e, int& cnt): entry(e), cnt(cnt)
-	{
-		cnt=0;	
-	}
-
-	bool operator()(const eListBoxEntry& s)
-	{
-		if (&entry == &s)
-			return 1;
-		cnt++;
-		return 0;
-	}
-};
-
-void eEPGSelector::invalidateEntry( eListBoxEntryEPG *e)
-{
-	int i;
-	if( events->forEachVisibleEntry( findEvent( *e, i ) ) == eListBoxBase::OK )
-		events->invalidateEntry( i );
 }

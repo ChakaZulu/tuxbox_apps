@@ -1,3 +1,5 @@
+#ifndef DISABLE_LCD
+
 #include <lib/gdi/lcd.h>
 
 #include <unistd.h>
@@ -38,16 +40,16 @@ int eLCD::lock()
 
 void eLCD::unlock()
 {
-  read( lcdfd, NULL, 0);
-  if ( errno == 9 )
-  {
-    eDebug("reopen lcd");
-    lcdfd=open("/dev/dbox/lcd0", O_RDWR);  // reopen device
-  }
-  else
-    eDebug("do not reopen lcd.. errno = %d", errno);
+	read( lcdfd, NULL, 0);
+	if ( errno == 9 )
+	{
+		eDebug("reopen lcd");
+		lcdfd=open("/dev/dbox/lcd0", O_RDWR);  // reopen device
+	}
+	else
+		eDebug("do not reopen lcd.. errno = %d", errno);
     
-  locked=0;
+	locked=0;
 }
 
 /* void eLCD::line(ePoint start, ePoint dst, int color)
@@ -204,3 +206,5 @@ public:
 };
 
 eAutoInitP0<eDBoxLCDHardware> init_eDBoxLCDHardware(eAutoInitNumbers::lowlevel, "d-Box LCD Hardware");
+
+#endif //DISABLE_LCD

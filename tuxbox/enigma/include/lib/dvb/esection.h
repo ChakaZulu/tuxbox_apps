@@ -1,15 +1,24 @@
 #ifndef __esection_h
 #define __esection_h
 
+#include <config.h>
 #include <asm/types.h>
-
 #include <libsig_comp.h>
 #include <lib/base/ebase.h>
+#include <lib/base/eptrlist.h>
 
 #define SECREAD_INORDER	1			// read them in order (read full tables)
 #define SECREAD_CRC			2			// check CRCs
 #define SECREAD_NOTIMEOUT	4		// never timeout
 #define SECREAD_NOABORT	8			// do not abort on transponderchange
+
+#if HAVE_DVB_API_VERSION < 3
+#define DEMUX0 "/dev/dvb/card0/demux0"
+#define DEMUX1 "/dev/dvb/card0/demux1"
+#else
+#define DEMUX0 "/dev/dvb/adapter0/demux0"
+#define DEMUX1 "/dev/dvb/adapter0/demux1"
+#endif
 
 class eSectionReader
 {
@@ -19,26 +28,29 @@ public:
 	eSectionReader();
 	int getHandle();		// for SocketNotifiers
 	void close();
-	int open(int pid, __u8 *data, __u8 *mask, int len, int flags);
+	int open(int pid, __u8 *data, __u8 *mask, int len, int flags, const char* dmxdev = DEMUX0 );
 	int read(__u8 *data);
 };
 
 class eSection: public Object
 {
+	eMainloop *context;
 	eSectionReader reader;
 	static ePtrList<eSection> active;
 	eSocketNotifier *notifier;
 	virtual int sectionRead(__u8 *data);
 	virtual void sectionFinish(int error);
-	
+protected:
 	int pid, tableid, tableidext, tableidmask;
+private:
 	int maxsec, section, flags;
 	void closeFilter();
 	eTimer *timer;
 	__u8 buf[65536];
 	int lockcount;
-	int setFilter(int pid, int tableid, int tableidext, int version);
+	int setFilter(int pid, int tableid, int tableidext, int version, const char *dmxdev=DEMUX0);
 public:
+	void setContext( eMainloop *context ) { this->context = context; }
 	void data(int socket);
 	void timeout();
 public:
@@ -46,7 +58,7 @@ public:
 	eSection();
 	virtual ~eSection();
 
-	int start();
+	int start(const char *dmxdev=DEMUX0);
 	int abort();
 	static int abortAll();
 	int getLockCount() { return lockcount; }
@@ -71,7 +83,6 @@ public:
 	int error;
 	int ready;
 };
-
 
 class eAUGTable: public Object
 {
@@ -161,7 +172,9 @@ public:
 
 	void getNext(int error)
 	{
-//		qDebug("eAUTable: got table (ready %d, error %d)", next->ready, next->error);
+//		printf("eAUTable: got table (ready %d, error %d\n", next->ready, next->error);
+		if ( current )
+			eDebug("current lockcount = %d", current->getLockCount() );
 		if (current && current->getLockCount())
 		{
 			delete next;

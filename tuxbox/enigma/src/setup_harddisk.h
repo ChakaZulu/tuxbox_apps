@@ -1,3 +1,5 @@
+#ifndef DISABLE_FILE
+
 #ifndef __lib_apps_enigma_setup_harddisk_h
 #define __lib_apps_enigma_setup_harddisk_h
 
@@ -25,6 +27,7 @@ class eHarddiskMenu: public eWindow
 	eStatusBar *sbar;
 	int dev;
 	int numpart;
+	int visible;
 	void s_format();
 	void extPressed();
 	void check();
@@ -48,3 +51,5 @@ public:
 };
 
 #endif
+
+#endif //DISABLE_FILE

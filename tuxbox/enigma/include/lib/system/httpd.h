@@ -89,6 +89,7 @@ public:
 	eHTTPConnection(eMainloop *ml); // ready to do "connectToHost"
 	static eHTTPConnection *doRequest(const char *uri, eMainloop *ml, int *error=0);
 	void start();
+	void gotHangup();
 	~eHTTPConnection();
 	
 		// stateRequest

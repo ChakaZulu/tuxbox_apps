@@ -1,6 +1,11 @@
 #include <enigma_plugins.h>
 
+#include <config.h>
 #include <plugin.h>
+
+#if HAVE_DVB_API_VERSION < 3
+#include <dbox/avia_gt_vbi.h>
+#endif
 
 #include <dlfcn.h>
 #include <dirent.h>
@@ -12,6 +17,7 @@
 #include <stdio.h>
 
 #include <enigma.h>
+#include <enigma_lcd.h>
 #include <lib/base/eerror.h>
 #include <lib/gdi/lcd.h>
 #include <lib/gdi/font.h>
@@ -67,18 +73,12 @@ void MakeParam(char* id, int val)
 		first = p;
 
 	p->next=0;
-	tmp = p;		
+	tmp = p;
 }
 
 ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* descr)
 	:eListBoxEntryText((eListBox<eListBoxEntryText>*)parent)
 {
-	if (!cfgfile)
-	{
-		text="[back]";
-		return;
-	}
-
 	eDebug(cfgfile);
 	text=getInfo(cfgfile, "name");
 
@@ -118,73 +118,105 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 	pluginname=pluginname.left(pluginname.length()-4);
 }
 
-eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
-	:eListBoxWindow<ePlugin>(_("Plugins"), 10, 400, true)
+eZapPlugins::eZapPlugins(int type, eWidget* lcdTitle, eWidget* lcdElement)
+	:eListBoxWindow<ePlugin>(type==2?_("Plugins"):_("Games"), 10, 400), type(type)
 {
+	PluginPath[0] = "/var/tuxbox/plugins/";
+	PluginPath[1] = PLUGINDIR "/";
+	PluginPath[2] = "";
 	setHelpText(_("select plugin and press ok"));
-	move(ePoint(150, 50));
+	move(ePoint(150, 100));
+#ifndef DISABLE_LCD
 	setLCD(lcdTitle, lcdElement);
-	new ePlugin(&list, 0);
+#endif
 	CONNECT(list.selected, eZapPlugins::selected);
 }
 
 int eZapPlugins::exec()
 {
-	const eString PluginPath = PLUGINDIR "/";
-	const eString PluginPath2 = GAMESDIR "/";	
-	struct dirent **namelist;
-
-	int n = scandir(PLUGINDIR "/", &namelist, 0, alphasort);
-
-	if (n < 0)
+	int cnt=0;
+	ePlugin *plg=0;
+	std::set<eString> exist;
+	for ( int i = 0; i < 2; i++ )
 	{
-		eDebug("Read Plugin Directory");
-		eMessageBox msg(_("Couldn't read plugin directory"), _("Error"), eMessageBox::iconError|eMessageBox::btOK );
-		msg.show();
-		msg.exec();
-		msg.hide();
-		return -1;
-	}
-
-	for(int count=0;count<n;count++)
-	{
-		eString	FileName = namelist[count]->d_name;
-
-		if ( FileName.find(".cfg") != eString::npos )
-			new ePlugin(&list, (PluginPath+FileName).c_str());
-
-		free(namelist[count]);
-  }
-	free(namelist);
-
-// look in var/tuxbox/games
-	n = scandir(GAMESDIR "/", &namelist, 0, alphasort);
-	if (n > 0)
-	{
-		for(int count=0;count<n;count++)
+		DIR *d=opendir(PluginPath[i].c_str());
+		if (!d)
 		{
-			eString	FileName = namelist[count]->d_name;
-			
-			if ( FileName.find(".cfg") != eString::npos )
-				new ePlugin(&list, (PluginPath2+FileName).c_str());
-
-			free(namelist[count]);
+			eString err;
+			err.sprintf(_("Couldn't read plugin directory %s"), PluginPath[i].c_str() );
+			eDebug(err.c_str());
+			if ( i )
+			{
+				eMessageBox msg(err, _("Error"), eMessageBox::iconError|eMessageBox::btOK );
+				msg.show();
+				msg.exec();
+				msg.hide();
+				return -1;
+			}
+			continue;
 		}
-		free(namelist);
+		int connType=0;
+		eConfig::getInstance()->getKey("/elitedvb/network/connectionType", connType);
+		while (struct dirent *e=readdir(d))
+		{
+			eString FileName = e->d_name;
+			if ( FileName.find(".cfg") != eString::npos )
+			{
+				eString cfgname=(PluginPath[i]+FileName).c_str();
+				int ttype=atoi(getInfo(cfgname.c_str(), "type").c_str());
+				if ((type == -1) || (type == ttype))
+				{
+					// do not add existing plugins twice
+					if ( exist.find(FileName) != exist.end() )
+						continue;
+					exist.insert(FileName);
+					// EVIL HACK
+					if ( !connType && cfgname.find("dsl") != eString::npos &&
+						cfgname.find("connect") != eString::npos )
+						continue;
+					////////////
+					plg = new ePlugin(&list, cfgname.c_str());
+					++cnt;
+				}
+			}
+		}
+		closedir(d);
 	}
-
-	show();
-	int res=eListBoxWindow<ePlugin>::exec();
-	hide();
+	int res=0;
+	if ((type == 2) && (cnt == 1))
+	{
+		selected(plg);
+	} else
+	{
+		show();
+		res=eListBoxWindow<ePlugin>::exec();
+		hide();
+	}
 	return res;
 }
 
-void eZapPlugins::execPluginByName(const char* name)
+eString eZapPlugins::execPluginByName(const char* name)
 {
-	eString PluginPath = PLUGINDIR "/";
-	PluginPath+=name;
-	ePlugin p(0, PluginPath.c_str());
-	execPlugin(&p);
+	if ( name )
+	{
+		eString Path;
+		for ( int i = 0; i < 3; i++ )
+		{
+			Path=PluginPath[i];
+			Path+=name;
+			FILE *fp=fopen(Path.c_str(), "rb");
+			if ( fp )
+			{
+				fclose(fp);
+				ePlugin p(0, Path.c_str());
+				execPlugin(&p);
+				return "OK";
+			}
+			else if ( i == 2)
+				return eString().sprintf(_("plugin '%s' not found"), name );
+		}
+	}
+	return _("no name given");
 }
 
 void eZapPlugins::execPlugin(ePlugin* plugin)
@@ -208,8 +240,23 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 			np=strchr(p,',');
 			if ( np )
 				*np=0;
-			argv[ argc++ ] = (*p == '/') ?
-				eString(p) : eString(PLUGINDIR "/" + eString(p));
+
+			for ( int i=0; i < 3; i++ )
+			{
+				eString str;
+				if (np)
+					str.assign( p, np-p );
+				else
+					str.assign( p );
+
+				FILE *fp=fopen((PluginPath[i]+str).c_str(), "rb");
+				if ( fp )
+				{
+					fclose(fp);
+					argv[argc++] = PluginPath[i]+str;
+					break;
+				}
+			}
 			p=np?np+1:0;
 		}
 	}
@@ -225,20 +272,14 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 	if (plugin->needrc)
 		MakeParam(P_ID_RCINPUT, eRCInput::getInstance()->lock());
 
+#ifndef DISABLE_LCD
 	if (plugin->needlcd)
-    MakeParam(P_ID_LCD,	eDBoxLCD::getInstance()->lock() );
-
-	if (plugin->needoffsets)
-	{
-		MakeParam(P_ID_OFF_X, 0);
-		MakeParam(P_ID_OFF_Y, 0);
-		MakeParam(P_ID_END_X, 720);
-		MakeParam(P_ID_END_Y, 576);
-	}
+		MakeParam(P_ID_LCD, eDBoxLCD::getInstance()->lock() );
+#endif
 
 	int tpid = -1;
- 	if (plugin->needvtxtpid)
- 	{
+	if (plugin->needvtxtpid)
+	{
 		if(Decoder::parms.tpid==-1)
 		{
 			MakeParam(P_ID_VTXTPID, 0);
@@ -256,6 +297,19 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 			Decoder::Set();
 		}
 	}
+	if (plugin->needoffsets)
+	{
+		int left=20, top=20, right=699, bottom=555;
+		eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/left", left);
+		eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/top", top);
+		eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/right", right);
+		eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/bottom", bottom);
+		MakeParam(P_ID_OFF_X, left);
+		MakeParam(P_ID_OFF_Y, top);
+		MakeParam(P_ID_END_X, right);
+		MakeParam(P_ID_END_Y, bottom);
+	}
+
 /*	for(PluginParam *par = first; par; par=par->next )
 	{
 		printf ("id: %s - val: %s\n", par->id, par->val);
@@ -270,8 +324,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		{
 			const char *de=dlerror();
 			eDebug(de);
-			if (isVisible())
-				hide();
+			hide();
 			eMessageBox msg(de, "plugin loading failed");
 			msg.show();
 			msg.exec();
@@ -287,15 +340,14 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		PluginExec execPlugin = (PluginExec) dlsym(libhandle[i-1], "plugin_exec");
 		if (!execPlugin)
 		{
-			if (isVisible())
-				hide();
+			hide();
 			eMessageBox msg("The symbol plugin_exec was not found. sorry.", "plugin executing failed");
 			msg.show();
 			msg.exec();
 			msg.hide();
 		}
 		else
-		{		
+		{
 			eDebug("exec Plugin now...");
 			execPlugin(first);
 			dlclose(libhandle[i-1]);
@@ -319,11 +371,16 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 	if (plugin->needrc)
 		eRCInput::getInstance()->unlock();
 
+#ifndef DISABLE_LCD
 	if (plugin->needlcd)
+	{
 		eDBoxLCD::getInstance()->unlock();
+		eZapLCD::getInstance()->invalidate();
+	}
+#endif
 
- 	if (plugin->needvtxtpid)
- 	{
+	if (plugin->needvtxtpid)
+	{
 		// start vtxt reinsertion
 		if (tpid != -1)
 		{
@@ -341,8 +398,9 @@ void eZapPlugins::selected(ePlugin *plugin)
 		close(0);
 		return;
 	}
-	execPlugin(plugin);
-
+	int wasVisible = isVisible();
 	hide();
-	show();
+	execPlugin(plugin);
+	if ( wasVisible )
+		show();
 }

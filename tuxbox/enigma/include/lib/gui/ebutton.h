@@ -9,7 +9,9 @@
  */
 class eButton: public eLabel
 {
+#ifndef DISABLE_LCD
 	eLabel*	tmpDescr; // used for LCD with description
+#endif
 protected:
 	gColor focusB, focusF, normalB, normalF;
 	eLabel *descr;

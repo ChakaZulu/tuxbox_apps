@@ -1,3 +1,4 @@
+// #define DEBUG_HTTPD
 #include <lib/system/httpd.h>
 
 #include <sys/socket.h>
@@ -54,13 +55,14 @@ int eHTTPError::doWrite(int w)
 
 eHTTPConnection::eHTTPConnection(int socket, int issocket, eHTTPD *parent, int persistent): eSocket(socket, issocket, parent->ml), parent(parent), persistent(persistent)
 {
-#if 0
+#ifdef DEBUG_HTTPD
 	eDebug("eHTTPConnection");
 #endif
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
 	CONNECT(this->error_ , eHTTPConnection::gotError);
 	CONNECT(this->connectionClosed_ , eHTTPConnection::destruct);
+	CONNECT(this->hangup , eHTTPConnection::gotHangup);
 
 	buffersize=128*1024;
 	localstate=stateWait;
@@ -70,14 +72,7 @@ eHTTPConnection::eHTTPConnection(int socket, int issocket, eHTTPD *parent, int p
 
 void eHTTPConnection::destruct()
 {
-	if (data && remotestate == stateData)
-		data->haveData(0, 0);
-	if (data)
-	{
-		delete data;
-		data=0;
-	}
-	transferDone(0);
+	gotHangup();
 	delete this;
 }
 
@@ -108,6 +103,24 @@ void eHTTPConnection::start()
 		localstate=stateRequest;
 		processLocalState();
 	}
+}
+
+void eHTTPConnection::gotHangup()
+{
+	if (data && remotestate == stateData)
+		data->haveData(0, 0);
+	if (data)
+	{
+		delete data;
+		data=0;
+	}
+	transferDone(0);
+
+	localstate=stateWait;
+	remotestate=stateRequest;
+	
+	remote_header.clear();
+	local_header.clear();
 }
 
 eHTTPConnection *eHTTPConnection::doRequest(const char *uri, eMainloop *ml, int *error)
@@ -176,7 +189,9 @@ eHTTPConnection *eHTTPConnection::doRequest(const char *uri, eMainloop *ml, int 
 		proto=defaultproto;
 	}
 
+#ifdef DEBUG_HTTPD
 	eDebug("proto: '%s', host '%s', path '%s', port '%d'", proto.c_str(), host.c_str(), path.c_str(), port);
+#endif
 
 	if (!host.size())
 	{
@@ -237,18 +252,20 @@ int eHTTPConnection::processLocalState()
 	int done=0;
 	while (!done)
 	{
-//		eDebug("processing local state %d", localstate);
+#ifdef DEBUG_HTTPD
+		eDebug("processing local state %d", localstate);
+#endif
 		switch (localstate)
 		{
 		case stateWait:
-#if 0
+#ifdef DEBUG_HTTPD
 			eDebug("local wait");
 #endif
 			done=1;
 			break;
 		case stateRequest:
 		{
-#if 0
+#ifdef DEBUG_HTTPD
 			eDebug("local request");
 #endif
 			eString req=request+" "+requestpath+" "+httpversion+"\r\n";
@@ -259,7 +276,7 @@ int eHTTPConnection::processLocalState()
 		}
 		case stateResponse:
 		{
-#if 0
+#ifdef DEBUG_HTTPD
 			eDebug("local Response");
 #endif
 			writeString( (httpversion + " " + eString().setNum(code)+" " + code_descr + "\r\n").c_str() );
@@ -268,7 +285,7 @@ int eHTTPConnection::processLocalState()
 			break;
 		}
 		case stateHeader:
-#if 0
+#ifdef DEBUG_HTTPD
 			eDebug("local header");
 #endif
 			for (std::map<std::string,std::string>::iterator cur=local_header.begin(); cur!=local_header.end(); ++cur)
@@ -285,7 +302,7 @@ int eHTTPConnection::processLocalState()
 				localstate=stateData;
 			break;
 		case stateData:
-#if 0
+#ifdef DEBUG_HTTPD
 			eDebug("local data");
 #endif
 			if (data)
@@ -305,6 +322,7 @@ int eHTTPConnection::processLocalState()
 			break;
 		case stateDone:
 #if 0
+			// move to stateClose
 			if (remote_header.find("Connection") != remote_header.end())
 			{
 				eString &connection=remote_header["Connection"];
@@ -314,25 +332,41 @@ int eHTTPConnection::processLocalState()
 					localstate=stateClose;
 			}
 #endif
+#ifdef DEBUG_HTTPD
 			eDebug("locate state done");
+#endif
 			if (!persistent)
 				localstate=stateClose;
 			else
 				localstate=stateWait;
 			break;
 		case stateClose:
+#ifdef DEBUG_HTTPD
 			eDebug("closedown");
-			close();		// bye, bye, remote
+#endif
+			if (persistent)
+			{
+				if (data)
+					delete data;
+				data=0;
+				localstate=stateWait;
+			} else
+				close();		// bye, bye, remote
 			return 1;
 		}
 	}
-// 	eDebug("end local");
+#ifdef DEBUG_HTTPD
+ 	eDebug("end local");
+#endif
 	return 0;
 }
 
 int eHTTPConnection::processRemoteState()
 {
 	int abort=0, done=0;
+#ifdef DEBUG_HTTPD
+	eDebug("%d bytes avail", bytesAvailable());
+#endif
 	while (((!done) || bytesAvailable()) && !abort)
 	{
 		switch (remotestate)
@@ -340,7 +374,7 @@ int eHTTPConnection::processRemoteState()
 		case stateWait:
 		{
 			int i=0;
-#if 0
+#ifdef DEBUG_HTTPD
 			eDebug("remote stateWait");
 #endif
 			char buffer[1024];
@@ -352,7 +386,7 @@ int eHTTPConnection::processRemoteState()
 		}
 		case stateRequest:
 		{
-#if 0
+#ifdef DEBUG_HTTPD
 			eDebug("stateRequest");
 #endif
 			eString line;
@@ -402,7 +436,9 @@ int eHTTPConnection::processRemoteState()
 		}
 		case stateResponse:
 		{
+#ifdef DEBUG_HTTPD
 			eDebug("state response..");
+#endif
 			eString line;
 			if (!getLine(line))
 			{
@@ -410,8 +446,9 @@ int eHTTPConnection::processRemoteState()
 				abort=1;
 				break;
 			}
-//			eDebug("line: %s", line.c_str());
-
+#ifdef DEBUG_HTTPD
+			eDebug("line: %s", line.c_str());
+#endif
 			int del[2];
 			del[0]=line.find(" ");
 			del[1]=line.find(" ", del[0]+1);
@@ -432,7 +469,7 @@ int eHTTPConnection::processRemoteState()
 		}
 		case stateHeader:
 		{
-#if 0
+#ifdef DEBUG_HTTPD
 			eDebug("remote stateHeader");
 #endif
 			eString line;
@@ -444,6 +481,14 @@ int eHTTPConnection::processRemoteState()
 			}
 			if (!line.length())
 			{
+				content_length=0;
+				content_length_remaining=-1;
+				if (remote_header.count("Content-Length"))
+				{
+					content_length=atoi(remote_header["Content-Length"].c_str());
+					content_length_remaining=content_length;
+				}
+
 				if (parent)
 				{
 					for (ePtrList<eHTTPPathResolver>::iterator i(parent->resolver); i != parent->resolver.end(); ++i)
@@ -462,13 +507,6 @@ int eHTTPConnection::processRemoteState()
 					data=new eHTTPError(this, 404);
 				}
 
-				content_length=0;
-				content_length_remaining=-1;
-				if (remote_header.count("Content-Length"))
-				{
-					content_length=atoi(remote_header["Content-Length"].c_str());
-					content_length_remaining=content_length;
-				}
 				if (content_length || 		// if content-length is set, we have content
 						remote_header.count("Content-Type") || 		// content-type - the same
 						(localstate != stateResponse))	// however, if we are NOT in response-state, so we are NOT server, there's ALWAYS more data to come. (exception: http/1.1 persistent)
@@ -493,7 +531,7 @@ int eHTTPConnection::processRemoteState()
 		}
 		case stateData:
 		{
-#if 0
+#ifdef DEBUG_HTTPD
 			eDebug("remote stateData");
 #endif
 			ASSERT(data);
@@ -525,18 +563,20 @@ int eHTTPConnection::processRemoteState()
 			remotestate=stateClose;
 			break;
 		case stateClose:
-			if (!persistent)
+//			if (!persistent)
 				remotestate=stateWait;
-			else
-				remotestate=stateRequest;
+//			else
+//				remotestate=stateRequest;
 			abort=1;
 			break;
 		default:
-			eDebug("bla wrong state %d", remotestate);
+			eDebug("HTTP: invalid state %d", remotestate);
 			done=1;
 		}
 	}
-//	eDebug("end remote");
+#ifdef DEBUG_HTTPD
+	eDebug("end remote");
+#endif
 	return 0;
 }
 

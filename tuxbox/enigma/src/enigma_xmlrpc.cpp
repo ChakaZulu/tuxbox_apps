@@ -1,3 +1,5 @@
+#ifndef DISABLE_NETWORK
+
 #include <errno.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/service.h>
@@ -372,3 +374,5 @@ void ezapInitializeXMLRPC(eHTTPD *httpd)
 	xmlrpc_addMethod("zapTo", zapTo);
 	xmlrpc_addMethod("getInfo", getInfo);
 }
+
+#endif //DISABLE_NETWORK

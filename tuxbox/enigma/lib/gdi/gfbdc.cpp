@@ -73,10 +73,7 @@ void gFBDC::calcRamp()
 			d=255;
 		ramp[i]=d;
 
-/*		if ( eDVB::getInstance()->getInfo("mID") == "01" )
-			rampalpha[i]=i*alpha/65535;
-		else*/
-			rampalpha[i]=i*alpha/256;
+		rampalpha[i]=i*alpha/256;
 	}
 
 	rampalpha[255]=255; // transparent BLEIBT bitte so.

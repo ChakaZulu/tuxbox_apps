@@ -1,3 +1,5 @@
+#ifndef DISABLE_LCD
+
 #ifndef __setuplcd_h
 #define __setuplcd_h
 
@@ -21,9 +23,9 @@ class eZapLCDSetup: public eWindow
 	int lcdstandby;
 	unsigned char lcdinverted;
 
-	eButton *ok, *abort;
+	eButton *ok;
 	void okPressed();
-	void abortPressed();
+	int eventHandler( const eWidgetEvent&);
 	void brightnessChanged( int );
 	void contrastChanged( int );
 	void standbyChanged( int );
@@ -36,3 +38,5 @@ private:
 };
 
 #endif
+
+#endif //DISABLE_LCD

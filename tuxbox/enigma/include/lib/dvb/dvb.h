@@ -145,11 +145,23 @@ public:
 				return 0;
 			return 1;
 		}
+		bool operator<(const cable &c) const
+		{
+			if ( frequency == c.frequency )
+			{
+				if ( symbol_rate == c.symbol_rate )
+					return fec_inner < c.fec_inner;
+				else
+					return symbol_rate < c.symbol_rate;
+			}
+			return frequency < c.frequency;
+		}
 	} cable;
 	struct satellite
 	{
 		int valid;
-		int frequency, symbol_rate, polarisation, fec, inversion, orbital_position;
+		unsigned int frequency, symbol_rate;
+		int polarisation, fec, inversion, orbital_position;
 		void set(const SatelliteDeliverySystemDescriptor *descriptor);
 		int tune(eTransponder *);
 		int isValid() const { return valid; }
@@ -161,7 +173,7 @@ public:
 			if ( abs( frequency-c.frequency ) > 1000 )
 				return 0;
 //   		eDebug("symbol_rate -> %i != %i", symbol_rate, c.symbol_rate );
-			if (symbol_rate != c.symbol_rate)
+			if ( abs(symbol_rate-c.symbol_rate) > 2000 )
 				return 0;
 //   		eDebug("polarisation -> %i != %i", polarisation, c.polarisation );
 			if (polarisation != c.polarisation)
@@ -170,13 +182,25 @@ public:
 			if (fec != c.fec)
 				return 0;
 //   		eDebug("inversion -> %i != %i", inversion, c.inversion );
-			if (inversion != c.inversion)
+			// dont compare inversion when one have AUTO
+			if (inversion != 2 && c.inversion != 2 && inversion != c.inversion)
 				return 0;
 //			eDebug("orbital_position -> %i != %i", orbital_position, c.orbital_position);
 			if (orbital_position != c.orbital_position)
 				return 0;
 //			eDebug("Satellite Data is equal");
 			return 1;
+		}
+		bool operator<(const satellite &s) const
+		{
+			if ( frequency == s.frequency )
+			{
+				if ( symbol_rate == s.symbol_rate )
+					return orbital_position < s.orbital_position;
+				else
+					return symbol_rate < s.symbol_rate;
+			}
+			return frequency < s.frequency;
 		}
 	} satellite;
 	eTransponder(eTransponderList &tplist, eDVBNamespace dvbnamespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
@@ -210,15 +234,24 @@ public:
 		stateToScan, stateError, stateOK
 	};
 	int state;
-	
+
+	operator tsref()
+	{
+		return tsref(
+			dvb_namespace,
+			transport_stream_id,
+			original_network_id );
+	}
+
 	bool operator==(const eTransponder &c) const
 	{
 //		eDebug("onid = %i, c.onid = %i, tsid = %i, c.tsid = %i", original_network_id.get(), transport_stream_id.get(), c.original_network_id.get(), c.transport_stream_id.get() );
 		if ( original_network_id != -1 && c.original_network_id != -1 && transport_stream_id != -1 && c.transport_stream_id != -1)
-//		{
+		{
 //	  	eDebug("TSID / ONID Vergleich");
-			return ( (original_network_id == c.original_network_id) && (transport_stream_id == c.transport_stream_id) );
-//		}
+				return ( original_network_id == c.original_network_id &&
+										transport_stream_id == c.transport_stream_id );
+		}
 		else
 		{
 			if (satellite.valid && c.satellite.valid)
@@ -226,8 +259,7 @@ public:
 			if (cable.valid && c.cable.valid)
 				return cable == c.cable;
 		}
-
-		return 1;		
+		return 1;
 	}
 
 	bool operator<(const eTransponder &c) const
@@ -235,7 +267,7 @@ public:
 		if ((original_network_id == -1) && (transport_stream_id == -1))
 		{
 			if ((c.original_network_id == -1) && (c.transport_stream_id == -1))
-				return this < &c;
+				return cable.valid?cable<c.cable:satellite<c.satellite;
 			else
 				return 1;
 		}
@@ -252,14 +284,26 @@ public:
 class eService
 {
 public:
-	eService(const eString &service_name);
+	eService(const eString &service_name, int spflags=0);
 	virtual ~eService();
-	
-	eLock access;
 
 	eString service_name;
+		// flags used for display in the service menu.
+	enum
+	{
+		spfOwnerdraw=1,
+		spfColDontChange=0,		// don't change
+		spfColSingle=2,				// i.e. 1 column only
+		spfColMulti=4,				// i.e. 3 columns
+		spfColCombi=6,				// i.e. 1 column "bouquets", 2 columns services
+		spfColMask=6
+	};
+	int spflags;
+
 	class eServiceDVB *dvb;
+#ifndef DISABLE_FILE
 	class eServiceID3 *id3;
+#endif
 };
 
 class eServiceDVB: public eService
@@ -275,42 +319,43 @@ public:
 	eServiceDVB(const eServiceDVB &c);
 
 	void update(const SDTEntry *sdtentry);
-	
+
 	eDVBNamespace dvb_namespace;
 	eTransportStreamID transport_stream_id;
 	eOriginalNetworkID original_network_id;
 	eServiceID service_id;
 	int service_type;
-	
+
 	eString service_provider;
-	
+
 	int service_number;		// nur fuer dvb, gleichzeitig sortierkriterium...
-	
-	enum {
-		dxNameFixed=1,
+
+	enum
+	{
+		dxNoDVB=1,
 		dxDontshow=2,
-		dxNoDVB=4		// no PAT/PMT/...
+		dxNoPMT=4
 	};
 	int dxflags;
-	
+
 	int cache[cacheMax];
-	
+
 	void set(cacheID c, int v)
 	{
 		cache[c]=v;
 	}
-	
+
 	int get(cacheID c)
 	{
 		return cache[c];
 	}
-	
+
 	void clearCache()
 	{
 		for (int i=0; i<cacheMax; i++)
 			cache[i]=-1;
 	}
-	
+
 	bool operator<(const eServiceDVB &c) const
 	{
 		if (original_network_id < c.original_network_id)
@@ -322,12 +367,20 @@ public:
 	}
 };
 
-struct eServiceReference
+class eServiceReference
 {
+	static std::set<eServiceReference> locked;
+	static bool lockedListChanged;
+public:
+	static void loadLockedList( const char* filename );
+	static void saveLockedList( const char* filename );
+	bool isLocked() const { return locked.find( *this ) != locked.end(); }
+	void lock() const { locked.insert( *this );lockedListChanged=true; }
+	void unlock() const { locked.erase( *this );lockedListChanged=true; }
 	enum
 	{
 		idInvalid=-1,
-		idStructure,	// service_id == 0 is root
+		idStructure, // service_id == 0 is root
 		idDVB,
 		idFile,
 		idUser=0x1000
@@ -352,7 +405,8 @@ struct eServiceReference
 		flagDirectory=isDirectory|mustDescent|canDescent,
 		shouldSort=8,			// should be ASCII-sorted according to service_name. great for directories.
 		hasSortKey=16,		// has a sort key in data[3]. not having a sort key implies 0.
-		sort1=32					// sort key is 1 instead of 0
+		sort1=32,					// sort key is 1 instead of 0
+		isMarker=64
 	};
 
 	inline int getSortKey() const { return (flags & hasSortKey) ? data[3] : ((flags & sort1) ? 1 : 0); }
@@ -421,7 +475,7 @@ struct eServiceReference
 	{
 		if (type != c.type)
 			return 0;
-		return /* (flags == c.flags) && */ (memcmp(data, c.data, sizeof(int)*4)==0) && (path == c.path);
+		return /* (flags == c.flags) && */ (memcmp(data, c.data, sizeof(int)*8)==0) && (path == c.path);
 	}
 	bool operator!=(const eServiceReference &c) const
 	{
@@ -453,7 +507,7 @@ struct eServiceReference
 
 class eServicePath
 {
-	std::stack<eServiceReference> path;
+	std::list<eServiceReference> path;
 public:
 	eServicePath()	{	}
 	eServicePath( const eString& data );
@@ -463,6 +517,8 @@ public:
 	bool up();
 	void down(const eServiceReference &ref);
 	eServiceReference current() const;
+	eServiceReference top() const { return current(); }
+	eServiceReference bottom() const;
 	int size() const;
 };
 
@@ -509,7 +565,12 @@ public:
 		: bouquet_id(bouquet_id), bouquet_name(bouquet_name)
 	{
 	}
-
+	template <class T>
+	void forEachServiceReference(T ob)
+	{
+		for (std::list<eServiceReferenceDVB>::iterator i(list.begin()); i!=list.end(); ++i)
+			ob(*i);
+	}
 	void add(const eServiceReferenceDVB &);
 	int remove(const eServiceReferenceDVB &);
 	bool operator == (const eBouquet &c) const
@@ -588,7 +649,7 @@ public:
 
 struct eDiSEqC
 {
-	enum { AA=0, AB=1, BA=2, BB=3 /* and 0xF0 .. 0xFF*/  }; // DiSEqC Parameter
+	enum { AA=0, AB=1, BA=2, BB=3, SENDNO=4 /* and 0xF0 .. 0xFF*/  }; // DiSEqC Parameter
 	int DiSEqCParam;
   
 	enum tDiSEqCMode	{	NONE=0, V1_0=1, V1_1=2, V1_2=3, SMATV=4 }; // DiSEqC Mode
@@ -599,9 +660,10 @@ struct eDiSEqC
 
 	std::map< int, int > RotorTable; // used for Rotors does not support gotoXX Cmd
 	int DiSEqCRepeats;      // for cascaded switches
-	int SeqRepeat;          // send the complete DiSEqC Sequence dupe...
-	int uncommitted_switch; // send to uncommited switch
-	int uncommitted_gap;    // send uncommitted switch in DiSEqC Repeat gap
+	int FastDiSEqC;         // send no DiSEqC on H/V or Lo/Hi change
+	int SeqRepeat;          // send the complete DiSEqC Sequence twice...
+	int SwapCmds;           // swaps the committed & uncommitted cmd
+	int uncommitted_cmd;    // state of the 4 uncommitted switches..
 	int useGotoXX;          // Rotor Support gotoXX Position ?
 	int useRotorInPower;    // can we use Rotor Input Power to detect Rotor state ?
 	double DegPerSec;       // degress per Second.. used when no Input Power can used
@@ -610,34 +672,34 @@ struct eDiSEqC
 	int gotoXXLaDirection;  // NORT, SOUTH
 	double gotoXXLongitude; // Longitude for gotoXX° Function
 	double gotoXXLatitude;  // Latitude for gotoXX° Function
+	void setRotorDefaultOptions(); // set default rotor options
 };
 
 class eLNB
 {
 	unsigned int lof_hi, lof_lo, lof_threshold;
-  int increased_voltage;
-  ePtrList<eSatellite> satellites;
+	int increased_voltage;
+	ePtrList<eSatellite> satellites;
 	eTransponderList &tplist;
 	eDiSEqC DiSEqC;
 public:
-
 	eLNB(eTransponderList &tplist): tplist(tplist)
 	{
 		satellites.setAutoDelete(true);
 	}
-	
 	void setLOFHi(unsigned int lof_hi) { this->lof_hi=lof_hi; }
 	void setLOFLo(unsigned int lof_lo) { this->lof_lo=lof_lo; }
 	void setLOFThreshold(unsigned int lof_threshold) { this->lof_threshold=lof_threshold; }
-  void setIncreasedVoltage( int inc ) { increased_voltage = inc; }
-  unsigned int getLOFHi() const { return lof_hi; }
+	void setIncreasedVoltage( int inc ) { increased_voltage = inc; }
+	unsigned int getLOFHi() const { return lof_hi; }
 	unsigned int getLOFLo() const { return lof_lo; }
 	unsigned int getLOFThreshold() const { return lof_threshold; }
-  int getIncreasedVoltage() const { return increased_voltage; }
+	int getIncreasedVoltage() const { return increased_voltage; }
 	eDiSEqC& getDiSEqC() { return DiSEqC; }	
 	eSatellite *addSatellite(int orbital_position);
 	void deleteSatellite(eSatellite *satellite);
 	void addSatellite( eSatellite *satellite);
+	void setDefaultOptions();
 	eSatellite* takeSatellite( eSatellite *satellite);
 	bool operator==(const eLNB& lnb) { return this == &lnb; }
 	ePtrList<eSatellite> &getSatelliteList() { return satellites; }
@@ -646,6 +708,12 @@ public:
 class tpPacket
 {
 public:
+	bool operator==(const tpPacket& p)
+	{
+		// this do only compare the adresses.. to find a tpPacket
+		// in a std::list<tpPacket>.. but it is fast !!
+		return &possibleTransponders == &p.possibleTransponders;
+	}
 	std::string name;
 	int scanflags;
 	int orbital_position;
@@ -656,9 +724,10 @@ class existNetworks
 {
 	bool networksLoaded;
 public:
-	const std::list<tpPacket>& getNetworks();
-	const std::map<int,tpPacket>& getNetworkNameMap();
+	std::list<tpPacket>& getNetworks();
+	std::map<int,tpPacket>& getNetworkNameMap();
 	int reloadNetworks();
+	int saveNetworks();
 	void invalidateNetworks() { networksLoaded=false; }
 protected:
 	int fetype;
@@ -673,13 +742,17 @@ class eTransponderList: public existNetworks
 	static eTransponderList* instance;
 	std::map<tsref,eTransponder> transponders;
 	std::map<eServiceReferenceDVB,eServiceDVB> services;
-	
 	std::multimap<int,eSatellite*> satellites;
 	std::list<eLNB> lnbs;
 	std::map<int,eServiceReferenceDVB> channel_number;
 	friend class eLNB;
 	friend class eSatellite;
+//	ePlaylist *newServices;
+//	eServiceReference newServicesRef;
 public:
+	std::map<tsref,int> TimeOffsetMap;
+	void readTimeOffsetData( const char* filename );
+	void writeTimeOffsetData( const char* filename );
 
 	void clearAllServices()	{	services.clear(); }
 	void clearAllTransponders()	{	transponders.clear(); }
@@ -692,6 +765,8 @@ public:
 	~eTransponderList()
 	{
 		writeLNBData();  // write Data to registry
+/*		newServices->save();
+		eServiceInterface::getInstance()->removeRef(newServicesRef);*/
 
 		if (instance == this)
 			instance = 0;

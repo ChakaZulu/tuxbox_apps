@@ -68,7 +68,7 @@ eActionMap::~eActionMap()
 	eActionMapList::getInstance()->removeActionMap(identifier);
 }
 
-void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, const XMLTreeNode *node, const eString& style)
+void eActionMap::loadXML(eRCDevice *device, eKeymap &keymap, const XMLTreeNode *node, const eString& style)
 {
 	for (XMLTreeNode *xaction=node->GetChild(); xaction; xaction=xaction->GetNext())
 	{
@@ -91,6 +91,7 @@ void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, c
 		}
 		const char *code=xaction->GetAttributeValue("code");
 		int icode=-1;
+		eString picture="";
 		if (!code)
 		{
 			const char *key=xaction->GetAttributeValue("key");
@@ -99,87 +100,29 @@ void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, c
 				eFatal("please specify a number as code= or a defined key with key=.");
 				continue;
 			}
-			std::map<std::string,int>::iterator i=keymap.find(std::string(key));
+
+			eKeymap::iterator i=keymap.find(std::string(key));
+
 			if (i == keymap.end())
 			{
-				eFatal("undefined key '%s' specified!", key);
+				eFatal("undefined key %s specified!", key);
 				continue;
 			}
-			icode=i->second;
+			icode=i->second.first;
+			picture=i->second.second;
 		} else
 			sscanf(code, "%x", &icode);
+	
 		const char *flags=xaction->GetAttributeValue("flags");
 		if (!flags || !*flags)
 			flags="b";
 		if (strchr(flags, 'm'))
-			action->insertKey( style, eRCKey(device, icode, 0) );
+			action->insertKey( style, eRCKey(device, icode, 0, picture) );
 		if (strchr(flags, 'b'))
-			action->insertKey( style, eRCKey(device, icode, eRCKey::flagBreak) );
+			action->insertKey( style, eRCKey(device, icode, eRCKey::flagBreak, picture) );
 		if (strchr(flags, 'r'))
-			action->insertKey( style, eRCKey(device, icode, eRCKey::flagRepeat) );
+			action->insertKey( style, eRCKey(device, icode, eRCKey::flagRepeat, picture) );
 	}
-}
-
-void eActionMap::reloadConfig()
-{
-#if 0
-	NConfig &nc=eDVB::getInstance()->config;
-	std::string path="/ezap/rc/keymaps/";
-	path+=identifier;
-	path+="/";
-	
-	for (actionList::iterator i(actions.begin()); i!=actions.end(); ++i)
-	{
-		std::string key=path+i->getIdentifier();
-		qDebug("loading %s", key.c_str());
-		char *value;
-		int len;
-		int err;
-		if (!(err=nc.getKey(value, len)))
-		{
-			qDebug("have data!");
-		} else
-			qDebug("error %d", err);
-	}
-#endif
-}
-
-void eActionMap::saveConfig()
-{
-#if 0
-	NConfig &nc=eDVB::getInstance()->config;
-	std::string path="/ezap/rc/keymaps/";
-	path+=identifier;
-	path+="/";
-	
-	for (actionList::iterator i(actions.begin()); i!=actions.end(); ++i)
-	{
-		std::string key=path+i->second.getIdentifier();
-		qDebug("saving %s", key.c_str());
-		std::string value;
-		
-		eAction::keyList &kl=i->second.getKeyList();
-		
-		for (eAction::keylist::iterator kli(kl.begin()); kli!=kl.end(); ++kli)
-		{
-			eRCKey &key=kli->second;
-			qDebug("%s, %x, %x", key.producer->getIdentifier(), key.code, key.flags);
-			value+=key.producer->getIdentifier();
-			value+=0;
-
-			value+=(key.code>>24)&0xFF;
-			value+=(key.code>>16)&0xFF;
-			value+=(key.code>>8)&0xFF;
-			value+=key.code&0xFF;
-
-			value+=(key.flags>>24)&0xFF;
-			value+=(key.flags>>16)&0xFF;
-			value+=(key.flags>>8)&0xFF;
-			value+=key.flags&0xFF;
-		}
-		nc.setKey(key.c_str(), value.data(), value.size());
-	}
-#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -191,21 +134,20 @@ eActionMapList::eActionMapList()
 	if (!instance)
 		instance=this;
 	char * tmp;
+	currentStyles.insert("");
+	
 	if ( eConfig::getInstance()->getKey("/ezap/rc/style", tmp ) )
-		currentStyle="default";
+		currentStyles.insert("default");
 	else
 	{
-		currentStyle=tmp;
+		currentStyles.insert(tmp);
 		delete [] tmp;
 	}
-	eDebug("currentStyle=%s", currentStyle.c_str() );	
-	xmlfiles.setAutoDelete(1);
+  xmlfiles.setAutoDelete(1);
 }
 
 eActionMapList::~eActionMapList()
 {
-	eConfig::getInstance()->setKey("/ezap/rc/style", currentStyle.c_str() ) ;
-
 	if (instance==this)
 		instance=0;
 }
@@ -258,10 +200,9 @@ int eActionMapList::loadXML(const char *filename)
 		eFatal("not a rcdefaults file.");
 		return -1;
 	}
-	
 
 	xmlfiles.push_back(parser);
-	
+
 	return 0;
 }
 
@@ -270,36 +211,38 @@ XMLTreeNode *eActionMapList::searchDevice(const eString &id)
 	for (ePtrList<XMLTreeParser>::iterator parser(xmlfiles.begin()); parser != xmlfiles.end(); ++parser)
 	{
 		XMLTreeNode *node=parser->RootNode();
-	
 		for (node=node->GetChild(); node; node=node->GetNext())
-			if (!strcmp(node->GetType(), "device"))
+		if (!strcmp(node->GetType(), "device"))
+		{
+			eKeymap keymap;
+			const char *identifier=node->GetAttributeValue("identifier");
+			if (!identifier)
 			{
-				const char *identifier=node->GetAttributeValue("identifier");
-				if (!identifier)
-				{
-					eFatal("please specify an remote control identifier!");
-					continue;
-				}
-				if (id == identifier)
-					return node;
+				eFatal("please specify a remote control identifier!");
+				continue;
 			}
+			if (id == identifier)
+				return node;
+		}
 	}
 	return 0;
 }
-	
+
 int eActionMapList::loadDevice(eRCDevice *device)
 {
 	XMLTreeNode *node=searchDevice(device->getIdentifier());
+
 	if (!node)
 		node=searchDevice("generic");
+
 	if (!node)
 	{
 		eFatal("couldn't load key bindings for device %s", device->getDescription());
 		return -1;
 	}
 
-	std::map<std::string,int> keymap;
-		
+	eKeymap keymap;
+
 	for (XMLTreeNode *xam=node->GetChild(); xam; xam=xam->GetNext())
 		if (!strcmp(xam->GetType(), "actionmap"))
 		{
@@ -321,21 +264,18 @@ int eActionMapList::loadDevice(eRCDevice *device)
 			if (style)
 			{
 				const char *descr=xam->GetAttributeValue("descr");
-				std::map<eString,eString>::iterator it = existingStyles.find(style);
-				if ( it == existingStyles.end() ) // not in map..
+				if (descr)
 				{
-					if (descr)
+					std::map<eString,eString>::iterator it = existingStyles.find(style);
+					if ( it == existingStyles.end() ) // not in map..
 						existingStyles[style]=descr;
-					else
-						existingStyles[style]=style;
 				}
-				else if ( descr && existingStyles[style] == style )
-					existingStyles[style]=descr;
 				am->loadXML(device, keymap, xam, style );
 			}
 			else
 				am->loadXML( device, keymap, xam );
-		} else if (!strcmp(xam->GetType(), "keys"))
+		}
+		else if (!strcmp(xam->GetType(), "keys"))
 		{
 			for (XMLTreeNode *k=xam->GetChild(); k; k=k->GetNext())
 			{
@@ -353,16 +293,20 @@ int eActionMapList::loadDevice(eRCDevice *device)
 							acode=k->GetAttributeValue("icode");
 							sscanf(acode, "%d", &code);
 						}
-						
-						if (code != -1)
-							keymap.insert(std::pair<std::string,int>(name, code));
+						if ( code != -1 )
+						{
+							const char *apng=k->GetAttributeValue("picture");
+							keymap.insert(std::pair<std::string, std::pair<int, std::string> >(name, std::pair<int, std::string> (code, apng ? apng : "")));
+						}
 						else
 							eFatal("no code specified for key %s!", name);
-					} else
+					}
+					else
 						eFatal("no name specified in keys!");
 				}
 			}
 		}
+
 	return 0;
 }
 

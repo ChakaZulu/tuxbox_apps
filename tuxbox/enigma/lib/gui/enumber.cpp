@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 #include <lib/gui/enumber.h>
 #include <lib/driver/rc.h>
 #include <lib/gui/eskin.h>
@@ -9,18 +7,17 @@
 #include <lib/gdi/font.h>
 #include <lib/gui/guiactions.h>
 
-void eNumber::unpack(const struct in_addr &l, int *t)
+void eNumber::unpack(__u32 l, int *t)
 {
-	uint8_t *tc = (uint8_t *) &l.s_addr;
-	for (int i = 0; i < 4; ++i)
-		t[i] = tc[i];
+	for (int i=0; i<4; i++)
+		*t++=(l>>((3-i)*8))&0xFF;
 }
 
-void eNumber::pack(struct in_addr &l, const int *const t)
+void eNumber::pack(__u32 &l, int *t)
 {
-	uint8_t *tc = (uint8_t *) &l.s_addr;
-	for (int i = 0; i < 4; ++i)
-		tc[i] = t[i];
+	l=0;
+	for (int i=0; i<4; i++)
+		l|=(*t++)<<((3-i)*8);
 }
 
 eRect eNumber::getNumberRect(int n)
@@ -47,7 +44,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	eString t;
 	if (flags & flagFillWithZeros || ( (flags & flagFixedNum) && n ))
 	{
-		eString s = "%0"+eString().setNum(maxdigits)+(base==10?"d":"X");
+    eString s = "%0"+eString().setNum(maxdigits)+(base==10?"d":"X");
 		const char* p = s.c_str();
 		char* tmp = new char[10];
 		strcpy( tmp, p );
@@ -88,7 +85,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	}
 	else
 		p->renderText(pos, t);
-
+		
 	p->clippop();
 }
 
@@ -155,62 +152,66 @@ void eNumber::invalidateNum()
 
 int eNumber::eventHandler(const eWidgetEvent &event)
 {
+#ifndef DISABLE_LCD
 	if (LCDTmp)
 		((eNumber*) LCDTmp)->eventHandler(event);
-
+#endif
 	switch (event.type)
 	{
-		case eWidgetEvent::changedSize:
-			if (deco)
-				dspace = (crect.width()) / len;
-			else
-				dspace = (size.width()) / len;	
-			if (deco_selected)
-				space_selected = (crect_selected.width()) / len;
-			break;
-		case eWidgetEvent::evtAction:
-			if ( len > 1 && event.action == &i_cursorActions->left)
+	case eWidgetEvent::changedSize:
+		if (deco)
+			dspace = (crect.width()) / len;
+		else
+			dspace = (size.width()) / len;	
+		if (deco_selected)
+			space_selected = (crect_selected.width()) / len;
+		break;
+	case eWidgetEvent::evtAction:
+		if ( len > 1 && event.action == &i_cursorActions->left)
+		{
+			int oldac=active;
+			active--;
+			invalidate(getNumberRect(oldac));
+			if (active<0)
+				active=len-1;
+			if (active!=oldac)
+				invalidate(getNumberRect(active));
+			digit=0;
+		} else if ( len > 1 && (event.action == &i_cursorActions->right) || (event.action == &i_cursorActions->ok))
+		{
+			int oldac=active;
+			active++;
+			invalidate(getNumberRect(oldac));
+			if (active>=len)
 			{
-				int oldac=active;
-				active--;
-				invalidate(getNumberRect(oldac));
-				if (active<0)
-					active=len-1;
-				if (active!=oldac)
-					invalidate(getNumberRect(active));
-				digit=0;
-			} else if ( len > 1 && (event.action == &i_cursorActions->right) || (event.action == &i_cursorActions->ok))
-			{
-				int oldac=active;
-				active++;
-				invalidate(getNumberRect(oldac));
-				if (active>=len)
-				{
-					if (event.action == &i_cursorActions->ok)
-						/*emit*/ selected(number);
-					active=0;
-				}
-				if (active!=oldac)
-					invalidate(getNumberRect(active));
-				digit=0;
-			} else
+				if (event.action == &i_cursorActions->ok)
+				/*emit*/ selected(number);
+				active=0;
+			}
+			if (active!=oldac)
+				invalidate(getNumberRect(active));
+			digit=0;
+		} else
 				break;
-			return 1;
-		default:
-			break;
+		return 1;
+	default:
+		break;
 	}
 	return eDecoWidget::eventHandler(event);
 }
 
+// isactive is the digit (always in the first field )
+// that ist active after get the first focus ! 
+
 eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eWidget* descr, int grabfocus, const char *deco)
-	:eDecoWidget(parent, grabfocus, deco ),
+ :eDecoWidget(parent, grabfocus, deco ),
 	active(0), 
 	cursorB(eSkin::getActive()->queryScheme("global.selected.background")),	
 	cursorF(eSkin::getActive()->queryScheme("global.selected.foreground")),	
 	normalB(eSkin::getActive()->queryScheme("global.normal.background")),	
 	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),	
 	have_focus(0), digit(isactive), isactive(isactive), flags(0), descr(descr), tmpDescr(0),
-neg(false)
+	neg(false)
 {
 	setNumberOfFields(_len);
 	setLimits(_min, _max);
@@ -220,77 +221,77 @@ neg(false)
 		number[i]=init[i];
 	addActionMap(&i_cursorActions->map);
 }                 
-
+             
 eNumber::~eNumber()
 {
 }
 
 int eNumber::keyDown(int key)
 {
+#ifndef DISABLE_LCD
 	if (LCDTmp)
 		((eNumber*) LCDTmp)->keyDown(key);
-
+#endif
 	switch (key)
 	{
-		case eRCInput::RC_0 ... eRCInput::RC_9:
-			{
-				int nn=(digit!=0)?number[active]*10:0;
-				nn+=key-eRCInput::RC_0;
-				if (flags & flagTime)
+	case eRCInput::RC_0 ... eRCInput::RC_9:
+	{
+		int nn=(digit!=0)?number[active]*10:0;
+		nn+=key-eRCInput::RC_0;
+		if (flags & flagTime)
+		{
+			if ( active )
+				max = 59;
+			else
+				max = 23;
+		}
+		else if (flags & flagFixedNum)
+		{
+			if (active)
+				max=999;
+			else
+				max=oldmax;
+		}
+		if (nn>=min && nn<=max)
+		{
+			number[active]=nn;
+			invalidate(getNumberRect(active));
+			digit++;
+			if ((digit>=maxdigits) || (nn==0))
+			{        
+				active++;
+				invalidate(getNumberRect(active-1));
+				digit=0;
+				/*emit*/ numberChanged();
+				if (active>=len)
 				{
-					if ( active )
-						max = 59;
-					else
-						max = 23;
+					/*emit*/ selected(number);
+					active=0;
 				}
-				else if (flags & flagFixedNum)
-				{
-					static int oldmax = max;
-					if (active)
-						max=999;
-					else
-						max=oldmax;
-				}
-				if (nn>=min && nn<=max)
-				{
-					number[active]=nn;
+				else
 					invalidate(getNumberRect(active));
-					digit++;
-					if ((digit>=maxdigits) || (nn==0))
-					{
-						active++;
-						invalidate(getNumberRect(active-1));
-						digit=0;
-						/*emit*/ numberChanged();
-						if (active>=len)
-						{
-							/*emit*/ selected(number);
-							active=0;
-						}
-						else
-							invalidate(getNumberRect(active));
-					}
-				}
-				break;
+			}
+		}
+		break;
 
-				break;
-			}
-		case eRCInput::RC_PLUS:
-			if (flags & flagPosNeg && neg )
-			{
-				neg=false;
-				invalidate(getNumberRect(0));
-			}
-			break;
+	break;
+	}
+	case eRCInput::RC_PLUS:
+		if (flags & flagPosNeg && neg )
+		{
+			neg=false;
+			invalidate(getNumberRect(0));
+		}
+	break;
 
-		case eRCInput::RC_MINUS:
-			if (flags & flagPosNeg && !neg )
-			{
-				neg=true;
-				invalidate(getNumberRect(0));
-			}
-		default:
-			return 0;
+	case eRCInput::RC_MINUS:
+		if (flags & flagPosNeg && !neg )
+		{
+			neg=true;
+			invalidate(getNumberRect(0));
+		}
+	default:
+		return 0;
 	}
 	return 1;
 }
@@ -300,11 +301,12 @@ void eNumber::gotFocus()
 	have_focus++;
 	digit=isactive;
 
-	if (deco && deco_selected)
+  if (deco && deco_selected)
 		invalidate();
 	else
 		invalidate(getNumberRect(active));
 
+#ifndef DISABLE_LCD
 	if (parent && parent->LCDElement)  // detect if LCD Avail
 	{
 		LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0);
@@ -337,10 +339,12 @@ void eNumber::gotFocus()
 		((eNumber*)LCDTmp)->have_focus=1;
 		LCDTmp->show();
 	}
+	#endif //DISABLE_LCD
 }
 
 void eNumber::lostFocus()
 {
+#ifndef DISABLE_LCD
 	if (LCDTmp)
 	{
 		delete LCDTmp;
@@ -351,12 +355,14 @@ void eNumber::lostFocus()
 			tmpDescr=0;
 		}
 	}
+#endif
 	have_focus--;
 
 	if (deco && deco_selected)
 		invalidate();
 	else
 		invalidate(getNumberRect(active));
+	isactive=0;
 }
 
 void eNumber::setNumber(int f, int n)
@@ -381,6 +387,7 @@ void eNumber::setLimits(int _min, int _max)
 {
 	min=_min;
 	max=_max;
+	oldmax=max;
 }
 
 void eNumber::setNumberOfFields(int n)
@@ -399,9 +406,9 @@ void eNumber::setMaximumDigits(int n)
 
 void eNumber::setFlags(int _flags)
 {
-	if (flags&flagFixedNum)
+  if (flags&flagFixedNum)
 		len=2;
-
+		
 	flags=_flags;
 }
 

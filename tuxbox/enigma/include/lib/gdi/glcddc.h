@@ -1,3 +1,5 @@
+#ifndef DISABLE_LCD
+
 #ifndef __glcddc_h
 #define __glcddc_h
 
@@ -20,3 +22,5 @@ public:
 
 
 #endif
+
+#endif //DISABLE_LCD

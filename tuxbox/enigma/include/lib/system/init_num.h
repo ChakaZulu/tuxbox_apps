@@ -13,6 +13,7 @@ namespace eAutoInitNumbers
 		rc=skin+increment,
 		guiobject=rc+increment,
 		actions=guiobject+increment,
+		sysinfo=actions+increment,
 		dvb=actions+increment,
 		service=dvb+increment,
 		osd=service+increment,

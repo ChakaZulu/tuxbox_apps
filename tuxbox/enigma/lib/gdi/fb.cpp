@@ -137,11 +137,12 @@ void fbClass::Box(int x, int y, int width, int height, int color, int backcolor)
 	int first=0xF0|((color&0xF0)>>4);
 	int last= 0xF0|((backcolor&0xF0)>>4);
 	color=(color&0xF)*0x11;
+	int halfwidth=width/2;
 	for (int ay=y; ay<(y+height); ay++)
 	{
 		lfb[offset]=first;
-		memset(lfb+offset+1, color, width/2-2);
-		lfb[offset+width/2-1]=last;
+		memset(lfb+offset+1, color, halfwidth-2);
+		lfb[offset+halfwidth-1]=last;
 		offset+=stride;
 	}
 }
@@ -149,10 +150,10 @@ void fbClass::Box(int x, int y, int width, int height, int color, int backcolor)
 void fbClass::NBox(int x, int y, int width, int height, int color)
 {
 	int offset=y*stride+x/2;
-	
+	int halfwidth=width/2;
 	for (int ay=y; ay<(y+height); ay++)
 	{
-		memset(lfb+offset, color, width/2);
+		memset(lfb+offset, color, halfwidth);
 		offset+=stride;
 	}
 }

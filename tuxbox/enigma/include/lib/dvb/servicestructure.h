@@ -20,7 +20,7 @@ public:
 	eService* addRef(const eServiceReference&);
 	void removeRef(const eServiceReference&);
 	
-	enum { modeRoot, modeTV, modeRadio, modeFile, modeFavourite, modeTvRadio };
+	enum { modeRoot, modeTV, modeRadio, modeFile, modeBouquets, modeTvRadio, modeData };
 	static eServiceReference getRoot(int mode)
 	{
     return eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory, mode);

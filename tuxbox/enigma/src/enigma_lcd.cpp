@@ -1,3 +1,5 @@
+#ifndef DISABLE_LCD
+
 #include <enigma_lcd.h>
 
 #include <time.h>
@@ -67,8 +69,9 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0)
 	CONNECT(eDVB::getInstance()->leaveService, eZapLCDMain::leaveService);
 }
 
-void eZapLCDMain::volumeUpdate(int vol)
+void eZapLCDMain::volumeUpdate(int mute_state, int vol)
 {
+	vol=mute_state?63:vol;
 	Volume->setPerc((63-vol)*100/63);
 }
 
@@ -98,8 +101,7 @@ void eZapLCDMain::setServiceName(eString name)
 
 void eZapLCDMain::leaveService(const eServiceReferenceDVB &service)
 {
-	if (Progress->isVisible())
-		Progress->hide();
+	Progress->hide();
 	ServiceName->setText("");
 }
 
@@ -112,8 +114,9 @@ eZapLCDMenu::eZapLCDMenu(eWidget *parent): eWidget(parent, 0)
 	ASSIGN(Element, eLabel, "element");
 }
 
-void eZapLCDScart::volumeUpdate(int vol)
+void eZapLCDScart::volumeUpdate(int mute_state, int vol)
 {
+	vol=mute_state?63:vol;
 	volume->setPerc((63-vol)*100/63);
 }
 
@@ -145,3 +148,5 @@ eZapLCDShutdown::eZapLCDShutdown(eWidget *parent): eWidget(parent, 0)
 	if (eSkin::getActive()->build(this, "enigma_lcd_shutdown"))
 		eFatal("skin load of \"enigma_lcd_shutdown\" failed");
 }
+
+#endif // DISABLE_LCD

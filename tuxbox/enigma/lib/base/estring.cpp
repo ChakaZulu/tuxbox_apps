@@ -3,12 +3,12 @@
 #include <limits.h>
 #include <lib/system/elock.h>
 
-static eLock lock;
+static pthread_mutex_t lock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 ///////////////////////////////////////// eString sprintf /////////////////////////////////////////////////
 eString& eString::sprintf(char *fmt, ...)
 {
-	eLocker locker(lock);
+	singleLock s(lock);
 // Implements the normal sprintf method, to use format strings with eString
 // The max length of the result string is 1024 char.
 	static char buf[1024];
@@ -80,9 +80,13 @@ eString& eString::strReplace(const char* fstr, const eString& rstr)
 //	replace all occurrence of fstr with rstr and, and returns a reference to itself
 	unsigned int index=0;
 	unsigned int fstrlen = strlen(fstr);
+	int rstrlen=rstr.size();
 
 	while ( ( index = find(fstr, index) ) != npos )
-		replace(index++, fstrlen, rstr);
+	{
+		replace(index, fstrlen, rstr);
+		index+=rstrlen;
+	}
 	
 	return *this;
 }
@@ -112,7 +116,7 @@ int eString::icompare(const eString& s)
 		else
 			p++, p2++;
 
-	return 0;
+	return length() == s.length() ? 0 : length() < s.length() ? -1 : 1;
 }
 
 		// 8859-x to dvb coding tables. taken from www.unicode.org/Public/MAPPINGS/ISO8859/
@@ -166,9 +170,9 @@ static unsigned long c88599[128]={
 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x00e4, 0x00e5, 0x00e6, 0x00e7, 0x00e8, 0x00e9, 0x00ea, 0x00eb, 0x00ec, 0x00ed, 0x00ee, 0x00ef, 
 0x011f, 0x00f1, 0x00f2, 0x00f3, 0x00f4, 0x00f5, 0x00f6, 0x00f7, 0x00f8, 0x00f9, 0x00fa, 0x00fb, 0x00fc, 0x0131, 0x015f, 0x00ff};
 
-		// UPC Direct / HBO strange two-character encoding. 0xC2 means acute, 0xCF caron.
+		// UPC Direct / HBO strange two-character encoding. 0xC2 means acute, 0xC8 doule 'dot', 0xCA small 'circle', 0xCD double 'acute', 0xCF acute.
 		// many thanks to the czechs who helped me while solving this.
-unsigned int doCzech(int c1, int c2)
+static inline unsigned int doCzech(int c1, int c2)
 {
 	switch (c1)
 	{
@@ -182,7 +186,7 @@ unsigned int doCzech(int c1, int c2)
 		case 'I': return 0x00CD;
 		case 'i': return 0x00ED;
 		case 'O': return 0x00D3;
-		case 'o': return 0x00E3;
+		case 'o': return 0x00F3; // corrected, was 0x00E3
 		case 'U': return 0x00DA;
 		case 'u': return 0x00FA;
 		case 'Y': return 0x00DD;
@@ -190,6 +194,38 @@ unsigned int doCzech(int c1, int c2)
 		default:
 			return 0;
 		}
+	case 0xC8: // double 'dot'
+		switch (c2)
+		{
+		case 'A': return 0x00C4;
+		case 'a': return 0x00E4;
+		case 'E': return 0x00CB;
+		case 'e': return 0x00EB;
+		case 'O': return 0x00D6;
+		case 'o': return 0x00F6;
+		case 'U': return 0x00DC;
+		case 'u': return 0x00FC;
+		default:
+			return 0;
+		}
+	case 0xCA: // small 'circle'
+		switch (c2)               
+		{                         
+		case 'U': return 0x016E;  
+		case 'u': return 0x016F;  
+		default:                  
+			return 0;             
+		}                         
+	case 0xCD: // double 'acute'
+		switch (c2)               
+		{                         
+		case 'O': return 0x0150;  
+		case 'o': return 0x0151;  
+		case 'U': return 0x0170;  
+		case 'u': return 0x0171;  
+		default:                  
+			return 0;             
+		}                         
 	case 0xCF: // caron
 		switch (c2)
 		{
@@ -219,7 +255,7 @@ unsigned int doCzech(int c1, int c2)
 	}
 }
 
-unsigned int recode(unsigned char d, int cp)
+static inline unsigned int recode(unsigned char d, int cp)
 {
 	if (d < 0x80)
 		return d;
@@ -242,9 +278,8 @@ unsigned int recode(unsigned char d, int cp)
 	}
 }
 
-eString convertDVBUTF8(unsigned char *data, int len)
+eString convertDVBUTF8(unsigned char *data, int len, int table)
 {
-	int table=5;
 	int i;
 	if (!len)
 		return "";
@@ -260,7 +295,7 @@ eString convertDVBUTF8(unsigned char *data, int len)
 	for (; i<len; ++i)
 	{
 		unsigned long code=0;
-		if ((table == 5) && ((data[i] == 0xC2) || (data[i] == 0xCF)) && (i+1 < len))
+		if ((table == 5) && ((data[i] == 0xC2) || (data[i] == 0xC8) || (data[i] == 0xCA) || (data[i] == 0xCD) || (data[i] == 0xCF)) && (i+1 < len))
 				// braindead czech encoding...
 			if ((code=doCzech(data[i], data[i+1])))
 				++i;
@@ -284,7 +319,7 @@ eString convertDVBUTF8(unsigned char *data, int len)
 	while (i < len)
 	{
 		unsigned long code=0;
-		if ((table == 5) && ((data[i] == 0xC2) || (data[i] == 0xCF)) && (i+1 < len))
+		if ((table == 5) && ((data[i] == 0xC2) || (data[i] == 0xC8) || (data[i] == 0xCA) || (data[i] == 0xCD) || (data[i] == 0xCF)) && (i+1 < len))
 				// braindead czech encoding...
 			if ((code=doCzech(data[i], data[i+1])))
 				i+=2;
@@ -315,6 +350,37 @@ eString convertDVBUTF8(unsigned char *data, int len)
 	if ( t != bytesneeded)
 		eFatal("t: %d, bytesneeded: %d", t, bytesneeded);
 	return eString().assign((char*)res, t);
+}
+
+eString convertUTF8DVB(const eString &string)
+{
+	eString ss=eString();
+	
+	int len=string.length();
+	for(int i=0;i<len;i++){
+		unsigned char c1=string[i];
+		unsigned int c;
+		if(c1<0x80)
+			c=c1;
+		else{
+			i++;
+			unsigned char c2=string[i];
+			c=((c1&0x3F)<<6) + (c2&0x3F);
+		}
+		// c = UNICODE
+		// now search it in table
+		if(c>=0x80){
+			for(unsigned int j=0;j<128;j++){
+				if(c88599[j]==c){            // now only 8859-9 ....
+					c=0x80+j;
+					break;
+				}
+			}
+		}
+		ss+=c;
+	}
+
+	return ss;
 }
 
 eString convertLatin1UTF8(const eString &string)
@@ -377,7 +443,7 @@ int isUTF8(const eString &string)
 	{
 		if (!(string[i]&0x80)) // normal ASCII
 			continue;
-		if ((string[i] & 0xE0) == 0xE0) // one char following.
+		if ((string[i] & 0xE0) == 0xC0) // one char following.
 		{
 				// first, length check:
 			if (i+1 >= len)

@@ -1,16 +1,22 @@
 #include <lib/dvb/dvbscan.h>
 
-int isValidONIDTSID(eOriginalNetworkID onid, eTransportStreamID tsid)
+inline int isValidONIDTSID(eOriginalNetworkID onid, eTransportStreamID tsid)
 {
-	if ((onid == 1) && (tsid > 1))
-		return 1;
-	if (onid == 1)
-		return 0;
-	if (onid == 0)
-		return 0;
-	if (onid == 0xFFFF)
-		return 0;
-	return 1;
+	switch( onid.get() )
+	{
+		case 0:
+		case 0xFFFF:
+		case 0x1111:
+			return 0;
+		case 1:
+			return tsid>1;
+		case 0x00B1:
+			return tsid != 0x00B0;
+		case 0x0002:
+			return tsid != 0x07E8;
+		default:
+			return 1;
+	}
 }
 
 		// work around for buggy transponders on hotbird (and maybe others)
@@ -32,6 +38,13 @@ eDVBScanController::eDVBScanController(eDVB &dvb): eDVBController(dvb)
 	CONNECT(dvb.tBAT.tableReady, eDVBScanController::BATready);
 
 	flags=flagNetworkSearch|flagClearList;
+#if DEBUG_TO_FILE
+	FILE *out = fopen("bla.out", "a");
+	if ( !out )
+		eFatal("could not open bla.out");
+	fprintf( out, "Begin Transponderscan\n");
+	fclose(out);
+#endif
 }
 
 eDVBScanController::~eDVBScanController()
@@ -63,22 +76,26 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 			dvb.settings->removeDVBBouquets();
 
 		/*emit*/ dvb.serviceListChanged();
-		
-				// ------------
 
 		currentONID=-1;
 		knownNetworks.clear();
+		current=knownTransponder.begin();
+
 		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanNext));
 		break;
 	case eDVBScanEvent::eventScanNext:
 	{
 		eDebug("[SCAN] eventScanNext");
-		
+
 		eTransponder* next = 0;
 
-		for (std::list<eTransponder>::iterator i(knownTransponder.begin()); !next && i != knownTransponder.end(); ++i)
-			if (i->state == eTransponder::stateToScan)
-				next = &(*i);
+		while ( current != knownTransponder.end() && !next )
+		{
+			if ( current->state == eTransponder::stateToScan )
+				next = &(*current);
+			else
+				current++;
+		}
 
 		if (!next)
 			dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanCompleted));
@@ -143,7 +160,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		SDT *sdt=dvb.tSDT.ready()?dvb.tSDT.getCurrent():0;
 		if (sdt)
 		{
-			if (handleSDT(transponder, sdt))
+			if (handleSDT(sdt))
 			{
 				if (flags&flagSkipKnownNIT)
 				{
@@ -197,10 +214,10 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 					// eTransponder &transponder=dvb.settings->transponderlist->createTransponder(tsid, onid);
 
 					// schon bekannte transponder nicht nochmal scannen
-					if (dvb.settings->transponderlist->searchTS(dvb_namespace, tsid, onid))
+					if (dvb.settings->getTransponders()->searchTS(dvb_namespace, tsid, onid))
 						continue;
 
-					eTransponder tp(*dvb.settings->transponderlist, -1, tsid, onid);
+					eTransponder tp(*dvb.settings->getTransponders(), -1, tsid, onid);
 					
 					for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
 					{
@@ -214,7 +231,10 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 							break;
 						}
 					}
-  					
+
+					if (flags & flagNoCircularPolarization)
+						tp.satellite.polarisation&=1;
+
 					if ( addTransponder(tp) )
 						dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanTPadded));
 				}
@@ -249,29 +269,12 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 	{
 		eDebug("completed");
 
-		int count=0;
-
-//		transponder->state = eTransponder::stateError;
-
 //		eDebug("STATE ERROR -> freq = %i, srate = %i, pol = %i, fec = %i, svalid = %i, ycvalid = %i, onid = %i, tsid = %i, inv = %i, op = %i",transponder->satellite.frequency, transponder->satellite.symbol_rate, transponder->satellite.polarisation, transponder->satellite.fec,  transponder->satellite.valid, transponder->cable.valid, transponder->original_network_id.get(), transponder->transport_stream_id.get(), transponder->satellite.inversion, transponder->satellite.orbital_position);
 
 		if (transponder)
-			for (std::list<eTransponder>::iterator it(knownTransponder.begin()); it != knownTransponder.end(); it++)
-			{
-//				eDebug("COMPARE WITH -> freq = %i, srate = %i, pol = %i, fec = %i, svalid = %i, ycvalid = %i, onid = %i, tsid = %i, inv = %i, op = %i",it->satellite.frequency, it->satellite.symbol_rate, it->satellite.polarisation, it->satellite.fec,  it->satellite.valid, it->cable.valid, it->original_network_id.get(), it->transport_stream_id.get(), it->satellite.inversion, it->satellite.orbital_position);
-				if (it->state != eTransponder::stateError && *it == *transponder)
-				{
-//					eDebug("EQUAL !!!!!!!!!!!!!!!!!!!!!!!!");
-					it->state = eTransponder::stateError;
-					count++;
-				}
-			}
+			current->state = eTransponder::stateError;
 
-		if (count > 1)
-			eFatal("dupe transponder found");
-
-//  	eDebug("set %i Transponder to stateError", count);
-	
+		current++;
 		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanNext));
 	}
 		break;
@@ -281,6 +284,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		dvb.settings->saveServices();
 		dvb.settings->sortInChannels();
 		/*emit*/ dvb.serviceListChanged();
+		dvb.settings->saveBouquets();
 
 		dvb.setState(eDVBState(eDVBState::stateIdle));
 		break;
@@ -317,48 +321,51 @@ void eDVBScanController::BATready(int error)
 	dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanGotBAT));
 }
 
-int eDVBScanController::handleSDT(eTransponder *&transponder, const SDT *sdt)
+int eDVBScanController::handleSDT(const SDT *sdt)
 {
 	eTransponder *old=0;
 // update tsid / onid
 	eTransportStreamID tsid=sdt->transport_stream_id;
 	eOriginalNetworkID onid=sdt->original_network_id;
-	
-	if (transponder->transport_stream_id != tsid.get() || transponder->original_network_id != onid.get())
+
+	if (transponder->transport_stream_id != tsid.get() ||
+			transponder->original_network_id != onid.get())
 	{
 		changedTransponder.push_back(*transponder);
-		
+
 		transponder->transport_stream_id=tsid.get();
 		transponder->original_network_id=onid.get();
 
 		old = transponder;
 	}
-	
+
 	eDVBNamespace dvb_namespace;
-	
+
 		// build "namespace" to work around buggy satellites
 	if (transponder->satellite.valid)
 		dvb_namespace=eTransponder::buildNamespace(onid, tsid, transponder->satellite.orbital_position, transponder->satellite.frequency);
 	else
 		dvb_namespace=0;
-	
+
 	transponder->dvb_namespace=dvb_namespace;
 
 		// ok we found the transponder, it seems to be valid
-	eTransponder &real=dvb.settings->transponderlist->createTransponder(dvb_namespace, tsid, onid);
+	// get Reference to the new Transponder
+	eTransponder &real = dvb.settings->getTransponders()->createTransponder(dvb_namespace, tsid, onid);
+	// replace referenced transponder with new transponderdata
 	real=*transponder;
-
-		// and we continue working on that
-	transponder=&real;
+	// set transponder pointer to the adress in the TransponderList
+	transponder = &real;
+	// set transponder to stateOK
 	transponder->state=eTransponder::stateOK;
 
-	if (old) // scan for dupe TPs after TSID / ONID Update
-	for (std::list<eTransponder>::iterator it(knownTransponder.begin()); it != knownTransponder.end(); it++)
-		if (old != &(*it) && *transponder == *it)
-		{
-//			eDebug("set TP in hanldeSDT to stateError");
-			it->state=eTransponder::stateError;
-		}
+	if (old) // scan for duplicate TPs after TSID / ONID Update
+		for (std::list<eTransponder>::iterator it(current); it != knownTransponder.end(); it++)
+			if ( *transponder == *it && old != &(*it) )
+			{
+//				eDebug("set TP in handleSDT to stateError");
+				it->state=eTransponder::stateError;
+			}
 
 	currentONID=onid.get();
 
@@ -368,41 +375,94 @@ int eDVBScanController::handleSDT(eTransponder *&transponder, const SDT *sdt)
 		known=1;
 
 		// insert the services
-	dvb.settings->transponderlist->handleSDT(sdt, dvb_namespace, onid, tsid);
-	
+	dvb.settings->getTransponders()->handleSDT(sdt, dvb_namespace, onid, tsid);
+
 	return known;
 }
 
+//static char *FEC[] = { "Auto", "1/2", "2/3", "3/4", "5/6", "7/8" };
+
 bool eDVBScanController::addTransponder(const eTransponder &transponder)
 {
-//	eDebug("TP TO ADD -> freq = %i, srate = %i, pol = %i, fec = %i, svalid = %i, cvalid = %i, onid = %i, tsid = %i, inv = %i, op = %i",transponder.satellite.frequency, transponder.satellite.symbol_rate, transponder.satellite.polarisation, transponder.satellite.fec,  transponder.satellite.valid, transponder.cable.valid, transponder.original_network_id.get(), transponder.transport_stream_id.get(), transponder.satellite.inversion, transponder.satellite.orbital_position);
+#if DEBUG_TO_FILE
+	FILE *out = fopen("bla.out", "a");
+	if ( !out )
+		eFatal("could not open bla.out");*/
 
-	if ( transponder.satellite.valid && transponder.satellite.orbital_position != knownTransponder.front().satellite.orbital_position && flags & flagSkipOtherOrbitalPositions )
+	fprintf(out, "TOADD -> %d, %d, %c, %s, %s, %s(%d), %d onid = %d, tsid = %d\n",
+		transponder.satellite.frequency, transponder.satellite.symbol_rate,
+		transponder.satellite.polarisation?'H':'V', FEC[transponder.satellite.fec],
+		transponder.satellite.valid?"SAT":transponder.cable.valid?"CAB":"UNK",
+		!transponder.satellite.inversion?"NO":transponder.satellite.inversion==2?"AUTO":"INV",
+		transponder.satellite.inversion,
+		transponder.satellite.orbital_position, transponder.original_network_id.get(),
+		transponder.transport_stream_id.get() );*/
+#endif
+	if ( transponder.satellite.valid &&
+			 transponder.satellite.orbital_position != knownTransponder.front().satellite.orbital_position &&
+			 flags & flagSkipOtherOrbitalPositions )
 	{
-//		eDebug("Skip Transponder from other orbital position ( transponder.satellite.orbital_position = %i, knownTransponder.front().satellite.orbital_position = %i)", transponder.satellite.orbital_position, knownTransponder.front().satellite.orbital_position );
+#if DEBUG_TO_FILE
+		fprintf(out,"Skip Transponder from other orbital position ( transponder.satellite.orbital_position = %i, knownTransponder.front().satellite.orbital_position = %i)\n", transponder.satellite.orbital_position, knownTransponder.front().satellite.orbital_position );
+		fclose(out);
+#endif
 		return false;
 	}
 
 	for ( std::list<eTransponder>::iterator n(changedTransponder.begin()); n != changedTransponder.end(); ++n)
 	{
 		if (*n == transponder)
+		{
+#if DEBUG_TO_FILE
+			fprintf(out, "This transponder has changed tsid/onid\n");
+			fclose(out);
+#endif
 			return false;
+		}
 	}
 
 	for (std::list<eTransponder>::iterator n(knownTransponder.begin()); n != knownTransponder.end(); ++n)
 	{
-//	eDebug("COMPARE WITH -> freq = %i, srate = %i, pol = %i, fec = %i, svalid = %i, cvalid = %i, onid = %i, tsid = %i, inv = %i, op = %i",n->satellite.frequency, n->satellite.symbol_rate, n->satellite.polarisation, n->satellite.fec,  n->satellite.valid, n->cable.valid, n->original_network_id.get(), n->transport_stream_id.get(), n->satellite.inversion, n->satellite.orbital_position);
-		if (*n == transponder)  // no dupe Transponders
+#if DEBUG_TO_FILE
+		fprintf(out,"COMPARE -> %d, %d, %c, %s, %s, %s, %d onid = %d, tsid = %d\n",
+		n->satellite.frequency, transponder.satellite.symbol_rate,
+		n->satellite.polarisation?'H':'V', FEC[transponder.satellite.fec],
+		n->satellite.valid?"SAT":transponder.cable.valid?"CAB":"UNK",
+		!n->satellite.inversion?"NO":transponder.satellite.inversion==2?"AUTO":"INV",
+		n->satellite.orbital_position, transponder.original_network_id.get(),
+		n->transport_stream_id.get() );                                      */
+#endif
+		if (*n == transponder)  // no duplicate Transponders
 		{
-//				eDebug("Transponder is already in list");
+#if DEBUG_TO_FILE
+			fprintf(out, "Don't add %d, %d, %c, %s, %s, %s, %d onid = %d, tsid = %d\n",
+				transponder.satellite.frequency, transponder.satellite.symbol_rate,
+				transponder.satellite.polarisation?'H':'V', FEC[transponder.satellite.fec],
+				transponder.satellite.valid?"SAT":transponder.cable.valid?"CAB":"UNK",
+				!transponder.satellite.inversion?"NO":transponder.satellite.inversion==2?"AUTO":"INV",
+				transponder.satellite.orbital_position, transponder.original_network_id.get(),
+				transponder.transport_stream_id.get() );
+			fprintf(out, "Transponder is already in list\n");
+			fclose(out);
+#endif
 			return false;
 		}
 	}
-//	eDebug("Transponder added");
+#if DEBUG_TO_FILE
+	fprintf(out,"Transponder added\n");
+	fprintf(out, "Add %d, %d, %c, %s, %s, %s, %d onid = %d, tsid = %d\n",
+		transponder.satellite.frequency, transponder.satellite.symbol_rate,
+		transponder.satellite.polarisation?'H':'V', FEC[transponder.satellite.fec],
+		transponder.satellite.valid?"SAT":transponder.cable.valid?"CAB":"UNK",
+		!transponder.satellite.inversion?"NO":transponder.satellite.inversion==2?"AUTO":"INV",
+		transponder.satellite.orbital_position, transponder.original_network_id.get(),
+		transponder.transport_stream_id.get() );
+	fclose(out);
+#endif
 
-	eTransponder t=transponder;
-	t.state=eTransponder::stateToScan;
-	knownTransponder.push_back(t);
+	knownTransponder.push_back(transponder);
+	if ( transponder.state != eTransponder::stateError )
+		knownTransponder.back().state = eTransponder::stateToScan;
 	return true;
 }
 
@@ -452,6 +512,15 @@ void eDVBScanController::setSkipOtherOrbitalPositions(int skipOtherOP)
 		flags|=flagSkipOtherOrbitalPositions;
 	else
 		flags&=~flagSkipOtherOrbitalPositions;
+
+}
+
+void eDVBScanController::setNoCircularPolarization(int nocircular)
+{
+	if (nocircular)
+		flags|=flagNoCircularPolarization;
+	else
+		flags&=~flagNoCircularPolarization;
 
 }
 

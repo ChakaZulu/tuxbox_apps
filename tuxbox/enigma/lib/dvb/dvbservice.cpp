@@ -1,20 +1,26 @@
 #include <lib/dvb/dvbservice.h>
-#include <lib/dvb/si.h>
-#include <errno.h>
-#include <lib/dvb/decoder.h>
-#include <lib/dvb/dvbci.h>
-#include <lib/dvb/eaudio.h>
 
+#include <errno.h>
+#include <lib/dvb/si.h>
+#include <lib/dvb/decoder.h>
+#ifndef DISABLE_CI
+	#include <lib/dvb/dvbci.h>
+#endif
+#include <lib/dvb/service.h>
+#include <lib/dvb/eaudio.h>
 #include <lib/system/info.h>
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
 : eDVBController(dvb)
+#ifndef DISABLE_CI
+, DVBCI(0), DVBCI2(0)
+#endif
 {
 	CONNECT(dvb.tPAT.tableReady, eDVBServiceController::PATready);
 	CONNECT(dvb.tPMT.tableReady, eDVBServiceController::PMTready);
 	CONNECT(dvb.tSDT.tableReady, eDVBServiceController::SDTready);
 	CONNECT(dvb.tEIT.tableReady, eDVBServiceController::EITready);
-	
+
 	initCAlist();
 
 	transponder=0;
@@ -32,13 +38,13 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 {
 #ifdef PROFILE
 	static timeval last_event;
-	
+
 	timeval now;
 	gettimeofday(&now, 0);
-	
+
 	int diff=(now.tv_sec-last_event.tv_sec)*1000000+(now.tv_usec-last_event.tv_usec);
 	last_event=now;
-	
+
 	char *what="unknown";
 
 	switch (event.type)
@@ -55,7 +61,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 	case eDVBServiceEvent::eventServiceFailed: what="Failed"; break;
 	default: { static char bug[100]; sprintf(bug, "%d", event.type); what=bug; }
 	}
-	
+
 	eDebug("[PROFILE] [%s] +%dus", what, diff);
 #endif
 	switch (event.type)
@@ -68,14 +74,14 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 	{
 		if (!service.path.size()) // a normal service, not a replay
 		{
-			if (!dvb.settings->transponderlist)
+			if (!dvb.settings->getTransponders())
 			{
 				eDebug("no tranponderlist");
 				service_state=ENOENT;
 				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
 				return;
 			}
-			eTransponder *n=dvb.settings->transponderlist->searchTS(service.getDVBNamespace(), service.getTransportStreamID(), service.getOriginalNetworkID());
+			eTransponder *n=dvb.settings->getTransponders()->searchTS(service.getDVBNamespace(), service.getTransportStreamID(), service.getOriginalNetworkID());
 			if (!n)
 			{
 				eDebug("no transponder %x %x", service.getOriginalNetworkID().get(), service.getTransportStreamID().get());
@@ -113,51 +119,62 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 	}
 	case eDVBServiceEvent::eventServiceTuneOK:
 	{
-		int nodvb=0;
+//		eDebug("apid = %04x, vpid = %04x, pcrpid = %04x, tpid = %04x", Decoder::parms.apid, Decoder::parms.vpid, Decoder::parms.pcrpid, Decoder::parms.tpid );
 		/*emit*/ dvb.enterTransponder(event.transponder);
-		
-				// do we haved fixed or cached PID values?
+		int nopmt=0;
+
+		// do we haved fixed or cached PID values?
+		eService *sp=eServiceInterface::getInstance()->addRef(service);
+		if (sp)
 		{
-		  eService *sp=eServiceInterface::getInstance()->addRef(service);
-		  if (sp)
-		  {
-		  	if (sp->dvb)
-		  	{
-		  		if (sp->dvb->dxflags & eServiceDVB::dxNoDVB)
-		  			nodvb=1;
-		  		// set cached pids...
-		  		Decoder::parms.vpid=sp->dvb->get(eServiceDVB::cVPID);
-		  		if (sp->dvb->get(eServiceDVB::cAC3PID) != -1)
-		  		{
-		  			Decoder::parms.audio_type=DECODE_AUDIO_AC3;
-			  		Decoder::parms.apid=sp->dvb->get(eServiceDVB::cAC3PID);
-					} else
+			if (sp->dvb)
+			{
+// VPID
+				Decoder::parms.vpid=sp->dvb->get(eServiceDVB::cVPID);
+// AC3PID
+				int tmp = sp->dvb->get(eServiceDVB::cAC3PID);
+				if ( tmp != -1)
+				{
+					Decoder::parms.audio_type=DECODE_AUDIO_AC3;
+					Decoder::parms.apid=tmp;
+				}
+/* APID*/ else
+				{
+					tmp = sp->dvb->get(eServiceDVB::cAPID);
+					if ( tmp != -1)
 					{
-		  			Decoder::parms.audio_type=DECODE_AUDIO_MPEG;
-			  		Decoder::parms.apid=sp->dvb->get(eServiceDVB::cAPID);
-			  	}
-		  		Decoder::parms.tpid=sp->dvb->get(eServiceDVB::cTPID);
-		  		Decoder::parms.pcrpid=sp->dvb->get(eServiceDVB::cPCRPID);
-		  		Decoder::Set();
-		  	}
-		  	eServiceInterface::getInstance()->removeRef(service);
-		  }
+						Decoder::parms.audio_type=DECODE_AUDIO_MPEG;
+						Decoder::parms.apid=tmp;
+					}
+				}
+// TPID
+				Decoder::parms.tpid=sp->dvb->get(eServiceDVB::cTPID);
+// PCRPID ... do not set on recorded streams..
+				tmp = sp->dvb->get(eServiceDVB::cPCRPID);
+				if ( tmp != -1 && !service.path.length() )
+					Decoder::parms.pcrpid=tmp;
+// start yet...
+				Decoder::Set();
+
+				if (sp->dvb->dxflags & eServiceDVB::dxNoPMT)
+					nopmt=1;
+
+				if ( !service.getServiceID().get() && sp->dvb->service_id.get() )
+				{
+					service.data[1] = sp->dvb->service_id.get();
+					dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
+					dvb.tPAT.start(new PAT());
+					eServiceInterface::getInstance()->removeRef(service);
+					break;
+				}
+			}
+			eServiceInterface::getInstance()->removeRef(service);
 		}
-		
-		if (!nodvb)		// if not a dvb service, don't even try to search a PAT, PMT etc.
+
+		if (!nopmt && service.getServiceID().get() ) // if not a dvb service, don't even try to search a PAT, PMT etc.
 			dvb.tPAT.start(new PAT());
-			
-		if (tdt)
-			delete tdt;
-		if (tMHWEIT)
-			delete tMHWEIT;
-		tMHWEIT=0;
-		tdt=new TDT();
-		CONNECT(tdt->tableReady, eDVBServiceController::TDTready);
-		tdt->start();
 
-
-		if (nodvb)
+		if (nopmt || ( service.path.size() && !service.getServiceID().get() ) )
 		{
 			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.getServiceID().get(), EIT::tsActual));
 			service_state=0;
@@ -167,14 +184,32 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			break;
 		}
 
+		if (tMHWEIT)
+		{
+			delete tMHWEIT;
+			tMHWEIT=0;
+		}
+
+		delete tdt;
+		tdt=0;
+
+		if ( !service.path.size() )
+		{
+			tdt=new TDT();
+			CONNECT(tdt->tableReady, eDVBServiceController::TDTready);
+			tdt->start();
+		}
+
 		dvb.tSDT.start(new SDT());
+
 		switch (service.getServiceType())
 		{
 		case 1:	// digital television service
 		case 2:	// digital radio service
 		case 3:	// teletext service
 			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.getServiceID().get(), EIT::tsActual));
-		case 5:	// NVOD time shifted service
+		case 5:	// NVOD time shifted service ( faked )
+		case 6:	// mosaic service
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
 			dvb.tPAT.get();
 			break;
@@ -182,10 +217,11 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetSDT));
 			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.getServiceID().get(), EIT::tsActual));
 			break;
-		case 6:	// mosaic service
-			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
-			dvb.tPAT.get();
-			break;
+		case 7: // linkage ( faked )
+			// start parentEIT
+			dvb.tEIT.start(new EIT(EIT::typeNowNext, parentservice.getServiceID().get(),
+				( (service.getTransportStreamID()==parentservice.getTransportStreamID())
+				&&(service.getOriginalNetworkID()==parentservice.getOriginalNetworkID())) ? EIT::tsActual:EIT::tsOther ));
 		case -1: // data
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
 			dvb.tPAT.get();
@@ -242,7 +278,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		}
 		if (dvb.getState()==eDVBServiceState::stateServiceGetPMT)
 			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitched));
- 		else
+		else
 			eDebug("nee, doch nicht (state ist %d)", (int)dvb.getState());
 		break;
 	case eDVBServiceEvent::eventServiceGotSDT:
@@ -284,13 +320,14 @@ void eDVBServiceController::PATready(int error)
 
 void eDVBServiceController::SDTready(int error)
 {
+	(void)error;
 	dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceGotSDT));
-	if (dvb.settings->transponderlist)
+	if (dvb.settings->getTransponders())
 	{
 		SDT *sdt=dvb.tSDT.ready()?dvb.tSDT.getCurrent():0;
 		if (sdt)
 		{
-			if (dvb.settings->transponderlist->handleSDT(sdt, service.getDVBNamespace()))
+			if (dvb.settings->getTransponders()->handleSDT(sdt, service.getDVBNamespace()))
 				dvb.serviceListChanged();
 
 			sdt->unlock();
@@ -300,6 +337,7 @@ void eDVBServiceController::SDTready(int error)
 
 void eDVBServiceController::PMTready(int error)
 {
+	(void)error;
 	dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceGotPMT));
 }
 
@@ -309,36 +347,23 @@ void eDVBServiceController::EITready(int error)
 	if (!error)
 	{
 		EIT *eit=dvb.getEIT();
+		eDebug("eit = %p", eit);
 
-		for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
-		{
-			EITEvent *event=*i;
-			if ( event->running_status >= 2 )
-			{
-				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
-					if (d->Tag()==DESCR_LINKAGE)
-					{
-						LinkageDescriptor *ld=(LinkageDescriptor*)*d;
-						//eDebug("linkage descriptor avail.. type = %d", ld->linkage_type );
-						if (ld->linkage_type!=0xB0)
-							continue;
-						//eDebug("Linkage found");
-						goto bla;
-					}
-			}
-		}
 		if ( service.getServiceType() == 4 ) // NVOD Service
 		{
-bla:
 			delete dvb.parentEIT;
 			dvb.parentEIT = new EIT( eit );
 			dvb.parentEIT->events.setAutoDelete(true);
 			eit->events.setAutoDelete(false);
 		}
+		eDebug("emit dvb.gotEIT(no error)");
 		/*emit*/ dvb.gotEIT(eit, 0);
 		eit->unlock();
 	} else
+	{
+		eDebug("emit dvb.gotEIT(with error)");
 		/*emit*/ dvb.gotEIT(0, error);
+	}
 }
 
 void eDVBServiceController::TDTready(int error)
@@ -346,8 +371,66 @@ void eDVBServiceController::TDTready(int error)
 	eDebug("TDTready %d", error);
 	if (!error)
 	{
-		eDebug("[TIME] time update to %s", ctime(&tdt->UTC_time));
-		dvb.time_difference=tdt->UTC_time-time(0);
+		std::map<tsref,int> &tOffsMap = eTransponderList::getInstance()->TimeOffsetMap;
+		std::map< tsref, int >::iterator it( tOffsMap.find( *transponder ) );
+
+		int enigma_diff = tdt->UTC_time-time(0);
+
+		if ( dvb.time_difference )  // ref time ready?
+		{
+			// curTime is our current reference time....
+			time_t curTime = time(0);
+			time_t TPTime = curTime+enigma_diff;
+			curTime += dvb.time_difference;
+
+			// difference between reference time and
+			// the transponder time
+			int diff = curTime-TPTime;
+
+			if ( abs(diff) < 120 )
+			{
+				eDebug("diff < 120 .. use Transponder Time");
+				tOffsMap[*transponder] = 0;
+				dvb.time_difference = enigma_diff;
+			}
+			else if ( it != tOffsMap.end() ) // correction saved?
+			{
+				eDebug("we have correction");
+				time_t CorrectedTpTime = TPTime+it->second;
+				int ddiff = curTime-CorrectedTpTime;
+				if ( abs(ddiff) < 120 )
+				{
+					eDebug("diff < 120 sek.. update time");
+					eDebug("update stored correction");
+					tOffsMap[*transponder] = diff;
+					dvb.time_difference = enigma_diff + diff;
+				}
+			}
+			else
+			{
+				eDebug("no correction found... store calced correction");
+				tOffsMap[*transponder] = diff;
+			}
+		}
+		else  // no time setted yet
+		{
+			if ( it != tOffsMap.end() )
+			{
+				enigma_diff += it->second;
+				eDebug("we have correction (%d)... use", it->second );
+			}
+			else
+				eDebug("dont have correction.. set Transponder Diff");
+			dvb.time_difference=enigma_diff;
+		}
+		time_t t = time(0)+dvb.time_difference;
+		tm now = *localtime(&t);
+
+		eDebug("[TIME] time update to %02d:%02d:%02d",
+			now.tm_hour,
+			now.tm_min,
+			now.tm_sec);
+
 		/*emit*/ dvb.timeUpdated();
 	}
 }
@@ -359,12 +442,29 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 		eDebug("is same service..");
 		return 0;
 	}
-	
+
+#ifndef DISABLE_CI
+	if ( DVBCI )
+		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::suspendPoll, 0));
+	if ( DVBCI2 )
+		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::suspendPoll, 0));
+#endif
 	Decoder::Flush();
 	/*emit*/ dvb.leaveService(service);
 
+// Linkage service handling.. 
+	if ( newservice.getServiceType()==7 && prevservice )
+	{
+		parentservice = prevservice;
+		prevservice = eServiceReferenceDVB();
+	}
+
+	if ( !newservice && service.getServiceType() == 1 )
+		prevservice=service;  // save currentservice
+/////////////////////////////////
+
 	service=newservice;
-	
+
 	dvb.tEIT.start(0);  // clear eit	
 	dvb.tPAT.start(0);  // clear tables.
 	dvb.tPMT.start(0);
@@ -378,13 +478,13 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 		case 1:  // tv service
 		case 2:  // radio service
 		case 4:  // nvod parent service
+		case 7:  // linkage service
 			delete dvb.parentEIT;
 			dvb.parentEIT = 0;
 		break;
 		case 5:  // nvod ref service
-		case 6:  // linkage ref service
 			// send Parent EIT .. for osd text..
-			dvb.gotEIT(0,0); 
+			dvb.gotEIT(0,0);
 		break;
 	}
 	return 1;
@@ -399,63 +499,65 @@ void eDVBServiceController::scanPMT()
 		return;
 	}
 	Decoder::parms.pmtpid=pmtpid;
-	if (!service.path.size())
-		Decoder::parms.pcrpid=pmt->PCR_PID;
-	else
-		Decoder::parms.pcrpid=-1;
+
 	Decoder::parms.ecmpid=Decoder::parms.emmpid=Decoder::parms.casystemid=-1;
-	Decoder::parms.vpid=Decoder::parms.apid=-1;
-	
+
 	int isca=0;
 
-	// ??
-	calist.clear();
+	if ( eSystemInfo::getInstance()->hasCI() )
+		calist.clear();
 
 	usedCASystems.clear();
 
 	Decoder::parms.descriptor_length=0;
 	
+#ifndef DISABLE_CI
 	DVBCI=eDVB::getInstance()->DVBCI;
 	DVBCI2=eDVB::getInstance()->DVBCI2;
-	
-  DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
-  DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
+
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
+	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
+#endif
 
 	isca+=checkCA(calist, pmt->program_info);
-	
+
 	PMTEntry *audio=0, *ac3_audio=0, *video=0, *teletext=0;
 
-	int sac3default = 0;
+	int audiopid=-1, videopid=-1, ac3pid=-1, tpid=-1;
 
-	sac3default=eAudio::getInstance()->getAC3default();
+	int sac3default=eAudio::getInstance()->getAC3default();
 
-	int audiopid=-1, videopid=-1;
+	if ( Decoder::parms.pcrpid == -1 && !service.path.size() )
+		Decoder::parms.pcrpid = pmt->PCR_PID;
 
-		// check formerly selected languages
-  eService *sp=eServiceInterface::getInstance()->addRef(service);
-  if (sp)
-  {
-  	if (sp->dvb)
-	 	{
-  		videopid=sp->dvb->get(eServiceDVB::cVPID);
-  		audiopid=sp->dvb->get(eServiceDVB::cAPID);
-  		sp->dvb->set(eServiceDVB::cPCRPID, Decoder::parms.pcrpid);
-  	}
-  	eServiceInterface::getInstance()->removeRef(service);
-  }
+	// get last selected audio / video pid from pid cache
+	eService *sp=eServiceInterface::getInstance()->addRef(service);
+	if (sp)
+	{
+		if (sp->dvb)
+		{
+			videopid=sp->dvb->get(eServiceDVB::cVPID);
+			audiopid=sp->dvb->get(eServiceDVB::cAPID);
+			ac3pid=sp->dvb->get(eServiceDVB::cAC3PID);
+			sp->dvb->set(eServiceDVB::cPCRPID, Decoder::parms.pcrpid);
+		}
+		eServiceInterface::getInstance()->removeRef(service);
+	}
 
 	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 	{
 		PMTEntry *pe=*i;
 
+#ifndef DISABLE_CI
 		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddPID, pe->elementary_PID,pe->stream_type));
 		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddPID, pe->elementary_PID,pe->stream_type));
+#endif
 
 		switch (pe->stream_type)
 		{
 		case 1:	// ISO/IEC 11172 Video
 		case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
-			if ((!video) || (pe->elementary_PID == videopid))
+			if ( (!video) || (pe->elementary_PID == videopid) )
 			{
 				video=pe;
 			}
@@ -463,7 +565,7 @@ void eDVBServiceController::scanPMT()
 			break;
 		case 3:	// ISO/IEC 11172 Audio
 		case 4: // ISO/IEC 13818-3 Audio
-			if ((!audio) || (pe->elementary_PID == audiopid))
+			if ( (!audio) || (pe->elementary_PID == audiopid) )
 			{
 				audio=pe;
 			}
@@ -474,30 +576,47 @@ void eDVBServiceController::scanPMT()
 			isca+=checkCA(calist, pe->ES_info);
 			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 			{
-				if ((i->Tag()==DESCR_AC3) && ((!ac3_audio) || (pe->elementary_PID == audiopid)))
+				int isac3=0;
+
+				if (i->Tag()==DESCR_AC3)
+				{
+					isac3=1;
+				}
+				else if (i->Tag() == DESCR_REGISTRATION)
+				{
+					RegistrationDescriptor *reg=(RegistrationDescriptor*)*i;
+					if (!memcmp(reg->format_identifier, "DTS", 3))
+						isac3=1;
+				}
+				else if ( (i->Tag()==DESCR_TELETEXT) && ( (!teletext) || (pe->elementary_PID == tpid) ) )
+				{
+					teletext=pe;
+				}
+
+				if (isac3 && ( (!ac3_audio) || (pe->elementary_PID == ac3pid) ) )
 				{
 					ac3_audio=pe;
 				}
-				if (i->Tag()==DESCR_TELETEXT)
-					teletext=pe;
 			}
 			break;
 		}
 		case 0xC1:
 		{
-			if (tMHWEIT)	// nur eine zur zeit
-				delete tMHWEIT;
-			tMHWEIT=0;
 			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 				if (i->Tag()==DESCR_MHW_DATA)
 				{
 					MHWDataDescriptor *mhwd=(MHWDataDescriptor*)*i;
 					if (!strncmp(mhwd->type, "PILOTE", 6))
 					{
-						eDebug("starting MHWEIT on pid %x, sid %x", pe->elementary_PID, service.getServiceID().get());
+						if (tMHWEIT)	// nur eine zur zeit
+						{
+							delete tMHWEIT;
+							tMHWEIT=0;
+						}
+/*						eDebug("starting MHWEIT on pid %x, sid %x", pe->elementary_PID, service.getServiceID().get());
 						tMHWEIT=new MHWEIT(pe->elementary_PID, service.getServiceID().get());
 						CONNECT(tMHWEIT->ready, eDVBServiceController::MHWEITready);
-						tMHWEIT->start();
+						tMHWEIT->start();*/
 						break;
 					}
 				}
@@ -506,19 +625,40 @@ void eDVBServiceController::scanPMT()
 		}
 	}
 
-  DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
-  DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+#ifndef DISABLE_CI
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+#endif
 
-	if (sac3default && ac3_audio)
- 		audio=ac3_audio;
+	int needAC3Workaround=0;
+	switch (eSystemInfo::getInstance()->getHwType())
+	{
+		case eSystemInfo::dbox2Nokia:
+		case eSystemInfo::dbox2Philips:
+		case eSystemInfo::dbox2Sagem:
+			needAC3Workaround=0;
+		default:
+			break;
+	}
 
-	setPID(video);
-	setPID(audio);
-	setPID(teletext);
+	if ( !needAC3Workaround && ac3_audio && ( sac3default || (ac3pid != -1) ) )
+	{
+		audiopid = ac3pid;
+		audio = ac3_audio;
+	}
+
+	if ( video && video->elementary_PID != videopid )
+		setPID(video);
+
+	if ( audio && audiopid != audio->elementary_PID )
+		setPID(audio);
+
+	if ( teletext && tpid != teletext->elementary_PID )
+		setPID(teletext);
 
 	/*emit*/ dvb.scrambled(isca);
 
-	if (isca && !calist)
+	if ( isca && !calist && !service.path.length() )
 	{
 		eDebug("NO CASYS");
 		service_state=ENOCASYS;
@@ -532,8 +672,16 @@ void eDVBServiceController::scanPMT()
 		eDebug("CA %04x ECMPID %04x", i->casysid, i->ecmpid);
 	}
 
-	pmt->unlock();
 	setDecoder();
+
+	// AC3 DBOX2 Workaround... buggy drivers...
+	if ( needAC3Workaround && ac3_audio && ( sac3default || (ac3pid != -1) ) )
+	{
+		setPID(ac3_audio);
+		setDecoder();
+	}
+
+	pmt->unlock();
 }
 
 
@@ -561,13 +709,21 @@ void eDVBServiceController::setPID(const PMTEntry *entry)
 						isaudio=1;
 						isAC3=1;
 					}
-					if (i->Tag()==DESCR_TELETEXT)
+					else if (i->Tag() == DESCR_REGISTRATION)
+					{
+						RegistrationDescriptor *reg=(RegistrationDescriptor*)*i;
+						if (!memcmp(reg->format_identifier, "DTS", 3))
+						{
+							isaudio=1;
+							isAC3=1;
+						}
+					} else if (i->Tag()==DESCR_TELETEXT)
 						isteletext=1;
 				}
 			}
 		}
 
-	  eService *sp=eServiceInterface::getInstance()->addRef(service);
+		eService *sp=eServiceInterface::getInstance()->addRef(service);
 		if (isaudio)
 		{
 			if (isAC3)
@@ -590,21 +746,21 @@ void eDVBServiceController::setPID(const PMTEntry *entry)
 				}
 			}
 		}
-		if (isvideo)
+		else if (isvideo)
 		{
 			Decoder::parms.vpid=entry->elementary_PID;
 			if (sp && sp->dvb)
 				sp->dvb->set(eServiceDVB::cVPID, entry->elementary_PID);
 		}
-		if (isteletext)
+		else if (isteletext)
 		{
+			Decoder::parms.tpid=entry->elementary_PID;
 			if (sp && sp->dvb)
 				sp->dvb->set(eServiceDVB::cTPID, entry->elementary_PID);
-			Decoder::parms.tpid=entry->elementary_PID;
 		}
 
-  	if (sp)
-	  	eServiceInterface::getInstance()->removeRef(service);
+		if (sp)
+			eServiceInterface::getInstance()->removeRef(service);
 	}
 }
 
@@ -649,8 +805,11 @@ void eDVBServiceController::MHWEITready(int error)
 			e->events.push_back(ev);
 		}
 		e->ready=1;
-		dvb.tEIT.inject(e);
-	} else
+		// check if no normal eit exist...
+//		if (!dvb.tEIT.ready())
+//			dvb.tEIT.inject(e);
+	}
+	else
 	{
 		delete tMHWEIT;
 		tMHWEIT=0;
@@ -668,18 +827,20 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 			CADescriptor *ca=(CADescriptor*)*i;
 			Decoder::addCADescriptor((__u8*)(ca->data));
 
+#ifndef DISABLE_CI 
 			unsigned  char *buf=new unsigned char[ca->data[1]+2];
 			memcpy(buf, ca->data, ca->data[1]+2);
-      DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf));
+			DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf));
 
 			unsigned  char *buf2=new unsigned char[ca->data[1]+2];
 			memcpy(buf2, ca->data, ca->data[1]+2);
-      DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf2));
+			DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf2));
+#endif
 
 			int avail=0;
 			if (availableCASystems.find(ca->CA_system_ID) != availableCASystems.end())
-					avail++;
-			
+				avail++;
+
 			usedCASystems.insert(ca->CA_system_ID);
 
 			if (avail)
@@ -708,7 +869,17 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 
 void eDVBServiceController::initCAlist()
 {
-	availableCASystems.clear();
+	availableCASystems=eSystemInfo::getInstance()->getCAIDs();
+}
 
-	availableCASystems = eSystemInfo::getInstance()->getCAIDs();
+void eDVBServiceController::clearCAlist()
+{
+	availableCASystems.clear();
+	initCAlist();
+#ifndef DISABLE_CI
+	if (DVBCI)
+		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getcaids));
+	if (DVBCI2)
+		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getcaids));
+#endif
 }

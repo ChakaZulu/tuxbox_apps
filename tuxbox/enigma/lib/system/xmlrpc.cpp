@@ -1,3 +1,5 @@
+#ifndef DISABLE_NETWORK
+
 #include <lib/system/xmlrpc.h>
 
 #include <lib/dvb/dvb.h>
@@ -5,210 +7,136 @@
 
 static std::map<eString, int (*)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant>&)> rpcproc;
 
-void eXMLRPCVariant::zero()
-{
-	_struct=0;
-	_array=0;
-	_i4=0;
-	_boolean=0;
-	_string=0;
-	_double=0;
-//	_datetime=0;
-//	_base64=0;
-}
-
-eXMLRPCVariant::eXMLRPCVariant(std::map<eString,eXMLRPCVariant*> *__struct)
-{
-	zero();
-	_struct=__struct;
-}
-
-eXMLRPCVariant::eXMLRPCVariant(std::vector<eXMLRPCVariant> *__array)
-{
-	zero();
-	_array=__array;
-}
-
-eXMLRPCVariant::eXMLRPCVariant(__s32 *__i4)
-{
-	zero();
-	_i4=__i4;
-}
-
-eXMLRPCVariant::eXMLRPCVariant(bool *__boolean)
-{
-	zero();
-	_boolean=__boolean;
-}
-
-eXMLRPCVariant::eXMLRPCVariant(eString *__string)
-{
-	zero();
-	_string=__string;
-}
-
-eXMLRPCVariant::eXMLRPCVariant(double *__double)
-{
-	zero();
-	_double=__double;
-}
-
-/*eXMLRPCVariant::eXMLRPCVariant(QDateTime *__datetime)
-{
-	zero();
-	_datetime=__datetime;
-} */
-
-/*eXMLRPCVariant::eXMLRPCVariant(QByteArray *__base64)
-{
-	zero();
-	_base64=__base64;
-} */
-
 eXMLRPCVariant::eXMLRPCVariant(const eXMLRPCVariant &c)
+	:type(c.type)
 {
-	zero();
-	if (c._i4)
-		_i4=new int(*c._i4);
-	if (c._boolean)
-		_boolean=new bool(*c._boolean);
-	if (c._string)
-		_string=new eString(*c._string);
-	if (c._double)
-		_double=new double(*c._double);
-	// datetime, base64
-	if (c._struct)
+	switch ( type )
 	{
-		_struct=new std::map<eString,eXMLRPCVariant*>;
-		for (std::map<eString,eXMLRPCVariant*>::iterator b(c._struct->begin()); b != c._struct->end(); ++b)
-			_struct->insert(std::pair<eString,eXMLRPCVariant*>(b->first, new eXMLRPCVariant(*b->second)));
+		case STRUCT:
+			if ( c._struct )
+				_struct=new std::map<eString,eXMLRPCVariant*>;
+			for (std::map<eString,eXMLRPCVariant*>::iterator b(c._struct->begin()); b != c._struct->end(); ++b)
+				_struct->insert(std::pair<eString,eXMLRPCVariant*>(b->first, new eXMLRPCVariant(*b->second)));
+			break;
+		case ARRAY:
+			if (c._array)
+				_array = new std::vector<eXMLRPCVariant>(*c._array);
+			break;
+		case I4:
+			if (c._i4)
+				_i4=new int(*c._i4);
+			break;
+		case BOOLEAN:
+			if (c._boolean)
+				_boolean=new bool(*c._boolean);
+			break;
+		case STRING:
+			if (c._string)
+				_string=new eString(*c._string);
+			break;
+		case DOUBLE:
+			if (c._double)
+				_double=new double(*c._double);
+			break;
 	}
-	if (c._array)
-		_array = new std::vector<eXMLRPCVariant>(*c._array);
 }
 
 eXMLRPCVariant::~eXMLRPCVariant()
 {
-	if (_struct)
+	switch ( type )
 	{
-		for (std::map<eString,eXMLRPCVariant*>::iterator i(_struct->begin()); i != _struct->end(); ++i)
-			delete i->second;
-
-		delete _struct;
+		case STRUCT:
+			for (std::map<eString,eXMLRPCVariant*>::iterator i(_struct->begin()); i != _struct->end(); ++i)
+				delete i->second;
+			delete _struct;
+			break;
+		case ARRAY:
+			delete _array;
+			break;
+		case I4:
+			delete _i4;
+			break;
+		case BOOLEAN:
+			delete _boolean;
+			break;
+		case STRING:
+			delete _string;
+			break;
+		case DOUBLE:
+			delete _double;
+			break;
 	}
-	if (_array)
-		delete _array;
-	if (_i4)
-		delete _i4;
-	if (_boolean)
-		delete _boolean;
-	if (_string)
-		delete _string;
-	if (_double)
-		delete _string;
-/*	if (_datetime)
-		delete _datetime;*/
-/*	if (_base64)
-		delete _base64;*/
 }
-
-std::map<eString,eXMLRPCVariant*> *eXMLRPCVariant::getStruct()
-{
-	return _struct;
-}
-
-std::vector<eXMLRPCVariant> *eXMLRPCVariant::getArray()
-{
-	return _array;
-}
-
-__s32 *eXMLRPCVariant::getI4()
-{
-	return _i4;
-}
-
-bool *eXMLRPCVariant::getBoolean()
-{
-	return _boolean;
-}
-
-eString *eXMLRPCVariant::getString()
-{
-	return _string;
-}
-
-double *eXMLRPCVariant::getDouble()
-{
-	return _double;
-}
-
-/*QDateTime *eXMLRPCVariant::getDatetime()
-{
-	return _datetime;
-} */
-
-/*QByteArray *eXMLRPCVariant::getBase64()
-{
-	return _base64;
-} */
 
 void eXMLRPCVariant::toXML(eString &result)
 {
-	if (getArray())
+	switch (type)
 	{
-		static eString s1("<value><array><data>");
-		result+=s1;
-		for (unsigned int i=0; i<getArray()->size(); i++)
+		case ARRAY:
 		{
-			static eString s("  ");
-			result+=s;
-			(*getArray())[i].toXML(result);
-			static eString s1("\n");
+			static eString s1("<value><array><data>");
 			result+=s1;
-		}
-		static eString s2("</data></array></value>\n");
-		result+=s2;
-	} else if (getStruct())
-	{
-		static eString s1("<value><struct>");
-		result+=s1;
-		for (std::map<eString,eXMLRPCVariant*>::iterator i(_struct->begin()); i != _struct->end(); ++i)
-		{
-			static eString s1("  <member><name>");
-			result+=s1;
-			result+=i->first;
-			static eString s2("</name>");
+			for (unsigned int i=0; i<getArray()->size(); i++)
+			{
+				static eString s("  ");
+				result+=s;
+				(*getArray())[i].toXML(result);
+				static eString s1("\n");
+				result+=s1;
+			}
+			static eString s2("</data></array></value>\n");
 			result+=s2;
-			i->second->toXML(result);
-			static eString s3("</member>\n");
-			result+=s3;
+			break;
 		}
-		static eString s2("</struct></value>\n");
-		result+=s2;
-	} else if (getI4())
-	{
-		static eString s1("<value><i4>");
-		result+=s1;
-		result+=eString().setNum(*getI4());
-		static eString s2("</i4></value>");
-		result+=s2;
-	} else if (getBoolean())
-	{
-		static eString s0("<value><boolean>0</boolean></value>");
-		static eString s1("<value><boolean>1</boolean></value>");
-		result+=(*getBoolean())?s1:s0;
-	} else if (getString())
-	{
-		static eString s1("<value><string>");
-		static eString s2("</string></value>");
-		result+=s1;
-		result+=*getString();
-		result+=s2;
-	} else if (getDouble())
-	{
-		result+=eString().sprintf("<value><double>%lf</double></value>", *getDouble());
-	}	else
-		eFatal("couldn't append");
+		case STRUCT:
+		{
+			static eString s1("<value><struct>");
+			result+=s1;
+			for (std::map<eString,eXMLRPCVariant*>::iterator i(_struct->begin()); i != _struct->end(); ++i)
+			{
+				static eString s1("  <member><name>");
+				result+=s1;
+				result+=i->first;
+				static eString s2("</name>");
+				result+=s2;
+				i->second->toXML(result);
+				static eString s3("</member>\n");
+				result+=s3;
+			}
+			static eString s2("</struct></value>\n");
+			result+=s2;
+			break;
+		}
+		case I4:
+		{
+			static eString s1("<value><i4>");
+			result+=s1;
+			result+=eString().setNum(*getI4());
+			static eString s2("</i4></value>");
+			result+=s2;
+			break;
+		}
+		case BOOLEAN:
+		{
+			static eString s0("<value><boolean>0</boolean></value>");
+			static eString s1("<value><boolean>1</boolean></value>");
+			result+=(*getBoolean())?s1:s0;
+			break;
+		}
+		case STRING:
+		{
+			static eString s1("<value><string>");
+			static eString s2("</string></value>");
+			result+=s1;
+			result+=*getString();
+			result+=s2;
+			break;
+		}
+		case DOUBLE:
+		{
+			result+=eString().sprintf("<value><double>%lf</double></value>", *getDouble());
+		}
+	}
 }
 
 static eXMLRPCVariant *fromXML(XMLTreeNode *n)
@@ -514,3 +442,5 @@ eHTTPDataSource *eHTTPXMLRPCResolver::getDataSource(eString request, eString pat
 		return new eXMLRPCResponse(conn);
 	return 0;
 }
+
+#endif //DISABLE_NETWORK

@@ -1,3 +1,5 @@
+#ifndef DISABLE_NETWORK
+
 #include <engrab.h>
 #include <stdio.h>
 #include <fstream>
@@ -31,22 +33,26 @@ static eString getEPGTitle()
 {
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 
-	eString evtName("not available");
+	eString descr(_("no description is available"));
 
-	EITEvent *event=eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref);
+	EITEvent *tmp=eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref);
 
-	if(!event)
-		return evtName;
-
-	for(ePtrList<Descriptor>::iterator d(event->descriptor); d!= event->descriptor.end(); ++d)
-		if(d->Tag()==DESCR_SHORT_EVENT)
+	if(tmp)
+	{
+		for (ePtrList<Descriptor>::const_iterator d(tmp->descriptor); d != tmp->descriptor.end(); ++d)
 		{
-			evtName=((ShortEventDescriptor*)*d)->event_name;
-			delete event;
-			break;
+			if ( d->Tag() == DESCR_SHORT_EVENT)
+			{
+				ShortEventDescriptor *s=(ShortEventDescriptor*)*d;
+				descr=s->event_name;
+				if ((s->text.length() > 0) && (s->text!=descr))
+					descr+=" - "+s->text;
+				break;
+			}
 		}
-
-	return evtName;
+		delete tmp;
+	}
+	return descr;
 }
 
 
@@ -59,7 +65,7 @@ ENgrab::~ENgrab()
 {
 }
  
-eString ENgrab::startxml()
+eString ENgrab::startxml( const char* descr )
 {
 	eString xmlstart;
 
@@ -67,7 +73,7 @@ eString ENgrab::startxml()
 	xmlstart+=" <neutrino commandversion=\"1\">\n";
 	xmlstart+="   <record command=\"record\">\n";
 	xmlstart+="    <channelname>"+getServiceName()+"</channelname>\n";//übernommen von trh
-	xmlstart+="    <epgtitle>"+getEPGTitle()+"</epgtitle>\n"; //übernommen von trh
+	xmlstart+="    <epgtitle>"+(descr?eString(descr):getEPGTitle())+"</epgtitle>\n"; //übernommen von trh
 	xmlstart+="    <onidsid>123456</onidsid>\n"; // keine ahnung aber wies aussieht wird die sid und die onid nicht gebraucht von ngrab
 	xmlstart+="    <epgid>123456</epgid>\n"; // und die epgid auch nicht
 	xmlstart+="    <videopid>"+eString().sprintf("%d", Decoder::parms.vpid)+"</videopid>\n";
@@ -117,10 +123,10 @@ eString ENgrab::stopxml()
 	return xmlstop;
 }
 
-void ENgrab::sendstart()
+void ENgrab::sendstart( const char *descr )
 {
 	eDebug("ngrab sendstart requested");
-	sendStr = startxml();
+	sendStr = startxml(descr);
 	sending();
 }
 
@@ -161,12 +167,12 @@ void ENgrab::sending()
 {
 	struct in_addr sinet_address;
 	eString hostname;
-	int port;
 	int de[4];
-
+	int port=4000;
+	sinet_address.s_addr = 0xC0A80028; // 192.168.0.40
 	eConfig::getInstance()->getKey("/elitedvb/network/nserver", sinet_address.s_addr);
 	eConfig::getInstance()->getKey("/elitedvb/network/nservport", port);
-	eNumber::unpack(sinet_address, de);
+	eNumber::unpack(sinet_address.s_addr, de);
 	hostname=eString().sprintf("%d.%d.%d.%d", de[0], de[1], de[2], de[3]);
 
 	if (!sd)
@@ -182,22 +188,4 @@ void ENgrab::sending()
 	}
 }
 
-void ENgrabWnd::onBackSelected()
-{
-	close(0);
-}
-
-ENgrabWnd::ENgrabWnd()
-	:eWindow(1), lb(this)
-{
-	move( ePoint(100,100));  // Fenster verschieben
-	cresize( eSize(400, 200 )); // Grösse festlegen
-	lb.cmove( ePoint(0,0));
-	lb.cresize( eSize( 400,200 ));
-	setText(_("ngrab recording"));
-
-	CONNECT((new eListBoxEntryMenu(&lb, _("[close]"), _("close Window") ))->selected, ENgrabWnd::onBackSelected);
-	CONNECT((new eListBoxEntryMenu(&lb, _("start recording"), _("start manual recording") ))->selected, ENgrabWnd::manualStart);
-	CONNECT((new eListBoxEntryMenu(&lb, _("stopp recording"), _("stop manual recording") ))->selected, ENgrabWnd::manualStop);
-	lb.moveSelection(eListBox<eListBoxEntryMenu>::dirFirst);
-}
+#endif // DISABLE_NETWORK

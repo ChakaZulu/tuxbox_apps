@@ -1,0 +1,9 @@
+# created by Enigma Language Editor 0.2
+#			 (c) 10/2002 ole <olest@gmx.net>
+# *************************************
+# *	 use/modify on your own risk!		*
+# *************************************
+#
+msgid ""
+msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Mon Sep 1 14:59:31 CEST 2003\nLast-Translator: unknown\nLanguage-Team: Lithuania / rimas@centras.lt\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+

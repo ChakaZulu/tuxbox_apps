@@ -1,0 +1,27 @@
+<?xml version = '1.0' encoding = 'UTF-8'?><!DOCTYPE KDevPrjSession ><KDevPrjSession>
+ <LastCompileConfig>(Default)</LastCompileConfig>
+ <Mainframe MaximizeMode="1" />
+ <DocsAndViews NumberOfDocuments="7" >
+  <Doc0 CursorPosLine="0" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/data/resources/rcgeneric_inputdev.xml" >
+   <View0 Top="23" Width="400" Attach="1" Height="300" Left="3" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  </Doc0>
+  <Doc1 CursorPosLine="0" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/data/resources/rcdbox_inputdev.xml" >
+   <View0 Top="44" Width="887" Attach="1" Height="390" Left="24" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  </Doc1>
+  <Doc2 CursorPosLine="0" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/data/resources/rcdboxbuttons.xml" >
+   <View0 Top="65" Width="887" Attach="1" Height="390" Left="45" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  </Doc2>
+  <Doc3 CursorPosLine="0" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/data/resources/rcdboxnew.xml" >
+   <View0 Top="86" Width="887" Attach="1" Height="390" Left="66" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  </Doc3>
+  <Doc4 CursorPosLine="0" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/data/resources/rcdboxold.xml" >
+   <View0 Top="107" Width="887" Attach="1" Height="390" Left="87" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  </Doc4>
+  <Doc5 CursorPosLine="0" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/data/resources/rcdreambox2.xml" >
+   <View0 Top="128" Width="887" Attach="1" Height="390" Left="108" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  </Doc5>
+  <Doc6 CursorPosLine="0" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/tuxbox-cvs/apps/tuxbox/enigma/data/resources/rcdreambox_inputdev.xml" >
+   <View0 Top="126" Width="893" Attach="1" Height="416" Left="126" Focus="1" Type="KWriteView" MinMaxMode="2" />
+  </Doc6>
+ </DocsAndViews>
+</KDevPrjSession>
