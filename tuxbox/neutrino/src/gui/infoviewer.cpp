@@ -530,7 +530,7 @@ void CInfoViewer::showSubchan()
 
 void CInfoViewer::showIcon_16_9() const
 {
-	frameBuffer->paintIcon( ( aspectRatio == 3 )?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+	frameBuffer->paintIcon( ( aspectRatio != 0 )?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 
 void CInfoViewer::showIcon_VTXT() const
