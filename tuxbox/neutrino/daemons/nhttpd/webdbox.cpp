@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.19 2002/04/17 20:15:48 dirch Exp $
+	$Id: webdbox.cpp,v 1.20 2002/04/18 01:59:25 dirch Exp $
 
 	License: GPL
 
@@ -327,14 +327,12 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 				if(request->ParameterList["mode"] == "TV")
 				{				
 					zapit.setMode(CZapitClient::MODE_RADIO);
-					if(request->Parent->DEBUG) printf("switched to tvmode");
 					sleep(1);
 					UpdateBouquets();
 				}
 				else if(request->ParameterList["mode"] == "RADIO")
 				{				
 					zapit.setMode(CZapitClient::MODE_RADIO);
-					if(request->Parent->DEBUG) printf("switched to radiomode");
 					sleep(1);
 					UpdateBouquets();
 				}
@@ -344,6 +342,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			if(request->ParameterList["1"] == "getpids")		// getpids !
 			{
 				SendcurrentVAPid(request);
+				return true;
 			}
 			else if(request->ParameterList["1"] == "stopplayback")
 			{
@@ -382,6 +381,38 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 	}
 	return true;
 }
+
+void TWebDbox::Authenticate(CWebserverRequest* request)
+{
+	printf("Authenticate\n");
+	request->SocketWriteLn("HTTP/1.0 401 Unauthorized");
+	request->SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\n\n");
+}
+
+bool TWebDbox::CheckAuth(CWebserverRequest* request)
+{ 
+	if(request->HeaderList["Authorization"] == "")
+		return false;
+	string encodet = request->HeaderList["Authorization"].substr(6,request->HeaderList["Authorization"].length() - 6);
+//	printf("base64: '%s'\n",encodet.c_str());
+	string decodet = b64decode((char *)encodet.c_str());
+//	printf("decodet: '%s'\n",decodet.c_str());
+	int pos = decodet.find_first_of(':');
+	string user = decodet.substr(0,pos);
+	string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
+	if(Parent->DEBUG) printf("user: '%s' passwd: '%s'\n",user.c_str(),passwd.c_str());
+	if(user.compare("test") == 0 && passwd.compare("test1") == 0)
+	{
+		printf("passwort ok\n");
+		return true;
+	}
+	else
+	{
+		printf("nicht ok\n");
+		return false;
+	}
+}
+
 //-------------------------------------------------------------------------
 
 bool TWebDbox::Execute(CWebserverRequest* request)
@@ -389,10 +420,19 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 	if(Parent->DEBUG) printf("Executing %s\n",request->Filename.c_str());
 	if(request->Filename.compare("test.dbox2") == 0)
 	{
+		if(!CheckAuth(request))
+		{
+			Authenticate(request);
+			return false;
+		}
+		else
+			request->SocketWriteLn("Zugriff ok\n");
 
+
+//		request->SocketWrite("HTTP/1.1 401 Unauthorized\n\n");
 		printf("Teste nun\n");
-		request->SendPlainHeader("text/html");
-		request->SocketWrite("alles wird gut\n");
+//		request->SendPlainHeader("text/html");
+//		request->SocketWrite("alles wird gut\n");
 		return true;
 	}
 /*
@@ -839,6 +879,7 @@ void TWebDbox::SendStreaminfo(CWebserverRequest* request)
 void TWebDbox::SendcurrentVAPid(CWebserverRequest* request)
 {
 CZapitClient::responseGetPIDs pids;
+	if(Parent->DEBUG) printf("hole jetzt die pids\n");
 	zapit.getPIDS(pids);
 
 	char *buf = new char[300];

@@ -25,6 +25,9 @@ using namespace std;
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
+extern string b64decode(char *s);
+
+
 
 class TWebserver;
 class CWebserverRequest;
@@ -78,6 +81,9 @@ public:
 		zapit.getChannels(ChannelList);
 		return true;
 	};
+
+	void Authenticate(CWebserverRequest* request);
+	bool CheckAuth(CWebserverRequest* request);
 
 
 
