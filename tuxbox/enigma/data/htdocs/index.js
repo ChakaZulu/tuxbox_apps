@@ -55,6 +55,21 @@ function deleteMovie(xy)
 	}
 }
 
+function recoverMovies()
+{
+	if (confirmAction('Do you really want to rebuild the movie playlist?'))
+	{
+		if (window.screen.width < 800)
+		{
+			document.location = "/cgi-bin/recoverRecordings";
+		}
+		else
+		{
+			NewWindow("/cgi-bin/recoverRecordings", "recoverRecordings", "200", "100", "no", "5000");
+		}
+	}
+}
+
 function openEPG(xy)
 {
 	if (xy == undefined)
