@@ -49,6 +49,8 @@ class CBouquet
 		ChannelList tvChannels;
 
 		CBouquet( string name) { Name=name; }
+		CBouquet( const CBouquet& bouquet);
+
 		~CBouquet();
 
 		void addService( channel* newChannel);
@@ -71,6 +73,7 @@ class CBouquetManager
 		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr, string strTitle);
 		void parseBouquetsXml(XMLTreeNode *root);
 		string convertForXML( string s);
+		void storeBouquets();
 	public:
 		class tvChannelIterator
 		{
@@ -111,9 +114,11 @@ class CBouquetManager
 		radioChannelIterator radioChannelsFind( unsigned int onid_sid);
 
 		BouquetList Bouquets;
+		BouquetList storedBouquets;
 
 		void saveBouquets();
 		void loadBouquets( bool ignoreBouquetFile = false);
+		void restoreBouquets();
 		void renumServices();
 
 		CBouquet* addBouquet( string name);

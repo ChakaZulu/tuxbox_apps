@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.13 2002/02/06 23:56:13 Simplex Exp $
+  $Id: bouquets.cpp,v 1.14 2002/02/09 22:04:05 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.14  2002/02/09 22:04:05  Simplex
+  speed up discarding BQ-Ed. changes
+
   Revision 1.13  2002/02/06 23:56:13  Simplex
   fixed bug with accessing radiochannel lists
 
@@ -71,6 +74,15 @@
 #include <config.h>
 
 /**** class CBouquet ********************************************************/
+CBouquet::CBouquet( const CBouquet& bouquet)
+{
+	Name = bouquet.Name;
+	for (unsigned int i=0; i< bouquet.tvChannels.size(); i++)
+		addService( new channel(*(bouquet.tvChannels[i])));
+	for (unsigned int i=0; i< bouquet.radioChannels.size(); i++)
+		addService( new channel(*(bouquet.radioChannels[i])));
+}
+
 CBouquet::~CBouquet()
 {
 	for (uint i=0; i<tvChannels.size(); i++)
@@ -108,7 +120,6 @@ channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType = 0)
 {
 	channel* result = NULL;
 
-	printf("searching channel\n");
 	ChannelList* channels = &tvChannels;
 	switch (serviceType)
 	{
@@ -126,10 +137,7 @@ channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType = 0)
 
 	if ((serviceType==0) && (result==NULL))
 	{
-		printf("Channel not found in default channellist\n");
 		result = getChannelByOnidSid(onidSid, 2);
-		if (result == NULL)
-			printf("Channel not found in default radiolist\n");
 	}
 
 	return( result);
@@ -151,10 +159,8 @@ void CBouquet::addService( channel* newChannel)
 
 void CBouquet::removeService( channel* oldChannel)
 {
-	printf("removing channel\n");
 	if (oldChannel != NULL)
 	{
-		printf("removing channel %s\n", oldChannel->name.c_str());
 		ChannelList* channels = &tvChannels;
 		switch (oldChannel->service_type)
 		{
@@ -168,18 +174,9 @@ void CBouquet::removeService( channel* oldChannel)
 			it++;
 		if (it<channels->end())
 		{
-			printf("channel found:");
-			printf("%s - ", (*it)->name.c_str());
 			channels->erase(it);
-			printf("erased ");
 			delete oldChannel;
-			printf("deleted ");
 		}
-		printf("done removing channel\n");
-	}
-	else
-	{
-		printf("NULL-channel!\n");
 	}
 }
 
@@ -419,6 +416,35 @@ void CBouquetManager::loadBouquets(bool ignoreBouquetFile = false)
 	{
 		makeRemainingChannelsBouquet( 1, 1, "Alle Kanäle");    // TODO: use locales
 	}
+	storeBouquets();
+}
+
+void CBouquetManager::storeBouquets()
+{
+	for (unsigned int i=0; i<storedBouquets.size(); i++)
+	{
+		delete storedBouquets[i];
+	}
+	storedBouquets.clear();
+
+	for (unsigned int i=0; i<Bouquets.size(); i++)
+	{
+		storedBouquets.insert( storedBouquets.end(), new CBouquet( *Bouquets[i]));
+	}
+}
+
+void CBouquetManager::restoreBouquets()
+{
+	for (unsigned int i=0; i<Bouquets.size(); i++)
+	{
+		delete Bouquets[i];
+	}
+	Bouquets.clear();
+
+	for (unsigned int i=0; i<storedBouquets.size(); i++)
+	{
+		Bouquets.insert( Bouquets.end(), new CBouquet( *storedBouquets[i]));
+	}
 }
 
 void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsigned int radioChanNr, string strTitle )
@@ -597,11 +623,9 @@ CBouquet* CBouquetManager::addBouquet( string name)
 
 void CBouquetManager::deleteBouquet( uint id)
 {
-	printf ("Deleting bouquet %d\n", id);
 	if (id < Bouquets.size() && Bouquets[id] != remainChannels)
 	{
 		CBouquet* bouquet = Bouquets[id];
-		printf ("bouquet %s\n", bouquet->Name.c_str());
 
 		BouquetList::iterator it;
 		uint i;

@@ -393,7 +393,7 @@ void CBEBouquetWidget::discardChanges()
 {
 	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", "bouqueteditor.discardingchanges");
 	hintBox->paint();
-	g_Zapit->reinitChannels();
+	g_Zapit->restoreBouquets();
 	hintBox->hide(false);
 	delete hintBox;
 }

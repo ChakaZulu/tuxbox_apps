@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.8 2002/02/09 16:11:04 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.9 2002/02/09 22:03:24 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.9  2002/02/09 22:03:24  Simplex
+  speed up discarding BQ-Ed. changes
+
   Revision 1.8  2002/02/09 16:11:04  Simplex
   extended the getchannels functions, bug fix
 
@@ -195,6 +198,21 @@ void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode 
 	responseGetBouquetChannels response;
 	while ( receive((char*)&response, sizeof(responseGetBouquetChannels)))
 		channels.insert( channels.end(), response);
+	zapit_close();
+}
+
+/* restore bouquets so as if they where just loaded*/
+void CZapitClient::restoreBouquets()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_RESTORE_BOUQUETS;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseCmd response;
+	receive((char* )&response, sizeof(response));
 	zapit_close();
 }
 
