@@ -240,7 +240,9 @@ int eFrontend::tune(eTransponder *trans,
 		hi=0;
 	}
 	
-	front.Frequency+=freq_offset;
+//	front.Frequency+=freq_offset;
+	if ((sat == 0) && (seq.continuousTone == SEC_TONE_ON))	// astra lnb hi
+		front.Frequency-=7000;
 	front.Inversion=Inversion;
 
 	diseqc.params[0]=0xF0;
@@ -274,6 +276,7 @@ int eFrontend::tune(eTransponder *trans,
 		
 		lastcsw=diseqc.params[0];
 		
+#if 0
 		if (changelnb)
 		{
 			if (sat==0)
@@ -281,10 +284,13 @@ int eFrontend::tune(eTransponder *trans,
 			else if (sat==1)
 				seq.miniCommand=SEC_MINI_B;
 		} else
+#endif
+
 			seq.miniCommand=SEC_MINI_NONE;
 
 		seq.numCommands=changelnb?1:0;
 		seq.commands=&cmd;
+		eDebug("%d %d sending sequence... %x", do_sec, secfd, SEC_SEND_SEQUENCE);
 		if (do_sec)
 			if (ioctl(secfd, SEC_SEND_SEQUENCE, &seq)<0)
 			{
