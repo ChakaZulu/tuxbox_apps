@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.45 2002/04/04 21:26:08 obi Exp $
+ * $Id: zapit.h,v 1.46 2002/04/04 23:40:55 obi Exp $
  */
 
 #ifndef __zapit_h__
@@ -13,6 +13,7 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include "bouquets.h"
 #include "cam.h"

@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.117 2002/04/04 21:26:08 obi Exp $
+  $Id: zapit.cpp,v 1.118 2002/04/04 23:40:55 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -93,6 +93,9 @@
 
 
 $Log: zapit.cpp,v $
+Revision 1.118  2002/04/04 23:40:55  obi
+support for new camd
+
 Revision 1.117  2002/04/04 21:26:08  obi
 some more code sorting
 
@@ -139,10 +142,6 @@ uint32_t lnb_offset_high = 10600000;
 /* ca stuff */
 uint16_t caid = 0;
 int caver = 0;
-
-#ifdef DEBUG
-extern int errno;
-#endif /* DEBUG */
 
 #ifndef DVBS
 CLcddClient lcdd;
@@ -434,6 +433,7 @@ int zapit (uint onid_sid, bool in_nvod)
 	char vpidbuf[5];
 	char apidbuf[5];
 	char pmtpidbuf[5];
+	char cadescrbuf[13];
 #endif /* USE_EXTERNAL_CAMD */
 
 	if (in_nvod)
@@ -650,7 +650,12 @@ int zapit (uint onid_sid, bool in_nvod)
 			sprintf(vpidbuf, "%x", Vpid);
 			sprintf(apidbuf, "%x", Apid);
 			sprintf(pmtpidbuf, "%x", Pmt);
-			if (execlp("/bin/camd", "camd", vpidbuf, apidbuf, pmtpidbuf, NULL) < 0)
+			if ((cit->second.ecmpid > 0x0000) && (cit->second.ecmpid < 0x1FFF))
+				sprintf(cadescrbuf, "0904%04x%04x", caid, cit->second.ecmpid);
+			else
+				sprintf(cadescrbuf, "");
+
+			if (execlp("/bin/camd", "camd", vpidbuf, apidbuf, pmtpidbuf, cadescrbuf, NULL) < 0)
 			{
 				perror("[zapit] execlp");
 				exit(0);
@@ -2303,7 +2308,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.117 2002/04/04 21:26:08 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.118 2002/04/04 23:40:55 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
