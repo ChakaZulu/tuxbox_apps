@@ -129,6 +129,8 @@ bool insert_modules(const CNFSMountGui::FSType fstype)
 		return ((system("insmod sunrpc") == 0) && (system("insmod lockd") == 0) && (system("insmod nfs") == 0));
 #endif
 	}
+	else if (fstype == CNFSMountGui::CIFS)
+		return (system("insmod cifs") == 0);
 	return false;
 }
 
