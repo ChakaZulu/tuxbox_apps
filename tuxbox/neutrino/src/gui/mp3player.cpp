@@ -125,6 +125,7 @@ CMP3PlayerGui::~CMP3PlayerGui()
 //------------------------------------------------------------------------
 int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 {
+	int adec;
 	CMP3Player::getInstance()->init();
 	m_state=CMP3PlayerGui::STOP;
 	current=-1;
@@ -179,6 +180,14 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	/*int ret =*/
 
 	show();
+
+	// enable spdif output
+	if ((adec=open (ADEC, O_RDWR | O_NONBLOCK)) >= 0)
+	{
+		if (ioctl (adec, AUDIO_SET_DA_IEC_DISABLE, 0) < 0)
+			perror("AUDIO_SET_DA_IEC_DISABLE");
+		close(adec);
+	}
 
 	// Restore previous background
 	if (usedBackground)

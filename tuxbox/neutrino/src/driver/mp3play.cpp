@@ -44,7 +44,11 @@
 #include <neutrino.h>
 #include <driver/mp3play.h>
 #include <dbox/avs_core.h>
-#define AVS_DEVICE "/dev/dbox/avs0"
+#include <linux/dvb/audio.h>
+
+#define AVS_DEVICE	"/dev/dbox/avs0"
+#define ADAP		"/dev/dvb/adapter0"
+#define ADEC		ADAP "/audio0"
 
 // Frames to skip in ff/rev mode
 #define FRAMES_TO_SKIP 75 
@@ -631,7 +635,9 @@ bool  CMP3Player::SetDSP(int soundfd, struct mad_header *Header)
 	 if (dsp_speed != m_samplerate)
 	 {
 		// mute audio to reduce pops when changing samplerate (avia_reset)
+		int adec;
 		bool was_muted = avs_mute(true);
+
 		if (::ioctl(soundfd, SNDCTL_DSP_SPEED, &dsp_speed))
 		{
 			printf("speed set failed\n");
@@ -639,6 +645,15 @@ bool  CMP3Player::SetDSP(int soundfd, struct mad_header *Header)
 	 	}
 	 	else
 	 		m_samplerate = dsp_speed;
+
+		// disable spdif output
+		if ((adec=::open (ADEC, O_RDWR | O_NONBLOCK)) >= 0)
+		{
+			if (::ioctl(adec, AUDIO_SET_DA_IEC_DISABLE, 1) < 0)
+				perror("AUDIO_SET_DA_IEC_DISABLE");
+			close(adec);
+		}
+
 		usleep(400000);
 		if (!was_muted)
 			avs_mute(false);
