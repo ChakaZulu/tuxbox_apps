@@ -1784,6 +1784,20 @@ void CNeutrinoApp::InitZapper()
 	}
 }
 
+void CNeutrinoApp::setupStreamingServer(void)
+{
+	CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
+	int port;
+	sscanf(g_settings.network_streamingserverport, "%d", &port);
+	info->ServerAddress = g_settings.network_streamingserver;
+	info->ServerPort = port;
+	info->StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
+	info->StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
+	info->Name = "ngrab";
+	vcrControl->registerDevice(CVCRControl::DEVICE_SERVER,info);
+	delete info;
+}
+
 int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
@@ -1854,19 +1868,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	// setup streaming server
 	if(g_settings.network_streaming_use)
-	{
-		CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
-		int port;
-		sscanf(g_settings.network_streamingserverport, "%d", &port);
-		info->ServerAddress = g_settings.network_streamingserver;
-		info->ServerPort = port;
-		info->StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
-		info->StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
-		info->Name = "ngrab";
-		vcrControl->registerDevice(CVCRControl::DEVICE_SERVER,info);
-		delete info;
-	}
-
+		setupStreamingServer();
 	channelList = new CChannelList( "channellist.head" );
 
 	dprintf( DEBUG_NORMAL, "menue setup\n");
@@ -2064,24 +2066,6 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else
 				standbyMode( true );
 		}
-		else if ( msg == NeutrinoMessages::STANDBY_ON )
-		{
-			if ( mode != mode_standby )
-			{
-				// noch nicht im Standby-Mode...
-				standbyMode( true );
-			}
-			g_RCInput->clearRCMsg();
-		}
-		else if ( msg == NeutrinoMessages::STANDBY_OFF )
-		{
-			if ( mode == mode_standby )
-			{
-				// WAKEUP
-				standbyMode( false );
-			}
-			g_RCInput->clearRCMsg();
-		}
 		else if ( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 		{
 			//TODO: MsgBox mit Ok / Cancel
@@ -2098,6 +2082,45 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		else if ( msg == NeutrinoMessages::EVT_EXTMSG )
 		{
 			ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+		}
+		else if ( msg == NeutrinoMessages::STANDBY_ON )
+		{
+			if ( mode != mode_standby )
+			{
+				// noch nicht im Standby-Mode...
+				standbyMode( true );
+				g_RCInput->clearRCMsg();
+			}
+		}
+		else if ( msg == NeutrinoMessages::STANDBY_OFF )
+		{
+			if ( mode == mode_standby == data)
+			{
+				// WAKEUP
+				standbyMode( false );
+				g_RCInput->clearRCMsg();
+			}
+		}
+		else if ( msg == NeutrinoMessages::CHANGEMODE )
+		{
+			if(data == mode_radio)
+			{
+				if ( mode == mode_tv )
+					radioMode();
+			}
+			if(data == mode_tv)				
+			{
+				if ( mode == mode_radio )
+					tvMode();
+			}
+			if(data == mode_standby)
+			{
+				if(mode != mode_standby)
+				{
+					standbyMode( true );
+					g_RCInput->clearRCMsg();
+				}
+			}
 		}
 		else if ( msg == NeutrinoMessages::VCR_ON )
 		{
@@ -2914,7 +2937,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.318 2002/09/07 16:33:46 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.319 2002/09/10 18:51:08 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -66,6 +66,7 @@ struct NeutrinoMessages {
 		RECORD_STOP	=				CRCInput::RC_Messages + 12,
 		ANNOUNCE_SLEEPTIMER =		CRCInput::RC_Messages + 13,
 		SLEEPTIMER =				CRCInput::RC_Messages + 14,
+		CHANGEMODE =				CRCInput::RC_Messages + 15,
 
 
 		EVT_VOLCHANGED 	= 			CRCInput::RC_Events + 1,
@@ -100,6 +101,14 @@ struct NeutrinoMessages {
 		EVT_TIMESET 		= 		CRCInput::RC_WithData + 5,
 		EVT_POPUP		=		CRCInput::RC_WithData + 6,
 		EVT_EXTMSG		=		CRCInput::RC_WithData + 7
+	};
+	enum
+	{
+		mode_unknown = -1,
+		mode_tv = 1,
+		mode_radio = 2,
+		mode_scart = 3,
+		mode_standby = 4
 	};
 };
 

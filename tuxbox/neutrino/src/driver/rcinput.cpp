@@ -598,7 +598,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 			else
 			 				printf("[neutrino] event INITID_CONTROLD - unknown eventID 0x%x\n",  emsg.eventID );
 			 		}
-			 		else if ( emsg.initiatorID == CEventServer::INITID_NHTTPD )
+			 		else if ( emsg.initiatorID == CEventServer::INITID_THTTPD )
 			 		{
 			 			if (emsg.eventID==NeutrinoMessages::SHUTDOWN)
 			 			{
@@ -616,6 +616,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 				*msg = NeutrinoMessages::EVT_EXTMSG;
 			 				*data = (unsigned) p;
 			 				dont_delete_p = true;
+			 			}
+			 			else if (emsg.eventID==NeutrinoMessages::CHANGEMODE)	// Change 
+			 			{
+			 				*msg = NeutrinoMessages::CHANGEMODE;
+			 				*data = *(unsigned*) p;
 			 			}
 			 			else if (emsg.eventID==NeutrinoMessages::STANDBY_ON)
 			 			{
