@@ -732,17 +732,23 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 }
 
 
-void sig_catch(int)
+void sig_catch(int signal)
 {
-	saveSettings();
+	switch (signal)
+	{
+	case SIGHUP:
+		saveSettings();
+		break;
+	default:
+		saveSettings();
+		exit(0);
+	}
 }
-
-
 
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.55 2002/03/19 23:23:25 McClean Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.56 2002/03/28 08:50:04 obi Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	if (fork() != 0)

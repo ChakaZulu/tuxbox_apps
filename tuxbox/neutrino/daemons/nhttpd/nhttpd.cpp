@@ -96,7 +96,6 @@ bool forken = false;
 		printf("Starte %s\n",threads?"threaded":"nicht threaded");
 	signal(SIGINT,sig_catch);	
 	signal(SIGHUP,sig_catch);
-	signal(SIGKILL,sig_catch);
 	signal(SIGTERM,sig_catch);
 
 	Ausgabe("Neutrino HTTP-Server starting..\n");
