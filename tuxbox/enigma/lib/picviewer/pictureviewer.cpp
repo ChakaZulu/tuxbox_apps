@@ -85,6 +85,28 @@ ePictureViewer::ePictureViewer( const eString &filename )
 
 ePictureViewer::~ePictureViewer()
 {
+	if (m_busy_buffer != NULL)
+	{
+		free(m_busy_buffer);
+		m_busy_buffer = NULL;
+	}
+	if (m_NextPic_Buffer != NULL)
+	{
+		free(m_NextPic_Buffer);
+		m_NextPic_Buffer = NULL;
+	}
+	if (m_CurrentPic_Buffer != NULL)
+	{
+		free(m_CurrentPic_Buffer);
+		m_CurrentPic_Buffer = NULL;
+	}
+	CFormathandler *tmp=NULL;
+	while(fh_root)
+	{
+		tmp = fh_root;
+		fh_root = fh_root->next;
+		free(tmp);
+	}
 }
 
 void ePictureViewer::add_format(int (*picsize)(const char *, int *, int *, int, int ), int (*picread)(const char *, unsigned char *, int, int), int (*id)(const char*))
@@ -539,23 +561,4 @@ void ePictureViewer::hideBusy()
 		m_busy_buffer = NULL;
 	}
 	eDebug("Hide Busy}");
-}
-
-void ePictureViewer::Cleanup()
-{
-	if (m_busy_buffer != NULL)
-	{
-		free(m_busy_buffer);
-		m_busy_buffer = NULL;
-	}
-	if (m_NextPic_Buffer != NULL)
-	{
-		free(m_NextPic_Buffer);
-		m_NextPic_Buffer = NULL;
-	}
-	if (m_CurrentPic_Buffer != NULL)
-	{
-		free(m_CurrentPic_Buffer);
-		m_CurrentPic_Buffer = NULL;
-	}
 }
