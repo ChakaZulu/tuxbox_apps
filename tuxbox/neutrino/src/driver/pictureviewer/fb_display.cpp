@@ -59,7 +59,7 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
     
     /* read current video mode */
     var = CFrameBuffer::getInstance()->getScreenInfo();
-    
+
     lfb = CFrameBuffer::getInstance()->getFrameBufferPointer();
 
     /* correct panning */
@@ -187,9 +187,12 @@ inline unsigned short make15color(unsigned char r, unsigned char g, unsigned cha
 	 ((r >> 3) & 31)        );
 }
 
-inline unsigned short make16color(unsigned char r, unsigned char g, unsigned char b)
+inline unsigned short make16color(const unsigned char r, const unsigned char g, const unsigned char b, const unsigned char rl, const unsigned char ro, const unsigned char gl, const unsigned char go, const unsigned char bl, const unsigned char bo)
 {
-       return (0x8000 | ((((b >> 3) & 31) << 10) | (((g >> 3) & 31) << 5)  | ((r >> 3) & 31)));
+    return (
+	    (((r >> (8 - rl)) & ((1 << rl) - 1)) << ro) |
+	    (((g >> (8 - gl)) & ((1 << gl) - 1)) << go) |
+	    (((b >> (8 - bl)) & ((1 << bl) - 1)) << bo));
 }
 
 void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *cpp)
@@ -199,6 +202,17 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
     unsigned char *c_fbbuff;
     unsigned short *s_fbbuff;
     unsigned int *i_fbbuff;
+    unsigned char * writep;
+    unsigned char rl, ro, gl, go, bl, bo;
+
+    struct fb_var_screeninfo *var;
+    var = CFrameBuffer::getInstance()->getScreenInfo();
+    rl = (var->red).length;
+    ro = (var->red).offset;
+    gl = (var->green).length;
+    go = (var->green).offset;
+    bl = (var->blue).length;
+    bo = (var->blue).offset;
 
     switch(bpp)
     {
@@ -218,10 +232,14 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
 	    break;
 	case 16:
 	    *cpp = 2;
-	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
+	    fbbuff = (void *) malloc(count * 2);
+	    writep = (unsigned char *)fbbuff;
 	    for(i = 0; i < count ; i++)
-		s_fbbuff[i] = make16color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2]);
-	    fbbuff = (void *) s_fbbuff;
+	    {
+		    unsigned short tmp = make16color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2], rl, ro, gl, go, bl, bo);
+		    (*(writep++)) = (unsigned char)(tmp & 0xFF);
+		    (*(writep++)) = (unsigned char)(tmp >> 8);
+	    }
 	    break;
 	case 24:
 	case 32:
