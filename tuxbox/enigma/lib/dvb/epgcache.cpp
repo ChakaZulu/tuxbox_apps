@@ -1,6 +1,7 @@
 #include <lib/dvb/epgcache.h>
 
-#undef NVOD   
+#undef NVOD
+#undef EPG_DEBUG  
 
 #include <time.h>
 #include <unistd.h>  // for usleep
@@ -226,7 +227,9 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			}
 			
 			evt = new eventData(eit_event, eit_event_size, source);
+#if EPG_DEBUG
 			bool consistencyCheck=true;
+#endif
 			if (ev_erase_count > 0 && tm_erase_count > 0) // 2 different pairs have been removed
 			{
 				// exempt memory
@@ -251,13 +254,13 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			}
 			else // added new eventData
 			{
-////////// DEBUG CODE... REMOVE LATER ////////////
+#if EPG_DEBUG
 				consistencyCheck=false;
-//////////////////////////////////////////////////
+#endif
 				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
 				prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
 			}
-////////// DEBUG CODE... REMOVE LATER ////////////
+#if EPG_DEBUG
 			if ( consistencyCheck )
 			{
 				if ( tm_it->second != evt || ev_it->second != evt )
@@ -275,10 +278,10 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 					eFatal("eventmap key(%d) non equal event_id(%d)", 
 						ev_it->first, event_id );
 			}
-//////////////////////////////////////////////////
+#endif
 		}
 next:
-////////// DEBUG CODE... REMOVE LATER ////////////
+#if EPG_DEBUG
 		if ( servicemap.first.size() != servicemap.second.size() )
 		{
 			FILE *f = fopen("/hdd/event_map.txt", "w+");
@@ -300,7 +303,7 @@ next:
 				service.sid, service.tsid, service.onid, 
 				servicemap.first.size(), servicemap.second.size() );
 		}
-//////////////////////////////////////////////////
+#endif
 		ptr += eit_event_size;
 		eit_event=(eit_event_struct*)(((__u8*)eit_event)+eit_event_size);
 	}
@@ -480,7 +483,9 @@ void eEPGCache::cleanLoop()
 				for ( eventMap::iterator i(evIt->second.first.begin());
 					i != evIt->second.first.end(); )
 				{
-//					ASSERT(i->second->getStartTime() == 3599);
+#if EPG_DEBUG
+					ASSERT(i->second->getStartTime() == 3599);
+#endif
 					int cnt=0;
 					for ( std::list<NVODReferenceEntry>::iterator ni(it->second.begin());
 						ni != it->second.end(); ++ni )
