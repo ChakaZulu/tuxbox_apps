@@ -4863,10 +4863,11 @@ void eZapMain::showEPG()
 		if (pMap)  // EPG vorhanden
 		{
 			timeMap::const_iterator It = pMap->begin();
+			int tsidonid = (ref.getTransportStreamID().get()<<16)|ref.getOriginalNetworkID().get();
 
 			while (It != pMap->end())
 			{
-				events.push_back( new EITEvent(*It->second) );
+				events.push_back( new EITEvent(*It->second, tsidonid) );
 				It++;
 			}
 			actual_eventDisplay=new eEventDisplay( service->service_name.c_str(), ref, &events );

@@ -1450,13 +1450,15 @@ public:
 		if (service)
 		{
 			eEPGCache::getInstance()->Lock();
-			const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)e);
+			eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
+			const timeMap* evt = eEPGCache::getInstance()->getTimeMap(ref);
 			if (evt)
 			{
+				int tsidonid = (ref.getTransportStreamID().get()<<16)|ref.getOriginalNetworkID().get();
 				timeMap::const_iterator It;
 				for (It = evt->begin(); (It != evt->end() && !short_description); ++It)
 				{
-					EITEvent event(*It->second);
+					EITEvent event(*It->second,tsidonid);
 					time_t now = time(0) + eDVB::getInstance()->time_difference;
 					if ((now >= event.start_time) && (now <= event.start_time + event.duration))
 					{
@@ -2559,9 +2561,11 @@ public:
 			if (current)
 			{
 				eEPGCache::getInstance()->Lock();
-				const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
+				eServiceReferenceDVB &dref = (eServiceReferenceDVB&)ref;
+				const timeMap* evt = eEPGCache::getInstance()->getTimeMap(dref);
 				if (evt)
 				{
+					int tsidonid = (dref.getTransportStreamID().get()<<16)|dref.getOriginalNetworkID().get();
 					int tablePos = 0;
 					time_t tableTime = start;
 					result  << "<tr>"
@@ -2580,7 +2584,7 @@ public:
 						eString short_description;
 						eString genre;
 						int genreCategory = 0; //none
-						EITEvent event(*It->second);
+						EITEvent event(*It->second, tsidonid);
 						LocalEventData led;
 						led.getLocalData(&event, &short_description, 0, &ext_description);
 						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
@@ -2822,7 +2826,10 @@ static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPCo
 		return "No EPG available";
 
 	eEPGCache::getInstance()->Lock();
-	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
+	eServiceReferenceDVB &dref =
+		(eServiceReferenceDVB&)ref;
+	int tsidonid = dref.getTransportStreamID().get()<<16|dref.getOriginalNetworkID().get();
+	const timeMap* evt = eEPGCache::getInstance()->getTimeMap(dref);
 
 	if (!evt)
 		return "No EPG available";
@@ -2833,7 +2840,7 @@ static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPCo
 		for(It=evt->begin(); It!= evt->end(); ++It)
 		{
 			ext_description = "";
-			EITEvent event(*It->second);
+			EITEvent event(*It->second, tsidonid);
 			LocalEventData led;
 			led.getLocalData(&event, &description, 0, &ext_description);
 
@@ -3187,6 +3194,11 @@ static eString reload_settings(eString request, eString dirpath, eString opt, eH
 		return "+ok";
 	}
 	return "-no settings to load\n";
+}
+
+static eString reload_encoding_table(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	return eString::readEncodingFile() ? "-couldn't open encoding file" : "+ok";
 }
 
 #ifndef DISABLE_FILE
@@ -4776,6 +4788,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/channelinfo", getchannelinfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadEncodingTable", reload_encoding_table, lockWeb);
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadRecordings", load_recordings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveRecordings", save_recordings, lockWeb);

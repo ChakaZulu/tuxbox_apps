@@ -1,5 +1,6 @@
 #include <lib/dvb/si.h>
 
+#include <config.h>
 #include <stdio.h>
 #include <time.h>
 #include <sstream>
@@ -18,30 +19,10 @@ extern "C"
 
 static int getEncodingTable( const char * language_code )
 {
-	if (!memcmp(language_code, "gre", 3))
-		return 7;  // ISO8859-7
-	else 
-		if (!memcmp(language_code, "pol", 3) // Polish
-/*		|| !memcmp(language_code, "cze", 3)  // Czech
-		|| !memcmp(language_code, "ces", 3)
-		|| !memcmp(language_code, "slv", 3)  // Slovenian
-		|| !memcmp(language_code, "slo", 3)  // Slovak
-		|| !memcmp(language_code, "slk", 3)
-		|| !memcmp(language_code, "scr", 3)  // Croatian
-		|| !memcmp(language_code, "hrv", 3)
-		|| !memcmp(language_code, "rum", 3)  // Romanian
-		|| !memcmp(language_code, "ron", 3)
-		|| !memcmp(language_code, "wen", 3)*/) // Sorbian language
-			return 2; // ISO8859-2
-	else 
-		if (!memcmp(language_code,"rus", 3)  // Russian
-		|| !memcmp(language_code, "bul", 3)  // Bulgarian
-/*		|| !memcmp(language_code, "scc", 3)  // Serbian
-		|| !memcmp(language_code, "srp", 3)
-		|| !memcmp(language_code, "mac", 3)  // Macedonian 
-		|| !memcmp(language_code, "mkd", 3)
-		|| !memcmp(language_code, "ukr", 3)*/) // Ukrainian
-			return 5; // ISO8859-5
+	std::map<eString, int>::iterator it =
+		eString::CountryCodeDefaultMapping.find(eString(language_code,3));
+	if ( it != eString::CountryCodeDefaultMapping.end() )
+		return it->second;
 	return 0;  // ISO8859-1 / Latin1
 }
 
@@ -136,12 +117,12 @@ static unsigned int crc32_be(unsigned int crc, unsigned char const *data, unsign
 	return crc;
 }
 
-Descriptor *Descriptor::create(descr_gen_t *descr)
+Descriptor *Descriptor::create(descr_gen_t *descr, int tsidonid)
 {
 	switch (descr->descriptor_tag)
 	{
 	case DESCR_SERVICE:
-		return new ServiceDescriptor((sdt_service_desc*)descr);
+		return new ServiceDescriptor((sdt_service_desc*)descr, tsidonid);
 	case DESCR_CA_IDENT:
 		return new CAIdentifierDescriptor(descr);
 	case DESCR_LINKAGE:
@@ -157,15 +138,15 @@ Descriptor *Descriptor::create(descr_gen_t *descr)
 	case 9:
 		return new CADescriptor((ca_descr_t*)descr);
 	case DESCR_NW_NAME:
-	  return new NetworkNameDescriptor(descr);
+		return new NetworkNameDescriptor(descr);
 	case DESCR_CABLE_DEL_SYS:
-	  return new CableDeliverySystemDescriptor((descr_cable_delivery_system_struct*)descr);
+		return new CableDeliverySystemDescriptor((descr_cable_delivery_system_struct*)descr);
 	case DESCR_SERVICE_LIST:
-	  return new ServiceListDescriptor(descr);
+		return new ServiceListDescriptor(descr);
 	case DESCR_SAT_DEL_SYS:
 	  return new SatelliteDeliverySystemDescriptor((descr_satellite_delivery_system_struct*)descr);
 	case DESCR_SHORT_EVENT:
-		return new ShortEventDescriptor(descr);
+		return new ShortEventDescriptor(descr,tsidonid);
 	case DESCR_ISO639_LANGUAGE:
 		return new ISO639LanguageDescriptor(descr);
 	case DESCR_AC3:
@@ -173,7 +154,7 @@ Descriptor *Descriptor::create(descr_gen_t *descr)
 	case DESCR_BOUQUET_NAME:
 		return new BouquetNameDescriptor(descr);
 	case DESCR_EXTENDED_EVENT:
-		return new ExtendedEventDescriptor(descr);
+		return new ExtendedEventDescriptor(descr,tsidonid);
 	case DESCR_COMPONENT:
 		return new ComponentDescriptor((descr_component_struct*)descr);
 	case DESCR_LESRADIOS:
@@ -234,15 +215,15 @@ eString UnknownDescriptor::toString()
 }
 #endif
 
-ServiceDescriptor::ServiceDescriptor(sdt_service_desc *descr)
-	:Descriptor((descr_gen_t*)descr)
+ServiceDescriptor::ServiceDescriptor(sdt_service_desc *descr, int tsidonid)
+	:Descriptor((descr_gen_t*)descr), tsidonid(tsidonid)
 {
 	int spl=descr->service_provider_name_length;
 	service_type=descr->service_type;
-	service_provider=convertDVBUTF8((unsigned char*)(descr+1), spl);
+	service_provider=convertDVBUTF8((unsigned char*)(descr+1), spl, 0, tsidonid);
 	sdt_service_descriptor_2 *descr2=(sdt_service_descriptor_2*)((__u8*)(descr+1)+spl);
 	spl=descr2->service_name_length;
-	service_name=convertDVBUTF8((unsigned char*)(descr2+1), spl);
+	service_name=convertDVBUTF8((unsigned char*)(descr2+1), spl, 0, tsidonid);
 }
 
 ServiceDescriptor::~ServiceDescriptor()
@@ -503,7 +484,7 @@ eString CADescriptor::toString()
 NetworkNameDescriptor::NetworkNameDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
 {
-	network_name=convertDVBUTF8((unsigned char*)(descr+1), len-2);
+	network_name=convertDVBUTF8((unsigned char*)(descr+1), len-2, 0);
 }
 
 NetworkNameDescriptor::~NetworkNameDescriptor()
@@ -735,8 +716,8 @@ eString ServiceListDescriptor::toString()
 }
 #endif
 
-ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr)
-	:Descriptor(descr)
+ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr, int tsidonid)
+	:Descriptor(descr), tsidonid(tsidonid)
 {
 	__u8 *data=(__u8*)descr;
 	memcpy(language_code, data+2, 3);
@@ -745,13 +726,13 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr)
 
 	int table=getEncodingTable(language_code);
 
-	event_name=convertDVBUTF8((unsigned char*)data+ptr, len, table);
+	event_name=convertDVBUTF8((unsigned char*)data+ptr, len, table, tsidonid);
 	// filter newlines in ARD ShortEventDescriptor event_name
 	event_name.strReplace("\xc2\x8a",": ");
 	ptr+=len;
 
 	len=data[ptr++];
-	text=convertDVBUTF8((unsigned char*) data+ptr, len, table);
+	text=convertDVBUTF8((unsigned char*) data+ptr, len, table, tsidonid);
 	while( text.length() && text[0] == '\x0A' )
 		text.erase(0,1);
 }
@@ -852,8 +833,8 @@ ItemEntry::~ItemEntry()
 {
 }
 
-ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr)
-	:Descriptor(descr)
+ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr, int tsidonid)
+	:Descriptor(descr), tsidonid(tsidonid)
 {
 	struct eit_extended_descriptor_struct *evt=(struct eit_extended_descriptor_struct *)descr;
 	descriptor_number = evt->descriptor_number;
@@ -878,18 +859,18 @@ ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr)
 		eString item;
 
 		item_description_len=data[ptr++];
-		item_description=convertDVBUTF8((unsigned char*) data+ptr, item_description_len, table);
+		item_description=convertDVBUTF8((unsigned char*) data+ptr, item_description_len, table, tsidonid );
 		ptr+=item_description_len;
 
 		item_len=data[ptr++];
-		item=convertDVBUTF8((unsigned char*) data+ptr, item_len, table);
+		item=convertDVBUTF8((unsigned char*) data+ptr, item_len, table, tsidonid);
 		ptr+=item_len;
 
 		items.push_back(new ItemEntry(item_description, item));
 	}
 
 	int text_length=data[ptr++];
-	text=convertDVBUTF8((unsigned char*) data+ptr, text_length, table);
+	text=convertDVBUTF8((unsigned char*) data+ptr, text_length, table, tsidonid);
 	ptr+=text_length;
 }
 
@@ -1140,7 +1121,7 @@ __u8 *PAT::getRAW()
 	return data;
 }
 
-SDTEntry::SDTEntry(sdt_descr_t *descr)
+SDTEntry::SDTEntry(sdt_descr_t *descr, int tsidonid)
 {
 	descriptors.setAutoDelete(true);
 	service_id=HILO(descr->service_id);
@@ -1153,7 +1134,7 @@ SDTEntry::SDTEntry(sdt_descr_t *descr)
 	while (ptr<dlen)
 	{
 		descr_gen_t *d=(descr_gen_t*)(((__u8*)descr)+ptr);
-		descriptors.push_back(Descriptor::create(d));
+		descriptors.push_back(Descriptor::create(d,tsidonid));
 		ptr+=d->descriptor_length+2;
 	}
 }
@@ -1175,7 +1156,7 @@ int SDT::data(__u8 *data)
 	while (ptr<slen-4)
 	{
 		sdt_descr_t *descr=(sdt_descr_t*)(data+ptr);
-		entries.push_back(new SDTEntry(descr));
+		entries.push_back(new SDTEntry(descr,(transport_stream_id<<16)|original_network_id));
 		int dlen=HILO(descr->descriptors_loop_length);
 		ptr+=SDT_DESCR_LEN+dlen;
 	}
@@ -1323,7 +1304,7 @@ NITEntry::NITEntry(nit_ts_t* ts)
 	while (ptr<elen)
 	{
 		descr_gen_t *d=(descr_gen_t*)(((__u8*)ts)+NIT_TS_LEN+ptr);
-		transport_descriptor.push_back(Descriptor::create(d));
+		transport_descriptor.push_back(Descriptor::create(d,(transport_stream_id<<16)|original_network_id));
 		ptr+=d->descriptor_length+2;
   }
 }
@@ -1357,7 +1338,7 @@ int NIT::data(__u8* data)
 	return ptr!=len;
 }
 
-EITEvent::EITEvent(const eit_event_struct *event)
+EITEvent::EITEvent(const eit_event_struct *event, int tsidonid)
 {
 	descriptor.setAutoDelete(true);
 	event_id=HILO(event->event_id);
@@ -1376,7 +1357,7 @@ EITEvent::EITEvent(const eit_event_struct *event)
 	while (ptr<len)
 	{
 		descr_gen_t *d=(descr_gen_t*) (((__u8*)(event+1))+ptr);
-		descriptor.push_back(Descriptor::create(d));
+		descriptor.push_back(Descriptor::create(d,tsidonid));
 		ptr+=d->descriptor_length+2;
 	}
 }
@@ -1401,7 +1382,7 @@ int EIT::data(__u8 *data)
 		int evLength=HILO(((eit_event_struct*)(data+ptr))->
 			descriptors_loop_length)+EIT_LOOP_SIZE;
 
-		events.push_back(new EITEvent((eit_event_struct*)(data+ptr)));
+		events.push_back(new EITEvent((eit_event_struct*)(data+ptr), (transport_stream_id<<16)|original_network_id));
 
 		// store plain data
 		__u8 *plain = new __u8[evLength];

@@ -416,7 +416,7 @@ static eString erc_epg(eString request, eString dirpath, eString opt, eHTTPConne
 			epgcache->Unlock();
 			return "-no events for this service";
 		}
-	
+		eServiceReferenceDVB &rref=(eServiceReferenceDVB&)ref;
 		timeMap::const_iterator ibegin = evmap->begin(), iend = evmap->end();
 		if (begin != 0)
 		{
@@ -430,10 +430,11 @@ static eString erc_epg(eString request, eString dirpath, eString opt, eHTTPConne
 			if (iend != evmap->end())
 				++iend;
 		}
-		
+		int tsidonid =
+			(rref.getTransportStreamID().get()<<16)|rref.getOriginalNetworkID().get();
 		for (timeMap::const_iterator event(ibegin); event != iend; ++event)
 		{
-			EITEvent *ev = new EITEvent(*event->second);
+			EITEvent *ev = new EITEvent(*event->second, tsidonid);
 			processEvent(res, ev, search, wantext);
 			delete ev;
 		}

@@ -478,15 +478,15 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				::close(fd);
 				if ( rd > 12 /*EIT_LOOP_SIZE*/ )
 				{
-					EITEvent *evt = new EITEvent( (eit_event_struct*)buf );
 					EIT *e=new EIT();
-					evt->free_CA_mode=0;
 					e->ts=EIT::tsFaked;
 					e->type=EIT::typeNowNext;
 					e->version_number=0;
 					e->current_next_indicator=0;
 					e->transport_stream_id=service.getTransportStreamID().get();
 					e->original_network_id=service.getOriginalNetworkID().get();
+					EITEvent *evt = new EITEvent( (eit_event_struct*)buf, (e->transport_stream_id<<16)|e->original_network_id );
+					evt->free_CA_mode=0;
 					e->events.push_back(evt);
 					e->ready=1;
 					dvb.tEIT.inject(e);

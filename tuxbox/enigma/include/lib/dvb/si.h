@@ -32,7 +32,7 @@ public:
 	};
 	inline virtual ~Descriptor(){};
 
-	static Descriptor *create(descr_gen_t *data);
+	static Descriptor *create(descr_gen_t *data, int tsidonid=0);
 	int Tag() { return tag; }
 
 #ifdef SUPPORT_XML	
@@ -62,10 +62,10 @@ public:
 class ServiceDescriptor: public Descriptor
 {
 public:
-  int service_type;
+  int service_type, tsidonid;
   eString service_provider, service_name;
   static const int CTag() { return DESCR_SERVICE; }
-  ServiceDescriptor(sdt_service_desc *descr);
+  ServiceDescriptor(sdt_service_desc *descr, int tsidonid);
   ~ServiceDescriptor();
   eString toString();
 };
@@ -165,7 +165,7 @@ public:
 class NetworkNameDescriptor: public Descriptor
 {
 public:
-	eString network_name;
+  eString network_name;
   NetworkNameDescriptor(descr_gen_t *descr);
   ~NetworkNameDescriptor();
   eString toString();
@@ -236,12 +236,13 @@ public:
 class ShortEventDescriptor: public Descriptor
 {
 public:
-	ShortEventDescriptor(descr_gen_t *descr);
+	ShortEventDescriptor(descr_gen_t *descr, int tsidonid);
 	ShortEventDescriptor(): Descriptor((descr_gen_t*)"\x4d") { };
 	eString toString();
 	char language_code[3];
 	eString event_name;
 	eString text;
+	int tsidonid;
 };
 
 class ISO639LanguageDescriptor: public Descriptor
@@ -281,13 +282,14 @@ public:
 class ExtendedEventDescriptor: public Descriptor
 {
 public:
-	ExtendedEventDescriptor(descr_gen_t *descr);
+	ExtendedEventDescriptor(descr_gen_t *descr, int tsidonid);
 	eString toString();
 	int descriptor_number;
 	int last_descriptor_number;
 	char language_code[3];
 	ePtrList< ItemEntry > items;
 	eString text;
+	int tsidonid;
 };
 
 class ComponentDescriptor: public Descriptor
@@ -397,8 +399,7 @@ public:
 class SDTEntry
 {
 public:
-	SDTEntry(sdt_descr_t *descr);
-	
+	SDTEntry(sdt_descr_t *descr, int tsidonid);
 	int service_id;
 	int EIT_schedule_flag;
 	int EIT_present_following_flag;
@@ -475,7 +476,7 @@ public:
 class EITEvent
 {
 public:
-	EITEvent(const eit_event_struct *event);
+	EITEvent(const eit_event_struct *event, int tsidonid);
 	EITEvent();
 	int event_id;
 	time_t start_time;

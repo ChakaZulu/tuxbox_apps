@@ -89,7 +89,7 @@ void eListBoxEntryEPG::build()
 }
 
 eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox, eServiceReference &ref)
-		:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), paraDate(0), paraTime(0), paraDescr(0), event(evt), service(ref)
+		:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), paraDate(0), paraTime(0), paraDescr(0), event(evt,(((eServiceReferenceDVB&)ref).getTransportStreamID().get()<<16)|((eServiceReferenceDVB&)ref).getOriginalNetworkID().get()), service(ref)
 {
 	build();
 }
@@ -177,11 +177,12 @@ void eEPGSelector::fillEPGList()
 	if (evt)
 		It = evt->begin();
 
+	int tsidonid = (current.getTransportStreamID().get()<<16)|current.getOriginalNetworkID().get();
 	if (current.data[0] == 5 ) // NVOD REF ENTRY
 	{
 		for (; It != evt->end(); It++)
 		{
-			EITEvent evt(*It->second);   // NVOD Service Event
+			EITEvent evt(*It->second,tsidonid);   // NVOD Service Event
 			for (ePtrList<Descriptor>::iterator d(evt.descriptor); d != evt.descriptor.end(); ++d)
 			{
 				Descriptor *descr=*d;
@@ -198,7 +199,7 @@ void eEPGSelector::fillEPGList()
 						if ( pIt != parent->end() )   // event found..
 						{
 							// build EITEvent with short and ext description )
-							EITEvent e(*pIt->second);
+							EITEvent e(*pIt->second,tsidonid);
 							// do not delete ePtrListEntrys..
 							e.descriptor.setAutoDelete(false);
 							e.start_time = evt.start_time;

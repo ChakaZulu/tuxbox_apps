@@ -295,9 +295,12 @@ void eZapEPG::buildService(serviceentry &service)
 
 	timeMap::const_iterator iend = evmap->lower_bound(end);
 
+	int tsidonid =
+		(service.service.getTransportStreamID().get()<<16) | service.service.getOriginalNetworkID().get();
+
 	for (timeMap::const_iterator event(ibegin); event != iend; ++event)
 	{
-		EITEvent *ev = new EITEvent(*event->second);
+		EITEvent *ev = new EITEvent(*event->second,tsidonid);
 		if (((ev->start_time+ev->duration)>= start) && (ev->start_time <= end))
 		{
 			eString description;

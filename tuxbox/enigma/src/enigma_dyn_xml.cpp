@@ -231,22 +231,23 @@ static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTT
 	if (!current)
 		return "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content id=\"current\">No EPG available</content>";
 
+	eServiceReferenceDVB &rref = (eServiceReferenceDVB&)ref;
 	eEPGCache::getInstance()->Lock();
-	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
+	const timeMap* evt = eEPGCache::getInstance()->getTimeMap(rref);
 
 	if (!evt)
 		return "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content id=\"evt\">No EPG available</content>";
 	else
 	{
 		timeMap::const_iterator It;
-
+		int tsidonid = (rref.getTransportStreamID().get()<<16) | rref.getOriginalNetworkID().get();
 		result << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content>";
 		
 		int i = 0;
 		for(It=evt->begin(); It!= evt->end(); ++It)
 		{
 			ext_description = "";
-			EITEvent event(*It->second);
+			EITEvent event(*It->second,tsidonid);
 			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 			{
 				Descriptor *descriptor = *d;

@@ -259,21 +259,23 @@ static eString wapEPG(int page)
 	if (!current)
 		return "No EPG available";
 
+	eServiceReferenceDVB &rref = (eServiceReferenceDVB&)ref;
 	eEPGCache::getInstance()->Lock();
-	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
+	const timeMap* evt = eEPGCache::getInstance()->getTimeMap(rref);
 
 	if (!evt)
 		return "No EPG available";
 	else
 	{
 		timeMap::const_iterator It;
+		int tsidonid = (rref.getTransportStreamID().get()<<16)|rref.getOriginalNetworkID().get();
 
 		int i = 0;
 		for(It=evt->begin(); It!= evt->end(); ++It)
 		{
 			if ((i >= page * 25) && (i < (page + 1) * 25))
 			{
-				EITEvent event(*It->second);
+				EITEvent event(*It->second, tsidonid);
 				LocalEventData led;
 				led.getLocalData(&event, &description);
 				tm* t = localtime(&event.start_time);

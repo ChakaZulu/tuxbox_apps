@@ -216,6 +216,8 @@ eZap::eZap(int argc, char **argv)
 	setlocale(LC_ALL, language);
 	free(language);
 
+	eString::readEncodingFile();
+
 #ifdef ENABLE_DYN_CONF
 #ifndef DISABLE_FILE
 	extern void initHDDparms(void);

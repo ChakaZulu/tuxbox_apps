@@ -4,10 +4,17 @@
 #include <string>
 #include <stdarg.h>
 #include <stdio.h>
+#include <set>
+#include <map>
 #include "eerror.h"
 
 class eString : public std::string
 {
+public:
+	static std::map<eString, int> eString::CountryCodeDefaultMapping;
+	static std::map<int, int> eString::TransponderDefaultMapping; // more priority as country..
+	static std::set<int> eString::TransponderUseTwoCharMapping;
+	static int readEncodingFile();
 public:
 // constructors
 	inline eString()	{}	
@@ -31,7 +38,7 @@ public:
 	int icompare(const eString& s);
 };
 
-eString convertDVBUTF8(const unsigned char *data, int len, int table=0); // with default ISO8859-1/Latin1
+eString convertDVBUTF8(const unsigned char *data, int len, int table=0, int tsidonid=0); // with default ISO8859-1/Latin1
 eString convertUTF8DVB(const eString &string, int table=0); // with default ISO8859-1/Latin1
 eString convertLatin1UTF8(const eString &string);
 int isUTF8(const eString &string);

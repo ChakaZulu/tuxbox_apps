@@ -548,7 +548,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_
 		// before use .. cast it to eit_event_struct*
 				return (EITEvent*) i->second->get();
 			else
-				return new EITEvent( *i->second );
+				return new EITEvent( *i->second, (It->first.tsid<<16)|It->first.onid );
 		}
 		else
 			eDebug("event %04x not found in epgcache", event_id);
@@ -579,7 +579,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, 
 				{
 					for ( eventMap::iterator emIt( evIt->second.first.begin() ); emIt != evIt->second.first.end(); emIt++)
 					{
-						EITEvent refEvt(*emIt->second);
+						EITEvent refEvt(*emIt->second, (evIt->first.tsid<<16)|evIt->first.onid);
 						if ( t >= refEvt.start_time && t <= refEvt.start_time+refEvt.duration)
 						{ // found the current start_time..
 							for (ePtrList<Descriptor>::iterator d(refEvt.descriptor); d != refEvt.descriptor.end(); ++d)
@@ -596,7 +596,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, 
 												// get plain data... not in EITEvent Format !!!
 												// before use .. cast it to eit_event_struct*
 												return (EITEvent*) i->second->get();
-											EITEvent *evt = new EITEvent( *i->second );
+											EITEvent *evt = new EITEvent( *i->second, (evIt->first.tsid<<16)|evIt->first.onid);
 											evt->start_time = refEvt.start_time;
 											evt->duration = refEvt.duration;
 											evt->event_id = refEvt.event_id;
@@ -627,7 +627,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, 
 						// get plain data... not in EITEvent Format !!!
 						// before use .. cast it to eit_event_struct*
 						return (EITEvent*) i->second->get();
-					return new EITEvent( *i->second );
+					return new EITEvent( *i->second, (It->first.tsid<<16)|It->first.onid  );
 				}
 			}
 		}
@@ -643,7 +643,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, 
 					// get plain data... not in EITEvent Format !!!
 					// before use .. cast it to eit_event_struct*
 					return (EITEvent*) i->second->get();
-				return new EITEvent( *i->second );
+				return new EITEvent( *i->second, (It->first.tsid<<16)|It->first.onid );
 			}
 		}
 	}
