@@ -147,9 +147,10 @@ extern const char * locale_real_names[]; /* #include <system/locals_intern.h> */
 CZapitClient::SatelliteList satList;
 CZapitClient::SatelliteList::iterator satList_it;
 
-#define NEUTRINO_SETTINGS_FILE       CONFIGDIR "/neutrino.conf"
-#define NEUTRINO_SCAN_SETTINGS_FILE  CONFIGDIR "/scan.conf"
-#define NEUTRINO_PARENTALLOCKED_FILE DATADIR   "/neutrino/.plocked"
+#define NEUTRINO_SETTINGS_FILE          CONFIGDIR "/neutrino.conf"
+#define NEUTRINO_RECORDING_ENDED_SCRIPT CONFIGDIR "/recording.end"
+#define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
+#define NEUTRINO_PARENTALLOCKED_FILE    DATADIR   "/neutrino/.plocked"
 
 static void initGlobals(void)
 {
@@ -3389,6 +3390,14 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 				puts("[neutrino.cpp] no recording devices");
 
 			startNextRecording();
+
+			if (recordingstatus == 0)
+			{
+				puts("[neutrino.cpp] executing " NEUTRINO_RECORDING_ENDED_SCRIPT ".");
+
+				if (system(NEUTRINO_RECORDING_ENDED_SCRIPT) != 0)
+					perror(NEUTRINO_RECORDING_ENDED_SCRIPT "failed");
+			}
 		}
 		else if(nextRecordingInfo!=NULL)
 		{
