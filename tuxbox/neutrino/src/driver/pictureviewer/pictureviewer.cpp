@@ -234,13 +234,15 @@ void CPictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 	m_busy_buffer = (unsigned char*) malloc(width*width*cpp);
 	busy_buffer_wrk = m_busy_buffer;
 	unsigned char* fb = CFrameBuffer::getInstance()->getFrameBufferPointer();
+	unsigned int stride = CFrameBuffer::getInstance()->getStride();
+
 	for(int y=sy ; y < sy+width; y++)
-   {
+	{
 		for(int x=sx ; x< sx+width; x++)
-	   {
-			memcpy(busy_buffer_wrk, fb+y*var->xres*cpp + x*cpp, cpp);
+		{
+			memcpy(busy_buffer_wrk, fb + y * stride + x*cpp, cpp);
 			busy_buffer_wrk+=cpp;
-			memcpy(fb+y*var->xres*cpp + x*cpp, fb_buffer, cpp);
+			memcpy(fb + y * stride + x*cpp, fb_buffer, cpp);
 		}
 	}
 	m_busy_x = sx;
@@ -258,13 +260,14 @@ void CPictureViewer::hideBusy()
 		struct fb_var_screeninfo *var;
 		var = CFrameBuffer::getInstance()->getScreenInfo();
 		unsigned char* fb = CFrameBuffer::getInstance()->getFrameBufferPointer();
+		unsigned int stride = CFrameBuffer::getInstance()->getStride();
 		unsigned char* busy_buffer_wrk = m_busy_buffer;
 
 		for(int y=m_busy_y ; y < m_busy_y+m_busy_width; y++)
 		{
 			for(int x=m_busy_x ; x< m_busy_x+m_busy_width; x++)
 			{
-				memcpy(fb+y*var->xres*m_busy_cpp + x*m_busy_cpp, busy_buffer_wrk, m_busy_cpp);
+				memcpy(fb + y * stride + x * m_busy_cpp, busy_buffer_wrk, m_busy_cpp);
 				busy_buffer_wrk+=m_busy_cpp;
 			}
 		}
