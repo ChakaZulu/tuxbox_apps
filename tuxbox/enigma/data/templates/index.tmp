@@ -28,60 +28,74 @@ a:active  { text-decoration:none; }
 td.menu { font-family: Verdana; font-size: 10pt; font-weight: bold}
 </style>
 <script language="javascript">
- function getNewPageTV(xy)
- {
-  document.location.href="/?mode=tv&bouquetid="+xy;
- }
+function getNewPageTV(xy)
+{
+	document.location.href="/?mode=tv&bouquetid="+xy;
+}
 
- function getNewPageRadio(xy)
- {
-  document.location.href="/?mode=radio&bouquetid="+xy;
- }
+function getNewPageRadio(xy)
+{
+	document.location.href="/?mode=radio&bouquetid="+xy;
+}
 
- function reload()
- {
-  document.location.reload();
- }
+function reload()
+{
+	document.location.reload();
+}
 
- function setVol(xy)
- {
-  win=window.open("/setVolume?volume="+xy, "switchStatus","width=50,height=20,left=0,top=0");
-  win.focus();
-  parent.setTimeout("reload()", 100);
- }
+function setVol(xy)
+{
+	win=window.open("/setVolume?volume="+xy, "switchStatus","width=50,height=20,left=0,top=0");
+	win.focus();
+	parent.setTimeout("reload()", 100);
+}
 
- function Mute()
- {
-  win=window.open("/setVolume?mute=1", "switchStatus","width=1,height=1,left=0,top=0");
-  win.focus();
-  parent.setTimeout("reload()", 100);
- }
+function Mute()
+{
+	win=window.open("/setVolume?mute=1", "switchStatus","width=1,height=1,left=0,top=0");
+	win.focus();
+	parent.setTimeout("reload()", 100);
+}
 
- function unMute()
- {
-  win=window.open("/setVolume?mute=0", "switchStatus","width=1,height=1,left=0,top=0");
-  win.focus();
-  parent.setTimeout("reload()", 100);
- }
+function unMute()
+{
+	win=window.open("/setVolume?mute=0", "switchStatus","width=1,height=1,left=0,top=0");
+	win.focus();
+	parent.setTimeout("reload()", 100);
+}
 
- function switchtoChannel(xy)
- {
-  win=window.open("/switchTo?service="+xy, "switchStatus","width=1,height=1,left=0,top=0");
-  win.focus();
-  parent.setTimeout("reload()", 3000);
- }
+function switchtoChannel(xy)
+{
+	win=window.open("/switchTo?service="+xy, "switchStatus","width=1,height=1,left=0,top=0");
+	win.focus();
+	parent.setTimeout("reload()", 3000);
+}
 
- function openEPG(xy)
- {
-  win=window.open("/cgi-bin/getcurrentepg2?ref="+xy, "epg", "width=500, height=600 left=0, top=0, scrollbars=yes, resizable=yes");
-  win.focus();
- }
+function openEPG(xy)
+{
+	win=window.open("/cgi-bin/getcurrentepg2?ref="+xy, "epg", "width=500, height=600 left=0, top=0, scrollbars=yes, resizable=yes");
+	win.focus();
+}
 
- function openSI()
- {
-  win=window.open("/cgi-bin/streaminfo", "si", "width=300, height=200, left=0, top=0");
-  win.focus();
- }
+function openSI()
+{
+	win=window.open("/cgi-bin/streaminfo", "si", "width=300, height=200, left=0, top=0");
+	win.focus();
+}
+
+function cleanupTimerList()
+{
+	win=window.open("/cleanupTimerList", "switchStatus", "width=1, height=1, left=0, top=0");
+	win.focus();
+	parent.setTimeout("close()", 300);
+}
+
+function clearTimerList()
+{
+	win=window.open("/clearTimerList", "switchStatus", "width=1, height=1, left=0, top=0");
+	win.focus();
+	parent.setTimeout("close()", 300);
+}
 </script>
 
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
