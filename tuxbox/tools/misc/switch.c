@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch.c,v $
+ *   Revision 1.3  2001/03/03 17:08:37  gillem
+ *   - devfs support
+ *
  *   Revision 1.2  2001/03/03 11:17:03  gillem
  *   - bugfix
  *
@@ -28,7 +31,7 @@
  *
  *
  *
- *   $Revision: 1.2 $
+ *   $Revision: 1.3 $
  *
  */
 
@@ -314,7 +317,7 @@ int main (int argc, char **argv) {
 
   int count,i;
 
-  if ((fd = open("/dev/avs",O_RDWR)) <= 0) {
+  if ((fd = open("/dev/dbox/avs",O_RDWR)) <= 0) {
     perror("open");
     return -1;                                                      
   }
