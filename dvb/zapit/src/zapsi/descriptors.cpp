@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.24 2002/04/20 10:27:17 obi Exp $
+ * $Id: descriptors.cpp,v 1.25 2002/04/20 21:16:51 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -61,8 +61,10 @@ std::string charToXML (uint8_t character)
 		return returnString += character;
 	case 0x80 ... 0x82:
 	case 0x86 ... 0x87:
-	case 0x8a:
+	case 0x8A:
 		return "";
+	case 0xE9:
+		return returnString += character;
 	default:
 		char val[7];
 		sprintf(val, "&#%d;", character);
@@ -491,7 +493,7 @@ uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t trans
 	if (lastProviderName != providerName)
 	{
 		lastProviderName = providerName;
-		eventServer->sendEvent(CZapitClient::EVT_SCAN_PROVIDER, CEventServer::INITID_ZAPIT, (void *) lastProviderName.c_str(), lastProviderName.length());
+		eventServer->sendEvent(CZapitClient::EVT_SCAN_PROVIDER, CEventServer::INITID_ZAPIT, (void *) lastProviderName.c_str(), lastProviderName.length() + 1);
 	}
 
 	switch (service_type)
