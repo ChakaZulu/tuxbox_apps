@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.22 2003/01/11 20:14:38 rasc Exp $
+ * $Id: frontend.h,v 1.23 2003/01/19 21:46:37 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef __frontend_h__
-#define __frontend_h__
+#ifndef __zapit_frontend_h__
+#define __zapit_frontend_h__
 
 /* system */
 #include <stdint.h>
@@ -65,74 +65,74 @@ class CFrontend
 		/* high lnb offsets */
 		int32_t lnbOffsetsHigh[MAX_LNBS];
 
-		void setSec (uint8_t sat_no, uint8_t pol, bool high_band, uint32_t frequency);
+		void setSec(uint8_t sat_no, uint8_t pol, bool high_band, uint32_t frequency);
 		
-		const bool sendDiseqcZeroByteCommand (uint8_t frm, uint8_t addr, uint8_t cmd);
-		const bool sendDiseqcSmatvRemoteTuningCommand (uint32_t frequency);
-		const uint8_t receiveDiseqcReply (int timeout_ms);
+		bool sendDiseqcZeroByteCommand(uint8_t frm, uint8_t addr, uint8_t cmd);
+		bool sendDiseqcSmatvRemoteTuningCommand(uint32_t frequency);
+		uint8_t receiveDiseqcReply(int timeout_ms);
 
 	public:
-		CFrontend ();
-		~CFrontend ();
+		CFrontend(void);
+		~CFrontend(void);
 
 		/*
 		 * linux dvb frontend api
 		 */
-		static fe_code_rate_t getCodeRate (uint8_t fec_inner);
-		static fe_modulation_t getModulation (uint8_t modulation);
+		static fe_code_rate_t getCodeRate(uint8_t fec_inner);
+		static fe_modulation_t getModulation(uint8_t modulation);
 
-		const dvb_frontend_info * getInfo ()	{ return info; };
+		struct dvb_frontend_info *getInfo(void)	{ return info; };
 
-		const bool secResetOverload ();
-		const bool secSetTone (fe_sec_tone_mode_t mode);
-		const bool secSetVoltage (fe_sec_voltage_t voltage);
+		bool secResetOverload(void);
+		bool secSetTone(fe_sec_tone_mode_t mode);
+		bool secSetVoltage(fe_sec_voltage_t voltage);
 
-		const bool sendDiseqcCommand (struct dvb_diseqc_master_cmd * cmd);
-		const bool sendToneBurst (fe_sec_mini_cmd_t burst);
+		bool sendDiseqcCommand(struct dvb_diseqc_master_cmd *cmd);
+		bool sendToneBurst(fe_sec_mini_cmd_t burst);
 
-		const fe_status_t getStatus ();
-		const uint32_t getBitErrorRate ();
-		const uint16_t getSignalStrength ();
-		const uint16_t getSignalNoiseRatio ();
-		const uint32_t getUncorrectedBlocks ();
+		fe_status_t getStatus(void);
+		uint32_t getBitErrorRate(void);
+		uint16_t getSignalStrength(void);
+		uint16_t getSignalNoiseRatio(void);
+		uint32_t getUncorrectedBlocks(void);
 
-		void setFrontend (dvb_frontend_parameters *feparams);
-		const dvb_frontend_parameters * getFrontend ();
-		void discardEvents ();
-		struct dvb_frontend_event getEvent ();
-		struct dvb_frontend_event blockingTune (dvb_frontend_parameters *feparams);
+		void setFrontend(struct dvb_frontend_parameters *feparams);
+		struct dvb_frontend_parameters getFrontend(void);
+		void discardEvents(void);
+		struct dvb_frontend_event getEvent(void);
+		struct dvb_frontend_event blockingTune(struct dvb_frontend_parameters *feparams);
 
-		unsigned int getFrequency ();
-		unsigned char getPolarization ();
+		unsigned int getFrequency(void);
+		unsigned char getPolarization(void);
 
 		
 		
 		/*
 		 * zapit tuner api
 		 */
-		const bool tuneTsidOnid (uint32_t tsid_onid);
-		const bool tuneFrequency (dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc);
+		bool tuneTsidOnid(uint32_t tsid_onid);
+		bool tuneFrequency(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc);
 
 		/*
 		 * zapit diseqc api
 		 */
 #if 0
-		const bool sendDiseqcCommand (fe_sec_tone_mode_t mode, fe_sec_voltage_t voltage, uint8_t diseqc, uint32_t repeats);
+		bool sendDiseqcCommand(fe_sec_tone_mode_t mode, fe_sec_voltage_t voltage, uint8_t diseqc, uint32_t repeats);
 #endif
-		const bool sendDiseqcPowerOn ();
-		const bool sendDiseqcReset ();
-		const bool sendDiseqcStandby ();
+		bool sendDiseqcPowerOn(void);
+		bool sendDiseqcReset(void);
+		bool sendDiseqcStandby(void);
 
-		void setDiseqcRepeats (uint8_t repeats)		{ diseqcRepeats = repeats; }
-		const uint8_t getDiseqcRepeats ()		{ return diseqcRepeats; }
+		void setDiseqcRepeats(uint8_t repeats)		{ diseqcRepeats = repeats; }
+		uint8_t getDiseqcRepeats(void)			{ return diseqcRepeats; }
 
-		void setDiseqcType (diseqc_t type);
-		const diseqc_t getDiseqcType ()			{ return diseqcType; }
+		void setDiseqcType(diseqc_t type);
+		diseqc_t getDiseqcType(void)			{ return diseqcType; }
 		
-		const bool isInitialized ()			{ return initialized; }
-		const uint32_t getTsidOnid ()			{ return currentTsidOnid; }
+		bool isInitialized(void)			{ return initialized; }
+		uint32_t getTsidOnid(void)			{ return currentTsidOnid; }
 
-		void setLnbOffset (bool high, uint8_t index, int32_t offset) {
+		void setLnbOffset(bool high, uint8_t index, int32_t offset) {
 
 			if (index < MAX_LNBS) {
 
@@ -144,4 +144,4 @@ class CFrontend
 		}
 };
 
-#endif /* __frontend_h__ */
+#endif /* __zapit_frontend_h__ */
