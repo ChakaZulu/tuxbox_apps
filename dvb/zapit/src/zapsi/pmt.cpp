@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.35 2003/10/07 20:08:40 obi Exp $
+ * $Id: pmt.cpp,v 1.36 2003/11/21 19:43:00 alexw Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -19,7 +19,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
-
+#define UPDATE_PMT 1
 #ifdef UPDATE_PMT
 #include <fcntl.h>
 #include <sys/ioctl.h>
