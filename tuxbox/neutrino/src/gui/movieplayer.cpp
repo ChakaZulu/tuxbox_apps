@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.65 2004/01/30 23:01:23 gagga Exp $
+  $Id: movieplayer.cpp,v 1.66 2004/02/01 21:18:35 zwen Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -710,7 +710,7 @@ PlayStreamThread (void *mrl)
 				// pida and pidv should have been set by ReceiveStreamThread now
 				// WHY ???!!!!
 				// TODO replace this with a condition/mutex !
-				while(!avpids_found)
+				while(!avpids_found && playstate > CMoviePlayerGui::STOPPED)
 				{
 					usleep(100000);
 				}
@@ -1410,7 +1410,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.65 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.66 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1556,7 +1556,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.65 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.66 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
         else if (msg == CRCInput::RC_left)
