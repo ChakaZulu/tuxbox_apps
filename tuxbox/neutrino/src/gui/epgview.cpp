@@ -461,7 +461,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 				// 31.05.2002 dirch		record timer
 				case CRCInput::RC_red:
-					if(g_settings.recording_type > 0)
+					if (g_settings.recording_type != CNeutrinoApp::RECORDING_OFF)
 					{
 						CTimerdClient timerdclient;
 						if(timerdclient.isTimerdAvailable())
@@ -702,8 +702,8 @@ void CEpgData::showTimerEventBar (bool show)
 
 
     // Button: Timer Record & Channelswitch
-	if(g_settings.recording_type)
-	{			// display record button only if recording to server or vcr
+	if (g_settings.recording_type != CNeutrinoApp::RECORDING_OFF)
+	{
 		pos = 0;
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+8+cellwidth*pos, y+h_offset );
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.recordevent"), COL_INFOBAR, 0, true); // UTF-8

@@ -222,7 +222,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 
 		else if (msg == (neutrino_msg_t)g_settings.key_channelList_addrecord)
 		{
-			if(g_settings.recording_type > 0)
+			if (g_settings.recording_type != CNeutrinoApp::RECORDING_OFF)
 			{
 				CTimerdClient timerdclient;
 				if(timerdclient.isTimerdAvailable())
@@ -494,13 +494,11 @@ void  EventList::showFunctionBar (bool show)
 
 
     // -- Button: Timer Record & Channelswitch
-    if(g_settings.recording_type) {
-	// display record button only if recording to server or vcr
-	pos = 0;
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, bx+8+cellwidth*pos, by+h_offset );
-	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos,
-		by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.recordevent"),
-		COL_INFOBAR, 0, true); // UTF-8
+    if (g_settings.recording_type != CNeutrinoApp::RECORDING_OFF)
+    {
+	    pos = 0;
+	    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, bx+8+cellwidth*pos, by+h_offset);
+	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.recordevent"), COL_INFOBAR, 0, true); // UTF-8
     }
 
     // Button: Timer Channelswitch

@@ -2661,7 +2661,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CNFSMountGui::automount();
 
 	// setup recording device
-	if(g_settings.recording_type > 0)
+	if (g_settings.recording_type != RECORDING_OFF)
 		setupRecordingDevice();
 
 	dprintf( DEBUG_NORMAL, "menue setup\n");

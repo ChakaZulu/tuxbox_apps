@@ -149,20 +149,19 @@ CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
 }
 bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
 {
-   // 0 = aus
-   // 1 = server
-   // 2 = vcr
-   // 3 = file/nfs
-   
-   if(g_settings.recording_type==0 || g_settings.recording_type == 3)
+   if ((g_settings.recording_type == CNeutrinoApp::RECORDING_OFF) ||
+       (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE))
    {
-      for(int i=0;i<8;i++)
-         toDisable[i]->setActive(false);
-      if (g_settings.recording_type==3)
-        toDisable[7]->setActive(true);
-        toDisable[8]->setActive(true);
+	   for(int i = 0; i < 8; i++)
+		   toDisable[i]->setActive(false);
+
+	   if (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE)
+	   {
+		   toDisable[7]->setActive(true);
+		   toDisable[8]->setActive(true);
+	   }
    }
-   else if(g_settings.recording_type==1)
+   else if (g_settings.recording_type == CNeutrinoApp::RECORDING_SERVER)
    {
       toDisable[0]->setActive(true);
       toDisable[1]->setActive(true);
@@ -174,7 +173,7 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
       toDisable[7]->setActive(false);
       toDisable[8]->setActive(false);
    }
-   else if(g_settings.recording_type==2)
+   else if (g_settings.recording_type == CNeutrinoApp::RECORDING_VCR)
    {
       toDisable[0]->setActive(false);
       toDisable[1]->setActive(false);
@@ -187,7 +186,7 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
       toDisable[8]->setActive(false);
    }
    
-   if (g_settings.recording_type == 3) 
+   if (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE) 
    {
         // set SPTS mode for drivers
         FILE * fd = fopen("/var/etc/.spts_mode", "w");

@@ -66,11 +66,19 @@ typedef struct neutrino_font_descr
 
 class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 {
-	private:
+ public:
+	enum
+		{
+			RECORDING_OFF    = 0,
+			RECORDING_SERVER = 1,
+			RECORDING_VCR    = 2,
+			RECORDING_FILE   = 3
+		};
 
-		CFrameBuffer	*frameBuffer;
+ private:
+	CFrameBuffer * frameBuffer;
 
-		enum
+	enum
 		{
 			mode_unknown = -1,
 			mode_tv = 1,
@@ -83,14 +91,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 			mode_mask = 0xFF,
 			norezap = 0x100
 		};
-
-		enum
-			{
-				RECORDING_OFF    = 0,
-				RECORDING_SERVER = 1,
-				RECORDING_VCR    = 2,
-				RECORDING_FILE   = 3
-			};
 
 		CConfigFile			configfile;
 		CScanSettings			scanSettings;
