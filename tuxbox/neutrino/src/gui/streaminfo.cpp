@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: streaminfo.cpp,v 1.18 2002/02/26 17:24:16 field Exp $
+$Id: streaminfo.cpp,v 1.19 2002/02/27 22:51:13 field Exp $
 
 Module StreamInfo
 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.19  2002/02/27 22:51:13  field
+ Tasten kaputt gefixt - sollte wieder gehen :)
+
  Revision 1.18  2002/02/26 17:24:16  field
  Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
 
@@ -103,7 +106,7 @@ int CStreamInfo::exec(CMenuTarget* parent, string)
 
 	bool doLoop = true;
 
-	int msg; uint data;
+	uint msg; uint data;
 	while ( doLoop )
 	{
 		g_RCInput->getMsg( &msg, &data, 130 );

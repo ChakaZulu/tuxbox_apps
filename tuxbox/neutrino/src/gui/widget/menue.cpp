@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.41 2002/02/26 17:24:16 field Exp $
+$Id: menue.cpp,v 1.42 2002/02/27 22:51:13 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.42  2002/02/27 22:51:13  field
+ Tasten kaputt gefixt - sollte wieder gehen :)
+
  Revision 1.41  2002/02/26 17:24:16  field
  Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
 
@@ -168,7 +171,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 	paint();
 	int retval = menu_return::RETURN_REPAINT;
-	int msg; uint data;
+	uint msg; uint data;
 
 	do
 	{
@@ -180,7 +183,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 		for (i= 0; i< items.size(); i++)
 		{
 			CMenuItem* titem = items[i];
-			if ( (titem->directKey!= -1) && (titem->directKey== msg) )
+			if ( (titem->directKey!= CRCInput::RC_nokey) && (titem->directKey== msg) )
 			{
 				if (titem->isSelectable())
 				{
@@ -379,7 +382,7 @@ CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool
 	optionValue = OptionValue;
 	observ=Observ;
 	localizing= Localizing;
-	directKey = -1;
+	directKey = CRCInput::RC_nokey;
 	iconName = "";
 }
 
@@ -477,7 +480,7 @@ CMenuOptionStringChooser::CMenuOptionStringChooser(string OptionName, char* Opti
 	observ=Observ;
 	localizing= Localizing;
 
-	directKey = -1;
+	directKey = CRCInput::RC_nokey;
 	iconName = "";
 }
 
@@ -553,7 +556,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey, bool Localizing, int DirectKey, string IconName)
+CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey, bool Localizing, uint DirectKey, string IconName)
 {
 	height=g_Fonts->menu->getHeight();
 	text=Text;
@@ -635,7 +638,7 @@ int CMenuForwarder::paint(bool selected)
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuSeparator::CMenuSeparator(int Type, string Text)
 {
-	directKey = -1;
+	directKey = CRCInput::RC_nokey;
 	iconName = "";
 
 	height = g_Fonts->menu->getHeight();

@@ -162,7 +162,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 	paint();
 
 	bool loop = true;
-	int msg; uint data;
+	uint msg; uint data;
 
 	while(loop)
 	{

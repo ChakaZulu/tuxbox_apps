@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.53 2002/02/27 20:25:16 chrissi Exp $
+//  $Id: neutrino.h,v 1.54 2002/02/27 22:51:13 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.54  2002/02/27 22:51:13  field
+//  Tasten kaputt gefixt - sollte wieder gehen :)
+//
 //  Revision 1.53  2002/02/27 20:25:16  chrissi
 //  network test menu entry added
 //  (for now only console debug information)
@@ -362,7 +365,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		//onchange
 		bool changeNotify(string OptionName);
 
-		int handleMsg(int msg, uint data);
+		int handleMsg(uint msg, uint data);
 
 	friend class CNeutrinoBouquetEditorEvents;
 };

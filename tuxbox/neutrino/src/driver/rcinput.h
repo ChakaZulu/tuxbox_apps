@@ -30,14 +30,14 @@
 */
 
 /*
-$Id: rcinput.h,v 1.18 2002/02/27 16:08:27 field Exp $
+$Id: rcinput.h,v 1.19 2002/02/27 22:51:13 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
- Revision 1.18  2002/02/27 16:08:27  field
- Boeser Tasten-Bug behoben, sollte wieder normal laufen :)
+ Revision 1.19  2002/02/27 22:51:13  field
+ Tasten kaputt gefixt - sollte wieder gehen :)
 
  Revision 1.17  2002/02/26 17:24:16  field
  Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
@@ -108,6 +108,7 @@ History:
 #include "ringbuffer.h"
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -116,8 +117,8 @@ class CRCInput
 	private:
 		struct event
 		{
-			int         key;
-			uint        data;
+			uint	msg;
+			uint	data;
 		};
 
 		int         fd_rc;
@@ -125,7 +126,7 @@ class CRCInput
 		int			fd_max;
 		CRingBuffer pb_keys;
 
-		//vector<event*>	eventlist;
+		vector<event*>	eventlist;
 
 		void open();
 		void close();
@@ -141,7 +142,8 @@ class CRCInput
 		    RC_red=0x13, RC_page_up=0x54, RC_page_down=0x53, RC_up=0xC, RC_down=0xD,
 		    RC_left=0xB, RC_right=0xA, RC_ok=0xE, RC_plus=0x15, RC_minus=0x16,
 		    RC_spkr=0xF, RC_help=0x17, RC_top_left=27, RC_top_right=28, RC_bottom_left=29, RC_bottom_right=30,
-		    RC_timeout=-1, RC_nokey=-2
+		    RC_timeout	= 0xFFFFFFFF,
+		    RC_nokey	= 0xFFFFFFFE
 		};
 
 		static const int RC_KeyBoard = 0x4000;
@@ -163,13 +165,13 @@ class CRCInput
 
 
 		static bool isNumeric(int key);
-		int  _getKey(int Timeout=-1, bool bAllowRepeatLR= false);     //get key from the input-device
-		int  _pushbackKey (int key);      // push key back in buffer (like ungetc)
-		void _clear (void);
+
 		static string getKeyName(int);
-		void getMsg(int *msg, uint* data, int Timeout=-1, bool bAllowRepeatLR= false);     //get message :) (calls _getKey at the moment)
-		void pushbackMsg(int msg, uint data);     // push message back into buffer - (calls _pushbackKey at the moment)
-		void clearMsg(int type);	// bestimmte Msgs aus der Schleife löschen - löscht zZ ALLES :(
+
+		void getMsg(uint *msg, uint* data, int Timeout=-1, bool bAllowRepeatLR= false);     //get message :) (calls _getKey at the moment)
+		void pushbackMsg(uint msg, uint data);     // push message back into buffer - (calls _pushbackKey at the moment)
+		void insertMsgAtTop(uint msg, uint data);
+		void clearMsg(uint min = 0, uint max = 0xFFFFFFFF );	// bestimmte Msgs aus der Schleife löschen - löscht zZ ALLES :(
 };
 
 #endif

@@ -124,7 +124,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 	bool loop=true;
 	while (loop)
 	{
-		int msg; uint data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
 
 		if ((msg==CRCInput::RC_timeout) || (msg==g_settings.key_channelList_cancel))

@@ -1,9 +1,8 @@
 #include "../include/debug.h"
 #include "../global.h"
 
-CBouquetList::CBouquetList(int Key=-1, const std::string &Name)
+CBouquetList::CBouquetList( const std::string &Name )
 {
-	key = Key;
 	name = Name;
 	selected = 0;
 	width = 500;
@@ -27,9 +26,12 @@ CBouquetList::~CBouquetList()
 	Bouquets.clear();
 }
 
-CBouquet* CBouquetList::addBouquet(const std::string& name)
+CBouquet* CBouquetList::addBouquet(const std::string& name, int BouquetKey )
 {
-	CBouquet* tmp = new CBouquet(Bouquets.size(), name);
+	if ( BouquetKey==-1 )
+		BouquetKey= Bouquets.size();
+
+	CBouquet* tmp = new CBouquet( BouquetKey, name );
 	Bouquets.insert(Bouquets.end(), tmp);
 	return(tmp);
 }
@@ -152,15 +154,16 @@ int CBouquetList::show()
 	while (loop)
 	{
 
-		int msg; uint data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
 
-		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
+		if ( ( msg == CRCInput::RC_timeout ) ||
+			 ( msg == g_settings.key_channelList_cancel ) )
 		{
 			selected = oldselected;
 			loop=false;
 		}
-		else if (key==g_settings.key_channelList_pageup)
+		else if ( msg == g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>Bouquets.size()-1)
@@ -168,7 +171,7 @@ int CBouquetList::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==g_settings.key_channelList_pagedown)
+		else if ( msg == g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=Bouquets.size()-1;
@@ -177,7 +180,7 @@ int CBouquetList::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==CRCInput::RC_up)
+		else if ( msg == CRCInput::RC_up )
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -198,7 +201,7 @@ int CBouquetList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if (key==CRCInput::RC_down)
+		else if ( msg == CRCInput::RC_down )
 		{
 			int prevselected=selected;
 			selected = (selected+1)%Bouquets.size();
@@ -214,30 +217,30 @@ int CBouquetList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if (key==CRCInput::RC_ok)
+		else if ( msg == CRCInput::RC_ok )
 		{
 			zapOnExit = true;
 			loop=false;
 		}
-		else if ( (key>=0) && (key<=9) )
+		else if ( ( msg >= 0 ) && ( msg <= 9 ) )
 		{
 			//numeric
 			if ( pos==maxpos )
 			{
-				if (key== 0)
+				if ( msg == 0)
 				{
 					chn = firstselected;
 					pos = maxpos- 1;
 				}
 				else
 				{
-					chn = key;
+					chn = msg;
 					pos = 0;
 				}
 			}
 			else
 			{
-				chn = chn* 10 + key;
+				chn = chn* 10 + msg;
 			}
 
 			if (chn> Bouquets.size())
@@ -263,10 +266,10 @@ int CBouquetList::show()
 			}
 
 		}
-		else if( (key==CRCInput::RC_red) ||
-				 (key==CRCInput::RC_green) ||
-				 (key==CRCInput::RC_yellow) ||
-				 (key==CRCInput::RC_blue) )
+		else if( ( msg == CRCInput::RC_red ) ||
+				 ( msg == CRCInput::RC_green ) ||
+				 ( msg == CRCInput::RC_yellow ) ||
+				 ( msg == CRCInput::RC_blue ) )
 		{
 			selected = oldselected;
 			g_RCInput->pushbackMsg( msg, data );

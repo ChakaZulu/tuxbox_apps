@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.175 2002/02/27 20:25:16 chrissi Exp $
+        $Id: neutrino.cpp,v 1.176 2002/02/27 22:51:12 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.176  2002/02/27 22:51:12  field
+  Tasten kaputt gefixt - sollte wieder gehen :)
+
   Revision 1.175  2002/02/27 20:25:16  chrissi
   network test menu entry added
   (for now only console debug information)
@@ -589,14 +592,14 @@ void CNeutrinoApp::setupNetwork(bool force)
 		setDefaultGateway(g_settings.network_defaultgateway);
 	}
 }
-void CNeutrinoApp::testNetwork(bool force)   
-{   
-	if((g_settings.networkSetOnStartup) || (force))   
-	{   
-		printf("doing network test...\n");   
-		//test network   
-		testNetworkSettings(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast, g_settings.network_defaultgateway, g_settings.network_nameserver);   
-	} 
+void CNeutrinoApp::testNetwork(bool force)
+{
+	if((g_settings.networkSetOnStartup) || (force))
+	{
+		printf("doing network test...\n");
+		//test network
+		testNetworkSettings(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast, g_settings.network_defaultgateway, g_settings.network_nameserver);
+	}
 }
 
 
@@ -1023,7 +1026,7 @@ void CNeutrinoApp::channelsInit()
 
 	//deleting old channelList for mode-switching.
 	delete channelList;
-	channelList = new CChannelList(1, "channellist.head");
+	channelList = new CChannelList( "channellist.head" );
 
 	sendmessage.version=1;
 	// neu! war 5, mit neuem zapit holen wir uns auch die onid_tsid
@@ -1072,7 +1075,7 @@ void CNeutrinoApp::channelsInit()
 	bouquet_msg   zapitbouquet;
 	//deleting old bouquetList for mode-switching.
 	delete bouquetList;
-	bouquetList = new CBouquetList(1, "bouquetlist.head");
+	bouquetList = new CBouquetList( "bouquetlist.head" );
 	bouquetList->orgChannelList = channelList;
 
 	sendmessage.version=1;
@@ -1119,8 +1122,7 @@ void CNeutrinoApp::channelsInit()
 		char bouquet_name[30];
 
 		strncpy(bouquet_name, zapitbouquet.name,30);
-		bouquet = bouquetList->addBouquet( zapitbouquet.name );
-		bouquet->key = zapitbouquet.bouquet_nr;
+		bouquet = bouquetList->addBouquet( zapitbouquet.name, zapitbouquet.bouquet_nr );
 		//			printf("%s\n", zapitbouquet.name);
 	}
 	printf("All bouquets received (%d). Receiving channels... \n", nBouquetCount);
@@ -1131,7 +1133,7 @@ void CNeutrinoApp::channelsInit()
 	{
 		sendmessage.version=1;
 		sendmessage.cmd = 'r';
-		sendmessage.param = bouquetList->Bouquets[i]->key;
+		sendmessage.param = bouquetList->Bouquets[i]->unique_key;
 
 		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		memset(&servaddr,0,sizeof(servaddr));
@@ -1802,7 +1804,7 @@ void CNeutrinoApp::SelectNVOD()
 			}
 			else
 			{
-				NVODSelector.addItem( new CMenuForwarder(subChannels.list[count].subservice_name, true, "", NVODChanger, nvod_id, false, (count<9)?(count+1):uint(-1)), (count == subChannels.selected) );
+				NVODSelector.addItem( new CMenuForwarder(subChannels.list[count].subservice_name, true, "", NVODChanger, nvod_id, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == subChannels.selected) );
 			}
 		}
 		NVODSelector.exec(NULL, "");
@@ -1829,7 +1831,7 @@ void CNeutrinoApp::SelectAPID()
 			char apid[5];
 			sprintf(apid, "%d", count);
 			APIDSelector.addItem( new CMenuForwarder(g_RemoteControl->audio_chans.apids[count].name, true,
-								  "", APIDChanger, apid, false, (count<9)?(count+1):-1), (count == g_RemoteControl->audio_chans.selected) );
+								  "", APIDChanger, apid, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->audio_chans.selected) );
 		}
 		APIDSelector.exec(NULL, "");
 	}
@@ -1860,7 +1862,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 				enabled_count++;
 
 			StreamFeatureSelector.addItem( new CMenuForwarder(g_PluginList->getName(count), enable_it, "",
-										   StreamFeaturesChanger, id, false, (cnt== 0)?CRCInput::RC_blue:-1, (cnt== 0)?"blau.raw":""), (cnt == 0) && enable_it );
+										   StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?"blau.raw":""), (cnt == 0) && enable_it );
 			cnt++;
 		}
 	}
@@ -1952,7 +1954,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	setupNetwork();
 
-	channelList = new CChannelList( 1, "channellist.head" );
+	channelList = new CChannelList( "channellist.head" );
 
 
 	//Main settings
@@ -2030,7 +2032,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 	while(nRun)
 	{
-		int msg; uint data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data );
 
 		if ( msg == messages::STANDBY_ON )
@@ -2040,7 +2042,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// noch nicht im Standby-Mode...
 				standbyMode( true );
 			}
-			g_RCInput->_clear();
+			g_RCInput->clearMsg();
 		}
 
 		if ( msg == messages::STANDBY_OFF )
@@ -2050,7 +2052,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// WAKEUP
 				standbyMode( false );
 			}
-			g_RCInput->_clear();
+			g_RCInput->clearMsg();
 		}
 
 		else if ( msg == messages::SHUTDOWN )
@@ -2197,7 +2199,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	}
 }
 
-int CNeutrinoApp::handleMsg(int msg, uint data)
+int CNeutrinoApp::handleMsg(uint msg, uint data)
 {
 
 /*    if ( msg == CRCInput::RC_spkr )
@@ -2234,7 +2236,7 @@ int CNeutrinoApp::handleMsg(int msg, uint data)
 			gettimeofday( &tv, NULL );
 			long long starttime = (tv.tv_sec*1000000) + tv.tv_usec;
 
-			int msg; uint data;
+			uint msg; uint data;
 			int diff = 0;
 			long long endtime;
 
@@ -2360,7 +2362,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 
 	char volume = g_Controld->getVolume();
 
-	int msg = key;
+	uint msg = key;
 	uint data;
 
 	do
@@ -2613,10 +2615,10 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	{
 		setupNetwork( true );
 	}
-	else if(actionKey=="networktest")   
-	{   
+	else if(actionKey=="networktest")
+	{
 		 testNetwork( true  );
-	}   
+	}
 
 	else if(actionKey=="savesettings")
 	{
@@ -2674,7 +2676,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.175 2002/02/27 20:25:16 chrissi Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.176 2002/02/27 22:51:12 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

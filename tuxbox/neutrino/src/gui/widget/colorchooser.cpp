@@ -92,7 +92,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 	int selected = 0;
 	while(loop)
 	{
-		int msg; uint data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, 300, true );
 
 		switch ( msg )

@@ -53,7 +53,7 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 
 	while(loop)
 	{
-		int msg; uint data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, 300, true );
 
 		switch ( msg )

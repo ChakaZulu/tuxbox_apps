@@ -30,14 +30,14 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.31 2002/02/27 16:08:27 field Exp $
+ $Id: rcinput.cpp,v 1.32 2002/02/27 22:51:13 field Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
- Revision 1.31  2002/02/27 16:08:27  field
- Boeser Tasten-Bug behoben, sollte wieder normal laufen :)
+ Revision 1.32  2002/02/27 22:51:13  field
+ Tasten kaputt gefixt - sollte wieder gehen :)
 
  Revision 1.30  2002/02/25 19:32:26  field
  Events <-> Key-Handling umgestellt! SEHR BETA!
@@ -214,7 +214,7 @@ void CRCInput::restartInput()
 *	get rc-key - timeout can be specified
 *
 **************************************************************************/
-int CRCInput::_getKey(int Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR= false)
 {
 	static long long last_keypress=0;
 	long long getKeyBegin;
@@ -223,15 +223,21 @@ int CRCInput::_getKey(int Timeout, bool bAllowRepeatLR)
 
 	struct timeval tv, tvselect;
 	struct timeval *tvslectp;
-	int Timeout2 = Timeout;
+	int InitialTimeout = Timeout;
 	fd_set rfds;
 	__u16 rc_key;
 
-	//es ist ein key im pushback-Buffer - diesen zurückgeben
-	if(pb_keys.available())
+	//es ist ein event im Buffer - diesen zurückgeben
+	if( eventlist.size() > 0 )
 	{
-		//printf("resonse pb-key\n");
-		return pb_keys.read();
+		vector<event*>::iterator e = eventlist.begin();
+
+		*msg = (*e)->msg;
+		*data = (*e)->data;
+		eventlist.erase( e );
+        delete *e;
+
+		return;
 	}
 
 	if(Timeout==-1)
@@ -293,7 +299,7 @@ int CRCInput::_getKey(int Timeout, bool bAllowRepeatLR)
 						if  ( (trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby) ||
 							  ((bAllowRepeatLR) && ((trkey==RC_left) || (trkey==RC_right))) )
 						{
-							if( rc_last_repeat_key!=rc_key)
+							if( rc_last_repeat_key!=rc_key )
 							{
 								if(abs(now_pressed-last_keypress)>repeat_block)
 								{
@@ -321,16 +327,23 @@ int CRCInput::_getKey(int Timeout, bool bAllowRepeatLR)
 							int trkey= translate(rc_key);
 							//printf("--!!!!!  translated key: %04x\n", trkey );
 							if (trkey!=RC_nokey)
-								return trkey;
+							{
+								*msg = trkey;
+								*data = 0;
+								return;
+							}
 						}
 					}
 
 				}
 			}
 		}
-		if(Timeout2==0)
+
+		if ( InitialTimeout == 0 )
 		{//nicht warten wenn kein key da ist
-			return RC_timeout;
+		   	*msg = RC_timeout;
+			*data = 0;
+			return;
 		}
 		else if(tvslectp != NULL)
 		{//timeout neu kalkulieren
@@ -339,45 +352,49 @@ int CRCInput::_getKey(int Timeout, bool bAllowRepeatLR)
 			long long diff = abs( (getKeyNow - getKeyBegin) / 100000 );
 			Timeout -= diff;
 			//printf("[rcin] diff timeout: %lld, %d von %d\n", diff, Timeout, Timeout2);
-			if(Timeout<=0)
+			if( Timeout <= 0 )
 			{
-				return RC_timeout;
+				*msg = RC_timeout;
+				*data = 0;
+				return;
 			}
 		}
 	}
-	return rc_key;
 }
 
 
 
-int CRCInput::_pushbackKey (int key)
+void CRCInput::insertMsgAtTop(uint msg, uint data)
 {
-	//printf("-----!!  pushback key: %04x\n", key );
-	pb_keys.add( key );
-	return 0;
+	event* tmp = new event();
+	tmp->msg 	= msg;
+	tmp->data	= data;
+	eventlist.insert(eventlist.begin(), tmp);
 }
 
-void CRCInput::getMsg(int *key, uint *data, int Timeout=-1, bool bAllowRepeatLR= false)
+void CRCInput::pushbackMsg(uint msg, uint data)
 {
-	*key	= _getKey( Timeout, bAllowRepeatLR );
-	*data	= 0; // einstweilen....
-}
-
-void CRCInput::pushbackMsg(int msg, uint data)
-{
-	_pushbackKey( msg );
+	event* tmp = new event();
+	tmp->msg 	= msg;
+	tmp->data	= data;
+	eventlist.insert(eventlist.end(), tmp);
 }
 
 
-void CRCInput::_clear (void)
+void CRCInput::clearMsg(uint min = 0, uint max = 0xFFFFFFFF )
 {
-	while (_getKey(0)!=RC_timeout)
-	{}
-}
+	vector<event*>::iterator e = eventlist.begin();
 
-void CRCInput::clearMsg(int type)
-{
-	_clear();
+	while ( e != eventlist.end() )
+	{
+		if ( ( (*e)->msg >= min ) && ( (*e)->msg <= max ) )
+		{
+			eventlist.erase( e );
+			delete *e;
+		}
+		else
+			e++;
+	}
 }
 
 /**************************************************************************

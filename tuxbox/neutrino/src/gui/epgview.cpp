@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.42 2002/02/26 17:24:16 field Exp $
+// $Id: epgview.cpp,v 1.43 2002/02/27 22:51:13 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.43  2002/02/27 22:51:13  field
+// Tasten kaputt gefixt - sollte wieder gehen :)
+//
 // Revision 1.42  2002/02/26 17:24:16  field
 // Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
 //
@@ -386,7 +389,7 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 		g_Fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-30, text, COL_MENUCONTENT);
 
 
-		int msg; uint data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, 20 );
 		neutrino->handleMsg( msg, data );
 
@@ -490,7 +493,7 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 		int scrollCount;
 		while(loop)
 		{
-			int msg; uint data;
+			uint msg; uint data;
 			g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
 
 			scrollCount = medlinecount;

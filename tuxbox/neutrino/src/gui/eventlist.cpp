@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.38 2002/02/26 17:24:16 field Exp $
+// $Id: eventlist.cpp,v 1.39 2002/02/27 22:51:13 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.39  2002/02/27 22:51:13  field
+// Tasten kaputt gefixt - sollte wieder gehen :)
+//
 // Revision 1.38  2002/02/26 17:24:16  field
 // Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
 //
@@ -374,7 +377,7 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 
 	while (loop)
 	{
-		int msg; uint data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
 
 		if ( msg == g_settings.key_channelList_pageup )

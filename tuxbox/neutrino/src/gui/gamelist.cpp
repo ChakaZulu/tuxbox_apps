@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.35 2002/02/26 17:24:16 field Exp $
+$Id: gamelist.cpp,v 1.36 2002/02/27 22:51:13 field Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.36  2002/02/27 22:51:13  field
+Tasten kaputt gefixt - sollte wieder gehen :)
+
 Revision 1.35  2002/02/26 17:24:16  field
 Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
 
@@ -401,7 +404,7 @@ void CPlugins::startPlugin(int number)
 		if (!plugin_list[number].rc)
 		{
     		g_RCInput->restartInput();
-    		g_RCInput->_clear();
+    		g_RCInput->clearMsg();
     	}
 
     	if (plugin_list[number].fb)
@@ -512,7 +515,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	bool loop=true;
 	while (loop)
 	{
-		int msg; uint data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_menu );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||

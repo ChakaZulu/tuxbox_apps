@@ -91,7 +91,7 @@ int CKeyChooserItem::exec(CMenuTarget* parent, string)
 
 	bool doLoop = true;
 
-	int msg; uint data;
+	uint msg; uint data;
 	while ( doLoop )
 	{
 		g_RCInput->getMsg( &msg, &data, 100 );

@@ -30,14 +30,15 @@ typedef enum bouquetSwitchMode
 class CBouquet
 {
 	public:
-		int				key;
+		int				unique_key;
 		string			name;
 		CChannelList*	channelList;
 
-		CBouquet(int Key=-1, const std::string& Name="")
+		CBouquet( int Unique_key=-1, const std::string& Name="" )
 		{
+			unique_key = Unique_key;
 			name = Name;
-			channelList = new CChannelList(Key, Name);
+			channelList = new CChannelList( Name );
 		}
 
 		~CBouquet()
@@ -58,7 +59,6 @@ class CBouquetList
 		int					fheight; // Fonthoehe Bouquetlist-Inhalt
 		int					theight; // Fonthoehe Bouquetlist-Titel
 
-		int					key;
 		string				name;
 
 		int		width;
@@ -72,13 +72,13 @@ class CBouquetList
 		void hide();
 
 	public:
-		CBouquetList(int Key=-1, const std::string& Name="");
+		CBouquetList( const std::string& Name="" );
 		~CBouquetList();
 
 		vector<CBouquet*>	Bouquets;
 
 		CChannelList* orgChannelList;
-		CBouquet* addBouquet(const std::string& name);
+		CBouquet* addBouquet(const std::string& name, int BouquetKey=-1 );
 		void setName(const std::string& Name);
 		int getActiveBouquetNumber();
 		int activateBouquet( int id, bool bShowChannelList = false);

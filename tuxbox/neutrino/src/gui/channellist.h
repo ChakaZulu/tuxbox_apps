@@ -32,9 +32,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.26 2002/02/27 16:08:27 field Exp $
+// $Id: channellist.h,v 1.27 2002/02/27 22:51:13 field Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.27  2002/02/27 22:51:13  field
+// Tasten kaputt gefixt - sollte wieder gehen :)
+//
 // Revision 1.26  2002/02/27 16:08:27  field
 // Boeser Tasten-Bug behoben, sollte wieder normal laufen :)
 //
@@ -148,7 +151,6 @@ class CChannelList
 		int			fheight; // Fonthoehe Channellist-Inhalt
 		int			theight; // Fonthoehe Channellist-Titel
 
-		int			key;
 		string			name;
 		vector<channel*>	chanlist;
 
@@ -164,7 +166,7 @@ class CChannelList
 		void hide();
 
 	public:
-		CChannelList(int Key=-1, const std::string& Name="");
+		CChannelList( const std::string& Name="" );
 		~CChannelList();
 		void addChannel(int key, int number, const std::string& name, unsigned int ids = 0);
 		void setName(const std::string& Name);

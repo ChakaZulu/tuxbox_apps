@@ -169,7 +169,7 @@ class CMenuForwarder : public CMenuItem
 		bool        localizing;
 	public:
 
-		CMenuForwarder(string Text, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true, int DirectKey= -1, string IconName= "");
+		CMenuForwarder(string Text, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, string IconName= "");
 		int paint(bool selected=false);
 		int getHeight()
 		{

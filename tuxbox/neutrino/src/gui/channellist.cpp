@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.67 2002/02/27 16:08:27 field Exp $
+// $Id: channellist.cpp,v 1.68 2002/02/27 22:51:13 field Exp $
 //
 // $Log: channellist.cpp,v $
-// Revision 1.67  2002/02/27 16:08:27  field
-// Boeser Tasten-Bug behoben, sollte wieder normal laufen :)
+// Revision 1.68  2002/02/27 22:51:13  field
+// Tasten kaputt gefixt - sollte wieder gehen :)
 //
 // Revision 1.66  2002/02/26 17:24:16  field
 // Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
@@ -241,9 +241,8 @@ static char* copyStringto(const char* from, char* to, int len)
 	return (char *)++from;
 }
 
-CChannelList::CChannelList(int Key=-1, const std::string &Name)
+CChannelList::CChannelList( const std::string &Name )
 {
-	key = Key;
 	name = Name;
 	selected = 0;
 	width = 520;
@@ -450,7 +449,7 @@ int CChannelList::show()
 	bool loop=true;
 	while (loop)
 	{
-		int msg; uint data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_chanlist );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
@@ -619,7 +618,6 @@ bool CChannelList::showInfo(int pos)
 	{
 		return false;
 	}
-//	selected=pos;
 
 	channel* chan = chanlist[pos];
 	g_InfoViewer->showTitle(pos+1, chan->name, chan->onid_sid, true );
@@ -681,7 +679,7 @@ int CChannelList::numericZap(int key)
 	char valstr[10];
 	int chn=key;
 	int pos=1;
-	int msg; uint data;
+	uint msg; uint data;
 	bool doZap = true;
 
 	while(1)
@@ -790,7 +788,6 @@ void CChannelList::quickZap(int key)
                 return;
         }
 
-              printf("quickzap start\n");
         if (key==g_settings.key_quickzap_down)
         {
                 if(selected==0)

@@ -413,7 +413,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
         usleep(50);
 
-        int msg; uint data;
+        uint msg; uint data;
 
         if ( !CalledFromNumZap )
         {
