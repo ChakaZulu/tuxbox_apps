@@ -3487,9 +3487,7 @@ eString getPDAContent(eString mode, eString path, eString opts)
 
 	result = readFile(TEMPLATE_DIR + "index_small.tmp");
 	eString tmp = getContent(mode, path, opts);
-	if (tmp)
-		result += tmp;
-	else
+	if (!tmp)
 		result = "";
 	result.strReplace("#CONTENT#", tmp);
 	result.strReplace("#VOLBAR#", getVolBar());
