@@ -529,7 +529,7 @@ static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnec
 	{
 		res+="EITEvent\n";
 		res+="event_id="+eString().sprintf("%04x\n", s->event_id);
-		res+="duration="+eString().sprintf("%04x\n", s->start_time);
+		res+="start_time="+eString().sprintf("%04x\n", s->start_time);
 		res+="duration="+eString().sprintf("%04x\n", s->duration);
 		res+="running_status="+eString().sprintf("%d\n", s->running_status);
 		res+="free_CA_mode="+eString().sprintf("%d\n", s->free_CA_mode);
@@ -873,6 +873,55 @@ static eString getVideoBar()
 	return result.str();
 }
 
+static eString deleteFile(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt = getRequestOptions(opts);
+	eString sref;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	sref = opt["ref"];
+
+	eServiceReference ref = string2ref(sref);
+	ePlaylist *recordings = eZapMain::getInstance()->recordings;
+	if ( ::unlink(ref.path.c_str() ) < 0 )
+	{
+		eDebug("remove File %s failed (%m)", ref.path.c_str() );
+		return "-not ok";
+	}
+	else
+	{
+		if ( ref.path.right(3).upper() == ".TS" )
+		{
+			for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
+				it != recordings->getList().end(); ++it )
+			{
+				if ( it->service.path == ref.path )
+				{
+					recordings->getList().erase(it);
+					recordings->save();
+					break;
+				}
+			}
+			int ret = 0;
+			int cnt = 1;
+			do
+			{
+				eString tmp;
+				tmp.sprintf("%s.%03d", ref.path.c_str(), cnt++);
+				ret = ::unlink(tmp.c_str());
+			}
+			while( !ret );
+			eString fname=ref.path;
+			fname.erase(fname.length()-2,2);
+			fname+="eit";
+			::unlink(fname.c_str());
+		}
+	}
+	return "+ok";
+}
+
+
 class eWebNavigatorListDirectory: public Object
 {
 	eString &result;
@@ -906,17 +955,25 @@ public:
 			result += DARKGREY;
 		result += "\">";
 
+		eString serviceRef = ref2string(e);
 		if (!(e.flags & eServiceReference::isDirectory))
 		{
-			result += button(50, "EPG", GREEN, "javascript:openEPG('" + ref2string(e) + "')");
+			result += button(50, "EPG", GREEN, "javascript:openEPG('" + serviceRef + "')");
 			result += "&nbsp;&nbsp;";
-			result += "<a href=\'javascript:switchChannel(\"" + ref2string(e) + "\")\'>";
+			if (serviceRef.find("%2fhdd%2fmovie%2f") != eString::npos)
+			{
+				result += "<a href=\"javascript:deleteMovie('";
+				result += serviceRef;
+				result += "')\"><img src=\"edittrash.png\" border=0></a>";
+				result += "&nbsp;&nbsp;";
+			}
+			result += "<a href=\'javascript:switchChannel(\"" + serviceRef + "\")\'>";
 		}
 		else
 		{
-			result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + ref2string(e) + "')");
+			result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + serviceRef + "')");
 			result += "&nbsp;&nbsp;";
-			result += eString("<a href=\"/")+ "?path=" + ref2string(e) + "\">";
+			result += eString("<a href=\"/")+ "?path=" + serviceRef + "\">";
 		}
 
 		eService *service=iface.addRef(e);
@@ -966,7 +1023,7 @@ static eString getZapContent(eString mode, eString path)
 			eWebNavigatorListDirectory navlist(result, path, tpath, *iface);
 			Signal1<void,const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
-				result+="<table width=\"100%%\">\n";
+				result+="<table width=\"100%\">\n";
 			iface->enterDirectory(current_service, signal);
 				result+="</table>\n";
 			eDebug("entered");
@@ -2778,6 +2835,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadRecordings", load_recordings);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveRecordings", save_recordings);
+	dyn_resolver->addDyn("GET", "/cgi-bin/deleteFile", deleteFile);
 #endif
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadPlaylist", load_playlist);
 	dyn_resolver->addDyn("GET", "/cgi-bin/savePlaylist", save_playlist);
