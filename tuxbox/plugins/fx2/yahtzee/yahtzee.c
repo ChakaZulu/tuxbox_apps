@@ -76,6 +76,8 @@ void	EnterPlayer( void )
 		tv.tv_usec = 1000;
 		select( 0, 0, 0, 0, &tv );		/* 1ms pause */
 	}
+	FBDrawString( 150, 64, 48, "Yahtzee presented by", WHITE, 0 );
+	FBDrawFx2Logo( 200, 112 );
 	/* first enter num players */
 	if ( numplayers )
 	{
@@ -269,6 +271,7 @@ static	void	SelectForRoll( void )
 				y=nr*68+128;
 				FBDrawRect( x+22,y,63,63,RED );
 				FBDrawRect( x+23,y+1,61,61,RED );
+				FBDrawRect( x+24,y+2,59,59,RED );
 			}
 			else
 			{
@@ -276,6 +279,7 @@ static	void	SelectForRoll( void )
 				y=nr*68+128;
 				FBDrawRect( x+22,y,63,63,WHITE );
 				FBDrawRect( x+23,y+1,61,61,WHITE );
+				FBDrawRect( x+24,y+2,59,59,WHITE );
 			}
 			break;
 		case RC_BLUE :
@@ -512,8 +516,8 @@ void	RunYahtzee( void )
 	FBDrawString( 36, 286, 32, "3of a kind",WHITE,0);
 	FBDrawString( 36, 314, 32, "4of a kind",WHITE,0);
 	FBDrawString( 36, 342, 32, "FullHouse",WHITE,0);
-	FBDrawString( 36, 370, 32, "sm.street",WHITE,0);
-	FBDrawString( 36, 398, 32, "lg.street",WHITE,0);
+	FBDrawString( 36, 370, 32, "Sm. street",WHITE,0);
+	FBDrawString( 36, 398, 32, "Lg. street",WHITE,0);
 	FBDrawString( 36, 426, 32, "Yahtzee",WHITE,0);
 	FBDrawString( 36, 454, 32, "Chance",WHITE,0);
 	FBDrawString( 36, 482, 32, "total",WHITE,0);
