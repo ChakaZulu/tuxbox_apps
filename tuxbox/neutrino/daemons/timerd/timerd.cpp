@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.37 2002/12/02 14:43:40 thegoodguy Exp $
+	$Id: timerd.cpp,v 1.38 2002/12/02 22:39:54 Zwen Exp $
 
 	License: GPL
 
@@ -36,185 +36,6 @@
 #include <sectionsdclient/sectionsdclient.h>
 
 #include <connection/basicserver.h>
-
-void loadTimersFromConfig()
-{
-	CConfigFile *config = new CConfigFile(',');
-
-	if(!config->loadConfig(CONFIGFILE))
-	{
-		/* set defaults if no configuration file exists */
-		dprintf("%s not found\n", CONFIGFILE);
-	}
-	else
-	{
-		vector<int> savedIDs;
-		savedIDs = config->getInt32Vector ("IDS");
-		dprintf("%d timer(s) in config\n",savedIDs.size());
-		for(unsigned int i=0; i < savedIDs.size(); i++)
-		{
-			stringstream ostr;
-			ostr << savedIDs[i];
-			string id=ostr.str();
-			CTimerd::CTimerEventTypes type=(CTimerd::CTimerEventTypes)config->getInt32 ("EVENT_TYPE_"+id,0);
-			time_t now = time(NULL);
-			switch(type)
-			{
-				case CTimerd::TIMER_SHUTDOWN :
-					{
-						CTimerEvent_Shutdown *event=
-						new CTimerEvent_Shutdown(config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else
-						{
-							dprintf("Timer too old %d/%d\n",(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}       
-				case CTimerd::TIMER_NEXTPROGRAM :
-					{
-						CTimerEvent_NextProgram *event=
-						new CTimerEvent_NextProgram(config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else
-						{
-							dprintf("Timer too old %d/%d\n",(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}       
-				case CTimerd::TIMER_ZAPTO :
-					{
-						CTimerEvent_Zapto *event=
-						new CTimerEvent_Zapto(config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else
-						{
-							dprintf("Timer too old %d/%d\n",(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}          
-				case CTimerd::TIMER_STANDBY :
-					{
-						CTimerEvent_Standby *event=
-						new CTimerEvent_Standby(config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else
-						{
-							dprintf("Timer too old %d/%d\n",(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}           
-				case CTimerd::TIMER_RECORD :
-					{
-						CTimerEvent_Record *event=
-						new CTimerEvent_Record(config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else
-						{
-							dprintf("Timer too old %d/%d\n",(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}          
-				case CTimerd::TIMER_SLEEPTIMER :
-					{
-						CTimerEvent_Sleeptimer *event=
-						new CTimerEvent_Sleeptimer(config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else
-						{
-							dprintf("Timer too old %d/%d\n",(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}
-				case CTimerd::TIMER_REMIND :
-					{
-						CTimerEvent_Remind *event=
-						new CTimerEvent_Remind(config, savedIDs[i]);
-						if((event->alarmTime >= now) || (event->stopTime > now))
-						{
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
-						{
-							// old periodic timers need to be rescheduled
-							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
-							CTimerManager::getInstance()->addEvent(event,false);
-						}
-						else
-						{
-							dprintf("Timer too old %d/%d\n",(int)now,(int) event->alarmTime);
-							delete event;
-						}
-						break;
-					}
-				default:
-					dprintf("Unknown timer on load %d\n",type);
-			}
-		}
-	}
-	delete config;
-	CTimerManager::getInstance()->saveEventsToConfig();
-}
 
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
@@ -524,9 +345,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 int main(int argc, char **argv)
 {
 	bool do_fork = true;
-	bool no_wait = false;
 
-	dprintf("startup!!!\n\n");
+	dprintf("startup\n");
 	if(argc > 1)
 	{
 		for(int i = 1; i < argc; i++)
@@ -535,10 +355,6 @@ int main(int argc, char **argv)
 			if(strncmp(argv[i], "-f", 2) == 0)
 			{
 				do_fork = false;
-			}
-			else if(strncmp(argv[i], "-w", 2) == 0)
-			{
-				no_wait=true;
 			}
 		}
 	}
@@ -566,15 +382,6 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
-
-	if(!no_wait)
-	{
-		// wait for correct date to be set...
-		CSectionsdClient sectionsd;
-		while(!sectionsd.getIsTimeSet())
-			sleep(1);
-	}
-	loadTimersFromConfig();
 
 	//startup Timer
 	try
