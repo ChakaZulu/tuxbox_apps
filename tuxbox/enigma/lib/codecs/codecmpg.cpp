@@ -490,8 +490,8 @@ void eMPEGDemux::setAudioStream( unsigned int id )
 		}
 		curAudioStreamID = id;
 	}
-	fseek(fAudio, 0, SEEK_SET);
-	fseek(fVideo, 0, SEEK_SET);
+//	fseek(fAudio, 0, SEEK_SET);
+//	fseek(fVideo, 0, SEEK_SET);
 }
 
 #endif // DISABLE_FILE
