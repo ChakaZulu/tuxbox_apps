@@ -5,7 +5,7 @@
 #include <time.h>
 
 #include <asm/types.h>
-#include "subtitle.h"
+#include <lib/dvb/subtitle.h>
 #include <lib/base/eerror.h>
 #include <lib/gdi/fb.h>
 
