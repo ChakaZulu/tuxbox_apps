@@ -54,7 +54,7 @@ void eWindow::redrawWidget(gPainter *target, const QRect &where)
 void eWindow::drawTitlebar(gPainter *target)
 {
 	int x=0, xm=width(), y, ym;
-
+	
 	if (iTopLeft)
 	{
 		target->blit(*iTopLeft, QPoint(0, 0));
@@ -76,6 +76,10 @@ void eWindow::drawTitlebar(gPainter *target)
 			target->blit(*iTop, QPoint(x, 0), QRect(x, 0, xm-x, height()));
 			x+=iTop->x;
 		}
+		target->flush();
+	} else
+	{
+		target->fill(QRect(0, 0, width(), titleSize));
 		target->flush();
 	}
 
