@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.40 2002/05/13 17:17:04 obi Exp $
+ * $Id: getservices.cpp,v 1.41 2002/08/27 15:46:23 obi Exp $
  */
 
 #include <stdio.h>
@@ -77,6 +77,9 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 	FrontendParameters feparams;
 	uint8_t polarization = 0;
 	uint8_t tmp;
+
+	/* FIXME: get inversion from services list */
+	feparams.Inversion = INVERSION_AUTO;
 
 	/* read all transponders */
 	while ((node != NULL) && (!strcmp(node->GetType(), "transponder")))
