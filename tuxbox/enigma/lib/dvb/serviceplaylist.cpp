@@ -355,13 +355,18 @@ void eServicePlaylistHandler::removePlaylist(const eServiceReference &service)
 	while (found)
 	{
 		found=0;
-		for (std::multimap<eServiceReference,eServiceReference>::iterator i(playlists.begin()); i != playlists.end(); i++)
+		for (std::multimap<eServiceReference,eServiceReference>::iterator i(playlists.begin()); i != playlists.end();)
+		{
 			if (i->second == service)
 			{
 				usedUniqueIDs.erase( service.data[1] );
 				found=1;
 				playlists.erase(i);
+				i=playlists.begin();
 			}
+			else
+				++i;
+		}
 	}
 }
 
