@@ -102,7 +102,7 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb)
 	tMHWEIT=0;
 	calist.setAutoDelete(true);
 
-	updateTDTTimer.start(90*60*1000,true);
+	updateTDTTimer.start(60*60*1000,true);  // update time every hour to transponder time
 
 	eDVBCaPMTClientHandler::registerCaPMTClient(this);  // static method...
 }
@@ -630,27 +630,27 @@ time_t getRTC()
 void eDVBServiceController::TDTready(int error)
 {
 	eDebug("TDTready %d", error);
-	// receive new TDT every 90 minutes
-	updateTDTTimer.start(90*60*1000,true);
+	// receive new TDT every 60 minutes
+	updateTDTTimer.start(60*60*1000,true);
 	if (!error && transponder)
 	{
 		std::map<tsref,int> &tOffsMap = eTransponderList::getInstance()->TimeOffsetMap;
 		std::map< tsref, int >::iterator it( tOffsMap.find( *transponder ) );
 
-		time_t nowTime=time(0)+dvb.time_difference;
+ // current linux time
+		time_t linuxTime = time(0);
+ // current enigma time
+		time_t nowTime=linuxTime+dvb.time_difference;
+
+	// difference between current enigma time and transponder time
 		int enigma_diff = tdt->UTC_time-nowTime;
 
 		if ( dvb.time_difference )  // ref time ready?
 		{
-			// curTime is our current reference time....
-			time_t TPTime = nowTime+enigma_diff;
-
 			// difference between reference time (current enigma time) 
 			// and the transponder time
-			int diff = nowTime-TPTime;
-			eDebug("[TIME] diff is %d", diff);
-
-			if ( abs(diff) < 120 )
+			eDebug("[TIME] diff is %d", enigma_diff);
+			if ( abs(enigma_diff) < 120 )
 			{
 				eDebug("[TIME] diff < 120 .. use Transponder Time");
 				tOffsMap[*transponder] = 0;
@@ -659,46 +659,42 @@ void eDVBServiceController::TDTready(int error)
 			else if ( it != tOffsMap.end() ) // correction saved?
 			{
 				eDebug("[TIME] we have correction %d", it->second);
-				time_t CorrectedTpTime = TPTime+it->second;
+				time_t CorrectedTpTime = tdt->UTC_time+it->second;
 				int ddiff = nowTime-CorrectedTpTime;
 				eDebug("[TIME] diff after add correction is %d", ddiff);
 				if ( abs(it->second) < 300 ) // stored correction < 5 min
 				{
 					eDebug("[TIME] use stored correction(<5 min)");
-					dvb.time_difference = enigma_diff + it->second;
+					dvb.time_difference = ddiff;
 				}
-				else if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
-					goto USE_RTC;
+				else if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 &&
+						getRTC() )
+				{
+					time_t rtc=getRTC();
+					tOffsMap[*transponder] = rtc-tdt->UTC_time;
+					dvb.time_difference = nowTime-rtc;  // set enigma time to rtc
+					eDebug("[TIME] update stored correction to %d (calced against RTC time)", rtc-tdt->UTC_time );
+				}
 				else if ( abs(ddiff) <= 120 )
 				{
 // with stored correction calced time difference is lower 2 min
 // this don't help when a transponder have a clock running to slow or to fast
 // then its better to have a DM7020 with always running RTC
 					eDebug("[TIME] use stored correction(corr < 2 min)");
-					dvb.time_difference = enigma_diff + it->second;
+					dvb.time_difference = ddiff;
 				}
 				else  // big change in calced correction.. hold current time and update correction
 				{
-USE_RTC:
-					time_t rtc=0;
-					if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 &&
-						(rtc=getRTC()) )
-					{
-						tOffsMap[*transponder] = tdt->UTC_time - rtc;
-						dvb.time_difference = rtc-nowTime;
-						eDebug("[TIME] update stored correction to %d (calced against RTC time)", dvb.time_difference);
-					}
-					else
-					{
-						eDebug("[TIME] update stored correction to %d", diff);
-						tOffsMap[*transponder] = diff;
-					}
+					eDebug("[TIME] update stored correction to %d", -enigma_diff);
+					tOffsMap[*transponder] = -enigma_diff;
+					dvb.time_difference=0;  // we better do not use stored correction..
 				}
 			}
 			else
 			{
-				eDebug("[TIME] no correction found... store calced correction(%d)",diff);
-				tOffsMap[*transponder] = diff;
+				eDebug("[TIME] no correction found... store calced correction(%d)",-enigma_diff);
+				tOffsMap[*transponder] = -enigma_diff;
+				dvb.time_difference=0;  // dont change enigma time
 			}
 		}
 		else  // no time setted yet
@@ -713,7 +709,13 @@ USE_RTC:
 			dvb.time_difference=enigma_diff;
 		}
 
-		eDebug("[TIME] time_difference is %d", dvb.time_difference );
+		if (!dvb.time_difference)
+		{
+			eDebug("[TIME] not changed");
+			dvb.time_difference=1;
+			return;
+		}
+
 		time_t t = nowTime+dvb.time_difference;
 		tm now = *localtime(&t);
 		eDebug("[TIME] time update to %02d:%02d:%02d",
@@ -721,10 +723,13 @@ USE_RTC:
 			now.tm_min,
 			now.tm_sec);
 
-		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
-			setRTC(nowTime);
+		dvb.time_difference = t - linuxTime;
+		eDebug("[TIME] time_difference is %d", dvb.time_difference );
 
-		if ( abs(dvb.time_difference) > 60 )
+		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
+			setRTC(t);
+
+		if ( abs(dvb.time_difference) > 59 )
 		{
 			eDebug("[TIME] set Linux Time");
 			timeval tnow;
@@ -733,7 +738,7 @@ USE_RTC:
 			settimeofday(&tnow,0);
 			for (ePtrList<eMainloop>::iterator it(eMainloop::existing_loops)
 				;it != eMainloop::existing_loops.end(); ++it)
-				it->setTimerOffset(t-nowTime);
+				it->setTimerOffset(dvb.time_difference);
 			dvb.time_difference=1;
 		}
 		else if ( !dvb.time_difference )
@@ -746,7 +751,7 @@ USE_RTC:
 		( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
 			&& eSystemInfo::getInstance()->hasStandbyWakeupTimer() ) )
 	{
-		eDebug("[TIME] no transponder tuned... try to use our RTC :)");
+		eDebug("[TIME] no transponder tuned... or no TDT/TOT avail .. try to use RTC :)");
 		time_t rtc_time = getRTC();
 		if ( rtc_time ) // RTC Ready?
 		{
@@ -755,15 +760,16 @@ USE_RTC:
 				now.tm_hour,
 				now.tm_min,
 				now.tm_sec);
-			time_t nowTime=time(0)+dvb.time_difference;
+			time_t linuxTime=time(0);
+			time_t nowTime=linuxTime+dvb.time_difference;
 			now = *localtime(&nowTime);
 			eDebug("[TIME] Receiver time is %02d:%02d:%02d",
 				now.tm_hour,
 				now.tm_min,
 				now.tm_sec);
-			dvb.time_difference = rtc_time - nowTime;
-			eDebug("[TIME] RTC to Receiver time difference is %d seconds", dvb.time_difference );
-			if ( abs(dvb.time_difference) > 60 )
+			dvb.time_difference = linuxTime - rtc_time;
+			eDebug("[TIME] RTC to Receiver time difference is %d seconds", nowTime - rtc_time );
+			if ( abs(dvb.time_difference) > 59 )
 			{
 				eDebug("[TIME] set Linux Time to RTC Time");
 				timeval tnow;
@@ -772,7 +778,7 @@ USE_RTC:
 				settimeofday(&tnow,0);
 				for (ePtrList<eMainloop>::iterator it(eMainloop::existing_loops)
 					;it != eMainloop::existing_loops.end(); ++it)
-					it->setTimerOffset(dvb.time_difference);
+					it->setTimerOffset(nowTime-rtc_time);
 				dvb.time_difference=1;
 			}
 			else if ( !dvb.time_difference )
