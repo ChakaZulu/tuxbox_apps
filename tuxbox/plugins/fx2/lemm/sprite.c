@@ -8,8 +8,8 @@
 #include <string.h>
 #include <sys/time.h>
 
-#include <colors.h>
 #include <rcinput.h>
+#include <colors.h>
 #include <sprite.h>
 
 extern	int		doexit;

@@ -46,6 +46,7 @@ static	int		haus_y1;
 static	int		haus_y2;
 static	int		to_rescue;
 static	int		newspeed;
+static	int		minspeed;
 static	int		in_level;		// gerade im level vorhanden
 static	int		lem_in;			// im haus
 static	int		lem_cnt;		// anz lemming die kommen
@@ -290,6 +291,9 @@ static	void	inSc( int picid, int ani, int x, int y, int usedbl )
 	int				height;
 
 	data=GetAniPic(picid,ani,&width,&height);
+
+	x-=main_x;
+
 	if ( usedbl & 2 )
 	{
 		x<<=1;
@@ -297,17 +301,16 @@ static	void	inSc( int picid, int ani, int x, int y, int usedbl )
 	}
 	if ( usedbl & 1 )
 	{
-		if (( x+width+width<main_x ) ||
-			( x>main_x+656 ))		// 656 = 720 - 32 - 32
+		if (( x+width+width<0 ) ||
+			( x>656 ))		// 656 = 720 - 32 - 32
 				return;
 	}
 	else
 	{
-		if (( x+width<main_x ) ||
-			( x>main_x+656 ))
+		if (( x+width<0 ) || ( x>656 ))
 				return;
 	}
-	FB2CopyImage( x-main_x+32, y+32, width, height, data, usedbl & 1 );
+	FB2CopyImage( x+32, y+32, width, height, data, usedbl & 1 );
 }
 
 void	DrawLevelIntoBg( void )
@@ -535,9 +538,9 @@ void	InitLevel( void )
 		haus_x=718;
 		haus_y1=139;
 		haus_y2=157;
-		to_rescue=20;
+		to_rescue=50;
 		newspeed=50;
-		lem_cnt=40;
+		lem_cnt=100;
 		break;
 	case 3 :
 		/* deko */
@@ -602,6 +605,7 @@ void	InitLevel( void )
 		lem_cnt=50;
 		break;
 	}
+	minspeed=newspeed;
 	DrawLevelIntoBg();
 	/* copy level to screen */
 	CopyBg2Screen( main_x, 0, 328, 160 );
@@ -900,7 +904,7 @@ static	int		lastc=0;
 			newspeed=1;
 		else
 		{
-			DrawNumber( 42, 389, newspeed );
+//			DrawNumber( 42, 389, newspeed );
 			DrawNumber( 74, 389, 100-newspeed );
 		}
 		break;
@@ -908,11 +912,11 @@ static	int		lastc=0;
 		if ( pause || (action!=2) )
 			break;
 		newspeed++;
-		if ( newspeed > 99 )
-			newspeed=99;
+		if ( newspeed > minspeed )
+			newspeed=minspeed;
 		else
 		{
-			DrawNumber( 42, 389, newspeed );
+//			DrawNumber( 42, 389, newspeed );
 			DrawNumber( 74, 389, 100-newspeed );
 		}
 		break;
@@ -1139,7 +1143,7 @@ static	int		blinkc=0;
 
 	sel_sprite=-1;
 
-	if (( lem_run < lem_cnt ) && !( counter1%((newspeed/2)+1) ) && !killall )
+	if (( lem_run < lem_cnt ) && !( counter1%((newspeed/2)+3) ) && !killall )
 	{
 		lemm[ lem_run ] = CreateSprite(3,0,deko[1]->x+19,deko[1]->y);
 		lemm[ lem_run ]->dir=0;		// rechts
@@ -1187,7 +1191,7 @@ static	int		blinkc=0;
 			{
 				s->type |= TYP_EXPLODE;
 				s->counter1=1;
-				kab=1;
+				kab++;
 			}
 		}
 
@@ -1200,6 +1204,9 @@ static	int		blinkc=0;
 		{
 			if ( s->countdown == -1 )
 			{
+//				inSc( 8, 0, s->x, s->y, 2 );		// explosion
+//				SpriteChangePic( s, 8 );		// explosion
+//				DrawSprite(s);
 				SoundPlay( SND_EXPLODE );
 			}
 			if ( s->countdown == -2 )

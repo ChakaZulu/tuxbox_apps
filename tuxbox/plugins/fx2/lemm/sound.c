@@ -25,7 +25,6 @@ void * _run_sound( void *ptr )
 {
 	int				sz;
 	int				i;
-	//int				dores=1;
 	unsigned char	*data;
 	struct timeval	tv;
 
