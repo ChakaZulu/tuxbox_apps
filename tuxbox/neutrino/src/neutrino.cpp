@@ -1715,10 +1715,10 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 {
 	CIPInput*   streamingSettings_server_ip= new CIPInput("streamingmenu.server_ip",  g_settings.streaming_server_ip, "ipsetup.hint_1", "ipsetup.hint_2");
 	CStringInput*  streamingSettings_server_port= new CStringInput("streamingmenu.server_port", g_settings.streaming_server_port, 6, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
- 	CStringInputSMS*  cddriveInput = new CStringInputSMS("streamingmenu.streaming_server_cddrive", g_settings.streaming_server_cddrive, 20,"", "","abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:");
+ 	CStringInputSMS*  cddriveInput = new CStringInputSMS("streamingmenu.streaming_server_cddrive", g_settings.streaming_server_cddrive, 20,"", "","abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
 	CStringInput*  streamingSettings_videorate= new CStringInput("streamingmenu.streaming_videorate", g_settings.streaming_videorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
 	CStringInput*  streamingSettings_audiorate= new CStringInput("streamingmenu.streaming_audiorate", g_settings.streaming_audiorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
-	CStringInputSMS*  startdirInput = new CStringInputSMS("streamingmenu.streaming_server_startdir", g_settings.streaming_server_startdir, 30,"", "","abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:");
+	CStringInputSMS*  startdirInput = new CStringInputSMS("streamingmenu.streaming_server_startdir", g_settings.streaming_server_startdir, 30,"", "","abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
 
 	CMenuForwarder* mf1 = new CMenuForwarder("streamingmenu.server_ip", (g_settings.streaming_type==1), g_settings.streaming_server_ip,streamingSettings_server_ip);
 	CMenuForwarder* mf2 = new CMenuForwarder("streamingmenu.server_port", (g_settings.streaming_type==1), g_settings.streaming_server_port,streamingSettings_server_port);
