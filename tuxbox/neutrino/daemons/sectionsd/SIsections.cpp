@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.22 2001/10/22 14:27:24 field Exp $
+// $Id: SIsections.cpp,v 1.23 2001/10/22 16:15:51 field Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.23  2001/10/22 16:15:51  field
+// Bugfix
+//
 // Revision 1.22  2001/10/22 14:27:24  field
 // Kleinigkeiten
 //
@@ -189,7 +192,7 @@ void SIsectionEIT::parseParentalRatingDescriptor(const char *buf, SIevent &e, un
 void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_extended_event_header *evt=(struct descr_extended_event_header *)buf;
-  if(cont->descriptor_length+sizeof(struct descr_generic_header)>maxlen)
+  if(evt->descriptor_length+sizeof(struct descr_generic_header)>maxlen)
     return; // defekt
   unsigned char *items=(unsigned char *)(buf+sizeof(struct descr_extended_event_header));
   while(items<(unsigned char *)(buf+sizeof(struct descr_extended_event_header)+evt->length_of_items)) {
@@ -219,7 +222,7 @@ void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e, uns
 void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   struct descr_short_event_header *evt=(struct descr_short_event_header *)buf;
-  if(cont->descriptor_length+sizeof(struct descr_generic_header)>maxlen)
+  if(evt->descriptor_length+sizeof(struct descr_generic_header)>maxlen)
     return; // defekt
   buf+=sizeof(struct descr_short_event_header);
   if(evt->event_name_length) {
