@@ -102,11 +102,9 @@
 		<TD background="topbalk.png" style="height: 112">
 			<table width=770>
 				<tr>
-					<td width=350px>&nbsp;</td>
-					<td align=right style="line-height: 10px">
+					<td width=150px>&nbsp;</td>
+					<td align=right style="line-height: 10px"><br><br><br>
 						<script language="javascript">
-							diskspace = '#DISKSPACE#';
-							document.write(diskspace);
 							volbar = '#VOLBAR#';
 							document.write(volbar);
 							document.write("<br><br><br>");
