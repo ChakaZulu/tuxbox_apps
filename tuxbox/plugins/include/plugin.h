@@ -3,9 +3,9 @@
 
 typedef struct _PluginParam
 {
-	char				*id;
-	char				*val;
-	struct _PluginParam	*next;
+	const char          * id;
+	char                * val;
+	struct _PluginParam * next;
 
 } PluginParam;
 

@@ -211,7 +211,7 @@ PluginParam * CPlugins::makeParam(const char * const id, const char * const valu
 	PluginParam * startparam = new PluginParam;
 
 	startparam->next = next;
-	startparam->id   = strdup(id   );
+	startparam->id   = id;
 	startparam->val  = strdup(value);
 
 	return startparam;
@@ -404,7 +404,7 @@ void CPlugins::startPlugin(int number)
 
 	for(par = startparam ; par; )
 	{
-		free(par->id);
+		/* we must not free par->id, since it is the original */
 		free(par->val);
 		PluginParam * tmp = par;
 		par = par->next;

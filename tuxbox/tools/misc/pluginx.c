@@ -1,5 +1,5 @@
 /*
- * $Id: pluginx.c,v 1.3 2003/12/27 20:16:44 carjay Exp $
+ * $Id: pluginx.c,v 1.4 2004/06/07 19:29:55 thegoodguy Exp $
  *
  * commandline tool to execute gui plugins without gui
  *
@@ -119,7 +119,7 @@ void load_so (char * filename)
 }
 
 
-void fd_to_param (char * filename, int flags, char * id, int type, PluginParam * param)
+void fd_to_param (char * filename, int flags, const char * const id, int type, PluginParam * param)
 {
 	int fd = open(filename, flags);
 
@@ -148,8 +148,7 @@ void fd_to_param (char * filename, int flags, char * id, int type, PluginParam *
 		for (tmp = fd; tmp > 9; tmp /= 10)
 			i++;
 
-		param->id = (char *) malloc(strlen(id) + 1);
-		strcpy(param->id, id);
+		param->id = id;
 		param->val = (char *) malloc(i);
 		sprintf(param->val, "%d", fd);
 		param->next = NULL;
@@ -363,7 +362,6 @@ int main (int argc, char ** argv)
 
 							while (plugin_param != NULL)
 							{
-								free(plugin_param->id);
 								free(plugin_param->val);
 								free(plugin_param);
 
