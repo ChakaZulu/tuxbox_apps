@@ -1,11 +1,9 @@
 /*
 	Control-Daemon  -   DBoxII-Project
 
-	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
-
-
-
+	Copyright (C) 2001 Steffen Hehn 'McClean',
+	              2002 dboxII-team
+	
 	License: GPL
 
 	This program is free software; you can redistribute it and/or modify
@@ -25,7 +23,7 @@
 
 #include <config.h>
 
- #include <math.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,6 +49,7 @@
 #include <zapit/zapitclient.h>
 #include <eventserver.h>
 
+#include <configfile.h>
 #include <controldclient/controldclient.h>
 #include <controldclient/controldMsg.h>
 #include <lcddclient/lcddclient.h>
@@ -69,17 +68,19 @@ CZapitClient	zapit;
 CTimerdClient	timerd;
 CEventServer	*eventServer;
 
+/* the configuration file */
+CConfigFile * config = NULL;
+
 struct Ssettings
 {
-	char volume;
-	char volume_avs;
+	int  volume;
+	int  volume_avs;
 	bool mute;
 	bool mute_avs;
-	char videooutput;
-	char videoformat;
+	int  videooutput;
+	int  videoformat;
 
-	char boxtype;
-	char lastmode;
+	char boxtype; // not part of the config - set by setBoxType()
 } settings;
 
 int	nokia_scart[6];
@@ -104,62 +105,9 @@ class CControldAspectRatioNotifier : public CAspectRatioNotifier
 CEventWatchDog* watchDog;
 CControldAspectRatioNotifier* aspectRatioNotifier;
 
-int loadSettings(Ssettings* lsettings=NULL)
-{
-	if(!lsettings)
-	{
-		lsettings = &settings;
-	}
-	int fd;
-	fd = open(CONF_FILE, O_RDONLY );
-
-	if (fd==-1)
-	{
-		printf("[controld] error while loading settings: %s\n", CONF_FILE );
-		return 0;
-	}
-	if(read(fd, lsettings, sizeof(Ssettings))!=sizeof(Ssettings))
-	{
-		printf("[controld] error while loading settings: %s - config from old version?\n", CONF_FILE );
-		return 0;
-	}
-	close(fd);
-
-	return 1;
-}
-
 void saveSettings()
 {
-	bool tosave = false;
-
-	Ssettings tmp;
-	if(loadSettings(&tmp)==1)
-	{
-		//compare...
-		if(memcmp(&tmp, &settings, sizeof(Ssettings))!=0)
-		{
-			tosave=true;
-		}
-	}
-	else
-	{
-		tosave=true;
-	}
-
-	if(tosave)
-	{
-		int fd;
-		fd = open(CONF_FILE, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH );
-
-		if (fd<0)
-		{
-			printf("[controld] error while saving settings: %s\n", CONF_FILE );
-			return;
-		}
-		write(fd, &settings,  sizeof(Ssettings) );
-		close(fd);
-		printf("[controld] settings saved\n");
-	}
+	config->saveConfig(CONF_FILE);
 }
 
 void shutdownBox()
@@ -195,7 +143,10 @@ void setvideooutput(int format, bool bSaveSettings = true)
 	// 2 - SVIDEO
 
 	if (bSaveSettings) // only set settings if we dont come from watchdog
+	{
 		settings.videooutput = format;
+		config->setInt32("videooutput", settings.videooutput);
+	}
 
 	int	arg;
 
@@ -272,6 +223,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 			format=3;
 
 		settings.videoformat = format;
+		config->setInt32("videoformat", settings.videoformat);
 	}
 
 	if (format==0) // automatic switch
@@ -627,7 +579,7 @@ void setBoxType()
 }
 
 
-// input:  0 <=     volumne          <= 100
+// input:  0 <=     volume           <= 100
 // output: 0 <= map_volume(., true)  <= 63
 // output: 0 <= map_volume(., false) <= 255 (well rather <= 0xFC)
 const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
@@ -659,15 +611,20 @@ const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 void parse_command(int connfd, CControld::commandHead* rmessage)
 {
 	
-	if(rmessage->version!=CControld::ACTVERSION)
+	if(rmessage->version != CControld::ACTVERSION)
 	{
-		perror("[controld] unknown version\n");
+		perror("[controld] wrong version\n");
 		return;
 	}
+
 	switch (rmessage->cmd)
 	{
 	case CControld::CMD_SHUTDOWN:
 		shutdownBox();
+		break;
+
+	case CControld::CMD_SAVECONFIG:
+		saveSettings();
 		break;
 
 	case CControld::CMD_SETVOLUME:
@@ -678,11 +635,13 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 		if (rmessage->cmd == CControld::CMD_SETVOLUME)
 		{
 			settings.volume = msg_commandVolume.volume;
+			config->setInt32("volume", settings.volume);
 			zapit.setVolume(map_volume(msg_commandVolume.volume, false), map_volume(msg_commandVolume.volume, false));
 		}
 		else
 		{
 			settings.volume_avs = msg_commandVolume.volume;
+			config->setInt32("volume_avs", settings.volume_avs);
 			audioControl::setVolume(map_volume(msg_commandVolume.volume, true));
 		}
 		lcdd.setVolume(msg_commandVolume.volume);
@@ -691,24 +650,28 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 
 	case CControld::CMD_MUTE:
 		settings.mute = true;
+		config->setBool("mute", settings.mute);
 		zapit.muteAudio(true);
 		lcdd.setMute(true);
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 		break;
 	case CControld::CMD_MUTE_AVS:
 		settings.mute_avs = true;
+		config->setBool("mute_avs", settings.mute_avs);
 		audioControl::setMute(true);
 		lcdd.setMute(true);
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
 		break;
 	case CControld::CMD_UNMUTE:
 		settings.mute = false;
+		config->setBool("mute", settings.mute);
 		zapit.muteAudio(false);
 		lcdd.setMute(settings.mute_avs);
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
 		break;
 	case CControld::CMD_UNMUTE_AVS:
 		settings.mute_avs = false;
+		config->setBool("mute_avs", settings.mute_avs);
 		audioControl::setMute(false);
 		lcdd.setMute(settings.mute);
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
@@ -748,9 +711,6 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			CControld::commandVideoPowerSave msg10;
 			read(connfd, &msg10, sizeof(msg10));
 			disableVideoOutput(msg10.powerdown);
-			break;
-		case CControld::CMD_SAVECONFIG:
-			saveSettings();
 			break;
 
 	case CControld::CMD_GETVOLUME:
@@ -821,7 +781,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.72 2002/10/17 13:07:16 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.73 2002/10/17 13:52:00 thegoodguy Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())
@@ -877,17 +837,22 @@ int main(int argc, char **argv)
 	signal(SIGQUIT,sig_catch);
 	signal(SIGTERM,sig_catch);
 
-	if (!loadSettings())
+	/* load configuration */
+	config = new CConfigFile(',');
+
+	if (!config->loadConfig(CONF_FILE))
 	{
-		printf("[controld] using defaults\n");
-		settings.volume      = 100;
-		settings.volume_avs  = 100;
-		settings.mute        = false;
-		settings.mute_avs    = false;
-		settings.videooutput = 1; // fblk1 - rgb
-		settings.videoformat = 2; // fnc2 - 4:3
-		settings.boxtype     = 1; //nokia
+		/* set defaults if no configuration file exists */
+		printf("[controld] %s not found\n", CONF_FILE);
 	}
+
+
+	settings.volume      = config->getInt32("volume", 100);
+	settings.volume_avs  = config->getInt32("volume_avs", 100);
+	settings.mute        = config->getBool("mute", false);
+	settings.mute_avs    = config->getBool("mute_avs", false);
+	settings.videooutput = config->getInt32("videooutput", 1); // fblk1 - rgb
+	settings.videoformat = config->getInt32("videoformat", 2); // fnc2 - 4:3
 
 	setBoxType(); // dummy set - liest den aktuellen Wert aus!
 
@@ -908,8 +873,8 @@ int main(int argc, char **argv)
 	setVideoFormat(settings.videoformat, false);
 
 
-    try
-    {
+	try
+	{
 		struct CControld::commandHead rmessage;
 		while(true)
 		{
@@ -952,4 +917,3 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 		}
 	}
 }
-

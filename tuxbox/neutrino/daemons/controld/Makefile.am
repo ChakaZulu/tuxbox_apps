@@ -4,13 +4,14 @@ INCLUDES = \
 	@ZAPIT_CFLAGS@ \
 	-I$(top_srcdir)/lib \
 	@EVENTSERVER_CFLAGS@
-	
+
 bin_PROGRAMS = controld
 
 controld_LDADD = \
 	driver/libcontrold_driver.a \
 	$(top_builddir)/lib/lcddclient/liblcddclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
+	@CONFIGFILE_LIBS@ \
 	@EVENTSERVER_LIBS@ \
 	@ZAPIT_LIBS@ \
 	-lpthread
