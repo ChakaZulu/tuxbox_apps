@@ -1071,10 +1071,6 @@ typedef struct standard_font
 	const int          size_offset;
 } standard_font_struct;
 
-#define FONT_STYLE_REGULAR 0
-#define FONT_STYLE_BOLD    1
-#define FONT_STYLE_ITALIC  2
-
 const standard_font_struct predefined_font[2] = 
 {
 	{"Micron",             FONTDIR "/micron",         0},
