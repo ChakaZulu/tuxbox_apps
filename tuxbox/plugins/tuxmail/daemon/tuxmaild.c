@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.7  2004/06/29 16:33:10  lazyt
+ * fix commandline interface
+ *
  * Revision 1.6  2004/04/03 17:33:08  lazyt
  * remove curl stuff
  * fix audio
@@ -352,7 +355,7 @@ void *InterfaceThread(void *arg)
 						break;
 
 				case 'S':	recv(fd_conn, &online, 1, 0);
-						kill(pid, SIGUSR1);
+						kill(pid, SIGUSR2);
 						break;
 
 				case 'L':	ReadSpamList();
@@ -971,7 +974,8 @@ void SigHandler(int signal)
 				ReadSpamList();
 				break;
 
-		case SIGUSR1:	printf("TuxMailD <wakeup>\n");
+		case SIGUSR1:	online ^= 1;
+		case SIGUSR2:	online?printf("TuxMailD <wakeup>\n"):printf("TuxMailD <sleep>\n");
 	}
 }
 
@@ -981,7 +985,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.6 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.7 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -1058,6 +1062,12 @@ int main(int argc, char **argv)
 		}
 
 		if(signal(SIGUSR1, SigHandler) == SIG_ERR)
+		{
+			printf("TuxMailD <Installation of Signalhandler failed>\n");
+			return -1;
+		}
+
+		if(signal(SIGUSR2, SigHandler) == SIG_ERR)
 		{
 			printf("TuxMailD <Installation of Signalhandler failed>\n");
 			return -1;
