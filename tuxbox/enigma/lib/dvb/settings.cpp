@@ -65,27 +65,32 @@ void eDVBSettings::renameDVBBouquet(int bouquet_id, eString& new_name)
 
 void eDVBSettings::addDVBBouquet(eDVBNamespace origin, const BAT *bat )
 {
-	eDebug("wir haben da eine bat, id %x", bat->bouquet_id);
+	eDebug("wir haben da eine bat, id %x our id is %08x", bat->bouquet_id, -(bat->bouquet_id | 0xF000000));
 	eString bouquet_name="Weiteres Bouquet";
 	for (ePtrList<Descriptor>::const_iterator i(bat->bouquet_descriptors); i != bat->bouquet_descriptors.end(); ++i)
 	{
 		if (i->Tag()==DESCR_BOUQUET_NAME)
+		{
 			bouquet_name=((BouquetNameDescriptor*)*i)->name;
+			bouquet_name+=" (BAT)";
+		}
 	}
-	eBouquet *bouquet=createBouquet(bat->bouquet_id, bouquet_name);
-	
+	eBouquet *bouquet=createBouquet(-(bat->bouquet_id|0xF000000), bouquet_name);
+	bouquet->list.clear();
 	for (ePtrList<BATEntry>::const_iterator be(bat->entries); be != bat->entries.end(); ++be)
 		for (ePtrList<Descriptor>::const_iterator i(be->transport_descriptors); i != be->transport_descriptors.end(); ++i)
 			if (i->Tag()==DESCR_SERVICE_LIST)
 			{
 				const ServiceListDescriptor *s=(ServiceListDescriptor*)*i;
 				for (ePtrList<ServiceListDescriptorEntry>::const_iterator a(s->entries); a != s->entries.end(); ++a)
+				{
 					bouquet->add(
 						eServiceReferenceDVB(
 							origin,
 							eTransportStreamID(be->transport_stream_id), 
 							eOriginalNetworkID(be->original_network_id), 
-							eServiceID(a->service_id), -1));
+							eServiceID(a->service_id), a->service_type));
+				}
 			}
 }
 

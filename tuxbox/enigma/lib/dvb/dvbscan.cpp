@@ -100,9 +100,6 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 				dvb.settings->clearList();
 		}
 
-		if (flags & flagUseBAT)
-			dvb.settings->removeDVBBouquets();
-
 		current=knownTransponder.begin();
 
 		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanNext));
@@ -182,7 +179,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		dvb.tSDT.start(new SDT());
 
 		if (flags & flagUseBAT)
-			dvb.tBAT.start(new BAT());
+			;
 		else
 			scanOK|=4;
 
@@ -208,6 +205,9 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		eDebug("scanOK %d", scanOK);
 		if (scanOK==15)
 			dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanComplete));
+
+		if (flags & flagUseBAT)
+			dvb.tBAT.start(new BAT());
 
 		break;
 	}
