@@ -96,7 +96,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CTimerd::RecordingInfo* nextRecordingInfo;
 		//bool				record_mode;
 
-		long long 			standby_pressed_at;
+		struct timeval                  standby_pressed_at;
 
 		CZapitClient::responseGetLastChannel    firstchannel;
 		st_rmsg				sendmessage;

@@ -120,9 +120,9 @@ static bool parentallocked = false;
 CZapitClient::SatelliteList satList;
 CZapitClient::SatelliteList::iterator satList_it;
 
-#define NEUTRINO_SETTINGS_FILE      CONFIGDIR "/neutrino.conf"
-#define NEUTRINO_SCAN_SETTINGS_FILE CONFIGDIR "/scan.conf"
-#define NEUTRINO_PARENTALLOCKED_FILE    DATADIR   "/neutrino/.plocked"
+#define NEUTRINO_SETTINGS_FILE       CONFIGDIR "/neutrino.conf"
+#define NEUTRINO_SCAN_SETTINGS_FILE  CONFIGDIR "/scan.conf"
+#define NEUTRINO_PARENTALLOCKED_FILE DATADIR   "/neutrino/.plocked"
 
 static void initGlobals(void)
 {
@@ -152,6 +152,8 @@ static void initGlobals(void)
 CNeutrinoApp::CNeutrinoApp()
 : configfile('\t')
 {
+	standby_pressed_at.tv_sec = 0;
+
 	frameBuffer = CFrameBuffer::getInstance();
 	frameBuffer->setIconBasePath(DATADIR "/neutrino/icons/");
 
@@ -2858,11 +2860,9 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		if (data == 0)
 		{
 			// trigger StandBy
-			struct timeval tv;
-			gettimeofday(&tv, NULL );
-			standby_pressed_at = (tv.tv_sec*1000000) + tv.tv_usec;
+			gettimeofday(&standby_pressed_at, NULL );
 
-			if( mode == mode_standby )
+			if (mode == mode_standby)
 			{
 				g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
 			}
@@ -2883,8 +2883,8 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 					timeout=timeout1;
 
 				uint msg; uint data;
-				int diff = 0;
-				long long endtime;
+				struct timeval endtime;
+				time_t seconds = 0;
 
 				do
 				{
@@ -2892,14 +2892,15 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 					if( msg != CRCInput::RC_timeout )
 					{
-						gettimeofday(&tv, NULL );
-						endtime = (tv.tv_sec*1000000) + tv.tv_usec;
-						diff = int((endtime - standby_pressed_at)/100000. );
+						gettimeofday(&endtime, NULL);
+						seconds = endtime.tv_sec - standby_pressed_at.tv_sec;
+						if (endtime.tv_usec < standby_pressed_at.tv_usec)
+							seconds--;
 					}
 
-				} while( ( msg != CRCInput::RC_timeout ) && ( diff < 10 ) );
+				} while ((msg != CRCInput::RC_timeout) && (seconds < 1));
 
-				g_RCInput->postMsg( ( diff >= 10 ) ? NeutrinoMessages::SHUTDOWN : NeutrinoMessages::STANDBY_ON, 0 );
+				g_RCInput->postMsg((seconds >= 1) ? NeutrinoMessages::SHUTDOWN : NeutrinoMessages::STANDBY_ON, 0);
 			}
 			else
 			{
@@ -2907,20 +2908,21 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			}
 			return messages_return::cancel_all | messages_return::handled;
 		}
-#if 0
-		else /* data == 1: Standby button released */
-		{
-			struct timeval tv;
-			gettimeofday(&tv, NULL );
-			long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
-			int diff = int((endtime - standby_pressed_at)/100000. );
-			if( diff >= 10 )
-			{
-				g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
-				return messages_return::cancel_all | messages_return::handled;
+		else                                        /* data == 1: KEY_POWER released                         */
+			if (standby_pressed_at.tv_sec != 0) /* check if we received a KEY_POWER pressed event before */
+			{                                   /* required for correct handling of KEY_POWER events of  */
+				                            /* the power button on the dbox (not the remote control) */
+				struct timeval endtime;
+				gettimeofday(&endtime, NULL);
+				time_t seconds = endtime.tv_sec - standby_pressed_at.tv_sec;
+				if (endtime.tv_usec < standby_pressed_at.tv_usec)
+					seconds--;
+				if (seconds >= 1)
+				{
+					g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
+					return messages_return::cancel_all | messages_return::handled;
+				}
 			}
-		}
-#endif
 	}
 	else if( msg == CRCInput::RC_plus ||
 		 msg == CRCInput::RC_minus )
