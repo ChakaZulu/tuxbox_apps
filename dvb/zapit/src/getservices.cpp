@@ -20,6 +20,32 @@ uint curr_diseqc;
 int serv_mode;
 typedef std::map<uint, transponder>::iterator titerator;
 
+void nameinsert(std::string name, uint onid_sid, uint sm)
+{
+	int number = 0;
+	char cnumber[3];
+	std::string newname = name;
+	
+	if (sm == 2)
+	{
+		while (namechans_radio.count(newname) != 0)
+		{
+			sprintf(cnumber, "%2d", ++number);
+			newname = name + cnumber;
+		}
+		namechans_radio.insert(std::pair<std::string, uint>(newname, onid_sid));
+	}
+	else
+	{
+		while (namechans_tv.count(newname) != 0)
+		{
+			sprintf(cnumber, "%2d", ++number);
+			newname = name + cnumber;
+		}
+		namechans_tv.insert(std::pair<std::string, uint>(newname, onid_sid));
+	}
+}
+
 void ParseTransponder(XMLTreeNode *xmltransponder) {
   
   for (XMLTreeNode *services=xmltransponder->GetChild(); services; services=services->GetNext())
@@ -83,7 +109,7 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 		    }
 		  else
 		    {
-		      namechans_radio.insert(std::pair<std::string, uint>(name, (onid<<16)+sid));
+		      nameinsert(name, (onid<<16)+sid, sm);
 		    } 
 		}
 	      else
@@ -96,7 +122,7 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 		    }
 		  else
 		    {
-		      namechans_tv.insert(std::pair<std::string, uint>(name, (onid<<16)+sid));
+		      nameinsert(name, (onid<<16)+sid, sm);
 		    } 
 		}
 	    } else { 

@@ -36,7 +36,6 @@
 	exit(1);
 
 
-#define EXTERNAL_CAMD
 #define FRONT_DEV "/dev/ost/qpskfe0"
 #define DEMUX_DEV "/dev/ost/demux0"
 #define SEC_DEV   "/dev/ost/sec0"
@@ -62,10 +61,6 @@ typedef enum {
   DVB_POL_VERT
 } DvbPol;
 
-#ifdef EXTERNAL_CAMD
-  char buffer[3][5];
-#endif
-
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
@@ -88,6 +83,7 @@ struct rmsg {
 
 int LoadServices();
 int get_caid();
-int sdt(uint osid);
+int sdt(uint osid,bool scan_mode);
 int pat(uint oonid,std::map<uint,channel> *cmap);
 void nit();
+int tune(uint tsid);

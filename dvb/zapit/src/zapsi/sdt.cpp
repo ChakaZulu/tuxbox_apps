@@ -14,7 +14,7 @@
 
 #define DEMUX_DEV "/dev/ost/demux0"
 
-int sdt(uint osid)
+int sdt(uint osid, bool scan_mode)
 {
   struct dmxSctFilterParams flt;
   int demux;
@@ -31,7 +31,7 @@ int sdt(uint osid)
   flt.filter.filter[0] = 0x42;
   flt.filter.mask[0]  =0xFF;
   flt.timeout=10000;
-  flt.flags=DMX_ONESHOT | DMX_CHECK_CRC;
+  flt.flags=DMX_IMMEDIATE_START | DMX_CHECK_CRC;
   
   if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
     perror("DMX_SET_FILTER");
@@ -66,6 +66,8 @@ int sdt(uint osid)
     
     tsid = (buffer[3]<<8) | buffer[4];
     printf("TSid: %04x\n",tsid);
+    if (scan_mode && tsid != osid)
+    	return -2;
     //printf("section_number: %04x\n",buffer[6]);
     //printf("last_section_number: %04x\n",buffer[7]);
     network_id = (buffer[8]<<8)|buffer[9];
@@ -84,7 +86,7 @@ int sdt(uint osid)
 	//printf("The descriptors-loop is %d byte long\n", desc_len);
 	++current_i;
 	
-	if (osid == sid)
+	if (osid == sid || scan_mode)
 	{
 	  printf("service_id: %x\n", sid); 
 	while (desc_tot < desc_len)
@@ -107,7 +109,7 @@ int sdt(uint osid)
 		desc_tot += linkage_desc(&buffer[current_i+desc_tot]);
 		break;
 	      case 0x4b:
-		desc_tot += nvod_ref_desc(&buffer[current_i+desc_tot],sid,tsid);
+		desc_tot += nvod_ref_desc(&buffer[current_i+desc_tot],tsid);
 		break;
 	      case 0x4c:
 		desc_tot += time_shift_service_desc(&buffer[current_i+desc_tot]);

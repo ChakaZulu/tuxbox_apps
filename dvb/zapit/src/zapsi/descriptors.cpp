@@ -184,7 +184,7 @@ int country_availability_desc(char *buffer)
 }
 	
 
-int nvod_ref_desc(char *buffer,int sid,int tsid)
+int nvod_ref_desc(char *buffer,int tsid)
 {
   int len = buffer[1];
   std::string servicename = "NVOD";

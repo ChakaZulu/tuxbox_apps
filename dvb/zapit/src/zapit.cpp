@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.8 2001/10/10 12:17:59 fnbrd Exp $
+  $Id: zapit.cpp,v 1.9 2001/10/10 14:08:29 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -69,6 +69,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.9  2001/10/10 14:08:29  faralla
+  preparations for included scan
+
   Revision 1.8  2001/10/10 12:17:59  fnbrd
   Singalhandler auskommentiert.
 
@@ -134,12 +137,9 @@
 #include "zapit.h"
 #include "../../apps//mczap/lcdd/lcdd.h"
 
-uint16_t old_tsid  = 0;
+extern uint16_t old_tsid;
 uint curr_onid_sid = 0;
-secVoltage Oldvoltage = 0;
-secToneMode OldTone = 0;
 boolean OldAC3 = false;
-char    OldParam;
 
 uint8_t fec_inner = 0; 
 uint16_t vpid, apid, pmt = 0;
@@ -155,7 +155,7 @@ std::map<uint, uint> allnumchannels_radio;
 std::map<std::string, uint> allnamechannels_tv;
 std::map<std::string, uint> allnamechannels_radio;
 
-std::map<uint, transponder>transponders;
+extern std::map<uint, transponder>transponders;
 std::map<uint, channel> allchans_tv;
 std::map<uint, uint> numchans_tv;
 std::map<std::string, uint> namechans_tv;
@@ -635,144 +635,6 @@ channel_msg load_settings()
   return output_msg;
 }
 
-int tune(uint tsid)
-{
-  struct qpskParameters front;
-  struct secCmdSequence seq;
-  struct secCommand cmd;
-  struct secDiseqcCmd diseqc;
-  int dosec;
-  unsigned char bits;
-  int sec_device = -1;
-  uint8_t Fec_inner;
-  int device = -1;
-  uint Frequency, Symbolrate;
-  int status = -1;
-
-  if (transponders.count(tsid) == 0)
-    {
-      printf("No transponder with tsid %04x found\nSEARCHING...\n", tsid);
-      nit();
-      if (transponders.count(tsid) == 0)
-	return -1;
-    }
-  
-  titerator transponder = transponders.find(tsid);
-
-  
-  diseqc.addr=0x10;
-  diseqc.cmd=0x38;
-  diseqc.numParams=1;
-  diseqc.params[0]=0xF0;
-  cmd.type=SEC_CMDTYPE_DISEQC;
-  bits=transponder->second.diseqc << 2;
-
-   if (transponder->second.frequency<8000)
-    {
-      // cable
-      Frequency = transponder->second.frequency*100;
-      dosec = 0;
-    }
-  else if (transponder->second.frequency>11700)
-    {
-      Frequency = transponder->second.frequency*1000-10600000;
-      seq.continuousTone = SEC_TONE_ON;
-      bits|=1;
-      dosec = 1;
-    }
-  else
-    {
-      Frequency = transponder->second.frequency*1000-9750000;
-      seq.continuousTone = SEC_TONE_OFF;
-      bits|=0;
-      dosec = 1;
-    }
-  Frequency += offset;
-  Symbolrate = transponder->second.symbolrate*1000;
-  
-  if (dosec)
-    {
-      if (transponder->second.polarity)
-        {
-	  seq.voltage=SEC_VOLTAGE_13;
-	  bits|=0;
-        }
-      else
-        {
-	  seq.voltage=SEC_VOLTAGE_18;
-	  bits|=2;
-        }
-      
-      diseqc.params[0]|=bits;
-      
-      if ( ( Oldvoltage != seq.voltage ) ||
-	   ( OldTone != seq.continuousTone ) ||
-	   ( OldParam != diseqc.params[0] ) )
-        {
-	  if((sec_device = open(SEC_DEV, O_RDWR)) < 0)
-            {
-	      printf("Cannot open SEC device \"%s\"\n",SEC_DEV);
-	      exit(-3);
-            }
-	  
-	  cmd.u.diseqc=diseqc;
-	  seq.miniCommand=SEC_MINI_NONE;
-	  seq.numCommands=1;
-	  seq.commands=&cmd;
-	  
-	  Oldvoltage = seq.voltage;
-	  OldTone = seq.continuousTone;
-	  OldParam = diseqc.params[0];
-	  
-	  ioctl(sec_device,SEC_SEND_SEQUENCE,&seq);
-	  
-	  close(sec_device);
-	  sec_device= -1;
-        }
-    }
-  
-  if (caid == 0)
-    caid=0x1722;
-
-  Fec_inner = transponder->second.fec;
-  
-  if ( ( device = open(FRONT_DEV, O_RDWR) ) < 0 )
-    {
-      printf("Cannot open frontend device \"%s\"\n",FRONT_DEV);
-      //close(device);
-      
-      if ( video>= 0 )
-	close(video);
-      if ( audio>= 0 )
-	close(audio);
-      
-      exit(-3);
-    };
-  printf ("Have to tune to freq: %d, sr: %d\n", Frequency, Symbolrate);
-  front.iFrequency = Frequency;
-  front.SymbolRate = Symbolrate;
-  front.FEC_inner = Fec_inner;
-  ioctl(device,QPSK_TUNE,&front);
-  
-  for (int i = 0; i < 200; i++)
-    { 		
-      ioctl(device, FE_READ_STATUS, &status);
-      printf("Waiting for Frontend-device\n");
-      if (status & 2)
-	break;
-      usleep(1000);
-    }
-
-  close(device);
-  device= -1;
-  
-  old_tsid = tsid;
-  
-  return 23;
-}
-
-
-
 int zapit (uint onid_sid,boolean in_nvod) {
 
   struct dmxPesFilterParams pes_filter;
@@ -864,7 +726,7 @@ else
     {
       nvodname = cit->second.name;
       printf("Getting sdt for NVOD\n");
-      sdt(cit->second.sid);
+      sdt(cit->second.sid,false);
       printf("Got sdt\n");
       if (!nvodchannels.empty())
 	{
@@ -1748,7 +1610,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.8 2001/10/10 12:17:59 fnbrd Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.9 2001/10/10 14:08:29 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   
   testmsg = load_settings();

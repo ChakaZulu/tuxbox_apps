@@ -16,7 +16,7 @@ int announcement_support_desc(char *buffer);
 int service_name_desc(char *buffer, int sid, int tsid, int onid);
 int bouquet_name_desc(char *buffer);
 int country_availability_desc(char *buffer);
-int nvod_ref_desc(char *buffer,int sid,int tsid);
+int nvod_ref_desc(char *buffer,int tsid);
 int time_shift_service_desc(char *buffer);
 int mosaic_desc(char *buffer);
 int ca_ident_desc(char *buffer);
