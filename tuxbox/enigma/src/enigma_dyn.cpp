@@ -55,6 +55,7 @@
 #include <enigma_dyn_rotor.h>
 #include <enigma_dyn_xml.h>
 #include <enigma_streamer.h>
+#include <enigma_processutils.h>
 
 using namespace std;
 
@@ -1730,10 +1731,8 @@ static eString getUSBInfo(void)
 {
 	std::stringstream result;
 	eString usbStick = "none";
-	system("cat /proc/scsi/usb-storage-0/0 > /tmp/usbstick.tmp"); // 2.4.20
-	system("cat /proc/scsi/usb-storage/0 >> /tmp/usbstick.tmp");  // 2.6.5
 	eString line;
-	ifstream infile("/tmp/usbstick.tmp");
+	ifstream infile("/proc/scsi/usb-storage/0");
 	if (infile)
 	{
 		usbStick = "";
@@ -1745,11 +1744,6 @@ static eString getUSBInfo(void)
 			{
 				usbStick += ", ";
 				usbStick += "Product =" + getRight(line, ':');
-			}
-			if (line.find("Attached:") != eString::npos)
-			{
-				usbStick += ", ";
-				usbStick += "Attached =" + getRight(line, ':');
 			}
 		}
 		result 	<< "<tr>"
@@ -2586,7 +2580,7 @@ static eString videopls(eString request, eString dirpath, eString opts, eHTTPCon
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eStreamer::getInstance()->setServiceReference(string2ref(opt["sref"]));
 
-	system("killall -9 streamts");
+	eProcessUtils::killProcess("streamts");
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
 	eString apid = eString().sprintf("%04x", Decoder::current.apid);
 	eString pmt = eString().sprintf("%04x", Decoder::current.pmtpid);
