@@ -3781,6 +3781,7 @@ struct appendonidsidnamestr
 	}
 };
 
+#if 0
 static eString neutrino_suck_getchannellist(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString channelstring;
@@ -3789,6 +3790,7 @@ static eString neutrino_suck_getchannellist(eString request, eString dirpath, eS
 
 	return channelstring;
 }
+#endif
 
 static eString cleanupTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
