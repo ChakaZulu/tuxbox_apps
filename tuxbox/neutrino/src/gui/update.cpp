@@ -284,6 +284,9 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.md5sumerror") );
 		return menu_return::RETURN_REPAINT;
 	}
+
+	CNeutrinoApp::getInstance()->exec(NULL, "savesettings");
+	sleep(2);
 	showGlobalStatus(60);
 
 	//flash it...
@@ -297,9 +300,6 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	//status anzeigen
 	showGlobalStatus(100);
 	showStatusMessage( g_Locale->getText("flashupdate.ready") );
-
-	CNeutrinoApp::getInstance()->exec(NULL, "savesettings");
-	sleep(2);
 
 	hide();
 	ShowHint ( "messagebox.info", g_Locale->getText("flashupdate.flashreadyreboot") );
