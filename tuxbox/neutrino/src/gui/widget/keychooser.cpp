@@ -47,15 +47,15 @@ CKeyChooser::CKeyChooser( int* Key, const char * const title, const std::string 
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	key = Key;
-	keyChooser = new CKeyChooserItem("keychooser.head", key);
+	keyChooser = new CKeyChooserItem(LOCALE_KEYCHOOSER_HEAD, key);
 	keyDeleter = new CKeyChooserItemNoKey(key);
 
 	addItem( new CMenuSeparator(CMenuSeparator::STRING, " ") );
 	addItem(GenericMenuSeparatorLine);
 	addItem(GenericMenuBack);
 	addItem(GenericMenuSeparatorLine);
-	addItem(new CMenuForwarder("keychoosermenu.setnew", true, NULL, keyChooser) );
-	addItem(new CMenuForwarder("keychoosermenu.setnone", true, NULL, keyDeleter) );
+	addItem(new CMenuForwarder(LOCALE_KEYCHOOSERMENU_SETNEW , true, NULL, keyChooser));
+	addItem(new CMenuForwarder(LOCALE_KEYCHOOSERMENU_SETNONE, true, NULL, keyDeleter));
 }
 
 
@@ -69,7 +69,7 @@ CKeyChooser::~CKeyChooser()
 void CKeyChooser::paint()
 {
 	std::string * text = &(((CMenuSeparator *)(items[0]))->text);
-	*text = g_Locale->getText("keychoosermenu.currentkey");
+	*text = g_Locale->getText(LOCALE_KEYCHOOSERMENU_CURRENTKEY);
 	(*text) += ": ";
 	(*text) += CRCInput::getKeyName(*key);
 
@@ -77,7 +77,7 @@ void CKeyChooser::paint()
 }
 
 //*****************************
-CKeyChooserItem::CKeyChooserItem(const char * const Name, int *Key)
+CKeyChooserItem::CKeyChooserItem(const neutrino_locale_t Name, int * Key)
 {
 	name = Name;
 	key = Key;
@@ -143,6 +143,6 @@ void CKeyChooserItem::paint()
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 
 	//paint msg...
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText("keychooser.text1"), COL_MENUCONTENT, 0, true); // UTF-8
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, y+ hheight+ mheight* 2, width, g_Locale->getText("keychooser.text2"), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText(LOCALE_KEYCHOOSER_TEXT1), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, y+ hheight+ mheight* 2, width, g_Locale->getText(LOCALE_KEYCHOOSER_TEXT2), COL_MENUCONTENT, 0, true); // UTF-8
 }

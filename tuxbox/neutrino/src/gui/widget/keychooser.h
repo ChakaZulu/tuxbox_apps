@@ -38,6 +38,7 @@
 #include <driver/framebuffer.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
+#include <system/localize.h>
 
 #include "menue.h"
 
@@ -68,14 +69,14 @@ class CKeyChooserItem : public CMenuTarget
 		int width;
 		int height;
 
-		const char * name;
-		int        * key;
+		neutrino_locale_t name;
+		int *             key;
 
 		void paint();
 
 	public:
 
-		CKeyChooserItem(const char * const Name, int *Key); // UTF-8
+		CKeyChooserItem(const neutrino_locale_t Name, int *Key);
 
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);

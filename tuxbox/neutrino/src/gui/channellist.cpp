@@ -930,7 +930,7 @@ void CChannelList::paintItem(int pos)
 
 const struct button_label CChannelListButtons[1] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED, "infoviewer.eventlist"}
+	{ NEUTRINO_ICON_BUTTON_RED, LOCALE_INFOVIEWER_EVENTLIST}
 };
 
 void CChannelList::paintHead()

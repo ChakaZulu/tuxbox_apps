@@ -1587,13 +1587,13 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	}
 
 	keySetupNotifier = new CKeySetupNotifier;
-	CStringInput * keySettings_repeat_genericblocker = new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
-	CStringInput * keySettings_repeatBlocker = new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_genericblocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
+	CStringInput * keySettings_repeat_genericblocker = new CStringInput(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, g_settings.repeat_genericblocker, 3, LOCALE_REPEATBLOCKER_HINT_1, LOCALE_REPEATBLOCKER_HINT_2, "0123456789 ", keySetupNotifier);
+	CStringInput * keySettings_repeatBlocker = new CStringInput(LOCALE_KEYBINDINGMENU_REPEATBLOCK, g_settings.repeat_blocker, 3, LOCALE_REPEATBLOCKER_HINT_1, LOCALE_REPEATBLOCKER_HINT_2, "0123456789 ", keySetupNotifier);
 	keySetupNotifier->changeNotify("initial", NULL);
 
-	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
-	miscSettings.addItem(new CMenuForwarder("keybindingmenu.repeatblock", true, g_settings.repeat_genericblocker, keySettings_repeatBlocker));
- 	miscSettings.addItem(new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, g_settings.repeat_blocker, keySettings_repeat_genericblocker));
+	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_RC));
+	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCK, true, g_settings.repeat_blocker, keySettings_repeatBlocker));
+ 	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, true, g_settings.repeat_genericblocker, keySettings_repeat_genericblocker));
 	miscSettings.addItem( m1 );
 }
 
@@ -2236,60 +2236,60 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	lcdSettings.addItem( oj );
 }
 
+enum keynames {
+	KEY_TV_RADIO_MODE,
+	KEY_PAGE_UP,
+	KEY_PAGE_DOWN,
+	KEY_CANCEL_ACTION,
+	KEY_SORT,
+	KEY_ADD_RECORD,
+	KEY_ADD_REMIND,
+	KEY_CHANNEL_UP,
+	KEY_CHANNEL_DOWN,
+	KEY_BOUQUET_UP,
+	KEY_BOUQUET_DOWN,
+	KEY_SUBCHANNEL_UP,
+	KEY_SUBCHANNEL_DOWN
+};
+
+const neutrino_locale_t keydescription_head[13] =
+{
+	LOCALE_KEYBINDINGMENU_TVRADIOMODE_HEAD,
+	LOCALE_KEYBINDINGMENU_PAGEUP_HEAD,
+	LOCALE_KEYBINDINGMENU_PAGEDOWN_HEAD,
+	LOCALE_KEYBINDINGMENU_CANCEL_HEAD,
+	LOCALE_KEYBINDINGMENU_SORT_HEAD,
+	LOCALE_KEYBINDINGMENU_ADDRECORD_HEAD,
+	LOCALE_KEYBINDINGMENU_ADDREMIND_HEAD,
+	LOCALE_KEYBINDINGMENU_CHANNELUP_HEAD,
+	LOCALE_KEYBINDINGMENU_CHANNELDOWN_HEAD,
+	LOCALE_KEYBINDINGMENU_BOUQUETUP_HEAD,
+	LOCALE_KEYBINDINGMENU_BOUQUETDOWN_HEAD,
+	LOCALE_KEYBINDINGMENU_SUBCHANNELUP_HEAD,
+	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN_HEAD
+};
+
+const neutrino_locale_t keydescription[13] =
+{
+	LOCALE_KEYBINDINGMENU_TVRADIOMODE,
+	LOCALE_KEYBINDINGMENU_PAGEUP,
+	LOCALE_KEYBINDINGMENU_PAGEDOWN,
+	LOCALE_KEYBINDINGMENU_CANCEL,
+	LOCALE_KEYBINDINGMENU_SORT,
+	LOCALE_KEYBINDINGMENU_ADDRECORD
+	LOCALE_KEYBINDINGMENU_ADDREMIND,
+	LOCALE_KEYBINDINGMENU_CHANNELUP,
+	LOCALE_KEYBINDINGMENU_CHANNELDOWN,
+	LOCALE_KEYBINDINGMENU_BOUQUETUP,
+	LOCALE_KEYBINDINGMENU_BOUQUETDOWN,
+	LOCALE_KEYBINDINGMENU_SUBCHANNELUP,
+	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN
+};
+
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 {
 	keySettings.addItem(GenericMenuSeparator);
 	keySettings.addItem(GenericMenuBack);
-
-	enum keynames {
-		KEY_TV_RADIO_MODE,
-		KEY_PAGE_UP,
-		KEY_PAGE_DOWN,
-		KEY_CANCEL_ACTION,
-		KEY_SORT,
-		KEY_ADD_RECORD,
-		KEY_ADD_REMIND,
-		KEY_CHANNEL_UP,
-		KEY_CHANNEL_DOWN,
-		KEY_BOUQUET_UP,
-		KEY_BOUQUET_DOWN,
-		KEY_SUBCHANNEL_UP,
-		KEY_SUBCHANNEL_DOWN
-	};
-
-	const char * keydescription_head[13] =
-		{
-			"keybindingmenu.tvradiomode_head",
-			"keybindingmenu.pageup_head",
-			"keybindingmenu.pagedown_head",
-			"keybindingmenu.cancel_head",
-			"keybindingmenu.sort_head",
-			"keybindingmenu.addrecord_head",
-			"keybindingmenu.addremind_head",
-			"keybindingmenu.channelup_head",
-			"keybindingmenu.channeldown_head",
-			"keybindingmenu.bouquetup_head",
-			"keybindingmenu.bouquetdown_head",
-			"keybindingmenu.subchannelup_head",
-			"keybindingmenu.subchanneldown_head"
-		};
-
-	const char * keydescription[13] =
-		{
-			"keybindingmenu.tvradiomode",
-			"keybindingmenu.pageup",
-			"keybindingmenu.pagedown",
-			"keybindingmenu.cancel",
-			"keybindingmenu.sort",
-			"keybindingmenu.addrecord",
-			"keybindingmenu.addremind",
-			"keybindingmenu.channelup",
-			"keybindingmenu.channeldown",
-			"keybindingmenu.bouquetup",
-			"keybindingmenu.bouquetdown",
-			"keybindingmenu.subchannelup",
-			"keybindingmenu.subchanneldown"
-		};
 
 	int * keyvalue_p[13] =
 		{
@@ -2313,19 +2313,19 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	for (int i = 0; i < 13; i++)
 		keychooser[i] = new CKeyChooser(keyvalue_p[i], keydescription_head[i], NEUTRINO_ICON_SETTINGS);
 
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.modechange") );
+	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_MODECHANGE));
 	keySettings.addItem(new CMenuForwarder(keydescription[KEY_TV_RADIO_MODE], true, NULL, keychooser[KEY_TV_RADIO_MODE]));
 
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.channellist") );
-	CMenuOptionChooser *oj = new CMenuOptionChooser("keybindingmenu.bouquethandling" , &g_settings.bouquetlist_mode, true );
-	oj->addOption(0, "keybindingmenu.bouquetchannels_on_ok");
-	oj->addOption(1, "keybindingmenu.bouquetlist_on_ok");
-	oj->addOption(2, "keybindingmenu.allchannels_on_ok");
+	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_CHANNELLIST));
+	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_KEYBINDINGMENU_BOUQUETHANDLING, &g_settings.bouquetlist_mode, true );
+	oj->addOption(0, LOCALE_KEYBINDINGMENU_BOUQUETCHANNELS_ON_OK);
+	oj->addOption(1, LOCALE_KEYBINDINGMENU_BOUQUETLIST_ON_OK    );
+	oj->addOption(2, LOCALE_KEYBINDINGMENU_ALLCHANNELS_ON_OK    );
 	keySettings.addItem( oj );
 	for (int i = KEY_PAGE_UP; i <= KEY_ADD_REMIND; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
 
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.quickzap") );
+	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_QUICKZAP));
 	for (int i = KEY_CHANNEL_UP; i <= KEY_SUBCHANNEL_DOWN; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
 }
@@ -2653,7 +2653,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget colorSettings       (LOCALE_COLORMENU_HEAD           , "colors.raw"          );
 	CMenuWidget fontSettings        ("fontmenu.head"                 , "colors.raw"          );
 	CMenuWidget lcdSettings         (LOCALE_LCDMENU_HEAD             , "lcd.raw"             );
-	CMenuWidget keySettings         ("keybindingmenu.head"           , "keybinding.raw"      , 400);
+	CMenuWidget keySettings         (LOCALE_KEYBINDINGMENU_HEAD      , "keybinding.raw"      , 400);
 	CMenuWidget miscSettings        (LOCALE_MISCSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget mp3picSettings      (LOCALE_MP3PICSETTINGS_GENERAL   , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget scanSettings        ("servicemenu.scants"            , NEUTRINO_ICON_SETTINGS);
