@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.127 2002/04/14 08:44:37 Simplex Exp $
+ * $Id: zapit.cpp,v 1.128 2002/04/14 10:16:46 Simplex Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1969,6 +1969,27 @@ frontend->getInfo()->type == FE_QAM //bei kabel
 				send( connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList),0);
 			break;
 
+			case CZapitClient::CMD_SCANSETSCANSATLIST :
+				CZapitClient::commandSetScanSatelliteList sat;
+				while( read( connfd, &sat, sizeof(sat)))
+				{
+					printf("[zapit] %s %d", sat.satName, sat.diseqc);
+					// todo
+				}
+			break;
+
+			case CZapitClient::CMD_SCANSETDISEQCTYPE :
+				diseqc_t diseqc;
+				read( connfd, &diseqc, sizeof(diseqc));
+				// todo
+			break;
+
+			case CZapitClient::CMD_SCANSETDISEQCREPEAT :
+				int repeat;
+				read( connfd, &repeat, sizeof(repeat));
+				// todo
+			break;
+
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
 				CZapitClient::commandAddBouquet msgAddBouquet;
 				read( connfd, &msgAddBouquet, sizeof(msgAddBouquet));
@@ -2239,7 +2260,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.127 2002/04/14 08:44:37 Simplex Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.128 2002/04/14 10:16:46 Simplex Exp $\n\n");
 
 	if (argc > 1)
 	{

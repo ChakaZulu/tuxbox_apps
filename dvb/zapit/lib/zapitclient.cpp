@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.24 2002/04/14 08:45:08 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.25 2002/04/14 10:16:05 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.25  2002/04/14 10:16:05  Simplex
+  new commands for scan configuration
+
   Revision 1.24  2002/04/14 08:45:08  Simplex
   renamed sattelite to satellite ;)
 
@@ -512,6 +515,48 @@ void CZapitClient::getScanSatelliteList( SatelliteList& satelliteList )
 
 	zapit_close();
 
+}
+
+/* tell zapit which satellites to scan*/
+void CZapitClient::setScanSatelliteList( ScanSatelliteList& satelliteList )
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SCANSETSCANSATLIST;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	for (uint i=0; i<satelliteList.size(); i++)
+	{
+		send((char*)&satelliteList[i], sizeof(satelliteList[i]));
+	}
+	zapit_close();
+}
+
+/* set diseqcType*/
+void CZapitClient::setDiseqcType( diseqc_t diseqc)
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SCANSETDISEQCTYPE;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&diseqc, sizeof(diseqc));
+	zapit_close();
+}
+
+/* set diseqcRepeat*/
+void CZapitClient::setDiseqcRepeat( int repeat)
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SCANSETDISEQCREPEAT;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&repeat, sizeof(repeat));
+	zapit_close();
 }
 
 
