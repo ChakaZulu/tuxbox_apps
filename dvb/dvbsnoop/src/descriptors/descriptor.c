@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.15 2004/01/01 20:31:22 rasc Exp $
+$Id: descriptor.c,v 1.16 2004/01/02 16:40:34 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: descriptor.c,v 1.15 2004/01/01 20:31:22 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.16  2004/01/02 16:40:34  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.15  2004/01/01 20:31:22  rasc
 PES program stream map, minor descriptor cleanup
 
@@ -146,11 +150,7 @@ void descriptor_any (u_char *b)
  // tag		 = b[0];
  len       	 = b[1];
 
- out_nl (4,"Descriptor-Data:");
-	indent (+1);
-	printhexdump_buf (4, b+2, len);
-	indent (-1);
-
+ print_databytes (4,"Descriptor-data:", b+2, len);
 }
 
 

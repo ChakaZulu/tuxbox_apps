@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.12 2004/01/02 02:45:33 rasc Exp $
+$Id: tslayer.c,v 1.13 2004/01/02 16:40:44 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: tslayer.c,v 1.12 2004/01/02 02:45:33 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.13  2004/01/02 16:40:44  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.12  2004/01/02 02:45:33  rasc
 no message
 
@@ -312,9 +316,9 @@ int ts_adaption_field (u_char  *b)
      a.transport_private_data_length		= b[0];
 
      out_SB_NL (5,"transport_private_data_length: ",
-	a.transport_private_data_length);
-     out_nl (4,"Transport_private_data:");
-     printhexdump_buf (4,b+1,a.transport_private_data_length);
+			a.transport_private_data_length);
+     print_databytes (4,"Transport_private_data:",b+1,
+			a.transport_private_data_length);
 
      n = 1 + a.transport_private_data_length;
      b   += n;
@@ -339,8 +343,7 @@ int ts_adaption_field (u_char  *b)
 
    if (len > 0) {
      out_nl (5,"(Stuffing_bytes length: %d) ",len);
-     out_nl (4,"Stuffing_bytes:");
-     printhexdump_buf (4,b,len);
+     print_databytes (4,"Stuffing bytes:",b,len);
    }
 
 
@@ -464,8 +467,7 @@ int ts_adaption_field_extension (u_char  *b)
 
   if (len > 0) {
      out_nl (6,"(Reserved Bytes length: %d) ",len);
-     out_nl (6,"Reserved bytes:");
-     printhexdump_buf (6,b,len);
+     print_databytes (6,"Reserved bytes:",b,len);
   }
 
 

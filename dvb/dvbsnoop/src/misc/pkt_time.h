@@ -1,5 +1,5 @@
 /*
-$Id: pkt_time.h,v 1.6 2004/01/01 20:09:26 rasc Exp $
+$Id: pkt_time.h,v 1.7 2004/01/02 16:40:37 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,10 @@ $Id: pkt_time.h,v 1.6 2004/01/01 20:09:26 rasc Exp $
 
 
 $Log: pkt_time.h,v $
+Revision 1.7  2004/01/02 16:40:37  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.6  2004/01/01 20:09:26  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -44,6 +48,9 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #ifndef __PKT_TIME
 #define __PKT_TIME 1
+
+
+#include "cmdline.h"
 
 
 void  out_receive_time (int verbose, OPTION *opt);

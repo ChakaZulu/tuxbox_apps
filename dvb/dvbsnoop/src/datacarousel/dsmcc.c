@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc.c,v 1.3 2004/01/01 20:09:16 rasc Exp $
+$Id: dsmcc.c,v 1.4 2004/01/02 16:40:33 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dsmcc.c,v 1.3 2004/01/01 20:09:16 rasc Exp $
 
 
 $Log: dsmcc.c,v $
+Revision 1.4  2004/01/02 16:40:33  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.3  2004/01/01 20:09:16  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -133,10 +137,7 @@ void decode_DSMCC_section (u_char *b, int len)
 
 	 // $$$ Remark: DVB defines 0x3E as datagram!!
 
-	 out_nl (3,"Private data:");
-	 indent (+1);
-	 printhexdump_buf (4, b, len1-4);	// -4 == CRC/Checksum
-	 indent (-1);
+	 print_private_data (4, b, len1-4);	// -4 == CRC/Checksum
 
  }
 
@@ -160,3 +161,4 @@ NOTE 1: The DownloadServerInitiate message, the DownloadInfoIndication message, 
 DownloadCancel message are in the userNetworkMessage class.
 NOTE 2: The DownloadDataBlock message is within the downloadMessage class.
 */
+

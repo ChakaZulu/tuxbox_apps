@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.12 2004/01/01 20:35:26 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.13 2004/01/02 16:40:34 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: mpeg_descriptor.c,v 1.12 2004/01/01 20:35:26 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.13  2004/01/02 16:40:34  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.12  2004/01/01 20:35:26  rasc
 PES program stream map, minor descriptor cleanup
 
@@ -371,8 +375,8 @@ void descriptorMPEG_Registration (u_char *b)
  indent(+1);
  printasciiline_buf (4, b+2, 4);
  indent(-1);
- out_nl (4,"add. info:");
- printhexdump_buf (4, b+6, d.descriptor_length -4);
+
+ print_databytes (4,"add. info:", b+6, d.descriptor_length -4);
 
 }
 
@@ -547,8 +551,7 @@ void descriptorMPEG_CA (u_char *b)
 
  len = d.descriptor_length-4;
  if (len > 0) {
-    out_nl (4,"Private-Data:");
-    printhexdump_buf (4, b+6,len);
+    print_private_data (4, b+6,len);
  }
 
 }
@@ -747,8 +750,7 @@ void descriptorMPEG_Copyright  (u_char *b)
 
  
  out_S2L_NL (4,"copyright_identifier: ",d.copyright_identifier,"see: SC29");
- out_nl (4,"add. info:");
- printhexdump_buf (4, b+6, d.descriptor_length -4);
+ print_databytes (4,"add. info:", b+6, d.descriptor_length -4);
 
 }
 
@@ -1036,21 +1038,14 @@ void descriptorMPEG_Carousel_Identifier (u_char *b)
  	out_SL_NL (4,"Original_size: ",d.original_size);
  	out_SB_NL (4,"Timeout: ",d.timeout);
  	out_SB_NL (4,"Object_key_length: ",d.object_key_length);
- 	out_nl (4,"Object_key_data:");
-		indent (+1);
- 		printhexdump_buf (5, b, d.object_key_length);
-		indent (-1);
+
+ 	print_databytes (4,"Object_key_data:", b, d.object_key_length);
 		b   += d.object_key_length;
 		len -= d.object_key_length;
  }
  indent (-1);
 
-
- /* -- private data */
- out_nl (4,"Private data bytes:");
- indent (+1);
- printhexdump_buf (4, b, len);
- indent (-1);
+ print_private_data (4, b, len);
 
 }
 
@@ -1123,21 +1118,10 @@ void descriptorMPEG_Association_tag (u_char *b)
 	 /* selector length == 0x00; */
 
  } else {
-
- 	out_nl (4,"Selector bytes:");
-	indent (+1);
-	printhexdump_buf (4, b, d.selector_length);
-	indent (-1);
-
-
+	print_databytes (4,"Selector bytes:", b, d.selector_length);
  }
 
-
- /* -- private data */
- out_nl (4,"Private data bytes:");
- indent (+1);
- printhexdump_buf (4, b, len);
- indent (-1);
+ print_private_data (4, b, len);
 
 }
 
@@ -1212,13 +1196,7 @@ void descriptorMPEG_Deferred_Association_tags (u_char *b)
 	dvbstrOriginalNetwork_ID(d.org_network_id));
 
 
-
- /* -- private data */
- out_nl (4,"Private data bytes:");
- indent (+1);
- printhexdump_buf (4, b, len);
- indent (-1);
-
+ print_private_data (4, b, len);
 
 }
 
@@ -1366,11 +1344,7 @@ void descriptorMPEG_MuxCode (u_char *b)
 
 
 
- out_nl (4,"MuxCodeTableEntry ($$$TODO):");
- indent (+1);
- printhexdump_buf (4, b+2, descriptor_length-2);
- indent (-1);
-
+ print_databytes (4,"MuxCodeTableEntry", b+2, descriptor_length-2); // $$$ TODO
 
    // $$$ TODO  defined in subclause 11.2.4.3 of ISO/IEC 14496-1.
    // Muxcode_descriptor () {

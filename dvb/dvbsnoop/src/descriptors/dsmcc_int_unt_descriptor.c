@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.10 2004/01/02 02:18:34 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.11 2004/01/02 16:40:34 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.10 2004/01/02 02:18:34 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.11  2004/01/02 16:40:34  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.10  2004/01/02 02:18:34  rasc
 more DSM-CC  INT/UNT descriptors
 
@@ -60,11 +64,13 @@ more PES stuff, DSM descriptors, testdata
 #include "dvbsnoop.h"
 #include "descriptor.h"
 #include "dsm_int_unt_descriptor.h"
+#include "dvb_descriptor.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 #include "misc/helper.h"
+#include "misc/pkt_time.h"
 
 
 
@@ -137,8 +143,8 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
      case 0x13:  descriptorDSMCC_IP_MAC_StreamLocation (b); break;
      case 0x14:  descriptorDSMCC_ISP_access_mode_descriptor (b); break;
      // DVB SI scope...
-     // case 0x57:  descriptorDVB_Telephone (b);  break;
-     // case 0x5F:  descriptorDVB_PrivateDataSpecifier (b);  break;
+     case 0x57:  descriptorDVB_Telephone (b);  break;
+     case 0x5F:  descriptorDVB_PrivateDataSpecifier (b);  break;
 
      default: 
 	if (b[0] < 0x80) {
@@ -174,26 +180,51 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
 
 void descriptorDSMCC_scheduling (u_char *b)
 {
- int len;
+ int        len;
+ int        x;
+ u_long     UTC_time_MJD;
+ u_long     UTC_time_UTC;
 
- // descriptor_tag	= b[0];
- len			= b[1];
 
 
- descriptor_any (b);		// $$$ TODO  scheduling descriptor (INT UNT)
+  // descriptor_tag	= b[0];
+  len			= b[1];
+
+  UTC_time_MJD			 = getBits (b, 0, 16, 16);
+  UTC_time_UTC			 = getBits (b, 0, 32, 24);
+  out (4,"start_date_time: ");
+  print_time40 (4, UTC_time_MJD,UTC_time_UTC);
+  out_NL (4);
+
+  UTC_time_MJD			 = getBits (b, 0, 56, 16);
+  UTC_time_UTC			 = getBits (b, 0, 72, 24);
+  out (4,"end_date_time: ");
+  print_time40 (4, UTC_time_MJD,UTC_time_UTC);
+  out_NL (4);
+
+
+  x = outBit_Sx     (4,"final_availability: ",	  b,96, 1);
+  	if (x == 1) out_nl (4,"  [= final schedule]");
+	else out_NL (4);
+	 
+  x = outBit_Sx     (4,"periodicity_flag: ",	  b,97, 1);
+  	if (x == 1) out_nl (4,"  [= only available between start/end time]");
+	else out_NL (4);
+ 
+  outBit_S2x_NL (4,"period_unit: ",	  	b, 98, 2,
+                        (char *(*)(u_long)) dsmccStr_TimeUnits);     
+  outBit_S2x_NL (4,"duration_unit: ",	  	b,100, 2,
+                        (char *(*)(u_long)) dsmccStr_TimeUnits);     
+  outBit_S2x_NL (4,"estimated_cycle_time_unit: ",b,102, 2,
+                        (char *(*)(u_long)) dsmccStr_TimeUnits);     
+
+  outBit_Sx_NL (4,"period: ",			b,104, 8);
+  outBit_Sx_NL (4,"duration: ",	  		b,112, 8);
+  outBit_Sx_NL (4,"estimated_cycle_time: ",	b,120, 8);
+
+  print_private_data (4,b+16,len-14);
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -223,10 +254,7 @@ void descriptorDSMCC_update (u_char *b)
  outBit_Sx     (4,"update_priority: ",	  b,22, 2);
  		out_nl (4,"  [0=highest]");
  
- out_nl (4,"Private Data:");
-	indent (+1);
-	printhexdump_buf (4,b+3,len-1);
-	indent (-1);
+ print_private_data (4,b+3,len-1);
 }
 
 
@@ -256,10 +284,7 @@ void descriptorDSMCC_ssu_location (u_char *b)
 	b += 2;
  }
 
- out_nl (4,"Private Data:");
-	indent (+1);
-	printhexdump_buf (4,b+4,len-2);
-	indent (-1);
+ print_private_data (4,b+4,len-2);
 }
 
 
@@ -349,10 +374,7 @@ void descriptorDSMCC_target_smartcard (u_char *b)
 
  outBit_Sx_NL (4,"Super_CA_system_id: ",  b,16,32);  // $$$ TODO ? TS 101 197
 
- out_nl (4,"Private Data:");
-	indent (+1);
-	printhexdump_buf (4,b+6,len-4);
-	indent (-1);
+ print_private_data (4,b+6,len-4);
 }
 
 
@@ -407,10 +429,7 @@ void descriptorDSMCC_target_serial_number (u_char *b)
  // descriptor_tag	= b[0];
  len			= b[1];
 
- out_nl (4,"Serial Data Bytes:");
-	indent(+1);
-	printhexdump_buf (4,b+2,len);
-	indent (-1);
+ print_databytes (4,"Serial Data Bytes:", b+2,len);
 }
 
 

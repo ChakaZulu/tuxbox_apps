@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.25 2004/01/01 20:35:26 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.26 2004/01/02 16:40:34 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dvb_descriptor.c,v 1.25 2004/01/01 20:35:26 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.26  2004/01/02 16:40:34  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.25  2004/01/01 20:35:26  rasc
 PES program stream map, minor descriptor cleanup
 
@@ -569,8 +573,7 @@ void descriptorDVB_VBI_Data  (u_char *b)
 
     } else {
 
-       out_nl (6,"Reserved Data:");
-       printhexdump_buf (6, b,len2);
+       print_databytes (6,"Reserved Data:", b,len2);
 
     }
 
@@ -821,11 +824,7 @@ void descriptorDVB_Linkage (u_char *b)
     } else if (d.linkage_type == 0x0C) {	/* EN 301 192  DSM-CC */
         sub_descriptorDVB_Linkage0x0C (b, len);
     } else {
-    	// private data
-	out_nl (4,"Private data:"); 
-	indent (+1);
-    	printhexdump_buf (4, b,len);
-	indent (-1);
+    	print_private_data (4, b,len);
     }
 
  indent (-1);
@@ -886,9 +885,7 @@ void sub_descriptorDVB_Linkage0x08 (u_char *b, int len)
     }
 
     if (len > 0) {
-      // private data 
-       out_nl (4,"Private data:"); 
-       printhexdump_buf (4, b,len);
+       print_private_data (4, b,len);
     }
 
 }
@@ -924,17 +921,14 @@ void sub_descriptorDVB_Linkage0x09 (u_char *b, int len)
 	if (OUI_data_length <= 0) continue;
 
     	selector_length = outBit_Sx_NL (4,"selector_length: ",  b, 0, 8);
-	out_nl (4,"Selector Bytes:");
-        	printhexdump_buf (4, b+1,selector_length);
+       	print_databytes (4,"Selector Bytes:", b+1,selector_length);
 		b 		+= (selector_length +1);	// +1 = length byte
 		OUI_data_length -= (selector_length +1);
 		len 		-= (selector_length +1);
     }
 
     if (len > 0) {
-      // private data 
-	out_nl (4,"Private data:"); 
-	printhexdump_buf (4, b,len);
+	print_private_data (4, b,len);
     }
 
 }
@@ -1015,9 +1009,7 @@ void sub_descriptorDVB_Linkage0x0B (u_char *b, int len)			 /* $$$ TODO */
  }
 
 
-  // private data
-  out_nl (4,"Private data:"); 
-  printhexdump_buf (4, b,len);
+ print_private_data (4, b,len);
 
 
 }
@@ -2591,9 +2583,7 @@ void descriptorDVB_ShortSmoothingBuffer  (u_char *b)
  out_S2B_NL (4,"sb_leak_rate: ", d.sb_leak_rate,
 	dvbstrShortSmoothingBufLeakRate_TYPE (d.sb_leak_rate) );
 
- out_nl (6,"Reserved:");
-   printhexdump_buf (6, b+3,d.descriptor_length-1);
-
+ print_databytes (6,"reserved:", b+3,d.descriptor_length-1);
 
 }
 
@@ -2943,9 +2933,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
  		out_S2B_NL (5,"higher_protocol_id: ",c.higher_protocol_id,
 			dsmccStrHigherProtocol_ID (c.higher_protocol_id) );
  		out_SB_NL (6,"reserved: ",c.reserved);
-
- 		out_nl (5,"private_data: ");
-		 	printhexdump_buf (4,  b+1, d.selector_length-1);
+		print_private_data (5, b+1, d.selector_length-1);
 
  } else if (d.data_broadcast_id == 0x000A) {
 	 /* TR 102 006 */
@@ -2983,23 +2971,18 @@ void descriptorDVB_DataBroadcast (u_char *b)
 		   s.selector_length2 = outBit_Sx_NL (4,"selector_length: ", b,40, 8);
 		   b += 6;
 		   s.OUI_data_length -= 6;
-		   out_nl (4,"Selector Bytes:");
-        		printhexdump_buf (4, b,s.selector_length2);
+        	   print_databytes (4,"Selector bytes:", b,s.selector_length2);
 			b += s.selector_length2;
 			s.OUI_data_length -= s.selector_length2;
     		}
 
 		len2 = d.selector_length - s.OUI_data_length -1;
     		if (len2 > 0) {
-      		   // private data 
-	 	   out_nl (4,"Private data:"); 
-		  printhexdump_buf (4, b,len2);
+		   print_private_data (4, b,len2);
     		}
 
-
  } else {
- 	out_nl    (4,"Selector-Bytes:");
- 	printhexdump_buf (4,  b, d.selector_length);
+ 	print_databytes (4,"Selector bytes:",  b, d.selector_length);
  }
  indent (-1);
 
@@ -3113,18 +3096,15 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
  		len2 = outBit_Sx_NL (5,"selector_length: ",	b,40, 8);
 		b += 6;
 		len -= 6;
-		out_nl (5,"Selector Bytes:");
-		indent(+1);
-	     		printhexdump_buf (5, b, len2);
-			b += len2;
-			len -= len2;
-		indent (-2);
+
+	     	print_databytes (5,"Selector bytes:", b, len2);
+		b += len2;
+		len -= len2;
+
+		indent (-1);
 	}
 
-	out_nl (5,"Private Data: ");
-		indent (+1);
-	     	printhexdump_buf (5, b, len);
-		indent (-1);
+	print_private_data (5, b, len);
 
 
  } else if (d.data_broadcast_id == 0x000B) {
@@ -3177,18 +3157,15 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 		}
 		indent (-1);
  	
-		out_nl (5,"Private Data: ");
-			indent (+1);
-	     		printhexdump_buf (5, b, len);
-			indent (-1);
+     		print_private_data (5, b, len);
 
 
 	 }
 	
  } else {
 
- 	out_nl (4,"ID_selector_bytes: ");
-     	printhexdump_buf (4, b, len);
+     	print_databytes(4,"ID_selector_bytes:", b, len);
+
  }
 
 }
@@ -3222,8 +3199,7 @@ void descriptorDVB_TransportStream  (u_char *b)
  d.descriptor_length       	 = b[1];
 
  
- out_nl (4,"Transport-stream-bytes: ");
-     printhexdump_buf (4, b+2, d.descriptor_length);
+ print_databytes (4,"Transport_stream_bytes:", b+2, d.descriptor_length);
 
 }
 
@@ -3258,8 +3234,7 @@ void descriptorDVB_DSNG  (u_char *b)
  d.descriptor_tag		 = b[0];
  d.descriptor_length       	 = b[1];
 
- out_nl (4,"DSNG-bytes: ");
-     printhexdump_buf (4, b+2, d.descriptor_length);
+ print_databytes (4,"DSNG_bytes:", b+2, d.descriptor_length);
 
 }
 
@@ -3402,8 +3377,7 @@ void descriptorDVB_AC3  (u_char *b)
      out_SB_NL (4,"asvc_flag: ",d.asvc_flag);
  }
 
- out_nl (4,"Additional info:");
-    printhexdump_buf (4, b, len);
+ print_databytes (4,"Additional info:", b, len);
 
 }
 

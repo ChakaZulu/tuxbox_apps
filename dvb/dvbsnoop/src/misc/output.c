@@ -1,5 +1,5 @@
 /*
-$Id: output.c,v 1.6 2004/01/01 20:09:26 rasc Exp $
+$Id: output.c,v 1.7 2004/01/02 16:40:37 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: output.c,v 1.6 2004/01/01 20:09:26 rasc Exp $
 
 
 $Log: output.c,v $
+Revision 1.7  2004/01/02 16:40:37  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.6  2004/01/01 20:09:26  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -113,7 +117,7 @@ int getVerboseLevel ()
   -- out_nl will append \n at the end of the output
 */
 
-void out(int verbose, char *msgfmt,...)
+void out(int verbose, const char *msgfmt,...)
 {
   va_list args;
 
@@ -125,7 +129,7 @@ void out(int verbose, char *msgfmt,...)
 }
 
 
-void out_nl(int verbose, char *msgfmt,...)
+void out_nl(int verbose, const char *msgfmt,...)
 {
   va_list args;
 

@@ -1,5 +1,5 @@
 /*
-$Id: st.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
+$Id: st.c,v 1.6 2004/01/02 16:40:40 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: st.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
 
 
 $Log: st.c,v $
+Revision 1.6  2004/01/02 16:40:40  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.5  2004/01/01 20:09:31  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -93,7 +97,6 @@ void decode_ST (u_char *b, int len)
  out_SW_NL (5,"Section_length: ",s.section_length);
 
  b += 3;
- out_nl    (3,"Section-Data:");
- printhex_buf (3, b, s.section_length);
+ print_databytes (3,"Section data:", b, s.section_length);
 
 }

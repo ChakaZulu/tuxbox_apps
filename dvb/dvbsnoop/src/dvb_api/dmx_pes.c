@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.19 2004/01/02 02:37:54 rasc Exp $
+$Id: dmx_pes.c,v 1.20 2004/01/02 16:40:36 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,10 @@ $Id: dmx_pes.c,v 1.19 2004/01/02 02:37:54 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.20  2004/01/02 16:40:36  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.19  2004/01/02 02:37:54  rasc
 pes sync bugfix
 
@@ -357,10 +361,11 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
     n1 = read(fd,buf+4,2);
     if (n1 == 2) {
         l = (buf[4]<<8) + buf[5];		// PES packet size...
+	n1 = 6; 				// 4+2 bytes read
 
 	if (l > 0) {
            n2 = read(fd, buf+6, (unsigned int) l );
-           n1 = (n2 < 0) ? n2 : 6+n2;		// we already read 4+2 bytes
+           n1 = (n2 < 0) ? n2 : n1+n2;
 	}
     }
 
@@ -368,91 +373,6 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
     return n1;
 }
 
-
-
-
-
-
-
-#if 0
-
-// $$ old pes_SyncRead
-
-/*
-  -- read PES packet (Synced)
-  -- return: len // read()-return code
-*/
-
-static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes)
-
-{
-    long    n,n1;
-    long    l;
-
-    
-
-    // -- simple PES sync... seek for 0x000001 (PES_SYNC_BYTE)
-    // -- $$$ Q: has this to be byteshifted or bit shifted???
-    // -- $$$ to be improved:
-    //
-    // ISO/IEC 13818-1:
-    // -- packet_start_code_prefix -- The packet_start_code_prefix is
-    // -- a 24-bit code. Together with the stream_id that follows it constitutes
-    // -- a packet start code that identifies the beginning of a packet.
-    // -- The packet_start_code_prefix  is the bit string '0000 0000 0000 0000
-    // -- 0000 0001' (0x000001).
-    // ==>   Check the stream_id with "dvb_str.c", if you do changes!
- 
-
-    // $$$ TODO: currently seeking 0x000001 is not sufficient for syncing PES
-    // $$$ TODO: I have to check for valid streamIDs, as packet start, too!!!!!
-    // $$$ TODO: dvbsnoop currently is not syncing PES correctly, so results may
-    // $$$ TODO: random... (identify by wrong stream_ID)...
-    // $$$ TODO: also:  syncing reads should be speed optimized! (less reads)
-
-
-
-    *skipped_bytes = 0;
-    buf[0] = 0xff;				// illegal bytes
-    buf[1] = 0xff;
-    buf[2] = 0xff;
-    while (1) {
-    	n = read(fd,buf+2,1);
-	if (n <= 0) return n;			// error or strange, abort
-
-	// -- sync found ? 0x000001
-	if (buf[0] == 0x00 && buf[1] == 0x00 && buf[2] == 0x01) break;
-
-	buf[0] = buf[1];			//  -- shift buffer  (byte-shifter)
-	buf[1] = buf[2];
-	(*skipped_bytes)++;			// sync skip counter
-    }
-
-
-    // -- Sync found!
-    // -- read more 3 bytes (streamID and packet length)
-    // -- read rest ...
-
-    n = read(fd,buf+3,3);
-    if (n == 3) {
-        l = (buf[4]<<8) + buf[5];		// PES packet size...
-
-	if (l > 0) {
-           if ( (l+6) > len) {
-		fprintf (stderr,"buffer to small on pes read (%ld)\n",l);
-	   	return -1;		// prevent buffer overflow
-	   }
-
-           n1 = read(fd, buf+6, (unsigned int) l );
-           n = (n1 < 0) ? n1 : 6+n1;		// we already read 3+3 bytes
-	}
-    }
-
-
-    return n;
-}
-
-#endif
 
 
 

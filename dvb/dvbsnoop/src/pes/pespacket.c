@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.17 2004/01/02 00:00:41 rasc Exp $
+$Id: pespacket.c,v 1.18 2004/01/02 16:40:38 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: pespacket.c,v 1.17 2004/01/02 00:00:41 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.18  2004/01/02 16:40:38  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.17  2004/01/02 00:00:41  rasc
 error output for buffer overflow
 
@@ -153,8 +157,7 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 	case 0xF1:		// EMM
 	case 0xF8:		// ITE-T Rec. H.222.1 type E
 	case 0xFF:		// program_stream_directory
-    		out_nl (4,"PES_packet_data_bytes:");
-		printhexdump_buf (4, b, len2);
+		print_databytes (3,"PES_packet_data_bytes:", b, len2);
 		n = len2;
 		break;
 
@@ -166,8 +169,7 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 		break;
 
 	case 0xBE:		// padding stream!
-    		out_nl (4,"Padding_bytes:");
-		printhexdump_buf (4, b, len2);
+		print_databytes (3,"Padding_bytes:", b, len2);
 		n = len2;
 		break;
 
@@ -183,7 +185,7 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
  		} else {
 
-    			out_nl (4,"Default PES decoding:");
+    			out_nl (3,"Default PES decoding:");
 			indent (+1);
 			PES_decode2 (b, len2, pid);
 			indent (-1);
@@ -417,11 +419,8 @@ void  PES_decode2 (u_char *b, int len, int pid)
 
    if (PES_private_data_flag == 0x01) {
 
-   	out_nl (3,"PES_private_data: ");
-	indent (+1);
-	printhexdump_buf (4, b, 16);
+	print_databytes (3,"PES_private_data", b, 16);
    	b += 16;
-   	indent (-1);
 
    }
 
@@ -480,11 +479,9 @@ void  PES_decode2 (u_char *b, int len, int pid)
 	indent (+1);
 	out_SB_NL  (3,"Marker_bit: ", getBits (b, 0,  0,  1) );
 	PES_extension_field_length =  getBits (b, 0,  1,  7);
-   	out_nl (3,"reserved: ");
-	indent (+1);
-	printhexdump_buf (6, b+1, PES_extension_field_length);
+	print_databytes (6,"reserved:", b+1, PES_extension_field_length);
 	b += PES_extension_field_length + 1;
-   	indent (-2);
+   	indent (-1);
 
    }
 
@@ -499,10 +496,8 @@ void  PES_decode2 (u_char *b, int len, int pid)
   * -- PES packet_data_bytes
   */
 
- out_nl (3,"PES_packet_data_bytes / stuffing bytes: ");
-   indent (+1);
-   printhexdump_buf (4, b, len - (b - b_start) );
-   indent (-1);
+   print_databytes (4,"PES_packet_data_bytes / stuffing bytes:",
+		   b, len - (b - b_start) );
 
 
 
@@ -629,20 +624,13 @@ void PES_data_packet (u_char *b, int len)
    }
 
 
-   out_nl (3,"PES_data_private_byte: ");
-   indent (+1);
-   printhexdump_buf (3, b, len2);
+   print_databytes (3,"PES_data_private_byte:", b, len2);
    b   += len2;
    len -= len2;
-   indent (-1);
 
-
-   out_nl (3,"PES_data_byte: ");
-   indent (+1);
-   printhexdump_buf (3, b, len);
+   print_databytes (3,"PES_data_byte:", b, len);
    b   += len;
    len -= len;
-   indent (-1);
 
 }
 

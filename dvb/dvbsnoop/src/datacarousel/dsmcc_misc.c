@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.3 2004/01/01 20:09:16 rasc Exp $
+$Id: dsmcc_misc.c,v 1.4 2004/01/02 16:40:33 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,10 @@ $Id: dsmcc_misc.c,v 1.3 2004/01/01 20:09:16 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.4  2004/01/02 16:40:33  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.3  2004/01/01 20:09:16  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -159,10 +163,7 @@ static int subDescriptor (u_char *b)
   outBit_Sx_NL (5,"SubDescriptorType: ", 	b, 0, 8); 
   len = outBit_Sx_NL (5,"SubDescriptorlength: ",b, 8, 8);
 
-  out_nl (4,"Additional Information:");
-  indent (+1);
-  printhexdump_buf (4, b+2, len);
-  indent (-1);
+  print_databytes (4,"Additional Information:", b+2, len);
 
   return len + 2;
 }

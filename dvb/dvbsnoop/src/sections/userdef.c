@@ -1,5 +1,5 @@
 /*
-$Id: userdef.c,v 1.3 2004/01/01 20:09:31 rasc Exp $
+$Id: userdef.c,v 1.4 2004/01/02 16:40:40 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: userdef.c,v 1.3 2004/01/01 20:09:31 rasc Exp $
 
 
 $Log: userdef.c,v $
+Revision 1.4  2004/01/02 16:40:40  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.3  2004/01/01 20:09:31  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -85,16 +89,12 @@ void decode_PRIVATE (u_char *b, int len)
 	section_length -= (5+4);		// 4:  CRC
  }
 
- out_nl (3, "Private data:");
- 	indent (+1);
- 	printhexdump_buf (4,b,section_length);
- 	indent (-1);
-	b += section_length;
+ print_private_data (3,b,section_length);
+ b += section_length;
 
  if (section_syntax_indicator != 0) {
  	outBit_Sx_NL (5,"CRC: ",		b, 0, 4);
  }
-	 
 
 }
 

@@ -1,5 +1,5 @@
 /*
-$Id: tdt.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
+$Id: tdt.c,v 1.6 2004/01/02 16:40:40 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: tdt.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
 
 
 $Log: tdt.c,v $
+Revision 1.6  2004/01/02 16:40:40  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.5  2004/01/01 20:09:31  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -46,7 +50,6 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "tdt.h"
 #include "strings/dvb_str.h"
 #include "misc/output.h"
-#include "misc/hexprint.h"
 
 
 

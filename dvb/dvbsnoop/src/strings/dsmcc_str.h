@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.13 2004/01/02 02:18:34 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.14 2004/01/02 16:40:43 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: dsmcc_str.h,v 1.13 2004/01/02 02:18:34 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.14  2004/01/02 16:40:43  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.13  2004/01/02 02:18:34  rasc
 more DSM-CC  INT/UNT descriptors
 
@@ -97,6 +101,7 @@ char *dsmccStr_AccessMode (u_int id);
 
 char *dsmccStr_UpdateFlag (u_int id);
 char *dsmccStr_UpdateMethod (u_int id);
+char *dsmccStr_TimeUnits (u_int id);
 
 
 

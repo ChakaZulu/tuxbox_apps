@@ -1,5 +1,5 @@
 /*
-$Id: emm_ecm.c,v 1.8 2004/01/01 20:09:31 rasc Exp $
+$Id: emm_ecm.c,v 1.9 2004/01/02 16:40:39 rasc Exp $
 
 
  DVBSNOOP
@@ -24,6 +24,10 @@ $Id: emm_ecm.c,v 1.8 2004/01/01 20:09:31 rasc Exp $
 
 
 $Log: emm_ecm.c,v $
+Revision 1.9  2004/01/02 16:40:39  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.8  2004/01/01 20:09:31  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -62,8 +66,8 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "emm_ecm.h"
 #include "descriptors/descriptor.h"
 #include "strings/dvb_str.h"
+#include "misc/helper.h"
 #include "misc/output.h"
-#include "misc/hexprint.h"
 
 
 
@@ -105,10 +109,7 @@ void decode_EMM_ECM (u_char *b, int len)
  out_SB_NL (6,"reserved_2: ",e.reserved_2);
  out_SW_NL (5,"Section_length: ",e.section_length);
 
- indent (+1);
- out_nl (3, "CA_message_section_data:");
- printhexdump_buf (3,b+3,e.section_length);
- indent (-1);
+ print_databytes(3,"CA_message_section_data:",b+3,e.section_length);
 
  //  !!! decoding the complete ECM/EMM stream may be illegal
  //      so we don't do this!

@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.18 2004/01/01 20:09:26 rasc Exp $
+$Id: helper.c,v 1.19 2004/01/02 16:40:37 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,10 @@ $Id: helper.c,v 1.18 2004/01/01 20:09:26 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.19  2004/01/02 16:40:37  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.18  2004/01/01 20:09:26  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -88,6 +92,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 #include "helper.h"
+#include "hexprint.h"
 #include "output.h"
 #include "strings/dvb_str.h"
 
@@ -102,7 +107,7 @@ dvbsnoop v0.7  -- Commit to CVS
   -- return: (unsigned long) value
  */
 
-u_long outBit_Sx (int verbosity, char *text, u_char *buf, int startbit, int bitlen)
+u_long outBit_Sx (int verbosity, const char *text, u_char *buf, int startbit, int bitlen)
 
 {
    u_long value;
@@ -123,7 +128,7 @@ u_long outBit_Sx (int verbosity, char *text, u_char *buf, int startbit, int bitl
 }
 
 
-u_long outBit_Sx_NL (int verbosity, char *text, u_char *buf, int startbit, int bitlen)
+u_long outBit_Sx_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen)
 
 {
   u_long value;
@@ -137,7 +142,7 @@ u_long outBit_Sx_NL (int verbosity, char *text, u_char *buf, int startbit, int b
 
 
 
-u_long outBit_S2x_NL (int verbosity, char *text, u_char *buf, int startbit, int bitlen, char *(*f)(u_long) )
+u_long outBit_S2x_NL (int verbosity, const char *text, u_char *buf, int startbit, int bitlen, char *(*f)(u_long) )
 
 {
    u_long value;
@@ -323,6 +328,34 @@ void print_time40 (int v, u_long mjd, u_long utc)
 	 (utc>>16) &0xFF, (utc>>8) &0xFF, (utc) &0xFF);
 
 }
+
+
+
+
+
+
+/*
+  -- print data bytes (str + hexdump)
+  -- print  "Private Data" and Hex-Dump
+
+*/
+void print_databytes (int v, const char *str, u_char *b, u_int len)
+{
+  out_nl (v,str);
+	indent (+1);
+	printhexdump_buf (v+1,b,len);
+	indent (-1);
+}
+
+void print_private_data (int v, u_char *b, u_int len)
+{
+  print_databytes (v,"Private Data:",b,len);
+}
+
+
+
+
+
 
 
 

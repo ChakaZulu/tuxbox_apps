@@ -1,5 +1,5 @@
 /*
-$Id: output.h,v 1.8 2004/01/01 20:09:26 rasc Exp $
+$Id: output.h,v 1.9 2004/01/02 16:40:37 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,10 @@ $Id: output.h,v 1.8 2004/01/01 20:09:26 rasc Exp $
 
 
 $Log: output.h,v $
+Revision 1.9  2004/01/02 16:40:37  rasc
+DSM-CC  INT/UNT descriptors complete
+minor changes and fixes
+
 Revision 1.8  2004/01/01 20:09:26  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -45,8 +49,8 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 void indent (int v);
 void setVerboseLevel (int v);
 int  getVerboseLevel ();
-void out(int verbose, char *msgfmt,...);
-void out_nl(int verbose, char *msgfmt,...);
+void out(int verbose, const char *msgfmt,...);
+void out_nl(int verbose, const char *msgfmt,...);
 void out_nl2(int verbose);
 void print_indent(void);
 
