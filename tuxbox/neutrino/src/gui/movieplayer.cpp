@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.39 2003/09/09 17:03:41 thegoodguy Exp $
+        $Id: movieplayer.cpp,v 1.40 2003/09/10 15:39:18 zwen Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -308,17 +308,34 @@ ReceiveStreamThread (void *mrl)
   // Example(ohne transcode zu mpeg1): ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
   //TODO make this nicer :-)
   std::string souturl;
-  if(!memcmp((char*)mrl, "vcd:", 4) || addurl.substr(addurl.length()-3) == "mpg" || addurl.substr(addurl.length()-3) == "m2p")
+  if(!memcmp((char*)mrl, "vcd:", 4) || 
+	  !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "mpg") || 
+	  !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "ac3") || 
+	  !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "m2p"))
   {
 	  // no transcode
-	  souturl = baseurl + "?sout=%23duplicate%7Bdst%3Dstd%7Baccess%3Dhttp%2Cmux%3Dts%2Curl%3D%3A" + g_settings.streaming_server_port + "%2Fdboxstream%7D%7D";
+	  souturl = std::string("") + "#duplicate{dst=std{access=http,mux=ts,url=:" + g_settings.streaming_server_port + 
+		  "/dboxstream}}";
+  }
+  else if(!memcmp((char*)mrl, "dvd", 3) && g_settings.streaming_ac3_enabled) 
+  {
+	  // transcode video only
+	  souturl = std::string("") + "#transcode{vcodec=mpgv,vb=" + g_settings.streaming_videorate + 
+		  "}:duplicate{dst=std{access=http,mux=ts,url=:" + g_settings.streaming_server_port + "/dboxstream}}";
   }
   else
   {
-	  // with transcode
-	  souturl = baseurl + "?sout=%23transcode%7Bvcodec%3Dmpgv%2Cvb%3D" + g_settings.streaming_videorate + "%2Cacodec%3Dmpga%2Cab%3D" + g_settings.streaming_audiorate + "%2Cchannels%3D2%7D%3Aduplicate%7Bdst%3Dstd%7Baccess%3Dhttp%2Cmux%3Dts%2Curl%3D%3A" + g_settings.streaming_server_port + "%2Fdboxstream%7D%7D";
+	  // transcode audio and video
+	  souturl = std::string("") + "#transcode{vcodec=mpgv,vb=" + g_settings.streaming_videorate + ",acodec=mpga,ab=" + 
+		  g_settings.streaming_audiorate + ",channels=2}:duplicate{dst=std{access=http,mux=ts,url=:" + 
+		  g_settings.streaming_server_port + "/dboxstream}}";
   }
-  httpres = sendGetRequest(souturl);
+  char *tmp = curl_escape (souturl.c_str (), 0);
+  printf("[movieplayer.cpp] URL      : %s?sout=%s\n",baseurl.c_str(), souturl.c_str());
+  printf("[movieplayer.cpp] URL(enc) : %s?sout=%s\n",baseurl.c_str(), tmp);
+  std::string url = baseurl + "?sout=" + tmp;
+  curl_free(tmp);
+  httpres = sendGetRequest(url);
 
   // play MRL
   std::string playurl = baseurl + "?control=play&item=0";
@@ -592,12 +609,16 @@ PlayStreamThread (void *mrl)
 	      if (ioctl (dmxv, DMX_SET_PES_FILTER, &p) < 0)
 		failed = true;
 	      if (g_settings.streaming_ac3_enabled == 1) {
-      		if (ioctl (adec, AUDIO_SET_BYPASS_MODE,1)<0)
+      		if (ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL)<0)
       		  {
       		  	perror("AUDIO_SET_BYPASS_MODE");
       		  	failed=true;
       		  }
        	      }
+			else
+			{
+				ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
+			}
 	      if (ioctl (adec, AUDIO_PLAY) < 0)
 		{
 		  perror ("AUDIO_PLAY");
@@ -664,8 +685,12 @@ PlayStreamThread (void *mrl)
 	      ioctl (dmxa, DMX_STOP);
 	      ioctl (vdec, VIDEO_PLAY);
 	      if (g_settings.streaming_ac3_enabled == 1) {
-      		ioctl (adec, AUDIO_SET_BYPASS_MODE,1);
+      		ioctl (adec, AUDIO_SET_BYPASS_MODE, 0UL );
       	      }
+			else
+			{
+				ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
+			}
 	      ioctl (adec, AUDIO_PLAY);
 	      p.pid = pida;
 	      p.pes_type = DMX_PES_AUDIO;
@@ -794,8 +819,12 @@ PlayFileThread (void *filename)
 	      ioctl (dmxa, DMX_STOP);
 	      ioctl (vdec, VIDEO_PLAY);
 	      if (g_settings.streaming_ac3_enabled == 1) {
-      		ioctl (adec, AUDIO_SET_BYPASS_MODE,1);
+      		ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL);
       	      }
+			else
+			{
+				ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
+			}
 	      ioctl (adec, AUDIO_PLAY);
 	      p.pid = pida;
 	      p.pes_type = DMX_PES_AUDIO;
@@ -824,8 +853,12 @@ PlayFileThread (void *filename)
     {
       ioctl (vdec, VIDEO_PLAY);
       if (g_settings.streaming_ac3_enabled == 1) {
-      	ioctl (adec, AUDIO_SET_BYPASS_MODE,1);
+      	ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL);
       }
+		else
+		{
+			ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
+		}
       ioctl (adec, AUDIO_PLAY);
       ioctl (dmxv, DMX_START);
       ioctl (dmxa, DMX_START);
