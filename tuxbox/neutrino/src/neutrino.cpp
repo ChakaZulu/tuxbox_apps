@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.205 2002/03/25 00:07:02 McClean Exp $
+        $Id: neutrino.cpp,v 1.206 2002/03/25 18:24:24 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -436,7 +436,7 @@ void CNeutrinoApp::saveSetup()
 **************************************************************************************/
 
 void CNeutrinoApp::firstChannel()
-{	
+{
 	string tmp;
 	g_Zapit->getLastChannel(tmp, firstchannel.chan_nr, firstchannel.mode);
 	strcpy( firstchannel.name, tmp.c_str() );
@@ -1673,10 +1673,14 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	res = res | g_RemoteControl->handleMsg(msg, data);
 	res = res | g_InfoViewer->handleMsg(msg, data);
 
+
+
 	if ( res != messages_return::unhandled )
+	{
+		if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
+			delete (unsigned char*) data;
 		return ( res & ( 0xFFFFFFFF - messages_return::unhandled ) );
-
-
+	}
 
     if ( msg == messages::EVT_VCRCHANGED )
 	{
@@ -1773,14 +1777,16 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		AudioMute( (bool)data, true );
 		return messages_return::handled;
 	}
-	else if ( ( msg == messages::EVT_BOUQUETSCHANGED ) ||
+/*	else if ( ( msg == messages::EVT_BOUQUETSCHANGED ) ||
 			  ( msg == messages::EVT_SERVICESCHANGED ) )
 	{
 		channelsInit();
 
 		return messages_return::handled;
 	}
-	else if ( msg == messages::EVT_SERVICESCHANGED )
+*/
+	else if ( ( msg == messages::EVT_BOUQUETSCHANGED ) ||
+			  ( msg == messages::EVT_SERVICESCHANGED ) )
 	{
 		tvMode( true );
 
@@ -1788,10 +1794,9 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		channelList->zapTo( 0 );
 
 		return messages_return::handled;
-
 	}
 
-    if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
+	if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
 		delete (unsigned char*) data;
 
 	return messages_return::unhandled;
@@ -2191,7 +2196,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.205 2002/03/25 00:07:02 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.206 2002/03/25 18:24:24 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

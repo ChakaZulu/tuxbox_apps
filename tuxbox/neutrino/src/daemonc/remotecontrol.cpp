@@ -77,7 +77,6 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 			//CURRENT-EPG für den aktuellen Kanal bekommen!;
 
 			current_EPGid= info_CN->current_uniqueKey;
-
 			if ( has_unresolved_ctags )
 				processAPIDnames();
 

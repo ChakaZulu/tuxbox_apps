@@ -356,7 +356,12 @@ void CInfoViewer::getEPG()
 
 	if ( ( info_CurrentNext.flags & sectionsd::epgflags::has_current ) &&
 		 ( showButtonBar ) )
-		g_RCInput->postMsg( messages::EVT_CURRENTEPG, (unsigned) &info_CurrentNext, false );
+	{
+		sectionsd::CurrentNextInfo*	_info = new sectionsd::CurrentNextInfo;
+		*_info = info_CurrentNext;
+		g_RCInput->postMsg( messages::EVT_CURRENTEPG, (unsigned) _info, false );
+	}
+
 
 }
 

@@ -242,6 +242,7 @@ scants.bouquet Bouquet
 scants.bouquet_leave leave current
 scants.bouquet_create create new
 scants.bouquet_erase erase all
+scants.finished Transponderscan finished successfully!
 
 flashupdate.head Software Update
 flashupdate.action Action:
@@ -315,6 +316,7 @@ messagebox.cancel Cancel
 messagebox.back Back
 messagebox.error Error
 messagebox.discard Discard changes?
+messagebox.info Information
 
 cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish to get this warning again?
 

@@ -94,7 +94,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		pos = (pos+1)%10;
 		g_FrameBuffer->paintIcon8(filename, x+300,ypos+15, 17);
 
-		long long timeoutEnd = g_RCInput->calcTimeoutEnd( 5 );
+		long long timeoutEnd = g_RCInput->calcTimeoutEnd_MS( 250 );
+		msg = CRCInput::RC_nokey;
 
 		while ( ! ( msg == CRCInput::RC_timeout ) )
 		{
@@ -104,15 +105,13 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			{
 				g_FrameBuffer->paintBoxRel(xpos3, ypos+ 2* mheight, 80, mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos3, ypos+ 3*mheight, width, (char*)data, COL_MENUCONTENT);
-
 				delete (unsigned char*) data;
 			}
             else
 			if ( msg == messages::EVT_SCAN_PROVIDER )
 			{
-				g_FrameBuffer->paintBoxRel(xpos3, ypos+ 3* mheight, 80, mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(xpos3, ypos+ 4* mheight, width, (char*)data, COL_MENUCONTENT);
-
+				g_FrameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight, width- 10, mheight, COL_MENUCONTENT);
+				g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width- 10, (char*)data, COL_MENUCONTENT);
 				delete (unsigned char*) data;
 			}
 			else
@@ -128,8 +127,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			{
 				char cb[10];
 				sprintf(cb, "%d", data);
-				g_FrameBuffer->paintBoxRel(xpos2, ypos, 80, mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(xpos2, ypos+ mheight, width, cb, COL_MENUCONTENT);
+				g_FrameBuffer->paintBoxRel(xpos1, ypos, 80, mheight, COL_MENUCONTENT);
+				g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
 			}
             else
 			if ( msg == messages::EVT_SCAN_COMPLETE )
@@ -137,73 +136,14 @@ int CScanTs::exec(CMenuTarget* parent, string)
 				finish= true;
 			}
 		}
-
-/*		if(pos==0)
-		{	//query zapit every xth loop
-			finish = g_Zapit->isScanReady( sat, ts, services);
-		}
-
-		ypos= y+ hheight + (mheight >>1);
-
-		char filename[30];
-		sprintf(filename, "radar%d.raw", pos);
-		pos = (pos+1)%10;
-		g_FrameBuffer->paintIcon8(filename, x+300,ypos+15, 17);
-
-		sprintf(strTransponders, "%d", ts);
-		if(strcmp(strLastTransponders, strTransponders)!=0)
-		{
-			g_FrameBuffer->paintBoxRel(xpos1, ypos, 80, mheight, COL_MENUCONTENT);
-			g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, strTransponders, COL_MENUCONTENT);
-			strcpy(strLastTransponders, strTransponders);
-		}
-		ypos+= mheight;
-
-		sprintf(strServices, "%d", services);
-		if(strcmp(strLastServices,strServices)!=0)
-		{
-			g_FrameBuffer->paintBoxRel(xpos2, ypos, 80, mheight, COL_MENUCONTENT);
-			g_Fonts->menu->RenderString(xpos2, ypos+ mheight, width, strServices, COL_MENUCONTENT);
-			strcpy(strLastServices,strServices);
-		}
-		ypos+= mheight;
-
-		if (atoi(getenv("fe"))==1)
-		{	//sat only
-			switch (sat)
-			{
-					case 1:
-					strcpy(strSatellite, g_Locale->getText("scants.astra").c_str() );
-					break;
-					case 2:
-					strcpy(strSatellite, g_Locale->getText("scants.hotbird").c_str() );
-					break;
-					case 4:
-					strcpy(strSatellite, g_Locale->getText("scants.kopernikus").c_str() );
-					break;
-					case 8:
-					strcpy(strSatellite, g_Locale->getText("scants.digituerk").c_str() );
-					break;
-					default:
-					strcpy(strSatellite,"unknown");
-			}
-			if(strcmp(strLastSatellite,strSatellite)!=0)
-			{
-				g_FrameBuffer->paintBoxRel(xpos3, ypos, 80, mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(xpos3, ypos+ mheight, width, strSatellite, COL_MENUCONTENT);
-				strcpy(strLastSatellite,strSatellite);
-			}
-		}
-
-		//g_RCInput->getKey(190);
-		usleep(100000);
-*/
 	}
 
 
 	hide();
 	g_RCInput->postMsg( messages::EVT_SERVICESCHANGED, 0 );
 	g_Sectionsd->setPauseScanning( false );
+	ShowMsg ( "messagebox.info", g_Locale->getText("scants.finished"), CMessageBox::mbBack, CMessageBox::mbBack);
+
 	return menu_return::RETURN_REPAINT;
 }
 

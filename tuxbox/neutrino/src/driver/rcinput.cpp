@@ -218,6 +218,17 @@ long long CRCInput::calcTimeoutEnd( int Timeout )
 	return ( timeNow + Timeout* 1000000 );
 }
 
+long long CRCInput::calcTimeoutEnd_MS( int Timeout )
+{
+	struct timeval tv;
+
+	gettimeofday( &tv, NULL );
+	long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
+	return ( timeNow + Timeout* 1000 );
+}
+
+
 void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, long long TimeoutEnd, bool bAllowRepeatLR= false)
 {
 	struct timeval tv;
