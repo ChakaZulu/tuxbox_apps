@@ -109,7 +109,7 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 			break;
 		case eFrontend::feSatellite:
 			p=new tpPacket("Astra 19.2E", SCAN_SKIP);
-			t=new eTransponder(-1, -1); t->setSatellite(11913000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
+			t=new eTransponder(0x0009, 0x0085); t->setSatellite(12422000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
 			t=new eTransponder(0x0454, 0x0001); t->setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0); p->possibleTransponders.append(t);
 			t=new eTransponder(0x0441, 0x0001); t->setSatellite(12187500, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
 			packets.append(p);
