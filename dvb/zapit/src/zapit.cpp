@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.67 2002/01/29 20:44:07 Simplex Exp $
+  $Id: zapit.cpp,v 1.68 2002/01/30 11:04:00 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.68  2002/01/30 11:04:00  faralla
+  prepared descrambling-status
+
   Revision 1.67  2002/01/29 20:44:07  Simplex
   made some Bouquetmanager-stuff "hot"
 
@@ -747,19 +750,20 @@ int find_emmpid(int ca_system_id)
   return 0;
 }
 
-void _writecam(int cmd, unsigned char *data, int len)
+void _writecamnu(int cmd, unsigned char *data, int len)
 {
   int camfd;
-  ca_msg_t ca_msg;
-  char buffer[128];
-  int csum=0, i;
-
-  camfd=open("/dev/ost/ca0", O_RDWR);
+  char buffer[256];
+  int csum=0, i, pt;
+  struct pollfd cam_pfd;
+  boolean output = false;
+  
+  camfd=open("/dev/dbox/cam0",O_RDWR);
 
   if( camfd <= 0 )
     {
+      perror("[zapit] _writecam: open cam0");
       close(camfd);
-      perror("[zapit] _writecam: open ca0");
       return;
     }
 
@@ -773,30 +777,79 @@ void _writecam(int cmd, unsigned char *data, int len)
     csum^=buffer[i];
   buffer[len++]=csum;
 
-  /* init ca message */
-  ca_msg.index = 0;
-  ca_msg.type = 0;
-
-  ca_msg.length = len-1;
-  memcpy(ca_msg.msg,buffer+1,len-1);
 
 
-  if ( ioctl(camfd,CA_SEND_MSG,&ca_msg) != 0 )
-    {
-      perror("[zapit] _writecam: ioctl");
-    }
-  /*
-    printf("%d >",len);
-    for (i=0; i<len; i++)
-    printf(" %02x", buffer[i]);
-    printf("\n");
-  */
+   if ( write(camfd,buffer+1,len-1) <= 0 )
+  {
+  	perror("[zapit] cam: write");
+  	close(camfd);
+	return;
+  }
+
+  if (buffer[4] == 0x03)
+  {
+  	close(camfd);
+  	return; //Let get_caid read the caid;
+  }
+
+/*
+  if (buffer[4] == 0x84)
+  {
+  	close(camfd);
+  	return; //Setting emmpid. No answer expected.
+  }	
+*/
+  
+  if (buffer[4] == 0x0d)
+  {      
+  	//output = true;
+  }
+
+   if (output)
+ {
+     dprintf("[zapit] sending to cam:");
+  for (int i = 0; i < len; i++)
+  	dprintf("%02X ", buffer[i]);
+  dprintf("\n");
+ }
+       cam_pfd.fd = camfd;
+   cam_pfd.events = POLLIN;
+   cam_pfd.revents = 0;
+     
+   pt = poll(&cam_pfd, 1, 1000);
+ 
+
+ 
+ 
+   if (!pt)
+   {
+	dprintf("[zapit] Read cam. Poll timeout\n");
+	close(camfd);
+	return;
+  }
+  
+  if ( read(camfd,&buffer,sizeof(buffer)) <= 0 )
+  {
+  	perror("read cam");
+  	close(camfd);
+  	return;
+  }
+
+
+  if (output)
+  {
+  dprintf("[zapit] ca returned: ");
+  for (int i = 0; i<buffer[2]+4;i++)
+	dprintf("%02X ", buffer[i]);
+  dprintf("\n");	
+  }
+
   close(camfd);
 }
 
 void writecam(unsigned char *data, int len)
 {
-  _writecam(0x23, data, len);
+  _writecamnu(0x23, data, len);
 }
 
 void descramble(int onID, int serviceID, int unknown, int caID, int ecmpid, pids *decode_pids)
@@ -2399,7 +2452,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.67 2002/01/29 20:44:07 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.68 2002/01/30 11:04:00 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
