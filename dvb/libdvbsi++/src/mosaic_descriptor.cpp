@@ -1,5 +1,5 @@
 /*
- * $Id: mosaic_descriptor.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: mosaic_descriptor.cpp,v 1.3 2004/06/18 19:20:34 sestegra Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -117,21 +117,23 @@ MosaicDescriptor::MosaicDescriptor(const uint8_t * const buffer) : Descriptor(bu
 	mosaicEntryPoint = (buffer[2] >> 7) & 0x01;
 	numberOfHorizontalElementaryCells = (buffer[2] >> 4) & 0x07;
 	numberOfVerticalElementaryCells = buffer[2] & 0x07;
+	uint8_t elementaryCellFieldLength = 0;
 
-	for (size_t i = 0; i < descriptorLength - 1; i += buffer[i + 6] + 2) {
-		mosaicCells.push_back(new MosaicCell(&buffer[i + 1]));
-		switch (buffer[i + 6 + buffer[i + 6] + 1]) {
+	for (size_t i = 0; i < descriptorLength - 1; i += buffer[i + 5] + 4 + elementaryCellFieldLength) {
+		mosaicCells.push_back(new MosaicCell(&buffer[i + 3]));
+		switch (buffer[i + 5 + buffer[i + 5] + 1]) {
 		case 0x01:
-			i += 2;
+			elementaryCellFieldLength = 2;
 			break;
 		case 0x02:
 		case 0x03:
-			i += 6;
+			elementaryCellFieldLength = 6;
 			break;
 		case 0x04:
-			i += 8;
+			elementaryCellFieldLength = 8;
 			break;
 		default:
+			elementaryCellFieldLength = 0;
 			break;
 		}
 	}
