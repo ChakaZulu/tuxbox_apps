@@ -118,6 +118,12 @@ class CIPChangeNotifier : public CChangeObserver
 		bool changeNotify(string OptionName, void*);
 };
 
+class CConsoleDestChangeNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(string OptionName, void*);
+};
+
 class CAPIDChangeExec : public CMenuTarget
 {
 	public:

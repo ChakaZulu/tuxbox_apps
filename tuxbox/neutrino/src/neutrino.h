@@ -127,6 +127,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
 		CIPChangeNotifier			*MyIPChanger;
 		CVCRControl					*vcrControl;
+		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
 
 		void doChecks();
 		void firstChannel();

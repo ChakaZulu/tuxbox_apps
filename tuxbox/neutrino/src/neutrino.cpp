@@ -38,7 +38,7 @@
 #include "neutrino.h"
 
 #include "zapit/getservices.h"
-#include "daemonc/remotecontrol.h"
+#include "daemonc/remotecontrol.h" 
 
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
@@ -66,6 +66,7 @@
 #include "gui/scan.h"
 #include "gui/favorites.h"
 #include "gui/sleeptimer.h"
+#include "gui/dboxinfo.h"
 
 #include "system/setting_helpers.h"
 #include "system/settings.h"
@@ -919,6 +920,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	}
 	mainMenu.addItem( new CMenuForwarder("mainmenu.settings", true, "", &mainSettings) );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.service", true, "", &service) );
+//	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+//	mainMenu.addItem( new CMenuForwarder("mainmenu.info", true, "", new CDBoxInfoWidget, "",true) );
 
 
 	mainSettings.addItem( new CMenuSeparator() );
@@ -1177,6 +1180,37 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 		miscSettings.addItem( oj );
+
+	
+		static int fb_destination = 0;
+		FILE* fd = fopen("/var/tuxbox/boot/ppcboot.conf", "r");
+		if(fd)
+		{
+			char buffer[200];
+			if(fgets(buffer,199,fd) != NULL)
+			{
+//				printf("buffer: '%s'\n",buffer);
+//				buffer[strlen(buffer)] = 0;
+				if(strncmp(buffer,"console=",8) == 0)
+				{
+					if(strncmp(&buffer[8],"null",4)==0)
+						fb_destination=0;
+					if(strncmp(&buffer[8],"ttyS0",5)==0)
+						fb_destination=1;
+					if(strncmp(&buffer[8],"tty",3)==0)
+						fb_destination=2;
+				}
+				else
+					printf("no console string found in ppcboot.conf\n");
+
+			}
+			fclose(fd);
+		}
+		oj = new CMenuOptionChooser("miscsettings.fb_destination", &fb_destination, true, ConsoleDestinationChanger );
+		oj->addOption(0, "options.null");
+		oj->addOption(1, "options.serial");
+		oj->addOption(2, "options.fb");
+		miscSettings.addItem( oj );
 	}
 
 	keySetupNotifier = new CKeySetupNotifier;
@@ -1187,7 +1221,6 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
-
 }
 
 
@@ -1782,6 +1815,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	NVODChanger			= new CNVODChangeExec;
 	StreamFeaturesChanger = new CStreamFeaturesChangeExec;
 	MyIPChanger			= new CIPChangeNotifier;
+	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
 
 	colorSetupNotifier->changeNotify("initial", NULL);
 
@@ -2728,7 +2762,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.300 2002/07/12 23:44:01 Homar Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.301 2002/07/12 23:59:28 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

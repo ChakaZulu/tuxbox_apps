@@ -2,6 +2,9 @@ menu.back Zurück
 
 options.off aus
 options.on ein
+options.serial seriell
+options.fb framebuffer
+options.null null
 
 mainmenu.head Hauptmenü
 mainmenu.tvmode TV-Modus
@@ -21,6 +24,8 @@ servicemenu.update Software-Aktualisierung
 servicemenu.scants Kanalsuche
 servicemenu.ucodecheck UCodes überprüfen
 
+cablesetup.spectralInversion Spectrale Inversion
+cablesetup.spectralInversionWarning Sie müssen rebooten, um die Änderungen zu aktivieren!
 cablesetup.provider Kabelanbieter
 
 satsetup.disqeqc DiSEqC
@@ -41,7 +46,7 @@ mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.streaming Streamingserver
 mainsettings.colors Farben / Themes
-mainsettings.lcd LCD - Einstellungen
+mainsettings.lcd LC-Display
 mainsettings.keybinding Tasten-Einstellungen
 mainsettings.misc Diverse Einstellungen
 mainsettings.scan Einstellungen Kanalsuche
@@ -51,6 +56,7 @@ miscsettings.shutdown_real Standbymodus
 miscsettings.boxtype DBox Hersteller
 miscsettings.startneutrinodirect Neutrino direkt starten
 miscsettings.general Allgemein
+miscsettings.fb_destination EXPERT! Boot-Konsole
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache
