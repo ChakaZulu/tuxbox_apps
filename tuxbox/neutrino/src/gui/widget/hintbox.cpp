@@ -38,7 +38,7 @@
 #define borderwidth 4
 
 
-CHintBox::CHintBox(const std::string Caption, std::string Text, std::string Icon, int Width, const bool utf8_encoded)
+CHintBox::CHintBox(const char * const Caption, std::string Text, std::string Icon, int Width, const bool utf8_encoded)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	theight= g_Fonts->menu_title->getHeight();
@@ -123,9 +123,9 @@ void CHintBox::hide()
 		frameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 
-int ShowHint(const std::string Caption, const std::string Text, std::string Icon, int Width, int timeout, const bool utf8_encoded)
+int ShowHintUTF(const char * const Caption, const std::string Text, std::string Icon, int Width, int timeout)
 {
- 	CHintBox* hintBox= new CHintBox(Caption, Text, Icon, Width, utf8_encoded);
+ 	CHintBox* hintBox= new CHintBox(Caption, Text, Icon, Width, true);
 	hintBox->paint();
 
 	if ( timeout == -1 )

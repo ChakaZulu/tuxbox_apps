@@ -158,7 +158,7 @@ bool CFlashUpdate::checkVersion4Update()
 		CConfigFile configfile('\t');
 		if(!configfile.loadConfig(sFileName))
 		{
-			ShowHintUTF( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
+			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
 			return false;
 		}
 		else
@@ -309,11 +309,11 @@ void CFlashExpert::readmtd(int readmtd)
 {
 	char tmp[10];
 	sprintf(tmp, "%d", readmtd);
-	string filename = "/tmp/mtd" + string(tmp) + string(".img");
-	if(readmtd==-1)
+	std::string filename = "/tmp/mtd" + string(tmp) + string(".img"); // US-ASCII (subset of UTF-8 and ISO8859-1)
+	if (readmtd == -1)
 	{
 		//ganzes flashimage lesen
-		filename = "/tmp/flashimage.img";
+		filename = "/tmp/flashimage.img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
 		readmtd = 4;
 	}
 	setTitle(g_Locale->getText("flashupdate.titlereadflash")); // UTF-8
@@ -336,7 +336,7 @@ void CFlashExpert::readmtd(int readmtd)
 		sprintf(message, g_Locale->getText("flashupdate.savesuccess").c_str(), filename.c_str() );
 		sleep(1);
 		hide();
-		ShowHint("messagebox.info", message);
+		ShowHintUTF("messagebox.info", message);
 	}
 }
 

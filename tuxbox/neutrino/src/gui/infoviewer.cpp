@@ -241,7 +241,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
 		paintTime( false, true );
 
 		// ... with channel name
-        g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, Channel.c_str(), COL_INFOBAR, 0, true); // UTF-8
+        g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, Channel, COL_INFOBAR, 0, true); // UTF-8
 
         ChanInfoX = BoxStartX + (ChanWidth / 3);
         int ChanInfoY = BoxStartY + ChanHeight+ 10;
@@ -263,7 +263,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
 		if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_later | CSectionsdClient::epgflags::has_current |  CSectionsdClient::epgflags::not_broadcast ) ) )
 		{
 			// nicht gefunden / noch nicht geladen
-			g_Fonts->infobar_info->RenderString(ChanNameX+ 10, ChanInfoY+ 2* g_Fonts->infobar_info->getHeight()+ 5, BoxEndX- (ChanNameX+ 20), g_Locale->getText(gotTime?(showButtonBar?"infoviewer.epgwait":"infoviewer.epgnotload"):"infoviewer.waittime").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_info->RenderString(ChanNameX+ 10, ChanInfoY+ 2* g_Fonts->infobar_info->getHeight()+ 5, BoxEndX- (ChanNameX+ 20), g_Locale->getText(gotTime?(showButtonBar?"infoviewer.epgwait":"infoviewer.epgnotload"):"infoviewer.waittime"), COL_INFOBAR, 0, true); // UTF-8
 		}
 		else
 			show_Data();
@@ -273,7 +273,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
         {
 			// blau
 			frameBuffer->paintIcon("blau.raw", BoxEndX- ICON_OFFSET- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.streaminfo").c_str(), COL_INFOBAR_BUTTONS);
+			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.streaminfo"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 
 			showButton_Audio();
 			showButton_SubServices();
@@ -538,7 +538,7 @@ void CInfoViewer::showIcon_VTXT() const
 
 void CInfoViewer::showFailure()
 {
-	ShowHint ( "messagebox.error", g_Locale->getText("infoviewer.notavailable"), "info.raw", 430 );
+	ShowHintUTF("messagebox.error", g_Locale->getText("infoviewer.notavailable"), "info.raw", 430); // UTF-8
 }
 
 void CInfoViewer::showMotorMoving(int duration)
@@ -552,7 +552,7 @@ void CInfoViewer::showMotorMoving(int duration)
 	strcat(text, buffer);
 	strcat(text, " s)");
 	
-	ShowHint( "messagebox.info", text, "info.raw", g_Fonts->menu->getRenderWidth(text) + 10, duration);
+	ShowHintUTF("messagebox.info", text, "info.raw", g_Fonts->menu->getRenderWidth(text) + 10, duration); // UTF-8
 }
 
 int CInfoViewer::handleMsg(uint msg, uint data)
@@ -698,10 +698,10 @@ void CInfoViewer::showButton_SubServices()
 
 		if ( g_RemoteControl->are_subchannels )
 			// SubServices
-			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.subservice").c_str(), COL_INFOBAR_BUTTONS);
+			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.subservice").c_str(), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 		else
 			// NVOD
-			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR_BUTTONS);
+			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	}
 }
 
@@ -812,7 +812,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 			if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_anything )
 			{
 				frameBuffer->paintIcon("rot.raw", BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-				g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR_BUTTONS);
+				g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.eventlist"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 			}
 		}
 
@@ -827,7 +827,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 			// kein EPG verfügbar
 			ChanInfoY += height;
 			frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR);
-			g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 20,  ChanInfoY+height, BoxEndX- (BoxStartX + ChanWidth + 20), g_Locale->getText(gotTime?"infoviewer.noepg":"infoviewer.waittime").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 20,  ChanInfoY+height, BoxEndX- (BoxStartX + ChanWidth + 20), g_Locale->getText(gotTime?"infoviewer.noepg":"infoviewer.waittime"), COL_INFOBAR, 0, true); // UTF-8
 		}
 		else
 		{
@@ -841,7 +841,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 			if ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next ) && ( !( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current )) )
 			{
 				// spätere Events da, aber kein aktuelles...
-				g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, BoxEndX- xStart, g_Locale->getText("infoviewer.nocurrent").c_str(), COL_INFOBAR);
+				g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, BoxEndX- xStart, g_Locale->getText("infoviewer.nocurrent"), COL_INFOBAR, 0, true); // UTF-8
 
 				ChanInfoY += height;
 
@@ -908,7 +908,7 @@ void CInfoViewer::showButton_Audio()
 						}
 
                         frameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
-                        g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text.c_str(), COL_INFOBAR);
+                        g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text, COL_INFOBAR, 0, true); // UTF-8
                         KillShowEPG = true;
                 };
 */
@@ -917,7 +917,7 @@ void CInfoViewer::showButton_Audio()
 	if ( count > 1 )
 	{
 		frameBuffer->paintIcon("gruen.raw", BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-		g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR_BUTTONS);
+		g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	};
 
 	if ( ( g_RemoteControl->current_PIDs.PIDs.selected_apid < count ) &&

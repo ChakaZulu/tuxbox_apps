@@ -267,28 +267,9 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 		frameBuffer->paintBackgroundBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5);
 	}
 
-	if(epgData.title.length()==0)
+	if (epgData.title.length() == 0) /* no epg info found */
 	{
-/*
-		//no epg-data found :(
-		char *text = (char*) g_Locale->getText("epgviewer.notfound").c_str();
-		int oy = 30;
-		int ox = g_Fonts->epg_info2->getRenderWidth(text)+30;
-		int sx = (((g_settings.screen_EndX- g_settings.screen_StartX)-ox) / 2) + g_settings.screen_StartX;
-		int sy = (((g_settings.screen_EndY- g_settings.screen_StartY)-oy) / 2) + g_settings.screen_StartY;
-		height = g_Fonts->epg_info2->getHeight();
-		frameBuffer->paintBoxRel(sx, sy, ox, height+ 10, COL_INFOBAR_SHADOW); //border
-		frameBuffer->paintBoxRel(sx+ 1, sy+ 1, ox- 2, height+ 8, COL_MENUCONTENT);
-		g_Fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-30, text, COL_MENUCONTENT);
-
-
-		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, 20 );
-		CNeutrinoApp::getInstance()->handleMsg( msg, data );
-
-		frameBuffer->paintBackgroundBoxRel(sx, sy, ox, height+10);
-*/
-		ShowHint ( "messagebox.info", g_Locale->getText("epgviewer.notfound"), "info.raw" );
+		ShowHintUTF("messagebox.info", g_Locale->getText("epgviewer.notfound"), "info.raw"); // UTF-8
 
 		return res;
 	}

@@ -309,7 +309,7 @@ int CTimerList::show()
 			if(timerlist.size()==0)
 			{
 				//evtl. anzeige dass keine kanalliste....
-				/* ShowHint ( "messagebox.info", g_Locale->getText("timerlist.empty"));		
+				/* ShowHintUTF("messagebox.info", g_Locale->getText("timerlist.empty")); // UTF-8
 				 return -1;*/
 			}
 			paint();
