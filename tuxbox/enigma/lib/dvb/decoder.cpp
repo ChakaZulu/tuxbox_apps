@@ -65,7 +65,7 @@ static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int c
 		return;
 	case 0:
 	{ 
-#if 1
+#if 0
 		close(0);
 		close(1);
 		close(2);
