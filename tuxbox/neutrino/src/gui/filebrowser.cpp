@@ -374,11 +374,7 @@ bool CFileBrowser::readDir_std(std::string dirname, CFileList* flist)
 	if (n < 0)
 	{
 		perror(("Filebrowser scandir: "+dirname).c_str());
-		dirname = "/";
-		Path = "/";
-		name = "/";
-		paintHead();
-		n = my_scandir(Path.c_str(), &namelist, 0, my_alphasort);
+		return false;
 	}
 	for(int i = 0; i < n;i++)
 	{
