@@ -6,11 +6,13 @@
 
 #define	MOUNTCONFIGFILE	"/var/tuxbox/config/enigma/mount.conf"
 
-void *mountThread(eString cmd);
+void *mountThread(void *cmd);
 
 class eMountPoint
 {
 private:
+	bool in_proc_filesystems(eString);
+	int readMounts(eString);
 	int doMount();
 public:
 	int id;			//sequential number
@@ -23,11 +25,10 @@ public:
 	int automount;		//mount at startup
 	eString options;	//rw, intr, soft, udp, nolock
 	eString ownOptions;	//rw, intr, soft, udp, nolock
-	eString mounted;	//if allready mounted or not
+	bool mounted;	//if already mounted or not
 	int rsize;		//read size
 	int wsize;		//write size
 
-	eMountPoint();
 	eMountPoint(CConfigFile *, int);
 	eMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int);
 	~eMountPoint();
@@ -42,9 +43,13 @@ class eMountMgr
 private:
 	static eMountMgr *instance;
 	std::vector <eMountPoint> mountPoints;
+	std::vector <eMountPoint>::iterator mp_it;
 public:
-	void removeMountPoint();
-	void addMountPoint();
+	void removeMountPoint(int);
+	void addMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int);
+	void save();
+	void init();
+	std::vector<eMountPoint> *mountPointList() {return &mountPoints;}
 
 	static eMountMgr *getInstance() {return (instance) ? instance : new eMountMgr();}
 

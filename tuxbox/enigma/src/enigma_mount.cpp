@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mount.h>
+#include <iostream>
+#include <sstream>
 #include <fstream>
 #include <pthread.h>
 #include <string.h>
@@ -20,25 +22,6 @@ int g_mntstatus1;
 
 eMountPoint::~eMountPoint()
 {
-}
-eMountPoint::eMountPoint()
-{
-	userName = "";
-	password = "";
-	localDir = "";
-	mountDir = "";
-	ip[0] = 0;
-	ip[1] = 0;
-	ip[2] = 0;
-	ip[3] = 0;
-	fstype = 0;
-	automount = 0;
-	options = "nolock";
-	ownOptions = "";
-	rsize = 4096;
-	wsize = 4096;
-	mounted = false;
-	id = 0;
 }
 
 eMountPoint::eMountPoint(CConfigFile *config, int i)
@@ -89,9 +72,159 @@ void eMountPoint::save(FILE *out)
 	fprintf(out,"--------------------------------------\n");
 }
 
+bool eMountPoint::in_proc_filesystems(eString fsname)
+{
+	eString s;
+	std::ifstream in("/proc/filesystems", std::ifstream::in);
+
+	while (in >> s)
+	{
+		if (s == fsname)
+	  	{
+			in.close();
+			return true;
+		}
+	}
+	in.close();
+
+	if (fsname == "nfs") 
+	{
+#ifdef HAVE_MODPROBE
+		system("modprobe nfs");
+#else
+		system("insmod sunrpc");
+		system("insmod lockd");
+		system("insmod nfs");
+#endif
+	} 
+	else 
+	if (fsname == "cifs") 
+	{
+		system("insmod cifs");
+		system("insmod /lib/modules/`uname -r`/kernel/fs/cifs/cifs.ko");
+	} 
+	else
+		eDebug("[enigma_mount] filesystem %s not supported.", fsname.c_str());
+
+	sleep(2);
+
+	return false;
+}
+
+int eMountPoint::readMounts(eString localdir)
+{
+	std::ifstream in;
+	eString mountDev;
+	eString mountOn;
+	eString mountType;
+	eString buffer;
+	std::stringstream tmp;
+
+	in.open("/proc/mounts", std::ifstream::in);
+	while(getline(in, buffer, '\n'))
+	{
+		mountDev = "";
+		mountOn = "";
+		mountType = "";
+		tmp.str(buffer);
+		tmp >> mountDev >> mountOn >> mountType;
+		tmp.clear();
+		if(mountOn == localdir)
+		{
+			in.close();
+			return -1;
+		}
+	}
+	in.close();
+	return 0;
+}
+
 int eMountPoint::doMount()
 {
-	return 0;
+	eString cmd;
+	eString ip;
+	eString useoptions;
+	int rc = 0;
+	if (!mounted)
+	{
+		pthread_mutex_init(&g_mut1, NULL);
+		pthread_cond_init(&g_cond1, NULL);
+		g_mntstatus1 = -1;
+		if (readMounts(localDir) != -1)
+		{
+			if (access(localDir.c_str(), R_OK))
+			{
+				
+				useoptions = options + ownOptions;
+				if (useoptions[useoptions.length() - 1] == ',')
+					useoptions = useoptions.left(useoptions.length() - 1);
+				ip.sprintf("%d.%d.%d.%d", ip[0], ip[1],	ip[2], ip[3]);
+				switch(fstype)
+				{
+					case 0:	/* NFS */
+						cmd = "mount -t ";
+						cmd += fstype ? "cifs //" : "nfs ";
+						if (in_proc_filesystems("nfs") || in_proc_filesystems("nfs"))
+						{
+							cmd = ip + ":" + mountDir + " " + localDir + " -o ";
+							cmd += eString().sprintf("rsize=%d,wsize=%d", rsize, wsize);
+							if (useoptions)
+								cmd += "," + useoptions;
+						}
+						else
+							rc = -4; //NFS filesystem not supported
+						break;
+					case 1: /* CIFS */
+						cmd = "mount -t ";
+						cmd += fstype ? "cifs //" : "nfs ";
+						if(in_proc_filesystems("cifs") || in_proc_filesystems("cifs"))
+						{
+							cmd = ip + "/" + mountDir + " " + localDir + " -o user=";
+							cmd += (userName != "") ? userName : "anonymous";
+							if (password != "")
+								cmd += "pass=" + password;
+							cmd += ",unc=//" + ip + "/" + mountDir;
+							if (useoptions != "")
+								cmd += "," + useoptions;
+						}																													
+						else
+							rc = -3; //CIFS filesystem not supported
+						break;
+					case 2:
+						cmd = "mount " + mountDir + " " + localDir;
+						break;
+				}
+
+				if (rc == 0)
+				{
+					pthread_create(&g_mnt1, 0, mountThread, (void *)cmd.c_str());
+
+					struct timespec timeout;
+					int retcode;
+
+					pthread_mutex_lock(&g_mut1);
+					timeout.tv_sec = time(NULL) + 8;
+					timeout.tv_nsec = 0;
+					retcode = pthread_cond_timedwait(&g_cond1, &g_mut1, &timeout);
+					if (retcode == ETIMEDOUT)
+						pthread_cancel(g_mnt1);
+					pthread_mutex_unlock(&g_mut1);
+
+					if (g_mntstatus1 != 0)
+						rc = -5; //mount failed (timeout)
+					else
+						mounted = true;
+				}
+			}
+			else
+				rc = -10;
+		}
+		else
+			rc = -2; //local dir is already a mountpoint
+	}
+	else 
+		rc = -1; //mount point is already mounted
+	return rc;
 }
 
 bool eMountPoint::mount()
@@ -116,7 +249,7 @@ bool eMountPoint::mount()
 				break;
 
 		case -5:
-				message = "Mounting failed (timeout).";
+				message = "Mount failed (timeout).";
 				break;
 
 		case -10:
@@ -144,30 +277,57 @@ eMountMgr::eMountMgr()
 	if (!instance)
 		instance = this;
 	
-	CConfigFile *config = new CConfigFile(',');
-	if (config->loadConfig(MOUNTCONFIGFILE))
-	{
-	}
+	init();
 }
 
 eMountMgr::~eMountMgr()
 {
-	
+	save();
+	mountPoints.clear();
 }
 
-void eMountMgr::addMountPoint()
+void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pid)
 {
-
+	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pid));
 }
 
-void eMountMgr::removeMountPoint()
+void eMountMgr::removeMountPoint(int id)
 {
-
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+		if (mp_it->id == id)
+			mountPoints.erase(mp_it);
 }
 
-void *mountThread(eString cmd)
+void eMountMgr::init()
 {
-	int ret = system(cmd.c_str());
+	mountPoints.clear();
+	CConfigFile *config = new CConfigFile(',');
+	if (config->loadConfig(MOUNTCONFIGFILE))
+	{
+		for (int i = 1; true; i++)
+		{
+			if (config->getString(eString().sprintf("localdir_%d", i)) != "")
+				mountPoints.push_back(eMountPoint(config, i));
+			else
+				break;
+		}
+	}
+}
+
+void eMountMgr::save()
+{
+	FILE *out = fopen(MOUNTCONFIGFILE, "w");
+	if (out)
+	{
+		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+			mp_it->save(out);
+		fclose(out);
+	}
+}
+
+void *mountThread(void *cmd)
+{
+	int ret = system((char *)cmd);
 	pthread_mutex_lock(&g_mut1);
 	g_mntstatus1 = ret;
 	pthread_cond_broadcast(&g_cond1);
