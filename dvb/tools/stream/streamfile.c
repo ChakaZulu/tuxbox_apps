@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.14 2004/04/30 09:38:40 thegoodguy Exp $
+ * $Id: streamfile.c,v 1.15 2004/04/30 09:55:07 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -133,7 +133,6 @@ void *FileThread (void *v_arg)
 {
 	ringbuffer_data_t vec[2];
 	size_t readsize, maxreadsize=0;
-	unsigned long long filesize = 0;
 	unsigned int filecount = 0;
 	const unsigned long long splitsize=((1024*1024*1024)/TS_SIZE)*TS_SIZE * limit; // 1GB%188
 	unsigned long long remfile=0;
@@ -170,7 +169,6 @@ void *FileThread (void *v_arg)
 				pfd[0].fd = fd2;
 				pfd[0].events = POLLOUT;
 
-				filesize = 0;
 				remfile = splitsize;
 				timer1 = time(NULL);
 			}
@@ -228,7 +226,6 @@ void *FileThread (void *v_arg)
 				all_bytes_written:
 					fdatasync(fd2);
 
-					filesize += (unsigned long long)readsize;
 					remfile -= (unsigned long long)readsize;
 					if (!silent) filesize2 += (unsigned long long)readsize;
 				}
