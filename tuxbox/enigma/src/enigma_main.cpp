@@ -4934,27 +4934,34 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	case eServiceEvent::evtAddNewAudioStreamId:
 		eDebug("case eServiceEvent::evtAddNewAudioStreamId:.. %02x", event.param );
 		audioselps.add(event.param);
-		if ( audioselps.getCount() == 1 )
-		{
-			eServiceHandler *handler=eServiceInterface::getInstance()->getService();
-			if (!handler)
-				return;
-			if ( playlist->current != playlist->getConstList().end()
-				&& playlist->current->current_position == -1 )
-			{
-				Decoder::Pause(0);
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, 0));
-				usleep(200);
-				Decoder::flushBuffer();
-//				Decoder::clearScreen();
-				Decoder::Resume(false);
-			}
-		}
-		else if ( audioselps.getCount() > 1 )
+		unsigned int audioStreamID=0;
+		eConfig::getInstance()->getKey("/ezap/audio/prevAudioStreamID", audioStreamID);
+		bool seekToBegin=true;
+		bool setStreamID=false;
+		if ( playlist->current != playlist->getConstList().end()
+			&& playlist->current->current_position != -1 )
+			seekToBegin=false;
+		if ( audioselps.getCount() > 1 )
 		{
 			ButtonYellowDis->hide();
 			ButtonYellowEn->show();
 			flags|=ENIGMA_AUDIO_PS;
+/////////////////////
+			if ( audioStreamID && audioStreamID == (unsigned int)event.param )
+				setStreamID=true;
+		}
+		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+		if (!handler)
+			return;
+		if ( setStreamID )
+			handler->setAudioStream(event.param);
+		if ( seekToBegin )
+		{
+			Decoder::Pause(0);
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, 0));
+			usleep(200);
+			Decoder::flushBuffer();
+			Decoder::Resume(false);
 		}
 		break;
 #endif // DISABLE_FILE

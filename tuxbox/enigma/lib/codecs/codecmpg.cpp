@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <lib/base/eerror.h>
+#include <lib/system/econfig.h>
 
 unsigned long eMPEGDemux::getLong()
 {
@@ -60,6 +61,11 @@ eMPEGDemux::eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int
 {
 	remaining=0;
 	memset(&pcmsettings, 0, sizeof(pcmsettings));
+}
+
+eMPEGDemux::~eMPEGDemux()
+{
+	eConfig::getInstance()->setKey("/ezap/audio/prevAudioStreamID", curAudioStreamID);
 }
 
 int eMPEGDemux::decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*newastreamid )

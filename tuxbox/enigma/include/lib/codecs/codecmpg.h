@@ -35,6 +35,7 @@ class eMPEGDemux: public eAudioDecoder
 	std::list<syncAudioPacket> syncbuffer;
 public:
 	eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd);
+	~eMPEGDemux();
 	virtual int decodeMore(int last, int maxsamples, Signal1<void, unsigned int>*newastreamid=0 ); // returns number of samples(!) written to IOBuffer (out)
 	virtual void resync(); // clear (secondary) decoder buffers
 	virtual int getMinimumFramelength();
