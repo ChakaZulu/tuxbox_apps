@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stropts.h>
 #include <malloc.h>
+#include <math.h>
 #include <linux/fb.h>
 #include <sys/time.h>
 #include <sys/mman.h>
@@ -451,6 +452,56 @@ void	FBMove( int x, int y, int x2, int y2, int dx, int dy )
 	free( back );
 }
 
+static	void	FBDrawClock()
+{
+	float			winkel;
+	struct timeval	tv;
+	int				xe = 0;
+	int				ye = 0;
+	int				x;
+	int				y;
+	unsigned char	*back;
+	int				i;
+
+/* copy out */
+	back = malloc(50*50);
+	for( i=0; i < 50; i++ )
+		memcpy(back+50*i,lfb+(280-25+i)*stride+360-25,50);
+
+	for( winkel=0; winkel < 3.1415*2; winkel+=0.001 )
+	{
+		x = sin(winkel)*24;
+		y = -cos(winkel)*24;
+		if (( xe == x ) && (ye == y ))
+			continue;
+		xe=x;
+		ye=y;
+		FBDrawLine( 360, 280 , xe + 360,  ye + 280, 2 );
+		tv.tv_usec = 1000;
+		tv.tv_sec = 0;
+		select(0,0,0,0,&tv);
+	}
+	xe=0;
+	ye=0;
+	for( winkel=0; winkel < 3.1415*2; winkel+=0.001 )
+	{
+		x = sin(winkel)*22;
+		y = -cos(winkel)*22;
+		if (( xe == x ) && (ye == y ))
+			continue;
+		xe=x;
+		ye=y;
+		FBDrawLine( 360, 280 , xe + 360,  ye + 280, 1 );
+		tv.tv_usec = 1000;
+		tv.tv_sec = 0;
+		select(0,0,0,0,&tv);
+	}
+
+	FBCopyImage( 360-25, 280-25, 50, 50, back );
+
+	free( back );
+}
+
 void	FBPause( void )
 {
 	unsigned char	*back;
@@ -474,7 +525,7 @@ static int			pos[64] =
 	Fx2PigPause();
 
 	back = malloc( available );
-	if ( back )		// dimm out
+	if ( back )		/* dimm out */
 	{
 		memcpy(back,lfb,available);
 
@@ -502,7 +553,7 @@ static int			pos[64] =
 		RcGetActCode();
 	}
 
-	if ( back )		// dimm in
+	if ( back )		/* dimm in */
 	{
 		for( i=0; i < 64; i++ )
 		{
@@ -519,11 +570,9 @@ static int			pos[64] =
 
 		free(back);
 	}
-	Fx2PigResume();
+	FBDrawClock();
 
-	tv.tv_usec = 0;
-	tv.tv_sec = 2;
-	select(0,0,0,0,&tv);
+	Fx2PigResume();
 }
 
 #else	/* USEX */
