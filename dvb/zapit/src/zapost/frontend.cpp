@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.5 2002/04/20 18:51:29 obi Exp $
+ * $Id: frontend.cpp,v 1.6 2002/04/21 21:18:32 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
+#include <sys/poll.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -305,45 +306,63 @@ const FrontendParameters *CFrontend::getFrontend ()
 	return feparams;
 }
 
-#if 0
-const FrontendInfo *CFrontend::getInfo ()
-{
-	FrontendInfo *info = new FrontendInfo();
-
-	if (ioctl(frontend_fd, FE_GET_INFO, info) < 0)
-	{
-		perror("FE_GET_INFO");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
-
-	return info;
-}
-#endif
-
-const FrontendEvent *CFrontend::getEvent ()
+const bool CFrontend::getEvent ()
 {
 	FrontendEvent *event = new FrontendEvent();
 
-	if (ioctl(frontend_fd, FE_GET_EVENT, event) < 0)
+	struct pollfd pfd[1];
+	pfd[0].fd = frontend_fd;
+	pfd[0].events = POLLIN | POLLPRI;
+
+	failed = true;
+
+	switch (poll(pfd, 1, 1000))
 	{
-		perror("FE_GET_EVENT");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
+	case -1:
+		perror("[CFrontend::getEvent] poll");
+		break;
+
+	case 0:
+		std::cerr << "[CFrontend::getEvent] timeout" << std::endl;
+		break;
+
+	default:
+		if (pfd[0].revents & POLLIN)
+		{
+			if (ioctl(frontend_fd, FE_GET_EVENT, event) < 0)
+			{
+				perror("[CFrontend::getEvent] FE_GET_EVENT");
+			}
+			else
+			{
+				failed = false;
+			}
+
+			switch (event->type)
+			{
+			case FE_UNEXPECTED_EV:
+				std::cerr << "[CFrontend::getEvent] FE_UNEXPECTED_EV" << std::endl;
+				break;
+
+			case FE_FAILURE_EV:
+				std::cerr << "[CFrontend::getEvent] FE_FAILURE_EV" << std::endl;
+				break;
+
+			case FE_COMPLETION_EV:
+				std::cout << "[CFrontend::getEvent] FE_COMPLETION_EV" << std::endl;
+				tuned = true;
+				break;
+			}
+		}
+		else
+		{
+			std::cerr << "[CFrontend::getEvent] pfd[0].revents: " << pfd[0].revents << std::endl;
+		}
+		break;
 	}
 
-	if (event->type == FE_COMPLETION_EV)
-	{
-		tuned = true;
-	}
-
-	return event;
+	delete event;
+	return tuned;
 }
 
 /*

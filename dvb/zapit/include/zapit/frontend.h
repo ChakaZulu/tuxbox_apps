@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.4 2002/04/19 14:53:29 obi Exp $
+ * $Id: frontend.h,v 1.5 2002/04/21 21:18:32 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -93,7 +93,7 @@ class CFrontend
 		const uint32_t getNextFrequency (uint32_t frequency);
 		const uint32_t getNextSymbolRate (uint32_t rate);
 		const FrontendParameters *getFrontend ();
-		const FrontendEvent *getEvent ();
+		const bool getEvent ();
 		const FrontendInfo *getInfo ()	{ return info; };
 
 		/* ost sec api */
