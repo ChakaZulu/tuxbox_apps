@@ -901,6 +901,12 @@ struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 		eString description = se->service.descr;
 		eString channel = getLeft(description, '/');
 		if (!channel)
+		{
+			eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(se->service);
+			if ( service )
+				channel=service->service_name;
+		}
+		if (!channel)
 			channel = "No channel available";
 		result += "<td>" + channel + "</td>";
 		description = getRight(description, '/');
