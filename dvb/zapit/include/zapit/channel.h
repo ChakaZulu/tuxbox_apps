@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.5 2002/05/31 16:33:48 happydude Exp $
+ * $Id: channel.h,v 1.6 2002/08/13 18:15:38 happydude Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -103,7 +103,7 @@ class CZapitChannel
 
 		/* set methods */
 		void setName(std::string pName)				{ name = pName; }
-		void setAudioChannel(unsigned char pAudioChannel)	{ currentAudioChannel = pAudioChannel; }
+		void setAudioChannel(unsigned char pAudioChannel)	{ if (pAudioChannel < audioChannels.size()) currentAudioChannel = pAudioChannel; }
 		void setPcrPid(unsigned short pPcrPid)			{ pcrPid = pPcrPid; }
 		void setPmtPid(unsigned short pPmtPid)			{ pmtPid = pPmtPid; }
 		void setTeletextPid(unsigned short pTeletextPid)	{ teletextPid = pTeletextPid; }
