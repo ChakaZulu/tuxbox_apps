@@ -51,6 +51,9 @@ void eWindow::redrawWidget(gPainter *target, const QRect &where)
 {
 	if (where.contains(QRect(0, 0, width(), titleSize)))
 		drawTitlebar(target);
+
+	if (LCDTitle)
+		LCDTitle->setText(text);
 }
 
 void eWindow::drawTitlebar(gPainter *target)
@@ -163,14 +166,3 @@ int eWindow::eventFilter(const eWidgetEvent &event)
 	}
 	return 0;
 }
-
-void eWindow::willShow()
-{
-	if (LCDTitle)
-		LCDTitle->setText(text);
-}
-
-void eWindow::willHide()
-{
-}
-
