@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.80 2004/02/18 20:54:54 zwen Exp $
+  $Id: movieplayer.cpp,v 1.81 2004/02/28 07:28:57 alexw Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -140,6 +140,7 @@ CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 
 CMoviePlayerGui::CMoviePlayerGui()
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	filebrowser = new CFileBrowser ();
 	filebrowser->Multi_Select = false;
 	filebrowser->Dirs_Selectable = false;
@@ -190,6 +191,13 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		parent->hide ();
 	}
 
+	bool usedBackground = frameBuffer->getuseBackground();
+	if (usedBackground)
+	{
+		frameBuffer->saveBackgroundImage();
+		frameBuffer->ClearFrameBuffer();
+	}
+
 	CBookmark * theBookmark=NULL;
     if (actionKey=="bookmarkplayback") {
         isBookmark = true;
@@ -200,8 +208,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
         }
 	}
 	
-	
-    // set zapit in standby mode
+	// set zapit in standby mode
 	g_Zapit->setStandby (true);
 
 	// tell neutrino we're in ts_mode
@@ -210,7 +217,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	// remember last mode
 	m_LastMode =
 		(CNeutrinoApp::getInstance ()->
-		 getLastMode () /*| NeutrinoMessages::norezap */ );
+		 getLastMode () | NeutrinoMessages::norezap );
 
 	// Stop sectionsd
 	//g_Sectionsd->setPauseScanning (true);
@@ -261,6 +268,15 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 
 	bookmarkmanager->flush();
 
+	// Restore previous background
+	if (usedBackground)
+	{
+		frameBuffer->restoreBackgroundImage();
+		frameBuffer->useBackground(true);
+		frameBuffer->paintBackground();
+	}
+
+	// Restore last mode
 	g_Zapit->setStandby (false);
 
 	// Start Sectionsd
@@ -269,6 +285,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	// Restore last mode
 	CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE,
 						 m_LastMode);
+	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
 	// always exit all
 	return menu_return::RETURN_REPAINT;
@@ -1628,7 +1645,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.80 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.81 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1800,7 +1817,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.80 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.81 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)

@@ -168,7 +168,7 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	// tell neutrino we're in mp3_mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_mp3 );
 	// remember last mode
-	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() /*| NeutrinoMessages::norezap*/);
+	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
 
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true); 
@@ -187,11 +187,11 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	//t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
 	//g_Zapit->zapTo_serviceID(channel_id);
 	g_Zapit->setStandby(false);
+
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
-
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
-	//sleep(3); // zapit doesnt like fast zapping in the moment
+	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
 	// always exit all	
 	return menu_return::RETURN_EXIT_ALL;
