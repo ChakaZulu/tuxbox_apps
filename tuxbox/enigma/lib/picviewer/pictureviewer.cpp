@@ -315,6 +315,7 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 	eDebug("---directory: %s", directory.c_str());
 	slideshowList.clear();
 	listDirectory(directory, 0);
+	slideshowList.sort();
 	for (myIt = slideshowList.begin(); myIt != slideshowList.end(); myIt++)
 	{
 		eString tmp = *myIt;
