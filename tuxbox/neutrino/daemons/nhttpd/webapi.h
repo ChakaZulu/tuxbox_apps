@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webapi.h,v 1.4 2002/10/15 20:39:47 woglinde Exp $
+        $Id: webapi.h,v 1.5 2002/10/25 11:18:08 dirch Exp $
 
         License: GPL
 
@@ -59,7 +59,6 @@ class CWebAPI
 
 		bool Test(CWebserverRequest* request);
 		bool Timer(CWebserverRequest* request);
-		bool Info(CWebserverRequest* request);
 		bool Dbox(CWebserverRequest* request);
 		bool Channellist(CWebserverRequest* request);
 		bool Controlpanel(CWebserverRequest* request);

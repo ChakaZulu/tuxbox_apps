@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.14 2002/10/23 19:03:19 Zwen Exp $
+	$Id: webapi.cpp,v 1.15 2002/10/25 11:18:08 dirch Exp $
 
 	License: GPL
 
@@ -65,7 +65,7 @@ bool CWebAPI::Execute(CWebserverRequest* request)
 			break;
 		case 1:	return Timer(request);
 			break;
-		case 2:	return Info(request);
+		case 2:	return ShowCurrentStreamInfo(request);
 			break;
 		case 3:	return Dbox(request);
 			break;
@@ -162,15 +162,6 @@ bool CWebAPI::Timer(CWebserverRequest* request)
 		aprintf("<h1>Error: Timerd not available</h1>\n");
 		request->SendHTMLFooter ();
 	}
-	return true;
-}
-
-//-------------------------------------------------------------------------
-bool CWebAPI::Info(CWebserverRequest* request)
-// shows informations about current stream
-{
-	request->SendPlainHeader("text/html");		
-	ShowCurrentStreamInfo(request);
 	return true;
 }
 
@@ -274,16 +265,7 @@ int mode;
 		}
 		else if( request->ParameterList["standby"] != "")
 		{
-			if(request->ParameterList["standby"] == "on")
-			{
-				Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_HTTPD);
-//				standby_mode = true;
-			}
-			if(request->ParameterList["standby"] == "off")
-			{
-				Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_HTTPD);
-//				standby_mode = false;
-			}
+			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_TOGGLE, CEventServer::INITID_HTTPD);
 		}
 		else if(request->ParameterList["1"] == "tvmode")				// switch to tv mode
 		{
@@ -422,17 +404,18 @@ bool CWebAPI::ShowCurrentStreamInfo(CWebserverRequest* request)
 	CStringList params;
 	CZapitClient::CCurrentServiceInfo serviceinfo;
 
+	request->SendPlainHeader("text/html");		
+
 	serviceinfo = Parent->Zapit->getCurrentServiceInfo();
 	params["onid"] = itoh(serviceinfo.onid);
 	params["sid"] = itoh(serviceinfo.sid);
 	params["tsid"] = itoh(serviceinfo.tsid);
 	params["vpid"] = itoh(serviceinfo.vdid);
 	params["apid"] = itoh(serviceinfo.apid);
-	params["vtxtpid"] = itoh(serviceinfo.vtxtpid);
+	params["vtxtpid"] = (serviceinfo.vtxtpid != 0)?itoh(serviceinfo.vtxtpid):"nicht verfügbar";
 	params["tsfrequency"] = itoa(serviceinfo.tsfrequency);
 	params["polarisation"] = serviceinfo.polarisation==1?"v":"h";
 	params["ServiceName"] = Parent->GetServiceName(Parent->Zapit->getCurrentServiceID());
-
 	Parent->GetStreamInfo(bitInfo);
 	
 	sprintf((char*) buf, "%d x %d", bitInfo[0], bitInfo[1] );
@@ -482,7 +465,7 @@ int pos = 0;
 
 	request->SocketWrite("<CENTER><TABLE WIDTH=\"95%\" CELLSPACING=\"0\">\n");
 
-    for( eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++, pos++ )
+	for( eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++, pos++ )
 	{
 		classname = (pos&1)?'a':'b';
 		char zbuffer[25] = {0};
@@ -494,6 +477,9 @@ int pos = 0;
 		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerd::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
 		request->printf("</NOBR></TD><TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
 		request->printf("<TD><A CLASS=\"elist\" HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
+		if(eventIterator->text.length() > 0)
+			request->printf("<TR VALIGN=\"middle\" CLASS=\"%c\"><TD COLSPAN=2></TD><TD>%s</TD></TR>\n",classname,eventIterator->text.c_str());
+
 	}
 
 	request->SocketWriteLn("</TABLE></CENTER>");
@@ -533,8 +519,11 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 		string bouquetstr = (BouquetNr >=0)?"&bouquet="+itoa(BouquetNr):"";
 		
 		request->printf("<TR><TD colspan=2 CLASS=\"%c\">",classname);
-		request->printf("%s<A CLASS=\"clist\" HREF=\"switch.dbox2?zapto=%d%s\">%d. %s</A>&nbsp;<A HREF=\"epg.dbox2?eventlist=%u\">%s</A></TD></TR>",((channel->channel_id == current_channel)?"<A NAME=akt></a>":" "),channel->channel_id,bouquetstr.c_str(),channel->nr,channel->name,channel->channel_id,((Parent->ChannelListEvents[channel->channel_id])?"<img src=\"../images/elist.gif\" ALT=\"Programmvorschau\">":""));
+		request->printf("%s<A CLASS=\"clist\" HREF=\"switch.dbox2?zapto=%d%s\">%d. %s</A>&nbsp;<A HREF=\"epg.dbox2?eventlist=%u\">%s</A>",((channel->channel_id == current_channel)?"<A NAME=akt></a>":" "),channel->channel_id,bouquetstr.c_str(),channel->nr,channel->name,channel->channel_id,((Parent->ChannelListEvents[channel->channel_id])?"<img src=\"../images/elist.gif\" ALT=\"Programmvorschau\">":""));
 
+		if(channel->channel_id == current_channel)
+			request->printf("&nbsp;&nbsp;<A HREF=\"/fb/info.dbox2\"><IMG SRC=\"/images/streaminfo.gif\" BORDER=0 ALT=\"Streaminfo\"></A>");
+		request->printf("</TD></TR>");
 		CChannelEvent *event = Parent->ChannelListEvents[channel->channel_id];
 		if(event)
 		{
@@ -559,24 +548,35 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 bool CWebAPI::ShowControlpanel(CWebserverRequest* request)
 {
-		char mutestr[6]={0};
+CStringList params;
 
 	if(Parent->Parent->NewGui)
 	{
-		CStringList params;
-//		params["standby"] = standby_mode?"off":"on";
-		switch(Parent->Controld->getBoxType())
+		request->SendPlainHeader("text/html");
+
+		int vol = Parent->Controld->getVolume();
+		char volbuf[5];
+		sprintf(volbuf,"%d",vol);
+		params["VOL1"] = volbuf;
+		sprintf(volbuf,"%d",100 - vol);
+		params["VOL2"] = volbuf;
+
+		if(	Parent->Controld->getMute())
 		{
-			case CControldClient::BOXTYPE_NOKIA :			// show the nokia rc
-				params["BoxType"] = "<img src=\"/images/nokia.gif\" usemap=\"#nokia\" border=0>";
-				break;
-			default :										// show sagem / phillips rc
-				params["BoxType"] = "<img src=\"/images/sagem.gif\" usemap=\"#sagem\" border=0>";
+			params["MUTE0"] = "01";
+			params["MUTE1"] = "00";
 		}
-		request->ParseFile(Parent->Parent->PrivateDocumentRoot + "/controlpanel.html", params);
+		else
+		{
+			params["MUTE0"] = "00";
+			params["MUTE1"] = "01";
+		}
+		
+		request->ParseFile(Parent->Parent->PrivateDocumentRoot + "/controlpanel.html",params);
 	}
 	else
 	{
+		char mutestr[6]={0};
 
 		request->SendPlainHeader("text/html");
 
@@ -584,7 +584,6 @@ bool CWebAPI::ShowControlpanel(CWebserverRequest* request)
 
 		request->SendFile(Parent->Parent->PrivateDocumentRoot,"/controlpanel.include1");
 		//muted
-//		request->SocketWrite(mutestring);
 		if(	Parent->Controld->getMute())
 			strcpy(mutestr,"mute");
 		else

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.20 2002/10/15 20:39:47 woglinde Exp $
+	$Id: webserver.cpp,v 1.21 2002/10/25 11:18:08 dirch Exp $
 
 	License: GPL
 
@@ -107,7 +107,7 @@ void CWebserver::ReadConfig()
 void CWebserver::SaveConfig()
 {
 	CConfigFile	*Config = new CConfigFile(',');
-	Config->setBool("NewGui",false);
+	Config->setBool("NewGui",true);
 	Config->setInt32("Port", 80);
 	Config->setBool("THREADS",true);
 	Config->setBool("VERBOSE",false);
@@ -171,18 +171,9 @@ CWebserverRequest	*req;
 	req->Client_Addr = ((Cmyconn *)myconn)->Client_Addr;
 	req->Socket = ((Cmyconn *)myconn)->Socket;
 	
-	pthread_mutex_lock( &ServerData_mutex );
-	req->RequestNumber = Requests++;
-	ThreadsCount++;
-	pthread_mutex_unlock( &ServerData_mutex );
 	if(req->GetRawRequest())
 	{
-		while(ThreadsCount > 15)
-		{
-			aprintf("Too many requests, waitin one sec\n");
-			sleep(1);
-		}
-		dprintf("++ Thread 0x06%X gestartet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);	
+		dprintf("++ Thread 0x06%X gestartet\n",(int)pthread_self());
 		if(req->ParseRequest())
 		{
 			req->SendResponse();
@@ -192,11 +183,7 @@ CWebserverRequest	*req;
 		else
 			dprintf("Error while parsing request\n");
 
-		pthread_mutex_lock( &ServerData_mutex );
-		ThreadsCount--;
-		pthread_mutex_unlock( &ServerData_mutex );
-
-		dprintf("-- Thread 0x06%X beendet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);
+		dprintf("-- Thread 0x06%X beendet\n",(int)pthread_self());
 		delete req;
 		delete (Cmyconn *) myconn;
 	}
@@ -253,19 +240,15 @@ pthread_t Threads[30];
 			req->Socket = sock_connect;	
 			req->Client_Addr = inet_ntoa(cliaddr.sin_addr);
 			req->RequestNumber = Requests++;
-//			if(DEBUG) printf("GetRawRequest()\n");
 			if(req->GetRawRequest())															//read request from client
 			{
-//				if(DEBUG) printf("ParseRequest()\n");
 				if(req->ParseRequest())															// parse it
 				{
-//					if(DEBUG) printf("SendResponse()\n");				
 					req->SendResponse();														// send the proper response
 					req->PrintRequest();									// and print if wanted
 				}
 				else
 					dperror("Error while parsing request");
-//				if(DEBUG) printf("EndRequest()\n");
 				req->EndRequest();																// end the request
 				delete req;													
 				req = NULL;
@@ -281,7 +264,6 @@ void CWebserver::Stop()
 {
 	if(ListenSocket != 0)
 	{
-//		if(DEBUG) printf("ListenSocket closed\n");
 		close( ListenSocket );					
 		ListenSocket = 0;
 	}
