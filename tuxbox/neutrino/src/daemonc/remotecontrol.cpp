@@ -167,7 +167,12 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
                                         RemoteControl->apids.count_apids = apid_return_buf.count_apids;
                                         printf("got apids for: %s - %d apids!\n", RemoteControl->apids.name, RemoteControl->apids.count_apids);
-                                        printf("%d - %d - %d - %d - %d\n", apid_return_buf.apid[0], apid_return_buf.apid[1], apid_return_buf.apid[2], apid_return_buf.apid[3], apid_return_buf.apid[4] );
+                                        // printf("%d - %d - %d - %d - %d\n", apid_return_buf.apid[0], apid_return_buf.apid[1], apid_return_buf.apid[2], apid_return_buf.apid[3], apid_return_buf.apid[4] );
+                                        for(int count=0;count<apid_return_buf.count_apids;count++)
+                                        {
+                                            printf("%s \n", apid_return_buf.apid_desc[count]);
+                                            strcpy(RemoteControl->apids.apid_names[count], apid_return_buf.apid_desc[count]);
+                                        }
 
                                         pthread_cond_signal( &g_InfoViewer->lang_cond );
                                     }
@@ -188,7 +193,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 //                            exit(-1);
                 }
                 if ( !do_immediatly )
-                    usleep(250000);
+                    usleep(100000);
             }
             else
             {
@@ -236,10 +241,9 @@ void CRemoteControl::setAPID(int APID)
 
     remotemsg.version=1;
     remotemsg.cmd=9;
-    remotemsg.param= APID;
-    printf("changing APID to %d\n", APID);
-
-    apid_info.selected = APID;
+    snprintf( (char*) &remotemsg.param, 2, "%.1d", APID);
+    apids.selected = APID;
+    printf("changing APID to %d\n", apids.selected);
 
     pthread_mutex_unlock( &send_mutex );
 	send();
