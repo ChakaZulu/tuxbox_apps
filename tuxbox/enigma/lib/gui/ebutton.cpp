@@ -41,7 +41,7 @@ int eButton::setProperty(const eString &prop, const eString &value)
 	else if (prop=="backgroundColor")
 	{
 		normalB=eSkin::getActive()->queryColor(value);
-		setForegroundColor(normalB);
+		setBackgroundColor(normalB);
 	}
 	if (prop=="activeForegroundColor")
 		focusF=eSkin::getActive()->queryColor(value);
