@@ -226,6 +226,7 @@ lcdcontroler.head LCD Einstellungen
 lcdcontroler.contrast Kontrast
 lcdcontroler.brightness normale Helligkeit 
 lcdcontroler.brightnessstandby Standby Helligkeit
+lcdcontroler.default Standard-Werte benutzen
 
 keychoosermenu.setnew Neue Taste einstellen
 keychoosermenu.setnone Keine Taste

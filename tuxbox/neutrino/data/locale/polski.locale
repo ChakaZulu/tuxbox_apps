@@ -226,6 +226,7 @@ lcdcontroler.head Ustawienia LCD
 lcdcontroler.contrast Kontrast
 lcdcontroler.brightness Jasnosc
 lcdcontroler.brightnessstandby Jasnosc w standby
+lcdcontroler.default unset
 
 keychoosermenu.setnew Wybierz nowy klawisz
 keychoosermenu.setnone Zaden

@@ -226,6 +226,7 @@ lcdcontroler.head LCD Eistellunga
 lcdcontroler.contrast Kontrast
 lcdcontroler.brightness normale Helligkeid 
 lcdcontroler.brightnessstandby Standby Helligkeid
+lcdcontroler.default unset
 
 keychoosermenu.setnew Neie Dasdn eistein
 keychoosermenu.setnone Koa Dasdn

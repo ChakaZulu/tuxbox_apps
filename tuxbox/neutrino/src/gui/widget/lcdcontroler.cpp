@@ -30,6 +30,7 @@
 */
 
 
+#include <math.h>
 #include <global.h>
 #include <neutrino.h>
 
@@ -50,10 +51,10 @@ CLcdControler::CLcdControler(string Name, CChangeObserver* Observer)
 	frameBuffer = CFrameBuffer::getInstance();
 	observer = Observer;
 	name = Name;
-	width = 360;
+	width = 390;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
-	height = hheight+ mheight* 3;
+	height = hheight+ mheight* 4+ +mheight/2;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 
@@ -64,30 +65,28 @@ CLcdControler::CLcdControler(string Name, CChangeObserver* Observer)
 
 void CLcdControler::setLcd()
 {
-	printf("contrast: %d brightness: %d brightness standby: %d\n", contrast, brightness, brightnessstandby);
+//	printf("contrast: %d brightness: %d brightness standby: %d\n", contrast, brightness, brightnessstandby);
 	CLCD::getInstance()->setBrightness(brightness);
 	CLCD::getInstance()->setBrightnessStandby(brightnessstandby);
 	CLCD::getInstance()->setContrast(contrast);
-//	g_lcdd->update();
 }
 
 int CLcdControler::exec(CMenuTarget* parent, string)
 {
-	int res = menu_return::RETURN_REPAINT;
+	int selected, res = menu_return::RETURN_REPAINT;
+	unsigned int contrast_alt, brightness_alt, brightnessstandby_alt;
+
 	if (parent)
 	{
 		parent->hide();
 	}
-	unsigned int contrast_alt= contrast;
-	unsigned int brightness_alt = brightness;
-	unsigned int brightnessstandby_alt= brightnessstandby;
-
+	contrast_alt = CLCD::getInstance()->getContrast();
+	brightness_alt = CLCD::getInstance()->getBrightness();
+	brightnessstandby_alt = CLCD::getInstance()->getBrightnessStandby();
+	selected = 0;
 
 	setLcd();
 	paint();
-//	setLcd();
-
-	int selected = 0;
 
 	uint msg; uint data;
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
@@ -103,30 +102,32 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 		switch ( msg )
 		{
 			case CRCInput::RC_down:
+				if(selected<3)	// max entries
 				{
-					int max = 2;
-
-					if(selected<max)
+					paintSlider(x+10, y+ hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", false);
+					paintSlider(x+10, y+ hheight+ mheight, brightness, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightness"),"brightness", false);
+					paintSlider(x+10, y+ hheight+ mheight* 2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", false);
+					selected++;
+					switch (selected)
 					{
-						paintSlider(x+10, y+ hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", false);
-						paintSlider(x+10, y+ hheight+ mheight, brightness, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightness"),"brightness", false);
-						paintSlider(x+ 10, y+ hheight+ mheight* 2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", false);
-						selected++;
-						switch (selected)
-						{
-							case 0:
-								paintSlider(x+ 10, y+ hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", true);
-								break;
-							case 1:
-								paintSlider(x+ 10, y+ hheight+ mheight, brightness, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightness"),"brightness", true);
-								break;
-							case 2:
-								paintSlider(x+ 10, y+ hheight+ mheight* 2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", true);
-								break;
-						}
+						case 0:
+							paintSlider(x+ 10, y+ hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", true);
+							break;
+						case 1:
+							paintSlider(x+ 10, y+ hheight+ mheight, brightness, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightness"),"brightness", true);
+							break;
+						case 2:
+							paintSlider(x+ 10, y+ hheight+ mheight* 2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", true);
+							CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
+							break;
+						case 3:
+							frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENTSELECTED);
+							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("lcdcontroler.default"), COL_MENUCONTENTSELECTED);
+							break;
 					}
-					break;
-    	        }
+				}
+				break;
+
 			case CRCInput::RC_up:
 				if(selected>0)
 				{
@@ -141,9 +142,15 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 							break;
 						case 1:
 							paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightness"),"brightness", true);
+							CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 							break;
 						case 2:
 							paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", true);
+							CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
+							frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENT);
+							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("lcdcontroler.default"), COL_MENUCONTENT);
+							break;
+						case 3:
 							break;
 					}
 				}
@@ -155,8 +162,10 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 					case 0:
 						if (contrast < 63)
 						{
-							if (contrast < 63 - 5)
-								contrast += 5;
+							int val = lrint(log(contrast+1));
+
+							if (contrast + val < 63)
+								contrast += val;
 							else
 								contrast = 63;
 
@@ -167,8 +176,8 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 					case 1:
 						if (brightness < 255)
 						{
-							if (brightness < 245)
-								brightness += 10;
+							if (brightness < 250)
+								brightness += 5;
 							else
 								brightness = 255;
 
@@ -179,8 +188,8 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 					case 2:
 						if (brightnessstandby < 255)
 						{
-							if (brightnessstandby < 245)
-								brightnessstandby += 10;
+							if (brightnessstandby < 250)
+								brightnessstandby += 5;
 							else
 								brightnessstandby = 255;
 
@@ -197,10 +206,7 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 					case 0:
 						if (contrast > 0)
 						{
-							if (contrast > 5)
-								contrast -= 5;
-							else
-								contrast = 0;
+							contrast -= lrint(log(contrast));
 
 							paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", true);
 							setLcd();
@@ -209,8 +215,8 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 					case 1:
 						if (brightness > 0)
 						{
-							if (brightness > 10)
-								brightness -= 10;
+							if (brightness > 5)
+								brightness -= 5;
 							else
 								brightness = 0;
 
@@ -221,8 +227,8 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 					case 2:
 						if (brightnessstandby > 0)
 						{
-							if (brightnessstandby > 10)
-								brightnessstandby -= 10;
+							if (brightnessstandby > 5)
+								brightnessstandby -= 5;
 							else
 								brightnessstandby = 0;
 
@@ -239,12 +245,26 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 					break;
 
 				// sonst abbruch...
-				CLCD::getInstance()->setContrast(contrast_alt);
-				CLCD::getInstance()->setBrightness(brightness_alt);
-				CLCD::getInstance()->setBrightnessStandby(brightnessstandby_alt);
+				contrast = contrast_alt;
+				brightness = brightness_alt;
+				brightnessstandby = brightnessstandby_alt;
+				setLcd();
+				loop = false;
+				break;
+
+			case CRCInput::RC_ok:
+				if (selected==3)	// default Werte benutzen
+				{
+					brightness = 0xff;
+					brightnessstandby = 0xaa;
+					contrast = 0x0F;
+					selected = 0;
+					setLcd();
+					paint();
+					break;
+				}
 
 			case CRCInput::RC_timeout:
-			case CRCInput::RC_ok:
 				loop = false;
 				break;
 
@@ -272,6 +292,8 @@ void CLcdControler::hide()
 
 void CLcdControler::paint()
 {
+	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+
 	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
@@ -280,20 +302,25 @@ void CLcdControler::paint()
 	paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightness"),"brightness", false);
 	paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby",false);
 
+	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT+3 );
+	g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("lcdcontroler.default"), COL_MENUCONTENT);
 }
 
 void CLcdControler::paintSlider(int x, int y, unsigned int spos, float factor, string text, string iconname, bool selected)
 {
 	int startx = 200;
-	if (!spos)
-		return;
-	frameBuffer->paintBoxRel(x + startx ,y,120,mheight, COL_MENUCONTENT);
-	frameBuffer->paintIcon("volumebody.raw",x + startx,y+2+mheight/4);
+	char wert[5];
+
+	frameBuffer->paintBoxRel(x + startx, y, 120, mheight, COL_MENUCONTENT);
+	frameBuffer->paintIcon("volumebody.raw", x + startx, y+2+mheight/4);
 	string iconfile = "volumeslider2";
 	if (selected)
 		iconfile += "blue";
 	iconfile +=".raw";
-	frameBuffer->paintIcon(iconfile,(int)(x+ (startx+3) +(spos / factor)),y+mheight/4);
+	frameBuffer->paintIcon(iconfile, (int)(x + (startx+3)+(spos / factor)), y+mheight/4);
 
-	g_Fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x, y+mheight, width, text.c_str(), COL_MENUCONTENT);
+	sprintf(wert, "%3d", spos);
+	frameBuffer->paintBoxRel(x + startx + 120 + 10, y, 50, mheight, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x + startx + 120 + 10, y+mheight, width, wert, COL_MENUCONTENT);
 }

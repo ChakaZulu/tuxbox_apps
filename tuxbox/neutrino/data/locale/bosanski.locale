@@ -226,6 +226,7 @@ lcdcontroler.head namjestiti tecni kristal
 lcdcontroler.contrast kontrast
 lcdcontroler.brightness normalna svjetlost
 lcdcontroler.brightnessstandby svjetlost u pripravnosti
+lcdcontroler.default unset
 
 keychoosermenu.setnew namjestiti novu tipku
 keychoosermenu.setnone nijedna tipka

@@ -495,7 +495,7 @@ void CLCD::setMode(MODES m, std::string title)
 void CLCD::setBrightness(int bright)
 {
 	g_settings.lcd_brightness = bright;
-	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+	setlcdparameter((mode==MODE_STANDBY)?g_settings.lcd_standbybrightness:g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 int CLCD::getBrightness()
@@ -506,6 +506,7 @@ int CLCD::getBrightness()
 void CLCD::setBrightnessStandby(int bright)
 {
 	g_settings.lcd_standbybrightness = bright;
+	setlcdparameter((mode==MODE_STANDBY)?g_settings.lcd_standbybrightness:g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 int CLCD::getBrightnessStandby()
@@ -516,7 +517,7 @@ int CLCD::getBrightnessStandby()
 void CLCD::setContrast(int contrast)
 {
 	g_settings.lcd_contrast = contrast;
-	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+	setlcdparameter((mode==MODE_STANDBY)?g_settings.lcd_standbybrightness:g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 int CLCD::getContrast()

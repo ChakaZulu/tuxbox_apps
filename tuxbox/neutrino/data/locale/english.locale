@@ -226,6 +226,7 @@ lcdcontroler.head LCD Stettings
 lcdcontroler.contrast Contrast
 lcdcontroler.brightness normal Brightness
 lcdcontroler.brightnessstandby Standby Brightness
+lcdcontroler.default Load default-settings
 
 keychoosermenu.setnew setup new key
 keychoosermenu.setnone no key
