@@ -194,15 +194,23 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 					// when event_time has changed we must remove the old entry from time map
 					It = servicemap.second.find(oldTM);
 					if ( It == servicemap.second.end() )
-						eFatal("!!!!No old event found");
+						eFatal("!!!!No old event found sid %04x tsid %04x onid %04x size %d size2 %d, eventid %d, oldtime %d, newtime %d", 
+							service.sid, service.tsid, service.onid, 
+							servicemap.first.size(), servicemap.second.size(),
+							event_id, oldTM, TM );
 					else
 						servicemap.second.erase(It);
 					prevTimeIt=It=servicemap.second.end();
 				}
 				delete it->second;
-				ASSERT(it->second=evt=new eventData(eit_event, eit_event_size, source));
 				if ( debug )
+				{
+					ASSERT(it->second=evt=new eventData(eit_event, eit_event_size, source));
 					eDebug("update in map %d==%d %d", it->first, event_id, TM);
+				}
+				else
+					it->second=evt=new eventData(eit_event, eit_event_size, source);
+					
 			}
 			else // we must add new event.. ( in maps this is really slow.. )
 			{
@@ -230,11 +238,18 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 						}
 					}
 					if (!bla) 
-						eFatal("old event in eventmap not found %d", TM);
+						eFatal("old event in eventmap not found sid %04x tsid %04x onid %04x size %d size2 %d, eventid %d, time_begin %d", 
+							service.sid, service.tsid, service.onid, 
+							servicemap.first.size(), servicemap.second.size(),
+							event_id, TM);
 				}
 				if (debug)
+				{
 					eDebug("add new event_map entry time %d, event_id %d", TM, event_id);
-				ASSERT(evt=new eventData(eit_event, eit_event_size, source));
+					ASSERT(evt=new eventData(eit_event, eit_event_size, source));
+				}
+				else
+					evt=new eventData(eit_event, eit_event_size, source);
 				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
 			}
  
@@ -255,9 +270,15 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 					if (debug)
 						eDebug("add new time_map entry time %d", TM);
 			}
+			if ( servicemap.first.size() != servicemap.second.size() )
+			{
+				eFatal("(1)map sizes not equal :( sid %04x tsid %04x onid %04x size %d size2 %d, eventid %d, time_begin %d", 
+					service.sid, service.tsid, service.onid, 
+					servicemap.first.size(), servicemap.second.size(),
+					event_id, TM );
+			}
 		}
 next:
-		ASSERT(servicemap.first.size() == servicemap.second.size() );
 		ptr += eit_event_size;
 		eit_event=(eit_event_struct*)(((__u8*)eit_event)+eit_event_size);
 	}
@@ -378,7 +399,12 @@ void eEPGCache::cleanLoop()
 		{
 			for (timeMap::iterator It = DBIt->second.second.begin(); It != DBIt->second.second.end();)
 			{
-				ASSERT(DBIt->second.first.size() == DBIt->second.second.size());				
+				if ( DBIt->second.first.size() != DBIt->second.second.size() )
+				{
+					eFatal("(2)map sizes not equal :( sid %04x tsid %04x onid %04x size %d size2 %d", 
+						DBIt->first.sid, DBIt->first.tsid, DBIt->first.onid, 
+						DBIt->second.first.size(), DBIt->second.second.size() );
+				}
 				cur_event = (*It->second).get();
 
 				duration = fromBCD( cur_event->duration_1)*3600 + fromBCD(cur_event->duration_2)*60 + fromBCD(cur_event->duration_3);
@@ -397,7 +423,10 @@ void eEPGCache::cleanLoop()
 //						eDebug("new %d", DBIt->second.first.size() );
 					}
 					else
-						eFatal("[EPGC] event not found");
+						eFatal("[EPGC] event not found sid %04x tsid %04x onid %04x size %d size2 %d, eventid %d, time %d", 
+							DBIt->first.sid, DBIt->first.tsid, DBIt->first.onid, 
+							DBIt->second.first.size(), DBIt->second.second.size(),
+							It->second->getEventID(), It->second->getStartTime() );
 
 					// remove entry from timeMap
 //					eDebug("old %d", DBIt->second.second.size() );
@@ -673,6 +702,8 @@ void eEPGCache::startEPG()
 		isRunning |= 2;
 		scheduleOtherReader.start();
 		isRunning |= 4;
+		abortTimer.start(15000,true);  
+	// when after 15seks non data is received.. this service have no epg
 	}
 	else
 	{
@@ -683,6 +714,12 @@ void eEPGCache::startEPG()
 
 void eEPGCache::abortNonAvail()
 {
+	if ( !firstNowNextEvent.valid() && (isRunning&2) )
+	{
+		eDebug("[EPGC] abort non avail nownext reading");
+		isRunning &= ~2;
+		nownextReader.abort();
+	}
 	if ( !firstScheduleEvent.valid() && (isRunning&1) )
 	{
 		eDebug("[EPGC] abort non avail schedule reading");
