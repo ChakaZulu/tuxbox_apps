@@ -1,9 +1,9 @@
 <tr>
 	<td rowspan="2" align="center">
-		<a href="javascript:deleteTimerEvent('#DELETEPARMS#')"><img src="trash.gif" border="0" height="20"></a>
+		<a href='javascript:deleteTimerEvent("#DELETEPARMS#")'><img src="trash.gif" border="0" height="20"></a>
 	</td>
 	<td rowspan="2" align="center">
-		<a href="javascript:editTimerEvent('#EDITPARMS#')"><img src="edit.gif" border="0" height="20"></a>
+		<a href='javascript:editTimerEvent("#EDITPARMS#")'><img src="edit.gif" border="0" height="20"></a>
 	</td>
 	<td rowspan="2" align="center">
 		<img src="#STATEPIC#">
