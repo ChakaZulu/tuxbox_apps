@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.30 2002/08/21 09:48:56 obi Exp $
+ * $Id: bouquets.cpp,v 1.31 2002/08/28 23:01:09 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -793,12 +793,7 @@ CZapitChannel* CBouquetManager::copyChannelByOnidSid( unsigned int onid_sid)
 
 CBouquetManager::tvChannelIterator CBouquetManager::tvChannelsBegin()
 {
-	unsigned int B=0;
-	while ((B<Bouquets.size()) && (Bouquets[B]->tvChannels.size()==0)) B++;
-	if (B<Bouquets.size())
-		return( tvChannelIterator(this, B));
-	else
-		return tvChannelsEnd();
+	return tvChannelIterator(this, 0, -1)++;
 }
 
 CBouquetManager::tvChannelIterator CBouquetManager::tvChannelsFind( unsigned int onid_sid)
@@ -811,21 +806,19 @@ CBouquetManager::tvChannelIterator CBouquetManager::tvChannelsFind( unsigned int
 
 CBouquetManager::tvChannelIterator CBouquetManager::tvChannelIterator::operator ++(int)
 {
-	if ((b==-1) && (c==-1))
-		return(*this);
-	c++;
-	if ((unsigned int) c >= Owner->Bouquets[b]->tvChannels.size())
+	if ((b != -1) || (c != -1))   // we can add if it's not the end marker
 	{
-		c = 0;
-		do
-		{
-			b++;
-		} while (((unsigned int) b < Owner->Bouquets.size()) && (Owner->Bouquets[b]->tvChannels.size()==0));
+		c++;
+		if ((unsigned int) c >= Owner->Bouquets[b]->tvChannels.size())
+			for (; (unsigned int) b < Owner->Bouquets.size(); b++)
+				if (Owner->Bouquets[b]->tvChannels.size() != 0)
+				{
+					c = 0;
+					goto end;
+				}
+		b = -1; c = -1;
 	}
-	if ((unsigned int) b >= Owner->Bouquets.size())
-	{
-		b=-1; c=-1;
-	}
+ end:
 	return(*this);
 }
 
@@ -834,24 +827,19 @@ CZapitChannel* CBouquetManager::tvChannelIterator::operator *()
 	return( Owner->Bouquets[b]->tvChannels[c]);
 }
 
-bool CBouquetManager::tvChannelIterator::operator != (const tvChannelIterator& it) const
+bool CBouquetManager::ChannelIterator::operator != (const ChannelIterator& it) const
 {
-	return( (b != it.b) || (c != it.c));
+	return( (b != it.b) || (c != it.c));    // not quite correct (might have different Owner!)
 }
 
-bool CBouquetManager::tvChannelIterator::operator == (const tvChannelIterator& it) const
+bool CBouquetManager::ChannelIterator::operator == (const ChannelIterator& it) const
 {
-	return( (b == it.b) && (c == it.c));
+	return( (b == it.b) && (c == it.c));    // not quite correct (might have different Owner!)
 }
 
 CBouquetManager::radioChannelIterator CBouquetManager::radioChannelsBegin()
 {
-	unsigned int B=0;
-	while ((B<Bouquets.size()) && (Bouquets[B]->radioChannels.size()==0)) B++;
-	if (B<Bouquets.size())
-		return( radioChannelIterator(this, B));
-	else
-		return radioChannelsEnd();
+	return radioChannelIterator(this, 0, -1)++;
 }
 
 CBouquetManager::radioChannelIterator CBouquetManager::radioChannelsFind( unsigned int onid_sid)
@@ -866,21 +854,19 @@ CBouquetManager::radioChannelIterator CBouquetManager::radioChannelsFind( unsign
 
 CBouquetManager::radioChannelIterator CBouquetManager::radioChannelIterator::operator ++(int)
 {
-	if ((b==-1) && (c==-1))
-		return(*this);
-	c++;
-	if ((unsigned int) c >= Owner->Bouquets[b]->radioChannels.size())
+	if ((b != -1) || (c != -1))   // we can add if it's not the end marker
 	{
-		c = 0;
-		do
-		{
-			b++;
-		} while (((unsigned int) b < Owner->Bouquets.size()) && (Owner->Bouquets[b]->radioChannels.size()==0));
+		c++;
+		if ((unsigned int) c >= Owner->Bouquets[b]->radioChannels.size())
+			for (; (unsigned int) b < Owner->Bouquets.size(); b++)
+				if (Owner->Bouquets[b]->radioChannels.size() != 0)
+				{
+					c = 0;
+					goto end;
+				}
+		b = -1; c = -1;
 	}
-	if ((unsigned int) b >= Owner->Bouquets.size())
-	{
-		b=-1; c=-1;
-	}
+ end:
 	return(*this);
 }
 
@@ -888,14 +874,3 @@ CZapitChannel* CBouquetManager::radioChannelIterator::operator *()
 {
 	return( Owner->Bouquets[b]->radioChannels[c]);
 }
-
-bool CBouquetManager::radioChannelIterator::operator != (const radioChannelIterator& it) const
-{
-	return( (b != it.b) || (c != it.c));
-}
-
-bool CBouquetManager::radioChannelIterator::operator == (const radioChannelIterator& it) const
-{
-	return( (b == it.b) && (c == it.c));
-}
-
