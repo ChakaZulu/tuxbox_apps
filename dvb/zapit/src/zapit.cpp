@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.270 2002/11/18 00:27:56 obi Exp $
+ * $Id: zapit.cpp,v 1.271 2002/11/18 07:53:42 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -389,7 +389,7 @@ int changeapid (uint8_t index)
 		return -1;
 
 	/* stop audio playback */
-	//audio->stop();
+	audio->stop();
 
 	/* update current channel */
 	channel->setAudioChannel(index);
@@ -405,7 +405,7 @@ int changeapid (uint8_t index)
 		return -1;
 
 	/* start audio playback */
-	//audio->start();
+	audio->start();
 
 	/* start demux filter */
 	INFO("audio dmx start");
@@ -998,7 +998,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	fprintf(stdout, "$Id: zapit.cpp,v 1.270 2002/11/18 00:27:56 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.271 2002/11/18 07:53:42 obi Exp $\n");
 
 	if (argc > 1)
 	{
