@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.9 2001/06/11 01:15:16 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.10 2001/06/11 01:19:58 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.10  2001/06/11 01:19:58  fnbrd
+// Debugausgabe raus.
+//
 // Revision 1.9  2001/06/11 01:15:16  fnbrd
 // NVOD reference descriptors und Service-Typ
 //
@@ -237,7 +240,6 @@ void SIsectionSDT::parseServiceDescriptor(const char *buf, SIservice &s)
 void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
 {
   struct descr_generic_header *desc;
-  printf("Test\n");
   while(len>=sizeof(struct descr_generic_header)) {
     desc=(struct descr_generic_header *)des;
 //    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
