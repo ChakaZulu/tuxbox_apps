@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.115 2003/05/21 11:26:11 digi_casi Exp $
+ * $Id: scan.cpp,v 1.116 2003/05/22 12:10:42 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -528,15 +528,17 @@ void *start_scanthread(void *)
 				/* satellite receivers might need diseqc */
 				if (frontend->getInfo()->type == FE_QPSK)
 					diseqc_pos = spI->first;
+				if (diseqc_pos == 255 /* = -1 */)
+					diseqc_pos = 0;
 				
 				/* position satellite dish if provider is on a different satellite */
 				currentSatellitePosition = frontend->getCurrentSatellitePosition();
 				satellitePosition = satellitePositions[providerName];
 				printf("[scan] satellitePosition = %d, currentSatellitePosition = %d\n", satellitePosition, currentSatellitePosition);
-				if ((frontend->getDiseqcType() == DISEQC_1_2) && (currentSatellitePosition != satellitePosition))
+				if ((frontend->getDiseqcType() == DISEQC_1_2) && (currentSatellitePosition != satellitePosition) && (motorPositions[providerName] != 0))
 				{
 					printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellitePosition);
-					printf("[scan] motorPosition = %d\n", motorPositions[providerName]);
+					printf("[scan] motor position: %d\n", motorPositions[providerName]);
 					frontend->positionMotor(motorPositions[providerName]);
 					frontend->setCurrentSatellitePosition(satellitePosition);
 				}
