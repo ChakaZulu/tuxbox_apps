@@ -4722,7 +4722,7 @@ void eZapMain::showSelectorStyleEPG()
 	}
 	else
 	{
-		doubleklickTimer.start(300,true);
+		doubleklickTimer.start(500,true);
 		doubleklickTimerConnection = CONNECT( doubleklickTimer.timeout, eZapMain::showCurrentStyleEPG );
 	}
 }
@@ -5829,7 +5829,7 @@ void eZapMain::showEPG_Streaminfo()
 	}
 	else
 	{
-		doubleklickTimer.start(300,true);
+		doubleklickTimer.start(500,true);
 		doubleklickTimerConnection = CONNECT( doubleklickTimer.timeout, eZapMain::showEPG );
 	}
 }
