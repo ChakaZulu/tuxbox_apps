@@ -548,6 +548,14 @@ static eString getContent(eString mode, int bouquetid)
 
 	if(mode=="tv"||mode=="radio")
 	{
+		if(!bouquetid)
+		{
+			int imode=eZap::TV;
+			if(mode=="radio")
+				imode=eZap::Radio;
+			eZap::getInstance()->setMode(imode);
+			eDebug("set mode %d", imode);
+		}
 		result=getWatchContent(mode, bouquetid);
 	}
 
