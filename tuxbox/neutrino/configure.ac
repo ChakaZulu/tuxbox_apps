@@ -50,5 +50,8 @@ data/Makefile
 data/fonts/Makefile
 data/icons/Makefile
 data/locale/Makefile
+data/lcd/Makefile
+data/lcd/icons/Makefile
+data/lcd/clock/Makefile
 ])
 
