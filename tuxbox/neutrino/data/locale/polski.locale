@@ -143,8 +143,8 @@ streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
 streamingmenu.streaming_ac3_enabled Obsluga AC3
 streamingmenu.off Wyl
 streamingmenu.on Wl
-streamingmenu.streaming_force_transcode Force Transcoding
-streamingmenu.streaming_resolution Resolution
+streamingmenu.streaming_force_transcode Wymuszone transkodowanie
+streamingmenu.streaming_resolution Rozdzielczosc
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
