@@ -1294,7 +1294,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 
 #if HAVE_DVB_API_VERSION == 1
-		dummy2 = 0;
+		static int dummy2 = 0;
 		fd = fopen("/var/etc/.bh", "r");
 		if(fd)
 		{
@@ -3377,7 +3377,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.447 2003/05/18 11:42:34 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.448 2003/05/18 11:51:08 alexw Exp $\n\n");
 
 	tzset();
 	initGlobals();
