@@ -51,6 +51,7 @@
 #include <netinet/ip.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <linux/input.h>
 
 #include <eventserver.h>
 
@@ -143,13 +144,12 @@ void CRCInput::open()
 	close();
 
 	//+++++++++++++++++++++++++++++++++++++++
-	fd_rc=::open("/dev/dbox/rc0", O_RDONLY);
+	fd_rc=::open("/dev/input/event0", O_RDONLY);
 	if (fd_rc<0)
 	{
-		perror("/dev/dbox/rc0");
+		perror("/dev/input/event0");
 		//exit(-1);
 	}
-	ioctl(fd_rc, RC_IOCTL_BCODES, 1);
 	fcntl(fd_rc, F_SETFL, O_NONBLOCK );
 
 	//+++++++++++++++++++++++++++++++++++++++
@@ -454,7 +454,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 
 	int timer_id;
 	fd_set rfds;
-	__u16 rc_key;
+	struct input_event ev;
 
 	//set 0
 	*data = 0;
@@ -854,12 +854,13 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 
 		if(FD_ISSET(fd_rc, &rfds))
 		{
-			status = read(fd_rc, &rc_key, sizeof(rc_key));
-			if (status==2)
+			status = read(fd_rc, &ev, sizeof(struct input_event));
+			if (status==sizeof(struct input_event))
 			{
-				if(rc_key!=0x5cfe)
+				// Uns interessiert nur wenn eine Taste gedrueckt wurde - nicht wenn eine losgelassen wurde
+				if(ev.value)
 				{
-					//printf("got key native key: %04x %04x, translate: %04x -%s-\n", rc_key, rc_key&0x1f, translate(rc_key), getKeyName(translate(rc_key)).c_str() );
+					//printf("got key native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
 					long long now_pressed;
 					bool keyok = true;
 
@@ -867,26 +868,21 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 					now_pressed = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 					//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
 
-					//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
-					if((rc_key&0xff00)==0x5c00)
-					{
-						rc_last_key = 0;
-					}
 					//test auf wiederholenden key (gedrückt gehalten)
-					if (rc_key == rc_last_key)
+					if (ev.code == rc_last_key)
 					{
 						keyok = false;
 						//nur diese tasten sind wiederholbar
-						int trkey = translate(rc_key);
+						int trkey = translate(ev.code);
 						if  ( (trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby) ||
 							  ((bAllowRepeatLR) && ((trkey==RC_left) || (trkey==RC_right))) )
 						{
-							if( rc_last_repeat_key!=rc_key )
+							if( rc_last_repeat_key!=ev.code )
 							{
 								if(abs(now_pressed-last_keypress)>repeat_block)
 								{
 									keyok = true;
-									rc_last_repeat_key = rc_key;
+									rc_last_repeat_key = ev.code;
 								}
 							}
 							else
@@ -899,14 +895,14 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 					{
 						rc_last_repeat_key = 0;
 					}
-					rc_last_key = rc_key;
-                    //printf("!!!!!!!  native key: %04x %04x\n", rc_key, rc_key&0x1f );
+					rc_last_key = ev.code;
+                    //printf("!!!!!!!  native key: %04x %04x\n", ev.code, ev.code&0x1f );
 					if(abs(now_pressed-last_keypress)>repeat_block_generic)
 					{
 						if(keyok)
 						{
 							last_keypress = now_pressed;
-							uint trkey= translate(rc_key);
+							uint trkey= translate(ev.code);
 							//printf("--!!!!!  translated key: %04x\n", trkey );
 							if (trkey!=RC_nokey)
 							{
@@ -971,15 +967,15 @@ void CRCInput::postMsg(uint msg, uint data, bool Priority)
 
 void CRCInput::clearRCMsg()
 {
-	__u16 rc_key;
+	struct input_event ev;
 	int status;
 
 	if (fd_rc)
 	{
 		do
 		{
-    		status = read(fd_rc, &rc_key, sizeof(rc_key));
-		} while (status== 2);
+    		status = read(fd_rc, &ev, sizeof(struct input_event));
+		} while (status== sizeof(struct input_event));
 	}
 }
 
@@ -1087,102 +1083,66 @@ int CRCInput::translate(int code)
 
 	//printf("try to translate key: %d\n", code);
 
-	if ((code&0xFF00)==0x5C00)
+	switch (code)
 	{
-		switch (code&0xFF)
-		{
-				case 0x0C:
-				return RC_standby;
-				case 0x20:
-				return RC_home;
-				case 0x27:
-				return RC_setup;
-				case 0x00:
-				return RC_0;
-				case 0x01:
-				return RC_1;
-				case 0x02:
-				return RC_2;
-				case 0x03:
-				return RC_3;
-				case 0x04:
-				return RC_4;
-				case 0x05:
-				return RC_5;
-				case 0x06:
-				return RC_6;
-				case 0x07:
-				return RC_7;
-				case 0x08:
-				return RC_8;
-				case 0x09:
-				return RC_9;
-				case 0x3B:
-				return RC_blue;
-				case 0x52:
-				return RC_yellow;
-				case 0x55:
-				return RC_green;
-				case 0x2D:
-				return RC_red;
-				case 0x54:
-				return RC_page_up;
-				case 0x53:
-				return RC_page_down;
-				case 0x0E:
-				return RC_up;
-				case 0x0F:
-				return RC_down;
-				case 0x2F:
-				return RC_left;
-				case 0x2E:
-				return RC_right;
-				case 0x30:
-				return RC_ok;
-				case 0x16:
-				return RC_plus;
-				case 0x17:
-				return RC_minus;
-				case 0x28:
-				return RC_spkr;
-				case 0x82:
-				return RC_help;
-				default:
-				//perror("unknown old rc code");
-				return RC_nokey;
-		}
+			case KEY_POWER:
+			return RC_standby;
+			case KEY_HOME:
+			return RC_home;
+			case KEY_SETUP:
+			return RC_setup;
+			case KEY_0:
+			return RC_0;
+			case KEY_1:
+			return RC_1;
+			case KEY_2:
+			return RC_2;
+			case KEY_3:
+			return RC_3;
+			case KEY_4:
+			return RC_4;
+			case KEY_5:
+			return RC_5;
+			case KEY_6:
+			return RC_6;
+			case KEY_7:
+			return RC_7;
+			case KEY_8:
+			return RC_8;
+			case KEY_9:
+			return RC_9;
+			case KEY_BLUE:
+			return RC_blue;
+			case KEY_YELLOW:
+			return RC_yellow;
+			case KEY_GREEN:
+			return RC_green;
+			case KEY_RED:
+			return RC_red;
+			case KEY_PAGEUP:
+			return RC_page_up;
+			case KEY_PAGEDOWN:
+			return RC_page_down;
+			case KEY_UP:
+			return RC_up;
+			case KEY_DOWN:
+			return RC_down;
+			case KEY_LEFT:
+			return RC_left;
+			case KEY_RIGHT:
+			return RC_right;
+			case KEY_OK:
+			return RC_ok;
+			case KEY_VOLUMEUP:
+			return RC_plus;
+			case KEY_VOLUMEDOWN:
+			return RC_minus;
+			case KEY_MUTE:
+			return RC_spkr;
+			case KEY_HELP:
+			return RC_help;
+			default:
+			//perror("unknown old rc code");
+			return RC_nokey;
 	}
-	else if ((code&0xFF00)==0xFF00)
-	{
-		//Fronttasten
-		//printf("-!!!!!!  before 0xFF key: %04x\n", code );
-		switch (code&0xFF)
-		{
-				case 0x12:
-				case 0x9d:
-				return RC_standby;
-				case 0x48:
-				case 0xab:
-				return RC_down;
-				case 0x24:
-				case 0xc7:
-				return RC_up;
-				case 0x20:
-				case 0x40:
-				case 0xaf:
-				case 0xcf:
-				return RC_nokey;
-				case 0x10:
-				case 0x9f:
-				return RC_standby_release;
-		}
-	}
-	else if (!(code&0x00))
-	{
-		//printf("-!!!!!!  before not-translated key: %04x\n", code );
-		return code&0x3F;
-	}
-	//else
-	//perror("unknown rc code");
-	return RC_nokey;
 }
