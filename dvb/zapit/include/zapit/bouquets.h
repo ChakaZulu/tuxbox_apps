@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.18 2002/04/24 21:25:12 Simplex Exp $
+ * $Id: bouquets.h,v 1.19 2002/05/13 17:17:04 obi Exp $
  */
 
 #ifndef __bouquets_h__
@@ -10,7 +10,7 @@
 #include <vector>
 #include <stdio.h>
 
-#include "getservices.h"
+#include "channel.h"
 #include "xml/xmltree.h"
 
 #ifdef HAVE_CONFIG_H
@@ -45,7 +45,7 @@ struct CmpChannelByChName: public binary_function <CZapitChannel* , CZapitChanne
 class CBouquet
 {
 	private:
-		CZapitChannel* getChannelByName(char* serviceName, uint8_t serviceType = 0);
+		CZapitChannel* getChannelByName(char* serviceName, unsigned char serviceType = 0);
 
 	public:
 		string Name;
@@ -63,16 +63,16 @@ class CBouquet
 		void addService (CZapitChannel* newChannel);
 
 		void removeService (CZapitChannel* oldChannel);
-		void removeService (char* serviceName, uint8_t serviceType = 0)	{removeService( getChannelByName( serviceName, serviceType));}
-		void removeService (uint32_t onidSid, uint8_t serviceType = 0)			{removeService( getChannelByOnidSid( onidSid, serviceType));}
+		void removeService (char* serviceName, unsigned char serviceType = 0)	{removeService( getChannelByName( serviceName, serviceType));}
+		void removeService (unsigned int onidSid, unsigned char serviceType = 0)			{removeService( getChannelByOnidSid( onidSid, serviceType));}
 
-		void moveService (char* serviceName, uint newPosition, uint8_t serviceType);
-//		void moveService (uint onidSid, uint newPosition);
-		void moveService (uint oldPosition, uint newPosition, uint8_t serviceType);
+		void moveService (char* serviceName, unsigned int newPosition, unsigned char serviceType);
+//		void moveService (unsigned int onidSid, unsigned int newPosition);
+		void moveService (unsigned int oldPosition, unsigned int newPosition, unsigned char serviceType);
 
-		int recModeRadioSize( uint32_t);
-		int recModeTVSize( uint32_t);
-		CZapitChannel* getChannelByOnidSid(uint32_t onidSid, uint8_t serviceType = 0);
+		int recModeRadioSize( unsigned int);
+		int recModeTVSize( unsigned int);
+		CZapitChannel* getChannelByOnidSid(unsigned int onidSid, unsigned char serviceType = 0);
 };
 
 typedef vector<CBouquet*> BouquetList;
@@ -103,7 +103,7 @@ class CBouquetManager
 
 		tvChannelIterator tvChannelsBegin();
 		tvChannelIterator tvChannelsEnd(){ return tvChannelIterator(this, -1, -1);};
-		tvChannelIterator tvChannelsFind(uint32_t onid_sid);
+		tvChannelIterator tvChannelsFind(unsigned int onid_sid);
 
 		class radioChannelIterator
 		{
@@ -122,7 +122,7 @@ class CBouquetManager
 
 		radioChannelIterator radioChannelsBegin();
 		radioChannelIterator radioChannelsEnd(){ return radioChannelIterator(this, -1, -1);};
-		radioChannelIterator radioChannelsFind(uint32_t onid_sid);
+		radioChannelIterator radioChannelsFind(unsigned int onid_sid);
 
 		BouquetList Bouquets;
 		BouquetList storedBouquets;
@@ -134,19 +134,19 @@ class CBouquetManager
 		void renumServices();
 
 		CBouquet* addBouquet( string name);
-		void deleteBouquet( uint id);
+		void deleteBouquet( unsigned int id);
 		void deleteBouquet( string name);
 		int  existsBouquet( string name);
-		void moveBouquet( uint oldId, uint newId);
+		void moveBouquet( unsigned int oldId, unsigned int newId);
 		bool existsChannelInBouquet( unsigned int bq_id, unsigned int onid_sid);
 
-		void saveAsLast( uint BouquetId, uint channelNr);
-		void getLast( uint* BouquetId, uint* channelNr);
+		void saveAsLast( unsigned int BouquetId, unsigned int channelNr);
+		void getLast( unsigned int* BouquetId, unsigned int* channelNr);
 		void clearAll();
 		void onTermination();
 		void onStart();
 
-		CZapitChannel* copyChannelByOnidSid(uint32_t onid_sid);
+		CZapitChannel* copyChannelByOnidSid(unsigned int onid_sid);
 
 };
 

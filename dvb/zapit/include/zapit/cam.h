@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.12 2002/05/12 01:56:18 obi Exp $
+ * $Id: cam.h,v 1.13 2002/05/13 17:17:04 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -23,9 +23,7 @@
 #define __cam_h__
 
 #include <ost/ca.h>
-#include <stdint.h>
 
-#include <getservices.h>
 #include "ci.h"
 
 class CCam

@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.29 2002/05/12 01:56:19 obi Exp $
+ * $Id: descriptors.cpp,v 1.30 2002/05/13 17:17:05 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -139,10 +139,6 @@ uint8_t CA_descriptor (uint8_t *buffer, uint16_t ca_system_id, uint16_t* ca_pid)
 	if ((((buffer[2] & 0x1F) << 8) | buffer[3]) == ca_system_id)
 	{
 		*ca_pid = ((buffer[4] & 0x1F) << 8) | buffer[5];
-	}
-	else
-	{
-		*ca_pid = INVALID;
 	}
 
 	return buffer[1];

@@ -1,5 +1,5 @@
 /*
- * $Id: audio.h,v 1.2 2002/05/12 12:54:47 obi Exp $
+ * $Id: audio.h,v 1.3 2002/05/13 17:17:04 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -23,7 +23,10 @@
 #ifndef __audio_h__
 #define __audio_h__
 
+/* nokia api */
 #include <ost/audio.h>
+
+#define AUDIO_DEV "/dev/ost/audio0"
 
 class CAudio
 {
@@ -52,7 +55,7 @@ class CAudio
 
 		/* shut up */
 		bool mute();
-		bool unMute();
+		bool unmute();
 
 		/* bypass audio to external decoder */
 		bool enableBypass();

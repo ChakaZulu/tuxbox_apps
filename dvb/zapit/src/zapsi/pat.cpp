@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.23 2002/05/12 01:56:19 obi Exp $
+ * $Id: pat.cpp,v 1.24 2002/05/13 17:17:05 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -24,22 +24,19 @@
 #include <fcntl.h>
 
 #include <clientlib/zapitclient.h>
-#include <zapost/dmx.h>
-
 #include <scan.h>
+#include <zapost/dmx.h>
 
 #include "pat.h"
 
-#define DEMUX_DEV "/dev/ost/demux0"
-
 #define PAT_LENGTH 1024
 
-extern CEventServer *eventServer;
-extern uint32_t found_transponders;
+extern CEventServer * eventServer;
+extern unsigned int found_transponders;
 
-int fake_pat(uint16_t onid, FrontendParameters feparams)
+int fake_pat (unsigned short onid, FrontendParameters feparams)
 {
-	uint16_t tsid;
+	unsigned short tsid;
 	int demux_fd;
 
 	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
@@ -81,7 +78,7 @@ int fake_pat(uint16_t onid, FrontendParameters feparams)
 
 		scantransponders.insert
 		(
-			std::pair <uint32_t, transpondermap>
+			std::pair <unsigned int, transpondermap>
 			(
 				(tsid << 16) | onid,
 				transpondermap
@@ -111,14 +108,14 @@ int parse_pat (int demux_fd, CZapitChannel * channel)
 	/* current positon in buffer */
 	unsigned short i;
 
+	/* set filter for program association section */
+	if (setDmxSctFilter(demux_fd, 0x0000, 0x00) < 0)
+	{
+		return -1;
+	}
+
 	do
 	{
-		/* set filter for program association section */
-		if (setDmxSctFilter(demux_fd, 0x0000, 0x00) < 0)
-		{
-			return -1;
-		}
-
 		/* read section */
 		if (read(demux_fd, buffer, PAT_LENGTH) < 0)
 		{

@@ -1,61 +1,73 @@
 /*
- * $Id: nit.cpp,v 1.16 2002/04/21 22:05:40 obi Exp $
+ * $Id: nit.cpp,v 1.17 2002/05/13 17:17:05 obi Exp $
+ *
+ * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
 
+/* system c */
 #include <fcntl.h>
-#include <ost/dmx.h>
 #include <stdio.h>
-#include <string.h>
-#include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+/* system c++ */
+#include <map>
+
+/* zapit */
+#include <getservices.h>
+#include <zapost/dmx.h>
+
 #include "descriptors.h"
 #include "nit.h"
-#include "getservices.h"
 
 #define DEMUX_DEV "/dev/ost/demux0"
 
-extern std::map <uint32_t, transponder> transponders;
+extern std::map <unsigned int, transponder> transponders;
 
-int parse_nit (uint8_t DiSEqC)
+int parse_nit (unsigned char DiSEqC)
 {
-	struct dmxSctFilterParams flt;
 	int demux_fd;
-  	uint8_t buffer[1024];
-	uint8_t section = 0;
+	unsigned char buffer[1024];
+	unsigned char section = 0;
 
 	/* position in buffer */
-	uint16_t pos;
-	uint16_t pos2;
+	unsigned short pos;
+	unsigned short pos2;
 
 	/* network_information_section elements */
-	uint16_t section_length;
-	uint16_t network_descriptors_length;
-	uint16_t transport_descriptors_length;
-	uint16_t transport_stream_loop_length;
-	uint16_t transport_stream_id;
-	uint16_t original_network_id;
-  
-  	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
-	{
-    		perror("[nit.cpp] " DEMUX_DEV);
-    		return -1;
-  	}
+	unsigned short section_length;
+	unsigned short network_descriptors_length;
+	unsigned short transport_descriptors_length;
+	unsigned short transport_stream_loop_length;
+	unsigned short transport_stream_id;
+	unsigned short original_network_id;
 
-  	memset (&flt.filter, 0, sizeof (struct dmxFilter));
-  
-  	flt.pid = 0x0010;
-  	flt.filter.filter[0] = 0x40;
-    	flt.filter.mask[0]  = 0xFF;
-  	flt.timeout = 10000;		/* 10 Sec. Max. for NIT (ETSI)   (2002-04-04 rasc) */
-  	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
- 
-  	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
+	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
-    		perror("[nit.cpp] DMX_SET_FILTER");
-  	}
+		perror("[nit.cpp] " DEMUX_DEV);
+		return -1;
+	}
+
+	if (setDmxSctFilter(demux_fd, 0x0010, 0x40) < 0)
+	{
+		return -1;
+	}
 
 	do
 	{
@@ -147,4 +159,3 @@ int parse_nit (uint8_t DiSEqC)
 	close(demux_fd);
 	return 0;
 }
-

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.181 2002/05/13 14:52:03 obi Exp $
+ * $Id: zapit.cpp,v 1.182 2002/05/13 17:17:04 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -45,6 +45,7 @@
 
 /* zapit library headers */
 #include <zapci/cam.h>
+#include <zapost/audio.h>
 #include <zapost/dmx.h>
 #include <zapost/frontend.h>
 #include <zapsi/pat.h>
@@ -56,27 +57,27 @@
 
 #define debug(fmt, args...) { if (debug) printf(fmt, ## args); }
 
-#define AUDIO_DEV "/dev/ost/audio0"
-#define DEMUX_DEV "/dev/ost/demux0"
 #define VBI_DEV   "/dev/dbox/vbi0"
 #define VIDEO_DEV "/dev/ost/video0"
 
 #define CONFIGFILE CONFIGDIR "/zapit/zapit.conf"
 
 /* the conditional access module */
-CCam *cam = NULL;
+CCam * cam = NULL;
 /* the configuration file */
-CConfigFile *config = NULL;
+CConfigFile * config = NULL;
 /* the event server */
-CEventServer *eventServer = NULL;
-/* the dvb frontend */
-CFrontend *frontend = NULL;
+CEventServer * eventServer = NULL;
+/* the dvb audio device */
+CAudio * audio = NULL;
+/* the dvb frontend device */
+CFrontend * frontend = NULL;
 /* the current channel */
-CZapitChannel *channel = NULL;
+CZapitChannel * channel = NULL;
 /* the transponder scan xml input */
-XMLTreeParser *scanInputParser = NULL;
+XMLTreeParser * scanInputParser = NULL;
 /* the bouquet manager */
-CBouquetManager* bouquetManager = NULL;
+CBouquetManager * bouquetManager = NULL;
 
 /* the map which stores the wanted cable/satellites */
 std::map <uint8_t, std::string> scanProviders;
@@ -98,9 +99,6 @@ CLcddClient lcdd;
 #endif /* DVBS */
 
 bool debug = false;
-
-/* previous ac3 state */
-bool wasAc3 = false;
 
 /* near video on demand */
 std::map <uint32_t, CZapitChannel> nvodchannels;
@@ -163,9 +161,10 @@ void CZapitDestructor()
 	if (dmx_general_fd != -1)
 		close(dmx_general_fd);
 
-	delete config;
-	delete frontend;
 	delete cam;
+	delete audio;
+	delete frontend;
+	delete config;
 
 	// remove this in class
 	exit(0);
@@ -286,87 +285,6 @@ channel_msg load_settings()
 	output_msg.chan_nr = config->getInt( valueName, 1);
 
 	return output_msg;
-}
-
-/*
- * return 0 on success or if nothing to do
- * return -1 otherwise
- */
-int setAudioBypassMode (bool isAc3)
-{
-	if (isAc3 == wasAc3)
-	{
-		return 0;
-	}
-
-	if (audio_fd != -1)
-	{
-		close(audio_fd);
-	}
-
-	if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
-	{
-		perror("[zapit] " AUDIO_DEV);
-		return -1;
-	}
-
-	if (ioctl(audio_fd, AUDIO_SET_BYPASS_MODE, isAc3 ? 0 : 1) < 0)
-	{
-		perror("[zapit] AUDIO_SET_BYPASS_MODE");
-		close(audio_fd);
-		return -1;
-	}
-
-	wasAc3 = isAc3;
-
-	return 0;
-}
-
-/*
- * return 0 on success
- * return -1 otherwise
- */
-int setAudioMute (bool mute)
-{
-	if ((audio_fd == -1) && ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0))
-	{
-		perror("[zapit] " AUDIO_DEV);
-		return -1;
-	}
-
-	if (ioctl(audio_fd, AUDIO_SET_MUTE, mute) < 0)
-	{
-		perror("[zapit] AUDIO_SET_MUTE");
-		return -1;
-	}
-
-	return 0;
-}
-
-/*
- * return 0 on success
- * return -1 otherwise
- */
-int setAudioVolume (unsigned int left, unsigned int right)
-{
-	audioMixer_t mixer;
-
-	if ((audio_fd == -1) && ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0))
-	{
-		perror("[zapit] " AUDIO_DEV);
-		return -1;
-	}
-
-	mixer.volume_left = left;
-	mixer.volume_right = right;
-
-	if (ioctl(audio_fd, AUDIO_SET_MIXER, &mixer) < 0)
-	{
-		perror("[zapit] AUDIO_SET_MIXER");
-		return -1;
-	}
-
-	return 0;
 }
 
 /*
@@ -548,9 +466,13 @@ int changeapid (uint8_t index)
 	channel->setAudioChannel(index);
 
 	/* set bypass mode */
-	if (setAudioBypassMode(channel->getAudioChannel()->isAc3) < 0)
+	if (channel->getAudioChannel()->isAc3)
 	{
-		return -1;
+		audio->enableBypass();
+	}
+	else
+	{
+		audio->disableBypass();
 	}
 
 	/* start demux filter */
@@ -1177,14 +1099,21 @@ void parse_command (CZapitClient::commandHead &rmsg)
 			{
 				CZapitClient::commandBoolean msgBoolean;
 				read(connfd, &msgBoolean, sizeof(msgBoolean));
-				setAudioMute(msgBoolean.truefalse);
+				if (msgBoolean.truefalse)
+				{
+					audio->mute();
+				}
+				else
+				{
+					audio->unmute();
+				}
 				break;
 			}
 			case CZapitClient::CMD_SET_VOLUME:
 			{
 				CZapitClient::commandVolume msgVolume;
 				read(connfd, &msgVolume, sizeof(msgVolume));
-				setAudioVolume(msgVolume.left, msgVolume.right);
+				audio->setVolume(msgVolume.left, msgVolume.right);
 				break;
 			}
 			default:
@@ -1208,7 +1137,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.181 2002/05/13 14:52:03 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.182 2002/05/13 17:17:04 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1313,6 +1242,14 @@ int main (int argc, char **argv)
 			sprintf(tmp, "lnb%d_OffsetHigh", i);
 			frontend->setLnbOffset(true, i, config->getInt(tmp));
 		}
+	}
+
+	audio = new CAudio();
+
+	if (!audio->isInitialized())
+	{
+		printf("[zapit] unable to initialize audio device\n");
+		CZapitDestructor();
 	}
 
 	/* initialize cam */
@@ -1605,7 +1542,14 @@ int startPlayBack()
 	}
 
 	/* set bypass mode */
-	setAudioBypassMode(channel->getAudioChannel()->isAc3);
+	if (channel->getAudioChannel()->isAc3)
+	{
+		audio->enableBypass();
+	}
+	else
+	{
+		audio->disableBypass();
+	}
 
 	/* start demux filters */
 	setDmxPesFilter(dmx_pcr_fd, DMX_OUT_DECODER, DMX_PES_PCR, channel->getPcrPid());

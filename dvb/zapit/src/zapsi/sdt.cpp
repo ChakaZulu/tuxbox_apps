@@ -1,47 +1,36 @@
 /*
- * $Id: sdt.cpp,v 1.22 2002/05/08 14:32:57 faralla Exp $
+ * $Id: sdt.cpp,v 1.23 2002/05/13 17:17:05 obi Exp $
  */
 
+/* system c */
 #include <fcntl.h>
-#include <ost/dmx.h>
 #include <stdio.h>
-#include <string.h>
-#include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "sdt.h"
+/* zapit */
+#include <zapost/dmx.h>
+
 #include "descriptors.h"
+#include "sdt.h"
 
-#define DEMUX_DEV "/dev/ost/demux0"
-
-uint16_t get_onid ()
+unsigned short get_onid ()
 {
-	struct dmxSctFilterParams flt;
 	int demux_fd;
-	uint8_t buffer[1024];
-	
+	unsigned char buffer[1024];
+
 	/* service_description_section elements */
-	uint16_t original_network_id;
-	
+	unsigned short original_network_id;
+
 	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[sdt.cpp] " DEMUX_DEV);
 		return 0;
 	}
 
-	memset (&flt.filter, 0, sizeof(struct dmxFilter));
-
-	flt.pid = 0x0011;
-	flt.filter.filter[0] = 0x42;
-	flt.filter.mask[0] = 0xFF;
-	flt.timeout = 10000;		/* 10 sec max. accord. ETSI (2002-04-04 rasc) */
-	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-
-	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
+	if (setDmxSctFilter(demux_fd, 0x0011, 0x42) < 0)
 	{
-		perror("[sdt.cpp] DMX_SET_FILTER");
 		close(demux_fd);
 		return 0;
 	}
@@ -52,48 +41,39 @@ uint16_t get_onid ()
 		close(demux_fd);
 		return 0;
 	}
-	
-	original_network_id = (buffer[8] << 8) | buffer[9];
- 
+
 	close(demux_fd);
+
+	original_network_id = (buffer[8] << 8) | buffer[9];
+
 	return original_network_id;
 }
 
 int parse_sdt ()
 {
-	struct dmxSctFilterParams flt;
 	int demux_fd;
-	uint8_t buffer[1024];
-	uint8_t section = 0;
+	unsigned char buffer[1024];
+	unsigned char section = 0;
 
 	/* position in buffer */
-	uint16_t pos;
-	uint16_t pos2;
+	unsigned short pos;
+	unsigned short pos2;
 
 	/* service_description_section elements */
-	uint16_t section_length;
-	uint16_t transport_stream_id;
-	uint16_t original_network_id;
-	uint16_t service_id;
-	uint16_t descriptors_loop_length;
-  
+	unsigned short section_length;
+	unsigned short transport_stream_id;
+	unsigned short original_network_id;
+	unsigned short service_id;
+	unsigned short descriptors_loop_length;
+
 	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[sdt.cpp] " DEMUX_DEV);
 		return -1;
 	}
 
-	memset (&flt.filter, 0, sizeof(struct dmxFilter));
-
-	flt.pid = 0x0011;
-	flt.filter.filter[0] = 0x42;
-	flt.filter.mask[0] = 0xFF;
-	flt.timeout = 10000;		/* 10 sec max. accord. ETSI (2002-04-04 rasc) */
-	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-
-	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
+	if (setDmxSctFilter(demux_fd, 0x0011, 0x42) < 0)
 	{
-		perror("[sdt.cpp] DMX_SET_FILTER");
 		close(demux_fd);
 		return -1;
 	}
@@ -198,7 +178,7 @@ int parse_sdt ()
 		}
 	}
 	while (section++ != buffer[7]);
- 
+
 	close(demux_fd);
 	return 0;
 }

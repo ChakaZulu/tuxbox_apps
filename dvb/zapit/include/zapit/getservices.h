@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.41 2002/05/13 14:56:51 obi Exp $
+ * $Id: getservices.h,v 1.42 2002/05/13 17:17:04 obi Exp $
  */
 
 #ifndef __getservices_h__
@@ -25,7 +25,6 @@
 #define CONFIGDIR "/var/tuxbox/config"
 #endif
 
-#define max_num_apids 13
 #define zapped_chan_is_nvod 0x80
 
 #define NONE 0x0000
@@ -36,95 +35,6 @@ void ParseChannels (XMLTreeNode * node, unsigned short transport_stream_id, unsi
 void FindTransponder (XMLTreeNode * root);
 void LoadSortList ();
 int LoadServices ();
-
-class CZapitAudioChannel
-{
-	public:
-		unsigned short pid;
-		bool isAc3;
-		std::string description;
-		unsigned char componentTag;
-};
-
-class CZapitChannel
-{
-	private:
-		/* channel name */
-		std::string name;
-
-		/* pids of this channel */
-		CZapitAudioChannel * audioChannels[max_num_apids];
-		unsigned short pcrPid;
-		unsigned short pmtPid;
-		unsigned short teletextPid;
-		unsigned short videoPid;
-
-		/* set true when pids are set up */
-		bool pidsFlag;
-
-		/* last selected audio channel */
-		unsigned char currentAudioChannel;
-
-		/* number of audio channels */
-		unsigned char audioChannelCount;
-
-		/* number in channel list */
-		unsigned short channelNumber;
-
-		/* read only properties, set by constructor */
-		unsigned short serviceId;
-		unsigned short transportStreamId;
-		unsigned short originalNetworkId;
-		unsigned char serviceType;
-		unsigned char DiSEqC;
-
-		/* the conditional access program map table of this channel */
-		CCaPmt * caPmt;
-
-	public:
-		/* constructor, desctructor */
-		CZapitChannel (std::string p_name, unsigned short p_sid, unsigned short p_tsid, unsigned short p_onid, unsigned char p_service_type, unsigned short p_chan_nr, unsigned char p_DiSEqC);
-		~CZapitChannel ();
-
-		/* get methods - read only variables */
-		unsigned short getServiceId()		{ return serviceId; }
-		unsigned short getTransportStreamId()	{ return transportStreamId; }
-		unsigned short getOriginalNetworkId()	{ return originalNetworkId; }
-		unsigned char getServiceType()		{ return serviceType; }
-		unsigned char getDiSEqC()		{ return DiSEqC; }
-		unsigned int getOnidSid()		{ return (originalNetworkId << 16) | serviceId; }
-		unsigned int getTsidOnid()		{ return (transportStreamId << 16) | originalNetworkId; }
-
-		/* get methods - read and write variables */
-		std::string getName()			{ return name; }
-		unsigned char getAudioChannelCount()	{ return audioChannelCount; }
-		unsigned short getPcrPid()		{ return pcrPid; }
-		unsigned short getPmtPid()		{ return pmtPid; }
-		unsigned short getTeletextPid()		{ return teletextPid; }
-		unsigned short getVideoPid()		{ return videoPid; }
-		unsigned short getChannelNumber()	{ return channelNumber; }
-		bool getPidsFlag()			{ return pidsFlag; }
-		CCaPmt * getCaPmt()			{ return caPmt; }
-
-		CZapitAudioChannel * getAudioChannel (unsigned char index = 0xFF);
-		unsigned short getAudioPid (unsigned char index = 0xFF);
-
-		int addAudioChannel(unsigned short pid, bool isAc3, string description, unsigned char componentTag);
-
-		/* set methods */
-		void setName(std::string pName)				{ name = pName; }
-		void setAudioChannel(unsigned char pAudioChannel)	{ currentAudioChannel = pAudioChannel; }
-		void setPcrPid(unsigned short pPcrPid)			{ pcrPid = pPcrPid; }
-		void setPmtPid(unsigned short pPmtPid)			{ pmtPid = pPmtPid; }
-		void setTeletextPid(unsigned short pTeletextPid)	{ teletextPid = pTeletextPid; }
-		void setVideoPid(unsigned short pVideoPid)		{ videoPid = pVideoPid; }
-		void setChannelNumber(unsigned short pChannelNumber)	{ channelNumber = pChannelNumber; }
-		void setPidsFlag()					{ pidsFlag = true; }
-		void setCaPmt(CCaPmt * pCaPmt)				{ caPmt = pCaPmt; }
-
-		/* cleanup methods */
-		void resetPids();
-};
 
 struct transponder
 {

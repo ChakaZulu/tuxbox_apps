@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.2 2002/05/12 12:54:47 obi Exp $
+ * $Id: audio.cpp,v 1.3 2002/05/13 17:17:04 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -28,9 +28,6 @@
 #include <unistd.h>
 
 #include "audio.h"
-
-#define AUDIO_DEV "/dev/ost/audio0"
-
 
 CAudio::CAudio()
 {
@@ -92,7 +89,7 @@ bool CAudio::mute()
 
 }
 
-bool CAudio::unMute()
+bool CAudio::unmute()
 {
 	if (status.muteState == true)
 		return setMute(false);

@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.2 2002/05/12 01:56:19 obi Exp $
+ * $Id: bat.cpp,v 1.3 2002/05/13 17:17:05 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,34 +35,32 @@
 #include "bat.h"
 #include "descriptors.h"
 
-#define DEMUX_DEV "/dev/ost/demux0"
-
 int parse_bat (int demux_fd)
 {
-	uint8_t buffer[1024];
-	uint8_t section = 0;
+	unsigned char buffer[1024];
+	unsigned char section = 0;
 
 	/* position in buffer */
-	uint16_t pos;
-	uint16_t pos2;
-	uint16_t pos3;
+	unsigned short pos;
+	unsigned short pos2;
+	unsigned short pos3;
 
 	/* bouquet_association_section elements */
-	uint16_t section_length;
-	uint16_t bouquet_id;
-	uint16_t bouquet_descriptors_length;
-	uint16_t transport_stream_loop_length;
-	uint16_t transport_stream_id;
-	uint16_t original_network_id;
-	uint16_t transport_descriptors_length;
+	unsigned short section_length;
+	unsigned short bouquet_id;
+	unsigned short bouquet_descriptors_length;
+	unsigned short transport_stream_loop_length;
+	unsigned short transport_stream_id;
+	unsigned short original_network_id;
+	unsigned short transport_descriptors_length;
+
+	if (setDmxSctFilter(demux_fd, 0x0011, 0x4A) < 0)
+	{
+		return -1;
+	}
 
 	do
 	{
-		if (setDmxSctFilter(demux_fd, 0x0011, 0x4A) < 0)
-		{
-			return -1;
-		}
-
 		if (read(demux_fd, buffer, sizeof(buffer)) < 0)
 		{
 			perror("[bat.cpp] read");

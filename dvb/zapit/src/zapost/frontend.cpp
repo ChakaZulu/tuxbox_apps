@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.16 2002/05/12 01:56:18 obi Exp $
+ * $Id: frontend.cpp,v 1.17 2002/05/13 17:17:04 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -19,18 +19,21 @@
  *
  */
 
+/* system c */
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
 #include <sys/time.h>
 #include <time.h>
 
+/* system c++ */
 #include <iostream>
 
+/* zapit */
+#include <getservices.h>
 #include <zapsi/nit.h>
 
 #include "frontend.h"

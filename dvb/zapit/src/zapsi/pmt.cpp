@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.17 2002/05/13 14:56:51 obi Exp $
+ * $Id: pmt.cpp,v 1.18 2002/05/13 17:17:05 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -20,19 +20,19 @@
  *
  */
 
-#include <fcntl.h>
-#include <stdint.h>
+/* system c */
 #include <stdio.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <unistd.h>
 
+/* system c++ */
+#include <string>
+
+/* zapit */
 #include <zapost/dmx.h>
 
 #include "descriptors.h"
 #include "pmt.h"
 
-#define DEMUX_DEV "/dev/ost/demux0"
 #define PMT_SIZE  1024
 
 /*
@@ -54,11 +54,11 @@
 
 unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, CCaPmt * caPmt)
 {
-	uint16_t ES_info_length;
-	uint16_t pos;
-	uint8_t descriptor_tag;
-	uint8_t descriptor_length;
-	uint8_t i;
+	unsigned short ES_info_length;
+	unsigned short pos;
+	unsigned char descriptor_tag;
+	unsigned char descriptor_length;
+	unsigned char i;
 
 	bool isAc3 = false;
 	std::string description = "";
@@ -254,17 +254,17 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 
 int parse_pmt (int demux_fd, CZapitChannel * channel)
 {
-	uint8_t buffer[PMT_SIZE];
+	unsigned char buffer[PMT_SIZE];
 
 	/* current position in buffer */
-	uint16_t i;
+	unsigned short i;
 
 	/* length of elementary stream description */
-	uint16_t ES_info_length;
+	unsigned short ES_info_length;
 
 	/* TS_program_map_section elements */
-	uint16_t section_length;
-	uint16_t program_info_length;
+	unsigned short section_length;
+	unsigned short program_info_length;
 
 	if (channel->getPmtPid() == 0)
 	{
