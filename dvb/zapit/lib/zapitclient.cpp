@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.2 2002/01/07 21:14:24 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.3 2002/01/12 22:07:01 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.3  2002/01/12 22:07:01  Simplex
+  method for zapping with bouquet and channel
+
   Revision 1.2  2002/01/07 21:14:24  Simplex
   functions for start and stop videoplayback
 
@@ -76,7 +79,69 @@ bool CZapitClient::send(char* data, int size)
 
 bool CZapitClient::receive(char* data, int size)
 {
-	read(sock_fd, data, size);
+	return (read(sock_fd, data, size) > 0);
+}
+
+/***********************************************/
+/*                                             */
+/* general functions for zapping               */
+/*                                             */
+/***********************************************/
+
+/* zaps to channel of specifeid bouquet */
+void CZapitClient::zapTo( unsigned int bouquet, unsigned int channel )
+{
+	commandHead msgHead;
+	commandZapto msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_ZAPTO;
+
+	msg.bouquet = bouquet;
+	msg.channel = channel;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+
+	zapit_close();
+}
+
+/* gets all bouquets */
+void CZapitClient::getBouquets( BouquetList& bouquets)
+{
+	commandHead msgHead;
+	commandGetBouquets msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_GET_BOUQUETS;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseGetBouquets response;
+	while ( receive((char*)&response, sizeof(responseGetBouquets)))
+		bouquets.insert( bouquets.end(), response);
+	zapit_close();
+}
+
+/* gets all channels that are in specified bouquet */
+void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList& channels)
+{
+	commandHead msgHead;
+	commandGetBouquetChannels msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_GET_BOUQUET_CHANNELS;
+
+	msg.bouquet = bouquet;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+
+	responseGetBouquetChannels response;
+	while ( receive((char*)&response, sizeof(responseGetBouquetChannels)))
+		channels.insert( channels.end(), response);
+	zapit_close();
+
 }
 
 /***********************************************/
