@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.4 2003/10/17 18:16:54 rasc Exp $
+$Id: sectables.c,v 1.5 2003/10/19 13:54:25 rasc Exp $
 
  --  For more information please see: ISO 13818 (-1) and ETSI 300 468
  -- Verbose Level >= 2
@@ -7,6 +7,9 @@ $Id: sectables.c,v 1.4 2003/10/17 18:16:54 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.5  2003/10/19 13:54:25  rasc
+-more table decoding
+
 Revision 1.4  2003/10/17 18:16:54  rasc
 - started more work on newer ISO 13818  descriptors
 - some reorg work started
@@ -41,6 +44,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "sit.h"
 #include "eit.h"
 #include "emm_ecm.h"
+#include "table_userdef.h"
 
 
 
@@ -160,40 +164,95 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 
 
 
+
+
+
 /*
   -- content of packet can not be determined via PID,
   -- so gess from first byte of packet header
 */
 
+
+
+
+typedef struct _TABLE_IF_FUNC {
+    u_int    from;          /* e.g. from id 1  */
+    u_int    to;            /*      to   id 3  */
+    void     (*func)();     /*      function for table decoding */
+} TABLE_ID_FUNC;
+
+
+/*
+ * -- Decode mapping table  (TableID --> decode function)
+ * -- Crosscheck this with dvb_str, when changing!!!
+ */
+
+static TABLE_ID_FUNC table_id_func[] = {
+
+     {  0x00, 0x00,  decode_PAT	},
+     {  0x01, 0x01,  decode_CAT	},
+     {  0x02, 0x02,  decode_PMT	},
+     {  0x03, 0x03,  decode_TSDT },
+     /* res. */
+     {  0x40, 0x41,  decode_NIT	},
+     {  0x42, 0x42,  decode_SDT	},
+     /* res. */
+     {  0x46, 0x46,  decode_SDT	},
+     /* res. */
+     {  0x4A, 0x4A,  decode_BAT	},
+     {  0x4E, 0x6E,  decode_EIT	},  /*  4 different types */
+     {  0x70, 0x70,  decode_TDT },
+     {  0x71, 0x71,  decode_RST },
+     {  0x72, 0x72,  decode_ST  },
+     {  0x73, 0x73,  decode_TOT },
+     /* res. */
+     {  0x7E, 0x7E,  decode_DIT },
+     {  0x7F, 0x7F,  decode_SIT },
+     {  0x80, 0x8F,  decode_EMM_ECM },   /* $$$ Conditional Access Message Section */
+
+     {  0x90, 0xFE,  decode_PRIVATE },	 /* opps!? DSM-CC or other stuff?! */
+     {  0,0, NULL }
+  };
+
+
+
+
+
+
 void  guess_table (u_char *buf, int len, u_int pid)
 
 {
 
-   out_nl (2,"Guess packet type from table id...");
-
-   /* $$$$ more tables to guess
-    *   Use Table to map functions calls ....   TODO
-    * */
-
-   switch (buf[0]) {	/* Table ID, guess what... */
+  TABLE_ID_FUNC *t = table_id_func;
+  u_int		table_id;
 
 
-	case  0x02:		/* Program Map Section */
-		decode_PMT  (buf, len);
-		break; 
 
-	case  0x80 ... 0x8F:	/* Conditional Access Message Section */
-		decode_EMM_ECM  (buf, len);
-		break; 
+  /* -- scan id table for decode function */
 
-	default:
-   		out_SB_NL (2,"Unknown, reserved or not implemented - TableID: ",buf[0]);
-		break;
-
-   }
+  table_id =  (u_int) buf[0];
+  while (t->func) {
+    if (t->from <= table_id && t->to >= table_id)
+       break;
+    t++;
+  }
 
 
-   return;
+
+  out_nl (2,"Guess table from table id...");
+
+  if (t->func == NULL) {
+   	out_SB_NL (2,"Unknown, reserved or not implemented - TableID: ",table_id);
+	return;
+  }
+
+
+  (*(t->func))(buf,len);		/* exec decode function */
+  return;
 }
+
+
+
+
 
 

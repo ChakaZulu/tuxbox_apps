@@ -3,10 +3,12 @@
   <HEAD> 
 	 <TITLE>dvbsnoop - A DVB Stream Analyzer Tool</TITLE>
 	 <META NAME="keywords"
-	  CONTENT="DVB stream analyze snoop sniffer dump MPEG MPG descriptor digital
-	  			 television TV satellite cable dvb-c dvb-s dvb-t MHP DSM-CC PES TOT PAT PMT
-				 SDT EIT NIT TDST RST SIT DIT BAT EMM ECM sections transport stream packet
-				 elementary stream DEMUX decode filter ISO-13818 'ETSI EN 300 468' 'ETSI ETR 162'">
+	  CONTENT="DVB stream analyze snoop sniffer monitor dump MPEG MPG descriptor digital
+	  			 television TV satellite cable dvb-c dvb-s dvb-t MHP DSM-CC SI PES TOT PAT PMT
+				 SDT EIT NIT TDST RST SIT DIT BAT EMM ECM 'SI Tables' sections transport stream analyzer packet
+				 elementary stream DEMUX decode filter
+				 'ISO/IEC 13818-1' 'ISO/IEC 13818-6' 'ETSI EN 300 468' 'ETSI ETR 162' 'H.220'
+	          ">
 	 <META NAME="description"
 	  CONTENT="dvbsnoop - dvbsnoop is a simple analyzing and monitoring tool for DVB data transmission streams and related data streams. ">
 	 <META NAME="Author" CONTENT="Rainer Scherg"> 
@@ -16,15 +18,16 @@
 	 <P>Get the source at: <A
 		HREF="http://cvs.tuxbox.org/">http://cvs.tuxbox.org/</A><BR><BR><BR></P> 
 	 <H2>What is dvbsnoop?</H2> 
-	 <P>dvbsnoop is a DVB sniffer and monitoring program. <BR><BR>Its purpose is
-		to debug, dump or view dvb/mpeg/dsm-cc/MHP stream information (e.g. digital
-		television broadcasts) send via satellite, cable or terrestrial. Basically you
-		can describe dvbsnoop as a simple DVB/MPEG stream analyzer, similar to TCP
-		network sniffer programs like <I>snoop</I> on Sun Solaris or <I>tcpdump</I>
-		under Linux.<BR><BR> The programm was mainly written to learn and understand
-		the DVB protocol structures and streams sent via sattelites. Out of this
-		reason, the programm ist not performance optimized, but it will hopefully do
-		its job.<BR><BR>Author: Rainer Scherg (rasc@users.sourceforge.net)</P> 
+	 <P>dvbsnoop is a DVB sniffer and analyzer program. <BR><BR>Its purpose is
+		to debug, dump or view stream information (e.g. digital television broadcasts)
+		send via satellite, cable or terrestrial. Streams can be DVB, MPEG, SI, PES or
+		transport streams. DSM-CC and MHP will follow...<BR>Basically you can describe
+		dvbsnoop as a simple stream analyzing program, similar to TCP network sniffer
+		programs like <I>snoop</I> on Sun Solaris or <I>tcpdump</I> under
+		Linux.<BR><BR> The programm was mainly written to learn and understand the DVB
+		protocol structures and streams sent via sattelites. Out of this reason, the
+		programm ist not performance optimized, but it will hopefully do its
+		job.<BR><BR>Author: Rainer Scherg (rasc@users.sourceforge.net)</P> 
 	 <P><BR></P> 
 	 <H2>Under what Licence is dvbsnoop?</H2> 
 	 <P>dvbsnoop is published under GPL with extension:</P> 
@@ -58,7 +61,7 @@ License:
 		your cat.</P> 
 	 <P>By the way: It is strictly forbidden to use this program for hacking
 		encrypted TV channels.</P> 
-	 <P><BR></P> 
+	 <P><BR><BR><BR></P> 
 	 <H2>How to use dvbsnoop?</H2> 
 	 <P>dvbsnoop is a commandline tool.<BR>To tune in a transponder, use a
 		proper tuning program like <I>dvbtune</I> (see:
@@ -110,7 +113,8 @@ License:
 		<TR> 
 		  <TD>-crc</TD> 
 		  <TD></TD> 
-		  <TD>CRC check when reading 'sec'</TD> 
+		  <TD>CRC check when reading 'sec'<BR>&nbsp; (depends on your driver
+			 implementation)</TD> 
 		</TR> 
 		<TR> 
 		  <TD>-nocrc</TD> 
@@ -162,9 +166,13 @@ License:
 	 <P>(default values are in square brackets...)</P> 
 	 <P></P> 
 	 <H3>Examples:</H3> 
-	 <H4>dvbsnoop 0x10;&nbsp; dvbsnoop 020;&nbsp; dvbsnoop 16</H4> 
+	 <H4>dvbsnoop 0x10;&nbsp; dvbsnoop 020;&nbsp; dvbsnoop -crc 16</H4> 
 	 <P>dump PID Hex 10 (sections mode). This command will dump the NIT
-		transmission within the dvb data stream.</P> 
+		transmission within the dvb data stream.<BR>To ensure data integrity on
+		hardware/driver level, use the <I>-crc</I> option - otherwise you may get
+		garbage data analyzed... (E.g.: Trying to decode a mpeg2 video stream PID as
+		section, will fail with -crc switch on. With <I>-nocrc</I>) you may get odd
+		results!)</P> 
 	 <TABLE> 
 		<TR> 
 		  <TD BGCOLOR="#e0e0e0"> 
@@ -262,11 +270,13 @@ Transport_stream_loop_length: 266 (0x010a)
 		</TR> 
 	 </TABLE> 
 	 <P></P> 
-	 <H4>dvbsnoop -n 10 -td -f 0x50 -m 0xff -nph -pd 3 0x12</H4> 
+	 <H4>dvbsnoop -n 10 -crc -td -f 0x50 -m 0xff -nph -pd 3 0x12</H4> 
 	 <P>dump 10 packets of PID 0x12 (EIT, ...) in sections mode, using the fpid
 		filter 0x50 and pid mask 0xff.<BR>-nph and -pd 3 tells dvbsnoop not to print a
 		hexdump and restrict output to print decoded streams at verbose level 3.
-		Timestamps should be printed in 'delta'-mode...</P> 
+		Timestamps should be printed in 'delta'-mode... Also check crc, to ensure
+		packets are vaild! (invalid packets will not be displayed - this is driver
+		dependent..)</P> 
 	 <TABLE> 
 		<TR> 
 		  <TD BGCOLOR="#e0e0e0"> 

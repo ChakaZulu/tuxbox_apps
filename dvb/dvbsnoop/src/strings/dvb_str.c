@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.13 2003/10/17 19:04:11 rasc Exp $
+$Id: dvb_str.c,v 1.14 2003/10/19 13:54:25 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.13 2003/10/17 19:04:11 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.14  2003/10/19 13:54:25  rasc
+-more table decoding
+
 Revision 1.13  2003/10/17 19:04:11  rasc
 - started more work on newer ISO 13818  descriptors
 - some reorg/update work started
@@ -140,7 +143,7 @@ char *dvbstrTableID (u_int id)
      {  0x74, 0x7D,  "reserved" },
      {  0x7E, 0x7E,  "discontinuity_information_section" },
      {  0x7F, 0x7F,  "selection_information_section" },
-     {  0x80, 0x8F,  "User private (EMM/ECM)" },
+     {  0x80, 0x8F,  "User private (EMM/ECM)" },   /* $$$ own definition! */
      {  0x90, 0xFE,  "User private" },
      {  0xFF, 0xFF,  "forbidden" },
      {  0,0, NULL }
