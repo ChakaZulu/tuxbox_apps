@@ -768,6 +768,9 @@ filebrowser.sort.size (Größe)
 filebrowser.nextpage Seite vor
 filebrowser.prevpage Seite zurück
 filebrowser.showrights Dateirechte anzeigen
+filebrowser.delete Löschen
+filebrowser.dodelete1 Soll
+filebrowser.dodelete2 gelöscht werden ?
 
 nfs.mount NFS/CIFS Verzeichnis mounten
 nfs.ip NFS/CIFS Server IP

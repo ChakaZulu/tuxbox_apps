@@ -1210,7 +1210,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	moviePlayer.addItem(new CMenuForwarder("movieplayer.vcdplayback", true, NULL, moviePlayerGui, "vcdplayback", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	moviePlayer.addItem(GenericMenuSeparatorLine);
 	moviePlayer.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &streamingSettings, NULL, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
-	moviePlayer.addItem(new CMenuForwarder("nfsmenu.head", true, NULL, new CNFSSmallMenu(), NULL, true, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX));
+	moviePlayer.addItem(new CMenuForwarder("nfsmenu.head", true, NULL, new CNFSSmallMenu(), NULL, true, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
 #endif
 
 	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui(), NULL, true, CRCInput::RC_3));

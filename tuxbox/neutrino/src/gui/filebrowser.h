@@ -151,6 +151,7 @@ class CFileBrowser
 		void paint();
 		void paintHead();
 		void paintFoot();
+		void recursiveDelete(const char* file);
 
 	public:
 		CFileList		filelist;

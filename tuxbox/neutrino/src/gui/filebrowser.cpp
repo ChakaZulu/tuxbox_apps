@@ -62,11 +62,17 @@
 typedef struct dirent64 dirent_struct;
 #define my_alphasort alphasort64
 #define my_scandir scandir64
+typedef struct stat64 stat_struct;
+#define my_stat stat64
+#define my_lstat lstat64
 #else
 #warning not using 64 bit file offsets
 typedef struct dirent dirent_struct;
 #define my_alphasort alphasort
 #define my_scandir scandir
+typedef struct stat stat_struct;
+#define my_stat stat
+#define my_lstat lstat
 #endif
 
 #define SMSKEY_TIMEOUT 2
@@ -428,7 +434,7 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 {
 //	printf("readDir_std %s\n",dirname.c_str());
-	struct stat statbuf;
+	stat_struct statbuf;
 	dirent_struct **namelist;
 	int n;
 
@@ -445,7 +451,7 @@ bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 		{
 			file.Name = dirname + namelist[i]->d_name;
 //			printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
-			if(stat((file.Name).c_str(),&statbuf) != 0)
+			if(my_stat((file.Name).c_str(),&statbuf) != 0)
 				perror("stat error");
 			else
 			{
@@ -602,6 +608,19 @@ bool CFileBrowser::exec(std::string Dirname)
 		else if ( msg == CRCInput::RC_home )
 		{
 			loop = false;
+		}
+		else if ( msg == CRCInput::RC_spkr )
+		{
+			std::string msg = g_Locale->getText("filebrowser.dodelete1");
+			msg += " ";
+			msg += filelist[selected].getFileName();
+			msg += " ";
+			msg += g_Locale->getText("filebrowser.dodelete2");
+			if (ShowMsgUTF("", msg, CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
+			{
+				recursiveDelete(filelist[selected].Name.c_str());
+				ChangeDir(Path);
+			}
 		}
 		else if (msg == CRCInput::RC_ok)
 		{
@@ -942,11 +961,16 @@ void CFileBrowser::paintFoot()
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x +3 , by2 - 3);
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35, ty2, dx - 35, g_Locale->getText("filebrowser.select"), COL_INFOBAR, 0, true); // UTF-8
+		
 		}
 
 		//?-Button
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by2 - 3);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, g_Locale->getText(sortByNames[(g_settings.filebrowser_sortmethod + 1) % FILEBROWSER_NUMBER_OF_SORT_VARIANTS]), COL_INFOBAR, 0, true); // UTF-8
+
+		//Mute-Button
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE_SMALL, x + (2 * dx), by2 - 3);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (2 * dx), ty2, dx - 35, g_Locale->getText("filebrowser.delete"), COL_INFOBAR, 0, true); // UTF-8
 
       if(m_oldKey!=0)
       {
@@ -1108,4 +1132,37 @@ void CFileBrowser::SMSInput(const neutrino_msg_t msg)
 	{
 		paintItem(selected - liststart);
 	}
+}
+void CFileBrowser::recursiveDelete(const char* file)
+{
+	stat_struct statbuf;
+	dirent_struct **namelist;
+	int n;
+	printf("Delete %s\n", file);
+	if(my_lstat(file,&statbuf) == 0)
+	{
+		if(S_ISDIR(statbuf.st_mode))
+		{
+			n = my_scandir(file, &namelist, 0, my_alphasort);
+			while(n--)
+			{
+				if(strcmp(namelist[n]->d_name, ".")!=0 && strcmp(namelist[n]->d_name, "..")!=0)
+				{
+					std::string fullname = file;
+					fullname += "/";
+					fullname += namelist[n]->d_name;
+					recursiveDelete(fullname.c_str());
+				}
+				free(namelist[n]);
+			}
+			free(namelist);
+			rmdir(file);
+		}
+		else
+		{
+			unlink(file);
+		}
+	}
+	else
+		perror(file);
 }

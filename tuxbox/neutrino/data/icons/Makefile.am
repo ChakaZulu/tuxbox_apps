@@ -12,4 +12,4 @@ install_DATA = \
 	streaming.raw timer.raw video.raw volume.raw volumebody.raw volumeslider2.raw \
 	volumeslider2alpha.raw volumeslider2blue.raw volumeslider2green.raw \
 	volumeslider2red.raw vtxt.raw vtxt_gray.raw movie.raw movieplayer.raw \
-	hidden.raw bookmarkmanager.raw
+	hidden.raw bookmarkmanager.raw mute_small.raw dbox_small.raw

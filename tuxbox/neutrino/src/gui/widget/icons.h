@@ -2,7 +2,7 @@
 #define __gui_widget_icons_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.3 2004/02/25 23:17:19 zwen Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.4 2004/03/12 09:17:17 zwen Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -30,10 +30,12 @@
 #define NEUTRINO_ICON_BUTTON_YELLOW "gelb.raw"
 
 #define NEUTRINO_ICON_BUTTON_DBOX         "dbox.raw"
+#define NEUTRINO_ICON_BUTTON_DBOX_SMALL   "dbox_small.raw"
 #define NEUTRINO_ICON_BUTTON_HELP         "help.raw"
 #define NEUTRINO_ICON_BUTTON_HELP_SMALL   "help_small.raw"
 #define NEUTRINO_ICON_BUTTON_HOME         "home.raw"
 #define NEUTRINO_ICON_BUTTON_MUTE         "mute.raw"
+#define NEUTRINO_ICON_BUTTON_MUTE_SMALL   "mute_small.raw"
 #define NEUTRINO_ICON_BUTTON_OKAY         "ok.raw"
 
 #define NEUTRINO_ICON_SETTINGS      "settings.raw"

@@ -763,6 +763,9 @@ filebrowser.sort.size (Size)
 filebrowser.nextpage Next Page
 filebrowser.prevpage Prev. Page
 filebrowser.showrights Show file rights
+filebrowser.delete Delete
+filebrowser.dodelete1 Delete
+filebrowser.dodelete2 ?
 
 nfs.mount Mount NFS/CIFS volume
 nfs.ip NFS/CIFS Server IP
