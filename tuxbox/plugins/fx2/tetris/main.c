@@ -14,8 +14,8 @@
 #include <colors.h>
 #include <board.h>
 
-	int		doexit = 0;
-	int		debug = 0;
+extern	int				doexit;
+extern	int				debug;
 extern	unsigned short	actcode;
 
 #define Debug	if(debug)printf

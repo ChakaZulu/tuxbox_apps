@@ -15,8 +15,8 @@
 
 #include <../../mczap/neutrinoNG/plugins/gameplugins.h>
 
-	int		debug = 0;
-	int		doexit = 0;
+extern	int				debug;
+extern	int				doexit;
 extern	unsigned short	actcode;
 
 static	void	setup_colors(void)

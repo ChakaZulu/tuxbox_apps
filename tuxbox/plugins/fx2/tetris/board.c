@@ -28,7 +28,7 @@ extern	double	sqrt( double in );
 
 extern	int		doexit;
 
-unsigned short	actcode=0xee;
+extern	unsigned short	actcode;
 
 static	long	score = 0;
 static	int		level = 1;

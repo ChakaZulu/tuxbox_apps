@@ -36,7 +36,7 @@ int				pac_look = 0;
 int				pac_step = 0;
 int				pac_c_step = 0;
 int				gametime=0;
-unsigned short	actcode=0xee;
+extern	unsigned short	actcode;
 int				pices = PICES;
 static	int		timeleft=8600;
 

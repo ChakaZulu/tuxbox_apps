@@ -15,8 +15,8 @@
 
 #include <../../mczap/neutrinoNG/plugins/gameplugins.h>
 
-	int		doexit = 0;
-	int		debug = 0;
+extern	int	doexit;
+extern	int	debug;
 extern	int	gametime;
 extern	int	pices;
 extern	unsigned short	actcode;
