@@ -324,10 +324,9 @@ int CChannelList::show()
 			bShowBouquetList = true;
 			loop=false;
 		}
-		else if( (msg==CRCInput::RC_red) ||
-				 (msg==CRCInput::RC_green) ||
-				 (msg==CRCInput::RC_yellow) ||
-				 (msg==CRCInput::RC_blue) ||
+		else if( (msg==CRCInput::RC_green) ||
+			 (msg==CRCInput::RC_yellow) ||
+			 (msg==CRCInput::RC_blue) ||
 		         (CRCInput::isNumeric(msg)) )
 		{
 			//pushback key if...
@@ -335,7 +334,7 @@ int CChannelList::show()
 			g_RCInput->postMsg( msg, data );
 			loop=false;
 		}
-		else if ( msg == CRCInput::RC_help )
+		else if ( msg == CRCInput::RC_red )   // changed HELP by RED (more straight forward) [rasc 28.06.2003]
 		{
 			hide();
 
@@ -344,20 +343,28 @@ int CChannelList::show()
 				res = -2;
 				loop = false;
 			}
-			else
-			{
-				g_RCInput->getMsg( &msg, &data, 0 );
+//			else
+//			{
+//				g_RCInput->getMsg( &msg, &data, 0 );
+//
+//				if ( ( msg != CRCInput::RC_red ) &&
+//				     ( msg != CRCInput::RC_timeout ) )
+//				{
+//					// RC_red schlucken
+//					g_RCInput->postMsg( msg, data );
+//				}
+//
+//			}
+			paintHead();
+			paint();
 
-				if ( ( msg != CRCInput::RC_red ) &&
-				     ( msg != CRCInput::RC_timeout ) )
-				{
-					// RC_red schlucken
-					g_RCInput->postMsg( msg, data );
-				}
-
-				paintHead();
-				paint();
-			}
+		}
+		else if ( msg == CRCInput::RC_help )
+		{
+			hide();
+			g_EpgData->show(chanlist[selected]->channel_id); 
+			paintHead();
+			paint();
 
 		}
 		else

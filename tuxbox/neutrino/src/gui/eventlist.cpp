@@ -277,13 +277,11 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			loop=false;
 		}
 
-		else if ( ( msg == CRCInput::RC_ok ) ||
-				  ( msg == CRCInput::RC_left ) ||
-				  ( msg == CRCInput::RC_red ) )
+		else if ( msg==CRCInput::RC_left || msg==CRCInput::RC_red )
 		{
 			loop= false;
 		}
-		else if (msg==CRCInput::RC_help || msg==CRCInput::RC_right)
+		else if (msg==CRCInput::RC_help || msg==CRCInput::RC_right || msg==CRCInput::RC_ok)
 		{
 			if ( evtlist[selected].eventID != 0 )
 			{
