@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <termios.h>
 #include <signal.h>
+#include <dirent.h>
 
 #include <lib/base/i18n.h>
 #include <lib/driver/rc.h>
@@ -121,6 +122,27 @@ eZap::eZap(int argc, char **argv)
 
 	eDebug("[ENIGMA] loading default keymaps...");
 	
+	struct dirent **namelist;
+	int n;
+
+	n = scandir(DATADIR "/enigma/resources/", &namelist, 0, alphasort);
+	if (n < 0)
+		perror("scandir");
+	else
+	{
+		while(n--)
+		{
+			std::string tmp_name(DATADIR "/enigma/resources/");
+			tmp_name.append(namelist[n]->d_name);
+			if (!strcmp(namelist[n]->d_name, ".."))
+				break;
+			std::cout << tmp_name << std::endl;
+			eActionMapList::getInstance()->loadXML( tmp_name.c_str());
+			free(namelist[n]);
+		}
+		free(namelist);
+	}
+
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox.xml");
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox2.xml");
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdbox.xml");

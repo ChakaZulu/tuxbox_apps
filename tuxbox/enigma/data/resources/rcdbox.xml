@@ -20,6 +20,8 @@
 			<key name="left" code="69" />
 			<key name="up" code="67" />
 			<key name="down" code="6c" />
+			<key name="pgup" code="68" />
+			<key name="pgdown" code="6d" />
 			<key name="ok" code="160" />
 			<key name="mute" code="71" />
 			<key name="power" code="74" />
