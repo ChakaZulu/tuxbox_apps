@@ -4609,6 +4609,36 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	return result;
 }
 
+static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	std::map<eString, eString> opts = getRequestOptions(opt, '&');
+	eString requester = opts["requester"];
+	eString result;
+
+/*	if (opts.find("path") == opts.end())
+		return "E: no path set";*/
+
+	if (opts.find("name") == opts.end())
+		return "E: no plugin name given";
+
+	eZapPlugins plugins(-1);
+	eString path;
+	if (opts.find("path") != opts.end())
+	{
+		path = opts["path"];
+		if (path.length() && (path[path.length()-1] != '/'))
+			path += '/';
+	}
+	if (ePluginThread::getInstance())
+		ePluginThread::getInstance()->kill(true);
+
+	result = plugins.execPluginByName((path + opts["name"]).c_str());
+	if (requester == "webif")
+		result = closeWindow(content, "", 500);
+
+	return result;
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	int lockWebIf = 1;
@@ -4693,6 +4723,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", startPlugin, lockWeb);
 // functions needed by dreamtv
 	dyn_resolver->addDyn("GET", "/cgi-bin/audioChannels", audioChannels, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/videoChannels", videoChannels, lockWeb);
@@ -4701,6 +4732,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/control/zapto", getCurrentVpidApid, false); // this dont really zap.. only used to return currently used pids;
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_getonidsid, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_getchannellist, lockWeb);
+	
 	ezapWapInitializeDyn(dyn_resolver, lockWeb);
 #ifdef ENABLE_DYN_MOUNT
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);
