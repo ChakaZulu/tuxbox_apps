@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.24 2003/03/03 03:43:58 obi Exp $
+// $Id: SIevents.cpp,v 1.25 2003/06/01 16:13:04 woglinde Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -23,10 +23,7 @@
 //
 //
 
-#ifdef DEBUG
 #include <assert.h>
-#endif
-
 #include <stdio.h>
 #include <time.h>
 

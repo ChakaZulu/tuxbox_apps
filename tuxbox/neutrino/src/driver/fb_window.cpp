@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.cpp,v 1.1 2003/02/22 23:17:13 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.cpp,v 1.2 2003/06/01 16:13:04 woglinde Exp $
  *
  * abstract fb_window class - d-box2 linux project
  *
@@ -68,6 +68,7 @@ void CFBWindow::paintBoxRel(const int _x, const int _y, const int _dx, const int
 bool CFBWindow::paintIcon(const std::string _filename, const int _x, const int _y, const color_t _offset)
 {
 	((CPrivateData *)private_data)->frameBuffer->paintIcon(_filename, x + _x, y + _y, _offset);
+	return 0;
 }
 
 void CFBWindow::RenderString(const font_t _font, const int _x, const int _y, const int _width, const std::string _text, const unsigned char _color, const int _boxheight, const bool _utf8_encoded)
