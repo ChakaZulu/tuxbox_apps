@@ -211,7 +211,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 		CHARSETMETA
 		"<head>\n"
 		"  <title>enigma status</title>\n"
-		"  <link rel=stylesheet type=\"text/css\" href=\"/index.css\">\n"
+		"  <link rel=stylesheet type=\"text/css\" href=\"/webif.css\">\n"
 		"</head>\n"
 		"<body>\n"
 		"<h1>Enigma status</h1>\n"
@@ -1522,7 +1522,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	if(!current)
 		return eString("epg not ready yet");
 
-	result+=eString("<html>" CHARSETMETA "<head><title>epgview</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/epgview.css\"></head><body bgcolor=#000000>");
+	result+=eString("<html>" CHARSETMETA "<head><title>epgview</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#000000>");
 	result+=eString("<span class=\"title\">");
 	result+=filter_string(current->service_name);
 	result+=eString("</span>");
@@ -1699,7 +1699,7 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 		}
 	}
 
-	result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#ffffff>"
+	result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>"
 		"<!-- " << sapi->service << "-->" << std::endl <<
 		"<table cellspacing=0 cellpadding=0 border=0>"
 		"<tr><td>Name:</td><td>" << name << "</td></tr>"
@@ -2372,8 +2372,8 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	description = filter_string(description);
 	ext_description = filter_string(ext_description);
 
-	result = "<html>" + eString(CHARSETMETA) + "<head><title>EPG Details</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#ffffff>";
-	result += "<span class=\"titel\"><b>" + description + "</b></span>";
+	result = "<html>" + eString(CHARSETMETA) + "<head><title>EPG Details</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>";
+	result += "<span class=\"title\"><b>" + description + "</b></span>";
 	result += "<p>";
 	result += ext_description;
 	result += "</body>";
