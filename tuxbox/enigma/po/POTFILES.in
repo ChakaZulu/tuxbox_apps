@@ -118,6 +118,7 @@
 ./src/setup_extra.cpp
 ./src/setup_harddisk.cpp
 ./src/setup_lcd.cpp
+./src/setup_keyboard.cpp
 ./src/setup_osd.cpp
 ./src/setup_rc.cpp
 ./src/setup_rfmod.cpp

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-06-25 08:53+0100\n"
+"POT-Creation-Date: 2004-06-25 13:47+0100\n"
 "PO-Revision-Date: Thu Mar 25 16:08:04 CET 2004\n"
 "Last-Translator: unknown\n"
 "Language-Team: Spanish / J.M. Degen <info@comant.tv>\n"
@@ -139,9 +139,10 @@ msgid "services scanned     :"
 msgstr "Servicios escaneados :"
 
 #: default.esml:577 src/parentallock.cpp:101 src/setup_lcd.cpp:112
-#: src/setup_osd.cpp:263 src/setup_rc.cpp:121 src/setup_timezone.cpp:42
-#: src/setupengrab.cpp:102 src/setupnetwork.cpp:609 src/setupvideo.cpp:172
-#: src/setupvideo.cpp:410 src/tpeditwindow.cpp:118 src/tpeditwindow.cpp:162
+#: src/setup_keyboard.cpp:55 src/setup_osd.cpp:263 src/setup_rc.cpp:121
+#: src/setup_timezone.cpp:42 src/setupengrab.cpp:102 src/setupnetwork.cpp:609
+#: src/setupvideo.cpp:172 src/setupvideo.cpp:410 src/tpeditwindow.cpp:118
+#: src/tpeditwindow.cpp:162
 msgid "save changes and return"
 msgstr "Guardar cambios y volver"
 
@@ -520,10 +521,10 @@ msgstr "Buscar el nombre del evento en la epg"
 
 #: default.esml:366 default.esml:390 default.esml:411 default.esml:469
 #: default.esml:577 src/parentallock.cpp:96 src/setup_lcd.cpp:107
-#: src/setup_osd.cpp:258 src/setup_rc.cpp:116 src/setup_rfmod.cpp:128
-#: src/setup_timezone.cpp:37 src/setupengrab.cpp:97 src/setupnetwork.cpp:604
-#: src/setupnetwork.cpp:1039 src/setupvideo.cpp:167 src/setupvideo.cpp:405
-#: src/tpeditwindow.cpp:112 src/tpeditwindow.cpp:159
+#: src/setup_keyboard.cpp:50 src/setup_osd.cpp:258 src/setup_rc.cpp:116
+#: src/setup_rfmod.cpp:128 src/setup_timezone.cpp:37 src/setupengrab.cpp:97
+#: src/setupnetwork.cpp:604 src/setupnetwork.cpp:1039 src/setupvideo.cpp:167
+#: src/setupvideo.cpp:405 src/tpeditwindow.cpp:112 src/tpeditwindow.cpp:159
 msgid "save"
 msgstr "Guardar"
 
@@ -2810,7 +2811,7 @@ msgstr "Añadir evento como grabaciación NGRAB a la lista temporizadores"
 
 #: src/epgactions.h:17
 msgid "add this event as simple Switch Event to timer list"
-msgstr "Añadir evento como comaio canal automático a la lista temporizadores"
+msgstr "Añadir evento como cambio canal automático a la lista temporizadores"
 
 #: src/epgactions.h:18
 msgid "remove this event from timer list"
@@ -3942,6 +3943,18 @@ msgstr "Invertido:"
 #: src/setup_lcd.cpp:103
 msgid "enable/disable inverted LCD (ok)"
 msgstr "Activar/desactivar inversión LCD (ok)"
+
+#: src/setup_keyboard.cpp:32 src/system_settings.cpp:56
+msgid "Keyboard Setup"
+msgstr "Configuración teclado"
+
+#: src/setup_keyboard.cpp:39
+msgid "Keyboard Mapping:"
+msgstr "Configuración teclado"
+
+#: src/setup_keyboard.cpp:46
+msgid "select your keyboard mapping (ok)"
+msgstr "Elige tipo del teclado (ok)"
 
 #: src/setup_osd.cpp:40
 msgid "PluginOffsetActions"
@@ -5207,10 +5220,6 @@ msgstr "Configuración disco duro"
 #: src/system_settings.cpp:51
 msgid "open harddisc setup"
 msgstr "Abrir configuración disco duro"
-
-#: src/system_settings.cpp:56
-msgid "Keyboard Setup"
-msgstr "Configuración teclado"
 
 #: src/system_settings.cpp:56
 msgid "open keyboard setup"
