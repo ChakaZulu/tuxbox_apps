@@ -2739,6 +2739,13 @@ void eZapMain::showMainMenu()
 	int res = mm.exec();
 	mm.hide();
 
+#ifndef DISABLE_LCD
+	pLCD->lcdMenu->hide();
+	pLCD->lcdMain->show();
+#endif
+	if (!doHideInfobar())
+		show();
+
 	if (res == 1 && handleState())
 	{
 		//standby Show Menu
@@ -2746,13 +2753,6 @@ void eZapMain::showMainMenu()
 		standbyTime-=1;
 		standbyRelease();
 	}
-
-#ifndef DISABLE_LCD
-	pLCD->lcdMenu->hide();
-	pLCD->lcdMain->show();
-#endif
-	if (!doHideInfobar())
-		show();
 }
 
 void eZapMain::toggleTimerMode(int newstate)
