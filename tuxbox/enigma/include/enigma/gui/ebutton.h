@@ -8,6 +8,7 @@ class eButton: public eLabel
 {
 	gColor focus, normal;
 	Q_OBJECT
+	eLabel*	tmpDescr; // used for LCD with description
 protected:
 	QString descr;
 	void keyUp(int key);
@@ -16,7 +17,7 @@ protected:
 signals:
 	void selected();
 public:
-	eButton(eWidget *parent, eLabel* descr=0);
+	eButton(eWidget *parent, eLabel* descr=0, int takefocus=1);
 };
 
 #endif

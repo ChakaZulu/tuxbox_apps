@@ -101,11 +101,13 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	v_pin8=0;
 	if (eDVB::getInstance()->config.getKey("/elitedvb/video/colorformat", temp))
 		temp=cfCVBS;
+	qDebug("colorformat: %i\n", temp);
 	v_colorformat=(eAVColorFormat)temp;
 	if (v_colorformat==cfNull)
 		v_colorformat=cfCVBS;
+
 	eDVB::getInstance()->config.getKey("/elitedvb/video/pin8", v_pin8);
-	
+	qDebug("Pin8: %i\n", v_pin8);	
 	setColorFormat(v_colorformat);
 	setPin8(v_pin8);
 }

@@ -89,8 +89,9 @@ void eMainMenu::sel_setup(eListboxEntry *)
 
 void eMainMenu::sel_plugins(eListboxEntry *)
 {
+	eZapLCD *pLCD=eZapLCD::getInstance();
+	eZapPlugins plugins(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	window->hide();
-	eZapPlugins plugins;
 	plugins.exec();
 	window->show();
 }
