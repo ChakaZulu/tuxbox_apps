@@ -1,7 +1,7 @@
 <html>
 <head>
 	<title>EPG Details</title>
-	<link rel="stylesheet" type="text/css" href="/epgview.css">
+	<link rel="stylesheet" type="text/css" href="/webif.css">
 </head>
 <body bgcolor="#ffffff">
 	<span style="width: 100%; background-color: #93A198">

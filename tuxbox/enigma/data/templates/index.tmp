@@ -1,44 +1,15 @@
 <HTML>
 <HEAD>
 <TITLE>Dreambox Web Interface</TITLE>
-<style type="text/css">
-a.volgreen { color:#00ff00; font-size:12pt; font-family: tahoma, arial; background-image: url(led_aan.gif)}
-a.volnot { color:#c0c0c0; font-size:12pt; font-family: tahoma, arial; background-image: url(led_uit.gif)}
-a.mute { color:#ffffff; font-size:8pt; font-family:tahoma, arial; }
-a.audio { color:#000000; font-size:8pt; font-family:Verdana; }
-
-.white { color:#000000; font-size:8pt; font-family: Verdana; letter-spacing: -1pt}
-.black { color:#000000; font-size: 9pt; font-family: Verdana; }
-.button { color:#ffffff; font-size: 10pt; font-weight: bold; font-family: Verdana; }
-.titel { color:#ffffff; font-size:14pt; font-family: tahoma, arial; }
-.servicename { color:#ffffff; font-size:13pt; font-family: tahoma, arial; }
-.epgzeit { color:#000000; font-size:12pt; font-family: tahoma, arial; }
-.epgdur { color:#000000; font-size:10pt; font-family: tahoma, arial; }
-.epgname { color:#000000; font-size:12pt; font-family: tahoma, arial; }
-.epgdesc { color:#000000; font-size:10pt; font-family: tahoma, arial; }
-
-a.normal  { color:#000000; font-size:10pt; font-family: tahoma, arial; }
-a.white   { color:#000000; font-size:10pt; font-family: Verdana; }
-a.small   { color:#000000; font-size:8pt; font-family: tahoma, arial; }
-
-a	{ color: #000000}
-a:hover { color: #93A198}
-a:link    { text-decoration:none; }
-a:visited { text-decoration:none; }
-a:active  { text-decoration:none; }
-td.menu { font-family: Verdana; font-size: 10pt; font-weight: bold}
-</style>
+<link rel="stylesheet" type="text/css" href="/webif.css">
 <script language="javascript">
 function NewWindow(mypage, myname, w, h, scroll)
 {
-	var win1 = (screen.width - w) / 2;
-	var wint = (screen.height - h) / 2;
-	winprops = 'height='+h+', width='+w+', top='+wint+', left='+win1+', scrollbars='+scroll+', resizable'
+	var winw = (window.width - w) / 2;
+	var winl = (window.height - h) / 2;
+	winprops = 'height='+h+', width='+w+', top='+wint+', left='+winl+', scrollbars='+scroll+', resizable'
 	win = window.open(mypage, myname, winprops)
-	if (parseInt(navigator.appVersion) >= 4)
-	{
-		win.window.focus();
-	}
+	if (parseInt(navigator.appVersion) >= 4) {win.window.focus();}
 }
 
 function reload()
@@ -122,11 +93,7 @@ function clearTimerList()
 			<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0>
 				<TR>
 					<TD><IMG SRC="filler.png" WIDTH=110 HEIGHT=22></TD>
-					<TD><button name="zap" type="button" style='width: 100px; height: 22px; background-color: #316183' value="ZAP" onclick="self.location.href='?mode=zap'"><span class="button">ZAP</class></button></TD>
-					<TD><button name="control" type="button" style='width: 100px; height: 22px; background-color: #316183' value="CONTROL" onclick="self.location.href='?mode=menu'"><span class="button">CONTROL</class></button></TD>
-					<TD><button name="links" type="button" style='width: 100px; height: 22px; background-color: #316183' value="LINKS" onclick="self.location.href='?mode=links'"><span class="button">LINKS</class></button></TD>
-					<TD><button name="updates" type="button" style='width: 100px; height: 22px; background-color: #316183' value="UPDATES" onclick="self.location.href='?mode=updates'"><span class="button">UPDATES</class></button></TD>
-					<TD><button name="about" type="button" style='width: 100px; height: 22px; background-color: #316183' value="ABOUT" onclick="self.location.href='?mode=about'"><span class="button">ABOUT</class></button></TD>
+						#TOPNAVI#
 					<TD><IMG SRC="filler.png" WIDTH=170 HEIGHT=22></TD>
 				</TR>
 			</TABLE>

@@ -1,8 +1,7 @@
 SUBDIRS = stylesheets
 
 EXTRA_DIST = \
-	epgview.css filler.png  \
-	led_aan.gif led_uit.gif on.gif off.gif si.css \
+	webif.css filler.png led_aan.gif led_uit.gif on.gif off.gif  \
 	speak_off.gif speak_on.gif topbalk.png trans.gif squ.png
 
 install-data-local:

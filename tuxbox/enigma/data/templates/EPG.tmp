@@ -1,7 +1,7 @@
 <html>
 <head>
 	<title>EPG</title>
-	<link rel="stylesheet" type="text/css" href="/epgview.css">
+	<link rel="stylesheet" type="text/css" href="/webif.css">
 	<script language="javascript">
 		function NewWindow(mypage, myname, w, h, scroll)
 		{
