@@ -49,7 +49,6 @@ NVODStream::NVODStream(eListbox *listbox, int transport_stream_id, int original_
 		(			(eDVB::getInstance()->transport_stream_id==transport_stream_id)
 			&&	(eDVB::getInstance()->original_network_id==original_network_id))?EIT::tsActual:EIT::tsOther		)
 {
-//	connect(&eit, SIGNAL(tableReady(int)), SLOT(EITready(int)));
 	CONNECT(eit.tableReady, NVODStream::EITready);
 	eit.start();
 }
@@ -101,7 +100,6 @@ eNVODSelector::eNVODSelector(): eWindow(0)
 	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
 	list->move(ePoint(0, 0));
 	list->resize(getClientSize());
-//	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
 	CONNECT(list->selected, eNVODSelector::selected);
 }
 
@@ -177,7 +175,6 @@ eAudioSelector::eAudioSelector(): eWindow(0)
 	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
 	list->move(ePoint(0, 0));
 	list->resize(getClientSize());
-///	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
 	CONNECT(list->selected, eAudioSelector::selected);
 }
 
@@ -212,7 +209,6 @@ eSubServiceSelector::eSubServiceSelector(): eWindow(0)
 	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
 	list->move(ePoint(0, 0));
 	list->resize(getClientSize());
-//	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
 	CONNECT(list->selected, eSubServiceSelector::selected);
 }
 
@@ -265,13 +261,11 @@ eServiceNumberWidget::eServiceNumberWidget(int initial)
 	number->move(ePoint(160, 0));
 	number->resize(eSize(50, eSkin::getActive()->queryValue("fontsize", 20)+4));
 
-//	connect(number, SIGNAL(selected(int*)), SLOT(selected(int*)));
 	CONNECT(number->selected, eServiceNumberWidget::selected);
 	
-/*	timer=new QTimer(this);
+/*	timer=new QTimer(eApp);
 	timer->start(2000);
-	
-	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
+	CONNECT(timer->timeout, eServiceNumberWidget::timeout);	
 */
 	chnum=initial;
 }
@@ -288,7 +282,7 @@ void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 {
 }
 
-eZapMain::eZapMain(): eWidget(0, 1)
+eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp)
 {
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
@@ -368,18 +362,6 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ASSIGN(Clock, eLabel, "time");
 
 	cur_start=cur_duration=-1;
-/*	connect(eStreamWatchdog::getInstance(), SIGNAL(AspectRatioChanged(int)), SLOT(set16_9Logo(int)));
-	connect(eEPGCache::getInstance(), SIGNAL(EPGAvail(bool)), SLOT(setEPGButton(bool)));
-	connect(eDVB::getInstance(), SIGNAL(scrambled(bool)), SLOT(setSmartcardLogo(bool)));
-	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));
-	connect(eDVB::getInstance(), SIGNAL(gotEIT(EIT*,int)), SLOT(gotEIT(EIT*,int)));
-	connect(eDVB::getInstance(), SIGNAL(gotSDT(SDT*)), SLOT(gotSDT(SDT*)));
-	connect(eDVB::getInstance(), SIGNAL(gotPMT(PMT*)), SLOT(gotPMT(PMT*)));
-	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
-	connect(&clocktimer, SIGNAL(timeout()), SLOT(clockUpdate()));
-	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(clockUpdate()));
-	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(leaveService(eService*)));
-	connect(eDVB::getInstance(), SIGNAL(volumeChanged(int)), SLOT(updateVolume(int)));*/
 	CONNECT(eStreamWatchdog::getInstance()->AspectRatioChanged, eZapMain::set16_9Logo);
 	CONNECT(eEPGCache::getInstance()->EPGAvail, eZapMain::setEPGButton);
 	CONNECT(eDVB::getInstance()->scrambled, eZapMain::setSmartcardLogo);

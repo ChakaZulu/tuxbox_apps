@@ -39,7 +39,7 @@ private:
 	eServiceSelector *serviceSelector;
 
 	eZapMain *main;
-	eTimer statusTimer;
+//	eTimer statusTimer;
 public:
 	static eZap *getInstance();
 	eWidget *focus;

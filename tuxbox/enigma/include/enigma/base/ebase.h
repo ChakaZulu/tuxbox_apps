@@ -152,14 +152,14 @@ private:
 	int state;
 	int requested;		// requested events (POLLIN, ...)
 public:
-	Signal1<void, int> activated;
-
-	eSocketNotifier(eMainloop *context, int fd, int req);
+	eSocketNotifier(eMainloop *context, int fd, int req, bool startnow=true);
 	~eSocketNotifier();
-	
+
+	Signal1<void, int> activated;
+	void activate(int what) { /*emit*/ activated(fd); }
+
 	void start();
 	void stop();
-	void activate(int what) { /*emit*/ activated(fd); }
 
 	int getFD() { return fd; }
 	int getRequested() { return requested; }
@@ -174,15 +174,19 @@ class eTimer
 	bool bSingleShot;
 	bool bActive;
 public:
-	eTimer(eMainloop *context=(eMainloop*)	eApp): bActive(false), context(*context) { }
+	eTimer(eMainloop *context): bActive(false), context(*context) { }
 	~eTimer()	{		if (bActive) stop();	}
+
 	Signal0<void> timeout;
 	void activate();
+
 	bool isActive()	{		return bActive;	}
+	timeval &getNextActivation() { return nextActivation; }
+
 	void start(long msec, bool b=false);
 	void stop();
 	void changeInterval(long msek);
-	timeval &getNextActivation() { return nextActivation; }
+
 	struct less
 	{
 		bool operator() (const eTimer* t1, const eTimer* t2)
@@ -195,31 +199,25 @@ public:
 			// werden in einer mainloop verarbeitet
 class eMainloop : public Object
 {
-	std::map<int,eSocketNotifier*> notifiers;
+	std::map<int, eSocketNotifier*> notifiers;
 	std::list<eTimer*> TimerList;
-	void processOneEvent();
 	bool app_exit_loop;
 	bool app_quit_now;
 	int loop_level;
+	void processOneEvent();
 public:
 	eMainloop():loop_level(0)	{	}
 	void addSocketNotifier(eSocketNotifier *sn);
 	void removeSocketNotifier(eSocketNotifier *sn);
-
-	void addTimer(eTimer* e)	
-	{		
-		TimerList.push_back(e);		
-		TimerList.sort(eTimer::less());
-	}
+	void addTimer(eTimer* e)	{		TimerList.push_back(e);		TimerList.sort(eTimer::less());	}
 	void removeTimer(eTimer* e)	{		TimerList.remove(e);	}	
+
 	int looplevel() { return loop_level; }
 	
+	int exec();		// recursive enter the loop
+	void quit();	// leave all pending loops (recursive leave())
 	void enter_loop();
 	void exit_loop();
-
-	int exec();		// recursive enter the loop
-	
-	void quit();	// leave all pending loops (recursive leave())
 };
 
 

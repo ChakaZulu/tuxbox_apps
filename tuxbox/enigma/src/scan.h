@@ -11,7 +11,6 @@ class eProgress;
 
 class tsText: public eWidget
 {
-//	Q_OBJECT
 	eLabel *headline, *body;
 protected:
 	void keyUp(int rc);
@@ -37,7 +36,6 @@ public:
 
 class tsFindInit: public eWidget
 {
-//	Q_OBJECT
 	eLabel *headline, *body;
 	eProgress *signalbar;
 	eTimer sstimer;
@@ -51,7 +49,7 @@ class tsFindInit: public eWidget
 	virtual int eventFilter(const eWidgetEvent &event);
 protected:
 	void keyUp(int rc);
-private:// slots:
+private:
 	void tunedIn(eTransponder *trans, int error);
 	void showSignalStrength();
 public:
@@ -63,7 +61,6 @@ public:
 
 class tsDoScan: public eWidget
 {
-//	Q_OBJECT
 	eTimer etatimer;
 	eLabel *transp_found, *transp_scanned, *known_services, *eta, *dummy1, *dummy2;
 	eProgress *bar, *dummybar;
@@ -74,7 +71,7 @@ class tsDoScan: public eWidget
 protected:
 	void updateStats();
 	virtual int eventFilter(const eWidgetEvent &event);
-private:// slots:
+private:
 	void stateChanged(int newstate);
 	void eventOccured(int event);
 	void updateETA();
@@ -83,9 +80,8 @@ public:
 	void redrawWidget();
 };
 
-class TransponderScan/*: public QObject*/
+class TransponderScan
 {
-//	Q_OBJECT
 	eWindow *window;
 	eProgress *progress;
 	eLabel *progress_text;

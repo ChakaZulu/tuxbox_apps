@@ -3,6 +3,7 @@
 #else
 #define DEMUX "/dev/demuxapi0"
 #endif
+#include <ebase.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -163,8 +164,7 @@ eSection::eSection(int pid, int tableid, int tableidext, int version, int flags,
 	notifier=0;
 	section=0;
 	lockcount=0;
-	timer=new eTimer;
-//	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
+	timer=new eTimer(eApp);
 	CONNECT(timer->timeout, eSection::timeout);
 	if (!(flags&SECREAD_NOABORT))
 		active.append(this);
@@ -216,8 +216,9 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 	
 	if (notifier)
 		delete notifier;
+
 	notifier=new eSocketNotifier(eApp, reader.getHandle(), eSocketNotifier::Read);
-	//connect(notifier, SIGNAL(activated(int)), SLOT(data(int)));
+
 	CONNECT(notifier->activated, eSection::data);
 }
 

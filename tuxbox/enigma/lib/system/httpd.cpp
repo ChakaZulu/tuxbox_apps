@@ -1,4 +1,3 @@
-//#include <qobject.h>
 #include <qfile.h>
 #include <sys/socket.h>
 #include <error.h>
@@ -30,11 +29,10 @@ void eHTTPGarbage::destruct(eHTTPConnection *c)
 	garbage.start(0, 1);
 }
 
-eHTTPGarbage::eHTTPGarbage()
+eHTTPGarbage::eHTTPGarbage():garbage(eApp)
 {
 	instance=this;
 	conn=0;
-//	connect(&garbage, SIGNAL(timeout()), this, SLOT(doGarbage()));
 	CONNECT(garbage.timeout, eHTTPGarbage::doGarbage);
 }
 
@@ -87,9 +85,6 @@ int eHTTPError::doWrite(int w)
 
 eHTTPConnection::eHTTPConnection(int socket, eHTTPD *parent): QSocket(parent), parent(parent)
 {
-/*	connect(this, SIGNAL(readyRead()), SLOT(readData()));
-	connect(this, SIGNAL(bytesWritten(int)), SLOT(bytesWritten(int)));
-	connect(this, SIGNAL(error(int)), SLOT(gotError()));*/
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
 	CONNECT(this->error_ , eHTTPConnection::error);
@@ -105,10 +100,6 @@ eHTTPConnection::eHTTPConnection(int socket, eHTTPD *parent): QSocket(parent), p
 
 eHTTPConnection::eHTTPConnection(const char *host, int port): QSocket(0), parent(0)
 {
-/*	connect(this, SIGNAL(readyRead()), SLOT(readData()));
-	connect(this, SIGNAL(bytesWritten(int)), SLOT(bytesWritten(int)));
-	connect(this, SIGNAL(error(int)), SLOT(gotError()));
-	connect(this, SIGNAL(connected()), SLOT(hostConnected()));*/
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
 	CONNECT(this->error_ , eHTTPConnection::error);
@@ -543,8 +534,6 @@ eHTTPConnection::~eHTTPConnection()
 void eHTTPD::newConnection(int socket)
 {
 	eHTTPConnection *conn=new eHTTPConnection(socket, this);
-/*	connect(conn, SIGNAL(connectionClosed()), SLOT(oneConnectionClosed()));
-	connect(conn, SIGNAL(delayedCloseFinished()), SLOT(oneConnectionClosed()));*/
 	CONNECT(conn->connectionClosed_ , eHTTPD::oneConnectionClosed);
 	CONNECT(conn->delayedCloseFinished_ , eHTTPD::oneConnectionClosed);	
 }

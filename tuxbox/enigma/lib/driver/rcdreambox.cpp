@@ -35,7 +35,8 @@ void eRCDeviceDreambox::repeat()
 	repeattimer.start(rrate, 1);
 }
 
-eRCDeviceDreambox::eRCDeviceDreambox(eRCDriver *driver): eRCDevice("Dreambox", driver)
+eRCDeviceDreambox::eRCDeviceDreambox(eRCDriver *driver)
+			: eRCDevice("Dreambox", driver), timeout(eApp), repeattimer(eApp)
 {
 	ccode=-1;
 	rrate=30;

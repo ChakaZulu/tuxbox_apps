@@ -230,7 +230,7 @@ int eWidget::exec()
 	}
 	event(eWidgetEvent(eWidgetEvent::execDone));
 	
-	return 0;/* result;*/
+	return result;
 }
 
 void eWidget::clear()

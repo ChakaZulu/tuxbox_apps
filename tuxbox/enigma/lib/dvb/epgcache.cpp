@@ -9,16 +9,12 @@ int eventData::CacheSize=0;
 eEPGCache *eEPGCache::instance;
 
 #define HILO(x) (x##_hi << 8 | x##_lo)
-eEPGCache::eEPGCache():eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
+eEPGCache::eEPGCache():CleanTimer(eApp), zapTimer(eApp),
+			eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
 //eEPGCache::eEPGCache():eSection(0x12, 0x40, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xC0)
 {
 	printf("[EPGC] Initialized EPGCache\n");
 	isRunning=0;
-/*	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*, int)), SLOT(enterService(eService*, int)));
-	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(stopEPG()));
-	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(timeUpdated()));
-	connect(&zapTimer, SIGNAL(timeout()), SLOT(startEPG()));
-	connect(&CleanTimer, SIGNAL(timeout()), SLOT(cleanLoop()));	*/
 
 	CONNECT(eDVB::getInstance()->switchedService, eEPGCache::enterService);
 	CONNECT(eDVB::getInstance()->leaveService, eEPGCache::stopEPG);

@@ -61,7 +61,7 @@ void eZapLCDMain::serviceChanged(eService *service, int)
 		ServiceName->setText("unknown");
 }
 
-eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0)
+eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0), clocktimer(eApp)
 {
 	if (eSkin::getActive()->build(this, "enigma_lcd_main"))
 		qFatal("skin load of \"enigma_lcd\" failed");
@@ -71,10 +71,6 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0)
 	ASSIGN(Clock, eLabel, "clock");
 	Volume->show();
 	
-/*	connect(&clocktimer, SIGNAL(timeout()), SLOT(clockUpdate()));
-	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(clockUpdate()));
-	connect(eDVB::getInstance(), SIGNAL(volumeChanged(int)), SLOT(volumeUpdate(int)));
-	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));*/
 	CONNECT(clocktimer.timeout, eZapLCDMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->timeUpdated, eZapLCDMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->volumeChanged, eZapLCDMain::volumeUpdate);

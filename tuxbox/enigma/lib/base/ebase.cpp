@@ -20,10 +20,12 @@ eThread::~eThread()
 	pthread_join(thread_id, 0);
 }
 
-eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested): fd(fd), context(*context), requested(requested)
+eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested, bool startnow): fd(fd), context(*context), requested(requested)
 {
 	state=0;
-	start();
+	
+	if (startnow)	
+		start();
 }
 
 eSocketNotifier::~eSocketNotifier()
@@ -35,6 +37,7 @@ void eSocketNotifier::start()
 {
 	if (state)
 		stop();
+
 	context.addSocketNotifier(this);
 	state=1;
 }
@@ -43,6 +46,7 @@ void eSocketNotifier::stop()
 {
 	if (state)
 		context.removeSocketNotifier(this);
+
 	state=0;
 }
 
@@ -50,12 +54,11 @@ void eSocketNotifier::stop()
 void eTimer::start(long msek, bool singleShot)
 {
 	if (!bActive)
-	{	
+	{
 		bActive = true;
 		bSingleShot = singleShot;
 		interval = msek;
-  	gettimeofday(&nextActivation, 0);		
-
+	 	gettimeofday(&nextActivation, 0);		
 		nextActivation += msek;
 		context.addTimer(this);
 	}
@@ -72,15 +75,18 @@ void eTimer::stop()
 
 void eTimer::changeInterval(long msek)
 {
-	if (bActive)
-		context.removeTimer(this);	
+	if (bActive)  // Timer is running?
+	{
+		context.removeTimer(this);	 // then stop
+		nextActivation -= interval;  // sub old interval
+	}
+	else
+			bActive=true;	// then activate Timer
 
-	nextActivation -= interval;
-	interval = msek;
-	nextActivation += interval;
+	interval = msek;   			 			// set new Interval
+	nextActivation += interval;		// calc nextActivation
 
-	if (bActive)
-		context.addTimer(this);
+	context.addTimer(this);				// add Timer to context TimerList
 }
 
 void eTimer::activate()   // Internal Funktion... called from eApplication
@@ -88,6 +94,7 @@ void eTimer::activate()   // Internal Funktion... called from eApplication
 	/*emit*/ timeout();
 //	printf("Timer emitted\n");
 	context.removeTimer(this);
+
 	if (!bSingleShot)
 	{
 		nextActivation += interval;
@@ -118,22 +125,17 @@ void eMainloop::processOneEvent()
 	{
 		pollfd p;
 		p.fd=i->first;
-		if (p.fd)
-		{
-			p.events=i->second->getRequested();
+		p.events=i->second->getRequested();
 
-			pfd.push_back(p);
+		pfd.push_back(p);
 //			printf("%d (%x)\n", i->first , i->second->getRequested());
-		}
 	}
-
 			// process pending timers...
 	long usec;
-
 	while (!TimerList.empty() && (usec = timeout_usec( (*TimerList.begin())->getNextActivation() ) ) <= 0 )
 		(*TimerList.begin())->activate();
 
-	int ret=poll(&(*pfd.begin()), notifiers.size(), TimerList.empty()?-1:usec / 1000);
+	int ret=poll(&(*pfd.begin()), notifiers.size(), TimerList.empty()?-1:usec / 1000);  // milli .. not micro seks
 
 	if (ret>0)
 	{
@@ -145,15 +147,16 @@ void eMainloop::processOneEvent()
 			if ( (i->revents & req) == req)
 			{
 				notifiers[i->fd]->activate(i->revents);
+
 				if (!--ret)		// shortcut
 					break;
 			}
 		}
-	} else if (ret<0)
-	{
-		printf("poll made error\n");
 	}
-		// das ist noch doof hier
+	else if (ret<0)
+		printf("poll made error\n");
+
+		// check Timers...
 	while (!TimerList.empty() && (timeout_usec( (*TimerList.begin())->getNextActivation() ) ) <= 0 )
 		(*TimerList.begin())->activate();
 }

@@ -53,7 +53,7 @@ void tsText::redrawWidget()
 {
 }
 
-tsFindInit::tsFindInit(eWidget *parent): eWidget(parent, 1)
+tsFindInit::tsFindInit(eWidget *parent): eWidget(parent, 1), sstimer(eApp)
 {
 	headline=new eLabel(this);
 	headline->setText("Empfange");
@@ -65,8 +65,6 @@ tsFindInit::tsFindInit(eWidget *parent): eWidget(parent, 1)
 
 	packets.setAutoDelete(true);
 	
-/*	connect(&sstimer, SIGNAL(timeout()), SLOT(showSignalStrength()));
-	connect(eFrontend::fe(), SIGNAL(tunedIn(eTransponder*,int)), SLOT(tunedIn(eTransponder*,int)));*/
 	CONNECT(sstimer.timeout, tsFindInit::showSignalStrength);
 	CONNECT(eFrontend::fe()->tunedIn, tsFindInit::tunedIn);
 	state=sInactive;
@@ -284,7 +282,7 @@ void tsDoScan::updateETA()
 	eta->setText(QString().sprintf("Left: %d Minutes and %02d Seconds", (int)left/60, (int)left%60));
 }
 
-tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(init)
+tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(init), etatimer(eApp)
 {
 	transp_found=new eLabel(this);
 	transp_found->move(ePoint(10, 0));
@@ -306,9 +304,6 @@ tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(
 	eta->move(ePoint(10, 120));
 	eta->resize(eSize(440, 30));
 
-/*	connect(eDVB::getInstance(), SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
-	connect(eDVB::getInstance(), SIGNAL(eventOccured(int)), SLOT(eventOccured(int)));
-	connect(&etatimer, SIGNAL(timeout()), SLOT(updateETA()));*/
 	CONNECT(eDVB::getInstance()->stateChanged, tsDoScan::stateChanged);
 	CONNECT(eDVB::getInstance()->eventOccured, tsDoScan::eventOccured);
 	CONNECT(etatimer.timeout, tsDoScan::updateETA);

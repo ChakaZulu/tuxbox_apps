@@ -35,7 +35,6 @@ eRCDriver::~eRCDriver()
 
 void eRCShortDriver::keyPressed(int)
 {
-	printf("KEYPRESSED\n");
 	__u16 rccode;
 	while (1)
 	{

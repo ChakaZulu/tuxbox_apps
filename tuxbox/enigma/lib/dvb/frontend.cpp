@@ -1,3 +1,4 @@
+#include <ebase.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +17,8 @@ eFrontend* eFrontend::frontend;
 eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 {
 	state=stateIdle;
-	timer=new eTimer;
-//	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
+	timer=new eTimer(eApp);
+
 	CONNECT(timer->timeout, eFrontend::timeout);
 	fd=::open(demod, O_RDWR);
 	if (fd<0)

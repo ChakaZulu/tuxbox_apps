@@ -1,3 +1,4 @@
+#include <ebase.h>
 #include <sys/ioctl.h>
 #include <dbox/fp.h>
 #include "rcdbox.h"
@@ -49,7 +50,7 @@ void eRCDeviceDBoxOld::repeat()
 	repeattimer.start(rrate, 1);
 }
 
-eRCDeviceDBoxOld::eRCDeviceDBoxOld(eRCDriver *driver): eRCDevice("DBoxOld", driver)
+eRCDeviceDBoxOld::eRCDeviceDBoxOld(eRCDriver *driver): eRCDevice("DBoxOld", driver), timeout(eApp), repeattimer(eApp)
 {
 	ccode=-1;
 	rrate=100;
@@ -175,7 +176,7 @@ void eRCDeviceDBoxNew::repeat()
 	repeattimer.start(rrate, 1);
 }
 
-eRCDeviceDBoxNew::eRCDeviceDBoxNew(eRCDriver *driver): eRCDevice("DBoxNew", driver)
+eRCDeviceDBoxNew::eRCDeviceDBoxNew(eRCDriver *driver): eRCDevice("DBoxNew", driver), timeout(eApp), repeattimer(eApp)
 {
 	ccode=-1;
 	rrate=100;
@@ -288,7 +289,7 @@ void eRCDeviceDBoxButton::repeat()
 	repeattimer.start(rrate, 1);
 }
 
-eRCDeviceDBoxButton::eRCDeviceDBoxButton(eRCDriver *driver): eRCDevice("DBoxButton", driver)
+eRCDeviceDBoxButton::eRCDeviceDBoxButton(eRCDriver *driver): eRCDevice("DBoxButton", driver), repeattimer(eApp)
 {
 	rrate=100;
 	rdelay=300;

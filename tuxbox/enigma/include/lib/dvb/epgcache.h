@@ -66,7 +66,6 @@ public:
 
 class eEPGCache: public eSection
 {
-//	Q_OBJECT
 private:
 	eService* current_service;
 	int current_sid;
@@ -81,8 +80,7 @@ private:
 
 	eTimer CleanTimer;
 	eTimer zapTimer;
-	eTimer EPGUpdate;
-public:/* slots:*/
+public:
 	inline void startEPG();
 	inline void stopEPG(eService* e = 0);
 	inline void enterService(eService*, int);
@@ -95,8 +93,7 @@ public:
 //	EITEvent *lookupEvent(int original_network_id, int service_id, int event_id);
 	EITEvent *lookupCurrentEvent(int original_network_id, int service_id);
 	inline const eventMap* eEPGCache::getEventMap(int original_network_id, int service_id);
-/*signals:
-	void EPGAvail(bool);*/
+
 	Signal1<void, bool> EPGAvail;
 };
 

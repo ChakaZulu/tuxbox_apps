@@ -29,12 +29,11 @@ int eListboxEntryEPG::operator==(const eListboxEntry & q) const
 
 class eEPGWindow: public eLBWindow
 {
-//	Q_OBJECT
 	eService* current;
 	eTimer closeTimer;
 protected:
 	int eventFilter(const eWidgetEvent &event);
-private:// slots:
+private:
 	void fillEPGList();
 	void entrySelected(eListboxEntry *entry);
 	void closeWnd();
