@@ -1189,10 +1189,11 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
 	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser("scants.bouquet", (int *)&scanSettings.bouquetMode, true );
-	ojBouquets->addOption( CZapitClient::BM_DELETEBOUQUETS, "scants.bouquet_erase");
-	ojBouquets->addOption( CZapitClient::BM_CREATEBOUQUETS, "scants.bouquet_create");
-	ojBouquets->addOption( CZapitClient::BM_DONTTOUCHBOUQUETS, "scants.bouquet_leave");
-	ojBouquets->addOption( CZapitClient::BM_CREATESATELLITEBOUQUET, "scants.bouquet_satellite");
+	ojBouquets->addOption(CZapitClient::BM_DELETEBOUQUETS, "scants.bouquet_erase");
+	ojBouquets->addOption(CZapitClient::BM_CREATEBOUQUETS, "scants.bouquet_create");
+	ojBouquets->addOption(CZapitClient::BM_DONTTOUCHBOUQUETS, "scants.bouquet_leave");
+	ojBouquets->addOption(CZapitClient::BM_UPDATEBOUQUETS, "scants.bouquet_update");
+	ojBouquets->addOption(CZapitClient::BM_CREATESATELLITEBOUQUET, "scants.bouquet_satellite");
 
 	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
