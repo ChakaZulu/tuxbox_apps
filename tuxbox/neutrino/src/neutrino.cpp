@@ -1,37 +1,40 @@
 /*
- 
-        $Id: neutrino.cpp,v 1.137 2002/01/28 19:52:32 field Exp $
- 
+
+        $Id: neutrino.cpp,v 1.138 2002/01/28 20:50:42 field Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
- 
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- 
+
   $Log: neutrino.cpp,v $
+  Revision 1.138  2002/01/28 20:50:42  field
+  Streaminfo besser
+
   Revision 1.137  2002/01/28 19:52:32  field
   Streaminfo ausfuehrlicher
 
@@ -97,330 +100,330 @@
 
   Revision 1.116  2002/01/03 19:33:33  McClean
   remove unnedded stuff
- 
+
   Revision 1.115  2002/01/02 04:56:27  McClean
   conf file unix-permission
- 
+
   Revision 1.114  2001/12/31 16:27:13  McClean
   use lcddclient
- 
+
   Revision 1.113  2001/12/30 23:15:47  Simplex
   bugfix in adjusting bouquet's channellist to current channel
- 
+
   Revision 1.112  2001/12/30 15:47:29  McClean
   use sms-input..
- 
+
   Revision 1.111  2001/12/29 02:17:00  McClean
   make some settings get from controld
- 
+
   Revision 1.110  2001/12/28 16:31:09  Simplex
   libcontroldclient is now used
- 
+
   Revision 1.109  2001/12/26 16:23:08  Simplex
   -Streamwatchdog renamed to EventWatchDog and moved to Controld
   -EventWatchdog now works with notifier-classes instead of callback-functioms
- 
+
   Revision 1.108  2001/12/20 00:25:38  McClean
   use libnet
- 
+
   Revision 1.107  2001/12/19 21:38:08  McClean
   new background
- 
+
   Revision 1.106  2001/12/19 18:41:25  McClean
   change menue-structure
- 
+
   Revision 1.105  2001/12/19 12:11:01  McClean
   scan-bouquethandling added
- 
+
   Revision 1.104  2001/12/18 21:14:21  McClean
   add proxy-support for updates
- 
+
   Revision 1.103  2001/12/17 19:49:55  McClean
   add ts-scan selection
- 
+
   Revision 1.102  2001/12/17 01:28:26  McClean
   accelerate radiomode-logo-paint
- 
+
   Revision 1.101  2001/12/16 23:38:33  McClean
   change scartmode-behavior
- 
+
   Revision 1.100  2001/12/15 13:52:22  obi
   moved configuation files to CONFIGDIR
- 
+
   Revision 1.99  2001/12/14 16:56:42  faralla
   better bouquet-key handling
- 
+
   Revision 1.98  2001/12/13 00:51:52  McClean
   fix infobar - showepg-bug
- 
+
   Revision 1.97  2001/12/12 19:11:32  McClean
   prepare timing setup...
- 
+
   Revision 1.96  2001/12/12 18:45:39  McClean
   fix gamelist-design, manual-update bug, add save settings now
- 
+
   Revision 1.95  2001/12/12 12:03:46  McClean
   make flash-compatible
- 
+
   Revision 1.94  2001/12/12 11:39:04  McClean
   fix timeselect-bug (cinedom)
- 
+
   Revision 1.93  2001/12/12 11:33:57  McClean
   major epg-fixes
- 
+
   Revision 1.92  2001/12/12 01:47:17  McClean
   cleanup
- 
+
   Revision 1.91  2001/12/07 00:20:36  McClean
   make softupdate work...
- 
+
   Revision 1.90  2001/12/05 21:38:09  rasc
   gamelist: eigener Fontdef fuer 2-zeiliges Menue
- 
+
   Revision 1.89  2001/12/05 01:40:55  McClean
   fixed bouquet-options bugs, soft-update-bug and add scartmode-support
- 
+
   Revision 1.88  2001/12/03 19:09:10  McClean
   fixed install targets
- 
+
   Revision 1.87  2001/12/02 11:59:26  waldi
   - add config.h include
   - change dir for icons
- 
+
   Revision 1.86  2001/12/01 23:13:50  Simplex
   new video format option: autodetect 16:9
- 
+
   Revision 1.85  2001/11/26 20:58:14  McClean
   *** empty log message ***
- 
+
   Revision 1.84  2001/11/24 21:22:07  Simplex
   setting-menuitems for bouquet stuff
- 
+
   Revision 1.83  2001/11/24 13:48:47  Simplex
   fixed "radio-only bouquets"-bug
- 
+
   Revision 1.82  2001/11/23 17:09:22  McClean
   dont know
- 
+
   Revision 1.81  2001/11/23 16:58:41  McClean
   update-functions
- 
+
   Revision 1.80  2001/11/23 13:48:35  faralla
   check if card fits camalpha.bin
- 
+
   Revision 1.79  2001/11/23 13:47:37  faralla
   check if card fits camalpha.bin
- 
+
   Revision 1.78  2001/11/20 23:23:10  Simplex
   Fix for unassigned bouquetList
- 
+
   Revision 1.77  2001/11/19 22:53:33  Simplex
   Neutrino can handle bouquets now.
   There are surely some bugs and todo's but it works :)
- 
+
   Revision 1.76  2001/11/05 16:04:25  field
   nvods/subchannels ver"c++"ed
- 
+
   Revision 1.75  2001/11/03 22:22:43  McClean
   radiomode backgound paint fix
- 
+
   Revision 1.74  2001/11/03 15:43:17  field
   Perspektiven
- 
+
   Revision 1.73  2001/10/31 12:35:39  field
   sectionsd stoppen waehrend scan
- 
+
   Revision 1.72  2001/10/30 22:18:09  McClean
   add ts-scan mask
- 
+
   Revision 1.71  2001/10/29 16:49:00  field
   Kleinere Bug-Fixes (key-input usw.)
- 
+
   Revision 1.70  2001/10/22 21:48:22  McClean
   design-update
- 
+
   Revision 1.69  2001/10/22 15:00:18  McClean
   icon update
- 
+
   Revision 1.68  2001/10/22 11:40:37  field
   nvod-zeitanzeige
- 
+
   Revision 1.67  2001/10/21 13:06:17  field
   nvod-zeiten funktionieren!
- 
+
   Revision 1.66  2001/10/15 17:27:19  field
   nvods (fast) implementiert (umschalten funkt noch nicht)
- 
+
   Revision 1.64  2001/10/14 23:39:55  McClean
   VCR-Mode prepared
- 
+
   Revision 1.63  2001/10/14 23:32:15  McClean
   menu structure - prepared for VCR-Switching
- 
+
   Revision 1.62  2001/10/14 14:30:47  rasc
   -- EventList Darstellung ueberarbeitet
   -- kleiner Aenderungen und kleinere Bugfixes
   -- locales erweitert..
- 
+
   Revision 1.61  2001/10/11 20:59:35  rasc
   clearbuffer() fuer RC-Input bei Start
- 
+
   Revision 1.60  2001/10/10 17:17:13  field
   zappen auf onid_sid umgestellt
- 
+
   Revision 1.59  2001/10/10 01:20:09  McClean
   menue changed
- 
+
   Revision 1.58  2001/10/09 21:48:37  McClean
   ucode-check
- 
+
   Revision 1.57  2001/10/07 13:16:57  McClean
   rgb/svideo/composite__4:3/16:9 switch
- 
+
   Revision 1.56  2001/10/07 12:17:22  McClean
   video mode setup (pre)
- 
+
   Revision 1.55  2001/10/04 23:21:13  McClean
   cleanup
- 
+
   Revision 1.54  2001/10/04 23:16:20  McClean
   get volume from controld
- 
+
   Revision 1.53  2001/10/04 19:28:43  fnbrd
   Eventlist benutzt ID bei zapit und laesst sich per rot wieder schliessen.
- 
+
   Revision 1.52  2001/10/02 23:16:48  McClean
   game interface
- 
+
   Revision 1.51  2001/10/02 17:56:33  McClean
   time in infobar (thread probs?) and "0" quickzap added
- 
+
   Revision 1.50  2001/10/01 20:41:08  McClean
   plugin interface for games - beta but nice.. :)
- 
+
   Revision 1.49  2001/09/27 11:25:38  field
   Numzap gefixt, kleinere Bugfixes
- 
+
   Revision 1.48  2001/09/26 16:24:17  rasc
   - kleinere Aenderungen: Channel Num Zap fuer >999 Channels (Eutelsat/Astra) und eigener Font
- 
+
   Revision 1.47  2001/09/26 11:40:48  field
   Tontraegerauswahl haut hin (bei Kanaelen mit EPG)
- 
+
   Revision 1.45  2001/09/23 21:34:07  rasc
   - LIFObuffer Module, pushbackKey fuer RCInput,
   - In einige Helper und widget-Module eingebracht
     ==> harmonischeres Menuehandling
   - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
- 
+
   Revision 1.44  2001/09/22 13:18:07  field
   epg-anzeige bug gefixt
- 
+
   Revision 1.43  2001/09/20 19:21:37  fnbrd
   Channellist mit IDs.
- 
+
   Revision 1.42  2001/09/20 17:02:16  field
   event-liste zeigt jetzt auch epgs an...
- 
+
   Revision 1.41  2001/09/20 14:10:10  field
   neues EPG-Handling abschaltbar
- 
+
   Revision 1.40  2001/09/20 00:36:32  field
   epg mit zaopit zum grossteil auf onid & s_id umgestellt
- 
+
   Revision 1.39  2001/09/19 20:48:26  field
   Sprachauswahl funktioniert... (zapit updaten!)
- 
+
   Revision 1.37  2001/09/18 20:20:26  field
   Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
   vorbereitet
- 
+
   Revision 1.36  2001/09/18 14:57:51  field
   tzset eingebaut, id wird beim starten ausgegeben
- 
+
   Revision 1.35  2001/09/18 11:34:42  fnbrd
   Some changes.
- 
+
   Revision 1.34  2001/09/18 10:49:49  fnbrd
   Eventlist, quick'n dirty
- 
+
   Revision 1.33  2001/09/17 23:57:50  McClean
   increase shutdown-logo-loadspeed
- 
+
   Revision 1.32  2001/09/17 18:36:56  fnbrd
   Fixed use of unwanted globals ;)
- 
+
   Revision 1.31  2001/09/17 16:02:35  field
   Keyblocker einstellbar, String(Nummern)-Input verbessert
- 
+
   Revision 1.29  2001/09/17 01:07:44  McClean
   i18n selectable from menue - call make install - the .locale-files are needed..
- 
+
   Revision 1.28  2001/09/16 03:38:44  McClean
   i18n + small other fixes
- 
+
   Revision 1.27  2001/09/16 02:27:22  McClean
   make neutrino i18n
- 
+
   Revision 1.26  2001/09/15 17:16:23  McClean
   i18n-module added
- 
+
   Revision 1.25  2001/09/14 16:18:46  field
   Umstellung auf globale Variablen...
- 
+
   Revision 1.24  2001/09/13 10:12:41  field
   Major update! Beschleunigtes zappen & EPG uvm...
- 
+
   Revision 1.23  2001/09/09 23:53:46  fnbrd
   Fixed some bugs, only shown compiling with -Os.
   Conclusion: use -Os ;)
- 
+
   Revision 1.22  2001/09/07 00:21:39  McClean
   spezial shutdown (lcd) fix for GeOrG :))
- 
+
   Revision 1.21  2001/09/03 03:34:04  tw-74
   cosmetic fixes, own "Mg" fontmetrics
- 
+
   Revision 1.20  2001/08/22 07:40:09  faralla
   works with zapit again
- 
+
   Revision 1.19  2001/08/22 07:39:12  faralla
   works with zapit again
- 
+
   Revision 1.18  2001/08/22 00:03:24  ge0rg
   verst„ndliche Fehlermeldungen
- 
+
   Revision 1.17  2001/08/21 18:30:15  ge0rg
   added power down LCD logo
- 
+
   Revision 1.16  2001/08/21 00:30:38  tw-74
   more fontrendering (see comments there), screen cosmetics
- 
+
   Revision 1.15  2001/08/20 13:13:38  tw-74
   cosmetic changes and changes for variable font size
- 
+
   Revision 1.14  2001/08/20 01:51:12  McClean
   channellist bug fixed - faster channellist response
- 
+
   Revision 1.13  2001/08/20 01:26:54  McClean
   stream info added
- 
+
   Revision 1.12  2001/08/18 12:50:29  tw-74
   cosmetic fixes (umlaute, tabbing, style)
- 
+
   Revision 1.11  2001/08/18 12:32:06  McClean
   settings menue - critcal crash bug fixed
- 
+
   Revision 1.10  2001/08/17 10:06:26  McClean
   cleanup - settings menue is broken!
- 
+
   Revision 1.9  2001/08/16 23:19:18  McClean
   epg-view and quickview changed
- 
+
   Revision 1.8  2001/08/15 17:10:02  fnbrd
   Channellist with events.
- 
- 
+
+
 */
 
 #include <config.h>
@@ -674,7 +677,7 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.network_streaming_use = 0;
 	strcpy(g_settings.network_streamingserver, "10.10.10.10");
 	strcpy(g_settings.network_streamingserverport, "4000");
-	
+
 
 	//key bindings
 	g_settings.key_tvradio_mode = CRCInput::RC_home;
@@ -757,7 +760,7 @@ void CNeutrinoApp::saveSetup()
 	else
 	{
 		tosave=true;
-	}	
+	}
 
 	if(tosave)
 	{
@@ -1957,11 +1960,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				int timeout = 5;
 				int timeout1 = 5;
-		
+
 				sscanf(g_settings.repeat_blocker, "%d", &timeout);
-				timeout = int(timeout/100.0)+2;
+				timeout = int(timeout/100.0) + 3;
 				sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
-				timeout1 = int(timeout1/100.0)+2;
+				timeout1 = int(timeout1/100.0) + 3;
 				if(timeout1>timeout)
 				{
 					timeout=timeout1;
@@ -2381,7 +2384,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.137 2002/01/28 19:52:32 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.138 2002/01/28 20:50:42 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

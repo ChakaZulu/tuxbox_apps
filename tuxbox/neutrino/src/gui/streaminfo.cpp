@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: streaminfo.cpp,v 1.14 2002/01/28 19:52:32 field Exp $
+$Id: streaminfo.cpp,v 1.15 2002/01/28 20:50:42 field Exp $
 
 Module StreamInfo
 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.15  2002/01/28 20:50:42  field
+ Streaminfo besser
+
  Revision 1.14  2002/01/28 19:52:32  field
  Streaminfo ausfuehrlicher
 
@@ -220,17 +223,17 @@ void CStreamInfo::paint()
 	g_RemoteControl->CopyPIDs();
 
 	if ( g_RemoteControl->vpid == 0 )
-		sprintf((char*) buf, "%s: %s", "vpid", g_Locale->getText("streaminfo.not_available").c_str() );
+		sprintf((char*) buf, "%s: %s", "v_pid", g_Locale->getText("streaminfo.not_available").c_str() );
 	else
-		sprintf((char*) buf, "%s: 0x%x", "vpid", g_RemoteControl->vpid );
+		sprintf((char*) buf, "%s: 0x%x", "v_pid", g_RemoteControl->vpid );
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
 	if ( g_RemoteControl->audio_chans.count_apids == 0 )
-		sprintf((char*) buf, "%s: %s", "apid(s)", g_Locale->getText("streaminfo.not_available").c_str() );
+		sprintf((char*) buf, "%s: %s", "a_pid(s)", g_Locale->getText("streaminfo.not_available").c_str() );
 	else
 	{
-		sprintf((char*) buf, "%s: ", "apid(s)" );
+		sprintf((char*) buf, "%s: ", "a_pid(s)" );
 		for (int i= 0; i< g_RemoteControl->audio_chans.count_apids; i++)
 		{
 			sprintf((char*) buf2, " 0x%x",  g_RemoteControl->audio_chans.apids[i].pid );
