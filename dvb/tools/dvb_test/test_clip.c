@@ -1,5 +1,5 @@
 /*
- * $Id: test_clip.c,v 1.3 2003/05/11 02:18:29 obi Exp $
+ * $Id: test_clip.c,v 1.4 2003/05/25 01:41:27 obi Exp $
  *
  * (C) 2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -36,11 +36,6 @@
 #define DMX	ADAP "/demux0"
 #define DVR	ADAP "/dvr0"
 
-#define AVIA_AV_STREAM_TYPE_0		0x00
-#define AVIA_AV_STREAM_TYPE_SPTS	0x01
-#define AVIA_AV_STREAM_TYPE_PES		0x02
-#define AVIA_AV_STREAM_TYPE_ES		0x03
-
 int main(int argc, char **argv)
 {
 	unsigned char buf[384 * 188];
@@ -53,7 +48,7 @@ int main(int argc, char **argv)
 	int done;
 
 	if (argc < 4) {
-		printf("usage: %s <filename> <video pid> <audio pid> [<streamtype>] [<audio bypass>]\n", argv[0]);
+		printf("usage: %s <filename> <video pid> <audio pid> [<audio bypass>]\n", argv[0]);
 		return 1;
 	}
 
@@ -85,7 +80,7 @@ int main(int argc, char **argv)
 		perror(VDEC);
 		return 1;
 	}
-	
+
 	if ((ts = open(tsfilename, O_RDONLY)) < 0) {
 		perror(tsfilename);
 		return 1;
@@ -113,32 +108,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (ioctl(adec, AUDIO_STOP) < 0) {
-		perror("AUDIO_STOP");
-		return 1;
-	}
-
-	if (ioctl(vdec, VIDEO_STOP) < 0) {
-		perror("VIDEO_STOP");
-		return 1;
-	}
-
 	if (argc >= 5) {
-		unsigned long streamtype = strtoul(argv[4], NULL, 0);
-
-		if (ioctl(adec, AUDIO_SET_STREAMTYPE, streamtype) < 0) {
-			perror("AUDIO_SET_STREAMTYPE");
-			return 1;
-		}
-
-		if (ioctl(vdec, VIDEO_SET_STREAMTYPE, streamtype) < 0) {
-			perror("VIDEO_SET_STREAMTYPE");
-			return 1;
-		}
-	}
-
-	if (argc >= 6) {
-		unsigned long bypass = strtoul(argv[5], NULL, 0);
+		unsigned long bypass = strtoul(argv[4], NULL, 0);
 
 		if (ioctl(adec, AUDIO_SET_BYPASS_MODE, bypass) < 0) {
 			perror("AUDIO_SET_BYPASS_MODE");
