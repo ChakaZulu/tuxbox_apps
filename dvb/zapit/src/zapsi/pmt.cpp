@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.33 2003/09/09 05:02:06 obi Exp $
+ * $Id: pmt.cpp,v 1.34 2003/09/28 12:40:14 alexw Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -20,16 +20,18 @@
  *
  */
 
+#ifdef UPDATE_PMT
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
 /* zapit */
+#include <zapit/settings.h>
+#endif
 #include <zapit/descriptors.h>
 #include <zapit/dmx.h>
 #include <zapit/debug.h>
 #include <zapit/pmt.h>
-#include <zapit/settings.h>
 
 #define PMT_SIZE 1024
 
@@ -269,6 +271,7 @@ int parse_pmt(CZapitChannel * const channel)
 	if (channel->getPmtPid() == 0)
 		return -1;
 
+#ifdef UPDATE_PMT
 	bzero(filter, DMX_FILTER_SIZE);
 	bzero(mask, DMX_FILTER_SIZE);
 	filter[0] = 0x02;	/* table_id */
@@ -281,6 +284,20 @@ int parse_pmt(CZapitChannel * const channel)
 	mask[2] = 0xFF;
 	mask[3] = 0x01;
 	mask[4] = 0xFF;
+#else
+	memset(filter, 0x00, DMX_FILTER_SIZE);
+	memset(mask, 0x00, DMX_FILTER_SIZE);
+
+	filter[0] = 0x02;
+	filter[1] = channel->getServiceId() >> 8;
+	filter[2] = channel->getServiceId();
+	mask[0] = 0xFF;
+	mask[1] = 0xFF;
+	mask[2] = 0xFF;
+
+	if (channel->getPmtPid() == 0)
+		return -1;
+#endif
 
 	if ((dmx.sectionFilter(channel->getPmtPid(), filter, mask) < 0) || (dmx.read(buffer, PMT_SIZE) < 0))
 		return -1;
@@ -319,6 +336,7 @@ int parse_pmt(CZapitChannel * const channel)
 	return 0;
 }
 
+#ifdef UPDATE_PMT
 int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 {
 	struct dmx_sct_filter_params dsfp;
@@ -355,4 +373,4 @@ int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 
 	return 0;
 }
-
+#endif

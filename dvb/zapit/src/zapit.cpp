@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.330 2003/09/17 16:12:01 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.331 2003/09/28 12:40:13 alexw Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -25,7 +25,9 @@
 /* system headers */
 #include <csignal>
 #include <fcntl.h>
+#ifdef UPDATE_PMT
 #include <sys/poll.h>
+#endif
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -172,7 +174,9 @@ CZapitClient::responseGetLastChannel load_settings(void)
  */
 
 static uint32_t tuned_transponder_id = 0;
+#ifdef UPDATE_PMT
 static int pmt_update_fd = -1;
+#endif
 
 int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 {
@@ -340,7 +344,9 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	cam->setCaPmt(thisChannel->getCaPmt());
 	saveSettings(false);
 
+#ifdef UPDATE_PMT
 	pmt_set_update_filter(thisChannel, &pmt_update_fd);
+#endif
 
 	if (channel != thisChannel)
 		delete thisChannel;
@@ -1539,7 +1545,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.330 2003/09/17 16:12:01 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.331 2003/09/28 12:40:13 alexw Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1619,6 +1625,7 @@ int main(int argc, char **argv)
 
 	leaveStandby();
 
+#ifdef UPDATE_PMT
 	while (zapit_server.run(parse_command, CZapitMessages::ACTVERSION, true)) {
 		unsigned int i, pollnum = 0;
 		struct pollfd pfd[1];
@@ -1642,6 +1649,9 @@ int main(int argc, char **argv)
 		/* yuck, don't waste that much cpu time :) */
 		usleep(0);
 	}
+#else
+	zapit_server.run(parse_command, CZapitMessages::ACTVERSION);
+#endif
 
 	enterStandby();
 
