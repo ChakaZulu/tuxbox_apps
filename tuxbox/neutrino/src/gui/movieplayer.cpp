@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.92 2004/05/20 15:45:26 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.93 2004/06/06 20:53:19 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1794,7 +1794,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP);
-			fullhelptext += "\nVersion: $Revision: 1.92 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.93 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1946,8 +1946,7 @@ CMoviePlayerGui::PlayFile (void)
         			apidtitle.append(" (AC3)");
     			}
     			    
-    			APIDSelector.addItem(new CMenuForwarder(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, 
-    			    false, (uint)(CRCInput::convertDigitToKey(count+1))), (count == 0));
+    			APIDSelector.addItem(new CMenuForwarder(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, CRCInput::convertDigitToKey(count+1)), (count == 0));
 			}
 		    APIDSelector.exec(NULL, "");
             if (currentapid == 0) {
@@ -1998,7 +1997,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP);
-			fullhelptext += "\nVersion: $Revision: 1.92 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.93 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)

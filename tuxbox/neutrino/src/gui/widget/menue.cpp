@@ -652,7 +652,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, const char * const ActionKey, const bool Localizing, neutrino_msg_t DirectKey, const char * const IconName)
+CMenuForwarder::CMenuForwarder(const neutrino_locale_t Text, const bool Active, const char * const Option, CMenuTarget* Target, const char * const ActionKey, neutrino_msg_t DirectKey, const char * const IconName)
 {
 	option = Option;
 	option_string = NULL;
@@ -660,12 +660,11 @@ CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const
 	active = Active;
 	jumpTarget = Target;
 	actionKey = ActionKey ? ActionKey : "";
-	localizing = Localizing;
 	directKey = DirectKey;
 	iconName = IconName ? IconName : "";
 }
 
-CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, const char * const ActionKey, const bool Localizing, neutrino_msg_t DirectKey, const char * const IconName)
+CMenuForwarder::CMenuForwarder(const neutrino_locale_t Text, const bool Active, const std::string &Option, CMenuTarget* Target, const char * const ActionKey, neutrino_msg_t DirectKey, const char * const IconName)
 {
 	option = NULL;
 	option_string = &Option;
@@ -673,7 +672,6 @@ CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const
 	active = Active;
 	jumpTarget = Target;
 	actionKey = ActionKey ? ActionKey : "";
-	localizing = Localizing;
 	directKey = DirectKey;
 	iconName = IconName ? IconName : "";
 }
@@ -706,11 +704,16 @@ const char * CMenuForwarder::getOption(void)
 			return NULL;
 }
 
+const char * CMenuForwarder::getName(void)
+{
+	return g_Locale->getText(text);
+}
+
 int CMenuForwarder::paint(bool selected)
 {
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 	int height = getHeight();
-	const char * l_text = localizing ? g_Locale->getText(text.c_str()) : text.c_str(); // FIXME
+	const char * l_text = getName();
 
 	int stringstartposX = x + offx + 10;
 
@@ -762,6 +765,19 @@ int CMenuForwarder::paint(bool selected)
 
 	return y+ height;
 }
+
+
+//-------------------------------------------------------------------------------------------------------------------------------
+const char * CMenuForwarderNonLocalized::getName(void)
+{
+	return the_text.c_str();
+}
+
+CMenuForwarderNonLocalized::CMenuForwarderNonLocalized(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, const char * const ActionKey, neutrino_msg_t DirectKey, const char * const IconName) : CMenuForwarder(NONEXISTANT_LOCALE, Active, Option, Target, ActionKey, DirectKey, IconName)
+{
+	the_text = Text;
+}
+
 
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuSeparator::CMenuSeparator(const int Type, const neutrino_locale_t Text)
