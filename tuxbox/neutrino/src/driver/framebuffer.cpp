@@ -620,7 +620,7 @@ void CFrameBuffer::setBackgroundColor(int color)
 	backgroundColor = color;
 }
 
-bool CFrameBuffer::loadPictureToMem(const std::string filename, const uint16_t width, const uint16_t height, uint8_t * memp)
+bool CFrameBuffer::loadPictureToMem(const std::string filename, const uint16_t width, const uint16_t height, const uint16_t stride, uint8_t * memp)
 {
 	struct rawHeader header;
 	int              fd;
@@ -642,7 +642,11 @@ bool CFrameBuffer::loadPictureToMem(const std::string filename, const uint16_t w
 		return false;
 	}
 
-	read(fd, memp, width * height);
+	if ((stride == 0) || (stride == width))
+	    read(fd, memp, width * height);
+	else
+	    for (int i = 0; i < height; i++)
+		read(fd, memp + i * stride, width);
 
 	close(fd);
 	return true;
@@ -650,7 +654,12 @@ bool CFrameBuffer::loadPictureToMem(const std::string filename, const uint16_t w
 
 bool CFrameBuffer::loadPicture2Mem(const std::string filename, uint8_t * memp)
 {
-	return loadPictureToMem(filename, 720, 576, memp);
+	return loadPictureToMem(filename, 720, 576, 0, memp);
+}
+
+bool CFrameBuffer::loadPicture2FrameBuffer(const std::string filename)
+{
+	return loadPictureToMem(filename, 720, 576, getStride(), getFrameBufferPointer());
 }
 
 bool CFrameBuffer::savePictureFromMem(const std::string filename, uint8_t * memp)
@@ -699,7 +708,7 @@ bool CFrameBuffer::loadBackground(const std::string filename, const unsigned cha
 
 	background = new uint8_t[720*576];
 
-	if (!loadPictureToMem(filename, 720, 576, background))
+	if (!loadPictureToMem(filename, 720, 576, 0, background))
 	{
 		delete[] background;
 		return false;

@@ -59,7 +59,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		return menu_return::RETURN_EXIT_ALL;
 
 	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
-	frameBuffer->loadPicture2Mem("scan.raw", frameBuffer->getFrameBufferPointer());
+	frameBuffer->loadPicture2FrameBuffer("scan.raw");
 
 	g_Sectionsd->setPauseScanning( true );
 

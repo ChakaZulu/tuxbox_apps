@@ -126,9 +126,10 @@ class CFrameBuffer
 		bool paintIcon8(const std::string filename, int x, int y, unsigned char offset=0);
 		void loadPal   (const std::string filename, unsigned char offset=0, unsigned char endidx=255 );
 
-		bool loadPicture2Mem   (const std::string filename, uint8_t * memp);
-		bool loadPictureToMem  (const std::string filename, const uint16_t width, const uint16_t height, uint8_t * memp);
-		bool savePictureFromMem(const std::string filename, uint8_t * memp);
+		bool loadPicture2Mem        (const std::string filename, uint8_t * memp);
+		bool loadPicture2FrameBuffer(const std::string filename);
+		bool loadPictureToMem       (const std::string filename, const uint16_t width, const uint16_t height, const uint16_t stride, uint8_t * memp);
+		bool savePictureFromMem     (const std::string filename, uint8_t * memp);
 
 		void setBackgroundColor(int color);
 		bool loadBackground(const std::string filename, const unsigned char col = 0);
