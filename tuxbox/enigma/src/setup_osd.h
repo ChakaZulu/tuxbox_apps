@@ -9,6 +9,8 @@ class eButton;
 class eZapOsdSetup: public eWindow
 {
 	eCheckbox* showOSDOnEITUpdate;
+	eCheckbox* showConsoleOnFB;
+
 	eButton *ok, *abort;
 private:
 	void fieldSelected(int *number);

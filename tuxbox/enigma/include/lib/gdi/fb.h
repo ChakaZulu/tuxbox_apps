@@ -17,6 +17,7 @@ class fbClass
 	int locked;
 public:
 	unsigned char *lfb;
+	int showConsole(int state);
 	int SetMode(unsigned int xRes, unsigned int yRes, unsigned int bpp);
 	int Available() { return available; }
 	unsigned int Stride() { return stride; }

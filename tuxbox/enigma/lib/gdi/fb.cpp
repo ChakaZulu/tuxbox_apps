@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <memory.h>
+
+#include <core/system/econfig.h>
+#include <linux/kd.h>
 #include "fb.h"
 
 fbClass *fbClass::instance;
@@ -25,6 +28,11 @@ fbClass::fbClass(const char *fb)
 	cmap.green=green;
 	cmap.blue=blue;
 	cmap.transp=trans;
+
+	int state=0;
+	eConfig::getInstance()->getKey("/ezap/osd/showConsoleOnFB", state);
+	showConsole(state);
+
 	fd=open(fb, O_RDWR);
 	if (fd<0)
 	{
@@ -59,6 +67,17 @@ fbClass::fbClass(const char *fb)
 nolfb:
 	printf("framebuffer not available.\n");
 	lfb=0;
+}
+
+int fbClass::showConsole(int state)
+{
+	int fd=open("/dev/console", O_RDWR);
+	if(fd>=0)
+	{
+		ioctl(fd, KDSETMODE, state?KD_TEXT:KD_GRAPHICS);
+		eDebug("set console to graphics mode!!!");
+		close(fd);
+	}
 }
 
 int fbClass::SetMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
