@@ -85,12 +85,14 @@ int eHTTPError::doWrite(int w)
 
 eHTTPConnection::eHTTPConnection(int socket, eHTTPD *parent): QSocket(parent), parent(parent)
 {
+	eDebug("eHTTPConnection");
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
-	CONNECT(this->error_ , eHTTPConnection::error);
+	CONNECT(this->error_ , eHTTPConnection::gotError);
+	eDebug("Aufruf von setSocket!");
 	setSocket(socket);
+	eDebug("zurück aus setSocket");
 //	QHostAddress me=address(), he=peerAddress();
-
 	buffersize=64*1024;
 	dying=0;
 	localstate=stateWait;
@@ -102,9 +104,9 @@ eHTTPConnection::eHTTPConnection(const char *host, int port): QSocket(0), parent
 {
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
-	CONNECT(this->error_ , eHTTPConnection::error);
+	CONNECT(this->error_ , eHTTPConnection::gotError);
 	CONNECT(this->connected_ , eHTTPConnection::hostConnected);	
-
+	eDebug("Hier");
 	connectToHost(host, port);
 	dying=0;
 
@@ -508,13 +510,13 @@ int eHTTPConnection::getLine(eString &line)
 	return 1;
 }
 
-void eHTTPConnection::gotError()
+void eHTTPConnection::gotError(int)
 {
 	eDebug("ich hab nen ERROR");
 	die();
 }
 
-eHTTPD::eHTTPD(Q_UINT16 port, int backlog, QObject *parent, const char *name): QServerSocket(port, backlog, parent, name)
+eHTTPD::eHTTPD(Q_UINT16 port, int backlog): QServerSocket(port, backlog)
 {
 	new eHTTPGarbage;
 	if (!ok())

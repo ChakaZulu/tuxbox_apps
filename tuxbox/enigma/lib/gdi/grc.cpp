@@ -71,7 +71,7 @@ gPainter::gPainter(gDC &dc, eRect rect): dc(dc), rc(gRC::getInstance()), foregro
 {
 	if (rect.isNull())
 		rect=eRect(ePoint(0, 0), dc.getSize());
-	ASSERT(!gPainter_instances);
+//	ASSERT(!gPainter_instances);
 	gPainter_instances++;
 	begin(rect);
 }

@@ -5,7 +5,8 @@
 #include <qfile.h>
 #include <eptrlist.h>
 #include <ebase.h>
-#include <qserversocket.h>
+#include <core/socket/qsocket.h>
+#include <core/socket/qserversocket.h>
 #include <map>
 #include <estring.h>
 #include <eerror.h>
@@ -14,7 +15,7 @@ class eHTTPConnection;
 class eHTTPDataSource;
 class eHTTPD;
 
-class eHTTPGarbage: public Object
+class eHTTPGarbage: public QObject, public Object
 {
 	eTimer garbage;
 	ePtrList<eHTTPConnection> *conn;
@@ -72,7 +73,7 @@ class eHTTPConnection: public QSocket
 	int buffersize, dying;
 private:
 	void readData();
-	void gotError();
+	void gotError(int);
 	void bytesWritten(int);
 	void hostConnected();
 public:
@@ -124,7 +125,7 @@ class eHTTPD: public QServerSocket, public Object
 private:// slots:
 	void oneConnectionClosed();
 public:
-	eHTTPD(Q_UINT16 port, int backlog=0, QObject *parent=0, const char *name=0);
+	eHTTPD(Q_UINT16 port, int backlog=0);
 	void newConnection(int socket);
 
 	void addResolver(eHTTPPathResolver *r) { resolver.push_back(r); }

@@ -42,7 +42,7 @@ eString& eString::removeChars(char fchar)
 //	Remove all chars that equal to fchar, and returns a reference to itself
 	int index=0;
 
-	while ( index = find(fchar, index) )
+	while ( ( index = find(fchar, index) ) != npos )
 		erase(index, 1);
 
 	return *this;
@@ -81,7 +81,7 @@ eString& eString::strReplace(const char* fstr, const eString& rstr)
 	int index=0;
 	int fstrlen = strlen(fstr);
 
-	while ( index = find(fstr, index) )
+	while ( ( index = find(fstr, index) ) != npos )
 		replace(index++, fstrlen, rstr);
 	
 	return *this;

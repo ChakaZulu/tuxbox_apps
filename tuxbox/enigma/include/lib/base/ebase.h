@@ -141,7 +141,7 @@ class eMainloop;
 class eSocketNotifier
 {
 public:
-	enum { Read=POLLIN, Write=POLLOUT };
+	enum { Read=POLLIN, Write=POLLOUT, http=POLLIN|POLLPRI };
 private:
 	eMainloop &context;
 	int fd;
@@ -163,6 +163,7 @@ public:
 
 	void start();
 	void stop();
+	bool isRunning() { return state; }
 
 	int getFD() { return fd; }
 	int getRequested() { return requested; }

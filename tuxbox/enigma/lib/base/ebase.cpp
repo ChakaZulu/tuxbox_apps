@@ -130,7 +130,7 @@ void eMainloop::processOneEvent()
 
 			int req = notifiers[pfd[i].fd]->getRequested();
 
-			if ( (pfd[i].revents & req) == req)
+			if ( pfd[i].revents & req )
 			{
 				notifiers[pfd[i].fd]->activate(pfd[i].revents);
 

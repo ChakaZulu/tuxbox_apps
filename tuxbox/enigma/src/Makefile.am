@@ -6,6 +6,7 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/core/base \
 	-I$(top_srcdir)/enigma/src/core/gdi \
 	-I$(top_srcdir)/enigma/src/core/system \
+	-I$(top_srcdir)/enigma/src/core/socket \
 	-I$(top_srcdir)/enigma/src/core/dvb \
 	-I$(top_srcdir)/enigma/src/core/driver \
 	-I$(top_srcdir)/enigma/src/core/xml \
@@ -29,6 +30,7 @@ enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/dvb/lowlevel/libenigma_dvb_lowlevel.la \
 	$(top_builddir)/enigma/src/core/gui/libenigma_gui.la \
 	$(top_builddir)/enigma/src/core/gdi/libenigma_gdi.la \
+	$(top_builddir)/enigma/src/core/socket/libenigma_socket.la \
 	$(top_builddir)/enigma/src/core/system/libenigma_system.la \
 	$(top_builddir)/enigma/src/core/xml/libenigma_xml.la \
 	$(top_builddir)/edvb/miniqt/libminiqt.la \
@@ -54,6 +56,9 @@ $(top_builddir)/enigma/src/core/gdi/libenigma_gdi.la:
 
 $(top_builddir)/enigma/src/core/gui/libenigma_gui.la:
 	$(MAKE) -C $(top_builddir)/enigma/src/core/gui
+
+$(top_builddir)/enigma/src/core/socket/libenigma_socket.la:
+	$(MAKE) -C $(top_builddir)/enigma/src/core/socket
 
 $(top_builddir)/enigma/src/core/system/libenigma_system.la:
 	$(MAKE) -C $(top_builddir)/enigma/src/core/system

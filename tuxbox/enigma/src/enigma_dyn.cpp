@@ -315,10 +315,7 @@ static eString getIP()
 
 static eString filter_string(eString string)
 {
-	string=string.removeChars('\x86');
-	string=string.removeChars('\x87');
-	string=string.removeChars('\x05');
-	return string;
+	return string.removeChars('\x86').removeChars('\x87').removeChars('\x05');
 }
 
 
