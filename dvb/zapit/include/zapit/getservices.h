@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.33 2002/04/10 18:36:21 obi Exp $
+ * $Id: getservices.h,v 1.34 2002/04/14 06:06:31 obi Exp $
  */
 
 #ifndef __getservices_h__
@@ -36,7 +36,7 @@
 #define INVALID 0x1FFF
 
 void ParseTransponders (XMLTreeNode *xmltransponder, uint8_t DiSEqC);
-void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t original_network_id);
+void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC);
 void FindTransponder (XMLTreeNode *root);
 void LoadSortList ();
 int LoadServices ();
@@ -88,10 +88,11 @@ class CZapitChannel
 		uint16_t transportStreamId;
 		uint16_t originalNetworkId;
 		uint8_t serviceType;
+		uint8_t DiSEqC;
 
 	public:
 		/* constructor */
-		CZapitChannel (std::string p_name, uint16_t p_sid, uint16_t p_tsid, uint16_t p_onid, uint8_t p_service_type, uint16_t p_chan_nr = 0)
+		CZapitChannel (std::string p_name, uint16_t p_sid, uint16_t p_tsid, uint16_t p_onid, uint8_t p_service_type, uint16_t p_chan_nr, uint8_t p_DiSEqC)
 		{
 			name = p_name;
 			memset(&chanpids, 0, sizeof(chanpids));
@@ -102,6 +103,7 @@ class CZapitChannel
 			originalNetworkId = p_onid;
 			serviceType = p_service_type;
 			channelNumber = p_chan_nr;
+			DiSEqC = p_DiSEqC;
 		}
 
 		/* get methods - read and write variables */
@@ -122,7 +124,9 @@ class CZapitChannel
 		uint16_t getTransportStreamId()	{ return transportStreamId; }
 		uint16_t getOriginalNetworkId()	{ return originalNetworkId; }
 		uint8_t getServiceType()	{ return serviceType; }
+		uint8_t getDiSEqC()		{ return DiSEqC; }
 		uint32_t getOnidSid()		{ return (originalNetworkId << 16) | serviceId; }
+		uint32_t getTsidOnid()		{ return (transportStreamId << 16) | originalNetworkId; }
 
 		/* set methods */
 		void setName(std::string pName)			{ name = pName; }
@@ -185,15 +189,4 @@ typedef struct channel_msg_struct_2 {
 	uint32_t onid_tsid;
 } channel_msg_2;
 
-extern std::map<uint, transponder> transponders;
-
-extern std::map<uint, CZapitChannel> allchans_tv;
-extern std::map<uint, uint> numchans_tv;
-extern std::map<std::string, uint> namechans_tv;
-
-extern std::map<uint, CZapitChannel> allchans_radio;
-extern std::map<uint, uint> numchans_radio;
-extern std::map<std::string, uint> namechans_radio;
-
 #endif /* __getservices_h__ */
-

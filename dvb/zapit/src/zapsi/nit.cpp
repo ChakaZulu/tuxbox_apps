@@ -1,10 +1,12 @@
 /*
- * $Id: nit.cpp,v 1.13 2002/04/10 18:36:21 obi Exp $
+ * $Id: nit.cpp,v 1.14 2002/04/14 06:06:31 obi Exp $
  */
 
 #include "nit.h"
 
-int nit (uint8_t DiSEqC)
+extern std::map <uint32_t, transponder> transponders;
+
+int parse_nit (uint8_t DiSEqC)
 {
 	struct dmxSctFilterParams flt;
 	int demux_fd;
@@ -89,7 +91,7 @@ int nit (uint8_t DiSEqC)
 				break;
 #endif
 			default:
-				printf("[nit.cpp] descriptor_tag: %02x\n", buffer[pos]);
+				printf("[nit.cpp] descriptor_tag (a): %02x\n", buffer[pos]);
 				break;
 			}
 		}
@@ -102,10 +104,12 @@ int nit (uint8_t DiSEqC)
 			original_network_id = (buffer[pos + 2] << 8) | buffer[pos + 3];
 			transport_descriptors_length = ((buffer[pos + 4] & 0x0F) << 8) | buffer[pos + 5];
 
-			printf("[nit.cpp] TS-ID: %04x\n", transport_stream_id);
-			printf("[nit.cpp] Original network-id: %04x\n", original_network_id);
+#ifdef DEBUG
+			printf("[nit.cpp] transport_stream_id: %04x\n", transport_stream_id);
+			printf("[nit.cpp] original_network_id: %04x\n", original_network_id);
+#endif
 
-			if (transponders.count(transport_stream_id) == 0)
+			if (transponders.count((transport_stream_id << 16) | original_network_id) == 0)
 			{
 				for (pos2 = pos + 6; pos2 < pos + transport_descriptors_length + 6; pos2 += buffer[pos2 + 1] + 2)
 				{
@@ -140,7 +144,7 @@ int nit (uint8_t DiSEqC)
 					case 0x6E: /* announcement_support_descriptor */
 						break;
 					default:
-						printf("[nit.cpp] descriptor_tag: %02x\n", buffer[pos2]);
+						printf("[nit.cpp] descriptor_tag (b): %02x\n", buffer[pos2]);
 						break;
 					}
 				}

@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.17 2002/04/10 18:36:21 obi Exp $
+ * $Id: sdt.cpp,v 1.18 2002/04/14 06:06:31 obi Exp $
  */
 
 #include <stdio.h>
@@ -20,10 +20,7 @@
 
 #define DEMUX_DEV "/dev/ost/demux0"
 
-extern std::string curr_chan_name;
-extern std::map <uint, CZapitChannel> nvodchannels;
-
-int sdt (uint16_t oservice_id, bool scan_mode)
+int parse_sdt (uint16_t oservice_id, bool scan_mode)
 {
 	struct dmxSctFilterParams flt;
 	int demux_fd;
@@ -74,15 +71,17 @@ int sdt (uint16_t oservice_id, bool scan_mode)
 		section_length = ((buffer[1] & 0x0F) << 8) | buffer[2];
 		transport_stream_id = (buffer[3] << 8) | buffer[4];
 		original_network_id = (buffer[8] << 8) | buffer[9];
-
+#ifdef DEBUG
 		printf("[sdt.cpp] transport_stream_id: %04x\n", transport_stream_id);
 		printf("[sdt.cpp] original_network_id: %04x\n", original_network_id);
-
+#endif
 		for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5)
 		{
 			service_id = (buffer[pos] << 8) | buffer[pos + 1];
 			descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
+#ifdef DEBUG
 			printf("[sdt.cpp] service_id: %04x\n", service_id);
+#endif
 
 			if ((oservice_id == service_id) || (scan_mode == true))
 			{
@@ -118,7 +117,12 @@ int sdt (uint16_t oservice_id, bool scan_mode)
 					case 0x64: /* data_broadcast_descriptor */
 						break;
 					default:
-						printf("[sdt.cpp] descriptor_tag %02x\n", buffer[pos2]);
+#ifdef DEBUG
+						printf("[sdt.cpp] unknown descriptor_tag, dump follows:\n");
+						printf("[sdt.cpp]");
+						for (int i = 0; i < buffer[pos2 + 1] + 2; i++) printf(" %02x", buffer[pos2 + i]);
+						printf("\n");
+#endif
 						break;
 					}
 				}

@@ -1,10 +1,18 @@
 /*
- * $Id: getservices.cpp,v 1.32 2002/04/10 18:36:21 obi Exp $
+ * $Id: getservices.cpp,v 1.33 2002/04/14 06:06:31 obi Exp $
  */
 
 #include "getservices.h"
 
 uint8_t curr_diseqc = 0;
+
+extern std::map <uint32_t, transponder> transponders;
+extern std::map <uint32_t, CZapitChannel> allchans_tv;
+extern std::map <uint32_t, uint32_t> numchans_tv;
+extern std::map <std::string, uint32_t> namechans_tv;
+extern std::map <uint32_t, CZapitChannel> allchans_radio;
+extern std::map <uint32_t, uint32_t> numchans_radio;
+extern std::map <std::string, uint32_t> namechans_radio;
 
 void nameinsert (std::string name, uint16_t original_network_id, uint16_t service_id, uint8_t service_type)
 {
@@ -96,9 +104,9 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 		/* add current transponder to list */
 		transponders.insert
 		(
-			std::pair <uint16_t, transponder>
+			std::pair <uint32_t, transponder>
 			(
-				transport_stream_id,
+				(transport_stream_id << 16) | original_network_id,
 				transponder
 				(
 					transport_stream_id,
@@ -111,7 +119,7 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 		);
 
 		/* read channels that belong to the current transponder */
-		ParseChannels(node->GetChild(), transport_stream_id, original_network_id);
+		ParseChannels(node->GetChild(), transport_stream_id, original_network_id, DiSEqC);
 
 		/* hop to next transponder */
 		node = node->GetNext();
@@ -120,7 +128,7 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 	return;
 }
 
-void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t original_network_id)
+void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC)
 {
 	uint16_t service_id;
 	std::string name;
@@ -150,7 +158,8 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 						transport_stream_id,
 						original_network_id,
 						service_type,
-						channel_number
+						channel_number,
+						DiSEqC
 					)
 				)
 			);
@@ -186,7 +195,8 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 						transport_stream_id,
 						original_network_id,
 						service_type,
-						channel_number
+						channel_number,
+						DiSEqC
 					)
 				)
 			);

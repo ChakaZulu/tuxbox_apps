@@ -1,36 +1,6 @@
 /*
- $Id: scan.h,v 1.11 2002/04/10 18:36:21 obi Exp $
-
-
-
- $Log: scan.h,v $
- Revision 1.11  2002/04/10 18:36:21  obi
- EXPERIMENTAL VERSION
- - rewrote scan, is now configurable through xml files
-   (currently limited (hardcoded) to Astra and Telekom cable until zapitclient offers full support)
- - moved services.xml to from CONFIGDIR/zapit to CONFIGDIR
- - restructured services lists
- - cache pids
- - replaced channel struct by CZapitChannel class
- - fixed emmpid bug
- - restructured pids
- - changed and added some defines to increase readability
- - added more features to pzapit
-
- Revision 1.10  2002/04/06 11:26:11  obi
- lots of changes, bugs and fixes, including:
- - anti-randomness fixes
- - unused code
- - probably something else
-
- Revision 1.9  2002/04/04 14:41:08  rasc
- - New functions in zapitclient for handling favorites
-   - test if a bouquet exists
- - Some Log - CVS Entries in modules
-
-
-
-*/
+ *  $Id: scan.h,v 1.12 2002/04/14 06:06:31 obi Exp $
+ */
 
 #ifndef __scan_h__
 #define __scan_h__
@@ -43,9 +13,9 @@
 
 struct transpondermap;
 
+#include "frontend.h"
 #include "pat.h"
 #include "sdt.h"
-#include "tune.h"
 #include "xml/xmltree.h"
 #include "zapit.h"
 #include "zapitclient.h"
@@ -137,8 +107,8 @@ struct bouquet_mulmap
 	}
 };
 
-extern std::map<int, transpondermap> scantransponders;
-extern std::map<int, scanchannel> scanchannels;
-extern std::multimap<std::string, bouquet_mulmap> scanbouquets;
+extern std::map <uint32_t, transpondermap> scantransponders;
+extern std::map <uint32_t, scanchannel> scanchannels;
+extern std::multimap <std::string, bouquet_mulmap> scanbouquets;
 
 #endif /* __scan_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.125 2002/04/11 16:30:08 obi Exp $
+ * $Id: zapit.cpp,v 1.126 2002/04/14 06:06:31 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -30,6 +30,8 @@
 #define dputs(str) { if (debug) puts(str); }
 
 #define VBI_DEV	"/dev/dbox/vbi0"
+
+CFrontend *frontend = NULL;
 
 struct rmsg {
 	uint8_t version;
@@ -63,8 +65,8 @@ CEventServer *eventServer;
 
 bool debug = false;
 
-extern uint16_t old_tsid;
 uint32_t curr_onid_sid = 0;
+uint8_t current_diseqc = 0;
 bool OldAC3 = false;
 
 /* near video on demand */
@@ -80,20 +82,20 @@ int dmx_pcr_fd = -1;
 int dmx_video_fd = -1;
 
 /* channellists */
-std::map<uint, uint> allnumchannels_tv;
-std::map<uint, uint> allnumchannels_radio;
-std::map<std::string, uint> allnamechannels_tv;
-std::map<std::string, uint> allnamechannels_radio;
+std::map <uint32_t, uint32_t> allnumchannels_tv;
+std::map <uint32_t, uint32_t> allnumchannels_radio;
+std::map <std::string, uint32_t> allnamechannels_tv;
+std::map <std::string, uint32_t> allnamechannels_radio;
 
-extern std::map<uint, transponder>transponders;
+std::map <uint32_t, transponder>transponders;
 
-std::map <uint, CZapitChannel> allchans_tv;
-std::map<uint, uint> numchans_tv;
-std::map<std::string, uint> namechans_tv;
+std::map <uint32_t, CZapitChannel> allchans_tv;
+std::map <uint32_t, uint32_t> numchans_tv;
+std::map <std::string, uint32_t> namechans_tv;
 
-std::map<uint, CZapitChannel> allchans_radio;
-std::map<uint, uint> numchans_radio;
-std::map<std::string, uint> namechans_radio;
+std::map <uint32_t, CZapitChannel> allchans_radio;
+std::map <uint32_t, uint32_t> numchans_radio;
+std::map <std::string, uint32_t> namechans_radio;
 
 bool Radiomode_on = false;
 pids chanpids;
@@ -299,7 +301,7 @@ void *decode_thread(void *ptr)
 
 	debug("[zapit] starting decode_thread\n");
 
-	if (vals->new_tsid == true)
+	if (vals->new_tp == true)
 	{
 		debug("[zapit] resetting cam\n");
 		cam_reset();
@@ -308,10 +310,10 @@ void *decode_thread(void *ptr)
 	if ((vals->chanpids->ecmpid != NONE) && (vals->chanpids->ecmpid != INVALID))
 	{
 		debug("[zapit] setting ecm pid %04x\n", vals->chanpids->ecmpid);
-		descramble(vals->onid, vals->tsid, 0x104, caid, vals->chanpids);
+		descramble(vals->tsid_onid, 0x104, caid, vals->chanpids);
 	}
 
-	if ((vals->new_tsid == true) && (vals->chanpids->emmpid != NONE) && (vals->chanpids->emmpid != INVALID))
+	if ((vals->new_tp == true) && (vals->chanpids->emmpid != NONE) && (vals->chanpids->emmpid != INVALID))
 	{
 		debug("[zapit] setting emm pid %04x\n", vals->chanpids->emmpid);
 		setemm(0x104, caid, vals->chanpids->emmpid);
@@ -332,8 +334,8 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	videoStatus video_status;
 #endif
 	std::map <uint, CZapitChannel>::iterator cit;
-	uint16_t transport_stream_id;
-	bool new_transport_stream_id;
+	bool new_transponder;
+	//pids chanpids;
 #ifdef USE_EXTERNAL_CAMD
 	char *vpidbuf;
 	char *apidbuf;
@@ -433,26 +435,26 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		debug("[zapit] demux device already closed (audio)\n");
 	}
 
-	transport_stream_id = cit->second.getTransportStreamId();
+	current_diseqc = cit->second.getDiSEqC();
 
-	/* Tune to new transponder if necessary */
-	if (transport_stream_id != old_tsid)
+	/* if channel's transponder does not match frontend's tuned transponder ... */
+	if (cit->second.getTsidOnid() != frontend->getTsidOnid())
 	{
-		old_tsid = transport_stream_id;
-
-		debug("[zapit] tunig to tsid %04x\n", transport_stream_id);
-
-		if (tune(transport_stream_id) != 0)
+		/* ... tune ... */
+		if (frontend->tuneChannel(&(cit->second)) == true)
 		{
-			debug("[zapit] no transponder with tsid %04x found\n", transport_stream_id);
+			/* ... and succeed ... */
+			new_transponder = true;
+		}
+		else
+		{
+			/* ... or fail. */
 			return -3;
 		}
-
-		new_transport_stream_id = true;
 	}
 	else
 	{
-		new_transport_stream_id = false;
+		new_transponder = false;
 	}
 
 	if (cit->second.getServiceType() == NVOD_REFERENCE_SERVICE)
@@ -562,9 +564,8 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	}
 #else
 	decode_vals *vals = (decode_vals*) malloc(sizeof(decode_vals));
-	vals->onid = onid_sid >> 16;
-	vals->tsid = transport_stream_id;
-	vals->new_tsid = new_transport_stream_id;
+	vals->tsid_onid = cit->second.getTsidOnid();
+	vals->new_tp = new_transponder;
 	vals->chanpids = &chanpids;
 
 	if (dec_thread != 0)
@@ -881,6 +882,7 @@ int changeapid(uint8_t pid_nr)
 {
 	struct dmxPesFilterParams pes_filter;
 	std::map<uint, CZapitChannel>::iterator cit;
+	//pids chanpids;
 
 	if (current_is_nvod)
 	{
@@ -897,6 +899,8 @@ int changeapid(uint8_t pid_nr)
 			cit = allchans_tv.find(curr_onid_sid);
 		}
 	}
+
+	//chanpids = cit->second.getPids();
 
 	if (pid_nr <= chanpids.count_apids)
 	{
@@ -1738,7 +1742,7 @@ void parse_command()
 						perror("[zapit] recv");
 						return;
 					}
-					nvodchannels.insert(std::pair<int, CZapitChannel>(nvod_onidsid,CZapitChannel("NVOD",(nvod_onidsid&0xFFFF),nvod_tsid,(nvod_onidsid>>16),1)));
+					nvodchannels.insert(std::pair<int, CZapitChannel>(nvod_onidsid,CZapitChannel("NVOD",(nvod_onidsid&0xFFFF),nvod_tsid,(nvod_onidsid>>16),1,0,current_diseqc)));
 				}
 			}
 			break;
@@ -2085,7 +2089,9 @@ void parse_command()
 								(msgAddSubService.onidsid&0xFFFF),
 								msgAddSubService.tsid,
 								(msgAddSubService.onidsid>>16),
-								1
+								1,
+								0,
+								current_diseqc
 							)
 						)
 					);
@@ -2229,7 +2235,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.125 2002/04/11 16:30:08 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.126 2002/04/14 06:06:31 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2279,6 +2285,15 @@ int main (int argc, char **argv)
 	found_transponders = 0;
 	found_channels = 0;
 	curr_sat = -1;
+
+	frontend = new CFrontend();
+
+	if (frontend->isInitialized() == false)
+	{
+		printf("[zapit] unable to open frontend devices. bye.\n");
+		delete frontend;
+		return -1;
+	}
 
 	g_BouquetMan = new CBouquetManager();
 
@@ -2377,7 +2392,7 @@ int main (int argc, char **argv)
 	_pids.vpid = 0xffff;
 	_pids.count_apids = 1;
 	_pids.apids[0].pid = 0xffff;
-	descramble(0xffff, 0xffff, 0xffff, 0xffff, &_pids);
+	descramble(0xffffffff, 0xffff, 0xffff, &_pids);
 #endif /* USE_EXTERNAL_CAMD */
 
 	// create eventServer

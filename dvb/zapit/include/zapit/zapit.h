@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.48 2002/04/10 18:36:21 obi Exp $
+ * $Id: zapit.h,v 1.49 2002/04/14 06:06:31 obi Exp $
  */
 
 #ifndef __zapit_h__
@@ -18,10 +18,10 @@
 #include "bouquets.h"
 #include "cam.h"
 #include "cat.h"
+#include "frontend.h"
 #include "getservices.h"
 #include "pat.h"
 #include "pmt.h"
-#include "tune.h"
 #include "zapitclient.h"
 
 #define AUDIO_DEV "/dev/ost/audio0"
@@ -30,9 +30,8 @@
 
 typedef struct decode_struct
 {
-	uint16_t onid;
-	uint16_t tsid;
-	bool new_tsid;
+	uint32_t tsid_onid;
+	bool new_tp;
 	pids *chanpids;
 } decode_vals;
 

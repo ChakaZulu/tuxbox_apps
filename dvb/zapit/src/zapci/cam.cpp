@@ -1,3 +1,7 @@
+/*
+ * $Id: cam.cpp,v 1.5 2002/04/14 06:06:31 obi Exp $
+ */
+
 #ifndef DVBS
 #include <fcntl.h>
 #include <ost/ca.h>
@@ -279,14 +283,18 @@ int _writecamnu (uint8_t cmd, uint8_t *data, uint8_t len)
 #endif
 
 	if (buffer[4] == 0x0d)
+	{
 		output = true;
+	}
 
+#ifdef DEBUG
 	if (output)
 	{
-		printf("[cam.cpp] sending to cam: ");
-		for (i = 0; i < len; i++) printf("%02X ", buffer[i]);
+		printf("[cam.cpp] sending to cam:");
+		for (i = 0; i < len; i++) printf(" %02x", buffer[i]);
 		printf("\n");
 	}
+#endif
 
 	cam_pfd.fd = camfd;
 	cam_pfd.events = POLLIN;
@@ -308,12 +316,14 @@ int _writecamnu (uint8_t cmd, uint8_t *data, uint8_t len)
 		return -1;
 	}
 
+#ifdef DEBUG
 	if (output)
 	{
 		printf("[cam.cpp] answer: ");
 		for (i = 0; i < buffer[2] + 4; i++) printf("%02X ", buffer[i]);
 		printf("\n");
 	}
+#endif
 
 	close(camfd);
 	return 0;
@@ -324,17 +334,17 @@ int writecam (uint8_t *data, uint8_t len)
 	return _writecamnu(0x23, data, len);
 }
 
-int descramble (uint16_t original_network_id, uint16_t service_id, uint16_t unknown, uint16_t ca_system_id, pids *decode_pids)
+int descramble (uint32_t tsid_onid, uint16_t unknown, uint16_t ca_system_id, pids *decode_pids)
 {
 	uint8_t buffer[100];
 	uint8_t i;
 	uint8_t p;
 
 	buffer[0] = 0x0D;
-	buffer[1] = original_network_id >> 8;
-	buffer[2] = original_network_id & 0xFF;
-	buffer[3] = service_id >> 8;
-	buffer[4] = service_id & 0xFF;
+	buffer[1] = tsid_onid >> 8;
+	buffer[2] = tsid_onid & 0xFF;
+	buffer[3] = tsid_onid >> 24;
+	buffer[4] = (tsid_onid >> 16) & 0xFF;
 	buffer[5] = unknown >> 8;
 	buffer[6] = unknown & 0xFF;
 	buffer[7] = ca_system_id >> 8;

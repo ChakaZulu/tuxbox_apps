@@ -1,5 +1,5 @@
 /*
- * $Id: nit.h,v 1.2 2002/04/06 11:26:11 obi Exp $
+ * $Id: nit.h,v 1.3 2002/04/14 06:06:31 obi Exp $
  */
 
 #ifndef __nit_h__
@@ -20,6 +20,6 @@
 
 #define DEMUX_DEV "/dev/ost/demux0"
 
-int nit (uint8_t DiSEqC);
+int parse_nit (uint8_t DiSEqC);
 
 #endif /* __nit_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.3 2002/04/10 18:36:21 obi Exp $
+ * $Id: sdt.h,v 1.4 2002/04/14 06:06:31 obi Exp $
  */
 
 #ifndef __sdt_h__
@@ -29,6 +29,6 @@ enum service_type_e {
 	DVB_MHP_SERVICE
 };
 
-int sdt (uint16_t osid, bool scan_mode);
+int parse_sdt (uint16_t osid, bool scan_mode);
 
 #endif /* __sdt_h__ */

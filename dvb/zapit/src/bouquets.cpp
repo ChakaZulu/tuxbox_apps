@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.23 2002/04/10 18:36:21 obi Exp $
+ * $Id: bouquets.cpp,v 1.24 2002/04/14 06:06:31 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -23,6 +23,13 @@
  */
 
 #include "bouquets.h"
+
+extern std::map <uint32_t, CZapitChannel> allchans_tv;
+extern std::map <uint32_t, uint32_t> numchans_tv;
+extern std::map <std::string, uint32_t> namechans_tv;
+extern std::map <uint32_t, CZapitChannel> allchans_radio;
+extern std::map <uint32_t, uint32_t> numchans_radio;
+extern std::map <std::string, uint32_t> namechans_radio;
 
 /**** class CBouquet ********************************************************/
 CBouquet::CBouquet (const CBouquet& bouquet)

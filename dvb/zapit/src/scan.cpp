@@ -1,12 +1,12 @@
 /*
- * $Id: scan.cpp,v 1.39 2002/04/10 18:36:21 obi Exp $
+ * $Id: scan.cpp,v 1.40 2002/04/14 06:06:31 obi Exp $
  */
 
 #include "scan.h"
 
-typedef std::map<int, scanchannel>::iterator sciterator;
-typedef std::map<int, transpondermap>::iterator stiterator;
-typedef std::multimap<std::string, bouquet_mulmap>::iterator sbiterator;
+typedef std::map <uint32_t, scanchannel>::iterator sciterator;
+typedef std::map <uint32_t, transpondermap>::iterator stiterator;
+typedef std::multimap <std::string, bouquet_mulmap>::iterator sbiterator;
 
 short scan_runs;
 short curr_sat;
@@ -14,34 +14,13 @@ short curr_sat;
 extern int found_transponders;
 extern int found_channels;
 
-int issatbox()
-{
-	FILE *fp;
-	char buffer[100];
-	int fe = -1;
-	fp = fopen("/proc/bus/dbox", "r");
-
-	if (fp == NULL)
-		return -1;
-
-	while (!feof(fp))
-	{
-		fgets(buffer, 100, fp);
-		sscanf(buffer, "fe=%d", &fe);
-	}
-
-	fclose(fp);
-
-	return fe;
-}
-
-int get_nits(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC, Modulation modulation)
+int get_nits (CFrontend *frontend, uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC, Modulation modulation)
 {
 	FrontendParameters feparams;
 	feparams.Frequency = frequency;
 	feparams.Inversion = INVERSION_AUTO;
 
-	if (DiSEqC < 0xff)
+	if (frontend->getInfo()->type == FE_QPSK)
 	{
 		feparams.u.qpsk.SymbolRate = symbol_rate;
 		feparams.u.qpsk.FEC_inner = FEC_inner;
@@ -53,9 +32,9 @@ int get_nits(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8
 		feparams.u.qam.QAM = modulation;
 	}
 
-	if (finaltune(feparams, polarity, DiSEqC) == 0)
+	if (frontend->tuneFrequency(feparams, polarity, DiSEqC) == true)
 	{
-		nit(DiSEqC);
+		parse_nit(DiSEqC);
 		return 0;
 	}
 	else
@@ -65,23 +44,16 @@ int get_nits(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8
 	}
 }
 
-void get_sdts()
+void get_sdts(CFrontend *frontend)
 {
-	int sdt_tries;
 	stiterator tI;
 
 	for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	{
-		sdt_tries = 0;
-
-		if (finaltune(tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) == 0)
+		if (frontend->tuneFrequency(tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) == true)
 		{
-			printf("[scan.cpp] looking up SDT of transport_stream_id %04x\n", tI->second.transport_stream_id);
-
-			while ((sdt(tI->second.transport_stream_id, true) == -2) && (sdt_tries != 5))
-			{
-				sdt_tries++;
-			}
+			printf("[scan.cpp] parsing sdt of tsid %04x, onid %04x\n", tI->second.transport_stream_id, tI->second.original_network_id);
+			parse_sdt(tI->second.transport_stream_id, true);
 		}
 		else
 		{
@@ -175,15 +147,15 @@ void write_bouquets(unsigned short mode)
 	return;
 }
 
-void write_transponder(FILE *fd, uint16_t transport_stream_id, uint8_t diseqc)
+void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t diseqc)
 {
-	stiterator tI = scantransponders.find(transport_stream_id);
+	stiterator tI = scantransponders.find((transport_stream_id << 16) | original_network_id);
 
 	/* cable */
 	if (diseqc == 0xFF)
 	{
 		fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%d\" symbol_rate=\"%d\" fec_inner=\"%d\" modulation\"%d\">\n",
+			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" symbol_rate=\"%u\" fec_inner=\"%hhu\" modulation=\"%hhu\">\n",
 			tI->second.transport_stream_id,
 			tI->second.original_network_id,
 			tI->second.feparams.Frequency,
@@ -196,7 +168,7 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint8_t diseqc)
 	else
 	{
 		fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%d\" symbol_rate=\"%d\" fec_inner=\"%d\" polarization=\"%d\">\n",
+			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" symbol_rate=\"%u\" fec_inner=\"%hhu\" polarization=\"%hhu\">\n",
 			tI->second.transport_stream_id,
 			tI->second.original_network_id,
 			tI->second.feparams.Frequency,
@@ -207,9 +179,17 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint8_t diseqc)
 
 	for (sciterator cI = scanchannels.begin(); cI != scanchannels.end(); cI++)
 	{
-		if (cI->second.tsid == transport_stream_id)
+		if ((cI->second.tsid == transport_stream_id) && (cI->second.onid == original_network_id))
 		{
-			if (cI->second.name.length() > 0)
+			if (cI->second.name.length() == 0)
+			{
+				fprintf(fd,
+					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%04x\" channel_nr=\"0\"/>\n",
+					cI->second.sid,
+					cI->second.sid,
+					cI->second.service_type);
+			}
+			else
 			{
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%04x\" channel_nr=\"0\"/>\n",
@@ -217,28 +197,26 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint8_t diseqc)
 					cI->second.name.c_str(),
 					cI->second.service_type);
 			}
-			else
-			{
-				fprintf(stderr, "[scan.cpp] skipping channel without name\n");
-			}
 		}
 	}
-	
+
 	fprintf(fd, "\t\t</transponder>\n");
 
 	return;
 }
 
-FILE *write_provider(FILE *fd, const char *type, const char *provider_name, const uint8_t diseqc_pos)
+FILE *write_provider(FILE *fd, const char *type, const char *provider_name, const uint8_t DiSEqC)
 {
 	if (!scantransponders.empty())
 	{
 		/* create new file if needed */
 		if (fd == NULL)
+		{
 			fd = write_xml_header(CONFIGDIR "/services.xml");
+		}
 
 		/* cable tag */
-		if (diseqc_pos == 0xFF)
+		if (!strcmp(type, "cable"))
 		{
 			fprintf(fd, "\t<%s name=\"%s\">\n", type, provider_name);
 		}
@@ -246,13 +224,13 @@ FILE *write_provider(FILE *fd, const char *type, const char *provider_name, cons
 		/* satellite tag */
 		else
 		{
-			fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hhd\">\n", type, provider_name, diseqc_pos);
+			fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hhd\">\n", type, provider_name, DiSEqC);
 		}
 
 		/* channels */
 		for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 		{
-			write_transponder(fd, tI->second.transport_stream_id, diseqc_pos);
+			write_transponder(fd, tI->second.transport_stream_id, tI->second.original_network_id, DiSEqC);
 		}
 
 		/* end tag */
@@ -276,13 +254,12 @@ void stop_scan()
 void *start_scanthread(void *param)
 {
 	FILE *fd = NULL;
-	int is_satbox = issatbox();
 	char providerName[32];
 	char filename[32];
 	char type[8];
 
 	unsigned short do_diseqc = *(unsigned short *) (param);
-	uint8_t diseqc_pos = 0xFF;
+	uint8_t diseqc_pos = 0;
 
 	uint32_t frequency;
 	uint32_t symbol_rate;
@@ -300,15 +277,17 @@ void *start_scanthread(void *param)
 	curr_sat = 0;
 	scan_runs = 1;
 
-	/* could the box type be determined? */
-	if (is_satbox == -1)
+	CFrontend *frontend = new (nothrow) CFrontend();
+
+	if ((frontend == NULL) || (frontend->isInitialized() == false))
 	{
+		printf("[scan.cpp] unable to open frontend devices. bye.\n");
 		stop_scan();
 		pthread_exit(0);
 	}
 
 	/* cable constants */
-	if (!is_satbox)
+	if (frontend->getInfo()->type == FE_QAM)
 	{
 		strcpy(filename, CONFIGDIR "/cables.xml");
 		strcpy(type, "cable");
@@ -316,11 +295,18 @@ void *start_scanthread(void *param)
 	}
 
 	/* satellite constants */
-	else
+	else if (frontend->getInfo()->type == FE_QPSK)
 	{
 		strcpy(filename, CONFIGDIR "/satellites.xml");
 		strcpy(type, "sat");
 		modulation = 0;
+	}
+
+	/* unsupported tuner */
+	else
+	{
+		stop_scan();
+		pthread_exit(0);
 	}
 
 	/* open list of transponders */
@@ -378,7 +364,7 @@ void *start_scanthread(void *param)
 		if ((!strcmp(providerName, "Astra 19.2E")) || (!strcmp(providerName, "Telekom")))
 		{
 			/* satellite might need diseqc */
-			if (is_satbox)
+			if (frontend->getInfo()->type == FE_QPSK)
 			{
 				// TODO: get dieseqc position from client
 				diseqc_pos = 0;
@@ -400,7 +386,7 @@ void *start_scanthread(void *param)
 				sscanf(transponder->GetAttributeValue("fec_inner"), "%hhu", &fec_inner);
 
 				/* cable */
-				if (!is_satbox)
+				if (frontend->getInfo()->type == FE_QAM)
 				{
 					sscanf(transponder->GetAttributeValue("modulation"), "%hhu", &modulation);
 				}
@@ -412,14 +398,14 @@ void *start_scanthread(void *param)
 				}
 
 				/* read network information table */
-				get_nits(frequency, symbol_rate, getFEC(fec_inner), polarization, diseqc_pos, getModulation(modulation));
+				get_nits(frontend, frequency, symbol_rate, getFEC(fec_inner), polarization, diseqc_pos, getModulation(modulation));
 
 				/* next transponder */
 				transponder = transponder->GetNext();
 			}
 
 			/* read service description table */
-			get_sdts();
+			get_sdts(frontend);
 
 			/* write services */
 			fd = write_provider(fd, type, providerName, diseqc_pos);
@@ -430,6 +416,7 @@ void *start_scanthread(void *param)
 	}
 
 	/* clean up - should this be done before every GetNext() ? */
+	delete frontend;
 	delete transponder;
 	delete search;
 	delete parser;
