@@ -21,6 +21,9 @@
  *
  *
  *   $Log: libavs.h,v $
+ *   Revision 1.3  2002/03/06 14:00:35  gillem
+ *   - more work on avslib
+ *
  *   Revision 1.2  2002/03/06 08:53:55  gillem
  *   - some fixes
  *   - add testavs
@@ -30,7 +33,7 @@
  *
  *
  *
- *   $Revision: 1.2 $
+ *   $Revision: 1.3 $
  *
  */
 
@@ -62,6 +65,13 @@ typedef enum eMode
     emYC
 } eMode;
 
+typedef enum eLevel
+{
+	elOFF,
+	el4X3,
+	el16X9
+} eLevel;
+
 typedef enum eSwitch
 {
 	esOFF = 0,
@@ -75,6 +85,7 @@ int avsSetVolume( int vol );
 int avsGetVolume( void );
 int avsSetMute( eSwitch mute );
 
+int avsSetLevel( eLevel level );
 int avsSetRoute( ePort port, eSource source, eMode mode );
 
 #endif

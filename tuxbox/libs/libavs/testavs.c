@@ -7,7 +7,10 @@ int main()
 		return -1;
 	}
 
-	avsSetRoute( epTV, esVCR, emNONE );
+	if ( avsSetRoute( epTV, esDIGITALENCODER, emCVBS ) != 0 )
+	{
+		printf("error\n");
+	}
 
 	avsDeInit();
 }

@@ -21,6 +21,9 @@
  *
  *
  *   $Log: libavs.c,v $
+ *   Revision 1.3  2002/03/06 14:00:35  gillem
+ *   - more work on avslib
+ *
  *   Revision 1.2  2002/03/06 08:54:06  gillem
  *   - some fixes
  *   - add testavs
@@ -30,7 +33,7 @@
  *
  *
  *
- *   $Revision: 1.2 $
+ *   $Revision: 1.3 $
  *
  */
 
@@ -39,6 +42,7 @@
 #include <sys/ioctl.h>
 
 #include "dbox/avs_core.h"
+#include "dbox/saa7126_core.h"
 
 #include "libavs.h"
 
@@ -147,6 +151,48 @@ int avsSetMute( eSwitch mute )
     return ret;
 }
 
+int avsSetLevel( eLevel level )
+{
+	int ret = -1;
+	int videolevel;
+
+	switch(level)
+	{
+		elOFF:
+			videolevel = 0;
+			break;
+		el4X3:
+			videolevel = 3;
+			break;
+		el16X9:
+			switch(avs_type)
+			{
+				case CXA2092:
+				case CXA2126:
+					videolevel = 1;
+					break;
+				case STV6412:
+					videolevel = 2;
+					break;
+			}
+			break;
+		default:
+			return ret;
+			break;
+	}
+
+	if ( ioctl( avs_fd, AVSIOSFNC, &videolevel ) != 0 )
+	{
+		sys_error("ioctl: ");
+	}
+	else
+	{
+		ret = 0;
+	}
+
+	return ret;
+}
+
 /*
  * the very nice routing, please bug report and NO dau report ...
  *
@@ -163,8 +209,9 @@ int avsSetRoute( ePort port, eSource source, eMode mode )
 	int videosource,audiosource;
 	int video;
 	int audio;
-	int m;
-    
+	int videomode;
+	int videofblk;
+
 	switch(port)
 	{
 		case epVCR:
@@ -182,9 +229,9 @@ int avsSetRoute( ePort port, eSource source, eMode mode )
 						case CXA2126:
 						{
 							videoport = AVSIOSVSW2;
-							videosource = 2;
+							videosource = 3;
 							audioport = AVSIOSASW2;
-							audiosource = 0;
+							audiosource = 2;
 							ret = 0;
 							break;
 						}
@@ -222,6 +269,23 @@ int avsSetRoute( ePort port, eSource source, eMode mode )
 					 * 4: R/C | G/CVBS/Y
 					 *
 					 */
+					video = 1;
+					audio = 1;
+
+					switch(avs_type)
+					{
+						case CXA2092:
+						case CXA2126:
+						{
+							videoport = AVSIOSVSW2;
+							videosource = 1;
+							audioport = AVSIOSASW2;
+							audiosource = 1;
+							ret = 0;
+							break;
+						}
+					}
+
 					break;
 				}
 
@@ -247,9 +311,9 @@ int avsSetRoute( ePort port, eSource source, eMode mode )
 						case CXA2126:
 						{
 							videoport = AVSIOSVSW1;
-							videosource = 2;
+							videosource = 3;
 							audioport = AVSIOSASW1;
-							audiosource = 0;
+							audiosource = 2;
 							ret = 0;
 							break;
 						}
@@ -280,15 +344,22 @@ int avsSetRoute( ePort port, eSource source, eMode mode )
 
 				case esDIGITALENCODER:
 				{
-					/*
-					 *
-					 * 0:
-					 * 1:
-					 * 4:
-					 * 5:
-					 * 6:
-					 *
-					 */
+					video = 1;
+					audio = 1;
+
+					switch(avs_type)
+					{
+						case CXA2092:
+						case CXA2126:
+						{
+							videoport = AVSIOSVSW1;
+							videosource = 1;
+							audioport = AVSIOSASW1;
+							audiosource = 1;
+							ret = 0;
+							break;
+						}
+					}
 					break;
 				}
 
@@ -327,6 +398,43 @@ int avsSetRoute( ePort port, eSource source, eMode mode )
 			{
 				sys_error("ioctl: ");
 				ret = -1;
+			}
+		}
+
+		// fblk bad mode here (0:0V(cvbs),1:5V(rgb),2:DE(auto),3:VCR(auto))
+		if ( (mode != emNONE) && (source == esDIGITALENCODER) )
+		{
+			switch(mode)
+			{
+				case emCVBS:
+					videomode = SAA_MODE_FBAS;
+					videofblk = 0;
+					break;
+				case emRGB:
+					videomode = SAA_MODE_RGB;
+					videofblk = 1;
+					break;
+				case emYC:
+					videomode = SAA_MODE_SVIDEO;
+					videofblk = 0;
+					break;
+				default:
+					videomode = -1;
+					break;
+			}
+
+			if ( videomode != -1 )
+			{
+				if ( ioctl( saa_fd, SAAIOSMODE, &videomode ) != 0 )
+				{
+					sys_error("ioctl: ");
+					ret = -1;
+				}
+				else if ( ioctl( avs_fd, AVSIOGFBLK, &videofblk ) != 0 )
+				{
+					sys_error("ioctl: ");
+					ret = -1;
+				}
 			}
 		}
 	}
