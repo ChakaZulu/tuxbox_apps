@@ -3567,8 +3567,12 @@ zap:
 			if (i != playlist->getList().end())
 			{
 //			eDebug("we have stored PlaylistPosition.. get this... and set..");
+				eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+				if (!handler)
+					return;
 				playlist->current=i;
-				setPlaylistPosition();
+				if (playlist->current->current_position != -1)
+					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, playlist->current->current_position));
 			}
 			else
 				addService(service);
@@ -4428,12 +4432,10 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			break;
 		}
 		startMessages();
-		if ( mode == modeFile )
-			num=-1;
 #ifndef DISABLE_FILE
-		else if ( num && (!eDVB::getInstance()->recorder || handleState() ) )
+		if ( num && (!eDVB::getInstance()->recorder || handleState() ) )
 #else
-		else if ( num && handleState() )
+		if ( num && handleState() )
 #endif
 		{
 			hide();
@@ -4502,15 +4504,36 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 				}
 				if ( num )
 				{
-					num = number;
-					eServiceReferenceDVB s=eDVB::getInstance()->settings->getTransponders()->searchServiceByNumber(num);
-					if (s)
+					if ( mode == modeFile )
 					{
-						eServicePath path(getRoot(listAll));  // All Services
-						path.down(s); // current service
-						setServiceSelectorPath(path);
-						modeLast[mode]=path;
-						playService(s, 0);
+						for (std::list<ePlaylistEntry>::const_iterator i(recordings->getConstList().begin());
+							i != recordings->getConstList().end(); ++i )
+						{
+							if ( i->service.flags & eServiceReference::isMarker )
+								continue;
+							if ( !--num )
+							{
+								eServicePath path;
+								path.down(recordingsref);
+								path.down(i->service);
+								setServiceSelectorPath(path);
+								modeLast[mode]=path;
+								playService( i->service, 0);
+								break;
+							}
+						}
+					}
+					else
+					{
+						eServiceReferenceDVB s=eDVB::getInstance()->settings->getTransponders()->searchServiceByNumber(num);
+						if (s)
+						{
+							eServicePath path(getRoot(listAll));  // All Services
+							path.down(s); // current service
+							setServiceSelectorPath(path);
+							modeLast[mode]=path;
+							playService(s, 0);
+						}
 					}
 				}
 			}
@@ -5430,7 +5453,10 @@ int eZapMain::getFirstBouquetServiceNum( eServiceReference ref, int _mode )
 			break;
 		case modeFile:
 			if ( userFileBouquets->getList().size() )
+			{
 				p=userFileBouquets;
+				p->getList().push_back(recordingsref);
+			}
 			break;
 	}
 	int num=1;
@@ -5440,7 +5466,11 @@ int eZapMain::getFirstBouquetServiceNum( eServiceReference ref, int _mode )
 			it != p->getConstList().end(); ++it)
 		{
 			if ( *it == ref )
+			{
+				if ( Mode == modeFile )
+					p->getList().remove(recordingsref);
 				return num;
+			}
 			ePlaylist *pl = (ePlaylist*)eServiceInterface::getInstance()->addRef( it->service );
 			if ( pl )
 			{
@@ -5454,6 +5484,8 @@ int eZapMain::getFirstBouquetServiceNum( eServiceReference ref, int _mode )
 				eServiceInterface::getInstance()->removeRef( it->service );
 			}
 		}
+		if ( Mode == modeFile )
+			p->getList().remove(recordingsref);
 	}
 	return 1;
 }
