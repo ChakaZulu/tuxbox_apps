@@ -253,6 +253,12 @@ struct SNeutrinoSettings
 	int   mp3player_display;
 	int   mp3player_follow;
 	char  mp3player_screensaver[3];
+
+	//uboot
+	int	uboot_lcd_inverse;
+	int	uboot_lcd_contrast;
+	int	uboot_console;
+	int	uboot_console_bak;
 };
 
 /* some default Values */

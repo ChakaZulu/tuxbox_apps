@@ -312,7 +312,7 @@ int CNeutrinoApp::loadSetup()
 	int erg = 0;
 
 	//settings laden - und dabei Defaults setzen!
-	if(!configfile.loadConfig(CONFIGDIR "/neutrino.conf"))
+	if(!configfile.loadConfig(settingsFile))
 	{
 		//file existiert nicht
 		erg = 1;
@@ -558,6 +558,46 @@ int CNeutrinoApp::loadSetup()
 		dprintf(DEBUG_NORMAL, "Loading of scan settings failed. Using defaults.\n");
 	}
 
+	// uboot config file
+	if(fromflash)
+	{
+		g_settings.uboot_console	= 0;
+		g_settings.uboot_lcd_inverse	= -1;
+		g_settings.uboot_lcd_contrast	= -1;
+	
+		FILE* fd = fopen("/var/tuxbox/boot/ppcboot.conf", "r");
+		if(fd)
+		{
+			char buffer[100];
+	
+			while(fgets(buffer, 99, fd) != NULL)
+			{
+				if(strncmp(buffer,"console=",8) == 0)
+				{
+					if(strncmp(&buffer[8], "null", 4)==0)
+						g_settings.uboot_console = 0;
+					else if(strncmp(&buffer[8], "ttyS0", 5)==0)
+						g_settings.uboot_console = 1;
+					else if(strncmp(&buffer[8], "tty", 3)==0)
+						g_settings.uboot_console = 2;
+				}
+				else if(strncmp(buffer,"lcd_inverse=", 11) == 0)
+				{
+					g_settings.uboot_lcd_inverse = atoi(&buffer[12]);
+				}
+				else if(strncmp(buffer,"lcd_contrast=", 12) == 0)
+				{
+					g_settings.uboot_lcd_contrast = atoi(&buffer[13]);
+				}
+				else
+					printf("unknown entry found in ppcboot.conf\n");
+			}
+	
+			fclose(fd);
+		}
+		g_settings.uboot_console_bak = g_settings.uboot_console;
+	}
+
 	return erg;
 }
 
@@ -568,8 +608,46 @@ int CNeutrinoApp::loadSetup()
 **************************************************************************************/
 void CNeutrinoApp::saveSetup()
 {
+	//uboot; write config only on changes
+	if( fromflash &&
+		((g_settings.uboot_console_bak != g_settings.uboot_console) ||
+		(g_settings.uboot_lcd_inverse  != g_settings.lcd_inverse) ||
+		(g_settings.uboot_lcd_contrast != g_settings.lcd_contrast)) )
+	{
+		FILE* fd = fopen("/var/tuxbox/boot/ppcboot.conf", "w");
 
+		if(fd != NULL)
+		{
+			char buffer[10];
+			g_settings.uboot_console_bak    = g_settings.uboot_console;
+			g_settings.uboot_lcd_inverse	= g_settings.lcd_inverse;
+			g_settings.uboot_lcd_contrast	= g_settings.lcd_contrast;
 
+			switch(g_settings.uboot_console)
+			{
+			case 1:
+				strcpy( buffer, "ttyS0" );
+				break;
+			case 2:
+				strcpy( buffer, "tty" );
+				break;
+			default:
+				strcpy( buffer, "null" );
+				break;
+			}
+			fprintf( fd, "console=%s\n", buffer );
+			fprintf( fd, "lcd_inverse=%d\n", g_settings.uboot_lcd_inverse );
+			fprintf( fd, "lcd_contrast=%d\n", g_settings.uboot_lcd_contrast );
+
+			fclose(fd);
+		}
+		else
+		{
+			dprintf(DEBUG_NORMAL, "unable to write file /var/tuxbox/boot/ppcboot.conf\n");
+		}
+	}
+
+	//scan settings
 	if(!scanSettings.saveSettings(scanSettingsFile))
 	{
 		dprintf(DEBUG_NORMAL, "error while saving scan-settings!\n");
@@ -1398,7 +1476,6 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(1, "options.on");
 		miscSettings.addItem( oj );
 
-
 #if HAVE_DVB_API_VERSION == 1
 		static int dummy2 = 0;
 		fd = fopen("/var/etc/.bh", "r");
@@ -1413,30 +1490,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		miscSettings.addItem( oj );
 #endif
 
-
-		static int fb_destination = 0;
-		fd = fopen("/var/tuxbox/boot/ppcboot.conf", "r");
-		if(fd)
-		{
-			char buffer[200];
-			if(fgets(buffer,199,fd) != NULL)
-			{
-				if(strncmp(buffer,"console=",8) == 0)
-				{
-					if(strncmp(&buffer[8],"null",4)==0)
-						fb_destination=0;
-					else if(strncmp(&buffer[8],"ttyS0",5)==0)
-						fb_destination=1;
-					else if(strncmp(&buffer[8],"tty",3)==0)
-						fb_destination=2;
-				}
-				else
-					printf("no console string found in ppcboot.conf\n");
-
-			}
-			fclose(fd);
-		}
-		oj = new CMenuOptionChooser("miscsettings.fb_destination", &fb_destination, true, ConsoleDestinationChanger );
+		oj = new CMenuOptionChooser("miscsettings.fb_destination", &g_settings.uboot_console, true, ConsoleDestinationChanger );
 		oj->addOption(0, "options.null");
 		oj->addOption(1, "options.serial");
 		oj->addOption(2, "options.fb");

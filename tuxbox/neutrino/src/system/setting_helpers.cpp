@@ -202,26 +202,9 @@ bool CMiscNotifier::changeNotify( string OptionName, void* )
 
 bool CConsoleDestChangeNotifier::changeNotify(string OptionName, void *Data)
 {
-	int value = *(int *)Data;
-	FILE* fd = fopen("/var/tuxbox/boot/ppcboot.conf", "w");
-	if(fd != NULL)
-	{
-		string buffer;
-		switch(value)
-		{
-			case 0:	buffer="null"; break;
-			case 1:	buffer="ttyS0"; break;
-			case 2:	buffer="tty"; break;
-		}
-		fprintf(fd,"console=%s\n",buffer.c_str());
-		fclose(fd);
-		return true;
-	}
-	else
-	{
-		printf("unable to write file /var/tuxbox/boot/ppcboot.conf\n");
-		return false;
-	}
+	g_settings.uboot_console = *(int *)Data;
+
+	return true;
 }
 
 CLcdNotifier::CLcdNotifier(int *lcdPowerSetting,int *lcdInverseSetting)
