@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.173 2004/04/15 16:02:06 rasc Exp $
+//  $Id: sectionsd.cpp,v 1.174 2004/04/21 17:13:18 zwen Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1060,7 +1060,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.173 2004/04/15 16:02:06 rasc Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.174 2004/04/21 17:13:18 zwen Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2661,7 +2661,7 @@ static void *sdtThread(void *)
 				};
 			}
 
-			if (timeoutsDMX >= RESTART_DMX_AFTER_TIMEOUTS)
+			if (timeoutsDMX >= RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
 				timeoutsDMX = 0;
 				dmxSDT.stop();
@@ -2899,7 +2899,7 @@ static void *timeThread(void *)
 
 		while(1)
 		{
-			if (getUTC(&UTC, !timeset)) /* initially: TDT (no CRC - but mandatory field), later: TOT (CRC - yet not mandatory)*/
+			if (scanning && getUTC(&UTC, !timeset)) /* initially: TDT (no CRC - but mandatory field), later: TOT (CRC - yet not mandatory)*/
 			{
 				tim = changeUTCtoCtime((const unsigned char *) &UTC);
 				
@@ -2926,6 +2926,9 @@ static void *timeThread(void *)
 				if (timeset) {
 					seconds = 60 * 30;
 					dprintf("dmxTOT: going to sleep for %d seconds.\n", seconds);
+				}
+				else if (!scanning){
+					seconds = 60;
 				}
 				else {
 					seconds = 1;
@@ -3051,7 +3054,7 @@ static void *eitThread(void *)
 				unlockServices();
 			}
 
-			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS)
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
 				if ( (zeit > lastRestarted + 3) || (dmxEIT.real_pauseCounter != 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
 				{
@@ -3471,7 +3474,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.173 2004/04/15 16:02:06 rasc Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.174 2004/04/21 17:13:18 zwen Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
