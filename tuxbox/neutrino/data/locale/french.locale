@@ -225,4 +225,5 @@ flashupdate.providerversiondiffer1 the provider id differs
 flashupdate.providerversiondiffer2 please install new flashimage
 flashupdate.nonewversion1 no new version available
 flashupdate.nonewversion2
+flashupdate.md5check checking image
 flashupdate.md5sumerror image has errors

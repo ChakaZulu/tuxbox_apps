@@ -221,5 +221,6 @@ flashupdate.providerversiondiffer1 Die ProviderID weicht ab
 flashupdate.providerversiondiffer2 Bitte neues Image installieren
 flashupdate.nonewversion1 keine neue Version verfügbar
 flashupdate.nonewversion2
+flashupdate.md5check Imageprüfung 
 flashupdate.md5sumerror Das Image ist fehlerhaft
 

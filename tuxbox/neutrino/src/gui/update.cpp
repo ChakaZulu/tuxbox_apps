@@ -218,9 +218,7 @@ int CHTTPUpdater::show_progress( void *clientp, size_t dltotal, size_t dlnow, si
 
 bool CHTTPUpdater::getInfo()
 {
-	printf("http->get versioninfo\n");
-	statusViewer->showStatusMessage( g_Locale->getText("flashupdate.getInfoFile") );
-	printf("status set...\n");
+	statusViewer->showStatusMessage( g_Locale->getText("flashupdate.getinfofile") );
 	CURL *curl;
 	CURLcode res;
 	FILE *headerfile;
@@ -237,8 +235,12 @@ bool CHTTPUpdater::getInfo()
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
-	}	
-	fclose(headerfile);
+	}
+//	printf("do flush\n");
+	fflush(headerfile);
+//	printf("do close\n");
+	fclose(headerfile); 
+//	printf("ready\n");
 	return res==0;
 }
 
@@ -262,27 +264,14 @@ bool CHTTPUpdater::getFile()
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 	}	
-	fclose(headerfile);
+//	printf("do flush\n");
+	fflush(headerfile);
+//	printf("do close\n");
+	fclose(headerfile); 
+//	printf("ready\n");
 	return res==0;
 }
 
-/*
-int main( int argc,char *argv[] )
-{
-	printf("Starting flashtools...\n\n");
-
-	CFlashTool ft;
-
-	ft.setMTDDevice("/root/test.wrt");
-
-
-	if(!ft.program("/var/tmp/cramfs.img"))
-	{
-		printf("error: %s\n", ft.getErrorMessage().c_str() );
-	}
-
-}
-*/
 
 CFlashUpdate::CFlashUpdate()
 {
@@ -453,6 +442,7 @@ void CFlashUpdate::paint()
 	unsigned char   md5buffer[16];
 	char            md5string[40]="";
 	
+	showStatusMessage(g_Locale->getText("flashupdate.md5check") );
 	if( md5_file("/var/tmp/cramfs.img", 1, (unsigned char*) &md5buffer))
 	{
 		showStatusMessage(g_Locale->getText("flashupdate.cantopenfile") );
@@ -465,7 +455,7 @@ void CFlashUpdate::paint()
 		strcat(md5string, tmp);
 	}
 	printf("%s\n%s\n\n", new_md5sum, md5string);
-	if(!strcmp(md5string, new_md5sum))
+	if(strcmp(md5string, new_md5sum)!=0)
 	{
 		showStatusMessage(g_Locale->getText("flashupdate.md5sumerror") );
 		return;
@@ -481,6 +471,12 @@ void CFlashUpdate::paint()
 		showStatusMessage( ft.getErrorMessage() );
 		return;
 	}
+
+	//versionsinfo schreiben
+	FILE* fd2 = fopen("/var/etc/version", "w");
+	fprintf(fd2, "%d.%d.%d\n", new_major, new_provider, new_minor);
+	fflush(fd2);
+	fclose(fd2);
 
 	showStatusMessage( g_Locale->getText("flashupdate.ready") );
 
