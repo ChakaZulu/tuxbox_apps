@@ -273,12 +273,11 @@ template <class T>
 inline eListBox<T>::eListBox(eWidget *parent, int ih)
 	 :eWidget(parent, 1),
 		top(childs.end()), bottom(childs.end()), current(childs.end()),
-		col_active(eSkin::getActive()->queryScheme("focusedColor")),
 		font_size(ih),
 		item_height(ih+2),
-		have_focus(0),
-		entryFnt(gFont("NimbusSansL-Regular Sans L Regular", font_size)),
-		flags(0)
+		flags(0),
+		col_active(eSkin::getActive()->queryScheme("focusedColor")),
+		entryFnt(gFont("NimbusSansL-Regular Sans L Regular", font_size))
 {
 	childs.setAutoDelete(false);	// machen wir selber
 
@@ -484,29 +483,32 @@ inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::evtAction:
-		if ((event.action == &i_listActions->pageup) && !(flags & flagNoPageMovement))
-			moveSelection(dirPageUp);
-		else if ((event.action == &i_listActions->pagedown) && !(flags & flagNoPageMovement))
-			moveSelection(dirPageDown);
-		else if ((event.action == &i_cursorActions->up) && !(flags & flagNoUpDownMovement))
-			moveSelection(dirUp);
-		else if ((event.action == &i_cursorActions->down) && !(flags & flagNoUpDownMovement))
-			moveSelection(dirDown);
-		else if (event.action == &i_cursorActions->ok)
-		{
-			if ( current == childs.end() )
-				/*emit*/ selected(0);
+		case eWidgetEvent::evtAction:
+			if ((event.action == &i_listActions->pageup) && !(flags & flagNoPageMovement))
+				moveSelection(dirPageUp);
+			else if ((event.action == &i_listActions->pagedown) && !(flags & flagNoPageMovement))
+				moveSelection(dirPageDown);
+			else if ((event.action == &i_cursorActions->up) && !(flags & flagNoUpDownMovement))
+				moveSelection(dirUp);
+			else if ((event.action == &i_cursorActions->down) && !(flags & flagNoUpDownMovement))
+				moveSelection(dirDown);
+			else if (event.action == &i_cursorActions->ok)
+			{
+				if ( current == childs.end() )
+					/*emit*/ selected(0);
+				else
+					/*emit*/ selected(*current);
+			}
+//			else if (event.action == &i_cursorActions->cancel)
+//			{
+//				/*emit*/ selected(0);
+//			}
 			else
-				/*emit*/ selected(*current);
-		} else if (event.action == &i_cursorActions->cancel)
-		{
-			/*emit*/ selected(0);
-		} else
-			break;
+				break;
 		return 1;
-	case eWidgetEvent::changedSize:
-		init();
+	
+		case eWidgetEvent::changedSize:
+			init();
 		break;
 	}
 	return eWidget::eventHandler(event);

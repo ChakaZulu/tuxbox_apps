@@ -7,6 +7,7 @@
 eCheckbox::eCheckbox(eWidget *parent, int checked, int Size):
 	eButton(parent)
 {
+	ischecked = -1;
 	setCheck(checked);
 	CONNECT(selected, eCheckbox::sel);
 }
@@ -44,8 +45,9 @@ void eCheckbox::gotFocus()
 
 void eCheckbox::setCheck(int c)
 {
-	if (ischecked == c)
+	if (ischecked != -1 && ischecked == c)
 		return;
+
 	ischecked=c;
 	gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked");
 	setPixmap(pm);

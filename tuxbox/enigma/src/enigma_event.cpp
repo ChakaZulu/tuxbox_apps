@@ -38,17 +38,15 @@ int eEventDisplay::eventHandler(const eWidgetEvent &event)
 				if (events)
 					prevEvent();
 				else
-					close(-1); // this go the prev event and call exec()   (in epgwindow.cpp)
+					close(1); // this go the prev event and call exec()   (in epgwindow.cpp)
 			}
 			else if (event.action == &i_cursorActions->right)
  			{
 				if (events)
 					nextEvent();
 				else
-					close(1);  // this go the next event and call exec()   (in epgwindow.cpp)
+					close(2);  // this go the next event and call exec()   (in epgwindow.cpp)
 			}
-			else if(event.action == &i_cursorActions->cancel)
-				close(0);
 			else
 				break;
 		return 1;

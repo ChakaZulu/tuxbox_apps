@@ -418,7 +418,7 @@ int TransponderScan::exec()
 			continue;
 		}
 		
-		if (res==2)
+		if (res==-1)
 		{
 			ret=-1;
 			break;

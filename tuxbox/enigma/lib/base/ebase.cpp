@@ -73,7 +73,7 @@ void eTimer::changeInterval(long msek)
 
 void eTimer::activate()   // Internal Funktion... called from eApplication
 {
-//	printf("Timer emitted\n");
+//	eDebug("Timer emitted");
 	context.removeTimer(this);
 
 	if (!bSingleShot)
@@ -122,7 +122,7 @@ void eMainloop::processOneEvent()
 
 	if (ret>0)
 	{
-//		printf("bin aussem poll raus und da war was\n");
+//		eDebug("bin aussem poll raus und da war was");
 		for (int i=0; i < fdAnz ; i++)
 		{
 			if( notifiers.find(pfd[i].fd) == notifiers.end())

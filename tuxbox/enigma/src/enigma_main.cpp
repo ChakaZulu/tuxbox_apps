@@ -789,7 +789,7 @@ void eZapMain::showMainMenu()
 	pLCD->lcdMenu->show();
 	eMainMenu mm;
 	mm.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-	if (mm.exec())
+	if (mm.exec() == 1)
 		eZap::getInstance()->quit();
 	pLCD->lcdMenu->hide();
 	pLCD->lcdMain->show();

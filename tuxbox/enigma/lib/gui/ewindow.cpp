@@ -4,6 +4,7 @@
 #include <core/system/init.h>
 #include <core/gdi/epng.h>
 #include <core/gui/elabel.h>
+#include <core/gui/guiactions.h>
 
 eWindow::eWindow(int takefocus)
 	:eWidget(0, takefocus)
@@ -40,6 +41,8 @@ eWindow::eWindow(int takefocus)
 	titleBorderY=eSkin::getActive()->queryValue("eWindow.titleBorderY", 0);
 	titleFontSize=eSkin::getActive()->queryValue("eWindow.titleFontSize", 20);
 	titleHeight=eSkin::getActive()->queryValue("eWindow.titleHeight", titleFontSize+10);
+
+	addActionMap(&i_cursorActions->map);
 }
 
 eWindow::~eWindow()
@@ -157,17 +160,24 @@ void eWindow::recalcClientRect()
 	clientrect=eRect(borderLeft, borderTop, size.width()-borderLeft-borderRight, size.height()-borderTop-borderBottom);
 }
 
-int eWindow::eventFilter(const eWidgetEvent &event)
+int eWindow::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::changedText:
-		redraw(eRect(0, 0, width(), borderTop));
+		case eWidgetEvent::changedText:
+			redraw(eRect(0, 0, width(), borderTop));
 		return 1;
-		break;
+
+		case eWidgetEvent::evtAction:
+			if (event.action == &i_cursorActions->cancel)
+				close(-1);
+			else
+				break;
+		return 1;
 	}
-	return 0;
+	return eWidget::eventHandler(event);
 }
+
 
 void eWindow::willShow()
 {

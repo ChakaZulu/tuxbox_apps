@@ -19,8 +19,8 @@ void eThread::run()
 
 eThread::~eThread()
 {
-	printf("waiting for thread shutdown");
+	eDebug("waiting for thread shutdown");
 	pthread_join(the_thread, 0);
-	printf("ok\n");
+	eDebug("ok");
 }
 

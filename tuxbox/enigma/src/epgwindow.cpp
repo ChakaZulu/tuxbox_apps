@@ -57,10 +57,12 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 		{
 			eListBoxEntryEPG* tmp;
 
-			if (ret==-1)
+			if (ret == 1)
 				tmp=list.goPrev();
-			else if (ret == 1)
+			else if (ret == 2)
 				tmp=list.goNext();
+			else
+				break; // close EventDisplay
 
 			if (tmp)
 				ei.setEvent(&tmp->event);					

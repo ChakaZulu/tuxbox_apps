@@ -7,7 +7,8 @@
 #include "frontend.h"
 #include "dvb.h"
 
-eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type): eWidget(parent), edit(edit), type(type)
+eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
+	:eWidget(parent), type(type), edit(edit)
 {
 	int init[5]={1,2,3,4,5};
 	frequency=new eNumber(this, 5, 0, 9, 1, init, 0, 0, edit);

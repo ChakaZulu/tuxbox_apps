@@ -21,7 +21,7 @@ protected:
 	void redrawWidget(gPainter *target, const eRect &where);
 	void drawTitlebar(gPainter *target);
 	void recalcClientRect();
-	int eventFilter(const eWidgetEvent &event);
+	int eventHandler(const eWidgetEvent &event);
 	void willShow();
 	void willHide();
 public:

@@ -29,7 +29,8 @@ struct serviceSelectorActions
 
 eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(5, "service selector actions");
 
-eListboxEntryService::eListboxEntryService(eService *service, eListBox<eListboxEntryService> *listbox): eListBoxEntry((eListBox<eListBoxEntry>*)listbox), service(service)
+eListboxEntryService::eListboxEntryService(eService *service, eListBox<eListboxEntryService> *listbox)
+	:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), service(service)
 {
 	bouquet=0;
 #if 0
@@ -50,7 +51,8 @@ eListboxEntryService::eListboxEntryService(eService *service, eListBox<eListboxE
 #endif
 }
 
-eListboxEntryService::eListboxEntryService(eBouquet *service, eListBox<eListboxEntryService> *listbox): eListBoxEntry((eListBox<eListBoxEntry>*)listbox), bouquet(bouquet)
+eListboxEntryService::eListboxEntryService(eBouquet *service, eListBox<eListboxEntryService> *listbox)
+	:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), bouquet(bouquet)
 {
 	service=0;
 	sort="";
@@ -163,7 +165,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 }
 
 eServiceSelector::eServiceSelector()
-								:eListBoxWindow<eListboxEntryService>("Select Service...", 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
+	:eListBoxWindow<eListboxEntryService>("Select Service...", 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
 {
 	pbs = new eBouquetSelector();
 	move(ePoint(70, 60));
