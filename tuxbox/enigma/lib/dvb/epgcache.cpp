@@ -165,76 +165,99 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			__u16 event_id = HILO(eit_event->event_id);
 //			eDebug("event_id is %d sid is %04x", event_id, service.sid);
 
-// search in timemap
-			timeMap::iterator tm_it =
-				servicemap.second.find(TM);
+			eventData *evt = 0;
+			int ev_erase_count = 0;
+			int tm_erase_count = 0;
 
 // search in eventmap
 			eventMap::iterator ev_it =
 				servicemap.first.find(event_id);
 
-			eventData *evt = 0;
-
 			// entry with this event_id is already exist ?
 			if ( ev_it != servicemap.first.end() )
-			  // we can update existing entry in 
-			  // event_id map (do not rebuild sorted binary tree)
 			{
-				prevEventIt = ev_it;
+				if ( source > ev_it->second->type )  // update needed ?
+					goto next; // when not.. the skip this entry
+// search this event in timemap
+				timeMap::iterator tm_it_tmp = 
+					servicemap.second.find(ev_it->second->getStartTime());
 
-				if ( source > ev_it->second->type  )  // update needed ?
-					goto next; // when not.. then skip this entry
-
-				if ( tm_it == servicemap.second.end() ) 
-					// no entry with this start_time in timemap.. time changed ?
+				if ( tm_it_tmp != servicemap.second.end() )
 				{
-					// when event_time has changed we must remove the old entry from time map
-					servicemap.second.erase(ev_it->second->getStartTime());
-					prevTimeIt=servicemap.second.end();
-				}
-				delete ev_it->second;  // release heap memory
-				ev_it->second=evt=new eventData(eit_event, eit_event_size, source);
-			}
-			else // we must add new event.. ( in maps this is really slow.. )
-			{
-				// event with same start-time already in timemap?
-				if ( tm_it != servicemap.second.end() )
-				{
-					if ( source > tm_it->second->type )
+					if ( tm_it_tmp->first == TM ) // correct eventData
 					{
-//						eDebug("skip %d - %d", It->second->type, source );
+						// exempt memory
+						delete ev_it->second;
+						evt = new eventData(eit_event, eit_event_size, source);
+						ev_it->second=evt;
+						tm_it_tmp->second=evt;
 						goto next;
 					}
-//					eDebug("update %d -> %d", It->second->type, source );
-					// we must search this event in servicemap ( realy slow :( )
-					for (eventMap::iterator it(servicemap.first.begin())
-						; it != servicemap.first.end(); ++it )
+					else
 					{
-						if ( it->second->getStartTime() == TM )
-						{
-							delete it->second;  // release heap memory
-							servicemap.first.erase(it);  // remove from event map
-							prevEventIt=servicemap.first.end();
-							break;
-						}
+						tm_erase_count++;
+						// delete the found record from timemap
+						servicemap.second.erase(tm_it_tmp);
+						prevTimeIt=servicemap.second.end();
 					}
 				}
-				evt=new eventData(eit_event, eit_event_size, source);
-				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
 			}
- 
- // update only data pointer in timemap.. 
-			if ( tm_it != servicemap.second.end() ) 
+
+// search in timemap, for check of a case if new time has coincided with time of other event 
+// or event was is not found in eventmap
+			timeMap::iterator tm_it =
+				servicemap.second.find(TM);
+
+			if ( tm_it != servicemap.second.end() )
 			{
-				tm_it->second=evt;
-				prevTimeIt=tm_it;
-			}
-			else  // add new entry to timemap
-			{
-#ifdef NVOD
-				if ( TM != 3599 )
+
+// i think, if event is not found on eventmap, but found on timemap updating nevertheless demands
+#if 0
+				if ( source > tm_it->second->type && tm_erase_count == 0 ) // update needed ?
+					goto next; // when not.. the skip this entry
 #endif
-					prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
+
+// search this time in eventmap
+				eventMap::iterator ev_it_tmp = 
+					servicemap.first.find(tm_it->second->getEventID());
+
+				if ( ev_it_tmp != servicemap.first.end() )
+				{
+					ev_erase_count++;				
+					// delete the found record from eventmap
+					servicemap.first.erase(ev_it_tmp);
+					prevEventIt=servicemap.first.end();
+				}
+			}
+			
+			evt = new eventData(eit_event, eit_event_size, source);
+			
+			if (ev_erase_count > 0 && tm_erase_count > 0) // 2 different pairs have been removed
+			{
+				// exempt memory
+				delete ev_it->second; 
+				delete tm_it->second;
+				ev_it->second=evt;
+				tm_it->second=evt;
+			}
+			else if (ev_erase_count == 0 && tm_erase_count > 0) 
+			{
+				// exempt memory
+				delete ev_it->second;
+				prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
+				ev_it->second=evt;
+			}
+			else if (ev_erase_count > 0 && tm_erase_count == 0)
+			{
+				// exempt memory
+				delete tm_it->second;
+				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
+				tm_it->second=evt;
+			}
+			else // added new eventData
+			{
+				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
+				prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
 			}
 		}
 next:
