@@ -43,7 +43,7 @@ class CListBox : public CMenuWidget
 		CFrameBuffer*	frameBuffer;
 		string		caption;
 		string		saveBoxCaption, saveBoxText;
-
+		int			saveBoxDefaultSelection;
 		int		width;
 		int		height;
 		int		x;
@@ -93,7 +93,6 @@ class CListBox : public CMenuWidget
 		void setModified( bool modified = true );
 		void setSaveDialogText(string title, string text);
 		virtual void onSaveData(){};
-
 
 
 	public:

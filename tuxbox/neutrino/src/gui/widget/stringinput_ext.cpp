@@ -201,12 +201,21 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 		}
 		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
 		{
-			if ( ( strcmp(value, oldval) != 0) &&
-			     ( ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 ) == CMessageBox::mbrCancel ) )
-				continue;
-
-			strcpy(value, oldval);
-			loop=false;
+			if(strcmp(value, oldval)!= 0){
+			     int erg=ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbNo | CMessageBox::mbYes | CMessageBox::mbCancel, "", 380 );
+				 if(erg==CMessageBox::mbrYes){
+					strcpy(value, oldval);
+					loop=false;
+				 }
+				 else if(erg==CMessageBox::mbrNo){
+					 loop=false;
+				 }
+				 else if(erg==CMessageBox::mbrCancel){
+				 }
+			} else {
+				//keine änderungen - beenden ok
+				loop=false;
+			}
 		}
 		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 		{

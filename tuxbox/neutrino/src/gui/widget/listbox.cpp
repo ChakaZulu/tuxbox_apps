@@ -33,6 +33,7 @@ CListBox::CListBox()
 	caption = "";
 	saveBoxCaption = "";
 	saveBoxText = 	 "";
+	saveBoxDefaultSelection = CMessageBox::mbrNo;
 	liststart = 0;
 	selected =  0;
 	width =  400;
