@@ -60,7 +60,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.5.0"
+#define WEBIFVERSION "2.6.0"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -1959,6 +1959,16 @@ struct getEntryString
 		}
 		tmp.strReplace("#CHANNEL#", channel);
 		tmp.strReplace("#DESCRIPTION#", description);
+		if (se->type & ePlaylistEntry::SwitchTimerEntry)
+			tmp.strReplace("#ACTION#", "ZAP");
+		else
+		if (se->type & ePlaylistEntry::recDVR)
+			tmp.strReplace("#ACTION#", "DVR");
+		else
+		if (se->type & ePlaylistEntry::recNgrab)
+			tmp.strReplace("#ACTION#", "NGRAB");
+		else
+			tmp.strReplace("#ACTION#", "&rbl.");
 
 		myList.push_back(myTimerEntry(se->time_begin, tmp));
 	}
@@ -1984,7 +1994,7 @@ static eString getControlTimerList()
 		result.strReplace("#TIMER_REGULAR#", tmp);
 	}
 	else
-		result.strReplace("#TIMER_REGULAR#", "<tr><td colspan=\"7\">None</td></tr>");
+		result.strReplace("#TIMER_REGULAR#", "<tr><td colspan=\"8\">None</td></tr>");
 
 	tmp ="";
 	myList.clear();
@@ -2001,7 +2011,7 @@ static eString getControlTimerList()
 		result.strReplace("#TIMER_REPEATED#", tmp);
 	}
 	else
-		result.strReplace("#TIMER_REPEATED#", "<tr><td colspan=\"7\">None</td></tr>");
+		result.strReplace("#TIMER_REPEATED#", "<tr><td colspan=\"8\">None</td></tr>");
 
 	// buttons
 	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()", "#FFFFFF"));
@@ -4062,6 +4072,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	eString fr = opt["fr"];
 	eString sa = opt["sa"];
 	eString su = opt["su"];
+	eString action = opt["action"];
 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
@@ -4121,8 +4132,25 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	}
 
 	oldType &= ~(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown);
-		oldType |= ePlaylistEntry::stateWaiting;
-		oldType |= atoi(after_event.c_str());
+	oldType |= ePlaylistEntry::stateWaiting;
+	oldType |= atoi(after_event.c_str());
+
+	oldType &= ~(ePlaylistEntry::SwitchTimerEntry | ePlaylistEntry::RecTimerEntry);
+	oldType &= ~(ePlaylistEntry::recDVR | ePlaylistEntry::recNgrab);
+	if (action == "zap")
+	{
+		oldType |= ePlaylistEntry::SwitchTimerEntry;
+	}
+	else
+	{
+		oldType |= ePlaylistEntry::RecTimerEntry;
+
+		if (action == "dvr")
+			oldType |= ePlaylistEntry::recDVR;
+		else
+		if (action == "ngrab")
+			oldType |= ePlaylistEntry::recNgrab;
+	}
 
 	if (oldType & ePlaylistEntry::isRepeating)
 	{
@@ -4222,6 +4250,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString fr = opt["fr"];
 	eString sa = opt["sa"];
 	eString su = opt["su"];
+	eString action = opt["action"];
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
 
@@ -4279,7 +4308,23 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eventDuration = eventDuration + (2 * timeroffset * 60);
 
 	int type = (after_event) ? atoi(after_event.c_str()) : 0;
-	type |= ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR;
+
+	type |= ePlaylistEntry::stateWaiting;
+
+	if (action == "zap")
+	{
+		type |= ePlaylistEntry::SwitchTimerEntry;
+	}
+	else
+	{
+		type |= ePlaylistEntry::RecTimerEntry;
+
+		if (action == "dvr")
+			type |= ePlaylistEntry::recDVR;
+		else
+		if (action == "ngrab")
+			type |= ePlaylistEntry::recNgrab;
+	}
 
 	if (timer == "repeating")
 	{
@@ -4366,6 +4411,19 @@ static eString showEditTimerEventWindow(eString request, eString dirpath, eStrin
 	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
 
 	result.strReplace("#CSS#", (pdaScreen == 0) ? "webif.css" : "webif_small.css");
+
+	if (evType & ePlaylistEntry::SwitchTimerEntry)
+	{
+		result.strReplace("#ZAP#", "selected");
+	}
+	else
+	{
+		if (evType & ePlaylistEntry::recDVR)
+			result.strReplace("#DVR#", "selected");
+		else
+		if (evType & ePlaylistEntry::recNgrab)
+			result.strReplace("#NGRAB#", "selected");
+	}
 
 	if (evType & ePlaylistEntry::isRepeating)
 	{

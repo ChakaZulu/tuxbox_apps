@@ -8,6 +8,9 @@
 	<td rowspan="2" align="center">
 		<img src="#STATEPIC#">
 	</td>
+	<td rowspan="2" align="center">
+		#ACTION#
+	</td>
 	<td>
 		#START#
 	</td>

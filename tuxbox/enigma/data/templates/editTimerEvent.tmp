@@ -20,6 +20,16 @@
 					</td>
 				</tr>
 				<tr>
+					<td>Action:</td>
+					<td>
+						<select name="action" size="1">
+							<option value="dvr" #DVR#>DVR</option>
+							<option value="ngrab" #NGRAB#>NGRAB</option>
+							<option value="zap" #ZAP#>ZAP</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
 					<td>
 						&nbsp;
 					</td>

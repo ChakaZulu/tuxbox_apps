@@ -12,7 +12,7 @@ function clearTimerList()
 
 function editTimerEvent(xy)
 {
-	NewWindow('showEditTimerEventWindow?'+xy, 'editTimer', '780', '350', 'no');
+	NewWindow('showEditTimerEventWindow?'+xy, 'editTimer', '780', '370', 'no');
 }
 
 function deleteTimerEvent(xy)
@@ -56,6 +56,8 @@ function addTimerEvent()
 	var descr = document.channelselector.descr.value;
 	var currentAfterEvent = document.channelselector.after_event.selectedIndex;
 	var after_event = document.channelselector.after_event.options[currentAfterEvent].value;
+	var currentAction = document.channelselector.action.selectedIndex;
+	var action = document.channelselector.action.options[currentAction].value;
 	if (timer == "repeating")
 	{
 		var mo = "off";
@@ -81,17 +83,17 @@ function addTimerEvent()
 		if (document.channelselector.su.checked)
 			su = "on";
 
-		url = 'addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&ehour=' + ehour + '&emin=' + emin + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event;
+		url = 'addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&ehour=' + ehour + '&emin=' + emin + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
 	}
 	else
-		url = 'addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event;
+		url = 'addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
 
 	NewWindow(url, 'add', '200', '200', 'no', '5000');
 }
 
 function showAddTimerEventWindow(timer)
 {
-	NewWindow("showAddTimerEventWindow?timer=" + timer, 'addTimer', '780', '380', 'no');
+	NewWindow("showAddTimerEventWindow?timer=" + timer, 'addTimer', '780', '400', 'no');
 }
 
 
