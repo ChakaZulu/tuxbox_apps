@@ -111,6 +111,7 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	needrc=(aneedrc.isNull()?false:atoi(aneedrc.c_str()));
 	needvtxtpid=(aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid.c_str()));
 	needoffsets=(aneedoffsets.isNull()?false:atoi(aneedoffsets.c_str()));
+	needvidformat=(aneedvidformat.isNull()?false:atoi(aneedvidformat.c_str()));
 	version=(apluginVersion.isNull()?0:atoi(apluginVersion.c_str()));
 	showpig=(apigon.isNull()?false:atoi(apigon.c_str()));
 
