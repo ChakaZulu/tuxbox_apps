@@ -1,7 +1,6 @@
 #include <time.h>
 #include "epgcache.h"
 #include "init.h"
-#include "edvb.h"
 #include "lowlevel/dvb.h"
 #include "si.h"
 //int eventData::refcount=0;
@@ -17,7 +16,9 @@ eEPGCache::eEPGCache():eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOU
 	isRunning=0;
 	IdleTimer.start(0);
 	connect(eDVB::getInstance(), SIGNAL(enterService(eService*)), SLOT(enterService()));
-	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(leaveService()));
+	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(stopEPG()));
+	connect(eDVB::getInstance(), SIGNAL(enterTransponder(eTransponder*)), SLOT(enterTransponder()));
+	connect(eDVB::getInstance(), SIGNAL(leaveTransponder(eTransponder*)), SLOT(stopEPG()));
 	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(timeUpdated()));	
 	connect(&zapTimer, SIGNAL(timeout()), SLOT(startEPG()));
 	connect(&IdleTimer, SIGNAL(timeout()), SLOT(cleanLoop()));	
@@ -27,79 +28,43 @@ eEPGCache::eEPGCache():eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOU
 int eEPGCache::sectionRead(__u8 *data)
 {
 //	qDebug("[EPGC] got EGP section, tableid: %02x", data[0]);
-	eit_t *eit = (eit_t*) data;
-	int service_id=HILO(eit->service_id);
+		eit_t *eit = (eit_t*) data;
+		int service_id=HILO(eit->service_id);
 //	int version_number=eit->version_number;
 //	int current_next_indicator=eit->current_next_indicator;
-	int transport_stream_id=HILO(eit->transport_stream_id);
-	int original_network_id=HILO(eit->original_network_id);
-	int len=HILO(eit->section_length)-1;//+3-4;
-	int ptr=EIT_SIZE;
-	while (ptr<len)
-	{
-		eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
-		int eit_event_size=HILO(eit_event->descriptors_loop_length)+EIT_LOOP_SIZE;
-
-		int duration=	fromBCD(eit_event->duration_1)*3600+
-									fromBCD(eit_event->duration_2)*60+
-									fromBCD(eit_event->duration_3);
-
-		time_t TM = parseDVBtime( eit_event->start_time_1,
-															eit_event->start_time_2,
-															eit_event->start_time_3,
-															eit_event->start_time_4,
-															eit_event->start_time_5);
-
-		if ( (time(0)+eDVB::getInstance()->time_difference) <= (TM+duration))  // old events should not be cached
+		int transport_stream_id=HILO(eit->transport_stream_id);
+		int original_network_id=HILO(eit->original_network_id);
+		int len=HILO(eit->section_length)-1;//+3-4;
+		int ptr=EIT_SIZE;
+		while (ptr<len)
 		{
+			eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
+			int eit_event_size=HILO(eit_event->descriptors_loop_length)+EIT_LOOP_SIZE;
+
+			int duration=	fromBCD(eit_event->duration_1)*3600+
+										fromBCD(eit_event->duration_2)*60+
+										fromBCD(eit_event->duration_3);
+
+			time_t TM = parseDVBtime( eit_event->start_time_1,
+																eit_event->start_time_2,
+																eit_event->start_time_3,
+																eit_event->start_time_4,
+																eit_event->start_time_5);
+
+			if ( (time(0)+eDVB::getInstance()->time_difference) <= (TM+duration))  // old events should not be cached
+			{
 //			int event_id=HILO(eit_event->event_id);
 
-			eventMap &service = eventDB[sref(original_network_id,service_id)];
-			eventMap::iterator event=service.find(TM);
+				eventMap &service = eventDB[sref(original_network_id,service_id)];
+				eventMap::iterator event=service.find(TM);
 
-			if (event==service.end())   // event still not cached
-				eventDB[sref(original_network_id,service_id)].insert(std::pair<int,eventData*>(TM, new eventData(eit_event, eit_event_size)));
+				if (event==service.end())   // event still not cached
+					eventDB[sref(original_network_id,service_id)].insert(std::pair<int,eventData*>(TM, new eventData(eit_event, eit_event_size)));
+			}
+ 	
+			ptr+=eit_event_size;
 		}
-
-		ptr+=eit_event_size;
-	}
-	return 0;
-}
-
-void eEPGCache::timeUpdated()
-{
-	if (!isRunning && zapTimer.isActive())
-	{
-		isRunning=1;
-		qDebug("[EPGC] time is now valid... start caching events");
-		start();
-	}
-}
-
-void eEPGCache::startEPG()
-{
-	if (eDVB::getInstance()->time_difference && !isRunning)	
-	{
-		isRunning=1;
-		qDebug("[EPGC] zapping finished.. restart caching events");
-		start();
-	}
-}
-
-void eEPGCache::enterService()
-{
-	zapTimer.stop();
-	zapTimer.start(3000, 1);
-}
-
-void eEPGCache::leaveService()
-{
-	if (eDVB::getInstance()->time_difference)
-	{
-		qDebug("[EPGC] zapping ... stop caching events");
-		abort();
-		isRunning=0;
-	}
+		return 0;
 }
 
 void eEPGCache::cleanLoop()
@@ -172,11 +137,6 @@ EITEvent *eEPGCache::lookupCurrentEvent(int original_network_id, int service_id)
 	if (event==service.end())
 		return 0;
 	return new EITEvent(*event->second);
-}
-
-const eventMap& eEPGCache::getEventMap(int original_network_id, int service_id)
-{
-	return eventDB[sref(original_network_id,service_id)];
 }
 
 eAutoInitP0<eEPGCache> init_eEPGCacheInit(6, "EPG cache");

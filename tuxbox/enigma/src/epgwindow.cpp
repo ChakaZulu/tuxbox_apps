@@ -5,15 +5,6 @@
 #include "edvb.h"
 #include "enigma_event.h"
 
-eListboxEntryEPG::eListboxEntryEPG(EITEvent* evt, eListbox *listbox): eListboxEntry(listbox), event(evt)
-{
-}
-
-eListboxEntryEPG::~eListboxEntryEPG()
-{
-	delete event;
-}
-
 QString eListboxEntryEPG::getText(int col=0) const
 {
 		tm* t = localtime(&event->start_time);
@@ -55,27 +46,37 @@ int eEPGWindow::eventFilter(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::keyDown:
-		switch (event.parameter)
+		case eWidgetEvent::keyUp:
+			if (event.parameter != eRCInput::RC_OK)
+				return 1;
+			else
+				return 0;
+
+		case eWidgetEvent::keyDown:
 		{
-			case eRCInput::RC_HOME:
- 			close(0);
-			break;
+			switch (event.parameter)
+			{
+				case eRCInput::RC_HOME:
+ 					close(0);
+				break;
+
+				case eRCInput::RC_LEFT:
+				case eRCInput::RC_RIGHT:
+				case eRCInput::RC_UP:
+				case eRCInput::RC_DOWN:
+					return 0;
+				break;
+			}
 		}
 	}
-	return 0;
+  return 1;
 }
 
 eEPGWindow::eEPGWindow(eService* service):current(service),
 								eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
-					
 {
 	move(QPoint(50, 50));
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
 	fillEPGList();
-}
-
-eEPGWindow::~eEPGWindow()
-{
 }

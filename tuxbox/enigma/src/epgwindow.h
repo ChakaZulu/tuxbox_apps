@@ -9,9 +9,22 @@ class eListboxEntryEPG: public eListboxEntry
 public:
 	EITEvent* event;
 	QString getText(int col=0) const;
-	eListboxEntryEPG(EITEvent* evt, eListbox *listbox);
-	~eListboxEntryEPG();
+	inline eListboxEntryEPG(EITEvent* evt, eListbox *listbox): eListboxEntry(listbox), event(evt)	{	}
+	inline ~eListboxEntryEPG(){ delete event; }
+	inline int operator<(const eListboxEntry& q) const;
+	inline int operator==(const eListboxEntry& q) const;
 };
+
+int eListboxEntryEPG::operator<(const eListboxEntry & q) const
+{
+	// much faster as string compare
+	return ( event->start_time < ((eListboxEntryEPG*) &q)->event->start_time );
+}
+
+int eListboxEntryEPG::operator==(const eListboxEntry & q) const
+{
+	return (event->start_time == ((eListboxEntryEPG*) &q)->event->start_time );
+}
 
 class eEPGWindow: public eLBWindow
 {
@@ -24,7 +37,7 @@ private slots:
 	void entrySelected(eListboxEntry *entry);
 public:
 	eEPGWindow(eService* service);
-	~eEPGWindow();
+	inline ~eEPGWindow(){};
 };
 
 #endif

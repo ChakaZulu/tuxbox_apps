@@ -18,14 +18,6 @@ static QString qHex(int v)
 	return QString().sprintf("%04x", v);
 }
 
-Descriptor::Descriptor(int tag): tag(tag)
-{
-}
-
-Descriptor::~Descriptor()
-{
-}
-
 int fromBCD(int bcd)
 {
 	if ((bcd&0xF0)>=0xA0)

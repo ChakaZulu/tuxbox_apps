@@ -30,13 +30,11 @@ eMainMenu::eMainMenu()
 
 int eMainMenu::exec()
 {
-	qDebug("Stop EPGCache");
-	eEPGCache::getInstance()->leaveService();
+	eEPGCache::getInstance()->stopEPG();
 	window->show();
 	int res=window->exec();
 	window->hide();
 	eEPGCache::getInstance()->startEPG();
-	qDebug("Restart EPGCache");
 	return res;
 }
 

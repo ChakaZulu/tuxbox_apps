@@ -1,74 +1,21 @@
 #include "elistbox.h"
 #include "fb.h"
-#include "rc.h"
-#include "eskin.h"
 #include <qrect.h>
 #include "elabel.h"
 #include "init.h"
 
-QString eListboxEntryText::getText(int col) const
+eListbox::eListbox(eWidget *parent, int type, int ih)
+	 :eWidget(parent, 1), type(type)
 {
-	switch (col)
-	{
-	case -1:
-		return sort?sort:text;
-	case 0:
-		return text;
-	default:
-		return 0;
-	}
-}
-
-eListboxEntryText::eListboxEntryText(eListbox *listbox, QString text, QString sort, void *data): eListboxEntry(listbox, data) , text(text), sort(sort)
-{
-}
-
-eListboxEntryText::~eListboxEntryText()
-{
-}
-
-eListboxEntry::eListboxEntry(eListboxEntry *listboxentry, void *data): listboxentry(listboxentry), data(data)
-{
-	parent=listboxentry->parent;
-	listboxentry->childs.append(this);
-	listbox=0;
-}
-
-eListboxEntry::eListboxEntry(eListbox *listbox, void *data): listbox(listbox), data(data)
-{
-	if (listbox)
-	{
-		parent=listbox;
-		listboxentry=0;
-		listbox->append(this);
-	}
-}
-
-eListboxEntry::~eListboxEntry()
-{
-	if (listboxentry)
-		listboxentry->childs.remove(this);
-	if (listbox)
-		listbox->childs.remove(this);
-	for (QListIterator<eListboxEntry> c(childs); c.current(); ++c)
-		delete c.current();
-}
-
-int eListboxEntry::operator<(const eListboxEntry &o)
-{
-	return qstricmp(getText(-1), o.getText(-1))<0;
-}
-
-int eListboxEntry::operator==(const eListboxEntry &o)
-{
-	return !qstricmp(getText(-1), o.getText(-1));
-}
- 
-void eListboxEntry::renderInto(gPainter *rc, QRect area) const
-{
-	rc->setFont(listbox->entryFnt);
-	rc->renderText(area, getText(0));
-	rc->flush();
+	col_active=eSkin::getActive()->queryScheme("focusedColor");
+	top=0;
+	bottom=0;
+	current=0;
+	font_size=ih;
+	item_height=ih+2;
+	have_focus=0;
+	entryFnt=gFont("NimbusSansL-Regular Sans L Regular", font_size);
+	childs.setAutoDelete(true);
 }
 
 void eListbox::redrawWidget(gPainter *target, const QRect &where)
@@ -259,34 +206,6 @@ void eListbox::keyUp(int rc)
 	}
 }
 
-void eListbox::append(eListboxEntry *entry)
-{
-	childs.append(entry);
-	actualize();
-}
-
-void eListbox::remove(eListboxEntry *entry)
-{
-	childs.remove(entry);
-	actualize();
-}
-
-void eListbox::geometryChanged()
-{
-	entries=size.height()/item_height;
-	if (top)
-	{
-		bottom=new QListIterator<eListboxEntry>(*top);
-		*bottom=*top;
-		(*bottom)+=entries;
-	}
-}
-
-void eListbox::clearList()
-{
-	childs.clear();
-}
-
 void eListbox::setCurrent(eListboxEntry *c)
 {
 	if (!current)
@@ -304,78 +223,14 @@ void eListbox::setCurrent(eListboxEntry *c)
 	}
 }
 
-void eListbox::sort()
+eListboxEntry::~eListboxEntry()
 {
-	childs.sort();
-}
-
-eListboxEntry *eListbox::goNext()
-{
-	keyDown(eRCInput::RC_DOWN);
-	return current?current->current():0;
-}
-
-eListboxEntry *eListbox::goPrev()
-{
-	keyDown(eRCInput::RC_UP);
-	return current?current->current():0;
-}
-
-eListbox::eListbox(eWidget *parent, int type, int ih)
-	 :eWidget(parent, 1), type(type)
-{
-	col_active=eSkin::getActive()->queryScheme("focusedColor");
-	top=0;
-	bottom=0;
-	current=0;
-	font_size=ih;
-	item_height=ih+2;
-	have_focus=0;
-	entryFnt=gFont("NimbusSansL-Regular Sans L Regular", font_size);
-	childs.setAutoDelete(true);
-}
-
-void eListbox::OnFontSizeChanged(int NewFontSize)
-{
-	item_height=NewFontSize+2;
-	font_size = NewFontSize;
-	entryFnt=gFont("NimbusSansL-Regular Sans L Regular", font_size);
-	geometryChanged();
-}
-
-QRect eListbox::getEntryRect(int pos)
-{
-	return QRect(QPoint(0, pos*item_height), QSize(size.width(), item_height));
-}
-
-void eListbox::invalidateEntry(int n)
-{
-	invalidate(getEntryRect(n));
-}
-
-eListbox::~eListbox()
-{
-	if (top)
-		delete top;
-	if (current)
-		delete current;
-}
-
-int eListbox::setProperty(const QString &prop, const QString &value)
-{
-	if (prop=="col_active")
-		col_active=eSkin::getActive()->queryScheme(value);
-	else
-		return eWidget::setProperty(prop, value);
-	return 0;
-}
-
-void eListbox::setActiveColor(gColor active)
-{
-	col_active=active;
-
-	if (current && current->current())
-		invalidateEntry(active);		/* das ist ja wohl buggy hier */
+	if (listboxentry)
+		listboxentry->childs.remove(this);
+	if (listbox)
+		listbox->childs.remove(this);
+	for (QListIterator<eListboxEntry> c(childs); c.current(); ++c)
+		delete c.current();
 }
 
 static eWidget *create_eListbox(eWidget *parent)

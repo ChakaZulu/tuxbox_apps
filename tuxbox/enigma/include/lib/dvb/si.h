@@ -15,17 +15,17 @@
 time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5);
 int fromBCD(int bcd);
 
-
 class Descriptor: public QObject
 {
 	Q_OBJECT
 public:
+	inline Descriptor(int tag):tag(tag){};
+	inline virtual ~Descriptor(){};
+
 	static Descriptor *create(descr_gen_t *data);
-	Descriptor(int tag);
 	int Tag() { return tag; }
 	virtual QString toString()=0;
-	virtual ~Descriptor();
-	
+
 	int tag;
 };
 
