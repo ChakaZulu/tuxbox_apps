@@ -67,7 +67,6 @@ function zapHeaderReload()
 function channelChange()
 {
 	currentChannel = document.channelselector.channel.selectedIndex;
-	currentBouquet = document.channelselector.bouquet.selectedIndex;
 	if (currentChannel >= 0)
 	{
 		var channel = document.channelselector.channel.options[currentChannel].value;
@@ -78,10 +77,7 @@ function zapChannelForward()
 {
 	currentChannel = currentChannel + 1;
 	if (currentChannel >= channels[currentBouquet].length)
-		if (autoBouquetChange == 0)
-			currentChannel = 0;
-		else
-			bouquetForward();
+		currentChannel = 0;
 	document.channelselector.channel.selectedIndex = currentChannel;
 	var channel = document.channelselector.channel.options[currentChannel].value;
 	switchChannel(channel, currentBouquet, currentChannel);
@@ -99,10 +95,7 @@ function zapChannelBackward()
 {
 	currentChannel = currentChannel - 1;
 	if (currentChannel < 0)
-		if (autoBouquetChange == 0)
-			currentChannel = channels[currentBouquet].length - 1;
-		else
-			bouquetBackward();
+		currentChannel = channels[currentBouquet].length - 1;
 	document.channelselector.channel.selectedIndex = currentChannel;
 	var channel = document.channelselector.channel.options[currentChannel].value;
 	switchChannel(channel, currentBouquet, currentChannel);
