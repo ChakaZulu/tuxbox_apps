@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.21 2002/12/16 18:43:50 TheDOC Exp $
+ * $Id: lcdmenu.cpp,v 1.22 2002/12/26 09:14:03 Jolt Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -249,37 +249,37 @@ bool CLCDMenu::rcLoop ()
 		switch (pressedKey)
 		{
 			/* 1-9: number keys */
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-		case 9:
+		case KEY_1:
+		case KEY_2:
+		case KEY_3:
+		case KEY_4:
+		case KEY_5:
+		case KEY_6:
+		case KEY_7:
+		case KEY_8:
+		case KEY_9:
 			if (pressedKey <= entryCount)
 				selected = selectEntry(pressedKey - 1);
 			break;
 
-		case 11: /* left arrow */
-		case 12: /* up arrow */
+		case KEY_LEFT: /* left arrow */
+		case KEY_UP: /* up arrow */
 			if (selectedEntry > 0)
 				selectEntry(selectedEntry - 1);
 			break;
 
-		case 10: /* right arrow */
-		case 13: /* down arrow */
+		case KEY_RIGHT: /* right arrow */
+		case KEY_DOWN: /* down arrow */
 			if (selectedEntry < entryCount)
 				selectEntry(selectedEntry + 1);
 			break;
 
 		//case -1: /* timeout */
-		case 14: /* ok button */
+		case KEY_OK: /* ok button */
 			selected = true;
 			break;
 
-		case 23: /* question mark */
+		case KEY_HELP: /* question mark */
 			changePin();
 			drawMenu();
 			selectEntry(selectedEntry);
