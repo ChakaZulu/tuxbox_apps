@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.38 2002/09/11 20:12:42 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.39 2002/09/18 13:26:18 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -71,7 +71,6 @@ class CBouquetManager
 		CBouquet* remainChannels;
 		void makeRemainingChannelsBouquet();
 		void parseBouquetsXml(const XMLTreeNode *root);
-		string convertForXML( string s);
 		void storeBouquets();
 	public:
 		CBouquetManager() { remainChannels = NULL; };
@@ -116,7 +115,5 @@ class CBouquetManager
 		CZapitChannel* findChannelByChannelID(const t_channel_id channel_id);
 
 };
-
-//extern CBouquetManager* BouquetManager;
 
 #endif /* __bouquets_h__ */

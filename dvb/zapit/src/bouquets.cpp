@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.62 2002/09/16 12:53:35 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.63 2002/09/18 13:26:18 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -29,6 +29,7 @@
 #include <zapsi/sdt.h>
 
 #include "bouquets.h"
+#include "xmlinterface.h"
 
 extern tallchans allchans;   //  defined in zapit.cpp
 
@@ -161,53 +162,6 @@ int CBouquet::recModeTVSize( unsigned int tsid)
 
 
 /**** class CBouquetManager *************************************************/
-
-string CBouquetManager::convertForXML( string s)
-{
-	string r;
-	unsigned int i;
-	for (i=0; i<s.length(); i++)
-	{
-		switch (s[i])
-		{
-		  case '&':
-			r += "&amp;";
-		  break;
-		  case '<':
-			r += "&lt;";
-		  break;
-		  case 'Ä':
-			r += "&#196;";
-		  break;
-		  case 'É':
-			r += "&#201;";
-		  break;
-		  case 'Í':
-			r += "&#205;";
-		  break;
-		  case 'Ü':
-			r += "&#220;";
-		  break;
-		  case 'é':
-			r += "&#233;";
-		  break;
-		  case '\"':
-			r += "&quot;";
-		  break;
-		  default:
-			if ((s[i]>=32) && (s[i]<128))
-				r += s[i];
-			else if (s[i] > 128)
-			{
-				char val[5];
-				sprintf(val, "%d", s[i]);
-				r = r + "&#" + val + ";";
-			}
-		}
-	}
-	return r;
-}
-
 void CBouquetManager::saveBouquets()
 {
 	printf("[zapit] creating new bouquets.xml\n");
@@ -267,7 +221,7 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 		printf("[zapit] reading Bouquets ");
 		while ((search) && (!(strcmp(search->GetType(), "Bouquet"))))
 		{
-			CBouquet* newBouquet = addBouquet( search->GetAttributeValue("name"));
+			CBouquet* newBouquet = addBouquet(Utf8_to_Latin1(search->GetAttributeValue("name")));
 			char* hidden = search->GetAttributeValue("hidden");
 			char* locked = search->GetAttributeValue("locked");
 			newBouquet->bHidden = hidden ? (strcmp(hidden, "1") == 0) : false;
