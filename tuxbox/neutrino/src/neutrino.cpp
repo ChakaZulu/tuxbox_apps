@@ -901,7 +901,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	streamstatus = streaming_stop;
+	streamstatus = 0;
 	if(g_settings.network_streaming_use)
 	{
 		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.streaming", &streamstatus, true, this );
@@ -1848,7 +1848,7 @@ bool CNeutrinoApp::setExternalRecording(int nstreamstatus )
 		perror("[neutrino] -  cannot connect to streamingserver\n");
 		return false;
 	}
-	streaming_commandhead rmsg;
+	externalCommand rmsg;
 	rmsg.version=1;
 	rmsg.command = nstreamstatus;
 	write(sock_fd, &rmsg, sizeof(rmsg));
@@ -1867,19 +1867,19 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 		if ( msg == NeutrinoMessages::RECORD_START)
 		{
-			if (streamstatus == streaming_stop)		
+			if( (streamstatus == CMD_VCR_STOP) || (streamstatus == CMD_VCR_UNKNOWN) )
 			{
 				// noch nicht am streamen . . 
-				setExternalRecording(streaming_start);
+				setExternalRecording(CMD_VCR_START);
 			}
 		}
 
 		if ( msg == NeutrinoMessages::RECORD_STOP)
 		{
-			if( (streamstatus == streaming_start) || (streamstatus == streaming_pause) )
+			if( (streamstatus == CMD_VCR_START) || (streamstatus == CMD_VCR_PAUSE) )
 			{
 				// wenn momentan am streamen oder paused . .
-				setExternalRecording(streaming_stop);
+				setExternalRecording(CMD_VCR_STOP);
 			}
 		}
 
@@ -2612,7 +2612,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.283 2002/05/23 22:53:22 McClean Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.284 2002/05/28 22:22:57 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
