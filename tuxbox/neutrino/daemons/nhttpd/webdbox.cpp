@@ -265,7 +265,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 		}
 		else if(request->ParameterList->Count == 1)
 		{
-			request->ParameterList->PrintParameterList();
+//			request->ParameterList->PrintParameterList();
 			if(request->ParameterList->GetIndex("eventid") != -1)
 			{	//special epg query
 				if(Parent->DEBUG) printf("event_id: %s\n",request->ParameterList->GetValue(request->ParameterList->GetIndex("eventid")));
@@ -796,16 +796,17 @@ void TWebDbox::ShowBouquets(TWebserverRequest *request)
 {
 char *buffer = new char[500];
 	request->SocketWriteLn("<html>\n<head><title>DBOX2-Neutrino Bouquetliste</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\"></head>");
-	request->SocketWriteLn("<body><table cellspacing=3 border=2><tr>\n");
-	sprintf(buffer,"<td><a href=\"channellist.dbox2\" target=\"content\"><h3>Alle Kanäle</h3></a></td>\n");
+	request->SocketWriteLn("<body style=\"background-color:#000000;\"><table cellspacing=0 cellpadding=0 border=0><tr height=10>\n");
+	sprintf(buffer,"<td><a class=b href=\"channellist.dbox2\" target=\"content\"><h4>Alle Kanäle</h4></a></td>\n");
 	request->SocketWrite(buffer);
 
 	for(int i = 0; i < BouquetList.size();i++)
 	{
-		sprintf(buffer,"<td><a href=\"channellist.dbox2?bouquet=%d\" target=\"content\"><h3>%s</h3></a></td>\n",BouquetList[i].bouquet_nr,BouquetList[i].name);
+		sprintf(buffer,"<td width=25>&nbsp;</td><td><h4><a class=b href=\"channellist.dbox2?bouquet=%d\" target=\"content\">%s</a></h4></td>\n",BouquetList[i].bouquet_nr,BouquetList[i].name);
 		request->SocketWrite(buffer);
 	}
-	request->SocketWriteLn("</tr></body></html>\n");
+	sprintf(buffer,"</tr><tr><td colspan=%d><hr></td><tr></table></body></html>\n",BouquetList.size() + 1);
+	request->SocketWrite(buffer);
 	delete[] buffer;
 }
 

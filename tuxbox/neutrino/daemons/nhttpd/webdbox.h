@@ -260,7 +260,7 @@ public:
 	~TWebDbox();
 
 	CZapitClient::BouquetList BouquetList;
-	CZapitClient::BouquetChannelList BouquetsList[10];
+	CZapitClient::BouquetChannelList BouquetsList[25];		// quick ´n dirty: Sollte reichen
 	CZapitClient::BouquetChannelList ChannelList;
 	CChannelEventList eList;
 
