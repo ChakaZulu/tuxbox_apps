@@ -13,7 +13,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+$Log: plugins.cpp,v $
+Revision 1.2  2001/11/15 00:43:45  TheDOC
+ added
 
+*/
 #include "plugins.h"
 
 #include <unistd.h>

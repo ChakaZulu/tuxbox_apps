@@ -13,7 +13,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+$Log: timer.cpp,v $
+Revision 1.2  2001/11/15 00:43:45  TheDOC
+ added
 
+*/
 #include "timer.h"
 
 timer::timer(hardware *h, channels *c, zap *z, tuner *t, osd *o)

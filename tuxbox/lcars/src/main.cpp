@@ -13,7 +13,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+$Log: main.cpp,v $
+Revision 1.6  2001/11/15 00:43:45  TheDOC
+ added
 
+*/
 #include <iostream.h>
 #include <fcntl.h>
 #include <unistd.h>

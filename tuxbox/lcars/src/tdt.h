@@ -13,7 +13,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+$Log: tdt.h,v $
+Revision 1.2  2001/11/15 00:43:45  TheDOC
+ added
 
+*/
 #ifndef TDT_H
 #define TDT_H
 

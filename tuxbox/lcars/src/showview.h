@@ -13,7 +13,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+$Log: showview.h,v $
+Revision 1.2  2001/11/15 00:43:45  TheDOC
+ added
 
+*/
 #ifndef SHOWVIEW_H
 #define SHOWVIEW_H
 

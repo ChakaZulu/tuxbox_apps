@@ -13,7 +13,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+$Log: descriptors.h,v $
+Revision 1.2  2001/11/15 00:43:45  TheDOC
+ added
 
+*/
 struct short_event_descriptor_header
 {
 	unsigned char descriptor_tag:8;

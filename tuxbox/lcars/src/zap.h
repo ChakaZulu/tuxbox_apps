@@ -13,7 +13,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+$Log: zap.h,v $
+Revision 1.2  2001/11/15 00:43:45  TheDOC
+ added
 
+*/
 #ifndef ZAP_H
 #define ZAP_H
 

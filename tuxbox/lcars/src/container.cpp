@@ -13,7 +13,12 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+/*
+$Log: container.cpp,v $
+Revision 1.2  2001/11/15 00:43:45  TheDOC
+ added
 
+*/
 #include "container.h"
 
 container::container(zap *z, channels *c, fbClass *f, osd *o, settings *s, tuner *t, pat *pa, pmt *pm, eit *e, scan *sc)
