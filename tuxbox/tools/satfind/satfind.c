@@ -260,11 +260,6 @@ int main(int argc, char **argv) {
   struct timeval tv;
   struct signal signal_quality,old_signal;
   struct dmx_sct_filter_params flt;
-#if HAVE_DVB_API_VERSION >= 3
-  struct dvb_frontend_info info;
-#else
-  FrontendInfo info;
-#endif
   unsigned char buf[1024];
   char network_name[31],old_name[31];
   int lcd;
@@ -286,14 +281,6 @@ int main(int argc, char **argv) {
   
   if((fe_fd=open(FE,O_RDONLY))<0) {
     perror("[satfind.c] Can't open Tuner");
-    return 1;
-  }
-  if(ioctl(fe_fd, FE_GET_INFO, &info) < 0) {
-    perror("[satfind.c] error ioctl FE_GET_INFO");
-    return 1;
-  }
-  if (info.type != FE_QPSK) {
-    fprintf(stderr,"[satfind.c] Fehler: Keine Satbox gefunden.\n");
     return 1;
   }
 
