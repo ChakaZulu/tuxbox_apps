@@ -70,7 +70,7 @@ miscsettings.head Diverse Eistellunga
 miscsettings.shutdown_real bissi ausmacha
 miscsettings.shutdown_real_rcdelay verzögats Ausschoitn
 miscsettings.boxtype DBox Hersteller
-miscsettings.bootinfo unset
+miscsettings.bootinfo Informationa beim Startn zoang
 miscsettings.startbhdriver BH-Mode Treiba lon
 miscsettings.general Allgemein
 miscsettings.fb_destination EXPERT! Boot-Konsole
@@ -89,7 +89,7 @@ audiomenu.avs_control Eistain avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
-audiomenu.PCMOffset unset
+audiomenu.PCMOffset Lautstärknabsenkung PCM
 
 videomenu.head Video-Eistellunga
 videomenu.screensetup Bildbereich eistein
@@ -140,7 +140,7 @@ streamingmenu.streaming_server_cddrive DVD Laufwerk
 streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate Datenrate Video
 streamingmenu.streaming_audiorate Datenrate Audio
-streamingmenu.streaming_ac3_enabled unset
+streamingmenu.streaming_ac3_enabled AC3 Untastützung
 streamingmenu.off Ausgschoitn
 streamingmenu.on Eigschoitn
 streamingmenu.streaming_force_transcode Transcode Forcieren
@@ -241,7 +241,7 @@ colorchooser.alpha alpha
 lcdmenu.head LCD Eistellunga
 lcdmenu.inverse Invertieren
 lcdmenu.power Pauwa
-lcdmenu.autodimm unset
+lcdmenu.autodimm Automatisch dimma
 lcdmenu.lcdcontroler Kontrast / Helligkeid
 lcdmenu.statusline Statuszeiln
 lcdmenu.statusline.volume Lautstärkn
@@ -360,7 +360,7 @@ scants.bouquet_leave ned olanga
 scants.bouquet_create nei macha
 scants.bouquet_erase wegmacha
 scants.bouquet_satellite Satelliten-Bouquet
-scants.bouquet_update unset
+scants.bouquet_update nei macha
 scants.failed Sendasuacha is gescheitat
 scants.finished Senda sand gfundn worn!
 
@@ -376,7 +376,7 @@ flashupdate.getupdatefileerror kon des Update ned lon
 flashupdate.cantopenfile kon de Datei ned aufmacha
 flashupdate.fileis0bytes de Datei hod 0 Byte
 flashupdate.eraseingflash lösch des Flash
-flashupdate.erasefailed unset
+flashupdate.erasefailed Flash löschn is schiafganga
 flashupdate.programmingflash programmier des Flash
 flashupdate.cantopenmtd kon des MTD-Device ned aufmacha
 flashupdate.ready hobs
@@ -404,6 +404,7 @@ flashupdate.proxyusername_hint2 Wans nix eigem wer koa Authentifizierung gmacht
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Gems as Proxy-Passwort ei
 flashupdate.proxypassword_hint2
+flashupdate.selectimage unset
 flashupdate.msgbox Des Image hob i gfundn:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWoins des Image runterlon \nund installiern?
 flashupdate.msgbox_manual A neas Image hob i gfundn:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWoins des instaliern?
 flashupdate.expertfunctions Experten-Funktionen
@@ -715,16 +716,16 @@ movieplayer.head Fuimspuia
 movieplayer.play Spuin
 movieplayer.choosets TS Spuin
 movieplayer.chooseps PS Spuin
-movieplayer.choosestream unset
+movieplayer.choosestream Streama
 movieplayer.choosepes PES spuin
 movieplayer.bookmark Vormerka
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile unset
+movieplayer.choosestreamfile Datei vom VLC
 movieplayer.pleasewait Oan Moment, de Verbindung\nzum Streamingserva werd hergsteaid
 movieplayer.nostreamingserver Koa Vabindung\nzum Streamingserva m�ch.
 movieplayer.defdir Start-Verz.
-movieplayer.buffering unset
+movieplayer.buffering Buffern..
 
 filebrowser.head Datiesucha
 filebrowser.filter.active Fuita o
@@ -752,7 +753,7 @@ nfs.type_nfs NFS
 nfs.type_cifs CIFS
 nfs.username CIFS Benutzanama
 nfs.password CIFS Passwort
-nfs.mounterror_notsup unset
+nfs.mounterror_notsup Mit dem Dateisystem kon i nix ofanga
 nfsmenu.head NFS/CIFS Eistellunga
 
 apids.hint_1 Gems de APIDs zu streama getrend

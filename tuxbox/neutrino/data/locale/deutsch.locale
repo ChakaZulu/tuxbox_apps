@@ -150,7 +150,6 @@ streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
 
-
 ping.ok ist erreichbar (ping)
 ping.unreachable ist nicht erreichbar (unreachable)
 ping.protocol ist nicht erreichbar (Host or protocol error)
