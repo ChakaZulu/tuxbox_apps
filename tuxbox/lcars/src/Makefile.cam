@@ -1,0 +1,106 @@
+CC=powerpc-linux-g++
+INCLUDES=../../include
+
+objects = main.o container.o timer.o pig.o plugins.o hardware.o scan.o network.o cam/cam.o teletext.o serial.o osd.o sdt.o zap.o nit.o pat.o pmt.o eit.o settings.o channels.o rc.o help.o fb.o tot.o checker.o mktime.o tuner.o
+flags = -Wall -O2
+freetype = -lfreetype
+#flags =  -fexpensive-optimizations -ffast-math -g -O3 -Wall
+
+all: lcars
+
+install: all
+	cp lcars ../../../cdkroot/bin/
+	cp fonts/ds9.ttf ../../../cdkroot/usr/lib/fonts
+	cp scan-file/scanlist.dat ../../../cdkroot/var/lcars/scanlist.dat
+
+lcars: $(objects)
+	$(CC) -o lcars -I$(INCLUDES) $(objects) $(flags) -pthread $(freetype) -ldl
+
+main.o: 
+	$(CC) -c main.cpp $(flags) 
+
+pig.o: pig.h
+	$(CC) -c pig.cpp $(flags)
+
+timer.o: timer.h
+	$(CC) -c timer.cpp $(flags)
+
+plugins.o: plugins.h
+	$(CC) -c plugins.cpp $(flags)
+
+network.o: network.h
+	$(CC) -c network.cpp $(flags)
+
+hardware.o: hardware.h
+	$(CC) -c hardware.cpp $(flags)
+
+showview.o:
+	$(CC) -c showview.cpp $(flags)
+
+container.o: container.h
+	$(CC) -c container.cpp $(flags)
+
+serial.o: serial.h
+	$(CC) -c serial.cpp $(flags)
+
+mktime.o: 
+	$(CC) -c mktime.c $(flags)
+
+osd.o: osd.h
+	$(CC) -c osd.cpp $(flags)
+
+sdt.o: sdt.h
+	$(CC) -c sdt.cpp $(flags)
+
+tdt.o: tdt.h
+	$(CC) -c tdt.cpp $(flags)
+
+tot.o: tot.h
+	$(CC) -c tot.cpp $(flags)
+
+zap.o: zap.h
+	$(CC) -c zap.cpp $(flags)
+
+nit.o: nit.h
+	$(CC) -c nit.cpp $(flags)
+
+pat.o: pat.h
+	$(CC) -c pat.cpp $(flags)
+ 
+pmt.o: pmt.h
+	$(CC) -c pmt.cpp $(flags)
+
+scan.o: scan.h
+	$(CC) -c scan.cpp $(flags)
+
+eit.o: eit.h
+	$(CC) -c eit.cpp $(flags)
+
+teletext.o: teletext.h
+	$(CC) -c teletext.cpp $(flags)
+
+settings.o: settings.h
+	$(CC) -c settings.cpp $(flags)
+
+channels.o: channels.h
+	$(CC) -c channels.cpp $(flags)
+
+rc.o: rc.h
+	$(CC) -c rc.cpp $(flags)
+
+help.o: help.h
+	$(CC) -c help.cpp $(flags)
+ 
+fb.o: fb.h
+	$(CC) -c fb.cpp $(flags)
+
+checker.o: checker.h
+	$(CC) -c checker.cpp $(flags)
+
+tuner.o: tuner.h
+	$(CC) -c tuner.cpp $(flags)
+
+clean:
+	rm -f $(objects)
+
+remake: clean all
