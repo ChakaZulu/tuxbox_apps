@@ -288,6 +288,89 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 	}
 }
 
+void LoadScart_Settings()
+{
+	// scart
+	sagem_scart[0]= 2;
+	sagem_scart[1]= 1;
+	sagem_scart[2]= 0;
+	sagem_scart[3]= 0;
+
+	nokia_scart[0]= 3;
+	nokia_scart[1]= 2;
+	nokia_scart[2]= 1;
+	nokia_scart[3]= 0;
+
+	philips_scart[0]= 2;
+	philips_scart[1]= 2;
+	philips_scart[2]= 3;
+	philips_scart[3]= 0;
+
+	// dvb
+	sagem_dvb[0]= 0;
+	sagem_dvb[1]= 0;
+	sagem_dvb[2]= 0;
+	sagem_dvb[3]= 0;
+
+	nokia_dvb[0]= 5;
+	nokia_dvb[1]= 1;
+	nokia_dvb[2]= 1;
+	nokia_dvb[3]= 0;
+
+	philips_dvb[0]= 1;
+	philips_dvb[1]= 1;
+	philips_dvb[2]= 1;
+	philips_dvb[3]= 0;
+
+	FILE* fd = fopen(CONFIGDIR"/scart.conf", "r");
+	if(fd)
+	{
+		printf("[controld]: loading scart-config (scart.conf)\n");
+
+		char buf[1000];
+		fgets(buf,sizeof(buf),fd);
+
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			sscanf( buf, "nokia_scart: %d %d %d %d\n", &nokia_scart[0], &nokia_scart[1], &nokia_scart[2], &nokia_scart[3] );
+			//printf( buf );
+		}
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			sscanf( buf, "nokia_dvb: %d %d %d %d\n", &nokia_dvb[0], &nokia_dvb[1], &nokia_dvb[2], &nokia_dvb[3] );
+			//printf( buf );
+		}
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			sscanf( buf, "sagem_scart: %d %d %d %d\n", &sagem_scart[0], &sagem_scart[1], &sagem_scart[2], &sagem_scart[3] );
+			//printf( buf );
+		}
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			sscanf( buf, "sagem_dvb: %d %d %d %d\n", &sagem_dvb[0], &sagem_dvb[1], &sagem_dvb[2], &sagem_dvb[3] );
+			//printf( buf );
+		}
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			sscanf( buf, "philips_scart: %d %d %d %d\n", &philips_scart[0], &philips_scart[1], &philips_scart[2], &philips_scart[3] );
+			//printf( buf );
+		}
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			sscanf( buf, "philips_dvb: %d %d %d %d\n", &philips_dvb[0], &philips_dvb[1], &philips_dvb[2], &philips_dvb[3] );
+			//printf( buf );
+		}
+		fclose(fd);
+	}
+	else
+	{
+		printf("[controld]: failed to load scart-config (scart.conf), using standard-values\n");
+
+
+	}
+}
+
+
 void routeVideo(int v1, int a1, int v2, int a2, int fblk)
 {
 	int fd;
@@ -334,10 +417,12 @@ void routeVideo(int v1, int a1, int v2, int a2, int fblk)
 char BoxNames[4][10] = {"","Nokia", "Sagem", "Philips"};
 void switch_vcr( bool vcr_on)
 {
+	LoadScart_Settings();
+
 	if (vcr_on)
 	{
 		//turn to scart-input
-		printf("switch to scart-input... (%s)\n", BoxNames[settings.boxtype]);
+		printf("[controld]: switch to scart-input... (%s)\n", BoxNames[settings.boxtype]);
 		if (settings.boxtype == 2) // Sagem
 		{
 			routeVideo(sagem_scart[0], sagem_scart[1], sagem_scart[2], sagem_scart[3], 0);
@@ -353,7 +438,7 @@ void switch_vcr( bool vcr_on)
 	}
 	else
 	{	//turn to dvb...
-		printf("switch to dvb-input...\n");
+		printf("[controld]: switch to dvb-input... (%s)\n", BoxNames[settings.boxtype]);
 		if (settings.boxtype == 2) // Sagem
 		{
 			routeVideo( sagem_dvb[0], sagem_dvb[1], sagem_dvb[2], sagem_dvb[3], settings.videooutput);
@@ -668,97 +753,14 @@ void sig_catch(int)
 }
 
 
-void LoadScart()
-{
-	// scart
-	sagem_scart[0]= 2;
-	sagem_scart[1]= 1;
-	sagem_scart[2]= 7;
-	sagem_scart[3]= 0;
-
-	nokia_scart[0]= 3;
-	nokia_scart[1]= 2;
-	nokia_scart[2]= 1;
-	nokia_scart[3]= 0;
-
-	philips_scart[0]= 2;
-	philips_scart[1]= 2;
-	philips_scart[2]= 3;
-	philips_scart[3]= 0;
-
-	// dvb
-	sagem_dvb[0]= 0;
-	sagem_dvb[1]= 0;
-	sagem_dvb[2]= 0;
-	sagem_dvb[3]= 0;
-
-	nokia_dvb[0]= 5;
-	nokia_dvb[1]= 1;
-	nokia_dvb[2]= 1;
-	nokia_dvb[3]= 0;
-
-	philips_dvb[0]= 1;
-	philips_dvb[1]= 1;
-	philips_dvb[2]= 1;
-	philips_dvb[3]= 0;
-
-	FILE* fd = fopen(CONFIGDIR"/scart.conf", "r");
-	if(fd)
-	{
-		printf("[controld]: loading scart-config (scart.conf)\n");
-
-		char buf[1000];
-		fgets(buf,sizeof(buf),fd);
-
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			sscanf( buf, "nokia_scart: %d %d %d %d\n", &nokia_scart[0], &nokia_scart[1], &nokia_scart[2], &nokia_scart[3] );
-			printf( buf );
-		}
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			sscanf( buf, "nokia_dvb: %d %d %d %d\n", &nokia_dvb[0], &nokia_dvb[1], &nokia_dvb[2], &nokia_dvb[3] );
-			printf( buf );
-		}
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			sscanf( buf, "sagem_scart: %d %d %d %d\n", &sagem_scart[0], &sagem_scart[1], &sagem_scart[2], &sagem_scart[3] );
-			printf( buf );
-		}
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			sscanf( buf, "sagem_dvb: %d %d %d %d\n", &sagem_dvb[0], &sagem_dvb[1], &sagem_dvb[2], &sagem_dvb[3] );
-			printf( buf );
-		}
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			sscanf( buf, "philips_scart: %d %d %d %d\n", &philips_scart[0], &philips_scart[1], &philips_scart[2], &philips_scart[3] );
-			printf( buf );
-		}
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			sscanf( buf, "philips_dvb: %d %d %d %d\n", &philips_dvb[0], &philips_dvb[1], &philips_dvb[2], &philips_dvb[3] );
-			printf( buf );
-		}
-		fclose(fd);
-	}
-	else
-	{
-		printf("[controld]: failed to load scart-config (scart.conf), using standard-values\n");
-
-
-	}
-}
 
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.39 2002/03/01 13:08:33 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.40 2002/03/01 13:21:09 field Exp $\n\n");
 
 	if (fork() != 0)
 		return 0;
-
-	LoadScart();
 
 	struct sockaddr_un servaddr;
 	int clilen;
