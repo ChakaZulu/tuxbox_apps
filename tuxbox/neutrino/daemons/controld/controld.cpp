@@ -631,7 +631,6 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			//printf("[controld] mute\n");
 			settings.mute = 1;
 			audioControl::setMute(true);
-			audioControl::setMuteSPDIF(true);
 			lcdd.setMute(true);
 			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 			break;
@@ -639,7 +638,6 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			//printf("[controld] unmute\n");
 			settings.mute = 0;
 			audioControl::setMute(false);
-			audioControl::setMuteSPDIF(false);
 			lcdd.setMute(false);
 			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 			break;
@@ -748,7 +746,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.57 2002/03/29 15:47:18 obi Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.58 2002/05/08 16:21:43 McClean Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())

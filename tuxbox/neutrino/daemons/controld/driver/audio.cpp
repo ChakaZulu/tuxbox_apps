@@ -53,25 +53,6 @@ void audioControl::setAudioMode(int mode)
 	close(fd);
 }
 
-void audioControl::setMuteSPDIF(bool mute)
-{
-	int fd;
-
-	if ((fd = open("/dev/ost/audio0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
-
-	if (ioctl(fd,AUDIO_SPDIF_SET, mute ? SPDIF_OFF : SPDIF_ON) < 0)
-	{
-		perror("AVSIOGVOL:");
-		return;
-	}
-	close(fd);
-
-}
-
 void audioControl::setVolume(char volume)
 {
 	int fd;
@@ -109,22 +90,18 @@ void audioControl::setVolume(char volume)
 
 void audioControl::setMute(bool mute)
 {
-	int i;
 	int fd;
 
-	i=mute?AVS_MUTE:AVS_UNMUTE;
-
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/ost/audio0",O_RDWR)) <= 0)
 	{
 		perror("open");
 		return;
 	}
 
-	if (ioctl(fd,AVSIOSMUTE,&i)< 0)
+	if (ioctl(fd,AUDIO_SET_MUTE, mute) < 0)
 	{
-		perror("AVSIOSMUTE:");
+		perror("AVSIOGVOL:");
 		return;
 	}
 	close(fd);
 }
-
