@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.47 2002/10/12 20:19:45 obi Exp $
+ * $Id: descriptors.cpp,v 1.48 2002/10/30 23:57:26 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -422,7 +422,7 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 	uint8_t service_provider_name_length = buffer[3];
 
 	CDVBString providerName = CDVBString((const char*)&(buffer[4]), service_provider_name_length);
-	CDVBString serviceName  = CDVBString((const char*)&(buffer[service_provider_name_length + 4]), (2 + buffer[1]) - (service_provider_name_length + 4));
+	CDVBString serviceName  = CDVBString((const char*)&(buffer[4 + service_provider_name_length + 1]), (2 + buffer[1]) - (4 + service_provider_name_length + 1));
 
 	found_channels++;
 
