@@ -73,7 +73,7 @@ nolfb:
 
 int fbClass::showConsole(int state)
 {
-	if ( tuxbox_get_model() == TUXBOX_MODEL_DBOX2 )
+//	if ( tuxbox_get_model() == TUXBOX_MODEL_DBOX2 )
 	{
 		int fd=open("/dev/vc/0", O_RDWR);
 		if(fd>=0)
