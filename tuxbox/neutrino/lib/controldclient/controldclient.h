@@ -76,12 +76,17 @@ class CControldClient
 			CMD_SETSCARTMODE,
 			CMD_GETSCARTMODE,
 			CMD_SHUTDOWN,
-			CMD_SETVIDEOPOWERDOWN
+			CMD_SETVIDEOPOWERDOWN,
+
+			CMD_REGISTEREVENT,
+			CMD_UNREGISTEREVENT,
+			CMD_EVENT
 		};
 
 		//command structures
 		struct commandHead
 		{
+			unsigned char messageType;
 			unsigned char version;
 			unsigned char cmd;
 		};
@@ -146,7 +151,6 @@ class CControldClient
 		{
 			bool powerdown;
 		};
-
 
 		//VideoFormat
 		static const char VIDEOFORMAT_AUTO = 0;
