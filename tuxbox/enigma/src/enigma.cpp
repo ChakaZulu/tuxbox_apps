@@ -32,6 +32,7 @@
 #include <lib/gui/ebutton.h>
 #include <lib/gui/actions.h>
 #include <lib/driver/rc.h>
+#include <lib/driver/eavswitch.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/decoder.h>
 
