@@ -84,6 +84,8 @@ class CInfoViewer
 		int					intShowDuration;
 		bool                KillShowEPG;
 
+
+		long long			infoBarEndTime;
 		pthread_t			thrViewer;
 		pthread_cond_t      epg_cond;
 		pthread_mutex_t     epg_mutex;

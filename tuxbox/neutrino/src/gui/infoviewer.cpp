@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.60 2002/01/16 02:09:04 McClean Exp $
+// $Id: infoviewer.cpp,v 1.61 2002/01/16 03:08:08 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.61  2002/01/16 03:08:08  McClean
+// HOTFIX for infobar-clear (timeout) - field..
+//
 // Revision 1.60  2002/01/16 02:09:04  McClean
 // cleanups+quickzap-fix
 //
@@ -279,6 +282,10 @@ const std::string CInfoViewer::getActiveChannelID()
 
 void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid )
 {
+	struct timeval tv;
+	gettimeofday( &tv, NULL );
+	infoBarEndTime = (tv.tv_sec*1000000) + tv.tv_usec;
+
 	if((Channel==CurrentChannel) && (is_visible))
 	{
 		pthread_mutex_lock( &epg_mutex );
@@ -634,7 +641,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 {
 	int repCount;
 	string query = "";
-	unsigned int    query_onid_tsid;
+	unsigned int query_onid_tsid;
 	bool gotEPG, requeryEPG;
 	struct timespec abs_wait;
 	struct timeval now;
@@ -648,8 +655,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 		if ( ( InfoViewer->is_visible ) )
 		{
 			gotEPG = true;
-			repCount = 10;
-			//printf("infoViewer -> visible\n");
+			repCount = 8;
 			do
 			{
 				if ( !gotEPG )
@@ -723,6 +729,37 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 
 			}
 			while ( ( requeryEPG ) && (repCount > 0) );
+			
+			//-----------------------------------------------------------------dummy --- field fragen!
+			printf("infoViewer -> fertig!\n");
+		
+			bool endloop = false;
+			do
+			{
+				struct timeval tv;
+				gettimeofday( &tv, NULL );
+				long long nowtime = (tv.tv_sec*1000000) + tv.tv_usec;
+				long long diff = (nowtime - InfoViewer->infoBarEndTime) / 1000000;
+				//printf("infoth: diff %lld \n", diff );
+				if (diff>(InfoViewer->intShowDuration/2))
+				{
+					InfoViewer->killTitle();
+					endloop = true;
+				}
+				else
+				{
+					usleep(10000);
+					/*
+					gettimeofday(&now, NULL);
+					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+					abs_wait.tv_sec += 1;
+					pthread_mutex_trylock( &InfoViewer->epg_mutex );
+					pthread_cond_timedwait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex, &abs_wait );
+					*/
+				}
+			}
+			while ((!endloop) && (InfoViewer->is_visible) && (query==InfoViewer->CurrentChannel));
+			//-----------------------------------------------------------------dummy --- field fragen!
 		}
 
 	}
