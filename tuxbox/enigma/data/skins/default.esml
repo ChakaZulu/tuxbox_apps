@@ -505,7 +505,7 @@
 			<eComboBox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satellite/cable provider (ok)" />
 			<eLabel name="status" position="10:90" size="e-10:90" />
 			<eFEStatus name="festatus" position="0:190" size="400:85" />
-			<eCheckbox name="nocircular" text="no circ polariz." position="4:e-80" size="250:30" helptext="change circular to linear polarization" />
+			<eCheckbox name="nocircular" text="no circ polariz." position="4:e-80" size="260:30" helptext="change circular to linear polarization" />
   		<eButton text="start scan" name="start" position="10:e-40" size="260:40" align="center" helptext="starts the transponder scan" loadDeco="" shortcut="green" />
 		</tsAutomatic>
 	</object>
