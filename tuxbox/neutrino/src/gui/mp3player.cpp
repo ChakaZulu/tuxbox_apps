@@ -570,7 +570,7 @@ void CMP3PlayerGui::paintInfo()
 		frameBuffer->paintBoxRel(x+2, y +2 , width-4, title_height-14, COL_MENUCONTENTSELECTED);
 		char sNr[20];
 		sprintf(sNr, ": %2d", current+1);
-		string tmp=g_Locale->getText("mp3player.playing") + sNr + " (" + playlist[current].Duration + ")";
+		string tmp=g_Locale->getText("mp3player.playing") + sNr ;
 		int w=g_Fonts->menu->getRenderWidth(tmp);
 		int xstart=(width-w)/2;
 		if(xstart < 10)
@@ -586,10 +586,16 @@ void CMP3PlayerGui::paintInfo()
 			xstart=10;
 		g_Fonts->menu->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED);
 		tmp = playlist[current].Bitrate + " / " + playlist[current].Samplerate + " / " + playlist[current].ChannelMode + 
-			" / " + playlist[current].Layer + " / " + playlist[current].Duration;
+			" / " + playlist[current].Layer;
 		frameBuffer->paintBoxRel(x + 10, y+ 4 + 2*fheight, width-20, sheight, COL_MENUCONTENTSELECTED);
 		xstart = ((width - 20 - g_Fonts->infobar_small->getRenderWidth( tmp ))/2)+10;
 		g_Fonts->infobar_small->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, tmp, COL_MENUCONTENTSELECTED);
+		
+		int w1=g_Fonts->menu->getRenderWidth(" / "+playlist[current].Duration);
+		int w2=g_Fonts->menu->getRenderWidth("0:00");
+		frameBuffer->paintBoxRel(x+width-w1-w2-10, y+4, w1+w2+4, 1*fheight, COL_MENUCONTENTSELECTED);
+		g_Fonts->menu->RenderString(x+width-w1-10, y+4 + 1*fheight, w1, " / " + playlist[current].Duration,
+											 COL_MENUCONTENTSELECTED);
 		showTime();
 	}
 }
@@ -1048,10 +1054,13 @@ void CMP3PlayerGui::showTime()
 	{
 		int diff = time(NULL)-m_starttime;
 		char sTime[11];
-		sprintf(sTime,"%3d:%02d",diff/60,diff%60);
-		int w=g_Fonts->menu->getRenderWidth("000:00");
-		frameBuffer->paintBoxRel(x+width-w-5, y+4, w+3, 1*fheight, COL_MENUCONTENTSELECTED);
-		g_Fonts->menu->RenderString(x+width-w-10, y+4 + 1*fheight, w, sTime, COL_MENUCONTENTSELECTED);
+		char sTime2[11];
+		sprintf(sTime,"%d:%02d",diff/60,diff%60);
+		sprintf(sTime2,"%d:00",diff/60);
+		int w1=g_Fonts->menu->getRenderWidth(" / "+playlist[current].Duration);
+		int w2=g_Fonts->menu->getRenderWidth(sTime2);
+		frameBuffer->paintBoxRel(x+width-w1-w2-11, y+4, w2, 1*fheight, COL_MENUCONTENTSELECTED);
+		g_Fonts->menu->RenderString(x+width-w1-w2-11, y+4 + 1*fheight, w2, sTime, COL_MENUCONTENTSELECTED);
 	}
 }
 
