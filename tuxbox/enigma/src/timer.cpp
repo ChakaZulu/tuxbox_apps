@@ -284,7 +284,7 @@ eTimerManager::eTimerManager()
 	logfile = fopen(TIMER_LOGFILE, "a" );
 	writeToLogfile("Timer is comming up");
 
-	if ( eSystemInfo::getInstance()->getHwType >= eSystemInfo::DM7000 )
+	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 	{
 		time_t now = time(0);
 		if ( now < 1072224000 ) // 01.01.2004
