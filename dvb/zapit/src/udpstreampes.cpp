@@ -16,7 +16,7 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-// Stand: 01.02.2004
+// Stand: 29.02.2004
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -459,7 +459,10 @@ void * TcpReceiver( void * Ptr )
          fflush(stderr);
       }
    }
-   pthread_exit(0);
+	sleep(3);
+   printf("EXIT\n" );
+   fflush(stdout);
+   exit(0); // jetzt sollte main() schon bei exit(0) sein
 }
 
 unsigned char *WritePtr, *ReadPtr;
@@ -825,13 +828,16 @@ int main ()
    PacketHeader->Status = 2; 
    SPkt.WriteBuf = NextSPktBuf[SPkt.WriteBuf];
    StreamStop = 0;
-   while ( !StreamStop ) usleep(15000);
+   for (i=0; i<200; i++) {
+	  	if ( StreamStop ) break;
+		usleep(15000);
+	}
    printf("EXIT\n" );
    fflush(stdout);
-	/* siehe stopPlayBack  
+   /*	 siehe stopPlayBack  
 	if (Bouquet != 0 && TSMode) {
 		zapit.startPlayBack();  
 	}
 	*/
-   return 0;
+	exit(0);
 }
