@@ -90,7 +90,7 @@ static time_t getNextEventStartTime( time_t t, int duration, int type, bool notT
 	return mktime(&tmp);
 }
 
-static eString getRight(const eString& str, char c )
+eString getRight(const eString& str, char c )
 {
 	unsigned int found = str.find(c);
 	unsigned int beg = ( found != eString::npos ? found : 0 );
@@ -107,7 +107,7 @@ static int getDate()
 	return ((100+now.tm_mday)*1000000)+((100+now.tm_mon+1)*1000)+now.tm_year;
 }
 
-static eString getLeft( const eString& str, char c )
+eString getLeft( const eString& str, char c )
 {
 	unsigned int found = str.find(c);
 	return found != eString::npos ? str.left(found):str;
@@ -812,7 +812,8 @@ void eTimerManager::actionHandler()
 			{
 				writeToLogfile("call eZapMain::getInstance()->recordDVR(0,0)");
 				eDebug("[eTimerManager] stop DVR");
-				eZapMain::getInstance()->recordDVR(0, 0);
+				int ret = eZapMain::getInstance()->recordDVR(0, 0);
+				writeToLogfile(eString().sprintf("result is %d", ret));
 			}
 			else
 #endif
@@ -835,7 +836,7 @@ void eTimerManager::actionHandler()
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d stopRecording", calldepth--));
 			break;
-
+/*
 		case restartRecording:
 			writeToLogfile(eString().sprintf("--> actionHandler() calldepth=%d restartRecording", ++calldepth));
 			eDebug("[eTimerManager] restart recording");
@@ -878,6 +879,7 @@ void eTimerManager::actionHandler()
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d pauseRecording", calldepth--));
 			break;
+*/
 		case oldService:
 			Decoder::locked=0;
 			playbackRef = eServiceReference();

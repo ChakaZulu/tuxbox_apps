@@ -2651,10 +2651,6 @@ int freeRecordSpace()
 
 int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_descr )
 {
-	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
-	if (!handler)
-		return -1;
-	
 	if (onoff) //  start recording
 	{
 		if ( freeRecordSpace() < 10) // less than 10MB free (or directory not found)
@@ -2681,6 +2677,12 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 			eDebug("after stop recording always record is running???\n");
 			return -2; // already recording
 		}
+
+		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+		if (!handler)
+			return -1;
+		else if ( handler->getID() != eServiceReference::idDVB )
+			return -1;
 
 		eServiceReference &ref_= eServiceInterface::getInstance()->service;
 
@@ -2780,7 +2782,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 			))
 		{
 			eDebug("couldn't record... :/");
-			return -3; // couldn't record... warum auch immer.
+			return -4; // couldn't record... warum auch immer.
 		} else
 		{
 			eServiceReference ref2=ref;
@@ -2847,8 +2849,10 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 	}
 	else   // stop recording
 	{
+		eServiceHandler *handler=eServiceInterface::getInstance()->getServiceHandler(eServiceReference::idDVB);
+		if (!handler)
+			return -1;
 		state &= ~(stateRecording|recDVR);
-
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordStop));
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordClose));
 		DVRSpaceLeft->hide();
