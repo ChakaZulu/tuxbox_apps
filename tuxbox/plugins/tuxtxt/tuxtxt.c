@@ -5,15 +5,16 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
- *    V1.9: enx fixed, subpage zapping fixed, tvmode reactivated              *
- *    V1.8: zap subpages, text&picture mode, subtitle fixed                   *
- *    V1.7: speedup?, neutrino look ;)                                        *
- *    V1.6: added transparency mode                                           *
- *    V1.5: added newsflash/subtitle support                                  *
- *    V1.4: skip not received pages on +/-10, some mods                       *
- *    V1.3: segfault fixed                                                    *
- *    V1.2: made it work under enigma                                         *
- *    V1.1: added tuxtxt to cvs                                               *
+ *    V1.10: added conceal/hold mosaics/release mosaics                       *
+ *    V1.09: enx fixed, subpage zapping fixed, tvmode reactivated             *
+ *    V1.08: zap subpages, text&picture mode, subtitle fixed                  *
+ *    V1.07: speedup?, neutrino look ;)                                       *
+ *    V1.06: added transparency mode                                          *
+ *    V1.05: added newsflash/subtitle support                                 *
+ *    V1.04: skip not received pages on +/-10, some mods                      *
+ *    V1.03: segfault fixed                                                   *
+ *    V1.02: made it work under enigma                                        *
+ *    V1.01: added tuxtxt to cvs                                              *
  ******************************************************************************/
 
 #include "tuxtxt.h"
@@ -26,7 +27,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.9 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.10 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -143,6 +144,9 @@ void plugin_exec(PluginParam *par)
 									break;
 
 					case RC_MUTE:	SwitchTVMode();
+									break;
+
+					case RC_HELP:	SwitchHintMode();
 				}
 			}
 
@@ -686,7 +690,7 @@ void GetNextSubPage()
 
 							PosX = StartX + 8*fontwidth;
 							PosY = StartY;
-							RenderCharFB('S', white);
+							RenderCharFB('U', white);
 							RenderCharFB('+', white);
 							RenderCharFB('1', white);
 
@@ -711,7 +715,7 @@ void GetNextSubPage()
 
 							PosX = StartX + 8*fontwidth;
 							PosY = StartY;
-							RenderCharFB('S', white);
+							RenderCharFB('U', white);
 							RenderCharFB('+', white);
 							RenderCharFB('1', white);
 
@@ -762,7 +766,7 @@ void GetPrevSubPage()
 
 							PosX = StartX + 8*fontwidth;
 							PosY = StartY;
-							RenderCharFB('S', white);
+							RenderCharFB('U', white);
 							RenderCharFB('-', white);
 							RenderCharFB('1', white);
 
@@ -787,7 +791,7 @@ void GetPrevSubPage()
 
 							PosX = StartX + 8*fontwidth;
 							PosY = StartY;
-							RenderCharFB('S', white);
+							RenderCharFB('U', white);
 							RenderCharFB('-', white);
 							RenderCharFB('1', white);
 
@@ -914,6 +918,24 @@ void SwitchTVMode()
 				pageupdate = 1;
 			}
 	}
+}
+
+/******************************************************************************
+ * SwitchHintMode                                                             *
+ ******************************************************************************/
+
+void SwitchHintMode()
+{
+	//toggle mode
+
+		hintmode++;
+		hintmode &= 1;
+
+		printf("TuxTxt <SwitchHintMode => %d>\n", hintmode);
+
+	//update page
+
+		pageupdate = 1;
 }
 
 /******************************************************************************
@@ -1175,8 +1197,9 @@ void RenderPage()
 void DecodePage()
 {
 	int row, col;
-	int boxed = 0, clear, loop;
+	int boxed = 0, hold, clear, loop;
 	int foreground, background, doubleheight, charset;
+	unsigned char held_mosaic;
 
 	//copy page to decode buffer
 
@@ -1194,7 +1217,7 @@ void DecodePage()
 	//modify header
 
 		if(boxed) memset(&page_char, ' ', 40);
-		else     memcpy(&page_char, " TuxTxt ", 8);
+		else      memcpy(&page_char, " TuxTxt ", 8);
 
 	//decode
 
@@ -1206,6 +1229,8 @@ void DecodePage()
 				background = black;
 				doubleheight = 0;
 				charset = 0;
+				hold = 0;
+				held_mosaic = ' ';
 
 				if(boxed == 1 && memchr(&page_char[row*40], start_box, 40) == 0)
 				{
@@ -1335,7 +1360,7 @@ void DecodePage()
 												charset = 1;
 												break;
 
-						case conceal:			//todo
+						case conceal:			if(!hintmode) foreground = background;
 												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												break;
 
@@ -1359,22 +1384,26 @@ void DecodePage()
 												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												break;
 
-						case hold_mosaic:		//todo
+						case hold_mosaic:		hold = 1;
 												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												break;
 
 						case release_mosaic:	page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
-												//todo
-												break;
+												hold = 0;
 					}
 
-					//show spacing attribute as space
+					//handle spacing attributes
 
-						page_char[row*40 + col] = ' ';
+						if(hold && charset) page_char[row*40 + col] = held_mosaic;
+						else				page_char[row*40 + col] = ' ';
 				}
 				else
 				{
 					page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+
+					//set new held-mosaic char
+
+						if(charset) held_mosaic = page_char[row*40 + col];
 
 					//skip doubleheight chars in lower line
 
@@ -1476,6 +1505,9 @@ int GetRCCode()
 											break;
 
 							case RC1_MUTE:	RCCode = RC_MUTE;
+											break;
+
+							case RC1_HELP:	RCCode = RC_HELP;
 						}
 					}
 					else
