@@ -87,8 +87,8 @@ int CFile::getType()
 	{
 		std::string extension;
 		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
-		if ((strcasecmp(extension.c_str(),"mp3") == 0) || (strcasecmp(extension.c_str(),"m2a") == 0) || 
-		    (strcasecmp(extension.c_str(),"mpa") == 0))
+		if ((strcasecmp(extension.c_str(),"mp3") == 0) || (strcasecmp(extension.c_str(),"m2a") == 0) ||
+		  (strcasecmp(extension.c_str(),"mpa") == 0) || (strcasecmp(extension.c_str(),"mp2") == 0))
 			return FILE_MP3;
 		if (strcasecmp(extension.c_str(),"m3u") == 0)
 			return FILE_MP3_PLAYLIST;
@@ -919,7 +919,7 @@ void CFileBrowser::paintFoot()
 		if(Filter != NULL)
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x + (3 * dx), by + 1);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20 + (3 * dx), ty, dx - 20, use_filter?g_Locale->getText("filebrowser.filter.active"):g_Locale->getText("filebrowser.filter.inactive"), COL_INFOBAR, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20 + (3 * dx), ty, dx - 20, use_filter?g_Locale->getText("filebrowser.filter.inactive"):g_Locale->getText("filebrowser.filter.active"), COL_INFOBAR, 0, true); // UTF-8
 		}
 
 		//OK-Button

@@ -103,6 +103,7 @@ CMP3PlayerGui::CMP3PlayerGui()
 	mp3filter.addFilter("mp3");
 	mp3filter.addFilter("m2a");
 	mp3filter.addFilter("mpa");
+	mp3filter.addFilter("mp2");
 	mp3filter.addFilter("m3u");
 	filebrowser->Filter = &mp3filter;
 	if(strlen(g_settings.network_nfs_mp3dir)!=0)
