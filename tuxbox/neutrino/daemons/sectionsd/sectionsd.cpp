@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.51 2001/08/17 16:37:28 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.52 2001/08/29 22:41:51 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.52  2001/08/29 22:41:51  fnbrd
+//  Fix error with pause.
+//
 //  Revision 1.51  2001/08/17 16:37:28  fnbrd
 //  Some mor informational output with -d and cache decrease
 //
@@ -227,7 +230,7 @@ static long secondsToCache=5*24*60L*60L; // 5 Tage
 // Ab wann ein Event als alt gilt (in Sekunden)
 static long oldEventsAre=60*60L; // 1h
 static int debug=0;
-static int scanning=0;
+static int scanning=1;
 
 #define dprintf(fmt, args...) {if(debug) printf(fmt, ## args);}
 #define dputs(str) {if(debug) puts(str);}
@@ -572,7 +575,7 @@ size_t j;
 }
 
 //------------------------------------------------------------
-// class DMX<>
+// class DMX
 //------------------------------------------------------------
 
 // zum stoppen/starten des DMX waehrend eines TCP/IP-Requests
@@ -1048,8 +1051,8 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.51 2001/08/17 16:37:28 fnbrd Exp $\n"
-    "Current time: %s\n"
+    "$Id: sectionsd.cpp,v 1.52 2001/08/29 22:41:51 fnbrd Exp $\n"
+    "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
     "Number of cached services: %u\n"
@@ -1283,7 +1286,7 @@ static void commandGetNextEPG(struct connectionData *client, char *data, const u
     return;
   unsigned long long *uniqueEventKey=(unsigned long long *)data;
   time_t *starttime=(time_t *)(data+8);
-  dprintf("Request of next epg for 0x%llx %s\n", *uniqueEventKey, ctime(starttime));
+  dprintf("Request of next epg for 0x%llx %s", *uniqueEventKey, ctime(starttime));
   if(dmxEIT.pause()) // -> lock
     return;
   lockEvents();
@@ -1500,7 +1503,7 @@ static void commandGetNextShort(struct connectionData *client, char *data, const
     return;
   unsigned long long *uniqueEventKey=(unsigned long long *)data;
   time_t *starttime=(time_t *)(data+8);
-  dprintf("Request of next short for 0x%llx %s\n", *uniqueEventKey, ctime(starttime));
+  dprintf("Request of next short for 0x%llx %s", *uniqueEventKey, ctime(starttime));
   if(dmxEIT.pause()) // -> lock
     return;
   lockEvents();
@@ -1954,6 +1957,7 @@ const unsigned timeoutInSeconds=2;
         // kleiner als 1 Tag machen wir den Cache nicht,
 	// da die timeouts ja auch von einem Sender ohne EPG kommen können
 	// Die 3000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
+	// Man koennte auch ab 3000 Events nur noch jedes 3 Event o.ä. einsortieren
         dmxSDT.pause();
         lockServices();
         unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
@@ -2190,7 +2194,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.51 2001/08/17 16:37:28 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.52 2001/08/29 22:41:51 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
