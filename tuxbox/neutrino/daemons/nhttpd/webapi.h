@@ -45,8 +45,8 @@ class CWebAPI
 		void loadTimerMain(CWebserverRequest* request);
 		void correctTime(struct tm *zt);
 		void showTimer(CWebserverRequest *request);
-		void modifyTimerForm(CWebserverRequest *request, unsigned timerId);
 		void doModifyTimer(CWebserverRequest *request);
+		void modifyTimerForm(CWebserverRequest *request, unsigned timerId);
 		void newTimerForm(CWebserverRequest *request);
 		void doNewTimer(CWebserverRequest *request);
 
@@ -55,6 +55,8 @@ class CWebAPI
 		CWebAPI(CWebDbox *parent){Parent = parent;};
 		~CWebAPI(){};
 		bool Execute(CWebserverRequest* request);
+
+	friend class CControlAPI;
 };
 
 #endif

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.2 2002/09/24 20:59:11 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.3 2002/10/03 15:28:24 dirch Exp $
 
 	License: GPL
 
@@ -117,7 +117,7 @@ bool CControlAPI::TimerCGI(CWebserverRequest *request)
 		{
 			if(request->ParameterList["action"] == "new")
 			{
-//				doNewTimer(helper);
+				Parent->WebAPI->doNewTimer(request);
 				request->SendOk();
 			}
 		}
@@ -531,9 +531,9 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 		char buf[10];
 		sprintf(buf, "%u\n", Parent->Zapit->getCurrentServiceID());
 		request->SocketWrite(buf);
+		return true;
 	}
-	else
-	if (request->ParameterList.size() == 1)
+	else if (request->ParameterList.size() == 1)
 	{
 		if(request->ParameterList["mode"] != "")			// TV oder RADIO - Mode
 		{

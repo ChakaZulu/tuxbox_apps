@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.4 2002/10/01 17:46:50 Zwen Exp $
+	$Id: webapi.cpp,v 1.5 2002/10/03 15:28:24 dirch Exp $
 
 	License: GPL
 
@@ -462,7 +462,7 @@ int pos = 0;
 		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
 		sprintf(buf,"<TR VALIGN=\"top\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
 		request->SocketWrite(buf); 
-		sprintf(buf,"<TD><A HREF=\"/fb/timer.dbox2?cmd=add&type=%d&alarmtime=%u&channel=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" BORDER=0 ALT=\"Timer setzen\"></A>&nbsp;</TD>\n",CTimerEvent::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
+		sprintf(buf,"<TD><A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" BORDER=0 ALT=\"Timer setzen\"></A>&nbsp;</TD>\n",CTimerEvent::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
 		request->SocketWrite(buf);
 		sprintf(buf, "<TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
 		sprintf(&buf[strlen(buf)], "<TD><A HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
@@ -1061,7 +1061,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite(buffer);
 	// ONID-SID
 	request->SocketWrite("<tr id=\"ProgramRow\" style=\"visibility:hidden\"><td colspan=2>\n");
-	request->SocketWrite("<select name=\"onidsid\">\n");
+	request->SocketWrite("<select name=\"channel_id\">\n");
 	CZapitClient::BouquetChannelList channellist;     
 	channellist.clear();
 	Parent->Zapit->getChannels(channellist);
@@ -1164,7 +1164,7 @@ time_t	announceTimeT = 0,
    bool standby_on = (request->ParameterList["sbon"]=="1");
    CTimerEvent::EventInfo eventinfo;
    eventinfo.epgID      = 0;
-   eventinfo.channel_id = atoi(request->ParameterList["onidsid"].c_str());
+   eventinfo.channel_id = atoi(request->ParameterList["channel_id"].c_str());
    void *data=NULL;
    if(type == CTimerEvent::TIMER_STANDBY)
       data=&standby_on;

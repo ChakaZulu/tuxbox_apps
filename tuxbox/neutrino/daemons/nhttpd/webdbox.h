@@ -70,50 +70,7 @@ class CWebDbox
 	string videooutput_names[3];
 	string videoformat_names[3];
 	string audiotype_names[5];
-//	map<unsigned, string> TimerEventNames;		
-//	map<unsigned, string> TimerEventStateNames;
-/*
-// send functions for ExecuteCGI (controld api)
-	void SendEventList(CWebserverRequest *request,t_channel_id channel_id);
-	void SendcurrentVAPid(CWebserverRequest* request);
-	void SendSettings(CWebserverRequest* request);
-	void SendStreamInfo(CWebserverRequest* request);
-	void SendBouquets(CWebserverRequest *request);
-	void SendBouquet(CWebserverRequest *request,int BouquetNr);
-	void SendChannelList(CWebserverRequest *request);
-// CGI functions for ExecuteCGI
-	bool TimerCGI();
-	bool SetModeCGI();
-	bool StandbyCGI();
-	bool GetDateCGI();
-	bool GetTimeCGI();
-	bool SettingsCGI();
-	bool GetServicesxmlCGI();
-	bool GetBouquetsxmlCGI();
-	bool GetChannel_IDCGI();
-	bool MessageCGI();
-	bool InfoCGI();
-	bool ShutdownCGI();
-	bool VolumeCGI();
-	bool ChannellistCGI();
-	bool GetBouquetCGI();
-	bool GetBouquetsCGI();
-	bool EpgCGI();
-	bool VersionCGI();
-	bool ZaptoCGI();
 
-// show functions for Execute (web api)
-	void ShowDboxMenu(CWebserverRequest* request);
-	void ShowTimerList(CWebserverRequest* request);
-	void ShowEventList(CWebserverRequest* request, t_channel_id channel_id);
-	void ShowBouquet(CWebserverRequest *request,int BouquetNr = -1);
-	void ShowBouquets(CWebserverRequest *request, unsigned int BouquetNr = 0);
-	bool ShowControlpanel(CWebserverRequest* request);
-	void ShowCurrentStreamInfo(CWebserverRequest* request);
-	bool ShowEpg(CWebserverRequest* request,string EpgID,string Startzeit = "");
-	void ShowEPG(CWebserverRequest *request,string Title, string Info1, string Info2);
-	bool ShowActualEpg(CWebserverRequest *request);
-*/
 // get functions to collect data
 	void GetChannelEvents();
 	bool GetStreamInfo(int bitinfo[10]);
@@ -139,14 +96,6 @@ public:
 	CControlAPI		*ControlAPI;
 	CWebAPI			*WebAPI;
 	CBouqueteditAPI	*BouqueteditAPI;
-
-
-//	bool ExecuteCGI(CWebserverRequest* request);
-
-
-//	bool Execute(CWebserverRequest* request);
-
-
 
 	friend class CWebAPI;
 	friend class CControlAPI;
