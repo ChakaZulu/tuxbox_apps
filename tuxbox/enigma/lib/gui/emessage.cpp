@@ -10,7 +10,7 @@ eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): 
 {
 	int fontsize=eSkin::getActive()->queryValue("fontsize", 20);
 	setText(caption);
-	move(ePoint(100, 70));
+	move(ePoint(50, 70));
 	resize(eSize(500, 430));
 	
 	if ( flags > 15 ) // we have to draw an icon

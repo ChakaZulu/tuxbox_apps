@@ -95,6 +95,7 @@
 		<img name="icon_question" src="icon-question-fs8.png" />
 		<img name="icon_error" src="icon-error-fs8.png" />
 		<img name="icon_warning" src="icon-warning-fs8.png" />
+		<img name="sselect_folder" src="folder-fs8.png" />
 	</images>
 	
 	<colors>

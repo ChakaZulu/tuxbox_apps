@@ -26,6 +26,7 @@ class eListBoxEntryService: public eListBoxEntry
 	eString short_name;
 	static gFont serviceFont, descrFont, numberFont;
 	static int maxNumSize;
+	static gPixmap *folder;
 	eTextPara *numPara, *namePara, *descrPara;
 	int nameXOffs, descrXOffs, numYOffs, nameYOffs, descrYOffs;
 	int num;

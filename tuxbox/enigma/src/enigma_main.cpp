@@ -919,9 +919,10 @@ void eZapMain::getPlaylistPosition()
 		if (!handler)
 			return;
 		time=handler->getPosition(eServiceHandler::posQueryRealCurrent);
+	
+		if ( curlist->current != curlist->list.end() && curlist->current->service == eServiceInterface::getInstance()->service )
+			curlist->current->current_position=time;
 	}
-	if (curlist->current != curlist->list.end())
-		curlist->current->current_position=time;
 }
 
 
@@ -1590,10 +1591,7 @@ void eZapMain::showEPG()
 	const eService *service=eServiceInterface::getInstance()->addRef( eServiceInterface::getInstance()->service );
 
 	if (!service && eServiceInterface::getInstance()->service.type == eServiceReference::idDVB && !(eServiceInterface::getInstance()->service.flags & eServiceReference::isDirectory) )
-	{
-		eServiceInterface::getInstance()->removeRef( eServiceInterface::getInstance()->service );
 		return;
-	}
 		
 	if (isVisible())
 	{

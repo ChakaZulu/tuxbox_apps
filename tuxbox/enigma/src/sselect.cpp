@@ -23,6 +23,7 @@
 gFont eListBoxEntryService::serviceFont;
 gFont eListBoxEntryService::descrFont;
 gFont eListBoxEntryService::numberFont;
+gPixmap *eListBoxEntryService::folder=0;
 int eListBoxEntryService::maxNumSize=0;
 
 struct serviceSelectorActions
@@ -75,6 +76,7 @@ int eListBoxEntryService::getEntryHeight()
 		numberFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Number");
 		serviceFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Name");
 		descrFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Description");
+		folder = eSkin::getActive()->queryImage("sselect_folder");
 	}
 	return calcFontHeight(serviceFont)+4;
 }
@@ -114,10 +116,43 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 	eString sname;
 	eString sdescr;
 	const eService *pservice=eServiceInterface::getInstance()->addRef(service);
+
 	if (pservice)
-	{
 		sname=pservice->service_name;
-		if (service.type == eServiceReference::idDVB && !(service.flags & eServiceReference::isDirectory) )
+
+	if (/*service.type == eServiceReference::idDVB &&*/ !(service.flags & eServiceReference::isDirectory) )
+	{
+		if (!numPara)
+		{
+			numPara = new eTextPara( eRect( 0, 0, maxNumSize, rect.height() ) );
+			numPara->setFont( numberFont );
+			numPara->renderString( eString().setNum(num) );
+			numPara->realign(eTextPara::dirRight);
+			numYOffs = ((rect.height() - numPara->getBoundBox().height()) / 2 ) - numPara->getBoundBox().top();
+			nameXOffs = maxNumSize+numPara->getBoundBox().height();
+		}
+		rc->renderPara(*numPara, ePoint( rect.left(), rect.top() + numYOffs ) );
+	}
+	else  // we draw the folder pixmap
+	{
+		nameXOffs = folder->x + 20;
+  	int ypos = (rect.height() - folder->y) / 2;
+		rc->blit( *folder, ePoint(10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);		
+	}
+
+	if (!namePara)
+	{
+		namePara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
+		namePara->setFont( serviceFont );
+		namePara->renderString( sname );
+		nameYOffs = ((rect.height() - namePara->getBoundBox().height()) / 2 ) - namePara->getBoundBox().top();	
+	}
+	// we can always render namePara
+	rc->renderPara(*namePara, ePoint( rect.left() + nameXOffs, rect.top() + nameYOffs ) );
+
+	if ( listbox->getColumns() == 1 && /*service.type == eServiceReference::idDVB && */!(service.flags & eServiceReference::isDirectory) )
+	{
+		if (pservice && service.type == eServiceReference::idDVB && !(service.flags & eServiceReference::isDirectory) )
 		{
 			EITEvent *e=eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)service);
 
@@ -136,37 +171,8 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 				}
 				delete e;
 			}
+			eServiceInterface::getInstance()->removeRef(service);
 		}
-	}
-	eServiceInterface::getInstance()->removeRef(service);
-
-	if (/*service.type == eServiceReference::idDVB &&*/ !(service.flags & eServiceReference::isDirectory) )
-	{
-		if (!numPara)
-		{
-			numPara = new eTextPara( eRect( 0, 0, maxNumSize, rect.height() ) );
-			numPara->setFont( numberFont );
-			numPara->renderString( eString().setNum(num) );
-			numPara->realign(eTextPara::dirRight);
-			numYOffs = ((rect.height() - numPara->getBoundBox().height()) / 2 ) - numPara->getBoundBox().top();
-		}
-		rc->renderPara(*numPara, ePoint( rect.left(), rect.top() + numYOffs ) );
-	}
-	if (!namePara)
-	{
-		namePara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
-		namePara->setFont( serviceFont );
-		namePara->renderString( sname );
-		nameXOffs = maxNumSize;
-		if ( numPara )
-			nameXOffs += numPara->getBoundBox().height();
-		nameYOffs = ((rect.height() - namePara->getBoundBox().height()) / 2 ) - namePara->getBoundBox().top();	
-	}
-	// we can always render namePara
-	rc->renderPara(*namePara, ePoint( rect.left() + nameXOffs, rect.top() + nameYOffs ) );
-
-	if ( listbox->getColumns() == 1 && /*service.type == eServiceReference::idDVB && */!(service.flags & eServiceReference::isDirectory) )
-	{
 		descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
 		descrPara->setFont( descrFont );
 		descrPara->renderString( sdescr );
