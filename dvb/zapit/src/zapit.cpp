@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.23 2001/10/30 19:49:59 field Exp $
+  $Id: zapit.cpp,v 1.24 2001/10/30 23:38:15 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.24  2001/10/30 23:38:15  faralla
+  no scan on its own
+
   Revision 1.23  2001/10/30 19:49:59  field
   caid wird neu gelesen, wenn noch nicht vorhanden
 
@@ -1307,7 +1310,7 @@ int prepare_channels()
 	}
       namechans_radio.clear();
     }
-else
+/*else
   {
     if (ls == -23)
     {
@@ -1322,7 +1325,7 @@ else
     	}
     	else
     		return -1;
-  }
+  }*/
   return 23;
 }
 
@@ -1861,7 +1864,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.23 2001/10/30 19:49:59 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.24 2001/10/30 23:38:15 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
