@@ -1,0 +1,140 @@
+<!DOCTYPE skin SYSTEM "skin.dtd" [
+<!ENTITY lt "<">
+<!ENTITY gt ">">
+<!ENTITY auml "&#228;">
+<!ENTITY ouml "&#246;">
+<!ENTITY uuml "&#252;">
+<!ENTITY Auml "&#196;">
+<!ENTITY Ouml "&#214;">
+<!ENTITY Uuml "&#220;">
+<!ENTITY szlig "&#223;">
+]>
+<eskin>
+	<author>
+		<name>Steffen Hehn</name>
+		<email>McClean@sth-tech.de</email>
+	</author>
+	
+	<colors>
+		<color name="background" color="#ff000000" />
+
+
+		<color name="content" color="#33000F80" end="#ffffff" size="16" />
+		<color name="content_selected" color="#90A0FF" end="#000F33" size="16" />
+
+		<color name="header" color="#000FA0" end="#ffffff" size="16" />
+
+		<color name="osd_normal" color="#000F9A" end="#ffffff" size="16" />
+		<color name="osd_epg" color="#000F9A" end="#aaaaff" size="16" />
+		<color name="osd_shadowcol" color="#030320" />
+		<color name="osd_shadow" color="#030320" end="#B1B2D9" size="16" />
+		<color name="osd_timebar" color="#1010AA"/>
+		<color name="osd_timebarborder" color="#ffffff"/>
+
+	</colors>
+	
+	<colorscheme>
+		<map name="backgroundColor" color="content" />
+		<map name="eServiceSelector.highlight" color="content_selected" />
+		<map name="focusedColor" color="content_selected" />
+
+		<map name="fgColor" color="content" />
+		<map name="fgColorDisabled" color="content" />
+
+		<map name="eWindow.titlebarColor" color="header" />
+
+		<map name="eProgress.border" color="content+15" />
+		<map name="eProgress.left" color="content+12" />
+		<map name="eProgress.right" color="content+5" />
+		
+	</colorscheme>
+	
+	<images basepath="" target="fb">
+		<img name="osd_crypt_on" src="crypt_on.png" />
+		<img name="osd_dolby_on" src="dolby_on.png" />
+		<img name="osd_format_on" src="format_on.png" />
+
+		<img name="eWindow.top" src="header.png" />
+
+		<img name="eWindow.topLeft" src="header.png" />
+		<img name="eWindow.topRight" src="header.png" />
+		<img name="eWindow.left" src="header.png" />
+		<img name="eWindow.right" src="header.png" />
+		<img name="eWindow.bottomLeft" src="bottom.png" />
+		<img name="eWindow.bottom" src="bottom.png" />
+		<img name="eWindow.bottomRight" src="bottom.png" />
+	</images>
+
+	<object name="test">
+		<eWindow position="75:75" size="500:300" text="Skinned testwindow">
+			<ePixmap position="0:0" size="720:216" pixmap="/share/tuxbox/elitedvb/pictures/osd.png"/>
+			<eLabel position="0:0" size="480:50" text="Hello world."
+				font="Courier New Regular;26"/>
+			<eLabel position="50:50" size="430:100" text="you suck\nblabla"/>
+			<eButton position="380:200" size="100:50" text="OK" name="okButton" />
+			<eButton position="280:200" size="100:50" text="Cancel" name="cancelButton" />
+		</eWindow>
+	</object>
+	
+	<object name="ezap_main">
+		<eZapMain position="10:390" size="710:160">
+
+			<!--kanalnummer-->
+			<eLabel position="4:3" size="113:62" backgroundColor="osd_normal" />
+
+			<!--hauptbox-->
+			<eLabel position="127:40" size="538:35" backgroundColor="osd_normal" />
+			<eLabel position="34:75" size="631:75" backgroundColor="osd_normal" />
+
+			<!--schatten-->
+			<eLabel position="14:65" size="113:10" backgroundColor="osd_shadowcol" />
+			<eLabel position="117:15" size="10:60" backgroundColor="osd_shadowcol" />
+			<eLabel position="127:15" size="548:25" backgroundColor="osd_shadowcol" />
+			<eLabel position="44:150" size="631:10" backgroundColor="osd_shadowcol" />
+			<eLabel position="665:40" size="10:110" backgroundColor="osd_shadowcol" />
+
+			<eLabel position="560:49" size="95:20" backgroundColor="osd_timebarborder" />
+			<eLabel position="562:51" size="91:16" backgroundColor="osd_timebar" />
+
+			<!--texte-->
+			<eLabel position="10:5" size="100:50" font="NimbusSansL-Regular Sans L Regular;50" name="ch_number" align="center"
+				backgroundColor="osd_normal"/>
+			
+
+			<eLabel position="140:41" size="400:35" font="NimbusSansL-Regular Sans L Regular;35" name="ch_name"
+				backgroundColor="osd_normal"/>
+
+
+			<eLabel position="50:82" size="75:27" font="NimbusSansL-Regular Sans L Regular;27" name="e_now_time"
+				backgroundColor="osd_epg"/>
+			<eLabel position="50:114" size="75:27" font="NimbusSansL-Regular Sans L Regular;27" name="e_next_time"
+				backgroundColor="osd_epg"/>
+
+			<eLabel position="140:82" size="410:35" font="NimbusSansL-Regular Sans L Regular;27" name="e_now_title"
+				backgroundColor="osd_epg"/>
+			<eLabel position="140:114" size="410:35" font="NimbusSansL-Regular Sans L Regular;27" name="e_next_title"
+				backgroundColor="osd_epg"/>
+
+			<eLabel position="570:82" size="85:35" font="NimbusSansL-Regular Sans L Regular;27" name="e_now_duration" align="right"
+				backgroundColor="osd_epg"/>
+			<eLabel position="570:114" size="85:35" font="NimbusSansL-Regular Sans L Regular;27" name="e_next_duration" align="right"
+				backgroundColor="osd_epg"/>
+
+
+			<!--
+			<eLabel position="570:10" size="90:35" font="NimbusSansL-Regular Sans L Regular;27" name="time"
+				backgroundColor="osd_normal"/>
+			-->
+
+
+			<ePixmap position="127:17" size="104:24" pixmap="osd_crypt_on" />
+			<ePixmap position="157:19" size="104:24" pixmap="osd_format_on" />
+			<ePixmap position="207:21" size="104:24" pixmap="osd_dolby_on" />
+
+			<eLabel name="description" />
+			
+			<eLabel name="volume_bar" />
+
+		</eZapMain>
+	</object>
+</eskin>
