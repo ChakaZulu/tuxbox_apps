@@ -170,7 +170,7 @@ bool CVCRControl::CVCRDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, const std::string & apids)
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids)
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -273,7 +273,7 @@ bool CVCRControl::CServerDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, const std::string & apids) 
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids) 
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -340,7 +340,7 @@ void CVCRControl::CServerDevice::serverDisconnect()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, unsigned long long epgid, const std::string & apids)
+bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids)
 {
 	printf("Send command: %d channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -424,7 +424,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 			ext_channel_name = "unknown";
 
 //		CSectionsdClient::responseGetCurrentNextInfoChannelID current_next;
-		if(epgid!=0)
+		if (epgid != 0)
 		{
 			CSectionsdClient sdc;
 			CShortEPGData epgdata;
