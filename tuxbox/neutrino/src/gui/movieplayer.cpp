@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.69 2004/02/07 01:40:08 zwen Exp $
+  $Id: movieplayer.cpp,v 1.70 2004/02/07 14:05:59 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -297,8 +297,8 @@ bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
 	std::string souturl;
 
 	//Resolve Resolution from Settings...
-	char* res_horiz = "";
-	char* res_vert = "";
+	const char * res_horiz;
+	const char * res_vert;
 	switch (g_settings.streaming_resolution)
 	{
 		case 0:
@@ -327,15 +327,22 @@ bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
 		souturl += "transcode{";
 		if(transcodeVideo!=TRANSCODE_VIDEO_OFF)
 		{
-			const char* codec = (transcodeVideo == TRANSCODE_VIDEO_MPEG1) ? "mpgv" : "mp2v";
-			souturl += std::string("vcodec=") + codec + ",vb=" + g_settings.streaming_videorate;
-			souturl += std::string(",width=") + res_horiz + ",height=" + res_vert;
+			souturl += "vcodec=";
+			souturl += (transcodeVideo == TRANSCODE_VIDEO_MPEG1) ? "mpgv" : "mp2v";
+			souturl += ",vb=";
+			souturl += g_settings.streaming_videorate;
+			souturl += ",width=";
+			souturl += res_horiz;
+			souturl += ",height=";
+			souturl += res_vert;
 		}
 		if(transcodeAudio!=0)
 		{
 			if(transcodeVideo!=TRANSCODE_VIDEO_OFF)
 				souturl += ",";
-			souturl += std::string("acodec=mpga,ab=") + g_settings.streaming_audiorate + ",channels=2";
+			souturl += "acodec=mpga,ab=";
+			souturl += g_settings.streaming_audiorate;
+			souturl += ",channels=2";
 		}
 		souturl += "}:";
 	}
@@ -588,19 +595,19 @@ ReceiveStreamThread (void *mrl)
 void *
 PlayStreamThread (void *mrl)
 {
+	CURLcode httpres;
+	struct dmx_pes_filter_params p;
+	ssize_t wr;
 	char buf[348 * 188];
 	bool failed = false;
 	// use global pida and pidv
 	pida = 0, pidv = 0, ac3 = -1;
-	int done, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
-	struct dmx_pes_filter_params p;
-	ssize_t wr;
+	int done, dmxa, dmxv = -1, dvr = -1, adec = -1, vdec = -1;
+
 	ringbuf = ringbuffer_create (RINGBUFFERSIZE);
 	printf ("[movieplayer.cpp] ringbuffer created\n");
 
 	bufferingBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.buffering")); // UTF-8
-
-	CURLcode httpres;
 
 	std::string baseurl = "http://";
 	baseurl += g_settings.streaming_server_ip;
@@ -719,8 +726,10 @@ PlayStreamThread (void *mrl)
 			case CMoviePlayerGui::SKIP:
 			{
 				//skipurl   = baseurl + "?control=seek&seek_value=%2B05%3A30";
-				char *tmp = curl_escape (skipvalue.c_str (), 0);
-			   skipurl   = baseurl + "?control=seek&seek_value=" + tmp;
+				skipurl = baseurl;
+				skipurl += "?control=seek&seek_value=";
+				char * tmp = curl_escape(skipvalue.c_str(), 0);
+				skipurl += tmp;
 				curl_free(tmp);
 				printf("[movieplayer.cpp] skipping URL(enc) : %s\n",skipurl.c_str());
 				httpres = sendGetRequest(skipurl);
@@ -728,14 +737,14 @@ PlayStreamThread (void *mrl)
 			}
 			break;
 			case CMoviePlayerGui::RESYNC:
-			    printf ("[movieplayer.cpp] Resyncing\n");
-			    ioctl (dmxa, DMX_STOP);
-				 printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
-				 bufferfilled=false;
-				 bufferingBox->paint ();
-				 ioctl (dmxa, DMX_START);
-				 playstate = CMoviePlayerGui::PLAY;
-				 break;
+				printf ("[movieplayer.cpp] Resyncing\n");
+				ioctl (dmxa, DMX_STOP);
+				printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
+				bufferfilled=false;
+				bufferingBox->paint ();
+				ioctl (dmxa, DMX_START);
+				playstate = CMoviePlayerGui::PLAY;
+				break;
 			case CMoviePlayerGui::PLAY:
 				if (len < MINREADSIZE)
 				{
@@ -1036,11 +1045,11 @@ PlayPESFileThread (void *filename)
 void *
 PlayFileThread (void *filename)
 {
+	struct dmx_pes_filter_params p;
 	bool failed = false;
 	unsigned char buf[384 * 188 * 2];
 	unsigned short pida = 0, pidv = 0, ac3=0;
-	int done, fd = 0, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
-	struct dmx_pes_filter_params p;
+	int done, fd, dmxa, dmxv = -1, dvr = -1, adec = -1, vdec = -1;
 	ssize_t wr = 0;
 	ssize_t cache = sizeof (buf);
 	size_t r = 0;
@@ -1051,7 +1060,7 @@ PlayFileThread (void *filename)
 		pthread_exit (NULL);
 	}
 
-	if ((fd = open ((char *) filename, O_RDONLY | O_LARGEFILE)) < 0)
+	if ((fd = open ((const char *) filename, O_RDONLY | O_LARGEFILE)) < 0)
 	{
 		playstate = CMoviePlayerGui::STOPPED;
 		pthread_exit (NULL);
@@ -1446,7 +1455,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.69 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.70 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1553,7 +1562,7 @@ CMoviePlayerGui::PlayFile (void)
 		if (start_play)
 		{
 			printf("Startplay\n");
-    		start_play = false;
+			start_play = false;
 			if (playstate >= CMoviePlayerGui::PLAY)
 			{
 				playstate = CMoviePlayerGui::STOPPED;
@@ -1591,30 +1600,30 @@ CMoviePlayerGui::PlayFile (void)
 		}
 		else if (msg == CRCInput::RC_blue)
 		{
-			if (bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount()) {
-    			std::string bookmarkurl = filename;
-    			char timerstring[200];
-    			printf("fileposition: %lld\n",fileposition);
-                sprintf(timerstring, "%lld",fileposition);
-                printf("timerstring: %s\n",timerstring);
-                std::string bookmarktime = "";
-                bookmarktime.append(timerstring);
-                printf("bookmarktime: %s\n",bookmarktime.c_str());
-    			bookmarkmanager->createBookmark(bookmarkurl, bookmarktime);
+			if (bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount())
+			{
+				char timerstring[200];
+				printf("fileposition: %lld\n",fileposition);
+				sprintf(timerstring, "%lld",fileposition);
+				printf("timerstring: %s\n",timerstring);
+				std::string bookmarktime = "";
+				bookmarktime.append(timerstring);
+				printf("bookmarktime: %s\n",bookmarktime.c_str());
+				bookmarkmanager->createBookmark(filename, bookmarktime);
 			}
-			else {
-    			printf("too many bookmarks\n");
-    			DisplayErrorMessage(g_Locale->getText("movieplayer.toomanybookmarks")); // UTF-8
-    			
+			else
+			{
+				printf("too many bookmarks\n");
+				DisplayErrorMessage(g_Locale->getText("movieplayer.toomanybookmarks")); // UTF-8
 			}
 		}
  		else if (msg == CRCInput::RC_help)
  		{
-     		std::string helptext = g_Locale->getText("movieplayer.tshelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.69 $\n\nMovieplayer (c) 2003, 2004 by gagga";
-     		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
+			fullhelptext += "\nVersion: $Revision: 1.70 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
-        else if (msg == CRCInput::RC_left)
+		else if (msg == CRCInput::RC_left)
 		{
 			// rewind
 			if (speed > 1)
@@ -1633,7 +1642,7 @@ CMoviePlayerGui::PlayFile (void)
 			playstate = CMoviePlayerGui::FF;
 			update_lcd = true;
 		}
-        else if (msg == CRCInput::RC_1)
+		else if (msg == CRCInput::RC_1)
 		{
 			// Jump Backwards 1 minute
 			jumpminutes = -1;
@@ -1647,7 +1656,7 @@ CMoviePlayerGui::PlayFile (void)
 			playstate = CMoviePlayerGui::JF;
 			update_lcd = true;
 		}
-        else if (msg == CRCInput::RC_4)
+		else if (msg == CRCInput::RC_4)
 		{
 			// Jump Backwards 5 minutes
 			jumpminutes = -5;
@@ -1661,7 +1670,7 @@ CMoviePlayerGui::PlayFile (void)
 			playstate = CMoviePlayerGui::JF;
 			update_lcd = true;
 		}
-        else if (msg == CRCInput::RC_7)
+		else if (msg == CRCInput::RC_7)
 		{
 			// Jump Backwards 10 minutes
 			jumpminutes = -10;
