@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.3 2001/05/18 13:11:46 fnbrd Exp $
+// $Id: SIutils.cpp,v 1.4 2001/05/19 22:46:50 fnbrd Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.4  2001/05/19 22:46:50  fnbrd
+// Jetzt wellformed xml.
+//
 // Revision 1.3  2001/05/18 13:11:46  fnbrd
 // Fast komplett, fehlt nur noch die Auswertung der time-shifted events
 // (Startzeit und Dauer der Cinedoms).
@@ -101,6 +104,7 @@ static const char descr_tbl[][50] = {
 	"FORBIDDEN"
 };
 
+// Thanks to tmbinc
 const char *decode_descr (unsigned char _index) {
 	int index = _index;
 
@@ -125,6 +129,7 @@ const char *decode_descr (unsigned char _index) {
 	return descr_tbl[index];
 }
 
+// Thanks to kwon
 time_t changeUTCtoCtime(const unsigned char *buffer)
 {
     int year, month, day, y_, m_, k,
@@ -169,4 +174,32 @@ time_t changeUTCtoCtime(const unsigned char *buffer)
 //      zeit.tm_mday, zeit.tm_mon+1, zeit.tm_year+1900,
 //      zeit.tm_hour, zeit.tm_min, zeit.tm_sec);
     return mktime(&zeit)+timezone;
+}
+
+// Thanks to tmbinc
+int saveStringToXMLfile(FILE *out, const char *c)
+{
+  if(!c)
+    return 1;
+  for(;*c; c++) {
+    switch (*c) {
+      case '&':
+        fprintf(out, "&amp;");
+        break;
+      case '<':
+        fprintf(out, "&lt;");
+        break;
+      case 0x81:
+      case 0x82:
+        break;
+      default:
+        if (*c<32)
+          break;
+        if ((*c>=32) && (*c<128))
+          fprintf(out, "%c", *c);
+        else
+          fprintf(out, "&#%d;", *c);
+     } // case
+  } // for
+  return 0;
 }

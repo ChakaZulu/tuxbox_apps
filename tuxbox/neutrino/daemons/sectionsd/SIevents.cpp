@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.1 2001/05/19 22:36:23 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.2 2001/05/19 22:46:50 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,8 +22,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
-// Revision 1.1  2001/05/19 22:36:23  fnbrd
-// Fehlte noch
+// Revision 1.2  2001/05/19 22:46:50  fnbrd
+// Jetzt wellformed xml.
 //
 //
 
@@ -33,8 +33,6 @@
 #include <set>
 #include <algorithm>
 #include <string>
-
-//#include <libxml/encoding.h>
 
 #include "SIutils.hpp"
 #include "SIservices.hpp"
@@ -74,9 +72,13 @@ int SIevent::saveXML(FILE *file, const char *serviceName) const
 {
   if(saveXML0(file))
     return 1;
-  if(serviceName)
-    if(fprintf(file, "    <service_name>%s</service_name>\n", serviceName)<0)
-      return 1;
+  if(serviceName) {
+    if(fprintf(file, "    <service_name>")<0)
+      return 2;
+    saveStringToXMLfile(file, serviceName);
+    if(fprintf(file, "</service_name>\n")<0)
+      return 3;
+  }
   return saveXML2(file);
 }
 
@@ -89,33 +91,35 @@ int SIevent::saveXML0(FILE *file) const
 
 int SIevent::saveXML2(FILE *file) const
 {
-//unsigned char buf[6000];
-
-  // Hier muss noch ne Wandlung der Sonderzeichen rein
-  if(name.length())
-    fprintf(file, "    <name>%s</name>\n", name.c_str());
-  if(text.length())
-    fprintf(file, "    <text>%s</text>\n", text.c_str());
-  if(item.length())
-    fprintf(file, "    <item>%s</item>\n", item.c_str());
-  if(itemDescription.length())
-    fprintf(file, "    <item_description>%s</item_description>\n", itemDescription.c_str());
+  if(name.length()) {
+    fprintf(file, "    <name>");
+    saveStringToXMLfile(file, name.c_str());
+    fprintf(file, "</name>\n");
+  }
+  if(text.length()) {
+    fprintf(file, "    <text>");
+    saveStringToXMLfile(file, text.c_str());
+    fprintf(file, "</text>\n");
+  }
+  if(item.length()) {
+    fprintf(file, "    <item>");
+    saveStringToXMLfile(file, item.c_str());
+    fprintf(file, "</item>\n");
+  }
+  if(itemDescription.length()) {
+    fprintf(file, "    <item_description>");
+    saveStringToXMLfile(file, itemDescription.c_str());
+    fprintf(file, "</item_description>\n");
+  }
   if(extendedText.length()) {
-// Leider konvertiert das nicht in HTML (oe->&ouml;)
-/*
-    int inlen=extendedText.length();
-    int outlen=sizeof(buf);
-//    UTF8Toisolat1(buf, &outlen, (const unsigned char *)extendedText.c_str(), &inlen);
-    isolat1ToUTF8(buf, &outlen, (const unsigned char *)extendedText.c_str(), &inlen);
-    buf[outlen]=0;
-    fprintf(file, "    <extended_text>%s</extended_text>\n", buf);
-*/
-    fprintf(file, "    <extended_text>%s</extended_text>\n", (const char *)extendedText.c_str());
+    fprintf(file, "    <extended_text>");
+    saveStringToXMLfile(file, extendedText.c_str());
+    fprintf(file, "</extended_text>\n");
   }
   if(startzeit) {
     struct tm *zeit=localtime(&startzeit);
     fprintf(file, "    <time>%02d:%02d:%02d</time>\n", zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-    fprintf(file, "    <date>%02d.%02d.%04d</time>\n", zeit->tm_mday, zeit->tm_mon+1, zeit->tm_year+1900);
+    fprintf(file, "    <date>%02d.%02d.%04d</date>\n", zeit->tm_mday, zeit->tm_mon+1, zeit->tm_year+1900);
   }
   if(dauer)
     fprintf(file, "    <duration>%u</duration>\n", dauer);
