@@ -312,6 +312,27 @@ void CLCD::showMenuText(const int position, const std::string text, const int hi
 	display.update();
 }
 
+void CLCD::showMP3(const std::string artist, const std::string title)
+{
+	if (mode != MODE_MP3) 
+	{
+		return;
+	}
+	// reload specified line
+	display.draw_fill_rect (-1,14,95,48, CLCDDisplay::PIXEL_OFF);
+	fonts.menu->RenderString(0,28, 95, artist.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	fonts.menu->RenderString(0,45, 107, title.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	display.update();
+}
+
+void CLCD::showMP3Play(bool play)
+{
+	display.draw_fill_rect (107,32,120,48, CLCDDisplay::PIXEL_OFF);
+	if(play)
+		fonts.menutitle->RenderString(107,45, 30, ">", CLCDDisplay::PIXEL_ON, 0);
+	else
+		fonts.menutitle->RenderString(107,45, 30, "| |", CLCDDisplay::PIXEL_ON, 0);
+}
 void CLCD::setMode(MODES m, std::string title)
 {
 	switch (m)
@@ -324,6 +345,19 @@ void CLCD::setMode(MODES m, std::string title)
 			showclock = true;
 			showVolume(volume);
 			showServicename(servicename);
+			showTime();
+			display.update();
+			break;
+		case MODE_MP3:
+			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+			//printf("[lcdd] mode: mp3\n");
+			display.load_screen(&icon_lcd);
+			mode = m;
+			showclock = true;
+			display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
+			fonts.menu->RenderString(94,28, 40, "MP3", CLCDDisplay::PIXEL_ON, 0);
+			showMP3Play(false);
+			//showVolume(volume);
 			showTime();
 			display.update();
 			break;

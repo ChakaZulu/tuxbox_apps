@@ -47,7 +47,8 @@ class CLCD
 			MODE_SAVER,
 			MODE_SHUTDOWN,
 			MODE_STANDBY,
-			MODE_MENU_UTF8
+			MODE_MENU_UTF8,
+			MODE_MP3
 		};
 
 
@@ -106,7 +107,8 @@ class CLCD
 		void showTime();
 		void showVolume(char vol);
 		void showMenuText(const int position, const std::string text, const int highlight = -1, const bool utf_encoded = false);
-
+		void showMP3(const std::string artist, const std::string title);
+		void showMP3Play(bool play=true);
 		void setBrightness(int);
 		int getBrightness();
 
