@@ -30,9 +30,13 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.72 2002/03/11 18:52:41 Simplex Exp $
+// $Id: channellist.cpp,v 1.73 2002/03/17 19:59:08 rasc Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.73  2002/03/17 19:59:08  rasc
+// -- channelselector, info details:
+// --    visible "connector line" between channel  and detail info at bottom
+//
 // Revision 1.72  2002/03/11 18:52:41  Simplex
 // fix
 //
@@ -667,6 +671,7 @@ int CChannelList::show()
 void CChannelList::hide()
 {
 	g_FrameBuffer->paintBackgroundBoxRel(x, y, width, height+ info_height+ 5);
+        clearItem2DetailsLine ();
 }
 
 bool CChannelList::showInfo(int pos)
@@ -955,6 +960,62 @@ void CChannelList::paintDetails(int index)
 	}
 }
 
+
+//
+// -- Decoreline to connect ChannelDisplayLine with ChannelDetail display
+// -- 2002-03-17 rasc
+//
+
+void CChannelList::clearItem2DetailsLine ()
+
+{
+ paintItem2DetailsLine (-1, 0);
+}
+
+void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
+
+{
+#define ConnectLineBox_Width	16
+
+	int xpos  = x - ConnectLineBox_Width;
+	int ypos1 = y + theight+0 + pos*fheight;
+	int ypos2 = y + height;
+	int ypos1a = ypos1 + (fheight/2)-2;
+	int ypos2a = ypos2 + (info_height/2)-2;
+	unsigned char col1 = COL_MENUCONTENT+6;
+	unsigned char col2 = COL_MENUCONTENT+1;
+
+
+	// Clear
+	g_FrameBuffer->paintBackgroundBoxRel(xpos,y, ConnectLineBox_Width, height+info_height);
+
+	// paint Line if detail info (and not valid list pos)
+	if (pos >= 0 &&  chanlist[ch_index]->currentEvent.description != "") {
+		// 1. col thick line
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 4,info_height, col1);
+
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 4,ypos2a-ypos1a, col1);
+
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,4, col1);
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos2a, 12,4, col1);
+
+		// 2. col small line
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 1,fheight,     col2);
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 1,info_height, col2);
+
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 1,ypos2a-ypos1a, col2);
+
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,1, col2);
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos2a, 12,1, col2);
+
+	}
+
+}
+
+
+
+
 void CChannelList::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight;
@@ -963,6 +1024,7 @@ void CChannelList::paintItem(int pos)
 	{
 		color = COL_MENUCONTENTSELECTED;
 		paintDetails(liststart+pos);
+		paintItem2DetailsLine (pos, liststart+pos);
 	}
 
 	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
