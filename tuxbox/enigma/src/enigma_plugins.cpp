@@ -121,7 +121,7 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 }
 
 eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
-	:eListBoxWindow<ePlugin>(_("Plugins"), 10, 400, true)
+	:eListBoxWindow<ePlugin>(_("Plugins"), 10, 400/*, true*/)
 {
 	move(ePoint(150, 50));
 	setLCD(lcdTitle, lcdElement);
@@ -238,7 +238,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		{
 			eDebug("stop gtx/enx_vbi");
 			ioctl(fd, AVIA_VBI_STOP_VTXT, 0);
-			close(fd);
+			::close(fd);
 		}
 	}
 
@@ -313,7 +313,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		if (fd > 0)
 		{
 			ioctl(fd, AVIA_VBI_START_VTXT, Decoder::parms.tpid);
-			close(fd);
+			::close(fd);
 		}
 	}
 
