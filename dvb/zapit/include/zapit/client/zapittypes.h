@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.22 2004/02/21 08:24:35 thegoodguy Exp $
+ * $Id: zapittypes.h,v 1.23 2004/02/24 23:50:57 thegoodguy Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -46,18 +46,16 @@ typedef int16_t t_satellite_position;
 typedef uint16_t t_network_id;
 
 /* unique channel identification */
-typedef uint32_t t_channel_id;
-#define CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id,original_network_id,transport_stream_id) ((original_network_id << 16) | service_id)
+typedef uint64_t t_channel_id;
+#define CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id,original_network_id,transport_stream_id) ((((t_channel_id)transport_stream_id) << 32) | (((t_channel_id)original_network_id) << 16) | (t_channel_id)service_id)
 #define CREATE_CHANNEL_ID CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id, original_network_id, transport_stream_id)
 #define GET_ORIGINAL_NETWORK_ID_FROM_CHANNEL_ID(channel_id) ((t_original_network_id)((channel_id) >> 16))
 #define GET_SERVICE_ID_FROM_CHANNEL_ID(channel_id) ((t_service_id)(channel_id))
-#define PRINTF_CHANNEL_ID_TYPE "%08x"
-#define PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS "%x"
-#define SCANF_CHANNEL_ID_TYPE "%x"
+#define PRINTF_CHANNEL_ID_TYPE "%16llx"
+#define PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS "%llx"
+#define SCANF_CHANNEL_ID_TYPE "%llx"
 
-typedef uint64_t t_channel_id64;
 #define CREATE_CHANNEL_ID64 (((uint64_t)satellitePosition << 48) | ((uint64_t) transport_stream_id << 32) | ((uint64_t)original_network_id << 16) | (uint64_t)service_id)
-#define PRINTF_CHANNEL_ID64_TYPE "%16llx"
 
 /* diseqc types */
 typedef enum {
