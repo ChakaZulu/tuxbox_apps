@@ -69,7 +69,9 @@ CInfoViewer::CInfoViewer()
 	is_visible       = false;
 	showButtonBar    = false;
 	gotTime          = g_Sectionsd->getIsTimeSet();
+#ifndef SKIP_CA_STATUS
 	CA_Status        = false;
+#endif
 }
 
 void CInfoViewer::start()
@@ -242,7 +244,9 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
 
 			showButton_Audio();
 			showButton_SubServices();
+#ifndef SKIP_CA_STATUS
 			showIcon_CA_Status();
+#endif
 			showIcon_16_9();
 			showIcon_VTXT();
         }
@@ -611,6 +615,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		gotTime = true;
 		return messages_return::handled;
 	}
+#ifndef SKIP_CA_STATUS
 	else if ( msg == NeutrinoMessages::EVT_ZAP_CA_CLEAR )
 	{
 		Set_CA_Status(false);
@@ -626,7 +631,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		Set_CA_Status(false);
 		return messages_return::handled;
 	}
-
+#endif
 
 	return messages_return::unhandled;
 }
@@ -880,6 +885,7 @@ void CInfoViewer::killTitle()
 	}
 }
 
+#ifndef SKIP_CA_STATUS
 void CInfoViewer::showIcon_CA_Status() const
 {
 	frameBuffer->paintIcon( ( CA_Status)?"ca.raw":"fta.raw", BoxEndX- 3* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
@@ -891,3 +897,4 @@ void CInfoViewer::Set_CA_Status(int Status)
 	if ( is_visible && showButtonBar )
 		showIcon_CA_Status();
 }
+#endif

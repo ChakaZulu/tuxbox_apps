@@ -23,3 +23,5 @@ libneutrino_gui2_a_SOURCES = \
 
 libtimerlist_a_SOURCES = \
 	timerlist.cpp
+
+AM_CPPFLAGS = -DSKIP_CA_STATUS

@@ -52,7 +52,9 @@ class CInfoViewer
 	
 	bool           gotTime;
 	bool           recordModeActive;
+#ifndef SKIP_CA_STATUS
 	bool           CA_Status;
+#endif
 	
 	int            InfoHeightY;
 	int            InfoHeightY_Info;
@@ -84,7 +86,9 @@ class CInfoViewer
 	void showButton_SubServices();
 	
 	void showIcon_16_9()      const;
+#ifndef SKIP_CA_STATUS
 	void showIcon_CA_Status() const;
+#endif
 	void showIcon_VTXT()      const;
 	void showRecordIcon(const bool show);
 	
@@ -102,7 +106,9 @@ class CInfoViewer
 	CSectionsdClient::CurrentNextInfo getEPG(const t_channel_id for_channel_id);
 	
 	void	showSubchan();
+#ifndef SKIP_CA_STATUS
 	void	Set_CA_Status(int Status);
+#endif
 	
 	int     handleMsg(uint msg, uint data);
 };
