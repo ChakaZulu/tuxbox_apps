@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.2 2002/04/04 21:26:08 obi Exp $
+ * $Id: pmt.cpp,v 1.3 2002/04/07 11:14:47 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -355,7 +355,7 @@ pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, uint16_t program_numbe
 				break;
 			}
 
-			if ((ret_pids.ecmpid != 0x0000) && (ret_pids.ecmpid != 0x1FFFF))
+			if ((ret_pids.ecmpid != 0x0000) && (ret_pids.ecmpid != 0x1FFF))
 				break;
 		}
 	}
