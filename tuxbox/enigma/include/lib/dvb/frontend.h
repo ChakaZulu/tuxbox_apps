@@ -113,7 +113,7 @@ class eFrontend: public Object
 	int SendSequence( const eSecCmdSequence &seq );
 	void checkLock();
 	void checkRotorLock();
-	void updateTransponder( eTransponder * );
+	void updateTransponder();
 public:
 	void disableRotor() { noRotorCmd = 1, lastRotorCmd=-1; } // no more rotor cmd is sent when tune
 	void enableRotor() { noRotorCmd = 0, lastRotorCmd=-1; }  // rotor cmd is sent when tune
