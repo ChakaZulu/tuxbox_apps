@@ -125,6 +125,7 @@ public:
 	int service_state;
 		/* current service */
 	eServiceReferenceDVB service;  // meta-service
+	int spSID;
 	eTransponder *transponder;
 	TDT *tdt;
 

@@ -204,8 +204,8 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		/*emit*/ dvb.enterTransponder(event.transponder);
 		int nopmt=0;
 
-		int spSID=-1;
-		// do we haved fixed or cached PID values?
+		spSID=service.getServiceID().get();
+  // do we haved fixed or cached PID values?
 		eService *sp=eServiceInterface::getInstance()->addRef(service);
 		if (sp)
 		{
@@ -248,18 +248,21 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 
 		if ( service.path )  // replay ?
 		{
-			if ( !service.getServiceID().get() && spSID != -1 )
-			{
-				service.data[1] = spSID;
-				eServiceInterface::getInstance()->service.data[1] = spSID;
-			}
-
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
 			dvb.tPAT.start(new PAT());
 
 			break;
 		}
-		if (!nopmt && service.getServiceID().get() ) // if not a dvb service, don't even try to search a PAT, PMT etc.
+		if (nopmt)  // dont get PMT and other..
+		{
+			dvb.tEIT.start(new EIT(EIT::typeNowNext, spSID, EIT::tsActual));
+			service_state=0;
+			/*emit*/ dvb.enterService(service);
+			/*emit*/ dvb.switchedService(service, -service_state);
+			dvb.setState(eDVBServiceState(eDVBServiceState::stateIdle));
+			break;
+		}
+		else if ( spSID ) // if not a dvb service, don't even try to search a PAT, PMT etc.
 		{
 // workaround for zap in background before recordings
 			if ( Decoder::locked == 2 && !dvb.recorder )
@@ -272,15 +275,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				eDebug("start PAT on demux0");
 				dvb.tPAT.start(new PAT());
 			}
-		}
-		if (nopmt || ( service.path.size() && !service.getServiceID().get() ) )
-		{
-			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.getServiceID().get(), EIT::tsActual));
-			service_state=0;
-			/*emit*/ dvb.enterService(service);
-			/*emit*/ dvb.switchedService(service, -service_state);
-			dvb.setState(eDVBServiceState(eDVBServiceState::stateIdle));
-			break;
 		}
 
 		if (tMHWEIT)
@@ -296,7 +290,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		case 1:	// digital television service
 		case 2:	// digital radio service
 		case 3:	// teletext service
-			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.getServiceID().get(), EIT::tsActual));
+			dvb.tEIT.start(new EIT(EIT::typeNowNext, spSID, EIT::tsActual));
 		case 5:	// NVOD time shifted service ( faked )
 		case 6:	// mosaic service
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
@@ -304,7 +298,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			break;
 		case 4:	// NVOD reference service
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetSDT));
-			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.getServiceID().get(), EIT::tsActual));
+			dvb.tEIT.start(new EIT(EIT::typeNowNext, spSID, EIT::tsActual));
 			break;
 		case 7: // linkage ( faked )
 			// start parentEIT
@@ -338,9 +332,9 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			dvb.tSDT.start(new SDT());
 
 		PAT *pat=dvb.tPAT.getCurrent();
-		PATEntry *pe=pat->searchService(service.getServiceID().get());
+		PATEntry *pe=pat->searchService(spSID);
 		if (!pe)
-		{
+  {
 #ifndef DISABLE_FILE
 			if ( service.path ) // recorded ts
 			{
@@ -412,12 +406,12 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		if ( Decoder::locked == 2 && !service.path && !dvb.recorder )
 		{
 			eDebug("start PMT on demux1");
-			dvb.tPMT.start(new PMT(pmtpid, service.getServiceID().get()), DEMUX1_DEV );
+			dvb.tPMT.start(new PMT(pmtpid, spSID), DEMUX1_DEV );
 		}
 		else
 		{
 			eDebug("start PMT on demux0");
-			dvb.tPMT.start(new PMT(pmtpid, service.getServiceID().get()));
+			dvb.tPMT.start(new PMT(pmtpid, spSID));
 		}
 
 		break;
