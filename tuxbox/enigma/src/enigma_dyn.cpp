@@ -63,7 +63,6 @@ using namespace std;
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
 
-eString multiEPG;
 
 static eString getVersionInfo(const char *info)
 {
@@ -1285,7 +1284,7 @@ static eString getScreenShot(void)
 		yres2 = xres * rv / rh;
 		winyres = yres2 * winxres / xres;
 
-		printf("[SCREENSHOT] xres = %d, yres = %d, rh = %d, rv = %d, winxres = %d, winyres = %d\n", xres, yres2, rh, rv, winxres, winyres);
+		eDebug("[SCREENSHOT] xres = %d, yres = %d, rh = %d, rv = %d, winxres = %d, winyres = %d\n", xres, yres2, rh, rv, winxres, winyres);
 
 		result = "<img width=\"" +  eString().sprintf("%d", winxres);
 		result += "\" height=\"" + eString().sprintf("%d", winyres);
@@ -1537,14 +1536,8 @@ static eString getEITC2()
 
 static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result;
-	eString tmp;
-
 	content->local_header["Content-Type"]="audio/mpegfile";
-	result="http://"+getIP()+":31338/";
-        tmp.sprintf("%02x\n", Decoder::current.apid);
- 	result+=tmp;
-	return result;
+	return "http://" + getIP() + ":31338/" + eString().sprintf("%02x\n", Decoder::current.apid);
 }
 
 static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -1600,164 +1593,206 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	return result;
 }
 
-static eString getcurepg3(eServiceReference ref, time_t start, time_t end, unsigned int d_min)
+class eMEPG
 {
-	std::stringstream result;
-	result << std::setfill('0');
+public:
+	int d_min;
+	eString multiEPG;
+	int hours;
+	time_t start;
+	time_t end;
+	int tableWidth;
 
-	eService* current;
-
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "sapi is not available.";
-
-	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
-
-	if (!current)
-		return "";
-
-	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
-
-	if (!evt)
-		result << "";
-	else
+	eMEPG()
 	{
-		int tableWidth = (end - start) / 60 * d_min;
+		hours = 6; // horizontally visible hours
+		d_min = 10; // distance on time scale for 1 minute
+	}
+
+	eString getMultiEPG()
+	{
+		return multiEPG;
+	}
+
+	eString getTimeScale()
+	{
+		std::stringstream result;
+
 		int tablePos = 0;
-		time_t tableTime = start;
-		result << "<table width=" << tableWidth << "border=1 rules=all>"
-		"<tr>"
-		"<td width=200>" << filter_string(current->service_name) << "</td>";
 
-		timeMap::const_iterator It;
+		result << "<table width=" << tableWidth << " border=1 rules=all>"
+			"<tr>"
+			"<td width=200>Channel</td>";
 
-		for(It=evt->begin(); It!= evt->end(); It++)
+		time_t i = start;
+		for (tablePos = 200; tablePos < tableWidth; tablePos += 15 * d_min)
 		{
-			EITEvent event(*It->second);
-			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-			{
-				Descriptor *descriptor=*d;
-				if (descriptor->Tag() == DESCR_SHORT_EVENT)
-				{
-					int colWidth = event.duration / 60 * d_min;
-					if (tablePos + colWidth <= tableWidth)
-					{
-						if (event.start_time >= start)
-						{
-							colWidth = (event.start_time - tableTime) / 60 * d_min;
-							if (event.start_time > tableTime)
-							{
-								result << "<td width=" << colWidth << ">&nbsp;</td>";
-								tableTime += event.duration;
-								tablePos += colWidth;
-							}
+			tm* t = localtime(&i);
+			result << "<td width=" << d_min * 15 << ">"
+				<< std::setfill('0')
+				<< std::setw(2) << t->tm_hour << ':'
+				<< std::setw(2) << t->tm_min << ' '
+				<< "</td>";
+			i += 15*60;
+		}
 
-							colWidth = event.duration / 60 * d_min;
-							result << "<td width=" << colWidth << ">";
-							eString rec = "javascript:record(\"ref=";
-								rec += ref2string(ref).c_str();
-								rec += "&ID=";
-								rec += eString().sprintf("%d", event.event_id);
-								rec += "&start=";
-								rec += eString().sprintf("%d", event.start_time);
-								rec += "&duration=";
-								rec += eString().sprintf("%d", event.duration);
-								rec += "\")";
-							tm* t = localtime(&event.start_time);
-							result << "<span class=\"epg\">";
-#ifndef DISABLE_FILE
-							result << button(50, "REC", RED, rec);
-							result << "&nbsp;&nbsp;"
+		result << "</tr>"
+			"</table>";
+		return result.str();
+	}
+
+	void getcurepg(eServiceReference ref)
+	{
+		std::stringstream result;
+		result << std::setfill('0');
+		eService* current;
+
+		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+		if (sapi)
+		{
+			current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
+			if (current)
+			{
+				const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
+				if (evt)
+				{
+					int tablePos = 0;
+					time_t tableTime = start;
+					result << "<table width=" << tableWidth << " border=1 rules=all>"
+					"<tr>"
+					"<td width=200>" << filter_string(current->service_name) << "</td>";
+					tablePos += 200;
+
+					timeMap::const_iterator It;
+
+					for(It=evt->begin(); It!= evt->end(); It++)
+					{
+						EITEvent event(*It->second);
+						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+						{
+							Descriptor *descriptor=*d;
+							if (descriptor->Tag() == DESCR_SHORT_EVENT)
+							{
+								time_t eventStart = event.start_time;
+								time_t eventEnd = event.start_time + event.duration;
+								int eventDuration = 0;
+								int colWidth = 0;
+								if ((eventEnd < tableTime) || (eventStart > end))
+								{
+									eventDuration = 0;
+								}
+								else	
+								if ((eventStart < tableTime) && (eventEnd > tableTime))
+								{
+									eventDuration = eventEnd - tableTime;
+								}
+								else
+								if (eventStart == tableTime)
+								{
+									eventDuration = event.duration;
+								}
+								else
+								if ((eventStart > tableTime) && (eventStart < end))
+								{
+									eventDuration = eventStart - tableTime;
+									colWidth = eventDuration / 60 * d_min;
+									result << "<td width=" << colWidth << ">&nbsp;</td>";
+									tableTime = eventStart;
+									tablePos += colWidth;
+									eventDuration = event.duration;
+								}
+
+								colWidth = eventDuration  / 60 * d_min;
+								if (tablePos + colWidth > tableWidth)
+									colWidth = tableWidth - tablePos;
+								if (colWidth > 0)
+								{
+									result << "<td width=" << colWidth << ">";
+								
+									eString rec = "javascript:record(\"ref=";
+										rec += ref2string(ref).c_str();
+										rec += "&ID=";
+										rec += eString().sprintf("%d", event.event_id);
+										rec += "&start=";
+										rec += eString().sprintf("%d", event.start_time);
+										rec += "&duration=";
+										rec += eString().sprintf("%d", event.duration);
+										rec += "\")";
+									tm* t = localtime(&event.start_time);
+									tm* t2 = localtime(&tableTime);
+									result << "<span class=\"epg\">"
+										<< tablePos << "/" << colWidth << ":"
+										<< std::setfill('0')
+										<< std::setw(2) << t2->tm_mday << '.'
+										<< std::setw(2) << t2->tm_mon+1 << ". - "
+										<< std::setw(2) << t2->tm_hour << ':'
+										<< std::setw(2) << t2->tm_min << ' '
+										<< "<br>";
+#ifndef DISABLE_FILE							
+									result << button(50, "REC", RED, rec)
+										<< "&nbsp;&nbsp;";
 #endif
-								<< std::setfill('0')
-								<< std::setw(2) << t->tm_mday << '.'
-								<< std::setw(2) << t->tm_mon+1 << ". - "
-								<< std::setw(2) << t->tm_hour << ':'
-								<< std::setw(2) << t->tm_min << ' '
-								<< " (" << event.duration / 60 << ")"
-								<< "<a href=\'javascript:EPGDetails(\"ref=" << ref2string(ref)
-								<< "&ID=" << event.event_id
-								<< "\")\'>"
-								<< "<br>"
-								<< ((ShortEventDescriptor*)descriptor)->event_name
-								<< "</a></span></u><br>\n";
-							result << "</td>";
-							tablePos += colWidth;
-							tableTime += event.duration;
+									result << std::setfill('0')
+										<< std::setw(2) << t->tm_mday << '.'
+										<< std::setw(2) << t->tm_mon+1 << ". - "
+										<< std::setw(2) << t->tm_hour << ':'
+										<< std::setw(2) << t->tm_min << ' '
+										<< " (" << event.duration / 60 << " min)"
+										<< "<a href=\'javascript:EPGDetails(\"ref=" << ref2string(ref)
+										<< "&ID=" << event.event_id
+										<< "\")\'>"
+										<< "<br>"
+										<< ((ShortEventDescriptor*)descriptor)->event_name
+										<< "</a></span></u><br>\n";
+								
+									result << "</td>";
+									tablePos += colWidth;
+									tableTime += eventDuration;
+								}
+							}
 						}
 					}
+					if (tablePos < tableWidth)
+						result << "<td width=" << tableWidth - tablePos << ">n/a</td>";
+
+					result << "</tr></table>";
 				}
+
+				multiEPG += result.str();
 			}
 		}
-		if (tablePos < tableWidth)
-			result << "<td width=" << tableWidth - tablePos << ">n/a</td>";
-
-		result << "</tr></table>";
 	}
+};
 
-	return result.str();
-}
-
-eString getTimeScale(time_t start, time_t end, unsigned int d_min)
-{
-	std::stringstream result;
-
-	result << "<table width=" << (end - start) / 60 * d_min << "border=1 rules=all>"
-		"<tr>"
-		"<td width=200>Channel</td>";
-
-	for (time_t i = start; i < end; i += 15*60)
-	{
-		tm* t = localtime(&i);
-		result << "<td width=" << d_min * 15 << ">"
-			<< std::setfill('0')
-			<< std::setw(2) << t->tm_hour << ':'
-			<< std::setw(2) << t->tm_min << ' '
-			<< "</td>";
-	}
-
-	result << "</tr>"
-		"</table>";
-	return result.str();
-}
+eMEPG mepg;
 
 void callbackFunction(const eServiceReference& s)
 {
-	printf("[ENIGMA_DYN] fetching EPG %s\n", ref2string(s).c_str());
-	int hours = 6; // horizontally visible hours
-	time_t now = time(0) + eDVB::getInstance()->time_difference;
-	time_t start = time(0) + eDVB::getInstance()->time_difference /*+ offs*/;
-	unsigned int tmp = start % 900;  // align to 15min
-	start -= (tmp + 60 * 60); // start 1 hour before now
-	time_t end = start + hours * 3600;
-	unsigned int d_min = 10; // distance on time scale for 1 minute
-	printf("[ENIGMA_DYN] multiEPG: now = %d, start = %d, end = %d\n", now, start, end);
-	multiEPG += getcurepg3(s, start, end, d_min);
+//	printf("[ENIGMA_DYN] fetching EPG %s\n", ref2string(s).c_str());
+	mepg.getcurepg(s);
 }
 
 static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
-	multiEPG = "";
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString>opt = getRequestOptions(opts);
 	eString refs = opt["ref"];
 	eServiceReference bouquetRef = string2ref(refs);
+
+	mepg.start = time(0) + eDVB::getInstance()->time_difference;
+	unsigned int tmp = mepg.start % 900;  // align to 15 min
+	mepg.start -= (tmp + 60 * 60); // start 1 hour before now
+	mepg.end = mepg.start + mepg.hours * 3600;
+	mepg.tableWidth = ((mepg.end - mepg.start) / 60 * mepg.d_min) + 200;
+	mepg.multiEPG = "";
 
 	Signal1<void, const eServiceReference&> cbSignal;
 	cbSignal.connect(slot(callbackFunction));
 	eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
 	eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
 
-	int hours = 6; // horizontally visible hours
-	time_t now = time(0) + eDVB::getInstance()->time_difference;
-	time_t start = time(0) + eDVB::getInstance()->time_difference /*+ offs*/;
-	unsigned int tmp = start % 900;  // align to 15min
-	start -= (tmp + 60 * 60); // start 1 hour before now
-	time_t end = start + hours * 3600;
-	unsigned int d_min = 10; // distance on time scale for 1 minute
-	eString timeScale = getTimeScale(start, end, d_min);
-	return "<html>" CHARSETMETA "<head><title>Multi-EPG</title></head><body>" + timeScale + multiEPG + "</body></html>";
+	return "<html>" CHARSETMETA "<head><title>Multi-EPG</title></head><body>" + mepg.getTimeScale() + mepg.getMultiEPG() + "</body></html>";
 }
 
 static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -1815,10 +1850,10 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 					tm* t = localtime(&event.start_time);
 					result << "<span class=\"epg\">";
 #ifndef DISABLE_FILE
-					result << button(50, "REC", RED, rec);
-					result << "&nbsp;&nbsp;"
+					result << button(50, "REC", RED, rec)
+						<< "&nbsp;&nbsp;";
 #endif
-						<< std::setw(2) << t->tm_mday << '.'
+					result << std::setw(2) << t->tm_mday << '.'
 						<< std::setw(2) << t->tm_mon+1 << ". - "
 						<< std::setw(2) << t->tm_hour << ':'
 						<< std::setw(2) << t->tm_min << ' '
@@ -2182,7 +2217,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 		Signal1<void,const eServiceReference&> signal;
 		signal.connect(slot(navlist, &eNavigatorListDirectory::addEntry));
 
-		res+="<table width=\"100%%\">\n";
+		res+="<table width=\"100%\">\n";
 		iface->enterDirectory(current_service, signal);
 		res+="</table>\n";
 		eDebug("entered");
