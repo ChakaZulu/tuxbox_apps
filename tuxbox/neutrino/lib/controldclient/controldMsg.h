@@ -86,11 +86,6 @@ class CControld : public CBasicMessage
 			unsigned char volume;
 		};
 
-		struct commandAnalogMode
-		{
-			unsigned char mode;
-		};
-
 		struct commandVideoFormat
 		{
 			unsigned char format;
