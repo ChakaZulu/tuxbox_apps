@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.5 2002/10/05 20:32:06 dirch Exp $
+	$Id: controlapi.cpp,v 1.6 2002/10/07 18:44:19 dirch Exp $
 
 	License: GPL
 
@@ -665,7 +665,7 @@ void CControlAPI::SendcurrentVAPid(CWebserverRequest* request)
 CZapitClient::responseGetPIDs pids;
 	Parent->Zapit->getPIDS(pids);
 
-	printf("%u\n%u\n", pids.PIDs.vpid, pids.APIDs[0].pid);
+	request->printf("%u\n%u\n", pids.PIDs.vpid, pids.APIDs[0].pid);
 }
 
 //-------------------------------------------------------------------------
