@@ -226,7 +226,6 @@ neutrino->showProfiling("vor Schatten;");
 
         if ( !calledFromNumZap )
         {
-            sec_timer_id = g_RCInput->addTimer(1000000, false);
             bool show_dot= true;
 
         	neutrino->showProfiling("start infoviewer loop");
