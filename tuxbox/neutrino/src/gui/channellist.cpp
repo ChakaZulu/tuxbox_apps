@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.48 2001/12/25 11:40:30 McClean Exp $
+// $Id: channellist.cpp,v 1.49 2001/12/30 23:16:15 Simplex Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.49  2001/12/30 23:16:15  Simplex
+// bugfix in adjusting bouquet's channellist to current channel
+//
 // Revision 1.48  2001/12/25 11:40:30  McClean
 // better pushback handling
 //
@@ -465,8 +468,7 @@ int CChannelList::show()
 				{
 					int nNext = (bouquetList->getActiveBouquetNumber()+1) % bouquetList->Bouquets.size();
 					bouquetList->activateBouquet(nNext);
-					if ( bouquetList->showChannelList())
-						bouquetList->adjustToChannel( getActiveChannelNumber());
+					bouquetList->showChannelList();
 					loop = false;
 
 				}
@@ -477,8 +479,7 @@ int CChannelList::show()
 				{
 					int nNext = (bouquetList->getActiveBouquetNumber()+bouquetList->Bouquets.size()-1) % bouquetList->Bouquets.size();
 					bouquetList->activateBouquet(nNext);
-					if ( bouquetList->showChannelList())
-						bouquetList->adjustToChannel( getActiveChannelNumber());
+					bouquetList->showChannelList();
 					loop = false;
 				}
 			}
@@ -491,7 +492,7 @@ int CChannelList::show()
 		{
 			bShowBouquetList = true;
 			loop=false;
-		} 
+		}
 		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
 			|| (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
 			|| (key==CRCInput::RC_standby)
@@ -551,6 +552,8 @@ void CChannelList::zapTo(int pos)
 		g_RemoteControl->zapTo_onid_sid( chan->onid_sid );
 	}
 	g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
+	if (bouquetList != NULL)
+		bouquetList->adjustToChannel( getActiveChannelNumber());
 }
 
 void CChannelList::numericZap(int key)
