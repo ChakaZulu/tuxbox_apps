@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.33 2003/01/30 17:21:17 obi Exp $
+ * $Id: nit.cpp,v 1.34 2003/02/28 16:13:49 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -138,7 +138,7 @@ int parse_nit(unsigned char DiSEqC)
 						break;
 
 					case 0x44:
-						if (cable_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id) < 0);
+						if (cable_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id) < 0)
 							return -2;
 						break;
 
