@@ -34,7 +34,6 @@
 #define __EVENTLIST_HPP__
 
 #include <string>
-#include <vector>
 
 #include <sectionsdclient/sectionsdclient.h>
 
@@ -50,14 +49,12 @@
 #include "widget/menue.h"
 
 
-using namespace std;
-
 class EventList
 {
 	private:
 		CFrameBuffer	*frameBuffer;
         CChannelEventList	evtlist;
-		void readEvents(const t_channel_id channel_id, const std::string& channelname); // I really don't like handling names
+		void readEvents(const t_channel_id channel_id);
 		unsigned int	selected;
 		unsigned int	current_event;
 		unsigned int	liststart;
@@ -69,7 +66,7 @@ class EventList
 		int		theight; // Fonthoehe Channellist-Titel
 
 		int		key;
-		string		name;
+		std::string	name;
 
 		int 		width;
 		int 		height;
@@ -85,7 +82,7 @@ class EventList
 	public:
 		EventList();
 		~EventList();
-		int exec(const t_channel_id channel_id, const string& channelname);
+		int exec(const t_channel_id channel_id, const std::string& channelname); // UTF-8
 };
 
 

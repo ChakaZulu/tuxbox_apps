@@ -83,7 +83,7 @@ EventList::~EventList()
 }
 
 
-void EventList::readEvents(const t_channel_id channel_id, const std::string& channelname)
+void EventList::readEvents(const t_channel_id channel_id)
 {
 	current_event = (unsigned int)-1;
 	evtlist = g_Sectionsd->getEventsServiceKey(channel_id);
@@ -113,14 +113,14 @@ void EventList::readEvents(const t_channel_id channel_id, const std::string& cha
 }
 
 
-int EventList::exec(const t_channel_id channel_id, const std::string& channelname)
+int EventList::exec(const t_channel_id channel_id, const std::string& channelname) // UTF-8
 {
 	int res = menu_return::RETURN_REPAINT;
 
 	name = channelname;
 	sort_mode=0;
 	paintHead();
-	readEvents(channel_id, channelname);
+	readEvents(channel_id);
 	paint();
 
 	int oldselected = selected;
@@ -292,7 +292,7 @@ void EventList::paintItem(unsigned int pos)
 {
 	int color;
 	int ypos = y+ theight+0 + pos*fheight;
-	string datetime1_str, datetime2_str, duration_str;
+	std::string datetime1_str, datetime2_str, duration_str;
 
 	if (liststart+pos==selected)
 	{
@@ -359,11 +359,10 @@ void EventList::paintItem(unsigned int pos)
 void EventList::paintHead()
 {
 	char l_name[100];
-	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head").c_str(), name.c_str() );
+	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head").c_str(), name.c_str()); // epglist.head must be UTF-8 encoded
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD);
-
+	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
 
 void EventList::paint()

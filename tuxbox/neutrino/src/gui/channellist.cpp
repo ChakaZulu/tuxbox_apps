@@ -329,7 +329,7 @@ int CChannelList::show()
 		{
 			hide();
 
-			if ( g_EventList->exec(chanlist[selected]->channel_id, chanlist[selected]->name ) == menu_return::RETURN_EXIT_ALL )
+			if ( g_EventList->exec(chanlist[selected]->channel_id, chanlist[selected]->name) == menu_return::RETURN_EXIT_ALL) // UTF-8
 			{
 				res = -2;
 				loop = false;
@@ -394,7 +394,7 @@ bool CChannelList::showInfo(int pos)
 	}
 
 	CChannel* chan = chanlist[pos];
-	g_InfoViewer->showTitle(pos+1, chan->name, chan->channel_id, true );
+	g_InfoViewer->showTitle(pos+1, chan->name, chan->channel_id, true); // UTF-8
 	return true;
 }
 
@@ -498,7 +498,7 @@ void CChannelList::zapTo(int pos)
 	if ( pos!=(int)tuned )
 	{
 		tuned = pos;
-		g_RemoteControl->zapTo_ChannelID(chan->channel_id, chan->name, !chan->bAlwaysLocked );
+		g_RemoteControl->zapTo_ChannelID(chan->channel_id, chan->name, !chan->bAlwaysLocked); // UTF-8
 	}
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
@@ -833,7 +833,7 @@ void CChannelList::paintItem(int pos)
 
 		if (liststart+pos==selected)
 		{
-			CLCD::getInstance()->showMenuText(0, chan->name );
+			CLCD::getInstance()->showMenuText(0, chan->name, -1, true); // UTF-8
 			CLCD::getInstance()->showMenuText(1, chan->currentEvent.description );
 		}
 
@@ -842,7 +842,7 @@ void CChannelList::paintItem(int pos)
 		if(strlen(chan->currentEvent.description.c_str()))
 		{
 			char nameAndDescription[100];
-			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", chan->name.c_str());
+			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", CZapitClient::Utf8_to_Latin1(chan->name).c_str());
 
 			unsigned int ch_name_len= g_Fonts->channellist->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len= g_Fonts->channellist_descr->getRenderWidth(chan->currentEvent.description.c_str());
@@ -863,7 +863,7 @@ void CChannelList::paintItem(int pos)
 		}
 		else
 			//name
-			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name.c_str(), color);
+			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name.c_str(), color, 0, true); // UTF-8
 	}
 }
 

@@ -785,10 +785,10 @@ void CNeutrinoApp::channelsInit()
 	delete channelList;
 	channelList = new CChannelList( "channellist.head" );
 	CZapitClient::BouquetChannelList zapitChannels;
-	g_Zapit->getChannels( zapitChannels );
+	g_Zapit->getChannels(zapitChannels, CZapitClient::MODE_CURRENT, CZapitClient::SORT_BOUQUET, true); // UTF-8
 	for(uint i=0; i<zapitChannels.size(); i++)
 	{
-		channelList->addChannel( zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].channel_id);
+		channelList->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].channel_id); // UTF-8
 	}
 	dprintf(DEBUG_DEBUG, "got channels\n");
 
@@ -806,12 +806,12 @@ void CNeutrinoApp::channelsInit()
 	for( uint i=0; i< bouquetList->Bouquets.size(); i++ )
 	{
 		CZapitClient::BouquetChannelList zapitChannels;
-		g_Zapit->getBouquetChannels( bouquetList->Bouquets[i]->unique_key, zapitChannels);
+		g_Zapit->getBouquetChannels(bouquetList->Bouquets[i]->unique_key, zapitChannels, CZapitClient::MODE_CURRENT, true); // UTF-8
 		for(uint j=0; j<zapitChannels.size(); j++)
 		{
-			CChannelList::CChannel* channel = channelList->getChannel( zapitChannels[j].nr);
+			CChannelList::CChannel* channel = channelList->getChannel(zapitChannels[j].nr);
 
-			bouquetList->Bouquets[i]->channelList->addChannel( channel);
+			bouquetList->Bouquets[i]->channelList->addChannel(channel);
 			if( bouquetList->Bouquets[i]->bLocked)
 			{
 				channel->bAlwaysLocked = true;
@@ -2343,7 +2343,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 			else if( msg == CRCInput::RC_red )
 			{	// eventlist
-				g_EventList->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName());
+				g_EventList->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName()); // UTF-8
 			}
 			else if( msg == CRCInput::RC_blue )
 			{	// streaminfo
@@ -2366,9 +2366,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 						( msg == NeutrinoMessages::SHOW_INFOBAR ) )
 			{
 				// show Infoviewer
-				g_InfoViewer->showTitle( channelList->getActiveChannelNumber(),
-												 channelList->getActiveChannelName(),
-												 channelList->getActiveChannel_ChannelID() );
+				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
 			else if( ( msg >= CRCInput::RC_0 ) && ( msg <= CRCInput::RC_9 ))
 			{ //numeric zap
@@ -3299,7 +3297,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.376 2002/12/18 00:25:41 McClean Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.377 2002/12/18 14:05:33 thegoodguy Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

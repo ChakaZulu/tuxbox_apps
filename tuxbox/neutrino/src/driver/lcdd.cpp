@@ -301,7 +301,7 @@ void CLCD::showVolume(char vol)
 	}
 }
 
-void CLCD::showMenuText(int position, std::string text, int highlight )
+void CLCD::showMenuText(const int position, const std::string text, const int highlight, const bool utf_encoded)
 {
 	if (mode != MODE_MENU)
 	{
@@ -309,7 +309,7 @@ void CLCD::showMenuText(int position, std::string text, int highlight )
 	}
 	// reload specified line
 	display.draw_fill_rect(-1,35+14*position,120,35+14+14*position, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(0,35+11+14*position, 140, text.c_str() , CLCDDisplay::PIXEL_INV, highlight);
+	fonts.menu->RenderString(0,35+11+14*position, 140, text.c_str() , CLCDDisplay::PIXEL_INV, highlight, utf_encoded);
 	display.update();
 }
 

@@ -99,13 +99,13 @@ class CChannelList
 	public:
 		CChannelList( const std::string& Name="" );
 		~CChannelList();
-		void addChannel(int key, int number, const std::string& name, t_channel_id ids = 0);
+		void addChannel(int key, int number, const std::string& name, t_channel_id ids = 0); // UTF-8
 		void addChannel(CChannel* chan);
 		CChannel* getChannel( int number);
 		CChannel* operator[]( uint index) { if (chanlist.size() > index) return chanlist[index]; else return NULL;};
-		const std::string getName() { return name; };
+		const std::string getName() const { return name; };
 		int getKey(int);
-		string getActiveChannelName();
+		std::string getActiveChannelName(); // UTF-8
 		int getActiveChannelNumber();
 		t_channel_id CChannelList::getActiveChannel_ChannelID();
 //		const string getActiveChannelID();

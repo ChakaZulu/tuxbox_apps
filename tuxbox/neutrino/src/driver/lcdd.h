@@ -105,7 +105,7 @@ class CLCD
 		void showServicename(const std::string name); // UTF-8
 		void showTime();
 		void showVolume(char vol);
-		void showMenuText(int position, std::string text, int highlight=-1);
+		void showMenuText(const int position, const std::string text, const int highlight = -1, const bool utf_encoded = false);
 
 		void setBrightness(int);
 		int getBrightness();
