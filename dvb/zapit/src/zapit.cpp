@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.68 2002/01/30 11:04:00 faralla Exp $
+  $Id: zapit.cpp,v 1.69 2002/01/30 11:49:21 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.69  2002/01/30 11:49:21  faralla
+  fixed old-style channellist
+
   Revision 1.68  2002/01/30 11:04:00  faralla
   prepared descrambling-status
 
@@ -802,7 +805,7 @@ void _writecamnu(int cmd, unsigned char *data, int len)
   
   if (buffer[4] == 0x0d)
   {      
-  	//output = true;
+  	output = true;
   }
 
    if (output)
@@ -1587,8 +1590,9 @@ int prepare_channels()
 	g_BouquetMan->clearAll();
 
   int ls = LoadServices();
-	g_BouquetMan->loadBouquets();
-
+  g_BouquetMan->loadBouquets();
+  g_BouquetMan->renumServices();
+  
   return 23;
 }
 
@@ -1669,7 +1673,7 @@ void parse_command()
     printf("  Param2: %d\n", rmsg.param2);
     printf("  Param3: %s\n", rmsg.param3);
   */
-
+  
   if(rmsg.version==1)
   {
   switch (rmsg.cmd)
@@ -2452,7 +2456,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.68 2002/01/30 11:04:00 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.69 2002/01/30 11:49:21 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
