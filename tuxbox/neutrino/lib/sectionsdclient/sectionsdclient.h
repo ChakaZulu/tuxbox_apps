@@ -73,14 +73,17 @@ typedef vector<CChannelEvent> CChannelEventList;
 
 class CSectionsdClient
 {
+ private:
         int sock_fd;
-		bool sectionsd_connect();
-		bool send(char* data, int size);
-		bool receive(char* data, int size);
-		int readResponse(char* data = NULL, int size= 0);
-		bool sectionsd_close();
 
-	public:
+	bool sectionsd_connect();
+	bool send_data(char* data, const size_t size);
+	bool receive(char* data, int size);
+	int readResponse(char* data = NULL, int size= 0);
+	bool sectionsd_close();
+	void send(const unsigned char command, char* data, const unsigned int size, const unsigned char version);
+
+ public:
 		enum events
 		{
 			EVT_TIMESET,
@@ -97,11 +100,13 @@ class CSectionsdClient
 
 		bool getIsTimeSet();
 
-		void setPauseScanning( bool doPause );
+		void setEventsAreOldInMinutes(const unsigned short minutes);
 
-		void setPauseSorting( bool doPause );
+		void setPauseScanning(const bool doPause);
 
-		void setServiceChanged( unsigned ServiceKey, bool requestEvent );
+		void setPauseSorting(const bool doPause);
+
+		void setServiceChanged(const unsigned ServiceKey, const bool requestEvent);
 
 		CChannelEventList getChannelEvents();
 
