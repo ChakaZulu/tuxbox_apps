@@ -33,6 +33,7 @@
 #include "gui/widget/messagebox.h"
 
 #include "vcrcontrol.h"
+#include "sectionsdclient.h"
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -255,14 +256,22 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsi
 		string extEpgid="error";
 		string extVideoPID="error";
 		string extAudioPID="error";
+		string extEPGTitle="not available";
 		sprintf(tmp,"%u", onidsid);
 		extOnidsid = tmp;
-		sprintf(tmp,"%llu", epgid);  //todo - ergibt immer leeren string  -- fixen!
+		sprintf(tmp,"%llu", epgid);
 		extEpgid = tmp;
 		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
 		extVideoPID = tmp;
 		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
 		extAudioPID = tmp;
+
+		CSectionsdClient sections;
+		sectionsd::responseGetCurrentNextInfoChannelID current_next;
+		if(sections.getCurrentNextServiceKey(onidsid, current_next))
+		{
+			extEPGTitle=current_next.current_name;
+		}
 
 		switch(command)
 		{
@@ -285,7 +294,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsi
 		extMessage +="<neutrino commandversion=\"1\">\n";
 		extMessage +="    <record command=\"" + extCommand + "\">\n";
 		extMessage +="        <channelname>" + g_RemoteControl->current_channel_name + "</channelname>\n";
-		extMessage +="        <epgtitle>noch nicht verfügbar</epgtitle>\n";
+		extMessage +="        <epgtitle>" + extEPGTitle + "</epgtitle>\n";
 		extMessage +="        <onidsid>" + extOnidsid + "</onidsid>\n";
 		extMessage +="        <epgid>" + extEpgid + "</epgid>\n";
 		extMessage +="        <videopid>" + extVideoPID + "</videopid>\n";
