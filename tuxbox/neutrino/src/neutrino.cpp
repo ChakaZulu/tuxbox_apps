@@ -428,6 +428,8 @@ int CNeutrinoApp::loadSetup()
 
 	//streaming
 	g_settings.network_streaming_use = configfile.getInt( "network_streaming_use", 0 );
+	g_settings.network_streaming_stopplayback = configfile.getInt( "network_streaming_stopplayback", 0 );
+	g_settings.network_streaming_stopsectionsd = configfile.getInt( "network_streaming_stopsectionsd", 1 );
 	strcpy( g_settings.network_streamingserver, configfile.getString( "network_streamingserver", "10.10.10.10").c_str() );
 	strcpy( g_settings.network_streamingserverport, configfile.getString( "network_streamingserverport", "4000").c_str() );
 
@@ -588,6 +590,8 @@ void CNeutrinoApp::saveSetup()
 
 	//streaming
 	configfile.setInt( "network_streaming_use", g_settings.network_streaming_use );
+	configfile.setInt( "network_streaming_stopplayback", g_settings.network_streaming_stopplayback );
+	configfile.setInt( "network_streaming_stopsectionsd", g_settings.network_streaming_stopsectionsd );
 	configfile.setString( "network_streamingserver", g_settings.network_streamingserver );
 	configfile.setString( "network_streamingserverport", g_settings.network_streamingserverport );
 
@@ -889,7 +893,7 @@ void CNeutrinoApp::ClearFrameBuffer()
 }
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
-                                CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
+                                CMenuWidget &networkSettings, CMenuWidget &streamingSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
                                 CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
@@ -925,6 +929,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
 	mainSettings.addItem( new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, "", &parentallockSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.streaming", true, "", &streamingSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
@@ -1350,7 +1355,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	networkSettings.addItem( m4);
 	networkSettings.addItem( m5);
-
+/*
 	if(g_settings.network_streaming_use)
 	{
 		networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1366,6 +1371,38 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 		networkSettings.addItem( new CMenuForwarder("networkmenu.streamingserver", true, g_settings.network_streamingserver,networkSettings_streamingserver));
 		networkSettings.addItem( new CMenuForwarder("networkmenu.streamingserverport", true, g_settings.network_streamingserverport,networkSettings_streamingserverport));
 	}
+*/
+}
+
+void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
+{
+	dprintf(DEBUG_DEBUG, "init streamingsettings\n");
+	streamingSettings.addItem( new CMenuSeparator() );
+	streamingSettings.addItem( new CMenuForwarder("menu.back") );
+	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	CMenuOptionChooser* oj = new CMenuOptionChooser("streamingmenu.usestreamserver", &g_settings.network_streaming_use, true);
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	streamingSettings.addItem( oj );
+
+	CStringInput*	streamingSettings_streamingserver= new CStringInput("streamingmenu.streamingserver", g_settings.network_streamingserver, 24, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput*	streamingSettings_streamingserverport= new CStringInput("streamingmenu.streamingserverport", g_settings.network_streamingserverport, 6, "ipsetup.hint_1", "ipsetup.hint_2","1234567890 ");
+
+	streamingSettings.addItem( new CMenuForwarder("streamingmenu.streamingserver", true, g_settings.network_streamingserver,streamingSettings_streamingserver));
+	streamingSettings.addItem( new CMenuForwarder("streamingmenu.streamingserverport", true, g_settings.network_streamingserverport,streamingSettings_streamingserverport));
+
+	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	oj = new CMenuOptionChooser("streamingmenu.stopplayback", &g_settings.network_streaming_stopplayback, true);
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	streamingSettings.addItem( oj );
+
+	oj = new CMenuOptionChooser("streamingmenu.stopsectionsd", &g_settings.network_streaming_stopsectionsd, true);
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");	
+	streamingSettings.addItem( oj );
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
@@ -1746,13 +1783,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
 	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
+	CMenuWidget streamingSettings("streamingmenu.head", "streaming.raw");
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400, 460);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 	CMenuWidget scanSettings("servicemenu.scants", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
 
-	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings,
+	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, streamingSettings,
 	             colorSettings, keySettings, videoSettings, languageSettings, miscSettings, service);
 
 	//service
@@ -1839,6 +1877,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//network Setup
 	InitNetworkSettings(networkSettings);
 
+	//streaming Setup
+	InitStreamingSettings(streamingSettings);
+
 	//color Setup
 	InitColorSettings(colorSettings);
 
@@ -1866,10 +1907,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		{
 			if(CVCRControl::getInstance()->registeredDevices() > 0)
 			{
-				if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_STOP || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_UNKNOWN)
 					CVCRControl::getInstance()->Record((CTimerEvent::EventInfo *) data);
-				else
-					printf("falscher state\n");
+					streamstatus = 1;
 			}
 			else
 				printf("Keine vcr Devices registriert\n");
@@ -1882,6 +1921,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE)
 				{
 					CVCRControl::getInstance()->Stop();
+					streamstatus=0;
 				}
 				else
 					printf("falscher state\n");
@@ -2322,7 +2362,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 	int y = g_settings.screen_EndY- 100;
 
-	unsigned char* pixbuf;
+	unsigned char* pixbuf = NULL;
 
 	if (bDoPaint)
 	{
@@ -2605,32 +2645,29 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	return returnval;
 }
 
-bool CNeutrinoApp::changeNotify(string OptionName)
-{/*
-	int port = 0;
-	sscanf(g_settings.network_streamingserverport, "%d", &port);
+bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
+{
+	CTimerEvent::EventInfo eventinfo;
 
-	printf("streaming : %d\n", streamstatus);
-	printf("port : %d\n", port);
-
-	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	SAI servaddr;
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(port);
-	inet_pton(AF_INET, g_settings.network_streamingserver, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+//	printf("neutrino: streaming geaendert Option: '%s' !\n",OptionName.c_str());
+//	printf("streaming : %d\n", streamstatus);
+	if(CVCRControl::getInstance()->registeredDevices() > 0)
 	{
-		perror("[neutrino] -  cannot connect to streamingserver\n");
-		return false;
+		if(streamstatus == 1)
+		{
+			eventinfo.onidSid = g_RemoteControl->current_onid_sid;
+			eventinfo.epgID = g_RemoteControl->current_EPGid;
+			CVCRControl::getInstance()->Record(&eventinfo);
+		}
+		else
+		{
+			CVCRControl::getInstance()->Stop();
+		}
+		return true;
 	}
-	streaming_commandhead rmsg;
-	rmsg.version=1;
-	rmsg.command = streamstatus +1;
-	write(sock_fd, &rmsg, sizeof(rmsg));
-	close(sock_fd);
-*/
+	else
+		printf("Keine Streamingdevices registriert\n");
+
 	return false;
 }
 
@@ -2644,7 +2681,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.292 2002/06/24 23:20:50 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.293 2002/07/05 02:08:10 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -41,6 +41,7 @@ mainsettings.language Language
 mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Network
+mainsettings.streaming Streamingserver
 mainsettings.colors Colors
 mainsettings.keybinding Key Setup
 mainsettings.misc Misc Settings
@@ -84,9 +85,14 @@ networkmenu.netmask Netmask
 networkmenu.broadcast Broadcast
 networkmenu.gateway Default Gateway
 networkmenu.nameserver Nameserver
-networkmenu.usestreamserver use streamserver
-networkmenu.streamingserver Streamingserver
-networkmenu.streamingserverport Port
+
+streamingmenu.head Streamingserver Settings
+streamingmenu.usestreamserver use streamingserver
+streamingmenu.streamingserver Streamingserver
+streamingmenu.streamingserverport Port
+streamingmenu.stopplayback stop Playback
+streamingmenu.stopsectionsd stop Sectionsd 
+
 
 ping.ok is reachable (ping)
 ping.unreachable is unreachable

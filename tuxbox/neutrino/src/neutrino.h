@@ -158,13 +158,14 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitColorThemesSettings(CMenuWidget &);
 		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors);
 		void InitNetworkSettings(CMenuWidget &networkSettings);
+		void InitStreamingSettings(CMenuWidget &streamingSettings);
 		void InitScreenSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);
 		void InitScanSettings(CMenuWidget &);
 		void InitParentalLockSettings(CMenuWidget &);
 		void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
 		void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings,
-		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings,
+		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings, CMenuWidget &networkSettings,
 		                  CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
 		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service);
 		void ClearFrameBuffer();
@@ -194,7 +195,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		//callback for menue
 		bool onPaintNotify(string MenuName);
 		//onchange
-		bool changeNotify(string OptionName);
+		bool changeNotify(string OptionName, void *Data);
 
 		int handleMsg(uint msg, uint data);
 		void showProfiling( string text );

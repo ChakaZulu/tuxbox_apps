@@ -131,6 +131,8 @@ struct SNeutrinoSettings
 
 	//streaming
 	int network_streaming_use;
+	int network_streaming_stopplayback;
+	int network_streaming_stopsectionsd;
 	char network_streamingserver[31];
 	char network_streamingserverport[10];
 

@@ -41,6 +41,7 @@ mainsettings.language Sprache
 mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Netzwerk
+mainsettings.streaming Streamingserver
 mainsettings.colors Farben / Themes
 mainsettings.keybinding Tasten-Einstellungen
 mainsettings.misc Diverse Einstellungen
@@ -83,9 +84,13 @@ networkmenu.netmask Netzmaske
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver
-networkmenu.usestreamserver Streamingserver benutzen
-networkmenu.streamingserver Streamingserver
-networkmenu.streamingserverport Port
+
+streamingmenu.head Streamingserver Einstellungen
+streamingmenu.usestreamserver Streamingserver benutzen
+streamingmenu.streamingserver Streamingserver
+streamingmenu.streamingserverport Port
+streamingmenu.stopplayback Playback anhalten
+streamingmenu.stopsectionsd Sectionsd anhalten
 
 ping.ok ist erreichbar (ping)
 ping.unreachable ist nicht erreichbar (unreachable)
