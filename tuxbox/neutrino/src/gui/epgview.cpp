@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.20 2001/10/18 22:01:31 field Exp $
+// $Id: epgview.cpp,v 1.21 2001/11/03 22:44:41 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.21  2001/11/03 22:44:41  McClean
+// radiomode paint bug fixed
+//
 // Revision 1.20  2001/10/18 22:01:31  field
 // kleiner Bugfix
 //
@@ -188,7 +191,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 	GetEPGData( channelName, onid_tsid, id, startzeit );
     if (doLoop)
     {
-    	g_FrameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_BACKGROUND);
+    	g_FrameBuffer->paintBackgroundBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5);
     }
 
 	if(strlen(epgData.title)==0)
@@ -205,7 +208,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 		g_Fonts->epg_info2->RenderString(sx+15, sy+height+5, ox-30, text, COL_MENUCONTENT);
 
 		g_RCInput->getKey(20);
-		g_FrameBuffer->paintBoxRel(sx, sy, ox, height+10, COL_BACKGROUND);
+		g_FrameBuffer->paintBackgroundBoxRel(sx, sy, ox, height+10);
 		return;
 	}
 
@@ -222,8 +225,8 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 
     if ( (oldx> ox) && (!doLoop) )
     {
-        g_FrameBuffer->paintBoxRel (oldsx, sy, sx- oldsx, oy+10, 255);
-        g_FrameBuffer->paintBoxRel (sx+ ox, sy, sx- oldsx, oy+10, 255);
+        g_FrameBuffer->paintBackgroundBoxRel (oldsx, sy, sx- oldsx, oy+10);
+        g_FrameBuffer->paintBackgroundBoxRel (sx+ ox, sy, sx- oldsx, oy+10);
     }
 
 	if(strlen(epgData.info1)!=0)
@@ -347,7 +350,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 
 void CEpgData::hide()
 {
-	g_FrameBuffer->paintBoxRel (sx, sy, ox+10, oy+10, 255);
+	g_FrameBuffer->paintBackgroundBoxRel (sx, sy, ox+10, oy+10);
 }
 
 void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
