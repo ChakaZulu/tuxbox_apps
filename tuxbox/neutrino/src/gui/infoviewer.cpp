@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.44 2001/11/03 15:43:17 field Exp $
+// $Id: infoviewer.cpp,v 1.45 2001/11/05 16:04:25 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.45  2001/11/05 16:04:25  field
+// nvods/subchannels ver"c++"ed
+//
 // Revision 1.44  2001/11/03 15:43:17  field
 // Perspektiven
 //
@@ -179,6 +182,20 @@ void CInfoViewer::setDuration( int Duration )
 	intShowDuration = Duration;
 }
 
+const std::string CInfoViewer::getActiveChannelID()
+{
+    string  s_id;
+    if ( g_settings.epg_byname == 0 )
+    {
+        char anid[10];
+        snprintf( anid, 10, "%x", Current_onid_tsid );
+        s_id= anid;
+    }
+    else
+        s_id= CurrentChannel;
+    return s_id;
+}
+
 void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid, bool CalledFromNumZap )
 {
     pthread_mutex_lock( &epg_mutex );
@@ -186,9 +203,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 	CurrentChannel = Channel;
     Current_onid_tsid = onid_tsid;
 
-//  Auskommentieren, falls es euch nicht gefällt..?
     ShowInfo_Info = !CalledFromNumZap;
-//    ShowInfo_Info = false;
 
     if ( CalledFromNumZap )
         EPG_NotFound_Text = (char*) g_Locale->getText("infoviewer.epgnotload").c_str();
@@ -258,8 +273,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         g_FrameBuffer->paintIcon("blau.raw", BoxEndX- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         g_Fonts->infobar_small->RenderString(BoxEndX- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 31, g_Locale->getText("infoviewer.streaminfo").c_str(), COL_INFOBAR);
 
-        g_RemoteControl->CopyNVODs();
-        showButtonNVOD();
+        showButtonNVOD(true);
+
         g_RemoteControl->CopyAPIDs();
         showButtonAudio();
     }
@@ -316,40 +331,29 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
 void CInfoViewer::showButtonNVOD(bool CalledFromShowData = false)
 {
-    char to_compare[50];
-    if ( g_settings.epg_byname == 0 )
-        snprintf( to_compare, 10, "%x", Current_onid_tsid );
-    else
-        strcpy( to_compare, CurrentChannel.c_str() );
+    CSubChannel_Infos subChannels= g_RemoteControl->getSubChannels();
 
-    if ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 )
+    if ( subChannels.has_subChannels_for( getActiveChannelID() ) )
     {
         // gelbe Taste für NVODs / Subservices
-        if  ( g_RemoteControl->nvods.count_nvods> 1 )
-        {
-            g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-            if (SubServiceList.size()> 0)
-                // SubServices
-                g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.subservice").c_str(), COL_INFOBAR);
-            else
-                // NVOD
-                g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR);
+        g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+        if ( subChannels.are_subchannels )
+            // SubServices
+            g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.subservice").c_str(), COL_INFOBAR);
+        else
+            // NVOD
+            g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR);
 
-            if (!CalledFromShowData)
-                showData();
-        };
+        if (!CalledFromShowData)
+            showData();
     };
 }
 
 void CInfoViewer::showButtonAudio()
 {
-    char to_compare[50];
-    if ( g_settings.epg_byname == 0 )
-        snprintf( to_compare, 10, "%x", Current_onid_tsid );
-    else
-        strcpy( to_compare, CurrentChannel.c_str() );
+    string  to_compare= getActiveChannelID();
 
-    if ( strcmp(g_RemoteControl->audio_chans.name, to_compare )== 0 )
+    if ( strcmp(g_RemoteControl->audio_chans.name, to_compare.c_str() )== 0 )
     {
         if ( ( g_RemoteControl->GetECMPID()== 0 ) || ( g_RemoteControl->audio_chans.count_apids== 0 ) )
         {
@@ -385,55 +389,43 @@ void CInfoViewer::showButtonAudio()
 void CInfoViewer::showData()
 {
     int is_nvod= false;
-    int has_subservices= (SubServiceList.size()> 0);
 
     if (ShowInfo_Info)
     {
-        if (has_subservices)
-        {
-            g_RemoteControl->CopyNVODs();
-            char to_compare[50];
-            if ( g_settings.epg_byname == 0 )
-                snprintf( to_compare, 10, "%x", Current_onid_tsid );
-            else
-                strcpy( to_compare, CurrentChannel.c_str() );
+        CSubChannel_Infos subChannels= g_RemoteControl->getSubChannels();
 
-            if ( strcmp(g_RemoteControl->nvods.name, to_compare )!= 0 )
+        if ( subChannels.are_subchannels )
+        {
+            string activeID= getActiveChannelID();
+            if ( !subChannels.has_subChannels_for( activeID ) )
             {
                 //printf("subservices %d\n", SubServiceList.size());
-                strcpy( g_RemoteControl->nvods.name, to_compare );
-                g_RemoteControl->nvods.count_nvods= SubServiceList.size();
+                subChannels= CSubChannel_Infos( activeID.c_str(), true );
                 for(unsigned int count=0;count<SubServiceList.size();count++)
             	{
-                    g_RemoteControl->nvods.nvods[count].onid_sid= SubServiceList[count]->originalNetworkId<<16 | SubServiceList[count]->serviceId;
-                    g_RemoteControl->nvods.nvods[count].tsid= SubServiceList[count]->transportStreamId;
-                    //printf("%x %x\n", g_RemoteControl->nvods.nvods[count].onid_sid, g_RemoteControl->nvods.nvods[count].tsid);
+                    subChannels.list.insert( subChannels.list.end(),
+                                             CSubService(SubServiceList[count]->originalNetworkId<<16 | SubServiceList[count]->serviceId,
+                                                         SubServiceList[count]->transportStreamId,
+                                                         SubServiceList[count]->name) );
                 }
-                g_RemoteControl->CopySubChannelsToZapit();
+                g_RemoteControl->CopySubChannelsToZapit( subChannels );
                 showButtonNVOD(true);
             }
         }
         else
         {
-
-            char to_compare[50];
-            if ( g_settings.epg_byname == 0 )
-                snprintf( to_compare, 10, "%x", Current_onid_tsid );
-            else
-                strcpy( to_compare, CurrentChannel.c_str() );
-
-            if ( ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 ) && ( g_RemoteControl->nvods.count_nvods> 0 ) )
+            if ( subChannels.has_subChannels_for( getActiveChannelID() ) )
             {
                 // NVOD- Zeiten aus dem aktuell selektierten holen!
                 is_nvod= true;
 
-                int sel= g_RemoteControl->nvods.selected;
-                unsigned    dauer =g_RemoteControl->nvods.nvods[sel].dauer/ 60;
+                unsigned sel= subChannels.selected;
+                unsigned dauer= subChannels.list[sel].dauer/ 60;
                 sprintf((char*) &runningDuration, "%d min", dauer);
 
-                struct      tm *pStartZeit = localtime(&g_RemoteControl->nvods.nvods[sel].startzeit);
+                struct      tm *pStartZeit = localtime(&subChannels.list[sel].startzeit);
                 sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
-                runningPercent=(unsigned)((float)(time(NULL)-g_RemoteControl->nvods.nvods[sel].startzeit)/(float)g_RemoteControl->nvods.nvods[sel].dauer*100.);
+                runningPercent=(unsigned)((float)(time(NULL)-subChannels.list[sel].startzeit)/(float)subChannels.list[sel].dauer*100.);
                 if (runningPercent>100)
                     runningPercent=0;
 
@@ -558,7 +550,6 @@ void * CInfoViewer::LangViewerThread (void *arg)
             g_RemoteControl->CopyAPIDs();
             InfoViewer->showButtonAudio();
 
-            g_RemoteControl->CopyNVODs();
             InfoViewer->showButtonNVOD();
         }
 

@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.28 2001/11/03 15:43:17 field Exp $
+// $Id: remotecontrol.cpp,v 1.29 2001/11/05 16:04:25 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.29  2001/11/05 16:04:25  field
+// nvods/subchannels ver"c++"ed
+//
 // Revision 1.28  2001/11/03 15:43:17  field
 // Perspektiven
 //
@@ -77,23 +80,23 @@ void CRemoteControl::send()
 //    printf("CRemoteControl: after pthread_cond_signal (with %s)\n", remotemsg.param3);
 }
 
-// quick'n dirty, damit der Rest was zum arbeiten hat ;)
-static void getNVODs(unsigned onidSid, CRemoteControl *RemoteControl )
+void CRemoteControl::getNVODs( char *channel_name )
 {
     char rip[]="127.0.0.1";
-
-    bool got_times= false;
     int rep_cnt= 0;
-    nvod_info   n_nvods[10];
-    int         count= 0;
+    CSubServiceListSorted   nvod_list;
+
+    unsigned int onidSid;
+    sscanf( channel_name, "%x", &onidSid );
+
     do
     {
-        pthread_mutex_unlock( &RemoteControl->send_mutex );
+        pthread_mutex_unlock( &send_mutex );
         rep_cnt++;
         if (rep_cnt> 1 )
         {
             usleep(200000);
-            printf("getNVODs - try #%d\n", rep_cnt);
+            printf("CRemoteControl - getNVODs - try #%d\n", rep_cnt);
         }
 
         int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -131,68 +134,33 @@ static void getNVODs(unsigned onidSid, CRemoteControl *RemoteControl )
                     //printf("dataLength: %u\n", resp.dataLength);
                     char *p=pData;
 
-                    count = 0;
                     while(p<pData+resp.dataLength)
                     {
-                        count+= 1;
                         unsigned onidsid2=*(unsigned *)p;
-                        // printf("onid_sid: 0x%x\n", onidsid2);
-                        n_nvods[count- 1].onid_sid = onidsid2;
-
                         p+=4;
                         unsigned short tsid=*(unsigned short *)p;
-                        // printf("tsid: 0x%x\n", tsid);
-                        n_nvods[count- 1].tsid = tsid;
-
                         p+=2;
                         time_t zeit=*(time_t *)p;
-                        n_nvods[count- 1].startzeit = zeit;
                         p+=4;
-                        //printf("%s", ctime(&zeit));
-
-                        n_nvods[count- 1].dauer = *(unsigned *)p;
+                        unsigned dauer = *(unsigned *)p;
                         p+=4;
 
-                        if (n_nvods[count- 1].dauer!= 0)
-                            got_times= true;
+                        if (dauer> 0)
+                            nvod_list.insert( CSubService(onidsid2, tsid, zeit, dauer) );
                     }
                 }
                 delete[] pData;
             }
             close(sock_fd);
         }
-        pthread_mutex_trylock( &RemoteControl->send_mutex );
+        pthread_mutex_trylock( &send_mutex );
 
-    } while ( ( ( count== 0 ) || ( !got_times ) ) && ( rep_cnt< 10) && ( strlen( RemoteControl->audio_chans_int.name )!= 0 ) );
+    } while ( ( nvod_list.size()== 0 ) && ( rep_cnt< 10) && ( strlen( audio_chans_int.name )!= 0 ) );
 
-    if ( count> 0 )
-    {
-        //sortieren
-        time_t  min_zeit;
-        int     min_index;
-        RemoteControl->nvods_int.count_nvods= 0;
-        for (int j=0;j<count;j++)
-        {
-            min_zeit= 0x7FFFFFFF;
-            min_index= -1;
+    subChannels_internal.clear( channel_name );
 
-            for (int i=0;i<count;i++)
-            {
-                if ( (n_nvods[i].dauer!= 0) && (n_nvods[i].startzeit< min_zeit) )
-                {
-                    min_index= i;
-                    min_zeit= n_nvods[i].startzeit;
-                }
-            }
-            if ( min_index!= -1)
-            {
-                memcpy(&RemoteControl->nvods_int.nvods[RemoteControl->nvods_int.count_nvods], &n_nvods[min_index], sizeof(nvod_info));
-                n_nvods[min_index].dauer= 0;
-                //printf("%s - %x\n", ctime(&nvods->nvods[nvods->count_nvods].startzeit), (unsigned int)nvods->nvods[nvods->count_nvods].startzeit);
-                RemoteControl->nvods_int.count_nvods++;
-            }
-        }
-    }
+    for(CSubServiceListSorted::iterator nvod=nvod_list.begin(); nvod!=nvod_list.end(); ++nvod)
+        subChannels_internal.list.insert(subChannels_internal.list.end(), * nvod );
 }
 
 void * CRemoteControl::RemoteControlThread (void *arg)
@@ -325,20 +293,14 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
                                                 if ( (return_buf[2] == 'd') && ( ZapStatus & 0x80 ) )
                                                 {
-                                                    unsigned int onid_sid;
-
-                                                    sscanf( r_msg.param3, "%x", &onid_sid );
-                                                    getNVODs( onid_sid, RemoteControl );
+                                                    RemoteControl->getNVODs( r_msg.param3 );
                                                     // send_mutex ist danach wieder locked
 
-                                                    printf("NVOD-Basechannel - got %d nvods!\n", RemoteControl->nvods_int.count_nvods);
+                                                    printf("NVOD-Basechannel - got %d nvods for >%s<!\n", RemoteControl->subChannels_internal.list.size(), RemoteControl->subChannels_internal.name.c_str());
 
-                                                    strcpy( RemoteControl->nvods_int.name, r_msg.param3 );
-
-                                                    if ( RemoteControl->nvods_int.count_nvods> 0 )
+                                                    if ( RemoteControl->subChannels_internal.list.size()> 0 )
                                                     {
                                                         // übertragen der ids an zapit initialisieren
-
                                                         RemoteControl->remotemsg.cmd= 'i';
                                                         RemoteControl->remotemsg.param= 1;
                                                         do_immediatly = true;
@@ -349,7 +311,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                                     if (return_buf[2] == 'd')
                                                         strcpy( RemoteControl->audio_chans_int.name, r_msg.param3 );
                                                     if (return_buf[2] == 'e')
-                                                        strcpy( RemoteControl->audio_chans_int.name, RemoteControl->nvods_int.name );
+                                                        strcpy( RemoteControl->audio_chans_int.name, RemoteControl->subChannels_internal.name.c_str() );
 
                                                     // Nur dann die Audio-Channels abholen, wenn nicht NVOD-Basechannel
 
@@ -377,23 +339,22 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                     }
                         case 'i':   {
                                         pthread_mutex_trylock( &RemoteControl->send_mutex );
-                                        //printf("Telling zapit the number of nvod-chans: %d\n",RemoteControl->nvods_int.count_nvods);
-                                        write(sock_fd, &RemoteControl->nvods_int.count_nvods, 2);
+                                        unsigned short nvodcount= RemoteControl->subChannels_internal.list.size();
+                                        write(sock_fd, &nvodcount, 2);
 
                                         //printf("Sending NVODs to zapit\n");
-                                        for(int count=0;count<RemoteControl->nvods_int.count_nvods;count++)
+                                        for(int count=0; count<nvodcount; count++)
                                         {
-                                            // printf("Sending NVOD %d - %x - %x\n", count, RemoteControl->nvods_int.nvods[count].onid_sid, RemoteControl->nvods_int.nvods[count].tsid);
-                                            write(sock_fd, &RemoteControl->nvods_int.nvods[count].onid_sid, 4);
-                                            write(sock_fd, &RemoteControl->nvods_int.nvods[count].tsid, 2);
+                                            write(sock_fd, &RemoteControl->subChannels_internal.list[count].onid_sid, 4);
+                                            write(sock_fd, &RemoteControl->subChannels_internal.list[count].tsid, 2);
                                         }
 
                                         if (RemoteControl->remotemsg.param== 1)
                                         {
                                             // called from NVOD - immediately change to nvod #max...
                                             RemoteControl->remotemsg.cmd= 'e';
-                                            RemoteControl->nvods_int.selected= RemoteControl->nvods_int.count_nvods- 1;
-                                            snprintf( (char*) &RemoteControl->remotemsg.param3, 10, "%x", RemoteControl->nvods_int.nvods[RemoteControl->nvods_int.selected].onid_sid);
+                                            RemoteControl->subChannels_internal.selected= nvodcount- 1;
+                                            snprintf( (char*) &RemoteControl->remotemsg.param3, 10, "%x", RemoteControl->subChannels_internal.list[nvodcount- 1].onid_sid);
 
                                             do_immediatly = true;
                                         }
@@ -447,17 +408,18 @@ void CRemoteControl::CopyAPIDs()
     pthread_mutex_unlock( &send_mutex );
 }
 
-void CRemoteControl::CopyNVODs()
+const CSubChannel_Infos CRemoteControl::getSubChannels()
 {
     pthread_mutex_lock( &send_mutex );
-    memcpy(&nvods, &nvods_int, sizeof(nvods));
+    CSubChannel_Infos subChannels(subChannels_internal);
     pthread_mutex_unlock( &send_mutex );
+    return  subChannels;
 }
 
-void CRemoteControl::CopySubChannelsToZapit()
+void CRemoteControl::CopySubChannelsToZapit( const CSubChannel_Infos& subChannels )
 {
     pthread_mutex_lock( &send_mutex );
-    memcpy(&nvods_int, &nvods, sizeof(nvods));
+    subChannels_internal= subChannels;
 
     remotemsg.version=1;
     remotemsg.cmd='i';
@@ -487,26 +449,29 @@ void CRemoteControl::setAPID(int APID)
     remotemsg.cmd=9;
     snprintf( (char*) &remotemsg.param, 2, "%.1d", APID);
     audio_chans_int.selected = APID;
-    printf("changing APID to %d\n", audio_chans_int.selected);
+    // printf("changing APID to %d\n", audio_chans_int.selected);
 
     pthread_mutex_unlock( &send_mutex );
 	send();
 }
 
-void CRemoteControl::setNVOD(int NVOD)
+void CRemoteControl::setSubChannel(unsigned numSub)
 {
     pthread_mutex_lock( &send_mutex );
-
+    if (subChannels_internal.selected== numSub )
+    {
+        pthread_mutex_unlock( &send_mutex );
+        return;
+    }
     memset(&audio_chans_int, 0, sizeof(audio_chans_int));
 
     remotemsg.version=1;
     remotemsg.cmd='e';
-    snprintf( (char*) &remotemsg.param3, 10, "%x", nvods_int.nvods[NVOD].onid_sid);
-    nvods_int.selected = NVOD;
-    printf("changing NVOD# to %d\n", nvods_int.selected);
+    snprintf( (char*) &remotemsg.param3, 10, "%x", subChannels_internal.list[numSub].onid_sid);
+    subChannels_internal.selected = numSub;
 
     pthread_mutex_unlock( &send_mutex );
-	send();
+    send();
 }
 
 
@@ -518,7 +483,7 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid )
     snprintf( (char*) &remotemsg.param3, 10, "%x", onid_sid);
 
     memset(&audio_chans_int, 0, sizeof(audio_chans_int));
-    memset(&nvods_int, 0, sizeof(nvods_int));
+    subChannels_internal.clear();
 
     pthread_mutex_unlock( &send_mutex );
 
@@ -528,14 +493,13 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid )
 void CRemoteControl::zapTo(string chnlname )
 {
     pthread_mutex_lock( &send_mutex );
-//    getNVODs(0x850001); // Cinedom 1 fest zum testen
     remotemsg.version=1;
     remotemsg.cmd=3;
     remotemsg.param=0x0100;
     strcpy( remotemsg.param3, chnlname.c_str() );
 
     memset(&audio_chans_int, 0, sizeof(audio_chans_int));
-    memset(&nvods_int, 0, sizeof(nvods_int));
+    subChannels_internal.clear();
 
     pthread_mutex_unlock( &send_mutex );
 

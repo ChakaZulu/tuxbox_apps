@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.35 2001/10/29 16:49:00 field Exp $
+// $Id: channellist.cpp,v 1.36 2001/11/05 16:04:25 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.36  2001/11/05 16:04:25  field
+// nvods/subchannels ver"c++"ed
+//
 // Revision 1.35  2001/10/29 16:49:00  field
 // Kleinere Bug-Fixes (key-input usw.)
 //
@@ -289,6 +292,20 @@ int CChannelList::getKey(int id)
 const std::string& CChannelList::getActiveChannelName()
 {
 	return chanlist[selected]->name;
+}
+
+const std::string CChannelList::getActiveChannelID()
+{
+    string  id;
+    if ( g_settings.epg_byname == 0 )
+    {
+        char anid[10];
+        snprintf( anid, 10, "%x", getActiveChannelOnid_sid() );
+        id= anid;
+    }
+    else
+        id= chanlist[selected]->name;
+    return id;
 }
 
 int CChannelList::getActiveChannelNumber()

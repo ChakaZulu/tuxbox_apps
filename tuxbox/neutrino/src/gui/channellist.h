@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.17 2001/10/16 18:34:13 rasc Exp $
+// $Id: channellist.h,v 1.18 2001/11/05 16:04:25 field Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.18  2001/11/05 16:04:25  field
+// nvods/subchannels ver"c++"ed
+//
 // Revision 1.17  2001/10/16 18:34:13  rasc
 // -- QuickZap to last channel verbessert.
 // -- Standard Kanal muss ca. 2-3 Sekunden aktiv sein fuer LastZap Speicherung.
@@ -65,8 +68,6 @@
 
 #include "../channels/lastchannel.h"
 
-
-
 using namespace std;
 
 class CChannelList
@@ -114,6 +115,7 @@ class CChannelList
 	unsigned int CChannelList::getActiveChannelOnid_sid() {
           return chanlist[selected]->onid_sid;
         }
+    const std::string getActiveChannelID();
 	void zapTo(int pos);
 	bool showInfo(int pos);
 	void updateEvents(void);

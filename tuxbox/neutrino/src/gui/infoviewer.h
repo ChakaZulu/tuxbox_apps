@@ -105,6 +105,7 @@ class CInfoViewer
         void killTitle();
 
         void setDuration( int Duration );
+        const std::string getActiveChannelID();
 };
 
 

@@ -129,9 +129,8 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
 //    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
-    int sel= atoi(actionKey.c_str());
-    if (g_RemoteControl->nvods.selected!= sel )
-        g_RemoteControl->setNVOD(sel);
+    unsigned sel= atoi(actionKey.c_str());
+    g_RemoteControl->setSubChannel(sel);
     g_RCInput->pushbackKey(CRCInput::RC_help);
     return RETURN_EXIT;
 };
