@@ -3,7 +3,7 @@ AM_INIT_AUTOMAKE([dist-bzip2 no-define nostdinc])
 
 AC_PROG_CXX
 AC_PROG_LIBTOOL
-PKG_CHECK_MODULES([LIBDVBSIPP],[libdvbsi++])
+#PKG_CHECK_MODULES([LIBDVBSIPP],[libdvbsi++])
 AC_CHECK_HEADER([linux/dvb/version.h],[],
 	[AC_MSG_ERROR([linux dvb api headers are required to build libdvb++])])
 
