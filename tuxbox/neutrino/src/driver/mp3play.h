@@ -1,16 +1,17 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
+	Copyright (C) 2002 Bjoern Kalkbrenner <terminar@cyberphoria.org>
+	libmad MP3 low-level core
+	Homepage: http://www.cyberphoria.org/
 
 	Kommentar:
 
-	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
-	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
+	based on
+	************************************
+	*** madlld -- Mad low-level      ***  v 1.0p1, 2002-01-08
+	*** demonstration/decoder        ***  (c) 2001, 2002 Bertrand Petit
+	************************************
 
 	License: GPL
 
@@ -33,20 +34,26 @@
 #ifndef __MP3_PLAY__
 #define __MP3_PLAY__
 
+#include <mad.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <linux/soundcard.h>
 
-struct mad_buffer
-{
-	unsigned char const *start;
-	unsigned long length;
-};
+
 
 
 class CMP3Player
 {
 	public:
-
-		void play();
+	  void ResetDSP();
+		int play(char *filename);
 };
 
 
 #endif
+
