@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.49 2003/03/27 00:35:04 dirch Exp $
+	$Id: webdbox.cpp,v 1.50 2003/09/16 10:16:40 thegoodguy Exp $
 
 	License: GPL
 
@@ -49,7 +49,7 @@ void CWebDbox::UpdateBouquets(void)
 
 //-------------------------------------------------------------------------
 
-void CWebDbox::ZapTo(string target)
+void CWebDbox::ZapTo(std::string target)
 {
 	t_channel_id channel_id = atoi(target.c_str());
 	
@@ -69,7 +69,7 @@ void CWebDbox::ZapTo(string target)
 
 //-------------------------------------------------------------------------
 
-void CWebDbox::ZapToSubService(string target)
+void CWebDbox::ZapToSubService(std::string target)
 {
 	t_channel_id channel_id = atoi(target.c_str());
 
@@ -206,7 +206,7 @@ bool CWebDbox::GetChannelEvents(void)
 
 //-------------------------------------------------------------------------
 
-string CWebDbox::GetServiceName(t_channel_id channel_id)
+std::string CWebDbox::GetServiceName(t_channel_id channel_id)
 {
 	unsigned int i;
 

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.26 2003/03/14 07:20:02 obi Exp $
+	$Id: webserver.cpp,v 1.27 2003/09/16 10:16:40 thegoodguy Exp $
 
 	License: GPL
 
@@ -49,7 +49,7 @@
 struct Cmyconn
 {
 	socklen_t	clilen;
-	string		Client_Addr;
+	std::string	Client_Addr;
 	int		Socket;
 	CWebserver	*Parent;	
 };

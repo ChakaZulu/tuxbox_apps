@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.39 2003/03/27 00:35:04 dirch Exp $
+	$Id: request.cpp,v 1.40 2003/09/16 10:16:40 thegoodguy Exp $
 
 	License: GPL
 
@@ -97,11 +97,11 @@ bool CWebserverRequest::CheckAuth()
 	if (HeaderList["Authorization"] == "")
 		return false;
 
-	string encodet = HeaderList["Authorization"].substr(6,HeaderList["Authorization"].length() - 6);
-	string decodet = b64decode((char *)encodet.c_str());
+	std::string encodet = HeaderList["Authorization"].substr(6,HeaderList["Authorization"].length() - 6);
+	std::string decodet = b64decode((char *)encodet.c_str());
 	int pos = decodet.find_first_of(':');
-	string user = decodet.substr(0,pos);
-	string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
+	std::string user = decodet.substr(0,pos);
+	std::string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
 
 	return (user.compare(Parent->AuthUser) == 0 &&
 	        passwd.compare(Parent->AuthPassword) == 0);
@@ -120,7 +120,7 @@ bool CWebserverRequest::GetRawRequest()
 		return false;
 	}
 
-	rawbuffer = string(buffer, rawbuffer_len);
+	rawbuffer = std::string(buffer, rawbuffer_len);
 
 	delete[] buffer;
 	return true;
@@ -155,7 +155,7 @@ void CWebserverRequest::SplitParameter(char *param_copy)
 
 //-------------------------------------------------------------------------
 
-bool CWebserverRequest::ParseParams(string param_string)			// parse parameter string
+bool CWebserverRequest::ParseParams(std::string param_string)			// parse parameter string
 {
 	if(param_string.length() <= 0)
 		return false;
@@ -187,7 +187,7 @@ bool CWebserverRequest::ParseParams(string param_string)			// parse parameter st
 //-------------------------------------------------------------------------
 
 
-bool CWebserverRequest::ParseFirstLine(string zeile)				// parse first line of request
+bool CWebserverRequest::ParseFirstLine(std::string zeile)				// parse first line of request
 {
 	int ende, anfang, t;
 
@@ -196,7 +196,7 @@ bool CWebserverRequest::ParseFirstLine(string zeile)				// parse first line of r
 
 	if (anfang > 0 && ende > 0 && anfang != ende)
 	{
-		string method,url,http;
+		std::string method,url,http;
 		method= zeile.substr(0,anfang);
 		url = zeile.substr(anfang+1,ende - (anfang+1));
 		http = zeile.substr(ende+1,zeile.length() - ende+1);
@@ -233,11 +233,11 @@ bool CWebserverRequest::ParseFirstLine(string zeile)				// parse first line of r
 
 
 //-------------------------------------------------------------------------
-bool CWebserverRequest::ParseHeader(string header)					// parse the header of the request
+bool CWebserverRequest::ParseHeader(std::string header)					// parse the header of the request
 {
 	bool ende = false;
 	int pos;
-	string sheader;
+	std::string sheader;
 
 	while(!ende)
 	{
@@ -263,7 +263,7 @@ bool CWebserverRequest::ParseHeader(string header)					// parse the header of th
 }
 
 //-------------------------------------------------------------------------
-bool CWebserverRequest::ParseBoundaries(string bounds)			// parse boundaries of post method
+bool CWebserverRequest::ParseBoundaries(std::string bounds)			// parse boundaries of post method
 {
 	aprintf("formdata: '%s'\n",bounds.c_str());
 	int i=0;
@@ -280,7 +280,7 @@ bool CWebserverRequest::ParseBoundaries(string bounds)			// parse boundaries of 
 			if(e_ende == 0)
 				e_ende = ende - 4;
 //			dprintf("ende: %s\n",e_ende); 
-			boundaries[i] = string(anfang + Boundary.length() +2,e_ende - (anfang + Boundary.length()+2) -2);
+			boundaries[i] = std::string(anfang + Boundary.length() +2,e_ende - (anfang + Boundary.length()+2) -2);
 			aprintf("boundary[%d]='%s'\n",i,boundaries[i].c_str());
 			anfang = e_ende;
 			i++;
@@ -303,7 +303,7 @@ bool CWebserverRequest::ParseRequest()
 			Send500Error();
 			return false;
 		}
-		string zeile1 = rawbuffer.substr(0,ende-1);
+		std::string zeile1 = rawbuffer.substr(0,ende-1);
 
 		if(ParseFirstLine(zeile1))
 		{
@@ -317,13 +317,13 @@ bool CWebserverRequest::ParseRequest()
 				Send500Error();
 				return false;
 			}
-			string header = rawbuffer.substr(ende+1,headerende - ende - 2);
+			std::string header = rawbuffer.substr(ende+1,headerende - ende - 2);
 			ParseHeader(header);
 			Host = HeaderList["Host"];
 			if(Method == M_POST) // TODO: Und testen ob content = formdata
 			{				
 
-				string t = "multipart/form-data; boundary=";
+				std::string t = "multipart/form-data; boundary=";
 				if(HeaderList["Content-Type"].compare(0,t.length(),t) == 0)
 				{
 					SocketWriteLn("Sorry, momentan broken\n");
@@ -338,7 +338,7 @@ bool CWebserverRequest::ParseRequest()
 					dprintf("Form Daten in Parameter String\n");
 					if((headerende + 3) < rawbuffer_len)
 					{
-						string params = rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3));
+						std::string params = rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3));
 						if(params[params.length()-1] == '\n')
 							params.substr(0,params.length() -2);
 						ParseParams(params);
@@ -355,7 +355,7 @@ bool CWebserverRequest::ParseRequest()
 				{
 //					Parent->Debug("Post Parameter vorhanden\n");
 					anfang = ende + 3;
-					Param_String = string(anfang,rawbuffer + rawbuffer_len - anfang);
+					Param_String = std::string(anfang,rawbuffer + rawbuffer_len - anfang);
 					dprintf("Post Param_String: %s\n",Param_String.c_str());
 					ParseParams(Param_String);
 				}
@@ -468,7 +468,7 @@ void CWebserverRequest::PrintRequest(void)					// for debugging and verbose outp
 
 //-------------------------------------------------------------------------
 
-void CWebserverRequest::SendHTMLHeader(string Titel)
+void CWebserverRequest::SendHTMLHeader(std::string Titel)
 {
 	SocketWriteLn("<html>\n<head><title>" + Titel + "</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../global.css\">");
 	SocketWriteLn("<meta http-equiv=\"cache-control\" content=\"no-cache\">");
@@ -520,7 +520,7 @@ void CWebserverRequest::Send500Error(void)
 
 //-------------------------------------------------------------------------
 
-void CWebserverRequest::SendPlainHeader(string contenttype)
+void CWebserverRequest::SendPlainHeader(std::string contenttype)
 {
 	SocketWrite("HTTP/1.0 200 OK\r\nContent-Type: " + contenttype + "\r\n\r\n");
 	HttpStatus = 200;
@@ -682,9 +682,9 @@ bool CWebserverRequest::SocketWriteData( char const * data, long length )
 
 //-------------------------------------------------------------------------
 
-string CWebserverRequest::GetContentType(string ext)
+std::string CWebserverRequest::GetContentType(std::string ext)
 {
-	string ctype;
+	std::string ctype;
 		// Anhand der Dateiendung den Content bestimmen
 	if(  (ext.compare("html") == 0) || (ext.compare("htm") == 0) )
 		ctype = "text/html";
@@ -705,7 +705,7 @@ string CWebserverRequest::GetContentType(string ext)
 
 //-------------------------------------------------------------------------
 
-bool CWebserverRequest::SendFile(const string path,const string filename)
+bool CWebserverRequest::SendFile(const std::string path,const std::string filename)
 {
 	if( (tmpint = OpenFile(path, filename) ) != -1 )		
 	{											// Wenn Datei geöffnet werden konnte
@@ -742,17 +742,17 @@ bool CWebserverRequest::SendFile(const string path,const string filename)
 
 //-------------------------------------------------------------------------
 
-string CWebserverRequest::GetFileName(string path, string filename)
+std::string CWebserverRequest::GetFileName(std::string path, std::string filename)
 {
-	string tmpfilename;
+	std::string tmpfilename;
 	if(path[path.length()-1] != '/')
 		tmpfilename = path + "/" + filename;
 	else
 		tmpfilename = path + filename;
 	
-	if( access(string(Parent->PublicDocumentRoot + tmpfilename).c_str(),4) == 0)
+	if( access(std::string(Parent->PublicDocumentRoot + tmpfilename).c_str(),4) == 0)
 			tmpfilename = Parent->PublicDocumentRoot + tmpfilename;
-	else if(access(string(Parent->PrivateDocumentRoot + tmpfilename).c_str(),4) == 0)
+	else if(access(std::string(Parent->PrivateDocumentRoot + tmpfilename).c_str(),4) == 0)
 			tmpfilename = Parent->PrivateDocumentRoot + tmpfilename;
 	else if(access(tmpfilename.c_str(),4) == 0)
 			;
@@ -765,7 +765,7 @@ string CWebserverRequest::GetFileName(string path, string filename)
 
 //-------------------------------------------------------------------------
 
-int CWebserverRequest::OpenFile(string path, string filename)
+int CWebserverRequest::OpenFile(std::string path, std::string filename)
 {
 	struct stat statbuf;
 	int  fd= -1;
@@ -791,7 +791,7 @@ int CWebserverRequest::OpenFile(string path, string filename)
 
 //-------------------------------------------------------------------------
 
-bool CWebserverRequest::ParseFile(const string filename,CStringList &params)
+bool CWebserverRequest::ParseFile(const std::string filename,CStringList &params)
 {
 	char *file_buffer, *out_buffer;
 	long file_length= 0,out_buffer_size = 0;
@@ -835,7 +835,7 @@ bool CWebserverRequest::ParseFile(const string filename,CStringList &params)
 long CWebserverRequest::ParseBuffer(char *file_buffer, long file_length, char *out_buffer, long out_buffer_size, CStringList &params)
 {
 	long pos = 0, outpos = 0, endpos = 0;
-	string parameter = "";
+	std::string parameter = "";
 
 	while(pos < file_length && outpos < out_buffer_size)
 	{
@@ -868,8 +868,8 @@ long CWebserverRequest::ParseBuffer(char *file_buffer, long file_length, char *o
 }
 
 //-------------------------------------------------------------------------
-// Decode URLEncoded string
-void CWebserverRequest::URLDecode(string &encodedString) 
+// Decode URLEncoded std::string
+void CWebserverRequest::URLDecode(std::string &encodedString) 
 {
 	char *newString=NULL;
 	const char *string = encodedString.c_str();

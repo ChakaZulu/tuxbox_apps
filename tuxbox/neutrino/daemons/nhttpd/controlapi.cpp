@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.23 2003/07/14 09:48:28 gagga Exp $
+	$Id: controlapi.cpp,v 1.24 2003/09/16 10:16:40 thegoodguy Exp $
 
 	License: GPL
 
@@ -319,7 +319,7 @@ bool CControlAPI::GetChannel_IDCGI(CWebserverRequest *request) // sendet die akt
 bool CControlAPI::MessageCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	string message;
+	std::string message;
 	int event = 0;
 
 	if (request->ParameterList.size() == 0)
@@ -683,7 +683,7 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 
 bool CControlAPI::StartPluginCGI(CWebserverRequest *request)
 {
-	string pluginname;
+	std::string pluginname;
 	if (request->ParameterList.size() == 1)
 	{
 
