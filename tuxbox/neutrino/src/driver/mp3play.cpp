@@ -142,7 +142,13 @@ unsigned short CMP3Player::MadFixedToUshort(mad_fixed_t Fixed)
 	 * part bits. Warning: this is a quick and dirty way to compute
 	 * the 16-bit number, madplay includes much better algorithms.
 	 */
-	Fixed=Fixed>>(MAD_F_FRACBITS-15);
+	if (Fixed >= MAD_F_ONE)
+		Fixed = MAD_F_ONE - 1;
+	else if (Fixed < -MAD_F_ONE)
+		Fixed = -MAD_F_ONE;
+ 
+	Fixed>>=MAD_F_FRACBITS-15;
+
 	return((unsigned short)Fixed);
 }
 
