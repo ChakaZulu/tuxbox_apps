@@ -119,7 +119,6 @@ class CFileBrowser
 	private:
 		CFrameBuffer	*frameBuffer;
 
-		CFileList		filelist;
 		CFileList		selected_filelist;
 		bool			readDir(const std::string & dirname, CFileList* flist);
 		bool			readDir_vlc(const std::string & dirname, CFileList* flist);
@@ -144,7 +143,6 @@ class CFileBrowser
 		int 			x;
 		int 			y;
 
-		void ChangeDir(const std::string & filename);
 
 		void paintItem(unsigned pos, unsigned int spalte = 0);
 		void paint();
@@ -153,6 +151,10 @@ class CFileBrowser
 		void hide();
 
 	public:
+		CFileList		filelist;
+
+		void ChangeDir(const std::string & filename);
+
 		std::string		Path;
 		bool			Multi_Select;
 		bool			Dirs_Selectable;
