@@ -218,6 +218,9 @@ lcdmenu.head LCD Settings
 lcdmenu.inverse Inversione
 lcdmenu.power Power
 lcdmenu.lcdcontroler Contrasto / Luminosita
+lcdmenu.statusline unset
+lcdmenu.statusline.volume unset
+lcdmenu.statusline.playtime unset
 
 lcdcontroler.head Impostazioni LCD
 lcdcontroler.contrast Contrasto

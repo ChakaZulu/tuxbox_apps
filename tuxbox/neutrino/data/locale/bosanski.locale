@@ -218,6 +218,9 @@ lcdmenu.head namjestiti tecni kristal
 lcdmenu.inverse invertirati
 lcdmenu.power struja
 lcdmenu.lcdcontroler kontrast / svjetlost
+lcdmenu.statusline unset
+lcdmenu.statusline.volume unset
+lcdmenu.statusline.playtime unset
 
 lcdcontroler.head namjestiti tecni kristal
 lcdcontroler.contrast kontrast

@@ -51,7 +51,7 @@ mainsettings.keybinding Tasdn-Eistellunga
 mainsettings.misc No a boar Eistellunga
 mainsettings.scan Eistellunga Senda-suacha
 
-mp3picsettings.general unset
+mp3picsettings.general Musi spuin / Buidl schaugn
 
 miscsettings.head Diverse Eistellunga
 miscsettings.shutdown_real bissi ausmacha
@@ -218,6 +218,9 @@ lcdmenu.head LCD Eistellunga
 lcdmenu.inverse Invertieren
 lcdmenu.power Pauwa
 lcdmenu.lcdcontroler Kontrast / Helligkeid
+lcdmenu.statusline unset
+lcdmenu.statusline.volume unset
+lcdmenu.statusline.playtime unset
 
 lcdcontroler.head LCD Eistellunga
 lcdcontroler.contrast Kontrast
@@ -382,7 +385,7 @@ flashupdate.titlewriteflash Flash schreim
 flashupdate.actionwriteflash schreib in flash
 flashupdate.flashreadyreboot Des Imag is gflasht worn.\nJetz start ma de Box nei.
 flashupdate.reallyflashmtd Woins echt flashen?\n\nWann was schiaflaft oder des Image hi is\wer de Box nimma startn.\n\nImagenama: %s\nZiel: %s
-flashupdate.wrongbase unset
+flashupdate.wrongbase Des Baseimage hot net de richtige Version, bitte an andres Baseimage installiern
 
 bouqueteditor.name Bouquets verwoitn
 bouqueteditor.delete Wegmacha
@@ -664,10 +667,10 @@ mp3player.keylevel Tasdn-Umschoitung
 mp3player.fastforward schnei vieri
 mp3player.pause Pause
 mp3player.rewind rewind
-mp3player.artist_title unset
-mp3player.title_artist unset
-mp3player.display_order unset
-mp3player.follow unset
+mp3player.artist_title Interpret, Titl
+mp3player.title_artist Interpret
+mp3player.display_order Ozoagn
+mp3player.follow aktuelle Liad
 
 filebrowser.head Datiesucha
 filebrowser.filter.active unset
@@ -675,8 +678,8 @@ filebrowser.filter.inactive unset
 filebrowser.select auswaehn
 filebrowser.mark markiern
 filebrowser.scan Verzeichnisse durchsuacha
-filebrowser.sort.name unset
-filebrowser.sort.date unset
+filebrowser.sort.name (Nama)
+filebrowser.sort.date (Datum)
 
 nfs.mount NFS Verzeichnis mountn
 nfs.ip NFS Serva IP

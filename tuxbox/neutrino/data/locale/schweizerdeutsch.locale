@@ -218,6 +218,9 @@ lcdmenu.head LCD Iistellige
 lcdmenu.inverse Inverdiere 
 lcdmenu.power Pfuus 
 lcdmenu.lcdcontroler Kontrast / Hälligkeit 
+lcdmenu.statusline unset
+lcdmenu.statusline.volume unset
+lcdmenu.statusline.playtime unset
 
 lcdcontroler.head LCD Stettings 
 lcdcontroler.contrast Kontrast 
