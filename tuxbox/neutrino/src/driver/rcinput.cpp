@@ -65,18 +65,10 @@
 
 #include "rcinput.h"
 
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
 
-
-void printbin( int a)
-{
-	for(int pos = 15;pos>=0;pos--)
-	{
-		printf("%d", a&(1<<pos)?1:0);
-	}
-	printf("\n");
-}
+#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
+static struct termio orig_termio;
+#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 
 
 /**************************************************************************
@@ -174,17 +166,17 @@ void CRCInput::open()
 #ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
 	fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
 
-	struct termio tio, tin;
+	struct termio new_termio;
 
-	ioctl(STDIN_FILENO, TCGETA, &tio);
+	ioctl(STDIN_FILENO, TCGETA, &orig_termio);
 
-	tin             = tio;
-	tin.c_lflag    &= ~(ICANON|ECHO);
-	tin.c_cc[VMIN ] = 1;
-	tin.c_cc[VTIME] = 0;
-	ioctl(0, TCSETA, &tin);
+	new_termio             = orig_termio;
+	new_termio.c_lflag    &= ~(ICANON|ECHO);
+	new_termio.c_cc[VMIN ] = 1;
+	new_termio.c_cc[VTIME] = 0;
 
-	//	ioctl(STDIN_FILENO, TCSETA, &tio);
+	ioctl(STDIN_FILENO, TCSETA, &new_termio);
+
 #else
 	//fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
 
@@ -201,12 +193,16 @@ void CRCInput::close()
 		::close(fd_rc);
 		fd_rc = 0;
 	}
+#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
+	ioctl(STDIN_FILENO, TCSETA, &orig_termio);
+#else
 /*
 	if(fd_keyb)
 	{
 		::close(fd_keyb);
 	}
 */
+#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 }
 
 void CRCInput::calculateMaxFd()
@@ -681,10 +677,10 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 		if(FD_ISSET(fd_event, &rfds))
 		{
 			//printf("[neutrino] event - accept!\n");
-			socklen_t	clilen;
-			SAI			cliaddr;
+			socklen_t          clilen;
+			struct sockaddr_in cliaddr;
 			clilen = sizeof(cliaddr);
-			int fd_eventclient = accept(fd_event, (SA *) &cliaddr, &clilen);
+			int fd_eventclient = accept(fd_event, (struct sockaddr *) &cliaddr, &clilen);
 
 			*msg = RC_nokey;
 			//printf("[neutrino] network event - read!\n");
