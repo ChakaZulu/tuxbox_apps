@@ -1,4 +1,7 @@
 /*
+
+        $Id: neutrino.cpp,v 1.8 2001/08/15 17:10:02 fnbrd Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -27,6 +30,12 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+  $Log: neutrino.cpp,v $
+  Revision 1.8  2001/08/15 17:10:02  fnbrd
+  Channellist with events.
+
+
 */
 
 #include "neutrino.h"
@@ -430,7 +439,7 @@ void CNeutrinoApp::firstChannel()
 	
 	if (strncmp(return_buf,"00a",3))
 	{
-		
+
 		printf("Wrong Command was send for firstChannel(). Exiting.\n");
 		return;
 	}
@@ -511,7 +520,7 @@ void CNeutrinoApp::channelsInit()
 		//printf("Channelnumber received: %d\n", channel_nr);
 		channelList->addChannel(channel_nr, channel_nr, channel_name);
 		memset(&zapitchannel,0,sizeof(zapitchannel));
-	} 
+	}
 	printf("All channels received\n");
 	
 			
@@ -660,7 +669,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	colorSetupNotifier->changeNotify("initial");
 	networkSetupNotifier.changeNotify("initial");
 
-	
+
 	//Main settings
 	CMenuWidget			mainSettings;
 	CMenuWidget			videoSettings;
@@ -877,16 +886,17 @@ int CNeutrinoApp::run(int argc, char **argv)
 		}
 		else if (key==CRCInput::RC_standby)
 		{
-			//exit 
+			//exit
 			infoViewer.killTitle();
 			nRun=false;
 		}
-		
+
 		if ((mode==mode_tv) || ((mode==mode_radio) && (zapit)) )
 		{
 			if (key==CRCInput::RC_ok)
 			{	//channellist
 				infoViewer.killTitle();
+				channelList->updateEvents();
 				channelList->exec(&frameBuffer,&fonts, &rcInput, &remoteControl, &infoViewer, &settings);
 			}
 			else if ((key==settings.key_quickzap_up) || (key==settings.key_quickzap_down))
