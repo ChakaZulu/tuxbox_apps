@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.46 2003/02/25 14:26:00 thegoodguy Exp $
+	$Id: timerd.cpp,v 1.47 2003/02/26 14:58:30 thegoodguy Exp $
 
 	License: GPL
 
@@ -62,18 +62,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 		case CTimerdMsg::CMD_GETSLEEPTIMER:
 			rspGetSleeptimer.eventID = 0;
-			if(CTimerManager::getInstance()->listEvents(events))
+			if (CTimerManager::getInstance()->listEvents(events))
 			{
-				if(events.size() > 0)
+				for (pos = events.begin(); pos != events.end(); pos++)
 				{
-					for(pos = events.begin();(pos != events.end());pos++)
+					printf("ID: %u type: %u\n",pos->second->eventID,pos->second->eventType);
+					if(pos->second->eventType == CTimerd::TIMER_SLEEPTIMER)
 					{
-						printf("ID: %u type: %u\n",pos->second->eventID,pos->second->eventType);
-						if(pos->second->eventType == CTimerd::TIMER_SLEEPTIMER)
-						{
-							rspGetSleeptimer.eventID = pos->second->eventID;
-							break;
-						}
+						rspGetSleeptimer.eventID = pos->second->eventID;
+						break;
 					}
 				}
 			}
@@ -140,8 +137,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			CBasicServer::send_data(connfd, &resp, sizeof(CTimerd::responseGetTimer));
 			break;
 
-		case CTimerdMsg::CMD_GETTIMERLIST:				// liste aller timer 
-			if(CTimerManager::getInstance()->listEvents(events))
+		case CTimerdMsg::CMD_GETTIMERLIST:
+			CTimerdMsg::generalInteger responseInteger;
+			responseInteger.number = (CTimerManager::getInstance()->listEvents(events)) ? events.size() : 0;
+
+			if (CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger)) == true)
 			{
 				for(CTimerEventMap::iterator pos = events.begin();pos != events.end();pos++)
 				{

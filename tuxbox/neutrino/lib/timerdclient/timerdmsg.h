@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.2 2003/01/26 15:07:11 zwen Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.3 2003/02/26 14:58:30 thegoodguy Exp $
  *
  * types used for clientlib <-> timerd communication - d-box2 linux project
  *
@@ -100,6 +100,13 @@ class CTimerdMsg : public CBasicMessage
 	struct commandSetStandby
 	{
 		bool standby_on;
+	};
+
+
+
+	struct generalInteger
+	{
+		int number;
 	};
 
 

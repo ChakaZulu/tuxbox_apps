@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.63 2003/01/26 15:07:10 zwen Exp $
+   $Id: timermanager.cpp,v 1.64 2003/02/26 14:58:30 thegoodguy Exp $
 
 	License: GPL
 
@@ -213,16 +213,13 @@ bool CTimerManager::listEvents(CTimerEventMap &Events)
 {
 	if(!&Events)
 		return false;
+
 	Events.clear();
-	if(getInstance()->events.size() > 0)
-	{
-		CTimerEventMap::iterator pos = getInstance()->events.begin();
-		for(int i = 0;pos != getInstance()->events.end();pos++,i++)
-			Events[pos->second->eventID] = pos->second;
-		return true;
-	}
-	else
-		return false;
+
+	for (CTimerEventMap::iterator pos = events.begin(); pos != events.end(); pos++)
+		Events[pos->second->eventID] = pos->second;
+
+	return true;
 }
 
 int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime, CTimerd::CTimerEventRepeat evrepeat)
