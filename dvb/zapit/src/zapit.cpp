@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.162 2002/04/24 15:40:54 field Exp $
+ * $Id: zapit.cpp,v 1.163 2002/04/24 18:51:18 field Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -467,30 +467,41 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		return 3;
 	}
 
+	int fd_pmt = 0;
+
 	/* search pids if they are unknown */
 	if (channel->knowsPids() == false)
 	{
 		/* get program map table pid from program association table */
 		debug("[zapit] trying to find pmt for sid %04x, onid %04x\n", channel->getServiceId(), channel->getOriginalNetworkId());
 
-		if (in_nvod)
+        int fd_cat = init_parse_cat();
+
+		if (channel->knowsPmtId() == false)
 		{
-			parse_pat(channel->getOriginalNetworkId(), &nvodchannels);
-		}
-		else if (currentMode & RADIO_MODE)
-		{
-			parse_pat(channel->getOriginalNetworkId(), &allchans_radio);
-		}
-		else
-		{
-			parse_pat(channel->getOriginalNetworkId(), &allchans_tv);
+			debug("parsing pat\n");
+			if (in_nvod)
+			{
+				parse_pat(channel->getOriginalNetworkId(), &nvodchannels);
+			}
+			else if (currentMode & RADIO_MODE)
+			{
+				parse_pat(channel->getOriginalNetworkId(), &allchans_radio);
+			}
+			else
+			{
+				parse_pat(channel->getOriginalNetworkId(), &allchans_tv);
+			}
 		}
 
 		/* parse program map table and store pids */
-		channel->setPids(parse_pmt(channel->getPmtPid(), cam->getCaSystemId(), channel->getServiceId()));
+
+		fd_pmt = init_parse_pmt(channel->getPmtPid(), channel->getServiceId());
+		channel->setPids(parse_pmt(channel->getPmtPid(), cam->getCaSystemId(), fd_pmt));
+		fd_pmt = 0;
 
 		/* parse conditional access table and store emm pid */
-		channel->setEmmPid(parse_cat(cam->getCaSystemId()));
+		channel->setEmmPid(parse_cat(cam->getCaSystemId(), fd_cat ));
 
 		if ((channel->getAudioPid() == NONE) && (channel->getVideoPid() == NONE))
 		{
@@ -502,6 +513,8 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	else
 	{
 		debug("[zapit] pids already known\n");
+
+		fd_pmt = init_parse_pmt(channel->getPmtPid(), channel->getServiceId());
 	}
 
 #ifdef DBOX2
@@ -561,6 +574,10 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 #endif /* USE_EXTERNAL_CAMD */
 
 	startPlayBack();
+
+	if ( fd_pmt )
+		channel->setPids(parse_pmt(channel->getPmtPid(), cam->getCaSystemId(), fd_pmt));
+
 	save_settings(false);
 	return 3;
 }
@@ -1883,7 +1900,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.162 2002/04/24 15:40:54 field Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.163 2002/04/24 18:51:18 field Exp $\n\n");
 
 	if (argc > 1)
 	{

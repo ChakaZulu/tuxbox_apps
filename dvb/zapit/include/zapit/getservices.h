@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.36 2002/04/19 14:53:29 obi Exp $
+ * $Id: getservices.h,v 1.37 2002/04/24 18:51:18 field Exp $
  */
 
 #ifndef __getservices_h__
@@ -113,6 +113,7 @@ class CZapitChannel
 		dvb_pid_t getVideoPid()		{ return chanpids.vpid; }
 		const pids *getPids()		{ return &chanpids; }
 		bool knowsPids()		{ return knowsPidsFlag; }
+		bool knowsPmtId()		{ return (chanpids.pmtpid != 0); }
 		uint16_t getChannelNumber()	{ return channelNumber; }
 
 		/* get methods - read only variables */
@@ -134,7 +135,7 @@ class CZapitChannel
 		void setPmtPid(dvb_pid_t pPmtPid)		{ chanpids.pmtpid = pPmtPid; }
 		void setTeletextPid(dvb_pid_t pTeletextPid)	{ chanpids.vtxtpid = pTeletextPid; }
 		void setVideoPid(dvb_pid_t pVideoPid)		{ chanpids.vpid = pVideoPid; }
-		void setPids(pids pPids)			{ chanpids = pPids; knowsPidsFlag = true; }
+		void setPids(pids pPids)			{ int _emmpid=chanpids.emmpid; chanpids = pPids; chanpids.emmpid=_emmpid; knowsPidsFlag = true; }
 		void setChannelNumber(uint16_t pChannelNumber)	{ channelNumber = pChannelNumber; }
 
 		/* cleanup methods */
@@ -180,7 +181,7 @@ typedef struct channel_msg_struct
         uint32_t chan_nr;
         char name[30];
         char mode;
-	
+
 } channel_msg;
 
 typedef struct channel_msg_struct_2
@@ -189,7 +190,7 @@ typedef struct channel_msg_struct_2
 	char name[30];
 	char mode;
 	uint32_t onid_tsid;
-	
+
 } channel_msg_2;
 
 #endif /* __getservices_h__ */

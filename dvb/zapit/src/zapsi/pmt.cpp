@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.10 2002/04/23 06:57:45 obi Exp $
+ * $Id: pmt.cpp,v 1.11 2002/04/24 18:51:18 field Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -249,11 +249,49 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 	return ES_info_length + 5;
 }
 
-pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, uint16_t program_number)
+int init_parse_pmt(dvb_pid_t pmt_pid, uint16_t program_number)
 {
-	uint8_t buffer[PMT_SIZE];
 	int fd;
 	struct dmxSctFilterParams flt;
+
+	if (pmt_pid == 0)
+	{
+		return 0;
+	}
+
+	if ((fd = open(DEMUX_DEV, O_RDWR)) < 0)
+	{
+		perror("[pmt.cpp] open");
+		return 0;
+	}
+
+	memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
+	memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
+
+	flt.pid = pmt_pid;
+	flt.filter.filter[0] = 0x02;
+	flt.filter.filter[1] = (program_number >> 8) & 0xFF;
+	flt.filter.filter[2] = program_number & 0xFF;
+	flt.filter.mask[0]  = 0xFF;
+	flt.filter.mask[1]  = 0xFF;
+	flt.filter.mask[2]  = 0xFF;
+	flt.timeout = 1000;
+	flt.flags= DMX_CHECK_CRC | DMX_ONESHOT | DMX_IMMEDIATE_START;
+
+	if (ioctl(fd, DMX_SET_FILTER, &flt) < 0)
+	{
+		perror("[pmt.cpp] DMX_SET_FILTER");
+		close(fd);
+		return 0;
+	}
+
+	return fd;
+}
+
+pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, int fd)
+{
+	uint8_t buffer[PMT_SIZE];
+
 	pids ret_pids;
 	uint8_t apid_list_entry;
 
@@ -278,32 +316,6 @@ pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, uint16_t program_numbe
 
 	ret_pids.pmtpid = pmt_pid;
 
-	if ((fd = open(DEMUX_DEV, O_RDWR)) < 0)
-	{
-		perror("[pmt.cpp] open");
-		return ret_pids;
-	}
-
-	memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
-	memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
-
-	flt.pid = pmt_pid;
-	flt.filter.filter[0] = 0x02;
-	flt.filter.filter[1] = (program_number >> 8) & 0xFF;
-	flt.filter.filter[2] = program_number & 0xFF;
-	flt.filter.mask[0]  = 0xFF;
-	flt.filter.mask[1]  = 0xFF;
-	flt.filter.mask[2]  = 0xFF;
-	flt.timeout = 1000;
-	flt.flags= DMX_CHECK_CRC | DMX_ONESHOT | DMX_IMMEDIATE_START;
-
-	if (ioctl(fd, DMX_SET_FILTER, &flt) < 0)
-	{
-		perror("[pmt.cpp] DMX_SET_FILTER");
-		close(fd);
-		return ret_pids;
-	}
-
 	if (read(fd, buffer, sizeof(buffer)) < 0)
 	{
 		perror("[pmt.cpp] read");
@@ -315,6 +327,7 @@ pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, uint16_t program_numbe
 
 	section_length = ((buffer[1] & 0xF) << 8) + buffer[2];
 	ret_pids.pcrpid = ((buffer[8] & 0x1f) << 8) + buffer[9];
+	ret_pids.pmtpid = pmt_pid;
 	program_info_length = ((buffer[10] & 0xF) << 8) | buffer[11];
 	ret_pids.ecmpid = NONE;
 
