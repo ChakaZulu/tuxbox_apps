@@ -57,6 +57,7 @@ private:
 	int mReadSlot;
 	int mSlotSize;
 	int mOutputFd;
+	State* mState;
 	bool mSeekable;
 	static void* OutputDsp(void *);
 };

@@ -71,6 +71,7 @@ int COggDec::Decoder(FILE *in, int OutputFd, State* state)
   ogg_int64_t jumptime=0;
   Status=0;
   mOutputFd = OutputFd;
+  mState = state;
 
   if (!Open(in, &vf))
   {
@@ -117,8 +118,11 @@ int COggDec::Decoder(FILE *in, int OutputFd, State* state)
 	  // clear buffer on state change
 	  if(oldstate!=*state)
 	  {
-		  mWriteSlot=mReadSlot=0;
-		  oldstate=*state;
+		  if(*state!=PAUSE)
+		  {
+			  mWriteSlot=mReadSlot=0;
+			  oldstate=*state;
+		  }
 	  }
 	  while((mWriteSlot+1)%DECODE_SLOTS == mReadSlot)
 	  {
@@ -176,7 +180,7 @@ void* COggDec::OutputDsp(void * arg)
 	COggDec* dec = (COggDec*) arg;
 	while(true)
 	{
-		while(dec->mReadSlot==dec->mWriteSlot)
+		while(dec->mReadSlot==dec->mWriteSlot || *dec->mState==PAUSE)
 		{
 			usleep(10000);
 		}
