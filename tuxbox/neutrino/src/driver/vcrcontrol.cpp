@@ -30,6 +30,8 @@
 */
 
 #include "global.h"
+#include "gui/widget/messagebox.h"
+
 #include "vcrcontrol.h"
 
 #define SA struct sockaddr
@@ -192,16 +194,15 @@ bool CVCRControl::CVCRDevice::Resume()
 //-------------------------------------------------------------------------
 bool CVCRControl::CServerDevice::Stop()
 {
-	printf("Stop\n");
+	printf("Stop\n"); 
+	if(!g_Zapit->isPlayBackActive())
+		g_Zapit->startPlayBack();
+	g_Sectionsd->setPauseScanning(false);
+	g_Zapit->setRecordMode( false );
 	if(sendCommand(CMD_VCR_STOP))
-	{
-		if(!g_Zapit->isPlayBackActive())
-			g_Zapit->startPlayBack();
-		g_Sectionsd->setPauseScanning(false);
-		g_Zapit->setRecordMode( false );
 		return true;
-	}
-	return false;
+	else
+		return false;
 }
 
 //-------------------------------------------------------------------------
@@ -220,7 +221,19 @@ bool CVCRControl::CServerDevice::Record(unsigned onidsid, unsigned long long epg
 
 	g_Zapit->setRecordMode( true );					// recordmode einschalten
 
-	return sendCommand(CMD_VCR_RECORD,onidsid,epgid);
+	if(!sendCommand(CMD_VCR_RECORD,onidsid,epgid))
+	{
+		if(!g_Zapit->isPlayBackActive())			// wenn command nicht gesendet werden konnte
+			g_Zapit->startPlayBack();				// dann alles rueckgaengig machen
+		g_Sectionsd->setPauseScanning(false);
+		g_Zapit->setRecordMode( false );
+		
+		ShowMsg ( "messagebox.info", g_Locale->getText("streamingserver.noconnect"), CMessageBox::mbrBack, CMessageBox::mbBack, "error.raw" );
+
+		return false;
+	}
+	else
+		return true;
 }
 
 

@@ -359,6 +359,8 @@ ucodes.failure ATTENTION, µCodes could NOT be found!\n\nPlease upload them via F
 
 stringinput.caps caps / no caps
 
+streamingserver.noconnect No connection to stramingserver.\nRecording canceled.
+
 GENRE.MOVIE.0 Spielfilm / Drama
 GENRE.MOVIE.1 detective/thriller
 GENRE.MOVIE.2 adventure/western/war

@@ -354,6 +354,8 @@ ucodes.failure Achtung, die µCodes wurden NICHT gefunden!\n\nBitte per FTP (oder
 
 stringinput.caps Groﬂ-/Kleinbuchstaben
 
+streamingserver.noconnect Keine Verbindung zum Streamingserver.\nAufnahme wird abgebrochen.
+
 GENRE.MOVIE.0 Spielfilm / Drama
 GENRE.MOVIE.1 Kriminalfilm/Thriller
 GENRE.MOVIE.2 Abenteuerfilm/Western/Kriegsfilm
