@@ -34,7 +34,7 @@
 #include <errno.h>
 #include <lib/dvb/servicedvb.h>
 #include <lib/dvb/record.h>
-#include <sstream>
+
 // #define OLD_VBI
 
 #undef strcpy
@@ -244,8 +244,9 @@ int Decoder::Set()
 {
 	if (locked)
 		return -1;
+
 	int changed=0;
-	parms.apid = priorityApid(parms.apid);
+
 	if (parms.vpid != current.vpid)
 		changed |= 1;
 	if (parms.apid != current.apid)
@@ -262,7 +263,6 @@ int Decoder::Set()
 		changed |= 0x100;
 
 	eDebug(" ------------> changed! %x", changed);
-
 	if (!changed)
 		return 0;
 
@@ -876,43 +876,3 @@ void Decoder::setAutoFlushScreen( int on )
 	}
 }
 
-int priorityApid(int apid)
-{
-	// audio channel priority handling
-	int apid2 = apid;
-	apid = 0;
-
-	char *audiochannelspriority = 0;
-	eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority);
-
-	eString audiochannel;
-
-	if (audiochannelspriority)
-	{
-		std::stringstream audiochannels;
-		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-		if (sapi)
-		{
-			std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
-			audiochannels.clear();
-			audiochannels.str(eString(audiochannelspriority));
-			while (audiochannels && apid == 0)
-			{
-				audiochannels >> audiochannel;
-				for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
-					;it != astreams.end(); ++it)
-				{
-					if (audiochannel == it->text)
-					{
-						apid = it->pmtentry->elementary_PID;
-						break;
-					}
-				}
-			}
-		}
-		free(audiochannelspriority);
-	}
-	if (apid == 0)
-		apid = apid2;
-	return apid;
-}

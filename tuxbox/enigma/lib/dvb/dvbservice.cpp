@@ -17,7 +17,7 @@
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/record.h>
 #include <lib/dvb/subtitling.h>
-
+#include <sstream>
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
 #define DEMUX1_DEV "/dev/dvb/card0/demux1"
@@ -30,6 +30,49 @@ std::set<eDVBCaPMTClient*> eDVBCaPMTClientHandler::capmtclients;
 
 pthread_mutex_t eDVBServiceController::availCALock =
 	PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+
+PMTEntry *priorityAudio(PMTEntry *audio)
+{
+	PMTEntry *audio2 = audio;
+	audio = 0;
+
+	char *audiochannelspriority = 0;
+	eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority);
+
+	eString audiochannel;
+
+	if (audiochannelspriority)
+	{
+//		printf(">>>%s\n", audiochannelspriority);
+		std::stringstream audiochannels;
+		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+		if (sapi)
+		{
+			std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
+			audiochannels.clear();
+			audiochannels.str(eString(audiochannelspriority));
+			while (audiochannels && audio == 0)
+			{
+				audiochannels >> audiochannel;
+				for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
+					;it != astreams.end(); ++it)
+				{
+//					printf("comparing:%s:%s:\n", audiochannel.c_str(), it->text.c_str());
+					if (audiochannel == it->text)
+					{
+						audio = it->pmtentry;
+						break;
+					}
+				}
+			}
+		}
+		free(audiochannelspriority);
+	}
+	if (audio == 0)
+		audio = audio2;
+//	printf("returning:%d\n", audio->elementary_PID);
+	return audio;
+}
 
 eString getISO639Description(char *iso)
 {
@@ -396,7 +439,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		else
 			eDebug("nee, doch nicht (state ist %d)", (int)dvb.getState());
 		break;
-	}                             
+	}
 	case eDVBServiceEvent::eventServiceGotSDT:
 	{
 		if (dvb.getState() != eDVBServiceState::stateServiceGetSDT)
@@ -762,6 +805,9 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 				break;
 		}
 	}
+
+	audio = priorityAudio(audio);
+
 	ePtrList<PMTEntry>::iterator tmp = pmt->streams.end();
 	if (TTXIt != tmp)
 	{
@@ -800,7 +846,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 	/*emit*/ dvb.scrambled(isca);
 
 	int hideerror=0;
-	eConfig::getInstance()->getKey("/elitedvb/extra/hideerror", hideerror);	
+	eConfig::getInstance()->getKey("/elitedvb/extra/hideerror", hideerror);
 	if ( hideerror || (dvb.recorder && service.path) )
 		;
 	else if (isca && !service.path && !calist )
@@ -864,7 +910,7 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 	/*emit*/ dvb.leaveService(service);
 
-// Linkage service handling.. 
+// Linkage service handling..
 	if ( newservice.getServiceType()==7 && prevservice )
 	{
 		parentservice = prevservice;
@@ -877,7 +923,7 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 	service=newservice;
 
-	dvb.tEIT.start(0);  // clear eit	
+	dvb.tEIT.start(0);  // clear eit
 	dvb.tPAT.start(0);  // clear tables.
 	dvb.tPMT.start(0);
 	dvb.tSDT.start(0);
