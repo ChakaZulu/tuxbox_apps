@@ -5435,7 +5435,11 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 				opos = refservice.data[4]>>16;
 			else
 				opos = serviceref.data[4]>>16;
-			name+=eString().sprintf(" (%d.%d\xC2\xB0%c)", abs(opos / 10), abs(opos % 10), opos>0?'E':'W');
+
+			int showSatPos = 1;
+			eConfig::getInstance()->getKey("/extras/showSatPos", showSatPos);
+			if (showSatPos == 1)
+				name+=eString().sprintf(" (%d.%d\xC2\xB0%c)", abs(opos / 10), abs(opos % 10), opos>0?'E':'W');
 //			name+=eString().sprintf("(%04x)",((eServiceReferenceDVB&)_serviceref).getServiceID().get() );
 		}
 		ChannelName->setText(name);
