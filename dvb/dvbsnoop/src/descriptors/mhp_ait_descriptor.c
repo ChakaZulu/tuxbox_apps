@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.7 2004/02/20 22:18:39 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.8 2004/02/21 00:50:40 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: mhp_ait_descriptor.c,v 1.7 2004/02/20 22:18:39 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.8  2004/02/21 00:50:40  rasc
+bugfix: MHP AIT descriptors
+
 Revision 1.7  2004/02/20 22:18:39  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -662,6 +665,7 @@ void descriptorMHP_AIT_delegated_application (u_char *b)
 
   // descriptor_tag	= b[0];
   len		        = b[1];
+  b += 2;
 
   // indent(+1);
   while (len > 0) {
@@ -691,7 +695,7 @@ void descriptorMHP_AIT_plug_in (u_char *b)
   // descriptor_tag	= b[0];
   len		        = b[1];
 
-  outBit_Sx_NL (4,"application_type: ",	b,  0,  16);
+  outBit_Sx_NL (4,"application_type: ",	b+2,  0,  16);
   b += 4;
   len -= 2;
 
@@ -720,6 +724,7 @@ void descriptorMHP_AIT_application_storage (u_char *b)
 {
   // descriptor_tag	= b[0];
   // len	        = b[1];
+  b +=2;
 
   outBit_S2x_NL(4,"storage_property: ",			b,  0,  8,
 		  	(char *(*)(u_long)) dsmccStrMHP_storage_property);
@@ -742,6 +747,7 @@ void descriptorMHP_AIT_ip_signalling (u_char *b)
 {
   // descriptor_tag	= b[0];
   // len	        = b[1];
+  b +=2;
 
   outBit_S2x_NL (4,"platform_id: ",	b,  0, 24,
 		  	(char *(*)(u_long)) dsmccStrPlatform_ID);

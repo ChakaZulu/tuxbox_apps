@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.27 2004/02/20 22:18:40 rasc Exp $
+$Id: cmdline.c,v 1.28 2004/02/21 00:50:41 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.27 2004/02/20 22:18:40 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.28  2004/02/21 00:50:41  rasc
+bugfix: MHP AIT descriptors
+
 Revision 1.27  2004/02/20 22:18:40  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -198,10 +201,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-hexdumpbuffer")) opt->buffer_hexdump = 1;
      else if (!strcmp (argv[i],"-nohexdumpbuffer")) opt->buffer_hexdump = 0;
      else if (!strcmp (argv[i],"-help")) opt->help = 1;
-     else if (!strcmp (argv[i],"-nph")) {	// old option  use -ph and -nhdb/-hdb
-	opt->buffer_hexdump = 0;
-	opt->printhex = 0;
-     } else if (!strcmp (argv[i],"-if")) {
+     else if (!strcmp (argv[i],"-nph")) opt->buffer_hexdump = 0; // old option  use -ph and -nhdb/-hdb
+     else if (!strcmp (argv[i],"-if")) {
 	 opt->inpPidFile = argv[++i];		// input filename
 	 opt->pid = DUMMY_PID;			// dummy to avoid usage output
      } else if (!strcmp (argv[i],"-s")) {
