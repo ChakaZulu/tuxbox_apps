@@ -605,6 +605,18 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 				*msg = NeutrinoMessages::SHUTDOWN;
 			 				*data = 0;
 			 			}
+						else if (emsg.eventID==NeutrinoMessages::EVT_POPUP)
+			 			{
+			 				*msg = NeutrinoMessages::EVT_POPUP;
+			 				*data = (unsigned) p;
+			 				dont_delete_p = true;
+			 			}
+			 			else if (emsg.eventID==NeutrinoMessages::EVT_EXTMSG)
+			 			{
+			 				*msg = NeutrinoMessages::EVT_EXTMSG;
+			 				*data = (unsigned) p;
+			 				dont_delete_p = true;
+			 			}
 			 			else if (emsg.eventID==NeutrinoMessages::STANDBY_ON)
 			 			{
 			 				*msg = NeutrinoMessages::STANDBY_ON;
@@ -735,44 +747,51 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 				*data = (unsigned) p;
 			 				dont_delete_p = true;
 			 			}
-						
+*/
 						if (emsg.eventID==CTimerdClient::EVT_ANNOUNCE_RECORD)
 			 			{
+							printf("neutino:EventAnnounceRecord\n");
+							*msg = NeutrinoMessages::ANNOUNCE_RECORD;
+							*data = 0;							
 						}
-
-
-						if (emsg.eventID==CTimerdClient::EVT_ANNOUNCE_ZAPTO)
+						else if (emsg.eventID==CTimerdClient::EVT_ANNOUNCE_ZAPTO)
 			 			{
+							printf("neutino:EventAnnounceZapto\n");
+							*msg = NeutrinoMessages::ANNOUNCE_ZAPTO;
+							*data = 0;							
 						}
-
-						if (emsg.eventID==CTimerdClient::EVT_ANNOUNCE_SHUTDOWN)
+						else if (emsg.eventID==CTimerdClient::EVT_ANNOUNCE_SHUTDOWN)
 			 			{
+							printf("neutino:EventAnnounceShutdown\n");
+							*msg = NeutrinoMessages::ANNOUNCE_SHUTDOWN;
+							*data = 0;							
 						}
-
-*/
-						if (emsg.eventID==CTimerdClient::EVT_RECORD_START)
+						else if (emsg.eventID==CTimerdClient::EVT_ANNOUNCE_SLEEPTIMER)
+			 			{
+							printf("neutino:EventAnnounceSleeptimer\n");
+							*msg = NeutrinoMessages::ANNOUNCE_SLEEPTIMER;
+							*data = 0;							
+						}
+						else if (emsg.eventID==CTimerdClient::EVT_RECORD_START)
 			 			{
 							printf("neutino:EventRecordStart\n");
 							*msg = NeutrinoMessages::RECORD_START;
 							*data = 0;
 						}
-
-						if (emsg.eventID==CTimerdClient::EVT_RECORD_STOP)
+						else if (emsg.eventID==CTimerdClient::EVT_RECORD_STOP)
 			 			{
 							printf("neutino:EventRecordStop\n");
 							*msg = NeutrinoMessages::RECORD_STOP;
 							*data = 0;
 						}
-
-						if (emsg.eventID==CTimerdClient::EVT_ZAPTO)
+						else if (emsg.eventID==CTimerdClient::EVT_ZAPTO)
 			 			{
 							*msg = NeutrinoMessages::ZAPTO;
 							*data = *(unsigned*) p;			// channelID
 							printf("neutino:Zapto: %u\n",*data);
 
 						}
-
-						if (emsg.eventID==CTimerdClient::EVT_SHUTDOWN)
+						else if (emsg.eventID==CTimerdClient::EVT_SHUTDOWN)
 			 			{
 			 				*msg = NeutrinoMessages::SHUTDOWN;
 			 				*data = 0;

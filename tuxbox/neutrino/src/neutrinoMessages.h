@@ -61,9 +61,10 @@ struct NeutrinoMessages {
 		ANNOUNCE_SHUTDOWN =			CRCInput::RC_Messages + 8,
 		ANNOUNCE_ZAPTO =			CRCInput::RC_Messages + 8,
 		ZAPTO =						CRCInput::RC_Messages + 9,
-		ANNUNCE_RECORD =			CRCInput::RC_Messages + 10,
+		ANNOUNCE_RECORD =			CRCInput::RC_Messages + 10,
 		RECORD_START =				CRCInput::RC_Messages + 11,
 		RECORD_STOP	=				CRCInput::RC_Messages + 12,
+		ANNOUNCE_SLEEPTIMER =		CRCInput::RC_Messages + 13,
 
 
 		EVT_VOLCHANGED 	= 			CRCInput::RC_Events + 1,
@@ -95,7 +96,9 @@ struct NeutrinoMessages {
 		EVT_SCAN_SATELLITE	=		CRCInput::RC_WithData + 2,
 		EVT_SCAN_PROVIDER	=		CRCInput::RC_WithData + 3,
 		EVT_NEXTEPG 		=		CRCInput::RC_WithData + 4,
-		EVT_TIMESET 		= 		CRCInput::RC_WithData + 5
+		EVT_TIMESET 		= 		CRCInput::RC_WithData + 5,
+		EVT_POPUP		=		CRCInput::RC_WithData + 6,
+		EVT_EXTMSG		=		CRCInput::RC_WithData + 7
 	};
 };
 

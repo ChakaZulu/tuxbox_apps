@@ -1797,6 +1797,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Timerd->registerEvent(CTimerdClient::EVT_RECORD_STOP, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_ANNOUNCE_ZAPTO, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_ZAPTO, 222, NEUTRINO_UDS_NAME);
+	g_Timerd->registerEvent(CTimerdClient::EVT_ANNOUNCE_SLEEPTIMER, 222, NEUTRINO_UDS_NAME);
 
 	//ucodes testen
 	doChecks();
@@ -1904,7 +1905,19 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			channelList->zapToOnidSid(data);
 		}
 
-		if ( msg == NeutrinoMessages::STANDBY_ON )
+		if ( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
+		{
+			ShowHint ( "messagebox.info", "gleich umschalten");
+		}
+		if ( msg == NeutrinoMessages::ANNOUNCE_RECORD)
+		{
+			ShowHint ( "messagebox.info", "Die Aufnahme beginnt in wenigen minuten");
+		}
+		if ( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
+		{
+			ShowHint ( "messagebox.info", "Sleeptimer löst gleich aus");
+		}
+		else if ( msg == NeutrinoMessages::STANDBY_ON )
 		{
 			if ( mode != mode_standby )
 			{
@@ -1913,8 +1926,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 			g_RCInput->clearRCMsg();
 		}
-
-		if ( msg == NeutrinoMessages::STANDBY_OFF )
+		else if ( msg == NeutrinoMessages::STANDBY_OFF )
 		{
 			if ( mode == mode_standby )
 			{
@@ -1923,18 +1935,23 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 			g_RCInput->clearRCMsg();
 		}
-
-		if ( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
+		else if ( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 		{
 			//TODO: MsgBox mit Ok / Cancel
 		}
-
 		else if ( msg == NeutrinoMessages::SHUTDOWN )
 		{
 			// AUSSCHALTEN...
 			ExitRun();
 		}
-
+		else if ( msg == NeutrinoMessages::EVT_POPUP )
+		{
+			ShowHint ( "messagebox.info", string((char *) data) );
+		}		
+		else if ( msg == NeutrinoMessages::EVT_EXTMSG )
+		{
+			ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+		}		
 		else if ( msg == NeutrinoMessages::VCR_ON )
 		{
 			if  ( mode != mode_scart )
@@ -2628,7 +2645,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.286 2002/05/30 13:35:14 McClean Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.287 2002/05/30 19:55:26 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
