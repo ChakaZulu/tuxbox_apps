@@ -115,7 +115,7 @@ bool TWebserver::Start()
 			do
 			{
 				printf("[nhttpd] bind to port %d failed...\n",Port);
-				printf("%d. Versuch, warte weitere 5 Sekunden\n",i++);
+				printf("%d. Versuch, warte 5 Sekunden\n",i++);
 				sleep(5);
 			}while(bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0);
 //			return false;
@@ -130,9 +130,6 @@ bool TWebserver::Start()
 
 	// TimerThread starten
 				
-//	if (pthread_create (&timerthread, NULL, TimerThread, (void *)TimerList) != 0 )
-//		perror("[nhttpd]: pthread_create(TimerThread)");
-
 	return true;
 }
 
@@ -184,7 +181,7 @@ pthread_t Threads[10];
                 perror("Error in accept");
                 continue;
         }
-        if(DEBUG) printf("server: got connection from %ld\n", cliaddr.sin_addr);
+        if(DEBUG) printf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
             
 		req = new TWebserverRequest(this);
 		memcpy(&(req->cliaddr),&cliaddr,sizeof(cliaddr));
