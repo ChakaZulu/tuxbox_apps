@@ -140,6 +140,7 @@ class CFileBrowser
 		int 			theight;	// Fonthoehe Filelist-Titel
 		int			foheight;	// Hoehe der button leiste
 		std::string		name;
+		std::string		base;
 		std::string		m_baseurl;
 		int 			width;
 		int 			height;
@@ -158,6 +159,9 @@ class CFileBrowser
 		void paintFoot();
 		void recursiveDelete(const char* file);
 
+	protected:
+		void commonInit();
+
 	public:
 		CFileList		filelist;
 
@@ -171,6 +175,7 @@ class CFileBrowser
 		CFileFilter *	Filter;
 
 		CFileBrowser();
+		CFileBrowser(const std::string &_base);
 		~CFileBrowser();
 
 		bool		exec(const char * const dirname);

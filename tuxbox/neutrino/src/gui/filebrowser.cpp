@@ -237,6 +237,18 @@ const neutrino_locale_t sortByNames[FILEBROWSER_NUMBER_OF_SORT_VARIANTS] =
 
 CFileBrowser::CFileBrowser()
 {
+	commonInit();
+	base = "";
+}
+
+CFileBrowser::CFileBrowser(const std::string &_base)
+{
+	commonInit();
+	base = _base;
+}
+
+void CFileBrowser::commonInit()
+{
 	frameBuffer = CFrameBuffer::getInstance();
 
 	Filter = NULL;
@@ -312,6 +324,11 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 			pos = Path.length();
 		newpath = Path.substr(0,pos);
 //		printf("path: %s filename: %s newpath: %s\n",Path.c_str(),filename.c_str(),newpath.c_str());
+		if (base.length())
+		{
+ 		  pos = newpath.find(base);
+		  if (pos != 0) return;
+		}
 	}
 	else
 	{
