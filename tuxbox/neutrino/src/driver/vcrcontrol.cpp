@@ -136,9 +136,6 @@ void CVCRControl::setDeviceOptions(CDeviceInfo *deviceInfo)
 
 			device->SwitchToScart = serverinfo->SwitchToScart;
 		}
-
-		if (!(deviceInfo->Name.empty()))
-			Device->Name = deviceInfo->Name;
 	}
 }
 //-------------------------------------------------------------------------
@@ -163,21 +160,21 @@ bool CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo
 		CServerDevice * device =  new CServerDevice();
 		Device = (CDevice*) device;
 		setDeviceOptions(deviceInfo);
-		printf("CVCRControl registered new server device: %s\n",device->Name.c_str());
+		printf("CVCRControl registered new server device: %s\n", "server");
 	}
 	else if(deviceType == DEVICE_VCR)
 	{
 		CVCRDevice * device = new CVCRDevice();
 		Device = (CDevice*) device;
 		setDeviceOptions(deviceInfo);
-		printf("CVCRControl registered new vcr device: %s\n",device->Name.c_str());
+		printf("CVCRControl registered new vcr device: %s\n", "vcr");
 	}
 	else if(deviceType == DEVICE_FILE)
 	{
 		CFileDevice * device = new CFileDevice();
 		Device = (CDevice*) device;
 		setDeviceOptions(deviceInfo);
-		printf("CVCRControl registered new file device: %s\n",device->Name.c_str());
+		printf("CVCRControl registered new file device: %s\n", "file");
 	}
 	else
 		return false;

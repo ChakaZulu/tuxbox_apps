@@ -2721,7 +2721,6 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		info->ServerAddress = g_settings.recording_server_ip;
 		info->StopPlayBack = (g_settings.recording_stopplayback == 1);
 		info->StopSectionsd = (g_settings.recording_stopsectionsd == 1);
-		info->Name = "ngrab";
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_SERVER,info);
 		delete info;		
 	}
@@ -2735,14 +2734,12 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		info->Directory = g_settings.network_nfs_recordingdir;
 		info->StopPlayBack = (g_settings.recording_stopplayback == 1);
 		info->StopSectionsd = (g_settings.recording_stopsectionsd == 1);
-		info->Name = "file";
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_FILE, info);
 		delete info;
 	}
 	else if(g_settings.recording_type == RECORDING_VCR)
 	{
 		CVCRControl::CVCRDeviceInfo * info = new CVCRControl::CVCRDeviceInfo;
-		info->Name = "vcr";
 		info->SwitchToScart = (g_settings.recording_vcr_no_scart==0);
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_VCR,info);
 		delete info;

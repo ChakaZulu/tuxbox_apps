@@ -63,16 +63,12 @@ class CVCRControl
 
 		class CDeviceInfo
 		{
-			public:
-				CDeviceInfo(){Name="";};
-				std::string   Name;
 		};
 
 		class CVCRDeviceInfo : public CDeviceInfo
 		{
-			public:
-				CVCRDeviceInfo() : CDeviceInfo(){};
-				bool  SwitchToScart;
+		public:
+			bool  SwitchToScart;
 		};
 		
 		class CFileAndServerDeviceInfo : public CDeviceInfo		
@@ -80,7 +76,7 @@ class CVCRControl
 			public:
 				bool StopPlayBack;
 				bool StopSectionsd;
-				CFileAndServerDeviceInfo() : CDeviceInfo() { StopPlayBack = false; StopSectionsd = true; };
+				CFileAndServerDeviceInfo() { StopPlayBack = false; StopSectionsd = true; };
 		};
 
 		class CFileDeviceInfo : public CFileAndServerDeviceInfo		
@@ -108,7 +104,6 @@ class CVCRControl
 			public:
 				int sock_fd;
 				int last_mode;
-				std::string Name;
 				virtual CVCRDevices getDeviceType(void) const = 0;
 				CVCRStates  deviceState;
 				virtual bool Stop() = 0;
@@ -122,8 +117,9 @@ class CVCRControl
 
 		class CVCRDevice : public CDevice		// VCR per IR
 		{
-			public:
-				bool SwitchToScart;
+		public:
+			bool  SwitchToScart;
+
 				virtual CVCRDevices getDeviceType(void) const
 					{
 						return DEVICE_VCR;
