@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.21 2002/01/08 23:22:08 McClean Exp $
+ $Id: rcinput.cpp,v 1.22 2002/01/09 00:05:08 McClean Exp $
  
  Module for Remote Control Handling
  
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.22  2002/01/09 00:05:08  McClean
+ secure-...
+
  Revision 1.21  2002/01/08 23:22:08  McClean
  fix for old nokia-fb's
 
@@ -166,7 +169,7 @@ void CRCInput::restartInput()
 **************************************************************************/
 int CRCInput::getKey(int Timeout)
 {
-	static unsigned long long last_keypress=0;
+	static long long last_keypress=0;
 	static __u16 rc_last_key = 0;
 	static __u16 rc_last_repeat_key = 0;
 	__u16 rc_key;
@@ -188,11 +191,11 @@ int CRCInput::getKey(int Timeout)
 			{
 				//printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
 				struct timeval tv;
-				unsigned long long now_pressed;
+				long long now_pressed;
 				bool keyok = true;
 
 				gettimeofday( &tv, NULL );
-				now_pressed = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
+				now_pressed = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 				//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
 				
 				//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
@@ -210,7 +213,7 @@ int CRCInput::getKey(int Timeout)
 					{
 						if( rc_last_repeat_key!=rc_key)
 						{
-							if(now_pressed-last_keypress>repeat_block)
+							if(abs(now_pressed-last_keypress)>repeat_block)
 							{
 								keyok = true;
 								rc_last_repeat_key = rc_key;
@@ -228,7 +231,7 @@ int CRCInput::getKey(int Timeout)
 				}
 				rc_last_key = rc_key;
 
-				if(now_pressed-last_keypress>repeat_block_generic)
+				if(abs(now_pressed-last_keypress)>repeat_block_generic)
 				{
 					if(keyok)
 					{
