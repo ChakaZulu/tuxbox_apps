@@ -134,6 +134,7 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 			if ((*item)->getType() == Drawable::DTYPE_PAGEBREAK)
 				pagebreak = true;
 		}
+                if (lineWidth > maxWidth)
 			maxWidth = lineWidth;
 		m_height += maxHeight;
 		if (m_height > HINTBOXEXT_MAX_HEIGHT || pagebreak) {
