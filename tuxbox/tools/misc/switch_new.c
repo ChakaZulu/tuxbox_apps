@@ -21,11 +21,14 @@
  *
  *
  *   $Log: switch_new.c,v $
+ *   Revision 1.2  2001/03/25 13:57:24  gillem
+ *   - update includes
+ *
  *   Revision 1.1  2001/03/20 21:16:00  gillem
  *   - switch rewrite
  *
  *
- *   $Revision: 1.1 $
+ *   $Revision: 1.2 $
  *
  */
 
@@ -37,7 +40,7 @@
 #include <fcntl.h>
 #include <argp.h>
 
-#include "avs_core.h"
+#include "dbox/avs_core.h"
 
 /* ---------------------------------------------------------------------- */
 
@@ -85,7 +88,38 @@ static struct argp argp = { options, parse_opt, 0, doc };
 
 /* ---------------------------------------------------------------------- */
 
-int ycm_show()
+int show_type()
+{
+	int i;
+
+	if (ioctl(fd,AVSIOGTYPE,&i)< 0)
+	{
+		perror("AVSIOGTYPE:");
+		return -1;
+	}
+
+	printf("Type: ");
+
+	switch(i)
+	{
+
+		case CXA2092:
+			printf("CXA2092");
+			break;
+		case CXA2126:
+			printf("CXA2126");
+			break;
+		default:
+			printf("unknown");
+			break;
+	}
+
+	printf("\n");
+
+	return 0;
+}
+
+int show_ycm()
 {
 	int i;
 
@@ -100,7 +134,7 @@ int ycm_show()
 	return 0;
 }
 
-int zcd_show()
+int show_zcd()
 {
 	int i;
 
@@ -114,7 +148,7 @@ int zcd_show()
 	return 0;
 }
 
-int fnc_show()
+int show_fnc()
 {
 	int i;
 
@@ -128,7 +162,7 @@ int fnc_show()
 	return 0;
 }
 
-int fblk_show()
+int show_fblk()
 {
 	int i;
 
@@ -183,10 +217,11 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
 	switch (key)
 	{
 		case 's':
-			zcd_show();
-			fnc_show();
-			ycm_show();
-			fblk_show();
+			show_type();
+			show_zcd();
+			show_fnc();
+			show_ycm();
+			show_fblk();
 			break;
 
 		case 'm':
