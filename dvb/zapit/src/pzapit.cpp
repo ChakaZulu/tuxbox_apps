@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.3 2002/03/24 16:21:20 obi Exp $
+ * $Id: pzapit.cpp,v 1.4 2002/03/24 16:34:39 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -103,7 +103,7 @@ int main (int argc, char** argv)
 
 	if (zap)
 	{
-		std::cout << "zapping to bouquet " << bouquets[bouquet].name << ", channel " << channels[channel].name << "." << endl;
+		std::cout << "zapping to bouquet " << bouquets[bouquet-1].name << ", channel " << channels[channel-1].name << "." << endl;
 		zapit->zapTo(bouquet, channel);
 	}
 
