@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.3  2004/04/24 22:24:23  carjay
+ * fix compiler warnings
+ *
  * Revision 1.2  2003/05/16 15:07:23  lazyt
  * skip unused accounts via "plus/minus", add mailaddress to spamlist via "blue"
  *
@@ -107,7 +110,6 @@
 enum {LEFT, CENTER, RIGHT};
 enum {SMALL, BIG};
 
-FT_Error 		error;
 FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache		cache;

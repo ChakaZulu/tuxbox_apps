@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.8  2004/04/24 22:24:23  carjay
+ * fix compiler warnings
+ *
  * Revision 1.7  2004/04/14 17:46:00  metallica
  *  fix2: seg fault (better)
  *
@@ -381,7 +384,8 @@ void UpdateLCD(int account)
 
 int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 {
-	int error,row, pitch, bit, x = 0, y = 0;
+	int row, pitch, bit, x = 0, y = 0;
+	FT_Error error;
 	FT_UInt glyphindex;
 	FT_Vector kerning;
 	FTC_Node anode;
@@ -390,7 +394,7 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 
 		if(!(glyphindex = FT_Get_Char_Index(face, currentchar)))
 		{
-			printf("TuxMail <FT_Get_Char_Index for Char \"%c\" failed with Errorcode 0x%.2X>\n", (int)currentchar, error);
+			printf("TuxMail <FT_Get_Char_Index for Char \"%c\" failed: \"undefined character code\">\n", (int)currentchar);
 			return 0;
 		}
 
@@ -843,10 +847,11 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.7 $", versioninfo[12];
-	int loop, account, mailindex,error;
+	char cvs_revision[] = "$Revision: 1.8 $", versioninfo[12];
+	int loop, account, mailindex;
 	FILE *fd_run;
-
+	FT_Error error;
+	
 	//show versioninfo
 
 		sscanf(cvs_revision, "%*s %s", versioninfo);
