@@ -409,7 +409,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
 				{
             		res = neutrino->handleMsg( msg, data );
 
-            		if ( res == messages_return::unhandled )
+            		if ( res & messages_return::unhandled )
             		{
             			// raus hier und im Hauptfenster behandeln...
             			g_RCInput->postMsg(  msg, data );
@@ -504,7 +504,7 @@ void CInfoViewer::showSubchan()
 			{
 				res = neutrino->handleMsg( msg, data );
 
-				if ( res == messages_return::unhandled )
+				if ( res & messages_return::unhandled )
 				{
 					// raus hier und im Hauptfenster behandeln...
 					g_RCInput->postMsg(  msg, data );

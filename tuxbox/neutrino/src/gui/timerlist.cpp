@@ -421,7 +421,7 @@ int CTimerList::show()
 		}
 		else
 		{
-			if( CNeutrinoApp::getInstance()->handleMsg( msg, data ) == messages_return::cancel_all )
+			if( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				loop = false;
 				res = menu_return::RETURN_EXIT_ALL;

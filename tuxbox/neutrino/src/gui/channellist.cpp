@@ -369,7 +369,7 @@ int CChannelList::show()
 		}
 		else
 		{
-			if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) == messages_return::cancel_all )
+			if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				loop = false;
 				res = - 2;

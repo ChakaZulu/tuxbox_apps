@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.26 2003/08/13 16:49:02 thegoodguy Exp $
+        $Id: movieplayer.cpp,v 1.27 2003/08/27 07:11:05 zwen Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -971,7 +971,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	}
       else
 	if (CNeutrinoApp::getInstance ()->
-	    handleMsg (msg, data) == messages_return::cancel_all)
+	    handleMsg (msg, data) & messages_return::cancel_all)
 	{
 	  exit = true;
 	}
@@ -1156,7 +1156,7 @@ CMoviePlayerGui::PlayFile (void)
 	}
       else
 	if (CNeutrinoApp::getInstance ()->
-	    handleMsg (msg, data) == messages_return::cancel_all)
+	    handleMsg (msg, data) & messages_return::cancel_all)
 	{
 	  isTS = true;		// also exit in PES Mode
 	  exit = true;
@@ -1255,7 +1255,7 @@ CMoviePlayerGui::show ()
       else
 	{
 	  if (CNeutrinoApp::getInstance ()->
-	      handleMsg (msg, data) == messages_return::cancel_all)
+	      handleMsg (msg, data) & messages_return::cancel_all)
 	    {
 	      loop = false;
 	    }

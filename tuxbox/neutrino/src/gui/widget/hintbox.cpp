@@ -147,7 +147,7 @@ int ShowHint(const std::string Caption, const std::string Text, std::string Icon
 		else
 		{
 	        res = CNeutrinoApp::getInstance()->handleMsg( msg, data );
-			if ( res == messages_return::unhandled )
+			if ( res & messages_return::unhandled )
 			{
 
 				// raus hier und darüber behandeln...
