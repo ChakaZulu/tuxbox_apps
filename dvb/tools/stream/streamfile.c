@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.11 2004/04/29 19:48:35 diemade Exp $
+ * $Id: streamfile.c,v 1.12 2004/04/29 23:04:05 carjay Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -134,8 +134,8 @@ void *FileThread (void *v_arg)
 	size_t readsize, maxreadsize=0;
 	unsigned long long filesize = 0;
 	unsigned int filecount = 0;
-	unsigned long long splitsize=1024*1024*1024; // 1GB
-	splitsize = limit * splitsize; // (lmit)GB
+	const unsigned long long splitsize=(1024*1024*1024)-112 * limit; // 1GB%188
+	unsigned long long remfile=0;
 	char filename[512];
 	time_t timer1 = 0;
 	unsigned long long filesize2 = 0;
@@ -148,13 +148,12 @@ void *FileThread (void *v_arg)
 		ringbuffer_get_read_vector(ringbuf, &(vec[0]));
 		readsize = vec[0].len + vec[1].len;
 		if ( readsize ) {
-			if (readsize > maxreadsize) {
+			if ((!silent)&&(readsize > maxreadsize)){
 				maxreadsize = readsize;
 			}
-			readsize = (readsize / TS_SIZE) * TS_SIZE;
 
 			// Do Splitting if necessary
-			if ((filesize + RINGBUFFERSIZE >= splitsize) || (fd2 == -1)) {
+			if (!remfile) {
 				sprintf(filename, "%s.%3.3d.ts", (char *)v_arg, ++filecount);
 				if (fd2 != -1 )
 					close(fd2);
@@ -166,7 +165,14 @@ void *FileThread (void *v_arg)
 				pfd[0].events = POLLOUT;
 
 				filesize = 0;
+				remfile=splitsize;
 				timer1 = time(NULL);
+			}
+
+			/* make sure file contains complete TS-packets and is <= splitsize */
+			if ((unsigned long long)readsize>remfile){ 
+				readsize=remfile%TS_SIZE;
+				remfile=0;
 			}
 
 			if (poll(pfd, 1, 5000)>0) {
@@ -183,7 +189,7 @@ void *FileThread (void *v_arg)
 					do {
 						if (((written = write(fd2, buf, todo)) < 0) && 
 						    (errno != EAGAIN))
-							perror("[streamfile]: write");	// CIFS returns EINVAL all the time :S
+							perror("[streamfile]: write");
 						else
 						{
 							if (todo == written)
@@ -202,19 +208,21 @@ void *FileThread (void *v_arg)
 					} while (todo>0 && !exit_flag);
 					fdatasync(fd2);
 					filesize += (unsigned long long)readsize;
-					filesize2 += (unsigned long long)readsize;
+					if (remfile) remfile -= (unsigned long long)readsize;
+					if (!silent) filesize2 += (unsigned long long)readsize;
 				}
 			} else {
 				perror ("[streamfile]: poll");	
 			}
 
-			if ((time(NULL) - timer1) > 10) {
+			if ((!silent)&&(time(NULL) - timer1) > 10) {
 				bitrate = (filesize2 / (time(NULL) - timer1) * 8);
-				dprintf("Datarate %d bits/sec, %d Kbits/sec, max. rb used %d bytes\n"
+				printf("Datarate %d bits/sec, %d Kbits/sec, max. rb used %d bytes\n"
 					, (int)bitrate, (int)bitrate/1024, maxreadsize);
 				filesize2 = 0;
 				timer1 = time(NULL);
 			}
+
 		}
 		else
 			usleep(1000);
@@ -297,10 +305,10 @@ main (int argc, char ** argv) {
 	pthread_create (&rcst, 0, FileThread, fname);
 	
 	/* write raw transport stream */
-	int offset;
+	int offset=0;
 
 	ringbuffer_data_t vec[2];
-	ssize_t r;
+	ssize_t r=0;
 	ssize_t todo;
 	ssize_t todo2;
 
@@ -365,7 +373,6 @@ main (int argc, char ** argv) {
 
 		todo = IN_SIZE;
 	}
-	exit_flag = 1;
 	//sleep(1); // give FileThread some time to write remaining content of ringbuffer to file
 	//	pthread_kill(rcst, SIGKILL);
 
