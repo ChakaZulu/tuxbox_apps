@@ -8,7 +8,7 @@
 				</select>
 			</td>
 			<td>
-				<select style="width: 500px; font-weight: bold;" onChange=channelChange() name="channel" size=30>
+				<select style="width: 450px; font-weight: bold;" onChange=channelChange() name="channel" size=30>
 				</select>
 			</td>
 		</tr>
