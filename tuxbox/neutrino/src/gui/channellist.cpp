@@ -924,6 +924,8 @@ void CChannelList::paintHead()
 
 void CChannelList::paint()
 {
+	g_Sectionsd->setPauseSorting( true );
+
 	liststart = (selected/listmaxshow)*listmaxshow;
 	int lastnum =  chanlist[liststart]->number + listmaxshow;
 
@@ -953,6 +955,7 @@ void CChannelList::paint()
 
 	g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
+	g_Sectionsd->setPauseSorting( false );
 }
 
 CChannelList::CChannel* CChannelList::getChannelFromOnidSid(int onidSid)

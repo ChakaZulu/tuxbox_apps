@@ -186,9 +186,10 @@ void CRemoteControl::processAPIDnames()
 
 	for(int count=0; count< current_PIDs.APIDs.size(); count++)
 	{
-		if ( current_PIDs.APIDs[count].component_tag != -1 )
+		if ( current_PIDs.APIDs[count].component_tag != 0xFF )
+		{
 			has_unresolved_ctags= true;
-
+        }
 		if ( strlen( current_PIDs.APIDs[count].desc ) == 3 )
 		{
 			// unaufgeloeste Sprache...
@@ -367,6 +368,7 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 	long long now = getcurrenttime();
 	if ( zap_completion_timeout < now )
 	{
+		printf("[remotecontrol]: doing zap to %x\n", onid_sid);
 		g_Zapit->zapTo_serviceID_NOWAIT( onid_sid );
 		zap_completion_timeout = now + 2 * (long long) 1000000;
 	}
