@@ -3890,12 +3890,16 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 			entry.service.descr = channel + "/" + description;
 
 			if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
+			{
+				content->code = 400;
+				content->code_descr = "Function failed.";
 				result = "Timer event could not be added because time of the event overlaps with an already existing event.";
+			}
 			else
 				result = "Timer event was created successfully.";
 			eTimerManager::getInstance()->saveTimerList();
 		}
-		else
+		if (command == "delete")
 		{
 			ePlaylistEntry e(
 				string2ref(result1),
@@ -3908,7 +3912,11 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 		}
 	}
 	else
-		result = "Service does not exist.";
+	{
+		content->code = 400;
+		content->code_descr = "Function failed.";
+		result = "TVBrowser and Enigma service name don't match.";
+	}
 
 	return result;
 }
