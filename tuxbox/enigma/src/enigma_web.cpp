@@ -423,7 +423,10 @@ static eString erc_epg(eString request, eString dirpath, eString opt, eHTTPConne
 		if (!ev)
 			return "-service or event_id invalid";
 		else
+		{
 			processEvent(res, ev, search, wantext);
+			delete ev;
+		}
 	}
 	
 	return res;
