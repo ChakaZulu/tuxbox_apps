@@ -105,6 +105,8 @@ videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect automatisch
 videomenu.vcrswitch Scart-Eingang automatisch
+videomenu.rgb_centering RGB-Zentrierung
+videomenu.csync Sync.-Korrektur
 
 networkmenu.head Netzwerk Einstellungen
 networkmenu.test Netzwerk testen

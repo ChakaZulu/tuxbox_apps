@@ -68,6 +68,7 @@
 #include "gui/widget/hintbox.h"
 #include "gui/widget/icons.h"
 #include "gui/widget/lcdcontroler.h"
+#include "gui/widget/rgbcsynccontroler.h"
 #include "gui/widget/keychooser.h"
 #include "gui/widget/stringinput.h"
 #include "gui/widget/stringinput_ext.h"
@@ -75,7 +76,7 @@
 #include "gui/color.h"
 
 #include "gui/bedit/bouqueteditor_bouquets.h"
-#include <gui/bouquetlist.h>
+#include "gui/bouquetlist.h"
 #include "gui/eventlist.h"
 #include "gui/channellist.h"
 #include "gui/screensetup.h"
@@ -369,6 +370,7 @@ int CNeutrinoApp::loadSetup()
 	//video
 	g_settings.video_Signal = configfile.getInt32( "video_Signal", 1 ); //RGB + CVBS
 	g_settings.video_Format = configfile.getInt32( "video_Format", 2 ); //4:3
+	g_settings.video_csync = configfile.getInt32( "video_csync", 0 ); 
 
 	//fb-alphawerte für gtx
 	g_settings.gtx_alpha1 = configfile.getInt32( "gtx_alpha1", 0);
@@ -681,6 +683,7 @@ void CNeutrinoApp::saveSetup()
 	//video
 	configfile.setInt32( "video_Signal", g_settings.video_Signal );
 	configfile.setInt32( "video_Format", g_settings.video_Format );
+	configfile.setInt32( "video_csync", g_settings.video_csync );
 
 	//fb-alphawerte für gtx
 	configfile.setInt32( "gtx_alpha1", g_settings.gtx_alpha1 );
@@ -1584,20 +1587,26 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 
 }
 
-void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier)
+void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 {
 	videoSettings.addItem(GenericMenuSeparator);
 	videoSettings.addItem(GenericMenuBack);
 	videoSettings.addItem(GenericMenuSeparatorLine);
 
+	CRGBCSyncControler* sc = new CRGBCSyncControler("videomenu.rgb_centering", &g_settings.video_csync);
+	bool bVisible = ( g_settings.video_Signal == 1 ) || ( g_settings.video_Signal == 3 ) || ( g_settings.video_Signal == 4 );  
+	CMenuForwarder* scf = new CMenuForwarder("videomenu.rgb_centering", bVisible, "", sc);
+	
+	CVideoSetupNotifier		*videoSetupNotifier = new CVideoSetupNotifier(scf);
 	CMenuOptionChooser* oj = new CMenuOptionChooser("videomenu.videosignal", &g_settings.video_Signal, true, videoSetupNotifier);
 	oj->addOption(1, "videomenu.videosignal_rgb");
 	oj->addOption(2, "videomenu.videosignal_svideo");
 	oj->addOption(3, "videomenu.videosignal_yuv_v");
 	oj->addOption(4, "videomenu.videosignal_yuv_c");
 	oj->addOption(0, "videomenu.videosignal_composite");
-
 	videoSettings.addItem( oj );
+
+	videoSettings.addItem(scf);
 
 	oj = new CMenuOptionChooser("videomenu.videoformat", &g_settings.video_Format, true, videoSetupNotifier);
 	oj->addOption(2, "videomenu.videoformat_43");
@@ -2496,7 +2505,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	colorSetupNotifier   = new CColorSetupNotifier;
 	audioSetupNotifier   = new CAudioSetupNotifier;
-	videoSetupNotifier   = new CVideoSetupNotifier;
 	APIDChanger       = new CAPIDChangeExec;
 	UCodeChecker      = new CUCodeCheckExec;
 	NVODChanger       = new CNVODChangeExec;
@@ -2554,7 +2562,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	InitAudioSettings(audioSettings, audioSetupNotifier);
 
 	//video Setup
-	InitVideoSettings(videoSettings, videoSetupNotifier);
+	InitVideoSettings(videoSettings);
 	videoSettings.setOnPaintNotifier(this);
 
 	// Parentallock settings

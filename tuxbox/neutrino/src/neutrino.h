@@ -108,7 +108,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
 		CColorSetupNotifier		*colorSetupNotifier;
 		CAudioSetupNotifier		*audioSetupNotifier;
-		CVideoSetupNotifier		*videoSetupNotifier;
 		CKeySetupNotifier       	*keySetupNotifier;
 		CAPIDChangeExec         	*APIDChanger;
 		CNVODChangeExec         	*NVODChanger;
@@ -163,7 +162,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitMiscSettings(CMenuWidget &);
 		void InitScanSettings(CMenuWidget &);
 		void InitParentalLockSettings(CMenuWidget &);
-		void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
+		void InitVideoSettings(CMenuWidget &videoSettings);
 		void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings,
 		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings, CMenuWidget &networkSettings,
 		                  CMenuWidget &colorSettings, CMenuWidget &lcdSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,

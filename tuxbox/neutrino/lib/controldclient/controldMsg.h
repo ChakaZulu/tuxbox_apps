@@ -77,7 +77,10 @@ class CControld : public CBasicMessage
 			CMD_REGISTEREVENT,
 			CMD_UNREGISTEREVENT,
 
-			CMD_EVENT
+			CMD_EVENT,
+
+			CMD_SETCSYNC,
+			CMD_GETCSYNC
 		};
 
 
@@ -145,6 +148,11 @@ class CControld : public CBasicMessage
 		struct responseScartMode
 		{
 			unsigned char mode;
+		};
+
+		struct commandCsync
+		{
+			unsigned char csync;
 		};
 
 };

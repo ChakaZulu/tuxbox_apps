@@ -397,11 +397,19 @@ bool CAudioSetupNotifier2::changeNotify(const std::string & OptionName, void*)
 
 }
 
+CVideoSetupNotifier::CVideoSetupNotifier( CMenuItem* i1)
+{
+   toDisable[0]=i1;
+}
+
 bool CVideoSetupNotifier::changeNotify(const std::string & OptionName, void*)
 {
 	if(OptionName=="videomenu.videosignal")
 	{
 		g_Controld->setVideoOutput( g_settings.video_Signal );
+		toDisable[0]->setActive(( g_settings.video_Signal == 1 ) || 
+										( g_settings.video_Signal == 3 ) || 
+										( g_settings.video_Signal == 4 ));
 	}
 	else if(OptionName=="videomenu.videoformat")
 	{

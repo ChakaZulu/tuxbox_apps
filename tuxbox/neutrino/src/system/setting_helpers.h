@@ -161,7 +161,10 @@ class CAudioSetupNotifier2 : public CChangeObserver
 
 class CVideoSetupNotifier : public CChangeObserver
 {
+	private:
+		CMenuItem* toDisable[1];
 	public:
+		CVideoSetupNotifier( CMenuItem* );
 		bool changeNotify(const std::string & OptionName, void*);
 };
 

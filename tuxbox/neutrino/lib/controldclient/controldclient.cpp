@@ -263,3 +263,20 @@ void CControldClient::saveSettings()
         send(CControld::CMD_SAVECONFIG);
         close_connection();
 }
+
+void CControldClient::setRGBCsync(char val)
+{
+	CControld::commandCsync msg;
+	msg.csync = val;
+	send(CControld::CMD_SETCSYNC, (char*) &msg, sizeof(msg));
+	close_connection();
+}
+
+char CControldClient::getRGBCsync()
+{
+	CControld::commandCsync msg;
+	send(CControld::CMD_GETCSYNC);
+	receive_data((char*) &msg, sizeof(msg));
+	close_connection();
+	return msg.csync;
+}

@@ -175,6 +175,17 @@ class CControldClient:private CBasicClient
 
 		void saveSettings();
 
+		/*
+		  setzen der sync correction im RGB mode des saa7126 (csync) 0=aus, 31=max
+		*/
+		
+		void setRGBCsync(char csync);
+		/*
+		  lesen der sync correction im RGB mode des saa7126 (csync) 0=aus, 31=max
+		*/
+		char getRGBCsync();
+
+		  
 };
 
 #endif

@@ -79,6 +79,7 @@ struct Ssettings
 	bool mute_avs;
 	int  videooutput;
 	int  videoformat;
+	int  csync;
 
 	CControldClient::tuxbox_maker_t boxtype; // not part of the config - set by setBoxType()
 } settings;
@@ -117,6 +118,37 @@ void shutdownBox()
 	timerd.shutdown();
 
 	saveSettings();
+}
+
+void setRGBCsync(int val)
+{
+	int fd;
+	settings.csync = val;
+	if ((fd = open(SAA7126_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
+		perror("[controld] " SAA7126_DEVICE);
+
+	else {
+		if ((ioctl(fd, SAAIOSCSYNC, &settings.csync) < 0))
+			perror("[controld] SAAIOSCSYNC");
+		
+		close(fd);
+	}
+	config->setInt32("csync", settings.csync);
+}
+
+char getRGBCsync()
+{
+	int fd, val=0;
+	if ((fd = open(SAA7126_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
+		perror("[controld] " SAA7126_DEVICE);
+
+	else {
+		if ((ioctl(fd, SAAIOGCSYNC, &val) < 0))
+			perror("[controld] SAAIOGCSYNC");
+		
+		close(fd);
+	}
+	return val;
 }
 
 void setvideooutput(int format, bool bSaveSettings = true)
@@ -201,6 +233,9 @@ void setvideooutput(int format, bool bSaveSettings = true)
 		
 		close(fd);
 	}
+	
+	if(format == 1 || format == 3 || format == 4)
+		setRGBCsync(settings.csync);
 }
 
 void setVideoFormat(int format, bool bSaveFormat = true )
@@ -793,6 +828,17 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd,&msg0,sizeof(msg0));
 		break;
 
+	case CControld::CMD_SETCSYNC:
+		CControld::commandCsync msg11;
+		CBasicServer::receive_data(connfd, &msg11, sizeof(msg11));
+		setRGBCsync(msg11.csync);
+		break;
+	case CControld::CMD_GETCSYNC:
+		CControld::commandCsync msg12;
+		msg12.csync = getRGBCsync();
+		CBasicServer::send_data(connfd, &msg12, sizeof(msg12));
+		break;
+
 	case CControld::CMD_REGISTEREVENT:
 		eventServer->registerEvent(connfd);
 		break;
@@ -834,7 +880,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.111 2003/11/20 18:33:08 zwen Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.112 2003/12/22 20:01:56 zwen Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -897,7 +943,8 @@ int main(int argc, char **argv)
 	settings.mute_avs    = config->getBool("mute_avs", false);
 	settings.videooutput = config->getInt32("videooutput", 1); // fblk1 - rgb
 	settings.videoformat = config->getInt32("videoformat", 2); // fnc2 - 4:3
-
+	settings.csync       = config->getInt32("csync", 0);
+	printf("cync %d\n",settings.csync);
 	setBoxType(); // dummy set - liest den aktuellen Wert aus!
 
 	watchDog = new CEventWatchDog();
