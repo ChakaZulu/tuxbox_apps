@@ -45,7 +45,7 @@
 
 #include <string>
 
-#define widest_number "0"
+#define widest_number "2"
 
 #define ANNOUNCETIME (1 * 60)
 
