@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.44 2002/02/28 15:03:55 field Exp $
+$Id: menue.cpp,v 1.45 2002/03/03 17:18:18 Simplex Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.45  2002/03/03 17:18:18  Simplex
+ menu and helper classes for youth protection
+
  Revision 1.44  2002/02/28 15:03:55  field
  Weiter Updates :)
 
@@ -705,4 +708,33 @@ int CMenuSeparator::paint(bool selected)
 	return y+ height;
 }
 
+bool CPINProtection::check()
+{
+	char cPIN[4] = "";
+	char hint[100] = "";
+	do
+	{
+		strcpy( cPIN, "");
+		CPINInput* PINInput = new CPINInput( "pinprotection.head", cPIN, 4, hint);
+		PINInput->exec( getParent(), "");
+		delete PINInput;
+		strcpy( hint, "pinprotection.wrongcode");
+	} while ((strcmp(cPIN,validPIN) != 0) && ( string(cPIN) != ""));
+	return ( strcmp(cPIN,validPIN) == 0);
+}
+
+int CLockedMenuForwarder::exec(CMenuTarget* parent)
+{
+	Parent = parent;
+	if (check())
+	{
+		Parent = NULL;
+		return CMenuForwarder::exec(parent);
+	}
+	else
+	{
+		Parent = NULL;
+		return menu_return::RETURN_REPAINT;
+	}
+}
 

@@ -391,3 +391,22 @@ GENRE.TRAVEL_HOBBIES.6 advertisement/shopping
 GENRE.TRAVEL_HOBBIES.7 gardening
 
 GENRE.UNKNOWN Unbekannt
+
+parentallock.parentallock Youth protection
+
+parentallock.prompt prompt for PIN
+parentallock.never never
+parentallock.onstart on start
+parentallock.changetolocked on locked bouquets
+parentallock.onsignal on broadcasted lock
+
+parentallock.lockage lock program
+parentallock.lockage12 from 12 years up
+parentallock.lockage16 from 16 years up
+parentallock.lockage18 from 18 years up
+
+parentallock.changepin change PIN code
+parentallock.changepin_hint1 Enter your new youth protection pin code here!
+
+pinprotection.wrongcode PIN-Code was wrong! Try again.
+pinprotection.head Enter PIN code

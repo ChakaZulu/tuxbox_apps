@@ -378,3 +378,27 @@ void CStringInputSMS::paint()
 	g_Fonts->infobar_small->RenderString(x+38, y+height-25+24 - 2, width, g_Locale->getText("stringinput.caps").c_str(), COL_INFOBAR);
 
 }
+
+void CPINInput::paintChar(int pos)
+{
+	int xs = 20;
+	int ys = mheight;
+	int xpos = x+ 20+ pos* xs;
+	int ypos = y+ hheight+ 25;
+
+	string ch = " ";
+	if(value[pos] != ' ')
+		ch = "*";
+
+	int color = COL_MENUCONTENT;
+	if (pos==selected)
+		color = COL_MENUCONTENTSELECTED;
+
+	g_FrameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
+	g_FrameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
+
+	int xfpos = xpos + ((xs- g_Fonts->menu->getRenderWidth(ch.c_str()))>>1);
+
+	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
+}
+
