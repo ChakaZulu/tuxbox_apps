@@ -339,7 +339,7 @@ int toptext_getnext(int startpage, int up, int findgroup)
 		else
 			prev_dec(&current);
 
-		if (subpagetable[current]!=0xFF) /* only if cached */
+		if (!bttok || basictop[current]) /* only if existent */
 		{
 			if (findgroup)
 			{
@@ -413,7 +413,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.72 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.73 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -505,7 +505,12 @@ void plugin_exec(PluginParam *par)
 						while (GetRCCode() != 1) /* wait for any key */
 							UpdateLCD();
 
-						for (i=0; i < 6; i += ((RCCode == RC_HELP) ? 2 : 1)) /* exit with ?: just restore video, leave audio */
+						if (RCCode == RC_HELP)
+							restoreaudio = 1;
+						else
+							restoreaudio = 0;
+						
+						for (i=0; i < 6; i += (restoreaudio ? 2 : 1)) /* exit with ?: just restore video, leave audio */
 						{
 							n = avstable_dvb[vendor][i];
 							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -522,8 +527,18 @@ void plugin_exec(PluginParam *par)
 
 			switch (RCCode)
 			{
-			case RC_UP:	GetNextPageOne();	break;
-			case RC_DOWN:	GetPrevPageOne();	break;
+			case RC_UP:
+				if (swapupdown)
+					GetPrevPageOne();
+				else
+					GetNextPageOne();
+				break;
+			case RC_DOWN:
+				if (swapupdown)
+					GetNextPageOne();
+				else
+					GetPrevPageOne();
+				break;
 			case RC_RIGHT:	GetNextSubPage();	break;
 			case RC_LEFT:	GetPrevSubPage();	break;
 			case RC_OK:
@@ -633,8 +648,10 @@ int Init()
 	screen_mode1 = 0;
 	screen_mode2 = 0;
 	color_mode   = 1;
+	menulanguage = 0;	/* german */
 	national_subset = 4;	/* german */
 	auto_national   = 1;
+	swapupdown      = 0;
 	showhex         = 0;
 
 	if ((conf = fopen(TUXTXTCONF, "rt")) == 0)
@@ -664,6 +681,13 @@ int Init()
 				if (ival >= 0 && ival <= 12)
 					national_subset = ival;
 			}
+			else if (1 == sscanf(line, "MenuLanguage %d", &ival))
+			{
+				if (ival >= 0 && ival <= MAXMENULANGUAGE)
+					menulanguage = ival;
+			}
+			else if (1 == sscanf(line, "SwapUpDown %d", &ival))
+				swapupdown = ival & 1;
 			else if (1 == sscanf(line, "ShowHexPages %d", &ival))
 				showhex = ival & 1;
 		}
@@ -950,14 +974,17 @@ void CleanUp()
 	ioctl(saa, SAAIOSWSS, &saa_old);
 
 #ifndef DREAMBOX
-	int vendor = tuxbox_get_vendor() - 1;
-	if (vendor < 3) /* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
+	if (restoreaudio)
 	{
-		for (i = 1; i < 6; i += 2) /* restore dvb audio */
+		int vendor = tuxbox_get_vendor() - 1;
+		if (vendor < 3) /* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 		{
-			n = avstable_dvb[vendor][i];
-			if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
-				perror("TuxTxt <ioctl(avs)>");
+			for (i = 1; i < 6; i += 2) /* restore dvb audio */
+			{
+				n = avstable_dvb[vendor][i];
+				if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
+					perror("TuxTxt <ioctl(avs)>");
+			}
 		}
 	}
 #endif
@@ -1022,8 +1049,10 @@ void CleanUp()
 			fprintf(conf, "ScreenMode16x9Normal %d\n", screen_mode1);
 			fprintf(conf, "ScreenMode16x9Divided %d\n", screen_mode2);
 			fprintf(conf, "ColorDimmed %d\n", color_mode);
+			fprintf(conf, "MenuLanguage %d\n", menulanguage);
 			fprintf(conf, "AutoNational %d\n", auto_national);
 			fprintf(conf, "NationalSubset %d\n", national_subset);
+			fprintf(conf, "SwapUpDown %d\n", swapupdown);
 			fclose(conf);
 		}
 	}
@@ -1339,30 +1368,6 @@ int GetNationalSubset(char *cc)
  * ConfigMenu                                                                 *
  ******************************************************************************/
 
-#define Menu_StartX (StartX + fontwidth*9/2)
-#define Menu_StartY (StartY + fontheight)
-#define Menu_Width 31
-
-const char MenuLine[] =
-{
-	4,9,12,13,16,19,20
-};
-
-enum
-{
-	M_HOT=0,
-	M_PID,
-	M_SC1,
-	M_SC2,
-	M_COL,
-	M_AUN,
-	M_NAT,
-	M_Number
-};
-
-#define M_Start M_HOT
-#define M_MaxDirect M_AUN
-
 void Menu_HighlightLine(char *menu, int line, int high)
 {
 	char hilitline[] = "ZXXXXXXXXXXXXXXXXXXXXXXXXXXXXZ›";
@@ -1420,64 +1425,20 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 		}
 	}
 
-	hex2str(&menu[2*Menu_Width*MenuLine[M_HOT] + 20 + 2], (hotindex >= 0) ? hotlist[hotindex] : page);
-	memcpy(&menu[2*Menu_Width*MenuLine[M_HOT] + 24], (hotindex >= 0) ? "entf." : "dazu ", 5);
+	hex2str(&menu[2*Menu_Width*MenuLine[M_HOT] + hotlistpagecolumn[menulanguage]], (hotindex >= 0) ? hotlist[hotindex] : page);
+	memcpy(&menu[2*Menu_Width*MenuLine[M_HOT] + hotlisttextcolumn[menulanguage]], &hotlisttext[menulanguage][(hotindex >= 0) ? 5 : 0], 5);
 	PosX = Menu_StartX + 20*fontwidth;
 	PosY = Menu_StartY + MenuLine[M_HOT]*fontheight;
 
-	for (k = 20; k < (24+5); k++)
-		RenderCharFB(menu[2*Menu_Width*MenuLine[M_HOT] + k], (menuitem == M_HOT) ? 'X' : menu[2*Menu_Width*MenuLine[M_HOT] + k+Menu_Width]);
+	Menu_HighlightLine(menu, MenuLine[M_HOT], (menuitem == M_HOT) ? 1 : 0);
 }
 
-
-void ConfigMenu(int Init)
+void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 {
-	struct dmx_pes_filter_params dmx_flt;
-	int val, byte, line, menuitem = M_Start;
-	int current_pid = 0;
-	int hotindex;
-	int oldscreenmode;
+	int byte, line;
 
-	char menu[] =
-/*     0000000000111111111122222222223 */
-/*     0123456789012345678901234567890 */
-		"àááááááááááááááááááááááááááááâè««««««««««««««««««««««««««««««›"
-		"ã     Konfigurationsmenue    äé«¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤«›"
-		"åææææææææææææææææææææææææææææçé««««««««««««««««««««««««««««««›"
-		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
-		"ã1 Favoriten: Seite 111 dazu äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
-		"ãíîñò                        äéËÈÈ¨¨ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
-		"ã+-?                         äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
-		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
-		"ã2     Teletext-Auswahl      äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
-		"ãí                          îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
-		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
-		"ã      Bildschirmformat      äéËÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
-		"ã3  Standard-Modus 16:9 = ausäéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
-		"ã4  TextBild-Modus 16:9 = einäéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
-		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
-		"ã5        Helligkeit         äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
-		"ãAnzeige 1/3 reduzieren = ausäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
-		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
-		"ã6  nationaler Zeichensatz   äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
-		"ãautomatische Erkennung = ausäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
-		"ãí    DE (#$@[\\]^_`{|}~)    îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
-		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
-		"åææææææææææææææææææææææææææææçéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
-		"ëìììììììììììììììììììììììììììììê›››››››››››››››››››››››››››››››";
-
-	if (!getpidsdone)
-		GetTeletextPIDs();
-
-	/* set current vtxt */
-	if (vtxtpid == 0)
-		vtxtpid = pid_table[0].vtxt_pid;
-	else
-	{
-		while(pid_table[current_pid].vtxt_pid != vtxtpid && current_pid < pids_found)
-			current_pid++;
-	}
-
+	memcpy(menu, configmenu[menulanguage], 2*Menu_Height*Menu_Width);
+	
 	if (SDT_ready)
 	{
 		memcpy(&menu[MenuLine[M_PID]*2*Menu_Width+3+(24-pid_table[current_pid].service_name_len)/2],
@@ -1487,7 +1448,6 @@ void ConfigMenu(int Init)
 	else
 		hex2str(&menu[MenuLine[M_PID]*2*Menu_Width + 13 + 3], vtxtpid);
 
-
 	if (current_pid == 0 || pids_found == 1)
 		menu[MenuLine[M_PID]*2*Menu_Width +  1] = ' ';
 
@@ -1495,14 +1455,10 @@ void ConfigMenu(int Init)
 		menu[MenuLine[M_PID]*2*Menu_Width + 28] = ' ';
 
 	/* set 16:9 modi, colors & national subset */
-	if (screen_mode1)
-		memcpy(&menu[MenuLine[M_SC1]*2*Menu_Width + 26], "ein", 3);
-	if (!screen_mode2)
-		memcpy(&menu[MenuLine[M_SC2]*2*Menu_Width + 26], "aus", 3);
-	if (color_mode)
-		memcpy(&menu[MenuLine[M_COL]*2*Menu_Width + 26], "ein", 3);
-	if (auto_national)
-		memcpy(&menu[MenuLine[M_AUN]*2*Menu_Width + 26], "ein", 3);
+	hex2str(&menu[2*Menu_Width*MenuLine[M_SC1] + 27], screen_mode1);
+	hex2str(&menu[2*Menu_Width*MenuLine[M_SC2] + 27], screen_mode2);
+	hex2str(&menu[2*Menu_Width*MenuLine[M_COL] + 27], color_mode);
+	hex2str(&menu[2*Menu_Width*MenuLine[M_AUN] + 27], auto_national);
 	if (national_subset != 4)
 		memcpy(&menu[2*Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*26], 26);
 	if (national_subset == 0  || auto_national)
@@ -1512,8 +1468,39 @@ void ConfigMenu(int Init)
 	if (showhex)
 		menu[MenuLine[M_PID]*2*Menu_Width + 27] = '?';
 
-	/* clear framebuffer */
-	ClearFB(transp);
+	/* render menu */
+	PosY = Menu_StartY;
+	for (line = 0; line < Menu_Height; line++)
+	{
+		PosX = Menu_StartX;
+
+		for (byte = 0; byte < Menu_Width; byte++)
+			RenderCharFB(menu[line*2*Menu_Width + byte], menu[line*2*Menu_Width + byte+Menu_Width]);
+
+		PosY += fontheight;
+	}
+	Menu_HighlightLine(menu, MenuLine[menuitem], 1);
+	Menu_UpdateHotlist(menu, hotindex, menuitem);
+}
+
+void ConfigMenu(int Init)
+{
+	struct dmx_pes_filter_params dmx_flt;
+	int val, menuitem = M_Start;
+	int current_pid = 0;
+	int hotindex;
+	int oldscreenmode;
+	char menu[2*Menu_Height*Menu_Width];
+
+	if (!getpidsdone)
+		GetTeletextPIDs();
+
+	/* set current vtxt */
+	if (vtxtpid == 0)
+		vtxtpid = pid_table[0].vtxt_pid;
+	else
+		while(pid_table[current_pid].vtxt_pid != vtxtpid && current_pid < pids_found)
+			current_pid++;
 
 	/* reset to normal mode */
 	if (zoommode)
@@ -1529,21 +1516,13 @@ void ConfigMenu(int Init)
 	if (screenmode)
 		SwitchScreenMode(0); /* turn off divided screen */
 
-	/* render menu */
-	PosY = Menu_StartY;
-	for (line = 0; line < sizeof(menu)/(2*Menu_Width); line++)
-	{
-		PosX = Menu_StartX;
-
-		for (byte = 0; byte < Menu_Width; byte++)
-			RenderCharFB(menu[line*2*Menu_Width + byte], menu[line*2*Menu_Width + byte+Menu_Width]);
-
-		PosY += fontheight;
-	}
-	Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 	hotindex = getIndexOfPageInHotlist();
-	Menu_UpdateHotlist(menu, hotindex, menuitem);
 
+	/* clear framebuffer */
+	ClearFB(transp);
+	clearbbcolor = black;
+	Menu_Init(menu, current_pid, menuitem, hotindex);
+	
 	/* set blocking mode */
 	val = fcntl(rc, F_GETFL);
 	fcntl(rc, F_SETFL, val &~ O_NONBLOCK);
@@ -1570,21 +1549,21 @@ void ConfigMenu(int Init)
 			switch (RCCode)
 			{
 			case RC_UP:
-				if (menuitem > 0 && !(auto_national && (menuitem-1 == M_NAT)))
-				{
-					Menu_HighlightLine(menu, MenuLine[menuitem], 0);
+				Menu_HighlightLine(menu, MenuLine[menuitem], 0);
+				if (--menuitem < 0)
+					menuitem = M_Number-1;
+				if (auto_national && (menuitem == M_NAT))
 					menuitem--;
-					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
-				}
+				Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 				break;
 
 			case RC_DOWN:
-				if (menuitem < M_Number-1 && !(auto_national && (menuitem+1 == M_NAT)))
-				{
-					Menu_HighlightLine(menu, MenuLine[menuitem], 0);
+				Menu_HighlightLine(menu, MenuLine[menuitem], 0);
+				if (++menuitem > M_Number-1)
+					menuitem = 0;
+				if (auto_national && (menuitem == M_NAT))
 					menuitem++;
-					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
-				}
+				Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 				break;
 
 			case RC_LEFT:
@@ -1651,20 +1630,24 @@ void ConfigMenu(int Init)
 							menu[MenuLine[M_NAT]*2*Menu_Width + 28] = 'î';
 						}
 
-						memcpy(&menu[2*Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*26], 26);
-						Menu_HighlightLine(menu, MenuLine[menuitem], 1);
+						Menu_Init(menu, current_pid, menuitem, hotindex);
 					}
 					break;
 
 				case M_HOT: /* move towards top of hotlist */
-				{
 					if (hotindex <= 0) /* if not found, start at end */
 						hotindex = maxhotlist;
 					else
 						hotindex--;
 					Menu_UpdateHotlist(menu, hotindex, menuitem);
-				}
-				break;
+					break;
+
+				case M_LNG:
+					saveconfig = 1;
+					if (--menulanguage < 0)
+						menulanguage = MAXMENULANGUAGE;
+					Menu_Init(menu, current_pid, menuitem, hotindex);
+					break;
 				} /* switch menuitem */
 				break; /* RC_LEFT */
 
@@ -1728,20 +1711,24 @@ void ConfigMenu(int Init)
 							menu[MenuLine[M_NAT]*2*Menu_Width + 28] = 'î';
 						}
 
-						memcpy(&menu[2*Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*26], 26);
-						Menu_HighlightLine(menu, MenuLine[menuitem], 1);
+						Menu_Init(menu, current_pid, menuitem, hotindex);
 					}
 					break;
 
 				case M_HOT: /* select hotindex */
-				{
 					if ((unsigned int)hotindex >= maxhotlist) /* if not found, start at 0 */
 						hotindex = 0;
 					else
 						hotindex++;
 					Menu_UpdateHotlist(menu, hotindex, menuitem);
-				}
-				break;
+					break;
+
+				case M_LNG:
+					saveconfig = 1;
+					if (++menulanguage > MAXMENULANGUAGE)
+						menulanguage = 0;
+					Menu_Init(menu, current_pid, menuitem, hotindex);
+					break;
 				}
 				break; /* RC_RIGHT */
 
@@ -1963,11 +1950,7 @@ void ConfigMenu(int Init)
 					screen_mode1++;
 					screen_mode1 &= 1;
 
-					if (screen_mode1)
-						memcpy(&menu[2*Menu_Width*MenuLine[M_SC1] + 26], "ein", 3);
-					else
-						memcpy(&menu[2*Menu_Width*MenuLine[M_SC1] + 26], "aus", 3);
-
+					hex2str(&menu[2*Menu_Width*MenuLine[M_SC1] + 27], screen_mode1);
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 
 					ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
@@ -1980,11 +1963,7 @@ void ConfigMenu(int Init)
 					screen_mode2++;
 					screen_mode2 &= 1;
 
-					if (screen_mode2)
-						memcpy(&menu[2*Menu_Width*MenuLine[M_SC2] + 26], "ein", 3);
-					else
-						memcpy(&menu[2*Menu_Width*MenuLine[M_SC2] + 26], "aus", 3);
-
+					hex2str(&menu[2*Menu_Width*MenuLine[M_SC2] + 27], screen_mode2);
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 					break;
 
@@ -1993,11 +1972,7 @@ void ConfigMenu(int Init)
 					color_mode++;
 					color_mode &= 1;
 
-					if (color_mode)
-						memcpy(&menu[2*Menu_Width*MenuLine[M_COL] + 26], "ein", 3);
-					else
-						memcpy(&menu[2*Menu_Width*MenuLine[M_COL] + 26], "aus", 3);
-
+					hex2str(&menu[2*Menu_Width*MenuLine[M_COL] + 27], color_mode);
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 
 					if (color_mode)
@@ -2016,26 +1991,9 @@ void ConfigMenu(int Init)
 					saveconfig = 1;
 					auto_national++;
 					auto_national &= 1;
-
 					if (auto_national)
-					{
-						memcpy(&menu[2*Menu_Width*MenuLine[M_AUN] + 26], "ein", 3);
-						menu[MenuLine[M_NAT]*2*Menu_Width +  1] = ' ';
-						menu[MenuLine[M_NAT]*2*Menu_Width + 28] = ' ';
 						national_subset = pid_table[current_pid].national_subset;
-						memcpy(&menu[2*Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*26], 26);
-					}
-					else
-					{
-						memcpy(&menu[2*Menu_Width*MenuLine[M_AUN] + 26], "aus", 3);
-						if (national_subset != 0)
-							menu[MenuLine[M_NAT]*2*Menu_Width +  1] = 'í';
-						if (national_subset != 12)
-							menu[MenuLine[M_NAT]*2*Menu_Width + 28] = 'î';
-					}
-
-					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
-					Menu_HighlightLine(menu, MenuLine[M_NAT], 0);
+					Menu_Init(menu, current_pid, menuitem, hotindex);
 					break;
 				case M_HOT: /* show selected page */
 				{
@@ -2453,7 +2411,6 @@ void Next100()
 void PageCatching()
 {
 	int val, byte;
-	char line25_2[] = "        íïðî w{hlen   ñò anzeigen       ¤¤¤¤¤¤¤¤¨¨¨¨¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤";
 
 	pagecatching = 1;
 
@@ -2464,7 +2421,7 @@ void PageCatching()
 	PosX = StartX;
 	PosY = StartY + 24*fontheight;
 	for (byte = 0; byte < 40; byte++)
-		RenderCharFB(line25_2[byte], line25_2[byte + 40]);
+		RenderCharFB(catchmenutext[menulanguage][byte], catchmenutext[menulanguage][byte+40]);
 
 	/* check for pagenumber(s) */
 	catch_row    = 1;
@@ -2884,6 +2841,7 @@ void SwitchTranspMode()
 	else
 	{
 		ClearFB(transp);
+		clearbbcolor = black;
 	}
 }
 
@@ -2942,8 +2900,8 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	int factor;
 	unsigned char *sbitbuffer;
 
-	/* skip doubleheight chars in lower line */
-	if (Char == 0xFF)
+
+	if (Char == 0xFF)	/* skip doubleheight chars in lower line */
 	{
 		PosX += fontwidth;
 		return;
@@ -2971,7 +2929,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		
 		Char = (Char & 0x1f) | ((Char & 0x40) >> 1);
 		if (Attribute & 0x200) /* separated mosaic */
-			for (y=0; y<3; y++)
+			for (y = 0; y < 3; y++)
 			{
 				FillRectMosaicSeparated(PosX,      PosY + yoffset + ymosaic[y], w1, ymosaic[y+1] - ymosaic[y], fgcolor, bgcolor, Char & 0x01);
 				FillRectMosaicSeparated(PosX + w1, PosY + yoffset + ymosaic[y], w2, ymosaic[y+1] - ymosaic[y], fgcolor, bgcolor, Char & 0x02);
@@ -2996,16 +2954,14 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	else
 		factor = 1;
 		
-	if (!Char || Char == ' ')
-	{
-		FillRect(PosX, PosY + yoffset, fontwidth, factor*fontheight, bgcolor);
-		PosX += fontwidth;
-		return;
-	}
-	
 	/* load char */
 	switch (Char)
 	{
+	case 0x00:
+	case 0x20:
+		FillRect(PosX, PosY + yoffset, fontwidth, factor*fontheight, bgcolor);
+		PosX += fontwidth;
+		return;
 	case 0x23:
 	case 0x24:
 		Char = nationaltable23[national_subset][Char-0x23];
@@ -3027,11 +2983,6 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	case 0x7E:
 		Char = nationaltable7b[national_subset][Char-0x7B];
 		break;
-	case 0x00:
-	case 0x20:
-		FillRect(PosX, PosY + yoffset, fontwidth, fontheight, bgcolor);
-		PosX += fontwidth;
-		return;
 	case 0x7F:
 		FillRect(PosX, PosY + yoffset, fontwidth, factor*ascender, fgcolor);
 		FillRect(PosX, PosY + yoffset + factor*ascender, fontwidth, factor*(fontheight-ascender), bgcolor);
@@ -3533,17 +3484,23 @@ void RenderMessage(int Message)
 	int byte;
 	int fbcolor, timecolor, menucolor;
 	int pagecolumn;
+	const char *msg;
 
-	char message_1[] = "àáááááááááááááááááááááááááááááááááááâè";
+
+/*                     0000000000111111111122222222223 */
+/*                     0123456789012345678901234567890 */
+	char message_1[] = "àááááááááááá TuxTxt x.xx áááááááááááâè";
 	char message_2[] = "ã                                   äé";
-	char message_3[] = "ã   suche nach Teletext-Anbietern   äé";
+/* 	char message_3[] = "ã   suche nach Teletext-Anbietern   äé"; */
 	char message_4[] = "ã                                   äé";
 	char message_5[] = "åæææææææææææææææææææææææææææææææææææçé";
 	char message_6[] = "ëììììììììììììììììììììììììììììììììììììê";
 
-	char message_7[] = "ã kein Teletext auf dem Transponder äé";
-	char message_8[] = "ã  warte auf Empfang von Seite 100  äé";
-	char message_9[] = "ã     Seite 100 existiert nicht!    äé";
+/* 	char message_7[] = "ã kein Teletext auf dem Transponder äé"; */
+/* 	char message_8[] = "ã  warte auf Empfang von Seite 100  äé"; */
+/* 	char message_9[] = "ã     Seite 100 existiert nicht!    äé"; */
+
+	memcpy(&message_1[20], versioninfo, 4);
 
 	/* reset zoom */
 	zoommode = 0;
@@ -3573,36 +3530,37 @@ void RenderMessage(int Message)
 	/* set pagenumber */
 	if (Message == PageNotFound || Message == ShowServiceName)
 	{
-		char *msg;
-
 		if (bttok && !basictop[page]) /* page non-existent according to TOP (continue search anyway) */
 		{
-			pagecolumn = 12;
-			msg = message_9;
+			pagecolumn = MESSAGE9PAGECOLUMN;
+			msg = message_9[menulanguage];
 		}
 		else
 		{
-			pagecolumn = 31;
-			msg = message_8;
+			pagecolumn = message8pagecolumn[menulanguage];
+			msg = message_8[menulanguage];
 		}
-
-		memset(&message_3[1], ' ', 35);
-		hex2str(msg+pagecolumn+2, page);
-		memcpy(&message_4, msg, sizeof(message_8));
+		memcpy(&message_4, msg, sizeof(message_4));
+		hex2str(message_4+pagecolumn, page);
 
 		if (SDT_ready)
-			memcpy(&message_2[2 + (35 - pid_table[current_service].service_name_len)/2], &pid_table[current_service].service_name, pid_table[current_service].service_name_len);
+			memcpy(&message_2[2 + (35 - pid_table[current_service].service_name_len)/2],
+					 &pid_table[current_service].service_name, pid_table[current_service].service_name_len);
 		else if (Message == ShowServiceName)
 			hex2str(&message_2[17+3], vtxtpid);
+
+		msg = &message_3_blank[0];
 	}
 	else if (Message == NoServicesFound)
-		memcpy(&message_3, &message_7, sizeof(message_7));
+		msg = &message_7[menulanguage][0];
+	else
+		msg = &message_3[menulanguage][0];
 
 	/* render infobar */
 	PosX = StartX + fontwidth+5;
 	PosY = StartY + fontheight*16;
 	for (byte = 0; byte < 37; byte++)
-		RenderCharFB(message_1[byte], menucolor<<4 | menu2);
+		RenderCharFB(message_1[byte], menucolor<<4 | ((byte >= 13 && byte <= 23) ? yellow : menu2));
 	RenderCharFB(message_1[37], fbcolor<<4 | menu2);
 
 	PosX = StartX + fontwidth+5;
@@ -3615,11 +3573,11 @@ void RenderMessage(int Message)
 
 	PosX = StartX + fontwidth+5;
 	PosY = StartY + fontheight*18;
-	RenderCharFB(message_3[0], menucolor<<4 | menu2);
+	RenderCharFB(msg[0], menucolor<<4 | menu2);
 	for (byte = 1; byte < 36; byte++)
-		RenderCharFB(message_3[byte], menucolor<<4 | white);
-	RenderCharFB(message_3[36], menucolor<<4 | menu2);
-	RenderCharFB(message_3[37], fbcolor<<4 | menu2);
+		RenderCharFB(msg[byte], menucolor<<4 | white);
+	RenderCharFB(msg[36], menucolor<<4 | menu2);
+	RenderCharFB(msg[37], fbcolor<<4 | menu2);
 
 	PosX = StartX + fontwidth+5;
 	PosY = StartY + fontheight*19;
@@ -3676,6 +3634,12 @@ void RenderPage()
 			return;
 		}
 
+		if (transpmode || (boxed && !screenmode))
+		{
+			ClearBB(transp);
+			clearbbcolor = black;
+		}
+
 		/* render page */
 		PosY = StartY;
 
@@ -3730,18 +3694,22 @@ void showlink(int column, int linkpage, int Attrib)
 	
 	if (adip[linkpage][0])
 	{
-#if CFGTTF 
-		fontwidth = screenmode ? fontwidth_small : fontwidth_topmenumain;
-		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
+#if CFGTTF
+		int l = strlen(adip[linkpage]);
+		
+		if (l > 9) /* smaller font, if no space for one half space at front and end */
+		{
+			fontwidth = oldfontwidth * 10 / (l+1);
+			typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
+		}
 		FillRect(PosX, PosY+yoffset, 10*oldfontwidth, fontheight, Attrib >> 4);
-		if (!(screenmode && screen_mode2)) /* one space at start, if font smaller */
-			PosX += fontwidth;
+		PosX += ((10*oldfontwidth) - (l*fontwidth))/2; /* center */
 		for (p = adip[linkpage]; *p; p++)
 			RenderCharBB(*p, Attrib);
 		fontwidth = oldfontwidth;
 		typettf.font.pix_width = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 #else	 /* !TTF */
-		for (p = adip[linkpage]; p < adip[linkpage]+10; p++)
+		for (p = adip[linkpage]; p < adip[linkpage]+10; p++) /* only first 10 chars */
 			RenderCharBB(*p, Attrib);
 #endif /* !TTF */
 	}
@@ -3873,7 +3841,7 @@ void CreateLine25()
 			{
 				indent = TOPMENUINDENTBLK;
 				if (!attr)
-					attr = black<<4 | yellow;
+					attr = black<<4 | (basictop[current] <=3 ? green : yellow);	/* green for program block */
 			}
 			else if (basictop[current] >= 6 && basictop[current] <= 7) /* group */
 			{
@@ -3906,8 +3874,8 @@ void CreateLine25()
 
 void CopyBB2FB()
 {
-	unsigned char *src, *dst;
-	int fillcolor, i;
+	unsigned char *src, *dst, *topsrc;
+	int fillcolor, i, screenwidth;
 
 	/* line 25 */
 	CreateLine25();
@@ -3933,7 +3901,7 @@ void CopyBB2FB()
 		return;
 	}
 
-	src = dst = lfb + StartY*var_screeninfo.xres;
+	src = dst = topsrc = lfb + StartY*var_screeninfo.xres;
 
 	if (zoommode == 2)
 		src += 12*fontheight*var_screeninfo.xres;
@@ -3941,8 +3909,11 @@ void CopyBB2FB()
 	if (var_screeninfo.yoffset)
 		dst += var_screeninfo.xres * var_screeninfo.yres;
 	else
+	{
 		src += var_screeninfo.xres * var_screeninfo.yres;
-		
+		topsrc += var_screeninfo.xres * var_screeninfo.yres;
+	}
+
 	if (transpmode)
 		fillcolor = transp;
 	else
@@ -3950,11 +3921,32 @@ void CopyBB2FB()
 
 	memset(dst - StartY*var_screeninfo.xres, fillcolor, StartY*var_screeninfo.xres);
 
+	if (screenmode) /* copy topmenu in normal height (since PIG also keeps dimensions) */
+	{
+		unsigned char *topdst = dst;
+		
+		if (screen_mode2)	/* 16:9 */
+			screenwidth = TV169STARTX;
+		else
+			screenwidth = TV43STARTX;
+		
+		topsrc += screenwidth;
+		topdst += screenwidth;
+		for (i=0; i < 25*fontheight; i++)
+		{
+			memcpy(topdst, topsrc, fontwidth_topmenusmall*TOPMENUCHARS);
+			topdst += var_screeninfo.xres;
+			topsrc += var_screeninfo.xres;
+		}
+	}
+	else
+		screenwidth = var_screeninfo.xres;
+		
 	for (i = 12*fontheight; i; i--)
 	{
-		memcpy(dst, src, var_screeninfo.xres);
+		memcpy(dst, src, screenwidth);
 		dst += var_screeninfo.xres;
-		memcpy(dst, src, var_screeninfo.xres);
+		memcpy(dst, src, screenwidth);
 		dst += var_screeninfo.xres;
 		src += var_screeninfo.xres;
 	}
@@ -4162,25 +4154,44 @@ void DecodePage()
 
 	if (!is_dec(page))
 	{
-		unsigned char *p, c, n;
-		
+		int i;
+		unsigned char *p, c, n, h, parityerror = 0;
+
 		/* show (usually nonexistent) page number for hex pages */
-		hex2str(page_char + 9 + 3, page);
+		hex2str(page_char + 8 + 2, page);
+
+		for (i = 0; i < 8 + 3; i++)
+			page_atrb[i] = black<<4 | white;
+
 		/* decode parity/hamming */
-		for (p = page_char + 9 + 4; p < page_char + sizeof(page_char); p++)
+		for (; i < sizeof(page_char); i++)
 		{
-			if (0xFF != (c = dehamming[*p]))
-				hex2str(p, c);
+			page_atrb[i] = black<<4 | white;
+			p = page_char + i;
+			h = dehamming[*p];
+			if (parityerror && h != 0xFF)	/* if no regular page (after any parity error) */
+				hex2str(p, h);	/* first try dehamming */
 			else 
 			{
 				n = 0;
-				for (c = *p; c; c &= (c-1))
+				for (c = *p; c; c &= (c-1)) /* calc parity */
 					n ^= 1;
 				if (n)
 					*p &= 127;
 				else
-					*p = ' ';
+				{
+					parityerror = 1;
+					if (h != 0xFF)	/* first parity error: try dehamming */
+						hex2str(p, h);
+					else
+						*p = ' ';
+				}
 			}
+		}
+		if (parityerror)
+		{
+			boxed = 0;
+			return; /* don't interpret irregular pages */
 		}
 	}
 
@@ -4270,8 +4281,12 @@ void DecodePage()
 
 				case start_box:
 					if (boxed)
+					{
+						if (col > 0)
+							memset(&page_char[row*40], ' ', col);
 						for (clear = 0; clear < col; clear++)
-							page_atrb[row*40 + clear] = transp<<4 | transp;
+							page_atrb[row*40 + clear] = doubleheight<<10 | transp<<4 | transp;
+					}
 					break;
 
 				case normal_size:

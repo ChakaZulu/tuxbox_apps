@@ -366,6 +366,7 @@ FONTTYPE type0r, type1r, type2r;
 /* some data */
 unsigned char basictop[0x900];
 unsigned char adip[0x900][13];  /* FIXME: pointers and malloc? */
+char versioninfo[16];
 char bttok;
 int adippg[10];
 int maxadippg;
@@ -383,7 +384,7 @@ int inputcounter;
 int zoommode, screenmode, transpmode, hintmode, boxed;
 int catch_row, catch_col, catched_page, pagecatching;
 int prev_100, prev_10, next_10, next_100;
-int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, national_subset, auto_national, showhex;
+int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, national_subset, auto_national, swapupdown, showhex, menulanguage;
 int clear_page, clear_subpage;
 int pids_found, current_service, getpidsdone;
 int SDT_ready;
@@ -429,7 +430,8 @@ const char countrystring[] =
 
 const unsigned char countryconversiontable[] = { 1, 4, 11, 5, 3, 8, 0, 9 };
 
-unsigned char vendor;	/* 0 Nokia, 1 Philips, 2 Sagem */
+unsigned char restoreaudio = 0;
+/* 0 Nokia, 1 Philips, 2 Sagem */
 /* typ_vcr/dvb: 	v1 a1 v2 a2 v3 a3 (vcr_only: fblk) */
 const int avstable_ioctl[7] =
 {
@@ -447,6 +449,218 @@ const unsigned char avstable_dvb[3][7] =
 	{ 1, 1, 1, 1, 1, 1, 0 },
 	{ 0, 0, 0, 0, 0, 0, 0 },
 };
+
+/* language dependent texts */
+#define MAXMENULANGUAGE 3 /* 0 deutsch, 1 englisch, 2 französisch, 3 niederländisch */
+
+#define Menu_StartX (StartX + fontwidth*9/2)
+#define Menu_StartY (StartY + fontheight)
+#define Menu_Height 24
+#define Menu_Width 31
+
+const char MenuLine[] =
+{
+	4,9,12,13,16,19,20,21
+};
+
+enum
+{
+	M_HOT=0,
+	M_PID,
+	M_SC1,
+	M_SC2,
+	M_COL,
+	M_AUN,
+	M_NAT,
+	M_LNG,
+	M_Number
+};
+
+#define M_Start M_HOT
+#define M_MaxDirect M_AUN
+
+const char hotlistpagecolumn[] =	/* last(!) column of page to show in each language */
+{
+	22, 26, 28, 27
+};
+const char hotlisttextcolumn[] =
+{
+	24, 14, 14, 15
+};
+const char hotlisttext[][2*5] =
+{
+	{ "dazu entf." },
+	{ " add rem. " },
+	{ "ajout  rem" },
+	{ "toev.entf." },
+};
+
+const char configmenu[][2*Menu_Height*Menu_Width] =
+{
+	{
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+		"àááááááááááááááááááááááááááááâè««««««««««««««««««««««««««««««›"
+		"ã     Konfigurationsmenue    äé«¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤«›"
+		"åææææææææææææææææææææææææææææçé««««««««««««««««««««««««««««««›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã1 Favoriten: Seite 111 dazu äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãíîñò                        äéËÈÈ¨¨ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã+-?                         äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã2     Teletext-Auswahl      äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãí                          îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã      Bildschirmformat      äéËÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ã3  Standard-Modus 16:9      äéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã4  TextBild-Modus 16:9      äéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã5        Helligkeit         äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãAnzeige 1/3 reduzieren      äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã6  nationaler Zeichensatz   äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãautomatische Erkennung      äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ãí    DE (#$@[\\]^_`{|}~)    îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ãí Sprache/Language deutsch îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"åææææææææææææææææææææææææææææçéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ëìììììììììììììììììììììììììììììê›››››››››››››››››››››››››››››››"
+	},
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+	{
+		"àááááááááááááááááááááááááááááâè««««««««««««««««««««««««««««««›"
+		"ã     Configuration menu     äé«¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤«›"
+		"åææææææææææææææææææææææææææææçé««««««««««««««««««««««««««««««›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã1 Favorites:  add page 111  äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãíîñò                        äéËÈÈ¨¨ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã+-?                         äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã2     Teletext selection    äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãí                          îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã        Screen format       äéËÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ã3 Standard mode 16:9        äéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã4 Text/TV mode  16:9        äéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã5        Brightness         äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ã         Reduce by 1/3      äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã6   national characterset   äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ã automatic recognition      äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ãí    DE (#$@[\\]^_`{|}~)    îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ãí Sprache/language english îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"åææææææææææææææææææææææææææææçéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ëìììììììììììììììììììììììììììììê›››››››››››››››››››››››››››››››"
+	},
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+	{
+		"àááááááááááááááááááááááááááááâè««««««««««««««««««««««««««««««›"
+		"ã    Menu de configuration   äé«¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤«›"
+		"åææææææææææææææææææææææææææææçé««««««««««««««««««««««««««««««›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã1 Favorites: ajout. page 111äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãíîñò                        äéËÈÈ¨¨ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã+-?                         äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã2  Selection de teletext    äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãí                          îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã      Format de l'#cran     äéËÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ã3 Mode standard 16:9        äéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã4 Texte/TV      16:9        äéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã5          Clarte           äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ã  R#duire de 1/3            äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã6     police nationale      äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãreconn. automatique         äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ãí    DE (#$@[\\]^_`{|}~)    îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ãí Sprache/language francaisîäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"åææææææææææææææææææææææææææææçéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ëìììììììììììììììììììììììììììììê›››››››››››››››››››››››››››››››"
+	},
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+	{
+		"àááááááááááááááááááááááááááááâè««««««««««««««««««««««««««««««›"
+		"ã      Configuratiemenu      äé«¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤«›"
+		"åææææææææææææææææææææææææææææçé««««««««««««««««««««««««««««««›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã1 Favorieten: toev. pag 111 äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãíîñò                        äéËÈÈ¨¨ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã+-?                         äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã2     Teletekst-selectie    äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãí                          îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã     Beeldschermformaat     äéËÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ã3   Standaardmode 16:9      äéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã4   Tekst/TV mode 16:9      äéË¤ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã5        Helderheid         äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ã  Verminderen met 1/3       äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ã6    nationale tekenset     äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+		"ãautomatische erkenning      äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ãí    DE (#$@[\\]^_`{|}~)    îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ãí Sprache/Language nederl. îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"åææææææææææææææææææææææææææææçéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+		"ëìììììììììììììììììììììììììììììê›››››››››››››››››››››››››››››››"
+	}
+};
+
+const char catchmenutext[][80] =
+{
+	{ "        íïğî w{hlen   ñò anzeigen       "
+	  "¤¤¤¤¤¤¤¤¨¨¨¨¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤" },
+	{ "        íïğî select   ñò show           "
+	  "¤¤¤¤¤¤¤¤¨¨¨¨¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤" },
+	{ "  íïğî selectionner   ñò montrer        "
+	  "¤¤¨¨¨¨¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤" },
+	{ "        íïğî kiezen   ñò tonen          "
+	  "¤¤¤¤¤¤¤¤¨¨¨¨¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤" }
+};
+
+const char message_3[][38] =
+{
+	{ "ã   suche nach Teletext-Anbietern   äé" },
+	{ "ã  searching for teletext Services  äé" },
+	{ "ã  recherche des services teletext  äé" },
+	{ "ã zoeken naar teletekst aanbieders  äé" }
+};
+const char message_3_blank[] = "ã                                   äé";
+const char message_7[][38] =
+{
+	{ "ã kein Teletext auf dem Transponder äé" },
+	{ "ã   no teletext on the transponder  äé" },
+	{ "ã pas de teletext sur le transponderäé" },
+	{ "ã geen teletekst op de transponder  äé" }
+};
+const char message_8[][38] =
+{
+/*    00000000001111111111222222222233333333334 */
+/*    01234567890123456789012345678901234567890 */
+	{ "ã  warte auf Empfang von Seite 100  äé" },
+	{ "ã waiting for reception of page 100 äé" },
+	{ "ã attentre la réception de page 100 äé" },
+	{ "ãwachten op ontvangst van pagina 100äé" }
+};
+const char message8pagecolumn[] = /* last(!) column of page to show in each language */
+{
+	33, 34, 34, 35
+};
+const char message_9[][38] =
+{
+/*    0000000000111111111122222222223 */
+/*    0123456789012345678901234567890 */
+	{ "ã     Seite 100 existiert nicht!    äé" },
+	{ "ã      Page 100 does not exist!     äé" },
+	{ "ã      Page 100 n'existe pas!       äé" },
+	{ "ã    Pagina 100 bestaat niet!       äé" } 
+};
+#define MESSAGE9PAGECOLUMN 14
 
 /* buffers */
 unsigned char  lcd_backbuffer[120*64 / 8];
