@@ -65,7 +65,7 @@ CMP3PlayerGui::CMP3PlayerGui()
 	visible = false;
 	selected = 0;
 	width = 720;
-	if ((g_settings.screen_EndX- g_settings.screen_StartX) < width-ConnectLineBox_Width)
+	if ((g_settings.screen_EndX- g_settings.screen_StartX) < width+ConnectLineBox_Width)
 		width=(g_settings.screen_EndX- g_settings.screen_StartX)-ConnectLineBox_Width;
 	height = 570;
 	if ((g_settings.screen_EndY- g_settings.screen_StartY) < height)
