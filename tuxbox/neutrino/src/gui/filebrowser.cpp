@@ -124,8 +124,26 @@ bool sortByName (const CFile& a, const CFile& b)
 {
 	if(a.Name == b.Name)
 		return a.Mode < b.Mode;
-	else
-		return a.Name < b.Name ;
+	else{
+
+    char ch1; char ch2;
+    unsigned int len = a.Name.length();
+    if (b.Name.length() < len) {
+      len = b.Name.length();
+    }
+
+    for (unsigned int i = 0; i<len; i++){
+      ch1 = a.Name[i];
+      ch2 = b.Name[i];
+      if (tolower(ch1) < tolower(ch2)){
+        return true;
+      }else if (tolower(ch1) > tolower(ch2)){
+        return false;
+      }
+
+    }
+    return false;
+  }
 }
 
 bool sortByType (const CFile& a, const CFile& b)
@@ -134,6 +152,7 @@ bool sortByType (const CFile& a, const CFile& b)
 		return a.Name > b.Name;
 	else
 		return a.Mode < b.Mode ;
+
 }
 
 bool sortByDate (const CFile& a, const CFile& b)

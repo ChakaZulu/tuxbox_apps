@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.49 2003/09/18 15:57:19 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.50 2003/10/12 16:33:26 gagga Exp $
  */
 
 #ifndef __bouquets_h__
@@ -10,6 +10,8 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <string.h>
+#include <ctype.h>
 
 #include <inttypes.h>
 #include <zapit/client/zapitclient.h>
@@ -29,7 +31,23 @@ struct CmpChannelByChName: public binary_function <CZapitChannel* , CZapitChanne
 {
 	bool operator() (CZapitChannel*  c1, CZapitChannel*  c2)
 	{
-		return (c1->getName() < c2->getName());
+    char ch1; char ch2;
+    unsigned int len = c1->getName().length();
+    if (c2->getName().length() < len) {
+      len = c2->getName().length();
+    }
+
+    for (unsigned int i = 0; i<len; i++){
+      ch1 = c1->getName()[i];
+      ch2 = c2->getName()[i];
+      if (tolower(ch1) < tolower(ch2)){
+        return true;
+      }else if (tolower(ch1) > tolower(ch2)){
+        return false;
+      }
+
+    }
+    return false;
 	};
 };
 

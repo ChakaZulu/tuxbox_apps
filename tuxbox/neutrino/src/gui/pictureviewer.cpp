@@ -66,7 +66,24 @@ bool comparePictureByDate (const CPicture& a, const CPicture& b)
 //------------------------------------------------------------------------
 bool comparePictureByFilename (const CPicture& a, const CPicture& b)
 {
-	return a.Filename < b.Filename ;
+    char ch1; char ch2;
+    unsigned int len = a.Filename.length();
+    if (b.Filename.length() < len) {
+      len = b.Filename.length();
+    }
+
+    for (unsigned int i = 0; i<len; i++){
+      ch1 = a.Filename[i];
+      ch2 = b.Filename[i];
+      if (tolower(ch1) < tolower(ch2)){
+        return true;
+      }else if (tolower(ch1) > tolower(ch2)){
+        return false;
+      }
+
+    }
+    return false;
+
 }
 //------------------------------------------------------------------------
 
