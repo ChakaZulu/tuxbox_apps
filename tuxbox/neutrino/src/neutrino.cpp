@@ -74,6 +74,7 @@
 #include "gui/color.h"
 
 #include "gui/bedit/bouqueteditor_bouquets.h"
+#include <gui/bouquetlist.h>
 #include "gui/eventlist.h"
 #include "gui/channellist.h"
 #include "gui/screensetup.h"
@@ -104,6 +105,7 @@
 
 #include <string.h>
 
+CBouquetList   * bouquetList;
 CPlugins       * g_PluginList;
 CRemoteControl * g_RemoteControl;
 

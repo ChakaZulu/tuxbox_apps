@@ -1,3 +1,5 @@
+#ifndef __neutrino_global_h__
+#define __neutrino_global_h__
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -47,7 +49,6 @@
 
 #include "gui/epgview.h"
 #include "gui/infoviewer.h"
-#include "gui/bouquetlist.h"
 #include "gui/eventlist.h"
 
 #ifndef NEUTRINO_CPP
@@ -74,10 +75,10 @@ NEUTRINO_CPP  EventList			*g_EventList;
 
 NEUTRINO_CPP CLocaleManager		*g_Locale;
 
-NEUTRINO_CPP CBouquetList		*bouquetList;
-
 
 #ifdef USEACTIONLOG
 	#include "helpers/actionlog.h"
 	NEUTRINO_CPP CActionLog		*g_ActionLog;
 #endif
+
+#endif /* __neutrino_global_h__ */

@@ -29,24 +29,28 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <gui/channellist.h>
+
 #include <global.h>
 #include <neutrino.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
+
+#include <gui/color.h>
+#include <gui/eventlist.h>
+#include <gui/infoviewer.h>
+#include <gui/widget/icons.h>
+#include <gui/widget/menue.h>
+#include <gui/widget/messagebox.h>
+
 #include <system/settings.h>
 #include <system/lastchannel.h>
 
-#include <gui/widget/icons.h>
-#include "widget/menue.h"
-#include "widget/messagebox.h"
 
-#include "channellist.h"
-#include "color.h"
-#include "eventlist.h"
-#include "infoviewer.h"
-
+#include <gui/bouquetlist.h>
 #include <daemonc/remotecontrol.h>
+extern CBouquetList * bouquetList;       /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 int info_height = 0;
@@ -157,7 +161,7 @@ int CChannelList::getKey(int id)
 	return chanlist[id]->key;
 }
 
-string CChannelList::getActiveChannelName()
+std::string CChannelList::getActiveChannelName()
 {
 	if (selected< chanlist.size())
 		return chanlist[selected]->name;
@@ -176,7 +180,7 @@ t_satellite_position CChannelList::getActiveSatellitePosition()
 /*
 const std::string CChannelList::getActiveChannelID()
 {
-	string  id;
+	std::string  id;
 	char anid[10];
 	snprintf( anid, 10, "%x", getActiveChannel_ChannelID() );
 	id= anid;
@@ -730,8 +734,8 @@ void CChannelList::paintDetails(int index)
 		sprintf( cNoch, "(%d / %d min)", seit, noch );
 		int noch_len = g_Fonts->channellist_number->getRenderWidth(cNoch, true); // UTF-8
 
-		string text1= chanlist[index]->currentEvent.description;
-		string text2= chanlist[index]->currentEvent.text;
+		std::string text1= chanlist[index]->currentEvent.description;
+		std::string text2= chanlist[index]->currentEvent.text;
 
 		int xstart = 10;
 		if ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) )
@@ -745,7 +749,7 @@ void CChannelList::paintDetails(int index)
 					text1 = text1.substr( 0, pos );
 			} while ( ( pos != -1 ) && ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) ) );
 
-			string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1).c_str();
+			std::string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1).c_str();
 			if ( text2 != "" )
 				text3= text3+ " · ";
 
@@ -886,7 +890,7 @@ void CChannelList::paintItem(int pos)
 
 void CChannelList::paintHead()
 {
-	string strCaption = g_Locale->getText(name);
+	std::string strCaption = g_Locale->getText(name);
 
 /*	if (strCaption == "")
 	{

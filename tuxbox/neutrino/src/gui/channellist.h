@@ -1,3 +1,6 @@
+#ifndef __channellist__
+#define __channellist__
+
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -29,20 +32,15 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <driver/framebuffer.h>
+#include <gui/widget/menue.h>
+#include <system/lastchannel.h>
 
-#ifndef __channellist__
-#define __channellist__
+#include <sectionsdclient/sectionsdclient.h>
+#include <zapit/client/zapitclient.h>
 
 #include <string>
 #include <vector>
-
-#include <driver/framebuffer.h>
-#include <system/lastchannel.h>
-
-#include "widget/menue.h"
-
-
-using namespace std;
 
 class CChannelList
 {
@@ -51,7 +49,7 @@ class CChannelList
 		{
 			private:
 				unsigned long long	last_unlocked_EPGid;
-				string      	        name;
+				std::string             name;
 				t_satellite_position	satellitePosition;
 				int         	        key;
 
@@ -80,8 +78,8 @@ class CChannelList
 		int			fheight; // Fonthoehe Channellist-Inhalt
 		int			theight; // Fonthoehe Channellist-Titel
 
-		string			name;
-		vector<CChannel*>	chanlist;
+		std::string		name;
+		std::vector<CChannel*>	chanlist;
 		CZapProtection* 	zapProtection;
 
 		int 			width;
@@ -110,7 +108,7 @@ class CChannelList
 		t_satellite_position getActiveSatellitePosition();
 		int getActiveChannelNumber();
 		t_channel_id CChannelList::getActiveChannel_ChannelID();
-//		const string getActiveChannelID();
+//		const std::string getActiveChannelID();
 		CChannel* getChannelFromChannelID(const t_channel_id channel_id);
 		void zapTo(int pos);
 		bool zapTo_ChannelID(const t_channel_id channel_id);

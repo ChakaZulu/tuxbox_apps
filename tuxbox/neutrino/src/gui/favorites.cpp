@@ -25,17 +25,22 @@
 */
 
 
-#include <zapit/client/zapitclient.h>
+#include <gui/channellist.h>
 
 #include <global.h>
 #include <neutrino.h>
 
-#include "favorites.h"
-#include "gui/channellist.h"
+#include <gui/favorites.h>
 
-#include "widget/messagebox.h"
-#include "widget/hintbox.h"
-#include "widget/stringinput.h"
+#include <gui/widget/hintbox.h>
+#include <gui/widget/messagebox.h>
+#include <gui/widget/stringinput.h>
+
+#include <zapit/client/zapitclient.h>
+
+
+#include <gui/bouquetlist.h>
+extern CBouquetList * bouquetList;       /* neutrino.cpp */
 
 
 //

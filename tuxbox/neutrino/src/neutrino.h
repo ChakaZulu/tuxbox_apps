@@ -35,14 +35,15 @@
 
 #include <configfile.h>
 
-#include <zapit/client/zapitclient.h>
-
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
 #include "system/setting_helpers.h"
 #include "system/configure_network.h"
 #include "timerdclient/timerdtypes.h"
-#include <daemonc/remotecontrol.h> /* st_rmsg */
+#include <gui/channellist.h>          /* CChannelList */
+#include <daemonc/remotecontrol.h>    /* st_rmsg      */
+
+#include <zapit/client/zapitclient.h>
 
 #include <string>
 
