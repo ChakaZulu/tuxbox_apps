@@ -1,5 +1,6 @@
- - New: Large file support (>2 GB), applies to -if  option (tnx to K. Zheng, Philips)
- - New: Full/raw transport stream read (option -tsraw)
+ - New: bad ts packet counter  on -s bandwidth (tnx to W.J. Beksi, setabox for basic patch)
+ - New: large file support (>2 GB), applies to -if  option (tnx to K. Zheng, Philips)
+ - New: full/raw transport stream read (option -tsraw)
 
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: option -privateprovider <providerstr>
@@ -10,7 +11,7 @@
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
  - New: new cmdline option -buffersize x (in Kbytes) to tweak DMX Buffer
  - Update: changes due to  EN 300 468 v1.6.1
- - Bugfix: Multilingual component descriptor  (tnx to Karsten Siebert, dpi AG)
+ - Bugfix: multilingual component descriptor  (tnx to Karsten Siebert, dpi AG)
  - Update: EN 300 468 v1.6.1 Terrestrial delivery system descriptor
  - Change: FE adaptions (due to change defines on API)
  - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert)

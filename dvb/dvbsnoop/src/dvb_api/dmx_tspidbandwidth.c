@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidbandwidth.c,v 1.8 2004/10/12 20:37:47 rasc Exp $
+$Id: dmx_tspidbandwidth.c,v 1.9 2004/12/07 22:25:10 rasc Exp $
 
 
  DVBSNOOP
@@ -12,6 +12,9 @@ $Id: dmx_tspidbandwidth.c,v 1.8 2004/10/12 20:37:47 rasc Exp $
 
 
 $Log: dmx_tspidbandwidth.c,v $
+Revision 1.9  2004/12/07 22:25:10  rasc
+ - New: bad ts packet counter  on -s bandwidth (tnx to W.J. Beksi, setabox for basic patch)
+
 Revision 1.8  2004/10/12 20:37:47  rasc
  - Changed: TS pid filtering from file, behavior changed
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
@@ -82,6 +85,7 @@ new: bandwidth usage reporting for a PID
 
 
 static int sync_ts (u_char *buf, int len);
+static int ts_error_count (u_char *buf, int len);
 
 
 
@@ -96,6 +100,7 @@ int ts_pidbandwidth (OPTION *opt)
   struct timeval tv,last_tv, first_tv;
   int		 pid;
   long           b;
+  long           packets_bad;
   long           packets_total;
   unsigned long long      b_total;
 
@@ -153,6 +158,7 @@ int ts_pidbandwidth (OPTION *opt)
 
 	b_total = 0;
 	packets_total = 0;
+  	packets_bad = 0;
 
 	while (1) {
 		int b_len, b_start;
@@ -168,6 +174,7 @@ int ts_pidbandwidth (OPTION *opt)
 				b_len = read(pfd.fd, buf, sizeof(buf));
 				gettimeofday (&tv, NULL);
 
+			
 				if (b_len >= TS_LEN) {
 					b_start = sync_ts (buf, b_len);
 				} else {
@@ -214,6 +221,16 @@ int ts_pidbandwidth (OPTION *opt)
 
 				   out (2, "   (Avrg: %5llu.%03llu kbit/s)", bit_s / 1000UL, bit_s % 1000UL);
 
+				   
+				   // -- bad packet(s) check in buffer
+				   {
+				     int bp;
+
+				     bp = ts_error_count (buf+b_start, b);
+				     packets_bad += bp;
+				     out (4, " [bad: %d]", bp);
+				   }
+
 				   out_NL (1);
 
 				}
@@ -237,9 +254,16 @@ int ts_pidbandwidth (OPTION *opt)
 	}
 
 
+	// -- bad packets stats
+	out_nl (4, "bad/total packets: %ld/%ld (= %1.1Lf%%)",
+		packets_bad, packets_total,
+                (((long double) packets_bad)*100)/packets_total );
 
-	if (ioctl(dmxfd, DMX_STOP) < 0)
+
+
+	if (ioctl(dmxfd, DMX_STOP) < 0) {
 		IO_error("DMX_STOP");
+	}
 	close(dmxfd);
 	close(pfd.fd);
 
@@ -249,6 +273,10 @@ int ts_pidbandwidth (OPTION *opt)
 }
 
 
+
+//
+// -- sync TS stream (if not already done by firmware)
+//
 
 static int sync_ts (u_char *buf, int len)
 {
@@ -271,8 +299,33 @@ static int sync_ts (u_char *buf, int len)
 
 
 
-/* 
- * $$$ TODO
- *  error/good packets  ratio display
- *
- */
+// 
+//  count error packets (ts error bit set, if passed thru by firmware)
+//  we are checking a synced buffer with 1..n TS packets
+//  so, we have to check every TS_LEN the error bit
+//  return: error count
+//
+
+static int ts_error_count (u_char *buf, int len) 
+{
+	int error_count = 0;
+
+
+	while (len > 0) {
+
+		// check  = getBits(buf, 0, 8, 1);
+		if (*(buf+1) & 0x80) error_count++;
+
+		len -= TS_LEN;
+		buf += TS_LEN;
+
+	}
+
+	return error_count;
+}
+
+
+
+//
+// $$$ TODO:  TS continuity_counter check, if passed thru by firmware
+//
