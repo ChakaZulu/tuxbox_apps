@@ -1,34 +1,34 @@
 <table height=25 width=100% border=0 cellpadding=0 cellspacing=0>
-<tr>
-	<td font style="font-family: Verdana; font-size: 12pt; font-weight: bold">#SERVICENAME#</font></td>
-	<td align=right>#EMPTYCELL#</td>
-	<td width=10>&nbsp;</td>
-</tr>
+	<tr>
+		<td font style="font-family: Verdana; font-size: 12pt; font-weight: bold">#SERVICENAME#</font></td>
+		<td align=right>#EMPTYCELL#</td>
+		<td width=10>&nbsp;</td>
+	</tr>
 </table>
 <table width=100% height=100% border=0 cellpadding=0 cellspacing=0>
-<tr>
-	<td width=40 align=left><span class="epgzeit"><b>#NOWT#</b></span></td>
-	<td width=5>&nbsp;</td>
-	<td width=50 align=left><span class="epgdur">#NOWD#</span></td>
-	<td width=5>&nbsp;</td>
-	<td width=320 Align=left><span class="epgname"><b>#NOWST#</b></span></td>
-	<td width=5>&nbsp;</td>
-	<td width=180 align=right>#VOLBAR#</td>
-	<td width=10>&nbsp;</td>
-</tr>
-<tr>
-	<td width=40 align=left><span class="epgzeit">#NEXTT#</span></td>
-	<td width=5>&nbsp;</td>
-	<td width=50 align=left><span class="epgdur">#NEXTD#</span></td>
-	<td width=5>&nbsp;</td>
-	<td width=320 align=left><span class="epgname">#NEXTST#</b></td>
-	<td width=5>&nbsp;</td>
-	<td width=180 align=right>#RECORDING#&nbsp;#CHANSTATS#</td>
-	<td width=10>&nbsp;</td>
-</tr>
+	<tr>
+		<td width=40 align=left><span class="epgzeit"><b>#NOWT#</b></span></td>
+		<td width=5>&nbsp;</td>
+		<td width=50 align=left><span class="epgdur">#NOWD#</span></td>
+		<td width=5>&nbsp;</td>
+		<td width=320 Align=left><span class="epgname"><b>#NOWST#</b></span></td>
+		<td width=5>&nbsp;</td>
+		<td width=180 align=right>#VOLBAR#</td>
+		<td width=10>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width=40 align=left><span class="epgzeit">#NEXTT#</span></td>
+		<td width=5>&nbsp;</td>
+		<td width=50 align=left><span class="epgdur">#NEXTD#</span></td>
+		<td width=5>&nbsp;</td>
+		<td width=320 align=left><span class="epgname">#NEXTST#</b></td>
+		<td width=5>&nbsp;</td>
+		<td width=180 align=right>#RECORDING#&nbsp;#CHANSTATS#</td>
+		<td width=10>&nbsp;</td>
+	</tr>
 </table>
 <table width=100% border=0 cellpadding=0 cellspacing=0 height=44>
-<tr>
-	<td align=left><span class="white">#STATS#</span></td>
-</tr>
+	<tr>
+		<td align=left><span class="white">#STATS#</span></td>
+	</tr>
 </table>

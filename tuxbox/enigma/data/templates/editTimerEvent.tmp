@@ -1,0 +1,106 @@
+<html>
+	<head>
+		<title>Edit Timer Event</title>
+		<link rel="stylesheet" type="text/css" href="webif.css">
+	</head>
+	<body>
+		<form action="/changeTimerEvent">
+			<input type="hidden" name="ID" value="#EVENTID#">
+			<input type="hidden" name="ref" value="#SERVICEREF#">
+			<table width=100% border=0 cellpadding=0 cellspacing=0>
+				<tr>
+					<td>Start:</d>
+					<td>
+						<select name="sday" size="1">
+							#SDAYOPTS#
+						</select>
+						.
+						<select name="smonth" size="1">
+							#SMONTHOPTS#
+						</select>
+						&nbsp;-&nbsp;
+						<select name="shour" size="1">
+							#SHOUROPTS#
+						</select>
+						:
+						<select name="smin" size="1">
+							#SMINOPTS#
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						&nbsp;
+					</td>
+					<td>
+						&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td>End:</d>
+					<td>
+						<select name="eday" size="1">
+							#EDAYOPTS#
+						</select>
+						.
+						<select name="emonth" size="1">
+							#EMONTHOPTS#
+						</select>
+						&nbsp;-&nbsp;
+						<select name="ehour" size="1">
+							#EHOUROPTS#
+						</select>
+						:
+						<select name="emin" size="1">
+							#EMINOPTS#
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						&nbsp;
+					</td>
+					<td>
+						&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td>Channel:</td>
+					<td>
+						<input name="channel" type="text" size="100" maxlength="100" value="#CHANNEL#">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						&nbsp;
+					</td>
+					<td>
+						&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td>Description:</td>
+					<td>
+						<input name="descr" type="text" size="100" maxlength="100" value="#DESCRIPTION#">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						&nbsp;
+					</td>
+					<td>
+						&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td>
+						&nbsp;
+					</td>
+					<td>
+						<input type="submit" value="  Change  ">
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>

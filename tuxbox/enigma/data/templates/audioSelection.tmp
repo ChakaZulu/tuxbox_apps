@@ -1,14 +1,17 @@
 <html>
-<head>
-<title>Audio Channel Selection</title>
-</head>
-<body>
-Please select audio channel:
-<br>
-<form action="/cgi-bin/setAudio">
-<select name="audio" size="1">
-#AUDIOCHANS#
-</select>
-</form>
-</body>
+	<head>
+		<title>Audio Channel Selection</title>
+		<link rel="stylesheet" type="text/css" href="webif.css">
+	</head>
+	<body>
+		Please select audio channel:
+		<br>
+		<form action="/cgi-bin/setAudio">
+			<select name="audio" size="1">
+				#AUDIOCHANS#
+			</select>
+			<br><br>
+			<input type="submit" value="  Select  ">
+		</form>
+	</body>
 </html>

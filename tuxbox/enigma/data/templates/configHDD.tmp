@@ -1,0 +1,22 @@
+<form action="/cgi-bin/setConfigHDD">
+	<table border=0 cellspacing=0 cellpadding=0>
+		<tr>
+			<td><input type="checkbox" name="swaphdd" value="on"></td>
+			<td>&nbsp;Use HDD Swap File:&nbsp;</td>
+			<td><input name="swaphddfile" type="text" size="50" maxlength="50" value="/hdd/swapfile"></td>
+		</tr>
+		<tr>
+			<td><input type="checkbox" name="boothdd" value="on"></td>
+			<td>&nbsp;Boot HDD Image:&nbsp;</td>
+			<td>
+				<select name="boothddimage" size="1">
+					<option>/hdd/Image1</option>
+					<option>/hdd/Image2</option>
+					<option>/hdd/Image3</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+	<br>
+	<input type="submit" value="  Configure  ">
+</form>

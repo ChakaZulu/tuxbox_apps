@@ -1,50 +1,50 @@
-<HTML>
-<HEAD>
-<TITLE>Dreambox Web Interface</TITLE>
-<link rel="stylesheet" type="text/css" href="/webif.css">
-<script language="javascript" type="text/javascript" src="/index.js"></script>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
-</HEAD>
-<BODY BGCOLOR=#FFFFFF leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="mainbody">
-<div align="center">
-<TABLE width="780" BORDER=0 CELLPADDING=0 CELLSPACING=0 height=100% id="megatable">
-	<TR>
-		<TD background="topbalk.png" height=112>
-			<table>
-			<tr>
-				<td width=160>&nbsp;</td>
-				<td>#HEADER#</td>
-			</tr>
+<html>
+	<head>
+		<title>Dreambox Web Interface</title>
+		<link rel="stylesheet" type="text/css" href="webif.css">
+		<script language="javascript" type="text/javascript" src="window.js"></script>
+		<script language="javascript" type="text/javascript" src="index.js"></script>
+		<script language="javascript" type="text/javascript" src="timer.js"></script>
+		<meta HTTP-EQUIV="Content-Type" content="text/html; charset=iso-8859-1">
+	</head>
+	<body #ONLOAD# leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="mainbody">
+		<div align="center">
+			<table width="780" height=100% border=0 cellpadding=0 cellspacing=0 id="megatable">
+				<tr>
+					<td background="topbalk.png" height=112>
+						<table>
+						<tr>
+							<td width=160>&nbsp;</td>
+							<td>#HEADER#</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td height=22>
+						<table width=100% border=0 cellpadding=0 cellspacing=0>
+							<tr>
+								<td id="topnavi">#TOPNAVI#</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td valign=top>
+						<table width=100% height=100% border=0 cellspacing=0 cellpadding=0>
+							<tr>
+								<td align=right valign=top width=110 class=menu id="leftnavi">
+									#LEFTNAVI#
+								</td>
+								<td align=left valign=top id="contentcell">
+									#CONTENT#
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
 			</table>
-		</TD>
-	</TR>
-	<TR>
-		<TD height=1>
-			<TABLE WIDTH=100% BORDER=0 CELLPADDING=0 CELLSPACING=0>
-				<TR>
-					<td id="topnavi">#TOPNAVI#</td>
-				</TR>
-			</TABLE>
-		</TD>
-	</TR>
-	<TR>
-		<TD valign=top>
-			<table width=100% height=100% border=0 cellspacing=0 cellpadding=0>
-			<tr>
-			<td align=right valign=top width=110 class=menu id="leftnavi">
-			<!--menubar-->
-				#NAVI#
-			</td>
-			<td align=left valign=top style="padding-left: 10px; padding-top: 10px; padding-right: 10px" id="contentcell">
-			<!--content cell-->
-				#COP#
-			</td>
-			</tr>
-			</table>
-		</td>
-	</tr>
-</TABLE>
-</div>
-<br>
-</BODY>
-</HTML>
+		</div>
+		<br>
+	</body>
+</html>

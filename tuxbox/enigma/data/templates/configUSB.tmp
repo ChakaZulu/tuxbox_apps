@@ -1,0 +1,22 @@
+<form name="usbconfig" action="/cgi-bin/setConfigUSB">
+	<table border=0 cellspacing=0 cellpadding=0>
+		<tr>
+			<td><input type="checkbox" name="swapusb" value="on"></td>
+			<td>&nbsp;Use USB Swap File:&nbsp;</td>
+			<td><input name="swapusbfile" type="text" size="50" maxlength="50" value="/USB/swapfile"></td>
+		</tr>
+		<tr>
+			<td><input type="checkbox" name="bootusb" value="on"></td>
+			<td>&nbsp;Boot USB Image:&nbsp;</td>
+			<td>
+				<select name="bootusbimage" size="1">
+					<option>/USB/Image1</option>
+					<option>/USB/Image2</option>
+					<option>/USB/Image3</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+	<br>
+	<input type="submit" value="  Configure  ">
+</form>

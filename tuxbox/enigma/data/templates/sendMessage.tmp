@@ -1,0 +1,7 @@
+Send the following message to your TV:
+<br><br>
+<form action="/cgi-bin/message">
+	<input name="msg" type="text" size="100" maxlength="100">
+	<br><br>
+	<input type="submit" value="  Send  ">
+</form>
