@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.14 2002/01/08 14:53:33 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.15 2002/03/02 06:48:07 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.15  2002/03/02 06:48:07  obi
+ * replaced ezap by enigma
+ *
  * Revision 1.14  2002/01/08 14:53:33  obi
  * added menu->update() to timeout method :)
  *
@@ -95,7 +98,7 @@ CLCDMenu::CLCDMenu(string configFilename)
 		config->setInt("text_align", 0);
 		config->setBool("show_numbers", false);
 		config->setString("pin", string("__lUISdFwUYjg"));
-		addEntry("EliteDVB");
+		addEntry("Enigma");
 		addEntry("Neutrino");
 		addEntry("Lcars");
 		addEntry("Maintenance");
