@@ -746,6 +746,7 @@ filebrowser.sort.date (date)
 filebrowser.sort.type (type)
 filebrowser.nextpage Next Page
 filebrowser.prevpage Prev. Page
+filebrowser.showrights Show file rights
 
 nfs.mount Mount NFS/CIFS volume
 nfs.ip NFS/CIFS Server IP

@@ -571,13 +571,18 @@ int CNeutrinoApp::loadSetup()
 	g_settings.lcd_show_volume = configfile.getInt32("lcd_show_volume", DEFAULT_LCD_SHOW_VOLUME);
 	g_settings.lcd_autodimm = configfile.getInt32("lcd_autodimm", DEFAULT_LCD_AUTODIMM);
 
+	//Picture-Viewer
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
 
+	//MP3-Player
 	g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
 	g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
 	strcpy( g_settings.mp3player_screensaver, configfile.getString( "mp3player_screensaver", "0" ).c_str() );
 
+	//Filebrowser
+	g_settings.filebrowser_showrights =  configfile.getInt32("filebrowser_showrights", 1);
+	
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
 		erg = 2;
@@ -875,12 +880,17 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "lcd_show_volume", g_settings.lcd_show_volume );
 	configfile.setInt32( "lcd_autodimm", g_settings.lcd_autodimm );
 
+	//Picture-Viewer
 	configfile.setString( "picviewer_slide_time", g_settings.picviewer_slide_time );
 	configfile.setInt32( "picviewer_scaling", g_settings.picviewer_scaling );
 
+	//MP3-Player
 	configfile.setInt32( "mp3player_display", g_settings.mp3player_display );
 	configfile.setInt32( "mp3player_follow", g_settings.mp3player_follow );
 	configfile.setString( "mp3player_screensaver", g_settings.mp3player_screensaver );
+
+	//Filebrowser
+	configfile.setInt32("filebrowser_showrights", g_settings.filebrowser_showrights);
 
 	if (configfile.getModifiedFlag())
 	{
@@ -1443,6 +1453,13 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	CStringInput * mp3_screensaver= new CStringInput("mp3player.screensaver_timeout", g_settings.mp3player_screensaver, 2, NULL, NULL, "0123456789 ");
 	mp3PicSettings.addItem( new CMenuForwarder("mp3player.screensaver_timeout", true, g_settings.mp3player_screensaver, mp3_screensaver ));
 	mp3PicSettings.addItem( new CMenuForwarder("mp3player.defdir", true, g_settings.network_nfs_mp3dir, this, "mp3dir"));
+
+	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "filebrowser.head") );
+	oj = new CMenuOptionChooser("filebrowser.showrights", &g_settings.filebrowser_showrights, true );
+	oj->addOption(0, "messagebox.no");
+	oj->addOption(1, "messagebox.yes");
+	mp3PicSettings.addItem( oj );
+
 }
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {

@@ -255,6 +255,9 @@ struct SNeutrinoSettings
 	int   mp3player_follow;
 	char  mp3player_screensaver[3];
 
+	//Filebrowser
+	int filebrowser_showrights;
+	
 	//uboot
 	int	uboot_lcd_inverse;
 	int	uboot_lcd_contrast;
