@@ -43,10 +43,15 @@ using namespace std;
 
 class CMP3
 {
+public:
 	string Filename;
+	string Title;
+	string Artist;
+	string Year;
+	string Comment;
 };
 
-typedef std::vector<string> CPlayList;
+typedef std::vector<CMP3> CPlayList;
 
 
 class CMP3PlayerGui : public CMenuTarget
@@ -56,7 +61,6 @@ class CMP3PlayerGui : public CMenuTarget
 	private:
 		CFrameBuffer		*frameBuffer;
 		CFileBrowser		filebrowser;
-//		CMP3Player			MP3Player;
 		unsigned int		selected;
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
@@ -78,6 +82,9 @@ class CMP3PlayerGui : public CMenuTarget
 		void paintHead();
 		void paintFoot();
 		void hide();
+
+		void get_id3(CMP3 * mp3);
+
 
 	public:
 		CMP3PlayerGui();

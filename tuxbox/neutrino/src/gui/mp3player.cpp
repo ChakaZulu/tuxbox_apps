@@ -51,7 +51,7 @@
 #define info_height 60
 
 
-
+//------------------------------------------------------------------------
 
 CMP3PlayerGui::CMP3PlayerGui()
 {
@@ -68,11 +68,14 @@ CMP3PlayerGui::CMP3PlayerGui()
 	Path = "/";
 }
 
+//------------------------------------------------------------------------
+
 CMP3PlayerGui::~CMP3PlayerGui()
 {
 	playlist.clear();
 }
 
+//------------------------------------------------------------------------
 int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 {
 	if(parent)
@@ -98,6 +101,7 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 	}
 }
 
+//------------------------------------------------------------------------
 
 int CMP3PlayerGui::show()
 {
@@ -167,7 +171,7 @@ int CMP3PlayerGui::show()
 		{
 			// OK button
 			if(CMP3Player::getInstance()->state == CMP3Player::STOP)
-				CMP3Player::getInstance()->play(playlist[selected].c_str());
+				CMP3Player::getInstance()->play(playlist[selected].Filename.c_str());
 			update=true;
 		}
 		else if(msg==CRCInput::RC_red && playlist.size() > 0)
@@ -191,12 +195,12 @@ int CMP3PlayerGui::show()
 					extension = file.substr(ext_pos + 1, file.length() - ext_pos);
 					if(extension == "mp3")
 					{
-/*
-						struct id3_file *id3file = id3_file_open(file.c_str(), ID3_FILE_MODE_READONLY);
-						if(id3file)
-						id3_file_close(id3file);
-*/
-						playlist.push_back(file);
+						CMP3 mp3;
+						mp3.Filename = file;
+
+						get_id3(&mp3);
+						printf("id3: Title: '%s' Artist: '%s' Comment: '%s'\n", mp3.Title.c_str(), mp3.Artist.c_str(), mp3.Comment.c_str());
+						playlist.push_back(mp3);
 					}
 				}
 			}
@@ -234,6 +238,8 @@ int CMP3PlayerGui::show()
 	return(res);
 }
 
+//------------------------------------------------------------------------
+
 void CMP3PlayerGui::hide()
 {
 	if(visible)
@@ -242,6 +248,8 @@ void CMP3PlayerGui::hide()
 		visible = false;
 	}
 }
+
+//------------------------------------------------------------------------
 
 void CMP3PlayerGui::paintItem(int pos)
 {
@@ -260,13 +268,15 @@ void CMP3PlayerGui::paintItem(int pos)
 	frameBuffer->paintBoxRel(x,ypos, width-15, 2*fheight, color);
 	if(liststart+pos<playlist.size())
 	{
-		string tmp = playlist[pos].substr(playlist[pos].rfind("/"));
+		string tmp = playlist[pos].Filename.substr(playlist[pos].Filename.rfind("/"));
 		
 		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-10, tmp.c_str(), color, fheight);
 //			CLCD::getInstance()->showMenuText(0, line1 );
 //			CLCD::getInstance()->showMenuText(1, line2 );
 	}
 }
+
+//------------------------------------------------------------------------
 
 void CMP3PlayerGui::paintHead()
 {
@@ -284,6 +294,8 @@ void CMP3PlayerGui::paintHead()
 	if (bouquetList!=NULL)
 		frameBuffer->paintIcon("dbox.raw", x+ width- 60, y+ 5 );*/
 }
+
+//------------------------------------------------------------------------
 
 void CMP3PlayerGui::paintFoot()
 {
@@ -317,6 +329,7 @@ void CMP3PlayerGui::paintFoot()
 		g_Fonts->infobar_small->RenderString(x+real_width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("mp3player.stop").c_str(), COL_INFOBAR);
 	}
 }
+//------------------------------------------------------------------------
 
 void CMP3PlayerGui::paint()
 {
@@ -363,5 +376,187 @@ void CMP3PlayerGui::paint()
 	visible = true;
 }
 
+//------------------------------------------------------------------------
+//------------------------------------------------------------------------
 
+// shameless stolen from player.c (mad)
 
+void CMP3PlayerGui::get_id3(CMP3 *mp3)
+{
+unsigned int i;
+struct id3_frame const *frame;
+id3_ucs4_t const *ucs4;
+id3_latin1_t *latin1;
+char const spaces[] = "          ";
+
+struct 
+{
+    char const *id;
+    char const *name;
+} const info[] = 
+{
+	{ ID3_FRAME_TITLE,  "Title"     },
+	{ "TIT3",           0               },  /* Subtitle */
+	{ "TCOP",           0,              },  /* Copyright */
+	{ "TPRO",           0,              },  /* Produced */
+	{ "TCOM",           "Composer"  },
+	{ ID3_FRAME_ARTIST, "Artist"    },
+	{ "TPE2",           "Orchestra" },
+	{ "TPE3",           "Conductor" },
+	{ "TEXT",           "Lyricist"  },
+	{ ID3_FRAME_ALBUM,  "Album"     },
+	{ ID3_FRAME_YEAR,   "Year"      },
+	{ ID3_FRAME_TRACK,  "Track"     },
+	{ "TPUB",           "Publisher" },
+	{ ID3_FRAME_GENRE,  "Genre"     },
+	{ "TRSN",           "Station"   },
+	{ "TENC",           "Encoder"   }
+};
+
+  /* text information */
+
+	struct id3_file *id3file = id3_file_open(mp3->Filename.c_str(), ID3_FILE_MODE_READONLY);
+	if(id3file == 0)
+		printf("error open id3 file\n");
+	id3_tag *tag=id3_file_tag(id3file);
+	if (tag) 
+	{
+		for (i = 0; i < sizeof(info) / sizeof(info[0]); ++i) 
+		{
+		union id3_field const *field;
+		unsigned int nstrings, namelen, j;
+		char const *name;
+
+			frame = id3_tag_findframe(tag, info[i].id, 0);
+			if (frame == 0)
+				continue;
+
+			field    = &frame->fields[1];
+			nstrings = id3_field_getnstrings(field);
+
+			name = info[i].name;
+	/*
+		if (name)
+		  name = gettext(name);
+	*/
+			namelen = name ? strlen(name) : 0;
+			assert(namelen < sizeof(spaces));
+
+			for (j = 0; j < nstrings; ++j) 
+			{
+				ucs4 = id3_field_getstrings(field, j);
+				assert(ucs4);
+
+				if (strcmp(info[i].id, ID3_FRAME_GENRE) == 0)
+					ucs4 = id3_genre_name(ucs4);
+
+				latin1 = id3_ucs4_latin1duplicate(ucs4);
+				if (latin1 == 0)
+					goto fail;
+
+				if (j == 0 && name)
+				{
+					if(strcmp(name,"Title") == 0)
+						mp3->Title = (char *) latin1;
+					if(strcmp(name,"Artist") == 0)
+						mp3->Artist = (char *) latin1;
+					if(strcmp(name,"Year") == 0)
+						mp3->Year = (char *) latin1;
+					printf("%s%s: %s\n", &spaces[namelen], name, latin1);
+				}
+				else 
+				{
+					if (strcmp(info[i].id, "TCOP") == 0 || strcmp(info[i].id, "TPRO") == 0) 
+					{
+						printf("%s  %s %s\n", spaces, (info[i].id[1] == 'C') ? ("Copyright (C)") : ("Produced (P)"), latin1);
+					}
+					else
+						printf("%s  %s\n", spaces, latin1);
+				}
+
+				free(latin1);
+			}
+		}
+
+	  /* comments */
+
+		i = 0;
+		while ((frame = id3_tag_findframe(tag, ID3_FRAME_COMMENT, i++))) 
+		{
+			id3_latin1_t *ptr, *newline;
+			int first = 1;
+
+			ucs4 = id3_field_getstring(&frame->fields[2]);
+			assert(ucs4);
+
+			if (*ucs4)
+				continue;
+
+			ucs4 = id3_field_getfullstring(&frame->fields[3]);
+			assert(ucs4);
+
+			latin1 = id3_ucs4_latin1duplicate(ucs4);
+			if (latin1 == 0)
+				goto fail;
+
+			ptr = latin1;
+			while (*ptr) 
+			{
+				newline = (id3_latin1_t *) strchr((char*)ptr, '\n');
+				if (newline)
+					*newline = 0;
+
+				if (strlen((char *)ptr) > 66) 
+				{
+				id3_latin1_t *linebreak;
+
+					linebreak = ptr + 66;
+
+					while (linebreak > ptr && *linebreak != ' ')
+						--linebreak;
+
+					if (*linebreak == ' ') 
+					{
+						if (newline)
+							*newline = '\n';
+
+						newline = linebreak;
+						*newline = 0;
+					}
+				}
+
+				if (first) 
+				{
+				char const *name;
+				unsigned int namelen;
+
+					name    = "Comment";
+					namelen = strlen(name);
+					assert(namelen < sizeof(spaces));
+					mp3->Comment = (char *) ptr;
+					printf("%s%s: %s\n", &spaces[namelen], name, ptr);
+					first = 0;
+				}
+				else 
+					printf("%s  %s\n", spaces, ptr);
+
+				ptr += strlen((char *) ptr) + (newline ? 1 : 0);
+			}
+
+			free(latin1);
+			break;
+		}
+		id3_tag_delete(tag);
+	}
+	else
+		printf("error open id3 tag\n");
+
+	if(id3file)
+		id3_file_close(id3file);
+
+	if (0) 
+	{
+fail:
+		printf("id3: not enough memory to display tag");
+	}
+}

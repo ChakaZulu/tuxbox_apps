@@ -41,5 +41,6 @@ neutrino_LDADD = \
 	@LIRCDCLIENT_LIBS@ \
 	@LCDDISPLAY_LIBS@ \
 	-lmad \
+	-lid3tag \
 	-lpthread -lz
 
