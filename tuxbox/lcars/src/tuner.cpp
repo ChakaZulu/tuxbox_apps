@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.18  2002/11/16 00:20:05  obi
+fe events
+
 Revision 1.17  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -75,7 +78,7 @@ tuner::tuner(settings *s)
 {
 	setting = s;
 
-	if ((frontend = open("/dev/dvb/adapter0/frontend0", O_RDWR)) < 0)
+	if ((frontend = open("/dev/dvb/adapter0/frontend0", O_RDWR|O_NONBLOCK)) < 0)
 	{
 		perror("OPEN FRONTEND DEVICE");
 		exit(1);
@@ -117,15 +120,14 @@ fe_code_rate_t tuner::getFEC(int fec)
 bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int fec, int dis)
 {
 	struct dvb_frontend_parameters frontp;
+	struct dvb_frontend_event event;
 	struct dvb_diseqc_master_cmd cmd;
 	fe_sec_mini_cmd_t mini_cmd;
 	fe_sec_tone_mode_t tone_mode;
 	fe_sec_voltage_t voltage;
-	fe_status_t status;
 
 	if (setting->boxIsSat())
 	{
-
 		// $$$ rasc
 		// Das Verhalten von Sectone (22KHz) sollte konfigurierbar sein.
 		// Ebenso die ZF fuer die LNBs (1 + 2) fuer jeweils Hi und Lo - Band
@@ -146,13 +148,9 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 		}
 
 		if (polarization == 0)
-		{
 			voltage = SEC_VOLTAGE_18;
-		}
 		else
-		{
 			voltage = SEC_VOLTAGE_13;
-		}
 
 		frontp.u.qpsk.fec_inner = getFEC(fec);
 
@@ -203,50 +201,41 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 
 	// -- Spektrum Inversion
 	// -- should be configurable, fixed for now (rasc)
-	if (setting->getInversion() == INVERSION_ON)
-	{
-		frontp.inversion = INVERSION_ON;
-	}
-	else if (setting->getInversion() == INVERSION_OFF)
-	{
-		frontp.inversion = INVERSION_OFF;
-	}
-	else if (setting->getInversion() == INVERSION_AUTO)
-	{
-		frontp.inversion = INVERSION_AUTO;
-	}
-	if (ioctl(frontend, FE_SET_FRONTEND, &frontp) < 0)
-	{
-		perror("FE_SET_FRONTEND");
+	frontp.inversion = (fe_spectral_inversion_t) setting->getInversion();
+
+	while (1) {
+		if (ioctl(frontend, FE_GET_EVENT, &event) == -1)
+			break;
 	}
 
-	if (ioctl(frontend, FE_READ_STATUS, &status) < 0)
-	{
-		perror("FE_READ_STATUS");
+	if (ioctl(frontend, FE_SET_FRONTEND, &frontp) < 0) {
+		perror("FE_SET_FRONTEND");
+		return 0;
 	}
+
+	do {
+		ioctl(frontend, FE_GET_EVENT, &event);
+	}
+	while (!(event.status & (FE_HAS_LOCK | FE_TIMEDOUT)));
 
 #ifdef DEBUG
 	printf (" Frequ: %u   ifreq: %u  Pol: %d  FEC: %d  Sym: %u  dis: %d\n",
 	        frequ, frontp.frequency, (int)polarization , (int)fec,
 	        symbol, (int)dis);
 
-	printf ("... Tuner-Lock Status: %d\n",status);
+	printf ("... Tuner-Lock Status: %d\n",event.status);
 
 	uint16_t state1, state2;
 
 	if (ioctl(frontend, FE_READ_SNR, &state1) < 0)
-	{
 		perror("FE_READ_SNR");
-	}
 
 	if (ioctl(frontend, FE_READ_SIGNAL_STRENGTH, &state2) < 0)
-	{
 		perror("FE_READ_SIGNAL_STRENGTH");
-	}
 
 	printf ("... S/N: %d  SigStrength: %d \n",state1,state2);
 #endif
 
-	return (status & FE_HAS_LOCK);
+	return (event.status & FE_HAS_LOCK);
 }
 
