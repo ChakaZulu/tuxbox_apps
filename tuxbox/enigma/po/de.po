@@ -4570,7 +4570,7 @@ msgstr "Manuelle Aktualsisierung"
 
 #: src/software_update.cpp:35
 msgid "open manual update"
-msgstr "Manuelles Update öffnen"
+msgstr "Manuelle Aktualisierung öffnen"
 
 #: src/software_update.cpp:37
 msgid "Expert Flash Save/Restore"
@@ -4592,7 +4592,7 @@ msgstr ""
 
 #: src/software_update.cpp:61
 msgid "Manual update"
-msgstr "Manuelles Update"
+msgstr "Manuelle Aktualisierung"
 
 #: src/sselect.cpp:51
 msgid "EPG Style Selector"
