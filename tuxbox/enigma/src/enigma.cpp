@@ -162,6 +162,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	eDebug("[ENIGMA] loading default keymaps...");
 	
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox.xml");
+	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox2.xml");
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxold.xml");
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxnew.xml");
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
