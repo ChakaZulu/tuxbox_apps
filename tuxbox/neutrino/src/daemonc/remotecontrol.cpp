@@ -85,8 +85,8 @@ int CRemoteControl::handleMsg(uint msg, uint data)
     		// warte auf keine Meldung vom ZAPIT -> jemand anderer hat das zappen ausgelöst...
     		if ( data != current_channel_id )
     		{
-				CLCD::getInstance()->showServicename(current_channel_name);
-    			current_channel_id = data;
+				CLCD::getInstance()->showServicename(current_channel_name); // UTF-8
+				current_channel_id = data;
 				is_video_started= true;
 
 				current_EPGid = 0;
@@ -210,7 +210,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 	{
 		if ( data == (( msg == NeutrinoMessages::EVT_ZAP_COMPLETE )?current_channel_id:current_sub_channel_id) )
 		{
-			CLCD::getInstance()->showServicename(current_channel_name);
+			CLCD::getInstance()->showServicename(current_channel_name); // UTF-8
 			g_Zapit->getPIDS( current_PIDs );
 			g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOTPIDS, current_channel_id, false );
 
@@ -223,7 +223,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 		if ( data == current_channel_id )
 		{
 		    needs_nvods = true;
-			CLCD::getInstance()->showServicename(std::string("["+current_channel_name+"]"));
+			CLCD::getInstance()->showServicename(std::string("[") + current_channel_name + std::string("]")); // UTF-8
 			if ( current_EPGid != 0)
 			{
 				getNVODs();
@@ -491,7 +491,7 @@ std::string CRemoteControl::subChannelDown()
 	}
 }
 
-void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::string channame, const bool start_video)
+void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::string channame, const bool start_video) // UTF-8
 {
 	current_channel_id = channel_id;
 	current_channel_name = channame;

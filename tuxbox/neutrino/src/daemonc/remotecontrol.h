@@ -112,7 +112,7 @@ public:
 	unsigned int            zapCount;
 
 	CRemoteControl();
-	void zapTo_ChannelID(const t_channel_id channel_id, const std::string channame, const bool start_video = true);
+	void zapTo_ChannelID(const t_channel_id channel_id, const std::string channame, const bool start_video = true); // UTF-8
 	void startvideo();
 	void stopvideo();
 	void queryAPIDs();
