@@ -81,9 +81,13 @@ bool canPlayService( const eServiceReference & ref )
 
 bool checkTimeshift( const eServiceReference &ref )
 {
-	if ( ref.type == eServiceReference::idDVB && ref.path )
-		return eSystemInfo::getInstance()->canTimeshift();
-	return true;
+	if ( ref.path )
+	{
+		if ( ref.type == eServiceReference::idDVB )
+			return eSystemInfo::getInstance()->canTimeshift();
+		return true;
+	}
+	return false;
 }
 
 static time_t getNextEventStartTime( time_t t, int duration, int type, int last_activation=-1 )
@@ -484,6 +488,10 @@ void eTimerManager::timeChanged()
 #define ZAP_BEFORE_TIME 60
 #define HDD_PREPARE_TIME 10
 
+#ifndef DISABLE_FILE
+extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
+#endif
+
 void eTimerManager::actionHandler()
 {
 	static int calldepth=0;
@@ -576,10 +584,9 @@ void eTimerManager::actionHandler()
 				eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		// workaround for start recording in background when a playback
 		// is running or the service is on the same transponder and satellite
-				if ( (nextStartingEvent->type & ePlaylistEntry::recDVR)
+				if ( nextStartingEvent->type & ePlaylistEntry::recDVR
 					&& handler && handler->getState() != eServiceHandler::stateStopped
-					&& rec && ((rec.path && rec.type != eServiceReference::idDVB || eSystemInfo::getInstance()->canTimeshift())
-					|| (canHandleTwoServices && onSameTP(rec,Ref)) ) )
+					&& rec && ( checkTimeshift(rec) || (canHandleTwoServices && onSameTP(rec,Ref))))
 				{
 					eDebug("[eTimerManager] change to service in background :)");
 					writeToLogfile("zap to correct service in background :)");
@@ -689,6 +696,8 @@ void eTimerManager::actionHandler()
 				{
 					writeToLogfile("attend HDD_PREPARE_TIME");
 					t -= HDD_PREPARE_TIME;  // for HDD Wakeup or whatever
+				// this wake up the hdd
+					freeRecordSpace();
 				}
 				actionTimer.start( t*1000 , true );
 				writeToLogfile(eString().sprintf("startEvent in %d seconds",t));
