@@ -23,8 +23,6 @@ extern "C"
 
 #include "pnm_file.h"
 
-#include <linux/config.h>
-
 #include "Table.h"
 #define CONFIGDIR "."
 #define GAMESDIR "."
