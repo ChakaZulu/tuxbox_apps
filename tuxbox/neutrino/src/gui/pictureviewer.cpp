@@ -80,7 +80,7 @@ CPictureViewerGui::CPictureViewerGui()
 
 	visible = false;
 	selected = 0;
-
+	listmaxshow = (height-theight-0)/fheight;
 	m_sort = FILENAME;
 	m_viewer = new CPictureViewer();
 	m_filebrowser = new CFileBrowser();
@@ -89,6 +89,7 @@ CPictureViewerGui::CPictureViewerGui()
 	picture_filter.addFilter("png");
 	picture_filter.addFilter("bmp");
 	picture_filter.addFilter("jpg");
+	picture_filter.addFilter("jpeg");
 	picture_filter.addFilter("gif");
 	m_filebrowser->Filter = &picture_filter;
    if(strlen(g_settings.network_nfs_picturedir)!=0)
@@ -232,22 +233,33 @@ int CPictureViewerGui::show()
 				view(next);
 			}
 		}
-		else if( msg == CRCInput::RC_left)
+		else if(( msg == CRCInput::RC_left) && (m_state!=MENU))
 		{
-			if(m_state!=MENU)
-			{
 				view((selected == 0) ? (playlist.size() - 1) : (selected - 1));
-			}
 		}
-		else if( msg == CRCInput::RC_right)
+		else if(( msg == CRCInput::RC_left) && (m_state==MENU))
 		{
-			if(m_state!=MENU)
-			{
-				unsigned int next=selected+1;
-				if( next+1 > playlist.size())
-					next=0;
-				view(next);
-			}
+			if ((int(selected)-int(listmaxshow))<0)
+				selected=playlist.size()-1;
+			else
+				selected -= listmaxshow;
+			liststart = (selected/listmaxshow)*listmaxshow;
+			paint();
+		}
+		else if(( msg == CRCInput::RC_right) && (m_state!=MENU))
+		{
+			unsigned int next=selected+1;
+			if( next+1 > playlist.size())
+				next=0;
+			view(next);
+		}
+		else if (( msg == CRCInput::RC_right) && (m_state==MENU))
+		{
+			selected+=listmaxshow;
+			if (selected>playlist.size()-1)
+			selected=0;
+			liststart = (selected/listmaxshow)*listmaxshow;
+			paint();
 		}
 		else if( msg == CRCInput::RC_up && playlist.size() > 0)
 		{
