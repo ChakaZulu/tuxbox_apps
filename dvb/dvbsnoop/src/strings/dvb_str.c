@@ -1,10 +1,13 @@
 /*
-$Id: dvb_str.c,v 1.6 2001/12/06 15:33:18 rasc Exp $
+$Id: dvb_str.c,v 1.7 2001/12/07 22:17:20 rasc Exp $
 
   -- dvb decoder helper functions
 
 
 $Log: dvb_str.c,v $
+Revision 1.7  2001/12/07 22:17:20  rasc
+no message
+
 Revision 1.6  2001/12/06 15:33:18  rasc
 some small work on pespacket.c
 
@@ -536,9 +539,12 @@ char *dvbstrNetworkIdent_ID (u_int i)
   STR_TABLE  Table[] = {
      {  0x0000, 0x0000,  "reserved" },
      {  0x0001, 0x0001,  "Astra Satellite Network 19.2E / Satellite / SES" },
+     {  0x0002, 0x0002,  "Astra Satellite Network 28.2E / Satellite / SES" },
+     {  0x0002, 0x0020,  "Astra Satellite Network / Satellite / SES" },
      {  0x0027, 0x0028,  "Hispasat 30W / Satellite / Hispasat FSS" },
      {  0x0028, 0x0028,  "Hispasat 30W / Satellite / Hispasat DBS" },
      {  0x0029, 0x0029,  "Hispasat 30W / Satellite / Hispasat America" },
+     {  0x0035, 0x0035,  "TV Africa / Satellite / Telemedia (PTY) Ltd." },
      {  0x0085, 0x0085,  "- / Satellite / Beta Technik" },
      {  0x013E, 0x013E,  "Eutel Satellite System 13.0E / Satellite / ETSO" },
 //$$$ lots are missing
