@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.7 2003/10/29 20:54:56 rasc Exp $
+$Id: pespacket.c,v 1.8 2003/10/29 22:39:18 rasc Exp $
 
    -- PES Decode/Table section
 
@@ -7,6 +7,9 @@ $Id: pespacket.c,v 1.7 2003/10/29 20:54:56 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.8  2003/10/29 22:39:18  rasc
+pes packet complete now...
+
 Revision 1.7  2003/10/29 20:54:56  rasc
 more PES stuff, DSM descriptors, testdata
 
@@ -149,6 +152,7 @@ int  PES_decode2 (u_char *b, int len, int pid)
 
 
  PES2_Packet  p;
+ u_char       *b_start = b;
 
 
  p.reserved1				= getBits (b, 0,  0, 2);
@@ -198,7 +202,7 @@ int  PES_decode2 (u_char *b, int len, int pid)
    // PTS from "if" before...
    out_nl (3,"DTS: ");
    indent (+1);
-   out_SB_NL  (3,"Fixed: ", getBits (b, 0,  0, 4) );
+   out_SB_NL  (6,"Fixed: ", getBits (b, 0,  0, 4) );
    print_xTS_field (b, 4) ;
    indent (-1);
    b += 5;
@@ -284,10 +288,10 @@ int  PES_decode2 (u_char *b, int len, int pid)
 
  if (p.additional_copy_info_flag == 0x01) {
 
-   out_nl (3,"additional_copy_info_flag: ");
+   out_nl (3,"additional_copy_info: ");
    indent (+1);
-   	out_SB_NL  (3,"marker_bit: ", getBits (b, 0,  0,  1) );
-   	out_SB_NL  (3,"additional_copy_info: ", getBits (b, 0,  1,  7) );
+   out_SB_NL  (3,"marker_bit: ", getBits (b, 0,  0,  1) );
+   out_SB_NL  (3,"additional_copy_info: ", getBits (b, 0,  1,  7) );
    b += 1;
    indent (-1);
 
@@ -296,9 +300,9 @@ int  PES_decode2 (u_char *b, int len, int pid)
 
  if (p.PES_CRC_flag == 0x01) {
 
-   out_nl (3,"PES_CRC_flag: ");
+   out_nl (3,"PES_CRC: ");
    indent (+1);
-   	out_SW_NL  (3,"previous_PES_packet_CRC: ", getBits (b, 0,  0, 16) );
+   out_SW_NL  (3,"previous_PES_packet_CRC: ", getBits (b, 0,  0, 16) );
    b += 2;
    indent (-1);
 
@@ -307,39 +311,123 @@ int  PES_decode2 (u_char *b, int len, int pid)
 
  if (p.PES_extension_flag == 0x01) {
 
-   out_nl (3,"PES_extension_flag: ");
+   u_int  PES_private_data_flag;
+   u_int  pack_header_field_flag;
+   u_int  program_packet_sequence_counter_flag;
+   u_int  P_STD_buffer_flag;
+   u_int  reserved;
+   u_int  PES_extension_flag2;
+
+
+   out_nl (3,"PES_extension: ");
    indent (+1);
 
-   out_SB_NL  (3,"PES_private_data_flag: ",       getBits (b, 0,  0,  1) );
-   out_SB_NL  (3,"pack_header_field_flag: ",      getBits (b, 0,  1,  1) );
-   out_SB_NL  (3,"program_packet_sequence_counter_flag: ",  getBits (b, 0,  2,  1) );
-   out_SB_NL  (3,"P-STD_buffer_flag: ",           getBits (b, 0,  3,  1) );
-   out_SB_NL  (6,"reserved: ",                    getBits (b, 0,  4,  3) );
-   out_SB_NL  (3,"PES_extension_flag2: ",         getBits (b, 0,  7,  1) );
+   PES_private_data_flag                  = getBits (b, 0,  0,  1);
+   pack_header_field_flag                 = getBits (b, 0,  1,  1);
+   program_packet_sequence_counter_flag   = getBits (b, 0,  2,  1);
+   P_STD_buffer_flag                      = getBits (b, 0,  3,  1);
+   reserved                               = getBits (b, 0,  4,  3);
+   PES_extension_flag2                    = getBits (b, 0,  7,  1);
+   b += 1;
+
+   out_SB_NL  (3,"PES_private_data_flag: ", PES_private_data_flag);
+   out_SB_NL  (3,"pack_header_field_flag: ",  pack_header_field_flag);
+   out_SB_NL  (3,"program_packet_sequence_counter_flag: ", program_packet_sequence_counter_flag);
+   out_SB_NL  (3,"P-STD_buffer_flag: ", P_STD_buffer_flag);
+   out_SB_NL  (6,"reserved: ", reserved);
+   out_SB_NL  (3,"PES_extension_flag2: ", PES_extension_flag2);
+
+
+   if (PES_private_data_flag == 0x01) {
+
+   	out_nl (3,"PES_private_data: ");
+	indent (+1);
+	printhexdump_buf (4, b, 16);
+   	b += 16;
+   	indent (-1);
+
+   }
+
+
+   if (pack_header_field_flag == 0x01) {		/* ISO 11172-1 pack header */
+	
+	int pack_field_length;
+
+   	out_nl (3,"pack_header_field: ");
+	indent (+1);
+	pack_field_length             = getBits (b, 0,  0,  8);
+   	out_SB_NL  (3,"pack_field_length: ", pack_field_length);
+   	out_nl (3,"Pack_header: ");
+	indent (+1);
+	printhexdump_buf (4, b+1, pack_field_length);
+   	b += pack_field_length +1;
+   	indent (-2);
+
+   }
 
 
 
+   if (program_packet_sequence_counter_flag == 0x01) {
+
+   	out_nl (3,"program_packet_sequence_counter: ");
+	indent (+1);
+	out_SB_NL  (3,"Marker_bit: ", getBits (b, 0,  0,  1) );
+	out_SB_NL  (3,"program_packet_sequence_counter: ", getBits (b, 0,  1,  7) );
+	out_SB_NL  (3,"Marker_bit: ", getBits (b, 0,  8,  1) );
+	out_SB_NL  (3,"MPEG1_MPEG2_identifier: ", getBits (b, 0,  9,  1) );
+	out_SB_NL  (3,"original_stuff_length: ", getBits (b, 0, 10,  6) );
+	b += 2;
+   	indent (-1);
+
+   }
 
 
+   if (P_STD_buffer_flag == 0x01) {
 
-   b += 1;   /* $$$$  - --------------------------------------------- */
+   	out_nl (3,"P-STD_buffer: ");
+	indent (+1);
+	out_SB_NL  (6,"Fix 01: ",             getBits (b, 0,  0,  2) );
+	out_SB_NL  (3,"P-STD_buffer_scale: ", getBits (b, 0,  2,  1) );
+	out_SB_NL  (3,"P-STD_buffer_size: ",  getBits (b, 0, 3,  13) );
+	b += 2;
+   	indent (-1);
+
+   }
+
+
+   if (PES_extension_flag2 == 0x01) {
+
+	u_int  PES_extension_field_length;
+
+   	out_nl (3,"PES_extension_2: ");
+	indent (+1);
+	out_SB_NL  (3,"Marker_bit: ", getBits (b, 0,  0,  1) );
+	PES_extension_field_length =  getBits (b, 0,  1,  7);
+   	out_nl (3,"reserved: ");
+	indent (+1);
+	printhexdump_buf (6, b+1, PES_extension_field_length);
+	b += PES_extension_field_length + 1;
+   	indent (-2);
+
+   }
+
    indent (-1);
-
 
  } /* p.PES_extension_flag */
 
 
 
+ /* 
+  * -- stuffing bytes
+  * -- PES packet_data_bytes
+  */
+
+ out_nl (3,"PES_packet_data_bytes / stuffing bytes: ");
+   indent (+1);
+   printhexdump_buf (4, b, len - (b - b_start) );
+   indent (-1);
 
 
-
-
-
-
- out_nl (3,".... rest still unimplemented.... ");
- // $$$ TODO
- // $$$ hier muss auch noch einiges gemacht werden (aber zur Zeit
- // $$$ so gut wie keine Zeit
 
  return 0;
 }
