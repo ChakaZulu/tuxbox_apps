@@ -5,21 +5,19 @@
 
 typedef struct  
 {
-  char *buf;
-  size_t len;
-} 
-ringbuffer_data_t ;
+	char *buf;
+	size_t len;
+} ringbuffer_data_t;
 
 typedef struct
 {
-  char *buf;
-  volatile size_t write_ptr;
-  volatile size_t read_ptr;
-  size_t size;
-  size_t size_mask;
-  int mlocked;
-} 
-ringbuffer_t ;
+	char *buf;
+	volatile size_t write_ptr;
+	volatile size_t read_ptr;
+	size_t size;
+	size_t size_mask;
+	int mlocked;
+} ringbuffer_t;
 
 ringbuffer_t *ringbuffer_create(int sz);
 void ringbuffer_free(ringbuffer_t *rb);

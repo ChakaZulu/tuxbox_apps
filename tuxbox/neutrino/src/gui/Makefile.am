@@ -18,7 +18,7 @@ libneutrino_gui_a_SOURCES = \
 	color.cpp favorites.cpp sleeptimer.cpp screensetup.cpp \
 	epgview.cpp infoviewer.cpp scan.cpp update.cpp dboxinfo.cpp \
 	filebrowser.cpp audioplayer.cpp nfs.cpp pictureviewer.cpp \
-	movieplayer.cpp ringbuffer.c rc_lock.cpp bookmarkmanager.cpp \
+	movieplayer.cpp rc_lock.cpp bookmarkmanager.cpp \
 	timeosd.cpp epgplus.cpp epg_menu.cpp
 #	ch_mosaic.cpp
 

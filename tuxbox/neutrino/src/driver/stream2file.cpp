@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.13 2004/05/31 14:12:25 thegoodguy Exp $
+ * $Id: stream2file.cpp,v 1.14 2004/06/03 17:33:04 alexw Exp $
  * 
  * streaming to file/disc
  * 
@@ -57,7 +57,7 @@
 #include <signal.h>
 
 extern "C" {
-#include <gui/ringbuffer.h>
+#include <driver/ringbuffer.h>
 }           	
 
 /* conversion buffer sizes */
