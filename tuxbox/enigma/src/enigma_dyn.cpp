@@ -1101,6 +1101,11 @@ static eString getStats()
 	result += getIP();
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
+	int lockWebIf = 1;
+	eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf);
+	result += (lockWebIf == 1) ? "locked" : "unlocked";
+	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
+
 	vpid = (Decoder::current.vpid == -1) ? "none" : vpid.sprintf("0x%x", Decoder::current.vpid);
 	result += "vpid: " + vpid;
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
@@ -4487,7 +4492,7 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	int lockWebIf = 1;
-	if ( eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf) )
+	if (eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf))
 		eConfig::getInstance()->setKey("/ezap/webif/lockWebIf", lockWebIf);
 	
 	printf("[ENIGMA_DYN] lockWebIf = %d\n", lockWebIf);
