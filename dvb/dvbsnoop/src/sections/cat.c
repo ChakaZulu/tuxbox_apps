@@ -1,11 +1,14 @@
 /*
-$Id: cat.c,v 1.6 2003/10/26 21:36:20 rasc Exp $
+$Id: cat.c,v 1.7 2003/10/26 22:02:53 rasc Exp $
 
  -- CAT Section
  -- rasc
    (c) rasc
 
 $Log: cat.c,v $
+Revision 1.7  2003/10/26 22:02:53  rasc
+fix
+
 Revision 1.6  2003/10/26 21:36:20  rasc
 private DSM-CC descriptor Tags started,
 INT-Section completed..
@@ -58,7 +61,7 @@ void decode_CAT (u_char *b, int len)
  } CAT;
 
  CAT  c;
- int  len;
+ int  len1;
 
  
  c.table_id 			 = b[0];
@@ -95,17 +98,17 @@ void decode_CAT (u_char *b, int len)
 
 
  // - header - CRC
- len = c.section_length - 5;
+ len1 = c.section_length - 5;
  b  += 8;
 
 
  indent (1);
- while (len > 0) {
+ while (len1 > 4) {
    int i;
 
-   i    =  descriptor (b);
-   len -= i;
-   b   += i;
+   i     =  descriptor (b);
+   len1 -= i;
+   b    += i;
    
  }
  indent (-1);

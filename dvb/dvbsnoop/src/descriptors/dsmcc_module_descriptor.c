@@ -1,16 +1,20 @@
 /*
-$Id: dsmcc_module_descriptor.c,v 1.6 2003/10/26 21:36:18 rasc Exp $ 
+$Id: dsmcc_module_descriptor.c,v 1.7 2003/10/26 22:02:53 rasc Exp $ 
 
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
 
-  DSM-CC Descriptors  ISO 13818-6
+  Private TAG Space  DSM-CC
+  DSM-CC Descriptors  ISO 13818-6  // TR 102 006
 
 
 
 
 $Log: dsmcc_module_descriptor.c,v $
+Revision 1.7  2003/10/26 22:02:53  rasc
+fix
+
 Revision 1.6  2003/10/26 21:36:18  rasc
 private DSM-CC descriptor Tags started,
 INT-Section completed..
@@ -37,7 +41,9 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 #include "dvbsnoop.h"
+#include "descriptor.h"
 #include "dsm_descriptor.h"
+#include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
@@ -132,6 +138,18 @@ void descriptorDSMCC_any (u_char *b)
 
 }
 
+
+
+
+
+
+
+
+/* $$$ TODO   EN 301 192  / TR 102 006
+ *
+ * private DSM-CC descriptors
+ *
+ * */
 
 
 
