@@ -41,7 +41,7 @@ protected:
 	enum {NOKIA, SAGEM, PHILIPS} Type;
 	int scart[6];
 	int dvb[6];
-	int active, input, lastVoltage;
+	int active, input;
 	void init();
 public:
 	eAVSwitch();
