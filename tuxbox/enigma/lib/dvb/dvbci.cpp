@@ -459,23 +459,16 @@ void eDVBCI::create_sessionobject(unsigned char *tag,unsigned char *data,unsigne
 
 	memcpy(buffer,"\x90\x2\x0\x3",4); //session nr.3 & capmt-tag
 	buffer[3]=session;			//session_id
-	
+
 	memcpy(buffer+4,tag,3);
-	
+
 	if(len<128)
 	{
 		buffer[7]=len&0x7f;
 		memcpy(buffer+8,data,len);
 		newlen+=1;
 	}
-	else if(len>127)
-	{
-		buffer[7]=0x81;
-		buffer[8]=len&0xff;
-		memcpy(buffer+9,data,len);
-		newlen+=2;
-	}
-	else 
+	else if(len>255)
 	{
 		buffer[7]=0x82;
 		buffer[8]=(len&0xff00)>>8;
@@ -483,7 +476,14 @@ void eDVBCI::create_sessionobject(unsigned char *tag,unsigned char *data,unsigne
 		memcpy(buffer+10,data,len);
 		newlen+=3;
 	}
-	
+	else // len > 127
+	{
+		buffer[7]=0x81;
+		buffer[8]=len&0xff;
+		memcpy(buffer+9,data,len);
+		newlen+=2;
+	}
+
 #if 0
 	for(int i=0;i<newlen;i++)
 		printf("%02x ",buffer[i]);
