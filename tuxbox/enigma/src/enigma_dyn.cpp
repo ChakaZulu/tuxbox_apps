@@ -14,6 +14,13 @@
 #include <config.h>
 #include <core/system/econfig.h>
 
+#include <stdio.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <arpa/inet.h>
+#include <linux/if_ether.h>
+
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 
 
@@ -285,14 +292,24 @@ static eString read_file(eString filename)
 static eString getIP()
 {
 	eString tmp;
-	int ip[4];
-	memset(&ip, 0, sizeof(ip));
-	tmp=read_file("/proc/net/tcp");
-	
-	if(sscanf(tmp.c_str(), "%02x%02x%02x%02x:0050", &ip[0], &ip[1], &ip[2], &ip[3])==4) {
-		return eString().sprintf("%d.%d.%d.%d", ip);
+	int sd;
+	struct ifreq ifr;
+	sd=socket(AF_INET, SOCK_DGRAM, 0);
+	if(sd<0)
+	{
+		return "?.?.?.?-socket-error";
 	}
-	return "?.?.?.?";
+	memset(&ifr, 0, sizeof(ifr));
+	ifr.ifr_addr.sa_family=AF_INET; // fixes problems with some linux vers.
+	strncpy(ifr.ifr_name, "eth0", sizeof(ifr.ifr_name));
+	if(ioctl(sd, SIOCGIFADDR, &ifr) < 0)
+	{
+		return "?.?.?.?-ioctl-error";
+	}
+	close(sd);
+	
+	tmp.sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr) );
+	return tmp;
 }
 
 
