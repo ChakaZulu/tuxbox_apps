@@ -62,6 +62,8 @@ enigmaCI::enigmaCI(): eWindow(0)
 	status->loadDeco();
 	
 	CONNECT(DVBCI->ci_progress, enigmaCI::updateCIinfo);		
+
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
 		
 }
 
@@ -75,7 +77,6 @@ void enigmaCI::updateCIinfo(const char *buffer)
 {
 	eDebug("new info %s",buffer);
 	app->setText(_(buffer));
-
 }
 
 void enigmaCI::okPressed()

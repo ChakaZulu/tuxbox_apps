@@ -84,6 +84,8 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::reset:
 		eDebug("[DVBCI] got reset message..");
+		if(!ci_state)
+			ci_progress("no module");	
 		ci_state=0;
 		clearCAIDs();
 		break;
@@ -91,6 +93,8 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		eDebug("[DVBCI] got init message..");
 		if(ci_state)
 			sendCAPMT();
+		else
+			ci_progress("no module");	
 		break;
 	case eDVBCIMessage::flush:
 		eDebug("[DVBCI] got flush message..");
