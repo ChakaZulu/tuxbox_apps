@@ -7,4 +7,4 @@ Name: tuxbox-xmltree
 Description: xmltree
 Version: @VERSION@
 Libs: -L${libdir} -lxmltree
-Cflags: -I${includedir}/tuxbox
+Cflags: -I${includedir}/tuxbox/xmltree
