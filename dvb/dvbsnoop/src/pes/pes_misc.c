@@ -1,5 +1,5 @@
 /*
-$Id: pes_misc.c,v 1.5 2004/02/04 23:54:37 rasc Exp $
+$Id: pes_misc.c,v 1.6 2004/02/05 10:30:57 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pes_misc.c,v 1.5 2004/02/04 23:54:37 rasc Exp $
 
 
 $Log: pes_misc.c,v $
+Revision 1.6  2004/02/05 10:30:57  rasc
+no message
+
 Revision 1.5  2004/02/04 23:54:37  rasc
 Bugfix:  PTS wrongly displayed!!!
 
@@ -85,6 +88,7 @@ void  print_xTS_field (int v, const char *str, u_char *b, int bit_offset)
 	int     h,m,s,u;
 	u_long  p = ull/90;
 
+	// -- following lines taken from "dvbtextsubs  Dave Chapman"
 	h=(p/(1000*60*60));
 	m=(p/(1000*60))-(h*60);
 	s=(p/1000)-(h*3600)-(m*60);
