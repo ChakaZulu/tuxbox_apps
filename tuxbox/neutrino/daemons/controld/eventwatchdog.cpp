@@ -19,12 +19,14 @@
 */
 
 #include <dbox/event.h>
+#include <dbox/saa7126_core.h>
 
 #include <eventserver.h>
 #include <controldclient/controldclient.h>
 
 #include "eventwatchdog.h"
 
+#define SAA7126_DEVICE	"/dev/dbox/saa0"
 
 CEventWatchDog::CEventWatchDog()
 {
@@ -148,7 +150,7 @@ void* CEventWatchDog::watchdogThread (void *arg)
 					{
 						if (event.event == EVENT_ARATIO_CHANGE)
 						{
-    		           		//printf("(event.event == EVENT_ARATIO_CHANGE)\n");
+    		           	 printf("(event.event == EVENT_ARATIO_CHANGE %d -> %d)\n", WatchDog->VideoMode, WatchDog->getVideoMode());
 							int newVideoMode = WatchDog->getVideoMode();
 							if ((newVideoMode           != WatchDog->VideoMode) &&
 							    (newVideoMode           != -1)                  &&
@@ -176,11 +178,23 @@ void* CEventWatchDog::watchdogThread (void *arg)
 									WatchDog->VideoMode = newVCRMode + 1;
 									WatchDog->videoModeChanged(newVCRMode + 1);
 								} else {
-									// going back to DVB, adjust format
+									// going back to DVB, adjust format if output not disabled
 									sleep(2);
 									int newVideoMode = WatchDog->getVideoMode();
 									WatchDog->VideoMode = newVideoMode;
-									WatchDog->videoModeChanged(newVideoMode);
+									int fd;
+									char disabled=0;
+									if ((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
+										perror("[controld] " SAA7126_DEVICE);
+									else 
+									{
+										if ((ioctl(fd,SAAIOGPOWERSAVE,&disabled) < 0))
+											perror("[controld] SAAIOSPOWERSAVE");
+										close(fd);
+									}
+									printf("Watchdog back to DVB disabled : %d\n",disabled);
+									if(!disabled)
+										WatchDog->videoModeChanged(newVideoMode);
 								}
 
 								pthread_mutex_unlock( &WatchDog->wd_mutex );
