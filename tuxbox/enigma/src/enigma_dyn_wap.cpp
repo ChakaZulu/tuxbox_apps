@@ -84,7 +84,7 @@ static eString admin2(eString command)
 		eZap::getInstance()->quit(2);
 	else
 	if (command == "wakeup")
-		eZapStandby::getInstance()->wakeUp(1);
+		eZapStandby::getInstance()->wakeUp(0);
 	else
 	if (command == "standby")
 		eZapMain::getInstance()->gotoStandby();
