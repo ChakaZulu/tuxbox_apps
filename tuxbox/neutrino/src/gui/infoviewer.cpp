@@ -446,9 +446,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 				{
 					// Handle anyway!
 					neutrino->handleMsg( msg, data );
-
         			g_RCInput->pushbackMsg( messages::SHOW_INFOBAR, 0 );
-					res = messages_return::cancel_info;
+					res = messages_return::cancel_all;
 				}
 				else
 				{

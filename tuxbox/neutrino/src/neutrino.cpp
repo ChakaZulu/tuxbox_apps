@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.193 2002/03/12 16:44:08 field Exp $
+        $Id: neutrino.cpp,v 1.194 2002/03/12 17:26:36 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -293,7 +293,7 @@ void CNeutrinoApp::setupDefaults()
 	strcpy(g_settings.network_defaultgateway, "");
 	strcpy(g_settings.network_nameserver, "");
 
-	FILE* fd = fopen("/var/ip", "r");
+	FILE* fd = fopen("/var/tuxbox/config/ip", "r");
 	if(fd)
 	{
 		char _ip[4];
@@ -2048,7 +2048,7 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 		}
 		else if ( lastMode == mode_standby )
 		{
-			usleep(10000);
+			usleep(100000);
 			standbyMode( true );
 		}
 	}
@@ -2242,7 +2242,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.193 2002/03/12 16:44:08 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.194 2002/03/12 17:26:36 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
