@@ -319,19 +319,27 @@ void CLCD::showMP3(const std::string artist, const std::string title)
 		return;
 	}
 	// reload specified line
-	display.draw_fill_rect (-1,14,95,48, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(0,28, 95, artist.c_str() , CLCDDisplay::PIXEL_ON, 0);
-	fonts.menu->RenderString(0,45, 107, title.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	display.draw_fill_rect (-1,13,106,30, CLCDDisplay::PIXEL_OFF);
+	display.draw_fill_rect (-1,30,121,49, CLCDDisplay::PIXEL_OFF);
+	fonts.menu->RenderString(0,28, 111, artist.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	fonts.menu->RenderString(0,45, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0);
 	display.update();
 }
 
 void CLCD::showMP3Play(bool play)
 {
-	display.draw_fill_rect (107,32,120,48, CLCDDisplay::PIXEL_OFF);
+	display.draw_fill_rect (109,21,119,31, CLCDDisplay::PIXEL_OFF);
 	if(play)
-		fonts.menutitle->RenderString(107,45, 30, ">", CLCDDisplay::PIXEL_ON, 0);
+	{
+		int x=112,y=22;
+		display.draw_line(x  ,y  ,x  ,y+8, CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+1,y+1,x+1,y+7, CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+2,y+2,x+2,y+6, CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+3,y+3,x+3,y+5, CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+4,y+4,x+4,y+4, CLCDDisplay::PIXEL_ON);
+	}
 	else
-		fonts.menutitle->RenderString(107,45, 30, "| |", CLCDDisplay::PIXEL_ON, 0);
+		display.draw_fill_rect (110,22,118,30, CLCDDisplay::PIXEL_ON);
 }
 void CLCD::setMode(MODES m, std::string title)
 {
@@ -349,18 +357,36 @@ void CLCD::setMode(MODES m, std::string title)
 			display.update();
 			break;
 		case MODE_MP3:
+	   {
 			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: mp3\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
 			showclock = true;
 			display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
-			fonts.menu->RenderString(94,28, 40, "MP3", CLCDDisplay::PIXEL_ON, 0);
+// 		fonts.menu->RenderString(94,28, 40, "MP3", CLCDDisplay::PIXEL_ON, 0);
+			int x=106,y=14;
+			display.draw_line(x  ,y  ,x  ,y+6,CLCDDisplay::PIXEL_ON);
+			display.draw_line(x  ,y  ,x+2,y+2,CLCDDisplay::PIXEL_ON);
+			display.draw_line(x+2,y+2,x+4,y  ,CLCDDisplay::PIXEL_ON);
+			display.draw_line(x+4,y  ,x+4,y+6,CLCDDisplay::PIXEL_ON);  
+
+			display.draw_line(x+6,y  ,x+6,y+6,CLCDDisplay::PIXEL_ON);  
+			display.draw_line(x+6,y  ,x+9,y  ,CLCDDisplay::PIXEL_ON);
+			display.draw_line(x+6,y+3,x+9,y+3,CLCDDisplay::PIXEL_ON);
+			display.draw_line(x+9,y  ,x+9,y+3,CLCDDisplay::PIXEL_ON);  
+
+			display.draw_line(x+13,y  ,x+13,y+6,CLCDDisplay::PIXEL_ON);
+			display.draw_line(x+11,y  ,x+13,y  ,CLCDDisplay::PIXEL_ON);
+			display.draw_line(x+11,y+3,x+13,y+3,CLCDDisplay::PIXEL_ON);
+			display.draw_line(x+11,y+6,x+13,y+6,CLCDDisplay::PIXEL_ON);
+
 			showMP3Play(false);
 			//showVolume(volume);
 			showTime();
 			display.update();
-			break;
+		   break;
+		}
 		case MODE_SCART:
 			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: scart\n");

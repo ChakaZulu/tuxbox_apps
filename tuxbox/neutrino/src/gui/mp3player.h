@@ -49,6 +49,7 @@ public:
 	string Artist;
 	string Year;
 	string Comment;
+	int Index;
 };
 
 typedef std::vector<CMP3> CPlayList;
@@ -57,17 +58,26 @@ typedef std::vector<CMP3> CPlayList;
 class CMP3PlayerGui : public CMenuTarget
 {
 	public:
-
+		enum State
+		{
+			PLAY=0,
+			STOP=1
+		};
 	private:
 		CFrameBuffer		*frameBuffer;
 		CFileBrowser		*filebrowser;
 		unsigned int		selected;
+		int      current;
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
 		int					fheight; // Fonthoehe Playlist-Inhalt
 		int					theight; // Fonthoehe Playlist-Titel
 		int					buttonHeight;
+		int               title_height;
+		int               info_height;
 		bool				visible;			
+		State          m_state;
+		time_t         m_starttime;
 
 		CPlayList			playlist;
 		string				Path;
@@ -89,6 +99,10 @@ class CMP3PlayerGui : public CMenuTarget
 		CFileFilter mp3filter;
 		void paintItemID3DetailsLine (int pos);
 		void clearItemID3DetailsLine ();
+		void play(int pos);
+		void stop();
+		int getNext();
+		void showTime();
 
 	public:
 		CMP3PlayerGui();

@@ -642,6 +642,11 @@ mp3player.add Add
 mp3player.delete Delete
 mp3player.stop Stop
 mp3player.playall Play all
+mp3player.shuffle shuffle
+mp3player.deleteall delete all
+mp3player.title Titel
+mp3player.artist Artist
+mp3player.playing Current Track
 
 filebrowser.head Filebrowser
 filebrowser.filter Filter
