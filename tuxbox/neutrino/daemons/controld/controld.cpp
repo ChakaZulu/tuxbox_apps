@@ -78,6 +78,9 @@ int	philips_scart[4];
 int	philips_dvb[4];
 char aspectRatio;
 
+char BoxNames[4][10] = {"","Nokia", "Sagem", "Philips"};
+
+
 void sig_catch(int);
 
 class CControldAspectRatioNotifier : public CAspectRatioNotifier
@@ -453,7 +456,6 @@ void routeVideo(int v1, int a1, int v2, int a2, int fblk)
 	close(fd);
 }
 
-char BoxNames[4][10] = {"","Nokia", "Sagem", "Philips"};
 void switch_vcr( bool vcr_on)
 {
 	LoadScart_Settings();
@@ -559,29 +561,9 @@ void disableVideoOutput(bool disable)
 
 void setBoxType()
 {
-	FILE* fd = fopen("/proc/bus/dbox", "rt");
-	if (fd==NULL)
-	{
-		printf("[controld] error while opening /proc/bus/dbox\n" );
-		return;
-	}
-
-	int mID;
-
-	char *tmpptr,buf[100], buf2[100];
-	int value, pos=0;
-	if(!feof(fd))
-	{
-		if(fgets(buf,29,fd)!=NULL)
-		{
-			buf[strlen(buf)-1]=0;
-			tmpptr=buf;
-			strsep(&tmpptr,"=");
-			mID=atoi(tmpptr);
-			//printf("%s: %d\n",buf,mID);
-		}
-	}
-	fclose(fd);
+	char strmID[40];
+	strcpy( strmID, getenv("mID") );
+	int mID = atoi(strmID);
 
 	switch ( mID )
 	{
@@ -592,8 +574,8 @@ void setBoxType()
 		default:
 			settings.boxtype= CControldClient::BOXTYPE_NOKIA;
 	}
-	//printf("settings.boxtype: %d\n", settings.boxtype);
 
+	printf("Boxtype detected: (%s, %d, %d, %s)\n", strmID, mID, settings.boxtype, BoxNames[settings.boxtype]);
 }
 
 void setVolume(char volume)
@@ -720,10 +702,10 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			setvideooutput(msg3.output);
 			break;
 		case CControld::CMD_SETBOXTYPE:
-			//printf("[controld] set boxtype\n");
+			//printf("[controld] set boxtype\n");    //-------------------dummy!!!!!!!!!!
 			CControld::commandBoxType msg4;
 			read(connfd, &msg4, sizeof(msg4));
-			setBoxType(msg4.boxtype);
+			setBoxType();
 			break;
 		case CControld::CMD_SETSCARTMODE:
 			//printf("[controld] set scartmode\n");
@@ -801,7 +783,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.51 2002/03/15 17:07:29 McClean Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.52 2002/03/15 18:05:58 McClean Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	if (fork() != 0)
