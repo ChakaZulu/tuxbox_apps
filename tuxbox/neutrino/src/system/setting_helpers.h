@@ -65,9 +65,9 @@ class CDHCPNotifier : public CChangeObserver
 class CStreamingNotifier : public CChangeObserver
 {
 	private:
-		CMenuItem* toDisable[9];
+		CMenuItem* toDisable[12];
 	public:
-		CStreamingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
+		CStreamingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
 		bool changeNotify(const std::string & OptionName, void*);
 };
 class CRecordingNotifier : public CChangeObserver

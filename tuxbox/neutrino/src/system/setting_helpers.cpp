@@ -101,7 +101,7 @@ bool CDHCPNotifier::changeNotify(const std::string & OptionName, void* data)
 	return true;
 }
 
-CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5, CMenuItem* i6, CMenuItem* i7, CMenuItem* i8, CMenuItem* i9, CMenuItem* i10)
+CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5, CMenuItem* i6, CMenuItem* i7, CMenuItem* i8, CMenuItem* i9, CMenuItem* i10, CMenuItem* i11, CMenuItem* i12)
 {
    toDisable[0]=i1;
    toDisable[1]=i2;
@@ -113,6 +113,8 @@ CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[7]=i8;
    toDisable[8]=i9;
    toDisable[9]=i10;
+   toDisable[10]=i11;
+   toDisable[11]=i12;
 
 }
 
@@ -120,12 +122,12 @@ bool CStreamingNotifier::changeNotify(const std::string & OptionName, void*)
 {
    if(g_settings.streaming_type==0)
    {
-      for (int i=0; i<=9; i++)
+      for (int i=0; i<=11; i++)
         toDisable[i]->setActive(false);
    }
    else if(g_settings.streaming_type==1)
    {
-      for (int i=0; i<=9; i++)
+      for (int i=0; i<=11; i++)
         toDisable[i]->setActive(true);
    }
    return true;
@@ -382,7 +384,7 @@ bool CAudioSetupNotifier2::changeNotify(const std::string & OptionName, void*)
 	if (g_settings.audio_avs_Control == 2)   
 		g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
 	else
-		g_RCInput->postMsg(NeutrinoMessages::EVT_VOLCHANGED, NULL);
+		g_RCInput->postMsg(NeutrinoMessages::EVT_VOLCHANGED, 0);
  
 	return true;
 }

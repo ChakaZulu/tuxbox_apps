@@ -513,14 +513,16 @@ int CNeutrinoApp::loadSetup()
 
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
-    g_settings.streaming_server_ip = configfile.getString("streaming_server_ip", "10.10.10.10");
+	g_settings.streaming_server_ip = configfile.getString("streaming_server_ip", "10.10.10.10");
 	strcpy( g_settings.streaming_server_port, configfile.getString( "streaming_server_port", "8080").c_str() );
 	strcpy( g_settings.streaming_server_cddrive, configfile.getString("streaming_server_cddrive", "D:").c_str() );
 	strcpy( g_settings.streaming_videorate,  configfile.getString("streaming_videorate", "1000").c_str() );
 	strcpy( g_settings.streaming_audiorate, configfile.getString("streaming_audiorate", "192").c_str() );
 	strcpy( g_settings.streaming_server_startdir, configfile.getString("streaming_server_startdir", "C:/Movies").c_str() );
-	g_settings.streaming_ac3_enabled = configfile.getInt32( "streaming_ac3_enabled", 0 );
-	g_settings.streaming_force_transcode = configfile.getInt32( "streaming_force_transcode", 0 );
+	g_settings.streaming_transcode_audio = configfile.getInt32( "streaming_transcode_audio", 0 );
+	g_settings.streaming_force_transcode_video = configfile.getInt32( "streaming_force_transcode_video", 0 );
+	g_settings.streaming_transcode_video_codec = configfile.getInt32( "streaming_transcode_video_codec", 0 );
+	g_settings.streaming_force_avi_rawaudio = configfile.getInt32( "streaming_force_avi_rawaudio", 0 );
 	g_settings.streaming_resolution = configfile.getInt32( "streaming_resolution", 0 );
 	
 	//rc-key configuration
@@ -833,8 +835,10 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString ( "streaming_videorate", g_settings.streaming_videorate );
 	configfile.setString ( "streaming_audiorate", g_settings.streaming_audiorate );
 	configfile.setString( "streaming_server_startdir", g_settings.streaming_server_startdir );
-	configfile.setInt32 ( "streaming_ac3_enabled", g_settings.streaming_ac3_enabled );
-	configfile.setInt32 ( "streaming_force_transcode", g_settings.streaming_force_transcode );
+	configfile.setInt32 ( "streaming_transcode_audio", g_settings.streaming_transcode_audio );
+	configfile.setInt32 ( "streaming_force_avi_rawaudio", g_settings.streaming_force_avi_rawaudio );
+	configfile.setInt32 ( "streaming_force_transcode_video", g_settings.streaming_force_transcode_video );
+	configfile.setInt32 ( "streaming_transcode_video_codec", g_settings.streaming_transcode_video_codec );
 	configfile.setInt32 ( "streaming_resolution", g_settings.streaming_resolution );
 	
 	//rc-key configuration
@@ -1186,6 +1190,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	moviePlayer.addItem(new CMenuForwarder("movieplayer.fileplayback", true, NULL, new CMoviePlayerGui(), "fileplayback", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	moviePlayer.addItem(new CMenuForwarder("movieplayer.dvdplayback", true, NULL, new CMoviePlayerGui(), "dvdplayback", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	moviePlayer.addItem(new CMenuForwarder("movieplayer.vcdplayback", true, NULL, new CMoviePlayerGui(), "vcdplayback", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	moviePlayer.addItem(GenericMenuSeparatorLine);
+	moviePlayer.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &streamingSettings));
 #endif
 
 	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui()));
@@ -1827,30 +1833,39 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CMenuForwarder* mf6 = new CMenuForwarder("streamingmenu.streaming_server_startdir", (g_settings.streaming_type==1), g_settings.streaming_server_startdir,startdirInput);
 	CMenuForwarder* mf7 = new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir,this,"moviedir");
  
-	CMenuOptionChooser* oj0 = new CMenuOptionChooser("streamingmenu.streaming_ac3_enabled", &g_settings.streaming_ac3_enabled, true);
+	CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_transcode_audio", &g_settings.streaming_transcode_audio, true);
+	oj1->addOption(0, "messagebox.no");
+	oj1->addOption(1, "messagebox.yes");
+                                             
+	CMenuOptionChooser* oj2 = new CMenuOptionChooser("streamingmenu.streaming_force_avi_rawaudio", &g_settings.streaming_force_avi_rawaudio, true);
+	oj2->addOption(0, "messagebox.no");
+	oj2->addOption(1, "messagebox.yes");
+                                             
+	CMenuOptionChooser* oj3 = new CMenuOptionChooser("streamingmenu.streaming_force_transcode_video", &g_settings.streaming_force_transcode_video, true);
+	oj3->addOption(0, "messagebox.no");
+	oj3->addOption(1, "messagebox.yes");
+
+// not yet supported by VLC
+	CMenuOptionChooser* oj4 = new CMenuOptionChooser("streamingmenu.streaming_transcode_video_codec", &g_settings.streaming_transcode_video_codec, true);
+	oj4->addOption(0, "streamingmenu.mpeg1");
+	oj4->addOption(1, "streamingmenu.mpeg2");
+
+  CMenuOptionChooser* oj5 = new CMenuOptionChooser("streamingmenu.streaming_resolution", &g_settings.streaming_resolution, true);
+	oj5->addOption(0, "streamingmenu.352x288");
+	oj5->addOption(1, "streamingmenu.352x576");
+	oj5->addOption(2, "streamingmenu.480x576");
+	oj5->addOption(3, "streamingmenu.704x576");
+
+  CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,mf7,oj1,oj2,oj3,oj4,oj5);
+	CMenuOptionChooser* oj0 = new CMenuOptionChooser("streamingmenu.streaming_type", &g_settings.streaming_type, true, StreamingNotifier);
 	oj0->addOption(0, "streamingmenu.off");
 	oj0->addOption(1, "streamingmenu.on");
-                                             
-	CMenuOptionChooser* oj2 = new CMenuOptionChooser("streamingmenu.streaming_force_transcode", &g_settings.streaming_force_transcode, true);
-	oj2->addOption(0, "streamingmenu.off");
-	oj2->addOption(1, "streamingmenu.on");
-
-  CMenuOptionChooser* oj3 = new CMenuOptionChooser("streamingmenu.streaming_resolution", &g_settings.streaming_resolution, true);
-	oj3->addOption(0, "streamingmenu.352x288");
-	oj3->addOption(1, "streamingmenu.352x576");
-	oj3->addOption(2, "streamingmenu.480x576");
-	oj3->addOption(3, "streamingmenu.704x576");
-
-  CStreamingNotifier *StreamingNotifier = new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5,mf6,mf7,oj0,oj2,oj3);
-	CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_type", &g_settings.streaming_type, true, StreamingNotifier);
-	oj1->addOption(0, "streamingmenu.off");
-	oj1->addOption(1, "streamingmenu.on");
 
 
 	streamingSettings.addItem(GenericMenuSeparator);
 	streamingSettings.addItem(GenericMenuBack);
 	streamingSettings.addItem(GenericMenuSeparatorLine);
-	streamingSettings.addItem( oj1);                          //Streaming Type
+	streamingSettings.addItem( oj0);                          //Streaming Type
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf1);                          //Server IP
 	streamingSettings.addItem( mf2);                          //Server Port
@@ -1858,16 +1873,15 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( mf6);                          //Startdir
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf4);                          //Video-Rate
-	streamingSettings.addItem( oj3);                          //Resolution
-	streamingSettings.addItem( oj2);                          //Force Transcode
+	streamingSettings.addItem( oj3);
+	streamingSettings.addItem( oj4);                          
+	streamingSettings.addItem( oj5);                          
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf5);                          //Audiorate
-	streamingSettings.addItem( oj0);                          //AC3 enabled
+	streamingSettings.addItem( oj1);                          
+	streamingSettings.addItem( oj2);                          
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf7);                          //default dir
-	//streamingSettings.addItem( new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir, 
-	//														 this, "moviedir"));
-
 }
 
 
@@ -2558,7 +2572,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget mp3picSettings("mp3picsettings.general", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget scanSettings("servicemenu.scants", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget service("servicemenu.head", NEUTRINO_ICON_SETTINGS);
-    CMenuWidget moviePlayer("movieplayer", "streaming.raw");
+	CMenuWidget moviePlayer("movieplayer", "streaming.raw");
     
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,

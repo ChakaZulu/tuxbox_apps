@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.61 2004/01/01 22:39:57 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.62 2004/01/17 23:40:54 zwen Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -63,7 +63,6 @@
 
 #include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
-#include <gui/widget/menue.h>
 #include <gui/widget/messagebox.h>
 #include <gui/widget/hintbox.h>
 #include <gui/widget/stringinput.h>
@@ -121,7 +120,7 @@ static long fileposition;
 ringbuffer_t *ringbuf;
 bool bufferfilled;
 int streamingrunning;
-unsigned short pida, pidv;
+unsigned short pida, pidv, ac3;
 CHintBox *hintBox;
 CHintBox *bufferingBox;
 bool avpids_found;
@@ -148,9 +147,10 @@ CMoviePlayerGui::CMoviePlayerGui() : bookmarkfile('\t')
 	videofilefilter.addFilter ("ts");
 	videofilefilter.addFilter ("ps");
 	videofilefilter.addFilter ("mpg");
-    videofilefilter.addFilter ("mpeg");
-    videofilefilter.addFilter ("m2p");
+	videofilefilter.addFilter ("mpeg");
+	videofilefilter.addFilter ("m2p");
 	videofilefilter.addFilter ("avi");
+	videofilefilter.addFilter ("vob");
 	filebrowser->Filter = &videofilefilter;
 	if (strlen (g_settings.network_nfs_moviedir) != 0)
 		Path = g_settings.network_nfs_moviedir;
@@ -278,7 +278,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 						 m_LastMode);
 
 	// always exit all
-	return menu_return::RETURN_EXIT_ALL;
+	return menu_return::RETURN_REPAINT;
 }
 
 //------------------------------------------------------------------------
@@ -292,7 +292,7 @@ CURLcode sendGetRequest (const std::string & url) {
 	curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
 	curl_easy_setopt (curl, CURLOPT_FILE, (void *) &response);
-	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
+	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true); 
 	httpres = curl_easy_perform (curl);
 	//printf ("[movieplayer.cpp] HTTP Result: %d\n", httpres);
 	curl_easy_cleanup (curl);
@@ -300,22 +300,9 @@ CURLcode sendGetRequest (const std::string & url) {
 }
 
 //------------------------------------------------------------------------
-void *
-ReceiveStreamThread (void *mrl)
+bool VlcSendPlaylist(char* mrl)
 {
-	printf ("[movieplayer.cpp] ReceiveStreamThread started\n");
-	int skt;
-	const char *server;
-	int port;
 	CURLcode httpres;
-
-	int nothingreceived=0;
-	
-	// Get Server and Port from Config
-	server = g_settings.streaming_server_ip.c_str ();
-	sscanf (g_settings.streaming_server_port, "%d", &port);
-	
-	
 	std::string baseurl = "http://";
 	baseurl += g_settings.streaming_server_ip;
 	baseurl += ':';
@@ -342,80 +329,74 @@ ReceiveStreamThread (void *mrl)
 	*/
 	std::string addurl = baseurl + "?control=add&mrl=" + (char*) mrl;
 	httpres = sendGetRequest(addurl);
-  
+	return (httpres==0);
+}
+#define TRANSCODE_VIDEO_OFF 0
+#define TRANSCODE_VIDEO_MPEG1 1
+#define TRANSCODE_VIDEO_MPEG2 2
+//------------------------------------------------------------------------
+bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
+{
+	CURLcode httpres;
+	std::string baseurl = "http://";
+	baseurl += g_settings.streaming_server_ip;
+	baseurl += ':';
+	baseurl += g_settings.streaming_server_port;
+	baseurl += '/';
+	
 	// add sout (URL encoded)
 	// Example(mit transcode zu mpeg1): ?sout=#transcode{vcodec=mpgv,vb=2000,acodec=mpga,ab=192,channels=2}:duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
 	// Example(ohne transcode zu mpeg1): ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
 	//TODO make this nicer :-)
 	std::string souturl;
 
-  //Resolve Resolution from Settings...
-  char* res_horiz = "";
-  char* res_vert = "";
-  switch (g_settings.streaming_resolution)
-  {
-    case 0:
-      res_horiz = "352";
-      res_vert = "288";
-      break;
-    case 1:
-      res_horiz = "352";
-      res_vert = "576";
-      break;
-    case 2:
-      res_horiz = "480";
-      res_vert = "576";
-      break;
-    case 3:
-      res_horiz = "704";
-      res_vert = "576";
-      break;
-    default:
-      res_horiz = "352";
-      res_vert = "288";
-  } //switch
-
-  //Menu Option Force Transcode: Transcode all Files, including mpegs.
-	if (!g_settings.streaming_force_transcode &&           
-		(!memcmp((char*)mrl, "vcd:", 4) ||
-		!strcasecmp(addurl.substr(addurl.length()-3).c_str(), "mpg") || 
-		!strcasecmp(addurl.substr(addurl.length()-4).c_str(), "mpeg") ||
-		!strcasecmp(addurl.substr(addurl.length()-3).c_str(), "ac3") || 
-		!strcasecmp(addurl.substr(addurl.length()-3).c_str(), "m2p")))
+	//Resolve Resolution from Settings...
+	char* res_horiz = "";
+	char* res_vert = "";
+	switch (g_settings.streaming_resolution)
 	{
-		// no transcode
-		souturl = "#duplicate{dst=std{access=http,mux=ts,url=:";
-		souturl += g_settings.streaming_server_port;
-		souturl += "/dboxstream}}";
-	}
-	else if(!memcmp((char*)mrl, "dvd", 3) && g_settings.streaming_ac3_enabled) 
+		case 0:
+			res_horiz = "352";
+			res_vert = "288";
+			break;
+		case 1:
+			res_horiz = "352";
+			res_vert = "576";
+			break;
+		case 2:
+			res_horiz = "480";
+			res_vert = "576";
+			break;
+		case 3:
+			res_horiz = "704";
+			res_vert = "576";
+			break;
+		default:
+			res_horiz = "352";
+			res_vert = "288";
+	} //switch
+	souturl = "#";
+	if(transcodeVideo!=TRANSCODE_VIDEO_OFF || transcodeAudio!=0)
 	{
-		// transcode video only
-		souturl = "#transcode{vcodec=mpgv,vb=";
-		souturl += g_settings.streaming_videorate;
-    souturl += ",width=";                                 //transcode to size specified
-    souturl += res_horiz;                                 //in Settings
-    souturl += ",height=";                                //
-    souturl += res_vert;                                  //
-		souturl += "}:duplicate{dst=std{access=http,mux=ts,url=:";
-		souturl += g_settings.streaming_server_port;
-		souturl += "/dboxstream}}";
+		souturl += "transcode{";
+		if(transcodeVideo!=TRANSCODE_VIDEO_OFF)
+		{
+			const char* codec = (transcodeVideo == TRANSCODE_VIDEO_MPEG1) ? "mpgv" : "mp2v";
+			souturl += std::string("vcodec=") + codec + ",vb=" + g_settings.streaming_videorate;
+			souturl += std::string(",width=") + res_horiz + ",height=" + res_vert;
+		}
+		if(transcodeAudio!=0)
+		{
+			if(transcodeVideo!=TRANSCODE_VIDEO_OFF)
+				souturl += ",";
+			souturl += std::string("acodec=mpga,ab=") + g_settings.streaming_audiorate + ",channels=2";
+		}
+		souturl += "}:";
 	}
-	else
-	{
-		// transcode audio and video
-		souturl = "#transcode{vcodec=mpgv,vb=";
-		souturl += g_settings.streaming_videorate;
-    souturl += ",width=";                                   //transcode to size specified
-    souturl += res_horiz;                                   //in Settings
-    souturl += ",height=";                                  //
-    souturl += res_vert;                                    //
-		souturl += ",acodec=mpga,ab=";
-		souturl += g_settings.streaming_audiorate;
-		souturl += ",channels=2}:duplicate{dst=std{access=http,mux=ts,url=:";
-		souturl += g_settings.streaming_server_port;
-		souturl += "/dboxstream}}";
-	}
+	souturl += "duplicate{dst=std{access=http,mux=ts,url=:";
+	souturl += g_settings.streaming_server_port;
+	souturl += "/dboxstream}}";
+	
 	char *tmp = curl_escape (souturl.c_str (), 0);
 	printf("[movieplayer.cpp] URL      : %s?sout=%s\n",baseurl.c_str(), souturl.c_str());
 	printf("[movieplayer.cpp] URL(enc) : %s?sout=%s\n",baseurl.c_str(), tmp);
@@ -426,12 +407,65 @@ ReceiveStreamThread (void *mrl)
 	// play MRL
 	std::string playurl = baseurl + "?control=play&item=0";
 	httpres = sendGetRequest(playurl);
-  
+
+	return true; // TODO error checking
+}
+//------------------------------------------------------------------------
+void *
+ReceiveStreamThread (void *mrl)
+{
+	printf ("[movieplayer.cpp] ReceiveStreamThread started\n");
+	int skt;
+
+	int nothingreceived=0;
+	
+	// Get Server and Port from Config
+
+	if (!VlcSendPlaylist((char*)mrl))
+	{
+		DisplayErrorMessage(g_Locale->getText("movieplayer.nostreamingserver")); // UTF-8
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+		// Assume safely that all succeeding HTTP requests are successful
+	}
+	
+
+	int transcodeVideo, transcodeAudio;
+	std::string sMRL=(char*)mrl;
+	//Menu Option Force Transcode: Transcode all Files, including mpegs.
+	if ((!memcmp((char*)mrl, "vcd:", 4) ||
+		  !strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "mpg") || 
+		  !strcasecmp(sMRL.substr(sMRL.length()-4).c_str(), "mpeg") ||
+		  !strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "m2p")))
+	{
+		if (g_settings.streaming_force_transcode_video)
+			transcodeVideo=g_settings.streaming_transcode_video_codec+1;
+		else
+			transcodeVideo=0;
+		transcodeAudio=g_settings.streaming_transcode_audio;
+	}
+	else
+	{
+		transcodeVideo=g_settings.streaming_transcode_video_codec+1;
+		if((!memcmp((char*)mrl, "dvd", 3) && !g_settings.streaming_transcode_audio) ||
+			(!strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "vob") && !g_settings.streaming_transcode_audio) ||
+			(!strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "ac3") && !g_settings.streaming_transcode_audio) ||
+			g_settings.streaming_force_avi_rawaudio)
+			transcodeAudio=0;
+		else
+			transcodeAudio=1;
+	}
+	VlcRequestStream(transcodeVideo, transcodeAudio);
+
 // TODO: Better way to detect if http://<server>:8080/dboxstream is already alive. For example repetitive checking for HTTP 404.
 // Unfortunately HTTP HEAD requests are not supported by VLC :(
 // vlc 0.6.3 and up may support HTTP HEAD requests.
 
 // Open HTTP connection to VLC
+
+	const char *server = g_settings.streaming_server_ip.c_str ();
+	int port;
+	sscanf (g_settings.streaming_server_port, "%d", &port);
 
 	struct sockaddr_in servAddr;
 	servAddr.sin_family = AF_INET;
@@ -533,9 +567,11 @@ ReceiveStreamThread (void *mrl)
 				//Use global pida, pidv
 				//unsigned short pidv = 0, pida = 0;
 				find_avpids (fd, &pidv, &pida);
+				lseek(fd, 0, SEEK_SET);
+				ac3 = (is_audio_ac3(fd) > 0);
 				close (fd);
-				printf ("[movieplayer.cpp] ReceiveStreamThread: while streaming found pida: 0x%04X ; pidv: 0x%04X\n",
-					pida, pidv);
+				printf ("[movieplayer.cpp] ReceiveStreamThread: while streaming found pida: 0x%04X ; pidv: 0x%04X ; ac3: %d\n",
+					pida, pidv, ac3);
 				avpids_found = true;
 			}
 			if (!bufferfilled) {
@@ -606,7 +642,7 @@ PlayStreamThread (void *mrl)
 	char buf[348 * 188];
 	bool failed = false;
 	// use global pida and pidv
-	pida = 0, pidv = 0;
+	pida = 0, pidv = 0, ac3 = 0;
 	int done, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
 	struct dmx_pes_filter_params p;
 	ssize_t wr;
@@ -648,8 +684,8 @@ PlayStreamThread (void *mrl)
 	size_t readsize, len;
 	len = 0;
 	bool driverready = false;
-	std::string pauseurl;
-	std::string unpauseurl;
+	std::string pauseurl   = baseurl + "?control=pause";
+	std::string unpauseurl = baseurl + "?control=pause";
 	while (playstate > CMoviePlayerGui::STOPPED)
 	{
 		readsize = ringbuffer_read_space (ringbuf);
@@ -678,7 +714,7 @@ PlayStreamThread (void *mrl)
 				p.pes_type = DMX_PES_VIDEO;
 				if (ioctl (dmxv, DMX_SET_PES_FILTER, &p) < 0)
 					failed = true;
-				if (g_settings.streaming_ac3_enabled == 1) {
+				if (ac3 == 1) {
 					if (ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL)<0)
 					{
 						perror("AUDIO_SET_BYPASS_MODE");
@@ -716,18 +752,16 @@ PlayStreamThread (void *mrl)
 				ioctl (dmxa, DMX_STOP);
 
 				// pause VLC
-				pauseurl = baseurl + "?control=pause";
 				httpres = sendGetRequest(pauseurl);
 
 				while (playstate == CMoviePlayerGui::PAUSE)
 				{
 					//ioctl (dmxv, DMX_STOP);	
-					ioctl (dmxa, DMX_STOP);
+					//ioctl (dmxa, DMX_STOP);
+					usleep(100000); // no busy wait
 				}
 				// unpause VLC
-				unpauseurl = baseurl + "?control=pause";
 				httpres = sendGetRequest(unpauseurl);
-
 				speed = 1;
 				break;
 			case CMoviePlayerGui::RESYNC:
@@ -811,7 +845,7 @@ PlayStreamThread (void *mrl)
 	ringbuffer_free(ringbuf);
 	delete bufferingBox;
 	delete hintBox;
-
+	
 	pthread_exit (NULL);
 }
 
@@ -821,7 +855,7 @@ PlayFileThread (void *filename)
 {
 	bool failed = false;
 	unsigned char buf[384 * 188 * 2];
-	unsigned short pida = 0, pidv = 0;
+	unsigned short pida = 0, pidv = 0, ac3=0;
 	int done, fd = 0, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
 	struct dmx_pes_filter_params p;
 	ssize_t wr = 0;
@@ -843,8 +877,10 @@ PlayFileThread (void *filename)
 	if (isTS)
 	{
 		find_avpids (fd, &pidv, &pida);
-		printf ("[movieplayer.cpp] found pida: 0x%04X ; pidv: 0x%04X\n",
-			pida, pidv);
+		lseek(fd, 0, SEEK_SET);
+		ac3 = is_audio_ac3 (fd);
+		printf ("[movieplayer.cpp] found pida: 0x%04X ; pidv: 0x%04X ; ac3: %d\n",
+			pida, pidv, ac3);
 	}
 	else
 	{				// Play PES
@@ -900,7 +936,7 @@ PlayFileThread (void *filename)
 				ioctl (dmxv, DMX_STOP);
 				ioctl (dmxa, DMX_STOP);
 				ioctl (vdec, VIDEO_PLAY);
-				if (g_settings.streaming_ac3_enabled == 1) {
+				if (ac3 == 1) {
 					ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL);
 				}
 				else
@@ -923,6 +959,7 @@ PlayFileThread (void *filename)
 			case CMoviePlayerGui::PREPARING:
 			case CMoviePlayerGui::STREAMERROR:
 			case CMoviePlayerGui::PLAY:
+			case CMoviePlayerGui::RESYNC:
 				break;
 			}
 
@@ -1122,7 +1159,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		}
 
 		g_RCInput->getMsg (&msg, &data, 100);	// 10 secs..
-		if (msg == CRCInput::RC_red || msg == CRCInput::RC_home)
+		if (msg == CRCInput::RC_home || msg == CRCInput::RC_red)
 		{
 			//exit play
 			exit = true;
@@ -1139,7 +1176,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.61 $\n\nMovieplayer (c) 2003 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.62 $\n\nMovieplayer (c) 2003 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1262,7 +1299,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.61 $\n\nMovieplayer (c) 2003 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.62 $\n\nMovieplayer (c) 2003 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
         else if (msg == CRCInput::RC_left)
@@ -1325,6 +1362,7 @@ CMoviePlayerGui::PlayFile (void)
 	pthread_join (rct, NULL);
 }
 
+/* Gui not used at the moment !!! See neutrino.cpp for current GUI (std. menu class) */
 int
 CMoviePlayerGui::show ()
 {

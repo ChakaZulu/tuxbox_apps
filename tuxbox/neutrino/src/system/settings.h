@@ -165,7 +165,10 @@ struct SNeutrinoSettings
 	char streaming_audiorate[6];
 	char streaming_server_startdir[40];
 	int streaming_ac3_enabled;
-	int streaming_force_transcode;
+	int streaming_transcode_audio;
+   int streaming_force_avi_rawaudio;
+	int streaming_force_transcode_video;
+   int streaming_transcode_video_codec;
 	int streaming_resolution;
     
 	//key configuration

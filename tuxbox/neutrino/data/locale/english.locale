@@ -142,15 +142,19 @@ streamingmenu.streaming_server_cddrive DVD Drive
 streamingmenu.streaming_server_startdir Directory (VLC)
 streamingmenu.streaming_videorate Datarate Video
 streamingmenu.streaming_audiorate Datarate Audio
-streamingmenu.streaming_ac3_enabled AC3 Support
 streamingmenu.off Off
 streamingmenu.on On
-streamingmenu.streaming_force_transcode Force Transcoding
 streamingmenu.streaming_resolution Resolution
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
+streamingmenu.streaming_transcode_audio Transcode audio (DVD/VCD/MPG)
+streamingmenu.streaming_force_avi_rawaudio Force AC3 for AVI
+streamingmenu.streaming_force_transcode_video Transcode MPG/VCD video
+streamingmenu.streaming_transcode_video_codec MPEG video codec
+streamingmenu.mpeg1 MPEG1
+streamingmenu.mpeg2 MPEG2
 
 ping.ok is reachable (ping)
 ping.unreachable is unreachable
