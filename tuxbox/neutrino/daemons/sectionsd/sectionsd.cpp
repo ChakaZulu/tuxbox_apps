@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.150 2003/02/05 22:13:10 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.151 2003/02/06 15:37:34 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -26,6 +26,7 @@
 //
 
 #include <dmx.h>
+#include <debug.h>
 
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -100,7 +101,6 @@
 static long secondsToCache = 21*24*60L*60L; // 21 Tage - Prozessorlast <3% (rasc)
 // Ab wann ein Event als alt gilt (in Sekunden)
 static long oldEventsAre = 60*60L; // 1h
-static int debug = 0;
 static int scanning = 1;
 
 
@@ -109,9 +109,6 @@ static int scanning = 1;
 CEventServer *eventServer;
 //CTimerdClient   *timerdClient;
 //bool            timerd = false;
-
-#define dprintf(fmt, args...) { if (debug) { printf(fmt, ## args); fflush(stdout); } }
-#define dputs(str) { if (debug) { puts(str); fflush(stdout); } }
 
 static pthread_mutex_t eventsLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
 static pthread_mutex_t servicesLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
@@ -163,7 +160,7 @@ void showProfiling( std::string text )
 	last_profile_call = now;
 }
 
-static int timeset = 0; // = 1 falls Uhrzeit gesetzt
+bool timeset = false;
 static const SIevent nullEvt; // Null-Event
 
 //------------------------------------------------------------
@@ -573,438 +570,7 @@ int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds)
 	return numberOfBytes;
 }
 
-//------------------------------------------------------------
-// class DMX
-//------------------------------------------------------------
-DMX::DMX(unsigned char p, unsigned short bufferSizeInKB, bool nCRC)
-{
-	fd = 0;
-	lastChanged = 0;
-	filter_index = 0;
-	pID = p;
-	dmxBufferSizeInKB = bufferSizeInKB;
-	noCRC = nCRC;
-	pthread_mutex_init(&pauselock, NULL); // default = fast mutex
-	pthread_mutex_init(&start_stop_mutex, NULL); // default = fast mutex
-	pthread_cond_init( &change_cond, NULL );
-	pauseCounter = 0;
-	real_pauseCounter = 0;
-}
 
-DMX::~DMX()
-{
-	closefd();
-	pthread_mutex_destroy(&pauselock); // ist bei Linux ein dummy
-	pthread_mutex_destroy(&start_stop_mutex); // ist bei Linux ein dummy
-	pthread_cond_destroy(&change_cond);
-}
-
-int DMX::read(char *buf, const size_t buflength, unsigned timeoutMInSeconds)
-{
-	return readNbytes(fd, buf, buflength, timeoutMInSeconds);
-}
-
-void DMX::closefd(void)
-{
-	if (fd)
-	{
-		close(fd);
-		fd = 0;
-	}
-}
-
-void DMX::addfilter(unsigned char filter, unsigned char mask)
-{
-	s_filters	tmp;
-	tmp.filter = filter;
-	tmp.mask = mask;
-	filters.insert(filters.end(), tmp);
-}
-
-int DMX::stop(void)
-{
-	if (!fd)
-		return 1;
-	
-	pthread_mutex_lock( &start_stop_mutex );
-	
-	if (real_pauseCounter == 0)
-		closefd();
-	
-	pthread_mutex_unlock( &start_stop_mutex );
-	
-	return 0;
-}
-
-void DMX::lock(void)
-{
-	pthread_mutex_lock( &start_stop_mutex );
-}
-
-void DMX::unlock(void)
-{
-	pthread_mutex_unlock( &start_stop_mutex );
-}
-
-bool DMX::isOpen(void)
-{
-	return fd ? true : false;
-}
-
-char * DMX::getSection(unsigned timeoutInMSeconds, int &timeouts)
-{
-	struct minimal_section_header {
-		unsigned char table_id : 8;
-		// 1 byte
-		unsigned char section_syntax_indicator : 1;
-		unsigned char reserved_future_use : 1;
-		unsigned char reserved1 : 2;
-		unsigned short section_length : 12;
-		// 3 bytes
-	} __attribute__ ((packed));
-	
-	minimal_section_header initial_header;
-	char * buf;
-	int    rc;
-	
-	lock();
-	
-	rc = read((char *) &initial_header, 3, timeoutInMSeconds);
-	
-	if (rc <= 0)
-	{
-		unlock();
-		if (rc == 0)
-		{
-			dprintf("dmx.read timeout - filter: %x - timeout# %d", filters[filter_index].filter, timeouts);
-			timeouts++;
-		}
-		else
-		{
-			dprintf("dmx.read rc: %d - filter: %x", rc, filters[filter_index].filter);
-			// restart DMX
-			real_pause();
-			real_unpause();
-		}
-		return NULL;
-	}
-	
-	timeouts = 0;
-	buf = new char[3 + initial_header.section_length];
-	
-	if (!buf)
-	{
-		unlock();
-		closefd();
-		fprintf(stderr, "[sectionsd] FATAL: Not enough memory: filter: %x\n", filters[filter_index].filter);
-		throw std::bad_alloc();
-		return NULL;
-	}
-	
-	if (initial_header.section_length > 0)
-		rc = read(buf + 3, initial_header.section_length, timeoutInMSeconds);
-	
-	unlock();
-	
-	if (rc <= 0)
-	{
-		delete[] buf;
-		if (rc == 0)
-		{
-			dprintf("dmx.read timeout after header - filter: %x", filters[filter_index].filter);
-		}
-		else
-		{
-			dprintf("dmx.read rc: %d after header - filter: %x", rc, filters[filter_index].filter);
-		}
-		// DMX restart required, since part of the header has been read
-		real_pause();
-		real_unpause();
-		return NULL;
-	}
-	
-	// check if the filter worked correctly
-	if (((initial_header.table_id ^ filters[filter_index].filter) & filters[filter_index].mask) != 0)
-	{
-		delete[] buf;
-		dprintf("[sectionsd] filter 0x%x mask 0x%x -> skip sections for table 0x%x\n", filters[filter_index].filter, filters[filter_index].mask, initial_header.table_id);
-		return NULL;
-	}
-	
-	if (initial_header.section_length < 5)  // skip sections which are too short
-	{
-		delete[] buf;
-		return NULL;
-	}
-	
-	memcpy(buf, &initial_header, 3);
-	
-	return buf;
-}
-
-int DMX::start(void)
-{
-	if (fd)
-	{
-		return 1;
-	}
-
-	pthread_mutex_lock( &start_stop_mutex );
-
-	if (real_pauseCounter != 0)
-	{
-		pthread_mutex_unlock( &start_stop_mutex );
-		return 0;
-	}
-
-	if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1)
-	{
-		perror ("[sectionsd] DMX: /dev/dvb/adapter0/demux0");
-		pthread_mutex_unlock( &start_stop_mutex );
-		return 2;
-	}
-
-	if (ioctl (fd, DMX_SET_BUFFER_SIZE, (unsigned long)(dmxBufferSizeInKB*1024UL)) == -1)
-	{
-		closefd();
-		perror ("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
-		pthread_mutex_unlock( &start_stop_mutex );
-		return 3;
-	}
-
-	struct dmx_sct_filter_params flt;
-
-	memset (&flt.filter, 0, sizeof (struct dmx_filter));
-
-	flt.pid = pID;
-	flt.filter.filter[0] = filters[filter_index].filter; // current/next
-	flt.filter.mask[0] = filters[filter_index].mask; // -> 4e und 4f
-	flt.timeout = 0;
-	flt.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-
-	if (ioctl (fd, DMX_SET_FILTER, &flt) == -1)
-	{
-		closefd();
-		perror ("[sectionsd] DMX: DMX_SET_FILTER");
-		pthread_mutex_unlock( &start_stop_mutex );
-		return 4;
-	}
-
-	//  	if(timeset) // Nur wenn ne richtige Uhrzeit da ist
-	//    	lastChanged=time(NULL);
-	pthread_mutex_unlock( &start_stop_mutex );
-
-	return 0;
-}
-
-int DMX::real_pause(void)
-{
-	if (!fd)
-		return 1;
-
-	pthread_mutex_lock( &start_stop_mutex );
-
-	if (real_pauseCounter == 0)
-	{
-		if (ioctl (fd, DMX_STOP, 0) == -1)
-		{
-			closefd();
-			perror ("[sectionsd] DMX: DMX_STOP");
-			pthread_mutex_unlock( &start_stop_mutex );
-			return 2;
-		}
-	}
-
-	//dprintf("real_pause: %d\n", real_pauseCounter);
-	pthread_mutex_unlock( &start_stop_mutex );
-
-	return 0;
-}
-
-int DMX::real_unpause(void)
-{
-	if (!fd)
-		return 1;
-
-	pthread_mutex_lock( &start_stop_mutex );
-
-	if (real_pauseCounter == 0)
-	{
-		if (ioctl (fd, DMX_START, 0) == -1)
-		{
-			closefd();
-			perror ("[sectionsd] DMX: DMX_START");
-			pthread_mutex_unlock( &start_stop_mutex );
-			return 2;
-		}
-
-		//dprintf("real_unpause DONE: %d\n", real_pauseCounter);
-	}
-
-	//    else
-	//dprintf("real_unpause NOT DONE: %d\n", real_pauseCounter);
-
-
-	pthread_mutex_unlock( &start_stop_mutex );
-
-	return 0;
-}
-
-int DMX::request_pause(void)
-{
-	real_pause(); // unlocked
-
-	pthread_mutex_lock( &start_stop_mutex );
-	//dprintf("request_pause: %d\n", real_pauseCounter);
-
-	real_pauseCounter++;
-	pthread_mutex_unlock( &start_stop_mutex );
-
-	return 0;
-}
-
-
-int DMX::request_unpause(void)
-{
-	pthread_mutex_lock( &start_stop_mutex );
-	//dprintf("request_unpause: %d\n", real_pauseCounter);
-	--real_pauseCounter;
-	pthread_mutex_unlock( &start_stop_mutex );
-
-	real_unpause(); // unlocked
-
-	return 0;
-}
-
-
-int DMX::pause(void)
-{
-	if (!fd)
-		return 1;
-
-	pthread_mutex_lock(&pauselock);
-
-	//dprintf("lock from pc: %d\n", pauseCounter);
-	pauseCounter++;
-
-	pthread_mutex_unlock(&pauselock);
-
-	return 0;
-}
-
-int DMX::unpause(void)
-{
-	if (!fd)
-		return 1;
-
-	pthread_mutex_lock(&pauselock);
-
-	//dprintf("unlock from pc: %d\n", pauseCounter);
-	--pauseCounter;
-
-	pthread_mutex_unlock(&pauselock);
-
-	return 0;
-}
-
-int DMX::change(int new_filter_index)
-{
-	if (!fd)
-		return 1;
-
-	showProfiling("changeDMX: before pthread_mutex_lock( &start_stop_mutex )");
-        pthread_mutex_lock( &start_stop_mutex );
-
-	showProfiling("changeDMX: after pthread_mutex_lock( &start_stop_mutex )");
-
-	if (real_pauseCounter > 0)
-	{
-		pthread_mutex_unlock( &start_stop_mutex );
-		dprintf("changeDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", filters[new_filter_index].filter);
-		return 0;	// läuft nicht (zB streaming)
-	}
-
-	//	if(pID==0x12) // Nur bei EIT
-	dprintf("changeDMX [%x]-> %s (0x%x)\n", pID, (new_filter_index == 0) ? "current/next" : "scheduled", filters[new_filter_index].filter);
-
-/*	if (ioctl (fd, DMX_STOP, 0) == -1)
-	{
-		closefd();
-		perror ("[sectionsd] DMX: DMX_STOP");
-		pthread_mutex_unlock( &start_stop_mutex );
-		return 2;
-	}
-*/
-	closefd();
-
-
-
-//	if (new_filter_index != filter_index)
-	{
-
-		if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1)
-		{
-			perror ("[sectionsd] DMX: /dev/dvb/adapter0/demux0");
-			pthread_mutex_unlock( &start_stop_mutex );
-			return 2;
-		}
-
-		if (ioctl (fd, DMX_SET_BUFFER_SIZE, (unsigned long)(dmxBufferSizeInKB*1024UL)) == -1)
-		{
-			closefd();
-			perror ("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
-			pthread_mutex_unlock( &start_stop_mutex );
-			return 3;
-		}
-
-		struct dmx_sct_filter_params flt;
-
-		memset (&flt.filter, 0, sizeof (struct dmx_filter));
-
-		flt.pid = pID;
-		flt.filter.filter[0] = filters[new_filter_index].filter;
-		flt.filter.mask[0] = filters[new_filter_index].mask;
-		flt.timeout = 0;
-		flt.flags = DMX_IMMEDIATE_START;
-
-		if ( ( new_filter_index != 0 ) && (!noCRC) )
-			flt.flags |= DMX_CHECK_CRC;
-
-		filter_index = new_filter_index;
-
-
-
-		if (ioctl (fd, DMX_SET_FILTER, &flt) == -1)
-		{
-			closefd();
-			perror ("[sectionsd] DMX: DMX_SET_FILTER");
-			pthread_mutex_unlock( &start_stop_mutex );
-			return 3;
-		}
-
-		showProfiling("after DMX_SET_FILTER");
-	}
-/*	else
-	{
-		if (ioctl (fd, DMX_START, 0) == -1)
-		{
-			closefd();
-			perror ("[sectionsd] DMX: DMX_START");
-			pthread_mutex_unlock( &start_stop_mutex );
-			return 3;
-		}
-		showProfiling("after DMX_START");
-	}
-*/
-        pthread_cond_signal( &change_cond );
-
-	if (timeset) // Nur wenn ne richtige Uhrzeit da ist
-		lastChanged = time(NULL);
-
-	pthread_mutex_unlock( &start_stop_mutex );
-
-	return 0;
-}
 
 // k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
 // falsch ist es zumindest nicht
@@ -1583,7 +1149,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.150 2003/02/05 22:13:10 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.151 2003/02/06 15:37:34 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2982,7 +2548,7 @@ static void commandGetIsTimeSet(int connfd, char *data, const unsigned dataLengt
 
 	sectionsd::responseIsTimeSet rmsg;
 
-	rmsg.IsTimeSet = (timeset != 0);
+	rmsg.IsTimeSet = timeset;
 
 	dprintf("Request of Time-Is-Set %d\n", rmsg.IsTimeSet);
 
@@ -3573,7 +3139,7 @@ static void *timeThread(void *)
 								continue;
 							}
 
-						timeset = 1;
+						timeset = true;
 					}
 
 					break;
@@ -3583,7 +3149,7 @@ static void *timeThread(void *)
 				dmxTOT.unlock();
 			}
 		}
-		while (timeset != 1);
+		while (!timeset);
 
 		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim) );
 
@@ -4197,7 +3763,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.150 2003/02/05 22:13:10 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.151 2003/02/06 15:37:34 thegoodguy Exp $\n");
 
 	try
 	{
