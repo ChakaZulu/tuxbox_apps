@@ -95,7 +95,10 @@ void eMP3Decoder::outputReady(int what)
 	if (output.empty())
 	{
 		outputsn->stop();
-		state=stateBuffering;
+		if (state!=stateFileEnd)
+			state=stateBuffering;
+		else
+			eDebug("ok, everything played..");
 	}
 }
 
@@ -143,7 +146,10 @@ void eMP3Decoder::decodeMore(int what)
 				read_start=input_buffer,
 				remaining=0;
 		
-				read_size=input.read(read_start, read_size);
+			read_size=input.read(read_start, read_size);
+			
+			if (!read_size)
+				break;
 		
 			mad_stream_buffer(&stream, input_buffer, read_size+remaining);
 			stream.error=(mad_error)0;
@@ -216,7 +222,11 @@ void eMP3Decoder::decodeMore(int what)
 	}
 	
 	if (flushbuffer)
+	{
 		eDebug("end of file...");
+		state=stateFileEnd;
+		inputsn->stop();
+	}
 	
 	if ((state == statePlaying) && (output.size() > maxOutputBufferSize))
 	{
@@ -302,7 +312,7 @@ eService *eServiceHandlerMP3::createService(const eServiceReference &service)
 		{ "TENC",           'e'}
 	};
 	
-	const char *naming="[%1 - %3] %2";
+	const char *naming="[%a] [%1 - %3] %2";
 	
 	for (const char *c=naming; *c; ++c)
 	{
