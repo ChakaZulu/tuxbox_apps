@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.14 2002/02/23 14:53:18 McClean Exp $
+// $Id: SIevents.cpp,v 1.15 2002/02/23 20:52:41 field Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.15  2002/02/23 20:52:41  field
+// Bugfix
+//
 // Revision 1.14  2002/02/23 14:53:18  McClean
 // add fsk
 //
@@ -141,7 +144,7 @@ char SIevent::getFSK()
       return(it->rating + 3);
     }
   }
-  if (ratings.size()==0)
+  if (ratings.size()!=0)
   {
     return(ratings.begin()->rating + 3);
   }

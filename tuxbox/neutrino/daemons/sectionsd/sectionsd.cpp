@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.97 2002/02/23 20:23:23 McClean Exp $
+//  $Id: sectionsd.cpp,v 1.98 2002/02/23 20:52:41 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.98  2002/02/23 20:52:41  field
+//  Bugfix
+//
 //  Revision 1.97  2002/02/23 20:23:23  McClean
 //  fix up
 //
@@ -1517,7 +1520,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.97 2002/02/23 20:23:23 McClean Exp $\n"
+    "$Id: sectionsd.cpp,v 1.98 2002/02/23 20:52:41 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1909,7 +1912,7 @@ struct sectionsd::msgResponseHeader responseHeader;
 	strcpy(p, e.userClassification.c_str());
 	p+=strlen(e.userClassification.c_str())+1;
 	SIevent tmp = e;
-	*p = tmp.getFSK();
+	*p = e.getFSK();
 	p++;
 
     sectionsd::sectionsdTime zeit;
@@ -3298,7 +3301,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.97 2002/02/23 20:23:23 McClean Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.98 2002/02/23 20:52:41 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
