@@ -2518,7 +2518,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint64_t data)
 	if( res != messages_return::unhandled )
 	{
 		if( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
-			delete (unsigned char*) data;
+			delete (unsigned char*) (uint)data;
 		return( res & ( 0xFFFFFFFF - messages_return::unhandled ) );
 	}
 
@@ -2658,15 +2658,15 @@ int CNeutrinoApp::handleMsg(uint msg, uint64_t data)
 		{
 			if(CVCRControl::getInstance()->isDeviceRegistered())
 			{
-				recording_id = ((CTimerd::RecordingInfo *) data)->eventID;
-				if(CVCRControl::getInstance()->Record((CTimerd::RecordingInfo *) data))
+				recording_id = ((CTimerd::RecordingInfo *) (uint)data)->eventID;
+				if(CVCRControl::getInstance()->Record((CTimerd::RecordingInfo *) (uint)data))
 					recordingstatus = 1;
 				else
 					recordingstatus = 0;
 			}
 			else
 				printf("Keine vcr Devices registriert\n");
-			delete (unsigned char*) data;
+			delete (unsigned char*) (uint)data;
 		}
 		else
 		{
@@ -2676,13 +2676,13 @@ int CNeutrinoApp::handleMsg(uint msg, uint64_t data)
 				delete nextRecordingInfo;
 				nextRecordingInfo=NULL;
 			}
-			nextRecordingInfo=((CTimerd::RecordingInfo*)data);
+			nextRecordingInfo=((CTimerd::RecordingInfo*) (uint)data);
 		}
 		return messages_return::handled | messages_return::cancel_all;
 	}
 	else if( msg == NeutrinoMessages::RECORD_STOP)
 	{
-		if(((CTimerd::RecordingStopInfo*)data)->eventID==recording_id)
+		if(((CTimerd::RecordingStopInfo*) (uint)data)->eventID==recording_id)
 		{ // passendes stop zur Aufnahme
 			if(CVCRControl::getInstance()->isDeviceRegistered())
 			{
@@ -2700,19 +2700,19 @@ int CNeutrinoApp::handleMsg(uint msg, uint64_t data)
 		}
 		else if(nextRecordingInfo!=NULL)
 		{
-			if(((CTimerd::RecordingStopInfo*)data)->eventID == nextRecordingInfo->eventID)
+			if(((CTimerd::RecordingStopInfo*)(uint)data)->eventID == nextRecordingInfo->eventID)
 			{
 				delete nextRecordingInfo;
 				nextRecordingInfo=NULL;
 			}
 		}
-		delete (unsigned char*) data;
+		delete (unsigned char*) (uint)data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ZAPTO)
 	{
 		CTimerd::EventInfo * eventinfo;
-		eventinfo = (CTimerd::EventInfo *) data;
+		eventinfo = (CTimerd::EventInfo *) (uint)data;
 		if(recordingstatus==0)
 		{
 			if(eventinfo->mode==CTimerd::MODE_RADIO && mode!=mode_radio)
@@ -2727,7 +2727,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint64_t data)
 			}
 			channelList->zapTo_ChannelID(eventinfo->channel_id);
 		}
-		delete (unsigned char*) data;
+		delete (unsigned char*) (uint)data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
@@ -2820,20 +2820,20 @@ int CNeutrinoApp::handleMsg(uint msg, uint64_t data)
 	else if( msg == NeutrinoMessages::EVT_POPUP )
 	{
 		if( mode != mode_scart )
-			ShowHint ( "messagebox.info", std::string((char *) data) );
-		delete (unsigned char*) data;
+			ShowHint ( "messagebox.info", std::string((char *) (uint)data) );
+		delete (unsigned char*) (uint)data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::EVT_EXTMSG )
 	{
 		if( mode != mode_scart )
-			ShowMsg ( "messagebox.info", std::string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
-		delete (unsigned char*) data;
+			ShowMsg ( "messagebox.info", std::string((char *) (uint)data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+		delete (unsigned char*) (uint)data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::REMIND)
 	{
-		std::string text = (char*)data;
+		std::string text = (char*)(uint)data;
 		std::string::size_type pos;
 		while((pos=text.find("/",0))!= std::string::npos)
 		{
@@ -2841,7 +2841,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint64_t data)
 		}
 		if( mode != mode_scart )
 			ShowMsg ( "timerlist.type.remind", text , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw",0 );
-		delete (unsigned char*) data;
+		delete (unsigned char*) (uint)data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::CHANGEMODE )
@@ -2904,14 +2904,14 @@ int CNeutrinoApp::handleMsg(uint msg, uint64_t data)
 	}
 	else if( msg == NeutrinoMessages::EVT_START_PLUGIN )
 	{
-		string plugname = std::string((char *) data);
+		string plugname = std::string((char *) (uint)data);
 				g_PluginList->setvtxtpid( g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 		g_PluginList->startPlugin( plugname );
-		delete (unsigned char*) data;
+		delete (unsigned char*) (uint)data;
 	}
 
 	if( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
-		delete (unsigned char*) data;
+		delete (unsigned char*) (uint)data;
 
 	return messages_return::unhandled;
 }
@@ -3425,7 +3425,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.464 2003/06/06 00:13:10 gagga Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.465 2003/06/06 11:39:47 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();
