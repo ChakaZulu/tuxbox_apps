@@ -235,7 +235,11 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
 
 	// Stop sectionsd
-	g_Sectionsd->setPauseScanning(true); 
+	g_Sectionsd->setPauseScanning(true);
+		
+	//Send ir
+	CIRSend irs("audioplayeron");
+	irs.Send(); 
 
 #ifdef DBOX
 	// disable iec aka digi out
@@ -262,6 +266,10 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_settings.audio_avs_Control = CControld::TYPE_OST;
 	}
 
+	//Send ir
+	CIRSend irs("audioplayeroff");
+	irs.Send();
+	
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
 
