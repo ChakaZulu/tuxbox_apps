@@ -27,6 +27,7 @@
 #include <arpa/inet.h>
 
 #include "getservices.h"
+#include "sdt.h"
 
 /*Thread stuff */
 #include <pthread.h>
@@ -87,3 +88,6 @@ struct rmsg {
 
 int LoadServices();
 int get_caid();
+int sdt(uint osid);
+int pat(uint oonid);
+void nit();

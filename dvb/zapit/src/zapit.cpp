@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.2 2001/09/28 17:05:42 faralla Exp $
+  $Id: zapit.cpp,v 1.3 2001/09/30 14:14:34 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -39,7 +39,13 @@
   
   cmd = 'b' Get current vpid and apid
   
-  cmd = 'c'  - wie cmd 5, nur mit onid_tsid
+  cmd = 'c'  - wie cmd 5, nur mit onid_sid
+
+  cmd = 'd'  wie cmd 1, nut mit onid_sid
+  param = (onid<<16)|sid
+
+  cmd = 'e' change nvod (Es muss vorher auf den Basiskanal geschaltet worden sein)
+  param = (onid<<16)|sid
   
   Bei Fehlschlagen eines Kommandos wird der negative Wert des kommandos zurückgegeben.
   
@@ -60,6 +66,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.3  2001/09/30 14:14:34  faralla
+  nvod-support
+
   Revision 1.2  2001/09/28 17:05:42  faralla
   bugfix
 
@@ -117,11 +126,12 @@ char    OldParam;
 uint8_t fec_inner = 0; 
 uint16_t vpid, apid, pmt = 0;
 boolean im_gone = true;
+boolean current_is_nvod;
+std::string nvodname;
 
 int video = -1;
 int audio = -1;
 
-//chanptr tv_channels, radio_channels, current;
 std::map<uint, uint> allnumchannels_tv;
 std::map<uint, uint> allnumchannels_radio;
 std::map<std::string, uint> allnamechannels_tv;
@@ -231,7 +241,7 @@ pids parse_pmt(int pid, int ca_system_id)
   
   flt.filter.mask[0]  =0xFF;
   flt.timeout=5000;
-  flt.flags=DMX_IMMEDIATE_START;
+  flt.flags=DMX_ONESHOT | DMX_CHECK_CRC;
   
   //printf("parsepmt is setting DMX-FILTER\n");
   if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
@@ -619,11 +629,14 @@ int tune(uint tsid)
   uint8_t Fec_inner;
   int device = -1;
   uint Frequency, Symbolrate;
+  int status = -1;
 
   if (transponders.count(tsid) == 0)
     {
-      printf("No transponder with tsid %04x found\n", tsid);
-      return -1;
+      printf("No transponder with tsid %04x found\nSEARCHING...\n", tsid);
+      nit();
+      if (transponders.count(tsid) == 0)
+	return -1;
     }
   
   titerator transponder = transponders.find(tsid);
@@ -723,15 +736,24 @@ int tune(uint tsid)
   front.FEC_inner = Fec_inner;
   ioctl(device,QPSK_TUNE,&front);
   
+  for (int i = 0; i < 200; i++)
+    { 		
+      ioctl(device, FE_READ_STATUS, &status);
+      printf("Waiting for Frontend-device\n");
+      if (status & 2)
+	break;
+      usleep(1000);
+    }
+
   close(device);
   device= -1;
   
   old_tsid = tsid;
-
+  
   return 23;
 }
 
-int zapit (uint onid_sid) {
+int zapit (uint onid_sid,boolean in_nvod) {
 
   struct dmxPesFilterParams pes_filter;
   int vid = -1;
@@ -741,12 +763,47 @@ int zapit (uint onid_sid) {
   //  time_t current_time = 0;
   uint16_t emmpid;
   boolean do_search_emmpid;
+  //std::map<uint,channel>::iterator cI;
  
-  if (Radiomode_on)
-    cit = allchans_radio.find(onid_sid);
+  if (in_nvod)
+    {
+      current_is_nvod = true;
+      if (nvodchannels.count(onid_sid)>0)
+	cit = nvodchannels.find(onid_sid);
+      else
+	{
+	  printf("onid_sid %08x not found\n", onid_sid);
+	  return -3;
+	}
+    }
   else
-    cit = allchans_tv.find(onid_sid);
-
+    {
+      current_is_nvod = false;
+      if (Radiomode_on)
+	{
+	  if (allchans_radio.count(onid_sid)>0)
+	    {
+	      cit = allchans_radio.find(onid_sid);
+	    }
+	  else
+	    {
+	      printf("onid_sid %08x not found\n", onid_sid);
+	      return -3;
+	    }
+	}
+      else
+	{
+	  if (allchans_tv.count(onid_sid) >0)
+	    {
+	      cit = allchans_tv.find(onid_sid);
+	    }
+	  else
+	    {
+	      printf("onid_sid %08x not found\n", onid_sid);
+	      return -3;
+	    }
+	}
+    }
   
   if ( ( vid = open(VIDEO_DEV, O_RDWR) ) < 0)
     {
@@ -775,14 +832,40 @@ int zapit (uint onid_sid) {
       printf("[zapit] tunig to tsid %04x\n", cit->second.tsid);
       if (tune(cit->second.tsid) < 0)
 	{
-	  printf("No transponder with tsid %04x found\n", cit->second.tsid);
-	  exit(-1);
+	  printf("No transponder with tsid %04x found\nHave to look it up in nit\n", cit->second.tsid);
+	  return -3;
 	}
       do_search_emmpid = true;
     }
 else
   do_search_emmpid = false;
 
+  if (cit->second.service_type == 4)
+    {
+      nvodname = cit->second.name;
+      printf("Getting sdt for NVOD\n");
+      sdt(cit->second.sid);
+      printf("Got sdt\n");
+      if (!nvodchannels.empty())
+	{
+	  curr_onid_sid = onid_sid;
+	  save_settings();
+	  printf("Trying to zap to %08x\n", nvodchannels.rbegin()->first);
+	  if (zapit(nvodchannels.rbegin()->first, true) > 0)
+	    return 3;
+	  else
+	    return -3;
+	}
+      else
+	return -3;
+    }
+
+  if (cit->second.pmt == 0 && cit->second.service_type != 4)
+    {
+      printf("Trying to find pmt for %04x\n", cit->second.sid);
+      pat(cit->second.onid);
+    }
+ 
   memset(&parse_pmt_pids,0,sizeof(parse_pmt_pids));
   parse_pmt_pids = parse_pmt(cit->second.pmt, caid);
   
@@ -815,7 +898,10 @@ else
     //	cit->second.last_update = current_time;
   }
   
-  write_lcd((char*) cit->second.name.c_str());
+  if (in_nvod)
+    write_lcd((char*) nvodname.c_str());
+  else
+    write_lcd((char*) cit->second.name.c_str());
   
   if (cit->second.vpid != 0x1fff || cit->second.apid != 0x8191)
     {
@@ -825,7 +911,7 @@ else
       Apid = cit->second.apid;
       Pmt = cit->second.pmt;
       
-      printf("Zapping to %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", cit->second.name.c_str(), cit->second.vpid, cit->second.apid, cit->second.pmt);
+      printf("Zapping to sid: %04x %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", cit->second.sid, cit->second.name.c_str(), cit->second.vpid, cit->second.apid, cit->second.pmt);
       
       
       //        descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
@@ -843,7 +929,7 @@ else
 	      else
 		printf("[zapit] no emmpid found...\n");
 	    }
-	}
+	}	
 
       if ( (video = open(DEMUX_DEV, O_RDWR)) < 0)
         {
@@ -905,7 +991,8 @@ else
       vid= -1;
       //printf("Saving settings\n");
       curr_onid_sid = onid_sid;
-      save_settings();
+      if (!in_nvod)
+	save_settings();
     }
   else
     {
@@ -921,7 +1008,8 @@ else
 int numzap(int channel_number) {
   std::map<uint, uint>::iterator cit;
   
-if (Radiomode_on)
+  nvodchannels.clear();
+  if (Radiomode_on)
     {
       if (allnumchannels_radio.count(channel_number) == 0)
 	{
@@ -940,16 +1028,18 @@ if (Radiomode_on)
       cit = allnumchannels_tv.find(channel_number);
     }
   
- printf("Zapping to onid_sid %04x\n", cit->second);
- if (zapit(cit->second) > 0)
-   return 2;
- else
-   return -2;
+  printf("Zapping to onid_sid %04x\n", cit->second);
+  if (zapit(cit->second,false) > 0)
+    return 2;
+  else
+    return -2;
 }
 
 
 int namezap(std::string channel_name) {
   std::map<std::string,uint>::iterator cit;
+  
+  nvodchannels.clear();
   // Search current channel
   if (Radiomode_on)
     {
@@ -971,7 +1061,7 @@ int namezap(std::string channel_name) {
     }
   
   printf("Zapping to onid_sid %04x\n", cit->second);
-  if (zapit(cit->second) > 0)
+  if (zapit(cit->second,false) > 0)
     return 3;
   else
     return -3;
@@ -982,11 +1072,18 @@ int changeapid(ushort pid_nr)
   struct dmxPesFilterParams pes_filter;
   std::map<uint,channel>::iterator cit;
 
-  if (Radiomode_on)
-    cit = allchans_radio.find(curr_onid_sid);
+  if (current_is_nvod)
+    {
+      cit = nvodchannels.find(curr_onid_sid);
+    }
   else
-    cit = allchans_tv.find(curr_onid_sid);
-
+    {
+      if (Radiomode_on)
+	cit = allchans_radio.find(curr_onid_sid);
+      else
+	cit = allchans_tv.find(curr_onid_sid);
+    }
+  
   if (pid_nr <= pids_desc.count_apids)
     {
       if ( audio>= 0 )
@@ -997,12 +1094,14 @@ int changeapid(ushort pid_nr)
       
       //        descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
       
+      
       if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
         {
 	  cam_reset();
 	  descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid,  pids_desc.apids[pid_nr].pid , vpid);
         }
       
+
       //        printf("Changing APID of %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", current->name, current->vpid, pids_desc.apid[pid_nr], current->pmt);
       
       if((audio = open(DEMUX_DEV, O_RDWR)) < 0)
@@ -1216,7 +1315,7 @@ void parse_command()
   short carsten;
   std::map<uint,uint>::iterator sit;
   std::map<uint,channel>::iterator cit;
-  
+  int number = 0;
   //printf ("parse_command\n");
   
   //byteorder!!!!!!
@@ -1512,14 +1611,29 @@ void parse_command()
 	}
        break;
     case 'd':
-      printf("zapping by number\n");
-      int number;
+      printf("[zapit] zapping by number\n");
+      number = 0;
       sscanf((const char*) &rmsg.param, "%x", &number);
 
-      if (zapit(number) > 0)
+      if (zapit(number,false) > 0)
       	status = "00d";
       else
       	status = "-0d";
+      //printf("zapit is sending back a status-msg %s\n", status);
+      if (send(connfd, status, strlen(status),0) <0) {
+	perror("Could not send any retun\n");
+	return;
+      }
+      break;
+    case 'e':
+      printf("[zapit] changing nvod");
+      number = 0;
+      sscanf((const char*) &rmsg.param, "%x", &number);
+      
+      if (zapit(number,true) > 0)
+      	status = "00e";
+      else
+      	status = "-0e";
       //printf("zapit is sending back a status-msg %s\n", status);
       if (send(connfd, status, strlen(status),0) <0) {
 	perror("Could not send any retun\n");
@@ -1580,7 +1694,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.2 2001/09/28 17:05:42 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.3 2001/09/30 14:14:34 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   
   testmsg = load_settings();
@@ -1599,7 +1713,7 @@ int main(int argc, char **argv) {
   
   printf("Channels have been loaded succesfully\n");
   
-  printf("We´ve got ");
+  printf("We have got ");
   if (!allnumchannels_tv.empty())
     channelcount = allnumchannels_tv.rbegin()->first;
   printf("%d tv- and ", channelcount);
