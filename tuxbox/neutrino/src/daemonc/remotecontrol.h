@@ -177,7 +177,6 @@ class CRemoteControl
         unsigned int    ecm_pid;
 
 		void send();
-		bool zapit_mode;
 
         pthread_t       thrSender;
         pthread_cond_t  send_cond;
@@ -191,14 +190,11 @@ class CRemoteControl
 
 		CRemoteControl();
         void zapTo_onid_sid( unsigned int onid_sid );
-		void zapTo( string chnlname );
         void queryAPIDs();
         void setAPID(int APID);
         void setSubChannel(unsigned numSub);
         void CopySubChannelsToZapit( const CSubChannel_Infos& subChannels );
 		void shutdown();
-		void setZapper (bool zapper);
-		bool getZapper(){return zapit_mode;}
 		void radioMode();
 		void tvMode();
 

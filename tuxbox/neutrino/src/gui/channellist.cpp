@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.39 2001/11/23 13:18:18 McClean Exp $
+// $Id: channellist.cpp,v 1.40 2001/12/12 01:47:17 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.40  2001/12/12 01:47:17  McClean
+// cleanup
+//
 // Revision 1.39  2001/11/23 13:18:18  McClean
 // radiomode-paint bug removed
 //
@@ -188,10 +191,7 @@ void CChannelList::updateEvents(void)
     sectionsd::msgRequestHeader req;
     req.version = 2;
 
-    if ( ( zapit ) &&  ( g_settings.epg_byname == 0 ) )
-        req.command = sectionsd::actualEventListTVshortIDs;
-    else
-        req.command = sectionsd::actualEventListTVshort;
+    req.command = sectionsd::actualEventListTVshortIDs;
     req.dataLength = 0;
     write(sock_fd,&req,sizeof(req));
 
@@ -490,18 +490,7 @@ void CChannelList::zapTo(int pos)
 	if ( pos!=(int)tuned )
 	{
 		tuned = pos;
-
-		if (!g_RemoteControl->getZapper())
-		{
-			g_RemoteControl->zapTo( chan->name );
-		}
-		else
-		{	//zapit-mode
-			if ( g_settings.epg_byname == 0 )
-				g_RemoteControl->zapTo_onid_sid( chan->onid_sid );
-			else
-				g_RemoteControl->zapTo( chan->name );
-		}
+		g_RemoteControl->zapTo_onid_sid( chan->onid_sid );
 	}
 	g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
 }

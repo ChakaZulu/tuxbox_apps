@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.12 2001/12/01 23:12:55 Simplex Exp $
+// $Id: global.h,v 1.13 2001/12/12 01:47:17 McClean Exp $
 //
 // $Log: global.h,v $
+// Revision 1.13  2001/12/12 01:47:17  McClean
+// cleanup
+//
 // Revision 1.12  2001/12/01 23:12:55  Simplex
 // global instance of watchdog
 //
@@ -84,7 +87,6 @@
 #define NEUTRINO_CPP extern
 #endif
 
-NEUTRINO_CPP bool zapit;
 
 NEUTRINO_CPP  CNeutrinoApp        *neutrino;
 NEUTRINO_CPP  SNeutrinoSettings   g_settings;

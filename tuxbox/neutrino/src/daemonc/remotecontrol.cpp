@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.33 2001/11/26 02:34:03 McClean Exp $
+// $Id: remotecontrol.cpp,v 1.34 2001/12/12 01:47:17 McClean Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.34  2001/12/12 01:47:17  McClean
+// cleanup
+//
 // Revision 1.33  2001/11/26 02:34:03  McClean
 // include (.../../stuff) changed - correct unix-formated files now
 //
@@ -99,7 +102,6 @@ CRemoteControl::CRemoteControl()
     memset(&audio_chans, 0, sizeof(audio_chans));
     memset(&audio_chans_int, 0, sizeof(audio_chans_int));
     ecm_pid=0;
-    zapit_mode=false;
 
     pthread_cond_init( &send_cond, NULL );
     pthread_mutex_init( &send_mutex, NULL );
@@ -110,10 +112,6 @@ CRemoteControl::CRemoteControl()
 	}
 }
 
-void CRemoteControl::setZapper(bool zapper)
-{
-	zapit_mode = zapper;
-}
 
 
 void CRemoteControl::send()
@@ -249,8 +247,6 @@ void * CRemoteControl::RemoteControlThread (void *arg)
             inet_pton(AF_INET, rip, &servaddr.sin_addr);
             sock_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-            if ( RemoteControl->zapit_mode )
-            {
                 char *return_buf;
                 int bytes_recvd = 0;
 	
@@ -422,17 +418,6 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                 if ( !do_immediatly )
                     usleep(100000);
                     //usleep(100);
-            }
-            else
-            {
-                servaddr.sin_port=htons(1500);
-                if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))!=-1)
-                {
-                    write(sock_fd, &r_msg, sizeof(r_msg) );
-
-                    usleep(1500000);
-                };
-            }
 
             close(sock_fd);
 
@@ -541,21 +526,6 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid )
 	send();
 }
 
-void CRemoteControl::zapTo(string chnlname )
-{
-    pthread_mutex_lock( &send_mutex );
-    remotemsg.version=1;
-    remotemsg.cmd=3;
-    remotemsg.param=0x0100;
-    strcpy( remotemsg.param3, chnlname.c_str() );
-
-    memset(&audio_chans_int, 0, sizeof(audio_chans_int));
-    subChannels_internal.clear();
-
-    pthread_mutex_unlock( &send_mutex );
-
-	send();
-}
 
 void CRemoteControl::radioMode()
 {

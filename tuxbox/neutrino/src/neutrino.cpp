@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.91 2001/12/07 00:20:36 McClean Exp $
+        $Id: neutrino.cpp,v 1.92 2001/12/12 01:47:17 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.92  2001/12/12 01:47:17  McClean
+  cleanup
+
   Revision 1.91  2001/12/07 00:20:36  McClean
   make softupdate work...
 
@@ -497,8 +500,6 @@ void CNeutrinoApp::setupDefaults()
 	//misc
 	g_settings.box_Type = 1;
 	g_settings.epg_byname = 0;
-    if ( !zapit )
-        g_settings.epg_byname = 1;
 
 	//video
 	g_settings.video_Signal = 0; //composite?
@@ -568,9 +569,6 @@ bool CNeutrinoApp::loadSetup()
 		return false;
 	}
 	close(fd);
-
-    if ( !zapit )
-        g_settings.epg_byname = 1;
 
 	return true;
 }
@@ -729,8 +727,6 @@ void CNeutrinoApp::isCamValid()
 **************************************************************************************/
 void CNeutrinoApp::channelsInit()
 {
-	if (zapit)
-	{
  		int sock_fd;
 		SAI servaddr;
 		char rip[]="127.0.0.1";
@@ -901,34 +897,6 @@ void CNeutrinoApp::channelsInit()
 			close(sock_fd);
 		}
 		printf("All bouquets-channels received\n");
-
-	}
-	else
-	{
-
-		char buffer[128];
-		FILE *fp=popen("pzap --dump", "r");
-
-		if (!fp)
-		{
-			perror("pzap --dump");
-			return;
-		}
-
-		int count = 0;
-		while ( fgets(buffer, 128, fp) )
-		{
-			if (buffer[strlen(buffer)-1]=='\n')
-				buffer[strlen(buffer)-1]=0;
-			char longname[100];
-			char shortname[100];
-			strcpy(shortname, buffer+7);
-			strcpy(longname, buffer+7);
-			channelList->addChannel(count, count+1, longname);
-			count++;
-	  	}
-		pclose(fp);
-	}
 }
 
 
@@ -940,22 +908,17 @@ void CNeutrinoApp::channelsInit()
 
 void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
- 	zapit = false;
 	softupdate = false;
 		
 	for(int x=1; x<argc; x++)
 	{
-		if ( !strcmp(argv[x], "-z")) {
-			printf("Using zapit\n");
-			zapit = true;
-		}
-		else if ( !strcmp(argv[x], "-su"))
+		if ( !strcmp(argv[x], "-su"))
 		{
 			printf("Software update enabled\n");
 			softupdate = true;
 		}
 		else {
-			printf("Usage: neutrino [-z] [-su]\n");
+			printf("Usage: neutrino [-su]\n");
 			exit(0);
 		}
 	}
@@ -1053,7 +1016,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 {
 	mainMenu.addItem( new CMenuSeparator() );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv"), true );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", (zapit), "", this, "radio") );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
@@ -1063,7 +1026,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuSeparator() );
 	mainSettings.addItem( new CMenuForwarder("menu.back") );
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.scants", (zapit), "", g_ScanTS) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.scants", true, "", g_ScanTS) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
@@ -1124,7 +1087,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuForwarder("menu.back") );
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.epgold", &g_settings.epg_byname, zapit);
+	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.epgold", &g_settings.epg_byname, true);
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 	miscSettings.addItem( oj );
@@ -1568,34 +1531,22 @@ void CNeutrinoApp::SelectAPID()
 
 void CNeutrinoApp::InitZapper()
 {
-	g_RemoteControl->setZapper(zapit);
-
-	if (!zapit)
-		channelsInit();
 
 	g_InfoViewer->start();
 	g_EpgData->start();
 
-	if (zapit)
+	isCamValid();
+	firstChannel();
+	if (firstchannel.mode == 't')
 	{
-		isCamValid();
-		firstChannel();
-		if (firstchannel.mode == 't')
-		{
-			//remoteControl.tvMode();
-			tvMode();
-		}
-		else
-		{
-			//remoteControl.radioMode();
-			radioMode();
-		}
+		//remoteControl.tvMode();
+		tvMode();
 	}
-	if (!zapit)
-    {
-		channelList->zapTo(0);
-        mode = mode_tv;
-    }
+	else
+	{
+		//remoteControl.radioMode();
+		radioMode();
+	}
 	if (bouquetList!=NULL)
 		bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
 }
@@ -1619,7 +1570,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			nRun=false;
 		}
 
-		if ((mode==mode_tv) || ((mode==mode_radio) && (zapit)) )
+		if ((mode==mode_tv) || ((mode==mode_radio)) )
 		{
 			if (key==CRCInput::RC_ok)
 			{
@@ -1941,12 +1892,9 @@ void CNeutrinoApp::tvMode()
 	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
 	g_FrameBuffer->useBackground(false);
 
-	if (zapit)
-	{
-		g_RemoteControl->tvMode();
-		channelsInit();
-		channelList->zapTo( firstchannel.chan_nr -1 );
-	}
+	g_RemoteControl->tvMode();
+	channelsInit();
+	channelList->zapTo( firstchannel.chan_nr -1 );
 }
 
 void CNeutrinoApp::scartMode()
@@ -1976,14 +1924,11 @@ void CNeutrinoApp::radioMode()
 	g_FrameBuffer->loadBackground("dboxradio.raw", 18);
 	g_FrameBuffer->useBackground(true);
 
-	if (zapit)
-	{
-		firstChannel();
-		g_RemoteControl->radioMode();
-		channelsInit();
+	firstChannel();
+	g_RemoteControl->radioMode();
+	channelsInit();
 //		bouquetList->activateBouquet(0,false);
-		channelList->zapTo( 0 );
-	}
+	channelList->zapTo( 0 );
 }
 
 
@@ -2045,7 +1990,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.91 2001/12/07 00:20:36 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.92 2001/12/12 01:47:17 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

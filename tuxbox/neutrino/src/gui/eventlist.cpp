@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.26 2001/11/26 02:34:04 McClean Exp $
+// $Id: eventlist.cpp,v 1.27 2001/12/12 01:47:17 McClean Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.27  2001/12/12 01:47:17  McClean
+// cleanup
+//
 // Revision 1.26  2001/11/26 02:34:04  McClean
 // include (.../../stuff) changed - correct unix-formated files now
 //
@@ -156,20 +159,11 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
     return;
   }
   sectionsd::msgRequestHeader req;
-  if(zapit) {
-    req.version = 2;
-    req.command = sectionsd::allEventsChannelID;
-    req.dataLength = 4;
-    write(sock_fd, &req, sizeof(req));
-    write(sock_fd, &onidSid, req.dataLength);
-  }
-  else {
-    req.version = 2;
-    req.command = sectionsd::allEventsChannelName;
-    req.dataLength = strlen(channelname.c_str())+1;
-    write(sock_fd, &req, sizeof(req));
-    write(sock_fd, channelname.c_str(), req.dataLength);
-  }
+  req.version = 2;
+  req.command = sectionsd::allEventsChannelID;
+  req.dataLength = 4;
+  write(sock_fd, &req, sizeof(req));
+  write(sock_fd, &onidSid, req.dataLength);
   sectionsd::msgResponseHeader resp;
   memset(&resp, 0, sizeof(resp));
   if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) {
