@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.51 2003/05/22 12:34:09 digi_casi Exp $
+ * $Id: frontend.cpp,v 1.52 2003/10/11 17:45:32 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -552,7 +552,7 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 {
 	uint8_t repeats = diseqcRepeats;
 
-	fe_sec_voltage_t v = pol ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18;
+	fe_sec_voltage_t v = (pol & 1) ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18;
 	fe_sec_tone_mode_t t = high_band ? SEC_TONE_ON : SEC_TONE_OFF;
 	fe_sec_mini_cmd_t b = (sat_no & 1) ? SEC_MINI_B : SEC_MINI_A;
 
@@ -568,7 +568,7 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 		{ 0xe0, 0x10, 0x38, 0x00, 0x00, 0x00 }, 4
 	};
 
-	cmd.msg[3] = 0xf0 | (((sat_no * 4) & 0x0f) | (high_band ? 1 : 0) | (pol ? 0 : 2));
+	cmd.msg[3] = 0xf0 | (((sat_no * 4) & 0x0f) | (high_band ? 1 : 0) | ((pol & 1) ? 0 : 2));
 
 	/*
 	 * set all SEC / DiSEqC parameters
