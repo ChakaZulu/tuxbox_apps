@@ -4,6 +4,7 @@
 </head>
 <body>
 <form name="mountpoint" action="#ACTION#">
+	<input name="action" type="hidden" value="#CMD#">
 	<table border=0 cellspacing=5 cellpadding=0>
 	<tr>
 		<td>

@@ -96,15 +96,22 @@ static eString addChangeMountPoint(eString request, eString dirpath, eString opt
 	if (udp == "on")
 		mp.options += "udp,";
 	if (mp.options.length() > 0)
-		mp.options = mp.options.left(mp.options.length() - 1); //remove last comma
-	
+		mp.options = mp.options.substr(0, mp.options.length() - 2); //remove last comma
+
+	eString result;
 	if (action == "change")
+	{
 		eMountMgr::getInstance()->changeMountPoint(atoi(id.c_str()), mp);
+		result = "<html><body>Mount point changed successfully.";
+	}
 	else
+	{
 		eMountMgr::getInstance()->addMountPoint(mp);
-	
+		result = "<html><body>Mount point added successfully.";
+	}
+
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	return "<html><body>Mount point added successfully.</body></html>";
+	return result;
 }
 
 static eString removeMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -122,16 +129,18 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 {
 	eString async, sync, atime, autom, execm, noexec, ro, rw, users, nolock, intr, soft, udp;
 	t_mount mp;
-	
+	eString cmd;
+
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eString action = opt["action"];
 	eString id = opt["id"];
-	
+
 	eString result = readFile(TEMPLATE_DIR + "mountPointWindow.tmp");
 	if (action == "change")
 	{
 		result.strReplace("#TITLE#", "Change Mount Point");
 		mp = eMountMgr::getInstance()->getMountPointData(atoi(id.c_str()));
+		cmd = "change";
 	}
 	else
 	{
@@ -139,10 +148,12 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 		mp.rsize = 4096;
 		mp.wsize = 4096;
 		mp.options = "nolock,intr,soft,udp";
+		cmd = "add";
 	}
-	
+
 	result.strReplace("#ACTION#", "/control/addChangeMountPoint");
-	
+	result.strReplace("#CMD#", cmd);
+
 	unsigned int pos = 0;
 	eString option;
 	while (mp.options.length() > 0)

@@ -306,8 +306,13 @@ void eMountMgr::changeMountPoint(int pid, t_mount pmp)
 void eMountMgr::removeMountPoint(int id)
 {
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
 		if (mp_it->mp.id == id)
+		{
 			mountPoints.erase(mp_it);
+			break;
+		}
+	}
 	save();
 }
 
