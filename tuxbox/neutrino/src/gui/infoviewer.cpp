@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.50 2001/11/22 13:18:18 field Exp $
+// $Id: infoviewer.cpp,v 1.51 2001/11/22 13:39:33 field Exp $
 //
 // $Log: infoviewer.cpp,v $
-// Revision 1.50  2001/11/22 13:18:18  field
-// Infoviewer update
+// Revision 1.51  2001/11/22 13:39:33  field
+// Verbesserungen
 //
 // Revision 1.47  2001/11/15 11:42:41  McClean
 // gpl-headers added
@@ -661,18 +661,21 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 //                printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
 
                 gotEPG = InfoViewer->getEPGData(query, query_onid_tsid);
-                gotEPG = gotEPG && (InfoViewer->Flag & ( sectionsd::epg_not_broadcast | sectionsd::epg_has_current ) );
-                if ( ( InfoViewer->Flag & sectionsd::epg_has_later ) && (!gotEPG) )
+                // gotEPG = gotEPG || ( InfoViewer->Flag & sectionsd::epg_not_broadcast );
+                gotEPG = gotEPG && ( InfoViewer->Flag & sectionsd::epg_has_current ) && ( InfoViewer->Flag & sectionsd::epg_has_next ) ;
+
+                if ( ( InfoViewer->Flag & ( sectionsd::epg_has_later | sectionsd::epg_has_current ) ) && (!gotEPG) )
                 {
                     if (repCount> 3)
                     {
                         repCount= 3;
-                        printf("CInfoViewer::InfoViewerThread epg_has_later -> repCount set to %d\n", repCount);
+                        printf("CInfoViewer::InfoViewerThread epg noch nicht komplett -> repCount decreased to %d\n", repCount);
                     }
                     else
                     if (repCount== 1)
                         gotEPG= true;
                 }
+
 
                 pthread_mutex_trylock( &InfoViewer->epg_mutex );
 
