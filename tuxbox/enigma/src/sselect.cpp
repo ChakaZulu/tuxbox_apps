@@ -407,7 +407,8 @@ void eServiceSelector::addBouquet(const eServiceReference &ref)
 {
 	if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
 		return;
-	new eListBoxEntryService(bouquets, ref, serviceentryflags);
+	if ( ref.flags & eServiceReference::canDescent && ref.flags & eServiceReference::isDirectory )
+		new eListBoxEntryService(bouquets, ref, serviceentryflags);
 }
 
 struct renumber
@@ -1027,9 +1028,13 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					path.up();
 					fillServiceList(path.current());
 					selectService( last );
-					eListBoxEntryService* p = services->goPrev();
-					if (p && (p->flags&eListBoxEntryService::flagIsReturn))
-						p=services->goPrev();
+					eListBoxEntryService* p=0;
+					do
+						p = services->goPrev();
+					while ( p && ( p->flags&eListBoxEntryService::flagIsReturn || 
+									( p->service != last && 
+										!(p->service.flags & eServiceReference::canDescent) &&
+										!(p->service.flags & eServiceReference::isDirectory))));
 					if (p)
 					{
 						path.down( p->service );
@@ -1058,9 +1063,13 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					path.up();
 					fillServiceList(path.current());
 					selectService( last );
-					eListBoxEntryService* p = services->goNext();
-					if (p && (p->flags&eListBoxEntryService::flagIsReturn))
-						p=services->goNext();
+					eListBoxEntryService* p=0;
+					do
+						p = services->goNext();
+					while ( p && ( p->flags&eListBoxEntryService::flagIsReturn || 
+									( p->service != last && 
+										!(p->service.flags & eServiceReference::canDescent) &&
+										!(p->service.flags & eServiceReference::isDirectory))));
 					if (p)
 					{
 						path.down( p->service );
