@@ -10,6 +10,7 @@ var bouquetRefs = new Array(
 function init()
 {	
 	#CHANNELS#
+	#CHANNELREFS#
 	);
 					
 	loadBouquets();

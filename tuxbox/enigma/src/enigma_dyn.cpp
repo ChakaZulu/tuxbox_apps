@@ -60,7 +60,7 @@ using namespace std;
 #define TOPNAVICOLOR "#D9E0E7"
 #define OCKER "#FFCC33"
 
-#define WEBXFACEVERSION "0.8"
+#define WEBXFACEVERSION "0.9"
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
@@ -1386,12 +1386,10 @@ class eWebNavigatorListDirectory2: public Object
 	eString origpath;
 	eString path;
 	eServiceInterface &iface;
-	int num;
 public:
 	eWebNavigatorListDirectory2(eString &result1, eString &result2, eString origpath, eString path, eServiceInterface &iface): result1(result1), result2(result2), origpath(origpath), path(path), iface(iface)
 	{
 		eDebug("path: %s", path.c_str());
-		num = 0;
 	}
 	void addEntry(const eServiceReference &e)
 	{
@@ -1402,53 +1400,15 @@ public:
 					 return;
 		}
 #endif
-		result1 += "<tr bgcolor=\"";
-		result1 += (num & 1) ? LIGHTGREY : DARKGREY;
-		result1 += "\"><td width=50 align=center>";
-
 		eString serviceRef = ref2string(e);
-		if (!(e.flags & eServiceReference::isDirectory))
+		
+		result1 += "\"" + serviceRef + "\",";
+		eService *service = iface.addRef(e);
+		if (service)
 		{
-			if (!e.path)
-				result1 += button(50, "EPG", GREEN, "javascript:openEPG('" + serviceRef + "')");
-			else 
-			if (serviceRef.find("%2fhdd%2fmovie%2f") != eString::npos)
-			{
-				result1 += "<a href=\"javascript:deleteMovie('";
-				result1 += serviceRef;
-				result1 += "')\"><img src=\"trash.gif\" height=22 border=0></a>";
-			}
-			else
-				result1 += "&#160;";
-			result1 += "</td><td><a href=\'javascript:switchChannel(\"" + serviceRef + "\")\'>";
-			eService *service = iface.addRef(e);
-			if (service)
-			{
-				result1 += filter_string(service->service_name);
-				iface.removeRef(e);
-			}
+			result2 += "\"" + filter_string(service->service_name) + "\",";
+			iface.removeRef(e);
 		}
-		else
-		{
-			int count = 0;
-			countDVBServices bla(e, count);
-			if (count)
-				result1 += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + serviceRef + "')");
-			else
-				result1 += "&#160;";
-			result1 += eString("</td><td><a href=\"/")+ "?path=" + serviceRef + "\">";
-			eService *service = iface.addRef(e);
-			if (service)
-			{
-				result1 += filter_string(service->service_name);
-				iface.removeRef(e);
-			}
-		}
-
-
-		result1 += "</a>";
-		result1 += "</td></tr>\n";
-		num++;
 	}
 };
 
@@ -1499,6 +1459,7 @@ static eString getZapContent2(eString mode, eString path)
 {
 	eString result, result1, result2;
 	eString tpath;
+	eString bouquets, bouquetrefs, channels, channelrefs;
 
 	unsigned int pos = 0, lastpos = 0, temp = 0;
 
@@ -1513,27 +1474,57 @@ static eString getZapContent2(eString mode, eString path)
 		else
 			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
 
-		eServiceReference current_service=string2ref(tpath);
+		eServiceReference current_service = string2ref(tpath);
 		eServiceInterface *iface = eServiceInterface::getInstance();
 
-		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
+		// first pass thru is to get all user bouquets
+		eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
+		Signal1<void, const eServiceReference&> signal;
+		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
+		iface->enterDirectory(current_service, signal);
+		bouquetrefs = result1;
+		bouquets = result2;
+		eDebug("entered");
+		iface->leaveDirectory(current_service);
+		eDebug("exited");
+		
+		// go thru all bouquets to get the channels
+		int i = 0;
+		eString tmp = bouquetrefs;
+		while (tmp.length() > 0)
 		{
-			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
-			result += "<script language=\"javascript\">window.close();</script>";
-		}
-		else
-		{
-			eString tmpFile = readFile(TEMPLATE_DIR + "zap.tmp");
+			sscanf(tmp.c_str(), "\"%s\",%s", tpath, tmp);
+			printf("[GETZAPCONTENT2] tpath = %s", tpath.c_str());
+			eServiceReference current_service = string2ref(tpath);
+
 			eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
 			Signal1<void, const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
-			result += "<table width=\"100%\" cellspacing=\"2\" cellpadding=\"1\" border=\"0\">\n";
+			channels += "channels[";
+			channels += eString().sprintf("%d", i);
+			channels += "] = new Array(";
+			channelrefs += "channelrefs[";
+			channelrefs += eString().sprintf("%d", i);
+			channelrefs += "] = new Array(";
 			iface->enterDirectory(current_service, signal);
-			result += "</table>\n";
+			channels += result2.left(result2.length() - 1);
+			channels += ");";
+			channelrefs += result1.left(result1.length() - 1);
+			channelrefs += ");";
 			eDebug("entered");
 			iface->leaveDirectory(current_service);
 			eDebug("exited");
+			i++;
 		}
+		
+		eString tmpFile = readFile(TEMPLATE_DIR + "zapdata.js");
+		tmpFile.strReplace("#BOUQUETS#", bouquets);
+		tmpFile.strReplace("#BOUQUETREFS#", bouquetrefs);
+		tmpFile.strReplace("#CHANNELS#", channels);
+		tmpFile.strReplace("#CHANNELREFS#", channelrefs);
+		
+		result = readFile(TEMPLATE_DIR + "zap.tmp");
+		result.strReplace("#ZAPDATA#", tmpFile);
 	}
 
 	return result;
