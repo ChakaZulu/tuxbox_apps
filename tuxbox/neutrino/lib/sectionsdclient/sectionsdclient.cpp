@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.3 2002/03/12 16:12:55 field Exp $
+  $Id: sectionsdclient.cpp,v 1.4 2002/03/18 09:32:51 field Exp $
 
   License: GPL
 
@@ -20,8 +20,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
-  Revision 1.3  2002/03/12 16:12:55  field
-  Bugfixes
+  Revision 1.4  2002/03/18 09:32:51  field
+  nix bestimmtes...
 
   Revision 1.2  2002/03/07 18:33:43  field
   ClientLib angegangen, Events angefangen
@@ -150,11 +150,16 @@ bool CSectionsdClient::getIsTimeSet()
 	msg.command = sectionsd::getIsTimeSet;
 	msg.dataLength = 0;
 
-	sectionsd_connect();
-	send((char*)&msg, sizeof(msg));
-	readResponse((char*)&rmsg, sizeof(rmsg));
-	sectionsd_close();
-	return rmsg.IsTimeSet;
+	if ( sectionsd_connect() )
+	{
+		send((char*)&msg, sizeof(msg));
+		readResponse((char*)&rmsg, sizeof(rmsg));
+		sectionsd_close();
+
+		return rmsg.IsTimeSet;
+	}
+	else
+		return false;
 }
 
 void CSectionsdClient::setPauseScanning( bool doPause )
