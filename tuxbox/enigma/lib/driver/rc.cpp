@@ -188,7 +188,17 @@ eRCDevice *eRCInput::getDevice(const eString &id)
 
 void eRCInput::setKeyboardMode(int mode)
 {
-	keyboardMode = mode;
+	for ( std::map<eString, eRCDevice*, eRCInput::lstr>::iterator it( devices.begin() )
+		;it != devices.end(); ++it)
+	{
+		eString tmp = it->first;
+		tmp.upper();
+		if ( !!strstr(tmp.c_str(), "KEYBOARD") )
+		{
+			keyboardMode = mode;
+			break;
+		}
+	}
 }
 
 std::map<eString,eRCDevice*,eRCInput::lstr> &eRCInput::getDevices()
