@@ -48,6 +48,7 @@ class CInfoViewer
         pthread_cond_t      epg_cond;
         pthread_mutex_t     epg_mutex;
 
+        pthread_t			thrLangViewer;
 
 		int					InfoHeightY;
         int					InfoHeightY_Info;
@@ -56,9 +57,11 @@ class CInfoViewer
 		int					BoxEndY;
 		int					BoxStartX;
 		int					BoxStartY;
+        int                 ButtonWidth;
 
         int                 ChanWidth;
         int                 ChanHeight;
+        int                 ChanInfoX;
 
 		string				CurrentChannel;
         char                *EPG_NotFound_Text;
@@ -72,12 +75,15 @@ class CInfoViewer
 		char				runningPercent;
 
 		static void * InfoViewerThread (void *arg);
+        static void * LangViewerThread (void *arg);
 		bool getEPGData( string channelName );
 		void showData();
         void showWarte();
+        void showButtons();
 	public:
 
         bool                is_visible;
+        pthread_cond_t      lang_cond;
 
         CInfoViewer();
 

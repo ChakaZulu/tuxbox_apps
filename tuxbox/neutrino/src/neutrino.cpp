@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.37 2001/09/18 20:20:26 field Exp $
+        $Id: neutrino.cpp,v 1.38 2001/09/19 18:03:14 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.38  2001/09/19 18:03:14  field
+  Infobar, Sprachauswahl
+
   Revision 1.37  2001/09/18 20:20:26  field
   Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
   vorbereitet
@@ -773,14 +776,14 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	videoSettings.addItem( oj );
 }
 
-void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier* networkSetupNotifier)
+void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 {
 	networkSettings.addItem( new CMenuSeparator() );
 	networkSettings.addItem( new CMenuForwarder("menu.back") );
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	networkSettings.addItem( new CMenuForwarder("networkmenu.setupnow", true, "", this, "network") );
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("networkmenu.setuponstartup", &g_settings.networkSetOnStartup, true, networkSetupNotifier);
+	CMenuOptionChooser* oj = new CMenuOptionChooser("networkmenu.setuponstartup", &g_settings.networkSetOnStartup, true);
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 
@@ -907,6 +910,33 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 }
 
+void CNeutrinoApp::SelectAPID()
+{
+    g_RemoteControl->CopyAPIDs();
+    if ( ( strcmp(g_RemoteControl->apid_info.name, channelList->getActiveChannelName().c_str() )== 0 ) &&
+         ( g_RemoteControl->apid_info.count_apids> 1 ) )
+    {
+        // wir haben APIDs für diesen Kanal!
+    	CMenuWidget APIDSelector("apidselector.head", "audio.raw");
+
+        APIDSelector.addItem( new CMenuSeparator() );
+        APIDSelector.addItem( new CMenuSeparator(CMenuSeparator::STRING, "apidselector.hint") );
+
+        APIDSelector.addItem( new CMenuForwarder("menu.back") );
+	    APIDSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+        for(int count=0;count<g_RemoteControl->apid_info.count_apids;count++)
+        {
+            char item_text[100];
+            char apid[5];
+            sprintf(apid, "%d", count);
+            sprintf(item_text, "Audio %d", count+ 1);
+            APIDSelector.addItem( new CMenuForwarder(item_text, true, "", APIDChanger, apid, false), (count == g_RemoteControl->apid_info.selected) );
+        }
+        APIDSelector.exec(NULL, "");
+    }
+}
+
 void CNeutrinoApp::InitZapper()
 {
 	g_RemoteControl->setZapper(zapit);
@@ -959,12 +989,19 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 			{	//channellist
 				channelList->exec();
 			}
-// mal nur in den infoviewer verlagert... sonst sind tasten fix belegt
-/*			else if (key==CRCInput::RC_yellow)
+			else if (key==CRCInput::RC_red)
 			{	// eventlist
-				eventlist->setName(channelList->getActiveChannelName());
-				eventlist->exec(channelList->getActiveChannelName());
-			} */
+                g_InfoViewer->killTitle();
+                g_EventList->exec(channelList->getActiveChannelName());
+			}
+			else if (key==CRCInput::RC_blue)
+			{	// streaminfo
+                g_StreamInfo->exec(NULL, "");
+			}
+            else if (key==CRCInput::RC_green)
+			{	// APID
+                SelectAPID();
+			}
 			else if ((key==g_settings.key_quickzap_up) || (key==g_settings.key_quickzap_down))
 			{
 				//quickzap
@@ -1054,8 +1091,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	colorSetupNotifier = new CColorSetupNotifier;
 	audioSetupNotifier = new CAudioSetupNotifier;
 	videoSetupNotifier = new CVideoSetupNotifier;
-	networkSetupNotifier = new CNetworkSetupNotifier;
-	
+	APIDChanger        = new CAPIDChangeExec;
+
     colorSetupNotifier->changeNotify("initial");
 
 	setupNetwork();
@@ -1085,7 +1122,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	InitVideoSettings(videoSettings, videoSetupNotifier);
 
 	//network Setup
-	InitNetworkSettings(networkSettings, networkSetupNotifier);
+	InitNetworkSettings(networkSettings);
 	
 	//color Setup
 	InitColorSettings(colorSettings);
@@ -1237,7 +1274,7 @@ void CNeutrinoApp::radioMode()
 **************************************************************************************/
 int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 {
-	printf("ac: %s\n", actionKey.c_str());
+//	printf("ac: %s\n", actionKey.c_str());
 	int returnval = CMenuTarget::RETURN_REPAINT;
 
 	if(actionKey=="theme_neutrino")
@@ -1282,7 +1319,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.37 2001/09/18 20:20:26 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.38 2001/09/19 18:03:14 field Exp $\n\n");
     tzset();
 
     initGlobals();

@@ -321,7 +321,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey="")
+CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey, bool Localizing)
 {
 	height=g_Fonts->menu->getHeight();
 	text=Text;
@@ -329,6 +329,7 @@ CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarg
 	active = Active;
 	jumpTarget = Target;
 	actionKey = ActionKey;
+    localizing = Localizing;
 }
 
 int CMenuForwarder::exec(CMenuTarget* parent)
@@ -346,7 +347,12 @@ int CMenuForwarder::exec(CMenuTarget* parent)
 
 int CMenuForwarder::paint(bool selected)
 {
-    string  l_text = g_Locale->getText(text);
+    string  l_text;
+
+    if ( localizing )
+        l_text = g_Locale->getText(text);
+    else
+        l_text = text;
 
 	int stringstartposX = x+10;
 

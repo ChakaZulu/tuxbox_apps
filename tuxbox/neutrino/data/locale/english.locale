@@ -114,6 +114,9 @@ channellist.head All Services
 
 infoviewer.epgnotload EPG not loaded....
 infoviewer.epgwait waiting for EPG...
+infoviewer.streaminfo Stream-Info
+infoviewer.eventlist Event-List
+infoviewer.languages Languages
 
 epgviewer.notfound no epg found
 epglist.head Event-list - %s
@@ -128,3 +131,6 @@ streaminfo.framerate Framerate
 streaminfo.framerate_unknown Framerate: unknown
 streaminfo.audiotype Audiotype
 streaminfo.audiotype_unknown Audiotype: unknown
+
+apidselector.head Select language
+apidselector.hint Careful, zapit f..s up

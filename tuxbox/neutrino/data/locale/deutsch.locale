@@ -62,7 +62,6 @@ colorthememenu.head Theme auswählen
 colorthememenu.neutrino_theme Neutrino Theme
 colorthememenu.classic_theme Klassik
 
-
 colormenusetup.head Menüfarben
 colormenusetup.menuhead Titelleiste
 colormenusetup.menucontent Fensterinhalt
@@ -114,6 +113,9 @@ channellist.head Alle Kanäle
 
 infoviewer.epgnotload EPG noch nicht geladen...
 infoviewer.epgwait Warte auf EPG...
+infoviewer.streaminfo Stream-Info
+infoviewer.eventlist Ereignis-Liste
+infoviewer.languages Sprachauswahl
 
 epgviewer.notfound keine EPG-Informationen gefunden
 epglist.head Ereignis-Liste - %s
@@ -128,3 +130,6 @@ streaminfo.framerate Bildrate
 streaminfo.framerate_unknown Bildrate: unbekannt
 streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: unbekannt
+
+apidselector.head Sprachauswahl
+apidselector.hint Vorsicht: Zapit handelt das noch falsch!

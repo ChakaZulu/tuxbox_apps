@@ -35,7 +35,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
     int sock_fd;
 	SAI servaddr;
 	char rip[]="127.0.0.1";
-    bool redo;
+    bool redo, do_immediatly;
 
 	while(1)
 	{
@@ -88,20 +88,43 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 //                printf("Received %d bytes\n", bytes_recvd);
 //                printf("That was returned: %s\n", return_buf);
 	
+                do_immediatly = false;
                 switch (atoi(return_buf))
                 {
                     case 0: printf("Unknown error reported from zapper\n");
 //                            exit(-1);
                             break;
-                    case 1: printf("Zapping by number returned successful\n");
-                            break;
+                    case 1: {
+                                printf("Zapping by number returned successful\n");
+                                break;
+                            }
                     case -1: printf("Zapping by number returned UNsuccessful\n");
                             break;
                     case 2: printf("zapit should be killed now.\n");
                             break;
                     case -2: printf("zapit could not be killed\n");
                             break;
-                    case 3: printf("Zapping by name returned successful\n");
+                    case 3: {
+                                printf("Zapping by name returned successful\n");
+
+                                // Überprüfen, ob wir die Audio-PIDs holen sollen...
+//                                printf("Checking for Audio-PIDs %s - %s - %d\n", RemoteControl->remotemsg.param3, r_msg.param3, RemoteControl->remotemsg.cmd);
+                                pthread_mutex_trylock( &RemoteControl->send_mutex );
+                                if ( ( RemoteControl->remotemsg.cmd== 3 ) &&
+                                     ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) )
+                                {
+                                    // noch immer der gleiche Kanal, Abfrage 8 starten
+                                    RemoteControl->remotemsg.cmd= 8;
+
+                                    strcpy( RemoteControl->apids.name, r_msg.param3 );
+                                    do_immediatly = true;
+//                                    printf("Audio-PIDs holen for %s\n", RemoteControl->apids.name);
+                                }
+                                else
+                                    pthread_mutex_unlock( &RemoteControl->send_mutex );
+
+                                break;
+                            }
                             break;
                     case -3: printf("\n\nHier wäre Platz für ne Fehlerbild-funktion\n\n");
                             break;
@@ -125,9 +148,35 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                             break;
                     case -7: printf("Could not change to TV-Mode\n");
                             break;
-                    case 8: printf("Got a pid-description\n");
-                            printf("should not be done in remotecontrol.cpp.\n");
-                            break;
+                    case 8: {
+//                                printf("Got a pid-description\n");
+                                // printf("should not be done in remotecontrol.cpp.\n");
+
+                                struct  pids    apid_return_buf;
+                                memset(&apid_return_buf, 0, sizeof(apid_return_buf));
+
+                                if ( read(sock_fd, &apid_return_buf, sizeof(apid_return_buf)) > 0 )
+                                {
+                                // PIDs emfangen, überprüfen, ob wir die Audio-PIDs übernehmen sollen...
+
+                                    pthread_mutex_trylock( &RemoteControl->send_mutex );
+                                    if ( //( remotemsg.cmd== 8 ) &&
+                                         ( strlen( RemoteControl->apids.name )!= 0 ) )
+                                    {
+                                        // noch immer der gleiche Kanal
+
+                                        RemoteControl->apids.count_apids = apid_return_buf.count_apids;
+                                        printf("got apids for: %s - %d apids!\n", RemoteControl->apids.name, RemoteControl->apids.count_apids);
+                                        printf("%d - %d - %d - %d - %d\n", apid_return_buf.apid[0], apid_return_buf.apid[1], apid_return_buf.apid[2], apid_return_buf.apid[3], apid_return_buf.apid[4] );
+
+                                        pthread_cond_signal( &g_InfoViewer->lang_cond );
+                                    }
+                                    pthread_mutex_unlock( &RemoteControl->send_mutex );
+                                }
+                                else
+                                    printf("pid-description fetch failed!\n");
+                                break;
+                            }
                     case -8: printf("Could not get a pid-description\n");
                             printf("should not be done in remotecontrol.cpp.\n");
                             break;
@@ -138,7 +187,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                     default: printf("Unknown return-code\n");
 //                            exit(-1);
                 }
-                usleep(250000);
+                if ( !do_immediatly )
+                    usleep(250000);
             }
             else
             {
@@ -162,15 +212,50 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 	return NULL;
 }
 
+void CRemoteControl::CopyAPIDs()
+{
+    pthread_mutex_lock( &send_mutex );
+    memcpy(&apid_info, &apids, sizeof(apid_info));
+    pthread_mutex_unlock( &send_mutex );
+}
+
+void CRemoteControl::queryAPIDs()
+{
+    pthread_mutex_lock( &send_mutex );
+
+    remotemsg.version=1;
+    remotemsg.cmd=8;
+
+    pthread_mutex_unlock( &send_mutex );
+	send();
+}
+
+void CRemoteControl::setAPID(int APID)
+{
+    pthread_mutex_lock( &send_mutex );
+
+    remotemsg.version=1;
+    remotemsg.cmd=9;
+    remotemsg.param= APID;
+    printf("changing APID to %d\n", APID);
+
+    apid_info.selected = APID;
+
+    pthread_mutex_unlock( &send_mutex );
+	send();
+}
+
 
 void CRemoteControl::zapTo(int, string chnlname )
 {
     pthread_mutex_lock( &send_mutex );
 
-        remotemsg.version=1;
-        remotemsg.cmd=3;
-        remotemsg.param=0x0100;
-        strcpy( remotemsg.param3, chnlname.c_str() );
+    remotemsg.version=1;
+    remotemsg.cmd=3;
+    remotemsg.param=0x0100;
+    strcpy( remotemsg.param3, chnlname.c_str() );
+
+    memset(&apids, 0, sizeof(apids));
 
     pthread_mutex_unlock( &send_mutex );
 
@@ -179,27 +264,39 @@ void CRemoteControl::zapTo(int, string chnlname )
 
 void CRemoteControl::radioMode()
 {
+    pthread_mutex_lock( &send_mutex );
+
 	remotemsg.version=1;
 	remotemsg.cmd=6;
 	
+    pthread_mutex_unlock( &send_mutex );
+
 	send();
 }
 
 void CRemoteControl::tvMode()
 {
+    pthread_mutex_lock( &send_mutex );
+
 	remotemsg.version=1;
 	remotemsg.cmd=7;
-	
+
+    pthread_mutex_unlock( &send_mutex );	
+
 	send();
 }
 
 
 void  CRemoteControl::shutdown()
 {
-        remotemsg.version=1;
-        remotemsg.cmd=4;
+    pthread_mutex_lock( &send_mutex );
 
-        send();
+    remotemsg.version=1;
+    remotemsg.cmd=4;
+
+    pthread_mutex_unlock( &send_mutex );
+
+    send();
 }
 
 

@@ -18,13 +18,12 @@
 #include "semaphore.h"
 #include <sys/wait.h>
 #include <signal.h>
+#include "../../../zapit/getservices.h"
 
 using namespace std;
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
-
-
 
 struct st_rmsg
 {
@@ -35,9 +34,19 @@ struct st_rmsg
 	char param3[30];
 };
 
+struct st_audio_info
+{
+    char    name[100];
+    ushort  count_apids;
+    char    apid_names[100][5];
+    int     selected;
+};
+
 class CRemoteControl
 {
 		st_rmsg	remotemsg;
+        st_audio_info apids;
+
 		void send();
 		bool zapit_mode;
 
@@ -48,14 +57,18 @@ class CRemoteControl
         static void * RemoteControlThread (void *arg);
 
 	public:
+        st_audio_info   apid_info;
 
 		CRemoteControl();
 		void zapTo(int key,  string chnlname );
+        void queryAPIDs();
+        void setAPID(int APID);
 		void shutdown();
 		void setZapper (bool zapper);
 		void radioMode();
 		void tvMode();
-	
+
+	    void CopyAPIDs();
 };
 
 

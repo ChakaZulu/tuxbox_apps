@@ -95,10 +95,10 @@ class CMenuForwarder : public CMenuItem
 	bool		active;
 	CMenuTarget*	jumpTarget;
 	string		actionKey;
-
+    bool        localizing;
 	public:
 		
-		CMenuForwarder(string Text, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="");
+		CMenuForwarder(string Text, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true);
 		int paint(bool selected=false);
 		int getHeight(){return height;};
 		int exec(CMenuTarget* parent);

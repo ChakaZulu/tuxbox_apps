@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.16 2001/09/18 20:20:26 field Exp $
+//  $Id: neutrino.h,v 1.17 2001/09/19 18:03:14 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.17  2001/09/19 18:03:14  field
+//  Infobar, Sprachauswahl
+//
 //  Revision 1.16  2001/09/18 20:20:26  field
 //  Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
 //  vorbereitet
@@ -119,9 +122,9 @@ class CNeutrinoApp : public CMenuTarget
 	CColorSetupNotifier    *colorSetupNotifier;
 	CAudioSetupNotifier    *audioSetupNotifier;
 	CVideoSetupNotifier    *videoSetupNotifier;
-	CNetworkSetupNotifier  *networkSetupNotifier;
     CLanguageSetupNotifier  *languageSetupNotifier;
     CKeySetupNotifier       *keySetupNotifier;
+    CAPIDChangeExec         *APIDChanger;
 
 	CChannelList		*channelList;
 
@@ -150,7 +153,7 @@ class CNeutrinoApp : public CMenuTarget
 	void InitLanguageSettings(CMenuWidget &);
 	void InitColorThemesSettings(CMenuWidget &);
 	void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
-	void InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier* networkSetupNotifier);
+	void InitNetworkSettings(CMenuWidget &networkSettings);
 	void InitScreenSettings(CMenuWidget &);
 	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
 	void InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
@@ -158,6 +161,7 @@ class CNeutrinoApp : public CMenuTarget
 	void ClearFrameBuffer();
 	void SetupFonts();
 	void SetupFrameBuffer();
+    void SelectAPID();
 	void CmdParser(int argc, char **argv);
 
 

@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.18 2001/09/18 20:20:26 field Exp $
+// $Id: infoviewer.cpp,v 1.19 2001/09/19 18:03:14 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.19  2001/09/19 18:03:14  field
+// Infobar, Sprachauswahl
+//
 // Revision 1.18  2001/09/18 20:20:26  field
 // Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
 // vorbereitet
@@ -65,8 +68,16 @@ CInfoViewer::CInfoViewer()
 
     if (pthread_create (&thrViewer, NULL, InfoViewerThread, (void *) this) != 0 )
 	{
-		perror("create failed\n");
+		perror("CInfoViewer::CInfoViewer create thrViewer failed\n");
 	}
+
+    pthread_cond_init( &lang_cond, NULL );
+
+    if (pthread_create (&thrLangViewer, NULL, LangViewerThread, (void *) this) != 0 )
+	{
+		perror("CInfoViewer::CInfoViewer create thrLangViewer failed\n");
+	}
+
 }
 
 void CInfoViewer::start()
@@ -74,7 +85,7 @@ void CInfoViewer::start()
 	InfoHeightY = g_Fonts->infobar_number->getHeight()*9/8 +
                   2*g_Fonts->infobar_info->getHeight() +
                   25;
-    InfoHeightY_Info = g_Fonts->infobar_small->getHeight();
+    InfoHeightY_Info = g_Fonts->infobar_small->getHeight()+ 5;
 
     ChanWidth = g_Fonts->infobar_number->getRenderWidth("000") + 10;
 	ChanHeight = g_Fonts->infobar_number->getHeight()*9/8;
@@ -89,28 +100,29 @@ void CInfoViewer::setDuration( int Duration )
 void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap )
 {
     pthread_mutex_lock( &epg_mutex );
-	CurrentChannel = Channel;
 
-//  noch auskommentiert, weil Button-Anzeige noch nicht funkt.
-//    ShowInfo_Info = !CalledFromNumZap;
-    ShowInfo_Info = false;
+	CurrentChannel = Channel;
+//  Auskommentieren, falls es euch nicht gefällt..?
+    ShowInfo_Info = !CalledFromNumZap;
+//    ShowInfo_Info = false;
 
     if ( CalledFromNumZap )
-    {
         EPG_NotFound_Text = (char*) g_Locale->getText("infoviewer.epgnotload").c_str();
-    }
     else
-    {
         EPG_NotFound_Text =  (char*) g_Locale->getText("infoviewer.epgwait").c_str();
-    }
+    is_visible = true;
+
     pthread_mutex_unlock( &epg_mutex );
 
 	BoxStartX = g_settings.screen_StartX+ 20;
 	BoxEndX   = g_settings.screen_EndX- 20;
 	BoxEndY   = g_settings.screen_EndY- 20;
-	BoxStartY = BoxEndY- InfoHeightY;
+
+
     if ( ShowInfo_Info )
-        BoxStartY-= InfoHeightY_Info;
+        BoxStartY = BoxEndY- InfoHeightY- InfoHeightY_Info+ 6;
+    else
+    	BoxStartY = BoxEndY- InfoHeightY;
 
 	//frameBuffer->paintVLine(settings->screen_StartX,0,576, 3);
 	//frameBuffer->paintVLine(settings->screen_EndX,0,576, 3);
@@ -138,20 +150,25 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
 	int height=g_Fonts->infobar_channame->getHeight()+5;
 	g_Fonts->infobar_channame->RenderString(ChanNameX+ 20, ChanNameY+height, BoxEndX-ChanNameX- 140, Channel.c_str(), COL_INFOBAR);
 
-	int ChanInfoX = BoxStartX + (ChanWidth >>1);
+	ChanInfoX = BoxStartX + (ChanWidth >>1);
 	int ChanInfoY = BoxStartY + ChanHeight+10;
 	g_FrameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndY, COL_INFOBAR);
 
     if ( ShowInfo_Info )
     {
-//        printf("hin %d\n", g_Fonts->info_symbols->getRenderWidth("hin"));
-//        g_Fonts->info_symbols->RenderString(BoxEndX - 400, BoxEndY - 10, 400, "hin", COL_INFOBAR);
+        ButtonWidth = (BoxEndX- ChanInfoX)>> 2;
 
-        g_FrameBuffer->paintIcon("blau.raw", BoxEndX-50, BoxEndY- 20);
+        g_FrameBuffer->paintBackgroundBox(ChanInfoX, BoxEndY- InfoHeightY_Info, BoxEndX, BoxEndY- InfoHeightY_Info+ 1);
+
+        g_FrameBuffer->paintIcon("blau.raw", BoxEndX- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+        g_Fonts->infobar_small->RenderString(BoxEndX- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 31, g_Locale->getText("infoviewer.streaminfo").c_str(), COL_INFOBAR);
+
+        g_FrameBuffer->paintIcon("rot.raw", BoxEndX- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+        g_Fonts->infobar_small->RenderString(BoxEndX- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
     }
 
-    is_visible = true;
     pthread_cond_signal( &epg_cond );
+    pthread_cond_signal( &lang_cond );
 
     usleep(50);
 
@@ -162,18 +179,20 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
         do
         {
             key = g_RCInput->getKey( intShowDuration* 5 );
+
             if ( key == CRCInput::RC_blue )
             {
                 g_StreamInfo->exec(NULL, "");
                 key = CRCInput::RC_timeout;
             }
-            else if ( key == CRCInput::RC_yellow )
+// Auskommentiert - wird von Hauptschleife aufgerufen...?
+/*            else if ( key == CRCInput::RC_yellow )
             {
                 killTitle();
                 g_EventList->exec(Channel);
                 key = CRCInput::RC_timeout;
             }
-
+*/
         } while (false);
 
         if ( ( key != CRCInput::RC_timeout ) &&
@@ -193,13 +212,28 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
     };
 }
 
+
+void CInfoViewer::showButtons()
+{
+    // welche Bedingung auch immer für die gelbe Taste...?
+    if ( false )
+    {
+        g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+        g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
+    };
+
+    // grün, wenn mehrere APIDs
+    if ( g_RemoteControl->apid_info.count_apids> 1 )
+    {
+        g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+        g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
+    }
+}
+
 void CInfoViewer::showData()
 {
 	int height;
-
 	int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
-
-	int ChanInfoX = BoxStartX + (ChanWidth >>1);
 	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
 	
 
@@ -224,7 +258,6 @@ void CInfoViewer::showData()
 	//info next
     g_FrameBuffer->paintBox(BoxStartX + ChanWidth + 25, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
-//	int start2width      = g_Fonts->infobar_info->getRenderWidth(nextStart);
 	int duration2Width   = g_Fonts->infobar_info->getRenderWidth(nextDuration);
 	int duration2TextPos = BoxEndX-duration2Width-10;
 	g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
@@ -245,10 +278,36 @@ void CInfoViewer::showWarte()
 
 void CInfoViewer::killTitle()
 {
-	g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
-    is_visible = false;
+    pthread_mutex_lock( &epg_mutex );
+    if (is_visible )
+    {
+    	g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
+        is_visible = false;
+    }
+    pthread_mutex_unlock( &epg_mutex );
 }
 
+
+void * CInfoViewer::LangViewerThread (void *arg)
+{
+	CInfoViewer* InfoViewer = (CInfoViewer*) arg;
+	while(1)
+	{
+        pthread_mutex_lock( &InfoViewer->epg_mutex );
+        pthread_cond_wait( &InfoViewer->lang_cond, &InfoViewer->epg_mutex );
+
+        if ( ( InfoViewer->is_visible ) && ( InfoViewer->ShowInfo_Info ) )
+        {
+            g_RemoteControl->CopyAPIDs();
+            if ( strcmp(g_RemoteControl->apid_info.name, InfoViewer->CurrentChannel.c_str() )== 0 )
+            {
+                InfoViewer->showButtons();
+            }
+        }
+
+        pthread_mutex_unlock( &InfoViewer->epg_mutex );
+    }
+}
 
 void * CInfoViewer::InfoViewerThread (void *arg)
 {
@@ -263,8 +322,6 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 	{
         pthread_mutex_lock( &InfoViewer->epg_mutex );
         pthread_cond_wait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex );
-
-//        printf("CInfoViewer::InfoViewerThread after pthread_cond_wait\n");
 
         if ( ( InfoViewer->is_visible ) )
         {
