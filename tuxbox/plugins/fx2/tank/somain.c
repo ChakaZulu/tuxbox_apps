@@ -82,7 +82,7 @@ int tank_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		{
 			doexit=0;
 			actcode=0xee;
-			while( actcode != RC_OK )
+			while(( actcode != RC_OK ) && !doexit )
 			{
 				tv.tv_sec = 0;
 				tv.tv_usec = 200000;

@@ -1,5 +1,5 @@
-#ifndef MAZE_H
-#define MAZE_H
+#ifndef TANK_H
+#define TANK_H
 
 extern	void	TankInitialize( void );
 extern	void	Play( void );

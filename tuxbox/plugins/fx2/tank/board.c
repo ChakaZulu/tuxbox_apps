@@ -27,6 +27,13 @@ static	unsigned long	oran=0;
 static	int		houses_x[10];
 
 static	int		player=0;
+static	int		cfly=120;
+static	int		last_x=120;
+static	int		use_comp=1;
+
+static	char	player2[] = "Player 2";
+static	char	compi[] = "dbox";
+static	char	*p2name=compi;
 
 static	int		myrand( int idx )
 {
@@ -127,6 +134,7 @@ void	TankInitialize( void )
 	FBFillRect( 0, 512, 720, 64, BROWN );
 
 	player=0;
+	cfly=120;
 	GeneratePlayer( 0 );
 	GeneratePlayer( 1 );
 
@@ -135,7 +143,7 @@ void	TankInitialize( void )
 
 /* label */
 	FBDrawString( 500, 64, 64, "Player 1", WHITE, 0 );
-	FBDrawString( 500, 128, 64, "Player 2", SAIR, 0 );
+	FBDrawString( 500, 128, 64, p2name, SAIR, 0 );
 
 /* middle */
 	FBFillRect( 300, 500, 120, 12, BROWN );
@@ -198,8 +206,10 @@ static	int	Fly( float ang_x, float ang_y )
 	unsigned char	px;
 	int				inair=0;
 
-	for( i=1; (x < 720) && ( x > -720 ) && !doexit; i++ )
+	for( i=1; !doexit; i++ )
 	{
+		if ( ( can_x+x >= 720 ) || ( can_x+x<0 ))
+			break;
 		if ( xo2 && yo2 )
 		{
 			FBFillRect( can_x+xo2, can_y-yo2, 2, 2, AIR );
@@ -283,10 +293,13 @@ static	int	Fly( float ang_x, float ang_y )
 		FBFlushGrafic();
 #endif
 	}
+	last_x=x+can_x;
 	if ( y <= 0 )
 	{
 		for( i=0; i<10; i++ )
 		{
+			if ( !houses_x[i] )
+				continue;
 			if ((houses_x[i] <= x+can_x ) &&
 				(houses_x[i]+16 > x+can_x ))
 			{
@@ -299,12 +312,49 @@ static	int	Fly( float ang_x, float ang_y )
 	return 0;
 }
 
+static	void	RunToFly( int speed )
+{
+	int				o=0;
+	int				y=0;
+	char			won[64];
+
+	if ( speed < 18 )
+		speed=18;
+	o = speed/4;
+	y = o*cang[player]/90;
+	if ( Fly( o-y , y ) )
+	{
+		for( o=0; o<5; o++ )
+			if ( houses_x[o] )
+				break;
+		if ( o==5 )
+		{
+			sprintf(won,"%s won the game",p2name);
+			FBDrawString( 200, 360, 64, won, RED, 0 );
+			doexit=4;
+		}
+		else
+		{
+			for( o=5; o<10; o++ )
+				if ( houses_x[o] )
+					break;
+			if ( o==10 )
+			{
+				FBDrawString( 200, 360, 64, "Player 1 won the game", RED, 0 );
+				doexit=4;
+			}
+		}
+	}
+
+	while( realcode != 0xee )
+		RcGetActCode( );
+	actcode=0xee;
+}
+
 static	void	Bomb( void )
 {
 	struct timeval	tv;
 	int				speed=0;
-	int				o=0;
-	int				y=0;
 
 	while( realcode != 0xee )
 		RcGetActCode( );
@@ -377,41 +427,39 @@ static	void	Bomb( void )
 			speed+=2;
 		}
 	}
-	if ( speed < 18 )
-		speed=18;
-	o = speed/4;
-	y = o*cang[player]/90;
-	if ( Fly( o-y , y ) )
-	{
-		for( o=0; o<5; o++ )
-			if ( houses_x[o] )
-				break;
-		if ( o==5 )
-		{
-			FBDrawString( 200, 360, 64, "Player 2 won the game", RED, 0 );
-			doexit=4;
-		}
-		for( o=5; o<10; o++ )
-			if ( houses_x[o] )
-				break;
-		if ( o==10 )
-		{
-			FBDrawString( 200, 360, 64, "Player 1 won the game", RED, 0 );
-			doexit=4;
-		}
-	}
-
-	while( realcode != 0xee )
-		RcGetActCode( );
-	actcode=0xee;
+	RunToFly( speed );
 }
 
 void	Play( void )
 {
-	if (actcode == 0xee )
-		return;
+	int		i;
+
+	if ( use_comp )
+	{
+		if ( !player && (actcode == 0xee ))
+			return;
+	}
+	else
+	{
+		if ( actcode == 0xee )
+			return;
+	}
 	switch( actcode )
 	{
+	case RC_RED :
+		FBDrawString( 500, 128, 64, p2name, AIR, 0 );
+		if ( use_comp )
+		{
+			use_comp=0;
+			p2name=player2;
+		}
+		else
+		{
+			use_comp=1;
+			p2name=compi;
+		}
+		FBDrawString( 500, 128, 64, p2name, player ? WHITE: SAIR, 0 );
+		break;
 	case RC_UP :
 		if ( cang[player] < 55 )
 		{
@@ -429,16 +477,43 @@ void	Play( void )
 		}
 		break;
 	case RC_OK :
-		Bomb();
+	case 0xee :
+		if ( use_comp && player ) // computer
+		{
+			RunToFly( cfly );
+			if ( last_x < 340 )
+			{
+				for( i=0; i<5; i++ )
+					if (houses_x[i] > last_x )
+						break;
+			}
+			else
+				i=0;
+			cfly -= 4;
+			if (( cfly < 65 ) || ( i==5 ))
+			{
+				cfly=120;
+				DrawCanon(0);
+				if ( cang[player] > 40 )
+					cang[player]-=2;
+				else
+					cang[player] = 55;
+				DrawCanon(1);
+			}
+		}
+		else
+		{
+			Bomb();
+		}
 		if ( !doexit )
 		{
 			DrawCanon(0);
 			FBDrawString( 500, player?128:64, 64,
-					player ? "Player 2" : "Player 1", SAIR, 0 );
+					player ? p2name : "Player 1", SAIR, 0 );
 			player=!player;
 			DrawCanon(1);
 			FBDrawString( 500, player?128:64, 64,
-					player ? "Player 2" : "Player 1", WHITE, 0 );
+					player ? p2name : "Player 1", WHITE, 0 );
 		}
 		break;
 	}
