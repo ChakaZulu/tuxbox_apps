@@ -92,6 +92,6 @@ eZapLCDScart::eZapLCDScart(eWidget *parent): eWidget(parent, 0)
 	if (eSkin::getActive()->build(this, "enigma_lcd_scart"))
 		qFatal("skin load of \"enigma_lcd_scart\" failed");
 
-	ASSIGN(Title, ePixmap, "enigma_logo");
-	ASSIGN(Scart, ePixmap, "lcd_scart");
+	ASSIGN(Title, eLabel, "enigma_logo");
+	ASSIGN(Scart, eLabel, "lcd_scart");
 }
