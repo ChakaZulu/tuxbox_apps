@@ -4,7 +4,6 @@
 #include "edvb.h"
 #include "dvb.h"
 #include "rc.h"
-#include "enigma.h"
 #include "eskin.h"
 
 void eServiceSelector::fillServiceList()
@@ -97,7 +96,7 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 	return 0;
 }
 
-eServiceSelector::eServiceSelector(): eLBWindow("Select Service...", eListbox::tLitebar, 16, eZap::FontSize, 400)
+eServiceSelector::eServiceSelector(): eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 400)
 {
 	move(QPoint(70, 60));
 	

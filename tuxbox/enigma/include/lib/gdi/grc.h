@@ -1,10 +1,12 @@
 #ifndef __grc_h
 #define __grc_h
 
+#define GRC_USE_LOCKS
+
 /*
 	gPainter ist die high-level version. die highlevel daten werden zu low level opcodes ueber
 	die gRC-queue geschickt und landen beim gDC der hardwarespezifisch ist, meist aber auf einen
-	gPixmap aufsetz (und damit unbeschleunigt ist).
+	gPixmap aufsetzt (und damit unbeschleunigt ist).
 */
 
 #include <pthread.h>
@@ -14,13 +16,6 @@
 #include "gpixmap.h"
 
 class eTextPara;
-
-/*
-		all operations between a begin() and end() or flush() are atomic, and a specific
-		order shouldn't be assumed. there should be no overlapping regions, since
-		render tasks could be splitted in multiple (hardware-) tasks, althought non-painting
-		opcodes e.g. setForegroundColor are processed in the right order compared to painting-ones.
-*/
 
 class gDC;
 struct gOpcode
@@ -106,7 +101,8 @@ struct gOpcode
 	int flags;
 	
 	gDC *dc;
-	
+
+#ifdef GRC_USE_LOCKS	
 	pthread_mutex_t mutex, free;
 	/*
 					free  	mutex
@@ -118,6 +114,7 @@ struct gOpcode
 	special handling for "begin"/"flush" opcode:
 		opcode will be locked (lock/lock) until next flush (or end).
 	*/
+#endif
 };
 
 
@@ -136,8 +133,12 @@ public:
 	gRC();
 	virtual ~gRC();
 
+#ifdef GRC_USE_LOCKS
 	gOpcode *alloc(gDC *dc);
 	void flushall(gDC *dc);
+#else
+	void submit(gOpcode *opcode);
+#endif
 	static gRC &getInstance();
 };
 

@@ -66,18 +66,19 @@ int fbClass::SetMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
 {
 	screeninfo.xres_virtual=screeninfo.xres=nxRes;
 	screeninfo.yres_virtual=screeninfo.yres=nyRes;
+	screeninfo.xoffset=screeninfo.yoffset=0;
 	screeninfo.bits_per_pixel=nbpp;
 	if (ioctl(fd, FBIOPUT_VSCREENINFO, &screeninfo)<0)
 	{
 		perror("FBIOPUT_VSCREENINFO");
+		qFatal("fb failed");
 		return -1;
 	}
 	if ((screeninfo.xres!=nxRes) && (screeninfo.yres!=nyRes) && (screeninfo.bits_per_pixel!=nbpp))
 	{
-		printf("SetMode failed: wanted: %dx%dx%d, got %dx%dx%d\n",
+		qFatal("SetMode failed: wanted: %dx%dx%d, got %dx%dx%d\n",
 			nxRes, nyRes, nbpp,
 			screeninfo.xres, screeninfo.yres, screeninfo.bits_per_pixel);
-		return -1;
 	}
 	xRes=screeninfo.xres;
 	yRes=screeninfo.yres;
@@ -86,7 +87,7 @@ int fbClass::SetMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
 	if (ioctl(fd, FBIOGET_FSCREENINFO, &fix)<0)
 	{
 		perror("FBIOGET_FSCREENINFO");
-		return -1;
+		qFatal("fb failed");
 	}
 	stride=fix.line_length;
 	memset(lfb, 0, stride*yRes);

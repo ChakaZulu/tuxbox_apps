@@ -3,6 +3,8 @@
 #include <sys/ioctl.h>
 #include "lcd.h"
 #include "lcd-ks0713.h"
+#include "init.h"
+#include "glcddc.h"
 
 eLCD *eLCD::primary;
 
@@ -54,14 +56,18 @@ eDBoxLCD::eDBoxLCD(): eLCD(QSize(120, 64))
 {
 	lcdfd=open("/dev/dbox/lcd0", O_RDWR);
 	if (lcdfd<0)
-		qFatal("couldn't open LCD - load lcd.o!");
-	int i=LCD_MODE_BIN;
-	ioctl(lcdfd, LCD_IOCTL_ASC_MODE, &i);
+		qWarning("couldn't open LCD - load lcd.o!");
+	else
+	{
+		int i=LCD_MODE_BIN;
+		ioctl(lcdfd, LCD_IOCTL_ASC_MODE, &i);
+	}
 }
 
 eDBoxLCD::~eDBoxLCD()
 {
-	close(lcdfd);
+	if (lcdfd>0)
+		close(lcdfd);
 }
 
 void eDBoxLCD::update()
@@ -80,5 +86,22 @@ void eDBoxLCD::update()
 			raw[y*120+x]=pix;
 		}
 	}
-	write(lcdfd, raw, 120*8);
+	if (lcdfd>0)
+		write(lcdfd, raw, 120*8);
+}
+
+class eDBoxLCDHardware
+{
+	eDBoxLCD lcd;
+	gLCDDC lcddc;
+public:
+	eDBoxLCDHardware(): lcddc(&lcd)
+	{
+	}
+};
+
+eAutoInitP0<eDBoxLCDHardware, 1> init_eDBoxLCDHardware("d-Box LCD Hardware");
+
+void lcd_dummy()
+{
 }

@@ -6,6 +6,7 @@
 #include "lcd.h"
 #include "grc.h"
 #include "elock.h"
+#include "init.h"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -568,3 +569,6 @@ QSize eTextPara::getExtend()
 		res.setHeight(cursor.y()+1);
 	return res;
 }
+
+eAutoInitP0<fontRenderClass, 1> init_fontRenderClass("Font Render Class");
+  

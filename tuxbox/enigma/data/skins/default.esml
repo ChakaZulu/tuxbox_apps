@@ -59,6 +59,7 @@
 		<value name="eWindow.titleOffsetX" value="10" />
 		<value name="eWindow.titleOffsetY" value="0" />
 		<value name="eWindow.titleSize" value="32" />
+		<value name="fontsize" value="24" />
 	</values>
 
 	<images basepath="" target="fb">

@@ -302,7 +302,7 @@ int eSkin::build(eWidget *widget, XMLTreeNode *node)
 	
 	for (XMLAttribute *attrib=node->GetAttributes(); attrib; attrib=attrib->GetNext())
 	{
-		qDebug("setting %s := %s", attrib->GetName(), attrib->GetValue());
+//		qDebug("setting %s := %s", attrib->GetName(), attrib->GetValue());
 		if (widget->setProperty(attrib->GetName(), attrib->GetValue()))
 		{
 			qDebug("failed");

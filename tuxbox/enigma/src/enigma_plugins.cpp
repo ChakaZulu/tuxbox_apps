@@ -8,6 +8,7 @@
 #include "enigma.h"
 #include "emessage.h"
 #include "config.h"
+#include "eskin.h"
 
 typedef int     (*PluginInfoProc)( struct SPluginInfo *info );
 typedef int     (*PluginExecProc)( int fd_fb, int fd_rc, int fd_lcd, char *cfgfile );
@@ -74,7 +75,7 @@ QString ePlugin::getText(int t) const
 
 eZapPlugins::eZapPlugins()
 {
-	window=new eLBWindow("Plugins", eListbox::tBorder, 10, eZap::FontSize, 400);
+	window=new eLBWindow("Plugins", eListbox::tBorder, 10, eSkin::getActive()->queryValue("fontsize", 20), 400);
 	window->move(QPoint(150, 136));
 	new ePlugin(window->list, 0);
   connect(window->list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));

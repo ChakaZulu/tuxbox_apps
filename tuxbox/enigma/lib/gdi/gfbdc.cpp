@@ -1,4 +1,5 @@
 #include "gfbdc.h"
+#include "init.h"
 
 gFBDC *gFBDC::instance;
 
@@ -62,3 +63,5 @@ gFBDC *gFBDC::getInstance()
 {
 	return instance;
 }
+
+eAutoInitP0<gFBDC, 1> init_gFBDC("GFBDC");

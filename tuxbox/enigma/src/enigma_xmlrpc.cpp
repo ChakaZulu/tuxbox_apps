@@ -223,14 +223,13 @@ static int zapTo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> &r
 
 static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> &result)
 {
-/*	if (xmlrpc_checkArgs("s", params, result))
+	if (xmlrpc_checkArgs("s", params, result))
 		return 1;
 
 	QString &param=*params[0]->getString();
 
 	qDebug("getInfo(%s);", (const char*)param);
 	
-	EITEntry *eitentry=0;
 	eService *service=0;
 	
 	if (!param.length())    // currently running
@@ -238,10 +237,117 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			// mal gucken
   } else if (param[0]=='S')
   {
-  	
-  }	*/
-  
-  xmlrpc_fault(result, -1, "not yet implemented");
+		QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;
+
+		eService *service=getServiceByID(param);
+		if (!service)
+		{
+			xmlrpc_fault(result, 3, "invalid handle");
+			return 0;
+		}
+		if (eDVB::getInstance()->service != service)
+		{
+			xmlrpc_fault(result, 4, "service currently not tuned in");
+			return 0;
+		}
+		if (eDVB::getInstance()->service_state==ENOENT)
+		{
+			xmlrpc_fault(result, 4, "service couldn't be tuned in");
+			return 0;
+		}
+		
+		static QString s1("type");
+		static QString g("Service");
+		s->insert(s1, new eXMLRPCVariant(new QString(g)));
+
+		static QString s0("caption");
+		s->insert(s0, new eXMLRPCVariant(new QString(service->service_name)));
+		
+		static QString s2("parentHandle");
+		static QString g2("NA");
+		s->insert(s2, new eXMLRPCVariant(new QString(g2)));
+		
+		PMT *pmt=eDVB::getInstance()->getPMT();
+		if (!pmt)
+		{
+			xmlrpc_fault(result, 1, "no PMT yet");
+			return 0;
+		}
+
+		PMTEntry *v=0;
+		for (QListIterator<PMTEntry> i(pmt->streams); (!v) && i.current(); ++i)
+		{
+			PMTEntry *pe=i.current();
+			switch (pe->stream_type)
+			{
+			case 1:	// ISO/IEC 11172 Video
+			case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
+				v=pe;
+				break;
+			}
+		}
+		
+		if (v)
+		{
+			static QString s2("videoPid");
+			s->insert(s2, new eXMLRPCVariant(new int(v->elementary_PID)));
+		}
+
+		QList<eXMLRPCVariant> asl;
+
+		for (QListIterator<PMTEntry> i(pmt->streams); i.current(); ++i)
+		{
+			PMTEntry *pe=i.current();
+			int isaudio=0, isAC3=0;
+			
+			switch (pe->stream_type)
+			{
+			case 3:	// ISO/IEC 11172 Audio
+			case 4: // ISO/IEC 13818-3 Audio
+				isaudio=1;
+				break;
+			case 6:
+			{
+				for (QListIterator<Descriptor> i(pe->ES_info); i.current(); ++i)
+				{
+					Descriptor *d=i.current();
+					if (d->Tag()==DESCR_AC3)
+					{
+						isaudio=1;
+						isAC3=1;
+					}
+				}
+			}
+			}
+			if (isaudio)
+			{
+				QMap<QString, eXMLRPCVariant*> *a=new QMap<QString, eXMLRPCVariant*>;
+				static QString s1("audioPid"), s2("handle"), s3("type"), s4("language"), s5("mpeg"), s6("ac3");
+				
+				a->insert(s1, new eXMLRPCVariant(new int(pe->elementary_PID)));
+				a->insert(s2, new eXMLRPCVariant(new QString("A")));	// nyi
+				a->insert(s3, new eXMLRPCVariant(new QString(isAC3?s6:s5)));
+
+				asl.append(new eXMLRPCVariant(a));
+			}
+		}
+		static QString as("audioPids");
+
+		QVector<eXMLRPCVariant> *nv=new QVector<eXMLRPCVariant>;
+		nv->setAutoDelete(true);
+		nv->resize(asl.count());
+		asl.toVector(nv);	
+		s->insert(as, new eXMLRPCVariant(nv));
+		pmt->unlock();
+		
+		result.append(new eXMLRPCVariant(s));
+		
+		QString res="";
+		result.first()->toXML(res);
+		qDebug("%s", (const char*)res);
+	} else
+		xmlrpc_fault(result, 3, "nene nur service bitte");
+	return 0;
 }
 
 void ezapInitializeXMLRPC(eHTTPDynPathResolver *dyn_resolver)

@@ -11,7 +11,7 @@ eWidget::eWidget(eWidget *parent, int takefocus):
 	QObject(parent), 
 	parent(parent), 
 	takefocus(takefocus), 
-	font(parent?parent->font:gFont("NimbusSansL-Regular Sans L Regular", eZap::FontSize)),
+	font(parent?parent->font:gFont("NimbusSansL-Regular Sans L Regular", eSkin::getActive()->queryValue("fontsize", 20))),
 	backgroundColor(parent?gColor(-1):gColor(0x20)),
 	foregroundColor(parent?parent->foregroundColor:gColor(0x2F))
 {
@@ -20,7 +20,6 @@ eWidget::eWidget(eWidget *parent, int takefocus):
 	state=parent?stateShow:0;
  	have_focus=0;
  	pixmap=0;
-	connect(eZap::getInstance(), SIGNAL(fontSizeChanged(int)), SLOT(OnFontSizeChanged(int)));
 	if (takefocus)
 	{
 		getTLW()->focusList()->append(this);

@@ -12,6 +12,7 @@
 #include "enumber.h"
 #include "eskin.h"
 #include "streamwd.h"
+#include "font.h"
 
 static QString getISO639Description(char *iso)
 {
@@ -88,7 +89,7 @@ eNVODSelector::eNVODSelector(): eWindow(0)
 	setText("NVOD");
 	move(QPoint(100, 100));
 	resize(QSize(420, 380));
-	list=new eListbox(this, eListbox::tLitebar, eZap::FontSize);
+	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
 	list->move(QPoint(0, 0));
 	list->resize(getClientSize());
 	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
@@ -158,7 +159,7 @@ eAudioSelector::eAudioSelector(): eWindow(0)
 	setText("Audio");
 	move(QPoint(100, 100));
 	resize(QSize(300, 330));
-	list=new eListbox(this, eListbox::tLitebar, eZap::FontSize);
+	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
 	list->move(QPoint(0, 0));
 	list->resize(getClientSize());
 	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
@@ -192,7 +193,7 @@ eSubServiceSelector::eSubServiceSelector(): eWindow(0)
 	setText("Bildregie");
 	move(QPoint(100, 100));
 	resize(QSize(350, 330));
-	list=new eListbox(this, eListbox::tLitebar, eZap::FontSize);
+	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
 	list->move(QPoint(0, 0));
 	list->resize(getClientSize());
 	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
@@ -240,11 +241,11 @@ eServiceNumberWidget::eServiceNumberWidget(int initial): eWindow(0)
 	label=new eLabel(this);
 	label->setText("Channel:");
 	label->move(QPoint(50, 00));
-	label->resize(QSize(110, eZap::FontSize+4));
+	label->resize(QSize(110, eSkin::getActive()->queryValue("fontsize", 20)+4));
 	
 	number=new eNumber(this, 1, 1, 999, 3, &initial, 1);
 	number->move(QPoint(160, 0));
-	number->resize(QSize(50, eZap::FontSize+4));
+	number->resize(QSize(50, eSkin::getActive()->queryValue("fontsize", 20)+4));
 
 	connect(number, SIGNAL(selected(int*)), SLOT(selected(int*)));
 	

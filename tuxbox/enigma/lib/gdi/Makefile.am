@@ -3,9 +3,9 @@ INCLUDES = \
 	-I$(top_srcdir)/edvb/miniqt \
 	-I$(top_srcdir)/enigma/src/core/system
 
-noinst_LIBRARIES = libgdi.a
+lib_LTLIBRARIES = libgdi.la
 
-libgdi_a_SOURCES = \
+libgdi_la_SOURCES = \
 	epng.cpp fb.cpp font.cpp gfbdc.cpp glcddc.cpp gpixmap.cpp grc.cpp \
 	lcd.cpp
 

@@ -219,6 +219,7 @@ void eDVB::scanEvent(int event)
 		scanEvent(eventScanError);
 		break;
 	case eventScanTuneOK:
+		qDebug("eventScanTuneOK");
 		setState(stateScanGetPAT);
 		tPAT.get();
 		break;
@@ -621,6 +622,7 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 	currentTransponderState=err;
 	if (!err)
 		emit enterTransponder(trans);
+	qDebug("state davor: %d\n", state);
 	tPAT.start(new PAT());
 	if (tdt)
 		delete tdt;
@@ -639,6 +641,8 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 		if (transponder==trans)
 			serviceEvent(err?eventServiceTuneFailed:eventServiceTuneOK);
 		break;		
+	default:
+		qDebug("wrong state %d", state);
 	}
 }
 
@@ -647,11 +651,15 @@ void eDVB::PATready(int error)
 	switch (state)
 	{
 	case stateScanGetPAT:
+		qDebug("stateScanGetPAT");
 		scanEvent(error?eventScanError:eventScanGotPAT);
 		break;
 	case stateServiceGetPAT:
+		qDebug("stateServiceGetPAT");
 		serviceEvent(error?eventServiceFailed:eventServiceGotPAT);
 		break;
+	default:
+		qDebug("anderer: %d", state);
 	}
 }
 
@@ -796,8 +804,8 @@ eDVB::eDVB()
 	int fe;
 	if (!frontend)
 	{
-		qWarning("WARNING: couldn't determine frontend-type, assuming cable...\n");
-		fe=eFrontend::feCable;
+		qWarning("WARNING: couldn't determine frontend-type, assuming satellite...\n");
+		fe=eFrontend::feSatellite;
 	} else
 	{
 		switch(atoi(frontend))

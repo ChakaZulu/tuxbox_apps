@@ -6,7 +6,7 @@
 #include "ebutton.h"
 #include "echeckbox.h"
 #include "rc.h"
-#include "enigma.h"
+#include "eskin.h"
 
 static void unpack(__u32 l, int *t)
 {
@@ -30,6 +30,7 @@ eZapNetworkSetup::eZapNetworkSetup(): eWindow(0)
 	__u32 sip=ntohl(0x0a000061), snetmask=ntohl(0xFF000000), sdns=ntohl(0x7f000001), sgateway=ntohl(0x7f000001);
 	int de[4];
 	int sdosetup=0;
+	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	eDVB::getInstance()->config.getKey("/elitedvb/network/ip", sip);
 	eDVB::getInstance()->config.getKey("/elitedvb/network/netmask", snetmask);
@@ -40,65 +41,65 @@ eZapNetworkSetup::eZapNetworkSetup(): eWindow(0)
 	eLabel *l=new eLabel(this);
 	l->setText("IP:");
 	l->move(QPoint(10, 0));
-	l->resize(QSize(150, eZap::FontSize+4));
+	l->resize(QSize(150, fd+4));
 
 	unpack(sip, de);
 	ip=new eNumber(this, 4, 0, 255, 3, de);
 	ip->move(QPoint(160, 0));
-	ip->resize(QSize(200, eZap::FontSize+4));
+	ip->resize(QSize(200, fd+4));
 
 	l=new eLabel(this);
 	l->setText("Netmask:");
 	l->move(QPoint(10, 40));
-	l->resize(QSize(150, eZap::FontSize+4));
+	l->resize(QSize(150, fd+4));
 
 	unpack(snetmask, de);
 	netmask=new eNumber(this, 4, 0, 255, 3, de);
 	netmask->move(QPoint(160, 40));
-	netmask->resize(QSize(200, eZap::FontSize+4));
+	netmask->resize(QSize(200, fd+4));
 	
 	l=new eLabel(this);
 	l->setText("Nameserver:");
 	l->move(QPoint(10, 80));
-	l->resize(QSize(150, eZap::FontSize+4));
+	l->resize(QSize(150, fd+4));
 
 	unpack(sdns, de);
 	dns=new eNumber(this, 4, 0, 255, 3, de);
 	dns->move(QPoint(160, 80));
-	dns->resize(QSize(200, eZap::FontSize+4));
+	dns->resize(QSize(200, fd+4));
 
 	l=new eLabel(this);
 	l->setText("Gateway:");
 	l->move(QPoint(10, 120));
-	l->resize(QSize(150, eZap::FontSize+4));
+	l->resize(QSize(150, fd+4));
 
 	unpack(sgateway, de);
 	gateway=new eNumber(this, 4, 0, 255, 3, de);
 	gateway->move(QPoint(160, 120));
-	gateway->resize(QSize(200, eZap::FontSize+4));
+	gateway->resize(QSize(200, fd+4));
 
 	connect(ip, SIGNAL(selected(int*)), SLOT(fieldSelected(int*)));
 
 	l=new eLabel(this);
 	l->setText("Configure Network");
 	l->move(QPoint(130, 160));
-	l->resize(QSize(240, eZap::FontSize+4));
+	l->resize(QSize(240, fd+4));
 
-	dosetup=new eCheckbox(this, sdosetup, eZap::FontSize);
+	dosetup=new eCheckbox(this, sdosetup, fd);
 	dosetup->move(QPoint(100, 163));
-	dosetup->resize(QSize(eZap::FontSize+4, eZap::FontSize+4));
+	dosetup->resize(QSize(fd+4, fd+4));
 
 	ok=new eButton(this);
 	ok->setText("[OK]");
 	ok->move(QPoint(160, 200));
-	ok->resize(QSize(90, eZap::FontSize+4));
+	ok->resize(QSize(90, fd+4));
 	
 	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
 
 	abort=new eButton(this);
 	abort->setText("[ABORT]");
 	abort->move(QPoint(270, 200));
-	abort->resize(QSize(120, eZap::FontSize+4));
+	abort->resize(QSize(120, fd+4));
 
 	connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
 	

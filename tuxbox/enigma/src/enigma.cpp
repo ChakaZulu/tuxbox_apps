@@ -27,26 +27,27 @@
 #include "enigma_setup.h"
 #include "enigma_plugins.h"
 #include "emessage.h"
-#include "grc.h"
-#include "gfbdc.h"
-#include "glcddc.h"
 #include "eskin.h"
 #include "eskin_register.h"
 #include "epng.h"
 #include "eavswitch.h"
 
+#include "actions.h"
+#include "rc.h"
+#include "gfbdc.h"
+
+#include "init.h"
+
 #include <config.h>
 
 eZap *eZap::instance;
-
-int eZap::FontSize=0;
 
 static char copyright[]="enigma, Copyright (C) dbox-Project\n"
 "enigma comes with ABSOLUTELY NO WARRANTY\n"
 "This is free software, and you are welcome\n"
 "to redistribute it under certain conditions.\n"
 "It is licensed under the GNU General Public License,\n"
-"Version 1\n";
+"Version 2\n";
 
 eZap *eZap::getInstance()
 {
@@ -57,7 +58,7 @@ void eZap::keyDown(int code)
 {
 	if (focus)
 		focus->event(eWidgetEvent(eWidgetEvent::keyDown, code));
-	else
+	else if (main)
 		main->event(eWidgetEvent(eWidgetEvent::keyDown, code));
 }
 
@@ -65,17 +66,30 @@ void eZap::keyUp(int code)
 {
 	if (focus)
 		focus->event(eWidgetEvent(eWidgetEvent::keyUp, code));
-	else
+	else if (main)
 		main->event(eWidgetEvent(eWidgetEvent::keyUp, code));
+}
+
+static eActionMap map("global", "Global");
+
+static eAction up(map, "hoch", "selection_up");
+
+void eZap::keyEvent(const eRCKey &key)
+{
+	qDebug("key event");
+	int c=key.getCompatibleCode();
+	if (c!=-1)
+	{
+		qDebug("have compat code");
+		if (key.getFlags()&eRCKey::flagBreak)
+			keyUp(c);
+		else
+			keyDown(c);
+	}
 }
 
 void eZap::status()
 {
-}
-
-void eZap::switchFontSize()
-{
-	emit fontSizeChanged(FontSize=useBigFonts?28:24);
 }
 
 QString eZap::getVersion()
@@ -83,47 +97,39 @@ QString eZap::getVersion()
 	return "enigma 0.1, compiled " __DATE__;
 }
 
+eAutoInitP0<eRCInput, 1> init_rcinput("RC Input layer");
+
 eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 {
 	instance=this;
-
-	grc=new gRC();
-	font=new fontRenderClass();
-
-
-	lcd=new eDBoxLCD;
-	glcddc=new gLCDDC(lcd);
-	gfbdc=new gFBDC();
+	
+	init=new eInit();
+	
+	init->setRunlevel(5);
 
 	focus=0;
-	
-	rc=new eRCInput;
-	connect(rc, SIGNAL(keyDown(int)), SLOT(keyDown(int)));
-	connect(rc, SIGNAL(keyUp(int)), SLOT(keyUp(int)));
+	main=0;
 
+	connect(eRCInput::getInstance(), SIGNAL(keyEvent(const eRCKey&)), SLOT(keyEvent(const eRCKey&)));
+
+#if 1
 	new eDVB();
 	
+#if 0
 	if (eDVB::getInstance()->config.getKey("/ezap/rc/repeatDelay", rc->rdelay))
 		rc->rdelay=500;
 	if (eDVB::getInstance()->config.getKey("/ezap/rc/repeatRate", rc->rrate))
 		rc->rrate=30;
-	if (eDVB::getInstance()->config.getKey("/ezap/osd/useBigOSD", useBigOSD))
-		useBigOSD=0;
-	if (eDVB::getInstance()->config.getKey("/ezap/osd/useBigFonts", useBigFonts))
-		useBigFonts=0;
+#endif
 
 	eSkin_init();
 
 	eSkin *skin=new eSkin;
 	if (skin->load( DATADIR "/enigma/skins/default.esml"))
 		qFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
-	skin->setPalette(gfbdc);
+	skin->setPalette(gFBDC::getInstance());
 	skin->makeActive();
 
-	qDebug("...");
-	switchFontSize();
-	qDebug("<-- switch font size");
-	
 	serviceSelector=new eServiceSelector;
 	
 	qDebug("<-- service selector");
@@ -215,6 +221,7 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 		if (t)
 			eDVB::getInstance()->switchService(t);
 	}
+#endif
 }
 
 eZap::~eZap()
@@ -229,17 +236,9 @@ eZap::~eZap()
 	delete serviceSelector;
 	qDebug("[ENIGMA] eDVB");
 	delete eDVB::getInstance();
-	qDebug("[ENIGMA] font");
-	delete font;
-	qDebug("[ENIGMA] rc");
-	delete rc;
-	qDebug("[ENIGMA] grc");
-	delete grc;
-	qDebug("[ENIGMA] gfbdc");
-	delete gfbdc;
-	qDebug("[ENIGMA] lcd");
-	delete glcddc;
 	qDebug("[ENIGMA] fertig");
+	init->setRunlevel(-1);
+	delete init;
 	instance=0;
 }
 
@@ -312,7 +311,7 @@ int main(int argc, char **argv)
 
 eMainMenu::eMainMenu()
 {
-	window=new eLBWindow("enigma 0.1" , eListbox::tBorder, 12, eZap::FontSize, 240);
+	window=new eLBWindow("enigma 0.1" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 240);
 	window->move(QPoint(70, 150));
 	connect(new eListboxEntryText(window->list, "TV Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "VCR Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_vcr(eListboxEntry*)));

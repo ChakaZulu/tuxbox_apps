@@ -170,7 +170,6 @@ gImage::gImage(QSize size, int _bpp)
 		clut=0;
 	}
 	data=new char[x*y*bypp];
-	qDebug("data is %p", data);
 }
 
 gImage::~gImage()

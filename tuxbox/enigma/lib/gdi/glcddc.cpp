@@ -43,3 +43,4 @@ gLCDDC *gLCDDC::getInstance()
 {
 	return instance;
 }
+

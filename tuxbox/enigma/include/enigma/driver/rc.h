@@ -6,26 +6,92 @@
 #include <qsocketnotifier.h>
 #include <qtimer.h>
 
+#include <list>
+
+class eRCInput;
+class eRCDriver;
+
+class eRCDevice: public QObject
+{
+protected:
+	int rrate, rdelay;
+	eRCInput *input;
+	eRCDriver *driver;
+public:
+	eRCDevice(eRCDriver *input);
+	~eRCDevice();
+	virtual void handleCode(int code)=0;
+	virtual const char *getDescription() const=0;
+};
+
+class eRCDriver: public QObject
+{
+	Q_OBJECT
+protected:
+	std::list<eRCDevice*> listeners;
+	eRCInput *input;
+public:
+	eRCDriver(eRCInput *input);
+	eRCInput *getInput() const { return input; }
+	void addCodeListener(eRCDevice *dev)
+	{
+		listeners.push_back(dev);
+	}
+	void removeCodeListener(eRCDevice *dev)
+	{
+		listeners.remove(dev);
+	}
+	~eRCDriver();
+};
+
+class eRCShortDriver: public eRCDriver
+{
+	Q_OBJECT
+protected:
+	QFile rc;
+	QSocketNotifier *sn;
+private slots:
+	void keyPressed(int);
+public:
+	eRCShortDriver(const char *filename);
+};
+
+class eRCKey
+{
+protected:
+	eRCDevice *producer;
+	int code, flags;
+public:
+	eRCKey(eRCDevice *producer, int code, int flags): 
+		producer(producer), code(code), flags(flags)
+	{
+	}
+	enum
+	{
+		flagBreak=1,
+		flagRepeat=2
+	};
+	virtual const char *getDescription() const =0;
+	bool operator>(const eRCKey &o) const
+	{
+		return (o.code==code) && 
+			((o.flags&flagBreak)==(flags&flagBreak)) && 
+			((o.flags&flagRepeat) || !(flags&flagRepeat));
+	}
+	int getFlags() const { return flags; }
+	eRCDevice *getProducer() const { return producer; }
+	virtual int getCompatibleCode() const;
+};
+
 class eRCInput: public QObject
 {
 	Q_OBJECT
-signals:
-	void keyDown(int code);
-	void keyUp(int code);
-private slots:
-	int keyPressed(int);
-	int timeOut();
-	int repeat();
-private:
-	QFile rc;
-	QSocketNotifier *sn;
-	QTimer timeout, repeattimer;
-	void processKeyEvent(int code, int isbreak=0);
-	int ccode;
-	int locked;
-	int translate(int code);
+	
 	static eRCInput *instance;
+signals:
+	void keyEvent(const eRCKey &);
 public:
+
 	enum
 	{
 		RC_0=0, RC_1=0x1, RC_2=0x2, RC_3=0x3, RC_4=0x4, RC_5=0x5, RC_6=0x6, RC_7=0x7,
@@ -38,10 +104,13 @@ public:
 	eRCInput();
 	~eRCInput();
 	
-	int rdelay, rrate;
-	
 	int lock();
 	void unlock();
+	
+	void keyPressed(const eRCKey &key)
+	{
+		emit keyEvent(key);
+	}
 	
 	static eRCInput *getInstance() { return instance; }
 };

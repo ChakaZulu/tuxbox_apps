@@ -4,7 +4,7 @@
 #include "font.h"
 #include <unistd.h>
 #include <pthread.h>
-
+#include "init.h"
 
 void *gRC::thread_wrapper(void *ptr)
 {
@@ -378,3 +378,4 @@ void gPixmapDC::exec(gOpcode *o)
 	pthread_mutex_unlock(&o->free);
 }
 
+eAutoInitP0<gRC, 1> init_grc("gRC");

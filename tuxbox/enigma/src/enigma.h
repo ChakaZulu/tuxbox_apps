@@ -5,7 +5,6 @@
 #include <qtimer.h>
 #include "rc.h"
 #include "fb.h"
-#include "font.h"
 #include "ewidget.h"
 #include "elbwindow.h"
 #include "si.h"
@@ -17,15 +16,16 @@ class eServiceSelector;
 class eZapMain;
 class eService;
 struct gRGB;
-class gRC;
+class eInit;
 
 class eZap: public QApplication
 {
 	Q_OBJECT
 	static eZap *instance;
 private slots:
-	void keyDown(int);
+	void keyEvent(const eRCKey &key);
 	void keyUp(int);
+	void keyDown(int);
 	void status();
 	
 private:
@@ -34,25 +34,15 @@ private:
 	void Set(gRGB *pal, int i, __u32 rgb);
 	__u32 Fade(__u32 val, int h);
 	
-	eRCInput *rc;
-	gFBDC *gfbdc;
-	gRC *grc;
-	fontRenderClass *font;
-
-	eLCD *lcd;
-	gLCDDC *glcddc;
+	eInit *init;
 	
 	eServiceSelector *serviceSelector;
-	
+
 	eZapMain *main;
 	QTimer statusTimer;
 public:
-	void switchFontSize();
 	static eZap *getInstance();
 	eWidget *focus;
-	int useBigOSD;
-	int useBigFonts;
-	static int FontSize;
 	eServiceSelector *getServiceSelector()
 	{
 		return serviceSelector;
@@ -62,10 +52,6 @@ public:
 
 	eZap(int argc, char **argv);
 	~eZap();
-
-signals:
-	void fontSizeChanged(int NewFontSize);
-
 };
 
 class eListBoxEntry;
