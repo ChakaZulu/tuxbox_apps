@@ -80,6 +80,7 @@ class eFrontend: public Object
 #else
 			curContTone,
 			curVoltage,
+			eTimer timeout;
 #endif
 			needreset,
 			lastcsw,
@@ -126,6 +127,9 @@ class eFrontend: public Object
 	int setFrontend();
 	void checkRotorLock();
 	void checkLock();
+	void tuneFailed();
+	void tuneOK();
+	void tune_all(eTransponder *trans);
 public:
 	void disableRotor() { noRotorCmd = 1, lastRotorCmd=-1; } // no more rotor cmd is sent when tune
 	void enableRotor() { noRotorCmd = 0, lastRotorCmd=-1; }  // rotor cmd is sent when tune
