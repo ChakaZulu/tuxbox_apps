@@ -1,6 +1,8 @@
-SUBDIRS = zapci zapost zapsi
+SUBDIRS = client
 
 pkgincludedir = ${includedir}/tuxbox/zapit
 pkginclude_HEADERS = \
-	bouquets.h channel.h getservices.h scan.h transponder.h zapit.h
+	audio.h bat.h bouquets.h cam.h channel.h ci.h descriptors.h dmx.h \
+	dvbstring.h frontend.h getservices.h nit.h pat.h pmt.h scan.h sdt.h \
+	settings.h transponder.h types.h video.h xmlinterface.h zapit.h
 

@@ -1,6 +1,4 @@
 pkgincludedir = ${includedir}/tuxbox/zapit
 pkginclude_HEADERS = \
-	basicclient.h \
-	zapitclient.h \
-	zapittypes.h
+	basicclient.h msgtypes.h zapitclient.h zapittypes.h
 

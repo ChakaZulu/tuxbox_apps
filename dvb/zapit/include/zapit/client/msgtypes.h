@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.2 2002/10/04 17:56:01 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.3 2002/10/12 19:57:16 obi Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -25,8 +25,8 @@
 #define __msgtypes_h__
 
 
-#include "include/zapittypes.h"
-#include "include/zapitclient.h"
+#include "zapittypes.h"
+#include "zapitclient.h"
 
 
 #define ZAPIT_UDS_NAME "/tmp/zapit.sock"
