@@ -314,13 +314,16 @@ static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTT
 			}
 			else
 			{
-				result << "<epg id=\"" << i << "\">"
+				eString ext_tmp2 = filter_string(description);
+			                ext_tmp2.strReplace("&", "&amp;");
+				
+					result << "<epg id=\"" << i << "\">"
 					<< eString().sprintf("<eventid>%x", event.event_id) << "</eventid><date>"
 					<< std::setw(2) << t->tm_mday << '.'
 					<< std::setw(2) << t->tm_mon+1 << "</date><time>"
 					<< std::setw(2) << t->tm_hour << ':'
 					<< std::setw(2) << t->tm_min << "</time>"
-					<< "<description>" << description << "</description></epg>\n";
+					<< "<description>" << filter_string(ext_tmp2) << "</description></epg>\n";
 			}
 			i++;
 		}
@@ -389,12 +392,15 @@ static eString getepgdetailsXML(eString request, eString dirpath, eString opts, 
 				if (!ext_description)
 					ext_description = "No detailed information available";
 
+					eString ext_tmp = filter_string(description);
+					ext_tmp.strReplace("&", "&amp;");
+					
 					result << "<path>" << ref2string(ref) << "</path>"
 					<< "<channel>" << filter_string(current->service_name) << "</channel>"
 					<< "<eventid>" << std::hex << event->event_id << std::dec << "</eventid>"
 					<< "<time>" << event->start_time << "</time>"
 					<< "<duration>" << event->duration << "</duration>"
-					<< "<descr>" << filter_string(description) << "</descr>"
+					<< "<descr>" << filter_string(ext_tmp) << "</descr>"
 					<< "<description>" << filter_string(ext_description) << "</description>";
 
 				delete event;
@@ -475,7 +481,9 @@ eString getTag(int id)
 
 eString genNodeHeader(int submode, std::list <treeNode>::iterator myIt)
 {
-	eString result = "<" + getTag(submode) + "s name=\"" + myIt->serviceName + "\">\n";
+	eString ext_tmp = filter_string(myIt->serviceName);
+	ext_tmp.strReplace("&", "&amp;");
+	eString result = "<" + getTag(submode) + "s name=\"" + filter_string(ext_tmp) + "\">\n";
 	return result;
 }
 
@@ -560,7 +568,9 @@ struct listChannels: public Object
 		else
 			serviceDescription = serviceName;
 
-//		serviceDescription.strReplace("'", "\\\'");
+		serviceDescription.strReplace("'", "\\\'");
+		serviceDescription.strReplace("\"", "\\\"");
+		serviceDescription.strReplace("&", "&amp;");
 		serviceNode = "<service reference=\"" + serviceReference + "\" orbitalposition=\"" + orbitalPosition + "\">" + serviceDescription + "</service>";
 		myList.push_back(treeNode(ref.flags & eServiceReference::isDirectory, serviceName, serviceNode, ref));
 	}
