@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.cpp,v $
+Revision 1.11  2003/01/26 04:08:16  thedoc
+correct sagem vcr-scart-routing
+
 Revision 1.10  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -163,7 +166,7 @@ bool hardware::switch_vcr()
 		avs = open("/dev/dbox/avs0",O_RDWR);
 		if (setting->getBox() == SAGEM) // Sagem
 		{
-			i = 2;
+			i = 0;
 			j = 1;
 			nothing = 7;
 			ioctl(avs,AVSIOSFBLK,&fblk);
