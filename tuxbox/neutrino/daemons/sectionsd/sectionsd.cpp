@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.15 2001/07/16 12:52:30 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.16 2001/07/16 12:56:50 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.16  2001/07/16 12:56:50  fnbrd
+//  Noch ein Fehler behoben.
+//
 //  Revision 1.15  2001/07/16 12:52:30  fnbrd
 //  Fehler behoben.
 //
@@ -991,8 +994,8 @@ static void *houseKeepingThread(void *)
     printf("housekeeping.\n");
     if(stopDMXeit())
       return 0;
-    if(stopDMXeitNVOD())
-      return 0;
+//    if(stopDMXeitNVOD())
+//      return 0;
     pthread_mutex_lock(&eventsLock);
     unsigned anzEventsAlt=events.size();
     events.mergeAndRemoveTimeShiftedEvents(services);
@@ -1009,8 +1012,8 @@ static void *houseKeepingThread(void *)
     pthread_mutex_unlock(&servicesLock);
     if(startDMXeit())
       return 0;
-    if(startDMXeitNVOD())
-      return 0;
+//    if(startDMXeitNVOD())
+//      return 0;
     // Speicher-Info abfragen
     struct mallinfo speicherinfo=mallinfo();
     printf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
@@ -1025,7 +1028,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.15 2001/07/16 12:52:30 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.16 2001/07/16 12:56:50 fnbrd Exp $\n");
   printf("caching %d hours\n", HOURS_TO_CACHE);
 
   tzset(); // TZ auswerten
