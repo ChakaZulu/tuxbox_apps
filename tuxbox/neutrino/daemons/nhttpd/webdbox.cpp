@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.16 2002/04/16 22:30:35 dirch Exp $
+	$Id: webdbox.cpp,v 1.17 2002/04/17 00:41:29 dirch Exp $
 
 	License: GPL
 
@@ -78,27 +78,34 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			strftime(timestr, 20, "%d.%m.%Y\n", localtime(&tm.time) );	//aktuelle zeit ausgeben
 			request->SocketWrite(timestr);
 			delete[] timestr;
+			return true;
 		}
 		else
+		{
 			request->SocketWrite("error");
+			return false;
+		}
 	}
 
 	if(request->Filename.compare("settings") == 0)		// sendet die settings
 	{
 		request->SendPlainHeader();
 		SendSettings(request);
+		return true;
 	}
 
 	if(request->Filename.compare("getservices") == 0)		// sendet die datei services.xml
 	{
 		request->SendPlainHeader();
 		request->SendFile("/var/tuxbox/config/zapit","services.xml");
+		return true;
 	}
 
 	if(request->Filename.compare("getbouquets") == 0)		// sendet die datei bouquets.xml
 	{
 		request->SendPlainHeader();
 		request->SendFile("/var/tuxbox/config/zapit","bouquets.xml");
+		return true;
 	}
 
 	if(request->Filename.compare("getonidsid") == 0)		// sendet die aktuelle onidsid
@@ -107,6 +114,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		char buf[10];
 		sprintf(buf, "%u\n", zapit.getCurrentServiceID());
 		request->SocketWrite(buf);
+		return true;
 	}
 	
 	if(request->Filename.compare("gettime") == 0)
@@ -120,9 +128,13 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			strftime(timestr, 50, "%H:%M:%S\n", tm );	// aktuelles datum ausgeben
 			request->SocketWrite(timestr);
 			delete[] timestr;
+			return true;
 		}
 		else
+		{
 			request->SocketWrite("error");
+			return false;
+		}
 	}
 
 	if(request->Filename.compare("info") == 0)
@@ -131,22 +143,31 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		if (request->ParameterList.size() == 0)
 		{	//paramlos
 			request->SocketWrite("Neutrino NG\n");
-		}
-		else if (request->ParameterList["1"] == "streaminfo")	// streminfo ausgeben
-		{
-			SendStreaminfo(request);
-		}
-		else if (request->ParameterList["1"] == "settings")	// streminfo ausgeben
-		{
-			SendStreaminfo(request);
-		}
-
-		else if (request->ParameterList["1"] == "version")	// streminfo ausgeben
-		{
-			SendStreaminfo(request);
+			return true;
 		}
 		else
-			request->SocketWrite("error");	
+		{
+			if (request->ParameterList["1"] == "streaminfo")	// streminfo ausgeben
+			{
+				SendStreaminfo(request);
+				return true;
+			}
+			else if (request->ParameterList["1"] == "settings")	// settings ausgeben
+			{
+				SendSettings(request);
+				return true;
+			}
+			else if (request->ParameterList["1"] == "version")	// verision ausgeben
+			{
+				request->SendFile("/",".version");
+				return true;
+			}
+			else
+			{
+				request->SocketWrite("error");	
+				return false;
+			}
+		}
 	}
 
 	if(request->Filename.compare("shutdown") == 0)
@@ -156,10 +177,12 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		{	//paramlos
 			controld.shutdown();			// dbox runterfahren
 			request->SocketWrite("ok");
+			return true;
 		}
 		else
 		{
 			request->SocketWrite("error");
+			return false;
 		}
 	}
 
@@ -171,6 +194,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			char buf[10];
 			sprintf(buf, "%d", controld.getVolume());			// volume ausgeben
 			request->SocketWrite(buf);
+			return true;
 		}
 		else
 		if (request->ParameterList.size() == 1)
@@ -179,17 +203,20 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			{
 				controld.setMute(true);
 				request->SocketWrite("ok");					// muten
+				return true;
 			}
 			else
 			if(request->ParameterList["unmute"] != "")
 			{
 				controld.setMute(false);
 				request->SocketWrite("ok");					// unmuten
+				return true;
 			}
 			else
 			if(request->ParameterList["status"] != "")
 			{
 				request->SocketWrite( (char *) (controld.getMute()?"1":"0") );	//  mute 
+				return true;
 			}
 			else
 			{	//set volume
@@ -197,11 +224,13 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 				request->SocketWrite((char*) request->ParameterList[0].c_str() );
 				controld.setVolume(vol);
 				request->SocketWrite("ok");
+				return true;
 			}
 		}
 		else
 		{
 			request->SocketWrite("error");
+			return false;
 		}
 	}
 
@@ -209,12 +238,14 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 	{
 		request->SendPlainHeader();          // Standard httpd header senden
 		SendChannelList(request);
+		return true;
 	}
 
 	if(request->Filename.compare("bouquets") == 0)
 	{
 		request->SendPlainHeader();          // Standard httpd header senden
 		SendBouquets(request);
+		return true;
 	}
 
 	if(request->Filename.compare("epg") == 0)
@@ -244,8 +275,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 				{
 					if(ChannelListEvents[ChannelList[i].onid_sid])
 					{
-						localtime(ChannelListEvents[ChannelList[i].onid_sid]->startTime
-						sprintf(buffer,"%u %d %ld %llu %s\n",ChannelList[i].onid_sid,ChannelListEvents[ChannelList[i].onid_sid]->startTime,ChannelListEvents[ChannelList[i].onid_sid]->duration / 60,ChannelListEvents[ChannelList[i].onid_sid]->eventID,ChannelListEvents[ChannelList[i].onid_sid]->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
+						sprintf(buffer,"%u %ld %ld %llu %s\n",ChannelList[i].onid_sid,ChannelListEvents[ChannelList[i].onid_sid]->startTime,ChannelListEvents[ChannelList[i].onid_sid]->duration,ChannelListEvents[ChannelList[i].onid_sid]->eventID,ChannelListEvents[ChannelList[i].onid_sid]->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
 						request->SocketWrite(buffer);
 					}
 				}
@@ -291,31 +321,31 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		else
 		if (request->ParameterList.size() == 1)
 		{
-			if(request->ParameterList["getpids"] != "")
+			if(request->ParameterList["1"] == "getpids")
 			{
 				SendcurrentVAPid(request);
 			}
-			else if(request->ParameterList["stopplayback"] != "")
+			else if(request->ParameterList["1"] == "stopplayback")
 			{
 				zapit.stopPlayBack();
 				sectionsd.setPauseScanning(true);
 				request->SocketWrite("ok");
 				if(Parent->VERBOSE) printf("stop playback requested..\n");
 			}
-			else if(request->ParameterList["startplayback"] != "")
+			else if(request->ParameterList["1"] == "startplayback")
 			{
 				zapit.startPlayBack();
 				sectionsd.setPauseScanning(false);
 				if(Parent->VERBOSE) printf("start playback requested..\n");
 				request->SocketWrite("ok");
 			}
-			else if(request->ParameterList["stopsectionsd"] != "")
+			else if(request->ParameterList["1"] == "stopsectionsd")
 			{
 				sectionsd.setPauseScanning(true);
 				if(Parent->VERBOSE) printf("stop sectionsd requested..\n");
 				request->SocketWrite("ok");
 			}
-			else if(request->ParameterList["startsectionsd"] != "")
+			else if(request->ParameterList["1"] == "startsectionsd")
 			{
 				sectionsd.setPauseScanning(false);
 				if(Parent->VERBOSE) printf("stop sectionsd requested..\n");
@@ -532,7 +562,7 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 				if(request->ParameterList["1"] == "settings")
 				{
 					if(request->Parent->DEBUG) printf("settings\n");
-					SendSettings(request);
+					ShowSettings(request);
 					return true;
 				}
 			}
@@ -807,7 +837,7 @@ CZapitClient::responseGetPIDs pids;
 //-------------------------------------------------------------------------
 void TWebDbox::SendSettings(CWebserverRequest* request)
 {
-	request->SendPlainHeader("text/html");
+//	request->SendPlainHeader("text/html");
 	char dbox_names[4][10]={"","Nokia","Sagem","Philips"};
 	char videooutput_names[3][13]={"Composite","RGB","S-Video"};
 	char videoformat_names[3][13]={"automatic","16:9","4:3"};

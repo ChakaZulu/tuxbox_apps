@@ -48,7 +48,7 @@ CWebserverRequest::CWebserverRequest(TWebserver *server)
 	HttpStatus = 0;
 
 //	ParameterList= new TParameterList; 
-	HeaderList = new TParameterList;
+//	HeaderList = new TParameterList;
 }
 
 //-------------------------------------------------------------------------
@@ -65,7 +65,7 @@ CWebserverRequest::~CWebserverRequest()
 	if(ContentType) delete ContentType;
 	if(Boundary) delete Boundary;
 */
-	if(HeaderList) delete HeaderList;
+//	if(HeaderList) delete HeaderList;
 	if(rawbuffer) 
 	{
 		free(rawbuffer); 
@@ -229,10 +229,10 @@ bool ende = false;
 
 void CWebserverRequest::ParseHeader(char * t, int len)
 {
-	if(!HeaderList)
-		HeaderList = new TParameterList;
+//	if(!HeaderList)
+//		HeaderList = new TParameterList;
 	
-	HeaderList->Add(t,len,':');
+//	HeaderList->Add(t,len,':');
 }
 
 
@@ -309,7 +309,7 @@ string buffer;
 				return false;
 			}
 			string header = buffer.substr(ende+1,headerende-2 -(ende+1));
-			if(Parent->DEBUG) printf("Alle Header: %s\n",header.c_str());
+//			if(Parent->DEBUG) printf("Alle Header: %s\n",header.c_str());
 /*			
 			if(Parent->DEBUG) printf("Und jetzt die Header :\n");
 			do{

@@ -69,7 +69,7 @@ public:
 	string ContentType;
 
 	CParameterList ParameterList;
-	TParameterList *HeaderList;
+//	TParameterList *HeaderList;
 	
 	int HttpStatus;
 
