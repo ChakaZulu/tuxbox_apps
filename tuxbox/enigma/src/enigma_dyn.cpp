@@ -62,29 +62,30 @@ using namespace std;
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
-extern bool onSameTP( const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2 ); // implemented in timer.cpp
+extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 
 static eString getVersionInfo(const char *info)
 {
-	FILE *f=fopen("/.version", "rt");
-	if (!f)
-		return "";
 	eString result;
-	while (1)
+	FILE *f=fopen("/.version", "rt");
+	if (f)
 	{
-		char buffer[128];
-		if (!fgets(buffer, 128, f))
-			break;
-		if (strlen(buffer))
-			buffer[strlen(buffer) -1 ] = 0;
-		if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)] == '=')))
+		while (1)
 		{
-			int i = strlen(info) + 1;
-			result = eString(buffer).mid(i, strlen(buffer)-i);
-			break;
+			char buffer[128];
+			if (!fgets(buffer, 128, f))
+				break;
+			if (strlen(buffer))
+				buffer[strlen(buffer) -1 ] = 0;
+			if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)] == '=')))
+			{
+				int i = strlen(info) + 1;
+				result = eString(buffer).mid(i, strlen(buffer)-i);
+				break;
+			}
 		}
+		fclose(f);
 	}
-	fclose(f);
 	return result;
 }
 
@@ -366,7 +367,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	{
 		if (command=="shutdown")
 		{
-			if ( eSystemInfo::getInstance()->canShutdown() )
+			if (eSystemInfo::getInstance()->canShutdown())
 			{
 				eZap::getInstance()->quit();
 				if (requester == "webif")
@@ -611,8 +612,8 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 		if (vid > 10) vid = 10;
 		if (vid < 0) vid = 0;
 
-		//set video position here...
-		//videopos = vid;
+		// set video position here...
+		// the question is how *ggg*
 	}
 
 	result += "<script language=\"javascript\">window.close();</script>";
@@ -692,7 +693,7 @@ static eString getNavi(eString mode, eString path)
 	else
 	if (mode.find("menu") == 0)
 	{
-		if ( eSystemInfo::getInstance()->canShutdown() )
+		if (eSystemInfo::getInstance()->canShutdown())
 		{
 			result += button(110, "Shutdown", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=shutdown\')");
 			result += "<br>";
@@ -710,7 +711,7 @@ static eString getNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "LCDshot", LEFTNAVICOLOR, "?mode=menuLCDShot");
 #endif
-		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
 		{
 			result += "<br>";
 			result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=menuScreenShot");
@@ -860,7 +861,7 @@ static eString getVideoBar()
 		min = total - current;
 		sec = min % 60;
 		min /= 60;
-		videopos = current / total * 10;
+		videopos = (current * 10) / total;
 	}
 
 	result << "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
@@ -877,7 +878,7 @@ static eString getVideoBar()
 			"<img src=\"trans.gif\" border=0></a></span></td>";
 	}
 
-	result << "<td>&nbsp;&nbsp;" << min << ":" << sec << "</td>";
+	result << "<td>&nbsp;&nbsp;-" << min << ":" << sec << "</td>";
 	result << "</tr>"
 		"</table>";
 	return result.str();
@@ -893,18 +894,18 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 	sref = opt["ref"];
 	eServiceReference ref = string2ref(sref);
 	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
-	if ( ::unlink(ref.path.c_str() ) < 0 )
+	if (::unlink(ref.path.c_str()) < 0)
 	{
-		eDebug("remove File %s failed (%m)", ref.path.c_str() );
+		eDebug("remove File %s failed (%m)", ref.path.c_str());
 	}
 	else
 	{
-		if ( ref.path.right(3).upper() == ".TS" )
+		if (ref.path.right(3).upper() == ".TS")
 		{
-			for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
-				it != recordings->getList().end(); ++it )
+			for (std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
+				it != recordings->getList().end(); ++it)
 			{
-				if ( it->service.path == ref.path )
+				if (it->service.path == ref.path)
 				{
 					recordings->getList().erase(it);
 					recordings->save();
@@ -919,10 +920,10 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 				tmp.sprintf("%s.%03d", ref.path.c_str(), cnt++);
 				ret = ::unlink(tmp.c_str());
 			}
-			while( !ret );
-			eString fname=ref.path;
-			fname.erase(fname.length()-2,2);
-			fname+="eit";
+			while(!ret);
+			eString fname = ref.path;
+			fname.erase(fname.length() - 2, 2);
+			fname += "eit";
 			::unlink(fname.c_str());
 		}
 	}
@@ -932,19 +933,19 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 struct countDVBServices: public Object
 {
 	int &count;
-	countDVBServices(const eServiceReference &bouquetRef, int &count )
+	countDVBServices(const eServiceReference &bouquetRef, int &count)
 		:count(count)
 	{
 		Signal1<void, const eServiceReference&> cbSignal;
-		CONNECT( cbSignal, countDVBServices::countFunction );
-		eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal );
+		CONNECT(cbSignal, countDVBServices::countFunction);
+		eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
 		eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
 	}
-	void countFunction( const eServiceReference& ref )
+	void countFunction(const eServiceReference& ref)
 	{
-		if ( ref.path
+		if (ref.path
 			|| ref.flags & eServiceReference::isDirectory
-			|| ref.type != eServiceReference::idDVB )
+			|| ref.type != eServiceReference::idDVB)
 			return;
 		++count;
 	}
@@ -998,7 +999,7 @@ public:
 		{
 			int count=0;
 			countDVBServices bla(e, count);
-			if ( count )
+			if (count)
 				result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + serviceRef + "')");
 			else
 				result += "&#160;";
@@ -1068,7 +1069,7 @@ static eString aboutDreambox(void)
 {
 	eString result="<table border=0>";
 
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
 		result += "<img src=\"dm7000.jpg\" width=\"650\" border=\"0\"><br>";
 
 	result+=eString().sprintf(
@@ -1077,11 +1078,11 @@ static eString aboutDreambox(void)
 		"<tr><td>Processor:</td><td>&nbsp;</td><td>%s</td></tr>",
 		eSystemInfo::getInstance()->getModel(),
 		eSystemInfo::getInstance()->getManufacturer(),
-		eSystemInfo::getInstance()->getCPUInfo() );
+		eSystemInfo::getInstance()->getCPUInfo());
 
 	eString sharddisks;
 #ifndef DISABLE_FILE
-	if ( eSystemInfo::getInstance()->hasHDD() )
+	if (eSystemInfo::getInstance()->hasHDD())
 	{
 		for (int c='a'; c<'h'; c++)
 		{
@@ -1144,7 +1145,7 @@ static eString aboutDreambox(void)
 		eString ver=verid.mid(1, 3);
 		eString date=verid.mid(4, 8);
 //		eString time=verid.mid(12, 4);
-		if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 			result += eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]+ ", " + date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4);
 		else
 			result += eString().sprintf("%s %c.%d. %s", typea[type%3], ver[0], atoi(eString().sprintf("%c%c", ver[1], ver[2]).c_str()	), (date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4)).c_str());
@@ -1157,17 +1158,16 @@ static eString aboutDreambox(void)
 
 static eString getCurService()
 {
-	eString result;
+	eString result = "n/a";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "n/a";
-
-	eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
-	if (current)
-		return current->service_name.c_str();
-	else
-		return "n/a";
+	if (sapi)
+	{
+		eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+		if (current)
+			result = current->service_name.c_str();
+	}
+	return result;
 }
 
 struct countTimer
@@ -1180,9 +1180,9 @@ struct countTimer
 	}
 	void operator()(ePlaylistEntry *se)
 	{
-		if ( se->type&ePlaylistEntry::isRepeating )
+		if (se->type&ePlaylistEntry::isRepeating)
 		{
-			if ( repeating )
+			if (repeating)
 				++count;
 		}
 		else if (!repeating)
@@ -1202,9 +1202,9 @@ struct getEntryString
 
 	void operator()(ePlaylistEntry* se)
 	{
-		if ( !repeating && se->type & ePlaylistEntry::isRepeating )
+		if (!repeating && se->type & ePlaylistEntry::isRepeating)
 			return;
-		if ( repeating && !(se->type & ePlaylistEntry::isRepeating) )
+		if (repeating && !(se->type & ePlaylistEntry::isRepeating))
 			return;
 		tm startTime = *localtime(&se->time_begin);
 		time_t time_end = se->time_begin + se->duration;
@@ -1232,7 +1232,7 @@ struct getEntryString
 		else
 			result << "<tr><td>&nbsp;</td><td>";
 
-		if ( se->type & ePlaylistEntry::isRepeating )
+		if (se->type & ePlaylistEntry::isRepeating)
 		{
 			if (se->type & ePlaylistEntry::Su)
 				result << "Su ";
@@ -1305,8 +1305,8 @@ static eString genTimerListBody(int type)
 	return result.str();
 }
 
-// for what this is needed ????
-// when not needed ..please remove.. (and the template file)
+// for what is this needed?
+// this is needed for standalone programs (like dreamTV) to be able to display the timer list
 static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString tmpFile;
@@ -1955,16 +1955,16 @@ public:
 			}
 		}
 	}
-	eMEPG( time_t start, const eServiceReference & bouquetRef )
+	eMEPG(time_t start, const eServiceReference & bouquetRef)
 		:hours(6)   // horizontally visible hours
 		,d_min(10)  // distance on time scale for 1 minute
 		,start(start)
-		,end( start + hours * 3600 )
-		,tableWidth( (end - start) / 60 * d_min + 200 )
+		,end(start + hours * 3600)
+		,tableWidth((end - start) / 60 * d_min + 200)
 	{
 		Signal1<void, const eServiceReference&> cbSignal;
-		CONNECT( cbSignal, eMEPG::getcurepg);                    
-		eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal );
+		CONNECT(cbSignal, eMEPG::getcurepg);                    
+		eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
 		eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
 	}
 
@@ -2010,7 +2010,7 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	time_t start = time(0) + eDVB::getInstance()->time_difference;
 	start -= ((start % 900) + (60 * 60)); // align to 15 mins & start 1 hour before now
 
-	eMEPG mepg( start, bouquetRef );
+	eMEPG mepg(start, bouquetRef);
 
 	eString result = read_file(TEMPLATE_DIR + "mepg.tmp");
 	result.strReplace("#BODY#", mepg.getTimeScale() + mepg.getMultiEPG());
@@ -2864,10 +2864,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #endif
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
 	dyn_resolver->addDyn("GET", "/setVideo", setVideo);
-
-// is this needed by anyone? when not.. please remove..
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, true);
-
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, true);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, true);
 	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList, true);
