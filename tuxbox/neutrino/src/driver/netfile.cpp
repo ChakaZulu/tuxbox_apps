@@ -1013,7 +1013,7 @@ FILE *f_open(const char *filename, const char *acctype)
 	  /* magic, if there is any */
 	  for (int i = 0; i < known_magic_count; i++)
 	  {
-		  if ((((uint32_t)magic) & (uint32_t)known_magic[i].mask) == (uint32_t)known_magic[i].mode)
+		  if (((*(uint32_t *)&(magic[0])) & *(uint32_t *)&(known_magic[i].mask[0])) == *(uint32_t *)&(known_magic[i].mode[0]))
 		  {
 			  f_type(fd, (char *)known_magic[i].type);
 			  goto magic_found;
