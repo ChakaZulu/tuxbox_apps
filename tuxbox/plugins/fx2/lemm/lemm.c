@@ -208,8 +208,12 @@ static	void	DrawNumber( int x, int y, int num )
 		DrawSimpleNumber( x+8, y, rest, 0 );
 }
 
-static	int		isBrick( int x, int y )
+// 14 background, 118 - stair
+static	int		isBrick( int x, int y, int seestair )
 {
+	if ( seestair )
+		return( (y<160) && (*(lfb+stride*y+x)!=14) &&
+				(*(lfb+stride*y+x)!=STEELBLUE) && (*(lfb+stride*y+x)!=118) );
 	return ((y<160)&&(*(lfb+stride*y+x)!=14)&&(*(lfb+stride*y+x)!=STEELBLUE));
 }
 
@@ -266,14 +270,14 @@ static	void	bgRect( int x, int y, int w, int h, unsigned char c )
 static	void	bghLine( int x, int y, int l, unsigned char *c, int clen )
 {
 	int		sy;
-	for( sy=y; sy<=y+clen; sy++ )
+	for( sy=y; sy<y+clen; sy++ )
 		memset(lfb+sy*stride+x,c[sy-y],l);
 }
 
 static	void	bgvLine( int x, int y, int l, unsigned char *c, int clen )
 {
 	int		sx, sy;
-	for( sy=y; sy<=y+l; sy++ )
+	for( sy=y; sy<y+l; sy++ )
 		for( sx=x; sx<x+clen; sx++ )
 			*(lfb+sy*stride+sx) = c[sx-x];
 }
@@ -463,8 +467,8 @@ void	DrawLevelIntoBg( void )
 		inBg(30,0,800,67);
 		inBg(30,0,806,87);
 		for( i=0; i<5; i++ )
-			for(x=5-i; x>-1; x-- )
-				inBg(30,0,720+6*x+i*3,120+i*6);
+			for(x=5-i; x>-2; x-- )
+				inBg(30,0,720+6*x+i*4,120+i*6);
 		break;
 	}
 }
@@ -533,11 +537,15 @@ void	InitLevel( void )
 		{
 		case 6 :
 			portfolio[7]=2;
+			portfolio[4]=2;
 			portfolio[3]=2;
 			portfolio[2]=2;
 			break;
 		case 1 :
 			portfolio[7]=10;
+//portfolio[4]=10;
+//portfolio[3]=10;
+//portfolio[2]=10;
 			break;
 		case 4 :
 			portfolio[2]=5;
@@ -546,9 +554,9 @@ void	InitLevel( void )
 		haus_x=889;
 		haus_y1=117;
 		haus_y2=135;
-		to_rescue=level==6?9:5;
+		to_rescue=level==6?39:5;
 		newspeed=level==6?1:50;
-		lem_cnt=10;
+		lem_cnt=level==6?40:10;
 		break;
 	case 2 :
 		/* deko */
@@ -676,14 +684,13 @@ void	AnimateDeko( void )
 				( deko[l]->ani == deko[l]->maxani ))
 			{
 				deko[l]->anilocked=1;
-				inBg(1,deko[l]->maxani,deko[l]->x,deko[l]->y);
+//				inBg(1,deko[l]->maxani,deko[l]->x,deko[l]->y);
 				action=2;						// send lemmings into level
 			}
 			SpriteNextPic( deko[l] );
 			DrawSprite( deko[l] );
 		}
 	}
-	DrawSprite( deko[0] );
 	pic_moved=0;
 }
 
@@ -759,6 +766,7 @@ static	int		zcnt=0;
 static	int		lastc=0;
 	int			nac;
 	int			sel_type=0;
+unsigned long	otype;
 
 	if ( realcode == 0xee )
 	{
@@ -983,24 +991,46 @@ static	int		lastc=0;
 			case 3 :
 				sel_type = TYP_STOPPER;
 				break;
+			case 4 :
+				sel_type = TYP_BUILDER;
+				break;
 			case 7 :
-				sel_type = TYP_DIGGER;
+				sel_type = TYP_DIGDOWN;
 				break;
 			}
-			if ( s->type == TYP_WALKER )
+			if ( !( s->type & TYP_STOPPER ) && !( s->type & TYP_FALLEN ))
 			{
+				otype = s->type;
 				s->type = sel_type;
 				portfolio[ afunc ]--;
 				DrawNumber( 106+afunc*32, 389, portfolio[afunc] );
-				if ( sel_type == TYP_DIGGER )
+				if ( sel_type == TYP_DIGDOWN )
 				{
 					SpriteChangePic( s, 5 );	// lemming3
 				}
 				if ( sel_type == TYP_STOPPER )
 				{
 					s->counter1=0;
+					if (( otype & TYP_BUILDER ) && ( s->counter2 < 12 ))
+					{
+						s->y+=3;
+					}
 					SpriteChangePic( s, 4 );	// lemming2
 					bgRect( s->x+(s->width/2), s->y, 1, s->height-2, 150 );
+				}
+				if ( sel_type == TYP_BUILDER )
+				{
+					s->counter1=0;
+					if ( otype & TYP_WALKER )
+						s->y -= 3;	// 2
+					SpriteChangePic( s, 31 );	// builder
+					if ( s->dir )
+					{
+						s->x++;
+						MirrorSprite( s );
+					}
+					else
+						s->x--;
 				}
 			}
 		}
@@ -1101,6 +1131,7 @@ static	int		blinkc=0;
 	{
 		counter1=0;
 		action=4;
+		DrawSprite( deko[0] );
 		return;
 	}
 	if ( action==4 )
@@ -1140,7 +1171,10 @@ static	int		blinkc=0;
 	}
 
 	if ( action != 2 )
+	{
+		DrawSprite( deko[0] );
 		return;
+	}
 	if ( pause )
 	{
 		UndrawSprite( deko[0] );
@@ -1223,7 +1257,8 @@ static	int		blinkc=0;
 			!( s->type & TYP_EXPLODE ))
 			bgRect( s->x+1, s->y, s->width-1, s->height-2, 150 );
 	}
-	DrawSprite( deko[2] );		// ziel
+//	DrawSprite( deko[2] );		// ziel
+	UnanimatedDeko();
 	for( i=0; i<lem_run; i++ )
 	{
 		if ( !lemm[i] )
@@ -1309,14 +1344,15 @@ static	int		blinkc=0;
 				}
 				else
 				{	/* kein bodenkontakt ? */
-					if(!isBrick(s->x+1,s->y+s->height)&&
-					   !isBrick(s->x-2+s->width,
-								s->y+s->height))
+					if(!isBrick(s->x+1,s->y+s->height,0)&&
+					   !isBrick(s->x-2+s->width,s->y+s->height,0))
 					{
 						if( !( s->type&TYP_WALKER ) )
 						{
-							s->type=TYP_WALKER|(s->type&TYP_EXPLODE);
-							SpriteChangePic( s, 3 );	// lemming1
+							if ( s->type & TYP_STOPPER )
+								bgRect(s->x+1,s->y,s->width-1,s->height-2,14);
+							s->type=TYP_WALKER|(s->type&TYP_UTILS);
+							SpriteChangePic( s, 3 );	// lemming1-faller
 							if ( s->dir )
 								MirrorSprite( s );
 						}
@@ -1348,9 +1384,9 @@ static	int		blinkc=0;
 							{	/* wieder auf boden */
 								s->counter2=0;
 								/* laeufer - getestet wird oben */
-								if((isBrick(s->x,s->y)&&
+								if((isBrick(s->x,s->y+3,1)&&
 									(s->dir==1))||
-								   (isBrick(s->x+s->width,s->y)&&
+								   (isBrick(s->x+s->width,s->y+3,1)&&
 									(s->dir==0)))
 								{
 									MirrorSprite( s );
@@ -1364,7 +1400,7 @@ static	int		blinkc=0;
 										for(b=8;b>0;b--)
 										{
 											if(isBrick(s->x,
-												s->y+s->height-b))
+												s->y+s->height-b,0))
 											{
 												s->y-=1;
 												b=0;
@@ -1376,7 +1412,7 @@ static	int		blinkc=0;
 										for(b=8;b>0;b--)
 										{
 											if(isBrick(s->x+s->width,
-												s->y+s->height-b))
+												s->y+s->height-b,0))
 											{
 												s->y-=1;
 												b=0;
@@ -1386,7 +1422,58 @@ static	int		blinkc=0;
 								}
 							} /* else, kein matsch */
 						} /** walker **/
-						if(s&&(s->type&TYP_DIGGER))
+						else if(s&&(s->type&TYP_BUILDER))
+						{
+							unsigned char	c=118;	// stair
+							if ( !s->ani )
+							{
+								s->counter2++;
+								s->y--;
+								if ( s->counter2 != 13 )
+								{
+									if ( s->dir )
+									{
+										s->x-=2;
+										bghLine(s->x+2,s->y+s->height,6,&c,1);
+										CopyBg2Screen( s->x+2,s->y+s->height,6,1);
+										if ( isBrick(s->x+1,s->y+2,1) )
+										{
+											s->y+=2;
+											s->dir=0;
+											s->counter2=13;
+										}
+									}
+									else
+									{
+										s->x+=2;
+										bghLine(s->x+1,s->y+s->height,6,&c,1);
+										CopyBg2Screen( s->x+1,s->y+s->height,6,1);
+										if ( isBrick(s->x+s->width,s->y+2,1) )
+										{
+											s->y+=2;
+											s->dir=1;
+											s->counter2=13;
+										}
+									}
+								}
+								if ( s->counter2 == 12 )
+								{
+									s->y+=2;
+									SpriteChangePic( s, 32 );//keinesteine
+									if ( s->dir )
+										MirrorSprite( s );
+								}
+								if ( s->counter2 == 13 )
+								{
+									s->type&=TYP_UTILS;
+									s->type|=TYP_WALKER;
+									SpriteChangePic( s, 3 );// lemming1
+									if ( s->dir )
+										MirrorSprite( s );
+								}
+							}
+						}
+						else if(s&&(s->type&TYP_DIGDOWN))
 						{
 							if(!(s->counter1%8))
 							{
@@ -1445,5 +1532,6 @@ static	int		blinkc=0;
 	{
 		SpriteSelPic( deko[0], 0 );
 	}
+	DrawSprite( deko[0] );
 	counter1++;
 }

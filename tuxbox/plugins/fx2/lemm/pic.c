@@ -15,6 +15,7 @@
 #include <malloc.h>
 
 #include <pics.h>
+#define	COMPSZ	7302
 
 extern	int		doexit;
 
@@ -30,7 +31,7 @@ typedef struct _Pic
 	int				height;
 } Pic;
 
-#define	NUMPICS		31
+#define	NUMPICS		33
 
 static	Pic	pics[] = {
 { 0,	0,	2,	14,	14 },		// 0 cursor
@@ -63,7 +64,9 @@ static	Pic	pics[] = {
 { 0,	0,	1,	25,	6 },
 { 0,	0,	1,	32,	32 },
 { 0,	0,	5,	9,	13 },	// 29 menu-icons (no ani)
-{ 0,	0,	1,	14, 14 } 	// 30 level6 short mask
+{ 0,	0,	1,	14, 14 }, 	// 30 level6 short mask
+{ 0,	0,  17, 9,  13 },	// lemming - builder
+{ 0,	0,  8, 	8,  11 }	// lemming - builder - ende
 };
 
 static	int		piccolors[] = {
@@ -85,7 +88,7 @@ static	int		piccolors[] = {
 	0xFF2222,
 	0x00BB00,
 	0xDDBB88,
-	0x000000,
+	0x010101,
 	0xDDBB44,
 	0xFFFF66,
 	0xBB8822,
@@ -174,7 +177,13 @@ static	int		piccolors[] = {
 	0x364C3E,
 	0x457559,
 	0x457C61,
-	0x3E6E52 };
+	0x3E6E52,
+	0xDD8822 };
+
+#if 0
+#include <tools.c.mayk>
+#include <i32.h>
+#endif
 
 int	LoadPics( void )
 {
@@ -184,7 +193,7 @@ int	LoadPics( void )
 
 	data = malloc(UNZSIZE+100);
 	i=UNZSIZE+100;
-	if ( uncompress(data,&i,pic_img_gz,7037) != Z_OK )
+	if ( uncompress(data,&i,pic_img_gz,COMPSZ) != Z_OK )
 	{
 		free(data);
 		return -1;
@@ -201,7 +210,7 @@ int	LoadPics( void )
 
 #if 0
 // add new
-	pics[30].pic_data=p31_data;
+	pics[32].pic_data=p32_data;
 	WritePics();
 #endif
 

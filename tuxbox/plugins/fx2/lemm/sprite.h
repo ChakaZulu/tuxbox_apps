@@ -16,7 +16,7 @@ typedef struct _Sprite
 	int				counter2;
 	struct _Sprite	*next;
 	struct _Sprite	*pre;
-	char			type;
+	unsigned long	type;
 	char			picid;
 	char			anilocked;
 	char			backlocked;
@@ -38,9 +38,15 @@ extern	void	SpriteGetBackground( Sprite *s );
 extern	void	DrawSprites( void );
 extern	void	SpriteChangePic( Sprite *s, int picid );
 
-#define TYP_WALKER		2
-#define	TYP_EXPLODE		4
-#define	TYP_STOPPER		8
-#define	TYP_DIGGER		16
-#define TYP_ATHOME		32
-#define TYP_FALLEN		64
+#define	TYP_CLIMB		(1L<<0)		// 0001
+#define	TYP_FALLER		(1L<<1)		// 0002
+#define	TYP_EXPLODE		(1L<<2)		// 0004
+#define TYP_UTILS		0x7
+#define	TYP_STOPPER		(1L<<3)		// 0008
+#define TYP_BUILDER		(1L<<4)		// 0010
+#define	TYP_DIGHORI		(1L<<5)		// 0020
+#define	TYP_DIGDIAG		(1L<<6)		// 0040
+#define	TYP_DIGDOWN		(1L<<7)		// 0080
+#define TYP_WALKER		(1L<<8)		// 0100
+#define TYP_FALLEN		(1L<<9)		// 0200
+#define TYP_ATHOME		(1L<<10)	// 0400
