@@ -30,6 +30,7 @@ class CSectionsdClient
 		bool sectionsd_connect();
 		bool send(char* data, int size);
 		bool receive(char* data, int size);
+		int readResponse(char* data = NULL, int size= 0);
 		bool sectionsd_close();
 
 	public:
@@ -37,6 +38,10 @@ class CSectionsdClient
 		{
 			EVT_TIMESET
 		};
+
+		bool getIsTimeSet();
+
+		void setPauseScanning( bool doPause );
 
 		/*
 			ein beliebiges Event anmelden

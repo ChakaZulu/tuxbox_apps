@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.28 2002/03/07 18:33:43 field Exp $
+//  $Id: sectionsdMsg.h,v 1.29 2002/03/12 16:12:55 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.29  2002/03/12 16:12:55  field
+//  Bugfixes
+//
 //  Revision 1.28  2002/03/07 18:33:43  field
 //  ClientLib angegangen, Events angefangen
 //
@@ -99,62 +102,74 @@
 //
 //
 
-struct sectionsd {
-  static const unsigned short portNumber=1600;
+struct sectionsd
+{
+	static const unsigned short portNumber=1600;
 
-  static const unsigned char epg_has_anything= 0x01;
-  static const unsigned char epg_has_later= 0x02;
-  static const unsigned char epg_has_current= 0x04;
-  static const unsigned char epg_not_broadcast= 0x08;
-  static const unsigned char epg_has_next= 0x10;
-  static const unsigned char epg_has_no_current= 0x20;
+	static const unsigned char epg_has_anything= 0x01;
+	static const unsigned char epg_has_later= 0x02;
+	static const unsigned char epg_has_current= 0x04;
+	static const unsigned char epg_not_broadcast= 0x08;
+	static const unsigned char epg_has_next= 0x10;
+	static const unsigned char epg_has_no_current= 0x20;
 
-  struct msgRequestHeader {
-    char version;
-    char command;
-    unsigned short dataLength;
-  } __attribute__ ((packed)) ;
+	struct msgRequestHeader
+	{
+		char version;
+		char command;
+		unsigned short dataLength;
+	} __attribute__ ((packed)) ;
 
-  struct msgResponseHeader {
-    unsigned short dataLength;
-  } __attribute__ ((packed)) ;
+	struct msgResponseHeader
+	{
+		unsigned short dataLength;
+	} __attribute__ ((packed)) ;
 
-  struct sectionsdTime {
-    time_t startzeit;
-    unsigned dauer;
-  } __attribute__ ((packed)) ;
+	struct sectionsdTime
+	{
+		time_t startzeit;
+		unsigned dauer;
+	} __attribute__ ((packed)) ;
 
-  static const int numberOfCommands=22;
-  enum commands {
-    actualEPGchannelName=0,
-    actualEventListTVshort,
-    currentNextInformation,
-    dumpStatusinformation,
-    allEventsChannelName,
-    setHoursToCache,
-    setEventsAreOldInMinutes,
-    dumpAllServices,
-    actualEventListRadioshort,
-    getNextEPG,
-    getNextShort,
-    pauseScanning, // for the grabbers ;)
-    actualEPGchannelID,
-    actualEventListTVshortIDs,
-    actualEventListRadioShortIDs,
-    currentNextInformationID,
-    epgEPGid,
-    epgEPGidShort,
-    CurrentComponentTagsChannelID,
-    allEventsChannelID,
-    timesNVODservice,
-    getEPGPrevNext
-  };
+	static const int numberOfCommands=23;
+	enum commands
+	{
+		actualEPGchannelName=0,
+		actualEventListTVshort,
+		currentNextInformation,
+		dumpStatusinformation,
+		allEventsChannelName,
+		setHoursToCache,
+		setEventsAreOldInMinutes,
+		dumpAllServices,
+		actualEventListRadioshort,
+		getNextEPG,
+		getNextShort,
+		pauseScanning, // for the grabbers ;)
+		actualEPGchannelID,
+		actualEventListTVshortIDs,
+		actualEventListRadioShortIDs,
+		currentNextInformationID,
+		epgEPGid,
+		epgEPGidShort,
+		CurrentComponentTagsChannelID,
+		allEventsChannelID,
+		timesNVODservice,
+		getEPGPrevNext,
+		getIsTimeSet
+	};
 
-  static const int numberOfCommands_v3=2;
-  enum commands_3 {
-    CMD_registerEvents,
-    CMD_unregisterEvents
-  };
+	static const int numberOfCommands_v3=2;
+	enum commands_3
+	{
+		CMD_registerEvents,
+		CMD_unregisterEvents
+	};
+
+	struct responseIsTimeSet
+	{
+		bool IsTimeSet;
+	};
 };
 
 //

@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.2 2002/03/07 18:33:43 field Exp $
+  $Id: sectionsdclient.cpp,v 1.3 2002/03/12 16:12:55 field Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.3  2002/03/12 16:12:55  field
+  Bugfixes
+
   Revision 1.2  2002/03/07 18:33:43  field
   ClientLib angegangen, Events angefangen
 
@@ -58,6 +61,23 @@ bool CSectionsdClient::sectionsd_connect()
 	}
 	return true;
 }
+
+int CSectionsdClient::readResponse(char* data, int size)
+{
+	struct sectionsd::msgResponseHeader responseHeader;
+    receive((char*)&responseHeader, sizeof(responseHeader));
+
+	if ( data != NULL )
+	{
+		if ( responseHeader.dataLength != size )
+			return -1;
+		else
+			return receive(data, size);
+	}
+	else
+		return responseHeader.dataLength;
+}
+
 
 bool CSectionsdClient::sectionsd_close()
 {
@@ -118,5 +138,37 @@ void CSectionsdClient::unRegisterEvent(unsigned int eventID, unsigned int client
 	sectionsd_connect();
 	send((char*)&msg, sizeof(msg));
 	send((char*)&msg2, sizeof(msg2));
+	sectionsd_close();
+}
+
+bool CSectionsdClient::getIsTimeSet()
+{
+	sectionsd::msgRequestHeader msg;
+	sectionsd::responseIsTimeSet rmsg;
+
+	msg.version = 2;
+	msg.command = sectionsd::getIsTimeSet;
+	msg.dataLength = 0;
+
+	sectionsd_connect();
+	send((char*)&msg, sizeof(msg));
+	readResponse((char*)&rmsg, sizeof(rmsg));
+	sectionsd_close();
+	return rmsg.IsTimeSet;
+}
+
+void CSectionsdClient::setPauseScanning( bool doPause )
+{
+	sectionsd::msgRequestHeader msg;
+
+	msg.version = 2;
+	msg.command = sectionsd::pauseScanning;
+	int PauseIt = ( doPause ) ? 1 : 0;
+	msg.dataLength = sizeof( PauseIt );
+
+	sectionsd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&PauseIt, msg.dataLength);
+	readResponse();
 	sectionsd_close();
 }

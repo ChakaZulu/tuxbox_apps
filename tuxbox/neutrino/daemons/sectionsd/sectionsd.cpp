@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.101 2002/03/07 18:33:43 field Exp $
+//  $Id: sectionsd.cpp,v 1.102 2002/03/12 16:12:55 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.102  2002/03/12 16:12:55  field
+//  Bugfixes
+//
 //  Revision 1.101  2002/03/07 18:33:43  field
 //  ClientLib angegangen, Events angefangen
 //
@@ -852,15 +855,15 @@ class DMX {
 int DMX::start(void)
 {
 	if(fd)
+	{
     	return 1;
-
+    }
 	pthread_mutex_lock( &start_stop_mutex );
 	if (real_pauseCounter!= 0)
     {
       	pthread_mutex_unlock( &start_stop_mutex );
       	return 0;
 	}
-
   	if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1)
   	{
     	perror ("[sectionsd] DMX: /dev/ost/demux0");
@@ -896,7 +899,6 @@ int DMX::start(void)
   	isScheduled=false;
   	if(timeset) // Nur wenn ne richtige Uhrzeit da ist
     	lastChanged=time(NULL);
-
   	pthread_mutex_unlock( &start_stop_mutex );
   	return 0;
 }
@@ -937,9 +939,12 @@ int DMX::real_unpause(void)
     		pthread_mutex_unlock( &start_stop_mutex );
     		return 2;
   		}
+  		//dprintf("real_unpause DONE: %d\n", real_pauseCounter);
     }
+//    else
+    	//dprintf("real_unpause NOT DONE: %d\n", real_pauseCounter);
 
-	//dprintf("real_unpause: %d\n", real_pauseCounter);
+
   	pthread_mutex_unlock( &start_stop_mutex );
   	return 0;
 }
@@ -949,7 +954,7 @@ int DMX::request_pause(void)
 	real_pause(); // unlocked
 
  	pthread_mutex_lock( &start_stop_mutex );
- 	dprintf("request_pause: %d\n", real_pauseCounter);
+ 	//dprintf("request_pause: %d\n", real_pauseCounter);
 
 	real_pauseCounter++;
 	pthread_mutex_unlock( &start_stop_mutex );
@@ -959,7 +964,7 @@ int DMX::request_pause(void)
 int DMX::request_unpause(void)
 {
  	pthread_mutex_lock( &start_stop_mutex );
- 	dprintf("request_unpause: %d\n", real_pauseCounter);
+ 	//dprintf("request_unpause: %d\n", real_pauseCounter);
 	--real_pauseCounter;
 	pthread_mutex_unlock( &start_stop_mutex );
 
@@ -1531,7 +1536,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.101 2002/03/07 18:33:43 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.102 2002/03/12 16:12:55 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2514,6 +2519,29 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
   dmxEIT.unpause(); // -> unlock
 }
 
+
+static void commandGetIsTimeSet(struct connectionData *client, char *data, const unsigned dataLength)
+{
+	if(dataLength)
+		return;
+
+	sectionsd::responseIsTimeSet rmsg;
+ 	rmsg.IsTimeSet = (timeset!= 0);
+
+    dprintf("Request of Time-Is-Set %d\n", 	rmsg.IsTimeSet);
+
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength= sizeof(rmsg);
+	if(writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS)>0)
+	{
+		writeNbytes(client->connectionSocket, (const char *)&rmsg, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+	}
+	else
+		dputs("[sectionsd] Fehler/Timeout bei write");
+	return;
+}
+
+
 static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectionData *, char *, const unsigned)  = {
   commandActualEPGchannelName,
   commandEventListTV,
@@ -2536,7 +2564,8 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectio
   commandCurrentComponentTagsChannelID,
   commandAllEventsChannelID,
   commandTimesNVODservice,
-  commandGetEPGPrevNext
+  commandGetEPGPrevNext,
+  commandGetIsTimeSet
 };
 
 static void *connectionThread(void *conn)
@@ -2622,8 +2651,7 @@ const unsigned timeoutInSeconds=2;
 		dprintf("sdt-thread started.\n");
 
 		int timeoutsDMX=0;
-		if(dmxSDT.start()) // -> unlock
-    		return 0;
+		dmxSDT.start(); // -> unlock
 
   		for(;;)
   		{
@@ -2631,8 +2659,7 @@ const unsigned timeoutInSeconds=2;
     		{
       			timeoutsDMX=0;
       			dmxSDT.stop();
-      			if(dmxSDT.start()) // leaves unlocked
-        			return 0;
+      			dmxSDT.start(); // leaves unlocked
       			dputs("dmxSDT restarted");
     		}
 
@@ -2813,11 +2840,10 @@ char *buf;
 		{
 			if(!dmxTOT.isOpen())
     		{
-				if(dmxTOT.start()) // -> unlock
-        			return 0;
+				dmxTOT.start(); // -> unlock
     		}
 			if(dmxTOT.change( true )) // von TOT nach TDT wechseln
-    			return 0;
+    			;
 
 	  		struct SI_section_TDT_header tdt_header;
 
@@ -2870,8 +2896,7 @@ char *buf;
   		{
     		if(!dmxTOT.isOpen())
     		{
-				if(dmxTOT.start()) // -> unlock
-        			return 0;
+				dmxTOT.start(); // -> unlock
     		}
 
     		struct SI_section_TOT_header header;
@@ -2982,8 +3007,7 @@ static void *eitThread(void *)
         int timeoutsDMX=0;
         time_t lastRestarted=time(NULL);
         double last_clock= 0;
-        if(dmxEIT.start()) // -> unlock
-            return 0;
+        dmxEIT.start(); // -> unlock
         for(;;)
         {
             if(timeoutsDMX>CHECK_RESTART_DMX_AFTER_TIMEOUTS-1)
@@ -3019,11 +3043,10 @@ static void *eitThread(void *)
 
             if(timeoutsDMX>=CHECK_RESTART_DMX_AFTER_TIMEOUTS)
             {
-                if(zeit>lastRestarted+3) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
+                if ( (zeit>lastRestarted+3) || (dmxEIT.real_pauseCounter!= 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
                 {
                     dmxEIT.stop(); // -> lock
-                    if(dmxEIT.start()) // -> unlock
-                       return 0;
+                    dmxEIT.start(); // -> unlock
                     dprintf("[eitThread] dmxEIT restarted, cache NOT decreased (dt=%ld)\n", (int)zeit-lastRestarted);
                 }
                 else
@@ -3050,8 +3073,7 @@ static void *eitThread(void *)
                         dmxSDT.real_unpause();
                     }
                     unlockEvents();
-                    if(dmxEIT.start()) // -> unlock
-                        return 0;
+                    dmxEIT.start(); // -> unlock
                     dputs("[eitThread] dmxEIT restarted");
                 }
                 lastRestarted= zeit;
@@ -3101,7 +3123,6 @@ static void *eitThread(void *)
                 else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
                     dmxEIT.change( true );
             }
-
             dmxEIT.lock();
             int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInSeconds);
             last_clock=clock();
@@ -3361,7 +3382,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.101 2002/03/07 18:33:43 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.102 2002/03/12 16:12:55 field Exp $\n");
 	try
 	{
 
