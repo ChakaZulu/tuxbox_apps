@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.10 2002/10/08 12:01:12 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.11 2002/10/12 23:14:20 obi Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -21,11 +21,10 @@
  *
  */
 
-#include "xmlinterface.h"
+#include <stdio.h>
 #include <xmltok.h>
 
-#include <stdio.h>
-
+#include <zapit/xmlinterface.h>
 
 std::string Unicode_Character_to_UTF8(const int character)
 {

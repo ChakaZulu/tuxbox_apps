@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.80 2002/10/08 20:19:10 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.81 2002/10/12 23:14:20 obi Exp $
  */
 
 #include <fcntl.h>
@@ -10,17 +10,16 @@
 /* libevent */
 #include <eventserver.h>
 
-#include <zapitclient.h>
-#include <zapost/frontend.h>
-#include <zapsi/bat.h>
-#include <zapsi/nit.h>
-#include <zapsi/pat.h>
-#include <zapsi/sdt.h>
-
-#include "settings.h"
-#include "bouquets.h"
-#include "scan.h"
-#include "xmlinterface.h"
+#include <zapit/bat.h>
+#include <zapit/bouquets.h>
+#include <zapit/client/zapitclient.h>
+#include <zapit/frontend.h>
+#include <zapit/nit.h>
+#include <zapit/pat.h>
+#include <zapit/scan.h>
+#include <zapit/sdt.h>
+#include <zapit/settings.h>
+#include <zapit/xmlinterface.h>
 
 short scan_runs;
 short curr_sat;

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.69 2002/10/07 23:36:27 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.70 2002/10/12 23:14:20 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -29,11 +29,10 @@
 /* tuxbox headers */
 #include <configfile.h>
 
-#include <zapsi/sdt.h>
-
-#include "settings.h"
-#include "bouquets.h"
-#include "xmlinterface.h"
+#include <zapit/bouquets.h>
+#include <zapit/sdt.h>
+#include <zapit/settings.h>
+#include <zapit/xmlinterface.h>
 
 extern tallchans allchans;   //  defined in zapit.cpp
 extern CConfigFile * config; //  defined in zapit.cpp

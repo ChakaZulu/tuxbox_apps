@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.10 2002/09/23 13:31:15 thegoodguy Exp $
+ * $Id: channel.cpp,v 1.11 2002/10/12 23:14:20 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -20,7 +20,7 @@
  *
  */
 
-#include "channel.h"
+#include <zapit/channel.h>
 
 CZapitChannel::CZapitChannel (std::string p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC)
 {

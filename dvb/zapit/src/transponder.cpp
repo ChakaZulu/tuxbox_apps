@@ -1,5 +1,5 @@
 /*
- * $Id: transponder.cpp,v 1.5 2002/05/20 09:53:33 obi Exp $
+ * $Id: transponder.cpp,v 1.6 2002/10/12 23:14:20 obi Exp $
  *
  * (C) 2002 by Steffen Hehn "McClean" <McClean@tuxbox.org>
  *
@@ -20,7 +20,7 @@
  */
 
 
-#include "transponder.h"
+#include <zapit/transponder.h>
 
 
 CTransponder::CTransponder()
