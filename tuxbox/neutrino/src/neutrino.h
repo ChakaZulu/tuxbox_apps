@@ -35,11 +35,11 @@
 
 #include <configfile.h>
 
-#include "neutrinoMessages.h"
-#include "driver/framebuffer.h"
-#include "system/setting_helpers.h"
-#include "system/configure_network.h"
-#include "timerdclient/timerdtypes.h"
+#include <neutrinoMessages.h>
+#include <driver/framebuffer.h>
+#include <system/setting_helpers.h>
+#include <system/configure_network.h>
+#include <timerdclient/timerdtypes.h>
 #include <gui/channellist.h>          /* CChannelList */
 #include <daemonc/remotecontrol.h>    /* st_rmsg      */
 
@@ -84,7 +84,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		int                             network_dhcp;
 		int                             network_automatic_start;
 
-		std::string			fontName;
+		const char *                    fontName;
 		std::string			fontFile;
 		int				fontsSizeOffset;
 
@@ -184,8 +184,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		bool getEnvironment(const char* name, int* value);
 		void ShowStreamFeatures();
 
-		long long last_profile_call;
-
 		CNeutrinoApp();
 		~CNeutrinoApp();
 
@@ -207,7 +205,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		bool changeNotify(std::string OptionName, void *Data);
 
 		int handleMsg(uint msg, uint data);
-		void showProfiling(std::string text);
 
 		int getMode() {return mode;}
 		int getLastMode() {return lastMode;}

@@ -1079,36 +1079,36 @@ void CNeutrinoApp::SetupFonts()
 	if (g_fontRenderer->AddFont((fontFile + "_italic.ttf").c_str()) != 0)
 		g_fontRenderer->AddFont((fontFile + ".ttf").c_str(), true);  // make italics
 
-	g_Fonts->menu                = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_menu               )                      );
-	g_Fonts->menu_title          = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_menu_title         )                      );
-	g_Fonts->menu_info           = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_menu_info          )                      );
+	g_Fonts->menu                = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_menu               )                      );
+	g_Fonts->menu_title          = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_menu_title         )                      );
+	g_Fonts->menu_info           = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_menu_info          )                      );
 
-	g_Fonts->epg_title           = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_epg_title          ) +     fontsSizeOffset);
-	g_Fonts->epg_info1           = g_fontRenderer->getFont(fontName.c_str(), "Italic"       , atoi(g_settings.fontsize_epg_info1          ) + 2 * fontsSizeOffset);
-	g_Fonts->epg_info2           = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_epg_info2          ) + 2 * fontsSizeOffset);
-	g_Fonts->epg_date            = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_epg_date           ) + 2 * fontsSizeOffset);
+	g_Fonts->epg_title           = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_epg_title          ) +     fontsSizeOffset);
+	g_Fonts->epg_info1           = g_fontRenderer->getFont(fontName, "Italic"       , atoi(g_settings.fontsize_epg_info1          ) + 2 * fontsSizeOffset);
+	g_Fonts->epg_info2           = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_epg_info2          ) + 2 * fontsSizeOffset);
+	g_Fonts->epg_date            = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_epg_date           ) + 2 * fontsSizeOffset);
 
-	g_Fonts->alert               = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_alert              )                      );
+	g_Fonts->alert               = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_alert              )                      );
 
-	g_Fonts->eventlist_title     = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_eventlist_title    )                      );
-	g_Fonts->eventlist_itemLarge = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_eventlist_itemlarge) +     fontsSizeOffset);
-	g_Fonts->eventlist_itemSmall = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_eventlist_itemsmall) +     fontsSizeOffset);
-	g_Fonts->eventlist_datetime  = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_eventlist_datetime ) +     fontsSizeOffset);
+	g_Fonts->eventlist_title     = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_eventlist_title    )                      );
+	g_Fonts->eventlist_itemLarge = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_eventlist_itemlarge) +     fontsSizeOffset);
+	g_Fonts->eventlist_itemSmall = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_eventlist_itemsmall) +     fontsSizeOffset);
+	g_Fonts->eventlist_datetime  = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_eventlist_datetime ) +     fontsSizeOffset);
 
-	g_Fonts->gamelist_itemLarge  = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_gamelist_itemlarge ) +     fontsSizeOffset);
-	g_Fonts->gamelist_itemSmall  = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_gamelist_itemsmall ) +     fontsSizeOffset);
+	g_Fonts->gamelist_itemLarge  = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_gamelist_itemlarge ) +     fontsSizeOffset);
+	g_Fonts->gamelist_itemSmall  = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_gamelist_itemsmall ) +     fontsSizeOffset);
 
-	g_Fonts->channellist         = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_channellist        ) +     fontsSizeOffset);
-	g_Fonts->channellist_descr   = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_channellist_descr  ) +     fontsSizeOffset);
-	g_Fonts->channellist_number  = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_channellist_number ) + 2 * fontsSizeOffset);
-	g_Fonts->channel_num_zap     = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_channel_num_zap    )                      );
+	g_Fonts->channellist         = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_channellist        ) +     fontsSizeOffset);
+	g_Fonts->channellist_descr   = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_channellist_descr  ) +     fontsSizeOffset);
+	g_Fonts->channellist_number  = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_channellist_number ) + 2 * fontsSizeOffset);
+	g_Fonts->channel_num_zap     = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_channel_num_zap    )                      );
 
-	g_Fonts->infobar_number      = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_infobar_number     )                      );
-	g_Fonts->infobar_channame    = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_infobar_channame   )                      );
-	g_Fonts->infobar_info        = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_infobar_info       ) +     fontsSizeOffset);
-	g_Fonts->infobar_small       = g_fontRenderer->getFont(fontName.c_str(), "Regular"      , atoi(g_settings.fontsize_infobar_small      ) +     fontsSizeOffset);
+	g_Fonts->infobar_number      = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_infobar_number     )                      );
+	g_Fonts->infobar_channame    = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_infobar_channame   )                      );
+	g_Fonts->infobar_info        = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_infobar_info       ) +     fontsSizeOffset);
+	g_Fonts->infobar_small       = g_fontRenderer->getFont(fontName, "Regular"      , atoi(g_settings.fontsize_infobar_small      ) +     fontsSizeOffset);
 
-	g_Fonts->filebrowser_item    = g_fontRenderer->getFont(fontName.c_str(), bold_style_name, atoi(g_settings.fontsize_filebrowser_item   ) +     fontsSizeOffset);
+	g_Fonts->filebrowser_item    = g_fontRenderer->getFont(fontName, bold_style_name, atoi(g_settings.fontsize_filebrowser_item   ) +     fontsSizeOffset);
 }
 
 /**************************************************************************************
@@ -2325,7 +2325,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
 
-	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName.c_str(), false);
+	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName, false);
 
 	g_info.box_Type = g_Controld->getBoxType();
 
@@ -2697,18 +2697,6 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 		}
 	}
-}
-
-void CNeutrinoApp::showProfiling(std::string text)
-{
-	struct timeval tv;
-
-	gettimeofday(&tv, NULL );
-	long long now = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
-
-
-	//printf("--> '%s' %f\n", text.c_str(), (now- last_profile_call)/ 1000.);
-	last_profile_call = now;
 }
 
 int CNeutrinoApp::handleMsg(uint msg, uint data)
