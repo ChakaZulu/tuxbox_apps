@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.50 2001/08/17 16:21:06 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.51 2001/08/17 16:37:28 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.51  2001/08/17 16:37:28  fnbrd
+//  Some mor informational output with -d and cache decrease
+//
 //  Revision 1.50  2001/08/17 16:21:06  fnbrd
 //  Intelligent cache decrease to prevent dmx buffer overflows.
 //
@@ -1045,7 +1048,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.50 2001/08/17 16:21:06 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.51 2001/08/17 16:37:28 fnbrd Exp $\n"
     "Current time: %s\n"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1947,16 +1950,19 @@ const unsigned timeoutInSeconds=2;
       timeoutsDMX=0;
       dmxEIT.stop(); // -> lock
       lockEvents();
-      if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>2000) {
+      if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000) {
         // kleiner als 1 Tag machen wir den Cache nicht,
 	// da die timeouts ja auch von einem Sender ohne EPG kommen können
-	// Die 2000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
+	// Die 3000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
         dmxSDT.pause();
         lockServices();
+        unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
         secondsToCache-=5*60L*60L; // 5h weniger
         dprintf("decreasing cache 5h (now %ldh)\n", secondsToCache/(60*60L));
         removeNewEvents();
         removeOldEvents(oldEventsAre);
+	if(anzEventsAlt>mySIeventsOrderUniqueKey.size())
+	  dprintf("Removed %u Events (%u -> %u)\n", anzEventsAlt-mySIeventsOrderUniqueKey.size(), anzEventsAlt, mySIeventsOrderUniqueKey.size());
         unlockServices();
         dmxSDT.unpause();
       }
@@ -2184,7 +2190,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.50 2001/08/17 16:21:06 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.51 2001/08/17 16:37:28 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
