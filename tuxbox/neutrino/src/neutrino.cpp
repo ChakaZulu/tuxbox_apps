@@ -371,7 +371,6 @@ int CNeutrinoApp::loadSetup()
 	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", true );
 	g_settings.shutdown_real_rcdelay = configfile.getInt32( "shutdown_real_rcdelay", true );
 	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
-	g_settings.show_camwarning = configfile.getInt32( "show_camwarning", 1 );
 	strcpy(g_settings.record_safety_time_before, configfile.getString( "record_safety_time_before", "00").c_str());
 	strcpy(g_settings.record_safety_time_after, configfile.getString( "record_safety_time_after", "00").c_str());
 	g_settings.infobar_sat_display = configfile.getInt32( "infobar_sat_display", true );
@@ -678,7 +677,6 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "shutdown_real", g_settings.shutdown_real );
 	configfile.setInt32( "shutdown_real_rcdelay", g_settings.shutdown_real_rcdelay );
 	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock);
-	configfile.setInt32( "show_camwarning", g_settings.show_camwarning );
 	configfile.setString( "record_safety_time_before", g_settings.record_safety_time_before );
 	configfile.setString( "record_safety_time_after", g_settings.record_safety_time_after );
 	configfile.setInt32( "infobar_sat_display", g_settings.infobar_sat_display );
@@ -2554,14 +2552,16 @@ int CNeutrinoApp::run(int argc, char **argv)
 	if(loadSettingsErg==1)
 	{
 		dprintf(DEBUG_INFO, "config file missing\n");
-		saveSetup();
 		ShowHintUTF("messagebox.info", g_Locale->getText("settings.noconffile")); // UTF-8
+		configfile.setModifiedFlag(true);
+		saveSetup();
 	}
 	else if(loadSettingsErg==2)
 	{
 		dprintf(DEBUG_INFO, "parts of configfile missing\n");
-		saveSetup();
 		ShowHintUTF("messagebox.info", g_Locale->getText("settings.missingoptionsconffile")); // UTF-8
+		configfile.setModifiedFlag(true);
+		saveSetup();
 	}
 
 	CLCD::getInstance()->showServicename("Waiting...");

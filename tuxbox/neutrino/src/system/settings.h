@@ -47,7 +47,6 @@ struct SNeutrinoSettings
 	int shutdown_real;
 	int shutdown_real_rcdelay;
 	int shutdown_showclock;
-	int show_camwarning;
 	char record_safety_time_before[3];
 	char record_safety_time_after[3];
 	int infobar_sat_display;
