@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.44 2003/03/02 23:10:15 obi Exp $
+ * $Id: frontend.cpp,v 1.45 2003/03/07 22:42:12 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -170,6 +170,9 @@ uint32_t CFrontend::getUncorrectedBlocks(void)
 void CFrontend::setFrontend(struct dvb_frontend_parameters *feparams)
 {
 	struct dvb_frontend_event event;
+
+	if (fd == -1)
+		return;
 
 	if (errno != 0)
 		errno = 0;
