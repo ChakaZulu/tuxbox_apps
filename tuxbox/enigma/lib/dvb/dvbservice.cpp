@@ -7,6 +7,7 @@
 
 #include <lib/dvb/si.h>
 #include <lib/dvb/decoder.h>
+#include <lib/dvb/iso639.h>
 #ifndef DISABLE_CI
 	#include <lib/dvb/dvbci.h>
 #endif
@@ -26,6 +27,18 @@
 
 std::set<eDVBCaPMTClient*> eDVBCaPMTClientHandler::capmtclients;
 eLock eDVBServiceController::availCALock;
+
+eString getISO639Description(char *iso)
+{
+	for (unsigned int i=0; i<sizeof(iso639)/sizeof(*iso639); ++i)
+	{
+		if (!strncasecmp(iso639[i].iso639foreign, iso, 3))
+			return iso639[i].description1;
+		if (!strncasecmp(iso639[i].iso639int, iso, 3))
+			return iso639[i].description1;
+	}
+	return eString()+iso[0]+iso[1]+iso[2];
+}
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
 : eDVBController(dvb)
@@ -281,6 +294,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		break;
 	case eDVBServiceEvent::eventServiceGotPAT:
 	{
+		int pmtpid=-1;
 		if (dvb.getState() != eDVBServiceState::stateServiceGetPAT)
 			break;
 
@@ -288,7 +302,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		PATEntry *pe=pat->searchService(service.getServiceID().get());
 		if (!pe)
 		{
-			pmtpid=-1;
 #ifndef DISABLE_FILE
 			if ( service.path ) // recorded ts
 			{
@@ -491,6 +504,37 @@ void eDVBServiceController::EITready(int error)
 	{
 		EIT *eit=dvb.getEIT();
 
+		for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
+		{
+//		eDebug("running_status = %d", e->running_status );
+			if ((e->running_status>=2) || (!e->running_status) ) // currently running service
+			{
+				for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+				{
+					if (d->Tag()==DESCR_COMPONENT)
+					{
+						for (std::list<audioStream>::iterator it(audioStreams.begin())
+							;it != audioStreams.end(); ++it )
+						{
+							if (((ComponentDescriptor*)*d)->component_tag == it->component_tag )
+							{
+								eString tmp = ((ComponentDescriptor*)*d)->text;
+								if (tmp)
+								{
+									it->text=tmp;
+									if ( it->isAC3 )
+										it->text+=" (AC3)";
+									else if ( it->isDTS )
+										it->text+=" (DTS)";
+								}
+							}
+						}
+					}
+				}
+				break;
+			}
+		}
+
 		if ( service.getServiceType() == 4 ) // NVOD Service
 		{
 			delete dvb.parentEIT;
@@ -576,7 +620,7 @@ void eDVBServiceController::TDTready(int error)
 
 void eDVBServiceController::scanPMT( PMT *pmt )
 {
-	Decoder::parms.pmtpid=pmtpid;
+	Decoder::parms.pmtpid=pmt->pid;
 
 	usedCASystems.clear();
 
@@ -605,6 +649,9 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 
 	int isca=checkCA(calist, pmt->program_info, pmt->program_number);
 
+	audioStreams.clear();
+	videoStreams.clear();
+
 	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 	{
 		PMTEntry *pe=*i;
@@ -616,34 +663,72 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 				if ( (!video) || (pe->elementary_PID == videopid) )
 					video=pe;
 				isca+=checkCA(calist, pe->ES_info, pmt->program_number);
+				videoStreams.push_back(pe);
 				break;
 			case 3:	// ISO/IEC 11172 Audio
 			case 4: // ISO/IEC 13818-3 Audio
+			case 6:
+			{
+				bool skip=false;
+				audioStream stream(pe);
+
 				if ( (!audio) || (pe->elementary_PID == audiopid) )
 					audio=pe;
 				isca+=checkCA(calist, pe->ES_info, pmt->program_number);
-					break;
-			case 6:
-			{
-				isca+=checkCA(calist, pe->ES_info, pmt->program_number);
+
 				for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 				{
-					int isac3=0;
-
-					if (i->Tag()==DESCR_AC3)
-						isac3=1;
-					else if (i->Tag() == DESCR_REGISTRATION)
+					switch( i->Tag() )
 					{
-						RegistrationDescriptor *reg=(RegistrationDescriptor*)*i;
-						if (!memcmp(reg->format_identifier, "DTS", 3))
-							isac3=1;
+						case DESCR_AC3:
+							stream.isAC3=1;
+							break;
+						case DESCR_REGISTRATION:
+						{
+							if (!memcmp(((RegistrationDescriptor*)*i)->format_identifier, "DTS", 3))
+								stream.isDTS=1;
+							break;
+						}
+						case DESCR_TELETEXT:
+							if ( (!teletext) || (pe->elementary_PID == tpid) )
+								teletext=pe;
+							skip=true;
+							break;
+						case DESCR_ISO639_LANGUAGE:
+							stream.text=getISO639Description(((ISO639LanguageDescriptor*)*i)->language_code);
+							break;
+						case DESCR_STREAM_ID:
+							stream.component_tag=((StreamIdentifierDescriptor*)*i)->component_tag;
+							break;
+						case DESCR_LESRADIOS:
+						{
+							LesRadiosDescriptor *d = (LesRadiosDescriptor*)*i;
+							if ( d->id && d->name )
+								stream.text.sprintf("%d.) %s", d->id, d->name.c_str());
+							else
+								skip=true;
+							break;
+						}
+						default:
+							break;
 					}
-					else if ( (i->Tag()==DESCR_TELETEXT) && ( (!teletext) || (pe->elementary_PID == tpid) ) )
-						teletext=pe;
-
-					if (isac3 && ( (!ac3_audio) || (pe->elementary_PID == ac3pid) ) )
-						ac3_audio=pe;
+					if (stream.isAC3 || stream.isDTS)
+					{ 
+						if ( (!ac3_audio) || (pe->elementary_PID == ac3pid) )
+							ac3_audio=pe;
+					}
 				}
+				
+				if (!stream.text)
+					stream.text.sprintf("PID %04x", pe->elementary_PID);
+
+				if (stream.isAC3)
+					stream.text+=" (AC3)";
+				if (stream.isDTS)
+					stream.text+=" (DTS)";
+
+				if (!skip)
+					audioStreams.push_back(stream);
 			}
 			default:
 				break;
@@ -799,7 +884,7 @@ void eDVBServiceController::handlePMT(const eServiceReferenceDVB &ref, PMT *pmt)
 	}
 	else
 	{
-		eDebug("[eDVBCIHandler] get PMT for unknow service");
+		eDebug("[eDVBCIHandler] get PMT for unknown service");
 		return;
 	}
 

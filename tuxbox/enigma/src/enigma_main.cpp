@@ -34,7 +34,6 @@
 #include <lib/dvb/epgcache.h>
 #include <lib/dvb/esection.h>
 #include <lib/dvb/decoder.h>
-#include <lib/dvb/iso639.h>
 #include <lib/dvb/servicemp3.h>
 #include <lib/dvb/servicestructure.h>
 #include <lib/dvb/serviceplaylist.h>
@@ -162,18 +161,6 @@ struct enigmaGlobalActions
 };
 
 eAutoInitP0<enigmaGlobalActions> i_enigmaGlobalActions(eAutoInitNumbers::actions, "enigma global actions");
-
-eString getISO639Description(char *iso)
-{
-	for (unsigned int i=0; i<sizeof(iso639)/sizeof(*iso639); ++i)
-	{
-		if (!strncasecmp(iso639[i].iso639foreign, iso, 3))
-			return iso639[i].description1;
-		if (!strncasecmp(iso639[i].iso639int, iso, 3))
-			return iso639[i].description1;
-	}
-	return eString()+iso[0]+iso[1]+iso[2];
-}
 
 #ifndef DISABLE_FILE
 
@@ -463,6 +450,39 @@ void eNVODSelector::add(eDVBNamespace dvb_namespace, NVODReferenceEntry *ref)
 	clearEntrys.connect( slot( *nvod, &NVODStream::selfDestroy) );
 }
 
+struct selectCurVideoStream
+{
+	int pid;
+	eListBox<eListBoxEntryText> &lb;
+	selectCurVideoStream(int pid, eListBox<eListBoxEntryText> &lb )
+		:pid(pid), lb(lb)
+	{
+	}
+
+	bool operator()(eListBoxEntryText& stream)
+	{
+		if ( ((PMTEntry*)stream.getKey())->elementary_PID == pid )
+		{
+			lb.setCurrent( &stream );
+			return true;
+		}
+		return false;
+	}
+};
+
+int eVideoSelector::eventHandler(const eWidgetEvent &e)
+{
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			list.forEachEntry(selectCurVideoStream(Decoder::current.vpid, list));
+			return 1;
+		default:
+			break;
+	}
+	return eWindow::eventHandler(e);
+}
+
 void eVideoSelector::selected(eListBoxEntryText *l)
 {
 	eServiceHandler *service=eServiceInterface::getInstance()->getService();
@@ -492,95 +512,70 @@ void eVideoSelector::add(PMTEntry *stream)
 		(void*)stream );
 }
 
-AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
-	:eListBoxEntryText((eListBox<eListBoxEntryText>*)listbox), isAC3(0)
-	,isDTS(0), component_tag(-1), stream(stream)
+struct updateAudioStream
 {
-	for (ePtrList<Descriptor>::iterator c(stream->ES_info); c != stream->ES_info.end(); ++c)
+	int cnt;
+	std::list<eDVBServiceController::audioStream> &astreams;
+	updateAudioStream(std::list<eDVBServiceController::audioStream> &astreams)
+		:cnt(0), astreams(astreams)
 	{
-		if (c->Tag()==DESCR_AC3)
-			isAC3=1;
-		else if (c->Tag() == DESCR_REGISTRATION)
-		{
-			RegistrationDescriptor *reg=(RegistrationDescriptor*)*c;
-			if (!memcmp(reg->format_identifier, "DTS", 3))
-				isDTS=1;
-		}
-		else if (c->Tag()==DESCR_ISO639_LANGUAGE)
-			text=getISO639Description(((ISO639LanguageDescriptor*)*c)->language_code);
-		else if (c->Tag()==DESCR_STREAM_ID)
-			component_tag=((StreamIdentifierDescriptor*)*c)->component_tag;
-		else if (c->Tag()==DESCR_LESRADIOS)
-		{
-			text=eString().sprintf("%d.) ", (((LesRadiosDescriptor*)*c)->id));
-			text+=((LesRadiosDescriptor*)*c)->name;
-		}
 	}
-	if (!text)
-		text.sprintf("PID %04x", stream->elementary_PID);
-	if (component_tag!=-1)
-	{
-		eServiceHandler *service=eServiceInterface::getInstance()->getService();
-		if (service)
-		{
-			EIT *eit=service->getEIT();
-			CONNECT( eDVB::getInstance()->tEIT.tableReady, AudioStream::EITready );
-			if (eit)
-				parseEIT(eit);
-		}
-	}
-	else if (isAC3)
-		text+=" (AC3)";
-	else if (isDTS)
-		text+=" (DTS)";
-}
 
-void AudioStream::parseEIT(EIT* eit)
-{
-	int p=0;
-	for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
+	bool operator()(AudioStream& stream)
 	{
-//		eDebug("running_status = %d", e->running_status );
-		if ((e->running_status>=2)|| (!p && !e->running_status))		// currently running service
+		++cnt;
+		if ( cnt>2 )
 		{
-			for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+			for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin()); it != astreams.end(); ++it )
 			{
-				if (d->Tag()==DESCR_COMPONENT)
+				if (it->pmtentry->elementary_PID == stream.stream.pmtentry->elementary_PID )
 				{
-					if (((ComponentDescriptor*)*d)->component_tag == component_tag )
-					{
-						eString tmp = ((ComponentDescriptor*)*d)->text;
-						if (tmp)
-						{
-							text=tmp;
-							goto raus;
-						}
-					}
+					stream.stream.text = it->text;
+					stream.update();
+					break;
 				}
 			}
 		}
-		p++;
+		return false;
 	}
-raus:
-	if (isAC3)
-		text+=" (AC3)";
-	if (isDTS)
-		text+=" (DTS)";
+};
+
+struct selectCurAudioStream
+{
+	int pid;
+	eListBox<AudioStream> &lb;
+	int cnt;
+	selectCurAudioStream( int pid, eListBox<AudioStream> &lb )
+		:pid(pid), lb(lb), cnt(0)
+	{
+	}
+
+	bool operator()(AudioStream& stream)
+	{
+		++cnt;
+		if ( cnt>2 && stream.stream.pmtentry->elementary_PID == pid )
+		{
+			lb.setCurrent( &stream );
+			return true;
+		}
+		return false;
+	}
+};
+
+AudioStream::AudioStream(eListBox<AudioStream> *listbox, eDVBServiceController::audioStream &stream)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*)listbox, stream.text)
+	,stream(stream.pmtentry)
+{
+}
+
+void AudioStream::update()
+{
+	text=stream.text;
 	if ( para )
 	{
 		para->destroy();
 		para=0;
 		listbox->invalidateContent();
-	}
-	eit->unlock();
-}
-
-void AudioStream::EITready(int error)
-{
-	if (!error)
-	{
-		EIT *eit=eDVB::getInstance()->getEIT();
-		parseEIT(eit);
 	}
 }
 
@@ -660,6 +655,24 @@ void ePSAudioSelector::add(unsigned int id)
 	list.endAtomic();
 }
 
+void eAudioSelector::update(std::list<eDVBServiceController::audioStream>& lst)
+{
+	list.forEachEntry(updateAudioStream(lst));
+}
+
+int eAudioSelector::eventHandler(const eWidgetEvent &e)
+{
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			list.forEachEntry(selectCurAudioStream(Decoder::current.apid, list));
+			return 1;
+		default:
+			break;
+	}
+	return eWindow::eventHandler(e);
+}
+
 void eAudioSelector::selected(AudioStream *l)
 {
 	if (l)
@@ -668,7 +681,7 @@ void eAudioSelector::selected(AudioStream *l)
 		{
 			eServiceHandler *service=eServiceInterface::getInstance()->getService();
 			if (l && service)
-				service->setPID(l->stream);
+				service->setPID(l->stream.pmtentry);
 			close(0);
 		}
 	}
@@ -696,7 +709,7 @@ void eAudioSelector::clear()
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 }
 
-void eAudioSelector::add(PMTEntry *pmt)
+void eAudioSelector::add(eDVBServiceController::audioStream &pmt)
 {
 	new AudioStream(&list, pmt);
 }
@@ -1950,6 +1963,9 @@ void eZapMain::setEIT(EIT *eit)
 			EINext->setText(nexttext);
 			EINextTime->setText(nexttime);
 		}
+		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+		if ( sapi )
+			audiosel.update(sapi->audioStreams);
 	}
 	else
 	{
@@ -5326,75 +5342,36 @@ void eZapMain::gotSDT()
 
 void eZapMain::gotPMT()
 {
-	eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return;
 
 	audiosel.clear();
 	videosel.clear();
 
-	PMT *pmt=sapi->getPMT();
-	if (!pmt)
-		return;
-
-	bool isAc3 = false;
-	int numaudio=0;
-	int numvideo=0;
-	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
+	bool isAC3=false;
+	for (std::list<eDVBServiceController::audioStream>::iterator it( sapi->audioStreams.begin() )
+		;it != sapi->audioStreams.end(); ++it )
 	{
-		PMTEntry *pe=*i;
-		int isaudio=0, isvideo=0;
-		if (pe->stream_type==1)
-			isvideo=1;
-		else if (pe->stream_type==2)
-			isvideo=1;
-		else if (pe->stream_type==3)
-			isaudio=1;
-		else if (pe->stream_type==4)
-			isaudio=1;
-		else if (pe->stream_type==6)
-		{
-			for (ePtrList<Descriptor>::iterator d(pe->ES_info); d != pe->ES_info.end(); ++d)
-			{
-				if (d->Tag()==DESCR_AC3)
-				{
-					isaudio++;
-					isAc3=true;
-				} else if (d->Tag() == DESCR_REGISTRATION)
-				{
-					RegistrationDescriptor *reg=(RegistrationDescriptor*)*d;
-					if (!memcmp(reg->format_identifier, "DTS", 3))
-					{
-						isaudio++;
-						isAc3=true;
-					}
-				}
-			}
-		}
-		if (isaudio)
-		{
-			audiosel.add(pe);
-			numaudio++;
-		}
-		if (isvideo)
-		{
-			videosel.add(pe);
-			numvideo++;
-		}
+		audiosel.add(*it);
+		if ( it->isAC3 || it->isDTS )
+			isAC3=true;
 	}
-	if (numaudio/*>1*/)
+
+	for (ePtrList<PMTEntry>::iterator it(sapi->videoStreams); it != sapi->videoStreams.end(); ++it)
+		videosel.add(*it);
+
+	if (sapi->audioStreams.size())
 		flags|=ENIGMA_AUDIO;
 	else
 		flags&=~ENIGMA_AUDIO;
 
-	if (numvideo>1)
+	if (sapi->videoStreams.size()>1)
 		flags|=ENIGMA_VIDEO;
 	else
 		flags&=~ENIGMA_VIDEO;
 
-	setAC3Logo(isAc3);
-
-	pmt->unlock();
+	setAC3Logo(isAC3);
 }
 
 void eZapMain::timeOut()

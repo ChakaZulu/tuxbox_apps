@@ -115,14 +115,14 @@ class eDVBServiceController
 {
 	Signal0<void> freeCheckFinishedCallback;
 	void freeCheckFinished();
-public:
-		/* current service */
-	eServiceReferenceDVB service,  // meta-service
-			     parentservice,prevservice;	// for linkage handling
-	eTransponder *transponder;
-	int pmtpid,
-			service_state;
+// for linkage handling	
+	eServiceReferenceDVB parentservice,prevservice;
 	MHWEIT *tMHWEIT;
+public:
+	int service_state;
+		/* current service */
+	eServiceReferenceDVB service;  // meta-service
+	eTransponder *transponder;
 	TDT *tdt;
 
 	static eLock availCALock;
@@ -134,8 +134,26 @@ public:
 
 	std::set<int> availableCASystems, usedCASystems;
 	ePtrList<CA> calist;		/** currently used ca-systems */
-
 	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors, int sid);
+
+	struct audioStream
+	{
+		audioStream(PMTEntry *p)
+			:component_tag(-1), pmtentry(p), isAC3(0), isDTS(0)
+		{}
+		audioStream(const audioStream &str)
+			:component_tag(str.component_tag), pmtentry(str.pmtentry)
+			,text(str.text), isAC3(str.isAC3), isDTS(str.isDTS)
+		{}
+		int component_tag;
+		PMTEntry *pmtentry;
+		eString text;
+		int isAC3;
+		int isDTS;
+	};
+	std::list<audioStream> audioStreams;
+	
+	ePtrList<PMTEntry> videoStreams;
 
 #ifndef DISABLE_CI
 	eDVBCI *DVBCI;

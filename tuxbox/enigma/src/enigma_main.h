@@ -8,6 +8,7 @@
 #include <lib/dvb/si.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/edvb.h>
+#include <lib/dvb/dvbservice.h>
 #include <lib/gui/combobox.h>
 #include <lib/gui/ewindow.h>
 #include <lib/gui/listbox.h>
@@ -172,23 +173,22 @@ class AudioStream: public eListBoxEntryText
 {
 	friend class eListBox<AudioStream>;
 	friend class eAudioSelector;
-	int isAC3, isDTS;
-	int component_tag;
-	void EITready(int error);
-	void parseEIT(EIT* eit);
 public:
-	AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream);
-	PMTEntry *stream;
+	eDVBServiceController::audioStream stream;
+	void update();
+	AudioStream(eListBox<AudioStream> *listbox, eDVBServiceController::audioStream &stream);
 	bool operator < ( const AudioStream& e) const	{	return 0;	}
 };
 
 class eAudioSelector: public eListBoxWindow<AudioStream>
 {
 	void selected(AudioStream *);
+	int eventHandler(const eWidgetEvent &);
 public:
 	eAudioSelector();
 	void clear();
-	void add(PMTEntry *);
+	void update(std::list<eDVBServiceController::audioStream>&);
+	void add(eDVBServiceController::audioStream &pmt);
 };
 
 class ePSAudioSelector: public eListBoxWindow<eListBoxEntryText>
@@ -204,6 +204,7 @@ public:
 class eVideoSelector: public eListBoxWindow<eListBoxEntryText>
 {
 	void selected(eListBoxEntryText *);
+	int eventHandler(const eWidgetEvent &);
 public:
 	eVideoSelector();
 	void clear();
