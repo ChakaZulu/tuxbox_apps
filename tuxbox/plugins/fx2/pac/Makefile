@@ -738,11 +738,29 @@ pac: main.o $(OBJS)
 clean::
 	$(RM) pac
 
-maze.o: pics.h text.h
+maze.o: pics.h text.h level.h
 
 pacman.so: somain.o $(OBJS)
 	$(CC) -o pacman.so -shared -Wl,-soname,pacman.so somain.o $(OBJS)
 	$(STRIP) pacman.so
+
+install:: pacman.so
+	@if [ -d $(DESTDIR)../../mczap/neutrinoNG/games ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)../../mczap/neutrinoNG/games); fi
+	@for flag in ${MAKEFLAGS} ''; do \
+	case "$$flag" in *=*) ;; *[i]*) set +e;; esac; done; \
+	for i in pacman.so; do \
+	(set -x; $(INSTALL) $(INSTALLFLAGS) -m 755 $$i $(DESTDIR)../../mczap/neutrinoNG/games); \
+	done
+
+install:: pacman.cfg
+	@if [ -d $(DESTDIR)../../mczap/neutrinoNG/games ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)../../mczap/neutrinoNG/games); fi
+	@for flag in ${MAKEFLAGS} ''; do \
+	case "$$flag" in *=*) ;; *[i]*) set +e;; esac; done; \
+	for i in pacman.cfg; do \
+	(set -x; $(INSTALL) $(INSTALLFLAGS) -m 644 $$i $(DESTDIR)../../mczap/neutrinoNG/games); \
+	done
 
 clean::
 	rm -f pacman.so

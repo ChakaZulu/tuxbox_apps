@@ -11,34 +11,25 @@
 #include <colors.h>
 #include <pics.h>
 #include <text.h>
+#include <level.h>
 
-#if 0
-#define	STATUS_X		5
-#define STATUS_Y		5
-#define LOGO_X			650
-#define LOGO_Y			0
-#else
 #define	STATUS_X		80
 #define STATUS_Y		50
 #define LOGO_X			600
 #define LOGO_Y			30
-#endif
 
 extern	double	sqrt( double in );
 
 extern	int		doexit;
 
-int				pac_x = 10;
-int				pac_x_minor = 0;
-int				pac_y = 9;
-int				pac_y_minor = 0;
-int				pac_look = 0;
-int				pac_step = 0;
-int				pac_c_step = 0;
 int				gametime=0;
 extern	unsigned short	actcode;
-int				pices = PICES;
-static	int		timeleft=8600;
+int				pices = 0;
+int				level = 0;
+int				score = 0;
+static	int		timeleft=0;
+
+static	int		piccs[] = { 166, 153, 162, 191 };
 
 typedef struct _Ghost
 {
@@ -48,9 +39,59 @@ typedef struct _Ghost
 	int				y_minor;
 	unsigned char	c1;
 	unsigned char	look;
+
 } Ghost;
 
+typedef struct _Pac
+{
+	int				x;
+	int				y;
+	int				x_minor;
+	int				y_minor;
+	int				look;
+	int				step;
+	int				c_step;
+
+} Pac;
+
 static	Ghost	ghost[4];
+static	Ghost	ighost0[4] = {
+{ 16, 3, 0, 0, BLUE, 0 },
+{ 3, 3, 0, 0, GRAY, 0 },
+{ 16, 11, 0, 0, RED, 1 },
+{ 3, 12, 0, 0, DARK, 1 } };
+
+static	Ghost	ighost1[4] = {
+{ 1, 3, 0, 0, RED, 0 },
+{ 16, 3, 0, 0, RED, 0 },
+{ 16, 13, 0, 0, GREEN, 1 },
+{ 5, 7, 0, 0, GREEN, 1 } };
+
+static	Ghost	ighost2[4] = {
+{ 5, 3, 0, 0, RED, 1 },
+{ 16, 3, 0, 0, BLUE, 0 },
+{ 16, 13, 0, 0, BLUE, 1 },
+{ 8, 7, 0, 0, RED, 1 } };
+
+static	Ghost	ighost3[4] = {
+{ 1, 16, 0, 0, RED, 1 },
+{ 2, 16, 0, 0, BLUE, 1 },
+{ 8, 16, 0, 0, BLUE, 1 },
+{ 9, 16, 0, 0, RED, 1 } };
+
+static	Ghost	*ighosts[] = { ighost0, ighost1, ighost2, ighost3 };
+
+static	Pac		pac;
+static	Pac		ipac[] = {
+{ 10, 9, 0, 0, 0, 0, 0 },
+{ 7, 9, 0, 0, 1, 0, 0 },
+{ 1, 3, 0, 0, 3, 0, 0 },
+{ 1, 3, 0, 0, 0, 0, 0 },
+ };
+
+static	unsigned char	maze[ 22 * 20 ];
+
+static	unsigned char	*mazes[] = { maze0, maze1, maze2, maze3 };
 
 unsigned	char	*pacs[] = {
 		pac_0_1, pac_0_2, pac_0_3, pac_0_4, pac_0_5,
@@ -87,87 +128,48 @@ void	DrawMaze( void )
 
 void	MazeInitialize( void )
 {
-	int				x;
-	int				y;
-	unsigned char	*p = maze+2*MAZEW;
+	memcpy(maze,mazes[ level ],MAZEW*MAZEH);
 
-	for( y = 0; y < MAZEH-2; y++ )
-	{
-		for( x = 0; x < MAZEW; x++, p++ )
-		{
-			if ( *p != '#' )
-				*p='.';
-		}
-	}
-	pac_x = 10;
-	pac_x_minor = 0;
-	pac_y = 9;
-	pac_y_minor = 0;
-	pac_look = 0;
-	pac_step = 0;
-	pac_c_step = 0;
+	pac = ipac[ level ];
 	gametime=0;
 	actcode=0xee;
-	maze[ pac_y * MAZEW + pac_x ] = ' ';
-	pices = PICES-1;
-	timeleft=8600;
-	ghost[0].x = 16;
-	ghost[0].y = 3;
-	ghost[0].x_minor = 0;
-	ghost[0].y_minor = 0;
-	ghost[0].c1 = BLUE;
-	ghost[0].look = 0;
-	ghost[1].x = 3;
-	ghost[1].y = 3;
-	ghost[1].x_minor = 0;
-	ghost[1].y_minor = 0;
-	ghost[1].c1 = GRAY;
-	ghost[1].look = 0;
-	ghost[2].x = 16;
-	ghost[2].y = 11;
-	ghost[2].x_minor = 0;
-	ghost[2].y_minor = 0;
-	ghost[2].c1 = RED;
-	ghost[2].look = 1;
-	ghost[3].x = 3;
-	ghost[3].y = 12;
-	ghost[3].x_minor = 0;
-	ghost[3].y_minor = 0;
-	ghost[3].c1 = DARK;
-	ghost[3].look = 1;
+	maze[ pac.y * MAZEW + pac.x ] = ' ';
+	pices = piccs[ level ]-1;
+	timeleft=52*pices;
+	memcpy(ghost,ighosts[ level ],sizeof(Ghost)*4);
 }
 
 void	DrawPac( void )
 {
-	int		istep = pac_step % 10;
+	int		istep = pac.step % 10;
 	int		lstep;
 	int		rstep;
-	int		opac_step = pac_step;
+	int		opac_step = pac.step;
 
-	pac_step = pac_look * 10 + istep;
-	if ( pac_step > 19 )
-		pac_step = opac_step;
-	lstep = pac_step - istep;
+	pac.step = pac.look * 10 + istep;
+	if ( pac.step > 19 )
+		pac.step = opac_step;
+	lstep = pac.step - istep;
 	rstep = lstep + 10;
-	FBCopyImage( pac_x*32+pac_x_minor,
-				pac_y*32+pac_y_minor, 32, 32, pacs[ pac_step/2 ] );
+	FBCopyImage( pac.x*32+pac.x_minor,
+				pac.y*32+pac.y_minor, 32, 32, pacs[ pac.step/2 ] );
 
-	if ( pac_c_step )
+	if ( pac.c_step )
 	{
-		pac_step--;
-		if ( pac_step < lstep )
+		pac.step--;
+		if ( pac.step < lstep )
 		{
-			pac_step = lstep + 1;
-			pac_c_step = 0;
+			pac.step = lstep + 1;
+			pac.c_step = 0;
 		}
 	}
 	else
 	{
-		pac_step++;
-		if ( pac_step == rstep )
+		pac.step++;
+		if ( pac.step == rstep )
 		{
-			pac_step = rstep - 2;
-			pac_c_step = 1;
+			pac.step = rstep - 2;
+			pac.c_step = 1;
 		}
 	}
 }
@@ -195,11 +197,15 @@ void	DrawGhosts( void )
 
 static	void	DelOnePices( void )
 {
+	pices--;
+	if ( pices < 0 )
+		pices=0;
 	FBPaintPixel( STATUS_X+pices, STATUS_Y, 0 );
 	FBPaintPixel( STATUS_X+pices, STATUS_Y+1, 0 );
 	if ( !pices )
 	{
 		gametime=timeleft;
+		score+=gametime;
 	}
 }
 
@@ -248,133 +254,129 @@ static	int	cd = 40;
 		doexit=1;
 		return;
 	}
-	if (( pac_x_minor == 0 ) && ( pac_y_minor == 0 ))
+	if (( pac.x_minor == 0 ) && ( pac.y_minor == 0 ))
 	{
 		switch( actcode )
 		{
 		case RC_UP :
-			if ( maze[ (pac_y-1) * MAZEW + pac_x ] != '#' )
-				pac_look=2;
+			if ( maze[ (pac.y-1) * MAZEW + pac.x ] != '#' )
+				pac.look=2;
 			break;
 		case RC_DOWN :
-			if ( maze[ (pac_y+1) * MAZEW + pac_x ] != '#' )
-				pac_look=3;
+			if ( maze[ (pac.y+1) * MAZEW + pac.x ] != '#' )
+				pac.look=3;
 			break;
 		case RC_RIGHT :
-			if ( maze[ pac_y * MAZEW + pac_x + 1 ] != '#' )
-				pac_look=0;
+			if ( maze[ pac.y * MAZEW + pac.x + 1 ] != '#' )
+				pac.look=0;
 			break;
 		case RC_LEFT :
-			if ( maze[ pac_y * MAZEW + pac_x - 1 ] != '#' )
-				pac_look=1;
+			if ( maze[ pac.y * MAZEW + pac.x - 1 ] != '#' )
+				pac.look=1;
 			break;
 		}
 	}
-	switch( pac_look )
+	switch( pac.look )
 	{
 	case 0 :		/* right */
-		if ( pac_x_minor == 30 )
+		if ( pac.x_minor == 30 )
 		{
-			pac_x_minor = 0;
-			pac_x++;
+			pac.x_minor = 0;
+			pac.x++;
 		}
 		else
 		{
-			if ( pac_x_minor == 0 )		/* next field */
+			if ( pac.x_minor == 0 )		/* next field */
 			{
-				if ( maze[ pac_y * MAZEW + pac_x + 1 ] != '#' )
+				if ( maze[ pac.y * MAZEW + pac.x + 1 ] != '#' )
 				{
-					pac_x_minor+=2;
+					pac.x_minor+=2;
 				}
 			}
 			else
 			{
-				if ( pac_x_minor == 16 )
+				if ( pac.x_minor == 16 )
 				{
-					if ( maze[ pac_y * MAZEW + pac_x + 1 ] == '.' )
+					if ( maze[ pac.y * MAZEW + pac.x + 1 ] == '.' )
 					{
-						pices--;
 						DelOnePices();
 					}
-					maze[ pac_y * MAZEW + pac_x + 1 ] = ' ';
+					maze[ pac.y * MAZEW + pac.x + 1 ] = ' ';
 				}
-				pac_x_minor+=2;
+				pac.x_minor+=2;
 			}
 		}
 		break;
 	case 1 :		/* left */
-		if ( pac_x_minor > 0 )
+		if ( pac.x_minor > 0 )
 		{
-			pac_x_minor-=2;
-			if ( pac_x_minor == 16 )
+			pac.x_minor-=2;
+			if ( pac.x_minor == 16 )
 			{
-				if ( maze[ pac_y * MAZEW + pac_x ] == '.' )
+				if ( maze[ pac.y * MAZEW + pac.x ] == '.' )
 				{
-					pices--;
 					DelOnePices();
 				}
-				maze[ pac_y * MAZEW + pac_x ] = ' ';
+				maze[ pac.y * MAZEW + pac.x ] = ' ';
 			}
 		}
 		else
 		{
-			if ( maze[ pac_y * MAZEW + pac_x - 1 ] != '#' )
+			if ( maze[ pac.y * MAZEW + pac.x - 1 ] != '#' )
 			{
-				pac_x_minor=30;
-				pac_x--;
+				pac.x_minor=30;
+				pac.x--;
 			}
 		}
 		break;
 	case 2 :		/* up */
-		if ( pac_y_minor > 0 )
+		if ( pac.y_minor > 0 )
 		{
-			pac_y_minor-=2;
-			if ( pac_y_minor == 16 )
+			pac.y_minor-=2;
+			if ( pac.y_minor == 16 )
 			{
-				if ( maze[ pac_y * MAZEW + pac_x ] == '.' )
+				if ( maze[ pac.y * MAZEW + pac.x ] == '.' )
 				{
-					pices--;
 					DelOnePices();
 				}
-				maze[ pac_y * MAZEW + pac_x ] = ' ';
+				maze[ pac.y * MAZEW + pac.x ] = ' ';
 			}
 		}
 		else
 		{
-			if ( maze[ (pac_y-1) * MAZEW + pac_x ] != '#' )
+			if ( maze[ (pac.y-1) * MAZEW + pac.x ] != '#' )
 			{
-				pac_y_minor=30;
-				pac_y--;
+				pac.y_minor=30;
+				pac.y--;
 			}
 		}
 		break;
 	case 3 :		/* down */
-		if ( pac_y_minor == 30 )
+		if ( pac.y_minor == 30 )
 		{
-			pac_y_minor = 0;
-			pac_y++;
+			pac.y_minor = 0;
+			pac.y++;
 		}
 		else
 		{
-			if ( pac_y_minor == 0 )		/* next field */
+			if ( pac.y_minor == 0 )		/* next field */
 			{
-				if ( maze[ (pac_y+1) * MAZEW + pac_x ] != '#' )
+				if ( maze[ (pac.y+1) * MAZEW + pac.x ] != '#' )
 				{
-					pac_y_minor+=2;
+					pac.y_minor+=2;
 				}
 			}
 			else
 			{
-				if ( pac_y_minor == 16 )
+				if ( pac.y_minor == 16 )
 				{
-					if ( maze[ (pac_y+1) * MAZEW + pac_x ] == '.' )
+					if ( maze[ (pac.y+1) * MAZEW + pac.x ] == '.' )
 					{
-						pices--;
 						DelOnePices();
 					}
-					maze[ (pac_y+1) * MAZEW + pac_x ] = ' ';
+					maze[ (pac.y+1) * MAZEW + pac.x ] = ' ';
 				}
-				pac_y_minor+=2;
+				pac.y_minor+=2;
 			}
 		}
 		break;
@@ -419,7 +421,7 @@ static	void	RunGhostLikePac( int nr )
 {
 	if ( ghost[nr].x_minor || ghost[nr].y_minor )
 		return;
-	switch( pac_look )
+	switch( pac.look )
 	{
 	case 2 :
 		if ( maze[ (ghost[nr].y-1) * MAZEW + ghost[nr].x ] != '#' )
@@ -556,7 +558,7 @@ void	MoveGhosts( void )
 
 void	CheckGhosts( void )
 {
-	if ( collghost( pac_x, pac_y, pac_x_minor, pac_y_minor ) )
+	if ( collghost( pac.x, pac.y, pac.x_minor, pac.y_minor ) )
 		doexit=1;
 }
 
@@ -568,7 +570,7 @@ void	DrawFill( void )
 
 void	DrawGameOver( void )
 {
-	FBCopyImage( 250, 290, GO_WIDTH, 64, data_gameover );
+	FBCopyImage( 250, 200, GO_WIDTH, 64, data_gameover );
 }
 
 void	DrawScore( void )
@@ -581,19 +583,32 @@ void	DrawScore( void )
 						data_no4, data_no5, data_no6, data_no7,
 						data_no8, data_no9 };
 
-	char	score[ 64 ];
-	char	*p=score;
+	char	cscore[ 64 ];
+	char	*p=cscore;
 	int		x = 250 + SC_WIDTH + 18;
 	int		h;
 
-	sprintf(score,"%d",gametime*100);
-	FBFillRect( 250,250, SC_WIDTH + 19, 64, BLACK );
-	FBCopyImage( 250, 250, SC_WIDTH, 64, data_score );
+	sprintf(cscore,"%d",score*100);
+	FBFillRect( 250,264, SC_WIDTH + 19, 64, BLACK );
+	FBCopyImage( 250, 264, SC_WIDTH, 64, data_score );
 
 	for( ; *p; p++ )
 	{
 		h = (*p - 48);
-		FBCopyImage( x, 250, ww[h], 64, nn[h] );
+		FBCopyImage( x, 264, ww[h], 64, nn[h] );
 		x += ww[h];
 	}
+}
+
+void	InitLevel( void )
+{
+	level=0;
+	score=0;
+}
+
+void	NextLevel( void )
+{
+	level++;
+	if ( level > 3 )
+		level=0;
 }

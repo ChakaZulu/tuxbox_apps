@@ -19,6 +19,7 @@ extern	int	doexit;
 extern	int	debug;
 extern	int	gametime;
 extern	int	pices;
+extern	int	score;
 extern	unsigned short	actcode;
 
 static	void	setup_colors( void )
@@ -47,6 +48,8 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd )
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
+	InitLevel();
+
 	while( doexit != 3 )
 	{
 		MazeInitialize();
@@ -73,9 +76,9 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd )
 		if ( doexit != 3 )
 		{
 			actcode=0xee;
-			if ( gametime )
+			if ( score )
 				DrawScore();
-			else
+			if ( !gametime )
 				DrawGameOver();
 			doexit=0;
 			while(( actcode != RC_OK ) && !doexit )
@@ -85,6 +88,10 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd )
 				x = select( 0, 0, 0, 0, &tv );		/* 100ms pause */
 				RcGetActCode( );
 			}
+			if ( gametime )
+				NextLevel();
+			else
+				InitLevel();
 		}
 	}
 
