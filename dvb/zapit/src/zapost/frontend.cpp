@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.31 2002/11/02 21:46:06 obi Exp $
+ * $Id: frontend.cpp,v 1.32 2002/11/02 22:24:37 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -299,7 +299,6 @@ struct dvb_frontend_event CFrontend::getEvent ()
 	}
 
 	if (!tuned) {
-		std::cout << "hoooo?" << std::endl;
 		currentFrequency = 0;
 		currentTsidOnid = 0;
 	}
