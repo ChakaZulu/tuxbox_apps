@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.40 2003/09/16 10:16:40 thegoodguy Exp $
+	$Id: request.cpp,v 1.41 2003/11/06 22:32:05 thegoodguy Exp $
 
 	License: GPL
 
@@ -143,13 +143,14 @@ void CWebserverRequest::SplitParameter(char *param_copy)
         }
 
 	*p = '\0';
-
-	if (ParameterList[param_copy].length() == 0)
+	if (ParameterList[param_copy].empty())
 		ParameterList[param_copy] = p + 1;
 
-	else {
+	else
+	{
+		std::string key = param_copy;
 		*p  = ',';
-		ParameterList[param_copy] += p;
+		ParameterList[key] += p;
 	}
 }
 
