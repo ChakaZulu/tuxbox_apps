@@ -100,10 +100,10 @@ int fh_bmp_load(const char *name, unsigned char *buffer, int x, int y)
 				int bytes = x / 8;
 				if (x % 8 > 0)
 					bytes++;
-				unsigned char * tbuffer = (unsigned char *) malloc(bytes);
+				unsigned char * tbuffer = new unsigned char[bytes];
 				if (tbuffer == NULL)
 				{
-					printf("Error: malloc\n");
+					eDebug("Error: malloc");
 					return (FH_ERROR_MALLOC);
 				}
 				for (i = 0; i < y; i++) 
@@ -155,7 +155,7 @@ int fh_bmp_load(const char *name, unsigned char *buffer, int x, int y)
 					}
 					wr_buffer -= x * 6; /* backoff 2 lines - x*2 *3 */
 				}
-				free(tbuffer);
+				delete [] tbuffer;
 			}
 			break;
 		case 4: /* 4bit palletized */
@@ -163,10 +163,10 @@ int fh_bmp_load(const char *name, unsigned char *buffer, int x, int y)
 			skip = fill4B(x / 2 + x % 2);
 			fetch_pallete(fd, pallete, 16);
 			lseek(fd, raster, SEEK_SET);
-			unsigned char * tbuffer = (unsigned char *) malloc(x / 2 + 1);
+			unsigned char * tbuffer = new unsigned char[x / 2 + 1];
 			if (tbuffer == NULL)
 			{
-				printf("Error: malloc\n");
+				eDebug("Error: malloc");
 				return (FH_ERROR_MALLOC);
 			}
 			unsigned char c1,c2;
@@ -197,7 +197,7 @@ int fh_bmp_load(const char *name, unsigned char *buffer, int x, int y)
 				}
 				wr_buffer -= x * 6; /* backoff 2 lines - x*2 *3 */
 			}
-			free(tbuffer);
+			delete [] tbuffer;
 		}
 		break;
 		case 8: /* 8bit palletized */
@@ -205,10 +205,10 @@ int fh_bmp_load(const char *name, unsigned char *buffer, int x, int y)
 			skip = fill4B(x);
 			fetch_pallete(fd, pallete, 256);
 			lseek(fd, raster, SEEK_SET);
-			unsigned char * tbuffer = (unsigned char *) malloc(x);
+			unsigned char * tbuffer = new unsigned char[x];
 			if (tbuffer == NULL)
 			{
-				printf("Error: malloc\n");
+				eDebug("Error: malloc");
 				return (FH_ERROR_MALLOC);
 			}
 			for (i = 0; i < y; i++) 
@@ -225,7 +225,7 @@ int fh_bmp_load(const char *name, unsigned char *buffer, int x, int y)
 				}
 				wr_buffer -= x * 3; /* backoff 2 lines - x*2 *3 */
 			}
-			free(tbuffer);
+			delete [] tbuffer;
 		}
 		break;
 		case 16: /* 16bit RGB */

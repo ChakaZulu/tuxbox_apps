@@ -84,7 +84,7 @@ void ePictureViewer::showNameOnLCD(const eString& filename)
 ePictureViewer::ePictureViewer(const eString &filename)
 	:eWidget(0, 1), slideshowTimer(eApp), filename(filename)
 {
-	eDebug("[PICTUREVIEWER] Constructor...");
+//	eDebug("[PICTUREVIEWER] Constructor...");
 
 	addActionMap(&i_cursorActions->map);
 	addActionMap(&i_shortcutActions->map);
@@ -145,19 +145,19 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	init_handlers();
 
 	CONNECT(slideshowTimer.timeout, ePictureViewer::slideshowTimeout);
-	eDebug("[PICTUREVIEWER] Constructor done.");
+//	eDebug("[PICTUREVIEWER] Constructor done.");
 }
 
 ePictureViewer::~ePictureViewer()
 {
 	if (m_busy_buffer != NULL)
 	{
-		free(m_busy_buffer);
+		delete [] m_busy_buffer;
 		m_busy_buffer = NULL;
 	}
 	if (m_NextPic_Buffer != NULL)
 	{
-		free(m_NextPic_Buffer);
+		delete [] m_NextPic_Buffer;
 		m_NextPic_Buffer = NULL;
 	}
 
@@ -166,14 +166,14 @@ ePictureViewer::~ePictureViewer()
 	{
 		tmp = fh_root;
 		fh_root = fh_root->next;
-		free(tmp);
+		delete tmp;
 	}
 }
 
 void ePictureViewer::add_format(int (*picsize)(const char *, int *, int *, int, int ), int (*picread)(const char *, unsigned char *, int, int), int (*id)(const char*))
 {
 	CFormathandler *fhn;
-	fhn = (CFormathandler *) malloc(sizeof(CFormathandler));
+	fhn = new CFormathandler;
 	fhn->get_size = picsize;
 	fhn->get_pic = picread;
 	fhn->id_pic = id;
@@ -214,7 +214,7 @@ ePictureViewer::CFormathandler *ePictureViewer::fh_getsize(const char *name, int
 
 bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 {
-	eDebug("DecodeImage {");
+//	eDebug("DecodeImage {");
 
 	int x, y, xs, ys, imx, imy;
 	getCurrentRes(&xs, &ys);
@@ -232,19 +232,19 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 	{
 		if (m_NextPic_Buffer != NULL)
 		{
-			free(m_NextPic_Buffer);
+			delete [] m_NextPic_Buffer;
 		}
-		m_NextPic_Buffer = (unsigned char *) malloc(x * y * 3);
+		m_NextPic_Buffer = new unsigned char[x * y * 3];
 		if (m_NextPic_Buffer == NULL)
 		{
 			eDebug("Error: malloc");
 			return false;
 		}
 
-		eDebug("---Decoding start(%d/%d)", x, y);
+//		eDebug("---Decoding start(%d/%d)", x, y);
 		if (fh->get_pic(name.c_str(), m_NextPic_Buffer, x, y) == FH_ERROR_OK)
 		{
-			eDebug("---Decoding done");
+//			eDebug("---Decoding done");
 			if ((x > (m_endx - m_startx) || y > (m_endy - m_starty)) && m_scaling != NONE && !unscaled)
 			{
 				double aspect_ratio_correction = m_aspect / ((double)xs / ys);
@@ -285,9 +285,9 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 		}
 		else
 		{
-			eDebug("Unable to read file !");
-			free(m_NextPic_Buffer);
-			m_NextPic_Buffer = (unsigned char *) malloc(3);
+//			eDebug("Unable to read file !");
+			delete [] m_NextPic_Buffer;
+			m_NextPic_Buffer = new unsigned char[3];
 			if (m_NextPic_Buffer == NULL)
 			{
 				eDebug("Error: malloc");
@@ -304,12 +304,12 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 	}
 	else
 	{
-		eDebug("Unable to read file or format not recognized!");
+//		eDebug("Unable to read file or format not recognized!");
 		if (m_NextPic_Buffer != NULL)
 		{
-			free(m_NextPic_Buffer);
+			delete [] m_NextPic_Buffer;
 		}
-		m_NextPic_Buffer = (unsigned char *) malloc(3);
+		m_NextPic_Buffer = new unsigned char[3];
 		if (m_NextPic_Buffer == NULL)
 		{
 			eDebug("Error: malloc");
@@ -325,18 +325,18 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 	}
 	m_NextPic_Name = name;
 	hideBusy();
-	eDebug("DecodeImage }");
+//	eDebug("DecodeImage }");
 	return(m_NextPic_Buffer != NULL);
 }
 
 bool ePictureViewer::ShowImage(const std::string& filename, bool unscaled)
 {
-	eDebug("Show Image {");
+//	eDebug("Show Image {");
 	unsigned int pos = filename.find_last_of("/");
 	if (pos == eString::npos)
 		pos = filename.length() - 1;
 	eString directory = pos ? filename.substr(0, pos) : "";
-	eDebug("---directory: %s", directory.c_str());
+//	eDebug("---directory: %s", directory.c_str());
 	slideshowList.clear();
 	int includesubdirs = 0;
 	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
@@ -344,7 +344,7 @@ bool ePictureViewer::ShowImage(const std::string& filename, bool unscaled)
 	for (myIt = slideshowList.begin(); myIt != slideshowList.end(); myIt++)
 	{
 		eString tmp = *myIt;
-		eDebug("[PICTUREVIEWER] comparing: %s:%s", tmp.c_str(), filename.c_str());
+//		eDebug("[PICTUREVIEWER] comparing: %s:%s", tmp.c_str(), filename.c_str());
 		if (tmp == filename)
 			break;
 	}
@@ -363,14 +363,14 @@ bool ePictureViewer::ShowImage(const std::string& filename, bool unscaled)
 #endif
 	showNameOnLCD(filename);
 	DisplayNextImage();
-	eDebug("Show Image }");
+//	eDebug("Show Image }");
 	return true;
 }
 
 void ePictureViewer::slideshowTimeout()
 {
 	eString tmp = *myIt;
-	eDebug("[PICTUREVIEWER] slideshowTimeout: show %s", tmp.c_str());
+//	eDebug("[PICTUREVIEWER] slideshowTimeout: show %s", tmp.c_str());
 	DecodeImage(*myIt, false);
 	showNameOnLCD(tmp);
 	DisplayNextImage();
@@ -453,7 +453,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 
 void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 {
-	eDebug("[PICTUREVIEWER] listDirectory: dir %s", directory.c_str());
+//	eDebug("[PICTUREVIEWER] listDirectory: dir %s", directory.c_str());
 	std::list<eString> piclist;
 	std::list<eString>::iterator picIt;
 	std::list<eString> dirlist;
@@ -466,14 +466,14 @@ void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 		while (struct dirent *e = readdir(d))
 		{
 			eString filename = eString(e->d_name);
-			eDebug("[PICTUREVIEWER] listDirectory: processing %s", filename.c_str());
+//			eDebug("[PICTUREVIEWER] listDirectory: processing %s", filename.c_str());
 			if ((filename != ".") && (filename != ".."))
 			{
 				struct stat s;
 				eString fullFilename = directory + "/" + filename;
 				if (lstat(fullFilename.c_str(), &s) < 0)
 				{
-					eDebug("--- file no good :(");
+//					eDebug("--- file no good :(");
 					continue;
 				}
 
@@ -522,17 +522,17 @@ void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 
 bool ePictureViewer::DisplayNextImage()
 {
-	eDebug("DisplayNextImage {");
+//	eDebug("DisplayNextImage {");
 	if (m_NextPic_Buffer != NULL)
 		fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
-	eDebug("DisplayNextImage }");
+//	eDebug("DisplayNextImage }");
 	return true;
 }
 
 #if 0
 void ePictureViewer::Zoom(float factor)
 {
-	eDebug("Zoom %f {",factor);
+//	eDebug("Zoom %f {",factor);
 	showBusy(m_startx + 3, m_starty + 3, 10, 0xff, 0xff, 0);
 
 	int oldx = m_NextPic_X;
@@ -570,12 +570,12 @@ void ePictureViewer::Zoom(float factor)
 	else
 		m_NextPic_YPan = 0;
 	fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
-	eDebug("Zoom }");
+//	eDebug("Zoom }");
 }
 
 void ePictureViewer::Move(int dx, int dy)
 {
-	eDebug("Move %d %d {", dx, dy);
+//	eDebug("Move %d %d {", dx, dy);
 	showBusy(m_startx + 3, m_starty + 3, 10, 0, 0xff, 0);
 
 	int xs, ys;
@@ -604,13 +604,13 @@ void ePictureViewer::Move(int dx, int dy)
 //	m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
 
 	fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
-	eDebug("Move }");
+//	eDebug("Move }");
 }
 #endif
 
 void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 {
-	eDebug("Show Busy{");
+//	eDebug("Show Busy{");
 
 	unsigned char rgb_buffer[3];
 	unsigned char *fb_buffer;
@@ -631,10 +631,10 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 	}
 	if (m_busy_buffer != NULL)
 	{
-		free(m_busy_buffer);
+		delete [] m_busy_buffer;
 		m_busy_buffer = NULL;
 	}
-	m_busy_buffer = (unsigned char *) malloc(width * width * cpp);
+	m_busy_buffer = new unsigned char[width * width * cpp];
 	if (m_busy_buffer == NULL)
 	{
 		eDebug("Error: malloc");
@@ -657,13 +657,13 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 	m_busy_y = sy;
 	m_busy_width = width;
 	m_busy_cpp = cpp;
-	free(fb_buffer);
-	eDebug("Show Busy}");
+	delete [] fb_buffer;
+//	eDebug("Show Busy}");
 }
 
 void ePictureViewer::hideBusy()
 {
-	eDebug("Hide Busy {");
+//	eDebug("Hide Busy {");
 	if (m_busy_buffer != NULL)
 	{
 		unsigned char *fb = fbClass::getInstance()->lfb;
@@ -678,8 +678,8 @@ void ePictureViewer::hideBusy()
 				busy_buffer_wrk += m_busy_cpp;
 			}
 		}
-		free(m_busy_buffer);
+		delete [] m_busy_buffer;
 		m_busy_buffer = NULL;
 	}
-	eDebug("Hide Busy}");
+//	eDebug("Hide Busy}");
 }
