@@ -469,8 +469,8 @@ bool eDVBScanController::addTransponder(const eTransponder &transponder)
 		transponder.transport_stream_id.get() );
 #endif
 	if ( transponder.satellite.valid &&
-			 transponder.satellite.orbital_position != knownTransponder.front().satellite.orbital_position &&
-			 flags & flagSkipOtherOrbitalPositions )
+			 abs(transponder.satellite.orbital_position-knownTransponder.front().satellite.orbital_position) > 4
+			 && flags & flagSkipOtherOrbitalPositions )
 	{
 #if DEBUG_TO_FILE
 		fprintf(out,"Skip Transponder from other orbital position ( transponder.satellite.orbital_position = %i, knownTransponder.front().satellite.orbital_position = %i)\n", transponder.satellite.orbital_position, knownTransponder.front().satellite.orbital_position );

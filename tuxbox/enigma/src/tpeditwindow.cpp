@@ -418,10 +418,10 @@ void eTransponderEditWindow::removePressed()
 	if ( !packet )
 		return;
 	std::list<eTransponder>::iterator it =
-		std::find(
-			packet->possibleTransponders.begin(),
-			packet->possibleTransponders.end(),
-			*tp);
+		packet->possibleTransponders.begin();
+	for ( ; it != packet->possibleTransponders.end(); ++it )
+		if ( &(*it) == tp )
+			break;
 	if ( it == packet->possibleTransponders.end() )
 		return;
 	packet->possibleTransponders.erase(it);
