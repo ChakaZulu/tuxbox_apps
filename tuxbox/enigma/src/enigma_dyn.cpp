@@ -873,7 +873,7 @@ static eString getVideoBar()
 	return result.str();
 }
 
-static eString deleteFile(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt = getRequestOptions(opts);
 	eString sref;
@@ -881,13 +881,11 @@ static eString deleteFile(eString request, eString dirpath, eString opts, eHTTPC
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	sref = opt["ref"];
-
 	eServiceReference ref = string2ref(sref);
 	ePlaylist *recordings = eZapMain::getInstance()->recordings;
 	if ( ::unlink(ref.path.c_str() ) < 0 )
 	{
 		eDebug("remove File %s failed (%m)", ref.path.c_str() );
-		return "-not ok";
 	}
 	else
 	{
@@ -918,7 +916,7 @@ static eString deleteFile(eString request, eString dirpath, eString opts, eHTTPC
 			::unlink(fname.c_str());
 		}
 	}
-	return "+ok";
+	return "<script language=\"javascript\">window.close();</script>";
 }
 
 
@@ -1073,6 +1071,7 @@ static eString aboutDreambox(void)
 			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STBx25xx, 252MHz</td></tr>";
 			break;
 		case eSystemInfo::DM7000:
+			result += "<img src=\"dm7000.jpg\" width=\"640\" border=\"0\"><br>";
 			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM7000</td></tr>";
 			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
 			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STB04500, 252MHz</td></tr>";
@@ -2835,7 +2834,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadRecordings", load_recordings);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveRecordings", save_recordings);
-	dyn_resolver->addDyn("GET", "/cgi-bin/deleteFile", deleteFile);
+	dyn_resolver->addDyn("GET", "/cgi-bin/deleteMovie", deleteMovie);
 #endif
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadPlaylist", load_playlist);
 	dyn_resolver->addDyn("GET", "/cgi-bin/savePlaylist", save_playlist);

@@ -27,9 +27,9 @@ function setVid(xy)
 	parent.setTimeout("reload()", 100);
 }	
 
-function Mute(xy)
+function Mute()
 {
-	win=window.open("/setVolume?mute="+xy, "switchStatus","width=1,height=1,left=0,top=0");
+	win=window.open("/setVolume?mute=1", "switchStatus","width=1,height=1,left=0,top=0");
 	win.focus();
 	parent.setTimeout("reload()", 100);
 }
@@ -38,6 +38,12 @@ function switchChannel(xy)
 {
 	win=window.open("?path="+xy, "switchStatus","width=1,height=1,left=0,top=0");
 	win.focus();
+	parent.setTimeout("reload()", 3000);
+}
+
+function deleteMovie(xy)
+{
+	win=window.open("/cgi-bin/deleteMovie?ref="+xy, "switchStatus","width=1,height=1,left=0,top=0");
 	parent.setTimeout("reload()", 3000);
 }
 
@@ -58,7 +64,7 @@ function admin(xy)
 
 function vcontrol(xy)
 {
-	win=window.open("/cgi-bin/videocontrol?command="+xy, "vcontrol", "width=200, height=100, left=0, top=0");
+	win=window.open("/cgi-bin/videocontrol?command="+xy, "vcontrol", "width=50, height=20, left=0, top=0");
 	win.focus();
 }
 
