@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.10 2001/06/11 01:19:58 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.11 2001/06/11 01:53:54 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.11  2001/06/11 01:53:54  fnbrd
+// Kleiner Fehler behoben.
+//
 // Revision 1.10  2001/06/11 01:19:58  fnbrd
 // Debugausgabe raus.
 //
@@ -358,8 +361,10 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
       firstKey=SIsection::key(&header);
       // Sonderfall: Nur eine Section
       // d.h. wir sind fertig
-      if(!header.section_number && !header.last_section_number)
+      if(!header.section_number && !header.last_section_number) {
+        close(fd);
         return 0;
+      }
     }
     else
       delete[] buf;
