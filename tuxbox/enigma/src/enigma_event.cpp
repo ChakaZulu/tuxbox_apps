@@ -97,7 +97,6 @@ void eEventDisplay::setEvent(EITEvent *event)
 		tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
 		if (begin)
 		{
-			qDebug("Starttime:%02d:%02d", begin->tm_hour, begin->tm_min);
 			_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
 			_eventDate=QString().sprintf("%d.%d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
 		}
@@ -105,7 +104,6 @@ void eEventDisplay::setEvent(EITEvent *event)
 		tm *end=event->start_time!=-1?localtime(&endtime):0;
 		if (end)
 		{
-			qDebug("EndTime:%02d:%02d", end->tm_hour, end->tm_min);
 			_eventTime+=QString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
 		}
 

@@ -21,7 +21,6 @@ eRCDevice::~eRCDevice()
 
 eRCDriver::eRCDriver(eRCInput *input): input(input)
 {
-	qDebug("creating eRCDriver");
 }
 
 eRCDriver::~eRCDriver()
@@ -48,12 +47,6 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 	sn=new QSocketNotifier(rc.handle(), QSocketNotifier::Read, this);
 	connect(sn, SIGNAL(activated(int)), SLOT(keyPressed(int)));
 }
-
-#if 0
-eRCDreamboxDriver::eRCDreamboxDriver(): eRCShortDriver("/dev/rawir")
-{
-}
-#endif
 
 eRCInput *eRCInput::instance;
 

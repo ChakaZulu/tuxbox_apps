@@ -76,11 +76,9 @@ static eAction up(map, "hoch", "selection_up");
 
 void eZap::keyEvent(const eRCKey &key)
 {
-	qDebug("key event");
 	int c=key.getCompatibleCode();
 	if (c!=-1)
 	{
-		qDebug("have compat code");
 		if (key.getFlags()&eRCKey::flagBreak)
 			keyUp(c);
 		else

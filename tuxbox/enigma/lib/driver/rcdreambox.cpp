@@ -159,7 +159,6 @@ class eDreamboxRCHardware
 public:
 	eDreamboxRCHardware(): device(&driver)
 	{
-		printf("dreambox hw init\n");
 	}
 };
 

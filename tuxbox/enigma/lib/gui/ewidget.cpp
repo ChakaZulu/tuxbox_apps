@@ -210,7 +210,6 @@ void eWidget::clear()
 	if (parent)
 	{
 		QRect me(getTLWPosition(), size);
-		qDebug("CLEAR %d %d %d %d", me.x(), me.y(), me.width(), me.height());
 		getTLW()->redraw(me);
 	} else
 	{
