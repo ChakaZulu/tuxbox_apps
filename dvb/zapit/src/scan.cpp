@@ -449,6 +449,8 @@ void *start_scanthread(void *param)
       get_nits(12111,27500,1,3,1, logfd);
       fprintf(logfd,	"get_nits(12168,27500,0,3,1, logfd);\n");
       get_nits(12168,27500,0,3,1, logfd);
+      fprintf(logfd,	"get_nits(12283,27500,1,3,1, logfd);\n");
+      get_nits(12283,27500,1,3,1, logfd);
 
       fprintf(logfd, "Got alle Nits\n");
       get_sdts(logfd);
@@ -527,6 +529,120 @@ void *start_scanthread(void *param)
        fprintf(logfd,"Scanning Kopernikus ready\n");
        }
 
+      if (do_diseqc & 9)
+      {
+      	curr_sat = 9;
+      printf("---------------------------\nSCANNING SIRIUS5\n---------------------------\n");
+      fprintf(logfd,"---------------------------\nSCANNING SIRIUS5\n---------------------------\n");
+
+      fprintf(logfd,"get_nits(12047,27500,1,3,2, logfd);\n");
+      get_nits(12050,27500,1,3,2, logfd);
+      fprintf(logfd,"get_nits(11971,27500,1,3,2, logfd);\n");
+      get_nits(11975,27500,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12028,27500,0,3,2, logfd);\n");
+      get_nits(12028,27500,0,3,2, logfd);
+      fprintf(logfd,"get_nits(11990,27500,0,3,2, logfd);\n");
+      get_nits(11994,27500,0,3,2, logfd);
+      fprintf(logfd,"get_nits(11875,27500,0,3,2, logfd);\n");
+      get_nits(11880,27500,0,3,2, logfd);
+      fprintf(logfd,"get_nits(11798,27500,0,3,2, logfd);\n");
+      get_nits(11804,27500,0,3,2, logfd);
+      fprintf(logfd,"get_nits(11817,27500,1,3,2, logfd);\n");
+      get_nits(11823,27500,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12380,27500,0,3,2, logfd);\n");
+      get_nits(12380,27500,0,3,2, logfd);
+      fprintf(logfd,"get_nits(11547,27500,0,3,2, logfd);\n");
+      get_nits(11547,27500,0,3,2, logfd);
+      fprintf(logfd,"get_nits(11727,27500,0,3,2, logfd);\n");
+      get_nits(11727,27500,0,3,2, logfd);
+      fprintf(logfd,"get_nits(11766,27500,0,3,2, logfd);\n");
+      get_nits(11766,27500,0,3,2, logfd);
+      fprintf(logfd,"get_nits(12073,25376,0,7,2, logfd);\n");
+      get_nits(12073,2537600,0,3,2, logfd);
+      fprintf(logfd,"get_nits(12153,7028,0,3,2, logfd);\n");
+      get_nits(12153,7028,0,3,2, logfd);
+      fprintf(logfd,"get_nits(12188,24500,0,7,2, logfd);\n");
+      get_nits(12188,24500,0,7,2, logfd);
+      fprintf(logfd,"get_nits(12226,25540,0,7,2, logfd);\n");
+      get_nits(12226,25540,0,7,2, logfd);
+      fprintf(logfd,"get_nits(12245,27500,1,7,2, logfd);\n");
+      get_nits(12245,27500,1,7,2, logfd);
+      fprintf(logfd,"get_nits(12280,27500,1,3,2, logfd);\n");
+      get_nits(12280,27500,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12303,25548,0,7,2, logfd);\n");
+      get_nits(12303,25548,0,7,2, logfd);
+      fprintf(logfd,"get_nits(12340,20000,0,3,2, logfd);\n");
+      get_nits(12340,20000,0,3,2, logfd);
+      fprintf(logfd,"get_nits(12415,25540,0,7,2, logfd);\n");
+      get_nits(12415,25540,0,7,2, logfd);
+      fprintf(logfd,"get_nits(12450,18056,0,3,2, logfd);\n");
+      get_nits(12450,18056,0,3,2, logfd);
+      fprintf(logfd,"get_nits(12469,5185,0,3,2, logfd);\n");
+      get_nits(12469,5185,0,3,2, logfd);
+      fprintf(logfd,"get_nits(12590,6111,1,3,2, logfd);\n");
+      get_nits(12590,6111,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12600,6111,1,3,2, logfd);\n");
+      get_nits(12600,6111,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12608,6111,1,3,2, logfd);\n");
+      get_nits(12608,6111,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12616,6111,1,3,2, logfd);\n");
+      get_nits(12616,6111,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12629,3222,1,7,2, logfd);\n");
+      get_nits(12629,3222,1,7,2, logfd);
+      fprintf(logfd,"get_nits(12633,3643,1,7,2, logfd);\n");
+      get_nits(12633,3643,1,7,2, logfd);
+      fprintf(logfd,"get_nits(12640,4000,1,3,2, logfd);\n");
+      get_nits(12640,4000,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12644,3200,1,3,2, logfd);\n");
+      get_nits(12644,3200,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12649,3977,1,3,2, logfd);\n");
+      get_nits(12649,3977,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12661,6110,0,3,2, logfd);\n");
+      get_nits(12661,6110,0,3,2, logfd);
+      fprintf(logfd,"get_nits(12674,6666,1,1,2, logfd);\n");
+      get_nits(12674,6666,1,1,2, logfd);
+      fprintf(logfd,"get_nits(12674,6110,0,3,2, logfd);\n");
+      get_nits(12674,6110,0,3,2, logfd);
+      fprintf(logfd,"get_nits(12683,6666,1,1,2, logfd);\n");
+      get_nits(12683,6666,1,1,2, logfd);
+      fprintf(logfd,"get_nits(12686,3400,0,3,2, logfd);\n");
+      get_nits(12686,3400,0,3,2, logfd);
+      fprintf(logfd,"get_nits(12690,3980,1,3,2, logfd);\n");
+      get_nits(12690,3980,1,3,2, logfd);
+      fprintf(logfd,"get_nits(12718,4000,0,7,2, logfd);\n");
+      get_nits(12718,4000,0,7,2, logfd);
+
+      fprintf(logfd, "Got alle Nits\n");
+      get_sdts(logfd);
+
+       if (!scantransponders.empty())
+	{
+		if (fd == NULL)
+	  {
+	  	fd = fopen(services_xml.c_str(), "w" );
+	  	if (fd == NULL)
+      		{
+      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
+      			fclose(logfd);
+      			scan_runs = 0;
+  			pthread_exit(0);
+  		}
+	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+      	  	fprintf(fd,"<ZAPIT>\n");
+      	}
+	fprintf(fd, "<satellite name=\"Sirius5\" diseqc=\"2\">\n");
+	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+	    {
+	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
+	      write_transponder(tI->second.tsid,fd);
+	      fprintf(fd,"</transponder>\n");
+	    }
+	  fprintf(fd, "</satellite>\n");
+	}
+       scanchannels.clear();
+       scantransponders.clear();
+       fprintf(logfd,"Scanning Sirius5 ready\n");
+       }
 
       if (do_diseqc & 8)
       {
@@ -610,6 +726,8 @@ void *start_scanthread(void *param)
        scantransponders.clear();
        fprintf(logfd,"Scanning Türksat ready\n");
        }
+
+
 
       }
       write_fake_bouquets(fd);
