@@ -333,7 +333,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	int y=numsys*fs+fs*2+20;
 
 	usedca[0]=new eLabel(this);
-	usedca[0]->setText(_("by it uses:"));
+	usedca[0]->setText(_("in use:"));
 	usedca[0]->move(ePoint(10, y));
 	usedca[0]->resize(eSize(420, fs));
 

@@ -158,10 +158,12 @@ eZap::eZap(int argc, char **argv)
 
 	eDebug("[ENIGMA] starting httpd");
 	httpd = new eHTTPD(80);
-	eDebug("[ENIGMA] starting httpd on serial port...");
+
+	serialhttpd=0;
+  if ( atoi(eDVB::getInstance()->getInfo("mID").c_str()) > 4 )
   {
-		int fd=::open("/dev/tts/0", O_RDWR);
-		serialhttpd=0;
+  	eDebug("[ENIGMA] starting httpd on serial port...");
+    int fd=::open("/dev/tts/0", O_RDWR);
 		if (fd < 0)
 			eDebug("[ENIGMA] serial port error (%m)");
 		else
@@ -216,7 +218,10 @@ eZap::~eZap()
 	delete serviceSelector;
 	eDebug("[ENIGMA] fertig");
 	init->setRunlevel(-1);
-	delete serialhttpd;
+
+  if (serialhttpd)
+    delete serialhttpd;
+    
 	delete httpd;
 	delete init;
 	instance = 0;

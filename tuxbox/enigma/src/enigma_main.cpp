@@ -2369,7 +2369,6 @@ void eZapMain::leaveService()
 	EINextDuration->setText("");
 	EINextTime->setText("");
 
-  eDebug("PROGRESS HIDE - updateProgress");
 	Progress->hide();
 }
 

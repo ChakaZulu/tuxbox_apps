@@ -298,9 +298,7 @@ int eFrontend::tune(eTransponder *trans,
   Decoder::Flush();
 	eSection::abortAll();
 	timer->stop();
-  eLNB *lnb = sat->getLNB();
-  eSwitchParameter &swParams = sat->getSwitchParams();
-  
+
   if (state==stateTuning)
 	{
 		state=stateIdle;
@@ -313,8 +311,10 @@ int eFrontend::tune(eTransponder *trans,
 
   transponder=trans;
 
-	if (lnb)   // then we must do Satellite Stuff
+	if (sat)   // then we must do Satellite Stuff
 	{
+    eSwitchParameter &swParams = sat->getSwitchParams();
+    eLNB *lnb = sat->getLNB();
     // Variables to detect if DiSEqC must sent .. or not
     int csw = lnb->getDiSEqC().DiSEqCParam,
         RotorCmd=-1;
