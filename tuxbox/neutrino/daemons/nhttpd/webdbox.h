@@ -246,49 +246,171 @@ public:
 class TWebDbox
 {
 	TWebserver * Parent;
-	TChannelList *ChannelList;
+	TChannelList *old_ChannelList;
 	CControldClient controld;
 	CSectionsdClient sectionsd;
 	CZapitClient zapit;
-	map<unsigned, char*> ChannelListEvents;
+//	map<unsigned, char*> ChannelListEvents;
 
-	time_t EPGDate;
+//	time_t EPGDate;
+//	CChannelEventList EventList;
 
 public:
 	TWebDbox(TWebserver * server);
 	~TWebDbox();
 
-	bool GetChannelList();
-	bool PublishChannelList(TWebserverRequest* request);
+	CZapitClient::BouquetList BouquetList;
+	CZapitClient::BouquetChannelList BouquetsList[10];
+	CZapitClient::BouquetChannelList ChannelList;
+	CChannelEventList eList;
 
-	void ShowSettings(TWebserverRequest* request);
-	void ShowChannelList(TWebserverRequest* request);
-	bool GetBouquetList();
-
-	void ShowTimerList(TWebserverRequest *request);
-	char *GetServiceName(int onidsid);
-	void GetCurrentEPG(TWebserverRequest *request,unsigned onidSid);
-	unsigned GetcurrentONIDSID();
-	void SetZapitMode(int mode);
-	bool Execute(TWebserverRequest* request);
 	bool ExecuteCGI(TWebserverRequest* request);
+// get functions to collect data
+	bool GetBouquets(void)
+	{
+		BouquetList.clear();
+		zapit.getBouquets(BouquetList); 
+		return true;
+	};
 
-	void Streaminfo(TWebserverRequest* request);
+	bool GetBouquet(unsigned int BouquetNr)
+	{
+		BouquetsList[BouquetNr].clear();
+		zapit.getBouquetChannels(BouquetNr,BouquetsList[BouquetNr]);
+		return true;
+	};
+
+	bool GetChannelList(void)
+	{
+		ChannelList.clear();
+		zapit.getChannels(ChannelList);
+		return true;
+	};
+
+	void GetChannelEvents()
+	{
+	char rip[]="127.0.0.1";
+
+		int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		SAI servaddr;
+		memset(&servaddr,0,sizeof(servaddr));
+		servaddr.sin_family=AF_INET;
+		servaddr.sin_port=htons(sectionsd::portNumber);
+		inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+		{
+			perror("Couldn't connect to sectionsd!");
+			return;
+		}
+
+		sectionsd::msgRequestHeader req;
+		req.version = 2;
+
+		req.command = sectionsd::actualEventListTVshortIDs;
+		req.dataLength = 0;
+		write(sock_fd,&req,sizeof(req));
+
+		sectionsd::msgResponseHeader resp;
+		memset(&resp, 0, sizeof(resp));
+
+		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+		{
+			close(sock_fd);
+			return ;
+		}
+		if(resp.dataLength<=0)
+		{
+			close(sock_fd);
+			return;
+		}
+
+		char* pData = new char[resp.dataLength] ;
+		if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
+		{
+			delete[] pData;
+			close(sock_fd);
+			return;
+		}
+		close(sock_fd);
 
 
+		char *actPos = pData;
+		while(actPos<pData+resp.dataLength)
+		{
+			CChannelEvent aEvent;
 
+			aEvent.serviceID = (unsigned) *actPos;
+			actPos+=4;
+
+			aEvent.eventID = (unsigned long long) *actPos;
+			actPos+=8;
+
+			aEvent.startTime = (time_t) *actPos;
+			actPos+=4;
+
+			aEvent.duration = (unsigned) *actPos;
+			actPos+=4;
+
+			aEvent.description= actPos;
+			actPos+=strlen(actPos)+1;
+
+			aEvent.text= actPos;
+			actPos+=strlen(actPos)+1;
+
+			eList.insert(eList.end(), aEvent);
+		}
+
+		delete[] pData;
+
+	}
+
+
+// send functions for ExecuteCGI (controld api)
+	void SendcurrentVAPid(TWebserverRequest* request);
+	void SendSettings(TWebserverRequest* request);
+	void SendStreaminfo(TWebserverRequest* request);
+	void SendBouquets(TWebserverRequest *request);
+	void SendBouquet(TWebserverRequest *request,int BouquetNr);
+	void SendChannelList(TWebserverRequest *request);
+
+
+	bool Execute(TWebserverRequest* request);
+// show functions for Execute (web api)
+	void ShowChannelList(TWebserverRequest* request,CZapitClient::BouquetChannelList channellist);
+	void ShowBouquet(TWebserverRequest *request,int BouquetNr);
+	void ShowBouquets(TWebserverRequest *request);
+
+
+// support functions
+	void ParseString(TWebserverRequest *request,char *str,TParameterList * Parameter);
+	void ZapTo(char* target);
+	void UpdateBouquets(void);
+
+
+// alt
 	void GetEventList(TWebserverRequest* request, TEventList *Events,unsigned onidSid, bool cgi = false);
 	void GetEPG(TWebserverRequest *request,long long epgid,bool cgi=false);
 
-	void GetEPGList();
-	void ZapTo(char* target);
-	void StopEPGScanning(TWebserverRequest* request, bool off);
-	void GetcurrentVAPid(TWebserverRequest* request);
-	void StopPlayback(TWebserverRequest* request); 
+//	bool GetChannelList();
+//	void ShowTimerList(TWebserverRequest *request);
+//	char *GetServiceName(int onidsid);
+//	void GetCurrentEPG(TWebserverRequest *request,unsigned onidSid);
+//	unsigned GetcurrentONIDSID();
+//	void SetZapitMode(int mode);
+//	void GetEPGList();
+//	void StopEPGScanning(TWebserverRequest* request, bool off);
+//	void StopPlayback(TWebserverRequest* request); 
+//	void updateEvents(void);
+//	bool GetEPG(int Channel_onsid);
+//	bool GetEventList(int Channel_onsid);
 
-	void ParseString(TWebserverRequest *request,char *str,TParameterList * Parameter);
+	bool GetEPGShortList()
+	{
+		CChannelEventList test = sectionsd.getChannelEvents();
 
-	void updateEvents(void);
+	}
+
 
 };
 
