@@ -1,5 +1,5 @@
 /*
- * $Id: bouquet_name_descriptor.cpp,v 1.1 2004/02/13 15:27:46 obi Exp $
+ * $Id: bouquet_name_descriptor.cpp,v 1.2 2004/06/18 18:57:32 sestegra Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -24,6 +24,10 @@
 BouquetNameDescriptor::BouquetNameDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
 	bouquetName.assign((char *)&buffer[2], descriptorLength);
+}
+
+BouquetNameDescriptor::~BouquetNameDescriptor(void)
+{
 }
 
 const std::string &BouquetNameDescriptor::getBouquetName(void) const
