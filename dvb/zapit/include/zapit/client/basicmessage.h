@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/Attic/basicmessage.h,v 1.1 2002/10/17 09:41:10 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/Attic/basicmessage.h,v 1.2 2002/10/18 11:56:56 thegoodguy Exp $
  *
  * types used for clientlib <-> daemon communication - d-box2 linux project
  *
@@ -28,11 +28,14 @@
 class CBasicMessage
 {
  public:
+	
+	typedef unsigned char t_version;
+	typedef unsigned char t_cmd;
 
 	struct Header
 	{
-		unsigned char version;
-		unsigned char cmd;
+		t_version version;
+		t_cmd     cmd;
 	};
 };
 
