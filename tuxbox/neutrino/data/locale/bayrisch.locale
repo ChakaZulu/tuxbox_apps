@@ -1,4 +1,4 @@
-menu.back Zruck
+﻿menu.back Zruck
 
 options.off ausmacha
 options.on omacha
@@ -56,6 +56,7 @@ mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.recording Streamingserva
+mainsettings.streaming Movieplayer
 mainsettings.colors Forbn / Themes
 mainsettings.plugins Plugins Eistellunga
 mainsettings.lcd LC-Disbläi
@@ -87,6 +88,7 @@ audiomenu.dolbydigital Dolby Digital
 audiomenu.avs_control Eistain avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
+audiomenu.lirc lirc
 
 videomenu.head Video-Eistellunga
 videomenu.screensetup Bildbereich eistein
@@ -128,6 +130,16 @@ recordingmenu.server_wakeup Serva zum Aufnemma (WOL)
 recordingmenu.server_mac MAC-Adressn
 recordingmenu.setupnow los moachs !
 recordingmenu.no_scart Scart Umschoita untadrucka
+
+streamingmenu.head unset
+streamingmenu.streaming_type unset
+streamingmenu.server_ip unset
+streamingmenu.server_port unset
+streamingmenu.streaming_server_cddrive unset
+streamingmenu.streaming_videorate unset
+streamingmenu.streaming_audiorate unset
+streamingmenu.off unset
+streamingmenu.on unset
 
 ping.ok kumt wos (ping)
 ping.unreachable kumt nix (unreachable)
@@ -241,6 +253,8 @@ keychooser.text2 Wanst ne wuist, wartn
 
 screensetup.upperleft rot = Buidlrand om, links
 screensetup.lowerright grün = Buidlrand untn, rechts
+
+bouquetlist.head Bouquets
 
 channellist.head Olle Senda
 channellist.nonefound Es san koane Senda gfundn worn!\nMachas bittschön a Sendersuach\n(dbox-Taste -> Service)
@@ -688,8 +702,13 @@ movieplayer.head Fuimspuia
 movieplayer.play Spuin
 movieplayer.choosets TS Spuin
 movieplayer.chooseps PS Spuin
+movieplayer.choosestream uset
 movieplayer.choosepes PES spuin
 movieplayer.bookmark Vormerka
+movieplayer.choosestreamsvcd (S)VCD
+movieplayer.choosestreamdvd DVD
+movieplayer.pleasewait unset
+movieplayer.nostreamingserver unset
 
 filebrowser.head Datiesucha
 filebrowser.filter.active Fuita o
@@ -700,18 +719,24 @@ filebrowser.scan Verzeichnisse durchsuacha
 filebrowser.sort.name (Nama)
 filebrowser.sort.date (Datum)
 
-nfs.mount NFS Verzeichnis mountn
-nfs.ip NFS Serva IP
-nfs.dir NFS Verzeichnis
+nfs.mount NFS/CIFS Verzeichnis mountn
+nfs.ip NFS/CIFS Serva IP
+nfs.dir NFS/CIFS Verzeichnis
 nfs.localdir Verzeichnis auf da Box
 nfs.automount Beim Startn mountn
 nfs.mountnow Jetzad mountn
 nfs.mounterror Mount-Fähla
-nfs.umount NFS Verzeichnis freigem
+nfs.mounttimeout unset
+nfs.umount NFS/CIFS Verzeichnis freigem
 nfs.umounterror Fähla beim Freigem
 nfs.alreadymounted Verzeichnis is scho gmounted
 nfs.mount_options unset
-nfsmenu.head NFS Eistellunga
+nfs.type Typ
+nfs.type_nfs NFS
+nfs.type_cifs CIFS
+nfs.username unset
+nfs.password unset
+nfsmenu.head NFS/CIFS Eistellunga
 
 apids.hint_1 Gems de APIDs zu streama getrend
 apids.hint_2 mid ' ' in hexadezimol ei

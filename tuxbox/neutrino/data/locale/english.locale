@@ -242,7 +242,6 @@ lcdcontroler.head LCD Stettings
 lcdcontroler.contrast Contrast
 lcdcontroler.brightness normal Brightness
 lcdcontroler.brightnessstandby Standby Brightness
-lcdcontroler.default Load default-settings
 
 keychoosermenu.setnew setup new key
 keychoosermenu.setnone no key
@@ -703,8 +702,8 @@ movieplayer.head Movieplayer
 movieplayer.play Play
 movieplayer.choosets Play TS
 movieplayer.chooseps Play PS
-movieplayer.choosepes Play PES
 movieplayer.choosestream Stream
+movieplayer.choosepes Play PES
 movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD

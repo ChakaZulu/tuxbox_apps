@@ -1,4 +1,4 @@
-menu.back z'ruck
+﻿menu.back z'ruck
 
 options.off us
 options.on ii
@@ -56,6 +56,7 @@ mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Netzwärk
 mainsettings.recording Sdreamingsörfer
+mainsettings.streaming Movieplayer
 mainsettings.colors Farbe / Theme / Schrifd
 mainsettings.plugins Plugin Iischdellige
 mainsettings.lcd LC-Display
@@ -87,6 +88,7 @@ audiomenu.dolbydigital Dolby Digidaal
 audiomenu.avs_control Luutstärgi Stüürig avs/os
 audiomenu.avs avs
 audiomenu.ost ost
+audiomenu.lirc lirc
 
 videomenu.head Video-Iischdellige
 videomenu.screensetup Bildbereich ischelle
@@ -128,6 +130,16 @@ recordingmenu.server_wakeup Uffnahmesörfer WOL
 recordingmenu.server_mac Mac Adräss
 recordingmenu.setupnow Iinsdellige jetz überneh
 recordingmenu.no_scart  Scart-Umschaldig underdrugge
+
+streamingmenu.head unset
+streamingmenu.streaming_type unset
+streamingmenu.server_ip unset
+streamingmenu.server_port unset
+streamingmenu.streaming_server_cddrive unset
+streamingmenu.streaming_videorate unset
+streamingmenu.streaming_audiorate unset
+streamingmenu.off unset
+streamingmenu.on unset
 
 ping.ok isch erreichbar (ping)
 ping.unreachable isch nidd erreichbar (unreachable)
@@ -241,6 +253,8 @@ keychooser.text2 Zuem abbreche warde..
 
 screensetup.upperleft rot = Bildrand obe, links
 screensetup.lowerright grün = Bildrand unde, rechts
+
+bouquetlist.head Bouquets
 
 channellist.head Alle Kanäle
 channellist.nonefound M'r hänn keine Kanäl g'funde!\nMach e Kanalsüchi\n(dbox-Taste -> Service)
@@ -688,8 +702,13 @@ movieplayer.head Movieplayer
 movieplayer.play Abspiele
 movieplayer.choosets TS abspiele
 movieplayer.chooseps PS abspiele
+movieplayer.choosestream uset
 movieplayer.choosepes PES abspiele
 movieplayer.bookmark Bookmarks
+movieplayer.choosestreamsvcd (S)VCD
+movieplayer.choosestreamdvd DVD
+movieplayer.pleasewait unset
+movieplayer.nostreamingserver unset
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter aah
@@ -700,18 +719,24 @@ filebrowser.scan Verzeichnisse durchsürche
 filebrowser.sort.name (Dateiname)
 filebrowser.sort.date (Datum)
 
-nfs.mount Verzeichniss i'hänge
-nfs.ip NFS Server IP
-nfs.dir NFS Server Verzeichniss
+nfs.mount NFS/CIFS Verzeichniss i'hänge
+nfs.ip NFS/CIFS Server IP
+nfs.dir NFS/CIFS Server Verzeichniss
 nfs.localdir lokales Verzeichniss
 nfs.automount Biem Start i'hänge
 nfs.mountnow Jetz i'hänge
 nfs.mounterror I'häng - Fehler
-nfs.umount NFS Verzeichniss abhänge
+nfs.mounttimeout unset
+nfs.umount NFS/CIFS Verzeichniss abhänge
 nfs.umounterror Abhäng-Fehler
 nfs.alreadymounted Verzeichnis bereits a'ghängt
 nfs.mount_options unset
-nfsmenu.head NFS Iischdellige
+nfs.type Typ
+nfs.type_nfs NFS
+nfs.type_cifs CIFS
+nfs.username unset
+nfs.password unset
+nfsmenu.head NFS/CIFS Iischdellige
 
 apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,
 apids.hint_2 abdrennd durch ' ' in hexadezimaler Form

@@ -1,4 +1,4 @@
-menu.back nazad
+﻿menu.back nazad
 
 options.off ugašeno
 options.on upaljeno
@@ -56,6 +56,7 @@ mainsettings.audio ton
 mainsettings.video video
 mainsettings.network mreža
 mainsettings.recording snimanje
+mainsettings.streaming promatrač filmova
 mainsettings.colors boje / teme
 mainsettings.plugins namješćenje plugina
 mainsettings.lcd tečni kristal
@@ -87,6 +88,7 @@ audiomenu.dolbydigital dolby digital
 audiomenu.avs_control upravljanje glasnosti avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
+audiomenu.lirc lirc
 
 videomenu.head namjestiti video
 videomenu.screensetup namjestiti ekran
@@ -128,6 +130,16 @@ recordingmenu.server_wakeup server za snimanje wol
 recordingmenu.server_mac mac adresa
 recordingmenu.setupnow namješćenje sada preuzeti
 recordingmenu.no_scart nema mijenjanja scarta
+
+streamingmenu.head unset
+streamingmenu.streaming_type unset
+streamingmenu.server_ip unset
+streamingmenu.server_port unset
+streamingmenu.streaming_server_cddrive unset
+streamingmenu.streaming_videorate unset
+streamingmenu.streaming_audiorate unset
+streamingmenu.off unset
+streamingmenu.on unset
 
 ping.ok pristupan (ping)
 ping.unreachable nije pristupan (unreachable)
@@ -690,8 +702,13 @@ movieplayer.head promatrač filmova
 movieplayer.play odigrati
 movieplayer.choosets odigrati ts
 movieplayer.chooseps odigrati ps
+movieplayer.choosestream uset
 movieplayer.choosepes odigrati pes
 movieplayer.bookmark oznaka
+movieplayer.choosestreamsvcd (S)VCD
+movieplayer.choosestreamdvd DVD
+movieplayer.pleasewait unset
+movieplayer.nostreamingserver unset
 
 filebrowser.head pretraživač datoteka
 filebrowser.filter.active upaljen filter
@@ -702,17 +719,24 @@ filebrowser.scan pretraži direktorije
 filebrowser.sort.name (ime datoteke)
 filebrowser.sort.date (datum)
 
-nfs.mount montira nfs direktorij
-nfs.ip ip nfs servera
-nfs.dir nfs direktorij
+nfs.mount montira nfs/cifs direktorij
+nfs.ip ip nfs/cifs servera
+nfs.dir nfs/cifs direktorij
 nfs.localdir lokalni direktorij
 nfs.automount pri startu montirati
 nfs.mountnow sada montirati
 nfs.mounterror greška pri montiranju
-nfs.umount nfs direktorij sada demontirati
+nfs.mounttimeout unset
+nfs.umount nfs/cifs direktorij sada demontirati
 nfs.umounterror greška pri demontiranju
 nfs.alreadymounted direktorij je već montiran
-nfsmenu.head namješćenje nfsa
+nfs.mount_options unset
+nfs.type Typ
+nfs.type_nfs NFS
+nfs.type_cifs CIFS
+nfs.username unset
+nfs.password unset
+nfsmenu.head namješćenje nfsa/cifsa
 
 apids.hint_1 Utipkajte heksadecimalne apids
 apids.hint_2 za streaming razdvojene sa ' '.

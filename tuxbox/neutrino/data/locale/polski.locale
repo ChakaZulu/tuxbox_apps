@@ -1,4 +1,4 @@
-menu.back wróc
+﻿menu.back wróc
 
 options.off wyl
 options.on wla
@@ -56,6 +56,7 @@ mainsettings.audio Dzwiek
 mainsettings.video Obraz
 mainsettings.network Siec
 mainsettings.recording Nagrywanie
+mainsettings.streaming Odtwarzacz filmów
 mainsettings.colors Kolory / Tematy
 mainsettings.plugins Dodatki
 mainsettings.lcd LCD-ustawienia
@@ -87,6 +88,7 @@ audiomenu.dolbydigital Dolby Digital
 audiomenu.avs_control sterowanie avs
 audiomenu.avs avs
 audiomenu.ost ost
+audiomenu.lirc lirc
 
 videomenu.head Ustawienie Obrazu
 videomenu.screensetup Ustawienie widocznej czesci obrazu
@@ -128,6 +130,16 @@ recordingmenu.server_wakeup Uruchamianie nagrywania przez siec
 recordingmenu.server_mac MAC adres
 recordingmenu.setupnow wykonaj zmiany 
 recordingmenu.no_scart nie przelaczaj w tryb Euro
+
+streamingmenu.head unset
+streamingmenu.streaming_type unset
+streamingmenu.server_ip unset
+streamingmenu.server_port unset
+streamingmenu.streaming_server_cddrive unset
+streamingmenu.streaming_videorate unset
+streamingmenu.streaming_audiorate unset
+streamingmenu.off unset
+streamingmenu.on unset
 
 ping.ok osiagalny (ping)
 ping.unreachable nieosiagalny
@@ -690,8 +702,13 @@ movieplayer.head Odtwarzacz filmów
 movieplayer.play Start
 movieplayer.choosets Odtwarzaj TS
 movieplayer.chooseps Odtwarzaj PS
+movieplayer.choosestream uset
 movieplayer.choosepes Odtwarzaj PES
 movieplayer.bookmark Ulubione
+movieplayer.choosestreamsvcd (S)VCD
+movieplayer.choosestreamdvd DVD
+movieplayer.pleasewait unset
+movieplayer.nostreamingserver unset
 
 filebrowser.head Przegladarka
 filebrowser.filter.active Filtr wlaczony
@@ -702,18 +719,24 @@ filebrowser.scan Skanuj folder
 filebrowser.sort.name (Nazwa)
 filebrowser.sort.date (Dane)
 
-nfs.mount Zamontuj volumin NFS
-nfs.ip NFS IP serwera
-nfs.dir katalog NFS
+nfs.mount Zamontuj volumin NFS/CIFS
+nfs.ip NFS/CIFS IP serwera
+nfs.dir katalog NFS/CIFS
 nfs.localdir lokalny katalog
 nfs.automount zamontuj przy starcie
 nfs.mountnow zamontuj teraz
 nfs.mounterror blad montowania
-nfs.umount Odmontuj volumin NFS
+nfs.mounttimeout unset
+nfs.umount Odmontuj volumin NFS/CIFS
 nfs.umounterror blad odmontowania voluminu
 nfs.alreadymounted katalog juz zamontowny
 nfs.mount_options unset
-nfsmenu.head ustawienia NFS
+nfs.type Typ
+nfs.type_nfs NFS
+nfs.type_cifs CIFS
+nfs.username unset
+nfs.password unset
+nfsmenu.head ustawienia NFS/CIFS
 
 apids.hint_1 Podaj APIDy do odbioru w
 apids.hint_2 formacie hex rozdzielone przez ' '

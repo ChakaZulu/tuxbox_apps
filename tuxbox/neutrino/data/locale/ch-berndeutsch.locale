@@ -1,0 +1,751 @@
+﻿menu.back Zrogg
+
+options.off aus
+options.on ein
+options.serial seriell
+options.fb framebuffer
+options.null nou
+options.default VorischtÃ¶uigÃ¤ bruuchÃ¤
+
+mainmenu.head HouptmenÃ¼
+mainmenu.tvmode TV-Modus
+mainmenu.radiomode Radio-Modus
+mainmenu.scartmode Scart-Iigang
+mainmenu.games Schpili
+mainmenu.mp3player MP3 Player
+mainmenu.sleeptimer SleepTimer
+mainmenu.shutdown UsschautÃ¤
+mainmenu.settings IschtÃ¶uigÃ¤
+mainmenu.service Service
+mainmenu.recording UfnÃ¤h
+mainmenu.recording_start Schtart
+mainmenu.recording_stop Schtopp
+mainmenu.pictureviewer BÃ¶udbetrachter
+mainmenu.movieplayer Movieplayer
+mainmenu.pausesectionsd EPG uslÃ¤se
+
+servicemenu.head Service
+servicemenu.update Software-Aktualisierig
+servicemenu.scants KanausuÃ¤chi
+servicemenu.ucodecheck UCodes Ã¼berprÃ¼Ã¤fe
+servicemenu.reload KanaulischtÃ¤ nÃ¶i ladÃ¤
+servicemenu.reload_hint KanaulischtÃ¤ wÃ¤rde nÃ¶i gladÃ¤,\nbitte wartÃ¤...
+
+cablesetup.provider KabuabiÃ¤ter
+
+satsetup.disqeqc DiSEqC
+satsetup.satellite Satellit
+satsetup.extended DiSEqC-IschtÃ¶uigÃ¤
+satsetup.extended_lnb LNB-IschtÃ¶uigÃ¤
+satsetup.extended_motor Motor-IschtÃ¶uigÃ¤
+satsetup.nodiseqc Keis DiSEqC
+satsetup.minidiseqc Mini-DiSEqC
+satsetup.diseqc10 DiSEqC 1.0
+satsetup.diseqc11 DiSEqC 1.1
+satsetup.diseqc12 DiSEqC 1.2
+satsetup.smatvremote SMATV Remote Tuning
+satsetup.diseqcrepeat DiSEqC-WiderholigÃ¤
+satsetup.savesettingsnow IschtÃ¶uigÃ¤ jetzt schpicherÃ¤
+satsetup.motorcontrol Manuells Motor-Setup
+
+mainsettings.head IschtÃ¶uigÃ¤
+mainsettings.savesettingsnow IschtÃ¶uigÃ¤ jetzt schpicherÃ¤
+mainsettings.savesettingsnow_hint IschtÃ¶uigÃ¤ wÃ¤rde jetzt gschpicherÃ¤t,\nbitte wartÃ¤...
+mainsettings.language Schprooch
+mainsettings.audio Audio
+mainsettings.video Video
+mainsettings.network NetzwÃ¤rk
+mainsettings.recording Ufnahm
+mainsettings.streaming Movieplayer
+mainsettings.colors FarbÃ¤ / Themes / Schrift
+mainsettings.plugins Plugin IschtÃ¶uigÃ¤
+mainsettings.lcd LC-Display
+mainsettings.keybinding TaschtÃ¤ IschtÃ¶uigÃ¤
+mainsettings.misc Diversi IschtÃ¶uigÃ¤
+mainsettings.scan IschtÃ¶uigÃ¤ KanausuÃ¤ch
+
+mp3picsettings.general MP3 Player / BÃ¶udbetrachter
+
+miscsettings.head Diversi IschtÃ¶uigÃ¤
+miscsettings.shutdown_real Standbymodus
+miscsettings.shutdown_real_rcdelay VerzÃ¶gertÃ¤ Shutdown
+miscsettings.boxtype DBox HÃ¤rschtÃ¶uÃ¤r
+miscsettings.startneutrinodirect Neutrino dirÃ¤kt schtartÃ¤
+miscsettings.startbhdriver BH-Mode Triiber ladÃ¤
+miscsettings.general Augemein
+miscsettings.fb_destination EXPERT! Boot-Konsole
+miscsettings.infobar_sat_display Infobar Satelliteazeig
+
+languagesetup.head SchproochiischtÃ¶uigÃ¤
+languagesetup.select Schprooch
+
+audiomenu.head Audio-IschtÃ¶uigÃ¤
+audiomenu.analogout Analog-Usgang
+audiomenu.monoright mono rÃ¤chts
+audiomenu.monoleft mono links
+audiomenu.stereo stereo
+audiomenu.dolbydigital Dolby Digitau
+audiomenu.avs_control Volume SchtÃ¼Ã¼rig avs/ost
+audiomenu.avs avs
+audiomenu.ost ost
+audiomenu.lirc lirc
+
+videomenu.head Video-IschtÃ¶uigÃ¤
+videomenu.screensetup BÃ¶udbeeich ischtÃ¶uÃ¤
+videomenu.videosignal Video Signauart
+videomenu.videosignal_rgb RGB + CVBS
+videomenu.videosignal_svideo S-Video
+videomenu.videosignal_yuv_v YUV + VBS
+videomenu.videosignal_yuv_c YUV + CVBS
+videomenu.videosignal_composite CVBS
+videomenu.videoformat BÃ¶udschirmformat
+videomenu.videoformat_43 4:3 (LB)
+videomenu.videoformat_431 4:3 (PS)
+videomenu.videoformat_169 16:9
+videomenu.videoformat_autodetect outomatisch
+videomenu.vcrswitch Scart-Iigang outomatisch
+
+networkmenu.head NetzwÃ¤rk IschtÃ¶uigÃ¤
+networkmenu.test NetzwÃ¤rk teschtÃ¤
+networkmenu.show aktivi NetzwÃ¤rkischtÃ¶uigÃ¤ zeigÃ¤
+networkmenu.setupnow NetzwÃ¤rkischtÃ¶uigÃ¤ jetzt zuÃ¤wisÃ¤
+networkmenu.setuponstartup Bim schtartÃ¤ NetzwÃ¤rk setzÃ¤
+networkmenu.ipaddress IP-AdrÃ¤ssi
+networkmenu.netmask Netzmaske
+networkmenu.broadcast Broadcast
+networkmenu.gateway Schtandard Gateway
+networkmenu.nameserver NamesÃ¶rver
+
+recordingmenu.head Ufnahm IschtÃ¶uigÃ¤
+recordingmenu.recording_type Ufnahme GrÃ¤t
+recordingmenu.server_ip UfnahmesÃ¶rver IP
+recordingmenu.server_port UfnahmesÃ¶rver Port
+recordingmenu.stopplayback PlaybÃ¤ck aahautÃ¤
+recordingmenu.stopsectionsd Sectionsd aahautÃ¤
+recordingmenu.vcr_devicename VCR NamÃ¤ (lirc)
+recordingmenu.off aus
+recordingmenu.server SÃ¶rver
+recordingmenu.vcr Videorekorder
+recordingmenu.server_wakeup UfnahmÃ¤sÃ¶rver WOL
+recordingmenu.server_mac Mac AdrÃ¤ssi
+recordingmenu.setupnow IschtÃ¶uigÃ¤ jetzt Ã¼bernÃ¤Ã¤
+recordingmenu.no_scart UngerdrÃ¼cke Scart-Umschautig
+
+streamingmenu.head unset
+streamingmenu.streaming_type unset
+streamingmenu.server_ip unset
+streamingmenu.server_port unset
+streamingmenu.streaming_server_cddrive unset
+streamingmenu.streaming_videorate unset
+streamingmenu.streaming_audiorate unset
+streamingmenu.off unset
+streamingmenu.on unset
+
+ping.ok isch erreichbar (ping)
+ping.unreachable isch nid erreichbar (unreachable)
+ping.protocol isch nid erreichbar (Host or protocol error)
+ping.socket isch nid erreichbar (Socket error)
+
+ipsetup.hint_1 Benutz 0..9 oder uÃ¤che/abÃ¤
+ipsetup.hint_2 OK schpicheret, Home bricht ab
+
+colormenu.head Farb-IschtÃ¶uigÃ¤
+colormenu.statusbar SchtatusbaukÃ¤
+colormenu.themeselect Theme uswÃ¤hle
+colormenu.font SchriftgrÃ¶ssi
+colormenu.menucolors MenÃ¼farbÃ¤
+colormenu.background Hingergrundfarb
+colormenu.background_head Hingergrundfarb
+colormenu.textcolor Textfarb
+colormenu.textcolor_head Textfarb
+colormenu.fade MenÃ¼s faden
+colormenu.timing OSD Timeouts
+
+colorthememenu.head Theme uswÃ¤hle
+colorthememenu.neutrino_theme Neutrino Theme
+colorthememenu.classic_theme Klassik
+
+colormenusetup.head MenÃ¼farbÃ¤
+colormenusetup.menuhead TituleischtÃ¤
+colormenusetup.menucontent FÃ¤ischterinhaut
+colormenusetup.menucontent_inactive FÃ¤ischterinhaut deaktiviert
+colormenusetup.menucontent_selected FÃ¤ischterinhaut selektiert
+
+colorstatusbar.head SchtatusbaukÃ¤-Farbe
+colorstatusbar.text SchtatusbaukÃ¤
+
+timing.head OSD Timeouts
+timing.menu MenÃ¼
+timing.chanlist KanaulischtÃ¤
+timing.epg Epg
+timing.infobar Infobar
+timing.filebrowser Filebrowser
+timing.hint_1 IblÃ¤ndzyt i Sek., diÃ¤ das OSD
+timing.hint_2 uf Ã¤m TV aazeiget wird
+
+repeatblocker.hint_1 Mindeschtzyt (in ms) zwÃ¼schÃ¤ 2 TaschtÃ¤drÃ¼ck
+repeatblocker.hint_2 0 schautet dÃ¤ Blocker us (Rot isch " ")
+
+keybindingmenu.RC FÃ¤rnbediÃ¤nig
+keybindingmenu.repeatblock WiderhouverzÃ¶gÃ¤rig
+keybindingmenu.repeatblockgeneric AafangsverzÃ¶gerig
+keybindingmenu.head TaschtÃ¤-IschtÃ¶uigÃ¤
+keybindingmenu.modechange Modus wÃ¤chsle
+keybindingmenu.channellist KanaulischtÃ¤
+keybindingmenu.quickzap SchnÃ¤uumschautig
+keybindingmenu.tvradiomode Fernseh-/Radio-Modus
+keybindingmenu.tvradiomode_head Fernseh-/Radio-Modus
+keybindingmenu.pageup SitÃ¤ hochbletterÃ¤
+keybindingmenu.pageup_head SitÃ¤ hochbletterÃ¤
+keybindingmenu.pagedown SitÃ¤ abÃ¤bletterÃ¤
+keybindingmenu.pagedown_head SitÃ¤ abÃ¤bletterÃ¤
+keybindingmenu.cancel KanaulischtÃ¤ schliÃ¤sse
+keybindingmenu.cancel_head KanaulischtÃ¤ schliÃ¤sse
+keybindingmenu.sort SortierreiÃ¤foug Ã¤ndere
+keybindingmenu.sort_head SortierreiÃ¤foug Ã¤ndere
+keybindingmenu.addrecord Ufnahm-Timer dÃ¤zuÃ¤fÃ¼ege
+keybindingmenu.addrecord_head Ufnahm-Timer dÃ¤zuÃ¤fÃ¼ege
+keybindingmenu.addremind Umschaut-Timer dÃ¤zuÃ¤fÃ¼ege
+keybindingmenu.addremind_head Umschaut-Timer dÃ¤zuÃ¤fÃ¼ege
+keybindingmenu.channelup Kanau uÃ¤che
+keybindingmenu.channelup_head Kanau uÃ¤che Taschte
+keybindingmenu.channeldown Kanau abÃ¤
+keybindingmenu.channeldown_head Kanau abÃ¤ TaschtÃ¤
+keybindingmenu.bouquetup Bouquet witer
+keybindingmenu.bouquetup_head Bouquet witer TaschtÃ¤
+keybindingmenu.bouquetdown Bouquet zrugg
+keybindingmenu.bouquetdown_head Bouquet zrugg TaschtÃ¤
+keybindingmenu.bouquethandling OK-TaschtÃ¤ fÃ¼r
+keybindingmenu.bouquetchannels_on_ok Bouquet-KanÃ¤u
+keybindingmenu.bouquetlist_on_ok BouquetlischtÃ¤
+keybindingmenu.allchannels_on_ok KanaulischtÃ¤
+keybindingmenu.subchannelup Ungerkanau witer
+keybindingmenu.subchannelup_head Ungerkanau witer
+keybindingmenu.subchanneldown Ungerkanau zrugg
+keybindingmenu.subchanneldown_head Ungerkanau zrugg
+
+colorchooser.red rot
+colorchooser.green grÃ¼Ã¤n
+colorchooser.blue blau
+colorchooser.alpha alpha
+
+lcdmenu.head LCD IschtÃ¶uigÃ¤
+lcdmenu.inverse InvertierÃ¤
+lcdmenu.power Power
+lcdmenu.lcdcontroler Kontrascht / HÃ¤uigkeit
+lcdmenu.statusline SchtatuszilÃ¤
+lcdmenu.statusline.volume LutschtÃ¤rchi
+lcdmenu.statusline.playtime SÃ¤ndigsvortschritt
+lcdmenu.statusline.both LutschtÃ¤rchi / Fortschritt
+
+lcdcontroler.head LCD IschtÃ¶uigÃ¤
+lcdcontroler.contrast Kontrascht
+lcdcontroler.brightness normali HÃ¤uigkeit
+lcdcontroler.brightnessstandby Standby HÃ¤uigkeit
+
+keychoosermenu.setnew NÃ¶ii TaschtÃ¤ ischtÃ¶uÃ¤
+keychoosermenu.setnone kei TaschtÃ¤
+keychoosermenu.currentkey Momentani TaschtÃ¤
+
+keychooser.head NÃ¶ii TaschtÃ¤ iischtÃ¶uÃ¤
+keychooser.text1 Bitte TaschtÃ¤ drÃ¼cke
+keychooser.text2 Zum abbrÃ¤che wartÃ¤..
+
+screensetup.upperleft rot = BÃ¶udrand obÃ¤, links
+screensetup.lowerright grÃ¼n = BÃ¶udrand ungÃ¤, rÃ¤chts
+
+bouquetlist.head Bouquets
+
+channellist.head Aui KanÃ¤u
+channellist.nonefound Ã¤s si keini KanÃ¤u gfungÃ¤ wordÃ¤!\nBitte fÃ¼Ã¤r Ã¤ KanausuÃ¤chi dÃ¼rÃ¤\n(dbox-TaschtÃ¤ -> Service)
+channellist.since sit %02d:%02d
+
+infoviewer.epgnotload InformationÃ¤ no nid gladÃ¤...
+infoviewer.epgwait WartÃ¤ uf EPG-InformationÃ¤...
+infoviewer.streaminfo Features
+infoviewer.eventlist Programm
+infoviewer.languages Tonwau
+infoviewer.notavailable Kanau (zur Zyt) nid verfÃ¼Ã¤gbar
+infoviewer.cantdecode Kanau cha nid entschlÃ¼sslet wÃ¤rde
+infoviewer.selecttime SchtartzytÃ¤
+infoviewer.nocurrent Kei Infos zum loufendÃ¤ Programm
+infoviewer.noepg Kei EPG-InformationÃ¤ verfÃ¼egbar
+infoviewer.subservice BÃ¶udregie
+infoviewer.waittime WartÃ¤ uf d'Uhrzyt...
+infoviewer.motor_moving AntennÃ¤positioniÃ¤rig
+
+epgviewer.notfound kei ProgramminformationÃ¤ (EPG) gfungÃ¤
+epgviewer.nodetailed Kei usfÃ¼Ã¤rlichi InformationÃ¤ verfÃ¼Ã¤gbar
+epgviewer.More_Screenings WitÃ¤ri Termin uf dÃ¤m Kanau
+epglist.head Vorschou - %s
+epglist.noevents Kei EPG-InformationÃ¤ verfÃ¼Ã¤gbar.
+
+streaminfo.head InformationÃ¤
+streaminfo.resolution UflÃ¶sig
+streaminfo.bitrate Bitrate
+streaminfo.aratio VerhÃ¤utnis
+streaminfo.aratio_unknown VerhÃ¤utnis: unbekannt
+streaminfo.framerate BÃ¶udratÃ¤
+streaminfo.framerate_unknown BÃ¶udratÃ¤: unbekannt
+streaminfo.audiotype Audiotyp
+streaminfo.audiotype_unknown Audiotyp: unbekannt
+streaminfo.not_crypted nid verschlÃ¼sslet
+streaminfo.ecm_invalid ungÃ¶utigs CA-System
+streaminfo.not_available nid verfÃ¼egbar
+
+streamfeatures.head Features
+streamfeatures.info Stream-InformationÃ¤
+
+apidselector.head Schproochuswau
+
+nvodselector.head Aafangszyt uswÃ¤hle
+nvodselector.subservice PepschpektivÃ¤
+nvodselector.directormode BÃ¶udregie-Modus
+
+ucodecheck.head UCode Ã¼berprÃ¼Ã¤fig
+ucodecheck.avia500 Avia 500
+ucodecheck.avia600 Avia 600
+ucodecheck.ucode UCode
+ucodecheck.cam-alpha Cam-Alpha
+
+date.Mon  Mo
+date.Tue  Di
+date.Wed  Mi
+date.Thu  Do
+date.Fri  Fr
+date.Sat  Sa
+date.Sun  So
+
+date.Jan  Jan
+date.Feb  Feb
+date.Mar  MÃ¤r
+date.Apr  Apr
+date.May  Mai
+date.Jun  Jun
+date.Jul  Jul
+date.Aug  Aug
+date.Sep  Sep
+date.Oct  Okt
+date.Nov  Nov
+date.Dec  Dez
+
+nvod.starting (Beginn i %d min)
+nvod.proz (%d%% vÃ¶rbi)
+
+scants.head KanausuÃ¤chi
+scants.startnow KanausuÃ¤chi schtartÃ¤
+scants.actsatellite Satellit:
+scants.actcable Kabu:
+scants.transponders Transponder:
+scants.freqdata FrequÃ¤nz:
+scants.provider Aabieter:
+scants.channel Kanau:
+scants.numberoftvservices TV
+scants.numberofradioservices Radio
+scants.numberofdataservices Data
+scants.numberoftotalservices Gsamt
+scants.services Services:
+scants.bouquet Bouquets
+scants.bouquet_leave nid Ã¤ndere
+scants.bouquet_create nÃ¶i erschtÃ¶uÃ¤
+scants.bouquet_erase lÃ¶sche
+scants.bouquet_satellite Satelliten-Bouquet
+scants.failed KanausuÃ¤chi fÃ¤ugschlagÃ¤!
+scants.finished KanausuÃ¤chi erfougrich beÃ¤ndet!
+
+motorcontrol.head Motor-Setup
+
+flashupdate.head AktualisiÃ¤rig
+flashupdate.action Aktion:
+flashupdate.globalprogress Gsamtschtatus:
+flashupdate.getinfofile lade Versionsinfo
+flashupdate.getinfofileerror cha s'Update nid lÃ¤se
+flashupdate.getupdatefile lade Update
+flashupdate.getupdatefileerror cha s'Update nid ladÃ¤
+flashupdate.cantopenfile cha Datei nid Ã¶ffnÃ¤
+flashupdate.fileis0bytes d'DateigrÃ¶ssi isch 0 Byte
+flashupdate.eraseingflash lÃ¶sche Flash
+flashupdate.programmingflash programmierÃ¤ Flash
+flashupdate.cantopenmtd cha s'MTD-Device nid Ã¶ffnÃ¤
+flashupdate.ready fertig
+flashupdate.reboot d'DBox wird nÃ¶i gschtartet
+flashupdate.updatemode Updatemodus
+flashupdate.updatemode_manual manuell (ftp)
+flashupdate.updatemode_internet internet
+flashupdate.currentversion_sep Installierti Version
+flashupdate.currentversiondate Datum
+flashupdate.currentversiontime Uhrzyt
+flashupdate.currentversionbaseversion Basisimage
+flashupdate.currentversionsnapshot ImageTyp
+flashupdate.checkupdate noch nÃ¶iere version suÃ¤che
+flashupdate.versioncheck VersionsÃ¼berprÃ¼Ã¤fig
+flashupdate.nonewversion ke nÃ¶ii version verfÃ¼egbar
+flashupdate.md5check ImageprÃ¼Ã¤fig
+flashupdate.md5sumerror s'Image isch fÃ¤hlerhaft
+flashupdate.proxyserver_sep ProxysÃ¶rver
+flashupdate.proxyserver Proxyname
+flashupdate.proxyserver_hint1 Gib Ã¤ ProxynamÃ¤ oder IP i (Host:Port)
+flashupdate.proxyserver_hint2 Ã¤ lÃ¤re Iitrag bedÃ¼tet kei Proxy
+flashupdate.proxyusername BenutzernamÃ¤
+flashupdate.proxyusername_hint1 Gib Ã¤ Proxy-BenutzernamÃ¤ i
+flashupdate.proxyusername_hint2 Ã¤ lÃ¤Ã¤re Iitrag bedÃ¼tet kei AuthentifiziÃ¤rig
+flashupdate.proxypassword Passwort
+flashupdate.proxypassword_hint1 Gib s'Proxy-Passwort i
+flashupdate.proxypassword_hint2
+flashupdate.msgbox Ã¤s isch fougendes nÃ¶is Image gfungÃ¤ wordÃ¤:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWosch diÃ¤ version jetzt abeladÃ¤\nu inschtaliÃ¤re?
+flashupdate.msgbox_manual Ã¤s isch Ã¤s nÃ¶is Image gfungÃ¤ worde:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWosch diÃ¤ Version jetzt inschtalliÃ¤re?
+flashupdate.expertfunctions ExpertÃ¤-Funktione
+flashupdate.readflash ganzes Flashimage uslÃ¤se
+flashupdate.writeflash ganzes Flashimage iischpilÃ¤
+flashupdate.readflashmtd einzÃ¤lni Partition uslÃ¤se
+flashupdate.writeflashmtd einzÃ¤lni Partition iischpilÃ¤
+flashupdate.savesuccess s'Image isch erfougrich ungerem\nDateinamÃ¤ %s gschpicheret worde.
+flashupdate.mtdselector Partitions-Uswau
+flashupdate.titlereadflash Flash uslÃ¤se
+flashupdate.actionreadflash lisÃ¤ flash
+flashupdate.fileselector Datei-Uswau
+flashupdate.titlewriteflash Flash schribÃ¤
+flashupdate.actionwriteflash schribÃ¤ flash
+flashupdate.flashreadyreboot s'Image isch erfougrich gflasht wordÃ¤.\nd'DBox wird jetzt nÃ¶i gschtartet.
+flashupdate.reallyflashmtd Wosch dÃ¤ Flashvorgang wÃ¼rklech dÃ¼rÃ¤fÃ¼erÃ¤?\n\nFaus Ã¤ FÃ¤hler uftritt oder s'Image nid\nfunktionstÃ¼chtig isch, wird dini Box nÃ¼m bootÃ¤.\n\nImagenamÃ¤: %s\nZiel: %s
+flashupdate.wrongbase s'Basisimage wiicht ab, bitte\nzersch Ã¤s nÃ¶is Basisimage inschtaliÃ¤re!
+
+bouqueteditor.name Bouquet-Verwautig
+bouqueteditor.delete LÃ¶schÃ¤
+bouqueteditor.add DerzuÃ¤fÃ¼Ã¤ge
+bouqueteditor.move VÃ¶rschiÃ¤be
+bouqueteditor.rename UmbenÃ¤nne
+bouqueteditor.hide VÃ¶rschteckÃ¤
+bouqueteditor.lock SchperrÃ¤
+bouqueteditor.newbouquetname NÃ¶iÃ¤ NamÃ¤ vom Bouquet
+bouqueteditor.bouquetname NamÃ¤ vom Bouquet
+bouqueteditor.savechanges? SÃ¶uÃ¤ d'Ã¤nderigÃ¤ gschpicheret wÃ¤rde?
+bouqueteditor.savingchanges Ã¤nderigÃ¤ wÃ¤rde gschpicheret. Bitte warte ...
+bouqueteditor.discardingchanges Ã¤nderigÃ¤ wÃ¤rde verworfe. Bitte warte ...
+bouqueteditor.switch Kanau ufnÃ¤/entfÃ¤rne
+bouqueteditor.switchmode TV/Radio
+bouqueteditor.return Fertig
+
+messagebox.yes Jo
+messagebox.no Nei
+messagebox.cancel Abbruch
+messagebox.back Zrugg
+messagebox.error FÃ¤hler
+messagebox.discard Wosch d'Ã¤nderigÃ¤ verwÃ¤rfe?
+messagebox.info InformationÃ¤
+
+settings.noconffile d'Neutrino IschtÃ¶uigÃ¤ si nid gfungÃ¤\nworde. Ã¤s wÃ¤rde d'StandartwÃ¤rt bruucht.
+settings.missingoptionsconffile d'Neutrino-IschtÃ¶uigÃ¤ si erwitert worde.\nDiÃ¤ nÃ¶iÃ¤ WÃ¤rt wÃ¤rde uf Standart gsetzt.
+
+cam.wrong Achtung, d' CAM_ALPHA.BIN passt\nnid zu dinere Smart-Card!!!\n\nWosch diÃ¤ Warnig wider gsee?
+ucodes.failure Achtung, d'ÂµCodes si NID gfunge worde!\n\nBitte per FTP (oder DBox-BootManager)\nuploade, u d'Box nÃ¶i schtarte!
+
+stringinput.caps Gross-/ChlibuÃ¤chschtabe
+stringinput.clear Aues lÃ¶sche
+
+streamingserver.noconnect Ke verbindig zum StreamingsÃ¶rver.\nd'Ufnahm wird abbroche.
+
+GENRE.MOVIE.0 SpÃ¶ufÃ¶um / Drama
+GENRE.MOVIE.1 Krimi/Thriller
+GENRE.MOVIE.2 AbentÃ¼rfÃ¶um/Western/ChriÃ¤gsfÃ¶um
+GENRE.MOVIE.3 Science-Fiction/FÃ¤ntÃ¤sy/Horror
+GENRE.MOVIE.4 Comedy
+GENRE.MOVIE.5 Soap/Melodrama/Folklore
+GENRE.MOVIE.6 Romantik
+GENRE.MOVIE.7 serious/classical/religious/historical movie/drama
+GENRE.MOVIE.8 adult movie/Drama
+
+GENRE.NEWS.0 Nachrichte
+GENRE.NEWS.1 Nachrichte/WÃ¤tter
+GENRE.NEWS.2 Nachrichtemagazin
+GENRE.NEWS.3 Dokumentation
+GENRE.NEWS.4 Diskussion/Interview/Debatte
+
+GENRE.SHOW.0 Show / Gameshow
+GENRE.SHOW.1 Gameshow/Quiz
+GENRE.SHOW.2 varietee
+GENRE.SHOW.3 Talkshow
+
+GENRE.SPORTS.0 Schport
+GENRE.SPORTS.1 Grossereigniss (Olympischi SchpÃ¶u, WÃ¤utmeischterschaft usw.)
+GENRE.SPORTS.2 Schportmagazin
+GENRE.SPORTS.3 Schutte
+GENRE.SPORTS.4 Tennis
+GENRE.SPORTS.5 Mannschaftsschport
+GENRE.SPORTS.6 LiÃ¤chtathletik
+GENRE.SPORTS.7 Motorschport
+GENRE.SPORTS.8 Wasserschport
+GENRE.SPORTS.9 Winterschport
+GENRE.SPORTS.10 equestrian
+GENRE.SPORTS.11 martial sports
+
+GENRE.CHILDRENs_PROGRAMMES.0 Chinder / Jugendprogramm
+GENRE.CHILDRENs_PROGRAMMES.1 Programm fÃ¼r Vorschouching
+GENRE.CHILDRENs_PROGRAMMES.2 Ungerhautigsprogramm fÃ¼r 6 bis 14-JÃ¤hrigi
+GENRE.CHILDRENs_PROGRAMMES.3 Ungerhautigsprogramm fÃ¼r 10 bis 16-JÃ¤hrigi
+GENRE.CHILDRENs_PROGRAMMES.4 Informations- und BÃ¶udigsprogramm
+GENRE.CHILDRENs_PROGRAMMES.5 TrickfÃ¶um
+
+GENRE.MUSIC_DANCE.0 Musik/Ballet/Tanz
+GENRE.MUSIC_DANCE.1 Rock/Pop
+GENRE.MUSIC_DANCE.2 serious music/Klassik
+GENRE.MUSIC_DANCE.3 Vouksmusik
+GENRE.MUSIC_DANCE.4 JÃ¤zz
+GENRE.MUSIC_DANCE.5 Musical/Oper
+GENRE.MUSIC_DANCE.6 Ballet
+
+GENRE.ARTS.0 Kunscht / Kultur
+GENRE.ARTS.1 DarschtÃ¶uendi KÃ¼nscht
+GENRE.ARTS.2 fine arts
+GENRE.ARTS.3 Religion
+GENRE.ARTS.4 Voukskunst
+GENRE.ARTS.5 Literatur
+GENRE.ARTS.6 FÃ¶um/Kino
+GENRE.ARTS.7 experimental fÃ¶um/video
+GENRE.ARTS.8 Rundfunk/Presse
+GENRE.ARTS.9 NÃ¶i MediÃ¤
+GENRE.ARTS.10 Kunst-/Kultur-Magazin
+GENRE.ARTS.11 Mode
+
+GENRE.SOZIAL_POLITICAL.0 Sozial & Politikereigniss / Wirtschaft
+GENRE.SOZIAL_POLITICAL.1 Magazin/Report/Dokumentation
+GENRE.SOZIAL_POLITICAL.2 Wirtschaft u Soziales
+GENRE.SOZIAL_POLITICAL.3 Bsungeri MÃ¶nsche
+
+GENRE.DOCUS_MAGAZINES.0 Doku/Magazin
+GENRE.DOCUS_MAGAZINES.1 Natur/TiÃ¤r/UmwÃ¤ut
+GENRE.DOCUS_MAGAZINES.2 NaturwÃ¼sseschaft und Technik
+GENRE.DOCUS_MAGAZINES.3 Medizin/PsÃ¼chologie/PsÃ¼chologie
+GENRE.DOCUS_MAGAZINES.4 Usland/Expeditions
+GENRE.DOCUS_MAGAZINES.5 Soziau- u GeischteswÃ¼sseschaft
+GENRE.DOCUS_MAGAZINES.6 WiterbÃ¶udig
+GENRE.DOCUS_MAGAZINES.7 Schprooche
+
+GENRE.TRAVEL_HOBBIES.0 Reise u Freizyt
+GENRE.TRAVEL_HOBBIES.1 Reisen u Tourismus
+GENRE.TRAVEL_HOBBIES.2 Handicraft
+GENRE.TRAVEL_HOBBIES.3 Motor
+GENRE.TRAVEL_HOBBIES.4 Fitness u Gsundheit
+GENRE.TRAVEL_HOBBIES.5 ChochÃ¤
+GENRE.TRAVEL_HOBBIES.6 Ichouf
+GENRE.TRAVEL_HOBBIES.7 Garte
+
+GENRE.UNKNOWN Unbekannt
+
+parentallock.parentallock Jugendschutz
+
+parentallock.prompt PIN-Igab
+parentallock.never NiÃ¤
+parentallock.onstart Bim Schtart
+parentallock.changetolocked Bi vorgschperrte Bouquets
+parentallock.onsignal Bi gsÃ¤ndeter Vorschperri
+parentallock.lockedsender Vorgschperrte SÃ¤nder...
+parentallock.lockedprogram Gschperrts Programm (FSK ab %d)
+parentallock.head Jugendschutz PIN
+
+parentallock.lockage SÃ¤ndige
+parentallock.lockage12 ab 12 Johr sperre
+parentallock.lockage16 ab 16 Johr sperre
+parentallock.lockage18 ab 18 Johr sperre
+
+parentallock.changepin PIN-Code feschtlege
+parentallock.changepin_hint1 Gib do dÃ¤ nÃ¶i PIN-Code i!
+
+pinprotection.wrongcode Gib dÃ¤ Code nomou i!
+pinprotection.head PIN-Abfroog
+
+favorites.bouquetname Mini Favorite
+favorites.nobouquets Favorite si nume mit aktivierte Bouquets mÃ¼glech
+favorites.addchannel Dr aktuell Kanau wird zum Bouquet \n"Mini Favorite" dÃ¤zuÃ¤gfÃ¼egt. \ns'Schpichere bruucht Ã¤ MomÃ¤nt...
+favorites.menueadd Kanau Favorite dÃ¤zuefÃ¼ege
+favorites.bqcreated Bouquet "Mini Favorite" isch aagleit worde...\n
+favorites.chadded Dr aktuell Kanau isch zu dÃ¤ FavoritÃ¤ dÃ¤zuÃ¤gfÃ¼egt worde...\n
+favorites.chalreadyinbq dr aktuell Kanau isch bereits i dÃ¤ Favorite...\n
+favorites.finalhint \nUs VersehÃ¤ dÃ¤zuegfÃ¼egti KanÃ¤u chÃ¶i mit\ndr Bouquetverwautig korrigiert wÃ¤rde.\n
+
+sleeptimerbox.title Sleeptimer
+sleeptimerbox.hint1 Usschautzyt i Min. (000=aus)
+sleeptimerbox.hint2 d'Dbox2 schautet sich nach derÃ¤ Zyt uus.
+sleeptimerbox.announce Sleeptimer i 1 min
+
+zaptotimer.announce I einer Minute wird umgschautet
+recordtimer.announce d'Ufnahm beginnt i wenige Minute
+shutdowntimer.announce d'Box wird i 1 Minute abÃ¤gfahre.\nShutdown abbrÃ¤che?
+
+timerbar.channelswitch Umschaute
+timerbar.recordevent UfnÃ¤
+timer.eventtimed.title SÃ¤ndig vormerke
+timer.eventtimed.msg d'SÃ¤ndig isch vorgmerkt
+timer.eventrecord.title Ufnahm vormerke
+timer.eventrecord.msg d'SÃ¤ndig isch zur Ufnahm vorgmerkt worde
+timerlist.name Timerlischte
+timerlist.delete LÃ¶sche
+timerlist.empty Ã¤s git momentan kei Timer
+timerlist.type.shutdown Shutdown
+timerlist.type.nextprogram NÃ¶chschts Programm
+timerlist.type.zapto Umschaute
+timerlist.type.standby Standby
+timerlist.type.record Ufnahm
+timerlist.type.remind Erinnerig
+timerlist.type.sleeptimer Sleeptimer
+timerlist.type.unknown Unbekannt
+timerlist.repeat.once eimalig
+timerlist.repeat.daily tÃ¤glech
+timerlist.repeat.weekly wÃ¶chentlech
+timerlist.repeat.biweekly 2-wÃ¶chentlech
+timerlist.repeat.fourweekly 4-wÃ¶chentlech
+timerlist.repeat.monthly monetlech
+timerlist.repeat.byeventdescription siehe timer
+timerlist.repeat.unknown unbekannt
+timerlist.repeat.weekdays A WochetÃ¤g
+timerlist.repeat.sunday So
+timerlist.repeat.monday Mo
+timerlist.repeat.tuesday Di
+timerlist.repeat.wednesday Mi
+timerlist.repeat.thursday Do
+timerlist.repeat.friday Fr
+timerlist.repeat.saturday Sa
+timerlist.weekdays WochentÃ¤g
+timerlist.weekdays.hint_1 Mo Di Mi Do Fr Sa So
+timerlist.weekdays.hint_2 'X'=Timer '-' kei Timer
+timerlist.program.unknown Programm unbekannt
+timerlist.standby.off Ufwache us Standby
+timerlist.standby.on Uf Standby go
+timerlist.alarmtime Alarmzyt
+timerlist.stoptime Schtoppzyt
+timerlist.new Neuer Timer
+timerlist.menumodify Timer bearbeite
+timerlist.type Timertyp
+timerlist.repeat Widerholige
+timerlist.save Timer spichere
+timerlist.standby SB Modus
+timerlist.channel Kanau
+timerlist.menunew NÃ¶ie Timer
+timerlist.reload Aktualisiere
+timerlist.modify Bearbeite
+timerlist.message Nachricht
+timerlist.apids Audio PIDs
+timerlist.bouquetselect Bouquet wÃ¤hle
+timerlist.channelselect Kanau wÃ¤hle
+timerlist.modeselect Modus-Uswau
+timerlist.modetv TV KanÃ¤le
+timerlist.moderadio Radio KanÃ¤le
+timersettings.separator TimerischtÃ¶uige
+timersettings.record_safety_time_before Ufnahmeschtart-Korrektur
+timersettings.record_safety_time_before.hint_1 Korrekturzyt i Min. (00=us), diÃ¤ bim Schtart
+timersettings.record_safety_time_before.hint_2 vom jewilige Timer abzoge wÃ¤rde
+timersettings.record_safety_time_after UfnahmeÃ¤ndi-Korrektur
+timersettings.record_safety_time_after.hint_1 Korrekturzyt i Min. (00=us), diÃ¤ uf d'Ã¤nd-
+timersettings.record_safety_time_after.hint_2 zyt vom jewilige Timer addiÃ¤rt wird
+
+fontsize.menu MenÃ¼text
+fontsize.menu_title MenÃ¼ Titu
+fontsize.menu_info MenÃ¼ Info
+fontsize.epg_title EPG Titu
+fontsize.epg_info1 EPG Info 1
+fontsize.epg_info2 EPG Info 2
+fontsize.epg_date EPG Datum
+fontsize.alert Alarm
+fontsize.eventlist_title Eventlist Titu
+fontsize.eventlist_itemlarge Eventlist gross
+fontsize.eventlist_itemsmall Eventlist chlii
+fontsize.eventlist_datetime Eventlist Datum / Zyt
+fontsize.channellist Kanaulischte
+fontsize.channellist_descr Beschribig
+fontsize.channellist_number Nummer
+fontsize.channel_num_zap kei Ahnig
+fontsize.infobar_number Infobar Nummer
+fontsize.infobar_channame Infobar Kanau
+fontsize.infobar_info Infobar Info
+fontsize.infobar_small Infobar chlii
+fontsize.gamelist_itemLarge gross
+fontsize.gamelist_itemSmall chlii
+fontsize.filebrowser_item Dateibrowser-Itrag
+fontsize.hint Font wird initialisiert,\nbitte warte...
+
+fontmenu.head SchriftgrÃ¶ssi IschtÃ¶uige
+fontmenu.channellist Kanaulischte
+fontmenu.eventlist Eventlist
+fontmenu.epg EPG
+fontmenu.infobar Infobar
+fontmenu.gamelist Gamelischte
+
+colormenu.gtx_alpha Transparenz (GTX)
+gtxalpha.alpha1 Alpha 1
+gtxalpha.alpha2 Alpha 2
+
+mp3player.name MP3 Player
+mp3player.head Mp3 Playlist
+mp3player.play Abschpile
+mp3player.add DÃ¤zuefÃ¼ege
+mp3player.delete LÃ¶sche
+mp3player.stop Schtopp
+mp3player.playall Aui abschpile
+mp3player.shuffle Shuffle
+mp3player.deleteall Aui lÃ¶sche
+mp3player.title Titu
+mp3player.artist Interpret
+mp3player.playing Aktuelle Track
+mp3player.id3scan Scanne ID3-Tags
+mp3player.keylevel Taschte-Umschautig
+mp3player.fastforward schnÃ¤ue Vorl.
+mp3player.pause Pause
+mp3player.rewind schnÃ¤ue RÃ¼ckl.
+mp3player.artist_title Interpret, Titu
+mp3player.title_artist Titu, Interpret
+mp3player.display_order Azeig
+mp3player.follow Selektiere akt. Track
+mp3player.screensaver_timeout BÃ¶udschirmschoner (min, 0=us)
+
+movieplayer.name Movieplayer
+movieplayer.head Movieplayer
+movieplayer.play Abschpile
+movieplayer.choosets TS Abschpile
+movieplayer.chooseps PS Abschpile
+movieplayer.choosestream uset
+movieplayer.choosepes PES Abschpile
+movieplayer.bookmark Bookmarks
+movieplayer.choosestreamsvcd (S)VCD
+movieplayer.choosestreamdvd DVD
+movieplayer.pleasewait unset
+movieplayer.nostreamingserver unset
+
+filebrowser.head Filebrowser
+filebrowser.filter.active FÃ¶uter a
+filebrowser.filter.inactive FÃ¶uter us
+filebrowser.select AuswÃ¤hle
+filebrowser.mark Markiere
+filebrowser.scan DÃ¼rsueche Verzeichnis
+filebrowser.sort.name (Dateiname)
+filebrowser.sort.date (Datum)
+
+nfs.mount NFS/CIFS Verzeichnis mounte
+nfs.ip NFS/CIFS SÃ¶rver IP
+nfs.dir NFS/CIFS Verzeichnis
+nfs.localdir lokaus Verzeichnis
+nfs.automount Bim Schtart mounte
+nfs.mountnow Jetz mounte
+nfs.mounterror Mount-FÃ¤hler: lade default-IschtÃ¶uige
+nfs.mounttimeout unset
+nfs.umount NFS/CIFS Verzeichnis unmounte
+nfs.umounterror Umount-FÃ¤hler
+nfs.alreadymounted Verzeichnis bereits gemountet
+nfs.mount_options Mount-Optione
+nfs.type Typ
+nfs.type_nfs NFS
+nfs.type_cifs CIFS
+nfs.username unset
+nfs.password unset
+nfsmenu.head NFS/CIFS IschtÃ¶uige
+
+apids.hint_1 Gib diÃ¤ z'streamende APIDs i,
+apids.hint_2 trennt dÃ¼r ' ' i hexadezimaler Form
+
+pictureviewer.head BÃ¶udbetrachter
+pictureviewer.sortorder Sort.reiÃ¤foug Ã¤ndere
+pictureviewer.sortorder.date (Datum)
+pictureviewer.sortorder.filename (Dateiname)
+pictureviewer.show Azeige
+pictureviewer.slideshow Diaschou
+pictureviewer.slide_time Diaschou-Azeigduur
+pictureviewer.scaling Skalierig

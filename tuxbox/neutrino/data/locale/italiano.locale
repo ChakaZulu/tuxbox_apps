@@ -56,6 +56,7 @@ mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Network
 mainsettings.recording Registrazione Streaming
+mainsettings.streaming Movieplayer
 mainsettings.colors Colori / Themes
 mainsettings.plugins plugins 
 mainsettings.lcd LC-Display
@@ -87,6 +88,7 @@ audiomenu.dolbydigital Dolby Digitale
 audiomenu.avs_control controllo Volume avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
+audiomenu.lirc lirc
 
 videomenu.head Impostazioni-Video
 videomenu.screensetup Impostazioni Margine Video
@@ -128,6 +130,16 @@ recordingmenu.server_wakeup Streamingserver accendi
 recordingmenu.server_mac Indirizzo Mac
 recordingmenu.setupnow Accettare le Impostazioni
 recordingmenu.no_scart no scart
+
+streamingmenu.head unset
+streamingmenu.streaming_type unset
+streamingmenu.server_ip unset
+streamingmenu.server_port unset
+streamingmenu.streaming_server_cddrive unset
+streamingmenu.streaming_videorate unset
+streamingmenu.streaming_audiorate unset
+streamingmenu.off unset
+streamingmenu.on unset
 
 ping.ok e raggiungibile (ping)
 ping.unreachable non e raggiungibile (unreachable)
@@ -241,6 +253,8 @@ keychooser.text2 Per interrompere aspettare..
 
 screensetup.upperleft rot = Margine Alto, sinistro
 screensetup.lowerright grÃƒÂ¼n = Margine Basso, destro
+
+bouquetlist.head Bouquets
 
 channellist.head Tutti i Canali
 channellist.nonefound Non e stato trovato nessun Canale!\nEseguire una nuova Ricerca Canali\n(dbox-Taste -> Servizio)
@@ -688,8 +702,13 @@ movieplayer.head movieplayer
 movieplayer.play Play
 movieplayer.choosets TS Play
 movieplayer.chooseps PS Play
+movieplayer.choosestream uset
 movieplayer.choosepes PES Play
 movieplayer.bookmark bookmark
+movieplayer.choosestreamsvcd (S)VCD
+movieplayer.choosestreamdvd DVD
+movieplayer.pleasewait unset
+movieplayer.nostreamingserver unset
 
 filebrowser.head filebrowser
 filebrowser.filter.active Filtro on
@@ -701,17 +720,23 @@ filebrowser.sort.name (Nome File)
 filebrowser.sort.date (Data)
 
 nfs.mount carica directory
-nfs.ip NFS Server IP
-nfs.dir NSF Directory
+nfs.ip NFS/CIFS Server IP
+nfs.dir NFS/CIFS Directory
 nfs.localdir Directory locale
 nfs.automount autocarica directory
 nfs.mountnow carica adesso
 nfs.mounterror errore di caricamento
-nfs.umount scarica NFS
-nfs.umounterror errore scarica NFS
+nfs.mounttimeout unset
+nfs.umount scarica NFS/CIFS
+nfs.umounterror errore scarica NFS/CIFS
 nfs.alreadymounted Directory gia caricato
 nfs.mount_options unset
-nfsmenu.head Impostazioni NFS 
+nfs.type Typ
+nfs.type_nfs NFS
+nfs.type_cifs CIFS
+nfs.username unset
+nfs.password unset
+nfsmenu.head Impostazioni NFS /CIFS
 
 apids.hint_1 Inoltrare i dati APIDs per Streamen,
 apids.hint_2 Diviso con ' ' in Formato hexadecimale
