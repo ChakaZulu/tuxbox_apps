@@ -82,6 +82,7 @@ class CPlugins
 		std::vector<struct plugin> plugin_list;
 
 		void parseCfg(plugin *plugin_data);
+		void scanDir(const char *dir);
 
 		std::map<std::string, std::string> params;
 	public:
@@ -101,6 +102,7 @@ class CPlugins
 		void setrc(int fd);
 		void setlcd(int fd);
 		void setvtxtpid(int fd);
+
 
 		int getNumberOfPlugins() { return plugin_list.size(); }
 		std::string getName(int number) { return plugin_list[number].name; }

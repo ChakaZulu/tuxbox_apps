@@ -47,19 +47,13 @@
 
 #include "gamelist.h"
 
-
-void CPlugins::loadPlugins()
+void CPlugins::scanDir(const char *dir)
 {
-	frameBuffer = CFrameBuffer::getInstance();
-	//printf("[CPlugins] Checking plugins-directory\n");
-//	printf("[CPlugins] Dir: %s\n", PLUGINDIR "/");
+struct dirent **namelist;
+std::string fname;
 
-	struct dirent **namelist;
+	int number_of_files = scandir(dir, &namelist, 0, alphasort);
 
-	int number_of_files = scandir(PLUGINDIR, &namelist, 0, alphasort);
-
-	number_of_plugins = 0;
-	plugin_list.clear();
 	for (int i = 0; i < number_of_files; i++)
 	{
 		std::string filename;
@@ -72,20 +66,26 @@ void CPlugins::loadPlugins()
 
 			plugin new_plugin;
 			new_plugin.filename = filename.substr(0, pos);
-			std::string fname = PLUGINDIR "/";
+			fname = string(dir) + "/";
 			new_plugin.cfgfile = fname.append(new_plugin.filename);
 			new_plugin.cfgfile.append(".cfg");
-			fname = PLUGINDIR "/";
-			new_plugin.sofile = fname.append(new_plugin.filename);
+			new_plugin.sofile = fname;
 			new_plugin.sofile.append(".so");
-
 			parseCfg(&new_plugin);
 
 			plugin_list.insert(plugin_list.end(), new_plugin);
 		}
 	}
-//	printf("[CPlugins] %d plugins found...\n", number_of_plugins);
+}
 
+void CPlugins::loadPlugins()
+{
+	frameBuffer = CFrameBuffer::getInstance();
+	number_of_plugins = 0;
+	plugin_list.clear();
+
+	scanDir(PLUGINDIR);
+	scanDir("/var/tuxbox/plugins");
 }
 
 CPlugins::~CPlugins()
