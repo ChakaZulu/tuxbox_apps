@@ -5201,7 +5201,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->nextService)
 		{
-#ifndef DISABEL_FILE
+#ifndef DISABLE_FILE
 			if ( eDVB::getInstance()->recorder || handleState() )
 #else
 			if ( handleState() )
