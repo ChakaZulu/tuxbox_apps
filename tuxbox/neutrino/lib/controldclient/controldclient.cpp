@@ -67,6 +67,7 @@ bool CControldClient::controld_close()
 	if(sock_fd!=0)
 	{
 		close(sock_fd);
+		sock_fd=0;
 	}
 }
 
