@@ -59,7 +59,6 @@
 #include <global.h>
 #include <neutrino.h>
 
-#define OLD_RC_API 1
 #ifdef OLD_RC_API
 #define RC_EVENT_DEVICE "/dev/dbox/rc0"
 #define RC_standby_release (KEY_MAX + 1)
