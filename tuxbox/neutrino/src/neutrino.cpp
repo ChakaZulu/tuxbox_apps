@@ -679,8 +679,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_bouquet_down = configfile.getInt32( "key_bouquet_down",  CRCInput::RC_left );
 	g_settings.key_subchannel_up = configfile.getInt32( "key_subchannel_up",  CRCInput::RC_right );
 	g_settings.key_subchannel_down = configfile.getInt32( "key_subchannel_down",  CRCInput::RC_left );
-  g_settings.key_zaphistory = configfile.getInt32( "key_zaphistory",  CRCInput::RC_home );
-  g_settings.key_lastchannel = configfile.getInt32( "key_lastchannel",  CRCInput::RC_0 );
+	g_settings.key_zaphistory = configfile.getInt32( "key_zaphistory",  CRCInput::RC_home );
+	g_settings.key_lastchannel = configfile.getInt32( "key_lastchannel",  CRCInput::RC_0 );
 
 	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
 	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
@@ -2455,8 +2455,8 @@ enum keynames {
 	KEY_BOUQUET_DOWN,
 	KEY_SUBCHANNEL_UP,
 	KEY_SUBCHANNEL_DOWN,
-  KEY_ZAP_HISTORY,
-  KEY_LASTCHANNEL
+	KEY_ZAP_HISTORY,
+	KEY_LASTCHANNEL
 };
 
 const neutrino_locale_t keydescription_head[15] =
@@ -2474,8 +2474,8 @@ const neutrino_locale_t keydescription_head[15] =
 	LOCALE_KEYBINDINGMENU_BOUQUETDOWN_HEAD,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELUP_HEAD,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN_HEAD,
-  LOCALE_KEYBINDINGMENU_ZAPHISTORY_HEAD,
-  LOCALE_KEYBINDINGMENU_LASTCHANNEL_HEAD
+	LOCALE_KEYBINDINGMENU_ZAPHISTORY_HEAD,
+	LOCALE_KEYBINDINGMENU_LASTCHANNEL_HEAD
 };
 
 const neutrino_locale_t keydescription[15] =
@@ -2493,8 +2493,8 @@ const neutrino_locale_t keydescription[15] =
 	LOCALE_KEYBINDINGMENU_BOUQUETDOWN,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELUP,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN,
-  LOCALE_KEYBINDINGMENU_ZAPHISTORY,
-  LOCALE_KEYBINDINGMENU_LASTCHANNEL
+	LOCALE_KEYBINDINGMENU_ZAPHISTORY,
+	LOCALE_KEYBINDINGMENU_LASTCHANNEL
 };
 
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
@@ -2517,8 +2517,8 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 			&g_settings.key_bouquet_down,
 			&g_settings.key_subchannel_up,
 			&g_settings.key_subchannel_down,
-      &g_settings.key_zaphistory,
-      &g_settings.key_lastchannel
+			&g_settings.key_zaphistory,
+			&g_settings.key_lastchannel
 		};
 
 	CKeyChooser * keychooser[15];
@@ -2544,7 +2544,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
   
 	keySettings.addItem(new CMenuForwarder(keydescription[KEY_ZAP_HISTORY], true, NULL, keychooser[KEY_ZAP_HISTORY]));
 	
-  keySettings.addItem(new CMenuForwarder(keydescription[KEY_LASTCHANNEL], true, NULL, keychooser[KEY_LASTCHANNEL]));
+	keySettings.addItem(new CMenuForwarder(keydescription[KEY_LASTCHANNEL], true, NULL, keychooser[KEY_LASTCHANNEL]));
 }
 
 void CNeutrinoApp::SelectNVOD()
