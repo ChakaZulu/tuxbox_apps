@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.37 2002/10/04 12:39:51 Zwen Exp $
+	$Id: timermanager.cpp,v 1.38 2002/10/09 19:20:16 Zwen Exp $
 
 	License: GPL
 
@@ -66,6 +66,8 @@ void* CTimerManager::timerThread(void *arg)
 {
 	CTimerManager *timerManager = (CTimerManager*) arg;
 	bool saveEvents;
+	int wait = ((int)time(NULL)) % 20; // Start at a multiple of 20 sec
+	sleep(wait);
 	while (1)
 	{
 		saveEvents = false;
@@ -249,15 +251,15 @@ void CTimerManager::saveEventsToConfig()
 //------------------------------------------------------------
 bool CTimerManager::shutdown()
 {
-// leider funktioniert der wakeup nicht richtig
-/*
+
 	time_t nextAnnounceTime=0;
 	CTimerEventMap::iterator pos = events.begin();
 	for(;pos != events.end();pos++)
 	{
 		CTimerEvent *event = pos->second;
-		if(event->eventType == CTimerEvent::TIMER_RECORD ||
-			event->eventType == CTimerEvent::TIMER_ZAPTO )
+		if((event->eventType == CTimerEvent::TIMER_RECORD ||
+			event->eventType == CTimerEvent::TIMER_ZAPTO ) &&
+			event->eventState == CTimerEvent::TIMERSTATE_SCHEDULED)
 		{
 			// Wir wachen nur für Records und Zaptos wieder auf
 			if(event->announceTime < nextAnnounceTime || nextAnnounceTime==0)
@@ -266,34 +268,34 @@ bool CTimerManager::shutdown()
 			}
 		}
 	}
-        int minutes=0xFFFF;
 	int erg;
+	
 	if(nextAnnounceTime!=0)
 	{
-           minutes=((nextAnnounceTime-time(NULL))/60)-5; //Wakeup 5 min befor next announce
-           if(minutes<1)
-              minutes=1; //wait at least 1 min befor wakeup
-        }
-        int fd = open("/dev/dbox/fp0", O_RDWR);
-        if ((erg=ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &minutes))<0)
-        {
-           if(erg==-1) // Wakeup not supported
-           {
-              dprintf("Wakeup not supported (%d min.)\n",minutes);
-           }
-           else
-           {
-              dprintf("Error setting wakeup (%d)\n",erg);
-           }
-           return false;
-        }
-        else
-        {
-           dprintf("wakeup in %d min. programmed\n",minutes);
-           return true;
-        }
-*/        
-return false;
+		int minutes=((nextAnnounceTime-time(NULL))/60)-3; //Wakeup 3 min befor next announce
+		if(minutes<1)
+			minutes=1; //1 minute is minimum
+
+		int fd = open("/dev/dbox/fp0", O_RDWR);
+		if ((erg=ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &minutes))<0)
+		{
+			if(erg==-1) // Wakeup not supported
+			{
+				dprintf("Wakeup not supported (%d min.)\n",minutes);
+			}
+			else
+			{
+				dprintf("Error setting wakeup (%d)\n",erg);
+			}
+			return false;
+		}
+		else
+		{
+			dprintf("wakeup in %d min. programmed\n",minutes);
+			return true;
+		}
+	}
+	return false;
 }
 
 //------------------------------------------------------------
