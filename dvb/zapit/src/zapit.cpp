@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.34 2001/11/15 23:06:54 Simplex Exp $
+  $Id: zapit.cpp,v 1.35 2001/11/18 13:52:54 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -75,6 +75,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.35  2001/11/18 13:52:54  faralla
+  command to get curr_onidsid
+
   Revision 1.34  2001/11/15 23:06:54  Simplex
   zapit now reads bouquets.xml,
   knows what it means and
@@ -1931,7 +1934,17 @@ void parse_command()
 	case 'r' :
 		sendChannelListOfBouquet(atoi((const char*) &rmsg.param));
 	break;
-
+	case 's':
+		status = "00s";
+		if (send(connfd, status, strlen(status),0) == -1) {
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+		if (send(connfd, &curr_onid_sid, sizeof(int),0) == -1) {
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+		break;
 	default:
       status = "000";
       //printf("zapit is sending back a status-msg %s\n", status);
@@ -1995,7 +2008,7 @@ int main(int argc, char **argv) {
     }
 
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.34 2001/11/15 23:06:54 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.35 2001/11/18 13:52:54 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
