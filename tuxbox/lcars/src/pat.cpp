@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pat.cpp,v $
+Revision 1.9  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.8  2002/09/18 17:31:03  TheDOC
 replaced O_RDONLY with O_RDWR on demux-device-open, stupid me
 
@@ -47,7 +50,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <stdio.h>
 #include <iostream>
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 #include <map>
 
@@ -58,16 +61,16 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 bool pat::readPAT()
 {
 	int fd, r;
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 	unsigned char buffer[BSIZE];
 
-	fd=open("/dev/dvb/card0/demux0", O_RDWR);
+	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
 	if (fd < 0)
 	{
 		perror("open readPAT-open");
 	}
 	//ioctl(fd,DMX_STOP,0);
-	memset (&flt.filter, 0, sizeof (struct dmxFilter));
+	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 	r = BSIZE;
 	flt.pid            = 0x0;
 	//flt.filter.filter[0] = 0x0;

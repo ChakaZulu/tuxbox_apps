@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tuner.h,v $
+Revision 1.7  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.6  2002/10/20 02:03:37  TheDOC
 Some fixes and stuff
 
@@ -43,13 +46,11 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <memory.h>
-#include <ost/dmx.h>
-#include <ost/video.h>
-#include <ost/frontend.h>
-#include <ost/audio.h>
-#include <ost/sec.h>
-#include <ost/sec.h>
-#include <ost/ca.h>
+#include <linux/dvb/dmx.h>
+#include <linux/dvb/video.h>
+#include <linux/dvb/frontend.h>
+#include <linux/dvb/audio.h>
+#include <linux/dvb/ca.h>
 #include <dbox/avs_core.h>
 
 #include "settings.h"
@@ -57,10 +58,12 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 class tuner
 {
 	settings *setting;
+	int frontend;
 public:
 	tuner(settings *s);
-	CodeRate getFEC(int fec);
-	bool tune(int frequ, int symbol, int polarization = -1, int fec = 0, int diseqc = 0);
+	~tuner();
+	fe_code_rate_t getFEC(int fec);
+	bool tune(unsigned int frequ, unsigned int symbol, int polarization = -1, int fec = 0, int diseqc = 0);
 };
 
 #endif

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tdt.cpp,v $
+Revision 1.7  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.6  2002/09/18 17:31:03  TheDOC
 replaced O_RDONLY with O_RDWR on demux-device-open, stupid me
 
@@ -40,7 +43,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 #include "tdt.h"
 #include "help.h"
@@ -68,17 +71,17 @@ void* tdt::start_timereader( void * this_ptr )
 	while(1)
 	{
 		int fd, r;
-		struct dmxSctFilterParams flt;
+		struct dmx_sct_filter_params flt;
 		unsigned char buffer[BSIZE];
 		time_t acttime = 0;
 
 		while(acttime < 100000)
 		{
 			// Lies den TDT
-			if ((fd=open("/dev/dvb/card0/demux0", O_RDWR)) < 0)
+			if ((fd=open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0)
 				perror("TDT open");
 
-			memset (&flt.filter, 0, sizeof (struct dmxFilter));
+			memset (&flt.filter, 0, sizeof (struct dmx_filter));
 			r = BSIZE;
 			flt.pid            = 0x14;
 			flt.filter.filter[0] = 0x70;

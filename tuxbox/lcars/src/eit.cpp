@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.14  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.13  2002/10/14 01:19:15  woglinde
 
 
@@ -63,7 +66,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 #include "eit.h"
 #include "help.h"
@@ -155,7 +158,7 @@ void eit::executeCommand()
 void eit::receiveNow(int SID)
 {
 	long fd, r;
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 	//unsigned char sec_buffer[10][BSIZE];
 	unsigned char buffer[BSIZE];
 
@@ -166,9 +169,9 @@ void eit::receiveNow(int SID)
 	//printf("Checking mutex\n");
 	pthread_mutex_lock( &mutex );
 	//printf("Mutex passed\n");
-	fd=open("/dev/dvb/card0/demux0", O_RDWR);
+	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
 
-	memset (&flt.filter, 0, sizeof (struct dmxFilter));
+	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 
 	eventlist.clear();
 	//printf("Anfangs-Events: %i\n", eventlist.size());
@@ -481,7 +484,7 @@ linkage eit::nextLinkage()
 void eit::readSchedule(int SID, osd *osd)
 {
 	long fd, r;
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 	//unsigned char sec_buffer[10][BSIZE];
 	unsigned char buffer[BSIZE];
 
@@ -489,9 +492,9 @@ void eit::readSchedule(int SID, osd *osd)
 	(*osd).setPerspectiveName("Reading Scheduling Information...");
 	(*osd).showPerspective();
 
-	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
+	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
 	
-	memset (&flt.filter, 0, sizeof (struct dmxFilter));
+	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 	
 	eventlist.clear();
 
@@ -700,7 +703,7 @@ void eit::dumpSchedule(int TS, int ONID, int SID, osd *osd)
 void eit::dumpSchedule(int SID, osd *osd)
 {
 	long fd, r;
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 	//unsigned char sec_buffer[10][BSIZE];
 	unsigned char buffer[BSIZE];
 	time_eventid.clear();
@@ -711,9 +714,9 @@ void eit::dumpSchedule(int SID, osd *osd)
 	osd->addCommand("SHOW perspective");
 
 	pthread_mutex_lock( &mutex );
-	fd=open("/dev/dvb/card0/demux0", O_RDWR);
+	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
 
-	memset (&flt.filter, 0, sizeof (struct dmxFilter));
+	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 
 	flt.pid            = 0x12;
 	flt.filter.filter[0] = 0x50;

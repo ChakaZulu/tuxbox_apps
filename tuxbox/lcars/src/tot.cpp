@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tot.cpp,v $
+Revision 1.8  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.7  2002/10/20 02:03:37  TheDOC
 Some fixes and stuff
 
@@ -43,7 +46,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 #include "tot.h"
 #include "help.h"
@@ -73,17 +76,17 @@ void* tot::start_timereader( void * this_ptr )
 {
 	tot *t = (tot *) this_ptr;
 	int fd, r;
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 	unsigned char buffer[BSIZE];
 	time_t acttime = 0;
 
 	while(1)
 	{
 		// Lies den TOT
-		if ((fd=open("/dev/dvb/card0/demux0", O_RDWR)) < 0)
+		if ((fd=open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0)
 			perror("TOT open");
 
-		memset (&flt.filter, 0, sizeof (struct dmxFilter));
+		memset (&flt.filter, 0, sizeof (struct dmx_filter));
 		r = BSIZE;
 		flt.pid            = 0x14;
 		flt.filter.filter[0] = 0x73;

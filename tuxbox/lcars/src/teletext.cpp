@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.11  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.10  2002/10/05 23:20:33  obi
 *hust*
 
@@ -55,7 +58,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 #define BSIZE 10000
 
@@ -68,18 +71,18 @@ void teletext::getTXT(int PID)
 
 void teletext::startReinsertion(int PID)
 {
-	dmxPesFilterParams pesFilterParams;
+	dmx_pes_filter_params pesFilterParams;
 
 	pesFilterParams.pid = PID;
 	pesFilterParams.input = DMX_IN_FRONTEND;
 	pesFilterParams.output = DMX_OUT_DECODER;
-	pesFilterParams.pesType = DMX_PES_TELETEXT;
+	pesFilterParams.pes_type = DMX_PES_TELETEXT;
 	pesFilterParams.flags  = DMX_IMMEDIATE_START;
 
 	std::cout << "Start reinsertion on PID " << PID << std::endl;
 	
 	if (txtfd == -1)
-		txtfd = open("/dev/dvb/card0/demux0", O_RDWR);
+		txtfd = open("/dev/dvb/adapter0/demux0", O_RDWR);
 	
 	if (ioctl(txtfd, DMX_SET_PES_FILTER, &pesFilterParams) < 0)
 		perror("DMX_SET_PES_FILTER");

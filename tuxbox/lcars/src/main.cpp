@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.25  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.24  2002/09/18 10:48:37  obi
 use devfs devices
 
@@ -186,7 +189,7 @@ int main(int argc, char **argv)
 	//printf("Ending OSD\n");
 
 
-	int test = open("/dev/dvb/card0/demux0", O_RDWR);
+	int test = open("/dev/dvb/adapter0/demux0", O_RDWR);
 	if (test < 0)
 	{
 		rc.start_thread(true);

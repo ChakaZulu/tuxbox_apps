@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.10  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.9  2002/10/20 02:03:37  TheDOC
 Some fixes and stuff
 
@@ -51,13 +54,11 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <memory.h>
-#include <ost/dmx.h>
-#include <ost/video.h>
-#include <ost/frontend.h>
-#include <ost/audio.h>
-#include <ost/sec.h>
-#include <ost/sec.h>
-#include <ost/ca.h>
+#include <linux/dvb/dmx.h>
+#include <linux/dvb/video.h>
+#include <linux/dvb/frontend.h>
+#include <linux/dvb/audio.h>
+#include <linux/dvb/ca.h>
 #include <dbox/avs_core.h>
 #include <dbox/fp.h>
 
@@ -81,18 +82,18 @@ zap::zap(settings &set, osd &o, tuner &t, cam &c) : setting(set), osdd(o), tune(
 {
 	//printf("Initializing zapper...\n");
 
-	vid = open("/dev/dvb/card0/video0", O_RDWR);
-	if((video = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
+	vid = open("/dev/dvb/adapter0/video0", O_RDWR);
+	if((video = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
 		//printf("Cannot open demux device \n");
 		exit(1);
 	}
 
-	if((audio = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
+	if((audio = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
 		//printf("Cannot open demux device\n");
 		exit(1);
 	}
-	aud = open("/dev/dvb/card0/audio0", O_RDWR);
-	ioctl(vid, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX);
+	aud = open("/dev/dvb/adapter0/audio0", O_RDWR);
+	ioctl(vid, VIDEO_SELECT_SOURCE, (video_stream_source_t)VIDEO_SOURCE_DEMUX);
 	old_frequ = 0;
 	old_TS = -1;
 }
@@ -134,29 +135,29 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 	close(audio);
 	close(pcr);
 
-	vid = open("/dev/dvb/card0/video0", O_RDWR);
+	vid = open("/dev/dvb/adapter0/video0", O_RDWR);
 	if (vid < 0)
-		perror("/dev/dvb/card0/video0");
+		perror("/dev/dvb/adapter0/video0");
 
-	if((video = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
-		perror("/dev/dvb/card0/demux0");
+	if((video = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
+		perror("/dev/dvb/adapter0/demux0");
 		exit(1);
 	}
 
-	if((pcr = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
-		perror("/dev/dvb/card0/demux0");
+	if((pcr = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
+		perror("/dev/dvb/adapter0/demux0");
 		exit(1);
 	}
 
-	aud = open("/dev/dvb/card0/audio0", O_RDWR);
+	aud = open("/dev/dvb/adapter0/audio0", O_RDWR);
 	if (aud < 0)
-		perror("/dev/dvb/card0/audio0");
+		perror("/dev/dvb/adapter0/audio0");
 
-	if((audio = open("/dev/dvb/card0/demux0", O_RDWR)) < 0) {
-		perror("/dev/dvb/card0/demux0");
+	if((audio = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
+		perror("/dev/dvb/adapter0/demux0");
 		exit(1);
 	}
-	struct dmxPesFilterParams pes_filter;
+	struct dmx_pes_filter_params pes_filter;
 
 	if (VPID == 0)
 		VPID = 0x1fff;
@@ -171,7 +172,7 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		pes_filter.pid     = VPID;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
-		pes_filter.pesType = DMX_PES_VIDEO;
+		pes_filter.pes_type = DMX_PES_VIDEO;
 		pes_filter.flags   = 0;
 		ioctl(video,DMX_SET_PES_FILTER,&pes_filter);
 		usevideo = true;
@@ -183,7 +184,7 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		pes_filter.pid     = APID;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
-		pes_filter.pesType = DMX_PES_AUDIO;
+		pes_filter.pes_type = DMX_PES_AUDIO;
 		pes_filter.flags   = 0;
 		ioctl(audio,DMX_SET_PES_FILTER,&pes_filter);
 		useaudio = true;
@@ -195,7 +196,7 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		pes_filter.pid     = PCR;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
-		pes_filter.pesType = DMX_PES_PCR;
+		pes_filter.pes_type = DMX_PES_PCR;
 		pes_filter.flags   = 0;
 		ioctl(pcr,DMX_SET_PES_FILTER,&pes_filter);
 		usepcr = true;
@@ -253,7 +254,7 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 
 void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
 {
-	struct dmxPesFilterParams pes_filter;
+	struct dmx_pes_filter_params pes_filter;
 
 	int i = AVS_MUTE;
 	int avs = open("/dev/dbox/avs0",O_RDWR);
@@ -268,7 +269,7 @@ void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
 	pes_filter.pid     = APID;
 	pes_filter.input   = DMX_IN_FRONTEND;
 	pes_filter.output  = DMX_OUT_DECODER;
-	pes_filter.pesType = DMX_PES_AUDIO;
+	pes_filter.pes_type = DMX_PES_AUDIO;
 	pes_filter.flags   = 0;
 	ioctl(audio, DMX_SET_PES_FILTER, &pes_filter);
 

@@ -11,7 +11,7 @@
 #include <sys/ioctl.h>
 #include <memory.h>
 
-#include <ost/ca.h>
+#include <linux/dvb/ca.h>
 
 #include "cam.h"
 
@@ -172,7 +172,7 @@ void cam::cam_answer()
 	int camfd, len = 0;
 	unsigned char buffer[128];
 
-	camfd=open("/dev/dvb/card0/ca0", O_RDWR);
+	camfd=open("/dev/dvb/adapter0/ca0", O_RDWR);
 	if( camfd <= 0 )
 	{
 		perror("open ca0");
@@ -242,7 +242,7 @@ void cam::sendCAM(void *data, unsigned int len)
 	ca_msg.length = len - 1;
 	memcpy(ca_msg.msg, command + 1, len - 1);
 	
-	fd=open("/dev/dvb/card0/ca0", O_RDWR);
+	fd=open("/dev/dvb/adapter0/ca0", O_RDWR);
 	if (ioctl(fd, CA_SEND_MSG, &ca_msg) != 0)
 	{
 		perror("cam-ioctl");
@@ -263,7 +263,7 @@ void cam::readCAID()
 		unsigned char buffer[128];
 		int fd;
 	
-		fd=open("/dev/dvb/card0/ca0", O_RDWR);
+		fd=open("/dev/dvb/adapter0/ca0", O_RDWR);
 		if(fd <= 0)
 		{
 			perror("open ca0");
@@ -323,7 +323,7 @@ bool cam::isfree()
 	int camfd, len = 0;
 	unsigned char buffer[128];
 
-	camfd=open("/dev/dvb/card0/ca0", O_RDWR);
+	camfd=open("/dev/dvb/adapter0/ca0", O_RDWR);
 	if( camfd <= 0 )
 	{
 		perror("open ca0");

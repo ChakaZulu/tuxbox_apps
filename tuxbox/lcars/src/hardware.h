@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.h,v $
+Revision 1.8  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.7  2002/06/02 15:39:40  TheDOC
 video data viewable
 
@@ -50,7 +53,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <dbox/avs_core.h>
-#include <ost/audio.h>
+#include <linux/dvb/audio.h>
 #include <dbox/fp.h>
 
 #include "settings.h"

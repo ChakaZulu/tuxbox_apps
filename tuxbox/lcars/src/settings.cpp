@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.9  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.8  2002/09/18 10:48:37  obi
 use devfs devices
 
@@ -51,13 +54,11 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <ost/dmx.h>
-#include <ost/video.h>
-#include <ost/frontend.h>
-#include <ost/audio.h>
-#include <ost/sec.h>
-#include <ost/sec.h>
-#include <ost/ca.h>
+#include <linux/dvb/dmx.h>
+#include <linux/dvb/video.h>
+#include <linux/dvb/frontend.h>
+#include <linux/dvb/audio.h>
+#include <linux/dvb/ca.h>
 #include <memory.h>
 #include <sstream>
 #include <sys/socket.h>
@@ -158,12 +159,12 @@ int settings::getEMMpid(int TS)
 int settings::find_emmpid(int ca_system_id) {
 	char buffer[1000];
 	int fd, r = 1000, count;
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 
-	fd=open("/dev/dvb/card0/demux0", O_RDWR);
+	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
 	if (fd<0)
 	{
-		perror("/dev/dvb/card0/demux0");
+		perror("/dev/dvb/adapter0/demux0");
 		return -fd;
 	}
 

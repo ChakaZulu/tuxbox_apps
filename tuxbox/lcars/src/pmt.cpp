@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pmt.cpp,v $
+Revision 1.9  2002/11/12 19:09:02  obi
+ported to dvb api v3
+
 Revision 1.8  2002/09/18 17:31:03  TheDOC
 replaced O_RDONLY with O_RDWR on demux-device-open, stupid me
 
@@ -46,7 +49,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 #include "pmt.h"
 
@@ -55,13 +58,13 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 pmt_data pmt::readPMT(int pmt_pid)
 {
 	int fd, r;
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 	unsigned char buffer[BSIZE];
 
 	// Lies den PMT
-	fd=open("/dev/dvb/card0/demux0", O_RDWR);
+	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
 
-	memset (&flt.filter, 0, sizeof (struct dmxFilter));
+	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 	r = BSIZE;
 	flt.pid            = pmt_pid;
 	flt.filter.filter[0] = 0x2;
