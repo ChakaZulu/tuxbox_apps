@@ -258,11 +258,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 						?eTransponder::buildNamespace(onid,tsid,tp.satellite.orbital_position,tp.satellite.frequency, tp.satellite.polarisation)
 						:-1;
 
-					// schon bekannte transponder nicht nochmal scannen
-					if (dvb.settings->getTransponders()->searchTS(dvb_namespace, tsid, onid))
-						continue;
-					else
-						tp.dvb_namespace=dvb_namespace;
+					tp.dvb_namespace=dvb_namespace;
 
 					if (flags&flagNoCircularPolarization)
 						tp.satellite.polarisation&=1;
@@ -407,11 +403,32 @@ void eDVBScanController::handleSDT(const SDT *sdt)
 
 	transponder->dvb_namespace=dvb_namespace;
 
-		// ok we found the transponder, it seems to be valid
+	eTransponder *tmp = 0;
+	if ( !isValidONIDTSID(onid,tsid) )  // feeds.. scpc.. or muxxers with default values
+	{
+		eDebug("[SCAN] SCPC detected... compare complete transponder");
+		// we must search transponder via freq pol usw..
+		transponder->transport_stream_id = -1;
+		transponder->original_network_id = -1;
+		tmp = dvb.settings->getTransponders()->searchTransponder(*transponder);
+		transponder->transport_stream_id = tsid.get();
+		transponder->original_network_id = onid.get();
+	}
+
+	// ok we found the transponder, it seems to be valid
 	// get Reference to the new Transponder
-	eTransponder &real = dvb.settings->getTransponders()->createTransponder(dvb_namespace, tsid, onid);
+	eTransponder &real = tmp?*tmp:dvb.settings->getTransponders()->createTransponder(dvb_namespace, tsid, onid);
 	// replace referenced transponder with new transponderdata
-	real=*transponder;
+
+	if ( tmp )
+	{
+		dvb_namespace=tmp->dvb_namespace;
+		tsid=tmp->transport_stream_id;
+		onid=tmp->original_network_id;
+	}
+	else
+		real=*transponder;
+
 	// set transponder pointer to the adress in the TransponderList
 	transponder = &real;
 	// set transponder to stateOK
