@@ -37,7 +37,7 @@ class CLcddMsg : public CBasicMessage
 
  public:
 
-	static const char ACTVERSION = 1;
+	static const CBasicMessage::t_version ACTVERSION = 1;
 
 	enum commands
 		{
