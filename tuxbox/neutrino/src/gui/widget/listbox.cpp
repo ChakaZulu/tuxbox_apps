@@ -221,22 +221,6 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 				}
 			}
 		}
-		else if ( msg ==CRCInput::RC_red)
-		{
-			onRedKeyPressed();
-		}
-		else if ( msg ==CRCInput::RC_green)
-		{
-			onGreenKeyPressed();
-		}
-		else if ( msg ==CRCInput::RC_yellow)
-		{
-			onYellowKeyPressed();
-		}
-		else if ( msg ==CRCInput::RC_blue)
-		{
-			onBlueKeyPressed();
-		}
 		else if ( msg == (uint) g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
@@ -257,6 +241,22 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 		else if( msg ==CRCInput::RC_ok)
 		{
 			onOkKeyPressed();
+		}
+		else if ( msg ==CRCInput::RC_red)
+		{
+			onRedKeyPressed();
+		}
+		else if ( msg ==CRCInput::RC_green)
+		{
+			onGreenKeyPressed();
+		}
+		else if ( msg ==CRCInput::RC_yellow)
+		{
+			onYellowKeyPressed();
+		}
+		else if ( msg ==CRCInput::RC_blue)
+		{
+			onBlueKeyPressed();
 		}
 		else
 		{
