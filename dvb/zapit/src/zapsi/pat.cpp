@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.35 2002/09/20 16:53:39 thegoodguy Exp $
+ * $Id: pat.cpp,v 1.36 2002/09/21 12:47:11 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 /* libevent */
 #include <eventserver.h>

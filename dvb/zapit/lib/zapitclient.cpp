@@ -529,7 +529,7 @@ void CZapitClient::setScanBouquetMode( bouquetMode mode)
 /***********************************************/
 
 /* adds bouquet at the end of the bouquetlist*/
-void CZapitClient::addBouquet( string name)
+void CZapitClient::addBouquet(std::string name)
 {
 	commandAddBouquet msg;
 
@@ -556,7 +556,7 @@ void CZapitClient::moveBouquet( unsigned int bouquet, unsigned int newPos)
 // -- check if Bouquet-Name exists (2002-04-02 rasc)
 // -- Return: Bouquet-ID  or  0 == no Bouquet found
 //
-unsigned int CZapitClient::existsBouquet( string name)
+unsigned int CZapitClient::existsBouquet(std::string name)
 {
 	commandExistsBouquet msg;
 	responseGeneralInteger response;
@@ -620,7 +620,7 @@ void CZapitClient::deleteBouquet( unsigned int bouquet)
 }
 
 /* assigns new name to bouquet*/
-void CZapitClient::renameBouquet( unsigned int bouquet, string newName)
+void CZapitClient::renameBouquet( unsigned int bouquet, std::string newName)
 {
 	commandRenameBouquet msg;
 
@@ -795,7 +795,7 @@ bool CZapitClient::isRecordModeActive()
 	return response.activated;
 }
 
-void CZapitClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
+void CZapitClient::registerEvent(unsigned int eventID, unsigned int clientID, std::string udsName)
 {
 	CEventServer::commandRegisterEvent msg;
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/types.h,v 1.1 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/types.h,v 1.2 2002/09/21 12:47:10 thegoodguy Exp $
  *
  * zapit's types - d-box2 linux project
  * these types are used by the clientlib and zapit itself
@@ -26,23 +26,7 @@
 #define __zapit__types_h__
 
 
-#include <stdint.h>
-
-
-/* unique channel identification */
-typedef uint32_t t_channel_id;
-#define CREATE_CHANNEL_ID ((original_network_id << 16) | service_id)
-
-
-/* diseqc types */
-enum diseqc_t
-{
-	NO_DISEQC,
-	MINI_DISEQC,
-	DISEQC_1_0,
-	DISEQC_1_1,
-	SMATV_REMOTE_TUNING
-};
+#include "clientlib/zapittypes.h"
 
 
 #endif /* __zapit__types_h__ */

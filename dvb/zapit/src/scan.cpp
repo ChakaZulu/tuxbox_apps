@@ -1,10 +1,11 @@
 /*
- * $Id: scan.cpp,v 1.67 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.68 2002/09/21 12:47:10 thegoodguy Exp $
  */
 
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 /* libevent */
 #include <eventserver.h>

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.25 2002/09/03 11:02:23 thegoodguy Exp $
+ * $Id: frontend.cpp,v 1.26 2002/09/21 12:47:11 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
+#include <unistd.h>
 
 /* system c++ */
 #include <iostream>

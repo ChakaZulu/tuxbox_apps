@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.234 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.235 2002/09/21 12:47:10 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -28,9 +28,12 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/un.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 /* d-box specific headers */
 #ifdef DBOX2
@@ -1049,7 +1052,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.234 2002/09/20 16:55:22 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.235 2002/09/21 12:47:10 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
