@@ -90,7 +90,7 @@ void CExtendedInput::calculateDialog()
 		maxX = ix>maxX?ix:maxX;
 		maxY = iy>maxY?iy:maxY;
 	}
-	
+
 	width = width>maxX+40?width:maxX+40;
 	height = height>maxY+hheight+ mheight?height:maxY+hheight+ mheight;
 
@@ -121,10 +121,10 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 
 	bool loop = true;
 	uint msg; uint data;
-	
+
 	while(loop)
 	{
-		g_lcdd->setMenuText(1, value, selectedChar);
+		g_lcdd->setMenuText(1, value, selectedChar+ 1);
 
 		g_RCInput->getMsg( &msg, &data, 300 );
 
@@ -255,7 +255,7 @@ void CExtendedInput::paint()
 		inputFields[i]->paint( x+20, y+hheight +20, (i==selectedChar) );
 	}
 
-	
+
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

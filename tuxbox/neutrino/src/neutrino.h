@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.75 2002/04/14 08:39:46 Simplex Exp $
+//  $Id: neutrino.h,v 1.76 2002/04/15 16:56:14 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -204,7 +204,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CIPChangeNotifier			*MyIPChanger;
 
 
-		void isCamValid();
+		void doChecks();
 		void firstChannel();
 		void setupDefaults();
 		void setupColors_classic();

@@ -117,7 +117,7 @@ void CRCInput::open()
 	if (fd_rc<0)
 	{
 		perror("/dev/dbox/rc0");
-		exit(-1);
+		//exit(-1);
 	}
 	ioctl(fd_rc, RC_IOCTL_BCODES, 1);
 	fcntl(fd_rc, F_SETFL, O_NONBLOCK );

@@ -320,6 +320,7 @@ messagebox.discard Wollen Sie die Änderungen verwerfen?
 messagebox.info Information
 
 cam.wrong Achtung, Ihre CAM_ALPHA.BIN passt\nnicht zu Ihrer Smart-Card!!!\n\nWollen Sie diese Warnung wieder sehen?
+ucodes.failure Achtung, die µCodes wurden NICHT gefunden!\n\nBitte per FTP (oder DBox-BootManager)\nuploaden, und die DBox neu starten!
 
 stringinput.caps Groß-/Kleinbuchstaben
 

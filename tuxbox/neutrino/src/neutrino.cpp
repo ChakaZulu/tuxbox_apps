@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.222 2002/04/14 20:00:37 Simplex Exp $
+        $Id: neutrino.cpp,v 1.223 2002/04/15 16:56:14 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -482,11 +482,11 @@ void CNeutrinoApp::firstChannel()
 
 /**************************************************************************************
 *                                                                                     *
-*          CNeutrinoApp -  isCamValid, check if card fits cam		              *
+*          CNeutrinoApp -  doChecks, check if card fits cam		              *
 *                                                                                     *
 **************************************************************************************/
 
-void CNeutrinoApp::isCamValid()
+void CNeutrinoApp::doChecks()
 {
 /*
 	int sock_fd;
@@ -550,6 +550,26 @@ void CNeutrinoApp::isCamValid()
 		}
 	}
 */
+	FILE* fd;
+	fd = fopen(UCODEDIR "/avia500.ux", "r");
+	if(fd)
+		fclose(fd);
+	bool ucodes_ok= (fd);
+	fd = fopen(UCODEDIR "/avia600.ux", "r");
+	if(fd)
+		fclose(fd);
+	ucodes_ok= ucodes_ok||(fd);
+	fd = fopen(UCODEDIR "/ucode.bin", "r");
+	if(fd)
+		fclose(fd);
+	ucodes_ok= ucodes_ok&&(fd);
+	fd = fopen(UCODEDIR "/cam-alpha.bin", "r");
+	if(fd)
+		fclose(fd);
+	ucodes_ok= ucodes_ok&&(fd);
+
+	if ( !ucodes_ok )
+		ShowMsg ( "messagebox.error", g_Locale->getText("ucodes.failure"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
 }
 
 
@@ -1287,8 +1307,8 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem( new CMenuForwarder("menu.back") );
 
 	keySetupNotifier = new CKeySetupNotifier;
-	CStringInput*	keySettings_repeatBlocker= new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
-	CStringInput*	keySettings_repeat_genericblocker= new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_genericblocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
+	CStringInput*	keySettings_repeat_genericblocker= new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
+	CStringInput*	keySettings_repeatBlocker= new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_genericblocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
 	keySetupNotifier->changeNotify("initial", NULL);
 
 	CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", "settings.raw");
@@ -1461,7 +1481,8 @@ void CNeutrinoApp::InitZapper()
 	g_InfoViewer->start();
 	g_EpgData->start();
 
-	isCamValid();
+
+	doChecks();
 	firstChannel();
 	if (firstchannel.mode == 't')
 	{
@@ -2373,7 +2394,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.222 2002/04/14 20:00:37 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.223 2002/04/15 16:56:14 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

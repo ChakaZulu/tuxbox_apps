@@ -324,6 +324,7 @@ messagebox.discard Discard changes?
 messagebox.info Information
 
 cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish to get this warning again?
+ucodes.failure ATTENTION, µCodes could NOT be found!\n\nPlease upload them via FTP (or DBox-BootManager),\nthen restart your DBox!
 
 stringinput.caps caps / no caps
 
