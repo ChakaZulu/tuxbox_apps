@@ -145,37 +145,45 @@ static eString tvMessageWindow(eString request, eString dirpath, eString opt, eH
 
 static eString getControlPlugins(void)
 {
-	std::stringstream result;
+	std::stringstream result, tmp;
 	struct dirent **e;
 	eString line;
-	int n = scandir("/lib/tuxbox/plugins", &e, 0, alphasort);
-	if (n > 0)
+	eString pluginsDir[2] = {"/lib/tuxbox/plugins", "/var/tuxbox/plugins"};
+	result << "<table width=100% border=1 cellspacing=0 cellpadding=0>";
+	for (int j = 0; j < 2; j++)
 	{
-		result << "<table width=100% border=1 cellspacing=0 cellpadding=0>";
-		for (int i = 0; i < n; i++)
+		int n = scandir(pluginsDir[j].c_str(), &e, 0, alphasort);
+		if (n > 0)
 		{
-			line = e[i]->d_name;
-			if (line.find(".cfg") != eString::npos)
+			for (int i = 0; i < n; i++)
 			{
-				result  << "<tr>"
-					<< "<td width=100>"
-					<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".cfg')")
-					<< "</td>"
-					<< "<td>"
-					<< getAttribute("/lib/tuxbox/plugins/" + line, "name")
-					<< "</td>"
-					<< "<td>"
-					<< getAttribute("/lib/tuxbox/plugins/" + line, "desc")
-					<< "</td>"
-					<< "</tr>";
+				line = e[i]->d_name;
+				if (line.find(".cfg") != eString::npos)
+				{
+					tmp	<< "<tr>"
+						<< "<td width=100>"
+						<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".cfg')")
+						<< "</td>"
+						<< "<td>"
+						<< getAttribute("/lib/tuxbox/plugins/" + line, "name")
+						<< "</td>"
+						<< "<td>"
+						<< getAttribute("/lib/tuxbox/plugins/" + line, "desc")
+						<< "</td>"
+						<< "</tr>";
+				}
 			}
 		}
-		result << "</table>";
-		result << "<br>";
-		result << button(100, "Stop", RED, "javascript:stopPlugin()");
 	}
+	if (tmp.str() == "")
+		result << "<tr><td>No plugins found.</td></tr>";
 	else
-		result << "No plugins found.";
+		result << tmp.str();
+	
+	result << "</table>";
+	result << "<br>";
+	result << button(100, "Stop", RED, "javascript:stopPlugin()");
+	
 	return result.str();
 }
 
@@ -2581,7 +2589,7 @@ public:
 		result << std::setfill('0');
 		eService* current;
 
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 		if (sapi)
 		{
 			current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
@@ -2593,7 +2601,7 @@ public:
 				{
 					int tablePos = 0;
 					time_t tableTime = start;
-					result << "<tr>"
+					result  << "<tr>"
 						<< "<td id=\"channel\" width=" << eString().sprintf("%d", channelWidth) << ">"
 						<< "<span class=\"channel\">"
 						<< filter_string(current->service_name)
@@ -2608,7 +2616,7 @@ public:
 						eString ext_description;
 						eString short_description;
 						eString genre;
-						int genreCategory;
+						int genreCategory = 16; //none
 						EITEvent event(*It->second);
 						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 						{
@@ -2676,9 +2684,9 @@ public:
 						colUnits = eventDuration / 60 / 15;
 						if (colUnits > 0)
 						{
-							result << "<td colspan=" << colUnits << ">";
+							result  << "<td id=\"genre" << eString("%02", genreCategory) << "\" colspan=" << colUnits << ">";
 #ifndef DISABLE_FILE
-							result << "<a href=\"javascript:record('"
+							result  << "<a href=\"javascript:record('"
 								<< "ref=" << ref2string(ref)
 								<< "&ID=" << std::hex << event.event_id << std::dec
 								<< "&start=" << event.start_time
@@ -2689,7 +2697,7 @@ public:
 								<< "&nbsp;&nbsp;";
 #endif
 							tm* t = localtime(&event.start_time);
-							result << std::setfill('0')
+							result  << std::setfill('0')
 								<< "<span class=\"time\">"
 								<< std::setw(2) << t->tm_mday << '.'
 								<< std::setw(2) << t->tm_mon+1 << ". - "
@@ -2700,14 +2708,16 @@ public:
 								<< " (" << event.duration / 60 << " min)"
 								<< "</span>"
 								<< "<br>Genre: " << genre
-								<< "<br><b>"
-								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\", \"0\", \"-1\")\'>"
-								<< "<span class=\"event\">"
+								<< "<br><b>";
+							if ((eventStart <= now) && (eventEnd >= now))
+								result << "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\", \"0\", \"-1\")\'>";
+							result	<< "<span class=\"event\">"
 								<< short_description
-								<< "</span>"
-								<< "</a>"
+								<< "</span>";
+							if ((eventStart <= now) && (eventEnd >= now))
+								result << "</a>";
 
-								<< "</b><br>";
+							result	<< "</b><br>";
 
 							if ((eventDuration >= 15 * 60) && (pdaScreen == 0))
 							{
@@ -2716,7 +2726,7 @@ public:
 									<< "</span>";
 							}
 
-							result << "</td>\n";
+							result  << "</td>\n";
 							tablePos += colUnits * 15 * d_min;
 							tableTime += eventDuration;
 						}
