@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.19 2002/12/17 22:02:36 obi Exp $
+ * $Id: frontend.h,v 1.20 2002/12/17 23:10:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -25,11 +25,11 @@
 /* system */
 #include <stdint.h>
 
-/* nokia api */
+/* linuxtv api */
 #include <linux/dvb/frontend.h>
 
 /* zapit */
-#include "channel.h"
+#include <zapit/types.h>
 
 #define MAX_LNBS	4
 
@@ -110,7 +110,7 @@ class CFrontend
 		/*
 		 * zapit tuner api
 		 */
-		const bool tuneChannel (CZapitChannel *channel);
+		const bool tuneTsidOnid (uint32_t tsid_onid);
 		const bool tuneFrequency (dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc);
 
 		/*
