@@ -7,7 +7,7 @@ Index:
 0
 +++
 Init:
-	FB direct SETFADE 0 24 81 84 255 255 255
+	#FB direct SETFADE 0 24 81 84 255 255 255
 	CONTROL Var Set SHOWHELP true
 	CONTROL Var Set NUMBERLASTCHANNELS 2
 	OSD direct SHOW proginfo 5
