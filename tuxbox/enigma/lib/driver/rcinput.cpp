@@ -48,25 +48,37 @@ void eRCDeviceInputDev::handleCode(int rccode)
 	switch (ev->value)
 	{
 	case 0:
+		if ( !iskeyboard )
+			repeattimer.stop();
 		/*emit*/ input->keyPressed(eRCKey(this, ev->code, eRCKey::flagBreak));
 		break;
 	case 1:
-		/*emit*/ input->keyPressed(eRCKey(this, ev->code, 0));
 		memcpy(&cur, ev, sizeof(struct input_event) );
+		if ( !iskeyboard )
+			repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
+		/*emit*/ input->keyPressed(eRCKey(this, ev->code, 0));
 		break;
 	case 2:
-		/*emit*/ input->keyPressed(eRCKey(this, ev->code, eRCKey::flagRepeat));
+		if ( iskeyboard )
+			/*emit*/ input->keyPressed(eRCKey(this, ev->code, eRCKey::flagRepeat));
 		break;
 	}
 }
 
+void eRCDeviceInputDev::repeat()
+{
+	/* emit */ input->keyPressed(eRCKey(this, cur.code, eRCKey::flagRepeat));
+	repeattimer.start(eRCInput::getInstance()->config.rrate, 1);
+}
+
 eRCDeviceInputDev::eRCDeviceInputDev(eRCInputEventDriver *driver)
-: eRCDevice(driver->getDeviceName(), driver)
+: eRCDevice(driver->getDeviceName(), driver), repeattimer(eApp)
 {
 	eString tmp=id;
 	tmp.upper();
 	iskeyboard = !!strstr(tmp.c_str(), "KEYBOARD");
 	eDebug("Input device \"%s\" is %sa keyboard.", id.c_str(), iskeyboard ? "" : "not ");
+	CONNECT( repeattimer.timeout, eRCDeviceInputDev::repeat);
 }
 
 const char *eRCDeviceInputDev::getDescription() const
