@@ -168,7 +168,6 @@ int CMoviePlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 	}
 
 	// set zapit in standby mode
-	t_channel_id serviceId = g_Zapit->getCurrentServiceID();
 	g_Zapit->setStandby(true);
 
 	// tell neutrino we're in ts_mode
@@ -184,26 +183,15 @@ int CMoviePlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 
 	//stop();
 	hide();
-	// Start Sectionsd
-	g_Sectionsd->setPauseScanning(false);
-	// Restore last mode
-	//t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
-	//g_Zapit->zapTo_serviceID(channel_id);
+
 	g_Zapit->setStandby(false);
 
-	/*g_Zapit->setStandby(true);
-	g_Sectionsd->setPauseScanning(true);
+	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
-	g_Zapit->setStandby(false);*/
-	g_Zapit->reinitChannels();
-	g_Zapit->startPlayBack();
-	g_Zapit->zapTo(serviceId);
-	//g_Zapit->startPlayBack(serviceId);
-	//g_Zapit->zapTo_serviceID(serviceId);
 
+	// Restore last mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
-	sleep(3); // zapit doesnt like fast zapping in the moment
-        g_Zapit->zapTo_serviceID(serviceId);
+
 	// always exit all
 	return menu_return::RETURN_EXIT_ALL;
 }
