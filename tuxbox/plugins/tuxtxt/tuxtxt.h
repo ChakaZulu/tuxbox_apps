@@ -55,13 +55,14 @@
 #endif
 
 #define CFGTTF 1
+#define CFGVAR 0 /* font(s) in /var/tuxtxt */
 #define TUXTXTCONF CONFIGDIR "/tuxtxt/tuxtxt.conf"
 
 /* fonts */
 #define TUXTXT0 FONTDIR "/tuxtxt0.fon"  /* G0 8+16pt */
 #define TUXTXT1 FONTDIR "/tuxtxt1.fon"  /* G1 8+16pt */
 #define TUXTXT2 FONTDIR "/tuxtxt2.fon"  /* NS 8+16pt */
-#if 0
+#if CFGVAR
 #if CFGTTF 
 #define TUXTXTTTF "/var/tuxtxt/tuxtxt.ttf" /* TTF */
 #else
@@ -367,6 +368,37 @@ FONTTYPE type0, type1, type2;
 FONTTYPE type0r, type1r, type2r;
 #endif
 
+/* national subsets */
+const char countrystring[] =
+"  CS/SK   (#$@[\\]^_`{|}~) "   /*  0 czech, slovak */
+"    EN    (#$@[\\]^_`{|}~) "   /*  1 english */
+"    ET    (#$@[\\]^_`{|}~) "   /*  2 estonian */
+"    FR    (#$@[\\]^_`{|}~) "   /*  3 french */
+"    DE    (#$@[\\]^_`{|}~) "   /*  4 german */
+"    IT    (#$@[\\]^_`{|}~) "   /*  5 italian */
+"  LV/LT   (#$@[\\]^_`{|}~) "   /*  6 latvian, lithuanian */
+"    PL    (#$@[\\]^_`{|}~) "   /*  7 polish */
+"  PT/ES   (#$@[\\]^_`{|}~) "   /*  8 portuguese, spanish */
+"    RO    (#$@[\\]^_`{|}~) "   /*  9 romanian */
+" SR/HR/SL (#$@[\\]^_`{|}~) "   /* 10 serbian, croatian, slovenian */
+" SV/FI/HU (#$@[\\]^_`{|}~) "   /* 11 swedish, finnish, hungarian */
+"    TR    (#$@[\\]^_`{|}~) "   /* 12 turkish */
+" RU/BUL/SER/CRO/UKR (cyr)  "   /* 13 cyrillic */
+"    GR                     "   /* 14 greek */
+;
+#define MAX_NATIONAL_SUBSET (sizeof(countrystring) / sizeof(countrystring[0]) - 1)
+
+enum
+{
+	NAT_DEFAULT = 4,
+	NAT_DE = 4,
+	NAT_MAX_FROM_HEADER = 12,
+	NAT_RU = 13,
+	NAT_GR = 14
+};
+
+const unsigned char countryconversiontable[] = { 1, 4, 11, 5, 3, 8, 0, 9 };
+
 
 /* some data */
 int flofpages[0x900][FLOFSIZE];
@@ -385,7 +417,6 @@ int vtxtpid;
 int PosX, PosY, StartX, StartY;
 int cached_pages, page_receiving, current_page[9], current_subpage[9];
 int page, subpage, lastpage, pageupdate, zap_subpage_manual;
-int current_national_subset;
 int inputcounter;
 int zoommode, screenmode, transpmode, hintmode, boxed, nofirst, savedscreenmode, showflof,show39;
 int catch_row, catch_col, catched_page, pagecatching;
@@ -418,24 +449,6 @@ struct _pid_table
 	int  national_subset;
 }pid_table[128];
 
-/* national subsets */
-const char countrystring[] =
-"  CS/SK  (#$@[\\]^_`{|}~)  "   /* czech, slovak */
-"    EN (#$@[\\]^_`{|}~)    "   /* english */
-"    ET (#$@[\\]^_`{|}~)    "   /* estonian */
-"    FR (#$@[\\]^_`{|}~)    "   /* french */
-"    DE (#$@[\\]^_`{|}~)    "   /* german */
-"    IT (#$@[\\]^_`{|}~)    "   /* italian */
-"  LV/LT  (#$@[\\]^_`{|}~)  "   /* latvian, lithuanian */
-"    PL (#$@[\\]^_`{|}~)    "   /* polish */
-"  PT/ES  (#$@[\\]^_`{|}~)  "   /* portuguese, spanish */
-"    RO (#$@[\\]^_`{|}~)    "   /* romanian */
-" SR/HR/SL (#$@[\\]^_`{|}~) "   /* serbian, croatian, slovenian */
-" SV/FI/HU (#$@[\\]^_`{|}~) "   /* swedish, finnish, hungarian */
-"    TR (#$@[\\]^_`{|}~)    ";  /* turkish */
-
-const unsigned char countryconversiontable[] = { 1, 4, 11, 5, 3, 8, 0, 9 };
-
 unsigned char restoreaudio = 0;
 /* 0 Nokia, 1 Philips, 2 Sagem */
 /* typ_vcr/dvb: 	v1 a1 v2 a2 v3 a3 (vcr_only: fblk) */
@@ -443,13 +456,17 @@ const int avstable_ioctl[7] =
 {
 	AVSIOSVSW1, AVSIOSASW1, AVSIOSVSW2, AVSIOSASW2, AVSIOSVSW3, AVSIOSASW3, AVSIOSFBLK
 };
+const int avstable_ioctl_get[7] =
+{
+	AVSIOGVSW1, AVSIOGASW1, AVSIOGVSW2, AVSIOGASW2, AVSIOGVSW3, AVSIOGASW3, AVSIOGFBLK
+};
 const unsigned char avstable_scart[3][7] =
 {
 	{ 3, 2, 1, 0, 1, 1, 2 },
 	{ 3, 3, 2, 2, 3, 2, 2 },
 	{ 2, 1, 0, 0, 0, 0, 0 },
 };
-const unsigned char avstable_dvb[3][7] =
+unsigned char avstable_dvb[3][7] =
 {
 	{ 5, 1, 1, 0, 1, 1, 0 },
 	{ 1, 1, 1, 1, 1, 1, 0 },
@@ -679,7 +696,7 @@ const char message_9[][38] =
 /* buffers */
 unsigned char  lcd_backbuffer[120*64 / 8];
 unsigned char  timestring[8];
-unsigned char  page_char[PAGESIZE];
+unsigned char  page_char[PAGESIZE+40];
 unsigned short page_atrb[PAGESIZE]; /*  ?????:h:cc:bbbb:ffff -> ?=reserved, h=double height, c=charset (0:G0 / 1:G1c / 2:G1s), b=background, f=foreground */
 
 /* cachetables */

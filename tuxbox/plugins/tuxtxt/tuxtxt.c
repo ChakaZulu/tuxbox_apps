@@ -428,9 +428,31 @@ void SetPosX(int column)
 #endif
 }
 
+#if DEBUG
+/* hexdump of page contents to stdout for debugging */
+void dump_page()
+{
+	int r, c;
+	char *p;
+
+	for (r=0; r < 25; r++)
+	{
+		p = cachetable[page][subpage] + 40*r;
+		for (c=0; c < 40; c++)
+			printf(" %02x", *p++);
+		printf("\n");
+		p = page_char + 40*r;
+		for (c=0; c < 40; c++)
+			printf("  %c", *p++);
+		printf("\n");
+	}
+}
+#endif
+
+		
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.82 $";
+	char cvs_revision[] = "$Revision: 1.83 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -477,6 +499,11 @@ void plugin_exec(PluginParam *par)
 			{
 				switch (RCCode)
 				{
+#if DEBUG
+				case RC_OK:
+					dump_page(); /* hexdump of page contents to stdout for debugging */
+					continue; /* otherwise ignore key */
+#endif
 				case RC_UP:
 				case RC_DOWN:
 				case RC_0:
@@ -504,16 +531,27 @@ void plugin_exec(PluginParam *par)
 				case RC_MUTE:		/* regular toggle to transparent */
 					break;
 
-#ifndef DREAMBOX
 				case RC_HELP: /* switch to scart input and back */
 				{
 					int i, n;
-					int vendor = tuxbox_get_vendor();
+#ifndef DREAMBOX
+					int vendor = tuxbox_get_vendor() - 1;
+#else
+					int vendor = 0; /* values unknown, rely on requested values */
+#endif
 
-					if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
+					if (vendor < 3) /* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 					{
 						for (i = 0; i < 6; i++) /* FIXME: FBLK seems to cause troubles */
 						{
+							if (!restoreaudio || !(i & 1)) /* not for audio if scart-audio active */
+							{
+								if ((ioctl(avs, avstable_ioctl_get[i], &n)) < 0) /* get current values for restoration */
+									perror("TuxTxt <ioctl(avs)>");
+								else
+									avstable_dvb[vendor][i] = n;
+							}
+							
 							n = avstable_scart[vendor][i];
 							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
 								perror("TuxTxt <ioctl(avs)>");
@@ -536,7 +574,6 @@ void plugin_exec(PluginParam *par)
 					}
 					continue; /* otherwise ignore exit key */
 				}
-#endif
 				default:
 					continue; /* ignore all other keys */
 				}
@@ -697,7 +734,7 @@ int Init()
 				auto_national = ival & 1;
 			else if (1 == sscanf(line, "NationalSubset %d", &ival))
 			{
-				if (ival >= 0 && ival <= 12)
+				if (ival >= 0 && ival <= MAX_NATIONAL_SUBSET)
 					national_subset = ival;
 			}
 			else if (1 == sscanf(line, "MenuLanguage %d", &ival))
@@ -751,7 +788,7 @@ int Init()
 
 	/* calculate font dimensions */
 	displaywidth = (ex-sx);
-	fontheight = 21;//(ey-sy) / 25;
+	fontheight = (ey-sy) / 25; //21;
 	fontwidth = fontwidth_normal = (ex-sx) / 40;
 	fontwidth_topmenumain = (TV43STARTX-sx) / 40;
 	fontwidth_topmenusmall = (ex- TOPMENUSTARTX) / TOPMENUCHARS;
@@ -907,12 +944,13 @@ int Init()
 			return 0;
 		}
 
+		if (auto_national)
+			national_subset = pid_table[0].national_subset;
 		if (pids_found > 1)
 			ConfigMenu(1);
 		else
 		{
 			vtxtpid = pid_table[0].vtxt_pid;
-			current_national_subset = pid_table[0].national_subset;
 			current_service = 0;
 			RenderMessage(ShowServiceName);
 		}
@@ -921,7 +959,6 @@ int Init()
 	{
 		SDT_ready = 0;
 		getpidsdone = 0;
-		current_national_subset = (auto_national ? -1 : national_subset); /* default from config file if not set to automatic */
 		pageupdate = 1; /* force display of message page not found (but not twice) */
 	}
 
@@ -1005,10 +1042,13 @@ void CleanUp()
 	ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
 	ioctl(saa, SAAIOSWSS, &saa_old);
 
-#ifndef DREAMBOX
 	if (restoreaudio)
 	{
+#ifndef DREAMBOX
 		int vendor = tuxbox_get_vendor() - 1;
+#else
+		int vendor = 0; /* values unknown, rely on requested values */
+#endif
 		if (vendor < 3) /* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 		{
 			for (i = 1; i < 6; i += 2) /* restore dvb audio */
@@ -1019,7 +1059,6 @@ void CleanUp()
 			}
 		}
 	}
-#endif
 
 	/* stop decode-thread */
 	if (pthread_cancel(thread_id) != 0)
@@ -1181,11 +1220,15 @@ int GetTeletextPIDs()
 			perror("TuxTxt <read PMT>");
 			continue;
 		}
-		for (pmt_scan = 0x0C + ((PMT[0x0A]<<8 | PMT[0x0B]) & 0x0FFF); pmt_scan < (((PMT[0x01]<<8 | PMT[0x02]) & 0x0FFF) - 7); pmt_scan += 5 + PMT[pmt_scan + 4])
+		for (pmt_scan = 0x0C + ((PMT[0x0A]<<8 | PMT[0x0B]) & 0x0FFF);
+			  pmt_scan < (((PMT[0x01]<<8 | PMT[0x02]) & 0x0FFF) - 7);
+			  pmt_scan += 5 + PMT[pmt_scan + 4])
 		{
 			if (PMT[pmt_scan] == 6)
 			{
-				for (desc_scan = pmt_scan + 5; desc_scan < pmt_scan + ((PMT[pmt_scan + 3]<<8 | PMT[pmt_scan + 4]) & 0x0FFF) + 5; desc_scan += 2 + PMT[desc_scan + 1])
+				for (desc_scan = pmt_scan + 5;
+					  desc_scan < pmt_scan + ((PMT[pmt_scan + 3]<<8 | PMT[pmt_scan + 4]) & 0x0FFF) + 5;
+					  desc_scan += 2 + PMT[desc_scan + 1])
 				{
 					if (PMT[desc_scan] == 0x56)
 					{
@@ -1208,13 +1251,17 @@ int GetTeletextPIDs()
 						else
 						{
 							country_code[0] = 0;
-							pid_table[pids_found].national_subset = -1;
+							pid_table[pids_found].national_subset = NAT_DEFAULT; /* use default charset */
 						}
 
-						if (pid_table[pids_found].vtxt_pid == vtxtpid)
-							printf("TuxTxt <Country code \"%s\" national subset %d>\n",
+#if DEBUG
+						printf("TuxTxt <Service %04x Country code \"%3s\" national subset %2d%s>\n",
+								 pid_table[pids_found].service_id,
 									 country_code,
-									 pid_table[pids_found].national_subset);
+								 pid_table[pids_found].national_subset,
+								 (pid_table[pids_found].vtxt_pid == vtxtpid) ? " * " : ""
+								 );
+#endif						
 
 						pids_found++;
 skip_pid:
@@ -1328,7 +1375,8 @@ skip_pid:
 		while (pid_table[current_service].vtxt_pid != vtxtpid && current_service < pids_found)
 			current_service++;
 
-		current_national_subset = pid_table[current_service].national_subset;
+		if (auto_national)
+			national_subset = pid_table[current_service].national_subset;
 		RenderMessage(ShowServiceName);
 	}
 
@@ -1398,8 +1446,16 @@ int GetNationalSubset(char *cc)
 		return 11;
 	if (memcmp(cc, "tur", 3) == 0)
 		return 12;
+	if (memcmp(cc, "rus", 3) == 0 ||
+	    memcmp(cc, "bul", 3) == 0 ||
+	    memcmp(cc, "ser", 3) == 0 ||
+	    memcmp(cc, "cro", 3) == 0 ||
+	    memcmp(cc, "ukr", 3) == 0)
+		return NAT_RU;
+	if (memcmp(cc, "gre", 3) == 0)
+		return NAT_GR;
 
-	return -1;
+	return NAT_DEFAULT;	/* use default charset */
 }
 
 /******************************************************************************
@@ -1497,7 +1553,7 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 		memcpy(&menu[2*Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*26], 26);
 	if (national_subset == 0  || auto_national)
 		menu[MenuLine[M_NAT]*2*Menu_Width +  1] = ' ';
-	if (national_subset == 12 || auto_national)
+	if (national_subset == MAX_NATIONAL_SUBSET || auto_national)
 		menu[MenuLine[M_NAT]*2*Menu_Width + 28] = ' ';
 	if (showhex)
 		menu[MenuLine[M_PID]*2*Menu_Width + 27] = '?';
@@ -1730,11 +1786,11 @@ void ConfigMenu(int Init)
 
 				case M_NAT:
 					saveconfig = 1;
-					if (national_subset < 12)
+					if (national_subset < MAX_NATIONAL_SUBSET)
 					{
 						national_subset++;
 
-						if (national_subset == 12)
+						if (national_subset == MAX_NATIONAL_SUBSET)
 						{
 							menu[MenuLine[M_NAT]*2*Menu_Width +  1] = 'í';
 							menu[MenuLine[M_NAT]*2*Menu_Width + 28] = ' ';
@@ -1949,7 +2005,8 @@ void ConfigMenu(int Init)
 
 							/* start demuxer with new vtxtpid */
 							vtxtpid = pid_table[current_pid].vtxt_pid;
-							current_national_subset = pid_table[current_pid].national_subset;
+							if (auto_national)
+								national_subset = pid_table[current_pid].national_subset;
 
 							dmx_flt.pid      = vtxtpid;
 							dmx_flt.input    = DMX_IN_FRONTEND;
@@ -2995,6 +3052,17 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	else
 		factor = 1;
 		
+	if (national_subset == NAT_GR &&	/* remap complete areas for greek and cyrillic */
+		 Char >= 0x40 && Char <= 0x7E)
+		Char += 0x390 - 0x40;
+	else if (national_subset == NAT_GR &&
+		 Char >= 0x23 && Char <= 0x24)
+		Char = nationaltable23[NAT_DE][Char-0x23];
+	else if (national_subset == NAT_RU &&
+		 Char >= 0x21 && Char <= 0x7E)
+		Char += 0x400 - 0x20;
+	else
+	{
 	/* load char */
 	switch (Char)
 	{
@@ -3114,6 +3182,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		break;
 	default:
 		break;
+	}
 	}
 
 	if (!(glyph = FT_Get_Char_Index(face, Char)))
@@ -3647,6 +3716,7 @@ void RenderMessage(int Message)
 void RenderPage()
 {
 	int row, col, byte;
+	int national_subset_bak = national_subset;
 
 	/* update lcd */
 	UpdateLCD();
@@ -3656,15 +3726,6 @@ void RenderPage()
 	if (transpmode != 2 && pageupdate && page_receiving != page && inputcounter == 2)
 	{
 
-		/* get national subset */
-		if (auto_national)
-		{
-			if (current_national_subset >= 0)
-				national_subset = current_national_subset;
-			else
-				national_subset = countryconversiontable[countrycontrolbitstable[page][subpage]];
-		}
-		
 		/* reset update flag */
 		pageupdate = 0;
 
@@ -3681,7 +3742,14 @@ void RenderPage()
 		nofirst = show39;
 		for (row = 1; row < 24; row++)
 		{
-			if (page_char[row*40] != ' ' && page_char[row*40] != 0x00 && page_char[row*40] != 0xFF && page_atrb[row*40] != (black <<4 | black)) {nofirst = 0; break;}
+			if (page_char[row*40] != ' '  &&
+				 page_char[row*40] != 0x00 &&
+				 page_char[row*40] != 0xFF &&
+				 (page_atrb[row*40] & 0x0F) != ((page_atrb[row*40] >> 4) & 0x0F))
+			{
+				nofirst = 0;
+				break;
+			}
 		}
 #if CFGTTF
 		fontwidth = fontwidth_normal = (ex-sx) / (40-nofirst);
@@ -3701,6 +3769,12 @@ void RenderPage()
 			clearbbcolor = black;
 		}
 
+		/* get national subset */
+		if (auto_national &&
+			 national_subset <= NAT_MAX_FROM_HEADER && /* not for GR/RU as long as line28 is not evaluated */
+			 countrycontrolbitstable[page][subpage] != 0xFF) /* individual subset according to page header */
+			national_subset = countryconversiontable[countrycontrolbitstable[page][subpage]];
+
 		/* render page */
 		PosY = StartY;
 
@@ -3713,6 +3787,7 @@ void RenderPage()
 
 			PosY += fontheight;
 		}
+		national_subset = national_subset_bak;
 
 		/* update framebuffer */
 		CopyBB2FB();
@@ -3785,51 +3860,7 @@ void showlink(int column, int linkpage, int Attrib)
 			RenderCharBB(*p, Attrib);
 #endif /* !TTF */
 	}
-	else
-	{
-
-		if (!showhex && showflof && flofpages[page][0] != 0) // FLOF-Navigation present
-		{
-			if (column == 0)
-			{
-				PosX = StartX;
-#if CFGTTF
-				FillRect(PosX, PosY+yoffset, displaywidth, fontheight, black);
-#else
-				FillRect(PosX, PosY+yoffset, (40-nofirst)*oldfontwidth, fontheight, black);
-#endif
-			}
-			p = page_char+24*40;
-			char* l;
-			char p1[41];
-			memset(p1,0,41);
-			strncpy(p1,p,40);
-			char* p2 = strchr(p1,(char)(column+1));
-			if (!p2 && column == 3) p2 = strchr(p1,(char)(6));
-			if (p2)
-			{
-				char* p3 = strchr(p2,(char)(column+2));
-			    if (!p3) p3 = strchr(p2,(char)(6));
-
-				if (p3) *p3= 0x00;
-				if (nofirst == 0 || column > 0)
-				{
-					FillRect(PosX, PosY+yoffset, (fontwidth/2), fontheight, Attrib>>4);
-					PosX += (fontwidth/2);
-				}
-				for (l = p2+1; *l; l++)
-				{
-					RenderCharBB(*l , Attrib);
-				}
-#if CFGTTF
-				FillRect(PosX, PosY+yoffset, (StartX+displaywidth)-PosX, fontheight, Attrib>>4);
-#else
-				FillRect(PosX, PosY+yoffset, (StartX+(40-nofirst)*oldfontwidth)-PosX, fontheight, Attrib>>4);
-#endif
-				PosX += (fontwidth/2);
-			}
-		}
-		else
+	else /* display number */
 		{
 			PosX = StartX + column*width;
 			FillRect(PosX, PosY+yoffset, displaywidth+sx-PosX, fontheight, Attrib >> 4);
@@ -3844,7 +3875,6 @@ void showlink(int column, int linkpage, int Attrib)
 			RenderCharBB(*p, Attrib);
 	}
 }
-}
 
 void CreateLine25()
 {
@@ -3853,12 +3883,20 @@ void CreateLine25()
 	if (maxadippg >= 0)
 		decode_adip();
 
-	if (!showhex && showflof && flofpages[page][0] != 0) // FLOF-Navigation present
+	if (!showhex && showflof &&
+		 (flofpages[page][0] || flofpages[page][1] || flofpages[page][2] || flofpages[page][3])) // FLOF-Navigation present
 	{
+		int i;
+		
 		prev_100 = flofpages[page][0];
 		prev_10  = flofpages[page][1];
 		next_10  = flofpages[page][2];
 		next_100 = flofpages[page][3];
+		
+		PosY = StartY + 24*fontheight;
+		PosX = StartX;
+		for (i=nofirst; i<40; i++)
+			RenderCharBB(page_char[24*40 + i], page_atrb[24*40 + i]);
 	}
 	else
 	{
@@ -3880,14 +3918,14 @@ void CreateLine25()
 	next_10  = toptext_getnext(prev_10, 1, 1);
 #endif
 	next_100 = toptext_getnext(next_10, 1, 0);
-	}
 	showlink(0, prev_100, red<<4 | white);
 	showlink(1, prev_10, green<<4 | black);
 	showlink(2, next_10, yellow<<4 | black);
 	showlink(3, next_100, blue<<4 | white);
+	}
 
-	
-	if (bttok && screenmode == 1) /* TOP-Info present, divided screen -> create TOP overview */
+	if (//bttok &&
+		 screenmode == 1) /* TOP-Info present, divided screen -> create TOP overview */
 	{
 		char line[TOPMENUCHARS];
 		int current;
@@ -4349,7 +4387,9 @@ void DecodePage()
 	}
 
 	/* decode */
-	for (row = 0; row < 24; row++)
+	for (row = 0;
+		  row < ((showflof && (flofpages[page][0] || flofpages[page][1] || flofpages[page][2] || flofpages[page][3])) ? 25 : 24);
+		  row++)
 	{
 		/* start-of-row default conditions */
 		foreground   = white;
@@ -4568,6 +4608,8 @@ void DecodePage()
 				if (doubleheight)
 					page_char[index + 40] = 0xFF;
 			}
+			if (!charset)
+				held_mosaic = ' '; /* forget if outside mosaic */
 		}
 
 		/* copy attribute to lower line if doubleheight */
@@ -4902,9 +4944,49 @@ void *CacheThread(void *arg)
 										flofpages[current_page[magazine] ][byte] = b4<<8 | b2<<4 | b3;
 								}
 							}
+
+							/* copy last 2 links to adip for TOP-Index */
+							int a, a1, e=39, l=3;
+							char *p = cachetable[current_page[magazine]][current_subpage[magazine]] + 24*40;
+							//printf(" %03x %40s\n", current_page[magazine], p);
+							
+							do
+							{
+								for (;
+									  l >= 2 && 0 == flofpages[current_page[magazine]][l];
+									  l--)
+									; /* find used linkindex */
+								for (;
+									  e >= 1 && !isalnum(p[e]);
+									  e--)
+									; /* find end */
+								for (a = a1 = e - 1;
+									  a >= 0 && p[a] >= ' ';
+									  a--) /* find start */
+									if (p[a] > ' ')
+										a1 = a; /* first non-space */
+								if (a >= 0 && l >= 2)
+								{
+									strncpy(adip[flofpages[current_page[magazine]][l]],
+											  &p[a1],
+											  12);
+									if (e-a1 < 11)
+										adip[flofpages[current_page[magazine]][l]][e-a1+1] = '\0';
+#if DEBUG
+									printf(" %03x/%02x %d %d %d %d %03x %s\n",
+											 current_page[magazine], current_subpage[magazine],
+											 l, a, a1, e,
+											 flofpages[current_page[magazine]][l],
+											 adip[flofpages[current_page[magazine]][l]]
+											 );
+#endif
 						}
+								e = a - 1;
+								l--;
+							} while (l >= 2);
 
 					}
+				}
 				}
 
 				/* copy row to pagebuffer */
