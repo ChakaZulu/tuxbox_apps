@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.h,v $
+Revision 1.5  2002/10/05 23:10:01  obi
+"das ist ja c++" ;)
+
 Revision 1.4  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -41,6 +44,7 @@ class teletext
 {
 	fbClass *fb_obj;;
 	rc *rc_obj;
+	int txtfd;
 public:
 	teletext(fbClass *f, rc *r) { fb_obj = f; rc_obj = r; }
 	void getTXT(int PID);

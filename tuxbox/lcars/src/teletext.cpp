@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.9  2002/10/05 23:10:01  obi
+"das ist ja c++" ;)
+
 Revision 1.8  2002/10/05 20:31:10  obi
 napi style teletext
 
@@ -55,7 +58,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include "teletext.h"
 
-static int txtfd = -1;
 
 void teletext::getTXT(int PID)
 {
