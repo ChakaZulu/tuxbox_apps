@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.11 2001/07/25 11:39:17 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.12 2001/11/03 03:13:52 field Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.12  2001/11/03 03:13:52  field
+// Auf Perspektiven vorbereitet
+//
 // Revision 1.11  2001/07/25 11:39:17  fnbrd
 // Added unique keys to Events and Services
 //
@@ -171,6 +174,7 @@ int SIevent::saveXML2(FILE *file) const
     fprintf(file, "    <user_classification>0x%02hhx</user_classification>\n", userClassification[i]);
   for_each(components.begin(), components.end(), saveSIcomponentXML(file));
   for_each(ratings.begin(), ratings.end(), saveSIparentalRatingXML(file));
+  for_each(linkage_descs.begin(), linkage_descs.end(), saveSIlinkageXML(file));
   fprintf(file, "  </event>\n");
   return 0;
 }
@@ -214,6 +218,7 @@ void SIevent::dump(void) const
   for_each(times.begin(), times.end(), printSItime());
   for_each(components.begin(), components.end(), printSIcomponent());
   for_each(ratings.begin(), ratings.end(), printSIparentalRating());
+  for_each(linkage_descs.begin(), linkage_descs.end(), printSIlinkage());
 }
 
 void SIevent::dumpSmall(void) const
@@ -232,6 +237,7 @@ void SIevent::dumpSmall(void) const
 */
   for_each(times.begin(), times.end(), printSItime());
   for_each(ratings.begin(), ratings.end(), printSIparentalRating());
+  for_each(linkage_descs.begin(), linkage_descs.end(), printSIlinkage());
 }
 /*
 // Liest n Bytes aus einem Socket per read

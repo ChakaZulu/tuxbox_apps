@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.79 2001/10/31 18:04:46 field Exp $
+//  $Id: sectionsd.cpp,v 1.80 2001/11/03 03:13:53 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.80  2001/11/03 03:13:53  field
+//  Auf Perspektiven vorbereitet
+//
 //  Revision 1.79  2001/10/31 18:04:46  field
 //  dmxTOT wird bei scan nicht gestoppt
 //
@@ -985,7 +988,7 @@ static const SIevent& findSIeventForEventUniqueKey(const long long& eventUniqueK
   return nullEvt;
 }
 
-static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned serviceUniqueKey, SItime& zeit, long plusminus = 0)
+static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned serviceUniqueKey, SItime& zeit, long plusminus = 0, unsigned char *flag = 0)
 {
     time_t azeit=time(NULL);
     // Event (serviceid) suchen
@@ -1016,14 +1019,25 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
     // weil normalerweise ist der cache nach hinten kürzer als nach vorne... :)
     // deswegen sollten die meisten events am anfang zu finden sein
 
+    if (flag!=0)
+        *flag= 0;
     for(MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
         if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey)
         {
+            if (flag!=0)
+                *flag|= 1; // überhaupt was da...
             for(SItimes::reverse_iterator t=e->first->times.rend(); t!=e->first->times.rbegin(); t--)
-                if((t->startzeit<=(long)(azeit+ plusminus)) && ((long)(azeit+plusminus)<=(long)(t->startzeit+t->dauer)))
+                if ((long)(azeit+plusminus)<=(long)(t->startzeit+t->dauer))
                 {
-                    zeit=*t;
-                    return *(e->first);
+                    if (flag!=0)
+                        *flag|= 2; // spätere events da...
+                    if (t->startzeit<=(long)(azeit+ plusminus))
+                    {
+                        if (flag!=0)
+                            *flag|= 4; // aktuelles event da...
+                        zeit=*t;
+                        return *(e->first);
+                    }
                 }
         }
 
@@ -1342,7 +1356,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.79 2001/10/31 18:04:46 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.80 2001/11/03 03:13:53 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1512,6 +1526,7 @@ static void commandCurrentComponentTagsChannelID(struct connectionData *client, 
   return;
 }
 
+
 static void commandCurrentNextInfoChannelID(struct connectionData *client, char *data, const unsigned dataLength)
 {
     int nResultDataSize=0;
@@ -1526,32 +1541,64 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
     lockServices();
     lockEvents();
     SItime zeitEvt1(0, 0);
-    const SIevent &evt=findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1);
+    unsigned char flag= 0;
+    const SIevent &evt=findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1, 0, &flag);
+
+    if(evt.serviceID==0)
+    {
+        MySIservicesOrderUniqueKey::iterator si=mySIservicesOrderUniqueKey.end();
+        si=mySIservicesOrderUniqueKey.find(*uniqueServiceKey);
+
+        if(si!=mySIservicesOrderUniqueKey.end())
+        {
+            if ( ( !si->second->eitScheduleFlag() ) &&
+                 ( !si->second->eitPresentFollowingFlag() ) )
+            {
+                flag|=8;
+            }
+        }
+    }
+    dprintf("current flag %d\n", flag);
     unlockServices();
 
+    SIevent nextEvt;
+
+    SItime zeitEvt2(zeitEvt1);
     if(evt.serviceID!=0)
     {//Found
         dprintf("current EPG found.\n");
-        SItime zeitEvt2(zeitEvt1);
-        const SIevent &nextEvt=findNextSIevent(evt.uniqueKey(), zeitEvt2);
 
-        std::string  next_text;
+        nextEvt=findNextSIevent(evt.uniqueKey(), zeitEvt2);
+
         if(nextEvt.serviceID!=0)
-        {
-            dprintf("next EPG found.\n")
-            next_text= nextEvt.name;
-        }
-        else
-            next_text= "|";
-
+            dprintf("next EPG found.\n");
+    }
 
         nResultDataSize=
+            sizeof(unsigned char)+  //Flag
             sizeof(unsigned long long)+       // Unique-Key
             sizeof(sectionsd::sectionsdTime)+ // zeit
             strlen(evt.name.c_str())+1+	  // name + 0
             sizeof(unsigned long long)+       // Unique-Key
             sizeof(sectionsd::sectionsdTime)+ // zeit
-            strlen(next_text.c_str())+1;   // name + 0
+            strlen(nextEvt.name.c_str())+1+   // name + 0
+            sizeof(int);    // num. Component-Tags
+
+        // current ComponentTags ...
+        int countDescs= 0;
+        dprintf("evt.linkage_descs.size %d \n", evt.linkage_descs.size());
+        for(SIlinkage_descs::iterator link=evt.linkage_descs.begin(); link!=evt.linkage_descs.end(); link++)
+        {
+            if (link->linkageType== 0xB0)
+            {
+                countDescs++;
+                nResultDataSize+= strlen(link->name.c_str())+1+ // name
+                                  sizeof(unsigned short)+ //transportStreamId
+                                  sizeof(unsigned short)+ //originalNetworkId
+                                  sizeof(unsigned short); //serviceId
+            }
+        }
+
         pResultData = new char[nResultDataSize];
         if(!pResultData)
         {
@@ -1561,6 +1608,9 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
             return;
         }
         char *p=pResultData;
+        *((unsigned char *)p)= flag;
+        p+=sizeof(unsigned char);
+
         *((unsigned long long *)p)=evt.uniqueKey();
         p+=sizeof(unsigned long long);
         sectionsd::sectionsdTime zeit;
@@ -1576,10 +1626,27 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         zeit.dauer=zeitEvt2.dauer;
         *((sectionsd::sectionsdTime *)p)=zeit;
         p+=sizeof(sectionsd::sectionsdTime);
-        strcpy(p, next_text.c_str());
-    //      p+=strlen(nextEvt.name.c_str())+1;
+        strcpy(p, nextEvt.name.c_str());
+        p+=strlen(nextEvt.name.c_str())+1;
+        *((int *)p)=countDescs;
+        p+=sizeof(int);
 
-    }
+        for(SIlinkage_descs::iterator link=evt.linkage_descs.begin(); link!=evt.linkage_descs.end(); link++)
+        {
+            if (link->linkageType== 0xB0)
+            {
+                strcpy(p, link->name.c_str());
+                p+=strlen(link->name.c_str())+1;
+                *((unsigned short *)p)=link->transportStreamId;
+                p+=sizeof(unsigned short);
+                *((unsigned short *)p)=link->originalNetworkId;
+                p+=sizeof(unsigned short);
+                *((unsigned short *)p)=link->serviceId;
+                p+=sizeof(unsigned short);
+            }
+        }
+
+
     unlockEvents();
     dmxEIT.unpause(); // -> unlock
 
@@ -2940,7 +3007,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.79 2001/10/31 18:04:46 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.80 2001/11/03 03:13:53 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {

@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.14 2001/07/25 11:39:17 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.15 2001/11/03 03:13:52 field Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.15  2001/11/03 03:13:52  field
+// Auf Perspektiven vorbereitet
+//
 // Revision 1.14  2001/07/25 11:39:17  fnbrd
 // Added unique keys to Events and Services
 //
@@ -92,6 +95,74 @@ struct descr_component_header {
   unsigned char component_tag : 8;
   unsigned iso_639_2_language_code : 24;
 } __attribute__ ((packed)) ;
+
+struct descr_linkage_header {
+  unsigned char descriptor_tag : 8;
+  unsigned char descriptor_length : 8;
+  unsigned short transport_stream_id : 16;
+  unsigned short original_network_id : 16;
+  unsigned short service_id : 16;
+  unsigned char linkage_type : 8;
+} __attribute__ ((packed)) ;
+
+class SIlinkage {
+  public:
+    SIlinkage(const struct descr_linkage_header *link) {
+      linkageType=link->linkage_type;
+      transportStreamId=link->transport_stream_id;
+      originalNetworkId=link->original_network_id;
+      serviceId=link->service_id;
+      if(link->descriptor_length>sizeof(struct descr_linkage_header)-2)
+        name=std::string(((const char *)link)+sizeof(struct descr_linkage_header), link->descriptor_length-(sizeof(struct descr_linkage_header)-2));
+    }
+    // Std-copy
+    SIlinkage(const SIlinkage &l) {
+      linkageType=l.linkageType;
+      transportStreamId=l.transportStreamId;
+      originalNetworkId=l.originalNetworkId;
+      serviceId=l.serviceId;
+      name=l.name;
+    }
+    // Der Operator zum sortieren
+    bool operator < (const SIlinkage& l) const {
+      return name < l.name;
+//      return component < c.component;
+    }
+    void dump(void) const {
+      printf("Linakge Type: 0x%02hhx\n", linkageType);
+      if(name.length())
+        printf("Name: %s\n", name.c_str());
+      printf("Transport Stream Id: 0x%04hhx\n", transportStreamId);
+      printf("Original Network Id: 0x%04hhx\n", originalNetworkId);
+      printf("Service Id: 0x%04hhx\n", serviceId);
+    }
+    int saveXML(FILE *file) const {
+      if(fprintf(file, "    <linkage type=\"0x%02hhx\" linkage descriptor=\"%s\" transport_stream_id=\"0x%04hhx\" original_network_id=\"0x%04hhx\" service_id=\"0x%04hhx\" />\n", linkageType, name.c_str(), transportStreamId, originalNetworkId, serviceId)<0)
+        return 1;
+      return 0;
+    }
+    unsigned char linkageType; // Linkage Descriptor
+    std::string name; // Text aus dem Linkage Descriptor
+    unsigned short transportStreamId; // Linkage Descriptor
+    unsigned short originalNetworkId; // Linkage Descriptor
+    unsigned short serviceId; // Linkage Descriptor
+};
+
+// Fuer for_each
+struct printSIlinkage : public std::unary_function<class SIlinkage, void>
+{
+  void operator() (const SIlinkage &l) { l.dump();}
+};
+
+// Fuer for_each
+struct saveSIlinkageXML : public std::unary_function<class SIlinkage, void>
+{
+  FILE *f;
+  saveSIlinkageXML(FILE *fi) { f=fi;}
+  void operator() (const SIlinkage &l) { l.saveXML(f);}
+};
+
+typedef std::multiset <SIlinkage, std::less<SIlinkage> > SIlinkage_descs;
 
 class SIcomponent {
   public:
@@ -270,6 +341,7 @@ class SIevent {
     }
     SIcomponents components;
     SIparentalRatings ratings;
+    SIlinkage_descs linkage_descs;
     SItimes times;
     // Der Operator zum sortieren
     bool operator < (const SIevent& e) const {

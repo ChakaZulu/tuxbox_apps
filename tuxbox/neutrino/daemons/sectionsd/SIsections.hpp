@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-// $Id: SIsections.hpp,v 1.12 2001/09/20 09:14:07 fnbrd Exp $
+// $Id: SIsections.hpp,v 1.13 2001/11/03 03:13:52 field Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.hpp,v $
+// Revision 1.13  2001/11/03 03:13:52  field
+// Auf Perspektiven vorbereitet
+//
 // Revision 1.12  2001/09/20 09:14:07  fnbrd
 // Small changes.
 //
@@ -402,6 +405,7 @@ class SIsectionEIT : public SIsection
     void parseContentDescriptor(const char *buf, SIevent &e, unsigned maxlen);
     void parseComponentDescriptor(const char *buf, SIevent &e, unsigned maxlen);
     void parseParentalRatingDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+    void parseLinkageDescriptor(const char *buf, SIevent &e, unsigned maxlen);
 };
 
 // Fuer for_each

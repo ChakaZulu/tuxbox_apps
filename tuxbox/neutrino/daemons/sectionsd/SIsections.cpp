@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.24 2001/10/24 14:00:14 field Exp $
+// $Id: SIsections.cpp,v 1.25 2001/11/03 03:13:52 field Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.25  2001/11/03 03:13:52  field
+// Auf Perspektiven vorbereitet
+//
 // Revision 1.24  2001/10/24 14:00:14  field
 // Ueberpruefung auf fehlerhafte Laengen verbessert
 //
@@ -159,6 +162,16 @@ inline unsigned min(unsigned a, unsigned b)
 // sollte hier alles ueberprueft werden.
 // Leider ist das noch nicht bei allen Descriptoren so.
 //-----------------------------------------------------------------------
+void SIsectionEIT::parseLinkageDescriptor(const char *buf, SIevent &e, unsigned maxlen)
+{
+  if(maxlen>=sizeof(struct descr_linkage_header))
+  {
+    SIlinkage l((const struct descr_linkage_header *)buf);
+    e.linkage_descs.insert(l);
+//    printf("LinkName: %s\n", l.name.c_str());
+  }
+}
+
 void SIsectionEIT::parseComponentDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
   if(maxlen>=sizeof(struct descr_component_header))
@@ -263,6 +276,8 @@ void SIsectionEIT::parseDescriptors(const char *des, unsigned len, SIevent &e)
       parseComponentDescriptor((const char *)desc, e, len);
     else if(desc->descriptor_tag==0x55)
       parseParentalRatingDescriptor((const char *)desc, e, len);
+    else if(desc->descriptor_tag==0x4A)
+      parseLinkageDescriptor((const char *)desc, e, len);
     if((unsigned)(desc->descriptor_length+2)>len)
       break;
     len-=desc->descriptor_length+2;
