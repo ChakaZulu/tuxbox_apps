@@ -21,6 +21,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
  
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,10 +31,6 @@
 // this method is recommended for FreeType >2.0.x:
 #include <ft2build.h>
 #include FT_FREETYPE_H
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
 #include <driver/fontrenderer.h>
 
