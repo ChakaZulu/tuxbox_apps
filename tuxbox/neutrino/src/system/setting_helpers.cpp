@@ -124,11 +124,6 @@ bool CVideoSetupNotifier::changeNotify(string OptionName, void*)
 	return false;
 }
 
-bool CBoxTypeSetupNotifier::changeNotify(string OptionName, void*)
-{
-	g_Controld->setBoxType( g_settings.box_Type );
-}
-
 bool CLanguageSetupNotifier::changeNotify(string OptionName, void*)
 {
 	//	printf("language notify: %s - %s\n", OptionName.c_str(), g_settings.language );

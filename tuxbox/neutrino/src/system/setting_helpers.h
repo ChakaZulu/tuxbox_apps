@@ -67,12 +67,6 @@ class CLanguageSetupNotifier : public CChangeObserver
 		bool changeNotify(string OptionName, void*);
 };
 
-class CBoxTypeSetupNotifier : public CChangeObserver
-{
-	public:
-		bool changeNotify(string OptionName, void*);
-};
-
 class CKeySetupNotifier : public CChangeObserver
 {
 	public:

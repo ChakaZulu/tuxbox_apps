@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.179 2002/02/28 15:03:55 field Exp $
+        $Id: neutrino.cpp,v 1.180 2002/03/01 15:31:28 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.180  2002/03/01 15:31:28  field
+  Updates
+
   Revision 1.179  2002/02/28 15:03:55  field
   Weiter Updates :)
 
@@ -1002,7 +1005,7 @@ void CNeutrinoApp::isCamValid()
 		exit(-1);
 	}
 
-	if  (ca_verid != 33 && ca_verid != 18 && ca_verid != 68)
+	if  ( (ca_verid != 33 && ca_verid != 18 && ca_verid != 68) )
 	{
 		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 		ShowMsg ( "messagebox.error", g_Locale->getText("cam.wrong"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
@@ -1464,7 +1467,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuForwarder("menu.back") );
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, false, new CBoxTypeSetupNotifier, false );
+	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, false, NULL, false );
 	oj->addOption(1, "Nokia");
 	oj->addOption(2, "Sagem");
 	oj->addOption(3, "Philips");
@@ -2323,10 +2326,6 @@ bool CNeutrinoApp::onPaintNotify(string MenuName)
 		g_settings.video_Signal = g_Controld->getVideoOutput();
 		g_settings.video_Format = g_Controld->getVideoFormat();
 	}
-	else if(MenuName == "miscsettings.head")
-	{//aktuelle werte vom controld holen...
-		g_settings.box_Type = g_Controld->getBoxType();
-	}
 
 	return false;
 }
@@ -2688,7 +2687,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.179 2002/02/28 15:03:55 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.180 2002/03/01 15:31:28 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
