@@ -146,7 +146,7 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strcmp(keystr, "flashupdate.head") != 0) &&
 			    (strncmp(keystr, "flashupdate.title", 17) != 0) &&
 			    (strncmp(keystr, "pictureviewer", 13) != 0) &&
-			    (strncmp(keystr, "scants.f", 8) != 0)
+			    ((strncmp(keystr, "scants", 6) != 0) || ((strncmp(keystr, "scants.b", 8) == 0) || (strncmp(keystr, "scants.s", 8) == 0)))
 			    )
 				text = CZapitClient::Utf8_to_Latin1(text);
 			localeData[keystr] = text;

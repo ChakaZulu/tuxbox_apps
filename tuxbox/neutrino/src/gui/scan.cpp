@@ -218,14 +218,14 @@ void CScanTs::hide()
 void CScanTs::paintLine(int x, int * y, int width, char * txt)
 {
 	frameBuffer->paintBoxRel(x, *y, width, mheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x, *y + mheight, width, g_Locale->getText(txt).c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x, *y + mheight, width, g_Locale->getText(txt).c_str(), COL_MENUCONTENT, 0, true); // UTF-8
 	*y += mheight;
 }
 
 void CScanTs::paintLine(int x, int y, int width, char * txt)
 {
 	frameBuffer->paintBoxRel(x, y, width, mheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x, y + mheight, width, g_Locale->getText(txt).c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x, y + mheight, width, g_Locale->getText(txt).c_str(), COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 void CScanTs::paint()
@@ -233,7 +233,7 @@ void CScanTs::paint()
 	ypos = y;
 	
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(xpos1, ypos + hheight, width, g_Locale->getText("scants.head").c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(xpos1, ypos + hheight, width, g_Locale->getText("scants.head").c_str(), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT);
 	
 	frameBuffer->loadPal("radar.pal", 17, 37);
@@ -245,12 +245,12 @@ void CScanTs::paint()
 	if (g_info.delivery_system == DVB_S)
 	{	//sat
 		paintLine(xpos1, &ypos, width - xpos1, "scants.actsatellite");
-		xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actsatellite").c_str());
+		xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actsatellite").c_str(), true); // UTF-8
 	}
 	if (g_info.delivery_system == DVB_C)
 	{	//cable
 		paintLine(xpos1, &ypos, width - xpos1, "scants.actcable");
-		xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actcable").c_str());
+		xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actcable").c_str(), true); // UTF-8
 	}
 
 	ypos_transponder = ypos;
@@ -282,7 +282,7 @@ void CScanTs::paint()
 
 int CScanTs::greater_xpos(int xpos, char * txt)
 {
-	int txt_xpos = xpos1 + 10 + g_Fonts->menu->getRenderWidth(g_Locale->getText(txt).c_str());
+	int txt_xpos = xpos1 + 10 + g_Fonts->menu->getRenderWidth(g_Locale->getText(txt).c_str(), true); // UTF-8
 	if (txt_xpos > xpos)
 		return txt_xpos;
 	else 
