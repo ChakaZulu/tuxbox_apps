@@ -471,13 +471,6 @@ CFile *CFileBrowser::getSelectedFile()
 
 //------------------------------------------------------------------------
 
-CFileList *CFileBrowser::getSelectedFiles()
-{
-	return &selected_filelist;
-}
-
-//------------------------------------------------------------------------
-
 void CFileBrowser::ChangeDir(const std::string & filename)
 {
 	std::string newpath;

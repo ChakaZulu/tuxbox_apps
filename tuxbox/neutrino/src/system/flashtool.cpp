@@ -51,7 +51,7 @@ CFlashTool::~CFlashTool()
 {
 }
 
-std::string CFlashTool::getErrorMessage()
+const std::string & CFlashTool::getErrorMessage(void) const
 {
 	return ErrorMessage;
 }
@@ -80,12 +80,6 @@ bool CFlashTool::readFromMTD( const std::string & filename, int globalProgressEn
 	if (mtdDevice.empty())
 	{
 		ErrorMessage = "mtd-device not set";
-		return false;
-	}
-
-	if (filename.empty())
-	{
-		ErrorMessage = "filename not set";
 		return false;
 	}
 
@@ -156,12 +150,6 @@ bool CFlashTool::program( const std::string & filename, int globalProgressEndEra
 	if (mtdDevice.empty())
 	{
 		ErrorMessage = "mtd-device not set";
-		return false;
-	}
-
-	if (filename.empty())
-	{
-		ErrorMessage = "filename not set";
 		return false;
 	}
 

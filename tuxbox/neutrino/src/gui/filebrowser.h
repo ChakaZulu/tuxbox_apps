@@ -238,8 +238,17 @@ class CFileBrowser
 
 		bool		exec(const char * const dirname);
 		CFile		*getSelectedFile();
-		CFileList	*getSelectedFiles();
-		std::string getCurrentDir() {return Path;}
+		
+		inline const CFileList & getSelectedFiles(void) const
+			{
+				return selected_filelist;
+			}
+
+		inline const std::string & getCurrentDir(void) const
+			{
+				return Path;
+			}
+
 //		size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data);
 };
 

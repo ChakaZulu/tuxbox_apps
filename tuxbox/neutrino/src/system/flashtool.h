@@ -53,7 +53,7 @@ class CFlashTool
 		CFlashTool();
 		~CFlashTool();
 
-		std::string getErrorMessage();
+		const std::string & getErrorMessage(void) const;
 
 		void setMTDDevice( const std::string & mtddevice );
 		void setStatusViewer( CProgress_StatusViewer* statusview );
