@@ -178,8 +178,8 @@ CFrameBuffer::~CFrameBuffer()
 		delete[] backupBackground;
 	}
 
-	if (-1 == ioctl(tty,KDSETMODE, kd_mode))
-	  perror("ioctl KDSETMODE");
+//	if (-1 == ioctl(tty,KDSETMODE, kd_mode))
+//	  perror("ioctl KDSETMODE");
 
 	if (-1 == ioctl(tty,VT_SETMODE, &vt_mode))
 		perror("ioctl VT_SETMODE");
