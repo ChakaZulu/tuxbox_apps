@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.4 2002/05/15 20:45:04 obi Exp $
+ * $Id: channel.cpp,v 1.5 2002/05/17 13:05:47 woglinde Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -62,7 +62,7 @@ CZapitAudioChannel * CZapitChannel::getAudioChannel (unsigned char index)
 	return retval;
 }
 
-unsigned short CZapitChannel::getAudioPid (unsigned char index = 0xFF)
+unsigned short CZapitChannel::getAudioPid (unsigned char index)
 {
 	unsigned short retval = 0;
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.184 2002/05/16 02:36:45 obi Exp $
+ * $Id: zapit.cpp,v 1.185 2002/05/17 13:05:47 woglinde Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1109,7 +1109,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.184 2002/05/16 02:36:45 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.185 2002/05/17 13:05:47 woglinde Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1404,7 +1404,7 @@ void sendAPIDs()
 }
 
 
-void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT)
+void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode)
 {
 	bouquet--;
 
@@ -1428,7 +1428,7 @@ void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode =
 	internalSendChannels( &channels);
 }
 
-void sendChannels( CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT, CZapitClient::channelsOrder order = CZapitClient::SORT_BOUQUET)
+void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder order)
 {
 	ChannelList channels;
 

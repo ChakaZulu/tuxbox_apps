@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.28 2002/05/13 17:17:04 obi Exp $
+ * $Id: bouquets.cpp,v 1.29 2002/05/17 13:05:47 woglinde Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -82,7 +82,7 @@ CZapitChannel* CBouquet::getChannelByName (char* serviceName, unsigned char serv
 // -- servicetype 0 queries TV and Radio Channels
 //
 
-CZapitChannel* CBouquet::getChannelByOnidSid (unsigned int onidSid, unsigned char serviceType = 0)
+CZapitChannel* CBouquet::getChannelByOnidSid (unsigned int onidSid, unsigned char serviceType)
 {
 	CZapitChannel* result = NULL;
 
@@ -376,7 +376,7 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 
 }
 
-void CBouquetManager::loadBouquets(bool ignoreBouquetFile = false)
+void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 {
 	FILE* in;
 	XMLTreeParser* parser;

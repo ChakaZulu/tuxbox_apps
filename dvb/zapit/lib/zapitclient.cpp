@@ -333,7 +333,7 @@ void CZapitClient::getPIDS( responseGetPIDs& pids )
 }
 
 /* gets all bouquets */
-void CZapitClient::getBouquets( BouquetList& bouquets, bool emptyBouquetsToo = false)
+void CZapitClient::getBouquets( BouquetList& bouquets, bool emptyBouquetsToo)
 {
 	commandHead msgHead;
 	commandGetBouquets msg;
@@ -352,7 +352,7 @@ void CZapitClient::getBouquets( BouquetList& bouquets, bool emptyBouquetsToo = f
 }
 
 /* gets all channels that are in specified bouquet */
-void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList& channels, channelsMode mode = MODE_CURRENT)
+void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList& channels, channelsMode mode)
 {
 	commandHead msgHead;
 	commandGetBouquetChannels msg;
@@ -373,7 +373,7 @@ void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList&
 }
 
 /* gets all channels */
-void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode = MODE_CURRENT, channelsOrder order = SORT_BOUQUET)
+void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode, channelsOrder order)
 {
 	commandHead msgHead;
 	commandGetChannels msg;
@@ -663,7 +663,7 @@ bool CZapitClient::existsChannelInBouquet( unsigned int bouquet, unsigned int on
 
 
 /* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
-void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsigned int newPos, channelsMode mode = MODE_CURRENT)
+void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsigned int newPos, channelsMode mode)
 {
 	commandHead msgHead;
 	commandMoveChannel msg;
