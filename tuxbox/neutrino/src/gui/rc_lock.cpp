@@ -39,13 +39,40 @@
 
 //
 // -- Menue Handler Interface
-// -- to fit the MenueClasses from McClean
-//
 // -- Infinite Loop to lock remote control (until release lock key pressed)
 // -- 2003-12-01 rasc
 //
 
 int CRCLock::exec(CMenuTarget* parent, const std::string &)
+{
+
+	if (parent)
+		parent->hide();
+
+
+	ShowMsgUTF("rclock.title", g_Locale->getText("rclock.lockmsg"),
+		CMessageBox::mbrYes, CMessageBox::mbYes, "info.raw");
+
+
+
+	// -- Lockup Box
+	
+	lockBox ();
+
+
+
+	ShowMsgUTF("rclock.title", g_Locale->getText("rclock.unlockmsg"),
+		CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+
+	return  menu_return::RETURN_EXIT_ALL;
+}
+
+
+
+
+
+
+void CRCLock::lockBox (void)
 {
 	unsigned long long timeoutEnd;
 	uint 		msg;
@@ -53,18 +80,6 @@ int CRCLock::exec(CMenuTarget* parent, const std::string &)
 
 
 
-	if (parent)
-		parent->hide();
-
-
-	ShowMsgUTF("rclock.header", g_Locale->getText("rclock.lockmsg"),
-		CMessageBox::mbrYes, CMessageBox::mbYes, "info.raw");
-
-
-	// -- show hint on LCD
-	// $$$ TODO
-	
-	
 
 	// -- Loop until release key pressed
 	// -- Key sequence:  <RED> <DBOX> within 5 secs
@@ -76,23 +91,25 @@ int CRCLock::exec(CMenuTarget* parent, const std::string &)
 		g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
 
 
-		if ( msg == CRCInput::RC_timeout ) continue;
-
 		if ( msg == CRCInput::RC_red)  {
 			timeoutEnd = CRCInput::calcTimeoutEnd( 5 );
 			g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
 
-			if ( msg == CRCInput::RC_timeout ) continue;
 			if ( msg == CRCInput::RC_setup)  break;
 		}
 
+		if ( msg == CRCInput::RC_timeout ) continue;
+
+		// -- Zwen told me: Eating only RC events would be nice
+		// -- so be it...
+
+		if ( msg >  CRCInput::RC_MaxRC ) {
+			CNeutrinoApp::getInstance()->handleMsg( msg, data ); 
+		}
 
 	}
 
-
-
-	ShowMsgUTF("rclock.header", g_Locale->getText("rclock.releasemsg"),
-		CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
-
-	return  menu_return::RETURN_EXIT_ALL;
+	return;
 }
+
+

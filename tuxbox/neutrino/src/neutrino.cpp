@@ -2351,9 +2351,6 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// -- Add Channel to favorites
 	StreamFeatureSelector.addItem(new CMenuForwarder("favorites.menueadd", true, NULL, new CFavorites, id, true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
 
-	// --  Lock remote control
-	StreamFeatureSelector.addItem(new CMenuForwarder("rclock.menueadd", true, NULL, new CRCLock, id, true, CRCInput::RC_nokey, ""), false);
-
 	// start/stop recording
 	if(g_settings.recording_type > 0)
 	{
@@ -2365,6 +2362,9 @@ void CNeutrinoApp::ShowStreamFeatures()
 	}
 	// -- Timer Liste
 	StreamFeatureSelector.addItem(new CMenuForwarder("timerlist.name", true, NULL, new CTimerList(), id, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
+
+	// --  Lock remote control
+	StreamFeatureSelector.addItem(new CMenuForwarder("rclock.menueadd", true, NULL, new CRCLock, id, true, CRCInput::RC_nokey, ""), false);
 
 	// -- Sectionsd pause
 	int dummy = g_Sectionsd->getIsScanningActive();

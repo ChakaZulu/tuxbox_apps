@@ -769,3 +769,10 @@ pictureviewer.slideshow Diaschou
 pictureviewer.slide_time Diaschou-Azeigduur
 pictureviewer.scaling Skalierig
 pictureviewer.defdir Schtart-Verz.
+
+
+rclock.menueadd Lock RC 
+rclock.title Lock Remote Control
+rclock.lockmsg Your DBOX2 remote control will be locked.\n To unlock the dbox2, press <RED> \n and <DBOX> on your\n remote control.
+rclock.unlockmsg DBOX2 remote control reactivated.
+

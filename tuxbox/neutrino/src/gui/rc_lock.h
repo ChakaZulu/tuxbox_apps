@@ -40,6 +40,7 @@ class CRCLock: public CMenuTarget
 	public:
 
 		int  exec(CMenuTarget* parent, const std::string & actionKey);
+		void lockBox(void);
 };
 
 
