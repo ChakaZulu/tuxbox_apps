@@ -337,9 +337,9 @@ int CPictureViewerGui::show()
 							printf("Wrong Filetype %s:%d\n",files->Name.c_str(), files->getType());
 						
 						if(m_sort==FILENAME)
-							sort(playlist.begin(),playlist.end(),sortByFilename);
+							std::sort(playlist.begin(),playlist.end(),sortByFilename);
 						else if(m_sort==DATE)
-							sort(playlist.begin(),playlist.end(),sortByDate);
+							std::sort(playlist.begin(),playlist.end(),sortByDate);
 					}
 				}
 	//				CLCD::getInstance()->setMode(CLCD::MODE_MP3);
