@@ -751,8 +751,9 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr)
 	ptr+=len;
 
 	len=data[ptr++];
-
 	text=convertDVBUTF8((unsigned char*) data+ptr, len, table);
+	while( text.length() && text[0] == '\x0A' )
+		text.erase(0,1);
 }
 
 #ifdef SUPPORT_XML
