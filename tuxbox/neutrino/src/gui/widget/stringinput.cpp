@@ -30,19 +30,18 @@
 */
 
 
-#include <global.h>
-#include <neutrino.h>
-
+#include <gui/widget/stringinput.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 
 #include <gui/color.h>
 
-#include "messagebox.h"
-#include "stringinput.h"
-
 #include <gui/widget/icons.h>
+#include <gui/widget/messagebox.h>
+
+#include <global.h>
+#include <neutrino.h>
 
 
 CStringInput::CStringInput(const char * const Name, char* Value, int Size, const char * const Hint_1, const char * const Hint_2, const char * const Valid_Chars, CChangeObserver* Observ, const char * const Icon)

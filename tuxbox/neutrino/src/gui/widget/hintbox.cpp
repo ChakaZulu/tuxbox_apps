@@ -30,10 +30,10 @@
 */
 
 
+#include <gui/widget/hintbox.h>
+
 #include <global.h>
 #include <neutrino.h>
-
-#include "hintbox.h"
 
 #define borderwidth 4
 
@@ -46,13 +46,13 @@ CHintBox::CHintBox(const char * const Caption, const char * const _Text, const i
 	fheight= g_Fonts->menu->getHeight();
 	iconfile = Icon;
 	caption = Caption;
-	Text = Text+ "\n";
+	Text = Text + '\n';
 	text.clear();
 
 	int pos;
 	do
 	{
-		pos = Text.find_first_of("\n");
+		pos = Text.find_first_of('\n');
 		if ( pos!=-1 )
 		{
 			text.push_back(Text.substr( 0, pos));
@@ -100,7 +100,7 @@ void CHintBox::paint(const bool saveScreen)
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	if ( iconfile!= "" )
 	{
-		frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
+		frameBuffer->paintIcon(iconfile, x + 8, y + 5);
 		g_Fonts->menu_title->RenderString(x+40, y+theight+0, width- 40, g_Locale->getText(caption), COL_MENUHEAD, 0, true); // UTF-8
 	}
 	else

@@ -30,30 +30,30 @@
 */
 
 
-#include <global.h>
-#include <neutrino.h>
-
-#include "messagebox.h"
+#include <gui/widget/messagebox.h>
 
 #include <gui/widget/icons.h>
+
+#include <global.h>
+#include <neutrino.h>
 
 //#define borderwidth 4
 
 
-CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier* Notifier, const char * const Icon, const int Width, const uint Default, const uint ShowButtons)
+CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier * const Notifier, const char * const Icon, const int Width, const uint Default, const uint ShowButtons)
 {
 	theight = g_Fonts->menu_title->getHeight();
 	fheight = g_Fonts->menu->getHeight();
 
 	iconfile = Icon ? Icon : "";
 	caption  = Caption;
-	Text     = Text + "\n";
+	Text     = Text + '\n';
 	text.clear();
 
 	int pos;
 	do
 	{
-		pos = Text.find_first_of("\n");
+		pos = Text.find_first_of('\n');
 		if ( pos!=-1 )
 		{
 			text.push_back(Text.substr( 0, pos));
@@ -111,7 +111,7 @@ void CMessageBox::paintHead()
 	window->paintBoxRel(0, 0, width, theight + 0, (CFBWindow::color_t)COL_MENUHEAD);
 	if ( iconfile!= "" )
 	{
-		window->paintIcon(iconfile.c_str(), 8, 5);
+		window->paintIcon(iconfile, 8, 5);
 		window->RenderString(g_Fonts->menu_title, 40, theight + 0, width - 40, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
 	}
 	else
