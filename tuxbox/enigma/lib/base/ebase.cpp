@@ -120,43 +120,40 @@ void eMainloop::removeSocketNotifier(eSocketNotifier *sn)
 void eMainloop::processOneEvent()
 {
 	int cnt=0;
-	std::vector<pollfd> pfd;
-//	printf("wir haben FDs:\n");
-//	pfd.clear();
-	for (std::map<int,eSocketNotifier*>::iterator i(notifiers.begin()); i!=notifiers.end(); ++i)
-	{
-		pollfd p;
-		p.fd=i->first;
-		p.events=i->second->getRequested();
+	int fdAnz = notifiers.size();
+	pollfd* pfd = new pollfd[fdAnz];  // make new pollfd array
 
-		pfd.push_back(p);
-//			printf("%d (%x)\n", i->first , i->second->getRequested());
+// fill pfd array
+	std::map<int,eSocketNotifier*>::iterator it(notifiers.begin());
+	for (int i=0; i < fdAnz; i++, it++)
+	{
+		pfd[i].fd = it->first;
+		pfd[i].events = it->second->getRequested();
 	}
-			// process pending timers...
+
+// process pending timers...
 	long usec;
 
 	while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
 		TimerList.begin()->activate();
 
-	int ret=poll(&(*pfd.begin()), notifiers.size(), TimerList ? usec / 1000 : -1);  // milli .. not micro seks
+	int ret=poll(pfd, fdAnz, TimerList ? usec / 1000 : -1);  // milli .. not micro seks
 
 	if (ret>0)
 	{
 //		printf("bin aussem poll raus und da war was\n");
-		for (std::vector<pollfd>::iterator i(pfd.begin()); i != pfd.end(); ++i)
+		for (int i=0; i < fdAnz ; i++)
 		{
-			std::map<int, eSocketNotifier*>::iterator valid(notifiers.find(i->fd));
-		
-			if( valid == notifiers.end())
+			if( notifiers.find(pfd[i].fd) == notifiers.end())
 				continue;
 
-			int req = notifiers[i->fd]->getRequested();
-		
-			if ( (i->revents & req) == req)
-			{
-				notifiers[i->fd]->activate(i->revents);
+			int req = notifiers[pfd[i].fd]->getRequested();
 
-				if (!--ret)		// shortcut
+			if ( (pfd[i].revents & req) == req)
+			{
+				notifiers[pfd[i].fd]->activate(pfd[i].revents);
+
+				if (!--ret)
 					break;
 			}
 		}
@@ -167,7 +164,10 @@ void eMainloop::processOneEvent()
 		// check Timers...
 	while ( TimerList && timeout_usec( TimerList.begin()->getNextActivation() ) <= 0 )
 		TimerList.begin()->activate();
+
+	delete [] pfd;
 }
+
 
 int eMainloop::exec()
 {
