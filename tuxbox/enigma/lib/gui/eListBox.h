@@ -19,11 +19,10 @@ class eListBox: public eWidget
 	ePtrList<T> childs;
 	ePtrList_T_iterator top, bottom, current;
 
-	int entries, font_size, item_height;
+	int entries, font_size, item_height, flags;
 	gColor col_active;
 	gFont entryFnt;
 
-	void geometryChanged();
 	void gotFocus();
 	void lostFocus();
 	eRect getEntryRect(int n);
@@ -55,6 +54,14 @@ public:
 		dirPageDown, dirPageUp, dirDown, dirUp
 	};
 	int moveSelection(int dir);
+	
+	enum
+	{
+		flagNoUpDownMovement=1,
+		flagNoPageMovement=2
+	};
+	
+	void setFlags(int flags);
 };
 
 class eListBoxEntry: public Object
@@ -178,32 +185,6 @@ inline void eListBox<T>::remove(T* entry)
 }
 
 template <class T>
-inline void eListBox<T>::geometryChanged()
-{
-	eDebug("geometryChanged");  // this Method is not tested !
-	entries=size.height()/item_height;
-
-	if (!childs.empty())
-	{
-		bool ok=false;
-
-		bottom=top;
-
-		for (int i=0; i < entries; i++, bottom++)
-		{
-			if (bottom == current)
-				ok = true;
-
-			if (bottom == --childs.end() )
-				break;
-		}
-
-		if (!ok)
-			current = top;		
-	}
-}
-
-template <class T>
 inline void eListBox<T>::clearList()
 {
 	childs.clear();
@@ -280,7 +261,8 @@ inline eListBox<T>::eListBox(eWidget *parent, int ih)
 		font_size(ih),
 		item_height(ih+2),
 		have_focus(0),
-		entryFnt(gFont("NimbusSansL-Regular Sans L Regular", font_size))
+		entryFnt(gFont("NimbusSansL-Regular Sans L Regular", font_size)),
+		flags(0)
 {
 	childs.setAutoDelete(false);	// machen wir selber
 
@@ -327,7 +309,7 @@ inline void eListBox<T>::gotFocus()
 		return;
 
 	ePtrList_T_iterator entry(top);
-
+	
 	for (int i=0; i<entries; i++, ++entry)
 		if (*entry == *current)
 			invalidateEntry(i);
@@ -340,15 +322,15 @@ inline void eListBox<T>::lostFocus()
 
 	if (childs.empty())
 		return;
-/*
-	ePtrList<T>::iterator entry(top);
+
+	ePtrList_T_iterator entry(top);
 
 	if (isVisible())
 	{
 		for (int i=0; i<entries; i++, ++entry)
 			if (*entry == *current)
 				invalidateEntry(i);
-	}*/
+	}
 
 /*	if (parent && parent->LCDElement)
 		parent->LCDElement->setText("");*/
@@ -373,7 +355,7 @@ inline int eListBox<T>::moveSelection(int dir)
 {
 	if (childs.empty())
 		return 0;
-
+		
 	T *oldptr = *current,
 		*oldtop = *top;
 	switch (dir)
@@ -474,18 +456,24 @@ inline int eListBox<T>::moveSelection(int dir)
 }
 
 template <class T>
+inline void eListBox<T>::setFlags(int _flags)
+{
+	flags=_flags;
+}
+
+template <class T>
 inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
 	case eWidgetEvent::evtAction:
-		if (event.action == &i_listActions->pageup)
+		if ((event.action == &i_listActions->pageup) && !(flags & flagNoPageMovement))
 			moveSelection(dirPageUp);
-		else if (event.action == &i_listActions->pagedown)
+		else if ((event.action == &i_listActions->pagedown) && !(flags & flagNoPageMovement))
 			moveSelection(dirPageDown);
-		else if (event.action == &i_cursorActions->up)
+		else if ((event.action == &i_cursorActions->up) && !(flags & flagNoUpDownMovement))
 			moveSelection(dirUp);
-		else if (event.action == &i_cursorActions->down)
+		else if ((event.action == &i_cursorActions->down) && !(flags & flagNoUpDownMovement))
 			moveSelection(dirDown);
 		else if (event.action == &i_cursorActions->ok)
 		{
@@ -497,8 +485,11 @@ inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 		{
 			/*emit*/ selected(0);
 		} else
-			return 0;
+			break;
 		return 1;
+	case eWidgetEvent::changedSize:
+		init();
+		break;
 	}
 	return eWidget::eventHandler(event);
 }
@@ -528,7 +519,7 @@ inline void eListBox<T>::setCurrent(T *c)
 		if (i == entries)
 		{
 			top=bottom=current;
-			for (int i=0; i<entries; i++, bottom++)
+			for (int i=1; i<entries; i++, bottom++)
 				if (bottom == --childs.end() )
 					break;
 		}
