@@ -160,7 +160,7 @@ int main( int argc, char ** argv )
 		while( !doexit )
 		{
 			tv.tv_sec = 0;
-			tv.tv_usec = 1000;
+			tv.tv_usec = 20000;
 			x = select( 0, 0, 0, 0, &tv );		/* 10ms pause */
 			MoveSide();
 			if ( !FallDown() )

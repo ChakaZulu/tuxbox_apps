@@ -30,7 +30,7 @@ extern	int		doexit;
 extern	unsigned short	realcode;
 extern	unsigned short	actcode;
 
-static	long	score = 0;
+		long	score = 0;
 static	int		level = 1;
 static	int		puz_x = 5;
 static	int		puz_y = 0;

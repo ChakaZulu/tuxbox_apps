@@ -16,9 +16,105 @@
 #include <plugin.h>
 #include <fx2math.h>
 
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
+
 extern	int				debug;
 extern	int				doexit;
 extern	unsigned short	actcode;
+extern	long			score;
+
+static	char			*proxy_addr=0;
+static	char			*proxy_user=0;
+static	char			*hscore=0;
+
+static	void	SaveGame( void )
+{
+	CURL		*curl;
+	CURLcode	res;
+	FILE		*fp;
+	char		url[ 512 ];
+	char		*user="nobody";
+	int			x;
+	char		*p;
+
+	if ( !score || !hscore )
+		return;
+
+	FBDrawString( 150,300,64,"Save Highscore ? (OK/BLUE)",WHITE,0);
+
+	while( realcode != 0xee )
+		RcGetActCode();
+
+	actcode=0xee;
+	de=doexit;
+	doexit=0;
+	while( !doexit )
+	{
+		tv.tv_sec = 0;
+		tv.tv_usec = 100000;
+		select( 0,0,0,0, &tv );
+		RcGetActCode();
+		if ( actcode == RC_BLUE )
+			return;
+		if ( actcode == RC_OK )
+			break;
+	}
+	if ( doexit )
+		return;
+
+	FBFillRect( 150,300,570,64,BLACK );
+	x=FBDrawString( 150,300,64,"name : ",WHITE,0);
+	user=FBEnterWord(150+x,300,64,9,WHITE);
+
+/* clean name */
+	x = strlen(user);
+	p=user;
+	for( p=user; *p; x--; p++ )
+	{
+		if (( *p == ' ' ) || ( *p == '&' ) || ( *p == '/' ))
+			memcpy(p,p+1,x);
+	}
+
+	sprintf(url,"%s/games/tetris.php?action=put&user=%s&score=%d",
+		hscore,user,score);
+
+	curl = curl_easy_init();
+	if ( !curl )
+		return;
+	fp = fopen( "/var/tmp/trash", "w");
+	if ( !fp )
+	{
+		curl_easy_cleanup(curl);
+		return;
+	}
+	curl_easy_setopt( curl, CURLOPT_URL, hscore );
+	curl_easy_setopt( curl, CURLOPT_FILE, fp );
+	curl_easy_setopt( curl, CURLOPT_NOPROGRESS, TRUE );
+	if ( proxy_addr )
+	{
+		curl_easy_setopt( curl, CURLOPT_PROXY, proxy_addr );
+		if ( proxy_user )
+			curl_easy_setopt( curl, CURLOPT_PROXYUSERPWD, proxy_user );
+	}
+	res = curl_easy_perform(curl);
+
+	if ( !res )
+		FBDrawString( 170,364,64,"success",WHITE,0);
+	else
+		FBDrawString( 170,364,64,"failed",WHITE,0);
+
+	curl_easy_cleanup(curl);
+	fclose( fp );
+	unlink( "/var/tmp/trash" );
+
+	tv.tv_sec = 2;
+	tv.tv_usec = 0;
+	select( 0,0,0,0, &tv );
+
+	return;
+}
 
 static	void	setup_colors(void)
 {
@@ -138,7 +234,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		while( !doexit )
 		{
 			tv.tv_sec = 0;
-			tv.tv_usec = 1000;
+			tv.tv_usec = 20000;
 			x = select( 0, 0, 0, 0, &tv );		/* 10ms pause */
 			MoveSide();
 			if ( !FallDown() )
@@ -187,6 +283,12 @@ int plugin_exec( PluginParam *par )
 			fd_rc=_atoi(par->val);
 		else if ( !strcmp(par->id,P_ID_NOPIG) )
 			fx2_use_pig=!_atoi(par->val);
+		else if ( !strcmp(par->id,P_ID_PROXY) && par->val && *par->val )
+			proxy_addr=par->val;
+		else if ( !strcmp(par->id,P_ID_HSCORE) && par->val && *par->val )
+			hscore=par->val;
+		else if ( !strcmp(par->id,P_ID_PROXY_USER) && par->val && *par->val )
+			proxy_user=par->val;
 	}
 	return tetris_exec( fd_fb, fd_rc, -1, 0 );
 }
