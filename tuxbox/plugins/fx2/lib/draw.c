@@ -1924,6 +1924,38 @@ static	char	*keynum[12] ={"1","2","3","4","5","6","7","8","9","","0",""};
 static	char	keyn[12] = {6,13,13,13,12,12,13,13,12,9,13,6};
 static	char	text[128];
 
+typedef struct _T9Words
+{
+	char	*in;
+	char	*out;
+} T9Words;
+
+static	T9Words	wlist[] = {
+{ "A4",			"Biggi" },
+{ "AGPGPTGAM",	"Christian" },
+{ "AIDPT",		"Biggest" },
+{ "DAPAKA",		"faralla" },
+{ "DWA",		"fx2" },
+{ "EPGDT",		"derget" },
+{ "GTMW",		"Hunz" },
+{ "JAMGMD",		"Janine" },
+{ "JATJDP",		"Katjes" },
+{ "JMJT",		"Jolt" },
+{ "MAPJGMGM",	"markinho" },
+{ "MAG",		"obi" },
+{ "MAWJ",		"Mayk" },
+{ "MBJDAM",		"McClean" },
+{ "MPA",		"Opa" },
+{ "NA",			"Oma" },
+{ "PGADMW",		"Shadow" },
+{ "PGJTGA",		"Silvia" },
+{ "PMTAPT",		"Rotart" },
+{ "TGEMA-",		"TheDOC1" },
+{ "TMAGMA",		"tmbinc" },
+{ "WAJDG",		"waldi" },
+{ 0,			0 }
+};
+
 char	*FBEnterWord( int xpos, int ypos, int height,int len,unsigned char col)
 {
 	struct timeval	tv;
@@ -1939,6 +1971,7 @@ char	*FBEnterWord( int xpos, int ypos, int height,int len,unsigned char col)
 	char			*pos;
 	int				dlen = 0;
 	char			blocker=0;
+	char			autot9=0;
 
 	/* draw help */
 	FBDrawRect( xoffs,yoffs, 3*52,4*52+4,WHITE);
@@ -1991,6 +2024,7 @@ char	*FBEnterWord( int xpos, int ypos, int height,int len,unsigned char col)
 #ifdef USEX
 		FBFlushGrafic();
 #endif
+		autot9=0;
 		if ( actcode <= 9 )	/* RC_0 .. RC_9 */
 		{
 			if ( actcode != lastcode )
@@ -2000,6 +2034,7 @@ char	*FBEnterWord( int xpos, int ypos, int height,int len,unsigned char col)
 				if ( idx == -1 )
 					idx=10;
 				subidx=0;
+				autot9=1;
 				*pos=keyw[idx][subidx];
 				i++;
 				lastcode=actcode;
@@ -2048,8 +2083,36 @@ char	*FBEnterWord( int xpos, int ypos, int height,int len,unsigned char col)
 				break;
 			}
 		}
+		if ( actcode == RC_BLUE )
+		{
+			if ( i > 0 )
+			{
+				autot9=1;
+				pos++;
+				i++;
+				break;
+			}
+		}
 	}
 	*pos=0;
+	while( realcode != 0xee )
+		RcGetActCode();
+	actcode=0xee;
+
+	if ( autot9 )
+	{
+		for( i=0; i<sizeof(wlist)/sizeof(T9Words); i++ )
+		{
+			y = strcmp(wlist[i].in,text);
+			if ( !y )
+			{
+				strcpy(text,wlist[i].out);
+				break;
+			}
+			if ( y > 0 )
+				break;
+		}
+	}
 	FBFillRect( xoffs,yoffs, 3*52+3,4*52+4+2,BLACK);
 	return( text );
 }
