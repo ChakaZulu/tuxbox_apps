@@ -29,214 +29,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-//
-// $Id: channellist.cpp,v 1.73 2002/03/17 19:59:08 rasc Exp $
-//
-// $Log: channellist.cpp,v $
-// Revision 1.73  2002/03/17 19:59:08  rasc
-// -- channelselector, info details:
-// --    visible "connector line" between channel  and detail info at bottom
-//
-// Revision 1.72  2002/03/11 18:52:41  Simplex
-// fix
-//
-// Revision 1.70  2002/03/06 11:18:39  field
-// Fixes & Updates
-//
-// Revision 1.69  2002/02/28 15:03:55  field
-// Weiter Updates :)
-//
-// Revision 1.68  2002/02/27 22:51:13  field
-// Tasten kaputt gefixt - sollte wieder gehen :)
-//
-// Revision 1.66  2002/02/26 17:24:16  field
-// Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
-//
-// Revision 1.65  2002/02/25 19:32:26  field
-// Events <-> Key-Handling umgestellt! SEHR BETA!
-//
-// Revision 1.64  2002/02/25 01:27:33  field
-// Key-Handling umgestellt (moeglicherweise beta ;)
-//
-// Revision 1.63  2002/02/04 06:15:30  field
-// sectionsd interface verbessert (bug beseitigt)
-//
-// Revision 1.62  2002/01/31 16:59:55  field
-// Kleinigkeiten
-//
-// Revision 1.61  2002/01/31 00:33:25  field
-// Kosmetik
-//
-// Revision 1.58  2002/01/30 17:28:37  McClean
-// new channellist painting
-//
-// Revision 1.57  2002/01/30 14:25:56  field
-// Abstandsfix
-//
-// Revision 1.55  2002/01/29 23:23:06  field
-// Mehr Details in Channellist (sectionsd updaten)
-//
-// Revision 1.53  2002/01/18 23:34:36  McClean
-// repair infobar
-//
-// Revision 1.52  2002/01/16 02:09:04  McClean
-// cleanups+quickzap-fix
-//
-// Revision 1.51  2002/01/15 20:55:14  McClean
-// zapinterface changed
-//
-// Revision 1.50  2002/01/03 20:03:20  McClean
-// cleanup
-//
-// Revision 1.49  2001/12/30 23:16:15  Simplex
-// bugfix in adjusting bouquet's channellist to current channel
-//
-// Revision 1.48  2001/12/25 11:40:30  McClean
-// better pushback handling
-//
-// Revision 1.47  2001/12/25 03:28:42  McClean
-// better pushback-handling
-//
-// Revision 1.46  2001/12/22 19:34:58  Simplex
-// - selected channel in bouquetlist is correct after numzap and quickzap
-// - dbox-key in channellist shows bouquetlist
-//
-// Revision 1.45  2001/12/14 17:03:40  faralla
-// forgot debug-output
-//
-// Revision 1.44  2001/12/14 16:56:42  faralla
-// better bouquet-key handling
-//
-// Revision 1.43  2001/12/12 19:11:32  McClean
-// prepare timing setup...
-//
-// Revision 1.42  2001/12/12 11:46:06  McClean
-// performance-improvements
-//
-// Revision 1.41  2001/12/12 11:33:57  McClean
-// major epg-fixes
-//
-// Revision 1.40  2001/12/12 01:47:17  McClean
-// cleanup
-//
-// Revision 1.39  2001/11/23 13:18:18  McClean
-// radiomode-paint bug removed
-//
-// Revision 1.38  2001/11/19 22:50:28  Simplex
-// Neutrino can handle bouquets now.
-// There are surely some bugs and todo's but it works
-//
-// Revision 1.37  2001/11/15 11:42:41  McClean
-// gpl-headers added
-//
-// Revision 1.36  2001/11/05 16:04:25  field
-// nvods/subchannels ver"c++"ed
-//
-// Revision 1.35  2001/10/29 16:49:00  field
-// Kleinere Bug-Fixes (key-input usw.)
-//
-// Revision 1.34  2001/10/18 14:31:23  field
-// Scrollleisten :)
-//
-// Revision 1.33  2001/10/16 18:34:13  rasc
-// -- QuickZap to last channel verbessert.
-// -- Standard Kanal muss ca. 2-3 Sekunden aktiv sein fuer LastZap Speicherung.
-// -- eigene Klasse fuer die Channel History...
-//
-// Revision 1.32  2001/10/13 00:46:48  McClean
-// nstreamzapd-support broken - repaired
-//
-// Revision 1.31  2001/10/11 21:04:58  rasc
-// - EPG:
-//   Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
-//   Key-handling etwas harmonischer gemacht  (Left/Right/Exit)
-// - Code etwas restrukturiert und eine Fettnaepfe meinerseits beseitigt
-//   (\r\n wg. falscher CSV Einstellung...)
-//
-// Revision 1.30  2001/10/10 17:17:13  field
-// zappen auf onid_sid umgestellt
-//
-// Revision 1.29  2001/10/02 17:56:33  McClean
-// time in infobar (thread probs?) and "0" quickzap added
-//
-// Revision 1.28  2001/09/27 17:19:21  field
-// Numeric-Zap fix gefixt
-//
-// Revision 1.27  2001/09/27 11:23:51  field
-// Numzap gefixt, kleiner Bugfixes
-//
-// Revision 1.26  2001/09/26 22:11:08  rasc
-// - kleiner Bugfix bei Abort NumericChannelzap
-//
-// Revision 1.25  2001/09/26 16:24:17  rasc
-// - kleinere Aenderungen: Channel Num Zap fuer >999 Channels
-//   (Eutelsat/Astra) und eigener Font
-//
-// Revision 1.24  2001/09/23 21:34:07  rasc
-// - LIFObuffer Module, pushbackKey fuer RCInput,
-// - In einige Helper und widget-Module eingebracht
-//   ==> harmonischeres Menuehandling
-// - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
-//
-// Revision 1.23  2001/09/21 14:33:39  field
-// Eventlist - ok/? vertauscht, epg-Breite flexibel
-//
-// Revision 1.22  2001/09/20 19:21:37  fnbrd
-// Channellist mit IDs.
-//
-// Revision 1.21  2001/09/20 14:10:10  field
-// neues EPG-Handling abschaltbar
-//
-// Revision 1.20  2001/09/20 13:44:57  field
-// epg-Anzeige verbessert
-//
-// Revision 1.19  2001/09/20 00:36:32  field
-// epg mit zaopit zum grossteil auf onid & s_id umgestellt
-//
-// Revision 1.18  2001/09/18 11:48:43  fnbrd
-// Changed some parameter to const string&
-//
-// Revision 1.17  2001/09/17 12:45:12  field
-// Sprache online umstellbar, kleine Aufraeumarbeiten
-//
-// Revision 1.16  2001/09/14 16:18:46  field
-// Umstellung auf globale Variablen...
-//
-// Revision 1.15  2001/09/13 10:12:41  field
-// Major update! Beschleunigtes zappen & EPG uvm...
-//
-// Revision 1.14  2001/09/06 19:13:21  McClean
-// no changes
-//
-// Revision 1.13  2001/09/06 12:04:10  McClean
-// fix neutrino-crash (no chanlist)
-//
-// Revision 1.12  2001/09/03 03:34:04  tw-74
-// cosmetic fixes, own "Mg" fontmetrics
-//
-// Revision 1.11  2001/08/21 00:30:38  tw-74
-// more fontrendering (see comments there), screen cosmetics
-//
-// Revision 1.10  2001/08/20 13:10:27  tw-74
-// cosmetic changes and changes for variable font size
-//
-// Revision 1.9  2001/08/20 01:51:12  McClean
-// channellist bug fixed - faster channellist response
-//
-// Revision 1.8  2001/08/20 01:26:54  McClean
-// stream info added
-//
-// Revision 1.7  2001/08/16 23:24:17  McClean
-// positioning and display-clear bug fixed
-//
-// Revision 1.6  2001/08/16 23:19:18  McClean
-// epg-view and quickview changed
-//
-// Revision 1.5  2001/08/15 17:02:26  fnbrd
-// Channellist now wider
-//
-//
-
 #include "channellist.h"
 #include "../global.h"
 
@@ -973,9 +765,8 @@ void CChannelList::clearItem2DetailsLine ()
 }
 
 void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
-
 {
-#define ConnectLineBox_Width	16
+	#define ConnectLineBox_Width	16
 
 	int xpos  = x - ConnectLineBox_Width;
 	int ypos1 = y + theight+0 + pos*fheight;
@@ -990,7 +781,8 @@ void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
 	g_FrameBuffer->paintBackgroundBoxRel(xpos,y, ConnectLineBox_Width, height+info_height);
 
 	// paint Line if detail info (and not valid list pos)
-	if (pos >= 0 &&  chanlist[ch_index]->currentEvent.description != "") {
+	if (pos >= 0 &&  chanlist[ch_index]->currentEvent.description != "")
+	{
 		// 1. col thick line
 		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
 		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 4,info_height, col1);
@@ -1004,11 +796,10 @@ void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
 		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 1,fheight,     col2);
 		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos2, 1,info_height, col2);
 
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 1,ypos2a-ypos1a, col2);
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 1,ypos2a-ypos1a+4, col2);
 
 		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,1, col2);
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos2a, 12,1, col2);
-
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2); //--
 	}
 
 }
