@@ -2,7 +2,7 @@
 #define __gui_widget_icons_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.4 2004/03/12 09:17:17 zwen Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.5 2004/09/12 22:43:36 chakazulu Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -36,7 +36,24 @@
 #define NEUTRINO_ICON_BUTTON_HOME         "home.raw"
 #define NEUTRINO_ICON_BUTTON_MUTE         "mute.raw"
 #define NEUTRINO_ICON_BUTTON_MUTE_SMALL   "mute_small.raw"
+
 #define NEUTRINO_ICON_BUTTON_OKAY         "ok.raw"
+
+#define NEUTRINO_ICON_BUTTON_0         "0.raw"
+#define NEUTRINO_ICON_BUTTON_1         "1.raw"
+#define NEUTRINO_ICON_BUTTON_2         "2.raw"
+#define NEUTRINO_ICON_BUTTON_3         "3.raw"
+#define NEUTRINO_ICON_BUTTON_4         "4.raw"
+#define NEUTRINO_ICON_BUTTON_5         "5.raw"
+#define NEUTRINO_ICON_BUTTON_6         "6.raw"
+#define NEUTRINO_ICON_BUTTON_7         "7.raw"
+#define NEUTRINO_ICON_BUTTON_8         "8.raw"
+#define NEUTRINO_ICON_BUTTON_9         "9.raw"
+
+#define NEUTRINO_ICON_BUTTON_TOP       "top.raw"
+#define NEUTRINO_ICON_BUTTON_RIGHT     "right.raw"
+#define NEUTRINO_ICON_BUTTON_DOWN      "down.raw"
+#define NEUTRINO_ICON_BUTTON_LEFT      "left.raw"
 
 #define NEUTRINO_ICON_SETTINGS      "settings.raw"
 
