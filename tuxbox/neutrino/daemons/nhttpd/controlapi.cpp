@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.51 2005/01/18 11:23:30 diemade Exp $
+	$Id: controlapi.cpp,v 1.52 2005/01/19 19:44:21 sat_man Exp $
 
 	License: GPL
 
@@ -374,7 +374,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 bool CControlAPI::SystemCGI(CWebserverRequest *request)
 {
 	std::string pluginname;
-	
+	request->SendPlainHeader("text/plain");          // Standard httpd header senden	
 	if (request->ParameterList.size() == 1)
 	{
 
