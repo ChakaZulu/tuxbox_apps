@@ -169,7 +169,7 @@ void CLocaleManager::loadLocale(std::string locale)
 			      (strcmp(buf, "flashupdate.reallyflashmtd") == 0) ||
 			      (strcmp(buf, "flashupdate.savesuccess") == 0) ||
 			      (strcmp(buf, "flashupdate.versioncheck") == 0))) &&
-			    ((strncmp(buf, "ma", 3) != 0) || (strcmp(buf, "mainsettings.savesettingsnow_hint") == 0)) &&
+			    ((strncmp(buf, "ma", 2) != 0) || (strcmp(buf, "mainsettings.savesettingsnow_hint") == 0)) &&
 			    ((strncmp(buf, "se", 2) != 0) || (strcmp(buf, "servicemenu.reload_hint") == 0)) &&
 			    ((strncmp(buf, "timerlist", 9) != 0) || (strncmp(buf, "timerlist.weekdays.hint", 23) == 0)) &&
 			    (strcmp(buf, "bouquetlist.head") != 0) &&
