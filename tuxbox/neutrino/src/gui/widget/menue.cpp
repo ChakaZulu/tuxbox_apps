@@ -248,7 +248,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 void CMenuWidget::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x,y, width,height );
+	frameBuffer->paintBackgroundBoxRel(x,y-10, width,height+20 );
 }
 
 void CMenuWidget::paint()
