@@ -1,7 +1,7 @@
-a.volgreen { color:#00ff00; font-size:12pt; font-family: tahoma, arial; background-image: url(led_aan.gif)}
-a.vidblue { color:#00ff00; font-size:12pt; font-family: tahome, arial; background-image: url(led_aan.gif)}
-a.volnot { color:#c0c0c0; font-size:12pt; font-family: tahoma, arial; background-image: url(led_uit.gif)}
-a.vidnot { color:#c0c0c0; font-size:12pt; font-family: tahoma, arial; background-image: url(led_uit.gif)}
+a.volgreen { color:#00ff00; font-size:12pt; font-family: tahoma, arial; background-image: url(led_on.gif)}
+a.vidblue { color:#00ff00; font-size:12pt; font-family: tahome, arial; background-image: url(led_on.gif)}
+a.volnot { color:#c0c0c0; font-size:12pt; font-family: tahoma, arial; background-image: url(led_off.gif)}
+a.vidnot { color:#c0c0c0; font-size:12pt; font-family: tahoma, arial; background-image: url(led_off.gif)}
 a.mute { color:#ffffff; font-size:8pt; font-family:tahoma, arial; }
 a.audio { color:#000000; font-size:8pt; font-family:Verdana; }
 .white { color:#000000; font-size: 8pt; font-family: Verdana; }
@@ -49,6 +49,10 @@ a:hover {
 
 #contentcell {
 	background-color: #ffffff;
+	padding-left: 10px; 
+	padding-top: 10px; 
+	padding-right: 10px;
+	padding-bottom: 10px;
 }
 
 #contentcell TD {
@@ -72,7 +76,7 @@ a:hover {
 #topnavi button,
 #leftnavi button {
 	border: 1px solid #4E5B93;
-	background-color: #ffffff;
+	background-color: #D9E0E7;
 	background-image: url(but_grey.png);
 	background-repeat: repeat-x;
 }
