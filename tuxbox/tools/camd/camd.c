@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.1 2002/05/05 01:37:37 obi Exp $
+ * $Id: camd.c,v 1.2 2002/05/05 21:24:05 obi Exp $
  *
  * (C) 2001, 2002 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -298,7 +298,7 @@ void class_23 (unsigned char * buffer, unsigned int len)
 	switch ((buffer[4] & 0x3C) >> 2)
 	{
 	case 0x00:
-		caid_count = buffer[4];
+		caid_count = buffer[5];
 
 		for (i = 0; i < buffer[5]; i++)
 		{
