@@ -21,3 +21,5 @@ install-data-local:
 	install -d $(DATADIR)/enigma/htdocs
 	install -m 0644 htdocs/*.gif $(DATADIR)/enigma/htdocs
 	install -d $(CONFIGDIR)/enigma
+	install -d $(DATADIR)/enigma/resources
+	install -m 0644 resources/*.xml $(DATADIR)/enigma/resources
