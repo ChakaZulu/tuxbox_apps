@@ -1,7 +1,13 @@
 /*
-  $Id: tuxbox.c,v 1.1 2003/01/04 23:38:46 waldi Exp $
+  $Id: tuxbox.c,v 1.2 2003/01/09 02:22:07 obi Exp $
   
   $Log: tuxbox.c,v $
+  Revision 1.2  2003/01/09 02:22:07  obi
+  read from proc, not from getenv()
+
+  bash does not like . /proc/bus/tuxbox which was the reason for copying
+  dbox.sh to /tmp
+
   Revision 1.1  2003/01/04 23:38:46  waldi
   move libtuxbox
 
@@ -23,32 +29,62 @@
 
 */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "tuxbox.h"
 
+static unsigned int tuxbox_read_proc(char *search)
+{
+	
+	FILE *file;
+	char *line = NULL;
+	size_t len = 0;
+	int ret = 0;
+
+	if (!search)
+		return ret;
+
+	file = fopen("/proc/bus/tuxbox", "r");
+
+	if (!file) {
+		perror("/proc/bus/tuxbox");
+		return ret;
+	}
+
+	while (getline(&line, &len, file) != -1) {
+		if (line) {
+			if (!strncmp(line, search, strlen(search))) {
+				char *value = strchr(line, '=');
+				if (value) {
+					ret = strtoul(&value[1], NULL, 0);
+					break;
+				}
+			}
+		}
+	}
+
+	fclose(file);
+
+	if (line)
+		free(line);
+
+	return ret;
+	
+}
+
 unsigned int tuxbox_get_capabilities(void)
 {
 
-	char *value;
-
-	if (!(value = getenv(TUXBOX_TAG_CAPABILITIES)))
-		return 0;
-		
-	return strtoul(value, NULL, 0);
+	return tuxbox_read_proc(TUXBOX_TAG_CAPABILITIES);
 
 }
 
 unsigned int tuxbox_get_vendor(void)
 {
 
-	char *value;
-
-	if (!(value = getenv(TUXBOX_TAG_VENDOR)))
-		return TUXBOX_VENDOR_UNKNOWN;
-		
-	return strtoul(value, NULL, 0);
+	return tuxbox_read_proc(TUXBOX_TAG_VENDOR);
 
 }
 
@@ -84,12 +120,7 @@ char *tuxbox_get_vendor_str(void)
 unsigned int tuxbox_get_model(void)
 {
 
-	char *value;
-
-	if (!(value = getenv(TUXBOX_TAG_MODEL)))
-		return TUXBOX_MODEL_UNKNOWN;
-		
-	return strtoul(value, NULL, 0);
+	return tuxbox_read_proc(TUXBOX_TAG_MODEL);
 
 }
 
@@ -121,11 +152,6 @@ char *tuxbox_get_model_str(void)
 unsigned int tuxbox_get_version(void)
 {
 
-	char *value;
-
-	if (!(value = getenv(TUXBOX_TAG_VERSION)))
-		return 0;
-		
-	return strtoul(value, NULL, 0);
+	return tuxbox_read_proc(TUXBOX_TAG_VERSION);
 
 }
