@@ -406,7 +406,7 @@ void RenderClearMenuLineBB(char *p, int attrcol, int attr)
 {
 	int col;
 
-	PosX = TOPMENUSTARTX;
+	PosX = screen_mode2 ? TOPMENU169STARTX : TOPMENU43STARTX;
 	RenderCharBB(' ', attrcol);			 /* indicator for navigation keys */
 #if 0
 	RenderCharBB(' ', attr);				 /* separator */
@@ -422,7 +422,7 @@ void RenderClearMenuLineBB(char *p, int attrcol, int attr)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.59 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.60 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -527,7 +527,7 @@ void plugin_exec(PluginParam *par)
 			case RC_YELLOW:	Next10();		break;
 			case RC_BLUE:	Next100();		break;
 			case RC_PLUS:	SwitchZoomMode();	break;
-			case RC_MINUS:	SwitchScreenMode();	break;
+			case RC_MINUS:	SwitchScreenMode(-1);	break;
 			case RC_MUTE:	SwitchTranspMode();	break;
 			case RC_HELP:	SwitchHintMode();	break;
 			case RC_DBOX:	ConfigMenu(0);		break;
@@ -753,7 +753,7 @@ int Init()
 		SDT_ready = 0;
 		getpidsdone = 0;
 		strcpy(country_code, "deu"); /* assume default */
-		RenderMessage(PageNotFound);
+		pageupdate = 1; /* force display of message page not found (but not twice) */
 	}
 
 	/* open avs */
@@ -822,14 +822,7 @@ void CleanUp()
 {
 	/* hide pig */
 	if (screenmode)
-	{
-		screenmode=0;
-#if HAVE_DVB_API_VERSION < 3
-		avia_pig_hide(pig);
-#else
-		ioctl(pig, VIDIOC_OVERLAY, &screenmode);
-#endif
-	}
+		SwitchScreenMode(0); /* turn off divided screen */
 
 	/* restore videoformat */
 	ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
@@ -1136,9 +1129,7 @@ skip_pid:
 
 		/* start new decode-thread */
 		if (pthread_create(&thread_id, NULL, CacheThread, NULL) != 0)
-		{
 			perror("TuxTxt <pthread_create>");
-		}
 	}
 	getpidsdone = 1;
 
@@ -1227,11 +1218,9 @@ void Menu_HighlightLine(char *menu, int line, int high)
 
 	PosX = Menu_StartX;
 	PosY = Menu_StartY + line*fixfontheight;
-	for (byte=0; byte < Menu_Width; byte++)
-	{
-		RenderCharFB(menu[itext + byte],
-						 (high ? hilitline[byte] : menu[itext + byte+Menu_Width]));
-	}
+
+	for (byte = 0; byte < Menu_Width; byte++)
+		RenderCharFB(menu[itext + byte], (high ? hilitline[byte] : menu[itext + byte+Menu_Width]));
 }
 
 void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
@@ -1241,6 +1230,7 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 	PosX = Menu_StartX + 6*type0.font.pix_width;
 	PosY = Menu_StartY + (MenuLine[M_HOT]+1)*fixfontheight;
 	j = 2*Menu_Width*(MenuLine[M_HOT]+1) + 6; /* start index in menu */
+
 	for (i=0; i<=maxhotlist+1; i++)
 	{
 		if (i == maxhotlist+1) /* clear last+1 entry in case it was deleted */
@@ -1260,33 +1250,31 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 			}
 			hex2str(&menu[j+2], hotlist[i]);
 		}
-		for (k=0; k<3; k++)
+
+		for (k = 0; k < 3; k++)
 		{
-			RenderCharFB(menu[j+k],
-							 attr);
+			RenderCharFB(menu[j+k], attr);
 		}
-		if (i==4)
+
+		if (i == 4)
 		{
-			PosX = Menu_StartX + 6*type0.font.pix_width;
+			PosX  = Menu_StartX + 6*type0.font.pix_width;
 			PosY += fixfontheight;
-			j += 2*Menu_Width - 4*4;
+			j    += 2*Menu_Width - 4*4;
 		}
 		else
 		{
-			j += 4; /* one space distance */
+			j    += 4; /* one space distance */
 			PosX += type0.font.pix_width;
 		}
 	}
-	hex2str(&menu[2*Menu_Width*MenuLine[M_HOT] + 20 + 2],
-			  (hotindex >= 0) ? hotlist[hotindex] : page);
-	memcpy(&menu[2*Menu_Width*MenuLine[M_HOT] + 24],
-			  (hotindex >= 0) ? "entf." : "dazu ", 5);
+	hex2str(&menu[2*Menu_Width*MenuLine[M_HOT] + 20 + 2], (hotindex >= 0) ? hotlist[hotindex] : page);
+	memcpy(&menu[2*Menu_Width*MenuLine[M_HOT] + 24], (hotindex >= 0) ? "entf." : "dazu ", 5);
 	PosX = Menu_StartX + 20*type0.font.pix_width;
 	PosY = Menu_StartY + MenuLine[M_HOT]*fixfontheight;
 
 	for (k=20; k < (24+5); k++)
-		RenderCharFB(menu[2*Menu_Width*MenuLine[M_HOT] + k],
-						 (menuitem == M_HOT) ? 'X' : menu[2*Menu_Width*MenuLine[M_HOT] + k+Menu_Width]);
+		RenderCharFB(menu[2*Menu_Width*MenuLine[M_HOT] + k], (menuitem == M_HOT) ? 'X' : menu[2*Menu_Width*MenuLine[M_HOT] + k+Menu_Width]);
 }
 
 
@@ -1385,7 +1373,7 @@ void ConfigMenu(int Init)
 
 	oldscreenmode = screenmode;
 	if (screenmode)
-		SwitchScreenMode(); /* turn off divided screen */
+		SwitchScreenMode(0); /* turn off divided screen */
 
 	/* render menu */
 	PosY = Menu_StartY;
@@ -1905,7 +1893,7 @@ void ConfigMenu(int Init)
 	pageupdate = 1;
 	RCCode = 0;
 	if (oldscreenmode)
-		SwitchScreenMode(); /* restore divided screen */
+		SwitchScreenMode(oldscreenmode); /* restore divided screen */
 }
 
 /******************************************************************************
@@ -2554,7 +2542,7 @@ void SwitchZoomMode()
  * SwitchScreenMode                                                           *
  ******************************************************************************/
 
-void SwitchScreenMode()
+void SwitchScreenMode(int newscreenmode)
 {
 #if HAVE_DVB_API_VERSION >= 3
 	struct v4l2_format format;
@@ -2563,9 +2551,12 @@ void SwitchScreenMode()
 	if (transpmode)
 		transpmode = 0;
 
-	/* toggle mode */
-	screenmode++;
-	screenmode &= 1;
+	if (newscreenmode < 0) /* toggle mode */
+		screenmode++;
+	else /* set directly */
+		screenmode = newscreenmode;
+	if ((screenmode > (screen_mode2 ? 2 : 1)) || (screenmode < 0))
+		screenmode = 0;
 
 	printf("TuxTxt <SwitchScreenMode: %d>\n", screenmode);
 
@@ -2582,59 +2573,61 @@ void SwitchScreenMode()
 	/* set mode */
 	if (screenmode)								 /* split */
 	{
-#if !TOPMENU169
-		if (screen_mode2)    /* 16:9 - traditional Layout */
+		int fw, fh, tx, ty, tw, th;
+		int sm = 0;
+
+		if (screenmode==1) /* split with topmenu */
 		{
-			type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = FONTWIDTH_SMALL;
-			type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = FONTHEIGHT_NORMAL;
+			if (screen_mode2)	/* 16:9 */
+			{
+				fw = FONTWIDTH_SMALL;
+				fh = FONTHEIGHT_NORMAL;
+				tx = TV169STARTX;
+				ty = TV169STARTY;
+				tw = TV169WIDTH;
+				th = TV169HEIGHT;
+			}
+			else /* 4:3 */
+			{
+				fw = FONTWIDTH_TOPMENUMAIN;
+				fh = FONTHEIGHT_NORMAL;
+				tx = TV43STARTX;
+				ty = TV43STARTY;
+				tw = TV43WIDTH;
+				th = TV43HEIGHT;
+			}
+		}
+		else /* 2: split with full height tv picture */
+		{
+			fw = FONTWIDTH_SMALL;
+			fh = FONTHEIGHT_NORMAL;
+			tx = StartX+322;
+			ty = StartY;
+			tw = 320;
+			th = 526;
+		}
+		
+		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fw;
+		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = fh;
 
 #if HAVE_DVB_API_VERSION < 3
-			avia_pig_set_pos(pig, (StartX+322), StartY);
-			avia_pig_set_size(pig, 320, 526);
-			avia_pig_set_stack(pig, 2);
-			avia_pig_show(pig);
+		avia_pig_hide(pig);
+		avia_pig_set_pos(pig, tx, ty);
+		avia_pig_set_size(pig, tw, th);
+		avia_pig_set_stack(pig, 2);
+		avia_pig_show(pig);
 #else
-			ioctl(pig, VIDIOC_G_FMT, &format);
-
-			format.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
-			format.fmt.win.w.left   = StartX+322;
-			format.fmt.win.w.top    = StartY;
-			format.fmt.win.w.width  = 320;
-			format.fmt.win.w.height = 526;
-
-			ioctl(pig, VIDIOC_S_FMT, &format);
-
-			ioctl(pig, VIDIOC_OVERLAY, &screenmode);
+		ioctl(pig, VIDIOC_OVERLAY, &sm);
+		sm = 1;
+		ioctl(pig, VIDIOC_G_FMT, &format);
+		format.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
+		format.fmt.win.w.left   = tx;
+		format.fmt.win.w.top    = ty;
+		format.fmt.win.w.width  = tw;
+		format.fmt.win.w.height = th;
+		ioctl(pig, VIDIOC_S_FMT, &format);
+		ioctl(pig, VIDIOC_OVERLAY, &sm);
 #endif
-		}
-		else                  /* 4:3 - small TV picture below space for TOP overview */
-		{
-#endif /* !TOPMENU169 */
-			type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = FONTWIDTH_TOPMENUMAIN;
-			type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = FONTHEIGHT_NORMAL;
-
-#if HAVE_DVB_API_VERSION < 3
-			avia_pig_set_pos(pig, TVSTARTX, screen_mode2 ? TV169STARTY : TV43STARTY);
-			avia_pig_set_size(pig, TVWIDTH, screen_mode2 ? TV169HEIGHT : TV43HEIGHT);
-			avia_pig_set_stack(pig, 2);
-			avia_pig_show(pig);
-#else
-			ioctl(pig, VIDIOC_G_FMT, &format);
-
-			format.fmt.win.w.left   = TVSTARTX;
-			format.fmt.win.w.top    = screen_mode2 ? TV169STARTY : TV43STARTY;
-			format.fmt.win.w.width  = TVWIDTH;
-			format.fmt.win.w.height = screen_mode2 ? TV169HEIGHT : TV43HEIGHT;
-			format.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
-
-			ioctl(pig, VIDIOC_S_FMT, &format);
-
-		ioctl(pig, VIDIOC_OVERLAY, &screenmode);
-#endif
-#if !TOPMENU169
-		}
-#endif /* !TOPMENU169 */
-
 		ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode2]);
 		ioctl(saa, SAAIOSWSS, &saamodes[screen_mode2]);
 	}
@@ -2660,7 +2653,7 @@ void SwitchScreenMode()
 void SwitchTranspMode()
 {
 	if (screenmode)
-		SwitchScreenMode(); /* turn off divided screen */
+		SwitchScreenMode(0); /* turn off divided screen */
 
 
 	/* toggle mode */
@@ -3099,7 +3092,7 @@ void RenderMessage(int Message)
 
 	/* set colors */
 #ifndef DREAMBOX
-	if (screenmode == 1)
+	if (screenmode)
 	{
 		fbcolor   = black;
 		timecolor = black<<4 | black;
@@ -3134,15 +3127,13 @@ void RenderMessage(int Message)
 			pagecolumn = 31;
 			msg = message_8;
 		}
+
 		memset(&message_3[1], ' ', 35);
-
 		hex2str(msg+pagecolumn+2, page);
-
 		memcpy(&message_4, msg, sizeof(message_8));
 
 		if (SDT_ready)
-			memcpy(&message_2[2 + (35 - pid_table[current_service].service_name_len)/2],
-					 &pid_table[current_service].service_name, pid_table[current_service].service_name_len);
+			memcpy(&message_2[2 + (35 - pid_table[current_service].service_name_len)/2], &pid_table[current_service].service_name, pid_table[current_service].service_name_len);
 		else if (Message == ShowServiceName)
 			hex2str(&message_2[17+3], vtxtpid);
 	}
@@ -3303,11 +3294,7 @@ void CreateLine25()
 	else
 		hex2str(&line25_1[34+2], next_100);
 
-	if (bttok &&
-#if !TOPMENU169
-		 !screen_mode2 &&
-#endif /* !TOPMENU169 */
-		 screenmode) /* TOP-Info present, divided screen -> create TOP overview */
+	if (bttok && screenmode == 1) /* TOP-Info present, divided screen -> create TOP overview */
 	{
 #if (TOPMENULINEWIDTH < (TOPMENUINDENTDEF+12+TOPMENUSPC+3+1))
 		char line[TOPMENUINDENTDEF+12+TOPMENUSPC+3+1];
@@ -3410,7 +3397,7 @@ void CreateLine25()
 			RenderClearMenuLineBB(line, attrcol, attr);
 		}
 #if (FONTWIDTH_TOPMENUMAIN != FONTWIDTH_TOPMENU)
-		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = FONTWIDTH_TOPMENUMAIN;
+		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = screen_mode2 ? FONTWIDTH_SMALL : FONTWIDTH_TOPMENUMAIN;
 #endif
 	}
 
@@ -4080,7 +4067,7 @@ void *CacheThread(void *arg)
 					if (b2 > 9 || b3 > 9)
 					{
 						current_subpage[magazine] = 0; /* copy page */
-						allocate_cache(magazine);
+						allocate_cache(magazine); /* FIXME: only until TOP-Info decoded? */
 						continue;
 					}
 
@@ -4133,7 +4120,8 @@ void *CacheThread(void *arg)
 #endif
 					}
 					else
-						countrycontrolbitstable[current_page[magazine]][current_subpage[magazine]] = ((b1 >> 3) & 0x01) | (((b1 >> 2) & 0x01) << 1) | (((b1 >> 1) & 0x01) << 2);
+						countrycontrolbitstable[current_page[magazine]][current_subpage[magazine]] =
+							((b1 >> 3) & 0x01) | (((b1 >> 2) & 0x01) << 1) | (((b1 >> 1) & 0x01) << 2);
 
 					allocate_cache(magazine);
 
@@ -4198,7 +4186,7 @@ void *CacheThread(void *arg)
 /* indent-tabs-mode:t */
 /* tab-width:3 */
 /* c-basic-offset:3 */
-/* comment-column:40 */
+/* comment-column:0 */
 /* fill-column:120 */
 /* time-stamp-line-limit:30 */
 /* time-stamp-format:"%02d.%02m.%:y %02H:%02M:%02S %u@%s" */
