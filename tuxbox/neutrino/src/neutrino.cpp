@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.199 2002/03/19 20:11:48 obi Exp $
+        $Id: neutrino.cpp,v 1.200 2002/03/19 23:30:11 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -264,7 +264,7 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.video_Format = 2; //4:3
 
 	//audio
-	g_settings.audio_Stereo = 1;
+	g_settings.audio_AnalogMode = 0;
 	g_settings.audio_DolbyDigital = 0;
 
 	//vcr
@@ -1050,13 +1050,15 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem( new CMenuForwarder("menu.back") );
 	audioSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("audiomenu.stereo", &g_settings.audio_Stereo, true, audioSetupNotifier);
-	oj->addOption(0, "options.off");
-	oj->addOption(1, "options.on");
+	CMenuOptionChooser* oj = new CMenuOptionChooser("audiomenu.analogout", &g_settings.audio_AnalogMode, true, audioSetupNotifier);
+		oj->addOption(0, "audiomenu.stereo");
+		oj->addOption(1, "audiomenu.monoleft");
+		oj->addOption(2, "audiomenu.monoright");
+
 	audioSettings.addItem( oj );
-	oj = new CMenuOptionChooser("audiomenu.dolbydigital", &g_settings.audio_DolbyDigital, true, audioSetupNotifier);
-	oj->addOption(0, "options.off");
-	oj->addOption(1, "options.on");
+		oj = new CMenuOptionChooser("audiomenu.dolbydigital", &g_settings.audio_DolbyDigital, true, audioSetupNotifier);
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
 	audioSettings.addItem( oj );
 }
 
@@ -2270,7 +2272,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.199 2002/03/19 20:11:48 obi Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.200 2002/03/19 23:30:11 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

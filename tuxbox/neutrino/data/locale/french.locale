@@ -43,6 +43,9 @@ languagesetup.head Ajuster un langue
 languagesetup.select Langue
 
 audiomenu.head ajuster I'argile
+audiomenu.analogout Analog Output
+audiomenu.monoright mono left
+audiomenu.monoleft mono right
 audiomenu.stereo Stéréo
 audiomenu.dolbydigital Dolby Digital
 

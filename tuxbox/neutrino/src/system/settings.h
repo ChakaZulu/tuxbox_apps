@@ -46,7 +46,7 @@ struct SNeutrinoSettings
 	int show_camwarning;
 
 	//audio
-	int audio_Stereo;
+	int audio_AnalogMode;
 	int audio_DolbyDigital;
 
 	//vcr
