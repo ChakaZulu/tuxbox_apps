@@ -6,7 +6,7 @@ options.serial seriell
 options.fb framebuffa
 options.null null
 
-mainmenu.head Hauptmenü
+mainmenu.head HauptmenÃ¼
 mainmenu.tvmode Fernseh schaugn
 mainmenu.radiomode Radio hern
 mainmenu.scartmode Scart hernemma
@@ -44,7 +44,7 @@ mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.recording Streamingserva
 mainsettings.colors Forbn / Themes
-mainsettings.lcd LC-Disbläi
+mainsettings.lcd LC-DisblÃ¤i
 mainsettings.keybinding Tasdn-Eistellunga
 mainsettings.misc No a boar Eistellunga
 mainsettings.scan Eistellunga Senda-suacha
@@ -60,12 +60,12 @@ languagesetup.head Sprocheistellunga
 languagesetup.select Sproch
 
 audiomenu.head Audio-Eistellunga
-audiomenu.analogout Analog-Ausgang
+audiomenu.analogout Analog-Ausgong
 audiomenu.monoright mono rechts
 audiomenu.monoleft mono links
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digital
-audiomenu.avs_control unset
+audiomenu.avs_control Eistain avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 
@@ -93,17 +93,17 @@ networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserva
 
 recordingmenu.head Streamingserva Eistellunga
-recordingmenu.recording_type unset
-recordingmenu.server_ip unset
-recordingmenu.server_port unset
+recordingmenu.recording_type GrÃ¤t zum Aufnemma
+recordingmenu.server_ip Aufnahmeserva IP
+recordingmenu.server_port Aunahmeserva Port
 recordingmenu.stopplayback Fuim ohoitn
 recordingmenu.stopsectionsd Sectionsd ohoitn
-recordingmenu.vcr_devicename unset
-recordingmenu.off unset
-recordingmenu.server unset
-recordingmenu.vcr unset
-recordingmenu.server_wakeup unset
-recordingmenu.server_mac unset
+recordingmenu.vcr_devicename Nama vom VCR (lirc)
+recordingmenu.off aus
+recordingmenu.server Serva
+recordingmenu.vcr Video Recorda
+recordingmenu.server_wakeup Serva zum Aufnemma (WOL)
+recordingmenu.server_mac MAC-Adressn
 
 ping.ok kumt wos (ping)
 ping.unreachable kumt nix (unreachable)
@@ -115,24 +115,24 @@ ipsetup.hint_2 Mit OK speichan, mit HOME obbrecha
 
 colormenu.head Farb-Eistellunga
 colormenu.statusbar Statusboikn
-colormenu.themeselect Theme auswähn
-colormenu.font unset
-colormenu.menucolors Menüfarbn
+colormenu.themeselect Theme auswÃ¤hn
+colormenu.font SchriftgrÃ¤ÃŸn
+colormenu.menucolors MenÃ¼farbn
 colormenu.background Hintergrundfarb
 colormenu.background_head Hintergrundfarbe
 colormenu.textcolor Textfarb
 colormenu.textcolor_head Textfarb
-colormenu.fade Menüs faden
+colormenu.fade MenÃ¼s faden
 
-colorthememenu.head Theme auswähn
+colorthememenu.head Theme auswÃ¤hn
 colorthememenu.neutrino_theme Neutrino Theme
 colorthememenu.classic_theme Klassik
 
-colormenusetup.head Menüfarbn
+colormenusetup.head MenÃ¼farbn
 colormenusetup.menuhead Titelleistn
 colormenusetup.menucontent Fenstainhoit
 colormenusetup.menucontent_inactive Fenstainhoit deaktiviert
-colormenusetup.menucontent_selected Fenstainhoit ausgwähit
+colormenusetup.menucontent_selected Fenstainhoit ausgwÃ¤hit
 
 colorstatusbar.head Statusboikn-Farbn
 colorstatusbar.text Statusboikn
@@ -141,8 +141,8 @@ repeatblocker.hint_1 Mindestzeit (ms) zwischn zwoa Dasdndrucka
 repeatblocker.hint_2 0 schoitt an Blocka aus (Rot is " ")
 
 keybindingmenu.RC Fernbedienung
-keybindingmenu.repeatblock Wiederholungsverzögerung
-keybindingmenu.repeatblockgeneric Onfangsverzögerung
+keybindingmenu.repeatblock WiederholungsverzÃ¶gerung
+keybindingmenu.repeatblockgeneric OnfangsverzÃ¶gerung
 keybindingmenu.head Dasdn-Eistellunga
 keybindingmenu.modechange Modus wexln
 keybindingmenu.channellist Sendalistn
@@ -155,8 +155,8 @@ keybindingmenu.pagedown Seitn obiblatln
 keybindingmenu.pagedown_head Seitn obiblatln
 keybindingmenu.cancel Sendalistn zuamacha
 keybindingmenu.cancel_head Sendalistn zuamacha
-keybindingmenu.sort unset
-keybindingmenu.sort_head unset
+keybindingmenu.sort Sortierfoige Ã¤ndan
+keybindingmenu.sort_head Sortierfoige Ã¤ndan
 keybindingmenu.channelup Senda aufi
 keybindingmenu.channelup_head Senda aufi Dasdn
 keybindingmenu.channeldown Senda obe
@@ -165,7 +165,7 @@ keybindingmenu.bouquetup Bouquet weida
 keybindingmenu.bouquetup_head Bouquet weida Dasdn
 keybindingmenu.bouquetdown Bouquet zruck
 keybindingmenu.bouquetdown_head Bouquet zruck Dasdn
-keybindingmenu.bouquethandling OK-Dasdn für
+keybindingmenu.bouquethandling OK-Dasdn fÃ¼r
 keybindingmenu.bouquetchannels_on_ok Bouquet-Senda
 keybindingmenu.bouquetlist_on_ok Bouquetlistn
 keybindingmenu.allchannels_on_ok Sendalistn
@@ -198,10 +198,10 @@ keychooser.text1 Dasdn drucka
 keychooser.text2 Wanst ne wuist, wartn
 
 screensetup.upperleft rot = Buidlrand om, links
-screensetup.lowerright grün = Buidlrand untn, rechts
+screensetup.lowerright grÃ¼n = Buidlrand untn, rechts
 
 channellist.head Olle Senda
-channellist.nonefound Es san koane Senda gfundn worn!\nMachas bittschön a Sendersuach\n(dbox-Taste -> Service)
+channellist.nonefound Es san koane Senda gfundn worn!\nMachas bittschÃ¶n a Sendersuach\n(dbox-Taste -> Service)
 channellist.since seid %02d:%02d
 
 infoviewer.epgnotload Informationen no ned glon...
@@ -224,16 +224,16 @@ epglist.head Vorschau - %s
 epglist.noevents Koa EPG do.
 
 streaminfo.head Informationen
-streaminfo.resolution Auflösung
+streaminfo.resolution AuflÃ¶sung
 streaminfo.bitrate Bitrate
-streaminfo.aratio Verhältnis
-streaminfo.aratio_unknown Verhältnis: ken i ned
+streaminfo.aratio VerhÃ¤ltnis
+streaminfo.aratio_unknown VerhÃ¤ltnis: ken i ned
 streaminfo.framerate Bildrate
 streaminfo.framerate_unknown Bildrate: ken i ned
 streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: ken i ned
-streaminfo.not_crypted ned verschlüsselt
-streaminfo.ecm_invalid ungültiges CA-System
+streaminfo.not_crypted ned verschlÃ¼sselt
+streaminfo.ecm_invalid ungÃ¼ltiges CA-System
 streaminfo.not_available kumt nix
 
 streamfeatures.head Features
@@ -261,7 +261,7 @@ date.Sun  So
 
 date.Jan  Jan
 date.Feb  Feb
-date.Mar  Mär
+date.Mar  MÃ¤r
 date.Apr  Apr
 date.May  Mai
 date.Jun  Jun
@@ -302,7 +302,7 @@ flashupdate.getupdatefile Update werd glon
 flashupdate.getupdatefileerror kon des Update ned lon
 flashupdate.cantopenfile kon de Datei ned aufmacha
 flashupdate.fileis0bytes de Datei hod 0 Byte
-flashupdate.eraseingflash lösch des Flash
+flashupdate.eraseingflash lÃ¶sch des Flash
 flashupdate.programmingflash programmier des Flash
 flashupdate.cantopenmtd kon des MTD-Device ned aufmacha
 flashupdate.ready hobs
@@ -338,10 +338,10 @@ flashupdate.writeflash ganzes Flashimage eispuin
 flashupdate.readflashmtd einzelne Partition aussalesn
 flashupdate.writeflashmtd einzelne Partition eispuin
 flashupdate.savesuccess Des Image is unter\nDateinamen %s gspeichat worn.
-flashupdate.mtdselector Partition auswähn
+flashupdate.mtdselector Partition auswÃ¤hn
 flashupdate.titlereadflash Flash auslesn
 flashupdate.actionreadflash flash lesn
-flashupdate.fileselector Datei auswähn
+flashupdate.fileselector Datei auswÃ¤hn
 flashupdate.titlewriteflash Flash schreim
 flashupdate.actionwriteflash schreib in flash
 flashupdate.flashreadyreboot Des Imag is gflasht worn.\nJetz start ma de Box nei.
@@ -356,9 +356,9 @@ bouqueteditor.hide Vastecka
 bouqueteditor.lock Sperrn
 bouqueteditor.newbouquetname Da neie Nama vom Bouquet
 bouqueteditor.bouquetname Nama vom Bouquet
-bouqueteditor.savechanges? Soin de Änderunga gspeichat wern?
-bouqueteditor.savingchanges D Änderunga wern gspeichat. An Moment ...
-bouqueteditor.discardingchanges D Änderunga wern verworfa. Kloana Moment ...
+bouqueteditor.savechanges? Soin de Ã„nderunga gspeichat wern?
+bouqueteditor.savingchanges D Ã„nderunga wern gspeichat. An Moment ...
+bouqueteditor.discardingchanges D Ã„nderunga wern verworfa. Kloana Moment ...
 bouqueteditor.switch Senda dazuadoa/wegmacha
 bouqueteditor.switchmode TV/Radio
 bouqueteditor.return Jetz hammas
@@ -367,17 +367,17 @@ messagebox.yes Scho
 messagebox.no Ned
 messagebox.cancel Abbrecha
 messagebox.back Zruck
-messagebox.error Bläd glaffa
-messagebox.discard Woins de Änderunga verwerfa?
+messagebox.error BlÃ¤d glaffa
+messagebox.discard Woins de Ã„nderunga verwerfa?
 messagebox.info Information
 
 settings.noconffile De Eistellunga von Neutrino san ned\ngfundn worn. Mia nemma de Standardwerte.
 settings.missingoptionsconffile Es gibt neie Eistellunga.\nDe stenga jetz erstmoi auf Standard.
 
 cam.wrong Obacht, Eana CAM_ALPHA.BIN passt\nned zu Eanara Smart-Card!!!\n\nWoins de Warnung numoi seagn?
-ucodes.failure Obacht, de µCodes san ned gfundn worn!\n\nLoans de doch bittschen mit FTP \nauffi, und startns de Box numoi!
+ucodes.failure Obacht, de ÂµCodes san ned gfundn worn!\n\nLoans de doch bittschen mit FTP \nauffi, und startns de Box numoi!
 
-stringinput.caps Groß-/Koabuchstobm
+stringinput.caps GroÃŸ-/Koabuchstobm
 
 streamingserver.noconnect Kao Verbindung zum Streamingserva.\nDe Aufnahme werd obbrocha.
 
@@ -403,9 +403,9 @@ GENRE.SHOW.2 varietee
 GENRE.SHOW.3 Talkshow
 
 GENRE.SPORTS.0 Sport
-GENRE.SPORTS.1 Großereignisse (Olympische Spiele, Weltmeisterschaften usw.)
+GENRE.SPORTS.1 GroÃŸereignisse (Olympische Spiele, Weltmeisterschaften usw.)
 GENRE.SPORTS.2 Sportsmagazine
-GENRE.SPORTS.3 Fußball
+GENRE.SPORTS.3 FuÃŸball
 GENRE.SPORTS.4 Tennis
 GENRE.SPORTS.5 Mannschaftssport
 GENRE.SPORTS.6 Leichtathletik
@@ -416,9 +416,9 @@ GENRE.SPORTS.10 equestrian
 GENRE.SPORTS.11 martial sports
 
 GENRE.CHILDRENs_PROGRAMMES.0 Kinder / Jugendprogramm
-GENRE.CHILDRENs_PROGRAMMES.1 Programm für Vorschulkinder
-GENRE.CHILDRENs_PROGRAMMES.2 Unterhaltungsprogramm für 6 bis 14-Jährige
-GENRE.CHILDRENs_PROGRAMMES.3 Unterhaltungsprogramm für 10 bis 16-Jährige
+GENRE.CHILDRENs_PROGRAMMES.1 Programm fÃ¼r Vorschulkinder
+GENRE.CHILDRENs_PROGRAMMES.2 Unterhaltungsprogramm fÃ¼r 6 bis 14-JÃ¤hrige
+GENRE.CHILDRENs_PROGRAMMES.3 Unterhaltungsprogramm fÃ¼r 10 bis 16-JÃ¤hrige
 GENRE.CHILDRENs_PROGRAMMES.4 Informations- und Bildungsprogramm
 GENRE.CHILDRENs_PROGRAMMES.5 Trickfilm
 
@@ -431,7 +431,7 @@ GENRE.MUSIC_DANCE.5 Musical/Oper
 GENRE.MUSIC_DANCE.6 Ballet
 
 GENRE.ARTS.0 Kunst / Kultur
-GENRE.ARTS.1 Darstellende Künste
+GENRE.ARTS.1 Darstellende KÃ¼nste
 GENRE.ARTS.2 fine arts
 GENRE.ARTS.3 Religion
 GENRE.ARTS.4 Volkskunst
@@ -506,7 +506,7 @@ sleeptimerbox.announce Eischloftimer in min
 
 zaptotimer.announce In na Minutn is schluss
 recordtimer.announce In na Minutn werd aufgnomma
-shutdowntimer.announce unset
+shutdowntimer.announce De Box werd in oana Minutn runtagfahrn.\n Obbrecha?
 
 timerbar.channelswitch Umschoitn
 timerbar.recordevent Aufnemma
@@ -518,7 +518,7 @@ timerlist.name Timerlistn
 timerlist.delete wegmacha
 timerlist.empty Grod hammer koane Timer
 timerlist.type.shutdown Ausmacha
-timerlist.type.nextprogram Nächsta Senda
+timerlist.type.nextprogram NÃ¤chsta Senda
 timerlist.type.zapto Umschoitn
 timerlist.type.standby Bissl Ausmacha
 timerlist.type.record Aufnemma
@@ -533,62 +533,62 @@ timerlist.repeat.fourweekly alle vier Wocha
 timerlist.repeat.monthly jeden Monat
 timerlist.repeat.byeventdescription wia da timer
 timerlist.repeat.unknown Kenn i ned
-timerlist.repeat.weekdays unset
-timerlist.repeat.sunday unset
-timerlist.repeat.monday unset
-timerlist.repeat.tuesday unset
-timerlist.repeat.wednesday unset
-timerlist.repeat.thursday unset
-timerlist.repeat.friday unset
-timerlist.repeat.saturday unset
-timerlist.weekdays unset
-timerlist.weekdays.hint_1 unset
-timerlist.weekdays.hint_2 unset
+timerlist.repeat.weekdays Wochatogs
+timerlist.repeat.sunday So
+timerlist.repeat.monday Mo
+timerlist.repeat.tuesday Die
+timerlist.repeat.wednesday Mi
+timerlist.repeat.thursday Do
+timerlist.repeat.friday Fr
+timerlist.repeat.saturday Sa
+timerlist.weekdays Wochentog
+timerlist.weekdays.hint_1 Mo Die Mi Do Fr Sa So
+timerlist.weekdays.hint_2 'X'=Timer '-' koa Timer
 timerlist.program.unknown Kenn den Senda ned
 timerlist.standby.off In Standy geh
 timerlist.standby.on Ausm Standy aufwacha
-timerlist.alarmtime unset
-timerlist.stoptime unset
-timerlist.new unset
-timerlist.menumodify unset
-timerlist.type unset
-timerlist.repeat unset
-timerlist.save unset
-timerlist.standby unset
-timerlist.channel unset
-timerlist.menunew unset
-timerlist.reload unset
-timerlist.modify unset
-timerlist.message unset
-timerlist.apid unset
-timersettings.separator unset
-timersettings.record_safety_time unset
-timersettings.record_safety_time.hint_1 unset
-timersettings.record_safety_time.hint_2 unset
+timerlist.alarmtime Alarmzeid
+timerlist.stoptime Stopzeid
+timerlist.new Neia Timer
+timerlist.menumodify Timer bearbeitn
+timerlist.type Timertyp
+timerlist.repeat Widahoin
+timerlist.save Speichan
+timerlist.standby SB 
+timerlist.channel Kanoi
+timerlist.menunew Neia Timer
+timerlist.reload akualisiern
+timerlist.modify Ã¤ndan
+timerlist.message Nochricht
+timerlist.apid Audio PID
+timersettings.separator Timer Eistellunga
+timersettings.record_safety_time Aufnemma - Korrekturzeid
+timersettings.record_safety_time.hint_1 De Zeid in Minutn (00=aus) werd beim Startn
+timersettings.record_safety_time.hint_2 vom Timer obzogn
 
-fontsize.menu unset
-fontsize.menu_title unset
-fontsize.menu_info unset
-fontsize.epg_title unset
-fontsize.epg_info1 unset
-fontsize.epg_info2 unset
-fontsize.epg_date unset
-fontsize.alert unset
-fontsize.eventlist_title unset
-fontsize.eventlist_itemlarge unset
-fontsize.eventlist_itemsmall unset
-fontsize.eventlist_datetime unset
-fontsize.channellist unset
-fontsize.channellist_descr unset
-fontsize.channellist_number unset
-fontsize.channel_num_zap unset
-fontsize.infobar_number unset
-fontsize.infobar_channame unset
-fontsize.infobar_info unset
-fontsize.infobar_small unset
+fontsize.menu Menutext
+fontsize.menu_title Menutitl
+fontsize.menu_info Menu Info
+fontsize.epg_title EPG Titl
+fontsize.epg_info1 EPG Info 1
+fontsize.epg_info2 EPG Info 2
+fontsize.epg_date EPG Datum
+fontsize.alert Alarm
+fontsize.eventlist_title Eventlistn Titl
+fontsize.eventlist_itemlarge Eventlistn groÃŸ
+fontsize.eventlist_itemsmall Eventlistn kloa
+fontsize.eventlist_datetime Eventlistn Datum/Zeid
+fontsize.channellist Kanallistn
+fontsize.channellist_descr Beschreibung
+fontsize.channellist_number Numma
+fontsize.channel_num_zap koa Ahnung
+fontsize.infobar_number Numma
+fontsize.infobar_channame Nama
+fontsize.infobar_info Infobar Info
+fontsize.infobar_small Infobar kloa
 
-fontmenu.head unset
-fontmenu.channellist unset
-fontmenu.eventlist unset
-fontmenu.epg unset
-fontmenu.infobar unset
+fontmenu.head SchriftgrÃ¶ssn Eistellunga
+fontmenu.channellist Kanallistn
+fontmenu.eventlist Eventlistn
+fontmenu.epg EPG
+fontmenu.infobar Infobar
