@@ -686,6 +686,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_bouquet_down = configfile.getInt32( "key_bouquet_down",  CRCInput::RC_left );
 	g_settings.key_subchannel_up = configfile.getInt32( "key_subchannel_up",  CRCInput::RC_right );
 	g_settings.key_subchannel_down = configfile.getInt32( "key_subchannel_down",  CRCInput::RC_left );
+  g_settings.key_zaphistory = configfile.getInt32( "key_zaphistory",  CRCInput::RC_home );
+  g_settings.key_lastchannel = configfile.getInt32( "key_lastchannel",  CRCInput::RC_0 );
 
 	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
 	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
@@ -1004,6 +1006,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "key_bouquet_down", g_settings.key_bouquet_down );
 	configfile.setInt32( "key_subchannel_up", g_settings.key_subchannel_up );
 	configfile.setInt32( "key_subchannel_down", g_settings.key_subchannel_down );
+	configfile.setInt32( "key_zaphistory", g_settings.key_zaphistory );
+	configfile.setInt32( "key_lastchannel", g_settings.key_lastchannel );
 
 	configfile.setString( "repeat_blocker", g_settings.repeat_blocker );
 	configfile.setString( "repeat_genericblocker", g_settings.repeat_genericblocker );
@@ -2456,10 +2460,12 @@ enum keynames {
 	KEY_BOUQUET_UP,
 	KEY_BOUQUET_DOWN,
 	KEY_SUBCHANNEL_UP,
-	KEY_SUBCHANNEL_DOWN
+	KEY_SUBCHANNEL_DOWN,
+  KEY_ZAP_HISTORY,
+  KEY_LASTCHANNEL
 };
 
-const neutrino_locale_t keydescription_head[13] =
+const neutrino_locale_t keydescription_head[15] =
 {
 	LOCALE_KEYBINDINGMENU_TVRADIOMODE_HEAD,
 	LOCALE_KEYBINDINGMENU_PAGEUP_HEAD,
@@ -2473,10 +2479,12 @@ const neutrino_locale_t keydescription_head[13] =
 	LOCALE_KEYBINDINGMENU_BOUQUETUP_HEAD,
 	LOCALE_KEYBINDINGMENU_BOUQUETDOWN_HEAD,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELUP_HEAD,
-	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN_HEAD
+	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN_HEAD,
+  LOCALE_KEYBINDINGMENU_ZAPHISTORY_HEAD,
+  LOCALE_KEYBINDINGMENU_LASTCHANNEL_HEAD
 };
 
-const neutrino_locale_t keydescription[13] =
+const neutrino_locale_t keydescription[15] =
 {
 	LOCALE_KEYBINDINGMENU_TVRADIOMODE,
 	LOCALE_KEYBINDINGMENU_PAGEUP,
@@ -2490,7 +2498,9 @@ const neutrino_locale_t keydescription[13] =
 	LOCALE_KEYBINDINGMENU_BOUQUETUP,
 	LOCALE_KEYBINDINGMENU_BOUQUETDOWN,
 	LOCALE_KEYBINDINGMENU_SUBCHANNELUP,
-	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN
+	LOCALE_KEYBINDINGMENU_SUBCHANNELDOWN,
+  LOCALE_KEYBINDINGMENU_ZAPHISTORY,
+  LOCALE_KEYBINDINGMENU_LASTCHANNEL
 };
 
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
@@ -2498,7 +2508,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem(GenericMenuSeparator);
 	keySettings.addItem(GenericMenuBack);
 
-	int * keyvalue_p[13] =
+	int * keyvalue_p[15] =
 		{
 			&g_settings.key_tvradio_mode,
 			&g_settings.key_channelList_pageup,
@@ -2512,12 +2522,14 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 			&g_settings.key_bouquet_up,
 			&g_settings.key_bouquet_down,
 			&g_settings.key_subchannel_up,
-			&g_settings.key_subchannel_down
+			&g_settings.key_subchannel_down,
+      &g_settings.key_zaphistory,
+      &g_settings.key_lastchannel
 		};
 
-	CKeyChooser * keychooser[13];
+	CKeyChooser * keychooser[15];
 
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < 15; i++)
 		keychooser[i] = new CKeyChooser(keyvalue_p[i], keydescription_head[i], NEUTRINO_ICON_SETTINGS);
 
 	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_MODECHANGE));
@@ -2535,6 +2547,10 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 	for (int i = KEY_CHANNEL_UP; i <= KEY_SUBCHANNEL_DOWN; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
+  
+	keySettings.addItem(new CMenuForwarder(keydescription[KEY_ZAP_HISTORY], true, NULL, keychooser[KEY_ZAP_HISTORY]));
+	
+  keySettings.addItem(new CMenuForwarder(keydescription[KEY_LASTCHANNEL], true, NULL, keychooser[KEY_LASTCHANNEL]));
 }
 
 void CNeutrinoApp::SelectNVOD()
@@ -3107,21 +3123,6 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// show Infoviewer
 				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
-			else if (CRCInput::isNumeric(msg))
-			{ //numeric zap  && "0"-quickzap
-				if( g_RemoteControl->director_mode )
-				{
-					g_RemoteControl->setSubChannel(CRCInput::getNumericValue(msg));
-					g_InfoViewer->showSubchan();
-				}
-				else
-					channelList->numericZap( msg );
-			}
-			else if( msg == CRCInput::RC_home )
-			{
-					// Home -> Zap-History "Bouquet"
-					channelList->numericZap( msg );
-			}
 			else if( msg == (neutrino_msg_t) g_settings.key_subchannel_up )
 			{
 				g_RemoteControl->subChannelUp();
@@ -3131,6 +3132,27 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				g_RemoteControl->subChannelDown();
 				g_InfoViewer->showSubchan();
+			}
+			else if( msg == (neutrino_msg_t) g_settings.key_zaphistory )
+      {
+        // Zap-History "Bouquet"
+        channelList->numericZap( msg );
+      }
+			else if( msg == (neutrino_msg_t) g_settings.key_lastchannel )
+      {
+        // Quick Zap
+        channelList->numericZap( msg );
+      }
+			else if (CRCInput::isNumeric(msg))
+			{ 
+        //numeric zap 
+				if( g_RemoteControl->director_mode )
+				{
+					g_RemoteControl->setSubChannel(CRCInput::getNumericValue(msg));
+					g_InfoViewer->showSubchan();
+				}
+				else
+					channelList->numericZap( msg );
 			}
 			else
 			{

@@ -191,6 +191,8 @@ struct SNeutrinoSettings
 	int key_bouquet_down;
 	int key_subchannel_up;
 	int key_subchannel_down;
+  int key_zaphistory;
+  int key_lastchannel;
 
 	char repeat_blocker[4];
 	char repeat_genericblocker[4];
@@ -355,4 +357,3 @@ class CScanSettings
 
 
 #endif
-

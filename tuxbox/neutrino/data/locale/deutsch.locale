@@ -402,6 +402,8 @@ keybindingmenu.channellist Kanalliste
 keybindingmenu.channelup Kanal hoch
 keybindingmenu.channelup_head Kanal hoch Taste
 keybindingmenu.head Tasten-Einstellungen
+keybindingmenu.lastchannel Letzter Kanal
+keybindingmenu.lastchannel_head Letzter Kanal
 keybindingmenu.modechange Modus wechsel
 keybindingmenu.pagedown Seite runterblättern
 keybindingmenu.pagedown_head Seite runterblättern
@@ -418,6 +420,8 @@ keybindingmenu.subchannelup Unterkanal weiter
 keybindingmenu.subchannelup_head Unterkanal weiter
 keybindingmenu.tvradiomode Fernseh-/Radio-Modus
 keybindingmenu.tvradiomode_head Fernseh-/Radio-Modus
+keybindingmenu.zaphistory Zapping-History Bouquet
+keybindingmenu.zaphistory_head Zapping-History Bouquet
 keychooser.head Neue Taste einstellen
 keychooser.text1 Bitte Taste drücken
 keychooser.text2 Zum abbrechen warten..

@@ -364,6 +364,8 @@ keybindingmenu.channellist Channellist
 keybindingmenu.channelup channel up
 keybindingmenu.channelup_head Keysetup channel up
 keybindingmenu.head Keybinding Setup
+keybindingmenu.lastchannel Quick Zap
+keybindingmenu.lastchannel_head Quick Zap
 keybindingmenu.modechange Modechange
 keybindingmenu.pagedown page down
 keybindingmenu.pagedown_head Keysetup page down
@@ -380,6 +382,8 @@ keybindingmenu.subchannelup subchannel up
 keybindingmenu.subchannelup_head key subchannel up
 keybindingmenu.tvradiomode TV/Radio-mode
 keybindingmenu.tvradiomode_head TV/Radio-mode
+keybindingmenu.zaphistory Zapping History Bouquet
+keybindingmenu.zaphistory_head Zapping History Bouquet
 keychooser.head Setup new Key
 keychooser.text1 Please press the new key
 keychooser.text2 wait a few seconds for abort

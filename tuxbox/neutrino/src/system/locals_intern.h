@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.15 2004/07/27 23:13:59 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.16 2004/07/29 22:05:37 sepp776 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -428,7 +428,9 @@ const char * locale_real_names[] =
 	"keybindingmenu.channelup",
 	"keybindingmenu.channelup_head",
 	"keybindingmenu.head",
-	"keybindingmenu.modechange",
+  "keybindingmenu.lastchannel",
+  "keybindingmenu.lastchannel_head",
+  "keybindingmenu.modechange",
 	"keybindingmenu.pagedown",
 	"keybindingmenu.pagedown_head",
 	"keybindingmenu.pageup",
@@ -444,6 +446,8 @@ const char * locale_real_names[] =
 	"keybindingmenu.subchannelup_head",
 	"keybindingmenu.tvradiomode",
 	"keybindingmenu.tvradiomode_head",
+	"keybindingmenu.zaphistory",
+	"keybindingmenu.zaphistory_head",
 	"keychooser.head",
 	"keychooser.text1",
 	"keychooser.text2",
