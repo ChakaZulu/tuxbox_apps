@@ -325,9 +325,12 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 
 	processTextToArray( epgData.info2.c_str() );
 
-	char _tfsk[11];
-	sprintf (_tfsk, "FSK: ab %d", epgData.fsk );
-	processTextToArray( _tfsk );
+	if (epgData.fsk > 0)
+	{
+		char _tfsk[11];
+		sprintf (_tfsk, "FSK: ab %d", epgData.fsk );
+		processTextToArray( _tfsk );
+	}
 
 	if (epgData.contentClassification.length()> 0)
 		processTextToArray( GetGenre(epgData.contentClassification[0]) );
