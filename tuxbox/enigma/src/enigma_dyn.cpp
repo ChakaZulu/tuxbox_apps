@@ -1099,21 +1099,19 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 {
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eString video = opt["position"];
-
 	if (video)
 	{
-		int vid = atoi(video.c_str());
-		if (vid > 10) vid = 10;
-		if (vid < 1) vid = 1;
+		int vid = atoi(video.c_str()); // 1..20
 
 		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		if (handler)
 		{
 			int total = handler->getPosition(eServiceHandler::posQueryLength);
 			int current = handler->getPosition(eServiceHandler::posQueryCurrent);
-			int skipTime = (total / 10 * vid) - current;
+			int skipTime = ((total * vid) / 20) - current;
+
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, skipTime * 1000));
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip, skipTime * 380));
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
 		}
 	}
