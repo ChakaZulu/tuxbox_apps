@@ -69,26 +69,29 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 	eString ref1, ref2;
 
 	std::stringstream result;
-	int height = 22;
-	if (pdaScreen == 1)
-	{
-		width = width / 2;
-		height = 14;
-	}
 
-	if (buttonRef.find("javascript") == eString::npos)
+	if (pdaScreen == 0)
 	{
-		ref1 = "\"self.location.href='";
-		ref2 = "'\"";
+		int height = 22;
+
+		if (buttonRef.find("javascript") == eString::npos)
+		{
+			ref1 = "\"self.location.href='";
+			ref2 = "'\"";
+		}
+
+		result << "<input name=\"" << buttonText << "\""
+			"type=\"button\" style='width: " << width << "px;"
+			"height:" << height << "px;";
+		if (buttonColor != "")
+			result << "background-color: " << buttonColor;
+		result << "' value=\"" << buttonText <<
+			"\" onclick=" << ref1 << buttonRef << ref2 << ">";
 	}
-	result << "<input name=\"" << buttonText << "\""
-		"type=\"button\" style='width: " << width << "px;"
-		"height:" << height << "px;";
-	if (buttonColor != "")
-		result << "background-color: " << buttonColor;
-	result << "' value=\"" << buttonText <<
-		"\" onclick=" << ref1 << buttonRef <<
-		ref2 << ">";
+	else
+	{
+		result << "<a href=\"" << buttonRef << "\"><span class=\"button\">" << buttonText << "</span></a>&nbsp;";
+	}
 	return result.str();
 }
 
