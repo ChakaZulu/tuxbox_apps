@@ -24,12 +24,15 @@
 
 
 #include <config.h>
+#include <global.h>
+#include <system/settings.h>
 
 #include "lcdd.h"
 #include "newclock.h"
 #include <dbox/fp.h>
 #include <sys/timeb.h>
 #include <time.h>
+
 
 CLCD::CLCD()
 	: configfile('\t')
@@ -38,7 +41,6 @@ CLCD::CLCD()
 
 CLCD::~CLCD()
 {
-	saveConfig();
 }
 
 CLCD* CLCD::getInstance()
@@ -49,48 +51,6 @@ CLCD* CLCD::getInstance()
 		lcdd = new CLCD();
 	}
 	return lcdd;
-}
-
-void CLCD::saveConfig()
-{
-	static bool inSave=false;
-	if(inSave==false)
-	{
-		inSave=true;
-		configfile.setInt32( "lcd_brightness", lcd_brightness );
-		configfile.setInt32( "lcd_standbybrightness", lcd_standbybrightness );
-		configfile.setInt32( "lcd_contrast", lcd_contrast );
-		configfile.setInt32( "lcd_power", lcd_power );
-		configfile.setInt32( "lcd_inverse", lcd_inverse );
-
-		if(configfile.getModifiedFlag())
-		{
-			printf("[lcdd] save config\n");
-			configfile.saveConfig(CONFIGDIR "/lcdd.conf");
-		}
-		inSave=false;
-	}
-}
-
-void CLCD::loadConfig()
-{
-	printf("[lcdd] load config\n");
-	if(!configfile.loadConfig(CONFIGDIR "/lcdd.conf"))
-	{
-		lcd_brightness = 0xff;
-		lcd_standbybrightness = 0xaa;
-		lcd_contrast = 0x0F;
-		lcd_power = 0x01;
-		lcd_inverse = 0x00;
-		saveConfig();
-		return;
-	}
-
-	lcd_brightness =  configfile.getInt32("lcd_brightness", 0xff);
-	lcd_standbybrightness = configfile.getInt32("lcd_standbybrightness", 0xaa);
-	lcd_contrast = configfile.getInt32("lcd_contrast", 0x0F);
-	lcd_power = configfile.getInt32("lcd_power", 0x01);
-	lcd_inverse = configfile.getInt32("lcd_inverse", 0x00);
 }
 
 void* CLCD::TimeThread(void *)
@@ -106,8 +66,6 @@ void* CLCD::TimeThread(void *)
 void CLCD::init()
 {
 	InitNewClock();
-
-	loadConfig();
 
 	if(!lcdInit())
 	{
@@ -135,7 +93,7 @@ bool CLCD::lcdInit()
 	fonts.menutitle=fontRenderer->getFont(FONTNAME, "Regular", 15);
 	fonts.menu=fontRenderer->getFont(FONTNAME, "Regular", 12);
 
-	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 	display.setIconBasePath( DATADIR "/lcdd/icons/");
 
 	if(!display.isAvailable())
@@ -367,7 +325,7 @@ void CLCD::setMode(MODES m, std::string title)
 	switch (m)
 	{
 		case MODE_TVRADIO:
-			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 			//printf("[lcdd] mode: tvradio\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
@@ -379,7 +337,7 @@ void CLCD::setMode(MODES m, std::string title)
 			break;
 		case MODE_MP3:
 	   {
-			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 			//printf("[lcdd] mode: mp3\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
@@ -411,7 +369,7 @@ void CLCD::setMode(MODES m, std::string title)
 		   break;
 		}
 		case MODE_SCART:
-			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 			//printf("[lcdd] mode: scart\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
@@ -422,7 +380,7 @@ void CLCD::setMode(MODES m, std::string title)
 			break;
 		case MODE_MENU:
 		case MODE_MENU_UTF8:
-			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 			//printf("[lcdd] mode: menu\n");
 			mode = m;
 			showclock = false;
@@ -431,7 +389,7 @@ void CLCD::setMode(MODES m, std::string title)
 			display.update();
 			break;
 		case MODE_SHUTDOWN:
-			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 			//printf("[lcdd] mode: shutdown\n");
 			mode = m;
 			showclock = false;
@@ -440,7 +398,7 @@ void CLCD::setMode(MODES m, std::string title)
 			break;
 		case MODE_STANDBY:
 			//printf("[lcdd] mode: standby\n");
-			setlcdparameter(lcd_standbybrightness, lcd_contrast, lcd_power, lcd_inverse);
+			setlcdparameter(g_settings.lcd_standbybrightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 			mode = m;
 			showclock = true;
 			display.draw_fill_rect (-1,0,120,64, CLCDDisplay::PIXEL_OFF);
@@ -455,56 +413,56 @@ void CLCD::setMode(MODES m, std::string title)
 
 void CLCD::setBrightness(int bright)
 {
-	lcd_brightness = bright;
-	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+	g_settings.lcd_brightness = bright;
+	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 int CLCD::getBrightness()
 {
-	return lcd_brightness;
+	return g_settings.lcd_brightness;
 }
 
 void CLCD::setBrightnessStandby(int bright)
 {
-	lcd_standbybrightness = bright;
+	g_settings.lcd_standbybrightness = bright;
 }
 
 int CLCD::getBrightnessStandby()
 {
-	return lcd_standbybrightness;
+	return g_settings.lcd_standbybrightness;
 }
 
 void CLCD::setContrast(int contrast)
 {
-	lcd_contrast = contrast;
-	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+	g_settings.lcd_contrast = contrast;
+	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 int CLCD::getContrast()
 {
-	return lcd_contrast;
+	return g_settings.lcd_contrast;
 }
 
 void CLCD::setPower(int power)
 {
-	lcd_power = power;
-	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+	g_settings.lcd_power = power;
+	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 int CLCD::getPower()
 {
-	return lcd_power;
+	return g_settings.lcd_power;
 }
 
 void CLCD::setInverse(int inverse)
 {
-	lcd_inverse = inverse;
-	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
+	g_settings.lcd_inverse = inverse;
+	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 int CLCD::getInverse()
 {
-	return lcd_inverse;
+	return g_settings.lcd_inverse;
 }
 
 void CLCD::setMuted(bool mu)

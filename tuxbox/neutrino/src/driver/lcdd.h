@@ -83,11 +83,6 @@ class CLCD
 
 		std::string			servicename;
 		char				volume;
-		int				lcd_brightness;
-		int				lcd_standbybrightness;
-		int				lcd_contrast;
-		int				lcd_power;
-		int				lcd_inverse;
 		bool				muted;
 		bool				showclock;
 		CConfigFile			configfile;
@@ -104,10 +99,6 @@ class CLCD
 
 		static CLCD* getInstance();
 		void init();
-
-		void saveConfig();
-		void loadConfig();
-
 
 		void setMode(MODES m, std::string title="");
 

@@ -225,6 +225,13 @@ struct SNeutrinoSettings
 	char	fontsize_infobar_small[4];
 
 	char	fontsize_filebrowser_item[4];
+
+	// lcdd
+	int	lcd_brightness;
+	int	lcd_standbybrightness;
+	int	lcd_contrast;
+	int	lcd_power;
+	int	lcd_inverse;
 };
 
 struct SglobalInfo

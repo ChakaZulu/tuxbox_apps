@@ -545,6 +545,13 @@ int CNeutrinoApp::loadSetup()
 	g_settings.timing_infobar = configfile.getInt32( "timing_infobar", 6 );
 	g_settings.timing_filebrowser = configfile.getInt32( "timing_filebrowser", 60 );
 
+	//lcdd
+	g_settings.lcd_brightness =  configfile.getInt32("lcd_brightness", 0xff);
+	g_settings.lcd_standbybrightness = configfile.getInt32("lcd_standbybrightness", 0xaa);
+	g_settings.lcd_contrast = configfile.getInt32("lcd_contrast", 0x0F);
+	g_settings.lcd_power = configfile.getInt32("lcd_power", 0x01);
+	g_settings.lcd_inverse = configfile.getInt32("lcd_inverse", 0x00);
+
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
 		erg = 2;
@@ -751,17 +758,24 @@ void CNeutrinoApp::saveSetup()
 	//BouquetHandling
 	configfile.setInt32( "bouquetlist_mode", g_settings.bouquetlist_mode );
 
-	// parentallock
+	//parentallock
 	configfile.setInt32( "parentallock_prompt", g_settings.parentallock_prompt );
 	configfile.setInt32( "parentallock_lockage", g_settings.parentallock_lockage );
 	configfile.setString( "parentallock_pincode", g_settings.parentallock_pincode );
 
-	// timing
+	//timing
 	configfile.setInt32( "timing_menu", g_settings.timing_menu );
 	configfile.setInt32( "timing_chanlist", g_settings.timing_chanlist );
 	configfile.setInt32( "timing_epg", g_settings.timing_epg );
 	configfile.setInt32( "timing_infobar", g_settings.timing_infobar );
 	configfile.setInt32( "timing_filebrowser", g_settings.timing_filebrowser );
+
+	//lcdd
+	configfile.setInt32( "lcd_brightness", g_settings.lcd_brightness );
+	configfile.setInt32( "lcd_standbybrightness", g_settings.lcd_standbybrightness );
+	configfile.setInt32( "lcd_contrast", g_settings.lcd_contrast );
+	configfile.setInt32( "lcd_power", g_settings.lcd_power );
+	configfile.setInt32( "lcd_inverse", g_settings.lcd_inverse );
 
 	if(configfile.getModifiedFlag())
 	{
@@ -3341,7 +3355,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.396 2003/02/02 16:00:56 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.397 2003/02/04 21:23:11 alexw Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
