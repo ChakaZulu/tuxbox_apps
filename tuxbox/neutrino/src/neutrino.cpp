@@ -1859,7 +1859,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( oj4);
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj5);
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "recordingmenu.fileseparator") );
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
 	recordingSettings.addItem( mf5);
 	recordingSettings.addItem( mf6);
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "recordingmenu.filesettingsseparator") );
