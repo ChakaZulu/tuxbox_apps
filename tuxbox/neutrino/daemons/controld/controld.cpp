@@ -541,7 +541,7 @@ void disableVideoOutput(bool disable)
 	*/
 	if(!disable)
 	{
-		zapit.startPlayBack();
+		zapit.setStandby(false);
 		setvideooutput(settings.videooutput, false);
 		setVideoFormat(settings.videoformat, false);
 	}
@@ -549,7 +549,7 @@ void disableVideoOutput(bool disable)
 	{
 		setvideooutput(0, false);
 		setVideoFormat(-1, false);
-		zapit.stopPlayBack();
+		zapit.setStandby(true);
 	}
 }
 
@@ -767,7 +767,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.81 2002/12/17 23:19:34 McClean Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.82 2002/12/22 19:21:12 thegoodguy Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;
