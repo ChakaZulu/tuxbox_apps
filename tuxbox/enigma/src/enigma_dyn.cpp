@@ -3818,118 +3818,6 @@ static eString getTransponderServices(eString request, eString dirpath, eString 
 	return "E: no DVB service is running.. or this is a playback";
 }
 
-#if 0
-class treeNode
-{
-public:
-	eString serviceNode;
-	eString serviceName;
-	bool isDirectory;
-	eServiceReference serviceReference;
-	int nodeID;
-	treeNode(int node, bool isdir, eString sname, eString snode, eServiceReference ref)
-	{
-//		eDebug("new Service: %s - %s", sname.c_str(), snode.c_str());
-		serviceName = sname;
-		serviceNode = snode;
-		isDirectory = isdir;
-		serviceReference = ref;
-		nodeID = node;
-	};
-	~treeNode() {};
-	bool operator < (const treeNode &a) const {return serviceName < a.serviceName;}
-};
-
-eString genNodes(bool sort, std::list <treeNode> &myList)
-{
-	std::list <treeNode>::iterator myIt;
-	eString result;
-
-	eDebug("[ENIGMA_DYN] start sorting...");
-
-	if (sort)
-		myList.sort();
-
-	for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
-		result += myIt->serviceNode + "\n";
-
-	eDebug("[ENIGMA_DYN] sorting done.");
-	return result;
-}
-
-struct listChannels: public Object
-{
-	eString &result;
-	std::list <treeNode> myList;
-	eServiceInterface *iface;
-	int &nodeID;
-	int anchor;
-	bool sort;
-	bool addEPG;
-
-	listChannels(const eServiceReference &service, eString &result, int &nodeID, int anchor, bool sort, bool addEPG)
-		:result(result), myList(myList), iface(eServiceInterface::getInstance()), nodeID(nodeID), anchor(anchor), sort(sort), addEPG(addEPG)
-	{
-		std::list <treeNode>::iterator myIt;
-		Signal1<void, const eServiceReference&> cbSignal;
-		CONNECT(cbSignal, listChannels::addTreeNode);
-		iface->enterDirectory(service, cbSignal);
-		iface->leaveDirectory(service);
-		result += genNodes(sort, myList);
-		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
-			if (myIt->isDirectory)
-				listChannels(myIt->serviceReference, result, nodeID, myIt->nodeID, sort, addEPG);
-	}
-
-	void addTreeNode(const eServiceReference& ref)
-	{
-		eString serviceReference, serviceName, serviceDescription, serviceNode, orbitalPosition;
-		
-		// sorry.. at moment we dont show any directory.. or locked service in webif
-		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
-			return;
-
-		eService *service = iface ? iface->addRef(ref) : 0;
-
-		serviceReference = ref.toString();
-		if (ref.descr) serviceName = filter_string(ref.descr);
-		else
-		{
-			if (service)
-			{
-				serviceName = filter_string(service->service_name);
-				iface->removeRef(ref);
-			}
-			else
-				serviceName = "unnamed service";
-		}
-
-		if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
-		{
-			const eServiceReferenceDVB& dvb_ref = (const eServiceReferenceDVB&)ref;
-			eTransponder *tp = eTransponderList::getInstance()->searchTS(
-				dvb_ref.getDVBNamespace(),
-				dvb_ref.getTransportStreamID(),
-				dvb_ref.getOriginalNetworkID());
-			if (tp && tp->satellite.isValid())
-				orbitalPosition = eString().setNum(tp->satellite.orbital_position);
-			else
-				orbitalPosition = 0;
-		}
-
-		eString epg;
-		if (addEPG && epg)
-			serviceDescription = serviceName + " - " + epg;
-		else
-			serviceDescription = serviceName;
-			
-		serviceDescription.strReplace("'", "\\\'");
-		serviceNode = "d.add(" + eString().sprintf("%d", ++nodeID) + "," + eString().sprintf("%d", anchor) + ",'" + serviceDescription + "','javascript:switchChannel(\"" +  serviceReference + "\")');";
-		myList.push_back(treeNode(nodeID, ref.flags & eServiceReference::isDirectory, serviceName, serviceNode, ref));
-	}
-};
-#endif
-
 struct listContent: public Object
 {
 	eString &result;
@@ -4009,30 +3897,6 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 
 	return "E: error during list services";
 }
-
-#if 0
-static eString getChannels(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/plain; charset=utf-8";
-	std::map<eString,eString> opts=getRequestOptions(opt, '&');
-
-	eString sref;
-	if (opts["ref"])
-		sref = opts["ref"];
-	else
-		sref = zap[0][1];
-
-	eString result = "d.add(0,-1,'" + zap[0][0] + "');\n";
-	eServiceReference ref(sref);
-	int nodeID = 0;
-	listChannels t(ref, result, nodeID, 0, false, false);
-
-	if (result)
-		return result;
-
-	return "E: error during list channels";
-}
-#endif
 
 struct appendonidsidnamestr
 {
@@ -5010,7 +4874,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/videoChannels", videoChannels, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getServices", getServices, lockWeb);
-//	dyn_resolver->addDyn("GET", "/cgi-bin/getChannels", getChannels, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/zapto", getCurrentVpidApid, false); // this dont really zap.. only used to return currently used pids;
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_getonidsid, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_getchannellist, lockWeb);
