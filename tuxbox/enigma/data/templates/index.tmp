@@ -57,7 +57,7 @@ function admin(xy)
 
 function openSI()
 {
-	NewWindow("/cgi-bin/streaminfo", "si", "300", "200", "no");
+	NewWindow("/cgi-bin/streaminfo?requester=webif", "si", "300", "200", "no");
 }
 
 function cleanupTimerList()

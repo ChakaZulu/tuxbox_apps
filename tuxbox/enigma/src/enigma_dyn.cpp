@@ -311,7 +311,7 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 		eZapMain::getInstance()->playService(*ref, eZapMain::psSetMode|eZapMain::psDontAdd);
 		delete ref;
 		result="0";
-	} 
+	}
 	else
 		result+="-1";
 
@@ -1605,7 +1605,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	return tmp2;
 }
 
-static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getsi(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
 	eString name,
@@ -1620,6 +1620,8 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 		sid,
 		pmt;
 
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	eString requester = opt["requester"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
@@ -1673,22 +1675,44 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 		}
 	}
 
-	result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>"
-		"<!-- " << sapi->service << "-->" << std::endl <<
-		"<table cellspacing=0 cellpadding=0 border=0>"
-		"<tr><td>Name:</td><td>" << name << "</td></tr>"
-		"<tr><td>Provider:</td><td>" << provider << "</td></tr>"
-		"<tr><td>VPID:</td><td>" << vpid << "</td></tr>"
-		"<tr><td>APID:</td><td>" << apid << "</td></tr>"
-		"<tr><td>PCRPID:</td><td>" << pcrpid << "</td></tr>"
-		"<tr><td>TPID:</td><td>" << tpid << "</td></tr>"
-		"<tr><td>TSID:</td><td>" << tsid << "</td></tr>"
-		"<tr><td>ONID:</td><td>" << onid << "</td></tr>"
-		"<tr><td>SID:</td><td>" << sid << "</td></tr>"
-		"<tr><td>PMT:</td><td>" << pmt << "</td></tr>"
-		"<tr><td>Video Format:<td>" << vidform << "</td></tr>"
-		"</table>"
-		"</body></html>";
+	if (requester == "webif")
+	{
+		result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>"
+			"<!-- " << sapi->service << "-->" << std::endl <<
+			"<table cellspacing=0 cellpadding=0 border=0>"
+			"<tr><td>Name:</td><td>" << name << "</td></tr>"
+			"<tr><td>Provider:</td><td>" << provider << "</td></tr>"
+			"<tr><td>VPID:</td><td>" << vpid << "</td></tr>"
+			"<tr><td>APID:</td><td>" << apid << "</td></tr>"
+			"<tr><td>PCRPID:</td><td>" << pcrpid << "</td></tr>"
+			"<tr><td>TPID:</td><td>" << tpid << "</td></tr>"
+			"<tr><td>TSID:</td><td>" << tsid << "</td></tr>"
+			"<tr><td>ONID:</td><td>" << onid << "</td></tr>"
+			"<tr><td>SID:</td><td>" << sid << "</td></tr>"
+			"<tr><td>PMT:</td><td>" << pmt << "</td></tr>"
+			"<tr><td>Video Format:<td>" << vidform << "</td></tr>"
+			"</table>"
+			"</body></html>";
+	}
+	else
+	{
+		result << "<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>"
+			"<!-- " << sapi->service.toString() << "-->\n"
+			"<table cellspacing=0 cellpadding=0 border=0>"
+			"<tr><td>name:</td><td>"+name+"</td></tr>"
+			"<tr><td>provider:</td><td>"+provider+"</td></tr>"
+			"<tr><td>vpid:</td><td>"+vpid+"</td></tr>"
+			"<tr><td>apid:</td><td>"+apid+"</td></tr>"
+			"<tr><td>pcrpid:</td><td>"+pcrpid+"</td></tr>"
+			"<tr><td>tpid:</td><td>"+tpid+"</td></tr>"
+			"<tr><td>tsid:</td><td>"+tsid+"</td></tr>"
+			"<tr><td>onid:</td><td>"+onid+"</td></tr>"
+			"<tr><td>sid:</td><td>"+sid+"</td></tr>"
+			"<tr><td>pmt:</td><td>"+pmt+"</td></tr>"
+			"<tr><td>vidformat:<td>"+vidform+"</td></tr>"
+			"</table>"
+			"</body></html>";
+	}
 
 	return result.str();
 }
