@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.1 2003/07/08 19:59:50 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.2 2003/09/09 05:12:45 obi Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,10 @@ $Id: mpeg_descriptor.c,v 1.1 2003/07/08 19:59:50 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.2  2003/09/09 05:12:45  obi
+print format identifier of registration descriptor in ascii.
+looks quite strange but is nice to see :)
+
 Revision 1.1  2003/07/08 19:59:50  rasc
 restructuring... some new, some fixes,
 trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
@@ -331,6 +335,9 @@ void descriptorMPEG_Registration (u_char *b)
 
 
  out_S2L_NL (4,"format_identifier: ",d.format_identifier,"see: SC29");
+ indent(+1);
+ printasciiline_buf (4, b+2, 4);
+ indent(-1);
  out_nl (4,"add. info:");
  printhexdump_buf (4, b+6, d.descriptor_length -4);
 
