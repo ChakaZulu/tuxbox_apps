@@ -362,6 +362,9 @@ int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 	for (uint8_t i = 0; i < params.length() && i < 6; i += 2)
 		cmd.msg[3 + cmd.msg_len++] = strtol( params.mid(i, 2).c_str(), 0, 16 );
 
+	if ( curVoltage == -1 && (::ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_18) < 0) )
+		eDebug("FE_SET_VOLTAGE (18) failed (%m)");
+
 	if (ioctl(fd, FE_SET_TONE, SEC_TONE_OFF) < 0)
 	{
 		eDebug("FE_SET_TONE failed (%m)");
@@ -1178,17 +1181,20 @@ int eFrontend::tune(eTransponder *trans,
 	if (state==stateTuning)
 		return -EBUSY;
 
-#if HAVE_DVB_API_VERSION < 3
 	if (needreset > 1)
 	{
+#if HAVE_DVB_API_VERSION < 3
 		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
 		usleep(150000);
+#else
+		curContTone = curVoltage = -1;
+#endif
 		// reset all diseqc devices
 		if (type==eSystemInfo::feSatellite)
 			InitDiSEqC();
 		needreset=0;
 	}
-#endif
+
 	transponder=trans;
 
 	if ( sat )   // then we must do Satellite Stuff
@@ -1749,16 +1755,14 @@ int eFrontend::tune_ofdm(eTransponder *transponder,
 
 int eFrontend::savePower()
 {
-#if HAVE_DVB_API_VERSION < 3
 	timer2.stop();
+#if HAVE_DVB_API_VERSION < 3
 	if ( ioctl(fd, FE_SET_POWER_STATE, FE_POWER_OFF) < 0 )
 		eDebug("FE_SET_POWER_STATE failed (%m)");
 
 	if (secfd != -1)
 	{        
-		transponder=0;
 		eSecCmdSequence seq;
-
 		seq.commands=0;
 		seq.numCommands=0;
 		seq.voltage= eSecCmdSequence::VOLTAGE_OFF;
@@ -1770,12 +1774,13 @@ int eFrontend::savePower()
 			return -1;
 		}
 	}
-	needreset = 2;
 #else
 	if (ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_OFF) < 0)
 		eDebug("FE_SET_VOLTAGE (off) failed (%m)");
 	if (ioctl(fd, FE_SET_TONE, SEC_TONE_OFF) < 0)
 		eDebug("FE_SET_TONE (off) failed (%m)");
 #endif
+	transponder=0;
+	needreset = 2;
 	return 0;
 }
