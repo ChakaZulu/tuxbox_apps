@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.325 2003/06/13 10:50:47 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.326 2003/06/23 19:57:37 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1403,6 +1403,8 @@ void enterStandby(void)
 		delete videoDecoder;
 		videoDecoder = NULL;
 	}
+
+	tuned_transponder_id = 0;
 }
 
 void leaveStandby(void)
@@ -1514,7 +1516,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.325 2003/06/13 10:50:47 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.326 2003/06/23 19:57:37 obi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
