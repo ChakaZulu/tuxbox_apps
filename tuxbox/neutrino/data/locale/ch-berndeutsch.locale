@@ -1,7 +1,7 @@
 menu.back Zrugg
 
-options.off ein
-options.on aus
+options.off aus
+options.on ein
 options.serial seriell
 options.fb framebuffer
 options.null nou
