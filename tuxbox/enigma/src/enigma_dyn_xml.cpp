@@ -1,4 +1,3 @@
-#ifdef ENABLE_DYN_XML
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -46,7 +45,67 @@ extern eString getEITC(eString result);
 extern eString getCurService();
 extern eString firmwareLevel(eString verid);
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
-extern eString removeBadChars(eString s);
+
+eString removeXMLBadChars(eString s)
+{
+//	s.strReplace("\x00", "");
+	s.strReplace("\x01", "");
+	s.strReplace("\x02", "");
+	s.strReplace("\x03", "");
+	s.strReplace("\x04", "");
+	s.strReplace("\x05", "");
+	s.strReplace("\x06", "");
+	s.strReplace("\x07", "");
+	s.strReplace("\x08", "");
+	s.strReplace("\x09", "");
+	s.strReplace("\x0a", "");
+	s.strReplace("\x0b", "");
+	s.strReplace("\x0c", "");
+	s.strReplace("\x0d", "");
+	s.strReplace("\x0e", "");
+	s.strReplace("\x0f", "");
+	s.strReplace("\x10", "");
+	s.strReplace("\x11", "");
+	s.strReplace("\x12", "");
+	s.strReplace("\x13", "");
+	s.strReplace("\x14", "");
+	s.strReplace("\x15", "");
+	s.strReplace("\x16", "");
+	s.strReplace("\x17", "");
+	s.strReplace("\x18", "");
+	s.strReplace("\x19", "");
+	s.strReplace("\x1a", "");
+	s.strReplace("\x1b", "");
+	s.strReplace("\x1c", "");
+	s.strReplace("\x1d", "");
+	s.strReplace("\x1e", "");
+	s.strReplace("\x1f", "");
+	return s;
+}
+
+struct countTimer
+{
+	int &count;
+	bool repeating;
+	countTimer(int &count,bool repeating)
+		:count(count), repeating(repeating)
+	{
+	}
+
+	void operator()(ePlaylistEntry *se)
+	{
+		if (se->type&ePlaylistEntry::isRepeating)
+		{
+			if (repeating)
+				++count;
+		}
+		else
+		{
+			if (!repeating)
+				++count;
+		}
+	}
+};
 
 static eString getimageinfoXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -72,8 +131,8 @@ static eString getimageinfoXML(eString request, eString dirpath, eString opts, e
 }
 
 //TODO:
-//<boquets bname="Servicenumbers" bpath="4097:7:0:33fc5:0:0:0:0:0:0:%2fvar%2ftuxbox%2fconfig%2fenigma%2fuserbouquet%2e33fc5%2etv">
-//  <name path="1:0:1:a:2:85:c00000:0:0:0:">Test1</name> 
+//<boquets bname="Servicenumbers" bpath="4097:7:0:33fc5:0:0:0:0:0:0:%2fvar%2ftuxbox%2fconfig%2fenigma%2fuserbouquet%2e33fc5%2etv"
+//  <name path="1:0:1:a:2:85:c00000:0:0:0:">Test1</name>
 //</boquets>
 
 class eXMLNavigatorListDirectory: public Object
@@ -324,7 +383,7 @@ static eString getAudioChannelsXML(eString request, eString dirpath, eString opt
 			else
 				result << eString().sprintf("<audio pid=\"0x%04x\">", it->pmtentry->elementary_PID);
 
-			result << removeBadChars(it->text);
+			result << removeXMLBadChars(it->text);
 			result << "</audio>";
 		}
 	}
@@ -465,7 +524,7 @@ static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTT
 	eEPGCache::getInstance()->Unlock();
 	
 	result << "</content>";
-
+	
 	return result.str();
 }
 
@@ -593,4 +652,3 @@ void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/xml/imginfo", getimageinfoXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/audio", getAudioChannelsXML, lockWeb);
 }
-#endif
