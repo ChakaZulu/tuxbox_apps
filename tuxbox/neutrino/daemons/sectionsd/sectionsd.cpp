@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.140 2002/11/03 22:26:54 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.141 2002/11/05 06:50:19 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -44,7 +44,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <stdio.h>
-#include <signal.h> 
+#include <signal.h>
 //#include <sys/resource.h> // getrusage
 #include <set>
 #include <map>
@@ -73,7 +73,7 @@
 //#include "../timermanager.h"
 
 // 60 Minuten Zyklus...
-#define TIME_EIT_SCHEDULED_PAUSE 60* 60 
+#define TIME_EIT_SCHEDULED_PAUSE 60* 60
 // Zeit die fuer die gewartet wird, bevor der Filter weitergeschaltet wird, falls es automatisch nicht klappt
 #define TIME_EIT_SKIPPING 30
 
@@ -231,7 +231,7 @@ class NvodSubEvent {
     unsigned long long uniqueMetaEventID; // ID des Meta-Events
     unsigned long long uniqueMetaEventID; // ID des eigentlichen Events
 };
- 
+
 // Menge sortiert nach Meta-ServiceIDs (NVODs)
 typedef std::multimap<unsigned, class NvodSubEvent *, std::less<unsigned> > nvodSubEvents;
 */
@@ -321,37 +321,6 @@ static void addEvent(const SIevent &evt)
 		// diese beiden Mengen enthalten nur Events mit Zeiten
 		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(e, e));
 		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
-
-		/*      auskommentiert - das ist ein Performance-WAHNSINN
-				*g* da muss eine bessere Lösung her (und die ist schon unterwegs)
-		 
-		            if (timerd)
-		            {
-		            	CTimerEvent_NextProgram::EventInfo evInfo;
-		                evInfo.uniqueKey = e->uniqueKey();
-		                evInfo.onidSid = (e->originalNetworkID << 16) + e->serviceID;
-		                strncpy( evInfo.name, evt.name.c_str(), 50);
-		                evInfo.fsk = evt.getFSK();
-		 
-		                for (SItimes::iterator it = evt.times.begin(); it != evt.times.end(); it++)
-		                {
-		                	time_t actTime_t;
-		                	::time(&actTime_t);
-		                	if (it->startzeit + it->dauer > actTime_t)
-		                	{
-		                		time_t kurzvorStartzeit = it->startzeit; // - 60;
-		                		struct tm* startTime = localtime( &(kurzvorStartzeit));
-		                		timerdClient->addTimerEvent(
-		                			CTimerdClient::TIMER_NEXTPROGRAM,
-		                			&evInfo,
-		                			startTime->tm_min,
-		                			startTime->tm_hour,
-		                			startTime->tm_mday,
-		                			startTime->tm_mon);
-		                	}
-		                }
-		            }
-		*/
 
 	}
 }
@@ -735,7 +704,7 @@ public:
 				unlock();
 				if (rc == 0)
 				{
-					dprintf("dmx.read timeout - filter: %x", filters[filter_index].filter);
+					dprintf("dmx.read timeout - filter: %x - timeout# %d", filters[filter_index].filter, timeouts);
 					timeouts++;
 				}
 				else
@@ -750,7 +719,7 @@ public:
 
 			timeouts = 0;
 			buf = new char[3 + initial_header.section_length];
-			
+
 			if (!buf)
 			{
 				unlock();
@@ -759,7 +728,7 @@ public:
 				throw std::bad_alloc();
 				return NULL;
 			}
-			    
+
 			if (initial_header.section_length > 0)
 				rc = read(buf + 3, initial_header.section_length, timeoutInMSeconds);
 
@@ -781,7 +750,7 @@ public:
 				real_unpause();
 				return NULL;
 			}
-			
+
 			// check if the filter worked correctly
 			if (((initial_header.table_id ^ filters[filter_index].filter) & filters[filter_index].mask) != 0)
 			{
@@ -984,64 +953,95 @@ int DMX::change(int new_filter_index)
 	if (!fd)
 		return 1;
 
-	if (new_filter_index == filter_index)
-	{
-		// do wakeup only... - no change neccessary
-		pthread_cond_signal( &change_cond );
-		return 0;
-	}
+	showProfiling("changeDMX: before pthread_mutex_lock( &start_stop_mutex )");
+        pthread_mutex_lock( &start_stop_mutex );
 
-	showProfiling("before pthread_mutex_lock( &start_stop_mutex );");
-
-	pthread_mutex_lock( &start_stop_mutex );
-	showProfiling("after pthread_mutex_lock( &start_stop_mutex );");
+	showProfiling("changeDMX: after pthread_mutex_lock( &start_stop_mutex )");
 
 	if (real_pauseCounter > 0)
 	{
 		pthread_mutex_unlock( &start_stop_mutex );
+		dprintf("changeDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", filters[new_filter_index].filter);
 		return 0;	// läuft nicht (zB streaming)
 	}
 
 	//	if(pID==0x12) // Nur bei EIT
-	dprintf("changeDMX [%x]-> %s (%d)\n", pID, (new_filter_index == 0) ? "current/next" : "scheduled", new_filter_index );
+	dprintf("changeDMX [%x]-> %s (0x%x)\n", pID, (new_filter_index == 0) ? "current/next" : "scheduled", filters[new_filter_index].filter);
 
-	if (ioctl (fd, DMX_STOP, 0) == -1)
+/*	if (ioctl (fd, DMX_STOP, 0) == -1)
 	{
 		closefd();
 		perror ("[sectionsd] DMX: DMX_STOP");
 		pthread_mutex_unlock( &start_stop_mutex );
 		return 2;
 	}
+*/
+	closefd();
 
-	struct dmxSctFilterParams flt;
 
-	memset (&flt, 0, sizeof (struct dmxSctFilterParams));
 
-	flt.pid = pID;
-
-	flt.filter.filter[0] = filters[new_filter_index].filter;
-
-	flt.filter.mask[0] = filters[new_filter_index].mask;
-
-	//dprintf("changeDMX newfilter %x %x\n", flt.filter.filter[0], flt.filter.mask[0]);
-	flt.flags = DMX_IMMEDIATE_START;
-
-	if ( ( new_filter_index != 0 ) && (!noCRC) )
-		flt.flags |= DMX_CHECK_CRC;
-
-	filter_index = new_filter_index;
-
-	pthread_cond_signal( &change_cond );
-
-	if (ioctl (fd, DMX_SET_FILTER, &flt) == -1)
+//	if (new_filter_index != filter_index)
 	{
-		closefd();
-		perror ("[sectionsd] DMX: DMX_SET_FILTER");
-		pthread_mutex_unlock( &start_stop_mutex );
-		return 3;
-	}
 
-	showProfiling("after DMX_SET_FILTER, &");
+		if ((fd = open("/dev/dvb/card0/demux0", O_RDWR)) == -1)
+		{
+			perror ("[sectionsd] DMX: /dev/dvb/card0/demux0");
+			pthread_mutex_unlock( &start_stop_mutex );
+			return 2;
+		}
+
+		if (dmxBufferSizeInKB != 256)
+			if (ioctl (fd, DMX_SET_BUFFER_SIZE, (unsigned long)(dmxBufferSizeInKB*1024UL)) == -1)
+			{
+				closefd();
+				perror ("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
+				pthread_mutex_unlock( &start_stop_mutex );
+				return 3;
+			}
+
+		struct dmxSctFilterParams flt;
+
+		memset (&flt, 0, sizeof (struct dmxSctFilterParams));
+
+		flt.pid = pID;
+
+		flt.filter.filter[0] = filters[new_filter_index].filter;
+
+		flt.filter.mask[0] = filters[new_filter_index].mask;
+
+		//dprintf("changeDMX newfilter %x %x\n", flt.filter.filter[0], flt.filter.mask[0]);
+		flt.flags = DMX_IMMEDIATE_START;
+
+		if ( ( new_filter_index != 0 ) && (!noCRC) )
+			flt.flags |= DMX_CHECK_CRC;
+
+		filter_index = new_filter_index;
+
+
+
+		if (ioctl (fd, DMX_SET_FILTER, &flt) == -1)
+		{
+			closefd();
+			perror ("[sectionsd] DMX: DMX_SET_FILTER");
+			pthread_mutex_unlock( &start_stop_mutex );
+			return 3;
+		}
+
+		showProfiling("after DMX_SET_FILTER");
+	}
+/*	else
+	{
+		if (ioctl (fd, DMX_START, 0) == -1)
+		{
+			closefd();
+			perror ("[sectionsd] DMX: DMX_START");
+			pthread_mutex_unlock( &start_stop_mutex );
+			return 3;
+		}
+		showProfiling("after DMX_START");
+	}
+*/
+        pthread_cond_signal( &change_cond );
 
 	if (timeset) // Nur wenn ne richtige Uhrzeit da ist
 		lastChanged = time(NULL);
@@ -1628,7 +1628,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.140 2002/11/03 22:26:54 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.141 2002/11/05 06:50:19 field Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1953,20 +1953,23 @@ static void commandLinkageDescriptorsUniqueKey(struct connectionData *client, ch
 	return ;
 }
 
-static t_channel_id messaging_current_servicekey = 0;
-std::vector<long long> messaging_skipped_sections_ID [0x22];		// 0x4e .. 0x6f
-static long long messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
-static int messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
-std::vector<long long>	messaging_sdt_skipped_sections_ID [2];		// 0x42, 0x46
-static long long messaging_sdt_sections_max_ID [2];			// 0x42, 0x46
-static int messaging_sdt_sections_got_all [2];			// 0x42, 0x46
+static t_channel_id	messaging_current_servicekey = 0;
+std::vector<long long>	messaging_skipped_sections_ID [0x22];			// 0x4e .. 0x6f
+static long long 	messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
+static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
+
+std::vector<long long>	messaging_sdt_skipped_sections_ID [2];			// 0x42, 0x46
+static long long 	messaging_sdt_sections_max_ID [2];			// 0x42, 0x46
+static int 		messaging_sdt_sections_got_all [2];			// 0x42, 0x46
 
 static bool	messaging_wants_current_next_Event = false;
-static time_t messaging_last_requested = time(NULL);
+static time_t	messaging_last_requested = time(NULL);
 static bool	messaging_neutrino_sets_time = false;
+static bool 	messaging_WaitForServiceDesc = false;
 
 static void commandserviceChanged(struct connectionData *client, char *data, const unsigned dataLength)
 {
+
 	if (dataLength != sizeof(sectionsd::commandSetServiceChanged))
 		return;
 
@@ -1975,13 +1978,14 @@ static void commandserviceChanged(struct connectionData *client, char *data, con
 
 	bool doWakeUp = false;
 
-	dprintf("[sectionsd] Service changed to " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
+	dprintf("[sectionsd] commandserviceChanged: Service changed to " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
 
-	showProfiling("before messaging lock");
+	showProfiling("[sectionsd] commandserviceChanged: before messaging lock");
 
 	time_t zeit = time(NULL);
 
 	lockMessaging();
+
 
 	if ( ( messaging_current_servicekey != *uniqueServiceKey ) ||
 	        ( zeit > ( messaging_last_requested + 5 ) ) )
@@ -2003,24 +2007,45 @@ static void commandserviceChanged(struct connectionData *client, char *data, con
 		}
 
 		doWakeUp = true;
+
+
+		lockServices();
+
+		MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
+		si = mySIservicesOrderUniqueKey.find(*uniqueServiceKey);
+
+		messaging_WaitForServiceDesc = (si == mySIservicesOrderUniqueKey.end() );
+		if ( messaging_WaitForServiceDesc )
+			dputs("[sectionsd] commandserviceChanged: current service-descriptor not loaded yet!" );
+
+		unlockServices();
 	}
 
 
 
-	if ( ( !doWakeUp ) && ( messaging_sections_got_all[0] ) && ( *requestCN_Event ) )
+	if ( ( !doWakeUp ) && ( messaging_sections_got_all[0] ) && ( *requestCN_Event ) && ( !messaging_WaitForServiceDesc ) )
 	{
 		messaging_wants_current_next_Event = false;
+		messaging_WaitForServiceDesc = false;
 		eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
 	}
 	else
 	{
-		messaging_wants_current_next_Event = *requestCN_Event;
+		if ( messaging_current_servicekey != *uniqueServiceKey )
+		{
+			messaging_wants_current_next_Event = *requestCN_Event;
+		}
+		else if ( *requestCN_Event )
+			messaging_wants_current_next_Event = true;
+
+		if ( messaging_WaitForServiceDesc )
+			messaging_wants_current_next_Event = false;
 
 		if (messaging_wants_current_next_Event)
-			dprintf("[sectionsd] requesting current_next event...\n");
+			dprintf("[sectionsd] commandserviceChanged: requesting current_next event...\n");
 	}
 
-	showProfiling("before wakeup");
+	showProfiling("[sectionsd] commandserviceChanged: before wakeup");
 	messaging_last_requested = zeit;
 
 	if ( doWakeUp )
@@ -2030,11 +2055,11 @@ static void commandserviceChanged(struct connectionData *client, char *data, con
 		dmxSDT.change( 0 );
 	}
 	else
-		dprintf("[sectionsd] ignoring wakeup request...\n");
+		dprintf("[sectionsd] commandserviceChanged: ignoring wakeup request...\n");
 
 	unlockMessaging();
 
-	showProfiling("after doWakeup");
+	showProfiling("[sectionsd] commandserviceChanged: after doWakeup");
 
 	struct sectionsd::msgResponseHeader msgResponse;
 
@@ -3155,7 +3180,7 @@ static void *sdtThread(void *)
 
 	struct SI_section_header header;
 	char *buf;
-	const unsigned timeoutInMSeconds = 500;
+	const unsigned timeoutInMSeconds = 250;
 	bool sendToSleepNow = false;
 
 	dmxSDT.addfilter(0x42, 0xff );
@@ -3211,6 +3236,8 @@ static void *sdtThread(void *)
 						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
 						dmxSDT.real_unpause();
 					}
+
+					timeoutsDMX = 0;
 				}
 				else if (zeit > dmxSDT.lastChanged + TIME_SDT_SKIPPING )
 				{
@@ -3219,12 +3246,16 @@ static void *sdtThread(void *)
 					if ( dmxSDT.filter_index + 1 < (signed) dmxSDT.filters.size() )
 					{
 						dmxSDT.change(dmxSDT.filter_index + 1);
-						dprintf("[sdtThread] skipping to next filter (> TIME_SDT_SKIPPING)\n" );
+						dputs("[sdtThread] skipping to next filter (> TIME_SDT_SKIPPING)");
+						unlockMessaging();
 					}
 					else
+					{
 						sendToSleepNow = true;
-
-					unlockMessaging();
+						dputs("[sdtThread] sending to sleep (> TIME_SDT_SKIPPING)");
+						unlockMessaging();
+						continue;
+					}
 				};
 			}
 
@@ -3233,10 +3264,20 @@ static void *sdtThread(void *)
 				timeoutsDMX = 0;
 				dmxSDT.stop();
 				dmxSDT.start(); // leaves unlocked
-				dputs("dmxSDT restarted");
+				dputs("\n !!! dmxSDT restarted !!!\n");
 			}
 
+			struct timeval tv;
+
+			gettimeofday( &tv, NULL );
+			long long _now = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
 			buf = dmxSDT.getSection(timeoutInMSeconds, timeoutsDMX);
+
+			gettimeofday( &tv, NULL );
+			_now = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000)- _now;
+        		dprintf("[sdtThread] dmxSDT.getSection returned after %f\n", _now / 1000.);
+
 
 			if (buf == NULL)
 				continue;
@@ -3247,6 +3288,8 @@ static void *sdtThread(void *)
 			if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))
 			{
 				// Wir wollen nur aktuelle sections
+				dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
+
 				SIsectionSDT sdt(SIsection(sizeof(header) + header.section_length - 5, buf));
 				lockServices();
 
@@ -3255,8 +3298,11 @@ static void *sdtThread(void *)
 
 				unlockServices();
 
+				dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
+
 
 				lockMessaging();
+
 
 				//SI_section_SDT_header* _header = (SI_section_SDT_header*) &header;
 				int msg_index = ( header.table_id == 0x42) ? 0 : 1;
@@ -3272,38 +3318,56 @@ static void *sdtThread(void *)
 					if ( messaging_sdt_sections_max_ID[msg_index] == -1 )
 					{
 						messaging_sdt_sections_max_ID[msg_index] = _id;
+						dprintf("[sdtThread] first msg_index 0x%llx\n", _id);
 					}
 					else
 					{
-						if ( !messaging_sdt_sections_got_all[msg_index] )
-						{
-							for ( std::vector<long long>::iterator i = messaging_sdt_skipped_sections_ID[msg_index].begin();
-							        i != messaging_sdt_skipped_sections_ID[msg_index].end(); ++i )
-								if ( *i == _id)
-								{
-									messaging_sdt_skipped_sections_ID[msg_index].erase(i);
-									break;
-								}
-
-							if ( ( messaging_sdt_sections_max_ID[msg_index] == _id ) &&
-							        ( messaging_sdt_skipped_sections_ID[msg_index].size() == 0 ) )
+						for ( std::vector<long long>::iterator i = messaging_sdt_skipped_sections_ID[msg_index].begin();
+						        i != messaging_sdt_skipped_sections_ID[msg_index].end(); ++i )
+							if ( *i == _id)
 							{
-								// alle pakete für den ServiceKey da!
-								dprintf("[sdtThread] got all packages for table_id 0x%x (%d)\n", header.table_id, msg_index);
-								messaging_sdt_sections_got_all[msg_index] = true;
+								messaging_sdt_skipped_sections_ID[msg_index].erase(i);
+								break;
 							}
+						dprintf("[sdtThread] now msg_index 0x%llx / skipsize %d\n", _id, messaging_sdt_skipped_sections_ID[msg_index].size());
+
+						if ( ( messaging_sdt_sections_max_ID[msg_index] == _id ) &&
+						        ( messaging_sdt_skipped_sections_ID[msg_index].size() == 0 ) )
+						{
+							// alle pakete für den ServiceKey da!
+							dprintf("[sdtThread] got all packages for table_id 0x%x (%d)\n", header.table_id, msg_index);
+							messaging_sdt_sections_got_all[msg_index] = true;
 						}
 					}
 
 					// überprüfen, ob nächster Filter gewünscht :)
 					if ( messaging_sdt_sections_got_all[dmxSDT.filter_index] )
 					{
+						if ( ( messaging_WaitForServiceDesc ) && ( dmxSDT.filter_index == 0 ) )
+						{
+					        	// restart EIT!
+					        	for ( int i = 0x4e; i <= 0x6f; i++)
+							{
+								messaging_skipped_sections_ID[i - 0x4e].clear();
+								messaging_sections_max_ID[i - 0x4e] = -1;
+								messaging_sections_got_all[i - 0x4e] = false;
+							}
+
+							messaging_wants_current_next_Event = true;
+							dmxEIT.change( 0 );
+
+							messaging_WaitForServiceDesc = false;
+						}
 						if ( dmxSDT.filter_index + 1 < (signed) dmxSDT.filters.size() )
 						{
 							dmxSDT.change(dmxSDT.filter_index + 1);
+							dputs("[sdtThread] change!")
 						}
 						else
+						{
 							sendToSleepNow = true;
+							dputs("[sdtThread] sendtosleep!")
+						}
 					}
 				}
 
@@ -3414,12 +3478,12 @@ __attribute__ ((packed)) ; // 8 bytes
 
 /*
 // BR schickt falschen Time-Offset, daher per TZ und Rest hier auskommentiert
- 
+
 struct descr_gen_struct {
   unsigned char descriptor_tag : 8;
   unsigned char descriptor_length : 8;
 } __attribute__ ((packed)) ;
- 
+
 struct local_time_offset {
   char country_code1 : 8;
   char country_code2 : 8;
@@ -3431,10 +3495,10 @@ struct local_time_offset {
   unsigned long long time_of_chng : 40;
   unsigned short next_time_offset : 8;
 } __attribute__ ((packed)) ;
- 
+
 static int timeOffsetMinutes=0; // minutes
 static int timeOffsetFound=0;
- 
+
 static void parseLocalTimeOffsetDescriptor(const char *buf, const char *countryCode)
 {
   struct descr_gen_struct *desc=(struct descr_gen_struct *)buf;
@@ -3454,7 +3518,7 @@ static void parseLocalTimeOffsetDescriptor(const char *buf, const char *countryC
     buf+=sizeof(struct local_time_offset);
   }
 }
- 
+
 static void parseDescriptors(const char *des, unsigned len, const char *countryCode)
 {
   struct descr_gen_struct *desc;
@@ -3470,7 +3534,7 @@ static void parseDescriptors(const char *des, unsigned len, const char *countryC
     des+=desc->descriptor_length+2;
   }
 }
- 
+
 */
 static void *timeThread(void *)
 {
@@ -3748,6 +3812,7 @@ static void *eitThread(void *)
 
 							if ( !dont_change )
 							{
+								dprintf("Change Filterindex: %d (ges. %d)\n", dmxEIT.filter_index, (signed) dmxEIT.filters.size() );
 								if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 								{
 									dmxEIT.change(dmxEIT.filter_index + 1);
@@ -3756,7 +3821,10 @@ static void *eitThread(void *)
 									timeoutsDMX = 0;
 								}
 								else
+								{
 									sendToSleepNow = true;
+									dputs("sendToSleepNow = true")
+								}
 							}
 						}
 				}
@@ -3865,7 +3933,7 @@ static void *eitThread(void *)
 			}
 
 			buf = dmxEIT.getSection(timeoutInMSeconds, timeoutsDMX);
-			
+
 			if (buf == NULL)
 				continue;
 
@@ -3903,7 +3971,7 @@ static void *eitThread(void *)
 				{
 					// == 0 -> kein event
 
-					dputs("[eitThread] adding events (begin)");
+					dprintf("[eitThread] adding %d events [table 0x%x] (begin)\n", eit.events().size(), header.table_id);
 
 					zeit = time(NULL);
 					// Nicht alle Events speichern
@@ -3944,7 +4012,7 @@ static void *eitThread(void *)
 
 					} // for
 
-					dputs("[eitThread] adding events (end)");
+					//dprintf("[eitThread] added %d events (end)\n",  eit.events().size());
 
 				} // if
 
@@ -3997,7 +4065,7 @@ static void *eitThread(void *)
 						// überprüfen, ob nächster Filter gewünscht :)
 						int	change_filter = 0;
 
-						for ( int i = (dmxEIT.filters[dmxEIT.filter_index].filter & dmxEIT.filters[dmxEIT.filter_index].mask); i <= dmxEIT.filters[dmxEIT.filter_index].filter; i++)
+						for ( int i = (dmxEIT.filters[dmxEIT.filter_index].filter & dmxEIT.filters[dmxEIT.filter_index].mask); i <= ( dmxEIT.filters[dmxEIT.filter_index].filter | ( !dmxEIT.filters[dmxEIT.filter_index].mask ) ); i++)
 						{
 							if ( messaging_sections_got_all[i - 0x4e] )
 								change_filter++;
@@ -4180,7 +4248,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.140 2002/11/03 22:26:54 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.141 2002/11/05 06:50:19 field Exp $\n");
 
 	try
 	{
@@ -4277,14 +4345,14 @@ int main(int argc, char **argv)
 		eventServer = new CEventServer;
 		/*
 				timerdClient = new CTimerdClient;
-		 
+
 				printf("[sectionsd ] checking timerd\n");
 				timerd = timerdClient->isTimerdAvailable();
 				if (timerd)
 					printf("[sectionsd ] timerd available\n");
 				else
 					printf("[sectionsd ] timerd NOT available\n");
-		*/ 
+		*/
 		// SDT-Thread starten
 		rc = pthread_create(&threadSDT, 0, sdtThread, 0);
 
@@ -4356,7 +4424,7 @@ int main(int argc, char **argv)
 							fprintf(stderr, "[sectionsd] failed to create connection-thread (rc=%d)\n", rc);
 							return 4;
 						}
-			*/ 
+			*/
 			// VERSUCH OHNE CONNECTION-THREAD!
 			// spart die thread-creation-zeit, und die Locks lassen ohnehin nur ein cmd gleichzeitig zu
 			connectionThread(client);
