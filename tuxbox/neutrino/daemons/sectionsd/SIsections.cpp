@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.4 2001/05/20 14:40:15 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.5 2001/05/21 22:44:44 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.5  2001/05/21 22:44:44  fnbrd
+// Timeout verbessert.
+//
 // Revision 1.4  2001/05/20 14:40:15  fnbrd
 // Mit parental_rating
 //
@@ -286,23 +289,35 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
     return 1;
   }
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
+    close(fd);
     perror ("DMX_SET_FILTER");
     return 2;
   }
+
+  time_t szeit=time(NULL);
+
+  printf("reading first\n");
   // Erstes Segment lesen
   do {
+    if(time(NULL)>szeit+(long)timeoutInSeconds) {
+      close(fd);
+      return 0; // timeout -> kein EPG
+    }
     if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
+      close(fd);
       perror ("read header");
       return 3;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
+      close(fd);
       printf("Not enough memory!\n");
       return 4;
     }
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
     if(readNbytes(fd, buf+sizeof(header), header.section_length-5)<0) {
+      close(fd);
       perror ("read section");
       return 5;
     }
@@ -314,12 +329,14 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
   } while (firstKey==(unsigned long long) -1);
   // Die restlichen Segmente lesen
 
-//  time_t szeit=time(NULL);
+  szeit=time(NULL);
+  printf("reading next\n");
 
   for(;;) {
-//    if(time(NULL)>szeit+timeoutInSeconds)
-//      break;
+    if(time(NULL)>szeit+(long)timeoutInSeconds)
+      break; // timeout
     if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
+      close(fd);
       perror ("read header");
       return 6;
     }
@@ -328,6 +345,7 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
       break;
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
+      close(fd);
       printf("Not enough memory!\n");
       return 7;
     }
@@ -335,6 +353,8 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
     memcpy(buf, &header, sizeof(header));
     // den Rest der Section einlesen
     if(readNbytes(fd, buf+sizeof(header), header.section_length-5)<0) {
+      close(fd);
+      delete[] buf;
       perror ("read section");
       return 8;
     }
@@ -397,25 +417,29 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
 #endif // DEBUG
 
   time_t starttime=time(NULL);
+  printf("reading missing\n");
 
   if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
     perror ("/dev/ost/demux0");
     return 9;
   }
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
+    close(fd);
     perror ("DMX_SET_FILTER");
     return 10;
   }
   // Jetzt lesen wir die fehlenden Sections ein
   for(;;) {
     if(time(NULL)>(long)(starttime+timeoutInSeconds))
-      break;
+      break; // Timeout
     if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
+      close(fd);
       perror ("read header");
       return 11;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
+      close(fd);
       printf("Not enough memory!\n");
       return 12;
     }
@@ -423,6 +447,8 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
     memcpy(buf, &header, sizeof(header));
     // den Rest der Section einlesen
     if(readNbytes(fd, buf+sizeof(header), header.section_length-5)<0) {
+      close(fd);
+      delete[] buf;
       perror ("read section");
       return 13;
     }
