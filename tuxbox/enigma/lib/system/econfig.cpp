@@ -65,7 +65,7 @@ eConfig::eConfig()
 	}
 	else   if ((configdir = opendir(CONFIGDIR "/enigma")) == 0)
 		  {
-			if(mkdir(CONFIGDIR "/enigma", S_IRWXU) == -1)
+			if(mkdir(CONFIGDIR "/enigma", 0777) == -1)
     			{
 			eFatal("error while opening configdir or creating - " CONFIGDIR "/enigma");
 			}
