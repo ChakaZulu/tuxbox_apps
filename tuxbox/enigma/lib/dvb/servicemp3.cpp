@@ -149,6 +149,12 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 {
 	state=stateInit;
 
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&lock, &attr);
+	pthread_mutexattr_destroy(&attr);
+
 	http=0;
 	seekbusy=0;
 
@@ -275,12 +281,6 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 
 	maxOutputBufferSize=256*1024;
 	minOutputBufferSize=8*1024;
-
-	pthread_mutexattr_t attr;
-	pthread_mutexattr_init(&attr);
-	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&lock, &attr);
-	pthread_mutexattr_destroy(&attr);
 
 	run();
 }
