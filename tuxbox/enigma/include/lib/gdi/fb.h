@@ -22,6 +22,7 @@ public:
 	unsigned int Stride() { return stride; }
 	fb_cmap *CMAP() { return &cmap; }
 	struct fb_var_screeninfo *getScreenInfo() { return &screeninfo; }
+	void paletteSet(struct fb_cmap *map = NULL);
 
 	fbClass(const char *fb="/dev/fb/0");
 	~fbClass();

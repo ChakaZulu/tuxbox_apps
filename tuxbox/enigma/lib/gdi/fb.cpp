@@ -190,3 +190,15 @@ void fbClass::unlock()
 	SetMode(xRes, yRes, bpp);
 	PutCMAP();
 }
+
+void fbClass::paletteSet(struct fb_cmap *map)
+{
+	if (locked)
+		return;
+
+	if (map == NULL)
+		map = &cmap;
+
+	ioctl(fd, FBIOPUTCMAP, map);
+}
+

@@ -139,7 +139,7 @@ void get8map(int fh, struct fb_cmap *map)
 void set332map()
 {
     make332map(&map332);
-//    CFrameBuffer::getInstance()->paletteSet(&map332);
+    fbClass::getInstance()->paletteSet(&map332);
 }
 
 void blit2FB(void *fbbuff,
