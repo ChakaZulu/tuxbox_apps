@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
  
  if((fd=popen("gunzip -c sw1.txt.gz","r")) == NULL) {
   fprintf(stderr,"pipe-error executing gunzip -c sw1.txt.gz\n");
-  exit(1);
+  return 1;
  }
 
  while(fgets(buffer,255,fd) != NULL) {
