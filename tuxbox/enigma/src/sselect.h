@@ -30,13 +30,12 @@ public:
 	}
 
 protected:
-	void redraw(gPainter *rc, const eRect &rect, gColor, gColor, gColor, gColor, bool highlighted);
+	void redraw(gPainter *rc, const eRect &rect, gColor, gColor, gColor, gColor, int hilited);
 };
 
 class eServiceSelector: public eWindow
 {
-	int lastTvBouquet, lastRadioBouquet, inFullServiceList;
-	bool selectioChanged;
+	int lastTvBouquet, lastRadioBouquet;
 
 	eServiceReference selected;
 	eServiceReference *result;
@@ -60,12 +59,12 @@ public:
 		dirUp,
 		dirDown
 	};
-	void actualize(int currentService, int dum=0);
+	void actualize();
 	void selectCurrentService();
 	void resetBouquet();
-	eServiceSelector(int currentService);
+	eServiceSelector();
 	~eServiceSelector();
-	void useBouquet(eBouquet *bouquet);
+	void useBouquet(const eBouquet *bouquet);
 	const eServiceReference *choose(int irc=-1);
 	const eServiceReference *next();
 	const eServiceReference *prev();

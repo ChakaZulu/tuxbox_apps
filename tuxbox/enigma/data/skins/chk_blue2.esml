@@ -19,6 +19,8 @@
 		<map name="eListBox.EntryText.normal" font="Blue.Regular" size="30" />
 		<map name="eServiceSelector.Entry.Name" font="Blue.Regular" size="32" />
 		<map name="eBouquetSelector.Entry.Name" font="Blue.Regular" size="32" />
+		<map name="eEPGSelector.Entry.Description" font="Blue.Regular" size="30" />
+		<map name="eEPGSelector.Entry.DateTime" font="Blue.Bold" size="24" />
 
 		<map name="eventview.description" font="Blue.Regular" size="32" />
 		<map name="eventview.date" font="Blue.Regular" size="30" />
@@ -76,7 +78,7 @@
 		<map name="eProgress.left" color="light" />
 		<map name="eProgress.right" color="middle" />
 		
-		<map name="eServiceSelector.highlight.background" color="dark" />
+		<map name="eServiceSelector.highlight.background" color="dark" />   <!-- used for all Selectors ... EPG, Service, Bouquet-->
 		<map name="eServiceSelector.highlight.foreground" color="dark+15" />
 	</colorscheme>
 	

@@ -350,7 +350,7 @@ public:
 	 *
 	 * \return If the widget and all parents are visible, \c true is returned, else false.
 	 */
-	int isVisible() { return (state&stateVisible) && ((!parent) || parent->isVisible()); }
+	int isVisible()	{		return (state&stateVisible) && ( (!parent) || parent->isVisible() );	}
 	
 	/**
 	 * \brief Possible focus directions.

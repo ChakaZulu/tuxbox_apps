@@ -73,7 +73,7 @@ bool eZap::setMode(int m)
 		else
 				channel = lastRadioChannel;
 
-	serviceSelector->actualize(channel);
+	serviceSelector->actualize();
 
 	if ( eDVB::getInstance()->settings->getTransponders() )
 	{
@@ -189,7 +189,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
     	eDVB::getInstance()->getServiceAPI()->switchService(*currentService);
 	}
 
-	serviceSelector = new eServiceSelector(mode?lastRadioChannel:lastTvChannel);
+	serviceSelector = new eServiceSelector();
 	eDebug("<-- service selector");
 
 	serviceSelector->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);

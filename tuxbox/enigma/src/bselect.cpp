@@ -7,8 +7,9 @@
 #include <core/dvb/edvb.h>
 #include <core/dvb/dvb.h>
 
-void eBouquetSelector::fillBouquetList()
+int eBouquetSelector::fillBouquetList()
 {
+	int cnt=0;
 	bouquets->clearList();
 	if (eDVB::getInstance()->settings->getBouquets())
 	{
@@ -30,10 +31,17 @@ void eBouquetSelector::fillBouquetList()
 				continue;
 
 			new eListBoxEntryBouquet(bouquets, *i);
+			cnt++;
 		}
+		// fake Entry for all services
+		if (cnt)
+			allServices = new eListBoxEntryBouquet(bouquets, new eBouquet(0, 9999, allServicesName) );
+
 		bouquets->sort();
 	}
 	bouquets->invalidate();
+
+	return cnt;
 }
 
 void eBouquetSelector::entrySelected(eListBoxEntryBouquet *entry)
@@ -42,7 +50,6 @@ void eBouquetSelector::entrySelected(eListBoxEntryBouquet *entry)
 		result=entry->bouquet;
 	else
 	{	
-		eDebug("CANCEL");
 		/* emit */ cancel();
 		result=0;
 	}
@@ -50,9 +57,8 @@ void eBouquetSelector::entrySelected(eListBoxEntryBouquet *entry)
 }
 
 eBouquetSelector::eBouquetSelector()
-	:eWindow(0)
+	:eWindow(0), allServicesName("* All Services *"), bouquets(new eListBox<eListBoxEntryBouquet>(this))
 {
-	bouquets = new eListBox<eListBoxEntryBouquet>(this);
 	bouquets->setName("bouquets");
 	bouquets->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 
@@ -60,24 +66,26 @@ eBouquetSelector::eBouquetSelector()
 		eWarning("Bouquet selector widget build failed!");
 	
 	CONNECT(bouquets->selected, eBouquetSelector::entrySelected);
-
-//	fillBouquetList();
 }
 
 
 eBouquetSelector::~eBouquetSelector()
 {
+	// remove fake Bouquet (all Services)
+	if (allServices)
+		delete allServices;
 }
 
 eBouquet *eBouquetSelector::choose(int irc)
 {
 	result=0;
 	show();
+/*
 	if (irc!=-1)
 	{
 		keyDown(irc);
 		keyUp(irc);
-	}
+	}*/
 	if (!exec())
 		result=0;
 	hide();

@@ -28,6 +28,9 @@
 
 		<map name="eBouquetSelector.Entry.Name" font="Nimbus" size="24" />
 
+		<map name="eEPGSelector.Entry.Description" font="Nimbus" size="24" />
+		<map name="eEPGSelector.Entry.DateTime" font="Nimbus" size="20" />
+
 		<map name="lcd.main.service_name" font="Nimbus" size="16" />
 		<map name="lcd.main.clock" font="Nimbus" size="14" />
 
@@ -224,7 +227,7 @@
 	</object>
 	
 	<object name="eServiceSelector">
-		<eServiceSelector cposition="100:90" csize="500:450" text="Services">
+		<eServiceSelector cposition="70:90" csize="600:450" text="Services">
 			<eListbox name="services" position="0:0" size="e:e" />
 		</eServiceSelector>
 	</object>
@@ -232,6 +235,12 @@
 	<object name="eBouquetSelector">
 		<eBouquetSelector cposition="100:90" csize="500:450" text="Bouquets">
 			<eListbox name="bouquets" position="0:0" size="e:e" />
+		</eBouquetSelector>
+	</object>
+
+	<object name="eEPGSelector">
+		<eBouquetSelector cposition="70:100" csize="600:420" text="EPG">
+			<eListbox name="events" position="0:0" size="e:e" />
 		</eBouquetSelector>
 	</object>
 

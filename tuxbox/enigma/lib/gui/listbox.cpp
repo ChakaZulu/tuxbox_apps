@@ -11,15 +11,15 @@ eListBoxEntryText::~eListBoxEntryText()
 	}
 }
 
-void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited)
+void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state)
 {
 	static eString oldtext;
 
-	if ((coNormalB != -1 && !highlited) || (highlited && coActiveB != -1))
+	if ((coNormalB != -1 && !state) || (state && coActiveB != -1))
 	{
-		rc->setForegroundColor(highlited?coActiveB:coNormalB);
+		rc->setForegroundColor(state?coActiveB:coNormalB);
 		rc->fill(rect);
-		rc->setBackgroundColor(highlited?coActiveB:coNormalB);
+		rc->setBackgroundColor(state?coActiveB:coNormalB);
 	} else
 	{
 		eWidget *w=listbox->getNonTransparentBackground();
@@ -27,7 +27,7 @@ void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB
 		rc->fill(rect);
 		rc->setBackgroundColor(w->getBackgroundColor());
 	}
-	rc->setForegroundColor(highlited?coActiveF:coNormalF);
+	rc->setForegroundColor(state?coActiveF:coNormalF);
 
 	if (text != oldtext || !para)
 	{
@@ -48,19 +48,19 @@ void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB
 	rc->renderPara(*para);
 
 	eWidget* p = listbox->getParent();			
-	if (highlited && p && p->LCDElement)
+	if (state && p && p->LCDElement)
 		p->LCDElement->setText(text);
 }
 
-void eListBoxEntryTextStream::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited)
+void eListBoxEntryTextStream::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state)
 {
 	rc->setFont( font );
 
-	if ((coNormalB != -1 && !highlited) || (highlited && coActiveB != -1))
+	if ((coNormalB != -1 && !state) || (state && coActiveB != -1))
 	{
-		rc->setForegroundColor(highlited?coActiveB:coNormalB);
+		rc->setForegroundColor(state?coActiveB:coNormalB);
 		rc->fill(rect);
-		rc->setBackgroundColor(highlited?coActiveB:coNormalB);
+		rc->setBackgroundColor(state?coActiveB:coNormalB);
 	} else
 	{
 		eWidget *w=listbox->getNonTransparentBackground();
@@ -69,11 +69,11 @@ void eListBoxEntryTextStream::redraw(gPainter *rc, const eRect& rect, gColor coA
 		rc->setBackgroundColor(w->getBackgroundColor());
 	}
 
-	rc->setForegroundColor(highlited?coActiveF:coNormalF);
+	rc->setForegroundColor(state?coActiveF:coNormalF);
 	rc->renderText(rect, text.str());
 
 	eWidget* p = listbox->getParent();			
-	if (highlited && p && p->LCDElement)
+	if (state && p && p->LCDElement)
 		p->LCDElement->setText(text.str());
 }
 

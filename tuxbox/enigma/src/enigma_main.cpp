@@ -978,7 +978,7 @@ void eZapMain::showEPGList()
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
-		eEPGWindow wnd(sapi->service);
+		eEPGSelector wnd(sapi->service);
 		wnd.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		if (isVisible())
 		{

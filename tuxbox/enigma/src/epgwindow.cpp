@@ -9,10 +9,57 @@
 #include <core/gui/eskin.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/dvbservice.h>
+#include <core/gdi/font.h>
+
+gFont eListBoxEntryEPG::TimeFont;
+gFont eListBoxEntryEPG::DescrFont;
+int eListBoxEntryEPG::TimeYOffs(-1);
+int eListBoxEntryEPG::TimeFontHeight(-1);
+
+eListBoxEntryEPG::~eListBoxEntryEPG()
+{
+	if (paraTime)
+	{
+		paraTime->destroy();
+		paraTime = 0;
+	}
+	if (paraDescr)
+	{
+		paraDescr->destroy();
+		paraDescr = 0;
+	}
+
+}
 
 eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox)
-		:eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox), event(evt)	
+		:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), paraTime(0), paraDescr(0), event(evt)	
 {	
+		if (!DescrFont.pointSize && !TimeFont.pointSize)
+		{
+			DescrFont = eSkin::getActive()->queryFont("eEPGSelector.Entry.Description");
+			TimeFont = eSkin::getActive()->queryFont("eEPGSelector.Entry.DateTime");
+		}
+
+		if ( TimeYOffs == -1 && TimeFontHeight == -1)
+		{
+			eRect rect(0,0,400,50);
+			eTextPara* tmp = new eTextPara(rect);
+			tmp->setFont( TimeFont );
+			tmp->renderString("0123456789");			
+			eSize s1 = tmp->getExtend();
+			tmp->destroy();
+
+			tmp = new eTextPara(rect);
+			tmp->setFont( DescrFont );
+			tmp->renderString("ABCefg");
+			eSize s2 = tmp->getExtend();
+			tmp->destroy();
+
+			TimeFontHeight = s1.height();
+			TimeYOffs = (s2.height() - TimeFontHeight) / 2;
+		}
+
+
 		for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 		{
 			Descriptor *descriptor=*d;
@@ -20,17 +67,58 @@ eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBo
 			{
 				tm* t = localtime(&event.start_time);
  		
-				text 	<< std::setw(2) << t->tm_mday << '.' << t->tm_mon+1 << ", "
-							<< std::setw(2) << std::setfill('0') << t->tm_hour << ':' << std::setw(2) << t->tm_min << "  "
- 							<< ((ShortEventDescriptor*)descriptor)->event_name;
+				time 	<< std::setw(2) << t->tm_mday << '.' << t->tm_mon+1 << ", "
+							<< std::setw(2) << std::setfill('0') << t->tm_hour << ':' << std::setw(2) << t->tm_min;
+				
+				descr = ((ShortEventDescriptor*)descriptor)->event_name;
 
 				return;
 			}
 		}
-		text << "no_name";
+		time << "no event data avail";
+
 }
 
-void eEPGWindow::fillEPGList()
+void eListBoxEntryEPG::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
+{
+	if ((coNormalB != -1 && !hilited) || (hilited && coActiveB != -1))
+	{
+		rc->setForegroundColor(hilited?coActiveB:coNormalB);
+		rc->fill(rect);
+		rc->setBackgroundColor(hilited?coActiveB:coNormalB);
+	} else
+	{
+		eWidget *w=listbox->getNonTransparentBackground();
+		rc->setForegroundColor(w->getBackgroundColor());
+		rc->fill(rect);
+		rc->setBackgroundColor(w->getBackgroundColor());
+	}
+	rc->setForegroundColor(hilited?coActiveF:coNormalF);
+
+	if (!paraTime && !paraDescr)
+	{
+		eRect r(rect);
+		r.setTop( r.top() + TimeYOffs );
+		paraTime = new eTextPara(r);
+		paraTime->setFont( TimeFont );
+		paraTime->renderString(time.str());
+		
+		int DescrXOffs = paraTime->getExtend().width() - rect.left();
+		r = rect;
+		r.setLeft( r.left() + DescrXOffs + TimeFontHeight );
+		paraDescr = new eTextPara(r);
+		paraDescr->setFont( DescrFont );
+		paraDescr->renderString(descr);
+	}
+	rc->renderPara(*paraTime);
+	rc->renderPara(*paraDescr);
+
+	eWidget* p = listbox->getParent();			
+	if (hilited && p && p->LCDElement)
+		p->LCDElement->setText(time.str()+" "+descr);
+}
+
+void eEPGSelector::fillEPGList()
 {
   eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
   if (service)
@@ -39,14 +127,14 @@ void eEPGWindow::fillEPGList()
 	const eventMap* evt = eEPGCache::getInstance()->getEventMap(current);
 	eventMap::const_iterator It;
 	for (It = evt->begin(); It != evt->end(); It++)
-		new eListBoxEntryEPG(*It->second, &list);
+		new eListBoxEntryEPG(*It->second, events);
 }
 
-void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
+void eEPGSelector::entrySelected(eListBoxEntryEPG *entry)
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 
-	if (!entry || !sapi) 
+	if (!entry || !sapi)
 		close(0);
 	else
 	{	
@@ -64,9 +152,9 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 			eListBoxEntryEPG* tmp;
 
 			if (ret == 1)
-				tmp=list.goPrev();
+				tmp=events->goPrev();
 			else if (ret == 2)
-				tmp=list.goNext();
+				tmp=events->goNext();
 			else
 				break; // close EventDisplay
 
@@ -80,12 +168,16 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 	}
 }
 
-eEPGWindow::eEPGWindow(const eServiceReference &service)
-	:eListBoxWindow<eListBoxEntryEPG>("Select Service...", 16, 600), current(service)
+eEPGSelector::eEPGSelector(const eServiceReference &service)
+	:eWindow(0), current(service)
 {
-	move(ePoint(50, 50));
-	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"),
-			eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
-	CONNECT(list.selected, eEPGWindow::entrySelected);
+	events = new eListBox<eListBoxEntryEPG>(this);
+	events->setName("events");
+	events->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
+
+	if (eSkin::getActive()->build(this, "eEPGSelector"))
+		eWarning("EPG selector widget build failed!");
+
+	CONNECT(events->selected, eEPGSelector::entrySelected);
 	fillEPGList();
 }

@@ -327,11 +327,11 @@ int tsAutomatic::loadNetworks()
 		} else
 			eFatal("unknown packet %s", node->GetType());
 
-	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
-		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-			for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
-				if (i->possibleTransponders.front().satellite.orbital_position == s->getOrbitalPosition())
-					new eListBoxEntryText(l_network, i->name, (void*)&*i, eTextPara::dirCenter);
+		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+			for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
+				for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
+					if ( ( i->possibleTransponders.front().satellite.orbital_position == s->getOrbitalPosition() ) || (fetype == eFrontend::feCable) )
+						new eListBoxEntryText(l_network, i->name, (void*)&*i, eTextPara::dirCenter);
 
 	return 0;
 }

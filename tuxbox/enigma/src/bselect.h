@@ -22,12 +22,15 @@ public:
 class eBouquetSelector: public eWindow
 {
 	eBouquet *result;
+	eListBoxEntryBouquet* allServices;
+	eString allServicesName;
 private:
 	void entrySelected(eListBoxEntryBouquet *entry);
 	eListBox<eListBoxEntryBouquet> *bouquets;
 public:
+	const eBouquet *getAllServicesBouquet()	{	return allServices->bouquet; }
 	Signal0<void> cancel;
-	void fillBouquetList();
+	int fillBouquetList();
 	eBouquetSelector();
 	~eBouquetSelector();
 	bool moveTo(int bouquet_id);

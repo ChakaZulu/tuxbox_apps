@@ -22,15 +22,15 @@ public:
 	}
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited) const
+	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited) const
 	{
 		rc->setFont(listbox->getFont());
 
-		if ((coNormalB != -1 && !highlited) || (highlited && coActiveB != -1))
+		if ((coNormalB != -1 && !hilited) || (hilited && coActiveB != -1))
 		{
-			rc->setForegroundColor(highlited?coActiveB:coNormalB);
+			rc->setForegroundColor(hilited?coActiveB:coNormalB);
 			rc->fill(rect);
-			rc->setBackgroundColor(highlited?coActiveB:coNormalB);
+			rc->setBackgroundColor(hilited?coActiveB:coNormalB);
 		} else
 		{
 			eWidget *w=listbox->getNonTransparentBackground();
@@ -39,14 +39,14 @@ protected:
 			rc->setBackgroundColor(w->getBackgroundColor());
 		}
 
-		rc->setForegroundColor(highlited?coActiveF:coNormalF);
+		rc->setForegroundColor(hilited?coActiveF:coNormalF);
 
 		eString txt(isback?_("[back]"):name + " - " + desc);
 
 		rc->renderText(rect, txt);
 		
 		eWidget* p = listbox->getParent();			
-		if (highlited && p && p->LCDElement)
+		if (hilited && p && p->LCDElement)
 			p->LCDElement->setText(txt);
 	}
 };

@@ -81,7 +81,7 @@ eListBoxEntryService::~eListBoxEntryService()
 {
 }
 
-void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool hilited)
+void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
 	const eService *pservice=eDVB::getInstance()->settings->getTransponders()->searchService(service);
 	eString sname;
@@ -165,17 +165,10 @@ struct eServiceSelector_addService: public std::unary_function<eServiceReference
 
 void eServiceSelector::fillServiceList()
 {
-	inFullServiceList=1;
-
-	setText("full services");
-
 	services->clearList();
 
 	if (eDVB::getInstance()->settings->getTransponders())
 		eDVB::getInstance()->settings->getTransponders()->forEachServiceReference(eServiceSelector_addService(*services, eZap::getInstance()->getMode() ));
-
-	services->sort();
-	services->invalidate();
 }
 
 struct moveFirstChar: public std::unary_function<const eListBoxEntryService&, void>
@@ -271,7 +264,6 @@ void eServiceSelector::entrySelected(eListBoxEntryService *entry)
 {
 	if (!entry)
 	{
-    inFullServiceList=0;
 		result=0;
 		hide();			// a little tricky..
 		resetBouquet();
@@ -279,16 +271,7 @@ void eServiceSelector::entrySelected(eListBoxEntryService *entry)
 	}
 	else if (entry->service)
 	{
-		if (inFullServiceList)
-		{
-			if (eZap::getInstance()->getMode() == eZap::TV)
-				lastTvBouquet = 9999;
-			else
-				lastRadioBouquet = 9999;
-
-      inFullServiceList=0;
-		}
-		else if (eZap::getInstance()->getMode() == eZap::TV)
+		if (eZap::getInstance()->getMode() == eZap::TV)
 			lastTvBouquet = pbs->current()->bouquet_id;
 		else
 			lastRadioBouquet = pbs->current()->bouquet_id;
@@ -354,7 +337,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				const eventMap* e = eEPGCache::getInstance()->getEventMap(selected);
 				if (e && !e->empty())
 				{
-					eEPGWindow wnd(selected);
+					eEPGSelector wnd(selected);
 
 					if (LCDElement && LCDTitle)
 						wnd.setLCD(LCDTitle, LCDElement);
@@ -367,7 +350,11 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				}
 			}
 			else if (event.action == &i_serviceSelectorActions->showAllServices)
-				fillServiceList();
+			{
+				useBouquet( pbs->getAllServicesBouquet() );
+				services->sort();
+				services->invalidate();
+			}
 			else
 				break;
 		return 1;
@@ -379,30 +366,21 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 	return eWindow::eventHandler(event);
 }
 
-void eServiceSelector::actualize(int currentService, int dum)
+void eServiceSelector::actualize()
 {
-	if (pbs->current() || dum)
-	{
-		pbs->fillBouquetList();
-		if (eZap::getInstance()->getMode() == eZap::TV)
-		{
-		 	if (currentService && lastTvBouquet != 9999 && pbs->moveTo(lastTvBouquet))
-				useBouquet( pbs->current() );
+		if (pbs->fillBouquetList())  // Bouquets added ?
+			if (eZap::getInstance()->getMode() == eZap::TV)
+			{
+			 	if ( pbs->moveTo(lastTvBouquet) )
+					useBouquet( pbs->current() );
+			}
 			else
-				fillServiceList();
-		}
-		else
-		{
-		 	if (currentService && lastRadioBouquet != 9999 && pbs->moveTo(lastRadioBouquet))
-				useBouquet( pbs->current() );			
-			else
-				fillServiceList();
-		}
-	}
+			 	if ( pbs->moveTo(lastRadioBouquet) )
+					useBouquet( pbs->current() );			
 }
 
-eServiceSelector::eServiceSelector(int currentService)
-								:eWindow(0), inFullServiceList(0), result(0), BrowseChar(0), BrowseTimer(eApp)
+eServiceSelector::eServiceSelector()
+								:eWindow(0), result(0), BrowseChar(0), BrowseTimer(eApp)
 {
 	services = new eListBox<eListBoxEntryService>(this);
 	services->setName("services");
@@ -416,19 +394,18 @@ eServiceSelector::eServiceSelector(int currentService)
 	if (eConfig::getInstance()->getKey("/ezap/ui/lastRadioBouquet", lastRadioBouquet))
 		lastRadioBouquet = 9999;
 
-	actualize(currentService, 1);
-
-	CONNECT_2_0(eDVB::getInstance()->bouquetListChanged, eServiceSelector::actualize, 0, 0);
+	CONNECT(eDVB::getInstance()->bouquetListChanged, eServiceSelector::actualize);
 	CONNECT(services->selected, eServiceSelector::entrySelected);
 	CONNECT(services->selchanged, eServiceSelector::selchanged);
-	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::fillServiceList);
+	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::actualize);
 	CONNECT(BrowseTimer.timeout, eServiceSelector::ResetBrowseChar);
 	CONNECT(pbs->cancel, eServiceSelector::resetBouquet);
 
 	if (eSkin::getActive()->build(this, "eServiceSelector"))
 		eWarning("Service selector widget build failed!");
 
-	services->init();
+	actualize();
+
 	addActionMap(&i_serviceSelectorActions->map);
 	addActionMap(&i_numberActions->map);
 }
@@ -437,9 +414,7 @@ void eServiceSelector::resetBouquet()
 {
 		int id = eZap::getInstance()->getMode()?lastRadioBouquet:lastTvBouquet;
 
-		if (id == 9999)
-			fillServiceList();
-		else if ( pbs->current() )
+		if ( pbs->current() )
 		{
 			pbs->moveTo( id );
 			useBouquet( pbs->current() );
@@ -481,30 +456,34 @@ void eServiceSelector::selectCurrentService()
 		services->forEachEntry( selectService( eDVB::getInstance()->getServiceAPI()->service ) );
 }
 
-void eServiceSelector::useBouquet(eBouquet *bouquet)
+void eServiceSelector::useBouquet(const eBouquet *bouquet)
 {
-  inFullServiceList=0;
 	services->clearList();
+
 	if (bouquet)
 	{
 		setText(bouquet->bouquet_name);
-
-		for (std::list<eServiceReference>::iterator i(bouquet->list.begin()); i != bouquet->list.end(); i++)
-		{
-			int addToList=0;
-
-			if (eZap::getInstance()->getMode() == eZap::TV)
+		
+		if (bouquet->bouquet_id != 9999) // all Services
+			for (std::list<eServiceReference>::const_iterator i( bouquet->list.begin() ); i != bouquet->list.end(); i++)
 			{
-				if (i->service_type == 1 || i->service_type == 4) // TV or Nvod
-					addToList++;
-			}
-			else
-				if (i->service_type == 2) //Radio
-					addToList++;
+				int addToList=0;
 
-			if (addToList)
-				new eListBoxEntryService(services, *i);
-		}
+				if (eZap::getInstance()->getMode() == eZap::TV)
+				{
+					if (i->service_type == 1 || i->service_type == 4) // TV or Nvod
+						addToList++;
+				}
+				else
+					if (i->service_type == 2) //Radio
+						addToList++;
+
+				if (addToList)
+					new eListBoxEntryService(services, *i);
+			}
+		else
+			fillServiceList();
+
 		if (bouquet->bouquet_id >= 0)
 			services->sort();
 	}
@@ -521,6 +500,9 @@ const eServiceReference *eServiceSelector::choose(int irc)
 	selectCurrentService();
 
 	result=0;
+
+	show();
+
 	switch (irc)
 	{
 	case dirUp:
@@ -532,9 +514,9 @@ const eServiceReference *eServiceSelector::choose(int irc)
 	default:
 		break;
 	}
-	show();
 	if (exec())
 		result=0;
+
 	hide();
 	return result;
 }

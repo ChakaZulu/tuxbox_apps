@@ -18,7 +18,7 @@ class eListBox: public eWidget
 	ePtrList<T> childs;
 	ePtrList_T_iterator top, bottom, current;
 
-	int entries, item_height, flags;
+	int MaxEntries, item_height, flags;
 	gPixmap *iArrowUpDown, *iArrowUp, *iArrowDown, *iArrowLeft, *iArrowRight;
 	gColor colorActiveB, colorActiveF;
 
@@ -131,7 +131,7 @@ public:
 	eSize getExtend();
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited);
+	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
 };
 
 class eListBoxEntryTextStream: public eListBoxEntry
@@ -153,7 +153,7 @@ public:
 	}
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited);
+	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
 };
 
 class eListBoxEntryMenu: public eListBoxEntryText
@@ -238,16 +238,14 @@ inline void eListBox<T>::setActiveColor(gColor back, gColor front)
 
 	if (current != childs.end())
 	{
-		ePtrList_T_iterator it(top);
-
-		for (int i = 0; i < entries; i++, it++)
+		int i = 0;
+		for (ePtrList_T_iterator it(top); it != bottom; i++, it++)
 		{
 			if (it == current)
 			{
 				invalidateEntry(i);
 				break;
-			} else if (it == childs.end())
-				break;
+			}
 		}
 	}
 }
@@ -300,16 +298,15 @@ inline eListBox<T>::~eListBox()
 template <class T>
 void eListBox<T>::eraseBackground(gPainter *target, const eRect &clip)
 {
-/*	if (((int)getBackgroundColor())!=-1)
-	{
-		target->clear();
-		target->flush();
-	}*/
 }
 
 template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
+	// letzter Parameter redraw
+	// 	0 not selected
+	//  1 selected with focus
+	//  2 selcted without focus
 	int i=0;
 
 	for (ePtrList_T_iterator entry(top); (entry != bottom) && (entry != childs.end()); ++entry)
@@ -317,19 +314,7 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 		eRect rect = getEntryRect(i);
 
 		if ( where.contains(rect) )
-		{
-/*			if (entries > 1 && iArrowUpDown && (entry == current) )
-			{
-				int pos = getEntryRect(i).right() - (iArrowUpDown->getSize().width()+10);
-				ePoint pixmap_pos( pos , getEntryRect(i).top()+1 );
-				rect.setRight(i-10);
-				entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), have_focus && (entry == current));
-				target->blit(*iArrowUpDown, pixmap_pos, eRect(), gPixmap::blitAlphaTest);
-			}
-			else*/
-				entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), have_focus && (entry == current));
-
-		}
+			entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), (entry == current)?(have_focus?1:2):0 );
 
 		i++;
 	}
@@ -345,9 +330,8 @@ inline void eListBox<T>::gotFocus()
 	if (childs.empty())
 		return;
 
-	ePtrList_T_iterator entry(top);
-	
-	for (int i=0; (i<entries) && (entry != childs.end()); i++, ++entry)
+	int i=0;	
+	for ( ePtrList_T_iterator entry(top); entry != bottom; i++, ++entry)
 		if (*entry == *current)
 			invalidateEntry(i);
 }
@@ -360,14 +344,14 @@ inline void eListBox<T>::lostFocus()
 	if (childs.empty())
 		return;
 
-	ePtrList_T_iterator entry(top);
-
+/*	
+	int i = 0;
 	if (isVisible())
 	{
-		for (int i=0; (i<entries) && (entry != childs.end()); i++, ++entry)
+		for (ePtrList_T_iterator entry(top); top != bottom; i++, ++entry)
 			if (*entry == *current)
 				invalidateEntry(i);
-	}
+	}*/
 
 	if (parent && parent->LCDElement)
 		parent->LCDElement->setText("");
@@ -376,11 +360,11 @@ inline void eListBox<T>::lostFocus()
 template <class T>
 inline void eListBox<T>::init()
 {
-	entries = size.height() / item_height;
+	MaxEntries = size.height() / item_height;
 
 	current = top = bottom = childs.begin();
 
-	for (int i=0; i < entries; i++, bottom++)
+	for (int i = 0; i < MaxEntries; i++, bottom++)
 	{
 		if (bottom == childs.end() )
 			break;	
@@ -403,7 +387,7 @@ inline int eListBox<T>::moveSelection(int dir)
 				current = bottom;		// --bottom always valid because !childs.empty()
 				--current;
 			} else
-				for (int i = 0; i < entries; i++)
+				for (int i = 0; i < MaxEntries; i++)
 				{
 					if (bottom == childs.end())
 						break;
@@ -417,7 +401,7 @@ inline int eListBox<T>::moveSelection(int dir)
 			if (top == childs.begin())
 				current = top;
 			else
-				for (int i = 0; i < entries; i++)
+				for (int i = 0; i < MaxEntries; i++)
 				{	
 					if (top == childs.begin())
 						break;
@@ -430,16 +414,16 @@ inline int eListBox<T>::moveSelection(int dir)
 		case dirUp:
 			if ( current == childs.begin() )				// wrap around?
 			{
-				top = current = --childs.end();					// select last
-				bottom = childs.end();
-				for (int i = 1; i < entries; i++, top--)
+				current = --childs.end();					// select last
+				top = bottom = childs.end();
+				for (int i = 0; i < MaxEntries; i++, top--)
 					if (top == childs.begin())
 						break;
 			}
 			else
 				if (current-- == top) // new top must set
 				{
-					for (int i = 0;i < entries; i++, top--, bottom--)
+					for (int i = 0;i < MaxEntries; i++, top--, bottom--)
 						if (top == childs.begin())
 							break;
 				}
@@ -449,46 +433,44 @@ inline int eListBox<T>::moveSelection(int dir)
 			if ( current == --childs.end() )				// wrap around?
 			{
 				top = current = bottom = childs.begin(); 	// goto first;
-				for (int i = 0; i < entries; i++, bottom++)
+				for (int i = 0; i < MaxEntries; i++, bottom++)
 					if ( bottom == childs.end() )
 						break;
 			}
 			else
-				if (++current == bottom)
+			{
+				if (++current == bottom)   // ++current ??
 				{
-					for (int i=0; i<entries; i++, top++, bottom++)
+					for (int i = 0; i<MaxEntries; i++, top++, bottom++)
 						if ( bottom == childs.end() )
 							break;
 				}
+			}
 			break;
 		case dirFirst:
 			top = current = bottom = childs.begin(); 	// goto first;
-			for (int i = 0; i < entries; i++, bottom++)
+			for (int i = 0; i < MaxEntries; i++, bottom++)
 				if ( bottom == childs.end() )
 					break;
 			break;
 		default:
 			return 0;
 	}
+	
+	if (*current != oldptr)  // current has changed
+		/*emit*/ selchanged(*current);
 
 	if (isVisible())
 	{
-		if (*current != oldptr)  // current has changed
-			/*emit*/ selchanged(*current);
-
 		if (oldtop != *top)
-		{
 			invalidate();
-		}
 		else if ( *current != oldptr)
 		{
 			int i=0;
 			int old=-1, cur=-1;
 			
-			for (ePtrList_T_iterator entry(top); i<entries; i++, ++entry)
-				if ( entry == childs.end())
-					break;
-				else if ( *entry == oldptr)
+			for (ePtrList_T_iterator entry(top); entry != bottom; i++, ++entry)
+				if ( *entry == oldptr)
 					old=i;
 				else if ( *entry == *current )
 					cur=i;
@@ -548,66 +530,65 @@ inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 template <class T>
 inline void eListBox<T>::setCurrent(const T *c)
 {
-	if (childs.empty())
-		return;
+	if (childs.empty() || *current == c)  // no entries or current is equal the entry to search
+		return;	// do nothing
 	
-	T *oldptr = *current;
+	ePtrList_T_iterator it(childs.begin());
 
-	ePtrList_T_iterator it = current;	
-
-	for (it = childs.begin(); it != childs.end() ; it++)
-		if ( *it == c )		// das suckt... hier werden Zeiger verglichen ! Hier wird nicht der Operator== von T benutzt !
+	for ( ; it != childs.end(); it++)
+		if ( *it == c )
 			break;
 
-	if ( it == childs.end() )
+	if ( it == childs.end() ) // entry not in listbox... do nothing
 		return;
+	
+	int newCurPos=-1;
+	int oldCurPos=-1;
+	ePtrList_T_iterator oldCur(current);
 
-	current = it;
-
-	if (current != childs.end() )
+	int i = 0;
+	for (it=top; it != bottom; it++, i++ )  // check if entry to set between bottom and top
 	{
-		ePtrList_T_iterator it(top);
-
-		int i = 0;
-		for (; i<entries; ++i, ++it)
-			if (it == current)
-				break;
-			else if (it == childs.end())
-				break;
-
-		if ((i == entries) || (it == childs.end()))
+		if ( *it == c)
 		{
-			top=bottom=current;
-			for (int i=0; i<entries; i++, bottom++)
-				if (bottom == childs.end() )
-					break;
-
-			if (isVisible())
-				invalidate();
-
-			return;
+			newCurPos=i;
+			current = it;
 		}
-
-		if (isVisible())
-		{
-			i=0;
-			int old=-1, cur=-1;
-			
-			for (ePtrList_T_iterator entry(top); i<entries; i++, ++entry)
-				if ( entry == childs.end())
-					break;
-				else if ( *entry == oldptr)
-					old=i;
-				else if ( *entry == *current )
-					cur=i;
-			
-				if ( old != -1 )
-					invalidateEntry(old);
-
-				if ( cur != -1 )
-					invalidateEntry(cur);
-		}
+		if ( *it == *oldCur)
+			oldCurPos=i;
 	}
+
+	if (newCurPos != -1) // the we start to search from begin
+	{
+		if (isVisible())
+		{			
+			invalidateEntry(newCurPos);
+			invalidateEntry(oldCurPos);
+		}
+	}	
+	else
+	{
+		bottom = childs.begin();
+		
+		while (newCurPos == -1)
+		{
+			if ( bottom != childs.end() )
+				top = bottom;		// nächster Durchlauf
+
+			for (	i = 0; i < MaxEntries && bottom != childs.end(); bottom++, i++)
+			{
+				if ( *bottom == c )		// das suckt... hier werden Zeiger verglichen ! Hier wird nicht der Operator== von T benutzt !
+				{
+					current = bottom;  // we have found
+					newCurPos++;
+				}
+      }
+		}
+		if (isVisible())
+			invalidate();   // Draw all
+  }
+
+	return;
 }
 
 template <class T>
