@@ -68,14 +68,27 @@ using namespace std;
 static int currentBouquet = 0;
 static int currentChannel = -1;
 
-#define zapModeTV "TV";
-#define zapPathTV ";0:7:1:0:0:0:0:0:0:0:"
-#define zapModeRadio "Radio";
-#define zapPathRadio ";0:7:2:0:0:0:0:0:0:0:"
-#define zapModeData "Data";
-#define zapPathData ";0:7:6:0:0:0:0:0:0:0:"
-static eString zapMode = zapModeTV;
-static eString zapPathes[4];
+#define ZAPMODETV 0
+#define ZAPMODERADIO 1
+#define ZAPMODEDATA 2
+#define ZAPMODERECORDINGS 3
+
+#define ZAPMODENAME 0
+#define ZAPMODECATEGORY 1
+#define ZAPSUBMODESATELLITES 2
+#define ZAPSUBMODEPROVIDERS 3
+#define ZAPSUBMODEBOUQUETS 4
+
+static int zapMode = ZAPMODETV;
+static int zapSubMode = ZAPSUBMODEBOUQUETS;
+
+static eString zap[4][5] =
+{
+	{"TV", ";0:7:1:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:6:0:0:0:0:0:0:"},
+	{"Radio", ";0:7:2:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:4:0:0:0:0:0:0:"},
+	{"Data", ";0:7:6:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ ""},
+	{"Recordings", "", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ";4097:7:0:1:0:0:0:0:0:0:"}
+};
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
@@ -529,13 +542,13 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	if (command == "rewind")
 	{
 		// not working... different solution required
-		eZapMain::getInstance()->startSkip(eZapMain::skipReverse);
+		// eZapMain::getInstance()->startSkip(eZapMain::skipReverse);
 	}
 	else
 	if (command == "forward")
 	{
 		// not working... different solution required
-		eZapMain::getInstance()->startSkip(eZapMain::skipForward);
+		// eZapMain::getInstance()->startSkip(eZapMain::skipForward);
 	}
 	else
 	if (command == "stop")
@@ -584,16 +597,16 @@ static eString audio(eString request, eString dirpath, eString opts, eHTTPConnec
 static eString setAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts);
-	int apid=-1;
+	int apid = -1;
 	sscanf(opt["audio"].c_str(), "0x%04x", &apid);
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if ( sapi )
 	{
-		std::list<eDVBServiceController::audioStream> &astreams( sapi->audioStreams );
+		std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
 		std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin());
-		for (;it != astreams.end(); ++it )
-			if ( it->pmtentry->elementary_PID == apid )
+		for (;it != astreams.end(); ++it)
+			if (it->pmtentry->elementary_PID == apid)
 			{
 				eServiceHandler *service=eServiceInterface::getInstance()->getService();
 				if (service)
@@ -602,30 +615,40 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 			}
 	}
 
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
+	return "<script language=\"javascript\">window.close();</script>";
 }
 
 static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString requester = opt["requester"];
+
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	eString audioChannels;// = "<option>German</option><option>English</option>";
+	eString audioChannels;
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-	if ( sapi )
+	if (sapi)
 	{
 		std::list<eDVBServiceController::audioStream> &astreams( sapi->audioStreams );
 		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
 			;it != astreams.end(); ++it )
 		{
-			audioChannels += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
+			if (requester == "webif")
+			{
+				if (it->pmtentry->elementary_PID == Decoder::current.apid)
+					audioChannels += eString().sprintf("<option selected value=\"0x%04x\">", it->pmtentry->elementary_PID);
+				else
+					audioChannels += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
+			}
+			else
+				audioChannels += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
+
 			audioChannels += it->text;
 			audioChannels += "</option>";
 		}
 	}
 	else
-		audioChannels = "<option>no audiodata avail</option>";
+		audioChannels = "<option>no audio data available</option>";
 
 	eString result = readFile(TEMPLATE_DIR + "audioSelection.tmp");
 	result.strReplace("#AUDIOCHANS#", audioChannels);
@@ -814,25 +837,29 @@ eString filter_string(eString string)
 	return string;
 }
 
+static eString getZapNavi(eString mode, eString path)
+{
+	eString result;
+	result += button(100, "TV", RED, "?path=" + zap[ZAPMODETV][ZAPMODECATEGORY]);
+	result += button(100, "Radio", GREEN, "?path=" + zap[ZAPMODERADIO][ZAPMODECATEGORY]);
+	result += button(100, "Data", BLUE, "?path=" + zap[ZAPMODEDATA][ZAPMODECATEGORY]);
+	result += "<br><br>";
+	return result;
+}
+
 static eString getLeftNavi(eString mode, eString path)
 {
 	eString result;
 	if (mode.find("zap") == 0)
 	{
-		result += button(110, "TV", LEFTNAVICOLOR, "?path=;0:7:1:0:0:0:0:0:0:0:");
+		result += button(110, "Satellites", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODESATELLITES]);
 		result += "<br>";
-		result += button(110, "Radio", LEFTNAVICOLOR, "?path=;0:7:2:0:0:0:0:0:0:0:");
+		result += button(110, "Providers", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEPROVIDERS]);
 		result += "<br>";
-		result += button(110, "Data", LEFTNAVICOLOR, "?path=;0:7:6:0:0:0:0:0:0:0:");
-		result += "<br>";
-		result += button(110, "Root", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2f");
+		result += button(110, "Bouquets", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEBOUQUETS]);
 #ifndef DISABLE_FILE
-		result += "<br>";
-		result += button(110, "Harddisk", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2fhdd%2f");
-		result += "<br>";
-		result += button(110, "Recordings", LEFTNAVICOLOR, "?path=;4097:7:0:1:0:0:0:0:0:0:");
-		result += "<br>";
-		result += button(110, "Bouquets", LEFTNAVICOLOR, "?path=;4097:7:0:6:0:0:0:0:0:0:");
+		result += "<br><br>";
+		result += button(110, "Recordings", LEFTNAVICOLOR,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
 #endif
 	}
 	else
@@ -1032,7 +1059,7 @@ static eString getEITC()
 
 		int p = 0;
 
-		for(ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
+		for (ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
 		{
 			if (*event)
 			{
@@ -1051,7 +1078,7 @@ static eString getEITC()
 					if (event->start_time != 0)
 					{
  						next_time.sprintf("%s", ctime(&event->start_time));
-						next_time=next_time.mid(10,6);
+						next_time=next_time.mid(10, 6);
 						next_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
 					}
 				}
@@ -1090,25 +1117,25 @@ static eString getEITC()
 
 		if (now_time != "")
 		{
+			now_longtext = filter_string(now_longtext);
+			if (now_longtext.find("&nbsp;") == 0)
+				now_longtext = now_longtext.right(now_longtext.length() - 6);
+
+			next_longtext = filter_string(next_longtext);
+			if (next_longtext.find("&nbsp;") == 0)
+				next_longtext = next_longtext.right(next_longtext.length() - 6);
+
 			result = readFile(TEMPLATE_DIR + "eit.tmp");
 			result.strReplace("#NOWT#", now_time);
 			result.strReplace("#NOWD#", now_duration);
 			result.strReplace("#NOWST#", now_text);
-			result.strReplace("#NOWLT#", filter_string(now_longtext));
+			result.strReplace("#NOWLT#", now_longtext);
 			result.strReplace("#NEXTT#", next_time);
 			result.strReplace("#NEXTD#", next_duration);
 			result.strReplace("#NEXTST#", next_text);
-			result.strReplace("#NEXTLT#", filter_string(next_longtext));
-		}
-		else
-		{
-			result = "eit undefined";
+			result.strReplace("#NEXTLT#", next_longtext);
 		}
 		eit->unlock();
-	}
-	else
-	{
-		result = "";
 	}
 
 	return result;
@@ -1190,7 +1217,7 @@ static eString getVideoBar()
 static eString getUpdates()
 {
 	std::stringstream result;
-	
+
 	eString myVersion = getAttribute("/.version", "version");
 	eString myCatalogURL = getAttribute("/.version", "catalog");
 	eString myComment = getAttribute("/.version", "comment");
@@ -1421,12 +1448,13 @@ public:
 		}
 #endif
 		eString serviceRef = ref2string(e);
-
 		result1 += "\"" + serviceRef + "\", ";
 		eService *service = iface.addRef(e);
 		if (service)
 		{
-			result2 += "\"" + filter_string(service->service_name) + "\", ";
+			eString tmp = filter_string(service->service_name);
+			tmp.strReplace("\"", "'");
+			result2 += "\"" + tmp + "\", ";
 			iface.removeRef(e);
 		}
 	}
@@ -1509,8 +1537,6 @@ static eString getZapContent2(eString mode, eString path)
 		eDebug("entered");
 		iface->leaveDirectory(current_service);
 		eDebug("exited");
-		printf("[GETZAPCONTENT2] collected bouquetrefs: %s", bouquetrefs.c_str());
-		printf("[GETZAPCONTENT2] collected bouquets: %s", bouquets.c_str());
 
 		// go thru all bouquets to get the channels
 		int i = 0;
@@ -1520,9 +1546,7 @@ static eString getZapContent2(eString mode, eString path)
 			tmp >> tpath;
 			if (tpath)
 			{
-				printf("[GETZAPCONTENT2] processing bouquet: tpath = %s", tpath.c_str());
 				tpath = tpath.mid(1, tpath.length() - 3);
-				printf("[GETZAPCONTENT2] processing bouquet: tpath = %s", tpath.c_str());
 				eServiceReference current_service = string2ref(tpath);
 
 				eWebNavigatorListDirectory2 navlist(result1, result2, tpath, tpath, *iface);
@@ -1549,8 +1573,6 @@ static eString getZapContent2(eString mode, eString path)
 				i++;
 			}
 		}
-		printf("[GETZAPCONTENT2] collected channelrefs: %s", channelrefs.c_str());
-		printf("[GETZAPCONTENT2] collected channels: %s", channels.c_str());
 
 		eString tmpFile = readFile(HTDOCS_DIR + "zapdata.js");
 		tmpFile.strReplace("#BOUQUETS#", bouquets);
@@ -1567,6 +1589,7 @@ static eString getZapContent2(eString mode, eString path)
 	return result;
 }
 
+#if 0
 static void getZapContent3(eString mode, eString path)
 {
 	eString result1, result2;
@@ -1574,6 +1597,9 @@ static void getZapContent3(eString mode, eString path)
 	std::stringstream tmp;
 
 	unsigned int pos = 0, lastpos = 0, temp = 0;
+
+	if (!path)
+		path = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
 
 	if ((path.find(";", 0)) == eString::npos)
 		path = ";" + path;
@@ -1613,6 +1639,7 @@ static void getZapContent3(eString mode, eString path)
 		}
 	}
 }
+#endif
 
 static eString getZap(eString mode, eString path)
 {
@@ -1620,20 +1647,18 @@ static eString getZap(eString mode, eString path)
 	eString zap_result;
 
 #ifndef DISABLE_FILE
-	if (path == ";4097:7:0:1:0:0:0:0:0:0:")
+	if (path == ";4097:7:0:1:0:0:0:0:0:0:") // recordings
 	{
 		eString tmpFile = readFile(TEMPLATE_DIR + "videocontrols.tmp");
 		tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
 		result += tmpFile;
-	}
-#endif
-	if (path == ";4097:7:0:6:0:0:0:0:0:0:")
-		zap_result += getZapContent2(mode, path);
-	else
-	{
 		zap_result += getZapContent(mode, path);
-		if (zap_result == NOCONTENT)
-			return zap_result;
+	}
+	else
+#endif
+	{
+		result += getZapNavi(mode, path);
+		zap_result += getZapContent2(mode, path);
 	}
 
 	result += getEITC();
@@ -1792,13 +1817,10 @@ static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTT
 	content->code=204;
 	content->code_descr="No Content";
 	return NOCONTENT;
-//	return getMsgWindow("Info", "Function is not supported by installed flash image.");
-//	return "<script language=\"javascript\">window.close();</script>";
 }
 
 static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-//	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString swapHDD = opt["swaphdd"];
 	eString swapHDDFile = opt["swaphddfile"];
@@ -1808,8 +1830,6 @@ static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTT
 	content->code=204;
 	content->code_descr="No Content";
 	return NOCONTENT;
-//	return getMsgWindow("Info", "Function is not supported by installed flash image.");
-//	return "<script language=\"javascript\">window.close();</script>";
 }
 
 static eString msgWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -1852,7 +1872,7 @@ struct countTimer
 		:count(count), repeating(repeating)
 	{
 	}
-	
+
 	void operator()(ePlaylistEntry *se)
 	{
 		if (se->type&ePlaylistEntry::isRepeating)
@@ -2084,11 +2104,34 @@ static eString getControlScreenShot(void)
 
 static eString getContent(eString mode, eString path)
 {
-	eString result;
+	eString result, tmp;
 
 	if (mode == "zap")
 	{
-		result = getTitle("ZAP");
+		tmp = "ZAP";
+		if (path == ";4097:7:0:1:0:0:0:0:0:0:")
+			tmp += ": Recordings";
+		else
+		{
+			if (zapMode >= 0)
+				tmp += ": " + zap[zapMode][ZAPMODENAME];
+			if (zapSubMode >= 0)
+			{
+				switch(zapSubMode)
+				{
+					case ZAPSUBMODESATELLITES:
+						tmp += " - Satellites";
+						break;
+					case ZAPSUBMODEPROVIDERS:
+						tmp += " - Providers";
+						break;
+					case ZAPSUBMODEBOUQUETS:
+						tmp += " - Bouquets";
+						break;
+				}
+			}
+		}
+		result = getTitle(tmp);
 		result += getZap(mode, path);
 	}
 	else
@@ -3061,12 +3104,37 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 
 	eDebug("[ENIGMA_DYN] web_root: mode = %s, spath = %s", mode.c_str(), spath.c_str());
 
-	if (!spath)
-		spath = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
-		//ref2string(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0));
-
 	if (!mode)
 		mode = "zap";
+
+	if (!spath)
+	{
+		spath = zap[zapMode][ZAPSUBMODEBOUQUETS];
+		zapSubMode = ZAPSUBMODEBOUQUETS;
+	}
+	else
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			if (spath == zap[i][ZAPMODECATEGORY])
+			{
+				zapMode = i;
+				spath = zap[i][ZAPSUBMODEBOUQUETS];
+				currentBouquet = 0;
+				currentChannel = -1;
+				break;
+			}
+		}
+
+		for (int i = 2; i < 5; i++)
+		{
+			if (spath == zap[zapMode][i])
+			{
+				zapSubMode = i;
+				break;
+			}
+		}
+	}
 
 	result = readFile(TEMPLATE_DIR + "index.tmp");
 	result.strReplace("#CONTENT#", getContent(mode, spath));
@@ -3074,18 +3142,25 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+	{
 		result.strReplace("#TOPBALK#", "topbalk.png");
+		result.strReplace("#BOX#", "Dreambox");
+	}
 	else
-	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
-		result.strReplace("#TOPBALK#", "topbalk2.png");
-	else
-	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
-		result.strReplace("#TOPBALK#", "topbalk3.png");
-	else
-//	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
-		result.strReplace("#TOPBALK#", "topbalk4.png");
+	{
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
+			result.strReplace("#TOPBALK#", "topbalk2.png");
+		else
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
+			result.strReplace("#TOPBALK#", "topbalk3.png");
+		else
+//		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
+			result.strReplace("#TOPBALK#", "topbalk4.png");
 
-	if (spath == ";4097:7:0:6:0:0:0:0:0:0:")
+		result.strReplace("#BOX#", "dBox");
+	}
+
+	if ((mode == "zap") && (spath != ";4097:7:0:1:0:0:0:0:0:0:"))
 		result.strReplace("#ONLOAD#", "onLoad=init()");
 
 	return result;
@@ -3250,18 +3325,18 @@ struct addToString
 	{
 		if (onSameTP(current,(eServiceReferenceDVB&)s))
 		{
-			dest+=s.toString();
+			dest += s.toString();
 			eServiceDVB *service = eTransponderList::getInstance()->searchService(s);
 			if (service)
 			{
-				for(int i=0; i < (int)eServiceDVB::cacheMax; ++i)
+				for(int i = 0; i < (int)eServiceDVB::cacheMax; ++i)
 				{
 					int d=service->get((eServiceDVB::cacheID)i);
 					if (d != -1)
 						dest+=eString().sprintf(";%02d%04x", i, d);
 				}
 			}
-			dest+='\n';
+			dest += '\n';
 		}
 	}
 };
@@ -3390,7 +3465,6 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 static eString genOptions(int start, int end, int delta, int selected)
 {
 	std::stringstream result;
-	// printf("[GENOPTIONS] start = %d, end = %d, delta = %d, selected = %d\n", start, end, delta, selected);
 	for (int i = start; i <= end; i += delta)
 	{
 		if (i == selected)
@@ -3622,7 +3696,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", startPlugin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stopPlugin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot);
-	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", osdshot); // for backward compatibility
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices);
 #ifndef DISABLE_FILE
