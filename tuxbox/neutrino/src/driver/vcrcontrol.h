@@ -119,7 +119,6 @@ class CVCRControl
 
 		class CVCRDevice : public CDevice		// VCR per IR
 		{
-			bool ParseFile(std::string filename);
 			public:
 				bool SwitchToScart;
 				virtual bool Stop(); 

@@ -143,8 +143,6 @@ CNeutrinoApp::CNeutrinoApp()
 	frameBuffer = CFrameBuffer::getInstance();
 	frameBuffer->setIconBasePath(DATADIR "/neutrino/icons/");
 
-//	vcrControl = CVCRControl::getInstance();
-
 	g_fontRenderer = new FBFontRenderClass();
 	SetupFrameBuffer();
 
@@ -447,7 +445,6 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.recording_server_port, configfile.getString( "recording_server_port", "4000").c_str() );
 	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
-	strcpy( g_settings.recording_vcr_devicename, configfile.getString( "recording_vcr_devicename", "ORION").c_str() );
 	g_settings.recording_vcr_no_scart = configfile.getInt32( "recording_vcr_no_scart", false);
 
 	//rc-key configuration
@@ -648,7 +645,6 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "recording_server_port", g_settings.recording_server_port );
 	configfile.setInt32 ( "recording_server_wakeup", g_settings.recording_server_wakeup );
 	configfile.setString( "recording_server_mac", g_settings.recording_server_mac );
-	configfile.setString( "recording_vcr_devicename", g_settings.recording_vcr_devicename );
 	configfile.setInt32 ( "recording_vcr_no_scart", g_settings.recording_vcr_no_scart );
 
 	//rc-key configuration
@@ -1536,9 +1532,6 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	oj4->addOption(0, "options.off");
 	oj4->addOption(1, "options.on");
 
-	CStringInput*  recordingSettings_vcr_devicename= new CStringInputSMS("recordingmenu.vcr_devicename", g_settings.recording_vcr_devicename, 20, "ipsetup.hint_1", "ipsetup.hint_2","abcdefghijklmnopqrstuvwxyz0123456789-. ");
-	CMenuForwarder *mf4 = new CMenuForwarder("recordingmenu.vcr_devicename", (g_settings.recording_type==2), g_settings.recording_vcr_devicename, recordingSettings_vcr_devicename );
-
 	CMenuOptionChooser* oj5 = new CMenuOptionChooser("recordingmenu.no_scart", &g_settings.recording_vcr_no_scart, (g_settings.recording_type==2));
 	oj5->addOption(0, "options.off");
 	oj5->addOption(1, "options.on");
@@ -1550,7 +1543,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CMenuForwarder *mf6 = new CMenuForwarder("timersettings.record_safety_time_after", true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
 	CRecordingNotifier *RecordingNotifier =
-		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,mf4,oj5);
+		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5);
 
    CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type,
                                                     true, RecordingNotifier);
@@ -1571,7 +1564,6 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( oj3 );
 	recordingSettings.addItem( oj4);
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	recordingSettings.addItem( mf4);
 	recordingSettings.addItem( oj5);
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
 	recordingSettings.addItem( mf5);
@@ -2027,7 +2019,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 	else if(g_settings.recording_type == 2)
 	{
 		CVCRControl::CVCRDeviceInfo * info = new CVCRControl::CVCRDeviceInfo;
-		info->Name = g_settings.recording_vcr_devicename;
+		info->Name = "vcr";
 		info->SwitchToScart = (g_settings.recording_vcr_no_scart==0);
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_VCR,info);
       delete info;
@@ -3297,7 +3289,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.377 2002/12/18 14:05:33 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.378 2002/12/18 19:11:07 Zwen Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

@@ -34,14 +34,12 @@
 #include <neutrinoMessages.h>
 
 #include <gui/widget/messagebox.h>
-#include <liblircdclient.h>
 
 #include "vcrcontrol.h"
 #include "neutrino.h"
+#include "irsend.h"
 
 #include <fstream>
-
-#define LIRCDIR "/var/tuxbox/config/lirc/"
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -150,57 +148,10 @@ bool CVCRControl::CVCRDevice::Stop()
 		g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
 		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
 	}
-	return ParseFile(LIRCDIR "stop.lirc");
+	CIRSend irs("stop");
+	return irs.Send();
 }
 
-//-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::ParseFile(string filename)
-{
-	ifstream inp;
-	char buffer[101];
-	int wait_time;
-	inp.open(filename.c_str(),ifstream::in);
-	if( inp.is_open() )
-	{
-		CLircdClient lirc;
-		if(lirc.Connect())
-		{
-			while(inp.good())
-			{
-				inp.getline(buffer,100);
-				if(buffer[0]!=0)
-				{
-					string line = buffer;
-					if(line.substr(0,4)=="WAIT" || line.substr(0,4)=="wait")
-					{
-						sscanf(line.substr(5).c_str(),"%d",&wait_time);
-						if(wait_time > 0)
-							usleep(wait_time*1000);
-					}
-					else
-					{
-						int duration=0;
-						unsigned int space_pos=line.find(" ");
-						if(space_pos!=string::npos)
-						{
-							sscanf(line.substr(space_pos+1).c_str(),"%d",&duration);
-						}
-						if(duration > 0)
-							lirc.SendUsecs(Name, line.substr(0,space_pos).c_str(),duration*1000);
-						else
-							lirc.SendOnce(Name, buffer);
-					}
-				}
-			}
-			lirc.Disconnect();
-			return true;
-		}
-		inp.close();
-	}
-	else
-		printf("konnte datei %s nicht oeffnen\n",filename.c_str());
-	return false;
-}
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, uint apid)
 {
@@ -253,19 +204,22 @@ bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, un
 
 	deviceState = CMD_VCR_RECORD;
 	// Send IR
-	return ParseFile(LIRCDIR "record.lirc");
+	CIRSend irs("record");
+	return irs.Send();
 }
 
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Pause()
 {
-	return ParseFile(LIRCDIR "pause.lirc");
+	CIRSend irs("pause");
+	return irs.Send();
 }
 
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Resume()
 {
-	return ParseFile(LIRCDIR "resume.lirc");
+	CIRSend irs("resume");
+	return irs.Send();
 }
 
 //-------------------------------------------------------------------------

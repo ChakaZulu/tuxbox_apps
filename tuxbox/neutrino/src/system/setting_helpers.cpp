@@ -119,7 +119,7 @@ bool CDHCPNotifier::changeNotify(string OptionName, void*)
 
 CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, 
                                         CMenuItem* i4, CMenuItem* i5, CMenuItem* i6, 
-                                        CMenuItem* i7, CMenuItem* i8)
+                                        CMenuItem* i7)
 {
    toDisable[0]=i1;
    toDisable[1]=i2;
@@ -128,7 +128,6 @@ CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[4]=i5;
    toDisable[5]=i6;
    toDisable[6]=i7;
-   toDisable[7]=i8;
 }
 bool CRecordingNotifier::changeNotify(string OptionName, void*)
 {
@@ -157,7 +156,6 @@ bool CRecordingNotifier::changeNotify(string OptionName, void*)
       toDisable[4]->setActive(false);
       toDisable[5]->setActive(false);
       toDisable[6]->setActive(true);
-      toDisable[7]->setActive(true);
    }
    return true;
 }

@@ -149,7 +149,6 @@ struct SNeutrinoSettings
 	char recording_server_port[10];
 	int  recording_server_wakeup;
 	char recording_server_mac[31];
-	char recording_vcr_devicename[50];
 	int  recording_vcr_no_scart;
 
 	//key configuration
