@@ -112,8 +112,8 @@ void parse_command(lcdd_msg rmsg) {
 void show_channelname( char * name)
 {
 	if (mode!=LCDM_TV) return;
-	display.draw_fill_rect (0,26,120,50, CLCDDisplay::PIXEL_OFF);
-	fonts.channelname->RenderString(1,43, 130, name, CLCDDisplay::PIXEL_ON);
+	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
+	fonts.channelname->RenderString(1,37, 130, name, CLCDDisplay::PIXEL_ON);
 	display.update();
 }
 
@@ -126,8 +126,8 @@ void show_time()
 	strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
 
 
-	display.draw_fill_rect (90,54,120,64, CLCDDisplay::PIXEL_OFF);
-	fonts.time->RenderString(93,63, 50, timestr, CLCDDisplay::PIXEL_ON);
+	display.draw_fill_rect (81,50,120,64, CLCDDisplay::PIXEL_OFF);
+	fonts.time->RenderString(83,62, 50, timestr, CLCDDisplay::PIXEL_ON);
 	display.update();
 }
 
@@ -151,11 +151,21 @@ void show_signal() {
 void show_volume(unsigned char vol)
 {
 	if (mode!=LCDM_TV) return;
-	display.draw_fill_rect (3,54,29,64, CLCDDisplay::PIXEL_OFF);
-	display.draw_fill_rect (3,54,3+(vol>>2),64, CLCDDisplay::PIXEL_ON);
-	if (muted) {
-		display.draw_fill_rect (4,55,2+(vol>>2),63, CLCDDisplay::PIXEL_OFF);
+	display.draw_fill_rect (1,51,73,63, CLCDDisplay::PIXEL_OFF);
+	//strichlin
+	if (muted)
+	{
+		display.draw_line (2,52,73,63, CLCDDisplay::PIXEL_ON);
 	}
+	else
+	{
+		int dp = int( vol/100.0*72.0);
+		for(int x = 2;x< dp;x+=2)
+		{
+			display.draw_line (x,51,x,63, CLCDDisplay::PIXEL_ON);
+		}
+	}
+
 	display.update();
 }
 
@@ -219,8 +229,8 @@ int main(int argc, char **argv)
 	printf("Network LCD-Driver 0.1\n\n");
 
 	fontRenderer = new fontRenderClass( &display );
-	fonts.channelname=fontRenderer->getFont("Arial", "Regular", 12);
-	fonts.time=fontRenderer->getFont("Arial", "Regular", 8);
+	fonts.channelname=fontRenderer->getFont("Arial", "Regular", 15);
+	fonts.time=fontRenderer->getFont("Arial", "Regular", 14);
 	fonts.menutitle=fontRenderer->getFont("Arial", "Regular", 15);
 	fonts.menu=fontRenderer->getFont("Arial", "Regular", 12);
 	display.setIconBasePath("/usr/lib/icons/");
