@@ -2647,7 +2647,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if (CRCInput::isNumeric(msg))
 			{ //numeric zap
 				if( g_RemoteControl->director_mode )
-				{//!!!
+				{
 					g_RemoteControl->setSubChannel(CRCInput::getNumericValue(msg));
 					g_InfoViewer->showSubchan();
 				}
