@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.6  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.5  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -352,6 +355,18 @@ void eit::receiveNow(int SID)
 	//vars->setvalue("%NOWDESCRIPTION", now.event_extended_text);
 	vars->setvalue("%NOWSTARTTIME", now.starttime);
 	vars->setvalue("%NOWDURATION", now.duration);
+	vars->setvalue("%NOWLINKAGE", now.number_perspectives);
+	if (now.number_components > 0)
+	{
+		vars->setvalue("%NOWAUDIO", now.audio_description[0]);
+		act_nowcomponent = 0;
+	}
+	else
+	{
+		vars->setvalue("%NOWAUDIO", "N/A");
+		act_nowcomponent = -1;
+	}
+	vars->setvalue("%NOWPARRATING", now.par_rating);
 	
 	vars->setvalue("%NEXTEVENTNAME", next.event_name);
 	vars->setvalue("%NEXTSHORTTEXT", next.event_short_text);
@@ -359,6 +374,18 @@ void eit::receiveNow(int SID)
 	//vars->setvalue("%NEXTDESCRIPTION", now.event_extended_text);
 	vars->setvalue("%NEXTSTARTTIME", next.starttime);
 	vars->setvalue("%NEXTDURATION", next.duration);
+	vars->setvalue("%NEXTLINKAGE", next.number_perspectives);
+	if (next.number_components > 0)
+	{
+		vars->setvalue("%NEXTAUDIO", next.audio_description[0]);
+		act_nextcomponent = 0;
+	}
+	else
+	{
+		vars->setvalue("%NEXTAUDIO", "N/A");
+		act_nextcomponent = -1;
+	}
+	vars->setvalue("%NEXTPARRATING", next.par_rating);
 
 	bool found = false;
 	for (int i = 0; i < now.number_components; i++)
@@ -416,7 +443,7 @@ linkage eit::nextLinkage()
 {
 	return (now.linkage_descr[curr_linkage++]);
 }
-
+/*
 void eit::readSchedule(int SID, osd *osd)
 {
 	long fd, r;
@@ -469,19 +496,6 @@ void eit::readSchedule(int SID, osd *osd)
 	
 		if (SID == ((buffer[3] << 8) | buffer[4]))
 		{
-		/*	for (int i = 0; i < r; i++)
-			{
-				if (buffer[i] < 91 && buffer[i] > 64)
-					printf("%d - %c\n", i, buffer[i]);
-				else if (buffer[i] < 123 && buffer[i] > 96)
-					printf("%d - %c\n", i, buffer[i]);
-				else
-					printf("%d - %x\n", i, buffer[i]);
-
-
-			}
-			printf("\n");
-		*/	
 			//printf("SID: %04x - table_id: %02x - section_number: %02x - last_section_number: %02x - segment_last_section: %02x - last_table: %02x\n", (buffer[3] << 8) | buffer[4], buffer[0], buffer[6], buffer[7], buffer[12], buffer[13]);
 			//printf("%d\n", buffer[0] & 0xf);
 
@@ -519,7 +533,7 @@ void eit::readSchedule(int SID, osd *osd)
 					int start = count + 13;
 					int descriptors_length = ((buffer[count + 11] & 0xf) << 8) | buffer[count + 12];
 					int text_length = 0;
-					while (start < count /*+ 14 */+ descriptors_length)
+					while (start < count + descriptors_length)
 					{
 						if (buffer[start] == 0x4d) // short_event_descripto
 						{	
@@ -579,14 +593,6 @@ void eit::readSchedule(int SID, osd *osd)
 						}
 						else if (buffer[start] == 0x50) // component_descriptor - audio-names
 						{
-							/*printf("---> component_descriptor: <---\n");
-							printf ("reserved_future_use: %01x\n", (buffer[start + 2] & 0xf0) >> 4);
-							printf ("stream_content: %01x\n", buffer[start + 2] & 0xf);
-							printf ("component_type: %02x\n", buffer[start + 3]);
-							printf ("component_tag: %02x\n", buffer[start + 4]);
-							printf ("language_code: %c%c%c\n", buffer[start + 5], buffer[start + 6], buffer[start + 7]);
-							printf ("text: ");
-							*/
 							tmp_event.component_tag[tmp_event.number_components] = buffer[start + 4];
 							tmp_event.stream_content[tmp_event.number_components] = buffer[start + 2] & 0xf;
 							tmp_event.component_type[tmp_event.number_components] = buffer[start + 3];
@@ -630,45 +636,30 @@ void eit::readSchedule(int SID, osd *osd)
 	} while(!quit);
 	(*osd).hidePerspective();
 }
-
+*/
 void eit::dumpSchedule(int TS, int ONID, int SID, osd *osd)
 {
-	/*for (std::multimap<int, struct event>::iterator it = eventlist.begin(); it != eventlist.end(); ++it)
-	{
-		struct tm *t;
-		t = localtime(&(*it).second.starttime);
-		char acttime[10];
-		strftime(acttime, sizeof acttime, "%H:%M %d.%m", t);
-		//printf("%s\n", acttime);
-		if (((*it).second.starttime + (*it).second.duration) >= time(0))
-		{
-			printf("Adding\n");
-			(*osd).addScheduleInformation((*it).second.starttime, (*it).second.event_name);
-		}
-		printf("%d, %d, %d - %s\n", time(0), (int)(*it).second.starttime, (int)(*it).second.duration, (*it).second.event_name);
-		//printf("%s - %d - %d - %s\n", ctime(&(*it).second.starttime), (*it).second.section,(*it).second.eventid, (*it).second.event_name);
-	}*/
-	printf("Finished EIT dump\n");
-
 	struct sid new_sid;
 	new_sid.SID = SID;
 	new_sid.TS = TS;
 	new_sid.ONID = ONID;
 	
-	std::multimap<struct sid, std::multimap<time_t, int>, ltstr>::iterator it = sid_eventid.find(new_sid);
-	//for (std::multimap<struct sid, std::multimap<time_t, int>, ltstr>::iterator it = sid_eventid.begin(); it != sid_eventid.end(); ++it)
+	for (std::map<int, struct event>::iterator it = eventid_event.begin(); it != eventid_event.end(); ++it)
+	{
+		event tmp_event = it->second;
+		osd->addScheduleInformation(tmp_event.starttime, tmp_event.event_name, tmp_event.eventid);
+	}
+	/*std::multimap<struct sid, std::multimap<time_t, int>, ltstr>::iterator it = sid_eventid.find(new_sid);
 	{
 		for (std::multimap<time_t, int>::iterator it2 = (*it).second.begin(); it2 != (*it).second.end(); ++it2)
 		{
-			event tmp_event = (*eventid_event.find((*it2).second)).second;
-			//printf("%x %s %s\n", (*it2).second, tmp_event.event_name, ctime(&tmp_event.starttime));
+			event tmp_event = eventid_event.find(it2->second)->second;
 			if ((tmp_event.starttime + tmp_event.duration) >= time(0))
 			{
-				printf("Adding\n");
-				(*osd).addScheduleInformation(tmp_event.starttime, tmp_event.event_name, tmp_event.eventid);
+				osd->addScheduleInformation(tmp_event.starttime, tmp_event.event_name, tmp_event.eventid);
 			}
 		}
-	}
+	}*/
 }
 
 
@@ -678,6 +669,8 @@ void eit::dumpSchedule(int SID, osd *osd)
 	struct dmxSctFilterParams flt;
 	//unsigned char sec_buffer[10][BSIZE];
 	unsigned char buffer[BSIZE];
+	time_eventid.clear();
+	eventid_event.clear();
 
 	osd->createPerspective();
 	osd->setPerspectiveName("Reading Scheduling Information...");
@@ -797,6 +790,10 @@ void eit::dumpSchedule(int SID, osd *osd)
 							tmp_event.event_short_text[text_length] = '\0';
 							
 						}
+						else if (buffer[desc_counter + end_counter] == 0x4a/* && ((buffer[count + 11] & 0xe0) >> 5) == 0x04*/) // linkage
+						{
+							tmp_event.number_perspectives++;
+						}
 						else if (buffer[desc_counter + end_counter] == 0x4e)
 						{
 							extended_event_descriptor_header extended_event_descriptor;
@@ -811,8 +808,34 @@ void eit::dumpSchedule(int SID, osd *osd)
 							}
 							
 						}
+						else if (buffer[desc_counter + end_counter] == 0x50) // component_descriptor - audio-names
+						{
+							int start = desc_counter + end_counter;
+							tmp_event.component_tag[tmp_event.number_components] = buffer[start + 4];
+							tmp_event.stream_content[tmp_event.number_components] = buffer[start + 2] & 0xf;
+							tmp_event.component_type[tmp_event.number_components] = buffer[start + 3];
+							printf("Found component TAG: %x\n", buffer[start + 4]);
+	
+							for (int i = 7; i <= buffer[start + 1]; i++)
+							{
+								tmp_event.audio_description[tmp_event.number_components][i-7] = buffer[start + 1 + i];
+							}
+							tmp_event.audio_description[tmp_event.number_components][buffer[start + 1] - 6] = '\0';
+							printf("%s\n", tmp_event.audio_description[tmp_event.number_components]);
+							tmp_event.number_components++;
+			
+						}
+						else if (buffer[desc_counter + end_counter] == 0x55)
+						{
+							int start = desc_counter + end_counter;
+							for (int i = 0; i < buffer[start + 1] / 4; i++)
+							{
+								if (buffer[start + 2 + i * 4] == 'D' && buffer[start + 3 + i * 4] == 'E' && buffer[start + 4 + i * 4] == 'U')
+									tmp_event.par_rating = buffer[start + 5 + i * 4];
+							}
+				}
 								
-							
+									
 						desc_counter += buffer[desc_counter + 1 + end_counter] + 2;
 					}
 					tmp_event.event_extended_text[ext_event_length] = '\0';
@@ -834,7 +857,11 @@ void eit::dumpSchedule(int SID, osd *osd)
 						{
 							(*sid_eventid.find(new_sid)).second.insert(std::pair<time_t, int>(tmp_event.starttime, tmp_event.eventid));
 						}
-						eventid_event.insert(std::pair<int, struct event>(tmp_event.eventid, tmp_event));
+						if (tmp_event.SID == SID)
+						{
+							eventid_event[tmp_event.eventid] = tmp_event; //.insert(std::pair<int, struct event>(tmp_event.eventid, tmp_event));
+							time_eventid[tmp_event.starttime] = tmp_event.eventid;
+						}
 					}
 
 					end_counter += tmp_event_header.descriptors_loop_length + sizeof(struct event_header);
@@ -860,4 +887,197 @@ void eit::dumpSchedule(int SID, osd *osd)
 event eit::getEvent(int eventid)
 {
 	return (*eventid_event.find(eventid)).second;
+}
+
+void eit::dumpEvent(int eventid)
+{
+	if (eventid_event.count(eventid) == 0)
+		return;
+	event tmp_event = eventid_event.find(eventid)->second;
+	vars->setvalue("%EVENTNAME", tmp_event.event_name);
+	vars->setvalue("%SHORTTEXT", tmp_event.event_short_text);
+	vars->setvalue("%EXTENDEDTEXT", tmp_event.event_extended_text);
+	vars->setvalue("%STARTTIME", tmp_event.starttime);
+	vars->setvalue("%DURATION", tmp_event.duration);
+	vars->setvalue("%LINKAGE", tmp_event.number_perspectives);
+	if (tmp_event.number_components > 0)
+	{	
+		vars->setvalue("%AUDIO", tmp_event.audio_description[0]);
+		act_schedcomponent = 0;
+	}
+	else
+	{
+		vars->setvalue("%AUDIO", "N/A");
+		act_schedcomponent = -1;
+	}
+	
+	vars->setvalue("%PARRATING", tmp_event.par_rating);
+}
+
+void eit::dumpNextEvent(int eventid)
+{
+	std::cout << "*********************Getting Next Eventid" << std::endl;
+	std::cout << "eventid: " << eventid << std::endl;
+	std::cout << "count1: " << eventid_event.count(eventid) << std::endl;
+	if (eventid_event.count(eventid) == 0)
+		return;
+	std::map<int, struct event>::iterator it = eventid_event.find(eventid);
+
+	std::cout << "starttime: " << it->second.starttime << std::endl;
+	std::cout << "count2: " << time_eventid.count(it->second.starttime) << std::endl;
+	if (time_eventid.count(it->second.starttime) == 0)
+		return;
+	std::map<time_t, int>::iterator it2 = time_eventid.find(it->second.starttime);
+	if (it2 == time_eventid.end())
+		it2 = time_eventid.begin();
+	else
+		it2++;
+	
+	std::cout << "eventid2: " << it2->second << std::endl;
+	std::cout << "count2: " << eventid_event.count(it2->second) << std::endl;
+	if (eventid_event.count(it2->second) == 0)
+		return;	
+	std::map<int, struct event>::iterator it3 = eventid_event.find(it2->second);
+
+	event tmp_event = it3->second;
+	vars->setvalue("%EVENTNAME", tmp_event.event_name);
+	vars->setvalue("%SHORTTEXT", tmp_event.event_short_text);
+	vars->setvalue("%EXTENDEDTEXT", tmp_event.event_extended_text);
+	vars->setvalue("%STARTTIME", tmp_event.starttime);
+	vars->setvalue("%DURATION", tmp_event.duration);
+	vars->setvalue("%EVENTID", tmp_event.eventid);
+	vars->setvalue("%LINKAGE", tmp_event.number_perspectives);
+	if (tmp_event.number_components > 0)
+	{
+		vars->setvalue("%AUDIO", tmp_event.audio_description[0]);
+		act_schedcomponent = 0;
+	}
+	else
+	{
+		vars->setvalue("%AUDIO", "N/A");
+		act_schedcomponent = -1;
+	}
+	vars->setvalue("%PARRATING", tmp_event.par_rating);
+}
+
+void eit::dumpPrevEvent(int eventid)
+{
+	std::cout << "*********************Getting Next Eventid" << std::endl;
+	std::cout << "eventid: " << eventid << std::endl;
+	std::cout << "count1: " << eventid_event.count(eventid) << std::endl;
+	if (eventid_event.count(eventid) == 0)
+		return;
+	std::map<int, struct event>::iterator it = eventid_event.find(eventid);
+
+	std::cout << "starttime: " << it->second.starttime << std::endl;
+	std::cout << "count2: " << time_eventid.count(it->second.starttime) << std::endl;
+	if (time_eventid.count(it->second.starttime) == 0)
+		return;
+	std::map<time_t, int>::iterator it2 = time_eventid.find(it->second.starttime);
+	if (it2 == time_eventid.begin())
+		it2 = time_eventid.end();
+	else
+		it2--;
+	
+	std::cout << "eventid2: " << it2->second << std::endl;
+	std::cout << "count2: " << eventid_event.count(it2->second) << std::endl;
+	if (eventid_event.count(it2->second) == 0)
+		return;	
+	std::map<int, struct event>::iterator it3 = eventid_event.find(it2->second);
+
+	event tmp_event = it3->second;
+	vars->setvalue("%EVENTNAME", tmp_event.event_name);
+	vars->setvalue("%SHORTTEXT", tmp_event.event_short_text);
+	vars->setvalue("%EXTENDEDTEXT", tmp_event.event_extended_text);
+	vars->setvalue("%STARTTIME", tmp_event.starttime);
+	vars->setvalue("%DURATION", tmp_event.duration);
+	vars->setvalue("%EVENTID", tmp_event.eventid);
+	vars->setvalue("%LINKAGE", tmp_event.number_perspectives);
+	if (tmp_event.number_components > 0)
+	{	
+		vars->setvalue("%AUDIO", tmp_event.audio_description[0]);
+		act_schedcomponent = 0;
+	}
+	else
+	{
+		vars->setvalue("%AUDIO", "N/A");
+		act_schedcomponent = -1;
+	}
+	vars->setvalue("%PARRATING", tmp_event.par_rating);
+}
+
+void eit::dumpNextSchedulingComponent()
+{
+	int eventid = atoi(vars->getvalue("%EVENTID").c_str());
+	if (eventid_event.count(eventid) == 0)
+		return;
+	event tmp_event = eventid_event.find(eventid)->second;
+
+	if (act_schedcomponent != -1)
+	{
+		act_schedcomponent++;
+		if (act_schedcomponent >= tmp_event.number_components)
+			act_schedcomponent = 0;
+		vars->setvalue("%AUDIO", tmp_event.audio_description[act_schedcomponent]);
+	}
+}
+
+void eit::dumpPrevSchedulingComponent()
+{
+	int eventid = atoi(vars->getvalue("%EVENTID").c_str());
+	if (eventid_event.count(eventid) == 0)
+		return;
+	event tmp_event = eventid_event.find(eventid)->second;
+
+	if (act_schedcomponent != -1)
+	{
+		act_schedcomponent--;
+		if (act_schedcomponent < 0 )
+			act_schedcomponent = tmp_event.number_components - 1;
+		vars->setvalue("%AUDIO", tmp_event.audio_description[act_schedcomponent]);
+	}
+}
+	
+void eit::dumpNextNowComponent()
+{
+	if (act_nowcomponent != -1)
+	{
+		act_nowcomponent++;
+		if (act_nowcomponent >= now.number_components)
+			act_nowcomponent = 0;
+		vars->setvalue("%NOWAUDIO", now.audio_description[act_nowcomponent]);
+	}
+}
+
+void eit::dumpPrevNowComponent()
+{
+	if (act_nowcomponent != -1)
+	{
+		act_nowcomponent--;
+		if (act_nowcomponent < 0)
+			act_nowcomponent = now.number_components - 1;
+		vars->setvalue("%NOWAUDIO", now.audio_description[act_nowcomponent]);
+	}
+}
+	
+void eit::dumpNextNextComponent()
+{
+	if (act_nextcomponent != -1)
+	{
+		act_nextcomponent++;
+		if (act_nextcomponent >= next.number_components)
+			act_nextcomponent = 0;
+		vars->setvalue("%NEXTAUDIO", next.audio_description[act_nextcomponent]);
+	}
+}
+
+void eit::dumpPrevNextComponent()
+{
+	if (act_nextcomponent != -1)
+	{
+		act_nextcomponent--;
+		if (act_nextcomponent < 0)
+			act_nextcomponent = next.number_components - 1;
+		vars->setvalue("%NEXTAUDIO", next.audio_description[act_nextcomponent]);
+	}
 }

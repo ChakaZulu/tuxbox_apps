@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: timer.cpp,v $
+Revision 1.7  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.6  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -83,7 +86,7 @@ void* timer::start_timer( void * this_ptr )
 	}
 }
 
-void timer::addTimer(time_t starttime, int type, std::string comment, int duration, int channel)
+void timer::addTimer(time_t starttime, int type, std::string comment, int duration, int channel, std::string audio)
 {
 	struct timer_entry new_timer;
 

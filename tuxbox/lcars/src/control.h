@@ -19,6 +19,8 @@
 #include "variables.h"
 #include "commandcoding.h"
 #include "ir.h"
+#include "pig.h"
+#include "teletext.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -65,6 +67,8 @@ class control
 	checker *checker_obj;
 	fbClass *fb_obj;
 	ir *ir_obj;
+	pig *pig_obj;
+	teletext *teletext_obj;
 
 	// Modes
 	typedef std::vector<command_class> commandlist;
@@ -131,19 +135,20 @@ class control
 
 	
 	// Aktuelles Kommando sofort ausfuehren 
-	int runCommand(command_class command, bool value = true);
 	bool checkSetting(std::string var);
-
-	command_class parseCommand(std::string cmd);
-
+	
 	bool lastcheck;
 
 	pthread_t thread;
 	static void *startlistening(void *object);
 public:
 	variables *vars;
+	void run();
 	void startThread();
-	control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i);
+	control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i, pig *p1, teletext *t2);
+
+	int runCommand(command_class command, bool value = true);
+	command_class parseCommand(std::string cmd);
 
 	void runSub(std::string);
 	bool subAvailable(std::string);

@@ -87,6 +87,7 @@ class fbClass
 
 public:
 	fbClass(variables *v, int x = 720, int y = 576, int bpp = 8);
+	//fbClass(variables *v, int x = 640, int y = 400, int bpp = 8);
 	~fbClass();
 
 	void test();

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.h,v $
+Revision 1.7  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.6  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -73,6 +76,9 @@ class plugins
 		bool vtxtpid;
 		int posx, posy, sizex, sizey;
 		bool showpig;
+		bool vformat;
+		bool offsets;
+
 	};
 	
 	int fb, rc, lcd, pid;

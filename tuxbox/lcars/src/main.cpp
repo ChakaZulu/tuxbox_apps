@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.17  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.16  2002/05/18 04:31:02  TheDOC
 Warningelimination
 
@@ -248,7 +251,7 @@ int main(int argc, char **argv)
 
 	}
 	
-	//teletext teletext(&fb, &rc);
+	teletext teletext(&fb, &rc);
 	
 	channels.loadDVBChannels();
 	channels.loadTS();
@@ -272,9 +275,6 @@ int main(int argc, char **argv)
 	//settings.getEMMpid();
 	
 	printf("container-chans: %d\n", (*container.channels_obj).numberChannels());
-
-	network network(container, &rc);
-	network.startThread();
 
 	timer timer(&hardware, &channels, &zap, &tuner, &osd, &variables);
 	timer.loadTimer();
@@ -329,7 +329,13 @@ int main(int argc, char **argv)
 	hardware.setOutputMode(settings.getOutputFormat());
 	rc.start_thread();
 
-	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir);
+	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir, &pig, &teletext);
+	
+	network network(container, &rc, &control);
+	network.startThread();
+	
+
+	control.run();
 	exit(0);
 	/*do
 	{

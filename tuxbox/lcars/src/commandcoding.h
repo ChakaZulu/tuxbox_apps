@@ -20,7 +20,7 @@ enum
 	FB,
 	IF,
 	ELSE,
-	IR
+	IR	
 };
 
 // Commands
@@ -50,7 +50,10 @@ enum
 	C_Read, // 21
 	C_Var, // 22
 	C_Sub, // 23
-	C_Send // 24
+	C_Send, // 24
+	C_Fillbox, // 25
+	C_Puttext, // 26
+	C_Get // 27
 };
 
 #endif

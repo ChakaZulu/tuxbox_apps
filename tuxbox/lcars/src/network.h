@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.h,v $
+Revision 1.5  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.4  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -40,6 +43,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "container.h"
 #include "xmlrpc.h"
 #include "rc.h"
+#include "control.h"
 
 #define PORT 80
 
@@ -48,12 +52,13 @@ class network
 	pthread_t thread;
 	
 public:
+	control *control_obj;
 	bool update_enabled;
 	xmlrpc xmlrpc_obj;
 	container cont;
 	rc *rc_obj;
 	void writetext(std::string text);
-	network(container &container, rc *r);
+	network(container &container, rc *r, control *c);
 	int fd;
 	int inbound_connection;
 	static void *startlistening(void *object);

@@ -1,6 +1,9 @@
 #include "variables.h"
 
 #include <iostream>
+#include <unistd.h>
+
+
 
 variables::variables()
 {
@@ -44,7 +47,10 @@ void variables::setvalue(std::string name, std::string value)
 
 bool variables::isavailable(std::string name)
 {
-	return (vars.count(name) > 0);
+	pthread_mutex_lock(&mutex);
+	bool tmp = (vars.count(name) > 0);
+	pthread_mutex_unlock(&mutex);
+	return tmp;
 }
 
 void variables::addEvent(std::string event)
@@ -53,14 +59,22 @@ void variables::addEvent(std::string event)
 	events.push(event);
 	pthread_mutex_unlock(&events_mutex);
 	pthread_mutex_unlock(&event_wait_mutex);
-
 }
 
 std::string variables::waitForEvent()
 {
 	std::string return_string;
-	if (events.size() == 0)
-		pthread_mutex_lock(&event_wait_mutex);
+	bool doit = true;
+
+	while(doit)
+	{
+		pthread_mutex_lock(&events_mutex);
+		doit = (events.size() == 0);
+		pthread_mutex_unlock(&events_mutex);
+		usleep(100);
+	}
+	//if (doit)
+	//	pthread_mutex_lock(&event_wait_mutex);
 	pthread_mutex_lock(&events_mutex);
 	return_string = events.front();
 	events.pop();

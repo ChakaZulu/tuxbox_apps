@@ -7,6 +7,7 @@ Index:
 0
 +++
 Init:
+	FB direct SETFADE 0 24 81 84 255 255 255
 	CONTROL Var Set SHOWHELP true
 	CONTROL Var Set NUMBERLASTCHANNELS 2
 	OSD direct SHOW proginfo 5
@@ -232,9 +233,13 @@ Init:
 	OSD direct COMMAND schedule select
 +++
 Actions:
-OK:
+HOME:
 	OSD direct HIDE schedule
 	CONTROL Mode 1
+OK:
+	OSD Get SelectedSchedulingEvent EVENTID
+	OSD direct HIDE schedule
+	CONTROL Mode 30
 UP:
 	OSD direct COMMAND schedule select prev
 DOWN:
@@ -243,9 +248,77 @@ RIGHT:
 	OSD direct COMMAND schedule page next
 LEFT:
 	OSD direct COMMAND schedule page prev
+STANDBY:
+	HARDWARE Shutdown
+------
++++
+Title:
+EPG Info Scheduling
++++
+Index:
+30
++++
+Init:
+	EIT Dump Event %EVENTID
+	OSD Set EPG EventName %EVENTNAME
+	OSD Set EPG EventShortText %SHORTTEXT
+	OSD Set EPG EventExtendedText %EXTENDEDTEXT
+	OSD Set EPG Starttime %STARTTIME
+	OSD Set EPG Duration %DURATION
+	OSD Set EPG ProgramName %SERVICENAME%
+	OSD Set EPG Linkage %LINKAGE
+	OSD Set EPG Audio %AUDIO
+	OSD Set EPG ParRating %PARRATING
+	OSD direct SHOW epg
++++
+Actions:
+DOWN:
+	EIT Dump NextEvent %EVENTID
+	OSD Set EPG EventName %EVENTNAME
+	OSD Set EPG EventShortText %SHORTTEXT
+	OSD Set EPG EventExtendedText %EXTENDEDTEXT
+	OSD Set EPG Starttime %STARTTIME
+	OSD Set EPG Duration %DURATION
+	OSD Set EPG ProgramName %SERVICENAME%
+	OSD Set EPG Linkage %LINKAGE
+	OSD Set EPG Audio %AUDIO
+	OSD Set EPG ParRating %PARRATING
+	OSD direct SHOW epg
+UP:
+	EIT Dump PrevEvent %EVENTID
+	OSD Set EPG EventName %EVENTNAME
+	OSD Set EPG EventShortText %SHORTTEXT
+	OSD Set EPG EventExtendedText %EXTENDEDTEXT
+	OSD Set EPG Starttime %STARTTIME
+	OSD Set EPG Duration %DURATION
+	OSD Set EPG ProgramName %SERVICENAME%
+	OSD Set EPG Linkage %LINKAGE
+	OSD Set EPG Audio %AUDIO
+	OSD Set EPG ParRating %PARRATING
+	OSD direct SHOW epg
+RIGHT:
+	EIT Dump NextSchedComponent
+	OSD Set EPG Audio %AUDIO
+	OSD direct SHOW epg
+LEFT:
+	EIT Dump PrevSchedComponent
+	OSD Set EPG Audio %AUDIO
+	OSD direct SHOW epg
 GREEN:
 	TIMER Set Schedule
 	TIMER Save
+	OSD direct HIDE epg
+	OSD direct COMMAND perspective name Event Added for Recording
+	OSD direct SHOW perspective
+	RC Wait Timed 2
+	OSD direct HIDE perspective
+	OSD direct SHOW epg
+YELLOW:
+	OSD direct HIDE epg
+	CONTROL Mode 1
+OK:
+	OSD direct HIDE epg
+	CONTROL Mode 1
 STANDBY:
 	HARDWARE Shutdown
 ------
@@ -263,11 +336,30 @@ Init:
 	OSD Set EPG Starttime %NOWSTARTTIME
 	OSD Set EPG Duration %NOWDURATION
 	OSD Set EPG ProgramName %SERVICENAME%
+	OSD Set EPG Linkage %NOWLINKAGE
+	OSD Set EPG Audio %NOWAUDIO
+	OSD Set EPG ParRating %NOWPARRATING
 	OSD direct SHOW epg
 +++
 Actions:
-RIGHT:
+DOWN:
 	CONTROL Mode 14
+RIGHT:
+	EIT Dump NextNowComponent
+	OSD Set EPG Audio %NOWAUDIO
+	OSD direct SHOW epg
+LEFT:
+	EIT Dump PrevNowComponent
+	OSD Set EPG Audio %NOWAUDIO
+	OSD direct SHOW epg
+GREEN:
+	TIMER Set Now
+	OSD direct HIDE epg
+	OSD direct COMMAND perspective name Event Added for Recording
+	OSD direct SHOW perspective
+	RC Wait Timed 2
+	OSD direct HIDE perspective
+	CONTROL Mode 1
 YELLOW:
 	OSD direct HIDE epg
 	CONTROL Mode 1
@@ -291,11 +383,31 @@ Init:
 	OSD Set EPG Starttime %NEXTSTARTTIME
 	OSD Set EPG Duration %NEXTDURATION
 	OSD Set EPG ProgramName %SERVICENAME%
+	OSD Set EPG Linkage %NEXTLINKAGE
+	OSD Set EPG Audio %NEXTAUDIO
+	OSD Set EPG ParRating %NEXTPARRATING
 	OSD direct SHOW epg
 +++
 Actions:
-LEFT:
+UP:
 	CONTROL Mode 13
+RIGHT:
+	EIT Dump NextNextComponent
+	OSD Set EPG Audio %NEXTAUDIO
+	OSD direct SHOW epg
+LEFT:
+	EIT Dump PrevNextComponent
+	OSD Set EPG Audio %NEXTAUDIO
+	OSD direct SHOW epg
+GREEN:
+	TIMER Set Next
+	TIMER Save
+	OSD direct HIDE epg
+	OSD direct COMMAND perspective name Event Added for Recording
+	OSD direct SHOW perspective
+	RC Wait Timed 2
+	OSD direct HIDE perspective
+	OSD direct SHOW epg
 YELLOW:
 	OSD direct HIDE epg
 	CONTROL Mode 1

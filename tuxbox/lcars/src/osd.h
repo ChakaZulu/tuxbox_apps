@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.h,v $
+Revision 1.6  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.5  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -108,6 +111,9 @@ class osd
 	int newlines[100];
 	int nlcounter;
 	int shown;
+	int linkage;
+	std::string audio;
+	int FSK;
 
 	// Menu
 	struct menu_entry
@@ -213,6 +219,9 @@ public:
 	void setEPGProgramName(std::string input);
 	void setEPGstarttime(time_t input);
 	void setEPGduration(int input);
+	void setEPGlinkage(int input);
+	void setEPGaudio(std::string input);
+	void setEPGfsk(int input);
 	void showEPG();
 	void showNextEPGPage();
 	void showPrevEPGPage();
@@ -264,7 +273,7 @@ public:
 	void selectPrevScheduleInformation();
 	void nextSchedulePage();
 	void prevSchedulePage();
-	int getSelectedSchedule();
+	int getSelectedSchedule(); // return: eventid
 	void selectScheduleInformation(int select, bool redraw = true);
 	void showSchedule(int page);
 	void hideSchedule();

@@ -11,6 +11,10 @@ Entries:
 2 Timer
 3 Recording
 4 PID
+!5 Remember Channels
+	4
+	3
+	2
 6 Plugins
 * Setup
 7 Manual Update
@@ -26,6 +30,10 @@ Actions:
 	CONTROL Menu Mode 1
 4:
 	CONTROL Menu Mode 2
+5:
+	CONTROL Var Set NUMBERLASTCHANNELS 4
+	CONTROL Var Set NUMBERLASTCHANNELS 3
+	CONTROL Var Set NUMBERLASTCHANNELS 2	
 6:
 	CONTROL Menu Mode 3
 7:
@@ -45,6 +53,11 @@ Index:
 Init:
 	OSD direct COMMAND menu set_size 200
 	TIMER Timers Dump
++++
+Actions:
+30:
+	TIMER Set RemoveFromMenu
+	TIMER Save
 ------
 +++
 Title:
@@ -64,8 +77,10 @@ Index:
 3
 +++
 Init:
+	FB direct SETFADE 0 24 81 84 255 255 255
 	PLUGINS Plugins Load
 	PLUGINS Plugins Dump
+	CONTROL Var Set PLUGINMENU true
 ------
 +++
 Title:

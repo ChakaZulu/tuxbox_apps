@@ -127,14 +127,14 @@ void fbClass::runCommand(std::string command_string)
 			values_int[i] = atoi(value.c_str());
 		}
 		std::getline(iss, value, '\n');
-		float size;
-		sscanf(value.c_str(), "%f", &size);
+		/*float size;
+		sscanf(value.c_str(), "%f", &size);*/
 		std::getline(iss, value, '\n');
 
 		if (vars->isavailable(value))
 			value = vars->getvalue(value);
-		if (size != factor)
-			setTextSize(size);
+		/*if (size != factor)
+			setTextSize(size);*/
 
 		putText(values_int[0], values_int[1], values_int[2], value, values_int[3], values_int[4]);
 	}
@@ -517,12 +517,12 @@ void fbClass::putText(int xpos, int ypos, int color, char text[500], int max_siz
 			draw_bitmap( font, pen_x + font.left, pen_y - font.top + (*ycorrector.find(factor)).second, color );
 			pen_x += font.advancex;
 		}
-		else
+		else if (alignment == 1)
 		{
 			draw_bitmap( font, pen_x - font.advancex + font.left, pen_y - font.top + (*ycorrector.find(factor)).second, color );
 			pen_x -= font.advancex + 2;
 		}
-                        
+		                        
 		// increment pen position 
 
 	}

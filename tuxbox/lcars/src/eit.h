@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.h,v $
+Revision 1.5  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.4  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -159,9 +162,11 @@ class eit
 	pthread_mutex_t mutex;
  
     static void* start_eitqueue( void * );
-	std::multimap<int, struct event> eventid_event;
-	std::multimap<time_t, int> time_eventid;
+	std::map<int, struct event> eventid_event;
+	std::map<time_t, int> time_eventid;
 	std::multimap<struct sid, std::multimap<time_t, int>, ltstr> sid_eventid;
+
+	int act_schedcomponent, act_nowcomponent, act_nextcomponent;
 
 public:	
 	eit(settings *s, osd *o, variables *v);
@@ -180,9 +185,21 @@ public:
 	void beginLinkage();
 	int numberPerspectives() { return now.number_perspectives; }
 	linkage nextLinkage();
-	void readSchedule(int SID, osd *osd);
+	//void readSchedule(int SID, osd *osd);
 	void dumpSchedule(int TS, int ONID, int SID, osd *osd);
 	event getEvent(int eventid);
+	void dumpEvent(int eventid);
+	void dumpNextEvent(int eventid);
+    void dumpPrevEvent(int eventid);
+	
+	void dumpNextSchedulingComponent();
+	void dumpPrevSchedulingComponent();
+	
+	void dumpNextNowComponent();
+	void dumpPrevNowComponent();
+	
+	void dumpNextNextComponent();
+	void dumpPrevNextComponent();
 
 	void dumpSchedule(int SID, osd *osd);
 };

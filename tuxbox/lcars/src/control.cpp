@@ -1,6 +1,6 @@
 #include "control.h"
 
-control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i)
+control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i, pig *p1, teletext *t2)
 {
 	osd_obj = o;
 	rc_obj = r;
@@ -19,6 +19,8 @@ control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c
 	fb_obj = f;
 	vars = v;
 	ir_obj = i;
+	pig_obj = p1;
+	teletext_obj = t2;
 
 	last_read.TS = -1;
 	last_read.ONID = -1;
@@ -27,7 +29,11 @@ control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c
 	loadMenus();
 	loadModes();
 	loadSubs();
-	startThread();
+	startThread();	
+}
+
+void control::run()
+{
 	runMode(0);
 }
 
@@ -245,6 +251,14 @@ command_class control::parseCommand(std::string cmd)
 	{
 		tmp_command.command = C_Send;
 	}
+	else if (tmp_string == "Fillbox")
+	{
+		tmp_command.command = C_Fillbox;
+	}
+	else if (tmp_string == "Get")
+	{
+		tmp_command.command = C_Get;
+	}
 	else 
 	{
 		std::cout << "Error in Command: Unknown Command (" << tmp_string << ") on String:" << std::endl << cmd << std::endl;
@@ -377,6 +391,27 @@ int control::runCommand(command_class command, bool val)
 				{
 					osd_obj->setEPGduration(atoi(command.args[2].c_str()));
 				}
+				else if (command.args[1] == "Linkage")
+				{
+					osd_obj->setEPGlinkage(atoi(command.args[2].c_str()));
+				}
+				else if (command.args[1] == "Audio")
+				{
+					osd_obj->setEPGaudio(command.args[2]);
+				}
+				else if (command.args[1] == "ParRating")
+				{
+					osd_obj->setEPGfsk(atoi(command.args[2].c_str()));
+				}
+			}
+		}
+		else if (command.command == C_Get)
+		{
+			if (command.args[0] == "SelectedSchedulingEvent")
+			{
+				std::string cmd = "%";
+				cmd.append(command.args[1]);
+				vars->setvalue(cmd, osd_obj->getSelectedSchedule());
 			}
 		}
 		else if (command.command == C_Channellist)
@@ -654,6 +689,11 @@ int control::runCommand(command_class command, bool val)
 				command.args[1].insert(0, "%");
 				vars->setvalue(command.args[1], command.args[2]);
 			}
+			else if (command.args[0] == "Length")
+			{
+				command.args[1].insert(0, "%");
+				vars->setvalue(command.args[1], command.args[2].length());
+			}
 			else if (command.args[0] == "Add")
 			{
 				command.args[1].insert(0, "%");
@@ -663,6 +703,11 @@ int control::runCommand(command_class command, bool val)
 			{
 				command.args[1].insert(0, "%");
 				vars->setvalue(command.args[1], atoi(vars->getvalue(command.args[1]).c_str()) - atoi(command.args[2].c_str()));
+			}
+			else if (command.args[0] == "Mul")
+			{
+				command.args[1].insert(0, "%");
+				vars->setvalue(command.args[1], atoi(vars->getvalue(command.args[1]).c_str()) * atoi(command.args[2].c_str()));
 			}
 			else if (command.args[0] == "Value")
 			{
@@ -912,9 +957,24 @@ int control::runCommand(command_class command, bool val)
 		{
 			if (command.args[0] == "Schedule")
 			{
-				int selectedeventid = osd_obj->getSelectedSchedule();
+				/*int selectedeventid = osd_obj->getSelectedSchedule();
 				event tmp_event = eit_obj->getEvent(selectedeventid);
-				timer_obj->addTimer(tmp_event.starttime, 2, tmp_event.event_name, tmp_event.duration, channels_obj->getCurrentChannelNumber());
+				timer_obj->addTimer(tmp_event.starttime, 2, tmp_event.event_name, tmp_event.duration, channels_obj->getCurrentChannelNumber(), vars->getvalue("%AUDIO"));*/
+				timer_obj->addTimer(atoi(vars->getvalue("%STARTTIME").c_str()), 2, vars->getvalue("%EVENTNAME"), atoi(vars->getvalue("%DURATION").c_str()), channels_obj->getCurrentChannelNumber(), vars->getvalue("%AUDIO"));
+			}
+			else if (command.args[0] == "Now")
+			{
+				timer_obj->addTimer(atoi(vars->getvalue("%NOWSTARTTIME").c_str()), 2, vars->getvalue("%NOWEVENTNAME"), atoi(vars->getvalue("%NOWDURATION").c_str()), channels_obj->getCurrentChannelNumber(), vars->getvalue("%NOWAUDIO"));
+			}
+			else if (command.args[0] == "Next")
+			{
+				timer_obj->addTimer(atoi(vars->getvalue("%NEXTSTARTTIME").c_str()), 2, vars->getvalue("%NEXTEVENTNAME"), atoi(vars->getvalue("%NEXTDURATION").c_str()), channels_obj->getCurrentChannelNumber(), vars->getvalue("%NEXTAUDIO"));
+			}
+			else if (command.args[0] == "RemoveFromMenu")
+			{
+				int number = osd_obj->menuSelectedIndex();
+				std::cout << "Number: " << number << std::endl;
+				timer_obj->rmTimer(timer_obj->getDumpedChannel(number), timer_obj->getDumpedStarttime(number));
 			}
 		}
 		else if (command.command == C_Save)
@@ -952,12 +1012,65 @@ int control::runCommand(command_class command, bool val)
 				}
 				eit_obj->dumpSchedule(channels_obj->getCurrentTS(), channels_obj->getCurrentONID(), channels_obj->getCurrentSID(), osd_obj);
 			}
+			else if (command.args[0] == "NextEvent")
+
+			{
+				eit_obj->dumpNextEvent(atoi(command.args[1].c_str()));
+			}
+			else if (command.args[0] == "PrevEvent")
+			{
+				eit_obj->dumpPrevEvent(atoi(command.args[1].c_str()));
+			}
+			else if (command.args[0] == "NextSchedComponent")
+			{
+				eit_obj->dumpNextSchedulingComponent();
+			}
+			else if (command.args[0] == "PrevSchedComponent")
+			{
+				eit_obj->dumpPrevSchedulingComponent();
+			}
+			else if (command.args[0] == "NextNextComponent")
+			{
+				eit_obj->dumpNextNextComponent();
+			}
+			else if (command.args[0] == "PrevNextComponent")
+			{
+				eit_obj->dumpPrevNextComponent();
+			}
+			else if (command.args[0] == "NextNowComponent")
+			{
+				eit_obj->dumpNextNowComponent();
+			}
+			else if (command.args[0] == "PrevNowComponent")
+			{
+				eit_obj->dumpPrevNowComponent();
+			}
+			else if (command.args[0] == "Event")
+			{
+				eit_obj->dumpEvent(atoi(command.args[1].c_str()));
+			}
+			
 		}
 		break;	
 	case FB:
 		if (command.command == C_direct)
 		{
 			fb_obj->runCommand(command.args[0]);
+		}
+		else if (command.command == C_Fillbox)
+		{
+			fb_obj->fillBox(atoi(command.args[0].c_str()), atoi(command.args[1].c_str()), atoi(command.args[2].c_str()), atoi(command.args[3].c_str()), atoi(command.args[4].c_str()));
+		}
+		else if (command.command == C_Get)
+		{
+			if (command.args[0] == "Width")
+			{
+				command.args[1].insert(0, "%");
+				int width = 0;
+				for (int i = 0; (unsigned int) i < command.args[2].length(); i++)
+					width += fb_obj->getWidth(command.args[2][i]);
+				vars->setvalue(command.args[1], width);
+			}
 		}
 		break;
 	case IR:
@@ -1502,6 +1615,7 @@ void control::openMenu(int menuNumber)
 
 	getMenu(menuNumber);
 
+	vars->setvalue("%PLUGINMENU", "false");
 	for (int i = 0; (unsigned int) i < tmp_menu.init_commands.size(); i++)
 	{
 		std::cout << "Init" << std::endl;
@@ -1530,7 +1644,66 @@ void control::openMenu(int menuNumber)
 		{
 			number = osd_obj->menuSelectedIndex();
 		}
-		if (number != -1)
+		else if (key == RC1_RED)
+		{
+			number = 30;
+		}
+		else if (key == RC1_GREEN)
+		{
+			number = 31;
+		}
+		else if (key == RC1_YELLOW)
+		{
+			number = 32;
+		}
+		else if (key == RC1_BLUE)
+		{
+			number = 33;
+		}
+		if (number > 0 && number < 30 && vars->getvalue("%PLUGINMENU") == "true")
+		{
+			std::cout << "NUUUUMBER: " << number << std::endl;
+			osd_obj->addCommand("HIDE menu");
+			//teletext_obj->stopReinsertion();
+			if (plugins_obj->getShowPig(number - 1))
+			{
+				pig_obj->hide();	
+				pig_obj->setSize(plugins_obj->getSizeX(number - 1), plugins_obj->getSizeY(number - 1));
+				pig_obj->setStack(1);
+				pig_obj->show();
+				pig_obj->setPosition(plugins_obj->getPosX(number - 1), plugins_obj->getPosY(number - 1));
+			}
+			plugins_obj->setfb(fb_obj->getHandle());
+			plugins_obj->setrc(rc_obj->getHandle());
+			plugins_obj->setlcd(-1);
+			plugins_obj->setvtxtpid(channels_obj->getCurrentTXT());
+			rc_obj->stoprc();
+			plugins_obj->startPlugin(number - 1);
+			if (plugins_obj->getShowPig(number - 1))
+			{
+				pig_obj->hide();
+			}
+			rc_obj->startrc();
+			rc_obj->restart();
+			osd_obj->initPalette();
+			usleep(400000);
+			fb_obj->clearScreen();
+			//teletext_obj->startReinsertion(channels_obj->getCurrentTXT());
+			tmp_menu = menus[menuNumber];
+
+			getMenu(menuNumber);
+
+			for (int i = 0; (unsigned int) i < tmp_menu.init_commands.size(); i++)
+			{
+				std::cout << "Init" << std::endl;
+				runCommand(tmp_menu.init_commands[i]);
+			}
+	
+			osd_obj->addCommand("SHOW menu");
+			osd_obj->addCommand("COMMAND menu select next");
+			
+		}
+		else if (number != -1 && number < 30)
 		{
 			osd_obj->selectEntry(number);
 
@@ -1601,8 +1774,33 @@ void control::openMenu(int menuNumber)
 			}
 			std::cout << "Number " << number << " selected." << std::endl;
 		}
+		else if (number > 29)
+		{
+			osd_obj->addCommand("HIDE menu");
+			std::map<int, menu_entry>::iterator it = tmp_menu.entries.find(number);
+			for (int j = 0; (unsigned int) j < it->second.action_commands.size(); j++)
+			{
+				if (runCommand(it->second.action_commands[j]) == 1)
+				{
+					getMenu(menuNumber);						
+				}
+			}
+			tmp_menu = menus[menuNumber];
+
+			getMenu(menuNumber);
+
+			for (int i = 0; (unsigned int) i < tmp_menu.init_commands.size(); i++)
+			{
+				std::cout << "Init" << std::endl;
+				runCommand(tmp_menu.init_commands[i]);
+			}
+	
+			osd_obj->addCommand("SHOW menu");
+			osd_obj->addCommand("COMMAND menu select next");
+		}
 	} while(key != RC1_HOME && key != RC1_RIGHT && key != RC1_LEFT);
 	osd_obj->addCommand("HIDE menu");
+	vars->setvalue("%PLUGINMENU", "false");
 }
 
 void control::startThread()
@@ -1616,6 +1814,7 @@ void *control::startlistening(void *object)
 	while(1)
 	{
 		std::string sub = c->vars->waitForEvent();
+		std::cerr << "Sub: " << sub << std::endl;
 		if (c->subAvailable(sub))
 			c->runSub(sub);
 	}

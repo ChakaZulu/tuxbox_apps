@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: timer.h,v $
+Revision 1.6  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.5  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -88,7 +91,7 @@ public:
 	void runTimer();
 	bool isEmpty();
 
-	void addTimer(time_t starttime, int type, std::string comment, int duration = 0, int channel = -1);
+	void addTimer(time_t starttime, int type, std::string comment, int duration = 0, int channel = -1, std::string audio = "");
 	time_t getTime();
 	int getNumberTimer() { return timer_list.size(); }
 	void dumpTimer();

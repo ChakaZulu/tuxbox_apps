@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.6  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.5  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -68,10 +71,11 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "pat.h"
 #include "pmt.h"
 
-network::network(container &contain, rc *r) : cont(contain)
+network::network(container &contain, rc *r, control *c) : cont(contain)
 {
 	xmlrpc_obj.setObjects(&cont);
 	rc_obj = r;
+	control_obj = c;
 }
 
 void network::startThread()
@@ -203,11 +207,18 @@ void *network::startlistening(void *object)
 					write(inbound_connection, (*n->cont.settings_obj).getVersion().c_str(), (*n->cont.settings_obj).getVersion().length());
 					strcpy(writebuffer, "<br><br><a href=\"/channels/gethtmlchannels\">Channellist</a>");
 					write(inbound_connection, writebuffer, strlen(writebuffer));
+					n->writetext("<br><br><a href=\"command\">Command-Parser</a>");
 					n->writetext("<br><br><a href=\"rc/frame\">Remote Control</a>");
 					n->writetext("<br><br><a href=\"/epg/now\">EPG Now</a>");
 					n->writetext("<br><br><a href=\"/epg/next\">EPG Next</a>");
 					strcpy(writebuffer, "<br><br><a href=\"/channels/lcars.dvb\">Channellist in DVB2000-format</a>");
 					write(inbound_connection, writebuffer, strlen(writebuffer));
+				}
+				else if (path[1] == "command")
+				{
+					std::string response = "<html><body><form action=\"http://192.168.40.4/command\" method=post><input type=text name=command size=80><br><input type=submit name=submit value=\"Befehl ausfuehren\"><br></form><form action=\"http://192.168.40.4/command\" method=post><input type=text name=sub size=80><br><input type=submit name=submit value=\"Sub starten\"></form></body></html>";
+					write(inbound_connection, headerok.c_str(), headerok.length());
+					write(inbound_connection, response.c_str(), response.length());
 				}
 				else if (path[1] == "version")
 				{
@@ -511,6 +522,7 @@ void *network::startlistening(void *object)
 			{
 				post = true;
 				postline = command[i];
+				std::cout << "Postline: " << postline << std::endl;
 			}
 		}
 		if (post)
@@ -527,7 +539,52 @@ void *network::startlistening(void *object)
 			int counter2 = 0;
 			while(std::getline(iss2, path[counter2++], '/'));
 
-			if (path[1] == "SID2")
+			std::cout << "PATH[1]: " << path[1] << std::endl;
+			if (path[1] == "command")
+			{
+				std::string parameters(command[parm_count - 1]);
+				std::stringstream iss(parameters);
+				std::string tmp_string;
+				std::vector<std::string> var_list;
+				std::string command;
+				var_list.clear();
+				while(std::getline(iss, tmp_string, '&'))
+					var_list.insert(var_list.end(), tmp_string);
+				for (int i = 0; (unsigned int) i < var_list.size(); i++)
+				{
+					std::cout << "command2" << std::endl;				
+					std::stringstream iss2(var_list[i]);
+					std::getline(iss2, tmp_string, '=');
+					if (tmp_string == "command")
+					{
+						std::getline(iss2, command, '=');
+						break;
+					}
+					else if (tmp_string == "sub")
+					{
+						std::getline(iss2, command, '=');
+						break;
+					}
+				}
+				
+				if (tmp_string == "command")
+				{
+					std::replace(command.begin(), command.end(), '+', ' ');
+					std::cout << "Command: " << command << std::endl;
+					n->control_obj->runCommand(n->control_obj->parseCommand(command));
+				}
+				else if (tmp_string == "sub")
+				{
+					std::replace(command.begin(), command.end(), '+', ' ');
+					std::cout << "Command: " << command << std::endl;
+					n->control_obj->runSub(command);
+				}
+				std::string response = "<html><body><form action=\"http://192.168.40.4/command\" method=post><input type=text name=command size=80><br><input type=submit name=submit value=\"Befehl ausfuehren\"><br></form><form action=\"http://192.168.40.4/command\" method=post><input type=text name=sub size=80><br><input type=submit name=submit value=\"Sub starten\"></form></body></html>";
+				write(inbound_connection, headerok.c_str(), headerok.length());
+				write(inbound_connection, response.c_str(), response.length());
+
+			}
+			else if (path[1] == "SID2")
 			{
 				std::string request(buffer);
 				std::string xml = request.substr(request.find("\r\n\r\n"));
@@ -555,6 +612,7 @@ void *network::startlistening(void *object)
 				//std::cout << send << std::endl;
 				write(inbound_connection, send.c_str(), send.length());
 			}
+			
 		}
 
 		close(inbound_connection);

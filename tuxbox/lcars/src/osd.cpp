@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.cpp,v $
+Revision 1.6  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.5  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -788,6 +791,8 @@ void osd::setServiceName(std::string  name)
 {
 	serviceName = name;
 	vars->setvalue("%SERVICENAME%", name);
+	//vars->addEvent("OSD_PROGINFO_SERVICENAME");
+	
 	if (proginfo_shown)
 	{
 		fb->setTextSize(0.4);
@@ -810,6 +815,8 @@ void osd::setServiceNumber(int number)
 {
 	serviceNumber = number;
 	vars->setvalue("%SERVICENUMBER%", number);
+	//vars->addEvent("OSD_PROGINFO_SERVICENUMBER");
+	
 	if (proginfo_shown)
 	{
 		fb->setTextSize(0.4);
@@ -836,6 +843,8 @@ void osd::setChannelsAvailable(bool available)
 void osd::setTeletext(bool available)
 {
 	teletext = available;
+	//vars->addEvent("OSD_PROGINFO_TELETEXT");
+	
 	if (proginfo_shown)
 	{
 		fb->setTextSize(0.4);
@@ -852,6 +861,8 @@ void osd::setTeletext(bool available)
 void osd::setPerspectiveAvailable(bool available)
 {
 	perspectiveAvailable = available;
+	//vars->addEvent("OSD_PROGINFO_PERSPECTIVE");
+	
 	if (vars->getvalue("%SHOWHELP") == "true")
 	{
 		if (proginfo_shown)
@@ -888,6 +899,8 @@ void osd::setNowTime(time_t starttime)
 	strftime(nowtime, sizeof nowtime, "%H:%M", t);
 	vars->setvalue("%NOWTIME%", nowtime);
 	
+	//vars->addEvent("OSD_PROGINFO_NOWTIME");
+	
 	if (proginfo_shown)
 	{
 		fb->setTextSize(0.4);
@@ -910,6 +923,8 @@ void osd::setNowDescription(std::string  description)
 {
 	nowDescription = description;
 	vars->setvalue("%NOWDESCRIPTION%", nowDescription);
+	//vars->addEvent("OSD_PROGINFO_NOWDESCRIPTION");
+	
 	if (proginfo_shown)
 	{
 		fb->setTextSize(0.4);
@@ -936,6 +951,8 @@ void osd::setNextTime(time_t starttime)
 	t = localtime(&nextTime);
 	strftime(nexttime, sizeof nexttime, "%H:%M", t);
 	vars->setvalue("%NEXTTIME%", nexttime);
+	//vars->addEvent("OSD_PROGINFO_NEXTTIME");
+
 	
 	if (proginfo_shown)
 	{
@@ -959,6 +976,9 @@ void osd::setNextDescription(std::string  description)
 {
 	nextDescription = description;
 	vars->setvalue("%NEXTDESCRIPTION%", nextDescription);
+	//vars->addEvent("OSD_PROGINFO_NEXTDESCRIPTION");
+
+	
 	if (proginfo_shown)
 	{
 		fb->setTextSize(0.4);
@@ -981,6 +1001,8 @@ void osd::setLanguage(std::string language_name)
 {
 	strcpy(language, language_name.c_str());
 	vars->setvalue("%LANGUAGE%", language);
+	//vars->addEvent("OSD_PROGINFO_LANGUAGE");
+	
 	if (proginfo_shown)
 	{
 		fb->setTextSize(0.4);
@@ -1007,6 +1029,9 @@ void osd::setLanguage(std::string language_name)
 void osd::setParentalRating(int rating)
 {
 	par_rating = rating;
+	vars->setvalue("%PARENTALRATING%", rating);
+	//vars->addEvent("OSD_PROGINFO_PARENTALRATING");
+	
 	if (proginfo_shown)
 	{
 		if (par_rating != 0)
@@ -1029,7 +1054,8 @@ void osd::showProgramInfo()
 	proginfo_shown = true;
 	vars->setvalue("%PROGINFO_SHOWN", "true");
 	
-	char nowtime[10], nexttime[10], acttime[10], number[10];
+	char nowtime[10], nexttime[10], acttime[10];
+	char number[10];
 	time_t act_time = time(0);
 	struct tm *t;
 	t = localtime(&act_time);
@@ -1048,6 +1074,8 @@ void osd::showProgramInfo()
 	vars->setvalue("%NEXTDESCRIPTION%", nextDescription);
 	vars->setvalue("%LANGUAGE%", language);
 
+	//vars->addEvent("OSD_PROGINFO_SHOW");
+	
 	if (prog_com_list_show.size() < 1)
 	{
 		printf("%d - %s\n", serviceNumber, serviceName.c_str());
@@ -1176,12 +1204,15 @@ void osd::showProgramInfo()
 			fb->runCommand(prog_com_list_show[i]);
 		}
 	}
+
 }
 
 void osd::hideProgramInfo()
 {
 	proginfo_shown = false;
+	//vars->addEvent("OSD_PROGINFO_HIDE");
 	vars->setvalue("%PROGINFO_SHOWN", "false");
+	
 	if (prog_com_list_hide.size() < 1)
 	{
 		printf("Hiding program info\n");
@@ -1349,6 +1380,9 @@ void osd::createEPG()
 	event_short_text = "";
 	event_extended_text = "";
 	description = "";
+	linkage = 0;
+	audio = "";
+	FSK = 0;
 }
 
 void osd::setEPGEventName(std::string  input)
@@ -1386,6 +1420,21 @@ void osd::setEPGduration(int input)
 	duration = input;
 }
 
+void osd::setEPGlinkage(int input)
+{
+	linkage = input;
+}
+
+void osd::setEPGaudio(std::string input)
+{
+	audio = input;
+}
+
+void osd::setEPGfsk(int input)
+{
+	FSK = input;
+}
+
 void osd::showEPG()
 {
 	char text[1000];
@@ -1410,7 +1459,7 @@ void osd::showEPG()
 	strftime(text, 6, "%H:%M", t);
 	fb->putText(495, 50, 7, text);
 
-	fb->fillBox(600, 57, 612, 500, 5);
+	fb->fillBox(600, 57, 612, 530, 5);
 
 	fb->setTextSize(0.4);
 	fb->fillBox(100, 75, 120, 99, 5);
@@ -1421,13 +1470,19 @@ void osd::showEPG()
 	fb->fillBox(490, 75, 560, 99, 0);
 	fb->fillBox(560, 75, 580, 99, 5);
 	fb->putText(125, 80, 0, programname, 270);
-				
+	
+	fb->fillBox(100, 475, 120, 500, 5);
+	fb->fillBox(120, 475, 350, 500, 0);
+	fb->fillBox(350, 475, 370, 500, 5);
+
 	t = localtime(&starttime);
 	strftime(text, 6, "%H:%M", t);
 	fb->putText(415, 80, 0, text);
+	strftime(text, 24, "%A, %m/%d/%Y", t);
+	fb->putText(125, 480, 0, text);
 
-	starttime += duration;
-	t = localtime(&starttime);
+	time_t endtime = starttime + duration;
+	t = localtime(&endtime);
 	strftime(text, 6, "%H:%M", t);
 	fb->putText(495, 80, 0, text);
 
@@ -1440,6 +1495,24 @@ void osd::showEPG()
 	fb->fillBox(100, 135, 110, 470, 5);
 	fb->fillBox(110, 135, 580, 470, 7);
 	fb->fillBox(580, 135, 590, 470, 5);
+	
+	fb->fillBox(370, 475, 570, 500, 7);
+	fb->fillBox(570, 475, 590, 500, 5);
+	fb->putText(375, 480, 7, "Linkage:");
+	fb->putText(500, 480, 7, linkage);
+	
+	fb->fillBox(100, 505, 120, 530, 5);
+	fb->fillBox(120, 505, 350, 530, 7);
+	fb->putText(125, 510, 7, audio);
+
+	fb->fillBox(350, 505, 370, 530, 5);
+	fb->fillBox(370, 505, 570, 530, 7);
+	fb->fillBox(570, 505, 590, 530, 5);
+	fb->putText(375, 510, 7, "FSK:");
+	if (FSK == 0)
+		fb->putText(500, 510, 7, 0);
+	else
+		fb->putText(500, 510, 7, FSK + 3);
 
 	nlcounter = 0;
 	int last = 0;

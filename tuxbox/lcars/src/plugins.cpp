@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.cpp,v $
+Revision 1.8  2002/05/20 20:08:12  TheDOC
+some new timer and epg-stuff
+
 Revision 1.7  2002/05/18 04:31:02  TheDOC
 Warningelimination
 
@@ -188,6 +191,14 @@ void plugins::parseCfg(plugin *plugin_data)
 		{
 			plugin_data->showpig = ((parm == "1")?true:false);
 		}
+		else if (cmd == "needoffsets")
+		{
+			plugin_data->offsets = ((parm == "1")?true:false);
+		}
+		else if (cmd == "needvidformat")
+		{
+			plugin_data->vformat = ((parm == "1")?true:false);
+		}
 	}
 
 	inFile.close();
@@ -246,6 +257,7 @@ PluginParam* plugins::makeParam(std::string id, PluginParam *next)
 
 void plugins::startPlugin(int number)
 {
+	std::cout << "Plugin-Number: " << number << std::endl;
 	PluginExec execPlugin;
 	char depstring[129];
 	char			*argv[20];
@@ -262,6 +274,12 @@ void plugins::startPlugin(int number)
 
 	startparam = 0;
 	tmpparam = startparam;
+
+	addParm(P_ID_VFORMAT, 2);
+	addParm(P_ID_OFF_X, 0);
+	addParm(P_ID_OFF_Y, 0);
+	addParm(P_ID_END_X, 720);
+	addParm(P_ID_END_Y, 576);
 
 	if (plugin_list[number].fb)
 	{
@@ -289,6 +307,17 @@ void plugins::startPlugin(int number)
 		std::cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << std::endl;
 
 		startparam = makeParam(P_ID_VTXTPID, startparam);
+	}
+	if (plugin_list[number].vformat)
+	{
+		startparam = makeParam(P_ID_VFORMAT, startparam);
+	}
+	if (plugin_list[number].offsets)
+	{
+		startparam = makeParam(P_ID_OFF_X, startparam);
+		startparam = makeParam(P_ID_OFF_Y, startparam);
+		startparam = makeParam(P_ID_END_X, startparam);
+		startparam = makeParam(P_ID_END_Y, startparam);
 	}
 
 	//PluginParam *par = startparam;
