@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.h,v 1.4 2004/01/01 20:09:23 rasc Exp $
+$Id: dmx_ts.h,v 1.5 2004/12/07 21:01:41 rasc Exp $
 
 
  DVBSNOOP
@@ -12,7 +12,7 @@ $Id: dmx_ts.h,v 1.4 2004/01/01 20:09:23 rasc Exp $
 */
 
 #ifndef __DMX_TS_H
-#define __DMX_TS_H 1
+#define __DMX_TS_H
 
 
 int  doReadTS (OPTION *opt);

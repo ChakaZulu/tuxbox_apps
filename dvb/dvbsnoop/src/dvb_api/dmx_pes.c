@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.29 2004/10/12 20:37:47 rasc Exp $
+$Id: dmx_pes.c,v 1.30 2004/12/07 21:01:40 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dmx_pes.c,v 1.29 2004/10/12 20:37:47 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.30  2004/12/07 21:01:40  rasc
+Large file support (> 2 GB) for -if cmd option. (tnx to K.Zheng,  Philips.com for reporting)
+
 Revision 1.29  2004/10/12 20:37:47  rasc
  - Changed: TS pid filtering from file, behavior changed
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
@@ -132,8 +135,10 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "pes/pespacket.h"
 #include "dvb_api.h"
+#include "file_io.h"
 #include "dmx_error.h"
 #include "dmx_pes.h"
+
 
 
 #define PES_BUF_SIZE  (256 * 1024)		/* default PES dmx buffer size */
@@ -166,7 +171,7 @@ int  doReadPES (OPTION *opt)
 
   if (opt->inpPidFile) {
   	f        = opt->inpPidFile;
-  	openMode = O_RDONLY;
+  	openMode = O_RDONLY | O_LARGEFILE;
         dmxMode  = 0;
   } else {
   	f        = opt->devDemux;

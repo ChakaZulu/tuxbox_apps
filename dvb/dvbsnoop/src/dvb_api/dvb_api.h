@@ -1,5 +1,5 @@
 /*
-$Id: dvb_api.h,v 1.4 2004/01/06 14:06:08 rasc Exp $
+$Id: dvb_api.h,v 1.5 2004/12/07 21:01:41 rasc Exp $
 
 
  DVBSNOOP
@@ -13,7 +13,7 @@ $Id: dvb_api.h,v 1.4 2004/01/06 14:06:08 rasc Exp $
 */
 
 #ifndef __DVB_API_H
-#define __DVB_API_H 1
+#define __DVB_API_H
 
 
 #include <sys/ioctl.h>

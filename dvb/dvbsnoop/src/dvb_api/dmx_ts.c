@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.29 2004/11/16 23:02:50 rasc Exp $
+$Id: dmx_ts.c,v 1.30 2004/12/07 21:01:41 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.29 2004/11/16 23:02:50 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.30  2004/12/07 21:01:41  rasc
+Large file support (> 2 GB) for -if cmd option. (tnx to K.Zheng,  Philips.com for reporting)
+
 Revision 1.29  2004/11/16 23:02:50  rasc
 cmd option "-tsraw" for full/raw TS read (if supported by hard-/firmware)
 
@@ -133,8 +136,10 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "ts/tslayer.h"
 #include "ts/ts2secpes.h"
 #include "dvb_api.h"
+#include "file_io.h"
 #include "dmx_error.h"
 #include "dmx_ts.h"
+
 
 
 
@@ -160,6 +165,7 @@ int  doReadTS (OPTION *opt)
   u_char  *b;			/* ptr for packet start */
   long    count;
   char    *f;
+  int     openMode;
   int     fileMode;
   long    dmx_buffer_size = TS_BUF_SIZE;
 
@@ -168,14 +174,16 @@ int  doReadTS (OPTION *opt)
 
   if (opt->inpPidFile) {
   	f        = opt->inpPidFile;
-        fileMode  = 1;
+  	openMode = O_RDONLY | O_LARGEFILE;
+        fileMode = 1;
   } else {
   	f        = opt->devDvr;
-        fileMode  = 0;
+  	openMode = O_RDWR;
+        fileMode = 0;
   } 
 
 
-  if((fd_dvr = open(f,O_RDONLY)) < 0){
+  if((fd_dvr = open(f,openMode)) < 0){
       IO_error(f);
       return -1;
   }

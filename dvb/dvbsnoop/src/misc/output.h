@@ -1,5 +1,5 @@
 /*
-$Id: output.h,v 1.10 2004/01/13 21:04:21 rasc Exp $
+$Id: output.h,v 1.11 2004/12/07 21:01:42 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: output.h,v 1.10 2004/01/13 21:04:21 rasc Exp $
 
 
 $Log: output.h,v $
+Revision 1.11  2004/12/07 21:01:42  rasc
+Large file support (> 2 GB) for -if cmd option. (tnx to K.Zheng,  Philips.com for reporting)
+
 Revision 1.10  2004/01/13 21:04:21  rasc
 BUGFIX: getbits overflow fixed...
 
@@ -46,7 +49,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 #ifndef __OUTPUT_H
-#define __OUTPUT_H 1
+#define __OUTPUT_H 
 
 
 void indent (int v);

@@ -1,5 +1,5 @@
 /*
-$Id: pkt_time.h,v 1.8 2004/01/11 21:01:32 rasc Exp $
+$Id: pkt_time.h,v 1.9 2004/12/07 21:01:42 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: pkt_time.h,v 1.8 2004/01/11 21:01:32 rasc Exp $
 
 
 $Log: pkt_time.h,v $
+Revision 1.9  2004/12/07 21:01:42  rasc
+Large file support (> 2 GB) for -if cmd option. (tnx to K.Zheng,  Philips.com for reporting)
+
 Revision 1.8  2004/01/11 21:01:32  rasc
 PES stream directory, PES restructured
 
@@ -50,7 +53,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 #ifndef __PKT_TIME
-#define __PKT_TIME 1
+#define __PKT_TIME
 
 
 #include "cmdline.h"

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.23 2004/11/16 23:02:50 rasc Exp $
+$Id: cmdline.h,v 1.24 2004/12/07 21:01:42 rasc Exp $
 
 
  DVBSNOOP
@@ -34,6 +34,7 @@ typedef struct _OPTIONS {
   int         printhex;			// hexdump mode
   int         printdecode;		// decode verbose mode
   int         binary_out;		// binary output?
+  char        *outPidFile;		// write to file (implies binary_out)
   char        *inpPidFile;		// read from file instead of dmux if not NULL
   char        *devDemux;		// input device DMX
   char        *devDvr;			// input device DVR

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_error.h,v 1.2 2004/01/25 22:36:52 rasc Exp $
+$Id: dmx_error.h,v 1.3 2004/12/07 21:01:40 rasc Exp $
 
 
  DVBSNOOP
@@ -12,7 +12,7 @@ $Id: dmx_error.h,v 1.2 2004/01/25 22:36:52 rasc Exp $
 */
 
 #ifndef __DMX_ERROR_H
-#define __DMX_ERROR_H 1
+#define __DMX_ERROR_H
 
 
 int  IO_error (u_char *str);

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.h,v 1.4 2004/01/01 20:09:23 rasc Exp $
+$Id: dmx_pes.h,v 1.5 2004/12/07 21:01:41 rasc Exp $
 
 
  DVBSNOOP
@@ -14,7 +14,7 @@ $Id: dmx_pes.h,v 1.4 2004/01/01 20:09:23 rasc Exp $
 
 
 #ifndef __DMX_PES_H
-#define __DMX_PES_H 1
+#define __DMX_PES_H
 
 
 int  doReadPES (OPTION *opt);

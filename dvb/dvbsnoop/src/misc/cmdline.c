@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.39 2004/11/16 23:02:50 rasc Exp $
+$Id: cmdline.c,v 1.40 2004/12/07 21:01:42 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.39 2004/11/16 23:02:50 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.40  2004/12/07 21:01:42  rasc
+Large file support (> 2 GB) for -if cmd option. (tnx to K.Zheng,  Philips.com for reporting)
+
 Revision 1.39  2004/11/16 23:02:50  rasc
 cmd option "-tsraw" for full/raw TS read (if supported by hard-/firmware)
 
@@ -195,6 +198,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->printhex = -1;		// see below
   opt->printdecode = -1;	// see below
   opt->binary_out = 0;
+  opt->outPidFile = (char *) NULL;
   opt->inpPidFile = (char *) NULL;
   opt->devDemux = DEMUX_DEVICE;
   opt->devDvr = DVR_DEVICE;
@@ -261,6 +265,11 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      } else if (!strcmp (argv[i],"-spiderpid")) {
 	 opt->spider_pid = 1;
 	 opt->rd_packet_count = 1;
+     } else if (!strcmp (argv[i],"-of")) {
+     	 opt->binary_out = 1;
+	 opt->outPidFile = argv[++i];		// binary output filename
+	 if (!opt->outPidFile) opt->outPidFile = ""; 
+	 if (!strcmp(opt->outPidFile,"-"))  opt->outPidFile = "/dev/stdout"; 
      } else if (!strcmp (argv[i],"-if")) {
 	 opt->inpPidFile = argv[++i];		// input filename
 	 if (!opt->inpPidFile) opt->inpPidFile = ""; 
@@ -385,7 +394,11 @@ static void usage (void)
     printf("   -tssubdecode: sub-decode sections or pes from ts stream decoding\n");
     printf("   -tsraw:       read raw/full TS in TS snoop mode\n");
     printf("   -b:           binary output of packets (disables other output)\n");
-    printf("   -if file:     input file, reads from binary <file> instead of demux device\n");
+// $$$ TODO  -of cmd option
+//  printf("   -of file:     output file, writes binary <file> (implies -b)\n");
+//  printf("                  <file>=\"-\" = /dev/stdout \n");
+    printf("   -if file:     input file, reads from binary <file> instead of demux device \n");
+    printf("                  <file>=\"-\" = /dev/stdin \n");
     printf("   -ph mode:     data hex dump mode, modes: [-ph 4]\n");
     printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line 4=hexdump2\n");
     printf("   -nph:         don't print hex dump of buffer [= -nohexdumpbuffer -ph 0]\n");
