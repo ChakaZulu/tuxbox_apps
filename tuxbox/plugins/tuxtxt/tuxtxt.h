@@ -96,7 +96,7 @@ int displaywidth;
 
 #if CFGTTF
 #define TV43STARTX (ex - 146) //(StartX + 2 + (40-nofirst)*fontwidth_topmenumain + (40*fontwidth_topmenumain/abx))
-#define TV169FULLSTARTX (sx + (ex - sx)/2) //(StartX + (40-nofirst)*fontwidth_small + ((40-nofirst)*fontwidth_small/abx))
+#define TV169FULLSTARTX (sx +(ex +1 - sx)/2) //(StartX + (40-nofirst)*fontwidth_small + ((40-nofirst)*fontwidth_small/abx))
 #define TVENDX ex
 #else
 #define TV43STARTX (StartX + 2 + 40*fontwidth_topmenumain)

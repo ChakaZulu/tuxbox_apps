@@ -409,16 +409,20 @@ void ClearB(int color)
 {
 	memset(lfb, color, 2*var_screeninfo.xres*var_screeninfo.yres);
 }
+int  GetCurFontWidth()
+{
+	int mx = (displaywidth)%(40-nofirst); // # of unused pixels
+	int abx = (mx == 0 ? displaywidth+1 : (displaywidth)/(mx+1));// distance between 'inserted' pixels
+	int nx= abx+1-((PosX-sx) % (abx+1)); // # of pixels to next insert
+	return fontwidth+(((PosX+fontwidth+1-sx) <= displaywidth && nx <= fontwidth+1) ? 1 : 0);
+}
 void SetPosX(int column)
 {
 #if CFGTTF
-		int abx = ((displaywidth)%(40-nofirst) == 0 ? displaywidth+1 : (displaywidth)/(((displaywidth)%(40-nofirst))));// distance between 'inserted' pixels
-//		int abx = (displaywidth)/(((displaywidth)%(40-nofirst))+1);// distance between 'inserted' pixels
 		PosX = StartX;
 		int i;
 		for (i = 0; i < column-nofirst; i++)
-			PosX += fontwidth+(((PosX-sx) / abx) < ((PosX+fontwidth+1-sx) /abx) ? 1 : 0);
-//		PosX = StartX + (column-nofirst)*fontwidth + ((column-nofirst)*fontwidth/abx);
+			PosX += GetCurFontWidth();
 #else
 		PosX = StartX + (column-nofirst)*fontwidth;
 #endif
@@ -426,7 +430,7 @@ void SetPosX(int column)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.81 $";
+	char cvs_revision[] = "$Revision: 1.82 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -750,7 +754,7 @@ int Init()
 	fontheight = 21;//(ey-sy) / 25;
 	fontwidth = fontwidth_normal = (ex-sx) / 40;
 	fontwidth_topmenumain = (TV43STARTX-sx) / 40;
-	fontwidth_topmenusmall = (ex- TV43STARTX) / TOPMENUCHARS;
+	fontwidth_topmenusmall = (ex- TOPMENUSTARTX) / TOPMENUCHARS;
 	fontwidth_small = (TV169FULLSTARTX-sx)  / 40;
 	ymosaic[0] = 0; /* y-offsets for 2*3 mosaic */
 	ymosaic[1] = (fontheight + 1) / 3;
@@ -2935,8 +2939,8 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	int factor;
 	unsigned char *sbitbuffer;
 
-	int abx = ((displaywidth)%(40-nofirst) == 0 ? displaywidth+1 : (displaywidth)/(((displaywidth)%(40-nofirst))));// distance between 'inserted' pixels
-	int curfontwidth = fontwidth+(((PosX-sx) / abx) < ((PosX+fontwidth+1-sx) /abx) ? 1 : 0);
+	int curfontwidth = GetCurFontWidth();
+
 
 	if (Char == 0xFF)	/* skip doubleheight chars in lower line */
 	{
@@ -3682,7 +3686,7 @@ void RenderPage()
 #if CFGTTF
 		fontwidth = fontwidth_normal = (ex-sx) / (40-nofirst);
 		fontwidth_topmenumain = (TV43STARTX-sx) / (40-nofirst);
-		fontwidth_topmenusmall = (ex- TV43STARTX - TOPMENUINDENTDEF) / TOPMENUCHARS;
+		fontwidth_topmenusmall = (ex- TOPMENUSTARTX) / TOPMENUCHARS;
 		fontwidth_small = (TV169FULLSTARTX-sx)  / (40-nofirst);
 		switch(screenmode)
 		{
@@ -3740,7 +3744,7 @@ void showlink(int column, int linkpage, int Attrib)
 		yoffset = var_screeninfo.yres;
 	
 #if CFGTTF
-	int abx = (displaywidth)/(((displaywidth)%(40-nofirst))+1);// distance between 'inserted' pixels
+	int abx = ((displaywidth)%(40-nofirst) == 0 ? displaywidth+1 : (displaywidth)/(((displaywidth)%(40-nofirst)))+1);// distance between 'inserted' pixels
 	int width = displaywidth /4;
 #else
 	int width = ((40-nofirst)*oldfontwidth)/4;
@@ -3784,7 +3788,7 @@ void showlink(int column, int linkpage, int Attrib)
 	else
 	{
 
-		if (showflof && flofpages[page][0] != 0) // FLOF-Navigation present
+		if (!showhex && showflof && flofpages[page][0] != 0) // FLOF-Navigation present
 		{
 			if (column == 0)
 			{
@@ -3828,6 +3832,7 @@ void showlink(int column, int linkpage, int Attrib)
 		else
 		{
 			PosX = StartX + column*width;
+			FillRect(PosX, PosY+yoffset, displaywidth+sx-PosX, fontheight, Attrib >> 4);
 		if (linkpage < page)
 		{
 			line[6] = '<';
@@ -3835,7 +3840,7 @@ void showlink(int column, int linkpage, int Attrib)
 		}
 		else
 			hex2str(line + 6, linkpage);
-		for (p = line; p < line+10; p++)
+			for (p = line; p < line+9; p++)
 			RenderCharBB(*p, Attrib);
 	}
 }
@@ -3892,7 +3897,7 @@ void CreateLine25()
 
 #if CFGTTF 
 		int olddisplaywidth = displaywidth;
-		displaywidth = fontwidth_topmenusmall*(40-nofirst);
+		displaywidth = 1000*(40-nofirst); // disable pixelinsert;
 		fontwidth = fontwidth_topmenusmall;
 		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 #else	 /* !TTF */
@@ -4030,8 +4035,6 @@ void CopyBB2FB()
 
 	src = dst = topsrc = lfb + StartY*var_screeninfo.xres;
 
-	if (zoommode == 2)
-		src += 12*fontheight*var_screeninfo.xres;
 
 	if (var_screeninfo.yoffset)
 		dst += var_screeninfo.xres * var_screeninfo.yres;
@@ -4040,12 +4043,16 @@ void CopyBB2FB()
 		src += var_screeninfo.xres * var_screeninfo.yres;
 		topsrc += var_screeninfo.xres * var_screeninfo.yres;
 	}
+	if (!pagecatching )
+		memcpy(dst+(24*fontheight)*var_screeninfo.xres, src + (24*fontheight)*var_screeninfo.xres, var_screeninfo.xres*fontheight); /* copy line25 in normal height */
 
 	if (transpmode)
 		fillcolor = transp;
 	else
 		fillcolor = black;
 
+	if (zoommode == 2)
+		src += 12*fontheight*var_screeninfo.xres;
 
 	if (screenmode == 1) /* copy topmenu in normal height (since PIG also keeps dimensions) */
 	{
@@ -4055,15 +4062,15 @@ void CopyBB2FB()
 
 		topsrc += screenwidth;
 		topdst += screenwidth;
-		for (i = 0; i < 25*fontheight; i++)
+		for (i=0; i < 24*fontheight; i++)
 		{
-			memcpy(topdst, topsrc,screenwidth);
+			memcpy(topdst, topsrc,ex-screenwidth);
 			topdst += var_screeninfo.xres;
 			topsrc += var_screeninfo.xres;
 		}
 	}
 	else if (screenmode == 2)
-		screenwidth = TV169FULLSTARTX+sx;
+		screenwidth = TV169FULLSTARTX;
 	else
 		screenwidth = var_screeninfo.xres;
 		
@@ -4081,9 +4088,9 @@ void CopyBB2FB()
 		src += var_screeninfo.xres;
 	}
 
-	if (!pagecatching)
-		memcpy(dst, lfb + (StartY+24*fontheight)*var_screeninfo.xres, var_screeninfo.xres*fontheight); /* copy line25 in normal height */
-	for (i = 0; i<var_screeninfo.yres - StartY - 25*fontheight;i++)
+//	if (!pagecatching )
+//		memcpy(dst, lfb + (StartY+24*fontheight)*var_screeninfo.xres, var_screeninfo.xres*fontheight); /* copy line25 in normal height */
+	for (i = var_screeninfo.yres - StartY - 25*fontheight; i >= 0;i--)
 	{
 		memset(dst + var_screeninfo.xres*(fontheight+i), fillcolor, screenwidth);
 	}
@@ -4291,8 +4298,9 @@ void DecodePage()
 		hex2str(page_char+3, page);
 		if (subpage != 0)
 		{
-			hex2str(page_char+6, subpage);
 			*(page_char+4) ='/';
+			*(page_char+5) ='0';
+			hex2str(page_char+6, subpage);
 		}
 
 	}
