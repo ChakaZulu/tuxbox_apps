@@ -108,7 +108,7 @@ recordingmenu.vcr Video Recorda
 recordingmenu.server_wakeup Serva zum Aufnemma (WOL)
 recordingmenu.server_mac MAC-Adressn
 recordingmenu.setupnow los moachs !
-recordingmenu.no_scart unset
+recordingmenu.no_scart Scart Umschoita untadrucka
 
 ping.ok kumt wos (ping)
 ping.unreachable kumt nix (unreachable)
@@ -407,7 +407,7 @@ cam.wrong Obacht, Eana CAM_ALPHA.BIN passt\nned zu Eanara Smart-Card!!!\n\nWoins
 ucodes.failure Obacht, de µCodes san ned gfundn worn!\n\nLoans de doch bittschen mit FTP \nauffi, und startns de Box numoi!
 
 stringinput.caps Groß-/Koabuchstobm
-stringinput.clear unset
+stringinput.clear Ois löschn
 
 streamingserver.noconnect Kao Verbindung zum Streamingserva.\nDe Aufnahme werd obbrocha.
 
@@ -658,13 +658,13 @@ filebrowser.select auswaehn
 filebrowser.mark markiern
 filebrowser.scan Verzeichnisse durchsuacha
 
-nfs.mount unset
-nfs.ip unset
-nfs.dir unset
-nfs.localdir unset
-nfs.automount unset
-nfs.mountnow unset
-nfs.mounterror unset
-nfs.umount unset
-nfs.umounterror unset
-nfs.alreadymounted unset
+nfs.mount NFS Verzeichnis mountn
+nfs.ip NFS Serva IP
+nfs.dir NFS Verzeichnis
+nfs.localdir Verzeichnis auf da Box
+nfs.automount Beim Startn mountn
+nfs.mountnow Jetzad mountn
+nfs.mounterror Mount-Fähla
+nfs.umount NFS Verzeichnis freigem
+nfs.umounterror Fähla beim Freigem
+nfs.alreadymounted Verzeichnis is scho gmounted
