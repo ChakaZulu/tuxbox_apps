@@ -1,3 +1,15 @@
+/*
+$Id: sdt.cpp,v 1.15 2002/04/04 14:54:34 rasc Exp $
+
+
+$Log: sdt.cpp,v $
+Revision 1.15  2002/04/04 14:54:34  rasc
+- timeout increase
+
+
+
+*/
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -47,7 +59,7 @@ int sdt(uint16_t oservice_id, bool scan_mode)
 	flt.pid = 0x0011;
 	flt.filter.filter[0] = 0x42;
 	flt.filter.mask[0] = 0xFF;
-	flt.timeout = 10000;
+	flt.timeout = 10000;		/* 10 sec max. accord. ETSI (2002-04-04 rasc) */
 	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 
 	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
