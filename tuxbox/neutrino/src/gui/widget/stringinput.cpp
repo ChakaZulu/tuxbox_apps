@@ -37,6 +37,7 @@
 
 #include <gui/color.h>
 
+#include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
 #include <gui/widget/messagebox.h>
 
@@ -322,10 +323,10 @@ void CStringInput::paint()
 
 	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 
-	if ( hint_1.length()> 0 )
+	if (!hint_1.empty())
 	{
 		g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, g_Locale->getText(hint_1), COL_MENUCONTENT, 0, true); // UTF-8
-		if ( hint_2.length()> 0 )
+		if (!hint_2.empty())
 			g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2), COL_MENUCONTENT, 0, true); // UTF-8
 	}
 
@@ -423,8 +424,7 @@ void CStringInputSMS::NormalKeyPressed(const unsigned int key)
 
 void CStringInputSMS::keyRedPressed()		// switch between lower & uppercase
 {
-	if (((value[selected]>='a') && (value[selected]<='z')) ||
-		((value[selected]>='A') && (value[selected]<='Z')))
+	if (((value[selected] | 32) >= 'a') && ((value[selected] | 32) <= 'z'))
 	value[selected] ^= 32;
 
 	paintChar(selected);
@@ -435,23 +435,61 @@ void CStringInputSMS::keyYellowPressed()		// clear all
 	last_digit = -1;
 	CStringInput::keyYellowPressed();
 }
+
 void CStringInputSMS::keyUpPressed()
-{}
+{
+	last_digit = -1;
+
+	if (selected > 0)
+	{
+		int lastselected = selected;
+		selected = 0;
+		paintChar(lastselected);
+		paintChar(selected);
+	}
+}
 
 void CStringInputSMS::keyDownPressed()
-{}
+{
+	last_digit = -1;
+
+	int lastselected = selected;
+	
+	selected = size - 1;
+
+	while (value[selected] == ' ')
+	{
+		selected--;
+		if (selected < 0)
+			break;
+	}
+
+	if (selected < (size - 1))
+		selected++;
+	
+	paintChar(lastselected);
+	paintChar(selected);
+}
 
 void CStringInputSMS::keyLeftPressed()
 {
-	last_digit = -1;				// no key pressed yet
+	last_digit = -1;
 	CStringInput::keyLeftPressed();
 }
 
 void CStringInputSMS::keyRightPressed()
 {
-	last_digit = -1;				// no key pressed yet
+	last_digit = -1;
 	CStringInput::keyRightPressed();
 }
+
+const struct button_label CStringInputSMSButtons[2] =
+{
+	{ NEUTRINO_ICON_BUTTON_RED   , "stringinput.caps"   },
+//	{ NEUTRINO_ICON_BUTTON_GREEN , ""},
+	{ NEUTRINO_ICON_BUTTON_YELLOW, "stringinput.clear" }
+//	{ NEUTRINO_ICON_BUTTON_BLUE  , ""}
+};
 
 void CStringInputSMS::paint()
 {
@@ -462,10 +500,7 @@ void CStringInputSMS::paint()
 	frameBuffer->paintBoxRel(x,y+height-25, width,25, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
 
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+8, y+height-25+1);
-	g_Fonts->infobar_small->RenderString(x+28, y+height-25+24 - 2, width, g_Locale->getText("stringinput.caps"), COL_INFOBAR, 0, true); // UTF-8
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+238, y+height-25+1);
-	g_Fonts->infobar_small->RenderString(x+258, y+height-25+24 - 2, width, g_Locale->getText("stringinput.clear"), COL_INFOBAR, 0, true); // UTF-8
+	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 8, y+height-25+1, 230, 2, CStringInputSMSButtons);
 }
 
 void CPINInput::paintChar(int pos)
