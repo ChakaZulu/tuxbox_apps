@@ -503,8 +503,8 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
 	stats+=tmp;
 
-//	tmp.sprintf("<span class=\"white\">vpid: 0x%x</span> | <a class=\"audio\" href=\"/audio.pls\">apid: 0x%x</a>", Decoder::parms.vpid, Decoder::parms.apid);
-//	stats+=tmp;
+	tmp.sprintf("<span class=\"white\">vpid: 0x%x</span> | <a class=\"audio\" href=\"/audio.pls\">apid: 0x%x</a>", Decoder::parms.vpid, Decoder::parms.apid);
+	stats+=tmp;
 	tvc="normal";
 	radioc="normal";
 	aboutc="normal";
