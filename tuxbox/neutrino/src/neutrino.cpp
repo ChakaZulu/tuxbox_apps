@@ -448,7 +448,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.streaming_server_cddrive, configfile.getString("streaming_server_cddrive", "D:").c_str() );
 	strcpy( g_settings.streaming_videorate,  configfile.getString("streaming_videorate", "1000").c_str() );
 	strcpy( g_settings.streaming_audiorate, configfile.getString("streaming_audiorate", "192").c_str() );
-	strcpy( g_settings.streaming_server_startdir, configfile.getString("streaming_server_startdir", "C:\\Movies").c_str() );
+	strcpy( g_settings.streaming_server_startdir, configfile.getString("streaming_server_startdir", "C:/Movies").c_str() );
 	
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
