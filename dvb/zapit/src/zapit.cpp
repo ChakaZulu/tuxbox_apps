@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.25 2001/10/31 10:47:31 field Exp $
+  $Id: zapit.cpp,v 1.26 2001/10/31 12:36:21 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.26  2001/10/31 12:36:21  field
+  vtxt abgedreht vor dem scan
+
   Revision 1.25  2001/10/31 10:47:31  field
   silent mode (-d debug switch)
 
@@ -1349,7 +1352,12 @@ void start_scan()
   allnumchannels_tv.clear();
   allnumchannels_radio.clear();
   allnamechannels_tv.clear();
-  allnamechannels_radio.clear();	
+  allnamechannels_radio.clear();
+  found_transponders = 0;
+  found_channels = 0;	
+
+  set_vtxt(0); // vtxt stoppen
+
   if (pthread_create(&scan_thread, 0, start_scanthread,0))
   {
   	perror("[zapit] pthread_create: scan_thread");
@@ -1881,7 +1889,7 @@ int main(int argc, char **argv) {
     }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.25 2001/10/31 10:47:31 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.26 2001/10/31 12:36:21 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
