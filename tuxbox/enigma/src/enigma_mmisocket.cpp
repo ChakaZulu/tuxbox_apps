@@ -173,7 +173,7 @@ void eSocketMMIHandler::initiateMMI()
 {
 	int ret=0;
 	{
-		unsigned char buf[]="\x9F\x88\x01";  // DISPLAY CONTROL
+		unsigned char buf[]="\x9F\x80\x22";  // ENTER MENU
 		ret = send_to_mmisock(buf, 3);
 	}
 	if ( ret )
