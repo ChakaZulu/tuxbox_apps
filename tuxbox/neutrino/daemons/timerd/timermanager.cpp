@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.12 2002/05/17 03:28:06 dirch Exp $
+	$Id: timermanager.cpp,v 1.13 2002/05/17 19:50:41 dirch Exp $
 
 	License: GPL
 
@@ -143,8 +143,8 @@ void CTimerEvent::printEvent(void)
 	dprintf("eventID: %03d type: %d time:%d (%02d.%02d. %02d:%02d) ",eventID,eventType,time(),alarmtime.tm_mday,alarmtime.tm_mon+1,alarmtime.tm_hour,alarmtime.tm_min)
 	switch(eventType)
 	{		
-		case CTimerdClient::TIMER_NEXTPROGRAM :
-			dprintf("NextProgram: %u\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.onidSid);
+		case CTimerdClient::TIMER_ZAPTO :
+			dprintf("Zapto: %u\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.onidSid);
 		break;
 
 		case CTimerdClient::TIMER_STANDBY :
@@ -206,32 +206,29 @@ void CTimerEvent_Shutdown::fireEvent()
 void CTimerEvent_Standby::fireEvent()
 {
 	dprintf("Standby Timer fired: %s\n",standby_on?"on":"off");
-	if(standby_on)
-		CTimerManager::getInstance()->getEventServer()->sendEvent(
-			CTimerdClient::EVT_STANDBY_ON,
-			CEventServer::INITID_TIMERD);
-	else
-		CTimerManager::getInstance()->getEventServer()->sendEvent(
-			CTimerdClient::EVT_STANDBY_OFF,
-			CEventServer::INITID_TIMERD);
-
+	CTimerManager::getInstance()->getEventServer()->sendEvent(
+		(standby_on)?CTimerdClient::EVT_STANDBY_ON:CTimerdClient::EVT_STANDBY_OFF,
+		CEventServer::INITID_TIMERD);
 }
 //-----------------------------------------
 void CTimerEvent_Record::fireEvent()
 {
-	dprintf("Record Timer fired\n");
+	dprintf("Record Timer fired\n"); 
 }
 //-----------------------------------------
 
+void CTimerEvent_Zapto::fireEvent()
+{
+	dprintf("Zapto Timer fired, onidSid: %d\n",eventInfo.onidSid);
+	CTimerManager::getInstance()->getZapitClient()->zapTo_serviceID(eventInfo.onidSid);
+}
+
+//-----------------------------------------
 void CTimerEvent_NextProgram::fireEvent()
 {
-	dprintf("NextProgram Timer fired, onidSid: %d\n",eventInfo.onidSid);
-	CTimerManager::getInstance()->getZapitClient()->zapTo_serviceID(eventInfo.onidSid);
-/*
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_NEXTPROGRAM,
 		CEventServer::INITID_TIMERD,
 		&eventInfo,
 		sizeof(eventInfo));
-*/
 }

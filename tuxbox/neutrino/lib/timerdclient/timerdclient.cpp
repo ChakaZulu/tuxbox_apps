@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: timerdclient.cpp,v 1.7 2002/05/17 13:06:51 woglinde Exp $
+	$Id: timerdclient.cpp,v 1.8 2002/05/17 19:50:41 dirch Exp $
 
 	License: GPL
 
@@ -175,7 +175,7 @@ int CTimerdClient::addTimerEvent( timerTypes evType, void* data, int min, int ho
 	{
 		length = 0;
 	}
-	else if (evType == TIMER_NEXTPROGRAM)
+	else if (evType == TIMER_NEXTPROGRAM || evType == TIMER_ZAPTO)
 	{
 		length = sizeof( CTimerd::EventInfo);
 	}

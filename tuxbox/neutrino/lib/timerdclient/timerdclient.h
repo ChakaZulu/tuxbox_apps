@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.9 2002/05/17 12:23:47 dirch Exp $
+	$Id: timerdclient.h,v 1.10 2002/05/17 19:50:41 dirch Exp $
 
 	License: GPL
 
@@ -65,6 +65,7 @@ class CTimerdClient
 		{
 			TIMER_SHUTDOWN = 1,
 			TIMER_NEXTPROGRAM,
+			TIMER_ZAPTO,
 			TIMER_STANDBY,
 			TIMER_RECORD
 		};
@@ -102,11 +103,18 @@ class CTimerdClient
 			addTimerEvent(TIMER_RECORD,NULL, min, hour, day, month);
 		};
 
-		int addNextProgramTimerEvent(unsigned onidSid,int min = 0, int hour = 0, int day = 0, int month = 0)
+		int addNextProgramTimerEvent(CTimerd::EventInfo eventInfo,int min = 0, int hour = 0, int day = 0, int month = 0)
+		{
+			// mal auf verdacht eingebaut
+			// keine ahnung ob / was hier noch fehlt
+			addTimerEvent(TIMER_NEXTPROGRAM,&eventInfo, min, hour, day, month);
+		};
+
+		int addZaptoTimerEvent(unsigned onidSid,int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
 			CTimerd::EventInfo eventInfo;
 			eventInfo.onidSid = onidSid;
-			addTimerEvent(TIMER_NEXTPROGRAM,&eventInfo, min, hour, day, month);
+			addTimerEvent(TIMER_ZAPTO,&eventInfo, min, hour, day, month);
 		};
 
 		int addStandbyTimerEvent(bool standby_on,int min = 0, int hour = 0, int day = 0, int month = 0)

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.8 2002/05/14 23:10:36 dirch Exp $
+	$Id: timerd.cpp,v 1.9 2002/05/17 19:50:41 dirch Exp $
 
 	License: GPL
 
@@ -53,7 +53,7 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 		return;
 	}
 
-//	CTimerEvent_NextProgram::EventMap::iterator it = NULL;
+	CTimerEvent_NextProgram::EventMap::iterator it = NULL;
 	CTimerEventMap events;
 	switch (rmessage->cmd)
 	{
@@ -94,6 +94,7 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 
 			CTimerd::responseAddTimer rspAddTimer;
 			CTimerEvent* event;
+			CTimerd::EventInfo evInfo;
 			switch (msgAddTimer.evType)
 			{
 
@@ -122,19 +123,21 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
 				break;
 
-				case CTimerdClient::TIMER_NEXTPROGRAM :
-					CTimerd::EventInfo evInfo;
+				case CTimerdClient::TIMER_ZAPTO :
 					read( connfd, &evInfo, sizeof(CTimerd::EventInfo));
 					if(evInfo.onidSid > 0)
 					{
-						event = new CTimerEvent_NextProgram(
+						event = new CTimerEvent_Zapto(
 							msgAddTimer.month, msgAddTimer.day,
 							msgAddTimer.hour, msgAddTimer.min);
 						static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.onidSid = evInfo.onidSid;
 						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
 					}
-/*					CTimerEvent_NextProgram::EventInfo evInfo;
-					read( connfd, &evInfo, sizeof(CTimerEvent_NextProgram::EventInfo));
+				break;
+
+				case CTimerdClient::TIMER_NEXTPROGRAM :
+//					CTimerd::EventInfo evInfo;
+					read( connfd, &evInfo, sizeof(CTimerd::EventInfo));
 
 					it = CTimerEvent_NextProgram::events.find( evInfo.uniqueKey);
 					if (it == CTimerEvent_NextProgram::events.end())
@@ -156,7 +159,7 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 						event->alarmtime.tm_min  = msgAddTimer.min;
 						rspAddTimer.eventID = event->eventID;
 					}
-*/
+
 				break;
 				default:
 					event = new CTimerEvent(

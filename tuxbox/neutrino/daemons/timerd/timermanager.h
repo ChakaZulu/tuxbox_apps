@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.8 2002/05/17 03:27:28 dirch Exp $
+	$Id: timermanager.h,v 1.9 2002/05/17 19:50:41 dirch Exp $
 
 	License: GPL
 
@@ -126,6 +126,17 @@ class CTimerEvent_NextProgram : public CTimerEvent
 
 		CTimerEvent_NextProgram( int mon = 0, int day = 0, int hour = 0, int min = 0) :
 			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_NEXTPROGRAM){};
+		virtual void fireEvent();
+};
+
+class CTimerEvent_Zapto : public CTimerEvent
+{
+	public:
+
+		CTimerd::EventInfo eventInfo;
+
+		CTimerEvent_Zapto( int mon = 0, int day = 0, int hour = 0, int min = 0) :
+			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_ZAPTO){};
 		virtual void fireEvent();
 };
 
