@@ -85,7 +85,7 @@ class CListBox : public CMenuWidget
 
 		//------malen der Items-------------------
 		virtual int getItemHeight();
-		virtual void paintItem(int itemNr, int paintNr, bool selected);
+		virtual void paintItem(uint itemNr, int paintNr, bool selected);
 
 		//------Benutzung von setModified---------
 		void setModified( bool modified = true );
