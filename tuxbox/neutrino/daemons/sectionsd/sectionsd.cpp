@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.29 2001/07/23 00:22:15 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.30 2001/07/23 02:43:30 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.30  2001/07/23 02:43:30  fnbrd
+//  internal changes.
+//
 //  Revision 1.29  2001/07/23 00:22:15  fnbrd
 //  Many internal changes, nvod-events now functional.
 //
@@ -385,12 +388,13 @@ inline int readNbytes(int fd, char *buf, int n, unsigned timeoutInSeconds)
 {
 int j;
 
+  timeoutInSeconds*=1000; // in Millisekunden aendern
   for(j=0; j<n;) {
     struct pollfd ufds;
     ufds.fd=fd;
     ufds.events=POLLIN;
     ufds.revents=0;
-    int rc=poll(&ufds, 1, timeoutInSeconds*1000);
+    int rc=poll(&ufds, 1, timeoutInSeconds);
     if(!rc)
       return 0; // timeout
     else if(rc<0 && errno==EINTR)
@@ -400,19 +404,21 @@ int j;
 //      printf("errno: %d\n", errno);
       return -1;
     }
+    if(!(ufds.revents&POLLIN)) {
+      // POLLHUP, beim dmx bedeutet das DMXDEV_STATE_TIMEDOUT ?
+//      dprintf("revents: 0x%hx\n", ufds.revents);
+      usleep(200*1000UL); // wir warten 200 Millisekunden bevor wir es nochmal probieren
+      if(timeoutInSeconds<=200)
+        return 0; // timeout
+      timeoutInSeconds-=200;
+      continue;
+    }
     int r=read (fd, buf, n-j);
     if(r>0) {
       j+=r;
       buf+=r;
     }
     else if(r<=0 && errno!=EINTR) {
-      // Hier kommt manchmal ein ETIMEDOUT
-      // Darf eigentlich nicht sein, da oben gebprueft wird
-      // ob Daten vorhanden sind. D.h. es sind
-      // weniger Daten da, als abgefragt werden
-      // Da aber nie mehr als ein Packet vom DMX requestet
-      // wird, und dieser auf CHECK_CRC steht, duerfte
-      // das nicht vorkommen
 //      printf("errno: %d\n", errno);
       perror ("[sectionsd] read");
       return -1;
@@ -441,6 +447,7 @@ class DMX {
     }
     ~DMX() {
       closefd();
+      pthread_mutex_destroy(&dmxlock); // ist bei Linux ein dummy
     }
     int start(void); // calls unlock at end
     int read(char *buf, size_t buflength, unsigned timeoutInSeconds) {
@@ -472,7 +479,9 @@ class DMX {
     }
     bool isScheduled;
     time_t lastChanged;
-
+    bool isOpen(void) {
+      return fd ? true : false;
+    }
   private:
     int fd;
     pthread_mutex_t dmxlock;
@@ -543,7 +552,9 @@ int DMX::change(void)
 {
   if(!fd)
     return 1;
-  dprintf("changeDMX -> %s\n", isScheduled ? "current/next" : "scheduled" );
+
+  if(pID==0x12) // Nur bei EIT
+    dprintf("changeDMX -> %s\n", isScheduled ? "current/next" : "scheduled" );
   if(pause()) // -> lock
     return 2;
   struct dmxSctFilterParams flt;
@@ -1084,6 +1095,7 @@ const unsigned timeoutInSeconds=2;
     int rc=dmxSDT.read((char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
       dmxSDT.unlock();
+      dputs("dmxSDT.read timeout");
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
@@ -1105,6 +1117,10 @@ const unsigned timeoutInSeconds=2;
     dmxSDT.unlock();
     if(!rc) {
       delete[] buf;
+      dputs("dmxSDT.read timeout after header");
+      // DMX neu starten, noetig, da bereits der Header gelesen wurde
+      dmxSDT.pause(); // -> lock
+      dmxSDT.unpause(); // -> unlock
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
@@ -1221,100 +1237,74 @@ static void parseDescriptors(const char *des, unsigned len, const char *countryC
 */
 static void *timeThread(void *)
 {
-int fd;
-struct dmxSctFilterParams flt;
 const unsigned timeoutInSeconds=31;
 char *buf;
+DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256);
 
 //  pthread_detach(pthread_self());
   dprintf("time-thread started.\n");
-  memset (&flt.filter, 0, sizeof (struct dmxFilter));
-  flt.pid              = 0x14;
-  flt.filter.filter[0] = 0x70; // TDT
-  flt.filter.mask[0]   = 0xff;
-  flt.timeout          = 0;
-  flt.flags            = DMX_IMMEDIATE_START;
-
+  dmxTOT.lock();
   // Zuerst per TDT (schneller)
-  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("[sectionsd] /dev/ost/demux0");
+  if(dmxTOT.start()) // -> unlock
     return 0;
-  }
-  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
-    close(fd);
-    perror ("[sectionsd] DMX_SET_FILTER");
+  if(dmxTOT.change()) // von TOT nach TDT wechseln
     return 0;
-  }
-  {
   struct SI_section_TDT_header tdt_header;
-  int rc=readNbytes(fd, (char *)&tdt_header, sizeof(tdt_header), timeoutInSeconds);
+  int rc=dmxTOT.read((char *)&tdt_header, sizeof(tdt_header), timeoutInSeconds);
   if(rc>0) {
     time_t tim=changeUTCtoCtime(((const unsigned char *)&tdt_header)+3);
     if(tim) {
       if(stime(&tim)< 0) {
         perror("[sectionsd] cannot set date");
-	close(fd);
-	return 0;
+	dmxTOT.closefd();
+        return 0;
       }
       timeset=1;
       time_t t=time(NULL);
       dprintf("local time: %s", ctime(&t));
     }
   }
-  }
-  if (ioctl (fd, DMX_STOP, 0) == -1) {
-    close(fd);
-    perror ("[sectionsd] DMX_STOP");
+  if(dmxTOT.change()) // von TDT nach TOT wechseln
     return 0;
-  }
-  flt.filter.filter[0] = 0x73; // TOT
-  flt.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
-    close(fd);
-    perror ("[sectionsd] DMX_SET_FILTER");
-    return 0;
-  }
   // Jetzt wird die Uhrzeit nur noch per TOT gesetzt (CRC)
   for(;;) {
-    if(!fd) {
-      if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-        perror ("[sectionsd] /dev/ost/demux0");
+    if(!dmxTOT.isOpen()) {
+      dmxTOT.lock();
+      if(dmxTOT.start()) // -> unlock
         return 0;
-      }
-      if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
-        close(fd);
-        perror ("[sectionsd] DMX_SET_FILTER");
-        return 0;
-      }
     }
     struct SI_section_TOT_header header;
-    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+    int rc=dmxTOT.read((char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
+      dputs("dmxTOT.read timeout");
       continue; // timeout -> keine Zeit
     }
     else if(rc<0) {
-      close(fd);
+      dmxTOT.closefd();
       break;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
       fprintf(stderr, "Not enough memory!\n");
-      close(fd);
+      dmxTOT.closefd();
       break;
     }
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
-    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    rc=dmxTOT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    delete[] buf;
     if(!rc) {
-      delete[] buf;
+      dputs("dmxTOT.read timeout after header");
+      // DMX neu starten, noetig, da bereits der Header gelesen wurde
+      dmxTOT.pause(); // -> lock
+      dmxTOT.unpause(); // -> unlock
       continue; // timeout -> kein TDT
     }
     else if(rc<0) {
-      delete[] buf;
+      dmxTOT.closefd();
       break;
     }
     time_t tim=changeUTCtoCtime(((const unsigned char *)&header)+3);
-//    printf("time: %ld\n", tim);
     if(tim) {
 //      timeOffsetFound=0;
 //      parseDescriptors(buf+sizeof(struct SI_section_TOT_header), ((struct SI_section_TOT_header *)buf)->descriptors_loop_length, "DEU");
@@ -1324,15 +1314,14 @@ char *buf;
 //        tim+=timeOffsetMinutes*60L;
       if(stime(&tim)< 0) {
         perror("[sectionsd] cannot set date");
+    	dmxTOT.closefd();
 	break;
       }
       timeset=1;
       time_t t=time(NULL);
       dprintf("local time: %s", ctime(&t));
     }
-    delete[] buf;
-    close(fd);
-    fd=0;
+    dmxTOT.closefd();
     if(timeset)
       rc=60*30;  // sleep 30 minutes
     else
@@ -1359,10 +1348,18 @@ const unsigned timeoutInSeconds=2;
   if(dmxEIT.start()) // -> unlock
     return 0;
   for(;;) {
+    time_t zeit=time(NULL);
+    if(dmxEIT.isScheduled) {
+      if(zeit>dmxEIT.lastChanged+TIME_EIT_SCHEDULED)
+        dmxEIT.change(); // -> lock, unlock
+    }
+    else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
+      dmxEIT.change(); // -> lock, unlock
     dmxEIT.lock();
     int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
       dmxEIT.unlock();
+      dputs("dmxEIT.read timeout");
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
@@ -1385,6 +1382,10 @@ const unsigned timeoutInSeconds=2;
     dmxEIT.unlock();
     if(!rc) {
       delete[] buf;
+      dputs("dmxEIT.read timeout after header");
+      // DMX neu starten, noetig, da bereits der Header gelesen wurde
+      dmxEIT.pause(); // -> lock
+      dmxEIT.unpause(); // -> unlock
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
@@ -1397,13 +1398,7 @@ const unsigned timeoutInSeconds=2;
     if(header.current_next_indicator) {
       // Wir wollen nur aktuelle sections
       SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
-      time_t zeit=time(NULL);
-      if(dmxEIT.isScheduled) {
-        if(zeit>dmxEIT.lastChanged+TIME_EIT_SCHEDULED)
-          dmxEIT.change(); // -> lock, unlock
-      }
-      else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
-        dmxEIT.change(); // -> lock, unlock
+      zeit=time(NULL);
       // Nicht alle Events speichern
       for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
         if(e->times.size()>0) {
@@ -1516,7 +1511,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.29 2001/07/23 00:22:15 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.30 2001/07/23 02:43:30 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
