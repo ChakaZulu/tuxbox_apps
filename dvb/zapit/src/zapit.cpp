@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.95 2002/03/18 12:34:03 happydude Exp $
+  $Id: zapit.cpp,v 1.96 2002/03/18 19:00:53 happydude Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -265,29 +265,176 @@ int set_vtxt (uint vpid)
 
 uint32_t _(uint8_t*_,uint16_t ___,uint16_t __){uint8_t o,O=0x00;for(o=0;o<___;o+=_[o+1]+2){if((_[o]==9)&&((_[o+2]<<8)+_[o+3]==__)&&((((_[o+2]<<8)+_[o+3])>>8)==(215&(24|_[o]+30))))return((_[o+4]&31)<<8)+_[o+5];if(_[o]==9)O=0x01;}if(O<=++o+-1*--o)return(1<<16)|(0<<8)|(O);else{return(O);}}
 
+uint16_t parse_es_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
+
+/* Stream types                                                                                        */
+/* 0x01 ISO/IEC 11172 Video                                                                            */
+/* 0x02 ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream */
+/* 0x03 ISO/IEC 11172 Audio                                                                            */
+/* 0x04 ISO/IEC 13818-3 Audio                                                                          */
+/* 0x06 ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data, e.g. teletext or ac3 */
+
+{
+	uint8_t stream_type;
+	uint16_t elementary_PID;
+	uint16_t ES_info_length;
+	uint16_t descr_pos;
+	uint8_t descriptor_tag;
+	uint8_t descriptor_length;
+	int ap_count = ret_pids->count_apids;
+	int vp_count = ret_pids->count_vpids;
+	int ecm_pid = ret_pids->ecmpid;
+
+	stream_type = buffer[0];
+	elementary_PID = ((buffer[1] & 0x1f) << 8) | buffer[2];
+	ES_info_length = ((buffer[3] & 0x0f) << 8) | buffer[4];
+
+	if ((stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06) && ap_count < max_num_apids)
+	{
+		ret_pids->apids[ap_count].component_tag = -1;
+		ret_pids->apids[ap_count].is_ac3 = false;
+		ret_pids->apids[ap_count].desc[0] = 0;
+	}
+
+	for (descr_pos = 5; descr_pos < ES_info_length + 5; descr_pos += descriptor_length + 2)
+	{
+		descriptor_tag = buffer[descr_pos];
+		descriptor_length = buffer[descr_pos + 1];
+
+		switch (descriptor_tag)
+		{
+			case 0x02: /* video_stream_descriptor */
+				break;
+
+			case 0x03: /* audio_stream_descriptor */
+				break;
+
+			case 0x07: /* target_background_grid_descriptor */
+				break;
+
+			case 0x09: /* CA_descriptor */
+				if ((ecm_pid = no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
+					ecm_pid = _(&buffer[descr_pos], descriptor_length, ca_system_id);
+				break;
+
+			case 0x0a: /* ISO_639_language_descriptor */
+				if (ap_count < max_num_apids && (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06))
+				{
+					if (ret_pids->apids[ap_count].desc[0] == 0)
+					{
+						memcpy(ret_pids->apids[ap_count].desc, &(buffer[descr_pos + 2]), descriptor_length);
+						ret_pids->apids[ap_count].desc[3] = 0;
+					}
+				}
+				break;
+
+			case 0x0e: /* maximum bitrate descriptor */
+				break;
+
+			case 0x0f: /* private data indicator descriptor - used in FUN Promo */
+				break;
+
+			case 0x11: /* STD_descriptor */
+				break;
+
+			case 0x52: /* stream_identifier_descriptor */
+				if (ap_count < max_num_apids && (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06))
+				{
+					ret_pids->apids[ap_count].component_tag = buffer[descr_pos + 2];
+				}
+				break;
+
+			case 0x56: /* teletext descriptor */
+				ret_pids->vtxtpid = elementary_PID;
+				break;
+
+			case 0x6a: /* AC3 descriptor */
+				if (ap_count < max_num_apids)
+				{
+					ret_pids->apids[ap_count].is_ac3 = true;
+				}
+				break;
+
+			case 0xb1: /* User Private descriptor - used in BetaDigital */
+				break;
+
+			case 0xc0: /* User Private descriptor - used in Canal+ - does anyone know what it's good for? */
+				break;
+
+			case 0xc5: /* User Private descriptor - Canal+ Radio */
+				if (ap_count < max_num_apids && (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06))
+				{
+					if (ret_pids->apids[ap_count].desc[0] == 0)
+					{
+						memcpy(ret_pids->apids[ap_count].desc, &(buffer[descr_pos + 3]), 0x18);
+						ret_pids->apids[ap_count].desc[24] = 0;
+					}
+				}
+				break;
+
+			case 0xfe: /* User Private descriptor - used in FUN Promo - does anyone know what it's good for? */
+				break;
+
+			default:
+				{
+					int i;
+					debug("stream type %#x descriptor tag: %#x\n", stream_type, descriptor_tag);
+					debug("data: ");
+					for (i = 0; i < descriptor_length + 2; i++) debug ("%02x ", buffer[descr_pos + i]);
+					debug("\n");
+				}
+				break;
+		}
+	}
+
+	switch (stream_type)
+	{
+		case 0x01:
+		case 0x02:
+			ret_pids->vpid = elementary_PID;
+			vp_count++;
+			break;
+
+		case 0x03:
+		case 0x04:
+		case 0x06:
+			if (ap_count < max_num_apids)
+			{
+				if (stream_type == 0x03 || stream_type == 0x04 || ret_pids->apids[ap_count].is_ac3)
+				{
+
+					if (ret_pids->apids[ap_count].desc[0] == 0)
+					{
+						sprintf(ret_pids->apids[ap_count].desc, "%02d", ap_count + 1);
+					}
+					ret_pids->apids[ap_count].pid = elementary_PID;
+					ap_count++;
+				}
+			}
+			break;
+	}
+	ret_pids->count_apids = ap_count;
+	ret_pids->count_vpids = vp_count;
+	ret_pids->ecmpid = ecm_pid;
+	return ES_info_length + 5;
+}
+
 pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 {
 	uint8_t buffer[PMT_SIZE];
 	int fd;
-	int ap_count = 0;
-	int vp_count = 0;
-	int ecm_pid = 0;
 	struct dmxSctFilterParams flt;
 	pids ret_pids;
 
 	/* current position in buffer */
 	uint16_t pos;
 
+	/* length of elementary stream description */
+	uint16_t es_info_length;
+
 	/* TS_program_map_section elements */
 	uint16_t section_length;
 	uint16_t program_info_length;
-	uint8_t stream_type;
-	uint16_t elementary_PID;
-	uint16_t ES_info_length;
-
-	uint16_t descr_pos;
-	uint8_t descriptor_tag;
-	uint8_t descriptor_length;
 
 	debug("[zapit] pmtpid: %04x\n", pid);
 
@@ -345,220 +492,14 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 	program_info_length = ((buffer[10] & 0xF) << 8) | buffer[11];
 
 	if (program_info_length > 0)
-		ecm_pid = _(&buffer[12], program_info_length, ca_system_id);
+		ret_pids.ecmpid = _(&buffer[12], program_info_length, ca_system_id);
 	else
-		ecm_pid = no_ecmpid_found;
+		ret_pids.ecmpid = no_ecmpid_found;
 
-	for (pos = 12 + program_info_length; pos < section_length - 1; pos += ES_info_length + 5)
+	for (pos = 12 + program_info_length; pos < section_length - 1; pos += es_info_length)
 	{
-		stream_type = buffer[pos];
-		elementary_PID = ((buffer[pos + 1] & 0x1F) << 8) | buffer[pos + 2];
-		ES_info_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
-
-		if (elementary_PID != 0)
-		{
-			debug("stream_type: %x\n", stream_type);
-
-			switch (stream_type)
-			{
-			case 0x01: /* ISO/IEC 11172 Video */
-			case 0x02: /* ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream */
-				for (descr_pos = pos + 5; descr_pos < pos + 5 + ES_info_length; descr_pos += descriptor_length + 2)
-				{
-					descriptor_tag = buffer[descr_pos];
-					descriptor_length = buffer[descr_pos + 1];
-
-					switch (descriptor_tag)
-					{
-						case 0x02: /* video_stream_descriptor */
-							break;
-
-						case 0x07: /* target_background_grid_descriptor */
-							break;
-
-						case 0x09: /* CA_descriptor */
-							if ((ecm_pid == no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
-								ecm_pid = _(&buffer[descr_pos], descriptor_length, ca_system_id);
-							break;
-
-						case 0x0A: /* ISO_639_language_descriptor */
-							break;
-
-						case 0x0E: /* maximum bitrate descriptor */
-							break;
-
-						case 0x11: /* STD_descriptor */
-							break;
-
-						case 0x52: /* stream_identifier_descriptor */
-							break;
-
-						case 0xB1: /* User Private descriptor - used in BetaDigital */
-							break;
-
-						default:
-							{
-								int i;
-								debug("stream type 0x01/0x02 descriptor tag: %x\n", descriptor_tag);
-								debug("data: ");
-								for (i = 0; i < descriptor_length + 2; i++) debug("%02x ", buffer[descr_pos + i]);
-								debug("\n");
-							}
-							break;
-					}
-				}
-
-				ret_pids.vpid = elementary_PID;
-				vp_count++;
-				break;
-
-			case 0x03: /* ISO/IEC 11172 Audio */
-			case 0x04: /* ISO/IEC 13818-3 Audio */
-				if (ap_count < max_num_apids)
-				{
-					ret_pids.apids[ap_count].component_tag = -1;
-					ret_pids.apids[ap_count].is_ac3 = false;
-					ret_pids.apids[ap_count].desc[0] = 0;
-
-					for (descr_pos = pos + 5; descr_pos < pos + 5 + ES_info_length; descr_pos += descriptor_length + 2)
-					{
-						descriptor_tag = buffer[descr_pos];
-						descriptor_length = buffer[descr_pos + 1];
-
-						switch (descriptor_tag)
-						{
-						case 0x03: /* audio_stream_descriptor */
-							break;
-
-						case 0x09: /* CA_descriptor */
-							if ((ecm_pid == no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
-								ecm_pid = _(&buffer[descr_pos], descriptor_length, ca_system_id);
-							break;
-
-						case 0x0A: /* ISO_639_language_descriptor */
-							if (ret_pids.apids[ap_count].desc[0] == 0)
-							{
-								buffer[descr_pos + 5] = 0; // quick'n'dirty
-								memcpy(ret_pids.apids[ap_count].desc, &(buffer[descr_pos + 2]), descriptor_length);
-							}
-							break;
-
-						case 0x0F: /* private data indicator descriptor - used in FUN Promo */
-							break;
-
-						case 0x52: /* stream_identifier_descriptor */
-							ret_pids.apids[ap_count].component_tag = buffer[descr_pos + 2];
-							break;
-
-						case 0xC0: /* User Private descriptor - does anyone know what it's good for? used in Canal+ */
-							break;
-
-						case 0xC5: /* Canal+ Radio descriptor */
-							if (ret_pids.apids[ap_count].desc[0] == 0)
-							{
-								memcpy(ret_pids.apids[ap_count].desc, &(buffer[descr_pos + 3]), 0x18);
-								ret_pids.apids[ap_count].desc[24] = 0;
-							}
-							break;
-
-						case 0xFE: /* User Private descriptor - does anyone know what it's good for? used in FUN Promo */
-							break;
-
-						default:
-							{
-								int i;
-								debug("stream type 0x03/0x04 descriptor tag: %x\n", descriptor_tag);
-								debug("data: ");
-								for (i = 0; i < descriptor_length + 2; i++) debug("%02x ", buffer[descr_pos + i]);
-								debug("\n");
-							}
-							break;
-						}
-					}
-
-					if (ret_pids.apids[ap_count].desc[0] == 0)
-					{
-						sprintf(ret_pids.apids[ap_count].desc, "%02d", ap_count + 1);
-					}
-					ret_pids.apids[ap_count].pid = elementary_PID;
-					ap_count++;
-				}
-				break;
-
-			case 0x06: /* ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data, e.g. teletext or ac3 */
-
-				ret_pids.apids[ap_count].component_tag = -1;
-				ret_pids.apids[ap_count].is_ac3 = false;
-				ret_pids.apids[ap_count].desc[0] = 0;
-
-				for (descr_pos = pos + 5; descr_pos < pos + 5 + ES_info_length; descr_pos += descriptor_length + 2)
-				{
-
-					descriptor_tag = buffer[descr_pos];
-					descriptor_length = buffer[descr_pos + 1];
-
-					switch (descriptor_tag)
-					{
-					case 0x09: /* CA_descriptor */
-						if ((ecm_pid == no_ecmpid_found) || (ecm_pid == invalid_ecmpid_found))
-							ecm_pid = _(&buffer[descr_pos], descriptor_length, ca_system_id);
-						break;
-
-					case 0x0A: /* ISO_639_language_descriptor */
-						if (ret_pids.apids[ap_count].desc[0] == 0)
-						{
-							buffer[descr_pos + 5] = 0; // quick'n'dirty
-							memcpy(ret_pids.apids[ap_count].desc, &(buffer[descr_pos + 2]), descriptor_length);
-						}
-						break;
-
-					case 0x0E: /* maximum bitrate descriptor */
-						break;
-
-					case 0x52: /* stream_identifier_descriptor */
-						ret_pids.apids[ap_count].component_tag = buffer[descr_pos + 2];
-						break;
-
-					case 0x56: /* teletext_descriptor */
-						ret_pids.vtxtpid = elementary_PID;
-						break;
-
-					case 0x6A: /* AC-3_descriptor */
-						ret_pids.apids[ap_count].is_ac3 = true;
-						break;
-
-					default:
-						{
-							int i;
-							debug("stream type 0x06 descriptor tag: %x\n", descriptor_tag);
-							debug("data: ");
-							for (i = 0; i < descriptor_length + 2; i++) debug("%02x ", buffer[descr_pos + i]);
-							debug("\n");
-						}
-						break;
-					}
-				}
-
-				if ((ret_pids.apids[ap_count].is_ac3 == true) && (ap_count < max_num_apids))
-				{
-					if (ret_pids.apids[ap_count].desc[0] == 0)
-					{
-						sprintf(ret_pids.apids[ap_count].desc, "%02d", ap_count + 1);
-					}
-					ret_pids.apids[ap_count].pid = elementary_PID;
-					ap_count++;
-				}
-				break;
-
-			default:
-				break;
-			}
-		}
+		es_info_length = parse_es_info(buffer+pos, &ret_pids, ca_system_id);
 	}
-
-	ret_pids.count_apids = ap_count;
-	ret_pids.count_vpids = vp_count;
-	ret_pids.ecmpid = ecm_pid;
 
 	return ret_pids;
 }
@@ -2584,7 +2525,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.95 2002/03/18 12:34:03 happydude Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.96 2002/03/18 19:00:53 happydude Exp $\n\n");
 
 	if (argc > 1)
 	{
