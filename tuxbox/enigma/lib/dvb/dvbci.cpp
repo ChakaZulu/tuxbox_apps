@@ -143,11 +143,51 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 			sendCAPMT();
 		eDebug("go ok");
 		break;
+	case eDVBCIMessage::mmi_begin:
+		eDebug("[DVBCI] got mmi_begin message..");
+		mmi_begin();
+		break;
+	case eDVBCIMessage::mmi_end:
+		eDebug("[DVBCI] got mmi_end message..");
+		mmi_end();
+		break;
+	case eDVBCIMessage::mmi_answ:
+		eDebug("[DVBCI] got mmi_answ message..");
+		//mmi_answ();
+		break;
+	case eDVBCIMessage::mmi_menuansw:
+		eDebug("[DVBCI] got mmi_menu_answ message..");
+		//mmi_menuansw();
+		break;
 	case eDVBCIMessage::exit:
 		eDebug("[DVBCI] got exit message..");
 		quit();
 		break;
 	}
+}
+
+void eDVBCI::mmi_begin()
+{
+	unsigned char buffer[10];
+	
+	eDebug("start mmi");
+	memcpy(buffer,"\x90\x2\x0\x2\x9f\x80\x22\x0",8);
+	sendTPDU(0xA0,8,1,buffer);
+}
+
+void eDVBCI::mmi_end()
+{
+	eDebug("stop mmi");
+}
+
+void eDVBCI::mmi_answ(unsigned char *buf,int len)
+{
+	eDebug("got mmi_answer");
+}
+
+void eDVBCI::mmi_menuansw(int val)
+{
+	eDebug("got mmi_menu_answer");
 }
 
 void eDVBCI::createCAPMT(int type,unsigned char *data)
@@ -312,8 +352,6 @@ void eDVBCI::app_manager(unsigned int session)
     default:
       break;
   }
-
-
 }
 
 
@@ -335,41 +373,9 @@ void eDVBCI::ca_manager(unsigned int session)
       }
     case 1:
       {
-        unsigned char buffer[100];
         eDebug("[DVBCI] [CA MANAGER] send ca_pmt\n");
-				
 				::ioctl(fd,CI_TS_ACTIVATE);	
 
-        memcpy(buffer,"\x90\x2\x0\x3\x9f\x80\x32",7);
-
-        buffer[7]=23;       //laenge
-
-        buffer[8]=0x03;     //one and only
-        buffer[9]=0x0F;     //prg nr
-        buffer[10]=0xAD;    //prg nr
-        buffer[11]=0xE5;    //current-next/version
-        buffer[12]=0x00;    //info len
-        buffer[13]=0x07;    //info len
-        buffer[14]=0x01;    //ca-pmt_cmd_id
-        buffer[15]=0x09;    //descriptor
-        buffer[16]=0x04;
-        buffer[17]=0x06;
-        buffer[18]=0x02;
-        buffer[19]=0xe5;
-        buffer[20]=0x05;
-
-        buffer[21]=0x02;    //stream type
-        buffer[22]=0xe0;    //pid
-        buffer[23]=0xa4;
-        buffer[24]=0x00;    //es-info length
-        buffer[25]=0x00;
-
-        buffer[26]=0x04;    //stream type
-        buffer[27]=0xe0;    //pid
-        buffer[28]=0x60;
-        buffer[29]=0x00;    //es-info length
-        buffer[30]=0x00;
-        //sendTPDU(0xA0,31,sessions[session].tc_id,buffer);
 				sendCAPMT();
         sessions[session].internal_state=2;
 
@@ -382,6 +388,11 @@ void eDVBCI::ca_manager(unsigned int session)
 
 void eDVBCI::handle_session(unsigned char *data,int len)
 {
+	printf("session:");
+	for(int i=0;i<len;i++)
+		printf("%02x ",data[i]);
+	printf("\n");	
+
 	if(data[4]==0x9f && data[5]==0x80 && data[6]==0x11)
 		help_manager(1);
 		
@@ -417,7 +428,23 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 		ca_manager(3);
 
 	}
-				
+
+	if(data[4]==0x9f && data[5]==0x88 && data[6]==0x01)
+	{
+		unsigned char buffer[20];
+		eDebug("[DVBCI] [APPLICATION MANAGER] -> display-control");
+		memcpy(buffer,"\x90\x2\x0\x5\x9f\x88\x2\x2\x1\x1",10);
+		sendTPDU(0xA0,10,1,buffer);
+	}
+
+	if(data[4]==0x9f && data[5]==0x88 && data[6]==0x09)
+	{
+		char buffer[len+1];
+		eDebug("[DVBCI] [APPLICATION MANAGER] -> mmi_menu");
+		memcpy(buffer+1,data,len);
+		buffer[0]=(len&0xff);
+		ci_mmi_progress(buffer);
+	}
 }
 
 int eDVBCI::service_available(unsigned long service_class)

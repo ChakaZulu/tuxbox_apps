@@ -7,9 +7,36 @@
 
 class eNumber;
 class eButton;
-class eCheckbox;
-
 class eDVBCI;
+
+class eListBoxMenuEntry: public eListBoxEntryText
+{
+	friend class eListBox<eListBoxMenuEntry>;
+public:
+	eListBoxMenuEntry(eListBox<eListBoxMenuEntry> *parent, eString name)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*)parent, name)
+	{
+	}
+};	
+
+class enigmaCImmi: public eWindow
+{
+	eButton *ok,*abort;
+	eListBox<eListBoxMenuEntry> *lentrys;
+	eStatusBar *status;
+	eLabel *tt,*stt,*bt,*cistate;
+	eDVBCI *DVBCI;
+
+private:
+	void okPressed();
+	void abortPressed();
+	void getmmi(const char *buffer);
+	int ci_state;
+
+public:
+	enigmaCImmi();
+	~enigmaCImmi();
+};
 
 class enigmaCI: public eWindow
 {

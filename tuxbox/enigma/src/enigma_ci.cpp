@@ -10,6 +10,89 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvbci.h>
 
+enigmaCImmi::enigmaCImmi(): eWindow(0)
+{
+	int fd=eSkin::getActive()->queryValue("fontsize", 20);
+
+	DVBCI=eDVB::getInstance()->DVBCI;
+
+	setText(_("Common Interface Module - mmi"));
+	move(ePoint(100, 70));
+	resize(eSize(500, 420));
+
+	tt=new eLabel(this);
+	tt->setText("-- title text --");
+	tt->move(ePoint(20,10));
+	tt->resize(eSize(460,fd+4));
+	//l->realign(eTextPara::dirCenter);
+
+	stt=new eLabel(this);
+	stt->setText("-- sub title text --");
+	stt->move(ePoint(20,40));
+	stt->resize(eSize(360,fd+4));
+		
+	bt=new eLabel(this);
+	bt->setText("-- bottom text --");
+	bt->move(ePoint(20,220));
+	bt->resize(eSize(360,fd+4));
+
+	cistate=new eLabel(this);
+	cistate->setText("ci-status: waitung for module");
+	cistate->move(ePoint(20,280));
+	cistate->resize(eSize(360,fd+4));
+	
+	abort=new eButton(this);
+	abort->setText(_("abort"));
+	abort->move(ePoint(350, 250));
+	abort->resize(eSize(90, fd+4));
+	abort->setHelpText(_("leave ci mmi"));
+	abort->loadDeco();
+
+	CONNECT(abort->selected, enigmaCImmi::abortPressed);		
+
+	lentrys=new eListBox<eListBoxMenuEntry>(this);
+	lentrys->setName("MenuEntrys");
+	lentrys->move(ePoint(20, 70));
+	lentrys->resize(eSize(460, (fd+4)*6));
+	lentrys->setFlags(eListBoxBase::flagNoPageMovement);
+	
+	for(int i=0;i<4;i++)
+		eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,"blub");
+
+	status = new eStatusBar(this);	
+	status->move( ePoint(0, clientrect.height()-30) );
+	status->resize( eSize( clientrect.width(), 30) );
+	status->loadDeco();
+	
+	CONNECT(DVBCI->ci_mmi_progress, enigmaCImmi::getmmi);		
+
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_begin));
+}
+
+enigmaCImmi::~enigmaCImmi()
+{
+
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_end));
+
+	if (status)
+		delete status;
+}
+
+void enigmaCImmi::abortPressed()
+{
+	close(0);
+}
+
+void enigmaCImmi::getmmi(const char *buffer)
+{
+	eDebug("new mmi message received");
+	
+	for(int i=1;i<buffer[0];i++)
+		printf("%02x ",buffer[i]);
+	printf("\n");
+	
+}
+
 enigmaCI::enigmaCI(): eWindow(0)
 {
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
@@ -64,7 +147,6 @@ enigmaCI::enigmaCI(): eWindow(0)
 	CONNECT(DVBCI->ci_progress, enigmaCI::updateCIinfo);		
 
 	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
-		
 }
 
 enigmaCI::~enigmaCI()
@@ -97,5 +179,11 @@ void enigmaCI::initPressed()
 
 void enigmaCI::appPressed()
 {
+	hide();
+	enigmaCImmi mmi;
+	mmi.show();
+	mmi.exec();
+	mmi.hide();
+	show();
 }
 

@@ -49,6 +49,11 @@ class eDVBCI: private eThread, public eMainloop, public Object
 	void dataAvailable(int what);
 	void poll();
 	void updateCIinfo(unsigned char *buffer);
+
+	void mmi_begin();
+	void mmi_end();
+	void mmi_answ(unsigned char *answ,int len);
+	void mmi_menuansw(int);
 				
 public:
 	struct eDVBCIMessage
@@ -65,6 +70,10 @@ public:
 			addAudio,
 			es,
 			go,
+			mmi_begin,
+			mmi_end,
+			mmi_answ,
+			mmi_menuansw,
 		};
 		int type;
 		union
@@ -87,5 +96,7 @@ public:
 	
 	void thread();
 	Signal1<void, const char*> ci_progress;
+	Signal1<void, const char*> ci_mmi_progress;
+
 };
 #endif
