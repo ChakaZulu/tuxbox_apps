@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.17 2005/01/12 20:28:40 chakazulu Exp $
+	$Id: timerdtypes.h,v 1.18 2005/01/30 14:13:34 chakazulu Exp $
 
 	License: GPL
 
@@ -109,6 +109,7 @@ class CTimerd
 						channel_id = e.channel_id;
 						epgID = e.epgID;
 						epg_starttime = e.epg_starttime;
+						recordingSafety = e.recordingSafety;
 					};
 				RecordingInfo& operator = (EventInfo& e)
 					{
@@ -116,6 +117,7 @@ class CTimerd
 						channel_id = e.channel_id;
 						epgID = e.epgID;
 						epg_starttime = e.epg_starttime;
+						recordingSafety = e.recordingSafety;
 						return *this;
 					}
 				char apids[TIMERD_APIDS_MAXLEN];
