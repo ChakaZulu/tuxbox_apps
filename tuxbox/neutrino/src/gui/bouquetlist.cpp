@@ -42,6 +42,7 @@
 #include <gui/widget/menue.h>
 
 #include <driver/fontrenderer.h>
+#include <driver/screen_max.h>
 #include <driver/rcinput.h>
 #include <daemonc/remotecontrol.h>
 #include <system/settings.h>
@@ -54,8 +55,10 @@ CBouquetList::CBouquetList()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	selected    =   0;
-	width       = 500;
-	height      = 440;
+	//width       = 500;
+	//height      = 440;
+	width  = w_max (500, 0);
+	height = h_max (440, 40);
 	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
 	listmaxshow = (height-theight-0)/fheight;

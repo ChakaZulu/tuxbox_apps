@@ -38,6 +38,7 @@
 #include <global.h>
 
 #include <driver/fontrenderer.h>
+#include <driver/screen_max.h>
 #include <driver/rcinput.h>
 
 
@@ -47,8 +48,11 @@ CDBoxInfoWidget::CDBoxInfoWidget()
 	frameBuffer = CFrameBuffer::getInstance();
 	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
-	width       = 600;
-	height      = hheight+13*mheight+ 10;
+	// width       = 600;
+	// height      = hheight+13*mheight+ 10;
+	width  = w_max (600, 0);
+	height = h_max (hheight+13*mheight+ 10, 0);
+	
 
     x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;

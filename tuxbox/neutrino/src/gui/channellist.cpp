@@ -39,6 +39,7 @@
 #include <neutrino.h>
 
 #include <driver/fontrenderer.h>
+#include <driver/screen_max.h>
 #include <driver/rcinput.h>
 
 #include <gui/color.h>
@@ -78,8 +79,11 @@ CChannelList::CChannelList( const std::string &Name )
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	selected = 0;
-	width = 560;
-	height = 420 + (1 + 3 + 16 + 3);
+	// width = 560;
+	// height = 420 + (1 + 3 + 16 + 3);
+	width  = w_max (560, 0);
+	height = h_max (420 + (1+3+16+3), 60);
+	
 	liststart = 0;
 	tuned=0xfffffff;
 	zapProtection = NULL;

@@ -39,6 +39,7 @@
 #include <neutrino.h>
 
 #include <driver/fontrenderer.h>
+#include <driver/screen_max.h>
 #include <gui/widget/icons.h>
 
 #include <zapit/client/zapitclient.h>
@@ -49,8 +50,11 @@ CBEChannelSelectWidget::CBEChannelSelectWidget(const std::string & Caption, unsi
 {
 	bouquet = Bouquet;
 	mode =    Mode;
-	width =   500;
-	height =  440;
+	// width =   500;
+	// height =  440;
+        width  = w_max (500, 0);
+        height = h_max (440, 40);
+
 	x = (((g_settings.screen_EndX - g_settings.screen_StartX) - width) / 2) + g_settings.screen_StartX;
 }
 

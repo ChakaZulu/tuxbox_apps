@@ -42,6 +42,7 @@
 #include <neutrino.h>
 
 #include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
+#include <driver/screen_max.h>
 
 #include <algorithm>
 
@@ -64,9 +65,13 @@ EventList::EventList()
 	selected = 0;
 	current_event = 0;
 
-	width  = 580;
-	//height = 440;
-	height = 480;
+	//width  = 580;
+	// //height = 440;
+	//height = 480;
+	width  = w_max (580, 40);
+	height = h_max (480, 20);
+
+
 	theight  = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->getHeight();
 	fheight1 = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMLARGE]->getHeight();
 	{

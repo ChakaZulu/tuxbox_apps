@@ -43,6 +43,7 @@
 #include <neutrino.h>
 
 #include <driver/encoding.h>
+#include <driver/screen_max.h>
 
 CEpgData::CEpgData()
 {
@@ -52,9 +53,14 @@ CEpgData::CEpgData()
 
 void CEpgData::start()
 {
-	ox = 540;
+	// ox = 540;
+	// oy = 320;
+	ox = w_max (540, 0);
+	oy = h_max (320, 0);
 	sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
-	oy = 320;
+
+
+
 	topheight     = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->getHeight();
 	topboxheight  = topheight + 6;
 	botheight     = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_DATE]->getHeight();

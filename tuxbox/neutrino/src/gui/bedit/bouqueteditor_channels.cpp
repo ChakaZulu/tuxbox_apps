@@ -39,6 +39,7 @@
 #include <neutrino.h>
 
 #include <driver/fontrenderer.h>
+#include <driver/screen_max.h>
 #include <gui/bedit/bouqueteditor_chanselect.h>
 #include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
@@ -50,8 +51,10 @@ CBEChannelWidget::CBEChannelWidget(const std::string & Caption, unsigned int Bou
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	selected = 0;
-	width =  500;
-	height = 440;
+	// width =  500;
+	// height = 440;
+        width  = w_max (500, 0);
+        height = h_max (440, 40);
 	ButtonHeight = 25;
 	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();

@@ -39,6 +39,7 @@
 #include <gui/channellist.h>
 
 #include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
+#include <driver/screen_max.h>
 
 #include <algorithm>
 #include <sstream>
@@ -579,8 +580,10 @@ EpgPlus::EpgPlus()
 
 	this->isStretchMode = false;
 
-	this->usableScreenWidth  = 580;
-	this->usableScreenHeight = 480;
+	// this->usableScreenWidth  = 580;
+	// this->usableScreenHeight = 480;
+	this->usableScreenWidth  = w_max (580,10);
+	this->usableScreenHeight = h_max (480,10);
 
 	this->headerHeight  = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->getHeight();
 
