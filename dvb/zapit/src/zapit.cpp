@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.78 2002/02/13 14:36:56 obi Exp $
+  $Id: zapit.cpp,v 1.79 2002/02/14 00:48:32 field Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.79  2002/02/14 00:48:32  field
+  Start/Stop Reihenfolge an TripleDes angepasst
+
   Revision 1.78  2002/02/13 14:36:56  obi
   added some defines to run on on x86
 
@@ -1256,68 +1259,70 @@ else
 	}
 #endif /* DVBS */
 
-      if ( (video = open(DEMUX_DEV, O_RDWR)) < 0)
-        {
-	  printf("[zapit] cannot open demux device \"%s\"\n",DEMUX_DEV);
-	  exit(1);
-        }
+	dprintf("[zapit] playing\n");
+	ioctl(vid, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX);
+	ioctl(vid, VIDEO_PLAY, 0);
 
-      dprintf("[zapit] setting vpid\n");
-      /* vpid */
-      pes_filter.pid     = Vpid;
-      pes_filter.input   = DMX_IN_FRONTEND;
-      pes_filter.output  = DMX_OUT_DECODER;
-      pes_filter.pesType = DMX_PES_VIDEO;
-      pes_filter.flags   = 0;
-      ioctl(video,DMX_SET_PES_FILTER,&pes_filter);
-      vpid = Vpid;
+    close(vid);
+	vid= -1;
 
-      if((audio = open(DEMUX_DEV, O_RDWR)) < 0)
-        {
-	  printf("[zapit] cannot open demux device \"%s\"\n",DEMUX_DEV);
-	  exit(1);
-        }
+	if ( parse_pmt_pids.apids[0].is_ac3 != OldAC3 )
+	{
+		OldAC3 = parse_pmt_pids.apids[0].is_ac3;
+		int ac3d=open(AUDIO_DEV, O_RDWR);
+		if( ac3d < 0 )
+		{
+			printf("[zapit] cannot open audio device \"%s\"\n",AUDIO_DEV);
+			exit(1);
+		}
+		else
+		{
+			//printf("Setting audiomode to %d", ( OldAC3 )?0:1);
+			ioctl(ac3d, AUDIO_SET_BYPASS_MODE, ( OldAC3 )?0:1);
+			close(ac3d);
+		}
+	}
 
-      dprintf("[zapit] setting apid\n");
-      /* apid */
-      pes_filter.pid     = Apid;
-      pes_filter.input   = DMX_IN_FRONTEND;
-      pes_filter.output  = DMX_OUT_DECODER;
-      pes_filter.pesType = DMX_PES_AUDIO;
-      pes_filter.flags   = 0;
-      //printf("changing filtered apid to %d\n", Apid);
-      ioctl(audio,DMX_SET_PES_FILTER,&pes_filter);
-      apid = Apid;
+	// -- set VPID --
+	if ( (video = open(DEMUX_DEV, O_RDWR)) < 0)
+	{
+		printf("[zapit] cannot open demux device \"%s\"\n",DEMUX_DEV);
+		exit(1);
+	}
+	dprintf("[zapit] setting vpid\n");
+	/* vpid */
+	pes_filter.pid     = Vpid;
+	pes_filter.input   = DMX_IN_FRONTEND;
+	pes_filter.output  = DMX_OUT_DECODER;
+	pes_filter.pesType = DMX_PES_VIDEO;
+	pes_filter.flags   = 0;
+	ioctl(video,DMX_SET_PES_FILTER,&pes_filter);
+	vpid = Vpid;
 
-      if ( parse_pmt_pids.apids[0].is_ac3 != OldAC3 )
-        {
-	  OldAC3 = parse_pmt_pids.apids[0].is_ac3;
-	  int ac3d=open(AUDIO_DEV, O_RDWR);
-	  if( ac3d < 0 )
-            {
-	      printf("[zapit] cannot open audio device \"%s\"\n",AUDIO_DEV);
-	      exit(1);
-            }
-	  else
-	    {
-	      //printf("Setting audiomode to %d", ( OldAC3 )?0:1);
-	      ioctl(ac3d, AUDIO_SET_BYPASS_MODE, ( OldAC3 )?0:1);
-	      close(ac3d);
-	    }
-    	}
 
-      dprintf("[zapit] starting dmx\n");
-      if (ioctl(audio,DMX_START,0) < 0)
-        dprintf("[zapit] \t\tATTENTION audio-ioctl not succesfull\n");
-      if (ioctl(video,DMX_START,0)<0)
-	    dprintf("[zapit] \t\tATTENTION video-ioctl not succesfull\n");
+	// -- set APID --
+	if((audio = open(DEMUX_DEV, O_RDWR)) < 0)
+	{
+		printf("[zapit] cannot open demux device \"%s\"\n",DEMUX_DEV);
+		exit(1);
+	}
+    dprintf("[zapit] setting apid\n");
+	/* apid */
+	pes_filter.pid     = Apid;
+	pes_filter.input   = DMX_IN_FRONTEND;
+	pes_filter.output  = DMX_OUT_DECODER;
+	pes_filter.pesType = DMX_PES_AUDIO;
+	pes_filter.flags   = 0;
+	//printf("changing filtered apid to %d\n", Apid);
+	ioctl(audio,DMX_SET_PES_FILTER,&pes_filter);
+	apid = Apid;
 
-      dprintf("[zapit] playing\n");
-      ioctl(vid, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX);
-      ioctl(vid, VIDEO_PLAY, 0);
+	dprintf("[zapit] starting dmx\n");
+	if (ioctl(audio,DMX_START,0) < 0)
+		dprintf("[zapit] \t\tATTENTION audio-ioctl not succesfull\n");
+	if (ioctl(video,DMX_START,0)<0)
+		dprintf("[zapit] \t\tATTENTION video-ioctl not succesfull\n");
 
-      close(vid);
-      vid= -1;
 
 #ifndef DVBS
 //  if (parse_pmt_pids.vtxtpid != 0)
@@ -2532,7 +2537,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.78 2002/02/13 14:36:56 obi Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.79 2002/02/14 00:48:32 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
