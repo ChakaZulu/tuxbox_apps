@@ -365,6 +365,7 @@ flashupdate.getupdatefileerror kann Update nicht laden
 flashupdate.cantopenfile kann Datei nicht öffnen
 flashupdate.fileis0bytes die Dateigröße ist 0 Byte
 flashupdate.eraseingflash lösche Flash
+flashupdate.erasefailed Flash löschen fehlgeschlagen
 flashupdate.programmingflash programmiere Flash
 flashupdate.cantopenmtd kann das MTD-Device nicht öffen
 flashupdate.ready fertig

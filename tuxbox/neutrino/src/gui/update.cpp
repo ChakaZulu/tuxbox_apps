@@ -293,7 +293,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	if(!ft.program(sFileName, 80, 100))
 	{
 		hide();
-		ShowHint("messagebox.error", ft.getErrorMessage());
+		ShowHintUTF("messagebox.error", ft.getErrorMessage()); // UTF-8
 		return menu_return::RETURN_REPAINT;
 	}
 
@@ -340,7 +340,7 @@ void CFlashExpert::readmtd(int readmtd)
 	ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(readmtd));
 	if(!ft.readFromMTD(filename, 100))
 	{
-		showStatusMessage(ft.getErrorMessage());
+		showStatusMessage(ft.getErrorMessage(), true); // UTF-8
 		sleep(10);
 	}
 	else
@@ -372,7 +372,7 @@ void CFlashExpert::writemtd(string filename, int mtdNumber)
 	ft.setMTDDevice( CMTDInfo::getInstance()->getMTDFileName(mtdNumber) );
 	if(!ft.program( "/tmp/" + filename, 50, 100))
 	{
-		showStatusMessage(ft.getErrorMessage());
+		showStatusMessage(ft.getErrorMessage(), true); // UTF-8
 		sleep(10);
 	}
 	else

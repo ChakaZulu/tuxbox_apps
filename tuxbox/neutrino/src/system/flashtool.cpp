@@ -300,7 +300,7 @@ bool CFlashTool::erase(int globalProgressEnd)
 
 		if(ioctl( fd, MEMERASE, &erase) != 0)
 		{
-			ErrorMessage = "erase error";
+			ErrorMessage = g_Locale->getText("flashupdate.erasefailed");
 			close(fd);
 			return false;
 		}
