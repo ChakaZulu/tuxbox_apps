@@ -39,10 +39,12 @@ class CWebserverCGI;
 class TWebDbox
 {
 	CWebserver * Parent;
-	CControldClient controld;
-	CSectionsdClient sectionsd;
-	CZapitClient zapit;
-	CTimerdClient timerd;
+
+	CControldClient *controld;
+	CSectionsdClient *sectionsd;
+	CZapitClient *zapit;
+	CTimerdClient *timerd;
+
 	CZapitClient::BouquetChannelList ChannelList;
 	map<unsigned, CChannelEvent *> ChannelListEvents;
 	map<int, CZapitClient::BouquetChannelList> BouquetsList;
@@ -53,6 +55,7 @@ class TWebDbox
 	string videoformat_names[3];
 	string audiotype_names[5];
 
+	map<unsigned, string> TimerEventNames;
 
 
 public:
@@ -71,21 +74,21 @@ public:
 	bool GetBouquets(void)
 	{
 		BouquetList.clear();
-		zapit.getBouquets(BouquetList); 
+		zapit->getBouquets(BouquetList); 
 		return true;
 	};
 
 	bool GetBouquet(unsigned int BouquetNr)
 	{
 		BouquetsList[BouquetNr].clear();
-		zapit.getBouquetChannels(BouquetNr,BouquetsList[BouquetNr]);
+		zapit->getBouquetChannels(BouquetNr,BouquetsList[BouquetNr]);
 		return true;
 	};
 
 	bool GetChannelList(void)
 	{
 		ChannelList.clear();
-		zapit.getChannels(ChannelList);
+		zapit->getChannels(ChannelList);
 		return true;
 	};
 
@@ -102,13 +105,16 @@ public:
 
 	bool Execute(CWebserverRequest* request);
 // show functions for Execute (web api)
+	void ShowDboxMenu(CWebserverRequest* request);
+	void ShowTimerList(CWebserverRequest* request);
 	void ShowEventList(CWebserverRequest* request, unsigned onidSid);
 	void ShowBouquet(CWebserverRequest *request,int BouquetNr = -1);
 	void ShowBouquets(CWebserverRequest *request, int BouquetNr = 0);
 	bool ShowControlpanel(CWebserverRequest* request);
-	void ShowSettings(CWebserverRequest *request);
 	void ShowCurrentStreamInfo(CWebserverRequest* request);
 	bool ShowEpg(CWebserverRequest* request,string EpgID,string Startzeit = "");
+	void ShowEPG(CWebserverRequest *request,CEPGData *epg);
+	bool ShowActualEpg(CWebserverRequest *request);
 
 // support functions
 	void ZapTo(string target);

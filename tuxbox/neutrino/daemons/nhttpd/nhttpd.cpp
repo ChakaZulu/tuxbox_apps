@@ -34,6 +34,7 @@
 
 #include "webserver.h"
 #include "webdbox.h"
+#include "debug.h"
 
 #include "config.h"
 
@@ -48,15 +49,10 @@ CWebserver* webserver;
 
 
 //-------------------------------------------------------------------------
-void Ausgabe(char * OutputString)
-{
-	printf("[nhttpd] %s\n",OutputString);
-}
-//-------------------------------------------------------------------------
 
 void sig_catch(int)
 {
-        Ausgabe("stop requested......");
+        aprintf("stop requested......");
         webserver->Stop();
         delete(webserver);
         exit(0);
@@ -108,14 +104,14 @@ int main(int argc, char **argv)
 	signal(SIGHUP,sig_catch);
 	signal(SIGTERM,sig_catch);
 
-	Ausgabe("Neutrino HTTP-Server starting..\n");
+	aprintf("Neutrino HTTP-Server starting..\n");
 
 	if (do_fork)
 	{
 		switch (fork())
 		{
 		case -1:
-			perror("[nhttpd] fork");
+			dperror("fork");
 			return -1;
 		case 0:
 			break;
@@ -125,32 +121,23 @@ int main(int argc, char **argv)
 
 		if (setsid() == -1)
 		{
-			perror("[nhttpd] setsid");
+			dperror("setsid");
 			return -1;
 		}
 	}
 
-	if ((webserver = new CWebserver()) != NULL)
+	if ((webserver = new CWebserver(debug)) != NULL)
 	{
-		if (webserver->Init(debug))
-		{
 			if (webserver->Start())
 			{
-//				printf("httpd gestartet\n");
+				if(debug) printf("httpd gestartet\n");
 				webserver->DoLoop();
 				webserver->Stop();
 			}
-		}
-		else
-		{
-			Ausgabe("Error initializing httpd");
-			return -1;
-		}
-		delete webserver;
 	}
 	else
 	{
-		Ausgabe("Error while creating httpd");
+		aprintf("Error initializing httpd");
 		return -1;
 	}
 

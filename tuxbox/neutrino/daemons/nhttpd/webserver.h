@@ -39,37 +39,39 @@ class CWebserver
 {
 	int				Port;
 	int				ListenSocket;
-	string			PrivateDocumentRoot;
-	string			PublicDocumentRoot;
-	pthread_t		Thread1;
-	pthread_t		timerthread;
 	bool			THREADS;
 	bool			NewGui;
 
 
 public:
+	CConfigFile		*Config;
+// config vars / switches
 	bool			STOP;
 	bool			DEBUG;
 	bool			VERBOSE;
 	bool			MustAuthenticate;
-	TWebDbox		*WebDbox;
-	CEventServer	EventServer;
-	CConfigFile		*Config;
+	
+	string			PrivateDocumentRoot;
+	string			PublicDocumentRoot;
+	string			Zapit_XML_Path;
 
-	CWebserver();
+
+	TWebDbox		*WebDbox;
+	CEventServer	*EventServer;
+
+	CWebserver(bool debug);
 	~CWebserver();
 
 	bool Init(bool debug);
 	bool Start();
 	void DoLoop();
 	void Stop();
-	void Debug(char * text){if(DEBUG) Ausgabe(text);};
-	void Ausgabe(char *text){if(text) printf("[httpd] %s\n",text);};
 
 	int SocketConnect(Tmconnect * con,int Port);
 
 	friend class CWebserverRequest;
 	friend class TWebDbox;
+
 };
 
 

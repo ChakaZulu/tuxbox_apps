@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.11 2002/05/12 18:16:09 dirch Exp $
+	$Id: request.cpp,v 1.12 2002/05/17 03:42:52 dirch Exp $
 
 	License: GPL
 
@@ -24,18 +24,19 @@
 
 
 */
+#include <arpa/inet.h> 
 
 
 #include "request.h"
 #include "webdbox.h"
-#include <arpa/inet.h> 
-
+#include "debug.h"
 
 
 //-------------------------------------------------------------------------
 CWebserverRequest::CWebserverRequest(CWebserver *server) 
 {
 	Parent = server;
+
 	Method = M_UNKNOWN; 
 	URL = "";
 	Filename = "";
@@ -188,7 +189,7 @@ int ende, anfang, t;
 			Method = M_PUT;
 		else
 		{
-			Parent->Ausgabe("Ungültige Methode oder fehlerhaftes Packet");
+			aprintf("Ungültige Methode oder fehlerhaftes Packet");
 			if(Parent->DEBUG) printf("Request: '%s'\n",rawbuffer.c_str());
 			return false;
 		}
@@ -271,7 +272,7 @@ int ende;
 	{
 		if((ende = rawbuffer.find_first_of('\n')) == 0)
 		{
-			Parent->Ausgabe("ParseRequest: Kein Zeilenende gefunden\n");
+			aprintf("ParseRequest: Kein Zeilenende gefunden\n");
 			Send500Error();
 			return false;
 		}
@@ -285,7 +286,7 @@ int ende;
 //			if(Parent->DEBUG) printf("headerende: %d buffer_len: %d\n",headerende,rawbuffer_len);
 			if(headerende == 0)
 			{
-				Parent->Ausgabe("ParseRequest: Keine Header gefunden\n");
+				aprintf("ParseRequest: Keine Header gefunden\n");
 				Send500Error();
 				return false;
 			}
@@ -293,6 +294,7 @@ int ende;
 			ParseHeader(header);
 			if(Method == M_POST) // TODO: Und testen ob content = formdata
 			{				
+/*
 				string t = "multipart/form-data; boundary=";
 				if(HeaderList["Content-Type"].compare(0,t.length(),t) == 0)
 				{
@@ -313,7 +315,8 @@ int ende;
 						ParseParams(params);
 					}
 				}
-				
+*/				
+				SocketWriteLn("Sorry, momentant broken >(\n");
 				if(Parent->DEBUG) printf("Method Post !\n");
 			}
 
@@ -479,7 +482,7 @@ void CWebserverRequest::RewriteURL()
 		if(split < URL.length())
 			Filename= URL.substr(split,URL.length()- split);
 		else
-			printf("[nhttpd] Kein Dateiname !\n");	
+			if(Parent->DEBUG) printf("Kein Dateiname !\n");	
 	}
 
 	if( (strncmp(Path.c_str(),"/fb",3) != 0) && (strncmp(Path.c_str(),"/control",8) != 0) )	// Nur umschreiben wenn nicht mit /fb/ anfängt
@@ -668,7 +671,7 @@ int CWebserverRequest::OpenFile(string path, string filename)
 		if (tmpint<=0)
 		{
 			printf("cannot open file %s\n", tmpstring.c_str());
-			if(Parent->DEBUG) perror("");
+			dperror("");
 		}	
 	}
 	return tmpint;
@@ -683,7 +686,7 @@ bool CWebserverRequest::ParseFile(string file,CStringList params)
 	FILE * f;
 	if((f = fopen(file.c_str(),"r")) == NULL)
 	{
-		printf("[nhttpd] Parse file open error: '%s'\n",file.c_str());
+		aprintf("Parse file open error: '%s'\n",file.c_str());
 		return false;
 	}
 	char zeile[1024];

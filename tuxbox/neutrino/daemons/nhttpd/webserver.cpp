@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.10 2002/05/12 18:16:09 dirch Exp $
+	$Id: webserver.cpp,v 1.11 2002/05/17 03:42:52 dirch Exp $
 
 	License: GPL
 
@@ -23,13 +23,14 @@
 
 
 */
+#include <netinet/in.h> 
+#include <sys/socket.h> 
+#include <sys/wait.h> 
 
 #include "webserver.h"
 #include "request.h"
 #include "webdbox.h"
-#include <netinet/in.h> 
-#include <sys/socket.h> 
-#include <sys/wait.h> 
+#include "debug.h"
 
 #define NHTTPD_CONFIGFILE CONFIGDIR "/nhttpd.conf"
 struct Cmyconn
@@ -45,7 +46,7 @@ unsigned long Requests = 0;
 int ThreadsCount = 0;
 
 //-------------------------------------------------------------------------
-CWebserver::CWebserver()
+CWebserver::CWebserver(bool debug)
 {
 	Port=0;
 	ListenSocket = 0;
@@ -54,6 +55,39 @@ CWebserver::CWebserver()
 	DEBUG = false;
 	STOP = false;
 	NewGui = false;
+	DEBUG = debug;
+
+	Config = new CConfigFile(',');
+
+	if (!Config->loadConfig(NHTTPD_CONFIGFILE) )
+	{
+		Config->setBool("NewGui",true);
+		Config->setInt("Port", 80);
+		Config->setBool("THREADS",true);
+		Config->setBool("VERBOSE",false);
+		Config->setBool("Authenticate",false);
+		Config->setString("AuthUser","root");
+		Config->setString("AuthPassword","dbox2");
+		Config->setString("PublicDocRoot",PUBLICDOCUMENTROOT);
+		Config->setString("PrivatDocRoot",PRIVATEDOCUMENTROOT);
+		Config->setString("Zapit_XML_Path","/var/tuxbox/config/zapit");
+		Config->saveConfig(NHTTPD_CONFIGFILE);
+	}
+ 
+	Port = Config->getInt("Port");
+	THREADS = Config->getBool("THREADS");
+	VERBOSE = Config->getBool("VERBOSE");
+	MustAuthenticate = Config->getBool("Authenticate");
+	PrivateDocumentRoot = Config->getString("PrivatDocRoot");
+	PublicDocumentRoot = Config->getString("PublicDocRoot");
+	NewGui = Config->getBool("NewGui");
+	Zapit_XML_Path = Config->getString("Zapit_XML_Path");
+	WebDbox = new TWebDbox(this);
+	EventServer = new CEventServer;
+	EventServer->registerEvent2( NeutrinoMessages::SHUTDOWN, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
+	EventServer->registerEvent2( NeutrinoMessages::STANDBY_ON, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
+	EventServer->registerEvent2( NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
+	if(DEBUG) printf("WebDbox initialized\n");
 }
 //-------------------------------------------------------------------------
 CWebserver::~CWebserver()
@@ -65,42 +99,12 @@ CWebserver::~CWebserver()
 
 	if(WebDbox)
 		delete WebDbox;
+	if(EventServer)
+		delete EventServer;
 }
 //-------------------------------------------------------------------------
 bool CWebserver::Init(bool debug)
 {
-	DEBUG = debug;
-
-	Config = new CConfigFile(',');
-
-	char tmp[16];
-
-	if (!Config->loadConfig(NHTTPD_CONFIGFILE) )
-	{
-		Config->setInt("Port", 80);
-		Config->setBool("THREADS",true);
-		Config->setBool("VERBOSE",false);
-		Config->setBool("Authenticate",false);
-		Config->setString("AuthUser","root");
-		Config->setString("AuthPassword","dbox2");
-		Config->setString("PublicDocRoot",PUBLICDOCUMENTROOT);
-		Config->setString("PrivatDocRoot",PRIVATEDOCUMENTROOT);
-		Config->saveConfig(NHTTPD_CONFIGFILE);
-	}
- 
-	Port = Config->getInt("Port");
-	THREADS = Config->getBool("THREADS");
-	VERBOSE = Config->getBool("VERBOSE");
-	MustAuthenticate = Config->getBool("Authenticate");
-	PrivateDocumentRoot = Config->getString("PrivatDocRoot");
-	PublicDocumentRoot = Config->getString("PublicDocRoot");
-	NewGui = Config->getBool("RC");
-
-	EventServer.registerEvent2( NeutrinoMessages::SHUTDOWN, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
-	EventServer.registerEvent2( NeutrinoMessages::STANDBY_ON, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
-	EventServer.registerEvent2( NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
-	WebDbox = new TWebDbox(this);
-	if(DEBUG) printf("WebDbox initialized\n");
 	return true;
 }
 //-------------------------------------------------------------------------
@@ -122,8 +126,8 @@ bool CWebserver::Start()
 		int i = 1;
 			do
 			{
-				printf("[nhttpd] bind to port %d failed...\n",Port);
-				printf("%d. Versuch, warte 5 Sekunden\n",i++);
+				aprintf("bind to port %d failed...\n",Port);
+				aprintf("%d. Versuch, warte 5 Sekunden\n",i++);
 				sleep(5);
 			}while(bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0);
 //			return false;
@@ -131,10 +135,10 @@ bool CWebserver::Start()
 
 	if (listen(ListenSocket, 5) !=0)
 	{
-			Ausgabe("listen failed...");
+			perror("listen failed...");
 			return false;
 	}
-	Debug("Server gestartet\n");
+	if(DEBUG) printf("Server gestartet\n");
 				
 	return true;
 }
@@ -155,24 +159,24 @@ CWebserverRequest	*req;
 	{
 		while(ThreadsCount > 15)
 		{
-			printf("[nhttpd] Too many requests, waitin one sec\n");
+			aprintf("Too many requests, waitin one sec\n");
 			sleep(1);
 		}
-		if( (req->Parent->DEBUG) || (req->Parent->VERBOSE) ) printf("++ Thread 0x06%X gestartet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);	
+		if(req->Parent->DEBUG) printf("++ Thread 0x06%X gestartet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);	
 		if(req->ParseRequest())
 		{
 			req->SendResponse();
-			if( (req->Parent->DEBUG) || (req->Parent->VERBOSE) ) req->PrintRequest();
+			if(req->Parent->DEBUG || req->Parent->VERBOSE) req->PrintRequest();
 			req->EndRequest();
 		}
 		else
-			printf("Error while parsing request\n");
+			if(req->Parent->DEBUG) printf("Error while parsing request\n");
 
 		pthread_mutex_lock( &ServerData_mutex );
 		ThreadsCount--;
 		pthread_mutex_unlock( &ServerData_mutex );
 
-		if( (req->Parent->DEBUG) || (req->Parent->VERBOSE) ) printf("-- Thread 0x06%X beendet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);
+		if(req->Parent->DEBUG) printf("-- Thread 0x06%X beendet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);
 		delete req;
 		delete (Cmyconn *) myconn;
 	}
@@ -215,7 +219,7 @@ pthread_t Threads[30];
 			myconn->Socket = sock_connect;
 			myconn->Parent = this;
 			if (pthread_create (&Threads[thread_num], &attr, WebThread, (void *)myconn) != 0 )	// start WebThread 
-				perror("[nhttpd]: pthread_create(WebThread)");
+				dperror("pthread_create(WebThread)");
 			if(thread_num == 20)																// testing
 				thread_num = 0;
 			else
@@ -236,14 +240,14 @@ pthread_t Threads[30];
 					if( DEBUG || VERBOSE ) req->PrintRequest();									// and print if wanted
 				}
 				else
-					Ausgabe("Error while parsing request");
+					dperror("Error while parsing request");
 				
 				req->EndRequest();																// end the request
 				delete req;													
 				req = NULL;
 			}
 			else
-				Ausgabe("Unable to read request");
+				dperror("Unable to read request");
 		}
 	}
 }
@@ -253,7 +257,7 @@ void CWebserver::Stop()
 {
 	if(ListenSocket != 0)
 	{
-		Debug("ListenSocket closed\n");
+		if(DEBUG) printf("ListenSocket closed\n");
 		close( ListenSocket );					
 		ListenSocket = 0;
 	}
@@ -278,8 +282,7 @@ int CWebserver::SocketConnect(Tmconnect * con,int Port)
 
 	if(connect(con->sock_fd, (SA *)&con->servaddr, sizeof(con->servaddr))==-1)
 	{
-		printf("[nhttp]: connect to socket %d failed",Port);
-		perror("");
+		printf("[nhttp]: connect to socket %d failed\n",Port);
 		return -1;
 	}
 	else
