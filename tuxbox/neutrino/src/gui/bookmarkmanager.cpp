@@ -4,7 +4,7 @@
   Part of Movieplayer (c) 2003, 2004 by gagga
   Based on code by Zwen. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.4 2004/02/10 15:57:25 gagga Exp $
+  $Id: bookmarkmanager.cpp,v 1.5 2004/02/10 22:22:50 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -127,11 +127,9 @@ int CBookmarkManager::createBookmark (std::string url, std::string time) {
 //------------------------------------------------------------------------
 
 void CBookmarkManager::removeBookmark (unsigned int index) {
-    printf ("remove bookmark\n");
     std::vector<CBookmark>::iterator p = bookmarks.begin()+index;
 	bookmarks.erase(p);
 	bookmarksmodified=true;
-
 }
 
 //------------------------------------------------------------------------
@@ -176,6 +174,7 @@ void CBookmarkManager::readBookmarkFile() {
             printf("CBookmarkManager: read bookmarktime: %s\n",bookmarks[i].getTime().c_str());
         }
     }
+    else bookmarkfile.clear();
 }
 
 //------------------------------------------------------------------------
