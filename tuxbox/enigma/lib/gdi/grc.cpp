@@ -3,18 +3,22 @@
 #include "grc.h"
 
 #include <unistd.h>
+#ifndef SYNC_PAINT
 #include <pthread.h>
+#endif
 
 #include <core/gdi/font.h>
 #include <core/system/init.h>
 
 #define MAXSIZE 1024
 
+#ifndef SYNC_PAINT
 void *gRC::thread_wrapper(void *ptr)
 {
 	nice(1);
 	return ((gRC*)ptr)->thread();
 }
+#endif
 
 gRC *gRC::instance=0;
 
@@ -23,7 +27,9 @@ gRC::gRC(): queuelock(MAXSIZE)
 	ASSERT(!instance);
 	instance=this;
 	queuelock.lock(MAXSIZE);
+#ifndef SYNC_PAINT
 	eDebug(pthread_create(&the_thread, 0, thread_wrapper, this)?"RC thread couldn't be created":"RC thread createted successfully");
+#endif
 }
 
 gRC::~gRC()
@@ -37,7 +43,11 @@ gRC::~gRC()
 
 void *gRC::thread()
 {
+#ifndef SYNC_PAINT
 	while (1)
+#else
+	while (queue.size())
+#endif
 	{
 		queuelock.lock(1);
 		gOpcode &o(queue.front());
@@ -46,7 +56,9 @@ void *gRC::thread()
 		o.dc->exec(&o);
 		queue.pop_front();
 	}
+#ifndef SYNC_PAINT
 	pthread_exit(0);
+#endif
 }
 
 gRC &gRC::getInstance()
@@ -62,6 +74,9 @@ void gRC::submit(const gOpcode &o)
 	if (o.opcode==gOpcode::end)
 	{
 		queuelock.unlock(collected);
+#ifdef SYNC_PAINT
+		thread();
+#endif
 		collected=0;
 	}
 }
