@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.252 2002/04/27 03:46:19 McClean Exp $
+        $Id: neutrino.cpp,v 1.253 2002/04/27 07:44:07 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -435,6 +435,7 @@ void CNeutrinoApp::setupDefaults()
 **************************************************************************************/
 bool CNeutrinoApp::loadSetup(SNeutrinoSettings* load2)
 {
+	char tmp[0xFFFF];
 	bool loadSuccessfull = true;
 	if(!load2)
 	{
@@ -442,19 +443,22 @@ bool CNeutrinoApp::loadSetup(SNeutrinoSettings* load2)
 	}
 
 	int fd = open(settingsFile.c_str(), O_RDONLY );
-	if (fd>0)
-	{
-		if(read(fd, load2, sizeof(SNeutrinoSettings))!=sizeof(SNeutrinoSettings))
-		{
-			printf("error while loading settings: %s - config from old version?\n", settingsFile.c_str() );
-			loadSuccessfull = false;
-		}
-		close(fd);
-	}
-	else
+
+	if (fd==-1)
 	{
 		printf("error while loading settings: %s\n", settingsFile.c_str() );
 		loadSuccessfull = false;
+	}
+	else if(read(fd, tmp, sizeof(tmp))!=sizeof(SNeutrinoSettings))
+	{
+		printf("error while loading settings: %s - config from old version?\n", settingsFile.c_str() );
+		loadSuccessfull = false;
+	}
+	else
+	{
+		memcpy(load2, &tmp, sizeof(SNeutrinoSettings));
+
+		close(fd);
 	}
 
 	ifstream is( scanSettingsFile.c_str());
@@ -2351,7 +2355,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.252 2002/04/27 03:46:19 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.253 2002/04/27 07:44:07 field Exp $\n\n");
 	tzset();
 	initGlobals();
 
