@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.18 2004/05/02 11:11:41 diemade Exp $
+ * $Id: streamfile.c,v 1.19 2004/05/02 11:23:31 diemade Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -279,9 +279,7 @@ main (int argc, char ** argv) {
 		if (!strcmp(argv[i], "-s"))
 			silent = 1;
 		if (!strcmp(argv[i], "-l"))
-		{
 			sscanf(argv[++i], "%d", &limit);
-		}
 		i++;
 	}
 	if (limit <= 0)
