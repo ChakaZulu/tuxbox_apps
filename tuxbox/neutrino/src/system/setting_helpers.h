@@ -64,6 +64,14 @@ class CDHCPNotifier : public CChangeObserver
 		void startStopDhcp();
 };
 
+class CRecordingNotifier : public CChangeObserver
+{
+	private:
+		CMenuForwarder* toDisable;
+	public:
+	CRecordingNotifier( CMenuForwarder*);
+	bool changeNotify(string OptionName, void*);
+};
 /*
 class CCableSpectalInversionNotifier : public CChangeObserver
 {

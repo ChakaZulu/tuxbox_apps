@@ -117,6 +117,18 @@ bool CDHCPNotifier::changeNotify(string OptionName, void*)
 	return true;
 }
 
+CRecordingNotifier::CRecordingNotifier( CMenuForwarder* a1)
+{
+	toDisable = a1;
+}
+
+bool CRecordingNotifier::changeNotify(string OptionName, void*)
+{
+// something sucks here :(
+//	toDisable->setActive(g_settings.vcr_recording==0);
+	return true;
+}
+
 bool CConsoleDestChangeNotifier::changeNotify(string OptionName, void *Data)
 {
 	int value = *(int *)Data;

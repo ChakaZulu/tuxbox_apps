@@ -359,6 +359,8 @@ int CNeutrinoApp::loadSetup()
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
 	g_settings.audio_DolbyDigital = configfile.getInt32( "audio_DolbyDigital", 0 );
+	g_settings.audio_SPDIF_Control = configfile.getInt32( "audio_SPDIF_Control", 0 );
+	
 
 	//vcr
 	g_settings.vcr_AutoSwitch = configfile.getInt32( "vcr_AutoSwitch", 1 );
@@ -441,6 +443,10 @@ int CNeutrinoApp::loadSetup()
 	g_settings.network_streaming_stopsectionsd = configfile.getInt32( "network_streaming_stopsectionsd", 1 );
 	strcpy( g_settings.network_streamingserver, configfile.getString( "network_streamingserver", "10.10.10.10").c_str() );
 	strcpy( g_settings.network_streamingserverport, configfile.getString( "network_streamingserverport", "4000").c_str() );
+
+	//vcr per ir
+	g_settings.vcr_recording = configfile.getInt32( "vcr_recording", 0 );
+	strcpy( g_settings.vcr_devicename, configfile.getString( "vcr_devicename", "ORION").c_str() );
 
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
@@ -549,6 +555,7 @@ void CNeutrinoApp::saveSetup()
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
 	configfile.setInt32( "audio_DolbyDigital", g_settings.audio_DolbyDigital );
+	configfile.setInt32( "audio_SPDIF_Control", g_settings.audio_SPDIF_Control );
 
 	//vcr
 	configfile.setInt32( "vcr_AutoSwitch", g_settings.vcr_AutoSwitch );
@@ -631,6 +638,10 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "network_streaming_stopsectionsd", g_settings.network_streaming_stopsectionsd );
 	configfile.setString( "network_streamingserver", g_settings.network_streamingserver );
 	configfile.setString( "network_streamingserverport", g_settings.network_streamingserverport );
+
+	//vcr per ir
+	configfile.setInt32( "vcr_recording", g_settings.vcr_recording );
+	configfile.setString( "vcr_devicename", g_settings.vcr_devicename );
 
 	//rc-key configuration
 	configfile.setInt32( "key_tvradio_mode", g_settings.key_tvradio_mode );
@@ -806,7 +817,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
 	softupdate = false;
 	fromflash = false;
-	g_settings.network_streaming_use = 0;
+//	g_settings.network_streaming_use = 0;
 
 	#define FONTNAME "Micron"
 	#define FONTFILE "micron"
@@ -826,11 +837,6 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 		{
 			dprintf(DEBUG_NORMAL, "zapitmode is default..\n");
 		}
-		else if ( !strcmp(argv[x], "-stream"))
-		{
-			dprintf(DEBUG_NORMAL, "enable streaming-control\n");
-			g_settings.network_streaming_use = 1;
-		}
 		else if ( !strcmp(argv[x], "-flash"))
 		{
 			dprintf(DEBUG_NORMAL, "enable flash\n");
@@ -844,7 +850,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 				fontName = argv[x+ 2];
 				fontsSizeOffset = atoi(argv[x+ 3]);
 			}
-            x+=3;
+			x+=3;
 		}
 		else if ( !strcmp(argv[x], "-debuglevel"))
 		{
@@ -878,7 +884,7 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 void CNeutrinoApp::SetupFonts()
 {
-    dprintf(DEBUG_INFO, "FontFile: %s\n", (fontFile+ ".ttf").c_str() );
+	dprintf(DEBUG_INFO, "FontFile: %s\n", (fontFile+ ".ttf").c_str() );
 	dprintf(DEBUG_INFO, "FontName: %s\n", fontName.c_str() );
 	dprintf(DEBUG_INFO, "FontSize: %d\n", fontsSizeOffset );
 
@@ -1290,7 +1296,12 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	
 	CStringInput*	timerSettings_record_safety_time= new CStringInput("timersettings.record_safety_time", g_settings.record_safety_time, 2, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
-   miscSettings.addItem( new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time ));
+    miscSettings.addItem( new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time ));
+
+	oj = new CMenuOptionChooser("miscsettings.spdif_control", &g_settings.audio_SPDIF_Control, true);
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	miscSettings.addItem( oj );
 }
 
 
@@ -1317,9 +1328,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 		n = scandir(pfad[p], &namelist, 0, alphasort);
 		if (n < 0)
 		{
-			perror("scandir");
-			//should be available...
-//			oj->addOption( "english" );
+			perror("loading locales: scandir");
 		}
 		else
 		{
@@ -1330,7 +1339,6 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 				if(pos!=-1)
 				{
 					locale = filen.substr(0,pos);
-					//					printf("locale found: %s\n", locale.c_str() );
 					oj->addOption( locale );
 				}
 				free(namelist[count]);
@@ -1499,7 +1507,26 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	streamingSettings.addItem( oj );
+	
+	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	
+	CStringInput*	streamingSettings_vcr_devicename= new CStringInputSMS("streamingmenu.vcr_devicename", g_settings.vcr_devicename, 20, "ipsetup.hint_1", "ipsetup.hint_2","abcdefghijklmnopqrstuvwxyz0123456789-. ");
+	CMenuForwarder *m1 = new CMenuForwarder("streamingmenu.vcr_devicename",g_settings.vcr_recording==1, g_settings.vcr_devicename, streamingSettings_vcr_devicename );
+	CRecordingNotifier* recordingNotifier = new CRecordingNotifier(m1);
+	
+	oj = new CMenuOptionChooser("streamingmenu.vcr_recording", &g_settings.vcr_recording, true, recordingNotifier);
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	streamingSettings.addItem( oj );
+	
+	streamingSettings.addItem( new CMenuForwarder("streamingmenu.vcr_devicename", true, g_settings.vcr_devicename,streamingSettings_vcr_devicename));
+	
+	CStringInput	*timerSettings_record_safety_time= new CStringInput("timersettings.record_safety_time", g_settings.record_safety_time, 2, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
+	streamingSettings.addItem( new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time ));
+
 	streamstatus = 0;
+
 }
 
 void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, string menuname, char *value)
@@ -1850,7 +1877,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 		new CFavorites, id, true, CRCInput::RC_green, "gruen.raw"), false );
 	
 	// start/stop streaming
-	if(g_settings.network_streaming_use)
+	if(g_settings.network_streaming_use || g_settings.vcr_recording)
 	{
 		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.streaming", &streamstatus, true, this, true, CRCInput::RC_red, "rot.raw" );
 		oj->addOption(0, "mainmenu.streaming_start");
@@ -1890,16 +1917,26 @@ void CNeutrinoApp::InitZapper()
 
 void CNeutrinoApp::setupStreamingServer(void)
 {
-	CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
-	int port;
-	sscanf(g_settings.network_streamingserverport, "%d", &port);
-	info->ServerAddress = g_settings.network_streamingserver;
-	info->ServerPort = port;
-	info->StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
-	info->StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
-	info->Name = "ngrab";
-	vcrControl->registerDevice(CVCRControl::DEVICE_SERVER,info);
-	delete info;
+	if(g_settings.vcr_recording)
+	{
+		CVCRControl::CVCRDeviceInfo * info = new CVCRControl::CVCRDeviceInfo;
+		info->Name = g_settings.vcr_devicename;
+		vcrControl->registerDevice(CVCRControl::DEVICE_VCR,info);
+
+	}
+	else
+	{
+		CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
+		int port;
+		sscanf(g_settings.network_streamingserverport, "%d", &port);
+		info->ServerAddress = g_settings.network_streamingserver;
+		info->ServerPort = port;
+		info->StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
+		info->StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
+		info->Name = "ngrab";
+		vcrControl->registerDevice(CVCRControl::DEVICE_SERVER,info);
+		delete info;
+	}
 }
 
 int CNeutrinoApp::run(int argc, char **argv)
@@ -1971,7 +2008,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	setupNetwork();
 
 	// setup streaming server
-	if(g_settings.network_streaming_use)
+	if(g_settings.network_streaming_use || g_settings.vcr_recording)
 		setupStreamingServer();
 	channelList = new CChannelList( "channellist.head" );
 
@@ -2749,9 +2786,9 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 		if ( !isEvent )
 		{
 			if ( current_muted )
-				g_Controld->Mute();
+				g_Controld->Mute((g_settings.audio_SPDIF_Control==1));
 			else
-				g_Controld->UnMute();
+				g_Controld->UnMute((g_settings.audio_SPDIF_Control==1));
 		}
 	}
 
@@ -2801,7 +2838,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 			{
 				current_volume += 5;
 			}
-			g_Controld->setVolume(current_volume);
+			g_Controld->setVolume(current_volume,(g_settings.audio_SPDIF_Control==1));
 		}
 		else if (msg==CRCInput::RC_minus)
 		{
@@ -2809,7 +2846,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 			{
 				current_volume -= 5;
 			}
-			g_Controld->setVolume(current_volume);
+			g_Controld->setVolume(current_volume,(g_settings.audio_SPDIF_Control==1));
 		}
 		else
 		{
@@ -3121,7 +3158,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.343 2002/10/16 01:14:06 woglinde Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.344 2002/10/16 16:25:24 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

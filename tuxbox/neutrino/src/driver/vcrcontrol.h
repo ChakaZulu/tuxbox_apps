@@ -120,7 +120,8 @@ class CVCRControl
 
 		class CVCRDevice : public CDevice		// VCR per IR
 		{
-				bool sendCommand(std::string command, const t_channel_id channel_id, unsigned long long epgid, uint apid=0);
+				bool sendCommand(std::string command, const t_channel_id channel_id=0, unsigned long long epgid=0, uint apid=0);
+				bool ParseFile(std::string filename);
 				bool IRDeviceConnect();
 				void IRDeviceDisconnect();
 			public:

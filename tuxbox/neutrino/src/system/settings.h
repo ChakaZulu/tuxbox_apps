@@ -55,6 +55,7 @@ struct SNeutrinoSettings
 	//audio
 	int audio_AnalogMode;
 	int audio_DolbyDigital;
+	int audio_SPDIF_Control;
 
 	//vcr
 	int	vcr_AutoSwitch;
@@ -138,6 +139,8 @@ struct SNeutrinoSettings
 	char network_streamingserver[31];
 	char network_streamingserverport[10];
 
+	int vcr_recording;
+	char vcr_devicename[50];
 
 	//key configuration
 	int key_tvradio_mode;

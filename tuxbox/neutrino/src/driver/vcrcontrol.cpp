@@ -28,6 +28,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include <sys/un.h>
 
 #include <global.h>
 
@@ -37,6 +38,8 @@
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
+
+#define LIRCDIR "/var/tuxbox/config/"
 
 
 CVCRControl* CVCRControl::getInstance()
@@ -99,17 +102,9 @@ int CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo)
 	static int i = 0;
 	if(deviceType == DEVICE_SERVER)
 	{
-		CServerDevice * device =  new CServerDevice(i++);     
-//		CServerDeviceInfo *serverinfo = (CServerDeviceInfo *) deviceInfo;
+		CServerDevice * device =  new CServerDevice(i++);		
 		Devices[device->deviceID] = (CDevice*) device;
 		setDeviceOptions(device->deviceID,deviceInfo);
-/*
-		device->Name = deviceInfo->Name;
-		device->ServerAddress = serverinfo->ServerAddress;
-		device->ServerPort = serverinfo->ServerPort;
-		device->StopPlayBack = serverinfo->StopPlayBack;
-		device->StopSectionsd = serverinfo->StopSectionsd;
-*/
 		printf("CVCRControl registered new serverdevice: %u %s\n",device->deviceID,device->Name.c_str());
 		return device->deviceID;
 	}
@@ -150,7 +145,7 @@ bool CVCRControl::CVCRDevice::sendCommand(std::string command, const t_channel_i
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::IRDeviceConnect()
 {
-/*	struct sockaddr_un addr;
+	struct sockaddr_un addr;
 
 	addr.sun_family=AF_UNIX;
 	strcpy(addr.sun_path, "/dev/lircd");
@@ -165,20 +160,61 @@ bool CVCRControl::CVCRDevice::IRDeviceConnect()
 	{
 		printf("could not connect to lircd-socket\n");
 		return false;
-	};*/
+	};
 	return true;
 
 }
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Stop()
 {
-	return true;
+	return ParseFile(LIRCDIR "stop.lirc");
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned long long epgid, uint apid) 
+bool CVCRControl::CVCRDevice::ParseFile(string filename)
 {
-	return true;
+FILE *inp;
+char buffer[101];
+char outbuffer[200];
+
+	if( (inp = fopen(filename.c_str(),"r")) > 0)
+	{
+		IRDeviceConnect();
+		std::stringstream ostr;
+
+		while(!feof(inp))
+		{
+			if(fgets(buffer,100,inp) != NULL)
+			{
+				sprintf(outbuffer,"SEND_ONCE %s %s \n",Name.c_str(),buffer);
+				printf("lirc send line: '%s'\n",outbuffer);
+//				ostr << "SEND_ONCE " << Name << " " << buffer << std::endl << std::ends;
+				write(sock_fd, outbuffer, strlen(outbuffer)+1);
+				sleep(1);
+			}
+		}
+		IRDeviceDisconnect();
+		return true;
+	}
+	else
+		printf("konnte datei niciht oeffnen\n");
+	return false;
+}
+//-------------------------------------------------------------------------
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned long long epgid, uint apid)
+{
+/*
+sendCommand(POWER
+CONTROL Wait 1
+IR Send CH1
+CONTROL Wait 1
+IR Send CH1
+CONTROL Wait 1
+IR Send CH0
+CONTROL Wait 1
+IR Send RECOTR
+*/
+	return ParseFile(LIRCDIR "record.lirc");
 }
 
 //-------------------------------------------------------------------------
