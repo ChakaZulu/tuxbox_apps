@@ -6356,10 +6356,10 @@ TextEditWindow::TextEditWindow( const char *InputFieldDescr, const char* useable
 	input = new eTextInputField(this,0,image);
 	input->setName("inputfield");
 	input->setHelpText(_("press ok to start edit mode"));
+	input->setFlags(eTextInputField::flagCloseParent);
 	if (useableChars)
 		input->setUseableChars( useableChars );
 	CONNECT( input->selected, TextEditWindow::accept );
-	CONNECT( input->cancelPressed, TextEditWindow::reject );
 
 	descr = new eLabel(this);
 	descr->setName("descr");

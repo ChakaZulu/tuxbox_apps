@@ -467,7 +467,8 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 				setText(oldText);
 				setHelpText(oldHelpText);
 				eWindow::globalCancel(eWindow::ON);
-				cancelPressed();
+				if ( flags & flagCloseParent && parent )
+					parent->reject();
 				break;
 			}
 			else if (event.action == &i_numberActions->key0)

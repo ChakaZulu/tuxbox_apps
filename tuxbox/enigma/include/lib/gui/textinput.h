@@ -37,6 +37,7 @@ class eTextInputField: public eButton
 	void lostFocus();
 	void updateHelpWidget();
 public:
+	enum { flagCloseParent=128 };
 	eTextInputField( eWidget* parent, eLabel *descr=0, eTextInputFieldHelpWidget* hlp=0, const char *deco="eNumber" );
 	static void loadKeyMappings();
 	void setMaxChars( int i ) { maxChars = i; }
@@ -45,7 +46,6 @@ public:
 	void setEditHelpText( eString str ) { editHelpText=str; }
 	bool inEditMode() const { return editMode; }
 	void toggleState();
-	Signal0<void> cancelPressed;
 };
 
 class eTextInputFieldHelpWidget : public eWidget
