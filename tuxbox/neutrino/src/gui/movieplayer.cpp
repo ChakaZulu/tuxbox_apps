@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.52 2003/09/23 16:01:06 gagga Exp $
+  $Id: movieplayer.cpp,v 1.53 2003/09/23 20:04:23 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -247,7 +247,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, std::string actionKey)
 CURLcode sendGetRequest (std::string url) {
 	CURL *curl;
 	CURLcode httpres;
-	httpres = (CURLcode) 1;
+
 	std::string response = "";
   
 	curl = curl_easy_init ();
@@ -270,7 +270,7 @@ ReceiveStreamThread (void *mrl)
 	const char *server;
 	int port;
 	CURLcode httpres;
-	httpres = (CURLcode) 1;
+
 	int nothingreceived=0;
 	
 	// Get Server and Port from Config
@@ -356,27 +356,25 @@ ReceiveStreamThread (void *mrl)
 // vlc 0.6.3 and up may support HTTP HEAD requests.
 
 // Open HTTP connection to VLC
-	bool vlc_is_sending = false;
 
 	struct sockaddr_in servAddr;
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_port = htons (port);
 	servAddr.sin_addr.s_addr = inet_addr (server);
-	int res;
+
 	printf ("[movieplayer.cpp] Server: %s\n", server);
 	printf ("[movieplayer.cpp] Port: %d\n", port);
 	char buf[RINGBUFFERSIZE];
 	int len;
 
-	while (!vlc_is_sending)
+	while (true)
 	{
 
 		//printf ("[movieplayer.cpp] Trying to call socket\n");
 		skt = socket (AF_INET, SOCK_STREAM, 0);
 
 		printf ("[movieplayer.cpp] Trying to connect socket\n");
-		res = connect (skt, (struct sockaddr *) &servAddr, sizeof (servAddr));
-		if (res < 0)
+		if (connect(skt, (struct sockaddr *) &servAddr, sizeof (servAddr)) < 0)
 		{
 			perror ("SOCKET");
 			playstate = CMoviePlayerGui::STOPPED;
@@ -386,7 +384,7 @@ ReceiveStreamThread (void *mrl)
 		printf ("[movieplayer.cpp] Socket OK\n");
 
 		// Skip HTTP header
-		char *msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
+		const char * msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
 		int msglen = strlen (msg);
 		if (send (skt, msg, msglen, 0) == -1)
 		{
@@ -401,7 +399,7 @@ ReceiveStreamThread (void *mrl)
 		int found = 0;
 		char line[200];
 		strcpy (line, "");
-		while (found < 4)
+		while (true)
 		{
 			len = recv (skt, buf, 1, 0);
 			strncat (line, buf, 1);
@@ -411,39 +409,26 @@ ReceiveStreamThread (void *mrl)
 				close (skt);
 				break;
 			}
-			if ((found == 0) & (buf[0] == '\r'))
+			if ((((found & (~2)) == 0) && (buf[0] == '\r')) || /* found == 0 || found == 2 */
+			    (((found & (~2)) == 1) && (buf[0] == '\n')))   /* found == 1 || found == 3 */
 			{
-				found++;
-			}
-			else if ((found == 1) & (buf[0] == '\n'))
-			{
-				found++;
-			}
-			else if ((found == 2) & (buf[0] == '\r'))
-			{
-				found++;
-			}
-			else if ((found == 3) & (buf[0] == '\n'))
-			{
-				found++;
+				if (found == 3)
+					goto vlc_is_sending;
+				else
+					found++;
 			}
 			else
 			{
-				(found = 0);
+				found = 0;
 			}
 		}
-		if (found == 4)
-		{
-			vlc_is_sending = true;
-
-		}
 	}
+ vlc_is_sending:
 	printf ("[movieplayer.cpp] Now VLC is sending. Read sockets created\n");
 	hintBox->hide ();
 	bufferingBox->paint ();
 	printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
 
-	int done;
 	int size;
 	streamingrunning = 1;
 	int fd = open ("/tmp/tmpts", O_CREAT | O_WRONLY);
@@ -491,13 +476,10 @@ ReceiveStreamThread (void *mrl)
 			pthread_exit (NULL);
 		}
 
-		len = 0;
 		pollret = poll (poller, (unsigned long) 1, -1);
 
 		if ((pollret < 0) ||
-		    ((poller[0].revents & POLLHUP) == POLLHUP) ||
-		    ((poller[0].revents & POLLERR) == POLLERR) ||
-		    ((poller[0].revents & POLLNVAL) == POLLNVAL))
+		    ((poller[0].revents & (POLLHUP | POLLERR | POLLNVAL)) != 0))
 		{
 			perror ("Error while polling()");
 			playstate = CMoviePlayerGui::STOPPED;
@@ -506,11 +488,10 @@ ReceiveStreamThread (void *mrl)
 		}
 
 
-		if (((poller[0].revents & POLLIN) == POLLIN) ||
-		    ((poller[0].revents & POLLPRI) == POLLPRI))
-		{
+		if ((poller[0].revents & (POLLIN | POLLPRI)) != 0)
 			len = recv (poller[0].fd, buf, size, 0);
-		}
+		else
+			len = 0;
 
 		if (len > 0)
 		{
@@ -533,8 +514,7 @@ ReceiveStreamThread (void *mrl)
       
 		while (len > 0)
 		{
-			done = ringbuffer_write (ringbuf, buf, len);
-			len -= done;
+			len -= ringbuffer_write (ringbuf, buf, len);
 		}
 
 	}
@@ -560,7 +540,6 @@ PlayStreamThread (void *mrl)
 	bufferingBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.buffering")); // UTF-8
 
 	CURLcode httpres;
-	httpres = (CURLcode) 1;
 
 	std::string baseurl = "http://";
 	baseurl += g_settings.streaming_server_ip;
@@ -1083,8 +1062,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 				g_RCInput->postMsg (msg, data);
 			}
 			else
-				if (CNeutrinoApp::getInstance ()->
-				    handleMsg (msg, data) & messages_return::cancel_all)
+				if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 				{
 					exit = true;
 				}
@@ -1239,8 +1217,7 @@ CMoviePlayerGui::PlayFile (void)
 				g_RCInput->postMsg (msg, data);
 			}
 			else
-				if (CNeutrinoApp::getInstance ()->
-				    handleMsg (msg, data) & messages_return::cancel_all)
+				if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 				{
 					isTS = true;		// also exit in PES Mode
 					exit = true;
@@ -1253,7 +1230,6 @@ CMoviePlayerGui::PlayFile (void)
 int
 CMoviePlayerGui::show ()
 {
-	int res = -1;
 	uint msg, data;
 	bool loop = true, update = true;
 	while (loop)
@@ -1323,8 +1299,7 @@ CMoviePlayerGui::show ()
 		}
 		else if (msg == NeutrinoMessages::CHANGEMODE)
 		{
-			if ((data & NeutrinoMessages::
-			     mode_mask) != NeutrinoMessages::mode_ts)
+			if ((data & NeutrinoMessages::mode_mask) != NeutrinoMessages::mode_ts)
 			{
 				loop = false;
 				m_LastMode = data;
@@ -1344,8 +1319,7 @@ CMoviePlayerGui::show ()
 			}
 			else
 			{
-				if (CNeutrinoApp::getInstance ()->
-				    handleMsg (msg, data) & messages_return::cancel_all)
+				if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 				{
 					loop = false;
 				}
@@ -1355,7 +1329,7 @@ CMoviePlayerGui::show ()
 	}
 	hide ();
 
-	return (res);
+	return -1;
 }
 
 //------------------------------------------------------------------------
@@ -1365,6 +1339,8 @@ CMoviePlayerGui::hide ()
 {
 	if (visible)
 	{
+/* the following 2 paintBackgroundBoxRel calls are superseeded by the ClearFrameBuffer call */
+/*
 		frameBuffer->paintBackgroundBoxRel (x -
 						    MOVIEPLAYER_ConnectLineBox_Width
 						    - 1,
@@ -1376,7 +1352,8 @@ CMoviePlayerGui::hide ()
 						    MOVIEPLAYER_ConnectLineBox_Width
 						    + 2, height + 2 - title_height);
 		frameBuffer->paintBackgroundBoxRel (x, y, width, title_height);
-		frameBuffer->ClearFrameBuffer ();
+*/
+		frameBuffer->ClearFrameBuffer();
 		visible = false;
 	}
 }
