@@ -21,7 +21,5 @@ nhttpd_LDADD = \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
-	@MD5SUM_LIBS@ \
-	@UCODES_LIBS@ \
 	@ZAPIT_LIBS@ \
 	-lpthread
