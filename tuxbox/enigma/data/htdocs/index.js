@@ -89,6 +89,7 @@ function deleteMovie(xy)
 			var channel = "";
 			if (selChannel >= 0)
 			{
+				currentChannel = selChannel;
 				channel = document.channelselector.channel.options[selChannel].value;
 				document.location = "cgi-bin/deleteMovie?ref="+channel;
 				setTimeout("reload()", 3000);
@@ -106,6 +107,7 @@ function downloadMovie()
 		var selChannel = document.channelselector.channel.selectedIndex;
 		if (selChannel >= 0)
 		{
+			currentChannel = selChannel;
 			var channel = document.channelselector.channel.options[selChannel].value;
 			var pos = channel.indexOf("%2f");
 			if (pos >= 0)

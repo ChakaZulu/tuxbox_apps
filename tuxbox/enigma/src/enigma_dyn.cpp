@@ -517,6 +517,9 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	else
 	if (command == "play")
 	{
+		eString curChannel = opt["curChannel"];
+		if (curChannel)
+			currentChannel = atoi(curChannel.c_str());
 		if (eServiceInterface::getInstance()->service == sref)
 			eZapMain::getInstance()->play();
 		else
