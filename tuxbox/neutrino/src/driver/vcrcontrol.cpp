@@ -337,11 +337,15 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 			}
 		}
 
-		CSectionsdClient sections;
 		CSectionsdClient::responseGetCurrentNextInfoChannelID current_next;
-		if(sections.getCurrentNextServiceKey(channel_id, current_next))
+		if(epgid!=0)
 		{
-			extEPGTitle=current_next.current_name;
+			CSectionsdClient sdc;
+			CShortEPGData epgdata;
+			if (sdc.getEPGidShort(epgid, &epgdata))
+			{
+				extEPGTitle=epgdata.title;
+			}
 		}
 
 		switch(command)
