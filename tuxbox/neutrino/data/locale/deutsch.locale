@@ -44,6 +44,7 @@ mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.recording Aufnahme
 mainsettings.colors Farben / Themes / Schrift
+mainsettings.plugins Plugins
 mainsettings.lcd LC-Display
 mainsettings.keybinding Tasten-Einstellungen
 mainsettings.misc Diverse Einstellungen
@@ -124,6 +125,7 @@ colormenu.background_head Hintergrundfarbe
 colormenu.textcolor Textfarbe
 colormenu.textcolor_head Textfarbe
 colormenu.fade Menüs faden
+colormenu.timing OSD Timeouts
 
 colorthememenu.head Theme auswählen
 colorthememenu.neutrino_theme Neutrino Theme
@@ -137,6 +139,28 @@ colormenusetup.menucontent_selected Fensterinhalt selektiert
 
 colorstatusbar.head Statusbalken-Farben
 colorstatusbar.text Statusbalken
+
+timing.head OSD Timeouts
+timing.menu Menu
+timing.chanlist Kanalliste
+timing.epg Epg
+timing.infobar Infobar
+timing.hint_1 Einblendzeit in Sek., die das OSD
+timing.hint_2 auf dem TV angezeigt wird
+
+pluginmenu.head Plugin Einstellungen
+tuxnews.size Tuxnews Größe
+tuxnews_size.small klein
+tuxnews_size.medium mittel
+tuxnews_size.large gross
+tuxnews.speed Tuxnews Geschwindigkeit
+tuxnews_speed.slow langsam
+tuxnews_speed.medium mittel
+tuxnews_speed.fast schnell
+tuxnews.position Tuxnews Position
+tuxnews_position.top oben
+tuxnews_position.center mitte
+tuxnews_position.bottom unten
 
 repeatblocker.hint_1 Mindestzeit (in ms) zwischen 2 Tastendrücken
 repeatblocker.hint_2 0 schaltet den Blocker aus (Rot ist " ")

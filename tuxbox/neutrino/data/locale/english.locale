@@ -124,6 +124,7 @@ colormenu.background_head Background
 colormenu.textcolor Textcolor
 colormenu.textcolor_head Textcolor
 colormenu.fade Fade menus
+colormenu.timing OSD Timing
 
 colorthememenu.head Theme Selector
 colorthememenu.neutrino_theme Neutrino Theme
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected Window-Content selected
 
 colorstatusbar.head Infobar
 colorstatusbar.text Infobar
+
+timing.head OSD Timeouts
+timing.menu Menu
+timing.chanlist Channellist
+timing.epg Epg
+timing.infobar Infobar
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 Shortest time (in ms) to recognize 2 keystrokes
 repeatblocker.hint_2 Enter 0 to switch of the blocker (red is space)

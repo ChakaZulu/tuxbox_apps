@@ -123,7 +123,8 @@ colormenu.background Colori di fondo
 colormenu.background_head Colori di fondo
 colormenu.textcolor Colori Testo
 colormenu.textcolor_head Colori di Testo
-colormenu.fade Menüs fade
+colormenu.fade unset
+colormenu.timing unset
 
 colorthememenu.head Sciegli Tema
 colorthememenu.neutrino_Theme Neutrino Tema
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected Contenuto Menü selezionato
 
 colorstatusbar.head Colori Contenuto Menü
 colorstatusbar.text Contenuto Menü
+
+timing.head unset
+timing.menu unset
+timing.chanlist unset
+timing.epg unset
+timing.infobar unset
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 Tempo (in ms) tra 2 premuteTasti
 repeatblocker.hint_2 0 spegne il Blocker tasti (Rosso e " ")

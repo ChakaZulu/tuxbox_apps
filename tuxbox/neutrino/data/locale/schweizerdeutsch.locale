@@ -124,6 +124,7 @@ colormenu.background_head Hintergrundfarb
 colormenu.textcolor Textfarb 
 colormenu.textcolor_head Textfarb 
 colormenu.fade Menüs faden 
+colormenu.timing unset
 
 colorthememenu.head Theme usswähle 
 colorthememenu.neutrino_theme Neutrino Theme 
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected Fenschderinhalt selektiert
 
 colorstatusbar.head Statusbalken-Farbe 
 colorstatusbar.text Statusbalken 
+
+timing.head unset
+timing.menu unset
+timing.chanlist unset
+timing.epg unset
+timing.infobar unset
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 Mindeschtzit (in ms) zwüsche 2 Tastedrück' 
 repeatblocker.hint_2 0 schaldet de Blocker us (Rot isch " ") 

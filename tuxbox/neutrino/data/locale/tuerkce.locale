@@ -101,8 +101,9 @@ colormenu.menucolors MENÜ RENKLERI
 colormenu.background ALT RENK
 colormenu.background_head ALT RENK
 colormenu.textcolor  YAZI RENGI
-colormenu.textcolor_head Textfarbe
-colormenu.fade Fade menus
+colormenu.textcolor_head unset
+colormenu.fade unset
+colormenu.timing unset
 
 colorthememenu.head RENK SECIMINI SECINIZ
 colorthememenu.neutrino_theme NEUTRINO RENK SECIMI
@@ -116,6 +117,14 @@ colormenusetup.menucontent_selected PENCERE ICI SECILMIS
 
 colorstatusbar.head ILETKENLIK MENÜ RENGI
 colorstatusbar.text ILETKENLIK MENÜSÜ
+
+timing.head unset
+timing.menu unset
+timing.chanlist unset
+timing.epg unset
+timing.infobar unset
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 IKI TUS BASMA ARASI EN AZ ZAMAN (ms)
 repeatblocker.hint_2 0 ENGELI KALDIRIYOR (KIRMIZI " ")

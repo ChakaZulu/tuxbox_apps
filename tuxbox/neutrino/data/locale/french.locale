@@ -123,7 +123,8 @@ colormenu.background Couleur de Arrière-plan
 colormenu.background_head Couleur de Arrière-plan
 colormenu.textcolor Couleur de Texte
 colormenu.textcolor_head Couleur de Texte
-colormenu.fade Fade menus
+colormenu.fade unset
+colormenu.timing unset
 
 colorthememenu.head Theme choisir
 colorthememenu.neutrino_theme Neutrino Thème
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected Contenu de fenêtre active
 
 colorstatusbar.head Couleur la Poutre de statut
 colorstatusbar.text Poutre de statut
+
+timing.head unset
+timing.menu unset
+timing.chanlist unset
+timing.epg unset
+timing.infobar unset
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 Temps minimum entre 2 clés dans les millisecondes
 repeatblocker.hint_2 0 met hors circuit l' amortissement  (Rouge est " ")

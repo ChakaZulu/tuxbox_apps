@@ -123,7 +123,8 @@ colormenu.background farba pozadia
 colormenu.background_head farba pozadia
 colormenu.textcolor farba textu
 colormenu.textcolor_head farba textu
-colormenu.fade Fade menus
+colormenu.fade unset
+colormenu.timing unset
 
 colorthememenu.head Theme vybrat
 colorthememenu.neutrino_theme Neutrino Theme
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected obsah okna vybrany
 
 colorstatusbar.head farba ukazovatela
 colorstatusbar.text ukazovatel
+
+timing.head unset
+timing.menu unset
+timing.chanlist unset
+timing.epg unset
+timing.infobar unset
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 najkratsi cas (ms) medzi 2 stlaceniami tlacitka
 repeatblocker.hint_2 0 vypina blokator (cervena je " ")

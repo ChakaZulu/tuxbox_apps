@@ -124,6 +124,7 @@ colormenu.background_head Hintergrundfarbe
 colormenu.textcolor Textfarb
 colormenu.textcolor_head Textfarb
 colormenu.fade Menüs faden
+colormenu.timing OSD Timeouts
 
 colorthememenu.head Theme auswähn
 colorthememenu.neutrino_theme Neutrino Theme
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected Fenstainhoit ausgwähit
 
 colorstatusbar.head Statusboikn-Farbn
 colorstatusbar.text Statusboikn
+
+timing.head OSD Timeouts
+timing.menu Menu
+timing.chanlist Kanalliste
+timing.epg Epg
+timing.infobar Infobar
+timing.hint_1 Einblendzeit in Sek., die das OSD
+timing.hint_2 auf dem TV angezeigt wird
 
 repeatblocker.hint_1 Mindestzeit (ms) zwischn zwoa Dasdndrucka
 repeatblocker.hint_2 0 schoitt an Blocka aus (Rot is " ")

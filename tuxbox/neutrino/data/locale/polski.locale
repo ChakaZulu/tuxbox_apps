@@ -123,7 +123,8 @@ colormenu.background kolor tla
 colormenu.background_head kolor tla
 colormenu.textcolor kolor tekstu
 colormenu.textcolor_head kolor tekstu
-colormenu.fade Fade menus
+colormenu.fade unset
+colormenu.timing unset
 
 colorthememenu.head wybor wygladu
 colorthememenu.neutrino_theme wyglad Neutrino
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected Zawartosc okien selekcja
 
 colorstatusbar.head kolory listwy statusowej
 colorstatusbar.text listwa statusowa
+
+timing.head unset
+timing.menu unset
+timing.chanlist unset
+timing.epg unset
+timing.infobar unset
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 czas (w ms) miedzy 2 naciskami klawisza
 repeatblocker.hint_2 0 wylacza blokade (czerwony jest " ")

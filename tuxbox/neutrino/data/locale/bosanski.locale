@@ -124,6 +124,7 @@ colormenu.background_head boja pozadine
 colormenu.textcolor boja teksta
 colormenu.textcolor_head boja teksta
 colormenu.fade izblijediti izbore
+colormenu.timing unset
 
 colorthememenu.head izabrati teme
 colorthememenu.neutrino_theme neutrino tema
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected izabran sadrzaj prozora
 
 colorstatusbar.head boja statusne trake
 colorstatusbar.text statusna traka
+
+timing.head unset
+timing.menu unset
+timing.chanlist unset
+timing.epg unset
+timing.infobar unset
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 vrijeme (u ms) izmedu 2 pritiska tipke
 repeatblocker.hint_2 0 ugasi blokera (crveno je " ")

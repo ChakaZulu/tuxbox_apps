@@ -124,6 +124,7 @@ colormenu.background_head ngjyra ne fund
 colormenu.textcolor ngjyra teksit 
 colormenu.textcolor_head ngjyra teksit 
 colormenu.fade pak ngjyra 
+colormenu.timing unset
 
 colorthememenu.head mi shi temat 
 colorthememenu.neutrino_theme neutrino tema 
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected e ke zgjedh përberjen e dritares
 
 colorstatusbar.head ngjyra e trakes statute 
 colorstatusbar.text traka statute 
+
+timing.head unset
+timing.menu unset
+timing.chanlist unset
+timing.epg unset
+timing.infobar unset
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 koha (u ms) midis 2 shumje e pullave 
 repeatblocker.hint_2 0 fike bllokerin (e kuqe është " ") 

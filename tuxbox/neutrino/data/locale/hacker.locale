@@ -124,6 +124,7 @@ colormenu.background_head 84[|<@|20µ/\/|)
 colormenu.textcolor +3><7[*|_0|2
 colormenu.textcolor_head +3><'|'[0|_0|2
 colormenu.fade |=4|)3 /\/\3|\||_|5
+colormenu.timing unset
 
 colorthememenu.head 7|-|3/\/\3 $3|_3[7*|2
 colorthememenu.neutrino_theme /\/3µ+|2¡/\/* '|'|-|3/\/\3
@@ -137,6 +138,14 @@ colormenusetup.menucontent_selected \/\/!/\/|]*\/\/-[*/\/+3|\|'|' 53|3['|'3|)
 
 colorstatusbar.head !/\/|=0|34|2
 colorstatusbar.text !|\||=*84|2
+
+timing.head unset
+timing.menu unset
+timing.chanlist unset
+timing.epg unset
+timing.infobar unset
+timing.hint_1 unset
+timing.hint_2 unset
 
 repeatblocker.hint_1 $|-|0|2'|'35+ '|'!/\/\3 (!|\| /\/\$) '|'* |23[*6|\|!z3 2 |<3y$7|20|<35
 repeatblocker.hint_2 3|\|73|2 0 70 $\/\/!+[|-| 0|= +|-|3 8|_*[|<3|2 (|23|) !$ $p4[3)
