@@ -2360,18 +2360,6 @@ void CNeutrinoApp::setupRecordingDevice(void)
    }
 }
 
-bool CNeutrinoApp::getEnvironment(const char* name, int* value)
-{
-	char* content = getenv(name);
-	if (content == NULL)
-	{
-		dprintf( DEBUG_NORMAL, "[neutrino] Fatal Error: Environment variable %s not set. Bye.\n\n", name);
-		return false;
-	}
-	sscanf(content, "%x", value);
-	return true;
-}
-
 int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
@@ -2490,47 +2478,56 @@ int CNeutrinoApp::run(int argc, char **argv)
 	// ScanSettings
 	InitScanSettings(scanSettings);
 
-	dprintf( DEBUG_NORMAL, "control event register\n");
+	dprintf( DEBUG_NORMAL, "registering as event client\n");
+
 	g_Controld->registerEvent(CControldClient::EVT_MUTECHANGED, 222, NEUTRINO_UDS_NAME);
 	g_Controld->registerEvent(CControldClient::EVT_VOLUMECHANGED, 222, NEUTRINO_UDS_NAME);
 	g_Controld->registerEvent(CControldClient::EVT_MODECHANGED, 222, NEUTRINO_UDS_NAME);
 	g_Controld->registerEvent(CControldClient::EVT_VCRCHANGED, 222, NEUTRINO_UDS_NAME);
 
-	dprintf( DEBUG_NORMAL, "sectionsd event register\n");
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_TIMESET, 222, NEUTRINO_UDS_NAME);
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_GOT_CN_EPG, 222, NEUTRINO_UDS_NAME);
 
-	dprintf( DEBUG_NORMAL, "zapit event register\n");
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_FAILED, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_SUB_COMPLETE, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_SUB_FAILED, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_MOTOR, 222, NEUTRINO_UDS_NAME);
 #ifndef SKIP_CA_STATUS
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_CA_CLEAR, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_CA_LOCK, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_CA_FTA, 222, NEUTRINO_UDS_NAME);
+#define ZAPIT_EVENT_COUNT 26
+#else
+#define ZAPIT_EVENT_COUNT 23
 #endif
-	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_ACTIVATED, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_COMPLETE, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FAILED, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS, 222, NEUTRINO_UDS_NAME);
- 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY, 222, NEUTRINO_UDS_NAME);
- 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCYP, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_SATELLITE, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_CHANNELS, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_PROVIDER, 222, NEUTRINO_UDS_NAME);
-	g_Zapit->registerEvent(CZapitClient::EVT_BOUQUETS_CHANGED, 222, NEUTRINO_UDS_NAME);
- 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_SERVICENAME, 222, NEUTRINO_UDS_NAME);
- 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FOUND_A_CHAN, 222, NEUTRINO_UDS_NAME);
- 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FOUND_TV_CHAN, 222, NEUTRINO_UDS_NAME);
- 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FOUND_RADIO_CHAN, 222, NEUTRINO_UDS_NAME);
- 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FOUND_DATA_CHAN, 222, NEUTRINO_UDS_NAME);
+	const CZapitClient::events zapit_event[ZAPIT_EVENT_COUNT] =
+		{
+			CZapitClient::EVT_ZAP_COMPLETE,
+			CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD,
+			CZapitClient::EVT_ZAP_FAILED,
+			CZapitClient::EVT_ZAP_SUB_COMPLETE,
+			CZapitClient::EVT_ZAP_SUB_FAILED,
+			CZapitClient::EVT_ZAP_MOTOR,
+#ifndef SKIP_CA_STATUS
+			CZapitClient::EVT_ZAP_CA_CLEAR,
+			CZapitClient::EVT_ZAP_CA_LOCK,
+			CZapitClient::EVT_ZAP_CA_FTA,
+#endif
+			CZapitClient::EVT_RECORDMODE_ACTIVATED,
+			CZapitClient::EVT_RECORDMODE_DEACTIVATED,
+			CZapitClient::EVT_SCAN_COMPLETE,
+			CZapitClient::EVT_SCAN_FAILED,
+			CZapitClient::EVT_SCAN_NUM_TRANSPONDERS,
+			CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS,
+			CZapitClient::EVT_SCAN_REPORT_FREQUENCY,
+			CZapitClient::EVT_SCAN_REPORT_FREQUENCYP,
+			CZapitClient::EVT_SCAN_SATELLITE,
+			CZapitClient::EVT_SCAN_NUM_CHANNELS,
+			CZapitClient::EVT_SCAN_PROVIDER,
+			CZapitClient::EVT_BOUQUETS_CHANGED,
+			CZapitClient::EVT_SCAN_SERVICENAME,
+			CZapitClient::EVT_SCAN_FOUND_A_CHAN,
+			CZapitClient::EVT_SCAN_FOUND_TV_CHAN,
+			CZapitClient::EVT_SCAN_FOUND_RADIO_CHAN,
+			CZapitClient::EVT_SCAN_FOUND_DATA_CHAN,
+		};
 
-	dprintf( DEBUG_NORMAL, "timerd event register\n");
+	for (int i = 0; i < ZAPIT_EVENT_COUNT; i++)
+		g_Zapit->registerEvent(zapit_event[i], 222, NEUTRINO_UDS_NAME);
+
 	g_Timerd->registerEvent(CTimerdClient::EVT_ANNOUNCE_SHUTDOWN, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_SHUTDOWN, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_ANNOUNCE_NEXTPROGRAM, 222, NEUTRINO_UDS_NAME);
