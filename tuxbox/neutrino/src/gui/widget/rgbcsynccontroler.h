@@ -58,7 +58,7 @@ class CRGBCSyncControler : public CMenuTarget
 
 		void paint();
 		void setCSync();
-		void paintSlider(int x, int y, unsigned int spos, float factor, const char * const text, const char * const iconname, bool selected); // text in UTF-8
+		void paintSlider(int x, int y, unsigned int spos, float factor, const neutrino_locale_t text, bool selected);
 
 	public:
 

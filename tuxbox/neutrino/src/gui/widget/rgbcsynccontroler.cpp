@@ -103,7 +103,7 @@ int CRGBCSyncControler::exec(CMenuTarget* parent, const std::string &)
 				if (*csync < 31)
 				{
 					(*csync)++;
-					paintSlider(x+10, y+hheight, *csync, CSYNCFACTOR, g_Locale->getText("videomenu.csync"),"", true);
+					paintSlider(x+10, y+hheight, *csync, CSYNCFACTOR, LOCALE_VIDEOMENU_CSYNC, true);
 					setCSync();
 				}
 				break;
@@ -112,7 +112,7 @@ int CRGBCSyncControler::exec(CMenuTarget* parent, const std::string &)
 				if (*csync > 0)
 			   {
 					(*csync)--;
-					paintSlider(x+10, y+hheight, *csync, CSYNCFACTOR, g_Locale->getText("videomenu.csync"),"", true);
+					paintSlider(x+10, y+hheight, *csync, CSYNCFACTOR, LOCALE_VIDEOMENU_CSYNC, true);
 					setCSync();
 				}
 				break;
@@ -164,12 +164,12 @@ void CRGBCSyncControler::paint()
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT_PLUS_0);
 
-	paintSlider(x+10, y+hheight, *csync, CSYNCFACTOR, g_Locale->getText("videomenu.csync"),"", true);
+	paintSlider(x+10, y+hheight, *csync, CSYNCFACTOR, LOCALE_VIDEOMENU_CSYNC, true);
 
 //	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT_PLUS_3);
 }
 
-void CRGBCSyncControler::paintSlider(int x, int y, unsigned int spos, float factor, const char * const text, const char * const iconname, bool selected)
+void CRGBCSyncControler::paintSlider(int x, int y, unsigned int spos, float factor, const neutrino_locale_t text, bool selected)
 {
 	int startx = 200;
 	char wert[5];
@@ -182,7 +182,7 @@ void CRGBCSyncControler::paintSlider(int x, int y, unsigned int spos, float fact
 	iconfile +=".raw";
 	frameBuffer->paintIcon(iconfile, (int)(x + (startx+3)+(spos / factor)), y+mheight/4);
 
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y+mheight, width, g_Locale->getText(text), COL_MENUCONTENT, 0, true); // UTF-8
 	sprintf(wert, "%3d", spos); // UTF-8 encoded
 	frameBuffer->paintBoxRel(x + startx + 120 + 10, y, 50, mheight, COL_MENUCONTENT_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x + startx + 120 + 10, y+mheight, width, wert, COL_MENUCONTENT, 0, true); // UTF-8

@@ -982,7 +982,7 @@ void CNeutrinoApp::doChecks()
 		fclose(fd);
 	ucodes_ok= ucodes_ok&&(fd);
 	if (!ucodes_ok)
-		DisplayErrorMessage(g_Locale->getText("ucodes.failure")); // UTF-8
+		DisplayErrorMessage(g_Locale->getText(LOCALE_UCODES_FAILURE));
 }
 
 
@@ -1672,41 +1672,41 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 	videoSettings.addItem(GenericMenuBack);
 	videoSettings.addItem(GenericMenuSeparatorLine);
 
-	CRGBCSyncControler* sc = new CRGBCSyncControler("videomenu.rgb_centering", &g_settings.video_csync);
+	CRGBCSyncControler* sc = new CRGBCSyncControler(LOCALE_VIDEOMENU_RGB_CENTERING, &g_settings.video_csync);
 	bool bVisible = ( g_settings.video_Signal == 1 ) || ( g_settings.video_Signal == 3 ) || ( g_settings.video_Signal == 4 );  
-	CMenuForwarder* scf = new CMenuForwarder("videomenu.rgb_centering", bVisible, NULL, sc);
+	CMenuForwarder* scf = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, bVisible, NULL, sc);
 	
-	CVideoSetupNotifier		*videoSetupNotifier = new CVideoSetupNotifier(scf);
-	CMenuOptionChooser* oj = new CMenuOptionChooser("videomenu.videosignal", &g_settings.video_Signal, true, videoSetupNotifier);
-	oj->addOption(1, "videomenu.videosignal_rgb");
-	oj->addOption(2, "videomenu.videosignal_svideo");
-	oj->addOption(3, "videomenu.videosignal_yuv_v");
-	oj->addOption(4, "videomenu.videosignal_yuv_c");
-	oj->addOption(0, "videomenu.videosignal_composite");
+	CVideoSetupNotifier * videoSetupNotifier = new CVideoSetupNotifier(scf);
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOSIGNAL, &g_settings.video_Signal, true, videoSetupNotifier);
+	oj->addOption(1, LOCALE_VIDEOMENU_VIDEOSIGNAL_RGB      );
+	oj->addOption(2, LOCALE_VIDEOMENU_VIDEOSIGNAL_SVIDEO   );
+	oj->addOption(3, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_V    );
+	oj->addOption(4, LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_C    );
+	oj->addOption(0, LOCALE_VIDEOMENU_VIDEOSIGNAL_COMPOSITE);
 	videoSettings.addItem( oj );
 
 	videoSettings.addItem(scf);
 
-	oj = new CMenuOptionChooser("videomenu.videoformat", &g_settings.video_Format, true, videoSetupNotifier);
-	oj->addOption(2, "videomenu.videoformat_43");
-	oj->addOption(3, "videomenu.videoformat_431");
-	oj->addOption(1, "videomenu.videoformat_169");
-	oj->addOption(0, "videomenu.videoformat_autodetect");
+	oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &g_settings.video_Format, true, videoSetupNotifier);
+	oj->addOption(2, LOCALE_VIDEOMENU_VIDEOFORMAT_43        );
+	oj->addOption(3, LOCALE_VIDEOMENU_VIDEOFORMAT_431       );
+	oj->addOption(1, LOCALE_VIDEOMENU_VIDEOFORMAT_169       );
+	oj->addOption(0, LOCALE_VIDEOMENU_VIDEOFORMAT_AUTODETECT);
 
-	if(g_settings.video_Format==0) // autodetect has to be initialized
+	if (g_settings.video_Format == 0) // autodetect has to be initialized
 	{
-		videoSetupNotifier->changeNotify("videomenu.videoformat", NULL);
+		videoSetupNotifier->changeNotify(LOCALE_VIDEOMENU_VIDEOFORMAT, NULL);
 	}
 
 	videoSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("videomenu.vcrswitch", &g_settings.vcr_AutoSwitch, true);
+	oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSWITCH, &g_settings.vcr_AutoSwitch, true);
 	oj->addOption(0, LOCALE_OPTIONS_OFF);
 	oj->addOption(1, LOCALE_OPTIONS_ON );
 	videoSettings.addItem( oj );
 
 	videoSettings.addItem(GenericMenuSeparatorLine);
-	videoSettings.addItem( new CMenuForwarder("videomenu.screensetup", true, NULL, new CScreenSetup()));
+	videoSettings.addItem(new CMenuForwarder(LOCALE_VIDEOMENU_SCREENSETUP, true, NULL, new CScreenSetup()));
 }
 
 void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
@@ -2640,7 +2640,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget mainMenu            (LOCALE_MAINMENU_HEAD       , "mainmenue.raw"       );
 	CMenuWidget mainSettings        (LOCALE_MAINSETTINGS_HEAD   , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget languageSettings    (LOCALE_LANGUAGESETUP_HEAD  , "language.raw"        );
-	CMenuWidget videoSettings       ("videomenu.head"           , "video.raw"           );
+	CMenuWidget videoSettings       (LOCALE_VIDEOMENU_HEAD      , "video.raw"           );
 	CMenuWidget audioSettings       (LOCALE_AUDIOMENU_HEAD      , "audio.raw"           );
 	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw"            , 500);
 	CMenuWidget networkSettings     (LOCALE_NETWORKMENU_HEAD    , "network.raw"         );
@@ -3207,7 +3207,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			standbyMode( false );
 		}
 		if( mode != mode_scart )
-			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("zaptotimer.announce")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE)); // UTF-8
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
@@ -3459,7 +3459,7 @@ void CNeutrinoApp::ExitRun()
 
 bool CNeutrinoApp::onPaintNotify(const std::string & MenuName)
 {
-	if(MenuName == "videomenu.head")
+	if (ARE_LOCALES_EQUAL(MenuName.c_str(), LOCALE_VIDEOMENU_HEAD))
 	{//aktuelle werte vom controld holen...
 		g_settings.video_Signal = g_Controld->getVideoOutput();
 		g_settings.video_Format = g_Controld->getVideoFormat();

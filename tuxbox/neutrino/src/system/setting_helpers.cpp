@@ -327,13 +327,13 @@ bool CAudioSetupNotifier::changeNotify(const std::string & OptionName, void*)
 {
 	//printf("notify: %s\n", OptionName.c_str() );
 
-	if (OptionName == LOCALE_AUDIOMENU_PCMOFFSET)
+	if (ARE_LOCALES_EQUAL(OptionName.c_str(), LOCALE_AUDIOMENU_PCMOFFSET))
 	{
 		if (g_settings.audio_avs_Control == 2)   //lirc
 			g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), CControld::TYPE_OST);
 	}
 
-	if (OptionName == LOCALE_AUDIOMENU_ANALOGOUT)
+	if (ARE_LOCALES_EQUAL(OptionName.c_str(), LOCALE_AUDIOMENU_ANALOGOUT))
 	{
 		g_Zapit->setAudioMode(g_settings.audio_AnalogMode);
 	}
@@ -364,14 +364,13 @@ CVideoSetupNotifier::CVideoSetupNotifier( CMenuItem* i1)
 
 bool CVideoSetupNotifier::changeNotify(const std::string & OptionName, void*)
 {
-	if(OptionName=="videomenu.videosignal")
+	if (ARE_LOCALES_EQUAL(OptionName.c_str(), LOCALE_VIDEOMENU_VIDEOSIGNAL))
 	{
-		g_Controld->setVideoOutput( g_settings.video_Signal );
-		toDisable[0]->setActive(( g_settings.video_Signal == 1 ) || 
-										( g_settings.video_Signal == 3 ) || 
-										( g_settings.video_Signal == 4 ));
+		g_Controld->setVideoOutput(g_settings.video_Signal);
+
+		toDisable[0]->setActive((g_settings.video_Signal == 1) || (g_settings.video_Signal == 3) || (g_settings.video_Signal == 4));
 	}
-	else if(OptionName=="videomenu.videoformat")
+	else if (ARE_LOCALES_EQUAL(OptionName.c_str(), LOCALE_VIDEOMENU_VIDEOFORMAT))
 	{
 		g_Controld->setVideoFormat( g_settings.video_Format );
 	}
@@ -436,17 +435,17 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
 	std::string text;
 	char res[60];
 
-	text = g_Locale->getText("ucodecheck.avia500");
+	text = g_Locale->getText(LOCALE_UCODECHECK_AVIA500);
 	text += ": ";
 	checkFile(UCODEDIR "/avia500.ux", (char*) &res);
 	text += res;
 	text += '\n';
-	text += g_Locale->getText("ucodecheck.avia600");
+	text += g_Locale->getText(LOCALE_UCODECHECK_AVIA600);
 	text += ": ";
 	checkFile(UCODEDIR "/avia600.ux", (char*) &res);
 	text += res;
 	text += '\n';
-	text += g_Locale->getText("ucodecheck.ucode");
+	text += g_Locale->getText(LOCALE_UCODECHECK_UCODE);
 	text += ": ";
 	checkFile(UCODEDIR "/ucode.bin", (char*) &res);
 	if (strcmp("not found", res) == 0)
@@ -454,12 +453,12 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
 	else
 		text += res;
 	text += '\n';
-	text += g_Locale->getText("ucodecheck.cam-alpha");
+	text += g_Locale->getText(LOCALE_UCODECHECK_CAM_ALPHA);
 	text += ": ";
 	checkFile(UCODEDIR "/cam-alpha.bin", (char*) &res);
 	text += res;
 
-	ShowMsgUTF("ucodecheck.head", text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
+	ShowMsgUTF(LOCALE_UCODECHECK_HEAD, text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 	return 1;
 }
 
