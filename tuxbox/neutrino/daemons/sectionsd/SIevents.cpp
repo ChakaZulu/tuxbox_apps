@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.23 2003/02/06 17:52:18 thegoodguy Exp $
+// $Id: SIevents.cpp,v 1.24 2003/03/03 03:43:58 obi Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -47,16 +47,19 @@
 
 SIevent::SIevent(const struct eit_event *e)
 {
-	eventID=e->event_id;
-	time_t startzeit=changeUTCtoCtime(((const unsigned char *)e)+2);
-	unsigned dauer=0;
-	if(e->duration!=0xffffff)
-		dauer=((e->duration)>>20)*10*3600L+(((e->duration)>>16)&0x0f)*3600L+
-			(((e->duration)>>12)&0x0f)*10*60L+(((e->duration)>>8)&0x0f)*60L+
-			(((e->duration)>>4)&0x0f)*10+((e->duration)&0x0f);
-	if(startzeit && dauer)
-		times.insert(SItime(startzeit, dauer));
-	serviceID=originalNetworkID=0;
+	eventID = (e->event_id_hi << 8) | e->event_id_lo;
+	time_t start_time = changeUTCtoCtime(((const unsigned char *)e) + 2);
+	unsigned long duration = 0;
+
+	if (!((e->duration_hi == 0xff) && (e->duration_mid == 0xff) && (e->duration_lo == 0xff)))
+		duration = ((e->duration_hi)>>4)*10*3600L + ((e->duration_hi)&0x0f)*3600L +
+			   ((e->duration_mid)>>4)*10*60L + ((e->duration_mid)&0x0f)*60L +
+			   ((e->duration_lo)>>4)*10 + ((e->duration_lo)&0x0f);
+
+	if (start_time && duration)
+		times.insert(SItime(start_time, duration));
+
+	serviceID = originalNetworkID = 0;
 }
 
 // Std-Copy
@@ -287,64 +290,78 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
 	SIevent evt; // Std-Event das bei Fehler zurueckgeliefert wird
 	struct SI_section_header header;
 	char *buf;
+	unsigned short section_length;
 
 	if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1) {
 		perror(DEMUX_DEVICE);
 		return evt;
 	}
-	if (!setfilter(fd, 0x12, 0x4e, 0xff, DMX_IMMEDIATE_START | DMX_CHECK_CRC))
-	{
+	
+	if (!setfilter(fd, 0x12, 0x4e, 0xff, DMX_IMMEDIATE_START | DMX_CHECK_CRC)) {
 		close(fd);
 		return evt;
 	}
 
-	time_t szeit=time(NULL);
+	time_t szeit = time(NULL);
 
-//  printf("reading first\n");
 	// Segment mit Event fuer sid suchen
 	do {
-		int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+		int rc = readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+		
 		if(!rc)
 			break; // timeout
+		
 		else if(rc<0) {
 			close(fd);
 			perror ("read header");
 			return evt;
 		}
-		buf=new char[sizeof(header)+header.section_length-5];
-		if(!buf) {
+		
+		section_length = (header.section_length_hi << 8) | header.section_length_lo;
+		
+		buf = new char[sizeof(header) + section_length - 5];
+		
+		if (!buf) {
 			close(fd);
 			printf("Not enough memory!\n");
 			return evt;
 		}
+		
 		// Den Header kopieren
 		memcpy(buf, &header, sizeof(header));
-		rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+		rc = readNbytes(fd, &buf[sizeof(header)], section_length - 5, timeoutInSeconds);
+		
 		if(!rc) {
 			delete[] buf;
 			break; // timeout
 		}
-		if(rc<0) {
+		
+		if (rc < 0) {
 			close(fd);
 			delete[] buf;
 			perror ("read section");
 			return evt;
 		}
-		if(header.current_next_indicator) {
+		
+		if (header.current_next_indicator) {
 			// Wir wollen nur aktuelle sections
-			SIsectionEIT e(SIsection(sizeof(header)+header.section_length-5, buf));
-			time_t zeit=time(NULL);
-			for(SIevents::iterator k=e.events().begin(); k!=e.events().end(); k++)
-				if(k->serviceID==serviceID)
-					for(SItimes::iterator t=k->times.begin(); t!=k->times.end(); t++)
-						if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer)) {
+			SIsectionEIT e(SIsection(sizeof(header) + section_length - 5, buf));
+			time_t zeit = time(NULL);
+			for (SIevents::iterator k = e.events().begin(); k != e.events().end(); k++)
+				if (k->serviceID == serviceID)
+					for (SItimes::iterator t = k->times.begin(); t != k->times.end(); t++)
+						if ((t->startzeit <= zeit) && (zeit <= (long)(t->startzeit+t->dauer))) {
 							close(fd);
 							return SIevent(*k);
 						}
 		}
-		else
+		
+		else {
 			delete[] buf;
-	} while (time(NULL)<szeit+(long)(timeoutInSeconds));
+		}
+		
+	} while (time(NULL) < szeit + (long)timeoutInSeconds);
+	
 	close(fd);
 	return evt;
 }

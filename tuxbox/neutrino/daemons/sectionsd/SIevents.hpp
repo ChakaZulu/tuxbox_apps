@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.19 2002/02/28 01:52:21 field Exp $
+// $Id: SIevents.hpp,v 1.20 2003/03/03 03:43:58 obi Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,14 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.20  2003/03/03 03:43:58  obi
+// - fixed lots of endian issues due to casting of char* to struct*
+// - fixed bat struct last section number entry
+// - fixed some dvb data return types in si section classes
+// - indented lots of code to make it readable
+//
+// sectionsd runs on little endian machines now, too :-)
+//
 // Revision 1.19  2002/02/28 01:52:21  field
 // Verbessertes Umschalt-Handling
 //
@@ -83,6 +91,7 @@
 // Alles neu macht der Mai.
 //
 
+#include <endian.h>
 #include <vector>
 
 // forward references
@@ -90,90 +99,117 @@ class SIservice;
 class SIservices;
 
 struct eit_event {
-  unsigned short event_id : 16;
-  unsigned long long start_time : 40;
-  unsigned int duration : 24;
-  unsigned char running_status : 3;
-  unsigned char free_CA_mode : 1;
-  unsigned short descriptors_loop_length : 12;
+	unsigned event_id_hi			: 8;
+	unsigned event_id_lo			: 8;
+	unsigned start_time_hi			: 8;
+	unsigned start_time_hi2			: 8;
+	unsigned start_time_mid			: 8;
+	unsigned start_time_lo2			: 8;
+	unsigned start_time_lo			: 8;
+	unsigned duration_hi			: 8;
+	unsigned duration_mid			: 8;
+	unsigned duration_lo			: 8;
+#if __BYTE_ORDER == __BIG_ENDIAN
+	unsigned running_status			: 3;
+	unsigned free_CA_mode			: 1;
+	unsigned descriptors_loop_length_hi	: 4;
+#else
+	unsigned descriptors_loop_length_hi	: 4;
+	unsigned free_CA_mode			: 1;
+	unsigned running_status			: 3;
+#endif
+	unsigned descriptors_loop_length_lo	: 8;
 } __attribute__ ((packed)) ;
 
 
 struct descr_component_header {
-  unsigned char descriptor_tag : 8;
-  unsigned char descriptor_length : 8;
-  unsigned char reserved_future_use : 4;
-  unsigned char stream_content : 4;
-  unsigned char component_type : 8;
-  unsigned char component_tag : 8;
-  unsigned iso_639_2_language_code : 24;
+	unsigned descriptor_tag			: 8;
+	unsigned descriptor_length		: 8;
+#if __BYTE_ORDER == __BIG_ENDIAN
+	unsigned reserved_future_use		: 4;
+	unsigned stream_content			: 4;
+#else
+	unsigned stream_content			: 4;
+	unsigned reserved_future_use		: 4;
+#endif
+	unsigned component_type			: 8;
+	unsigned component_tag			: 8;
+	unsigned iso_639_2_language_code_hi	: 8;
+	unsigned iso_639_2_language_code_mid	: 8;
+	unsigned iso_639_2_language_code_lo	: 8;
 } __attribute__ ((packed)) ;
 
 struct descr_linkage_header {
-  unsigned char descriptor_tag : 8;
-  unsigned char descriptor_length : 8;
-  unsigned short transport_stream_id : 16;
-  unsigned short original_network_id : 16;
-  unsigned short service_id : 16;
-  unsigned char linkage_type : 8;
+	unsigned descriptor_tag			: 8;
+	unsigned descriptor_length		: 8;
+	unsigned transport_stream_id_hi		: 8;
+	unsigned transport_stream_id_lo		: 8;
+	unsigned original_network_id_hi		: 8;
+	unsigned original_network_id_lo		: 8;
+	unsigned service_id_hi			: 8;
+	unsigned service_id_lo			: 8;
+	unsigned linkage_type			: 8;
 } __attribute__ ((packed)) ;
 
 class SIlinkage {
-  public:
-    SIlinkage(const struct descr_linkage_header *link) {
-      linkageType=link->linkage_type;
-      transportStreamId=link->transport_stream_id;
-      originalNetworkId=link->original_network_id;
-      serviceId=link->service_id;
-      if(link->descriptor_length>sizeof(struct descr_linkage_header)-2)
-        name=std::string(((const char *)link)+sizeof(struct descr_linkage_header), link->descriptor_length-(sizeof(struct descr_linkage_header)-2));
-    }
-    // Std-copy
-    SIlinkage(const SIlinkage &l) {
-      linkageType=l.linkageType;
-      transportStreamId=l.transportStreamId;
-      originalNetworkId=l.originalNetworkId;
-      serviceId=l.serviceId;
-      name=l.name;
-    }
-    // Der Operator zum sortieren
-    bool operator < (const SIlinkage& l) const {
-      return name < l.name;
-//      return component < c.component;
-    }
+public:
+	SIlinkage(const struct descr_linkage_header *link) {
+		linkageType = link->linkage_type;
+		transportStreamId = (link->transport_stream_id_hi << 8) | link->transport_stream_id_lo;
+		originalNetworkId = (link->original_network_id_hi << 8) | link->original_network_id_lo;
+		serviceId = (link->service_id_hi << 8) | link->service_id_lo;
+		if (link->descriptor_length > sizeof(struct descr_linkage_header) - 2)
+			name = std::string(((const char *)link) + sizeof(struct descr_linkage_header), link->descriptor_length - (sizeof(struct descr_linkage_header) - 2));
+	}
 
-    void dump(void) const {
-      printf("Linakge Type: 0x%02hhx\n", linkageType);
-      if(name.length())
-        printf("Name: %s\n", name.c_str());
-      printf("Transport Stream Id: 0x%04hhx\n", transportStreamId);
-      printf("Original Network Id: 0x%04hhx\n", originalNetworkId);
-      printf("Service Id: 0x%04hhx\n", serviceId);
-    }
-    int saveXML(FILE *file) const {
-      if(fprintf(file, "    <linkage type=\"0x%02hhx\" linkage descriptor=\"%s\" transport_stream_id=\"0x%04hhx\" original_network_id=\"0x%04hhx\" service_id=\"0x%04hhx\" />\n", linkageType, name.c_str(), transportStreamId, originalNetworkId, serviceId)<0)
-        return 1;
-      return 0;
-    }
-    unsigned char linkageType; // Linkage Descriptor
-    std::string name; // Text aus dem Linkage Descriptor
-    unsigned short transportStreamId; // Linkage Descriptor
-    unsigned short originalNetworkId; // Linkage Descriptor
-    unsigned short serviceId; // Linkage Descriptor
+	// Std-copy
+	SIlinkage(const SIlinkage &l) {
+		linkageType = l.linkageType;
+		transportStreamId = l.transportStreamId;
+		originalNetworkId = l.originalNetworkId;
+		serviceId = l.serviceId;
+		name = l.name;
+	}
+
+	// Der Operator zum sortieren
+	bool operator < (const SIlinkage& l) const {
+		return name < l.name;
+	}
+
+	void dump(void) const {
+		printf("Linakge Type: 0x%02hhx\n", linkageType);
+		if (name.length())
+			printf("Name: %s\n", name.c_str());
+		printf("Transport Stream Id: 0x%04hhx\n", transportStreamId);
+		printf("Original Network Id: 0x%04hhx\n", originalNetworkId);
+		printf("Service Id: 0x%04hhx\n", serviceId);
+	}
+
+	int saveXML(FILE *file) const {
+		if(fprintf(file, "    <linkage type=\"0x%02hhx\" linkage descriptor=\"%s\" transport_stream_id=\"0x%04hhx\" original_network_id=\"0x%04hhx\" service_id=\"0x%04hhx\" />\n", linkageType, name.c_str(), transportStreamId, originalNetworkId, serviceId)<0)
+			return 1;
+		return 0;
+	}
+
+	unsigned char linkageType; // Linkage Descriptor
+	std::string name; // Text aus dem Linkage Descriptor
+	unsigned short transportStreamId; // Linkage Descriptor
+	unsigned short originalNetworkId; // Linkage Descriptor
+	unsigned short serviceId; // Linkage Descriptor
 };
 
 // Fuer for_each
 struct printSIlinkage : public std::unary_function<class SIlinkage, void>
 {
-  void operator() (const SIlinkage &l) { l.dump();}
+	void operator() (const SIlinkage &l) { l.dump();}
 };
 
 // Fuer for_each
 struct saveSIlinkageXML : public std::unary_function<class SIlinkage, void>
 {
-  FILE *f;
-  saveSIlinkageXML(FILE *fi) { f=fi;}
-  void operator() (const SIlinkage &l) { l.saveXML(f);}
+	FILE *f;
+	saveSIlinkageXML(FILE *fi) { f=fi;}
+	void operator() (const SIlinkage &l) { l.saveXML(f);}
 };
 
 //typedef std::multiset <SIlinkage, std::less<SIlinkage> > SIlinkage_descs;

@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.9 2002/11/03 22:26:54 thegoodguy Exp $
+// $Id: SIservices.hpp,v 1.10 2003/03/03 03:43:58 obi Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -27,6 +27,7 @@
 
 
 #include <algorithm>
+#include <endian.h>
 
 #include <sectionsdclient/sectionsdMsg.h>
 
@@ -36,15 +37,24 @@ class SIservice;
 class SIevent;
 
 struct sdt_service {
-	unsigned short service_id : 16;
-	// 2 Byte
-	unsigned char reserved_future_use : 6;
-	unsigned char EIT_schedule_flag : 1;
-	unsigned char EIT_present_following_flag : 1;
-	// 3 Bytes
-	unsigned char running_status : 3;
-	unsigned char free_CA_mode : 1;
-	unsigned short descriptors_loop_length : 12;
+	unsigned service_id_hi			: 8;
+	unsigned service_id_lo			: 8;
+#if __BYTE_ORDER == __BIG_ENDIAN
+	unsigned reserved_future_use		: 6;
+	unsigned EIT_schedule_flag		: 1;
+	unsigned EIT_present_following_flag	: 1;
+	unsigned running_status			: 3;
+	unsigned free_CA_mode			: 1;
+	unsigned descriptors_loop_length_hi	: 4;
+#else
+	unsigned EIT_present_following_flag	: 1;
+	unsigned EIT_schedule_flag		: 1;
+	unsigned reserved_future_use		: 6;
+	unsigned descriptors_loop_length_hi	: 4;
+	unsigned free_CA_mode			: 1;
+	unsigned running_status			: 3;
+#endif
+	unsigned descriptors_loop_length_lo	: 8;
 } __attribute__ ((packed)) ; // 5 Bytes
 
 
@@ -110,13 +120,13 @@ typedef std::set <SInvodReference, std::less<SInvodReference> > SInvodReferences
 class SIservice {
 public:
 	SIservice(const struct sdt_service *s) {
-		serviceID=s->service_id;
-		originalNetworkID=0;
-		serviceTyp=0;
-		flags.EIT_schedule_flag=s->EIT_schedule_flag;
-		flags.EIT_present_following_flag=s->EIT_present_following_flag;
-		flags.running_status=s->running_status;
-		flags.free_CA_mode=s->free_CA_mode;
+		serviceID = (s->service_id_hi << 8) | s->service_id_lo;
+		originalNetworkID = 0;
+		serviceTyp = 0;
+		flags.EIT_schedule_flag = s->EIT_schedule_flag;
+		flags.EIT_present_following_flag = s->EIT_present_following_flag;
+		flags.running_status = s->running_status;
+		flags.free_CA_mode = s->free_CA_mode;
 	}
 	// Um einen service zum Suchen zu erstellen
 	SIservice(const t_service_id sid, const t_original_network_id onid) {

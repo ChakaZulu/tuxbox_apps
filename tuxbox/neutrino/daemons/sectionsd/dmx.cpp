@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.21 2003/03/02 23:19:15 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.22 2003/03/03 03:43:58 obi Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -27,6 +27,7 @@
 #include <dmxapi.h>
 #include <debug.h>
 
+#include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -155,16 +156,25 @@ void DMX::unlock(void)
 char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 {
 	struct minimal_section_header {
-		unsigned char  table_id                 :  8;
-		unsigned char  section_syntax_indicator :  1;
-		unsigned char  reserved_future_use      :  1;
-		unsigned char  reserved1                :  2;
-		unsigned short section_length           : 12;
+		unsigned table_id                 : 8;
+#if __BYTE_ORDER == __BIG_ENDIAN
+		unsigned section_syntax_indicator : 1;
+		unsigned reserved_future_use      : 1;
+		unsigned reserved1                : 2;
+		unsigned section_length_hi        : 4;
+#else
+		unsigned section_length_hi        : 4;
+		unsigned reserved1                : 2;
+		unsigned reserved_future_use      : 1;
+		unsigned section_syntax_indicator : 1;
+#endif
+		unsigned section_length_lo        : 8;
 	} __attribute__ ((packed));  // 3 bytes total
 	
 	minimal_section_header initial_header;
 	char * buf;
 	int    rc;
+	unsigned short section_length;
 	
 	lock();
 	
@@ -187,9 +197,11 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		}
 		return NULL;
 	}
+
+	section_length = (initial_header.section_length_hi << 8) | initial_header.section_length_lo;
 	
 	timeouts = 0;
-	buf = new char[3 + initial_header.section_length];
+	buf = new char[section_length + 3];
 	
 	if (!buf)
 	{
@@ -200,8 +212,8 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		return NULL;
 	}
 	
-	if (initial_header.section_length > 0)
-		rc = read(buf + 3, initial_header.section_length, timeoutInMSeconds);
+	if (section_length > 0)
+		rc = read(buf + 3, section_length, timeoutInMSeconds);
 	
 	if (rc <= 0)
 	{
@@ -234,7 +246,7 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 
 	unlock();	
 
-	if (initial_header.section_length < 5)  // skip sections which are too short
+	if (section_length < 5)  // skip sections which are too short
 	{
 		delete[] buf;
 		return NULL;

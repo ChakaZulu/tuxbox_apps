@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.161 2003/03/02 22:28:22 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.162 2003/03/03 03:43:58 obi Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1052,7 +1052,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.161 2003/03/02 22:28:22 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.162 2003/03/03 03:43:58 obi Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2706,15 +2706,18 @@ static void *sdtThread(void *)
 			if (buf == NULL)
 				continue;
 
+			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
+							((SI_section_header*)buf)->section_length_lo;
 			// copy the header
-			memcpy(&header, buf, std::min((unsigned)((SI_section_header*)buf)->section_length + 3, sizeof(header)));
+			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
 
 			if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))
 			{
 				// Wir wollen nur aktuelle sections
 				dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
 
-				SIsectionSDT sdt(SIsection(sizeof(header) + header.section_length - 5, buf));
+				SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
+
 				lockServices();
 
 				for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
@@ -2734,10 +2737,11 @@ static void *sdtThread(void *)
 				if ( !messaging_sdt_sections_got_all[msg_index] )
 				{
 					long long _id = (((unsigned long long)header.table_id) << 40) +
-					                (((unsigned long long)header.table_id_extension) << 32) +
-					                (header.section_number << 16) +
-					                (header.version_number << 8) +
-					                header.current_next_indicator;
+					                (((unsigned long long)header.table_id_extension_hi) << 32) +
+					                (((unsigned long long)header.table_id_extension_lo) << 24) +
+					                (((unsigned long long)header.section_number) << 16) +
+					                (((unsigned long long)header.version_number) << 8) +
+					                (((unsigned long long)header.current_next_indicator));
 
 					if ( messaging_sdt_sections_max_ID[msg_index] == -1 )
 					{
@@ -2805,12 +2809,13 @@ static void *sdtThread(void *)
 
 				int msg_index = ( header.table_id == 0x42) ? 0 : 1;
 				long long _id = (((unsigned long long)header.table_id) << 40) +
-				                (((unsigned long long)header.table_id_extension) << 32) +
-				                (header.section_number << 16) +
-				                (header.version_number << 8) +
-				                header.current_next_indicator;
+				                (((unsigned long long)header.table_id_extension_hi) << 32) +
+				                (((unsigned long long)header.table_id_extension_lo) << 24) +
+				                (((unsigned long long)header.section_number) << 16) +
+				                (((unsigned long long)header.version_number) << 8) +
+				                (((unsigned long long)header.current_next_indicator));
 
-				if ( messaging_sdt_sections_max_ID[msg_index] != -1 )
+				if (messaging_sdt_sections_max_ID[msg_index] != -1)
 					messaging_sdt_skipped_sections_ID[msg_index].push_back(_id);
 
 				unlockMessaging();
@@ -3173,8 +3178,11 @@ static void *eitThread(void *)
 			if (buf == NULL)
 				continue;
 
+			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
+							((SI_section_header*)buf)->section_length_lo;
+			
 			// copy the header
-			memcpy(&header, buf, std::min((unsigned)((SI_section_header*)buf)->section_length + 3, sizeof(header)));
+			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
 
 			if ((header.current_next_indicator) && (!dmxEIT.pauseCounter ))
 			{
@@ -3201,7 +3209,7 @@ static void *eitThread(void *)
 				                }
 				*/
 
-				SIsectionEIT eit(SIsection(3 + header.section_length, buf));
+				SIsectionEIT eit(SIsection(section_length + 3, buf));
 
 				if (eit.header())
 				{
@@ -3254,24 +3262,26 @@ static void *eitThread(void *)
 
 				lockMessaging();
 
-				if ( ( header.table_id != 0x4e ) ||
-				        ( header.table_id_extension == ( messaging_current_servicekey & 0xFFFF ) ) )
+				if ((header.table_id != 0x4e) ||
+				        (((header.table_id_extension_hi << 8) | header.table_id_extension_lo) ==
+					 (messaging_current_servicekey & 0xFFFF)))
 				{
-					if ( !messaging_sections_got_all[header.table_id - 0x4e] )
+					if (!messaging_sections_got_all[header.table_id - 0x4e])
 					{
 						long long _id = (((unsigned long long)header.table_id) << 40) +
-						                (((unsigned long long)header.table_id_extension) << 32) +
-						                (header.section_number << 16) +
-						                (header.version_number << 8) +
-						                header.current_next_indicator;
+						                (((unsigned long long)header.table_id_extension_hi) << 32) +
+						                (((unsigned long long)header.table_id_extension_lo) << 24) +
+						                (((unsigned long long)header.section_number) << 16) +
+						                (((unsigned long long)header.version_number) << 8) +
+						                (((unsigned long long)header.current_next_indicator));
 
-						if ( messaging_sections_max_ID[header.table_id - 0x4e] == -1 )
+						if (messaging_sections_max_ID[header.table_id - 0x4e] == -1)
 						{
 							messaging_sections_max_ID[header.table_id - 0x4e] = _id;
 						}
 						else
 						{
-							if ( !messaging_sections_got_all[header.table_id - 0x4e] )
+							if (!messaging_sections_got_all[header.table_id - 0x4e])
 							{
 								for ( std::vector<long long>::iterator i = messaging_skipped_sections_ID[header.table_id - 0x4e].begin();
 								        i != messaging_skipped_sections_ID[header.table_id - 0x4e].end(); ++i )
@@ -3332,12 +3342,13 @@ static void *eitThread(void *)
 				//SI_section_EIT_header* _header = (SI_section_EIT_header*) & header;
 
 				long long _id = (((unsigned long long)header.table_id) << 40) +
-				                (((unsigned long long)header.table_id_extension) << 32) +
-				                (header.section_number << 16) +
-				                (header.version_number << 8) +
-				                header.current_next_indicator;
+				                (((unsigned long long)header.table_id_extension_hi) << 32) +
+				                (((unsigned long long)header.table_id_extension_lo) << 24) +
+				                (((unsigned long long)header.section_number) << 16) +
+				                (((unsigned long long)header.version_number) << 8) +
+				                (((unsigned long long)header.current_next_indicator));
 
-				if ( messaging_sections_max_ID[header.table_id - 0x4e] != -1 )
+				if (messaging_sections_max_ID[header.table_id - 0x4e] != -1)
 					messaging_skipped_sections_ID[header.table_id - 0x4e].push_back(_id);
 
 				unlockMessaging();
@@ -3476,7 +3487,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.161 2003/03/02 22:28:22 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.162 2003/03/03 03:43:58 obi Exp $\n");
 
 	try
 	{

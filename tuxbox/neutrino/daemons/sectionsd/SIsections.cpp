@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.30 2003/02/06 17:52:18 thegoodguy Exp $
+// $Id: SIsections.cpp,v 1.31 2003/03/03 03:43:58 obi Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -41,41 +41,41 @@
 
 //#define DEBUG
 
-// #pragma pack(1) // fnbrd: geht anscheinend nicht beim gcc
-
 struct descr_generic_header {
-  unsigned char descriptor_tag : 8;
-  unsigned char descriptor_length : 8;
+	unsigned descriptor_tag			: 8;
+	unsigned descriptor_length		: 8;
 } __attribute__ ((packed)) ;
 
 struct descr_short_event_header {
-  unsigned char descriptor_tag : 8;
-  unsigned char descriptor_length : 8;
-  unsigned language_code : 24;
-  unsigned char event_name_length : 8;
+	unsigned descriptor_tag			: 8;
+	unsigned descriptor_length		: 8;
+	unsigned language_code_hi		: 8;
+	unsigned language_code_mid		: 8;
+	unsigned language_code_lo		: 8;
+	unsigned event_name_length		: 8;
 } __attribute__ ((packed)) ;
 
 struct descr_service_header {
-  unsigned char descriptor_tag : 8;
-  unsigned char descriptor_length : 8;
-  unsigned char service_typ : 8;
-  unsigned char service_provider_name_length : 8;
+	unsigned descriptor_tag			: 8;
+	unsigned descriptor_length		: 8;
+	unsigned service_typ			: 8;
+	unsigned service_provider_name_length	: 8;
 } __attribute__ ((packed)) ;
 
 struct descr_extended_event_header {
-  unsigned char descriptor_tag : 8;
-  unsigned char descriptor_length : 8;
-  unsigned char descriptor_number : 4;
-  unsigned char last_descriptor_number : 4;
-  unsigned iso_639_2_language_code : 24;
-  unsigned char length_of_items : 8;
+	unsigned descriptor_tag			: 8;
+	unsigned descriptor_length		: 8;
+	unsigned descriptor_number		: 4;
+	unsigned last_descriptor_number		: 4;
+	unsigned iso_639_2_language_code_hi	: 8;
+	unsigned iso_639_2_language_code_mid	: 8;
+	unsigned iso_639_2_language_code_lo	: 8;
+	unsigned length_of_items		: 8;
 } __attribute__ ((packed)) ;
-
-//#pragma pack()
 
 inline unsigned min(unsigned a, unsigned b)
 {
-  return b<a ? b : a;
+	return b < a ? b : a;
 }
 
 
@@ -210,29 +210,34 @@ void SIsectionEIT::parseDescriptors(const char *des, unsigned len, SIevent &e)
 // Die infos aus dem Puffer holen
 void SIsectionEIT::parse(void)
 {
-//  printf("parse\n");
-  if(!buffer || parsed)
-    return;
-  if(bufferLength<sizeof(SI_section_EIT_header)+sizeof(struct eit_event)) {
-    delete [] buffer;
-    buffer=0;
-    bufferLength=0;
-    return;
-  }
-  const char *actPos=buffer+sizeof(SI_section_EIT_header);
-  while(actPos<buffer+bufferLength-sizeof(struct eit_event)) {
-    struct eit_event *evt=(struct eit_event *)actPos;
-    SIevent e(evt);
-    e.serviceID=serviceID();
-    e.originalNetworkID=originalNetworkID();
-//    printf("actpos: %p buf+bl: %p evtid: %hu desclen: %hu\n", actPos, buffer+bufferLength, evt->event_id, evt->descriptors_loop_length);
-//    printf("maxlen: %u (%s)\n", min((unsigned)(buffer+bufferLength-actPos), evt->descriptors_loop_length), (unsigned)(buffer+bufferLength-actPos)< evt->descriptors_loop_length ? "bufferLength" : "descriptor_loop_length");
-    parseDescriptors(((const char *)evt)+sizeof(struct eit_event), min((unsigned)(buffer+bufferLength-actPos), evt->descriptors_loop_length), e);
-    //printf("lds: %d\n", e.linkage_descs.size());
-    evts.insert(e);
-    actPos+=sizeof(struct eit_event)+evt->descriptors_loop_length;
-  }
-  parsed=1;
+	const char *actPos;
+	struct eit_event *evt;
+	unsigned short descriptors_loop_length;
+
+	if (!buffer || parsed)
+		return;
+
+	if (bufferLength < sizeof(SI_section_EIT_header) + sizeof(struct eit_event)) {
+		delete [] buffer;
+		buffer=0;
+		bufferLength=0;
+		return;
+	}
+
+	actPos = &buffer[sizeof(SI_section_EIT_header)];
+
+	while (actPos < &buffer[bufferLength - sizeof(struct eit_event)]) {
+		evt = (struct eit_event *) actPos;
+		SIevent e(evt);
+		e.serviceID = serviceID();
+		e.originalNetworkID = originalNetworkID();
+		descriptors_loop_length = (evt->descriptors_loop_length_hi << 8) | evt->descriptors_loop_length_lo;
+		parseDescriptors(((const char *)evt) + sizeof(struct eit_event), min((unsigned)(buffer + bufferLength - actPos), descriptors_loop_length), e);
+		evts.insert(e);
+		actPos += sizeof(struct eit_event) + descriptors_loop_length;
+	}
+
+	parsed = 1;
 }
 
 void SIsectionSDT::parseNVODreferenceDescriptor(const char *buf, SIservice &s)
@@ -293,22 +298,27 @@ void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
 // Die infos aus dem Puffer holen
 void SIsectionSDT::parse(void)
 {
-//  printf("parse\n");
-//  saveBufferToFile("sdt.sec");
-//  printf("Size: %d\n", sizeof(SI_section_SDT_header));
-  if(!buffer || bufferLength<sizeof(SI_section_SDT_header)+sizeof(struct sdt_service) || parsed)
-    return;
-  const char *actPos=buffer+sizeof(SI_section_SDT_header);
-  while(actPos<=buffer+bufferLength-sizeof(struct sdt_service)) {
-    struct sdt_service *sv=(struct sdt_service *)actPos;
-    SIservice s(sv);
-    s.originalNetworkID=originalNetworkID();
-//    printf("actpos: %p buf+bl: %p sid: %hu desclen: %hu\n", actPos, buffer+bufferLength, sv->service_id, sv->descriptors_loop_length);
-    parseDescriptors(((const char *)sv)+sizeof(struct sdt_service), sv->descriptors_loop_length, s);
-    svs.insert(s);
-    actPos+=sizeof(struct sdt_service)+sv->descriptors_loop_length;
-  }
-  parsed=1;
+	const char *actPos;
+	struct sdt_service *sv;
+	unsigned short descriptors_loop_length;
+
+	if (!buffer || bufferLength < sizeof(SI_section_SDT_header) + sizeof(struct sdt_service) || parsed)
+		return;
+
+	actPos = &buffer[sizeof(SI_section_SDT_header)];
+
+	while (actPos <= &buffer[bufferLength - sizeof(struct sdt_service)]) {
+		sv = (struct sdt_service *)actPos;
+		SIservice s(sv);
+		s.originalNetworkID = originalNetworkID();
+		descriptors_loop_length = (sv->descriptors_loop_length_hi << 8) | sv->descriptors_loop_length_lo;
+		//printf("actpos: %p buf+bl: %p sid: %hu desclen: %hu\n", actPos, buffer+bufferLength, sv->service_id, sv->descriptors_loop_length);
+		parseDescriptors(((const char *)sv) + sizeof(struct sdt_service), descriptors_loop_length, s);
+		svs.insert(s);
+		actPos += sizeof(struct sdt_service) + descriptors_loop_length;
+	}
+
+	parsed = 1;
 }
 
 // Liest n Bytes aus einem Socket per read
@@ -352,232 +362,279 @@ int SIsections :: readSections(const unsigned short pid, const unsigned char fil
 	unsigned long long firstKey=(unsigned long long)-1;
 	SIsections missingSections;
 	char *buf;
+	unsigned short section_length;
 
 	if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1) {
 		perror(DEMUX_DEVICE);
 		return 1;
 	}
-	if (!setfilter(fd, pid, filter, mask, DMX_IMMEDIATE_START | DMX_CHECK_CRC))
-	{
+
+	if (!setfilter(fd, pid, filter, mask, DMX_IMMEDIATE_START | DMX_CHECK_CRC)) {
 		close(fd);
 		return 2;
 	}
 
-  time_t szeit=time(NULL);
+	time_t szeit = time(NULL);
 
-//  printf("reading first\n");
-  // Erstes Segment lesen
-  do {
-    if(time(NULL)>szeit+(long)(timeoutInSeconds)) {
-      close(fd);
-      return 0; // timeout -> kein EPG
-    }
-    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
-    if(!rc) {
-      close(fd);
-      return 0; // timeout -> kein EPG
-    }
-    else if(rc<0) {
-      close(fd);
-//      perror ("read header");
-      return 3;
-    }
-    buf=new char[sizeof(header)+header.section_length-5];
-    if(!buf) {
-      close(fd);
-      fprintf(stderr, "Not enough memory!\n");
-      return 4;
-    }
-    // Den Header kopieren
-    memcpy(buf, &header, sizeof(header));
-    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
-    if(!rc) {
-      close(fd);
-      delete[] buf;
-      return 0; // timeout -> kein EPG
-    }
-    else if(rc<0) {
-      close(fd);
-//      perror ("read section");
-      delete[] buf;
-      return 5;
-    }
-    if(readNext || header.current_next_indicator) {
-      // Wir wollen nur aktuelle sections
-      insert(SIsection(sizeof(header)+header.section_length-5, buf));
-      firstKey=SIsection::key(&header);
-      // Sonderfall: Nur eine Section
-      // d.h. wir sind fertig
-      if(!header.section_number && !header.last_section_number) {
-        close(fd);
-        return 0;
-      }
-    }
-    else
-      delete[] buf;
-  } while (firstKey==(unsigned long long) -1);
-  // Die restlichen Segmente lesen
+	// Erstes Segment lesen
 
-  szeit=time(NULL);
-//  printf("reading next\n");
+	do {
+		if (time(NULL) > szeit + (long)timeoutInSeconds) {
+			close(fd);
+			return 0; // timeout -> kein EPG
+		}
 
-  for(;;) {
-    if(time(NULL)>szeit+(long)(timeoutInSeconds))
-      break; // timeout
-    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
-    if(!rc)
-      break; // timeout
-    else if(rc<0) {
-      close(fd);
-//      perror ("read header");
-      return 6;
-    }
-    if(firstKey==SIsection::key(&header))
-      // Wir haben die 1. section wieder gefunden
-      break;
-    buf=new char[sizeof(header)+header.section_length-5];
-    if(!buf) {
-      close(fd);
-      fprintf(stderr, "Not enough memory!\n");
-      return 7;
-    }
-    // Den Header kopieren (evtl. malloc und realloc nehmen)
-    memcpy(buf, &header, sizeof(header));
-    // den Rest der Section einlesen
-    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
-    if(!rc) {
-      delete[] buf;
-      break; // timeout
-    }
-    else if(rc<0) {
-      close(fd);
-      delete[] buf;
-//      perror ("read section");
-      return 8;
-    }
-    if(readNext || header.current_next_indicator)
-      insert(SIsection(sizeof(header)+header.section_length-5, buf));
-    else
-      delete[] buf;
-  }
-  close(fd);
+		int rc = readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
 
-#ifdef DEBUG
-  // Die Sections ausgeben
-  printf("----------------Found sections-----------------------\n");
-//  for_each(begin(), end(), printSIsection());
-  for_each(begin(), end(), printSIsectionEIT());
-  printf("-----------------------------------------------------\n");
-#endif // DEBUG
+		if(!rc) {
+			close(fd);
+			return 0; // timeout -> kein EPG
+		}
 
-  // Jetzt erstellen wir eine Liste der fehlenden Sections
-  unsigned actualTableIDextension=(unsigned)-1;
-  unsigned actualTableID=(unsigned)-1;
-  unsigned maxNr=0;
-  unsigned lastNr=0;
-  for(SIsections::iterator k=begin(); k!=end(); k++) {
-    if(k->tableIDextension()!=actualTableIDextension || k->tableID()!=actualTableID) {
-      // Neue Table-ID-Extension
-      maxNr=k->lastSectionNumber();
-      lastNr=k->sectionNumber();
-      actualTableIDextension=k->tableIDextension();
-      actualTableID=k->tableID();
-    }
-    else if(k->sectionNumber()!=lastNr+1) {
-      // Es fehlen Sections
-      for(unsigned l=lastNr+1; l<k->sectionNumber(); l++) {
-//	printf("Debug: t: 0x%02x s: %u nr: %u last: %u max: %u l: %u\n", actualTableID, actualTableIDextension, k->sectionNumber(), lastNr, maxNr, l);
-	struct SI_section_header h;
-        memcpy(&h, k->header(), sizeof(struct SI_section_header));
-	h.section_number=l;
-        missingSections.insert(SIsection(&h));
-      }
-      lastNr=k->sectionNumber();
-    }
-    else
-      lastNr=k->sectionNumber();
-  }
-#ifdef DEBUG
-  printf("Sections read: %d\n\n", size());
-#endif // DEBUG
-  if(!missingSections.size())
-    return 0;
+		else if(rc<0) {
+			close(fd);
+			//perror ("read header");
+			return 3;
+		}
 
+		section_length = (header.section_length_hi << 8) | header.section_length_lo;
+
+		buf = new char[sizeof(header) + section_length - 5];
+
+		if (!buf) {
+			close(fd);
+			fprintf(stderr, "Not enough memory!\n");
+			return 4;
+		}
+
+		// Den Header kopieren
+		memcpy(buf, &header, sizeof(header));
+
+		rc = readNbytes(fd, &buf[sizeof(header)], section_length - 5, timeoutInSeconds);
+
+		if (!rc) {
+			close(fd);
+			delete[] buf;
+			return 0; // timeout -> kein EPG
+		}
+
+		else if (rc<0) {
+			close(fd);
+			//perror ("read section");
+			delete[] buf;
+			return 5;
+		}
+
+		if ((readNext) || (header.current_next_indicator)) {
+			// Wir wollen nur aktuelle sections
+			insert(SIsection(sizeof(header) + section_length - 5, buf));
+			firstKey = SIsection::key(&header);
+
+			// Sonderfall: Nur eine Section
+			// d.h. wir sind fertig
+			if ((!header.section_number) && (!header.last_section_number)) {
+				close(fd);
+				return 0;
+			}
+		}
+
+		else {
+			delete[] buf;
+		}
+
+	} while (firstKey == (unsigned long long) -1);
+
+	// Die restlichen Segmente lesen
+	szeit = time(NULL);
+
+	for (;;) {
+		if (time(NULL) > szeit + (long)timeoutInSeconds)
+			break; // timeout
+
+		int rc = readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+
+		if(!rc)
+			break; // timeout
+
+		else if(rc<0) {
+			close(fd);
+			//perror ("read header");
+			return 6;
+		}
+
+		if (firstKey==SIsection::key(&header))
+			// Wir haben die 1. section wieder gefunden
+			break;
+
+		section_length = (header.section_length_hi << 8) | header.section_length_lo;
+
+		buf = new char[sizeof(header) + section_length - 5];
+
+		if (!buf) {
+			close(fd);
+			fprintf(stderr, "Not enough memory!\n");
+			return 7;
+		}
+
+		// Den Header kopieren (evtl. malloc und realloc nehmen)
+		memcpy(buf, &header, sizeof(header));
+
+		// den Rest der Section einlesen
+		rc = readNbytes(fd, &buf[sizeof(header)], section_length - 5, timeoutInSeconds);
+
+		if (!rc) {
+			delete[] buf;
+			break; // timeout
+		}
+
+		else if (rc < 0) {
+			close(fd);
+			delete[] buf;
+			//perror ("read section");
+			return 8;
+		}
+
+		if ((readNext) || (header.current_next_indicator))
+			insert(SIsection(sizeof(header) + section_length - 5, buf));
+		else
+			delete[] buf;
+	}
+
+	close(fd);
 
 #ifdef DEBUG
-  printf("----------------Missing sections---------------------\n");
-  for_each(missingSections.begin(), missingSections.end(), printSmallSIsectionHeader());
-  printf("-----------------------------------------------------\n");
-  printf("Sections read: %d\n\n", size());
-  printf("Sections misssing: %d\n", missingSections.size());
-  printf("Searching missing sections\n");
+	// Die Sections ausgeben
+	printf("----------------Found sections-----------------------\n");
+	//  for_each(begin(), end(), printSIsection());
+	for_each(begin(), end(), printSIsectionEIT());
+	printf("-----------------------------------------------------\n");
 #endif // DEBUG
 
-  szeit=time(NULL);
-//  printf("reading missing\n");
 
-  if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1) {
-    perror(DEMUX_DEVICE);
-    return 9;
-  }
-	if (!setfilter(fd, pid, filter, mask, DMX_IMMEDIATE_START | DMX_CHECK_CRC))
-	{
+	// Jetzt erstellen wir eine Liste der fehlenden Sections
+	unsigned short actualTableIDextension = (unsigned short) -1;
+	unsigned char actualTableID = (unsigned char) -1;
+	unsigned char maxNr = 0;
+	unsigned char lastNr = 0;
+
+	for (SIsections::iterator k = begin(); k != end(); k++) {
+		if ((k->tableIDextension() != actualTableIDextension) || (k->tableID() != actualTableID)) {
+			// Neue Table-ID-Extension
+			maxNr = k->lastSectionNumber();
+			actualTableIDextension = k->tableIDextension();
+			actualTableID = k->tableID();
+		}
+
+		else if (k->sectionNumber() != (unsigned char)(lastNr + 1)) {
+			// Es fehlen Sections
+			for (unsigned l = lastNr + 1; l < k->sectionNumber(); l++) {
+				//printf("Debug: t: 0x%02x s: %u nr: %u last: %u max: %u l: %u\n", actualTableID, actualTableIDextension, k->sectionNumber(), lastNr, maxNr, l);
+
+				struct SI_section_header h;
+				memcpy(&h, k->header(), sizeof(struct SI_section_header));
+				h.section_number = l;
+				missingSections.insert(SIsection(&h));
+			}
+		}
+
+		lastNr = k->sectionNumber();
+	}
+
+#ifdef DEBUG
+	printf("Sections read: %d\n\n", size());
+#endif // DEBUG
+
+	if (!missingSections.size())
+		return 0;
+
+#ifdef DEBUG
+	printf("----------------Missing sections---------------------\n");
+	for_each(missingSections.begin(), missingSections.end(), printSmallSIsectionHeader());
+	printf("-----------------------------------------------------\n");
+	printf("Sections read: %d\n\n", size());
+	printf("Sections misssing: %d\n", missingSections.size());
+	printf("Searching missing sections\n");
+#endif // DEBUG
+
+	szeit = time(NULL);
+
+	if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1) {
+		perror(DEMUX_DEVICE);
+		return 9;
+	}
+
+	if (!setfilter(fd, pid, filter, mask, DMX_IMMEDIATE_START | DMX_CHECK_CRC)) {
 		close(fd);
 		return 10;
 	}
-  // Jetzt lesen wir die fehlenden Sections ein
-  for(;;) {
-    if(time(NULL)>szeit+(long)(timeoutInSeconds))
-      break; // Timeout
-    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
-    if(!rc)
-      break; // timeout
-    else if(rc<0) {
-      close(fd);
-//      perror ("read header");
-      return 11;
-    }
-    buf=new char[sizeof(header)+header.section_length-5];
-    if(!buf) {
-      close(fd);
-      fprintf(stderr, "Not enough memory!\n");
-      return 12;
-    }
-    // Den Header kopieren (evtl. malloc und realloc nehmen)
-    memcpy(buf, &header, sizeof(header));
-    // den Rest der Section einlesen
-    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
-    if(!rc) {
-      delete[] buf;
-      break; // timeout
-    }
-    else if(rc<0) {
-      close(fd);
-      delete[] buf;
-//      perror ("read section");
-      return 13;
-    }
-    if(missingSections.find(SIsection(&header))!=missingSections.end()) {
-#ifdef DEBUG
-      printf("Find missing section:");
-      SIsection::dumpSmallSectionHeader(&header);
-#endif  // DEBUG
-      // War bisher vermisst
-      // In die Menge einfuegen
-      insert(SIsection(sizeof(header)+header.section_length-5, buf));
-      // Und aus der vermissten Menge entfernen
-//      printf("Sections misssing: %d\n", missingSections.size());
-      missingSections.erase(SIsection(&header));
-#ifdef DEBUG
-      printf("Sections misssing: %d\n", missingSections.size());
-#endif // DEBUG
-    }
-    else
-      // Puffer wieder loeschen
-      delete[] buf;
-  }
-  close(fd);
 
-  return 0;
+	// Jetzt lesen wir die fehlenden Sections ein
+	for(;;) {
+		if (time(NULL) > szeit + (long)timeoutInSeconds)
+			break; // Timeout
+
+		int rc = readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+
+		if(!rc)
+			break; // timeout
+
+		else if (rc < 0) {
+			close(fd);
+			//perror ("read header");
+			return 11;
+
+		}
+
+		section_length = (header.section_length_hi << 8) | header.section_length_lo;
+		
+		buf = new char[sizeof(header) + section_length - 5];
+
+		if (!buf) {
+			close(fd);
+			fprintf(stderr, "Not enough memory!\n");
+			return 12;
+		}
+
+		// Den Header kopieren (evtl. malloc und realloc nehmen)
+		memcpy(buf, &header, sizeof(header));
+		// den Rest der Section einlesen
+		rc = readNbytes(fd, &buf[sizeof(header)], section_length - 5, timeoutInSeconds);
+
+		if (!rc) {
+			delete[] buf;
+			break; // timeout
+		}
+
+		else if (rc < 0) {
+			close(fd);
+			delete[] buf;
+			//perror ("read section");
+			return 13;
+		}
+
+		if (missingSections.find(SIsection(&header)) != missingSections.end()) {
+#ifdef DEBUG
+			printf("Find missing section:");
+			SIsection::dumpSmallSectionHeader(&header);
+#endif  // DEBUG
+			// War bisher vermisst
+			// In die Menge einfuegen
+			insert(SIsection(sizeof(header) + section_length - 5, buf));
+
+			// Und aus der vermissten Menge entfernen
+			missingSections.erase(SIsection(&header));
+#ifdef DEBUG
+			printf("Sections misssing: %d\n", missingSections.size());
+#endif // DEBUG
+		}
+
+		else {
+			// Puffer wieder loeschen
+			delete[] buf;
+		}
+	}
+
+	close(fd);
+	return 0;
 }
 
