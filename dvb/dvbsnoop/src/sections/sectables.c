@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: sectables.c,v 1.3 2003/07/06 05:49:25 obi Exp $
 
  --  For more information please see: ISO 13818 (-1) and ETSI 300 468
  -- Verbose Level >= 2
@@ -7,6 +7,9 @@ $Id: sectables.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.3  2003/07/06 05:49:25  obi
+CAMT fix and indentation
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -170,9 +173,7 @@ void  guess_table (u_char *buf, int len, u_int pid)
 		decode_PMT  (buf, len);
 		break; 
 
-	case  0x82:		/* EMM/ECM Section */
-	case  0x81:		/* EMM/ECM Section */
-	case  0x80:		/* EMM/ECM Section */
+	case  0x80 ... 0x8F:	/* Conditional Access Message Section */
 		decode_EMM_ECM  (buf, len);
 		break; 
 
