@@ -7,34 +7,34 @@ options.fb framebuffer
 options.null null 
 
 mainmenu.head glavni izbor 
-mainmenu.tvmode TV 
+mainmenu.tvmode tv 
 mainmenu.radiomode radio 
-mainmenu.scartmode AV-Scart ulaz 
+mainmenu.scartmode av-scart ulaz 
 mainmenu.games igre 
 mainmenu.sleeptimer vremenski brojac za ugasiti 
 mainmenu.shutdown ugasiti 
 mainmenu.settings namjescenje 
 mainmenu.service servis 
-mainmenu.streaming Streaming (snimati) 
-mainmenu.streaming_start start 
-mainmenu.streaming_stop stop 
+mainmenu.recording snimanje 
+mainmenu.recording_start start 
+mainmenu.recording_stop stop 
 
 servicemenu.head servis 
-servicemenu.update softver obnoviti 
+servicemenu.update obnoviti softver 
 servicemenu.scants traziti kanale 
-servicemenu.ucodecheck provjeriti UCodese 
+servicemenu.ucodecheck provjeriti ucodese 
 
-cablesetup.provider snabdjevac CATVa 
+cablesetup.provider snabdjevac 
 
-satsetup.disqeqc DiSEqC 
+satsetup.disqeqc diseqc 
 satsetup.satellite satelit 
-satsetup.extended DiSEqC namjestiti 
-satsetup.nodiseqc nema DiSEqCa 
-satsetup.minidiseqc Mini-DiSEqC 
-satsetup.diseqc10 DiSEqC 1.0 
-satsetup.diseqc11 DiSEqC 1.1 
-satsetup.smatvremote SMATV Remote Tuning 
-satsetup.diseqcrepeat ponavljanje DiSEqCa 
+satsetup.extended diseqc namjestiti 
+satsetup.nodiseqc nema diseqca 
+satsetup.minidiseqc mini-diseqc 
+satsetup.diseqc10 diseqc 1.0 
+satsetup.diseqc11 diseqc 1.1 
+satsetup.smatvremote smatv remote tuning 
+satsetup.diseqcrepeat ponavljanje diseqca 
 
 mainsettings.head namjescenje 
 mainsettings.savesettingsnow namjescenje sada memorisati 
@@ -42,7 +42,7 @@ mainsettings.language jezik
 mainsettings.audio ton 
 mainsettings.video video 
 mainsettings.network mreza 
-mainsettings.streaming Streamingserver 
+mainsettings.recording snimanje 
 mainsettings.colors boje / teme 
 mainsettings.lcd tecni kristal 
 mainsettings.keybinding namjestiti tipku 
@@ -50,11 +50,12 @@ mainsettings.misc namjestiti razne stvari
 mainsettings.scan namjestiti trazenja kanala 
 
 miscsettings.head namjestiti razne stvari 
-miscsettings.shutdown_real pripravnosti 
-miscsettings.boxtype proizvodjac dBox2 
-miscsettings.startneutrinodirect direktno startovati Neutrino 
+miscsettings.shutdown_real pripravnost 
+miscsettings.boxtype proizvodjac dbox2 
+miscsettings.startneutrinodirect direktni start neutrina 
 miscsettings.general generalno 
-miscsettings.fb_destination MAJSTORI! Boot konsola 
+miscsettings.fb_destination majstori! boot konsola 
+miscsettings.spdif_control upravljanje spdifa 
 
 languagesetup.head izabrati jezik 
 languagesetup.select jezik 
@@ -64,45 +65,51 @@ audiomenu.analogout analogni izlaz
 audiomenu.monoright mono desno 
 audiomenu.monoleft mono lijevo 
 audiomenu.stereo stereo 
-audiomenu.dolbydigital Dolby Digital 
+audiomenu.dolbydigital dolby digital 
 
 videomenu.head namjestiti video 
 videomenu.screensetup namjestiti ekran 
 videomenu.videosignal vrsta video signala 
-videomenu.videosignal_rgb RGB 
-videomenu.videosignal_svideo S-Video 
-videomenu.videosignal_composite Composite 
+videomenu.videosignal_rgb rgb 
+videomenu.videosignal_svideo s-video 
+videomenu.videosignal_composite composite 
 videomenu.videoformat format ekrana 
 videomenu.videoformat_43 4:3 
 videomenu.videoformat_169 16:9 
 videomenu.videoformat_autodetect automaticno 
-videomenu.vcrswitch automaticni AV-Scart ulaz 
+videomenu.vcrswitch automaticni av-scart ulaz 
 
 networkmenu.head namjestiti mrezu 
 networkmenu.test provjeriti mrezu 
 networkmenu.show pokazati aktivne podatke mreze 
 networkmenu.setupnow sada namjestiti podatke mreze 
 networkmenu.setuponstartup namjestiti mrezu pri startu 
-networkmenu.ipaddress IP adresa 
-networkmenu.netmask Netmask 
-networkmenu.broadcast Broadcast 
-networkmenu.gateway Standard Gateway 
-networkmenu.nameserver Nameserver 
+networkmenu.ipaddress ip adresa 
+networkmenu.netmask netmask 
+networkmenu.broadcast broadcast 
+networkmenu.gateway standard gateway 
+networkmenu.nameserver nameserver 
 
-streamingmenu.head namjestiti Streamingserver 
-streamingmenu.usestreamserver upotrijebiti Streamingserver 
-streamingmenu.streamingserver Streamingserver 
-streamingmenu.streamingserverport Port 
-streamingmenu.stopplayback zaustaviti Playback 
-streamingmenu.stopsectionsd zaustaviti Sectionsd 
+recordingmenu.head namjestiti snimanje 
+recordingmenu.recording_type vrsta snimanja 
+recordingmenu.server_ip ip servera za snimanje 
+recordingmenu.server_port port servera za snimanje 
+recordingmenu.stopplayback zaustaviti playback 
+recordingmenu.stopsectionsd zaustaviti sectionsd 
+recordingmenu.vcr_devicename ime video rikordera (lirc) 
+recordingmenu.off ugaseno 
+recordingmenu.server server 
+recordingmenu.vcr video rikorder 
+recordingmenu.server_wakeup server za snimanje wol 
+recordingmenu.server_mac mac adresa 
 
 ping.ok pristupan (ping) 
 ping.unreachable nije pristupan (unreachable) 
-ping.protocol nije pristupan (Host or protocol error) 
-ping.socket nije pristupan (Socket error) 
+ping.protocol nije pristupan (host or protocol error) 
+ping.socket nije pristupan (socket error) 
 
 ipsetup.hint_1 upotrijebite 0..9 ili gore/dole 
-ipsetup.hint_2 OK memorise, Home prekida 
+ipsetup.hint_2 ok memorise, home prekida 
 
 colormenu.head namjestiti boje 
 colormenu.statusbar statusna traka 
@@ -139,14 +146,16 @@ keybindingmenu.head namjestiti tipaljku
 keybindingmenu.modechange promijeniti stanje 
 keybindingmenu.channellist lista kanala 
 keybindingmenu.quickzap brzo prebacivanje 
-keybindingmenu.tvradiomode TV/radio 
-keybindingmenu.tvradiomode_head TV/radio 
+keybindingmenu.tvradiomode tv/radio 
+keybindingmenu.tvradiomode_head tv/radio 
 keybindingmenu.pageup stranu gore 
 keybindingmenu.pageup_head stranu gore 
 keybindingmenu.pagedown stranu dole 
 keybindingmenu.pagedown_head stranu dole 
 keybindingmenu.cancel zatvoriti listu kanala 
 keybindingmenu.cancel_head zatvoriti listu kanala 
+keybindingmenu.sort promijeniti smjer sortiranja 
+keybindingmenu.sort_head promijeniti smjer sortiranja 
 keybindingmenu.channelup kanal gore 
 keybindingmenu.channelup_head tipka za kanal gore 
 keybindingmenu.channeldown kanal dole 
@@ -155,7 +164,7 @@ keybindingmenu.bouquetup buket dalje
 keybindingmenu.bouquetup_head tipka za buket dalje 
 keybindingmenu.bouquetdown buket nazad 
 keybindingmenu.bouquetdown_head tipka za buket nazad 
-keybindingmenu.bouquethandling OK-tipka za 
+keybindingmenu.bouquethandling ok-tipka za 
 keybindingmenu.bouquetchannels_on_ok buket kanali 
 keybindingmenu.bouquetlist_on_ok lista buketa 
 keybindingmenu.allchannels_on_ok lista kanala 
@@ -171,7 +180,7 @@ colorchooser.alpha alfa
 
 lcdmenu.head namjestiti tecni kristal 
 lcdmenu.inverse invertirati 
-lcdmenu.power snaga 
+lcdmenu.power struja 
 lcdmenu.lcdcontroler kontrast / svjetlost 
 
 lcdcontroler.head namjestiti tecni kristal 
@@ -185,49 +194,49 @@ keychoosermenu.currentkey sadasnja tipka
 
 keychooser.head namjestiti novu tipku 
 keychooser.text1 pritisnite tipku 
-keychooser.text2 cekati na prekid.. 
+keychooser.text2 cekati na prekid... 
 
 screensetup.upperleft crveno = ekran gore, lijevo 
 screensetup.lowerright zeleno = ekran dole, desno 
 
 channellist.head svi kanali 
-channellist.nonefound Nije nadjen nijedan kanal!\nNapravite trazenje kanala\n(dBox2-tipka -> Servis) 
+channellist.nonefound Nije nadjen nijedan kanal!\nNapravite trazenje kanala\n(dbox2-tipka -> servis) 
 channellist.since od %02d:%02d 
 
 infoviewer.epgnotload informacije jos nisu pristupacne... 
-infoviewer.epgwait ceka se na EPG informacije... 
+infoviewer.epgwait ceka se na epg informacije... 
 infoviewer.streaminfo osobine 
 infoviewer.eventlist program 
 infoviewer.languages izbor tona 
 infoviewer.notavailable kanal (trenutacno) nije pristupan 
 infoviewer.cantdecode kanal se ne moze desifrovati 
-infoviewer.selecttime pocetno vrijeme 
+infoviewer.selecttime pocetak 
 infoviewer.nocurrent nema informacije o ovom programu 
-infoviewer.noepg nema EPG informacije 
+infoviewer.noepg nema epg informacije 
 infoviewer.subservice rezija slike 
-infoviewer.waittime ceka se na vrijeme... 
+infoviewer.waittime ceka se na vrijeme ... 
 
-epgviewer.notfound nisu nadjene informacije o programu (EPG) 
+epgviewer.notfound nisu nadjene informacije o programu (epg) 
 epgviewer.nodetailed nema opsirnih informacija 
 epgviewer.More_Screenings drugi termini na ovom kanalu 
 epglist.head pregled - %s 
-epglist.noevents Nema EPG informacije. 
+epglist.noevents Nema epg informacije. 
 
 streaminfo.head informacije 
 streaminfo.resolution rezolucija 
-streaminfo.bitrate Bitrate 
+streaminfo.bitrate bitrate 
 streaminfo.aratio odnos 
 streaminfo.aratio_unknown nepoznat odnos 
-streaminfo.framerate Framerate 
-streaminfo.framerate_unknown nepoznat Framerate 
+streaminfo.framerate framerate 
+streaminfo.framerate_unknown nepoznat framerate 
 streaminfo.audiotype vrsta tona 
 streaminfo.audiotype_unknown nepoznata vrsta tona 
 streaminfo.not_crypted nije sifrovano 
-streaminfo.ecm_invalid nevazeci CA sistem 
+streaminfo.ecm_invalid nevazeci ca sistem 
 streaminfo.not_available nije pristupno 
 
-streamfeatures.head osobine Streama 
-streamfeatures.info informacija o Streamu 
+streamfeatures.head osobine streama 
+streamfeatures.info informacija o streamu 
 
 apidselector.head izbor jezika 
 
@@ -235,11 +244,11 @@ nvodselector.head izabrati pocetak
 nvodselector.subservice perspektive 
 nvodselector.directormode rezija slike 
 
-ucodecheck.head provjera UCodesa 
-ucodecheck.avia500 Avia 500 
-ucodecheck.avia600 Avia 600 
-ucodecheck.ucode UCode 
-ucodecheck.cam-alpha Cam-Alpha 
+ucodecheck.head provjera ucodesa 
+ucodecheck.avia500 avia 500 
+ucodecheck.avia600 avia 600 
+ucodecheck.ucode ucode 
+ucodecheck.cam-alpha cam-alpha 
 
 date.Mon  pon 
 date.Tue  uto 
@@ -268,13 +277,13 @@ nvod.proz (%d%% proslo)
 scants.head trazenje kanala 
 scants.startnow poceti trazenje kanala 
 scants.actsatellite satelit: 
-scants.astra Astra 
-scants.hotbird Hotbird 
-scants.kopernikus Kopernikus 
-scants.sirius Sirius 
-scants.thor Thor 
-scants.digituerk Digituerk 
-scants.tuerksat Tuerksat 
+scants.astra astra 
+scants.hotbird hotbird 
+scants.kopernikus kopernikus 
+scants.sirius sirius 
+scants.thor thor 
+scants.digituerk digituerk 
+scants.tuerksat tuerksat 
 scants.transponders transponderi: 
 scants.services servisi: 
 scants.bouquet bukete 
@@ -294,9 +303,9 @@ flashupdate.cantopenfile nemoze se otvoriti datoteka
 flashupdate.fileis0bytes velicina datoteke je 0 bajtova 
 flashupdate.eraseingflash brise se fles 
 flashupdate.programmingflash programira se fles 
-flashupdate.cantopenmtd nemoze se otvoriti MTD-uredaj 
+flashupdate.cantopenmtd nemoze se otvoriti mtd-uredaj 
 flashupdate.ready gotovo 
-flashupdate.reboot startuje se dBox2 ponovno 
+flashupdate.reboot startuje se dbox2 ponovno 
 flashupdate.updatemode softver se obnavlja 
 flashupdate.updatemode_manual rucno (ftp) 
 flashupdate.updatemode_internet sa interneta 
@@ -310,15 +319,15 @@ flashupdate.versioncheck provjeriti verziju
 flashupdate.nonewversion nema nove verzije 
 flashupdate.md5check provjera imidza 
 flashupdate.md5sumerror imidz ima greski 
-flashupdate.proxyserver_sep Proxyserver 
-flashupdate.proxyserver Proxyname 
-flashupdate.proxyserver_hint1 utipkajte ime Proxya ili IP adresu (Host:Port) 
-flashupdate.proxyserver_hint2 prazno znaci da nema Proxya 
+flashupdate.proxyserver_sep proxyserver 
+flashupdate.proxyserver proxyname 
+flashupdate.proxyserver_hint1 utipkajte ime proxya ili ip adresu (host:port) 
+flashupdate.proxyserver_hint2 prazno znaci da nema proxya 
 flashupdate.proxyusername korisnik 
-flashupdate.proxyusername_hint1 utipkajte ime korisnika za Proxy 
+flashupdate.proxyusername_hint1 utipkajte ime korisnika za proxy 
 flashupdate.proxyusername_hint2 prazno znaci da nema provjere 
 flashupdate.proxypassword lozinka 
-flashupdate.proxypassword_hint1 utipkajte lozinku za Proxy 
+flashupdate.proxypassword_hint1 utipkajte lozinku za proxy 
 flashupdate.proxypassword_hint2 
 flashupdate.msgbox Nadjen je novi imidz:\nDatum: %s, %s\nOsnovni imidz: %s\nvrsta imidza: %s\n\nHocete li ovu verziju sada preuzeti\nsa interneta i instalirati? 
 flashupdate.msgbox_manual Nadjen je novi imidz:\nDatum: %s, %s\nOsnovni imidz: %s\nVrsta imidza: %s\n\nHocete li ovu verziju sada instalirati? 
@@ -334,8 +343,8 @@ flashupdate.actionreadflash ucitaje se fles
 flashupdate.fileselector izbor datoteke 
 flashupdate.titlewriteflash pisati fles 
 flashupdate.actionwriteflash pise se fles 
-flashupdate.flashreadyreboot Imidz je uspjesno flesovan.\nVas dBox2 startuje sada ponovno. 
-flashupdate.reallyflashmtd Hocete li stvarno nastaviti flesovanje?\n\nAko se desi greska ili imidz nije\nu redu, onda vas dBox2 nece vise raditi.\n\nIme imidza: %s\nPozicija: %s 
+flashupdate.flashreadyreboot Imidz je uspjesno flesovan.\nVas dbox2 startuje sada ponovno. 
+flashupdate.reallyflashmtd Hocete li stvarno nastaviti flesovanje?\n\nAko se desi greska ili imidz nije\nu redu, onda vas dbox2 nece vise raditi.\n\nIme imidza: %s\nPozicija: %s 
 
 bouqueteditor.name namjestiti buket 
 bouqueteditor.delete izbrisati 
@@ -350,7 +359,7 @@ bouqueteditor.savechanges? Hocete li memorisati promjene?
 bouqueteditor.savingchanges Memorisu se promjene. Cekajte molim ... 
 bouqueteditor.discardingchanges Pobacuju se promjene. Cekajte molim ... 
 bouqueteditor.switch preuzeti/izbaciti kanal 
-bouqueteditor.switchmode TV/radio 
+bouqueteditor.switchmode tv/radio 
 bouqueteditor.return gotovo 
 
 messagebox.yes ja 
@@ -361,15 +370,15 @@ messagebox.error greska
 messagebox.discard Hocete li pobaciti promijenito? 
 messagebox.info informacija 
 
-settings.noconffile Podaci o Neutrinu nisu nadjeni.\nMecu se standardni podaci. 
+settings.noconffile Podaci o neutrinu nisu nadjeni.\nMecu se standardni podaci. 
 settings.missingoptionsconffile Neutrino je opsiren.\nNove stvari su namjescene na standardne podatke. 
 
-cam.wrong Paznja, vas CAM_ALPHA.BIN ne pase\nuz vasu Smart-Karticu!!!\n\nHocete li da vidite ovo upozorenje opet? 
-ucodes.failure Paznja, nisu nadjeni µCodesi!\n\nMolim sa FTPeom (ili DBox-BootManagerom)\npostaviti, i dBox2 ponovno startovati! 
+cam.wrong Paznja, vas cam_alpha.bin ne pase\nuz vasu smart-karticu!!!\n\nHocete li da vidite ovo upozorenje opet? 
+ucodes.failure Paznja, nisu nadjeni ucodesi!\n\nMolim sa ftpeom (ili dbox-bootmanagerom)\npostaviti, i dbox2 ponovno startovati! 
 
 stringinput.caps velika/mala slova 
 
-streamingserver.noconnect Ne postoji veza sa Streamingserverom.\nPrekid snimanja. 
+streamingserver.noconnect Ne postoji veza sa streamingserverom.\nPrekid snimanja. 
 
 GENRE.MOVIE.0 igrani film / drama 
 GENRE.MOVIE.1 kriminalni film / triler 
@@ -428,7 +437,7 @@ GENRE.ARTS.4 umjetnost
 GENRE.ARTS.5 literatura 
 GENRE.ARTS.6 film/kino 
 GENRE.ARTS.7 eksperimentalni film/video 
-GENRE.ARTS.8 RTV/stampa 
+GENRE.ARTS.8 rtv/stampa 
 GENRE.ARTS.9 nove medije 
 GENRE.ARTS.10 magazin za umjetnost / kulturu 
 GENRE.ARTS.11 moda 
@@ -460,25 +469,25 @@ GENRE.UNKNOWN nepoznato
 
 parentallock.parentallock sticenje omladine 
 
-parentallock.prompt pitati za PIN-broj 
+parentallock.prompt pitati za pin-broj 
 parentallock.never nikada 
 parentallock.onstart pri startu 
 parentallock.changetolocked kod zabranjenih buketa 
 parentallock.onsignal ako ima privremena spera na kanalu 
 parentallock.lockedsender ako je kanal zabranjen 
 parentallock.lockedprogram zabranjen program (od %d godina) 
-parentallock.head PIN-broj za sticenje omladine 
+parentallock.head pin-broj za sticenje omladine 
 
 parentallock.lockage emisije 
 parentallock.lockage12 zabraniti od 12 godina 
 parentallock.lockage16 zabraniti od 16 godina 
 parentallock.lockage18 zabraniti od 18 godina 
 
-parentallock.changepin izabrati PIN-broj 
-parentallock.changepin_hint1 Utipkajte novi PIN-broj! 
+parentallock.changepin izabrati pin-broj 
+parentallock.changepin_hint1 Utipkajte novi pin-broj! 
 
-pinprotection.wrongcode Utipkajte PIN-broj ponovno! 
-pinprotection.head kontrola PIN-broja 
+pinprotection.wrongcode Utipkajte pin-broj ponovno! 
+pinprotection.head kontrola pin-broja 
 
 favorites.bouquetname moji ljubimci 
 favorites.nobouquets moji ljubimci su samo u aktiviranim buketima moguci 
@@ -491,17 +500,17 @@ favorites.finalhint \nSlucajno dodati kanali mogu se\nizbrisati u namjescenju bu
 
 sleeptimerbox.title vremenski brojac za ugasiti 
 sleeptimerbox.hint1 ugasiti za XXX minuta. (000=ugaseno) 
-sleeptimerbox.hint2 dBox2 ce se ugasiti za to vrijeme. 
+sleeptimerbox.hint2 Dbox2 ce se ugasiti za to vrijeme. 
 sleeptimerbox.announce vremenski brojac ce ugasiti za 1 minutu 
 
-zaptotimer.announce za jednu minutu ce se dBox2 prebaciti 
+zaptotimer.announce za jednu minutu ce se dbox2 prebaciti 
 recordtimer.announce snimanje pocinje za jednu minutu 
-shutdowntimer.announce dBox2 ce se ugasiti za 1 minutu.\nPrekinuti gasenje? 
+shutdowntimer.announce Dbox2 ce se ugasiti za 1 minutu.\nPrekinuti gasenje? 
 
 timerbar.channelswitch prebaciti 
 timerbar.recordevent snimati 
 timer.eventtimed.title zapamtiti emisiju 
-timer.eventtimed.msg Emisija je zapamcena.\ndBox2 ce se automaticno upaliti i prebaciti na emisiju. 
+timer.eventtimed.msg Emisija je zapamcena.\nDbox2 ce se automaticno upaliti i prebaciti na emisiju. 
 timer.eventrecord.title zapamtiti snimanje 
 timer.eventrecord.msg emisija je zapamcena za snimanje 
 timerlist.name lista vremenskih brojaca 
@@ -538,14 +547,18 @@ timerlist.channel kanal
 timerlist.menunew novi vremenski brojac 
 timerlist.reload obnoviti 
 timerlist.modify obrada 
+timerlist.message obavijest 
+timerlist.apid audio pid 
+timersettings.separator namjescenje vremenskog brojaca 
+timersettings.record_safety_time ispraviti snimanje 
 
 fontsize.menu tekst u izboru 
 fontsize.menu_title naslov izbora 
 fontsize.menu_info izbor za informaciju 
-fontsize.epg_title naslov EPGea 
-fontsize.epg_info1 EPG informacija 1 
-fontsize.epg_info2 EPG informacija 2 
-fontsize.epg_date EPG datum 
+fontsize.epg_title naslov epgea 
+fontsize.epg_info1 epg informacija 1 
+fontsize.epg_info2 epg informacija 2 
+fontsize.epg_date epg datum 
 fontsize.alert uzbuna 
 fontsize.eventlist_title naslov liste dogadjaja 
 fontsize.eventlist_itemlarge velika lista dogadjaja 
@@ -563,5 +576,5 @@ fontsize.infobar_small mala infromativna traka
 fontmenu.head namjescenje velicine slova 
 fontmenu.channellist lista kanala 
 fontmenu.eventlist lista dogadjaja 
-fontmenu.epg EPG 
-fontmenu.infobar informativna traka 
+fontmenu.epg epg 
+fontmenu.infobar informativna traka
