@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.36 2004/10/12 20:37:48 rasc Exp $
+$Id: cmdline.c,v 1.37 2004/10/12 21:12:05 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.36 2004/10/12 20:37:48 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.37  2004/10/12 21:12:05  rasc
+no message
+
 Revision 1.36  2004/10/12 20:37:48  rasc
  - Changed: TS pid filtering from file, behavior changed
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
@@ -337,7 +340,7 @@ static void usage (void)
     printf("                         feinfo = frontend information\n");
     printf("                 stream type or pidscan\n");
     printf("   -timeout ms:  section read timeout in ms [-TIMEOUT 0]\n");
-    printf("   -maxdmx n:    max demux filters <n> to use in pidscan mode (0=default) [-maxdmx 0]\n");
+    printf("   -maxdmx n:    max demux filters <n> to use in pidscan mode (0=max) [-maxdmx 0]\n");
     printf("   -buffersize kb: read buffersize in KBytes  [-buffersize 0]\n");
     printf("                 (0 = use default read buffer size)\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
