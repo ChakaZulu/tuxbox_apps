@@ -401,14 +401,14 @@ bool CChannelList::showInfo(int pos)
 
 int CChannelList::handleMsg(uint msg, uint data)
 {
-	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
+	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS)
 	{
 		// 0x100 als FSK-Status zeigt an, dass (noch) kein EPG zu einem Kanal der NICHT angezeigt
 		// werden sollte (vorgesperrt) da ist
 
 		//printf("program-lock-status: %d\n", data);
 
-		if ( g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSIGNAL )
+		if (g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSIGNAL || g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSTART)
 		{
 			if ( zapProtection != NULL )
 				zapProtection->fsk = data;
