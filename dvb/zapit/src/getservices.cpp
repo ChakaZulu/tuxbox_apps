@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.64 2002/12/22 22:56:57 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.65 2002/12/23 10:35:46 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -38,7 +38,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC)
 	{
 		/* common */
 		GET_ATTR(node, "id", "%hx", transport_stream_id);
-		GET_ATTR(node, "onid", "%hx", original_network_id);
+		GET_ATTR(node, "onid", SCANF_ORIGINAL_NETWORK_ID_TYPE, original_network_id);
 		GET_ATTR(node, "frequency", "%u", feparams.frequency);
 		GET_ATTR(node, "inversion", "%hhu", tmp);
 
@@ -125,7 +125,7 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 
 	while ((node = xmlGetNextOccurence(node, "channel")) != NULL)
 	{
-		GET_ATTR(node, "service_id", "%hx", service_id);
+		GET_ATTR(node, "service_id", SCANF_SERVICE_ID_TYPE, service_id);
 		name = xmlGetAttribute(node, "name");
 		GET_ATTR(node, "service_type", "%hhx", service_type);
 

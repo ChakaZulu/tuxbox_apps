@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.79 2002/12/23 02:19:41 obi Exp $
+ * $Id: bouquets.cpp,v 1.80 2002/12/23 10:35:46 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -37,6 +37,16 @@
 
 extern tallchans allchans;   //  defined in zapit.cpp
 extern CConfigFile config;   //  defined in zapit.cpp
+
+
+#define GET_ATTR(node, name, fmt, arg)                                  \
+        do {                                                            \
+                char * ptr = xmlGetAttribute(node, name);               \
+                if ((ptr == NULL) || (sscanf(ptr, fmt, &arg) <= 0))     \
+                        arg = 0;                                        \
+        }                                                               \
+        while (0)
+
 
 /**** class CBouquet ********************************************************/
 
@@ -232,8 +242,8 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 			while ((channel_node = xmlGetNextOccurence(channel_node, "channel")) != NULL)
 			{
-				sscanf(xmlGetAttribute(channel_node, "serviceID"), "%hx", &service_id);
-				sscanf(xmlGetAttribute(channel_node, "onid"), "%hx", &original_network_id);
+				GET_ATTR(channel_node, "serviceID", SCANF_SERVICE_ID_TYPE, service_id);
+				GET_ATTR(channel_node, "onid", SCANF_ORIGINAL_NETWORK_ID_TYPE, original_network_id);
 
 				CZapitChannel* chan = findChannelByChannelID(CREATE_CHANNEL_ID);
 

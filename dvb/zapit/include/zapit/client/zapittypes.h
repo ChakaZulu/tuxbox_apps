@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.5 2002/12/10 00:44:00 Homar Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.6 2002/12/23 10:35:46 thegoodguy Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -28,7 +28,11 @@
 #include <stdint.h>
 
 typedef uint16_t t_service_id;
+#define SCANF_SERVICE_ID_TYPE "%hx"
+
 typedef uint16_t t_original_network_id;
+#define SCANF_ORIGINAL_NETWORK_ID_TYPE "%hx"
+
 typedef uint16_t t_transport_stream_id;
 typedef uint16_t t_network_id;
 
