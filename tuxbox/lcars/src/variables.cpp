@@ -59,7 +59,6 @@ void variables::addEvent(std::string event)
 	events.push(event);
 	pthread_mutex_unlock(&events_mutex);
 	pthread_mutex_unlock(&event_wait_mutex);
-	pthread_mutex_init(&event_wait_mutex, NULL);
 }
 
 std::string variables::waitForEvent()
