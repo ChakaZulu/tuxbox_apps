@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.25 2001/09/22 14:57:45 field Exp $
+// $Id: infoviewer.cpp,v 1.26 2001/09/22 17:57:03 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.26  2001/09/22 17:57:03  McClean
+// infobar painting modified
+//
 // Revision 1.25  2001/09/22 14:57:45  field
 // Anzeige, wenn Kanal nicht verfuegbar
 //
@@ -179,7 +182,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
     {
         ButtonWidth = (BoxEndX- ChanInfoX)>> 2;
 
-        g_FrameBuffer->paintBackgroundBox(ChanInfoX, BoxEndY- InfoHeightY_Info, BoxEndX, BoxEndY- InfoHeightY_Info+ 1);
+		g_FrameBuffer->paintHLine(ChanInfoX, BoxEndX,  BoxEndY-InfoHeightY_Info, COL_INFOBAR_SHADOW);
+		//g_FrameBuffer->paintHLine(ChanInfoX, BoxEndX,  BoxEndY-InfoHeightY_Info+1, COL_INFOBAR_SHADOW); 2Lines wegen scanline?
 
         g_FrameBuffer->paintIcon("blau.raw", BoxEndX- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         g_Fonts->infobar_small->RenderString(BoxEndX- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 31, g_Locale->getText("infoviewer.streaminfo").c_str(), COL_INFOBAR);
@@ -255,7 +259,7 @@ void CInfoViewer::showButtons()
         int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
         int xStart= BoxStartX + ChanWidth + 30;
 
-    	int ChanNameX = BoxStartX + ChanWidth + 10;
+    	//int ChanNameX = BoxStartX + ChanWidth + 10;
     	int ChanNameY = BoxStartY + ChanHeight + 10;
     	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
 
