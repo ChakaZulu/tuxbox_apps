@@ -213,15 +213,17 @@ void *start_scanthread(void *)
   if (!issatbox())
     {
       int symbolrate = 6900;
-      for (int freq = 3300; freq<=4500; freq +=80)
+      for (int freq = 3300; freq<=4600; freq +=80)
 	{
 	  //get_nits(freq,symbolrate,0,0,0);
 	  //printf("get_nits() done\n");
-	  finaltune(freq,symbolrate,0,0,0);
-    	  fake_pat(&scantransponders, freq, symbolrate);
-  	  //else
-    		//printf("No signal found on transponder\n"); 
+	  if (finaltune(freq,symbolrate,0,0,0)>0)
+    	  	fake_pat(&scantransponders, freq, symbolrate);
+  	  else
+    		printf("No signal found on transponder\n"); 
 	}
+	if (finaltune(3300,6875,0,0,0)>0)
+    	  	fake_pat(&scantransponders, 3300,6875);
 	get_sdts();
       if (!scantransponders.empty())
       {
