@@ -81,7 +81,10 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 	unsigned char r_alt= *r;
 	unsigned char g_alt= *g;
 	unsigned char b_alt= *b;
-	unsigned char a_alt= *alpha;
+	unsigned char a_alt;
+	if (alpha)
+		a_alt= *alpha;
+
 
 	setColor();
 	paint();
@@ -235,7 +238,8 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 				*r = r_alt;
 				*g = g_alt;
 				*b = b_alt;
-				*alpha = a_alt;
+				if (alpha)
+					*alpha= a_alt;
 
 			case CRCInput::RC_timeout:
 			case CRCInput::RC_ok:
