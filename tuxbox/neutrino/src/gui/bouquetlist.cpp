@@ -54,18 +54,8 @@
 CBouquetList::CBouquetList()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	selected    =   0;
-	width  = w_max (500, 0);
-	height = h_max (440, 50);
-
-	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
-	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
-	listmaxshow = (height-theight-0)/fheight;
-	height      = theight + listmaxshow * fheight; // recalc height
-	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
-	liststart = 0;
-	tuned=0xfffffff;
+	selected    = 0;
+	liststart   = 0;
 }
 
 CBouquetList::~CBouquetList()
@@ -175,6 +165,12 @@ int CBouquetList::show()
 	width  = w_max (500, 0);
 	height = h_max (440, 40);
 
+	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
+	listmaxshow = (height-theight-0)/fheight;
+	height      = theight + listmaxshow * fheight; // recalc height
+	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 
 	if(Bouquets.size()==0)
 	{

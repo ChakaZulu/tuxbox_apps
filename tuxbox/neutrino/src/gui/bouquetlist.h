@@ -77,7 +77,6 @@ class CBouquetList
 		CFrameBuffer		*frameBuffer;
 
 		unsigned int		selected;
-		unsigned int		tuned;
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
 		unsigned int		numwidth;
