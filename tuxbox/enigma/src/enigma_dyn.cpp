@@ -2684,7 +2684,9 @@ public:
 						colUnits = eventDuration / 60 / 15;
 						if (colUnits > 0)
 						{
-							result  << "<td id=\"genre" << eString("%02", genreCategory) << "\" colspan=" << colUnits << ">";
+							result  << "<td class=\"genre"
+								<< eString().sprintf("%02d", genreCategory)
+								<< "\" colspan=" << colUnits << "\">";
 #ifndef DISABLE_FILE
 							result  << "<a href=\"javascript:record('"
 								<< "ref=" << ref2string(ref)
@@ -2707,21 +2709,22 @@ public:
 								<< "<span class=\"duration\">"
 								<< " (" << event.duration / 60 << " min)"
 								<< "</span>"
-								<< "<br>Genre: " << genre
-								<< "<br><b>";
+								<< "<br>"
+								<< "Genre: " << genre
+								<< "<br>";
 							if ((eventStart <= now) && (eventEnd >= now))
 								result << "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\", \"0\", \"-1\")\'>";
-							result	<< "<span class=\"event\">"
-								<< short_description
+							result  << "<span class=\"event\">"
+								<< "<b>" << short_description << "</b>"
 								<< "</span>";
 							if ((eventStart <= now) && (eventEnd >= now))
 								result << "</a>";
 
-							result	<< "</b><br>";
+							result	<< "<br>";
 
 							if ((eventDuration >= 15 * 60) && (pdaScreen == 0))
 							{
-								result << "<span class=\"description\">"
+								result  << "<span class=\"description\">"
 									<< filter_string(ext_description)
 									<< "</span>";
 							}
@@ -2904,11 +2907,12 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				<< "')\"><img src=\"timer.gif\" border=0></a>"
 				<< "</td>";
 #endif
-			result << "<td>"
+			result  << "<td class=\"genre" << eString().sprintf("%02d", genreCategory) << "\">"
 				<< "<span class=\"event\">"
 				<< filter_string(description)
 				<< "</span>"
-				<< "<br>Genre: " << genre
+				<< "<br>"
+				<< "Genre: " << genre
 				<< "<br>"
 				<< "<span class=\"description\">"
 				<< filter_string(ext_description)

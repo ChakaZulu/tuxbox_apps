@@ -141,93 +141,74 @@ a:hover {
 	padding-right:3px;
 	vertical-align: top;
 	text-align: left;
-	background-image: url(mepg_grad.png);
-	background-repeat: repeat-x;
 }
 
-#genre00 {
-	background-image: url(genre00.png);
-	background-repeat: repeat-x;
+.genre00 {
+	background-color: #F3EE5F;
 }
 
-#genre01 {
-	background-image: url(genre01.png);
-	background-repeat: repeat-x;
+.genre01 {
+	background-color: #E7F587;
 }
 
-#genre02 {
-	background-image: url(genre02.png);
-	background-repeat: repeat-x;
+.genre02 {
+	background-color: #DD95CA;
 }
 
-#genre03 {
-	background-image: url(genre03.png);
-	background-repeat: repeat-x;
+.genre03 {
+	background-color: #A4DAE3;
 }
 
-#genre04 {
-	background-image: url(genre04.png);
-	background-repeat: repeat-x;
+.genre04 {
+	background-color: #AECED4;
 }
 
-#genre05 {
-	background-image: url(genre05.png);
-	background-repeat: repeat-x;
+.genre05 {
+	background-color: #1EDCA4;
 }
 
-#genre06 {
-	background-image: url(genre06.png);
-	background-repeat: repeat-x;
+.genre06 {
+	background-color: #D5DC1E;
 }
 
-#genre07 {
-	background-image: url(genre07.png);
-	background-repeat: repeat-x;
+.genre07 {
+	background-color: #DCBA1E;
 }
 
-#genre08 {
-	background-image: url(genre08.png);
-	background-repeat: repeat-x;
+.genre08 {
+	background-color: #DA8E8E;
 }
 
-#genre09 {
-	background-image: url(genre09.png);
-	background-repeat: repeat-x;
+.genre09 {
+	background-color: #DA8EBE;
 }
 
-#genre10 {
-	background-image: url(genre10.png);
-	background-repeat: repeat-x;
+.genre10 {
+	background-color: #EF13F7;
 }
 
-#genre11 {
-	background-image: url(genre11.png);
-	background-repeat: repeat-x;
+.genre11 {
+	background-color: #A771F7;
 }
 
-#genre12 {
-	background-image: url(genre12.png);
-	background-repeat: repeat-x;
+.genre12 {
+	background-color: #8DB9F1;
 }
 
-#genre13 {
-	background-image: url(genre13.png);
-	background-repeat: repeat-x;
+.genre13 {
+	background-color: #B9DBF1;
 }
 
-#genre14 {
-	background-image: url(genre14.png);
-	background-repeat: repeat-x;
+.genre14 {
+	background-color: #B9ECF1;
 }
 
-#genre15 {
-	background-image: url(genre15.png);
-	background-repeat: repeat-x;
+.genre15 {
+	background-color: #B9F1CF;
 }
 
-#genre16 {
-	background-image: url(genre16.png);
-	background-repeat: repeat-x;
+.genre16 {
+	background-color: #E0E6EB;
 }
 
 #megatable {
