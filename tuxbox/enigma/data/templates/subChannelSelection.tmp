@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<title>SubChannel Selection</title>
+		<link rel="stylesheet" type="text/css" href="webif.css">
+		<script>
+			function subChannelChange()
+			{
+				var i = document.subchannelselector.subchannel.selectedIndex;
+				var subChannel = document.subchannelselector.subchannel.options[i].value;
+				document.location = "/cgi-bin/setSubChannel?subChannel="+subChannel;
+			}
+		</script>
+	</head>
+	<body>
+		Please select subchannel:
+		<br>
+		<form name="subchannelselector">
+			<select name="subchannel" size="1" onChange=subChannelChange()>
+				#SUBCHANS#
+			</select>
+		</form>
+	</body>
+</html>

@@ -434,6 +434,13 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 	return "<script language=\"javascript\">window.close();</script>";
 }
 
+static eString setSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+
+	return "<script language=\"javascript\">window.close();</script>";
+}
+
 static eString setScreen(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -480,6 +487,23 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 
 	eString result = readFile(TEMPLATE_DIR + "audioSelection.tmp");
 	result.strReplace("#AUDIOCHANS#", audioChannels);
+
+	return result;
+}
+
+static eString selectSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString requester = opt["requester"];
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	eString subChannels;
+
+	subChannels = "<option>no subchannels available</option>";
+
+	eString result = readFile(TEMPLATE_DIR + "subChannelSelection.tmp");
+	result.strReplace("#SUBCHANS#", subChannels);
 
 	return result;
 }
@@ -561,7 +585,8 @@ static eString getChannelNavi(void)
 
 	if (sapi && sapi->service)
 	{
-		result = button(100, "AUDIO", OCKER, "javascript:selectAudio()");
+		result = button(100, "Audio", OCKER, "javascript:selectAudio()");
+		result += button(100, "SubChannel", OCKER, "javascript:selectSubChannel()");
 		if (getCurService() != "&nbsp;")
 		{
 			result += button(100, "EPG", GREEN, "javascript:openEPG()");
@@ -571,8 +596,10 @@ static eString getChannelNavi(void)
 				result += button(100, "Stream Info", YELLOW, "javascript:openSI()");
 			}
 #ifndef DISABLE_FILE
-			result += button(100, "Record", RED, "javascript:DVRrecord('start')");
-			result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
+			if (eZapMain::getInstance()->isRecording())
+				result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
+			else
+				result += button(100, "Record", RED, "javascript:DVRrecord('start')");
 #endif
 		}
 	}
@@ -3998,6 +4025,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/selectSubChannel", selectSubChannel, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setSubChannel", setSubChannel, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setScreen", setScreen, lockWeb);
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB, lockWeb);

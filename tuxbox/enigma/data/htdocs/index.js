@@ -94,12 +94,17 @@ function selectAudio()
 	NewWindow("/cgi-bin/selectAudio?requester=webif", "audio", "200", "100", "no");
 }
 
+function selectSubChannel()
+{
+	NewWindow("/cgi-bin/selectSubChannel", "subchannel", "200", "100", "no");
+}
+
 function configUSB()
 {
-	alert("This function is not working yet...");
+	document.location = "/cgi-bin/setConfigUSB?swapusb="+usbconfig.swapusb.value+"&swapusbfile="+usbconfig.swapusbfile.value;
 }
 
 function configHDD()
 {
-	alert("This function is not working yet...");
+	document.location = "/cgi-bin/setConfigHDD?swaphdd="+hddconfig.swaphdd.value+"&swaphddfile="+hddconfig.swaphddfile.value;	
 }
