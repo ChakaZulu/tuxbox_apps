@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.27 2003/01/15 00:55:56 pumuckel Exp $
+	$Id: webapi.cpp,v 1.28 2003/01/20 12:47:48 pumuckel Exp $
 
 	License: GPL
 
@@ -478,7 +478,7 @@ char mode;
 		request->printf("</NOBR></TD><TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
 		request->printf("<TD><A CLASS=\"elist\" HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
 		if(eventIterator->text.length() > 0)
-			request->printf("<TR VALIGN=\"middle\" CLASS=\"%c\"><TD COLSPAN=2>&nbsp;</TD><TD>%s</TD></TR>\n",classname,eventIterator->text.c_str());
+			request->printf("<TR VALIGN=\"middle\" CLASS=\"%c\"><TD COLSPAN=2><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD><TD>%s</TD></TR>\n",classname,eventIterator->text.c_str());
 
 	}
 
@@ -530,14 +530,14 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 			prozent = 100 * (time(NULL) - event->startTime) / event->duration;
 			request->printf("<TR><TD align=left width=31 CLASS=\"%cepg\">",classname);
 			request->printf("<TABLE border=0 rules=none heigth=10 width=30 cellspacing=0 cellpadding=0><TR><TD ROWSPAN=3 BGCOLOR=#000000><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD><TD BGCOLOR=#000000 COLSPAN=2><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD><TD ROWSPAN=3 BGCOLOR=#000000><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD></TR>");
-			request->printf("<TR><TD bgcolor=\"#2211FF\" height=10 width=%d>&nbsp;</TD><TD bgcolor=\"#EAEBFF\" heigth=10 width=%d>&nbsp;</TD></TR><TR><TD BGCOLOR=#000000 COLSPAN=2><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD></TR></TABLE></TD>",(prozent / 10) * 3,(10 - (prozent / 10))*3);
+			request->printf("<TR><TD bgcolor=\"#2211FF\" height=10 width=%d><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD><TD bgcolor=\"#EAEBFF\" heigth=10 width=%d><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD></TR><TR><TD BGCOLOR=#000000 COLSPAN=2><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD></TR></TABLE></TD>",(prozent / 10) * 3,(10 - (prozent / 10))*3);
 			request->printf("<TD CLASS=\"%cepg\">",classname);
 			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx>",event->eventID);
 //			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx&startzeit=%lx>",event->eventID,event->startTime);
 			request->printf("%s&nbsp;",event->description.c_str()); 
 			request->printf("<font size=-3><NOBR>(%ld von %d min, %d%%)</NOBR></font></a>&nbsp;</TD></TR>\n",(time(NULL) - event->startTime)/60,event->duration / 60,prozent  ); 
 		}
-		request->printf("<tr height=2><TD colspan=2>&nbsp;</TD></TR>\n");
+		request->printf("<tr height=2><TD colspan=2><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD></TR>\n");
 
 	}
 
@@ -810,7 +810,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 		request->printf("<img border=0 src=\"../images/modify.gif\" alt=\"Timer ändern\"></a><NOBR></TD></TR>\n");
 	}
 	classname = (i++&1)?'a':'b';
-	request->printf("<TR><TD CLASS=\"%ctimer\" colspan=5>&nbsp;</TD>\n<TD CLASS=\"%ctimer\" align=\"center\">\n",classname,classname);
+	request->printf("<TR><TD CLASS=\"%ctimer\" colspan=5><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD>\n<TD CLASS=\"%ctimer\" align=\"center\">\n",classname,classname);
 	request->SocketWrite("<a HREF=\"javascript:location.reload()\">\n");
 	request->SocketWrite("<img border=0 src=\"../images/reload.gif\" alt=\"Aktualisieren\"></a></TD>\n");   
 	request->printf("<TD CLASS=\"%ctimer\" align=\"center\">\n",classname);
