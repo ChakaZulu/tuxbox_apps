@@ -1,5 +1,6 @@
 #include <lib/system/info.h>
 #include <lib/base/estring.h>
+#include <tuxbox.h>
 
 eSystemInfo *eSystemInfo::instance;
 
@@ -69,5 +70,17 @@ int eSystemInfo::isRelease()
 
 int eSystemInfo::getAVS()
 {
-	return avsDM7000;
+
+	switch (tuxbox_get_vendor())
+	{
+		case TUXBOX_VENDOR_NOKIA:
+			return avsNokia;
+		case TUXBOX_VENDOR_SAGEM:
+			return avsSagem;
+		case TUXBOX_VENDOR_PHILIPS:
+			return avsPhilips;
+		default:
+			return avsDM7000;
+	}
 }
+
