@@ -1,5 +1,3 @@
-INCLUDES = $(DRIVER_INCLUDES)
-
 bin_PROGRAMS = dvbsnoop
 
 noinst_HEADERS = \
