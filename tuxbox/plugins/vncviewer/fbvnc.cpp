@@ -786,7 +786,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
          else if(iev.type == EV_REL)
          {
             retval=FBVNC_EVENT_TS_MOVE;
-            if(iev.code == REL_X)
+            if(iev.code == REL_Y)
             {
                if (iev.value < 0) //Up
                {
@@ -846,7 +846,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
                      rc_dy	= iev.value;
                }
             }
-            else if(iev.code == REL_Y)
+            else if(iev.code == REL_X)
             {
                if (iev.value < 0) //Left
 					{
