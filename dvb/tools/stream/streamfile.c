@@ -1,9 +1,10 @@
 /*
- * $Id: streamfile.c,v 1.13 2004/04/29 23:19:28 carjay Exp $
+ * $Id: streamfile.c,v 1.14 2004/04/30 09:38:40 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
- * Copyright (C) 2004 Axel Buehning <diemade@tuxbox.org>
+ * Copyright (C) 2004 Axel Buehning <diemade@tuxbox.org>,
+ *                    thegoodguy <thegoodguy@berlios.de>
  *
  * based on code which is
  * Copyright (C) 2001 TripleDES
@@ -143,76 +144,100 @@ void *FileThread (void *v_arg)
 
 	struct pollfd pfd[1];
 	
-	while (!exit_flag)
+	while (1)
 	{
 		ringbuffer_get_read_vector(ringbuf, &(vec[0]));
 		readsize = vec[0].len + vec[1].len;
-		if ( readsize ) {
-			if ((!silent)&&(readsize > maxreadsize)){
+		if (readsize)
+		{
+			if ((!silent)&&(readsize > maxreadsize))
+			{
 				maxreadsize = readsize;
 			}
 
 			// Do Splitting if necessary
-			if (!remfile) {
+			if (remfile == 0)
+			{
 				sprintf(filename, "%s.%3.3d.ts", (char *)v_arg, ++filecount);
-				if (fd2 != -1 )
+				if (fd2 != -1)
 					close(fd2);
-				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_NONBLOCK | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0) {
+				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_NONBLOCK | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
+				{
 					perror("[streamfile]: opening outfile");
-					pthread_exit (NULL);
+					exit_flag = 1;
+					pthread_exit(NULL);
 				}
 				pfd[0].fd = fd2;
 				pfd[0].events = POLLOUT;
 
 				filesize = 0;
-				remfile=splitsize;
+				remfile = splitsize;
 				timer1 = time(NULL);
 			}
 
 			/* make sure file contains complete TS-packets and is <= splitsize */
-			if ((unsigned long long)readsize>remfile){ 
-				readsize=remfile%TS_SIZE;
-				remfile=0;
+			if ((unsigned long long)readsize > remfile)
+			{ 
+				readsize = remfile;
+
+				if (vec[0].len > readsize)
+					vec[0].len = readsize;
+
+				vec[1].len = readsize - vec[0].len;
 			}
 
-			if (poll(pfd, 1, 5000)>0) {
-				if (pfd[0].revents & POLLOUT) {
+			if (poll(pfd, 1, 5000) > 0)
+			{
+				if (pfd[0].revents & POLLOUT)
+				{
 					ssize_t written;
-					const char * buf = vec[0].buf;
-					ssize_t todo = vec[0].len;
-					
-					/* readsize has been reduced to a multiple of TS_SIZE, hence might be smaller than vec[0].len */
-					if (todo > readsize)
-						todo = readsize;
-					ssize_t todo2 = readsize - todo;
 
-					do {
-						if (((written = write(fd2, buf, todo)) < 0) && 
-						    (errno != EAGAIN))
-							perror("[streamfile]: write");
+					while (1)
+					{
+						if ((written = write(fd2, vec[0].buf, vec[0].len)) < 0)
+						{
+							if (errno != EAGAIN)
+							{
+								exit_flag = 1;
+								perror("[streamfile]: write");
+								goto terminate_thread;
+							}
+						}
 						else
 						{
-							if (todo == written)
+							ringbuffer_read_advance(ringbuf, written);
+
+							if (vec[0].len == written)
 							{
-								todo = todo2;
-								buf = vec[1].buf;
-								todo2 = 0;
+								if (vec[1].len == 0)
+								{
+									goto all_bytes_written;
+								}
+
+								vec[0] = vec[1];
+								vec[1].len = 0;
 							}
 							else
 							{
-								todo -= written;
-								buf += written;
+								vec[0].len -= written;
+								vec[0].buf += written;
 							}
-							ringbuffer_read_advance(ringbuf, written);
 						}
-					} while (todo>0 && !exit_flag);
+					}
+
+				all_bytes_written:
 					fdatasync(fd2);
+
 					filesize += (unsigned long long)readsize;
-					if (remfile) remfile -= (unsigned long long)readsize;
+					remfile -= (unsigned long long)readsize;
 					if (!silent) filesize2 += (unsigned long long)readsize;
 				}
-			} else {
+			}
+			else
+			{
 				perror ("[streamfile]: poll");	
+				if (exit_flag)
+					goto terminate_thread;
 			}
 
 			if ((!silent)&&(time(NULL) - timer1) > 10) {
@@ -225,10 +250,17 @@ void *FileThread (void *v_arg)
 
 		}
 		else
+		{
+			if (exit_flag)
+				goto terminate_thread;
 			usleep(1000);
+		}
 	}
-	if (fd2!=-1) close (fd2);
-	pthread_exit (NULL);
+ terminate_thread:
+	if (fd2 != -1)
+		close (fd2);
+
+	pthread_exit(NULL);
 }
 
 
