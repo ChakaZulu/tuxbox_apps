@@ -33,7 +33,13 @@
 #include <sys/mount.h>
 #include <sys/reboot.h>
 
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,7)
+#include <linux/compiler.h>
+#include <mtd/mtd-user.h>
+#else
 #include <linux/mtd/mtd.h>
+#endif
 #include <libcramfs.h>
 
 #include <driver/encoding.h>
