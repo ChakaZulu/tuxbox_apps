@@ -304,6 +304,8 @@ void tsAutomatic::networkSelected(eListBoxEntryText *l)
 
 void tsAutomatic::dvbEvent(const eDVBEvent &event)
 {
+	if (!inProgress)
+		return;
 	switch (event.type)
 	{
 		case eDVBScanEvent::eventScanCompleted:
