@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.196 2002/08/24 14:20:35 obi Exp $
+ * $Id: zapit.cpp,v 1.197 2002/08/24 15:59:26 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -268,7 +268,7 @@ channel_msg load_settings()
 {
 	channel_msg output_msg;
 	string valueName;
-	if (config->getInt("lastChannelMode"))
+	if (config->getInt("lastChannelMode", 0))
 	{
 		output_msg.mode = 'r';
 	}
@@ -277,7 +277,7 @@ channel_msg load_settings()
 		output_msg.mode = 't';
 	}
 	valueName = (currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV";
-	output_msg.chan_nr = config->getInt( valueName, 1);
+	output_msg.chan_nr = config->getInt(valueName, 1);
 
 	return output_msg;
 }
@@ -1123,7 +1123,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.196 2002/08/24 14:20:35 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.197 2002/08/24 15:59:26 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1164,21 +1164,8 @@ int main (int argc, char **argv)
 
 	if (!config->loadConfig(CONFIGFILE))
 	{
-		char tmp[16];
-
 		/* set defaults if no configuration file exists */
-		config->setInt("diseqcRepeats", 0);
-		config->setInt("diseqcType", NO_DISEQC);
-		config->setInt("lastChannel", 1);
-		config->setInt("lastChannelMode", 0);
-
-		for (i = 0; i < MAX_LNBS; i++)
-		{
-			sprintf(tmp, "lnb%d_OffsetHigh", i);
-			config->setInt(tmp, 10600000);
-			sprintf(tmp, "lnb%d_OffsetLow", i);
-			config->setInt(tmp, 9750000);
-		}
+		printf("[zapit] %s not found\n", CONFIGFILE);
 	}
 
 	/* create bouquet manager */
@@ -1216,17 +1203,17 @@ int main (int argc, char **argv)
 	{
 		char tmp[16];
 
-		frontend->setDiseqcType((diseqc_t) config->getInt("diseqcType"));
-		frontend->setDiseqcRepeats(config->getInt("diseqcRepeats"));
+		frontend->setDiseqcType((diseqc_t) config->getInt("diseqcType", NO_DISEQC));
+		frontend->setDiseqcRepeats(config->getInt("diseqcRepeats", 0));
 
 		for (i = 0; i < MAX_LNBS; i++)
 		{
 			/* low offset */
 			sprintf(tmp, "lnb%d_OffsetLow", i);
-			frontend->setLnbOffset(false, i, config->getInt(tmp));
+			frontend->setLnbOffset(false, i, config->getInt(tmp, 9750000));
 			/* high offset */
 			sprintf(tmp, "lnb%d_OffsetHigh", i);
-			frontend->setLnbOffset(true, i, config->getInt(tmp));
+			frontend->setLnbOffset(true, i, config->getInt(tmp, 10600000));
 		}
 	}
 
