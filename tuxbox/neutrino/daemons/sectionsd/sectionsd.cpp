@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.158 2003/03/01 19:26:51 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.159 2003/03/02 13:21:14 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -71,6 +71,11 @@
 #include "SIservices.hpp"
 #include "SIevents.hpp"
 #include "SIsections.hpp"
+
+
+/* please use the same define status as in dmx.cpp! */
+#define PAUSE_EQUALS_STOP 1
+
 
 
 //#include "timerdclient.h"
@@ -1047,7 +1052,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.158 2003/03/01 19:26:51 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.159 2003/03/02 13:21:14 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2642,6 +2647,9 @@ static void *sdtThread(void *)
 					{
 						dprintf("dmxSDT: waking up again - requested from .change()\n");
 						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
+#ifdef PAUSE_EQUALS_STOP 1
+						dmxSDT.real_unpause();
+#endif
 					}
 					else
 					{
@@ -3127,6 +3135,9 @@ static void *eitThread(void *)
 					{
 						dprintf("dmxEIT: waking up again - requested from .change()\n");
 						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
+#ifdef PAUSE_EQUALS_STOP 1
+						dmxEIT.real_unpause();
+#endif
 					}
 					else
 					{
@@ -3459,7 +3470,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.158 2003/03/01 19:26:51 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.159 2003/03/02 13:21:14 thegoodguy Exp $\n");
 
 	try
 	{
