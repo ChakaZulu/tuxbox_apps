@@ -469,11 +469,14 @@ int tsAutomatic::loadNetworks()
 	if(	(err = eTransponderList::getInstance()->reloadNetworks()) )
 		return err;
 
+	std::map<int,eSatellite*> sats;
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-			for ( std::list<tpPacket>::const_iterator i(eTransponderList::getInstance()->getNetworks().begin()); i != eTransponderList::getInstance()->getNetworks().end(); ++i)
-				if ( ( i->orbital_position == s->getOrbitalPosition() ) || (eSystemInfo::getInstance()->getFEType() != eSystemInfo::feSatellite) )
-					new eListBoxEntryText(*l_network, i->name, (void*)&*i, eTextPara::dirCenter);
+			sats[s->getOrbitalPosition()]=s;
+
+	for ( std::list<tpPacket>::const_iterator i(eTransponderList::getInstance()->getNetworks().begin()); i != eTransponderList::getInstance()->getNetworks().end(); ++i)
+		if ( ( sats.find(i->orbital_position) != sats.end()) || (eSystemInfo::getInstance()->getFEType() != eSystemInfo::feSatellite) )
+			new eListBoxEntryText(*l_network, i->name, (void*)&*i, eTextPara::dirCenter);
 
 	return 0;
 }
@@ -896,11 +899,14 @@ tsMultiSatScan::tsMultiSatScan(eWidget *parent)
 	if(	(err = eTransponderList::getInstance()->reloadNetworks()) )
 		eFatal("couldn't load Networks... \nplease check satellites.xml");
 
+	std::map<int,eSatellite*> sats;
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-			for ( std::list<tpPacket>::iterator i(eTransponderList::getInstance()->getNetworks().begin()); i != eTransponderList::getInstance()->getNetworks().end(); ++i)
-				if ( ( i->orbital_position == s->getOrbitalPosition() ) || (eSystemInfo::getInstance()->getFEType() != eSystemInfo::feSatellite) )
-					new eListBoxEntrySat(satellites, &*i );
+			sats[s->getOrbitalPosition()]=s;
+
+	for ( std::list<tpPacket>::iterator i(eTransponderList::getInstance()->getNetworks().begin()); i != eTransponderList::getInstance()->getNetworks().end(); ++i)
+		if ( sats.find(i->orbital_position) != sats.end() )
+			new eListBoxEntrySat(satellites, &*i );
 
 	CONNECT( satellites->selected, tsMultiSatScan::entrySelected );
 	CONNECT( start->selected, eWidget::accept );

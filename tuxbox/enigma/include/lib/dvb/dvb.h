@@ -662,7 +662,6 @@ class eSatellite
 	eString description;
 	eSwitchParameter switchParams;
 	eLNB *lnb;
-	std::map<int, eSatellite*>::iterator tpiterator;
 	friend class eLNB;
 public:
 	eSatellite(eTransponderList &tplist, int orbital_position, eLNB &lnb);
@@ -773,11 +772,15 @@ public:
 class tpPacket
 {
 public:
-	bool operator==(const tpPacket& p)
+	bool operator==(const tpPacket& p) const
 	{
 		// this do only compare the adresses.. to find a tpPacket
 		// in a std::list<tpPacket>.. but it is fast !!
 		return &possibleTransponders == &p.possibleTransponders;
+	}
+	bool operator<(const tpPacket& p) const
+	{
+		return orbital_position < p.orbital_position;
 	}
 	std::string name;
 	int scanflags;
@@ -807,7 +810,7 @@ class eTransponderList: public existNetworks, public Object
 	static eTransponderList* instance;
 	std::map<tsref,eTransponder> transponders;
 	std::map<eServiceReferenceDVB,eServiceDVB> services;
-	std::multimap<int,eSatellite*> satellites;
+	std::map<int,eSatellite*> satellites;
 	std::list<eLNB> lnbs;
 	std::map<int,eServiceReferenceDVB> channel_number;
 	friend class eLNB;
@@ -887,8 +890,8 @@ public:
 
 	eTransponder *getFirstTransponder(int state);
 	eSatellite *findSatellite(int orbital_position);
-	std::multimap< int, eSatellite*>::iterator begin() { return satellites.begin(); }
-	std::multimap< int, eSatellite*>::iterator end() { return satellites.end(); }
+	std::map< int, eSatellite*>::iterator begin() { return satellites.begin(); }
+	std::map< int, eSatellite*>::iterator end() { return satellites.end(); }
 	std::list<eLNB>& getLNBs()	{	return lnbs;	}
 };
 

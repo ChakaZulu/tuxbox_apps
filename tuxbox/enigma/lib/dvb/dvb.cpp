@@ -73,18 +73,15 @@ int eTransponder::satellite::tune(eTransponder *trans)
 {
 	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d", frequency, symbol_rate, polarisation?"V":"H", fec, orbital_position);
 
-	std::multimap< int, eSatellite* >::iterator it ( trans->tplist.begin() );
+	eSatellite *sat = trans->tplist.findSatellite(orbital_position);
 
-	while ( it != trans->tplist.end() && it->second->getOrbitalPosition() != orbital_position )
-		++it;
-
-	if (it == trans->tplist.end())
+	if (!sat)
 	{
 		eDebug("no such satellite %d", orbital_position);
 		return -ENOENT;
 	}
 
-	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inversion, *it->second );
+	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inversion, *sat );
 }
 
 void eTransponder::terrestrial::set(const TerrestrialDeliverySystemDescriptor *descriptor)
@@ -300,17 +297,17 @@ void eServiceDVB::update(const SDTEntry *sdtentry)
 eSatellite::eSatellite(eTransponderList &tplist, int orbital_position, eLNB &lnb):
 		tplist(tplist), orbital_position(orbital_position), lnb(&lnb)
 {
-	tpiterator=tplist.satellites.insert(std::pair<int,eSatellite*>(orbital_position,this));
+	tplist.satellites[orbital_position]=this;
 }
 
 eSatellite::~eSatellite()
 {
-	tplist.satellites.erase(tpiterator);
+	tplist.satellites.erase(orbital_position);
 }
 
 void eSatellite::setOrbitalPosition(int orbital_position)
 {
-	tplist.satellites.erase(tpiterator);		// we must renew the entry in the map in eTransponderList
+	tplist.satellites.erase(this->orbital_position);		// we must renew the entry in the map in eTransponderList
 	this->orbital_position=orbital_position;
 	tplist.satellites.insert( std::pair< int, eSatellite*>( orbital_position, this ));
 }
@@ -529,6 +526,7 @@ int existNetworks::reloadNetworks()
 		} else 
 			eFatal("unknown packet %s", node->GetType());
 
+	networks.sort();
 	return 0;
 }
 
@@ -1086,7 +1084,7 @@ eTransponder *eTransponderList::getFirstTransponder(int state)
 
 eSatellite *eTransponderList::findSatellite(int orbital_position)
 {
-	std::multimap<int,eSatellite*>::iterator i=satellites.find(orbital_position);
+	std::map<int,eSatellite*>::iterator i=satellites.find(orbital_position);
 	if (i == satellites.end())
 		return 0;
 	return i->second;

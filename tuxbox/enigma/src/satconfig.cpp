@@ -538,46 +538,51 @@ void eSatelliteConfigurationManager::repositionWidgets()
 		tmp=1;
 
 	eWidget *old = focus;
+
+	std::list<std::pair<eSatellite*,int> > sats;
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 	{
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
+			sats.push_back(std::pair<eSatellite*,int>(s,count));
+		++count;
+	}
+
+	for ( std::list<std::pair<eSatellite*,int> >::iterator it(sats.begin()); it != sats.end(); ++it)
+	{
+		SatelliteEntry& entry = entryMap[ it->first ];
+		// search eComboBox for this eSatellite and move
+
+		entry.sat->hide();
+		entry.lnb->hide();
+		entry.voltage->hide();
+		entry.hilo->hide();
+		entry.fixed->hide();
+		entry.description->hide();
+
+		entry.sat->move( ePoint((tmp>2?SAT_POS_X:75), y) );
+		entry.fixed->move( ePoint(0, y) );
+		entry.description->move( ePoint(DESC_POS_X, y) );
+		entry.lnb->move( ePoint(LNB_POS_X, y) );
+		entry.lnb->setText( eString().sprintf("%d", it->second) );
+		entry.fixed->setShortcut(eString().sprintf("%d", (y - POS_Y) / 40 + 1 ) );
+		entry.fixed->setShortcutPixmap(eString().sprintf("%d", (y - POS_Y) / 40 + 1 ));
+
+		entry.hilo->move( ePoint(HILO_POS_X, y) );
+		entry.voltage->move( ePoint(VOLTAGE_POS_X, y) );
+
+		entry.sat->show();
+		if (tmp>2) // user defined..
 		{
-			SatelliteEntry& entry = entryMap[ *s ];
-			// search eComboBox for this eSatellite and move
-
-			entry.sat->hide();
-			entry.lnb->hide();
-			entry.voltage->hide();
-			entry.hilo->hide();
-			entry.fixed->hide();
-			entry.description->hide();
-
-			entry.sat->move( ePoint((tmp>2?SAT_POS_X:75), y) );
-			entry.fixed->move( ePoint(0, y) );
-			entry.description->move( ePoint(DESC_POS_X, y) );
-			entry.lnb->move( ePoint(LNB_POS_X, y) );
-			entry.lnb->setText( eString().sprintf("%d", count) );
-			entry.fixed->setShortcut(eString().sprintf("%d", (y - POS_Y) / 40 + 1 ) );
-			entry.fixed->setShortcutPixmap(eString().sprintf("%d", (y - POS_Y) / 40 + 1 ));
-
-			entry.hilo->move( ePoint(HILO_POS_X, y) );
-			entry.voltage->move( ePoint(VOLTAGE_POS_X, y) );
-
-			entry.sat->show();
-			if (tmp>2) // user defined..
-			{
-				entry.lnb->show();
-				entry.voltage->show();
-				entry.hilo->show();
-			}
-			else
-			{
-				entry.fixed->show();
-				entry.description->show();
-			}
-			y+=40;
+			entry.lnb->show();
+			entry.voltage->show();
+			entry.hilo->show();
 		}
-		count++;
+		else
+		{
+			entry.fixed->show();
+			entry.description->show();
+		}
+		y+=40;
 	}
 	if ( old )
 		setFocus(old);
@@ -586,9 +591,12 @@ void eSatelliteConfigurationManager::repositionWidgets()
 
 void eSatelliteConfigurationManager::createControlElements()
 {
+	ePtrList<eSatellite> sats;
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-			createSatWidgets( *s );
+			sats.push_back(*s);
+	for (ePtrList<eSatellite>::iterator it(sats.begin()); it != sats.end(); ++it )
+		createSatWidgets(*it);
 }
 
 void eSatelliteConfigurationManager::lnbSelected(eButton* who)

@@ -26,9 +26,12 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 		sat=new eComboBox(this, 4, l, edit);
 		sat->setName("sat");
 
+		std::map<int,eSatellite*> sats;
 		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 			for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-				new eListBoxEntryText(*sat, s->getDescription().c_str(), (void*) *s);
+				sats[s->getOrbitalPosition()]=s;
+		for (std::map<int,eSatellite*>::iterator it = sats.begin(); it != sats.end(); ++it)
+				new eListBoxEntryText(*sat, it->second->getDescription().c_str(), (void*) it->second);
 
 		CONNECT(sat->selchanged, eTransponderWidget::updated1);
 	}
