@@ -49,6 +49,8 @@ eDVBCI::eDVBCI():pollTimer(this),messages(this, 1)
 	CONNECT(ci->activated, eDVBCI::dataAvailable);
 	CONNECT(pollTimer.timeout,eDVBCI::poll);
 	CONNECT(messages.recv_msg, eDVBCI::gotMessage);
+	
+	memset(appName,0,sizeof(appName));
 
 	if (state != stateError)
 		run();
@@ -79,6 +81,16 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 			ci->start();
 			ci_state=0;
 		}
+		break;
+	case eDVBCIMessage::reset:
+		eDebug("[DVBCI] got reset message..");
+		ci_state=0;
+		clearCAIDs();
+		break;
+	case eDVBCIMessage::init:
+		eDebug("[DVBCI] got init message..");
+		if(ci_state)
+			sendCAPMT();
 		break;
 	case eDVBCIMessage::flush:
 		eDebug("[DVBCI] got flush message..");
@@ -166,6 +178,8 @@ void eDVBCI::sendCAPMT()
 	
 	if(CAPMTlen>0)
 		sendTPDU(0xA0,CAPMTlen,1,CAPMT);
+
+	ci_progress(appName);
 	
 }
 
@@ -189,6 +203,7 @@ void eDVBCI::addCAID(int caid)
 	std::list<int>& availCA = sapi->availableCASystems;
 	
 	availCA.push_back(caid);
+
 }
 
 void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data)
@@ -364,11 +379,17 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 		help_manager(1);
 		
 	if(data[4]==0x9f && data[5]==0x80 && data[6]==0x10)
+	{
 		help_manager(1);
-		
+		ci_progress("help-manager init");
+
+	}	
 	if(data[4]==0x9f && data[5]==0x80 && data[6]==0x21)
 	{
 		eDebug("[DVBCI] APP-INFO");
+		memcpy(appName,data+14,data[13]);
+		appName[data[13]]=0x0;
+		ci_progress("application manager-init");
 	}
 	
 	if(data[4]==0x9f && data[5]==0x80 && data[6]==0x31)
@@ -378,14 +399,16 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 		
 		if(data[7]>(len+8))
 			eDebug("[DVBCI] [CA MANAGER] error in ca-info");
+
+		ci_progress("ca-manager init");
 			
 		for(i=8;i<data[7]+8;i+=2)
 		{
 			eDebug("[DVBCI] [CA MANAGER] add CAID: %04x",data[i]<<8|data[i+1]);
 			addCAID(data[i]<<8|data[i+1]);
 		}	
-
 		ca_manager(3);
+
 	}
 				
 }
@@ -399,6 +422,7 @@ int eDVBCI::service_available(unsigned long service_class)
 		case 0x030041:
 		case 0x034100:
 		case 0x400041:
+		case 0x240041:
 			return 1;
 		default:
 			return 0;
@@ -451,7 +475,7 @@ void eDVBCI::handle_spdu(unsigned int tpdu_tc_id,unsigned char *data,int len)
 			}
 			else
 			{
-				eDebug("[DVBCI] unknown serviceclass requested");
+				eDebug("[DVBCI] unknown serviceclass (%x) requested",*(unsigned long*)(data+2));
 				memcpy(buffer,"\x92\x7\xf0",3);
 				memcpy(buffer+3,data+2,4);
 				sendTPDU(0xA0,9,tpdu_tc_id,buffer);
@@ -532,6 +556,7 @@ void eDVBCI::dataAvailable(int what)
 	if(present!=1)						//CI removed
 	{	
 		eDebug("[DVBCI] module removed");	
+		ci_progress("no module");
 		
 		::read(fd,&buffer,0);	
 		ci_state=0;
@@ -543,6 +568,7 @@ void eDVBCI::dataAvailable(int what)
 	{
 		int i;
 		eDebug("[DVBCI] module inserted");	
+		ci_progress("module found");
 
 		for(i=0;i<MAX_SESSIONS;i++)
 			sessions[i].state=STATE_FREE;
