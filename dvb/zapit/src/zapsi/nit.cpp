@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.15 2002/04/19 14:53:29 obi Exp $
+ * $Id: nit.cpp,v 1.16 2002/04/21 22:05:40 obi Exp $
  */
 
 #include <fcntl.h>
@@ -73,6 +73,10 @@ int parse_nit (uint8_t DiSEqC)
 		{
 			switch (buffer[pos])
 			{
+			case 0x0F:
+				Private_data_indicator_descriptor(buffer + pos);
+				break;
+
 			case 0x40:
 				network_name_descriptor(buffer + pos);
 				break;
@@ -83,6 +87,12 @@ int parse_nit (uint8_t DiSEqC)
 
 			case 0x5F:
 				private_data_specifier_descriptor(buffer + pos);
+				break;
+
+			case 0x80: /* unknown, Eutelsat 13.0E */
+				break;
+
+			case 0x90: /* unknown, Eutelsat 13.0E */
 				break;
 
 			default:
@@ -115,6 +125,13 @@ int parse_nit (uint8_t DiSEqC)
 
 					case 0x44:
 						cable_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id);
+						break;
+
+					case 0x5F:
+						private_data_specifier_descriptor(buffer + pos2);
+						break;
+
+					case 0x82: /* unknown, Eutelsat 13.0E */
 						break;
 
 					default:

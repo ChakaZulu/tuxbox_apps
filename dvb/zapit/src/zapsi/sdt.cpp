@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.19 2002/04/19 14:53:29 obi Exp $
+ * $Id: sdt.cpp,v 1.20 2002/04/21 22:05:40 obi Exp $
  */
 
 #include <fcntl.h>
@@ -77,6 +77,14 @@ int parse_sdt ()
 			{
 				switch (buffer[pos2])
 				{
+				case 0x0A:
+					ISO_639_language_descriptor(buffer + pos2);
+					break;
+
+				case 0x40:
+					network_name_descriptor(buffer + pos2);
+					break;
+
 				case 0x47:
 					bouquet_name_descriptor(buffer + pos2);
 					break;
@@ -105,12 +113,34 @@ int parse_sdt ()
 					CA_identifier_descriptor(buffer + pos2);
 					break;
 
+				case 0x5D:
+					multilingual_service_name_descriptor(buffer + pos2);
+					break;
+
 				case 0x5F:
 					private_data_specifier_descriptor(buffer + pos2);
 					break;
 
 				case 0x64:
 					data_broadcast_descriptor(buffer + pos2);
+					break;
+
+				case 0x80: /* unknown, Eutelsat 13.0E */
+					break;
+
+				case 0x84: /* unknown, Eutelsat 13.0E */
+					break;
+
+				case 0x86: /* unknown, Eutelsat 13.0E */
+					break;
+
+				case 0xB2: /* unknown, Eutelsat 13.0E */
+					break;
+
+				case 0xC0: /* unknown, Eutelsat 13.0E */
+					break;
+
+				case 0xE7: /* unknown, Eutelsat 13.0E */
 					break;
 
 				default:
