@@ -1,14 +1,15 @@
-#include <sys/ioctl.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
-//#include <stdio.h>
-#include "dbox/fb.h"
 
-#define VERSION 1.0
+#include <dbox/fb.h>
 
 void help (char *prog_name)
 {
-	printf("Version %s\n",VERSION);
+	printf("$Id: aviafbtool.c,v 1.2 2002/08/21 08:11:35 obi Exp $\n\n");
 	printf("Usage: %s <switches>\n\n",prog_name);
 	printf("Switches:\n"
 	"-h,     --help             help\n"
@@ -16,16 +17,22 @@ void help (char *prog_name)
 	"-b,     --blev <val> <val> set the blev\n"
 	"-s,     --show             show fb\n"
 	"-u,     --hide             hide fb\n");
-	exit(0);
 }
 
 int main(int argc, char **argv)
 {
 	int x, y, fd, count;
+
+	if (argc == 1)
+	{
+		help(argv[0]);
+		return EXIT_FAILURE;
+	}
+
 	if ((fd = open("/dev/fb/0", O_RDWR)) < 0)
 	{
 		perror("open /dev/fb/0");
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	for(count=1;count<argc;count++)
@@ -35,13 +42,14 @@ int main(int argc, char **argv)
 		if ((strcmp("-h",argv[count]) == 0) || (strcmp("--help",argv[count]) == 0))
 		{
 			help(argv[0]);
+			return EXIT_FAILURE;
 		}
 		else if ((strcmp("-p",argv[count]) == 0) || (strcmp("--pos",argv[count]) == 0))
 		{
 			if (argc < count+3)
 			{
 				printf("No coordinates given\n");
-				exit(1);
+				return EXIT_FAILURE;
 			}
 			else
 			{
@@ -51,7 +59,7 @@ int main(int argc, char **argv)
 				if (ioctl(fd, AVIA_GT_GV_SET_POS, (x << 16) | y) < 0)
 				{
 					perror("AVIA_GT_GV_SET_POS");
-					return -1;
+					return EXIT_FAILURE;
 				}
 			}
 		}
@@ -60,7 +68,7 @@ int main(int argc, char **argv)
                         if (argc < count+3)
                         {
                                 printf("No blev given\n");
-                                exit(1);
+                                return EXIT_FAILURE;
                         }
                         else
                         {
@@ -71,7 +79,7 @@ int main(int argc, char **argv)
 				if (ioctl(fd, AVIA_GT_GV_SET_BLEV, (x << 8) | y) < 0)
 				{
 					perror("AVIA_GT_GV_SET_BLEV");
-					return -1;
+					return EXIT_FAILURE;
 				}
 			}
 		}
@@ -80,7 +88,7 @@ int main(int argc, char **argv)
 			if (ioctl(fd, AVIA_GT_GV_SHOW, 0) < 0)
 			{
 				perror("AVIA_GT_GV_SHOW");
-				return -1;
+				return EXIT_FAILURE;
 			}
 		}
 		else if ((strcmp("-u",argv[count]) == 0) || (strcmp("--hide",argv[count]) == 0))
@@ -88,16 +96,18 @@ int main(int argc, char **argv)
 			if (ioctl(fd, AVIA_GT_GV_HIDE, 0) < 0)
 			{
 				perror("AVIA_GT_GV_HIDE");
-				return -1;
+				return EXIT_FAILURE;
 			}
 		}
 		else
 		{
 			help(argv[0]);
+			return EXIT_FAILURE;
 		}
 	}
 
 	close (fd);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
+
