@@ -1,9 +1,12 @@
 #ifndef EVENTLIST_HPP
 #define EVENTLIST_HPP
 //
-// $Id: eventlist.h,v 1.6 2001/09/20 17:02:16 field Exp $
+// $Id: eventlist.h,v 1.7 2001/09/21 14:33:39 field Exp $
 //
 // $Log: eventlist.h,v $
+// Revision 1.7  2001/09/21 14:33:39  field
+// Eventlist - ok/? vertauscht, epg-Breite flexibel
+//
 // Revision 1.6  2001/09/20 17:02:16  field
 // event-liste zeigt jetzt auch epgs an...
 //
@@ -39,14 +42,18 @@
 
 using namespace std;
 
+struct epg_event {
+    unsigned long long id;
+    time_t    startzeit;
+    string    description;
+};
+
 class EventList
 {
   private:
     struct event {
-      unsigned long long id;
-      time_t    startzeit;
-      string    datetimeduration;
-      string    name;
+        epg_event   epg;
+        string      datetimeduration;
     };
 
     void removeAllEvents(void);

@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.22 2001/09/20 19:21:37 fnbrd Exp $
+// $Id: channellist.cpp,v 1.23 2001/09/21 14:33:39 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.23  2001/09/21 14:33:39  field
+// Eventlist - ok/? vertauscht, epg-Breite flexibel
+//
 // Revision 1.22  2001/09/20 19:21:37  fnbrd
 // Channellist mit IDs.
 //
@@ -91,81 +94,104 @@ void CChannelList::updateEvents(void)
 		perror("Couldn't connect to sectionsd!");
 		return;
 	}
-  sectionsd::msgRequestHeader req;
-  req.version = 2;
-  req.command = sectionsd::actualEventListTVshortIDs;
-//  req.command = sectionsd::actualEventListTVshort;
-  req.dataLength = 0;
-  write(sock_fd,&req,sizeof(req));
 
-  sectionsd::msgResponseHeader resp;
-  memset(&resp, 0, sizeof(resp));
-  if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) {
-    close(sock_fd);
-    return;
-  }
-  if(resp.dataLength<=0) {
-    close(sock_fd);
-    return;
-  }
+    sectionsd::msgRequestHeader req;
+    req.version = 2;
 
-  char* pData = new char[resp.dataLength] ;
-  if(read(sock_fd, pData, resp.dataLength)<=0) {
-    delete[] pData;
+    if ( ( zapit ) &&  ( g_settings.epg_byname == 0 ) )
+        req.command = sectionsd::actualEventListTVshortIDs;
+    else
+        req.command = sectionsd::actualEventListTVshort;
+    req.dataLength = 0;
+    write(sock_fd,&req,sizeof(req));
+
+    sectionsd::msgResponseHeader resp;
+    memset(&resp, 0, sizeof(resp));
+    if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+    {
+        close(sock_fd);
+        return;
+    }
+    if(resp.dataLength<=0)
+    {
+        close(sock_fd);
+        return;
+    }
+
+    char* pData = new char[resp.dataLength] ;
+    if ( read(sock_fd, pData, resp.dataLength)<=0 )
+    {
+        delete[] pData;
+        close(sock_fd);
+        return;
+    }
+
     close(sock_fd);
-    return;
-  }
-  close(sock_fd);
-  char *actPos=pData;
-  for(unsigned int count=0;count<chanlist.size();count++)
-    chanlist[count]->currentEvent="";
+
+    char *actPos = pData;
+
+    for(unsigned int count=0;count<chanlist.size();count++)
+        chanlist[count]->currentEvent.description="";
 
 //printf("\n read finished CChannelList::updateEvents \n\n");
-  if(zapit) {
-  printf("data length: %u\n", resp.dataLength);
-  while(actPos<pData+resp.dataLength) {
-    unsigned serviceID=*((unsigned *)actPos);
-    actPos+=4;
-    actPos+=8; // eventID
-//    printf("desc: %s\n", actPos);
-    // quick'n dirty, sollte man mal anders machen
-    for(unsigned int count=0;count<chanlist.size();count++) {
-      if(chanlist[count]->onid_sid==serviceID) {
-        chanlist[count]->currentEvent=actPos;
-//	printf("Channel found: %s\n", actPos);
-	break;
-      }
-    }
-    actPos+=strlen(actPos)+1;
-  }
-  } // if zapit
-  else {
-  char epgID[20];
-  char channelName[50];
-  char channelDescription[1000];
-  while(*actPos && actPos<pData+resp.dataLength) {
-    *epgID=0;
-    actPos = copyStringto( actPos, epgID, sizeof(epgID));
-//    printf("id: %s\n", epgID);
-    *channelName=0;
-    actPos = copyStringto( actPos, channelName, sizeof(channelName));
-//    printf("name: %s\n", channelName);
-    *channelDescription=0;
-    actPos = copyStringto( actPos, channelDescription, sizeof(channelDescription));
-//    printf("desc: %s\n", channelDescription);
-    // quick'n dirty, sollte man mal anders machen
-    for(unsigned int count=0;count<chanlist.size();count++) {
-      if(!strcasecmp(chanlist[count]->name.c_str(), channelName)) {
-        chanlist[count]->currentEvent=channelDescription;
-//	printf("Channel found\n");
-	break;
-      }
-    }
-  }
-  } // else zapit
-  delete[] pData;
+
+    if ( req.command == sectionsd::actualEventListTVshortIDs )
+    {
+        printf("data length: %u\n", resp.dataLength);
+        while(actPos<pData+resp.dataLength)
+        {
+            unsigned* serviceID = (unsigned*) actPos;
+            actPos+=4;
+
+            unsigned long long* evt_id = (unsigned long long*) actPos;
+            actPos+=8;
+
+            // quick'n dirty, sollte man mal anders machen
+            for (unsigned int count=0;count<chanlist.size();count++)
+            {
+                if (chanlist[count]->onid_sid==*serviceID)
+                {
+                    chanlist[count]->currentEvent.id= *evt_id;
+                    chanlist[count]->currentEvent.description= actPos;
+                    //	printf("Channel found: %s\n", actPos);
+                    break;
+                }
+            }
+            actPos+=strlen(actPos)+1;
+        }
+    } // if sectionsd::actualEventListTVshortIDs 
+    else
+    {
+        // old way
+        char epgID[20];
+        char channelName[50];
+        char channelDescription[1000];
+        while (*actPos && actPos<pData+resp.dataLength)
+        {
+            *epgID=0;
+            actPos = copyStringto( actPos, epgID, sizeof(epgID));
+            //    printf("id: %s\n", epgID);
+            *channelName=0;
+            actPos = copyStringto( actPos, channelName, sizeof(channelName));
+            //    printf("name: %s\n", channelName);
+            *channelDescription=0;
+            actPos = copyStringto( actPos, channelDescription, sizeof(channelDescription));
+            //    printf("desc: %s\n", channelDescription);
+            // quick'n dirty, sollte man mal anders machen
+            for(unsigned int count=0;count<chanlist.size();count++)
+            {
+                if(!strcasecmp(chanlist[count]->name.c_str(), channelName))
+                {
+                    chanlist[count]->currentEvent.description = channelDescription;
+                    //	printf("Channel found\n");
+                	break;
+                }
+            }
+        }
+    } // else zapit
+    delete[] pData;
 //printf("\n END CChannelList::updateEvents \n\n");
-  return;
+    return;
 }
 
 CChannelList::CChannelList(int Key=-1, const std::string &Name)
@@ -467,11 +493,11 @@ void CChannelList::paintItem(int pos)
                 sprintf((char*) tmp, "%d", chan->number);
 		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
 		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
-		if(strlen(chan->currentEvent.c_str()))
+		if(strlen(chan->currentEvent.description.c_str()))
 		{
     			// name + description
 			char nameAndDescription[100];
-			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
+			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.description.c_str());
 			g_Fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
                 }
 		else

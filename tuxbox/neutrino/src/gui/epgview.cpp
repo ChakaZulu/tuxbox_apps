@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.12 2001/09/20 17:02:16 field Exp $
+// $Id: epgview.cpp,v 1.13 2001/09/21 14:33:39 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.13  2001/09/21 14:33:39  field
+// Eventlist - ok/? vertauscht, epg-Breite flexibel
+//
 // Revision 1.12  2001/09/20 17:02:16  field
 // event-liste zeigt jetzt auch epgs an...
 //
@@ -46,7 +49,6 @@ CEpgData::CEpgData()
 
 void CEpgData::start()
 {
-	ox = 500;
 	oy = 290;
 
 	topheight= g_Fonts->epg_title->getHeight();
@@ -58,7 +60,6 @@ void CEpgData::start()
 
 	oy=topboxheight+botboxheight+medlinecount*medlineheight; // recalculate
 
-	sx = (((g_settings.screen_EndX-g_settings.screen_StartX)-ox) / 2) + g_settings.screen_StartX;
 	sy = (((g_settings.screen_EndY-g_settings.screen_StartY)-oy) / 2) + g_settings.screen_StartY;
 }
 
@@ -86,6 +87,7 @@ void CEpgData::processTextToArray( char* text  )
 	string	aktLine = "";
 	string	aktWord = "";
 	int	aktWidth = 0;
+    strcat(text, " ");
 
 	//printf("orginaltext:\n%s\n\n", text);
 	while(*text!=0)
@@ -136,13 +138,7 @@ void CEpgData::showText( int startPos, int ypos )
 	int linecount=medlinecount;
 	string t;
 	g_FrameBuffer->paintBoxRel(sx, y, ox, linecount*medlineheight, COL_MENUCONTENT);
-/*	if(startPos==0){
-		t=epgData.info1;
-		g_Fonts->epg_info1->RenderString(sx+10,y+medlineheight,ox-15,t.c_str(),COL_MENUCONTENT);
-		y+=medlineheight;
-		linecount--;
-	}
-*/
+
 	for(int i=startPos; i<textCount && i<startPos+linecount; i++,y+=medlineheight)
 	{
 		t=epgText[i];
@@ -194,6 +190,14 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 
     processTextToArray( epgData.info2 );
 
+    // Variable Breite, falls der Text zu lang' ist...
+    ox = g_Fonts->epg_title->getRenderWidth( epgData.title )+ 15;
+    if (ox < 500 )
+        ox = 500;
+    else if ( ox > ( g_settings.screen_EndX- g_settings.screen_StartX - 20) )
+        ox = ( g_settings.screen_EndX- g_settings.screen_StartX - 20);
+
+	sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
 
 	//show the epg
 	g_FrameBuffer->paintBoxRel(sx, sy, ox, topboxheight, COL_MENUHEAD);

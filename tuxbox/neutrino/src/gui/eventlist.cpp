@@ -1,7 +1,10 @@
 //
-// $Id: eventlist.cpp,v 1.10 2001/09/20 17:02:16 field Exp $
+// $Id: eventlist.cpp,v 1.11 2001/09/21 14:33:39 field Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.11  2001/09/21 14:33:39  field
+// Eventlist - ok/? vertauscht, epg-Breite flexibel
+//
 // Revision 1.10  2001/09/20 17:02:16  field
 // event-liste zeigt jetzt auch epgs an...
 //
@@ -124,20 +127,20 @@ void EventList::readEvents(const std::string& channelname)
 
             event* evt = new event();
 
-            sscanf(epgID, "%llx", &evt->id);
+            sscanf(epgID, "%llx", &evt->epg.id);
             sscanf(edate, "%02d.%02d", &tmZeit.tm_mday, &tmZeit.tm_mon);
             tmZeit.tm_mon--;
             sscanf(etime, "%02d:%02d", &tmZeit.tm_hour, &tmZeit.tm_min);
             evtTime = (tmZeit.tm_mon+ 1)* 1000000+ (tmZeit.tm_mday)* 10000+ (tmZeit.tm_hour)* 100+ tmZeit.tm_min;
             tmZeit.tm_sec= 0;
 
-            evt->startzeit = mktime(&tmZeit);
+            evt->epg.startzeit = mktime(&tmZeit);
 //            printf("Time: %02d.%02d %02d:%02d %lx\n", tmZeit.tm_mday, tmZeit.tm_mon+ 1, tmZeit.tm_hour, tmZeit.tm_min, evt->startzeit);
 
             if ( (evtTime- aktTime) < 0 )
                 current_event++;
 
-            evt->name=std::string(ename);
+            evt->epg.description=std::string(ename);
             evt->datetimeduration=std::string(edate);
             evt->datetimeduration+=std::string(" ");
             evt->datetimeduration+=std::string(etime);
@@ -148,7 +151,7 @@ void EventList::readEvents(const std::string& channelname)
 //            printf("id: %s - name: %s\n", epgID, evt->name.c_str());
 //    tmp->number=number;
 //    tmp->name=name;
-            if(evt->name !="")
+            if(evt->epg.description !="")
                 evtlist.insert(evtlist.end(), evt);
         }
 
@@ -160,9 +163,9 @@ void EventList::readEvents(const std::string& channelname)
     {
         event* evt = new event();
 
-        evt->name= g_Locale->getText("epglist.noevents") ;
+        evt->epg.description= g_Locale->getText("epglist.noevents") ;
         evt->datetimeduration= std::string("");
-        evt->id = 0;
+        evt->epg.id = 0;
         evtlist.insert(evtlist.end(), evt);
         current_event++;
     }
@@ -272,19 +275,21 @@ void EventList::exec(const std::string& channelname)
 		}
 		else if (key==CRCInput::RC_ok)
 		{
+            loop= false;
+		}
+   		else if (key==CRCInput::RC_help)
+		{
             event* evt = evtlist[selected];
-            if ( evt->id != 0 )
+            if ( evt->epg.id != 0 )
             {
                 hide();
 
-                g_EpgData->show("", 0, evt->id, &evt->startzeit);
+                g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
 
                 paintHead();
                 paint();
             }
-            else
-                loop= false;
-		}
+        }
 	}
 
     hide();
@@ -324,7 +329,7 @@ void EventList::paintItem(unsigned int pos)
 
 
         g_Fonts->channellist_number->RenderString(x+ 10, ypos+ fheight, 157, evt->datetimeduration.c_str(), color, fheight);
-		g_Fonts->channellist->RenderString(x+ 170, ypos+ fheight, width- 180, evt->name.c_str(), color);
+		g_Fonts->channellist->RenderString(x+ 170, ypos+ fheight, width- 180, evt->epg.description.c_str(), color);
 	}
 }
 
