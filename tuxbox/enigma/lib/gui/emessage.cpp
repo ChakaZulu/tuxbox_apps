@@ -33,7 +33,8 @@ eMessageBox::eMessageBox(QString message, QString caption): eWindow(0)
 	b->resize(ext);
 //	b->move(QPoint((clientrect.width()-ext.width())/2, clientrect.height()-fontsize-14));	// center
 	b->move(QPoint(clientrect.width()-ext.width(), clientrect.height()-fontsize-14));	// right align
-	connect(b, SIGNAL(selected()), SLOT(okPressed()));
+//	connect(b, SIGNAL(selected()), SLOT(okPressed()));
+	CONNECT(b->selected, eMessageBox::okPressed);
 }
 
 eMessageBox::~eMessageBox()

@@ -16,8 +16,9 @@ eFrontend* eFrontend::frontend;
 eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 {
 	state=stateIdle;
-	timer=new QTimer(this);
-	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
+	timer=new QTimer;
+//	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
+	CONNECT(timer->time_out, eFrontend::timeout);
 	fd=::open(demod, O_RDWR);
 	if (fd<0)
 	{
@@ -64,7 +65,7 @@ void eFrontend::timeout()
 	{
 		qDebug("+");
 		state=stateIdle;
-		emit tunedIn(transponder, 0);
+		/*emit*/ tunedIn(transponder, 0);
 	} else
 		if (--tries)
 		{
@@ -74,7 +75,7 @@ void eFrontend::timeout()
 		{
 			printf("couldn't lock. (state: %x)\n", Status());
 			state=stateIdle;
-			emit tunedIn(transponder, -ETIMEDOUT);
+			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
 		}
 }
 
@@ -198,7 +199,7 @@ int eFrontend::tune(eTransponder *trans,
 	{
 		state=stateIdle;
 		if (transponder)
-			emit tunedIn(transponder, -ECANCELED);
+			/*emit*/ tunedIn(transponder, -ECANCELED);
 	}
 	
 	if (state==stateTuning)

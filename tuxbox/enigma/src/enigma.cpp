@@ -112,7 +112,8 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 
 	focus = 0;
 
-	connect(eRCInput::getInstance(), SIGNAL(keyEvent(const eRCKey&)), SLOT(keyEvent(const eRCKey&)));
+//	connect(eRCInput::getInstance(), SIGNAL(keyEvent(const eRCKey&)), SLOT(keyEvent(const eRCKey&)));
+	CONNECT(eRCInput::getInstance()->keyEvent, eZap::keyEvent);
 
 	eDVB::getInstance()->configureNetwork();
 	qDebug("<-- network");

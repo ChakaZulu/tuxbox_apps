@@ -5,21 +5,22 @@
 #include "si.h"
 #include "dvb.h"
 
-class eStreamWatchdog: public QObject
+class eStreamWatchdog: public Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	QSocketNotifier* sn;
 	int handle;
 	static eStreamWatchdog *instance;
-	private slots:
+private:// slots:
 	void check(int);
 public:
 	void reloadSettings();
 	eStreamWatchdog();
 	~eStreamWatchdog();
 	static eStreamWatchdog *getInstance();
-signals:
-	void AspectRatioChanged(int);
+/*signals:
+	void AspectRatioChanged(int);*/
+	Signal1<void, int> AspectRatioChanged;
 };
 
 #endif

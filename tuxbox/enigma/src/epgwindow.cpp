@@ -89,7 +89,10 @@ eEPGWindow::eEPGWindow(eService* service):current(service),
 {
 	move(QPoint(50, 50));
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
-	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
-	connect(&closeTimer, SIGNAL(timeout()), SLOT(closeWnd()));
+//	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
+//	connect(&closeTimer, SIGNAL(timeout()), SLOT(closeWnd()));
+	CONNECT(closeTimer.time_out, eEPGWindow::closeWnd);
+	CONNECT(list->selected, eEPGWindow::entrySelected);
+
 	fillEPGList();
 }

@@ -14,11 +14,17 @@ eEPGCache::eEPGCache():eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOU
 {
 	printf("[EPGC] Initialized EPGCache\n");
 	isRunning=0;
-	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*, int)), SLOT(enterService(eService*, int)));
+/*	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*, int)), SLOT(enterService(eService*, int)));
 	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(stopEPG()));
 	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(timeUpdated()));
 	connect(&zapTimer, SIGNAL(timeout()), SLOT(startEPG()));
-	connect(&CleanTimer, SIGNAL(timeout()), SLOT(cleanLoop()));	
+	connect(&CleanTimer, SIGNAL(timeout()), SLOT(cleanLoop()));	*/
+
+	CONNECT(eDVB::getInstance()->switchedService, eEPGCache::enterService);
+	CONNECT(eDVB::getInstance()->leaveService, eEPGCache::stopEPG);
+	CONNECT(eDVB::getInstance()->timeUpdated, eEPGCache::timeUpdated);
+	CONNECT(zapTimer.time_out, eEPGCache::startEPG);
+	CONNECT(CleanTimer.time_out, eEPGCache::cleanLoop);
 	instance=this;
 }
 
@@ -66,7 +72,7 @@ int eEPGCache::sectionRead(__u8 *data)
 				serviceLastUpdated.insert(*(It++));
 
 			if (!eventDB[sref(current_service->original_network_id, current_service->service_id)].empty())
-		  	emit EPGAvail(1);
+		  	/*emit*/ EPGAvail(1);
 
 			return -1;
 		}

@@ -5,12 +5,12 @@
 
 class eRCDeviceDBoxOld: public eRCDevice
 {
-	Q_OBJECT
+//	Q_OBJECT
 	int last, ccode;
 	QTimer timeout, repeattimer;
-private slots:
-	int timeOut();
-	int repeat();
+private:// slots:
+	void timeOut();
+	void repeat();
 public:
 	void handleCode(int code);
 	eRCDeviceDBoxOld(eRCDriver *driver);
@@ -19,12 +19,12 @@ public:
 
 class eRCDeviceDBoxNew: public eRCDevice
 {
-	Q_OBJECT
+//	Q_OBJECT
 	int last, ccode;
 	QTimer timeout, repeattimer;
-private slots:
-	int timeOut();
-	int repeat();
+private:// slots:
+	void timeOut();
+	void repeat();
 public:
 	void handleCode(int code);
 	eRCDeviceDBoxNew(eRCDriver *driver);
@@ -33,11 +33,11 @@ public:
 
 class eRCDeviceDBoxButton: public eRCDevice
 {
-	Q_OBJECT
+//	Q_OBJECT
 	int last;
 	QTimer repeattimer;
-private slots:
-	int repeat();
+private:// slots:
+	void repeat();
 public:
 	void handleCode(int code);
 	eRCDeviceDBoxButton(eRCDriver *driver);

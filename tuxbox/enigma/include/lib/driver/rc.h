@@ -1,16 +1,20 @@
 #ifndef __rc_h
 #define __rc_h
 
-#include <qobject.h>
+//#include <qobject.h>
 #include <qsocketnotifier.h>
 #include <qtimer.h>
-
 #include <list>
+
+#include <sigc++/signal_system.h>
+#ifdef SIGC_CXX_NAMESPACES
+using namespace SigC;
+#endif
 
 class eRCInput;
 class eRCDriver;
 
-class eRCDevice: public QObject
+class eRCDevice: public Object
 {
 protected:
 	int rrate, rdelay;
@@ -23,9 +27,9 @@ public:
 	virtual const char *getDescription() const=0;
 };
 
-class eRCDriver: public QObject
+class eRCDriver: public Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 protected:
 	std::list<eRCDevice*> listeners;
 	eRCInput *input;
@@ -45,11 +49,11 @@ public:
 
 class eRCShortDriver: public eRCDriver
 {
-	Q_OBJECT
+//	Q_OBJECT
 protected:
 	int handle;
 	QSocketNotifier *sn;
-private slots:
+/*private slots:*/
 	void keyPressed(int);
 public:
 	eRCShortDriver(const char *filename);
@@ -83,16 +87,16 @@ public:
 	virtual int getCompatibleCode() const;
 };
 
-class eRCInput: public QObject
+class eRCInput: public Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	int locked;	
 	int handle;
 	static eRCInput *instance;
-signals:
-	void keyEvent(const eRCKey &);
+//signals:
+//	void keyEvent(const eRCKey &);
 public:
-
+	Signal1<void, const eRCKey&> keyEvent;
 	enum
 	{
 		RC_0=0, RC_1=0x1, RC_2=0x2, RC_3=0x3, RC_4=0x4, RC_5=0x5, RC_6=0x6, RC_7=0x7,
@@ -114,7 +118,7 @@ public:
 
 	void keyPressed(const eRCKey &key)
 	{
-		emit keyEvent(key);
+		/*emit*/ keyEvent(key);
 	}
 	
 	static eRCInput *getInstance() { return instance; }

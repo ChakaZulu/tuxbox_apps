@@ -1,6 +1,6 @@
 #include "elock.h"
 #include <unistd.h>
-#include <qobject.h>
+//#include <qobject.h>
 
 void eLock::lock(int res)
 {

@@ -1,11 +1,18 @@
 #ifndef __ewidget_h
 #define __ewidget_h
 
-#include <qobject.h>
+//#include <qobject.h>
 #include <qpoint.h>
 #include <qsize.h>
 #include <qlist.h>
 #include "grc.h"
+#include <list>
+
+#include <sigc++/signal_system.h>
+#ifdef SIGC_CXX_NAMESPACES
+using namespace SigC;
+#endif
+
 
 class eWidgetEvent
 {
@@ -24,19 +31,20 @@ public:
 	eWidgetEvent(eventType type, int parameter=0): type(type), parameter(parameter) { }
 };
 
-class eWidget: public QObject
+class eWidget: public Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	enum
 	{
 		stateShow=1
 	};
 
-public slots:
+public:// slots:
 	void close(int result);
 	void accept();
 	void reject();
-
+	std::list<eWidget*> childlist;
+	
 protected:
 	eWidget *parent;
 	QString name;

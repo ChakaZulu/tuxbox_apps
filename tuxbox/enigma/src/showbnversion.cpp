@@ -140,7 +140,8 @@ ShowBNVersion::ShowBNVersion(): eWindow(1)
 	res2->move(QPoint(10, 130));
 	res2->resize(QSize(380, 30));
 	
-	connect(eDVB::getInstance(), SIGNAL(eventOccured(int)), SLOT(eventOccured(int)));
+//	connect(eDVB::getInstance(), SIGNAL(eventOccured(int)), SLOT(eventOccured(int)));
+	CONNECT(eDVB::getInstance()->eventOccured, ShowBNVersion::eventOccured);
 	bnd[0]=0;
 	bnd[1]=0;
 }

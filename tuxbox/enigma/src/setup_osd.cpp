@@ -36,14 +36,16 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	ok->move(QPoint(20, 100));
 	ok->resize(QSize(90, eZap::FontSize+4));
 	
-	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
+//	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
+	CONNECT(ok->selected, eZapOsdSetup::okPressed);
 
 	abort=new eButton(this);
 	abort->setText("[ABORT]");
 	abort->move(QPoint(140, 100));
 	abort->resize(QSize(100, eZap::FontSize+4));
 
-	connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
+//	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
+	CONNECT(ok->selected, eZapOsdSetup::okPressed);
 
 	labelFonts=new eLabel(this);
 	labelFonts->setText("Big Fonts");

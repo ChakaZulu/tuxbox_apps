@@ -3,13 +3,18 @@
 
 #include "elbwindow.h"
 
+#include <sigc++/signal_system.h>
+#ifdef SIGC_CXX_NAMESPACES
+using namespace SigC;
+#endif
+
 class eListBoxEntry;
 
-class eMainMenu: public QObject
+class eMainMenu: public /*Q*/Object
 {
-	Q_OBJECT;
+//	Q_OBJECT;
 	eLBWindow* window;
-private slots:
+private:// slots:
 	void sel_close(eListboxEntry *);
 	void sel_vcr(eListboxEntry *);
 	void sel_scan(eListboxEntry *);

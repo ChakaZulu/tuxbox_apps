@@ -7,9 +7,9 @@ class eLabel;
 
 class eMessageBox: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eLabel *text;
-public slots:
+public:// slots:
 	void okPressed();
 public:
 	eMessageBox(QString string, QString caption);

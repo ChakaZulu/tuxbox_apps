@@ -1,7 +1,7 @@
 #ifndef __esection_h
 #define __esection_h
 
-#include <qobject.h>
+//#include <qobject.h>
 #include <qsocketnotifier.h>
 #include <qtimer.h>
 #include <qlist.h>
@@ -24,9 +24,9 @@ public:
 	int read(__u8 *data);
 };
 
-class eSection: public QObject
+class eSection: public /*Q*/Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eSectionReader reader;
 	static QList<eSection> active;
 	QSocketNotifier *notifier;
@@ -40,7 +40,7 @@ class eSection: public QObject
 	__u8 buf[65536];
 	int lockcount;
 	int setFilter(int pid, int tableid, int tableidext, int version);
-public slots:
+public:// slots:
 	void data(int socket);
 	void timeout();
 public:
@@ -60,14 +60,15 @@ public:
 
 class eTable: public eSection
 {
-	Q_OBJECT
+//	Q_OBJECT
 	virtual int sectionRead(__u8 *d) { int err=data(d); if (err<0) error=err; return err; }
 	virtual void sectionFinish(int err);
 protected:
 	virtual int data(__u8 *data)=0;
-signals:
-	void tableReady(int);
+/*signals:
+	void tableReady(int);*/
 public:
+	Signal1<void, int> tableReady;
 	eTable(int pid, int tableid, int tableidext=-1, int version=-1);
 	eTable();
 	virtual eTable *createNext();
@@ -77,14 +78,15 @@ public:
 };
 
 
-class eAUGTable: public QObject
+class eAUGTable: public /*Q*/Object
 {
-	Q_OBJECT
+/*	Q_OBJECT
 signals:
-	void tableReady(int);
-protected slots:
+	void tableReady(int);*/
+protected:/* slots:*/
 	void slotTableReady(int);
 public:
+	Signal1<void, int> tableReady;
 	virtual void getNext(int err)=0;
 };
 
@@ -114,7 +116,8 @@ public:
 		if (next)
 			delete next;
 		next=cur;
-		connect(next, SIGNAL(tableReady(int)), SLOT(slotTableReady(int)));
+		//connect(next, SIGNAL(tableReady(int)), SLOT(slotTableReady(int)));
+		CONNECT(next->tableReady, eAUTable::slotTableReady);
 		return next->start();
 	}
 	
@@ -122,11 +125,11 @@ public:
 	{
 		if (current)
 		{
-			emit tableReady(0);
+			/*emit*/ tableReady(0);
 			return 0;
 		} else if (!next)
 		{
-			emit tableReady(-1);
+			/*emit*/ tableReady(-1);
 			return 0;
 		} else
 			return 1;
@@ -142,7 +145,7 @@ public:
 	
 	void abort()
 	{
-		qDebug("eAUTable: aborted!");
+		printf("eAUTable: aborted!\n");
 		if (next)
 			next->abort();
 		delete next;
@@ -174,7 +177,7 @@ public:
 				delete next;
 				next=0;
 				if (first)
-					emit tableReady(error);
+					/*emit*/ tableReady(error);
 				first=0;
 				return;
 			} else
@@ -190,12 +193,14 @@ public:
 		if (!current->ready)
 			qFatal("was soll das denn? not ready? ICH GLAUBE ES HACKT!");
 			
-		emit tableReady(0);
+		/*emit*/ tableReady(0);
 
 		next=(Table*)current->createNext();
 		if (next)
 		{
-			connect(next, SIGNAL(tableReady(int)), SLOT(slotTableReady(int)));
+			//connect(next, SIGNAL(tableReady(int)), SLOT(slotTableReady(int)));
+			CONNECT(next->tableReady, eAUTable::slotTableReady);
+			
 			next->start();
 		}
 	}

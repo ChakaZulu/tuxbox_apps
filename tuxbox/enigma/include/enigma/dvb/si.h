@@ -15,9 +15,9 @@
 time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5);
 int fromBCD(int bcd);
 
-class Descriptor: public QObject
+class Descriptor: public /*Q*/Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 public:
 	inline Descriptor(int tag):tag(tag){};
 	inline virtual ~Descriptor(){};
@@ -270,7 +270,7 @@ public:
 
 class PAT: public eTable
 {
-	Q_OBJECT
+//	Q_OBJECT
 protected:
 	int data(__u8 *data);
 public:
@@ -303,7 +303,7 @@ public:
 
 class SDT: public eTable
 {
-	Q_OBJECT
+//	Q_OBJECT
 protected:
 	int data(__u8 *data);
 public:
@@ -441,13 +441,14 @@ public:
 
 class MHWEIT: public eSection
 {
-	Q_OBJECT
+//	Q_OBJECT
 	int sectionRead(__u8 *data);
 	int available;
 	void sectionFinish(int);
-signals:
-	void ready(int);
+/*signals:
+	void ready(int);*/
 public:
+	Signal1<void, int> ready;
 	MHWEIT(int pid, int service_id);
 	std::vector<MHWEITEvent> events;
 };

@@ -79,7 +79,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	gateway->move(QPoint(160, 120));
 	gateway->resize(QSize(200, fd+4));
 
-	connect(ip, SIGNAL(selected(int*)), SLOT(fieldSelected(int*)));
+//	connect(ip, SIGNAL(selected(int*)), SLOT(fieldSelected(int*)));
+	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
 	l=new eLabel(this);
 	l->setText("Configure Network");
@@ -95,15 +96,17 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ok->move(QPoint(160, 200));
 	ok->resize(QSize(90, fd+4));
 	
-	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
+//	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
+	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
 
 	abort=new eButton(this);
 	abort->setText("[ABORT]");
 	abort->move(QPoint(270, 200));
 	abort->resize(QSize(120, fd+4));
 
-	connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
-	
+	//connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
+	CONNECT(abort->selected, eZapNetworkSetup::abortPressed);
+
 }
 
 eZapNetworkSetup::~eZapNetworkSetup()

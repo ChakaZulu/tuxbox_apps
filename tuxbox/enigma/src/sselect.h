@@ -20,12 +20,12 @@ public:
 
 class eServiceSelector: public eLBWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eService *result, *selected;
 	eBouquetSelector* pbs;
 protected:
 	int eventFilter(const eWidgetEvent &event);
-private slots:
+private:// slots:
 	void fillServiceList();
 	void entrySelected(eListboxEntry *entry);
 	void selchanged(eListboxEntry *entry);

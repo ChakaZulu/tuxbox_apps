@@ -8,9 +8,9 @@ class eLBWindow;
 
 class eBouquetSelector: public eLBWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eBouquet *result;
-private slots:
+private:/* slots:*/
 	void fillBouquetList();
 	void entrySelected(eListboxEntry *entry);
 public:

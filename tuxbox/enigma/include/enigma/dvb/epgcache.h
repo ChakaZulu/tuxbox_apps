@@ -66,7 +66,7 @@ public:
 
 class eEPGCache: public eSection
 {
-	Q_OBJECT
+//	Q_OBJECT
 private:
 	eService* current_service;
 	int current_sid;
@@ -82,9 +82,9 @@ private:
 	QTimer CleanTimer;
 	QTimer zapTimer;
 	QTimer EPGUpdate;
-public slots:
+public:/* slots:*/
 	inline void startEPG();
-	inline void stopEPG();
+	inline void stopEPG(eService* e = 0);
 	inline void enterService(eService*, int);
 	void cleanLoop();
 	void timeUpdated();
@@ -95,8 +95,9 @@ public:
 //	EITEvent *lookupEvent(int original_network_id, int service_id, int event_id);
 	EITEvent *lookupCurrentEvent(int original_network_id, int service_id);
 	inline const eventMap* eEPGCache::getEventMap(int original_network_id, int service_id);
-signals:
-	void EPGAvail(bool);
+/*signals:
+	void EPGAvail(bool);*/
+	Signal1<void, bool> EPGAvail;
 };
 
 inline void eEPGCache::enterService(eService* service, int err)
@@ -126,12 +127,12 @@ inline void eEPGCache::enterService(eService* service, int err)
 	if (It != serviceLastUpdated.end() && !eventDB[SREF].empty())
 	{
 		qDebug("[EPGC] service has EPG");
-		emit EPGAvail(1);
+		/*emit*/ EPGAvail(1);
 	}
 	else
 	{
 		qDebug("[EPGC] service has no EPG");
-		emit EPGAvail(0);
+		/*emit*/ EPGAvail(0);
 	}
 }
 
@@ -152,7 +153,7 @@ inline void eEPGCache::startEPG()
 	}
 }
 
-inline void eEPGCache::stopEPG()
+inline void eEPGCache::stopEPG(eService*)
 {
 	zapTimer.stop();
 	if (isRunning)

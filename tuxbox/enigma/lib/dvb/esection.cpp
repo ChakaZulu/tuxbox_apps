@@ -153,8 +153,9 @@ eSection::eSection(int pid, int tableid, int tableidext, int version, int flags,
 	notifier=0;
 	section=0;
 	lockcount=0;
-	timer=new QTimer(this);
-	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
+	timer=new QTimer;
+//	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
+	CONNECT(timer->time_out, eSection::timeout);
 	if (!(flags&SECREAD_NOABORT))
 		active.append(this);
 }
@@ -206,7 +207,8 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 	if (notifier)
 		delete notifier;
 	notifier=new QSocketNotifier(reader.getHandle(), QSocketNotifier::Read);
-	connect(notifier, SIGNAL(activated(int)), SLOT(data(int)));
+	//connect(notifier, SIGNAL(activated(int)), SLOT(data(int)));
+	CONNECT(notifier->activated_, eSection::data);
 }
 
 void eSection::closeFilter()
@@ -312,7 +314,7 @@ void eTable::sectionFinish(int err)
 	if (err)
 		error=err;
 	ready=1;
-	emit tableReady(error);
+	/*emit*/ tableReady(error);
 }
 
 eTable::eTable(int pid, int tableid, int tableidext, int version): eSection(pid, tableid, tableidext, version, (pid==0x14)?0:(SECREAD_INORDER|SECREAD_CRC))

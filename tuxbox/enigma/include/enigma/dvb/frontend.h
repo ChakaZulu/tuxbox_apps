@@ -6,7 +6,7 @@
 	 sec etc.
 */
 
-#include <qobject.h>
+//#include <qobject.h>
 #include <qtimer.h>
 #include <stdlib.h>
 
@@ -17,9 +17,9 @@
 
 class eTransponder;
 
-class eFrontend: public QObject
+class eFrontend: public /*Q*/Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	uint32_t lnbfreq_low, lnbfreq_hi, threshold;
 	int do_sec, type;
 	int fd, secfd;
@@ -36,11 +36,12 @@ class eFrontend: public QObject
 			uint32_t SymbolRate, CodeRate FEC_inner,
 			SpectralInversion Inversion, int sat,
 			Modulation QAM);
-private slots:
+private:/* slots:*/
 	void timeout();
-signals:
-	void tunedIn(eTransponder *trans, int error);
+/*signals:
+	void tunedIn(eTransponder *trans, int error);*/
 public:
+	Signal2<void, eTransponder*, int> tunedIn;
 	~eFrontend();
 
 	enum

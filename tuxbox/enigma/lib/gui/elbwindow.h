@@ -6,7 +6,7 @@
 
 class eLBWindow: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	void OnFontSizeChanged(int NewFontSize);
 protected:
 	int Entrys;

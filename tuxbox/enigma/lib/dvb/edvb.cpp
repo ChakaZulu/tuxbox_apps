@@ -141,7 +141,7 @@ void eDVB::revalidateBouquets()
 		for (BouquetIterator i = bouquets.begin(); i != bouquets.end(); i++)
 			for (ServiceReferenceIterator service = (*i)->list.begin(); service != (*i)->list.end(); service++)
 				(*service)->service=transponderlist->searchService((*service)->original_network_id, (*service)->service_id);
-	emit bouquetListChanged();
+	/*emit*/ bouquetListChanged();
 	printf("ok\n");
 }
 
@@ -183,7 +183,7 @@ int eDVB::checkCA(std::list<CA*> &list, const QList<Descriptor> &descriptors)
 
 void eDVB::scanEvent(int event)
 {
-	emit eventOccured(event);
+	/*emit*/ eventOccured(event);
 	switch (event)
 	{
 	case eventScanBegin:
@@ -193,7 +193,7 @@ void eDVB::scanEvent(int event)
 		transponderlist=new eTransponderList();
 		if (useBAT)
 			removeDVBBouquets();
-		emit serviceListChanged();
+		/*emit*/ serviceListChanged();
 		if (!initialTransponders)
 		{
 			qFatal("no initial transponders");
@@ -376,7 +376,7 @@ void eDVB::scanEvent(int event)
 		printf("scan has finally completed.\n");
 		saveServices();
 		sortInChannels();
-		emit serviceListChanged();
+		/*emit*/ serviceListChanged();
 		setState(stateIdle);
 		break;
 	}
@@ -384,7 +384,7 @@ void eDVB::scanEvent(int event)
 
 void eDVB::serviceEvent(int event)
 {
-	emit eventOccured(event);
+	/*emit*/ eventOccured(event);
 #ifdef PROFILE
 	static timeval last_event;
 	
@@ -441,7 +441,7 @@ void eDVB::serviceEvent(int event)
 			serviceEvent(eventServiceTuneOK);
 		} else
 		{
-			emit leaveTransponder(transponder);
+			/*emit*/ leaveTransponder(transponder);
 			transponder=n;
 			if (n->tune())
 				serviceEvent(eventServiceTuneFailed);
@@ -452,7 +452,7 @@ void eDVB::serviceEvent(int event)
 		break;
 	}
 	case eventServiceTuneOK:
-		emit enterTransponder(transponder);
+		/*emit*/ enterTransponder(transponder);
 		tSDT.start(new SDT());
 		switch (service_type)
 		{
@@ -517,7 +517,7 @@ void eDVB::serviceEvent(int event)
 			PMT *pmt=tPMT.ready()?tPMT.getCurrent():0;
 			if (pmt)
 			{
-				emit gotPMT(pmt);
+				/*emit*/ gotPMT(pmt);
 				pmt->unlock();
 			}
 		}
@@ -533,7 +533,7 @@ void eDVB::serviceEvent(int event)
 		if (sdt)
 		{
 			setState(stateIdle);
-			emit gotSDT(sdt);
+			/*emit*/ gotSDT(sdt);
 			sdt->unlock();
 			if (service_type==4)
 				service_state=ENVOD;
@@ -546,9 +546,9 @@ void eDVB::serviceEvent(int event)
 		Decoder::Set();
 		break;
 	case eventServiceSwitched:
-		emit enterService(service);
+		/*emit*/ enterService(service);
 	case eventServiceFailed:
-		emit switchedService(service, -service_state);
+		/*emit*/ switchedService(service, -service_state);
 		setState(stateIdle);
 		break;
 	}
@@ -619,7 +619,8 @@ void eDVB::scanPMT()
 					{
 						printf("starting MHWEIT on pid %x, sid %x\n", pe->elementary_PID, service_id);
 						tMHWEIT=new MHWEIT(pe->elementary_PID, service_id);
-						connect(tMHWEIT, SIGNAL(ready(int)), SLOT(MHWEITready(int)));
+						//connect(tMHWEIT, SIGNAL(ready(int)), SLOT(MHWEITready(int)));
+						CONNECT(tMHWEIT->ready, eDVB::MHWEITready);
 						tMHWEIT->start();
 						break;
 					}
@@ -633,7 +634,7 @@ void eDVB::scanPMT()
 	setPID(audio);
 	setPID(teletext);
 
-	emit scrambled(isca);
+	/*emit*/ scrambled(isca);
 
 	if (isca && calist.empty())
 	{
@@ -658,7 +659,7 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 	currentTransponder=trans;
 	currentTransponderState=err;
 	if (!err)
-		emit enterTransponder(trans);
+		/*emit*/ enterTransponder(trans);
 	tPAT.start(new PAT());
 	if (tdt)
 		delete tdt;
@@ -666,7 +667,8 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 		delete tMHWEIT;
 	tMHWEIT=0;
 	tdt=new TDT();
-	connect(tdt, SIGNAL(tableReady(int)), SLOT(TDTready(int)));
+//	connect(tdt, SIGNAL(tableReady(int)), SLOT(TDTready(int)));
+	CONNECT(tdt->tableReady, eDVB::TDTready);
 	tdt->start();
 	switch (state)
 	{
@@ -765,10 +767,10 @@ void eDVB::EITready(int error)
 	if (!error)
 	{
 		EIT *eit=tEIT.getCurrent();
-		emit gotEIT(eit, 0);
+		/*emit*/ gotEIT(eit, 0);
 		eit->unlock();
 	} else
-		emit gotEIT(0, error);
+		/*emit*/ gotEIT(0, error);
 }
 
 void eDVB::TDTready(int error)
@@ -778,7 +780,7 @@ void eDVB::TDTready(int error)
 	{
 		printf("[TIME] time update to %s\n", ctime(&tdt->UTC_time));
 		time_difference=tdt->UTC_time-time(0);
-		emit timeUpdated();
+		/*emit*/ timeUpdated();
 	}
 }
 
@@ -855,7 +857,7 @@ int eDVB::switchService(eService *newservice)
 {
 	if (newservice==service)
 		return 0;
-	emit leaveService(service);
+	/*emit*/ leaveService(service);
 	service=newservice;
 	return switchService(service->service_id, service->original_network_id, service->transport_stream_id, service->service_type);
 }
@@ -917,7 +919,8 @@ eDVB::eDVB()
 	}
 	if (eFrontend::open(fe)<0)
 		qFatal("couldn't open frontend");
-	connect(eFrontend::fe(), SIGNAL(tunedIn(eTransponder*,int)), SLOT(tunedIn(eTransponder*,int)));
+//	connect(eFrontend::fe(), SIGNAL(tunedIn(eTransponder*,int)), SLOT(tunedIn(eTransponder*,int)));
+	CONNECT(eFrontend::fe()->tunedIn, eDVB::tunedIn);
 
 	transponderlist=0;
 	currentTransponder=0;
@@ -926,14 +929,20 @@ eDVB::eDVB()
 	loadBouquets();
 	Decoder::Initialize();
 	
-	connect(&tPAT, SIGNAL(tableReady(int)), SLOT(PATready(int)));
+/*	connect(&tPAT, SIGNAL(tableReady(int)), SLOT(PATready(int)));
 	connect(&tPMT, SIGNAL(tableReady(int)), SLOT(PMTready(int)));
 	connect(&tSDT, SIGNAL(tableReady(int)), SLOT(SDTready(int)));
 	connect(&tNIT, SIGNAL(tableReady(int)), SLOT(NITready(int)));
 	connect(&tONIT, SIGNAL(tableReady(int)), SLOT(ONITready(int)));
 	connect(&tEIT, SIGNAL(tableReady(int)), SLOT(EITready(int)));
-	connect(&tBAT, SIGNAL(tableReady(int)), SLOT(BATready(int)));
-	
+	connect(&tBAT, SIGNAL(tableReady(int)), SLOT(BATready(int)));*/
+	CONNECT(tPAT.tableReady, eDVB::PATready);
+	CONNECT(tPMT.tableReady, eDVB::PMTready);
+	CONNECT(tSDT.tableReady, eDVB::SDTready);
+	CONNECT(tNIT.tableReady, eDVB::NITready);
+	CONNECT(tONIT.tableReady, eDVB::ONITready);	
+	CONNECT(tEIT.tableReady, eDVB::EITready);
+	CONNECT(tBAT.tableReady, eDVB::BATready);
 	setState(stateIdle);
 
 	availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
@@ -1025,7 +1034,7 @@ void eDVB::setTransponders(eTransponderList *tlist)
 	if (transponderlist)
 		delete transponderlist;
 	transponderlist=tlist;
-	emit serviceListChanged();
+	/*emit*/ serviceListChanged();
 }
 
 std::string eDVB::getInfo(const char *info)
@@ -1391,7 +1400,7 @@ void eDVB::changeVolume(int abs, int vol)
 
 	eAVSwitch::getInstance()->setVolume(mute?0:((63-volume)*65536/64));
 
-	emit volumeChanged(mute?63:volume);
+	/*emit*/ volumeChanged(mute?63:volume);
 }
 
 static void unpack(__u32 l, int *t)

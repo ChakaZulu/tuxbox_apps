@@ -13,10 +13,10 @@ public:
 
 class eSatelliteConfigurationManager: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eListbox *list;
 	eButton *close, *sat_new, *sat_delete;
-public slots:
+public:// slots:
 	void newSatellite();
 	void deleteSatellite();
 public:

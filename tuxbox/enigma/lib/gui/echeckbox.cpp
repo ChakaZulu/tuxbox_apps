@@ -9,7 +9,8 @@ eCheckbox::eCheckbox(eWidget *parent, int checked=0, int Size, eLabel* descr):
 	setFlags(RS_DIRECT);
 	setFont(gFont("Marlett Regular", Size));
 	setCheck(checked);
-	connect(this, SIGNAL(selected()), SLOT(sel()));
+//	connect(this, SIGNAL(selected()), SLOT(sel()));
+	CONNECT(selected, eCheckbox::sel);
 }
 
 eCheckbox::~eCheckbox()
@@ -19,7 +20,7 @@ eCheckbox::~eCheckbox()
 void eCheckbox::sel()
 {
 	setCheck(ischecked^1);
-	emit checked(ischecked);
+	/*emit*/ checked(ischecked);
 }
 
 void eCheckbox::setCheck(int c)

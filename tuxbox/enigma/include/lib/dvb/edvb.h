@@ -1,13 +1,18 @@
 #ifndef __edvb_h
 #define __edvb_h
 
-#include "qobject.h"
+//#include "qobject.h"
 #include "qlist.h"
 #include "esection.h"
 #include <stdio.h>
 #include "nconfig.h"
 #include <list>
 #include <string>
+
+#include <sigc++/signal_system.h>
+#ifdef SIGC_CXX_NAMESPACES
+using namespace SigC;
+#endif
 
 #define IntIterator std::list<int>::iterator
 #define BouquetIterator std::list<eBouquet*>::iterator
@@ -45,9 +50,9 @@ class eAVSwitch;
 class eStreamWatchdog;
 class MHWEIT;
 
-class eDVB: public QObject
+class eDVB: public /*Q*/Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	static eDVB *instance;
 protected:
 	friend class sortinChannel;
@@ -114,9 +119,8 @@ protected:
 	void serviceEvent(int event);	
 	void scanPMT();
 
-private slots:
+private:// slots:
 	void tunedIn(eTransponder*, int);
-	
 	void PATready(int error);
 	void SDTready(int error);
 	void PMTready(int error);
@@ -167,30 +171,49 @@ public:
 
 private:
 	int state;
-	void setState(int newstate) { emit stateChanged(state=newstate); }
+	void setState(int newstate) { /*emit*/ stateChanged(state=newstate); }
 
+public:
+	Signal1<void, int> stateChanged;
+	Signal1<void, int> eventOccured;
+	Signal0<void> serviceListChanged;
+	Signal0<void> bouquetListChanged;
+	Signal1<void, eService*> leaveService;
+	Signal1<void, eService*> enterService;
+	Signal1<void, eTransponder*> leaveTransponder;
+	Signal1<void, eTransponder*> enterTransponder;
+	Signal2<void, eTransponder*, int> switchedTransponder;
+	Signal2<void, eService*, int> switchedService;
+	Signal2<void, EIT*, int> gotEIT;
+	Signal1<void, SDT*> gotSDT;
+	Signal1<void, PMT*> gotPMT;
+	Signal1<void, bool> scrambled;
+	Signal1<void, int> volumeChanged;
+	Signal0<void> timeUpdated;
 		/* generic state - public */
-signals:
-	void stateChanged(int newstate);
-	void eventOccured(int event);
-	void timeUpdated();
+//signals:
+//	void stateChanged(int newstate);
+//	void eventOccured(int event);
+//	void timeUpdated();
 		/* public general signals */
-signals:
-	void serviceListChanged();
-	void bouquetListChanged();
-	void leaveService(eService *);
-	void enterService(eService *);	/** only succesfull channel-switches */
+//signals:
+//	void serviceListChanged();
+//	void bouquetListChanged();
+//	void leaveService(eService *);
+//	void enterService(eService *);	/** only succesfull channel-switches */
 
-	void leaveTransponder(eTransponder *);
-	void enterTransponder(eTransponder *);
+//	void leaveTransponder(eTransponder *);
+//	void enterTransponder(eTransponder *);
 	
-	void switchedTransponder(eTransponder*,int);
-	void switchedService(eService*,int);
+//	void switchedTransponder(eTransponder*,int);
+//	void switchedService(eService*,int);
 	
-	void gotEIT(EIT *eit, int);
-	void gotSDT(SDT *sdt);
-	void gotPMT(PMT *pmt);
-	void scrambled(bool);
+//	void gotEIT(EIT *eit, int);
+//	void gotSDT(SDT *sdt);
+//	void gotPMT(PMT *pmt);
+
+//	void scrambled(bool);
+//	void volumeChanged(int vol);
 
 		/* SCAN - public */
 public:
@@ -216,7 +239,8 @@ public:
 	
 	void setPID(PMTEntry *entry);
 	void setDecoder();
-	PMT *getPMT(); 
+
+	PMT *getPMT();
 	EIT *getEIT();
 	
 	void sortInChannels();
@@ -236,8 +260,7 @@ public:
 	
 	void configureNetwork();
 
-signals:
-	void volumeChanged(int vol);
+
 };
 
 #endif

@@ -65,8 +65,10 @@ tsFindInit::tsFindInit(eWidget *parent): eWidget(parent, 1)
 
 	packets.setAutoDelete(true);
 	
-	connect(&sstimer, SIGNAL(timeout()), SLOT(showSignalStrength()));
-	connect(eFrontend::fe(), SIGNAL(tunedIn(eTransponder*,int)), SLOT(tunedIn(eTransponder*,int)));
+/*	connect(&sstimer, SIGNAL(timeout()), SLOT(showSignalStrength()));
+	connect(eFrontend::fe(), SIGNAL(tunedIn(eTransponder*,int)), SLOT(tunedIn(eTransponder*,int)));*/
+	CONNECT(sstimer.time_out, tsFindInit::showSignalStrength);
+	CONNECT(eFrontend::fe()->tunedIn, tsFindInit::tunedIn);
 	state=sInactive;
 }
 
@@ -304,9 +306,12 @@ tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(
 	eta->move(QPoint(10, 120));
 	eta->resize(QSize(440, 30));
 
-	connect(eDVB::getInstance(), SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
+/*	connect(eDVB::getInstance(), SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
 	connect(eDVB::getInstance(), SIGNAL(eventOccured(int)), SLOT(eventOccured(int)));
-	connect(&etatimer, SIGNAL(timeout()), SLOT(updateETA()));
+	connect(&etatimer, SIGNAL(timeout()), SLOT(updateETA()));*/
+	CONNECT(eDVB::getInstance()->stateChanged, tsDoScan::stateChanged);
+	CONNECT(eDVB::getInstance()->eventOccured, tsDoScan::eventOccured);
+	CONNECT(etatimer.time_out, tsDoScan::updateETA);
 }
 
 int tsDoScan::eventFilter(const eWidgetEvent &event)

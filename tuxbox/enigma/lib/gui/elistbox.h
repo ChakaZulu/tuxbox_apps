@@ -9,17 +9,17 @@
 class eListbox;
 #include <qsortedlist.h>
 
-class eListboxEntry: public QObject
+class eListboxEntry: public /*Q*/Object
 {
-	Q_OBJECT
-
+//	Q_OBJECT
 	friend class eListbox;
 	eListbox *listbox;
 	eListboxEntry *listboxentry;
 	QSortedList<eListboxEntry> childs;
-signals:
-	void selected(eListboxEntry *lbe);
+/*signals:
+	void selected(eListboxEntry *lbe);*/
 public:
+	Signal1<void, eListboxEntry*> selected;
 	eListbox *parent;
 	void *data;
 	eListboxEntry(eListboxEntry *listboxentry, void *data=0);
@@ -44,7 +44,7 @@ public:
 
 class eListbox: public eWidget
 {
-	Q_OBJECT
+//	Q_OBJECT
 	
 	friend class eListboxEntry;
 	void redrawWidget(gPainter *target, const QRect &area);
@@ -66,9 +66,11 @@ class eListbox: public eWidget
 public:
 	void keyDown(int rc);
 	void keyUp(int rc);
-signals:
+/*signals:
 	void selected(eListboxEntry *lbe);
-	void selchanged(eListboxEntry *lbe);
+	void selchanged(eListboxEntry *lbe);*/
+	Signal1<void, eListboxEntry*> selected;
+	Signal1<void, eListboxEntry*> selchanged;
 public:
 	void append(eListboxEntry *entry);
 	void remove(eListboxEntry *entry);

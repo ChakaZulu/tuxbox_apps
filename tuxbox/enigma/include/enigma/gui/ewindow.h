@@ -5,7 +5,7 @@
 
 class eWindow: public eWidget
 {
-	Q_OBJECT
+//	Q_OBJECT
 
 	gPixmap *iTopLeft, *iTop, 
 			*iTopRight, *iLeft, *iRight, 

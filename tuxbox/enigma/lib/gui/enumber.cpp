@@ -72,7 +72,7 @@ void eNumber::keyDown(int key)
 		if (active>=len)
 		{
 			if (key==eRCInput::RC_OK)
-				emit selected(number);
+				/*emit*/ selected(number);
 			active=0;
 		}
 
@@ -110,7 +110,7 @@ void eNumber::keyDown(int key)
 			
 				if (active>=len)
 				{
-					emit selected(number);
+					/*emit*/ selected(number);
 					active=0;
 				}
 				else

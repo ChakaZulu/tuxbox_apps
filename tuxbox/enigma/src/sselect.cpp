@@ -176,9 +176,12 @@ eServiceSelector::eServiceSelector()
 	move(QPoint(70, 60));
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 	fillServiceList();
-	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
+/*	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
 	connect(list, SIGNAL(selchanged(eListboxEntry*)), SLOT(selchanged(eListboxEntry*)));
-	connect(eDVB::getInstance(), SIGNAL(serviceListChanged()), SLOT(fillServiceList()));
+	connect(eDVB::getInstance(), SIGNAL(serviceListChanged()), SLOT(fillServiceList()));*/
+	CONNECT(list->selected, eServiceSelector::entrySelected);
+	CONNECT(list->selchanged, eServiceSelector::selchanged);
+	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::fillServiceList);
 }
 
 eServiceSelector::~eServiceSelector()

@@ -7,16 +7,18 @@
 class eButton: public eLabel
 {
 	gColor focus, normal;
-	Q_OBJECT
+//	Q_OBJECT
 	eLabel*	tmpDescr; // used for LCD with description
 protected:
 	QString descr;
 	void keyUp(int key);
 	void gotFocus();
 	void lostFocus();
+/*
 signals:
-	void selected();
+	void selected();*/
 public:
+	Signal0<void> selected;
 	eButton(eWidget *parent, eLabel* descr=0, int takefocus=1);
 };
 

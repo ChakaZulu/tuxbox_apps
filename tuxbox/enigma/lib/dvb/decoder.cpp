@@ -10,7 +10,7 @@
 #endif
 
 
-#include <qobject.h>
+//#include <qobject.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -167,18 +167,18 @@ int Decoder::Set()
 	if (parms.recordmode != current.recordmode)
 		changed|=0xF;
 
-	qDebug(" ------------> changed! %x", changed);
+	printf(" ------------> changed! %x\n", changed);
 
 	if (changed&9)													// stop decoding
 		if (fd.video!=-1)
 		{
 #ifdef DBOX
-			qDebug("VIDEO_STOP");
+			printf("VIDEO_STOP\n");
 			if (ioctl(fd.video, VIDEO_STOP, 1)<0)
-				perror("VIDEO_STOP");
+				perror("VIDEO_STOP\n");
 #else
 			if (ioctl(fd.video, MPEG_VID_STOP, 1)<0)
-				perror("MPEG_VID_STOP");
+				perror("MPEG_VID_STOP\n");
 #endif
 			close(fd.video);
 			fd.video=-1;
@@ -240,7 +240,7 @@ int Decoder::Set()
 		{
 #ifdef DBOX
 			videoStatus status;
-			qDebug("VIDEO_GET_STATUS, VIDEO_SELECT_SOURCE, VIDEO_PLAY");
+			printf("VIDEO_GET_STATUS, VIDEO_SELECT_SOURCE, VIDEO_PLAY\n");
 			if (ioctl(fd.video, VIDEO_GET_STATUS, &status)<0)
 				perror("VIDEO_GET_STATUS");
 //			if (status.streamSource != (videoStreamSource_t)VIDEO_SOURCE_DEMUX)//
@@ -249,7 +249,7 @@ int Decoder::Set()
 			if (ioctl(fd.video, VIDEO_PLAY, 0)<0)
 				perror("VIDEO_PLAY");
 #else
-			qDebug("VIDEO_SELECT_SOURCE, VIDEO_PLAY");
+			printf("VIDEO_SELECT_SOURCE, VIDEO_PLAY\n");
 			if (ioctl(fd.video, MPEG_VID_SELECT_SOURCE, 0)<0)
 				perror("MPEG_VID_SELECT_SOURCE");
 			if (ioctl(fd.video, MPEG_VID_PLAY, 0)<0)
@@ -262,10 +262,10 @@ int Decoder::Set()
 	{
 		int fd=open(AUDIO_DEV, O_RDWR);
 		if (fd<0)
-			qDebug("couldn't set audio mode (%s) - maybe old driver?", strerror(errno));
+			printf("couldn't set audio mode (%s) - maybe old driver?\n", strerror(errno));
 		else
 		{
-			qDebug(" ----------------------------- setting audiomode to %d", (parms.audio_type==DECODE_AUDIO_MPEG)?1:0);
+			printf(" ----------------------------- setting audiomode to %d\n", (parms.audio_type==DECODE_AUDIO_MPEG)?1:0);
 			ioctl(fd, AUDIO_SET_BYPASS_MODE, (parms.audio_type==DECODE_AUDIO_MPEG)?1:0);
 			close(fd);
 		}
@@ -300,7 +300,7 @@ int Decoder::Set()
 		if ((!parms.recordmode) && parms.vpid != -1)
 		{
 			fd.demux_video=open(DEMUX_DEV, O_RDWR);
-			qDebug("open pid %x -> video (%d)", parms.vpid, fd.demux_video);
+			printf("open pid %x -> video (%d)\n", parms.vpid, fd.demux_video);
 			pes_filter.pid		 = parms.vpid;
 #ifdef DBOX
 			pes_filter.input	 = DMX_IN_FRONTEND;
@@ -321,7 +321,7 @@ int Decoder::Set()
 		if ((!parms.recordmode) && parms.apid != -1)
 		{
 			fd.demux_audio=open(DEMUX_DEV, O_RDWR);
-			qDebug("open pid %x -> audio (%d)", parms.apid, fd.demux_audio);
+			printf("open pid %x -> audio (%d)\n", parms.apid, fd.demux_audio);
 			pes_filter.pid		 = parms.apid;
 #ifdef DBOX
 			pes_filter.input	 = DMX_IN_FRONTEND;
@@ -351,7 +351,7 @@ int Decoder::Set()
   if (changed&8)
   	if ((!parms.recordmode) && (parms.pcrpid!=-1))
   	{
-			qDebug("start pcr");
+			printf("start pcr\n");
 #ifdef DBOX
 			if (ioctl(fd.demux_pcr, DMX_START,0)<0)	
 				perror("DMX_START");
@@ -364,7 +364,7 @@ int Decoder::Set()
   if (changed&1)
   	if ((!parms.recordmode) && (parms.vpid!=-1))
   	{
-			qDebug("start video");
+			printf("start video\n");
 #ifdef DBOX
 			if (ioctl(fd.demux_video, DMX_START,0)<0)
 				perror("DMX_START");
@@ -377,7 +377,7 @@ int Decoder::Set()
   if (changed&2)
   	if ((!parms.recordmode) && (parms.apid!=-1))
   	{
-			qDebug("start audio");
+			printf("start audio\n");
 #ifdef DBOX
 			if (ioctl(fd.demux_audio, DMX_START,0)<0)
 				perror("DMX_START");

@@ -1,7 +1,9 @@
 INCLUDES = \
 	-I$(DRIVER)/lcd \
 	-I$(top_srcdir)/edvb/miniqt \
-	-I$(top_srcdir)/enigma/src/core/system
+	-I$(top_srcdir)/enigma/src/core/system \
+  -I$(includedir)/sigc++-1.0 \
+	-I$(includedir)/../lib/sigc++-1.0/include
 
 noinst_LTLIBRARIES = libgdi.la
 

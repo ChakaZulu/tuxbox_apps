@@ -19,12 +19,12 @@ public:
 	QString getText(int t) const;
 };
 
-class eZapPlugins: public QObject
+class eZapPlugins: public /*Q*/Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eLBWindow *window;
 
-private slots:
+private:// slots:
 	void selected(eListboxEntry *);
 public:
 	eZapPlugins(eWidget* lcdTitle=0, eWidget* lcdElement=0);

@@ -8,12 +8,11 @@ class eButton;
 
 class eZapOsdSetup: public eWindow
 {
-	Q_OBJECT
 	eLabel *labelOsd, *labelFonts;
 	eButton *ok, *abort;
 	eCheckbox* bigosd;
 	eCheckbox* bigfonts;
-private slots:
+private:// slots:
 	void fieldSelected(int *number);
 	void okPressed();
 	void abortPressed();

@@ -16,7 +16,8 @@ int eDownloadWindow::eventFilter(const eWidgetEvent &event)
 		} else
 		{
 			qDebug("ok, let's start");
-			connect(c, SIGNAL(closing()), SLOT(httpDone()));
+//			connect(c, SIGNAL(closing()), SLOT(httpDone()));
+			CONNECT(c.closing, eDownloadWindow::httpDone);
 			c->start();
 		}
 		break;

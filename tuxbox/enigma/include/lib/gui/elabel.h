@@ -7,7 +7,7 @@
 
 class eLabel: public eWidget
 {
-	Q_OBJECT
+//	Q_OBJECT
 protected:
 	int flags;
 	eTextPara *para;

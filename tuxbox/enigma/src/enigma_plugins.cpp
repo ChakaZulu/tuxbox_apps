@@ -125,7 +125,8 @@ eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 	window->move(QPoint(150, 136));
 	window->setLCD(lcdTitle, lcdElement);
 	new ePlugin(window->list, 0);
-	connect(window->list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
+	CONNECT(window->list->selected, eZapPlugins::selected);
+//	connect(window->list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
 }
 
 int eZapPlugins::exec()

@@ -10,7 +10,7 @@ class eLabel;
 
 class eEventDisplay: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	QString service;
 	QListIterator<EITEvent> *events;
 	QList<EITEvent> *eventlist;

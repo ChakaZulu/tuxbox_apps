@@ -15,7 +15,7 @@ class eZapLCDScart;
 
 class eZapLCD: public eWidget
 {
-	Q_OBJECT
+//	Q_OBJECT
 	static eZapLCD* instance;
 public:
 	static eZapLCD* getInstance() { return instance; }
@@ -28,11 +28,11 @@ public:
 
 class eZapLCDMain: public eWidget
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eLabel *Clock, *ServiceName;
 	eProgress *Volume;
 	QTimer clocktimer;
-private slots:
+private:// slots:
 	void clockUpdate();
 	void volumeUpdate(int);
 	void serviceChanged(eService *, int);
@@ -42,8 +42,8 @@ public:
 
 class eZapLCDMenu: public eWidget
 {
-	Q_OBJECT
-private slots:
+/*	Q_OBJECT
+private slots:*/
 
 public:
 	eLabel *Title;
@@ -53,8 +53,8 @@ public:
 
 class eZapLCDScart: public eWidget
 {
-	Q_OBJECT
-private slots:
+/*	Q_OBJECT
+private slots:*/
 
 public:
 	ePixmap *Title, *Scart;

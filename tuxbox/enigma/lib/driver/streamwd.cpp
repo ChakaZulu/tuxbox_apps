@@ -36,8 +36,9 @@ eStreamWatchdog::eStreamWatchdog()
 		}
 		else
 		{
-			sn=new QSocketNotifier(handle, QSocketNotifier::Read, this);
-			connect(sn, SIGNAL(activated(int)), SLOT(check(int)));
+			sn=new QSocketNotifier(handle, QSocketNotifier::Read);
+//			connect(sn, SIGNAL(activated(int)), SLOT(check(int)));
+			CONNECT(sn->activated_, eStreamWatchdog::check);
 		}
 	}
 
@@ -89,7 +90,7 @@ void eStreamWatchdog::reloadSettings()
 			
 			qDebug("Aratio changed\n");			
 
-			emit AspectRatioChanged(isanamorph);
+			/*emit*/ AspectRatioChanged(isanamorph);
 
 			int fd;
 

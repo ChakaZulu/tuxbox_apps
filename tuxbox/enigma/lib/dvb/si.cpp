@@ -972,7 +972,7 @@ MHWEIT::MHWEIT(int pid, int service_id): eSection(pid, 0x90, service_id, -1, 0, 
 
 void MHWEIT::sectionFinish(int err)
 {
-	emit ready(err);
+	/*emit*/ ready(err);
 }
 
 int MHWEIT::sectionRead(__u8 *data)

@@ -6,7 +6,7 @@
 
 class eProgress: public eWidget
 {
-	Q_OBJECT
+//	Q_OBJECT
 	int perc, border;
 	gColor left, right;
 public:

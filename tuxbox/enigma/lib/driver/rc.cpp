@@ -52,8 +52,9 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 		sn=0;
 	} else
 	{
-		sn=new QSocketNotifier(handle, QSocketNotifier::Read, this);
-		connect(sn, SIGNAL(activated(int)), SLOT(keyPressed(int)));
+		sn=new QSocketNotifier(handle, QSocketNotifier::Read);
+//		connect(sn, SIGNAL(activated(int)), SLOT(keyPressed(int)));
+		CONNECT(sn->activated_, eRCShortDriver::keyPressed);
 		eRCInput::getInstance()->setFile(handle);
 	}
 }

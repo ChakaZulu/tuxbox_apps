@@ -23,8 +23,8 @@ class gPainter;
 
 class NVODStream: public eListboxEntry
 {
-	Q_OBJECT
-private slots:
+//	Q_OBJECT
+private:// slots:
 	void EITready(int error);
 public:
 	NVODStream(eListbox *listbox, int transport_stream_id, int original_network_id, int service_id);
@@ -37,9 +37,9 @@ class NVODReferenceEntry;
 
 class eNVODSelector: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eListbox *list;
-private slots:
+private:// slots:
 	void selected(eListboxEntry *);
 public:
 	eNVODSelector();
@@ -49,7 +49,7 @@ public:
 
 class AudioStream: public eListboxEntry
 {
-	Q_OBJECT
+//	Q_OBJECT
 public:
 	enum
 	{
@@ -62,9 +62,9 @@ public:
 
 class eAudioSelector: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eListbox *list;
-private slots:
+private:// slots:
 	void selected(eListboxEntry *);
 public:
 	eAudioSelector();
@@ -76,7 +76,7 @@ class LinkageDescriptor;
 
 class SubService: public eListboxEntry
 {
-	Q_OBJECT
+//	Q_OBJECT
 public:
 	SubService(eListbox *listbox, LinkageDescriptor *descr);
 	QString getText(int col=0) const;
@@ -87,9 +87,9 @@ public:
 
 class eSubServiceSelector: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eListbox *list;
-private slots:
+private:// slots:
 	void selected(eListboxEntry *);
 public:
 	eSubServiceSelector();
@@ -99,11 +99,11 @@ public:
 
 class eServiceNumberWidget: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eNumber *number;
 	int chnum;
 	QTimer *timer;
-private slots:
+private:// slots:
 	void selected(int*);
 	void timeout();
 public:
@@ -119,7 +119,7 @@ class eEventDisplay;
 
 class eZapMain: public eWidget
 {
-	Q_OBJECT;
+//	Q_OBJECT;
 	
 	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext, 
 		*EINowDuration, *EINextDuration, *EINowTime, *EINextTime,
@@ -153,7 +153,7 @@ class eZapMain: public eWidget
 protected:
 	void keyDown(int);
 	void keyUp(int);
-private slots:
+private:// slots:
 	void serviceChanged(eService *, int);
 	void gotEIT(EIT *, int);
 	void gotSDT(SDT *);

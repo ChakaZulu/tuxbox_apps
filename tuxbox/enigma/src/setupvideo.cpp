@@ -71,7 +71,8 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	colorformat->setText("[color]");
 	colorformat->move(QPoint(160, 20));
 	colorformat->resize(QSize(85, fd+4));
-	connect(colorformat, SIGNAL(selected()), SLOT(toggleColorformat()));
+//	connect(colorformat, SIGNAL(selected()), SLOT(toggleColorformat()));
+	CONNECT(colorformat->selected, eZapVideoSetup::toggleColorformat);
 
   l=new eLabel(this);
 	l->setText("Aspect Ratio:");
@@ -82,19 +83,23 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	pin8->setText("[Pin8]");
 	pin8->move(QPoint(160, 55));
 	pin8->resize(QSize(140, fd+4));
-	connect(pin8, SIGNAL(selected()), SLOT(togglePin8()));
+//	connect(pin8, SIGNAL(selected()), SLOT(togglePin8()));
+	CONNECT(pin8->selected, eZapVideoSetup::togglePin8);
 
 	ok=new eButton(this);
 	ok->setText("[OK]");
 	ok->move(QPoint(10, 150));
 	ok->resize(QSize(50, fd+4));
-	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
+//  connect(ok, SIGNAL(selected()), SLOT(okPressed()));
+	CONNECT(ok->selected, eZapVideoSetup::okPressed);	
 
 	abort=new eButton(this);
 	abort->setText("[ABORT]");
 	abort->move(QPoint(80, 150));
 	abort->resize(QSize(100, fd+4));
-	connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
+//	connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
+	CONNECT(abort->selected, eZapVideoSetup::abortPressed);
+
 
 	unsigned int temp;
 	v_colorformat=cfCVBS;

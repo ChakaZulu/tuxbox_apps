@@ -13,13 +13,13 @@ class eHTTPConnection;
 class eHTTPDataSource;
 class eHTTPD;
 
-class eHTTPGarbage: public QObject
+class eHTTPGarbage: public /*Q*/Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	QTimer garbage;
 	QList<eHTTPConnection> *conn;
 	static eHTTPGarbage *instance;
-public slots:
+public:// slots:
 	void doGarbage();
 public:
 	void destruct(eHTTPConnection *c);
@@ -58,7 +58,7 @@ public:
 
 class eHTTPConnection: public QSocket
 {
-	Q_OBJECT
+//	Q_OBJECT
 	void doError(int error);
 	
 	int getLine(QString &line);
@@ -71,14 +71,15 @@ class eHTTPConnection: public QSocket
 	eHTTPD *parent;
 	
 	int buffersize, dying;
-private slots:
+private:// slots:
 	void readData();
 	void gotError();
 	void bytesWritten(int);
 	void hostConnected();
-signals:
-	void closing();
+/*signals:
+	void closing();*/
 public:
+	Signal0<void> closing;
 	enum
 	{
 		/*
@@ -119,12 +120,12 @@ public:
 	int content_length, content_length_remaining;
 };
 
-class eHTTPD: public QServerSocket
+class eHTTPD: public QServerSocket, public Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	friend class eHTTPConnection;
 	QList<eHTTPPathResolver> resolver;
-private slots:
+private:// slots:
 	void oneConnectionClosed();
 public:
 	eHTTPD(Q_UINT16 port, int backlog=0, QObject *parent=0, const char *name=0);

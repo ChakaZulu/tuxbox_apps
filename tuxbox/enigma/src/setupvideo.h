@@ -10,7 +10,7 @@ class eCheckbox;
 
 class eZapVideoSetup: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eButton *colorformat, *pin8, *abort, *ok;
 	
 	unsigned int v_pin8; 		// 0: 4:3 Letterboxed, 1: 4:3 panscan, 2: 16:9 w/ pin8 signal
@@ -18,7 +18,7 @@ class eZapVideoSetup: public eWindow
 	void setPin8(int w);
 	void setColorFormat(eAVColorFormat w);
 
-private slots:
+private:// slots:
 	void okPressed();
 	void abortPressed();
 	

@@ -18,7 +18,16 @@ eMainMenu::eMainMenu()
 	window=new eLBWindow("enigma 0.1" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 240);
 	window->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	window->move(QPoint(70, 150));
-	connect(new eListboxEntryText(window->list, "TV Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
+	CONNECT((new eListboxEntryText(window->list, "TV Mode"))->selected, eMainMenu::sel_close);
+	CONNECT((new eListboxEntryText(window->list, "VCR Mode"))->selected, eMainMenu::sel_vcr);
+	CONNECT((new eListboxEntryText(window->list, "Transponder Scan"))->selected, eMainMenu::sel_scan);
+	CONNECT((new eListboxEntryText(window->list, "Setup"))->selected, eMainMenu::sel_setup);
+	CONNECT((new eListboxEntryText(window->list, "Streaminfo"))->selected, eMainMenu::sel_streaminfo);
+	CONNECT((new eListboxEntryText(window->list, "Show BN version"))->selected, eMainMenu::sel_bnversion);
+	CONNECT((new eListboxEntryText(window->list, "Plugins"))->selected, eMainMenu::sel_plugins);
+	CONNECT((new eListboxEntryText(window->list, "Quit enigma"))->selected, eMainMenu::sel_quit);
+	CONNECT((new eListboxEntryText(window->list, "About..."))->selected, eMainMenu::sel_about);
+/*	connect(new eListboxEntryText(window->list, "TV Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "VCR Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_vcr(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Transponder Scan"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_scan(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Setup"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_setup(eListboxEntry*)));
@@ -26,7 +35,7 @@ eMainMenu::eMainMenu()
 	connect(new eListboxEntryText(window->list, "Show BN version"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_bnversion(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Plugins"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_plugins(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Quit enigma"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_quit(eListboxEntry*)));
-	connect(new eListboxEntryText(window->list, "About..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_about(eListboxEntry*)));
+	connect(new eListboxEntryText(window->list, "About..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_about(eListboxEntry*)));*/
 }
 
 int eMainMenu::exec()

@@ -15,7 +15,7 @@ void eButton::keyUp(int key)
 	switch (key)
 	{
 	case eRCInput::RC_OK:
-		emit selected();
+		/*emit*/ selected();
 		
 		if (parent && parent->LCDElement)
 		{

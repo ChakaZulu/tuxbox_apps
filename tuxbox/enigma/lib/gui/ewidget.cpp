@@ -9,7 +9,7 @@
 #include "init.h"
 
 eWidget::eWidget(eWidget *parent, int takefocus):
-	QObject(parent), 
+//	QObject(parent),
 	parent(parent), 
 	takefocus(takefocus), 
 	font(parent?parent->font:gFont("NimbusSansL-Regular Sans L Regular", eSkin::getActive()->queryValue("fontsize", 20))),
@@ -29,6 +29,10 @@ eWidget::eWidget(eWidget *parent, int takefocus):
 		getTLW()->focusList()->append(this);
 		checkFocus();
 	}
+
+	if (parent)
+		parent->childlist.push_back(this);
+
 	just_showing=0;
 }
 
@@ -37,6 +41,9 @@ eWidget::~eWidget()
 	hide();
 	if (takefocus)
 		getTLW()->focusList()->remove(this);
+
+	if (parent && !parent->childlist.empty())
+		parent->childlist.remove(this);
 }
 
 void eWidget::takeFocus()
@@ -115,10 +122,11 @@ void eWidget::redraw(QRect area)		// area bezieht sich nicht auf die clientarea
 			redrawWidget(p, area);
 			delete p;
 		}
-		if (children())
+//		if (children())
+		if(!childlist.empty())
 		{
-			area.moveBy(-clientrect.x(), -clientrect.y());		// ab hier jetzt schon.  
-			QObjectListIt it(*children());
+			area.moveBy(-clientrect.x(), -clientrect.y());		// ab hier jetzt schon.
+/*			QObjectListIt it(*children());
 			eWidget *w;
 			while((w=(eWidget *)it.current()))
 			{
@@ -129,7 +137,20 @@ void eWidget::redraw(QRect area)		// area bezieht sich nicht auf die clientarea
 					cr.moveBy(-w->position.x(), -w->position.y());
 					w->redraw(cr);
 				}
+			}*/
+			std::list<eWidget*>::iterator It = childlist.begin();
+			while (It != childlist.end())
+			{
+				QRect cr=area&QRect((*It)->position, (*It)->size);
+				if (!cr.isEmpty())
+				{
+					cr.moveBy(-(*It)->position.x(), -(*It)->position.y());
+					(*It)->redraw(cr);
+				}
+				It++;				
 			}
+		
+		
 		}
 	}
 }
@@ -285,7 +306,7 @@ void eWidget::willShowChildren()
 	if (state&stateShow)
 	{
 		_willShow();
-		if (children())
+/*		if(children)
 		{
 			QObjectListIt it(*children());
 			eWidget *w;
@@ -293,6 +314,15 @@ void eWidget::willShowChildren()
 			{
 				++it;
 				w->willShowChildren();
+			}
+		}*/
+		if (!childlist.empty())
+		{
+			std::list<eWidget*>::iterator It = childlist.begin();
+			while(It != childlist.end())
+			{
+				(*It)->willShowChildren();
+				It++;
 			}
 		}
 	}
@@ -312,7 +342,7 @@ void eWidget::hide()
 void eWidget::willHideChildren()
 {
 	_willHide();
-	if (children())
+/*	if (children())
 	{
 		QObjectListIt it(*children());
 		eWidget *w;
@@ -321,7 +351,16 @@ void eWidget::willHideChildren()
 			++it;
 			w->willHideChildren();
 		}
-	}
+	}*/
+		if (!childlist.empty())
+		{
+			std::list<eWidget*>::iterator It = childlist.begin();
+			while(It != childlist.end())
+			{
+				(*It)->willHideChildren();
+				It++;
+			}
+		}
 }
 
 int eWidget::eventFilter(const eWidgetEvent &event)
@@ -570,7 +609,7 @@ eWidget *eWidget::search(const QString &sname)
 	if (name==sname)
 		return this;
 		
-	if (children())
+/*	if (children())
 	{
 		QObjectListIt it(*children());
 		eWidget *w;
@@ -581,7 +620,20 @@ eWidget *eWidget::search(const QString &sname)
 			if (p)
 				return p;
 		}
+	}*/
+
+	if (!childlist.empty())
+	{
+		std::list<eWidget*>::iterator It = childlist.begin();
+		while(It != childlist.end())
+		{
+			eWidget* p = (*It)->search(sname);
+			if (p)
+				return p;
+			It++;
+		}
 	}
+
 	return 0;
 }
 

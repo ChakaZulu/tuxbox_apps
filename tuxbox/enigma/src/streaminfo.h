@@ -10,8 +10,7 @@ struct decoderParameters;
 
 class eStreaminfo: public eWindow
 {
-	Q_OBJECT
-	
+//	Q_OBJECT
 	eMultipage mp;
 protected:
 	void keyUp(int code);

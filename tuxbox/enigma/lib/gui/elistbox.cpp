@@ -80,7 +80,7 @@ void eListbox::redrawEntry(gPainter *target, int pos, eListboxEntry *entry, cons
 	gColor color=(have_focus && entry && entry==current->current())?col_active:getBackgroundColor();
 
 	if(	entry && entry==current->current())
-		emit selchanged(*current);
+		/*emit*/ selchanged(*current);
 	
 	if (color != -1)
 	{
@@ -195,16 +195,17 @@ void eListbox::keyUp(int rc)
 	switch (rc)
 	{
 	case eRCInput::RC_HELP:
-		emit selected(0);
+		/*emit*/ selected(0);
 		return;
 	case eRCInput::RC_OK:
 		if (!current)
-			emit selected(0);
+			/*emit*/ selected(0);
 		else
 		{
+			void* e = (void*)*current;
 			if (*current)
-				emit current->current()->selected(*current);
-			emit selected(*current);
+				/*emit*/ current->current()->selected(*current);
+			/*emit*/ selected(*current);
 		}
 	}
 }

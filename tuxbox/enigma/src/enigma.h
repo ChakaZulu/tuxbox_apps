@@ -18,11 +18,11 @@ class eService;
 struct gRGB;
 class eInit;
 
-class eZap: public QApplication
+class eZap: public QApplication, public Object
 {
-	Q_OBJECT
+//	Q_OBJECT
 	static eZap *instance;
-private slots:
+private:// slots:
 	void keyEvent(const eRCKey &key);
 	void keyUp(int);
 	void keyDown(int);

@@ -9,11 +9,11 @@ class eCheckbox;
 
 class eZapNetworkSetup: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eNumber *ip, *netmask, *dns, *gateway;
 	eButton *ok, *abort;
 	eCheckbox *dosetup;
-private slots:
+private:// slots:
 	void fieldSelected(int *number);
 	void okPressed();
 	void abortPressed();

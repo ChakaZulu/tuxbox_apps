@@ -1,4 +1,4 @@
-#include <qobject.h>
+//#include <qobject.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -71,12 +71,12 @@ int fbClass::SetMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
 	if (ioctl(fd, FBIOPUT_VSCREENINFO, &screeninfo)<0)
 	{
 		perror("FBIOPUT_VSCREENINFO");
-		qFatal("fb failed");
+		printf("fb failed\n");
 		return -1;
 	}
 	if ((screeninfo.xres!=nxRes) && (screeninfo.yres!=nyRes) && (screeninfo.bits_per_pixel!=nbpp))
 	{
-		qFatal("SetMode failed: wanted: %dx%dx%d, got %dx%dx%d\n",
+		printf("SetMode failed: wanted: %dx%dx%d, got %dx%dx%d\n",
 			nxRes, nyRes, nbpp,
 			screeninfo.xres, screeninfo.yres, screeninfo.bits_per_pixel);
 	}
@@ -87,7 +87,7 @@ int fbClass::SetMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
 	if (ioctl(fd, FBIOGET_FSCREENINFO, &fix)<0)
 	{
 		perror("FBIOGET_FSCREENINFO");
-		qFatal("fb failed");
+		printf("fb failed\n");
 	}
 	stride=fix.line_length;
 	memset(lfb, 0, stride*yRes);

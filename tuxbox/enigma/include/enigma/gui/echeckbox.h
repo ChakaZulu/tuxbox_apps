@@ -5,13 +5,14 @@
 
 class eCheckbox: public eButton
 {
-	Q_OBJECT
+//	Q_OBJECT
 protected:
 	int ischecked;
-private slots:
+private: // slots:
 	void sel();
-signals:
-	void checked(int);
+/*signals:
+	void checked(int);*/
+	Signal1<void, int> checked;
 public:
 	eCheckbox(eWidget *parent, int checked=0, int Size=25, eLabel* descr=0);
 	~eCheckbox();

@@ -11,7 +11,7 @@ void eRCDeviceDreambox::handleCode(int rccode)
 	int old=ccode;
 	ccode=rccode;
 	if ((old!=-1) && (old!=rccode))
-		emit input->keyPressed(eRCKeyDreambox(this, old&0xF7FF, eRCKey::flagBreak));
+		/*emit*/ input->keyPressed(eRCKeyDreambox(this, old&0xF7FF, eRCKey::flagBreak));
 	if (old != rccode)
 	{
 		repeattimer.start(rdelay, 1);
@@ -19,22 +19,20 @@ void eRCDeviceDreambox::handleCode(int rccode)
 	}
 }
 
-int eRCDeviceDreambox::timeOut()
+void eRCDeviceDreambox::timeOut()
 {
 	int oldcc=ccode;
 	ccode=-1;
 	repeattimer.stop();
 	if (oldcc!=-1)
 		input->keyPressed(eRCKeyDreambox(this, oldcc&0xF7FF, eRCKey::flagBreak));
-	return 0;
 }
 
-int eRCDeviceDreambox::repeat()
+void eRCDeviceDreambox::repeat()
 {
 	if (ccode!=-1)
 		input->keyPressed(eRCKeyDreambox(this, ccode&0xF7FF, eRCKey::flagRepeat));
 	repeattimer.start(rrate, 1);
-	return 0;
 }
 
 eRCDeviceDreambox::eRCDeviceDreambox(eRCDriver *driver): eRCDevice(driver)
@@ -42,8 +40,10 @@ eRCDeviceDreambox::eRCDeviceDreambox(eRCDriver *driver): eRCDevice(driver)
 	ccode=-1;
 	rrate=30;
 	rdelay=500;
-	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
-	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));
+/*	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
+	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));*/
+	CONNECT(timeout.time_out, eRCDeviceDreambox::timeOut);
+	CONNECT(repeattimer.time_out, eRCDeviceDreambox::repeat);
 }
 
 const char *eRCDeviceDreambox::getDescription() const

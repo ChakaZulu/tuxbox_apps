@@ -8,14 +8,14 @@ class BNDirectory;
 
 class ShowBNVersion: public eWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eLabel *text, *res1, *res2;
 	BNDirectory *bnd[2];
 protected:
 	void willShow();
 	void willHide();
 	void keyUp(int rc);
-private slots:
+private:// slots:
 	void eventOccured(int event);
 public:
 	ShowBNVersion();

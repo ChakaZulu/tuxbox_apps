@@ -7,22 +7,19 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/core/dvb \
 	-I$(top_srcdir)/enigma/src/core/driver \
 	-I$(top_srcdir)/enigma/src/core/xml \
-	-I$(top_srcdir)/include
+	-I$(top_srcdir)/include \
+  -I$(includedir)/sigc++-1.0 \
+	-I$(includedir)/../lib/sigc++-1.0/include
 
 bin_PROGRAMS = enigma
 
 enigma_SOURCES = \
-	bselect.cpp bselect.moc.cpp enigma.cpp enigma.moc.cpp enigma_dyn.cpp \
-	enigma_event.cpp enigma_event.moc.cpp enigma_lcd.cpp enigma_lcd.moc.cpp \
-	enigma_main.cpp enigma_main.moc.cpp enigma_plugins.cpp enigma_plugins.moc.cpp \
-	enigma_setup.cpp enigma_setup.moc.cpp enigma_xmlrpc.cpp scan.cpp \
-	scan.moc.cpp \
-	setupnetwork.cpp setupnetwork.moc.cpp \
-	setupvideo.cpp setupvideo.moc.cpp showbnversion.cpp \
-	showbnversion.moc.cpp sselect.cpp sselect.moc.cpp streaminfo.cpp \
-	streaminfo.moc.cpp enigma_mainmenu.cpp enigma_mainmenu.moc.cpp \
-	download.cpp download.moc.cpp satconfig.cpp satconfig.moc.cpp \
-	epgwindow.cpp epgwindow.moc.cpp
+	bselect.cpp enigma.cpp enigma_dyn.cpp enigma_event.cpp enigma_lcd.cpp \
+	enigma_main.cpp enigma_plugins.cpp enigma_setup.cpp enigma_xmlrpc.cpp scan.cpp \
+	setupnetwork.cpp setupvideo.cpp showbnversion.cpp sselect.cpp streaminfo.cpp \
+	enigma_mainmenu.cpp satconfig.cpp epgwindow.cpp
+
+#download.cpp
 
 enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/driver/libdriver.la \
@@ -33,11 +30,12 @@ enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/system/libsystem.la \
 	$(top_builddir)/enigma/src/core/xml/libxml.la \
 	$(top_builddir)/edvb/miniqt/libminiqt.a \
+	$(LIBSIGC_LIBS) \
 	-ldl -lpthread
 
 enigma_LDFLAGS = -rpath $(LIBDIR)/enigma
 
-AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS)
+AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS)
 
 $(top_builddir)/enigma/src/core/driver/libdriver.la:
 	$(MAKE) -C $(top_builddir)/enigma/src/core/driver
@@ -63,8 +61,4 @@ $(top_builddir)/enigma/src/core/xml/libxml.la:
 $(top_builddir)/edvb/miniqt/libminiqt.a:
 	$(MAKE) -C $(top_builddir)/edvb/miniqt
 
-%.moc.cpp: %.h
-	$(MOC) $< -o $@
-
 clean-local:
-	-rm *.moc.cpp

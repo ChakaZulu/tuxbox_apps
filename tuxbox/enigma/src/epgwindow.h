@@ -4,6 +4,12 @@
 #include "elbwindow.h"
 #include "epgcache.h"
 
+#include <sigc++/signal_system.h>
+#ifdef SIGC_CXX_NAMESPACES
+using namespace SigC;
+#endif
+
+
 class eListboxEntryEPG: public eListboxEntry
 {
 public:
@@ -28,12 +34,12 @@ int eListboxEntryEPG::operator==(const eListboxEntry & q) const
 
 class eEPGWindow: public eLBWindow
 {
-	Q_OBJECT
+//	Q_OBJECT
 	eService* current;
 	QTimer closeTimer;
 protected:
 	int eventFilter(const eWidgetEvent &event);
-private slots:
+private:// slots:
 	void fillEPGList();
 	void entrySelected(eListboxEntry *entry);
 	void closeWnd();

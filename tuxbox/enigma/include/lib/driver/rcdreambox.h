@@ -5,12 +5,12 @@
 
 class eRCDeviceDreambox: public eRCDevice
 {
-	Q_OBJECT
+//	Q_OBJECT
 	int last, ccode;
 	QTimer timeout, repeattimer;
-private slots:
-	int timeOut();
-	int repeat();
+private:// slots:
+	void timeOut();
+	void repeat();
 public:
 	void handleCode(int code);
 	eRCDeviceDreambox(eRCDriver *driver);

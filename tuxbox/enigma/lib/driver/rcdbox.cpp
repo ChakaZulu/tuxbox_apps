@@ -24,7 +24,7 @@ void eRCDeviceDBoxOld::handleCode(int rccode)
 		int old=ccode;
 		ccode=rccode;
 		if ((old!=-1) && (old!=rccode))
-			emit input->keyPressed(eRCKeyDBoxOld(this, old, eRCKey::flagBreak));
+			/*emit*/ input->keyPressed(eRCKeyDBoxOld(this, old, eRCKey::flagBreak));
 		if (old != rccode)
 		{
 			repeattimer.start(rdelay, 1);
@@ -33,22 +33,20 @@ void eRCDeviceDBoxOld::handleCode(int rccode)
 	}
 }
 
-int eRCDeviceDBoxOld::timeOut()
+void eRCDeviceDBoxOld::timeOut()
 {
 	int oldcc=ccode;
 	ccode=-1;
 	repeattimer.stop();
 	if (oldcc!=-1)
 		input->keyPressed(eRCKeyDBoxOld(this, oldcc, eRCKey::flagBreak));
-	return 0;
 }
 
-int eRCDeviceDBoxOld::repeat()
+void eRCDeviceDBoxOld::repeat()
 {
 	if (ccode!=-1)
 		input->keyPressed(eRCKeyDBoxOld(this, ccode, eRCKey::flagRepeat));
 	repeattimer.start(rrate, 1);
-	return 0;
 }
 
 eRCDeviceDBoxOld::eRCDeviceDBoxOld(eRCDriver *driver): eRCDevice(driver)
@@ -56,8 +54,10 @@ eRCDeviceDBoxOld::eRCDeviceDBoxOld(eRCDriver *driver): eRCDevice(driver)
 	ccode=-1;
 	rrate=100;
 	rdelay=300;
-	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
-	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));
+/*	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
+	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));*/
+	CONNECT(timeout.time_out, eRCDeviceDBoxOld::timeOut);
+	CONNECT(repeattimer.time_out, eRCDeviceDBoxOld::repeat);
 }
 
 const char *eRCDeviceDBoxOld::getDescription() const
@@ -74,7 +74,7 @@ void eRCDeviceDBoxNew::handleCode(int rccode)
 	int old=ccode;
 	ccode=rccode;
 	if ((old!=-1) && (old!=rccode))
-		emit input->keyPressed(eRCKeyDBoxNew(this, old&0x3F, eRCKey::flagBreak));
+		/*emit*/ input->keyPressed(eRCKeyDBoxNew(this, old&0x3F, eRCKey::flagBreak));
 	if (old != rccode)
 	{
 		repeattimer.start(rdelay, 1);
@@ -82,22 +82,20 @@ void eRCDeviceDBoxNew::handleCode(int rccode)
 	}
 }
 
-int eRCDeviceDBoxNew::timeOut()
+void eRCDeviceDBoxNew::timeOut()
 {
 	int oldcc=ccode;
 	ccode=-1;
 	repeattimer.stop();
 	if (oldcc!=-1)
 		input->keyPressed(eRCKeyDBoxNew(this, oldcc&0x3F, eRCKey::flagBreak));
-	return 0;
 }
 
-int eRCDeviceDBoxNew::repeat()
+void eRCDeviceDBoxNew::repeat()
 {
 	if (ccode!=-1)
 		input->keyPressed(eRCKeyDBoxNew(this, ccode&0x3F, eRCKey::flagRepeat));
 	repeattimer.start(rrate, 1);
-	return 0;
 }
 
 eRCDeviceDBoxNew::eRCDeviceDBoxNew(eRCDriver *driver): eRCDevice(driver)
@@ -105,8 +103,10 @@ eRCDeviceDBoxNew::eRCDeviceDBoxNew(eRCDriver *driver): eRCDevice(driver)
 	ccode=-1;
 	rrate=100;
 	rdelay=400;
-	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
-	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));
+/*	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
+	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));*/
+	CONNECT(timeout.time_out, eRCDeviceDBoxNew::timeOut);
+	CONNECT(repeattimer.time_out, eRCDeviceDBoxNew::repeat);
 }
 
 const char *eRCDeviceDBoxNew::getDescription() const
@@ -124,9 +124,9 @@ void eRCDeviceDBoxButton::handleCode(int code)
 	
 	for (int i=0; i<4; i++)
 		if ((last&~code) & (1<<i))
-			emit input->keyPressed(eRCKeyDBoxButton(this, i, eRCKey::flagBreak));
+			/*emit*/ input->keyPressed(eRCKeyDBoxButton(this, i, eRCKey::flagBreak));
 		else if ((~last&code)&(1<<i))
-			emit input->keyPressed(eRCKeyDBoxButton(this, i, 0));
+			/*emit*/ input->keyPressed(eRCKeyDBoxButton(this, i, 0));
 	if (code)
 		repeattimer.start(rdelay, 1);
 	else
@@ -134,13 +134,12 @@ void eRCDeviceDBoxButton::handleCode(int code)
 	last=code;
 }
 
-int eRCDeviceDBoxButton::repeat()
+void eRCDeviceDBoxButton::repeat()
 {
 	for (int i=0; i<4; i++)
 		if (last&(1<<i))
-			emit input->keyPressed(eRCKeyDBoxButton(this, i, eRCKey::flagRepeat));
+			/*emit*/ input->keyPressed(eRCKeyDBoxButton(this, i, eRCKey::flagRepeat));
 	repeattimer.start(rrate, 1);
-	return 0;
 }
 
 eRCDeviceDBoxButton::eRCDeviceDBoxButton(eRCDriver *driver): eRCDevice(driver)
@@ -148,7 +147,8 @@ eRCDeviceDBoxButton::eRCDeviceDBoxButton(eRCDriver *driver): eRCDevice(driver)
 	rrate=100;
 	rdelay=300;
 	last=0;
-	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));
+//	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));
+	CONNECT(repeattimer.time_out, eRCDeviceDBoxButton::repeat);
 }
 
 const char *eRCDeviceDBoxButton::getDescription() const
