@@ -33,8 +33,7 @@ pthread_mutex_t eDVBServiceController::availCALock =
 
 PMTEntry *eDVBServiceController::priorityAudio(PMTEntry *audio)
 {
-	PMTEntry *audio2 = audio;
-	audio = 0;
+	PMTEntry *audio2 = 0;
 
 	char *audiochannelspriority = 0;
 	eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority);
@@ -48,7 +47,7 @@ PMTEntry *eDVBServiceController::priorityAudio(PMTEntry *audio)
 
 		audiochannels.clear();
 		audiochannels.str(eString(audiochannelspriority));
-		while (audiochannels && audio == 0)
+		while (audiochannels && audio2 == 0)
 		{
 			audiochannels >> audiochannel;
 			for (std::list<eDVBServiceController::audioStream>::iterator it(audioStreams.begin())
@@ -57,14 +56,14 @@ PMTEntry *eDVBServiceController::priorityAudio(PMTEntry *audio)
 //				printf("  -comparing:%s:%s:\n", audiochannel.c_str(), it->text.c_str());
 				if (audiochannel == it->text)
 				{
-					audio = it->pmtentry;
+					audio2 = it->pmtentry;
 					break;
 				}
 			}
 		}
 		free(audiochannelspriority);
 	}
-	if (audio == 0)
+	if (audio2 != 0)
 		audio = audio2;
 //	printf("<<<%d\n", audio->elementary_PID);
 	return audio;
@@ -581,6 +580,14 @@ void eDVBServiceController::EITready(int error)
 	}
 	else
 		/*emit*/ dvb.gotEIT(0, error);
+
+	PMTEntry *audio = 0;
+	audio = priorityAudio(audio);
+	if (audio)
+	{
+		setPID(audio);
+		setDecoder();
+	}
 }
 
 void eDVBServiceController::TDTready(int error)
@@ -1171,7 +1178,7 @@ void eDVBServiceController::MHWEITready(int error)
 		e->current_next_indicator=0;
 		e->transport_stream_id=service.getTransportStreamID().get();
 		e->original_network_id=service.getOriginalNetworkID().get();
-		
+
 		for (int i=0; i<2; i++)
 		{
 			MHWEITEvent *me=&tMHWEIT->events[i];
@@ -1222,7 +1229,7 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 // this is old unneeded code for camd call..
 // now we do this in eDVBCAHandler..
 			Decoder::addCADescriptor((__u8*)(ca->data));
-#endif 
+#endif
 
 			int avail=0;
 			{
