@@ -1,7 +1,6 @@
 INCLUDES = \
 	-I$(top_srcdir)/lib \
-	@EVENTSERVER_CFLAGS@ \
-	-I@DRIVER@
+	@EVENTSERVER_CFLAGS@
 
 bin_PROGRAMS = bat epg epgMini nit sectionsd sdt
 
