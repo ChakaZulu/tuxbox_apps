@@ -48,12 +48,13 @@ class TWebserver
 
 public:
 	bool			DEBUG;
+	bool			VERBOSE;
 	TWebDbox		*WebDbox;
 
 	TWebserver();
 	~TWebserver();
 
-	bool Init(int port,char * publicdocumentroot,bool debug, bool threads);
+	bool Init(int port,char * publicdocumentroot,bool debug, bool verbose,bool threads);
 	bool Start();
 	void DoLoop();
 	void Stop();

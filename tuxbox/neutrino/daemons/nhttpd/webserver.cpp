@@ -1,9 +1,7 @@
 /*
 	webserver  -   DBoxII-Project
 
-	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
-
+	Copyright (C) 2001/2002 Dirk Szymanski
 
 
 	License: GPL
@@ -17,12 +15,13 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	// Revision 1.1  11.02.2002 20:20  dirch
+	// Revision 1.2  22.03.2002 20:20  dirch
 
 */
 
@@ -61,11 +60,12 @@ TWebserver::~TWebserver()
 		delete TimerList;
 }
 //-------------------------------------------------------------------------
-bool TWebserver::Init(int port,char * publicdocumentroot,bool debug,bool threads)
+bool TWebserver::Init(int port,char * publicdocumentroot,bool debug,bool verbose,bool threads)
 {
 	Port=port;
 	DEBUG = debug;
 	THREADS = threads;
+	VERBOSE = verbose;
 	PrivateDocumentRoot = new TString(PRIVATEDOCUMENTROOT);
 	PublicDocumentRoot = new TString(publicdocumentroot);
 	WebDbox = new TWebDbox(this);
@@ -73,7 +73,7 @@ bool TWebserver::Init(int port,char * publicdocumentroot,bool debug,bool threads
 	return true;
 }
 //-------------------------------------------------------------------------
-
+/*
 void * TimerThread(void  *timerlist)
 {
 bool ende = false;
@@ -94,7 +94,7 @@ TTimerList *TimerList = (TTimerList *) timerlist;
 //	pthread_detach(pthread_self());
 
 }
-
+*/
 //-------------------------------------------------------------------------
 bool TWebserver::Start()
 {
@@ -130,8 +130,8 @@ bool TWebserver::Start()
 
 	// TimerThread starten
 				
-	if (pthread_create (&timerthread, NULL, TimerThread, (void *)TimerList) != 0 )
-		perror("[nhttpd]: pthread_create(TimerThread)");
+//	if (pthread_create (&timerthread, NULL, TimerThread, (void *)TimerList) != 0 )
+//		perror("[nhttpd]: pthread_create(TimerThread)");
 
 	return true;
 }
@@ -140,16 +140,14 @@ bool TWebserver::Start()
 void * WebThread(void * request)
 {
 TWebserverRequest *req = (TWebserverRequest *)request;
-	if(req->Parent->DEBUG) printf("*********** Thread %ld gestartet\n",(int)pthread_self());
+	if(req->Parent->DEBUG) printf("*********** Thread %X gestartet\n",(int)pthread_self());
 	if(req)
 	{
 		if(req->ParseRequest())
 		{
-			if(req->Parent->DEBUG) printf("Vor Response send\n");
 			req->SendResponse();
-			if(req->Parent->DEBUG) printf("Response gesendet\n");
 
-//			req->PrintRequest();
+			if(req->Parent->VERBOSE) req->PrintRequest();
 
 			req->EndRequest();
 
@@ -160,7 +158,7 @@ TWebserverRequest *req = (TWebserverRequest *)request;
 		delete req;
 		if(req->Parent->DEBUG) printf("Nach delete req\n");
 	}
-	if(req->Parent->DEBUG) printf("*********** Thread %ld beendet\n",(int)pthread_self());
+	if(req->Parent->DEBUG) printf("*********** Thread %X beendet\n",(int)pthread_self());
 	pthread_exit((void *)NULL);
 //	if(req->Parent->DEBUG) printf("*********** Thread %ld gelöscht\n",(int)pthread_self());
 //	pthread_detach(pthread_self());
@@ -176,26 +174,22 @@ int thread_num =0;
 pthread_t Threads[10];
 
 
+	clilen = sizeof(cliaddr);
 	while(1)
 	{
-		if(DEBUG) printf("Im Loop\n");
-		clilen = sizeof(cliaddr);
 		memset(&cliaddr, 0, sizeof(cliaddr));
-		if(DEBUG) printf("accept\n");
 
 		if ((sock_connect = accept(ListenSocket, (SA *) &cliaddr, &clilen)) == -1) 
 		{
-                perror("Fehler in accept");
+                perror("Error in accept");
                 continue;
         }
         if(DEBUG) printf("server: got connection from %ld\n", cliaddr.sin_addr);
             
 		req = new TWebserverRequest(this);
-		if(DEBUG) printf("Vor GetRawRequest\n");
+		memcpy(&(req->cliaddr),&cliaddr,sizeof(cliaddr));
 		if(req->GetRawRequest(sock_connect))
 		{
-			if(DEBUG) printf("nach GetRawRequest\n");
-
 
 			if(THREADS)
 			{
@@ -216,11 +210,9 @@ pthread_t Threads[10];
 				else
 					Ausgabe("Error while parsing request");
 				
-				if(DEBUG) printf("Beende jetzt den Request\n");
 				req->EndRequest();
-				if(DEBUG) printf("Löesche jetzt den Request\n");
 				delete req;
-				if(DEBUG) printf("Request gelöscht\n");
+				if(DEBUG) printf("Request beendet und gelöscht\n");
 				req = NULL;
 			}
 		}
