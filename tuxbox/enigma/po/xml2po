@@ -13,6 +13,7 @@ while (<$list>) {
 
 	open ($fh, "<$xmlpath") or die "cannot open file $xmlpath";
 
+	$line=1;
 	while (<$fh>) {
 		while (s/(\w+)=\"(.*?)\"//) {
 			if ($1 eq "text" or $1 eq "helptext")
