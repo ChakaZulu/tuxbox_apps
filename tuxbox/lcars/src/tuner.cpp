@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.19  2002/11/16 02:35:13  obi
+clear event before ioctl
+
 Revision 1.18  2002/11/16 00:20:05  obi
 fe events
 
@@ -214,6 +217,7 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 	}
 
 	do {
+		memset(&event, 0, sizeof(event));
 		ioctl(frontend, FE_GET_EVENT, &event);
 	}
 	while (!(event.status & (FE_HAS_LOCK | FE_TIMEDOUT)));
