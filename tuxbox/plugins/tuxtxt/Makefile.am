@@ -6,6 +6,8 @@ INCLUDES = \
 
 noinst_LTLIBRARIES = tuxtxt.la
 
+#tuxtxt_la_CFLAGS = -DDREAMBOX
+
 tuxtxt_la_SOURCES = tuxtxt.c
 
 tuxtxt_la_LIBADD = \

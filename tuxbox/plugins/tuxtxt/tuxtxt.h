@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.h,v $
+ * Revision 1.39  2004/02/06 01:59:45  ghostrider
+ * tuxtxt is now ready for old and new dvb api
+ *
  * Revision 1.38  2004/01/16 14:38:11  alexw
  * follow freetype changes
  *
@@ -29,16 +32,26 @@
  *
  ******************************************************************************/
 
+#include <config.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/dmx.h>
+#else
 #include <linux/dvb/dmx.h>
+#endif
 #include <linux/fb.h>
+
+#if HAVE_DVB_API_VERSION < 3
+#include <dbox/avia_gt_pig.h>
+#else
 #include <linux/input.h>
 #include <linux/videodev.h>
+#endif
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
@@ -60,9 +73,14 @@
 //devices
 
 #define AVS "/dev/dbox/avs0"
-#define DMX "/dev/dvb/adapter0/demux0"
 #define SAA "/dev/dbox/saa0"
+#if HAVE_DVB_API_VERSION < 3
+#define DMX "/dev/dvb/card0/demux0"
+#define PIG "/dev/dbox/pig0"
+#else
+#define DMX "/dev/dvb/adapter0/demux0"
 #define PIG "/dev/v4l/video0"
+#endif
 
 //fonts
 
@@ -123,7 +141,34 @@
 #define release_mosaic		0x1F
 
 //rc codes
-
+#if HAVE_DVB_API_VERSION < 3
+#define KEY_0		0x5C00
+#define KEY_1		0x5C01
+#define KEY_2		0x5C02
+#define KEY_3		0x5C03
+#define KEY_4		0x5C04
+#define KEY_5		0x5C05
+#define KEY_6		0x5C06
+#define KEY_7		0x5C07
+#define KEY_8		0x5C08
+#define KEY_9		0x5C09
+#define KEY_POWER	0x5C0C
+#define KEY_UP		0x5C0E
+#define KEY_DOWN	0x5C0F
+#define KEY_VOLUMEUP	0x5C16
+#define KEY_VOLUMEDOWN	0x5C17
+#define KEY_HOME	0x5C20
+#define KEY_SETUP	0x5C27
+#define KEY_MUTE	0x5C28
+#define KEY_RED		0x5C2D
+#define KEY_RIGHT	0x5C2E
+#define KEY_LEFT	0x5C2F
+#define KEY_OK		0x5C30
+#define KEY_BLUE	0x5C3B
+#define KEY_YELLOW	0x5C52
+#define KEY_GREEN	0x5C55
+#define KEY_HELP	0x5C82
+#endif
 #define	RC_0		0x00
 #define	RC_1		0x01
 #define	RC_2		0x02
@@ -206,7 +251,11 @@ FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache	cache;
 FTC_SBit		sbit;
+#if HAVE_DVB_API_VERSION < 3
+FTC_Image_Desc		type0, type1, type2;
+#else
 FTC_ImageTypeRec	type0, type1, type2;
+#endif
 FT_Face			face0, face1, face2;
 
 //some data

@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.c,v $
+ * Revision 1.55  2004/02/06 01:59:45  ghostrider
+ * tuxtxt is now ready for old and new dvb api
+ *
  * Revision 1.54  2004/01/16 14:38:11  alexw
  * follow freetype changes
  *
@@ -53,9 +56,15 @@
  * plugin_exec                                                                *
  ******************************************************************************/
 
+#if HAVE_DVB_API_VERSION < 3 
+#define dmx_pes_filter_params dmxPesFilterParams
+#define pes_type pesType
+#define dmx_sct_filter_params dmxSctFilterParams
+#endif
+
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.54 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.55 $", versioninfo[16];
 
 	//show versioninfo
 
@@ -338,7 +347,9 @@ int Init()
 		type0.font.face_id = (FTC_FaceID) TUXTXT0;
 		type1.font.face_id = (FTC_FaceID) TUXTXT1;
 		type2.font.face_id = (FTC_FaceID) TUXTXT2;
+#if HAVE_DVB_API_VERSION >= 3
 		type0.flags = type1.flags = type2.flags = FT_LOAD_MONOCHROME;
+#endif
 		type0.font.pix_width  = type1.font.pix_width  = type2.font.pix_width  = (FT_UShort) 16;
 		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = (FT_UShort) 22;
 
@@ -502,8 +513,12 @@ void CleanUp()
 
 		if(screenmode)
 		{
-			screenmode = 0;
+			screenmode=0;
+#if HAVE_DVB_API_VERSION < 3
+			avia_pig_hide(pig);
+#else
 			ioctl(pig, VIDIOC_OVERLAY, &screenmode);
+#endif
 		}
 
 	//restore videoformat
@@ -596,8 +611,12 @@ int GetTeletextPIDs()
 		RenderMessage(ShowInfoBar);
 
 	//read PAT to get all PMT's
-
+#if HAVE_DVB_API_VERSION < 3
+		memset(dmx_flt.filter.filter, 0, DMX_FILTER_SIZE);
+		memset(dmx_flt.filter.mask, 0, DMX_FILTER_SIZE);
+#else
 		memset(&dmx_flt.filter, 0x00, sizeof(struct dmx_filter));
+#endif
 
 		dmx_flt.pid				= 0x0000;
 		dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
@@ -948,8 +967,11 @@ void ConfigMenu(int Init)
 		{
 			screenmode = 0;
 
+#if HAVE_DVB_API_VERSION < 3 
+			avia_pig_hide(pig);
+#else
 			ioctl(pig, VIDIOC_OVERLAY, &screenmode);
-
+#endif
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
 
@@ -2170,8 +2192,9 @@ void SwitchZoomMode()
 
 void SwitchScreenMode()
 {
+#if HAVE_DVB_API_VERSION >= 3
 	struct v4l2_format format;
-
+#endif
 	//reset transparency mode
 
 		if(transpmode) transpmode = 0;
@@ -2189,7 +2212,7 @@ void SwitchScreenMode()
 
 	//clear backbuffer
 
-		memset(&backbuffer, black, sizeof(backbuffer));
+		memset(&backbuffer, screenmode?transp:black, sizeof(backbuffer));
 
 	//set mode
 
@@ -2198,6 +2221,12 @@ void SwitchScreenMode()
 			type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = 8;
 			type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = 21;
 
+#if HAVE_DVB_API_VERSION < 3
+			avia_pig_set_pos(pig, (StartX+322), StartY);
+			avia_pig_set_size(pig, 320, 526);
+			avia_pig_set_stack(pig, 2);
+			avia_pig_show(pig);
+#else	
 			ioctl(pig, VIDIOC_G_FMT, &format);
 
 			format.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
@@ -2209,16 +2238,19 @@ void SwitchScreenMode()
 			ioctl(pig, VIDIOC_S_FMT, &format);
 
 			ioctl(pig, VIDIOC_OVERLAY, &screenmode);
-
+#endif
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode2]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode2]);
 		}
 		else
 		{
+#if HAVE_DVB_API_VERSION < 3
+			avia_pig_hide(pig);
+#else
+			ioctl(pig, VIDIOC_OVERLAY, &screenmode);
+#endif
 			type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = 16;
 			type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = 22;
-
-			ioctl(pig, VIDIOC_OVERLAY, &screenmode);
 
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
@@ -2658,6 +2690,7 @@ void RenderMessage(int Message)
 
 	//set colors
 
+#ifndef DREAMBOX
 		if(screenmode == 1)
 		{
 			fbcolor   = black;
@@ -2665,6 +2698,7 @@ void RenderMessage(int Message)
 			menucolor = menu1;
 		}
 		else
+#endif
 		{
 			fbcolor   = transp;
 			timecolor = transp<<4 | transp;
@@ -2827,8 +2861,11 @@ void CreateLine25()
 	int cancel_page;
 
 	char line25_1[] = "   ?00<      ??0<      >??0      >?00   ((((((((((1111111111AAAAAAAAAAXXXXXXXXXX";
+#ifndef DREAMBOX
 	char line25_2[] = " 瀔 w{hlen   嚦 anzeigen   黀 abbrechen 尹角中中中中尹角中中中中中尹角中中中中中";
-//	char line25_2[] = " 瀔 w{hlen   嚦 anzeigen   蘜 abbrechen 尹角中中中中尹角中中中中中尹角中中中中中";
+#else
+	char line25_2[] = " 瀔 w{hlen   嚦 anzeigen   蘜 abbrechen 尹角中中中中尹角中中中中中尹角中中中中中";
+#endif
 
 	//get prev 100th
 
@@ -3358,11 +3395,24 @@ void DecodePage()
 
 int GetRCCode()
 {
+#if HAVE_DVB_API_VERSION < 3
+	static unsigned short LastKey = -1;
+#else
 	struct input_event ev;
 	static __u16 rc_last_key = KEY_RESERVED;
-
+#endif
 	//get code
-
+#if HAVE_DVB_API_VERSION < 3
+	if(read(rc, &RCCode, 2) == 2)
+	{
+		if (RCCode != LastKey)
+		{
+			LastKey = RCCode;
+			
+			if ((RCCode & 0xFF00) == 0x5C00)
+			{
+				switch(RCCode)
+#else
 	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
 	{
 		if(ev.value)
@@ -3371,7 +3421,9 @@ int GetRCCode()
 			{
 				rc_last_key = ev.code;
 				switch(ev.code)
+#endif
 				{
+
 					case KEY_UP:		RCCode = RC_UP;
 										break;
 
@@ -3432,7 +3484,7 @@ int GetRCCode()
 					case KEY_VOLUMEUP:	RCCode = RC_PLUS;
 										break;
 
-					case KEY_VOLUMEDOWN:RCCode = RC_MINUS;
+					case KEY_VOLUMEDOWN:	RCCode = RC_MINUS;
 										break;
 
 					case KEY_MUTE:		RCCode = RC_MUTE;
@@ -3451,12 +3503,26 @@ int GetRCCode()
 				}
 				return 1;
 			}
+#if HAVE_DVB_API_VERSION < 3
+			else
+			{
+				RCCode &= 0x003F;
+			}
+#endif			
 		}
+#if HAVE_DVB_API_VERSION < 3
+		else
+		{
+			RCCode = -1;
+		}
+		return 1;
+#else
 		else
 		{
 			RCCode = 0;
 			rc_last_key = KEY_RESERVED;
 		}
+#endif
 	}
 
 		RCCode = 0;
