@@ -34,6 +34,7 @@
 #include <neutrino.h>
 
 #include "eventlist.h"
+#include "widget/messagebox.h"
 
 // sort operators
 bool sortById (const CChannelEvent& a, const CChannelEvent& b)
@@ -186,6 +187,51 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			hide();
 			paintHead();
 			paint();
+		}
+		else if ( msg == (uint) g_settings.key_channelList_addrecord )
+		{
+			if(g_settings.recording_type > 0)
+			{
+				CTimerdClient timerdclient;
+				if(timerdclient.isTimerdAvailable())
+				{
+					CTimerd::CChannelMode mode;
+					if(CNeutrinoApp::getInstance()->getMode()==NeutrinoMessages::mode_radio)
+						mode = CTimerd::MODE_RADIO;
+					else
+						mode = CTimerd::MODE_TV;
+					
+					timerdclient.addRecordTimerEvent(channel_id,
+																evtlist[selected].startTime - (atoi(g_settings.record_safety_time_before)*60),
+																evtlist[selected].startTime + evtlist[selected].duration + (atoi(g_settings.record_safety_time_after)*60),
+																evtlist[selected].eventID, evtlist[selected].startTime,
+																evtlist[selected].startTime - (ANNOUNCETIME + 120 + (atoi(g_settings.record_safety_time_before)*60)),
+																"", mode );
+					ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+				}
+				else
+					printf("timerd not available\n");
+			}					
+		}
+		else if ( msg == (uint) g_settings.key_channelList_addremind )
+	   {
+			CTimerdClient timerdclient;
+			if(timerdclient.isTimerdAvailable())
+			{
+				CTimerd::CChannelMode mode;
+				if(CNeutrinoApp::getInstance()->getMode()==NeutrinoMessages::mode_radio)
+					mode = CTimerd::MODE_RADIO;
+				else
+					mode = CTimerd::MODE_TV;
+				timerdclient.addZaptoTimerEvent(channel_id, 
+														  evtlist[selected].startTime,
+														  evtlist[selected].startTime - ANNOUNCETIME, 0,
+														  evtlist[selected].eventID, evtlist[selected].startTime,
+														  "", mode);
+				ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+			}
+			else
+				printf("timerd not available\n");
 		}
 		else if ( msg == CRCInput::RC_up )
 		{

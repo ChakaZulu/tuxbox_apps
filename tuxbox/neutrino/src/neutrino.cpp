@@ -458,10 +458,12 @@ int CNeutrinoApp::loadSetup()
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
 
-	g_settings.key_channelList_pageup = configfile.getInt32( "key_channelList_pageup",  CRCInput::RC_red );
-	g_settings.key_channelList_pagedown = configfile.getInt32( "key_channelList_pagedown", CRCInput::RC_green );
+	g_settings.key_channelList_pageup = configfile.getInt32( "key_channelList_pageup",  CRCInput::RC_minus );
+	g_settings.key_channelList_pagedown = configfile.getInt32( "key_channelList_pagedown", CRCInput::RC_plus );
 	g_settings.key_channelList_cancel = configfile.getInt32( "key_channelList_cancel",  CRCInput::RC_home );
 	g_settings.key_channelList_sort = configfile.getInt32( "key_channelList_sort",  CRCInput::RC_blue );
+	g_settings.key_channelList_addrecord = configfile.getInt32( "key_channelList_addrecord",  CRCInput::RC_red );
+	g_settings.key_channelList_addremind = configfile.getInt32( "key_channelList_addremind",  CRCInput::RC_yellow );
 
 	g_settings.key_quickzap_up = configfile.getInt32( "key_quickzap_up",  CRCInput::RC_up );
 	g_settings.key_quickzap_down = configfile.getInt32( "key_quickzap_down",  CRCInput::RC_down );
@@ -690,6 +692,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "key_channelList_pagedown", g_settings.key_channelList_pagedown );
 	configfile.setInt32( "key_channelList_cancel", g_settings.key_channelList_cancel );
 	configfile.setInt32( "key_channelList_sort", g_settings.key_channelList_sort );
+	configfile.setInt32( "key_channelList_addrecord", g_settings.key_channelList_addrecord );
+	configfile.setInt32( "key_channelList_addremind", g_settings.key_channelList_addremind );
 
 	configfile.setInt32( "key_quickzap_up", g_settings.key_quickzap_up );
 	configfile.setInt32( "key_quickzap_down", g_settings.key_quickzap_down );
@@ -1839,6 +1843,8 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	CKeyChooser*   keySettings_channelList_pagedown = new CKeyChooser(&g_settings.key_channelList_pagedown, "keybindingmenu.pagedown_head", "settings.raw");
 	CKeyChooser*   keySettings_channelList_cancel = new CKeyChooser(&g_settings.key_channelList_cancel, "keybindingmenu.cancel_head", "settings.raw");
 	CKeyChooser*   keySettings_channelList_sort = new CKeyChooser(&g_settings.key_channelList_sort, "keybindingmenu.sort_head", "settings.raw");
+	CKeyChooser*   keySettings_channelList_addrecord = new CKeyChooser(&g_settings.key_channelList_addrecord, "keybindingmenu.addrecord_head", "settings.raw");
+	CKeyChooser*   keySettings_channelList_addremind = new CKeyChooser(&g_settings.key_channelList_addremind, "keybindingmenu.addremind_head", "settings.raw");
 	CKeyChooser*   keySettings_quickzap_up = new CKeyChooser(&g_settings.key_quickzap_up, "keybindingmenu.channelup_head",   "settings.raw");
 	CKeyChooser*   keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, "keybindingmenu.channeldown_head", "settings.raw");
 	CKeyChooser*   keySettings_bouquet_up = new CKeyChooser(&g_settings.key_bouquet_up, "keybindingmenu.bouquetup_head",   "settings.raw");
@@ -1859,6 +1865,8 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.pagedown", true, "", keySettings_channelList_pagedown ));
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.cancel", true, "", keySettings_channelList_cancel ));
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.sort", true, "", keySettings_channelList_sort ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.addrecord", true, "", keySettings_channelList_addrecord ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.addremind", true, "", keySettings_channelList_addremind ));
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.quickzap") );
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.channelup", true, "", keySettings_quickzap_up ));
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.channeldown", true, "", keySettings_quickzap_down ));
@@ -3353,7 +3361,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.417 2003/02/19 18:43:29 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.418 2003/02/22 13:14:03 zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
