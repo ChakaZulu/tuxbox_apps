@@ -2734,11 +2734,16 @@ void eZapMain::showMainMenu()
 #endif
 
 	mm.show();
-
-	if (mm.exec() == 1 && handleState())
-		eZap::getInstance()->quit();
-
+	int res = mm.exec();
 	mm.hide();
+
+	if (res == 1 && handleState())
+	{
+		//standby Show Menu
+		gettimeofday(&standbyTime, 0);
+		standbyTime-=1;
+		standbyRelease();
+	}
 
 #ifndef DISABLE_LCD
 	pLCD->lcdMenu->hide();
