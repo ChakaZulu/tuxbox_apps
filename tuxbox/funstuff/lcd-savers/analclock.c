@@ -149,7 +149,7 @@ void render_clock(screen_t back, screen_t s) {
 	y = MY + isin(-SIN_SIZE/2 - t->tm_sec*SIN_SIZE/30)*RAD/SIN_MUL;
 	putpixel(x, y, LCD_PIXEL_INV, s);
 	
-	printf("%i\n", t->tm_sec);
+	//printf("%i\n", t->tm_sec);
 }
 
 int main(int argc, char *args[]) {
