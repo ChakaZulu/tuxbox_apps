@@ -25,6 +25,8 @@ void help(char *prog_name) {
      "-r, --rgb             rgb mode\n"
      "-f, --fbas            fbas mode\n"
      "-s, --svideo          svideo mode\n"
+     "-y, --yuv-cvbs        yuv+cvbs mode\n"
+     "    --yuv-vbs         yuv+vbs mode\n"
      "-p, --pal             pal mode\n"
      "-n, --ntsc            ntsc mode\n"
      "-i, --input <X>       input control\n"
@@ -118,6 +120,14 @@ int main(int argc, char **argv)
     }
     else if ((strcmp("-s",argv[count]) == 0) || (strcmp("--svideo",argv[count]) == 0)) {
 	  arg = SAA_MODE_SVIDEO;
+	  mode = SAAIOSMODE;
+    }
+    else if ((strcmp("-y",argv[count]) == 0) || (strcmp("--yuv-cvbs",argv[count]) == 0)) {
+	  arg = SAA_MODE_YUV_C;
+	  mode = SAAIOSMODE;
+    }
+    else if (strcmp("--yuv-vbs",argv[count]) == 0) {
+	  arg = SAA_MODE_YUV_V;
 	  mode = SAAIOSMODE;
     }
     else if ((strcmp("-p",argv[count]) == 0) || (strcmp("--pal",argv[count]) == 0)) {
