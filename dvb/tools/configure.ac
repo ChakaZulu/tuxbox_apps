@@ -1,0 +1,15 @@
+AC_INIT(tuxbox-apps-dvb-tools,0.0.1,,dvb-tools)
+AM_INIT_AUTOMAKE(dvb-zapit,0.0.1)
+
+TUXBOX_APPS
+TUXBOX_APPS_DIRECTORY
+
+AC_PROG_CC
+AC_PROG_CXX
+
+TUXBOX_APPS_DVB
+
+AC_OUTPUT([
+Makefile
+])
+
