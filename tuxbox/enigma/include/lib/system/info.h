@@ -2,6 +2,7 @@
 #define __lib_system_info_h
 
 #include <set>
+#include <config.h>
 
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
