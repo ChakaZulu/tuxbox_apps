@@ -2878,6 +2878,7 @@ void CNeutrinoApp::ExitRun()
 		frameBuffer->loadPicture2FrameBuffer("shutdown.raw");
 	frameBuffer->loadPal("shutdown.pal");
 
+	networkConfig.commitConfig();
 	saveSetup();
 	g_Controld->shutdown();
 
@@ -3274,6 +3275,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	else if(actionKey=="savesettings")
 	{
 		g_Controld->saveSettings();
+		networkConfig.commitConfig();
 		saveSetup();
 	}
 	else if(actionKey=="recording")
@@ -3358,7 +3360,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.431 2003/03/27 19:05:29 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.432 2003/03/28 09:27:03 thegoodguy Exp $\n\n");
 
 	tzset();
 	initGlobals();
