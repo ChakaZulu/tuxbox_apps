@@ -10,6 +10,7 @@ class eTextInputFieldHelpWidget;
 
 class eTextInputField: public eButton
 {
+	int table;
 	int curPos;
 	unsigned int maxChars;
 	int eventHandler( const eWidgetEvent &);

@@ -42,6 +42,11 @@ eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFiel
 	addActionMap(&i_texteditActions->map);
 	flags=0;
 	align=eTextPara::dirLeft;
+	table=5;	
+	char *language=0;
+	eConfig::getInstance()->getKey("/elitedvb/language", language);
+	if (strstr(language,"ru_RU"))
+		table=1;
 	updateHelpWidget();
 }
 
@@ -155,7 +160,7 @@ void eTextInputField::updateHelpWidget()
 					keymappings["default"][i].first;
 			}
 
-			eString tmpStr = convertUTF8DVB(keysStr);
+			eString tmpStr = convertUTF8DVB(keysStr, table);
 
 			if ( i < 10)
 			{
@@ -171,7 +176,7 @@ void eTextInputField::updateHelpWidget()
 				if ( useableChars.find(tmpStr[d]) != eString::npos )
 					filtered+=tmpStr[d];
 
-			helpwidget->keys[i]->setText(convertDVBUTF8((unsigned char*)filtered.c_str(),filtered.length()));
+			helpwidget->keys[i]->setText(convertDVBUTF8((unsigned char*)filtered.c_str(),filtered.length(), table));
 		}
 	}
 }
@@ -179,9 +184,9 @@ void eTextInputField::updateHelpWidget()
 void eTextInputField::updated()
 {
 	if ( editLabel )
-		editLabel->setText(convertDVBUTF8((unsigned char*)isotext.c_str(),isotext.length()));
+		editLabel->setText(convertDVBUTF8((unsigned char*)isotext.c_str(),isotext.length(), table));
 	else
-		text=convertDVBUTF8((unsigned char*)isotext.c_str(),isotext.length());
+		text=convertDVBUTF8((unsigned char*)isotext.c_str(),isotext.length(), table);
 	drawCursor();
 }
 
@@ -292,9 +297,9 @@ void eTextInputField::drawCursor()
 int eTextInputField::eventHandler( const eWidgetEvent &event )
 {
 	if (editLabel)
-		isotext=convertUTF8DVB(editLabel->getText());
+		isotext=convertUTF8DVB(editLabel->getText(), table);
 	else
-		isotext=convertUTF8DVB(text);
+		isotext=convertUTF8DVB(text, table);
 	switch (event.type)
 	{
 		case eWidgetEvent::changedText:
@@ -500,7 +505,7 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 						keymappings["default"][key].first;
 				}
 
-				eString tmpStr=convertUTF8DVB(keysStr);
+				eString tmpStr=convertUTF8DVB(keysStr, table);
 
 				if ( key < 10)
 				{
@@ -564,7 +569,7 @@ void eTextInputField::lostFocus()
 	if ( editMode )
 	{
 		nextCharTimer.stop();
-		isotext=convertUTF8DVB(editLabel->getText());
+		isotext=convertUTF8DVB(editLabel->getText(), table);
 		setText(isotext);
 		setHelpText(oldHelpText);
 		while ( text.length() && text[text.length()-1] == ' ' )
