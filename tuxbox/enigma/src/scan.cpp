@@ -701,6 +701,7 @@ int TransponderScan::exec()
 			finish.show();
 			finish.exec();
 			finish.hide();
+			state=stateEnd;
 			break;
 		}
 		default:
