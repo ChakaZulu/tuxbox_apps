@@ -30,6 +30,8 @@
 #include "getservices.h"
 #include "sdt.h"
 
+#include "bouquets.h"
+
 /*Thread stuff */
 #include <pthread.h>
 
@@ -76,7 +78,6 @@ typedef struct decode_struct{
 } decode_vals;
 
 int LoadServices();
-int LoadBouquets();
 int get_caid();
 int sdt(uint osid,bool scan_mode);
 int pat(uint oonid,std::map<uint,channel> *cmap);
@@ -84,3 +85,5 @@ void nit();
 int tune(uint tsid);
 void *start_scanthread(void *);
 int get_caver();
+
+CBouquetManager* g_BouquetMan;

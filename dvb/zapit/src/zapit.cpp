@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.53 2001/12/24 15:33:27 obi Exp $
+  $Id: zapit.cpp,v 1.54 2001/12/30 18:38:37 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -69,7 +69,7 @@
   		cam-type F == 64
   		other cam-type == 128
   		so valid are : 33, 18 and 68
-  
+
   cmd = 'u' get current vtxt-pid
 
 
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.54  2001/12/30 18:38:37  Simplex
+  intregration of CBouquetManager (part I)
+
   Revision 1.53  2001/12/24 15:33:27  obi
   - do not kill camd which does not run before startup of zapit
   - use CONFIGDIR
@@ -318,7 +321,6 @@ std::map<std::string, uint> namechans_tv;
 std::map<uint, channel> allchans_radio;
 std::map<uint, uint> numchans_radio;
 std::map<std::string, uint> namechans_radio;
-std::vector<bouquet> allBouquets;
 
 typedef std::map<uint, transponder>::iterator titerator;
 
@@ -332,7 +334,7 @@ extern int found_channels;
 extern short curr_sat;
 extern short scan_runs;
 boolean use_vtxtd = false;
-int vtxt_pid; 
+int vtxt_pid;
 
 void start_scan();
 volatile sig_atomic_t keep_going = 1; /* controls program termination */
@@ -382,9 +384,9 @@ int set_vtxt(uint vpid)
     char hexpid[20];
 
     vtxt_pid = vpid;
-    
+
     if (use_vtxtd)
-    {    
+    {
     memset(&hexpid,0, sizeof(hexpid));
     sprintf(hexpid,"%x",vpid);
     vtxtsock=socket(AF_LOCAL, SOCK_STREAM,0);
@@ -418,7 +420,7 @@ int set_vtxt(uint vpid)
    }
    else
    {
-   	
+
     fd = open("/dev/dbox/vbi0", O_RDWR);
     if (fd < 0)
     {
@@ -508,7 +510,7 @@ pids parse_pmt(int pid, int ca_system_id)
   flt.filter.filter[0]=2;
 
   flt.filter.mask[0]  =0xFF;
-//  flt.timeout=5000;
+  flt.timeout=5000;
   flt.flags=DMX_ONESHOT | DMX_CHECK_CRC;
 
   //printf("parsepmt is setting DMX-FILTER\n");
@@ -1183,7 +1185,7 @@ else
 //  if (parse_pmt_pids.vtxtpid != 0)
     dprintf("[zapit] setting vtxt\n");
     set_vtxt(parse_pmt_pids.vtxtpid);
-    
+
 
       //printf("Saving settings\n");
       curr_onid_sid = onid_sid;
@@ -1418,7 +1420,7 @@ void endzap()
     }
 
   ioctl(vid, VIDEO_STOP, false);
-  	
+
   if ( video>= 0 )
     {
       close(video);
@@ -1487,12 +1489,13 @@ int prepare_channels()
 	allchans_radio.clear();
 	numchans_radio.clear();
 	namechans_radio.clear();
-	allBouquets.clear();
 	found_transponders = 0;
 	found_channels = 0;
 
+	g_BouquetMan->clearAll();
+
   int ls = LoadServices();
-  LoadBouquets();
+	g_BouquetMan->loadBouquets();
 
   if (ls > 0)
     {
@@ -1597,7 +1600,7 @@ void start_scan(unsigned short do_diseqc)
       audio = -1;
     }
 
-  
+
 
   if (pthread_create(&scan_thread, 0, start_scanthread,&do_diseqc))
   {
@@ -2165,10 +2168,10 @@ void sendBouquetList()
 	}
 
 	uint nBouquetCount = 0;
-	for (uint i=0; i<allBouquets.size(); i++)
+	for (uint i=0; i<g_BouquetMan->Bouquets.size(); i++)
 	{
-		if ( (Radiomode_on) && (allBouquets[i].radio_channels.size()> 0) ||
-			!(Radiomode_on) && (allBouquets[i].tv_channels.size()> 0))
+		if ( (Radiomode_on) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) ||
+			!(Radiomode_on) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0))
 			{
 				nBouquetCount++;
 			}
@@ -2181,15 +2184,15 @@ void sendBouquetList()
 	}
 	else
 	{
-		for (uint i=0; i<allBouquets.size(); i++)
+		for (uint i=0; i<g_BouquetMan->Bouquets.size(); i++)
 		{
 			// send bouquet only if there are channels in it
-			if ( (Radiomode_on) && (allBouquets[i].radio_channels.size()> 0) ||
-				!(Radiomode_on) && (allBouquets[i].tv_channels.size()> 0))
+			if ( (Radiomode_on) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) ||
+				!(Radiomode_on) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0))
 			{
 				bouquet_msg msgBouquet;
 				// we'll send name and i+1 as bouquet number
-				strncpy(msgBouquet.name, allBouquets[i].name.c_str(),30);
+				strncpy(msgBouquet.name, g_BouquetMan->Bouquets[i]->Name.c_str(),30);
 				msgBouquet.bouquet_nr = i+1;
 
 				if (send(connfd, &msgBouquet, sizeof(msgBouquet),0) == -1)
@@ -2209,7 +2212,7 @@ void sendChannelListOfBouquet( uint nBouquet)
 
 	// we get the bouquet number as 1-beginning but need it 0-beginning
 	nBouquet--;
-	if (nBouquet < 0 || nBouquet>allBouquets.size())
+	if (nBouquet < 0 || nBouquet>g_BouquetMan->Bouquets.size())
 	{
 		printf("[zapit] invalid bouquet number: %d",nBouquet);
 		status = "-0r";
@@ -2227,9 +2230,9 @@ void sendChannelListOfBouquet( uint nBouquet)
 
 	std::vector<channel*> channels;
 	if (Radiomode_on)
-		channels = allBouquets[nBouquet].radio_channels;
+		channels = g_BouquetMan->Bouquets[nBouquet]->radioChannels;
 	else
-		channels = allBouquets[nBouquet].tv_channels;
+		channels = g_BouquetMan->Bouquets[nBouquet]->tvChannels;
 
 	if (!channels.empty())
 	{
@@ -2315,13 +2318,15 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.53 2001/12/24 15:33:27 obi Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.54 2001/12/30 18:38:37 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
   found_channels = 0;
   curr_sat = -1;
-  
+
+	g_BouquetMan = new CBouquetManager();
+
   testmsg = load_settings();
 
   if (testmsg.mode== 'r')

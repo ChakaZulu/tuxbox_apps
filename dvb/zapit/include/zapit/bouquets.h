@@ -57,6 +57,7 @@ class CBouquetManager
 
 		void saveAsLast( uint BouquetId, uint channelNr);
 		void getLast( uint* BouquetId, uint* channelNr);
+		void clearAll();
 		void onTermination();
 		void onStart();
 };
