@@ -40,6 +40,7 @@
 #define SAA_INP_CBENB   128
 
 #define SAA_WSS_43F	0
+#define SAA_WSS_169C	3
 #define SAA_WSS_169F	7
 
 eAVSwitch *eAVSwitch::instance=0;
@@ -347,7 +348,20 @@ int eAVSwitch::setAspectRatio(eAVAspectRatio as)
 {
 	int saa;
 	aspect=as;
-	saa = (aspect==r169) ? SAA_WSS_169F : SAA_WSS_43F;
+	switch (aspect)
+	{
+		case r43:
+			saa = SAA_WSS_43F;
+			break;
+		case r169:
+			saa = SAA_WSS_169F;
+			break;
+		case r169c:
+			saa = SAA_WSS_169C;
+			break;
+		default:
+			saa = SAA_WSS_43F;
+	}
 	ioctl(saafd,SAAIOSWSS,&saa);
 	return setTVPin8(active?((aspect==r169)?6:12):0);
 }

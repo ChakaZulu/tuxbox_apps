@@ -68,6 +68,7 @@ void eStreamWatchdog::check(int)
 void eStreamWatchdog::reloadSettings()
 {
 	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
+	eAVAspectRatio aratio = rUnknown;
 	if (bitstream)
 	{
 		char buffer[100];
@@ -94,28 +95,43 @@ void eStreamWatchdog::reloadSettings()
 		/*emit*/ AspectRatioChanged(isanamorph);
 
 	int videoDisplayFormat=VIDEO_LETTER_BOX;
-	int doanamorph=0;
 	unsigned int pin8;
 	eConfig::getInstance()->getKey("/elitedvb/video/pin8", pin8);
 	switch (pin8)
 	{
 	case 0:
-		doanamorph=0;
-		videoDisplayFormat=isanamorph?VIDEO_LETTER_BOX:VIDEO_PAN_SCAN;
+		if (isanamorph)
+		{
+			aratio=r169c;
+			videoDisplayFormat=VIDEO_LETTER_BOX;
+		}
+		else
+		{
+			aratio=r43;
+			videoDisplayFormat=VIDEO_PAN_SCAN;
+		}
 		break;
 	case 1:
-		doanamorph=0;
 		videoDisplayFormat=VIDEO_PAN_SCAN;
+		aratio=r43;
  		break;
 	case 2:
-		doanamorph=isanamorph;
-		videoDisplayFormat=isanamorph?VIDEO_CENTER_CUT_OUT:VIDEO_PAN_SCAN;
+		if (isanamorph)
+		{
+			aratio=r169;
+			videoDisplayFormat = VIDEO_CENTER_CUT_OUT;
+		}
+		else
+		{
+			aratio=r43;
+			videoDisplayFormat = VIDEO_PAN_SCAN;
+		}
 		break;
 	}
 
 	eAVSwitch::getInstance()->setVideoFormat( videoDisplayFormat );
 
-	eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
+	eAVSwitch::getInstance()->setAspectRatio(aratio);
 }
 
 int eStreamWatchdog::isAnamorph()

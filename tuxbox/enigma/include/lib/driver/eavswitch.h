@@ -5,7 +5,7 @@
 
 enum eAVAspectRatio
 {
-	rUnknown, r43, r169
+	rUnknown, r43, r169, r169c
 };
 
 enum eAVColorFormat
