@@ -42,6 +42,7 @@ void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 		{
 			eServiceReference ref(id, 0, filename);
 			ref.descr = filename.substr(filename.find_last_of("/") + 1, filename.length() - 1);
+			ref.flags |= eServiceReference::isNotPlayable;
 			eServiceFileHandler::getInstance()->addReference(node, ref);
 		}
 	}
