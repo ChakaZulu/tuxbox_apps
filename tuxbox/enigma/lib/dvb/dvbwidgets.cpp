@@ -106,11 +106,9 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 		l->setName("lBandwidth");
 		bandwidth=new eListBox<eListBoxEntryText>(this, l, edit);
 		bandwidth->setName("Bandwidth");
-		bandwidthEntry[0]=new eListBoxEntryText(bandwidth, "Auto", (void*)-1);
-		bandwidthEntry[1]=new eListBoxEntryText(bandwidth, "8 MHz", (void*)0);
-		bandwidthEntry[2]=new eListBoxEntryText(bandwidth, "7 MHz", (void*)1);
-		bandwidthEntry[3]=new eListBoxEntryText(bandwidth, "6 MHz", (void*)2);
-		bandwidthEntry[4]=new eListBoxEntryText(bandwidth, "5 MHz", (void*)3);
+		bandwidthEntry[0]=new eListBoxEntryText(bandwidth, "8 MHz", (void*)0);
+		bandwidthEntry[1]=new eListBoxEntryText(bandwidth, "7 MHz", (void*)1);
+		bandwidthEntry[2]=new eListBoxEntryText(bandwidth, "6 MHz", (void*)2);
 		CONNECT(bandwidth->selchanged, eTransponderWidget::updated1);
 		l = new eLabel(this);
 		l->setName("ltmMode");
@@ -119,7 +117,6 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 		tmModeEntry[0]=new eListBoxEntryText(tmMode, "Auto", (void*)-1);
 		tmModeEntry[1]=new eListBoxEntryText(tmMode, "2k", (void*)0);
 		tmModeEntry[2]=new eListBoxEntryText(tmMode, "8k", (void*)1);
-		tmModeEntry[3]=new eListBoxEntryText(tmMode, "4k", (void*)2);
 		CONNECT(tmMode->selchanged, eTransponderWidget::updated1);
 		l = new eLabel(this);
 		l->setName("lCodeRateLP");
@@ -279,8 +276,8 @@ int eTransponderWidget::setTransponder(const eTransponder *transponder)
 		else
 			fec->setCurrent(fecEntry[0]);
 
-		if (transponder->terrestrial.bandwidth >= 0 && transponder->terrestrial.bandwidth < 4 )
-			bandwidth->setCurrent(bandwidthEntry[transponder->terrestrial.bandwidth+1]);
+		if (transponder->terrestrial.bandwidth >= 0 && transponder->terrestrial.bandwidth < 3)
+			bandwidth->setCurrent(bandwidthEntry[transponder->terrestrial.bandwidth]);
 		else
 			bandwidth->setCurrent(bandwidthEntry[0]);
 
