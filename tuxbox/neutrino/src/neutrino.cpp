@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.82 2001/11/23 17:09:22 McClean Exp $
+        $Id: neutrino.cpp,v 1.83 2001/11/24 13:48:47 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.83  2001/11/24 13:48:47  Simplex
+  fixed "radio-only bouquets"-bug
+
   Revision 1.82  2001/11/23 17:09:22  McClean
   dont know
 
@@ -633,7 +636,7 @@ void CNeutrinoApp::isCamValid()
 	char rip[]="127.0.0.1";
 	char *return_buf;
 	int ca_verid = 0;
-	
+
 	sendmessage.version=1;
 	sendmessage.cmd = 't';
 
@@ -672,12 +675,12 @@ void CNeutrinoApp::isCamValid()
 		return;
 	}
 	free(return_buf);
-	
+
 	if (recv(sock_fd, &ca_verid, sizeof(int),0) <= 0 ) {
 		perror("Nothing could be received\n");
 		exit(-1);
 	}
-	
+
 	if (ca_verid != 33 && ca_verid != 18 && ca_verid != 68)
 	{
 		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
@@ -685,7 +688,7 @@ void CNeutrinoApp::isCamValid()
 
 }
 
-		
+
 /**************************************************************************************
 *                                                                                     *
 *          CNeutrinoApp -  channelsInit, get the Channellist from daemon              *
@@ -809,6 +812,7 @@ void CNeutrinoApp::channelsInit()
 
 			strncpy(bouquet_name, zapitbouquet.name,30);
 			bouquet = bouquetList->addBouquet( zapitbouquet.name );
+			bouquet->key = zapitbouquet.bouquet_nr;
 //			printf("%s\n", zapitbouquet.name);
 		}
 		printf("All bouquets received (%d). Receiving channels... \n", nBouquetCount);
@@ -818,7 +822,7 @@ void CNeutrinoApp::channelsInit()
 		{
 			sendmessage.version=1;
 			sendmessage.cmd = 'r';
-			sendmessage.param = i+1;
+			sendmessage.param = bouquetList->Bouquets[i]->key;
 
 			sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 			memset(&servaddr,0,sizeof(servaddr));
@@ -1037,7 +1041,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 		updateSettings->addItem( new CMenuSeparator() );
 		updateSettings->addItem( new CMenuForwarder("menu.back") );
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		
+
 		//get current flash-version
 		FILE* fd = fopen("/var/etc/version", "r");
 		strcpy(g_settings.softupdate_currentversion, "1.0.0");
@@ -1067,9 +1071,9 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 			oj->addOption(1, "flashupdate.updatemode_internet");
 		updateSettings->addItem( oj );
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		updateSettings->addItem( new CMenuForwarder("flashupdate.checkupdate", true, "", g_Update ) );		
+		updateSettings->addItem( new CMenuForwarder("flashupdate.checkupdate", true, "", g_Update ) );
 
-		mainSettings.addItem( new CMenuForwarder("mainsettings.update", true, "", updateSettings ) );		
+		mainSettings.addItem( new CMenuForwarder("mainsettings.update", true, "", updateSettings ) );
 		printf("ready - soft-update-stuff\n");
 	}
 
@@ -1968,7 +1972,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.82 2001/11/23 17:09:22 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.83 2001/11/24 13:48:47 Simplex Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.41 2001/11/23 13:45:59 faralla Exp $
+  $Id: zapit.cpp,v 1.42 2001/11/24 13:47:31 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -58,8 +58,8 @@
 
   cmd = 'r' get list of channels of a specified bouquet
   param = id of bouquet
-  
-  cmd = 't' Get or-ed values for caid and ca-version. 
+
+  cmd = 't' Get or-ed values for caid and ca-version.
   		caid 0x1722 == 1
   		caid 0x1702 == 2
   		caid 0x1762 == 4
@@ -69,7 +69,7 @@
   		cam-type F == 64
   		other cam-type == 128
   		so valid are : 33, 18 and 68
-  		
+
 
   Bei Fehlschlagen eines Kommandos wird der negative Wert des kommandos zurückgegeben.
 
@@ -90,6 +90,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.42  2001/11/24 13:47:31  Simplex
+  fixed "radio-only bouquets"-bug
+
   Revision 1.41  2001/11/23 13:45:59  faralla
   fixes for ca_version
 
@@ -2001,7 +2004,7 @@ void parse_command()
 		break;
 	case 't':
 		status = "00t";
-		
+
 		switch (caid)
 		{
 			case 0x1722 : caid_ver = 1;
@@ -2085,7 +2088,7 @@ int main(int argc, char **argv) {
     }
 
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.41 2001/11/23 13:45:59 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.42 2001/11/24 13:47:31 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2098,7 +2101,7 @@ int main(int argc, char **argv) {
 
   caver = get_caver();
   caid = get_caid();
-  
+
   memset(&pids_desc, 0, sizeof(pids));
 
   if (prepare_channels() <0) {
@@ -2129,16 +2132,16 @@ int main(int argc, char **argv) {
     case -1:                    // can't fork
       perror ("[zapit] fork()");
       exit (3);
-    case 0:                     // child, process becomes a daemon: 
+    case 0:                     // child, process becomes a daemon:
       //close (STDIN_FILENO);
       //close (STDOUT_FILENO);
       //close (STDERR_FILENO);
-      if (setsid () == -1)      // request a new session (job control) 
+      if (setsid () == -1)      // request a new session (job control)
 	{
 	  exit (4);
 	}
       break;
-    default:                    // parent returns to calling process: 
+    default:                    // parent returns to calling process:
       return 0;
     }
 
@@ -2160,7 +2163,7 @@ int main(int argc, char **argv) {
       parse_command();
       close(connfd);
     }
-    
+
   return 0;
 }
 
@@ -2173,7 +2176,16 @@ void sendBouquetList()
 		return;
 	}
 
-	uint nBouquetCount = allBouquets.size();
+	uint nBouquetCount = 0;
+	for (uint i=0; i<allBouquets.size(); i++)
+	{
+		if ( (Radiomode_on) && (allBouquets[i].radio_channels.size()> 0) ||
+			!(Radiomode_on) && (allBouquets[i].tv_channels.size()> 0))
+			{
+				nBouquetCount++;
+			}
+	}
+
 	if (send(connfd, &nBouquetCount, sizeof(nBouquetCount),0) == -1)
 	{
 		perror("[zapit] could not send any return\n");
@@ -2200,7 +2212,7 @@ void sendBouquetList()
 			}
 		}
 	}
-	
+
 }
 
 void sendChannelListOfBouquet( uint nBouquet)
