@@ -10,6 +10,7 @@ noinst_HEADERS = \
 	eit.h \
 	eit.h \
 	mdt.h \
+	nit.h \
 	pat.h \
 	pmt.h \
 	rst.h \

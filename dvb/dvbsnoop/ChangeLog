@@ -1,4 +1,5 @@
 
+ - Change: FE adaptions (due to change defines on API)
  - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert)
  - New: MetaData Section  (Basic) (H.222.0 AMD1)
  - New: MPEG Metadata STD descriptor (H.222.0 AMD1)

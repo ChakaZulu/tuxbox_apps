@@ -1,5 +1,5 @@
 /*
-$Id: fe_misc.c,v 1.4 2004/04/01 23:02:10 rasc Exp $
+$Id: fe_misc.c,v 1.5 2004/08/22 22:07:48 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_misc.c,v 1.4 2004/04/01 23:02:10 rasc Exp $
 
 
 $Log: fe_misc.c,v $
+Revision 1.5  2004/08/22 22:07:48  rasc
+- Fix: nit.h got lost in Makefile
+
 Revision 1.4  2004/04/01 23:02:10  rasc
 clear structures in cases these are not completly filled...
 
@@ -250,7 +253,20 @@ int  print_FE_BasicCapabilities (int v, int fd_fe)
       if (fi.caps &  FE_CAN_BANDWIDTH_AUTO)		out_nl (v,"auto bandwidth");
       if (fi.caps &  FE_CAN_GUARD_INTERVAL_AUTO)	out_nl (v,"auto guard interval");
       if (fi.caps &  FE_CAN_HIERARCHY_AUTO)	out_nl (v,"auto hierarchy");
+
+#ifdef FE_CAN_CLEAN_SETUP
       if (fi.caps &  FE_CAN_CLEAN_SETUP)	out_nl (v,"clean setup");
+#endif
+#ifdef FE_NEED_BENDING
+      if (fi.caps &  FE_NEEDS_BENDING)		out_nl (v,"FE_NEEDS_BENDING");
+#endif
+#ifdef FE_CAN_RECOVER
+      if (fi.caps &  FE_CAN_RECOVER)		out_nl (v,"FE_CAN_RECOVER");
+#endif
+#ifdef FE_CAN_MUTE_TS
+      if (fi.caps &  FE_CAN_MUTE_TS)		out_nl (v,"FE_CAN_MUTE_TS");
+#endif
+
       indent (-1);
       out_NL(v);
 
