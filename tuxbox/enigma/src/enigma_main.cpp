@@ -3056,7 +3056,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 
 		eServiceReferenceDVB &ref=(eServiceReferenceDVB&)ref_;
 		// build filename
-		eString servicename, descr = _("no description available");
+		eString servicename, descr/* = _("no description available")*/;
 
 		eService *service=0;
 
@@ -3097,7 +3097,14 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 		if ( servicename )
 		{
 //			eDebug("we have servicename... sname + \" - \" + descr(%s)",descr.c_str());
+			// append date..
+			filename = servicename;
+			if ( descr )
+				filename += " - " + descr;
 			filename = servicename + " - " + descr;
+			time_t now = time(0)+eDVB::getInstance()->time_difference;
+			tm nowTime = *localtime(&now);
+			filename += eString().sprintf(" - %02d.%02d.%02d", nowTime.tm_mday, nowTime.tm_mon+1, nowTime.tm_year%100 );
 			filename = filename.left(100);
 		}
 		else
