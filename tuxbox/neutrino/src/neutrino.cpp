@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.118 2002/01/04 02:38:05 McClean Exp $
+        $Id: neutrino.cpp,v 1.119 2002/01/04 02:41:47 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.119  2002/01/04 02:41:47  McClean
+  errormessage changed
+
   Revision 1.118  2002/01/04 02:38:05  McClean
   cleanup
 
@@ -2169,7 +2172,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 
 	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
 	{
-		perror("CRemoteControl - getNVODs - couldn't connect to sectionsd!\n");
+		perror("[neutrino] -  cannot connect to streamingserver\n");
 		return false;
 	}
 	streaming_commandhead rmsg;
@@ -2189,7 +2192,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.118 2002/01/04 02:38:05 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.119 2002/01/04 02:41:47 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
