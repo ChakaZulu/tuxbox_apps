@@ -90,11 +90,15 @@ void CHintBox::paint(const bool saveScreen)
 		if (pixbuf!= NULL)
 			frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 
+		/*
 		// clear border
 		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
 		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
 		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
 		frameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
+		*/
+		frameBuffer->paintBoxRel(x + borderwidth, y+ height, width, borderwidth, COL_BACKGROUND);
+		frameBuffer->paintBoxRel(x + width, y + borderwidth, borderwidth, height - borderwidth, COL_BACKGROUND);
 	}
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
