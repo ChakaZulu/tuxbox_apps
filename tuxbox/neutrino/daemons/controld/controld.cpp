@@ -162,9 +162,6 @@ void shutdownBox()
 void setvideooutput(int format, bool bSaveSettings = true)
 {
 	int fd;
-	/*
-		RGB : fblk 1
-	*/
 	if (format < 0)
 	{
 		format=0;
@@ -174,21 +171,67 @@ void setvideooutput(int format, bool bSaveSettings = true)
 		format=3;
 	}
 
+	// 0 - COMPOSITE
+	// 1 - RGB
+	// 2 - SVIDEO
+
 	if (bSaveSettings) // only set settings if we dont come from watchdog
 		settings.videooutput = format;
 
+	int	arg;
+
+    switch ( format )
+	{
+	 	case 0:
+	 		arg = 0;
+	 		break;
+		case 1:
+	 		arg = 1;
+	 		break;
+		case 2:
+	 		arg = 0;
+	 		break;
+    }
 	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
 		perror("open");
 		return;
 	}
 
-	if (ioctl(fd,AVSIOSFBLK,&format)< 0)
+	if (ioctl(fd, AVSIOSFBLK, &arg)< 0)
 	{
 		perror("AVSIOSFBLK:");
 		return;
 	}
 	close(fd);
+
+
+	switch ( format )
+	{
+	 	case 0:
+	 		arg = SAA_MODE_FBAS;
+	 		break;
+		case 1:
+	 		arg = SAA_MODE_RGB;
+	 		break;
+		case 2:
+	 		arg = SAA_MODE_SVIDEO;
+	 		break;
+    }
+	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
+	{
+		perror("[controld] SAA DEVICE: ");
+		return;
+	}
+
+	if ( (ioctl(fd, SAAIOSMODE, &arg) < 0))
+	{
+		perror("[controld] IOCTL: ");
+		close(fd);
+		return;
+	}
+	close(fd);
+
 }
 
 void setVideoFormat(int format, bool bUnregNotifier = true)
@@ -290,38 +333,6 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 
 void LoadScart_Settings()
 {
-	// scart
-	sagem_scart[0]= 2;
-	sagem_scart[1]= 1;
-	sagem_scart[2]= 0;
-	sagem_scart[3]= 0;
-
-	nokia_scart[0]= 3;
-	nokia_scart[1]= 2;
-	nokia_scart[2]= 1;
-	nokia_scart[3]= 0;
-
-	philips_scart[0]= 2;
-	philips_scart[1]= 2;
-	philips_scart[2]= 3;
-	philips_scart[3]= 0;
-
-	// dvb
-	sagem_dvb[0]= 0;
-	sagem_dvb[1]= 0;
-	sagem_dvb[2]= 0;
-	sagem_dvb[3]= 0;
-
-	nokia_dvb[0]= 5;
-	nokia_dvb[1]= 1;
-	nokia_dvb[2]= 1;
-	nokia_dvb[3]= 0;
-
-	philips_dvb[0]= 1;
-	philips_dvb[1]= 1;
-	philips_dvb[2]= 1;
-	philips_dvb[3]= 0;
-
 	FILE* fd = fopen(CONFIGDIR"/scart.conf", "r");
 	if(fd)
 	{
@@ -366,7 +377,37 @@ void LoadScart_Settings()
 	{
 		printf("[controld]: failed to load scart-config (scart.conf), using standard-values\n");
 
+		// scart
+		sagem_scart[0]= 2;
+		sagem_scart[1]= 1;
+		sagem_scart[2]= 0;
+		sagem_scart[3]= 0;
 
+		nokia_scart[0]= 3;
+		nokia_scart[1]= 2;
+		nokia_scart[2]= 1;
+		nokia_scart[3]= 0;
+
+		philips_scart[0]= 2;
+		philips_scart[1]= 2;
+		philips_scart[2]= 3;
+		philips_scart[3]= 0;
+
+		// dvb
+		sagem_dvb[0]= 0;
+		sagem_dvb[1]= 0;
+		sagem_dvb[2]= 0;
+		sagem_dvb[3]= 0;
+
+		nokia_dvb[0]= 5;
+		nokia_dvb[1]= 1;
+		nokia_dvb[2]= 1;
+		nokia_dvb[3]= 0;
+
+		philips_dvb[0]= 1;
+		philips_dvb[1]= 1;
+		philips_dvb[2]= 1;
+		philips_dvb[3]= 0;
 	}
 }
 
@@ -524,7 +565,7 @@ void setBoxType(char type)
 	FILE* fd = fopen("/proc/bus/dbox", "rt");
 	if (fd==NULL)
 	{
-		printf("error while opening /proc/bus/dbox\n" );
+		printf("[controld] error while opening /proc/bus/dbox\n" );
 		return;
 	}
 
@@ -757,7 +798,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.40 2002/03/01 13:21:09 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.41 2002/03/01 15:04:19 field Exp $\n\n");
 
 	if (fork() != 0)
 		return 0;
