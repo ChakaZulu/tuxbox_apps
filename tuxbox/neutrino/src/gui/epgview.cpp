@@ -249,7 +249,7 @@ string GetGenre( char contentClassification )
 }
 
 
-int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startzeit, bool doLoop )
+int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t* startzeit, bool doLoop )
 {
 	int res = menu_return::RETURN_REPAINT;
 
@@ -261,10 +261,10 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 		g_Fonts->epg_date->RenderString(g_settings.screen_StartX+10, g_settings.screen_StartY+height, 40, "-@-", COL_INFOBAR);
 	}
 
-	GetEPGData( onid_sid, id, startzeit );
+	GetEPGData(channel_id, id, startzeit );
 	if (doLoop)
 	{
-		evtlist = g_Sectionsd->getEventsServiceKey( onid_sid );
+		evtlist = g_Sectionsd->getEventsServiceKey(channel_id);
 		frameBuffer->paintBackgroundBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5);
 	}
 
@@ -353,7 +353,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	// -- 2002-05-03 rasc
 	processTextToArray("\n") ;
 	processTextToArray(g_Locale->getText("epgviewer.More_Screenings")+":");
-	FollowScreenings(onid_sid, epgData.title);
+	FollowScreenings(channel_id, epgData.title);
 
 
 	//show the epg
@@ -426,7 +426,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 						frameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 						g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 1);
 
-						show(onid_sid, prev_id, &prev_zeit, false);
+						show(channel_id, prev_id, &prev_zeit, false);
 					}
 					break;
 
@@ -437,7 +437,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 						frameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 						g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 1);
 
-						show(onid_sid, next_id, &next_zeit, false);
+						show(channel_id, next_id, &next_zeit, false);
 					}
 					break;
 
@@ -464,7 +464,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 						timerdclient = new CTimerdClient;
 						if(timerdclient->isTimerdAvailable())
 						{
-							timerdclient->addRecordTimerEvent(onid_sid, epgData.eventID, epgData.epg_times.startzeit, epgData.epg_times.startzeit - ANNOUNCETIME,epgData.epg_times.startzeit + epgData.epg_times.dauer );
+							timerdclient->addRecordTimerEvent(channel_id, epgData.eventID, epgData.epg_times.startzeit, epgData.epg_times.startzeit - ANNOUNCETIME,epgData.epg_times.startzeit + epgData.epg_times.dauer );
 							ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 						}
 						else
@@ -479,8 +479,8 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 					timerdclient = new CTimerdClient;
 					if(timerdclient->isTimerdAvailable())
 					{
-						timerdclient->addZaptoTimerEvent(onid_sid, epgData.eventID, epgData.epg_times.startzeit, epgData.epg_times.startzeit - ANNOUNCETIME, 0);
-						printf("Added ZaptoTimerEvent for onidsid: %u epgID: %llu\n",onid_sid,epgData.eventID);
+						timerdclient->addZaptoTimerEvent(channel_id, epgData.eventID, epgData.epg_times.startzeit, epgData.epg_times.startzeit - ANNOUNCETIME, 0);
+						printf("Added ZaptoTimerEvent for channel_id: %08x epgID: %llu\n", channel_id, epgData.eventID);
 						ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					}
 					else
@@ -523,7 +523,7 @@ void CEpgData::hide()
 	#endif
 }
 
-void CEpgData::GetEPGData( const unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
+void CEpgData::GetEPGData(const t_channel_id channel_id, unsigned long long id, time_t* startzeit )
 {
 	epgText.clear();
 	emptyLineCount = 0;
@@ -533,7 +533,7 @@ void CEpgData::GetEPGData( const unsigned int onid_tsid, unsigned long long id, 
 	if ( id!= 0 )
 		res = g_Sectionsd->getEPGid( id, *startzeit, &epgData );
 	else
-		res = g_Sectionsd->getActualEPGServiceKey( onid_tsid, &epgData );
+		res = g_Sectionsd->getActualEPGServiceKey(channel_id, &epgData );
 
 	if ( res )
 	{
@@ -560,7 +560,7 @@ void CEpgData::GetEPGData( const unsigned int onid_tsid, unsigned long long id, 
 
 	#ifdef USEACTIONLOG
 		char buf[1000];
-		sprintf((char*) buf, "epg: %08x %s %s - %s, \"%s\"", onid_sid, epgData.date.c_str(), epgData.start.c_str(), epgData.end.c_str(), epgData.title.c_str() );
+		sprintf((char*) buf, "epg: %08x %s %s - %s, \"%s\"", channel_id, epgData.date.c_str(), epgData.start.c_str(), epgData.end.c_str(), epgData.title.c_str() );
 		g_ActionLog->println(buf);
 	#endif
 }
@@ -600,7 +600,7 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 // -- 2002-05-03 rasc
 //
 
-int CEpgData::FollowScreenings (unsigned int onid_sid, string title)
+int CEpgData::FollowScreenings (const t_channel_id channel_id, string title)
 
 {
   CChannelEventList::iterator e;
@@ -614,7 +614,7 @@ int CEpgData::FollowScreenings (unsigned int onid_sid, string title)
 
   	count = 0;
 	screening_dates = "";
-	// alredy read: evtlist = g_Sectionsd->getEventsServiceKey( onid_sid );
+	// alredy read: evtlist = g_Sectionsd->getEventsServiceKey( channel_id );
     	curtime = time(NULL);
 
 	for ( e= evtlist.begin(); e != evtlist.end(); ++e )

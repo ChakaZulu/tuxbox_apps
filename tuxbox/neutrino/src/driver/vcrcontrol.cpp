@@ -133,7 +133,7 @@ void CVCRControl::CVCRDevice::IRDeviceDisconnect()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::sendCommand(std::string command,unsigned onidsid,unsigned long long epgid)
+bool CVCRControl::CVCRDevice::sendCommand(std::string command, const t_channel_id channel_id, unsigned long long epgid)
 {
 	if(IRDeviceConnect())
 	{
@@ -175,7 +175,7 @@ bool CVCRControl::CVCRDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::Record(unsigned onidsid, unsigned long long epgid)	
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned long long epgid)	
 {
 	return true;
 }
@@ -207,12 +207,12 @@ bool CVCRControl::CServerDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::Record(unsigned onidsid, unsigned long long epgid)	
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, unsigned long long epgid)	
 {
-	printf("Record onidsid: %x epg: %llx\n",onidsid,epgid);
-	if(onidsid != 0)		// wenn ein channel angegeben ist
-		if(g_Zapit->getCurrentServiceID() != onidsid)	// und momentan noch nicht getuned ist
-			g_Zapit->zapTo_serviceID(onidsid);		// dann umschalten
+	printf("Record channel_id: %x epg: %llx\n", channel_id, epgid);
+	if(channel_id != 0)		// wenn ein channel angegeben ist
+		if(g_Zapit->getCurrentServiceID() != channel_id)	// und momentan noch nicht getuned ist
+			g_Zapit->zapTo_serviceID(channel_id);		// dann umschalten
 
 	if(StopPlayBack && g_Zapit->isPlayBackActive())	// wenn playback gestoppt werden soll und noch läuft
 		g_Zapit->stopPlayBack();					// dann playback stoppen
@@ -222,7 +222,7 @@ bool CVCRControl::CServerDevice::Record(unsigned onidsid, unsigned long long epg
 
 	g_Zapit->setRecordMode( true );					// recordmode einschalten
 
-	if(!sendCommand(CMD_VCR_RECORD,onidsid,epgid))
+	if(!sendCommand(CMD_VCR_RECORD,channel_id,epgid))
 	{
 		if(!g_Zapit->isPlayBackActive())			// wenn command nicht gesendet werden konnte
 			g_Zapit->startPlayBack();				// dann alles rueckgaengig machen
@@ -245,20 +245,20 @@ void CVCRControl::CServerDevice::serverDisconnect()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsid,unsigned long long epgid)
+bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, unsigned long long epgid)
 {
-	printf("Send command: %d onidsid: %x epgid: %llx\n",command, onidsid, epgid);
+	printf("Send command: %d channel_id: %x epgid: %llx\n",command, channel_id, epgid);
 	if(serverConnect())
 	{
 		char tmp[40];
 		string extCommand="unknown";
-		string extOnidsid="error";
+		string ext_channel_id = "error";
 		string extEpgid="error";
 		string extVideoPID="error";
 		string extAudioPID="error";
 		string extEPGTitle="not available";
-		sprintf(tmp,"%u", onidsid);
-		extOnidsid = tmp;
+		sprintf(tmp,"%u", channel_id);
+		ext_channel_id = tmp;
 		sprintf(tmp,"%llu", epgid);
 		extEpgid = tmp;
 		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
@@ -268,7 +268,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsi
 
 		CSectionsdClient sections;
 		sectionsd::responseGetCurrentNextInfoChannelID current_next;
-		if(sections.getCurrentNextServiceKey(onidsid, current_next))
+		if(sections.getCurrentNextServiceKey(channel_id, current_next))
 		{
 			extEPGTitle=current_next.current_name;
 		}
@@ -295,7 +295,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsi
 		extMessage +="    <record command=\"" + extCommand + "\">\n";
 		extMessage +="        <channelname>" + g_RemoteControl->current_channel_name + "</channelname>\n";
 		extMessage +="        <epgtitle>" + extEPGTitle + "</epgtitle>\n";
-		extMessage +="        <onidsid>" + extOnidsid + "</onidsid>\n";
+		extMessage +="        <onidsid>" + ext_channel_id + "</onidsid>\n";
 		extMessage +="        <epgid>" + extEpgid + "</epgid>\n";
 		extMessage +="        <videopid>" + extVideoPID + "</videopid>\n";
 		extMessage +="        <audiopids selected=\"" + extAudioPID + "\">\n";

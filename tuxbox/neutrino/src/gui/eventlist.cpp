@@ -70,10 +70,10 @@ EventList::~EventList()
 }
 
 
-void EventList::readEvents(unsigned onidSid, const std::string& channelname)
+void EventList::readEvents(const t_channel_id channel_id, const std::string& channelname)
 {
 	current_event = (unsigned int)-1;
-	evtlist = g_Sectionsd->getEventsServiceKey( onidSid );
+	evtlist = g_Sectionsd->getEventsServiceKey(channel_id);
     time_t azeit=time(NULL);
 
 	for ( CChannelEventList::iterator e= evtlist.begin(); e != evtlist.end(); ++e )
@@ -100,20 +100,20 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
 }
 
 
-int EventList::exec(unsigned onidSid, const std::string& channelname)
+int EventList::exec(const t_channel_id channel_id, const std::string& channelname)
 {
 	int res = menu_return::RETURN_REPAINT;
 
 	name = channelname;
 	paintHead();
-	readEvents(onidSid, channelname);
+	readEvents(channel_id, channelname);
 	paint();
 
 	int oldselected = selected;
 
 	#ifdef USEACTIONLOG
 		char buf[1000];
-		sprintf((char*) buf, "epg-Eventlist: %08x \"%s\"", onidSid, channelname.c_str() );
+		sprintf((char*) buf, "epg-Eventlist: %08x \"%s\"", channel_id, channelname.c_str() );
 		g_ActionLog->println(buf);
 	#endif
 
@@ -201,7 +201,7 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 			{
 				hide();
 
-				res = g_EpgData->show(onidSid, evtlist[selected].eventID, &evtlist[selected].startTime);
+				res = g_EpgData->show(channel_id, evtlist[selected].eventID, &evtlist[selected].startTime);
                 if ( res == menu_return::RETURN_EXIT_ALL )
                 {
                 	loop = false;

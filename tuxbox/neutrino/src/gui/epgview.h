@@ -72,19 +72,19 @@ class CEpgData
 		int			botheight,botboxheight;
 		int			medlineheight,medlinecount;
 
-		void GetEPGData( unsigned int onid_sid, unsigned long long id, time_t* startzeit );
+		void GetEPGData(const t_channel_id channel_id, unsigned long long id, time_t* startzeit );
 		void GetPrevNextEPGData( unsigned long long id, time_t* startzeit );
 		void addTextToArray( string text );
 		void processTextToArray( string text );
 		void showText( int startPos, int ypos );
-		int FollowScreenings(unsigned int onid_sid, string title);
+		int FollowScreenings(const t_channel_id channel_id, string title);
 		void showTimerEventBar(bool show);
 
 	public:
 
 		CEpgData();
 		void start( );
-		int show( unsigned int onid_tsid, unsigned long long id = 0, time_t* startzeit = NULL, bool doLoop = true );
+		int show(const t_channel_id channel_id, unsigned long long id = 0, time_t* startzeit = NULL, bool doLoop = true );
 		void hide();
 };
 

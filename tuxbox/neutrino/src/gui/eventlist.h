@@ -55,7 +55,7 @@ class EventList
 	private:
 		CFrameBuffer	*frameBuffer;
         CChannelEventList	evtlist;
-		void readEvents(unsigned onidSid, const std::string& channelname); // I really don't like handling names
+		void readEvents(const t_channel_id channel_id, const std::string& channelname); // I really don't like handling names
 		unsigned int	selected;
 		unsigned int	current_event;
 		unsigned int	liststart;
@@ -82,7 +82,7 @@ class EventList
 	public:
 		EventList();
 		~EventList();
-		int exec(unsigned onidSid, const string& channelname);
+		int exec(const t_channel_id channel_id, const string& channelname);
 };
 
 

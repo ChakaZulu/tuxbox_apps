@@ -110,7 +110,7 @@ class CVCRControl
 				CVCRDevices deviceType;
 				CVCRStates  deviceState;
 				virtual bool Stop(){return false;};
-				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0){return false;};
+				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0){return false;};
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return false;};
@@ -120,12 +120,12 @@ class CVCRControl
 
 		class CVCRDevice : public CDevice		// VCR per IR
 		{
-				bool sendCommand(std::string command,unsigned onidsid,unsigned long long epgid);
+				bool sendCommand(std::string command, const t_channel_id channel_id, unsigned long long epgid);
 				bool IRDeviceConnect();
 				void IRDeviceDisconnect();
 			public:
 				virtual bool Stop();		// TODO: VCR ansteuerung
-				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0);	
+				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0);	
 				virtual bool Pause();
 				virtual bool Resume();
 				virtual bool IsAvailable(){return true;};
@@ -142,13 +142,13 @@ class CVCRControl
 					unsigned char		version;			// momentan 1
 					unsigned char		command;			// siehe externalcommands
 					unsigned long long	epgID;				// may be zero
-					unsigned int		onidsid;			// may be zero
+					t_channel_id		channel_id;			// may be zero
 				};
 
 				bool serverConnect();
 				void serverDisconnect();
 
-				bool sendCommand(CVCRCommand command,unsigned onidsid = 0,unsigned long long epgid = 0);
+				bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0,unsigned long long epgid = 0);
 
 			public:
 				std::string	ServerAddress;
@@ -157,7 +157,7 @@ class CVCRControl
 				bool	StopSectionsd;
 
 				virtual bool Stop();
-				virtual bool Record(unsigned int onidsid = 0, unsigned long long epgid = 0);
+				virtual bool Record(const t_channel_id channel_id = 0, unsigned long long epgid = 0);
 				virtual bool Pause(){return false;};
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return true;};
