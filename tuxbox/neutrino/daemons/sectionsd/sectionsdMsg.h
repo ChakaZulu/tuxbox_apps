@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.11 2001/07/25 16:46:46 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.12 2001/07/25 20:46:21 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.12  2001/07/25 20:46:21  fnbrd
+//  Neue Kommandos, kleine interne Verbesserungen.
+//
 //  Revision 1.11  2001/07/25 16:46:46  fnbrd
 //  Added unique-keys to all commands.
 //
@@ -69,7 +72,7 @@ struct msgSectionsdResponseHeader {
   unsigned short dataLength;
 };
 
-#define NUMBER_OF_SECTIONSD_COMMANDS 9
+#define NUMBER_OF_SECTIONSD_COMMANDS 11
 
 enum sectionsdCommands {
   actualEPGchannelName=0,
@@ -81,6 +84,8 @@ enum sectionsdCommands {
   setEventsAreOldInMinutes,
   dumpAllServices,
   actualEventListRadioshort,
+  getNextEPG,
+  getNextShort
 };
 
 //
@@ -152,5 +157,21 @@ enum sectionsdCommands {
 //   data of response:
 //     is a string (c-string) with all cached actual events,
 //     3 lines per service, first line unique-event-key, second line service name, third line event name
+//
+// getNextEPG:
+//   data of request:
+//     8 bytes (long long in 32 bit world) with unique key (binary) of the event for wich the next should be delivered
+//     4 bytes with start time (ctime) of the above event
+//   data of response:
+//     is a string (c-string) describing the EPG:
+//     unique key (long long, hex) 0xff name  0xff text  0xff extended text  0xff start time GMT (ctime, hex ) 0xff duration (seconds, hex)
+//
+// getNextShort:
+//   data of request:
+//     8 bytes (long long in 32 bit world) with unique key (binary) of the event for wich the next should be delivered
+//     4 bytes with start time (ctime) of the above event
+//   data of response:
+//     is a string (c-string) describing the Event in short terms:
+//     1. line unique key (long long, hex), 2. line name, 3. line start time GMT (ctime, hex ), 4 line  duration (seconds, hex)
 //
 #endif // SECTIONSDMSG_H
