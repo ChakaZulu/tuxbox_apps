@@ -93,8 +93,8 @@ int Decoder::Initialize()
 	parms.tpid=
 	parms.pcrpid=
 	parms.ecmpid=
-	parms.emmpid=
-	parms.audio_type=-1;
+	parms.emmpid=-1;
+	parms.audio_type=0;
 	parms.emmpid=-2;
 	parms.recordmode=0;
 	parms.descriptor_length=0;
@@ -116,9 +116,9 @@ void Decoder::Flush()
 	parms.apid=
 	parms.tpid=
 	parms.pcrpid=
-	parms.ecmpid=
+	parms.ecmpid=-1;
 //	parms.emmpid=
-	parms.audio_type=-1;
+	parms.audio_type=0;
 	parms.descriptor_length=0;
 	parms.emmpid=-2;
 	parms.recordmode=0;
@@ -206,7 +206,7 @@ int Decoder::Set()
 			qDebug("couldn't set audio mode (%s) - maybe old driver?", strerror(errno));
 		else
 		{
-			qDebug("setting audiomode to %d", (parms.audio_type==DECODE_AUDIO_MPEG)?1:0);
+			qDebug(" ----------------------------- setting audiomode to %d", (parms.audio_type==DECODE_AUDIO_MPEG)?1:0);
 			ioctl(fd, AUDIO_SET_BYPASS_MODE, (parms.audio_type==DECODE_AUDIO_MPEG)?1:0);
 			close(fd);
 		}
