@@ -6,65 +6,91 @@
 #include <stdio.h>
 #include <stropts.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #ifndef i386
-#include <dbox/avia_gt_pig.h>
+#include <linux/videodev.h>
 
+static	struct v4l2_window window = {
+
+	.x = 0,
+	.y = 0,
+	.width = 0,
+	.height = 0,
+	.chromakey = 0,
+	.clips = NULL,
+	.clipcount = 0,
+	.bitmap = NULL,
+	
+};
+	
 static	int			fd = -1;
-static	int			l_x = 0;
-static	int			l_y = 0;
-static	int			l_width = 0;
-static	int			l_height = 0;
 		int			fx2_use_pig = 1;
 
 void	Fx2SetPig( int x, int y, int width, int height )
 {
+	int preview;
+
 	if ( fd==-1 )
 		return;
-	if (( x == l_x ) && ( y == l_y ) &&
-		( width == l_height ) && ( height == l_height ))
+	if (( x == window.x ) && ( y == window.y ) &&
+		( width == window.height ) && ( height == window.height ))
 			return;
-	avia_pig_hide(fd);
-	if (( x != l_x ) || ( y != l_y ))
-		avia_pig_set_pos(fd,x,y);
-	if (( width != l_height ) || ( height != l_height ))
-		avia_pig_set_size(fd,width,height);
-	l_x=x;
-	l_y=y;
-	l_width=width;
-	l_height=height;
-	avia_pig_show(fd);
+			
+	preview = 0;
+			
+	ioctl(fd, VIDIOC_PREVIEW, &preview);
+
+	window.x=x;
+	window.y=y;
+	window.width=width;
+	window.height=height;
+
+	ioctl(fd, VIDIOC_S_WIN, &window);
+
+	preview = 1;
+	
+	ioctl(fd, VIDIOC_PREVIEW, &preview);
 }
 
 void	Fx2ShowPig( int x, int y, int width, int height )
 {
+	int preview;
+	
 	if ( fd != -1 )
 	{
 		Fx2SetPig(x,y,width,height);
 		return;
 	}
 	if (( fd == -1 ) && fx2_use_pig )
-		fd = open( "/dev/dbox/pig0", O_RDONLY );
+		fd = open( "/dev/v4l2/capture0", O_RDONLY );
 	if ( fd == -1 )
 		return;
 
-	l_x=x;
-	l_y=y;
-	l_width=width;
-	l_height=height;
-	avia_pig_set_pos(fd,x,y);
-	avia_pig_set_size(fd,width,height);
-	avia_pig_set_stack(fd,2);
+	window.x=x;
+	window.y=y;
+	window.width=width;
+	window.height=height;
 
-	avia_pig_show(fd);
+	ioctl(fd, VIDIOC_S_WIN, &window);
+
+//FIXME	avia_pig_set_stack(fd,2);
+
+	preview = 1;
+	
+	ioctl(fd, VIDIOC_PREVIEW, &preview);
 }
 
 void	Fx2StopPig( void )
 {
+	int preview;
+
 	if ( fd == -1 )
 		return;
 
-	avia_pig_hide(fd);
+	preview = 0;
+	
+	ioctl(fd, VIDIOC_PREVIEW, &preview);
 
 	close(fd);
 	fd=-1;
@@ -72,14 +98,22 @@ void	Fx2StopPig( void )
 
 void	Fx2PigPause( void )
 {
-	if ( fd != -1 )
-		avia_pig_hide(fd);
+	int preview;
+
+	if ( fd != -1 ) {
+		preview = 0;
+		ioctl(fd, VIDIOC_PREVIEW, &preview);
+	}
 }
 
 void	Fx2PigResume( void )
 {
-	if ( fd != -1 )
-		avia_pig_show(fd);
+	int preview;
+
+	if ( fd != -1 ) {
+		preview = 1;
+		ioctl(fd, VIDIOC_PREVIEW, &preview);
+	}
 }
 
 #else
