@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.10 2003/11/24 23:52:16 rasc Exp $
+$Id: dmx_ts.c,v 1.11 2003/12/10 22:54:11 obi Exp $
 
  -- Transport Streams
  --  For more information please see:
@@ -13,6 +13,9 @@ $Id: dmx_ts.c,v 1.10 2003/11/24 23:52:16 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.11  2003/12/10 22:54:11  obi
+more tiny fixes
+
 Revision 1.10  2003/11/24 23:52:16  rasc
 -sync option, some TS and PES stuff;
 dsm_addr inactive, may be wrong - due to missing ISO 13818-6
@@ -125,15 +128,10 @@ int  doReadTS (OPTION *opt)
     flt.input  = DMX_IN_FRONTEND;
     flt.output = DMX_OUT_TS_TAP;
     flt.pes_type = DMX_PES_OTHER;
-    flt.flags = 0;
+    flt.flags = DMX_IMMEDIATE_START;
 
     if ((i=ioctl(fd_dmx,DMX_SET_PES_FILTER,&flt)) < 0) {
       perror ("DMX_SET_PES_FILTER failed: ");
-      return -1;
-    }
-
-    if ((i=ioctl(fd_dmx,DMX_START,&flt)) < 0) {
-      perror ("DMX_START failed: ");
       return -1;
     }
 
@@ -225,7 +223,6 @@ int  doReadTS (OPTION *opt)
   */
 
   if (!fileMode) {
-     ioctl (fd_dmx, DMX_SET_FILTER, 0);
      ioctl (fd_dmx, DMX_STOP, 0);
 
      close(fd_dmx);

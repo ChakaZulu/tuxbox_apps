@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.11 2003/11/26 16:27:46 rasc Exp $
+$Id: dmx_pes.c,v 1.12 2003/12/10 22:54:11 obi Exp $
 
  -- PE Streams
  --  For more information please see:
@@ -14,6 +14,9 @@ $Id: dmx_pes.c,v 1.11 2003/11/26 16:27:46 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.12  2003/12/10 22:54:11  obi
+more tiny fixes
+
 Revision 1.11  2003/11/26 16:27:46  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function
@@ -124,15 +127,10 @@ int  doReadPES (OPTION *opt)
     flt.input  = DMX_IN_FRONTEND;
     flt.output = DMX_OUT_TAP;
     flt.pes_type = DMX_PES_OTHER;
-    flt.flags = 0;
+    flt.flags = DMX_IMMEDIATE_START;
 
     if ((i=ioctl(fd,DMX_SET_PES_FILTER,&flt)) < 0) {
       perror ("DMX_SET_PES_FILTER failed: ");
-      return -1;
-    }
-
-    if ((i=ioctl(fd,DMX_START,&flt)) < 0) {
-      perror ("DMX_START failed: ");
       return -1;
     }
 
@@ -226,7 +224,6 @@ int  doReadPES (OPTION *opt)
     -- Stop Demux
   */
   if (dmxMode) {
-    ioctl (fd, DMX_SET_FILTER, 0);
     ioctl (fd, DMX_STOP, 0);
   }
 
