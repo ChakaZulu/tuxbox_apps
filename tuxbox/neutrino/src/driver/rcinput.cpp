@@ -298,7 +298,7 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 			read(fd_pipe_high_priority[0], &buf, sizeof(buf));
 			*msg = buf[0];
 			*data = buf[1];
-			printf("got event from high-pri pipe %x %x\n", *msg, *data );
+//printf("got event from high-pri pipe %x %x\n", *msg, *data );
 			return;
 		}
 
@@ -376,7 +376,7 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 							{
 								*msg = messages::EVT_CURRENTNEXT_EPG;
 								*data = *(unsigned*) p;
-								printf("[neutrino] event - CSectionsdClient::EVT_CURRENTNEXT_EPG (for %x)\n", *(unsigned*)data );
+								//printf("[neutrino] event - CSectionsdClient::EVT_CURRENTNEXT_EPG (for %x)\n", *(unsigned*)data );
 							}
 
 							else
@@ -482,7 +482,7 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 			read(fd_pipe_low_priority[0], &buf, sizeof(buf));
 			*msg = buf[0];
 			*data = buf[1];
-			printf("got event from low-pri pipe %x %x\n", *msg, *data );
+//printf("got event from low-pri pipe %x %x\n", *msg, *data );
 			return;
 		}
 

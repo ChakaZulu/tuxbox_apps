@@ -91,17 +91,19 @@ class CInfoViewer
 
 		string						CurrentChannel;
 		sectionsd::CurrentNextInfo	info_CurrentNext;
-        unsigned int				current_onid_tsid;
+        unsigned int				current_onid_sid;
 
 		char aspectRatio;
 
 		void getEPG();
 
-		void showData( bool calledFromEvent = false );
+		void show_Data( bool calledFromEvent = false );
 
-		void showButtonAudio();
-		void showButtonNVOD( bool CalledFromShowData = false );
-		void show16_9();
+		void showButton_Audio();
+		void showButton_SubServices();
+
+		void showIcon_16_9();
+		void showIcon_VTXT();
 	public:
 
 		bool	is_visible;
@@ -110,7 +112,7 @@ class CInfoViewer
 
 		void start();
 
-		void showTitle( int ChanNum, string Channel, unsigned int onid_tsid = 0, bool calledFromNumZap = false );
+		void showTitle( int ChanNum, string Channel, unsigned int onid_sid = 0, bool calledFromNumZap = false );
 		void killTitle();
 
 		int handleMsg(uint msg, uint data);

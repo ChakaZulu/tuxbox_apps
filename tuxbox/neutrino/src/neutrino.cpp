@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.202 2002/03/22 17:34:03 field Exp $
+        $Id: neutrino.cpp,v 1.203 2002/03/23 19:21:33 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -567,63 +567,12 @@ void CNeutrinoApp::isCamValid()
 **************************************************************************************/
 void CNeutrinoApp::channelsInit()
 {
-/*
-	int sock_fd;
-	SAI servaddr;
-	char rip[]="127.0.0.1";
-	char *return_buf;
-	channel_msg_2   zapitchannel;
-*/
-
 	//deleting old channelList for mode-switching.
 	delete channelList;
 	channelList = new CChannelList( "channellist.head" );
-/*
-	sendmessage.version=1;
-	// neu! war 5, mit neuem zapit holen wir uns auch die onid_tsid
-	sendmessage.cmd = 'c';
-
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(1505);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-	{
-		perror("neutrino: connect(zapit)");
-		exit(-1);
-	}
-
-	write(sock_fd, &sendmessage, sizeof(sendmessage));
-	return_buf = (char*) malloc(4);
-	memset(return_buf, 0, 4);
-	if (recv(sock_fd, return_buf, 3,0) <= 0 )
-	{
-		perror("recv(zapit)");
-		exit(-1);
-	}
-
-	if ( strcmp(return_buf, "00c")!= 0 )
-	{
-		free(return_buf);
-		printf("Wrong Command was send for channelsInit(). Exiting.\n");
-		return;
-	}
-	free(return_buf);
-	memset(&zapitchannel,0,sizeof(zapitchannel));
-	while (recv(sock_fd, &zapitchannel, sizeof(zapitchannel),0)>0)
-	{
-		char channel_name[30];
-		strncpy(channel_name, zapitchannel.name,30);
-		channelList->addChannel( zapitchannel.chan_nr, zapitchannel.chan_nr, channel_name, zapitchannel.onid_tsid );
-	}
-	printf("All channels received\n");
-	close(sock_fd);
-*/
 
 	CZapitClient::BouquetChannelList zapitChannels;
-	g_Zapit->getChannels( zapitChannels);
+	g_Zapit->getChannels( zapitChannels );
 	for (uint i=0; i<zapitChannels.size(); i++)
 	{
 		channelList->addChannel( zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].onid_sid );
@@ -1286,73 +1235,62 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.subchanneldown", true, "", keySettings_subchannel_down ));
 }
 
-static char* copyStringto(const char* from, char* to, int len, char delim)
-{
-	const char *fromend=from+len;
-	while(*from!=delim && from<fromend && *from)
-	{
-		*(to++)=*(from++);
-	}
-	*to=0;
-	return (char *)++from;
-}
-
 void CNeutrinoApp::SelectNVOD()
 {
-/*
-	if ( g_RemoteControl->subChannels.has_subChannels_for( channelList->getActiveChannelID() ) )
+	if ( g_RemoteControl->subChannels.size()> 0 )
 	{
 		// NVOD/SubService- Kanal!
-		CMenuWidget NVODSelector( g_RemoteControl->subChannels.are_subchannels?"nvodselector.subservice":"nvodselector.head",
-		                          "video.raw", 400 );
+		CMenuWidget NVODSelector( g_RemoteControl->are_subchannels?"nvodselector.subservice":"nvodselector.head", "video.raw", 400 );
 
 		NVODSelector.addItem( new CMenuSeparator() );
 
-		for(unsigned count=0;count<g_RemoteControl->subChannels.list.size();count++)
+		int count = 0;
+		char nvod_id[5];
+
+		for ( CSubServiceListSorted::iterator e=g_RemoteControl->subChannels.begin(); e!=g_RemoteControl->subChannels.end(); ++e)
 		{
-			char nvod_id[5];
 			sprintf(nvod_id, "%d", count);
 
-			if (!g_RemoteControl->subChannels.are_subchannels)
+			if ( !g_RemoteControl->are_subchannels )
 			{
 				char nvod_time_a[50], nvod_time_e[50], nvod_time_x[50];
 				char nvod_s[100];
 				struct  tm *tmZeit;
 
-				tmZeit= localtime(&g_RemoteControl->subChannels.list[count].startzeit);
+				tmZeit= localtime( &e->startzeit );
 				sprintf(nvod_time_a, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
 
-				time_t endtime=g_RemoteControl->subChannels.list[count].startzeit+ g_RemoteControl->subChannels.list[count].dauer;
+				time_t endtime = e->startzeit+ e->dauer;
 				tmZeit= localtime(&endtime);
 				sprintf(nvod_time_e, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
 
 				time_t jetzt=time(NULL);
-				if (g_RemoteControl->subChannels.list[count].startzeit > jetzt)
+				if (e->startzeit > jetzt)
 				{
-					int mins=(g_RemoteControl->subChannels.list[count].startzeit- jetzt)/ 60;
+					int mins=(e->startzeit- jetzt)/ 60;
 					sprintf(nvod_time_x, g_Locale->getText("nvod.starting").c_str(), mins);
 				}
 				else
-					if ( (g_RemoteControl->subChannels.list[count].startzeit<= jetzt) && (jetzt < endtime) )
+					if ( (e->startzeit<= jetzt) && (jetzt < endtime) )
 					{
-						int proz=(jetzt- g_RemoteControl->subChannels.list[count].startzeit)*100/ g_RemoteControl->subChannels.list[count].dauer;
+						int proz=(jetzt- e->startzeit)*100/ e->dauer;
 						sprintf(nvod_time_x, g_Locale->getText("nvod.proz").c_str(), proz);
 					}
 					else
 						nvod_time_x[0]= 0;
 
-				//string nvod_s= nvod_time_a+ " - "+ nvod_time_e+ " "+ nvod_time_x;
 				sprintf(nvod_s, "%s - %s %s", nvod_time_a, nvod_time_e, nvod_time_x);
-				NVODSelector.addItem( new CMenuForwarder(nvod_s, true, "", NVODChanger, nvod_id, false), (count == g_RemoteControl->subChannels.selected) );
+				NVODSelector.addItem( new CMenuForwarder(nvod_s, true, "", NVODChanger, nvod_id, false), (count == g_RemoteControl->selected_subchannel) );
 			}
 			else
 			{
-				NVODSelector.addItem( new CMenuForwarder(g_RemoteControl->subChannels.list[count].subservice_name, true, "", NVODChanger, nvod_id, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->subChannels.selected) );
+				NVODSelector.addItem( new CMenuForwarder(e->subservice_name, true, "", NVODChanger, nvod_id, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
 			}
+
+			count++;
 		}
 		NVODSelector.exec(NULL, "");
 	}
-*/
 }
 
 void CNeutrinoApp::SelectAPID()
@@ -2285,7 +2223,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.202 2002/03/22 17:34:03 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.203 2002/03/23 19:21:33 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

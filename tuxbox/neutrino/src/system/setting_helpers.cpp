@@ -192,7 +192,6 @@ void showSubchan(string subChannelName)
 		int dy = 30;
 		int x = g_settings.screen_EndX - dx -10;
 		int y = g_settings.screen_StartY + 10;
-		printf("before paint\n");
 		g_FrameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
 		g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, subChannelName.c_str(), COL_MENUCONTENT);
 		uint msg; uint data;

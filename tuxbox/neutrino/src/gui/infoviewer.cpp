@@ -64,12 +64,12 @@ void CInfoViewer::start()
 	aspectRatio = g_Controld->getAspectRatio();
 }
 
-void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid, bool calledFromNumZap )
+void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid, bool calledFromNumZap )
 {
 neutrino->showProfiling("infoviewer showtitle");
 
         CurrentChannel = Channel;
-        current_onid_tsid = onid_tsid;
+        current_onid_sid = onid_sid;
         showButtonBar = !calledFromNumZap;
         is_visible = true;
 
@@ -144,10 +144,10 @@ neutrino->showProfiling("after getEPG();");
 		if ( !( info_CurrentNext.flags & ( sectionsd::epgflags::has_later | sectionsd::epgflags::has_current |  sectionsd::epgflags::not_broadcast ) ) )
 		{
 			// nicht gefunden / noch nicht geladen
-			g_Fonts->infobar_info->RenderString(ChanNameX+ 10, ChanInfoY+ 2* g_Fonts->infobar_info->getHeight()+ 5, BoxEndX- (ChanNameX+ 20), g_Locale->getText(showButtonBar?"infoviewer.epgnotload":"infoviewer.epgwait").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_info->RenderString(ChanNameX+ 10, ChanInfoY+ 2* g_Fonts->infobar_info->getHeight()+ 5, BoxEndX- (ChanNameX+ 20), g_Locale->getText(gotTime?(showButtonBar?"infoviewer.epgwait":"infoviewer.epgnotload"):"infoviewer.waittime").c_str(), COL_INFOBAR);
 		}
 		else
-			showData();
+			show_Data();
 
 neutrino->showProfiling("after showData();");
 
@@ -157,11 +157,10 @@ neutrino->showProfiling("after showData();");
 			g_FrameBuffer->paintIcon("blau.raw", BoxEndX- ICON_OFFSET- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.streaminfo").c_str(), COL_INFOBAR_BUTTONS);
 
-			g_FrameBuffer->paintIcon("dd_gray.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-			g_FrameBuffer->paintIcon("vtxt_gray.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-
-			showButtonAudio();
-			show16_9();
+			showButton_Audio();
+			showButton_SubServices();
+			showIcon_16_9();
+			showIcon_VTXT();
 
 neutrino->showProfiling("g_Sectionsd->setServiceChanged");
 			if ( ( ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) &&
@@ -169,12 +168,12 @@ neutrino->showProfiling("g_Sectionsd->setServiceChanged");
 				 ( info_CurrentNext.flags & sectionsd::epgflags::not_broadcast ) )
 			{
 				// alles was nötig ist, ist da!
-				g_Sectionsd->setServiceChanged( onid_tsid, false );
+				g_Sectionsd->setServiceChanged( onid_sid, false );
 			}
 			else
 			{
 				// EVENT anfordern!
-				g_Sectionsd->setServiceChanged( onid_tsid, true );
+				g_Sectionsd->setServiceChanged( onid_sid, true );
 			}
         }
 
@@ -246,46 +245,83 @@ neutrino->showProfiling("vor Schatten;");
 	neutrino->showProfiling("end infoviewer");
 }
 
-void CInfoViewer::show16_9()
+void CInfoViewer::showIcon_16_9()
 {
-	if ( ( is_visible ) && ( showButtonBar ) )
-		g_FrameBuffer->paintIcon( ( aspectRatio == 3 )?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+	g_FrameBuffer->paintIcon( ( aspectRatio == 3 )?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+}
+
+void CInfoViewer::showIcon_VTXT()
+{
+	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid != 0 )
+		g_FrameBuffer->paintIcon("vtxt.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+	else
+		g_FrameBuffer->paintIcon("vtxt_gray.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 
 int CInfoViewer::handleMsg(uint msg, uint data)
 {
     if ( msg == messages::EVT_CURRENTNEXT_EPG )
 	{
-		if ( data == current_onid_tsid )
+		if ( data == current_onid_sid )
 		{
             getEPG();
 
 			if ( is_visible )
-				showData( true );
+				show_Data( true );
 		}
 	    return messages_return::handled;
 	}
     else if ( msg == messages::EVT_ZAP_GOTAPIDS )
 	{
-		if ( data == current_onid_tsid )
+		if ( data == current_onid_sid )
 		{
-			if ( is_visible )
-				showButtonAudio();
+			if ( is_visible && showButtonBar )
+				showButton_Audio();
 		}
 	    return messages_return::handled;
 	}
 	else if ( msg == messages::EVT_ZAP_GOTPIDS )
 	{
-		if ( data == current_onid_tsid )
+		if ( data == current_onid_sid )
 		{
-			// vtxt anzeigen!
+			if ( is_visible && showButtonBar )
+				showIcon_VTXT();
+		}
+	    return messages_return::handled;
+	}
+	else if ( msg == messages::EVT_ZAP_GOT_SUBSERVICES )
+	{
+		if ( data == current_onid_sid )
+		{
+			if ( is_visible && showButtonBar )
+				showButton_SubServices();
+		}
+	    return messages_return::handled;
+	}
+	else if ( msg == messages::EVT_ZAP_SUB_COMPLETE )
+	{
+		//if ( data == current_onid_sid )
+		{
+			if ( is_visible && showButtonBar &&  ( !g_RemoteControl->are_subchannels ) )
+				show_Data( true );
+		}
+	    return messages_return::handled;
+	}
+	else if ( msg == messages::EVT_ZAP_FAILED )
+	{
+		if ( data == current_onid_sid )
+		{
+			// show failure..!
+			printf("zap failed!\n");
 		}
 	    return messages_return::handled;
 	}
     else if ( msg == messages::EVT_MODECHANGED )
 	{
         aspectRatio = data;
-		show16_9();
+        if ( is_visible && showButtonBar )
+			showIcon_16_9();
+
         return messages_return::handled;
 	}
 	else if ( msg == messages::EVT_TIMESET )
@@ -298,30 +334,25 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 }
 
 
-void CInfoViewer::showButtonNVOD(bool CalledFromShowData = false)
+void CInfoViewer::showButton_SubServices()
 {
-/*        CSubChannel_Infos subChannels= g_RemoteControl->getSubChannels();
+	if ( g_RemoteControl->subChannels.size()> 0 )
+	{
+		// gelbe Taste für NVODs / Subservices
+		g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
-        if ( subChannels.has_subChannels_for( getActiveChannelID() ) )
-        {
-                // gelbe Taste für NVODs / Subservices
-                g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-                if ( subChannels.are_subchannels )
-                        // SubServices
-                        g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.subservice").c_str(), COL_INFOBAR_BUTTONS);
-                else
-                        // NVOD
-                        g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR_BUTTONS);
-
-                if (!CalledFromShowData)
-                        showData();
-        };
-*/
+		if ( g_RemoteControl->are_subchannels )
+			// SubServices
+			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.subservice").c_str(), COL_INFOBAR_BUTTONS);
+		else
+			// NVOD
+			g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR_BUTTONS);
+	}
 }
 
 void CInfoViewer::getEPG()
 {
-	g_Sectionsd->getCurrentNextServiceKey( current_onid_tsid, info_CurrentNext );
+	g_Sectionsd->getCurrentNextServiceKey( current_onid_sid, info_CurrentNext );
 
 	if ( ( info_CurrentNext.flags & sectionsd::epgflags::has_current ) &&
 		 ( showButtonBar ) )
@@ -330,7 +361,7 @@ void CInfoViewer::getEPG()
 }
 
 
-void CInfoViewer::showData( bool calledFromEvent = false )
+void CInfoViewer::show_Data( bool calledFromEvent = false )
 {
 	char runningStart[10];
 	char runningDuration[10];
@@ -345,55 +376,24 @@ void CInfoViewer::showData( bool calledFromEvent = false )
 	if ( is_visible )
 	{
 
-        if (showButtonBar)
+       	if ( ( g_RemoteControl->current_onid_sid == current_onid_sid ) &&
+       		 ( g_RemoteControl->subChannels.size()> 0 ) && ( !g_RemoteControl->are_subchannels ) )
+       	{
+			is_nvod = true;
+ 			info_CurrentNext.current_zeit.startzeit = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].startzeit;
+ 			info_CurrentNext.current_zeit.dauer = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].dauer;
+        }
+        else
         {
-/*                CSubChannel_Infos subChannels= g_RemoteControl->getSubChannels();
-
-                if ( SubServiceList.size()> 0 )
-                {
-                        string activeID= getActiveChannelID();
-                        if ( !subChannels.has_subChannels_for( activeID ) )
-                        {
-                                //printf("subservices %d\n", SubServiceList.size());
-                                subChannels= CSubChannel_Infos( activeID.c_str(), true );
-                                for(unsigned int count=0;count<SubServiceList.size();count++)
-                                {
-                                        subChannels.list.insert( subChannels.list.end(),
-                                                                 CSubService(SubServiceList[count]->originalNetworkId<<16 | SubServiceList[count]->serviceId,
-                                                                             SubServiceList[count]->transportStreamId,
-                                                                             SubServiceList[count]->name) );
-                                }
-                                g_RemoteControl->CopySubChannelsToZapit( subChannels );
-                                showButtonNVOD(true);
-                        }
-                }
-
-                if ( !subChannels.are_subchannels )
-                {
-                        if ( subChannels.has_subChannels_for( getActiveChannelID() ) )
-                        {
-                                // NVOD- Zeiten aus dem aktuell selektierten holen!
-                                is_nvod= true;
-
-                                unsigned sel= subChannels.selected;
-                                unsigned dauer= subChannels.list[sel].dauer/ 60;
-                                //sprintf((char*) &runningDuration, "%d min", dauer);
-
-                                struct      tm *pStartZeit = localtime(&subChannels.list[sel].startzeit);
-                                sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
-                                runningPercent=(unsigned)((float)(time(NULL)-subChannels.list[sel].startzeit)/(float)subChannels.list[sel].dauer*100.);
-
-        						unsigned seit = ( time(NULL) - subChannels.list[sel].startzeit ) / 60;
-                                unsigned rest = ( (subChannels.list[sel].startzeit + subChannels.list[sel].dauer) - time(NULL) ) / 60;
-
-								sprintf((char*) &runningRest, "%d / %d min", seit, rest);
-                                if (runningPercent>100)
-                                        runningPercent=0;
-
-                                Flag|= sectionsd::epgflags::has_current;
-                                //printf("%s %s %d\n", runningDuration, runningStart, runningPercent);
-                        }
-                }*/
+        	if ( ( info_CurrentNext.flags & sectionsd::epgflags::has_current) &&
+        		 ( info_CurrentNext.flags & sectionsd::epgflags::has_next) &&
+        		 ( showButtonBar ) )
+        	{
+        		if ( info_CurrentNext.next_zeit.startzeit < ( info_CurrentNext.current_zeit.startzeit+ info_CurrentNext.current_zeit.dauer ) )
+        		{
+        			is_nvod = true;
+        		}
+        	}
         }
 
 		time_t jetzt=time(NULL);
@@ -401,14 +401,24 @@ void CInfoViewer::showData( bool calledFromEvent = false )
 		if ( info_CurrentNext.flags & sectionsd::epgflags::has_current)
 		{
 			unsigned dauer = info_CurrentNext.current_zeit.dauer / 60;
-			unsigned rest = ( (info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer) - jetzt ) / 60;
+			int rest = ( (info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer) - jetzt ) / 60;
 
-			unsigned seit = ( jetzt - info_CurrentNext.current_zeit.startzeit ) / 60;
-			sprintf( (char*)&runningRest, "%d / %d min", seit, rest);
+			int seit = ( jetzt - info_CurrentNext.current_zeit.startzeit ) / 60;
+			if ( seit< 0 )
+			{
+				runningPercent= 0;
+				sprintf( (char*)&runningRest, "in %d min", -seit);
+			}
+			else
+			{
+				runningPercent=(unsigned)((float)(jetzt-info_CurrentNext.current_zeit.startzeit)/(float)info_CurrentNext.current_zeit.dauer*100.);
+				sprintf( (char*)&runningRest, "%d / %d min", seit, rest);
+			}
 
 			struct tm *pStartZeit = localtime(&info_CurrentNext.current_zeit.startzeit);
         	sprintf( (char*)&runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min );
-			runningPercent=(unsigned)((float)(jetzt-info_CurrentNext.current_zeit.startzeit)/(float)info_CurrentNext.current_zeit.dauer*100.);
+
+
 		}
 
 		if ( info_CurrentNext.flags & sectionsd::epgflags::has_next)
@@ -418,7 +428,6 @@ void CInfoViewer::showData( bool calledFromEvent = false )
 			struct tm *pStartZeit = localtime(&info_CurrentNext.next_zeit.startzeit);
 			sprintf( (char*)&nextStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
 		}
-
 
 		int height = g_Fonts->infobar_channame->getHeight()/3;
 		int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
@@ -453,7 +462,7 @@ void CInfoViewer::showData( bool calledFromEvent = false )
 			// kein EPG verfügbar
 			ChanInfoY += height;
 			g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR);
-			g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 20,  ChanInfoY+height, BoxEndX- (BoxStartX + ChanWidth + 20), g_Locale->getText("infoviewer.noepg").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 20,  ChanInfoY+height, BoxEndX- (BoxStartX + ChanWidth + 20), g_Locale->getText(gotTime?"infoviewer.noepg":"infoviewer.waittime").c_str(), COL_INFOBAR);
 		}
 		else
 		{
@@ -500,7 +509,7 @@ void CInfoViewer::showData( bool calledFromEvent = false )
 	}
 }
 
-void CInfoViewer::showButtonAudio()
+void CInfoViewer::showButton_Audio()
 {
 /*        string  to_compare= getActiveChannelID();
 
@@ -551,6 +560,8 @@ void CInfoViewer::showButtonAudio()
 		g_FrameBuffer->paintIcon("dd.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 	else if ( g_RemoteControl->has_ac3 )
 		g_FrameBuffer->paintIcon("dd_avail.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+	else
+		g_FrameBuffer->paintIcon("dd_gray.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 
 void CInfoViewer::killTitle()

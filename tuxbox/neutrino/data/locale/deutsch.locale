@@ -171,6 +171,7 @@ infoviewer.selecttime Startzeiten
 infoviewer.nocurrent Keine Info zu laufendem Programm
 infoviewer.noepg Keine EPG-Information verfügbar
 infoviewer.subservice Bildregie
+infoviewer.waittime Warte auf Uhrzeit...
 
 epgviewer.notfound keine Programminformationen (EPG) gefunden
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar

@@ -88,20 +88,7 @@ class CSubService
 			dauer=adauer;
 			subservice_name= "";
 		}
-		// Std-Copy
-		CSubService(const CSubService &ss)
-		{
-			startzeit=ss.startzeit;
-			dauer=ss.dauer;
-			onid_sid=ss.onid_sid;
-			tsid=ss.tsid;
-			subservice_name=ss.subservice_name;
-		}
-		// Der Operator zum sortieren
-		bool operator < (const CSubService& c) const
-		{
-			return startzeit <= c.startzeit;
-		}
+
 		unsigned int    onid_sid;
 		unsigned short  tsid;
 		time_t          startzeit;
@@ -109,19 +96,18 @@ class CSubService
 		string          subservice_name;
 };
 
-typedef std::multiset <CSubService, std::less<CSubService> > CSubServiceListSorted;
+//typedef std::multiset <CSubService, std::less<CSubService> > CSubServiceListSorted;
+typedef std::vector<CSubService> CSubServiceListSorted;
 
 class CRemoteControl
 {
-		st_rmsg             remotemsg;
-		pthread_mutex_t     send_mutex;
-
-		void send();
-
+		unsigned		_zapTo_onid_sid;
+		unsigned		_subChannel_zapTo_onid_sid;
 		pthread_t       thrSender;
 		pthread_cond_t  send_cond;
-
+		pthread_mutex_t send_mutex;
 		static void * RemoteControlThread (void *arg);
+
 		void getNVODs();
 		void processAPIDnames();
 		void getSubChannels();
@@ -141,6 +127,7 @@ class CRemoteControl
 		CSubServiceListSorted			subChannels;
 		int								selected_subchannel;
 		bool                        	are_subchannels;
+		bool							needs_nvods;
 
 		CRemoteControl();
 		void zapTo_onid_sid( unsigned int onid_sid, string channame );
@@ -150,7 +137,6 @@ class CRemoteControl
 		string subChannelUp();
 		string subChannelDown();
 
-		void shutdown();
 		void radioMode();
 		void tvMode();
 

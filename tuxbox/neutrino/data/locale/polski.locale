@@ -171,6 +171,7 @@ infoviewer.selecttime Timeselection
 infoviewer.nocurrent No info for current program available
 infoviewer.noepg EPG not available
 infoviewer.subservice Subservices
+infoviewer.waittime Waiting for time...
 
 epgviewer.notfound EPG-Informacje nie znalezione
 epgviewer.nodetailed Informacje nie sa dostepne

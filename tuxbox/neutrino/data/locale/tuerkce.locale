@@ -170,6 +170,7 @@ infoviewer.selecttime BASLANGIC VAKTI
 infoviewer.nocurrent SIMDIKI PROGRAMA BILGI YOK
 infoviewer.noepg EPG BULUNAMIYOR
 infoviewer.subservice EKRAN YÖNETIMI
+infoviewer.waittime Waiting for time...
 
 epgviewer.notfound EPG BILGISI BULUNAMADI
 epgviewer.nodetailed AYRINTILI BILGI YOK
