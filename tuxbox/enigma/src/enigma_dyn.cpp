@@ -46,6 +46,10 @@
 
 #define DELETE(WHAT) result.strReplace(#WHAT, "")
 
+#define BLUE "12259E"
+#define RED "CB0303"
+#define OCKER "FFCC33"
+
 extern eString getRight(const eString&, char );  // implemented in timer.cpp
 extern eString getLeft( const eString&, char );  // implemented in timer.cpp
 
@@ -73,11 +77,11 @@ static eString getVersionInfo(const char *info)
 	return result;
 }
 
-static eString button(eString buttonText, eString buttonColor, eString buttonRef)
+static eString button(int width, eString buttonText, eString buttonColor, eString buttonRef)
 {
 	std::stringstream result;
 	result << "<button name=\"" << buttonText << "\""
-		"type=\"button\" style='width: 100px; height: 22px; background-color: #" << buttonColor << "' "
+		"type=\"button\" style='width: " << eString().sprintf("%d", width) << "px; height: 22px; background-color: #" << buttonColor << "' "
 		"value=\"" << buttonText << "\" "
 		"onclick=\"self.location.href='" << buttonRef << "'\">"
 		"<span class=\"button\">" << buttonText << "</class>"
@@ -510,6 +514,69 @@ eString filter_string(eString string)
 		removeChars('\x87').
 		removeChars('\xC2').
 		removeChars('\x05');
+}
+
+static eString getNavi(eString mode, eString path)
+{
+	eString result = "";
+	if (mode.find("zap") == 0)
+	{
+		result += button(110, "TV", OCKER, "?path=;0:7:1:0:0:0:0:0:0:0:");
+		result += "<br>";
+		result += button(110, "Radio", OCKER, "?path=;0:7:2:0:0:0:0:0:0:0:");
+		result += "<br>";
+		result += button(110, "Data", OCKER, "?path=;0:7:6:0:0:0:0:0:0:0:");
+		result += "<br>";
+		result += button(110, "Root", OCKER, "?path=;2:47:0:0:0:0:%2f");
+#ifndef DISABLE_FILE
+		result += "<br>";
+		result += button(110, "Harddisk", OCKER, "?path=;2:47:0:0:0:0:%2fhdd%2f");
+		result += "<br>";
+		result += button(110, "Recordings", OCKER, "?path=;4097:7:0:1:0:0:0:0:0:0:");
+#endif
+	}
+	else
+	if (mode.find("menu") == 0)
+	{
+		result += button(110, "Shutdown", OCKER, "?mode=menuShutdown");
+		result += "<br>";
+		result += button(110, "Restart", OCKER, "?mode=menuRestart");
+		result += "<br>";
+		result += button(110, "Reboot", OCKER, "?mode=menuReboot");
+		result += "<br>";
+		result += button(110, "Standby", OCKER, "?mode=menuStandby");
+		result += "<br>";
+		result += button(110, "Wakeup", OCKER, "?mode=menuWakeup");
+		result += "<br>";
+		result += button(110, "Frameshot", OCKER, "?mode=menuFrameshot");
+		result += "<br>";
+		result += button(110, "Screenshot", OCKER, "?mode=menuScreenShot");
+		result += "<br>";
+		result += button(110, "Timer List", OCKER, "?mode=menuTimerList");
+	}
+	else
+	if (mode.find("links") == 0)
+	{
+		result += button(110, "DMM Sites", OCKER, "?mode=linksOfficialSites");
+		result += "<br>";
+		result += button(110, "Other Sites", OCKER, "?mode=linksOtherSites");
+		result += "<br>";
+		result += button(110, "Forums", OCKER, "?mode=linksForums");
+		result += "<br>";
+	}
+	else
+	if (mode.find("updates") == 0)
+	{
+	}
+	else
+	if (mode.find("about") == 0)
+	{
+		result += button(110, "Receiver", OCKER, "?mode=aboutDreambox");
+		result += "<br>";
+		result += button(110, "DMM", OCKER, "?mode=aboutDMM");
+	}
+
+	return result;
 }
 
 #ifndef DISABLE_FILE
@@ -1267,9 +1334,9 @@ static eString getContent(eString mode, eString path)
 	{
 		result = genTimerListBody();
 		result += "<br>";
-		result += button("Cleanup", "12259E", "?cleanupTimer");
+		result += button(100, "Cleanup", "12259E", "?cleanupTimer");
 		result += "&nbsp;&nbsp;&nbsp;";
-		result += button("Clear", "CB0303", "?ClearTimer");
+		result += button(100, "Clear", "CB0303", "?ClearTimer");
 	}
 	else
 		result = mode + " is not available yet";
@@ -1375,14 +1442,6 @@ static eString getEITC2()
 	result.strReplace("#STATS#", getStats());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
 
-	return result;
-}
-
-static eString getMode(eString mode)
-{
-	eString result;
-	mode.upper();
-	result="<span class=\"titel\">"+mode+"</span>";
 	return result;
 }
 
@@ -1606,7 +1665,7 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 		}
 	}
 
-	result << "<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>"
+	result << "<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#ffffff>"
 		"<!-- " << sapi->service << "-->" << std::endl <<
 		"<table cellspacing=0 cellpadding=0 border=0>"
 		"<tr><td>name:</td><td>" << name << "</td></tr>"
@@ -1897,8 +1956,8 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 
 	result = read_file(TEMPLATE_DIR+"index.tmp");
 	result.strReplace("#COP#", getContent(mode, spath));
-	result.strReplace("#MODE#", getMode(mode));
 	result.strReplace("#HEADER#", getEITC2());
+	result.strReplace("#NAVI#", getNavi(mode, spath));
 
 	return result;
 }

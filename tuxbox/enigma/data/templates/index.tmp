@@ -136,25 +136,9 @@ function clearTimerList()
 		<TD bgcolor="#F8FDF2" valign=top>
 			<table width=100% height=100% border=0 cellspacing=0 cellpadding=0>
 			<tr>
-			<td align=right valign=top width=110 class=menu bgcolor="#DEE6D6" style="padding-top: 10px">
+			<td align=right valign=top width=110 class=menu bgcolor="#DEE6D6">
 			<!--menubar-->
-			<script language="javascript">
-			if('#MODE#'.indexOf("ZAP") > -1) {
-				document.write("<a href=\"?path=;0:7:1:0:0:0:0:0:0:0:\">TV</a><br><a href=\"?path=;0:7:2:0:0:0:0:0:0:0:\">Radio</a><br><a href=\"?path=;0:7:6:0:0:0:0:0:0:0:\">Data</a><br><a href=\"?path=;2:47:0:0:0:0:%2f\">Root</a><br><a href=\"?path=;2:47:0:0:0:0:%2fhdd%2f\">Harddisk</a><br><a href=\"?path=;4097:7:0:1:0:0:0:0:0:0:\">Recordings</a><br>");
-			}
-			if('#MODE#'.indexOf("MENU") > -1) {
-				document.write("<a href=\"?mode=menuShutdown\">Shutdown</a><br><a href=\"?mode=menuRestart\">Restart</a><br><a href=\"?mode=menuReboot\">Reboot</a><br><a href=\"?mode=menuStandby\">Standby</a><br><a href=\"?mode=menuWakeup\">Wakeup</a><br><br><a href=\"?mode=menuFBShot\">Framebuffershot</a><br><a href=\"?mode=menuScreenShot\">Screenshot</a><br><a href=\"?mode=menuTimerList\">Timer List</a>");
-			}
-			if('#MODE#'.indexOf("LINKS") > -1) {
-				document.write("<a href=\"?mode=linksOfficialSites\">Official sites</a><br><a href=\"?mode=linksOtherSites\">Other sites</a><br><a href=\"?mode=linksForums\">Forums</a>");
-			}
-			if('#MODE#'.indexOf("UPDATES") > -1) {
-				document.write(" ");
-			}
-			if('#MODE#'.indexOf("ABOUT") > -1) {
-				document.write("<a href=\"?mode=aboutDreambox\">About Box</a><br><a href=\"?mode=aboutDMM\">About DMM</a>");
-			}
-			</script>
+				#NAVI#
 			</td>
 			<td align=left valign=top style="padding-left: 10px; padding-top: 10px; padding-right: 10px">
 			<!--content cell-->
