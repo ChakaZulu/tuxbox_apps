@@ -1,7 +1,7 @@
-#ifndef __caids_h__
-#define __caids_h__
+#ifndef __cam_h__
+#define __cam_h__
 
-#ifndef USE_EXTERNAL_CAMD
+#ifndef DVBS
 #include <ost/ca.h>
 #include <ost/dmx.h>
 #include <stdint.h>
@@ -19,6 +19,6 @@ int descramble (uint16_t original_network_id, uint16_t service_id, uint16_t unkn
 int cam_reset ();
 int setemm (uint16_t unknown, uint16_t ca_system_id, dvb_pid_t emm_pid);
 
-#endif
+#endif /* DVBS */
 
-#endif /* __caids_h__ */
+#endif /* __cam_h__ */

@@ -1,8 +1,14 @@
 /*
-$Id: sdt.cpp,v 1.15 2002/04/04 14:54:34 rasc Exp $
+$Id: sdt.cpp,v 1.16 2002/04/06 11:26:11 obi Exp $
 
 
 $Log: sdt.cpp,v $
+Revision 1.16  2002/04/06 11:26:11  obi
+lots of changes, bugs and fixes, including:
+- anti-randomness fixes
+- unused code
+- probably something else
+
 Revision 1.15  2002/04/04 14:54:34  rasc
 - timeout increase
 
@@ -36,6 +42,7 @@ int sdt(uint16_t oservice_id, bool scan_mode)
 	struct dmxSctFilterParams flt;
 	int demux_fd;
 	uint8_t buffer[1024];
+	uint8_t section = 0;
 
 	/* position in buffer */
 	uint16_t pos;
@@ -132,7 +139,7 @@ int sdt(uint16_t oservice_id, bool scan_mode)
 			}
 		}
 	}
-	while (buffer[6] != buffer[7]);
+	while (section++ != buffer[7]);
  
 	close(demux_fd);
 	return 23;

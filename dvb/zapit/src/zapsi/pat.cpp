@@ -75,6 +75,7 @@ int pat(uint oonid, std::map<uint, channel> *cmap)
 	struct dmxSctFilterParams flt;
 	int demux_fd;
 	uint8_t buffer[PAT_LENGTH];
+	uint8_t section = 0;
 
 	/* current positon in buffer */
 	uint16_t pos;
@@ -136,12 +137,7 @@ int pat(uint oonid, std::map<uint, channel> *cmap)
 			}
 		}
 	}
-	while (buffer[6] != buffer[7]);
-
-	if (ioctl(demux_fd, DMX_STOP, 0) < 0)
-	{
-		perror("[pat.cpp] DMX_STOP");
-	}
+	while (section++ != buffer[7]);
 
 	close(demux_fd);
 	return 1;

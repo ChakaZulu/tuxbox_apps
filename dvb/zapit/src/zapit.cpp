@@ -1,123 +1,27 @@
 /*
-
-  Zapit  -   DBoxII-Project
-
-  $Id: zapit.cpp,v 1.121 2002/04/05 16:29:46 obi Exp $
-
-  Done 2001 by Philipp Leusmann using many parts of code from older
-  applications by the DBoxII-Project.
-
-  Kommentar:
-
-  Dies ist ein zapper der für die kommunikation über tcp/ip ausgelegt ist.
-  Er benutzt Port 1505
-  Die Kanalliste muß als CONFIGDIR/zapit/settings.xml erstellt vorhanden sein.
-  Die Bouqueteinstellungen liegen in CONFIGDIR/zapit/bouquets.xml
-
-  cmd = 1 zap to channel (numeric)
-  param = channelnumber
-
-  cmd = 2 kill current zap for streaming
-
-  cmd = 3 zap to channel (channelname)
-  param3 = channelname
-
-  cmd = 4 shutdown the box
-
-  cmd = 5 Get the Channellist
-
-  cmd = 6 Switch to RadioMode
-
-  cmd = 7 Switch to TVMode
-
-  cmd = 8 Get back a struct of current Apid-descriptions.
-
-  cmd = 9 Change apid
-  param = apid-number (0 .. count_apids-1)
-
-  cmd = 'a' Get last channel
-
-  cmd = 'b' Get current vpid and apid
-
-  cmd = 'c'  - wie cmd 5, nur mit onid_sid
-
-  cmd = 'd'  wie cmd 1, nut mit onid_sid
-  param = (onid<<16)|sid
-  response[1] liefert status-infos...
-
-  cmd = 'e' change nvod (Es muss vorher auf den Basiskanal geschaltet worden sein)
-  param = (onid<<16)|sid
-
-  cmd = 'f' is nvod-base-channel?
-  if true returns chans_msg2 for each nvod_channel;
-
-  cmd = 'p' prepare channels
-  calls prepare_channels to reload services and bouquets
-
-  cmd = 'q' get list of all bouquets
-
-  cmd = 'r' get list of channels of a specified bouquet
-  param = id of bouquet
-
-  cmd = 't' Get or-ed values for caid and ca-version.
-  		caid 0x1722 == 1
-  		caid 0x1702 == 2
-  		caid 0x1762 == 4
-  		other caid == 8
-  		cam-type E == 16
-  		cam-type D == 32
-  		cam-type F == 64
-  		other cam-type == 128
-  		so valid are : 33, 18 and 68
-
-  cmd = 'u' get current vtxt-pid
-
-
-  Bei Fehlschlagen eines Kommandos wird der negative Wert des kommandos zurückgegeben.
-
-  License: GPL
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-$Log: zapit.cpp,v $
-Revision 1.121  2002/04/05 16:29:46  obi
-small fixes
-
-Revision 1.120  2002/04/05 15:12:13  rasc
--- existsChannelInBouquet  (True/False)
-
-Revision 1.119  2002/04/05 01:14:18  rasc
--- Favorites Bouquet handling (Easy Add Channels)
-
-Revision 1.118  2002/04/04 23:40:55  obi
-support for new camd
-
-Revision 1.117  2002/04/04 21:26:08  obi
-some more code sorting
-
-Revision 1.116  2002/04/04 19:36:49  obi
-some code sorting
-
-Revision 1.115  2002/04/04 14:41:08  rasc
-- New functions in zapitclient for handling favorites
-  - test if a bouquet exists
-- Some Log - CVS Entries in modules
-
-
-*/
+ * $Id: zapit.cpp,v 1.122 2002/04/06 11:26:11 obi Exp $
+ *
+ * zapit - d-box2 linux project
+ * 
+ * (C) 2001, 2002 by Philipp Leusmann <faralla@berlios.de>
+ *
+ * based on code from older applications of the d-box2 linux project.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
 
 #include "zapit.h"
 #include "lcddclient.h"
@@ -157,7 +61,7 @@ CLcddClient lcdd;
 
 CEventServer *eventServer;
 
-static int debug = 0;
+bool debug = false;
 
 extern uint16_t old_tsid;
 uint32_t curr_onid_sid = 0;
@@ -211,21 +115,27 @@ static int camdpid = -1;
 pthread_t dec_thread;
 #endif /* USE_EXTERNAL_CAMD */
 
-
-void termination_handler (int signum)
+void signal_handler (int signum)
 {
-#ifdef USE_EXTERNAL_CAMD
-	if (camdpid != -1)
+	switch (signum)
 	{
-		kill(camdpid, SIGTERM);
-		waitpid(camdpid, 0, 0);
-	}
+	case SIGUSR1:
+		debug = (debug ? false : true);
+		break;
+	default:
+#ifdef USE_EXTERNAL_CAMD
+		if (camdpid != -1)
+		{
+			kill(camdpid, SIGTERM);
+			waitpid(camdpid, 0, 0);
+		}
 #endif
-	if (connfd != -1)
-		close(connfd);
+		if (connfd != -1)
+			close(connfd);
 
-	system("cp /tmp/zapit_last_chan " CONFIGDIR "/zapit/last_chan");
-	exit(0);
+		system("cp /tmp/zapit_last_chan " CONFIGDIR "/zapit/last_chan");
+		exit(0);
+	}
 }
 
 #ifndef DVBS
@@ -400,7 +310,7 @@ void *decode_thread(void *ptr)
 	{
 		if(parse_cat(caid, &emmpid) == 0)
 		{
-			debug("[zapit] emmpid >0x%04x< found for caid 0x%04x\n", emmpid, caid);
+			debug("[zapit] emmpid %04x found for caid %04x\n", emmpid, caid);
 			setemm(0x104, caid, emmpid);
 		}
 		else
@@ -532,7 +442,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 #endif /* USE_EXTERNAL_CAMD */
 		debug("[zapit] tunig to tsid %04x\n", cit->second.tsid);
 
-		if (tune(cit->second.tsid) < 0)
+		if (tune(cit->second.tsid) != 0)
 		{
 			debug("[zapit] no transponder with tsid %04x found\nHave to look it up in nit\n", cit->second.tsid);
 			return -3;
@@ -553,13 +463,16 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		return 3;
 	}
 
-#ifndef USE_EXTERNAL_CAMD
 	if (caid == 0)
 	{
-		caid = get_caid();
-	}
+#ifdef DVBS
+		caid = 0x1702;
 #else
-	caid = 0x1702;
+		caid = get_caid();
+#endif /* DVBS */
+	}
+
+#ifdef USE_EXTERNAL_CAMD
 	if (camdpid != -1)
 	{
 		kill(camdpid, SIGTERM);
@@ -741,21 +654,24 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		{
 			OldAC3 = parse_pmt_pids.apids[0].is_ac3;
 
-			if (audio_fd == -1)
+			if (audio_fd != -1)
 			{
-				if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
-				{
-					perror("[zapit] unable to open audio device");
-					return -3;
-				}
-				else
-				{
-					debug("[zapit] opened audio device\n");
-				}
+				debug("[zapit] closing open audio device.\n");
+				close(audio_fd);
 			}
 			else
 			{
-				debug("[zapit] audio device already open\n");
+				debug("[zapit] audio device already closed.\n");
+			}
+			
+			if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
+			{
+				perror("[zapit] unable to open audio device");
+				return -3;
+			}
+			else
+			{
+				debug("[zapit] opened audio device\n");
 			}
 
 			if(ioctl(audio_fd, AUDIO_SET_BYPASS_MODE, OldAC3 ? 0 : 1) < 0)
@@ -2317,7 +2233,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.121 2002/04/05 16:29:46 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.122 2002/04/06 11:26:11 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2325,7 +2241,7 @@ int main (int argc, char **argv)
 		{
 			if (!strcmp(argv[i], "-d"))
 			{
-				debug = 1;
+				debug = true;
 			}
 			else if (!strcmp(argv[i], "-lo"))
 			{
@@ -2432,10 +2348,11 @@ int main (int argc, char **argv)
 		return -1;
 	}
 
-	signal(SIGHUP,termination_handler);
-	signal(SIGTERM,termination_handler);
+	signal(SIGHUP, signal_handler);
+	signal(SIGTERM, signal_handler);
+	signal(SIGUSR1, signal_handler);
 
-	if (debug == 0)
+	if (debug == false)
 	{
 		switch (fork())
 		{

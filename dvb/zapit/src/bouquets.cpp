@@ -1,100 +1,28 @@
 /*
-  BouquetManager für zapit  -   DBoxII-Project
-
-  $Id: bouquets.cpp,v 1.21 2002/04/05 15:12:13 rasc Exp $
-
-  License: GPL
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-  $Log: bouquets.cpp,v $
-  Revision 1.21  2002/04/05 15:12:13  rasc
-  -- existsChannelInBouquet  (True/False)
-
-  Revision 1.20  2002/04/05 01:14:18  rasc
-  -- Favorites Bouquet handling (Easy Add Channels)
-
-  Revision 1.19  2002/04/04 14:41:08  rasc
-  - New functions in zapitclient for handling favorites
-    - test if a bouquet exists
-  - Some Log - CVS Entries in modules
-
-  Revision 1.18  2002/04/02 23:08:04  rasc
-  -- ...existBouquet: check if Bouquet exists (returns true/false)
-
-  Revision 1.17  2002/03/14 20:52:48  Simplex
-  small fix
-
-  Revision 1.16  2002/03/03 20:39:57  Simplex
-  handling locked and hidden bouquets
-
-  Revision 1.15  2002/02/27 19:24:54  Simplex
-  bugfix: loading empty bouquets.xml doesn't fail anymore
-
-  Revision 1.14  2002/02/09 22:04:05  Simplex
-  speed up discarding BQ-Ed. changes
-
-  Revision 1.13  2002/02/06 23:56:13  Simplex
-  fixed bug with accessing radiochannel lists
-
-  Revision 1.12  2002/02/04 23:22:51  Simplex
-  fixed bug saving bouquets.xml
-
-  Revision 1.11  2002/01/31 22:52:48  Simplex
-  bugfix
-
-  Revision 1.10  2002/01/30 22:41:00  Simplex
-  prevent deleting special bouquet
-
-  Revision 1.9  2002/01/29 20:44:07  Simplex
-  made some Bouquetmanager-stuff "hot"
-
-  Revision 1.8  2002/01/29 17:22:33  field
-  Speedup (debug-out), Cant decode verbessert
-
-  Revision 1.7  2002/01/16 22:42:30  Simplex
-  improved build up of "special" bouquet
-
-  Revision 1.6  2002/01/15 23:08:50  Simplex
-  added iterating  through channellists
-  added "special" bouquet
-
-  Revision 1.5  2002/01/05 16:39:32  Simplex
-  completed commands for bouquet-editor
-
-  Revision 1.4  2002/01/04 22:52:31  Simplex
-  prepared zapitclient,
-  added new command structure (version 2),
-  added some commands for bouquet editor,
-
-  Revision 1.3  2002/01/02 18:07:54  Simplex
-  fixed bug with channels of servicetype 4
-
-  Revision 1.2  2001/12/30 18:38:37  Simplex
-  intregration of CBouquetManager (part I)
-
-  Revision 1.1  2001/12/27 16:49:28  Simplex
-  BouquetManager initial revision (completely untested)
-
-
-*/
-
-#define BOUQUETS_CPP
+ * $Id: bouquets.cpp,v 1.22 2002/04/06 11:26:11 obi Exp $
+ *
+ * BouquetManager for zapit - d-box2 linux project
+ *
+ * (C) 2002 by Simplex <simplex@berlios.de>,
+ *             rasc <rasc@berlios.de>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
 
 #include "bouquets.h"
-#include <config.h>
 
 /**** class CBouquet ********************************************************/
 CBouquet::CBouquet( const CBouquet& bouquet)

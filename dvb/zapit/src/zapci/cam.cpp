@@ -1,4 +1,4 @@
-#ifndef USE_EXTERNAL_CAMD
+#ifndef DVBS
 #include <fcntl.h>
 #include <ost/ca.h>
 #include <stdio.h>
@@ -384,5 +384,5 @@ int setemm (uint16_t unknown, uint16_t ca_system_id, dvb_pid_t emm_pid)
 	return writecam(buffer, sizeof(buffer));
 }
 
-#endif /* USE_EXTERNAL_CAMD */
+#endif /* DVBS */
 

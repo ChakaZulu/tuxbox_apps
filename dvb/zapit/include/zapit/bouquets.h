@@ -1,36 +1,23 @@
-// $Id: bouquets.h,v 1.14 2002/04/05 15:12:13 rasc Exp $
-//
-//
-// $Log: bouquets.h,v $
-// Revision 1.14  2002/04/05 15:12:13  rasc
-// -- existsChannelInBouquet  (True/False)
-//
-// Revision 1.13  2002/04/04 14:41:08  rasc
-// - New functions in zapitclient for handling favorites
-//   - test if a bouquet exists
-// - Some Log - CVS Entries in modules
-//
-// Revision 1.12  2002/04/02 23:08:04  rasc
-// -- ...existBouquet: check if Bouquet exists (returns true/false)
-//
-//
-//
+/*
+ * $Id: bouquets.h,v 1.15 2002/04/06 11:26:11 obi Exp $
+ */
 
-
-#ifndef __bouquets__
-#define __bouquets__
-
-#ifndef BOUQUETS_CPP
-#define BOUQUETS_CPP extern
-#endif
+#ifndef __bouquets_h__
+#define __bouquets_h__
 
 #include <algorithm>
 #include <functional>
-
 #include <vector>
 #include <stdio.h>
+
 #include "getservices.h"
 #include "xml/xmltree.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#else
+#define CONFIGDIR "/var/tuxbox/config/zapit"
+#endif
 
 using namespace std;
 
@@ -160,6 +147,6 @@ class CBouquetManager
 
 };
 
-BOUQUETS_CPP CBouquetManager* BouquetManager;
+//extern CBouquetManager* BouquetManager;
 
-#endif
+#endif /* __bouquets_h__ */

@@ -1,9 +1,15 @@
 /*
- $Id: scan.h,v 1.9 2002/04/04 14:41:08 rasc Exp $
+ $Id: scan.h,v 1.10 2002/04/06 11:26:11 obi Exp $
 
 
 
  $Log: scan.h,v $
+ Revision 1.10  2002/04/06 11:26:11  obi
+ lots of changes, bugs and fixes, including:
+ - anti-randomness fixes
+ - unused code
+ - probably something else
+
  Revision 1.9  2002/04/04 14:41:08  rasc
  - New functions in zapitclient for handling favorites
    - test if a bouquet exists
@@ -13,26 +19,38 @@
 
 */
 
-
-
 #ifndef __scan_h__
 #define __scan_h__
 
+#include <ost/frontend.h>
+#include <pthread.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string>
 
-#include <config.h>
+struct transpondermap;
+
+#include "pat.h"
+#include "sdt.h"
+#include "tune.h"
 #include "zapitclient.h"
-#include "eventserver.h"
-#include "getservices.h"
 
-struct scanchannel{
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#else
+#define CONFIGDIR "/var/tuxbox/config/zapit"
+#endif
+
+struct scanchannel
+{
 	std::string name;
-	int sid;
-	int tsid;
-	int service_type;
-	int pmt;
-	int onid;
+	uint16_t sid;
+	uint16_t tsid;
+	uint8_t service_type;
+	uint16_t pmt;
+	uint16_t onid;
 
-	scanchannel(std::string Name, int Sid, int Tsid,int Onid, int Service_type)
+	scanchannel(std::string Name, uint16_t Sid, uint16_t Tsid, uint16_t Onid, uint8_t Service_type)
 	{
 		name = Name;
 		sid = Sid;
@@ -41,7 +59,7 @@ struct scanchannel{
 		service_type = Service_type;
 		pmt = 0;
 	}
-	scanchannel(std::string Name, int Sid, int Tsid,int Onid)
+	scanchannel(std::string Name, uint16_t Sid, uint16_t Tsid, uint16_t Onid)
 	{
 		name = Name;
 		sid = Sid;
@@ -51,7 +69,7 @@ struct scanchannel{
 		pmt = 0;
 	}
 
-	scanchannel(int Sid, int Tsid, int Pmt)
+	scanchannel(uint16_t Sid, uint16_t Tsid, uint16_t Pmt)
 	{
 		sid = Sid;
 		tsid = Tsid;
@@ -89,10 +107,10 @@ struct bouquet_mulmap
 {
 	std::string provname;
 	std::string servname;
-	int sid;
-	int onid;
+	uint16_t sid;
+	uint16_t onid;
 
-	bouquet_mulmap(std::string Provname, std::string Servname, int Sid, int Onid)
+	bouquet_mulmap(std::string Provname, std::string Servname, uint16_t Sid, uint16_t Onid)
 	{
 		provname = Provname;
 		servname = Servname;

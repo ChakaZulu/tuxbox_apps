@@ -1,45 +1,15 @@
 /*
-$Id: nit.cpp,v 1.11 2002/04/04 14:35:16 rasc Exp $
-
-
-
-$Log: nit.cpp,v $
-Revision 1.11  2002/04/04 14:35:16  rasc
-- set NIT Timout to 10 secs accoring ETSI (fix random scan results)
-
-
-
-*/
-
-
-
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <string>
-#include <ost/dmx.h>
-#include <sys/poll.h>
+ * $Id: nit.cpp,v 1.12 2002/04/06 11:26:11 obi Exp $
+ */
 
 #include "nit.h"
-#include "sdt.h"
-#include "getservices.h"
-#include "descriptors.h"
 
-#define DEMUX_DEV "/dev/ost/demux0"
-
-using namespace std;
-
-void nit (int diseqc)
+int nit (uint8_t DiSEqC)
 {
 	struct dmxSctFilterParams flt;
 	int demux_fd;
   	uint8_t buffer[1024];
+	uint8_t section = 0;
 
 	/* position in buffer */
 	uint16_t pos;
@@ -56,7 +26,7 @@ void nit (int diseqc)
   	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
     		perror("[nit.cpp] " DEMUX_DEV);
-    		return;
+    		return -1;
   	}
 
   	memset (&flt.filter, 0, sizeof (struct dmxFilter));
@@ -78,7 +48,7 @@ void nit (int diseqc)
 		{
 			perror("[nit.cpp] read");
 			close(demux_fd);
-			return;
+			return -1;
 		}
 
 		section_length = ((buffer[1] & 0x0F) << 8) + buffer[2];
@@ -95,7 +65,7 @@ void nit (int diseqc)
 			case 0x42: /* stuffing_descriptor */
 				break;
 			case 0x43: /* satellite_delivery_system_descriptor */
-				sat_deliv_system_desc(&buffer[pos], transport_stream_id, diseqc);
+				sat_deliv_system_desc(&buffer[pos], transport_stream_id, DiSEqC);
 				break;
 			case 0x44: /* cable_delivery_system_descriptor */
 				cable_deliv_system_desc(&buffer[pos], transport_stream_id);
@@ -146,7 +116,7 @@ void nit (int diseqc)
 					case 0x42: /* stuffing_descriptor */
 						break;
 					case 0x43: /* satellite_delivery_system_descriptor */
-						sat_deliv_system_desc(&buffer[pos2], transport_stream_id, diseqc);
+						sat_deliv_system_desc(&buffer[pos2], transport_stream_id, DiSEqC);
 						break;
 					case 0x44: /* cable_delivery_system_descriptor */
 						cable_deliv_system_desc(&buffer[pos2], transport_stream_id);
@@ -175,8 +145,9 @@ void nit (int diseqc)
 			}
 		}
 	}
-	while (buffer[6] != buffer[7]);
+	while (section++ != buffer[7]);
 
 	close(demux_fd);
+	return 0;
 }
 

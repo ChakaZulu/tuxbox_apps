@@ -1,51 +1,8 @@
 /*
-$Id: scan.cpp,v 1.34 2002/04/04 23:40:13 obi Exp $
+ * $Id: scan.cpp,v 1.35 2002/04/06 11:26:11 obi Exp $
+ */
 
-
-
-$Log: scan.cpp,v $
-Revision 1.34  2002/04/04 23:40:13  obi
-show number of found transponders / channels on console
-
-Revision 1.33  2002/04/04 14:41:08  rasc
-- New functions in zapitclient for handling favorites
-  - test if a bouquet exists
-- Some Log - CVS Entries in modules
-
-
-*/
-
-
-#include <stdio.h>
-#include <sys/poll.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <map>
-#include <ctype.h>
-#include <string>
-#include "descriptors.h"
 #include "scan.h"
-
-#include <ost/dmx.h>
-#include <ost/frontend.h>
-#include <ost/sec.h>
-#include <ost/video.h>
-#include <ost/ca.h>
-
-#include "nit.h"
-#include "pat.h"
-#include "sdt.h"
-#include "tune.h"
-
-
-#define FRONT_DEV "/dev/ost/qpskfe0"
-#define DEMUX_DEV "/dev/ost/demux0"
-#define SEC_DEV   "/dev/ost/sec0"
 
 typedef std::map<int, scanchannel>::iterator sciterator;
 typedef std::map<int, transpondermap>::iterator stiterator;
@@ -73,32 +30,49 @@ int issatbox()
 	{
 		fgets(buffer, 100, fp);
 		sscanf(buffer, "fe=%d", &fe);
-
 	}
+
 	fclose(fp);
 
 	return fe;
 }
 
-void get_nits(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC)
+int get_nits(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC)
 {
 	FrontendParameters feparams;
 	feparams.Frequency = frequency;
 	feparams.Inversion = INVERSION_AUTO;
-	feparams.u.qpsk.SymbolRate = symbol_rate;
-	feparams.u.qpsk.FEC_inner = FEC_inner;
+
+	if (DiSEqC < 0xff)
+	{
+		feparams.u.qpsk.SymbolRate = symbol_rate;
+		feparams.u.qpsk.FEC_inner = FEC_inner;
+	}
+	else
+	{
+		feparams.u.qam.SymbolRate = symbol_rate;
+		feparams.u.qam.FEC_inner = FEC_inner;
+		feparams.u.qam.QAM = QAM_64;
+	}
 
 	if (finaltune(feparams, polarity, DiSEqC) == 0)
+	{
 		nit(DiSEqC);
+		return 0;
+	}
 	else
+	{
 		printf("No signal found on transponder\n");
+		return -1;
+	}
 }
 
 void get_sdts()
 {
 	int sdt_tries;
+	stiterator tI;
 
-	for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+	for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	{
 		sdt_tries = 0;
 
@@ -265,7 +239,6 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id)
 				transponder += "\" serviceType=\"";
 				transponder += service_type;
 				transponder += "\" channelNR=\"0\"/>\n";
-				//transponder += "\"/>\n";
 			}
 		}
 	}
@@ -301,9 +274,8 @@ void *start_scanthread(void *param)
 	FILE *fd = NULL;
 	std::string transponder;
 	int is_satbox = issatbox();
-	char satName[50];
+	char satName[32];
 	unsigned short do_diseqc = *(unsigned short *) (param);
-	FrontendParameters feparams;
 	uint8_t diseqc_pos; // TODO: get as parameter for each sat
 
 	scan_runs = 1;
@@ -316,10 +288,13 @@ void *start_scanthread(void *param)
 
 	if (!is_satbox)
 	{
+		curr_sat = 0;
 		strcpy(satName, "cable");
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
-		curr_sat = 0;
+		printf("[scan.cpp] scanning %s\n", satName);
+#if 1
+		FrontendParameters feparams;
 		feparams.Inversion = INVERSION_AUTO;
 		feparams.u.qam.FEC_inner = FEC_AUTO;
 		feparams.u.qam.QAM = QAM_64;
@@ -348,7 +323,7 @@ void *start_scanthread(void *param)
 				}
 			}
 		}
-		
+
 		feparams.Frequency = 522000;
 
 		if (finaltune(feparams, 0, 0) == 0)
@@ -359,7 +334,22 @@ void *start_scanthread(void *param)
 		{
 			printf("[scan.cpp] No signal found on transponder.\n");
 		}
+#else
+		uint32_t frequency;
 
+		for (frequency = 306000; frequency <= 460000; frequency += 8000)
+		{
+			if (get_nits(frequency, 6900000, FEC_AUTO, 0, 0xFF) != 0)
+			{
+				get_nits(frequency, 6875000, FEC_AUTO, 0, 0xFF);
+			}
+		}
+
+		if (get_nits(522000, 6900000, FEC_AUTO, 0, 0xFF) != 0)
+		{
+			get_nits(522000, 6875000, FEC_AUTO, 0, 0xFF);
+		}
+#endif
 		get_sdts();
 
 		if (!scantransponders.empty())
@@ -387,28 +377,26 @@ void *start_scanthread(void *param)
 			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
 			printf("[scan.cpp] scanning %s\n", satName);
+#if 0
 			get_nits(10788000, 22000000, FEC_5_6, 1, diseqc_pos);	// 54
 			get_nits(10832000, 22000000, FEC_5_6, 0, diseqc_pos);	// 57 **
 			get_nits(10862000, 22000000, FEC_5_6, 0, diseqc_pos);	// 59
+#endif
 			get_nits(10876000, 22000000, FEC_5_6, 1, diseqc_pos);	// 60 **
 #if 0
 			get_nits(11719500, 27500000, FEC_3_4, 0, diseqc_pos);	// 65
 			get_nits(11739500, 27500000, FEC_3_4, 1, diseqc_pos);	// 66
 			get_nits(11758500, 27500000, FEC_3_4, 0, diseqc_pos);	// 67
 			get_nits(11778000, 27500000, FEC_3_4, 1, diseqc_pos);	// 68
-#endif
 			get_nits(11798000, 27500000, FEC_3_4, 0, diseqc_pos);	// 69 *
-#if 0
 			get_nits(11817000, 27500000, FEC_3_4, 1, diseqc_pos);	// 70
 			get_nits(11836500, 27500000, FEC_3_4, 0, diseqc_pos);	// 71
 			get_nits(11856000, 27500000, FEC_3_4, 1, diseqc_pos);	// 72
 			get_nits(11876000, 27500000, FEC_3_4, 0, diseqc_pos);	// 73
 			get_nits(11895000, 27500000, FEC_3_4, 1, diseqc_pos);	// 74
-#endif
 			get_nits(11914000, 27500000, FEC_3_4, 0, diseqc_pos);	// 75 *
-			//get_nits(11934000, 27500000, FEC_3_4, 1, diseqc_pos);	// 76
+			get_nits(11934000, 27500000, FEC_3_4, 1, diseqc_pos);	// 76
 			get_nits(11953500, 27500000, FEC_3_4, 0, diseqc_pos);	// 77 *
-#if 0
 			get_nits(11973000, 27500000, FEC_3_4, 1, diseqc_pos);	// 78
 			get_nits(11992500, 27500000, FEC_3_4, 0, diseqc_pos);	// 79
 			get_nits(12012000, 27500000, FEC_3_4, 1, diseqc_pos);	// 80
@@ -420,9 +408,7 @@ void *start_scanthread(void *param)
 			get_nits(12129000, 27500000, FEC_3_4, 1, diseqc_pos);	// 86
 			get_nits(12148000, 27500000, FEC_3_4, 0, diseqc_pos);	// 87
 			get_nits(12168000, 27500000, FEC_3_4, 1, diseqc_pos);	// 88 *
-#endif
 			get_nits(12187500, 27500000, FEC_3_4, 0, diseqc_pos);	// 89 *
-#if 0
 			get_nits(12207000, 27500000, FEC_3_4, 1, diseqc_pos);	// 90
 			get_nits(12226000, 27500000, FEC_3_4, 0, diseqc_pos);	// 91
 			get_nits(12246000, 27500000, FEC_3_4, 1, diseqc_pos);	// 92
@@ -434,9 +420,7 @@ void *start_scanthread(void *param)
 			get_nits(12363000, 27500000, FEC_3_4, 1, diseqc_pos);	// 98
 			get_nits(12382500, 27500000, FEC_3_4, 0, diseqc_pos);	// 99
 			get_nits(12402000, 27500000, FEC_3_4, 1, diseqc_pos);	// 100
-#endif
 			get_nits(12422000, 27500000, FEC_3_4, 0, diseqc_pos);	// 101 empty?
-#if 0
 			get_nits(12441000, 27500000, FEC_3_4, 1, diseqc_pos);	// 102
 			get_nits(12460000, 27500000, FEC_3_4, 0, diseqc_pos);	// 103
 			get_nits(12480000, 27500000, FEC_3_4, 1, diseqc_pos);	// 104
