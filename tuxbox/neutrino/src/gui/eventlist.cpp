@@ -118,6 +118,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 	int res = menu_return::RETURN_REPAINT;
 
 	name = channelname;
+	sort_mode=0;
 	paintHead();
 	readEvents(channel_id, channelname);
 	paint();
