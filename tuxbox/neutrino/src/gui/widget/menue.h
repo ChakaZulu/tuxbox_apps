@@ -130,9 +130,8 @@ class CMenuItem
 		}
 		virtual void setActive( bool Active)
 		{
-			printf("set active ..\n");
 			active = Active;
-			//paint();
+			paint();
 		};
 };
 
@@ -260,16 +259,23 @@ class CMenuWidget : public CMenuTarget
 		CFrameBuffer		*frameBuffer;
 		COnPaintNotifier*	onPaintNotifier;
 		vector<CMenuItem*>	items;
+		vector<unsigned int> page_start;
+		vector<unsigned int> page_end;
 		string			name;
 		string			iconfile;
 		bool			localizing;
 
 		int			width;
 		int			height;
+		int         wanted_height;
 		int			x;
 		int			y;
 		int			selected;
 		int 			iconOffset;
+		unsigned int         item_start_y;
+		unsigned int         current_page;
+		unsigned int         total_pages;
+		virtual void paintItems();
 
 	public:
 		CMenuWidget()
@@ -280,7 +286,7 @@ class CMenuWidget : public CMenuTarget
 			onPaintNotifier=NULL;
 			iconOffset= 0;
 		};
-		CMenuWidget(string Name, string Icon="", int mwidth=400, int mheight=390, bool Localizing=true);
+		CMenuWidget(string Name, string Icon="", int mwidth=400, int mheight=576, bool Localizing=true);
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, bool defaultselected=false);

@@ -67,8 +67,12 @@ CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight, bool
 	iconfile = Icon;
 	selected = -1;
 	width = mwidth;
+	if(width > (g_settings.screen_EndX - g_settings.screen_StartX))
+		width = g_settings.screen_EndX - g_settings.screen_StartX;
 	height = mheight; // height(menu_title)+10+...
+	wanted_height=mheight;
 	localizing = Localizing;
+	current_page=0;
 }
 
 CMenuWidget::~CMenuWidget()
@@ -78,6 +82,8 @@ CMenuWidget::~CMenuWidget()
 		delete items[count];
 	}
 	items.clear();
+	page_start.clear();
+	page_end.clear();
 }
 
 void CMenuWidget::addItem(CMenuItem* menuItem, bool defaultselected)
@@ -167,12 +173,21 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 							if ( item->isSelectable() )
 							{
-								//clear prev. selected
-								items[selected]->paint( false );
-								//select new
-								item->paint( true );
-								selected = pos;
-								break;
+								if(pos <= (int)page_end[current_page] && pos >= (int)page_start[current_page])
+								{ // Item is currently on screen
+									//clear prev. selected
+									items[selected]->paint( false );
+									//select new
+									item->paint( true );
+									selected = pos;
+									break;
+								}
+								else
+								{
+									selected=pos;
+									paintItems();
+									break;
+								}
 							}
 						}
 					}
@@ -249,7 +264,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 void CMenuWidget::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x,y-10, width,height+50 );
+	frameBuffer->paintBackgroundBoxRel(x,y-10, width+15,height+50 );
 }
 
 void CMenuWidget::paint()
@@ -261,12 +276,38 @@ void CMenuWidget::paint()
 	}
 	g_lcdd->setMode(CLcddTypes::MODE_MENU, l_name);
 
+	height=wanted_height;
+	if(height > (g_settings.screen_EndY - g_settings.screen_StartY))
+		height = g_settings.screen_EndY - g_settings.screen_StartY;
 
 	int neededWidth = g_Fonts->menu_title->getRenderWidth(l_name.c_str());
 	if (neededWidth> width-48)
 	{
 		width= neededWidth+ 49;
+		if(width > (g_settings.screen_EndX - g_settings.screen_StartX))
+			width = g_settings.screen_EndX - g_settings.screen_StartX;
 	}
+	int hheight = g_Fonts->menu_title->getHeight();
+	int itemHeightTotal=0;
+	int heightCurrPage=0;
+	page_end.clear();
+	page_start.clear();
+	page_start.insert(page_start.end(), 0);
+	total_pages=1;
+	for (unsigned int i= 0; i< items.size(); i++)
+	{
+		int item_height=items[i]->getHeight();
+		itemHeightTotal+=item_height;
+		heightCurrPage+=item_height;
+		if(heightCurrPage > (height-hheight))
+		{
+			page_end.insert(page_end.end(), i-1);
+			page_start.insert(page_start.end(), i);
+			total_pages++;
+			heightCurrPage=item_height;
+		}
+	}
+	page_end.insert(page_end.end(), items.size()-1);
 
 	iconOffset= 0;
 	for (unsigned int i= 0; i< items.size(); i++)
@@ -279,18 +320,52 @@ void CMenuWidget::paint()
 		}
 	}
 
-	y= ( 576 - height ) >> 1;
+	// shrink menu if less items
+	if(hheight+itemHeightTotal < height)
+		height=hheight+itemHeightTotal;
+	
+	y= ( ( ( g_settings.screen_EndY- g_settings.screen_StartY ) - height) >> 1 ) + g_settings.screen_StartY;
 	x= ( ( ( g_settings.screen_EndX- g_settings.screen_StartX ) - width ) >> 1 ) + g_settings.screen_StartX;
 
+	int sb_width;
+	if(total_pages > 1)
+		sb_width=15;
+	else
+		sb_width=0;
 
-	int hheight = g_Fonts->menu_title->getHeight();
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+38,y+hheight+1, width, l_name.c_str(), COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width+sb_width,hheight, COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+38,y+hheight+1, width-40, l_name.c_str(), COL_MENUHEAD);
 	frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
 
-	int ypos = y+hheight;
+	item_start_y = y+hheight;
+	paintItems();
+}
 
-	for(unsigned int count=0;count<items.size();count++)
+void CMenuWidget::paintItems()
+{
+	int item_height=height-(item_start_y-y);
+	
+	//Item not currently on screen
+	if(selected>=0)
+	{
+		while(selected < (int)page_start[current_page])
+			current_page--;
+		while(selected > (int)page_end[current_page])
+			current_page++;
+	}
+	
+	// Scrollbar
+	if(total_pages>1)
+	{
+		frameBuffer->paintBoxRel(x+ width,item_start_y, 15, item_height,  COL_MENUCONTENT+ 1);
+		float sbh= ((item_height-4) / total_pages);
+		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ int(current_page* sbh) , 11, 
+										 int(sbh),  COL_MENUCONTENT+ 3);
+	}
+	frameBuffer->paintBoxRel(x,item_start_y, width,item_height, COL_MENUCONTENT);
+	unsigned int count;
+	int ypos=item_start_y;
+	for(count=page_start[current_page]; count <= page_end[current_page];count++)
 	{
 		CMenuItem* item = items[count];
 		item->init(x,ypos, width, iconOffset);
@@ -304,7 +379,6 @@ void CMenuWidget::paint()
 			ypos = item->paint(selected==((signed int) count) );
 		}
 	}
-	//	height = ypos - y;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
