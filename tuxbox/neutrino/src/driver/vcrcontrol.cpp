@@ -147,9 +147,9 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsi
 		string extCommand="unknown";
 		string extOnidsid="error";
 		string extEpgid="error";
-		sprintf(tmp,"%ud", onidsid);
+		sprintf(tmp,"%u", onidsid);
 		extOnidsid = tmp;
-		sprintf(tmp,"%ll", epgid);  //todo - ergibt immer leeren string  -- fixen!
+		sprintf(tmp,"%llu", epgid);  //todo - ergibt immer leeren string  -- fixen!
 		extEpgid = tmp;
 
 		switch(command)
