@@ -139,7 +139,8 @@ recordingmenu.server_wakeup WOL сервера записи
 recordingmenu.server_mac MAC адрес
 recordingmenu.setupnow применить изменения
 recordingmenu.no_scart не переключаться в режим скарта
-recordingmenu.error_dir_not_writable нельзя записать в папку-записи.\n запись не возможна
+
+streaming.dir_not_writable нельзя записать в папку-записи.\n запись не возможна
 
 streamingmenu.head Настройки видеоплеера
 streamingmenu.streaming_type Сервер записи

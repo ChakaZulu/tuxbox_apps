@@ -637,7 +637,8 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		printf("[vcrcontrol] stream2file error code: %d\n", error_msg);
 #warning FIXME: Use better error message
 		DisplayErrorMessage(g_Locale->getText(
-						      error_msg == STREAM2FILE_INVALID_DIRECTORY ? "recordingmenu.error_dir_not_writable" :
+						      error_msg == STREAM2FILE_BUSY ? "streaming.busy" :
+						      error_msg == STREAM2FILE_INVALID_DIRECTORY ? "streaming.dir_not_writable" :
 						      "streamingserver.noconnect"
 						      )); // UTF-8
 

@@ -139,8 +139,10 @@ recordingmenu.server_wakeup recording server WOL
 recordingmenu.server_mac MAC address
 recordingmenu.setupnow activate changes
 recordingmenu.no_scart do not switch to scart mode
-recordingmenu.error_dir_not_writable The recording directory can not be written.\nRecording will not work.
 recordingmenu.splitsize Max. file size (GB)
+
+streaming.busy One or several recording processes are active.\nIf you encounter this message an no recording is active, please restart Neutrino.
+streaming.dir_not_writable The recording directory is not writable.\nRecording will not work.
 
 streamingmenu.head Movieplayer Settings
 streamingmenu.streaming_type Streamingserver
@@ -832,3 +834,8 @@ EPGPlus.refresh_epg Refresh
 EPGPlus.remind Schedule
 EPGPlus.scroll_mode Scroll Mode
 EPGPlus.stretch_mode Stretch Mode
+
+eventlistbar.channelswitch schedule
+eventlistbar.recordevent record
+eventlistbar.eventsort sorting
+

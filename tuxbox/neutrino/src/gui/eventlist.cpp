@@ -228,11 +228,11 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				if(timerdclient.isTimerdAvailable())
 				{
 					timerdclient.addRecordTimerEvent(channel_id,
-																evtlist[selected].startTime,
-																evtlist[selected].startTime + evtlist[selected].duration,
-																evtlist[selected].eventID, evtlist[selected].startTime,
-																evtlist[selected].startTime - (ANNOUNCETIME + 120),
-																"", true );
+									 evtlist[selected].startTime,
+									 evtlist[selected].startTime + evtlist[selected].duration,
+									 evtlist[selected].eventID, evtlist[selected].startTime,
+									 evtlist[selected].startTime - (ANNOUNCETIME + 120),
+									 "", true );
 					ShowMsgUTF("timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 				}
 				else
@@ -245,10 +245,10 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			if(timerdclient.isTimerdAvailable())
 			{
 				timerdclient.addZaptoTimerEvent(channel_id, 
-														  evtlist[selected].startTime,
-														  evtlist[selected].startTime - ANNOUNCETIME, 0,
-														  evtlist[selected].eventID, evtlist[selected].startTime,
-														  "");
+								evtlist[selected].startTime,
+								evtlist[selected].startTime - ANNOUNCETIME, 0,
+								evtlist[selected].eventID, evtlist[selected].startTime,
+								"");
 				ShowMsgUTF("timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 			}
 			else
@@ -310,21 +310,21 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				hide();
 
 				res = g_EpgData->show(channel_id, evtlist[selected].eventID, &evtlist[selected].startTime);
-                if ( res == menu_return::RETURN_EXIT_ALL )
-                {
-                	loop = false;
-                }
-                else
-                {
-                	g_RCInput->getMsg( &msg, &data, 0 );
-
+				if ( res == menu_return::RETURN_EXIT_ALL )
+				{
+					loop = false;
+				}
+				else
+				{
+					g_RCInput->getMsg( &msg, &data, 0 );
+					
 					if ( ( msg != CRCInput::RC_red ) &&
-				         ( msg != CRCInput::RC_timeout ) )
+					     ( msg != CRCInput::RC_timeout ) )
 					{
 						// RC_red schlucken
 						g_RCInput->postMsg( msg, data );
 					}
-
+					
 					paintHead();
 					paint();
 					showFunctionBar(true);
@@ -494,27 +494,35 @@ void  EventList::showFunctionBar (bool show)
 
 
     // -- Button: Timer Record & Channelswitch
-    if (g_settings.recording_type != CNeutrinoApp::RECORDING_OFF)
+    if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
+	(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
     {
 	    pos = 0;
-	    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, bx+8+cellwidth*pos, by+h_offset);
+#warning FIXME: display other icons depending on g_settings.key_channelList_addrecord
+	    if (g_settings.key_channelList_addrecord == CRCInput::RC_red)
+		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, bx+8+cellwidth*pos, by+h_offset);
 	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.recordevent"), COL_INFOBAR, 0, true); // UTF-8
     }
 
     // Button: Timer Channelswitch
-    pos = 2;
-    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, bx+8+cellwidth*pos, by+h_offset );
-    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos,
-		by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.channelswitch"),
-		COL_INFOBAR, 0, true); // UTF-8
+    if (g_settings.key_channelList_addremind != CRCInput::RC_nokey)
+    {
+	    pos = 2;
+#warning FIXME: display other icons depending on g_settings.key_channelList_addremind
+	    if (g_settings.key_channelList_addremind == CRCInput::RC_yellow)
+		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, bx+8+cellwidth*pos, by+h_offset );
+	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.channelswitch"), COL_INFOBAR, 0, true); // UTF-8
+    }
 
     // Button: Event Re-Sort
-    pos = 3;
-    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, bx+8+cellwidth*pos, by+h_offset );
-    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos,
-		by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.eventsort"),
-		COL_INFOBAR, 0, true); // UTF-8
-
+    if (g_settings.key_channelList_sort != CRCInput::RC_nokey)
+    {
+	    pos = 3;
+#warning FIXME: display other icons depending on g_settings.key_channelList_sort value
+	    if (g_settings.key_channelList_sort == CRCInput::RC_blue)
+		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, bx+8+cellwidth*pos, by+h_offset );
+	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText("eventlistbar.eventsort"), COL_INFOBAR, 0, true); // UTF-8
+    }
 }
 
 
