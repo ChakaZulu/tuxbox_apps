@@ -5,6 +5,7 @@ set22k
 setpid
 setvoltage
 test_av
+test_clip
 test_pes
 test_sec_ne
 test_sections
