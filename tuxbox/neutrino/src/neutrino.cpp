@@ -2142,7 +2142,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 		KEY_TV_RADIO_MODE,
 		KEY_PAGE_UP,
 		KEY_PAGE_DOWN,
-		KEY_CANCEL,
+		KEY_CANCEL_ACTION,
 		KEY_SORT,
 		KEY_ADD_RECORD,
 		KEY_ADD_REMIND,
