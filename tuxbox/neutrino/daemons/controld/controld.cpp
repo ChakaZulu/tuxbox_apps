@@ -60,7 +60,8 @@
 
 
 #define CONF_FILE CONFIGDIR "/controld.conf"
-#define SAA7126_DEVICE "/dev/dbox/saa0"
+#define AVS_DEVICE	"/dev/dbox/avs0"
+#define SAA7126_DEVICE	"/dev/dbox/saa0"
 
 
 CZapitClient	zapit;
@@ -148,7 +149,7 @@ void setvideooutput(int format, bool bSaveSettings = true)
 
 	int	arg;
 
-	switch ( format )
+	switch (format)
 	{
 	case 0:
 		arg = 0;
@@ -160,21 +161,17 @@ void setvideooutput(int format, bool bSaveSettings = true)
 		arg = 0;
 		break;
 	}
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) < 0)
-	{
-		perror("open");
-		return;
-	}
 
-	if (ioctl(fd, AVSIOSFBLK, &arg)< 0)
-	{
-		perror("AVSIOSFBLK:");
+	if ((fd = open(AVS_DEVICE, O_RDWR)) < 0)
+		perror("[controld] " AVS_DEVICE);
+	else {
+		if (ioctl(fd, AVSIOSFBLK, &arg)< 0)
+			perror("[controld] AVSIOSFBLK");
+
 		close(fd);
-		return;
 	}
-	close(fd);
 
-	switch ( format )
+	switch (format)
 	{
 	case 0:
 		arg = SAA_MODE_FBAS;
@@ -186,18 +183,16 @@ void setvideooutput(int format, bool bSaveSettings = true)
 		arg = SAA_MODE_SVIDEO;
 		break;
 	}
-	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
-	{
-		perror("[controld] SAA DEVICE: ");
-		return;
-	}
 
-	if ( (ioctl(fd, SAAIOSMODE, &arg) < 0))
-	{
-		perror("[controld] IOCTL: ");
-	}
-	close(fd);
+	if ((fd = open(SAA7126_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
+		perror("[controld] " SAA7126_DEVICE);
 
+	else {
+		if ((ioctl(fd, SAAIOSMODE, &arg) < 0))
+			perror("[controld] SAAIOSMODE");
+		
+		close(fd);
+	}
 }
 
 void setVideoFormat(int format, bool bSaveFormat = true )
@@ -224,11 +219,11 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		config->setInt32("videoformat", settings.videoformat);
 	}
 
-	if (format==0) // automatic switch
+	if (format == 0) // automatic switch
 	{
 		printf("[controld] setting VideoFormat to auto \n");
 
-		switch ( aspectRatio )
+		switch (aspectRatio)
 		{
 		case 2 :	// 4:3
 			format= 2;
@@ -243,48 +238,46 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		}
 	}
 
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) < 0)
+	if ((fd = open(AVS_DEVICE, O_RDWR)) < 0)
+		perror("[controld] " AVS_DEVICE);
+	else
 	{
-		perror("open");
-		return;
-	}
+		if (format < 0)
+			format= 0;
 
-	if (format< 0)
-		format= 0;
+		avsiosfncFormat = format;
 
-	avsiosfncFormat = format;
-	if (settings.boxtype == CControldClient::TUXBOX_MAKER_PHILIPS)
-	{
-		switch (format)
+		if (settings.boxtype == CControldClient::TUXBOX_MAKER_PHILIPS)
 		{
-		case 1 :
-			avsiosfncFormat=2;
-			break;
-		case 2 :
-			avsiosfncFormat=3;
-			break;
+			switch (format)
+			{
+			case 1 :
+				avsiosfncFormat=2;
+				break;
+			case 2 :
+				avsiosfncFormat=3;
+				break;
+			}
 		}
-	}
-	if (ioctl(fd,AVSIOSFNC,&avsiosfncFormat)< 0)
-	{
-		perror("AVSIOSFNC");
-		close(fd);
-		return;
-	}
-	close(fd);
 
-	switch( format )
+		if (ioctl(fd,AVSIOSFNC, &avsiosfncFormat)< 0)
+			perror("[controld] AVSIOSFNC");
+		
+		close(fd);
+	}
+
+	switch (format)
 	{
 		//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
-	case AVS_FNCOUT_EXT169	:
+	case AVS_FNCOUT_EXT169:
 		videoDisplayFormat = ZAPIT_VIDEO_CENTER_CUT_OUT;
 		wss = SAA_WSS_169F;
 		break;
-	case AVS_FNCOUT_EXT43	:
+	case AVS_FNCOUT_EXT43:
 		videoDisplayFormat = ZAPIT_VIDEO_LETTER_BOX;
 		wss = SAA_WSS_43F;
 		break;
-	case AVS_FNCOUT_EXT43_1	: 
+	case AVS_FNCOUT_EXT43_1: 
 		videoDisplayFormat = ZAPIT_VIDEO_PAN_SCAN;
 		wss = SAA_WSS_43F;
 		break;
@@ -296,14 +289,15 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 
 	zapit.setDisplayFormat(videoDisplayFormat);
 
-	if ( (fd = open(SAA7126_DEVICE,O_RDWR)) < 0)
-	{
-		perror("open " SAA7126_DEVICE);
-		return;
-	}
+	if ((fd = open(SAA7126_DEVICE,O_RDWR)) < 0)
+		perror("[controld] " SAA7126_DEVICE);
 
-	ioctl(fd,SAAIOSWSS,&wss);
-	close(fd);
+	else {
+		if (ioctl(fd,SAAIOSWSS,&wss) < 0)
+			perror("[controld] SAAIOSWSS");
+
+		close(fd);
+	}
 }
 
 void LoadScart_Settings()
@@ -415,60 +409,32 @@ void routeVideo(int v1, int a1, int v2, int a2, int v3, int a3, int fblk)
 {
 	int fd;
 
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) < 0)
-	{
-		perror("open");
-		return;
-	}
+	if ((fd = open(AVS_DEVICE, O_RDWR)) < 0)
+		perror("[controld] " AVS_DEVICE);
 
-	if (ioctl(fd, AVSIOSFBLK, &fblk)< 0)
-	{
-		perror("AVSIOSFBLK:");
+	else if (ioctl(fd, AVSIOSFBLK, &fblk) < 0)
+		perror("[controld] AVSIOSFBLK");
+
+	else if (ioctl(fd, AVSIOSVSW1, &v1) < 0)
+		perror("[controld] AVSIOSVSW1");
+
+	else if (ioctl(fd, AVSIOSASW1, &a1) < 0)
+		perror("[controld] AVSIOSASW1");
+
+	else if (ioctl(fd, AVSIOSVSW2, &v2) < 0)
+		perror("[controld] AVSIOSVSW2");
+
+	else if (ioctl(fd, AVSIOSASW2, &a2) < 0)
+		perror("[controld] AVSIOSASW2");
+
+	else if (ioctl(fd, AVSIOSVSW3, &v3) < 0)
+		perror("[controld] AVSIOSVSW3");
+
+	else if (ioctl(fd, AVSIOSASW3, &a3) < 0)
+		perror("[controld] AVSIOSASW3");
+
+	if (fd != -1)
 		close(fd);
-		return;
-	}
-
-	if (ioctl(fd,AVSIOSVSW1,&v1)< 0)
-	{
-		perror("AVSIOSVSW1:");
-		close(fd);
-		return;
-	}
-
-	if (ioctl(fd,AVSIOSASW1,&a1)< 0)
-	{
-		perror("AVSIOSASW1:");
-		close(fd);
-		return;
-	}
-
-	if (ioctl(fd,AVSIOSVSW2,&v2)< 0)
-	{
-		perror("AVSIOSVSW2:");
-		close(fd);
-		return;
-	}
-
-	if (ioctl(fd,AVSIOSASW2,&a2)< 0)
-	{
-		perror("AVSIOSASW2:");
-		close(fd);
-		return;
-	}
-
-	if (ioctl(fd,AVSIOSVSW3,&v3)< 0)
-	{
-		perror("AVSIOSVSW3:");
-		close(fd);
-		return;
-	}
-
-	if (ioctl(fd,AVSIOSASW3,&a3)< 0)
-	{
-		perror("AVSIOSASW3:");
-	}
-
-	close(fd);
 }
 
 void switch_vcr( bool vcr_on)
@@ -529,19 +495,17 @@ void disableVideoOutput(bool disable)
 	int fd;
 	printf("[controld] videoOutput %s\n", disable?"off":"on");
 
-	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
+	if ((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
+		perror("[controld] " SAA7126_DEVICE);
+
+	else 
 	{
-		perror("[controld] SAA DEVICE: ");
-		return;
+		if ((ioctl(fd,SAAIOSPOWERSAVE,&arg) < 0))
+			perror("[controld] SAAIOSPOWERSAVE");
+
+		close(fd);
 	}
 
-	if ( (ioctl(fd,SAAIOSPOWERSAVE,&arg) < 0))
-	{
-		perror("[controld] IOCTL: ");
-		close(fd);
-		return;
-	}
-	close(fd);
 	/*
 	  arg=disable?0:0xf;
 	  if((fd = open("/dev/dbox/fp0",O_RDWR|O_NONBLOCK)) < 0)
@@ -558,9 +522,10 @@ void disableVideoOutput(bool disable)
 	  }
 	  close(fd);
 	*/
-	if(!disable)
+
+	if (!disable)
 	{
-//		zapit.setStandby(false);
+		//zapit.setStandby(false);
 		zapit.muteAudio(false);
 		setvideooutput(settings.videooutput, false);
 		setVideoFormat(settings.videoformat, false);
@@ -569,7 +534,7 @@ void disableVideoOutput(bool disable)
 	{
 		setvideooutput(0, false);
 		setVideoFormat(-1, false);
-//		zapit.setStandby(true);
+		//zapit.setStandby(true);
 		zapit.muteAudio(true);
 	}
 }
@@ -820,30 +785,58 @@ void sig_catch(int signal)
 	}
 }
 
-int main(int /*argc*/, char** /*argv*/)
+void usage(FILE *dest)
 {
+	fprintf(dest, "controld\n");
+	fprintf(dest, "commandline parameters:\n");
+	fprintf(dest, "-d, --debug    enable debugging code\n");
+	fprintf(dest, "-h, --help     display this text and exit\n\n");
+}
+
+int main(int argc, char **argv)
+{
+	bool debug = false;
+
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.101 2003/03/14 05:38:04 obi Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.102 2003/03/14 06:29:11 obi Exp $\n\n");
+
+	for (int i = 1; i < argc; i++)
+	{
+		if ((!strncmp(argv[i], "-d", 2)) || (!strncmp(argv[i], "--debug", 7))) {
+			debug = true;
+		}
+		else if ((!strncmp(argv[i], "-h", 2)) || (!strncmp(argv[i], "--help", 6))) {
+			usage(stdout);
+			return EXIT_SUCCESS;
+		}
+		else {
+			usage(stderr);
+			return EXIT_FAILURE;
+		}
+	}
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;
 
-	switch (fork())
+	if (!debug)
 	{
-	case -1:
-		perror("[controld] fork");
-		return EXIT_FAILURE;
-	case 0:
-		break;
-	default:
-		return EXIT_SUCCESS;
-	}
+		switch (fork())
+		{
+		case -1:
+			perror("[controld] fork");
+			return EXIT_FAILURE;
+		case 0:
+			break;
+		default:
+			return EXIT_SUCCESS;
+		}
 	
-	if (setsid() == -1)
-	{
-		perror("[controld] setsid");
-		return EXIT_FAILURE;
+		if (setsid() == -1)
+		{
+			perror("[controld] setsid");
+			return EXIT_FAILURE;
+		}
 	}
 
 	eventServer = new CEventServer;
@@ -891,6 +884,11 @@ int main(int /*argc*/, char** /*argv*/)
 	controld_server.run(parse_command, CControld::ACTVERSION);
 
 	shutdownBox();
+
+	delete aspectRatioNotifier;
+	delete watchDog;
+	delete config;
+	delete eventServer;
 
 	return EXIT_SUCCESS;
 }

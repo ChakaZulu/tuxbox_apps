@@ -23,7 +23,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -34,6 +33,7 @@
 #include <dbox/avs_core.h>
 #include "audio.h"
 
+#define AVS_DEVICE "/dev/dbox/avs0"
 
 void audioControl::setVolume(const unsigned char volume)
 {
@@ -41,18 +41,14 @@ void audioControl::setVolume(const unsigned char volume)
 
 	int i = volume;
 
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
+	if ((fd = open(AVS_DEVICE, O_RDWR)) < 0)
+		perror("[controld] " AVS_DEVICE);
+	else {
+		if (ioctl(fd, AVSIOSVOL, &i) < 0)
+			perror("[controld] AVSIOGVOL");
 
-	if (ioctl(fd,AVSIOSVOL,&i)< 0)
-	{
-		perror("AVSIOGVOL:");
-		return;
+		close(fd);
 	}
-	close(fd);
 }
 
 void audioControl::setMute(const bool mute)
@@ -61,16 +57,14 @@ void audioControl::setMute(const bool mute)
 	
 	a = mute ? AVS_MUTE : AVS_UNMUTE;
 
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
+	if ((fd = open(AVS_DEVICE, O_RDWR)) < 0)
+		perror("[controld] " AVS_DEVICE);
 
-	if (ioctl(fd,AVSIOSMUTE, &a) < 0)
-	{
-		perror("AVSIOSMUTE:");
-		return;
+	else {
+		if (ioctl(fd, AVSIOSMUTE, &a) < 0)
+			perror("[controld] AVSIOSMUTE");
+
+		close(fd);
 	}
-	close(fd);
 }
+

@@ -52,24 +52,32 @@ int CEventWatchDog::getVideoMode()
 	int bitInfo = 0;
 	char buffer[100];
 	FILE* fp = fopen("/proc/bus/bitstream", "r");
-	while (!feof(fp))
-	{
-		fgets(buffer, 100, fp);
-		sscanf(buffer, "A_RATIO: %d", &bitInfo);
+	
+	if (fp) {
+
+		while (!feof(fp))
+		{
+			fgets(buffer, 100, fp);
+			sscanf(buffer, "A_RATIO: %d", &bitInfo);
+		}
+	
+		fclose(fp);
 	}
-	fclose(fp);
+
 	return bitInfo;
 }
 
 int CEventWatchDog::getVCRMode()
 {
-	int val;
+	int val = 0;
 	int fp = open("/dev/dbox/fp0",O_RDWR);
 
-	ioctl(fp, FP_IOCTL_GET_VCR, &val);
+	if (fp >= 0) {
+		ioctl(fp, FP_IOCTL_GET_VCR, &val);
+		close(fp);
+		//printf("getVCRMode= %d\n", val);
+	}
 
-	close(fp);
-	//printf("getVCRMode= %d\n", val);
 	return val;
 }
 
@@ -98,7 +106,6 @@ void* CEventWatchDog::watchdogThread (void *arg)
 	//printf("[controld] watchdogThread-pid: %d\n", getpid());
 	try
 	{
-
 		CEventWatchDog* WatchDog = (CEventWatchDog*) arg;
 
 		int fd_ev;
@@ -110,15 +117,15 @@ void* CEventWatchDog::watchdogThread (void *arg)
 
         if ( (fd_ev = open( EVENT_DEVICE, O_RDWR | O_NONBLOCK ) ) < 0)
 		{
-			perror("open");
-			return NULL;
+			perror("[controld] " EVENT_DEVICE);
+			pthread_exit(NULL);
 		}
 
         if ( ioctl(fd_ev, EVENT_SET_FILTER, EVENT_VCR_CHANGED | EVENT_ARATIO_CHANGE /*| EVENT_VHSIZE_CHANGE*/ ) < 0 )
 		{
 			perror("ioctl");
 			close(fd_ev);
-			return NULL;
+			pthread_exit(NULL);
 		}
 
 		while (1)
