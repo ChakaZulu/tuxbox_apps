@@ -2667,9 +2667,9 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		if( g_settings.recording_server_wakeup )
 		{
 			std::string command;
-			command = "ether-wake " + std::string(g_settings.recording_server_mac);
+			command = "etherwake " + std::string(g_settings.recording_server_mac);
 			if(system(command.c_str()) != 0)
-				perror("ether-wake failed");
+				perror("etherwake failed");
 		}
 		if( mode != mode_scart )
 			ShowHint ( "messagebox.info", g_Locale->getText("recordtimer.announce") );
@@ -3327,7 +3327,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.425 2003/03/12 20:36:29 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.426 2003/03/14 13:29:52 alexw Exp $\n\n");
 
 	tzset();
 	initGlobals();
