@@ -104,7 +104,7 @@ function clearTimerList()
 <BODY BGCOLOR=#FFFFFF leftmargin=0 topmargin=0 marginwidth=0 marginheight=0>
 <table width=100% height=100% cellpadding=0 cellspacing=0>
 <tr>
-<td bgcolor="#597563">&nbsp;</td>
+<td bgcolor="#ababab">&nbsp;</td>
 <td width=780 valign=top>
 <TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 height=100%>
 	<TR>
@@ -150,7 +150,7 @@ function clearTimerList()
 	</tr>
 </TABLE>
 </td>
-<td bgcolor="#597563">&nbsp;</td>
+<td bgcolor="#ababab">&nbsp;</td>
 </tr>
 </table>
 </BODY>
