@@ -1,5 +1,8 @@
 AC_DEFUN([TUXBOX_APPS],
-[AC_ARG_WITH(target,
+[AM_CONFIG_HEADER(config.h)
+AM_MAINTAINER_MODE
+
+AC_ARG_WITH(target,
 	[  --with-target=TARGET    target for compilation [[native,cdk]]],
 	[TARGET="$with_target"],[TARGET="native"])
 
@@ -9,40 +12,45 @@ AC_ARG_WITH(targetprefix,
 
 AC_ARG_WITH(debug,
 	[  --without-debug         disable debugging code],
-	[if [$with_target != "yes"]; then DEBUG="-g3"; AC_DEFINE(DEBUG,1,[Enable debug messages]); fi],[DEBUG="-g3"])
+	[DEBUG="$with_target"],[DEBUG="yes"])
 
-if [ "$TARGET" = "native" ]; then
-	if [ "$CFLAGS" = "" -a "$CXXFLAGS" = "" ]; then
-		CFLAGS="-Wall -O2 -pipe $DEBUG"
-		CXXFLAGS="-Wall -O2 -pipe $DEBUG"
+if test "$DEBUG" = "yes"; then
+	DEBUG_CFLAGS="-g3"
+	AC_DEFINE(DEBUG,1,[Enable debug messages])
+fi
+
+if test "$TARGET" = "native"; then
+	if test "$CFLAGS" = "" -a "$CXXFLAGS" = ""; then
+		CFLAGS="-Wall -O2 -pipe $DEBUG_CFLAGS"
+		CXXFLAGS="-Wall -O2 -pipe $DEBUG_CFLAGS"
 	fi
-	if [ "$prefix" = "NONE" ]; then
+	if test "$prefix" = "NONE"; then
 		prefix=/usr/local
 	fi
-	if [ "$targetprefix" = "NONE" ]; then
+	if test "$targetprefix" = "NONE"; then
 		targetprefix="\${prefix}"
 		_targetprefix="${prefix}"
 	else
 		_targetprefix="$targetprefix"
 	fi
-elif [ "$TARGET" = "cdk" -o "$TARGET" = "cdkflash" ]; then
+elif test "$TARGET" = "cdk"; then
 	if test "$CC" = "" -a "$CXX" = ""; then
 		CC=powerpc-tuxbox-linux-gnu-gcc CXX=powerpc-tuxbox-linux-gnu-g++
 	fi
-	if [ "$CFLAGS" = "" -a "$CXXFLAGS" = "" ]; then
-		CFLAGS="-Wall -Os -mcpu=823 -pipe $DEBUG"
-		CXXFLAGS="-Wall -Os -mcpu=823 -pipe $DEBUG"
+	if test "$CFLAGS" = "" -a "$CXXFLAGS" = ""; then
+		CFLAGS="-Wall -Os -mcpu=823 -pipe $DEBUG_CFLAGS"
+		CXXFLAGS="-Wall -Os -mcpu=823 -pipe $DEBUG_CFLAGS"
 	fi
-	if [ "$prefix" = "NONE" ]; then
+	if test "$prefix" = "NONE"; then
 		prefix=/dbox2/cdkroot
 	fi
-	if [ "$targetprefix" = "NONE" ]; then
+	if test "$targetprefix" = "NONE"; then
 		targetprefix=""
 		_targetprefix=""
 	else
 		_targetprefix="$targetprefix"
 	fi
-	if [ "$host_alias" = "" ]; then
+	if test "$host_alias" = ""; then
 		cross_compiling=yes
 		host_alias=powerpc-tuxbox-linux-gnu
 	fi

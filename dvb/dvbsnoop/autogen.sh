@@ -32,8 +32,8 @@ fi
 
 if [ ! -e acinclude.m4 ]; then
 	for i in .. ../.. ../../..; do
-		if [ -e $i/acinclude.m4 ]; then
-			ln -s $i/acinclude.m4 .
+		if [ -e `pwd`/$i/acinclude.m4 ]; then
+			ln -s `pwd`/$i/acinclude.m4 .
 		fi
 	done
 fi
