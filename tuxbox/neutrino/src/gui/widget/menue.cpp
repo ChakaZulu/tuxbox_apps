@@ -312,8 +312,7 @@ void CMenuWidget::paint()
 	iconOffset= 0;
 	for (unsigned int i= 0; i< items.size(); i++)
 	{
-		if ( (items[i]->iconName!= "") ||
-			 (((uint)items[i]->directKey>= CRCInput::RC_0) && ((uint)items[i]->directKey<= CRCInput::RC_9)) )
+		if ((items[i]->iconName!= "") || CRCInput::isNumeric(items[i]->directKey))
 		{
 			iconOffset= g_Fonts->menu->getHeight();
 			break;
@@ -484,11 +483,11 @@ int CMenuOptionChooser::paint( bool selected )
 	{
 		frameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
 	}
-	else if (((uint)directKey>= CRCInput::RC_0) && ((uint)directKey<= CRCInput::RC_9))
+	else if (CRCInput::isNumeric(directKey))
 	{
 		//number
 		char tmp[10];
-		sprintf((char*) tmp, "%d", directKey);
+		sprintf((char*) tmp, "%d", CRCInput::getNumericValue(directKey));
 
 		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, tmp, color, height);
 	}
@@ -686,11 +685,11 @@ int CMenuForwarder::paint(bool selected)
 	{
 		frameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
 	}
-	else if (((uint)directKey>= CRCInput::RC_0) && ((uint)directKey<= CRCInput::RC_9))
+	else if (CRCInput::isNumeric(directKey))
 	{
 		//number
 		char tmp[10];
-		sprintf((char*) tmp, "%d", directKey);
+		sprintf((char*) tmp, "%d", CRCInput::getNumericValue(directKey));
 
 		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, tmp, color, height);
 	}
