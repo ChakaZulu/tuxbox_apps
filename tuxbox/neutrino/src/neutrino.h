@@ -179,9 +179,9 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void ShowStreamFeatures();
 
 		CNeutrinoApp();
-		~CNeutrinoApp();
 
 	public:
+		~CNeutrinoApp();
 		const CScanSettings& getScanSettings(){ return scanSettings;};
 
 		CChannelList			*channelList;
