@@ -10,7 +10,7 @@
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
+
 
 	License: GPL
 
@@ -23,16 +23,19 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-// 
-// $Id: global.h,v 1.11 2001/11/23 16:58:41 McClean Exp $
+//
+// $Id: global.h,v 1.12 2001/12/01 23:12:55 Simplex Exp $
 //
 // $Log: global.h,v $
+// Revision 1.12  2001/12/01 23:12:55  Simplex
+// global instance of watchdog
+//
 // Revision 1.11  2001/11/23 16:58:41  McClean
 // update-functions
 //
@@ -75,6 +78,7 @@
 #include "widget/eventlist.hpp"
 #include "helpers/locale.h"
 #include "helpers/update.h"
+#include "helpers/streamwatchdog.h"
 
 #ifndef NEUTRINO_CPP
 #define NEUTRINO_CPP extern
@@ -104,7 +108,8 @@ NEUTRINO_CPP  CFlashUpdate    *g_Update;
 
 NEUTRINO_CPP  CScreenSetup    *g_ScreenSetup;
 
-NEUTRINO_CPP CLocaleManager	*g_Locale;
+NEUTRINO_CPP CLocaleManager   *g_Locale;
 
+NEUTRINO_CPP CStreamWatchDog  *g_WatchDog;
 
 
