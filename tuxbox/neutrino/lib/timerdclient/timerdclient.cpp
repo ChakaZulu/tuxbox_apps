@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.47 2004/03/12 22:01:02 zwen Exp $
+	$Id: timerdclient.cpp,v 1.48 2004/04/21 19:30:23 zwen Exp $
 
 	License: GPL
 
@@ -372,4 +372,14 @@ void CTimerdClient::setWeekdaysToStr(CTimerd::CTimerEventRepeat rep, char* str)
 		strcpy(str,"-------");
 }
 //-------------------------------------------------------------------------
+void CTimerdClient::stopTimerEvent( int evId)
+{
+	CTimerdMsg::commandRemoveTimer msgRemoveTimer;
+
+	msgRemoveTimer.eventID  = evId;
+
+	send(CTimerdMsg::CMD_STOPTIMER, (char*) &msgRemoveTimer, sizeof(msgRemoveTimer));
+
+	close_connection();  
+}
 

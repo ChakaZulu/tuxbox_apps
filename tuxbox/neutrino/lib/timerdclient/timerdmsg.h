@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.6 2004/04/21 18:58:26 metallica Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.7 2004/04/21 19:30:23 zwen Exp $
  *
  * types used for clientlib <-> timerd communication - d-box2 linux project
  *
@@ -49,14 +49,15 @@ class CTimerdMsg : public CBasicMessage
 			CMD_MODIFYTIMER,
 			CMD_GETSLEEPTIMER,
 			CMD_RESCHEDULETIMER,
-			CMD_STOPTIMER,
+
 			CMD_REGISTEREVENT,
 			CMD_UNREGISTEREVENT,
 			CMD_TIMERDAVAILABLE,
 			CMD_SHUTDOWN,
 			CMD_SETAPID,
 			CMD_GETRECSAFETY,
-			CMD_SETRECSAFETY
+			CMD_SETRECSAFETY,
+			CMD_STOPTIMER
 		};
 
 

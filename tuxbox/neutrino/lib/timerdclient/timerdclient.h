@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.41 2004/03/12 22:01:02 zwen Exp $
+	$Id: timerdclient.h,v 1.42 2004/04/21 19:30:23 zwen Exp $
 
 	License: GPL
 
@@ -67,6 +67,7 @@ class CTimerdClient:private CBasicClient
 //		int addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, int min, int hour, int day = 0, int month = 0, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 
 		void removeTimerEvent( int evId);	// remove timer event
+		void stopTimerEvent( int evId);	// set timer state to stoped (rescedule on demand)
 
 		void getTimerList( CTimerd::TimerList &timerlist);		// returns the list of all timers
 		void getTimer( CTimerd::responseGetTimer &timer, unsigned timerID);		// returns specified timer
