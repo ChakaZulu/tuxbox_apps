@@ -142,6 +142,7 @@ void eListBoxBase::gotFocus()
 	if (parent && parent->LCDElement)  // detect if LCD Avail
 		if (descr)
 		{
+			eDebug("eListBoxBase::gotFocus()");
 			parent->LCDElement->setText("");
 			LCDTmp = new eLabel(parent->LCDElement);
 			LCDTmp->hide();
@@ -190,7 +191,8 @@ void eListBoxEntry::drawEntryRect( gPainter* rc, const eRect& rect, const gColor
 		rc->setForegroundColor(state?coActiveB:coNormalB);
 		rc->fill(rect);
 		rc->setBackgroundColor(state?coActiveB:coNormalB);
-	}else
+	}
+	else
 	{
 		eWidget *w=listbox->getNonTransparentBackground();
 		rc->setForegroundColor(w->getBackgroundColor());

@@ -170,7 +170,7 @@ void eXMLRPCVariant::toXML(eString &result)
 			static eString s1("\n");
 			result+=s1;
 		}
-		static eString s2("</data></aray></value>\n");
+		static eString s2("</data></array></value>\n");
 		result+=s2;
 	} else if (getStruct())
 	{
@@ -260,6 +260,7 @@ static eXMLRPCVariant *fromXML(XMLTreeNode *n)
 	} else if (!strcmp(n->GetType(), "array"))
 	{
 		ePtrList<eXMLRPCVariant> l;
+		l.setAutoDelete(true);
 		n=n->GetChild();
 		if (strcmp(data, "data"))
 			return 0;
@@ -271,13 +272,8 @@ static eXMLRPCVariant *fromXML(XMLTreeNode *n)
 					return 0;
 				l.push_back(value);
 			}
-		std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
 
-	// copy ePtrList to std::vector
-		for (ePtrList<eXMLRPCVariant>::iterator it(l); it != l.end(); it++)
-			nv->push_back(**it);
-
-		return new eXMLRPCVariant(nv);
+		return new eXMLRPCVariant( l.getVector() );
 	}
 	eDebug("couldn't convert %s", n->GetType());
 	return 0;
@@ -352,21 +348,19 @@ int eXMLRPCResponse::doCall()
 	ePtrList<eXMLRPCVariant> ret;
 	ret.setAutoDelete(true);
 
-	std::vector<eXMLRPCVariant> vparams;
-
-	// copy ePtrList to std::vector
-	for (ePtrList<eXMLRPCVariant>::iterator it(params); it != params.end(); ++it)
-		vparams.push_back(**it);
-
 	int (*proc)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant> &)=rpcproc[methodName];
 	int fault;
+
+	std::vector<eXMLRPCVariant>* v = params.getVector();
 	
 	if (!proc)
 	{
 		fault=1;
-		xmlrpc_fault(ret, -1, "called method not present");
+		xmlrpc_fault(ret, -1, "called method not present");         	
 	} else
-		fault=proc(vparams, ret);
+		fault=proc( *v , ret);
+
+	delete v;
 
 	eDebug("converting to text...");
 

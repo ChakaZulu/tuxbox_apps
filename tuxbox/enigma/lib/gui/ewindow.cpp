@@ -16,7 +16,7 @@ eWindow::eWindow(int takefocus)
 	borderRight=deco.borderRight;
 	borderBottom=deco.borderBottom;*/
 	
-// setBackgroundColor(eSkin::getActive()->queryScheme("global.normal.background"));
+//	setBackgroundColor(eSkin::getActive()->queryScheme("global.normal.background"));
 	titleBarColor=eSkin::getActive()->queryScheme("eWindow.titleBar");
 	fontColor=eSkin::getActive()->queryScheme("eWindow.titleBarFont");
 

@@ -37,7 +37,6 @@ protected:
 	eListBoxBase(eWidget* parent, const eWidget* descr=0);
 	eRect getEntryRect(int n);
 	int setProperty(const eString &prop, const eString &value);
-	void eraseBackground(gPainter *target, const eRect &clip) { }
 	int eventHandler(const eWidgetEvent &event);
 	void recalcMaxEntries();
 	void recalcClientRect();
@@ -63,8 +62,8 @@ public:
 
 	void init();
 
-	void append(T* e);
-	void remove(T* e);
+	void append(T* e, bool holdCurrent=false);
+	void remove(T* e, bool holdCurrent=false);
 	void clearList();
 
 	Signal1<void, T*> selected;	
@@ -207,22 +206,27 @@ public:
 
 
 template <class T>
-inline void eListBox<T>::append(T* entry)
+inline void eListBox<T>::append(T* entry, bool holdCurrent)
 {
-	T* cur = current;
+	T* cur = 0;
+	if (holdCurrent)
+		cur = current;
+
 	childs.push_back(entry);
 	init();
+
 	if (cur)
 		setCurrent(cur);
 }
 
 template <class T>
-inline void eListBox<T>::remove(T* entry)
+inline void eListBox<T>::remove(T* entry, bool holdCurrent)
 {
 	T* cur = 0;
-	if (current != entry)
+
+	if (holdCurrent && current != entry)
 		cur = current;
-		
+
 	childs.take(entry);
 	init();
 
@@ -271,6 +275,7 @@ inline eListBox<T>::eListBox(eWidget *parent, const eWidget* descr)
 	addActionMap(&i_cursorActions->map);
 	addActionMap(&i_listActions->map);
 	item_height = T::getEntryHeight();
+
 }
 
 template <class T>

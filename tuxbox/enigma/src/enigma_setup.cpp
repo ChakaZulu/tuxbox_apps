@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.19 2002/08/11 00:52:23 Ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.20 2002/08/12 23:10:26 Ghostrider Exp $
  */
 
 #include "enigma_setup.h"
@@ -39,6 +39,7 @@
 eZapSetup::eZapSetup()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 8, 220, true)
 {
+	eDebug("statusbar = %p", statusbar);
 	move(ePoint(150, 136));
 	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("back to Mainmenu") ))->selected, eZapSetup::sel_close);
 	CONNECT((new eListBoxEntryMenu(&list, _("Channels..."), _("open channel setup") ))->selected, eZapSetup::sel_channels);

@@ -17,7 +17,7 @@ struct gColor
 	{
 	}
 	operator int() const { return color; }
-	int operator ==(const gColor &o) const { return o.color!=color; }
+	int operator ==(const gColor &o) const { return o.color==color; }
 };
 
 struct gRGB

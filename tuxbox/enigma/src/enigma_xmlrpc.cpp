@@ -1,6 +1,6 @@
 #include <errno.h>
 #include <core/dvb/dvbservice.h>
-
+#include <core/dvb/service.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
 #include <core/system/xmlrpc.h>
@@ -66,6 +66,7 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 	if (!param.length())		// root
 	{
 		ePtrList<eXMLRPCVariant> l;
+		l.setAutoDelete(true);
 		ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->settings->getBouquets();
 		if (pBouquets)
 		{
@@ -89,12 +90,7 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 				l.push_back(new eXMLRPCVariant(s));
 			}
 		}
-		std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
-		
-		for (ePtrList<eXMLRPCVariant>::iterator it(l); it != l.end(); it++)		
-			nv->push_back(**it);
-
-		result.push_back(new eXMLRPCVariant(nv));
+		result.push_back( new eXMLRPCVariant( l.getVector() ) );
 
 	} else if (param[0]=='B')
 	{
@@ -104,7 +100,7 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 		else
 		{
 			ePtrList<eXMLRPCVariant> l;
-
+			l.setAutoDelete(true);
 			for (std::list<eServiceReferenceDVB>::iterator s = b->list.begin(); s != b->list.end(); s++)
 			{
 				eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(*s);
@@ -132,12 +128,7 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 				s->INSERT(s3, new eXMLRPCVariant(new bool(1)));
 				l.push_back(new eXMLRPCVariant(s));
 			}
-			std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
-			
-			for (ePtrList<eXMLRPCVariant>::iterator it(l); it != l.end(); it++)
-				nv->push_back(**it);
-
-			result.push_back(new eXMLRPCVariant(nv));
+			result.push_back(new eXMLRPCVariant( l.getVector() ));
 		}
 	} else if (param[0]=='S')
 	{
@@ -160,6 +151,7 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 		}
 
 		ePtrList<eXMLRPCVariant> l;
+		l.setAutoDelete(true);
 
 		for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
 		{
@@ -206,13 +198,7 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 			l.push_back(new eXMLRPCVariant(s));
 		}
 		eit->unlock();
-
-		std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
-
-		for (ePtrList<eXMLRPCVariant>::iterator it(l); it != l.end(); it++)
-			nv->push_back(**it);
-		
-		result.push_back(new eXMLRPCVariant(nv));
+		result.push_back(new eXMLRPCVariant( l.getVector() ));
 	} else
 		xmlrpc_fault(result, 3, "couldn't get of this");
 	return 0;
@@ -223,19 +209,26 @@ static int zapTo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &
 	if (xmlrpc_checkArgs("s", params, result))
 		return 1;
 
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
+	eString &param=*params[0].getString();
+
+	eDebug("zapTo(%s);", param.c_str());
+
+	if (param[0] != 'S')
+	{
+		xmlrpc_fault(result, 3, "nene nur service bitte");
+		return 0;
+	}
+	
+	eServiceReferenceDVB s=getServiceByID(param.c_str());
+
+	if ( eServiceInterface::getInstance()->getService()->getID() != s.type )
 	{
 		xmlrpc_fault(result, 3, "currently not available");
 		return 0;
 	}
 	
-	eString &param=*params[0].getString();
+	eServiceInterface::getInstance()->play(s);
 
-	eDebug("zapTo(%s);", param.c_str());
-	
-	eServiceReferenceDVB s=getServiceByID(param.c_str());
-	sapi->switchService(s);
 	return 0;
 }
 
@@ -314,8 +307,8 @@ static int getInfo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 			s->INSERT(s2, new eXMLRPCVariant(new int(v->elementary_PID)));
 		}
 
-		ePtrList<eXMLRPCVariant> asl;
-
+		ePtrList<eXMLRPCVariant> l;
+		l.setAutoDelete(true);
 		for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 		{
 			PMTEntry *pe=*i;
@@ -349,21 +342,16 @@ static int getInfo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 				a->INSERT(s2, new eXMLRPCVariant(new eString("A")));	// nyi
 				a->INSERT(s3, new eXMLRPCVariant(new eString(isAC3?s6:s5)));
 
-				asl.push_back(new eXMLRPCVariant(a));
+				l.push_back( new eXMLRPCVariant( a ) );
 			}
 		}
 		static eString as("audioPids");
+		s->INSERT(as, new eXMLRPCVariant( l.getVector() ) );
 
-		std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
-
-    for (ePtrList<eXMLRPCVariant>::iterator it(asl); it != asl.end(); it++)
-			nv->push_back(**it);
-
-		s->INSERT(as, new eXMLRPCVariant(nv));
 		pmt->unlock();
 		
 		result.push_back(new eXMLRPCVariant(s));
-		
+
 		eString res="";
 		result.first()->toXML(res);
 		eDebug("%s", res.c_str());
