@@ -1,0 +1,19 @@
+all:: snake snake.so
+
+# PREF=powerpc-linux-
+CC=$(PREF)gcc
+STRIP=$(PREF)strip
+CDEBUGFLAGS=-g -O2 -Wall -pedantic -DUSEX
+INCLUDES=-I. -I../lib
+OBJS=snake.o
+
+SingleProgramTarget(snake,main.o $(OBJS),,-L../lib -lfx2)
+
+snake.o: pics.h text.h
+
+snake.so: somain.o $(OBJS)
+	$(CC) -o snake.so -shared -Wl,-soname,snake.so somain.o $(OBJS)
+	$(STRIP) snake.so
+
+clean::
+	rm -f snake.so
