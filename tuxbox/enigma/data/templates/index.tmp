@@ -120,13 +120,13 @@ function clearTimerList()
 		<TD height=1>
 			<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0>
 				<TR>
-					<TD><IMG SRC="knop_0.gif" WIDTH=94 HEIGHT=22></TD>
-					<TD><a href="?mode=zap"><IMG SRC="knop_1.gif" WIDTH=111 HEIGHT=22 border=0></a></TD>
-					<TD><a href="?mode=menu"><IMG SRC="knop_2.gif" WIDTH=102 HEIGHT=22 border=0></a></TD>
-					<TD><a href="?mode=links"><IMG SRC="knop_3.gif" WIDTH=101 HEIGHT=22 border=0></a></TD>
-					<TD><a href="?mode=updates"><IMG SRC="knop_4.gif" WIDTH=120 HEIGHT=22 border=0></a></TD>
-					<TD><a href="?mode=about"><IMG SRC="knop_5.gif" WIDTH=108 HEIGHT=22 border=0></a></TD>
-					<TD><IMG SRC="knop_6.gif" WIDTH=144 HEIGHT=22></TD>
+					<TD><IMG SRC="knop_0.gif" WIDTH=110 HEIGHT=22></TD>
+					<TD><button name="zap" type="button" style='width: 100px; height: 22px; background-color: #93A198' value="ZAP" onclick="self.location.href='?mode=zap'"><span class="button">ZAP</class></button></TD>
+					<TD><button name="control" type="button" style='width: 100px; height=22px; background-color: #93A198' value="CONTROL" onclick="self.location.href='?mode=menu'"><span class="button">CONTROL</class></button></TD>
+					<TD><button name="links" type="button" style='width: 100px; height: 22px; background-color: #93A198' value="LINKS" onclick="self.location.href='?mode=links'"><span class="button">LINKS</class></button></TD>
+					<TD><button name="updates" type="button" style='width: 100px; height=22px; background-color: #93A198' value="UPDATES" onclick="self.location.href='?mode=updates'"><span class="button">UPDATES</class></button></TD>
+					<TD><button name="about" type="button" style='width: 100px; height: 22px; background-color: #93A198' value="ABOUT" onclick="self.location.href='?mode=about'"><span class="button">ABOUT</class></button></TD>
+					<TD><IMG SRC="knop_0.gif" WIDTH=170 HEIGHT=22></TD>
 				</TR>
 			</TABLE>
 		</TD>
