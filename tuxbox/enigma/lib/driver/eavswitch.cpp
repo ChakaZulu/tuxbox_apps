@@ -77,14 +77,19 @@ int eAVSwitch::setVolume(int vol)
 
 int eAVSwitch::setTVPin8(int vol)
 {
+/* results from philips:	fnc=0 -> 0V
+				fnc=1 -> 0V
+				fnc=2 -> 6V
+				fnc=3 -> 12V
+*/
 	int fnc;
 	switch (vol)
 	{
 	case 0:
-		fnc=0;
+		fnc=(Type==PHILIPS?1:0);
 		break;
 	case 6:
-		fnc=1;
+		fnc=(Type==PHILIPS?2:1);
 		break;
 	case 12:
 		fnc=(Type==PHILIPS?3:2);
