@@ -381,47 +381,41 @@ eZapMain::~eZapMain()
 
 void eZapMain::aspectRatioChanged(int aspect)
 {
-    if (aspect)
-    {
-	WideOff->hide();
-	WideOn->show();
-    }
-    else
-    {
-	WideOn->hide();
-	WideOff->show();
-    }
-    qDebug("Aspect Ratio: %d", aspect);
+	if (aspect)
+	{
+		WideOff->hide();
+		WideOn->show();
+	} else
+	{
+		WideOn->hide();
+		WideOff->show();
+	}
 }
 
 void eZapMain::isAC3(bool b)
 {
-    if (b)
-    {
-	DolbyOff->hide();
-	DolbyOn->show();
-    }
-    else
-    {
-	DolbyOn->hide();
-	DolbyOff->show();
-    }
-    qDebug("AC3: %s", b?"true":"false");
+	if (b)
+	{
+		DolbyOff->hide();
+		DolbyOn->show();
+	} else
+	{
+		DolbyOn->hide();
+		DolbyOff->show();
+	}
 }
 
 void eZapMain::scrambled(bool b)
 {
-    if (b)
-    {
-	CryptOff->hide();
-	CryptOn->show();
-    }
-    else
-    {
-	CryptOn->hide();
-	CryptOff->show();
-    }
-    qDebug("Channel is %s", b?"scrambled":"FTA");
+	if (b)
+	{
+		CryptOff->hide();
+		CryptOn->show();
+	} else
+	{
+		CryptOn->hide();
+		CryptOff->show();
+	}
 }
 
 void eZapMain::setEIT(EIT *eit)
