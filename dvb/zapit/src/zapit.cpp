@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.134 2002/04/17 09:45:54 obi Exp $
+ * $Id: zapit.cpp,v 1.135 2002/04/17 10:07:35 field Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1998,6 +1998,7 @@ frontend->getInfo()->type == FE_QAM //bei kabel
 				responseGetOtherPIDs.ecmpid = channel->getEcmPid();
 				responseGetOtherPIDs.vtxtpid = channel->getTeletextPid();
 				responseGetOtherPIDs.pcrpid = channel->getPcrPid();
+				responseGetOtherPIDs.selected_apid = channel->getAudioChannel();
 				send( connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs),0);
 				sendAPIDs();
 			break;
@@ -2165,7 +2166,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.134 2002/04/17 09:45:54 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.135 2002/04/17 10:07:35 field Exp $\n\n");
 
 	if (argc > 1)
 	{
