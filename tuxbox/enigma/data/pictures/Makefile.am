@@ -1,4 +1,4 @@
-SUBDIRS = mainmenu chk_stone chk_v2 neutrino shortcut
+SUBDIRS = mainmenu chk_stone chk_silver chk_v2 neutrino shortcut
 
 installdir = $(DATADIR)/enigma/pictures
 
