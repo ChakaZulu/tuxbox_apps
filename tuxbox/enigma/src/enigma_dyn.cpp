@@ -836,7 +836,8 @@ static eString getLeftNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "LCDshot", LEFTNAVICOLOR, "?mode=controlLCDShot");
 #endif
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		{
 			result += "<br>";
 			result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=controlScreenShot");
@@ -1245,6 +1246,7 @@ static eString getUpdatesInternet()
 	return result.str();
 }
 
+#ifndef DISABLE_FILE
 static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts);
@@ -1286,6 +1288,7 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 	}
 	return "<script language=\"javascript\">window.close();</script>";
 }
+#endif
 
 struct countDVBServices: public Object
 {
@@ -1553,7 +1556,12 @@ static eString getZap(eString mode, eString path)
 	result += getEITC();
 	eString curService = filter_string(getCurService());
 	if (curService == "n/a")
-		curService = eZapMain::getInstance()->dvrActive() ? "Digital Video Recorder" : "&nbsp;";
+		curService = 
+#ifndef DISABLE_FILE
+			eZapMain::getInstance()->dvrActive() ? 
+				"Digital Video Recorder" : 
+#endif
+				"&nbsp;";
 	result.strReplace("#SERVICENAME#", curService);
 
 

@@ -18,7 +18,7 @@ class eString;
 class eSystemInfo
 {
 	static eSystemInfo *instance;
-	int hashdd, hasci, hasrfmod, haslcd, hasnetwork,
+	int hashdd, hasci, hasrfmod, haslcd, hasnetwork, haskeyboard, 
 		canmeasurelnbcurrent, hwtype, fetype, hasnegfilter,
 		canupdateTransponder, canshutdown, canrecordts,
 		defaulttimertype, alphaincrement;
@@ -28,7 +28,7 @@ class eSystemInfo
 public:
 	static eSystemInfo *getInstance() { return instance; }
 	eSystemInfo();
-	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM5600, DM5620, DM500, TR_DVB272S, Unknown };
+	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM7020, DM5600, DM5620, DM500, TR_DVB272S, Unknown };
 	enum { feSatellite, feCable, feTerrestrial };
 
 	const char *getHelpStr() { return helpstr; }
@@ -42,6 +42,7 @@ public:
 	int hasRFMod() { return hasrfmod; }
 	int hasLCD() { return haslcd; }
 	int hasNetwork() { return hasnetwork; }
+	int hasKeyboard() { return haskeyboard; }	
 	int canMeasureLNBCurrent() { return canmeasurelnbcurrent; }
 	int canShutdown() { return canshutdown; }
 	int canRecordTS() { return canrecordts; }

@@ -17,7 +17,7 @@
 eSystemInfo *eSystemInfo::instance;
 
 eSystemInfo::eSystemInfo()
-	:hashdd(0), hasci(0), hasrfmod(0), haslcd(0), hasnetwork(1)
+	:hashdd(0), hasci(0), hasrfmod(0), haslcd(0), hasnetwork(1), haskeyboard(0)
 	,canmeasurelnbcurrent(0), hasnegfilter(0), canupdateTransponder(0)
 	,canshutdown(1), canrecordts(0), alphaincrement(10)
 {
@@ -151,6 +151,7 @@ eSystemInfo::eSystemInfo()
 	switch (mid)
 	{
 		case 5 ... 7:
+		case 9:
 			manufactstr="Dream-Multimedia-TV";
 			helpstr="dreambox";
 			canupdateTransponder=1;
@@ -160,8 +161,8 @@ eSystemInfo::eSystemInfo()
 					midstr="5";
 					modelstr="DM7000";
 					cpustr="STB04500, 252MHz";
-					hashdd = haslcd = canmeasurelnbcurrent = hasci =
-					canupdateTransponder = canrecordts = 1;
+					haskeyboard = hashdd = haslcd = canmeasurelnbcurrent = hasci
+					= canrecordts = 1;
 					hwtype = DM7000;
 					caids.insert(0x4a70);
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
@@ -171,7 +172,6 @@ eSystemInfo::eSystemInfo()
 					cpustr="STBx25xx, 252MHz";
 					alphaincrement=25;
 					canshutdown=0;
-					canupdateTransponder=1;
 					hasci = 2;
 					hwtype = getInfo("type", true) == "DM5600" ? DM5600 : DM5620;
 					if ( hwtype == DM5600 )
@@ -194,9 +194,18 @@ eSystemInfo::eSystemInfo()
 					alphaincrement=25;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 					canshutdown=0;
-					canupdateTransponder=1;
 					hwtype = DM500;
 					caids.insert(0x4a70);
+					break;
+				case 9:
+					midstr="9";
+					modelstr="DM7020";
+					cpustr="STB04500, 252MHz";
+					haskeyboard = hasrfmod = hashdd = haslcd = canmeasurelnbcurrent = hasci
+					= canrecordts = 1;
+					hwtype = DM7020;
+					caids.insert(0x4a70);
+					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 					break;
 			}
 			break;

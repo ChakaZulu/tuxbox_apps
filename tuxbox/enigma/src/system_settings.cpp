@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: system_settings.cpp,v 1.5 2004/05/01 09:03:49 ghostrider Exp $
+ * $Id: system_settings.cpp,v 1.6 2004/05/05 13:30:43 ghostrider Exp $
  */
 
 #include <system_settings.h>
@@ -50,7 +50,7 @@ eSystemSettings::eSystemSettings()
 		CONNECT((new eListBoxEntryMenu(&list, _("Harddisc Setup"), eString().sprintf("(%d) %s", ++entry, _("open harddisc setup")) ))->selected, eSystemSettings::harddisc_setup);
 #endif
 #ifdef ENABLE_KEYBOARD
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if ( eSystemInfo::getInstance()->hasKeyboard() )
 		CONNECT((new eListBoxEntryMenu(&list, _("Keyboard Setup"), eString().sprintf("(%d) %s", ++entry, _("open keyboard setup")) ))->selected, eSystemSettings::keyboard_setup);
 #endif
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );

@@ -81,7 +81,8 @@ void CAService::sendCAPMT( PMT *pmt )
 
 	capmt[23]=0x82;  // demuxer kram..
 	capmt[24]=0x02;
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 
+		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
 	{
 		capmt[25]=0x03;  // descramble on demux0 and demux1
 		capmt[26]=0x01;  // get section data from demux1

@@ -163,6 +163,7 @@ eZap::eZap(int argc, char **argv)
 	switch( eSystemInfo::getInstance()->getHwType() )
 	{
 		case eSystemInfo::DM7000:
+		case eSystemInfo::DM7020:
 			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdm7000.xml") )
 				if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox2.xml") )
 					if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdm7000.xml") )

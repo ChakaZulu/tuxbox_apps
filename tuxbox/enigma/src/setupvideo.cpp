@@ -89,7 +89,8 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	entrys[0]=new eListBoxEntryText(pin8, _("4:3 letterbox"), (void*)0);
 	entrys[1]=new eListBoxEntryText(pin8, _("4:3 panscan"), (void*)1);
 	entrys[2]=new eListBoxEntryText(pin8, _("16:9"), (void*)2);
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
 		entrys[3]=new eListBoxEntryText(pin8, _("always 16:9"), (void*)3);
 	pin8->setCurrent(entrys[v_pin8]);
 	CONNECT( pin8->selchanged, eZapVideoSetup::VPin8Changed );

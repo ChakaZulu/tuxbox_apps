@@ -698,11 +698,13 @@ eAudioSelector::eAudioSelector()
 	list.selchanged.connect( slot( AudioChannelSelectionChanged2 ) );
 	list.setFlags( eListBoxBase::flagNoPageMovement );
 
-	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-70));
-	
-	m_dyncfg = new eAudioDynamicConfig(this);
-	m_dyncfg->move(ePoint(10, getClientSize().height()-70));
-	m_dyncfg->resize(eSize(getClientSize().width()-20, 50));
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	{
+		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-70));		
+		m_dyncfg = new eAudioDynamicConfig(this);
+		m_dyncfg->move(ePoint(10, getClientSize().height()-70));
+		m_dyncfg->resize(eSize(getClientSize().width()-20, 50));
+	}
 }
 
 void eAudioSelector::clear()
@@ -6283,6 +6285,7 @@ eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdE
 			new eListBoxEntryText(&list, _("reboot now"), (void*)4, 0, _("restart your receiver"));
 			break;
 		case eSystemInfo::DM7000:
+		case eSystemInfo::DM7020:
 			new eListBoxEntryText(&list, _("shutdown now"), (void*)1, 0, _("shutdown your dreambox"));
 			new eListBoxEntryText(&list, _("restart"), (void*)4, 0, _("restart your dreambox"));
 			break;
