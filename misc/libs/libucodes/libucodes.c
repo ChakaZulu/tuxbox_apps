@@ -3,43 +3,105 @@
 #include <string.h>
 #include "../libmd5sum/libmd5sum.h"
 
+unsigned char md5buffer[16];
 
-struct Smd5sum
-{
-	char	name[20];
-	char	md5data[16];
-};
 
-void setMD5Data(struct Smd5sum* mds, char* Name, char md1, char md2,  char md3,  char md4,  char md5, char md6
-		char md7, char md8, char md9, char md10, char md11, char md12, char md13, char md14, char md15, char md16 )
+int checkFile(char* filename, char* result)
 {
-	strcpy(mds->name, Name);
+	int	count;
+	char	md5string[40]="";
+	FILE*	fi;
+	char	buf[100];
+	char	keystr[100];
+	char	valstr[100];
+	char*	tmpptr;
+	char*	key;
+	char*	val;
+	char	keyfound;
+
+	//get the file-md5sum and convert to string..
+	if( md5_file(filename, 1, (unsigned char*) &md5buffer))
+	{
+		strcpy(result, "not found");
+		return -2;
+	}
+
+	for(count=0;count<16;count++)
+        {
+		char tmp[6];
+               	sprintf((char*) &tmp, "%02x", md5buffer[count] );
+		strcat(md5string, tmp);
+        }
 	
+	//search the md5-string in the ressource-file
+	fi = fopen("/etc/ucodes.md5", "rt");
+	if(fi==NULL)
+	{
+		strcpy(result, "no ressourcefile");
+		return -3;
+	}
+	while(!feof(fi))
+	{	//split md5 - description...
+		if(fgets(buf,sizeof(buf)-1,fi)!=NULL)
+		{
+			tmpptr=buf;
+			key= (char*) &keystr;
+			val= (char*) &valstr;
+			keyfound = 0;
+			for(; (*tmpptr!=10) && (*tmpptr!=13);tmpptr++)
+			{
+				if((*tmpptr==' ') && (!keyfound))
+				{
+					keyfound=1;
+				}
+				else
+				{
+					if(!keyfound)
+					{
+						*key = *tmpptr;
+						key++;
+					}
+					else
+					{
+						*val = *tmpptr;
+						val++;
+					}
+				}
+			}
+			*key=0;
+			*val=0;
+
+			if(strcmp(keystr,md5string)==0)
+			{
+				strcpy(result, valstr );
+				return 0;
+			}
+		}
+	}
+	fclose(fi);
+
+	strcpy(result, "unknown");
+	return -1;
 }
 
 
 
-#define COUNT_AVIA500 2
-struct Smd5sum md5avia500[COUNT_AVIA500];
-
-#define COUNT_AVIA600 2
-struct Smd5sum md5avia600[COUNT_AVIA600];
-
-#define COUNT_UCODE 2
-struct Smd5sum md5ucodes[COUNT_UCODE];
-
-#define COUNT_CAMALPHA 4
-struct Smd5sum md5cam[COUNT_CAMALPHA];
-
- 
-
 int main(int argc, char **argv)
 {
-	//setup avia 500-files
-	int pos = 0;
-	//avia500v093
-	setMD5Data(md5avia500[pos++], "ok, V0.93", 0xfe, 0xce, 0x1d, 0x33, 0x24, 0xe0, 0x91, 0x7b, 0x92, 0x1d,
-							0x81, 0x44, 0x90, 0xd8, 0xa8, 0x24 ); 
+	char res[60];
+	
+	
+	checkFile("/ucodes/avia500.ux", (char*) &res);
+	printf("avia500: %s\n", res);
+
+	checkFile("/ucodes/avia600.ux", (char*) &res);
+        printf("avia600: %s\n", res);
+
+        checkFile("/ucodes/ucode.bin", (char*) &res);
+        printf("ucodes: %s\n", res);
+
+        checkFile("/ucodes/cam-alpha.bin", (char*) &res);
+        printf("cam-alpha: %s\n", res);
 
 
 
