@@ -17,6 +17,8 @@
 #include <config.h>
 #include <apps/enigma/enigma.h>
 #include <apps/enigma/enigma_main.h>
+#include <apps/enigma/sselect.h>
+
 #include <core/system/http_dyn.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
@@ -25,6 +27,7 @@
 #include <core/gdi/fb.cpp>
 #include <core/dvb/decoder.h>
 #include <core/dvb/dvbservice.h>
+#include <core/dvb/service.h>
 #include <core/gui/emessage.h>
 #include <core/driver/eavswitch.h>
 
@@ -554,8 +557,19 @@ static eString getContent(eString mode, int bouquetid)
 			if(mode=="radio")
 				imode=eZap::Radio;
 			eZap::getInstance()->setMode(imode);
-			eDebug("set mode %d", imode);
+			bouquetid=eZap::getInstance()->getServiceSelector()->getCurrentBouquet();
 		}
+		else
+		{
+/*
+	buggy stuff... :(
+			if(eZap::getInstance()->getServiceSelector()->getCurrentBouquet()!=bouquetid)
+			{
+				eZap::getInstance()->getServiceSelector()->useBouquet(getBouquet(bouquetid));
+			}		
+*/
+		}
+
 		result=getWatchContent(mode, bouquetid);
 	}
 
@@ -782,7 +796,20 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 	int bouquetid=atoi(bid.c_str());
 
 	if(!mode)
-		mode="tv";
+	{
+		switch(eZap::getInstance()->getMode())
+		{
+			case 0:
+				mode="tv";
+				break;
+			case 1:
+				mode="radio";
+				break;
+			default:
+				mode="tv";
+				break;
+		}
+	}
 
 	result=read_file(TEMPLATE_DIR+"index.tmp");
 
@@ -825,10 +852,6 @@ static eString switchServiceWeb(eString request, eString path, eString opt, eHTT
 {
 	content->local_header["Content-Type"]="text/html";
 
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "<script language=\"javascript\">alert(\"ERROR not available (scan in progress?)\")</script>";
-	
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
 	unsigned int optval=opt.find("=");
 	if (optval!=eString::npos)
@@ -839,14 +862,13 @@ static eString switchServiceWeb(eString request, eString path, eString opt, eHTT
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
-		sapi->switchService(
-			eServiceReferenceDVB(
-				eTransportStreamID(transport_stream_id), 
-				eOriginalNetworkID(original_network_id),
-				eServiceID(service_id),
-				service_type
-				)
-			);
+		eZap::getInstance()->getServiceSelector()->actualize();
+		if(eDVB::getInstance()->settings->getTransponders())
+		{
+			const eServiceReferenceDVB *ref=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(original_network_id), eServiceID(service_id));
+			if(ref)
+				eServiceInterface::getInstance()->play(*ref);
+		}
 		result+="<script language=\"javascript\">window.close();</script>";
 	} else
 	{
