@@ -15,9 +15,9 @@ mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown Ausschalten
 mainmenu.settings Einstellungen
 mainmenu.service Service
-mainmenu.streaming Streaming (aufnehmen)
-mainmenu.streaming_start start
-mainmenu.streaming_stop stop
+mainmenu.recording Aufnehmen
+mainmenu.recording_start start
+mainmenu.recording_stop stop
 
 servicemenu.head Service
 servicemenu.update Software-Aktualisierung
@@ -42,7 +42,7 @@ mainsettings.language Sprache
 mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Netzwerk
-mainsettings.streaming Streamingserver
+mainsettings.recording Aufnahme
 mainsettings.colors Farben / Themes / Schrift
 mainsettings.lcd LC-Display
 mainsettings.keybinding Tasten-Einstellungen
@@ -55,6 +55,7 @@ miscsettings.boxtype DBox Hersteller
 miscsettings.startneutrinodirect Neutrino direkt starten
 miscsettings.general Allgemein
 miscsettings.fb_destination EXPERT! Boot-Konsole
+miscsettings.spdif_control SPDIF Steuerung
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache
@@ -89,12 +90,18 @@ networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver
 
-streamingmenu.head Streamingserver Einstellungen
-streamingmenu.usestreamserver Streamingserver benutzen
-streamingmenu.streamingserver Streamingserver
-streamingmenu.streamingserverport Port
-streamingmenu.stopplayback Playback anhalten
-streamingmenu.stopsectionsd Sectionsd anhalten
+recordingmenu.head Aufnahme Einstellungen
+recordingmenu.recording_type Aufnahme Gerät
+recordingmenu.server_ip Aufnahmeserver IP
+recordingmenu.server_port Aufnahmeserver Port
+recordingmenu.stopplayback Playback anhalten
+recordingmenu.stopsectionsd Sectionsd anhalten
+recordingmenu.vcr_devicename VCR Name (lirc)
+recordingmenu.off aus
+recordingmenu.server Server
+recordingmenu.vcr Video Rekorder
+recordingmenu.server_wakeup Aufnahmeserver WOL
+recordingmenu.server_mac Mac Adresse
 
 ping.ok ist erreichbar (ping)
 ping.unreachable ist nicht erreichbar (unreachable)
