@@ -45,6 +45,7 @@ extern int endianTest;
 
 #define MAX_ENCODINGS 10
 
+#define dprintf(fmt, args...) {if(debug) printf( "[vncv] " fmt, ## args);}
 
 /* args.c */
 
@@ -67,14 +68,17 @@ extern int requestedDepth;
 extern char *passwdFile;
 extern char passwdString[];
 extern Bool outlineSolid;
+extern int serverScaleFactor;
+extern int rcCycleDuration;
+extern int rcTest;
 extern int updateRequestPeriodms;
 extern int delay;
-extern Bool debug;
 extern char *hwType;
 extern int kbdDelay;
 extern int kbdRate;
 extern char *pnmFifo;
 extern int pnmCacheSize;
+extern int debug;
 
 extern void processArgs(int argc, char **argv);
 extern void usage();
@@ -95,6 +99,7 @@ extern Bool ConnectToRFBServer(const char *hostname, int port);
 extern Bool DisconnectFromRFBServer();
 extern Bool InitialiseRFBConnection(int sock);
 extern Bool SetFormatAndEncodings();
+extern Bool SetScaleFactor();
 extern Bool SendIncrementalFramebufferUpdateRequest();
 extern Bool SendFramebufferUpdateRequest(int x, int y, int w, int h,
 					 Bool incremental);

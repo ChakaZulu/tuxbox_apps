@@ -3,7 +3,7 @@ INCLUDES = -I./rfb @CONFIGFILE_CFLAGS@ -I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = vnc.la
 
-vnc_la_SOURCES = args.c fbdraw.c fbgl.c fscale.c icons.c keyboard.c \
+vnc_la_SOURCES = args.c fbdraw.c fscale.c fbgl.c icons.c keyboard.c \
                  list.c overlay.c rfbproto.c sockets.c rfb/d3des.c  \
                  rfb/vncauth.c fbvnc.cpp 
 

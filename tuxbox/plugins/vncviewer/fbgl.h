@@ -18,8 +18,6 @@ struct viewport {
 	int v_scale;
 	int v_bpp;
 	Pixel *v_buf;
-
-	bool p_landscape;
 };
 
 typedef struct {
@@ -33,7 +31,6 @@ typedef struct {
 	int pv_ysize;
 	int p_xoff;
 	int p_yoff;
-	bool p_landscape;
 	Pixel *p_buf;
 
 	/* viewport */
@@ -50,8 +47,8 @@ typedef struct {
 	int hide_overlays; /* ref count */
 
 	/* input devices */
-	int ts_x;
-	int ts_y;
+	int mouse_x;
+	int mouse_y;
 	bool ts_pressed;
 
 	int ts_fd;
@@ -87,7 +84,6 @@ extern fbvnc_framebuffer_t global_framebuffer;
 	const int pv_ysize = global_framebuffer.pv_ysize;			\
 	const int p_xoff = global_framebuffer.p_xoff;			\
 	const int p_yoff = global_framebuffer.p_yoff;			\
-	const bool p_landscape = global_framebuffer.p_landscape;	\
 	Pixel *const p_buf = global_framebuffer.p_buf;			\
 	const int v_xsize = global_framebuffer.v_xsize;			\
 	const int v_ysize = global_framebuffer.v_ysize;			\
@@ -98,8 +94,8 @@ extern fbvnc_framebuffer_t global_framebuffer;
 	Pixel *const v_buf = global_framebuffer.v_buf;			\
 	List *const overlays = global_framebuffer.overlays;		\
 	const bool hide_overlays = global_framebuffer.hide_overlays;	\
-	const int ts_x = global_framebuffer.ts_x;			\
-	const int ts_y = global_framebuffer.ts_y;			\
+	const int mouse_x = global_framebuffer.mouse_x;			\
+	const int mouse_y = global_framebuffer.mouse_y;			\
 	const bool ts_pressed = global_framebuffer.ts_pressed;		\
 	const int ts_fd = global_framebuffer.ts_fd;			\
 	const int kb_fd = global_framebuffer.kb_fd;			\
@@ -115,7 +111,6 @@ extern fbvnc_framebuffer_t global_framebuffer;
 	(void)pv_ysize;							\
 	(void)p_xoff;							\
 	(void)p_yoff;							\
-	(void)p_landscape;						\
 	(void)p_buf;							\
 	(void)v_xsize;							\
 	(void)v_ysize;							\
@@ -126,8 +121,8 @@ extern fbvnc_framebuffer_t global_framebuffer;
 	(void)v_buf;							\
 	(void)overlays;							\
 	(void)hide_overlays;						\
-	(void)ts_x;							\
-	(void)ts_y;							\
+	(void)mouse_x;							\
+	(void)mouse_y;							\
 	(void)ts_pressed;						\
 	(void)ts_fd;							\
 	(void)kb_fd;							\
@@ -156,8 +151,9 @@ enum fbvnc_event {
 	FBVNC_EVENT_SEND_UPDATE_REQUEST = 0x2000,
 	FBVNC_EVENT_KEYREPEAT = 0x4000,
 	FBVNC_EVENT_TICK_SECOND = 0x8000,
-	FBVNC_EVENT_ZOOM_IN       = 0x10000,
-	FBVNC_EVENT_ZOOM_OUT       = 0x20000
+	FBVNC_EVENT_ZOOM_IN        = 0x10000,
+	FBVNC_EVENT_ZOOM_OUT       = 0x20000,
+	FBVNC_EVENT_DCLICK         = 0x40000
 };
 
 typedef struct {

@@ -734,10 +734,6 @@ key_special_action(int key)
 		system("zsuspend");
 	} else if (key==XK_Return) {
 		toggle_light();
-	} else if (key==XK_Tab || key==XK_End) {
-		flip_orientation();
-	} else if ((fn_action && key==XK_Home) || (!fn_action && key==XK_Control_L)) {
-		set_mouse_state((mouse_multibutton_mode+1) % 3);
 	} else if (key==XK_f) {
 		extern void refresh_framerate(void);
 		refresh_framerate();
@@ -755,38 +751,6 @@ key_special_action(int key)
 		show_pnm_image();
 	}
 	return 1;
-}
-
-static int
-landscape_cursor_remap (int key) {
-	bool landscape = global_framebuffer.p_landscape;
-
-	if (landscape_is_native) {
-		if (landscape) return key;
-
-		if (key == XK_Up) {
-			key = XK_Left;
-		} else if (key == XK_Left) {
-			key = XK_Down;
-		} else if (key == XK_Right) {
-			key = XK_Up;
-		} else if (key == XK_Down) {
-			key = XK_Right;
-		}
-	} else {
-		if (!landscape) return key;
-
-		if (key == XK_Up) {
-			key = XK_Right;
-		} else if (key == XK_Left) {
-			key = XK_Up;
-		} else if (key == XK_Right) {
-			key = XK_Down;
-		} else if (key == XK_Down) {
-			key = XK_Left;
-		}
-	}
-	return key;
 }
 
 int  /* keysym */
@@ -811,7 +775,6 @@ key_map(int hwkey)
 		if (fbvnc_keymap[pos+1]) pos++;
 	}
 	key = fbvnc_keymap[pos];
-	key = landscape_cursor_remap(key);
 
 	return key;
 }

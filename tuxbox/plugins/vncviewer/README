@@ -19,6 +19,7 @@ up/down/left/right: move pointer/pan screen
 vol_down: scale++ (zoom out)
 vol_up: scale-- (zoom in)
 red: toggle virtual keyboard
+blue: left double click
 
 Configfile (CONFIGDIR + vnc.conf) syntax
 =========================================
@@ -26,6 +27,10 @@ server=<vnc server>
 port=<vnc port> (i.e. 5900 for screen0 5901 for screen1 ...)
 passwd=<passwd> (only needed if not using using vncpasswd)
 scale=<scale factor> (1 no scale - 4 scale by 1/4)
+server_scale=<scale factor> (1 no scale.... / server must support this feature)
+debug=<debug?> (turn on debugging -> 1)
+
+ATTENTION: Unix style ! remove any CR
 
 Authentication
 =============================================

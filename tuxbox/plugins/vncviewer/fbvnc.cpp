@@ -29,6 +29,8 @@
 #endif
 #include <X11/keysym.h>
 
+#define STEP_PAN 30
+
 extern "C" {
 #include "vncviewer.h"
 #include "fbgl.h"
@@ -43,29 +45,6 @@ int fb_fd;
 int rc_fd;
 char terminate;
 int gScale,sx,sy,ex,ey;
-
-static bool quit_requested = 0;
-
-struct fb_calibration
-{
-	int a;
-	int b;
-	int c;
-	int d;
-	int e;
-	int f;
-	int s;
-} tscal;
-static bool need_calibrate = 0;
-
-#define TS_TYPE_IPAQ 1
-#define TS_TYPE_ZAURUS 2
-#define TS_TYPE_PS2 3
-#define TS_TYPE_C700 4
-
-static int ts_type = TS_TYPE_ZAURUS;
-bool landscape_is_native = 0;
-
 void fbvnc_close(void);
 
 void
@@ -83,9 +62,6 @@ cleanup_and_exit(char *msg, int ret) {
 	terminate=1;
 }
 
-void signal_quit(int sig) {
-	quit_requested = 1;
-}
 extern "C"
 {
 	void *
@@ -111,11 +87,10 @@ get_fbinfo() {
 	if(vinf.bits_per_pixel != 8*sizeof(Pixel))
 	{
 		printf("bpp %d 8*sizeof(Pixel)=%d\n",vinf.bits_per_pixel, 8*sizeof(Pixel));
-		//cleanup_and_exit("data type 'Pixel' size mismatch", EXIT_ERROR);
+		cleanup_and_exit("data type 'Pixel' size mismatch", EXIT_ERROR);
 	}
 	myFormat.bitsPerPixel = 8*sizeof(Pixel);
 	myFormat.depth = vinf.bits_per_pixel;
-	myFormat.bigEndian = 0;
 	myFormat.trueColour = 1;
 	myFormat.redShift = vinf.red.offset;
 	myFormat.redMax = (1<<vinf.red.length)-1;
@@ -123,7 +98,7 @@ get_fbinfo() {
 	myFormat.greenMax = (1<<vinf.green.length)-1;
 	myFormat.blueShift = vinf.blue.offset;
 	myFormat.blueMax = (1<<vinf.blue.length)-1;
-	//printf("RGB %d/%d %d/%d %d/%d\n", myFormat.redMax, myFormat.redShift, myFormat.greenMax, myFormat.greenShift, myFormat.blueMax, myFormat.blueShift);
+	dprintf("RGB %d/%d %d/%d %d/%d\n", myFormat.redMax, myFormat.redShift, myFormat.greenMax, myFormat.greenShift, myFormat.blueMax, myFormat.blueShift);
 	global_framebuffer.p_xsize = vinf.xres;
 	global_framebuffer.p_ysize = vinf.yres;
 	global_framebuffer.pv_xsize = ex-sx;
@@ -137,154 +112,6 @@ get_fbinfo() {
 	global_framebuffer.kb_fd = -1;
 #endif
 }
-
-#define FBVNC_CALIBRATION_FILE "/etc/fbvnc-calibration.conf"
-
-void
-ts_get_calibration() {
-	FILE *f;
-
-	f = fopen(FBVNC_CALIBRATION_FILE, "r");
-	if(!f)
-	{
-		need_calibrate = 1;
-	}
-	else
-	{
-		fscanf(f, "%d %d %d %d %d %d",
-				 &tscal.a, &tscal.b, &tscal.c,
-				 &tscal.d, &tscal.e, &tscal.f);
-		fclose(f);
-	}
-}
-
-void
-ts_save_calibration() {
-	FILE *f;
-	f = fopen(FBVNC_CALIBRATION_FILE, "w");
-	if(!f)
-	{
-		perror(FBVNC_CALIBRATION_FILE);
-		return;
-	}
-	fprintf(f, "%d %d %d %d %d %d",
-			  tscal.a, tscal.b, tscal.c,
-			  tscal.d, tscal.e, tscal.f);
-	fclose(f);
-}
-
-void
-init_pointer() {
-	int ts_fd = -1;
-
-	if(!strcmp(hwType, "zaurus"))
-	{
-		ts_type = TS_TYPE_ZAURUS;
-		landscape_is_native=0;
-	}
-	else if(!strcmp(hwType, "ipaq"))
-	{
-		ts_type = TS_TYPE_IPAQ;
-		landscape_is_native=0;
-	}
-	else if(!strcmp(hwType, "ps2de"))
-	{
-		ts_type = TS_TYPE_PS2;
-		landscape_is_native=1;
-	}
-	else if(!strcmp(hwType, "ps2us") || !strcmp(hwType, "ps2"))
-	{
-		ts_type = TS_TYPE_PS2;
-		landscape_is_native=1;
-	}
-	else if(!strcmp(hwType, "c700") || !strcmp(hwType, "C700"))
-	{
-		ts_type = TS_TYPE_C700;
-		landscape_is_native=0;
-	}
-	else
-	{
-		cleanup_and_exit("unknown hardware type", EXIT_ERROR);
-	}
-
-	switch(ts_type)
-	{
-		case TS_TYPE_ZAURUS:
-		case TS_TYPE_C700:
-			ts_fd = open("/dev/ts", O_RDONLY);
-			if(ts_fd<0)
-				cleanup_and_exit("Can't open /dev/ts", EXIT_SYSERROR);
-			break;
-		case TS_TYPE_IPAQ:
-			ts_fd = open("/dev/h3600_tsraw", O_RDONLY);
-			if(ts_fd<0)
-				cleanup_and_exit("Can't open /dev/h3600_tsraw", EXIT_SYSERROR);
-			break;
-	}
-
-	if(ts_fd >= 0)
-	{
-		global_framebuffer.ts_fd = ts_fd;
-		ts_get_calibration();
-	}
-}
-
-static void
-hwtype_readproc()
-{
-	FILE *dinfo;
-	char product[100];
-
-	dinfo=fopen("/proc/deviceinfo/product", "r");
-	if(!dinfo) return;
-
-	fscanf(dinfo, "%99s", product);
-	if(debug) fprintf(stderr, "hwdetect: product='%s'\n", product);
-	if(!strcmp(product, "SL-C700")
-		|| !strcmp(product, "SL-C750")
-		|| !strcmp(product, "SL-C760")
-	  )
-	{
-		hwType = "c700";
-		if(debug) fprintf(stderr, "hwdetect: C700 detected\n");
-	}
-	else if(!strcmp(product, "SL-5000D")
-			  || !strcmp(product, "SL-5500")
-			 )
-	{
-		hwType = "zaurus";
-		if(debug) fprintf(stderr, "hwdetect: Zaurus 5x00 detected\n");
-	}
-}
-
-static void
-hwtype_guess()
-{
-	if(access("/dev/h3600_tsraw", F_OK) >= 0)
-	{
-		hwType = "ipaq";
-		if(debug) fprintf(stderr, "hwdetect: guessing iPAQ\n");
-	}
-	else if(access("/dev/ts", F_OK) >= 0)
-	{
-		hwType = "zaurus";
-		if(debug) fprintf(stderr, "hwdetect: guessing Zaurus 5x00\n");
-	}
-	else
-	{
-		hwType = "ps2us";
-		if(debug) fprintf(stderr, "hwdetect: defaulting to ps2us\n");
-	}
-}
-
-static void
-hwtype_autodetect()
-{
-	if(!hwType)	hwtype_readproc();
-	if(!hwType)	hwtype_guess();
-	if(!hwType)	cleanup_and_exit("can't determine hardware type, use '-hw' switch", EXIT_ERROR);
-}
-
 
 void
 fbvnc_init() {
@@ -300,9 +127,6 @@ fbvnc_init() {
 	global_framebuffer.overlays = list_new();
 	global_framebuffer.hide_overlays = 0;
 
-	global_framebuffer.ts_x = 0;
-	global_framebuffer.ts_y = 0;
-
 	global_framebuffer.v_xsize = v_xsize;
 	global_framebuffer.v_ysize = v_ysize;
 	global_framebuffer.v_x0 = 0;
@@ -310,18 +134,8 @@ fbvnc_init() {
 	global_framebuffer.v_scale = gScale;
 	global_framebuffer.v_bpp = sizeof(Pixel);
 	global_framebuffer.v_buf = (Pixel*) xmalloc(v_xsize * v_ysize * sizeof(Pixel));
-#if 0
-	signal(SIGINT, signal_quit);
-	signal(SIGTERM, signal_quit);
-	signal(SIGQUIT, signal_quit);
-#endif
-	hwtype_autodetect();
 
 	init_keyboard();
-	init_pointer();
-
-	/* start in portrait mode by default ? */
-	global_framebuffer.p_landscape = landscape_is_native;
 
 	struct fb_var_screeninfo vinf;
 	struct fb_fix_screeninfo finf;
@@ -396,82 +210,6 @@ fbvnc_close() {
 		free(global_framebuffer.v_buf);
 	}
 	DisconnectFromRFBServer();
-}
-
-#define SQR(x) ((x)*(x))
-
-#define TS_SAMPLES 5
-
-int
-ts_filter(fbvnc_event_t *ev, int tx, int ty, int pressed) {
-	static int curr_sample = 0;
-	static int num_samples = 0;
-	static int ox[TS_SAMPLES], oy[TS_SAMPLES];
-
-	if(!pressed)
-	{
-		num_samples = 0;
-		curr_sample = 0;
-		ev->x = global_framebuffer.ts_x;
-		ev->y = global_framebuffer.ts_y;
-		return pressed;
-	}
-
-	ox[curr_sample] = tx;
-	oy[curr_sample] = ty;
-
-	++ num_samples;
-
-	if(num_samples < TS_SAMPLES)
-	{
-		/* ignore it - too little data */
-		ev->evtype = FBVNC_EVENT_NULL;
-		pressed = 0;
-	}
-	else
-	{
-		int x=0, y=0;
-		int i;
-		int worst_i = 0, worst_dist=0;
-
-		/* ignore the sample farthest from mouse pos */
-		for(i=0; i < TS_SAMPLES; i++)
-		{
-			int mx = global_framebuffer.ts_x;
-			int my = global_framebuffer.ts_y;
-			int d;
-
-			d = SQR(ox[i]-mx)+SQR(oy[i]-my);
-			if(d > worst_dist)
-			{
-				worst_i = i;
-				worst_dist = d;
-			}
-		}
-
-		for(i=0; i < TS_SAMPLES; i++)
-		{
-			if(i == worst_i) continue;
-			x += ox[i];
-			y += oy[i];
-		}
-		ev->x = x/(TS_SAMPLES-1);
-		ev->y = y/(TS_SAMPLES-1);
-	}
-
-	++ curr_sample;
-	if(curr_sample >= TS_SAMPLES)	curr_sample = 0;
-
-	return pressed;
-}
-
-void
-bad_ts_read(int expected, int read)
-{
-	char err[100];
-	sprintf(err, "read touchscreen: expected %d bytes, got %d (bad '-hw' type?)\n",
-			  expected, read);
-	cleanup_and_exit(err, EXIT_ERROR);
 }
 
 struct sched
@@ -609,20 +347,15 @@ fd_copy(fd_set *out, fd_set *in, int n)
 enum fbvnc_event 
 fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 {
-	fd_set rfds, wfds, save_rfds;
+	fd_set rfds, wfds;
 	int i,ret;
 	enum fbvnc_event retval;
 	int max;
 	struct timeval timeout;
-	struct timeval tzero = {0, 0};
-	bool got_data_immediately;
 	static fbvnc_event_t nextev = {0,0,0,0,0,0,0};
 	static int next_mb = -1, countevt=0;
 	static unsigned short lastcode=0;
 	static struct timeval evttime;
-#ifdef INPUT_PS2MOUSE
-	extern int msefd;	/* set in ofbis library */
-#endif
 	IMPORT_FRAMEBUFFER_VARS
 
 	if(nextev.evtype!=0)
@@ -676,44 +409,20 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 	FD_ZERO(&rfds);
 	FD_ZERO(&wfds);
 
-#ifdef INPUT_TS
-	FD_SET_u(ts_fd, &rfds);
-#endif
-#ifdef INPUT_PS2MOUSE
-	FD_SET_u(msefd, &rfds);
-#endif
 	if(kb_fd!=-1)
 		FD_SET_u(kb_fd, &rfds);
 	FD_SET_u(rc_fd, &rfds);
-
-	/* quick check on input devices without waiting */
-	fd_copy(&save_rfds, &rfds, max+1); /* save for later */
-	ret = select(max+1, &rfds, 0, 0, &tzero);
-
-	if(ret)
+	for(i=0; i<num_read_fds; i++)
 	{
-		got_data_immediately = 1;
+		if(read_fd[i] < 0) continue;
+		FD_SET_u(read_fd[i], &rfds);
 	}
-	else
+	for(i=0; i<num_write_fds; i++)
 	{
-		got_data_immediately = 0;
-
-		/* try again on all fds, wait this time */
-		fd_copy(&rfds, &save_rfds, max+1); /* restore */
-
-		for(i=0; i<num_read_fds; i++)
-		{
-			if(read_fd[i] < 0) continue;
-			FD_SET_u(read_fd[i], &rfds);
-		}
-
-		for(i=0; i<num_write_fds; i++)
-		{
-			if(write_fd[i] < 0) continue;
-			FD_SET_u(write_fd[i], &wfds);
-		}
-		ret = select(max+1, &rfds, &wfds, 0, &timeout);
+		if(write_fd[i] < 0) continue;
+		FD_SET_u(write_fd[i], &wfds);
 	}
+	ret = select(max+1, &rfds, &wfds, 0, &timeout);
 
 	if(!ret)
 	{
@@ -724,16 +433,21 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 		return((fbvnc_event)ev->evtype);
 	}
 
-	if(quit_requested)
-	{
-		cleanup_and_exit("Interrupt.", EXIT_OK);
-	}
-
-	ev->x = ts_x;
-	ev->y = ts_y;
+	ev->x = global_framebuffer.mouse_x;
+	ev->y = global_framebuffer.mouse_y;
 	ev->dx = 0;
 	ev->dy = 0;
 
+	for(i=0; i<num_read_fds; i++)
+	{
+		int fd = read_fd[i];
+		if(fd<0)	continue;
+		if(FD_ISSET(fd, &rfds))
+		{
+			ev->fd = fd;
+			RetEvent(FBVNC_EVENT_DATA_READABLE);
+		}
+	}
 	if(kb_fd!=-1)
 	{
 		if(FD_ISSET(kb_fd, &rfds))
@@ -743,220 +457,20 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			r=read(kb_fd, &k, sizeof k);
 			if(r!=sizeof k) cleanup_and_exit("read kb", EXIT_SYSERROR);
 
-			if(debug)
-			{
-				/* debug keyboard */
-				fprintf(stderr, "key=%d (0x%02x)\n", k, k);
-			}
+			/* debug keyboard */
+			dprintf("key=%d (0x%02x)\n", k, k);
 
 			ev->key = k&0x7f;
 			RetEvent((k&0x80) ? FBVNC_EVENT_BTN_UP : FBVNC_EVENT_BTN_DOWN);
 		}
 	}
 
-#ifdef INPUT_TS
-	if(FD_ISSET(ts_fd, &rfds))
-	{
-		int t_x=0, t_y=0, pressed=0;
-		int r;
-		int evtype;
-		int raw_x, raw_y;
-
-		if(ts_type == TS_TYPE_IPAQ)
-		{
-			struct h3600_ts_event
-			{
-				unsigned short pressure;
-				unsigned short x;
-				unsigned short y;
-				unsigned short pad;
-			} ts;
-
-			r=read(ts_fd, &ts, sizeof ts);
-			if(r!=sizeof ts) bad_ts_read(sizeof ts, r);
-
-			t_x = ts.x;
-			t_y = ts.y;
-			pressed = (ts.pressure!= 0);
-		}
-		else if(ts_type == TS_TYPE_ZAURUS)
-		{
-			struct zaurus_ts_event
-			{
-				int x;
-				int y;
-				int pressure;
-				long long millisecs;
-			} ts;
-
-			r=read(ts_fd, &ts, sizeof ts);
-			if(r!=sizeof ts) bad_ts_read(sizeof ts, r);
-
-			t_x = ts.x;
-			t_y = ts.y;
-			pressed = (ts.pressure!= 0);
-		}
-		else if(ts_type == TS_TYPE_C700)
-		{
-			struct zaurus_ts_event
-			{
-				short pressure;
-				short x;
-				short y;
-				short millisecs;
-			} ts;
-
-			r=read(ts_fd, &ts, sizeof ts);
-			if(r!=sizeof ts) bad_ts_read(sizeof ts, r);
-
-			t_x = ts.x;
-			t_y = ts.y;
-			pressed = (ts.pressure!= 0);
-		}
-		else
-		{
-			cleanup_and_exit("unknown touchscreen type", EXIT_ERROR);
-		}
-
-		raw_x = t_x;
-		raw_y = t_y;
-
-		t_x = ( tscal.a * raw_x + tscal.b * raw_y + tscal.c ) >>16;
-		t_y = ( tscal.d * raw_x + tscal.e * raw_y + tscal.f ) >>16;
-
-		if(debug)
-		{
-			fprintf(stderr, "ts: rx=%d ry=%d x=%d y=%d p=%d\n",
-					  raw_x, raw_y, t_x, t_y, pressed);
-		}
-
-		/* filter touchscreen events */
-		pressed = ts_filter(ev, t_x, t_y, pressed);
-
-		if(!need_calibrate)
-		{
-			/* clamp the coordinates - the driver returns 
-			 * coordinates outside the tochpad area */
-
-			if(ev->x >= global_framebuffer.p_xsize)
-				ev->x = global_framebuffer.p_xsize-1;
-			if(ev->y >= global_framebuffer.p_ysize)
-				ev->y = global_framebuffer.p_ysize-1;
-			if(ev->x < 0 || ev->x > 60000) ev->x = 0;
-			if(ev->y < 0 || ev->y > 60000) ev->y = 0;
-		}
-
-		ev->dx = ev->x - ts_x;
-		ev->dy = ev->y - ts_y;
-
-		if(pressed)
-		{
-			evtype = ts_pressed
-						? FBVNC_EVENT_TS_MOVE
-						: FBVNC_EVENT_TS_DOWN;
-			global_framebuffer.ts_pressed = 1;
-		}
-		else
-		{
-			evtype = ts_pressed
-						? FBVNC_EVENT_TS_UP
-						: FBVNC_EVENT_TIMEOUT;
-			global_framebuffer.ts_pressed = 0;
-		}
-
-		if(evtype == FBVNC_EVENT_TS_MOVE && got_data_immediately)
-		{
-			/* not enough time passed since last move -
-			 * aggregate the deltas and check again later.
-			 */
-			return 0;
-		}
-
-		if(pressed)
-		{
-			global_framebuffer.ts_x = ev->x;
-			global_framebuffer.ts_y = ev->y;
-		}
-		RetEvent(evtype);
-	}
-#endif
-#ifdef INPUT_PS2MOUSE
-	if(FD_ISSET(msefd, &rfds))
-	{
-		static int readpos = 0;
-		static char buf[3];
-		static int mouse_x = -1, mouse_y = -1;
-		static int edx = 0, edy = 0;
-		int r;
-		int buttons, dx, dy;
-
-		if(mouse_x < 0) mouse_x = global_framebuffer.pv_xsize / 2;
-		if(mouse_y < 0) mouse_y = global_framebuffer.pv_ysize / 2;
-
-		/* fprintf(stderr, "read mouse readpos=%d buf=[%d,%d,%d]\n", readpos, buf[0], buf[1], buf[2]); */
-		r=read(msefd, buf + readpos, 3-readpos);
-		if(r<=0)	cleanup_and_exit("bad mouse read", EXIT_ERROR);
-		readpos += r;
-
-		if(readpos<3) RetEvent(FBVNC_EVENT_NULL);
-
-		readpos=0;
-		buttons = buf[0] & 7;
-
-		/* swap buttons #2 and #3 (bit values 2,4) */
-		if(buttons)	buttons = (buttons&1) | ((buttons&2)<<1) | ((buttons&4)>>1);
-
-		dx = (signed char)buf[1];
-		dy =-(signed char)buf[2];
-
-		/* fprintf(stderr, "buttons=%d dx=%d dy=%d\n", buttons, dx, dy); */
-
-		mouse_x += dx;
-		mouse_y += dy;
-
-		ev->x = mouse_x;
-		ev->y = mouse_y;
-		ev->dx = edx += dx;
-		ev->dy = edy += dy;
-
-		if(mouse_x < 0) mouse_x = 0;
-		if(mouse_y < 0) mouse_y = 0;
-
-		if(mouse_x >= global_framebuffer.pv_xsize) mouse_x = global_framebuffer.pv_xsize-1;
-		if(mouse_y >= global_framebuffer.pv_ysize) mouse_y = global_framebuffer.pv_ysize-1;
-
-		if(buttons & ~mouse_button)
-		{
-			mouse_button = buttons;
-			edx = edy = 0;
-			RetEvent(FBVNC_EVENT_TS_DOWN);
-		}
-		if(~buttons & mouse_button)
-		{
-			mouse_button = buttons;
-			edx = edy = 0;
-			RetEvent(FBVNC_EVENT_TS_UP);
-		}
-
-		if(got_data_immediately)
-		{
-			/* not enough time passed since last move -
-			 * aggregate the deltas and check again later.
-			 */
-			return 0;
-		}
-		edx = edy = 0;
-		RetEvent(FBVNC_EVENT_TS_MOVE);
-	}
-#endif
 	if(FD_ISSET(rc_fd, &rfds))
 	{
 		struct input_event iev;
 		int count;
-		static int rc_x = -1, rc_y=-1, rc_dx=0, rc_dy=0, step=5;
+		static int rc_dx=0, rc_dy=0, step=5;
 		static char rc_pan=0;
-		if(rc_x < 0) rc_x = global_framebuffer.pv_xsize / 2;
-		if(rc_y < 0) rc_y = global_framebuffer.pv_ysize / 2;
 
 		count = read(rc_fd, &iev, sizeof(struct input_event));
 		if((count == sizeof(struct input_event)) && ((iev.value == 1)||(iev.value == 2)))
@@ -967,9 +481,9 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			if(lastcode==iev.code)
 			{
 				if((iev.time.tv_sec == evttime.tv_sec
-					 && (iev.time.tv_usec - evttime.tv_usec) < 225000) ||
+					 && (iev.time.tv_usec - evttime.tv_usec) < rcCycleDuration) ||
 					((iev.time.tv_sec-1) == evttime.tv_sec
-					 && ((iev.time.tv_usec+1000000) -evttime.tv_usec) < 225000))
+					 && ((iev.time.tv_usec+1000000) -evttime.tv_usec) < rcCycleDuration))
 				{
 					countevt++;
 				}
@@ -985,8 +499,18 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 				iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN ||
 				iev.code == KEY_LEFT || iev.code == KEY_RIGHT)
 			{
+				// ignore curser events older than 350 ms
+				struct timeval now;
+				gettimeofday(&now,NULL);
+				if((now.tv_sec > iev.time.tv_sec+1) ||
+					((now.tv_sec == iev.time.tv_sec+1) && ((now.tv_usec+1000000) - iev.time.tv_usec) > 350000) ||
+					((now.tv_sec == iev.time.tv_sec) && ((now.tv_usec) - iev.time.tv_usec) > 350000))
+				{
+					RetEvent(FBVNC_EVENT_NULL);
+				}
+
 				if(rc_pan)
-					step=30;
+					step=STEP_PAN;
 				else
 				{
 					if(countevt>20)
@@ -1014,43 +538,121 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 				retval = FBVNC_EVENT_QUIT;
 			if(iev.code == KEY_TOPLEFT || iev.code == KEY_TOPRIGHT || iev.code == KEY_UP)
 			{
+				if(global_framebuffer.mouse_y == 0 && global_framebuffer.v_y0==0)
+				{
+					RetEvent(FBVNC_EVENT_NULL);
+				}
 				if(!rc_pan)
-					rc_y -= step;
+					global_framebuffer.mouse_y -= step;
 				else
 					rc_dy	= step;
-				if(rc_y <0)
-					rc_y =0;
-				retval=FBVNC_EVENT_TS_MOVE;
+				if(global_framebuffer.mouse_y <0)
+				{
+					if(step < STEP_PAN)
+						step=STEP_PAN;
+					if(global_framebuffer.v_y0<step)
+						step=global_framebuffer.v_y0;
+					global_framebuffer.mouse_y = 0;
+					rc_dy = step;
+					ev->key = hbtn.pan;
+					retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+
+					nextev.key = hbtn.pan;
+					nextev.x = global_framebuffer.mouse_x;
+					nextev.y = global_framebuffer.mouse_y;
+					nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+				}
+				else
+					retval=FBVNC_EVENT_TS_MOVE;
 			}
 			if(iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN)
 			{
+				if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize &&
+					global_framebuffer.v_y0 + global_framebuffer.pv_ysize >= global_framebuffer.v_ysize)
+				{
+					RetEvent(FBVNC_EVENT_NULL);
+				}
 				if(!rc_pan)
-					rc_y += step;
+					global_framebuffer.mouse_y += step;
 				else
 					rc_dy	=-step;
-				if(rc_y >= global_framebuffer.pv_ysize)
-					rc_y = global_framebuffer.pv_ysize-1;
-				retval=FBVNC_EVENT_TS_MOVE;
+				if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize)
+				{
+					if(step < STEP_PAN)
+						step=STEP_PAN;
+					if((global_framebuffer.v_ysize - global_framebuffer.v_y0 - global_framebuffer.pv_ysize) < step)
+						step=(global_framebuffer.v_ysize - global_framebuffer.v_y0 - global_framebuffer.pv_ysize);
+					global_framebuffer.mouse_y = global_framebuffer.pv_ysize - 1;
+					rc_dy = -step;
+					ev->key = hbtn.pan;
+					retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+
+					nextev.key = hbtn.pan;
+					nextev.x = global_framebuffer.mouse_x;
+					nextev.y = global_framebuffer.mouse_y;
+					nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+				}
+				else
+					retval=FBVNC_EVENT_TS_MOVE;
 			}
 			if(iev.code == KEY_TOPLEFT || iev.code == KEY_BOTTOMLEFT || iev.code == KEY_LEFT)
 			{
+				if(global_framebuffer.mouse_x == 0 && global_framebuffer.v_x0==0)
+				{
+					RetEvent(FBVNC_EVENT_NULL);
+				}
 				if(!rc_pan)
-					rc_x -= step;
+					global_framebuffer.mouse_x -= step;
 				else
 					rc_dx	=step;
-				if(rc_x <0)
-					rc_x =0;
-				retval=FBVNC_EVENT_TS_MOVE;
+				if(global_framebuffer.mouse_x <0)
+				{
+					if(step < STEP_PAN)
+						step=STEP_PAN;
+					if(global_framebuffer.v_x0<step)
+						step=global_framebuffer.v_x0;
+					global_framebuffer.mouse_x = 0;
+					rc_dx = step;
+					ev->key = hbtn.pan;
+					retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+
+					nextev.key = hbtn.pan;
+					nextev.x = global_framebuffer.mouse_x;
+					nextev.y = global_framebuffer.mouse_y;
+					nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+				}
+				else
+					retval=FBVNC_EVENT_TS_MOVE;
 			}
 			if(iev.code == KEY_TOPRIGHT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_RIGHT)
 			{
+				if(global_framebuffer.mouse_x >= global_framebuffer.pv_xsize &&
+					global_framebuffer.v_x0 + global_framebuffer.pv_xsize >= global_framebuffer.v_xsize)
+				{
+					RetEvent(FBVNC_EVENT_NULL);
+				}
 				if(!rc_pan)
-					rc_x += step;
+					global_framebuffer.mouse_x += step;
 				else
 					rc_dx	=-step;
-				if(rc_x >= global_framebuffer.pv_xsize)
-					rc_x = global_framebuffer.pv_xsize-1;
-				retval=FBVNC_EVENT_TS_MOVE;
+				if(global_framebuffer.mouse_x >= global_framebuffer.pv_xsize)
+				{
+					if(step < STEP_PAN)
+						step=STEP_PAN;
+					if((global_framebuffer.v_xsize - global_framebuffer.v_x0 - global_framebuffer.pv_xsize) < step)
+						step=(global_framebuffer.v_xsize - global_framebuffer.v_x0 - global_framebuffer.pv_xsize);
+					global_framebuffer.mouse_x = global_framebuffer.pv_xsize - 1;
+					rc_dx = -step;
+					ev->key = hbtn.pan;
+					retval=(fbvnc_event) (FBVNC_EVENT_BTN_DOWN | FBVNC_EVENT_TS_MOVE);
+
+					nextev.key = hbtn.pan;
+					nextev.x = global_framebuffer.mouse_x;
+					nextev.y = global_framebuffer.mouse_y;
+					nextev.evtype = (fbvnc_event) (FBVNC_EVENT_BTN_UP | FBVNC_EVENT_TS_MOVE);
+				}
+				else
+					retval=FBVNC_EVENT_TS_MOVE;
 			}
 			else if(iev.code == KEY_HELP)
 			{
@@ -1076,18 +678,18 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			else if(iev.code == KEY_VOLUMEDOWN)
 			{
-				rc_x = rc_y = 0;
+				global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
 				retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_OUT | FBVNC_EVENT_TS_MOVE);
 			}
 			else if(iev.code == KEY_VOLUMEUP)
 			{
-				rc_x = rc_y = 0;
+				global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
 				retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_IN | FBVNC_EVENT_TS_MOVE);
 			}
 			else if(iev.code == KEY_OK)
 			{
-				nextev.x =rc_x;
-				nextev.y =rc_y;  
+				nextev.x =global_framebuffer.mouse_x;
+				nextev.y =global_framebuffer.mouse_y;  
 				nextev.evtype = FBVNC_EVENT_TS_UP;
 				next_mb=0;
 				mouse_button=1;
@@ -1095,8 +697,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			else if(iev.code == KEY_2)
 			{
-				nextev.x =rc_x;
-				nextev.y =rc_y;  
+				nextev.x =global_framebuffer.mouse_x;
+				nextev.y =global_framebuffer.mouse_y;  
 				nextev.evtype = FBVNC_EVENT_TS_UP;
 				next_mb=0;
 				mouse_button=2;
@@ -1104,8 +706,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			else if(iev.code == KEY_3)
 			{
-				nextev.x =rc_x;
-				nextev.y =rc_y;  
+				nextev.x =global_framebuffer.mouse_x;
+				nextev.y =global_framebuffer.mouse_y;  
 				nextev.evtype = FBVNC_EVENT_TS_UP;
 				next_mb=0;
 				mouse_button=4;
@@ -1115,30 +717,24 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			{
 				toggle_keyboard();
 			}
+			else if(iev.code == KEY_BLUE)
+			{
+				retval=FBVNC_EVENT_DCLICK;				
+			}
 
 			// action
-			ev->x =rc_x;
-			ev->y =rc_y;
+			ev->x =global_framebuffer.mouse_x;
+			ev->y =global_framebuffer.mouse_y;
 			ev->dx=rc_dx;
 			ev->dy=rc_dy;
 
 			if(retval & FBVNC_EVENT_TS_MOVE)
 				rc_dx = rc_dy = 0;
-			//printf("x:%d/y:%d (%d) dx:%d/dy:%d [%d]\n",ev->x,ev->y,mouse_button,ev->dx,ev->dy,countevt);
+			dprintf("Event x:%d/y:%d (%d) dx:%d/dy:%d [%d]\n",ev->x,ev->y,mouse_button,ev->dx,ev->dy,countevt);
 			RetEvent(retval);
 		}
 		else
 			RetEvent(FBVNC_EVENT_NULL);
-	}
-	for(i=0; i<num_read_fds; i++)
-	{
-		int fd = read_fd[i];
-		if(fd<0)	continue;
-		if(FD_ISSET(fd, &rfds))
-		{
-			ev->fd = fd;
-			RetEvent(FBVNC_EVENT_DATA_READABLE);
-		}
 	}
 	for(i=0; i<num_write_fds; i++)
 	{
@@ -1158,17 +754,8 @@ void
 scaledPointerEvent(int xp, int yp, int button) {
 	IMPORT_FRAMEBUFFER_VARS
 
-	/* fprintf(stderr, "mouse click, button=%d\n", button); */
-	if(p_landscape)
-	{
-		SendPointerEvent(xp*v_scale + v_x0, yp*v_scale + v_y0, button);
-	}
-	else
-	{
-		SendPointerEvent((yp          )*v_scale + v_x0,
-							  (pv_xsize-xp-1)*v_scale + v_y0,
-							  button);
-	}
+	dprintf("mouse click, button=%d\n", button);
+	SendPointerEvent(xp*v_scale + v_x0, yp*v_scale + v_y0, button);
 }
 
 bool img_saved = 0;
@@ -1185,7 +772,6 @@ save_viewport(struct viewport *dst) {
 	dst->v_ysize = v_ysize;
 	dst->v_buf = v_buf;
 	dst->v_scale = v_scale;
-	dst->p_landscape = p_landscape;
 }
 
 void
@@ -1194,7 +780,6 @@ activate_viewport(struct viewport *src) {
 	global_framebuffer.v_ysize = src->v_ysize;
 	global_framebuffer.v_buf = src->v_buf;
 	global_framebuffer.v_scale = src->v_scale;
-	global_framebuffer.p_landscape = src->p_landscape;
 }
 
 static struct viewport v_img;
@@ -1202,7 +787,7 @@ static struct viewport v_img;
 void
 open_pnm_fifo(int *fdp)
 {
-	printf("open_pnm\n");
+	dprintf("open_pnm_fifo()\n");
 	int pnmfd;
 	pnmfd = open(pnmFifo, O_RDONLY | O_NDELAY);
 	if(pnmfd < 0)
@@ -1215,7 +800,7 @@ open_pnm_fifo(int *fdp)
 void
 load_pnm_image(int *fdp)
 {
-	printf("load_pnm\n");
+	dprintf("load_pnm_image()\n");
 	static FILE *f = 0;
 	int fd;
 
@@ -1227,7 +812,6 @@ load_pnm_image(int *fdp)
 		if(!f) return;
 
 		v_img.v_scale = 1;
-		v_img.p_landscape = 0;
 		v_img.v_x0 = 0;
 		v_img.v_y0 = 0;
 		v_img.v_bpp = 16;
@@ -1247,7 +831,7 @@ load_pnm_image(int *fdp)
 
 void
 show_pnm_image() {
-	printf("show_pnm\n");
+	dprintf("show_pnm_image()\n");
 	struct viewport v_save;
 	static int kx0=0, ky0=0;
 
@@ -1308,13 +892,12 @@ show_pnm_image() {
 extern "C" {
 	void plugin_exec(PluginParam *par) {
 		fbvnc_overlay_t *active_overlay = 0;
-		int overlay_toggle = 0;
 		int panning = 0;
-		int mouse_x = 0, mouse_y = 0;
 		int readfd[2];	/* pnmfd and/or rfbsock */
 		int key_pending = 0;
 		static int pnmfd = -1;
 		int lcd;
+
 		fb_fd = lcd = rc_fd = sx = ex = sy = ey = -1;
 		for(; par; par = par->next)
 		{
@@ -1359,21 +942,26 @@ extern "C" {
 		gScale=config.getInt32("scale",1);
 		if(gScale > 4 || gScale < 1)
 			gScale=1;
+		serverScaleFactor = config.getInt32("server_scale",1);
+		rcCycleDuration = config.getInt32("rc_cycle_duration",225)*1000;
+		rcTest = config.getInt32("rc_test",0);
 		strcpy(passwdString,config.getString("passwd","").substr(0,8).c_str());
 		if(strlen(passwdString) == 0)
 		{
 			passwdFile = CONFIGDIR "/vncpasswd";
 		}
+		debug = config.getInt32("debug",0);
+
 		sched = list_new();
 
 		terminate=0;
-		//forceOwnCmap = True;
 		requestedDepth = 16;
 		forceTruecolour = True;
 		hwType = "ps2de";
 #if 0
 		processArgs(argc, argv);
 #endif
+		signal(SIGPIPE, SIG_IGN);
 
 		if(!ConnectToRFBServer(hostname, port))
 		{
@@ -1381,40 +969,57 @@ extern "C" {
 			return;
 		}
 
+		dprintf("InitialiseRFBConnection()\n");
 		if(!InitialiseRFBConnection(rfbsock))
 		{
 			printf("Cannot initialize\n");
 			return;
 		}
+		dprintf("fbvnc_init()\n");
 		fbvnc_init();
+		dprintf("overlays_init()\n");
 		overlays_init();
+		dprintf("toggle_keyb()\n");
+		toggle_keyboard();
 
-		if(ts_type != TS_TYPE_IPAQ)
-		{
-			/* hide virt keyboard on machines with real keyboard */
-			toggle_keyboard();
-		}
-
+		
+		dprintf("SetFormatAndEncodings()\n");
 		if(!SetFormatAndEncodings())
 			cleanup_and_exit("encodings", EXIT_ERROR);
+		
+		dprintf("SetScaleFactor()\n");
+ 		if(serverScaleFactor > 1)
+		{
+			if(!SetScaleFactor())
+				cleanup_and_exit("server side scale", EXIT_ERROR);
+			// workaround for ultravnc, ultravnc sends FramebufferChange Msg after update only
+			if(!SendFramebufferUpdateRequest(0, 0, 1, 1, False))
+				cleanup_and_exit("update request", EXIT_ERROR);
+		}
+		else
+		{
+			if(!SendFramebufferUpdateRequest(0, 0, si.framebufferWidth, si.framebufferHeight, False))
+				cleanup_and_exit("update request", EXIT_ERROR);
+		}
 
-		if(!SendFramebufferUpdateRequest(0, 0, si.framebufferWidth,
-													si.framebufferHeight, False))
-			cleanup_and_exit("update request", EXIT_ERROR);
-
-		global_framebuffer.num_read_fds = 2;
+		global_framebuffer.mouse_x = global_framebuffer.pv_xsize / 2;
+		global_framebuffer.mouse_y = global_framebuffer.pv_ysize / 2;
+		scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, 0);
+		
+		global_framebuffer.num_read_fds = 1;
 		global_framebuffer.num_write_fds = 0;
 		global_framebuffer.read_fd = readfd;
 		readfd[FDNUM_VNC] = rfbsock;
 		readfd[FDNUM_PNM]=-1;
-
+		
 		if(pnmFifo)
 		{
 			open_pnm_fifo(&pnmfd);
 		}
-
+		
 		schedule_add(sched, 1000, FBVNC_EVENT_TICK_SECOND);
 
+		sendUpdateRequest=false;
 		while(!terminate)
 		{
 			fbvnc_event_t ev;
@@ -1438,6 +1043,7 @@ extern "C" {
 
 				if(msWait <= 0)
 				{
+					dprintf("SendIncUpdate\n");
 					if(!SendIncrementalFramebufferUpdateRequest())
 						cleanup_and_exit("inc update", EXIT_ERROR);
 				}
@@ -1458,7 +1064,6 @@ extern "C" {
 			}
 			fbvnc_get_event(&ev, sched);
 
-			//printf("Event %X\n",ev.evtype);
 			if(ev.evtype == FBVNC_EVENT_NULL)
 			{
 				//nothing yet
@@ -1475,6 +1080,9 @@ extern "C" {
 					schedule_delete(sched, FBVNC_EVENT_TICK_SECOND);
 					schedule_add(sched, 1000, FBVNC_EVENT_TICK_SECOND);
 				}
+				else
+					dprintf("Event %X\n",ev.evtype);
+
 				if(ev.evtype & FBVNC_EVENT_SEND_UPDATE_REQUEST)
 				{
 					if(!SendIncrementalFramebufferUpdateRequest())
@@ -1487,7 +1095,7 @@ extern "C" {
 						if(ev.fd == readfd[FDNUM_VNC])
 						{
 							if(!HandleRFBServerMessage())
-								cleanup_and_exit("rfb msg", EXIT_ERROR);
+								cleanup_and_exit("rfb server closed connection", EXIT_ERROR);
 						}
 						else if(pnmFifo && ev.fd == pnmfd)
 						{
@@ -1500,93 +1108,6 @@ extern "C" {
 									  ev.fd);
 							cleanup_and_exit("bad data", EXIT_ERROR);
 						}
-					}
-				}
-				if(ev.evtype & FBVNC_EVENT_TS_DOWN)
-				{
-					pan_toggle_count = 0;
-					key_pending = 0;
-					active_overlay = check_overlays(&ev);
-					if(!active_overlay)
-					{
-						if(panning)
-						{
-							panning = 2;
-							overlay_toggle=0;
-						}
-						else
-						{
-							mouse_x = ev.x;
-							mouse_y = ev.y;
-							if(mouse_multibutton_mode==2)
-							{
-								mouse_button = 1;
-								/* workaround: Zaurus hardware can't register
-								 * [menu] and [mail] simultaneously w/ ts
-								 * so use mouse1 instead for right click
-								 */
-								if(btn_state[hbtn.mouse1])	mouse_button = 4;
-								if(btn_state[hbtn.mouse2])	mouse_button = 2;
-								if(btn_state[hbtn.mouse3])	mouse_button = 4;
-								scaledPointerEvent(mouse_x, mouse_y, mouse_button);
-							}
-							else
-							{
-								scaledPointerEvent(mouse_x, mouse_y, mouse_button);
-							}
-						}
-					}
-				}
-				if(ev.evtype & FBVNC_EVENT_TS_MOVE)
-				{
-					key_pending = 0;
-					if(active_overlay)
-					{
-						overlay_event(&ev, active_overlay, 0);
-					}
-#if 1
-					else if(panning)
-					{
-						panning=2;
-						overlay_toggle=0;
-						vp_pan(-ev.dx, -ev.dy);
-					}
-#endif
-					else if(panning)
-					{
-						vp_pan(-ev.dx, -ev.dy);
-					}
-					else
-					{
-						mouse_x = ev.x;
-						mouse_y = ev.y;
-						scaledPointerEvent(mouse_x, mouse_y, mouse_button);
-					}
-				}
-				if(ev.evtype & FBVNC_EVENT_TS_UP)
-				{
-					key_pending = 0;
-					if(active_overlay)
-					{
-						overlay_event(&ev, active_overlay, 0);
-						active_overlay = 0;
-					}
-					else if(!panning)
-					{
-						mouse_x = ev.x;
-						mouse_y = ev.y;
-						if(mouse_multibutton_mode != 1)
-						{
-							scaledPointerEvent(mouse_x, mouse_y, 0);
-						}
-					}
-				}
-				if(ev.evtype & FBVNC_EVENT_KEYREPEAT)
-				{
-					if(kbdRate && rep_key)
-					{
-						schedule_add(sched, 1000 / kbdRate, FBVNC_EVENT_KEYREPEAT);
-						SendKeyEvent(rep_key, 1);
 					}
 				}
 				if(ev.evtype & FBVNC_EVENT_BTN_DOWN)
@@ -1610,40 +1131,22 @@ extern "C" {
 					}
 					else if(ev.key==hbtn.mouse1)
 					{
-						if(btn_state[hbtn.altgr] || btn_state[hbtn.action])
-						{
-							set_mouse_state((mouse_multibutton_mode+1) % 3);
-						}
+						mouse_button = 1;
+ 						scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, mouse_button);
 					}
-					else if(mouse_multibutton_mode==1)
+					else if(ev.key==hbtn.mouse2)
 					{
-						if(ev.key==hbtn.mouse1)
-						{
-							mouse_button = 1;
-						}
-						else if(ev.key==hbtn.mouse2)
-						{
-							mouse_button = 2;
-						}
-						else if(ev.key==hbtn.mouse3)
-						{
-							mouse_button = 4;
-						}
-						scaledPointerEvent(mouse_x, mouse_y, mouse_button);
+						mouse_button = 2;
+ 						scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, mouse_button);
 					}
-					else if(mouse_multibutton_mode==2)
+					else if(ev.key==hbtn.mouse3)
 					{
-						if(ev.key==hbtn.mouse1 || ev.key==hbtn.mouse2 || ev.key==hbtn.mouse3)
-						{
-							mouse_button = 1;
-							/* don't generate event yet */
-							key_pending = ev.key;
-						}
+						mouse_button = 4;
+ 						scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, mouse_button);
 					}
 					else if(ev.key==hbtn.pan)
 					{
 						vp_hide_overlays();
-						overlay_toggle=1;
 						panning = 1;
 					}
 					else if(key_pending)	key_press(key_pending);
@@ -1662,34 +1165,16 @@ extern "C" {
 					{
 						overlay_event(&ev, active_overlay, 0);
 					}
-					else if(mouse_multibutton_mode==1 && ( ev.key==hbtn.mouse1 ||
-																		ev.key==hbtn.mouse2 ||
-																		ev.key==hbtn.mouse3 ))
+					else if(ev.key==hbtn.mouse1 ||
+							  ev.key==hbtn.mouse2 ||
+							  ev.key==hbtn.mouse3 )
 					{
 						mouse_button = 0;
-						scaledPointerEvent(mouse_x, mouse_y, 0);
-					}
-					else if(mouse_multibutton_mode==2 && (ev.key==hbtn.mouse1 || 
-																	  ev.key==hbtn.mouse2 || 
-																	  ev.key==hbtn.mouse3))
-					{
-						mouse_button = 1;
-						if(key_pending)
-						{
-							/* not used as modifier - send key events */
-							key_press(ev.key);
-							key_release(ev.key);
-							key_pending = 0;
-							schedule_delete(sched, FBVNC_EVENT_KEYREPEAT);
-						}
+						scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, 0);
 					}
 					else if(ev.key==hbtn.pan)
 					{
-#if 1
-						if(panning == 1 && overlay_toggle)
-#else	
 						if(panning == 1)
-#endif	
 						{
 							/* no mouse move events, toggle overlay */
 							if(global_framebuffer.hide_overlays > 1)
@@ -1713,6 +1198,7 @@ extern "C" {
 						{
 							vp_restore_overlays();
 						}
+						scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, mouse_button);
 						panning = 0;
 					}
 					else if(ev.key==hbtn.action)
@@ -1722,6 +1208,66 @@ extern "C" {
 					else
 					{
 						key_release(ev.key);
+					}
+				}
+				if(ev.evtype & FBVNC_EVENT_TS_DOWN)
+				{
+					pan_toggle_count = 0;
+					key_pending = 0;
+					active_overlay = check_overlays(&ev);
+					if(!active_overlay)
+					{
+						if(panning)
+						{
+							panning = 2;
+						}
+						else
+						{
+							global_framebuffer.mouse_x = ev.x;
+							global_framebuffer.mouse_y = ev.y;
+							scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, mouse_button);
+						}
+					}
+				}
+				if(ev.evtype & FBVNC_EVENT_TS_MOVE)
+				{
+					key_pending = 0;
+					if(active_overlay)
+					{
+						overlay_event(&ev, active_overlay, 0);
+					}
+					else if(panning)
+					{
+						vp_pan(-ev.dx, -ev.dy);
+					}
+					else
+					{
+						global_framebuffer.mouse_x = ev.x;
+						global_framebuffer.mouse_y = ev.y;
+						scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, mouse_button);
+					}
+				}
+				if(ev.evtype & FBVNC_EVENT_TS_UP)
+				{
+					key_pending = 0;
+					if(active_overlay)
+					{
+						overlay_event(&ev, active_overlay, 0);
+						active_overlay = 0;
+					}
+					else if(!panning)
+					{
+						global_framebuffer.mouse_x = ev.x;
+						global_framebuffer.mouse_y = ev.y;
+						scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, mouse_button);
+					}
+				}
+				if(ev.evtype & FBVNC_EVENT_KEYREPEAT)
+				{
+					if(kbdRate && rep_key)
+					{
+						schedule_add(sched, 1000 / kbdRate, FBVNC_EVENT_KEYREPEAT);
+						SendKeyEvent(rep_key, 1);
 					}
 				}
 				if(ev.evtype & FBVNC_EVENT_ZOOM_IN)
@@ -1740,6 +1286,16 @@ extern "C" {
 						vp_pan(0, 0);
 					}
 				}
+				if(ev.evtype & FBVNC_EVENT_DCLICK)
+				{
+					global_framebuffer.mouse_x = ev.x;
+					global_framebuffer.mouse_y = ev.y;
+					scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, 1);
+					scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, 0);
+					scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, 1);
+					scaledPointerEvent(global_framebuffer.mouse_x, global_framebuffer.mouse_y, 0);
+				}
+
 			}
 		}
 		return;

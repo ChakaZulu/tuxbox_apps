@@ -289,7 +289,6 @@ SetFormatAndEncodings()
 	spf.format.greenMax = Swap16IfLE(spf.format.greenMax);
 	spf.format.blueMax = Swap16IfLE(spf.format.blueMax);
 	spf.format.bigEndian = (*(char *)&endianTest ? 0 : 1);
-
 	if(!WriteExact(rfbsock, (char *)&spf, sz_rfbSetPixelFormatMsg))
 		return False;
 
@@ -324,6 +323,28 @@ SetFormatAndEncodings()
 	return True;
 }
 
+Bool
+SetScaleFactor()
+{
+	rfbSetScaleFactorMsg sf;
+
+	sf.type = rfbSetScaleFactor;
+	sf.scale = serverScaleFactor;
+	printf("Sending scale %d request to rfb server\n",serverScaleFactor);
+	if(!WriteExact(rfbsock, (char *)&sf, sz_rfbSetScaleFactorMsg))
+		return False;
+	else
+	{
+/*		printf("Waiting for answer\n");
+		rfbReSizeFrameBufferMsg sfb;
+		if(!ReadExact(rfbsock, (char *)&sfb, sz_rfbReSizeFrameBufferMsg)) return False;
+//		if(sfb.type!=rfbReSizeFrameBuffer)
+		printf("rfbReSizeFrameBuffer: %d/%d | %d/%d\n",sfb.buffer_w,sfb.buffer_h,sfb.desktop_w,sfb.desktop_h);
+		si.framebufferWidth = Swap16IfLE(sfb.buffer_w);
+		si.framebufferHeight = Swap16IfLE(sfb.buffer_h);*/
+	}
+	return True;
+}
 
 /*
  * SendIncrementalFramebufferUpdateRequest.
@@ -354,7 +375,9 @@ SendFramebufferUpdateRequest(int x, int y, int w, int h, Bool incremental)
 	fur.h = Swap16IfLE(h);
 
 	if(!WriteExact(rfbsock, (char *)&fur, sz_rfbFramebufferUpdateRequestMsg))
+	{
 		return False;
+	}
 
 	gettimeofday(&updateRequestTime, NULL);
 
@@ -428,17 +451,17 @@ HandleRFBServerMessage()
 	if(!ReadExact(rfbsock, (char *)&msg, 1))
 		return False;
 
+	dprintf("HandleRFBServerMessage %d\n",msg.type);
 	switch(msg.type)
 	{
-		
 		case rfbSetColourMapEntries:
 			{
-				printf("rfbSetColourMapEntries\n");
+				dprintf("rfbSetColourMapEntries\n");
 				int i;
 				CARD16 rgb[3];
 				XColor xc;
 
-				if(!ReadExact(rfbsock, ((char *)&msg) + 1,
+				if(!ReadExact(rfbsock, ((char *)&msg.scme) + 1,
 								  sz_rfbSetColourMapEntriesMsg - 1))
 					return False;
 
@@ -462,7 +485,7 @@ HandleRFBServerMessage()
 
 		case rfbFramebufferUpdate:
 			{
-//				printf("rfbFramebufferUpdate\n");
+				dprintf("rfbFramebufferUpdate\n");
 				rfbFramebufferUpdateRectHeader rect;
 				int linesToRead;
 				int bytesPerLine;
@@ -473,7 +496,7 @@ HandleRFBServerMessage()
 					return False;
 
 				msg.fu.nRects = Swap16IfLE(msg.fu.nRects);
-
+				dprintf("# Rect %d\n",msg.fu.nRects);
 				for(i = 0; i < msg.fu.nRects; i++)
 				{
 					if(!ReadExact(rfbsock, (char *)&rect,
@@ -484,8 +507,8 @@ HandleRFBServerMessage()
 					rect.r.y = Swap16IfLE(rect.r.y);
 					rect.r.w = Swap16IfLE(rect.r.w);
 					rect.r.h = Swap16IfLE(rect.r.h);
-
 					rect.encoding = Swap32IfLE(rect.encoding);
+					dprintf("Rect x/y/w/h %d/%d/%d/%d %u\n",rect.r.x,rect.r.y,rect.r.w,rect.r.h, (uint)rect.encoding);
 
 					if((rect.r.x + rect.r.w > si.framebufferWidth) ||
 						(rect.r.y + rect.r.h > si.framebufferHeight))
@@ -500,12 +523,10 @@ HandleRFBServerMessage()
 						fprintf(stderr,"%s: zero size rect - ignoring\n",programName);
 						continue;
 					}
-
 					switch(rect.encoding)
 					{
 						
 						case rfbEncodingRaw:
-							printf("rfbEncodingRaw\n");
 							bytesPerLine = rect.r.w * myFormat.bitsPerPixel / 8;
 							linesToRead = BUFFER_SIZE / bytesPerLine;
 
@@ -528,7 +549,7 @@ HandleRFBServerMessage()
 
 						case rfbEncodingCopyRect:
 							{
-//								printf("rfbEncodingCopyRect\n");
+								dprintf("rfbEncodingCopyRect\n");
 								rfbCopyRect cr;
 
 								if(!ReadExact(rfbsock, (char *)&cr, sz_rfbCopyRect))
@@ -544,7 +565,7 @@ HandleRFBServerMessage()
 
 						case rfbEncodingRRE:
 							{
-//								printf("RRE\n");
+								dprintf("RRE\n");
 								rfbRREHeader hdr;
 								CARD8 pix8;
 								CARD16 pix16;
@@ -640,7 +661,7 @@ HandleRFBServerMessage()
 
 						case rfbEncodingCoRRE:
 							{
-//								printf("rfbEncodingCoRRE\n");
+								dprintf("rfbEncodingCoRRE\n");
 								rfbRREHeader hdr;
 								CARD8 pix8;
 								CARD16 pix16;
@@ -730,7 +751,7 @@ HandleRFBServerMessage()
 
 						case rfbEncodingHextile:
 							{
-//								printf("Hextile\n");
+								dprintf("Hextile\n");
 								switch(myFormat.bitsPerPixel)
 								{
 									case 8:
@@ -753,14 +774,12 @@ HandleRFBServerMessage()
 							}
 
 						default:
-							fprintf(stderr,"%s: unknown rect encoding %d\n",programName,
-									  (int)rect.encoding);
+							printf("vnc: unknown rect encoding %u\n",(uint)rect.encoding);
 							return False;
 					}
 				}
 
 				sendUpdateRequest = True;
-
 				break;
 			}
 
@@ -772,7 +791,7 @@ HandleRFBServerMessage()
 			{
 				char *str;
 
-				if(!ReadExact(rfbsock, ((char *)&msg) + 1,
+				if(!ReadExact(rfbsock, ((char *)&msg.sct) + 1,
 								  sz_rfbServerCutTextMsg - 1))
 					return False;
 
@@ -792,9 +811,22 @@ HandleRFBServerMessage()
 
 				break;
 			}
-
+		case rfbReSizeFrameBuffer:
+			{
+				if(!ReadExact(rfbsock, ((char *)&msg.rsfb) + 1,
+								  sz_rfbReSizeFrameBufferMsg - 1))
+					return False;
+				dprintf("rfbReSizeFrameBuffer: %d/%d | %d/%d\n",msg.rsfb.buffer_w,msg.rsfb.buffer_h,msg.rsfb.desktop_w,msg.rsfb.desktop_h);
+				si.framebufferWidth = Swap16IfLE(msg.rsfb.buffer_w);
+				si.framebufferHeight = Swap16IfLE(msg.rsfb.buffer_h);
+				FILL_RECT(0, 0, si.framebufferWidth, si.framebufferHeight, 0);
+				if(!SendFramebufferUpdateRequest(0, 0, si.framebufferWidth,
+															si.framebufferHeight, False))
+					return False;
+			}
+			break;
 		default:
-			fprintf(stderr,"%s: unknown message type %d from VNC server\n",
+			printf("%s: unknown message type %d from VNC server\n",
 					  programName,msg.type);
 			return False;
 	}
@@ -945,4 +977,5 @@ Bool DisconnectFromRFBServer()
 {
 	if(rfbsock>0)
 		close(rfbsock);
+	return True;
 }

@@ -13,7 +13,6 @@ struct hbtn {
 };
 
 #define N_SCANCODE 256
-extern bool landscape_is_native;
 extern int *fbvnc_keymap;
 extern struct hbtn hbtn;
 extern bool img_saved;

@@ -220,11 +220,6 @@ fn_translate(int key) {
 		out=0;
 		break;
 
-	case XK_Return:
-		flip_orientation();
-		out=0;
-		break;
-
 	case XK_x:
 		open_emergency_xterm();
 		out=0;
@@ -256,21 +251,13 @@ fn_translate(int key) {
 void ov_redraw(fbvnc_overlay_t *ov) {
 	IMPORT_FRAMEBUFFER_VARS
 
-	if (p_landscape) {
 		redraw_phys(ov->x, ov->y, ov->w, ov->h);
-	} else {
-		redraw_phys(pv_xsize - ov->y - ov->h, ov->x, ov->h, ov->w);
-	}
 }
 
 void ov_redraw_part(fbvnc_overlay_t *ov, int x, int y, int w, int h) {
 	IMPORT_FRAMEBUFFER_VARS
 
-	if (p_landscape) {
 		redraw_phys(ov->x+x, ov->y+y, w, h);
-	} else {
-		redraw_phys(pv_xsize - ov->y - y - h, ov->x+x, h, w);
-	}
 }
 
 void
@@ -500,35 +487,6 @@ set_scale(int s) {
 }
 
 int mouse_button;
-int mouse_multibutton_mode;
-
-void set_mouse_state(int multi) {
-	if (multi == 2) {
-		ov_fill(ov_mousestate, 2, 3, 2, 3, ICO_BLACK);
-		ov_fill(ov_mousestate, 5, 3, 2, 3, ICO_BLACK);
-		ov_fill(ov_mousestate, 8, 3, 2, 3, ICO_BLACK);
-		mouse_button = 1;
-	} else if (multi) {
-		ov_fill(ov_mousestate, 2, 3, 2, 3, ICO_WHITE);
-		ov_fill(ov_mousestate, 5, 3, 2, 3, ICO_WHITE);
-		ov_fill(ov_mousestate, 8, 3, 2, 3, ICO_WHITE);
-		mouse_button = 0;
-	} else {
-		ov_fill(ov_mousestate, 2, 3, 2, 3, ICO_BLACK);
-		ov_fill(ov_mousestate, 5, 3, 2, 3, ICO_WHITE);
-		ov_fill(ov_mousestate, 8, 3, 2, 3, ICO_WHITE);
-		mouse_button = 1;
-	}
-	mouse_multibutton_mode = multi;
-	ov_redraw(ov_mousestate);
-}
-
-int
-ev_mouse(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
-	set_mouse_state((mouse_multibutton_mode+1) % 3);
-	return 1;
-}
-
 static bool light=1;
 
 void
@@ -562,11 +520,8 @@ int
 ev_zoom(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	int row = ev->x / 10;
 
-	if (row==0) {
-		flip_orientation();
-	} else {
-		set_scale(row);
-	}
+	set_scale(row);
+
 	return 1;
 }
 
@@ -749,13 +704,9 @@ add_overlay(int x0l, int y0l, int x0p, int y0p,
 	ov->x0p = x0p;
 	ov->y0p = y0p;
 
-	if (p_landscape) {
-		ov->x = ov->x0l;
-		ov->y = ov->y0l;
-	} else {
-		ov->x = ov->x0p;
-		ov->y = ov->y0p;
-	}
+	ov->x = ov->x0l;
+	ov->y = ov->y0l;
+
 	ov->h = h;
 	ov->w = w;
 	ov->events_wanted = events_wanted;
@@ -796,35 +747,18 @@ void draw_overlay_part(fbvnc_overlay_t *ov, int x, int y, int w, int h) {
 	if (hide_overlays) return;
 	if (! ov->visible) return;
 
-	if (p_landscape) {
-		for (j=0; j<h; j++) {
-			Pixel *src = ov->pixels + (j+y)*ov->w + x;
-			Pixel *dst = p_buf + p_xsize*(ov->y + j + y + p_yoff)
-				+ ov->x + x + p_xoff;
-			int i;
+	for (j=0; j<h; j++) {
+		Pixel *src = ov->pixels + (j+y)*ov->w + x;
+		Pixel *dst = p_buf + p_xsize*(ov->y + j + y + p_yoff)
+		+ ov->x + x + p_xoff;
+		int i;
+		
+		for (i=0; i<w; i++) {
+			Pixel c = *src;
 			
-			for (i=0; i<w; i++) {
-				Pixel c = *src;
-
-				if (c != ICO_TRANS) *dst = c;
-				dst++;
-				src++;
-			}
-		}
-	} else {
-		for (j=0; j<h; j++) {
-			Pixel *src = ov->pixels + (j+y)*ov->w + x;
-			Pixel *dst = p_buf + p_xsize*(ov->x+x+p_xoff)
-			           + (pv_xsize - (ov->y + y + j + p_yoff) - 1);
-			int i;
-
-			for (i=0; i<w; i++) {
-				Pixel c = *src;
-
-				if (c != ICO_TRANS) *dst = c;
-				dst += pv_xsize;
-				src++;
-			}
+			if (c != ICO_TRANS) *dst = c;
+			dst++;
+			src++;
 		}
 	}
 }
@@ -858,32 +792,17 @@ redraw_overlays(int xp, int yp, int wp, int hp) {
 		fbvnc_overlay_t *ov = p->val;
 
 		/* clip to redraw changed regions only */
-		if (p_landscape) {
-			int x0, y0, x1, y1, w, h;
-			x0 = MAX(xp, ov->x);
-			y0 = MAX(yp, ov->y);
-			x1 = MIN(xp+wp, ov->x+ov->w);
-			y1 = MIN(yp+hp, ov->y+ov->h);
-
-			w = x1-x0;
-			h = y1-y0;
-
-			if (h>0 && w>0) {
-				draw_overlay_part(ov, x0 - ov->x, y0 - ov->y, w, h);
-			}
-		} else {
-			int x0, y0, x1, y1, w, h;
-			x0 = MAX(yp, ov->x);
-			y0 = MAX(p_xsize - xp - wp, ov->y);
-			x1 = MIN(yp+hp, ov->x + ov->w);
-			y1 = MIN(p_xsize - xp, ov->y + ov->h);
-
-			w = x1-x0;
-			h = y1-y0;
-
-			if (h>0 && w>0) {
-				draw_overlay_part(ov, x0 - ov->x, y0 - ov->y, w, h);
-			}
+		int x0, y0, x1, y1, w, h;
+		x0 = MAX(xp, ov->x);
+		y0 = MAX(yp, ov->y);
+		x1 = MIN(xp+wp, ov->x+ov->w);
+		y1 = MIN(yp+hp, ov->y+ov->h);
+		
+		w = x1-x0;
+		h = y1-y0;
+		
+		if (h>0 && w>0) {
+			draw_overlay_part(ov, x0 - ov->x, y0 - ov->y, w, h);
 		}
 	}
 }
@@ -899,13 +818,8 @@ overlay_event(fbvnc_event_t *ev, fbvnc_overlay_t *ov, bool check_hit) {
 	}
 	if (! ov->visible) return 0;
 
-	if (p_landscape) {
-		x = ev->x;
-		y = ev->y;
-	} else {
-		x = ev->y;
-		y = pv_xsize - ev->x - 1;
-	}
+	x = ev->x;
+	y = ev->y;
 
 	if (check_hit && (
 			x < ov->x || x >= ov->x + ov->w ||

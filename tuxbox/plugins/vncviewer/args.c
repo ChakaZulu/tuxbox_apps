@@ -62,8 +62,11 @@ char passwdString[9];
 Bool outlineSolid = False;
 int updateRequestPeriodms = 0;
 int delay = 0;
+int serverScaleFactor=1;
+int rcCycleDuration=225000;
+int rcTest=0;
 
-Bool debug = False;
+int debug = 0;
 
 
 void
