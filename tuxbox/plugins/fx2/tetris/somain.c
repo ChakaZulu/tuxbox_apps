@@ -2,19 +2,23 @@
 ** initial coding by fx2
 */
 
-#include <stdio.h>
 #include <fcntl.h>
-#include <string.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include <rcinput.h>
-#include <draw.h>
-#include <colors.h>
 #include <board.h>
+#include <colors.h>
+#include <draw.h>
+#include <fx2math.h>
 #include <pig.h>
 #include <plugin.h>
-#include <fx2math.h>
+#include <rcinput.h>
 
 #include <curl/curl.h>
 #include <curl/types.h>
@@ -250,7 +254,7 @@ static	void	SaveGame( void )
 
 	chk=BuildCheck( user, score );
 
-	sprintf(url,"%s/games/tetris.php?action=put&user=%s&score=%d&chk=%d",
+	sprintf(url,"%s/games/tetris.php?action=put&user=%s&score=%ld&chk=%lu",
 		hscore,user,score,chk);
 
 	curl = curl_easy_init();
@@ -303,7 +307,7 @@ static	void	ShowHScore( HScore *g )
 	for( i=0; i < 8; i++ )
 	{
 		FBDrawString( 100, 100+i*48, 48, g[i].name, WHITE, 0 );
-		sprintf(pp,"%d",g[i].points);
+		sprintf(pp,"%ld",g[i].points);
 		x = FBDrawString( 400, 100+i*48, 48, pp, BLACK, BLACK );
 		FBDrawString( 500-x, 100+i*48, 48, pp, WHITE, BLACK );
 	}

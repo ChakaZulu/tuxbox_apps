@@ -2,17 +2,18 @@
 ** initial coding by fx2
 */
 
-#include <stdio.h>
 #include <fcntl.h>
-#include <string.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 
-#include <rcinput.h>
-#include <draw.h>
 #include <colors.h>
-#include <plugin.h>
+#include <draw.h>
 #include <fx2math.h>
+#include <plugin.h>
+#include <rcinput.h>
 
 #include <config.h>
 
@@ -321,10 +322,9 @@ int bouquet_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	int				t;
 	int				r;
 	int				i;
-	int				idx;
+	int				idx=0;
 	int				cnum;
-	Channel			*ch;
-	int				fd;
+	Channel			*ch=NULL;
 	FILE			*fp;
 	char			line[512];
 	char			l2[512];

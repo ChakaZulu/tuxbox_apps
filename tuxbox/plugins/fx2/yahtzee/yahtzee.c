@@ -3,16 +3,22 @@
 */
 
 
-#include <stdio.h>
-
-#include <draw.h>
-#include <sys/time.h>
-#include <rcinput.h>
+#include <fcntl.h>
 #include <malloc.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+
 #include <colors.h>
+#include <draw.h>
 #include <pics.h>
 #include <pig.h>
-#include <fcntl.h>
+#include <rcinput.h>
+
 #include <config.h>
 
 #define LOGO_X			600
@@ -388,7 +394,7 @@ static	void	SelectInBoard( void )
 	struct timeval	tv;
 	time_t			t1;
 	time_t			t2=0;
-	short			last;
+	short			last=0;
 	int				nr=0;
 	int				nnr=0;
 	int				i = actplayer;
@@ -709,7 +715,7 @@ void	DrawWinner( void )
 		if ( hsc[i].flag )
 			FBFillRect( 88, 120+i*48, 8, 8, YELLOW );
 		FBDrawString( 100, 100+i*48, 48, hsc[i].name, WHITE, 0 );
-		sprintf(text,"%d",hsc[i].points);
+		sprintf(text,"%ld",hsc[i].points);
 		n = FBDrawString( 400, 100+i*48, 48, text, BLACK, BLACK );
 		FBDrawString( 500-n, 100+i*48, 48, text, WHITE, BLACK );
 	}

@@ -4,11 +4,12 @@
 
 
 #include <stdio.h>
-
-#include <draw.h>
+#include <string.h>
 #include <sys/time.h>
-#include <rcinput.h>
+
 #include <colors.h>
+#include <draw.h>
+#include <rcinput.h>
 
 #define	STATUS_X		80
 #define STATUS_Y		50
