@@ -1220,7 +1220,7 @@ void eZapMain::reloadPaths(int reset)
 int eZapMain::doHideInfobar()
 {
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
-	if ( (ref.type == eServiceReference::idDVB)
+	if ( (ref.type == eServiceReference::idDVB && ref.data[0] != 2 )
 #ifndef DISABLE_FILE
 		||
 			(ref.type == eServiceReference::idUser &&
@@ -1997,11 +1997,9 @@ void eZapMain::setPlaylistPosition()
 		if (playlist->current->current_position != -1)
 		{
 			eDebug("setPlaylistPosition");
-//			Decoder::startTrickmode();
 			Decoder::Pause();
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, playlist->current->current_position));
 			Decoder::Resume();
-//			Decoder::stopTrickmode();
 		}
 }
 
@@ -2267,7 +2265,18 @@ void eZapMain::hideVolumeSlider()
 
 void eZapMain::toggleMute()
 {
-	eAVSwitch::getInstance()->toggleMute();
+	eServiceReference &ref = eServiceInterface::getInstance()->service;
+// sorry.. disable Mute when playback TS or MPG File..
+// better do pause
+	if ( (ref.type == eServiceReference::idDVB && ref.path)
+#ifndef DISABLE_FILE
+		|| (ref.type == eServiceReference::idUser &&
+			ref.data[0] == eMP3Decoder::codecMPG )
+#endif
+		 )
+		 pause();
+	else
+		eAVSwitch::getInstance()->toggleMute();
 }
 
 void eZapMain::showMainMenu()
@@ -2459,9 +2468,6 @@ void eZapMain::pause()
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 	if (handler->getState() == eServiceHandler::statePause)
 	{
-		eDebug("state = pause");
-		if ( ref.type == eServiceReference::idDVB && ref.path )
-			setPlaylistPosition();
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
 	}
 	else
@@ -2479,7 +2485,7 @@ void eZapMain::pause()
 			else if ( !eDVB::getInstance()->recorder )
 			{
 				record();
-				usleep(750*1000);
+				usleep(1000*1000);
 			}
 #endif
 		}
@@ -4583,12 +4589,9 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 			if ( playlist->current != playlist->getConstList().end()
 				&& playlist->current->current_position == -1 )
 			{
-				Decoder::Pause();
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
-				usleep(100*1000);
+				Decoder::Pause(false);
 				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, 0));
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
-				Decoder::Resume();
+				Decoder::Resume(false);
 			}
 		}
 		else if ( audioselps.getCount() > 1 )

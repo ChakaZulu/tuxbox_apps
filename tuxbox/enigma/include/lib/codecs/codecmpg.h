@@ -22,10 +22,15 @@ class eMPEGDemux: public eAudioDecoder
 	void syncBits();
 	std::map<int,int> audiostreams;
 	int validpackets;
+	int lastAudioPTS, lastVideoPTS;
+	int synced;
+//	FILE *fAudio, *fVideo;
 public:
 	eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio);
 	~eMPEGDemux()
 	{
+//		fclose(fAudio);
+//		fclose(fVideo);
 	}
 	virtual int decodeMore(int last, int maxsamples, Signal1<void, unsigned int>*newastreamid=0 ); // returns number of samples(!) written to IOBuffer (out)
 	virtual void resync(); // clear (secondary) decoder buffers

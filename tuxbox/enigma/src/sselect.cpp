@@ -1177,10 +1177,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					if (path.current().type == eServicePlaylistHandler::ID)
 					{
 						if ( movemode )
-						{
-							eZapMain::getInstance()->toggleMoveMode(this);
-							updateNumbers();
-						}
+							serviceSelected( services->getCurrent() );
 						else
 						{
 							eZapMain::getInstance()->toggleMoveMode(this);

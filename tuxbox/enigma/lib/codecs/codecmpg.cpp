@@ -55,14 +55,18 @@ void eMPEGDemux::syncBits()
 
 eMPEGDemux::eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio)
 	:input(input), video(video), audio(audio), minFrameLength(4096),
-	mpegtype(-1), curAudioStreamID(0), validpackets(0)
+	mpegtype(-1), curAudioStreamID(0), validpackets(0),
+	lastAudioPTS(-1), lastVideoPTS(-1), synced(0)
 {
 	remaining=0;
 	memset(&pcmsettings, 0, sizeof(pcmsettings));
+//	fAudio=fopen("/hdd/audio.pes", "w+" );
+//	fVideo=fopen("/hdd/video.pes", "w+" );
 }
 
 int eMPEGDemux::decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*newastreamid )
 {
+//	eDebug("decoderMore");
 	int written=0;
 	(void)last;
 
@@ -78,15 +82,27 @@ int eMPEGDemux::decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*
 			}
 			syncBits();
 			if (getBits(8))
+			{
+//				eDebug("skip");
 				continue;
+			}
 a:
 			if (getBits(8))
+			{
+//				eDebug("skip");
 				continue;
+			}
 			int c=getBits(8);
 			if (!c)
+			{
+//				eDebug("skip");
 				goto a;
+			}
 			if (c != 1)
+			{
+//				eDebug("skip");
 				continue;
+			}
 			if (!maxsamples)
 				break;
 			code = getBits(8);
@@ -145,7 +161,7 @@ a:
 							break;
 					if (pack_stuffing_length >= 0)
 						continue;
-					//eDebug("scr: %08x:%02d\n", scr_base, scr_ext);
+//					eDebug("scr: %08x:%02d\n", scr_base, scr_ext);
 					break;
 				}
 				case 0xbb:  // system_header_start_code
@@ -174,6 +190,7 @@ a:
 				}
 				case 0xbc: // program_stream_map
 				{
+					eDebug("program stream map!\n");
 #if 0  //
 					int program_stream_map_length=getBits(16);
 					eDebug("program stream map!\n");
@@ -226,7 +243,11 @@ a:
 						{
 							eDebug("/*emit*/ (*newastreamid)(%02x)", code);
 							if ( !curAudioStreamID )
+							{
+								Decoder::parms.audio_type = DECODE_AUDIO_MPEG;
+								Decoder::Set();
 								curAudioStreamID = code;
+							}
 							/*emit*/ (*newastreamid)(code);
 						}
 					}
@@ -300,25 +321,111 @@ a:
 								eDebug("found new AC3 stream subid %02x", subid);
 								eDebug("/*emit*/ (*newastreamid)(%04x)", code);
 								if ( !curAudioStreamID )
+								{
+									Decoder::parms.audio_type = DECODE_AUDIO_AC3_VOB;
+									Decoder::Set();
 									curAudioStreamID = code;
+								}
 								/*emit*/ (*newastreamid)(code);
 							}
 						}
 					}
 					if (code == 0xE0)
 					{
-						++validpackets;
 						if (validpackets < 100)
+						{
+							++validpackets;
 							break;
+						}
+						if ( lastVideoPTS == -1 ||
+							( lastAudioPTS != -1 && abs(lastAudioPTS-lastVideoPTS) > 0x30000 ) )
+						{
+							int pos=5;
+							while( buffer[++pos] == 0xFF );  // stuffing überspringen
+								if ( (buffer[pos] & 0xC0) == 0x40 ) // buffer scale size
+									pos+=2;
+							if ( ((buffer[pos] & 0xF0) == 0x20) ||  //MPEG1
+									 ((buffer[pos] & 0xF0) == 0x30) ||  //MPEG1
+									 ((buffer[pos] & 0xC0) == 0x80) )   //MPEG2
+							{
+								int readPTS=1;
+								if ((buffer[pos] & 0xC0) == 0x80) // we must skip many bytes
+								{
+									if ((c & 0x30) != 0)
+										eDebug("warning encrypted multiplex not handled!!!");
+									++pos; // flags
+									if ( ((buffer[pos]&0xC0) != 0x80) &&
+											 ((buffer[pos]&0xC0) != 0xC0) )
+										readPTS=0;
+									pos+=2;
+								}
+								if (readPTS)
+								{
+									lastVideoPTS = (buffer[pos++] & 0x0E) << 28;
+									lastVideoPTS |= (buffer[pos++] & 0xFF) << 21;
+									lastVideoPTS |= (buffer[pos++] & 0xFE) << 13;
+									lastVideoPTS |= (buffer[pos++] & 0xFF) << 5;
+									lastVideoPTS |= (buffer[pos] >> 1) & 0x1F;
+									eDebug("VPTS %08x", lastVideoPTS);
+								}
+							}
+						}
 						video.write(buffer, p);
+//						fwrite(buffer, p, 1, fVideo);
 						written+=p;
 					}
 					else if ( code == curAudioStreamID )
 					{
-						++validpackets;
 						if ( validpackets < 100)
+						{
+							++validpackets;
 							break;
-						audio.write(buffer, p);
+						}
+						if ( !synced )
+						{
+							int pos=5;
+							while( buffer[++pos] == 0xFF );  // stuffing überspringen
+								if ( (buffer[pos] & 0xC0) == 0x40 ) // buffer scale size
+									pos+=2;
+							if ( ((buffer[pos] & 0xF0) == 0x20) ||  //MPEG1
+									 ((buffer[pos] & 0xF0) == 0x30) ||  //MPEG1
+									 ((buffer[pos] & 0xC0) == 0x80) )   //MPEG2
+							{
+								int readPTS=1;
+								if ((buffer[pos] & 0xC0) == 0x80) // we must skip many bytes
+								{
+									if ((c & 0x30) != 0)
+										eDebug("warning encrypted multiplex not handled!!!");
+									++pos; // flags
+									if ( ((buffer[pos]&0xC0) != 0x80) &&
+											 ((buffer[pos]&0xC0) != 0xC0) )
+										readPTS=0;
+									pos+=2;
+								}
+								if (readPTS)
+								{
+									lastAudioPTS = (buffer[pos++] & 0x0E) << 28;
+									lastAudioPTS |= (buffer[pos++] & 0xFF) << 21;
+									lastAudioPTS |= (buffer[pos++] & 0xFE) << 13;
+									lastAudioPTS |= (buffer[pos++] & 0xFF) << 5;
+									lastAudioPTS |= (buffer[pos] >> 1) & 0x1F;
+									if ( lastVideoPTS != -1 )
+										eDebug("APTS %08x", lastAudioPTS);
+								}
+							}
+						}
+						if ( lastVideoPTS != -1 && lastAudioPTS != -1 )
+						{
+							if ( synced || abs(lastAudioPTS-lastVideoPTS) < 0x750 )
+							{
+								synced=1;
+								audio.write(buffer, p);
+//								fwrite(buffer, p, 1, fAudio);
+							}
+							else
+								eDebug("PTSA = %08x\nPTSV = %08x\nDIFF = %08x",
+									lastAudioPTS, lastVideoPTS, abs(lastAudioPTS-lastVideoPTS) );
+						}
 						written+=p;
 					}
 					break;
@@ -351,7 +458,8 @@ finish:
 
 void eMPEGDemux::resync()
 {
-	remaining=0;
+	remaining=synced=0;
+	lastAudioPTS=lastVideoPTS=-1;
 }
 
 int eMPEGDemux::getMinimumFramelength()
@@ -382,6 +490,8 @@ void eMPEGDemux::setAudioStream( unsigned int id )
 		}
 		curAudioStreamID = id;
 	}
+	fseek(fAudio, 0, SEEK_SET);
+	fseek(fVideo, 0, SEEK_SET);
 }
 
 #endif // DISABLE_FILE

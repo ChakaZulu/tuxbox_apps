@@ -149,4 +149,15 @@
 200310301230 5 5 Add ability to select audio tracks in VOB Files 
 200310301230 5 5 Add ability to play AC3 audio in VOB Files.. (only optical out)
 200311041500 5 * Many gui improvements (fixes, scrollbar added)
-
+200311301520 5 * Fix Hotbird Scan ( fix for incomplete Sections )
+200311301520 5 * Another one change path of satellites.xml to /share/tuxbox
+200312011330 5 5 Small Audio/Video sync problem fixed
+200312021300 5 56 Add radio mp3 and scan background picture.. update bootlogo
+200312030130 5 56 No more block artefacts with some CIs on FreeTV services
+200312040100 5 56 important PPPOE Router fix.. FTP WWW Telnet and Samba Ports were open
+200312041830 5 56 compatibility fix ( /var/tmp is now a symlink to /tmp )
+200312041830 5 5 MPEG1/MPEG2 Playback fix... after find the first audio stream id we seek to begin of the file
+200312051530 5 * Scan improovements .. (faster scan and never more scan unusable transponders)
+200312082200 5 5 MPEG2/VOB Playback much better sync
+200312101700 5 5 creating ext3 filesystems was broken in 1.07.1 .. fixed this
+200312101745 5 * fix small bug in service organising

@@ -699,6 +699,8 @@ void eSatelliteConfigurationManager::voltageChanged(eComboBox* who, eListBoxEntr
 
 void eSatelliteConfigurationManager::closePressed()
 {
+	eTransponderList::getInstance()->writeLNBData();
+	eConfig::getInstance()->flush();
 	close(1);
 }
 

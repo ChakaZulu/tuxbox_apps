@@ -146,23 +146,27 @@ void Decoder::Flush()
 	Set();
 }
 
-void Decoder::Pause()
+void Decoder::Pause( bool disableAudio )
 {
+	eDebug("Decoder::Pause()");
 	if (fd.video != -1)
 	{
 		if ( ::ioctl(fd.video, VIDEO_FREEZE) < 0 )
 			eDebug("VIDEO_FREEZE failed (%m)");
-		if (::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 0)<0)
-			eDebug("AUDIO_SET_AV_SYNC failed (%m)");
 		if (fd.video == 0x1FFE)
 		{
-			if (::ioctl(fd.audio, AUDIO_SET_MUTE, 1 )<0)
-				eDebug("AUDIO_SET_MUTE failed (%m)");
-			else
-				eDebug("audio_pause (success)");
+			if ( ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 0) < 0 )
+				eDebug("AUDIO_SET_AV_SYNC failed (%m)");
+			if ( disableAudio )
+			{
+				if ( ::ioctl(fd.audio, AUDIO_SET_MUTE, 1 )<0)
+					eDebug("AUDIO_SET_MUTE failed (%m)");
+				else
+					eDebug("audio_pause (success)");
+			}
 		}
 	}
-	if ( fd.video != 0x1FFE && fd.audio != -1 )
+	if ( fd.audio != -1 && fd.video != 0x1FFE  )  // not Video Clip mode
 	{
 		if (::ioctl(fd.audio, AUDIO_STOP)<0)
 			eDebug("AUDIO_STOP failed(%m)");
@@ -171,15 +175,16 @@ void Decoder::Pause()
 	}
 }
 
-void Decoder::Resume()
+void Decoder::Resume(bool enableAudio)
 {
+	eDebug("Decoder::Resume()");
 	if (fd.video != -1)
 	{
 		if (::ioctl(fd.video, VIDEO_CONTINUE)<0)
 			eDebug("VIDEO_CONTINUE failed(%m)");
-		if (::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1)<0)
+		if ( ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1 ) < 0 )
 			eDebug("AUDIO_SET_AV_SYNC failed (%m)");
-		if (fd.video == 0x1FFE)
+		if ( enableAudio && fd.video == 0x1FFE)  // Video Clip Mode
 		{
 			if (::ioctl(fd.audio, AUDIO_SET_MUTE, 0 )<0)
 				eDebug("AUDIO_SET_MUTE failed (%m)");
@@ -187,7 +192,7 @@ void Decoder::Resume()
 				eDebug("audio_pause (success)");
 		}
 	}
-	if ( fd.video != 0x1FFE && fd.audio != -1)
+	if ( fd.audio != -1 && fd.video != 0x1FFE )  // not Video Clip Mode
 	{
 		if (::ioctl(fd.audio, AUDIO_PLAY)<0)
 			eDebug("AUDIO_PLAY failed (%m)");
@@ -685,6 +690,9 @@ int Decoder::displayIFrame(const char *frame, int len)
 	parms.vpid=0x1FFF;
 	parms.pcrpid=-1;
 	Set();
+
+	if (fd.video != -1 && ::ioctl(fd.video, VIDEO_CLEAR_BUFFER)<0 )
+		eDebug("VIDEO_CLEAR_BUFFER failed (%m)");
 
 	unsigned char buf[128];
 	memset(&buf, 0, 128);

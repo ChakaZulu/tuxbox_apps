@@ -42,6 +42,7 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 		stateInit, stateError, stateBuffering, stateBufferFull, statePlaying, statePause, stateFileEnd
 	};
 
+	bool skipping;
 	int state;
 	int dspfd[2];
 	int type;
@@ -94,6 +95,8 @@ public:
 			setSpeed, // 0..
 			seek,	// 0..65536
 			seekreal,
+			startSkip,
+			stopSkip,
 			setAudioStream
 		};
 		int type;

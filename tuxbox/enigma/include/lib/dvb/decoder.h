@@ -37,8 +37,8 @@ public:
 	static int Initialize();
 	static void Close();
 	static void Flush();
-	static void Pause();
-	static void Resume();
+	static void Pause( bool disableAudio=true );
+	static void Resume( bool enableAudio=true );
 	static void addCADescriptor(__u8 *descriptor);
 	static int Set();
 	static void flushBuffer();

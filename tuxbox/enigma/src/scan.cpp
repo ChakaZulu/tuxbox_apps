@@ -382,7 +382,10 @@ int tsAutomatic::nextTransponder(int next)
 	}
 
 	if (current_tp == last_tp)
+	{
+		inProgress=0;
 		return 1;
+	}
 
 	if ( c_nocircular && c_nocircular->isChecked() )
 		current_tp->satellite.polarisation&=1;   // CEDR
@@ -1093,10 +1096,11 @@ int TransponderScan::Exec()
 						last_orbital_pos = pkt->orbital_position;
 					}
 
+					int cnt=0;
 					for (std::list<eTransponder>::iterator i(pkt->possibleTransponders.begin()); i != pkt->possibleTransponders.end(); ++i)
 					{
 						if(snocircular)
-							i->satellite.polarisation&=1;   // CEDR*/
+							i->satellite.polarisation&=1;   // CEDR
 
 						if ( lnb )
 						{
@@ -1105,6 +1109,14 @@ int TransponderScan::Exec()
 									continue;
 						}
 						sapi->addTransponder(*i);
+						cnt++;
+					}
+
+					if (!cnt)  // no transponders to scan
+					{
+						toScan.erase(toScan.begin());
+						++satScanned;
+						continue;
 					}
 
 					// scanflags auswerten

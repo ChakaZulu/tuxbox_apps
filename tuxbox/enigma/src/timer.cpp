@@ -995,10 +995,17 @@ eTimerManager::~eTimerManager()
 
 ePlaylistEntry* eTimerManager::findEvent( eServiceReference *service, EITEvent *evt )
 {
-	ePlaylistEntry tmp(*service, evt->start_time, evt->duration, evt->event_id);
+// is the middle of the event overlapping with this event in timerlist?
+// with this we prevent that the event before and after the "main" event
+// are marked as "in timer" in the epg list
+	ePlaylistEntry tmp(*service,
+		evt->start_time + (evt->duration/2) -1,
+		3, evt->event_id);
+
 	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
 		if ( *service == i->service && Overlapping(*i, tmp ) )
 			return &*i;
+
 	return 0;
 }
 

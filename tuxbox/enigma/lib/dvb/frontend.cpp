@@ -55,7 +55,7 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 #else
 	curContTone = curVoltage = -1;
 #endif
-	needreset = 1;
+	needreset = 2;
 }
 
 void eFrontend::InitDiSEqC()
@@ -149,7 +149,7 @@ void eFrontend::timeout()
 		else
 		{
 			if ( !eDVB::getInstance()->getScanAPI() )
-				needreset=1;
+				needreset++;
 			eDebug("couldn't lock. (state: %x)", Status());
 			state=stateIdle;
 			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
@@ -1119,7 +1119,7 @@ int eFrontend::tune(eTransponder *trans,
 		return -EBUSY;
 
 #if HAVE_DVB_API_VERSION < 3
-	if (needreset)
+	if (needreset >= 2)
 	{
 		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
 		usleep(150000);
@@ -1635,7 +1635,7 @@ int eFrontend::savePower()
 			return -1;
 		}
 	}
-	needreset = 1;
+	needreset = 2;
 #endif
 	return 0;
 }

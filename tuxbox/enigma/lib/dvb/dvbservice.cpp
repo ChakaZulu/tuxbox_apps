@@ -615,7 +615,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 
 	if ( eDVB::getInstance()->recorder && service.path )
 		;
-	else if (isca && service.path && !calist )
+	else if (isca && !service.path && !calist )
 	{
 		eDebug("NO CASYS");
 		service_state=ENOCASYS;
@@ -718,7 +718,6 @@ void eDVBServiceController::handlePMT( const eServiceReferenceDVB &ref, PMT *pmt
 	int sid = pmt->program_number;
 	int update = lastPMTVersion != -1;
 	lastPMTVersion = pmt->version_number;
-	Decoder::parms.pmtpid=pmtpid;
 
 	if ( eSystemInfo::getInstance()->hasCI() )
 		calist.clear();
@@ -728,7 +727,8 @@ void eDVBServiceController::handlePMT( const eServiceReferenceDVB &ref, PMT *pmt
 	if ( DVBCI2 )
 		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, -1));
 
-	for (ePtrList<Descriptor>::const_iterator i(pmt->program_info); i != pmt->program_info.end(); ++i)
+	for (ePtrList<Descriptor>::const_iterator i(pmt->program_info);
+		i != pmt->program_info.end(); ++i)
 	{
 		if (i->Tag()==9)	// CADescriptor
 		{
@@ -748,7 +748,8 @@ void eDVBServiceController::handlePMT( const eServiceReferenceDVB &ref, PMT *pmt
 		}
 	}
 
-	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
+	for (ePtrList<PMTEntry>::iterator i(pmt->streams);
+		i != pmt->streams.end(); ++i)
 	{
 		PMTEntry *pe=*i;
 
@@ -765,7 +766,8 @@ void eDVBServiceController::handlePMT( const eServiceReferenceDVB &ref, PMT *pmt
 			case 4: // ISO/IEC 13818-3 Audio
 			case 6:
 			{
-				for (ePtrList<Descriptor>::const_iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
+				for (ePtrList<Descriptor>::const_iterator i(pe->ES_info);
+					i != pe->ES_info.end(); ++i)
 				{
 					if (i->Tag()==9)	// CADescriptor
 					{
@@ -812,7 +814,8 @@ void eDVBServiceController::setPID(const PMTEntry *entry)
 			break;
 			case 6:
 			{
-				for (ePtrList<Descriptor>::const_iterator i(entry->ES_info); i != entry->ES_info.end(); ++i)
+				for (ePtrList<Descriptor>::const_iterator i(entry->ES_info);
+					i != entry->ES_info.end(); ++i)
 				{
 					if (i->Tag()==DESCR_AC3)
 					{
@@ -929,7 +932,8 @@ void eDVBServiceController::MHWEITready(int error)
 int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors, int sid)
 {
 	int found=0;
-	for (ePtrList<Descriptor>::const_iterator i(descriptors); i != descriptors.end(); ++i)
+	for (ePtrList<Descriptor>::const_iterator i(descriptors);
+		i != descriptors.end(); ++i)
 	{
 		if (i->Tag()==9)	// CADescriptor
 		{
@@ -945,7 +949,8 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 
 			if (avail)
 			{
-				for (ePtrList<CA>::iterator a = list.begin(); a != list.end(); a++)
+				for (ePtrList<CA>::iterator a = list.begin();
+					a != list.end(); a++)
 				{
 					if (a->casysid==ca->CA_system_ID)
 					{

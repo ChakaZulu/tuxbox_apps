@@ -358,7 +358,7 @@
 			<eLabel text="Voltage" name="lVoltage" position="440:55" size="90:30" align="center"/>
 			<eWidget name="buttons" position="10:90" size="e-40:200" />
 			<eProgress name="scrollbar" position="e-35:90" size="20:190" direction="1" />
-			<eButton name="close" position="10:e-100" size="175:40" text="OK" helptext="close Satellite Configuration" loadDeco="" shortcut="green" />
+			<eButton name="close" position="10:e-100" size="175:40" text="save" helptext="close Satellite Configuration" loadDeco="" shortcut="green" />
 			<eButton name="new" position="195:e-100" size="175:40" text="new" helptext="add a new Satellite" loadDeco="" shortcut="yellow" />
 			<eButton name="erase" position="380:e-100" size="175:40" text="erase" helptext="remove the selected Satellite" loadDeco="" shortcut="red" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />

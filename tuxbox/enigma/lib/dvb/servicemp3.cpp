@@ -126,7 +126,7 @@ void eHTTPStream::haveData(void *vdata, int len)
 
 eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *handler)
 : handler(handler), input(8*1024), output(256*1024),
-	output2(256*1024), type(type), outputbr(0), audio_tracks(0),
+	output2(256*1024), skipping(false), type(type), outputbr(0), audio_tracks(0),
 	messages(this, 1)
 {
 	state=stateInit;
@@ -213,7 +213,6 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 		} else
 			outputsn[0]=0;
 		outputsn[1]=0;
-		Decoder::displayIFrameFromFile(DATADIR "/iframe");
 	} else
 	{
 		Decoder::parms.vpid=0x1ffe;
@@ -389,7 +388,6 @@ void eMP3Decoder::outputReady(int what)
 //			eDebug("reconfigured audio interface...");
 		}
 	}
-
 	output.tofile(dspfd[0], 65536);
 	checkFlow(0);
 }
@@ -527,6 +525,7 @@ void eMP3Decoder::recalcPosition()
 
 void eMP3Decoder::dspSync()
 {
+	eDebug("dspSync");
 	if (::ioctl(dspfd[type==codecMPG], SNDCTL_DSP_RESET) < 0)
 		eDebug("SNDCTL_DSP_RESET failed (%m)");
 
@@ -554,7 +553,7 @@ void eMP3Decoder::decodeMore(int what)
 {
 	int flushbuffer=0;
 	(void)what;
-	
+
 	if (state == stateFileEnd)
 	{
 		inputsn->stop();
@@ -565,11 +564,12 @@ void eMP3Decoder::decodeMore(int what)
 	{
 		if (input.fromfile(sourcefd, audiodecoder->getMinimumFramelength()) < audiodecoder->getMinimumFramelength())
 		{
+			eDebug("couldn't read %d bytes", audiodecoder->getMinimumFramelength() );
 			flushbuffer=1;
 			break;
 		}
 	}
-	
+
 	checkFlow(flushbuffer);
 
 	if (flushbuffer)
@@ -580,6 +580,14 @@ void eMP3Decoder::decodeMore(int what)
 		outputsn[0]->start();
 		if (outputsn[1])
 			outputsn[1]->start();
+		if ( skipping )
+		{
+			skipping=false;
+			if ( type == codecMPG )
+				Decoder::stopTrickmode();
+			else if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 1) < 0)
+				eDebug("AUDIO_SET_MUTE error (%m)");
+		}
 	}
 }
 
@@ -670,7 +678,10 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 //			speed=message.parm;
 			state=stateBuffering;
 			if ( type == codecMPG )
+			{
 				Decoder::Resume();
+				checkFlow(0);
+			}
 		}
 		else
 		{
@@ -683,15 +694,37 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 	case eMP3DecoderMessage::setAudioStream:
 		if ( type == codecMPG && audiodecoder )
 		{
-			Decoder::Pause();
+			int position = getPosition(1);
+			Decoder::Pause(false);
 			((eMPEGDemux*)audiodecoder)->setAudioStream(message.parm);
-			::lseek(sourcefd, getPosition(1), SEEK_SET);
+			::lseek(sourcefd, position, SEEK_SET);
 			input.clear();
 			output.clear();
 			output2.clear();
 			dspSync();
 			audiodecoder->resync();
-			Decoder::Resume();
+			Decoder::Resume(false);
+			checkFlow(0);
+		}
+		break;
+	case eMP3DecoderMessage::startSkip:
+		if ( !skipping )
+		{
+			skipping=true;
+			if ( type == codecMPG )
+				Decoder::startTrickmode();
+			else if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 1) < 0)
+				eDebug("AUDIO_SET_MUTE error (%m)");
+		}
+		break;
+	case eMP3DecoderMessage::stopSkip:
+		if ( skipping )
+		{
+			skipping=false;
+			if ( type == codecMPG )
+				Decoder::stopTrickmode();
+			else if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 0) < 0)
+				eDebug("AUDIO_SET_MUTE error (%m)");
 		}
 		break;
 	case eMP3DecoderMessage::seek:
@@ -768,6 +801,7 @@ int eMP3Decoder::getPosition(int real)
 	if ( type == codecMPG && real)
 	{
 		unsigned int position=::lseek(sourcefd, 0, SEEK_CUR);
+		eDebug("position = %d", position);
 		position-=1024*1024*2;// latency
 		position-=input.size();
 		position-=output.size();
@@ -905,9 +939,10 @@ int eServiceHandlerMP3::serviceCommand(const eServiceCommand &cmd)
 			return -2;
 		break;
 	case eServiceCommand::cmdSeekBegin:
+		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::startSkip));
+		break;
 	case eServiceCommand::cmdSeekEnd:
-		if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, cmd.type == eServiceCommand::cmdSeekBegin) < 0)
-			eDebug("AUDIO_SET_MUTE error (%m)");
+		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::stopSkip));
 		break;
 	case eServiceCommand::cmdSkip:
 		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::skip, cmd.parm));
