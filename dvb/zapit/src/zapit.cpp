@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.29 2001/11/08 13:25:10 field Exp $
+  $Id: zapit.cpp,v 1.30 2001/11/08 17:34:32 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.30  2001/11/08 17:34:32  field
+  Auf sortierte Listen vorbereitet
+
   Revision 1.29  2001/11/08 13:25:10  field
   Poll-Timeout heruntergedreht
 
@@ -222,6 +225,7 @@ std::map<std::string, uint> namechans_tv;
 std::map<uint, channel> allchans_radio;
 std::map<uint, uint> numchans_radio;
 std::map<std::string, uint> namechans_radio;
+std::vector<unsigned long> sortlist_tv;
 
 typedef std::map<uint, transponder>::iterator titerator;
 
@@ -1292,9 +1296,18 @@ int prepare_channels()
   if (ls > 0)
     {
       int number = 1;
+      for(unsigned int i= 0; i< sortlist_tv.size(); i++)
+      {
+         cit = allchans_tv.find(sortlist_tv[i]);
+         if (cit!= allchans_tv.end())
+         {
+            allnumchannels_tv.insert(std::pair<uint,uint>(number++, (cit->second.onid<<16)+cit->second.sid));
+   	        allnamechannels_tv.insert(std::pair<std::string, uint>(cit->second.name, (cit->second.onid<<16)+cit->second.sid));
+         }
+      }
       for (numit = numchans_tv.begin(); numit != numchans_tv.end(); numit++)
 	{
-	  cit = allchans_tv.find(numit->second);
+   cit = allchans_tv.find(numit->second);
 	  cit->second.chan_nr = number;
 	  allnumchannels_tv.insert(std::pair<uint,uint>(number++, (cit->second.onid<<16)+cit->second.sid));
 	  allnamechannels_tv.insert(std::pair<std::string, uint>(cit->second.name, (cit->second.onid<<16)+cit->second.sid));
@@ -1928,7 +1941,7 @@ int main(int argc, char **argv) {
     }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.29 2001/11/08 13:25:10 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.30 2001/11/08 17:34:32 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;

@@ -2,6 +2,7 @@
 #define __getservices__
 
 #include <map>
+#include <vector>
 #include <string>
 
 struct channel {
@@ -95,5 +96,6 @@ extern std::map<std::string, uint> namechans_tv;
 extern std::map<uint, channel> allchans_radio;
 extern std::map<uint, uint> numchans_radio;
 extern std::map<std::string, uint> namechans_radio;
+extern std::vector<unsigned long> sortlist_tv;
 
 #endif

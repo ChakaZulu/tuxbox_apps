@@ -13,6 +13,7 @@
 void ParseTransponder(XMLTreeNode *xmltransponder);
 void ParseRoot(XMLTreeNode *root);
 void FindTransponder(XMLTreeNode *root);
+void LoadSortList(void);
 int LoadServices(void);
 
 uint curr_tsid = 0;
@@ -116,16 +117,24 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 		}
 	      else
 		{
-		  allchans_tv.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0,0,0, pmt, ecmpid, sid, tsid,onid,sm)));
-		  
-		  if (cnr > 0)
-		    {
-		      numchans_tv.insert(std::pair<uint, uint>(cnr, (onid<<16)+sid));
-		    }
-		  else
-		    {
-		      nameinsert(name, (onid<<16)+sid, sm);
-		    } 
+            allchans_tv.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0,0,0, pmt, ecmpid, sid, tsid,onid,sm)));
+
+            bool is_in_sorted_list= false;
+            unsigned int onid_sid= (onid<<16)+ sid;
+            for(unsigned int i= 0; i< sortlist_tv.size(); i++)
+                if ( sortlist_tv[i]== onid_sid )
+                {
+                    is_in_sorted_list= true;
+                    break;
+                }
+
+            if (!is_in_sorted_list)
+            {
+                if (cnr > 0)
+                    numchans_tv.insert(std::pair<uint, uint>(cnr, (onid<<16)+sid));
+                else
+                    nameinsert(name, (onid<<16)+sid, sm);
+            }
 		}
 	    } else { 
 	      //printf("Channelname is empty\n");
@@ -195,10 +204,28 @@ void FindTransponder(XMLTreeNode *root)
   }
 }
 
+void LoadSortList(void)
+{
+    sortlist_tv.clear();
+    FILE *in=fopen("/var/zapit/sortlist.tv", "r");
+    if (in)
+    {
+        unsigned int buf[4096];
+        unsigned int len=fread(buf, 1, sizeof(buf), in);
+        for (unsigned int i=0; i< (len/ sizeof(unsigned int)); i++)
+        {
+            sortlist_tv.insert(sortlist_tv.end(), buf[i]);
+        }
+        fclose(in);
+    }
+}
+
 int LoadServices(void)
 {
   curr_diseqc = 0;
-  
+
+  LoadSortList();
+
   XMLTreeParser *parser=new XMLTreeParser("ISO-8859-1");
   FILE *in=fopen("/var/zapit/services.xml", "r");
   if (!in)
@@ -232,7 +259,7 @@ int LoadServices(void)
   delete parser;
   
   fclose(in);
-  
+
   //printf("Returning channels\n");
   //printf("%d channels added\nPlease report to faralla@gmx.de if you see less in your neutrino-channellist\n",count);
   return 23;
