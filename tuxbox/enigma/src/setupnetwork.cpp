@@ -618,7 +618,9 @@ void eZapNetworkSetup::typeChanged(eListBoxEntryText *le)
 			rejectFTP->show();
 			rejectTelnet->show();
 			rejectSamba->show();
+#ifndef DISABLE_NFS
 			nfs->hide();	//nfs
+#endif
 			tdsl->show();			
 			lNameserver->hide();
 			lGateway->hide();
@@ -636,7 +638,9 @@ void eZapNetworkSetup::typeChanged(eListBoxEntryText *le)
 			rejectTelnet->hide();
 			rejectSamba->hide();
 			tdsl->hide();
+#ifndef DISABLE_NFS
 			nfs->show();   //nfs
+#endif
 			lLogin->hide();
 			lPassword->hide();
 			login->hide();
