@@ -47,6 +47,8 @@
 			<key name="LAME" code="52" picture="key.21" />
 			<key name="radio" code="53" picture="key.16" />
 			<key name="help" code="54" picture="key.23" />
+			<key name="discrete_off" code="b4"/>
+			<key name="discrete_on" code="e8"/>
 		</keys>
 		
 				<!-- globale shortcuts. sollten auf jeder FB zu finden sein. -->
@@ -112,6 +114,8 @@
 			<action name="standby_press" key="power" flags="m" />
 			<action name="standby_repeat" key="power" flags="r" />
 			<action name="standby_release" key="power" flags="b" />
+			<action name="standby_press" key="discrete_off" flags="m"/>
+			<action name="standby_release" key="discrete_off" flags="b"/>
 			<action name="showSubservices" key="green" flags="m" />
 			<action name="showAudio" key="yellow" flags="m" />
 			<action name="showAudio" key="audio" flags="m" />
@@ -239,6 +243,7 @@
 
 		<actionmap name="enigmaStandby">
 			<action name="wakeUp" key="power" flags="m" />
+			<action name="wakeUp" key="discrete_on" flags="m"/>
 		</actionmap>
 		<actionmap name="enigmaVCR">
 			<action name="volumeUp" key="volup" flags="mr" />
