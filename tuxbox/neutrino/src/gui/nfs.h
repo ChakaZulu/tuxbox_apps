@@ -100,6 +100,6 @@ bool in_proc_filesystems(const char * const fsname);
 bool insert_modules(const CNFSMountGui::FSType fstype);
 bool remove_modules(const CNFSMountGui::FSType fstype);
 
+extern bool nfs_mounted_once; /* needed by update.cpp to prevent removal of modules after flashing a new cramfs, since rmmod (busybox) might no longer be available */
+
 #endif
-
-

@@ -132,7 +132,7 @@ bool insert_modules(const CNFSMountGui::FSType fstype)
 	return false;
 }
 
-static bool nfs_mounted_once = false;
+bool nfs_mounted_once = false;
 
 bool remove_modules(const CNFSMountGui::FSType fstype)
 {
