@@ -136,7 +136,11 @@ CRCInput::CRCInput()
 		exit( -1 );
 	}
 
-	fd_rc[0] = fd_rc[1] = -1;
+	for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
+	{
+		fd_rc[i] = -1;
+	}
+
 	open();
 }
 
