@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.47 2001/12/17 21:45:06 faralla Exp $
+  $Id: zapit.cpp,v 1.48 2001/12/19 14:52:33 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -90,6 +90,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.48  2001/12/19 14:52:33  faralla
+  sending pid to vtxtd
+
   Revision 1.47  2001/12/17 21:45:06  faralla
   removed byteorder-conversion
 
@@ -351,7 +354,42 @@ void write_lcd(char *name) {
 
 int set_vtxt(uint vpid)
 {
-    int fd;
+    int fd, vtxtsock;
+    FILE *vtxtfd;
+    struct sockaddr_un vtxtsrv;
+    char vtxtbuf[255];
+    char hexpid[20];
+    
+    memset(&hexpid,0, sizeof(hexpid));
+    sprintf(hexpid,"%x",vpid);
+    vtxtsock=socket(AF_LOCAL, SOCK_STREAM,0);
+    memset(&vtxtsrv,0,sizeof(vtxtsrv));
+    vtxtsrv.sun_family=AF_LOCAL;
+    strcpy(vtxtsrv.sun_path, "/var/dvb/vtxtd");
+    connect(vtxtsock,(const struct sockaddr *) &vtxtsrv,sizeof(vtxtsrv));
+    vtxtfd=fdopen(vtxtsock,"a+");
+    setlinebuf(vtxtfd);
+
+    if (vtxtfd==NULL)
+    {
+    	perror("[zapit] vtxtd fdopen");
+    }
+    else
+    {
+    	if (vpid == 0)
+    	{
+    		fprintf(vtxtfd,"stop\n");
+    		dprintf("[zapit] vtxtd return %s\n", fgets(vtxtbuf,255,vtxtfd));
+    	}
+    	else
+    	{
+    		fprintf(vtxtfd,"stop\n");
+    		dprintf("[zapit] vtxtd return %s\n", fgets(vtxtbuf,255,vtxtfd));
+    		fprintf(vtxtfd,"pid %s\n", hexpid);
+    		dprintf("[zapit] vtxtd return %s\n", fgets(vtxtbuf,255,vtxtfd));
+    	}
+    	fclose(vtxtfd);
+    }
 
     fd = open("/dev/dbox/vbi0", O_RDWR);
     if (fd < 0)
@@ -2225,7 +2263,7 @@ int main(int argc, char **argv) {
 
   system("/usr/bin/killall camd");
   system("cp /var/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.47 2001/12/17 21:45:06 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.48 2001/12/19 14:52:33 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
