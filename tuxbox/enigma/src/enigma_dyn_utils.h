@@ -14,7 +14,6 @@
 #define HTDOCS_DIR DATADIR+eString("/enigma/htdocs/")
 
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
-#define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
 #define WINDOWCLOSE "<html><head><META http-equiv=Content-Type content=\"text/html; charset=UTF-8\"></head><body><script  language=\"javascript\">close();</script></body></html>"
 #define WINDOWBACK "<html><head><META http-equiv=Content-Type content=\"text/html; charset=UTF-8\"></head><body><script  language=\"javascript\">back();</script></body></html>"
 

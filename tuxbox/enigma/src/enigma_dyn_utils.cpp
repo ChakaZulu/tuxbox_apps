@@ -221,13 +221,13 @@ eString closeWindow(eHTTPConnection *content, eString msg, int wait)
 
 	if (pdaScreen == 0)
 	{
-		content->code=204;
-		content->code_descr="No Content";
-		result = eString(NOCONTENT);
+		content->code = 204;
+		content->code_descr = "No Content";
+		result = "";
 	}
 	else
 	{
-		content->local_header["Content-Type"]="text/html; charset=utf-8";
+		content->local_header["Content-Type"] = "text/html; charset=utf-8";
 		result = readFile(TEMPLATE_DIR + "pdaResponse.tmp");
 		result.strReplace("#WAIT#", eString().sprintf("%d", wait));
 		result.strReplace("#MSG#", msg);
