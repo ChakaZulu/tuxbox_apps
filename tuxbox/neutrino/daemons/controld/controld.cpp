@@ -1,23 +1,23 @@
 /*
 	Control-Daemon  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
- 
- 
+
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -104,6 +104,7 @@ int loadSettings(Ssettings* lsettings=NULL)
 		return 0;
 	}
 	close(fd);
+
 	return 1;
 }
 
@@ -152,7 +153,7 @@ void shutdownBox()
 	}
 }
 
-void setvideooutput(int format)
+void setvideooutput(int format, bool bSaveSettings = true)
 {
 	int fd;
 	/*
@@ -167,7 +168,8 @@ void setvideooutput(int format)
 		format=3;
 	}
 
-	settings.videooutput = format;
+	if (bSaveSettings) // only set settings if we dont come from watchdog
+		settings.videooutput = format;
 
 	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
@@ -201,7 +203,7 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 		format=3;
 	}
 
-	if ((format==0) || bUnregNotifier) // only set settings if we dont come from watchdog
+	if (bUnregNotifier) // only set settings if we dont come from watchdog
 		settings.videoformat = format;
 
 	if (format==0) // automatic switch
@@ -324,7 +326,7 @@ void switch_vcr( bool vcr_on)
 		printf("switch to scart-input... (%s)\n", BoxNames[settings.boxtype]);
 		if (settings.boxtype == 2) // Sagem
 		{
-			routeVideo(2, 1, 7, 2);
+			routeVideo(2, 1, 7, 0);
 		}
 		else if (settings.boxtype == 1) // Nokia
 		{
@@ -392,7 +394,7 @@ void disableVideoOutput(bool disable)
 			perror("[controld] FP DEVICE: ");
 			return;
 		}
-	 
+
 		if ( (ioctl(fd,FP_IOCTL_LCD_DIMM,&arg) < 0))
 		{
 			perror("[controld] IOCTL: ");
@@ -409,15 +411,50 @@ void disableVideoOutput(bool disable)
 	}
 	else
 	{
-		setvideooutput(0);
-		setVideoFormat(0);
+		setvideooutput(0, false);
+		setVideoFormat(0, false);
 		zapit.stopPlayBack();
 	}
 }
 
 void setBoxType(char type)
 {
-	settings.boxtype = type;
+	// settings.boxtype = type;
+	FILE* fd = fopen("/proc/bus/dbox", "rt");
+	if (fd==NULL)
+	{
+		printf("error while opening /proc/bus/dbox\n" );
+		return;
+	}
+
+	int mID;
+
+	char *tmpptr,buf[100], buf2[100];
+	int value, pos=0;
+	if(!feof(fd))
+	{
+		if(fgets(buf,29,fd)!=NULL)
+		{
+			buf[strlen(buf)-1]=0;
+			tmpptr=buf;
+			strsep(&tmpptr,"=");
+			mID=atoi(tmpptr);
+			//printf("%s: %d\n",buf,mID);
+		}
+	}
+	fclose(fd);
+
+	switch ( mID )
+	{
+		case 3:	settings.boxtype= CControldClient::BOXTYPE_SAGEM;
+				break;
+		case 2:	settings.boxtype= CControldClient::BOXTYPE_PHILIPS;
+				break;
+		default:
+			settings.boxtype= CControldClient::BOXTYPE_NOKIA;
+	}
+	//printf("settings.boxtype: %d\n", settings.boxtype);
+
 }
 
 void setVolume(char volume)
@@ -665,6 +702,8 @@ int main(int argc, char **argv)
 		settings.videoformat = 2; // fnc2 - 4:3
 		settings.boxtype = 1; //nokia
 	}
+
+	setBoxType( 0 ); // dummy set - liest den aktuellen Wert aus!
 
 	watchDog = new CEventWatchDog();
 	aspectRatioNotifier = new CControldAspectRatioNotifier();
