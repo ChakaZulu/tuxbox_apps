@@ -53,6 +53,7 @@ class CRemoteControl
 {
 		st_rmsg	remotemsg;
         st_audio_info audio_chans_int;
+        unsigned int    ecm_pid;
 
 		void send();
 		bool zapit_mode;
@@ -76,6 +77,7 @@ class CRemoteControl
 		void tvMode();
 
 	    void CopyAPIDs();
+        unsigned int GetECMPID();
 };
 
 

@@ -175,6 +175,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                             RemoteControl->audio_chans_int.apids[count].ctag= apid_return_buf.apids[count].component_tag;
                                             RemoteControl->audio_chans_int.apids[count].is_ac3= apid_return_buf.apids[count].is_ac3;
                                         }
+                                        RemoteControl->ecm_pid= apid_return_buf.ecmpid;
+                                        // printf("ECM_PID %x\n", RemoteControl->ecm_pid);
 
                                         pthread_cond_signal( &g_InfoViewer->lang_cond );
                                     }
@@ -217,6 +219,14 @@ void * CRemoteControl::RemoteControlThread (void *arg)
         } while ( redo );
 	}
 	return NULL;
+}
+
+unsigned int CRemoteControl::GetECMPID()
+{
+    pthread_mutex_lock( &send_mutex );
+    int ep = ecm_pid;
+    pthread_mutex_unlock( &send_mutex );
+    return ep;
 }
 
 void CRemoteControl::CopyAPIDs()

@@ -118,6 +118,7 @@ infoviewer.streaminfo Stream-Informations
 infoviewer.eventlist l' événement énumérerait
 infoviewer.languages Choix linguistique
 infoviewer.notavailable Channel not available
+infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
 
 epgviewer.notfound pas d' EPG informations trouvé
 epgviewer.nodetailed No detailed informations available

@@ -119,6 +119,7 @@ infoviewer.streaminfo Stream-Info
 infoviewer.eventlist Event-List
 infoviewer.languages Audio
 infoviewer.notavailable Channel not available
+infoviewer.cantdecode Channel can't be decoded
 
 epgviewer.notfound no epg found
 epgviewer.nodetailed No detailed informations available

@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.29 2001/09/26 11:40:48 field Exp $
+// $Id: infoviewer.cpp,v 1.30 2001/09/26 15:02:34 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.30  2001/09/26 15:02:34  field
+// Anzeige zu verschluesselten Sendern
+//
 // Revision 1.29  2001/09/26 11:40:48  field
 // Tontraegerauswahl haut hin (bei Kanaelen mit EPG)
 //
@@ -261,12 +264,7 @@ void CInfoViewer::showButtons()
     };
 
     // grn, wenn mehrere APIDs
-    if ( g_RemoteControl->audio_chans.count_apids> 1 )
-    {
-        g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-        g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
-    }
-    else if ( g_RemoteControl->audio_chans.count_apids== 0 )
+    if ( ( g_RemoteControl->GetECMPID()== 0 ) || ( g_RemoteControl->audio_chans.count_apids== 0 ) )
     {
         int height = g_Fonts->infobar_info->getHeight();
         int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
@@ -276,9 +274,21 @@ void CInfoViewer::showButtons()
     	int ChanNameY = BoxStartY + ChanHeight + 10;
     	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
 
-        g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, g_Locale->getText("infoviewer.notavailable").c_str(), COL_INFOBAR);
+        string  disp_text;
+        if ( g_RemoteControl->GetECMPID()== 0 )
+            disp_text= g_Locale->getText("infoviewer.cantdecode");
+        else
+            disp_text= g_Locale->getText("infoviewer.notavailable");
+
+        g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text.c_str(), COL_INFOBAR);
         KillShowEPG = true;
-    }
+    };
+
+    if ( g_RemoteControl->audio_chans.count_apids> 1 )
+    {
+        g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+        g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
+    };
 }
 
 void CInfoViewer::showData()
