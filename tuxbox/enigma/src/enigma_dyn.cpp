@@ -954,8 +954,8 @@ struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 	void operator()(ePlaylistEntry* se)
 	{
 		result += "<tr>";
-		begin;
-		end;
+		begin = "";
+		end = "";
 		tm startTime = *localtime(&se->time_begin);
 		time_t time_end = se->time_begin + se->duration;
 		tm endTime = *localtime(&time_end);
