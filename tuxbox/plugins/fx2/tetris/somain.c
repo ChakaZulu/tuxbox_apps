@@ -236,7 +236,7 @@ static	void	SaveGame( void )
 			memcpy(p,p+1,x);
 	}
 
-	chk=BuildChk( user, score );
+	chk=BuildCheck( user, score );
 
 	sprintf(url,"%s/games/tetris.php?action=put&user=%s&score=%d&chk=%d",
 		hscore,user,score,chk);
