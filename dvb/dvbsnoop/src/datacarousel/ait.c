@@ -1,5 +1,5 @@
 /*
-$Id: ait.c,v 1.2 2004/02/09 21:24:57 rasc Exp $
+$Id: ait.c,v 1.3 2004/02/10 22:57:52 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ait.c,v 1.2 2004/02/09 21:24:57 rasc Exp $
 
 
 $Log: ait.c,v $
+Revision 1.3  2004/02/10 22:57:52  rasc
+MHP descriptor, missing DVB descriptor done
+
 Revision 1.2  2004/02/09 21:24:57  rasc
 AIT descriptors
 minor redesign on output routines
@@ -35,6 +38,7 @@ some AIT descriptors
 
 #include "dvbsnoop.h"
 #include "ait.h"
+#include "mhp_misc.h"
 
 #include "descriptors/descriptor.h"
 #include "strings/dvb_str.h"
@@ -136,16 +140,6 @@ void decode_MHP_AIT (u_char *b, int len)
 
 
 
-
-
-
-int  mhp_application_identifier (int  v, u_char *b)
-{
- 	outBit_Sx_NL  (v,"organisation_id: ",	b,  0, 32);
- 	outBit_S2x_NL (v,"appliction_id: ",	b, 32, 16,
-			(char *(*)(u_long)) dsmccStrMHP_application_id );
-	return 6;
-}
 
 
 

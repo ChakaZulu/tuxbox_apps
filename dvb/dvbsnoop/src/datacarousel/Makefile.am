@@ -9,6 +9,7 @@ noinst_HEADERS = \
 	unts.h \
 	datagram.h \
 	dsmcc_misc.h \
+	mhp_misc.h \
 	llc_snap.h
 
 
@@ -19,5 +20,6 @@ libdatacarousel_a_SOURCES = \
 	unts.c \
 	datagram.c \
 	dsmcc_misc.c \
+	mhp_misc.c \
 	llc_snap.c
 

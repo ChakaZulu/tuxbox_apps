@@ -1,5 +1,5 @@
 /*
-$Id: ait.h,v 1.2 2004/02/10 22:57:52 rasc Exp $
+$Id: mhp_misc.h,v 1.1 2004/02/10 22:57:52 rasc Exp $
 
 
  DVBSNOOP
@@ -13,13 +13,11 @@ $Id: ait.h,v 1.2 2004/02/10 22:57:52 rasc Exp $
 */
 
 
-#ifndef __AIT_H
-#define __AIT_H 
+#ifndef __MHP_MISC_H
+#define __MHP_MISC_H 
 
 
-
-void  decode_MHP_AIT (u_char *b, int len);
-
+int  mhp_application_identifier (int  v, u_char *b);
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.2 2004/02/09 21:24:58 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.3 2004/02/10 22:57:54 rasc Exp $ 
 
 
  DVBSNOOP
@@ -11,12 +11,15 @@ $Id: mhp_ait_descriptor.c,v 1.2 2004/02/09 21:24:58 rasc Exp $
 
 
  -- Private TAG Space  MHP  AIT
- -- TS 102 812
+ -- TS 102 812  v1.2.1  10.11
 
 
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.3  2004/02/10 22:57:54  rasc
+MHP descriptor, missing DVB descriptor done
+
 Revision 1.2  2004/02/09 21:24:58  rasc
 AIT descriptors
 minor redesign on output routines
@@ -36,6 +39,8 @@ some AIT descriptors
 #include "dvbsnoop.h"
 #include "descriptor.h"
 #include "mhp_ait_descriptor.h"
+#include "dvb_descriptor.h"
+#include "datacarousel/mhp_misc.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
@@ -83,7 +88,9 @@ int  descriptorMHP_AIT (u_char *b)
      case 0x02:  descriptorMHP_AIT_transport_protocol (b); break;
      case 0x03:  descriptorMHP_AIT_dvb_j_application (b); break;
      case 0x04:  descriptorMHP_AIT_dvb_j_application_location (b); break;
-//     {  0x05, 0x05,  "External application authorisation descriptor" },
+     case 0x05:  descriptorMHP_AIT_external_application_authorisation (b); break;
+     // case 0x06: reserved
+     // case 0x07: reserved
 //     {  0x06, 0x06,  "Routing Descriptor IPv4" },
 //     {  0x07, 0x07,  "Routing Descriptor IPv6" },
 //     {  0x08, 0x08,  "DVB-HTML application descriptor" },
@@ -95,12 +102,8 @@ int  descriptorMHP_AIT (u_char *b)
 //     {  0x0E, 0x0E,  "delegated application descriptor" },
 //     {  0x0F, 0x0F,  "Plug-in descriptor" },
 //     {  0x10, 0x10,  "Application storage descriptor" },
-//     {  0x11, 0x5E,  "reserved to MHP" },
-//     {  0x5F, 0x5F,  "private data specifier descriptor" },
-//     {  0x60, 0x7F,  "reserved to MHP" },
-//     {  0x80, 0xFF,  "user defined" },
-//
-// data_broadcast_id descr..  10.1
+
+     case 0x5F:  descriptorDVB_PrivateDataSpecifier (b); break;
 
      default: 
 	if (b[0] < 0x80) {
@@ -396,6 +399,41 @@ void descriptorMHP_AIT_dvb_j_application_location (u_char *b)
 }
 
 
+
+
+
+
+/*
+  0x05 -  External Application Authorisation
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_external_application_authorisation (u_char *b)
+{
+  int  len;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+  b += 2;
+
+  indent(+1);
+  while (len > 0) {
+	  int x;
+
+	  x = mhp_application_identifier (4, b);
+	  b += x;
+	  len -= x;
+
+  	  outBit_Sx_NL (4,"application_priority: ",	b, 0, 8);
+	  b++;
+	  len--;
+
+	  out_NL (4);
+  }
+  indent(-1);
+
+}
 
 
 

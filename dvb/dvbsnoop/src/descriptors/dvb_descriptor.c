@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.28 2004/02/09 22:56:59 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.29 2004/02/10 22:57:54 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.28 2004/02/09 22:56:59 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.29  2004/02/10 22:57:54  rasc
+MHP descriptor, missing DVB descriptor done
+
 Revision 1.28  2004/02/09 22:56:59  rasc
 Bugfix VBI Data descriptor
 
@@ -3329,7 +3332,7 @@ void descriptorDVB_AncillaryData  (u_char *b)
 	d.ancillary_data_identifier);
 
 
- // $$$ TODO the following should normally in dvbStrAncillaryData...()
+ // $$$  the following should normally in dvbStrAncillaryData...()
 
  i = d.ancillary_data_identifier;
  indent (+1);
@@ -3690,40 +3693,18 @@ void descriptorDVB_AdaptionFieldData (u_char *b)
 /*
   0x71  Service Identifier descriptor 
   ETSI EN 300 468     6.2.x
+  ETSI TS 102 812  v1.2.1  10.12
 */
 
 void descriptorDVB_ServiceIdentifier (u_char *b)
 
 {
+ int  len;
 
- typedef struct  _descServiceIdentifier {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
+ // tag		 = b[0];
+ len       	 = b[1];
 
-    // ? .. 
-
- } descServiceIdentifier;
-
-
-
- descServiceIdentifier     d;
- int                       len;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
-
- b   += 2;
- len = d.descriptor_length - 0;
-
-//$$$ TODO 
- out_nl (4,"Service Identifier:  [no encoding known, Report!] ");
-
- descriptor_any (b);
-
-
+ print_text_468A (4, "textual_service_identifier: ", b+2, len);
 
 }
 

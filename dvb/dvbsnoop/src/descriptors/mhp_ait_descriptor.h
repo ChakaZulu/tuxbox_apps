@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.h,v 1.2 2004/02/09 21:24:58 rasc Exp $ 
+$Id: mhp_ait_descriptor.h,v 1.3 2004/02/10 22:57:54 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: mhp_ait_descriptor.h,v 1.2 2004/02/09 21:24:58 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.h,v $
+Revision 1.3  2004/02/10 22:57:54  rasc
+MHP descriptor, missing DVB descriptor done
+
 Revision 1.2  2004/02/09 21:24:58  rasc
 AIT descriptors
 minor redesign on output routines
@@ -42,6 +45,7 @@ void descriptorMHP_AIT_application_name (u_char *b);
 void descriptorMHP_AIT_transport_protocol (u_char *b);
 void descriptorMHP_AIT_dvb_j_application (u_char *b);
 void descriptorMHP_AIT_dvb_j_application_location (u_char *b);
+void descriptorMHP_AIT_external_application_authorisation (u_char *b);
 
 
 
