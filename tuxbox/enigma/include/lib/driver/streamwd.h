@@ -10,6 +10,7 @@ class eStreamWatchdog: public Object
 {
 	eSocketNotifier* sn;
 	int handle;
+	int isanamorph;
 	static eStreamWatchdog *instance;
 private:
 	void check(int);
@@ -18,6 +19,7 @@ public:
 	eStreamWatchdog();
 	~eStreamWatchdog();
 	static eStreamWatchdog *getInstance();
+	int isAnamorph();
 	Signal1<void, int> AspectRatioChanged;
 };
 

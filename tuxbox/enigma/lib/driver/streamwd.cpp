@@ -45,7 +45,7 @@ eStreamWatchdog::eStreamWatchdog()
 
 	if (!instance)
 		instance=this;
-
+	isanamorph=0;
 }
 
 eStreamWatchdog *eStreamWatchdog::getInstance()
@@ -65,7 +65,6 @@ void eStreamWatchdog::check(int)
 
 void eStreamWatchdog::reloadSettings()
 {
-	int isanamorph=0;
 	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
 	if (bitstream)
 	{
@@ -127,6 +126,11 @@ void eStreamWatchdog::reloadSettings()
 	close(fd);
 
 	eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
+}
+
+int eStreamWatchdog::isAnamorph()
+{
+	return isanamorph;
 }
 
 eStreamWatchdog::~eStreamWatchdog()
