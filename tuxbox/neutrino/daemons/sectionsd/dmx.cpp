@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.18 2003/03/01 19:37:55 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.19 2003/03/02 01:20:22 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -42,14 +42,14 @@
 */
 
 
-int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds);
+ssize_t readNbytes(int fd, char * buf, const size_t n, unsigned timeoutInMSeconds);
 extern void showProfiling(std::string text);
 extern bool timeset;
 
 
 DMX::DMX(const unsigned char p, const unsigned short bufferSizeInKB)
 {
-	fd = 0;
+	fd = -1;
 	lastChanged = 0;
 	filter_index = 0;
 	pID = p;
@@ -76,17 +76,17 @@ DMX::~DMX()
 	pthread_cond_destroy (&change_cond);
 }
 
-int DMX::read(char *buf, const size_t buflength, unsigned timeoutMInSeconds)
+ssize_t DMX::read(char * const buf, const size_t buflength, const unsigned timeoutMInSeconds)
 {
 	return readNbytes(fd, buf, buflength, timeoutMInSeconds);
 }
 
 void DMX::closefd(void)
 {
-	if (fd)
+	if (isOpen())
 	{
 		close(fd);
-		fd = 0;
+		fd = -1;
 	}
 }
 
@@ -100,7 +100,7 @@ void DMX::addfilter(const unsigned char filter, const unsigned char mask)
 
 int DMX::immediate_stop(void)
 {
-	if (fd == 0)
+	if (!isOpen())
 		return 1;
 	
 	if (real_pauseCounter == 0)
@@ -148,11 +148,6 @@ void DMX::unlock(void)
 #else
 	pthread_mutex_unlock(&start_stop_mutex);
 #endif
-}
-
-bool DMX::isOpen(void)
-{
-	return fd ? true : false;
 }
 
 char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
@@ -250,7 +245,7 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 
 int DMX::immediate_start(void)
 {
-	if (fd != 0)
+	if (isOpen())
 		return 1;
 
 	if (real_pauseCounter != 0)
@@ -292,7 +287,7 @@ int DMX::start(void)
 
 int DMX::real_pause(void)
 {
-	if (!fd)
+	if (!isOpen())
 		return 1;
 
 	lock();
@@ -320,8 +315,10 @@ int DMX::real_pause(void)
 
 int DMX::real_unpause(void)
 {
-	if (!fd)
+#ifndef PAUSE_EQUALS_STOP	       
+	if (!isOpen())
 		return 1;
+#endif
 
 	lock();
 
@@ -381,7 +378,7 @@ int DMX::request_unpause(void)
 
 int DMX::pause(void)
 {
-	if (!fd)
+	if (!isOpen())
 		return 1;
 
 	pthread_mutex_lock(&pauselock);
@@ -396,7 +393,7 @@ int DMX::pause(void)
 
 int DMX::unpause(void)
 {
-	if (!fd)
+	if (!isOpen())
 		return 1;
 
 	pthread_mutex_lock(&pauselock);
@@ -411,7 +408,7 @@ int DMX::unpause(void)
 
 int DMX::change(const int new_filter_index)
 {
-	if (!fd)
+	if (!isOpen())
 		return 1;
 
 	showProfiling("changeDMX: before pthread_mutex_lock(&start_stop_mutex)");
@@ -483,20 +480,17 @@ int DMX::change(const int new_filter_index)
 // und -1 bei Fehler
 // ansonsten die Anzahl gelesener Bytes
 /* inline */
-int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds)
+ssize_t readNbytes(int fd, char * buf, const size_t n, unsigned timeoutInMSeconds)
 {
 	size_t j;
 
-	//	timeoutInSeconds*; // in Millisekunden aendern
-
 	for (j = 0; j < n;)
 	{
-
 		struct pollfd ufds;
 		ufds.fd = fd;
 		ufds.events = POLLIN;
 		ufds.revents = 0;
-		int rc = poll(&ufds, 1, timeoutInMSeconds);
+		int rc = ::poll(&ufds, 1, timeoutInMSeconds);
 
 		if (!rc)
 			return 0; // timeout
@@ -531,7 +525,7 @@ int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds)
 			continue;
 		}
 
-		int r = read (fd, buf, n - j);
+		int r = ::read(fd, buf, n - j);
 
 		if (r > 0)
 		{

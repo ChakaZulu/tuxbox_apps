@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.3 2003/03/01 19:37:55 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.4 2003/03/02 01:20:22 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -35,6 +35,8 @@ class DMX
 	unsigned char   pID;
 	unsigned short  dmxBufferSizeInKB;
 
+	inline bool isOpen(void) { return (fd != -1); }
+
 	int immediate_start(void); /* mutex must be locked before and unlocked after this method */
 	int immediate_stop(void);  /* mutex must be locked before and unlocked after this method */
 
@@ -59,7 +61,7 @@ class DMX
 	~DMX();
 
 	int start(void);
-	int read(char *buf, const size_t buflength, const unsigned timeoutMInSeconds);
+	ssize_t read(char * const buf, const size_t buflength, const unsigned timeoutMInSeconds);
 	void closefd(void);
 	void addfilter(const unsigned char filter, const unsigned char mask);
 	int stop(void);
@@ -77,8 +79,6 @@ class DMX
 
 	void lock(void);
 	void unlock(void);
-
-	bool isOpen(void);
 
 	char * getSection(const unsigned timeoutInMSeconds, int &timeouts);
 	// section with size < 3 + 5 are skipped !
