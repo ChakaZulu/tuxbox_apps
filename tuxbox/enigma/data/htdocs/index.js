@@ -24,8 +24,16 @@ function switchChannel(xy, bouquet, channel)
 	}
 	else
 	{
-		document.location = "/cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
-		setTimeout("zapHeaderReload()", 3000);
+		if (zapMode < 4)
+		{
+			document.location = "/cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
+			setTimeout("zapHeaderReload()", 3000);
+		}
+		else
+		{
+			document.location = "?path="+xy;
+			setTimeout("zapBodyReload()", 3000);
+		}
 	}
 }
 

@@ -64,6 +64,10 @@ function zapHeaderReload()
 	parent.header.location.reload();
 	document.channelselector.channel.focus();
 }
+function zapBodyReload()
+{
+	parent.body.location.reload();
+}
 function channelChange()
 {
 	currentChannel = document.channelselector.channel.selectedIndex;

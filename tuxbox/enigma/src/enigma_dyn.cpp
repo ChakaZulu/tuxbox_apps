@@ -51,7 +51,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.4.0"
+#define WEBXFACEVERSION "1.4.1"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -64,12 +64,13 @@ int zapSubMode = ZAPSUBMODEBOUQUETS;
 
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 
-eString zap[4][5] =
+eString zap[5][5] =
 {
 	{"TV", ";0:7:1:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:6:0:0:0:0:0:0:"},
 	{"Radio", ";0:7:2:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:4:0:0:0:0:0:0:"},
 	{"Data", ";0:7:6:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ ""},
-	{"Recordings", ";4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""}
+	{"Recordings", ";4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""},
+	{"Root", ";2:47:0:0:0:0:/", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""}
 };
 
 eString removeBadChars(eString s)
@@ -736,8 +737,9 @@ static eString getZapNavi(eString mode, eString path)
 	result += button(100, "Radio", GREEN, "?path=" + zap[ZAPMODERADIO][ZAPMODECATEGORY]);
 	result += button(100, "Data", BLUE, "?path=" + zap[ZAPMODEDATA][ZAPMODECATEGORY]);
 #ifndef DISABLE_FILE
-	result += button(100, "Movies", OCKER,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
+	result += button(100, "Movies", OCKER, "?path=" + zap[ZAPMODERECORDINGS][ZAPMODECATEGORY]);
 #endif
+	result += button(100, "Root", PINK, "?path=" + zap[ZAPMODEROOT][ZAPMODECATEGORY]);
 	result += "<br><br>";
 	return result;
 }
@@ -1511,12 +1513,15 @@ public:
 			}
 			eEPGCache::getInstance()->Unlock();
 
-			result1 += "\"" + ref2string(e) + "\", ";
 			eString tmp = filter_string(service->service_name);
 			if (short_description && (zapSubMode != ZAPMODERECORDINGS))
 				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 			tmp.strReplace("\"", "'");
-			result2 += "\"" + tmp + "\", ";
+			if (!((zapSubMode == ZAPSUBMODESATELLITES) && (tmp.find("Provider") != eString::npos)))
+			{
+				result1 += "\"" + ref2string(e) + "\", ";
+				result2 += "\"" + tmp + "\", ";
+			}
 			iface.removeRef(e);
 		}
 	}
@@ -1646,12 +1651,13 @@ static eString getZapContent2(eString mode, eString path)
 		int autobouquetchange = 0;
 		eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autobouquetchange);
 		result.strReplace("#AUTOBOUQUETCHANGE#", eString().sprintf("%d", autobouquetchange));
+		result.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
+		result.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
 	}
 
 	return result;
 }
 
-#ifndef DISABLE_FILE
 static eString getZapContent3(eString mode, eString path)
 {
 	eString result, result1, result2;
@@ -1704,12 +1710,21 @@ static eString getZapContent3(eString mode, eString path)
 	tmpFile.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
 	tmpFile.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
 	tmpFile.strReplace("#AUTOBOUQUETCHANGE#", "0");
+	tmpFile.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
+	tmpFile.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
 
 	result = readFile(TEMPLATE_DIR + "rec.tmp");
 	result.strReplace("#ZAPDATA#", tmpFile);
+	if (screenWidth > 1024)
+		result.strReplace("#SELSIZE#", "25");
+	else
+		result.strReplace("#SELSIZE#", "10");
+	if (zapMode == ZAPMODERECORDINGS)
+		result.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()"));
+	else
+		result.strReplace("#BUTTON#", "");
 	return result;
 }
-#endif
 
 static eString getZap(eString mode, eString path)
 {
@@ -1719,21 +1734,29 @@ static eString getZap(eString mode, eString path)
 	{
 		result += getZapNavi(mode, path);
 #ifndef DISABLE_FILE
-		if ((path == ";4097:7:0:1:0:0:0:0:0:0:") ) // recordings
+		if (zapMode == ZAPMODERECORDINGS) // recordings
 		{
 			eString tmpFile = readFile(TEMPLATE_DIR + "videocontrols.tmp");
 			tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
 			result += tmpFile;
 			result += getZapContent3(mode, path);
 		}
-#endif
-		eString tmp = readFile(TEMPLATE_DIR + "zap.tmp");
-		if (screenWidth > 1024)
-			tmp.strReplace("#SELSIZE#", "30");
 		else
-			tmp.strReplace("#SELSIZE#", "15");
-		tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path));
-		result += tmp;
+#endif
+		if (zapMode == ZAPMODEROOT) // root
+		{
+			result += getZapContent3(mode, path);
+		}
+		else
+		{
+			eString tmp = readFile(TEMPLATE_DIR + "zap.tmp");
+			if (screenWidth > 1024)
+				tmp.strReplace("#SELSIZE#", "30");
+			else
+				tmp.strReplace("#SELSIZE#", "15");
+			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path));
+			result += tmp;
+		}
 	}
 	else
 	{
@@ -2172,6 +2195,7 @@ static eString getControlTimerList()
 	return result;
 }
 
+#if 0
 static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result;
@@ -2180,6 +2204,7 @@ static eString showTimerList(eString request, eString dirpath, eString opt, eHTT
 	result.strReplace("#BODY#", getControlTimerList());
 	return result;
 }
+#endif
 
 static eString getControlScreenShot(void)
 {
@@ -2251,8 +2276,11 @@ static eString getContent(eString mode, eString path)
 		tmp = "ZAP";
 		if (pdaScreen == 0)
 		{
-			if (path == ";4097:7:0:1:0:0:0:0:0:0:")
+			if (zapMode == ZAPMODERECORDINGS)
 				tmp += ": Recordings";
+			else
+			if (zapMode == ZAPMODEROOT)
+				tmp += ": ROOT";
 			else
 			{
 				if (zapMode >= 0)
@@ -4157,7 +4185,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	}
 	else
 	{
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			if (spath == zap[i][ZAPMODECATEGORY])
 			{
@@ -4229,7 +4257,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #endif
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume, lockWeb);
 	dyn_resolver->addDyn("GET", "/setVideo", setVideo, lockWeb);
-	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, lockWeb);
+//	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/addTimerEvent2", addTimerEvent2, lockWeb);
 	dyn_resolver->addDyn("GET", "/deleteTimerEvent", deleteTimerEvent, lockWeb);
