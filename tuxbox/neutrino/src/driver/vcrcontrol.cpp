@@ -349,6 +349,8 @@ bool CVCRControl::CFileDevice::Stop()
 
 	RestoreNeutrino();
 
+	deviceState = CMD_VCR_STOP;
+
 	return return_value;
 }
 
