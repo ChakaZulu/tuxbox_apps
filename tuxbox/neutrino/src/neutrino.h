@@ -180,7 +180,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void RealRun(CMenuWidget &mainSettings);
 		void InitZapper();
 		void InitKeySettings(CMenuWidget &);
-		void InitServiceSettings(CMenuWidget &);
+		void InitServiceSettings(CMenuWidget &, CMenuWidget &);
 		void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
 		void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier);
 		void InitColorSettings(CMenuWidget &);
@@ -196,8 +196,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings,
 		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings,
 		                  CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
-		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &scanSettings,
-		                  CMenuWidget &service);
+		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service);
 		void ClearFrameBuffer();
 		void SetupFonts();
 		void SetupFrameBuffer();

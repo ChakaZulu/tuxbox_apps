@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.240 2002/04/20 23:52:56 McClean Exp $
+        $Id: neutrino.cpp,v 1.241 2002/04/22 01:56:44 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -760,7 +760,7 @@ void CNeutrinoApp::ClearFrameBuffer()
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
                                 CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
-                                CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &scanSettings, CMenuWidget &service)
+                                CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
 {
 	mainMenu.addItem( new CMenuSeparator() );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv", true, CRCInput::RC_red, "rot.raw"), true );
@@ -794,7 +794,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.scan", true, "", &scanSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
 
 }
@@ -900,62 +899,21 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( ojInv );
 		settings.addItem( oj);
 	}
+
+	settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	settings.addItem( new CMenuForwarder("scants.startnow", true, "", new CScanTs() ) );
+
 }
 
 
-void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
+void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSettings)
 {
 	service.addItem( new CMenuSeparator() );
 	service.addItem( new CMenuForwarder("menu.back") );
 	service.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-	//servicescan
-	CMenuWidget* TSScan = new CMenuWidget("servicemenu.scants", "settings.raw");
-	TSScan->addItem( new CMenuForwarder("menu.back") );
-	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
-
-/*
-	if (atoi(getenv("fe"))==1)
-	{// only sat-params....
-		oj = new CMenuOptionChooser("scants.astra", &g_settings.scan_astra, true );
-		oj->addOption(0, "options.off");
-		oj->addOption(1, "options.on");
-		TSScan->addItem( oj );
-		oj = new CMenuOptionChooser("scants.hotbird", &g_settings.scan_eutel, true );
-		oj->addOption(0, "options.off");
-		oj->addOption(2, "options.on");
-		TSScan->addItem( oj );
-		oj = new CMenuOptionChooser("scants.kopernikus", &g_settings.scan_kopernikus, true );
-		oj->addOption(0, "options.off");
-		oj->addOption(4, "options.on");
-		TSScan->addItem( oj );
-                oj = new CMenuOptionChooser("scants.digituerk", &g_settings.scan_digituerk, true );
-		oj->addOption(0, "options.off");
-		oj->addOption(8, "options.on");
-		TSScan->addItem( oj );
-		oj = new CMenuOptionChooser("scants.sirius", &g_settings.scan_sirius, true );
-		oj->addOption(0, "options.off");
-		oj->addOption(16, "options.on");
-		TSScan->addItem( oj );
-		oj = new CMenuOptionChooser("scants.thor", &g_settings.scan_thor, true );
-		oj->addOption(0, "options.off");
-		oj->addOption(32, "options.on");
-		TSScan->addItem( oj );
-		oj = new CMenuOptionChooser("scants.tuerksat", &g_settings.scan_tuerksat, true );
-		oj->addOption(0, "options.off");
-		oj->addOption(64, "options.on");
-		TSScan->addItem( oj );
-	}
-	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-*/
-	TSScan->addItem( new CMenuForwarder("scants.startnow", true, "", new CScanTs() ) );
-	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", TSScan) );
-
-	//ucodecheck
+	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", &scanSettings ) );
 	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", UCodeChecker ) );
-	//	miscSettings.addItem( new CMenuForwarder("miscsettings.reload_services", true, "", g_ReloadServices ) );
-
 
 	//softupdate
 	if (softupdate)
@@ -1569,14 +1527,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400, 460);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
-	CMenuWidget scanSettings("mainsettings.scan", "settings.raw");
+	CMenuWidget scanSettings("servicemenu.scants", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings,
-	             colorSettings, keySettings, videoSettings, languageSettings, miscSettings, scanSettings, service);
+	             colorSettings, keySettings, videoSettings, languageSettings, miscSettings, service);
 
 	//service
-	InitServiceSettings(service);
+	InitServiceSettings(service, scanSettings);
 
 	//language Setup
 	InitLanguageSettings(languageSettings);
@@ -2376,7 +2334,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.240 2002/04/20 23:52:56 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.241 2002/04/22 01:56:44 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

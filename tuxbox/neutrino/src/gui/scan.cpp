@@ -123,23 +123,16 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 			if ( msg == NeutrinoMessages::EVT_SCAN_SATELLITE )
 			{
-				frameBuffer->paintBoxRel(xpos3, ypos+ 2* mheight, 80, mheight, COL_MENUCONTENT);
+				frameBuffer->paintBox(xpos3, ypos+ 2* mheight, x+width-105, ypos+ 2* mheight+mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos3, ypos+ 3*mheight, width, (char*)data, COL_MENUCONTENT);
 				delete (unsigned char*) data;
 			}
             else
-			if ( msg == NeutrinoMessages::EVT_SCAN_PROVIDER )
-			{
-				frameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight, width- 10, mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width- 10, (char*)data, COL_MENUCONTENT);
-				delete (unsigned char*) data;
-			}
-			else
 			if ( msg == NeutrinoMessages::EVT_SCAN_NUM_CHANNELS )
 			{
 				char cb[10];
 				sprintf(cb, "%d", data);
-				frameBuffer->paintBoxRel(xpos2, ypos+ mheight, 80, mheight, COL_MENUCONTENT);
+				frameBuffer->paintBox(xpos2, ypos+ mheight, x+width-105, ypos+ mheight+mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos2, ypos+ 2* mheight, width, cb, COL_MENUCONTENT);
 			}
 			else
@@ -147,10 +140,17 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			{
 				char cb[10];
 				sprintf(cb, "%d", data);
-				frameBuffer->paintBoxRel(xpos1, ypos, 80, mheight, COL_MENUCONTENT);
+				frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
 			}
-            else
+			else
+			if ( msg == NeutrinoMessages::EVT_SCAN_PROVIDER )
+			{
+				frameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight+2, width-20, mheight, COL_MENUCONTENT);
+				g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE);
+				delete (unsigned char*) data;
+			}
+			else
 			if ( msg == NeutrinoMessages::EVT_SCAN_COMPLETE )
 			{
 				finish= true;
