@@ -268,7 +268,8 @@ int CRCInput::messageLoop( bool anyKeyCancels, int timeout )
 			}
 			else if ( mr & messages_return::unhandled )
 			{
-				if ( msg <= CRCInput::RC_MaxRC )
+				if ((msg <= CRCInput::RC_MaxRC) &&
+				    (data == 0))                     /* <- button pressed */
 				{
 					if ( anyKeyCancels )
 						doLoop = false;
@@ -994,9 +995,9 @@ void CRCInput::clearRCMsg()
 *       isNumeric - test if key is 0..9
 *
 **************************************************************************/
-bool CRCInput::isNumeric(unsigned int key)
+bool CRCInput::isNumeric(const unsigned int key)
 {
-	if( (key>=RC_0) && (key<=RC_9))
+	if ((key == RC_0) || ((key >= RC_1) && (key <= RC_9)))
 		return true;
 	else
 		return false;
@@ -1088,12 +1089,6 @@ int CRCInput::translate(int code)
 
 	switch (code)
 	{
-			case KEY_POWER:
-			return RC_standby;
-			case KEY_HOME:
-			return RC_home;
-			case KEY_SETUP:
-			return RC_setup;
 			case KEY_0:
 			return RC_0;
 			case KEY_1:
@@ -1114,36 +1109,25 @@ int CRCInput::translate(int code)
 			return RC_8;
 			case KEY_9:
 			return RC_9;
-			case KEY_BLUE:
-			return RC_blue;
-			case KEY_YELLOW:
-			return RC_yellow;
-			case KEY_GREEN:
-			return RC_green;
-			case KEY_RED:
-			return RC_red;
-			case KEY_PAGEUP:
-			return RC_page_up;
-			case KEY_PAGEDOWN:
-			return RC_page_down;
+			case KEY_HOME:
 			case KEY_UP:
-			return RC_up;
-			case KEY_DOWN:
-			return RC_down;
+			case KEY_PAGEUP:
 			case KEY_LEFT:
-			return RC_left;
 			case KEY_RIGHT:
-			return RC_right;
-			case KEY_OK:
-			return RC_ok;
-			case KEY_VOLUMEUP:
-			return RC_plus;
-			case KEY_VOLUMEDOWN:
-			return RC_minus;
+			case KEY_DOWN:
+			case KEY_PAGEDOWN:
 			case KEY_MUTE:
-			return RC_spkr;
+			case KEY_VOLUMEDOWN:
+			case KEY_VOLUMEUP:
+			case KEY_POWER:
 			case KEY_HELP:
-			return RC_help;
+			case KEY_SETUP:
+			case KEY_OK:
+			case KEY_RED:
+			case KEY_GREEN:
+			case KEY_YELLOW:
+			case KEY_BLUE:
+				return code;
 			default:
 			//perror("unknown old rc code");
 			return RC_nokey;

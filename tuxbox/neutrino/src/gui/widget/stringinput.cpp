@@ -206,7 +206,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		{
 			keyRightPressed();
 		}
-		else if ( ( msg>= 0 ) && ( msg<= 9) )
+		else if (CRCInput::isNumeric(msg))
 		{
 			key0_9Pressed( msg );
 		}
@@ -488,7 +488,7 @@ int CPINInput::exec( CMenuTarget* parent, string )
 		{
 			keyRightPressed();
 		}
-		else if ( ( msg>= 0 ) && ( msg<= 9) )
+		else if (CRCInput::isNumeric(msg))
 		{
 			int old_selected = selected;
 			key0_9Pressed( msg );

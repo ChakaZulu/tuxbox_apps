@@ -189,7 +189,7 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 				}
 			}
 		}
-		else if ( ((msg>= 0) && (msg<=9)) || (msg == CRCInput::RC_red) || (msg == CRCInput::RC_green) || (msg == CRCInput::RC_blue) || (msg == CRCInput::RC_yellow)
+		else if ( (CRCInput::isNumeric(msg)) || (msg == CRCInput::RC_red) || (msg == CRCInput::RC_green) || (msg == CRCInput::RC_blue) || (msg == CRCInput::RC_yellow)
 					|| (msg == CRCInput::RC_up) || (msg == CRCInput::RC_down))
 		{
 			inputFields[selectedChar]->keyPressed(msg);
