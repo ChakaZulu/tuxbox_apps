@@ -44,6 +44,42 @@
 
 using namespace std;
 
+eString getConfigSwapFile(void)
+{
+	eString result;
+	result = readFile(TEMPLATE_DIR + "configSwapFile.tmp");
+	eString th1, th2, th3, th4, th5;
+	eString td1, td2, td3, td4, td5;
+
+	int swapfile = 0;
+	eString procswaps = readFile("/proc/swaps");
+	std::stringstream tmp;
+	tmp.str(procswaps);
+	tmp >> th1 >> th2 >> th3 >> th4 >> th5 >> td1 >> td2 >> td3 >> td4 >> td5;
+	if (!td1)
+	{
+		th1 = "&nbsp;"; th2 = th3 = th4 = th5 = "&nbsp;";
+		td1 = "none"; td2 = td3 = td4 = td5 = "&nbsp;";
+	}
+	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
+	char *swapfilename;
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
+		swapfilename = "";
+	result.strReplace("#SWAP#", (swapfile == 1) ? "checked" : "");
+	result.strReplace("#SWAPFILE#", eString(swapfilename));
+	result.strReplace("#TH1#", th1);
+	result.strReplace("#TH2#", th2);
+	result.strReplace("#TH3#", th3);
+	result.strReplace("#TH4#", th4);
+	result.strReplace("#TH5#", th5);
+	result.strReplace("#TD1#", td1);
+	result.strReplace("#TD2#", td2);
+	result.strReplace("#TD3#", td3);
+	result.strReplace("#TD4#", td4);
+	result.strReplace("#TD5#", td5);
+	return result;
+}
+
 void deactivateSwapFile(eString swapFile)
 {
 	eString cmd;

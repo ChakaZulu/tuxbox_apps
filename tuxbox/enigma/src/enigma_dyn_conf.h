@@ -6,6 +6,7 @@ class eHTTPDynPathResolver;
 #ifndef DISABLE_FILE
 void ezapConfInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb);
 eString getConfigSettings(void);
+eString getConfigSwapFile(void);
 #endif
 
 #endif /* __enigma_dyn_conf_h */
