@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.25 2004/02/20 23:13:17 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.26 2004/02/24 23:03:08 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,11 @@ $Id: dsmcc_str.h,v 1.25 2004/02/20 23:13:17 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.26  2004/02/24 23:03:08  rasc
+private data of DSMCC::DSI
+BIOP::ServiceGatewayInformation()
+IOP::IOR()
+
 Revision 1.25  2004/02/20 23:13:17  rasc
 BIOP:  TapUse
 
@@ -167,6 +172,7 @@ char *dsmccStr_transactionID_originator (u_int id);
 
 
 char *dsmccStrBIOP_TabUse (u_int id);
+char *dsmccStrIOP_ProfileID (u_int id);
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.21 2004/02/20 22:18:38 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.22 2004/02/24 23:03:05 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: dsmcc_carousel_descriptor.c,v 1.21 2004/02/20 22:18:38 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.22  2004/02/24 23:03:05  rasc
+private data of DSMCC::DSI
+BIOP::ServiceGatewayInformation()
+IOP::IOR()
+
 Revision 1.21  2004/02/20 22:18:38  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -336,6 +341,15 @@ void descriptorDSMCC_compressed_module (u_char *b)
   outBit_S2x_NL(4,"compression_method: ",  b,16, 8,
 			(char *(*)(u_long)) dsmccStr_compression_method);
   outBit_S2Tx_NL (4,"original_size: ", b,24,32, "(bytes)");
+
+  // Module data stored in the following structure: 
+  // zlib structure(){
+  //	compression_method 1
+  //	flags_check 1
+  //	compressed_data n
+  // 	check value 4
+  // }
+
 }
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_unm_dsi.c,v 1.3 2004/02/17 23:54:12 rasc Exp $
+$Id: dsmcc_unm_dsi.c,v 1.4 2004/02/24 23:03:04 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: dsmcc_unm_dsi.c,v 1.3 2004/02/17 23:54:12 rasc Exp $
 
 
 $Log: dsmcc_unm_dsi.c,v $
+Revision 1.4  2004/02/24 23:03:04  rasc
+private data of DSMCC::DSI
+BIOP::ServiceGatewayInformation()
+IOP::IOR()
+
 Revision 1.3  2004/02/17 23:54:12  rasc
 Bug (not fixed yet): DSM-CC  DII Carousel Descriptor Loop is strange
 
@@ -36,6 +41,8 @@ DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 #include "dvbsnoop.h"
 #include "dsmcc_unm_dsi.h"
 #include "dsmcc_misc.h"
+#include "dsmcc_grpinfind.h"
+#include "biop_servgatinf.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
 
@@ -54,6 +61,7 @@ int dsmcc_DownloadServerInitiate (int v, u_char *b, u_int len)
    int   	len_org = len;
    int		len2;
    int		x;
+   u_long	uu_type_id;
 
 
 
@@ -64,14 +72,30 @@ int dsmcc_DownloadServerInitiate (int v, u_char *b, u_int len)
 
 	x = dsmcc_CompatibilityDescriptor (b+20);
 	b += 20+x;
-	len -= 20+x;
+	// len -= 20+x;
 
 	len2 = outBit_Sx_NL (v,"privateDataLength: ",	b,  0, 16);
-	b += 2;
-	// $$$ TODO  Super-group-Info  && carousel descr.
-	// GroupStruct + dsmcc_CarouselDescriptor_Loop ("GroupInfo", b, len);
+	b += 2; 
+	// len -= 2;
 
-	print_databytes (v, "private data: ", b, len2);
+	// DataCarousel: GroupInfoByte structure + dsmcc_CarouselDescriptors
+	// ObjectCarousel: BIOP::ServiceGatewayInformation
+	// because we do not know, if DC or OC, we make a check for BIOP
+	// U-U Objects type_id "src\0"  and "DSM:"
+	// (normally we should remember a databroadcast_id for decision)
+	
+	out (v,"guessing private data: ");
+	uu_type_id = getBits (b+4, 0, 0, 32);
+	if (uu_type_id != 0x73726700 && uu_type_id != 0x53443a4d ) {
+		// Data Carousel
+		dsmcc_GroupInfoIndication (v, b, len2);
+	} else {
+		// Object Carousel
+		BIOP_ServiceGatewayInfo   (v, b, len2);
+	}
+
+	// b += len2;
+	// len -= len2;
 
 	return len_org;
 }
@@ -103,29 +127,12 @@ int dsmcc_DownloadServerInitiate (int v, u_char *b, u_int len)
 // structure as defined in table 37.
 //
 // --> SuperGroupInfo
-
-
-/* $$$ TODO
-GroupInfoIndication() {
-NumberOfGroups 2
-for(i=0;i< numberOfGroups;i++) {
-GroupId 4
-GroupSize 4
-GroupCompatibility()
-GroupInfoLength 2
-for(i=0;i<N;I++) {
-groupInfoByte
-}
-1
-}
-PrivateDataLength 2
-for(i=0;i< privateDataLength;i++) {
-privateDataByte
-}
-1
-}
-
 // groupInfobyte may contain BIOP, descriptor_carousel_loopm etc.
 
+// Or 
+//
+// PrivateDataBytes   may Contain BIOP::ServiceGateway Info
+// $$$ TO be checked!!!!!
 
-*/
+
+

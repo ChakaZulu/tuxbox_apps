@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.31 2004/02/20 23:13:17 rasc Exp $
+$Id: dsmcc_str.c,v 1.32 2004/02/24 23:03:07 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: dsmcc_str.c,v 1.31 2004/02/20 23:13:17 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.32  2004/02/24 23:03:07  rasc
+private data of DSMCC::DSI
+BIOP::ServiceGatewayInformation()
+IOP::IOR()
+
 Revision 1.31  2004/02/20 23:13:17  rasc
 BIOP:  TapUse
 
@@ -1175,6 +1180,42 @@ char *dsmccStrBIOP_TabUse (u_int id)
   return findTableID (TableIDs, id);
 }
 
+
+
+
+/*
+  -- DSM-CC  IOP ProfileID
+  -- ISO/IEC 13816-6
+  -- Profile Tags 0x49534F00 - 0x49534F0F (the first 3 octets spell ISO)
+*/
+
+char *dsmccStrIOP_ProfileID (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x49534f00, 0x49534f00,   "TAG_MIN" },
+	{ 0x49534f01, 0x49534f01,   "TAG_CHILD" },
+	{ 0x49534f02, 0x49534f02,   "TAG_OPTIONS" },
+	{ 0x49534f03, 0x49534f03,   "TAG_LITE_MIN" },
+	{ 0x49534f04, 0x49534f04,   "TAG_LITE_CHILD" },
+	{ 0x49534f05, 0x49534f05,   "TAG_LITE_OPTIONS" },
+	{ 0x49534f06, 0x49534f06,   "TAG_BIOP" },
+	{ 0x49534f07, 0x49534f07,   "TAG_ONC" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+// IOP::component_IDs
+//	{ 0x49534f40, 0x49534f40,   "TAG_ConnBinder" },
+//	{ 0x49534f41, 0x49534f41,   "TAG_IIOPAddr" },
+//	{ 0x49534f42, 0x49534f42,   "TAG_Addr" },
+//	{ 0x49534f43, 0x49534f43,   "TAG_NameId" },
+//	{ 0x49534f44, 0x49534f44,   "TAG_IntfCode" },
+//	{ 0x49534f45, 0x49534f45,   "TAG_ObjectKey" },
+//	{ 0x49534f46, 0x49534f46,   "TAG_ServiceLocation" },
+//	{ 0x49534f50, 0x49534f50,   "TAG_ObjectLocation" },
+//	{ 0x49534f58, 0x49534f58,   "TAG_Intf" },
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.17 2004/02/20 22:18:39 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.18 2004/02/24 23:03:05 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: mpeg_descriptor.c,v 1.17 2004/02/20 22:18:39 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.18  2004/02/24 23:03:05  rasc
+private data of DSMCC::DSI
+BIOP::ServiceGatewayInformation()
+IOP::IOR()
+
 Revision 1.17  2004/02/20 22:18:39  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -1216,6 +1221,7 @@ void descriptorMPEG_Deferred_Association_tags (u_char *b)
  len -= 6;
 
  out_SW_NL  (4,"Transport_stream_ID: ",d.transport_stream_id);
+ out_SW_NL  (4,"Program_number: ",d.program_number);
  out_S2W_NL (4,"Original_network_ID: ",d.org_network_id,
 	dvbstrOriginalNetwork_ID(d.org_network_id));
 

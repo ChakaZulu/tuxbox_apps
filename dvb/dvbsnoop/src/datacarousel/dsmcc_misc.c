@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.12 2004/02/20 23:13:17 rasc Exp $
+$Id: dsmcc_misc.c,v 1.13 2004/02/24 23:03:04 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,11 @@ $Id: dsmcc_misc.c,v 1.12 2004/02/20 23:13:17 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.13  2004/02/24 23:03:04  rasc
+private data of DSMCC::DSI
+BIOP::ServiceGatewayInformation()
+IOP::IOR()
+
 Revision 1.12  2004/02/20 23:13:17  rasc
 BIOP:  TapUse
 
@@ -496,18 +501,20 @@ int dsmcc_CarouselDescriptor_Loop (const char *s, u_char *b, int len)
    int len_org = len;
 
 
-  out_nl (4,"%s  (Carousel Descriptor loop):", s);
+  if (len > 0) {
+	  out_nl (4,"%s  (Carousel Descriptor loop):", s);
 
-  indent (+1);
-  while (len > 0) {
-	int  x;
+	  indent (+1);
+	  while (len > 0) {
+		int  x;
 
- 	x   = descriptor (b,  DSMCC_CAROUSEL);
-	b += x;
-	len -= x;
+ 		x   = descriptor (b,  DSMCC_CAROUSEL);
+		b += x;
+		len -= x;
+  	}
+	  out_NL (4);
+  	indent (-1);
   }
-  out_NL (4);
-  indent (-1);
 
   return len_org;
 }

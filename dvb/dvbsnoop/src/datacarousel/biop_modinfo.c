@@ -1,5 +1,5 @@
 /*
-$Id: biop_modinfo.c,v 1.2 2004/02/20 23:13:17 rasc Exp $
+$Id: biop_modinfo.c,v 1.3 2004/02/24 23:03:04 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,11 @@ $Id: biop_modinfo.c,v 1.2 2004/02/20 23:13:17 rasc Exp $
 
 
 $Log: biop_modinfo.c,v $
+Revision 1.3  2004/02/24 23:03:04  rasc
+private data of DSMCC::DSI
+BIOP::ServiceGatewayInformation()
+IOP::IOR()
+
 Revision 1.2  2004/02/20 23:13:17  rasc
 BIOP:  TapUse
 
@@ -38,7 +43,6 @@ some minor changes...
 #include "dvbsnoop.h"
 #include "biop_modinfo.h"
 #include "dsmcc_misc.h"
-#include "descriptors/descriptor.h"
 
 #include "misc/output.h"
 #include "misc/hexprint.h"
@@ -56,7 +60,7 @@ some minor changes...
  */
 
 
-int biop_ModuleInfo (int v, u_char *b, u_int len)
+int BIOP_ModuleInfo (int v, u_char *b, u_int len)
 {
    int   	len_org = len;
    int 		n1;

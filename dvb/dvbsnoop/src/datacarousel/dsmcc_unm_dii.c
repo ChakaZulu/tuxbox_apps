@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_unm_dii.c,v 1.4 2004/02/20 22:18:38 rasc Exp $
+$Id: dsmcc_unm_dii.c,v 1.5 2004/02/24 23:03:04 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: dsmcc_unm_dii.c,v 1.4 2004/02/20 22:18:38 rasc Exp $
 
 
 $Log: dsmcc_unm_dii.c,v $
+Revision 1.5  2004/02/24 23:03:04  rasc
+private data of DSMCC::DSI
+BIOP::ServiceGatewayInformation()
+IOP::IOR()
+
 Revision 1.4  2004/02/20 22:18:38  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -84,7 +89,7 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 	b += 2;
 	len -= 2;
 
-	for (i=1; i <= n_modules; i++) {
+	for (i=0; i < n_modules; i++) {
 		u_int    mId;
 
 		out_NL (v);
@@ -109,7 +114,7 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 		// ISO 13818-6:2000  11.3.3.2
 
 		if (mId < 0xFFF0) {
-			biop_ModuleInfo (v, b, len2);
+			BIOP_ModuleInfo (v, b, len2);
 		} else {
 			print_databytes (v, "moduleInfoBytes: ", b, len2);  // $$$ TODO Davic
 		}
