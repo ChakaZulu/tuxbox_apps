@@ -86,13 +86,13 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		while( !doexit )
 		{
 			tv.tv_sec = 0;
-			tv.tv_usec = 90000;
+			tv.tv_usec = 80000;
 			x = select( 0, 0, 0, 0, &tv );		/* 50ms pause */
 			RcGetActCode( );
 			RunKey();
 			UnanimatedDeko();
-			RunLemm();
 			AnimateDeko();
+			RunLemm();
 			dblDrawFrame( 0 );
 #ifdef USEX
 			FBFlushGrafic();

@@ -23,6 +23,7 @@ extern	unsigned short	realcode;
 extern	unsigned short	actcode;
 
 extern	unsigned char	*GetAniPic( int idx, int ani, int *width, int *height );
+extern	unsigned char	*GetMirrorPic( char picid );
 extern	int				LoadPics( void );
 extern	void			SoundPlay( int pnr );
 extern	void			SoundStart( void );
@@ -542,7 +543,7 @@ void	InitLevel( void )
 			break;
 		case 1 :
 			portfolio[7]=10;
-#if 0
+#if 1
 portfolio[6]=10;
 portfolio[4]=10;
 portfolio[3]=10;
@@ -1175,6 +1176,7 @@ static	int		blinkc=0;
 	int			cursor_get=0;
 	int			kab=0;
 	int			hbk=0;	// hat boden kontakt
+//int			hhy=0;
 
 	blinkc++;
 
@@ -1406,20 +1408,39 @@ static	int		blinkc=0;
 						hbk=isBrick(s->x+1,s->y+s->height+1,0)||
 								isBrick(s->x-2+s->width,s->y+s->height+1,0);
 						break;
+					case TYP_DIGDIAG :
+						hbk=isBrick(s->x+10,s->y+s->height-2,0)||
+								isBrick(s->x+11,s->y+s->height-2,0);
+						break;
+					case TYP_BUILDER :
+						hbk=1;
+						break;
 					}
 					if ( !hbk )
 					{
 #if 0
-if ( s->type & TYP_STOPPER )
+if ( s->type & TYP_DIGDIAG )
 {
-hhy=s->y+s->height;
+hhy=s->y+s->height-2;
 printf("kein boden on %d, %d\n",s->x,s->y+s->height);
 }
 #endif
 						if( !( s->type&TYP_WALKER ) )
 						{
-							if ( s->type & TYP_STOPPER )
+							switch( s->type & TYP_WORK )
+							{
+							case TYP_STOPPER :
 								bgRect(s->x+1,s->y,s->width-1,s->height-2,14);
+								break;
+							case TYP_DIGDIAG :
+								s->y+=5;
+								if ( !s->dir )
+									s->x+=7;
+								break;
+							case TYP_DIGDOWN :
+								s->y+=2;
+								break;
+							}
 							s->type=TYP_WALKER|(s->type&TYP_UTILS);
 							SpriteChangePic( s, 3 );	// lemming1-faller
 							if ( s->dir )
@@ -1557,20 +1578,25 @@ printf("kein boden on %d, %d\n",s->x,s->y+s->height);
 						}	/* digger */
 						else if(s&&(s->type&TYP_DIGDIAG))
 						{
-							unsigned char	c=118;	// stair
+							if ( s->ani == 8 )
+							{
+								if ( s->dir )
+								{
+									unsigned char *data = GetMirrorPic(34);
+									bg2CopyImage(s->x,s->y+2,5,14,data);
+								}
+								else
+								{
+									inBg(34,0,s->x+12,s->y+2);
+								}
+							}
 							if ( !s->ani )
 							{
 								s->y+=1;
 								if ( s->dir )
-								{
-									inBg(30,0,s->x,s->y);
 									s->x-=2;
-								}
 								else
-								{
-									inBg(30,0,s->x+3,s->y+3);
 									s->x+=2;
-								}
 							}
 						}
 					}	/* freier fall */

@@ -15,7 +15,7 @@
 #include <malloc.h>
 
 #include <pics.h>
-#define	COMPSZ	7302
+#define	COMPSZ	7882
 
 extern	int		doexit;
 
@@ -31,7 +31,7 @@ typedef struct _Pic
 	int				height;
 } Pic;
 
-#define	NUMPICS		33
+#define	NUMPICS		35
 
 static	Pic	pics[] = {
 { 0,	0,	2,	14,	14 },		// 0 cursor
@@ -65,8 +65,10 @@ static	Pic	pics[] = {
 { 0,	0,	1,	32,	32 },
 { 0,	0,	5,	9,	13 },	// 29 menu-icons (no ani)
 { 0,	0,	1,	14, 14 }, 	// 30 level6 short mask
-{ 0,	0,  17, 9,  13 },	// lemming - builder
-{ 0,	0,  8, 	8,  11 }	// lemming - builder - ende
+{ 0,	0,  17, 9,  13 },	// 31 lemming - builder
+{ 0,	0,  8, 	8,  11 },	// 32 lemming - builder - ende
+{ 0,	0,	22,	17,	17 },	// 33 lemming - hacke
+{ 0,	0,	1,	5,	14 }	// 34 maske hacke
 };
 
 static	int		piccolors[] = {
@@ -182,7 +184,7 @@ static	int		piccolors[] = {
 
 #if 0
 #include <tools.c.mayk>
-#include <i32.h>
+#include <i33.h>
 #endif
 
 int	LoadPics( void )
@@ -210,7 +212,7 @@ int	LoadPics( void )
 
 #if 0
 // add new
-	pics[32].pic_data=p32_data;
+	pics[34].pic_data=px_data;
 	WritePics();
 #endif
 
