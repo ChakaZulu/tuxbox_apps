@@ -15,16 +15,14 @@ public:
 	ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* descr=0);
 };
 
-class eZapPlugins: public Object
+class eZapPlugins: public eListBoxWindow<ePlugin>
 {
-	eListBoxWindow<ePlugin> *window;
 private:
 	void selected(ePlugin *);
 public:
 	eZapPlugins(eWidget* lcdTitle=0, eWidget* lcdElement=0);
 	void execPluginByName(const char* name);
 	void execPlugin(ePlugin* plugin);
-	~eZapPlugins();
 	int exec();
 };
 

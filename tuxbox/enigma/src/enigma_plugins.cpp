@@ -121,12 +121,12 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 }
 
 eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
+	:eListBoxWindow<ePlugin>(_("Plugins"), 10, 400, true)
 {
-	window=new eListBoxWindow<ePlugin>(_("Plugins"), 10, 400);
-	window->move(ePoint(150, 136));
-	window->setLCD(lcdTitle, lcdElement);
-	new ePlugin(&window->list, 0);
-	CONNECT(window->list.selected, eZapPlugins::selected);
+	move(ePoint(150, 50));
+	setLCD(lcdTitle, lcdElement);
+	new ePlugin(&list, 0);
+	CONNECT(list.selected, eZapPlugins::selected);
 }
 
 int eZapPlugins::exec()
@@ -151,22 +151,17 @@ int eZapPlugins::exec()
 		eString	FileName = namelist[count]->d_name;
 
 		if ( FileName.find(".cfg") != eString::npos )
-			new ePlugin(&window->list, (PluginPath+FileName).c_str());		
+			new ePlugin(&list, (PluginPath+FileName).c_str());		
 
 		free(namelist[count]);
   }
 
 	free(namelist);
 
-	window->show();
-	int res=window->exec();
-	window->hide();
+	show();
+	int res=eListBoxWindow<ePlugin>::exec();
+	hide();
 	return res;
-}
-
-eZapPlugins::~eZapPlugins()
-{
-	delete window;
 }
 
 void eZapPlugins::execPluginByName(const char* name)
@@ -185,7 +180,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 
 	if (plugin->depend)
 	{
-		char	depstring[129];
+ 		char	depstring[129];
 		char	*p;
 		char	*np;
 
@@ -216,7 +211,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		MakeParam(P_ID_RCINPUT, eRCInput::getInstance()->lock());
 
 	if (plugin->needlcd)
-		MakeParam(P_ID_LCD, eLCD::getPrimary()->lock());
+		MakeParam(P_ID_LCD,	eDBoxLCD::getInstance()->lock() );
 
 	if (plugin->needoffsets)
 	{
@@ -247,12 +242,11 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		}
 	}
 
-/*	for(PluginParam *par = first; par; par=par->next )
+	for(PluginParam *par = first; par; par=par->next )
 	{
 		printf ("id: %s - val: %s\n", par->id, par->val);
-		printf("%d\n", par->next);
+		printf("%p\n", par->next);
 	}
-*/
 
 	for (i=0; i<argc; i++)
 	{
@@ -309,7 +303,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		eRCInput::getInstance()->unlock();
 
 	if (plugin->needlcd)
-		eLCD::getPrimary()->unlock();
+		eDBoxLCD::getInstance()->unlock();
 
  	if (plugin->needvtxtpid)
  	{
@@ -329,11 +323,11 @@ void eZapPlugins::selected(ePlugin *plugin)
 {
 	if (!plugin || !plugin->pluginname )
 	{
-		window->close(0);
+		close(0);
 		return;
 	}
 	execPlugin(plugin);
 
-	window->hide();
-	window->show();
+	hide();
+	show();
 }

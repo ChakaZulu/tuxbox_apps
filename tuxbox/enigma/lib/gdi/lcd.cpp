@@ -12,31 +12,18 @@
 #include <core/gdi/glcddc.h>
 #include <core/system/econfig.h>
 
-eLCD *eLCD::primary;
-
 eDBoxLCD *eDBoxLCD::instance;
 
 eLCD::eLCD(eSize size): res(size)
 {
-	locked = 0;
+	locked=0;
 	_buffer=new unsigned char[res.height()*res.width()];
 	_stride=res.width();
-	if (!primary)
-		primary=this;
 }
 
 eLCD::~eLCD()
 {
-	if (this==primary)
-	{
-		primary=0;
-		delete [] _buffer;
-	}	
-}
-
-eLCD *eLCD::getPrimary()
-{
-	return primary;
+	delete [] _buffer;
 }
 
 int eLCD::lock()

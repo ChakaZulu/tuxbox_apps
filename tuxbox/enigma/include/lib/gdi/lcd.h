@@ -13,7 +13,6 @@
 class eLCD
 {
 protected:
-	static eLCD *primary;
 	eSize res;
 	unsigned char *_buffer;
 	int lcdfd;
@@ -25,7 +24,6 @@ public:
 
 	eLCD(eSize size);
 	virtual ~eLCD();
-	static eLCD *getPrimary();
 
 	__u8 *buffer() { return (__u8*)_buffer; }
 	int stride() { return _stride; }

@@ -22,7 +22,6 @@ gLCDDC::gLCDDC(eLCD *lcd): lcd(lcd)
 gLCDDC::~gLCDDC()
 {
 	delete pixmap;
-	delete lcd;
 	instance=0;
 }
 
