@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.21 2001/10/10 02:53:47 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.22 2001/10/10 14:56:30 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.22  2001/10/10 14:56:30  fnbrd
+//  tsid wird bei nvod mitgeschickt
+//
 //  Revision 1.21  2001/10/10 02:53:47  fnbrd
 //  Neues kommando (noch nicht voll funktionsfaehig).
 //
@@ -292,6 +295,7 @@ struct sectionsd {
 //   data of response:
 //     for every (sub-)channel
 //       channelID (4 byte, onid<<16+sid)
+//       transportStreamID (2 byte)
 //       number of start times (1 byte)
 //       start time 1 (4 bytes ctime)
 //       ...

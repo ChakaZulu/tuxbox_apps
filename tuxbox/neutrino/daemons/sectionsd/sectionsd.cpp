@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.65 2001/10/10 02:53:47 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.66 2001/10/10 14:56:30 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.66  2001/10/10 14:56:30  fnbrd
+//  tsid wird bei nvod mitgeschickt
+//
 //  Revision 1.65  2001/10/10 02:53:47  fnbrd
 //  Neues kommando (noch nicht voll funktionsfaehig).
 //
@@ -1163,7 +1166,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.65 2001/10/10 02:53:47 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.66 2001/10/10 14:56:30 fnbrd Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1840,7 +1843,7 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
   if(si!=mySIservicesNVODorderUniqueKey.end()) {
     dprintf("NVODServices: %u\n", si->second->nvods.size());
     if(si->second->nvods.size()) {
-      responseHeader.dataLength=(4+1+4)*si->second->nvods.size();
+      responseHeader.dataLength=(4+2+1+4)*si->second->nvods.size();
       msgData=new char[responseHeader.dataLength];
       if(!msgData) {
 	fprintf(stderr, "low on memory!\n");
@@ -1855,6 +1858,8 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
         // Zeiten sind erstmal dummy, d.h. pro Service eine Zeit
         *(unsigned *)p=ni->uniqueKey();
         p+=4;
+        *(unsigned short *)p=ni->transportStreamID;
+        p+=2;
         *p=1;
 	p++;
         *(time_t *)p=t;
@@ -2531,7 +2536,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.65 2001/10/10 02:53:47 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.66 2001/10/10 14:56:30 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
