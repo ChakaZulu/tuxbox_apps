@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.83 2004/04/02 23:56:32 zwen Exp $
+  $Id: movieplayer.cpp,v 1.84 2004/04/05 15:05:19 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -201,14 +201,14 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		frameBuffer->ClearFrameBuffer();
 	}
 
-	CBookmark * theBookmark=NULL;
-    if (actionKey=="bookmarkplayback") {
-        isBookmark = true;
-        theBookmark = bookmarkmanager->getBookmark(NULL);
-        if (theBookmark == NULL) {
-            bookmarkmanager->flush();
-            return menu_return::RETURN_REPAINT;
-        }
+	const CBookmark * theBookmark = NULL;
+	if (actionKey=="bookmarkplayback") {
+		isBookmark = true;
+		theBookmark = bookmarkmanager->getBookmark(NULL);
+		if (theBookmark == NULL) {
+			bookmarkmanager->flush();
+			return menu_return::RETURN_REPAINT;
+		}
 	}
 	
 	// set zapit in standby mode
@@ -252,7 +252,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
         isBookmark = true;
         if (theBookmark != NULL) {
             startfilename = theBookmark->getUrl();
-            sscanf (theBookmark->getTime().c_str(), "%lld", &startposition);
+            sscanf (theBookmark->getTime(), "%lld", &startposition);
             int vlcpos = startfilename.rfind("vlc://");
             if (vlcpos==0)
             {
@@ -1660,7 +1660,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.83 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.84 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1832,7 +1832,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.83 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.84 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)

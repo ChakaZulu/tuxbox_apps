@@ -38,7 +38,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
 
 #include <driver/framebuffer.h>
 #include <gui/widget/menue.h>
@@ -48,23 +47,18 @@
 
 class CBookmark
 {
-    private:
-        std::string name;
-        std::string url;
-        std::string time;
-
-    public:
-    	CBookmark(std::string name, std::string url, std::string time);
-    	CBookmark();
-    	~CBookmark();
-    	std::string getName();                
-    	std::string getUrl();                
-    	std::string getTime();
-    	void setName(std::string name);                
-    	void setUrl(std::string url);
-    	void setTime(std::string time);
-
-            
+ private:
+	std::string name;
+	std::string url;
+	std::string time;
+ public:
+	CBookmark(const std::string & name, const std::string & url, const std::string & time);
+	const char * const getName(void) const { return name.c_str(); };
+	const char * const getUrl (void) const { return url .c_str(); };
+	const char * const getTime(void) const { return time.c_str(); };                
+	inline void setName(const std::string & new_name) { name = new_name; };
+	inline void setUrl (const std::string & new_url ) { url  = new_url ; };
+	inline void setTime(const std::string & new_time) { time = new_time; };
 };
 
 //-----------------------------------------
@@ -96,7 +90,7 @@ class CBookmarkManager
 	CBookmark getBookmark();
 	int addBookmark(CBookmark inBookmark);
 	
-    void paintItem(int pos);
+	void paintItem(int pos);
 	void paint();
 	void paintHead();
 	void paintFoot();
@@ -107,16 +101,15 @@ class CBookmarkManager
  public:
 	CBookmarkManager();
 	~CBookmarkManager();
-	int createBookmark(std::string name, std::string url, std::string time);
-	int createBookmark(std::string url, std::string time);
-	int createBookmark(CBookmark bookmark);
+	int createBookmark(const std::string & name, const std::string & url, const std::string & time);
+	int createBookmark(const std::string & url, const std::string & time);
 	void removeBookmark(unsigned int index);
 	void renameBookmark(unsigned int index);
-	int getBookmarkCount();
-	int getMaxBookmarkCount();
+	int getBookmarkCount(void) const;
+	int getMaxBookmarkCount(void) const;
 	void flush();
 	
-	CBookmark * getBookmark(CMenuTarget* parent);
+	const CBookmark * getBookmark(CMenuTarget* parent);
 };
 
 #endif

@@ -4,7 +4,7 @@
   Part of Movieplayer (c) 2003, 2004 by gagga
   Based on code by Zwen. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.7 2004/03/13 16:45:51 thegoodguy Exp $
+  $Id: bookmarkmanager.cpp,v 1.8 2004/04/05 15:05:19 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -54,80 +54,44 @@
 #define info_height 60
 
 
-CBookmark::CBookmark(std::string inName, std::string inUrl, std::string inTime)
+CBookmark::CBookmark(const std::string & inName, const std::string & inUrl, const std::string & inTime)
 {
-    name = inName;
-    url = inUrl;
-    time = inTime;
-}
-
-CBookmark::~CBookmark() {
-}
-
-
-std::string CBookmark:: getName() {
-    return name;
-}
-
-std::string CBookmark:: getUrl() {
-    return url;
-}
-
-std::string CBookmark:: getTime() {
-    return time;
-}
-
-void CBookmark:: setName(std::string inName) {
-    name = inName;
-}
-void CBookmark:: setUrl(std::string inUrl) {
-    url = inUrl;
-}
-
-void CBookmark:: setTime(std::string inTime) {
-    time = inTime;
+	name = inName;
+	url = inUrl;
+	time = inTime;
 }
 
 //------------------------------
 
 int CBookmarkManager::addBookmark (CBookmark inBookmark) {
-    if (bookmarks.size() < MAXBOOKMARKS) {
-        bookmarks.push_back(inBookmark);
-        printf("CBookmarkManager: addBookmark: %s %s\n",inBookmark.getName().c_str(), inBookmark.getTime().c_str());
-        bookmarksmodified = true;
-        return 0;
-    }
+	if (bookmarks.size() < MAXBOOKMARKS)
+	{
+		bookmarks.push_back(inBookmark);
+		printf("CBookmarkManager: addBookmark: %s %s\n", inBookmark.getName(), inBookmark.getTime());
+		bookmarksmodified = true;
+		return 0;
+	}
     // TODO:show dialog to delete old bookmark
     return -1;    
 }
 
 //------------------------------------------------------------------------
-
-int CBookmarkManager::createBookmark (CBookmark inBookmark) {
-    addBookmark(inBookmark);
-    return 0;
+inline int CBookmarkManager::createBookmark (const std::string & name, const std::string & url, const std::string & time) {
+	return addBookmark(CBookmark(name, url, time));
 }
 
-int CBookmarkManager::createBookmark (std::string name, std::string url, std::string time) {
-    CBookmark *bookmark = new CBookmark (name, url, time);
-    return addBookmark(*bookmark);    
-}
-
-int CBookmarkManager::createBookmark (std::string url, std::string time) {
+int CBookmarkManager::createBookmark (const std::string & url, const std::string & time) {
     char bookmarkname[26]="";
-    CStringInputSMS * bookmarkname_input = new CStringInputSMS("movieplayer.bookmarkname", bookmarkname, 25, "movieplayer.bookmarkname_hint1", "movieplayer.bookmarkname_hint1", "abcdefghijklmnopqrstuvwxyz0123456789-_");
-    bookmarkname_input->exec(NULL, "");
-    std::string *namestring = new std::string(bookmarkname);
+    CStringInputSMS bookmarkname_input("movieplayer.bookmarkname", bookmarkname, 25, "movieplayer.bookmarkname_hint1", "movieplayer.bookmarkname_hint1", "abcdefghijklmnopqrstuvwxyz0123456789-_");
+    bookmarkname_input.exec(NULL, "");
     // TODO: return -1 if no name was entered
-    CBookmark *bookmark = new CBookmark (*namestring, url, time);
-    return addBookmark(*bookmark);
-    
+    return createBookmark(std::string(bookmarkname), url, time);
 }
 
 //------------------------------------------------------------------------
 
 void CBookmarkManager::removeBookmark (unsigned int index) {
-    std::vector<CBookmark>::iterator p = bookmarks.begin()+index;
+	std::vector<CBookmark>::iterator p = bookmarks.begin()+index;
 	bookmarks.erase(p);
 	bookmarksmodified=true;
 }
@@ -135,93 +99,110 @@ void CBookmarkManager::removeBookmark (unsigned int index) {
 //------------------------------------------------------------------------
 
 void CBookmarkManager::renameBookmark (unsigned int index) {
-    if (bookmarks.size() == 0 || index>bookmarks.size()) return;
-    CBookmark & theBookmark = bookmarks[index];
-	char bookmarkname[26];
-	strncpy (bookmarkname, theBookmark.getName().c_str(), 25);
-    CStringInputSMS * bookmarkname_input = new CStringInputSMS("movieplayer.bookmarkname", bookmarkname, 25, "movieplayer.bookmarkname_hint1", "movieplayer.bookmarkname_hint1", "abcdefghijklmnopqrstuvwxyz0123456789-_");
-    bookmarkname_input->exec(NULL, "");
-    std::string *namestring = new std::string(bookmarkname);
-    if (theBookmark.getName() != *namestring) {
-        theBookmark.setName(*namestring);
-        bookmarksmodified=true;
-    }
+	if (index >= bookmarks.size())
+		return;
 
+	CBookmark & theBookmark = bookmarks[index];
+	char bookmarkname[26];
+	strncpy (bookmarkname, theBookmark.getName(), 25);
+	CStringInputSMS bookmarkname_input("movieplayer.bookmarkname", bookmarkname, 25, "movieplayer.bookmarkname_hint1", "movieplayer.bookmarkname_hint1", "abcdefghijklmnopqrstuvwxyz0123456789-_");
+	bookmarkname_input.exec(NULL, "");
+
+	if (strcmp(theBookmark.getName(), bookmarkname) != 0)
+	{
+		theBookmark.setName(std::string(bookmarkname));
+		bookmarksmodified=true;
+	}
 }
+
+#define BOOKMARKSTRINGLENGTH (10 + 1)
+#define BOOKMARKSTRINGMODIFICATIONPOINT 8
+const char * const BOOKMARKSTRING = "bookmark0.";
 
 //------------------------------------------------------------------------
 void CBookmarkManager::readBookmarkFile() {
-	if(bookmarkfile.loadConfig(BOOKMARKFILE)) {
-    	bookmarksmodified = false;
-    	bookmarks.clear();
-        int bookmarkcount = bookmarkfile.getInt32( "bookmarkcount", 0 );
-        printf("CBookmarkManager: read bookmarkcount:%d\n",bookmarkcount);
-        if (bookmarkcount > MAXBOOKMARKS) bookmarkcount = MAXBOOKMARKS;
-        //TODO: change to iterator
-        for (int i=0;i<bookmarkcount;i++) {
-            char counterstring[4];
-            sprintf(counterstring, "%d",(i+1));
-            std::string bookmarkstring = "bookmark";
-            bookmarkstring += counterstring;
-            std::string bookmarkname = bookmarkfile.getString(bookmarkstring + ".name","");
-            std::string bookmarkurl = bookmarkfile.getString(bookmarkstring + ".url","");
-            std::string bookmarktime =bookmarkfile.getString(bookmarkstring + ".time","");
-            
-            CBookmark *bookmark = new CBookmark(bookmarkname, bookmarkurl, bookmarktime);
-            bookmarks.push_back(*bookmark);
-            printf("CBookmarkManager: read bookmarkname: %s\n",bookmarks[i].getName().c_str());
-            printf("CBookmarkManager: read bookmarkurl: %s\n",bookmarks[i].getUrl().c_str());
-            printf("CBookmarkManager: read bookmarktime: %s\n",bookmarks[i].getTime().c_str());
-        }
-    }
-    else bookmarkfile.clear();
+	if (bookmarkfile.loadConfig(BOOKMARKFILE))
+	{
+		char bookmarkstring[BOOKMARKSTRINGLENGTH];
+		strcpy(bookmarkstring, BOOKMARKSTRING);
+	
+		bookmarksmodified = false;
+		bookmarks.clear();
+
+		unsigned int bookmarkcount = bookmarkfile.getInt32("bookmarkcount", 0);
+
+		if (bookmarkcount > MAXBOOKMARKS)
+			bookmarkcount = MAXBOOKMARKS;
+
+		while (bookmarkcount-- > 0)
+		{
+			std::string tmp = bookmarkstring;
+			tmp += "name";
+			std::string bookmarkname = bookmarkfile.getString(tmp, "");
+			tmp = bookmarkstring;
+			tmp += "url";
+			std::string bookmarkurl = bookmarkfile.getString(tmp, "");
+			tmp = bookmarkstring;
+			tmp += "time";
+			std::string bookmarktime = bookmarkfile.getString(tmp, "");
+			
+			bookmarks.push_back(CBookmark(bookmarkname, bookmarkurl, bookmarktime));
+
+			bookmarkstring[BOOKMARKSTRINGMODIFICATIONPOINT]++;
+		}
+	}
+	else
+		bookmarkfile.clear();
 }
 
 //------------------------------------------------------------------------
 void CBookmarkManager::writeBookmarkFile() {
-    printf("CBookmarkManager: Writing bookmark file\n");
-    //TODO: change to iterator
-    for (unsigned int i=0;i<bookmarks.size();i++) {
-        char counterstring[4];
-        sprintf(counterstring, "%d",(i+1));
-        std::string bookmarkstring = "bookmark";
-        bookmarkstring.append(counterstring);
-        std::string bookmarknamestring = bookmarkstring + ".name";
-        std::string bookmarkurlstring = bookmarkstring + ".url";
-        std::string bookmarktimestring = bookmarkstring + ".time";
-        bookmarkfile.setString(bookmarknamestring,bookmarks[i].getName());
-        bookmarkfile.setString(bookmarkurlstring,bookmarks[i].getUrl());
-        bookmarkfile.setString(bookmarktimestring,bookmarks[i].getTime());
-    }
-    bookmarkfile.setInt32("bookmarkcount", bookmarks.size());
-    bookmarkfile.saveConfig(BOOKMARKFILE);
+	char bookmarkstring[BOOKMARKSTRINGLENGTH];
+	strcpy(bookmarkstring, BOOKMARKSTRING);
+
+	printf("CBookmarkManager: Writing bookmark file\n");
+	
+	for (std::vector<CBookmark>::const_iterator it = bookmarks.begin(); it != bookmarks.end(); it++)
+	{
+		std::string tmp = bookmarkstring;
+		tmp += "name";
+		bookmarkfile.setString(tmp, it->getName());
+		tmp = bookmarkstring;
+		tmp += "url";
+		bookmarkfile.setString(tmp, it->getUrl());
+		tmp = bookmarkstring;
+		tmp += "time";
+		bookmarkfile.setString(tmp, it->getTime());
+
+		bookmarkstring[BOOKMARKSTRINGMODIFICATIONPOINT]++;
+	}
+	bookmarkfile.setInt32("bookmarkcount", bookmarks.size());
+	bookmarkfile.saveConfig(BOOKMARKFILE);
 }
 
 //------------------------------------------------------------------------
 
 CBookmarkManager::CBookmarkManager() : bookmarkfile ('\t')
 {
-    bookmarks.clear();
-    readBookmarkFile();
-    
+	readBookmarkFile();
 }
 
 //------------------------------------------------------------------------
 
 CBookmarkManager::~CBookmarkManager () {
-    flush();   
+	flush();   
 }
 
 //------------------------------------------------------------------------
 
-int CBookmarkManager::getBookmarkCount() {
-    return bookmarks.size();
+int CBookmarkManager::getBookmarkCount(void) const {
+	return bookmarks.size();
 }
 
 //------------------------------------------------------------------------
 
-int CBookmarkManager::getMaxBookmarkCount() {
-    return MAXBOOKMARKS;    
+int CBookmarkManager::getMaxBookmarkCount(void) const {
+	return MAXBOOKMARKS;    
 }
 
 //------------------------------------------------------------------------
@@ -234,7 +215,7 @@ void CBookmarkManager::flush() {
 
 //------------------------------------------------------------------------
 
-CBookmark * CBookmarkManager::getBookmark(CMenuTarget* parent)
+const CBookmark * CBookmarkManager::getBookmark(CMenuTarget* parent)
 {
 	if(parent)
 	{
@@ -376,8 +357,10 @@ CBookmark * CBookmarkManager::getBookmark(CMenuTarget* parent)
 	}
 	hide();
 
-	if (res >=0 && res < bookmarks.size()) return &bookmarks[res];
-	else return NULL;
+	if ((res >=0) && (((unsigned int)res) < bookmarks.size()))
+		return &bookmarks[res];
+	else
+		return NULL;
 }
 
 //------------------------------------------------------------------------
@@ -421,8 +404,8 @@ void CBookmarkManager::paintItem(int pos)
 		// LCD Display
 		if(liststart+pos==selected)
 		{
-			CLCD::getInstance()->showMenuText(0, theBookmark.getName().c_str(), -1, true); // UTF-8
-			CLCD::getInstance()->showMenuText(1, theBookmark.getUrl().c_str(), -1, true); // UTF-8
+			CLCD::getInstance()->showMenuText(0, theBookmark.getName(), -1, true); // UTF-8
+			CLCD::getInstance()->showMenuText(1, theBookmark.getUrl(), -1, true); // UTF-8
 		}
 	}
 }
