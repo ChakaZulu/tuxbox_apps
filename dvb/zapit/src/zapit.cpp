@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.13 2001/10/12 16:14:21 faralla Exp $
+  $Id: zapit.cpp,v 1.14 2001/10/15 17:23:48 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.14  2001/10/15 17:23:48  field
+  nvod support, tut noch nicht (faralla, schau dir mal das kommando "i" an..?)
+
   Revision 1.13  2001/10/12 16:14:21  faralla
   scan threaded and status-poll
 
@@ -759,7 +762,7 @@ else
 	    //return -3;
 	//}
       //else
-       return -3;
+       return 3;
     }
 
   if (cit->second.pmt == 0 && cit->second.service_type != 4)
@@ -1656,19 +1659,21 @@ void parse_command()
 	}
 	}
 	break;
-       uint nvod_tsid, nvod_onidsid;
+       uint nvod_onidsid, cnt_nvods;
+       ushort  nvod_tsid;
        struct pollfd recv_fd;
        case 'i':
+        printf("i found ...!\n");
        	if (current_is_nvod)
        		status = "00i";
        	else
        		status = "-0i";
-       	if (send(connfd, &status, strlen(status),0) == -1) 
+       	if (send(connfd, status, strlen(status),0) == -1)
 		{
 		  perror("Could not send any retun\n");
 		  return;
 		}
-	recv_fd.fd = connfd;
+/*	recv_fd.fd = connfd;
   	recv_fd.events = POLLIN;
   	recv_fd.revents = 0;
   	
@@ -1684,9 +1689,35 @@ void parse_command()
 				perror("receiving nvod_channels");
 				return;
 			}
-		printf("Received onid_sid %x. tsid: %x, sid: %x, onid: %x\n", nvod_onidsid, nvod_tsid, (nvod_onidsid&0x10000), (nvod_onidsid>>16));
+        printf(".");
+//		printf("Received onid_sid %x. tsid: %x, sid: %x, onid: %x\n", nvod_onidsid, nvod_tsid, (nvod_onidsid&0x10000), (nvod_onidsid>>16));
 		nvodchannels.insert(std::pair<int,channel>(nvod_onidsid,channel("NVOD",0,0,0,0,0,(nvod_onidsid&0x10000),nvod_tsid,(nvod_onidsid>>16),1)));
 	}
+*/
+    if (recv(connfd, &cnt_nvods, 2,0)==-1)
+    {
+        perror("receiving nvod_channels cnt_nvods?");
+        return;
+    }
+    else
+    {
+        printf("num: %d\n", cnt_nvods);
+        for (int cnt= 0; cnt<cnt_nvods; cnt++)
+        {
+            if (recv(connfd, &nvod_onidsid, 4,0)==-1)
+			{
+				perror("receiving nvod_channels");
+				return;
+			}
+    		if (recv(connfd, &nvod_tsid, 2,0) == -1)
+			{
+				perror("receiving nvod_channels");
+				return;
+			}
+    		printf("Received onid_sid %x. tsid: %x, sid: %x, onid: %x\n", nvod_onidsid, nvod_tsid, (nvod_onidsid&0x10000), (nvod_onidsid>>16));
+    		nvodchannels.insert(std::pair<int,channel>(nvod_onidsid,channel("NVOD",0,0,0,0,0,(nvod_onidsid&0x10000),nvod_tsid,(nvod_onidsid>>16),1)));
+        }
+    }
 	break;
 	default:  
       status = "000";
@@ -1742,7 +1773,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.13 2001/10/12 16:14:21 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.14 2001/10/15 17:23:48 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
