@@ -531,12 +531,12 @@ CRC: 3952000829 (0xeb8ebf3d)
 		</TR> 
 	 </TABLE> 
 	 <P></P> 
-	 <H4>dvbsnoop -n 200 -s ts -b 0x00 &gt; ts-stream.pid0x1000.file</H4> 
+	 <H4>dvbsnoop -n 200 -s ts -b 0x00 &gt; ts-stream.pid0x00.file</H4> 
 	 <P>Dump 200 packets of PID 0x00 in transport stream mode to an image
 		file.<BR>The raw datastream will be dumped in the specified stream mode (PES,
 		SECTION or TS).<BR>This file can be used, to postprocess the dvb data
 		streams.</P> 
-	 <H4>dvbsnoop -if ts-stream.pid0x1000.file &nbsp; -s ts 0x00</H4> 
+	 <H4>dvbsnoop -if ts-stream.pid0x00.file &nbsp; -s ts 0x00</H4> 
 	 <P>Read a data stream from file and analyze the stream.<BR>It is important
 		that you specify mode (si, pes, ...) and pid!</P> 
 	 <P></P> 

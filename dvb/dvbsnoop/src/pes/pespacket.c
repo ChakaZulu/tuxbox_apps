@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.13 2003/11/26 19:55:33 rasc Exp $
+$Id: pespacket.c,v 1.14 2003/12/17 23:15:04 rasc Exp $
 
 
 
@@ -19,6 +19,9 @@ $Id: pespacket.c,v 1.13 2003/11/26 19:55:33 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.14  2003/12/17 23:15:04  rasc
+PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
+
 Revision 1.13  2003/11/26 19:55:33  rasc
 no message
 
@@ -70,6 +73,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "pespacket.h"
+#include "pes_dsmcc.h"
 #include "misc/hexprint.h"
 
 
@@ -135,14 +139,12 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 	case 0xBF:		// private_stream_2  (EN301192-1.3.1 S.10)
 	case 0xF0:		// ECM
 	case 0xF1:		// EMM
-	case 0xF2:		// DSMCC stream		// $$$ TODO 
 	case 0xF8:		// ITE-T Rec. H.222.1 type E
 	case 0xFF:		// program_stream_directory
     		out_nl (4,"PES_packet_data_bytes:");
 		printhexdump_buf (4, b, len2);
 		n = len2;
 		break;
-
 
 	case 0xBD:		// Data Stream, privat_stream_1 (EN301192-1.3.1 S.11)
     		out_nl (3,"PES_data_packet:");
@@ -156,6 +158,11 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 		printhexdump_buf (4, b, len2);
 		n = len2;
 		break;
+
+	case 0xF2:		// DSMCC stream
+		PES_decodeDSMCC (b, len2);
+		break;
+
 
 	default:
     		out_nl (4,"Default PES decoding:");
@@ -496,6 +503,8 @@ void print_xTS_field (u_char *b, int bit_offset)
  out_SW_NL  (4,"Marker_bit_2: ",f.marker_bit_2);
  out_SB_NL  (4,"Bit 14-0: ",f.xTS_14_0);
  out_SW_NL  (4,"Marker_bit_3: ",f.marker_bit_3);
+ out_SL_NL  (3," == > xTS = ",
+		 (u_long) (f.xTS_32_30<<30) + (f.xTS_29_15<<15) + f.xTS_14_0);
 
 }
 
@@ -563,7 +572,7 @@ void PES_data_packet (u_char *b, int len)
    	out_nl (3,"PTS_extension:");
 	indent (+1);
 	out_SB_NL  (6,"reserved: ", getBits (b, 0,  0,  7) );
-	out_SW_NL  (6,"PTS_extension: ", getBits (b, 0,  7, 9) );
+	out_SW_NL  (3,"PTS_extension: ", getBits (b, 0,  7, 9) );
 	/* $$$ TODO  PCR extension output in clear text, see ISO 13818-1*/
 	b   += 2;
 	len -= 2;
@@ -575,7 +584,7 @@ void PES_data_packet (u_char *b, int len)
    	out_nl (3,"output_data_rate:");
 	indent (+1);
 	out_SB_NL  (6,"reserved: ", getBits (b, 0,  0,  4) );
-	out_SL_NL  (6,"output_data_rate: ", getBits (b, 0,  4, 28) );
+	out_SL_NL  (3,"output_data_rate: ", getBits (b, 0,  4, 28) );
 	b   += 4;
 	len -= 4;
 	len2 -= 4;
@@ -604,5 +613,4 @@ void PES_data_packet (u_char *b, int len)
 
 
 
-/* $$$ TODO   PES DSM-CC Control, etc.  e.g. from ITU-T H.222.0 */
 

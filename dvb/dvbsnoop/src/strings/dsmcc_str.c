@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.7 2003/11/29 23:11:43 rasc Exp $
+$Id: dsmcc_str.c,v 1.8 2003/12/17 23:15:05 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_str.c,v 1.7 2003/11/29 23:11:43 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.8  2003/12/17 23:15:05  rasc
+PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
+
 Revision 1.7  2003/11/29 23:11:43  rasc
 no message
 
@@ -439,6 +442,74 @@ char *dsmccStrOUI  (u_int id)
 {
 	return (char *) "http://standards.ieee.org/regauth/oui/";
 }
+
+
+
+
+
+/*
+  --  Command_ID
+  --  e.g. from ITU H.222.0 Annex B
+  --  
+*/
+
+char *dsmccStr_Command_ID  (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "forbidden" },
+	{ 0x01, 0x01,   "control" },
+	{ 0x02, 0x02,   "Acknownledge" },
+	{ 0x03, 0xFF,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+/*
+  --  Command_ID
+  --  e.g. from ITU H.222.0 Annex B
+  --  
+*/
+
+char *dsmccStr_SelectMode_ID  (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "forbidden" },
+	{ 0x01, 0x01,   "storage" },
+	{ 0x02, 0x02,   "retrieval" },
+	{ 0x03, 0x1F,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+/*
+  --  direction_indicator
+  --  e.g. from ITU H.222.0 Annex B
+  --  
+*/
+
+char *dsmccStr_DirectionIndicator (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "Forward" },
+	{ 0x01, 0x01,   "Backward" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
 
 
 

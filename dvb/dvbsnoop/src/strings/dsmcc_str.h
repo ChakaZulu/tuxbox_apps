@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.8 2003/11/29 23:11:43 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.9 2003/12/17 23:15:05 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsmcc_str.h,v 1.8 2003/11/29 23:11:43 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.9  2003/12/17 23:15:05  rasc
+PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
+
 Revision 1.8  2003/11/29 23:11:43  rasc
 no message
 
@@ -70,6 +73,13 @@ char *dsmccStrCarouselType_ID (u_int id);
 char *dsmccStrHigherProtocol_ID (u_int id);
 char *dsmccStrUpdateType_ID (u_int id);
 char *dsmccStrOUI  (u_int id);
+
+char *dsmccStr_Command_ID  (u_int id);
+char *dsmccStr_SelectMode_ID  (u_int id);
+char *dsmccStr_DirectionIndicator (u_int id);
+
+
+
 
 #endif
 
