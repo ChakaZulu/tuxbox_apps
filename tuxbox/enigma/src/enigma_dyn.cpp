@@ -1487,6 +1487,37 @@ struct countDVBServices: public Object
 	}
 };
 
+class eWebNavigatorSearchService: public Object
+{
+	eString &result;
+	eString searched_service;
+	eServiceInterface &iface;
+public:
+	eWebNavigatorSearchService(eString &result, eString searched_service, eServiceInterface &iface): result(result), searched_service(searched_service), iface(iface)
+	{
+		eDebug("[eWebNavigatorSearchService] searched_service: %s", searched_service.c_str());
+	}
+
+	void addEntry(const eServiceReference &e)
+	{
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (e.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
+
+		eService *service = iface.addRef(e);
+		if (service)
+		{
+			eDebug("[eWebNavigatorSearchService] searched_service: %s, service: %s\n", searched_service.c_str(), filter_string(service->service_name).c_str());
+			if (filter_string(service->service_name).find(searched_service) != eString::npos && !result)
+			{
+				result = ref2string(e);
+				eDebug("[eWebNavigatorSearchService] service found: %s\n", searched_service.c_str());
+			}
+			iface.removeRef(e);
+		}
+	}
+};
+
 class eWebNavigatorListDirectory: public Object
 {
 	eString &result;
@@ -3800,38 +3831,52 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 
 static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eString result;
+	eString result, result1;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString serviceRef = opt["ref"];
-	eString eventID = opt["ID"];
 	eString eventStartTime = opt["start"];
-	eString eventDuration = opt["duration"];
+	eString eventEndTime = opt["end"];
 	eString channel = httpUnescape(opt["channel"]);
 	eString description = httpUnescape(opt["descr"]);
 	if (description == "")
-		description = _("No description available");
-
-	int eventid;
-	sscanf(eventID.c_str(), "%x", &eventid);
-	eDebug("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+		description = "No description available";
 
 	int timeroffset = 0;
-	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
-		timeroffset = 0;
+	eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset);
 
 	int start = atoi(eventStartTime.c_str()) - (timeroffset * 60);
-	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
+	int end = atoi(eventEndTime.c_str()) + (timeroffset * 60);
+	int duration = start - end;
 
-	ePlaylistEntry entry(string2ref(serviceRef), start, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
-	entry.service.descr = channel + "/" + description;
+	// determine service reference
+	eServiceInterface *iface = eServiceInterface::getInstance();
+	eServiceReference all_services = eServiceReference(eServiceReference::idDVB,
+		eServiceReference::flagDirectory|eServiceReference::shouldSort,
+		-2, -1, 0xFFFFFFFF);
 
-	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
-		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
+	eWebNavigatorSearchService navlist(result1, channel, *iface);
+	Signal1<void, const eServiceReference&> signal;
+	signal.connect(slot(navlist, &eWebNavigatorSearchService::addEntry));
+	iface->enterDirectory(all_services, signal);
+	eDebug("entered");
+	iface->leaveDirectory(all_services);
+	eDebug("exited");
+
+	if (result1)
+	{
+		ePlaylistEntry entry(string2ref(result1), start, duration, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+		entry.service.descr = channel + "/" + description;
+
+		if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
+			result = "Timer event could not be added because time of the event overlaps with an already existing event.";
+		else
+			result = "Timer event was created successfully.";
+		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	}
 	else
-		result += _("Timer event was created successfully.");
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		result = "Service does not exist.";
+
 	return result;
 }
 
@@ -3878,23 +3923,39 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 static eString deleteTVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString serviceRef = opt["ref"];
-	eString eventType = opt["type"];
 	eString eventStartTime = opt["start"];
-	eString result;
-
-	eDebug("[ENIGMA_DYN] deleteTimerEvent: serviceRef = %s, type = %s, start = %s", serviceRef.c_str(), eventType.c_str(), eventStartTime.c_str());
-
-	ePlaylistEntry e(
-		string2ref(serviceRef),
-		atoi(eventStartTime.c_str()),
-		-1, -1, atoi(eventType.c_str()));
-
-	eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
+	eString channel = httpUnescape(opt["channel"]);
+	eString result, result1;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	eTimerManager::getInstance()->saveTimerList();
+	// determine service reference
+	eServiceInterface *iface = eServiceInterface::getInstance();
+	eServiceReference all_services = eServiceReference(eServiceReference::idDVB,
+		eServiceReference::flagDirectory|eServiceReference::shouldSort,
+		-2, -1, 0xFFFFFFFF);
+
+	eWebNavigatorSearchService navlist(result1, channel, *iface);
+	Signal1<void, const eServiceReference&> signal;
+	signal.connect(slot(navlist, &eWebNavigatorSearchService::addEntry));
+	iface->enterDirectory(all_services, signal);
+	eDebug("entered");
+	iface->leaveDirectory(all_services);
+	eDebug("exited");
+	
+	if (result1)
+	{
+		ePlaylistEntry e(
+			string2ref(result1),
+			atoi(eventStartTime.c_str()),
+			-1, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+
+		eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
+		eTimerManager::getInstance()->saveTimerList();
+		result = "Timer event deleted successfully.";
+	}
+	else
+		result = "Service does not exist.";
 
 	return result;
 }
