@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.23 2004/04/07 19:33:22 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.24 2004/04/08 15:41:01 thegoodguy Exp $
 
 	License: GPL
 
@@ -155,22 +155,43 @@ bool CBouqueteditAPI::addBouquet(CWebserverRequest* request)
 {
 	if(!request->Authenticate())
         	return false;	
-	if (request->ParameterList["name"] == "") {
+	if (request->ParameterList["name"].empty())
+	{
 		request->SendPlainHeader("text/html");
-		request->SendHTMLHeader("Bouquet-Editor");
-		request->SocketWrite("<H2>Bouquet-Editor</H2><BR><H3>Neues Bouquet</H3>\n");
-		request->SocketWrite("<FORM ACTION=\"add\" METHOD=\"POST\" ENCTYPE=\"x-www-form-urlencoded\">\n");
-		request->SocketWrite("Bouquetname: <INPUT TYPE=\"Text\" SIZE=\"30\" NAME=\"name\">");
-		request->SocketWrite("<INPUT TYPE=\"submit\" VALUE=\"add\">\n");
-		request->SocketWrite("</FORM>\n");
+		request->SocketWrite(
+			"<!DOCTYPE html\n"
+			"     PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n"
+			"     \"DTD/xhtml1-strict.dtd\">\n"
+			"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"de\" lang=\"de\">\n"
+			"<head>\n"
+			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
+			"<meta http-equiv=\"cache-control\" content=\"no-cache\" />\n"
+			"<meta http-equiv=\"expires\" content=\"0\" />\n"
+			"<link rel=\"stylesheet\" href=\"../global.css\" type=\"text/css\" />\n"
+			"<title>Bouquet-Editor</title>\n"
+			"</head>\n"
+			"\n"
+			"<body>\n"
+			"<h2>Bouquet-Editor</h2>\n"
+			"<h3>Neues Bouquet</h3>\n"
+			"<form action=\"add\" method=\"post\" accept-charset=\"UTF-8\" enctype=\"x-www-form-urlencoded\">\n"
+			"<p>"
+			"Name des neuen Bouquets: "
+			"<input type=\"text\" size=\"30\" name=\"name\" />\n"
+			"<input type=\"submit\" value=\"add\" />"
+			"</p>"
+			"</form>\n");
 		request->SendHTMLFooter();
 	}
 	else
 	{
-		if (Parent->Zapit->existsBouquet(ZapitTools::Latin1_to_UTF8(request->ParameterList["name"].c_str()).c_str()) == -1) {
-			Parent->Zapit->addBouquet(ZapitTools::Latin1_to_UTF8(request->ParameterList["name"].c_str()).c_str());
+		if (Parent->Zapit->existsBouquet(request->ParameterList["name"].c_str()) == -1)
+		{
+			Parent->Zapit->addBouquet(request->ParameterList["name"].c_str());
 			request->Send302("/bouquetedit/main#akt");
-		} else {
+		}
+		else
+		{
 			request->SendPlainHeader("text/html");
 			request->SendHTMLHeader("Bouquet-Editor");
 			request->SocketWrite("Have to add:");
