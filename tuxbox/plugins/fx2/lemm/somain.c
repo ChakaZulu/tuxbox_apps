@@ -29,7 +29,6 @@ extern	void	InitLevel( void );
 extern	void	PicSetupColors( void );
 
 /* special */
-extern	void	ModifyColor( char picid, unsigned char cfrom, unsigned char cto );
 extern	void	AnimateDeko( void );
 extern	void	UnanimatedDeko( void );
 extern	void	RunKey( void );

@@ -16,7 +16,6 @@
 
 #include <pics.h>
 
-#define UNZSIZE		97329
 
 extern	int		doexit;
 
@@ -41,7 +40,7 @@ static	Pic	pics[] = {
 { 0,	0,	12,	12,	12 },		// 5 lemming3
 { 0,	0,	5,	5,	11 },		// 6 lemming4
 { 0,	0,	2,	41,	25 },		// 7 haus
-{ 0,	0,	1,	32,	32 },		// 8 explosion
+{ 0,	0,	1,	16,	16 },		// 8 explosion
 { 0,	0,	3,	32,	14 },		// 9 feuer
 { 0,	0,	1,	32,	32 },
 { 0,	0,	1,	41,	3 },
@@ -62,8 +61,7 @@ static	Pic	pics[] = {
 { 0,	0,	1,	17,	1 },
 { 0,	0,	1,	25,	6 },
 { 0,	0,	1,	32,	32 },
-{ 0,	0,	1,	100,100 },
-{ 0,	0,	5,	9,	13 } };		// menu-icons
+{ 0,	0,	5,	9,	13 } };		// 30 menu-icons
 
 static	int		piccolors[] = {
 	0x00EE00,
@@ -191,7 +189,7 @@ int	LoadPics( void )
 
 	pics[0].pic_data=data;
 	sz=pics[0].width*pics[0].height*pics[0].ani;
-	for( i=1; i<31; i++ )
+	for( i=1; i<30; i++ )
 	{
 		data+=sz;
 		pics[i].pic_data=data;
@@ -199,39 +197,6 @@ int	LoadPics( void )
 	}
 	return 0;
 }
-
-#if 0
-void	WritePics( void )
-{
-	int			i;
-	int			sz;
-	int			fd;
-
-	fd=open("pics.img",O_CREAT|O_WRONLY,0666);
-	if ( fd != -1 )
-	{
-		for( i=0; i<31; i++ )
-		{
-			sz=pics[i].width*pics[i].height*pics[i].ani;
-			write(fd,pics[i].pic_data,sz);
-		}
-		close(fd);
-	}
-}
-
-void	ModifyColor( int picid, unsigned char cfrom, unsigned char cto )
-{
-	unsigned char	*p;
-	int				sz;
-
-	sz=pics[picid].width*pics[picid].height*pics[picid].ani;
-	for( p=pics[picid].pic_data; sz; sz--, p++ )
-	{
-		if ( *p == cfrom )
-			*p = cto;
-	}
-}
-#endif
 
 unsigned char	*GetAniPic( int idx, int ani, int *width, int *height )
 {
@@ -260,7 +225,7 @@ void	RemovePics( void )
 {
 	int		i;
 
-	for( i=0; i<31; i++ )
+	for( i=0; i<30; i++ )
 		if ( pics[i].pic_flip )
 			free( pics[i].pic_flip );
 	if ( pics[0].pic_data )

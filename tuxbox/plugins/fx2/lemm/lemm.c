@@ -200,7 +200,10 @@ static	void	DrawNumber( int x, int y, int num )
 		DrawSimpleNumber( x, y, i, 0 );
 	else
 		FB2CopyImage( x, y, 3, 5, p0_0, 1 );
-	DrawSimpleNumber( x+8, y, rest, 0 );
+	if ( !num )
+		FB2CopyImage( x+8, y, 3, 5, p0_0, 1 );
+	else
+		DrawSimpleNumber( x+8, y, rest, 0 );
 }
 
 static	int		isBrick( int x, int y )
@@ -699,13 +702,13 @@ int	InitLemm( void )
 	for( i=0; i<320; i+=32 )
 		inSc( 19, 0, i+main_x, 352, 1 );
 
-	inSc( 30, 0, 66+main_x, 370, 1 );
-	inSc( 30, 1, 100+main_x, 372, 1 );
+	inSc( 29, 0, 66+main_x, 370, 1 );
+	inSc( 29, 1, 100+main_x, 372, 1 );
 	inSc( 8, 0, 134+main_x, 372, 0 );		// explosion
 	inSc( 4, 10, 166+main_x, 374, 1 );		// lemming2
-	inSc( 30, 2, 200+main_x, 368, 1 );
-	inSc( 30, 3, 234+main_x, 368, 1 );
-	inSc( 30, 4, 264+main_x, 372, 1 );
+	inSc( 29, 2, 200+main_x, 368, 1 );
+	inSc( 29, 3, 234+main_x, 368, 1 );
+	inSc( 29, 4, 264+main_x, 372, 1 );
 	inSc( 5, 2, 292+main_x, 368, 1 );
 
 	inSc( 20, 0, 320+main_x, 352, 1 );
@@ -879,7 +882,7 @@ static	int		lastc=0;
 	case RC_6 :
 	case RC_7 :
 	case RC_8 :
-		if ( pause || !action || (action==3) )
+		if ( pause || !action || (action>2))
 			break;
 		nac=actcode-1;
 		if ( afunc == actcode-1 )
@@ -904,7 +907,6 @@ static	int		lastc=0;
 			newspeed=1;
 		else
 		{
-//			DrawNumber( 42, 389, newspeed );
 			DrawNumber( 74, 389, 100-newspeed );
 		}
 		break;
@@ -916,7 +918,6 @@ static	int		lastc=0;
 			newspeed=minspeed;
 		else
 		{
-//			DrawNumber( 42, 389, newspeed );
 			DrawNumber( 74, 389, 100-newspeed );
 		}
 		break;
@@ -1066,6 +1067,15 @@ static	int		blinkc=0;
 
 	if ( action==3 )
 	{
+		counter1=0;
+		action=4;
+		return;
+	}
+	if ( action==4 )
+	{
+		if ( counter1 < 8 )
+			return;
+
 		if ( to_rescue > lem_in )
 		{
 			FBDrawString( 252, 142, 64, "You lost !", WHITE, 0 );
@@ -1092,7 +1102,7 @@ static	int		blinkc=0;
 		}
 		if ( afunc != -1 )
 			FBCopyImage( (afunc+2)*32+32, 384, 32, 48, svdimage[afunc+2] );
-		action=4;
+		action=5;
 		doexit=1;
 	}
 
@@ -1204,9 +1214,11 @@ static	int		blinkc=0;
 		{
 			if ( s->countdown == -1 )
 			{
-//				inSc( 8, 0, s->x, s->y, 2 );		// explosion
-//				SpriteChangePic( s, 8 );		// explosion
-//				DrawSprite(s);
+				s->y-=4;
+				s->x-=4;
+				SpriteChangePic( s, 8 );		// explosion
+				SpriteGetBackground( s );
+				DrawSprite(s);
 				SoundPlay( SND_EXPLODE );
 			}
 			if ( s->countdown == -2 )
@@ -1397,6 +1409,5 @@ static	int		blinkc=0;
 	{
 		SpriteSelPic( deko[0], 0 );
 	}
-//	DrawSprite( deko[0] );
 	counter1++;
 }
