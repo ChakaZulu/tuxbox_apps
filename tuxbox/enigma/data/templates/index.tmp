@@ -3,6 +3,6 @@
 		<title>Enigma Web Interface - #BOX#</title>
 	</head>
 	<script>
-		document.location = "/?screenWidth="+screen.width;
+		document.location = "/?screenWidth="+window.screen.width;
 	</script>
 </html>
