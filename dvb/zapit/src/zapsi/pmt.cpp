@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.41 2005/01/25 18:50:19 thegoodguy Exp $
+ * $Id: pmt.cpp,v 1.42 2005/03/14 19:58:48 mws Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -362,6 +362,19 @@ int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 		return -1;
 	}
 
+	return 0;
+}
+
+int pmt_stop_update_filter(int *fd)
+{
+	if ((*fd == -1)) {
+		perror("check your code - nothing to stop");
+		return 0;
+	}
+	if (ioctl(*fd, DMX_STOP) < 0) {
+		perror("DMX_STOP_FILTER");
+	}
+	close(*fd);
 	return 0;
 }
 

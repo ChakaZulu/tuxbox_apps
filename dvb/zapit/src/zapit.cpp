@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.369 2005/03/03 19:59:33 diemade Exp $
+ * $Id: zapit.cpp,v 1.370 2005/03/14 19:58:48 mws Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -531,7 +531,8 @@ int start_scan(bool scan_mode)
 
 	bouquetManager->clearAll();
 	stopPlayBack();
-
+	pmt_stop_update_filter(&pmt_update_fd);
+	pmt_update_fd = -1;
 	tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 	found_transponders = 0;
 	found_channels = 0;
@@ -1766,7 +1767,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.369 2005/03/03 19:59:33 diemade Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.370 2005/03/14 19:58:48 mws Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1872,22 +1873,14 @@ int main(int argc, char **argv)
 
 	if (update_pmt) {
 		while (zapit_server.run(parse_command, CZapitMessages::ACTVERSION, true)) {
-			unsigned int i, pollnum = 0;
-			struct pollfd pfd[1];
+			struct pollfd pfd;
 
 			if (pmt_update_fd != -1) {
-				pfd[pollnum].fd = pmt_update_fd;
-				pfd[pollnum].events = (POLLIN | POLLPRI);
-				pollnum++;
-			}
-
-			if (pollnum) {
-				if (poll(pfd, pollnum, 0) > 0) {
-					for (i = 0; i < pollnum; i++) {
-						if (pfd[i].fd == pmt_update_fd) {
-							zapit(channel->getChannelID(), current_is_nvod, 0);
-						}
-					}
+				pfd.fd = pmt_update_fd;
+				pfd.events = (POLLIN | POLLPRI);
+				if (poll(&pfd, 1, 0) > 0) {
+					if (pfd.fd == pmt_update_fd)
+						zapit(channel->getChannelID(), current_is_nvod, 0);
 				}
 			}
 			/* yuck, don't waste that much cpu time :) */
