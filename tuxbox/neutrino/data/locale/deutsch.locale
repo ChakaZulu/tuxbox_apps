@@ -568,10 +568,10 @@ nfs.ip Server IP
 nfs.localdir lokales Verzeichnis
 nfs.mount Netzwerk Verzeichnis mounten
 nfs.mount_options Mount-Optionen
-nfs.mountok Mount erfolgreich
 nfs.mounterror Mount-Fehler
 nfs.mounterror_notsup Dateisystem-Typ wird nicht unterstützt.
 nfs.mountnow Jetzt mounten
+nfs.mountok Mount erfolgreich
 nfs.mounttimeout Mount-Fehler: Timeout
 nfs.password Passwort
 nfs.remount Verzeichnisse erneut mounten
