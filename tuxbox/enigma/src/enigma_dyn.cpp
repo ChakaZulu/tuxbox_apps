@@ -52,7 +52,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.4.6"
+#define WEBXFACEVERSION "1.4.7"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -258,7 +258,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 			result += "OFF";
 	result += "</td></tr>\n";
 	result += "<tr><td>Mode:</td><td>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</td></tr>\n";
-	
+
 	eString sRef;
 	if (eServiceInterface::getInstance()->service)
 		sRef = eServiceInterface::getInstance()->service.toString();
@@ -1508,8 +1508,7 @@ public:
 		if (service)
 		{
 			eDebug("[eWebNavigatorSearchService] searched_service: %s, service: %s\n", searched_service.c_str(), filter_string(service->service_name).c_str());
-			eString serviceName = filter_string(service->service_name).upper();
-			if (serviceName.find(searched_service.upper()) != eString::npos && !result)
+			if ((filter_string(service->service_name).upper() == searched_service.upper()) && !result)
 			{
 				result = ref2string(e);
 				eDebug("[eWebNavigatorSearchService] service found: %s\n", searched_service.c_str());
@@ -3204,7 +3203,11 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 		"<!-- " << sapi->service << "-->" << std::endl <<
 		"<table cellspacing=5 cellpadding=0 border=0>"
 		"<tr><td>Name:</td><td>" << name << "</td></tr>"
-		"<tr><td>Provider:</td><td>" << provider << "</td></tr>"
+		"<tr><td>Provider:</td><td>" << provider << "</td></tr>";
+		eString sRef;
+		if (eServiceInterface::getInstance()->service)
+			sRef = eServiceInterface::getInstance()->service.toString();
+	result << "<tr><td>Service reference:</td><td>" << sRef << "</td></tr>"
 		"<tr><td>VPID:</td><td>" << vpid << "</td></tr>"
 		"<tr><td>APID:</td><td>" << apid << "</td></tr>"
 		"<tr><td>PCRPID:</td><td>" << pcrpid << "</td></tr>"
@@ -3733,7 +3736,7 @@ struct listContent: public Object
 			result += filter_string(ref.descr);
 		else if ( service )
 			result += filter_string(service->service_name);
-		else 
+		else
 			result += "unnamed service";
 		result += "\n";
 		if (service)
@@ -3874,19 +3877,28 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	time_t eventEndTime = mktime(&end);
 	int duration = eventEndTime - eventStartTime;
 
-	// determine service reference
-	eServiceInterface *iface = eServiceInterface::getInstance();
-	eServiceReference all_services = eServiceReference(eServiceReference::idDVB,
-		eServiceReference::flagDirectory|eServiceReference::shouldSort,
-		-2, -1, 0xFFFFFFFF);
+	if (channel.find("/") != eString::npos)
+	{
+		eString tmp = channel;
+		channel = getLeft(tmp, '/');
+		result1 = getRight(tmp, '/');
+	}
+	else
+	{
+		// determine service reference
+		eServiceInterface *iface = eServiceInterface::getInstance();
+		eServiceReference all_services = eServiceReference(eServiceReference::idDVB,
+			eServiceReference::flagDirectory|eServiceReference::shouldSort,
+			-2, -1, 0xFFFFFFFF);
 
-	eWebNavigatorSearchService navlist(result1, channel, *iface);
-	Signal1<void, const eServiceReference&> signal;
-	signal.connect(slot(navlist, &eWebNavigatorSearchService::addEntry));
-	iface->enterDirectory(all_services, signal);
-	eDebug("entered");
-	iface->leaveDirectory(all_services);
-	eDebug("exited");
+		eWebNavigatorSearchService navlist(result1, channel, *iface);
+		Signal1<void, const eServiceReference&> signal;
+		signal.connect(slot(navlist, &eWebNavigatorSearchService::addEntry));
+		iface->enterDirectory(all_services, signal);
+		eDebug("entered");
+		iface->leaveDirectory(all_services);
+		eDebug("exited");
+	}
 
 	if (result1)
 	{
