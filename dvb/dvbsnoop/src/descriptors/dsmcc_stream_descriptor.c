@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_stream_descriptor.c,v 1.1 2004/01/03 00:30:06 rasc Exp $ 
+$Id: dsmcc_stream_descriptor.c,v 1.2 2004/01/11 21:01:31 rasc Exp $ 
 
 
  DVBSNOOP
@@ -10,13 +10,15 @@ $Id: dsmcc_stream_descriptor.c,v 1.1 2004/01/03 00:30:06 rasc Exp $
  (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
 
 
- -- Private TAG Space  DSM-CC
  -- DSM-CC STREAM Descriptors  ISO 13818-6
 
 
 
 
 $Log: dsmcc_stream_descriptor.c,v $
+Revision 1.2  2004/01/11 21:01:31  rasc
+PES stream directory, PES restructured
+
 Revision 1.1  2004/01/03 00:30:06  rasc
 DSM-CC  STREAM descriptors module (started)
 

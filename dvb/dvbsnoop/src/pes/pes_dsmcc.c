@@ -1,5 +1,5 @@
 /*
-$Id: pes_dsmcc.c,v 1.7 2004/01/02 22:25:39 rasc Exp $
+$Id: pes_dsmcc.c,v 1.8 2004/01/11 21:01:32 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pes_dsmcc.c,v 1.7 2004/01/02 22:25:39 rasc Exp $
 
 
 $Log: pes_dsmcc.c,v $
+Revision 1.8  2004/01/11 21:01:32  rasc
+PES stream directory, PES restructured
+
 Revision 1.7  2004/01/02 22:25:39  rasc
 DSM-CC  MODULEs descriptors complete
 
@@ -55,6 +58,7 @@ PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
+#include "pes_misc.h"
 #include "pes_dsmcc.h"
 
 
@@ -292,25 +296,8 @@ static int  dsmcc_timecode (u_char *b)
 	len = 1;
 
 	if (infinite_time_flag == 0) {
-		u_long   PTS_32_30;
-		u_long   PTS_29_15;
-		u_long   PTS_14_0;
-
-		out_nl (4,"TIME PERIOD:");
-		indent (+1);
-		            outBit_Sx_NL (6,"reserved: ",	b,0,4);
-   		PTS_32_30 = outBit_Sx_NL (5,"PTS[32..30]: ",	b,4,3);
-		            outBit_Sx_NL (5,"marker_bit: ",	b,7,1);
-   		PTS_29_15 = outBit_Sx_NL (5,"PTS[29..15]: ",	b,8,15);
-		            outBit_Sx_NL (5,"marker_bit: ",	b,23,1);
-   		PTS_14_0  = outBit_Sx_NL (5,"PTS[14..0]: ",	b,24,15);
-		            outBit_Sx_NL (5,"marker_bit: ",	b,39,1);
-
-		out_SL (4," ==> PTS = ",
-			(PTS_32_30<<30) + (PTS_29_15<<15) + PTS_14_0);
-			out_nl (4, " (cycles of the 90 kHz system clock)");
-
-		indent (-1);
+		outBit_Sx_NL (6,"reserved: ",	b,0,4);
+		print_xTS_field (4,"Time period", b, 4);
 		len += 5;
 	}
 

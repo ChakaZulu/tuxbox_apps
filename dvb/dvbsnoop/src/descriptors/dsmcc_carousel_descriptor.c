@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.14 2004/01/02 22:59:59 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.15 2004/01/11 21:01:31 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_carousel_descriptor.c,v 1.14 2004/01/02 22:59:59 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.15  2004/01/11 21:01:31  rasc
+PES stream directory, PES restructured
+
 Revision 1.14  2004/01/02 22:59:59  rasc
 DSM-CC  modules renaming...
 
@@ -60,7 +63,7 @@ more PES stuff, DSM descriptors, testdata
 
 /*
   determine descriptor type and print it...
-  !!! DSMCC_MODULE descriptors are in a private tag space !!!
+  !!! DSMCC_CAROUSEL descriptors are in a private tag space !!!
 
   The userInfo field of BIOP::ModuleInfo shall be structured as a
   loop of descriptors which enables the use of Module descriptors
@@ -70,7 +73,7 @@ more PES stuff, DSM descriptors, testdata
   return byte length
 */
 
-int  descriptorDSMCC_MODULE  (u_char *b)
+int  descriptorDSMCC_CAROUSEL (u_char *b)
 
 {
  int len;
@@ -81,8 +84,8 @@ int  descriptorDSMCC_MODULE  (u_char *b)
   len = ((int) b[1]) + 2;
 
   out_NL (4);
-  out_S2B_NL (4,"DSM-CC_MODULE-DescriptorTag: ",id,
-		  dsmccStrDSMCC_MODULE_DescriptorTAG (id));
+  out_S2B_NL (4,"DSM-CC_CAROUSEL-DescriptorTag: ",id,
+		  dsmccStrDSMCC_CAROUSEL_DescriptorTAG (id));
   out_SB_NL  (5,"Descriptor_length: ",b[1]);
 
   // empty ??
@@ -110,7 +113,7 @@ int  descriptorDSMCC_MODULE  (u_char *b)
 
      default: 
 	if (b[0] < 0x80) {
-	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC_MODULE context), Report!");
+	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC_CAROUSEL context), Report!");
 	}
 	descriptor_any (b);
 	break;
@@ -129,7 +132,7 @@ int  descriptorDSMCC_MODULE  (u_char *b)
 
 /* 
  * EN 301 192  / TR 102 006
- * private DSM-CC MODULE descriptors
+ * private DSM-CC CAROUSEL descriptors
  *
  * 0x00 - 0x0A currently allocated by DVB
  * 0x0B - 0x6F reserved for future use by DVB

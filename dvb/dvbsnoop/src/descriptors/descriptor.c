@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.19 2004/01/03 00:30:06 rasc Exp $
+$Id: descriptor.c,v 1.20 2004/01/11 21:01:31 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: descriptor.c,v 1.19 2004/01/03 00:30:06 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.20  2004/01/11 21:01:31  rasc
+PES stream directory, PES restructured
+
 Revision 1.19  2004/01/03 00:30:06  rasc
 DSM-CC  STREAM descriptors module (started)
 
@@ -115,8 +118,8 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
   		descriptorDSMCC_STREAM (b); 
 		break;
 
-     case DSMCC_MODULE:
-  		descriptorDSMCC_MODULE (b);
+     case DSMCC_CAROUSEL:
+  		descriptorDSMCC_CAROUSEL (b);
 		break;
 
      case DSMCC_INT_UNT:

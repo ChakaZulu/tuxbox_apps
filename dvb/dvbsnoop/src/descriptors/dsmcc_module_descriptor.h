@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_module_descriptor.h,v 1.9 2004/01/03 00:30:06 rasc Exp $ 
+$Id: dsmcc_module_descriptor.h,v 1.10 2004/01/11 21:01:31 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_module_descriptor.h,v 1.9 2004/01/03 00:30:06 rasc Exp $
 
 
 $Log: dsmcc_module_descriptor.h,v $
+Revision 1.10  2004/01/11 21:01:31  rasc
+PES stream directory, PES restructured
+
 Revision 1.9  2004/01/03 00:30:06  rasc
 DSM-CC  STREAM descriptors module (started)
 
@@ -52,11 +55,11 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 */
 
 
-#ifndef __DSM_MODULE_DESCRIPTOR_H
-#define __DSM_MODULE_DESCRIPTOR_H 1
+#ifndef __DSM_CAROUSEL_DESCRIPTOR_H
+#define __DSM_CAROUSEL_DESCRIPTOR_H 1
 
 
-int  descriptorDSMCC_MODULE (u_char *b);
+int  descriptorDSMCC_CAROUSEL (u_char *b);
 
 void descriptorDSMCC_type (u_char *b);
 void descriptorDSMCC_name (u_char *b);

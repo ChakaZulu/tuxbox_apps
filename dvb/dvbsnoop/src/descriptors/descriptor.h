@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.h,v 1.7 2004/01/02 22:25:35 rasc Exp $ 
+$Id: descriptor.h,v 1.8 2004/01/11 21:01:31 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: descriptor.h,v 1.7 2004/01/02 22:25:35 rasc Exp $
 
 
 $Log: descriptor.h,v $
+Revision 1.8  2004/01/11 21:01:31  rasc
+PES stream directory, PES restructured
+
 Revision 1.7  2004/01/02 22:25:35  rasc
 DSM-CC  MODULEs descriptors complete
 
@@ -43,7 +46,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 // Descriptor tag space/scope...
 typedef enum {
 	MPEG, DVB_SI,
-	DSMCC_STREAM, DSMCC_MODULE, DSMCC_INT_UNT, MHP
+	DSMCC_STREAM, DSMCC_CAROUSEL, DSMCC_INT_UNT, MHP
 } DTAG_SCOPE;
 
 
