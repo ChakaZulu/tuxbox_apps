@@ -77,7 +77,7 @@ typedef struct stat stat_struct;
 #define my_lstat lstat
 #endif
 
-#define SMSKEY_TIMEOUT 2
+#define SMSKEY_TIMEOUT 2000
 //------------------------------------------------------------------------
 size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data)
 {
@@ -108,8 +108,157 @@ int mycasecmp(const void * a, const void * b)
 {
 	return strcasecmp(*(const char * *)a, *(const char * *)b);
 }
+//------------------------------------------------------------------------
+//------------------------------------------------------------------------
+
+SMSKeyInput::SMSKeyInput()
+{
+	resetOldKey();
+	m_timeout = SMSKEY_TIMEOUT;
+}
+//------------------------------------------------------------------------
+
+unsigned char SMSKeyInput::handleMsg(const neutrino_msg_t msg)
+{
+	time_t keyTime = time(NULL);
+	bool timeoutNotReached = (keyTime*1000 <= m_oldKeyTime*1000 + m_timeout);
+	unsigned char key = 0;
+	if(msg == CRCInput::RC_1)
+	{
+			key = '1';
+	}
+	if(msg == CRCInput::RC_2)
+	{
+		if(m_oldKey == 'a' && timeoutNotReached)
+			key = 'b';
+		else if(m_oldKey == 'b' && timeoutNotReached)
+			key = 'c';
+		else if(m_oldKey == 'c' && timeoutNotReached)
+			key = '2';
+		else
+			key = 'a';
+	}
+	else if(msg == CRCInput::RC_3)
+	{
+		if(m_oldKey == 'd' && timeoutNotReached)
+			key = 'e';
+		else if(m_oldKey == 'e' && timeoutNotReached)
+			key = 'f';
+		else if(m_oldKey == 'f' && timeoutNotReached)
+			key = '3';
+		else
+			key = 'd';
+	}
+	else if(msg == CRCInput::RC_4)
+	{
+		if(m_oldKey == 'g' && timeoutNotReached)
+			key = 'h';
+		else if(m_oldKey == 'h' && timeoutNotReached)
+			key = 'i';
+		else if(m_oldKey == 'i' && timeoutNotReached)
+			key = '4';
+		else
+			key = 'g';
+	}
+	else if(msg == CRCInput::RC_5)
+	{
+		if(m_oldKey == 'j' && timeoutNotReached)
+			key = 'k';
+		else if(m_oldKey == 'k' && timeoutNotReached)
+			key = 'l';
+		else if(m_oldKey == 'l' && timeoutNotReached)
+			key = '5';
+		else
+			key = 'j';
+	}
+	else if(msg == CRCInput::RC_6)
+	{
+		if(m_oldKey == 'm' && timeoutNotReached)
+			key = 'n';
+		else if(m_oldKey == 'n' && timeoutNotReached)
+			key = 'o';
+		else if(m_oldKey == 'o' && timeoutNotReached)
+			key = '6';
+		else
+			key = 'm';
+	}
+	else if(msg == CRCInput::RC_7)
+	{
+		if(m_oldKey == 'p' && timeoutNotReached)
+			key = 'q';
+		else if(m_oldKey == 'q' && timeoutNotReached)
+			key = 'r';
+		else if(m_oldKey == 'r' && timeoutNotReached)
+			key = 's';
+		else if(m_oldKey == 's' && timeoutNotReached)
+			key = 's';
+		else
+			key = 'p';
+	}
+	else if(msg == CRCInput::RC_8)
+	{
+		if(m_oldKey == 't' && timeoutNotReached)
+			key = 'u';
+		else if(m_oldKey == 'u' && timeoutNotReached)
+			key = 'v';
+		else if(m_oldKey == 'v' && timeoutNotReached)
+			key = '8';
+		else
+			key = 't';
+	}
+	else if(msg == CRCInput::RC_9)
+	{
+		if(m_oldKey == 'w' && timeoutNotReached)
+			key = 'x';
+		else if(m_oldKey == 'x' &&timeoutNotReached)
+			key = 'y';
+		else if(m_oldKey == 'y' &&timeoutNotReached)
+			key = 'z';
+		else if(m_oldKey == 'z' && timeoutNotReached)
+			key = '9';
+		else
+			key = 'w';
+	}
+	else if(msg == CRCInput::RC_0)
+	{
+		key = '0';
+	}	
+	m_oldKeyTime=keyTime;
+	m_oldKey=key;
+	return key;
+}
+//------------------------------------------------------------------------
+
+void SMSKeyInput::resetOldKey()
+{
+	m_oldKeyTime = 0;
+	m_oldKey = 0;
+}
+
+unsigned char SMSKeyInput::getOldKey()
+{
+	return m_oldKey;
+}
+
+time_t SMSKeyInput::getOldKeyTime()
+{
+ 	return m_oldKeyTime;
+}
+
+int SMSKeyInput::getTimeout()
+{
+	return m_timeout;
+}
+
+void SMSKeyInput::setTimeout(int timeout)
+{
+	m_timeout = timeout;
+}
+
 
 //------------------------------------------------------------------------
+//------------------------------------------------------------------------
+
 CFile::FileType CFile::getType(void) const
 {
 	if(S_ISDIR(Mode))
@@ -282,9 +431,8 @@ void CFileBrowser::commonInit()
 
 	//recalc height
 	height = theight + listmaxshow * fheight + 2 * foheight;
-	
-	m_oldKeyTime = 0;
-	m_oldKey = 0;
+
+	m_SMSKeyInput.setTimeout(SMSKEY_TIMEOUT);
 }
 
 //------------------------------------------------------------------------
@@ -551,7 +699,7 @@ bool CFileBrowser::exec(const char * const dirname)
 
 		if(!CRCInput::isNumeric(msg))
 		{
-			m_oldKey=0;
+			m_SMSKeyInput.resetOldKey();
 		}
 		
 		if (msg == CRCInput::RC_yellow)
@@ -1028,11 +1176,11 @@ void CFileBrowser::paintFoot()
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE_SMALL, x + (2 * dx), by2 - 3);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (2 * dx), ty2, dx - 35, g_Locale->getText(LOCALE_FILEBROWSER_DELETE), COL_INFOBAR, 0, true); // UTF-8
 
-      if(m_oldKey!=0)
-      {
-         char cKey[2]={m_oldKey,0};
-         g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + width - 16, by2 , 16, cKey, COL_MENUHEAD, 0, true); // UTF-8
-      }
+		if(m_SMSKeyInput.getOldKey()!=0)
+		{
+			char cKey[2]={m_SMSKeyInput.getOldKey(),0};
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + width - 16, by2 , 16, cKey, COL_MENUHEAD, 0, true); // UTF-8
+		}
 	}
 }
 
@@ -1063,108 +1211,8 @@ void CFileBrowser::paint()
 //------------------------------------------------------------------------
 void CFileBrowser::SMSInput(const neutrino_msg_t msg)
 {
-	time_t keyTime = time(NULL);
-	unsigned char key = 0;
-	if(msg == CRCInput::RC_1)
-	{
-			key = '1';
-	}
-	if(msg == CRCInput::RC_2)
-	{
-		if(m_oldKey == 'a' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'b';
-		else if(m_oldKey == 'b' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'c';
-		else if(m_oldKey == 'c' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = '2';
-		else
-			key = 'a';
-	}
-	else if(msg == CRCInput::RC_3)
-	{
-		if(m_oldKey == 'd' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'e';
-		else if(m_oldKey == 'e' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'f';
-		else if(m_oldKey == 'f' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = '3';
-		else
-			key = 'd';
-	}
-	else if(msg == CRCInput::RC_4)
-	{
-		if(m_oldKey == 'g' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'h';
-		else if(m_oldKey == 'h' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'i';
-		else if(m_oldKey == 'i' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = '4';
-		else
-			key = 'g';
-	}
-	else if(msg == CRCInput::RC_5)
-	{
-		if(m_oldKey == 'j' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'k';
-		else if(m_oldKey == 'k' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'l';
-		else if(m_oldKey == 'l' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = '5';
-		else
-			key = 'j';
-	}
-	else if(msg == CRCInput::RC_6)
-	{
-		if(m_oldKey == 'm' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'n';
-		else if(m_oldKey == 'n' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'o';
-		else if(m_oldKey == 'o' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = '6';
-		else
-			key = 'm';
-	}
-	else if(msg == CRCInput::RC_7)
-	{
-		if(m_oldKey == 'p' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'q';
-		else if(m_oldKey == 'q' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'r';
-		else if(m_oldKey == 'r' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 's';
-		else if(m_oldKey == 's' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 's';
-		else
-			key = 'p';
-	}
-	else if(msg == CRCInput::RC_8)
-	{
-		if(m_oldKey == 't' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'u';
-		else if(m_oldKey == 'u' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'v';
-		else if(m_oldKey == 'v' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = '8';
-		else
-			key = 't';
-	}
-	else if(msg == CRCInput::RC_9)
-	{
-		if(m_oldKey == 'w' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'x';
-		else if(m_oldKey == 'x' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'y';
-		else if(m_oldKey == 'y' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = 'z';
-		else if(m_oldKey == 'z' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
-			key = '9';
-		else
-			key = 'w';
-	}
-	else if(msg == CRCInput::RC_0)
-	{
-		key = '0';
-	}
+	unsigned char key = m_SMSKeyInput.handleMsg(msg);
+
 	unsigned int i;
 	for(i=(selected+1) % filelist.size(); i != selected ; i= (i+1) % filelist.size())
 	{
@@ -1173,8 +1221,6 @@ void CFileBrowser::SMSInput(const neutrino_msg_t msg)
 			break;
 		}
 	}
-	m_oldKeyTime=keyTime;
-	m_oldKey=key;
 	int prevselected=selected;
 	selected=i;
 	paintItem(prevselected - liststart);

@@ -65,6 +65,53 @@
 
 #define VLC_URI "vlc://"
 
+/**
+ * Converts input of numeric keys to SMS style char input.
+ */
+class SMSKeyInput
+{
+	// time since last input
+	time_t m_oldKeyTime;
+
+	// last key input
+	unsigned char m_oldKey;
+
+	// keypresses within this period are taken as a sequence
+	int m_timeout;
+public:
+	SMSKeyInput();
+
+	/**
+	 * Returns the SMS char calculated with respect to the new input.
+	 * @param msg the current RC input
+	 * @return the calculated SMS char
+	 */
+	unsigned char handleMsg(const neutrino_msg_t msg);
+
+	/**
+	 * Resets the key history which is needed for proper calculation
+	 * of the SMS char by #handleMsg(neutrino_msg_t)
+	 */
+	void resetOldKey();
+
+	/**
+	 * @return the last key calculated by #handleMsg(neutrino_msg_t)
+	 */
+	unsigned char getOldKey();
+	
+	time_t getOldKeyTime();
+
+	int getTimeout();
+
+	/**
+	 * Sets the timeout.
+	 * @param timeout keypresses within this period are taken as a
+	 * sequence. unit: msecs
+	 */
+	void setTimeout(int timeout);
+};
+//------------------------------------------------------------------------
+
 
 class CFileFilter
 {
@@ -86,6 +133,7 @@ public:
 		return false;
 	};
 };
+//------------------------------------------------------------------------
 
 class CFile
 {
@@ -116,6 +164,7 @@ public:
 	bool Marked;
 	time_t Time;
 };
+//------------------------------------------------------------------------
 
 typedef std::vector<CFile> CFileList;
 
@@ -150,8 +199,7 @@ class CFileBrowser
 		int 			x;
 		int 			y;
 
-		time_t m_oldKeyTime;
-		unsigned char m_oldKey;
+		SMSKeyInput m_SMSKeyInput;
 
 		void paintItem(unsigned pos);
 		void paint();
