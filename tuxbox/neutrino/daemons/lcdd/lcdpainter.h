@@ -28,7 +28,7 @@
 
 #include <lcddisplay/lcddisplay.h>
 #include <lcddisplay/fontrenderer.h>
-#include <lcddclient/lcddclient.h>
+#include <lcddclient/lcddtypes.h>
 
 
 class CLCDPainter
@@ -52,7 +52,7 @@ class CLCDPainter
 		raw_display_t		icon_setup;
 		raw_display_t		icon_power;
 
-		CLcddClient::mode	mode;
+		CLcddTypes::mode	mode;
 
 		string				servicename;
 		char				volume;
@@ -76,7 +76,7 @@ class CLCDPainter
 		void show_volume(char vol);
 		void show_menu(int position, char* text, int highlight);
 
-		bool set_mode(CLcddClient::mode m, char *title);
+		bool set_mode(CLcddTypes::mode m, char *title);
 
 		void setlcdparameter(int dimm, int contrast, int power, int inverse);
 

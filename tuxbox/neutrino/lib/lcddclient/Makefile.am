@@ -1,5 +1,6 @@
 INCLUDES = \
-        -I$(top_srcdir)/lib
+        -I$(top_srcdir)/lib \
+	@ZAPIT_CFLAGS@
 
 lib_LTLIBRARIES  = liblcddclient.la
 

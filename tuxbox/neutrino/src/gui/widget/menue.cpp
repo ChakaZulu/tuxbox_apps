@@ -240,7 +240,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 	hide();
 	if(!parent)
 	{
-		g_lcdd->setMode(CLcddClient::MODE_TVRADIO, g_Locale->getText(name));
+		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO, g_Locale->getText(name));
 	}
 
 	return retval;
@@ -258,7 +258,7 @@ void CMenuWidget::paint()
 	{
 		l_name = g_Locale->getText(name);
 	}
-	g_lcdd->setMode(CLcddClient::MODE_MENU, l_name);
+	g_lcdd->setMode(CLcddTypes::MODE_MENU, l_name);
 
 
 	int neededWidth = g_Fonts->menu_title->getRenderWidth(l_name.c_str());

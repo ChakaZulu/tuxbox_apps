@@ -87,7 +87,7 @@ bool CLCDPainter::init()
 	}
 	display.dump_screen(&icon_lcd);
 
-	mode = CLcddClient::MODE_TVRADIO;
+	mode = CLcddTypes::MODE_TVRADIO;
 	show_servicename("Booting...");
 	showclock=true;
 	return true;
@@ -96,7 +96,7 @@ bool CLCDPainter::init()
 void CLCDPainter::show_servicename( string name )
 {
 	servicename = name;
-	if (mode!=CLcddClient::MODE_TVRADIO)
+	if (mode!=CLcddTypes::MODE_TVRADIO)
 	{
 		return;
 	}
@@ -143,7 +143,7 @@ void CLCDPainter::show_time()
 		ftime(&tm);
 		strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
 
-		if(mode!=CLcddClient::MODE_STANDBY)
+		if(mode!=CLcddTypes::MODE_STANDBY)
 		{
 			display.draw_fill_rect (77,50,120,64, CLCDDisplay::PIXEL_OFF);
 			int pos = 122 - fonts.time->getRenderWidth(timestr);
@@ -168,7 +168,7 @@ void CLCDPainter::show_time()
 void CLCDPainter::show_volume(char vol)
 {
 	volume = vol;
-	if ((mode==CLcddClient::MODE_TVRADIO) || (mode==CLcddClient::MODE_SCART))
+	if ((mode==CLcddTypes::MODE_TVRADIO) || (mode==CLcddTypes::MODE_SCART))
 	{
 		display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
 		//strichlin
@@ -188,7 +188,7 @@ void CLCDPainter::show_volume(char vol)
 
 void CLCDPainter::show_menu(int position, char* text, int highlight )
 {
-	if (mode != CLcddClient::MODE_MENU)
+	if (mode != CLcddTypes::MODE_MENU)
 	{
 		return;
 	}
@@ -198,12 +198,12 @@ void CLCDPainter::show_menu(int position, char* text, int highlight )
 	display.update();
 }
 
-bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
+bool CLCDPainter::set_mode(CLcddTypes::mode m, char *title)
 {
 	bool shall_exit = false;
 	switch (m)
 	{
-		case CLcddClient::MODE_TVRADIO:
+		case CLcddTypes::MODE_TVRADIO:
 			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: tvradio\n");
 			display.load_screen(&icon_lcd);
@@ -214,7 +214,7 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 			show_time();
 			display.update();
 			break;
-		case CLcddClient::MODE_SCART:
+		case CLcddTypes::MODE_SCART:
 			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: scart\n");
 			display.load_screen(&icon_lcd);
@@ -224,17 +224,17 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 			show_time();
 			display.update();
 			break;
-		case CLcddClient::MODE_MENU:
-		case CLcddClient::MODE_MENU_UTF8:
+		case CLcddTypes::MODE_MENU:
+		case CLcddTypes::MODE_MENU_UTF8:
 			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: menu\n");
 			mode = m;
 			showclock = false;
 			display.load_screen(&icon_setup);
-			fonts.menutitle->RenderString(-1,28, 140, title, CLCDDisplay::PIXEL_ON, 0, m == CLcddClient::MODE_MENU_UTF8);
+			fonts.menutitle->RenderString(-1,28, 140, title, CLCDDisplay::PIXEL_ON, 0, m == CLcddTypes::MODE_MENU_UTF8);
 			display.update();
 			break;
-		case CLcddClient::MODE_SHUTDOWN:
+		case CLcddTypes::MODE_SHUTDOWN:
 			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: shutdown\n");
 			mode = m;
@@ -243,7 +243,7 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 			display.update();
 			shall_exit = true;
 			break;
-		case CLcddClient::MODE_STANDBY:
+		case CLcddTypes::MODE_STANDBY:
 			//printf("[lcdd] mode: standby\n");
 			setlcdparameter(lcd_standbybrightness, lcd_contrast, lcd_power, lcd_inverse);
 			mode = m;

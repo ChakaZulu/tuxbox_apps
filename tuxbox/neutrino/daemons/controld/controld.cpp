@@ -544,11 +544,11 @@ void setScartMode(bool onoff)
 {
 	if(onoff)
 	{
-		lcdd.setMode(CLcddClient::MODE_SCART);
+		lcdd.setMode(CLcddTypes::MODE_SCART);
 	}
 	else
 	{
-		lcdd.setMode(CLcddClient::MODE_TVRADIO);
+		lcdd.setMode(CLcddTypes::MODE_TVRADIO);
 	}
 	switch_vcr( onoff );
 }
@@ -778,7 +778,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.68 2002/10/13 11:35:02 woglinde Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.69 2002/10/13 20:49:40 thegoodguy Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())

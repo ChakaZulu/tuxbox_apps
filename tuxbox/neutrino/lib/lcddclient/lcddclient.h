@@ -34,34 +34,19 @@
 
 #include <string>
 
+#include <zapit/basicclient.h>
+#include <lcddclient/lcddtypes.h>
 #include <lcddclient/lcddMsg.h>
 
 
 using namespace std;
 
-class CLcddClient
+class CLcddClient:private CBasicClient
 {
-		int sock_fd;
-
-		bool lcdd_connect();
-		bool send(char* data, int size);
-		bool receive(char* data, int size);
-		bool lcdd_close();
+	private:
+		bool send(const unsigned char command, char* data, const unsigned int size);
 
 	public:
-		enum mode
-		{
-			MODE_TVRADIO,
-			MODE_SCART,
-			MODE_MENU,
-			MODE_SAVER,
-			MODE_SHUTDOWN,
-			MODE_STANDBY,
-			MODE_MENU_UTF8
-		};
-
-		CLcddClient();
-
 		void setMode(char mode, string head="");
 		void setMenuText(char pos, string text, char highlight=0);
 		void setServiceName(string name);

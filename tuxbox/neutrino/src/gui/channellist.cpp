@@ -196,7 +196,7 @@ int CChannelList::show()
 		//evtl. anzeige dass keine kanalliste....
 		return res;
 	}
-	g_lcdd->setMode(CLcddClient::MODE_MENU_UTF8, g_Locale->getText(name));
+	g_lcdd->setMode(CLcddTypes::MODE_MENU_UTF8, g_Locale->getText(name));
 
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
@@ -369,7 +369,7 @@ int CChannelList::show()
 			res = -2;
 	}
 
-	g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
+	g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
 
 	if(zapOnExit)
 	{

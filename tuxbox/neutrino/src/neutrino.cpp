@@ -2835,7 +2835,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 	}
 	else if( mode == mode_standby )
 	{
-		g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
+		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 	}
 
@@ -2920,7 +2920,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		if (frameBuffer->getActive())
 			memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 
-		g_lcdd->setMode(CLcddClient::MODE_STANDBY);
+		g_lcdd->setMode(CLcddTypes::MODE_STANDBY);
 		g_Controld->videoPowerDown(true);
 
 		lastMode = mode;
@@ -2930,7 +2930,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	{
 	    // STANDBY AUS
 
-		g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
+		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 
 		mode = mode_unknown;
@@ -2959,7 +2959,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 	}
 	else if( mode == mode_standby )
 	{
-		g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
+		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 	}
 
@@ -3096,7 +3096,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.339 2002/10/10 22:32:51 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.340 2002/10/13 20:49:41 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

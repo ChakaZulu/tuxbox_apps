@@ -343,7 +343,7 @@ int CTimerList::show()
 	}
 	hide();
 
-	//g_lcdd->setMode(CLcddClient::MODE_TVRADIO, g_Locale->getText(name) );
+	//g_lcdd->setMode(CLcddTypes::MODE_TVRADIO, g_Locale->getText(name) );
 
 	return(res);
 }
@@ -496,7 +496,7 @@ void CTimerList::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
 	
-	g_lcdd->setMode(CLcddClient::MODE_MENU, g_Locale->getText("timerlist.name") );
+	g_lcdd->setMode(CLcddTypes::MODE_MENU, g_Locale->getText("timerlist.name") );
 
 	paintHead();
 	for(unsigned int count=0;count<listmaxshow;count++)

@@ -126,7 +126,7 @@ void CLCDD::parse_command(int connfd, CLcddMsg::commandHead rmsg)
 		case CLcddMsg::CMD_SETMODE:
 			CLcddMsg::commandMode msg4;
 			read(connfd, &msg4, sizeof(msg4));
-			lcdPainter.set_mode((CLcddClient::mode) msg4.mode, msg4.text);
+			lcdPainter.set_mode((CLcddTypes::mode) msg4.mode, msg4.text);
 			break;
 		case CLcddMsg::CMD_SETMENUTEXT:
 			CLcddMsg::commandMenuText msg5;
@@ -217,7 +217,7 @@ void CLCDD::sig_catch(int)
 int CLCDD::main(int argc, char **argv)
 {
 	debugoutput = true;
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.55 2002/10/13 07:27:00 woglinde Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.56 2002/10/13 20:49:40 thegoodguy Exp $\n\n");
 
 	InitNewClock();
 
