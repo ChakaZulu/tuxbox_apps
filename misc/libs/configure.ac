@@ -11,6 +11,7 @@ AM_PROG_LIBTOOL
 AC_OUTPUT([
 Makefile
 libconfigfile/Makefile
+libconnection/Makefile
 libcramfs/Makefile
 libeventserver/Makefile
 libmd5sum/Makefile
@@ -19,6 +20,7 @@ libnet/Makefile
 libucodes/Makefile
 libxmltree/Makefile
 tuxbox-configfile.pc
+tuxbox-connection.pc
 tuxbox-cramfs.pc
 tuxbox-eventserver.pc
 tuxbox-md5sum.pc

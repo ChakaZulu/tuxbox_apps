@@ -2,7 +2,7 @@
 #define __basicserver__
 
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.h,v 1.3 2002/10/18 11:55:09 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.h,v 1.4 2002/12/02 13:31:52 thegoodguy Exp $
  *
  * Basic Server Class (Neutrino) - DBoxII-Project
  *
@@ -28,7 +28,7 @@
 
 #include <string>
 
-#include <zapit/client/basicmessage.h>
+#include "basicmessage.h"
 
 class CBasicServer
 {
