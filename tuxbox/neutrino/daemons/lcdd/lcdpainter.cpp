@@ -178,8 +178,8 @@ void CLCDPainter::show_volume(char vol)
 		}
 		else
 		{
-			int dp = int( vol/100.0*72.0);
-			display.draw_fill_rect (0,52,dp,61, CLCDDisplay::PIXEL_ON);
+			int dp = int( vol/100.0*72.0+1.0);
+			display.draw_fill_rect (1,53,dp,60, CLCDDisplay::PIXEL_ON);
 		}
 
 		display.update();
