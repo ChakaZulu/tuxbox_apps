@@ -122,8 +122,6 @@ int eAVSwitch::setInput(int v)
 	switch (v)
 	{
 	case 0:
-		v = 63; 	// mute before change back... don't plopp
-		ioctl(fd, AVSIOSVOL, &v);
 		v = (Type == SAGEM)?0:2;
 		ioctl(fd, AVSIOSFBLK, &v);
 		ioctl(fd, AVSIOSVSW1, dvb);
@@ -136,8 +134,6 @@ int eAVSwitch::setInput(int v)
 			ioctl(fd, AVSIOSVOL, &eDVB::getInstance()->volume);
 		break;
 	case 1:
-		v = 63; 	// mute before change ... don't plopp
-		ioctl(fd, AVSIOSVOL, &v);
 		v = (colorformat == cfRGB?1:0);
 		ioctl(fd, AVSIOSFBLK, &v);
 		ioctl(fd, AVSIOSVSW1, scart);
