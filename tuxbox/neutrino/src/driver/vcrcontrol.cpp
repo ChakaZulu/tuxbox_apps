@@ -36,6 +36,7 @@
 #include <gui/widget/messagebox.h>
 
 #include "vcrcontrol.h"
+#include "neutrinoMessages.h"
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -168,6 +169,8 @@ bool CVCRControl::CVCRDevice::IRDeviceConnect()
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Stop()
 {
+	// leave scart mode
+	g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
 	return ParseFile(LIRCDIR "stop.lirc");
 }
 
@@ -213,6 +216,24 @@ int wait_time;
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned long long epgid, uint apid)
 {
+	if(channel_id != 0)		// wenn ein channel angegeben ist
+	{
+		if(g_Zapit->getCurrentServiceID() != channel_id)	// und momentan noch nicht getuned ist
+		{
+			g_Zapit->zapTo_serviceID(channel_id);		// dann umschalten
+		}
+	}
+	if(apid !=0) //selbiges für apid
+	{
+ 		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
+		if(si.apid != apid)
+		{
+			printf("Setting Audio channel to %x\n",apid);
+			g_Zapit->setAudioChannel(apid);
+		}
+	}
+	// switch to scart mode
+	g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
 /*
 sendCommand(POWER
 CONTROL Wait 1
@@ -314,7 +335,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 //		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
 		CZapitClient::responseGetPIDs pids;
 		g_Zapit->getPIDS (pids);
-		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
+ 		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
 		sprintf(tmp,"%u", si.vdid );
 		extVideoPID = tmp;
 //		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
