@@ -1,5 +1,5 @@
 /*
- * $Id: capmt.cpp,v 1.3 2003/09/17 16:03:21 obi Exp $
+ * $Id: capmt.cpp,v 1.4 2003/10/14 14:46:40 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -116,7 +116,7 @@ CaProgramMapTable::CaProgramMapTable(const ProgramMapTable * const pmt, const ui
 {
 	uint32_t length = 6;
 
-	caPmtTag = 0x9f80c3;
+	caPmtTag = 0x9f8032;
 	caPmtListManagement = listManagement;
 
 	programNumber = pmt->tableIdExtension;
