@@ -9,6 +9,7 @@
 #include <functional>
 
 #include <vector>
+#include <stdio.h>
 #include "getservices.h"
 #include "xml/xmltree.h"
 
