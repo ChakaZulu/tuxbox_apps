@@ -52,7 +52,6 @@ function init()
 
 function update()
 {
-	init2();
 	<!-- service & epg data -->
 	parent.header.getElem("id", "servicename", null).firstChild.nodeValue = serviceName;
 	parent.header.getElem("id", "nowt", null).firstChild.nodeValue = nowT;
