@@ -1,5 +1,5 @@
 /*
- * $Id: audio.h,v 1.6 2002/08/21 09:59:23 obi Exp $
+ * $Id: audio.h,v 1.7 2002/09/18 10:06:30 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -66,6 +66,10 @@ class CAudio
 		/* start and stop audio */
 		int start ();
 		int stop ();
+
+		/* select channels */
+		int selectChannel (audioChannelSelect_t sel);
+		audioChannelSelect_t getSelectedChannel ();
 };
 
 #endif /* __audio_h__ */

@@ -749,15 +749,27 @@ bool CZapitClient::isPlayBackActive()
 	return response.activated;
 }
 
+void CZapitClient::setDisplayFormat (int format)
+{
+	commandInt msg;
+	msg.val = format;
+	send(CMD_SET_DISPLAY_FORMAT, (char*)&msg, sizeof(msg));
+	zapit_close();
+}
+
+void CZapitClient::setAudioMode (int mode)
+{
+	commandInt msg;
+	msg.val = mode;
+	send(CMD_SET_AUDIO_MODE, (char*)&msg, sizeof(msg));
+	zapit_close();
+}
 
 void CZapitClient::setRecordMode( bool activate )
 {
 	commandSetRecordMode msg;
-
 	msg.activate = activate;
-
 	send(CMD_SET_RECORD_MODE, (char*)&msg, sizeof(msg));
-
 	zapit_close();
 }
 

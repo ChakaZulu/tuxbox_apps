@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.227 2002/09/16 22:38:55 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.228 2002/09/18 10:06:29 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -994,6 +994,22 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				playbackStopForced = true;
 				break;
 
+			case CZapitClient::CMD_SET_DISPLAY_FORMAT:
+			{
+				CZapitClient::commandInt msg;
+				read(connfd, &msg, sizeof(msg));
+				video->setCroppingMode((videoDisplayFormat_t) msg.val);
+				break;
+			}
+
+			case CZapitClient::CMD_SET_AUDIO_MODE:
+			{
+				CZapitClient::commandInt msg;
+				read(connfd, &msg, sizeof(msg));
+				audio->selectChannel((audioChannelSelect_t) msg.val);
+				break;
+			}
+
 			case CZapitClient::CMD_GETPIDS:
 			{
 				CZapitClient::responseGetOtherPIDs responseGetOtherPIDs;
@@ -1085,7 +1101,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.227 2002/09/16 22:38:55 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.228 2002/09/18 10:06:29 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

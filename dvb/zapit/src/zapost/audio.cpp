@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.4 2002/05/16 02:33:26 obi Exp $
+ * $Id: audio.cpp,v 1.5 2002/09/18 10:06:30 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -192,5 +192,23 @@ int CAudio::stop ()
 	status.playState = AUDIO_STOPPED;
 
 	return 0;
+}
+
+int CAudio::selectChannel (audioChannelSelect_t sel)
+{
+	if (ioctl(fd, AUDIO_CHANNEL_SELECT, &sel) < 0)
+	{
+		perror("AUDIO_CHANNEL_SELECT");
+		return -1;
+	}
+
+	status.channelSelect = sel;
+
+	return 0;
+}
+
+audioChannelSelect_t CAudio::getSelectedChannel ()
+{
+	return status.channelSelect;
 }
 
