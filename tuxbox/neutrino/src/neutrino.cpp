@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.34 2001/09/18 10:49:49 fnbrd Exp $
+        $Id: neutrino.cpp,v 1.35 2001/09/18 11:34:42 fnbrd Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.35  2001/09/18 11:34:42  fnbrd
+  Some changes.
+
   Revision 1.34  2001/09/18 10:49:49  fnbrd
   Eventlist, quick'n dirty
 
@@ -952,7 +955,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 			}
 			else if (key==CRCInput::RC_yellow)
 			{	// eventlist
-				eventlist->exec("Premiere 1");
+				eventlist->setName(channelList->getActiveChannelName());
+				eventlist->exec(channelList->getActiveChannelName());
 			}
 			else if ((key==g_settings.key_quickzap_up) || (key==g_settings.key_quickzap_down))
 			{

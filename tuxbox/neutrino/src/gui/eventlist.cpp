@@ -1,7 +1,10 @@
 //
-// $Id: eventlist.cpp,v 1.2 2001/09/18 11:05:58 field Exp $
+// $Id: eventlist.cpp,v 1.3 2001/09/18 11:34:42 fnbrd Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.3  2001/09/18 11:34:42  fnbrd
+// Some changes.
+//
 // Revision 1.2  2001/09/18 11:05:58  field
 // Ausgabe quick'n'dirty gefixt
 //
@@ -26,7 +29,7 @@ static char* copyStringto(const char* from, char* to, int len, char delim)
 }
 
 // quick'n dirty
-void EventList::readEvents(const char *channelname)
+void EventList::readEvents(const std::string& channelname)
 {
   char rip[]="127.0.0.1";
 
@@ -44,10 +47,10 @@ void EventList::readEvents(const char *channelname)
   sectionsd::msgRequestHeader req;
   req.version = 2;
   req.command = sectionsd::allEventsChannelName;
-  req.dataLength = strlen(channelname)+1;
+  req.dataLength = strlen(channelname.c_str())+1;
 //  req.dataLength = 0;
-  write(sock_fd,&req,sizeof(req));
-  write(sock_fd, channelname, req.dataLength);
+  write(sock_fd, &req, sizeof(req));
+  write(sock_fd, channelname.c_str(), req.dataLength);
 
   sectionsd::msgResponseHeader resp;
   memset(&resp, 0, sizeof(resp));
@@ -92,6 +95,11 @@ void EventList::readEvents(const char *channelname)
 //    printf("desc: %s\n", channelDescription);
     event* evt = new event();
     evt->name=std::string(ename);
+    evt->datetimeduration=std::string(edate);
+    evt->datetimeduration+=std::string(" ");
+    evt->datetimeduration+=std::string(etime);
+    evt->datetimeduration+=std::string(" ");
+    evt->datetimeduration+=std::string(eduration);
     printf("name: %s\n", evt->name.c_str());
 //    tmp->number=number;
 //    tmp->name=name;
@@ -101,7 +109,7 @@ void EventList::readEvents(const char *channelname)
   return;
 }
 
-EventList::EventList(int Key=-1, string Name="")
+EventList::EventList(int Key=-1, const std::string &Name)
 {
 	key = Key;
 	name = Name;
@@ -130,12 +138,12 @@ EventList::~EventList()
   removeAllEvents();
 }
 
-void EventList::setName(string Name)
+void EventList::setName(const std::string& Name)
 {
 	name = Name;
 }
 
-void EventList::exec(const char *channelname)
+void EventList::exec(const std::string& channelname)
 {
   paintHead();
   readEvents(channelname);
@@ -243,7 +251,8 @@ void EventList::paintItem(int pos)
 //                sprintf((char*) tmp, "%d", chan->number);
 //		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(evt->name.c_str());
 //		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, evt->name.c_str(), color, fheight);
-		printf("Rendering %s\n", evt->name.c_str());
+		printf("Rendering '%s'\n", evt->name.c_str());
+		printf("date time duration '%s'\n", evt->datetimeduration.c_str());
 
 //		if(strlen(chan->currentEvent.c_str()))
 //		{
