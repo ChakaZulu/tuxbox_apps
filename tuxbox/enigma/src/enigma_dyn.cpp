@@ -53,6 +53,8 @@ using namespace std;
 
 #define BLUE "#12259E"
 #define RED "#CB0303"
+#define GREEN "#1FCB12"
+#define YELLOW "#F5FF3C"
 #define LIGHTGREY "#DEE6D6"
 #define DARKGREY "#ABABAB"
 #define LEFTNAVICOLOR "#316183"
@@ -113,18 +115,6 @@ eString getTitle(eString title)
 		<< "</span><br><br>";
 	return result.str();
 }
-
-#ifndef DISABLE_FILE
-eString getDVRRecordingControls(void)
-{
-	eString result;
-	result += button(100, "Record", RED, "javascript:DVRrecord('start')");
-	result += "&nbsp;&nbsp;&nbsp;";
-	result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
-	result += "<br><br>";
-	return result;
-}
-#endif
 
 static int getHex(int c)
 {
@@ -1285,9 +1275,6 @@ static eString getContent(eString mode, eString path)
 	if (mode == "zap")
 	{
 		result = getTitle("Zap");
-#ifndef DISABLE_FILE
-		result += getDVRRecordingControls();
-#endif
 		zap_result += getZapContent(mode, path);
 		result += getEITC();
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
@@ -1296,13 +1283,17 @@ static eString getContent(eString mode, eString path)
 
 		if (sapi && sapi->service)
 		{
-			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">EPG-Info</a></u>");
-			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">Stream-Info</a></u>");
+			eString buttons = button(100, "EPG", GREEN, "javascript:openEPG()");
+			buttons += button(100, "Info", YELLOW, "javascript:openSI()");
+#ifndef DISABLE_FILE
+			buttons += button(100, "Record", RED, "javascript:DVRrecord('start')");
+			buttons += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
+#endif
+			result.strReplace("#OPS#", buttons);
 		}
 		else
 		{
-			DELETE(#EPG#);
-			DELETE(#SI#);
+			DELETE(#OPS#);
 		}
 		result += zap_result;
 	}
