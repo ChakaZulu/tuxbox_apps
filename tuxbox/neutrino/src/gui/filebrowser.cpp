@@ -137,7 +137,7 @@ CFileBrowser::CFileBrowser()
 	foheight = 30;
 
 	theight  = g_Fonts->eventlist_title->getHeight();
-	fheight = g_Fonts->eventlist_itemLarge->getHeight();
+	fheight = g_Fonts->filebrowser_item->getHeight();
 
 
 	listmaxshow = max(1,(int)(height - theight - foheight)/fheight);
@@ -557,9 +557,9 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 				default:
 						fileicon = "file.raw";
 			}
-			frameBuffer->paintIcon(fileicon, x+5 , ypos +5 );
+			frameBuffer->paintIcon(fileicon, x+5 , ypos + (fheight-16) / 2 );
 			
-			g_Fonts->filebrowser_itemFile->RenderString(x+35, ypos+ fheight-1, width -(35+170) , actual_file->getFileName().c_str(), color);
+			g_Fonts->filebrowser_item->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName().c_str(), color);
 
 			if( S_ISREG(actual_file->Mode) )
 			{
@@ -570,12 +570,12 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 					modestring += string((actual_file->Mode & (2 << (m*3)))?"w":"-");
 					modestring += string((actual_file->Mode & (1 << (m*3)))?"x":"-");
 				}
-				g_Fonts->filebrowser_itemFile->RenderString(x + width - 160 , ypos+ fheight-1, 80, modestring.c_str(), color);
+				g_Fonts->filebrowser_item->RenderString(x + width - 160 , ypos+ fheight, 80, modestring.c_str(), color);
 
 				char tmpstr[256];
 				snprintf(tmpstr,sizeof(tmpstr),"%d kb", (int)((actual_file->Size / 1024) +0.9));
-				int breite = g_Fonts->filebrowser_itemFile->getRenderWidth(tmpstr)< 70?g_Fonts->filebrowser_itemFile->getRenderWidth(tmpstr):60;
-				g_Fonts->filebrowser_itemFile->RenderString(x + width - 80 + (60 - breite), ypos+ fheight-1, breite, tmpstr, color);
+				int breite = g_Fonts->filebrowser_item->getRenderWidth(tmpstr)< 70?g_Fonts->filebrowser_item->getRenderWidth(tmpstr):60;
+				g_Fonts->filebrowser_item->RenderString(x + width - 80 + (60 - breite), ypos+ fheight, breite, tmpstr, color);
 			}
 		}
 	}

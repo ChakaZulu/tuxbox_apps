@@ -143,8 +143,7 @@ class FontsDef
 		*infobar_info,
 		*infobar_small,
 
-		*filebrowser_itemFolder,
-		*filebrowser_itemFile;
+		*filebrowser_item;
 };
 
 

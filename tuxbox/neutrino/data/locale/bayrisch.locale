@@ -626,6 +626,7 @@ fontsize.infobar_info Infobar Info
 fontsize.infobar_small Infobar kloa
 fontsize.gamelist_itemLarge groß
 fontsize.gamelist_itemSmall kloa
+fontsize.filebrowser_item undef
 
 fontmenu.head Schriftgrössn Eistellunga
 fontmenu.channellist Kanallistn

@@ -626,6 +626,7 @@ fontsize.infobar_info info
 fontsize.infobar_small small
 fontsize.gamelist_itemLarge large
 fontsize.gamelist_itemSmall small
+fontsize.filebrowser_item filebrowser item
 
 fontmenu.head Fontsize settings
 fontmenu.channellist Channellist

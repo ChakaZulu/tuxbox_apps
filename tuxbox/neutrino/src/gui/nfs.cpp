@@ -73,7 +73,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
 				a=g_Locale->getText("messagebox.yes");
 			else
 				a=g_Locale->getText("messagebox.no");
-			sprintf(m_entry[i],"%s:%s -> %s auto: %s",g_settings.network_nfs_ip[i],g_settings.network_nfs_dir[i], 
+			sprintf(m_entry[i],"%s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i],g_settings.network_nfs_dir[i], 
 					  g_settings.network_nfs_local_dir[i], a.c_str());
 		}
    }

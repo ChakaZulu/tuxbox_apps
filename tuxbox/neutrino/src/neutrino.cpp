@@ -521,8 +521,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.fontsize_infobar_info     , configfile.getString( "fontsize_infobar_info", "20").c_str() );
 	strcpy( g_settings.fontsize_infobar_small    , configfile.getString( "fontsize_infobar_small", "14").c_str() );
 
-	strcpy( g_settings.fontsize_filebrowser_itemfolder, configfile.getString( "fontsize_filebrowser_itemfolder", "16").c_str() );
-	strcpy( g_settings.fontsize_filebrowser_itemfile , configfile.getString( "fontsize_filebrowser_itemfile", "14").c_str() );
+	strcpy( g_settings.fontsize_filebrowser_item, configfile.getString( "fontsize_filebrowser_item", "16").c_str() );
 
 	//Software-update
 	g_settings.softupdate_mode = configfile.getInt32( "softupdate_mode", 1 );
@@ -740,8 +739,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "fontsize_infobar_info", g_settings.fontsize_infobar_info );
 	configfile.setString( "fontsize_infobar_small", g_settings.fontsize_infobar_small );
 
-	configfile.setString( "fontsize_filebrowser_itemfolder", g_settings.fontsize_filebrowser_itemfolder );
-	configfile.setString( "fontsize_filebrowser_itemfile", g_settings.fontsize_filebrowser_itemfile );
+	configfile.setString( "fontsize_filebrowser_item", g_settings.fontsize_filebrowser_item );
 
 	//Software-update
 	configfile.setInt32( "softupdate_mode", g_settings.softupdate_mode );
@@ -981,9 +979,7 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->infobar_info      =  g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_infobar_info) + fontsSizeOffset );
 	g_Fonts->infobar_small     =  g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_infobar_small) + fontsSizeOffset );
 
-	g_Fonts->filebrowser_itemFolder =   g_fontRenderer->getFont(fontName.c_str(), "Bold",  atoi(g_settings.fontsize_filebrowser_itemfolder) + fontsSizeOffset );
-	g_Fonts->filebrowser_itemFile =   g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_filebrowser_itemfile) + fontsSizeOffset );
-
+	g_Fonts->filebrowser_item =   g_fontRenderer->getFont(fontName.c_str(), "Bold",  atoi(g_settings.fontsize_filebrowser_item) + fontsSizeOffset );
 }
 
 /**************************************************************************************
@@ -1644,6 +1640,7 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	fontSettings.addItem( new CMenuForwarder("fontmenu.epg", true,"", &fontSettings_Epg) );
 	fontSettings.addItem( new CMenuForwarder("fontmenu.infobar", true,"", &fontSettings_Infobar) );
 	fontSettings.addItem( new CMenuForwarder("fontmenu.gamelist", true,"", &fontSettings_Gamelist) );
+	AddFontSettingItem(fontSettings, "fontsize.filebrowser_item", g_settings.fontsize_filebrowser_item);
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings )
@@ -3341,7 +3338,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.390 2003/01/22 19:12:56 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.391 2003/01/23 23:48:53 zwen Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

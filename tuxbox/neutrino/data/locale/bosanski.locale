@@ -626,6 +626,7 @@ fontsize.infobar_info infromativna traka za informaciju
 fontsize.infobar_small mala infromativna traka
 fontsize.gamelist_itemLarge veliko
 fontsize.gamelist_itemSmall malo
+fontsize.filebrowser_item undef
 
 fontmenu.head namjescenje velicine slova
 fontmenu.channellist lista kanala

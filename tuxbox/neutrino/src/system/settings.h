@@ -224,8 +224,7 @@ struct SNeutrinoSettings
 	char	fontsize_infobar_info[4];
 	char	fontsize_infobar_small[4];
 
-	char	fontsize_filebrowser_itemfolder[4];
-	char	fontsize_filebrowser_itemfile[4];
+	char	fontsize_filebrowser_item[4];
 };
 
 struct SglobalInfo
