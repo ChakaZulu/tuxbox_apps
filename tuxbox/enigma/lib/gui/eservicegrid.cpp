@@ -5,10 +5,10 @@ eServiceGrid::eServiceGrid(eWidget *parent): eWidget(parent)
 	para=0;
 	grid=0;
 	
-	elemsize=QSize(16, 16);
+	elemsize=eSize(16, 16);
 }
 
-void eServiceGrid::createGrid(QSize gs)
+void eServiceGrid::createGrid(eSize gs)
 {
 	gridsize=gs;
 	if (grid)
@@ -18,7 +18,7 @@ void eServiceGrid::createGrid(QSize gs)
 	grid=new (eService*)[gridsize.x()*gridsize.y()];
 }
 
-eService **eServiceGrid::allocateGrid(QSize size)
+eService **eServiceGrid::allocateGrid(eSize size)
 {
 	for (int y=0; y<gridsize.height(); y++)
 		for (int x=0; x<gridsize.width(); x++)
@@ -39,7 +39,7 @@ eService **eServiceGrid::allocateGrid(QSize size)
 
 void eServiceGrid::setGridSize(int gx, int gy)
 {
-	createGrid(QSize(gx, gy));
+	createGrid(eSize(gx, gy));
 }
 
 void eServiceGrid::addService(eService *service)
@@ -47,8 +47,8 @@ void eServiceGrid::addService(eService *service)
 	eTextPara temp;
 	temp.setFont(font);
 	temp.renderText(service->service_name);
-	QSize size=temp.getExtends();
-	QSize gsize=QSize((size.width()+elemsize.width()-1)/elemsize.width(), (size.height()+elemsize.height()-1)/elemsize.height());
+	eSize size=temp.getExtends();
+	eSize gsize=eSize((size.width()+elemsize.width()-1)/elemsize.width(), (size.height()+elemsize.height()-1)/elemsize.height());
 	eService **sp=allocateGrid(gsize);
 	if (!sp)
 		return;

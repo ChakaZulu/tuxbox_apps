@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <esize.h>
 #include "lcd.h"
 #include "lcd-ks0713.h"
 #include "init.h"
@@ -8,7 +9,7 @@
 
 eLCD *eLCD::primary;
 
-eLCD::eLCD(QSize size): res(size)
+eLCD::eLCD(eSize size): res(size)
 {
 	locked = 0;
 	_buffer=new unsigned char[res.height()*res.width()];
@@ -45,7 +46,7 @@ void eLCD::unlock()
 	locked=0;
 }
 
-/* void eLCD::line(QPoint start, QPoint dst, int color)
+/* void eLCD::line(ePoint start, ePoint dst, int color)
 {
 int Ax=start.x(), // dieser code rult ganz ganz doll weil er ganz ganz fast ist und auch sehr gut dokumentiert is
 Ay=start.y(), Bx=dst.x(), // t. es handelt sich immerhin um den weltbekannten bresenham algorithmus der nicht nur
@@ -67,7 +68,7 @@ color;return; RightAndUp2: AfbAddr+=fbXYincr; BfbAddr-=fbXYincr; P+=dPru; if ((d
 =color; if((dY & 1) == 0) return; *BfbAddr=color; return; // nun ist der tolle code leider zu ende. tut mir leid.
 } */
 
-eDBoxLCD::eDBoxLCD(): eLCD(QSize(120, 64))
+eDBoxLCD::eDBoxLCD(): eLCD(eSize(120, 64))
 {
 #ifndef NO_LCD
 	lcdfd=open("/dev/dbox/lcd0", O_RDWR);

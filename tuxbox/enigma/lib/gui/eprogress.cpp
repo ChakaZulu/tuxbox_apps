@@ -1,6 +1,6 @@
 #include "eprogress.h"
 #include "fb.h"
-#include <qrect.h>
+#include <erect.h>
 #include <stdlib.h>
 #include "lcd.h"
 #include "eskin.h"
@@ -26,7 +26,7 @@ void eProgress::setPerc(int p)
 	redraw();
 }
 
-void eProgress::redrawWidget(gPainter *target, const QRect &area)
+void eProgress::redrawWidget(gPainter *target, const eRect &area)
 {
 	int dh=perc*(size.width()-border*2)/100;
 	if (dh<0)
@@ -34,14 +34,14 @@ void eProgress::redrawWidget(gPainter *target, const QRect &area)
 	if (dh>(size.width()-border*2))
 		dh=size.width()-border*2;
 	target->setForegroundColor(getForegroundColor());
-	target->fill(QRect(0, 0, size.width(), border));
-	target->fill(QRect(0, border, border, size.height()-border));
-	target->fill(QRect(border, size.height()-border, size.width()-border, border));
-	target->fill(QRect(size.width()-border, border, border, size.height()-border));
+	target->fill(eRect(0, 0, size.width(), border));
+	target->fill(eRect(0, border, border, size.height()-border));
+	target->fill(eRect(border, size.height()-border, size.width()-border, border));
+	target->fill(eRect(size.width()-border, border, border, size.height()-border));
 	target->setForegroundColor(left);
-	target->fill(QRect(border, border, dh, size.height()-border*2));
+	target->fill(eRect(border, border, dh, size.height()-border*2));
 	target->setForegroundColor(right);
-	target->fill(QRect(border+dh, border, size.width()-border*2-dh, size.height()-border*2));
+	target->fill(eRect(border+dh, border, size.width()-border*2-dh, size.height()-border*2));
 }
 
 int eProgress::setProperty(const QString &prop, const QString &value)

@@ -1,7 +1,8 @@
 INCLUDES = \
 	-I$(DRIVER)/lcd \
 	-I$(top_srcdir)/edvb/miniqt \
-	-I$(top_srcdir)/enigma/src/core/system
+	-I$(top_srcdir)/enigma/src/core/system \
+	-I$(top_srcdir)/enigma/src/core/gui
 
 noinst_LTLIBRARIES = libgdi.la
 

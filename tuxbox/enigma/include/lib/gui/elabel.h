@@ -20,11 +20,11 @@ public:
 	eLabel(eWidget *parent, int flags=0 /* RS_WRAP */ , int takefocus=0);
 	~eLabel();
 
-	void redrawWidget(gPainter *target, const QRect &area);
+	void redrawWidget(gPainter *target, const eRect &area);
 	void setFlags(int flag);
 	int setProperty(const QString &prop, const QString &value);
 
-	QSize getExtend();
+	eSize getExtend();
 };
 
 #endif

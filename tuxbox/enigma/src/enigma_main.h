@@ -146,8 +146,8 @@ class eZapMain: public eWidget
 	int isEPG;	
 	eZapLCD lcdmain;
 	
-	void redrawWidget(gPainter *, const QRect &where);
-	void eraseBackground(gPainter *, const QRect &where);
+	void redrawWidget(gPainter *, const eRect &where);
+	void eraseBackground(gPainter *, const eRect &where);
 	void setEIT(EIT *);
 	void handleNVODService(SDTEntry *sdtentry);
 protected:

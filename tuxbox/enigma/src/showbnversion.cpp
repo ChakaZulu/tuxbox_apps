@@ -125,20 +125,20 @@ void ShowBNVersion::eventOccured(int event)
 ShowBNVersion::ShowBNVersion(): eWindow(1)
 {
 	setText("Show current BN version");
-	move(QPoint(150, 150));
-	resize(QSize(400, 300));
+	move(ePoint(150, 150));
+	resize(eSize(400, 300));
 	
 	text=new eLabel(this);
-	text->move(QPoint(10, 40));
-	text->resize(QSize(380, 60));
+	text->move(ePoint(10, 40));
+	text->resize(eSize(380, 60));
 	
 	res1=new eLabel(this);
-	res1->move(QPoint(10, 100));
-	res1->resize(QSize(380, 30));
+	res1->move(ePoint(10, 100));
+	res1->resize(eSize(380, 30));
 	
 	res2=new eLabel(this);
-	res2->move(QPoint(10, 130));
-	res2->resize(QSize(380, 30));
+	res2->move(ePoint(10, 130));
+	res2->resize(eSize(380, 30));
 	
 //	connect(eDVB::getInstance(), SIGNAL(eventOccured(int)), SLOT(eventOccured(int)));
 	CONNECT(eDVB::getInstance()->eventOccured, ShowBNVersion::eventOccured);

@@ -1,5 +1,4 @@
 #include "ewindow.h"
-#include <qrect.h>
 #include "enigma.h"
 #include "grc.h"
 #include "eskin.h"
@@ -48,9 +47,9 @@ void eWindow::OnFontSizeChanged(int NewFontSize)
 {
 }
 
-void eWindow::redrawWidget(gPainter *target, const QRect &where)
+void eWindow::redrawWidget(gPainter *target, const eRect &where)
 {
-	if (where.contains(QRect(0, 0, width(), titleSize)))
+	if (where.contains(eRect(0, 0, width(), titleSize)))
 		drawTitlebar(target);
 
 	if (LCDTitle)
@@ -63,7 +62,7 @@ void eWindow::drawTitlebar(gPainter *target)
 	
 	if (iTopLeft)
 	{
-		target->blit(*iTopLeft, QPoint(0, 0));
+		target->blit(*iTopLeft, ePoint(0, 0));
 		target->flush();
 		x+=iTopLeft->x;
 	}
@@ -71,7 +70,7 @@ void eWindow::drawTitlebar(gPainter *target)
 	if (iTopRight)
 	{
 		xm-=iTopRight->x;
-		target->blit(*iTopRight, QPoint(xm, 0), QRect(x, 0, width()-x, height()));
+		target->blit(*iTopRight, ePoint(xm, 0), eRect(x, 0, width()-x, height()));
 		target->flush();
 	}
 	
@@ -79,13 +78,13 @@ void eWindow::drawTitlebar(gPainter *target)
 	{
 		while (x<xm)
 		{
-			target->blit(*iTop, QPoint(x, 0), QRect(x, 0, xm-x, height()));
+			target->blit(*iTop, ePoint(x, 0), eRect(x, 0, xm-x, height()));
 			x+=iTop->x;
 		}
 		target->flush();
 	} else
 	{
-		target->fill(QRect(0, 0, width(), titleSize));
+		target->fill(eRect(0, 0, width(), titleSize));
 		target->flush();
 	}
 
@@ -94,7 +93,7 @@ void eWindow::drawTitlebar(gPainter *target)
 
 	if (iBottomLeft)
 	{
-		target->blit(*iBottomLeft, QPoint(0, height()-iBottomLeft->y));
+		target->blit(*iBottomLeft, ePoint(0, height()-iBottomLeft->y));
 		target->flush();
 		x+=iBottomLeft->x;
 	}
@@ -102,7 +101,7 @@ void eWindow::drawTitlebar(gPainter *target)
 	if (iBottomRight)
 	{
 		xm-=iBottomRight->x;
-		target->blit(*iBottomRight, QPoint(xm, height()-iBottomRight->y), QRect(x, height()-iBottomRight->y, width()-x, iBottomRight->y));
+		target->blit(*iBottomRight, ePoint(xm, height()-iBottomRight->y), eRect(x, height()-iBottomRight->y, width()-x, iBottomRight->y));
 		target->flush();
 	}
 	
@@ -110,7 +109,7 @@ void eWindow::drawTitlebar(gPainter *target)
 	{
 		while (x<xm)
 		{
-			target->blit(*iBottom, QPoint(x, height()-iBottom->y), QRect(x, height()-iBottom->y, xm-x, iBottom->y));
+			target->blit(*iBottom, ePoint(x, height()-iBottom->y), eRect(x, height()-iBottom->y, xm-x, iBottom->y));
 			x+=iBottom->x;
 		}
 		target->flush();
@@ -126,7 +125,7 @@ void eWindow::drawTitlebar(gPainter *target)
 	{
 		while (y<ym)
 		{
-			target->blit(*iLeft, QPoint(0, y), QRect(0, y, iLeft->x, ym-y));
+			target->blit(*iLeft, ePoint(0, y), eRect(0, y, iLeft->x, ym-y));
 			y+=iLeft->y;
 		}
 	}
@@ -139,7 +138,7 @@ void eWindow::drawTitlebar(gPainter *target)
 	{
 		while (y<ym)
 		{
-			target->blit(*iRight, QPoint(width()-iRight->x, y), QRect(width()-iRight->x, y, iRight->x, ym-y));
+			target->blit(*iRight, ePoint(width()-iRight->x, y), eRect(width()-iRight->x, y, iRight->x, ym-y));
 			y+=iRight->y;
 		}
 	}
@@ -147,13 +146,13 @@ void eWindow::drawTitlebar(gPainter *target)
 	target->flush();
 
 	target->setFont(gFont("NimbusSansL-Regular Sans L Regular", titleFontSize));
-	target->renderText(QRect(titleOffsetX, titleOffsetY, width()-titleOffsetX, titleSize), text);
+	target->renderText(eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX, titleSize), text);
 	target->flush();
 }
 
 void eWindow::recalcClientRect()
 {
-	clientrect=QRect(border, titleSize, size.width()-border*2, size.height()-titleSize-border);
+	clientrect=eRect(border, titleSize, size.width()-border*2, size.height()-titleSize-border);
 }
 
 int eWindow::eventFilter(const eWidgetEvent &event)
@@ -161,7 +160,7 @@ int eWindow::eventFilter(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::changedText:
-		redraw(QRect(0, 0, width(), titleSize));
+		redraw(eRect(0, 0, width(), titleSize));
 		return 1;
 		break;
 	}

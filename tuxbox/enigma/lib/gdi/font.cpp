@@ -227,7 +227,7 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 		{
 			int linelength=cursor.x()-i->x;
 			i->flags|=GS_ISFIRST;
-			QPoint offset=QPoint(i->x, i->y);
+			ePoint offset=ePoint(i->x, i->y);
 			newLine();
 			offset-=cursor;
 			while (i != glyphs.end())		// rearrange them into the next line
@@ -236,7 +236,7 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 				i->y-=offset.y();
 				++i;
 			}
-			cursor+=QPoint(linelength, 0);	// put the cursor after that line
+			cursor+=ePoint(linelength, 0);	// put the cursor after that line
 		} else
 		{
 	    if (cnt)
@@ -265,7 +265,7 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 	ng.flags=flags;
 	glyphs.push_back(ng); 
 
-	cursor+=QPoint(xadvance, 0);
+	cursor+=ePoint(xadvance, 0);
 	previous=glyphIndex;
 	return 0;
 }
@@ -276,7 +276,7 @@ void eTextPara::newLine()
 		maximum.setWidth(cursor.x());
 	cursor.setX(left);
 	int linegap=current_face->size->metrics.height-(current_face->size->metrics.ascender+current_face->size->metrics.descender);
-	cursor+=QPoint(0, (current_face->size->metrics.ascender+current_face->size->metrics.descender+linegap*1/2)>>6);
+	cursor+=ePoint(0, (current_face->size->metrics.ascender+current_face->size->metrics.descender+linegap*1/2)>>6);
 	if (maximum.height()<cursor.y())
 		maximum.setHeight(cursor.y());
 	previous=0;
@@ -330,7 +330,7 @@ void eTextPara::setFont(Font *fnt)
 	previous=0;
 	if (cursor.y()==-1)
 	{
-		cursor=QPoint(area.x(), area.y()+(current_face->size->metrics.ascender>>6));
+		cursor=ePoint(area.x(), area.y()+(current_face->size->metrics.ascender>>6));
 		left=cursor.x();
 	}
 	use_kerning=FT_HAS_KERNING(current_face);
@@ -366,8 +366,8 @@ int eTextPara::renderString(const QString &qstring, int rflags)
 			{
 			case '\t':
 				isprintable=0;
-				cursor+=QPoint(current_font->tabwidth, 0);
-				cursor-=QPoint(cursor.x()%current_font->tabwidth, 0);
+				cursor+=ePoint(current_font->tabwidth, 0);
+				cursor-=ePoint(cursor.x()%current_font->tabwidth, 0);
 				break;
 			case '\n':
 				isprintable=0;
@@ -397,7 +397,7 @@ int eTextPara::renderString(const QString &qstring, int rflags)
 	return 0;
 }
 
-void eTextPara::blit(gPixmapDC &dc, const QPoint &offset)
+void eTextPara::blit(gPixmapDC &dc, const ePoint &offset)
 {
 	eLocker lock(ftlock);
 
@@ -411,7 +411,7 @@ void eTextPara::blit(gPixmapDC &dc, const QPoint &offset)
 	if (!target.clut)
 		opcode=1;
 	
-	QRect clip(0, 0, target.x, target.y);
+	eRect clip(0, 0, target.x, target.y);
 	clip&=dc.getClip();
 
 	int buffer_stride=target.stride;
@@ -549,9 +549,9 @@ void eTextPara::clear()
 	glyphs.clear();
 }
 
-QSize eTextPara::getExtend()
+eSize eTextPara::getExtend()
 {
-	QSize res=maximum;
+	eSize res=maximum;
 			/* account last unfinished line */
 	if (cursor.x() > res.width())
 		res.setWidth(cursor.x());

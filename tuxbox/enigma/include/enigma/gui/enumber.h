@@ -9,9 +9,9 @@ class eNumber: public eWidget
 {
 //	Q_OBJECT
 private:
-	void redrawNumber(gPainter *, int n, const QRect &rect);
-	void redrawWidget(gPainter *, const QRect &rect);
-	QRect getNumberRect(int n);
+	void redrawNumber(gPainter *, int n, const eRect &rect);
+	void redrawWidget(gPainter *, const eRect &rect);
+	eRect getNumberRect(int n);
 	int eventFilter(const eWidgetEvent &event);
 	int number[4];
 	int len, space, active;

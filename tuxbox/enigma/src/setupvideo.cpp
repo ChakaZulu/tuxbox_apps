@@ -59,44 +59,44 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	setText("Video Setup");
-	move(QPoint(150, 136));
-	resize(QSize(350, 250));
+	move(ePoint(150, 136));
+	resize(eSize(350, 250));
 
 	eLabel *l=new eLabel(this);
 	l->setText("Colorformat:");
-	l->move(QPoint(10, 20));
-	l->resize(QSize(150, fd+4));
+	l->move(ePoint(10, 20));
+	l->resize(eSize(150, fd+4));
 	
 	colorformat=new eButton(this, l);
 	colorformat->setText("[color]");
-	colorformat->move(QPoint(160, 20));
-	colorformat->resize(QSize(85, fd+4));
+	colorformat->move(ePoint(160, 20));
+	colorformat->resize(eSize(85, fd+4));
 //	connect(colorformat, SIGNAL(selected()), SLOT(toggleColorformat()));
 	CONNECT(colorformat->selected, eZapVideoSetup::toggleColorformat);
 
   l=new eLabel(this);
 	l->setText("Aspect Ratio:");
-	l->move(QPoint(10, 55));
-	l->resize(QSize(170, fd+4));
+	l->move(ePoint(10, 55));
+	l->resize(eSize(170, fd+4));
 
 	pin8=new eButton(this, l);
 	pin8->setText("[Pin8]");
-	pin8->move(QPoint(160, 55));
-	pin8->resize(QSize(140, fd+4));
+	pin8->move(ePoint(160, 55));
+	pin8->resize(eSize(140, fd+4));
 //	connect(pin8, SIGNAL(selected()), SLOT(togglePin8()));
 	CONNECT(pin8->selected, eZapVideoSetup::togglePin8);
 
 	ok=new eButton(this);
 	ok->setText("[OK]");
-	ok->move(QPoint(10, 150));
-	ok->resize(QSize(50, fd+4));
+	ok->move(ePoint(10, 150));
+	ok->resize(eSize(50, fd+4));
 //  connect(ok, SIGNAL(selected()), SLOT(okPressed()));
 	CONNECT(ok->selected, eZapVideoSetup::okPressed);	
 
 	abort=new eButton(this);
 	abort->setText("[ABORT]");
-	abort->move(QPoint(80, 150));
-	abort->resize(QSize(100, fd+4));
+	abort->move(ePoint(80, 150));
+	abort->resize(eSize(100, fd+4));
 //	connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
 	CONNECT(abort->selected, eZapVideoSetup::abortPressed);
 

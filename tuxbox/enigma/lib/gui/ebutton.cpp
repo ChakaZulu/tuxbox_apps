@@ -38,16 +38,16 @@ void eButton::gotFocus()
 		{
 			LCDTmp = new eLabel(parent->LCDElement);
 			LCDTmp->hide();
-			QSize s = parent->LCDElement->getSize();
-			LCDTmp->move(QPoint(0,s.height()/2));
-			LCDTmp->resize(QSize(chkbx?s.height()/2:s.width(), s.height()/2));
+			eSize s = parent->LCDElement->getSize();
+			LCDTmp->move(ePoint(0,s.height()/2));
+			LCDTmp->resize(eSize(chkbx?s.height()/2:s.width(), s.height()/2));
 			LCDTmp->setText(txt);
 			LCDTmp->setBackgroundColor(255);
 			LCDTmp->show();
 			tmpDescr = new eLabel(parent->LCDElement);
 			tmpDescr->hide();
-			tmpDescr->move(QPoint(0,0));
-			tmpDescr->resize(QSize(s.width(), s.height()/2));
+			tmpDescr->move(ePoint(0,0));
+			tmpDescr->resize(eSize(s.width(), s.height()/2));
 			tmpDescr->setText(descr);
 			tmpDescr->show();
 		}

@@ -11,7 +11,7 @@ void gPixmap::unlock()
 	contentlock.unlock(1);
 }
 
-void gPixmap::fill(const QRect &area, const gColor &color)
+void gPixmap::fill(const eRect &area, const gColor &color)
 {
 	if ((area.height()<=0) || (area.width()<=0))
 		return;
@@ -19,19 +19,19 @@ void gPixmap::fill(const QRect &area, const gColor &color)
 		memset(((__u8*)data)+y*stride+area.left(), color.color, area.width());
 }
 
-void gPixmap::blit(const gPixmap &src, QPoint pos, const QRect &clip)
+void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip)
 {
 	if (bpp != src.bpp)
 		qFatal("cannot blit %dbpp from %dbpp", bpp, src.bpp);
 	
-	QRect area=QRect(pos, src.getSize());
+	eRect area=eRect(pos, src.getSize());
 	if (!clip.isNull())
 		area&=clip;
-	area&=QRect(QPoint(0, 0), getSize());
+	area&=eRect(ePoint(0, 0), getSize());
 	if ((area.width()<0) || (area.height()<0))
 		return;
 	
-	QRect srcarea=area;
+	eRect srcarea=area;
 	srcarea.moveBy(-pos.x(), -pos.y());
 
 	__u8 *srcptr=(__u8*)src.data;
@@ -99,7 +99,7 @@ void gPixmap::mergePalette(const gPixmap &target)
 	delete lookup;	
 }
 
-void gPixmap::line(QPoint start, QPoint dst, gColor color)
+void gPixmap::line(ePoint start, ePoint dst, gColor color)
 {
 int Ax=start.x(), // dieser code rult ganz ganz doll weil er ganz ganz fast ist und auch sehr gut dokumentiert is
 Ay=start.y(), Bx=dst.x(), // t. es handelt sich immerhin um den weltbekannten bresenham algorithmus der nicht nur
@@ -138,7 +138,7 @@ gPixmap::~gPixmap()
 	finalLock();
 }
 
-gImage::gImage(QSize size, int _bpp)
+gImage::gImage(eSize size, int _bpp)
 {
 	x=size.width();
 	y=size.height();

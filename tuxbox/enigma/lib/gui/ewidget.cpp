@@ -2,7 +2,6 @@
 #include "ewidget.h"
 #include <errno.h>
 #include <qobjectlist.h>
-#include <qrect.h>
 #include "gfbdc.h"
 #include "epng.h"
 #include "eskin.h"
@@ -92,7 +91,7 @@ void eWidget::setPalette()
 {
 }
 
-void eWidget::resize(QSize nsize)
+void eWidget::resize(eSize nsize)
 {
 	size=nsize;
 	recalcClientRect();
@@ -100,21 +99,21 @@ void eWidget::resize(QSize nsize)
 	recalcClip();
 }
 
-void eWidget::move(QPoint nposition)
+void eWidget::move(ePoint nposition)
 {
 	position=nposition;
 	event(eWidgetEvent(eWidgetEvent::changedPosition));
 	recalcClip();
 }
 
-void eWidget::redraw(QRect area)		// area bezieht sich nicht auf die clientarea
+void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 {
 	if (getTLW()->just_showing)
 		return;
 	if (isVisible())
 	{
 		if (area.isNull())
-			area=QRect(0, 0, size.width(), size.height());
+			area=eRect(0, 0, size.width(), size.height());
 		if (area.width()>0)
 		{
 			gPainter *p=getPainter(area);
@@ -122,26 +121,14 @@ void eWidget::redraw(QRect area)		// area bezieht sich nicht auf die clientarea
 			redrawWidget(p, area);
 			delete p;
 		}
-//		if (children())
 		if(!childlist.empty())
 		{
 			area.moveBy(-clientrect.x(), -clientrect.y());		// ab hier jetzt schon.
-/*			QObjectListIt it(*children());
-			eWidget *w;
-			while((w=(eWidget *)it.current()))
-			{
-				++it;
-				QRect cr=area&QRect(w->position, w->size);
-				if (!cr.isEmpty())
-				{
-					cr.moveBy(-w->position.x(), -w->position.y());
-					w->redraw(cr);
-				}
-			}*/
+
 			std::list<eWidget*>::iterator It = childlist.begin();
 			while (It != childlist.end())
 			{
-				QRect cr=area&QRect((*It)->position, (*It)->size);
+				eRect cr=area&eRect((*It)->position, (*It)->size);
 				if (!cr.isEmpty())
 				{
 					cr.moveBy(-(*It)->position.x(), -(*It)->position.y());
@@ -155,13 +142,13 @@ void eWidget::redraw(QRect area)		// area bezieht sich nicht auf die clientarea
 	}
 }
 
-void eWidget::invalidate(QRect area)
+void eWidget::invalidate(eRect area)
 {
 	if (!isVisible())
 		return;
 
 	if (area.isNull())
-		area=QRect(0, 0, size.width(), size.height());
+		area=eRect(0, 0, size.width(), size.height());
 
 	eWidget *w=this;
 
@@ -249,7 +236,7 @@ void eWidget::clear()
 {
 	if (parent)
 	{
-		QRect me(getTLWPosition(), size);
+		eRect me(getTLWPosition(), size);
 		getTLW()->redraw(me);
 	} else
 	{
@@ -306,16 +293,6 @@ void eWidget::willShowChildren()
 	if (state&stateShow)
 	{
 		_willShow();
-/*		if(children)
-		{
-			QObjectListIt it(*children());
-			eWidget *w;
-			while((w=(eWidget *)it.current()))
-			{
-				++it;
-				w->willShowChildren();
-			}
-		}*/
 		if (!childlist.empty())
 		{
 			std::list<eWidget*>::iterator It = childlist.begin();
@@ -342,16 +319,6 @@ void eWidget::hide()
 void eWidget::willHideChildren()
 {
 	_willHide();
-/*	if (children())
-	{
-		QObjectListIt it(*children());
-		eWidget *w;
-		while((w=(eWidget *)it.current()))
-		{
-			++it;
-			w->willHideChildren();
-		}
-	}*/
 		if (!childlist.empty())
 		{
 			std::list<eWidget*>::iterator It = childlist.begin();
@@ -386,13 +353,13 @@ void eWidget::lostFocus()
 
 void eWidget::recalcClientRect()
 {
-	clientrect=QRect(0, 0, size.width(), size.height());
+	clientrect=eRect(0, 0, size.width(), size.height());
 }
 
 void eWidget::recalcClip()
 {
 	eWidget *t=this;
-	QRect rect=QRect(0, 0, size.width(), size.height());
+	eRect rect=eRect(0, 0, size.width(), size.height());
 	while (t)
 	{
 		rect&=t->clientrect;
@@ -419,11 +386,11 @@ void eWidget::checkFocus()
 	}
 }
 
-void eWidget::redrawWidget(gPainter *target, const QRect &clip)
+void eWidget::redrawWidget(gPainter *target, const eRect &clip)
 {
 }
 
-void eWidget::eraseBackground(gPainter *target, const QRect &clip)
+void eWidget::eraseBackground(gPainter *target, const eRect &clip)
 {
 	if (((int)getBackgroundColor())!=-1)
 	{
@@ -513,9 +480,9 @@ void eWidget::setName(const char *_name)
 	name=_name;
 }
 
-gPainter *eWidget::getPainter(QRect area)
+gPainter *eWidget::getPainter(eRect area)
 {
-	QRect myclip=QRect(getAbsolutePosition(), size);
+	eRect myclip=eRect(getAbsolutePosition(), size);
 	if (parent)
 		myclip&=parent->clientclip;
 	gPainter *p=new gPainter(*getTLW()->target, myclip);
@@ -568,7 +535,7 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		int err=parse(value, v, e, 2);
 		if (err)
 			return err;
-		move(QPoint(v[0], v[1]));
+		move(ePoint(v[0], v[1]));
 	} else if (prop=="cposition")
 	{
 		int v[2], e[2];
@@ -586,7 +553,7 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		v[0]-=clientrect.x();
 		v[1]-=clientrect.y();
 		
-		move(QPoint(v[0], v[1]));
+		move(ePoint(v[0], v[1]));
 	} else if (prop=="size")
 	{
 		int v[2], e[2];
@@ -599,7 +566,7 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		int err=parse(value, v, e, 2);
 		if (err)
 			return err;		
-		resize(QSize(v[0], v[1]));
+		resize(eSize(v[0], v[1]));
 	} else if (prop=="csize")
 	{
 		int v[2], e[2];
@@ -615,7 +582,7 @@ int eWidget::setProperty(const QString &prop, const QString &value)
 		recalcClientRect();
 		v[0]+=size.width()-clientrect.width();
 		v[1]+=size.height()-clientrect.height();
-		resize(QSize(v[0], v[1]));
+		resize(eSize(v[0], v[1]));
 	} else if (prop=="text")
 	{
 		QString text;
@@ -685,19 +652,6 @@ eWidget *eWidget::search(const QString &sname)
 	if (name==sname)
 		return this;
 		
-/*	if (children())
-	{
-		QObjectListIt it(*children());
-		eWidget *w;
-		while((w=(eWidget *)it.current()))
-		{
-			++it;
-			eWidget *p=w->search(sname);
-			if (p)
-				return p;
-		}
-	}*/
-
 	if (!childlist.empty())
 	{
 		std::list<eWidget*>::iterator It = childlist.begin();

@@ -67,10 +67,10 @@ void gRC::submit(const gOpcode &o)
 
 static int gPainter_instances;
 
-gPainter::gPainter(gDC &dc, QRect rect): dc(dc), rc(gRC::getInstance()), foregroundColor(0), backgroundColor(0)
+gPainter::gPainter(gDC &dc, eRect rect): dc(dc), rc(gRC::getInstance()), foregroundColor(0), backgroundColor(0)
 {
 	if (rect.isNull())
-		rect=QRect(QPoint(0, 0), dc.getSize());
+		rect=eRect(ePoint(0, 0), dc.getSize());
 	ASSERT(!gPainter_instances);
 	gPainter_instances++;
 	begin(rect);
@@ -82,13 +82,13 @@ gPainter::~gPainter()
 	gPainter_instances--;
 }
 
-void gPainter::begin(const QRect &rect)
+void gPainter::begin(const eRect &rect)
 {
 	gOpcode o;
 	dc.lock();
 	o.dc=&dc;
 	o.opcode=gOpcode::begin;
-	o.parm.begin.area=new QRect(rect);
+	o.parm.begin.area=new eRect(rect);
 	
 	cliparea=rect;
 	setLogicalZero(cliparea.topLeft());
@@ -110,16 +110,16 @@ void gPainter::setFont(const gFont &mfont)
 	font=mfont;
 }
 
-void gPainter::renderText(const QRect &pos, const QString &string, int flags)
+void gPainter::renderText(const eRect &pos, const QString &string, int flags)
 {
-	QRect area=pos;
+	eRect area=pos;
 	area.moveBy(logicalZero.x(), logicalZero.y());
 
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::renderText;
 	o.parm.renderText.text=new QString(string);
-	o.parm.renderText.area=new QRect(area);
+	o.parm.renderText.area=new eRect(area);
 	o.parm.renderText.font=new gFont(font);
 	o.flags=flags;
 	rc.submit(o);
@@ -131,30 +131,30 @@ void gPainter::renderPara(eTextPara &para)
 	o.dc=&dc;
 	o.opcode=gOpcode::renderPara;
 	o.parm.renderPara.textpara=para.grab();
-	o.parm.renderPara.offset=new QPoint(logicalZero);
+	o.parm.renderPara.offset=new ePoint(logicalZero);
 	rc.submit(o);
 }
 
-void gPainter::fill(const QRect &area)
+void gPainter::fill(const eRect &area)
 {
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::fill;
-	o.parm.fill.area=new QRect(area);
+	o.parm.fill.area=new eRect(area);
 	o.parm.fill.area->moveBy(logicalZero.x(), logicalZero.y());
 	(*o.parm.fill.area)&=cliparea;
 	o.parm.fill.color=new gColor(foregroundColor);
 	rc.submit(o);
 }
 
-void gPainter::blit(gPixmap &pixmap, QPoint pos, QRect clip)
+void gPainter::blit(gPixmap &pixmap, ePoint pos, eRect clip)
 {
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::blit;
-	o.parm.blit.position=new QPoint(pos);
+	o.parm.blit.position=new ePoint(pos);
 	(*o.parm.blit.position)+=logicalZero;
-	o.parm.blit.clip=new QRect(clip);
+	o.parm.blit.clip=new eRect(clip);
 	(*o.parm.blit.clip).moveBy(logicalZero.x(), logicalZero.y());
 	o.parm.blit.pixmap=pixmap.lock();
 	rc.submit(o);
@@ -165,7 +165,7 @@ void gPainter::clear()
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::fill;
-	o.parm.fill.area=new QRect(cliparea);
+	o.parm.fill.area=new eRect(cliparea);
 	o.parm.fill.color=new gColor(backgroundColor);
 	rc.submit(o);
 }
@@ -192,23 +192,23 @@ void gPainter::mergePalette(gPixmap &target)
 	rc.submit(o);
 }
 
-void gPainter::line(QPoint start, QPoint end)
+void gPainter::line(ePoint start, ePoint end)
 {
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::line;
-	o.parm.line.start=new QPoint(start+logicalZero);
-	o.parm.line.end=new QPoint(end+logicalZero);
+	o.parm.line.start=new ePoint(start+logicalZero);
+	o.parm.line.end=new ePoint(end+logicalZero);
 	o.parm.line.color=new gColor(foregroundColor);
 	rc.submit(o);
 }
 
-void gPainter::setLogicalZero(QPoint rel)
+void gPainter::setLogicalZero(ePoint rel)
 {
 	logicalZero=rel;
 }
 
-void gPainter::moveLogicalZero(QPoint rel)
+void gPainter::moveLogicalZero(ePoint rel)
 {
 	logicalZero+=rel;
 }
@@ -219,12 +219,12 @@ void gPainter::resetLogicalZero()
 	logicalZero.setY(0);
 }
 
-void gPainter::clip(QRect clip)
+void gPainter::clip(eRect clip)
 {
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::clip;
-	o.parm.clip.clip=new QRect(clip);
+	o.parm.clip.clip=new eRect(clip);
 	o.parm.clip.clip->moveBy(logicalZero.x(), logicalZero.y());
 	cliparea&=*o.parm.clip.clip;
 	rc.submit(o);
@@ -276,7 +276,7 @@ void gPixmapDC::exec(gOpcode *o)
 		eTextPara *para=new eTextPara(*o->parm.renderText.area);
 		para->setFont(*o->parm.renderText.font);
 		para->renderString(*o->parm.renderText.text, o->flags);
-		para->blit(*this, QPoint(0, 0));
+		para->blit(*this, ePoint(0, 0));
 		para->destroy();
 		delete o->parm.renderText.text;
 		delete o->parm.renderText.area;

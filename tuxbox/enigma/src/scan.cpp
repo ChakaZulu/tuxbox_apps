@@ -26,11 +26,11 @@ int tsText::eventFilter(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::changedSize:
-		headline->move(QPoint(0, 0));
-		headline->resize(QSize(size.width(), 40));
+		headline->move(ePoint(0, 0));
+		headline->resize(eSize(size.width(), 40));
 
-		body->move(QPoint(0, 40));
-		body->resize(QSize(size.width(), size.height()-40));
+		body->move(ePoint(0, 40));
+		body->resize(eSize(size.width(), size.height()-40));
 		break;
 	}
 	return 0;
@@ -161,14 +161,14 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 		break;
 	}
 	case eWidgetEvent::changedSize:
-		headline->move(QPoint(10, 0));
-		headline->resize(QSize(size.width()-20, 40));
+		headline->move(ePoint(10, 0));
+		headline->resize(eSize(size.width()-20, 40));
 
-		body->move(QPoint(10, 40));
-		body->resize(QSize(size.width()-20, 100));
+		body->move(ePoint(10, 40));
+		body->resize(eSize(size.width()-20, 100));
 	
-		signalbar->move(QPoint(10, 150));
-		signalbar->resize(QSize(size.width()-20, 10));
+		signalbar->move(ePoint(10, 150));
+		signalbar->resize(eSize(size.width()-20, 10));
 		break;
 	case eWidgetEvent::execDone:
 		state=sInactive;
@@ -287,24 +287,24 @@ void tsDoScan::updateETA()
 tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(init)
 {
 	transp_found=new eLabel(this);
-	transp_found->move(QPoint(10, 0));
-	transp_found->resize(QSize(440, 30));
+	transp_found->move(ePoint(10, 0));
+	transp_found->resize(eSize(440, 30));
 
 	transp_scanned=new eLabel(this);
-	transp_scanned->move(QPoint(10, 30));
-	transp_scanned->resize(QSize(440, 30));
+	transp_scanned->move(ePoint(10, 30));
+	transp_scanned->resize(eSize(440, 30));
 
 	known_services=new eLabel(this);
-	known_services->move(QPoint(10, 60));
-	known_services->resize(QSize(440, 30));
+	known_services->move(ePoint(10, 60));
+	known_services->resize(eSize(440, 30));
 
 	bar=new eProgress(this);
-	bar->move(QPoint(10, 90));
-	bar->resize(QSize(440, 20));
+	bar->move(ePoint(10, 90));
+	bar->resize(eSize(440, 20));
 
 	eta=new eLabel(this);
-	eta->move(QPoint(10, 120));
-	eta->resize(QSize(440, 30));
+	eta->move(ePoint(10, 120));
+	eta->resize(eSize(440, 30));
 
 /*	connect(eDVB::getInstance(), SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
 	connect(eDVB::getInstance(), SIGNAL(eventOccured(int)), SLOT(eventOccured(int)));
@@ -353,34 +353,34 @@ TransponderScan::TransponderScan()
 {
 	window=new eWindow(0);
 	window->setText("Transponder Scan");
-	window->move(QPoint(100, 100));
-	window->resize(QSize(460, 300));
+	window->move(ePoint(100, 100));
+	window->resize(eSize(460, 300));
 	
 	progress=new eProgress(window);
-	progress->move(QPoint(60, window->getClientSize().height()-25));
-	progress->resize(QSize(window->getClientSize().width()-70, 10));
+	progress->move(ePoint(60, window->getClientSize().height()-25));
+	progress->resize(eSize(window->getClientSize().width()-70, 10));
 
 	progress_text=new eLabel(window);
-	progress_text->move(QPoint(0, window->getClientSize().height()-30));
-	progress_text->resize(QSize(50, 30));
+	progress_text->move(ePoint(0, window->getClientSize().height()-30));
+	progress_text->resize(eSize(50, 30));
 
 	eWidget *s=new tsText("Kanalsuche", "Willkommen bei der Kanalsuche.\n"
 			"OK zum fortfahren, ? zum Abbruch", window);
-	s->move(QPoint(0, 0));
-	s->resize(QSize(
+	s->move(ePoint(0, 0));
+	s->resize(eSize(
 			window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
 
 	s=new tsFindInit(window);
-	s->move(QPoint(0, 0));
-	s->resize(QSize(window->getClientSize().width(), window->getClientSize().height()-30));
+	s->move(ePoint(0, 0));
+	s->resize(eSize(window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
 
 	s=new tsDoScan((tsFindInit*)s, window);
-	s->move(QPoint(0, 0));
-	s->resize(QSize(window->getClientSize().width(), window->getClientSize().height()-30));
+	s->move(ePoint(0, 0));
+	s->resize(eSize(window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
 	s=new tsText("ÜBERSTANDEN!",
@@ -390,8 +390,8 @@ TransponderScan::TransponderScan()
 		"(wenn denn beim Scan alles geklappt hat. Wenn nicht: Don't worry, "
 		"be happy und: Auf ein neues, wenn es wieder heisst:\nStarte V1.6!)"
 		, window);
-	s->move(QPoint(0, 0));
-	s->resize(QSize(
+	s->move(ePoint(0, 0));
+	s->resize(eSize(
 			window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);

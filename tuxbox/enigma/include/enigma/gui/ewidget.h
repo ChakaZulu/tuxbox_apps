@@ -2,8 +2,9 @@
 #define __ewidget_h
 
 //#include <qobject.h>
-#include <qpoint.h>
-#include <qsize.h>
+#include "epoint.h"
+#include "esize.h"
+#include "erect.h"
 #include <qlist.h>
 #include "grc.h"
 #include <list>
@@ -48,10 +49,10 @@ public:// slots:
 protected:
 	eWidget *parent;
 	QString name;
-	QPoint position;
-	QSize size;
-	QRect clientrect;
-	QRect clientclip;
+	ePoint position;
+	eSize size;
+	eRect clientrect;
+	eRect clientclip;
 	QList<eWidget> _focusList;
 	eWidget *oldfocus;
 	int takefocus;
@@ -108,29 +109,29 @@ public:
 	eWidget *LCDElement;
 	eWidget *LCDTmp;
 
-	inline QPoint getAbsolutePosition()
+	inline ePoint getAbsolutePosition()
 	{
 		return (parent?(parent->getAbsolutePosition()+parent->clientrect.topLeft()+position):position);
 	}
-	inline QPoint getTLWPosition()
+	inline ePoint getTLWPosition()
 	{
-		return (parent?(parent->getTLWPosition()+parent->clientrect.topLeft()+position):QPoint(0,0));
+		return (parent?(parent->getTLWPosition()+parent->clientrect.topLeft()+position):ePoint(0,0));
 	}
-	virtual void redrawWidget(gPainter *target, const QRect &area);
-	virtual void eraseBackground(gPainter *target, const QRect &area);
+	virtual void redrawWidget(gPainter *target, const eRect &area);
+	virtual void eraseBackground(gPainter *target, const eRect &area);
 	eWidget(eWidget *parent=0, int takefocus=0);
 	virtual ~eWidget();
 	QList<eWidget> *focusList() { return &_focusList; }
 
-	void resize(QSize size);
-	void move(QPoint position);
-	QSize getSize() { return size; }
-	QPoint getPosition() { return position; }
-	QSize getClientSize() { return clientrect.size(); }
-	QRect getClientRect() { return clientrect; }
+	void resize(eSize size);
+	void move(ePoint position);
+	eSize getSize() { return size; }
+	ePoint getPosition() { return position; }
+	eSize getClientSize() { return clientrect.size(); }
+	eRect getClientRect() { return clientrect; }
 
-	void redraw(QRect area=QRect());
-	void invalidate(QRect area=QRect());
+	void redraw(eRect area=eRect());
+	void invalidate(eRect area=eRect());
 	int exec();
 	
 	void clear();
@@ -158,7 +159,7 @@ public:
 	int width() { return getSize().width(); }
 	int height() { return getSize().height(); }
 	
-	gPainter *getPainter(QRect area=QRect());
+	gPainter *getPainter(eRect area=eRect());
 	
 	virtual int setProperty(const QString &prop, const QString &value);
 	

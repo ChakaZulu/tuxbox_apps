@@ -4,7 +4,6 @@
 #include "lcd.h"
 #include "eskin.h"
 #include "init.h"
-#include <qrect.h>
 
 eLabel::eLabel(eWidget *parent, int flags, int takefocus):
 	eWidget(parent, takefocus), flags(flags)
@@ -30,7 +29,7 @@ void eLabel::validate()
 {
 	if (!para)
 	{
-		para=new eTextPara(QRect(0, 0, size.width(), size.height()));
+		para=new eTextPara(eRect(0, 0, size.width(), size.height()));
 		para->setFont(font);
 		para->renderString(text, flags);
 		para->realign(align);
@@ -49,7 +48,7 @@ void eLabel::setFlags(int flag)
 		invalidate();
 }
 
-void eLabel::redrawWidget(gPainter *target, const QRect &area)
+void eLabel::redrawWidget(gPainter *target, const eRect &area)
 {
 	if (isVisible())
 	{
@@ -73,7 +72,7 @@ int eLabel::eventFilter(const eWidgetEvent &event)
 	return 0;
 }
 
-QSize eLabel::getExtend()
+eSize eLabel::getExtend()
 {
 	validate();
 	return para->getExtend();

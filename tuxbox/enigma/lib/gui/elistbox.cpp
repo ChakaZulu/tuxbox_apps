@@ -1,6 +1,5 @@
 #include "elistbox.h"
 #include "fb.h"
-#include <qrect.h>
 #include "elabel.h"
 #include "init.h"
 
@@ -18,7 +17,7 @@ eListbox::eListbox(eWidget *parent, int type, int ih)
 	childs.setAutoDelete(true);
 }
 
-void eListbox::redrawWidget(gPainter *target, const QRect &where)
+void eListbox::redrawWidget(gPainter *target, const eRect &where)
 {
 	if (!top)
 		return;
@@ -71,9 +70,9 @@ void eListbox::actualize()
 	entries=size.height()/item_height;
 }
 
-void eListbox::redrawEntry(gPainter *target, int pos, eListboxEntry *entry, const QRect &where)
+void eListbox::redrawEntry(gPainter *target, int pos, eListboxEntry *entry, const eRect &where)
 {
-	QRect rect=QRect(QPoint(0, pos*item_height), QSize(size.width(), item_height));
+	eRect rect=eRect(ePoint(0, pos*item_height), eSize(size.width(), item_height));
 	if (!where.contains(rect))
 		return;
 

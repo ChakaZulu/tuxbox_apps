@@ -14,7 +14,7 @@ public:
 	~eProgress();
 	
 	void setPerc(int perc);
-	void redrawWidget(gPainter *target, const QRect &area);
+	void redrawWidget(gPainter *target, const eRect &area);
 	int setProperty(const QString &prop, const QString &value);
 };
 

@@ -25,8 +25,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	eWindow(0)
 {
 	setText("Network Setup");
-	move(QPoint(150, 136));
-	resize(QSize(420, 290));
+	move(ePoint(150, 136));
+	resize(eSize(420, 290));
 
 	__u32 sip=ntohl(0x0a000061), snetmask=ntohl(0xFF000000), sdns=ntohl(0x7f000001), sgateway=ntohl(0x7f000001);
 	int de[4];
@@ -41,68 +41,68 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	eLabel *l=new eLabel(this);
 	l->setText("IP:");
-	l->move(QPoint(10, 0));
-	l->resize(QSize(150, fd+4));
+	l->move(ePoint(10, 0));
+	l->resize(eSize(150, fd+4));
 
 	unpack(sip, de);
 	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	ip->move(QPoint(160, 0));
-	ip->resize(QSize(200, fd+4));
+	ip->move(ePoint(160, 0));
+	ip->resize(eSize(200, fd+4));
 
 	l=new eLabel(this);
 	l->setText("Netmask:");
-	l->move(QPoint(10, 40));
-	l->resize(QSize(150, fd+4));
+	l->move(ePoint(10, 40));
+	l->resize(eSize(150, fd+4));
 
 	unpack(snetmask, de);
 	netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	netmask->move(QPoint(160, 40));
-	netmask->resize(QSize(200, fd+4));
+	netmask->move(ePoint(160, 40));
+	netmask->resize(eSize(200, fd+4));
 	
 	l=new eLabel(this);
 	l->setText("Nameserver:");
-	l->move(QPoint(10, 80));
-	l->resize(QSize(150, fd+4));
+	l->move(ePoint(10, 80));
+	l->resize(eSize(150, fd+4));
 
 	unpack(sdns, de);
 	dns=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	dns->move(QPoint(160, 80));
-	dns->resize(QSize(200, fd+4));
+	dns->move(ePoint(160, 80));
+	dns->resize(eSize(200, fd+4));
 
 	l=new eLabel(this);
 	l->setText("Gateway:");
-	l->move(QPoint(10, 120));
-	l->resize(QSize(150, fd+4));
+	l->move(ePoint(10, 120));
+	l->resize(eSize(150, fd+4));
 
 	unpack(sgateway, de);
 	gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	gateway->move(QPoint(160, 120));
-	gateway->resize(QSize(200, fd+4));
+	gateway->move(ePoint(160, 120));
+	gateway->resize(eSize(200, fd+4));
 
 //	connect(ip, SIGNAL(selected(int*)), SLOT(fieldSelected(int*)));
 	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
 	l=new eLabel(this);
 	l->setText("Configure Network");
-	l->move(QPoint(130, 160));
-	l->resize(QSize(240, fd+4));
+	l->move(ePoint(130, 160));
+	l->resize(eSize(240, fd+4));
 
 	dosetup=new eCheckbox(this, sdosetup, fd, l);
-	dosetup->move(QPoint(100, 163));
-	dosetup->resize(QSize(fd+4, fd+4));
+	dosetup->move(ePoint(100, 163));
+	dosetup->resize(eSize(fd+4, fd+4));
 
 	ok=new eButton(this);
 	ok->setText("[OK]");
-	ok->move(QPoint(160, 200));
-	ok->resize(QSize(90, fd+4));
+	ok->move(ePoint(160, 200));
+	ok->resize(eSize(90, fd+4));
 	
 //	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
 
 	abort=new eButton(this);
 	abort->setText("[ABORT]");
-	abort->move(QPoint(270, 200));
-	abort->resize(QSize(120, fd+4));
+	abort->move(ePoint(270, 200));
+	abort->resize(eSize(120, fd+4));
 
 	//connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
 	CONNECT(abort->selected, eZapNetworkSetup::abortPressed);

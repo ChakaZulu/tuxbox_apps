@@ -14,8 +14,8 @@ eZapLCD::eZapLCD(): eWidget()
 {
 	instance = this;
 	setTarget(gLCDDC::getInstance());
-	move(QPoint(0, 0));
-	resize(QSize(120, 64));
+	move(ePoint(0, 0));
+	resize(eSize(120, 64));
 
 	lcdMain = new eZapLCDMain(this);
 	lcdMenu = new eZapLCDMenu(this);

@@ -9,11 +9,12 @@
 #include <freetype/cache/ftcmanag.h>
 #include <freetype/cache/ftcsbits.h>
 #include <freetype/cache/ftlru.h>
-#include <qsize.h>
-#include <qpoint.h>
-#include <qrect.h>
+#include <esize.h>
+#include <epoint.h>
+#include <erect.h>
 #include <qlist.h>
 #include <vector>
+#include <qstring.h>
 
 class FontRenderClass;
 class Font;
@@ -81,9 +82,9 @@ class eTextPara
 	int use_kerning;
 	int previous;
 
-	QRect area;
-	QPoint cursor;
-	QSize maximum;
+	eRect area;
+	ePoint cursor;
+	eSize maximum;
 	int left;
 	glyphString glyphs;
 	int refcnt;
@@ -92,7 +93,7 @@ class eTextPara
 	void newLine();
 	void setFont(Font *font);
 public:
-	eTextPara(QRect area, QPoint start=QPoint(-1, -1))
+	eTextPara(eRect area, ePoint start=ePoint(-1, -1))
 		: area(area), cursor(start), maximum(0, 0), left(start.x())
 	{
 		current_font=0;
@@ -109,14 +110,14 @@ public:
 
 	void clear();
 
-	void blit(gPixmapDC &dc, const QPoint &offset);
+	void blit(gPixmapDC &dc, const ePoint &offset);
 
 	enum
 	{
 		dirLeft, dirRight, dirCenter, dirBlock
 	};
 	void realign(int dir);
-	QSize getExtend();
+	eSize getExtend();
 };
 
 class Font

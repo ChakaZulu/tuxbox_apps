@@ -173,7 +173,7 @@ eServiceSelector::eServiceSelector()
 								:eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
 {
 	pbs = new eBouquetSelector();
-	move(QPoint(70, 60));
+	move(ePoint(70, 60));
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 	fillServiceList();
 /*	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));

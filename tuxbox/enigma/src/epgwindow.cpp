@@ -87,7 +87,7 @@ void eEPGWindow::closeWnd()
 eEPGWindow::eEPGWindow(eService* service):current(service),
 								eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
 {
-	move(QPoint(50, 50));
+	move(ePoint(50, 50));
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 //	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
 //	connect(&closeTimer, SIGNAL(timeout()), SLOT(closeWnd()));

@@ -6,15 +6,15 @@
 class eServiceGrid: public eWidget
 {
 	eService *(*grid);
-	QSize gridsize;
-	QSize elemsize;
+	eSize gridsize;
+	eSize elemsize;
 	
 	eTextPara *para;
 	
 	void validate();
 	
-	void createGrid(QSize gridsize);
-	eService **allocateGrid(QSize size);
+	void createGrid(eSize gridsize);
+	eService **allocateGrid(eSize size);
 	
 public:
 	eServiceGrid(eWidget *parent);

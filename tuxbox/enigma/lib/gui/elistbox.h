@@ -24,7 +24,7 @@ public:
 	virtual int operator==(const eListboxEntry &) const;
 	virtual ~eListboxEntry();
 	virtual QString getText(int col=0) const =0;
-	virtual void renderInto(gPainter *rc, QRect rect) const;
+	virtual void renderInto(gPainter *rc, eRect rect) const;
 };
 
 class eListboxEntryText: public eListboxEntry
@@ -42,7 +42,7 @@ class eListbox: public eWidget
 //	Q_OBJECT
 	
 	friend class eListboxEntry;
-	void redrawWidget(gPainter *target, const QRect &area);
+	void redrawWidget(gPainter *target, const eRect &area);
 	QSortedList<eListboxEntry> childs;
 	gFont entryFnt;
 	QListIterator<eListboxEntry> *top, *bottom, *current;
@@ -51,12 +51,12 @@ class eListbox: public eWidget
 	
 	gColor col_active;
 	void actualize();
-	void redrawEntry(gPainter *target, int pos, eListboxEntry *entry, const QRect &where);
+	void redrawEntry(gPainter *target, int pos, eListboxEntry *entry, const eRect &where);
 	void geometryChanged();
 	void gotFocus();
 	void lostFocus();
 	void OnFontSizeChanged(int NewFontSize);
-	QRect getEntryRect(int n);
+	eRect getEntryRect(int n);
 	void invalidateEntry(int n);
 public:
 	void keyDown(int rc);
@@ -108,7 +108,7 @@ inline int eListboxEntry::operator==(const eListboxEntry &o) const
 	return !qstricmp(getText(-1), o.getText(-1));
 }
 
-inline void eListboxEntry::renderInto(gPainter *rc, QRect area) const
+inline void eListboxEntry::renderInto(gPainter *rc, eRect area) const
 {
 	rc->setFont(listbox->entryFnt);
 	rc->renderText(area, getText(0));
@@ -178,9 +178,9 @@ inline void eListbox::OnFontSizeChanged(int NewFontSize)
 	geometryChanged();
 }
 
-inline QRect eListbox::getEntryRect(int pos)
+inline eRect eListbox::getEntryRect(int pos)
 {
-	return QRect(QPoint(0, pos*item_height), QSize(size.width(), item_height));
+	return eRect(ePoint(0, pos*item_height), eSize(size.width(), item_height));
 }
 
 inline void eListbox::invalidateEntry(int n)

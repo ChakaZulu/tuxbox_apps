@@ -9,7 +9,7 @@
 
 #include <pthread.h>
 #include <qstring.h>
-#include <qrect.h>
+#include <erect.h>
 #include "elock.h"
 #include "gpixmap.h"
 
@@ -47,25 +47,25 @@ struct gOpcode
 	{
 		struct
 		{
-			QRect *area;
+			eRect *area;
 		} begin;
 		
 		struct
 		{
-			QRect *area;
+			eRect *area;
 			gColor *color;
 		} fill;
 
 		struct
 		{
 			gFont *font;
-			QRect *area;
+			eRect *area;
 			QString *text;
 		} renderText;
 
 		struct
 		{
-			QPoint *offset;
+			ePoint *offset;
 			eTextPara *textpara;
 		} renderPara;
 
@@ -77,8 +77,8 @@ struct gOpcode
 		struct
 		{
 			gPixmap *pixmap;
-			QPoint *position;
-			QRect *clip;
+			ePoint *position;
+			eRect *clip;
 		} blit;
 
 		struct
@@ -88,13 +88,13 @@ struct gOpcode
 		
 		struct
 		{
-			QPoint *start, *end;
+			ePoint *start, *end;
 			gColor *color;
 		} line;
 
 		struct
 		{
-			QRect *clip;
+			eRect *clip;
 		} clip;
 	} parm;
 
@@ -131,39 +131,39 @@ class gPainter
 	gOpcode *beginptr;
 
 			/* paint states */	
-	QRect cliparea;
+	eRect cliparea;
 	gFont font;
 	gColor foregroundColor, backgroundColor;
-	QPoint logicalZero;
-	void begin(const QRect &rect);
+	ePoint logicalZero;
+	void begin(const eRect &rect);
 	void end();
 public:
-	gPainter(gDC &dc, QRect rect=QRect());
+	gPainter(gDC &dc, eRect rect=eRect());
 	virtual ~gPainter();
 
 	void setBackgroundColor(const gColor &color);
 	void setForegroundColor(const gColor &color);
 
 	void setFont(const gFont &font);
-	void renderText(const QRect &position, const QString &string, int flags=0);
+	void renderText(const eRect &position, const QString &string, int flags=0);
 	void renderPara(eTextPara &para);
 
-	void fill(const QRect &area);
+	void fill(const eRect &area);
 	
 	void clear();
 	
-	void blit(gPixmap &src, QPoint pos, QRect clip=QRect());
+	void blit(gPixmap &src, ePoint pos, eRect clip=eRect());
 
 	void setPalette(gRGB *colors, int start=0, int len=256);
 	void mergePalette(gPixmap &target);
 	
-	void line(QPoint start, QPoint end);
+	void line(ePoint start, ePoint end);
 
-	void setLogicalZero(QPoint abs);
-	void moveLogicalZero(QPoint rel);
+	void setLogicalZero(ePoint abs);
+	void moveLogicalZero(ePoint rel);
 	void resetLogicalZero();
 	
-	void clip(QRect clip);
+	void clip(eRect clip);
 
 	void flush();
 };
@@ -175,8 +175,8 @@ protected:
 public:
 	virtual void exec(gOpcode *opcode)=0;
 	virtual gPixmap &getPixmap()=0;
-	virtual QSize getSize()=0;
-	virtual const QRect &getClip()=0;
+	virtual eSize getSize()=0;
+	virtual const eRect &getClip()=0;
 	virtual ~gDC();
 	void lock() { dclock.lock(1); }
 	void unlock() { dclock.unlock(1); }
@@ -186,7 +186,7 @@ class gPixmapDC: public gDC
 {
 protected:
 	gPixmap *pixmap;
-	QRect clip;
+	eRect clip;
 
 	void exec(gOpcode *opcode);
 	gPixmapDC();
@@ -194,8 +194,8 @@ public:
 	gPixmapDC(gPixmap *pixmap);
 	virtual ~gPixmapDC();
 	gPixmap &getPixmap() { return *pixmap; }
-	const QRect &getClip() { return clip; }
-	virtual QSize getSize() { return QSize(pixmap->x, pixmap->y); }
+	const eRect &getClip() { return clip; }
+	virtual eSize getSize() { return eSize(pixmap->x, pixmap->y); }
 };
 
 #endif

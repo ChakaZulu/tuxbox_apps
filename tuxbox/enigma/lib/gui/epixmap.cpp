@@ -4,7 +4,7 @@
 
 ePixmap::ePixmap(eWidget *parent): eWidget(parent)
 {
-	position=QPoint(0, 0);
+	position=ePoint(0, 0);
 	setBackgroundColor(getForegroundColor());
 }
 
@@ -12,13 +12,13 @@ ePixmap::~ePixmap()
 {
 }
 
-void ePixmap::redrawWidget(gPainter *paint, const QRect &area)
+void ePixmap::redrawWidget(gPainter *paint, const eRect &area)
 {
 	if (pixmap)
 		paint->blit(*pixmap, position);
 }
 
-void ePixmap::eraseBackground(gPainter *target, const QRect &area)
+void ePixmap::eraseBackground(gPainter *target, const eRect &area)
 {
 }
 

@@ -46,7 +46,7 @@ void eBouquetSelector::entrySelected(eListboxEntry *entry)
 eBouquetSelector::eBouquetSelector()
 								:eLBWindow("Select Bouquet...", eListbox::tLitebar, 17, eSkin::getActive()->queryValue("fontsize", 20), 400)
 {
-	move(QPoint(80, 60));
+	move(ePoint(80, 60));
 /*	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
 	connect(eDVB::getInstance(), SIGNAL(bouquetListChanged()), SLOT(fillBouquetList()));*/
 	CONNECT(list->selected, eBouquetSelector::entrySelected);

@@ -128,9 +128,9 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 		p.clear();
 		p.flush();
 		p.setForegroundColor(gColor(0x13));
-		p.fill(QRect(0, 0, 720, 576));
+		p.fill(eRect(0, 0, 720, 576));
 		
-		QRect x(10, 10, 100, 50);
+		eRect x(10, 10, 100, 50);
 		p.setFont(gFont("NimbusSansL-Regular Sans L Regular", 30));
 		for (int i=0; i<100; i++)
 		{

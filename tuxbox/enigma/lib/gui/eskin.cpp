@@ -175,7 +175,7 @@ int eSkin::parseColors(XMLTreeNode *xcolors)
 	}
 	if (paldummy)
 		delete paldummy;
-	paldummy=new gImage(QSize(1, 1), 8);
+	paldummy=new gImage(eSize(1, 1), 8);
 	paldummy->clut=palette;
 	paldummy->colors=maxcolors;
 	return 0;

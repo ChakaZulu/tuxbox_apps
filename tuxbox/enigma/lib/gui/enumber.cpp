@@ -3,14 +3,14 @@
 #include "rc.h"
 #include "eskin.h"
 
-QRect eNumber::getNumberRect(int n)
+eRect eNumber::getNumberRect(int n)
 {
-	return QRect(n*space, 0, space, size.height());
+	return eRect(n*space, 0, space, size.height());
 }
 
-void eNumber::redrawNumber(gPainter *p, int n, const QRect &area)
+void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 {
-	QRect pos=QRect(n*space, 0, space, size.height());
+	eRect pos=eRect(n*space, 0, space, size.height());
 
 	if (!area.contains(pos))
 		return;
@@ -22,7 +22,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const QRect &area)
 	p->flush();
 }
 
-void eNumber::redrawWidget(gPainter *p, const QRect &area)
+void eNumber::redrawWidget(gPainter *p, const eRect &area)
 {
 	for (int i=0; i<len; i++)
 		redrawNumber(p, i, area);
@@ -133,21 +133,21 @@ void eNumber::gotFocus()
 		{
 			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0);
 			LCDTmp->hide();
-			QSize s = parent->LCDElement->getSize();
-			LCDTmp->move(QPoint(0,s.height()/2));
-			LCDTmp->resize(QSize(s.width(), s.height()/2));
+			eSize s = parent->LCDElement->getSize();
+			LCDTmp->move(ePoint(0,s.height()/2));
+			LCDTmp->resize(eSize(s.width(), s.height()/2));
 			tmpDescr = new eLabel(parent->LCDElement);
-			tmpDescr->move(QPoint(0,0));
-			tmpDescr->resize(QSize(s.width(), s.height()/2));
+			tmpDescr->move(ePoint(0,0));
+			tmpDescr->resize(eSize(s.width(), s.height()/2));
 			tmpDescr->setText(descr);
 		}
 		else
 		{
 			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0);
 			LCDTmp->hide();
-			QSize s = parent->LCDElement->getSize();
+			eSize s = parent->LCDElement->getSize();
 			LCDTmp->resize(s);
-			LCDTmp->move(QPoint(0,0));
+			LCDTmp->move(ePoint(0,0));
 		}
 		((eNumber*)LCDTmp)->digit=digit;
 		((eNumber*)LCDTmp)->active=active;

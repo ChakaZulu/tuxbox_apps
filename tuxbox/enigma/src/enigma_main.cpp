@@ -96,10 +96,10 @@ void eNVODSelector::selected(eListboxEntry *l)
 eNVODSelector::eNVODSelector(): eWindow(0)
 {
 	setText("NVOD");
-	move(QPoint(100, 100));
-	resize(QSize(440, 380));
+	move(ePoint(100, 100));
+	resize(eSize(440, 380));
 	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
-	list->move(QPoint(0, 0));
+	list->move(ePoint(0, 0));
 	list->resize(getClientSize());
 //	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
 	CONNECT(list->selected, eNVODSelector::selected);
@@ -172,10 +172,10 @@ void eAudioSelector::selected(eListboxEntry *l)
 eAudioSelector::eAudioSelector(): eWindow(0)
 {
 	setText("Audio");
-	move(QPoint(100, 100));
-	resize(QSize(300, 330));
+	move(ePoint(100, 100));
+	resize(eSize(300, 330));
 	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
-	list->move(QPoint(0, 0));
+	list->move(ePoint(0, 0));
 	list->resize(getClientSize());
 ///	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
 	CONNECT(list->selected, eAudioSelector::selected);
@@ -207,10 +207,10 @@ QString SubService::getText(int col=0) const
 eSubServiceSelector::eSubServiceSelector(): eWindow(0)
 {
 	setText("Bildregie");
-	move(QPoint(100, 100));
-	resize(QSize(350, 330));
+	move(ePoint(100, 100));
+	resize(eSize(350, 330));
 	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
-	list->move(QPoint(0, 0));
+	list->move(ePoint(0, 0));
 	list->resize(getClientSize());
 //	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
 	CONNECT(list->selected, eSubServiceSelector::selected);
@@ -253,17 +253,17 @@ eServiceNumberWidget::eServiceNumberWidget(int initial)
 										:eWindow(0)
 {
 	setText("Channel");
-	move(QPoint(200, 140));
-	resize(QSize(280, 120));
+	move(ePoint(200, 140));
+	resize(eSize(280, 120));
 	eLabel *label;
 	label=new eLabel(this);
 	label->setText("Channel:");
-	label->move(QPoint(50, 00));
-	label->resize(QSize(110, eSkin::getActive()->queryValue("fontsize", 20)+4));
+	label->move(ePoint(50, 00));
+	label->resize(eSize(110, eSkin::getActive()->queryValue("fontsize", 20)+4));
 	
 	number=new eNumber(this, 1, 1, 999, 3, &initial, 1, label);
-	number->move(QPoint(160, 0));
-	number->resize(QSize(50, eSkin::getActive()->queryValue("fontsize", 20)+4));
+	number->move(ePoint(160, 0));
+	number->resize(eSize(50, eSkin::getActive()->queryValue("fontsize", 20)+4));
 
 //	connect(number, SIGNAL(selected(int*)), SLOT(selected(int*)));
 	CONNECT(number->selected, eServiceNumberWidget::selected);
@@ -280,11 +280,11 @@ eServiceNumberWidget::~eServiceNumberWidget()
 {
 }
 
-void eZapMain::redrawWidget(gPainter *painter, const QRect &where)
+void eZapMain::redrawWidget(gPainter *painter, const eRect &where)
 {
 }
 
-void eZapMain::eraseBackground(gPainter *painter, const QRect &where)
+void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 {
 }
 

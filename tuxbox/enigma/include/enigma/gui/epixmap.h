@@ -6,13 +6,13 @@ class gPixmap;
 
 class ePixmap: public eWidget
 {
-	QPoint position;
+	ePoint position;
 public:
 	ePixmap(eWidget *parent);
 	~ePixmap();
 	
-	void redrawWidget(gPainter *paint, const QRect &area);
-	void eraseBackground(gPainter *target, const QRect &area);
+	void redrawWidget(gPainter *paint, const eRect &area);
+	void eraseBackground(gPainter *target, const eRect &area);
 };
 
 #endif

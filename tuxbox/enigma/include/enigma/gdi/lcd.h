@@ -2,14 +2,14 @@
 #define __lcd_h
 
 #include <asm/types.h>
-#include <qsize.h>
-#include <qrect.h>
+#include <esize.h>
+#include <erect.h>
 
 class eLCD
 {
 protected:
 	static eLCD *primary;
-	QSize res;
+	eSize res;
 	unsigned char *_buffer;
 	int lcdfd;
 	int _stride;
@@ -18,13 +18,13 @@ public:
 	int lock();
 	void unlock();
 
-	eLCD(QSize size);
+	eLCD(eSize size);
 	virtual ~eLCD();
 	static eLCD *getPrimary();
 
 	__u8 *buffer() { return (__u8*)_buffer; }
 	int stride() { return _stride; }
-	QSize size() { return res; }
+	eSize size() { return res; }
 	
 	virtual void update()=0;
 };

@@ -3,7 +3,7 @@
 
 #include <pthread.h>
 #include <qstring.h>
-#include <qrect.h>
+#include <erect.h>
 #include "fb.h"
 #include "elock.h"
 
@@ -69,13 +69,13 @@ struct gPixmap
 	gPixmap *lock();
 	void unlock();
 	
-	QSize getSize() const { return QSize(x, y); } 
+	eSize getSize() const { return eSize(x, y); }
 	
-	void fill(const QRect &area, const gColor &color);
-	void blit(const gPixmap &src, QPoint pos, const QRect &clip=QRect());
+	void fill(const eRect &area, const gColor &color);
+	void blit(const gPixmap &src, ePoint pos, const eRect &clip=eRect());
 	
 	void mergePalette(const gPixmap &target);
-	void line(QPoint start, QPoint end, gColor color);
+	void line(ePoint start, ePoint end, gColor color);
 
 	void finalLock();
 	gPixmap();
@@ -84,7 +84,7 @@ struct gPixmap
 
 struct gImage: gPixmap
 {
-	gImage(QSize size, int bpp);
+	gImage(eSize size, int bpp);
 	~gImage();
 };
 

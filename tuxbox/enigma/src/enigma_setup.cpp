@@ -11,7 +11,7 @@
 eZapSetup::eZapSetup()
 	:eLBWindow("Setup", eListbox::tBorder, 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
 {
-	move(QPoint(150, 136));
+	move(ePoint(150, 136));
 	CONNECT((new eListboxEntryText(list, "[Zurück]"))->selected, eZapSetup::sel_close);
 	CONNECT((new eListboxEntryText(list, "Bouquets..."))->selected, eZapSetup::sel_bouquet);
 	CONNECT((new eListboxEntryText(list, "Network..."))->selected, eZapSetup::sel_network);

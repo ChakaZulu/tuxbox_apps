@@ -70,7 +70,7 @@ gImage *loadPNG(const char *filename)
 	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, 0, 0, 0);
 	
 //	qDebug("loaded %dx%dx%d png, %d", (int)width, (int)height, (int)bit_depth, color_type);
-	res=new gImage(QSize(width, height), bit_depth);
+	res=new gImage(eSize(width, height), bit_depth);
 	
 	png_bytep *rowptr=new png_bytep[height];
 	

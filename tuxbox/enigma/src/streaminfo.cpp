@@ -100,73 +100,73 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	
 	service_name[0]=new eLabel(this);
 	service_name[0]->setText("Name:");
-	service_name[0]->move(QPoint(10, yOffs));
-	service_name[0]->resize(QSize(140, fs+5));
+	service_name[0]->move(ePoint(10, yOffs));
+	service_name[0]->resize(eSize(140, fs+5));
 
 	service_name[1]=new eLabel(this);
 	service_name[1]->setText(cservice?(cservice->service_name.c_str()):"--");
 	service_name[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
-	service_name[1]->move(QPoint(185, yOffs+2));
-	service_name[1]->resize(QSize(260, fs+5));
+	service_name[1]->move(ePoint(185, yOffs+2));
+	service_name[1]->resize(eSize(260, fs+5));
 	yOffs+=fs+5;
 
 	service_provider[0]=new eLabel(this);
 	service_provider[0]->setText("Provider:");
-	service_provider[0]->move(QPoint(10, yOffs));
-	service_provider[0]->resize(QSize(140, fs+5));
+	service_provider[0]->move(ePoint(10, yOffs));
+	service_provider[0]->resize(eSize(140, fs+5));
 	
 	service_provider[1]=new eLabel(this);
 	service_provider[1]->setText(cservice?cservice->service_provider.c_str():"--");
 	service_provider[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
-	service_provider[1]->move(QPoint(185, yOffs+2));
-	service_provider[1]->resize(QSize(260, fs+5));
+	service_provider[1]->move(ePoint(185, yOffs+2));
+	service_provider[1]->resize(eSize(260, fs+5));
 	yOffs+=fs+5;
 
 	vpid[0]=new eLabel(this);
 	vpid[0]->setText("Video PID:");
-	vpid[0]->move(QPoint(10, yOffs));
-	vpid[0]->resize(QSize(140, fs+5));
+	vpid[0]->move(ePoint(10, yOffs));
+	vpid[0]->resize(eSize(140, fs+5));
 	
 	vpid[1]=new eLabel(this);
 	vpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	vpid[1]->setText((parms.vpid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.vpid, parms.vpid));
-	vpid[1]->move(QPoint(185, yOffs+2));
-	vpid[1]->resize(QSize(260, fs+5));
+	vpid[1]->move(ePoint(185, yOffs+2));
+	vpid[1]->resize(eSize(260, fs+5));
 	yOffs+=fs+5;
 
 	apid[0]=new eLabel(this);
 	apid[0]->setText("Audio PID:");
-	apid[0]->move(QPoint(10, yOffs));
-	apid[0]->resize(QSize(140, fs+5));
+	apid[0]->move(ePoint(10, yOffs));
+	apid[0]->resize(eSize(140, fs+5));
 	
 	apid[1]=new eLabel(this);
 	apid[1]->setText((parms.apid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.apid, parms.apid));
-	apid[1]->move(QPoint(185, yOffs+2));
-	apid[1]->resize(QSize(260, fs+5));
+	apid[1]->move(ePoint(185, yOffs+2));
+	apid[1]->resize(eSize(260, fs+5));
 	apid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	yOffs+=fs+5;
 
 	pcrpid[0]=new eLabel(this);
 	pcrpid[0]->setText("PCR PID:");
-	pcrpid[0]->move(QPoint(10, yOffs));
-	pcrpid[0]->resize(QSize(140, fs+5));
+	pcrpid[0]->move(ePoint(10, yOffs));
+	pcrpid[0]->resize(eSize(140, fs+5));
 	
 	pcrpid[1]=new eLabel(this);
 	pcrpid[1]->setText((parms.pcrpid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.pcrpid, parms.pcrpid));
-	pcrpid[1]->move(QPoint(185, yOffs+2));
-	pcrpid[1]->resize(QSize(260, fs+5));
+	pcrpid[1]->move(ePoint(185, yOffs+2));
+	pcrpid[1]->resize(eSize(260, fs+5));
 	pcrpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	yOffs+=fs+5;
 
 	tpid[0]=new eLabel(this);
 	tpid[0]->setText("Teletext PID:");
-	tpid[0]->move(QPoint(10, yOffs));
-	tpid[0]->resize(QSize(140, fs+5));
+	tpid[0]->move(ePoint(10, yOffs));
+	tpid[0]->resize(eSize(140, fs+5));
 	
 	tpid[1]=new eLabel(this);
 	tpid[1]->setText((parms.tpid==-1)?QString("keine"):QString().sprintf("%04xh  (%dd)", parms.tpid, parms.tpid));
-	tpid[1]->move(QPoint(185, yOffs+2));
-	tpid[1]->resize(QSize(260, fs+5));
+	tpid[1]->move(ePoint(185, yOffs+2));
+	tpid[1]->resize(eSize(260, fs+5));
 	tpid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	yOffs+=fs+5;
 	
@@ -205,49 +205,49 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	
 	vform[0]=new eLabel(this);
 	vform[0]->setText("Videoformat:");
-	vform[0]->move(QPoint(10, yOffs));
-	vform[0]->resize(QSize(150, fs+5));
+	vform[0]->move(ePoint(10, yOffs));
+	vform[0]->resize(eSize(150, fs+5));
 	
 	vform[1]=new eLabel(this);
 	vform[1]->setText(vformat);
-	vform[1]->move(QPoint(185, yOffs));
-	vform[1]->resize(QSize(260, fs));
+	vform[1]->move(ePoint(185, yOffs));
+	vform[1]->resize(eSize(260, fs));
 	vform[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	yOffs+=fs+5;
 
 	tsid[0]=new eLabel(this);
 	tsid[0]->setText("Transport Stream ID:");
-	tsid[0]->move(QPoint(10, yOffs));
-	tsid[0]->resize(QSize(230, fs+5));
+	tsid[0]->move(ePoint(10, yOffs));
+	tsid[0]->resize(eSize(230, fs+5));
 
 	tsid[1]=new eLabel(this);
 	tsid[1]->setText(QString().sprintf("%04xh", eDVB::getInstance()->transport_stream_id));
-	tsid[1]->move(QPoint(280, yOffs));
-	tsid[1]->resize(QSize(130, fs+5));
+	tsid[1]->move(ePoint(280, yOffs));
+	tsid[1]->resize(eSize(130, fs+5));
 	tsid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	yOffs+=fs+5;
 
 	onid[0]=new eLabel(this);
 	onid[0]->setText("Original Network ID:");
-	onid[0]->move(QPoint(10, yOffs));
-	onid[0]->resize(QSize(210, fs+5));
+	onid[0]->move(ePoint(10, yOffs));
+	onid[0]->resize(eSize(210, fs+5));
 
 	onid[1]=new eLabel(this);
 	onid[1]->setText(QString().sprintf("%04xh", eDVB::getInstance()->original_network_id));
-	onid[1]->move(QPoint(280, yOffs));
-	onid[1]->resize(QSize(130, fs+5));
+	onid[1]->move(ePoint(280, yOffs));
+	onid[1]->resize(eSize(130, fs+5));
 	onid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	yOffs+=fs+5;
 
 	sid[0]=new eLabel(this);
 	sid[0]->setText("Service ID:");
-	sid[0]->move(QPoint(10, yOffs));
-	sid[0]->resize(QSize(185, fs+5));
+	sid[0]->move(ePoint(10, yOffs));
+	sid[0]->resize(eSize(185, fs+5));
 
 	sid[1]=new eLabel(this);
 	sid[1]->setText(QString().sprintf("%04xh", eDVB::getInstance()->service_id));
-	sid[1]->move(QPoint(280, yOffs));
-	sid[1]->resize(QSize(130, fs+5));
+	sid[1]->move(ePoint(280, yOffs));
+	sid[1]->resize(eSize(130, fs+5));
 	sid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 }
 
@@ -269,8 +269,8 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	int fs=eSkin::getActive()->queryValue("fontsize", 20);
 	availca[0]=new eLabel(this);
 	availca[0]->setText("Unterstützte Verschlüsselungssyst.:");
-	availca[0]->move(QPoint(10, 0));
-	availca[0]->resize(QSize(420, fs+5));
+	availca[0]->move(ePoint(10, 0));
+	availca[0]->resize(eSize(420, fs+5));
 	yOffs+=fs+5;
 
 	QString availcas="keine";
@@ -293,15 +293,15 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 
 	availca[1]=new eLabel(this);
 	availca[1]->setText(availcas);
-	availca[1]->move(QPoint(10, fs*2));
-	availca[1]->resize(QSize(420, numsys*fs+fs));
+	availca[1]->move(ePoint(10, fs*2));
+	availca[1]->resize(eSize(420, numsys*fs+fs));
 	
 	int y=numsys*fs+fs*2+20;
 
 	usedca[0]=new eLabel(this);
 	usedca[0]->setText("davon benutzt:");
-	usedca[0]->move(QPoint(10, y));
-	usedca[0]->resize(QSize(420, fs));
+	usedca[0]->move(ePoint(10, y));
+	usedca[0]->resize(eSize(420, fs));
 
 	QString usedcas="keines";
 	
@@ -324,8 +324,8 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 
 	usedca[1]=new eLabel(this);
 	usedca[1]->setText(usedcas);
-	usedca[1]->move(QPoint(10, y+50));
-	usedca[1]->resize(QSize(420, numsys*fs+fs));
+	usedca[1]->move(ePoint(10, y+50));
+	usedca[1]->resize(eSize(420, numsys*fs+fs));
 }
 
 void siCA::redrawWidget()
@@ -335,19 +335,19 @@ void siCA::redrawWidget()
 eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1)
 {
 	setText(mode?"Record mode - read manual":"Streaminfo");
-	move(QPoint(100, 80));
-	resize(QSize(450, 450));
+	move(ePoint(100, 80));
+	resize(eSize(450, 450));
 	
 	eWidget *w=new siPID(parms?*parms:Decoder::parms, this);
-	w->move(QPoint(2, 40));
-	w->resize(QSize(size.width()-4, size.height()-40));
+	w->move(ePoint(2, 40));
+	w->resize(eSize(size.width()-4, size.height()-40));
 	w->hide();
 
 	mp.addPage(w);
 
 	w=new siCA(this);
-	w->move(QPoint(2, 40));
-	w->resize(QSize(size.width()-4, size.height()-40));
+	w->move(ePoint(2, 40));
+	w->resize(eSize(size.width()-4, size.height()-40));
 	w->hide();
 
 	mp.addPage(w);
