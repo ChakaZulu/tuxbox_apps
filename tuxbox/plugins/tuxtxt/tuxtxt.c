@@ -1,10 +1,11 @@
 /******************************************************************************
- *                    <<< TuxTxt - Videotext via d-box >>>                    *
+ *                 <<< TuxTxt - Videotext SoftwareDecoder >>>                 *
  *                                                                            *
  *                        (c) Thomas "LazyT" Loewe '02                        *
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.15: added colorkeys                                                  *
  *    V1.14: use videoformat-settings                                         *
  *    V1.13: some fixes                                                       *
  *    V1.12: added zoom, removed +/-10                                        *
@@ -31,7 +32,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.14 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.15 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -143,6 +144,18 @@ void plugin_exec(PluginParam *par)
 					case RC_9:		PageInput(9);
 									break;
 
+					case RC_RED:	Prev100();
+									break;
+
+					case RC_GREEN:	Prev10();
+									break;
+
+					case RC_YELLOW:	Next10();
+									break;
+
+					case RC_BLUE:	Next100();
+									break;
+
 					case RC_PLUS:	SwitchZoomMode();
 									break;
 
@@ -242,7 +255,7 @@ int Init()
 	//center screen
 
 		StartX = sx + (((ex-sx) - 40*fontwidth) / 2);
-		StartY = sy + (((ey-sy) - 24*fixfontheight) / 2);
+		StartY = sy + (((ey-sy) - 25*fixfontheight) / 2);
 
 	//get fixed screeninfo
 
@@ -703,6 +716,66 @@ void GetPrevSubPage()
 }
 
 /******************************************************************************
+ * Prev100                                                                    *
+ ******************************************************************************/
+
+void Prev100()
+{
+	if(zoommode == 2) zoommode = 1;
+
+	lastpage = page;
+	page = prev_100;
+	pageupdate = 1;
+
+	printf("TuxTxt <Prev100 => %.3X>\n", page);
+}
+
+/******************************************************************************
+ * Prev10                                                                     *
+ ******************************************************************************/
+
+void Prev10()
+{
+	if(zoommode == 2) zoommode = 1;
+
+	lastpage = page;
+	page = prev_10;
+	pageupdate = 1;
+
+	printf("TuxTxt <Prev10 => %.3X>\n", page);
+}
+
+/******************************************************************************
+ * Next10                                                                    *
+ ******************************************************************************/
+
+void Next10()
+{
+	if(zoommode == 2) zoommode = 1;
+
+	lastpage = page;
+	page = next_10;
+	pageupdate = 1;
+
+	printf("TuxTxt <Next10 => %.3X>\n", page);
+}
+
+/******************************************************************************
+ * Next100                                                                    *
+ ******************************************************************************/
+
+void Next100()
+{
+	if(zoommode == 2) zoommode = 1;
+
+	lastpage = page;
+	page = next_100;
+	pageupdate = 1;
+
+	printf("TuxTxt <Next100 => %.3X>\n", page);
+}
+
+/******************************************************************************
  * PageCatching                                                               *
  ******************************************************************************/
 
@@ -972,8 +1045,8 @@ void SwitchScreenMode()
 				fontwidth  =  8;
 				fontheight = 21;
 
-				avia_pig_set_pos(pig, (StartX+321-55), StartY);
-				avia_pig_set_size(pig, 320, 504);
+				avia_pig_set_pos(pig, (StartX+322-55), StartY);
+				avia_pig_set_size(pig, 320, 526);
 				avia_pig_set_stack(pig, 1);
 				avia_pig_show(pig);
 			}
@@ -1157,7 +1230,7 @@ void RenderCharBB(int Char, int Attribute)
 					}
 					else
 					{
-						if(transpmode == 1)
+						if(transpmode == 1 && PosY < StartY + 24*fixfontheight)
 						{
 							Attribute &= 0xFF0F;
 							Attribute |= transp<<4;
@@ -1270,7 +1343,6 @@ void RenderPage()
 {
 	int row, col, byte;
 
-
 	if(transpmode != 2 && pageupdate && current_page != page && inputcounter == 2)
 	{
 		//reset update flag
@@ -1321,6 +1393,92 @@ void RenderPage()
 }
 
 /******************************************************************************
+ * CreateLine25                                                               *
+ ******************************************************************************/
+
+void CreateLine25()
+{
+	int byte;
+	char line25[] = "   ?00<      ??0<      >??0      >?00             0000000000GGGGGGGGGG";
+
+	//get prev 100th
+
+		prev_100 = page & 0xF00;
+
+		if(!(page & 0x0FF) || subpagetable[prev_100] == 0xFF)
+		{
+			do
+			{
+				prev_100 -= 0x100;
+
+				if(prev_100 == 0x000) prev_100 = 0x800;
+			}
+			while(subpagetable[prev_100] == 0xFF);
+		}
+
+		line25[3] = (prev_100 >> 8) | '0';
+
+	//get next 100th
+
+		next_100 = page & 0xF00;
+
+		do
+		{
+			next_100 += 0x100;
+
+			if(next_100 == 0x900) next_100 = 0x100;
+		}
+		while(subpagetable[next_100] == 0xFF);
+
+		line25[34] = (next_100 >> 8) | '0';
+
+	//get prev 10th
+
+		prev_10 = page & 0xFF0;
+
+		if(!(page & 0x00F) || subpagetable[prev_10] == 0xFF)
+		{
+			do
+			{
+				if((prev_10 & 0x0F0) == 0x000) prev_10 -= 0x70;
+				else						   prev_10 -= 0x10;
+
+				if(prev_10 <= 0x090)		   prev_10 = 0x890;
+			}
+			while(subpagetable[prev_10] == 0xFF);
+		}
+		
+		line25[13] = (prev_10 >> 8) | '0';
+		line25[14] = ((prev_10 & 0x0F0)>>4) | '0';
+
+	//get next 10th
+
+		next_10 = page & 0xFF0;
+
+		do
+		{
+			if((next_10 & 0x0F0) == 0x090) next_10 += 0x70;
+			else						   next_10 += 0x10;
+
+			if(next_10 >= 0x900)		   next_10 = 0x100;
+		}
+		while(subpagetable[next_10] == 0xFF);
+
+		line25[24] = (next_10 >> 8) | '0';
+		line25[25] = ((next_10 & 0x0F0)>>4) | '0';
+
+	//render line 25
+
+		PosX = StartX;
+		PosY = StartY + 24*fixfontheight;
+
+		for(byte = 0; byte < 40; byte++)
+		{
+			RenderCharBB(line25[byte], line25[byte + 40]);
+		}
+}
+
+/******************************************************************************
  * CopyBB2FB                                                                  *
  ******************************************************************************/
 
@@ -1328,6 +1486,10 @@ void CopyBB2FB()
 {
 	int src, dst = 0;
 	int fillcolor = black;
+
+	//line 25
+
+		CreateLine25();
 
 	//copy backbuffer to framebuffer
 
@@ -1359,7 +1521,9 @@ void CopyBB2FB()
 		}
 		while(dst < var_screeninfo.xres * 24*fixfontheight);
 
-		memset(lfb + (StartY + 24*fixfontheight)*var_screeninfo.xres, fillcolor, var_screeninfo.xres*var_screeninfo.yres - (StartY + 24*fixfontheight)*var_screeninfo.xres);
+		memcpy(lfb + StartY*var_screeninfo.xres + dst, backbuffer + StartY*var_screeninfo.xres + 24*fixfontheight*var_screeninfo.xres, var_screeninfo.xres*fixfontheight);
+
+		memset(lfb + (StartY + 25*fixfontheight)*var_screeninfo.xres, fillcolor, var_screeninfo.xres*var_screeninfo.yres - (StartY + 25*fixfontheight)*var_screeninfo.xres);
 }
 
 /******************************************************************************
@@ -1662,6 +1826,18 @@ int GetRCCode()
 											break;
 
 							case RC1_9:		RCCode = RC_9;
+											break;
+
+							case RC1_RED:	RCCode = RC_RED;
+											break;
+
+							case RC1_GREEN:	RCCode = RC_GREEN;
+											break;
+
+							case RC1_YELLOW:RCCode = RC_YELLOW;
+											break;
+
+							case RC1_BLUE:	RCCode = RC_BLUE;
 											break;
 
 							case RC1_PLUS:	RCCode = RC_PLUS;

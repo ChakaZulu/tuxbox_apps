@@ -130,6 +130,10 @@
 
 void CleanUp();
 void PageInput(int Number);
+void Prev100();
+void Prev10();
+void Next10();
+void Next100();
 void PageCatching();
 void CatchNextPage(int Init);
 void CatchPrevPage();
@@ -141,6 +145,7 @@ void SwitchZoomMode();
 void SwitchScreenMode();
 void SwitchTranspMode();
 void SwitchHintMode();
+void CreateLine25();
 void CopyBB2FB();
 void RenderCatchedPage();
 void RenderCharFB(int Char, int Attribute);
@@ -175,6 +180,7 @@ int zoommode, screenmode, transpmode, hintmode;
 int fontwidth, fontheight;
 int vidformat, fnc_old;
 int catch_row, catch_col, catched_page;
+int prev_100, prev_10, next_10, next_100;
 
 pthread_t thread_id;
 void *thread_result;
