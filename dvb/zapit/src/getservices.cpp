@@ -144,7 +144,7 @@ void ParseRoot (XMLTreeNode *root)
 	{
 		if (!strcasecmp(c->GetType(), "transponder"))
 		{
-			sscanf(c->GetAttributeValue("transportID"), "%hd", &curr_tsid);
+			sscanf(c->GetAttributeValue("transportID"), "%hx", &curr_tsid);
 			transponders.insert(std::pair<uint, transponder>(curr_tsid, transponder(curr_tsid, feparams)));
 			ParseTransponder(c);
 		}

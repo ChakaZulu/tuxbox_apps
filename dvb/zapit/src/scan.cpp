@@ -244,13 +244,14 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id)
 				transponder += "\" serviceType=\"";
 				transponder += service_type;
 				transponder += "\" channelNR=\"0\"/>\n";
+				transponder += "\"/>\n";
 			}
 		}
 	}
 
-	fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", transport_stream_id);
+	fprintf(fd, "\t<transponder transportID=\"%04x\">\n", transport_stream_id);
 	fprintf(fd, "%s", transponder.c_str());
-	fprintf(fd, "</transponder>\n");
+	fprintf(fd, "\t</transponder>\n");
 	return;
 }
 

@@ -48,8 +48,8 @@ void nit (int diseqc)
   
   	flt.pid = 0x0010;
   	flt.filter.filter[0] = 0x40;
-    	flt.filter.mask[0]  = 0xFE;
-  	flt.timeout = 5000;
+    	flt.filter.mask[0]  = 0xFF;
+  	flt.timeout = 2000;
   	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
  
   	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
