@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.11 2002/03/30 03:54:31 dirch Exp $
+  $Id: sectionsdclient.cpp,v 1.12 2002/04/12 15:47:28 field Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.12  2002/04/12 15:47:28  field
+  laestigen Bug in der glibc2.2.5 umschifft
+
   Revision 1.11  2002/03/30 03:54:31  dirch
   sectionsd_close vergessen ;)
 
@@ -411,7 +414,7 @@ CChannelEventList CSectionsdClient::getChannelEvents()
 		send((char*)&req, sizeof(req));
 
 		int nBufSize = readResponse();
-		
+
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
@@ -473,7 +476,7 @@ bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEP
 			char* pData = new char[nBufSize];
 			receive(pData, nBufSize);
 			sectionsd_close();
-			
+
 			char* dp = pData;
 
 
@@ -495,7 +498,7 @@ bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEP
 
 			epgdata->epg_times.startzeit = ((sectionsd::sectionsdTime *) dp)->startzeit;
 			epgdata->epg_times.dauer = ((sectionsd::sectionsdTime *) dp)->dauer;
-			dp+= sizeof(sectionsd::sectionsdTime);			
+			dp+= sizeof(sectionsd::sectionsdTime);
 
 			delete[] pData;
 			return true;

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.112 2002/04/10 16:40:46 field Exp $
+//  $Id: sectionsd.cpp,v 1.113 2002/04/12 15:47:27 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.113  2002/04/12 15:47:27  field
+//  laestigen Bug in der glibc2.2.5 umschifft
+//
 //  Revision 1.112  2002/04/10 16:40:46  field
 //  Timeset verändert, timerd (einstweilen) auskommentiert
 //
@@ -748,48 +751,58 @@ static void addService(const SIservice &s)
 // Liefert 0 bei timeout
 // und -1 bei Fehler
 // ansonsten die Anzahl gelesener Bytes
-/* inline */ int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInSeconds)
+/* inline */
+int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInSeconds)
 {
-size_t j;
+	size_t j;
 
-  timeoutInSeconds*=1000; // in Millisekunden aendern
-  for(j=0; j<n;) {
-    struct pollfd ufds;
-    ufds.fd=fd;
-    ufds.events=POLLIN;
-    ufds.revents=0;
-    int rc=poll(&ufds, 1, timeoutInSeconds);
-    if(!rc)
-      return 0; // timeout
-    else if(rc<0 && errno==EINTR)
-      continue; // interuppted
-    else if(rc<0) {
-      perror ("[sectionsd] poll");
-//      printf("errno: %d\n", errno);
-      return -1;
-    }
-    if(!(ufds.revents&POLLIN)) {
-      // POLLHUP, beim dmx bedeutet das DMXDEV_STATE_TIMEDOUT
-      // kommt wenn ein Timeout im Filter gesetzt wurde
-//      dprintf("revents: 0x%hx\n", ufds.revents);
-      usleep(200*1000UL); // wir warten 200 Millisekunden bevor wir es nochmal probieren
-      if(timeoutInSeconds<=200)
-        return 0; // timeout
-      timeoutInSeconds-=200;
-      continue;
-    }
-    int r=read (fd, buf, n-j);
-    if(r>0) {
-      j+=r;
-      buf+=r;
-    }
-    else if(r<=0 && errno!=EINTR) {
-//      printf("errno: %d\n", errno);
-      perror ("[sectionsd] read");
-      return -1;
-    }
-  }
-  return j;
+	timeoutInSeconds*=1000; // in Millisekunden aendern
+	for(j=0; j<n;)
+	{
+		struct pollfd ufds;
+		ufds.fd=fd;
+		ufds.events=POLLIN;
+		ufds.revents=0;
+		int rc=poll(&ufds, 1, timeoutInSeconds);
+		if(!rc)
+			return 0; // timeout
+		else if(rc<0 && errno==EINTR)
+			continue; // interuppted
+		else if(rc<0)
+		{
+			perror ("[sectionsd] poll");
+			//printf("errno: %d\n", errno);
+			return -1;
+		}
+
+		if(!(ufds.revents&POLLIN))
+		{
+			// POLLHUP, beim dmx bedeutet das DMXDEV_STATE_TIMEDOUT
+			// kommt wenn ein Timeout im Filter gesetzt wurde
+			// dprintf("revents: 0x%hx\n", ufds.revents);
+
+			usleep(200*1000UL); // wir warten 200 Millisekunden bevor wir es nochmal probieren
+
+			if(timeoutInSeconds<=200)
+				return 0; // timeout
+			timeoutInSeconds-=200;
+			continue;
+		}
+
+		int r=read (fd, buf, n-j);
+		if(r>0)
+		{
+			j+=r;
+			buf+=r;
+		}
+		else if(r<=0 && errno!=EINTR)
+		{
+			//printf("errno: %d\n", errno);
+			perror ("[sectionsd] read");
+			return -1;
+		}
+	}
+	return j;
 }
 
 // Schreibt n Bytes in einen Socket per write
@@ -1118,7 +1131,7 @@ int DMX::change(bool set_Scheduled)
 	}
 
 	if(pID==0x12) // Nur bei EIT
-		dprintf("changeDMX -> %s\n", set_Scheduled ? "scheduled" : "current/next" );
+		dprintf("changeDMX -> %s\n", (new_filter_index==0) ? "current/next %d" : "scheduled %d", new_filter_index );
 
 	if (ioctl (fd, DMX_STOP, 0) == -1)
 	{
@@ -1132,13 +1145,14 @@ int DMX::change(bool set_Scheduled)
 	memset (&flt, 0, sizeof (struct dmxSctFilterParams));
 
     flt.pid              = pID;
-    flt.filter.filter[0] = filters[filter_index].filter;
-    flt.filter.mask[0]   = filters[filter_index].filter;
+    flt.filter.filter[0] = filters[new_filter_index].filter;
+    flt.filter.mask[0]   = filters[new_filter_index].mask;
+    dprintf("changeDMX newfilter %x %x\n", flt.filter.filter[0], flt.filter.mask[0]);
     flt.flags            = DMX_IMMEDIATE_START;
-    if ( ( filter_index!= 0 ) && (!noCRC) )
+    if ( ( new_filter_index!= 0 ) && (!noCRC) )
       		flt.flags|=DMX_CHECK_CRC;
-    filter_index = new_filter_index;
 
+    filter_index = new_filter_index;
 	pthread_cond_signal( &change_cond );
 
 	if (ioctl (fd, DMX_SET_FILTER, &flt) == -1)
@@ -1560,7 +1574,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.112 2002/04/10 16:40:46 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.113 2002/04/12 15:47:27 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2762,9 +2776,10 @@ static void *connectionThread(void *conn)
 		struct sectionsd::msgRequestHeader header;
 		memset(&header, 0, sizeof(header));
 
-		if(readNbytes(client->connectionSocket, (char *)&header, sizeof(header) , TIMEOUT_CONNECTIONS)>0)
+		int readbytes= readNbytes(client->connectionSocket, (char *)&header, sizeof(header) , TIMEOUT_CONNECTIONS);
+		if(readbytes>0)
 		{
-			dprintf("version: %hhd, cmd: %hhd\n", header.version, header.command);
+			dprintf("version: %hhd, cmd: %hhd, numbytes: %d\n", header.version, header.command, readbytes);
 			if(header.version==2 && header.command<sectionsd::numberOfCommands)
 			{
 				dprintf("data length: %hd\n", header.dataLength);
@@ -2787,9 +2802,21 @@ static void *connectionThread(void *conn)
 			else if(header.version==3 && header.command<sectionsd::numberOfCommands_v3)
 			{
 				int connfd= client->connectionSocket;
+				printf("int connfd=%d\n", connfd);
+
 
             	if ( header.command == sectionsd::CMD_registerEvents )
-					eventServer->registerEvent( connfd );
+            	{
+
+					CEventServer::commandRegisterEvent msg;
+
+					int readresult= readNbytes(client->connectionSocket, (char *)&msg, sizeof(msg) , TIMEOUT_CONNECTIONS);
+
+					//printf("[connectionThread]: read bytes  %d/%d\n", readresult,  sizeof(msg));
+					//printf("[connectionThread]: register event (%d) to: %d - %s\n", msg.eventID, msg.clientID, msg.udsName);
+					eventServer->registerEvent2(msg.eventID, msg.clientID, msg.udsName);
+					//eventServer->registerEvent( connfd );
+				}
 				else if ( header.command == sectionsd::CMD_unregisterEvents )
 					eventServer->unRegisterEvent( connfd );
 
@@ -3091,7 +3118,13 @@ static void *timeThread(void *)
 			}
   		} while (timeset!=1);
 
-  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tv, sizeof(tv) );
+		long long timeOld = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+        struct timeval tv_n;
+        gettimeofday( &tv_n, NULL );
+        long long timeN = (long long) tv_n.tv_usec + (long long)((long long) tv_n.tv_sec * (long long) 1000000);
+
+		printf("\n[sectionsd]: timeold\n%llx - %llx, pdata= %x\n", timeN, timeOld, (unsigned) &timeOld );
+  		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &timeOld, sizeof(timeOld) );
 
 		dmxTOT.closefd();
 		dprintf("dmxTOT: changing from TDT/TOT to TOT.\n");
@@ -3605,7 +3638,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.112 2002/04/10 16:40:46 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.113 2002/04/12 15:47:27 field Exp $\n");
 	try
 	{
 
