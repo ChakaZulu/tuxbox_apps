@@ -68,7 +68,7 @@ extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDV
 
 eString getAttribute(eString filename, eString attribute)
 {
-	eString result;
+	eString result = "&nbsp;";
 
 	ifstream infile(filename.c_str());
 	if (infile)
@@ -102,7 +102,7 @@ eString readFile(eString filename)
 eString firmwareLevel(eString verid)
 {
 	eString result = "unknown";
-	
+
 	if (verid)
 	{
 		int type = atoi(verid.left(1).c_str());
@@ -254,7 +254,7 @@ std::map<eString, eString> getRequestOptions(eString opt)
 	return result;
 }
 
-static eString getControlMessage(void)
+static eString tvMessageWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	return readFile(TEMPLATE_DIR + "sendMessage.tmp");
 }
@@ -262,28 +262,33 @@ static eString getControlMessage(void)
 static eString getControlPlugins(void)
 {
 	std::stringstream result;
-	result << "<table width=100% border=1 cellspacing=0 cellpadding=0>";
 	system("ls /lib/tuxbox/plugins/*.cfg > /tmp/plugins.tmp");
 	eString line;
 	ifstream pluginsFile("/tmp/plugins.tmp");
-	while (getline(pluginsFile, line, '\n'))
+	if (pluginsFile)
 	{
-		result  << "<tr>"
-			<< "<td width=100>"
-			<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".so')")
-			<< "</td>"
-			<< "<td>"
-			<< getAttribute(line, "name")
-			<< "</td>"
-			<< "<td>"
-			<< getAttribute(line, "desc")
-			<< "</td>"
-			<< "</tr>";
+		result << "<table width=100% border=1 cellspacing=0 cellpadding=0>";
+		while (getline(pluginsFile, line, '\n'))
+		{
+			result  << "<tr>"
+				<< "<td width=100>"
+				<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".so')")
+				<< "</td>"
+				<< "<td>"
+				<< getAttribute(line, "name")
+				<< "</td>"
+				<< "<td>"
+				<< getAttribute(line, "desc")
+				<< "</td>"
+				<< "</tr>";
+		}
+		system("rm /tmp/plugins.tmp");
+		result << "</table>";
+		result << "<br>";
+		result << button(100, "Stop", RED, "javascript:stopPlugin()");
 	}
-	system("rm /tmp/plugins.tmp");
-	result << "</table>";
-	result << "<br>";
-	result << button(100, "Stop", RED, "javascript:stopPlugin()");
+	else
+		result << "No plugins found.";
 	return result.str();
 }
 
@@ -800,7 +805,7 @@ static eString getLeftNavi(eString mode, eString path)
 			result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=controlScreenShot");
 		}
 		result += "<br>";
-		result += button(110, "Message", LEFTNAVICOLOR, "?mode=controlMessage");
+		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
 		result += "<br>";
 		result += button(110, "Plugins", LEFTNAVICOLOR, "?mode=controlPlugins");
 		result += "<br>";
@@ -1152,28 +1157,29 @@ static eString getUpdates()
 static eString getUpdatesInternet()
 {
 	std::stringstream result;
-	eString imageName, imageVersion, imageURL, imageCreator, imageMD5;
+	eString imageName = "&nbsp;", imageVersion = "&nbsp;", imageURL = "&nbsp;", imageCreator = "&nbsp;", imageMD5 = "&nbsp;";
 	eString myCatalogURL = getAttribute("/.version", "catalog");
-	
+
 	result << "<h2>Available Images</h2>";
-	result << "<table width=100% border=1 cellpadding=0 cellspacing=0>";
 
 	if (myCatalogURL.length())
 	{
 		system(eString("wget -q -O /tmp/catalog.xml " + myCatalogURL).c_str());
-		eString line;
 		ifstream catalogFile("/tmp/catalog.xml");
 		if (catalogFile)
 		{
+			result << "<table width=100% border=1 cellpadding=0 cellspacing=0>";
+			eString line;
 			while (getline(catalogFile, line, '\n'))
 			{
-				if (line.find("<image ") != eString::npos)
+				if (line.find("<image") != eString::npos)
 				{
-					if (imageVersion)
+					if (imageVersion != "&nbsp;")
 					{
-						result  << "<tr><td>" << imageVersion 
-							<< "</td><td>" << imageName 
-							<< "</td></tr>";
+						result  << "<tr>"
+							<< "<td>" << imageVersion << "</td>"
+							<< "<td>" << imageName << "</td>"
+							<< "</tr>";
 					}
 					imageName = "&nbsp;";
 					imageVersion = "&nbsp;";
@@ -1184,25 +1190,24 @@ static eString getUpdatesInternet()
 				else
 				if (line.find("version=") != eString::npos)
 				{
-					imageName = getRight(line, '"');
-					imageName = getLeft(imageName, '"');
+					imageVersion = getRight(line, '"');
+					imageVersion = getLeft(imageVersion, '"');
 				}
 				else
 				if (line.find("name=") != eString::npos)
 				{
 					imageName = getRight(line, '"');
-					imageName = getLeft(imageName, '"');	
+					imageName = getLeft(imageName, '"');
 				}
 			}
+			result << "</table>";
 		}
 		else
-			result << "<tr><td>No image information available</td></tr>";
+			result << "No image information available.";
 	}
 	else
-		result << "<tr><td>No image information available</td></tr>";
-		
-	result << "</table>";
-	
+		result << "No image information available.";
+
 	return result.str();
 }
 
@@ -1300,7 +1305,7 @@ public:
 		{
 			if (!e.path)
 				result += button(50, "EPG", GREEN, "javascript:openEPG('" + serviceRef + "')");
-			else 
+			else
 			if (serviceRef.find("%2fhdd%2fmovie%2f") != eString::npos)
 			{
 				result += "<a href=\"javascript:deleteMovie('";
@@ -1727,16 +1732,16 @@ struct getEntryString
 		result << "<tr>";
 		if (!repeating)
 		{
-			result  << "<td><a href=\"javascript:deleteTimerEvent(\'"
+			result  << "<td align=center><a href=\"javascript:deleteTimerEvent(\'"
 				<< "ref=" << ref2string(se->service)
 				<< "&ID=" << std::hex << se->event_id << std::dec
 				<< "&start=" << se->time_begin
 				<< "&duration=" << se->duration
 				<< "\')\"><img src=\"trash.gif\" border=0 height=20></a></td>";
 
-			result << "<td><a href=\"javascript:editTimerEvent(\'"
+			result << "<td align=center><a href=\"javascript:editTimerEvent(\'"
 				<< "ref=" << ref2string(se->service)
-				<< "start=" << se->time_begin
+				<< "&start=" << se->time_begin
 				<< "&duration=" << se->duration
 				<< "&ID=" << std::hex << se->event_id << std::dec
 				<< "&channel=" << channel
@@ -1995,12 +2000,6 @@ static eString getContent(eString mode, eString path)
 	{
 		result = getTitle("CONTROL: Timer List");
 		result += getControlTimerList();
-	}
-	else
-	if (mode == "controlMessage")
-	{
-		result = getTitle("CONTROL: Message");
-		result += getControlMessage();
 	}
 	else
 	if (mode == "controlPlugins")
@@ -2601,11 +2600,11 @@ static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPC
 	}
 	if (ePluginThread::getInstance())
 		ePluginThread::getInstance()->kill(true);
-		
+
 	result = plugins.execPluginByName((path + opts["name"]).c_str());
 	if (requester == "webif")
 		result = "<script language=\"javascript\">window.close();</script>";
-		
+
 	return result;
 }
 
@@ -3124,7 +3123,6 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
 
 	ePlaylistEntry entry(string2ref(serviceRef), start, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
-	eDebug("[ENIGMA_DYN] description = %s", description.c_str());
 	entry.service.descr = channel + "/" + description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
@@ -3140,7 +3138,7 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 	eString result;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString serviceRef = opt["ref"];
 	eString eventID = opt["ID"];
 	eString eventStartTime = opt["start"];
@@ -3148,13 +3146,13 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
-	eDebug("[ENIGMA_DYN] deleteTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+	printf("[ENIGMA_DYN] deleteTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
 
 	EITEvent evt;
 	evt.start_time = atoi(eventStartTime.c_str());
 	evt.duration = atoi(eventDuration.c_str());
 	evt.event_id = eventid;
-	eServiceReference ref(string2ref(serviceRef));
+	eServiceReference ref = string2ref(serviceRef);
 	eTimerManager::getInstance()->deleteEventFromTimerList(&ref, &evt);
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return "<script language=\"javascript\">window.close();</script>";
@@ -3163,6 +3161,7 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 static eString genOptions(int start, int end, int delta, int selected)
 {
 	std::stringstream result;
+	// printf("[GENOPTIONS] start = %d, end = %d, delta = %d, selected = %d\n", start, end, delta, selected);
 	for (int i = start; i <= end; i += delta)
 	{
 		if (i == selected)
@@ -3194,30 +3193,36 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	eString emin = opt["emin"];
 	eString description = httpUnescape(opt["descr"]);
 	eString channel = httpUnescape(opt["channel"]);
-	
-	tm start;
+
+	time_t now = time(0)+eDVB::getInstance()->time_difference;
+	tm start = *localtime(&now);
 	start.tm_mday = atoi(sday.c_str());
 	start.tm_mon = atoi(smonth.c_str()) - 1;
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
-	tm end;
+	start.tm_sec = 0;
+	tm end = *localtime(&now);
 	end.tm_mday = atoi(eday.c_str());
-	end.tm_mon = atoi(emonth.c_str()) - 1;
+	end.tm_mon = atoi(emonth.c_str()) -1 ;
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
-	
+	end.tm_sec = 0;
+
 	time_t eventStartTime = mktime(&start);
 	time_t eventEndTime = mktime(&end);
 	int duration = eventEndTime - eventStartTime;
-	
+
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
-	
+	// printf("[CHANGETIMER] start: %d.%d. - %d:%d, end: %d.%d. - %d:%d\n", start.tm_mday, start.tm_mon, start.tm_hour, start.tm_min,
+									end.tm_mday, end.tm_mon, end.tm_hour, end.tm_min);
+
 	EITEvent evt;
 	evt.start_time = eventStartTime;
 	evt.duration = duration;
 	evt.event_id = eventid;
-	eServiceReference ref(string2ref(serviceRef));
+	printf("[CHANGETIMER] startTime = %d, startDuration = %d, eventID = %x\n", evt.start_time, evt.duration, evt.event_id);
+	eServiceReference ref = string2ref(serviceRef);
 	eTimerManager::getInstance()->modifyEventInTimerList(&ref, &evt, channel + "/" + description);
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return "<script language=\"javascript\">window.close();</script>";
@@ -3232,30 +3237,30 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	eString eventStartTime = opt["start"];
 	eString eventDuration = opt["duration"];
 	eString description = httpUnescape(opt["descr"]);
-	eString channel = opt["channel"];
-	
+	eString channel = httpUnescape(opt["channel"]);
+
 	time_t eventStart = atoi(eventStartTime.c_str());
 	time_t eventEnd = eventStart + atoi(eventDuration.c_str());
 	tm start = *localtime(&eventStart);
 	tm end = *localtime(&eventEnd);
 
-	eDebug("[ENIGMA_DYN] editTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+	// printf("[ENIGMA_DYN] editTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
 
 	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
-	
+
 	result.strReplace("#EVENTID#", eventID);
 	result.strReplace("#SERVICEREF#", serviceRef);
-	
+
 	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
 	result.strReplace("#SMONTHOPTS#", genOptions(1, 12, 1, start.tm_mon + 1));
 	result.strReplace("#SHOUROPTS#", genOptions(0, 23, 1, start.tm_hour));
 	result.strReplace("#SMINOPTS#", genOptions(0, 55, 5, (start.tm_min / 5) * 5));
-	
+
 	result.strReplace("#EDAYOPTS#", genOptions(1, 31, 1, end.tm_mday));
 	result.strReplace("#EMONTHOPTS#", genOptions(1, 12, 1, end.tm_mon + 1));
 	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
-	
+
 	result.strReplace("#CHANNEL#", channel);
 	result.strReplace("#DESCRIPTION#", description);
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
@@ -3350,6 +3355,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList, true);
 	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails);
 	dyn_resolver->addDyn("GET", "/msgWindow", msgWindow);
+	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
