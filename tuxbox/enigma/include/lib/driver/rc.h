@@ -2,7 +2,6 @@
 #define __rc_h
 
 #include <qobject.h>
-#include <qfile.h>
 #include <qsocketnotifier.h>
 #include <qtimer.h>
 
@@ -48,7 +47,7 @@ class eRCShortDriver: public eRCDriver
 {
 	Q_OBJECT
 protected:
-	QFile rc;
+	int handle;
 	QSocketNotifier *sn;
 private slots:
 	void keyPressed(int);
@@ -88,7 +87,7 @@ class eRCInput: public QObject
 {
 	Q_OBJECT
 	int locked;	
-	QFile* rc;
+	int handle;
 	static eRCInput *instance;
 signals:
 	void keyEvent(const eRCKey &);
@@ -111,7 +110,7 @@ public:
 	void close();
 	bool open();
 
-	void setFile(QFile* file);
+	void setFile(int handle);
 
 	void keyPressed(const eRCKey &key)
 	{

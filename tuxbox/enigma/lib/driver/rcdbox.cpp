@@ -158,8 +158,8 @@ const char *eRCDeviceDBoxButton::getDescription() const
 
 eRCDBoxDriver::eRCDBoxDriver(): eRCShortDriver("/dev/dbox/rc0")
 {
-	if (rc.handle()>0)
-		ioctl(rc.handle(), RC_IOCTL_BCODES, 1);
+	if (handle>0)
+		ioctl(handle, RC_IOCTL_BCODES, 1);
 }
 
 const char *eRCKeyDBoxOld::getDescription() const
