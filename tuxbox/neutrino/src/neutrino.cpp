@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.233 2002/04/20 15:21:14 McClean Exp $
+        $Id: neutrino.cpp,v 1.234 2002/04/20 16:39:30 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -115,7 +115,6 @@ static void initGlobals(void)
 	g_EpgData = NULL;
 	g_InfoViewer = NULL;
 	g_EventList = NULL;
-	g_ScreenSetup = NULL;
 
 	g_Locale = NULL;
 	g_PluginList = NULL;
@@ -1194,7 +1193,7 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	videoSettings.addItem( oj );
 
 	videoSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	videoSettings.addItem( new CMenuForwarder("videomenu.screensetup", true, "", g_ScreenSetup ) );
+	videoSettings.addItem( new CMenuForwarder("videomenu.screensetup", true, "", new CScreenSetup() ) );
 }
 
 void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
@@ -1557,7 +1556,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_EpgData = new CEpgData;
 	g_InfoViewer = new CInfoViewer;
 	g_ScanTS = new CScanTs;
-	g_ScreenSetup = new CScreenSetup;
 	g_EventList = new EventList;
 	g_Update = new CFlashUpdate;
 
@@ -2388,7 +2386,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.233 2002/04/20 15:21:14 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.234 2002/04/20 16:39:30 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
