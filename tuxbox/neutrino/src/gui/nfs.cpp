@@ -276,11 +276,12 @@ int CNFSMountGui::menuEntry(int nr)
    /* rewrite fstype in new entries */
    if(strlen(local_dir)==0)
    {
-      if(m_cifs_sup && !m_nfs_sup)
+      if(m_cifs_sup != FS_UNSUPPORTED && m_nfs_sup==FS_UNSUPPORTED)
          *type = (int) CIFS;
    }
-   bool typeEnabled = (m_cifs_sup && m_nfs_sup) || (m_cifs_sup && *type != (int)CIFS)
-                                                || (m_nfs_sup  && *type != (int)NFS);
+   bool typeEnabled = (m_cifs_sup != FS_UNSUPPORTED && m_nfs_sup != FS_UNSUPPORTED) || 
+      (m_cifs_sup != FS_UNSUPPORTED && *type != (int)CIFS) || 
+      (m_nfs_sup != FS_UNSUPPORTED && *type != (int)NFS);
 
 	CMenuWidget mountMenuEntryW("nfs.mount", "network.raw",720);
 	mountMenuEntryW.addItem(new CMenuSeparator());
