@@ -81,7 +81,8 @@ class CZapitClient:public CBasicClient
 			BM_CREATEBOUQUETS,
 			BM_DELETEBOUQUETS,
 			BM_DONTTOUCHBOUQUETS,
-			BM_UPDATEBOUQUETS	 // not yet supported
+			BM_UPDATEBOUQUETS,	 // not yet supported
+			BM_CREATESATELLITEBOUQUET
 		};
 
 
