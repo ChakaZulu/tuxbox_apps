@@ -3315,6 +3315,8 @@ int eZapMain::handleStandby(int i)
 		{
 			if ( !force && (eServiceInterface::getInstance()->service.path || timeshift) )
 				break;
+			if ( ePluginThread::getInstance() ) // don't shutdown, when a plugin is running
+				break;
 			eMessageBox mb(_("Shutdown your Receiver now?"),_("Timer Message"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes, 30);
 			mb.show();
 			int ret = mb.exec();
@@ -3330,6 +3332,8 @@ int eZapMain::handleStandby(int i)
 		case 3: // immediate go to standby
 		{
 			if ( !force && (eServiceInterface::getInstance()->service.path || timeshift) )
+				break;
+			if ( ePluginThread::getInstance() ) // don't goto standby, when a plugin is running
 				break;
 			if ( !eZapStandby::getInstance() )
 			{
