@@ -11,7 +11,8 @@ eString getConfigFlashMgr(void);
 
 class eFlashOperationsHandler: public eMainloop, private eThread, public Object
 {
-	eString progressMessage1, progressMessage2, progressComplete;
+	eString progressMessage1, progressMessage2;
+	int progressComplete;
 	struct Message
 	{
 		int type;
@@ -40,7 +41,7 @@ public:
 	void writePartition(const char * mtd, const char * filename);
 	eString getProgressMessage1() { return progressMessage1; }
 	eString getProgressMessage2() { return progressMessage2; }
-	eString getProgressComplete() { return progressComplete; }
+	int getProgressComplete() { return progressComplete; }
 	static eFlashOperationsHandler *getInstance() { return (instance) ? instance : new eFlashOperationsHandler(); }
 };
 
@@ -57,6 +58,7 @@ public:
 	eFlashMgr();
 	~eFlashMgr();
 	eString htmlList();
+	eString getMTDName(eString mtd);
 };
 
 #endif /* __enigma_dyn_flash_h */

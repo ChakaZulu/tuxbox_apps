@@ -11,7 +11,7 @@ function update()
 <script>
 	var progress1 = "#PROGRESSMESSAGE1#";
 	var progress2 = "#PROGRESSMESSAGE2#";
-	var completion = #PROGRESSCOMPLETION#;
+	var completion = #PROGRESSCOMPLETE#;
 </script>
 </body>
 </html>

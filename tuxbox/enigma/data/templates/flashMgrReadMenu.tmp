@@ -6,7 +6,7 @@
 	<body id="flashmgr">
 		Save flash partition #MTD# (#MTDNAME#) to the following file:
 		<br><br>
-		<form name="fileselector" action="/cgi-bin/readFlashPartition">
+		<form name="fileselector" action="/readFlashPartition">
 			<input type="hidden" name="mtd" value="#MTD#">
 			<input name="file" type="text" size="100" maxlength="100" value="#FILE#">
 			<br><br>

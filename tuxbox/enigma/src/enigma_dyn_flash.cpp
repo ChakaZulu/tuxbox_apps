@@ -102,7 +102,8 @@ int eFlashOperationsHandler::writeFlash(eString mtd, eString filename)
 {
 	int fd1, fd2;
 	
-	progressMessage1 = progressMessage2 = progressComplete = "";
+	progressMessage1 = progressMessage2 = "";
+	progressComplete = 0;
 	
 	int mtdno = -1;
 	sscanf(mtd.c_str(), "mtd%d", &mtdno);
@@ -165,7 +166,7 @@ int eFlashOperationsHandler::writeFlash(eString mtd, eString filename)
 	erase.length = meminfo.erasesize;
 	for (erase.start = 0; erase.start < meminfo.size; erase.start += meminfo.erasesize)
 	{
-		progressComplete.sprintf("%d", erase.start * 100 / meminfo.size);
+		progressComplete = erase.start * 100 / meminfo.size;
 #if 0
 		if (ioctl(fd2, MEMERASE, &erase) != 0)
 		{
@@ -174,7 +175,7 @@ int eFlashOperationsHandler::writeFlash(eString mtd, eString filename)
 			return -8;
 		}
 #else
-		usleep(5000);
+		sleep(1);
 #endif
 	}
 
@@ -194,7 +195,7 @@ int eFlashOperationsHandler::writeFlash(eString mtd, eString filename)
 		usleep(5000);
 #endif
 		fsize -= block;
-		progressComplete.sprintf("%d", ((filesize - fsize) * 100) / filesize);
+		progressComplete = ((filesize - fsize) * 100) / filesize;
 	}
 
 	close(fd1);
@@ -217,21 +218,32 @@ int eFlashOperationsHandler::readFlash(eString mtd, eString filename)
 	long filesize;
 	mtd_info_t meminfo;
 	
-	progressMessage1 = progressMessage2 = progressComplete = "";
+	progressMessage1 = progressMessage2 = "";
+	progressComplete = 0;
 	
 	int mtdno = -1;
 	sscanf(mtd.c_str(), "mtd%d", &mtdno);
 	eString mtddev = "/dev/mtd/" + eString().sprintf("%d", mtdno);
 
 	if ((fd1 = open(mtddev.c_str(), O_RDONLY)) < 0)
+	{
+		progressMessage1 = "Error during Operation";
+		progressMessage2 = "Could not open /dev/mtd.";
 		return -1;
+	}
 
 	if (ioctl(fd1, MEMGETINFO, &meminfo) != 0)
+	{
+		progressMessage1 = "Error during Operation";
+		progressMessage2 = "Could not execute ioctl MEMGETINFO.";
 		return -2;
+	}
 
 	if ((fd2 = open(filename.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH)) < 0)
 	{
 		close(fd1);
+		progressMessage1 = "Error during Operation";
+		progressMessage2 = "Could not open file.";
 		return -3;
 	}
 
@@ -239,6 +251,8 @@ int eFlashOperationsHandler::readFlash(eString mtd, eString filename)
 
 	progressMessage1 = "Please wait while flash partition " + mtddev + " is being saved to " + filename + "...";
 	progressMessage2 = "Saving flash partition...";
+	
+	sleep(1);
 
 	char buf[meminfo.erasesize];
 	long fsize = filesize;
@@ -250,7 +264,8 @@ int eFlashOperationsHandler::readFlash(eString mtd, eString filename)
 		read(fd1, &buf, block);
 		write(fd2, &buf, block);
 		fsize -= block;
-		progressComplete.sprintf("%d", ((filesize - fsize) * 100) / filesize);
+		progressComplete = ((filesize - fsize) * 100) / filesize;
+		sleep(1);
 	}
 	close(fd1);
 	close(fd2);
@@ -272,7 +287,9 @@ eFlashMgr::eFlashMgr()
 	eString procmtd = readFile("/proc/mtd");
 	tmp.str(procmtd);
 	tmp >> h1 >> h2 >> h3 >> h4;
+	h1.left(h1.length() - 1);
 	tmp >> mtd.dev;
+	mtd.dev.left(mtd.dev.length() - 1);
 	while (tmp)
 	{
 		mtd.size = mtd.erasesize = mtd.name = "";
@@ -284,6 +301,8 @@ eFlashMgr::eFlashMgr()
 			mtd.name += t + " ";
 			tmp >> t;
 		}
+		mtd.name.left(mtd.name.length() - 1);
+		mtd.name.strReplace("\"", "");
 		mtds.push_back(mtd);
 		mtd.dev = t;
 	}
@@ -316,6 +335,15 @@ eString eFlashMgr::htmlList(void)
 	return result;
 }
 
+eString eFlashMgr::getMTDName(eString mtd)
+{
+	for (std::list<t_mtd>::iterator mtd_it = mtds.begin(); mtd_it != mtds.end(); mtd_it++)
+		if (mtd == mtd_it->dev)
+			return mtd_it->name;
+	
+	return "";
+}
+
 eString writeFlashPartition(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -323,7 +351,7 @@ eString writeFlashPartition(eString request, eString dirpath, eString opts, eHTT
 	eString fileName = opt["file"];
 	
 	eFlashOperationsHandler::getInstance()->writePartition(mtd.c_str(), fileName.c_str());
-
+	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "flashMgrProgress.tmp");
 	return result;
@@ -342,14 +370,6 @@ eString readFlashPartition(eString request, eString dirpath, eString opts, eHTTP
 	return result;
 }
 
-eString flashProgressInfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString result = readFile(TEMPLATE_DIR + "flashMgrProgressInfo.tmp");
-	return result;
-}
-
 eString flashProgressData(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -357,25 +377,50 @@ eString flashProgressData(eString request, eString dirpath, eString opts, eHTTPC
 	eString result = readFile(TEMPLATE_DIR + "flashMgrProgressData.tmp");
 	result.strReplace("#PROGRESSMESSAGE1#", eFlashOperationsHandler::getInstance()->getProgressMessage1());
 	result.strReplace("#PROGRESSMESSAGE2#", eFlashOperationsHandler::getInstance()->getProgressMessage2());
-	result.strReplace("#PROGRESSCOMPLETE#", eFlashOperationsHandler::getInstance()->getProgressComplete());
+	result.strReplace("#PROGRESSCOMPLETE#", eString().sprintf("%d", eFlashOperationsHandler::getInstance()->getProgressComplete()));
 	return result;
 }
 
 eString showWriteMenu(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString mtd = opt["mtd"];
+	eString fileName = opt["file"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "flashMgrWriteMenu.tmp");
+	result.strReplace("#MTD#", mtd);
+	result.strReplace("#MTDNAME#", flashMgr.getMTDName(mtd));
+	result.strReplace("#FILE#", fileName);
 	
+	eString files;
+	DIR *d = opendir("/tmp");
+	if (d)
+	{
+		while (struct dirent *e = readdir(d))
+		{
+			eString filename = eString(e->d_name);
+			if (filename.right(4).upper() == ".IMG")
+				files += "<option value=\"" + filename + "\">" + filename + "</option>";
+		}
+		closedir(d);
+	}
+	if (!files)
+		files += "<option>no images available</option>";
+
+	result.strReplace("#FILES#", files);
 	return result;
 }
 
 eString showReadMenu(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString mtd = opt["mtd"];
+	eString fileName = opt["file"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "flashMgrReadMenu.tmp");
-	
+	result.strReplace("#MTD#", mtd);
+	result.strReplace("#MTDNAME#", flashMgr.getMTDName(mtd));
+	result.strReplace("#FILE#", fileName);
 	return result;
 }
 
@@ -388,9 +433,8 @@ void ezapFlashInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/showWriteMenu", showWriteMenu, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/showReadMenu", showReadMenu, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/writeFlashPartition", writeFlashPartition, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/readFlashPartition", readFlashPartition, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/flashProgressInfo", flashProgressInfo, lockWeb);
+	dyn_resolver->addDyn("GET", "/writeFlashPartition", writeFlashPartition, lockWeb);
+	dyn_resolver->addDyn("GET", "/readFlashPartition", readFlashPartition, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/flashProgressData", flashProgressData, lockWeb);
 }
 #endif
