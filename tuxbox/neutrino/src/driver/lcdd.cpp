@@ -243,26 +243,28 @@ void CLCD::showServicename(const std::string & name) // UTF-8
 
 void CLCD::showTime()
 {
-	char timestr[50];
-	struct timeb tm;
 	if (showclock)
 	{
-		ftime(&tm);
-		strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
+		char timestr[21];
+		struct timeb tm;
+		struct tm * t;
 
-		if(mode!=MODE_STANDBY)
+		ftime(&tm);
+		t = localtime(&tm.time);
+
+		if (mode == MODE_STANDBY)
 		{
-			display.draw_fill_rect (77,50,120,64, CLCDDisplay::PIXEL_OFF);
-			int pos = 122 - fonts.time->getRenderWidth(timestr);
-			fonts.time->RenderString(pos,62, 50, timestr, CLCDDisplay::PIXEL_ON);
+			display.draw_fill_rect(-1, -1, 120, 64, CLCDDisplay::PIXEL_OFF); // clear lcd
+
+			ShowNewClock(&display, t->tm_hour, t->tm_min, t->tm_wday, t->tm_mday, t->tm_mon);
 		}
 		else
 		{
-			//big clock
-			struct tm *t = localtime(&tm.time);
+			strftime((char*) &timestr, 20, "%H:%M", t);
 
-			display.draw_fill_rect (-1,-1,120,64, CLCDDisplay::PIXEL_OFF);
-			ShowNewClock(&display, t->tm_hour, t->tm_min, t->tm_wday, t->tm_mday, t->tm_mon);
+			display.draw_fill_rect (77, 50, 120, 64, CLCDDisplay::PIXEL_OFF);
+
+			fonts.time->RenderString(122 - fonts.time->getRenderWidth(timestr), 62, 50, timestr, CLCDDisplay::PIXEL_ON);
 		}
 		display.update();
 	}
@@ -399,101 +401,92 @@ void CLCD::setMode(const MODES m, const char * const title)
 {
 	switch (m)
 	{
-		case MODE_TVRADIO:
-			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
-			//printf("[lcdd] mode: tvradio\n");
-			mode = m;
-			showclock = true;
-			switch(g_settings.lcd_show_volume){
-			case 0:
-				display.load_screen(&icon_lcd2);
-				showPercentOver(percentOver, false);
-				break;
-			case 1:
-				display.load_screen(&icon_lcd);
-				showVolume(volume, false);
-				break;
-			case 2:
-				display.load_screen(&icon_lcd3);
-				showVolume(volume, false);
-				showPercentOver(percentOver, false);
-				break;
-			}
-			showServicename(servicename);
-			showTime();
-			display.update();
-			break;
-		case MODE_MP3:
+	case MODE_TVRADIO:
+		setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+		mode = m;
+		switch (g_settings.lcd_show_volume)
 		{
-			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
-			//printf("[lcdd] mode: mp3\n");
+		case 0:
+			display.load_screen(&icon_lcd2);
+			showPercentOver(percentOver, false);
+			break;
+		case 1:
 			display.load_screen(&icon_lcd);
-			mode = m;
-			showclock = true;
-			display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
-			int x=106,y=14;
-			display.draw_line(x  ,y  ,x  ,y+6,CLCDDisplay::PIXEL_ON);
-			display.draw_line(x  ,y  ,x+2,y+2,CLCDDisplay::PIXEL_ON);
-			display.draw_line(x+2,y+2,x+4,y  ,CLCDDisplay::PIXEL_ON);
-			display.draw_line(x+4,y  ,x+4,y+6,CLCDDisplay::PIXEL_ON);  
-
-			display.draw_line(x+6,y  ,x+6,y+6,CLCDDisplay::PIXEL_ON);  
-			display.draw_line(x+6,y  ,x+9,y  ,CLCDDisplay::PIXEL_ON);
-			display.draw_line(x+6,y+3,x+9,y+3,CLCDDisplay::PIXEL_ON);
-			display.draw_line(x+9,y  ,x+9,y+3,CLCDDisplay::PIXEL_ON);  
-
-			display.draw_line(x+13,y  ,x+13,y+6,CLCDDisplay::PIXEL_ON);
-			display.draw_line(x+11,y  ,x+13,y  ,CLCDDisplay::PIXEL_ON);
-			display.draw_line(x+11,y+3,x+13,y+3,CLCDDisplay::PIXEL_ON);
-			display.draw_line(x+11,y+6,x+13,y+6,CLCDDisplay::PIXEL_ON);
-
-			display.draw_line(x-2,12,x-2,32, CLCDDisplay::PIXEL_ON);
-			display.draw_line(x-2,32,x+14,32, CLCDDisplay::PIXEL_ON);
-
-			showMP3Play(MP3_STOP);
 			showVolume(volume, false);
-			showTime();
-			display.update();
-		   break;
+			break;
+		case 2:
+			display.load_screen(&icon_lcd3);
+			showVolume(volume, false);
+			showPercentOver(percentOver, false);
+			break;
 		}
-		case MODE_SCART:
-			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
-			//printf("[lcdd] mode: scart\n");
-			display.load_screen(&icon_lcd);
-			mode = m;
-			showclock = true;
-			showVolume(volume, false);
-			showTime();
-			display.update();
-			break;
-		case MODE_MENU_UTF8:
-			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
-			//printf("[lcdd] mode: menu\n");
-			mode = m;
-			showclock = false;
-			display.load_screen(&icon_setup);
-			fonts.menutitle->RenderString(-1,28, 140, title, CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
-			display.update();
-			break;
-		case MODE_SHUTDOWN:
-			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
-			//printf("[lcdd] mode: shutdown\n");
-			mode = m;
-			showclock = false;
-			display.load_screen(&icon_power);
-			display.update();
-			break;
-		case MODE_STANDBY:
-			//printf("[lcdd] mode: standby\n");
-			setlcdparameter(g_settings.lcd_standbybrightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
-			mode = m;
-			showclock = true;
-			display.draw_fill_rect (-1,0,120,64, CLCDDisplay::PIXEL_OFF);
-			showTime();
-			display.update();
-			break;
-		default:
-			printf("[lcdd] Unknown mode: %i\n", m);
+		showServicename(servicename);
+		showclock = true;
+		showTime();      /* "showclock = true;" implies that "showTime();" does a "display.update();" */
+		break;
+	case MODE_MP3:
+	{
+		setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+		mode = m;
+		display.load_screen(&icon_lcd);
+		display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
+		int x=106,y=14;
+		display.draw_line(x  ,y  ,x  ,y+6,CLCDDisplay::PIXEL_ON);
+		display.draw_line(x  ,y  ,x+2,y+2,CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+2,y+2,x+4,y  ,CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+4,y  ,x+4,y+6,CLCDDisplay::PIXEL_ON);  
+		
+		display.draw_line(x+6,y  ,x+6,y+6,CLCDDisplay::PIXEL_ON);  
+		display.draw_line(x+6,y  ,x+9,y  ,CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+6,y+3,x+9,y+3,CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+9,y  ,x+9,y+3,CLCDDisplay::PIXEL_ON);  
+		
+		display.draw_line(x+13,y  ,x+13,y+6,CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+11,y  ,x+13,y  ,CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+11,y+3,x+13,y+3,CLCDDisplay::PIXEL_ON);
+		display.draw_line(x+11,y+6,x+13,y+6,CLCDDisplay::PIXEL_ON);
+		
+		display.draw_line(x-2,12,x-2,32, CLCDDisplay::PIXEL_ON);
+		display.draw_line(x-2,32,x+14,32, CLCDDisplay::PIXEL_ON);
+		
+		showMP3Play(MP3_STOP);
+		showVolume(volume, false);
+		showclock = true;
+		showTime();      /* "showclock = true;" implies that "showTime();" does a "display.update();" */
+		break;
+	}
+	case MODE_SCART:
+		setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+		mode = m;
+		display.load_screen(&icon_lcd);
+		showVolume(volume, false);
+		showclock = true;
+		showTime();      /* "showclock = true;" implies that "showTime();" does a "display.update();" */
+		break;
+	case MODE_MENU_UTF8:
+		setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+		mode = m;
+		showclock = false;
+		display.load_screen(&icon_setup);
+		fonts.menutitle->RenderString(-1,28, 140, title, CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+		display.update();
+		break;
+	case MODE_SHUTDOWN:
+		setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+		mode = m;
+		showclock = false;
+		display.load_screen(&icon_power);
+		display.update();
+		break;
+	case MODE_STANDBY:
+		setlcdparameter(g_settings.lcd_standbybrightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+		mode = m;
+		showclock = true;
+		showTime();      /* "showclock = true;" implies that "showTime();" does a "display.update();" */
+		                 /* "showTime()" clears the whole lcd in MODE_STANDBY                         */
+		break;
+	default:
+		printf("[lcdd] Unknown mode: %i\n", m);
 	}
 }
 
