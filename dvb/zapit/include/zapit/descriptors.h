@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.h,v 1.20 2005/01/12 19:38:13 thegoodguy Exp $
+ * $Id: descriptors.h,v 1.21 2005/01/21 21:50:29 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -55,8 +55,8 @@ void FlexMuxTiming_descriptor(const unsigned char * const buffer);
 void network_name_descriptor(const unsigned char * const buffer);
 void service_list_descriptor(const unsigned char * const buffer, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id);
 void stuffing_descriptor(const unsigned char * const buffer);
-int satellite_delivery_system_descriptor(const unsigned char * const buffer, const scantransponder_id_t scantransponder_id, uint8_t DiSEqC);
-int cable_delivery_system_descriptor(const unsigned char * const buffer, const scantransponder_id_t scantransponder_id);
+int satellite_delivery_system_descriptor(const unsigned char * const buffer, const transponder_id_t transponder_id, uint8_t DiSEqC);
+int cable_delivery_system_descriptor(const unsigned char * const buffer, const transponder_id_t transponder_id);
 void VBI_data_descriptor(const unsigned char * const buffer);
 void VBI_teletext_descriptor(const unsigned char * const buffer);
 void bouquet_name_descriptor(const unsigned char * const buffer);

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.140 2005/01/12 19:38:13 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.141 2005/01/21 21:50:30 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -80,31 +80,41 @@ void write_xml_header(FILE * fd);
 void write_xml_footer(FILE * fd);
 int write_provider(FILE *fd, const char *frontendType, const char *provider_name, const uint8_t DiSEqC);
 
-t_satellite_position driveMotorToSatellitePosition(char * providerName)
+t_satellite_position driveMotorToSatellitePosition(const char * const providerName)
 {
-	t_satellite_position currentSatellitePosition = 0;
-	t_satellite_position satellitePosition = 0;
-	int waitForMotor = 0;
+	t_satellite_position satellite_position;
+	t_satellite_position currentSatellitePosition;
+	int                  waitForMotor;
 
-	/* position satellite dish if provider is on a different satellite */
-	currentSatellitePosition = frontend->getCurrentSatellitePosition();
-	satellitePosition = satellitePositions[providerName];
-	printf("[scan] scanning now: %s\n", providerName);
-	printf("[scan] currentSatellitePosition = %d, scanSatellitePosition = %d\n", currentSatellitePosition, satellitePosition);
-	printf("[scan] motorPosition = %d\n", motorPositions[satellitePosition]);
-	if ((currentSatellitePosition != satellitePosition) && (motorPositions[satellitePosition] != 0))
+	if (frontend->getInfo()->type == FE_QPSK) /* sat */
 	{
-		printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellitePosition);
-		printf("[scan] motorPosition = %d\n", motorPositions[satellitePosition]);
-		frontend->positionMotor(motorPositions[satellitePosition]);
-		waitForMotor = abs(satellitePosition - currentSatellitePosition) / motorRotationSpeed;
-		printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
-		eventServer->sendEvent(CZapitClient::EVT_ZAP_MOTOR, CEventServer::INITID_ZAPIT, &waitForMotor, sizeof(waitForMotor));
-		sleep(waitForMotor);
-		frontend->setCurrentSatellitePosition(satellitePosition);
-	}
+		satellite_position = satellitePositions[providerName];
 
-	return satellitePosition;
+		if (frontend->getDiseqcType() == DISEQC_1_2)
+		{
+			waitForMotor = 0;
+			/* position satellite dish if provider is on a different satellite */
+			currentSatellitePosition = frontend->getCurrentSatellitePosition();
+			printf("[scan] scanning now: %s\n", providerName);
+			printf("[scan] currentSatellitePosition = %d, scanSatellitePosition = %d\n", currentSatellitePosition, satellite_position);
+			printf("[scan] motorPosition = %d\n", motorPositions[satellite_position]);
+			if ((currentSatellitePosition != satellite_position) && (motorPositions[satellite_position] != 0))
+			{
+				printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellite_position);
+				printf("[scan] motorPosition = %d\n", motorPositions[satellite_position]);
+				frontend->positionMotor(motorPositions[satellite_position]);
+				waitForMotor = abs(satellite_position - currentSatellitePosition) / motorRotationSpeed;
+				printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
+				eventServer->sendEvent(CZapitClient::EVT_ZAP_MOTOR, CEventServer::INITID_ZAPIT, &waitForMotor, sizeof(waitForMotor));
+				sleep(waitForMotor);
+				frontend->setCurrentSatellitePosition(satellite_position);
+			}
+		}
+	}
+	else
+		satellite_position = 0;
+
+	return satellite_position;
 }
 
 void cp(char * from, char * to)
@@ -194,12 +204,12 @@ void get_transponder (TP_params *TP)
 	return;
 }
 
-int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(scantransponder_id_t TsidOnid, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
+int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(transponder_id_t transponder_id, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
 {
-	if (TsidOnid == 0)
+	if (transponder_id == TRANSPONDER_ID_NOT_TUNED)
 		return 1;
 
-	if (scantransponders.find(TsidOnid) == scantransponders.end())
+	if (transponders.find(transponder_id) == transponders.end())
 	{
 		found_transponders++;
 
@@ -211,15 +221,15 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(scantransponder_id_t Tsid
 			sizeof(found_transponders)
 		);
 
-		scantransponders.insert
+		transponders.insert
 		(
-			std::pair <scantransponder_id_t, transponder>
+			std::pair<transponder_id_t, transponder>
 			(
-				TsidOnid,
+				transponder_id,
 				transponder
 				(
-					(TsidOnid >> 16) &0xFFFF,
-					TsidOnid &0xFFFF,
+					GET_TRANSPORT_STREAM_ID_FROM_TRANSPONDER_ID(transponder_id),
+					GET_ORIGINAL_NETWORK_ID_FROM_TRANSPONDER_ID(transponder_id),
 					*feparams,
 					polarity,
 					DiSEqC
@@ -234,12 +244,12 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(scantransponder_id_t Tsid
 }
 uint32_t fake_tid, fake_nid;
 
-int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t DiSEqC)
+int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, const t_satellite_position satellite_position, uint8_t DiSEqC)
 {
 	if(scan_mode)
 	{
 		fake_tid++; fake_nid++;
-		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun((fake_tid << 16 | fake_nid), feparams, polarization, DiSEqC);
+		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellite_position,fake_nid,fake_tid), feparams, polarization, DiSEqC);
 		return status;
 	}
  	eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &(feparams->frequency),sizeof(feparams->frequency));
@@ -247,8 +257,12 @@ int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, uin
 	if (frontend->setParameters(feparams, polarization, DiSEqC) < 0)
 		return -1;
 
-	if ((status = parse_nit(DiSEqC)) <= -2) /* nit unavailable */
-		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(get_sdt_TsidOnid(), feparams, polarization, DiSEqC);
+	if ((status = parse_nit(satellite_position, DiSEqC)) <= -2) /* nit unavailable */
+	{
+		uint32_t tsid_onid = get_sdt_TsidOnid();
+	
+		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellite_position,(t_original_network_id)tsid_onid, (t_transport_stream_id)(tsid_onid >> 16)), feparams, polarization, DiSEqC);
+	}
 
 	return status;
 }
@@ -257,7 +271,7 @@ int get_sdts(char * frontendType)
 {
 	uint32_t TsidOnid;
 
-	for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++) {
+	for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++) {
 		/* msg to neutrino */
 		processed_transponders++;
 
@@ -414,7 +428,7 @@ int write_provider(FILE *fd, const char *frontendType, const char *provider_name
 {
 	int status = -1;
 
-	if (!scantransponders.empty())
+	if (!transponders.empty())
 	{
 		/* cable tag */
 		if (!strcmp(frontendType, "cable"))
@@ -429,7 +443,7 @@ int write_provider(FILE *fd, const char *frontendType, const char *provider_name
 		}
 
 		/* channels */
-		for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+		for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
 		{
 			write_transponder(fd, tI->second);
 		}
@@ -441,12 +455,12 @@ int write_provider(FILE *fd, const char *frontendType, const char *provider_name
 
 	/* clear results for next provider */
 	allchans.clear();                  // different provider may have the same onid/sid pair // FIXME
-	scantransponders.clear();
+	transponders.clear();
 
 	return status;
 }
 
-int scan_transponder(xmlNodePtr transponder, uint8_t diseqc_pos)
+int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellite_position, uint8_t diseqc_pos)
 {
 	uint8_t polarization = 0;
 	struct dvb_frontend_parameters feparams;
@@ -485,13 +499,15 @@ int scan_transponder(xmlNodePtr transponder, uint8_t diseqc_pos)
 	}
 
 		/* read network information table */
-	status = get_nits(&feparams, polarization, diseqc_pos);
+	status = get_nits(&feparams, polarization, satellite_position, diseqc_pos);
 
 	return 0;
 }
 
 void scan_provider(xmlNodePtr search, char * providerName, uint8_t diseqc_pos, char * frontendType)
 {
+	t_satellite_position satellite_position = driveMotorToSatellitePosition(providerName);
+
 	xmlNodePtr transponder = NULL;
 
 	/* send sat name to client */
@@ -501,7 +517,7 @@ void scan_provider(xmlNodePtr search, char * providerName, uint8_t diseqc_pos, c
 	/* read all transponders */
 	while ((transponder = xmlGetNextOccurence(transponder, "transponder")) != NULL)
 	{
-		scan_transponder(transponder, diseqc_pos);
+		scan_transponder(transponder, satellite_position, diseqc_pos);
 
 		/* next transponder */
 		transponder = transponder->xmlNextNode;
@@ -638,9 +654,6 @@ void *start_scanthread(void *scanmode)
 			if (diseqc_pos == 255 /* = -1 */)
 				diseqc_pos = 0;
 
-			if (!strcmp(frontendType, "sat") && (frontend->getDiseqcType() == DISEQC_1_2))
-				driveMotorToSatellitePosition(providerName);
-
 			scan_provider(search, providerName, diseqc_pos, frontendType);
 
 			/* write services */
@@ -683,7 +696,7 @@ void *start_scanthread(void *scanmode)
 void scan_clean()
 {
         allchans.clear();                  // different provider may have the same onid/sidpair // FIXME
-        scantransponders.clear();
+        transponders.clear();
 	cp(SERVICES_TMP, SERVICES_XML);
         stop_scan(false);
 }
@@ -742,7 +755,7 @@ int scan_transponder(TP_params *TP)
 	struct stat buffer; 
 	char* frontendType = getFrontendName();
 	char providerName[32] = "";
-	t_satellite_position satellitePosition = 0;
+	t_satellite_position satellite_position;
 	uint8_t diseqc_pos = 0;
 	int prov_found = 0;
 
@@ -754,6 +767,9 @@ int scan_transponder(TP_params *TP)
         found_radio_chans = 0;
         found_data_chans = 0;
 	fake_tid = fake_nid = 0;
+
+	transponders.clear();
+
 	scanBouquetManager = new CBouquetManager();
 
 	printf("[scan_transponder] freq %d rate %d fec %d pol %d\n", TP->feparams.frequency, TP->feparams.u.qpsk.symbol_rate, TP->feparams.u.qpsk.fec_inner, TP->polarization);
@@ -770,17 +786,16 @@ int scan_transponder(TP_params *TP)
 	scan_mode = true;
 	TP->feparams.inversion = INVERSION_AUTO;
 
-	if (!strcmp(frontendType, "sat") && (frontend->getDiseqcType() == DISEQC_1_2))
-		satellitePosition = driveMotorToSatellitePosition(providerName);
+	satellite_position = driveMotorToSatellitePosition(providerName);
 
-	get_nits(&(TP->feparams), TP->polarization, diseqc_pos);
+	get_nits(&(TP->feparams), TP->polarization, satellite_position, diseqc_pos);
 	status = get_sdts(frontendType);
 
 	if(allchans.empty())
 	{
 		printf("[scan_transponder] nothing found!\n");
 		allchans.clear();
-		scantransponders.clear();
+		transponders.clear();
 		status = 0;
 		goto abort_scan;
 	}
@@ -807,11 +822,11 @@ int scan_transponder(TP_params *TP)
 	else
 	{
 		/* channels */
-		for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+		for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
 			write_transponder(fd, tI->second);
 		fprintf(fd, "\t</%s>\n", frontendType);
 		allchans.clear();
-		scantransponders.clear();
+		transponders.clear();
 	}
 
 	if (fd1)

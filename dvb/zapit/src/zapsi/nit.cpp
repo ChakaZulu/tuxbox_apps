@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.37 2005/01/12 19:38:14 thegoodguy Exp $
+ * $Id: nit.cpp,v 1.38 2005/01/21 21:50:30 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -31,9 +31,9 @@
 
 #define NIT_SIZE 1024
 
-extern transponder_list_t transponders;
+extern transponder_list_t transponders; //  defined in zapit.cpp
 
-int parse_nit(unsigned char DiSEqC)
+int parse_nit(const t_satellite_position satellite_position, const unsigned char DiSEqC)
 {
 	CDemux dmx;
 
@@ -51,6 +51,8 @@ int parse_nit(unsigned char DiSEqC)
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
 	unsigned short network_id;
+
+	transponder_id_t transponder_id;
 
 	unsigned char filter[DMX_FILTER_SIZE];
 	unsigned char mask[DMX_FILTER_SIZE];
@@ -118,7 +120,9 @@ int parse_nit(unsigned char DiSEqC)
 			original_network_id = (buffer[pos + 2] << 8) | buffer[pos + 3];
 			transport_descriptors_length = ((buffer[pos + 4] & 0x0F) << 8) | buffer[pos + 5];
 
-			if (transponders.find((transport_stream_id << 16) | original_network_id) == transponders.end())
+			transponder_id = CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellite_position,original_network_id,transport_stream_id);
+
+			if (transponders.find(transponder_id) == transponders.end())
 			{
 				for (pos2 = pos + 6; pos2 < pos + transport_descriptors_length + 6; pos2 += buffer[pos2 + 1] + 2)
 				{
@@ -133,12 +137,12 @@ int parse_nit(unsigned char DiSEqC)
 						break;
 
 					case 0x43:
-						if (satellite_delivery_system_descriptor(buffer + pos2, (transport_stream_id << 16) | original_network_id, DiSEqC) < 0)
+						if (satellite_delivery_system_descriptor(buffer + pos2, transponder_id, DiSEqC) < 0)
 							return -2;
 						break;
 
 					case 0x44:
-						if (cable_delivery_system_descriptor(buffer + pos2, (transport_stream_id << 16) | original_network_id) < 0)
+						if (cable_delivery_system_descriptor(buffer + pos2, transponder_id) < 0)
 							return -2;
 						break;
 

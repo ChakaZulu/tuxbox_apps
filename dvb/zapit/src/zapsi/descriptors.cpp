@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.67 2005/01/12 19:38:14 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.68 2005/01/21 21:50:30 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,8 +35,8 @@
 #include <zapit/sdt.h>
 #include <zapit/debug.h>
 
-extern tallchans allchans;   //  defined in zapit.cpp
-std::map <uint32_t, transponder> scantransponders;
+extern tallchans allchans;              //  defined in zapit.cpp
+extern transponder_list_t transponders; //  defined in zapit.cpp
 std::string curr_chan_name;
 uint32_t found_transponders;
 uint32_t found_channels;
@@ -224,7 +224,7 @@ void stuffing_descriptor(const unsigned char * const)
 }
 
 /* 0x43 */
-int satellite_delivery_system_descriptor(const unsigned char * const buffer, const scantransponder_id_t scantransponder_id, unsigned char DiSEqC)
+int satellite_delivery_system_descriptor(const unsigned char * const buffer, const transponder_id_t transponder_id, unsigned char DiSEqC)
 {
 	dvb_frontend_parameters feparams;
 	uint8_t polarization;
@@ -266,7 +266,7 @@ int satellite_delivery_system_descriptor(const unsigned char * const buffer, con
 	if (feparams.u.qpsk.symbol_rate >= 50000000)
 		feparams.u.qpsk.symbol_rate /= 10;
 
-	if (scantransponders.find(scantransponder_id) == scantransponders.end())
+	if (transponders.find(transponder_id) == transponders.end())
 	{
 		found_transponders++;
 
@@ -278,15 +278,15 @@ int satellite_delivery_system_descriptor(const unsigned char * const buffer, con
 			sizeof(found_transponders)
 		);
 
-		scantransponders.insert
+		transponders.insert
 		(
-			std::pair <scantransponder_id_t, transponder>
+			std::pair<transponder_id_t, transponder>
 			(
-				scantransponder_id,
+				transponder_id,
 				transponder
 				(
-					GET_TRANSPORT_STREAM_ID_FROM_SCANTRANSPONDER_ID(scantransponder_id),
-					GET_ORIGINAL_NETWORK_ID_FROM_SCANTRANSPONDER_ID(scantransponder_id),
+					GET_TRANSPORT_STREAM_ID_FROM_TRANSPONDER_ID(transponder_id),
+					GET_ORIGINAL_NETWORK_ID_FROM_TRANSPONDER_ID(transponder_id),
 					feparams,
 					polarization,
 					DiSEqC
@@ -299,7 +299,7 @@ int satellite_delivery_system_descriptor(const unsigned char * const buffer, con
 }
 
 /* 0x44 */
-int cable_delivery_system_descriptor(const unsigned char * const buffer, const scantransponder_id_t scantransponder_id)
+int cable_delivery_system_descriptor(const unsigned char * const buffer, const transponder_id_t transponder_id)
 {
 	if (frontend->getInfo()->type != FE_QAM)
 		return -1;
@@ -334,7 +334,7 @@ int cable_delivery_system_descriptor(const unsigned char * const buffer, const s
 	feparams.u.qam.fec_inner = CFrontend::getCodeRate(buffer[12] & 0x0F);
 	feparams.u.qam.modulation = CFrontend::getModulation(buffer[8]);
 
-	if (scantransponders.find(scantransponder_id) == scantransponders.end())
+	if (transponders.find(transponder_id) == transponders.end())
 	{
 		found_transponders++;
 
@@ -346,15 +346,15 @@ int cable_delivery_system_descriptor(const unsigned char * const buffer, const s
 			sizeof(found_transponders)
 		);
 
-		scantransponders.insert
+		transponders.insert
 		(
-			std::pair <scantransponder_id_t, transponder>
+			std::pair<transponder_id_t, transponder>
 			(
-				scantransponder_id,
+				transponder_id,
 				transponder
 				(
-					GET_TRANSPORT_STREAM_ID_FROM_SCANTRANSPONDER_ID(scantransponder_id),
-					GET_ORIGINAL_NETWORK_ID_FROM_SCANTRANSPONDER_ID(scantransponder_id),
+					GET_TRANSPORT_STREAM_ID_FROM_TRANSPONDER_ID(transponder_id),
+					GET_ORIGINAL_NETWORK_ID_FROM_TRANSPONDER_ID(transponder_id),
 					feparams
 				)
 			)

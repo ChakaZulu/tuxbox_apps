@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.17 2003/03/14 07:31:50 obi Exp $
+ * $Id: sdt.h,v 1.18 2005/01/21 21:50:29 thegoodguy Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -24,7 +24,7 @@
 
 #include "types.h"
 
-unsigned long get_sdt_TsidOnid(void);
+uint32_t get_sdt_TsidOnid(void);
 int nvod_service_ids(const t_transport_stream_id, const t_original_network_id, const t_service_id, const unsigned int num, t_transport_stream_id * const, t_original_network_id * const, t_service_id * const);
 int parse_sdt(const t_transport_stream_id, const t_original_network_id, const unsigned char diseqc);
 

@@ -1,5 +1,5 @@
 /*
- * $Id: nit.h,v 1.6 2003/01/30 17:21:16 obi Exp $
+ * $Id: nit.h,v 1.7 2005/01/21 21:50:29 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,6 +22,6 @@
 #ifndef __zapit_nit_h__
 #define __zapit_nit_h__
 
-int parse_nit(const unsigned char diseqc);
+int parse_nit(const t_satellite_position satellite_position, const unsigned char diseqc);
 
 #endif /* __zapit_nit_h__ */

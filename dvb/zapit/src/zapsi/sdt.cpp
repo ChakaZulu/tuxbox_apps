@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.44 2003/03/14 08:22:04 obi Exp $
+ * $Id: sdt.cpp,v 1.45 2005/01/21 21:50:30 thegoodguy Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -34,7 +34,7 @@
 #define SDT_SIZE 1024
 
 
-unsigned long get_sdt_TsidOnid(void)
+uint32_t get_sdt_TsidOnid(void)
 {
 	CDemux dmx;
 	
