@@ -50,7 +50,7 @@ class CBouquet
 		ChannelList radioChannels;
 		ChannelList tvChannels;
 
-		CBouquet( string name) { Name=name; }
+		CBouquet( string name) { Name=name; bHidden = false; bLocked = false;}
 		CBouquet( const CBouquet& bouquet);
 
 		~CBouquet();
