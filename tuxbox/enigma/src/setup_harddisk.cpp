@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.18 2004/08/27 13:53:28 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.19 2004/11/08 20:37:07 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -530,7 +530,7 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 			if ( fs == "ext3" )
 			{
 				eWindow::globalCancel(eWindow::OFF);
-				fsck = new eConsoleAppContainer( eString().sprintf("/sbin/fsck.ext3 -f /dev/ide/host%d/bus%d/target%d/lun0/%s", host, bus, target, part.c_str()) );
+				fsck = new eConsoleAppContainer( eString().sprintf("/sbin/fsck.ext3 -f -y /dev/ide/host%d/bus%d/target%d/lun0/%s", host, bus, target, part.c_str()) );
 
 				if ( !fsck->running() )
 				{
@@ -553,7 +553,7 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 			else if ( fs == "reiserfs" )
 			{
 				eWindow::globalCancel(eWindow::OFF);
-				fsck = new eConsoleAppContainer( eString().sprintf("/sbin/reiserfsck --fix-fixable /dev/ide/host%d/bus%d/target%d/lun0/%s", host, bus, target, part.c_str()) );
+				fsck = new eConsoleAppContainer( eString().sprintf("/sbin/reiserfsck -y --fix-fixable /dev/ide/host%d/bus%d/target%d/lun0/%s", host, bus, target, part.c_str()) );
 
 				if ( !fsck->running() )
 				{
