@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.90 2003/09/17 09:54:44 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.91 2003/09/17 10:49:52 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -33,6 +33,7 @@
 
 #include <zapit/bouquets.h>
 #include <zapit/debug.h>
+#include <zapit/getservices.h> /* LoadServices */
 #include <zapit/sdt.h>
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
@@ -320,24 +321,38 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 		if (bouquetMode == CZapitClient::BM_UPDATEBOUQUETS)
 		{
 			storeBouquets();
-
 			clearAll();
+
+			LoadServices(frontend->getInfo()->type, diseqcType);
+
 			loadBouquets();
+
 			deleteBouquet(remainChannels);
 			remainChannels = NULL;
 
-			while (storedBouquets.size() != 0)
+			for (unsigned int i = 0; i < Bouquets.size(); i++)
+			{
+				unsigned int j;
+				for (j = 0; j < Bouquets[i]->tvChannels.size(); j++)
+					Bouquets[i]->tvChannels[j] = new CZapitChannel(*(Bouquets[i]->tvChannels[j]));
+				for (j = 0; j < Bouquets[i]->radioChannels.size(); j++)
+					Bouquets[i]->radioChannels[j] = new CZapitChannel(*(Bouquets[i]->tvChannels[j]));
+			}
+				
+			allchans.clear();
+
+			while (!(storedBouquets.empty()))
 			{
 				int dest = existsBouquet(storedBouquets[0]->Name);
 				if (dest != -1)
 				{
-					while (storedBouquets[0]->tvChannels.size() != 0)
+					while (!(storedBouquets[0]->tvChannels.empty()))
 					{
 						if (!(existsChannelInBouquet(dest, storedBouquets[0]->tvChannels[0]->getChannelID())))
 							Bouquets[dest]->addService(storedBouquets[0]->tvChannels[0]);
 						storedBouquets[0]->removeService(storedBouquets[0]->tvChannels[0]);
 					}
-					while (storedBouquets[0]->radioChannels.size() != 0)
+					while (!(storedBouquets[0]->radioChannels.empty()))
 					{
 						if (!(existsChannelInBouquet(dest, storedBouquets[0]->radioChannels[0]->getChannelID())))
 							Bouquets[dest]->addService(storedBouquets[0]->radioChannels[0]);
@@ -530,7 +545,7 @@ void CBouquetManager::makeRemainingChannelsBouquet()
 	for (ChannelList::const_iterator it = unusedChannels.begin(); it != unusedChannels.end(); it++)
 		remainChannels->addService(findChannelByChannelID((*it)->getChannelID()));
 
-	if ((remainChannels->tvChannels.size() == 0) && (remainChannels->radioChannels.size() == 0))
+	if ((remainChannels->tvChannels.empty()) && (remainChannels->radioChannels.empty()))
 	{
 		deleteBouquet(remainChannels);
 		remainChannels = NULL;
