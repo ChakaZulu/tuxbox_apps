@@ -451,7 +451,7 @@ std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRComman
 	sprintf(tmp, "%d", g_Zapit->getMode());
 	extMessage += tmp;
 	extMessage += "</mode>\n\t\t<videopid>";
-	sprintf(tmp, "%u", si.vdid);
+	sprintf(tmp, "%u", si.vpid);
 	extMessage += tmp;
 	extMessage += "</videopid>\n\t\t<audiopids selected=\"";
 	extMessage += apids10;
@@ -522,18 +522,25 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	unsigned int pos;
 
 	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
-	pids[0] = si.vdid;
+	if (si.vpid != 0)
+	{
+		pids[0] = si.vpid;
+		numpids = 1;
+	}
+	else
+	{
+		/* no video pid */
+		numpids = 0;
+	}
 
 	if (apids.empty())
 	{
-		pids[1] = si.apid;
-		numpids = 2;
+		pids[numpids++] = si.apid;
 	}
 	else
 	{
 		unsigned int index = 0;
-		unsigned int pos = 0;
-		numpids = 1;
+		pos = 0;
 		
 		while(pos != std::string::npos)
 		{

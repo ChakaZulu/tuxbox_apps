@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.55 2004/04/02 13:26:58 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.56 2004/05/06 06:45:37 thegoodguy Exp $
 
 	License: GPL
 
@@ -448,7 +448,7 @@ bool CWebAPI::ShowCurrentStreamInfo(CWebserverRequest* request)
 	params["onid"] = itoh(serviceinfo.onid);
 	params["sid"] = itoh(serviceinfo.sid);
 	params["tsid"] = itoh(serviceinfo.tsid);
-	params["vpid"] = itoh(serviceinfo.vdid);
+	params["vpid"] = itoh(serviceinfo.vpid);
 	params["apid"] = itoh(serviceinfo.apid);
 	params["vtxtpid"] = (serviceinfo.vtxtpid != 0)?itoh(serviceinfo.vtxtpid):"nicht verfügbar";
 	params["tsfrequency"] = itoa(serviceinfo.tsfrequency);

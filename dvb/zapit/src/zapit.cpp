@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.350 2004/04/08 07:19:00 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.351 2004/05/06 06:45:36 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -651,7 +651,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		msgCurrentServiceInfo.onid = channel->getOriginalNetworkId();
 		msgCurrentServiceInfo.sid = channel->getServiceId();
 		msgCurrentServiceInfo.tsid = channel->getTransportStreamId();
-		msgCurrentServiceInfo.vdid = channel->getVideoPid();
+		msgCurrentServiceInfo.vpid = channel->getVideoPid();
 		msgCurrentServiceInfo.apid = channel->getAudioPid();
 		msgCurrentServiceInfo.vtxtpid = channel->getTeletextPid();
 		msgCurrentServiceInfo.pcrpid = channel->getPcrPid();
@@ -1374,9 +1374,9 @@ int startPlayBack(CZapitChannel *thisChannel)
 
 	if (thisChannel->getPcrPid() != 0)
 		have_pcr = true;
-	if (thisChannel->getAudioPid() != 0)
+	if (thisChannel->getAudioPid() != NONE)
 		have_audio = true;
-	if ((thisChannel->getVideoPid() != 0) && (currentMode & TV_MODE))
+	if ((thisChannel->getVideoPid() != NONE) && (currentMode & TV_MODE))
 		have_video = true;
 	if (thisChannel->getTeletextPid() != 0)
 		have_teletext = true;
@@ -1624,7 +1624,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.350 2004/04/08 07:19:00 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.351 2004/05/06 06:45:36 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

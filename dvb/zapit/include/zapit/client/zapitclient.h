@@ -179,7 +179,7 @@ class CZapitClient:public CBasicClient
 			t_original_network_id onid;
 			t_service_id           sid;
 			t_transport_stream_id tsid;
-			unsigned short	vdid;
+			unsigned short	vpid;
 			unsigned short	apid;
 			unsigned short	pcrpid;
 			unsigned short	vtxtpid;
