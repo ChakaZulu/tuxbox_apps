@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.41 2002/03/06 11:18:39 field Exp $
+// $Id: eventlist.cpp,v 1.42 2002/03/13 21:28:19 McClean Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.42  2002/03/13 21:28:19  McClean
+// implement phong shading
+//
 // Revision 1.41  2002/03/06 11:18:39  field
 // Fixes & Updates
 //
@@ -491,6 +494,10 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 	}
 
 	hide();
+
+	#ifdef USEACTIONLOG
+		g_ActionLog->println("epg-Eventlist: closed");
+	#endif
 
 	return res;
 }
