@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.70 2002/09/23 13:31:15 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.71 2002/09/24 10:11:12 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -227,7 +227,7 @@ void write_bouquets()
 		unlink(BOUQUETS_XML);
 	}
 
-	else if ((bouquetMode == CZapitClient::BM_DONTTOUCHBOUQUETS)/* || (scanbouquets.empty())*/)
+	else if ((bouquetMode == CZapitClient::BM_DONTTOUCHBOUQUETS))
 	{
 		printf("[zapit] leaving bouquets untouched.\n");
 	}

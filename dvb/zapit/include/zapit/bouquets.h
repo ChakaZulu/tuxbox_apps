@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.41 2002/09/20 16:55:22 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.42 2002/09/24 10:11:12 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <functional>
 #include <vector>
-#include <ext/hash_set>
 #include <ext/hash_map>
 #include <stdint.h>
 #include <stdio.h>

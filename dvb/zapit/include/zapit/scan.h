@@ -1,5 +1,5 @@
 /*
- *  $Id: scan.h,v 1.19 2002/09/23 13:31:15 thegoodguy Exp $
+ *  $Id: scan.h,v 1.20 2002/09/24 10:11:12 thegoodguy Exp $
  */
 
 #ifndef __scan_h__
@@ -79,29 +79,11 @@ struct transpondermap
 	}
 };
 
-struct bouquet_mulmap
-{
-	std::string           provname;
-	std::string           servname;
-	t_service_id          service_id;
-	t_original_network_id original_network_id;
-
-	bouquet_mulmap(std::string Provname, std::string Servname, t_service_id Sid, t_original_network_id Onid)
-	{
-		provname = Provname;
-		servname = Servname;
-		service_id = Sid;
-		original_network_id = Onid;
-	}
-};
-
 extern std::map <t_channel_id, scanchannel> scanchannels;
 typedef std::map <t_channel_id, scanchannel>::iterator sciterator;
 
 extern std::map <uint32_t, transpondermap> scantransponders;
 typedef std::map <uint32_t, transpondermap>::iterator stiterator;
-
-typedef std::multimap <std::string, bouquet_mulmap>::iterator sbiterator;
 
 extern CBouquetManager* scanBouquetManager;
 

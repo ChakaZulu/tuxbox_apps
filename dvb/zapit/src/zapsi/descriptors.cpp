@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.39 2002/09/20 16:53:39 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.40 2002/09/24 10:11:12 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -37,7 +37,6 @@
 
 std::map <uint32_t, transpondermap> scantransponders;
 std::map <t_channel_id, scanchannel> scanchannels;
-multimap <std::string, bouquet_mulmap> scanbouquets;
 std::string curr_chan_name;
 uint32_t found_transponders;
 uint32_t found_channels;
