@@ -234,6 +234,7 @@ scants.actsatellite SATELLITE:
 scants.astra astra
 scants.hotbird hotbird
 scants.kopernikus kopernikus
+scants.sirius sirius
 scants.digituerk digituerk
 scants.transponders TRANSPONDER:
 scants.services SERVIS:
