@@ -28,21 +28,32 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include <sys/un.h>
-
-#include <global.h>
-#include <neutrinoMessages.h>
+#include <driver/vcrcontrol.h>
 
 #include <gui/widget/messagebox.h>
 
-#include "vcrcontrol.h"
-#include "neutrino.h"
-#include "irsend.h"
+#include <driver/irsend.h>
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/un.h>
+
 
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
-#include <fstream>
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -156,7 +167,7 @@ bool CVCRControl::CVCRDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, string apids)
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, std::string apids)
 {
 	printf("Record channel_id: %x epg: %llx, apids %s mode \n", channel_id, epgid, apids.c_str());
 	// leave menu (if in any)
@@ -254,7 +265,7 @@ bool CVCRControl::CServerDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, string apids) 
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, std::string apids) 
 {
 	printf("Record channel_id: %x epg: %llx, apids %s mode %d\n", channel_id, epgid, apids.c_str(),mode);
 	if(channel_id != 0)		// wenn ein channel angegeben ist
@@ -315,21 +326,21 @@ void CVCRControl::CServerDevice::serverDisconnect()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, unsigned long long epgid, string apids)
+bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, unsigned long long epgid, std::string apids)
 {
 	printf("Send command: %d channel_id: %x epgid: %llx\n",command, channel_id, epgid);
 	if(serverConnect())
 	{
 		char tmp[40];
-		string apids10;
-		string extCommand="unknown";
-		string ext_channel_id = "error";
-		string ext_channel_name = "unknown";
-		string extEpgid="error";
-		string extMode="error";
-		string extVideoPID="error";
-		string extAudioPID="error";
-		string extEPGTitle="not available";
+		std::string apids10;
+		const char * extCommand = "unknown";
+		std::string ext_channel_id = "error";
+		std::string ext_channel_name = "unknown";
+		std::string extEpgid="error";
+		std::string extMode="error";
+		std::string extVideoPID="error";
+		std::string extAudioPID="error";
+		std::string extEPGTitle="not available";
 		sprintf(tmp,"%u", channel_id);
 		ext_channel_id = tmp;
 		sprintf(tmp,"%llu", epgid);
@@ -344,7 +355,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		//Apids
 /*		for(int i=0 ; i < MAX_APIDS ; i++)
 			sApids[i]="";*/
-		if(apids=="")
+		if (apids.empty())
 		{
 			sprintf(tmp,"%u", si.apid);
 			apids10=tmp;
@@ -353,10 +364,10 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		{
 			unsigned int index=0,pos=0;
 			apids10="";
-			while(pos!=string::npos)
+			while(pos!=std::string::npos)
 			{
-				pos = apids.find(" ",index);
-				if(pos!=string::npos)
+				pos = apids.find(' ', index);
+				if(pos!=std::string::npos)
 				{
 					sprintf(tmp, "%ld ", strtol(apids.substr(index,pos-index).c_str(),NULL,16));
 					index=pos+1;
@@ -393,27 +404,34 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 				extEPGTitle=epgdata.title;
 			}
 		}
-
+		
 		switch(command)
 		{
-			case CMD_VCR_RECORD: extCommand="record";
-				break;
-			case CMD_VCR_STOP: extCommand="stop";
-				break;
-			case CMD_VCR_PAUSE: extCommand="pause";
-				break;
-			case CMD_VCR_RESUME: extCommand="resume";
-				break;
-			case CMD_VCR_AVAILABLE: extCommand="available";
-				break;
-			case CMD_VCR_UNKNOWN:
-			default:
-				printf("CVCRControl: Unknown Command\n");
+		case CMD_VCR_RECORD:
+			extCommand = "record";
+			break;
+		case CMD_VCR_STOP:
+			extCommand = "stop";
+			break;
+		case CMD_VCR_PAUSE:
+			extCommand = "pause";
+			break;
+		case CMD_VCR_RESUME:
+			extCommand = "resume";
+			break;
+		case CMD_VCR_AVAILABLE:
+			extCommand = "available";
+			break;
+		case CMD_VCR_UNKNOWN:
+		default:
+			printf("CVCRControl: Unknown Command\n");
 		}
 
-		string extMessage = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n\n";
+		std::string extMessage = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n\n";
 		extMessage +="<neutrino commandversion=\"1\">\n";
-		extMessage +="    <record command=\"" + extCommand + "\">\n";
+		extMessage += "    <record command=\"";
+		extMessage += extCommand;
+		extMessage += "\">\n";
 		extMessage +="        <channelname>" + ext_channel_name + "</channelname>\n";
 		extMessage +="        <epgtitle>" + extEPGTitle + "</epgtitle>\n";
 		extMessage +="        <onidsid>" + ext_channel_id + "</onidsid>\n";
@@ -428,7 +446,11 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		for(unsigned int i= 0; i< pids.APIDs.size(); i++)
 		{
 			sprintf(tmp, "%u",  pids.APIDs[i].pid );
-			extMessage +="            <audio pid=\"" + string(tmp) + "\" name=\"" + string(g_RemoteControl->current_PIDs.APIDs[i].desc)  + "\">\n";
+			extMessage +="            <audio pid=\"";
+			extMessage += tmp;
+			extMessage += "\" name=\"";
+			extMessage += g_RemoteControl->current_PIDs.APIDs[i].desc;
+			extMessage += "\">\n";
 /*			if(pids.APIDs[i].pid==apid)
 				apidFound=true;*/
 		}
