@@ -40,7 +40,9 @@ int eHTTPFile::doWrite(int bytes)
 			return -1;
 		else
 			return 1;
-	} else
+	} else if (method == methodPUT)
+		return 1;
+	else
 		return -1;
 }
 
