@@ -1,6 +1,7 @@
-bin_PROGRAMS = aviafbtool camd fbclear lcddump pluginx saa switch rcsim
+bin_PROGRAMS = aviafbtool camd fbclear lcddump pluginx saa switch rcsim aviaext
 
 aviafbtool_SOURCES = aviafbtool.c
+aviaext_SOURCES = aviaext.c
 camd_SOURCES = camd.c
 fbclear_SOURCES = fbclear.c
 lcddump_SOURCES = lcddump.c
