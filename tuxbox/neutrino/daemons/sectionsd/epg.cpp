@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.9 2001/05/15 05:02:55 fnbrd Exp $
+// $Id: epg.cpp,v 1.10 2001/05/15 19:51:55 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epg.cpp,v $
+// Revision 1.10  2001/05/15 19:51:55  fnbrd
+// epgSmall funktioniert jetzt zufriedenstellend.
+//
 // Revision 1.9  2001/05/15 05:02:55  fnbrd
 // Weiter gearbeitet.
 //
@@ -68,7 +71,11 @@ int main(int argc, char **argv)
 //  for_each(epgset.begin(), epgset.end(), printSmallSectionHeader());
 //  for_each(epgset.begin(), epgset.end(), printSIsection());
 #ifdef READ_PRESENT_INFOS
-  for_each(epgset.begin(), epgset.end(), printSIsectionEIT());
+  SIevents events;
+  for(SIsectionsEIT::iterator k=epgset.begin(); k!=epgset.end(); k++)
+    events.insert((k->events()).begin(), (k->events()).end());
+  for_each(events.begin(), events.end(), printSIevent());
+//  for_each(epgset.begin(), epgset.end(), printSIsectionEIT());
 #endif
   return 0;
 }
