@@ -219,7 +219,7 @@ static	void	Roll( void )
 		RcGetActCode();
 		if ( actcode == RC_YELLOW )
 			DoYellow();
-		if (( actcode == RC_BLUE ) || ( actcode == RC_OK ))
+		if (( actcode == RC_OK ))
 			break;
 	}
 	while(( realcode != 0xee ) && !doexit )
@@ -386,6 +386,8 @@ static	int		ScoreOf( int l )
 static	void	SelectInBoard( void )
 {
 	struct timeval	tv;
+	time_t			t1;
+	time_t			t2=0;
 	short			last;
 	int				nr=0;
 	int				nnr=0;
@@ -395,6 +397,8 @@ static	void	SelectInBoard( void )
 	char			blocker;
 	int				val=-1;
 
+	t1 = time(0);
+
 	for( nnr=0; nnr<15; nnr++ )
 		if ( player[i].nums[nnr] == -1 )
 			break;
@@ -403,9 +407,13 @@ static	void	SelectInBoard( void )
 
 	nr = -1;
 
-	while(( realcode != 0xee ) && !doexit )
-		RcGetActCode();
-	last=0xee;
+	while( ! (t2 > t1) )
+	{
+		while(( realcode != 0xee ) && !doexit )
+			RcGetActCode();
+		last=0xee;
+		t2 = time(0);
+	}
 	blocker=0;
 	while( !doexit && !rdy )
 	{
