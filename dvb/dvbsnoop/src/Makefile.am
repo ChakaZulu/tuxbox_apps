@@ -5,7 +5,8 @@ noinst_HEADERS = \
 	dmx_pes.h dvb_str.h hexprint.h pespacket.h sdt.h tdt.h cmdline.h \
 	dmx_sect.h eit.h nit.h pkt_time.h sectables.h tot.h descriptor.h \
 	mpeg_descriptor.h dvb_descriptor.h dsm_descriptor.h \
-	dmx_ts.h emm_ecm.h output.h pmt.h sit.h tsdt.h dsmcc_str.h
+	dmx_ts.h emm_ecm.h output.h pmt.h sit.h tsdt.h dsmcc_str.h \
+	version.h
 
 dvbsnoop_SOURCES = \
 	bat.c dit.c dvbsnoop.c helper.c pat.c rst.c st.c tslayer.c cat.c \
