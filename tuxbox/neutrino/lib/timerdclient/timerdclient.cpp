@@ -3,14 +3,8 @@
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
-	Kommentar:
-
-	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
-	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
+	
+	$Id: timerdclient.cpp,v 1.5 2002/05/14 23:07:25 dirch Exp $
 
 	License: GPL
 
@@ -118,6 +112,38 @@ void CTimerdClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
 	timerd_close();
 }
 
+void CTimerdClient::getTimerList( CTimerd::TimerList &timerlist)
+{
+	CTimerd::commandHead msg;
+	msg.version=CTimerd::ACTVERSION;
+	msg.cmd=CTimerd::CMD_GETTIMERLIST;
+
+	timerd_connect();
+	send((char*)&msg, sizeof(msg));
+	timerlist.clear();
+	CTimerd::responseGetTimer response;
+	while ( receive((char*)&response, sizeof(CTimerd::responseGetTimer)))
+		timerlist.insert( timerlist.end(), response);
+	timerd_close();
+}
+
+void CTimerdClient::getTimer( CTimerd::responseGetTimer &timer, unsigned timerID)
+{
+	CTimerd::commandHead msg;
+	msg.version=CTimerd::ACTVERSION;
+	msg.cmd=CTimerd::CMD_GETTIMER;
+
+	timerd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&timerID, sizeof(timerID));
+
+	CTimerd::responseGetTimer response;
+	timer = response;
+	receive((char*)&response, sizeof(CTimerd::responseGetTimer));
+	timerd_close();
+}
+
+
 int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0, int hour = 0, int day = 0, int month = 0)
 {
 	CTimerd::commandHead msg;
@@ -127,7 +153,6 @@ int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0
 	time_t actTime_t;
 	::time(&actTime_t);
 	struct tm* actTime = localtime(&actTime_t);
-//	actTime->tm_mon += 1;
 
 	if (min==0)
 		min = actTime->tm_min;
@@ -139,20 +164,24 @@ int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0
 		month = actTime->tm_mon;
 
 	CTimerd::commandAddTimer msgAddTimer;
-	msgAddTimer.month  = month  ;
+	msgAddTimer.month  = month - 1;
 	msgAddTimer.day    = day    ;
 	msgAddTimer.hour   = hour   ;
 	msgAddTimer.min    = min    ;
 	msgAddTimer.evType = evType ;
 
 	int length;
-	if ( evType == TIMER_SHUTDOWN )
+	if ( evType == TIMER_SHUTDOWN || evType == TIMER_RECORD)
 	{
 		length = 0;
 	}
 	else if (evType == TIMER_NEXTPROGRAM)
 	{
-		length = sizeof( CTimerEvent_NextProgram::EventInfo);
+		length = sizeof( CTimerd::EventInfo);
+	}
+	else if(evType == TIMER_STANDBY)
+	{
+		length = sizeof(CTimerd::commandSetStandby);
 	}
 	else
 	{
@@ -162,7 +191,8 @@ int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0
 	timerd_connect();
 	send((char*)&msg, sizeof(msg));
 	send((char*)&msgAddTimer, sizeof(msgAddTimer));
-	send((char*)data, length);
+	if((data != NULL) && (length > 0))
+		send((char*)data, length);
 
 	CTimerd::responseAddTimer response;
 	receive((char*)&response, sizeof(response));
@@ -173,6 +203,18 @@ int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0
 
 void CTimerdClient::removeTimerEvent( int evId)
 {
+	CTimerd::commandHead msg;
+	msg.version=CTimerd::ACTVERSION;
+	msg.cmd=CTimerd::CMD_REMOVETIMER;
+	CTimerd::commandRemoveTimer msgRemoveTimer;
+	msgRemoveTimer.eventID  = evId;
+ 
+	timerd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*) &msgRemoveTimer, sizeof(msgRemoveTimer));
+
+	timerd_close();
+	
 }
 
 bool CTimerdClient::isTimerdAvailable()

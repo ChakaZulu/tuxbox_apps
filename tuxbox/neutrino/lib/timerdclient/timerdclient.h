@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-
+	$Id: timerdclient.h,v 1.6 2002/05/14 23:07:25 dirch Exp $
 
 	License: GPL
 
@@ -43,6 +43,8 @@
 
 #include <string>
 
+#include "timerdMsg.h"
+
 using namespace std;
 
 class CTimerdClient
@@ -62,13 +64,17 @@ class CTimerdClient
 		enum timerTypes
 		{
 			TIMER_SHUTDOWN = 1,
-			TIMER_NEXTPROGRAM
+			TIMER_NEXTPROGRAM,
+			TIMER_STANDBY,
+			TIMER_RECORD
 		};
 
 		enum events
 		{
 			EVT_SHUTDOWN = 1,
-			EVT_NEXTPROGRAM
+			EVT_NEXTPROGRAM,
+			EVT_STANDBY,
+			EVT_RECORD
 		};
 
 		CTimerdClient::CTimerdClient();
@@ -77,11 +83,37 @@ class CTimerdClient
 		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
 
 		bool isTimerdAvailable();
+
 		int addTimerEvent( timerTypes evType, void* data = 0, int min = 0, int hour = 0, int day = 0, int month = 0);
 		void removeTimerEvent( int evId);
 
+		void getTimerList( CTimerd::TimerList &timerlist);
+		void getTimer( CTimerd::responseGetTimer &timer, unsigned timerID);
 
 
+		int addShutdownTimerEvent(int min = 0, int hour = 0, int day = 0, int month = 0)
+		{
+			addTimerEvent(TIMER_SHUTDOWN,NULL,month, day, hour, min);
+		};
+
+		int addRecordTimerEvent(int min = 0, int hour = 0, int day = 0, int month = 0)
+		{
+			addTimerEvent(TIMER_RECORD,NULL,month, day, hour, min);
+		};
+
+		int addNextProgramTimerEvent(unsigned onidSid,int min = 0, int hour = 0, int day = 0, int month = 0)
+		{
+			CTimerd::EventInfo eventInfo;
+			eventInfo.onidSid = onidSid;
+			addTimerEvent(TIMER_NEXTPROGRAM,&eventInfo,month, day, hour, min);
+		};
+
+		int addStandbyTimerEvent(bool standby_on,int min = 0, int hour = 0, int day = 0, int month = 0)
+		{
+			CTimerd::commandSetStandby standby;
+			standby.standby_on =standby_on;
+			addTimerEvent(TIMER_STANDBY,&standby,month, day, hour, min);
+		};
 };
 
 #endif
