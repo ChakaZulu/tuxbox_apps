@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.10 2002/10/12 20:19:44 obi Exp $
+ * $Id: dmx.cpp,v 1.11 2002/11/02 17:21:15 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -27,7 +27,7 @@
 
 int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigned char * mask)
 {
-	struct dmxSctFilterParams sctFilterParams;
+	struct dmx_sct_filter_params sctFilterParams;
 
 	if (fd < 0)
 		return -1;
@@ -220,14 +220,14 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 	return 0;
 }
 
-int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned short pid)
+int setDmxPesFilter (int fd, dmx_output_t output, dmx_pes_type_t pes_type, unsigned short pid)
 {
-	dmxPesFilterParams pesFilterParams;
+	dmx_pes_filter_params pesFilterParams;
 
 	if (fd < 0)
 		return -1;
 
-	if ((pid <= 0x0001) && (pesType != DMX_PES_PCR))
+	if ((pid <= 0x0001) && (pes_type != DMX_PES_PCR))
 		return -1;
 
 	if ((pid >= 0x0002) && (pid <= 0x0000F))
@@ -239,7 +239,7 @@ int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned 
 	pesFilterParams.pid = pid;
 	pesFilterParams.input = DMX_IN_FRONTEND;
 	pesFilterParams.output = output;
-	pesFilterParams.pesType = pesType;
+	pesFilterParams.pes_type = pes_type;
 	pesFilterParams.flags = 0;
 
 	if (ioctl(fd, DMX_SET_PES_FILTER, &pesFilterParams) < 0)

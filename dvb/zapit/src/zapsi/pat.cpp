@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.39 2002/10/12 20:19:45 obi Exp $
+ * $Id: pat.cpp,v 1.40 2002/11/02 17:21:16 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -40,7 +40,7 @@ extern unsigned int found_channels;
 extern unsigned int found_transponders;
 static int status = 0;
 
-int fake_pat (uint32_t TsidOnid, FrontendParameters feparams, uint8_t polarity, uint8_t DiSEqC)
+int fake_pat (uint32_t TsidOnid, dvb_frontend_parameters feparams, uint8_t polarity, uint8_t DiSEqC)
 {
 	if (scantransponders.find(TsidOnid) == scantransponders.end())
 	{

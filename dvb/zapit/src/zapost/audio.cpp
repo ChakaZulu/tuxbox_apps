@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.9 2002/10/12 20:19:44 obi Exp $
+ * $Id: audio.cpp,v 1.10 2002/11/02 17:21:15 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -36,9 +36,9 @@ CAudio::CAudio()
 
 	mixer.volume_left = 0;
 	mixer.volume_right = 0;
-	status.bypassMode = false;
-	status.playState = AUDIO_STOPPED;
-	status.streamSource = AUDIO_SOURCE_MEMORY;
+	status.bypass_mode = false;
+	status.play_state = AUDIO_STOPPED;
+	status.stream_source = AUDIO_SOURCE_MEMORY;
 
 	if ((fd = open(AUDIO_DEVICE, O_RDWR)) < 0)
 	{
@@ -76,7 +76,7 @@ int CAudio::setBypassMode (bool enable)
 		return -1;
 	}
 
-	status.bypassMode = enable;
+	status.bypass_mode = enable;
 
 	return 0;
 }
@@ -89,14 +89,14 @@ int CAudio::setMute (bool enable)
 		return -1;
 	}
 
-	status.muteState = enable;
+	status.mute_state = enable;
 
 	return 0;
 }
 
 int CAudio::mute ()
 {
-	if (status.muteState == false)
+	if (status.mute_state == false)
 	{
 		return setMute(true);
 	}
@@ -109,7 +109,7 @@ int CAudio::mute ()
 
 int CAudio::unmute ()
 {
-	if (status.muteState == true)
+	if (status.mute_state == true)
 	{
 		return setMute(false);
 	}
@@ -121,7 +121,7 @@ int CAudio::unmute ()
 
 int CAudio::enableBypass ()
 {
-	if (status.bypassMode == false)
+	if (status.bypass_mode == false)
 	{
 		return setBypassMode(true);
 	}
@@ -133,7 +133,7 @@ int CAudio::enableBypass ()
 
 int CAudio::disableBypass ()
 {
-	if (status.bypassMode == true)
+	if (status.bypass_mode == true)
 	{
 		return setBypassMode(false);
 	}
@@ -162,12 +162,12 @@ int CAudio::setVolume (unsigned char left, unsigned char right)
 	return -1;
 }
 
-int CAudio::setSource (audioStreamSource_t source)
+int CAudio::setSource (audio_stream_source_t source)
 {
-	if (status.streamSource == source)
+	if (status.stream_source == source)
 		return 0;
 
-	if (status.playState != AUDIO_STOPPED)
+	if (status.play_state != AUDIO_STOPPED)
 		return -1;
 
 	if (ioctl(fd, AUDIO_SELECT_SOURCE, source) < 0)
@@ -176,13 +176,13 @@ int CAudio::setSource (audioStreamSource_t source)
 		return -1;
 	}
 
-	status.streamSource = source;
+	status.stream_source = source;
 	return 0;
 }
 
 int CAudio::start ()
 {
-	if (status.playState == AUDIO_PLAYING)
+	if (status.play_state == AUDIO_PLAYING)
 	{
 		return 0;
 	}
@@ -193,14 +193,14 @@ int CAudio::start ()
 		return -1;
 	}
 
-	status.playState = AUDIO_PLAYING;
+	status.play_state = AUDIO_PLAYING;
 
 	return 0;
 }
 
 int CAudio::stop ()
 {
-	if (status.playState == AUDIO_STOPPED)
+	if (status.play_state == AUDIO_STOPPED)
 	{
 		return 0;
 	}
@@ -211,12 +211,12 @@ int CAudio::stop ()
 		return -1;
 	}
 
-	status.playState = AUDIO_STOPPED;
+	status.play_state = AUDIO_STOPPED;
 
 	return 0;
 }
 
-int CAudio::selectChannel (audioChannelSelect_t sel)
+int CAudio::selectChannel (audio_channel_select_t sel)
 {
 	if (ioctl(fd, AUDIO_CHANNEL_SELECT, &sel) < 0)
 	{
@@ -224,13 +224,13 @@ int CAudio::selectChannel (audioChannelSelect_t sel)
 		return -1;
 	}
 
-	status.channelSelect = sel;
+	status.channel_select = sel;
 
 	return 0;
 }
 
-audioChannelSelect_t CAudio::getSelectedChannel ()
+audio_channel_select_t CAudio::getSelectedChannel ()
 {
-	return status.channelSelect;
+	return status.channel_select;
 }
 

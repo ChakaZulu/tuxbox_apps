@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.55 2002/10/23 20:52:27 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.56 2002/11/02 17:21:15 obi Exp $
  */
 
 #include <stdio.h>
@@ -14,42 +14,61 @@
 extern std::map <uint32_t, transponder> transponders;
 extern tallchans allchans;
 
+
+#define GET_ATTR(node, name, fmt, arg)					\
+	do {								\
+		char * ptr = node->GetAttributeValue(name);		\
+		if ((ptr == NULL) || (sscanf(ptr, fmt, &arg) <= 0))	\
+			arg = 0;					\
+	}								\
+	while (0)
+
+
 void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 {
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
-	FrontendParameters feparams;
+	dvb_frontend_parameters feparams;
 	uint8_t polarization = 0;
 	uint8_t tmp;
 
-	/* FIXME: get inversion from services list */
-	feparams.Inversion = INVERSION_AUTO;
-
 	/* read all transponders */
-	while ((node != NULL) && (!strcmp(node->GetType(), "transponder")))
-	{
+	while ((node != NULL) && (!strcmp(node->GetType(), "transponder"))) {
+
 		/* common */
-		sscanf(node->GetAttributeValue("id"), "%hx", &transport_stream_id);
-		sscanf(node->GetAttributeValue("onid"), "%hx", &original_network_id);
-		sscanf(node->GetAttributeValue("frequency"), "%u", &feparams.Frequency);
+		GET_ATTR(node, "id", "%hx", transport_stream_id);
+		GET_ATTR(node, "onid", "%hx", original_network_id);
+		GET_ATTR(node, "frequency", "%u", feparams.frequency);
+		GET_ATTR(node, "inversion", "%hhu", tmp);
+
+		switch (tmp) {
+		case 0:
+			feparams.inversion = INVERSION_OFF;
+			break;
+		case 1:
+			feparams.inversion = INVERSION_ON;
+			break;
+		default:
+			feparams.inversion = INVERSION_AUTO;
+			break;
+		}
 
 		/* cable */
-		if (DiSEqC == 0xFF)
-		{
-			sscanf(node->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qam.SymbolRate);
-			sscanf(node->GetAttributeValue("fec_inner"), "%hhu", &tmp);
-			feparams.u.qam.FEC_inner = CFrontend::getFEC(tmp);
-			sscanf(node->GetAttributeValue("modulation"), "%hhu", &tmp);
-			feparams.u.qam.QAM = CFrontend::getModulation(tmp);
+		if (DiSEqC == 0xFF) {
+
+			GET_ATTR(node, "symbol_rate", "%u", feparams.u.qam.symbol_rate);
+			GET_ATTR(node, "fec_inner", "%hhu", tmp);
+			feparams.u.qam.fec_inner = CFrontend::getCodeRate(tmp);
+			GET_ATTR(node, "modulation", "%hhu", tmp);
+			feparams.u.qam.modulation = CFrontend::getModulation(tmp);
 		}
 
 		/* satellite */
-		else
-		{
-			sscanf(node->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qpsk.SymbolRate);
-			sscanf(node->GetAttributeValue("fec_inner"), "%hhu", &tmp);
-			feparams.u.qpsk.FEC_inner = CFrontend::getFEC(tmp);
-			sscanf(node->GetAttributeValue("polarization"), "%hhu", &polarization);
+		else {
+			GET_ATTR(node, "symbol_rate", "%u", feparams.u.qpsk.symbol_rate);
+			GET_ATTR(node, "fec_inner", "%hhu", tmp);
+			feparams.u.qpsk.fec_inner = CFrontend::getCodeRate(tmp);
+			GET_ATTR(node, "polarization", "%hhu", polarization);
 		}
 
 		/* add current transponder to list */
@@ -87,12 +106,11 @@ void ParseChannels (XMLTreeNode *node, t_transport_stream_id transport_stream_id
 
 	while ((node != NULL) && (!strcmp(node->GetType(), "channel")))
 	{
-		sscanf(node->GetAttributeValue("service_id"), "%hx", &service_id);
+		GET_ATTR(node, "service_id", "%hx", service_id);
 		name = node->GetAttributeValue("name");
-		sscanf(node->GetAttributeValue("service_type"), "%hhx", &service_type);
+		GET_ATTR(node, "service_type", "%hhx", service_type);
 
-		switch (service_type)
-		{
+		switch (service_type) {
 		case DIGITAL_TELEVISION_SERVICE:
 		case NVOD_REFERENCE_SERVICE:
 		case NVOD_TIME_SHIFTED_SERVICE:
@@ -143,7 +161,7 @@ void FindTransponder (XMLTreeNode *search)
 		else if (!(strcmp(search->GetType(), "sat")))
 		{
 			printf("[getservices.cpp] going to parse satellite %s\n", search->GetAttributeValue("name"));
-			sscanf(search->GetAttributeValue("diseqc"), "%hhu", &DiSEqC);
+			GET_ATTR(search, "diseqc", "%hhu", DiSEqC);
 			ParseTransponders(search->GetChild(), DiSEqC);
 		}
 

@@ -1,17 +1,28 @@
 /*
- * $Id: getservices.h,v 1.49 2002/10/12 20:19:44 obi Exp $
+ * $Id: getservices.h,v 1.50 2002/11/02 17:21:15 obi Exp $
+ *
+ * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
 
 #ifndef __getservices_h__
 #define __getservices_h__
 
-#include <ost/frontend.h>
-
-#include <stdint.h>
-#include <string.h>
-
-#include <iostream>
-#include <string>
+#include <linux/dvb/frontend.h>
 
 #include <eventserver.h>
 
@@ -35,12 +46,12 @@ int LoadServices ();
 struct transponder
 {
 	t_transport_stream_id transport_stream_id;
-	FrontendParameters feparams;
+	dvb_frontend_parameters feparams;
 	unsigned char polarization;
 	unsigned char DiSEqC;
 	t_original_network_id original_network_id;
 
-	transponder (t_transport_stream_id p_transport_stream_id, FrontendParameters p_feparams)
+	transponder (t_transport_stream_id p_transport_stream_id, dvb_frontend_parameters p_feparams)
 	{
 		transport_stream_id = p_transport_stream_id;
 		feparams = p_feparams;
@@ -49,7 +60,7 @@ struct transponder
 		original_network_id = 0;
 	}
 
-	transponder (t_transport_stream_id p_transport_stream_id, FrontendParameters p_feparams, unsigned short p_polarization, unsigned char p_DiSEqC, t_original_network_id p_original_network_id)
+	transponder (t_transport_stream_id p_transport_stream_id, dvb_frontend_parameters p_feparams, unsigned short p_polarization, unsigned char p_DiSEqC, t_original_network_id p_original_network_id)
 	{
 		transport_stream_id = p_transport_stream_id;
 		feparams = p_feparams;

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.268 2002/10/28 22:47:21 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.269 2002/11/02 17:21:15 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -932,7 +932,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			{
 				CZapitMessages::commandInt msg;
 				read(connfd, &msg, sizeof(msg));
-				video->setCroppingMode((videoDisplayFormat_t) msg.val);
+				video->setCroppingMode((video_displayformat_t) msg.val);
 				break;
 			}
 
@@ -940,7 +940,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			{
 				CZapitMessages::commandInt msg;
 				read(connfd, &msg, sizeof(msg));
-				audio->selectChannel((audioChannelSelect_t) msg.val);
+				audio->selectChannel((audio_channel_select_t) msg.val);
 				break;
 			}
 
@@ -1029,7 +1029,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.268 2002/10/28 22:47:21 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.269 2002/11/02 17:21:15 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1118,11 +1118,11 @@ int main (int argc, char **argv)
 	if (!audio->isInitialized())
 	{
 		printf("[zapit] unable to initialize audio device\n");
-		CZapitDestructor();
+		//CZapitDestructor();
 	}
 	else
 	{
-		audio->setVolume(255, 255);
+		audio->setVolume(222, 222);
 	}
 
 	video = new CVideo();
@@ -1130,7 +1130,7 @@ int main (int argc, char **argv)
 	if (!video->isInitialized())
 	{
 		printf("[zapit] unable to initialize video device\n");
-		CZapitDestructor();
+		//CZapitDestructor();
 	}
 	else
 	{

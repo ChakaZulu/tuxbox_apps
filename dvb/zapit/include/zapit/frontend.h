@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.16 2002/10/12 20:19:44 obi Exp $
+ * $Id: frontend.h,v 1.17 2002/11/02 17:21:15 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -26,8 +26,7 @@
 #include <stdint.h>
 
 /* nokia api */
-#include <ost/frontend.h>
-#include <ost/sec.h>
+#include <linux/dvb/frontend.h>
 
 /* zapit */
 #include "channel.h"
@@ -38,9 +37,7 @@ class CFrontend
 {
 	private:
 		/* frontend file descriptor */
-		int frontend_fd;
-		/* sec file descriptor */
-		int sec_fd;
+		int fd;
 		/* last action failed flag */
 		bool failed;
 		/* tuning finished flag */
@@ -48,19 +45,19 @@ class CFrontend
 		/* all devices opened without error flag */
 		bool initialized;
 		/* information about the used frontend type */
-		FrontendInfo *info;
+		dvb_frontend_info *info;
 		/* current tuned transport stream id / original network id */
 		uint32_t currentTsidOnid;
 		/* current tuned frequency */
 		uint32_t currentFrequency;
 		/* current 22kHz tone mode */
-		secToneMode currentToneMode;
+		fe_sec_tone_mode_t currentToneMode;
 		/* current H/V voltage */
-		secVoltage currentVoltage;
+		fe_sec_voltage_t currentVoltage;
 		/* current diseqc position */
 		uint8_t currentDiseqc;
 		/* how often to repeat DiSEqC 1.1 commands */
-		uint32_t diseqcRepeats;
+		uint8_t diseqcRepeats;
 		/* DiSEqC type of attached hardware */
 		diseqc_t diseqcType;
 		/* low lnb offsets */
@@ -68,70 +65,80 @@ class CFrontend
 		/* high lnb offsets */
 		int32_t lnbOffsetsHigh[MAX_LNBS];
 
+		void setSec (uint8_t sat_no, uint8_t pol, bool high_band, uint32_t frequency);
+		
+		const bool sendDiseqcZeroByteCommand (uint8_t frm, uint8_t addr, uint8_t cmd);
+		const bool sendDiseqcSmatvRemoteTuningCommand (uint32_t frequency);
+		const uint8_t receiveDiseqcReply (int timeout_ms);
+
 	public:
 		CFrontend ();
 		~CFrontend ();
 
-		/* ost tuner api */
-		static CodeRate CFrontend::getFEC (uint8_t FEC_inner);
-		static Modulation CFrontend::getModulation (uint8_t modulation);
+		/*
+		 * linux dvb frontend api
+		 */
+		static fe_code_rate_t CFrontend::getCodeRate (uint8_t fec_inner);
+		static fe_modulation_t CFrontend::getModulation (uint8_t modulation);
 
-		void selfTest ();
-		void setPowerState (FrontendPowerState state);
-		void setFrontend (FrontendParameters *feparams);
-		const FrontendPowerState getPowerState ();
-		const FrontendStatus getStatus ();
+		const dvb_frontend_info * getInfo ()	{ return info; };
+
+		const bool secResetOverload ();
+		const bool secSetTone (fe_sec_tone_mode_t mode);
+		const bool secSetVoltage (fe_sec_voltage_t voltage);
+
+		const bool sendDiseqcCommand (struct dvb_diseqc_master_cmd * cmd);
+		const bool sendToneBurst (fe_sec_mini_cmd_t burst);
+
+		const fe_status_t getStatus ();
 		const uint32_t getBitErrorRate ();
-		const int32_t getSignalStrength ();
-		const int32_t getSignalNoiseRatio ();
+		const uint16_t getSignalStrength ();
+		const uint16_t getSignalNoiseRatio ();
 		const uint32_t getUncorrectedBlocks ();
-		const uint32_t getNextFrequency (uint32_t frequency);
-		const uint32_t getNextSymbolRate (uint32_t rate);
-		const FrontendParameters *getFrontend ();
+
+		void setFrontend (dvb_frontend_parameters *feparams);
+		const dvb_frontend_parameters * getFrontend ();
+		void discardEvents ();
 		const bool getEvent ();
-		const FrontendInfo *getInfo ()	{ return info; };
+
 		unsigned int getFrequency ();
 		unsigned char getPolarization ();
 
-		/* ost sec api */
-		void secSetTone (secToneMode mode);
-		void secSetVoltage (secVoltage voltage);
-		void secSendSequence (secCmdSequence *sequence);
-		//void secResetOverload ();
-		const secStatus *secGetStatus ();
-
-		/* zapit tuner api */
+		
+		
+		/*
+		 * zapit tuner api
+		 */
 		const bool tuneChannel (CZapitChannel *channel);
-		const bool tuneFrequency (FrontendParameters feparams, uint8_t polarization, uint8_t diseqc);
+		const bool tuneFrequency (dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc);
 
-		/* zapit diseqc api */
-		const bool sendDiseqcMiniCommand (secToneMode mode, secVoltage voltage, uint8_t diseqc);
-		const bool sendDiseqcCommand (secToneMode mode, secVoltage voltage, uint8_t diseqc, uint32_t repeats);
+		/*
+		 * zapit diseqc api
+		 */
+#if 0
+		const bool sendDiseqcCommand (fe_sec_tone_mode_t mode, fe_sec_voltage_t voltage, uint8_t diseqc, uint32_t repeats);
+#endif
 		const bool sendDiseqcPowerOn ();
 		const bool sendDiseqcReset ();
 		const bool sendDiseqcStandby ();
-		const bool sendDiseqcZeroByteCommand (uint8_t addr, uint8_t cmd);
-		const bool sendDiseqcSmatvRemoteTuningCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t frequency);
 
-		void setDiseqcRepeats(uint32_t repeats)	{ diseqcRepeats = repeats; }
-		void setDiseqcType(diseqc_t type)	{ diseqcType = type; }
-		const uint32_t getDiseqcRepeats()	{ return diseqcRepeats; }
-		const diseqc_t getDiseqcType()		{ return diseqcType; }
-		const bool isInitialized()		{ return initialized; }
-		const uint32_t getTsidOnid()		{ return currentTsidOnid; }
+		void setDiseqcRepeats (uint8_t repeats)		{ diseqcRepeats = repeats; }
+		const uint8_t getDiseqcRepeats ()		{ return diseqcRepeats; }
 
-		void setLnbOffset(bool high, uint8_t index, int32_t offset)
-		{
-			if (index < MAX_LNBS)
-			{
+		void setDiseqcType (diseqc_t type)		{ diseqcType = type; }
+		const diseqc_t getDiseqcType ()			{ return diseqcType; }
+		
+		const bool isInitialized ()			{ return initialized; }
+		const uint32_t getTsidOnid ()			{ return currentTsidOnid; }
+
+		void setLnbOffset (bool high, uint8_t index, int32_t offset) {
+
+			if (index < MAX_LNBS) {
+
 				if (high)
-				{
 					lnbOffsetsHigh[index] = offset;
-				}
 				else
-				{
 					lnbOffsetsLow[index] = offset;
-				}
 			}
 		}
 };

@@ -1,11 +1,11 @@
 /*
- *  $Id: scan.h,v 1.23 2002/09/24 16:46:17 thegoodguy Exp $
+ *  $Id: scan.h,v 1.24 2002/11/02 17:21:15 obi Exp $
  */
 
 #ifndef __scan_h__
 #define __scan_h__
 
-#include <ost/frontend.h>
+#include <linux/dvb/frontend.h>
 
 #include <stdint.h>
 
@@ -18,11 +18,11 @@ struct transpondermap
 {
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
-	FrontendParameters    feparams;
+	dvb_frontend_parameters    feparams;
 	uint8_t               polarization;
 	uint8_t               DiSEqC;
 
-	transpondermap(const t_transport_stream_id p_transport_stream_id, const t_original_network_id p_original_network_id, const FrontendParameters p_feparams, const uint8_t p_polarization = 0, const uint8_t p_DiSEqC = 0)
+	transpondermap(const t_transport_stream_id p_transport_stream_id, const t_original_network_id p_original_network_id, const dvb_frontend_parameters p_feparams, const uint8_t p_polarization = 0, const uint8_t p_DiSEqC = 0)
 	{
 		transport_stream_id = p_transport_stream_id;
 		original_network_id = p_original_network_id;

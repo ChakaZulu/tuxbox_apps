@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.29 2002/10/12 20:19:44 obi Exp $
+ * $Id: frontend.cpp,v 1.30 2002/11/02 17:21:15 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -40,59 +40,77 @@
 #include <zapit/sdt.h>
 #include <zapit/settings.h>
 
+
+#define DVB_IOCTL(cmd, arg)				\
+	do { 						\
+		if (ioctl(fd, cmd, arg) < 0) {		\
+			perror(__PRETTY_FUNCTION__);	\
+			failed = true;			\
+		}					\
+		else {					\
+			failed = false;			\
+		}					\
+							\
+	} while(0)
+
+
 extern std::map <uint32_t, transponder> transponders;
 
-/* constructor */
+
+/*
+ * constructor
+ */
+
 CFrontend::CFrontend ()
 {
 	failed = false;
 	tuned = false;
-	currentToneMode = 0;
-	currentVoltage = 0;
+	currentToneMode = SEC_TONE_OFF;
+	currentVoltage = SEC_VOLTAGE_13;
 	currentFrequency = 0;
 	currentTsidOnid = 0;
 	diseqcRepeats = 0;
 	diseqcType = NO_DISEQC;
 
-	info = new FrontendInfo();
+	info = new dvb_frontend_info();
 
-	if ((frontend_fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
-	{
+	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0) {
 		perror(FRONTEND_DEVICE);
 		initialized = false;
 	}
-	else if (ioctl(frontend_fd, FE_GET_INFO, info) < 0)
-	{
+	else if (ioctl(fd, FE_GET_INFO, info) < 0) {
 		perror("FE_GET_INFO");
 		initialized = false;
 	}
-	else if ((sec_fd = open(SEC_DEVICE, O_RDWR)) < 0)
-	{
-		perror(SEC_DEVICE);
-		initialized = false;
-	}
-	else
-	{
+	else {
 		initialized = true;
+		sendDiseqcReset();
+		sendDiseqcPowerOn();
 	}
 }
 
-/* destructor */
-CFrontend::~CFrontend ()
-{
-	delete info;
-	close(sec_fd);
-	close(frontend_fd);
-}
 
 /*
- * ost frontend api
+ * destructor
  */
 
-CodeRate CFrontend::getFEC (uint8_t FEC_inner)
+CFrontend::~CFrontend ()
 {
-	switch (FEC_inner)
-	{
+	sendDiseqcStandby();
+	
+	delete info;
+	close(fd);
+}
+
+
+
+/*
+ * dvb frontend api
+ */
+
+fe_code_rate_t CFrontend::getCodeRate (uint8_t fec_inner)
+{
+	switch (fec_inner & 0x0F) {
 	case 0x01:
 		return FEC_1_2;
 	case 0x02:
@@ -110,10 +128,10 @@ CodeRate CFrontend::getFEC (uint8_t FEC_inner)
 	}
 }
 
-Modulation CFrontend::getModulation (uint8_t modulation)
+
+fe_modulation_t CFrontend::getModulation (uint8_t modulation)
 {
-	switch (modulation)
-	{
+	switch (modulation) {
 	case 0x01:
 		return QAM_16;
 	case 0x02:
@@ -125,743 +143,551 @@ Modulation CFrontend::getModulation (uint8_t modulation)
 	case 0x05:
 		return QAM_256;
 	default:
-		return QAM_64;
+		return QAM_AUTO;
 	}
 }
 
+
 unsigned int CFrontend::getFrequency ()
 {
-	if (info->type == FE_QPSK)
-	{
+	switch (info->type) {
+	case FE_QPSK:
 		if (currentToneMode == SEC_TONE_OFF)
-		{
 			return currentFrequency + lnbOffsetsLow[currentDiseqc];
-		}
 		else
-		{
 			return currentFrequency + lnbOffsetsHigh[currentDiseqc];
-		}
-	}
-	else
-	{
+
+	case FE_QAM:
+	default:
 		return currentFrequency;
 	}
 }
 
+
 unsigned char CFrontend::getPolarization ()
 {
 	if (currentVoltage == SEC_VOLTAGE_13)
-	{
 		return 1;
-	}
 	else
-	{
 		return 0;
-	}
 }
 
-void CFrontend::selfTest ()
+
+const fe_status_t CFrontend::getStatus ()
 {
-	if (ioctl(frontend_fd, FE_SELFTEST) < 0)
-	{
-		perror("FE_SELFTEST");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
-}
+	fe_status_t status;
 
-void CFrontend::setPowerState (FrontendPowerState state)
-{
-	if (ioctl(frontend_fd, FE_SET_POWER_STATE, state) < 0)
-	{
-		perror("FE_SET_POWER_STATE");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
-}
-
-const FrontendPowerState CFrontend::getPowerState ()
-{
-	FrontendPowerState state;
-
-	if (ioctl(frontend_fd, FE_GET_POWER_STATE, &state) < 0)
-	{
-		perror("FE_GET_POWER_STATE");
-		failed = true;
-	}
-
-	return state;
-}
-
-const FrontendStatus CFrontend::getStatus ()
-{
-	FrontendStatus status;
-
-	if (ioctl(frontend_fd, FE_READ_STATUS, &status) < 0)
-	{
-		perror("FE_READ_STATUS");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
+	DVB_IOCTL(FE_READ_STATUS, &status);
 
 	return status;
 }
+
 
 const uint32_t CFrontend::getBitErrorRate ()
 {
 	uint32_t ber;
 
-	if (ioctl(frontend_fd, FE_READ_BER, &ber) < 0)
-	{
-		perror("FE_READ_BER");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
+	DVB_IOCTL(FE_READ_BER, &ber);
 
 	return ber;
 }
 
-const int32_t CFrontend::getSignalStrength ()
-{
-	int32_t strength;
 
-	if (ioctl(frontend_fd, FE_READ_SIGNAL_STRENGTH, &strength) < 0)
-	{
-		perror("FE_READ_SIGNAL_STRENGTH");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
+const uint16_t CFrontend::getSignalStrength ()
+{
+	uint16_t strength;
+
+	DVB_IOCTL(FE_READ_SIGNAL_STRENGTH, &strength);
 
 	return strength;
 }
 
-const int32_t CFrontend::getSignalNoiseRatio ()
-{
-	int32_t snr;
 
-	if (ioctl(frontend_fd, FE_READ_SNR, &snr) < 0)
-	{
-		perror("FE_READ_SNR");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
+const uint16_t CFrontend::getSignalNoiseRatio ()
+{
+	uint16_t snr;
+
+	DVB_IOCTL(FE_READ_SNR, &snr);
 
 	return snr;
 }
+
 
 const uint32_t CFrontend::getUncorrectedBlocks ()
 {
 	uint32_t blocks;
 
-	if (ioctl(frontend_fd, FE_READ_UNCORRECTED_BLOCKS, &blocks) < 0)
-	{
-		perror("FE_READ_UNCORRECTED_BLOCKS");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
+	DVB_IOCTL(FE_READ_UNCORRECTED_BLOCKS, &blocks);
 
 	return blocks;
 }
 
-const uint32_t CFrontend::getNextFrequency (uint32_t frequency)
+
+void CFrontend::discardEvents ()
 {
-	if (ioctl(frontend_fd, FE_GET_NEXT_FREQUENCY, &frequency) < 0)
-	{
-		perror("FE_GET_NEXT_FREQUENCY");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
-
-	return frequency;
-}
-
-const uint32_t CFrontend::getNextSymbolRate (uint32_t rate)
-{
-	if (ioctl(frontend_fd, FE_GET_NEXT_SYMBOL_RATE, rate) < 0)
-	{
-		perror("FE_GET_NEXT_SYMBOL_RATE");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
-
-	return rate;
-}
-
-void CFrontend::setFrontend (FrontendParameters *feparams)
-{
-	FrontendEvent *event = new FrontendEvent();
-
-	std::cout << "[CFrontend::setFrontend] freq " << feparams->Frequency << std::endl;
+	struct dvb_frontend_event event;
 
 	/* clear old events */
-	while (ioctl(frontend_fd, FE_GET_EVENT, event) >= 0)
-		std::cout << "[CFrontend::setFrontend] discard event" << std::endl;
-
-	delete event;
-
-	if (ioctl(frontend_fd, FE_SET_FRONTEND, feparams) < 0)
-	{
-		perror("FE_SET_FRONTEND");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
+	while (1) {
+		if (ioctl(fd, FE_GET_EVENT, &event) == -1)
+			break;
 	}
 }
 
-const FrontendParameters *CFrontend::getFrontend ()
-{
-	FrontendParameters *feparams = new FrontendParameters();
 
-	if (ioctl(frontend_fd, FE_GET_FRONTEND, feparams) < 0)
-	{
-		perror("FE_GET_FRONTEND");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
+void CFrontend::setFrontend (dvb_frontend_parameters *feparams)
+{
+	std::cout << __PRETTY_FUNCTION__ << ": freq " << feparams->frequency << std::endl;
+
+	discardEvents();
+
+	DVB_IOCTL(FE_SET_FRONTEND, feparams);
+}
+
+
+const dvb_frontend_parameters *CFrontend::getFrontend ()
+{
+	dvb_frontend_parameters *feparams = new dvb_frontend_parameters();
+
+	DVB_IOCTL(FE_GET_FRONTEND, feparams);
 
 	return feparams;
 }
 
+
 const bool CFrontend::getEvent ()
 {
-	FrontendEvent *event = new FrontendEvent();
-
+	struct dvb_frontend_event event;
 	struct pollfd pfd[1];
 
-	pfd[0].fd = frontend_fd;
-	pfd[0].events = POLLIN | POLLPRI;
+	pfd[0].fd = fd;
+	pfd[0].events = POLLIN;
 
-	failed = true;
-
-	switch (poll(pfd, 1, 10000))
-	{
+	switch (poll(pfd, 1, 10000)) {
 	case -1:
-		perror("[CFrontend::getEvent] poll");
+		perror("poll");
+		failed = true;
 		break;
 
 	case 0:
-		std::cerr << "[CFrontend::getEvent] timeout" << std::endl;
+		std::cerr << __PRETTY_FUNCTION__ << ": timeout" << std::endl;
+		failed = true;
 		break;
 
 	default:
-		if (pfd[0].revents & POLLIN)
-		{
-			if (ioctl(frontend_fd, FE_GET_EVENT, event) < 0)
-			{
-				perror("[CFrontend::getEvent] FE_GET_EVENT");
-				break;
-			}
-			else
-			{
-				failed = false;
-			}
+		if (pfd[0].revents & POLLIN) {
 
-			switch (event->type)
-			{
-			case FE_UNEXPECTED_EV:
-				std::cerr << "[CFrontend::getEvent] FE_UNEXPECTED_EV" << std::endl;
-				break;
+			DVB_IOCTL(FE_GET_EVENT, &event);
 
-			case FE_FAILURE_EV:
-				std::cerr << "[CFrontend::getEvent] FE_FAILURE_EV" << std::endl;
-				break;
-
-			case FE_COMPLETION_EV:
-				currentFrequency = event->u.completionEvent.Frequency;
-				std::cout << "[CFrontend::getEvent] FE_COMPLETION_EV: freq " << currentFrequency << std::endl;
+			if (event.status & FE_HAS_LOCK) {
+				currentFrequency = event.parameters.frequency;
+				std::cout << __PRETTY_FUNCTION__ << ": FE_HAS_LOCK: freq " << currentFrequency << std::endl;
 				tuned = true;
-				break;
+			}
+
+			else {
+				std::cout << __PRETTY_FUNCTION__ << ": NO LOCK: " << event.status << std::endl;
 			}
 		}
-		else
-		{
-			std::cerr << "[CFrontend::getEvent] pfd[0].revents: " << pfd[0].revents << std::endl;
+		else {
+			std::cerr << __PRETTY_FUNCTION__ << ": pfd[0].revents: " << pfd[0].revents << std::endl;
 		}
 		break;
 	}
 
-	if (tuned == false)
-	{
+	if (!tuned) {
 		currentFrequency = 0;
 		currentTsidOnid = 0;
 	}
 
-	delete event;
 	return tuned;
 }
 
+
+
+
 /*
- * ost sec api
+ * linuxtv SEC / DiSEqC api
  */
-void CFrontend::secSetTone (secToneMode toneMode)
+
+
+const bool
+CFrontend::secSetTone (fe_sec_tone_mode_t toneMode)
 {
-	if (ioctl(sec_fd, SEC_SET_TONE, toneMode) < 0)
-	{
-		perror("SEC_SET_TONE");
-		failed = true;
-	}
-	else
-	{
+	DVB_IOCTL(FE_SET_TONE, toneMode);
+
+	if (!failed)
 		currentToneMode = toneMode;
-		failed = false;
-	}
+
+	return !failed;
 }
 
-void CFrontend::secSetVoltage (secVoltage voltage)
+
+const bool
+CFrontend::secSetVoltage (fe_sec_voltage_t voltage)
 {
-	if (ioctl(sec_fd, SEC_SET_VOLTAGE, voltage) < 0)
-	{
-		perror("SEC_SET_VOLTAGE");
-		failed = true;
-	}
-	else
-	{
+	DVB_IOCTL(FE_SET_VOLTAGE, voltage);
+	usleep(15 * 1000);
+
+	if (!failed)
 		currentVoltage = voltage;
-		failed = false;
-	}
+
+	return !failed;
 }
 
-const secStatus *CFrontend::secGetStatus ()
+
+const bool
+CFrontend::secResetOverload ()
 {
-	secStatus *status = new secStatus();
-
-	if (ioctl(sec_fd, SEC_GET_STATUS, status) < 0)
-	{
-		perror("SEC_GET_STATUS");
-		failed = true;
-	}
-	else
-	{
-		failed = false;
-	}
-
-	return status;
+	DVB_IOCTL(FE_DISEQC_RESET_OVERLOAD, 0);
+	return !failed;
 }
 
-void CFrontend::secSendSequence (secCmdSequence *sequence)
+
+const bool
+CFrontend::sendDiseqcCommand (struct dvb_diseqc_master_cmd * cmd)
 {
-	if (ioctl(sec_fd, SEC_SEND_SEQUENCE, sequence) < 0)
-	{
-		perror("SEC_SEND_SEQUENCE");
-		failed = true;
-	}
-	else
-	{
-		currentToneMode = sequence->continuousTone;
-		currentVoltage = sequence->voltage;
-		failed = false;
-	}
+	DVB_IOCTL(FE_DISEQC_SEND_MASTER_CMD, cmd);
+	usleep(15 * 1000);
+	return !failed;
 }
 
-#if 0
-void CFrontend::secResetOverload ()
+
+const uint8_t
+CFrontend::receiveDiseqcReply (int timeout_ms)
 {
-	if (ioctl(sec_fd, SEC_RESET_OVERLOAD) < 0)
-	{
-		perror("SEC_RESET_OVERLOAD");
-		failed = true;
+	int ret;
+	std::string status;
+	struct dvb_diseqc_slave_reply reply;
+
+	reply.timeout = timeout_ms;
+
+	DVB_IOCTL(FE_DISEQC_RECV_SLAVE_REPLY, &reply);
+
+	if (failed) {
+		status = "ioctl failed";
+		ret = 0;
 	}
-	else
-	{
-		failed = false;
+
+	else {
+
+		if (reply.msg_len == 0) {
+			status = "timeout";
+			ret = 1;
+		}
+
+		else {
+
+			switch (reply.msg[0]) {
+			case 0xe4:
+				status = "ok";
+				ret = 0;
+				break;
+
+			case 0xe5:
+				status = "invalid address or unknown command";
+				ret = 1;
+				break;
+
+			case 0xe6:
+				status = "parity error";
+				ret = 1;
+				break;
+
+			case 0xe7:
+				status = "contention flag mismatch";
+				ret = 1;
+				break;
+
+			default:
+				status = "unexpected reply";
+				ret = 0;
+				break;
+			}
+
+		}
+
 	}
+
+	std::cout << __PRETTY_FUNCTION__ << ": " << status << std::endl;
+
+	return ret;
 }
-#endif
+
+
+const bool
+CFrontend::sendToneBurst (fe_sec_mini_cmd_t burst)
+{
+	DVB_IOCTL(FE_DISEQC_SEND_BURST, burst);
+	usleep(15 * 1000);
+
+	if (!failed)
+		currentDiseqc = (burst == SEC_MINI_A) ? 0x00 : 0x01;
+
+	return !failed;
+}
+
+
+
 
 /*
  * zapit frontend api
  */
-const bool CFrontend::tuneChannel (CZapitChannel *channel)
+
+const bool
+CFrontend::tuneChannel (CZapitChannel *channel)
 {
-	bool noNit = false;
+	std::map <uint32_t, transponder>::iterator transponder;
 
-	if (transponders.find(channel->getTsidOnid()) == transponders.end())
-	{
-		/* if not found, look up in nit */
-		if ((parse_nit(channel->getDiSEqC()) < 0))
-		{
-			currentTsidOnid = get_sdt_TsidOnid();
-			noNit = true;
-		}
-		else if (transponders.find(channel->getTsidOnid()) == transponders.end())
-		{
-			return false;
-		}
-	}
+	if (!channel)
+		return false;
 
-	currentTsidOnid = noNit ? currentTsidOnid : channel->getTsidOnid();
+	transponder = transponders.find(channel->getTsidOnid());
 
-	std::map <uint32_t, transponder>::iterator transponder = transponders.find(currentTsidOnid);
+	if (transponder == transponders.end())
+		return false;
 
-	return tuneFrequency
-	(
-		transponder->second.feparams,
-		transponder->second.polarization,
-		transponder->second.DiSEqC
-	);
+	return tuneFrequency(&(transponder->second.feparams), transponder->second.polarization, transponder->second.DiSEqC);
 }
 
-const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polarization, uint8_t diseqc)
+
+const bool
+CFrontend::tuneFrequency (dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc)
 {
-	bool secChanged = false;
+	int freq_offset = 0;
+
 	tuned = false;
 
+	std::cout << __PRETTY_FUNCTION__ << ": " << feparams->frequency << std::endl;
+
 	/* sec */
-	if (info->type == FE_QPSK)
-	{
-		secToneMode toneMode;
-		secVoltage voltage;
+	if (info->type == FE_QPSK) {
+
+		bool high_band;
 
 		/* tone */
-		if (feparams.Frequency < 11700000)
-		{
-			/* low band */
-			feparams.Frequency -= lnbOffsetsLow[diseqc];
-			toneMode = SEC_TONE_OFF;
+		if (feparams->frequency < 11700000) {
+			high_band = false;
+			freq_offset = lnbOffsetsLow[diseqc];
 		}
-		else
-		{
-			/* high band */
-			feparams.Frequency -= lnbOffsetsHigh[diseqc];
-			toneMode = SEC_TONE_ON;
+		else {
+			high_band = true;
+			freq_offset = lnbOffsetsHigh[diseqc];
 		}
 
-		/* voltage */
-		if (polarization == 1)
-		{
-			/* vertical */
-			voltage = SEC_VOLTAGE_13;
-		}
-		else
-		{
-			/* horizontal */
-			voltage = SEC_VOLTAGE_18;
-		}
-
-		/* do diseqc stuff */
-		switch (diseqcType)
-		{
-		case NO_DISEQC:
-			if (currentToneMode != toneMode)
-			{
-				secSetTone(toneMode);
-				secChanged = true;
-			}
-			if (currentVoltage != voltage)
-			{
-				secSetVoltage(voltage);
-				secChanged = true;
-			}
-			break;
-
-		case MINI_DISEQC:
-			if ((currentVoltage != voltage) || (currentToneMode != toneMode) || (currentDiseqc != diseqc))
-			{
-				sendDiseqcMiniCommand(toneMode, voltage, diseqc);
-				secChanged = true;
-			}
-			break;
-
-		case DISEQC_1_0:
-			if ((currentVoltage != voltage) || (currentToneMode != toneMode) || (currentDiseqc != diseqc))
-			{
-				sendDiseqcCommand(toneMode, voltage, diseqc, 0);
-				secChanged = true;
-			}
-			break;
-
-		case DISEQC_1_1:
-			if ((currentVoltage != voltage) || (currentToneMode != toneMode) || (currentDiseqc != diseqc))
-			{
-				sendDiseqcCommand(toneMode, voltage, diseqc, diseqcRepeats);
-				secChanged = true;
-			}
-			break;
-
-		case SMATV_REMOTE_TUNING:
-			if ((currentFrequency != feparams.Frequency) || (currentVoltage != voltage) || (currentToneMode != toneMode) || (currentDiseqc != diseqc))
-			{
-				sendDiseqcSmatvRemoteTuningCommand(toneMode, voltage, diseqc, feparams.Frequency);
-				secChanged = true;
-			}
-			break;
-		}
+		feparams->frequency -= freq_offset;
+		setSec (diseqc, polarization, high_band, feparams->frequency);
 	}
 
-	if ((currentFrequency != feparams.Frequency) || (secChanged == true))
-	{
-		/* tune */
-		setFrontend(&feparams);
+	if ((!(info->caps & FE_CAN_INVERSION_AUTO)) && (feparams->inversion == INVERSION_AUTO))
+		feparams->inversion = INVERSION_OFF;
 
-		/* wait for completion */
+	/* tune */
+	setFrontend(feparams);
+
+	/* wait for completion */
+	getEvent();
+
+
+	/*
+	 * software auto inversion for stupid frontends
+	 */
+
+	if ((!tuned) && (!(info->caps & FE_CAN_INVERSION_AUTO))) {
+		switch (feparams->inversion) {
+		case INVERSION_OFF:
+			feparams->inversion = INVERSION_ON;
+			break;
+		case INVERSION_ON:
+			feparams->inversion = INVERSION_OFF;
+			break;
+		}
+
+		setFrontend(feparams);
 		getEvent();
+	}
 
-		/*
-		 * the frontend got lock at a different frequency
-		 * than requested, so we need to look up the tsid/onid.
-		 */
-		if ((tuned == true) && (currentFrequency != feparams.Frequency))
-		{
-			currentTsidOnid = get_sdt_TsidOnid();
+	/*
+	 * the frontend got lock at a different frequency
+	 * than requested, so we need to look up the tsid/onid.
+	 *
+	 * FIXME: be somewhat tolerant about this since fe_bend_frequency
+	 * prevents exact tuning
+	 */
+
+	if ((tuned) && (currentFrequency != feparams->frequency)) {
+
+		uint32_t tsid_onid = get_sdt_TsidOnid();
+
+		if (currentTsidOnid != tsid_onid) {
+			if (!(info->caps & FE_CAN_INVERSION_AUTO)) {
+				switch (feparams->inversion) {
+				case INVERSION_OFF:
+					feparams->inversion = INVERSION_ON;
+					break;
+				case INVERSION_ON:
+					feparams->inversion = INVERSION_OFF;
+					break;
+				}
+
+				setFrontend(feparams);
+				getEvent();
+
+				if ((tuned) && (currentFrequency != feparams->frequency))
+					tsid_onid = get_sdt_TsidOnid();
+			}
+
+			currentTsidOnid = tsid_onid;
 		}
 	}
+
+	if (info->type == FE_QPSK)
+		feparams->frequency += freq_offset;
 
 	return tuned;
 }
 
-/*
- * zapit diseqc api
- */
-const bool CFrontend::sendDiseqcMiniCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc)
-{
-	secCmdSequence *sequence = new secCmdSequence();
 
-	switch (diseqc)
-	{
-	case 0:
-		sequence->miniCommand = SEC_MINI_A;
-		break;
-	case 1:
-		sequence->miniCommand = SEC_MINI_B;
-		break;
-	default:
-		failed = true;
-		return false;
-	}
 
-	sequence->numCommands = 0;
-	sequence->continuousTone = toneMode;
-	sequence->voltage = voltage;
-	sequence->commands = NULL;
-
-	secSendSequence(sequence);
-
-	delete sequence;
-
-	if (failed == false)
-	{
-		currentDiseqc = diseqc;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-const bool CFrontend::sendDiseqcPowerOn ()
-{
-	return sendDiseqcZeroByteCommand(0x10, 0x03);
-}
-
-const bool CFrontend::sendDiseqcReset ()
-{
-	return sendDiseqcZeroByteCommand(0x10, 0x00);
-}
-
-const bool CFrontend::sendDiseqcStandby ()
-{
-	return sendDiseqcZeroByteCommand(0x10, 0x02);
-}
-
-const bool CFrontend::sendDiseqcZeroByteCommand (uint8_t addr, uint8_t cmd)
-{
-	secCmdSequence *sequence = new secCmdSequence();
-	sequence->commands = new secCommand();
-
-	sequence->miniCommand = SEC_MINI_NONE;
-	sequence->continuousTone = SEC_TONE_OFF;
-	sequence->voltage = SEC_VOLTAGE_OFF;
-
-	sequence->commands[0].type = SEC_CMDTYPE_DISEQC;
-	sequence->commands[0].u.diseqc.addr = addr;
-	sequence->commands[0].u.diseqc.cmd = cmd;
-	sequence->commands[0].u.diseqc.numParams = 0;
-
-	secSendSequence(sequence);
-
-	delete sequence->commands;
-	delete sequence;
-
-	if (failed == false)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
 
 /*
- * this can handle a maximum of 12 LNBs,
- * connected to 3 cascaded switches.
- * for up to 64 LNBs, a more complex
- * setup will be needed.
+ * zapit SEC / DiSEqC api
  */
-const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t repeats)
+
+
+void
+CFrontend::setSec (uint8_t sat_no, uint8_t pol, bool high_band, uint32_t frequency)
 {
-	/* repeats = number of cascaded switches minus one */
-	if (repeats > 2)
-	{
-		std::cerr << "[CFrontend::sendDiseqcCommand] max. 2 repeats allowed." << std::endl;
-		return false;
+	uint8_t repeats = diseqcRepeats;
+
+	fe_sec_voltage_t v = pol ? SEC_VOLTAGE_13 : SEC_VOLTAGE_18;
+	fe_sec_tone_mode_t t = high_band ? SEC_TONE_ON : SEC_TONE_OFF;
+	fe_sec_mini_cmd_t b = (sat_no % 2) ? SEC_MINI_B : SEC_MINI_A;
+
+	/*
+	 * [0] from master, no reply, 1st transmission
+	 * [1] any lnb switcher or smatv
+	 * [2] write to port group 0 (committed switches)
+	 * [3] high nibble: reset bits, low nibble set bits
+	 *     bits are: option, position, polarizaion, band
+	 */
+
+	struct dvb_diseqc_master_cmd cmd = {
+		{ 0xe0, 0x10, 0x38, 0x00, 0x00, 0x00 }, 4
+	};
+
+	cmd.msg[3] = 0xf0 | (((sat_no * 4) & 0x0f) | (high_band ? 1 : 0) | (pol ? 0 : 2));
+
+	/*
+	 * set all SEC / DiSEqC parameters
+	 */
+
+	secSetTone(SEC_TONE_OFF);
+	secSetVoltage(v);
+
+	if (diseqcType >= SMATV_REMOTE_TUNING) {
+
+		if (diseqcType >= DISEQC_2_0)
+			cmd.msg[0] |= 0x02;	/* reply required */
+
+		sendDiseqcCommand(&cmd);
+
+		if (diseqcType >= DISEQC_2_0)
+			repeats += receiveDiseqcReply(50);
+
 	}
 
-	/* diseqc = currently selected lnb */
-	if (diseqc > 11)
-	{
-		std::cerr << "[CFrontend::sendDiseqcCommand] currently only 12 DiSEqC positions are supported." << std::endl;
-		return false;
-	}
+	if ((diseqcType >= DISEQC_1_1) && (repeats)) {
 
-	if (diseqc >= (repeats + 1) << 2)
-	{
-		std::cerr << "[CFrontend::sendDiseqcCommand] not enough repeats (" << repeats << ") for requested DiSEqC position (" << diseqc << ")." << std::endl;
-		return false;
-	}
+		for (uint16_t i = 0; i < repeats; i++) {
 
-	secCmdSequence *sequence = new secCmdSequence();
-	sequence->commands = new secCommand[(repeats * 2) + 1];
+			uint8_t again = 0;
 
-	sequence->miniCommand = SEC_MINI_NONE;
-	sequence->continuousTone = toneMode;
-	sequence->voltage = voltage;
+			usleep(100 * 1000);	/* wait at least 100ms before retransmission */
 
-#ifdef DBOX2
-	sequence->commands[0].type = SEC_CMDTYPE_DISEQC_RAW;
-	sequence->commands[0].u.diseqc.cmdtype = 0xE0;	/* from master, no reply, 1st transmission */
-#else
-	sequence->commands[0].type = SEC_CMDTYPE_DISEQC;
-#endif
-	sequence->commands[0].u.diseqc.addr = 0x10;	/* any lnb switcher or smatv */
-	sequence->commands[0].u.diseqc.cmd = 0x38;	/* write to port group 0 (committed switches) */
+			cmd.msg[2] |= 0x01;	/* uncommitted switches */
+			sendDiseqcCommand(&cmd);
 
-	if (diseqc < 4)
-	{
-		sequence->commands[0].u.diseqc.numParams = 1;
-		sequence->commands[0].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
-	}
-	else
-	{
-		sequence->commands[0].u.diseqc.numParams = 0;
-	}
+			if (diseqcType >= DISEQC_2_0)
+				again += receiveDiseqcReply(50);
 
-	for (sequence->numCommands = 1; sequence->numCommands < (repeats << 1) + 1; sequence->numCommands += 2)
-	{
-#ifdef DBOX2
-		sequence->commands[sequence->numCommands].type = SEC_CMDTYPE_DISEQC_RAW;
-		sequence->commands[sequence->numCommands].u.diseqc.cmdtype = (sequence->numCommands - 1 ? 0xE1 : 0xE0);
-		sequence->commands[sequence->numCommands + 1].type = SEC_CMDTYPE_DISEQC_RAW;
-		sequence->commands[sequence->numCommands + 1].u.diseqc.cmdtype = 0xE1;	/* from master, no reply, repeated transmission */
-#else
-		sequence->commands[sequence->numCommands].type = SEC_CMDTYPE_DISEQC;
-		sequence->commands[sequence->numCommands + 1].type = SEC_CMDTYPE_DISEQC;
-#endif
-		sequence->commands[sequence->numCommands].u.diseqc.addr = 0x10;
-		sequence->commands[sequence->numCommands].u.diseqc.cmd = 0x39;		/* write to port group 1 (uncommitted switches) */
-		sequence->commands[sequence->numCommands + 1].u.diseqc.addr = 0x10;
-		sequence->commands[sequence->numCommands + 1].u.diseqc.cmd = 0x38;
+			cmd.msg[0] |= 0x01;	/* repeated transmission */
+			cmd.msg[2] &= 0xFE;	/* committed switches */
+			sendDiseqcCommand(&cmd);
 
-		if (((sequence->numCommands == 1) && (diseqc < 8)) || ((sequence->numCommands == 3) && (diseqc >= 8)))
-		{
-			sequence->commands[sequence->numCommands].u.diseqc.numParams = 1;
-			sequence->commands[sequence->numCommands].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
-			sequence->commands[sequence->numCommands + 1].u.diseqc.numParams = 1;
-			sequence->commands[sequence->numCommands + 1].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+			if (diseqcType >= DISEQC_2_0)
+				again += receiveDiseqcReply(50);
+
+			if (again == 2)
+				repeats++;
+
 		}
-		else
-		{
-			sequence->commands[sequence->numCommands].u.diseqc.numParams = 0;
-			sequence->commands[sequence->numCommands + 1].u.diseqc.numParams = 0;
-		}
+
 	}
 
-	secSendSequence(sequence);
+	if (diseqcType == SMATV_REMOTE_TUNING)
+		sendDiseqcSmatvRemoteTuningCommand(frequency);
 
-	delete sequence->commands;
-	delete sequence;
+	if (diseqcType == MINI_DISEQC)
+		sendToneBurst(b);
 
-	if (failed == false)
-	{
-		currentDiseqc = diseqc;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	secSetTone(t);
 }
 
-const bool CFrontend::sendDiseqcSmatvRemoteTuningCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t frequency)
+
+const bool
+CFrontend::sendDiseqcPowerOn ()
 {
-	secCmdSequence *sequence = new secCmdSequence();
-	sequence->commands = new secCommand[2];
+	return sendDiseqcZeroByteCommand(0xe0, 0x10, 0x03);
+}
 
-	sequence->miniCommand = SEC_MINI_NONE;
-	sequence->continuousTone = toneMode;
-	sequence->voltage = voltage;
-	sequence->numCommands = 2;
 
-	sequence->commands[0].type = SEC_CMDTYPE_DISEQC;
-	sequence->commands[0].u.diseqc.addr = 0x10;	/* any interface */
-	sequence->commands[0].u.diseqc.cmd = 0x38;	/* write n0 */
-	sequence->commands[0].u.diseqc.numParams = 1;
-	sequence->commands[0].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+const bool
+CFrontend::sendDiseqcReset ()
+{
+	/* Reset && Clear Reset */
+	return (sendDiseqcZeroByteCommand(0xe0, 0x10, 0x00) && sendDiseqcZeroByteCommand(0xe0, 0x10, 0x01));
+}
 
-	sequence->commands[1].type = SEC_CMDTYPE_DISEQC;
-	sequence->commands[1].u.diseqc.addr = 0x71;	/* intelligent slave interface for multi-master bus */
-	sequence->commands[1].u.diseqc.cmd = 0x58;	/* write channel frequency */
-	sequence->commands[1].u.diseqc.numParams = 3;
-	sequence->commands[1].u.diseqc.params[0] = (((frequency / 10000000) << 4) & 0xF0) | ((frequency / 1000000) & 0x0F);
-	sequence->commands[1].u.diseqc.params[1] = (((frequency / 100000) << 4) & 0xF0) | ((frequency / 10000) & 0x0F);
-	sequence->commands[1].u.diseqc.params[2] = (((frequency / 1000) << 4) & 0xF0) | ((frequency / 100) & 0x0F);
 
-	secSendSequence(sequence);
+const bool
+CFrontend::sendDiseqcStandby ()
+{
+	return sendDiseqcZeroByteCommand(0xe0, 0x10, 0x02);
+}
 
-	delete sequence->commands;
-	delete sequence;
 
-	if (failed == false)
-	{
-		currentDiseqc = diseqc;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+const bool
+CFrontend::sendDiseqcZeroByteCommand (uint8_t framing_byte, uint8_t address, uint8_t command)
+{
+	struct dvb_diseqc_master_cmd diseqc_cmd = {
+		{ framing_byte, address, command, 0x00, 0x00, 0x00 }, 3
+	};
+
+	return sendDiseqcCommand(&diseqc_cmd);
+}
+
+
+const bool
+CFrontend::sendDiseqcSmatvRemoteTuningCommand (uint32_t frequency)
+{
+ 	/*
+	 * [0] from master, no reply, 1st transmission
+	 * [1] intelligent slave interface for multi-master bus
+	 * [2] write channel frequency
+	 * [3] frequency
+	 * [4] frequency
+	 * [5] frequency
+	 */
+
+	struct dvb_diseqc_master_cmd cmd = {
+		{ 0xe0, 0x71, 0x58, 0x00, 0x00, 0x00 }, 6
+	};
+
+	cmd.msg[3] = (((frequency / 10000000) << 4) & 0xF0) | ((frequency / 1000000) & 0x0F);
+	cmd.msg[4] = (((frequency / 100000) << 4) & 0xF0) | ((frequency / 10000) & 0x0F);
+	cmd.msg[5] = (((frequency / 1000) << 4) & 0xF0) | ((frequency / 100) & 0x0F);
+
+	return sendDiseqcCommand(&cmd);
 }
 

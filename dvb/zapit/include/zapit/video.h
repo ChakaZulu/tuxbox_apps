@@ -1,5 +1,5 @@
 /*
- * $Id: video.h,v 1.3 2002/09/21 20:20:05 thegoodguy Exp $
+ * $Id: video.h,v 1.4 2002/11/02 17:21:15 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -24,7 +24,7 @@
 
 #include <time.h>
 
-#include <ost/video.h>
+#include <linux/dvb/video.h>
 
 class CVideo
 {
@@ -33,7 +33,7 @@ class CVideo
 		int fd;
 
 		/* video status */
-		struct videoStatus status;
+		struct video_status status;
 
 		/* true when construction was complete */
 		bool initialized;
@@ -46,23 +46,23 @@ class CVideo
 		bool isInitialized () { return initialized; }
 
 		/* aspect ratio */
-		videoFormat_t getAspectRatio () { return status.videoFormat; }
-		int setAspectRatio (videoFormat_t format);
+		video_format_t getAspectRatio () { return status.video_format; }
+		int setAspectRatio (video_format_t format);
 
 		/* cropping mode */
-		videoDisplayFormat_t getCroppingMode () { return status.displayFormat; }
-		int setCroppingMode (videoDisplayFormat_t format);
+		video_displayformat_t getCroppingMode () { return status.display_format; }
+		int setCroppingMode (video_displayformat_t format);
 
 		/* stream source */
-		videoStreamSource_t getSource () { return status.streamSource; }
-		int setSource (videoStreamSource_t source);
+		video_stream_source_t getSource () { return status.stream_source; }
+		int setSource (video_stream_source_t source);
 
 		/* blank on freeze */
-		bool getBlank () { return status.videoBlank; }
+		bool getBlank () { return status.video_blank; }
 		int setBlank (bool blank);
 
 		/* get play state */
-		bool isPlaying () { return (status.playState == VIDEO_PLAYING); }
+		bool isPlaying () { return (status.play_state == VIDEO_PLAYING); }
 
 		/* change video play state */
 		int start ();

@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.4 2002/10/12 20:19:44 obi Exp $
+ * $Id: video.cpp,v 1.5 2002/11/02 17:21:15 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -32,8 +32,8 @@
 CVideo::CVideo ()
 {
 	initialized = false;
-	status.playState = VIDEO_STOPPED;
-	status.streamSource = VIDEO_SOURCE_DEMUX;
+	status.play_state = VIDEO_STOPPED;
+	status.stream_source = VIDEO_SOURCE_DEMUX;
 
 	if ((fd = open(VIDEO_DEVICE, O_RDWR)) < 0)
 	{
@@ -58,9 +58,9 @@ CVideo::~CVideo ()
 	}
 }
 
-int CVideo::setAspectRatio (videoFormat_t format)
+int CVideo::setAspectRatio (video_format_t format)
 {
-	if (status.videoFormat == format)
+	if (status.video_format == format)
 	{
 		return 0;
 	}
@@ -71,13 +71,13 @@ int CVideo::setAspectRatio (videoFormat_t format)
 		return -1;
 	}
 
-	status.videoFormat = format;
+	status.video_format = format;
 	return 0;
 }
 
-int CVideo::setCroppingMode (videoDisplayFormat_t format)
+int CVideo::setCroppingMode (video_displayformat_t format)
 {
-	if (status.displayFormat == format)
+	if (status.display_format == format)
 	{
 		return 0;
 	}
@@ -88,19 +88,19 @@ int CVideo::setCroppingMode (videoDisplayFormat_t format)
 		return -1;
 	}
 
-	status.displayFormat = format;
+	status.display_format = format;
 	return 0;
 }
 
-int CVideo::setSource (videoStreamSource_t source)
+int CVideo::setSource (video_stream_source_t source)
 {
 #ifndef ALWAYS_DO_VIDEO_SELECT_SOURCE
-	if (status.streamSource == source)
+	if (status.stream_source == source)
 	{
 		return 0;
 	}
 #endif
-	if (status.playState != VIDEO_STOPPED)
+	if (status.play_state != VIDEO_STOPPED)
 	{
 		return -1;
 	}
@@ -111,14 +111,14 @@ int CVideo::setSource (videoStreamSource_t source)
 		return -1;
 	}
 
-	status.streamSource = source;
+	status.stream_source = source;
 
 	return 0;
 }
 
 int CVideo::start ()
 {
-	if (status.playState == VIDEO_PLAYING)
+	if (status.play_state == VIDEO_PLAYING)
 	{
 		return 0;
 	}
@@ -129,32 +129,32 @@ int CVideo::start ()
 		return -1;
 	}
 
-	status.playState = VIDEO_PLAYING;
+	status.play_state = VIDEO_PLAYING;
 
 	return 0;
 }
 
 int CVideo::stop ()
 {
-	if (status.playState == VIDEO_STOPPED)
+	if (status.play_state == VIDEO_STOPPED)
 	{
 		return 0;
 	}
 
-	if (ioctl(fd, VIDEO_STOP, status.videoBlank) < 0)
+	if (ioctl(fd, VIDEO_STOP, status.video_blank) < 0)
 	{
 		perror("VIDEO_STOP");
 		return -1;
 	}
 
-	status.playState = VIDEO_STOPPED;
+	status.play_state = VIDEO_STOPPED;
 
 	return 0;
 }
 
 int CVideo::setBlank (bool blank)
 {
-	if (status.videoBlank == blank)
+	if (status.video_blank == blank)
 	{
 		return 0;
 	}
@@ -165,7 +165,7 @@ int CVideo::setBlank (bool blank)
 		return -1;
 	}
 
-	status.videoBlank = blank;
+	status.video_blank = blank;
 
 	return 0;
 }

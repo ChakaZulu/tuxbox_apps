@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.81 2002/10/12 23:14:20 obi Exp $
+ * $Id: scan.cpp,v 1.82 2002/11/02 17:21:15 obi Exp $
  */
 
 #include <fcntl.h>
@@ -61,130 +61,75 @@ void stop_scan()
 	}
 }
 
+
 /* build transponder for cable-users with sat-feed*/
-int build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, Modulation modulation)
+int build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, fe_code_rate_t fec_inner, fe_modulation_t modulation)
 {
-	FrontendParameters feparams;
-	feparams.Frequency = frequency;
-	feparams.Inversion = INVERSION_AUTO;
-	if (frontend->getInfo()->type == FE_QPSK)
-	{
-		feparams.u.qpsk.SymbolRate = symbol_rate;
-		feparams.u.qpsk.FEC_inner = FEC_inner;
-	}
-	else
-	{
-		feparams.u.qam.SymbolRate = symbol_rate;
-		feparams.u.qam.FEC_inner = FEC_inner;
-		feparams.u.qam.QAM = modulation;
+	dvb_frontend_parameters feparams;
+
+	if (frontend->getInfo()->type != FE_QAM)
+		return -1;
+
+	feparams.frequency = frequency;
+	feparams.inversion = INVERSION_AUTO;
+	feparams.u.qam.symbol_rate = symbol_rate;
+	feparams.u.qam.fec_inner = fec_inner;
+	feparams.u.qam.modulation = modulation;
+
+	if (!frontend->tuneFrequency(&feparams, 0, 0))
+		return -1;
+
+	return fake_pat(get_sdt_TsidOnid(), feparams, 0, 0);
+}
+
+
+int get_nits (uint32_t frequency, uint32_t symbol_rate, fe_code_rate_t fec_inner, uint8_t polarization, uint8_t DiSEqC, fe_modulation_t modulation)
+{
+	dvb_frontend_parameters feparams;
+	feparams.frequency = frequency;
+	feparams.inversion = INVERSION_AUTO;
+
+	switch (frontend->getInfo()->type) {
+	case FE_QPSK:
+		feparams.u.qpsk.symbol_rate = symbol_rate;
+		feparams.u.qpsk.fec_inner = fec_inner;
+		break;
+
+	case FE_QAM:
+		feparams.u.qam.symbol_rate = symbol_rate;
+		feparams.u.qam.fec_inner = fec_inner;
+		feparams.u.qam.modulation = modulation;
+		break;
+
+	case FE_OFDM:
+	default:
+		return -1;
 	}
 
-	if (frontend->tuneFrequency(feparams, 0, 0) == true)
-	{
-		status = fake_pat(get_sdt_TsidOnid(), feparams,0,0);
-	}
-	else
-	{
-		printf("No signal found on transponder\n");
-		status = -1;
-	}
+	if (!frontend->tuneFrequency(&feparams, polarization, DiSEqC))
+		return -1;
+
+	if ((status = parse_nit(DiSEqC)) <= -2) /* nit unavailable */
+		status = fake_pat(get_sdt_TsidOnid(), feparams, polarization, DiSEqC);
+
 	return status;
 }
 
-int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarization, uint8_t DiSEqC, Modulation modulation)
-{
-	FrontendParameters feparams;
-	feparams.Frequency = frequency;
-	feparams.Inversion = INVERSION_AUTO;
-
-	if (frontend->getInfo()->type == FE_QPSK)
-	{
-		feparams.u.qpsk.SymbolRate = symbol_rate;
-		feparams.u.qpsk.FEC_inner = FEC_inner;
-	}
-	else
-	{
-		feparams.u.qam.SymbolRate = symbol_rate;
-		feparams.u.qam.FEC_inner = FEC_inner;
-		feparams.u.qam.QAM = modulation;
-	}
-
-	if (frontend->tuneFrequency(feparams, polarization, DiSEqC) == true)
-	{
-		int tmp = found_transponders;
-
-		if ((status = parse_nit(DiSEqC)) <= -2)
-		{
-			/* NIT war leer, leese TS-ID und ON-ID von der SDT aus */
-			switch (status)
-			{
-				case -2:
-					printf("[scan.cpp] NIT nicht frontendkonform, lese SDT aus\n");
-					break;
-				case -3:
-					printf("[scan.cpp] NIT war leer, lese SDT aus\n");
-					break;
-				//todo weitere stati abfragen
-			}
-
-			status = fake_pat(get_sdt_TsidOnid(), feparams, polarization, DiSEqC);
-			printf("[scan.cpp] TS-ON ID = %08x\n", get_sdt_TsidOnid());
-		}
-
-		if (found_transponders != tmp)
-		{
-			printf("found new transponder(s) on %u %u %hhu\n", frequency, symbol_rate, polarization);
-		}
-		else
-		{
-			printf("no new transponder(s) in current nit\n");
-		}
-	}
-	else
-	{
-		printf("\n****************\nNo signal found on transponder (%u %u %hhu)\n****************\n\n", frequency, symbol_rate, polarization);
-		status = -1;
-	}
-
-	return status;
-}
 
 int get_sdts()
 {
 	stiterator tI;
-	int demux_fd = -1;
 
-	//demux_fd = open(DEMUX_DEVICE, O_RDWR);
-	//if (demux_fd == -1)
-	//	perror(DEMUX_DEVICE);
+	for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++) {
 
-	for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-	{
-		if (frontend->tuneFrequency(tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) == true)
-		{
-			printf("[scan.cpp] parsing SDT (tsid:onid %04x:%04x)\n", tI->second.transport_stream_id, tI->second.original_network_id);
-			status = parse_sdt(tI->second.DiSEqC);
+		if (!frontend->tuneFrequency(&tI->second.feparams, tI->second.polarization, tI->second.DiSEqC))
+			continue;
 
-			if (demux_fd != -1) {
-				printf("[scan.cpp] parsing PAT\n");
-				parse_pat(demux_fd, NULL, tI->second.original_network_id, tI->second.DiSEqC);
-				printf("[scan.cpp] parsing BAT\n");
-				parse_bat(demux_fd);
-				printf("[scan.cpp] parsing NIT\n");
-				parse_nit(tI->second.DiSEqC);
-			}
-		}
-		else
-		{
-			printf("\n****************\nNo signal found on transponder (%u %u %hhu)\n****************\n\n", tI->second.feparams.Frequency, tI->second.feparams.u.qpsk.SymbolRate, tI->second.polarization);
-			status = -1;
-		}
+		printf("[scan.cpp] parsing SDT (tsid:onid %04x:%04x)\n", tI->second.transport_stream_id, tI->second.original_network_id);
+		parse_sdt(tI->second.DiSEqC);
 	}
 
-	if (demux_fd != -1)
-		close(demux_fd);
-
-	return status;
+	return 0;
 }
 
 FILE *write_xml_header (const char *filename)
@@ -197,101 +142,85 @@ FILE *write_xml_header (const char *filename)
 		stop_scan();
 		pthread_exit(0);
 	}
-	else
-	{
-		fprintf(fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<zapit>\n");
-	}
+
+	fprintf(fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<zapit>\n");
 
 	return fd;
 }
 
 int write_xml_footer(FILE *fd)
 {
-	if (fd != NULL)
-	{
+	if (fd != NULL)	{
 		fprintf(fd, "</zapit>\n");
-		status = fclose(fd);
+		return fclose(fd);
 	}
-	else
-	{
-		status = -1;
-	}
-	return status;
+
+	return -1;
 }
 
 void write_bouquets()
 {
-	if (bouquetMode == CZapitClient::BM_DELETEBOUQUETS)
-	{
+	if (bouquetMode == CZapitClient::BM_DELETEBOUQUETS) {
 		printf("[zapit] removing existing bouquets.\n");
 		unlink(BOUQUETS_XML);
 	}
 
 	else if ((bouquetMode == CZapitClient::BM_DONTTOUCHBOUQUETS))
-	{
 		printf("[zapit] leaving bouquets untouched.\n");
-	}
 
 	else
-	{
 		scanBouquetManager->saveBouquets();
-	}
 }
 
 void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id, uint8_t diseqc)
 {
 	stiterator tI = scantransponders.find((transport_stream_id << 16) | original_network_id);
 
-	switch (frontend->getInfo()->type)
-	{
+	switch (frontend->getInfo()->type) {
 	case FE_QAM: /* cable */
 		fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" symbol_rate=\"%u\" fec_inner=\"%hhu\" modulation=\"%hhu\">\n",
+			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hhu\" symbol_rate=\"%u\" fec_inner=\"%hhu\" modulation=\"%hhu\">\n",
 			tI->second.transport_stream_id,
 			tI->second.original_network_id,
-			tI->second.feparams.Frequency,
-			tI->second.feparams.u.qam.SymbolRate,
-			tI->second.feparams.u.qam.FEC_inner,
-			tI->second.feparams.u.qam.QAM);
+			tI->second.feparams.frequency,
+			tI->second.feparams.inversion,
+			tI->second.feparams.u.qam.symbol_rate,
+			tI->second.feparams.u.qam.fec_inner,
+			tI->second.feparams.u.qam.modulation);
 		break;
 
 	case FE_QPSK: /* satellite */
 		fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" symbol_rate=\"%u\" fec_inner=\"%hhu\" polarization=\"%hhu\">\n",
+			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hhu\" symbol_rate=\"%u\" fec_inner=\"%hhu\" polarization=\"%hhu\">\n",
 			tI->second.transport_stream_id,
 			tI->second.original_network_id,
-			tI->second.feparams.Frequency,
-			tI->second.feparams.u.qpsk.SymbolRate,
-			tI->second.feparams.u.qpsk.FEC_inner,
+			tI->second.feparams.frequency,
+			tI->second.feparams.inversion,
+			tI->second.feparams.u.qpsk.symbol_rate,
+			tI->second.feparams.u.qpsk.fec_inner,
 			tI->second.polarization);
 		break;
 
+	case FE_OFDM: /* terrestrial */
 	default:
 		return;
 	}
 
 	for (tallchans_iterator cI = allchans.begin(); cI != allchans.end(); cI++)
-	{
-		if ((cI->second.getTransportStreamId() == transport_stream_id) && (cI->second.getOriginalNetworkId() == original_network_id))
-		{
+		if ((cI->second.getTransportStreamId() == transport_stream_id) && (cI->second.getOriginalNetworkId() == original_network_id)) {
 			if (cI->second.getName().length() == 0)
-			{
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\"/>\n",
 					cI->second.getServiceId(),
 					cI->second.getServiceId(),
 					cI->second.getServiceType());
-			}
 			else
-			{
 				fprintf(fd,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
 					cI->second.getServiceId(),
 					convert_UTF8_To_UTF8_XML(cI->second.getName()).c_str(),
 					cI->second.getServiceType());
-			}
 		}
-	}
 
 	fprintf(fd, "\t\t</transponder>\n");
 
@@ -418,11 +347,9 @@ void *start_scanthread(void *param)
 		/* increase sat counter */
 		curr_sat++;
 
-		/* satellite tuners might need diseqc */
+		/* satellite receivers might need diseqc */
 		if (frontend->getInfo()->type == FE_QPSK)
-		{
 			diseqc_pos = spI->first;
-		}
 
 		/* send sat name to client */
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &providerName, strlen(providerName) + 1);
@@ -450,10 +377,10 @@ void *start_scanthread(void *param)
 
 			if (!strcmp(type,"cable") && satfeed)
 				/* build special transponder for cable with satfeed*/
-				status = build_bf_transponder(frequency, symbol_rate, CFrontend::getFEC(fec_inner), CFrontend::getModulation(modulation));
+				status = build_bf_transponder(frequency, symbol_rate, CFrontend::getCodeRate(fec_inner), CFrontend::getModulation(modulation));
 			else
 				/* read network information table */
-				status = get_nits(frequency, symbol_rate, CFrontend::getFEC(fec_inner), polarization, diseqc_pos, CFrontend::getModulation(modulation));
+				status = get_nits(frequency, symbol_rate, CFrontend::getCodeRate(fec_inner), polarization, diseqc_pos, CFrontend::getModulation(modulation));
 			/* next transponder */
 			transponder = transponder->GetNext();
 		}

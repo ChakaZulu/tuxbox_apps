@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.49 2002/10/31 10:10:36 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.50 2002/11/02 17:21:16 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -261,10 +261,10 @@ uint8_t stuffing_descriptor (uint8_t *buffer)
 /* 0x43 */
 uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC)
 {
-	FrontendParameters feparams;
+	dvb_frontend_parameters feparams;
 	uint8_t polarization;
 
-	feparams.Frequency =
+	feparams.frequency =
 	(
 		((buffer[2] >> 4)	* 100000000) +
 		((buffer[2] & 0x0F)	* 10000000) +
@@ -275,14 +275,10 @@ uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transpor
 		((buffer[5] >> 4)	* 100) +
 		((buffer[5] & 0x0F)	* 10)
 	);
-	if (frontend->getInfo()->type == FE_QAM)
-	{
-		if (feparams.Frequency > 810000) return 0;
-	}
 
-	feparams.Inversion = INVERSION_AUTO;
+	feparams.inversion = INVERSION_AUTO;
 
-	feparams.u.qpsk.SymbolRate =
+	feparams.u.qpsk.symbol_rate =
 	(
 		((buffer[9] >> 4)	* 100000000) +
 		((buffer[9] & 0x0F)	* 10000000) +
@@ -293,7 +289,7 @@ uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transpor
 		((buffer[12] >> 4)	* 100)
 	);
 
-	feparams.u.qpsk.FEC_inner = CFrontend::getFEC(buffer[12] & 0x0F);
+	feparams.u.qpsk.fec_inner = CFrontend::getCodeRate(buffer[12] & 0x0F);
 	polarization = (buffer[8] >> 5) & 0x03;
 
 	if (scantransponders.find((transport_stream_id << 16) | original_network_id) == scantransponders.end())
@@ -331,24 +327,23 @@ uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transpor
 /* 0x44 */
 uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id)
 {
-	FrontendParameters feparams;
+	dvb_frontend_parameters feparams;
 
-	feparams.Frequency =
+	feparams.frequency =
 	(
-		((buffer[2] >> 4)	* 1000000) +
-		((buffer[2] & 0x0F)	* 100000) +
-		((buffer[3] >> 4)	* 10000) +
-		((buffer[3] & 0x0F)	* 1000) +
-		((buffer[4] >> 4)	* 100) +
-		((buffer[4] & 0x0F)	* 10) +
-		((buffer[5] >> 4)	* 1)
+		((buffer[2] >> 4)	* 1000000000) +
+		((buffer[2] & 0x0F)	* 100000000) +
+		((buffer[3] >> 4)	* 10000000) +
+		((buffer[3] & 0x0F)	* 1000000) +
+		((buffer[4] >> 4)	* 100000) +
+		((buffer[4] & 0x0F)	* 10000) +
+		((buffer[5] >> 4)	* 1000) +
+		((buffer[6] & 0x0F)	* 100)
 	);
 
-	if (feparams.Frequency > 810000) return 0;
+	feparams.inversion = INVERSION_AUTO;
 
-	feparams.Inversion = INVERSION_AUTO;
-
-	feparams.u.qam.SymbolRate =
+	feparams.u.qam.symbol_rate =
 	(
 		((buffer[9] >> 4)	* 100000000) +
 		((buffer[9] & 0x0F)	* 10000000) +
@@ -359,8 +354,8 @@ uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_st
 		((buffer[12] >> 4)	* 100)
 	);
 
-	feparams.u.qam.FEC_inner = CFrontend::getFEC(buffer[12] & 0x0F);
-	feparams.u.qam.QAM = CFrontend::getModulation(buffer[8]);
+	feparams.u.qam.fec_inner = CFrontend::getCodeRate(buffer[12] & 0x0F);
+	feparams.u.qam.modulation = CFrontend::getModulation(buffer[8]);
 
 	if (scantransponders.find((transport_stream_id << 16) | original_network_id) == scantransponders.end())
 	{
