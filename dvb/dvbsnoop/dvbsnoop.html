@@ -68,14 +68,14 @@ License:
 		encrypted TV channels.</P> 
 	 <P><BR><BR><BR></P> 
 	 <H2>Installation...</H2> 
-	 <P>dvbsnoop is based on the <A HREF="http:/www.linuxtv.org">linux dvb
+	 <P>dvbsnoop is based on the <A HREF="http://www.linuxtv.org">linux dvb
 		api</A>. You need to have the dvb driver installed on your computer to use
 		dvbsnoop. dvbsnoop is text-based, so it should work on any unix based system,
 		which offers you shell access.</P> 
-	 <H3> on a dbox2/linux (ppc)</H3> 
-	 <P>dvbsnoop is part of the dbox2 cdk. The dbox2 is a powerfull digital
+	<H3> cross compiling for the dbox2 (ppc)</H3> 
+	 <P>dvbsnoop is part of the dbox2 cdk. The dbox2 is a powerful digital
 		satellite receiver (set top box) with a network interface.<BR> Just follow the
-		install instruction of the dbox2 cdk:</P> 
+		installation instructions of the dbox2 cdk:</P> 
 	 <TABLE CELLPADDING="10"> 
 		<TR> 
 		  <TD>&nbsp;</TD> 
@@ -87,11 +87,13 @@ make .dvbsnoop
 </PRE></TD> 
 		</TR> 
 	 </TABLE> 
-	 <H3> on a PC/linux (i386)</H3> 
+	 <H3> native compilation</H3> 
 	 <P>Check out dvbsnoop from the cvs. You will find the cvs and checkout
-		instructions on <A HREF="http://cvs.tuxbox.org">http://cvs.tuxbox.org</A>. You
-		may need to copy the file "acinclude.m4" from the tuxbox-CVS directory (/cdk)
-		to the dvbsnoop directory.</P> 
+	 	instructions on <A HREF="http://cvs.tuxbox.org">http://cvs.tuxbox.org</A>.
+		If your distribution still uses Linux kernel 2.4, then you probably need to
+		set the path to your DVB API header files by appending
+			<PRE>CPPFLAGS=-I/path/to/dvb-kernel/linux/include</PRE>
+		to the configure command.</P>
 	 <TABLE CELLPADDING="10"> 
 		<TR> 
 		  <TD>&nbsp;</TD> 
@@ -107,21 +109,6 @@ make
 		card for my linux server) - so I do not know if dvbsnoop is compiling on a
 		linux based PC smoothly. Feedback or Makefile.am patches would be nice, if
 		there is any problem...</P> 
-	 <H3> on a PC/linux (i386)</H3> 
-	 <TABLE CELLPADDING="10"> 
-		<TR> 
-		  <TD>&nbsp;</TD> 
-		  <TD BGCOLOR="#c0c0c0"> 
-			 <PRE>cp Makefile.simple Makefile
-vi Makefile
-(do some adaption stuff...)
-make
-</PRE></TD> 
-		</TR> 
-	 </TABLE> 
-	 <P>Basically, you have to compile all .c-files into one executable. Include
-		pathes have to be set to the dvbsnoop/src directory and to the DVB-API base
-		include directory...</P> 
 	 <P><BR><BR><BR></P> 
 	 <H2>How to use dvbsnoop?</H2> 
 	 <P>dvbsnoop is a commandline tool.<BR>To tune in a transponder, use a
