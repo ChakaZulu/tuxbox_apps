@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.3 2002/08/27 19:00:45 obi Exp $
+$Id: dvbsnoop.h,v 1.4 2002/09/13 23:57:04 obi Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -8,6 +8,9 @@ $Id: dvbsnoop.h,v 1.3 2002/08/27 19:00:45 obi Exp $
    (c) rasc
 
 $Log: dvbsnoop.h,v $
+Revision 1.4  2002/09/13 23:57:04  obi
+define NEWSTRUCT to work with current linuxtv cvs
+
 Revision 1.3  2002/08/27 19:00:45  obi
 use devfs device names
 
@@ -22,6 +25,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #define VERSION  "0.7b"
 
+//#define NEWSTRUCT
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,26 +35,18 @@ dvbsnoop v0.7  -- Commit to CVS
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#ifdef NEWSTRUCT
+#include <linux/dvb/dmx.h>
+#define DEMUX_DEVICE "/dev/dvb/adapter0/demux0"
+#define DVR_DEVICE   "/dev/dvb/adapter0/dvr0"
+#else
 #include <ost/dmx.h>
-
-
-//typedef  unsigned long   u_long;
-//typedef  unsigned int    u_int;
-//typedef  unsigned char   u_char;
-
+#define DEMUX_DEVICE "/dev/dvb/card0/demux0"
+#define DVR_DEVICE   "/dev/dvb/card0/dvr0"
+#endif
 
 #include "helper.h"
 #include "dvb_str.h"
 #include "output.h"
-
-
-
-
-
-
-
-#define DEMUX_DEVICE "/dev/dvb/card0/demux0"
-#define DVR_DEVICE   "/dev/dvb/card0/dvr0"
-
-
 
