@@ -5895,7 +5895,7 @@ void eZapMain::gotMessage(const int &c)
 	else if ( c == eZapMain::messageWakeUp )
 	{
 		if ( eZapStandby::getInstance() )
-			eZapStandby::getInstance()->wakeUp(1);
+			eZapStandby::getInstance()->wakeUp(0);
 		else if ( enigmaVCR::getInstance() )
 			enigmaVCR::getInstance()->switchBack();
 		return;

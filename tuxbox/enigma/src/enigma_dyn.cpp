@@ -465,7 +465,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 		{
 			if (eZapStandby::getInstance())
 			{
-				eZapStandby::getInstance()->wakeUp(1);
+				eZapStandby::getInstance()->wakeUp(0);
 				result = "Enigma is waking up...";
 			}
 			else
