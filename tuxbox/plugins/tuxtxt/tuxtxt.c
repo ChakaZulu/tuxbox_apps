@@ -452,7 +452,7 @@ void dump_page()
 		
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.83 $";
+	char cvs_revision[] = "$Revision: 1.84 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -1090,6 +1090,9 @@ void CleanUp()
 
 	/* close saa */
 	close(saa);
+
+	/* close pig */
+	close(pig);
 
 	/* close freetype */
 	FTC_Manager_Done(manager);
