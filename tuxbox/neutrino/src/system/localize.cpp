@@ -49,12 +49,16 @@ char* getISO639Description(char *iso)
 
 void CLocaleManager::loadLocale(string locale)
 {
-	string filename = DATADIR  "/neutrino/locale/" + locale + ".locale";
-	FILE* fd = fopen(filename.c_str(), "r");
+	string filename[] = {"/var/tuxbox/config/locale/" + locale + ".locale",DATADIR  "/neutrino/locale/" + locale + ".locale"};
+	FILE* fd = fopen(filename[0].c_str(), "r");
 	if(!fd)
 	{
-		perror("cannot read locale");
-		return;
+		fd = fopen(filename[1].c_str(), "r");
+		if(!fd)
+		{		
+			perror("cannot read locale");
+			return;
+		}
 	}
 
 	//	printf("read locale: %s\n", locale.c_str() );

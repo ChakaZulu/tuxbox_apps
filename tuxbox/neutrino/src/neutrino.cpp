@@ -1249,28 +1249,35 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	int n;
 	//		printf("scanning locale dir now....(perhaps)\n");
 
-	n = scandir(DATADIR "/neutrino/locale", &namelist, 0, alphasort);
-	if (n < 0)
+	char *pfad[] = {DATADIR "/neutrino/locale","/var/tuxbox/config/locale"};
+	string filen, locale;
+	int pos;
+
+	for(int p = 0;p < 2;p++)
 	{
-		perror("scandir");
-		//should be available...
-		oj->addOption( "english" );
-	}
-	else
-	{
-		for(int count=0;count<n;count++)
+		n = scandir(pfad[p], &namelist, 0, alphasort);
+		if (n < 0)
 		{
-			string filen = namelist[count]->d_name;
-			int pos = filen.find(".locale");
-			if(pos!=-1)
-			{
-				string locale = filen.substr(0,pos);
-				//					printf("locale found: %s\n", locale.c_str() );
-				oj->addOption( locale );
-			}
-			free(namelist[count]);
+			perror("scandir");
+			//should be available...
+//			oj->addOption( "english" );
 		}
-		free(namelist);
+		else
+		{
+			for(int count=0;count<n;count++)
+			{
+				filen = namelist[count]->d_name;
+				pos = filen.find(".locale");
+				if(pos!=-1)
+				{
+					locale = filen.substr(0,pos);
+					//					printf("locale found: %s\n", locale.c_str() );
+					oj->addOption( locale );
+				}
+				free(namelist[count]);
+			}
+			free(namelist);
+		}
 	}
 	languageSettings.addItem( oj );
 }
@@ -1450,6 +1457,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	streamingSettings.addItem( oj );
+	streamstatus = 0;
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
@@ -1737,7 +1745,6 @@ void CNeutrinoApp::ShowStreamFeatures()
 //	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
 //		new CFavorites, id, true, CRCInput::RC_yellow, "gelb.raw"), false );
 	
-	streamstatus = 0;
 	// start/stop streaming
 	if(g_settings.network_streaming_use)
 	{
@@ -2382,7 +2389,115 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 		return messages_return::handled;
 	}
+/*
+		if (msg == NeutrinoMessages::RECORD_START)
+		{
+			if(CVCRControl::getInstance()->registeredDevices() > 0)
+			{
+				if(g_Zapit->getCurrentServiceID() != ((CTimerEvent::EventInfo *) data)->onidSid)	// und momentan noch nicht getuned ist
+					g_Zapit->zapTo_serviceID(((CTimerEvent::EventInfo *) data)->onidSid);		// dann umschalten
+				CVCRControl::CServerDeviceInfo serverinfo;
+				serverinfo.StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
+				serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
+				CVCRControl::getInstance()->setDeviceOptions(0,&serverinfo);
 
+				CVCRControl::getInstance()->Record((CTimerEvent::EventInfo *) data);
+				streamstatus = 1;
+			}
+			else
+				printf("Keine vcr Devices registriert\n");
+			return messages_return::handled | messages_return::cancel_all;
+		}
+
+		if ( msg == NeutrinoMessages::RECORD_STOP)
+		{
+			if(CVCRControl::getInstance()->registeredDevices() > 0)
+			{
+				if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE)
+				{
+					CVCRControl::getInstance()->Stop();
+					streamstatus=0;
+				}
+				else
+					printf("falscher state\n");
+			}
+			else
+				printf("Keine vcr Devices registriert\n");
+			return messages_return::handled;
+		}
+
+		if ( msg == NeutrinoMessages::ZAPTO)
+		{
+			CTimerEvent::EventInfo * eventinfo; 
+			eventinfo = (CTimerEvent::EventInfo *) data;
+			channelList->zapToOnidSid(eventinfo->onidSid);
+			return messages_return::handled;
+		}
+
+		if ( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
+		{
+			ShowHint ( "messagebox.info", g_Locale->getText("zaptotimer.announce") );
+			return messages_return::handled;
+		}
+		if ( msg == NeutrinoMessages::ANNOUNCE_RECORD)
+		{
+			ShowHint ( "messagebox.info", g_Locale->getText("recordtimer.announce") );
+			return messages_return::handled;
+		}
+		if ( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
+		{
+			ShowHint ( "messagebox.info", g_Locale->getText("sleeptimerbox.announce") );
+			return messages_return::handled;
+		}
+		if ( msg == NeutrinoMessages::SLEEPTIMER)
+		{
+			if(g_settings.shutdown_real)
+				ExitRun();
+			else
+				standbyMode( true );
+			return messages_return::handled;
+		}
+		else if ( msg == NeutrinoMessages::STANDBY_ON )
+		{
+			if ( mode != mode_standby )
+			{
+				// noch nicht im Standby-Mode...
+				standbyMode( true );
+			}
+			g_RCInput->clearRCMsg();
+			return messages_return::handled;
+		}
+		else if ( msg == NeutrinoMessages::STANDBY_OFF )
+		{
+			if ( mode == mode_standby )
+			{
+				// WAKEUP
+				standbyMode( false );
+			}
+			g_RCInput->clearRCMsg();
+			return messages_return::handled;
+		}
+		else if ( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
+		{
+			//TODO: MsgBox mit Ok / Cancel
+		}
+		else if ( msg == NeutrinoMessages::SHUTDOWN )
+		{
+			// AUSSCHALTEN...
+			ExitRun();
+			return messages_return::handled;
+		}
+		else if ( msg == NeutrinoMessages::EVT_POPUP )
+		{
+			ShowHint ( "messagebox.info", string((char *) data) );
+			return messages_return::handled;
+		}
+		else if ( msg == NeutrinoMessages::EVT_EXTMSG )
+		{
+			ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+			return messages_return::handled;
+		}
+*/
 	if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
 		delete (unsigned char*) data;
 
@@ -2799,7 +2914,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.317 2002/09/07 14:57:37 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.318 2002/09/07 16:33:46 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
