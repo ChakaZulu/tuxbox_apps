@@ -148,13 +148,13 @@ infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar
 infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
 infoviewer.selecttime Startzeiten
 infoviewer.nocurrent Keine Info zu laufendem Programm
-infoviewer.noepg Kein EPG verfügbar
+infoviewer.noepg Keine EPG-Information verfügbar
 infoviewer.subservice Bildregie
 
 epgviewer.notfound keine Programminformationen (EPG) gefunden
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
 epglist.head Vorschau - %s
-epglist.noevents Kein EPG verfügbar...
+epglist.noevents Keine EPG-Information verfügbar.
 
 channellist.since seit %02d:%02d
 
