@@ -69,8 +69,22 @@
 
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
-#define cramfs_list_filename "cramfs.list"
-#define local_cramfs_filename "update.cramfs"
+
+#ifdef SQUASHFS
+#define LIST_OF_UPDATES_LOCAL_FILENAME "squashfs.list"
+#define UPDATE_LOCAL_FILENAME          "update.squashfs"
+#define RELEASE_CYCLE                  "1.8"
+#define FILEBROWSER_UPDATE_FILTER      "squashfs"
+#define MTD_OF_WHOLE_IMAGE             5
+#define MTD_DEVICE_OF_UPDATE_PART      "/dev/mtd/3"
+#else
+#define LIST_OF_UPDATES_LOCAL_FILENAME "cramfs.list"
+#define UPDATE_LOCAL_FILENAME          "update.cramfs"
+#define RELEASE_CYCLE                  "1.7"
+#define FILEBROWSER_UPDATE_FILTER      "cramfs"
+#define MTD_OF_WHOLE_IMAGE             4
+#define MTD_DEVICE_OF_UPDATE_PART      "/dev/mtd/2"
+#endif
 
 
 CFlashUpdate::CFlashUpdate()
@@ -107,7 +121,7 @@ bool CFlashUpdate::selectHttpImage(void)
 	std::string url;
 	std::string name;
 	std::string version;
-	std::vector<std::string> cramfs_lists, urls, names, versions, descriptions;
+	std::vector<std::string> updates_lists, urls, names, versions, descriptions;
 	int selected = -1;
 
 	httpTool.setStatusViewer(this);
@@ -136,13 +150,13 @@ bool CFlashUpdate::selectHttpImage(void)
 			startpos += 2;
 			endpos    = url.find('/', startpos);
 		}
-		cramfs_lists.push_back(url.substr(startpos, endpos - startpos));
+		updates_lists.push_back(url.substr(startpos, endpos - startpos));
 
-		SelectionWidget.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, cramfs_lists.rbegin()->c_str()));
+		SelectionWidget.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, updates_lists.rbegin()->c_str()));
 		
-		if (httpTool.downloadFile(url, gTmpPath cramfs_list_filename, 20))
+		if (httpTool.downloadFile(url, gTmpPath LIST_OF_UPDATES_LOCAL_FILENAME, 20))
 		{
-			std::ifstream in(gTmpPath cramfs_list_filename);
+			std::ifstream in(gTmpPath LIST_OF_UPDATES_LOCAL_FILENAME);
 			while (in >> url >> version >> std::ws)
 			{
 				urls.push_back(url);
@@ -192,8 +206,8 @@ bool CFlashUpdate::getUpdateImage(const std::string & version)
 
 	showStatusMessageUTF(std::string(g_Locale->getText("flashupdate.getupdatefile")) + ' ' + version); // UTF-8
 
-	printf("get update (url): %s - %s\n", filename.c_str(), gTmpPath local_cramfs_filename);
-	return httpTool.downloadFile(filename, gTmpPath local_cramfs_filename, 40 );
+	printf("get update (url): %s - %s\n", filename.c_str(), gTmpPath UPDATE_LOCAL_FILENAME);
+	return httpTool.downloadFile(filename, gTmpPath UPDATE_LOCAL_FILENAME, 40 );
 }
 
 bool CFlashUpdate::checkVersion4Update()
@@ -223,17 +237,17 @@ bool CFlashUpdate::checkVersion4Update()
 	}
 	else
 	{
-		CFileBrowser CramfsBrowser;
+		CFileBrowser UpdatesBrowser;
 
-		CFileFilter CramfsFilter;
-		CramfsFilter.addFilter("cramfs");
+		CFileFilter UpdatesFilter;
+		UpdatesFilter.addFilter(FILEBROWSER_UPDATE_FILTER);
 
-		CramfsBrowser.Filter = &CramfsFilter;
+		UpdatesBrowser.Filter = &UpdatesFilter;
 
 		CFile * CFileSelected = NULL;
 
-		CramfsBrowser.ChangeDir(gTmpPath);
-		for (CFileList::iterator file = CramfsBrowser.filelist.begin(); file != CramfsBrowser.filelist.end(); file++)
+		UpdatesBrowser.ChangeDir(gTmpPath);
+		for (CFileList::iterator file = UpdatesBrowser.filelist.begin(); file != UpdatesBrowser.filelist.end(); file++)
 		{
 			if (!(S_ISDIR(file->Mode)))
 			{
@@ -246,14 +260,14 @@ bool CFlashUpdate::checkVersion4Update()
 				}
 			}
 		}
-		CramfsBrowser.hide();
+		UpdatesBrowser.hide();
 		
 		if (CFileSelected == NULL)
 		{
-			if (!(CramfsBrowser.exec(gTmpPath)))
+			if (!(UpdatesBrowser.exec(gTmpPath)))
 				return false;
 		
-			CFileSelected = CramfsBrowser.getSelectedFile();
+			CFileSelected = UpdatesBrowser.getSelectedFile();
 
 			if (CFileSelected == NULL)
 				return false;
@@ -285,7 +299,7 @@ bool CFlashUpdate::checkVersion4Update()
 	}
 	sprintf(msg, g_Locale->getText(msg_body), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getReleaseCycle(), versionInfo->getType());
 
-	if (strcmp("1.7", versionInfo->getReleaseCycle()))
+	if (strcmp(RELEASE_CYCLE, versionInfo->getReleaseCycle()))
 	{
 		delete versionInfo;
 		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.wrongbase")); // UTF-8
@@ -328,15 +342,18 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getupdatefileerror")); // UTF-8
 			return menu_return::RETURN_REPAINT;
 		}
-		filename = std::string(gTmpPath local_cramfs_filename);
+		filename = std::string(gTmpPath UPDATE_LOCAL_FILENAME);
 	}
 
 	showGlobalStatus(40);
 
 	CFlashTool ft;
-	ft.setMTDDevice("/dev/mtd/2");
+	ft.setMTDDevice(MTD_DEVICE_OF_UPDATE_PART);
 	ft.setStatusViewer(this);
 
+#ifdef SQUASHFS
+#warning no squash filesystem check implemented
+#else
 	//image-check
 	showStatusMessageUTF(g_Locale->getText("flashupdate.md5check")); // UTF-8
 	if(!ft.check_cramfs(filename))
@@ -345,6 +362,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 		ShowHintUTF( "messagebox.error", g_Locale->getText("flashupdate.md5sumerror")); // UTF-8
 		return menu_return::RETURN_REPAINT;
 	}
+#endif
 
 	CNeutrinoApp::getInstance()->exec(NULL, "savesettings");
 	sleep(2);
@@ -395,9 +413,8 @@ void CFlashExpert::readmtd(int readmtd)
 	filename += ".img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
 	if (readmtd == -1)
 	{
-		//ganzes flashimage lesen
 		filename = "/tmp/flashimage.img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
-		readmtd = 4;
+		readmtd = MTD_OF_WHOLE_IMAGE;
 	}
 	setTitle(g_Locale->getText("flashupdate.titlereadflash")); // UTF-8
 	paint();
@@ -549,8 +566,7 @@ int CFlashExpert::exec(CMenuTarget* parent, const std::string & actionKey)
 		{
 			if(selectedMTD==-1)
 			{
-				//ganzes Image schreiben -> mtd 4
-				writemtd("flashimage.img", 4);
+				writemtd("flashimage.img", MTD_OF_WHOLE_IMAGE);
 			}
 			else
 			{
