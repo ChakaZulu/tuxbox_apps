@@ -34,6 +34,8 @@
 
 #include "vcrcontrol.h"
 
+#include <sys/un.h>
+
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
