@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.19 2001/10/02 16:18:53 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.20 2001/10/10 13:40:25 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.20  2001/10/10 13:40:25  fnbrd
+// Fixed small bug with service names
+//
 // Revision 1.19  2001/10/02 16:18:53  fnbrd
 // Fehler behoben.
 //
@@ -299,7 +302,7 @@ void SIsectionSDT::parseServiceDescriptor(const char *buf, SIservice &s)
   buf+=sizeof(struct descr_service_header);
   s.serviceTyp=sv->service_typ;
   if(sv->service_provider_name_length) {
-    if(*(buf+1) < 0x06) // other code table
+    if(*buf < 0x06) // other code table
       s.providerName=std::string(buf+1, sv->service_provider_name_length-1);
     else
       s.providerName=std::string(buf, sv->service_provider_name_length);
