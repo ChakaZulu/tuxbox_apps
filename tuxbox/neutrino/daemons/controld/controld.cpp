@@ -723,6 +723,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			audioControl::setVolume(map_volume(msg_commandVolume.volume, true));
 		}
 		//lcdd.setVolume(msg_commandVolume.volume);
+#warning FIXME: generation of event is okay - however: event message is junk (what do i care about the new volume if i do not know which volume changed?)
 		eventServer->sendEvent(CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD, &msg_commandVolume.volume, sizeof(msg_commandVolume.volume));
 		break;
 
@@ -880,7 +881,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.112 2003/12/22 20:01:56 zwen Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.113 2003/12/28 23:27:37 thegoodguy Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
