@@ -13,8 +13,8 @@ class eEventDisplay: public eWindow
 	ePtrList<EITEvent> *eventlist;
 	eLabel *title, *long_description, *eventDate, *eventTime, *channel;
 protected:
-	void keyDown(int rc);
-	void keyUp(int rc);
+	int keyDown(int rc);
+	int keyUp(int rc);
 public:
 	eEventDisplay(eString service, const ePtrList<EITEvent>* e=0, EITEvent* evt=0);
 	~eEventDisplay();

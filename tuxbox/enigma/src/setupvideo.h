@@ -23,8 +23,6 @@ private:
 	
 	void toggleColorformat();
 	void togglePin8();
-protected:
-	int eventFilter(const eWidgetEvent &event);
 public:
 	eZapVideoSetup();
 	~eZapVideoSetup();

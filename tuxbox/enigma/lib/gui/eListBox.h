@@ -7,6 +7,7 @@
 #include <core/gui/ewidget.h>
 #include <core/gui/eskin.h>
 #include <core/gui/ewindow.h>
+#include <core/gui/guiactions.h>
 
 #include <sstream>
 
@@ -27,6 +28,8 @@ class eListBox: public eWidget
 	void lostFocus();
 	eRect getEntryRect(int n);
 	void invalidateEntry(int n);
+protected:
+	int eventHandler(const eWidgetEvent &event);
 public:
 	void append(T* e);
 	void remove(T* e);
@@ -34,8 +37,6 @@ public:
 	eListBox(eWidget *parent, int FontSize=20);
 	~eListBox();
 
-	void keyDown(int rc);
-	void keyUp(int rc);
 	Signal1<void, T*> selected;	
 	Signal1<void, T*> selchanged;
 
@@ -49,6 +50,11 @@ public:
 
 	int have_focus;
 	void setActiveColor(gColor active);
+	enum
+	{
+		dirPageDown, dirPageUp, dirDown, dirUp
+	};
+	int moveSelection(int dir);
 };
 
 class eListBoxEntry: public Object
@@ -250,14 +256,14 @@ inline void eListBox<T>::setActiveColor(gColor active)
 template <class T>
 inline T* eListBox<T>::goNext()
 {
-	keyDown(eRCInput::RC_DOWN);
+	moveSelection(dirDown);
 	return current!=childs.end() ? *current : 0;
 }
 
 template <class T>
 inline T* eListBox<T>::goPrev()
 {
-	keyDown(eRCInput::RC_UP);
+	moveSelection(dirUp);
 	return current!=childs.end() ? *current : 0;
 }
 
@@ -272,6 +278,9 @@ inline eListBox<T>::eListBox(eWidget *parent, int ih)
 		entryFnt(gFont("NimbusSansL-Regular Sans L Regular", font_size))
 {
 	childs.setAutoDelete(false);	// machen wir selber
+
+	addActionMap(&i_cursorActions->map);
+	addActionMap(&i_listActions->map);
 }
 
 template <class T>
@@ -315,7 +324,11 @@ inline void eListBox<T>::gotFocus()
 	if (childs.empty())
 		return;
 
-	invalidate();
+	ePtrList_T_iterator entry(top);
+
+	for (int i=0; i<entries; i++, ++entry)
+		if (*entry == *current)
+			invalidateEntry(i);
 }
 
 template <class T>
@@ -354,17 +367,16 @@ inline void eListBox<T>::init()
 }
 
 template <class T>
-inline void eListBox<T>::keyDown(int rc)
+inline int eListBox<T>::moveSelection(int dir)
 {
 	if (childs.empty())
-		return;
+		return 0;
 
 	T *oldptr = *current,
 		*oldtop = *top;
-
-	switch (rc)
+	switch (dir)
 	{
-		case eRCInput::RC_RIGHT:
+		case dirPageDown:
 			if (bottom == --childs.end() )
 				current = bottom;
 			else
@@ -378,7 +390,7 @@ inline void eListBox<T>::keyDown(int rc)
 				}
 		break;
 
-		case eRCInput::RC_LEFT:
+		case dirPageUp:
 			if (top == childs.begin())
 				current = top;
 			else
@@ -392,7 +404,7 @@ inline void eListBox<T>::keyDown(int rc)
 				}
 		break;
 		
-		case eRCInput::RC_UP:
+		case dirUp:
 			if ( current == childs.begin() )				// wrap around?
 			{
 				top = bottom = current = --childs.end();					// select last
@@ -409,7 +421,7 @@ inline void eListBox<T>::keyDown(int rc)
 				}
 		break;
 
-		case eRCInput::RC_DOWN:
+		case dirDown:
 			if ( current == --childs.end() )				// wrap around?
 			{
 				top = current = bottom = childs.begin(); 	// goto first;
@@ -425,6 +437,8 @@ inline void eListBox<T>::keyDown(int rc)
 							break;
 				}
 		break;
+		default:
+			return 0;
 	}
 
 	if (isVisible())
@@ -454,22 +468,37 @@ inline void eListBox<T>::keyDown(int rc)
 				invalidateEntry(cur);
 		}
 	}
+	return 1;
 }
 
 template <class T>
-inline void eListBox<T>::keyUp(int rc)
+inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 {
-	switch (rc)
+	switch (event.type)
 	{
-	case eRCInput::RC_HELP:
-		/*emit*/ selected(0);
-		return;
-	case eRCInput::RC_OK:
-		if ( current == childs.end() )
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_listActions->pageup)
+			moveSelection(dirPageUp);
+		else if (event.action == &i_listActions->pagedown)
+			moveSelection(dirPageDown);
+		else if (event.action == &i_cursorActions->up)
+			moveSelection(dirUp);
+		else if (event.action == &i_cursorActions->down)
+			moveSelection(dirDown);
+		else if (event.action == &i_cursorActions->ok)
+		{
+			if ( current == childs.end() )
+				/*emit*/ selected(0);
+			else
+				/*emit*/ selected(*current);
+		} else if (event.action == &i_cursorActions->cancel)
+		{
 			/*emit*/ selected(0);
-		else
-			/*emit*/ selected(*current);
+		} else
+			return 0;
+		return 1;
 	}
+	return eWidget::eventHandler(event);
 }
 
 template <class T>

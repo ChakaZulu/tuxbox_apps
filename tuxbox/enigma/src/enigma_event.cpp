@@ -7,9 +7,11 @@
 #include "eskin.h"
 #include <eerror.h>
 
-void eEventDisplay::keyDown(int rc)
+int eEventDisplay::keyDown(int rc)
 {
-	if (eventlist)
+	if (!eventlist)
+		return 0;
+		
 	switch (rc)
 	{
 		case eRCInput::RC_RIGHT:
@@ -29,16 +31,22 @@ void eEventDisplay::keyDown(int rc)
     	
 			setEvent(**events);
 		break;
+	default:
+		return 0;
 	}
+	return 1;
 }
 
-void eEventDisplay::keyUp(int rc)
+int eEventDisplay::keyUp(int rc)
 {
 	switch (rc)
 	{
 	case eRCInput::RC_OK:
 	case eRCInput::RC_HELP:
 		close(0);
+		return 1;
+	default:
+		return 0;
 	}
 }
 

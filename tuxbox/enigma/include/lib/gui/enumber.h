@@ -23,8 +23,8 @@ private:
 /*signals:
 	void selected(int *number);*/
 protected:
-	void keyUp(int key);
-	void keyDown(int key);
+	int keyUp(int key);
+	int keyDown(int key);
 	void gotFocus();
 	void lostFocus();
 public:

@@ -160,6 +160,7 @@ void eZapNetworkSetup::abortPressed()
 
 int eZapNetworkSetup::eventFilter(const eWidgetEvent &event)
 {
+#if 0
 	// work around for sucking event priority
 	int ineNumber=0;
 	eWidget *current=getTLW()->focusList()->current();
@@ -198,5 +199,6 @@ int eZapNetworkSetup::eventFilter(const eWidgetEvent &event)
 			return 1;
 		}
 	}
+#endif
 	return 0;
 }

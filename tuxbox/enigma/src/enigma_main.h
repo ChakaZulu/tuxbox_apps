@@ -140,9 +140,26 @@ class eZapMain: public eWidget
 	void eraseBackground(gPainter *, const eRect &where);
 	void setEIT(EIT *);
 	void handleNVODService(SDTEntry *sdtentry);
+	
+	// actions
+	void showServiceSelector(int dir);
+	void nextService();
+	void prevService();
+	void volumeUp();
+	void volumeDown();
+	void toggleMute();
+	void showMainMenu();
+	void standby();
+	void showSubserviceMenu();
+	void showAudioMenu();
+	void runVTXT();
+	void showEPGList();
+	void showEPG();
+	void showInfobar();
+	void hideInfobar();
+	
 protected:
-	void keyDown(int);
-	void keyUp(int);
+	int eventHandler(const eWidgetEvent &event);
 private:
 	void serviceChanged(eService *, int);
 	void gotEIT(EIT *, int);

@@ -5,8 +5,8 @@
 #include "edvb.h"
 #include <core/xml/xmltree.h>
 
-eAction::eAction(eActionMap &map, char *identifier, char *description)
-		: map(&map),  description(description), identifier(identifier)
+eAction::eAction(eActionMap &map, char *identifier, char *description, int priority)
+		: map(&map),  description(description), identifier(identifier), priority(priority)
 {
 	map.add(this);
 }
@@ -18,12 +18,11 @@ eAction::~eAction()
 
 // ---------------------------------------------------------------------------
 
-const eAction *eActionMap::findAction(const eRCKey &key) const
+void eActionMap::findAction(eActionPrioritySet &list, const eRCKey &key, void *context) const
 {
 	for (std::list<eAction*>::const_iterator i=actions.begin(); i!=actions.end(); ++i)
 		if ((*i)->containsKey(key))
-			return *i;
-	return 0;
+			list.insert(eAction::directedAction(context, *i));
 }
 
 eAction *eActionMap::findAction(const char *id) const
@@ -45,7 +44,7 @@ eActionMap::~eActionMap()
 	eActionMapList::getInstance()->removeActionMap(identifier);
 }
 
-void eActionMap::loadXML(eRCDevice *device, const XMLTreeNode *node)
+void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, const XMLTreeNode *node)
 {
 	for (XMLTreeNode *xaction=node->GetChild(); xaction; xaction=xaction->GetNext())
 	{
@@ -63,16 +62,28 @@ void eActionMap::loadXML(eRCDevice *device, const XMLTreeNode *node)
 			eDebug("please specify a valid action with name=. valid actions are:");
 			for (actionList::iterator i(actions.begin()); i != actions.end(); ++i)
 				eDebug("  %s (%s)", (*i)->getIdentifier(), (*i)->getDescription());
+			eDebug("but NOT %s", name);
 			continue;
 		}
 		const char *code=xaction->GetAttributeValue("code");
+		int icode=-1;
 		if (!code)
 		{
-			eDebug("please specify a number as code=.");
-			continue;
-		}
-		int icode=-1;
-		sscanf(code, "%x", &icode);
+			const char *key=xaction->GetAttributeValue("key");
+			if (!key)
+			{
+				eWarning("please specify a number as code= or a defined key with key=.");
+				continue;
+			}
+			std::map<std::string,int>::iterator i=keymap.find(std::string(key));
+			if (i == keymap.end())
+			{
+				eWarning("undefined key %s specified!", key);
+				continue;
+			}
+			icode=i->second;
+		} else
+			sscanf(code, "%x", &icode);
 		const char *flags=xaction->GetAttributeValue("flags");
 		if (!flags || !*flags)
 			flags="b";
@@ -211,6 +222,8 @@ int eActionMapList::loadXML(const char *filename)
 	
 	XMLTreeNode *node=parser->RootNode();
 	
+	std::map<std::string,int> keymap;
+	
 	for (node=node->GetChild(); node; node=node->GetNext())
 		if (!strcmp(node->GetType(), "device"))
 		{
@@ -240,7 +253,28 @@ int eActionMapList::loadXML(const char *filename)
 							eDebug("  %s", i->first);
 						continue;
 					}
-					am->loadXML(device, xam);
+					am->loadXML(device, keymap, xam);
+				} else if (!strcmp(xam->GetType(), "keys"))
+				{
+					for (XMLTreeNode *k=xam->GetChild(); k; k=k->GetNext())
+					{
+						if (!strcmp(k->GetType(), "key"))
+						{
+							const char *name=k->GetAttributeValue("name");
+							if (name)
+							{
+								const char *acode=k->GetAttributeValue("code");
+								if (acode)
+								{
+									int code=0;
+									sscanf(acode, "%x", &code);
+									keymap.insert(std::pair<std::string,int>(name, code));
+								} else
+									eWarning("no code specified for key %s!", name);
+							} else
+								eWarning("no name specified in keys!");
+						}
+					}
 				}
 		}
 

@@ -126,8 +126,10 @@ void eServiceSelector::entrySelected(eListboxEntry *e)
 {
 	eListboxEntryService *entry=(eListboxEntryService*)e;
 	if (!entry)
+	{
 		result=0;
-	else if (entry->service)
+		close(0);
+	} else if (entry->service)
 	{
 		result=((eListboxEntryService*)entry)->service;
 		close(1);
@@ -142,6 +144,7 @@ void eServiceSelector::selchanged(eListboxEntry *entry)
 
 int eServiceSelector::eventFilter(const eWidgetEvent &event)
 {
+#if 0
 	switch (event.type)
 	{
 		case eWidgetEvent::keyDown:
@@ -206,6 +209,7 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 			}
 		break;
 	}
+#endif
 	return 0;
 }
 
@@ -256,8 +260,8 @@ eService *eServiceSelector::choose(eService *current, int irc)
 	show();
 	if (irc!=-1)
 	{
-		event(eWidgetEvent(eWidgetEvent::keyDown, irc));
-		event(eWidgetEvent(eWidgetEvent::keyUp, irc));
+		keyDown(irc);
+		keyUp(irc);
 	}
 	if (!exec())
 		result=0;

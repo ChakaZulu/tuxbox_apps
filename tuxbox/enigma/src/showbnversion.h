@@ -13,7 +13,7 @@ class ShowBNVersion: public eWindow
 protected:
 	void willShow();
 	void willHide();
-	void keyUp(int rc);
+	int keyUp(int rc);
 private:
 	void eventOccured(int event);
 public:

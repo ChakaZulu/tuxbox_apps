@@ -12,17 +12,48 @@
 
 class eActionMap;
 
+/**
+ * \brief An action
+ *
+ * An action is an action of the user. It might raise by a keypress or otherwise. bla.
+ */
 class eAction
 {
 	typedef std::set<eRCKey> keylist;
 	char *description, *identifier;
 	std::set<eRCKey> keys;
 	eActionMap *map;
+	int priority;
+	friend struct priorityComperator;
 public:
-	eAction(eActionMap &map, char *identifier, char *description);
+	typedef std::pair<void*,eAction*> directedAction;
+	/**
+	 * \brief Functor to compare by priority.
+	 *
+	 * This is useful in sorted priority lists.
+	 */
+	struct priorityComperator
+	{
+		bool operator()(const directedAction &a, const directedAction &b)
+		{
+			return a.second->priority > b.second->priority;
+		}
+	};
+
+	enum
+	{
+		prioGlobal=0, prioDialog=10, prioWidget=20, prioDialogHi=30
+	};
+	/**
+	 * \param priority The priority of this action. 0 should be used for
+	 * global actions, 10 for dialog-local actions, 20 for widget-local actions,
+	 * 30 for dialog-hi-priority actions.
+	 */
+	eAction(eActionMap &map, char *identifier, char *description, int priority=0);
 	~eAction();
 	const char *getDescription() const { return description; }
 	const char *getIdentifier() const { return identifier; }
+	int getPriority() const { return priority; }
 	
 	Signal0<void> handler;
 	
@@ -35,6 +66,8 @@ public:
 		return 0;
 	}
 };
+
+typedef std::multiset<eAction::directedAction,eAction::priorityComperator> eActionPrioritySet;
 
 class XMLTreeNode;
 
@@ -54,12 +87,12 @@ public:
 	{
 		actions.remove(action);
 	}
-	const eAction *findAction(const eRCKey &key) const;
+	void findAction(eActionPrioritySet &list, const eRCKey &key, void *context) const;
 	eAction *findAction(const char *id) const;
 	const char *getDescription() const { return description; }
 	const char *getIdentifier() const { return identifier; }
 	void reloadConfig();
-	void loadXML(eRCDevice *device, const XMLTreeNode *node);
+	void loadXML(eRCDevice *device, std::map<std::string,int> &keymap, const XMLTreeNode *node);
 	void saveConfig();
 };
 

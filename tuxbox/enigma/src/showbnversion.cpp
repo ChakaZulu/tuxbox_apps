@@ -77,13 +77,16 @@ void ShowBNVersion::willHide()
 {
 }
 
-void ShowBNVersion::keyUp(int rc)
+int ShowBNVersion::keyUp(int rc)
 {
 	switch (rc)
 	{
 	case eRCInput::RC_OK:
 	case eRCInput::RC_HELP:
 		close(0);
+		return 1;
+	default:
+		return 0;
 	}
 }
 

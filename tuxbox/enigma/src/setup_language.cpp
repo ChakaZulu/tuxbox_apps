@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.2 2002/05/12 03:30:26 tmbinc Exp $
+ * $Id: setup_language.cpp,v 1.3 2002/05/22 17:53:53 tmbinc Exp $
  */
 
 #include "setup_language.h"
@@ -112,6 +112,7 @@ void eZapLanguageSetup::toggleLanguage()
 
 int eZapLanguageSetup::eventFilter(const eWidgetEvent &event)
 {
+#if 0
 	switch (event.type)
 	{
 	case eWidgetEvent::keyDown:
@@ -131,5 +132,6 @@ int eZapLanguageSetup::eventFilter(const eWidgetEvent &event)
 			return 1;
 		}
 	}
+#endif
 	return 0;
 }

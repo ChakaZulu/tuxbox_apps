@@ -14,7 +14,7 @@ class eSkinSetup: public eWindow
 	void loadSkins();
 	void accept();
 	void skinSelected(eListboxEntry *l);
-	int eventFilter(const eWidgetEvent &event);
+	int keyDown(int rc);
 public:
 	eSkinSetup();
 	~eSkinSetup();

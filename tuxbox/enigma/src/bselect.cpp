@@ -65,8 +65,8 @@ eBouquet *eBouquetSelector::choose(eBouquet *current, int irc)
 	show();
 	if (irc!=-1)
 	{
-		event(eWidgetEvent(eWidgetEvent::keyDown, irc));
-		event(eWidgetEvent(eWidgetEvent::keyUp, irc));
+		keyDown(irc);
+		keyUp(irc);
 	}
 	if (!exec())
 		result=0;

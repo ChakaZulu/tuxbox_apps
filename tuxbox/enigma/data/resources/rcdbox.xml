@@ -1,0 +1,39 @@
+<rcdefaults>
+	<author>
+		<name>Felix Domke</name>
+		<email>tmbinc@gmx.net</email>
+	</author>
+	
+	<device identifier="DBoxOld" >
+		<keys>
+			<key name="power" code="5c0c" />
+			<key name="home" code="5c20" />
+			<key name="d-box" code="5c27" />
+			<key name="0" code="5c00" />
+			<key name="1" code="5c01" />
+			<key name="2" code="5c02" />
+			<key name="3" code="5c03" />
+			<key name="4" code="5c04" />
+			<key name="5" code="5c05" />
+			<key name="6" code="5c06" />
+			<key name="7" code="5c07" />
+			<key name="8" code="5c08" />
+			<key name="9" code="5c09" />
+			<key name="blue" code="5c3b" />
+			<key name="yellow" code="5c52" />
+			<key name="green" code="5c55" />
+			<key name="red" code="5c2d" />
+			<key name="pageup" code="5c54" />
+			<key name="pagedown" code="5c53" />
+			<key name="up" code="5c0e" />
+			<key name="down" code="5c0f" />
+			<key name="left" code="5c2f" />
+			<key name="right" code="5c2e" />
+			<key name="ok" code="5c30" />
+			<key name="volup" code="5c16" />
+			<key name="voldown" code="5c17" />
+			<key name="mute" code="5c28" />
+			<key name="help" code="5c82" />
+		</keys>
+	</device>
+</rcdefaults>

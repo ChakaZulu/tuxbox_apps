@@ -52,11 +52,12 @@ eNumber::~eNumber()
 {
 }
 
-void eNumber::keyUp(int key)
+int eNumber::keyUp(int key)
 {
+	return 0;
 }
 
-void eNumber::keyDown(int key)
+int eNumber::keyDown(int key)
 {
 	if (LCDTmp)
 		((eNumber*) LCDTmp)->keyDown(key);
@@ -119,7 +120,10 @@ void eNumber::keyDown(int key)
 		}
 		break;
 	}
+	default:
+		return 0;
 	}
+	return 1;
 }
 
 void eNumber::gotFocus()

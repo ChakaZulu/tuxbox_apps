@@ -9,16 +9,15 @@
 #include <core/base/eptrlist.h>
 #include <include/libsig_comp.h>
 #include <core/gdi/grc.h>
-
-class eAction;
-class eActionMap;
+#include <core/driver/rc.h>
+#include <core/gui/actions.h>
 
 class eWidgetEvent
 {
 public:
 	enum eventType
 	{
-		keyUp, keyDown,
+		evtKey,
 		willShow, willHide,
 		execBegin, execDone,
 		gotFocus, lostFocus,
@@ -26,15 +25,17 @@ public:
 		changedText, changedFont, changedForegroundColor, changedBackgroundColor,
 		changedSize, changedPosition, changedPixmap,
 
-		handleAction
+		evtAction
 	} type;
 	union
 	{
 		int parameter;
 		const eAction *action;
-	};
+		const eRCKey *key;
+	}; 
 	eWidgetEvent(eventType type, int parameter=0): type(type), parameter(parameter) { }
 	eWidgetEvent(eventType type, const eAction *action): type(type), action(action) { }
+	eWidgetEvent(eventType type, const eRCKey &key): type(type), key(&key) { }
 	
 	/**
 	 * \brief Event should be delivered to the focused widget.
@@ -45,9 +46,7 @@ public:
 	{
 		switch (type)
 		{
-		case keyUp:
-		case keyDown:
-		case handleAction:
+		case evtKey:
 			return 1;
 		default:
 			return 0;
@@ -135,8 +134,6 @@ protected:
 	void willShowChildren();
 	void willHideChildren();
 	
-	void keyEvent(const class eRCKey &key);
-	
 	/**
 	 * \brief Hi priority event filter.
 	 *
@@ -150,11 +147,12 @@ protected:
 	 *
 	 * If re-implemented in a widget-sub-class, \c eWidget::event should be called whenever the event is
 	 * not processed by the widget.
+	 * \return 1 if the event was processed, 0 if ignored. it might be forwarded to other widgets then.
 	 */
-	virtual void eventHandler(const eWidgetEvent &event);
+	virtual int eventHandler(const eWidgetEvent &event);
 	
-	virtual void keyDown(int rc);
-	virtual void keyUp(int rc);
+	virtual int keyDown(int rc);
+	virtual int keyUp(int rc);
 	
 	virtual void gotFocus();
 	virtual void lostFocus();
@@ -165,7 +163,9 @@ protected:
 	
 	typedef ePtrList<eActionMap> actionMapList;
 
+	void findAction(eActionPrioritySet &prio, const eRCKey &key, eWidget *context);
 	void addActionMap(eActionMap *map);
+	void removeActionMap(eActionMap *map);
 	actionMapList actionmaps;
 
 			// generic properties
@@ -319,7 +319,7 @@ public:
 	 * Internally calles \a eventFilter, then \a eventHandler() (in some cases of the focused widget)
 	 * \param event The event to deliver.
 	 */
-	virtual void event(const eWidgetEvent &event);
+	int event(const eWidgetEvent &event);
 	
 	/**
 	 * \brief Shows the widget.

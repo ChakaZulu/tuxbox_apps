@@ -16,8 +16,6 @@ class eZap: public eApplication
 	static eZap *instance;
 private:
 	void keyEvent(const eRCKey &key);
-	void keyUp(int);
-	void keyDown(int);
 	void status();
 
 private:

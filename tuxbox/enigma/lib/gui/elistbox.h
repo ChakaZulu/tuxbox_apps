@@ -51,12 +51,16 @@ class eListbox: public eWidget
 	void geometryChanged();
 	void gotFocus();
 	void lostFocus();
-	void OnFontSizeChanged(int NewFontSize);
 	eRect getEntryRect(int n);
 	void invalidateEntry(int n);
+protected:
+	int eventHandler(const eWidgetEvent &event);
 public:
-	void keyDown(int rc);
-	void keyUp(int rc);
+	enum
+	{
+		dirUp, dirDown, dirPageUp, dirPageDown
+	};
+	void moveSelection(int dir);
 	Signal1<void, eListboxEntry*> selected;
 	Signal1<void, eListboxEntry*> selchanged;
 public:
@@ -163,14 +167,6 @@ inline void eListbox::clearList()
 inline void eListbox::sort()
 {
 	childs.sort();
-}
-
-inline void eListbox::OnFontSizeChanged(int NewFontSize)
-{
-	item_height=NewFontSize+2;
-	font_size = NewFontSize;
-	entryFnt=gFont("NimbusSansL-Regular Sans L Regular", font_size);
-	geometryChanged();
 }
 
 inline eRect eListbox::getEntryRect(int pos)

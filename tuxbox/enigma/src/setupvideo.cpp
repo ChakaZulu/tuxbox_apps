@@ -161,27 +161,3 @@ void eZapVideoSetup::togglePin8()
 		v_pin8=0;
 	setPin8(v_pin8);
 }
-
-int eZapVideoSetup::eventFilter(const eWidgetEvent &event)
-{
-	switch (event.type)
-	{
-	case eWidgetEvent::keyDown:
-		switch(event.parameter)
-		{
-		case eRCInput::RC_RIGHT:
-			focusNext(eWidget::focusDirE);
-			return 1;
-		case eRCInput::RC_DOWN:
-			focusNext(eWidget::focusDirS);
-			return 1;
-		case eRCInput::RC_LEFT:
-			focusNext(eWidget::focusDirW);
-			return 1;
-		case eRCInput::RC_UP:
-			focusNext(eWidget::focusDirN);
-			return 1;
-		}
-	}
-	return 0;
-}

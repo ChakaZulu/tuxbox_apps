@@ -47,6 +47,7 @@ void eEPGWindow::entrySelected(eListboxEntry *entry)
 
 int eEPGWindow::eventFilter(const eWidgetEvent &event)
 {
+#if 0
 	switch (event.type)
 	{
 		case eWidgetEvent::keyUp:
@@ -80,6 +81,7 @@ int eEPGWindow::eventFilter(const eWidgetEvent &event)
 		}
 	}
 	return 0;
+#endif
 }
 
 void eEPGWindow::closeWnd()

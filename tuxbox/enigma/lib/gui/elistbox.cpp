@@ -2,6 +2,7 @@
 #include "fb.h"
 #include "elabel.h"
 #include "init.h"
+#include <core/gui/guiactions.h>
 
 eListbox::eListbox(eWidget *parent, int ih)
 	 :eWidget(parent, 1)
@@ -15,6 +16,9 @@ eListbox::eListbox(eWidget *parent, int ih)
 	have_focus=0;
 	entryFnt=gFont("NimbusSansL-Regular Sans L Regular", font_size);
 	childs.setAutoDelete(true);
+	
+	addActionMap(&i_cursorActions->map);
+	addActionMap(&i_listActions->map);
 }
 
 void eListbox::redrawWidget(gPainter *target, const eRect &where)
@@ -100,7 +104,42 @@ void eListbox::redrawEntry(gPainter *target, int pos, eListboxEntry *entry, cons
 	target->flush();
 }
 
-void eListbox::keyDown(int rc)
+int eListbox::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_listActions->pageup)
+			moveSelection(dirPageUp);
+		else if (event.action == &i_listActions->pagedown)
+			moveSelection(dirPageDown);
+		else if (event.action == &i_cursorActions->up)
+			moveSelection(dirUp);
+		else if (event.action == &i_cursorActions->down)
+			moveSelection(dirDown);
+		else if (event.action == &i_cursorActions->ok)
+		{
+			if (!current)
+				/*emit*/ selected(0);
+			else
+			{
+				void* e = (void*)*current;
+				if (*current)
+					/*emit*/ current->current()->selected(*current);
+				/*emit*/ selected(*current);
+			}
+		} else if (event.action == &i_cursorActions->cancel)
+		{
+			eDebug("cancel!");
+			/*emit*/ selected(0);
+		} else
+			return 0;
+		return 1;
+	}
+	return eWidget::eventHandler(event);
+}
+
+void eListbox::moveSelection(int dir)
 {
 	if (!current)
 		return;
@@ -108,9 +147,9 @@ void eListbox::keyDown(int rc)
 	
 	eListboxEntry *oldptr=current->current(), *oldtop=top->current();
 
-	switch (rc)
+	switch (dir)
 	{
-	case eRCInput::RC_RIGHT:
+	case dirPageDown:
 		(*top)+=entries;
 		(*bottom)+=entries;
 		(*current)+=entries;
@@ -123,7 +162,7 @@ void eListbox::keyDown(int rc)
 			current->toLast();
 		}
 		break;
-	case eRCInput::RC_LEFT:
+	case dirPageUp:
 		(*top)-=entries;
 		(*bottom)-=entries;
 		(*current)-=entries;
@@ -133,8 +172,7 @@ void eListbox::keyDown(int rc)
 			current->toFirst();
 		}
 		break;
-		
-	case eRCInput::RC_UP:
+	case dirUp:
 		
 		if (current->atFirst())				// wrap around?
 		{
@@ -155,7 +193,7 @@ void eListbox::keyDown(int rc)
 		}
 		cs=1;
 		break;
-	case eRCInput::RC_DOWN:
+	case dirDown:
 		if (current->atLast())				// wrap around?
 		{
 			current->toFirst();					// go to first
@@ -189,26 +227,6 @@ void eListbox::keyDown(int rc)
 				invalidateEntry(old);
 			if ((cur != -1) && (cur != old))
 				invalidateEntry(cur);
-		}
-	}
-}
-
-void eListbox::keyUp(int rc)
-{
-	switch (rc)
-	{
-	case eRCInput::RC_HELP:
-		/*emit*/ selected(0);
-		return;
-	case eRCInput::RC_OK:
-		if (!current)
-			/*emit*/ selected(0);
-		else
-		{
-			void* e = (void*)*current;
-			if (*current)
-				/*emit*/ current->current()->selected(*current);
-			/*emit*/ selected(*current);
 		}
 	}
 }

@@ -1,29 +1,68 @@
 #include <time.h>
 #include <errno.h>
+
+#include <core/base/i18n.h>
+#include <core/system/init.h>
+#include <core/dvb/edvb.h>
+#include <core/dvb/epgcache.h>
+#include <core/dvb/esection.h>
+#include <core/dvb/decoder.h>
+#include <core/gdi/font.h>
+#include <core/gui/elabel.h>
+#include <core/gui/eprogress.h>
+#include <core/gui/enumber.h>
+#include <core/gui/eskin.h>
+#include <core/gui/elistbox.h>
+#include <core/gui/ebutton.h>
+#include <core/driver/rc.h>
+#include <core/driver/streamwd.h>
+
+#include <core/gui/actions.h>
+
 #include "enigma_main.h"
-#include "elistbox.h"
 #include "iso639.h"
-#include "edvb.h"
 #include "enigma_mainmenu.h"
-#include "elabel.h"
-#include "eprogress.h"
 #include "enigma_event.h"
 #include "sselect.h"
-#include "enumber.h"
 #include "eskin.h"
-#include "streamwd.h"
 #include "font.h"
-#include "rc.h"
 #include "enigma.h"
 #include "enigma_lcd.h"
-#include "decoder.h"
 #include "enigma_plugins.h"
 #include "download.h"
-#include "epgcache.h"
 #include "epgwindow.h"
 
-#include "ebutton.h"
-#include "esection.h"
+struct enigmaMainActions
+{
+	eActionMap map;
+	eAction showMainMenu, standby, toggleInfobar, showServiceSelector,
+		showSubservices, showAudio, pluginVTXT, showEPGList, showEPG, nextService,
+		prevService, serviceListDown, serviceListUp, volumeUp, volumeDown, toggleMute;
+	enigmaMainActions(): 
+		map("enigmaMain", _("enigma Zapp")),
+		showMainMenu(map, "showMainMenu", _("show main menu"), eAction::prioDialog),
+		standby(map, "standby", _("go to standby"), eAction::prioDialog),
+		toggleInfobar(map, "toggleInfobar", _("toggle infobar"), eAction::prioDialog),
+		showServiceSelector(map, "showServiceSelector", _("show service selector"), eAction::prioDialog),
+		showSubservices(map, "showSubservices", _("show subservices/NVOD"), eAction::prioDialog),
+		showAudio(map, "showAudio", _("show audio selector"), eAction::prioDialog),
+		pluginVTXT(map, "pluginVTXT", _("show Videotext"), eAction::prioDialog),
+		showEPGList(map, "showEPGList", _("show epg schedule list"), eAction::prioDialog),
+		showEPG(map, "showEPG", _("show extended info"), eAction::prioDialog),
+		nextService(map, "nextService", _("quickzap next"), eAction::prioDialog),
+		prevService(map, "prevService", _("quickzap prev"), eAction::prioDialog),
+		serviceListDown(map, "serviceListDown", _("service list and down"), eAction::prioDialog),
+		serviceListUp(map, "serviceListUp", _("service list and up"), eAction::prioDialog),
+		volumeUp(map, "volumeUp", _("volume up"), eAction::prioDialog),
+		volumeDown(map, "volumeDown", _("volume down"), eAction::prioDialog),
+		toggleMute(map, "toggleMute", _("toggle mute flag"), eAction::prioDialog)
+	{
+	}
+};
+
+eAutoInitP0<enigmaMainActions> i_enigmaMainActions(5, "enigma main actions");
+
+// #define NEUTRINO_STYLED_NAVIGATION
 
 /*
 
@@ -89,6 +128,30 @@ public:
 
 */
 
+class VCR: public eWindow
+{
+	eButton *b_quit;
+public:
+	VCR(): eWindow(0)
+	{
+		setText("VCR");
+		move(ePoint(100, 100));
+		resize(eSize(500, 400));
+		
+		b_quit=new eButton(this);
+		b_quit->move(ePoint(0, 30));
+		b_quit->resize(eSize(clientrect.width(), 30));
+		b_quit->setText("abort recording");
+		CONNECT(b_quit->selected, VCR::accept);
+		
+		eDVB::getInstance()->recBegin("/test.ts");
+	}
+	~VCR()
+	{
+		eDVB::getInstance()->recEnd();
+	}
+};
+
 static eString getISO639Description(char *iso)
 {
 	for (unsigned int i=0; i<sizeof(iso639)/sizeof(*iso639); ++i)
@@ -100,7 +163,6 @@ static eString getISO639Description(char *iso)
 	}
 	return eString()+iso[0]+iso[1]+iso[2];
 }
-
 
 void NVODStream::EITready(int error)
 {
@@ -447,6 +509,8 @@ eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp)
 	eDebug("...");
 	clockUpdate();	
 	eDebug("<-- clockUpdate");
+	
+	addActionMap(&i_enigmaMainActions->map);
 }
 
 eZapMain::~eZapMain()
@@ -644,66 +708,64 @@ void eZapMain::handleNVODService(SDTEntry *sdtentry)
 	nvodsel.setText(eDVB::getInstance()->service->service_name.c_str());
 }
 
-void eZapMain::keyDown(int code)
+void eZapMain::showServiceSelector(int dir)
 {
-	switch (code)
-	{
-	case eRCInput::RC_DOWN:
-	case eRCInput::RC_UP:
-	{
-		hide();
-		eZapLCD* pLCD = eZapLCD::getInstance();
-		pLCD->lcdMain->hide();
-		pLCD->lcdMenu->show();
-		eService *service=eZap::getInstance()->getServiceSelector()->choose(0, code);
-		pLCD->lcdMain->show();
-		pLCD->lcdMenu->hide();
-		if (!service)
-			break;
-		if (service)
-			if (eDVB::getInstance()->switchService(service))
-			{
-#if 0
-				serviceChanged(service, -EAGAIN);
-#endif
-			}
-		break;
-	}
-	case eRCInput::RC_RIGHT:
-	{
-		eService *service=eZap::getInstance()->getServiceSelector()->next();
-		if (!service)
-			break;
-		if (service)
-			if (eDVB::getInstance()->switchService(service))
-				serviceChanged(service, -EAGAIN);
-		break;
-	}
-	case eRCInput::RC_LEFT:
-	{
-		eService *service=eZap::getInstance()->getServiceSelector()->prev();
-		if (!service)
-			break;
-		if (service)
-			if (eDVB::getInstance()->switchService(service))
-				serviceChanged(service, -EAGAIN);
-		break;
-	}
-	case eRCInput::RC_MINUS:
-		eDVB::getInstance()->changeVolume(0, +4);
+	hide();
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	pLCD->lcdMain->hide();
+	pLCD->lcdMenu->show();
+	eService *service=eZap::getInstance()->getServiceSelector()->choose(0, dir);
+	pLCD->lcdMain->show();
+	pLCD->lcdMenu->hide();
+	if (!service)
+		return;
+	if (service)
+		if (eDVB::getInstance()->switchService(service))
+			serviceChanged(service, -EAGAIN);
+}
+
+void eZapMain::nextService()
+{
+	eService *service=eZap::getInstance()->getServiceSelector()->next();
+	if (!service)
+		return;
+	if (service)
+		if (eDVB::getInstance()->switchService(service))
+			serviceChanged(service, -EAGAIN);
+}
+
+void eZapMain::prevService()
+{
+	eService *service=eZap::getInstance()->getServiceSelector()->prev();
+	if (!service)
+		return;
+	if (service)
+		if (eDVB::getInstance()->switchService(service))
+			serviceChanged(service, -EAGAIN);
+}
+
+void eZapMain::volumeUp()
+{
+	eDVB::getInstance()->changeVolume(0, +4);
 //		if (!isVisible())
 //			show();
 //		timeout.start(1000, 1);
-		break;
-	case eRCInput::RC_PLUS:
+}
+
+void eZapMain::volumeDown()
+{
 		eDVB::getInstance()->changeVolume(0, -4);
 //		if (!isVisible())
 //			show();
 //		timeout.start(1000, 1);
-		break;
-	case eRCInput::RC_MUTE:
-		eDVB::getInstance()->changeVolume(2, 1);
-		break;
+}
+
+void eZapMain::toggleMute()
+{
+	eDVB::getInstance()->changeVolume(2, 1);
+}
+
+/*
 	case eRCInput::RC_0 ... eRCInput::RC_9:
 	{
 		if (!eDVB::getInstance()->getTransponders())
@@ -739,17 +801,54 @@ void eZapMain::keyDown(int code)
 
 		break;
 	}
+	default:
+		return 0;
 	}
+	return 1;
+} */
+
+void eZapMain::showMainMenu()
+{
+	if (isVisible())
+		hide();
+
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	pLCD->lcdMain->hide();
+	pLCD->lcdMenu->show();
+	eMainMenu mm;
+	mm.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+	if (mm.exec())
+		eZap::getInstance()->quit();
+	pLCD->lcdMenu->hide();
+	pLCD->lcdMain->show();
 }
 
-void eZapMain::keyUp(int code)
+void eZapMain::standby()
 {
-	switch (code)
-	{
-	case eRCInput::RC_DBOX:
+	eZap::getInstance()->quit();
+}
+
+void eZapMain::showInfobar()
+{
+	timeout.start(10000, 1);
+	show();
+}
+
+void eZapMain::hideInfobar()
+{
+	timeout.stop();
+	hide();
+}
+
+void eZapMain::showSubserviceMenu()
+{
+	if (flags&ENIGMA_NVOD)
 	{
 		if (isVisible())
+		{
+			timeout.stop();
 			hide();
+		}
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
@@ -759,146 +858,171 @@ void eZapMain::keyUp(int code)
 			eZap::getInstance()->quit();
 		pLCD->lcdMenu->hide();
 		pLCD->lcdMain->show();
-		break;
 	}
-	case eRCInput::RC_STANDBY:
-		eZap::getInstance()->quit();
-		break;
-	case eRCInput::RC_OK:
-		if (isVisible())
-		{
-			timeout.stop();
-			hide();
-		} else
-		{
-			timeout.start(10000, 1);
-			show();
-		}
-		break;
-	case eRCInput::RC_GREEN:
+	if (flags&ENIGMA_SUBSERVICES)
 	{
-		if (flags&ENIGMA_NVOD)
-		{
-			if (isVisible())
-			{
-				timeout.stop();
-				hide();
-			}
-			nvodsel.show();
-			nvodsel.exec();
-			nvodsel.hide();
-		}
-		if (flags&ENIGMA_SUBSERVICES)
-		{
-			if (isVisible())
-			{
-				timeout.stop();
-				hide();
-			}
-			subservicesel.show();
-			subservicesel.exec();
-			subservicesel.hide();
-		}
-		break;
-	}
-	case eRCInput::RC_YELLOW:
-	{
-		if (flags&ENIGMA_AUDIO)
-		{
-			if (isVisible())
-			{
-				timeout.stop();
-				hide();
-			}
-			audiosel.show();
-			audiosel.exec();
-			audiosel.hide();
-		}
-		break;
-	}
-	case eRCInput::RC_BLUE:
-	{
-		if (isVT)
-		{
-			eZapPlugins plugins;
-			plugins.execPluginByName("tuxtxt.cfg");
-		}
-		break;
-	}
-	case eRCInput::RC_RED:
-	{
-		if (isEPG)
-		{
-			eZapLCD* pLCD = eZapLCD::getInstance();
-			pLCD->lcdMain->hide();
-			pLCD->lcdMenu->show();
-			eEPGWindow wnd(eDVB::getInstance()->service);
-			wnd.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-			if (isVisible())
-			{
-				timeout.stop();
-				hide();
-			}
-			wnd.show();
-			wnd.exec();
-			wnd.hide();
-			pLCD->lcdMenu->hide();
-			pLCD->lcdMain->show();
-		}
-/*		BlaTest bla;
-		bla.show();
-		bla.exec();
-		bla.hide(); */
-		break;
-	}
-	case eRCInput::RC_HELP:
-	{
-		eService* service = eDVB::getInstance()->service;
-
-		if (!service)
-			break;
-
 		if (isVisible())
 		{
 			timeout.stop();
 			hide();
 		}
+		subservicesel.show();
+		subservicesel.exec();
+		subservicesel.hide();
+	}
+}
 
-		const eventMap* pMap = eEPGCache::getInstance()->getEventMap(service->original_network_id, service->service_id);
-
-		if (isEPG)  // EPG vorhanden
+void eZapMain::showAudioMenu()
+{
+	if (flags&ENIGMA_AUDIO)
+	{
+		if (isVisible())
 		{
-			eventMap::const_iterator It = pMap->begin();
-			ePtrList<EITEvent> events;
-			events.setAutoDelete(true);
-			events.push_back( new EITEvent(*(It++)->second));
-			if (It != pMap->end())  // sicher ist sicher !
-				events.push_back( new EITEvent(*It->second));
-			eEventDisplay ei(service->service_name.c_str(), &events);			
+			timeout.stop();
+			hide();
+		}
+		audiosel.show();
+		audiosel.exec();
+		audiosel.hide();
+	}
+}
+
+void eZapMain::runVTXT()
+{
+	if (isVT)
+	{
+		eZapPlugins plugins;
+		plugins.execPluginByName("tuxtxt.cfg");
+	}
+}
+
+void eZapMain::showEPGList()
+{
+#if 1
+	if (isEPG)
+	{
+		eZapLCD* pLCD = eZapLCD::getInstance();
+		pLCD->lcdMain->hide();
+		pLCD->lcdMenu->show();
+		eEPGWindow wnd(eDVB::getInstance()->service);
+		wnd.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+		if (isVisible())
+		{
+			timeout.stop();
+			hide();
+		}
+		wnd.show();
+		wnd.exec();
+		wnd.hide();
+		pLCD->lcdMenu->hide();
+		pLCD->lcdMain->show();
+	}
+#else
+	VCR bla;
+	hide();
+	bla.show();
+	bla.exec();
+	bla.hide();
+	show();
+#endif
+}
+
+void eZapMain::showEPG()
+{
+	eService* service = eDVB::getInstance()->service;
+
+	if (!service)
+		return;
+
+	if (isVisible())
+	{
+		timeout.stop();
+		hide();
+	}
+
+#ifdef USE_CACHED_EPG
+	const eventMap* pMap = eEPGCache::getInstance()->getEventMap(service->original_network_id, service->service_id);
+
+	if (pMap && isEPG)  // EPG vorhanden
+	{
+		eventMap::const_iterator It = pMap->begin();
+			
+		ePtrList<EITEvent> events;
+		events.setAutoDelete(true);
+			
+		while (It != pMap->end())  // sicher ist sicher !
+		{
+			events.push_back( new EITEvent(*It->second));
+			It++;
+		}
+		eEventDisplay ei(service->service_name.c_str(), &events);			
+		actual_eventDisplay=&ei;
+		ei.show();
+		ei.exec();
+		ei.hide();
+		actual_eventDisplay=0;
+	} else	
+#endif
+	{
+		EIT *eit=eDVB::getInstance()->getEIT();
+		ePtrList<EITEvent> dummy;
+		{
+			eEventDisplay ei(service->service_name.c_str(), eit?&eit->events:&dummy);
+			if (eit)
+				eit->unlock();		// HIER liegt der hund begraben.
 			actual_eventDisplay=&ei;
 			ei.show();
 			ei.exec();
 			ei.hide();
 			actual_eventDisplay=0;
 		}
-		else	
-		{
-			EIT *eit=eDVB::getInstance()->getEIT();
-			ePtrList<EITEvent> dummy;
-			{
-				eEventDisplay ei(service->service_name.c_str(), eit?&eit->events:&dummy);
-				if (eit)
-					eit->unlock();		// HIER liegt der hund begraben.
-				actual_eventDisplay=&ei;
-				ei.show();
-				ei.exec();
-				ei.hide();
-				actual_eventDisplay=0;
-			}
-		}
-		break;
 	}
+}
+
+int eZapMain::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_enigmaMainActions->showMainMenu)
+			showMainMenu();
+		else if (event.action == &i_enigmaMainActions->standby)
+			standby();
+		else if ((!isVisible()) && (event.action == &i_enigmaMainActions->toggleInfobar))
+			showInfobar();
+		else if (isVisible() && (event.action == &i_enigmaMainActions->toggleInfobar))
+			hideInfobar();
+		else if (event.action == &i_enigmaMainActions->showServiceSelector)
+			showServiceSelector(0);
+		else if (event.action == &i_enigmaMainActions->showSubservices)
+			showSubserviceMenu();
+		else if (event.action == &i_enigmaMainActions->showAudio)
+			showAudioMenu();
+		else if (event.action == &i_enigmaMainActions->pluginVTXT)
+			runVTXT();
+		else if (event.action == &i_enigmaMainActions->showEPGList)
+			showEPGList();
+		else if (event.action == &i_enigmaMainActions->showEPG)
+			showEPG();
+		else if (event.action == &i_enigmaMainActions->nextService)
+			nextService();
+		else if (event.action == &i_enigmaMainActions->prevService)
+			prevService();
+		else if (event.action == &i_enigmaMainActions->serviceListDown)
+			showServiceSelector(-1);
+		else if (event.action == &i_enigmaMainActions->serviceListUp)
+			showServiceSelector(1);
+		else if (event.action == &i_enigmaMainActions->volumeUp)
+			volumeUp();
+		else if (event.action == &i_enigmaMainActions->volumeDown) 
+			volumeDown();
+		else if (event.action == &i_enigmaMainActions->toggleMute)
+			toggleMute();
+		else 
+			break;
+		return 1;
 	}
+	return eWidget::eventHandler(event);
 }
 
 void eZapMain::serviceChanged(eService *service, int err)
@@ -1099,7 +1223,5 @@ void eZapMain::clockUpdate()
 
 void eZapMain::updateVolume(int vol)
 {
-	eDebug("setting volbar to %d", (63-vol)*100/63);
 	VolumeBar->setPerc((63-vol)*100/63);
 }
-

@@ -1,31 +1,14 @@
 #include "ebutton.h"
 #include "eskin.h"
-#include "rc.h"
-#include "init.h"
+#include <core/system/init.h>
+#include "guiactions.h"
 
 eButton::eButton(eWidget *parent, eLabel* desc, int takefocus):
 	eLabel(parent, 0, takefocus), descr(desc?desc->getText():""), tmpDescr(0)
 {
 	focus=eSkin::getActive()->queryScheme("focusedColor");
 	normal=eSkin::getActive()->queryScheme("fgColor");
-}
-
-void eButton::keyUp(int key)
-{
-	switch (key)
-	{
-	case eRCInput::RC_OK:
-		/*emit*/ selected();
-		
-		if (parent && parent->LCDElement)
-		{
-			eString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
-			if (LCDTmp)
-				LCDTmp->setText(txt);
-			else
-				parent->LCDElement->setText(txt);
-		}
-	}
+	addActionMap(&i_cursorActions->map);
 }
 
 void eButton::gotFocus()
@@ -78,6 +61,30 @@ void eButton::lostFocus()
 	}
 	setBackgroundColor(normal);
 	invalidate();
+}
+
+int eButton::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_cursorActions->ok)
+		{
+			/*emit*/ selected();
+		
+			if (parent && parent->LCDElement)
+			{
+				eString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
+				if (LCDTmp)
+					LCDTmp->setText(txt);
+				else
+					parent->LCDElement->setText(txt);
+			}
+			return 1;
+		}
+		break;
+	}
+	return eWidget::eventHandler(event);
 }
 
 static eWidget *create_eButton(eWidget *parent)

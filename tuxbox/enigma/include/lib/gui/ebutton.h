@@ -13,7 +13,7 @@ class eButton: public eLabel
 	eLabel*	tmpDescr; // used for LCD with description
 protected:
 	eString descr;
-	void keyUp(int key);
+	int eventHandler(const eWidgetEvent &event);
 	void gotFocus();
 	void lostFocus();
 public:

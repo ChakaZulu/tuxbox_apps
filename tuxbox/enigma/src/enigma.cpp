@@ -41,57 +41,12 @@ eZap *eZap::getInstance()
 	return instance;
 }
 
-void eZap::keyDown(int code)
-{
-	if (focus)
-		focus->event(eWidgetEvent(eWidgetEvent::keyDown, code));
-	else if (main)
-		main->event(eWidgetEvent(eWidgetEvent::keyDown, code));
-}
-
-void eZap::keyUp(int code)
-{
-	if (focus)
-		focus->event(eWidgetEvent(eWidgetEvent::keyUp, code));
-	else if (main)
-		main->event(eWidgetEvent(eWidgetEvent::keyUp, code));
-}
-
-struct enigmaActions
-{
-	eActionMap map;
-	eAction up, down, left, right;
-	enigmaActions(): 
-		map("global", "Global"),
-		up(map, "selection_up", _("up")),
-		down(map, "selection_down", _("down")),
-		left(map, "selection_left", _("left")),
-		right(map, "selection_right", _("right"))
-	{
-	}
-};
-
-eAutoInitP0<enigmaActions> enigmaActions(5, "enigma Actions");
-
 void eZap::keyEvent(const eRCKey &key)
 {
-	int c = key.producer->getKeyCompatibleCode(key);
-	
-	const eAction *action=enigmaActions->map.findAction(key);
-	if (action == &enigmaActions->up)
-		eDebug("action: UP !!!");
-
-	if (c != -1)
-	{
-		if (key.flags & eRCKey::flagBreak)
-		{
-			keyUp(c);
-		}
-		else
-		{
-			keyDown(c);
-		}
-	}
+	if (focus)
+		focus->event(eWidgetEvent(eWidgetEvent::evtKey, key));
+	else if (main)
+		main->event(eWidgetEvent(eWidgetEvent::evtKey, key));
 }
 
 void eZap::status()

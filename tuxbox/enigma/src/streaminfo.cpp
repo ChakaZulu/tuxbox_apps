@@ -8,26 +8,31 @@
 #include "multipage.h"
 #include "eskin.h"
 
-void eStreaminfo::keyUp(int code)
+int eStreaminfo::keyUp(int code)
 {
 	switch (code)
 	{
 	case eRCInput::RC_OK:
 	case eRCInput::RC_HELP:
 		close(0);
+		return 1;
+	default:
+		return 0;
 	}
 }
 
-void eStreaminfo::keyDown(int code)
+int eStreaminfo::keyDown(int code)
 {
 	switch (code)
 	{
 	case eRCInput::RC_RIGHT:
 		mp.next();
-		break;
+		return 1;
 	case eRCInput::RC_LEFT:
 		mp.prev();
-		break;
+		return 1;
+	default:
+		return 0;
 	}
 }
 

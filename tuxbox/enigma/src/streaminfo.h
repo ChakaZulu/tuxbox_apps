@@ -12,8 +12,8 @@ class eStreaminfo: public eWindow
 {
 	eMultipage mp;
 protected:
-	void keyUp(int code);
-	void keyDown(int code);
+	int keyUp(int code);
+	int keyDown(int code);
 public:
 	eStreaminfo(int mode=0, decoderParameters *parms=0);
 };

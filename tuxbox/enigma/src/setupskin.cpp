@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.2 2002/05/16 15:52:06 tmbinc Exp $
+ * $Id: setupskin.cpp,v 1.3 2002/05/22 17:53:53 tmbinc Exp $
  */
 
 #include "setupskin.h"
@@ -130,33 +130,21 @@ eSkinSetup::~eSkinSetup()
 {
 }
 
-int eSkinSetup::eventFilter(const eWidgetEvent &event)
+int eSkinSetup::keyDown(int rc)
 {
-	int inlist=0;
-	if (focusList()->current() == lskins)
-		inlist=1;
-	switch (event.type)
+	switch(rc)
 	{
-	case eWidgetEvent::keyDown:
-		switch(event.parameter)
-		{
-		case eRCInput::RC_RIGHT:
-			focusNext(eWidget::focusDirE);
-			return 1;
-		case eRCInput::RC_DOWN:
-			if (inlist)
-				break;
-			focusNext(eWidget::focusDirS);
-			return 1;
-		case eRCInput::RC_LEFT:
-			focusNext(eWidget::focusDirW);
-			return 1;
-		case eRCInput::RC_UP:
-			if (inlist)
-				break;
-			focusNext(eWidget::focusDirN);
-			return 1;
-		}
+	case eRCInput::RC_RIGHT:
+		focusNext(eWidget::focusDirE);
+		return 1;
+	case eRCInput::RC_DOWN:
+		focusNext(eWidget::focusDirS);
+		return 1;
+	case eRCInput::RC_LEFT:
+		focusNext(eWidget::focusDirW);
+		return 1;
+	case eRCInput::RC_UP:
+		focusNext(eWidget::focusDirN);
+		return 1;
 	}
-	return 0;
 }

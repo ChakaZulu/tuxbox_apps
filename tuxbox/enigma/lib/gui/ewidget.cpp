@@ -9,6 +9,7 @@
 #include <core/system/init.h>
 #include <core/gui/actions.h>
 #include <core/base/eptrlist.h>
+#include "guiactions.h"
 
 eWidget::eWidget(eWidget *parent, int takefocus):
 	parent(parent),
@@ -26,10 +27,7 @@ eWidget::eWidget(eWidget *parent, int takefocus):
  	have_focus=0;
  	pixmap=0;
 	if (takefocus)
-	{
 		getTLW()->focusList()->push_back(this);
-		checkFocus();
-	}
 
 	if (parent)
 		parent->childlist.push_back(this);
@@ -53,6 +51,7 @@ void eWidget::takeFocus()
 	{
 		oldTLfocus=eZap::getInstance()->focus;
 		eZap::getInstance()->focus=this;
+		addActionMap(&i_focusActions->map);
 	}
 	have_focus++;
 }
@@ -61,6 +60,7 @@ void eWidget::releaseFocus()
 {
 	if ((!parent) && have_focus)
 	{
+		removeActionMap(&i_focusActions->map);
 		if (eZap::getInstance()->focus==this)	// if we don't have lost the focus, ...
 			eZap::getInstance()->focus=oldTLfocus;	// give it back
 	 	have_focus--;
@@ -175,36 +175,26 @@ void eWidget::invalidate(eRect area)
 	w->redraw(area);
 }
 
-void eWidget::event(const eWidgetEvent &event)
+int eWidget::event(const eWidgetEvent &event)
 {
 	if (!eventFilter(event))
 	{
 		eWidget *target=this;
-		if (have_focus && event.toFocus())	// bypassing focus handling for root-widget
-			target=focusList()->current();
-		if (target) 
-			target->eventHandler(event);
-	}
-}
-
-void eWidget::keyEvent(const eRCKey &key)
-{
-	const eAction *a;
-	for (actionMapList::iterator i = actionmaps.begin(); i != actionmaps.end(); ++i)
-		if ((a=(*i)->findAction(key)))
+/*		if (have_focus && event.toFocus())	// bypassing focus handling for root-widget
+			target=focusList()->current();  */
+		if (target)
 		{
-			event(eWidgetEvent(eWidgetEvent::handleAction, a));
-			return;
+			while (target)
+			{
+				if (target->eventHandler(event))
+					return 1;
+				if (target==this)
+					break;
+				target=target->parent;
+			} 
 		}
-	/* Action not found, try to use old Keyhandle */
-	int c = key.producer->getKeyCompatibleCode(key);
-	if (c != -1)
-	{
-		if (key.flags & eRCKey::flagBreak)
-			event(eWidgetEvent(eWidgetEvent::keyUp, c));
-		else
-			event(eWidgetEvent(eWidgetEvent::keyDown, c));
 	}
+	return 0;
 }
 
 	/* das ist bestimmt ne einzige race hier :) */
@@ -333,24 +323,71 @@ void eWidget::willHideChildren()
 	}
 }
 
+void eWidget::findAction(eActionPrioritySet &prio, const eRCKey &key, eWidget *context)
+{
+	for (actionMapList::iterator i = actionmaps.begin(); i != actionmaps.end(); ++i)
+		(*i)->findAction(prio, key, context);
+}
+
 int eWidget::eventFilter(const eWidgetEvent &event)
 {
 	return 0;
 }
 
-void eWidget::eventHandler(const eWidgetEvent &event)
+int eWidget::eventHandler(const eWidgetEvent &evt)
 {
-	switch (event.type)
+	switch (evt.type)
 	{
-	case eWidgetEvent::handleAction:
-		(const_cast<eAction*>(event.action))->handler();	// only useful for global actions
+	case eWidgetEvent::evtAction:
+		if (evt.action == &i_focusActions->up)
+			focusNext(focusDirN);
+		else if (evt.action == &i_focusActions->down)
+			focusNext(focusDirS);
+		else if (evt.action == &i_focusActions->left)
+			focusNext(focusDirW);
+		else if (evt.action == &i_focusActions->right)
+			focusNext(focusDirE);
+		else
+			return 0;
+		return 1;
+	case eWidgetEvent::evtKey:
+	{
+		eActionPrioritySet prio;
+
+		findAction(prio, *evt.key, this);
+		if (focus && (focus != this))
+			focus->findAction(prio, *evt.key, focus);
+
+		// and look at global ones. NOT YET.
+		
+		for (eActionPrioritySet::iterator i(prio.begin()); i != prio.end(); ++i)
+		{
+			if (i->first)
+			{
+				if (((eWidget*)i->first)->event(eWidgetEvent(eWidgetEvent::evtAction, i->second)))
+					break;
+			} else
+			{
+				(const_cast<eAction*>(evt.action))->handler();	// only useful for global actions
+				break;
+			}
+		}
+
+		if (focus)
+		{
+			/* Action not found, try to use old Keyhandle */
+			int c = evt.key->producer->getKeyCompatibleCode(*evt.key);
+			if (c != -1)
+			{
+				if (evt.key->flags & eRCKey::flagBreak)
+					focus->keyUp(c);
+				else
+					focus->keyDown(c);
+			}
+		}
+		return 1;
 		break;
-	case eWidgetEvent::keyUp:
-		keyUp(event.parameter);
-		break;
-	case eWidgetEvent::keyDown:
-		keyDown(event.parameter);
-		break;
+	}
 	case eWidgetEvent::gotFocus:
 		gotFocus();
 		break;
@@ -368,14 +405,17 @@ void eWidget::eventHandler(const eWidgetEvent &event)
 		invalidate();
 		break;
 	}
+	return 0;
 }
 
-void eWidget::keyDown(int rc)
+int eWidget::keyDown(int rc)
 {
+	return 0;
 }
 
-void eWidget::keyUp(int rc)
+int eWidget::keyUp(int rc)
 {
+	return 0;
 }
 
 void eWidget::gotFocus()
@@ -409,24 +449,25 @@ void eWidget::recalcClip()
 void eWidget::checkFocus()
 {
 	ePtrList<eWidget> *l=getTLW()->focusList();
-	if (!(l->current() && (l->current()->isVisible())))
+	if (!(getTLW()->focus && getTLW()->focus->isVisible()))
 	{
-		if (l->current())
-			l->current()->event(eWidgetEvent(eWidgetEvent::lostFocus));
-
 		l->first();
 
 		while (l->current() && !(l->current()->isVisible()))
 			l->next();
 
-		if (l->current())
-			l->current()->event(eWidgetEvent(eWidgetEvent::gotFocus));
+		setFocus(l->current());
 	}
 }
 
 void eWidget::addActionMap(eActionMap *map)
 {
 	actionmaps.push_back(map);
+}
+
+void eWidget::removeActionMap(eActionMap *map)
+{
+	actionmaps.remove(map);
 }
 
 void eWidget::redrawWidget(gPainter *target, const eRect &clip)
@@ -544,6 +585,8 @@ void eWidget::focusNext(int dir)
 
 void eWidget::setFocus(eWidget *newfocus)
 {
+	if (parent)
+		return getTLW()->setFocus(newfocus);
 	if (focus == newfocus)
 		return;
 	if (focus)
