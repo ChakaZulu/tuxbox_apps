@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.59 2002/01/30 23:06:24 field Exp $
+// $Id: channellist.cpp,v 1.60 2002/01/30 23:50:41 field Exp $
 //
 // $Log: channellist.cpp,v $
-// Revision 1.59  2002/01/30 23:06:24  field
-// eventlist aus channellist aufrufbar
+// Revision 1.60  2002/01/30 23:50:41  field
+// OnScreen Help :)
 //
 // Revision 1.58  2002/01/30 17:28:37  McClean
 // new channellist painting
@@ -850,7 +850,11 @@ void CChannelList::paintHead()
 		strCaption = name;
 	}
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, strCaption.c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, strCaption.c_str(), COL_MENUHEAD);
+
+	g_FrameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
+	if (bouquetList!=NULL)
+		g_FrameBuffer->paintIcon("dbox.raw", x+ width- 60, y+ 5 );
 }
 
 void CChannelList::paint()

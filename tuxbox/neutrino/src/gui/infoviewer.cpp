@@ -336,7 +336,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 		// kill linke seite
         g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth >>1), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
         // kill progressbar
-        g_FrameBuffer->paintBackgroundBox(BoxEndX- 112, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
+        g_FrameBuffer->paintBackgroundBox(BoxEndX- 120, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
 
         //number box
         g_FrameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW);
