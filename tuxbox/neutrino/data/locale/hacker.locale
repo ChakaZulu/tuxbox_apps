@@ -78,7 +78,8 @@ videomenu.videosignal_rgb |2@|3
 videomenu.videosignal_svideo $-\/¡|]3*
 videomenu.videosignal_composite [*/\/\P*5¡+3
 videomenu.videoformat |=0|2/\/\4+
-videomenu.videoformat_43 04:03
+videomenu.videoformat_43 04:03 (LB)
+videomenu.videoformat_431 04:03 (PS)
 videomenu.videoformat_169 16:09
 videomenu.videoformat_autodetect 4µ+0|]3+3[7
 videomenu.vcrswitch 5\/\/¡7[|-| 5[4|2+ 4µ70/\/\47![41|_Y

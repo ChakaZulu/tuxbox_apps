@@ -78,7 +78,8 @@ videomenu.videosignal_rgb RVB
 videomenu.videosignal_svideo S-Vidéo
 videomenu.videosignal_composite Composite
 videomenu.videoformat Format de Télévision
-videomenu.videoformat_43 4:3
+videomenu.videoformat_43 4:3 (LB)
+videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect automatiquement
 videomenu.vcrswitch changer Scart automatiquement
