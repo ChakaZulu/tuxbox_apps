@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.334 2003/11/21 19:42:59 alexw Exp $
+ * $Id: zapit.cpp,v 1.335 2003/11/21 19:46:11 alexw Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -21,7 +21,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+
 #define UPDATE_PMT 1
+
 /* system headers */
 #include <csignal>
 #include <fcntl.h>
@@ -306,6 +308,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 #endif
 	{
 		bool failed = false;
+
+		thisChannel->resetPids();
 
 		DBG("looking up pids for channel_id " PRINTF_CHANNEL_ID_TYPE, thisChannel->getChannelID());
 
@@ -1545,7 +1549,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.334 2003/11/21 19:42:59 alexw Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.335 2003/11/21 19:46:11 alexw Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
