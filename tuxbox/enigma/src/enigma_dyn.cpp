@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -85,7 +86,7 @@ static int getHex(int c)
 
 eString httpUnescape(const eString &string)
 {
-	eString ret="";
+	eString ret;
 	for (unsigned int i=0; i<string.length(); ++i)
 	{
 		int c=string[i];
@@ -117,7 +118,7 @@ eString httpUnescape(const eString &string)
 
 eString httpEscape(const eString &string)
 {
-	eString ret="";
+	eString ret;
 	for (unsigned int i=0; i<string.length(); ++i)
 	{
 		int c=string[i];
@@ -144,7 +145,7 @@ eString httpEscape(const eString &string)
 std::map<eString,eString> getRequestOptions(eString opt)
 {
 	std::map<eString,eString> result;
-	
+
 	if (opt[0]=='?')
 		opt=opt.mid(1);
 
@@ -201,7 +202,8 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 		opt=opt.mid(optval+1);
 	if (opt.length())
 		sscanf(opt.c_str(), "%x:%x:%x:%x:%x", &service_id, &dvb_namespace, &transport_stream_id, &original_network_id, &service_type);
-	eString result="";
+
+	eString result;
 
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
@@ -212,13 +214,23 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 #ifndef DISABLE_FILE
 		if ( eDVB::getInstance()->recorder && !ref->path )
 		{
-			if ( eDVB::getInstance()->recorder->scrambled )
+			int canHandleTwoScrambledServices=0;
+			eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices",
+				canHandleTwoScrambledServices);
+
+			if ( !canHandleTwoScrambledServices && eDVB::getInstance()->recorder->scrambled )
+			{
+				delete ref;
 				return "-1";
+			}
 			eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
 			if ( ref->getTransportStreamID() != rec.getTransportStreamID() ||
 					ref->getOriginalNetworkID() != rec.getOriginalNetworkID() ||
 					ref->getDVBNamespace() != rec.getDVBNamespace() )
-					return "-1";
+			{
+				delete ref;
+				return "-1";
+			}
 		}
 #endif
 		eZapMain::getInstance()->playService(*ref, eZapMain::psSetMode|eZapMain::psDontAdd);
@@ -277,7 +289,7 @@ static eString audio(eString request, eString dirpath, eString opts, eHTTPConnec
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
-	eString result="";
+	eString result;
 	eString volume=opt["volume"];
 	if (volume)
 	{
@@ -297,7 +309,8 @@ static eString audio(eString request, eString dirpath, eString opts, eHTTPConnec
 
 static eString getPMT(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="x-application/PMT";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	//"x-application/PMT";
 	PMT *pmt=eDVB::getInstance()->getPMT();
 	if (!pmt)
 		return "result=ERROR\n";
@@ -321,17 +334,46 @@ static eString getPMT(eString request, eString dirpath, eString opt, eHTTPConnec
 	return res;
 }
 
+static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	//"x-application/PMT";
+	EIT *eit=eDVB::getInstance()->getEIT();
+	if (!eit)
+		return "result=ERROR\n";
+	eString res="result=OK\n";
+	res+="EIT"+eString().sprintf("(%04x)\n", eit->service_id);
+	res+="original_network_id="+eString().sprintf("%04x\n", eit->original_network_id);
+	res+="transport_stream_id="+eString().sprintf("%04x\n", eit->transport_stream_id);
+	res+="events\n";
+	for (ePtrList<EITEvent>::iterator s(eit->events); s != eit->events.end(); ++s)
+	{
+		res+="EITEvent\n";
+		res+="event_id="+eString().sprintf("%04x\n", s->event_id);
+		res+="duration="+eString().sprintf("%04x\n", s->start_time);
+		res+="duration="+eString().sprintf("%04x\n", s->duration);
+		res+="running_status="+eString().sprintf("%d\n", s->running_status);
+		res+="free_CA_mode="+eString().sprintf("%d\n", s->free_CA_mode);
+		res+="descriptors\n";
+		for (ePtrList<Descriptor>::iterator d(s->descriptor); d != s->descriptor.end(); ++d)
+			res+=d->toString();
+	}
+	eit->unlock();
+	return res;
+}
+
 static eString version(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain";
 	eString result;
-	result.sprintf("EliteDVB Version : %s\r\n, eZap Version : doof\r\n",eDVB::getInstance()->getVersion().c_str());
+	result.sprintf("enigma");
+//	result.sprintf("EliteDVB Version : %s\r\n, eZap Version : doof\r\n",eDVB::getInstance()->getVersion().c_str());
 	return result;
 }
 
 static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result="";
+	eString result;
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
@@ -355,7 +397,7 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString mute="0";
 	eString volume;
-	eString result="";
+	eString result;
 	int mut=0, vol=0;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -458,7 +500,7 @@ eString filter_string(eString string)
 static eString getVolBar()
 {
 // returns the volumebar
-	eString result="";
+	eString result;
 	int volume=atoi(getVolume().c_str());
 
 	result+="<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
@@ -690,8 +732,7 @@ static eString aboutDreambox(void)
 	result += sharddisks;
 #endif //DISABLE_FILE
 
-	result += "<tr><td>Firmware:</td><td>";
-	result += "<td>&nbsp;</td>";
+	result += "<tr><td>Firmware:</td><td><td>&nbsp;</td>";
 	eString verid=getVersionInfo("version");
 	if (!verid)
 	{
@@ -879,8 +920,8 @@ static eString getEITC()
 
 	if(eit)
 	{
-		eString now_time="", now_duration="", now_text="", now_longtext="";
-		eString next_time="", next_duration="", next_text="", next_longtext="";
+		eString now_time, now_duration, now_text, now_longtext;
+		eString next_time, next_duration, next_text, next_longtext;
 
 		int p=0;
 
@@ -1113,7 +1154,9 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	if (!sapi)
 		return "not available";
 
-	current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+	eServiceReference ref(opt);
+
+	current=eDVB::getInstance()->settings->getTransponders()->searchService(ref?ref:sapi->service);
 	if(!current)
 		return eString("epg not ready yet");
 
@@ -1123,7 +1166,11 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	result+=eString("</span>");
 	result+=eString("<br>\n");
 
-	const timeMap* evt=eEPGCache::getInstance()->getTimeMap(sapi->service);
+	const timeMap* evt=ref ?
+		eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref)
+			:
+		eEPGCache::getInstance()->getTimeMap(sapi->service);
+
 	if(!evt)
 		return eString("epg not ready yet");
 
@@ -1188,7 +1235,7 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	pmt=eString().sprintf("%04xh", Decoder::current.pmtpid);
 
 	FILE *bitstream=0;
-	
+
 	if (Decoder::current.vpid!=-1)
 		bitstream=fopen("/proc/bus/bitstream", "rt");
 	if (bitstream)
@@ -1274,10 +1321,21 @@ static eString start_plugin(eString request, eString dirpath, eString opt, eHTTP
 	return plugins.execPluginByName( (path+opts["name"]).c_str() );
 }
 
+static eString stop_plugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if ( ePluginThread::getInstance() )
+	{
+		ePluginThread::getInstance()->kill(true);
+		return "OK plugin is stopped";
+	}
+	else
+		return "E: no plugin is running";
+}
+
 static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::map<eString,eString> opts=getRequestOptions(opt);
-	
+
 	if (opts.find("timeout") == opts.end())
 		return "E: no timeout set";
 	
@@ -1425,7 +1483,7 @@ public:
 static eString navigator(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::map<eString,eString> opts=getRequestOptions(opt);
-	
+
 	if (opts.find("path") == opts.end())
 	{
 		content->code=301;
@@ -1452,7 +1510,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 		current=spath;
 		spath="";
 	}
-	
+
 	eDebug("current service: %s\n", current.c_str());
 	eServiceReference current_service=string2ref(current);
 
@@ -1568,6 +1626,133 @@ static eString screenshot(eString request, eString dirpath, eString opts, eHTTPC
 	return "not ok\n";
 }
 
+static eString listDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString answer;
+	content->local_header["Content-Type"]="text/plain; charset=utf-8";
+	answer.sprintf(
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<directory path=\"%s\" dircount=\"\" filecount=\"\" linkcount=\"\">\n",
+		opt.length()?opt.c_str():"?");
+	DIR *d=0;
+	if( opt.length() )
+	{
+		if ( opt[opt.length()-1] != '/' )
+			opt+='/';
+		d = opendir(opt.c_str());
+	}
+	if ( d )
+	{
+		char buffer[255];
+		int dircount, filecount, linkcount;
+		dircount=filecount=linkcount=0;
+		while (struct dirent *e=readdir(d))
+		{
+			eString filename=opt;
+			filename+=e->d_name;
+
+			struct stat s;
+			if (lstat(filename.c_str(), &s)<0)
+				continue;
+			if ( S_ISLNK(s.st_mode) )
+			{
+				int count = readlink(filename.c_str(), buffer, 255);
+				eString dest(buffer,count);
+				answer+=eString().sprintf("\t<object type=\"link\" name=\"%s\" dest=\"%s\"/>\n",e->d_name, dest.c_str() );
+				++linkcount;
+			}
+			else if (S_ISDIR(s.st_mode))
+			{
+				answer+=eString().sprintf("\t<object type=\"directory\" name=\"%s\"/>\n",e->d_name );
+				++dircount;
+			}
+			else if (S_ISREG(s.st_mode))
+			{
+				answer+=eString().sprintf("\t<object type=\"file\" name=\"%s\" size=\"%d\"/>\n",
+					e->d_name,
+					s.st_size );
+				++filecount;
+			}
+		}
+		unsigned int pos = answer.find("dircount=\"");
+		answer.insert( pos+10, eString().sprintf("%d", dircount ) );
+		pos = answer.find("filecount=\"");
+		answer.insert( pos+11, eString().sprintf("%d", filecount ) );
+		pos = answer.find("linkcount=\"");
+		answer.insert( pos+11, eString().sprintf("%d", linkcount ) );
+		closedir(d);
+		answer+="</directory>\n";
+		return answer;
+	}
+	else
+		return eString().sprintf("E: couldn't read directory %s", opt.length()?opt.c_str():"?" );
+}
+
+static eString makeDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if ( opt.find("&&") == eString::npos )
+	{
+		if ( system(eString().sprintf("mkdir %s", opt.c_str()).c_str()) >> 8 )
+			return eString().sprintf("E: create directory %s failed", opt.c_str() );
+		return "OK";
+	}
+	return "E: invalid command";
+}
+
+static eString removeDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if ( opt.find("&&") == eString::npos )
+	{
+		if ( system(eString().sprintf("rmdir %s", opt.c_str()).c_str()) >> 8 )
+			return eString().sprintf("E: remove directory %s failed", opt.c_str() );
+		return "OK";
+	}
+	return "E: invalid command";
+}
+
+static eString removeFile(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if ( opt.find("&&") == eString::npos )
+	{
+		if ( system(eString().sprintf("rm %s", opt.c_str()).c_str()) >> 8 )
+			return eString().sprintf("E: remove file %s failed", opt.c_str() );
+		return "OK";
+	}
+	return "E: invalid command";
+}
+
+static eString moveFile(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if ( opt.find("&&") == eString::npos )
+	{
+		std::map<eString,eString> opts=getRequestOptions(opt);
+		if ( opts.find("source") == opts.end() || !opts["source"].length() )
+			return "E: option source missing or empty source given";
+		if ( opts.find("dest") == opts.end() || !opts["dest"].length() )
+			return "E: option dest missing or empty dest given";
+		if ( system(eString().sprintf("mv %s %s", opts["source"].c_str(), opts["dest"].c_str() ).c_str()) >> 8 )
+			return eString().sprintf("E: cannot move %s to %s", opts["source"].c_str(), opts["dest"].c_str() );
+		return "OK";
+	}
+	return "E: invalid command";
+}
+
+static eString createSymlink(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if ( opt.find("&&") == eString::npos )
+	{
+		std::map<eString,eString> opts=getRequestOptions(opt);
+		if ( opts.find("source") == opts.end() || !opts["source"].length() )
+			return "E: option source missing or empty source given";
+		if ( opts.find("dest") == opts.end() || !opts["dest"].length() )
+			return "E: option dest missing or empty dest given";
+		if ( system(eString().sprintf("ln -sf %s %s", opts["source"].c_str(), opts["dest"].c_str() ).c_str()) >> 8 )
+			return eString().sprintf("E: cannot create symlink %s to %s", opts["source"].c_str(), opts["dest"].c_str() );
+		return "OK";
+	}
+	return "E: invalid command";
+}
+
 static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	if(opt!="getpids")
@@ -1586,6 +1771,62 @@ static eString neutrino_suck_getonidsid(eString request, eString dirpath, eStrin
 		| sapi->service.getServiceID().get();
 
 	return eString().sprintf("%d\n", onidsid);
+}
+
+static eString getCurrentServiceRef(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if ( eServiceInterface::getInstance()->service )
+		return eServiceInterface::getInstance()->service.toString();
+	else
+		return "E:no service running";
+}
+
+struct addToString
+{
+	eString &dest;
+	eServiceReferenceDVB &current;
+	addToString(eString &dest, eServiceReferenceDVB &current)
+		:dest(dest), current(current)
+	{
+	}
+	void operator()(const eServiceReference& s)
+	{
+		eServiceReferenceDVB &bla((eServiceReferenceDVB&)s);
+		if ( current.getTransportStreamID() == bla.getTransportStreamID() &&
+				 current.getOriginalNetworkID() == bla.getOriginalNetworkID() &&
+				 current.getDVBNamespace() == bla.getDVBNamespace() )
+		{
+			dest+=s.toString();
+			eServiceDVB *service = (eServiceDVB*) eServiceInterface::getInstance()->addRef(s);
+			if ( service )
+			{
+				for(int i=0; i < (int)eServiceDVB::cacheMax; ++i)
+				{
+					int d=service->get((eServiceDVB::cacheID)i);
+					if ( d != -1 )
+						dest+=eString().sprintf(";%02d%04x", i, d);
+				}
+				eServiceInterface::getInstance()->removeRef(s);
+			}
+			dest+='\n';
+		}
+	}
+};
+
+static eString getTransponderServices(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/plain; charset=utf-8";
+	eServiceReferenceDVB cur = (eServiceReferenceDVB&)eServiceInterface::getInstance()->service;
+	if ( cur.type == eServiceReference::idDVB && !cur.path )
+	{
+		eString result;
+		eTransponderList::getInstance()->forEachServiceReference( addToString(result,cur) );
+		if ( result )
+			return result;
+		else
+			return "E: no other services on the current transponder";
+	}
+	return "E: no DVB service is running.. or this is a playback";
 }
 
 struct appendonidsidnamestr: public std::unary_function<const eServiceDVB&, void>
@@ -1617,12 +1858,20 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/", web_root);
 	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator);
 
+	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory);
+	dyn_resolver->addDyn("GET", "/cgi-bin/mkdir", makeDirectory, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/rmdir", removeDirectory, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/rm", removeFile, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/mv", moveFile, true);
+	dyn_resolver->addDyn("GET", "/cgi-bin/ln", createSymlink, true );
+
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getEIT", getEIT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);
 	dyn_resolver->addDyn("GET", "/control/message", message);
 	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage);
@@ -1644,8 +1893,10 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadTimerList", load_timerList);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList);
 	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", start_plugin);
+	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stop_plugin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", screenshot);
-
+	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef);
+	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices);
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid );
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist );
