@@ -25,7 +25,7 @@ class eZapPlugins: public QObject
 private slots:
 	void selected(eListboxEntry *);
 public:
-	eZapPlugins();
+	eZapPlugins(eWidget* lcdTitle=0, eWidget* lcdElement=0);
 	~eZapPlugins();
 	int exec();
 };

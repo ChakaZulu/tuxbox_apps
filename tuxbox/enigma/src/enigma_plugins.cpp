@@ -69,13 +69,13 @@ QString ePlugin::getText(int t) const
 	if (t)
 		return 0;
 	if (isback)
-		return "Zurück";
+		return "[Zurück]";
 	return name + " - " + desc;
 }
 
-eZapPlugins::eZapPlugins()
+eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 {
-	window=new eLBWindow("Plugins", eListbox::tBorder, 10, eSkin::getActive()->queryValue("fontsize", 20), 400);
+	window=new eLBWindow("Plugins", eListbox::tBorder, 10, eSkin::getActive()->queryValue("fontsize", 20), 400, lcdTitle, lcdElement);
 	window->move(QPoint(150, 136));
 	new ePlugin(window->list, 0);
   connect(window->list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
