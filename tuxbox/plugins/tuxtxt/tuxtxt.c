@@ -1,10 +1,11 @@
 /******************************************************************************
  *                 <<< TuxTxt - Videotext SoftwareDecoder >>>                 *
  *                                                                            *
- *                        (c) Thomas "LazyT" Loewe '02                        *
+ *                (c) Thomas "LazyT" Loewe '02 (LazyT@gmx.net)                *
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.22: small zoom-fix                                                   *
  *    V1.21: cleanup                                                          *
  *    V1.20: show servicename instead of pid                                  *
  *    V1.19: added configmenu                                                 *
@@ -38,7 +39,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.21 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.22 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -1530,16 +1531,19 @@ void RenderCatchedPage()
 
 void SwitchZoomMode()
 {
-	//toggle mode
+	if(subpagetable[page] != 0xFF)
+	{
+		//toggle mode
 
-		zoommode++;
-		if(zoommode == 3) zoommode = 0;
+			zoommode++;
+			if(zoommode == 3) zoommode = 0;
 
-		printf("TuxTxt <SwitchZoomMode => %d>\n", zoommode);
+			printf("TuxTxt <SwitchZoomMode => %d>\n", zoommode);
 
-	//update page
+		//update page
 
-		CopyBB2FB();
+			CopyBB2FB();
+	}
 }
 
 /******************************************************************************
