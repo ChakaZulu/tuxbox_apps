@@ -44,6 +44,8 @@ class CBouquet
 
 	public:
 		string Name;
+		bool   bHidden;
+		bool   bLocked;
 
 		ChannelList radioChannels;
 		ChannelList tvChannels;

@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.15 2002/02/27 19:24:54 Simplex Exp $
+  $Id: bouquets.cpp,v 1.16 2002/03/03 20:39:57 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.16  2002/03/03 20:39:57  Simplex
+  handling locked and hidden bouquets
+
   Revision 1.15  2002/02/27 19:24:54  Simplex
   bugfix: loading empty bouquets.xml doesn't fail anymore
 
@@ -80,6 +83,8 @@
 CBouquet::CBouquet( const CBouquet& bouquet)
 {
 	Name = bouquet.Name;
+	bHidden = bouquet.bHidden;
+	bLocked = bouquet.bLocked;
 	for (unsigned int i=0; i< bouquet.tvChannels.size(); i++)
 		addService( new channel(*(bouquet.tvChannels[i])));
 	for (unsigned int i=0; i< bouquet.radioChannels.size(); i++)
@@ -286,7 +291,10 @@ void CBouquetManager::saveBouquets()
 	{
 		if (Bouquets[i] != remainChannels)
 		{
-			fprintf(bouq_fd, "\t<Bouquet name=\"%s\">\n", convertForXML(Bouquets[i]->Name).c_str());
+			fprintf(bouq_fd, "\t<Bouquet name=\"%s\" hidden=\"%d\" locked=\"%d\">\n",
+			        convertForXML(Bouquets[i]->Name).c_str(),
+			        Bouquets[i]->bHidden ? 1 : 0,
+			        Bouquets[i]->bLocked ? 1 : 0);
 			for ( uint j=0; j<Bouquets[i]->tvChannels.size(); j++)
 			{
 				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
@@ -332,6 +340,10 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 		while ((search) && (!(strcmp(search->GetType(), "Bouquet"))))
 		{
 			CBouquet* newBouquet = addBouquet( search->GetAttributeValue("name"));
+			char* hidden = search->GetAttributeValue("hidden");
+			char* locked = search->GetAttributeValue("locked");
+			newBouquet->bHidden = hidden ? (strcmp(hidden, "1") == 0) : false;
+			newBouquet->bLocked = locked ? (strcmp(locked, "1") == 0) : false;
 			channel_node = search->GetChild();
 
 			while (channel_node)

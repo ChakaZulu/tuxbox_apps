@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.82 2002/02/23 13:13:16 field Exp $
+  $Id: zapit.cpp,v 1.83 2002/03/03 20:39:57 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -2291,6 +2291,18 @@ void parse_command()
 					((Radiomode_on && msgMoveChannel.mode == CZapitClient::MODE_CURRENT ) || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1);
 			break;
 
+			case CZapitClient::CMD_BQ_SET_LOCKSTATE :
+				CZapitClient::commandBouquetState msgBouquetLockState;
+				read( connfd, &msgBouquetLockState, sizeof(msgBouquetLockState));
+				g_BouquetMan->Bouquets[msgBouquetLockState.bouquet-1]->bLocked = msgBouquetLockState.state;
+			break;
+
+			case CZapitClient::CMD_BQ_SET_HIDDENSTATE :
+				CZapitClient::commandBouquetState msgBouquetHiddenState;
+				read( connfd, &msgBouquetHiddenState, sizeof(msgBouquetHiddenState));
+				g_BouquetMan->Bouquets[msgBouquetHiddenState.bouquet-1]->bHidden = msgBouquetHiddenState.state;
+			break;
+
 			case CZapitClient::CMD_BQ_RENUM_CHANNELLIST :
 				g_BouquetMan->renumServices();
 			break;
@@ -2480,7 +2492,7 @@ int main (int argc, char **argv)
 	}
 
 	system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-	printf("Zapit $Id: zapit.cpp,v 1.82 2002/02/23 13:13:16 field Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.83 2002/03/03 20:39:57 Simplex Exp $\n\n");
 	scan_runs = 0;
 	found_transponders = 0;
 	found_channels = 0;
@@ -2611,8 +2623,8 @@ void sendBouquets(bool emptyBouquetsToo)
 	for (uint i=0; i<g_BouquetMan->Bouquets.size(); i++)
 	{
 		if ( emptyBouquetsToo ||
-			 (Radiomode_on) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) ||
-			!(Radiomode_on) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0))
+			 (Radiomode_on) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden) ||
+			!(Radiomode_on) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden))
 		{
 			CZapitClient::responseGetBouquets msgBouquet;
 			// we'll send name and i+1 as bouquet number

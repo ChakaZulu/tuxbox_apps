@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.9 2002/02/09 22:03:24 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.10 2002/03/03 20:40:35 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.10  2002/03/03 20:40:35  Simplex
+  handling locked and hidden bouquets
+
   Revision 1.9  2002/02/09 22:03:24  Simplex
   speed up discarding BQ-Ed. changes
 
@@ -351,6 +354,40 @@ void CZapitClient::removeChannelFromBouquet( unsigned int bouquet, unsigned int 
 
 	msg.bouquet = bouquet;
 	msg.onid_sid = onid_sid;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+	zapit_close();
+}
+
+/* set a bouquet's lock-state*/
+void CZapitClient::setBouquetLock( unsigned int bouquet, bool lock)
+{
+	commandHead msgHead;
+	commandBouquetState msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_BQ_SET_LOCKSTATE;
+
+	msg.bouquet = bouquet;
+	msg.state   = lock;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+	zapit_close();
+}
+
+/* set a bouquet's hidden-state*/
+void CZapitClient::setBouquetHidden( unsigned int bouquet, bool hidden)
+{
+	commandHead msgHead;
+	commandBouquetState msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_BQ_SET_HIDDENSTATE;
+
+	msg.bouquet = bouquet;
+	msg.state   = hidden;
 
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
