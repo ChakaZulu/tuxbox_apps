@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.8 2004/04/29 13:41:48 diemade Exp $
+ * $Id: streamfile.c,v 1.9 2004/04/29 13:57:57 diemade Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -283,11 +283,11 @@ main (int argc, char ** argv) {
 	// create and delete temp-file to wakeup the disk from standby
 	sprintf(buf, "%s.tmp", fname);
 	fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
-	memset(buf, 0x00, IN_SIZE);
 	write(fd, buf, IN_SIZE);
 	fdatasync(fd);
 	close(fd);
-	unlink(fname);
+	unlink(buf);
+	memset(buf, 0x00, IN_SIZE);
 
 	bp = buf;
 
