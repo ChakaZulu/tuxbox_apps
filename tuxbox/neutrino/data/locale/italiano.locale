@@ -737,7 +737,6 @@ movieplayer.pesplayback PES playback (Sperimentale)
 movieplayer.fileplayback File via VLC
 movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD
-movieplayer.tshelp ROSSO/Home Stop\nVERDE Resync\nGIALLO Pausa/avanti\nBLU Inserire Bookmark\n1 ca. 1 Minuto indietro\n3 ca. 1 Minuto avanti\n4 ca. 5 Minuti indietro\n6 ca. 5 Minuti avanti\n7 ca. 10 Minuti indietro\n9 ca. 10 Minuti avanti\nAiuto: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.vlchelp ROSSo/Home Stop\nVERDE Resync\nGIALLO Pausa/avanti\nBLU Inserire Bookmark\n1 ca. 1 Minuto indietro\n3 ca. 1 Minuto avanti\n4 ca. 5 Minuti indietro\n6 ca. 5 Minuti avanti\n7 ca. 10 Minuti indietro\n9 ca. 10 Minuti avanti\nAiuto: http://www.giggo.de/dbox2/movieplayer.html\nmovieplayer.toomanybookmarks Ha Inserito troppi Bookmarks.\nprima cancellare uno vecchio.
 movieplayer.toomanybookmarks Lei ha gia creato troppi Bookmarks.\nEs prima deve Cancellare un altro.
 movieplayer.bookmarkname Nome Bookmark

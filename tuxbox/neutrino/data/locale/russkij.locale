@@ -747,7 +747,6 @@ movieplayer.pesplayback Play PES (Экспериментально)
 movieplayer.fileplayback Файл через VLC
 movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD
-movieplayer.tshelp КРАСНАЯ/Home Стоп\nЗЕЛЕНАЯ Ресинхронизазия\nЖЕЛТАЯ Пауза/Продолжить\nСИНЯЯ Create bookmark\nd-box время высветить\n1 примерно на 1 мин. назад\n3 пропустить около 1 мин.\n4 примерно на 5 мин. назад \n6 пропустить около 5 мин.\n7 примерно на 10 мин. назад\n9 пропустить около 10 мин.\nпомощ: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.vlchelp КРАСНАЯ/Home Стоп\nЗЕЛЕНАЯ Ресинхронизазия\nЖЕЛТАЯ Пауза/Продолжить\nСИНЯЯ Create bookmark\nd-box время высветить\n1 примерно на 1 мин. назад\n3 пропустить около 1 мин.\n4 примерно на 5 мин. назад \n6 пропустить около 5 мин.\n7 примерно на 10 мин. назад\n9 пропустить около 10 мин.\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.toomanybookmarks Слишком много закладок.\n Удалите прадварительно одну из существующих.
 movieplayer.bookmarkname Имя закладки
