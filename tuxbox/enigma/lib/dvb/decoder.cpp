@@ -34,7 +34,7 @@
 #include <errno.h>
 #include <lib/dvb/servicedvb.h>
 #include <lib/dvb/record.h>
-
+#include <sstream>
 // #define OLD_VBI
 
 #undef strcpy
@@ -79,7 +79,7 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 		waitpid(lastpid, 0, 0);
 		lastpid=-1;
 	}
- 
+
 	if (!descriptor_length)
 		return;
 
@@ -92,7 +92,7 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 	sprintf(buffer[2], "%x", sapi->service.getServiceID().get());
 
 	char descriptor[2048];
-	
+
 	for (int i=0; i<descriptor_length; i++)
 		sprintf(descriptor+i*2, "%02x", descriptors[i]);
 
@@ -102,7 +102,7 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 		eDebug("fork failed!");
 		return;
 	case 0:
-	{ 
+	{
 #if 0
 		close(0);
 		close(1);
@@ -133,7 +133,7 @@ int Decoder::Initialize()
 }
 
 void Decoder::Close()
-{	
+{
 	Flush();
 	eDebug("fd video = %d, audio = %d, demux_video = %d, demux_audio = %d, demux_pcr = %d, demux_vtxt = %d, mpeg = %d",
 					fd.video, fd.audio, fd.demux_video, fd.demux_audio, fd.demux_pcr, fd.demux_vtxt, fd.mpeg);
@@ -239,12 +239,13 @@ void Decoder::SetStreamType(int type)
 		eDebug("AUDIO_SET_STREAMTYPE failed (%m)");
 }
 
+int priorityApid(int);
 int Decoder::Set()
 {
 	if (locked)
 		return -1;
 	int changed=0;
-
+	parms.apid = priorityApid(parms.apid);
 	if (parms.vpid != current.vpid)
 		changed |= 1;
 	if (parms.apid != current.apid)
@@ -873,4 +874,45 @@ void Decoder::setAutoFlushScreen( int on )
 			fd.mpeg = -1;
 		}
 	}
+}
+
+int priorityApid(int apid)
+{
+	// audio channel priority handling
+	int apid2 = apid;
+	apid = 0;
+
+	char *audiochannelspriority;
+	if (eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority))
+		audiochannelspriority = "";
+
+	eString audiochannel;
+
+	if (strlen(audiochannelspriority) > 0)
+	{
+		std::stringstream audiochannels;
+		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+		if (sapi)
+		{
+			std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
+			audiochannels.str(eString(audiochannelspriority));
+			while (audiochannels && apid == 0)
+			{
+				audiochannels >> audiochannel;
+				for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
+					;it != astreams.end(); ++it)
+				{
+
+					if (audiochannel == it->text)
+					{
+						apid = it->pmtentry->elementary_PID;
+						break;
+					}
+				}
+			}
+		}
+	}
+	if (apid == 0)
+		apid = apid2;
+	return apid;
 }

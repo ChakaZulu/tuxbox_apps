@@ -45,7 +45,7 @@ Specifies the priority of audio channels (e.g. german english...). When zapped t
 <table border=0 cellspacing=5 cellpadding=0>
 <tr>
 	<td>
-		<input style="color:#000000" name="audiochannelspriority" type="text" size="100" maxlenght="100" value="#AUDIOCHANNELSPRIORITY#">
+		<input style="color:#000000" name="audiochannelspriority" type="text" size="90" maxlenght="256" value="#AUDIOCHANNELSPRIORITY#">
 	</td>	
 </tr>
 </table>
