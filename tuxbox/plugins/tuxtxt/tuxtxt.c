@@ -893,6 +893,19 @@ void ConfigMenu()
 								{
 									case 1:	if(pids_found > 1)
 											{
+
+												//stop decode-thread
+
+													if(pthread_cancel(thread_id) != 0)
+													{
+														perror("TuxTxt <pthread_cancel>");
+													}
+
+													if(pthread_join(thread_id, &thread_result) != 0)
+													{
+														perror("TuxTxt <pthread_join>");
+													}
+
 												//stop demuxer
 
 													ioctl(dmx, DMX_STOP);
@@ -951,6 +964,12 @@ void ConfigMenu()
 													{
 														perror("TuxTxt <DMX_SET_PES_FILTER>");
 													}
+
+													if(pthread_create(&thread_id, NULL, CacheThread, NULL) != 0)
+													{
+														perror("TuxTxt <pthread_create>");
+													}
+
 
 												//show new videotext
 
