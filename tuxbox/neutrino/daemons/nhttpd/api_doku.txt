@@ -1022,7 +1022,7 @@ Rückgabe: Gibt zurück, in welchem Modus der Demux laeuft
 1 = SPTS
 
 Beispiel:
-http://dbox/control/system?getAViAExtPlayback
+http://dbox/control/system?getAViAExtPlayBack
 1
 
 
@@ -1031,7 +1031,7 @@ Rückgabe: ok
 
 Aktiviert den PES-Modus
 
-http://dbox/control/system?setAViAExtPlayback=pes
+http://dbox/control/system?setAViAExtPlayBack=pes
 ok
 
 
@@ -1040,6 +1040,6 @@ Rückgabe: ok
 
 Aktiviert den SPTS-Modus
 
-http://dbox/control/system?setAViAExtPlayback=spts
+http://dbox/control/system?setAViAExtPlayBack=spts
 ok
 
