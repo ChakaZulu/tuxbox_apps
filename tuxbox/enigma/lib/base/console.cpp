@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.4 2003/09/07 00:03:35 ghostrider Exp $
+ * $Id: console.cpp,v 1.5 2003/10/03 18:20:29 ghostrider Exp $
  */
 
 #include <lib/base/console.h>
@@ -67,7 +67,7 @@ int bidirpipe(int pfd[], char *cmd , char *argv[])
 }
 
 eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
-:pid(-1), killstate(0), outbuf(0)
+:pid(-1), killstate(0)
 {
 //	eDebug("cmd = %s", cmd.c_str() );
 	memset(fd, 0, sizeof(fd) );
@@ -145,7 +145,7 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 	eDebug("pipe in = %d, out = %d, err = %d", fd[0], fd[1], fd[2]);
 
 	in = new eSocketNotifier(eApp, fd[0], 19 );  // 19 = POLLIN, POLLPRI, POLLHUP
-	out = new eSocketNotifier(eApp, fd[1], eSocketNotifier::Write);  // POLLOUT
+	out = new eSocketNotifier(eApp, fd[1], eSocketNotifier::Write, false);  // POLLOUT
 	err = new eSocketNotifier(eApp, fd[2], 19 );  // 19 = POLLIN, POLLPRI, POLLHUP
 	CONNECT(in->activated, eConsoleAppContainer::readyRead);
 	CONNECT(out->activated, eConsoleAppContainer::readyWrite);
@@ -160,8 +160,6 @@ eConsoleAppContainer::~eConsoleAppContainer()
 		killstate=-1;
 		kill();
 	}
-	if ( outbuf )
-		delete [] outbuf;
 }
 
 void eConsoleAppContainer::kill()
@@ -192,7 +190,7 @@ void eConsoleAppContainer::readyRead(int what)
 //		eDebug("what = %d");
 		char buf[2048];
 		int readed = read(fd[0], buf, 2048);
-		eDebug("%d bytes read", readed);
+//		eDebug("%d bytes read", readed);
 		if ( readed != -1 && readed )
 		{
 /*			for ( int i = 0; i < readed; i++ )
@@ -217,7 +215,7 @@ void eConsoleAppContainer::readyErrRead(int what)
 //		eDebug("what = %d");
 		char buf[2048];
 		int readed = read(fd[2], buf, 2048);
-		eDebug("%d bytes read", readed);
+//		eDebug("%d bytes read", readed);
 		if ( readed != -1 && readed )
 		{
 /*			for ( int i = 0; i < readed; i++ )
@@ -229,28 +227,33 @@ void eConsoleAppContainer::readyErrRead(int what)
 	}
 }
 
-void eConsoleAppContainer::write( const eString & str )
+void eConsoleAppContainer::write( const char *data, int len )
 {
-	outbuf = new char[ str.length()];
-	strcpy( outbuf, str.c_str() );
+	char *tmp = new char[len];
+	memcpy(tmp, data, len);
+	outbuf.push(queue_data(tmp,len));
+	out->start();
 }
 
 void eConsoleAppContainer::readyWrite(int what)
 {
-	if (what == 4 && outbuf)
+	if (what == POLLOUT && outbuf.size() )
 	{
-		if ( ::write( fd[1], outbuf, strlen(outbuf) ) != (int) strlen(outbuf) )
+		queue_data d = outbuf.front();
+		outbuf.pop();
+		if ( ::write( fd[1], d.data, d.len ) != d.len )
 		{
 			/* emit */ dataSent(-1);
-			eDebug("writeError");
+//			eDebug("writeError");
 		}
 		else
 		{
 			/* emit */ dataSent(0);
-			eDebug("write ok");
+//			eDebug("write ok");
 		}
 
-		delete outbuf;
-		outbuf=0;
+		delete [] d.data;
 	}
+	if ( !outbuf.size() )
+		out->stop();
 }

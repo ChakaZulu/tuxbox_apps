@@ -2,20 +2,30 @@
 #include <stdio.h>
 #include <lib/base/eerror.h>
 
+void thread_completed(void *p)
+{
+	eDebug("thread has completed..");
+	int *alive = (int*)p;
+	*alive=0;
+}
+
 void *eThread::wrapper(void *ptr)
 {
-	((eThread*)ptr)->thread();
+	eThread *p = (eThread*)ptr;
+	p->alive=1;
+	pthread_cleanup_push( thread_completed, (void*)&p->alive );
+	p->thread();
 	pthread_exit(0);
+	pthread_cleanup_pop(0);
 }
 
 eThread::eThread()
+	:alive(0)
 {
-	alive=0;
 }
 
 void eThread::run( int prio, int policy )
 {
-	alive=1;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	if (prio)
@@ -34,10 +44,18 @@ eThread::~eThread()
 		kill();
 }
 
-void eThread::kill()
+void eThread::kill(bool hard)
 {
-	alive=0;
-	eDebug("waiting for thread shutdown");
-	pthread_join(the_thread, 0);
-	eDebug("ok");
+	if ( hard )
+	{
+		eDebug("killing the thread...");
+		pthread_cancel(the_thread);
+		alive=0;
+	}
+	else
+	{
+		eDebug("waiting for thread shutdown...");
+		pthread_join(the_thread, 0);
+		eDebug("ok");
+	}
 }

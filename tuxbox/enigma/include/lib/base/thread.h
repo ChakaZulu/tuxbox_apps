@@ -16,8 +16,9 @@ public:
 	void run(int prio=0, int policy=0);
 
 	virtual void thread()=0;
-	
-	void kill();
+
+	void kill(bool hard=false);
+
 };
 
 #endif

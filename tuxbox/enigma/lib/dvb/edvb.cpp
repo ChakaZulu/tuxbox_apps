@@ -467,7 +467,6 @@ void eDVB::recEnd()
 {
 	if (!recorder)
 		return;
-	recorder->close();
 	delete recorder;
 	recorder=0;
 }

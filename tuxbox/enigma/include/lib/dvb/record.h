@@ -22,18 +22,14 @@
  * \todo Howto disable this warning?
  */
 
-class eIOBuffer;
-
-class eDVBRecorder: private eThread, eMainloop, public Object
+class eDVBRecorder: private eThread, public Object
 {
-	enum { stateRunning = 1, stateStopped = 0 };
+	enum { stateRunning = 1, stateStopped = 0 }state;
 	struct eDVBRecorderMessage
 	{
 		enum eCode
 		{
-			mOpen, mAddPID, mRemovePID, mRemoveAllPIDs, mClose, mStart, mStop, mExit, mWrite,
-			mAddNewPID, mValidatePIDs,
-			rWriteError, // disk full etc.
+			rWriteError // disk full etc.
 		} code;
 		union
 		{
@@ -61,42 +57,23 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 		}
 	};
 
-	std::set<pid_t> pids;
-	std::set<pid_t> newpids;
-
-	int dvrfd;
-	int outfd;
-
-	eSocketNotifier *sn;
-
-	eLock lock;
-	eString filename;
-	int splits, splitsize;
-	int size;
-	int state;
-
-	void openFile(int suffix=0);
-	void dataAvailable(int what);
-
-	eFixedMessagePump<eDVBRecorderMessage> messagepump;
+	std::set<pid_t> pids, newpids;
 	eFixedMessagePump<eDVBRecorderMessage> rmessagepump;
 
-	eIOBuffer buffer;
+	int splits, splitsize, size, dvrfd, outfd;
+
+//	pthread_mutex_t bufferLock;
+
+	eString filename;
+
+	char buf[65536+188];  // 188 bytes vor manual inject.. in buffer
+	int bufptr;
 
 	void thread();
-	void gotMessage(const eDVBRecorderMessage &msg);
 	void gotBackMessage(const eDVBRecorderMessage &msg);
+	inline int flushBuffer();
+	void openFile(int suffix=0);
 
-	void s_open(const char *filename);
-	std::pair<std::set<pid_t>::iterator,bool> s_addPID(int pid);
-	void s_removePID(int pid);
-	void s_removeAllPIDs();
-	void s_close();
-	void s_start();
-	void s_stop();
-	void s_exit();
-	// funktions for PID updates ( after got new PMT )
-	void s_validatePIDs();
 public:
 		/// the constructor
 	eDVBRecorder();
@@ -106,74 +83,47 @@ public:
 	/**
 	 * \brief Opens a file
 	 *
-	 * This asynchronous call will open a new filename. It will close open files.
+	 * This call will open a new filename. It will close open files.
 	 * \param filename Pointer to a filename. Existing files will be deleted. (life is cruel)
 	 */
-	void open(const char *filename)
-	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mOpen, strcpy(new char[strlen(filename)+1], filename)));
-	}
+	void open(const char *filename);
+
 	/**
 	 * \brief Adds a PID.
 	 *
-	 * This asynchronous call will add a PID to record. Recording doesn't start until using \c start().
+	 * This call will add a PID to record. Recording doesn't start until using \c start().
 	 * \sa eDVBRecorder::start
 	 */
-	void addPID(int pid)
-	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mAddPID, pid));
-	}
-	
+	std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> addPID(int pid);
+
 	/**
 	 * \brief Removes a PID.
 	 *
-	 * This asynchrounus call will remove a PID.
+	 * This call will remove a PID.
 	 */
-	void removePID(int pid)
-	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mRemovePID, pid));
-	}
-	
-	/**
-	 * \brief Removes a PID.
-	 *
-	 * This asynchrounus call will remove all pids.
-	 */
-	void removeAllPIDs()
-	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mRemoveAllPIDs));
-	}
-	
+	void removePID(int pid);
+
 	/**
 	 * \brief Start recording.
 	 *
-	 * This asynchronous call will start the recording. You can stop it with \c stop().
+	 * This call will start the recording. You can stop it with \c stop().
 	 * \sa eDVBRecorder::stop
 	 */
-	void start()
-	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mStart));
-	}
-	
+	void start();
+
 	/**
 	 * \brief Stop recording.
 	 *
-	 * This asynchrounous call will stop the recording. You can restart it (and append data) with \c start again.
+	 * This call will pause the recording. You can restart it (and append data) with \c start again.
 	 */
-	void stop()
-	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mStop));
-	}
-	
+	void stop();
+
 	/**
 	 * \brief Closes recording file.
 	 *
 	 * This will close the recorded file.
 	 */
-	void close()
-	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mClose));
-	}
+	void close();
 
 	/**
 	 * \brief Writes a section into the stream.
@@ -184,15 +134,21 @@ public:
 	 */
 	void writeSection(void *data, int pid);
 
-	void addNewPID(int pid)
-	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mAddNewPID, pid));
-	}
+	/**
+	 * \brief Adds a PID to running recording.
+	 *
+	 * This call will add a new PID to a running record. After add all new PIDs .. \c validatePIDs() must be called.
+	 * \sa eDVBRecorder::addNewPID
+	 */
+	void addNewPID(int pid);
 
-	void validatePIDs()
-	{
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mValidatePIDs));
-	}
+	/**
+	 * \brief Validate all PIDs.
+	 *
+	 * This call will remove all PID they never contains in the pmt, and add all new PIDs. All PIDs must set with \c addNewPID before.
+	 * \sa eDVBRecorder::validatePIDs
+	 */
+	void validatePIDs();
 
 	enum { recWriteError };
 	Signal1<void,int> recMessage;

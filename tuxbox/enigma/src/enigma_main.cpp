@@ -2486,7 +2486,8 @@ void eZapMain::play()
 			pause();
 			break;
 		default:
-			playService( eServiceInterface::getInstance()->service, psDontAdd );
+			if ( mode == modeFile )
+				playService( eServiceInterface::getInstance()->service, psDontAdd );
 			break;
 	}
 	updateProgress();

@@ -16,39 +16,44 @@
 #define DEMUX1_DEV "/dev/dvb/adapter0/demux1"
 #endif
 
-void eDVBRecorder::dataAvailable(int)
+int eDVBRecorder::flushBuffer()
 {
-	int res = 0;
-
-	int r = buffer.fromfile(dvrfd,65536);
-	if (r<=0)
+	if (!bufptr)
+		return 0;
+	int wr = ::write(outfd, buf, bufptr);
+	if ( wr < bufptr )
 	{
-		eDebug("reading failed..(err %d)", -r);
-		return;
+		eDebug("recording write error, maybe disk full");
+		rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
+		return wr;
 	}
-
-	while ( buffer.size() > 32767 )
-	{
-		res=buffer.tofile(outfd, 32768);
-
-		if (res <= 0 && buffer.size() > 32767 )
-		{
-			eDebug("recording write error, maybe disk full");
-//		s_close();
-			rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
-			return;
-		}
-		size+=res;
-	}
-	if (size > splitsize)
-		openFile(++splits);
+	size+=wr;
+	bufptr=0;
+	return wr;
 }
 
 void eDVBRecorder::thread()
 {
-	messagepump.start();
-	enter_loop();
-	lock.unlock();
+	rmessagepump.start();
+	int wr=-1;
+	while (state != stateStopped)
+	{
+		wr=0;
+//		singleLock s(bufferLock);
+
+		int r = ::read(dvrfd, buf+bufptr, 65536-bufptr );
+		if ( r < 0 )
+			continue;
+
+		bufptr += r;
+
+		if ( bufptr > 65535 )
+			wr = flushBuffer();
+
+		if (size > splitsize)
+			openFile(++splits);
+	}
+	rmessagepump.stop();
 }
 
 void eDVBRecorder::gotBackMessage(const eDVBRecorderMessage &msg)
@@ -63,61 +68,14 @@ void eDVBRecorder::gotBackMessage(const eDVBRecorderMessage &msg)
 	}
 }
 
-void eDVBRecorder::gotMessage(const eDVBRecorderMessage &msg)
-{
-	switch (msg.code)
-	{
-	case eDVBRecorderMessage::mOpen:
-		s_open(msg.filename);
-		break;
-	case eDVBRecorderMessage::mAddPID:
-		s_addPID(msg.pid);
-		break;
-	case eDVBRecorderMessage::mRemovePID:
-		s_removePID(msg.pid);
-		break;
-	case eDVBRecorderMessage::mRemoveAllPIDs:
-		s_removeAllPIDs();
-		break;
-	case eDVBRecorderMessage::mClose:
-		s_close();
-		break;
-	case eDVBRecorderMessage::mStart:
-		s_start();
-		break;
-	case eDVBRecorderMessage::mStop:
-		s_stop();
-		break;
-	case eDVBRecorderMessage::mExit:
-		s_exit();
-		break;
-	case eDVBRecorderMessage::mWrite:
-		::write(outfd, msg.write.data, msg.write.len);
-		::free(msg.write.data);
-		break;
-	case eDVBRecorderMessage::mAddNewPID:
-	{
-		pid_t p;
-		p.pid = msg.pid;
-		newpids.insert(p);
-		break;
-	}
-	case eDVBRecorderMessage::mValidatePIDs:
-		s_validatePIDs();
-		break;
-	default:
-		eDebug("received unknown message!");
-	}
-}
-
 void eDVBRecorder::openFile(int suffix)
 {
 	eString tfilename=filename;
 	if (suffix)
 		tfilename+=eString().sprintf(".%03d", suffix);
-		
+
 	size=0;
-		
+
 	if (outfd >= 0)
 		::close(outfd);
 
@@ -128,19 +86,22 @@ void eDVBRecorder::openFile(int suffix)
 		eDebug("failed to open DVR file: %s (%m)", tfilename.c_str());	
 }
 
-void eDVBRecorder::s_open(const char *_filename)
+void eDVBRecorder::open(const char *_filename)
 {
-	eDebug("eDVBRecorder::s_open(%s)", _filename);
+	eDebug("eDVBRecorder::open(%s)", _filename);
 	pids.clear();
+	newpids.clear();
 
-	filename=eString(_filename);
-	delete[] _filename;
-	
+	filename=_filename;
+
 	splitsize=1024*1024*1024; // 1G
-	outfd=-1;
+
 	openFile(splits=0);
 
-	dvrfd=::open(DVR_DEV, O_RDONLY|O_NONBLOCK);
+	if ( dvrfd >= 0 )
+		::close(dvrfd);
+
+	dvrfd=::open(DVR_DEV, O_RDONLY);
 	if (dvrfd < 0)
 	{
 		eDebug("failed to open "DVR_DEV" (%m)");
@@ -148,18 +109,13 @@ void eDVBRecorder::s_open(const char *_filename)
 		outfd=-1;
 		return;
 	}
-	if (outfd >= 0)
-	{
-		sn=new eSocketNotifier(this, dvrfd, eSocketNotifier::Read);
-		CONNECT(sn->activated, eDVBRecorder::dataAvailable);
-		sn->start();
-	} else
+	if (outfd < 0)
 		rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
 }
 
-std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::s_addPID(int pid)
+std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::addPID(int pid)
 {
-	eDebug("eDVBRecorder::s_addPID(0x%x)", pid );
+	eDebug("eDVBRecorder::addPID(0x%x)", pid );
 	pid_t p;
 	p.pid=pid;
 	if ( pids.find(p) != pids.end() )
@@ -196,21 +152,30 @@ std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::s_addPID(i
 	return pids.insert(p);
 }
 
-void eDVBRecorder::s_validatePIDs()
+void eDVBRecorder::addNewPID(int pid)
 {
-	eDebug("s_validatePIDs");
+	pid_t p;
+	p.pid = pid;
+	newpids.insert(p);
+}
+
+void eDVBRecorder::validatePIDs()
+{
+	if (state==stateStopped)
+		return;
+	eDebug("validatePIDs");
 	for (std::set<pid_t>::iterator it(pids.begin()); it != pids.end(); ++it )
 	{
 		std::set<pid_t>::iterator i = newpids.find(*it);
 		if ( i == newpids.end() )  // no more existing pid...
 		{
-			s_removePID(it->pid);
+			removePID(it->pid);
 			it = pids.begin();
 		}
 	}
 	for (std::set<pid_t>::iterator it(newpids.begin()); it != newpids.end(); ++it )
 	{
-		std::pair<std::set<pid_t>::iterator,bool> newpid = s_addPID(it->pid);
+		std::pair<std::set<pid_t>::iterator,bool> newpid = addPID(it->pid);
 		if ( newpid.second )
 		{
 			if ( state == stateRunning )
@@ -218,7 +183,7 @@ void eDVBRecorder::s_validatePIDs()
 				if (::ioctl(newpid.first->fd, DMX_START, 0)<0)
 				{
 					eDebug("DMX_START failed (%m)");
-												::close(newpid.first->fd);
+					::close(newpid.first->fd);
 				}
 			}
 		}
@@ -228,7 +193,7 @@ void eDVBRecorder::s_validatePIDs()
 	newpids.clear();
 }
 
-void eDVBRecorder::s_removePID(int pid)
+void eDVBRecorder::removePID(int pid)
 {
 	pid_t p;
 	p.pid=pid;
@@ -239,18 +204,23 @@ void eDVBRecorder::s_removePID(int pid)
 			::close(pi->fd);
 		pids.erase(pi);
 	}
-	eDebug("eDVBRecorder::s_removePID(0x%x)", pid);
+	eDebug("eDVBRecorder::removePID(0x%x)", pid);
 }
 
-void eDVBRecorder::s_removeAllPIDs()
+void eDVBRecorder::start()
 {
-	pids.clear();
-	eDebug("eDVBRecorder::s_removeAllPIDs()");
-}
+	if ( state == stateRunning )
+		return;
 
-void eDVBRecorder::s_start()
-{
-	eDebug("eDVBRecorder::s_start();");
+	eDebug("eDVBRecorder::start()");
+
+	state = stateRunning;
+
+	if ( !thread_running() )
+	{
+		eDebug("run thread");
+		run();
+	}
 
 	for (std::set<pid_t>::iterator i(pids.begin()); i != pids.end(); ++i)
 	{
@@ -263,73 +233,84 @@ void eDVBRecorder::s_start()
 			continue;
 		}
 	}
-	state = stateRunning;
 }
 
-void eDVBRecorder::s_stop()
+void eDVBRecorder::stop()
 {
-	eDebug("eDVBRecorder::s_stop();");
+	if ( state != stateRunning )
+		return;
+
+	eDebug("eDVBRecorder::stop()");
+	state = stateStopped;
+
+	int timeout=20;
+	while ( thread_running() && timeout )
+	{
+		usleep(100000);  // 2 sec time for thread shutdown
+		--timeout;
+	}
+
 	for (std::set<pid_t>::iterator i(pids.begin()); i != pids.end(); ++i)
 		if (i->fd >= 0)
 			::ioctl(i->fd, DMX_STOP, 0);
 
-	state = stateStopped;
-
-	buffer.tofile(outfd,buffer.size());
+	flushBuffer();
 }
 
-void eDVBRecorder::s_close()
+void eDVBRecorder::close()
 {
-	eDebug("eDVBRecorder::s_close");
+	if (state == stateRunning)
+		stop();
+
+	eDebug("eDVBRecorder::close()");
+
 	if (outfd < 0)
 		return;
-	delete sn;
+
 	for (std::set<pid_t>::iterator i(pids.begin()); i != pids.end(); ++i)
 		if (i->fd >= 0)
 			::close(i->fd);
+
 	::close(dvrfd);
 	::close(outfd);
-}
 
-void eDVBRecorder::s_exit()
-{
-	eDebug("eDVBRecorder::s_exit()");
-	exit_loop();
+	if ( thread_running() )
+	{
+		kill(true);
+		rmessagepump.stop();
+	}
 }
-
 
 eDVBRecorder::eDVBRecorder()
-:messagepump(this, 1), rmessagepump(this, 1), buffer(32768)
+:state(stateStopped), rmessagepump(eApp, 1), dvrfd(-1), outfd(-1), bufptr(0)
 {
-	CONNECT(messagepump.recv_msg, eDVBRecorder::gotMessage);
 	CONNECT(rmessagepump.recv_msg, eDVBRecorder::gotBackMessage);
-	lock.lock();
-	run();
+//	pthread_mutex_init(&bufferLock, 0);
 }
 
 eDVBRecorder::~eDVBRecorder()
 {
-	messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mExit));
-	lock.lock();
+	close();
 }
 
 void eDVBRecorder::writeSection(void *data, int pid)
 {
+	if ( state == stateRunning )
+		return;
+
 	__u8 *table=(__u8*)data;
 	int len=(table[1]<<8)&0x1F;
 	len|=table[2];
-	
-	eDebug("len: %d", len);
-	
+
 	len+=3;
-	
+
 	int first=1;
 	int cc=0;
 	
 	while (len)
 	{
 		// generate header:
-		__u8 *packet=(__u8*)malloc(188); // yes, malloc
+		__u8 packet[188]; // yes, malloc
 		int pos=0;
 		packet[pos++]=0x47;        // sync_byte
 		packet[pos]=pid>>8;        // pid
@@ -347,9 +328,16 @@ void eDVBRecorder::writeSection(void *data, int pid)
 		len-=tc;
 		pos+=tc;
 		memset(packet+pos, 0xFF, 188-pos);
-		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mWrite, packet, 188));
+
+//		singleLock s(bufferLock);
+
+		memcpy(buf+bufptr, packet, 188);
+		bufptr += 188;
+
+		if ( bufptr > 65535 )
+			flushBuffer();
+
 		first=0;
 	}
 }
-
 #endif //DISABLE_FILE

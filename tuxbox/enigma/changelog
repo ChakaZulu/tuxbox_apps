@@ -124,3 +124,9 @@
 200309221720 5 * Fix function of bouq up/down keys (when servicelist is closed)
 200309221720 5 * Readd [GO UP] entry in normal service lists
 200309252300 45 * MMI fixes ( another CI number input fix ), better MMI close handling
+200309281217 5 * Dont rezapp when play button pressed and no file mode running
+200309281217 5 45 Fix no selectable audio tracks bug
+200309281217 5 45 Fix no more playable ts files without enigma private descriptor
+200309281217 6 45 Fix errors in recorded ts files
+200310021730 2 5 Fix recording services with higher bitrates (MTV2... CT1 or other)
+200310031400 5 * Fix reboot after Flash update...

@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.9 2003/09/25 21:08:59 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.10 2003/10/03 18:20:30 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -558,7 +558,7 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 					eDebug("reiserfsck opened");
 					CONNECT( fsck->dataAvail, ePartitionCheck::getData );
 					CONNECT( fsck->appClosed, ePartitionCheck::fsckClosed );
-					fsck->write("Yes\n");
+					fsck->write("Yes\n",4);
 				}
 			}
 			else
@@ -618,9 +618,9 @@ void ePartitionCheck::getData( eString str )
 {
 	str.removeChars('\x8');
 	if ( str.find("<y>") != eString::npos )
-		fsck->write("y");
+		fsck->write("y",1);
 	else if ( str.find("[N/Yes]") != eString::npos )
-		fsck->write("Yes");
+		fsck->write("Yes",3);
 
 	lState->setText(str);
 }

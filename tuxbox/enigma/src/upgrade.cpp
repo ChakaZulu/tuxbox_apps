@@ -596,7 +596,9 @@ void eUpgrade::flashImage(int checkmd5)
 				// file operations... then the update ist very slow on the
 				// dreambox
 				nice(-10);
-
+				
+				system("cp /sbin/rebootSE /tmp/reboot");
+				
 				if(!erase(mtd))
 				{
 					mb.hide();
