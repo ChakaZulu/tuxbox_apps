@@ -9,31 +9,63 @@
 #include "emessage.h"
 #include "config.h"
 #include "eskin.h"
+#include "lcd.h"
+#include <include/plugin.h>
+#include <dbox/avia_vbi.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include "decoder.h"
 
-typedef int	(*PluginInfoProc)( struct SPluginInfo *info );
-typedef int	(*PluginExecProc)( int fd_fb, int fd_rc, int fd_lcd, char *cfgfile );
-
-static QString getInfo(const char *file, const char *info)
+QString getInfo(const char *file, const char *info)
 {
 	FILE *f=fopen(file, "rt");
 	if (!f)
 		return 0;
+
 	QString result(0);
-	while (1)
+
+	char buffer[128];
+
+	while (fgets(buffer, 127, f))
 	{
-		char buffer[128];
-		if (!fgets(buffer, 128, f))
-			break;
 		if (strlen(buffer))
 			buffer[strlen(buffer)-1]=0;
-		if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)]=='=')))
+
+		if (strstr(buffer, info))
 		{
-			result=QString(buffer).mid(strlen(info)+1);
+  		result=QString(buffer).mid(strlen(info)+1, strlen(buffer)-strlen(info+1));
 			break;
 		}
 	}	
 	fclose(f);
 	return result;
+}
+
+PluginParam *first=0, *tmp=0;
+
+void MakeParam(char* id, int val)
+{
+	PluginParam* p = new PluginParam;
+
+	if (tmp)
+		tmp->next = p;
+
+	p->id = new char[strlen(id)+1];
+	strcpy(p->id, id);
+	char buf[10];
+	sprintf(buf, "%i", val);
+	p->val = new char[strlen(buf)+1];
+	strcpy(p->val, buf);
+
+	if (!first)
+		first = p;
+
+	p->next=0;
+	tmp = p;		
 }
 
 ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
@@ -43,6 +75,7 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 		isback=1;
 		return;
 	}
+
 	qDebug(cfgfile);
 	name=getInfo(cfgfile, "name");
 	if (!name)
@@ -50,23 +83,30 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	desc=getInfo(cfgfile, "desc");
 	if (!desc)
 		desc="";
-	const char *aneedfb=getInfo(cfgfile, "needfb"),
-							*aneedlcd=getInfo(cfgfile, "needlcd"),
-							*aneedrc=getInfo(cfgfile, "needrc");
-/*							*aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
-							*aneedoffset=getInfo(cfgfile, "needoffsets");*/
 
-	needfb=atoi(aneedfb?aneedfb:0);
-	needlcd=atoi(aneedlcd?aneedlcd:0);
-	needrc=atoi(aneedrc?aneedrc:0);
-/*	needvtxtpid=atoi(aneedvtxtpid?aneedvtxtpid:0);
-	needoffset=atoi(aneedoffset?aneedoffset:0);*/
+	depend=getInfo(cfgfile, "depend");
+
+	QString atype=getInfo(cfgfile, "type"),
+					apluginVersion=getInfo(cfgfile, "pluginversion"),
+					aneedfb=getInfo(cfgfile, "needfb"),
+					aneedrc=getInfo(cfgfile, "needrc"),
+					aneedlcd=getInfo(cfgfile, "needlcd"),
+					aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
+					aneedoffsets=getInfo(cfgfile, "needoffsets"),
+					apigon=getInfo(cfgfile, "pigon");
+
+	needfb=(aneedfb.isNull()?false:atoi(aneedfb));
+	needlcd=(aneedlcd.isNull()?false:atoi(aneedlcd));
+	needrc=(aneedrc.isNull()?false:atoi(aneedrc));
+	needvtxtpid=(aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid));
+	needoffsets=(aneedoffsets.isNull()?false:atoi(aneedoffsets));
+	version=(apluginVersion.isNull()?0:atoi(apluginVersion));
+	showpig=(apigon.isNull()?false:atoi(apigon));
 
 	isback=0;
 	sopath=QString(cfgfile).left(strlen(cfgfile)-4)+".so";	// uarg
 	pluginname=QString(cfgfile).mid(QString(cfgfile).findRev('/')+1);
 	pluginname=pluginname.left(pluginname.length()-4);
-	depend=getInfo(cfgfile, "depend");
 }
 
 QString ePlugin::getText(int t) const
@@ -103,7 +143,7 @@ int eZapPlugins::exec()
 		return -1;
 	}
 
-	int nPlugins = 0; //Anzahl Plugins die gefunden wurden (CFG Dateien)
+	int nPlugins = 0;
 
 	for(int count=0; count<n; count++)
 	{       	
@@ -145,14 +185,13 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 		window->close(0);
 		return;
 	}
-	
+
 	window->hide();
 	
 	void *libhandle[20];
 	int argc=0;
 	QString argv[20];
-	
-	
+
 	if (plugin->depend)
 	{
 		char	depstring[129];
@@ -176,8 +215,45 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 	argv[argc++]=plugin->sopath;
 
 	int i;
-		
 	qDebug("pluginname is %s", (const char*)plugin->pluginname);
+
+	if (plugin->needfb)
+		MakeParam(P_ID_FBUFFER, fbClass::getInstance()->lock());
+
+	if (plugin->needrc)
+		MakeParam(P_ID_RCINPUT, eRCInput::getInstance()->lock());
+
+	if (plugin->needlcd)
+		MakeParam(P_ID_LCD, eLCD::getPrimary()->lock());
+
+	if (plugin->needoffsets)
+	{
+		MakeParam(P_ID_OFF_X, 37);
+		MakeParam(P_ID_OFF_Y, 23);
+		MakeParam(P_ID_END_X, 668);
+		MakeParam(P_ID_END_Y, 555);
+	}
+
+ 	if (plugin->needvtxtpid)
+ 	{
+		// versuche, den gtx/enx_vbi zu stoppen	
+		qDebug("try to stop gtx/enx_vbi");
+		MakeParam(P_ID_VTXTPID, Decoder::parms.tpid);
+    int fd = open("/dev/dbox/vbi0", O_RDWR);
+		if (fd > 0)
+		{
+			qDebug("stop gtx/enx_vbi");
+			ioctl(fd, AVIA_VBI_STOP_VTXT, 0);
+			close(fd);
+		}
+	}
+
+	PluginParam *par = first;
+	for( ; par; par=par->next )
+	{
+		 printf ("id: %s - val: %s\n", par->id, par->val);
+		 printf("%d\n", par->next);
+	}
 
 	for (i=0; i<argc; i++)
 	{
@@ -199,28 +275,54 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 	{
 		qDebug("would exec plugin %s", (const char*)plugin->sopath);
 
-		PluginExecProc execPlugin=(PluginExecProc)dlsym(libhandle[i-1], plugin->pluginname + "_exec");
-		
+		PluginExec execPlugin = (PluginExec) dlsym(libhandle[i-1], "plugin_exec");
 		if (!execPlugin)
 		{
 			eMessageBox msg("The symbol " + plugin->pluginname + "_exec" + " was not found. sorry.", "plugin executing failed");
 			msg.show();
 			msg.exec();
 			msg.hide();
-		} else
-		{
-			int fb_fd=fbClass::getInstance()->lock();
-			int rc_fd=eRCInput::getInstance()->lock();
-			execPlugin(fb_fd, rc_fd, -1,0 /*cfgfile*/);
-			fbClass::getInstance()->unlock();
-			eRCInput::getInstance()->unlock();
 		}
+		else
+		{		
+			printf("exec Plugin now...\n");
+			execPlugin(first);
+			dlclose(libhandle[i-1]);
+			printf("exec done...\n");
+		}
+
+		while (i--)
+			dlclose(libhandle[i]);
 	}
-	
-	while (i--)
+
+	do  // Parameter Liste freigegeben
 	{
-		dlclose(libhandle[i]);
+		tmp = first->next;
+		delete first;
+		first = tmp;
 	}
+	while (first);
+
+	if (plugin->needfb)
+		fbClass::getInstance()->unlock();
+	
+	if (plugin->needrc)
+		eRCInput::getInstance()->unlock();
+
+	if (plugin->needlcd)
+		eLCD::getPrimary()->unlock();
+
+ 	if (plugin->needvtxtpid)
+ 	{
+		// versuche, den gtx/enx_vbi wieder zu starten
+		qDebug("try to restart gtx/enx_vbi");
+ 		int fd = open("/dev/dbox/vbi0", O_RDWR);
+		if (fd > 0)
+		{
+			ioctl(fd, AVIA_VBI_START_VTXT, Decoder::parms.tpid);
+			close(fd);
+		}
+  }
 
 	window->show();
 }

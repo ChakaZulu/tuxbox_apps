@@ -11,8 +11,13 @@ protected:
 	static eLCD *primary;
 	QSize res;
 	unsigned char *_buffer;
+	int lcdfd;
 	int _stride;
+	int locked;
 public:
+	int lock();
+	void unlock();
+
 	eLCD(QSize size);
 	virtual ~eLCD();
 	static eLCD *getPrimary();
@@ -26,7 +31,6 @@ public:
 
 class eDBoxLCD: public eLCD
 {
-	int lcdfd;
 public:
 	eDBoxLCD();
 	~eDBoxLCD();

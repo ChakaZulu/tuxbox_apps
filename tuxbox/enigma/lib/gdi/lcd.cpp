@@ -10,6 +10,7 @@ eLCD *eLCD::primary;
 
 eLCD::eLCD(QSize size): res(size)
 {
+	locked = 0;
 	_buffer=new unsigned char[res.height()*res.width()];
 	_stride=res.width();
 	if (!primary)
@@ -28,6 +29,20 @@ eLCD::~eLCD()
 eLCD *eLCD::getPrimary()
 {
 	return primary;
+}
+
+int eLCD::lock()
+{
+	if (locked)
+		return -1;
+
+	locked=1;
+	return lcdfd;
+}
+
+void eLCD::unlock()
+{
+	locked=0;
 }
 
 /* void eLCD::line(QPoint start, QPoint dst, int color)

@@ -9,9 +9,11 @@ class eListboxEntry;
 class ePlugin: eListboxEntry
 {
 public:
+	int version;
 	QString name, desc;
 	QString depend, sopath, pluginname;
-	int needfb, needrc, needlcd, needvtxtpid, needoffset;
+	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig;
+	int posx, posy, sizex, sizey;
 	int isback;
 	ePlugin(eListbox *parent, const char *cfgfile);
 	QString getText(int t) const;
