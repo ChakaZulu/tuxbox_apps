@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.54 2001/12/12 11:46:06 McClean Exp $
+// $Id: infoviewer.cpp,v 1.55 2001/12/12 19:11:32 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.55  2001/12/12 19:11:32  McClean
+// prepare timing setup...
+//
 // Revision 1.54  2001/12/12 11:46:06  McClean
 // performance-improvements
 //
@@ -199,7 +202,7 @@ char* copyStringto( char* from, char* to, int len)
 
 CInfoViewer::CInfoViewer()
 {
-	intShowDuration = 15; //7,5 sec
+	intShowDuration = g_settings.timing_infobar; //15 means7,5 sec
     BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
     is_visible=false;
     ShowInfo_Info=false;

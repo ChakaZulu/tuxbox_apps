@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.28 2001/12/12 11:46:06 McClean Exp $
+// $Id: epgview.cpp,v 1.29 2001/12/12 19:11:32 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.29  2001/12/12 19:11:32  McClean
+// prepare timing setup...
+//
 // Revision 1.28  2001/12/12 11:46:06  McClean
 // performance-improvements
 //
@@ -339,7 +342,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
     	int scrollCount;
     	while(loop)
     	{
-    		int key = g_RCInput->getKey(1000);
+    		int key = g_RCInput->getKey(g_settings.timing_epg);
 
     		scrollCount = medlinecount;
 

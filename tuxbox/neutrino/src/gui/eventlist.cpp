@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.27 2001/12/12 01:47:17 McClean Exp $
+// $Id: eventlist.cpp,v 1.28 2001/12/12 19:11:32 McClean Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.28  2001/12/12 19:11:32  McClean
+// prepare timing setup...
+//
 // Revision 1.27  2001/12/12 01:47:17  McClean
 // cleanup
 //
@@ -336,7 +339,7 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 	bool loop=true;
 	while (loop)
 	{
-		key = g_RCInput->getKey(100);
+		key = g_RCInput->getKey(g_settings.timing_chanlist);
 		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
 		{
 			selected = oldselected;

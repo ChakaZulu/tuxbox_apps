@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.19 2001/12/12 18:45:39 McClean Exp $
+$Id: gamelist.cpp,v 1.20 2001/12/12 19:11:32 McClean Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.20  2001/12/12 19:11:32  McClean
+prepare timing setup...
+
 Revision 1.19  2001/12/12 18:45:39  McClean
 fix gamelist-design, manual-update bug, add save settings now
 
@@ -177,7 +180,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	bool loop=true;
 	while (loop)
 	{
-		int key = g_RCInput->getKey(100);
+		int key = g_RCInput->getKey(g_settings.timing_menu);
 		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
 		{
 			loop=false;

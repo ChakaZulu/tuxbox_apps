@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.26 2001/11/26 02:34:04 McClean Exp $
+$Id: menue.cpp,v 1.27 2001/12/12 19:11:32 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.27  2001/12/12 19:11:32  McClean
+ prepare timing setup...
+
  Revision 1.26  2001/11/26 02:34:04  McClean
  include (.../../stuff) changed - correct unix-formated files now
 
@@ -123,7 +126,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
     int retval = CMenuItem::RETURN_REPAINT;
 
     do {
-	key = g_RCInput->getKey(300);
+	key = g_RCInput->getKey(g_settings.timing_menu);
 
 	switch (key) {
 
