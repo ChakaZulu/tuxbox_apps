@@ -41,7 +41,7 @@ CScanTs::CScanTs()
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 }
-
+/*
 bool CScanTs::scanReady(short* sat, int *ts, int *services)
 {
 	int sock_fd;
@@ -157,7 +157,7 @@ void CScanTs::startScan()
 	free(return_buf);
 	close(sock_fd);
 }
-
+*/
 
 int CScanTs::exec(CMenuTarget* parent, string)
 {
@@ -165,7 +165,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	g_FrameBuffer->loadPicture2Mem("scan.raw", g_FrameBuffer->lfb);
 
 	g_Sectionsd->setPauseScanning( true );
-	startScan();
+	g_Zapit->startScan( g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk | g_settings.scan_bouquet );
 
 	paint();
 
@@ -176,9 +176,9 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	char strLastTransponders[100] = "";
 	char strLastSatellite[100] = "";
 
-	int ts = 0;
-	int services = 0;
-	short sat = 0;
+	unsigned int ts = 0;
+	unsigned int services = 0;
+	unsigned int sat = 0;
 	int ypos=y;
 	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 	ypos= y+ hheight + (mheight >>1);
@@ -202,7 +202,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	{
 		if(pos==0)
 		{	//query zapit every xth loop
-			finish = scanReady(&sat, &ts, &services);
+			finish = g_Zapit->isScanReady( sat, ts, services);
 		}
 
 		ypos= y+ hheight + (mheight >>1);

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.25 2002/03/07 18:32:34 field Exp $
+// $Id: global.h,v 1.26 2002/03/14 20:42:56 McClean Exp $
 //
 // $Log: global.h,v $
+// Revision 1.26  2002/03/14 20:42:56  McClean
+// to fix...
+//
 // Revision 1.25  2002/03/07 18:32:34  field
 // Bugfix, weitere Umstellungen ;)
 //
@@ -100,7 +103,7 @@
 //
 //
 
-//#define USEACTIONLOG
+#define USEACTIONLOG
 
 #include "neutrino.h"
 #include "controldclient.h"
