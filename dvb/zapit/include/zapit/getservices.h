@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#include <config.h>
+
 struct channel {
   std::string name;
   time_t last_update;

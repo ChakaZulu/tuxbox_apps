@@ -32,7 +32,7 @@ typedef std::multimap<std::string, bouquet_mulmap>::iterator sbiterator;
 #ifdef NVOD_HACK
 std::string curr_chan;
 #endif
-std::string services_xml = "/var/zapit/services.xml";
+std::string services_xml = CONFIGDIR "/zapit/services.xml";
 std::string logfile = "/tmp/zapit_scan.log";
 int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr, FILE *logfd);
 int finaltune(int freq, int symbolrate, int polarity, int fec,int diseq);
@@ -119,12 +119,12 @@ void write_bouquets(unsigned short mode)
 	if (mode&1024)
 	{
 		printf("[zapit] removin existing bouqets.xml\n");
-		system("/bin/rm /var/zapit/bouquets.xml");
+		system("/bin/rm " CONFIGDIR "/zapit/bouquets.xml");
 		scanbouquets.clear();
 		return;
 	}
 		
-	bouq_fd = fopen("/var/zapit/bouquets.xml", "r");
+	bouq_fd = fopen(CONFIGDIR "/zapit/bouquets.xml", "r");
 	
 	
 	if (mode&256 || scanbouquets.empty())
@@ -140,11 +140,11 @@ void write_bouquets(unsigned short mode)
 		printf("[zapit] creating new bouquets.xml\n");
 		if (bouq_fd != NULL)
 			fclose(bouq_fd);
-		bouq_fd = fopen("/var/zapit/bouquets.xml", "w");
+		bouq_fd = fopen(CONFIGDIR "/zapit/bouquets.xml", "w");
 		
 		if (bouq_fd == NULL)
 			{
-				perror("fopen /var/zapit/bouquets.xml");
+				perror("fopen " CONFIGDIR "/zapit/bouquets.xml");
 				scanbouquets.clear();
 				return;
 			}
@@ -335,7 +335,7 @@ void *start_scanthread(void *param)
       	
       	if (fd == NULL)
       	{
-      		perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      		perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
       		fclose(logfd);
       		scan_runs = 0;
   		pthread_exit(0);
@@ -392,7 +392,7 @@ void *start_scanthread(void *param)
 	  	fd = fopen(services_xml.c_str(), "w" );
 	  	if (fd == NULL)
       		{
-      			perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
       			fclose(logfd);
       			scan_runs = 0;
   			pthread_exit(0);
@@ -458,7 +458,7 @@ void *start_scanthread(void *param)
 	  	fd = fopen(services_xml.c_str(), "w" );
 	  	if (fd == NULL)
       		{
-      			perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
       			fclose(logfd);
       			scan_runs = 0;
   			pthread_exit(0);
@@ -503,7 +503,7 @@ void *start_scanthread(void *param)
 	  	fd = fopen(services_xml.c_str(), "w" );
 	  	if (fd == NULL)
       		{
-      			perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
       			fclose(logfd);
       			scan_runs = 0;
   			pthread_exit(0);
@@ -587,7 +587,7 @@ void *start_scanthread(void *param)
 	  	fd = fopen(services_xml.c_str(), "w" );
 	  	if (fd == NULL)
       		{
-      			perror("Could not create /var/zapit/services.xml. Please check if /var/zapit exists and space is available\nCancelling scan");
+      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
       			fclose(logfd);
       			scan_runs = 0;
   			pthread_exit(0);

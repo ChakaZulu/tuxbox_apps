@@ -200,10 +200,10 @@ int LoadServices(void)
   curr_diseqc = 0;
 
   XMLTreeParser *parser=new XMLTreeParser("ISO-8859-1");
-  FILE *in=fopen("/var/zapit/services.xml", "r");
+  FILE *in=fopen(CONFIGDIR "/zapit/services.xml", "r");
   if (!in)
     {
-      perror("[zapit] /var/zapit/services.xml");
+      perror("[zapit] " CONFIGDIR "/zapit/services.xml");
       return -23;
     }
 
@@ -241,10 +241,10 @@ int LoadServices(void)
 int LoadBouquets(void)
 {
 	XMLTreeParser *parser=new XMLTreeParser("ISO-8859-1");
-	FILE *in=fopen("/var/zapit/bouquets.xml", "r");
+	FILE *in=fopen(CONFIGDIR "/zapit/bouquets.xml", "r");
 	if (!in)
 	{
-		perror("[zapit] /var/zapit/bouquets.xml");
+		perror("[zapit] " CONFIGDIR "/zapit/bouquets.xml");
 		return -23;
 	}
 
