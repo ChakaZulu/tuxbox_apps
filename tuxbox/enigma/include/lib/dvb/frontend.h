@@ -80,7 +80,6 @@ class eFrontend: public Object
 #else
 			curContTone,
 			curVoltage,
-			eTimer timeout;
 #endif
 			needreset,
 			lastcsw,
@@ -94,6 +93,9 @@ class eFrontend: public Object
 	eTransponder *transponder;
 	static eFrontend *frontend;
 	eTimer rotorTimer1, rotorTimer2, 
+#if HAVE_DVB_API_VERSION >=3
+				timeout,
+#endif
 				checkRotorLockTimer, checkLockTimer, updateTransponderTimer;
 	eSocketNotifier *sn;
 	int tries, noRotorCmd, wasLoopthrough, lostlockcount;
