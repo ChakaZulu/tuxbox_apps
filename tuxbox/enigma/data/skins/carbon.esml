@@ -280,18 +280,18 @@
 
 	<object name="eZapMainMenu">
 		<eWidget position="0:306" size="720:270" backgroundColor="-1" >
-		<eLabel position="3:35" size="714:100" backgroundColor="content" />
-		<eLabel position="245:169" size="233:35" backgroundColor="content" />
+		<eLabel position="3:45" size="714:100" backgroundColor="content" />
+		<eLabel position="199:140" size="320:22" backgroundColor="content" />
 		<eLabel pixmap="mainmenu.background" position="0:0" size="e:e" 
 			name="background" alphatest="on" />
-		<eLabel position="26:48" size="70:71" name="l3" alphatest="on" />
-		<eLabel position="115:48" size="70:71" name="l2" alphatest="on" />
-		<eLabel position="204:48" size="70:71" name="l1" alphatest="on" />
-		<eLabel position="310:34" size="100:101" name="m" alphatest="on" />
-		<eLabel position="447:48" size="70:71" name="r1" alphatest="on" />
-		<eLabel position="534:48" size="70:71" name="r2" alphatest="on" />
-		<eLabel position="625:48" size="70:71" name="r3" alphatest="on" />
-		<eLabel position="199:173" size="320:48" align="center" font="eWindow.TitleBar" foregroundColor="text1" 
+		<eLabel position="7:65" size="70:71" name="l3" alphatest="on" />
+		<eLabel position="100:65" size="70:71" name="l2" alphatest="on" />
+		<eLabel position="198:65" size="70:71" name="l1" alphatest="on" />
+		<eLabel position="313:41" size="100:101" name="m" alphatest="on" />
+		<eLabel position="453:65" size="70:71" name="r1" alphatest="on" />
+		<eLabel position="551:65" size="70:71" name="r2" alphatest="on" />
+		<eLabel position="645:65" size="70:71" name="r3" alphatest="on" />
+		<eLabel position="199:140" size="320:22" align="center" font="Blue.Bold;22" foregroundColor="text1" 
 			backgroundColor="content" name="description" alphatest="on" />
 		</eWidget>
 	</object>
@@ -330,7 +330,7 @@
 		<eLabel position="60:400" size="630:150" pixmap="info-bg" name="osd" alphatest="on" />
 		<eLabel position="90:428" size="80:18" font="Blue.Bold;22" name="ch_number" 
 			foregroundColor="text1" align="center" />
-		<eLabel position="240:488" size="300:18" font="Blue.Bold;22" name="ch_name" 
+		<eLabel position="240:488" size="312:18" font="Blue.Bold;22" name="ch_name" 
 			foregroundColor="text1" align="center" wrap="on" />
 		<eLabel position="90:450" size="80:18" font="Blue.Bold;22" name="time" 
 			foregroundColor="text1" align="center" />
@@ -343,8 +343,7 @@
 		<eLabel position="107:489" size="23:20" pixmap="button_yellow" name="button_yellow_enabled" />
 		<eLabel position="84:489" size="23:20" pixmap="button_green" name="button_green_enabled" />
 		<eLabel position="64:489" size="23:20" pixmap="button_red" name="button_red_enabled" />
-		<eLabel name="recStatus" position="542:488" size="15:18" text="R" foregroundColor="std_dred" 
-			backgroundColor="content" alphatest="on" font="Blue.Bold;22" align="center" />
+		<eLabel name="recStatus" position="447:435" size="18:18" pixmap="rec_symbol" alphatest="on" />
 		<eLabel name="dvrInfoBar" position="170:419" size="433:62" alphatest="on" pixmap="dvrtable">
 		<eLabel name="TimeLeft" position="330:4" size="150:51" alphatest="on" font="Blue.Regular;24"
 			foregroundColor="white" wrap="on" />
