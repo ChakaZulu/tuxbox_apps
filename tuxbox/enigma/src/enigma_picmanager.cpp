@@ -125,7 +125,7 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 
 
 	sort = new eCheckbox(this, sortpictures, 1);
-	sort->setText(_("Sort pictures"));
+	sort->setText(_("Sort slides"));
 	sort->move(ePoint(10, y));
 	sort->resize(eSize(300, h));
 	sort->setHelpText(_("Sort pictures alphabetically"));
@@ -152,7 +152,7 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	subdirs->setText(_("Include subdirectories"));
 	subdirs->move(ePoint(10, y));
 	subdirs->resize(eSize(300, h));
-	subdirs->setHelpText(_("Include subdirectories in slideshow"));
+	subdirs->setHelpText(_("Include slides of subdirectories in slideshow"));
 
 	y += dy;
 
@@ -160,7 +160,7 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	busy->setText(_("Show busy sign"));
 	busy->move(ePoint(10, y));
 	busy->resize(eSize(300, h));
-	busy->setHelpText(_("Show busy sign while decompressing image"));
+	busy->setHelpText(_("Show busy sign while preprocessing slide"));
 
 	y += dy + 20;
 
