@@ -74,7 +74,7 @@
 
  function openEPG()
  {
-  win=window.open("/cgi-bin/getcurrentepg", "epg", "width=400, height=200, left=0, top=0");
+  win=window.open("/cgi-bin/getcurrentepg", "epg", "width=600, left=0, top=0");
   win.focus();
  }
 
