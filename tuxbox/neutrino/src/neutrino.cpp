@@ -2195,7 +2195,12 @@ void CNeutrinoApp::ExitRun()
 	frameBuffer->loadPal("shutdown.pal");
 
 	saveSetup();
-	g_Timer->setBoxWakeupTime (g_Timer->getNextTimerEventStart() -120);
+	{ time_t   nextTimerEvent;
+	   nextTimerEvent = g_Timer->getNextTimerEventStart();
+	   if (nextTimerEvent) {
+		   g_Timer->setBoxWakeupTime (nextTimerEvent-120);
+	   }
+	}
 	g_Controld->shutdown();
 	sleep(55555);
 }
@@ -2573,7 +2578,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.278 2002/05/20 20:13:03 rasc Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.279 2002/05/20 22:31:21 rasc Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
