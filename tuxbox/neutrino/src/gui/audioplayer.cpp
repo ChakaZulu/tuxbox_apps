@@ -86,7 +86,7 @@
 #endif
 #define ConnectLineBox_Width	15
 
-#define AUDIOPLAYERGUI_SMSKEY_TIMEOUT 200
+#define AUDIOPLAYERGUI_SMSKEY_TIMEOUT 500
 
 //------------------------------------------------------------------------
 
@@ -251,9 +251,6 @@ int CAudioPlayerGui::show()
 	bool clear_before_update=false;
 	key_level=0;
 
-	unsigned char keySelectedBySMSInput=0;
-	bool checkSMSKeyInput=false;
-
 	while(loop)
 	{
 		if(!m_screensaver)
@@ -304,14 +301,6 @@ int CAudioPlayerGui::show()
 			{
 				screensaver(false);
 			}
-		}
-
-		if (!(msg == CRCInput::RC_timeout)
-		    && ((!g_RCInput->isNumeric(msg) || msg == CRCInput::RC_0) || playlist.empty()))
-		{
-			//printf("resetting\n");
-			m_SMSKeyInput.resetOldKey();
-			checkSMSKeyInput=false;
 		}
 
 		if( msg == CRCInput::RC_timeout)
@@ -699,23 +688,6 @@ int CAudioPlayerGui::show()
 
 			paintFoot();
 		}
-		else if ((msg >= CRCInput::RC_1) && (msg <= CRCInput::RC_9) && !(playlist.empty()))
-		{ //numeric zap or SMS zap
-			if (m_select_title_by_name)
-			{
-				//printf("received key: %c\n",msg);
-				keySelectedBySMSInput = m_SMSKeyInput.handleMsg(msg);
-				checkSMSKeyInput=true;
-			} else 
-			{
-				//printf("numeric zap\n");
-				int val=0;
-				if (getNumericInput(msg,val))
-					selected = std::min((int)playlist.size(), val) - 1;
-				update = true;
-			}
-			
-		}
 		else if(msg == CRCInput::RC_0)
 		{
 			if(current>=0)
@@ -724,6 +696,63 @@ int CAudioPlayerGui::show()
 				update=true;
 			}
 		}
+		else if ((msg >= CRCInput::RC_1) && (msg <= CRCInput::RC_9) && !(playlist.empty()))
+		{ //numeric zap or SMS zap
+			if (m_select_title_by_name)
+			{
+				//printf("select by name\n");
+				unsigned char smsKey = 0;
+				time_t actTime = time(NULL);
+				
+				neutrino_msg_t      newMsg = msg;
+				neutrino_msg_data_t newData;
+				
+				int x1=(g_settings.screen_EndX- g_settings.screen_StartX)/2 + g_settings.screen_StartX-50;
+				int y1=(g_settings.screen_EndY- g_settings.screen_StartY)/2 + g_settings.screen_StartY;
+				int h = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight();
+				
+				do 
+				{
+					smsKey = m_SMSKeyInput.handleMsg(newMsg);
+					//printf("  new key: %c", keySelectedBySMSInput);
+					actTime = time(NULL);
+					g_RCInput->getMsg_ms(&newMsg,&newData,AUDIOPLAYERGUI_SMSKEY_TIMEOUT-100);
+					
+
+					/* show a hint box with current char (too slow at the moment)*/
+// 					char selectedKey[1];
+// 					sprintf(selectedKey,"%c",smsKey);
+					
+// 					int w = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getRenderWidth(selectedKey);
+// 					frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT_PLUS_6);
+// 					frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED_PLUS_0);
+// 					g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]
+// 						->RenderString(x1,y1,w+1,selectedKey,COL_MENUCONTENTSELECTED,0);
+
+
+				} while ((newMsg != CRCInput::RC_timeout) 
+					 && ((newMsg >= CRCInput::RC_1) && (newMsg <= CRCInput::RC_9) && !(playlist.empty())));
+				if (newMsg == CRCInput::RC_timeout
+				    || newMsg == CRCInput::RC_nokey)
+				{
+					//printf("selected key: %c\n",smsKey);
+					selectTitle(smsKey);
+					update=true;
+				}
+				msg = newMsg;
+				data = newData; // necessary?
+				m_SMSKeyInput.resetOldKey();
+			} else 
+			{
+				//printf("numeric zap\n");
+				int val=0;
+				if (getNumericInput(msg,val)) 
+					selected = std::min((int)playlist.size(), val) - 1;
+				update = true;
+			}
+
+		}
+
 		else if(msg==CRCInput::RC_setup)
 		{
 			CNFSSmallMenu nfsMenu;
@@ -766,51 +795,6 @@ int CAudioPlayerGui::show()
 			// update mute icon
 			paintHead();
 			paintLCD();
-		}
-
-		// check if sms key selection can be executed
-		if (checkSMSKeyInput)
-		{
-			time_t actTime = time(NULL);
-			double timeout = m_SMSKeyInput.getOldKeyTime() + m_SMSKeyInput.getTimeout()/1000.0; 
-			if(actTime > timeout)
-			{
-				checkSMSKeyInput=false;
-				
-				unsigned int i;
-				//printf("before loop\n");
-				for(i=(selected+1) % playlist.size(); i != selected ; i= (i+1) % playlist.size())
-				{	
-					std::string fName = "";
-					getFileInfoToDisplay(fName,i,true);
-					char firstCharOfTitle = fName[0];
-					//printf("index i: %d\n",i);
-					if (tolower(firstCharOfTitle) == keySelectedBySMSInput)
-					{
-						//printf("got it: %s\n",fName.c_str());
-						break;
-					}
-				}
-				
-				int prevselected=selected;
-				selected=i;
-				
-				paintItem(prevselected - liststart);
-				unsigned int oldliststart = liststart;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				//printf("before paint\n");
-				if(oldliststart!=liststart)
-				{
-					paint();
-				}
-				else
-				{
-					paintItem(selected - liststart);
-				}
-				update=true;
-			} 
-//			else 
-// 				printf("no timeout\n");
 		}
 	}
 	hide();
@@ -1508,7 +1492,7 @@ void CAudioPlayerGui::getFileInfoToDisplay(std::string& fileInfo, int pos, bool 
 	CAudioMetaData meta;
 	meta.clear();
 	CAudiofile file = playlist[pos];
-	// make sure that fields are read if we are selecting titles by name
+	// make sure that fields are read
 	if (loadMetaData
 	    && (file.Artist.empty() || file.Title.empty()))
 	{
@@ -1662,6 +1646,48 @@ bool CAudioPlayerGui::getNumericInput(neutrino_msg_data_t& msg, int& val) {
 	} while (g_RCInput->isNumeric(msg) && val < 1000000);
 	return (msg == CRCInput::RC_ok);
 }
+
+//------------------------------------------------------------------------
+
+void CAudioPlayerGui::selectTitle(unsigned char selectionChar)
+{
+	
+	unsigned int i;
+	//printf("before loop\n");
+	for(i=(selected+1) % playlist.size(); i != selected ; i= (i+1) % playlist.size())
+	{	
+		if (m_state == CAudioPlayerGui::PLAY
+		    && i%10==0) 
+			usleep(10*1000); // do not disturb decoding
+		std::string fName = "";
+		getFileInfoToDisplay(fName,i,true);
+		char firstCharOfTitle = fName[0];
+		//printf("index i: %d\n",i);
+		if (tolower(firstCharOfTitle) == selectionChar)
+		{
+			//printf("got it: %s\n",fName.c_str());
+			break;
+		}
+	}
+	
+	int prevselected=selected;
+	selected=i;
+	
+	paintItem(prevselected - liststart);
+	unsigned int oldliststart = liststart;
+	liststart = (selected/listmaxshow)*listmaxshow;
+	//printf("before paint\n");
+	if(oldliststart!=liststart)
+	{
+		paint();
+	}
+	else
+	{
+		paintItem(selected - liststart);
+	}
+}
+
+
 //------------------------------------------------------------------------
 
 void CAudioPlayerGui::savePlaylist()

@@ -143,7 +143,8 @@ class CAudioPlayerGui : public CMenuTarget
 	void showMetaData();
 	void screensaver(bool on);
 	bool getNumericInput(neutrino_msg_t& msg,int& val);
-	
+
+	void selectTitle(unsigned char selectionChar);
 	/**
 	 * Appends the file information to the given string.
 	 * @param fileInfo a string where the file information will be appended
