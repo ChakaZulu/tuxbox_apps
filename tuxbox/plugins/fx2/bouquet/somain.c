@@ -459,6 +459,16 @@ int bouquet_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		}
 	}
 
+	for( i=0; i<num_ch_tv; i++ )
+		free( tv_ch[i].name );
+	for( i=0; i<num_ch_radio; i++ )
+		free( radio_ch[i].name );
+	for( i=0; i<num_lines; i++ )
+		free( lines[i] );
+	free( lines );
+	free( tv_ch );
+	free( radio_ch );
+
 	RcClose();
 	FBClose();
 
