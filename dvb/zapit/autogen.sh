@@ -1,6 +1,6 @@
 #!/bin/sh
 
-package="zapit"
+package="tuxbox-zapit"
 
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.

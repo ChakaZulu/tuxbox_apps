@@ -1,4 +1,4 @@
-AC_INIT(tuxbox-apps-dvb-zapit,0.0.1,,tuxbox-zapit)
+AC_INIT(tuxbox-zapit,0.0.1)
 AM_INIT_AUTOMAKE(tuxbox-zapit,0.0.1)
 
 TUXBOX_APPS
