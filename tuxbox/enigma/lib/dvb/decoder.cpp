@@ -20,6 +20,7 @@
 #define audioStreamSource_t audio_stream_source_t
 #define videoStreamSource_t video_stream_source_t
 #define streamSource stream_source
+#define dmxPesFilterParams dmx_pes_filter_params
 #endif
 
 #include <stdio.h>
@@ -47,6 +48,7 @@
 typedef unsigned char __u8;
 
 #include <lib/dvb/decoder.h>
+#include <lib/dvb/dvbservice.h>
 #include <lib/base/eerror.h>
 
 decoderParameters Decoder::current;
@@ -58,7 +60,7 @@ int Decoder::fd::demux_audio;
 int Decoder::fd::demux_pcr;
 int Decoder::fd::demux_vtxt;
 
-static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int casystemid, int descriptor_length, __u8 *descriptors)
+static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *descriptors)
 {
 	eDebug("-------------------Set ECM-----------------");
 	static int lastpid=-1;
@@ -73,14 +75,18 @@ static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int c
 	if (!descriptor_length)
 		return;
 
-	char buffer[6][5];
+	char buffer[3][5];
 	sprintf(buffer[0], "%x", vpid);
 	sprintf(buffer[1], "%x", apid);
-	sprintf(buffer[2], "%x", ecmpid);
-	sprintf(buffer[3], "%x", emmpid);
-	sprintf(buffer[4], "%x", pmtpid);
-	sprintf(buffer[5], "%x", casystemid);
-	
+#if HAVE_DVB_API_VERSION < 3
+	sprintf(buffer[2], "%x", pmtpid);
+#else
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
+	sprintf(buffer[2], "%x", sapi->service.getServiceID().get());
+#endif
+
 	char descriptor[2048];
 	
 	for (int i=0; i<descriptor_length; i++)
@@ -99,7 +105,7 @@ static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int c
 		close(2);
 #endif
 
-		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[4], descriptor, 0)<0)
+		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[2], descriptor, 0)<0)
 			eDebug("camd");
 
 		_exit(0);
@@ -225,11 +231,7 @@ int Decoder::Set()
 {
 	int changed=0;
 
-#if HAVE_DVB_API_VERSION < 3
 	dmxPesFilterParams pes_filter;
-#else
-	dmx_pes_filter_params pes_filter;
-#endif
 
 	if (parms.vpid != current.vpid)
 		changed |= 1;
@@ -260,7 +262,7 @@ int Decoder::Set()
 	eDebug(" ------------> changed! %x", changed);
 
 	if (changed & 0xF7)
-		SetECM(parms.vpid, parms.apid, parms.ecmpid, parms.emmpid, parms.pmtpid, parms.casystemid, parms.descriptor_length, parms.descriptors);
+		SetECM(parms.vpid, parms.apid, parms.pmtpid, parms.descriptor_length, parms.descriptors);
 
 	if (changed & 4)
 	{
@@ -319,11 +321,7 @@ int Decoder::Set()
 			pes_filter.pid=parms.tpid;
 			pes_filter.input=DMX_IN_FRONTEND;
 			pes_filter.output=DMX_OUT_DECODER;
-#if HAVE_DVB_API_VERSION < 3
 			pes_filter.pesType=DMX_PES_TELETEXT;
-#else
-			pes_filter.pes_type=DMX_PES_TELETEXT;
-#endif
 			pes_filter.flags=DMX_IMMEDIATE_START;
 			eDebugNoNewLine("DMX_SET_PES_FILTER(0x%02x) - vtxt - ", parms.tpid);
 			if (::ioctl(fd.demux_vtxt, DMX_SET_PES_FILTER, &pes_filter)<0)
@@ -366,11 +364,8 @@ int Decoder::Set()
 		}
 
 		// get audio status
-#if HAVE_DVB_API_VERSION < 3
 		audioStatus astatus;
-#else
-		audio_status astatus;
-#endif
+
 		eDebugNoNewLine("AUDIO_GET_STATUS - ");
 		if (::ioctl(fd.audio, AUDIO_GET_STATUS, &astatus)<0)
 			eDebug("failed (%m)");
