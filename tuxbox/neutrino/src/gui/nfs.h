@@ -36,34 +36,41 @@
 #include <pthread.h>
 #include "gui/widget/menue.h"
 
-using namespace std;
-
 
 class CNFSMountGui : public CMenuTarget
 {
-	public:
-		enum FSType
+ protected:
+	
+	enum FS_Support
 		{
-			NFS=0,
-			CIFS
+			FS_UNSUPPORTED   = 0,
+			FS_READY         = 1,
+			FS_NEEDS_MODULES = 2
 		};
 	
-   private:
-		int menu();
-		int menuEntry(int nr);
-      static bool fsSupported(FSType fs);
+ public:
 
-		char m_entry[4][200];
-      bool m_nfs_sup;
-      bool m_cifs_sup;
+	enum FSType
+		{
+			NFS  = 0,
+			CIFS = 1
+		};
+	
+ private:
+	static FS_Support fsSupported(const FSType fs, const bool load_modules = false);
 
-   public:
-		CNFSMountGui();
-		~CNFSMountGui(){};
-		int  exec(CMenuTarget* parent, string actionKey);
-		static void mount(const char* ip, const char* dir, const char* local_dir, FSType fstype, 
-								const char* username, const char* password, bool showerror=false);
-		static void automount();
+	int menu();
+	int menuEntry(int nr);
+
+	char       m_entry[4][200];
+	FS_Support m_nfs_sup;
+	FS_Support m_cifs_sup;
+
+ public:
+	CNFSMountGui();
+	int exec(CMenuTarget* parent, std::string actionKey);
+	static void mount(const char * const ip, const char * const dir, const char* local_dir, const FSType fstype, const char * const username, const char * const password, const bool showerror = false);
+	static void automount();
 };
 
 class CNFSUmountGui : public CMenuTarget
@@ -75,8 +82,8 @@ class CNFSUmountGui : public CMenuTarget
 	public:
 		CNFSUmountGui(){};
 		~CNFSUmountGui(){};
-		int  exec(CMenuTarget* parent, string actionKey);
-		static void umount(string dir="");
+		int  exec(CMenuTarget* parent, std::string actionKey);
+		static void umount(std::string dir="");
 };
 
 class CNFSSmallMenu : public CMenuTarget
@@ -86,8 +93,12 @@ class CNFSSmallMenu : public CMenuTarget
    public:
 		CNFSSmallMenu(){};
 		~CNFSSmallMenu(){};
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 };
+
+bool in_proc_filesystems(const char * const fsname);
+bool insert_modules(const CNFSMountGui::FSType fstype);
+bool remove_modules(const CNFSMountGui::FSType fstype);
 
 #endif
 
