@@ -180,7 +180,8 @@ void CRCInput::open()
 	saved_orig_termio      = true;
 
 	new_termio             = orig_termio;
-	new_termio.c_lflag    &= ~(ICANON|ECHO);
+	new_termio.c_lflag    &= ~ICANON;
+	//	new_termio.c_lflag    &= ~(ICANON|ECHO);
 	new_termio.c_cc[VMIN ] = 1;
 	new_termio.c_cc[VTIME] = 0;
 
@@ -964,6 +965,14 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 							default :
 								printf("[neutrino] event INITID_TIMERD - unknown eventID 0x%x\n",  emsg.eventID );
 
+						}
+					}
+					else if (emsg.initiatorID == CEventServer::INITID_GENERIC_INPUT_EVENT_PROVIDER)
+					{
+						if (read_bytes == sizeof(int))
+						{
+							*msg  = *(int *)p;
+							*data = emsg.eventID;
 						}
 					}
 					else
