@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.49 2003/12/19 23:35:47 derget Exp $
+ * $Id: pzapit.cpp,v 1.50 2004/02/02 13:34:39 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -56,8 +56,8 @@ int usage (const char * basename)
 	std::cout << "shutdown zapit: " << basename << " -kill" << std::endl;
 	std::cout << "enter standby: " << basename << " -esb" << std::endl;
 	std::cout << "leave standby: " << basename << " -lsb" << std::endl;
-        std::cout << "set avia500/600 in ntsc mode: " << basename << " --ntsc" << std::endl;
-        std::cout << "set avia500/600 in pal mode: " << basename << " --pal" << std::endl;
+        std::cout << "switch to ntsc mode: " << basename << " --ntsc" << std::endl;
+        std::cout << "switch to pal mode: " << basename << " --pal" << std::endl;
 	std::cout << "send diseqc 1.2 motor command: " << basename << "-m <cmdtype> <addr> <cmd> <number of parameters> <parameter 1> <parameter 2>" << std::endl;
 	return -1;
 }
@@ -438,16 +438,16 @@ int main (int argc, char** argv)
 
         if (set_pal)
         {
-                zapit.setVideoSystem_a(PAL);
                 zapit.stopPlayBack();
+                zapit.setVideoSystem_a(PAL);
                 zapit.startPlayBack();
                 return 0;
         }
                  
         if (set_ntsc)
         {
-                zapit.setVideoSystem_a(NTSC);
                 zapit.stopPlayBack();
+                zapit.setVideoSystem_a(NTSC);
                 zapit.startPlayBack();
                 return 0;
         }
