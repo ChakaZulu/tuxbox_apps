@@ -61,7 +61,7 @@ CFrameBuffer* CFrameBuffer::getInstance()
 	}
 	else
 	{
-		printf("[neutrino] frameBuffer Instace requested\n");
+		//printf("[neutrino] frameBuffer Instace requested\n");
 	}
 	return frameBuffer;
 }
