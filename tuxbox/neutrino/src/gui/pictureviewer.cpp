@@ -405,6 +405,7 @@ int CPictureViewerGui::show()
 				CNFSSmallMenu nfsMenu;
 				nfsMenu.exec(this, "");
 				update=true;
+            CLCD::getInstance()->setMode(CLCD::MODE_MENU, g_Locale->getText("pictureviewer.head") );
 			}
 		}
 		else if(msg == NeutrinoMessages::CHANGEMODE)
