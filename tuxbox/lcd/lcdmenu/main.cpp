@@ -1,5 +1,5 @@
 /*
- * $Id: main.cpp,v 1.3 2002/09/01 00:47:23 obi Exp $
+ * $Id: main.cpp,v 1.4 2003/11/25 14:24:55 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -27,6 +27,10 @@ int main (int argc, char **argv)
 {
     /* create menu instance */
     CLCDMenu *menu = CLCDMenu::getInstance();
+
+    /* don't continue if there is no lcd */
+    if (!menu->isAvailable())
+	    return 0;
 
     /* draw the menu */
     menu->drawMenu();
