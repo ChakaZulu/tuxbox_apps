@@ -11,6 +11,11 @@
 #include <lib/gdi/fb.h>
 #include <lib/gdi/grc.h>
 
+#include <config.h>
+#if HAVE_DVB_API_VERSION >= 3
+#include <dbox/fb.h>
+#endif
+
 fbClass *fbClass::instance;
 
 fbClass *fbClass::getInstance()
@@ -204,4 +209,18 @@ void fbClass::paletteSet(struct fb_cmap *map)
 
 	ioctl(fd, FBIOPUTCMAP, map);
 }
+
+#if HAVE_DVB_API_VERSION >= 3
+void fbClass::setTransparency(int tr)
+{
+	if (tr > 8)
+		tr = 8;
+
+	int val = (tr << 8) | tr;
+	if (ioctl(fd, AVIA_GT_GV_SET_BLEV, val))
+		perror("AVIA_GT_GV_SET_BLEV");
+}
+#endif
+
+
 

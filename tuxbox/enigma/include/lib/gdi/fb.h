@@ -1,6 +1,7 @@
 #ifndef __FB_H
 #define __FB_H
 
+#include <config.h>
 #include <linux/fb.h>
 #include <lib/base/eerror.h>
 
@@ -23,6 +24,9 @@ public:
 	fb_cmap *CMAP() { return &cmap; }
 	struct fb_var_screeninfo *getScreenInfo() { return &screeninfo; }
 	void paletteSet(struct fb_cmap *map = NULL);
+#if HAVE_DVB_API_VERSION >= 3
+	void setTransparency( int tr = 0 );
+#endif
 
 	fbClass(const char *fb="/dev/fb/0");
 	~fbClass();
