@@ -1,9 +1,12 @@
 /*
-$Id: menue.cpp,v 1.20 2001/10/15 00:24:07 McClean Exp $
+$Id: menue.cpp,v 1.21 2001/10/22 15:00:18 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.21  2001/10/22 15:00:18  McClean
+ icon update
+
  Revision 1.20  2001/10/15 00:24:07  McClean
  lcd-optimize
 
@@ -166,8 +169,8 @@ void CMenuWidget::paint()
 
 	int hheight = g_Fonts->menu_title->getHeight();
 	g_FrameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+36,y+hheight, width, l_name.c_str(), COL_MENUHEAD);
-	g_FrameBuffer->paintIcon(iconfile.c_str(),x+8,y+6);
+	g_Fonts->menu_title->RenderString(x+38,y+hheight+1, width, l_name.c_str(), COL_MENUHEAD);
+	g_FrameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
 
 	int ypos = y+hheight;
 

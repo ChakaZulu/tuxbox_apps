@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.68 2001/10/22 11:40:37 field Exp $
+        $Id: neutrino.cpp,v 1.69 2001/10/22 15:00:18 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.69  2001/10/22 15:00:18  McClean
+  icon update
+
   Revision 1.68  2001/10/22 11:40:37  field
   nvod-zeitanzeige
 
@@ -1425,14 +1428,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 
 	//Main settings
-	CMenuWidget mainMenu("mainmenu.head", "settings.raw");
+	CMenuWidget mainMenu("mainmenu.head", "mainmenue.raw");
 	CMenuWidget mainSettings("mainsettings.head", "settings.raw");
-	CMenuWidget languageSettings("languagesetup.head", "settings.raw");
+	CMenuWidget languageSettings("languagesetup.head", "language.raw");
 	CMenuWidget videoSettings("videomenu.head", "video.raw");
 	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
-	CMenuWidget networkSettings("networkmenu.head", "settings.raw");
-	CMenuWidget colorSettings("colormenu.head", "settings.raw");
-	CMenuWidget keySettings("keybindingmenu.head", "settings.raw");
+	CMenuWidget networkSettings("networkmenu.head", "network.raw");
+	CMenuWidget colorSettings("colormenu.head", "colors.raw");
+	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw");
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings, miscSettings);
@@ -1649,7 +1652,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.68 2001/10/22 11:40:37 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.69 2001/10/22 15:00:18 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
