@@ -89,7 +89,7 @@ function vcontrol(xy)
 
 function openSI()
 {
-	NewWindow("/cgi-bin/streaminfo?requester=webif", "si", "300", "250", "no");
+	NewWindow("/cgi-bin/streaminfo?requester=webif", "si", "310", "290", "no");
 }
 
 function openChannelInfo()
