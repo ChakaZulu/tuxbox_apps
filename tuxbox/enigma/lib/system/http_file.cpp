@@ -1,5 +1,6 @@
 #include <lib/system/http_file.h>
 #include <lib/base/estring.h>
+#include <src/enigma_dyn_utils.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -165,6 +166,7 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 			eString newpath=i->path+path.mid(i->root.length());
 			if (newpath.find('?'))
 				newpath=newpath.left(newpath.find('?'));
+			newpath = httpUnescape(newpath);
 			eDebug("translated %s to %s", path.c_str(), newpath.c_str());
 
 			if (i->authorized & ((method==eHTTPFile::methodGET)?1:2))
