@@ -41,13 +41,8 @@ void eStatusBar::update( const eWidget* p )
 
 void eStatusBar::setFlags( int fl )	
 {
-	if( fl == flagOwnerDraw )
-	{
-		flags = fl;
-		initialize();
-	}
-	else
-		eLabel::setFlags(fl);
+	eLabel::setFlags(fl);
+	initialize();
 }
 
 int eStatusBar::setProperty(const eString &prop, const eString &value)
@@ -58,7 +53,7 @@ int eStatusBar::setProperty(const eString &prop, const eString &value)
 		return eLabel::setProperty(prop, value);
 
 	initialize();
-	
+
 	return 0;
 }
 
