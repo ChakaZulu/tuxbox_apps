@@ -38,16 +38,18 @@ typedef struct channel_msg_struct_2 {
 
 typedef struct apid_struct_2 {
     uint    pid;
-    char    desc[30];
+    char    desc[4];
     int     is_ac3;
     int     component_tag;
 }apid_struct;
+
+#define max_num_apids 10
 
 typedef struct pids{
 	ushort count_vpids;
 	uint vpid;
 	ushort count_apids;
-	apid_struct apids[5];
+	apid_struct apids[max_num_apids];
 	uint ecmpid;
 }pids;
 

@@ -26,8 +26,6 @@
 
 #include "getservices.h"
 
-#include "iso639.h"
-
 /*Thread stuff */
 #include <pthread.h>
 #define errexit(code,str)                          \
