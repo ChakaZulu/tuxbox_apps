@@ -22,6 +22,7 @@ class ePictureViewer: public eMainloop, private eThread, public Object
 		enum
 		{
 			display,
+			slideshow,
 			zoom,
 			move,
 			quit
@@ -30,7 +31,10 @@ class ePictureViewer: public eMainloop, private eThread, public Object
 			:type(type), filename(filename)
 		{}
 	};
-
+	
+	eTimer slideshowTimer;
+	std::list<eString> slideshowList;
+	std::list <eString>::iterator myIt;
 	eFixedMessagePump<Message> messages;
 	static ePictureViewer *instance;
 	void gotMessage(const Message &message);
@@ -57,6 +61,7 @@ public:
 	};
 
 	bool ShowImage(const std::string& filename, bool unscaled = false);
+	bool ShowSlideshow(const std::string& filename, bool unscaled = false);
 	bool DecodeImage(const std::string& name, bool showBusySign = false, bool unscaled = false);
 	bool DisplayNextImage();
 	void SetScaling(ScalingMode s) {m_scaling = s;}
@@ -68,13 +73,15 @@ public:
 	void Cleanup();
 	void SetVisible(int startx, int endx, int starty, int endy);
 	void displayImage(eString filename);
+	void displaySlideshow(eString filename);
+	void slideshowTimeout();
 
 private:
 	CFormathandler *fh_root;
 	ScalingMode m_scaling;
 	float m_aspect;
 	std::string m_NextPic_Name;
-	unsigned char* m_NextPic_Buffer;
+	unsigned char *m_NextPic_Buffer;
 	int m_NextPic_X;
 	int m_NextPic_Y;
 	int m_NextPic_XPos;
@@ -82,7 +89,7 @@ private:
 	int m_NextPic_XPan;
 	int m_NextPic_YPan;
 	std::string m_CurrentPic_Name;
-	unsigned char* m_CurrentPic_Buffer;
+	unsigned char *m_CurrentPic_Buffer;
 	int m_CurrentPic_X;
 	int m_CurrentPic_Y;
 	int m_CurrentPic_XPos;
@@ -90,7 +97,7 @@ private:
 	int m_CurrentPic_XPan;
 	int m_CurrentPic_YPan;
 	
-	unsigned char* m_busy_buffer;
+	unsigned char *m_busy_buffer;
 	int m_busy_x;
 	int m_busy_y;
 	int m_busy_width;
@@ -101,8 +108,8 @@ private:
 	int m_endx;
 	int m_endy;
 	
-	CFormathandler * fh_getsize(const char *name,int *x,int *y, int width_wanted, int height_wanted);
+	CFormathandler * fh_getsize(const char *name, int *x, int *y, int width_wanted, int height_wanted);
 	void init_handlers(void);
-	void add_format(int (*picsize)(const char *, int *, int*, int, int), int (*picread)(const char *, unsigned char *, int , int), int (*id)(const char *));
+	void add_format(int (*picsize)(const char *, int *, int *, int, int), int (*picread)(const char *, unsigned char *, int , int), int (*id)(const char *));
 };
 #endif

@@ -7,42 +7,43 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
+#include <dirent.h>
 #include <lib/picviewer/pictureviewer.h>
 #include "fb_display.h"
 
 /* resize.cpp */
-extern unsigned char * simple_resize(unsigned char * orgin, int ox, int oy, int dx, int dy);
-extern unsigned char * color_average_resize(unsigned char * orgin, int ox, int oy, int dx, int dy);
+extern unsigned char *simple_resize(unsigned char *orgin, int ox, int oy, int dx, int dy);
+extern unsigned char *color_average_resize(unsigned char *orgin, int ox, int oy, int dx, int dy);
 
 #ifdef FBV_SUPPORT_GIF
-extern int fh_gif_getsize(const char *, int *, int*, int, int);
+extern int fh_gif_getsize(const char *, int *, int *, int, int);
 extern int fh_gif_load(const char *, unsigned char *, int, int);
 extern int fh_gif_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_JPEG
-extern int fh_jpeg_getsize(const char *, int *, int*, int, int);
+extern int fh_jpeg_getsize(const char *, int *, int *, int, int);
 extern int fh_jpeg_load(const char *, unsigned char *, int, int);
 extern int fh_jpeg_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_PNG
-extern int fh_png_getsize(const char *, int *, int*, int, int);
+extern int fh_png_getsize(const char *, int *, int *, int, int);
 extern int fh_png_load(const char *, unsigned char *, int, int);
 extern int fh_png_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_BMP
-extern int fh_bmp_getsize(const char *, int *, int*, int, int);
+extern int fh_bmp_getsize(const char *, int *, int *, int, int);
 extern int fh_bmp_load(const char *, unsigned char *, int, int);
 extern int fh_bmp_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_CRW
-extern int fh_crw_getsize(const char *, int *, int*, int, int);
+extern int fh_crw_getsize(const char *, int *, int *, int, int);
 extern int fh_crw_load(const char *, unsigned char *, int, int);
 extern int fh_crw_id(const char *);
 #endif
 
 ePictureViewer *ePictureViewer::instance;
 
-ePictureViewer::ePictureViewer(): messages(this, 1)
+ePictureViewer::ePictureViewer(): slideshowTimer(eApp), messages(this, 1)
 {
 	printf("[PICTUREVIEWER] Constructor...\n");
 	if (!instance)
@@ -79,6 +80,7 @@ ePictureViewer::ePictureViewer(): messages(this, 1)
 	init_handlers();
 
 	CONNECT(messages.recv_msg, ePictureViewer::gotMessage);
+	CONNECT(slideshowTimer.timeout, ePictureViewer::slideshowTimeout);
 	run();
 	printf("[PICTUREVIEWER] Constructor done.\n");
 }
@@ -104,10 +106,23 @@ void ePictureViewer::gotMessage(const Message &msg )
 	switch (msg.type)
 	{
 		case Message::display:
+		{
 			printf("[PICTUREVIEWER] display: %s\n", msg.filename);
-			fbClass::getInstance()->SetMode(720, 576, 16);
+			struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
+			fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 16);
+			fbClass::getInstance()->PutCMAP();
 			ShowImage(std::string(msg.filename), false);
 			break;
+		}
+		case Message::slideshow:
+		{
+			printf("[PICTUREVIEWER] slideShow: %s\n", msg.filename);
+			struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
+			fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 16);
+			fbClass::getInstance()->PutCMAP();
+			ShowSlideshow(std::string(msg.filename), false);
+			break;
+		}
 		case Message::zoom:
 			printf("[PICTUREVIEWER] zoom\n");
 //			zoom
@@ -118,6 +133,7 @@ void ePictureViewer::gotMessage(const Message &msg )
 			break;
 		case Message::quit:
 			printf("[PICTUREVIEWER] quit\n");
+			slideshowTimer.stop();
 			Cleanup();
 			quit(0);
 			break;
@@ -309,9 +325,45 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 		free(m_CurrentPic_Buffer);
 		m_CurrentPic_Buffer = NULL;
 	}
-	DecodeImage(filename, true, unscaled);
+	DecodeImage(filename, false, unscaled);
 	DisplayNextImage();
 	printf("Show Image }\n");
+	return true;
+}
+
+void ePictureViewer::slideshowTimeout()
+{
+	printf("[PICTUREVIEWER] slideshowTimeout...\n");
+	
+	slideshowTimer.start(5000, true);
+	++myIt;
+	eString tmp = *myIt;
+	printf("[PICTUREVIEWER] slideshowTimeout: show %s\n", tmp.c_str());
+	ShowImage(*myIt, false);
+}
+
+bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
+{
+	printf("Show Slideshow {\n");
+	slideshowList.clear();	
+	// gen pic list for slideshow
+	int pos = filename.find_last_of("/");
+	if (pos == -1)
+		pos = filename.length() - 1;
+	eString directory = filename.substr(0, pos);
+	printf("---directory: %s\n", directory.c_str());
+	DIR *d = opendir(directory.c_str());
+	if (d)
+	{
+		while (struct dirent *e = readdir(d))
+			slideshowList.push_back(eString(e->d_name));
+		closedir(d);
+	}
+	slideshowList.sort();
+	myIt = slideshowList.begin();
+	slideshowTimer.start(5000, true);
+	ShowImage(*myIt, unscaled);
+	printf("Show Slideshow }\n");
 	return true;
 }
 
@@ -323,13 +375,13 @@ bool ePictureViewer::DisplayNextImage()
 		free(m_CurrentPic_Buffer);
 		m_CurrentPic_Buffer = NULL;
 	}
-	if(m_NextPic_Buffer != NULL)
-		fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan,
-	m_NextPic_XPos, m_NextPic_YPos);
+	if (m_NextPic_Buffer != NULL)
+		fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
 	printf("---DisplayNextImage fb_disp done\n");
 	m_CurrentPic_Buffer = m_NextPic_Buffer;
 	m_NextPic_Buffer = NULL;
 	m_CurrentPic_Name = m_NextPic_Name;
+	m_NextPic_Name = "";
 	m_CurrentPic_X = m_NextPic_X;
 	m_CurrentPic_Y = m_NextPic_Y;
 	m_CurrentPic_XPos = m_NextPic_XPos;
@@ -386,7 +438,7 @@ void ePictureViewer::Zoom(float factor)
 void ePictureViewer::Move(int dx, int dy)
 {
 	printf("Move %d %d {\n", dx, dy);
-	showBusy(m_startx+3,m_starty+3,10,0x00,0xff,00);
+	showBusy(m_startx + 3, m_starty + 3, 10, 0, 0xff, 0);
 
 	int xs, ys;
 	getCurrentRes(&xs, &ys);
@@ -457,7 +509,7 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 	{
 		for(int x = sx ; x < sx + width; x++)
 		{
-			memcpy(busy_buffer_wrk, fb + y * stride + x*cpp, cpp);
+			memcpy(busy_buffer_wrk, fb + y * stride + x * cpp, cpp);
 			busy_buffer_wrk += cpp;
 			memcpy(fb + y * stride + x * cpp, fb_buffer, cpp);
 		}
@@ -515,4 +567,9 @@ void ePictureViewer::Cleanup()
 void ePictureViewer::displayImage(eString filename)
 {
 	messages.send(Message(Message::display, filename.c_str()));
+}
+
+void ePictureViewer::displaySlideshow(eString filename)
+{
+	messages.send(Message(Message::slideshow, filename.c_str()));
 }
