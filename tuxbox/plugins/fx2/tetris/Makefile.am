@@ -3,11 +3,11 @@ INCLUDES = -I$(srcdir)/../lib
 bin_PROGRAMS = tetris
 noinst_LTLIBRARIES = libtetris.la
 
-libtetris_la_SOURCES = board.c main.c somain.c
+libtetris_la_SOURCES = board.c somain.c
 
 libtetris_la_LDFLAGS = -rpath $(PLUGINDIR)
 
-tetris_SOURCES = board.c main.c somain.c
+tetris_SOURCES = board.c main.c
 
 tetris_LDADD = ../lib/libfx2.la
 

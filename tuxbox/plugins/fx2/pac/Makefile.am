@@ -1,10 +1,15 @@
 INCLUDES = -I$(srcdir)/../lib
 
+bin_PROGRAMS = pac
 noinst_LTLIBRARIES = libpac.la
 
-libpac_la_SOURCES = main.c maze.c somain.c
+libpac_la_SOURCES = maze.c somain.c
 
 libpac_la_LDFLAGS = -rpath $(PLUGINDIR)
+
+pac_SOURCES = maze.c main.c
+
+pac_LDADD = ../lib/libfx2.la
 
 install-exec-local:
 	install -d $(PLUGINDIR)

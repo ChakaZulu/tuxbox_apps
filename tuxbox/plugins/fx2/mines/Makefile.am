@@ -1,10 +1,15 @@
 INCLUDES = -I$(srcdir)/../lib
 
+bin_PROGRAMS = mines
 noinst_LTLIBRARIES = libmines.la
 
-libmines_la_SOURCES = board.c main.c somain.c
+libmines_la_SOURCES = board.c somain.c
 
 libmines_la_LDFLAGS = -rpath $(PLUGINDIR)
+
+mines_SOURCES = board.c main.c
+
+mines_LDADD = ../lib/libfx2.la
 
 install-exec-local:
 	install -d $(PLUGINDIR)
