@@ -7,7 +7,8 @@
 			{
 				var i = document.subchannelselector.subchannel.selectedIndex;
 				var subChannel = document.subchannelselector.subchannel.options[i].value;
-				document.location = "/cgi-bin/setSubChannel?subChannel="+subChannel;
+				document.location = "/cgi-bin/zapTo?path="+subChannel;
+				window.close();
 			}
 		</script>
 	</head>
