@@ -10,23 +10,20 @@
 #include <errno.h>
 #include <string.h>
 
-#include <ost/dmx.h>
-#include <ost/frontend.h>
-#include <ost/sec.h>
-#include <ost/video.h>
+#include <linux/dvb/dmx.h>
 
 #define BSIZE					 10000
 
 int main(int argc, char **argv)
 {
 	int fd, pid,filter,mask;
-	struct dmxSctFilterParams flt; 
+	struct dmx_sct_filter_params flt; 
 	char buffer[BSIZE], *bp;
 
-	memset(&flt.filter.filter,0,DMX_FILTER_SIZE);
-	memset(&flt.filter.mask,0,DMX_FILTER_SIZE);
-	
+	memset(&flt.filter, 0, sizeof(struct dmx_filter));
+
 	bp=buffer;
+
 	while (bp-buffer < BSIZE)
 	{
 		unsigned char c;
@@ -34,6 +31,7 @@ int main(int argc, char **argv)
 		if ((*bp++=c)=='\n')
 			break;
 	}
+
 	*bp++=0;
 	
 	bp=buffer;
@@ -44,15 +42,15 @@ int main(int argc, char **argv)
 	}
 	fflush(stdout);
 	
-	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
+	fd=open("/dev/dvb/adapter0/demux0", O_RDONLY);
+
 	if (fd<0)
 	{
-		perror("/dev/dvb/card0/demux0");
+		perror("/dev/dvb/adapter0/demux0");
 		return -fd;
 	}
 	
 	sscanf(bp, "%4x %2x %2x", &pid,&filter,&mask);
-	//sscanf(bp+5, "%x", &filter);
 	
 	printf("pid: %x\n", pid);
 	printf("filter: %x\n",filter);
@@ -73,15 +71,11 @@ int main(int argc, char **argv)
 
 	while (1)
 	{
-		//int pr=0;
 		int r,a;
-		//int tr=BSIZE;
 
 		if ((r=read(fd,buffer,3)) <=0) perror("read");
 		a=(((buffer[1] & 0xF)<<8) + buffer[2]);
 		if ((r=read(fd,buffer+3,a)) <=0) perror("read");
-		//for(i=0;i<10;i++)printf("%02x ",buffer[i]);
-		//printf("\n");
 
 		if (write(1, buffer, a)!=a)
 		{
@@ -93,3 +87,4 @@ int main(int argc, char **argv)
 	close(fd);
 	return 0;
 }
+

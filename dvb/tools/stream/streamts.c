@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.8 2002/09/27 05:23:27 obi Exp $
+ * $Id: streamts.c,v 1.9 2002/11/12 08:05:10 obi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -45,7 +45,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 #include <transform.h>
 
 /* conversion buffer sizes */
@@ -58,8 +58,8 @@
 /* maximum number of pes pids */
 #define MAXPIDS	8
 
-#define DMXDEV	"/dev/dvb/card0/demux0"
-#define DVRDEV	"/dev/dvb/card0/dvr0"
+#define DMXDEV	"/dev/dvb/adapter0/demux0"
+#define DVRDEV	"/dev/dvb/adapter0/dvr0"
 
 int dvrfd;
 int demuxfd[MAXPIDS];
@@ -197,7 +197,7 @@ int dvr_to_ps (int dvr_fd, uint16_t audio_pid, uint16_t video_pid, uint8_t ps) {
 int setPesFilter (uint16_t pid)
 {
 	int fd;
-	struct dmxPesFilterParams flt; 
+	struct dmx_pes_filter_params flt; 
 
 	if ((fd = open(DMXDEV, O_RDWR)) < 0)
 		return -1;
@@ -208,7 +208,7 @@ int setPesFilter (uint16_t pid)
 	flt.pid = pid;
 	flt.input = DMX_IN_FRONTEND;
 	flt.output = DMX_OUT_TS_TAP;
-	flt.pesType = DMX_PES_OTHER;
+	flt.pes_type = DMX_PES_OTHER;
 	flt.flags = 0;
 
 	if (ioctl(fd, DMX_SET_PES_FILTER, &flt) < 0)
