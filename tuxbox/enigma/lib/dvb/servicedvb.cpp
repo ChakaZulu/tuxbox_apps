@@ -159,7 +159,8 @@ void eDVRPlayerThread::thread()
 void eDVRPlayerThread::outputReady(int what)
 {
 	(void)what;
-	seekbusy-=buffer.tofile(dvrfd, 65424);
+	int bla = eSystemInfo::getInstance()->getHwType() < 3 ? 65424 : 65536;
+	seekbusy-=buffer.tofile(dvrfd, bla);
 	if (seekbusy < 0)
 		seekbusy=0;
 	if ((state == stateBufferFull) && (buffer.size()<maxBufferSize))
@@ -243,7 +244,7 @@ void eDVRPlayerThread::readMore(int what)
 		}
 	}
 
-	int bla = eSystemInfo::getInstance()->getHwType() < 3 ? 65423 : 16355;
+	int bla = eSystemInfo::getInstance()->getHwType() < 3 ? 100000 : 16384;
 
 	if ( (state == stateBuffering && buffer.size() > bla) || flushbuffer )
 	{
