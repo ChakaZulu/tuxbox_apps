@@ -2,9 +2,6 @@ AC_DEFUN_ONCE([TUXBOX_APPS],[
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
-AC_CANONICAL_BUILD
-AC_CANONICAL_HOST
-
 AC_ARG_WITH(target,
 	[  --with-target=TARGET    target for compilation [[native,cdk]]],
 	[TARGET="$withval"],[TARGET="native"])
@@ -60,6 +57,9 @@ elif test "$TARGET" = "cdk"; then
 else
 	AC_MSG_ERROR([invalid target $TARGET, choose on from native,cdk]);
 fi
+
+AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
 
 targetdatadir="\${targetprefix}/share"
 _targetdatadir="${_targetprefix}/share"
