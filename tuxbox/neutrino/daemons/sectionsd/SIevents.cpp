@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.13 2001/11/03 15:39:57 field Exp $
+// $Id: SIevents.cpp,v 1.14 2002/02/23 14:53:18 McClean Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.14  2002/02/23 14:53:18  McClean
+// add fsk
+//
 // Revision 1.13  2001/11/03 15:39:57  field
 // Deadlock behoben, Perspektiven
 //
@@ -126,6 +129,24 @@ int SIevent::saveXML(FILE *file, const char *serviceName) const
       return 3;
   }
   return saveXML2(file);
+}
+
+char SIevent::getFSK()
+{
+  char fsk = 0;
+  for (SIparentalRatings::iterator it = ratings.begin(); it != ratings.end(); it++)
+  {
+    if (it->countryCode == "DEU")
+    {
+      return(it->rating + 3);
+    }
+  }
+  if (ratings.size()==0)
+  {
+    return(ratings.begin()->rating + 3);
+  }
+
+  return fsk;
 }
 
 int SIevent::saveXML0(FILE *file) const
