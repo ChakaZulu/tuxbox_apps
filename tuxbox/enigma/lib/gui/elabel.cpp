@@ -9,6 +9,7 @@ eLabel::eLabel(eWidget *parent, int flags, int takefocus):
 	eWidget(parent, takefocus), flags(flags)
 {
 	para=0;
+	align=eTextPara::dirLeft;
 //	setBackgroundColor(eSkin::getActive()->queryScheme("fgColor"));
 }
 
@@ -31,6 +32,7 @@ void eLabel::validate()
 		para=new eTextPara(QRect(0, 0, size.width(), size.height()));
 		para->setFont(font);
 		para->renderString(text, flags);
+		para->realign(align);
 	}
 }
 
@@ -78,7 +80,19 @@ int eLabel::setProperty(const QString &prop, const QString &value)
 {
 	if (prop=="wrap")
 		setFlags(RS_WRAP);
-	else
+	else if (prop=="align")
+	{
+		if (value=="left")
+			align=eTextPara::dirLeft;
+		else if (value=="center")
+			align=eTextPara::dirCenter;
+		else if (value=="right")
+			align=eTextPara::dirRight;
+		else if (value=="block")
+			align=eTextPara::dirBlock;
+		else
+			align=eTextPara::dirLeft;
+	} else
 		return eWidget::setProperty(prop, value);
 	return 0;
 }

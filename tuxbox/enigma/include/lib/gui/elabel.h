@@ -11,6 +11,7 @@ class eLabel: public eWidget
 protected:
 	int flags;
 	eTextPara *para;
+	int align;
 	void invalidate();
 	void validate();
 	void willHide();
