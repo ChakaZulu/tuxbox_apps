@@ -831,3 +831,18 @@ videomenu.videosignal_svideo S-Video
 videomenu.videosignal_yuv_c YUV + CVBS
 videomenu.videosignal_yuv_v YUV + VBS
 zaptotimer.announce In einer Minute wird umgeschaltet.
+scantp.abort_scan Breche Scan ab
+scantp.fec_1_2 1/2
+scantp.fec_2_3 2/3
+scantp.fec_3_4 3/4
+scantp.fec_5_6 5/6
+scantp.fec_7_8 7/8
+scantp.pol_h H
+scantp.pol_v V
+scantp.scanmode Schnell Scan
+scantp.scan Manual Scan
+scantp.freq Frequenz
+scantp.rate Symbol rate
+scantp.fec FEC
+scantp.pol Polarisation
+

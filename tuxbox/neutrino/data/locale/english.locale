@@ -793,3 +793,17 @@ videomenu.videosignal_svideo S-Video
 videomenu.videosignal_yuv_c YUV + CVBS
 videomenu.videosignal_yuv_v YUV + VBS
 zaptotimer.announce Zapto timer in one minute
+scantp.abort_scan Abort Scan
+scantp.fec_1_2 1/2
+scantp.fec_2_3 2/3
+scantp.fec_3_4 3/4
+scantp.fec_5_6 5/6
+scantp.fec_7_8 7/8
+scantp.pol_h H
+scantp.pol_v V
+scantp.scanmode Fast Scan
+scantp.scan Manual Scan
+scantp.freq Frequency
+scantp.rate Symbol rate
+scantp.fec FEC
+scantp.pol Polarization

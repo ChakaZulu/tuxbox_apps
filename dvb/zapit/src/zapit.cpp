@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.356 2004/08/02 08:09:44 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.357 2004/10/27 16:08:42 lucgas Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -109,7 +109,10 @@ extern int found_channels;
 extern short curr_sat;
 extern short scan_runs;
 extern void get_transponder (TP_params *TP);
-extern void scan_transponder(TP_params *TP);
+extern int scan_transponder(TP_params *TP);
+extern void scan_clean();
+extern short abort_scan;
+
 
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
@@ -513,7 +516,7 @@ void parseScanInputXml(void)
  * return 0 on success
  * return -1 otherwise
  */
-int start_scan(void)
+int start_scan(bool scan_mode)
 {
 	if (!scanInputParser) {
 		parseScanInputXml();
@@ -533,7 +536,7 @@ int start_scan(void)
 	found_channels = 0;
 	scan_runs = 1;
 
-	if (pthread_create(&scan_thread, 0, start_scanthread, NULL)) {
+	if (pthread_create(&scan_thread, 0, start_scanthread,  (void*)scan_mode)) {
 		ERROR("pthread_create");
 		scan_runs = 0;
 		return -1;
@@ -738,15 +741,61 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	}
 
 	case CZapitMessages::CMD_SCANSTART:
-		if (start_scan() == -1)
+	{
+		bool scan_mode;
+		CBasicServer::receive_data(connfd, &scan_mode, sizeof(scan_mode));
+
+		if (start_scan(scan_mode) == -1)
 			eventServer->sendEvent(CZapitClient::EVT_SCAN_FAILED, CEventServer::INITID_ZAPIT);
+		break;
+	}
+	case CZapitMessages::CMD_SCANSTOP:
+		if(scan_runs)
+		{
+			pthread_cancel(scan_thread);
+			scan_runs = 0;
+			scan_clean();
+		}
 		break;
 
 	case CZapitMessages::CMD_SCAN_TP:
 	{
 		TP_params TP;
 		CBasicServer::receive_data(connfd, &TP, sizeof(TP));
-		scan_transponder(&TP);
+		std::map <uint32_t, transponder>::iterator transponder = transponders.find(channel->getTsidOnid());
+		if(!(TP.feparams.frequency > 0) && channel)
+		 {
+
+			TP.feparams.frequency = transponder->second.feparams.frequency;
+			TP.feparams.u.qpsk.symbol_rate = transponder->second.feparams.u.qpsk.symbol_rate;
+			TP.feparams.u.qpsk.fec_inner = transponder->second.feparams.u.qpsk.fec_inner;
+			TP.polarization = transponder->second.polarization;
+		}
+		if(scanProviders.size()>0)
+			scanProviders.clear();
+			
+			std::map<string, t_satellite_position>::iterator spos_it;
+			for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
+			{
+				if(spos_it->second == channel->getSatellitePosition())
+				{
+					scanProviders[transponder->second.DiSEqC] = spos_it->first.c_str();
+				}
+			}
+			channel = 0;
+		TP.diseqc=transponder->second.DiSEqC;
+		if(transponders.size()>0)
+			transponders.clear();
+		bouquetManager->clearAll();
+		allchans.clear();  // <- this invalidates all bouquets, too!
+		stopPlayBack();
+		if(scan_transponder(&TP))
+		{
+			DBG("transponder scan ok");
+		}
+		prepare_channels(frontend->getInfo()->type, diseqcType);
+		DBG("channels reinit ok");
+		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
 		break;
 	}
 
@@ -1640,7 +1689,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.356 2004/08/02 08:09:44 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.357 2004/10/27 16:08:42 lucgas Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

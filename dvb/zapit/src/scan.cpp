@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.135 2004/04/02 13:26:58 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.136 2004/10/27 16:08:42 lucgas Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -41,6 +41,9 @@ static int status = 0;
 uint processed_transponders;
 uint32_t actual_freq;
 uint actual_polarisation;
+bool scan_mode = false;
+bool one_flag;
+int one_tpid, one_onid;
 
 CBouquetManager* scanBouquetManager;
 
@@ -146,52 +149,6 @@ void copy_to_end(FILE * fd, FILE * fd1)
 	unlink(SERVICES_TMP);
 }
 
-int append_service(char* providerName, TP_params* TP)
-{
-	FILE* fd;
-	FILE* fd1;
-	struct stat buffer; 
-
-	char* frontendType = getFrontendName();
- 	t_satellite_position satellitePosition = 0;
-
-	if (!frontendType)
-		return 0;
-
-	for (spI = scanProviders.begin(); spI != scanProviders.end(); spI++)
-		if (!strcmp(spI->second.c_str(), providerName))
-			break;
-
-	/* copy services.xml to /tmp directory */
-
-			if(stat(SERVICES_XML, &buffer) == 0){
-  				 if (buffer.st_size > 0){
-				cp(SERVICES_XML, SERVICES_TMP);
-				}
-			}
-	fd = fopen(SERVICES_XML, "w");
-
-	if ((fd1 = fopen(SERVICES_TMP, "r")))
-		copy_to_satellite(fd, fd1, providerName);
-	else
-		write_xml_header(fd);
-
-	if (!strcmp(frontendType, "sat") && (frontend->getDiseqcType() == DISEQC_1_2))
-		satellitePosition = driveMotorToSatellitePosition(providerName);
-
-	/* write services */
-	int scan_status = write_provider(fd, frontendType, providerName, TP->diseqc);
-
-	if (fd1)
-		copy_to_end(fd, fd1);
-
-	write_xml_footer(fd);
-
-	fclose(fd);
-	fclose(fd1);
-	return scan_status;
-}
-
 char* getFrontendName(void)
 {
 	if (!frontend)
@@ -228,91 +185,11 @@ void stop_scan(const bool success)
 	}
 }
 
-int add_transponder (TP_params *TP)
-{
-	if (frontend->setParameters(TP) < 0)
-		return -1;
-
-	if (TP_scanmap.find(TP->TP_id) == TP_scanmap.end())
-	{
-		found_transponders++;
-
-		eventServer->sendEvent
-		(
-			CZapitClient::EVT_SCAN_NUM_TRANSPONDERS,
-			CEventServer::INITID_ZAPIT,
-			&found_transponders,
-			sizeof(found_transponders)
-		);
-	 	eventServer->sendEvent
-	 	(
-			CZapitClient::EVT_SCAN_REPORT_FREQUENCY,
-			CEventServer::INITID_ZAPIT,
-			&(TP->feparams.frequency),
-			sizeof(TP->feparams.frequency)
-		);
-
-		TP_scanmap.insert
-		(
-			std::pair <uint32_t, TP_map>
-			(
-				TP->TP_id,
-				TP_map
-				(
-					*TP
-				)
-			)
-		);
-
-		return 0;
-	}
-
-	return -1;
-}
 
 void get_transponder (TP_params *TP)
 {
 	memcpy(TP,frontend->getParameters(),sizeof(TP_params));
 	return;
-}
-
-int get_nit(TP_params* TP)
-{
- 	eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &(TP->feparams.frequency),sizeof(TP->feparams.frequency));
-
-	if (frontend->setParameters(TP) < 0)
-		return -1;
-
-	if ((status = parse_nit(TP->diseqc)) <= -2) // nit unavailable
-		status = add_transponder(TP);
-
-	return status;
-}
-
-int get_sdt(void)
-{
-	uint32_t TsidOnid;
-	TP_iterator tI;
-
-	for (tI = TP_scanmap.begin(); tI != TP_scanmap.end(); tI++)
-	{
-		if (frontend->setParameters(&tI->second.TP) < 0)
-			continue;
-
-		TsidOnid = get_sdt_TsidOnid();
-		parse_sdt(((TsidOnid >> 16)&0xFFFF), TsidOnid &0xFFFF, tI->second.TP.diseqc);
-	}
-	return 0;
-}
-
-void scan_transponder(TP_params *TP)
-{
-/* only for testing, please remove <- wtf? */
-	add_transponder(TP);
-	get_nit(TP);
-	get_sdt();
-	append_service("Test", TP);
-	TP_scanmap.clear();
 }
 
 int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(uint32_t TsidOnid, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
@@ -350,9 +227,16 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(uint32_t TsidOnid, struct
 
 	return 1;
 }
+uint32_t fake_tid, fake_nid;
 
 int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t DiSEqC)
 {
+	if(scan_mode)
+	{
+		fake_tid++; fake_nid++;
+		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun((fake_tid << 16 | fake_nid), feparams, polarization, DiSEqC);
+		return status;
+	}
  	eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &(feparams->frequency),sizeof(feparams->frequency));
 
 	if (frontend->setParameters(feparams, polarization, DiSEqC) < 0)
@@ -367,6 +251,7 @@ int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, uin
 int get_sdts(char * frontendType)
 {
 	stiterator tI;
+	uint32_t TsidOnid;
 
 	for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++) {
 		/* msg to neutrino */
@@ -385,6 +270,13 @@ int get_sdts(char * frontendType)
 
 		if (frontend->setParameters(&tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) < 0)
 			continue;
+
+		if(scan_mode)
+		{
+			TsidOnid = get_sdt_TsidOnid();
+			tI->second.transport_stream_id = (TsidOnid >> 16)&0xFFFF;
+			tI->second.original_network_id = TsidOnid &0xFFFF;
+		}
 
 		INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
  		parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
@@ -421,12 +313,25 @@ void write_bouquets(const char * const providerName)
 
 void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id)
 {
-	stiterator tI = scantransponders.find((transport_stream_id << 16) | original_network_id);
+	stiterator tI;
+	if(scan_mode)
+	{
+		for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++) 
+		{
+			if((tI->second.transport_stream_id == transport_stream_id) && (tI->second.original_network_id == original_network_id)) break;
+		}
+	}
+	else
+	{
+	tI = scantransponders.find((transport_stream_id << 16) | original_network_id);
+	}
+	
 	static bool emptyTransponder = false;
 	switch (frontend->getInfo()->type) {
 	case FE_QAM: /* cable */
 		fprintf(fd,
 			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n",
+
 			tI->second.transport_stream_id,
 			tI->second.original_network_id,
 			tI->second.feparams.frequency,
@@ -465,8 +370,10 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 			if(emptyTransponder){
 					fprintf(fd,
 			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n",
-			tI->second.transport_stream_id,
-			tI->second.original_network_id,
+
+			one_flag ? one_tpid : tI->second.transport_stream_id,
+			one_flag ? one_onid : tI->second.original_network_id,
+			
 			tI->second.feparams.frequency,
 			tI->second.feparams.inversion,
 			tI->second.feparams.u.qpsk.symbol_rate,
@@ -632,7 +539,7 @@ void scan_provider(xmlNodePtr search, char * providerName, uint8_t diseqc_pos, c
 	}
 }
 
-void *start_scanthread(void *)
+void *start_scanthread(void *scanmode)
 {
 	FILE *fd = NULL;
 	FILE *fd1 = NULL;
@@ -649,6 +556,7 @@ void *start_scanthread(void *)
  	found_data_chans = 0;
 
 	curr_sat = 0;
+	one_flag = false;
 
         if ((frontendType = getFrontendName()) == NULL)
 	{
@@ -656,10 +564,16 @@ void *start_scanthread(void *)
 		stop_scan(false);
 		pthread_exit(0);
 	}
+	if(scanmode)
+		scan_mode = true;
+	else
+		scan_mode = false;
+	printf("[zapit] scan mode %s\n", scan_mode ? "fast" : "full");
+	fake_tid = fake_nid = 0;
 
 	/* get first child */
 	xmlNodePtr search = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
-	xmlNodePtr transponder = NULL;
+
 
 	if  (!strcmp(frontendType, "cable"))
 	{
@@ -739,9 +653,6 @@ void *start_scanthread(void *)
 	chmod(SERVICES_XML, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	abort_scan:
-	/* clean up - should this be done before every xmlNextNode ? */
-	delete transponder;
-	delete search;
 
 	/* write bouquets if services were found */
 	if (scan_status != -1)
@@ -757,3 +668,151 @@ void *start_scanthread(void *)
 	stop_scan(true);
 	pthread_exit(0);
 }
+void scan_clean()
+{
+        allchans.clear();                  // different provider may have the same onid/sidpair // FIXME
+        scantransponders.clear();
+	cp(SERVICES_TMP, SERVICES_XML);
+        stop_scan(false);
+}
+int copy_to_satellite_inc(TP_params * TP, FILE * fd, FILE * fd1, char * providerName)
+{
+	//copies services from previous services.xml file from start up to the sat that is being scanned...
+	char buffer[256] = "";
+	int found = 0;
+	char * ptr;
+
+	char freq[50], pol[50], rate[50], fec[50];
+	//look for sat to be scanned... or end of file
+
+	sprintf(freq, "frequency=\"%d\"", TP->feparams.frequency);
+	sprintf(rate, "symbol_rate=\"%d\"", TP->feparams.u.qpsk.symbol_rate);
+	sprintf(fec, "fec_inner=\"%d\"", TP->feparams.u.qpsk.fec_inner);
+	sprintf(pol, "polarization=\"%d\"", TP->polarization);
+
+	DBG("%s %s %s %s", freq, rate, fec, pol);
+
+	fgets(buffer, 255, fd1);
+	//while(!feof(fd1) && !((strstr(buffer, "sat name") && strstr(buffer, providerName)) || strstr(buffer, "</zapit>")))
+	while(!feof(fd1) && !strstr(buffer, "</zapit>"))
+	{
+		if( strstr(buffer, "sat name") && strstr(buffer, providerName) )
+		{
+			found = 1;
+		}
+		else if (strstr(buffer, "</sat>") && found)
+			break;
+		if(!one_flag && found && strstr(buffer, "<transponder id") && strstr(buffer, freq) && strstr(buffer, rate) && strstr(buffer, fec) && strstr(buffer, pol))
+		{
+			if( (ptr = strstr(buffer, " id=")))
+				sscanf(ptr+5, "%4x", &one_tpid);
+			if( (ptr = strstr(buffer, " onid=")))
+				sscanf(ptr+5, "%4x", &one_onid);
+			one_flag = true;
+
+			DBG("found id %x/%x %s %s %s %s", one_tpid, one_onid, freq, rate, fec, pol);
+			while(!feof(fd1) && !strstr(buffer, "</transponder>"))
+				fgets(buffer, 255, fd1);
+		}
+		else
+			fputs(buffer, fd);
+		fgets(buffer, 255, fd1);
+	}
+
+	return found;
+}
+int scan_transponder(TP_params *TP)
+{
+/* only for testing, please remove <- wtf? */
+
+	FILE* fd;
+	FILE* fd1;
+	struct stat buffer; 
+	char* frontendType = getFrontendName();
+	char providerName[32] = "";
+	t_satellite_position satellitePosition = 0;
+	uint8_t diseqc_pos = 0;
+	int prov_found = 0;
+
+	one_flag = false;
+        found_transponders = 0;
+        found_channels = 0;
+        processed_transponders = 0;
+        found_tv_chans = 0;
+        found_radio_chans = 0;
+        found_data_chans = 0;
+	fake_tid = fake_nid = 0;
+	scanBouquetManager = new CBouquetManager();
+
+	printf("[scan_transponder] freq %d rate %d fec %d pol %d\n", TP->feparams.frequency, TP->feparams.u.qpsk.symbol_rate, TP->feparams.u.qpsk.fec_inner, TP->polarization);
+
+	//scanProviders[TP->diseqc] = "Test";
+
+	strcpy(providerName, scanProviders.begin()->second.c_str());
+	//strcpy(providerName, "Test");
+	diseqc_pos = scanProviders.begin()->first;
+
+	printf("[scan_transponder] scanning sat %s diseqc %d\n", providerName, diseqc_pos);
+	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, providerName, strlen(providerName) + 1);
+
+	scan_mode = true;
+	TP->feparams.inversion = INVERSION_AUTO;
+
+	if (!strcmp(frontendType, "sat") && (frontend->getDiseqcType() == DISEQC_1_2))
+		satellitePosition = driveMotorToSatellitePosition(providerName);
+
+	get_nits(&(TP->feparams), TP->polarization, diseqc_pos);
+	status = get_sdts(frontendType);
+
+	if(allchans.empty())
+	{
+		printf("[scan_transponder] nothing found!\n");
+		allchans.clear();
+		scantransponders.clear();
+		status = 0;
+		goto abort_scan;
+	}
+
+	/* copy services.xml to /tmp directory */
+	if(stat(SERVICES_XML, &buffer) == 0)
+	{
+  		if (buffer.st_size > 0)
+		{
+			cp(SERVICES_XML, SERVICES_TMP);
+		}
+	}
+	fd = fopen(SERVICES_XML, "w");
+
+	if ((fd1 = fopen(SERVICES_TMP, "r")))
+		prov_found = copy_to_satellite_inc(TP, fd, fd1, providerName);
+	else
+		write_xml_header(fd);
+
+//printf("found : %d\n", prov_found); fflush(stdout);
+	/* write services */
+	if(!prov_found)
+		write_provider(fd, frontendType, providerName, diseqc_pos);
+	else
+	{
+		/* channels */
+		for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+			write_transponder(fd, tI->second.transport_stream_id, tI->second.original_network_id);
+		fprintf(fd, "\t</%s>\n", frontendType);
+		allchans.clear();
+		scantransponders.clear();
+	}
+
+	if (fd1)
+		copy_to_end(fd, fd1);
+
+	write_xml_footer(fd);
+
+	write_bouquets(providerName);
+	status = 1;
+
+abort_scan:
+	stop_scan(status);
+	DBG("[scan_transponder] done scan freq %d rate %d fec %d pol %d\n", TP->feparams.frequency, TP->feparams.u.qpsk.symbol_rate, TP->feparams.u.qpsk.fec_inner, TP->polarization);
+	return status;
+}
+

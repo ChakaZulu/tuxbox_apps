@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.101 2004/08/02 08:09:44 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.102 2004/10/27 16:08:41 lucgas Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -201,25 +201,47 @@ void CBouquetManager::writeBouquetFooter(FILE * bouq_fd)
 
 void CBouquetManager::writeBouquetChannels(FILE * bouq_fd, uint i)
 {
+	bool write_names = config.getBool("writeChannelsNames", true);
+//printf("[zapit] writeChannelsNames %d\n", write_names);
 	if (!strcmp(getFrontendName(), "sat"))
 	{
 		for ( unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
 		{
-			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
+			if(write_names)
+			{
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
 					Bouquets[i]->tvChannels[j]->getServiceId(),
 					convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName().c_str()).c_str(),
 					Bouquets[i]->tvChannels[j]->getTransportStreamId(),
 					Bouquets[i]->tvChannels[j]->getOriginalNetworkId(),
 					Bouquets[i]->tvChannels[j]->getSatellitePosition());
+			}
+			else
+			{
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%x\" tsid=\"%x\" onid=\"%x\"/>\n",
+					Bouquets[i]->tvChannels[j]->getServiceId(),
+					Bouquets[i]->tvChannels[j]->getTransportStreamId(),
+					Bouquets[i]->tvChannels[j]->getOriginalNetworkId());
+			}
 		}
 		for ( unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
 		{
-			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
+			if(write_names)
+			{
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
 					Bouquets[i]->radioChannels[j]->getServiceId(),
 					convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName().c_str()).c_str(),
 					Bouquets[i]->radioChannels[j]->getTransportStreamId(),
 					Bouquets[i]->radioChannels[j]->getOriginalNetworkId(),
 					Bouquets[i]->radioChannels[j]->getSatellitePosition());
+			}
+			else
+			{
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%x\" tsid=\"%x\" onid=\"%x\"/>\n",
+					Bouquets[i]->radioChannels[j]->getServiceId(),
+					Bouquets[i]->radioChannels[j]->getTransportStreamId(),
+					Bouquets[i]->radioChannels[j]->getOriginalNetworkId());
+			}
 		}
 	}
 	else
@@ -271,8 +293,11 @@ void CBouquetManager::saveBouquets(void)
 
 void CBouquetManager::saveBouquets(const CZapitClient::bouquetMode bouquetMode, const char * const providerName)
 {
+//	printf("[zapit] b size %d\n", Bouquets.size());
+//	printf("[zapit] b name %s\n", providerName);
 	if (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET)
 	{
+//	printf("[zapit] b mode sat \n");
 		while (Bouquets.size() > 1)
 		{
 			BouquetList::iterator it = Bouquets.begin() + 1;
@@ -281,9 +306,12 @@ void CBouquetManager::saveBouquets(const CZapitClient::bouquetMode bouquetMode, 
 			delete (*it);
 			Bouquets.erase(it);
 		}
+//	printf("[zapit] b mode sat \n");
+		if(Bouquets.size() > 0)
 		Bouquets[0]->Name = providerName;
 	}
 	
+//	printf("[zapit] b mode sat \n");
 	if ((bouquetMode == CZapitClient::BM_UPDATEBOUQUETS) || (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET))
 	{
 		BouquetList storedBouquets;

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.24 2004/10/23 18:03:40 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.25 2004/10/27 16:08:47 lucgas Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -859,5 +859,20 @@ const char * locale_real_names[] =
 	"videomenu.videosignal_yuv_c",
 	"videomenu.videosignal_yuv_v",
 	"zaptotimer.announce",
+	"scantp.abort_scan",
+	"scantp.fec_1_2",
+	"scantp.fec_2_3",
+	"scantp.fec_3_4",
+	"scantp.fec_5_6",
+	"scantp.fec_7_8",
+	"scantp.pol_h",
+	"scantp.pol_v",
+	"scantp.scanmode",
+	"scantp.scan",
+	"scantp.freq",
+	"scantp.rate",
+	"scantp.fec",
+	"scantp.pol",
+	
 };
 #endif

@@ -346,6 +346,13 @@ class CScanSettings
 	char	                  satName[MAX_SATELLITES][30];
 	delivery_system_t         delivery_system;
 
+	int		scan_mode;
+	int		TP_scan;
+	int		TP_fec;
+	int		TP_pol;
+	char		TP_freq[9];
+	char		TP_rate[9];
+
 	CScanSettings();
 
 	int* diseqscOfSat( char* satname);

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.67 2003/12/19 23:35:45 derget Exp $
+ * $Id: zapit.h,v 1.68 2004/10/27 16:08:40 lucgas Exp $
  */
 
 #ifndef __zapit_h__
@@ -11,7 +11,7 @@
 
 void save_settings (bool write);
 void *start_scanthread(void *);
-int start_scan();
+int start_scan(bool scan_mode);
 
 /**************************************************************/
 /*  functions for new command handling via CZapitClient       */

@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.36 2004/09/20 23:57:43 sat_man Exp $
+        $Id: settings.cpp,v 1.37 2004/10/27 16:08:47 lucgas Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -97,7 +97,7 @@ int * CScanSettings::motorPosOfSat(char* satname)
 
 char * CScanSettings::satOfDiseqc(int diseqc) const
 {
-	if (diseqcMode == NO_DISEQC) 
+	if (0/*diseqcMode == NO_DISEQC*/) 
 		return (char *)&satNameNoDiseqc;
 		
 	if (diseqc >= 0 && diseqc < MAX_SATELLITES) 
@@ -125,7 +125,22 @@ void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 {
 	satList.clear();
 	CZapitClient::commandSetScanSatelliteList sat;
-	if  (diseqcMode == NO_DISEQC)
+	if  (TP_scan)
+	{
+		strncpy(sat.satName, satNameNoDiseqc, 30);
+		sat.diseqc = 0;
+		for (int i = 0; i < MAX_SATELLITES; i++)
+		{
+			if (!strcmp(satName[i], satNameNoDiseqc))
+			{
+				if (satDiseqc[i] != -1)
+					sat.diseqc = satDiseqc[i];
+				break;
+			}
+		}
+		satList.push_back(sat);
+	}
+	else if  (diseqcMode == NO_DISEQC)
 	{
 		strncpy(sat.satName, satNameNoDiseqc, 30);
 		sat.diseqc = 0;
@@ -137,7 +152,7 @@ void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 		sat.diseqc = -1;
 		for (int i = 0; i < MAX_SATELLITES; i++)
 		{
-			if (satName[i] == satNameNoDiseqc)
+			if (!strcmp(satName[i], satNameNoDiseqc))
 			{
 				if (satDiseqc[i] != -1)
 					sat.diseqc = satDiseqc[i];
@@ -216,7 +231,7 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt32("bouquetMode" , bouquetMode);
 	strcpy(satNameNoDiseqc, configfile.getString("satNameNoDiseqc", satNameNoDiseqc).c_str());
 
-	if (diseqcMode != NO_DISEQC)
+	if (1/*diseqcMode != NO_DISEQC*/)
 	{
 		char tmp[20];
 		int i;
@@ -228,13 +243,22 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 			sprintf((char*)&tmp, "satDiseqc%d", i);
 			satDiseqc[i] = configfile.getInt32(tmp, -1);
 			
-			if (diseqcMode == DISEQC_1_2)
+			if (1/*diseqcMode == DISEQC_1_2*/)
 			{
 				sprintf((char*)&tmp, "satMotorPos%d", i);
 				satMotorPos[i] = configfile.getInt32(tmp, -1);
 			}
 		}
 	}
+	scan_mode = configfile.getInt32("scan_mode", 0);
+	TP_scan = configfile.getInt32("TP_scan", 0);
+	TP_fec = configfile.getInt32("TP_fec", 1);
+	TP_pol = configfile.getInt32("TP_pol", 0);
+	strcpy(TP_freq, configfile.getString("TP_freq", "10100000").c_str());
+	strcpy(TP_rate, configfile.getString("TP_rate", "27500000").c_str());
+#if HAVE_DVB_API_VERSION >= 3
+	if(TP_fec == 4) TP_fec = 5;
+#endif	
 	return true;
 }
 
@@ -246,7 +270,7 @@ bool CScanSettings::saveSettings(const char * const fileName)
 	configfile.setInt32( "bouquetMode", bouquetMode );
 	configfile.setString( "satNameNoDiseqc", satNameNoDiseqc );
 	
-	if (diseqcMode != NO_DISEQC)	
+	if (1/*diseqcMode != NO_DISEQC*/)	
 	{
 		char tmp[20];
 		int i;
@@ -265,13 +289,19 @@ bool CScanSettings::saveSettings(const char * const fileName)
 			sprintf((char*)&tmp, "satDiseqc%d", i);
 			configfile.setInt32(tmp, satDiseqc[i]);
 
-			if (diseqcMode == DISEQC_1_2)
+			if (1/*diseqcMode == DISEQC_1_2*/)
 			{
 				sprintf((char*)&tmp, "satMotorPos%d", i);
 				configfile.setInt32(tmp, satMotorPos[i]);
 			}
 		}
 	}
+	configfile.getInt32("scan_mode",scan_mode );
+	configfile.setInt32("TP_scan", TP_scan);
+	configfile.setInt32("TP_fec", TP_fec);
+	configfile.setInt32("TP_pol", TP_pol);
+	configfile.setString("TP_freq", TP_freq);
+	configfile.setString("TP_rate", TP_rate);
 
 	if(configfile.getModifiedFlag())
 		configfile.saveConfig(fileName);

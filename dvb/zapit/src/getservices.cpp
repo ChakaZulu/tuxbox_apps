@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.84 2003/12/09 21:12:28 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.85 2004/10/27 16:08:41 lucgas Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -82,6 +82,13 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 		}
 
 		/* add current transponder to list */
+		if (transponders.find((transport_stream_id << 16) | original_network_id) != transponders.end())
+		{
+			printf("[getservices] dup transponder id %X onid %X\n", transport_stream_id, original_network_id);
+		}
+		if(feparams.frequency < 20000) feparams.frequency = feparams.frequency*1000;
+		if(feparams.u.qpsk.symbol_rate < 50000) feparams.u.qpsk.symbol_rate = feparams.u.qpsk.symbol_rate * 1000;
+
 		transponders.insert
 		(
 			std::pair <uint32_t, transponder>
@@ -142,8 +149,7 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 					)
 				)
 			);
-
-			break;
+ 			break;
 
 		default:
 			break;
@@ -220,6 +226,8 @@ int LoadMotorPositions(void)
 
 int LoadSatellitePositions(void)
 {
+	std::map<string, t_satellite_position>::iterator spos_it;
+	
 	xmlDocPtr parser = parseXmlFile(SATELLITES_XML);
 
 	if (parser == NULL)
@@ -241,7 +249,9 @@ int LoadSatellitePositions(void)
 	}
 	
 	xmlFreeDoc(parser);
-		
+	for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
+		printf("satelliteName = %s, satellitePosition = %d\n", spos_it->first.c_str(), spos_it->second);
+
 	return 0;
 }
 

@@ -338,10 +338,10 @@ class CZapitClient:public CBasicClient
 	/*					*/
 	/****************************************/
 	/* start TS-Scan */
-	bool startScan();
-
+	bool startScan( bool scan_mode);
+	bool stopScan();
 	/* start manual scan */
-	bool scan_TP(TP_params* TP);
+	bool scan_TP(TP_params TP);
 
 	/* query if ts-scan is ready - response gives status */
 	bool isScanReady(unsigned int &satellite, unsigned int &processed_transponder, unsigned int &transponder, unsigned int &services );

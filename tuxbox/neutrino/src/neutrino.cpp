@@ -1392,27 +1392,66 @@ const CMenuOptionChooser::keyval SATSETUP_DISEQC_OPTIONS[SATSETUP_DISEQC_OPTION_
 	{ SMATV_REMOTE_TUNING, LOCALE_SATSETUP_SMATVREMOTE }
 
 };
+#define SATSETUP_SCANTP_FEC_COUNT 5
+
+#define SATSETUP_SCANTP_FEC_COUNT 5
+#if HAVE_DVB_API_VERSION < 3
+const CMenuOptionChooser::keyval SATSETUP_SCANTP_FEC[SATSETUP_SCANTP_FEC_COUNT] =
+{
+	{ 1, LOCALE_SCANTP_FEC_1_2 },
+	{ 2, LOCALE_SCANTP_FEC_2_3 },
+	{ 3, LOCALE_SCANTP_FEC_3_4 },
+	{ 4, LOCALE_SCANTP_FEC_5_6 },
+	{ 5, LOCALE_SCANTP_FEC_7_8 }
+};
+#else
+const CMenuOptionChooser::keyval SATSETUP_SCANTP_FEC[SATSETUP_SCANTP_FEC_COUNT] =
+{
+        { 1, LOCALE_SCANTP_FEC_1_2 },
+        { 2, LOCALE_SCANTP_FEC_2_3 },
+        { 3, LOCALE_SCANTP_FEC_3_4 },
+        { 5, LOCALE_SCANTP_FEC_5_6 },
+        { 7, LOCALE_SCANTP_FEC_7_8 }
+};
+#endif
+
+#define SATSETUP_SCANTP_POL_COUNT 2
+const CMenuOptionChooser::keyval SATSETUP_SCANTP_POL[SATSETUP_SCANTP_POL_COUNT] =
+{
+	{ 0, LOCALE_SCANTP_POL_H },
+	{ 1, LOCALE_SCANTP_POL_V }
+};
+
+#define OPTIONS_OFF0_ON1_OPTION_COUNT 2
+const CMenuOptionChooser::keyval OPTIONS_OFF0_ON1_OPTIONS[OPTIONS_OFF0_ON1_OPTION_COUNT] =
+{
+	{ 0, LOCALE_OPTIONS_OFF },
+	{ 1, LOCALE_OPTIONS_ON  }
+};
+
 
 void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
 	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, SCANTS_BOUQUET_OPTIONS, SCANTS_BOUQUET_OPTION_COUNT, true);
 
+	settings.addItem(GenericMenuSeparator);
+	settings.addItem(GenericMenuBack);
+	settings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_SAVESETTINGSNOW, true, NULL, this, "savesettings", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+	settings.addItem(GenericMenuSeparatorLine);
+
 	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
 	{
-		settings.addItem(GenericMenuSeparator);
-		settings.addItem(GenericMenuBack);
-		settings.addItem(GenericMenuSeparatorLine);
 
 		satList.clear();
 		g_Zapit->getScanSatelliteList(satList);
 
+		printf("[neutrino] received %d sats\n", satList.size());
 		t_satellite_position currentSatellitePosition = g_Zapit->getCurrentSatellitePosition();
 
-		if (scanSettings.diseqcMode == DISEQC_1_2)
+		if (1/*scanSettings.diseqcMode == DISEQC_1_2*/)
 		{
-			//printf("[neutrino] received %d sats\n", satList.size());
 			for (uint i = 0; i < satList.size(); i++)
 			{
 				//printf("[neutrino] received %d: %s, %d\n", i, satList[i].satName, satList[i].satPosition);
@@ -1431,7 +1470,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			}
 		}
 
-		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.satNameNoDiseqc, (scanSettings.diseqcMode == NO_DISEQC));
+		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.satNameNoDiseqc, ((scanSettings.diseqcMode == DISEQC_1_2) || (scanSettings.diseqcMode == NO_DISEQC)));
 		for (uint i=0; i < satList.size(); i++)
 		{
 			ojSat->addOption(satList[i].satName);
@@ -1464,7 +1503,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		for( uint i=0; i < satList.size(); i++)
 		{
-			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.motorPosOfSat(satList[i].satName), true, 0, satList.size(), 0, 0, LOCALE_OPTIONS_OFF, satList[i].satName);
+			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.motorPosOfSat(satList[i].satName), true, 0, 64/*satList.size()*/, 0, 0, LOCALE_OPTIONS_OFF, satList[i].satName);
 
 			extMotorSettings->addItem(oj);
 		}
@@ -1475,15 +1514,13 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( ojBouquets );
 		settings.addItem( ojSat );
 		settings.addItem( ojDiseqcRepeats );
+
 		settings.addItem( ojExtSatSettings );
 		settings.addItem( ojExtMotorSettings );
-		settings.addItem(GenericMenuSeparatorLine);
+		//settings.addItem(GenericMenuSeparatorLine);
 	}
 	else
 	{//kabel
-		settings.addItem(GenericMenuSeparator);
-		settings.addItem(GenericMenuBack);
-		settings.addItem(GenericMenuSeparatorLine);
 
 		CZapitClient::SatelliteList providerList;
 		g_Zapit->getScanSatelliteList(providerList);
@@ -1498,10 +1535,30 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( ojBouquets);
 		settings.addItem( oj);
 	}
+	CMenuOptionChooser* onoff_mode = ( new CMenuOptionChooser(LOCALE_SCANTP_SCANMODE, (int *)&scanSettings.scan_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
+	settings.addItem(onoff_mode);
+	if(scanSettings.TP_fec == 0)
+		scanSettings.TP_fec = 1;
+
+	settings.addItem(GenericMenuSeparatorLine);
+
+	CMenuOptionChooser* onoff = ( new CMenuOptionChooser(LOCALE_SCANTP_SCAN, (int *)&scanSettings.TP_scan, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
+	
+	CStringInput* freq = new CStringInput(LOCALE_SCANTP_FREQ, (char *) scanSettings.TP_freq, 8, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
+	CStringInput* rate = new CStringInput(LOCALE_SCANTP_RATE, (char *) scanSettings.TP_rate, 8, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
+
+	CMenuOptionChooser* fec = new CMenuOptionChooser(LOCALE_SCANTP_FEC, (int *)&scanSettings.TP_fec, SATSETUP_SCANTP_FEC, SATSETUP_SCANTP_FEC_COUNT, true);
+	CMenuOptionChooser* pol = new CMenuOptionChooser(LOCALE_SCANTP_POL, (int *)&scanSettings.TP_pol, SATSETUP_SCANTP_POL, SATSETUP_SCANTP_POL_COUNT, true);
+
+	settings.addItem(onoff);
+	settings.addItem(new CMenuForwarder(LOCALE_SCANTP_FREQ, true, scanSettings.TP_freq, freq));
+	settings.addItem(new CMenuForwarder(LOCALE_SCANTP_RATE, true, scanSettings.TP_rate, rate));
+	settings.addItem(fec);
+	settings.addItem(pol);
+	settings.addItem(GenericMenuSeparatorLine);
 
 	settings.addItem(new CMenuForwarder(LOCALE_SCANTS_STARTNOW, true, NULL, new CScanTs()));
 }
-
 
 #define FLASHUPDATE_UPDATEMODE_OPTION_COUNT 2
 const CMenuOptionChooser::keyval FLASHUPDATE_UPDATEMODE_OPTIONS[FLASHUPDATE_UPDATEMODE_OPTION_COUNT] =
@@ -1639,12 +1696,6 @@ void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 
 }
 
-#define OPTIONS_OFF0_ON1_OPTION_COUNT 2
-const CMenuOptionChooser::keyval OPTIONS_OFF0_ON1_OPTIONS[OPTIONS_OFF0_ON1_OPTION_COUNT] =
-{
-	{ 0, LOCALE_OPTIONS_OFF },
-	{ 1, LOCALE_OPTIONS_ON  }
-};
 
 #define OPTIONS_OFF1_ON0_OPTION_COUNT 2
 const CMenuOptionChooser::keyval OPTIONS_OFF1_ON0_OPTIONS[OPTIONS_OFF1_ON0_OPTION_COUNT] =

@@ -47,7 +47,13 @@
 #include <global.h>
 #include <neutrino.h>
 
+#if HAVE_DVB_API_VERSION >= 3
+#else
+#include <ost/frontend.h>
+#include <ost/sec.h>
+#endif
 
+TP_params TP;
 CScanTs::CScanTs()
 {
 	frameBuffer = CFrameBuffer::getInstance();
@@ -63,13 +69,37 @@ CScanTs::CScanTs()
 	xpos1 = x + 10;
 	found_transponder = 0;
 }
-
+#define get_set CNeutrinoApp::getInstance()->getScanSettings()
+#define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
 int CScanTs::exec(CMenuTarget* parent, const std::string &)
 {
 	diseqc_t            diseqcType = NO_DISEQC;
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
+
+// printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d\n", get_set.TP_scan, get_set.TP_freq, get_set.TP_rate, get_set.TP_fec, get_set.TP_pol);
+
+if(get_set.TP_scan)
+{
+#if HAVE_DVB_API_VERSION < 3
+	TP.feparams.Frequency = atoi(get_set.TP_freq);
+	TP.feparams.u.qpsk.SymbolRate = atoi(get_set.TP_rate);
+	TP.feparams.u.qpsk.FEC_inner = (CodeRate)get_set.TP_fec;
+	TP.polarization = get_set.TP_pol;
+
+//printf("[neutrino] freq %d rate %d fec %d pol %d\n", TP.feparams.Frequency, TP.feparams.u.qpsk.SymbolRate, TP.feparams.u.qpsk.FEC_inner, TP.polarization);
+#else
+	TP.feparams.frequency = atoi(get_set.TP_freq);
+	TP.feparams.u.qpsk.symbol_rate = atoi(get_set.TP_rate);
+	TP.feparams.u.qpsk.fec_inner = (fe_code_rate_t) get_set.TP_fec;
+	TP.polarization = get_set.TP_pol;
+
+// printf("[neutrino] freq %d rate %d fec %d pol %d\n", TP.feparams.frequency, TP.feparams.u.qpsk.symbol_rate, TP.feparams.u.qpsk.fec_inner, TP.polarization);
+#endif
+
+	//return menu_return::RETURN_REPAINT;
 	
+}
 	success = false;
 	
 	if (!frameBuffer->getActive())
@@ -105,8 +135,14 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 	}
 
 	/* go */
-	success = g_Zapit->startScan();
-
+	if(get_set.TP_scan)
+	{
+		success = g_Zapit->scan_TP(TP);
+	}
+	else
+	{
+		success = g_Zapit->startScan(get_set.scan_mode);
+	}
 	paint();
 
 	/* poll for messages */
@@ -125,11 +161,12 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 		while (!(msg == CRCInput::RC_timeout));
 	}
 
+	ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, success ? g_Locale->getText(LOCALE_SCANTS_FINISHED) : g_Locale->getText(LOCALE_SCANTS_FAILED), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+
 	hide();
 	
 	g_Sectionsd->setPauseScanning(false);
 	
-	ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, success ? g_Locale->getText(LOCALE_SCANTS_FINISHED) : g_Locale->getText(LOCALE_SCANTS_FAILED), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 
 	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
 		g_Controld->setVideoFormat(g_settings.video_Format);
@@ -140,7 +177,7 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 {
 	char buffer[32];
-	
+	int result;
 	switch (msg)
 	{
 		case NeutrinoMessages::EVT_SCAN_SATELLITE:
@@ -202,6 +239,19 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 			success = (msg == NeutrinoMessages::EVT_SCAN_COMPLETE);
 			istheend = true;
 			msg = CRCInput::RC_timeout;
+			break;
+		case CRCInput::RC_home:
+			if(get_set.TP_scan)
+				break;
+			result = ShowMsgUTF ( LOCALE_SCANTP_ABORT_SCAN, "Are you sure ? You can lost your settings.", CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo );//FIXME loclalize
+			if(result == CMessageBox::mbrYes)
+			{
+				//success = false;
+				//istheend = true;
+				//msg = CRCInput::RC_timeout;
+				g_Zapit->stopScan();
+				g_Zapit->reinitChannels();
+			}
 			break;
 		default:
 			if ((msg >= CRCInput::RC_WithData) && (msg < CRCInput::RC_WithData + 0x10000000)) 

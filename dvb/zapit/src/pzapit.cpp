@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.50 2004/02/02 13:34:39 obi Exp $
+ * $Id: pzapit.cpp,v 1.51 2004/10/27 16:08:42 lucgas Exp $
  *
  * simple commandline client for zapit
  *
@@ -425,7 +425,7 @@ int main (int argc, char** argv)
 		unsigned int transponder;
 		unsigned int services;
 		
-		zapit.startScan();
+		zapit.startScan(1);
 
 		while (zapit.isScanReady(satellite, processed_transponder, transponder, services) == false)
 		{

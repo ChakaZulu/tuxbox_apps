@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.104 2004/08/02 08:09:44 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.105 2004/10/27 16:08:41 lucgas Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -482,19 +482,26 @@ void CZapitClient::sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t cm
 /***********************************************/
 
 /* start TS-Scan */
-bool CZapitClient::startScan()
-{
-	bool reply = send(CZapitMessages::CMD_SCANSTART);
+bool CZapitClient::startScan(const bool  scan_mode)
+{	
+	bool reply = send(CZapitMessages::CMD_SCANSTART, (char*)&scan_mode, sizeof(scan_mode));
 
 	close_connection();
 
 	return reply;
 }
 
-/* start manual scan */
-bool CZapitClient::scan_TP(TP_params* TP)
+bool CZapitClient::stopScan()
 {
-	bool reply = send(CZapitMessages::CMD_SCAN_TP, (char*)TP, sizeof(TP));
+        bool reply = send(CZapitMessages::CMD_SCANSTOP);
+        close_connection();
+        return reply;
+}
+
+/* start manual scan */
+bool CZapitClient::scan_TP(TP_params TP)
+{
+	bool reply = send(CZapitMessages::CMD_SCAN_TP, (char*)&TP, sizeof(TP));
 	close_connection();
 	return reply;
 }
