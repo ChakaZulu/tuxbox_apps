@@ -120,10 +120,15 @@ function selectSubChannel()
 
 function configSwapFile()
 {
-	document.location = "/cgi-bin/setConfigSwapFile?swap="+swapfileconfig.swap.value+"&swapfile="+swapfileconfig.swapfile.value;
+	var activate = "off";
+	if (swapfileconfig.swap.checked)
+		activate = "on";
+	document.location = "/cgi-bin/setConfigSwapFile?swap="+activate+"&swapfile="+swapfileconfig.swapfile.value;
+	setTimeout("reload()", 500);
 }
 
-function selectImage(Image)
+function selectImage(image)
 {
-	document.location = "/cgi-bin/setConfigMultiBoot?image="+image;	
+	document.location = "/cgi-bin/setConfigMultiBoot?image="+image;
+	setTimeout("reload()", 500);
 }

@@ -1,3 +1,21 @@
+<table border=1 cellspacing=5 cellpadding=0>
+<thead>
+<th>#TH1#</th>
+<th>#TH2#</th>
+<th>#TH3#</th>
+<th>#TH4#</th>
+<th>#TH5#</th>
+</thead>
+<tbody>
+<tr>
+<td>#TD1#</td>
+<td>#TD2#</td>
+<td>#TD3#</td>
+<td>#TD4#</td>
+<td>#TD5#</td>
+</tr>
+</tbody>
+</table>
 <form name="swapfileconfig">
 	<table border=0 cellspacing=5 cellpadding=0>
 		<tr>

@@ -58,8 +58,8 @@ eString getInstalledImages(void)
 	eString image;
 	unsigned int pos = 0;
 	int i = 0;
-	eString dreamFlashImages = getAttribute("/var/mnt/usb/lcdmenu.conf", "menu_items");
-	eString activeImage = getAttribute("/var/mnt/usb/lcdmenu.conf", "default_entry");
+	eString dreamFlashImages = getAttribute("/var/mnt/usb/tools/lcdmenu.conf", "menu_items");
+	eString activeImage = getAttribute("/var/mnt/usb/tools/lcdmenu.conf", "default_entry");
 	if (dreamFlashImages.length() > 0)
 		dreamFlashImages = dreamFlashImages.substr(0, dreamFlashImages.length() - 1); //remove last comma
 	while (dreamFlashImages.length() > 0)
@@ -82,22 +82,21 @@ eString getInstalledImages(void)
 			result += "<img src=\"off.gif\" alt=\"offline\" border=0>";
 		result += "</td>";
 		result += "<td>";
-		result += button(100, "Select", GREEN, "javascript:selectImage('" + eString().sprintf("%d", i) + "')");
+		if (i != atoi(activeImage.c_str()))
+			result += button(100, "Select", GREEN, "javascript:selectImage('" + eString().sprintf("%d", i) + "')");
+		else
+			result += "&nbsp;";
+		result += "</td>";
+		result += "<td>";
+		result += image;
 		result += "</td>";
 		result += "</tr>";
 		i++;
 	}
+	if (result == "")
+		result = "<tr><td>none</td></tr>";
 	
 	return result;
-}
-
-void activateSwapFile(eString swapFile)
-{
-	eString cmd;
-	cmd = "mkswap " + swapFile;
-	system(cmd.c_str());
-	cmd = "swapon " + swapFile;
-	system(cmd.c_str());
 }
 
 void deactivateSwapFile(eString swapFile)
@@ -105,6 +104,25 @@ void deactivateSwapFile(eString swapFile)
 	eString cmd;
 	cmd = "swapoff " + swapFile;
 	system(cmd.c_str());
+}
+
+void activateSwapFile(eString swapFile)
+{
+	eString procswaps = readFile("/proc/swaps");
+	eString th1, th2, th3, th4, th5;
+	eString td1, td2, td3, td4, td5;
+	std::stringstream tmp;
+	tmp.str(procswaps);
+	tmp >> th1 >> th2 >> th3 >> th4 >> th5 >> td1 >> td2 >> td3 >> td4 >> td5;
+	if ((td1 != "") && (td1 != swapFile))
+		deactivateSwapFile(td1);
+	if ((td1 == "") || (td1 != swapFile))
+	{
+		eString cmd = "mkswap " + swapFile;
+		system(cmd.c_str());
+		cmd = "swapon " + swapFile;
+		system(cmd.c_str());
+	}
 }
 
 void setSwapFile(int nextswapfile, eString nextswapfilename)
@@ -134,7 +152,7 @@ eString setConfigMultiBoot(eString request, eString dirpath, eString opts, eHTTP
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString imageNumber = opt["image"];
-	
+
 	CConfigFile *config = new CConfigFile(',');
 	if (config->loadConfig("/var/mnt/usb/tools/lcdmenu.conf"))
 	{
@@ -155,5 +173,3 @@ void ezapConfInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 }
 #endif
 #endif
-
-

@@ -1,11 +1,13 @@
-Installed DreamFlash Version: #DREAMFLASHVERSION#
+DreamFlash Version: #DREAMFLASHVERSION#
 <br><br>
 The following images are installed:
+<br>
 <table border=1 cellspacing=5 cellpadding=0>
 	#INSTALLEDIMAGES#
 </table>
-Please select an image and reboot the box.
 <br>
+Please select an image and reboot the box.
+<br><br>
 #REBOOTBUTTON#
 <br><br>
 Please note that currently only images on USB sticks are supported.
