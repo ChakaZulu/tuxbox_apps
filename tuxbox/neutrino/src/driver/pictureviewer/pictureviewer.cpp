@@ -257,8 +257,6 @@ void CPictureViewer::hideBusy()
 //	dbout("Hide Busy{\n");
 	if(m_busy_buffer!=NULL)
 	{
-		struct fb_var_screeninfo *var;
-		var = CFrameBuffer::getInstance()->getScreenInfo();
 		unsigned char* fb = CFrameBuffer::getInstance()->getFrameBufferPointer();
 		unsigned int stride = CFrameBuffer::getInstance()->getStride();
 		unsigned char* busy_buffer_wrk = m_busy_buffer;
