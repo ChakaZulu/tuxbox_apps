@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.329 2003/09/16 08:58:39 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.330 2003/09/17 16:12:01 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -681,6 +681,21 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 	
+	case CZapitMessages::CMD_GET_CHANNEL_NAME:
+	{
+		t_channel_id                           requested_channel_id;
+		CZapitMessages::responseGetChannelName response;
+		CBasicServer::receive_data(connfd, &requested_channel_id, sizeof(requested_channel_id));
+		tallchans_iterator it = allchans.find(requested_channel_id);
+		if (it == allchans.end())
+			response.name[0] = 0;
+		else
+			strncpy(response.name, it->second.getName().c_str(), 30);
+
+		CBasicServer::send_data(connfd, &response, sizeof(response));
+		break;
+	}
+
 	case CZapitMessages::CMD_BQ_RESTORE:
 	{
 		CZapitMessages::responseCmd response;
@@ -1524,7 +1539,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.329 2003/09/16 08:58:39 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.330 2003/09/17 16:12:01 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

@@ -264,6 +264,9 @@ class CZapitClient:public CBasicClient
 	/* gets all channels */
 	bool getChannels(BouquetChannelList& channels, const channelsMode mode = MODE_CURRENT, const channelsOrder order = SORT_BOUQUET, const bool utf_encoded = false);
 
+	/* get the name of a channel */
+	std::string getChannelName(const t_channel_id channel_id);
+
 	/* restore bouquets so as if they where just loaded*/
 	void restoreBouquets();
 
