@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.20 2004/01/11 22:49:41 rasc Exp $
+$Id: pespacket.c,v 1.21 2004/01/22 22:26:35 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: pespacket.c,v 1.20 2004/01/11 22:49:41 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.21  2004/01/22 22:26:35  rasc
+pes_pack_header
+section read timeout
+
 Revision 1.20  2004/01/11 22:49:41  rasc
 PES restructured
 
@@ -155,7 +159,7 @@ void decodePES_buf (u_char *b, u_int len, int pid)
  switch (p.stream_id) {
 
 	// -- special ProgramStream (PS) - IDs
-	// $$$ TODO
+	// $$$ TODO   (out of this control struct due to length handling, etc??)
 //	case 0xB9:		// MPEG_program_end
 //	case 0xBA:		// MPEG_pack_header_start
 //	case 0xBB:		// MPEG_system_header_start

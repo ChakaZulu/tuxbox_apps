@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc.c,v 1.5 2004/01/02 22:25:34 rasc Exp $
+$Id: dsmcc.c,v 1.6 2004/01/22 22:26:34 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dsmcc.c,v 1.5 2004/01/02 22:25:34 rasc Exp $
 
 
 $Log: dsmcc.c,v $
+Revision 1.6  2004/01/22 22:26:34  rasc
+pes_pack_header
+section read timeout
+
 Revision 1.5  2004/01/02 22:25:34  rasc
 DSM-CC  MODULEs descriptors complete
 
@@ -135,7 +139,7 @@ void decode_DSMCC_section (u_char *b, int len)
 
  } else if (table_id == 0x3E) {
 
-	 // $$$ Remark: DVB defines 0x3E as datagram!!   $$$ TODO ??
+	 // $$$ Remark: DVB defines 0x3E as datagram!!  // $$$ TODO ??
 	 print_private_data (4, b, len1);
 
  }
@@ -156,8 +160,9 @@ void decode_DSMCC_section (u_char *b, int len)
 
 
 /*
-NOTE 1: The DownloadServerInitiate message, the DownloadInfoIndication message, and the
-DownloadCancel message are in the userNetworkMessage class.
+NOTE 1: The DownloadServerInitiate message, the DownloadInfoIndication
+	message, and the DownloadCancel message are in the
+	userNetworkMessage class.
 NOTE 2: The DownloadDataBlock message is within the downloadMessage class.
 */
 
@@ -172,6 +177,7 @@ static void DSMCC_descriptor_list (u_char *b, int len)
 	  b += x;
 	  len -= x;
    }
+
 }
 
 

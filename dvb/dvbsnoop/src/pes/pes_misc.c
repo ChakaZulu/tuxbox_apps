@@ -1,5 +1,5 @@
 /*
-$Id: pes_misc.c,v 1.1 2004/01/11 21:01:32 rasc Exp $
+$Id: pes_misc.c,v 1.2 2004/01/22 22:26:35 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: pes_misc.c,v 1.1 2004/01/11 21:01:32 rasc Exp $
 
 
 $Log: pes_misc.c,v $
+Revision 1.2  2004/01/22 22:26:35  rasc
+pes_pack_header
+section read timeout
+
 Revision 1.1  2004/01/11 21:01:32  rasc
 PES stream directory, PES restructured
 
@@ -30,6 +34,7 @@ PES stream directory, PES restructured
 #include "dvbsnoop.h"
 #include "pes_misc.h"
 #include "misc/hexprint.h"
+#include "misc/helper.h"
 #include "misc/output.h"
 
 
@@ -71,20 +76,88 @@ void  print_xTS_field (int v, const char *str, u_char *b, int bit_offset)
 
 
 
+/*
+ *  PES/PS  Pack Header
+ *  if (len == -1) then pack_header is in a PS
+ *  else  pack_header is in a pes packet
+ *        and check if a system_header is within len
+ */
 
-void pack_header (u_char *b, int len)
+
+void pack_header (int v, u_char *b, int len)
 {
 
 	/*  ... $$$ TODO   */
 	/* z.B. H.222 ISO 13818-1 Table 2-33 */
 	/* 	ISO 11172-1 pack header */
 
-   printhexdump_buf (4, b, len);
+   printhexdump_buf (v, b, len);
 
+
+
+   int 	v1 = v+1;
+   int  pack_stuffing_len;
+
+
+   if (len == 0) return;
+
+   out_nl (v,"Pack_header: ");
+   indent (+1);
+
+   outBit_Sx_NL (v1,"pack_start_code: ",	b,  0, 32);
+   outBit_Sx_NL (v1,"fixed '01': ",		b, 32,  2);
+   print_xTS_field (v1, "system_clock_reference_base", 	b, 34) ;   // len 36b
+   outBit_Sx_NL (v1,"system_clock_reference_extension: ",b, 70,  9);
+   outBit_Sx_NL (v1,"marker_bit: ",		b, 79, 1);
+
+   outBit_Sx   (v1,"program_mux_rate: ",	b, 80,22);
+   	out_nl (v1,"  [=  x 50 bytes/sec]");
+
+   outBit_Sx_NL (v1,"marker_bit: ",		b, 102, 1);
+   outBit_Sx_NL (v1,"marker_bit: ",		b, 103, 1);
+   outBit_Sx_NL (v1,"reserved: ",		b, 104, 5);
+
+   pack_stuffing_len = outBit_Sx_NL (v1,"pack_stuffing_len: ",	b, 109, 3);
+   print_databytes (6,"stuffing bytes 0xFF:", b+14, pack_stuffing_len);
+
+   b += 14 + pack_stuffing_len;
+   if (len >= 0) len -= 14 + pack_stuffing_len;
+
+   if (len > 0) system_header (v1, b, len);
+
+   indent (-1);
 }
 
 
-// $$$ TODO  system_header()
+
+
+/*
+ *  PS System header
+ */
+
+
+void system_header (int v, u_char *b, int len)
+{
+
+	/*  ... $$$ TODO   */
+	/* z.B. H.222 ISO 13818-1 Table 2-34 */
+	/* 	ISO 11172-1 system header */
+
+   if (len <= 0) return;
+
+   out_nl (v,"System_header: ");
+   indent (+1);
+
+
+   // $$$ TODO  PS system header
+   printhexdump_buf (v, b, len);
+
+
+
+   indent (-1);
+}
+
+
 // $$$ TODO  Program Streams   (START/END
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: pes_std.c,v 1.1 2004/01/11 21:01:32 rasc Exp $
+$Id: pes_std.c,v 1.2 2004/01/22 22:26:35 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: pes_std.c,v 1.1 2004/01/11 21:01:32 rasc Exp $
 
 
 $Log: pes_std.c,v $
+Revision 1.2  2004/01/22 22:26:35  rasc
+pes_pack_header
+section read timeout
+
 Revision 1.1  2004/01/11 21:01:32  rasc
 PES stream directory, PES restructured
 
@@ -256,11 +260,9 @@ void  PES_decode_std (u_char *b, int len)
 	indent (+1);
 	pack_field_length             = getBits (b, 0,  0,  8);
    	out_SB_NL  (3,"pack_field_length: ", pack_field_length);
-   	out_nl (3,"Pack_header: ");
-	indent (+1);
-	pack_header (b+1, pack_field_length);
+	pack_header (3, b+1, pack_field_length);
    	b += pack_field_length +1;
-   	indent (-2);
+   	indent (-1);
 
    }
 

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.22 2004/01/06 14:06:09 rasc Exp $
+$Id: cmdline.c,v 1.23 2004/01/22 22:26:35 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: cmdline.c,v 1.22 2004/01/06 14:06:09 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.23  2004/01/22 22:26:35  rasc
+pes_pack_header
+section read timeout
+
 Revision 1.22  2004/01/06 14:06:09  rasc
 no message
 
@@ -138,7 +142,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->pid = INVALID_PID;
   opt->filter = 0;
   opt->mask = 0;
-  // opt->timeout_ms = 0;		// no timeout or default timeout in ms (SECTIONS)
+  opt->timeout_ms = 0;		// no timeout (0) or default timeout in ms (SECTIONS)
   opt->crc = 0;
   opt->packet_count = 0;
   opt->packet_header_sync = 0;
@@ -172,6 +176,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-pd")) opt->printdecode = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-npd")) opt->printdecode = 0;
      else if (!strcmp (argv[i],"-HCP")) opt->hide_copyright= 1;
+     else if (!strcmp (argv[i],"-TIMEOUT")) opt->timeout_ms = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-tf")) opt->time_mode = FULL_TIME;
      else if (!strcmp (argv[i],"-td")) opt->time_mode = DELTA_TIME;
      else if (!strcmp (argv[i],"-tn")) opt->time_mode = NO_TIME;
@@ -263,6 +268,7 @@ static void usage (void)
     printf("                         bandwidth = data rate statistics for pid\n");
     printf("                         signal = signal rate statistics \n");
     printf("                 stream type or pidscan\n");
+// experimental $$$ TODO    printf("   -TIMEOUT ms:  section read timeout in ms [-TIMEOUT 0]\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
     printf("   -f maxdmx:    max demux filters to use in pidscan mode\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");

@@ -1,5 +1,5 @@
 /*
-$Id: pes_misc.h,v 1.1 2004/01/11 21:01:32 rasc Exp $
+$Id: pes_misc.h,v 1.2 2004/01/22 22:26:35 rasc Exp $
 
    
  DVBSNOOP
@@ -18,7 +18,8 @@ $Id: pes_misc.h,v 1.1 2004/01/11 21:01:32 rasc Exp $
 
 
 void print_xTS_field (int v, const char *str, u_char *b, int bit_offset);
-void pack_header (u_char *b, int len);
+void pack_header (int v, u_char *b, int len);
+void system_header (int v, u_char *b, int len);
 
 
 #endif
