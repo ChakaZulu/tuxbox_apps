@@ -4,6 +4,7 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="dhtml.js"></script>
 		<script language="javascript" type="text/javascript" src="index.js"></script>
+		<script language="javascript" type="text/javascript" src="data2.js"></script>
 		<script>
 			function headerUpdateVolumeBar(volume, mute)
 			{
@@ -89,28 +90,30 @@
 		<tr>
 			<td colspan="2">
 				<!-- begin header -->
-				<table id="headTable" width="100%" height="112px" border="0" cellpadding="0" cellspacing="0" background="#TOPBALK#">
+				<table id="headTable" style="table-layout: fixed" width="780px" height="112px" border="0" cellpadding="0" cellspacing="0" background="#TOPBALK#">
 				<tr>
-					<td>
-						<img width="150" height="0" border="0" src="trans.gif">
-					</td>
-					<td>
-						<table id="headercell" width=100% border="0" cellpadding="0" cellspacing="0">
+					<td width="150px">&nbsp;</td>
+					<td width="620px">
+						<table id="headercell" style="table-layout: fixed" width="620px" border="0" cellpadding="0" cellspacing="0">
 						<tr>
-							<td>
-								<table width=100% border="0" height="68px"cellpadding="0" cellspacing="0">
+							<td width="620px">
+								<table style="table-layout: fixed" width="620px" border="0" height="60px" cellpadding="0" cellspacing="0">
 								<tr>
-									<td id="servicename" colspan="6" class="servicename" colspan=6 align=left>&nbsp;</td>
-									<td width="190px" id="empty" align=right>#EMPTYCELL#</td>
+									<td id="servicename" width="440px" class="servicename" align="left">&nbsp;</td>
+									<td width="180px" id="empty" align=right>#EMPTYCELL#</td>
 								</tr>
 								<tr>
-									<td id="nowt" class="epgzeit_bold" width=40 align=left>&nbsp;</td>
-									<td width=5>&nbsp;</td>
-									<td id="nowd" class="epgdur" width=50 align=left>&nbsp;</td>
-									<td width=5>&nbsp;</td>
-									<td id="nowst" class="epgname_bold" width=320 align=left>&nbsp;</td>
-									<td width=5>&nbsp;</td>
-									<td width=190px align=right>
+									<td width="440px">
+										<table style="table-layout:fixed" border="0" cellspacing="0" cellpadding="0">
+										<tr>
+											<td id="nowt" class="epgzeit_bold" width="50px" align=left>&nbsp;</td>
+											<td id="nowd" class="epgdur" width="40px" align=left>&nbsp;</td>
+											<td id="nowst" class="epgname_bold" width="350px" align=left>&nbsp;</td>
+
+										</tr>
+										</table>
+									</td>
+									<td width="180px" align=right>
 										<table border="0" cellspacing="0" cellpadding="0">
 										<tr>
 											<td><a href="javascript:setVol(9)"><img id="imgVol9" src="led_on.gif" border="0" width="15" height="8"></a></td>
@@ -130,13 +133,17 @@
 									</td>
 								</tr>
 								<tr>
-									<td id="nextt" class="epgzeit" width=40 align=left>&nbsp;</td>
-									<td width=5>&nbsp;</td>
-									<td id="nextd" class="epgdur" width=50 align=left>&nbsp;</td>
-									<td width=5>&nbsp;</td>
-									<td id="nextst" class="epgname" width=320 align=left>&nbsp;</td>
-									<td width=5>&nbsp;</td>
-									<td width="190px" align="right">
+									<td width="440px">
+										<table style="table-layout:fixed" border="0" cellspacing="0" cellpadding="0">
+										<tr>
+											<td id="nextt" class="epgzeit_bold" width="50px" align=left>&nbsp;</td>
+											<td id="nextd" class="epgdur" width="40px" align=left>&nbsp;</td>
+											<td id="nextst" class="epgname_bold" width="350px" align=left>&nbsp;</td>
+
+										</tr>
+										</table>
+									</td>
+									<td width="180px" align="right">
 										<table border="0" cellpadding="0" cellspacing="0">
 										<tr>
 											<td><img id="recording" width="12" border="0" src="trans.gif"></td>
@@ -151,7 +158,12 @@
 									</td>
 								</tr>
 								</table>
-								<table id="statcell" border="0" cellpadding="0" cellspacing="0" height="34px">
+								<table style="table-layout: fixed" width="620px" height="7px" border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td width="630px" height="7px">&nbsp;</td>
+								</tr>
+								</table>
+								<table id="statcell" border="0" cellpadding="0" cellspacing="0" height="20px">
 								<tr>
 									<td id="lock">&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
@@ -170,6 +182,11 @@
 									<td id="vpid">&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td>apid:&nbsp;<a id="apid" href="audio.m3u">&nbsp;</a></td>
+								</tr>
+								</table>
+								<table style="table-layout: fixed" width="620px" height="5px" border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td width="630px" height="5px">&nbsp;</td>
 								</tr>
 								</table>
 							</td>
@@ -210,7 +227,7 @@
 		</tr>
 		<tr height="100%">
 			<td><iframe name="leftnavi" width="110px" height="100%" src="leftnavi" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe></td>
-			<td><iframe name="body" width="670px" height="100%" src="body" scrolling="auto" frameborder="0" marginwidth="0" marginheight="0"></iframe></td>
+			<td><iframe name="body" width="670px" height="100%" src="body" scrolling="auto" frameborder="0" marginwidth="0" marginheight="0" style="background-color: #F4F4F4F4"></iframe></td>
 		</tr>
 		<tr>
 			<td colspan="2"><iframe name="data" src="blank" width="100%" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe></td>

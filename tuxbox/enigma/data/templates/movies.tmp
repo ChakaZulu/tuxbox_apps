@@ -36,7 +36,7 @@
 		}
 		</script>
 	</head>
-	<body onLoad="init()" style="padding: 10px" leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="mainbody">
+	<body onLoad="init()" style="padding: 10px; background-color: #F4F4F4F4" leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="contentcell">
 		<map name="ctrl">
 			<area shape="circle" coords="30, 25, 15" href="javascript:video('play')" alt="Play">
 			<area shape="circle" coords="60, 25, 10" href="javascript:video('stop')" alt="Stop">

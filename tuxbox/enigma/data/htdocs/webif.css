@@ -42,17 +42,7 @@ a:hover {
 
 #contentcell {
 	background-color: #f4f4f4;
-	padding-left: 10px;
-	padding-top: 10px;
-	padding-right: 10px;
-	padding-bottom: 10px;
-}
-
-#headercell {
-	padding-left: 10px;
-	padding-top: 0px;
-	padding-right: 10px;
-	padding-bottom: 5px;
+	padding: 10px;
 }
 
 #statcell TD {
@@ -209,10 +199,5 @@ a:hover {
 
 .genre15 {
 	background-color: #B9F1CF;
-}
-
-#megatable {
-	border-left: 0px solid #98A4B6;
-	border-right: 0px solid #98A4B6;
 }
 

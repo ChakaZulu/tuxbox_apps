@@ -2554,8 +2554,6 @@ eString getEITC(eString result)
 		eit->unlock();
 	}
 
-	now_text = now_text.left(30);
-	next_text = next_text.left(30);
 	result.strReplace("#NOWT#", now_time);
 	if (now_duration)
 		now_duration = "(" + now_duration + ")";
