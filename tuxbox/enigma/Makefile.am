@@ -1,4 +1,10 @@
+if HAVE_LIBFREETYPE
+if HAVE_LIBPNG
+
 SUBDIRS = src
+
+endif
+endif
 
 install-data-local:
 	install -d $(FONTDIR)

@@ -7,7 +7,7 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/apps/enigma \
 	-I$(top_srcdir)/enigma/src/core/dvb
 
-lib_LTLIBRARIES = libgui.la
+noinst_LTLIBRARIES = libgui.la
 
 libgui_la_SOURCES = \
 	ebutton.cpp ebutton.moc.cpp echeckbox.cpp echeckbox.moc.cpp \
@@ -17,10 +17,16 @@ libgui_la_SOURCES = \
 	eskin_register.cpp ewidget.cpp ewidget.moc.cpp ewindow.cpp \
 	ewindow.moc.cpp multipage.cpp actions.cpp
 
+libgui_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
+
 AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS)
 
 %.moc.cpp: %.h
 	$(MOC) $< -o $@
+
+install-exec-local:
+	install -d $(LIBDIR)/enigma
+	$(LIBTOOL) --mode=install $(INSTALL) libgui.la $(LIBDIR)/enigma
 
 clean-local:
 	-rm *.moc.cpp

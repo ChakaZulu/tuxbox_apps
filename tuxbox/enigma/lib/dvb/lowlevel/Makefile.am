@@ -1,4 +1,10 @@
-lib_LTLIBRARIES = liblowlevel.la
+noinst_LTLIBRARIES = liblowlevel.la
 
 liblowlevel_la_SOURCES = decode.cpp
+
+liblowlevel_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
+
+install-exec-local:
+	install -d $(LIBDIR)/enigma
+	$(LIBTOOL) --mode=install $(INSTALL) liblowlevel.la $(LIBDIR)/enigma
 

@@ -31,8 +31,9 @@ enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/system/libsystem.la \
 	$(top_builddir)/enigma/src/core/xml/libxml.la \
 	$(top_builddir)/edvb/miniqt/libminiqt.a \
-	$(LIBFREETYPE_LIBS) \
-	-ldl -lpng -lpthread
+	-ldl -lpthread
+
+enigma_LDFLAGS = -rpath $(LIBDIR)/enigma
 
 AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS)
 
