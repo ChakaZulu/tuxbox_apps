@@ -167,7 +167,7 @@ bool CFSMounter::isMounted(const char * const local_dir)
 #else
 	path_max = 4096;
 #endif
-	char mount_point[PATH_MAX];
+	char mount_point[path_max];
 	if (realpath(local_dir, mount_point) == NULL) {
 		printf("[CFSMounter] could not resolve dir: %s: %s\n",local_dir, strerror(errno));
 		return false;
