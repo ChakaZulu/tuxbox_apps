@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.169 2002/05/04 14:13:18 McClean Exp $
+ * $Id: zapit.cpp,v 1.170 2002/05/04 14:39:57 McClean Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1470,9 +1470,9 @@ void parse_command ()
 
 			case CZapitClient::CMD_GET_CURRENT_SERVICEINFO :
 				CZapitClient::responseCurrentServiceInfo msgCurrentServiceInfo;
-				msgCurrentServiceInfo.onid = channel->getOnidSid() >> 16;
-				msgCurrentServiceInfo.sid = channel->getOnidSid() & 0xffff;
-				msgCurrentServiceInfo.tsid = frontend->getTsidOnid() >> 16;
+				msgCurrentServiceInfo.onid = channel->getOriginalNetworkId();
+				msgCurrentServiceInfo.sid = channel->getServiceId();
+				msgCurrentServiceInfo.tsid = channel->getTransportStreamId();
 				msgCurrentServiceInfo.vdid = channel->getVideoPid();
 				msgCurrentServiceInfo.apid = channel->getAudioPid();
 				msgCurrentServiceInfo.vtxtpid = channel->getTeletextPid();
@@ -1886,7 +1886,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.169 2002/05/04 14:13:18 McClean Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.170 2002/05/04 14:39:57 McClean Exp $\n\n");
 
 	if (argc > 1)
 	{
