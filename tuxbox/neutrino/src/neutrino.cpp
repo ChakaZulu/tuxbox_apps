@@ -2152,7 +2152,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		{
 			CTimerEvent::EventInfo * eventinfo; 
 			eventinfo = (CTimerEvent::EventInfo *) data;
-			channelList->zapTo_ChannelID(eventinfo->onidSid);
+			channelList->zapTo_ChannelID(eventinfo->channel_id);
 		}
 
 		if ( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
@@ -2521,8 +2521,8 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		{
 			if(CVCRControl::getInstance()->registeredDevices() > 0)
 			{
-				if(g_Zapit->getCurrentServiceID() != ((CTimerEvent::EventInfo *) data)->onidSid)	// und momentan noch nicht getuned ist
-					g_Zapit->zapTo_serviceID(((CTimerEvent::EventInfo *) data)->onidSid);		// dann umschalten
+				if(g_Zapit->getCurrentServiceID() != ((CTimerEvent::EventInfo *) data)->channel_id)	// und momentan noch nicht getuned ist
+					g_Zapit->zapTo_serviceID(((CTimerEvent::EventInfo *) data)->channel_id);		// dann umschalten
 				CVCRControl::CServerDeviceInfo serverinfo;
 				serverinfo.StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
 				serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
@@ -2557,7 +2557,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		{
 			CTimerEvent::EventInfo * eventinfo; 
 			eventinfo = (CTimerEvent::EventInfo *) data;
-			channelList->zapToOnidSid(eventinfo->onidSid);
+			channelList->zapToOnidSid(eventinfo->channel_id);
 			return messages_return::handled;
 		}
 
@@ -3016,7 +3016,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 		{
 			if(streamstatus == 1)
 			{
-				eventinfo.onidSid = g_RemoteControl->current_channel_id;
+				eventinfo.channel_id = g_RemoteControl->current_channel_id;
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
 
 				CVCRControl::CServerDeviceInfo serverinfo;
@@ -3048,7 +3048,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.330 2002/09/23 13:31:14 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.331 2002/09/24 20:59:11 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

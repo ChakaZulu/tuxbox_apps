@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.28 2002/09/23 17:21:39 Zwen Exp $
+	$Id: timermanager.cpp,v 1.29 2002/09/24 20:59:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -356,11 +356,11 @@ void CTimerEvent::printEvent(void)
 	switch(eventType)
 	{		
 		case CTimerEvent::TIMER_ZAPTO :
-			dprintf("Zapto: %x epg: %llx\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.onidSid,static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.epgID);
+			dprintf("Zapto: %x epg: %llx\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.channel_id,static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.epgID);
 		break;
 
 		case CTimerEvent::TIMER_RECORD :
-			dprintf("Record: %x epg: %llx\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.onidSid,static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.epgID);
+			dprintf("Record: %x epg: %llx\n",static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.channel_id,static_cast<CTimerEvent_NextProgram*>(this)->eventInfo.epgID);
 		break;
 
 		case CTimerEvent::TIMER_STANDBY :
@@ -501,7 +501,7 @@ CTimerEvent(TIMER_RECORD, config, iId)
    ostr << iId;
    string id=ostr.str();
    eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
-   eventInfo.onidSid = config->getInt32("EVENT_INFO_ONID_SID_"+id);
+   eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::announceEvent()
@@ -538,7 +538,7 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
    ostr << eventID;
    string id=ostr.str();
    config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
-   config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
+   config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
 }
 //=============================================================
 // Zapto Event
@@ -550,7 +550,7 @@ CTimerEvent(TIMER_RECORD, config, iId)
    ostr << iId;
    string id=ostr.str();
    eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
-   eventInfo.onidSid = config->getInt32("EVENT_INFO_ONID_SID_"+id);
+   eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent_Zapto::announceEvent()
@@ -580,7 +580,7 @@ void CTimerEvent_Zapto::saveToConfig(CConfigFile *config)
    ostr << eventID;
    string id=ostr.str();
    config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
-   config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
+   config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
 }
 //=============================================================
 // NextProgram Event
@@ -592,7 +592,7 @@ CTimerEvent(TIMER_RECORD, config, iId)
    ostr << iId;
    string id=ostr.str();
    eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
-   eventInfo.onidSid = config->getInt32("EVENT_INFO_ONID_SID_"+id);
+   eventInfo.channel_id = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 }
 //------------------------------------------------------------
 
@@ -625,7 +625,7 @@ void CTimerEvent_NextProgram::saveToConfig(CConfigFile *config)
    ostr << eventID;
    string id=ostr.str();
    config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
-   config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
+   config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
 }
 //=============================================================
 //=============================================================

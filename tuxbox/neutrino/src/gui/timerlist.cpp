@@ -142,7 +142,7 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 		timerNew.announceTime=timerNew.alarmTime-60;
 		CTimerEvent::EventInfo eventinfo;
 		eventinfo.epgID=0;
-		eventinfo.onidSid=timerNew.onidSid;
+		eventinfo.channel_id=timerNew.channel_id;
 		timerNew.standby_on = (timerNew_standby_on == 1);
 		void *data=NULL;
 		if(timerNew.eventType == CTimerEvent::TIMER_STANDBY)
@@ -385,7 +385,7 @@ void CTimerList::paintItem(int pos)
          case CTimerEvent::TIMER_ZAPTO :
          case CTimerEvent::TIMER_RECORD :
          {
-				zAddData=convertChannelId2String(timer.onidSid);
+				zAddData=convertChannelId2String(timer.channel_id);
 			}
 			break;
 			case CTimerEvent::TIMER_STANDBY :
@@ -413,7 +413,7 @@ void CTimerList::paintItem(int pos)
 				case CTimerEvent::TIMER_ZAPTO :
 				{
 					line1+=" ";
-					line1+=convertChannelId2String(timer.onidSid);
+					line1+=convertChannelId2String(timer.channel_id);
 				}
 				break;
 				case CTimerEvent::TIMER_STANDBY :
@@ -591,9 +591,8 @@ void CTimerList::newTimer()
 	timerNew.eventRepeat = CTimerEvent::TIMERREPEAT_ONCE ;
 	timerNew.alarmTime = (time(NULL)/60)*60;
 	timerNew.stopTime = 0;
-	timerNew.onidSid = 0;
+	timerNew.channel_id = 0;
 	timerNew_standby_on =false;
-	timerNew.onidSid = 0;
 	strcpy(timerNew_channel_name,"0");
 
 	CMenuWidget timerSettings("timerlist.menunew", "settings.raw");
@@ -615,7 +614,7 @@ void CTimerList::newTimer()
 	m3->addOption((int)CTimerEvent::TIMERREPEAT_FOURWEEKLY , "timerlist.repeat.fourweekly");
 	m3->addOption((int)CTimerEvent::TIMERREPEAT_MONTHLY , "timerlist.repeat.monthly");
 
-	CMenuOptionChooser* m4 = new CMenuOptionChooser("timerlist.channel", &((int) timerNew.onidSid) , false); 
+	CMenuOptionChooser* m4 = new CMenuOptionChooser("timerlist.channel", &((int) timerNew.channel_id) , false); 
 	if(channellist.size()==0)
    {
 		CZapitClient *Zapit = new CZapitClient();

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 
-	$Id: timerdMsg.h,v 1.15 2002/09/23 17:19:57 Zwen Exp $
+	$Id: timerdMsg.h,v 1.16 2002/09/24 20:59:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -134,7 +134,7 @@ class CTimerd
 			time_t							alarmTime;
 			time_t							announceTime;
 			time_t							stopTime;
-			unsigned int onidSid ; //only filled if applicable
+			t_channel_id channel_id; //only filled if applicable
 			unsigned long long epgID; //only filled if applicable
 			bool standby_on; //only filled if applicable
 		};

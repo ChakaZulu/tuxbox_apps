@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.18 2002/09/05 22:35:54 dirch Exp $
+	$Id: timermanager.h,v 1.19 2002/09/24 20:59:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -37,9 +37,16 @@
 #include <configfile.h>
 #include "config.h"
 
+
+#include <stdint.h>
+typedef uint32_t t_channel_id; // should be the same as in zapit/clientlib/zapittypes.h
+
+
 #define CONFIGFILE CONFIGDIR "/timerd.conf"
 
+
 using namespace std;
+
 
 class CTimerEvent;
 typedef map<int, CTimerEvent*> CTimerEventMap;
@@ -53,7 +60,7 @@ class CTimerEvent
 		struct EventInfo
 		{
 			unsigned long long epgID;
-			unsigned int      onidSid;
+			t_channel_id       channel_id;
 		};
 		
 		enum CTimerEventRepeat 

@@ -4,7 +4,7 @@
    Copyright (C) 2001 Steffen Hehn 'McClean'
    Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timerd.cpp,v 1.17 2002/09/23 17:21:39 Zwen Exp $
+   $Id: timerd.cpp,v 1.18 2002/09/24 20:59:12 thegoodguy Exp $
 
    License: GPL
 
@@ -267,17 +267,17 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                else if(event->eventID == CTimerEvent::TIMER_NEXTPROGRAM)
                {
                   resp.epgID = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID;
-                  resp.onidSid = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.onidSid;
+                  resp.channel_id = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id;
                }
                else if(event->eventID == CTimerEvent::TIMER_RECORD)
                {
                   resp.epgID = static_cast<CTimerEvent_Record*>(event)->eventInfo.epgID;
-                  resp.onidSid = static_cast<CTimerEvent_Record*>(event)->eventInfo.onidSid;
+                  resp.channel_id = static_cast<CTimerEvent_Record*>(event)->eventInfo.channel_id;
                }
                else if(event->eventID == CTimerEvent::TIMER_ZAPTO)
                {
                   resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
-                  resp.onidSid = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.onidSid;
+                  resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
                }
             }
          }
@@ -305,17 +305,17 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                else if(event->eventType == CTimerEvent::TIMER_NEXTPROGRAM)
                {
                   resp.epgID = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID;
-                  resp.onidSid = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.onidSid;
+                  resp.channel_id = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id;
                }
                else if(event->eventType == CTimerEvent::TIMER_RECORD)
                {
                   resp.epgID = static_cast<CTimerEvent_Record*>(event)->eventInfo.epgID;
-                  resp.onidSid = static_cast<CTimerEvent_Record*>(event)->eventInfo.onidSid;
+                  resp.channel_id = static_cast<CTimerEvent_Record*>(event)->eventInfo.channel_id;
                }
                else if(event->eventType == CTimerEvent::TIMER_ZAPTO)
                {
                   resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
-                  resp.onidSid = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.onidSid;
+                  resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
                }
                write( connfd, &resp, sizeof(CTimerd::responseGetTimer));
             }
@@ -391,21 +391,21 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                                              msgAddTimer.alarmTime,
                                              msgAddTimer.stopTime,
                                              msgAddTimer.eventRepeat);
-               static_cast<CTimerEvent_Record*>(event)->eventInfo.onidSid = evInfo.onidSid;
+               static_cast<CTimerEvent_Record*>(event)->eventInfo.channel_id = evInfo.channel_id;
                static_cast<CTimerEvent_Record*>(event)->eventInfo.epgID = evInfo.epgID;
                rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                break;
 
             case CTimerEvent::TIMER_ZAPTO :
                read( connfd, &evInfo, sizeof(CTimerEvent::EventInfo));
-               if(evInfo.onidSid > 0)
+               if(evInfo.channel_id > 0)
                {
                   event = new CTimerEvent_Zapto(
                                                msgAddTimer.announceTime,
                                                msgAddTimer.alarmTime,
                                                msgAddTimer.stopTime,
                                                msgAddTimer.eventRepeat);
-                  static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.onidSid = evInfo.onidSid;
+                  static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id = evInfo.channel_id;
                   static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID = evInfo.epgID;
                   rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                }

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.16 2002/09/05 22:31:24 dirch Exp $
+	$Id: timerdclient.h,v 1.17 2002/09/24 20:59:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -121,12 +121,12 @@ class CTimerdClient
 			{return addTimerEvent(CTimerEvent::TIMER_SHUTDOWN, NULL, announcetime, alarmtime, stoptime);};
 
 		// adds new record timer event
-		int addRecordTimerEvent(unsigned onidSid,unsigned long long epgID,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
+		int addRecordTimerEvent(const t_channel_id channel_id, unsigned long long epgID,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
 			{
 				CTimerEvent::EventInfo eventInfo;
-				eventInfo.onidSid = onidSid;
+				eventInfo.channel_id = channel_id;
 				eventInfo.epgID = epgID;
-				printf("[TIMERDCLIENTLIB] ONI-SID %d\n",eventInfo.onidSid );
+				printf("[TIMERDCLIENTLIB] channel_id %08x\n",eventInfo.channel_id);
 				return addTimerEvent(CTimerEvent::TIMER_RECORD, &eventInfo, announcetime, alarmtime, stoptime);
 			};
 
@@ -135,10 +135,10 @@ class CTimerdClient
 			{return addTimerEvent(CTimerEvent::TIMER_STANDBY, &standby_on,  announcetime, alarmtime, stoptime);};
 
 		// adds new zapto timer event
-		int addZaptoTimerEvent(unsigned onidSid,unsigned long long epgID,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
+		int addZaptoTimerEvent(const t_channel_id channel_id, unsigned long long epgID,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
 		{
 			CTimerEvent::EventInfo eventInfo;
-			eventInfo.onidSid = onidSid;
+			eventInfo.channel_id = channel_id;
 			eventInfo.epgID = epgID;
 			return addTimerEvent(CTimerEvent::TIMER_ZAPTO, &eventInfo, announcetime, alarmtime, stoptime);
 		};

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.1 2002/09/24 08:09:19 dirch Exp $
+	$Id: controlapi.cpp,v 1.2 2002/09/24 20:59:11 thegoodguy Exp $
 
 	License: GPL
 
@@ -268,7 +268,7 @@ bool CControlAPI::GetBouquetsxmlCGI(CWebserverRequest *request)		// sendet die d
 	return true;
 }
 //-------------------------------------------------------------------------
-bool CControlAPI::GetChannel_IDCGI(CWebserverRequest *request) // sendet die aktuelle onidsid
+bool CControlAPI::GetChannel_IDCGI(CWebserverRequest *request) // sendet die aktuelle channel_id
 {
 	request->SendPlainHeader("text/plain");
 	char buf[10];
@@ -738,7 +738,7 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 				CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
 				for(; channel != channellist.end();channel++)
 				{
-					if(channel->channel_id==timer->onidSid)
+					if(channel->channel_id==timer->channel_id)
 					{
 						strncpy(zAddData, channel->name, 20);
 						zAddData[20]=0;

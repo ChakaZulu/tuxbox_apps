@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.2 2002/09/24 17:45:18 Zwen Exp $
+	$Id: webapi.cpp,v 1.3 2002/09/24 20:59:11 thegoodguy Exp $
 
 	License: GPL
 
@@ -767,7 +767,7 @@ char *buffer = new char[300];
                CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
                for(; channel != channellist.end();channel++)
                {
-                  if(channel->channel_id==timer->onidSid)
+                  if (channel->channel_id == timer->channel_id)
                   {
                      strncpy(zAddData, channel->name, 20);
                      zAddData[20]=0;
@@ -1163,8 +1163,8 @@ time_t	announceTimeT = 0,
    (CTimerEvent::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
    bool standby_on = (request->ParameterList["sbon"]=="1");
    CTimerEvent::EventInfo eventinfo;
-   eventinfo.epgID=0;
-   eventinfo.onidSid=atoi(request->ParameterList["onidsid"].c_str());
+   eventinfo.epgID      = 0;
+   eventinfo.channel_id = atoi(request->ParameterList["onidsid"].c_str());
    void *data=NULL;
    if(type == CTimerEvent::TIMER_STANDBY)
       data=&standby_on;

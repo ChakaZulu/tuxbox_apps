@@ -184,8 +184,8 @@ class CVCRControl
 		{
 			if(Devices[deviceID] != NULL) 
 			{
-				printf("eventinfo->onidSid: %x, eventinfo->epgID: %llx\n",eventinfo->onidSid,eventinfo->epgID);
-				return Devices[deviceID]->Record(eventinfo->onidSid,eventinfo->epgID); 
+				printf("eventinfo->channel_id: %08x, eventinfo->epgID: %llx\n", eventinfo->channel_id, eventinfo->epgID);
+				return Devices[deviceID]->Record(eventinfo->channel_id, eventinfo->epgID); 
 			}
 			else return false;
 		};
