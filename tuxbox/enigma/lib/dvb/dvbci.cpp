@@ -497,6 +497,7 @@ int eDVBCI::service_available(unsigned long service_class)
 	{
 		case 0x010041:
 		case 0x020041:
+		
 		case 0x030041:
 		case 0x034100:	//WTF? find the bug ... endianess fool on integer-fields?
 										//if it is so...perhaps its better you switch the xa to 8bit mode *g*
@@ -562,6 +563,13 @@ void eDVBCI::handle_spdu(unsigned int tpdu_tc_id,unsigned char *data,int len)
 				sendTPDU(0xA0,9,tpdu_tc_id,buffer);
 			}
 			break;
+		case 0x95:		//T_close_session
+			{
+				memcpy(buffer,"\x96\x3\x0",3);
+				buffer[3]=data[2];
+				buffer[4]=data[3];
+				sendTPDU(0xA0,5,tpdu_tc_id,buffer);
+			}										
 		default:
 			eDebug("[DVBCI] unknown SPDU-TAG:%x",data[0]);		
 	}
