@@ -408,7 +408,7 @@ void eMainMenu::sel_bnversion(eListboxEntry *)
 void eMainMenu::sel_record(eListboxEntry *)
 {
 	Decoder::parms.recordmode=1;
-	Decoder::Set(0);
+	Decoder::Set();
 	eStreaminfo si(1);
 	window->hide();
 	si.show();
@@ -416,7 +416,7 @@ void eMainMenu::sel_record(eListboxEntry *)
 	si.hide();
 	window->show();
 	Decoder::parms.recordmode=0;
-	Decoder::Set(eDVB::getInstance()->useAC3);
+	Decoder::Set();
 };
 
 void eMainMenu::sel_about(eListboxEntry *)
