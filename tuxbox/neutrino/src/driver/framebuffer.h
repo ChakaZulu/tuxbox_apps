@@ -59,15 +59,16 @@ class CFrameBuffer
 			uint8_t transp;
 		} __attribute__ ((packed));
 
-		std::string	iconBasePath;
+		std::string     iconBasePath;
 
-		int			fd, tty;
-		unsigned char	*lfb;
+		int             fd, tty;
+		unsigned char * lfb;
 		int		available;
 		uint8_t *       background;
-		int			backgroundColor;
+		uint8_t *       backupBackground;
+		int             backgroundColor;
 		std::string     backgroundFilename;
-		bool			useBackgroundPaint;
+		bool            useBackgroundPaint;
 		unsigned int	xRes, yRes, stride, bpp;
 		t_fb_var_screeninfo screeninfo, oldscreen;
 		fb_cmap cmap;
@@ -134,6 +135,10 @@ class CFrameBuffer
 		void setBackgroundColor(int color);
 		bool loadBackground(const std::string filename, const unsigned char col = 0);
 		void useBackground(bool);
+		bool getuseBackground(void);
+
+		void saveBackgroundImage(void);  // <- implies useBackground(false);
+		void restoreBackgroundImage(void);
 
 		void paintBackgroundBox(int xa, int ya, int xb, int yb);
 		void paintBackgroundBoxRel(int x, int y, int dx, int dy);

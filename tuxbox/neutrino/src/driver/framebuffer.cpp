@@ -52,6 +52,7 @@ CFrameBuffer::CFrameBuffer()
 	backgroundColor = 0;
 	useBackgroundPaint = false;
 	background = NULL;
+	backupBackground = NULL;
 	backgroundFilename = "";
 	fd  = 0;
 	tty = 0;
@@ -163,9 +164,14 @@ nolfb:
 
 CFrameBuffer::~CFrameBuffer()
 {
-	if(background)
+	if (background)
 	{
 		delete[] background;
+	}
+
+	if (backupBackground)
+	{
+		delete[] backupBackground;
 	}
 
 	if (-1 == ioctl(tty,KDSETMODE, kd_mode))
@@ -736,6 +742,37 @@ void CFrameBuffer::useBackground(bool ub)
 	useBackgroundPaint = ub;
 }
 
+bool CFrameBuffer::getuseBackground(void)
+{
+	return useBackgroundPaint;
+}
+
+void CFrameBuffer::saveBackgroundImage(void)
+{
+	if (backupBackground != NULL)
+		delete[] backupBackground;
+
+	backupBackground = background;
+	useBackground(false); // <- necessary since no background is available
+	background = NULL;
+}
+
+void CFrameBuffer::restoreBackgroundImage(void)
+{
+	uint8_t * tmp = background;
+
+	if (backupBackground != NULL)
+	{
+		background = backupBackground;
+		backupBackground = NULL;
+	}
+	else
+		useBackground(false); // <- necessary since no background is available
+
+	if (tmp != NULL)
+		delete[] tmp;
+}
+
 void CFrameBuffer::paintBackgroundBox(int xa, int ya, int xb, int yb)
 {
 	int dx = xb - xa;
@@ -781,7 +818,7 @@ void CFrameBuffer::paintBackground()
 			memcpy(lfb + i * stride, background + i * 720, 720);
 	}
 	else
-		memset(lfb, 255, stride*576);
+		memset(lfb, backgroundColor, stride*576);
 }
 
 void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, unsigned char* memp)

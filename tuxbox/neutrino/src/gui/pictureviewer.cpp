@@ -115,9 +115,12 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	}
 
 	// set radio mode background
+	bool usedBackground = frameBuffer->getuseBackground();
+	if (usedBackground)
+		frameBuffer->saveBackgroundImage();
 	frameBuffer->useBackground(false);
 	frameBuffer->setBackgroundColor(0);
-	frameBuffer->paintBackgroundBox(0,0,720,576);
+	frameBuffer->paintBackground();
 
 
 	// tell neutrino we're in pic_mode
@@ -130,9 +133,11 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 
 	show();
 
-	// Restore normal background
-	if(frameBuffer->getActive())
-		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
+	// Restore previous background
+	if (usedBackground)
+		frameBuffer->restoreBackgroundImage();
+	frameBuffer->useBackground(usedBackground);
+	frameBuffer->paintBackground();
 
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);

@@ -114,9 +114,9 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 		parent->hide();
 	}
 
-	// set radio mode background
-//	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-//	frameBuffer->loadBackground("radiomode.raw");
+	bool usedBackground = frameBuffer->getuseBackground();
+	if (usedBackground)
+		frameBuffer->saveBackgroundImage();
 	frameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
 	frameBuffer->loadBackground("scan.raw");
 	frameBuffer->useBackground(true);
@@ -137,10 +137,11 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 
 	show();
 
-	// Restore normal background
-	if(frameBuffer->getActive())
-		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
-	frameBuffer->useBackground(false);
+	// Restore previous background
+	if (usedBackground)
+		frameBuffer->restoreBackgroundImage();
+	frameBuffer->useBackground(usedBackground);
+	frameBuffer->paintBackground();
 
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
