@@ -1,11 +1,14 @@
 /*
-$Id: pat.c,v 1.3 2002/12/05 18:33:19 rasc Exp $
+$Id: pat.c,v 1.4 2003/10/24 22:17:21 rasc Exp $
 
    -- PAT section
 
    (c) rasc
 
 $Log: pat.c,v $
+Revision 1.4  2003/10/24 22:17:21  rasc
+code reorg...
+
 Revision 1.3  2002/12/05 18:33:19  rasc
 bugfix: PAT didn't see the last entry (tnx to obi)
 
@@ -24,6 +27,10 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "pat.h"
+#include "descriptors/descriptor.h"
+#include "strings/dvb_str.h"
+#include "misc/output.h"
+#include "misc/hexprint.h"
 
 
 

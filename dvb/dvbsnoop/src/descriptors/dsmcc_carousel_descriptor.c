@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.1 2003/07/08 19:59:50 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.2 2003/10/24 22:17:17 rasc Exp $ 
 
 
   dvbsnoop
@@ -11,6 +11,9 @@ $Id: dsmcc_carousel_descriptor.c,v 1.1 2003/07/08 19:59:50 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.2  2003/10/24 22:17:17  rasc
+code reorg...
+
 Revision 1.1  2003/07/08 19:59:50  rasc
 restructuring... some new, some fixes,
 trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
@@ -22,7 +25,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 #include "dvbsnoop.h"
 #include "dsm_descriptor.h"
-#include "hexprint.h"
+#include "helper/hexprint.h"
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.7 2003/10/16 19:02:28 rasc Exp $
+$Id: dmx_ts.c,v 1.8 2003/10/24 22:17:18 rasc Exp $
 
  -- (c) 2001 rasc
  -- Transport Streams
@@ -9,6 +9,9 @@ $Id: dmx_ts.c,v 1.7 2003/10/16 19:02:28 rasc Exp $
  -- Verbose Level >= 1
 
 $Log: dmx_ts.c,v $
+Revision 1.8  2003/10/24 22:17:18  rasc
+code reorg...
+
 Revision 1.7  2003/10/16 19:02:28  rasc
 some updates to dvbsnoop...
 - small bugfixes
@@ -37,11 +40,11 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 #include "dvbsnoop.h"
-#include "cmdline.h"
-#include "hexprint.h"
-#include "pkt_time.h"
 #include "dmx_ts.h"
-#include "tslayer.h"
+#include "misc/cmdline.h"
+#include "misc/hexprint.h"
+#include "misc/pkt_time.h"
+#include "ts/tslayer.h"
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.6 2003/10/16 19:02:28 rasc Exp $
+$Id: dmx_sect.c,v 1.7 2003/10/24 22:17:18 rasc Exp $
 
  -- (c) 2001 rasc
  --  Sections Streams
@@ -10,6 +10,9 @@ $Id: dmx_sect.c,v 1.6 2003/10/16 19:02:28 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.7  2003/10/24 22:17:18  rasc
+code reorg...
+
 Revision 1.6  2003/10/16 19:02:28  rasc
 some updates to dvbsnoop...
 - small bugfixes
@@ -35,11 +38,11 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 #include "dvbsnoop.h"
-#include "cmdline.h"
-#include "hexprint.h"
-#include "pkt_time.h"
 #include "dmx_sect.h"
-#include "sectables.h"
+#include "misc/cmdline.h"
+#include "misc/hexprint.h"
+#include "misc/pkt_time.h"
+#include "sections/sectables.h"
 
 
 

@@ -1,23 +1,37 @@
-SUBDIRS = datacarousel
 
 bin_PROGRAMS = dvbsnoop
 
+INCLUDES = \
+	-I$(top_srcdir)
+
+
+SUBDIRS = \
+	datacarousel \
+	descriptors \
+	dvb_api \
+	pes \
+	sections \
+	ts \
+	strings \
+	misc
+
+
 noinst_HEADERS = \
-	bat.h dit.h dvbsnoop.h helper.h pat.h rst.h st.h tslayer.h cat.h \
-	dmx_pes.h dvb_str.h hexprint.h pespacket.h sdt.h tdt.h cmdline.h \
-	dmx_sect.h eit.h nit.h pkt_time.h sectables.h tot.h descriptor.h \
-	mpeg_descriptor.h dvb_descriptor.h dsm_descriptor.h \
-	dmx_ts.h emm_ecm.h output.h pmt.h sit.h tsdt.h dsmcc_str.h \
-	table_userdef.h version.h
+	dvbsnoop.h \
+	version.h
 
 dvbsnoop_SOURCES = \
-	bat.c dit.c dvbsnoop.c helper.c pat.c rst.c st.c tslayer.c cat.c \
-	dmx_pes.c dvb_str.c hexprint.c pespacket.c sdt.c tdt.c cmdline.c \
-	dmx_sect.c eit.c nit.c pkt_time.c sectables.c tot.c descriptor.c \
-	mpeg_descriptor.c dvb_descriptor.c dsm_descriptor.c \
-	dmx_ts.c emm_ecm.c output.c pmt.c sit.c tsdt.c dsmcc_str.c \
-	table_userdef.c
+	dvbsnoop.c
+
 
 dvbsnoop_LDADD = \
-	$(top_builddir)/src/datacarousel/libdatacarousel.a
+	$(top_builddir)/src/datacarousel/libdatacarousel.a \
+	$(top_builddir)/src/descriptors/libdescriptors.a \
+	$(top_builddir)/src/dvb_api/libdvbapi.a \
+	$(top_builddir)/src/pes/libpes.a \
+	$(top_builddir)/src/sections/libsections.a \
+	$(top_builddir)/src/ts/libts.a \
+	$(top_builddir)/src/strings/libstrings.a \
+	$(top_builddir)/src/misc/libmisc.a 
+
 

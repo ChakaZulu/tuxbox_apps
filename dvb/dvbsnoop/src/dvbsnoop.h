@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.11 2003/10/17 19:14:40 rasc Exp $
+$Id: dvbsnoop.h,v 1.12 2003/10/24 22:17:13 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -8,6 +8,9 @@ $Id: dvbsnoop.h,v 1.11 2003/10/17 19:14:40 rasc Exp $
    (c) rasc
 
 $Log: dvbsnoop.h,v $
+Revision 1.12  2003/10/24 22:17:13  rasc
+code reorg...
+
 Revision 1.11  2003/10/17 19:14:40  rasc
 no message
 
@@ -75,7 +78,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #endif
 
 #include "version.h"
-#include "helper.h"
-#include "dvb_str.h"
-#include "output.h"
+#include "strings/dvb_str.h"
+#include "misc/helper.h"
+#include "misc/output.h"
 

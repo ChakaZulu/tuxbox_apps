@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.7 2003/10/16 19:02:27 rasc Exp $
+$Id: dmx_pes.c,v 1.8 2003/10/24 22:17:18 rasc Exp $
 
  -- (c) 2001 rasc
  -- PE Streams
@@ -10,6 +10,9 @@ $Id: dmx_pes.c,v 1.7 2003/10/16 19:02:27 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.8  2003/10/24 22:17:18  rasc
+code reorg...
+
 Revision 1.7  2003/10/16 19:02:27  rasc
 some updates to dvbsnoop...
 - small bugfixes
@@ -38,11 +41,11 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 #include "dvbsnoop.h"
-#include "cmdline.h"
-#include "hexprint.h"
-#include "pkt_time.h"
 #include "dmx_pes.h"
-#include "pespacket.h"
+#include "misc/cmdline.h"
+#include "misc/hexprint.h"
+#include "misc/pkt_time.h"
+#include "pes/pespacket.h"
 
 
 

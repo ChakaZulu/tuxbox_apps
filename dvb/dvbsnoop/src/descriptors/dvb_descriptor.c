@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.7 2003/10/21 21:31:29 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.8 2003/10/24 22:17:17 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.7 2003/10/21 21:31:29 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.8  2003/10/24 22:17:17  rasc
+code reorg...
+
 Revision 1.7  2003/10/21 21:31:29  rasc
 no message
 
@@ -45,7 +48,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 #include "dvbsnoop.h"
 #include "dvb_descriptor.h"
-#include "hexprint.h"
+#include "helper/hexprint.h"
 
 
 

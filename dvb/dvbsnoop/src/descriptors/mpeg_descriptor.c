@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.3 2003/10/17 18:16:54 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.4 2003/10/24 22:17:17 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,9 @@ $Id: mpeg_descriptor.c,v 1.3 2003/10/17 18:16:54 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.4  2003/10/24 22:17:17  rasc
+code reorg...
+
 Revision 1.3  2003/10/17 18:16:54  rasc
 - started more work on newer ISO 13818  descriptors
 - some reorg work started
@@ -27,7 +30,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 #include "dvbsnoop.h"
 #include "mpeg_descriptor.h"
-#include "hexprint.h"
+#include "helper/hexprint.h"
 
 
 

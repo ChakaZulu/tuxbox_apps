@@ -1,5 +1,5 @@
 /*
-$Id: rst.c,v 1.3 2003/10/16 19:02:29 rasc Exp $
+$Id: rst.c,v 1.4 2003/10/24 22:17:21 rasc Exp $
 
    -- RST section
    -- Running Status Table
@@ -9,6 +9,9 @@ $Id: rst.c,v 1.3 2003/10/16 19:02:29 rasc Exp $
 
 
 $Log: rst.c,v $
+Revision 1.4  2003/10/24 22:17:21  rasc
+code reorg...
+
 Revision 1.3  2003/10/16 19:02:29  rasc
 some updates to dvbsnoop...
 - small bugfixes
@@ -29,6 +32,10 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "rst.h"
+#include "descriptors/descriptor.h"
+#include "strings/dvb_str.h"
+#include "misc/output.h"
+#include "misc/hexprint.h"
 
 
 
