@@ -749,8 +749,7 @@ void eZapMain::keyUp(int code)
 		eventMap::const_iterator It;
 		for (It = evt.begin(); It != evt.end(); It++)
 		{
-			qDebug("Vector Size = %i\n", It->second.size());
-				EITEvent* e = new EITEvent( (const eit_event_struct*) &(*It->second.begin()));
+				EITEvent* e = new EITEvent(*It->second);
  				tm* t = localtime(&e->start_time);
 				QString _long_description;
 				_long_description += QString().sprintf("Start = %02d:%02d", t->tm_hour, t->tm_min);

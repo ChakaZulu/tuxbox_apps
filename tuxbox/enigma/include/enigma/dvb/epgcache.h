@@ -7,8 +7,7 @@
 #include "si.h"
 #include "dvb.h"
 
-#define eventData std::vector<__u8>
-#define eventMap std::map<int, eventData>
+#define eventMap std::map<int, eventData*>
 #define eventCache std::hash_map<sref, eventMap >
 
 namespace std
@@ -24,6 +23,33 @@ struct hash<sref>
 };
 }
 
+class eventData
+{
+	char* EITdata;
+	int ByteSize;
+public:
+	eventData(const eit_event_struct* e, int size)
+	{
+		ByteSize=size;
+		EITdata = new char[size];
+		memcpy(EITdata, (char*) e, size);
+	}
+	eventData(const eventData& Q)
+	:ByteSize(Q.ByteSize)
+	{
+		EITdata = new char[ByteSize];
+		memcpy(EITdata, Q.EITdata, ByteSize);
+	}
+	~eventData()
+	{
+		delete [] EITdata;
+	}	
+	operator const eit_event_struct*() const
+	{
+		return (const eit_event_struct*) EITdata;
+	}
+};
+
 class eEPGCache: public eSection
 {
 	Q_OBJECT
@@ -36,6 +62,7 @@ public slots:
 	void leaveTransponder();
 public:
 	eEPGCache();
+	~eEPGCache();
 	static eEPGCache *getInstance() { return instance; }
 	EITEvent *lookupEvent(int original_network_id, int service_id, int event_id);
 	EITEvent *lookupCurrentEvent(int original_network_id, int service_id);
