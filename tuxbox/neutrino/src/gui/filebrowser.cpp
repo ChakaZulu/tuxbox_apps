@@ -312,7 +312,7 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 		sort(filelist.begin(), filelist.end(), sortByDate);
 	else
 		sort(filelist.begin(), filelist.end(), sortBySize);
-		
+
 	selected = 0;
 	paintHead();
 	paint();
@@ -322,7 +322,7 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 bool CFileBrowser::readDir(const std::string & dirname, CFileList* flist)
 {
 	bool ret;
-		
+
 	if (dirname.find(VLC_URI)==0)
 	{
 		ret = readDir_vlc(dirname, flist);
@@ -620,7 +620,7 @@ bool CFileBrowser::exec(std::string Dirname)
 				sort(filelist.begin(), filelist.end(), sortByDate);
 			else
 				sort(filelist.begin(), filelist.end(), sortBySize);
-				
+
 			paint();
 		}
 		else if(CRCInput::isNumeric(msg))
@@ -932,15 +932,15 @@ void CFileBrowser::paintFoot()
 		//?-Button
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by2 - 3);
 		if (smode == 0)
-			currentsort = g_Locale->getText("filebrowser.sort.name");
-		else if (smode == 1)
 			currentsort = g_Locale->getText("filebrowser.sort.namedirsfirst");
-		else if (smode == 2)
+		else if (smode == 1)
 			currentsort = g_Locale->getText("filebrowser.sort.type");
-		else if (smode == 3) 
+		else if (smode == 2)
 			currentsort = g_Locale->getText("filebrowser.sort.date");
-		else
+		else if (smode == 3)
 			currentsort = g_Locale->getText("filebrowser.sort.size");
+		else
+			currentsort = g_Locale->getText("filebrowser.sort.name");
 
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, currentsort, COL_INFOBAR, 0, true); // UTF-8
 
