@@ -11,7 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2004-02-03 05:08+0100\n"
 "PO-Revision-Date: Mon Feb 2 22:17:52 CET 2004\n"
 "Last-Translator: unknown\n"
-"Language-Team: Romanian / lucgas@lucian.homelinux.com\n"
+"Language-Team: Romanian / Lucian Gassmann (lucgas)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -135,7 +135,7 @@ msgstr "standby"
 
 #: default.esml:714 src/timer.cpp:2059
 msgid "Wednesday"
-msgstr "Wednesday"
+msgstr "Miercuri"
 
 #: default.esml:393
 msgid "Toneburst:"
@@ -147,7 +147,7 @@ msgstr "Partition Control"
 
 #: default.esml:754 default.esml:778
 msgid "enter recording end time (0..9, left, right, ok)"
-msgstr "introdu sfirsit inregistrare (0..9, left, right, ok)"
+msgstr "introduceti sfirsit inregistrare (0..9, stinga, dreapta, ok)"
 
 #: default.esml:719 default.esml:723
 msgid "select year (ok)"
@@ -609,7 +609,7 @@ msgstr "hard-disc:"
 
 #: default.esml:437
 msgid "Use Motor Input Power"
-msgstr "Foloseste intrarea energiei in motor"
+msgstr "Foloseste curent motor"
 
 #: default.esml:443
 msgid "when the motor support this, then use"
@@ -1142,7 +1142,7 @@ msgstr "OK"
 
 #: lib/gui/emessage.cpp:106
 msgid "Cancel"
-msgstr "Cancel"
+msgstr "Renunta"
 
 #: lib/gui/emessage.cpp:107
 msgid "Yes"
@@ -2019,7 +2019,7 @@ msgstr "SleepTimer"
 
 #: src/enigma_main.cpp:2540
 msgid "Sorry, you cannot record this service."
-msgstr "Iertare, acest serviciu nu poate fi inregistrat"
+msgstr "Scuze, acest serviciu nu poate fi inregistrat"
 
 #: src/enigma_main.cpp:2698
 msgid "Show recorded movies?"
@@ -3058,7 +3058,7 @@ msgstr "2 LNBs via Toneburst Signal"
 
 #: src/satconfig.cpp:60
 msgid "2 satellites via 22Khz (only Highband)"
-msgstr "2 satellites via 22Khz (only Highband)"
+msgstr "2 sateliti via 22Khz (only Highband)"
 
 #: src/satconfig.cpp:60
 msgid "2 LNBs via 22Khz Signal.. special for old analog switches"
@@ -3066,7 +3066,7 @@ msgstr "2 LNBs via 22Khz Signal.. special pentru analog switches"
 
 #: src/satconfig.cpp:61
 msgid "2 satellites via DiSEqC A/B"
-msgstr "2 satellites via DiSEqC A/B"
+msgstr "2 sateliti via DiSEqC A/B"
 
 #: src/satconfig.cpp:61
 msgid "2 LNBs via DiSEqC"
@@ -3074,7 +3074,7 @@ msgstr "2 LNBs via DiSEqC"
 
 #: src/satconfig.cpp:62
 msgid "4 satellites via DiSEqC OPT A/B"
-msgstr "4 satellites via DiSEqC OPT A/B"
+msgstr "4 sateliti via DiSEqC OPT A/B"
 
 #: src/satconfig.cpp:62
 msgid "4 LNBs via DiSEqC"
@@ -4529,7 +4529,7 @@ msgstr "Octombrie"
 
 #: src/timer.cpp:1605
 msgid "November"
-msgstr "Novembrie"
+msgstr "Noiembrie"
 
 #: src/timer.cpp:1605
 msgid "December"
@@ -4569,11 +4569,11 @@ msgstr ""
 
 #: src/timer.cpp:2146
 msgid "no description found"
-msgstr "no description found"
+msgstr "nu este descris"
 
 #: src/tpeditwindow.cpp:57
 msgid "Satellite Edit"
-msgstr "Satellite Edit"
+msgstr "Editare Satelit"
 
 #: src/tpeditwindow.cpp:63
 msgid "press ok to change satellite name"
@@ -4593,7 +4593,7 @@ msgid ""
 "this is recommend"
 msgstr ""
 "scan Network Information Table(s)\n"
-"this is recommend"
+"este recomandat"
 
 #: src/tpeditwindow.cpp:96
 msgid "Extended networks search"
@@ -4639,11 +4639,11 @@ msgstr "Salveaza schimbari?"
 
 #: src/tpeditwindow.cpp:255
 msgid "Transponders changed"
-msgstr "Transponders changed"
+msgstr "Transponderi schimbati"
 
 #: src/tpeditwindow.cpp:265
 msgid "Transponders couldn't be written to file!"
-msgstr "Transponders couldn't be written to file!"
+msgstr "Transponderi nu pot fi salvati in file!"
 
 #: src/tpeditwindow.cpp:266
 msgid "Write Error"
@@ -4692,15 +4692,15 @@ msgstr "Error!"
 
 #: src/upgrade.cpp:492
 msgid "Download aborted."
-msgstr "Download aborted."
+msgstr "Renunta download."
 
 #: src/upgrade.cpp:502
 msgid "checking consistency of file..."
-msgstr "checking consistency of file..."
+msgstr "control consistenta file..."
 
 #: src/upgrade.cpp:506 src/upgrade.cpp:508
 msgid "write error while downloading..."
-msgstr "write error while downloading..."
+msgstr "eroare gasita la control download..."
 
 #: src/upgrade.cpp:520 src/upgrade.cpp:522
 msgid "Data error. The checksum didn't match."
@@ -4708,27 +4708,27 @@ msgstr "Data error. The checksum didn't match."
 
 #: src/upgrade.cpp:532
 msgid "Checksum OK. Ready to upgrade."
-msgstr "Checksum OK. Ready to upgrade."
+msgstr "Checksum OK. Sunt gata pt upgrade."
 
 #: src/upgrade.cpp:534
 msgid "Are you sure you want to upgrade to this new version?"
-msgstr "Are you sure you want to upgrade to this new version?"
+msgstr "Esti sigur ca vrei o noua versiune de Soft?"
 
 #: src/upgrade.cpp:535
 msgid "Ready to upgrade"
-msgstr "Ready to upgrade"
+msgstr "Sunt gata pt upgrade"
 
 #: src/upgrade.cpp:545
 msgid "Please wait... do NOT switch off the receiver!"
-msgstr "Please wait... do NOT switch off the receiver!"
+msgstr "Asteptati... nu opriti receiver!"
 
 #: src/upgrade.cpp:546
 msgid "upgrade in progress"
-msgstr "upgrade in progress"
+msgstr "upgrade in progres"
 
 #: src/upgrade.cpp:574
 msgid "Can't read flashimage.img!"
-msgstr "Can't read flashimage.img!"
+msgstr "Nu pot citi flashimage.img!"
 
 #: src/upgrade.cpp:574 src/upgrade.cpp:588 src/upgrade.cpp:607
 #: src/upgrade.cpp:618
@@ -4741,15 +4741,15 @@ msgstr "flashimage.img has filesize of 0byte!"
 
 #: src/upgrade.cpp:607
 msgid "Erase error!"
-msgstr "Erase error!"
+msgstr "Erase eroare!"
 
 #: src/upgrade.cpp:618
 msgid "Can't open mtd!"
-msgstr "Can't open mtd!"
+msgstr "Nu pot deschide mtd!"
 
 #: src/upgrade.cpp:633
 msgid "Writing Software to Flash..."
-msgstr "Writing Software to Flash..."
+msgstr "Scrie Software in Flash..."
 
 #: src/upgrade.cpp:655
 msgid ""
@@ -4765,27 +4765,27 @@ msgstr "upgrade ok"
 
 #: src/upgrade.cpp:683
 msgid "Erasing Flash..."
-msgstr "Erasing Flash..."
+msgstr "Sterge Flash..."
 
 #: src/upgrade.cpp:717
 msgid "This is the currently installed release."
-msgstr "This is the currently installed release."
+msgstr "Acesta este Soft instalant curent."
 
 #: src/upgrade.cpp:720
 msgid "This is an older release."
-msgstr "This is an older release."
+msgstr "Acesta este un Soft vechi."
 
 #: src/upgrade.cpp:723
 msgid "No changelog data available."
-msgstr "No changelog data available."
+msgstr "Nu gasesc changelog data."
 
 #: src/upgrade.cpp:737
 msgid "No new features were added in this release."
-msgstr "No new features were added in this release."
+msgstr "Nimic nou in acest release."
 
 #: src/upgrade.cpp:740
 msgid "The following new features were added in this release:\n"
-msgstr "The following new features were added in this release:\n"
+msgstr "Urmatoarele imbunatatiri sau facut in acest release:\n"
 
 #: src/wizard_language.cpp:154
 msgid "Choose your language..."
@@ -4793,11 +4793,11 @@ msgstr "Alegeti Limba..."
 
 #: src/wizard_language.cpp:155
 msgid "press up/down/ok"
-msgstr "apasati sus/jos n/ok"
+msgstr "apasati sus/jos/ok"
 
 #: src/wizard_scan.cpp:116
 msgid "Direct connection to one LNB"
-msgstr "Direct connection to one LNB"
+msgstr "Conectare directa la un LNB"
 
 #: src/wizard_scan.cpp:119
 msgid "Simple DiSEqC (2 LNBs/satellites)"
@@ -4805,7 +4805,7 @@ msgstr "Simple DiSEqC (2 LNBs/satellites)"
 
 #: src/wizard_scan.cpp:122
 msgid "Complex configuration (including DiSEqC 1.2)"
-msgstr "Complex configuration (including DiSEqC 1.2)"
+msgstr "Configuratie complexa (including DiSEqC 1.2)"
 
 #: src/system_settings.cpp:40 src/time_settings.cpp:31
 msgid "Time Settings"
