@@ -1372,6 +1372,15 @@ void eZapMain::loadUserBouquets( bool destroy )
 	if ( destroy )
 		destroyUserBouquets();
 
+	eString basePath=eplPath;
+	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
+	{
+		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable )
+			basePath+="/cable";
+		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
+			basePath+="/terrestrial";
+	}
+
 	// create user bouquet tv list
 	eServicePlaylistHandler::getInstance()->addNum( 6 );
 	userTVBouquetsRef=eServiceReference( eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 0, 6);
@@ -1382,7 +1391,7 @@ void eZapMain::loadUserBouquets( bool destroy )
 	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTvRadio), userTVBouquetsRef);
 	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeBouquets), userTVBouquetsRef);
 	userTVBouquets->service_name=_("Bouquets (TV)");
-	userTVBouquets->load((eplPath+"/userbouquets.tv.epl").c_str());
+	userTVBouquets->load((basePath+"/userbouquets.tv.epl").c_str());
 
 	// create user bouquet file list
 	eServicePlaylistHandler::getInstance()->addNum( 3 );
@@ -1405,7 +1414,7 @@ void eZapMain::loadUserBouquets( bool destroy )
 	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTvRadio), userRadioBouquetsRef);
 	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeBouquets), userRadioBouquetsRef);
 	userRadioBouquets->service_name=_("Bouquets (Radio)");
-	userRadioBouquets->load((eplPath+"/userbouquets.radio.epl").c_str());
+	userRadioBouquets->load((basePath+"/userbouquets.radio.epl").c_str());
 
 	int i=0;
 	for (int d = modeTV; d <= modeFile; d++)
@@ -1452,13 +1461,13 @@ void eZapMain::loadUserBouquets( bool destroy )
 				case modeTV:
 					parentList = userTVBouquets;
 					parentRef = userTVBouquetsRef;
-					path = eplPath+'/'+eString().sprintf("userbouquet.%x.tv",ref.data[1]);
+					path = basePath+'/'+eString().sprintf("userbouquet.%x.tv",ref.data[1]);
 					name = _("Favourites (TV)");
 					break;
 				case modeRadio:
 					parentList = userRadioBouquets;
 					parentRef = userRadioBouquetsRef;
-					path = eplPath+'/'+eString().sprintf("userbouquet.%x.radio",ref.data[1]);
+					path = basePath+'/'+eString().sprintf("userbouquet.%x.radio",ref.data[1]);
 					name = _("Favourites (Radio)");
 					break;
 				case modeFile:
@@ -4070,13 +4079,23 @@ void eZapMain::createEmptyBouquet(int mode)
 	{
 		eServiceReference newList=
 			eServicePlaylistHandler::getInstance()->newPlaylist();
+
+		eString basePath=eplPath;
+		if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
+		{
+			if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable )
+				basePath+="/cable";
+			if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
+				basePath+="/terrestrial";
+		}
+
 		switch ( mode )
 		{
 			case modeTV:
-				addUserBouquet( userTVBouquetsRef, userTVBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.tv",newList.data[1]), wnd.getEditText(), newList, true );
+				addUserBouquet( userTVBouquetsRef, userTVBouquets, basePath+'/'+eString().sprintf("userbouquet.%x.tv",newList.data[1]), wnd.getEditText(), newList, true );
 				break;
 			case modeRadio:
-				addUserBouquet( userRadioBouquetsRef, userRadioBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.radio",newList.data[1]), wnd.getEditText(), newList, true );
+				addUserBouquet( userRadioBouquetsRef, userRadioBouquets, basePath+'/'+eString().sprintf("userbouquet.%x.radio",newList.data[1]), wnd.getEditText(), newList, true );
 				break;
 #ifndef DISABLE_FILE
 			case modeFile:
@@ -4153,13 +4172,22 @@ void eZapMain::copyProviderToBouquets(eServiceSelector *sel)
 		eServiceInterface::getInstance()->removeRef(ref);
 	}
 
+	eString basePath=eplPath;
+	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
+	{
+		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable )
+			basePath+="/cable";
+		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
+			basePath+="/terrestrial";
+	}
+
 	switch ( mode )
 	{
 		case modeTV:
-			currentSelectedUserBouquet = addUserBouquet( userTVBouquetsRef, userTVBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.tv",currentSelectedUserBouquetRef.data[1]), name, currentSelectedUserBouquetRef, false );
+			currentSelectedUserBouquet = addUserBouquet( userTVBouquetsRef, userTVBouquets, basePath+'/'+eString().sprintf("userbouquet.%x.tv",currentSelectedUserBouquetRef.data[1]), name, currentSelectedUserBouquetRef, false );
 			break;
 		case modeRadio:
-			currentSelectedUserBouquet = addUserBouquet( userRadioBouquetsRef, userRadioBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.radio",currentSelectedUserBouquetRef.data[1]), name, currentSelectedUserBouquetRef, false );
+			currentSelectedUserBouquet = addUserBouquet( userRadioBouquetsRef, userRadioBouquets, basePath+'/'+eString().sprintf("userbouquet.%x.radio",currentSelectedUserBouquetRef.data[1]), name, currentSelectedUserBouquetRef, false );
 			break;
 	}
 
@@ -5627,6 +5655,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	case eServiceEvent::evtFlagsChanged:
 	{
 		serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
+#ifndef DISABLE_FILE
 		if ( timeshift && !(serviceFlags & eServiceHandler::flagIsSeekable) )
 		{
 			if ( eDVB::getInstance()->recorder &&
@@ -5636,6 +5665,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		}
 		if ( serviceFlags & eServiceHandler::flagStartTimeshift )
 			timeshift=1;
+#endif
 		setSmartcardLogo( serviceFlags & eServiceHandler::flagIsScrambled );
 		if (serviceFlags & eServiceHandler::flagSupportPosition)
 			progresstimer.start(1000);
