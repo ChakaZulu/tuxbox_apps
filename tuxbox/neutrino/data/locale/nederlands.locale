@@ -3,12 +3,44 @@ EPGMenu.eventinfo Info over uitzending
 EPGMenu.eventlist Preview programma
 EPGMenu.head EPG - Programma Informatie
 EPGMenu.streaminfo technische Informatie
+EPGPlus.actions Aktie's
+EPGPlus.change_font_size Fonttype veranderen
+EPGPlus.change_font_style Fontstijl veranderen
+EPGPlus.change_size Grootte veranderen
+EPGPlus.channelentry_font Kanaal
+EPGPlus.channelentry_separationlineheight Hoogteverschil tussen 2 kanaalnamen
+EPGPlus.channelentry_width Breedte van de kanaallnamen
+EPGPlus.channelevententry_font Uitzendingen
+EPGPlus.edit_fonts Fonts instellen
+EPGPlus.edit_sizes Grootte instellen
+EPGPlus.font_style_bold Vet
+EPGPlus.font_style_italic Cursief
+EPGPlus.font_style_regular Normaal
+EPGPlus.footer_fontbouquetchannelname Kies Boeket- of Kanaalnaam
+EPGPlus.footer_fontbuttons Knoppen
+EPGPlus.footer_fonteventdescription Titel 1 kies uitzending
+EPGPlus.footer_fonteventshortdescription Titel 2 kies uitzending
 EPGPlus.head Preview  (EPG Plus)
+EPGPlus.header_font Menu
+EPGPlus.next_bouquet Volgend Boeket
+EPGPlus.options Optie's
+EPGPlus.page_down Vorige pagina.
+EPGPlus.page_up Volgende pagina.
+EPGPlus.prev_bouquet Vorig Boeket.
 EPGPlus.record Opname
 EPGPlus.refresh_epg Aktualiseren
 EPGPlus.remind Herinneren
+EPGPlus.reset_settings Resetten van instellingen.
+EPGPlus.save_settings Instellingen bewaren
 EPGPlus.scroll_mode Scroll Mode
+EPGPlus.select_font_name Lettertype kiezen
+EPGPlus.settings Instellingen
+EPGPlus.slider_width Breedte van de sliders
 EPGPlus.stretch_mode Stretch Mode
+EPGPlus.swap_mode Bladeren
+EPGPlus.timeline_fontdate Tijdschaal datum
+EPGPlus.timeline_fonttime Tijdschaal Tijd
+EPGPlus.view_mode Mode
 GENRE.ARTS.0 Kunst/ cultuur
 GENRE.ARTS.1 Beeldende kunst
 GENRE.ARTS.10 kunst/culturele magazines
