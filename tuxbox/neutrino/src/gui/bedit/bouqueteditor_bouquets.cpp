@@ -48,6 +48,7 @@
 #include <gui/widget/stringinput.h>
 
 #include <zapit/client/zapitclient.h>
+#include <zapit/client/zapittools.h>
 
 
 CBEBouquetWidget::CBEBouquetWidget()
@@ -420,9 +421,9 @@ void CBEBouquetWidget::deleteBouquet()
 void CBEBouquetWidget::addBouquet()
 {
 	std::string newName = inputName("", "bouqueteditor.bouquetname");
-	if (newName != "")
+	if (!(newName.empty()))
 	{
-		g_Zapit->addBouquet( newName);
+		g_Zapit->addBouquet(ZapitTools::Latin1_to_UTF8(newName.c_str()).c_str());
 		Bouquets.clear();
 		g_Zapit->getBouquets(Bouquets, true);
 		selected = Bouquets.size() - 1;
@@ -461,10 +462,10 @@ void CBEBouquetWidget::cancelMoveBouquet()
 
 void CBEBouquetWidget::renameBouquet()
 {
-	std::string newName = inputName( Bouquets[selected].name, "bouqueteditor.newbouquetname");
+	std::string newName = inputName(Bouquets[selected].name, "bouqueteditor.newbouquetname");
 	if (newName != Bouquets[selected].name)
 	{
-		g_Zapit->renameBouquet(selected, newName);
+		g_Zapit->renameBouquet(selected, ZapitTools::Latin1_to_UTF8(newName.c_str()).c_str());
 		Bouquets.clear();
 		g_Zapit->getBouquets(Bouquets, true);
 		bouquetsChanged = true;
@@ -490,17 +491,15 @@ void CBEBouquetWidget::switchLockBouquet()
 	paint();
 }
 
-std::string CBEBouquetWidget::inputName(const std::string & defaultName, const std::string & caption)
+std::string CBEBouquetWidget::inputName(const char * const defaultName, const char * const caption)
 {
-	char Name[30] = "";
-	if (defaultName != "")
-	{
-		strncpy( Name, defaultName.c_str(), 30);
-	}
+	char Name[30];
 
-	CStringInputSMS* nameInput = new CStringInputSMS(caption.c_str(), Name, 29, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+	strncpy(Name, defaultName, 30);
+
+	CStringInputSMS* nameInput = new CStringInputSMS(caption, Name, 29, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	nameInput->exec(this, "");
-	return( Name);
+	return std::string(Name);
 }
 
 void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned int toPosition)

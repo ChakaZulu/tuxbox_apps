@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.24 2004/04/02 13:26:58 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.25 2004/04/07 19:33:21 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -74,16 +74,6 @@ std::string Unicode_Character_to_UTF8(const int character)
 	int length = XmlUtf8Encode(character, buf);
 	return std::string(buf, length);
 #endif /* USE_LIBXML */
-}
-
-std::string convert_to_UTF8(const std::string s)
-{
-	std::string r;
-	
-	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
-		r += Unicode_Character_to_UTF8((const unsigned char)*it);
-		
-	return r;
 }
 
 #ifdef USE_LIBXML

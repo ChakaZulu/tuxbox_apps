@@ -357,7 +357,7 @@ class CZapitClient:public CBasicClient
 	/****************************************/
 
 	/* adds bouquet at the end of the bouquetlist*/
-	void addBouquet(const std::string & name);
+	void addBouquet(const char * const name); // UTF-8 encoded
 
 	/* moves a bouquet from one position to another */
 	/* bouquets are numbered starting at 0 */
@@ -368,7 +368,7 @@ class CZapitClient:public CBasicClient
 
 	/* assigns new name to bouquet*/
 	/* bouquets are numbered starting at 0 */
-	void renameBouquet(const unsigned int bouquet, const std::string & newName);
+	void renameBouquet(const unsigned int bouquet, const char * const newName); // UTF-8 encoded
 
 	/* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
 	/* bouquets are numbered starting at 0 */
@@ -377,7 +377,7 @@ class CZapitClient:public CBasicClient
 	// -- check if Bouquet-Name exists (2002-04-02 rasc)
 	// -- Return bq_id or -1
 	/* bouquets are numbered starting at 0 */
-	signed int existsBouquet(const char * name); // UTF-8 encoded
+	signed int existsBouquet(const char * const name); // UTF-8 encoded
 
 
 	// -- check if Channel already in Bouquet (2002-04-05 rasc)

@@ -105,7 +105,7 @@ class CBEBouquetWidget : public CMenuWidget
 		void saveChanges();
 		void discardChanges();
 
-		std::string inputName( const std::string & defaultName, const std::string & caption);
+		std::string inputName(const char * const defaultName, const char * const caption);
 
 	public:
 		CBEBouquetWidget();

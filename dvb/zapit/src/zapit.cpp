@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.348 2004/04/04 00:46:57 carjay Exp $
+ * $Id: zapit.cpp,v 1.349 2004/04/07 19:33:21 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -903,7 +903,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::commandAddBouquet msgAddBouquet;
 		CBasicServer::receive_data(connfd, &msgAddBouquet, sizeof(msgAddBouquet));
-		bouquetManager->addBouquet(convert_to_UTF8(std::string(msgAddBouquet.name)));
+		bouquetManager->addBouquet(msgAddBouquet.name);
 		break;
 	}
 
@@ -920,7 +920,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::commandRenameBouquet msgRenameBouquet;
 		CBasicServer::receive_data(connfd, &msgRenameBouquet, sizeof(msgRenameBouquet)); // bouquet & channel number are already starting at 0!
 		if (msgRenameBouquet.bouquet < bouquetManager->Bouquets.size())
-			bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = convert_to_UTF8(std::string(msgRenameBouquet.name));
+			bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = msgRenameBouquet.name;
 		break;
 	}
 
@@ -1620,7 +1620,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.348 2004/04/04 00:46:57 carjay Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.349 2004/04/07 19:33:21 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

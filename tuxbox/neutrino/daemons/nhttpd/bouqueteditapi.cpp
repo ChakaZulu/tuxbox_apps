@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.22 2004/04/02 13:26:58 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.23 2004/04/07 19:33:22 thegoodguy Exp $
 
 	License: GPL
 
@@ -168,7 +168,7 @@ bool CBouqueteditAPI::addBouquet(CWebserverRequest* request)
 	else
 	{
 		if (Parent->Zapit->existsBouquet(ZapitTools::Latin1_to_UTF8(request->ParameterList["name"].c_str()).c_str()) == -1) {
-			Parent->Zapit->addBouquet(request->ParameterList["name"]);
+			Parent->Zapit->addBouquet(ZapitTools::Latin1_to_UTF8(request->ParameterList["name"].c_str()).c_str());
 			request->Send302("/bouquetedit/main#akt");
 		} else {
 			request->SendPlainHeader("text/html");
@@ -274,7 +274,7 @@ bool CBouqueteditAPI::renameBouquet(CWebserverRequest* request)
 		}
 		else
 		{
-			Parent->Zapit->renameBouquet(atoi(request->ParameterList["selected"].c_str()) - 1, request->ParameterList["nameto"].c_str());
+			Parent->Zapit->renameBouquet(atoi(request->ParameterList["selected"].c_str()) - 1, ZapitTools::Latin1_to_UTF8(request->ParameterList["nameto"].c_str()).c_str());
 			request->Send302((char*)("/bouquetedit/main?selected=" + request->ParameterList["selected"] + "#akt").c_str());
 		}
 		return true;

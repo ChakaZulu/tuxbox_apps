@@ -44,8 +44,6 @@
 
 #include <gui/bouquetlist.h>
 
-#include <zapit/client/zapittools.h>
-
 extern CBouquetList * bouquetList;       /* neutrino.cpp */
 
 
@@ -77,7 +75,7 @@ int CFavorites::addChannelToFavorites()
 	//
 	bouquet_id = g_Zapit->existsBouquet(fav_bouquetname);
 	if (bouquet_id == -1) {
-		g_Zapit->addBouquet(ZapitTools::UTF8_to_Latin1(fav_bouquetname));
+		g_Zapit->addBouquet(fav_bouquetname);
 	        bouquet_id = g_Zapit->existsBouquet(fav_bouquetname);
 		status |= 1;
 	}

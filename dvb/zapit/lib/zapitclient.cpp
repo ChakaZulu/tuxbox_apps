@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.99 2004/04/02 13:26:57 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.100 2004/04/07 19:33:21 thegoodguy Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -596,17 +596,17 @@ void CZapitClient::setScanBouquetMode(const bouquetMode mode)
 
 
 /***********************************************/
-/*					     */
-/* Bouquet editing functions		   */
-/*					     */
+/*                                             */
+/* Bouquet editing functions                   */
+/*                                             */
 /***********************************************/
 
-/* adds bouquet at the end of the bouquetlist*/
-void CZapitClient::addBouquet(const std::string & name)
+/* adds bouquet at the end of the bouquetlist  */
+void CZapitClient::addBouquet(const char * const name)
 {
 	CZapitMessages::commandAddBouquet msg;
 
-	strncpy(msg.name, name.c_str(), 30);
+	strncpy(msg.name, name, 30);
 
 	send(CZapitMessages::CMD_BQ_ADD_BOUQUET, (char*)&msg, sizeof(msg));
 
@@ -641,12 +641,12 @@ void CZapitClient::deleteBouquet(const unsigned int bouquet)
 
 /* assigns new name to bouquet */
 /* bouquets are numbered starting at 0 */
-void CZapitClient::renameBouquet(const unsigned int bouquet, const std::string & newName)
+void CZapitClient::renameBouquet(const unsigned int bouquet, const char * const newName)
 {
 	CZapitMessages::commandRenameBouquet msg;
 
 	msg.bouquet = bouquet;
-	strncpy(msg.name, newName.c_str(), 30);
+	strncpy(msg.name, newName, 30);
 
 	send(CZapitMessages::CMD_BQ_RENAME_BOUQUET, (char*)&msg, sizeof(msg));
 
@@ -656,7 +656,7 @@ void CZapitClient::renameBouquet(const unsigned int bouquet, const std::string &
 // -- check if Bouquet-Name exists
 // -- Return: Bouquet-ID  or  -1 == no Bouquet found
 /* bouquets are numbered starting at 0 */
-signed int CZapitClient::existsBouquet(const char * name)
+signed int CZapitClient::existsBouquet(const char * const name)
 {
 	CZapitMessages::commandExistsBouquet msg;
 	CZapitMessages::responseGeneralInteger response;
