@@ -10,6 +10,5 @@ AC_OUTPUT([
 Makefile
 etherwake/Makefile
 fbshot/Makefile
-ggrab/Makefile
 ])
 
