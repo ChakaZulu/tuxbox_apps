@@ -652,7 +652,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.recording_use_fdatasync         = configfile.getBool("recordingmenu.use_fdatasync"        , false);
 	g_settings.recording_stream_all_audio_pids = configfile.getBool("recordingmenu.stream_all_audio_pids", true );
 	g_settings.recording_stream_vtxt_pid       = configfile.getBool("recordingmenu.stream_vtxt_pid"      , false);
-	strcpy( g_settings.recording_ringbuffers, configfile.getString( "recording_ringbuffers", "20").c_str() );
+	strcpy( g_settings.recording_ringbuffers, configfile.getString( "recordingmenu.ringbuffers", "20").c_str() );
 
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
