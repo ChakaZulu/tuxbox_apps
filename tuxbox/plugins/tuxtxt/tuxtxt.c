@@ -411,7 +411,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.68 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.69 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -485,6 +485,7 @@ void plugin_exec(PluginParam *par)
 				case RC_MUTE:		/* regular toggle to transparent */
 					break;
 
+#ifndef DREAMBOX
 				case RC_HELP: /* switch to scart input and back */
 				{
 					int i, n;
@@ -511,6 +512,7 @@ void plugin_exec(PluginParam *par)
 					}
 					continue; /* otherwise ignore exit key */
 				}
+#endif
 				default:
 					continue; /* ignore all other keys */
 				}
@@ -711,6 +713,8 @@ int Init()
 	typettf.font.pix_height = (FT_UShort) fontheight;
 #if HAVE_DVB_API_VERSION >= 3
 	typettf.flags = FT_LOAD_MONOCHROME;
+#else
+	typettf.image_type = ftc_image_mono;
 #endif
 	if ((error = FTC_Manager_Lookup_Face(manager, TUXTXTTTF, &face)))
 	{
@@ -789,11 +793,13 @@ int Init()
 #endif
 
 	/* "correct" semi-transparent for Nokia (GTX only allows 2(?) levels of transparency) */
+#ifndef DREAMBOX
 	if (tuxbox_get_vendor() == TUXBOX_VENDOR_NOKIA)
 	{
 		tr1[transp2-1] = 0xFFFF;
 		tr2[transp2-1] = 0xFFFF;
 	}
+#endif
 
 	/* set new colormap */
 	if (color_mode)
@@ -932,8 +938,6 @@ int Init()
 void CleanUp()
 {
 	int i, n;
-	int vendor = tuxbox_get_vendor();
-	
 	/* hide pig */
 	if (screenmode)
 		SwitchScreenMode(0); /* turn off divided screen */
@@ -942,6 +946,8 @@ void CleanUp()
 	ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
 	ioctl(saa, SAAIOSWSS, &saa_old);
 
+#ifndef DREAMBOX
+	int vendor = tuxbox_get_vendor();
 	if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 	{
 		for (i = 1; i < 6; i += 2) /* restore dvb audio */
@@ -951,6 +957,7 @@ void CleanUp()
 				perror("TuxTxt <ioctl(avs)>");
 		}
 	}
+#endif
 
 	/* stop decode-thread */
 	if (pthread_cancel(thread_id) != 0)
@@ -3124,7 +3131,11 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		return;
 	}
 
+#ifdef DREAMBOX
+	if ((error = FTC_SBit_Cache_Lookup(cache, &typettf, glyph, &sbit)) != 0)
+#else
 	if ((error = FTC_SBitCache_Lookup(cache, &typettf, glyph, &sbit, NULL)) != 0)
+#endif
 	{
 #if DEBUG
 		printf("TuxTxt <FTC_SBitCache_Lookup: 0x%x> c%x a%x g%x w%d h%d x%d y%d\n",
@@ -3339,7 +3350,11 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	if (pt == pt2)
 		Char += national_subset*13 + 1;
 
+#ifdef DREAMBOX
+	if ((error = FTC_SBit_Cache_Lookup(cache, pt, Char, &sbit)) != 0)
+#else
 	if ((error = FTC_SBitCache_Lookup(cache, pt, Char, &sbit, NULL)) != 0)
+#endif
 	{
 #if DEBUG
 		printf("TuxTxt <FTC_SBitCache_Lookup: 0x%x> c%x a%x w%d h%d x%d y%d\n",
