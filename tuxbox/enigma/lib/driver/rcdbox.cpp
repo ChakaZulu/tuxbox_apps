@@ -104,7 +104,7 @@ eRCDeviceDBoxNew::eRCDeviceDBoxNew(eRCDriver *driver): eRCDevice(driver)
 {
 	ccode=-1;
 	rrate=100;
-	rdelay=300;
+	rdelay=400;
 	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
 	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));
 }
