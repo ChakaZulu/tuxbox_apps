@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.11 2001/08/18 12:32:06 McClean Exp $
+        $Id: neutrino.cpp,v 1.12 2001/08/18 12:50:29 tw-74 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -10,9 +10,9 @@
 	Kommentar:
 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumöglichkeiten gut aussehen. Neutrino basiert
+	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons übernommen.
+	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
 
 	License: GPL
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.12  2001/08/18 12:50:29  tw-74
+  cosmetic fixes (umlaute, tabbing, style)
+
   Revision 1.11  2001/08/18 12:32:06  McClean
   settings menue - critcal crash bug fixed
 
@@ -101,7 +104,7 @@ class CColorSetupNotifier : public CChangeObserver
 class CAudioSetupNotifier : public CChangeObserver
 {
 	void changeNotify(string OptionName)
-		{
+	{
 		printf("notify: %s\n", OptionName.c_str() );
 	};
 };
@@ -109,7 +112,7 @@ class CAudioSetupNotifier : public CChangeObserver
 class CVideoSetupNotifier : public CChangeObserver
 {
 	void changeNotify(string OptionName)
-		{
+	{
 		printf("notify: %s\n", OptionName.c_str() );
 	};
 };
@@ -121,9 +124,9 @@ void setNetworkAdress(char* ip, char* netmask, char* broadcast)
 	printf("Broadcast: %s\n", broadcast);
 	if(fork()==0)
 	{
-	    if (execlp("ifconfig", "ifconfig", "eth0", "up", ip, "netmask", netmask, "broadcast", broadcast, 0)<0)
+		if (execlp("ifconfig", "ifconfig", "eth0", "up", ip, "netmask", netmask, "broadcast", broadcast, 0)<0)
 		{
-	      perror("exec failed - ifconfig\n");
+			perror("exec failed - ifconfig\n");
 		}
 	}
 }
@@ -134,7 +137,7 @@ void setDefaultGateway(char* ip)
 	{
 	    if (execlp("route", "route", "add", "-net", "default", "gw", ip, 0)<0)
 		{
-	      perror("exec failed - route\n");
+			perror("exec failed - route\n");
 		}
 	}
 }
@@ -855,7 +858,8 @@ void CNeutrinoApp::InitZapper()
 	if (zapit) 
 	{
 		firstChannel();
-		if (firstchannel.mode == 't') {
+		if (firstchannel.mode == 't')
+		{
 			//remoteControl.tvMode();
 			tvMode();
 		}
