@@ -10,6 +10,7 @@ class eRCDeviceInputDev: public eRCDevice
 {
 	struct input_event cur;
 	int iskeyboard;
+	eTimer repeattimer;
 public:
 	void repeat();
 	void handleCode(int code);
