@@ -272,29 +272,20 @@ void CPlugins::startPlugin(const char * const name)
 void CPlugins::startScriptPlugin(int number)
 {
 	const char *script = plugin_list[number].pluginfile.c_str();
-	FILE *f = fopen(script,"r");
+	printf("[CPlugins] executing %s\n",script);
+	FILE *f = popen(script,"r");
 	if (f != NULL)
 	{
-		fclose(f);
-		printf("[CPlugins] executing %s\n",script);
-		f = popen(script,"r");
-		if (f != NULL)
+		char output[1024];
+		while (fgets(output,1024,f))
 		{
-			char output[1024];
-			while (fgets(output,1024,f))
-			{
-				scriptOutput += output; 
-			}
-			pclose(f);
-		} 
-		else 
-		{	
-			printf("[CPlugins] can't execute %s\n",script);
+			scriptOutput += output; 
 		}
+		pclose(f);
 	} 
-	else
-	{
-		printf("[CPlugins] file not found %s\n",script);
+	else 
+	{	
+		printf("[CPlugins] can't execute %s\n",script);
 	}
 }
 
