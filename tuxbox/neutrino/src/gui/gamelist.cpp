@@ -32,6 +32,7 @@
 #include "gamelist.h"
 #include "../include/debug.h"
 #include "../global.h"
+#include <config.h>
 
 // hi McClean - hab schon mal was geaendert - falls es nicht gefaellt
 // altes gamelist.cpp ist als svd.gamelist.cpp eingecheckt.
@@ -125,7 +126,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	struct dirent **namelist;
 	int n;
 
-	n = scandir("/usr/lib/neutrino/games", &namelist, 0, alphasort);
+	n = scandir(PLUGINDIR "/", &namelist, 0, alphasort);
 	if (n < 0)
 	{
 		perror("scandir");
@@ -141,7 +142,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			{
 				string pluginname = filen.substr(0,pos);
 				printf("found game plugin: %s\n", pluginname.c_str());
-				if (_loadInfo( ("/usr/lib/neutrino/games/"+filen).c_str(), &info ) )
+				if (_loadInfo( (PLUGINDIR"/"+filen).c_str(), &info ) )
 					continue;
 
 				game* tmp = new game();
@@ -328,7 +329,7 @@ void CGameList::runGame(int selected )
 	}
 	while ( i == argc )		// alles geladen
 	{
-		handle = dlopen ( ("/usr/lib/neutrino/games/"+pluginname+".so").c_str(), RTLD_NOW);
+		handle = dlopen ( (PLUGINDIR "/"+pluginname+".so").c_str(), RTLD_NOW);
 		if (!handle)
 		{
 			fputs (dlerror(), stderr);
