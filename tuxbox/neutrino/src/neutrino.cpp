@@ -1047,7 +1047,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	ojBouquets->addOption( CZapitClient::BM_DELETEBOUQUETS, "scants.bouquet_erase");
 	ojBouquets->addOption( CZapitClient::BM_CREATEBOUQUETS, "scants.bouquet_create");
 	ojBouquets->addOption( CZapitClient::BM_DONTTOUCHBOUQUETS, "scants.bouquet_leave");
-	ojBouquets->addOption( CZapitClient::BM_CREATESATELLITEBOUQUET, "scants.satellite");
+	ojBouquets->addOption( CZapitClient::BM_CREATESATELLITEBOUQUET, "scants.bouquet_satellite");
 
 	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
@@ -3428,7 +3428,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.469 2003/06/13 12:37:04 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.470 2003/06/13 12:45:52 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();
