@@ -1370,11 +1370,11 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		if(!configfile.loadConfig("/.version"))
 		{
 			//error default
-			strcpy(g_settings.softupdate_currentversion, "0105200205212015");
+			strcpy(g_settings.softupdate_currentversion, "????????????????");
 		}
 		else
 		{
-			strcpy(g_settings.softupdate_currentversion, configfile.getString( "version", "0105200205212015").c_str());
+			strcpy(g_settings.softupdate_currentversion, configfile.getString( "version", "????????????????").c_str());
 		}
 		dprintf(DEBUG_INFO, "current flash-version: %s\n", g_settings.softupdate_currentversion);
 
