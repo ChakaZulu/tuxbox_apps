@@ -528,13 +528,10 @@ eHTTPD::eHTTPD(Q_UINT16 port, int backlog): QServerSocket(port, backlog)
 
 eHTTPConnection::~eHTTPConnection()
 {
-	eDebug("~eHTTPConnection");
 	if (state()!=Idle)
-		qFatal("~eHTTPConnection, status still %d", state());
-	eDebug("data %x", data);
+		eWarning("~eHTTPConnection, status still %d", state());
 	if (data)
 		delete data;
-	eDebug("ok");
 }
 
 void eHTTPD::newConnection(int socket)
