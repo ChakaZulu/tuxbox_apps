@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.5 2003/02/24 21:17:31 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.6 2003/02/24 22:20:53 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -27,9 +27,11 @@
 #include <dmxapi.h>
 #include <debug.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <sys/poll.h>
 
 #include <string>
 
