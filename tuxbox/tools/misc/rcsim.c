@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  ******************************************************************************
- * $Id: rcsim.c,v 1.2 2003/12/27 20:16:44 carjay Exp $
+ * $Id: rcsim.c,v 1.3 2004/02/01 21:20:38 carjay Exp $
  ******************************************************************************/
 
 #include <stdio.h>
@@ -33,6 +33,8 @@
 #include <unistd.h>
 #include <linux/input.h>
 #include <error.h>
+
+#define EVENTDEV "/dev/input/event0"
 
 enum {	// not defined in input.h but used like that, at least in 2.4.22
 	KEY_RELEASED = 0,
@@ -82,14 +84,17 @@ static const struct key keyname[] = {
 
 void usage(char *n){
 	printf ("Usage: %s <keyname> [<time>] [<repeat>]\n"
-		"       <keyname> is an excerpt from <linux/input.h> and corresponds\n"
-		"             to the keys on the dbox2-remote control\n"
+		"       <keyname> is an excerpt of the 'KEY_FOO'-names in <linux/input.h>,\n"
+		"             only the keys on the dbox2-remote control are supported\n"
 		"       <time> is how long a code is repeatedly sent,\n"
 		"              unit is seconds, default is 0 = sent only once\n"
 		"       <repeat> what time is waited until a new code is sent\n"
 		"                (if <time> is greater than 0), unit is milliseconds,\n"
 		"		 default is 500\n"
-		"       Example: %s KEY_1\n",n,n);
+		"       Examples: %s KEY_1\n"
+		"                        ; KEY_1 sent once\n"
+		"                 %s KEY_OK 2 250\n"
+		"                        ; KEY_OK sent every 250ms for 2 seconds\n",n,n,n);
 }
 
 int send (int ev, unsigned int code, unsigned int value){
@@ -113,6 +118,12 @@ int main (int argc, char **argv){
 		return 1;
 	}
 
+	if (argc==2)
+		if (!strncmp(argv[1],"--help",6)||!strncmp(argv[1],"-h",2)){
+			usage(argv[0]);
+			return 1;
+		}
+
 	for (offset=0;offset<keys;offset++){
 		if (!strcmp(argv[1],keyname[offset].name)){
 			sendcode = keyname[offset].code;
@@ -133,7 +144,7 @@ int main (int argc, char **argv){
 		time=(atol (argv[2])*1000)/reptime;
 	}
 
-	evd=open ("/dev/input/event0",O_RDWR);
+	evd=open (EVENTDEV,O_RDWR);
 	if (evd<0){
 		perror ("opening event0 failed");
 		return 1;
