@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.172 2002/02/26 19:05:25 field Exp $
+        $Id: neutrino.cpp,v 1.173 2002/02/26 21:10:30 chrissi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.173  2002/02/26 21:10:30  chrissi
+  network test menu entry added
+  (for now only console debug information)
+
   Revision 1.172  2002/02/26 19:05:25  field
   Neues Event-Handling funktioniert
 
@@ -581,6 +585,16 @@ void CNeutrinoApp::setupNetwork(bool force)
 	}
 }
 
+void CNeutrinoApp::testNetwork(bool force)
+{
+	if((g_settings.networkSetOnStartup) || (force))
+	{
+		printf("doing network test...\n");
+		//test network
+		testNetworkSettings(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast, g_settings.network_defaultgateway, g_settings.network_nameserver);
+	}
+}
+
 
 /**************************************************************************************
 *                                                                                     *
@@ -745,7 +759,7 @@ void CNeutrinoApp::setupDefaults()
 	//network
 	g_settings.networkSetOnStartup = 0;
 	strcpy(g_settings.network_ip, "10.10.10.100");
-	strcpy(g_settings.network_netmask, "255.255.255.000");
+	strcpy(g_settings.network_netmask, "255.255.255.0");
 	strcpy(g_settings.network_broadcast, "10.10.10.255");
 	strcpy(g_settings.network_defaultgateway, "10.10.10.10");
 	strcpy(g_settings.network_nameserver, "10.10.10.10");
@@ -1559,6 +1573,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( new CMenuSeparator() );
 	networkSettings.addItem( new CMenuForwarder("menu.back") );
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, "", this, "networktest") );
 	networkSettings.addItem( new CMenuForwarder("networkmenu.setupnow", true, "", this, "network") );
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("networkmenu.setuponstartup", &g_settings.networkSetOnStartup, true);
@@ -2593,6 +2608,10 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	{
 		setupNetwork( true );
 	}
+	else if(actionKey=="networktest")
+	{
+		testNetwork( true );
+	}
 	else if(actionKey=="savesettings")
 	{
 		g_Controld->saveSettings();
@@ -2649,7 +2668,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.172 2002/02/26 19:05:25 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.173 2002/02/26 21:10:30 chrissi Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

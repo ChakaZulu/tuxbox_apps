@@ -54,6 +54,7 @@ videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect autodetect
 
 networkmenu.head AG AYARLARI
+networkmenu.test test network now
 networkmenu.setupnow AG AYARINI SIMDI KAYID ED
 networkmenu.setuponstartup TEKRAR ACIMININDA KAYIDLAMA
 networkmenu.ipaddress IP-ADRESI

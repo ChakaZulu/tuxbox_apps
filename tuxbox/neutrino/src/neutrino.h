@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.50 2002/02/26 17:24:16 field Exp $
+//  $Id: neutrino.h,v 1.51 2002/02/26 21:10:30 chrissi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.51  2002/02/26 21:10:30  chrissi
+//  network test menu entry added
+//  (for now only console debug information)
+//
 //  Revision 1.50  2002/02/26 17:24:16  field
 //  Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
 //
@@ -301,6 +305,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void setupColors_classic();
 		void setupColors_neutrino();
 		void setupNetwork( bool force= false );
+		void testNetwork( bool force= false );
 
 		void saveSetup();
 		bool loadSetup(SNeutrinoSettings* load2=NULL);

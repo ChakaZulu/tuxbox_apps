@@ -54,6 +54,7 @@ videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect automatisch
 
 networkmenu.head Netzwerk Einstellungen
+networkmenu.test Netzwerkeinstellungen testen
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen
 networkmenu.setuponstartup Beim Starten Netzwerk setzen
 networkmenu.ipaddress IP-Adresse

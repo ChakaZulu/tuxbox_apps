@@ -212,3 +212,12 @@ void setNameServer(char* ip)
 	}
 }
 
+void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway, char* nameserver)
+{
+	printf("testNw IP       : %s\n", ip);
+	printf("testNw Netmask  : %s\n", netmask);
+	printf("testNw Broadcast: %s\n", broadcast);
+	printf("testNw Gateway: %s\n", gateway);
+	printf("testNw Nameserver: %s\n", nameserver);
+	// netSetIP( "eth0", ip, netmask, broadcast);
+}

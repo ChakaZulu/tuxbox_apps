@@ -54,6 +54,7 @@ videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect autodetect
 
 networkmenu.head Ustawienia Sieciowe
+networkmenu.test test network now
 networkmenu.setupnow Ustawienia teraz przekazac
 networkmenu.setuponstartup Przy starcie przekazac
 networkmenu.ipaddress IP-Adres
