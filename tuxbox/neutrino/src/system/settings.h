@@ -139,8 +139,8 @@ struct SNeutrinoSettings
 	int  network_nfs_automount[4];
 	char network_nfs_mount_options[2][31];
 	int  network_nfs_type[4];
-	char network_nfs_username[4][100];
-	char network_nfs_password[4][100];
+	char network_nfs_username[4][31];
+	char network_nfs_password[4][31];
    char network_nfs_mp3dir[100];
    char network_nfs_picturedir[100];
    char network_nfs_moviedir[100];
@@ -159,9 +159,9 @@ struct SNeutrinoSettings
 	int  streaming_type;
         std::string streaming_server_ip;
 	char streaming_server_port[10];
-        char streaming_server_cddrive[20];
-	char streaming_videorate[5];
-	char streaming_audiorate[5];
+        char streaming_server_cddrive[21];
+	char streaming_videorate[6];
+	char streaming_audiorate[6];
 	char streaming_server_startdir[40];
 
 	//key configuration
