@@ -201,6 +201,7 @@ protected:
 	eString helptext;
 	int selectable;
 public:
+	void clearLB() { listbox=0; }
 	int isSelectable() const { return selectable; }
 	eListBoxEntry(eListBox<eListBoxEntry>* parent, eString hlptxt=0, int selectable=3 )
 		:listbox(parent), helptext(hlptxt?hlptxt:eString(" ")),
