@@ -26,9 +26,11 @@
 #ifndef __lcdd__
 #define __lcdd__
 
+#include "lcdpainter.h"
 #include <libconfigfile/configfile.h>
 #include <liblcddisplay.h>
 #include <lcddclient.h>
+#include <lcddMsg.h>
 
 #include <pthread.h>
 
@@ -36,33 +38,12 @@
 class CLCDD
 {
 	private:
-		
-		class FontsDef
-		{
-			public:
-				Font *channelname;
-				Font *time; 
-				Font *menutitle;
-				Font *menu;
-		};
-
+		CLCDPainter		lcdPainter;
 		CConfigFile		configfile;
-		CLCDDisplay		display;
-		fontRenderClass	*fontRenderer;
-		FontsDef		fonts;
 		pthread_t		thrTime;
 
-		CLcddClient::mode	mode;
-		raw_display_t	icon_lcd;
-		raw_display_t	icon_setup;
-		raw_display_t	icon_power;
-
-		char			servicename[40];
-		char			volume;
-		int				lcd_brightness;
-		int				lcd_standbybrightness;
-		bool			muted, shall_exit, debugoutput;
-		bool			showclock;
+		bool			shall_exit;
+		bool			debugoutput;
 
 		CLCDD();
 		~CLCDD();
@@ -70,18 +51,8 @@ class CLCDD
 		static void* TimeThread(void*);
 		static void sig_catch(int);
 
-		void parse_command(int connfd, CLcddClient::commandHead rmsg);
+		void parse_command(int connfd, CLcddMsg::commandHead rmsg);
 		
-		void show_servicename(string name);
-		void show_time();
-		void show_signal();
-		void show_volume(char vol);
-		void show_menu(int position, char* text, int highlight);
-
-		void dimmlcd(int val);
-
-		void set_mode(CLcddClient::mode m, char *title);
-
 	public:
 
 		static CLCDD* getInstance();
@@ -89,7 +60,6 @@ class CLCDD
 
 		void saveConfig();
 		void loadConfig();
-
 };
 
 

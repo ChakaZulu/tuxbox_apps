@@ -30,6 +30,14 @@
 */
 
 #include "lcddclient.h"
+#include "lcddMsg.h"
+
+#include <stdio.h>
+#include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 
 
 CLcddClient::CLcddClient()
@@ -89,10 +97,10 @@ bool CLcddClient::receive(char* data, int size)
 
 void CLcddClient::setMode(char mode, string head="")
 {
-	commandHead msg;
-	commandMode msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETMODE;
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandMode msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETMODE;
 	msg2.mode = mode;
 	strcpy( msg2.text, head.substr(0, sizeof(msg2.text)-2).c_str() );
 	lcdd_connect();
@@ -103,10 +111,10 @@ void CLcddClient::setMode(char mode, string head="")
 
 void CLcddClient::setMenuText(char pos, string text, char highlight)
 {
-	commandHead msg;
-	commandMenuText msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETMENUTEXT;
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandMenuText msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETMENUTEXT;
 	msg2.position = pos;
 	msg2.highlight = highlight;
 	strcpy( msg2.text, text.substr(0, sizeof(msg2.text)-2).c_str() );
@@ -118,10 +126,10 @@ void CLcddClient::setMenuText(char pos, string text, char highlight)
 
 void CLcddClient::setServiceName(string name)
 {
-	commandHead msg;
-	commandServiceName msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETSERVICENAME;
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandServiceName msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETSERVICENAME;
 	strcpy( msg2.servicename, name.substr(0, sizeof(msg2.servicename)-2).c_str() );
 	lcdd_connect();
 	send((char*)&msg, sizeof(msg));
@@ -131,10 +139,10 @@ void CLcddClient::setServiceName(string name)
 
 void CLcddClient::setMute(bool mute)
 {
-	commandHead msg;
-	commandMute msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETMUTE;
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandMute msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETMUTE;
 	msg2.mute = mute;
 	lcdd_connect();
 	send((char*)&msg, sizeof(msg));
@@ -144,10 +152,10 @@ void CLcddClient::setMute(bool mute)
 
 void CLcddClient::setVolume(char volume)
 {
-	commandHead msg;
-	commandVolume msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETVOLUME;
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandVolume msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETVOLUME;
 	msg2.volume = volume;
 	lcdd_connect();
 	send((char*)&msg, sizeof(msg));
@@ -155,9 +163,65 @@ void CLcddClient::setVolume(char volume)
 	lcdd_close();
 }
 
+void CLcddClient::setBrightness(int brightness)
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandSetBrightness msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETLCDBRIGHTNESS;
+	msg2.brightness = brightness;
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+}
+
+int CLcddClient::getBrightness()
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::responseGetBrightness msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_GETLCDBRIGHTNESS;
+
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+
+	return msg2.brightness;
+}
+
+void CLcddClient::setBrightnessStandby(int brightness)
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandSetBrightness msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETSTANDBYLCDBRIGHTNESS;
+	msg2.brightness = brightness;
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+}
+
+int CLcddClient::getBrightnessStandby()
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::responseGetBrightness msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_GETSTANDBYLCDBRIGHTNESS;
+
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+
+	return msg2.brightness;
+}
+
 void CLcddClient::shutdown()
 {
-	setMode(MODE_SHUTDOWN, "");
+	setMode(CLcddClient::MODE_SHUTDOWN, "");
 }
 
 const std::string CLcddClient::getSystemId ()

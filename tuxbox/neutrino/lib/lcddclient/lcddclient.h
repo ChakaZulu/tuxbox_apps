@@ -32,19 +32,9 @@
 #ifndef __lcddclient__
 #define __lcddclient__
 
-#include <stdio.h>
-#include <unistd.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
 #include <string>
 
 using namespace std;
-
-
-#define LCDD_UDS_NAME "/tmp/lcdd.sock"
 
 
 class CLcddClient
@@ -59,58 +49,6 @@ class CLcddClient
 	public:
 		static const std::string getSystemId();
 
-		static const char ACTVERSION = 4;
-
-		enum commands
-		{
-			CMD_SETMODE = 1,
-			CMD_SETSERVICENAME,
-			CMD_SETMENUTEXT,
-			CMD_SETVOLUME,
-			CMD_SETMUTE,
-			CMD_SETLCDBRIGHTNESS,
-			CMD_GETLCDBRIGHTNESS,
-			CMD_SETSTANDBYLCDBRIGHTNESS,
-			CMD_GETSTANDBYLCDBRIGHTNESS
-
-		};
-
-		//command structures
-		struct commandHead
-		{
-			unsigned char messageType;
-			unsigned char version;
-			unsigned char cmd;
-		};
-
-		struct commandMode
-		{
-			unsigned char mode;
-			char text[30];
-		};
-
-		struct commandServiceName
-		{
-			char servicename[40];
-		};
-
-		struct commandMenuText
-		{
-			char position;
-			char highlight;
-			char text[30];
-		};
-
-		struct commandMute
-		{
-			bool mute;
-		};
-
-		struct commandVolume
-		{
-			char volume;
-		};
-
 		static const bool MUTE_ON  = true;
 		static const bool MUTE_OFF = false;
 
@@ -124,10 +62,6 @@ class CLcddClient
 			MODE_STANDBY
 		};
 
-
-		/*
-			Konstruktor
-		*/
 		CLcddClient();
 
 		void setMode(char mode, string head="");
@@ -137,6 +71,11 @@ class CLcddClient
 		void setVolume(char);
 		void shutdown();
 
+		void setBrightness(int brightness);
+		int getBrightness();
+
+		void setBrightnessStandby(int brightness);
+		int getBrightnessStandby();
 };
 
 #endif
