@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.164 2003/03/03 13:38:33 obi Exp $
+//  $Id: sectionsd.cpp,v 1.165 2003/03/06 19:45:13 obi Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1052,7 +1052,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.164 2003/03/03 13:38:33 obi Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.165 2003/03/06 19:45:13 obi Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3491,25 +3491,20 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.164 2003/03/03 13:38:33 obi Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.165 2003/03/06 19:45:13 obi Exp $\n");
 
-	try
-	{
-
-		if (argc != 1 && argc != 2)
-		{
+	try {
+		if (argc != 1 && argc != 2) {
 			printHelp();
-			return 1;
+			return EXIT_FAILURE;
 		}
 
-		if (argc == 2)
-		{
+		if (argc == 2) {
 			if (!strcmp(argv[1], "-d"))
 				debug = 1;
-			else
-			{
+			else {
 				printHelp();
-				return 1;
+				return EXIT_FAILURE;
 			}
 		}
 
@@ -3517,30 +3512,26 @@ int main(int argc, char **argv)
 		printf("events are old %ldmin after their end time\n", oldEventsAre / 60);
 		tzset(); // TZ auswerten
 
-
 		CBasicServer sectionsd_server;
 
 		if (!sectionsd_server.prepare(SECTIONSD_UDS_NAME))
-			return -1;
+			return EXIT_FAILURE;
 
-		switch (fork()) // switching to background
-		{
+		if (!debug) {
+			switch (fork()) { // switching to background
+			case -1:
+				perror("[sectionsd] fork");
+				return EXIT_FAILURE;
+			case 0:
+				break;
+			default:
+				return EXIT_SUCCESS;
+			}
 
-		case - 1:
-			perror("[sectionsd] fork");
-			return -1;
-
-		case 0:
-			break;
-
-		default:
-			return 0;
-		}
-
-		if (setsid() == -1)
-		{
-			perror("[sectionsd] setsid");
-			return -1;
+			if (setsid() == -1) {
+				perror("[sectionsd] setsid");
+				return EXIT_FAILURE;
+			}
 		}
 
 		// from here on forked
@@ -3561,37 +3552,33 @@ int main(int argc, char **argv)
 		// SDT-Thread starten
 		rc = pthread_create(&threadSDT, 0, sdtThread, 0);
 
-		if (rc)
-		{
+		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create sdt-thread (rc=%d)\n", rc);
-			return 1;
+			return EXIT_FAILURE;
 		}
 
 		// EIT-Thread starten
 		rc = pthread_create(&threadEIT, 0, eitThread, 0);
 
-		if (rc)
-		{
+		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create eit-thread (rc=%d)\n", rc);
-			return 1;
+			return EXIT_FAILURE;
 		}
 
 		// time-Thread starten
 		rc = pthread_create(&threadTOT, 0, timeThread, 0);
 
-		if (rc)
-		{
+		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create time-thread (rc=%d)\n", rc);
-			return 1;
+			return EXIT_FAILURE;
 		}
 
 		// housekeeping-Thread starten
 		rc = pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);
 
-		if (rc)
-		{
+		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create houskeeping-thread (rc=%d)\n", rc);
-			return 1;
+			return EXIT_FAILURE;
 		}
 
 		pthread_attr_t conn_attrs;
@@ -3610,5 +3597,7 @@ int main(int argc, char **argv)
 	}
 
 	puts("[sectionsd] ended");
-	return 0;
+
+	return EXIT_SUCCESS;
 }
+
