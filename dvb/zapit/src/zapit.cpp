@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.155 2002/04/21 18:19:26 obi Exp $
+ * $Id: zapit.cpp,v 1.156 2002/04/21 20:17:43 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1563,15 +1563,17 @@ void parse_command ()
 
 			case CZapitClient::CMD_SCANSETDISEQCTYPE :
 				diseqc_t diseqc;
-				read( connfd, &diseqc, sizeof(diseqc));
+				read(connfd, &diseqc, sizeof(diseqc));
 				frontend->setDiseqcType(diseqc);
-			break;
+				printf("[zapit] set diseqc type %d\n", diseqc);
+				break;
 
 			case CZapitClient::CMD_SCANSETDISEQCREPEAT :
-				uint32_t repeat;
-				read( connfd, &repeat, sizeof(repeat));
-				frontend->setDiseqcRepeats(repeat);
-			break;
+				uint32_t repeats;
+				read(connfd, &repeats, sizeof(repeats));
+				frontend->setDiseqcRepeats(repeats);
+				printf("[zapit] set diseqc repeats to %d\n", repeats);
+				break;
 
 			case CZapitClient::CMD_SCANSETBOUQUETMODE :
 				read( connfd, &bouquetMode, sizeof(bouquetMode));
@@ -1881,7 +1883,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.155 2002/04/21 18:19:26 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.156 2002/04/21 20:17:43 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
