@@ -2036,7 +2036,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "helpForums")
 	{
-		result = getTitle("HELP: Forums");
+		result = getTitle("HELP: Boards");
 		result += readFile(TEMPLATE_DIR + "helpForums.tmp");
 	}
 	else
