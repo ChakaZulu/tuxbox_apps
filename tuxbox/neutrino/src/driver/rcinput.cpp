@@ -83,7 +83,7 @@ void CRCInput::open()
 	//+++++++++++++++++++++++++++++++++++++++
 	fd_event = 0;
 	fd_eventclient = -1;
-	
+
 	//network-setup
 	struct sockaddr_un servaddr;
 	int clilen;
@@ -242,32 +242,54 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 */
 		if(FD_ISSET(fd_event, &rfds))
 		{
-			printf("[neutrino] network - accept!\n");
+			//printf("[neutrino] network - accept!\n");
 			socklen_t	clilen;
 			SAI			cliaddr;
 			clilen = sizeof(cliaddr);
 			fd_eventclient = accept(fd_event, (SA *) &cliaddr, &clilen);
-
 		}
+
 		if(fd_eventclient!=-1)
 		{
 			if(FD_ISSET(fd_eventclient, &rfds))
 			{
-				printf("[neutrino] network - read!\n");
+				*msg = RC_nokey;
+				//printf("[neutrino] network - read!\n");
 				CEventServer::eventHead emsg;
-				if ( recv(fd_eventclient, &emsg, sizeof(emsg), MSG_WAITALL)== sizeof(emsg) )
+				int read_bytes= recv(fd_eventclient, &emsg, sizeof(emsg), MSG_WAITALL);
+				//printf("[neutrino] event read %d\n", read_bytes);
+				if ( read_bytes == sizeof(emsg) )
 				{
 					if (emsg.eventID==CControldClient::EVT_VOLUMECHANGED)
 					{
-						printf("[neutrino] network - event -> volume changed!\n");
+						*msg = messages::EVT_VOLCHANGED;
+						char vol;
+						recv(fd_eventclient, &vol, sizeof(vol), MSG_WAITALL);
+						*data = vol;
+					}
+
+					if (emsg.eventID==CControldClient::EVT_MUTECHANGED)
+					{
+						*msg = messages::EVT_MUTECHANGED;
+						bool muted;
+						recv(fd_eventclient, &muted, sizeof(muted), MSG_WAITALL);
+						*data = muted;
 					}
 				}
 				else
 				{
-					printf("[neutrino] network - read failed!\n");
+					printf("[neutrino] event - read failed!\n");
 				}
+
 				::close(fd_eventclient);
 				fd_eventclient = -1;
+
+				if ( *msg != RC_nokey )
+				{
+					// raus hier :)
+					//printf("[neutrino] event 0x%x\n", *msg);
+					return;
+				}
 			}
 		}
 

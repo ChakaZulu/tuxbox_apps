@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.186 2002/03/03 20:38:18 Simplex Exp $
+        $Id: neutrino.cpp,v 1.187 2002/03/05 17:33:06 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1592,11 +1592,11 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//init programm
 	InitZapper();
 
-	mute = false;
-	nRun = true;
-
-	//demo only!!!!!!!!!!!!! (for eventserver) ------------------------------------------------ dont use!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	current_volume= g_Controld->getVolume();
 	g_Controld->registerEvent(CControldClient::EVT_VOLUMECHANGED, 222, NEUTRINO_UDS_NAME);
+
+	AudioMute( g_Controld->getMute(), true );
+	g_Controld->registerEvent(CControldClient::EVT_MUTECHANGED, 222, NEUTRINO_UDS_NAME);
 
 	RealRun(mainMenu);
 
@@ -1606,11 +1606,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 {
-	// display volume...
-	char volume = g_Controld->getVolume();
-	g_Controld->setVolume(volume);
-
-	while(nRun)
+	while( true )
 	{
 		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data );
@@ -1865,7 +1861,17 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if ( msg == CRCInput::RC_spkr )
 	{
 		//mute
-		AudioMuteToggle( ( mode != mode_scart ) );
+		AudioMute( !current_muted );
+		return messages_return::handled;
+	}
+	else if ( msg == messages::EVT_VOLCHANGED )
+	{
+		current_volume = data;
+		return messages_return::handled;
+	}
+	else if ( msg == messages::EVT_MUTECHANGED )
+	{
+		AudioMute( (bool)data, true );
 		return messages_return::handled;
 	}
 
@@ -1908,30 +1914,37 @@ bool CNeutrinoApp::onPaintNotify(string MenuName)
 	return false;
 }
 
-void CNeutrinoApp::AudioMuteToggle(bool bDoPaint)
+void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 {
 	int dx = 40;
 	int dy = 40;
 	int x = g_settings.screen_EndX-dx;
 	int y = g_settings.screen_StartY;
-	if ( !mute )
+
+	if ( newValue != current_muted )
 	{
-		if (bDoPaint)
+		current_muted = newValue;
+
+		if ( !isEvent )
+		{
+			if ( current_muted )
+				g_Controld->Mute();
+			else
+				g_Controld->UnMute();
+		}
+	}
+
+	if ( isEvent && ( mode != mode_scart ) )
+	{
+		// anzeigen NUR, wenn es vom Event kommt
+		if ( current_muted )
 		{
 			g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
 			g_FrameBuffer->paintIcon("mute.raw", x+5, y+5);
 		}
-		g_Controld->Mute();
-	}
-	else
-	{
-		if (bDoPaint)
-		{
+		else
 			g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
-		}
-		g_Controld->UnMute();
 	}
-	mute = !mute;
 }
 
 void CNeutrinoApp::setVolume(int key, bool bDoPaint)
@@ -1949,8 +1962,6 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		g_FrameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 	}
 
-	char volume = g_Controld->getVolume();
-
 	uint msg = key;
 	uint data;
 
@@ -1958,31 +1969,36 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 	{
 		if (msg==CRCInput::RC_plus)
 		{
-			if (volume<100)
+			if (current_volume<100)
 			{
-				volume += 5;
+				current_volume += 5;
 			}
+			g_Controld->setVolume(current_volume);
 		}
 		else if (msg==CRCInput::RC_minus)
 		{
-			if (volume>0)
+			if (current_volume>0)
 			{
-				volume -= 5;
+				current_volume -= 5;
 			}
+			g_Controld->setVolume(current_volume);
 		}
 		else
 		{
 			if ( (msg!=CRCInput::RC_ok) || (msg!=CRCInput::RC_home) )
-				g_RCInput->pushbackMsg( msg, data );
+			{
+				if ( neutrino->handleMsg( msg, data ) == messages_return::unhandled )
+				{
+					g_RCInput->pushbackMsg( msg, data );
 
-			msg= CRCInput::RC_timeout;
+					msg= CRCInput::RC_timeout;
+				}
+			}
 		}
-
-		g_Controld->setVolume(volume);
 
 		if (bDoPaint)
 		{
-			int vol = volume<<1;
+			int vol = current_volume<<1;
 			g_FrameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
 			g_FrameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
         }
@@ -2265,7 +2281,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.186 2002/03/03 20:38:18 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.187 2002/03/05 17:33:06 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.21 2002/03/02 14:55:21 McClean Exp $
+$Id: rcinput.h,v 1.22 2002/03/05 17:33:07 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.22  2002/03/05 17:33:07  field
+ Events worken (so halbwegs :)
+
  Revision 1.21  2002/03/02 14:55:21  McClean
  base-functions for eventhandling (dont worxx)
 
@@ -144,10 +147,10 @@ class CRCInput
 
 	public:
 		//rc-code definitions
-		static const uint RC_MaxRC = 0x3F;
-		static const uint RC_KeyBoard = 0x4000;
-		static const uint RC_Events 	 = 0x80000000;
-		static const uint RC_Messages = 0x90000000;
+		static const uint RC_MaxRC		= 0x3F;
+		static const uint RC_KeyBoard	= 0x4000;
+		static const uint RC_Events		= 0x80000000;
+		static const uint RC_Messages	= 0x90000000;
 		enum
 		{
 		    RC_standby=0x10, RC_home=0x1F, RC_setup=0x18, RC_0=0x0, RC_1=0x1,

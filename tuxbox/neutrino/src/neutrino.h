@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.58 2002/03/03 17:24:22 Simplex Exp $
+//  $Id: neutrino.h,v 1.59 2002/03/05 17:33:06 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.59  2002/03/05 17:33:06  field
+//  Events worken (so halbwegs :)
+//
 //  Revision 1.58  2002/03/03 17:24:22  Simplex
 //  menu and helper classes for youth protection
 //
@@ -257,7 +260,10 @@ struct messages {
 			VCR_OFF		= CRCInput::RC_Messages + 4,
 			STANDBY_ON	= CRCInput::RC_Messages + 5,
 			STANDBY_OFF	= CRCInput::RC_Messages + 6,
-			SHUTDOWN	= CRCInput::RC_Messages + 7
+			SHUTDOWN	= CRCInput::RC_Messages + 7,
+
+			EVT_VOLCHANGED 	= CRCInput::RC_Events + 1,
+			EVT_MUTECHANGED	= CRCInput::RC_Events + 2
 		};
 };
 
@@ -289,10 +295,8 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		//    EventList *eventlist;
 		string				settingsFile;
 
-		bool				nRun;
 		int				    mode;
 		int					lastMode;
-		bool				mute;
 		bool				softupdate;
 		bool				fromflash;
 		int					streamstatus;
@@ -300,6 +304,9 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
 		channel_msg         firstchannel;
 		st_rmsg				sendmessage;
+
+		char				current_volume;
+		bool				current_muted;
 
 		CColorSetupNotifier		*colorSetupNotifier;
 		CAudioSetupNotifier		*audioSetupNotifier;
@@ -331,7 +338,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void scartMode( bool bOnOff );
 		void standbyMode( bool bOnOff );
 		void setVolume(int key, bool bDoPaint = true);
-		void AudioMuteToggle(bool bDoPaint = true);
+		void AudioMute( bool newValue, bool isEvent= false );
 
 		void ExitRun();
 		void RealRun(CMenuWidget &mainSettings);
