@@ -10,6 +10,8 @@ class eService;
 template <class Factory>
 class eServiceCache
 {
+
+public:
 	struct eCachedService
 	{
 		int refcnt;
@@ -36,7 +38,6 @@ class eServiceCache
 	std::map<eServiceReference,eNode> cache;
 	Factory &factory;
 	
-public:
 	eServiceCache(Factory &factory): factory(factory)
 	{
 	}

@@ -739,7 +739,7 @@ void eRotorManual::onScanPressed()
 
 int eRotorManual::eventHandler( const eWidgetEvent& e)
 {
-	static timeval begTime=0;
+	static timeval begTime={0,0};
 	static bool running=false;
 	switch (e.type)
 	{

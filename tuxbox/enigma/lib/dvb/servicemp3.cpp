@@ -7,6 +7,7 @@
 #include <lib/codecs/codecmpg.h>
 #include <lib/dvb/decoder.h>
 
+#include <assert.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <id3tag.h>
@@ -956,7 +957,7 @@ eServiceMP3::eServiceMP3(const char *filename): eService("")
 	service_name=description;
 #endif
 
-	for (int i=0; i<tag->nframes; ++i)
+	for (uint i=0; i<tag->nframes; ++i)
 	{
 		union id3_field const *field;
 		unsigned int nstrings, j;

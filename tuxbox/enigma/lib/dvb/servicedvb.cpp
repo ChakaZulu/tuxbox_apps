@@ -648,7 +648,7 @@ struct eServiceHandlerDVB_addService
 {
 	Signal1<void,const eServiceReference&> &callback;
 	int type;
-	int DVBNamespace;
+	uint DVBNamespace;
 	eServiceHandlerDVB_addService(Signal1<void,const eServiceReference&> &callback, int type, int DVBNamespace)
 	: callback(callback), type(type), DVBNamespace(DVBNamespace)
 	{
