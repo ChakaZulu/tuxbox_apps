@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.7 2001/06/13 19:08:27 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.8 2001/07/14 22:59:58 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.8  2001/07/14 22:59:58  fnbrd
+// removeOldEvents() in SIevents
+//
 // Revision 1.7  2001/06/13 19:08:27  fnbrd
 // Timeout bei read() per poll() implementiert.
 //
@@ -341,6 +344,38 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
   } while (time(NULL)<szeit+(long)(timeoutInSeconds));
   close(fd);
   return evt;
+}
+
+void SIevents::removeOldEvents(void)
+{
+  // Alte events loeschen
+  time_t zeit=time(NULL);
+  // Muss unbedingt ne andere Menge nehmen, bei der man Elemente loeschen kann
+  // ohne das der iterator ungültig wird
+  int restartEvents=1;
+  for(;restartEvents;) {
+    restartEvents=0;
+    for(SIevents::iterator e=begin(); e!=end(); e++) {
+      int restartTimes=1;
+      SIevent evt(*e);
+      for(;restartTimes;) {
+        restartTimes=0; // wird gesetzt falls nochmal alle events durchgegangen werden muessen
+        for(SItimes::iterator t=evt.times.begin(); t!=evt.times.end(); t++)
+          if(t->startzeit+(int)t->dauer<zeit) {
+            evt.times.erase(*t); // -> iterator ungueltig :(
+            restartTimes=1;
+	    restartEvents=1;
+            break;
+          }
+      } // for restartTimes
+      if(restartEvents) {
+        erase(evt);
+        if(evt.times.size()!=0)
+	  insert(evt);
+	break;
+      }
+    } // for SIevents
+  } // for restartEvents
 }
 
 // Entfernt anhand der Services alle time shifted events (ohne Text,

@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.10 2001/06/27 11:59:44 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.11 2001/07/14 22:59:58 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.11  2001/07/14 22:59:58  fnbrd
+// removeOldEvents() in SIevents
+//
 // Revision 1.10  2001/06/27 11:59:44  fnbrd
 // Angepasst an gcc 3.0
 //
@@ -334,6 +337,8 @@ class SIevents : public set <SIevent, less<SIevent> >
     // Entfernt anhand der Services alle time shifted events (Service-Typ 0)
     // und sortiert deren Zeiten in die Events mit dem Text ein.
     void mergeAndRemoveTimeShiftedEvents(const SIservices &);
+    // Loescht alte Events (aufgrund aktueller Zeit und Zeit im Event)
+    void removeOldEvents(void);
 };
 
 #endif // SIEVENTS_HPP
