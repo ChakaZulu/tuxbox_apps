@@ -160,6 +160,14 @@ void Decoder::Pause( int flags )
 			return;
 		if ( fd.audio != -1 )
 		{
+//trans play ts
+#if HAVE_DVB_API_VERSION >= 3
+			if (::ioctl(fd.audio, AUDIO_STOP)<0)
+				eDebug("AUDIO_STOP failed(%m)");
+			else
+				eDebug("audio_pause (success)");
+#else
+//trans play ts
 			if ( ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 0) < 0 )
 				eDebug("AUDIO_SET_AV_SYNC failed (%m)");
 			if ( flags & 1 )
@@ -167,6 +175,10 @@ void Decoder::Pause( int flags )
 				if ( ::ioctl(fd.audio, AUDIO_SET_MUTE, 1 )<0)
 					eDebug("AUDIO_SET_MUTE failed (%m)");
 			}
+//trans play ts
+#endif
+//trans play ts
+
 		}
 	}
 }
@@ -177,16 +189,38 @@ void Decoder::Resume(bool enableAudio)
 	if (fd.video != -1)
 	{
 //		clearScreen();
+//trans play ts
+#if HAVE_DVB_API_VERSION >= 3
+		if (::ioctl(fd.video, VIDEO_STOP)<0)
+			eDebug("VIDEO_STOP failed(%m)");
+		if (::ioctl(fd.video, VIDEO_PLAY)<0)
+			eDebug("VIDEO_PLAY failed(%m)");
+#else
+//trans play ts
 		if (::ioctl(fd.video, VIDEO_CONTINUE)<0)
 			eDebug("VIDEO_CONTINUE failed(%m)");
 		if ( ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1 ) < 0 )
 			eDebug("AUDIO_SET_AV_SYNC failed (%m)");
+//trans play ts
+#endif
+//trans play ts
 		if ( enableAudio )  // Video Clip Mode
 		{
+//trans play ts
+#if HAVE_DVB_API_VERSION >= 3
+			if (::ioctl(fd.audio, AUDIO_PLAY)<0)
+				eDebug("AUDIO_PLAY failed (%m)");
+			else
+				eDebug("audio continue (success)");
+#else
+//trans play ts
 			if (::ioctl(fd.audio, AUDIO_SET_MUTE, 0 )<0)
 				eDebug("AUDIO_SET_MUTE failed (%m)");
 			else
 				eDebug("audio_pause (success)");
+//trans play ts
+#endif
+//trans play ts
 		}
 	}
 }
