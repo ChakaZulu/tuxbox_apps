@@ -133,10 +133,10 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	height = 570;
 	if((g_settings.screen_EndY- g_settings.screen_StartY) < height)
 		height=(g_settings.screen_EndY- g_settings.screen_StartY);
-	buttonHeight = std::min(25,g_Fonts->infobar_small->getHeight());
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->menu->getHeight();
-	sheight= g_Fonts->infobar_small->getHeight();
+	sheight = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
+	buttonHeight = std::min(25, sheight);
+	theight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	title_height=fheight*2+20+sheight+4;
 	info_height=fheight*2;
 	listmaxshow = (height-info_height-title_height-theight-2*buttonHeight)/(fheight);
@@ -536,12 +536,11 @@ int CMP3PlayerGui::show()
 			{
 				val = val * 10 + CRCInput::getNumericValue(msg);
 				sprintf(str,"%d",val);
-				int w=g_Fonts->channel_num_zap->getRenderWidth(str);
-				frameBuffer->paintBoxRel(x1-7, y1-g_Fonts->channel_num_zap->getHeight()-5, w+14, 
-							 g_Fonts->channel_num_zap->getHeight()+10, COL_MENUCONTENT+6);
-				frameBuffer->paintBoxRel(x1-4, y1-g_Fonts->channel_num_zap->getHeight()-3, w+8, 
-							 g_Fonts->channel_num_zap->getHeight()+6, COL_MENUCONTENTSELECTED);
-				g_Fonts->channel_num_zap->RenderString(x1,y1,w+1,str,COL_MENUCONTENTSELECTED,0);
+				int w = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getRenderWidth(str);
+				int h = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight();
+				frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT         + 6);
+				frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED    );
+				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->RenderString(x1,y1,w+1,str,COL_MENUCONTENTSELECTED,0);
 				g_RCInput->getMsg( &msg, &data, 100 ); 
 			} while (g_RCInput->isNumeric(msg) && val < 1000000);
 			if (msg == CRCInput::RC_ok)
@@ -682,9 +681,9 @@ void CMP3PlayerGui::paintItem(int pos)
 			tmp += ')';
 		}
 		
-		int w=g_Fonts->menu->getRenderWidth(playlist[pos + liststart].Duration)+5;
-		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30-w, tmp, color, fheight, true); // UTF-8
-		g_Fonts->menu->RenderString(x+width-15-w,ypos+fheight, w, playlist[pos + liststart].Duration, color, fheight);
+		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(playlist[pos + liststart].Duration)+5;
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,ypos+fheight, width-30-w, tmp, color, fheight, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-15-w,ypos+fheight, w, playlist[pos + liststart].Duration, color, fheight);
 		
 		if ((pos + liststart) == selected)
 		{
@@ -704,7 +703,7 @@ void CMP3PlayerGui::paintHead()
 	std::string strCaption = g_Locale->getText("mp3player.head");
 	frameBuffer->paintBoxRel(x,y+title_height, width,theight, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+title_height+10);
-	g_Fonts->menu_title->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
 	int ypos=y+title_height;
 	if(theight > 26)
 		ypos = (theight-26) / 2 + y + title_height;
@@ -750,26 +749,26 @@ void CMP3PlayerGui::paintFoot()
 	if (!(playlist.empty()))
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + 1* ButtonWidth2 + 25, y+(height-info_height-buttonHeight)-3);
-		g_Fonts->infobar_small->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, 
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, 
 						     ButtonWidth2- 28, g_Locale->getText("mp3player.play"), COL_INFOBAR, 0, true); // UTF-8
 	}
 	if(m_state!=CMP3PlayerGui::STOP)
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth + 25, y+(height-info_height-buttonHeight)-3);
-		g_Fonts->infobar_small->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, 
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, 
 						     ButtonWidth2- 28, g_Locale->getText("mp3player.keylevel"), COL_INFOBAR, 0, true); // UTF-8
 	}
 
-	if(key_level==0)
+	if (key_level == 0)
 	{
 		if (playlist.empty())
-			::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + ButtonWidth + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 1, &(MP3PlayerButtons[1][1]));
+			::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + ButtonWidth + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 1, &(MP3PlayerButtons[1][1]));
 		else
-			::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, MP3PlayerButtons[1]);
+			::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, MP3PlayerButtons[1]);
 	}
 	else
 	{	
-		::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, MP3PlayerButtons[0]);
+		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, MP3PlayerButtons[0]);
 	}
 //	printf("paintFoot}\n");
 }
@@ -787,11 +786,11 @@ void CMP3PlayerGui::paintInfo()
 		sprintf(sNr, ": %2d", current+1);
 		std::string tmp = g_Locale->getText("mp3player.playing");
 		tmp += sNr ;
-		int w=g_Fonts->menu->getRenderWidth(tmp, true); // UTF-8
+		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true); // UTF-8
 		int xstart=(width-w)/2;
 		if(xstart < 10)
 			xstart=10;
-		g_Fonts->menu->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 		if (playlist[current].Title.empty())
 			tmp = playlist[current].Artist;
 		else if (playlist[current].Artist.empty())
@@ -809,11 +808,11 @@ void CMP3PlayerGui::paintInfo()
 			tmp += playlist[current].Title;
 		}
 
-		w=g_Fonts->menu->getRenderWidth(tmp, true); // UTF-8
+		w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true); // UTF-8
 		xstart=(width-w)/2;
 		if(xstart < 10)
 			xstart=10;
-		g_Fonts->menu->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 #ifdef INCLUDE_UNUSED_STUFF
 		tmp = playlist[current].Bitrate + " / " + playlist[current].Samplerate + " / " + playlist[current].ChannelMode + " / " + playlist[current].Layer;
 #endif
@@ -1228,7 +1227,7 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 
 		// paint id3 infobox 
 		frameBuffer->paintBoxRel(x+2, ypos2 +2 , width-4, info_height-4, COL_MENUCONTENTDARK);
-		g_Fonts->menu->RenderString(x+10, ypos2 + 2 + 1*fheight, width- 80, playlist[selected].Title, COL_MENUCONTENTDARK, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, ypos2 + 2 + 1*fheight, width- 80, playlist[selected].Title, COL_MENUCONTENTDARK, 0, true); // UTF-8
 		std::string tmp;
 		if (playlist[selected].Genre.empty())
 			tmp = playlist[selected].Year;
@@ -1240,8 +1239,8 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 			tmp += " / ";
 			tmp += playlist[selected].Year;
 		}
-		int w=g_Fonts->menu->getRenderWidth(tmp, true) + 10; // UTF-8
-		g_Fonts->menu->RenderString(x+width-w-5, ypos2 + 2 + 1*fheight, w, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
+		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true) + 10; // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w-5, ypos2 + 2 + 1*fheight, w, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
 		tmp = playlist[selected].Artist;
 		if (!(playlist[selected].Album.empty()))
 		{
@@ -1249,7 +1248,7 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 			tmp += playlist[selected].Album;
 			tmp += ')';
 		}
-		g_Fonts->menu->RenderString(x+10, ypos2 + 2*fheight-2, width- 20, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, ypos2 + 2*fheight-2, width- 20, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
 	}
 	else
 	{
@@ -1397,8 +1396,8 @@ void CMP3PlayerGui::updateMP3Infos()
 		{
 			m_mp3info=CMP3Player::getInstance()->getMp3Info();
 			frameBuffer->paintBoxRel(x + 10, y+ 4 + 2*fheight, width-20, sheight, COL_MENUCONTENTSELECTED);
-			int xstart = ((width - 20 - g_Fonts->infobar_small->getRenderWidth( m_mp3info ))/2)+10;
-			g_Fonts->infobar_small->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, m_mp3info, COL_MENUCONTENTSELECTED);
+			int xstart = ((width - 20 - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth( m_mp3info ))/2)+10;
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, m_mp3info, COL_MENUCONTENTSELECTED);
 		}
 	}
 }
@@ -1427,13 +1426,13 @@ void CMP3PlayerGui::updateTimes(const bool force)
 		std::string time_tmp = m_time_played.substr(0,m_time_played.find(':')+1);
 		time_tmp += "00";
 
-		int w1=g_Fonts->menu->getRenderWidth(" / " + m_time_total);
-		int w2=g_Fonts->menu->getRenderWidth(time_tmp);
+		int w1 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(" / " + m_time_total);
+		int w2 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(time_tmp);
 
 		if (updateTotal)
 		{
 			frameBuffer->paintBoxRel(x+width-w1-10, y+4, w1+4, fheight, COL_MENUCONTENTSELECTED);
-			g_Fonts->menu->RenderString(x+width-w1-10, y+4 + fheight, w1, " / " + m_time_total, COL_MENUCONTENTSELECTED);
+			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-10, y+4 + fheight, w1, " / " + m_time_total, COL_MENUCONTENTSELECTED);
 		}
 		if (updatePlayed || (m_state == CMP3PlayerGui::PAUSE))
 		{
@@ -1442,7 +1441,7 @@ void CMP3PlayerGui::updateTimes(const bool force)
 			gettimeofday(&tv, NULL);
 			if ((m_state != CMP3PlayerGui::PAUSE) || (tv.tv_sec & 1))
 			{
-				g_Fonts->menu->RenderString(x+width-w1-w2-11, y+4 + fheight, w2, m_time_played, COL_MENUCONTENTSELECTED);
+				g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-w2-11, y+4 + fheight, w2, m_time_played, COL_MENUCONTENTSELECTED);
 			}
 		}
 	}

@@ -75,7 +75,6 @@ class CBEBouquetWidget : public CMenuWidget
 
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
-		unsigned int		numwidth;
 		int					fheight; // Fonthoehe Bouquetlist-Inhalt
 		int					theight; // Fonthoehe Bouquetlist-Titel
 

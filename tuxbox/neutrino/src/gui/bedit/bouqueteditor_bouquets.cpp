@@ -52,8 +52,8 @@ CBEBouquetWidget::CBEBouquetWidget()
 	width  = 500;
 	height = 440;
 	ButtonHeight = 25;
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->channellist->getHeight();
+	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
 	height = theight+0+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
@@ -87,25 +87,13 @@ void CBEBouquetWidget::paintItem(int pos)
 		{
 			//frameBuffer->paintIcon("hidden.raw", x + 48, ypos);
 		}
-		g_Fonts->channellist->RenderString(x+68, ypos+ fheight, width-68, Bouquets[liststart+pos].name, color);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+68, ypos+ fheight, width-68, Bouquets[liststart+pos].name, color);
 	}
 }
 
 void CBEBouquetWidget::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
-	int lastnum =  liststart + listmaxshow;
-
-	if(lastnum<10)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("0");
-	else if(lastnum<100)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("00");
-	else if(lastnum<1000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("000");
-	else if(lastnum<10000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
-	else // if(lastnum<100000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
 
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
@@ -127,7 +115,7 @@ void CBEBouquetWidget::paint()
 void CBEBouquetWidget::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, "Bouquets" /*g_Locale->getText(name).c_str()*/, COL_MENUHEAD);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, "Bouquets" /*g_Locale->getText(name).c_str()*/, COL_MENUHEAD);
 }
 
 const struct button_label CBEBouquetWidgetButtons[3] =
@@ -160,7 +148,7 @@ void CBEBouquetWidget::paintFoot()
 			Button[3].locale = "bouqueteditor.lock";
 		break;
 	}
-	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 5, y + height + 4, (width - 28 - 10) / 4, 4, Button);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 5, y + height + 4, (width - 28 - 10) / 4, 4, Button);
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+width - 28, y+height);
 }
 

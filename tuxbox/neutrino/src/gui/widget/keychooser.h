@@ -72,7 +72,6 @@ class CKeyChooserItem : public CMenuTarget
 		int mheight; // menu font height
 		std::string	name;
 		int		*key;
-		FontsDef	*fonts;
 
 		void paint();
 

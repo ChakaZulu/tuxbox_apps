@@ -204,12 +204,12 @@ int CChannelList::show()
 	}
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(name));
 
-	int buttonHeight = 7 + std::min(16, g_Fonts->infobar_small->getHeight());
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->channellist->getHeight();
+	int buttonHeight = 7 + std::min(16, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight());
+	theight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
 	listmaxshow = (height - theight - buttonHeight -0)/fheight;
 	height = theight + buttonHeight + listmaxshow * fheight;
-	info_height = g_Fonts->channellist->getHeight() + g_Fonts->channellist_descr->getHeight() + 10;
+	info_height = fheight + g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getHeight() + 10;
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 
@@ -548,8 +548,8 @@ int CChannelList::numericZap(int key)
 
 	int ox=300;
 	int oy=200;
-	int sx = 4* g_Fonts->channel_num_zap->getRenderWidth(widest_number)+ 14;
-	int sy = g_Fonts->channel_num_zap->getHeight()+6;
+	int sx = 4 * g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getRenderWidth(widest_number) + 14;
+	int sy = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight() + 6;
 	char valstr[10];
 	int chn = CRCInput::getNumericValue(key);
 	int pos = 1;
@@ -571,7 +571,7 @@ int CChannelList::numericZap(int key)
 			for (int i=3; i>=0; i--)
 			{
 				valstr[i+ 1]= 0;
-				g_Fonts->channel_num_zap->RenderString(ox+7+ i*((sx-14)>>2), oy+sy-3, sx, &valstr[i], COL_INFOBAR);
+				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->RenderString(ox+7+ i*((sx-14)>>2), oy+sy-3, sx, &valstr[i], COL_INFOBAR);
 			}
 
 			showInfo(chn- 1);
@@ -719,19 +719,19 @@ void CChannelList::paintDetails(int index)
 		struct		tm *pStartZeit = localtime(&chanlist[index]->currentEvent.startTime);
 		unsigned 	seit = ( time(NULL) - chanlist[index]->currentEvent.startTime ) / 60;
 		sprintf( cSeit, g_Locale->getText("channellist.since"), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
-		int seit_len = g_Fonts->channellist_descr->getRenderWidth(cSeit, true); // UTF-8
+		int seit_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(cSeit, true); // UTF-8
 
 		int noch = ( chanlist[index]->currentEvent.startTime + chanlist[index]->currentEvent.duration - time(NULL)   ) / 60;
 		if ( (noch< 0) || (noch>=10000) )
 			noch= 0;
 		sprintf( cNoch, "(%d / %d min)", seit, noch );
-		int noch_len = g_Fonts->channellist_number->getRenderWidth(cNoch, true); // UTF-8
+		int noch_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth(cNoch, true); // UTF-8
 
 		std::string text1= chanlist[index]->currentEvent.description;
 		std::string text2= chanlist[index]->currentEvent.text;
 
 		int xstart = 10;
-		if ( g_Fonts->channellist->getRenderWidth(text1) > (width - 30 - seit_len) )
+		if (g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(text1) > (width - 30 - seit_len) )
 		{
 			// zu breit, Umbruch versuchen...
 		    int pos;
@@ -740,14 +740,14 @@ void CChannelList::paintDetails(int index)
 				pos = text1.find_last_of("[ -.]+");
 				if ( pos!=-1 )
 					text1 = text1.substr( 0, pos );
-			} while ( ( pos != -1 ) && ( g_Fonts->channellist->getRenderWidth(text1) > (width - 30 - seit_len) ) );
+			} while ( ( pos != -1 ) && (g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(text1) > (width - 30 - seit_len) ) );
 
 			std::string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1);
 			if (!(text2.empty()))
 				text3 += " · ";
 
-			xstart+= g_Fonts->channellist->getRenderWidth(text3);
-			g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3, COL_MENUCONTENTDARK);
+			xstart += g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(text3);
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3, COL_MENUCONTENTDARK);
 		}
 
 		if (!(text2.empty()))
@@ -755,12 +755,12 @@ void CChannelList::paintDetails(int index)
 			while ( text2.find_first_of("[ -.+*#?=!$%&/]+") == 0 )
 				text2 = text2.substr( 1 );
 			text2 = text2.substr( 0, text2.find('\n') );
-			g_Fonts->channellist_descr->RenderString(x+ xstart, y+ height+ 5+ 2* fheight, width- xstart- 20- noch_len, text2, COL_MENUCONTENTDARK);
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ xstart, y+ height+ 5+ 2* fheight, width- xstart- 20- noch_len, text2, COL_MENUCONTENTDARK);
 		}
 
-		g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ fheight, width - 30 - seit_len, text1, COL_MENUCONTENTDARK);
-		g_Fonts->channellist_descr->RenderString (x+ width- 10- seit_len, y+ height+ 5+    fheight   , seit_len, cSeit, COL_MENUCONTENTDARK, 0, true); // UTF-8
-		g_Fonts->channellist_number->RenderString(x+ width- 10- noch_len, y+ height+ 5+ 2* fheight- 2, noch_len, cNoch, COL_MENUCONTENTDARK, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 10, y+ height+ 5+ fheight, width - 30 - seit_len, text1, COL_MENUCONTENTDARK);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString (x+ width- 10- seit_len, y+ height+ 5+    fheight   , seit_len, cSeit, COL_MENUCONTENTDARK, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(x+ width- 10- noch_len, y+ height+ 5+ 2* fheight- 2, noch_len, cNoch, COL_MENUCONTENTDARK, 0, true); // UTF-8
 	}
 }
 
@@ -851,33 +851,33 @@ void CChannelList::paintItem(int pos)
 			CLCD::getInstance()->showMenuText(1, chan->currentEvent.description );
 		}
 
-		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
-		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
+		int numpos = x+5+numwidth- g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth(tmp);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 		if (!(chan->currentEvent.description.empty()))
 		{
 			char nameAndDescription[100];
 			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", CZapitClient::Utf8_to_Latin1(chan->name).c_str());
 
-			unsigned int ch_name_len= g_Fonts->channellist->getRenderWidth(nameAndDescription);
-			unsigned int ch_desc_len= g_Fonts->channellist_descr->getRenderWidth(chan->currentEvent.description);
+			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
+			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(chan->currentEvent.description);
 
 			if ( (width- numwidth- 20- 15- ch_name_len)< ch_desc_len )
 				ch_desc_len = (width- numwidth- 20- 15- ch_name_len);
 			if (ch_desc_len< 0)
 				ch_desc_len = 0;
 
-			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
 
 
 			// rechtsbündig - auskommentiert
-			// g_Fonts->channellist_descr->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
+			// g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 
 			// linksbündig
-			g_Fonts->channellist_descr->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 		}
 		else
 			//name
-			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name, color, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name, color, 0, true); // UTF-8
 	}
 }
 
@@ -889,13 +889,13 @@ const struct button_label CChannelListButtons[1] =
 void CChannelList::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width- 65, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 
 	int ButtonWidth = (width - 20) / 4;
-	int buttonHeight = 7 + std::min(16, g_Fonts->infobar_small->getHeight());
+	int buttonHeight = 7 + std::min(16, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight());
 	frameBuffer->paintHLineRel(x, width, y + (height - buttonHeight), COL_INFOBAR_SHADOW);
 	frameBuffer->paintBoxRel(x, y + (height - buttonHeight) + 1, width, buttonHeight - 1, COL_MENUHEAD);
-	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + (height - buttonHeight) + 3, ButtonWidth, 1, CChannelListButtons);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight) + 3, ButtonWidth, 1, CChannelListButtons);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 	if (bouquetList != NULL)
@@ -910,15 +910,15 @@ void CChannelList::paint()
 	int lastnum =  chanlist[liststart]->number + listmaxshow;
 
 	if(lastnum<10)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("0");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("0");
 	else if(lastnum<100)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("00");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("00");
 	else if(lastnum<1000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("000");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("000");
 	else if(lastnum<10000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("0000");
 	else // if(lastnum<100000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("00000");
 
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{

@@ -107,8 +107,8 @@ int CScreenSetup::exec(CMenuTarget* parent, const std::string &)
 					int x=15*5;
 					int y=15*24;
 
-					g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft"), (selected == 0)?COL_MENUHEAD:COL_MENUCONTENT, 0, true); // UTF-8
-					g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright"), (selected == 1)?COL_MENUHEAD:COL_MENUCONTENT, 0, true); // UTF-8
+					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft"), (selected == 0)?COL_MENUHEAD:COL_MENUCONTENT, 0, true); // UTF-8
+					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright"), (selected == 1)?COL_MENUHEAD:COL_MENUCONTENT, 0, true); // UTF-8
                 	break;
                 }
 			case CRCInput::RC_up:
@@ -210,10 +210,10 @@ void CScreenSetup::paintCoords()
 	sprintf((char*) &xepos, "EX: %d", x_coord[1] );
 	sprintf((char*) &yepos, "EY: %d", y_coord[1] );
 
-	g_Fonts->menu->RenderString(x+10,y+30, 200, xpos, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x+10,y+50, 200, ypos, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x+10,y+70, 200, xepos, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x+10,y+90, 200, yepos, COL_MENUCONTENT);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,y+30, 200, xpos, COL_MENUCONTENT);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,y+50, 200, ypos, COL_MENUCONTENT);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,y+70, 200, xepos, COL_MENUCONTENT);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,y+90, 200, yepos, COL_MENUCONTENT);
 }
 
 void CScreenSetup::paint()
@@ -235,8 +235,8 @@ void CScreenSetup::paint()
 	int y=15*24;
 	frameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUCONTENT);
 
-	g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft"), COL_MENUHEAD, 0, true); // UTF-8
-	g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright"), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft"), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright"), COL_MENUCONTENT, 0, true); // UTF-8
 
 	paintBorderUL();
 	paintBorderLR();

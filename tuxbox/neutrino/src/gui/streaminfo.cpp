@@ -43,10 +43,10 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 CStreamInfo::CStreamInfo()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	width = 400;
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
-	height = hheight+14*mheight+ 10;
+	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	width       = 400;
+	height      = hheight+14*mheight+ 10;
 
     	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
@@ -83,7 +83,7 @@ void CStreamInfo::paint()
 	
 	ypos = y;
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight+1, width, head_string, COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10, ypos+ hheight+1, width, head_string, COL_MENUHEAD, 0, true); // UTF-8
 
 	ypos+= hheight;
 	frameBuffer->paintBoxRel(x, ypos, width, height - hheight, COL_MENUCONTENT);
@@ -124,12 +124,12 @@ void CStreamInfo::paint()
 	//paint msg...
 	ypos+= mheight;
 	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText("streaminfo.resolution"), bitInfo[0], bitInfo[1] );
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 
 	ypos += mheight;
 	sprintf((char*) buf, "%s: %d bits/sec", g_Locale->getText("streaminfo.bitrate"), bitInfo[4]*50);
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 
 	ypos += mheight;
@@ -147,7 +147,7 @@ void CStreamInfo::paint()
 	default:
 		strncpy(buf, g_Locale->getText("streaminfo.aratio_unknown"), sizeof(buf));
 	}
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 
 
@@ -163,7 +163,7 @@ void CStreamInfo::paint()
 			default:
 			strncpy(buf, g_Locale->getText("streaminfo.framerate_unknown"), sizeof(buf));
 	}
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 
 
@@ -184,7 +184,7 @@ void CStreamInfo::paint()
 			default:
 			strncpy(buf, g_Locale->getText("streaminfo.audiotype_unknown"), sizeof(buf));
 	}
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 	ypos+= mheight+ 10;
 
 	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
@@ -192,22 +192,22 @@ void CStreamInfo::paint()
 	//onid
 	ypos+= mheight;
 	sprintf((char*) buf, "%s: 0x%04x", "onid", si.onid);
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//sid
 	ypos+= mheight;
 	sprintf((char*) buf, "%s: 0x%04x", "sid", si.sid);
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//tsid
 	ypos+= mheight;
 	sprintf((char*) buf, "%s: 0x%04x", "tsid", si.tsid);
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//tsfrequenz
 	ypos+= mheight;
 	sprintf((char*) buf, "%s: %dkhz (%c)", "tsf", si.tsfrequency, (si.polarisation == 1) ? 'v' : 'h');
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//vpid
 	ypos+= mheight;
@@ -215,7 +215,7 @@ void CStreamInfo::paint()
 		sprintf((char*) buf, "%s: %s", "vpid", g_Locale->getText("streaminfo.not_available"));
 	else
 		sprintf((char*) buf, "%s: 0x%04x", "vpid", g_RemoteControl->current_PIDs.PIDs.vpid );
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//apid	
 	ypos+= mheight;
@@ -237,17 +237,17 @@ void CStreamInfo::paint()
 				strcat((char*) buf, buf2);
 		}
 	}
-	g_Fonts->menu->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//vtxtpid
 	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid == 0 )
         	sprintf((char*) buf, "%s: %s", "vtxtpid", g_Locale->getText("streaminfo.not_available"));
 	else
         	sprintf((char*) buf, "%s: 0x%04x", "vtxtpid", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 	ypos+= mheight+ 10;
 	
 	//satellite
 	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }

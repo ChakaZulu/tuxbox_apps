@@ -42,13 +42,13 @@
 
 CMotorControl::CMotorControl()
 {
+	frameBuffer = CFrameBuffer::getInstance();
+	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+
 	satfindpid = -1;
 	
-	frameBuffer = CFrameBuffer::getInstance();
-	
 	width = 430;
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
 	height = hheight + (19 * mheight) + 5;
 	if (height > 576) height = 576;
 	x = ((720 - width) >> 1);
@@ -334,13 +334,13 @@ void CMotorControl::paintLine(int x, int * y, int width, char * txt)
 {
 	*y += mheight;
 	frameBuffer->paintBoxRel(x, *y - mheight, width, mheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x, *y, width, txt, COL_MENUCONTENT);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, *y, width, txt, COL_MENUCONTENT);
 }
 
 void CMotorControl::paintLine(int x, int y, int width, char * txt)
 {
 	//frameBuffer->paintBoxRel(x, y - mheight, width, mheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x, y, width, txt, COL_MENUCONTENT);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y, width, txt, COL_MENUCONTENT);
 }
 
 void CMotorControl::paintSeparator(int xpos, int * ypos, int width, char * txt)
@@ -352,11 +352,11 @@ void CMotorControl::paintSeparator(int xpos, int * ypos, int width, char * txt)
 	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1), COL_MENUCONTENT + 3);
 	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1) + 1, COL_MENUCONTENT + 1);
 	
-	stringwidth = g_Fonts->menu->getRenderWidth(txt);
+	stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(txt);
 	stringstartposX = 0;
 	stringstartposX = (xpos + (width >> 1)) - (stringwidth >> 1);
 	frameBuffer->paintBoxRel(stringstartposX - 5, *ypos - mheight, stringwidth + 10, mheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(stringstartposX, *ypos, stringwidth, txt, COL_MENUCONTENT);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, *ypos, stringwidth, txt, COL_MENUCONTENT);
 }
 
 void CMotorControl::paintStatus()
@@ -365,7 +365,7 @@ void CMotorControl::paintStatus()
 	char buf2[256];
 	
 	int xpos1 = x + 10;
-	int xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth("(a) Motor Position:");
+	int xpos2 = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth("(a) Motor Position:");
 	int width2 = width - (xpos2 - xpos1) - 10;
 	int width1 = width - 10;
 	
@@ -419,7 +419,7 @@ void CMotorControl::paint()
 {
 	ypos = y;
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x + 10, ypos + hheight, width, g_Locale->getText("motorcontrol.head"), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x + 10, ypos + hheight, width, g_Locale->getText("motorcontrol.head"), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT);
 
 	ypos += hheight + (mheight >> 1) - 10;
@@ -432,7 +432,7 @@ void CMotorControl::paintMenu()
 	ypos = ypos_menue;
 	
 	int xpos1 = x + 10;
-	int xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth("(7/yellow)");
+	int xpos2 = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth("(7/yellow)");
 	int width2 = width - (xpos2 - xpos1) - 10;
 	int width1 = width - 10;
 	

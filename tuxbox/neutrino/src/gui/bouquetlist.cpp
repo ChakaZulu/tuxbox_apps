@@ -50,13 +50,13 @@
 CBouquetList::CBouquetList()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	selected = 0;
-	width =  500;
-	height = 440;
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->channellist->getHeight();
+	selected    =   0;
+	width       = 500;
+	height      = 440;
+	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
-	height = theight+0+listmaxshow*fheight; // recalc height
+	height      = theight + listmaxshow * fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
@@ -353,17 +353,17 @@ void CBouquetList::paintItem(int pos)
 		char tmp[10];
 		sprintf((char*) tmp, "%d", liststart+pos+ 1);
 
-		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
-		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
+		int numpos = x+5+numwidth- g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth(tmp);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 
-		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, bouq->channelList->getName(), color, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, bouq->channelList->getName(), color, 0, true); // UTF-8
 	}
 }
 
 void CBouquetList::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText("bouquetlist.head"), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, g_Locale->getText("bouquetlist.head"), COL_MENUHEAD, 0, true); // UTF-8
 }
 
 void CBouquetList::paint()
@@ -372,15 +372,15 @@ void CBouquetList::paint()
 	int lastnum =  liststart + listmaxshow;
 
 	if(lastnum<10)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("0");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("0");
 	else if(lastnum<100)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("00");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("00");
 	else if(lastnum<1000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("000");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("000");
 	else if(lastnum<10000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("0000");
 	else // if(lastnum<100000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("00000");
 
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{

@@ -61,8 +61,8 @@ CAlphaSetup::CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigne
 	observer = Observer;
 	name = Name;
 	width = 360;
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
+	hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	height = hheight+ mheight*3;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
@@ -245,7 +245,7 @@ void CAlphaSetup::hide()
 void CAlphaSetup::paint()
 {
 	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
 	paintSlider(x+10, y+hheight, alpha1,g_Locale->getText("gtxalpha.alpha1"),"red", true);
@@ -265,5 +265,5 @@ void CAlphaSetup::paintSlider(const int x, const int y, const unsigned char * co
 	iconfile +=".raw";
 	frameBuffer->paintIcon(iconfile,x+73+sspos,y+mheight/4);
 
-	g_Fonts->menu->RenderString(x,y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x,y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
 }

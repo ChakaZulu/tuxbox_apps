@@ -55,11 +55,11 @@ static const std::string iconnames[4] = {
 CColorChooser::CColorChooser(const char * const Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer) // UTF-8
 {
 	frameBuffer = CFrameBuffer::getInstance();
+	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	observer = Observer;
 	name = Name;
 	width = 360;
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
 	height = hheight+ mheight* 4;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
@@ -213,7 +213,7 @@ void CColorChooser::hide()
 void CColorChooser::paint()
 {
 	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
 	const char * names[4] = {
@@ -242,5 +242,5 @@ void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const char * 
 	iconfile +=".raw";
 	frameBuffer->paintIcon(iconfile,x+73+(*spos),y+mheight/4);
 
-	g_Fonts->menu->RenderString(x,y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x,y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
 }

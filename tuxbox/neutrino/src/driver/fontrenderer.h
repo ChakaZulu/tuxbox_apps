@@ -114,39 +114,4 @@ class FBFontRenderClass
 		friend class Font;
 };
 
-class FontsDef
-{
-	public:
-		Font
-		*menu,
-		*menu_title,
-		*menu_info,
-		*epg_title,
-		*epg_info1, // epg_info1 should be same size as info2, but italic!
-		*epg_info2,
-		*epg_date,
-
-		*eventlist_title,
-		*eventlist_itemLarge,
-		*eventlist_datetime,
-		*eventlist_itemSmall,
-
-		*gamelist_itemLarge,
-		*gamelist_itemSmall,
-
-		*alert,
-		*channellist,
-		*channellist_descr,
-		*channellist_number,
-		*channel_num_zap,
-
-		*infobar_number,
-		*infobar_channame,
-		*infobar_info,
-		*infobar_small,
-
-		*filebrowser_item;
-};
-
-
 #endif

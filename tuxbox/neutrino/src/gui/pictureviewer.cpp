@@ -112,10 +112,10 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	height = 570;
 	if((g_settings.screen_EndY- g_settings.screen_StartY) < height)
 		height=(g_settings.screen_EndY- g_settings.screen_StartY);
-	buttonHeight = std::min(25,g_Fonts->infobar_small->getHeight());
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->menu->getHeight();
-	sheight= g_Fonts->infobar_small->getHeight();
+	sheight      = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
+	buttonHeight = std::min(25, sheight);
+	theight      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	listmaxshow = (height-theight-2*buttonHeight)/(fheight);
 	height = theight+2*buttonHeight+listmaxshow*fheight;	// recalc height
 
@@ -526,9 +526,9 @@ void CPictureViewerGui::paintItem(int pos)
 		tmp += ')';
 		char timestring[18];
 		strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&playlist[liststart+pos].Date));
-		int w = g_Fonts->menu->getRenderWidth(timestring);
-		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30 - w, tmp, color, fheight);
-		g_Fonts->menu->RenderString(x+width-20-w,ypos+fheight, w, timestring, color, fheight);
+		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(timestring);
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,ypos+fheight, width-30 - w, tmp, color, fheight);
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-20-w,ypos+fheight, w, timestring, color, fheight);
 
 	}
 //	printf("paintItem}\n");
@@ -542,7 +542,7 @@ void CPictureViewerGui::paintHead()
 	std::string strCaption = g_Locale->getText("pictureviewer.head");
 	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+10);
-	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
 	int ypos=y+0;
 	if(theight > 26)
 		ypos = (theight-26) / 2 + y ;
@@ -570,7 +570,7 @@ void CPictureViewerGui::paintFoot()
 	if (!playlist.empty())
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + 1* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
-		g_Fonts->infobar_small->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-buttonHeight)+24 - 4, 
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-buttonHeight)+24 - 4, 
 						     ButtonWidth2- 28, g_Locale->getText("pictureviewer.show"), COL_INFOBAR, 0, true); // UTF-8
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
 		std::string tmp = g_Locale->getText("pictureviewer.sortorder");
@@ -579,14 +579,14 @@ void CPictureViewerGui::paintFoot()
 			tmp += g_Locale->getText("pictureviewer.sortorder.date");
 		else if(m_sort==DATE)
 			tmp += g_Locale->getText("pictureviewer.sortorder.filename");
-		g_Fonts->infobar_small->RenderString(x+ 0* ButtonWidth2 +53 , y+(height-buttonHeight)+24 - 4, 
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth2 +53 , y+(height-buttonHeight)+24 - 4, 
 														 ButtonWidth2- 28, tmp, COL_INFOBAR, 0, true); // UTF-8
 
 
-		::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + (height - 2 * buttonHeight) + 4, ButtonWidth, 4, PictureViewerButtons);
+		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - 2 * buttonHeight) + 4, ButtonWidth, 4, PictureViewerButtons);
 	}
 	else
-		::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + ButtonWidth + 10, y + (height - 2 * buttonHeight) + 4, ButtonWidth, 1, &(PictureViewerButtons[1]));
+		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + ButtonWidth + 10, y + (height - 2 * buttonHeight) + 4, ButtonWidth, 1, &(PictureViewerButtons[1]));
 //	printf("paintFoot}\n");
 }
 //------------------------------------------------------------------------

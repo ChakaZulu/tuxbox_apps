@@ -121,7 +121,6 @@ CZapitClient::SatelliteList::iterator satList_it;
 static void initGlobals(void)
 {
 	g_fontRenderer  = NULL;
-	g_Fonts         = NULL;
 
 	g_RCInput       = NULL;
 	g_Controld      = new CControldClient;
@@ -315,7 +314,7 @@ typedef struct font_sizes
 #define FONT_STYLE_BOLD    1
 #define FONT_STYLE_ITALIC  2
 
-const font_sizes_struct neutrino_font[FONTSIZE_ENTRY_COUNT] = 
+const font_sizes_struct neutrino_font[FONT_TYPE_COUNT] = 
 {
 	{"fontsize.menu"               ,  20, FONT_STYLE_BOLD   , 0},
 	{"fontsize.menu_title"         ,  30, FONT_STYLE_BOLD   , 0},
@@ -324,7 +323,6 @@ const font_sizes_struct neutrino_font[FONTSIZE_ENTRY_COUNT] =
 	{"fontsize.epg_info1"          ,  17, FONT_STYLE_ITALIC , 2},
 	{"fontsize.epg_info2"          ,  17, FONT_STYLE_REGULAR, 2},
 	{"fontsize.epg_date"           ,  15, FONT_STYLE_REGULAR, 2},
-	{"fontsize.alert"              , 100, FONT_STYLE_REGULAR, 0},
 	{"fontsize.eventlist_title"    ,  30, FONT_STYLE_REGULAR, 0},
 	{"fontsize.eventlist_itemlarge",  20, FONT_STYLE_BOLD   , 1},
 	{"fontsize.eventlist_itemsmall",  14, FONT_STYLE_REGULAR, 1},
@@ -1061,37 +1059,12 @@ void CNeutrinoApp::SetupFonts()
 	if (g_fontRenderer->AddFont((fontFile + "_italic.ttf").c_str()) != 0)
 		g_fontRenderer->AddFont((fontFile + ".ttf").c_str(), true);  // make italics
 
-	Font * * list [FONTSIZE_ENTRY_COUNT] =
-		{
-			&g_Fonts->menu,
-			&g_Fonts->menu_title,
-			&g_Fonts->menu_info,
-			&g_Fonts->epg_title,
-			&g_Fonts->epg_info1,
-			&g_Fonts->epg_info2,
-			&g_Fonts->epg_date,
-			&g_Fonts->alert,
-			&g_Fonts->eventlist_title,
-			&g_Fonts->eventlist_itemLarge,
-			&g_Fonts->eventlist_itemSmall,
-			&g_Fonts->eventlist_datetime,
-			&g_Fonts->gamelist_itemLarge,
-			&g_Fonts->gamelist_itemSmall,
-			&g_Fonts->channellist,
-			&g_Fonts->channellist_descr,
-			&g_Fonts->channellist_number,
-			&g_Fonts->channel_num_zap,
-			&g_Fonts->infobar_number,
-			&g_Fonts->infobar_channame,
-			&g_Fonts->infobar_info,
-			&g_Fonts->infobar_small,
-			&g_Fonts->filebrowser_item
-		};
-
 	const char * style[3] = {"Regular", bold_style_name, "Italic"};
 
-	for (int i = 0; i < FONTSIZE_ENTRY_COUNT; i++)
-		(* list[i]) = g_fontRenderer->getFont(fontName, style[neutrino_font[i].style], configfile.getInt32(neutrino_font[i].name, neutrino_font[i].defaultsize) + neutrino_font[i].size_offset * fontsSizeOffset);
+	for (int i = 0; i < FONT_TYPE_COUNT; i++)
+	{
+		g_Font[i] = g_fontRenderer->getFont(fontName, style[neutrino_font[i].style], configfile.getInt32(neutrino_font[i].name, neutrino_font[i].defaultsize) + neutrino_font[i].size_offset * fontsSizeOffset);
+	}
 }
 
 /**************************************************************************************
@@ -1834,7 +1807,7 @@ public:
 		}
 };
 
-void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrinoSettings::FONTSIZE_ENTRIES number_of_fontsize_entry)
+void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrinoSettings::FONT_TYPES number_of_fontsize_entry)
 {
 	fontSettings.addItem(new CMenuNumberInput(neutrino_font[number_of_fontsize_entry].name, neutrino_font[number_of_fontsize_entry].defaultsize, this, &configfile));
 }
@@ -1844,55 +1817,54 @@ typedef struct font_sizes_groups
 {
 	const char * const                                groupname;
 	const unsigned int                                count;
-	const SNeutrinoSettings::FONTSIZE_ENTRIES * const content;
+	const SNeutrinoSettings::FONT_TYPES * const content;
 	const char * const                                actionkey;
 } font_sizes_groups_struct;
 
-const SNeutrinoSettings::FONTSIZE_ENTRIES channellist_font_sizes[4] =
+const SNeutrinoSettings::FONT_TYPES channellist_font_sizes[4] =
 {
-	SNeutrinoSettings::FONTSIZE_CHANNELLIST,
-	SNeutrinoSettings::FONTSIZE_CHANNELLIST_DESCR,
-	SNeutrinoSettings::FONTSIZE_CHANNELLIST_NUMBER,
-	SNeutrinoSettings::FONTSIZE_CHANNEL_NUM_ZAP
+	SNeutrinoSettings::FONT_TYPE_CHANNELLIST,
+	SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR,
+	SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER,
+	SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP
 };
 
-const SNeutrinoSettings::FONTSIZE_ENTRIES eventlist_font_sizes[4] =
+const SNeutrinoSettings::FONT_TYPES eventlist_font_sizes[4] =
 {
-	SNeutrinoSettings::FONTSIZE_EVENTLIST_TITLE,
-	SNeutrinoSettings::FONTSIZE_EVENTLIST_ITEMLARGE,
-	SNeutrinoSettings::FONTSIZE_EVENTLIST_ITEMSMALL,
-	SNeutrinoSettings::FONTSIZE_EVENTLIST_DATETIME,
+	SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE,
+	SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMLARGE,
+	SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMSMALL,
+	SNeutrinoSettings::FONT_TYPE_EVENTLIST_DATETIME,
 };
 
-const SNeutrinoSettings::FONTSIZE_ENTRIES infobar_font_sizes[4] =
+const SNeutrinoSettings::FONT_TYPES infobar_font_sizes[4] =
 {
-	SNeutrinoSettings::FONTSIZE_INFOBAR_NUMBER,
-	SNeutrinoSettings::FONTSIZE_INFOBAR_CHANNAME,
-	SNeutrinoSettings::FONTSIZE_INFOBAR_INFO,
-	SNeutrinoSettings::FONTSIZE_INFOBAR_SMALL
+	SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER,
+	SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME,
+	SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO,
+	SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL
 };
 
-const SNeutrinoSettings::FONTSIZE_ENTRIES epg_font_sizes[4] =
+const SNeutrinoSettings::FONT_TYPES epg_font_sizes[4] =
 {
-	SNeutrinoSettings::FONTSIZE_EPG_TITLE,
-	SNeutrinoSettings::FONTSIZE_EPG_INFO1,
-	SNeutrinoSettings::FONTSIZE_EPG_INFO2,
-	SNeutrinoSettings::FONTSIZE_EPG_DATE
+	SNeutrinoSettings::FONT_TYPE_EPG_TITLE,
+	SNeutrinoSettings::FONT_TYPE_EPG_INFO1,
+	SNeutrinoSettings::FONT_TYPE_EPG_INFO2,
+	SNeutrinoSettings::FONT_TYPE_EPG_DATE
 };
 
-const SNeutrinoSettings::FONTSIZE_ENTRIES gamelist_font_sizes[2] =
+const SNeutrinoSettings::FONT_TYPES gamelist_font_sizes[2] =
 {
-	SNeutrinoSettings::FONTSIZE_GAMELIST_ITEMLARGE,
-	SNeutrinoSettings::FONTSIZE_GAMELIST_ITEMSMALL
+	SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMLARGE,
+	SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMSMALL
 };
 
-const SNeutrinoSettings::FONTSIZE_ENTRIES other_font_sizes[5] =
+const SNeutrinoSettings::FONT_TYPES other_font_sizes[4] =
 {
-	SNeutrinoSettings::FONTSIZE_ALERT,
-	SNeutrinoSettings::FONTSIZE_MENU,
-	SNeutrinoSettings::FONTSIZE_MENU_TITLE,
-	SNeutrinoSettings::FONTSIZE_MENU_INFO,
-	SNeutrinoSettings::FONTSIZE_FILEBROWSER_ITEM
+	SNeutrinoSettings::FONT_TYPE_MENU,
+	SNeutrinoSettings::FONT_TYPE_MENU_TITLE,
+	SNeutrinoSettings::FONT_TYPE_MENU_INFO,
+	SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM
 };
 
 const font_sizes_groups font_sizes_groups[6] =
@@ -1902,7 +1874,7 @@ const font_sizes_groups font_sizes_groups[6] =
 	{"fontmenu.epg"        , 4, epg_font_sizes        , "fontsize.depg"},
 	{"fontmenu.infobar"    , 4, infobar_font_sizes    , "fontsize.dinf"},
 	{"fontmenu.gamelist"   , 2, gamelist_font_sizes   , "fontsize.dgam"},
-	{NULL                  , 5, other_font_sizes      , "fontsize.doth"}
+	{NULL                  , 4, other_font_sizes      , "fontsize.doth"}
 };
 
 void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
@@ -1910,11 +1882,9 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
 	fontSettings.addItem(GenericMenuSeparator);
 	fontSettings.addItem(GenericMenuBack);
 	fontSettings.addItem(GenericMenuSeparatorLine);
-	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_ALERT);
-	fontSettings.addItem(GenericMenuSeparatorLine);
-	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_MENU);
-	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_MENU_TITLE);
-	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_MENU_INFO);
+	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONT_TYPE_MENU);
+	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONT_TYPE_MENU_TITLE);
+	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONT_TYPE_MENU_INFO);
 	fontSettings.addItem(GenericMenuSeparatorLine);
 
 	for (int i = 0; i < 5; i++)
@@ -1933,7 +1903,7 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
 		fontSettings.addItem(new CMenuForwarder(font_sizes_groups[i].groupname, true, NULL, fontSettingsSubMenu));
 	}
 
-	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONTSIZE_FILEBROWSER_ITEM);
+	AddFontSettingItem(fontSettings, SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM);
 	fontSettings.addItem(GenericMenuSeparatorLine);
 	fontSettings.addItem( new CMenuForwarder("options.default", true, NULL, this, font_sizes_groups[5].actionkey, this) );
 }
@@ -2382,7 +2352,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	SetupTiming();
 
-	g_Fonts = new FontsDef;
 	SetupFonts();
 
 	frameBuffer->ClearFrameBuffer();
@@ -3623,7 +3592,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 			if (actionKey == font_sizes_groups[i].actionkey)
 				for (unsigned int j = 0; j < font_sizes_groups[i].count; j++)
 				{
-					SNeutrinoSettings::FONTSIZE_ENTRIES k = font_sizes_groups[i].content[j];
+					SNeutrinoSettings::FONT_TYPES k = font_sizes_groups[i].content[j];
 					configfile.setInt32(neutrino_font[k].name, neutrino_font[k].defaultsize);
 				}
 		}

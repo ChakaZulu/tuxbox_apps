@@ -288,14 +288,14 @@ void CMenuWidget::paint()
 	if(height > (g_settings.screen_EndY - g_settings.screen_StartY))
 		height = g_settings.screen_EndY - g_settings.screen_StartY;
 
-	int neededWidth = g_Fonts->menu_title->getRenderWidth(l_name, true); // UTF-8
+	int neededWidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getRenderWidth(l_name, true); // UTF-8
 	if (neededWidth> width-48)
 	{
 		width= neededWidth+ 49;
 		if(width > (g_settings.screen_EndX - g_settings.screen_StartX))
 			width = g_settings.screen_EndX - g_settings.screen_StartX;
 	}
-	int hheight = g_Fonts->menu_title->getHeight();
+	int hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	int itemHeightTotal=0;
 	int heightCurrPage=0;
 	page_end.clear();
@@ -322,7 +322,7 @@ void CMenuWidget::paint()
 	{
 		if ((items[i]->iconName!= "") || CRCInput::isNumeric(items[i]->directKey))
 		{
-			iconOffset= g_Fonts->menu->getHeight();
+			iconOffset = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 			break;
 		}
 	}
@@ -341,7 +341,7 @@ void CMenuWidget::paint()
 		sb_width=0;
 
 	frameBuffer->paintBoxRel(x,y, width+sb_width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+38,y+hheight+1, width-40, l_name, COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+38,y+hheight+1, width-40, l_name, COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintIcon(iconfile, x + 8, y + 5);
 
 	item_start_y = y+hheight;
@@ -396,7 +396,7 @@ void CMenuWidget::paintItems()
 
 CMenuOptionChooser::CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const bool Localizing, const uint DirectKey, const std::string & IconName)
 {
-	height= g_Fonts->menu->getHeight();
+	height = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	optionName = OptionName;
 	active = Active;
 	optionValue = OptionValue;
@@ -490,7 +490,7 @@ int CMenuOptionChooser::paint( bool selected )
 	}
 	else if (CRCInput::isNumeric(directKey))
 	{
-		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, CRCInput::getKeyName(directKey), color, height);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(x + 10, y+ height, height, CRCInput::getKeyName(directKey), color, height);
 	}
 
 
@@ -501,12 +501,12 @@ int CMenuOptionChooser::paint( bool selected )
 	else
 		l_option = option;
 
-	int stringwidth = g_Fonts->menu->getRenderWidth(l_option, true); // UTF-8
+	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_option, true); // UTF-8
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
-	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
-	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color, 0, true); // UTF-8
 
 	if (selected)
 	{
@@ -522,15 +522,15 @@ int CMenuOptionChooser::paint( bool selected )
 
 CMenuOptionStringChooser::CMenuOptionStringChooser(const char * const OptionName, char* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
 {
-	height= g_Fonts->menu->getHeight();
-	optionName = OptionName;
-	active = Active;
+	height      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	optionName  = OptionName;
+	active      = Active;
 	optionValue = OptionValue;
-	observ=Observ;
-	localizing= Localizing;
+	observ      = Observ;
+	localizing  = Localizing;
 
-	directKey = CRCInput::RC_nokey;
-	iconName = "";
+	directKey   = CRCInput::RC_nokey;
+	iconName    = "";
 }
 
 
@@ -586,12 +586,12 @@ int CMenuOptionStringChooser::paint( bool selected )
 	else
 		l_option = optionValue;
 
-	int stringwidth = g_Fonts->menu->getRenderWidth(l_option);
+	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_option);
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
-	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
-	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color);
 
 	if(selected)
 	{
@@ -633,7 +633,7 @@ CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const
 
 int CMenuForwarder::getHeight(void) const
 {
-	return g_Fonts->menu->getHeight();
+	return g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 }
 
 int CMenuForwarder::exec(CMenuTarget* parent)
@@ -687,7 +687,7 @@ int CMenuForwarder::paint(bool selected)
 		color = COL_MENUCONTENTINACTIVE;
 
 	frameBuffer->paintBoxRel(x,y, dx, height, color );
-	g_Fonts->menu->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x), l_text, color, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+ height, dx- (stringstartposX - x), l_text, color, 0, true); // UTF-8
 
 	if (!iconName.empty())
 	{
@@ -695,15 +695,15 @@ int CMenuForwarder::paint(bool selected)
 	}
 	else if (CRCInput::isNumeric(directKey))
 	{
-		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, CRCInput::getKeyName(directKey), color, height);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(x + 10, y+ height, height, CRCInput::getKeyName(directKey), color, height);
 	}
 
 	if (option_text != NULL)
 	{
-		int stringwidth = g_Fonts->menu->getRenderWidth(option_text);
+		int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(option_text);
 		int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
-		g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x),  option_text, color);
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x),  option_text, color);
 	}
 
 	return y+ height;
@@ -722,7 +722,7 @@ CMenuSeparator::CMenuSeparator(const int Type, const char * const Text)
 
 int CMenuSeparator::getHeight(void) const
 {
-	return text.empty() ? 10 : g_Fonts->menu->getHeight();
+	return text.empty() ? 10 : g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 }
 
 int CMenuSeparator::paint(bool selected)
@@ -741,7 +741,7 @@ int CMenuSeparator::paint(bool selected)
 	{
 		int stringstartposX;
 		std::string l_text = g_Locale->getText(text);
-		int stringwidth = g_Fonts->menu->getRenderWidth(l_text, true); // UTF-8
+		int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_text, true); // UTF-8
 
 		/* if no alignment is specified, align centered */
 		if (type & ALIGN_LEFT)
@@ -753,7 +753,7 @@ int CMenuSeparator::paint(bool selected)
 
 		frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT );
 
-		g_Fonts->menu->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
 
 		if(selected)
 		{

@@ -154,8 +154,8 @@ CTimerList::CTimerList()
 	if(g_settings.screen_EndX-g_settings.screen_StartX < width)
 		width=g_settings.screen_EndX-g_settings.screen_StartX-10;
 	buttonHeight = 25;
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->menu->getHeight();
+	theight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 	liststart = 0;
@@ -479,13 +479,13 @@ void CTimerList::paintItem(int pos)
 		char zStopTime[25] = {0};
 		struct tm *stopTime = localtime(&(timer.stopTime));
 		strftime(zStopTime,20,"%d.%m. %H:%M",stopTime);
-		g_Fonts->menu->RenderString(x+10,ypos+fheight, 150, zAlarmTime, color, fheight, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,ypos+fheight, 150, zAlarmTime, color, fheight, true); // UTF-8
 		if(timer.stopTime != 0)
 		{
-			g_Fonts->menu->RenderString(x+10,ypos+2*fheight, 150, zStopTime, color, fheight, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10,ypos+2*fheight, 150, zStopTime, color, fheight, true); // UTF-8
 		}
-		g_Fonts->menu->RenderString(x+160,ypos+fheight, (real_width-160)/2-5, convertTimerRepeat2String(timer.eventRepeat), color, fheight, true); // UTF-8
-		g_Fonts->menu->RenderString(x+160+(real_width-160)/2,ypos+fheight, (real_width-160)/2-5, convertTimerType2String(timer.eventType), color, fheight, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+160,ypos+fheight, (real_width-160)/2-5, convertTimerRepeat2String(timer.eventRepeat), color, fheight, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+160+(real_width-160)/2,ypos+fheight, (real_width-160)/2-5, convertTimerType2String(timer.eventType), color, fheight, true); // UTF-8
 		std::string zAddData("");
 		switch(timer.eventType)
 		{
@@ -524,7 +524,7 @@ void CTimerList::paintItem(int pos)
 				break;
 			default:{}
 		}
-		g_Fonts->menu->RenderString(x+160,ypos+2*fheight, real_width-165, zAddData, color, fheight, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+160,ypos+2*fheight, real_width-165, zAddData, color, fheight, true); // UTF-8
 		// LCD Display
 		if(liststart+pos==selected)
 		{
@@ -562,7 +562,7 @@ void CTimerList::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	frameBuffer->paintIcon("timer.raw",x+5,y+4);
-	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("timerlist.name"), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("timerlist.name"), COL_MENUHEAD, 0, true); // UTF-8
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 /*	if (bouquetList!=NULL)
@@ -583,13 +583,13 @@ void CTimerList::paintFoot()
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
 	if (timerlist.empty())
-		::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + ButtonWidth + 10, y + height + 4, ButtonWidth, 2, &(TimerListButtons[1]));
+		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + ButtonWidth + 10, y + height + 4, ButtonWidth, 2, &(TimerListButtons[1]));
 	else
 	{
-		::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + height + 4, ButtonWidth, 3, TimerListButtons);
+		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + height + 4, ButtonWidth, 3, TimerListButtons);
 
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 1* ButtonWidth + 10, y+height);
-		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth + 38, y+height+24 - 2, ButtonWidth- 28, g_Locale->getText("timerlist.modify"), COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+width-1 * ButtonWidth + 38, y+height+24 - 2, ButtonWidth- 28, g_Locale->getText("timerlist.modify"), COL_INFOBAR, 0, true); // UTF-8
 	}
 }
 

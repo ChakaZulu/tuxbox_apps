@@ -159,7 +159,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitColorSettingsTiming(CMenuWidget &colorSettings_timing);
 		void InitLcdSettings(CMenuWidget &lcdSettings);
 		void InitNetworkSettings(CMenuWidget &networkSettings);
-		void AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrinoSettings::FONTSIZE_ENTRIES number_of_fontsize_entry);
+		void AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrinoSettings::FONT_TYPES number_of_fontsize_entry);
 		void InitFontSettings(CMenuWidget &fontSettings);
 		void InitRecordingSettings(CMenuWidget &recordingSettings);
 		void InitStreamingSettings(CMenuWidget &streamingSettings);

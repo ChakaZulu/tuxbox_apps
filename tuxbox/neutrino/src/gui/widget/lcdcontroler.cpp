@@ -50,11 +50,11 @@
 CLcdControler::CLcdControler(const char * const Name, CChangeObserver* Observer)
 {
 	frameBuffer = CFrameBuffer::getInstance();
+	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	observer = Observer;
 	name = Name;
 	width = 390;
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
 	height = hheight+ mheight* 4+ +mheight/2;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
@@ -125,7 +125,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 							break;
 						case 3:
 							frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENTSELECTED);
-							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENTSELECTED, 0, true); // UTF-8
+							g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 							break;
 					}
 				}
@@ -151,7 +151,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 							paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", true);
 							CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 							frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENT);
-							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT, 0, true); // UTF-8
+							g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT, 0, true); // UTF-8
 							break;
 						case 3:
 							break;
@@ -299,7 +299,7 @@ void CLcdControler::paint()
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 
 	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
 	paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", true);
@@ -307,7 +307,7 @@ void CLcdControler::paint()
 	paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby",false);
 
 	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT+3 );
-	g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 void CLcdControler::paintSlider(int x, int y, unsigned int spos, float factor, const char * const text, const char * const iconname, bool selected)
@@ -323,8 +323,8 @@ void CLcdControler::paintSlider(int x, int y, unsigned int spos, float factor, c
 	iconfile +=".raw";
 	frameBuffer->paintIcon(iconfile, (int)(x + (startx+3)+(spos / factor)), y+mheight/4);
 
-	g_Fonts->menu->RenderString(x, y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
 	sprintf(wert, "%3d", spos); // UTF-8 encoded
 	frameBuffer->paintBoxRel(x + startx + 120 + 10, y, 50, mheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x + startx + 120 + 10, y+mheight, width, wert, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x + startx + 120 + 10, y+mheight, width, wert, COL_MENUCONTENT, 0, true); // UTF-8
 }

@@ -469,10 +469,10 @@ CGameList::CGameList(const char * const Name)
 	height = 526;
    if((height+50)>(g_settings.screen_EndY-g_settings.screen_StartY))
       height=(g_settings.screen_EndY-g_settings.screen_StartY) - 50; // 2*25 pixel frei
-	theight= g_Fonts->menu_title->getHeight();
+	theight  = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	//
-	fheight1= g_Fonts->gamelist_itemLarge->getHeight();
-	fheight2= g_Fonts->gamelist_itemSmall->getHeight();
+	fheight1 = g_Font[SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMLARGE]->getHeight();
+	fheight2 = g_Font[SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMSMALL]->getHeight();
 	fheight = fheight1 + fheight2 + 2;
 	//
 	listmaxshow = (height-theight-0)/fheight;
@@ -662,20 +662,20 @@ void CGameList::paintItem(int pos)
 	if(liststart+pos<gamelist.size())
 	{
     	game* aktgame = gamelist[liststart+pos];
-		g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name, color);
-		g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc, color);
+		g_Font[SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMLARGE]->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name, color);
+		g_Font[SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMSMALL]->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc, color);
 	}
 }
 
 void CGameList::paintHead()
 {
 	if(listmaxshow > gamelist.size()+1)
-      frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
-   else
-      frameBuffer->paintBoxRel(x,y, width+15,theight, COL_MENUHEAD);
+		frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
+	else
+		frameBuffer->paintBoxRel(x,y, width+15,theight, COL_MENUHEAD);
 
 	frameBuffer->paintIcon("games.raw",x+8,y+5);
-	g_Fonts->menu_title->RenderString(x+38,y+theight+1, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+38,y+theight+1, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 }
 
 void CGameList::paint()

@@ -54,17 +54,17 @@ CExtendedInput::CExtendedInput(const char * const Name, char* Value, const char 
 
 	observ = Observ;
 
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
-	iheight = g_Fonts->menu_info->getHeight();
+	hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	iheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_INFO]->getHeight();
 
 	localizing = Localizing;
-	width = g_Fonts->menu_title->getRenderWidth(localizing ? g_Locale->getText(name) : name, true)+20; // UTF-8
+	width = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getRenderWidth(localizing ? g_Locale->getText(name) : name, true)+20; // UTF-8
 	height = hheight+ mheight+ 20;
 
-	if ( hint_1.length()> 0 )
+	if (!(hint_1.empty()))
 		height+= iheight;
-	if ( hint_2.length()> 0 )
+	if (!(hint_2.empty()))
 		height+= iheight;
 
 	x = ((720-width)>>1);
@@ -240,13 +240,13 @@ void CExtendedInput::paint()
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
 	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_MENUCONTENT);
 
-	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, localizing ? g_Locale->getText(name) : name, COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10, y+ hheight, width- 10, localizing ? g_Locale->getText(name) : name, COL_MENUHEAD, 0, true); // UTF-8
 
 	if (hint_1.length() > 0)
 	{
-		g_Fonts->menu_info->RenderString(x+ 20, hintPosY, width- 20, localizing ? g_Locale->getText(hint_1) : hint_1, COL_MENUCONTENT, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_INFO]->RenderString(x+ 20, hintPosY, width- 20, localizing ? g_Locale->getText(hint_1) : hint_1, COL_MENUCONTENT, 0, true); // UTF-8
 		if (hint_2.length() > 0)
-			g_Fonts->menu_info->RenderString(x+ 20, hintPosY + iheight, width- 20, localizing ? g_Locale->getText(hint_2) : hint_2, COL_MENUCONTENT, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_MENU_INFO]->RenderString(x+ 20, hintPosY + iheight, width- 20, localizing ? g_Locale->getText(hint_2) : hint_2, COL_MENUCONTENT, 0, true); // UTF-8
 	}
 
 	for(unsigned int i=0; i<inputFields.size();i++)
@@ -264,7 +264,7 @@ CExtendedInput_Item_Char::CExtendedInput_Item_Char(const std::string & Chars, bo
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	idx = 20;
-	idy = g_Fonts->menu->getHeight();
+	idy = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	allowedChars = Chars;
 	selectable = Selectable;
 }
@@ -296,9 +296,9 @@ void CExtendedInput_Item_Char::paint(int x, int y, bool focusGained )
 	char text[2];
 	text[0] = *data;
 	text[1] = 0;
-	int xfpos = startx + 1 + ((idx- g_Fonts->menu->getRenderWidth( text ))>>1);
+	int xfpos = startx + 1 + ((idx- g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth( text ))>>1);
 
-	g_Fonts->menu->RenderString(xfpos,starty+idy, idx, text, color);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(xfpos,starty+idy, idx, text, color);
 }
 
 bool CExtendedInput_Item_Char::isAllowedChar( char ch )

@@ -64,16 +64,16 @@ EventList::EventList()
 	width  = 580;
 	//height = 440;
 	height = 480;
-	theight  = g_Fonts->eventlist_title->getHeight();
-	fheight1 = g_Fonts->eventlist_itemLarge->getHeight();
+	theight  = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->getHeight();
+	fheight1 = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMLARGE]->getHeight();
 	{
-		int h1 = g_Fonts->eventlist_itemSmall->getHeight();
-		int h2 = g_Fonts->eventlist_datetime->getHeight();
+		int h1 = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMSMALL]->getHeight();
+		int h2 = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_DATETIME]->getHeight();
 		fheight2 = (h1 > h2) ? h1 : h2;
 	}
 	fheight = fheight1 + fheight2 + 2;
-	fwidth1 = g_Fonts->eventlist_datetime->getRenderWidth("DDD, 00:00,  ");
-	fwidth2 = g_Fonts->eventlist_itemSmall->getRenderWidth("[999 min] ");
+	fwidth1 = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_DATETIME]->getRenderWidth("DDD, 00:00,  ");
+	fwidth2 = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMSMALL]->getRenderWidth("[999 min] ");
 
 
 	listmaxshow = (height-theight-0)/fheight;
@@ -397,21 +397,21 @@ void EventList::paintItem(unsigned int pos)
 		}
 
 		// 1st line
-		g_Fonts->eventlist_datetime->RenderString(x+5,         ypos+ fheight1+3, fwidth1+5,            datetime1_str, color, 0, true); // UTF-8
-		g_Fonts->eventlist_datetime->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10- 20, datetime2_str, color, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_DATETIME]->RenderString(x+5,         ypos+ fheight1+3, fwidth1+5,            datetime1_str, color, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_DATETIME]->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10- 20, datetime2_str, color, 0, true); // UTF-8
 
 		int seit = ( evtlist[liststart+pos].startTime - time(NULL) ) / 60;
 		if ( (seit> 0) && (seit<100) && (duration_str.length()!=0) )
 		{
 			char beginnt[100];
 			sprintf((char*) &beginnt, "in %d min", seit);
-			int w= g_Fonts->eventlist_itemSmall->getRenderWidth(beginnt) + 10;
+			int w = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMSMALL]->getRenderWidth(beginnt) + 10;
 
-			g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20- w, ypos+ fheight1+3, fwidth2, beginnt, color);
+			g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMSMALL]->RenderString(x+width-fwidth2-5- 20- w, ypos+ fheight1+3, fwidth2, beginnt, color);
 		}
-		g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2, duration_str, color, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMSMALL]->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2, duration_str, color, 0, true); // UTF-8
 		// 2nd line
-		g_Fonts->eventlist_itemLarge->RenderString(x+ 20, ypos+ fheight, width- 25- 20, evtlist[liststart+pos].description, color);
+		g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMLARGE]->RenderString(x+ 20, ypos+ fheight, width- 25- 20, evtlist[liststart+pos].description, color);
 	}
 }
 
@@ -421,7 +421,7 @@ void EventList::paintHead()
 	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head"), name.c_str()); // UTF-8
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
 
 void EventList::paint()

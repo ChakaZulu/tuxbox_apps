@@ -49,7 +49,6 @@ class CListBox : public CMenuWidget
 		unsigned int	liststart;
 		unsigned int	listmaxshow;
 	
-		unsigned int	numwidth;
 		int 		ButtonHeight;
 
 		//----------------------------

@@ -63,15 +63,15 @@ CStringInput::CStringInput(const char * const Name, char* Value, int Size, const
 	if (width<420)
 		width = 420;
 
-	int neededWidth = g_Fonts->menu_title->getRenderWidth(g_Locale->getText(name), true); // UTF-8
+	int neededWidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getRenderWidth(g_Locale->getText(name), true); // UTF-8
 	if (!(iconfile.empty()))
 		neededWidth += 28;
 	if (neededWidth+20> width)
 		width = neededWidth+20;
 
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
-	iheight = g_Fonts->menu_info->getHeight();
+	hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	iheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_INFO]->getHeight();
 
 	height = hheight+ mheight+ 50;
 	if (!(hint_1.empty()))
@@ -341,13 +341,13 @@ void CStringInput::paint()
 	else
 		iconoffset = 0;
 
-	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 
 	if (!hint_1.empty())
 	{
-		g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, g_Locale->getText(hint_1), COL_MENUCONTENT, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_INFO]->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, g_Locale->getText(hint_1), COL_MENUCONTENT, 0, true); // UTF-8
 		if (!hint_2.empty())
-			g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2), COL_MENUCONTENT, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_MENU_INFO]->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2), COL_MENUCONTENT, 0, true); // UTF-8
 	}
 
 	for (int count=0;count<size;count++)
@@ -371,9 +371,9 @@ void CStringInput::paintChar(int pos, const char c)
 	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
 	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
 
-	int xfpos = xpos + ((xs- g_Fonts->menu->getRenderWidth(ch))>>1);
+	int xfpos = xpos + ((xs- g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(ch))>>1);
 
-	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch, color);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(xfpos,ypos+ys, width, ch, color);
 }
 
 void CStringInput::paintChar(int pos)
@@ -526,7 +526,7 @@ void CStringInputSMS::paint()
 	frameBuffer->paintBoxRel(x,y+height-25, width,25, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
 
-	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 8, y+height-25+1, 230, 2, CStringInputSMSButtons);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 8, y+height-25+1, 230, 2, CStringInputSMSButtons);
 }
 
 void CPINInput::paintChar(int pos)

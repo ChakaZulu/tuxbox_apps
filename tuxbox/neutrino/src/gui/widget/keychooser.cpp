@@ -69,18 +69,18 @@ void CKeyChooser::paint()
 	std::string text = g_Locale->getText("keychoosermenu.currentkey");
 	text += ": ";
 	text += CRCInput::getKeyName(*key);
-	g_Fonts->menu->RenderString(x+ 10, y+ 65, width, text, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, y+ 65, width, text, COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 //*****************************
 CKeyChooserItem::CKeyChooserItem(const char * const Name, int *Key)
 {
 	frameBuffer = CFrameBuffer::getInstance();
+	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	name = Name;
 	key = Key;
 	width = 350;
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
 	height = hheight+2*mheight;
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
@@ -137,10 +137,10 @@ void CKeyChooserItem::paint()
 {
 
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
 	//paint msg...
-	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText("keychooser.text1"), COL_MENUCONTENT, 0, true); // UTF-8
-	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight* 2, width, g_Locale->getText("keychooser.text2"), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText("keychooser.text1"), COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, y+ hheight+ mheight* 2, width, g_Locale->getText("keychooser.text2"), COL_MENUCONTENT, 0, true); // UTF-8
 }

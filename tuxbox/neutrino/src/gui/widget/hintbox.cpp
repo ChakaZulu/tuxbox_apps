@@ -46,10 +46,10 @@ CHintBox::CHintBox(const char * const Caption, const char * const Text, const in
 
 	message = strdup(Text);
 
-	width  = Width;
+	width   = Width;
 
-	theight = g_Fonts->menu_title->getHeight();
-	fheight = g_Fonts->menu->getHeight();
+	theight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	height  = theight + fheight;
 
 	caption = Caption;
@@ -71,7 +71,7 @@ CHintBox::CHintBox(const char * const Caption, const char * const Text, const in
 			break;
 	}
 
-	nw = g_Fonts->menu_title->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
+	nw = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
 
 	if (Icon != NULL)
 	{
@@ -86,7 +86,7 @@ CHintBox::CHintBox(const char * const Caption, const char * const Text, const in
 
 	for (std::vector<char *>::const_iterator it = line.begin(); it != line.end(); it++)
 	{
-		nw = g_Fonts->menu->getRenderWidth(*it, true) + 20; // UTF-8
+		nw = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(*it, true) + 20; // UTF-8
 		if (nw > width )
 			width = nw;
 	}
@@ -123,17 +123,17 @@ void CHintBox::paint(void)
 	if (!iconfile.empty())
 	{
 		window->paintIcon(iconfile.c_str(), 8, 5);
-		window->RenderString(g_Fonts->menu_title, 40, theight, width - 40, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
+		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE], 40, theight, width - 40, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
 	}
 	else
-		window->RenderString(g_Fonts->menu_title, 10, theight, width - 10, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
+		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE], 10, theight, width - 10, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
 
 	window->paintBoxRel(0, theight, width, height - theight, (CFBWindow::color_t)COL_MENUCONTENT);
 
 	ypos = theight + (fheight >> 1);
 
 	for (std::vector<char *>::const_iterator it = line.begin(); it != line.end(); it++)
-		window->RenderString(g_Fonts->menu, 10, (ypos += fheight), width, *it, (CFBWindow::color_t)COL_MENUCONTENT, 0, true); // UTF-8
+		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_MENU], 10, (ypos += fheight), width, *it, (CFBWindow::color_t)COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 void CHintBox::hide(void)

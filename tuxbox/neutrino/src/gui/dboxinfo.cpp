@@ -41,11 +41,11 @@
 
 CDBoxInfoWidget::CDBoxInfoWidget()
 {
-	frameBuffer =	CFrameBuffer::getInstance();
-	width = 	600;
-	hheight = 	g_Fonts->menu_title->getHeight();
-	mheight = 	g_Fonts->menu->getHeight();
-	height = 	hheight+13*mheight+ 10;
+	frameBuffer = CFrameBuffer::getInstance();
+	hheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	mheight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	width       = 600;
+	height      = hheight+13*mheight+ 10;
 
     x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
@@ -75,7 +75,7 @@ void CDBoxInfoWidget::paint()
 {
 	int ypos=y;
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight+1, width, g_Locale->getText("dboxinfo.head"), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10, ypos+ hheight+1, width, g_Locale->getText("dboxinfo.head"), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	ypos+= hheight + (mheight >>1);
@@ -94,7 +94,7 @@ void CDBoxInfoWidget::paint()
 	{
 		if(fgets(buf,255,fd)!=NULL)
 		{
-			g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
 			ypos+= mheight;
 			

@@ -164,8 +164,8 @@ CFileBrowser::CFileBrowser()
 	
 	foheight = 30;
 
-	theight  = g_Fonts->eventlist_title->getHeight();
-	fheight = g_Fonts->filebrowser_item->getHeight();
+	theight = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->getHeight();
+	fheight = g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->getHeight();
 
 
 	listmaxshow = std::max(1,(int)(height - theight - foheight)/fheight);
@@ -736,9 +736,9 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 			frameBuffer->paintIcon(fileicon, x+5 , ypos + (fheight-16) / 2 );
 			
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-			g_Fonts->filebrowser_item->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName(), color); // ISO-8859-1
+			g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName(), color); // ISO-8859-1
 #else
-			g_Fonts->filebrowser_item->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName(), color, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName(), color, 0, true); // UTF-8
 #endif
 
 			if( S_ISREG(actual_file->Mode) )
@@ -750,29 +750,32 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 					modestring += (actual_file->Mode & (2 << (m*3)))?'w':'-';
 					modestring += (actual_file->Mode & (1 << (m*3)))?'x':'-';
 				}
-				g_Fonts->filebrowser_item->RenderString(x + width - 180 , ypos+ fheight, 80, modestring, color, 0, true); // UTF-8
+				g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + width - 180 , ypos+ fheight, 80, modestring, color, 0, true); // UTF-8
 
 				char tmpstr[256];
-            if((double)actual_file->Size / (1024. * 1024 * 1024) > 1)
-            {
-               snprintf(tmpstr,sizeof(tmpstr),"%.4gG", 
-                        (double)actual_file->Size / (1024. * 1024 * 1024));
-            }
-            else if((double)actual_file->Size / (1024. * 1024) > 1)
-            {
-               snprintf(tmpstr,sizeof(tmpstr),"%.4gM", 
-                        (double)actual_file->Size / (1024. * 1024));
-            }
-            else if((double)actual_file->Size / (1024.) > 1)
-            {
-               snprintf(tmpstr,sizeof(tmpstr),"%.4gK", 
-                        (double)actual_file->Size / (1024.));
-            }
-            else
-               snprintf(tmpstr,sizeof(tmpstr),"%d", (int)actual_file->Size);
+				if((double)actual_file->Size / (1024. * 1024 * 1024) > 1)
+				{
+					snprintf(tmpstr,sizeof(tmpstr),"%.4gG", 
+						 (double)actual_file->Size / (1024. * 1024 * 1024));
+				}
+				else if((double)actual_file->Size / (1024. * 1024) > 1)
+				{
+					snprintf(tmpstr,sizeof(tmpstr),"%.4gM", 
+						 (double)actual_file->Size / (1024. * 1024));
+				}
+				else if((double)actual_file->Size / (1024.) > 1)
+				{
+					snprintf(tmpstr,sizeof(tmpstr),"%.4gK", 
+						 (double)actual_file->Size / (1024.));
+				}
+				else
+					snprintf(tmpstr,sizeof(tmpstr),"%d", (int)actual_file->Size);
+				
+				int breite = g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->getRenderWidth(tmpstr);
+				if (breite >= 80)
+					breite = 70;
 
-				int breite = g_Fonts->filebrowser_item->getRenderWidth(tmpstr)< 80?g_Fonts->filebrowser_item->getRenderWidth(tmpstr):70;
-				g_Fonts->filebrowser_item->RenderString(x + width - 90 + (70 - breite), ypos+ fheight, breite, tmpstr, color);
+				g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + width - 90 + (70 - breite), ypos+ fheight, breite, tmpstr, color);
 			}
 			if( S_ISDIR(actual_file->Mode) )
 			{
@@ -781,8 +784,8 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 
 				rawtime = actual_file->Time;
 				strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&rawtime));
-				int breite = g_Fonts->filebrowser_item->getRenderWidth(timestring);
-				g_Fonts->filebrowser_item->RenderString(x + width - 20 - breite , ypos+ fheight, breite+1, timestring, color);
+				int breite = g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->getRenderWidth(timestring);
+				g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + width - 20 - breite , ypos+ fheight, breite+1, timestring, color);
 			}
 		}
 	}
@@ -800,10 +803,10 @@ void CFileBrowser::paintHead()
 
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
 	snprintf(l_name, sizeof(l_name), "%s %s", CZapitClient::Utf8_to_Latin1(g_Locale->getText("filebrowser.head")).c_str(), name.c_str()); // ISO-8859-1
-	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD); // ISO-8859-1
+	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD); // ISO-8859-1
 #else
 	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText("filebrowser.head"), name.c_str()); // UTF-8
-	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
 #endif
 }
 
@@ -815,7 +818,7 @@ void CFileBrowser::paintFoot()
 	int dx = width / 4;
 	int type;
 	int by = y + height - (foheight -4);
-	int ty = by + g_Fonts->infobar_small->getHeight();
+	int ty = by + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
 
 	frameBuffer->paintBoxRel(x, y+height- (foheight ), width, (foheight ), COL_MENUHEAD);
 
@@ -827,7 +830,7 @@ void CFileBrowser::paintFoot()
 		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x +3 , by -3);
-			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select"), COL_INFOBAR, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select"), COL_INFOBAR, 0, true); // UTF-8
 		}
 
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by -3);
@@ -835,19 +838,19 @@ void CFileBrowser::paintFoot()
 			nextsort = g_Locale->getText("filebrowser.sort.name");
 		else
 			nextsort = g_Locale->getText("filebrowser.sort.date");
-		g_Fonts->infobar_small->RenderString(x + 35 + (1 * dx), ty, dx - 35, nextsort, COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty, dx - 35, nextsort, COL_INFOBAR, 0, true); // UTF-8
 
 		if(Multi_Select)
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + (2 * dx), by);
-			g_Fonts->infobar_small->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark"), COL_INFOBAR, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark"), COL_INFOBAR, 0, true); // UTF-8
 			
 		}
 
 		if(Filter != NULL)
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x + (3 * dx), by);
-			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, use_filter?g_Locale->getText("filebrowser.filter.inactive"):g_Locale->getText("filebrowser.filter.active"), COL_INFOBAR, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 25 + (3 * dx), ty, dx - 25, use_filter?g_Locale->getText("filebrowser.filter.inactive"):g_Locale->getText("filebrowser.filter.active"), COL_INFOBAR, 0, true); // UTF-8
 		}
 	}
 }

@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.54 2003/09/27 11:48:17 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.55 2003/10/03 23:17:00 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -186,10 +186,10 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	height = 570;
 	if ((g_settings.screen_EndY - g_settings.screen_StartY) < height)
 		height = (g_settings.screen_EndY - g_settings.screen_StartY);
-	buttonHeight = std::min(25, g_Fonts->infobar_small->getHeight ());
-	theight = g_Fonts->menu_title->getHeight ();
-	fheight = g_Fonts->menu->getHeight ();
-	sheight = g_Fonts->infobar_small->getHeight ();
+	sheight      = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
+	buttonHeight = std::min(25, sheight);
+	theight      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	title_height = fheight * 2 + 20 + sheight + 4;
 	info_height = fheight * 2;
 	listmaxshow =
@@ -1365,7 +1365,7 @@ CMoviePlayerGui::paintHead ()
 {
 	frameBuffer->paintBoxRel (x, y + title_height, width, theight, COL_MENUHEAD);
 	frameBuffer->paintIcon ("movie.raw", x + 7, y + title_height + 10);
-	g_Fonts->menu_title->RenderString (x + 35, y + theight + title_height + 0, width - 45, g_Locale->getText("movieplayer.head"), COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString (x + 35, y + theight + title_height + 0, width - 45, g_Locale->getText("movieplayer.head"), COL_MENUHEAD, 0, true); // UTF-8
 	int ypos = y + title_height;
 	if (theight > 26)
 		ypos = (theight - 26) / 2 + y + title_height;
@@ -1432,11 +1432,11 @@ CMoviePlayerGui::paintFoot ()
 				      info_height
 				      - 2 * buttonHeight), COL_INFOBAR_SHADOW);
 
-	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, MoviePlayerButtons);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, MoviePlayerButtons);
 
 /*  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_RED, x + 0 * ButtonWidth + 10,
     y + (height - info_height - 2 * buttonHeight) + 4);
-    g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText("movieplayer.bookmark"), COL_INFOBAR, 0, true);	// UTF-8
+    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText("movieplayer.bookmark"), COL_INFOBAR, 0, true); // UTF-8
 */
 }
 

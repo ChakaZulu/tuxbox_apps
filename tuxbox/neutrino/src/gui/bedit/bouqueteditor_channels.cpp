@@ -49,8 +49,8 @@ CBEChannelWidget::CBEChannelWidget(const std::string & Caption, unsigned int Bou
 	width =  500;
 	height = 440;
 	ButtonHeight = 25;
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->channellist->getHeight();
+	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
 	height = theight+0+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
@@ -78,7 +78,7 @@ void CBEChannelWidget::paintItem(int pos)
 	}
 	if(liststart+pos < Channels.size())
 	{
-		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, Channels[liststart+pos].name, color);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, Channels[liststart+pos].name, color);
 	}
 }
 
@@ -88,15 +88,15 @@ void CBEChannelWidget::paint()
 	int lastnum =  liststart + listmaxshow;
 
 	if(lastnum<10)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("0");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("0");
 	else if(lastnum<100)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("00");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("00");
 	else if(lastnum<1000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("000");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("000");
 	else if(lastnum<10000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("0000");
 	else // if(lastnum<100000)
-		numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
+		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("00000");
 
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
@@ -118,7 +118,7 @@ void CBEChannelWidget::paint()
 void CBEChannelWidget::paintHead()
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, caption.c_str() , COL_MENUHEAD);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, caption.c_str() , COL_MENUHEAD);
 }
 
 const struct button_label CBEChannelWidgetButtons[4] =
@@ -134,7 +134,7 @@ void CBEChannelWidget::paintFoot()
 	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + height + 4, (width - 20) / 4, 4, CBEChannelWidgetButtons);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + height + 4, (width - 20) / 4, 4, CBEChannelWidgetButtons);
 }
 
 void CBEChannelWidget::hide()
