@@ -107,6 +107,17 @@ public:
 	~eRCShortDriver();
 };
 
+class eRCInputEventDriver: public eRCDriver
+{
+protected:
+	int handle;
+	eSocketNotifier *sn;
+	void keyPressed(int);
+public:
+	eRCInputEventDriver(const char *filename);
+	~eRCInputEventDriver();
+};
+
 class eRCKey
 {
 public:

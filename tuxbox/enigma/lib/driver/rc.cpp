@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <linux/input.h>
 
 #include <lib/system/init.h>
 #include <lib/system/econfig.h>
@@ -66,6 +67,42 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 }
 
 eRCShortDriver::~eRCShortDriver()
+{
+	if (handle>=0)
+		close(handle);
+	if (sn)
+		delete sn;
+}
+
+void eRCInputEventDriver::keyPressed(int)
+{
+	struct input_event ev;
+	while (1)
+	{
+		if (read(handle, &ev, sizeof(struct input_event))!=sizeof(struct input_event))
+			break;
+		if (enabled && !input->islocked())
+			for (std::list<eRCDevice*>::iterator i(listeners.begin()); i!=listeners.end(); ++i)
+				(*i)->handleCode((int)&ev);
+	}
+}
+
+eRCInputEventDriver::eRCInputEventDriver(const char *filename): eRCDriver(eRCInput::getInstance())
+{
+	handle=open(filename, O_RDONLY|O_NONBLOCK);
+	if (handle<0)
+	{
+		eDebug("failed to open %s", filename);
+		sn=0;
+	} else
+	{
+		sn=new eSocketNotifier(eApp, handle, eSocketNotifier::Read);
+		CONNECT(sn->activated, eRCInputEventDriver::keyPressed);
+		eRCInput::getInstance()->setFile(handle);
+	}
+}
+
+eRCInputEventDriver::~eRCInputEventDriver()
 {
 	if (handle>=0)
 		close(handle);
