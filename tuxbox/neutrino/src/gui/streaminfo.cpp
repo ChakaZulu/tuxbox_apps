@@ -41,7 +41,7 @@
 CStreamInfo::CStreamInfo()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	width = 350;
+	width = 400;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
 	height = hheight+14*mheight+ 10;
@@ -112,12 +112,12 @@ void CStreamInfo::paint()
 
 	//paint msg...
 	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText("streaminfo.resolution").c_str(), bitInfo[0], bitInfo[1] );
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 
 	ypos+= mheight;
 
 	sprintf((char*) buf, "%s: %d bit/sec", g_Locale->getText("streaminfo.bitrate").c_str(), bitInfo[4]*50);
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 
 	ypos+= mheight;
 
@@ -136,7 +136,7 @@ void CStreamInfo::paint()
 			default:
 			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.aratio_unknown").c_str());
 	}
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 
 	ypos+= mheight;
 
@@ -152,7 +152,7 @@ void CStreamInfo::paint()
 			default:
 			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.framerate_unknown").c_str());
 	}
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 
 	ypos+= mheight;
 
@@ -174,29 +174,29 @@ void CStreamInfo::paint()
 			default:
 			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.audiotype_unknown").c_str());
 	}
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 	ypos+= mheight+ 10;
 
 	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
 
 	//onid
 	sprintf((char*) buf, "%s: 0x%04x", "onid", si.onid);
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
 	//sid
 	sprintf((char*) buf, "%s: 0x%04x", "sid", si.sid);
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
 	//tsid
 	sprintf((char*) buf, "%s: 0x%04x", "tsid", si.tsid);
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
 	//tsfrequenz
 	sprintf((char*) buf, "%s: %dkhz %s", "tsf", si.tsfrequency, si.polarisation==1?"(v)":"(h)");
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
 	//vpid
@@ -204,7 +204,7 @@ void CStreamInfo::paint()
 		sprintf((char*) buf, "%s: %s", "vpid", g_Locale->getText("streaminfo.not_available").c_str() );
 	else
 		sprintf((char*) buf, "%s: 0x%04x", "vpid", g_RemoteControl->current_PIDs.PIDs.vpid );
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
 	//apid	
@@ -223,7 +223,7 @@ void CStreamInfo::paint()
 			strcat((char*) buf, buf2);
 		}
 	}
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
 	//vtxtpid
@@ -231,10 +231,10 @@ void CStreamInfo::paint()
         	sprintf((char*) buf, "%s: %s", "vtxtpid", g_Locale->getText("streaminfo.not_available").c_str() );
 	else
         	sprintf((char*) buf, "%s: 0x%04x", "vtxtpid", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 	ypos+= mheight+ 10;
 	
 	//satellite
 	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);
 }
