@@ -27,7 +27,7 @@ public:
 		changedText, changedFont, changedForegroundColor, changedBackgroundColor,
 		changedSize, changedPosition, changedPixmap, childChangedHelpText,
 
-		evtAction
+		evtAction, evtShortcut
 	} type;
 	union
 	{
@@ -111,8 +111,13 @@ protected:
 	eSize size;
 	eRect clientrect;
 	eRect clientclip;
+	
+	eAction *shortcut;
+	eWidget *shortcutFocusWidget;
 
 	ePtrList<eWidget> _focusList;
+	
+	ePtrList<eWidget> actionListener;
 	eWidget *focus;
 
 		/// old top-level focus
@@ -463,6 +468,12 @@ public:
 	
 	void zOrderLower();
 	void zOrderRaise();
+	
+	/**
+	 * \brief sets the shortcut (generate evtShortcut)
+	 */
+	void setShortcut(const eString &shortcut);
+	void setShortcutFocus(eWidget *focus);
 };
 
 class eDecoWidget:public eWidget

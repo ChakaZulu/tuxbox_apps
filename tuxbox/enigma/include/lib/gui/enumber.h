@@ -16,7 +16,7 @@ private:
 	void redrawWidget(gPainter *, const eRect &rect);
 	eRect getNumberRect(int n);
 	int eventHandler(const eWidgetEvent &event);
-	int number[16];
+	int number[24];
 	int len, dspace, space_selected, active;
 	gColor cursorB, cursorF, normalB, normalF;
 	int have_focus;
@@ -38,6 +38,8 @@ public:
 	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eWidget* descr=0, int grabfocus=1, const char* deco="eNumber" );
 	~eNumber();
 	int getNumber(int f) { if ((f>=0) && (f<len)) return number[f]; return -1; }
+	double getFixedNum();
+	void setFixedNum(double);
 	void setNumber(int f, int n);
 	void setLimits(int min, int max);
 	void setNumberOfFields(int n);
@@ -49,7 +51,8 @@ public:
 		flagFillWithZeros=4,
 		flagTime=8,
 		flagPosNeg=16,
-		flagHideInput=32
+		flagHideInput=32,
+		flagFixedNum=64
 	};
 	void setFlags(int flags);
 	void setBase(int base);

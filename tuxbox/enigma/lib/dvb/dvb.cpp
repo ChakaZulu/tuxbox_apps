@@ -124,11 +124,12 @@ void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation
 	satellite.inversion=inversion;
 }
 
-void eTransponder::setCable(int frequency, int symbol_rate, int inversion)
+void eTransponder::setCable(int frequency, int symbol_rate, int inversion, int modulation)
 {
 	cable.frequency=frequency;
 	cable.symbol_rate=symbol_rate;
 	cable.inversion=inversion;
+	cable.modulation=modulation;
 	cable.valid=1;
 }
 
@@ -260,11 +261,14 @@ void eTransponderList::removeOrbitalPosition(int orbital_position)
 	{
 		eTransponder &t=it->second;
 				// is this transponder on the removed orbital_position ?
+		eDebug("transponder on %d, remove %d", t.satellite.orbital_position, orbital_position);
 		if (t.satellite.isValid() && t.satellite.orbital_position == orbital_position)
 		{
+			eDebug("found transponder to remove");
 			t.satellite.valid=0;
 			if (!t.cable.isValid())
 			{
+				eDebug("removing transponder");
 				// delete this transponder (including services)
 				eTransportStreamID tsid=it->first.first;
 				eOriginalNetworkID onid=it->first.second;
@@ -280,6 +284,7 @@ void eTransponderList::removeOrbitalPosition(int orbital_position)
 					if ((ref.getOriginalNetworkID() == onid) &&
 							(ref.getTransportStreamID() == tsid))
 					{
+						eDebug("removing service");
 						std::map<eServiceReferenceDVB,eService>::iterator i=sit;
 						++sit;
 								// if yes, get rid of it.
@@ -475,6 +480,7 @@ void eTransponderList::readLNBData()
 	{
 		unsigned int tmp=0;
 		int tmpint=0;
+		double tmpdouble=0;
 
 		if ( eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/lofH").c_str(), tmp) )
 			break;
@@ -519,8 +525,14 @@ void eTransponderList::readLNBData()
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/useGotoXX").c_str(), tmpint );
 		lnb.getDiSEqC().useGotoXX = tmpint;
 
-		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/rotorOffset").c_str(), tmpint );
-		lnb.getDiSEqC().rotorOffset = tmpint;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/gotoXXOffset").c_str(), tmpdouble );
+		lnb.getDiSEqC().gotoXXOffset = tmpdouble;
+
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/gotoXXLatitude").c_str(), tmpdouble );
+		lnb.getDiSEqC().gotoXXLatitude = tmpdouble;
+  
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/gotoXXLongitude").c_str(), tmpdouble );
+		lnb.getDiSEqC().gotoXXLongitude = tmpdouble;
 
 		char* tmpStr=0;
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/RotorTable").c_str(), tmpStr );    
@@ -533,6 +545,7 @@ void eTransponderList::readLNBData()
 				eString cur = tmp.mid(i);
 				int x = atoi( cur.mid(0,4).c_str() );
 				int y = atoi( cur.mid(4,3).c_str() );
+				eDebug("satpos = %d, pos=%d", y,x);
 				lnb.getDiSEqC().RotorTable[x] = y;
 			}
 		}
@@ -579,7 +592,9 @@ void eTransponderList::readLNBData()
 			lnb.getDiSEqC().uncommitted_switch=0;
 			lnb.getDiSEqC().uncommitted_gap=0;
 			lnb.getDiSEqC().useGotoXX=1;
-			lnb.getDiSEqC().rotorOffset=0;
+			lnb.getDiSEqC().gotoXXOffset=180.0;  // this is exakt south
+			lnb.getDiSEqC().gotoXXLatitude=0.0;
+			lnb.getDiSEqC().gotoXXLongitude=0.0;
 			eSatellite *sat = lnb.addSatellite(192);
 			sat->setDescription("Astra 19.2E");
 			eSwitchParameter &sParams = sat->getSwitchParams();
@@ -601,7 +616,9 @@ void eTransponderList::readLNBData()
 			lnb.getDiSEqC().uncommitted_switch=0;
 			lnb.getDiSEqC().uncommitted_gap=0;
 			lnb.getDiSEqC().useGotoXX=1;
-			lnb.getDiSEqC().rotorOffset=0;
+			lnb.getDiSEqC().gotoXXOffset=180.0;
+			lnb.getDiSEqC().gotoXXLatitude=0.0;
+			lnb.getDiSEqC().gotoXXLongitude=0.0;
 			eSatellite *sat = lnb.addSatellite(130);
 			sat->setDescription("Eutelsat 13.0E");
 			eSwitchParameter &sParams = sat->getSwitchParams();
@@ -631,16 +648,18 @@ void eTransponderList::writeLNBData()
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/uncommitted_switch").c_str(), (int) it->getDiSEqC().uncommitted_switch );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/uncommitted_gap").c_str(), (int) it->getDiSEqC().uncommitted_gap );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/useGotoXX").c_str(), (int) it->getDiSEqC().useGotoXX );
-		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/rotorOffset").c_str(), (int) it->getDiSEqC().rotorOffset );    
-
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/gotoXXOffset").c_str(), it->getDiSEqC().gotoXXOffset );    
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/gotoXXLatitude").c_str(), it->getDiSEqC().gotoXXLatitude );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/gotoXXLongitude").c_str(), it->getDiSEqC().gotoXXLongitude );
 		eString tmpStr;
 		for ( std::map<int,int>::iterator i( it->getDiSEqC().RotorTable.begin() ); i != it->getDiSEqC().RotorTable.end(); i++ )
 		{
 			if ( i->first > 0 )
 				tmpStr+=eString().sprintf("+%03d%03d", i->first, i->second );
 			else
-				tmpStr+=eString().sprintf("%03d%03d", i->first, i->second );      
+				tmpStr+=eString().sprintf("%04d%03d", i->first, i->second );
 		}
+		eDebug("satpos %s",tmpStr.c_str());
 
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/RotorTable").c_str(), tmpStr.c_str() );
         
@@ -673,6 +692,7 @@ void eTransponderList::writeLNBData()
 		eDebug("delete lnb");		
 	}
 	////////////////////////
+	eConfig::getInstance()->flush();
 }
 
 

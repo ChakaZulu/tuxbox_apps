@@ -1,3 +1,4 @@
+#include <math.h>
 #include <lib/dvb/dvbwidgets.h>
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvb.h>
@@ -186,7 +187,7 @@ int eTransponderWidget::getTransponder(eTransponder *transponder)
 	switch (type)
 	{
 	case deliveryCable:
-		transponder->setCable(frequency->getNumber()*1000, symbolrate->getNumber()*1000, inversion->isChecked() );
+		transponder->setCable(frequency->getNumber()*1000, symbolrate->getNumber()*1000, inversion->isChecked(), 3 );
 		return 0;
 	case deliverySatellite:
 		eDebug("setting to: %d %d %d %d %d %d", frequency->getNumber(), symbolrate->getNumber(), (int)polarity->getCurrent()->getKey(), (int)fec->getCurrent()->getKey(), ((eSatellite*)sat->getCurrent()->getKey())->getOrbitalPosition(), inversion->isChecked());
@@ -226,6 +227,9 @@ eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent
 	p_agc=new eProgress(this);
 	p_agc->setName("agc");
 
+	p_ber=new eProgress(this);
+	p_ber->setName("ber");
+
 	c_sync=new eCheckbox(this, 0, 0);
 	c_sync->setName("sync");
 
@@ -238,6 +242,10 @@ eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent
 	lsync_num=new eLabel(this);
 	lsync_num->setName("agc_num");
 
+	lber_num=new eLabel(this);
+	lber_num->setName("ber_num");
+
+
 	CONNECT(updatetimer.timeout, eFEStatusWidget::update);
 
 	if (eSkin::getActive()->build(this, "eFEStatusWidget"))
@@ -246,12 +254,15 @@ eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent
 
 void eFEStatusWidget::update()
 {
-	int snr=fe->SNR(),
-			agc=fe->SignalStrength();
-	p_agc->setPerc(agc*100/65536);
-	p_snr->setPerc(snr*100/65536);
-	lsnr_num->setText(eString().sprintf("%d",snr));
-	lsync_num->setText(eString().sprintf("%d",agc));	
+	int snr=fe->SNR()*100/65536,
+		agc=fe->SignalStrength()*100/65536,
+		ber=fe->BER();
+	p_agc->setPerc((agc));
+	p_snr->setPerc((snr));
+	p_ber->setPerc((int)log2(ber));
+	lsnr_num->setText(eString().sprintf("%d%%",snr));
+	lsync_num->setText(eString().sprintf("%d%%",agc));
+	lber_num->setText(eString().sprintf("%d",ber));	
 	int status=fe->Status();
 	c_lock->setCheck(!!(status & FE_HAS_LOCK));
 	c_sync->setCheck(!!(status & FE_HAS_SYNC));

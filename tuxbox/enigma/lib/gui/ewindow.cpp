@@ -75,11 +75,17 @@ void eWindow::recalcClientRect()
 
 int eWindow::eventHandler(const eWidgetEvent &event)
 {
+	eRect rc;
 	switch (event.type)
 	{
 		case eWidgetEvent::changedText:
-     redraw( getTitleBarRect() );
-		return 1;
+		{
+			eRect rc = getTitleBarRect();
+			if ( !titleHeight && deco && deco.borderTop )
+				rc.setHeight( deco.borderTop );
+			redraw(rc);
+			return 1;
+		}
     
 		case eWidgetEvent::evtAction:
 			if ((event.action == &i_cursorActions->cancel) && in_loop)	// hack

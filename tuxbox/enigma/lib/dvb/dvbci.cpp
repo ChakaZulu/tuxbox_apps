@@ -3,6 +3,8 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/si.h>
 
+//#include <enigma_main.h>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -76,6 +78,7 @@ eDVBCI::eDVBCI()
 	CONNECT(messages.recv_msg, eDVBCI::gotMessage);
 	
 	memset(appName,0,sizeof(appName));
+	tempPMTentrys=0;		
 
   run();
 }
@@ -128,23 +131,23 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		newService();
 		break;
 	case eDVBCIMessage::mmi_begin:
-		eDebug("[DVBCI] got mmi_begin message..");
+		//eDebug("[DVBCI] got mmi_begin message..");
 		mmi_begin();
 		break;
 	case eDVBCIMessage::mmi_end:
-		eDebug("[DVBCI] got mmi_end message..");
+		//eDebug("[DVBCI] got mmi_end message..");
 		mmi_end();
 		break;
 	case eDVBCIMessage::mmi_answ:
-		eDebug("[DVBCI] got mmi_answ message..");
+		//eDebug("[DVBCI] got mmi_answ message..");
 		mmi_answ(message.data, 0);
 		break;
 	case eDVBCIMessage::mmi_menuansw:
-		eDebug("[DVBCI] got mmi_menu_answ message..");
+		//eDebug("[DVBCI] got mmi_menu_answ message..");
 		mmi_menuansw((int)message.pid);
 		break;
 	case eDVBCIMessage::exit:
-		eDebug("[DVBCI] got exit message..");
+		//eDebug("[DVBCI] got exit message..");
 		quit();
 		break;
 	case eDVBCIMessage::getcaids:
@@ -178,7 +181,11 @@ void eDVBCI::mmi_begin()
 
 void eDVBCI::mmi_end()
 {
+	unsigned char buffer[10];
+
 	eDebug("stop mmi");
+	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x00\x1\x0",9);
+	sendTPDU(0xA0,9,1,buffer);
 }
 
 void eDVBCI::mmi_answ(unsigned char *buf,int len)
@@ -238,27 +245,34 @@ void eDVBCI::newService()
 	//eDebug("got new %d PMT entrys",tempPMTentrys);
 	ci_progress(appName);	
 	unsigned char capmt[2048];
+	int session;
 	
 	int i;
 	for(i=0;i<MAX_SESSIONS;i++)
 		if(sessions[i].state && (sessions[i].service_class==0x30041 || sessions[i].service_class==0x34100))
 			break;
 	if(i==MAX_SESSIONS)
+	{
 		eDebug("NO SESSION ID for CA-MANAGER");		
+		return;
+	}	
+	session=i;
 	
 	memcpy(capmt,"\x90\x2\x0\x3\x9f\x80\x32",7); //session nr.3 & capmt-tag
 	capmt[3]=i;			//session_id
-	capmt[8]=0x03;	//ca_pmt_list_management
-	capmt[9]=(unsigned char)((tempPMT[0].pid>>8) & 0xff);			//prg-nr
-	capmt[10]=(unsigned char)(tempPMT[0].pid & 0xff);					//prg-nr
-	capmt[11]=0x00;	//reserved - version - current/next
-	capmt[12]=0x00;	//reserved - prg-info len
-	capmt[13]=0x00;	//prg-info len
+	capmt[7]=0x81;
+
+	capmt[9]=0x03;	//ca_pmt_list_management
+	capmt[10]=(unsigned char)((tempPMT[0].pid>>8) & 0xff);			//prg-nr
+	capmt[11]=(unsigned char)(tempPMT[0].pid & 0xff);					//prg-nr
+	capmt[12]=0x00;	//reserved - version - current/next
+	capmt[13]=0x00;	//reserved - prg-info len
+	capmt[14]=0x00;	//prg-info len
 	
-	int lenpos=12;
+	int lenpos=13;
 	int len=0;
 	int first=1;
-	int wp=14;
+	int wp=15;
 		
 	for(int i=0;i<tempPMTentrys;i++)
 	{
@@ -292,6 +306,9 @@ void eDVBCI::newService()
 						capmt[wp++]=0x01;				//ca_pmt_command_id
 						len++;
 					}
+					
+					
+					
 					memcpy(capmt+wp,tempPMT[i].descriptor,tempPMT[i].descriptor[1]+2);
 					wp+=tempPMT[i].descriptor[1]+2;
 					len+=tempPMT[i].descriptor[1]+2;
@@ -299,15 +316,66 @@ void eDVBCI::newService()
 				break;
 		}
 	}			
-	capmt[7]=wp-8;
+
+	//capmt[8]=wp-8;
+
 	capmt[lenpos]=((len & 0xf00)>>8);
 	capmt[lenpos+1]=(len & 0xff);
 
-	sendTPDU(0xA0,wp,1,capmt);
 	
-//	for(int i=0;i<wp;i++)
-//		printf("%02x ",capmt[i]);
-//	printf("\n");	
+
+	//sendTPDU(0xA0,wp,1,capmt);
+	
+	create_sessionobject(capmt+4,capmt+9,wp-9,session);
+	
+#if 0
+	printf("CAPMT-LEN:%d\n",wp);
+	
+	for(int i=9;i<wp;i++)
+		printf("%02x ",capmt[i]);
+	printf("\n");	
+#endif	
+}
+
+void eDVBCI::create_sessionobject(unsigned char *tag,unsigned char *data,unsigned int len,int session)
+{
+	unsigned char buffer[len+3+5+4];	//data + tag_len + max_lengtfieldlen + spdu_header
+	int newlen=len+3+4;
+
+	memcpy(buffer,"\x90\x2\x0\x3",4); //session nr.3 & capmt-tag
+	buffer[3]=session;			//session_id
+	
+	memcpy(buffer+4,tag,3);
+	
+	if(len<128)
+	{
+		buffer[7]=len&0x7f;
+		memcpy(buffer+8,data,len);
+		newlen+=1;
+	}
+	else if(len>127)
+	{
+		buffer[7]=0x81;
+		buffer[8]=len&0xff;
+		memcpy(buffer+9,data,len);
+		newlen+=2;
+	}
+	else 
+	{
+		buffer[7]=0x82;
+		buffer[8]=(len&0xff00)>>8;
+		buffer[9]=len&0xff;
+		memcpy(buffer+10,data,len);
+		newlen+=3;
+	}
+	
+#if 0
+	for(int i=0;i<newlen;i++)
+		printf("%02x ",buffer[i]);
+	printf("\n");	
+#endif
+	sendTPDU(0xA0,newlen,1,buffer);
+
 }
 
 void eDVBCI::clearCAIDs()
@@ -338,19 +406,17 @@ void eDVBCI::pushCAIDs()
 
 	std::list<int>& availCA = sapi->availableCASystems;
 
-#if 1	
 	lock.lock();	
 	eDebug("count for caids: %d",caidcount);
 	for(unsigned int i=0;i<caidcount;i++)
 		availCA.push_back(caids[i]);
 
 	lock.unlock();
-#endif	
 }
 
 void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data)
 {
-	unsigned char buffer[len+6];
+	unsigned char buffer[len+7];
 	
 	buffer[0]=tc_id;
 	buffer[1]=0;
@@ -358,11 +424,12 @@ void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_i
 
 	if(len>110)
 	{
-		buffer[3]=0x81;
-		buffer[4]=len+1;
-		buffer[5]=tc_id;
-		memcpy(buffer+6,data,len);
-		sendData(tc_id,buffer+2,len+4);
+		buffer[3]=0x82;
+		buffer[4]=((len+1)>>8);
+		buffer[5]=((len+1) & 0xff);
+		buffer[6]=tc_id;
+		memcpy(buffer+7,data,len);
+		sendData(tc_id,buffer+2,len+5);
 	}
 	else
 	{	
@@ -378,6 +445,8 @@ void eDVBCI::sendData(unsigned char tc_id,unsigned char *data,unsigned int len)
 	unsigned int bytesleft=len;
 	unsigned char lpdu[PAYLOAD_LEN+2];
 	unsigned int rp=0;
+
+	pollTimer.stop();	
 	
 	lpdu[0]=tc_id;
 	
@@ -389,6 +458,12 @@ void eDVBCI::sendData(unsigned char tc_id,unsigned char *data,unsigned int len)
 			memcpy(lpdu+2,data+rp,PAYLOAD_LEN);
 			rp+=PAYLOAD_LEN;
 			bytesleft-=PAYLOAD_LEN;
+#if 0			
+			int i;
+			for(i=0;i<PAYLOAD_LEN+2;i++)
+				printf("%02x ",lpdu[i]);
+			printf("\n");	
+#endif
 
 			if(write(fd,lpdu,PAYLOAD_LEN+2)<0)
 			{
@@ -401,7 +476,12 @@ void eDVBCI::sendData(unsigned char tc_id,unsigned char *data,unsigned int len)
 		{
 			lpdu[1]=0x00;
 			memcpy(lpdu+2,data+rp,bytesleft+2);
-
+#if 0
+			int i;
+			for(i=0;i<bytesleft+2;i++)
+				printf("%02x ",lpdu[i]);
+			printf("\n");	
+#endif
 			if(write(fd,lpdu,bytesleft+2)<0)
 			{
 				eDebug("[DVBCI] write error");
@@ -411,6 +491,7 @@ void eDVBCI::sendData(unsigned char tc_id,unsigned char *data,unsigned int len)
 			bytesleft=0;	
 		}
 	}				
+
 }
 
 void eDVBCI::help_manager(unsigned int session)
@@ -448,29 +529,7 @@ void eDVBCI::help_manager(unsigned int session)
         //was wir alles koennen :)
         memcpy(buffer,"\x90\x2\x0\x1\x9f\x80\x11",7);
 
-        buffer[7]=0x14;
-#if 0
-        buffer[8]=0x00;			//res. manager
-        buffer[9]=0x01;
-        buffer[10]=0x00;
-        buffer[11]=0x41;		//? :)
-        buffer[12]=0x00;
-        buffer[13]=0x40; //02
-        buffer[14]=0x00;
-        buffer[15]=0x41;		//CA
-        buffer[16]=0x00;
-        buffer[17]=0x03;
-        buffer[18]=0x41; //00		//date-time
-
-        buffer[19]=0x00;		
-        buffer[20]=0x24;
-        buffer[21]=0x00;
-        buffer[22]=0x41;		
-
-        buffer[23]=0x00;
-        buffer[24]=0x40;
-        buffer[25]=0x00;
-#else
+        buffer[7]=0x10;
         buffer[8]=0x00;			//res. manager
         buffer[9]=0x01;
         buffer[10]=0x00;
@@ -490,13 +549,7 @@ void eDVBCI::help_manager(unsigned int session)
         buffer[21]=0x40;
         buffer[22]=0x00;		//mmi
         buffer[23]=0x41;
-#if 0				
-        buffer[24]=0x00;
-        buffer[25]=0x40;
-        buffer[26]=0x00;
-        buffer[27]=0x41;
-#endif
-#endif
+
         sendTPDU(0xA0,24,sessions[session].tc_id,buffer);
         sessions[session].internal_state=3;
         break;
@@ -542,8 +595,19 @@ void eDVBCI::ca_manager(unsigned int session)
 				clearCAIDs();
         eDebug("[DVBCI] [CA MANAGER] up to now nothing happens -> ca_info_enq");
 
-        memcpy(buffer,"\x90\x2\x0\x3\x9f\x80\x30\x0",9);
-        sendTPDU(0xA0,9,sessions[session].tc_id,buffer);
+        memcpy(buffer,"\x90\x2\x0\x3\x9f\x80\x30\x0",8);
+
+				int i;
+				for(i=0;i<MAX_SESSIONS;i++)
+				if(sessions[i].state && (sessions[i].service_class==0x30041 || sessions[i].service_class==0x34100))
+					break;
+				if(i==MAX_SESSIONS)
+				{
+					eDebug("NO SESSION ID for CA-MANAGER");		
+					return;
+				}	
+				buffer[3]=i;
+        sendTPDU(0xA0,8,sessions[session].tc_id,buffer);
 
         break;
       }
@@ -624,15 +688,20 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 	{
 		unsigned char buffer[20];
 		eDebug("[DVBCI] [DATE TIME ENQ]");
-		memcpy(buffer,"\x90\x2\x0\x5\x9f\x88\x41\x5\xcd\x64\x1\x51\x40",13);
+		memcpy(buffer,"\x90\x2\x0\x5\x9f\x88\x41\x5\xcd\x8A\x23\x13\x12",13);
 		sendTPDU(0xA0,13,1,buffer);
 	}
 
 	if(data[4]==0x9f && data[5]==0x88)
 	{
 		char buffer[len+1];
+		int i;
 		eDebug("[DVBCI] [APPLICATION MANAGER] -> mmi_menu");
 		eDebug("mmi len:%d",len);
+		for(i=0;i<len;i++)
+			printf("%02x ",data[i]);
+		printf("\n");	
+		
 		memcpy(buffer+1,data,len);
 		buffer[0]=(len&0xff);
 		ci_mmi_progress(buffer);
@@ -731,9 +800,12 @@ void eDVBCI::receiveTPDU(unsigned char tpdu_tag,unsigned int tpdu_len,unsigned c
 		case 0x80:
 			if(data[0]==0x80)
 				sendTPDU(0x81,0,tpdu_tc_id,0);
+			else
+				pollTimer.start(200);	
 			break;
 		case 0x83:
 			eDebug("[DVBCI] T_C_ID %d wurde erstellt",tpdu_tc_id);	
+			//pollTimer.start(800);		//200
 			break;
 		case 0xA0:
 			if(tpdu_len)
@@ -759,7 +831,8 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 	int tpdu_len;
 	int tpdu_tc_id;
 	int x=0;
-#if 0	
+#if 1	
+	printf("incoming:");	
 	for(int i=0;i<len;i++)
 		printf("%02x ",buffer[i]);
 	printf("\n");	
@@ -785,8 +858,12 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 		if(y&0x80)						//aua fix me
 		{
 			//eDebug("y & 0x80 %x",tpdu_len);
-			x++;
-			tpdu_len=buffer[x++];
+			y&=0x7f;
+			int i;
+			for(i=0;i<y;i++)
+				tpdu_len=(buffer[x++]&0xff)<<(((y*8)-8)-(i*8));
+			//x++;
+			//tpdu_len=buffer[x++];
 			//eDebug("len:%d\n",tpdu_len);
 		}
 		tpdu_len--;
@@ -795,6 +872,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 		memcpy(ml_buffer,buffer+x,len-7);
 		ml_bufferlen=len-7;
 		ml_buffersize=tpdu_len;	
+		dataAvailable(0);
 	}
 	else if(!m_l && ml_bufferlen)		//last fragment
 	{
@@ -812,24 +890,28 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 			if(y&0x80)						//aua fix me
 			{
 				//eDebug("y & 0x80 %x",tpdu_len);
-				x++;
-				tpdu_len=buffer[x++];
+				y&=0x7f;
+				int i;
+				for(i=0;i<y;i++)
+					tpdu_len=(buffer[x++]&0xff)<<(((y*8)-8)-(i*8));
+				//tpdu_len=buffer[x++];
 				//eDebug("len:%d\n",tpdu_len);
 			}
 			tpdu_len--;
-			if(tpdu_len>(len-6))
-				tpdu_len=len-6;
+			//if(tpdu_len>(len-6))
+			//	tpdu_len=len-6;
 			tpdu_tc_id=buffer[x++];
-
-			//printf("tpdu:");
-			//for(int i=0;i<tpdu_len;i++)
-			//	printf("%02x ",buffer[x+i]);
-			//printf("\n");	
-
+#if 1
+			printf("tpdu (%02x):",tpdu_tag);
+			for(int i=0;i<tpdu_len;i++)
+				printf("%02x ",buffer[(x-tpdu_len+1)+i]);
+			printf("\n");	
+#endif
 			receiveTPDU(tpdu_tag,tpdu_len,tpdu_tc_id,buffer+x);
 			x+=tpdu_len;
 		}	
 	}	
+	//pollTimer.start(200);
 }
 
 void eDVBCI::dataAvailable(int what)
@@ -847,6 +929,9 @@ void eDVBCI::dataAvailable(int what)
 		eDebug("[DVBCI] module removed");	
 		memset(appName,0,sizeof(appName));
 		ci_progress("no module");
+
+		for(int i=0;i<MAX_SESSIONS;i++)
+			sessions[i].state=STATE_FREE;
 		
 		::read(fd,&buffer,0);	
 		ci_state=0;
@@ -859,6 +944,8 @@ void eDVBCI::dataAvailable(int what)
 		int i;
 		eDebug("[DVBCI] module inserted");	
 		ci_progress("module found");
+		
+		//eZapMain::getInstance()->postMessage(eZapMessage(1,"Common Interface","CI inserted - initializing...",10),0);
 
 		for(i=0;i<MAX_SESSIONS;i++)
 			sessions[i].state=STATE_FREE;
@@ -867,8 +954,6 @@ void eDVBCI::dataAvailable(int what)
 
 		::read(fd,&buffer,0);	
 
-		//::ioctl(fd,CI_TS_ACTIVATE);
-	
 		if(::ioctl(fd,CI_RESET)!=0)
 		{
 			ci_state=0;
@@ -884,8 +969,14 @@ void eDVBCI::dataAvailable(int what)
 
 	if(size>0)
 	{
+		int i;
+#if 0		
+		for(i=0;i<size;i++)
+			printf("%02x ",buffer[i]);
+		printf("\n");	
+#endif	
 		incoming(buffer,size);			
-		pollTimer.start(250);
+		//pollTimer.start(250);
 		return;
 	}	
 	
@@ -894,13 +985,14 @@ void eDVBCI::dataAvailable(int what)
 		sendTPDU(0x82,0,1,0);	
 		ci_state=2;
 	}
-	pollTimer.start(250);
+	//pollTimer.start(200);		//200
 }
 
 void eDVBCI::poll()
 {
 	int present;
 
+	printf("TIMER\n");
 	::ioctl(fd,CI_GET_STATUS,&present);	
 
 	if(present)						//CI removed

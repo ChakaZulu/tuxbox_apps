@@ -67,6 +67,8 @@ Descriptor *Descriptor::create(descr_gen_t *descr)
 		return new NVODReferenceDescriptor(descr);
 	case DESCR_TIME_SHIFTED_SERVICE:
 		return new TimeShiftedServiceDescriptor((descr_time_shifted_service_struct*)descr);
+	case DESCR_TIME_SHIFTED_EVENT:
+		return new TimeShiftedEventDescriptor((descr_time_shifted_event_struct*)descr);	
 	case DESCR_STREAM_ID:
 		return new StreamIdentifierDescriptor((descr_stream_identifier_struct*)descr);
 	case 9:
@@ -101,7 +103,6 @@ Descriptor *Descriptor::create(descr_gen_t *descr)
 	case DESCR_CONTENT:
 		return new ContentDescriptor((descr_gen_struct*)descr);
 	case DESCR_COUNTRY_AVAIL:
-	case DESCR_TIME_SHIFTED_EVENT:
 	case DESCR_MOSAIC:
 	case DESCR_TELETEXT:
 	case DESCR_TELEPHONE:
@@ -320,6 +321,20 @@ eString TimeShiftedServiceDescriptor::toString()
 {
 	eString res="TimeShiftedServiceDescriptor\n";
 	res+="	reference_service_id: " + qHex(reference_service_id) + "\n";
+	return res;
+}
+
+TimeShiftedEventDescriptor::TimeShiftedEventDescriptor(descr_time_shifted_event_struct *descr): Descriptor(DESCR_TIME_SHIFTED_EVENT)
+{
+	reference_service_id=HILO(descr->reference_service_id);
+	reference_event_id=HILO(descr->reference_event_id);
+}
+
+eString TimeShiftedEventDescriptor::toString()
+{
+	eString res="TimeShiftedEventDescriptor\n";
+	res+="	reference_service_id: " + qHex(reference_service_id) + "\n";
+	res+="	reference_event_id: " + qHex(reference_event_id) + "\n";	
 	return res;
 }
 

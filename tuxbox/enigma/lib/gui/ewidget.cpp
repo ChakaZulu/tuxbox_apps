@@ -15,6 +15,7 @@ eWidget *eWidget::root;
 
 eWidget::eWidget(eWidget *_parent, int takefocus):
 	parent(_parent ? _parent : root),
+	shortcut(0), shortcutFocusWidget(0),
 	focus(0), takefocus(takefocus),
 	font( parent ? parent->font : eSkin::getActive()->queryFont("global.normal") ),
 	backgroundColor(_parent?gColor(-1):gColor(eSkin::getActive()->queryScheme("global.normal.background"))),
@@ -46,6 +47,9 @@ eWidget::~eWidget()
 	hide();
 	if (takefocus)
 		getTLW()->focusList()->remove(this);
+		
+	if (shortcut)
+		getTLW()->actionListener.remove(this);
 
 	if (parent && !parent->childlist.empty())
 		parent->childlist.remove(this);
@@ -362,8 +366,14 @@ void eWidget::willHideChildren()
 void eWidget::findAction(eActionPrioritySet &prio, const eRCKey &key, eWidget *context)
 {
 	for (actionMapList::iterator i = actionmaps.begin(); i != actionmaps.end(); ++i)
-		(*i)->findAction(prio, key, context);
-		
+	{
+		(*i)->findAction(prio, key, context, eActionMapList::getInstance()->getCurrentStyle());
+		(*i)->findAction(prio, key, context, "");
+	}
+
+	for(ePtrList<eWidget>::iterator w(actionListener.begin()); w != actionListener.end(); ++w)
+		i_shortcutActions->map.findAction(prio, key, w, "");
+
 	if (focus && focus != this)
 		focus->findAction(prio, key, context);
 }
@@ -381,7 +391,9 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 		/* emit */ focusChanged(focus);  // faked focusChanged Signal to the Statusbar
 	break;
 	case eWidgetEvent::evtAction:
-		if (evt.action == &i_focusActions->up)
+		if (evt.action == shortcut && isVisible())
+			event(eWidgetEvent(eWidgetEvent::evtShortcut));
+		else if (evt.action == &i_focusActions->up)
 			focusNext(focusDirPrev);
 		else if (evt.action == &i_focusActions->down)
 			focusNext(focusDirNext);
@@ -397,6 +409,7 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 		eActionPrioritySet prio;
 
 		findAction(prio, *evt.key, this);
+
 		if (focus && (focus != this))
 			focus->findAction(prio, *evt.key, focus);
 
@@ -445,6 +458,10 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 	case eWidgetEvent::changedPosition:
 	case eWidgetEvent::changedPixmap:
 		invalidate();
+		break;
+	case eWidgetEvent::evtShortcut:
+		eDebug("got evtShortcut");
+		setFocus(shortcutFocusWidget ? shortcutFocusWidget : this);
 		break;
 	default:
 		break;
@@ -924,6 +941,10 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 		setForegroundColor(eSkin::getActive()->queryColor(value));
 	else if (prop=="backgroundColor")
 		setBackgroundColor(eSkin::getActive()->queryColor(value));
+	else if (prop=="shortcut")
+		setShortcut(value);
+	else if (prop=="shortcutFocus")
+		setShortcutFocus(parent ? parent->search(value) : 0);
 	else
 	{
 		eFatal("skin property %s does not exist", prop.c_str());
@@ -988,6 +1009,20 @@ void eWidget::zOrderRaise()
 		show();
 }
 
+void eWidget::setShortcut(const eString &shortcutname)
+{
+	if (!shortcut)
+		getTLW()->actionListener.push_back(this);
+	shortcut=i_shortcutActions->map.findAction(shortcutname.c_str());
+}
+
+void eWidget::setShortcutFocus(eWidget *focus)
+{
+	shortcutFocusWidget=focus;
+	if (!focus)
+		eFatal("setShortcutFocus with unknown widget!");
+}
+
 static eWidget *create_eWidget(eWidget *parent)
 {
 	return new eWidget(parent);
@@ -1029,15 +1064,15 @@ int eDecoWidget::eventFilter( const eWidgetEvent &evt )
 		{
 			crect.setLeft( deco.borderLeft );
 			crect.setTop( deco.borderTop );
-			crect.setRight( width() - 1 - deco.borderRight );
-			crect.setBottom( height() - 1 - deco.borderBottom );
+			crect.setRight( width() - deco.borderRight );
+			crect.setBottom( height() - deco.borderBottom );
 		}
 		if (deco_selected)
 		{
 			crect_selected.setLeft( deco_selected.borderLeft );
 			crect_selected.setTop( deco_selected.borderTop );
-			crect_selected.setRight( width() - 1 - deco_selected.borderRight );
-			crect_selected.setBottom( height() - 1 - deco_selected.borderBottom );
+			crect_selected.setRight( width() - deco.borderRight );
+			crect_selected.setBottom( height() - deco.borderBottom );
 		}
 	}
 	return 0; //always return 0... the eventHandler must been called...

@@ -7,16 +7,19 @@
 class eLabel;
 class eButton;
 class eSlider;
+class eCheckbox;
 
 class eZapLCDSetup: public eWindow
 {
 	eSlider *p_brightness, *p_contrast, *p_standby;
 	eLabel *bbrightness, *bcontrast, *bstandby;
 	eStatusBar* statusbar;
+	eCheckbox* inverted;
 	
 	int lcdbrightness;
 	int lcdcontrast;
 	int lcdstandby;
+	unsigned char lcdinverted;
 	                	
 	eButton *ok, *abort;
 	void okPressed();
@@ -24,6 +27,7 @@ class eZapLCDSetup: public eWindow
 	void brightnessChanged( int );
 	void contrastChanged( int );
 	void standbyChanged( int );
+	void invertedChanged( int );
 	void update(int brightness, int contrast);
 public:
 	eZapLCDSetup();

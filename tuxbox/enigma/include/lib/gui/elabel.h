@@ -13,12 +13,14 @@ protected:
 	int blitFlags;
 	int flags;
 	eTextPara *para;
+	gColor transparentBackgroundColor;
 	int align;
 	void validate( const eSize* s=0 );
 	int eventHandler(const eWidgetEvent &event);
 	void redrawWidget(gPainter *target, const eRect &area);
 	int setProperty(const eString &prop, const eString &value);
 	int yOffs;
+	gPixmap *shortcutPixmap; // shortcut pixmap to be displayed right after description
 public:
 	void invalidate();
 	enum { flagVCenter = 64 };

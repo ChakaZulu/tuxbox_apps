@@ -449,13 +449,13 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 			eString str1, str2, str3;
 			if (type == erase)
 			{
-				str1 = _("You would to delete the running event.. this stops the timer mode (recording)!");
+				str1 = _("You would to delete the running event..\nthis stops the timer mode (recording)!");
 				str2 = _("Delete event from timerlist");
 				str3 = _("Really delete this event?");
 			}
 			else if (type == update)
 			{
-				str1 = _("You would to update the running event.. this stops the timer mode (recording)!");
+				str1 = _("You would to update the running event.. \nthis stops the timer mode (recording)!");
 				str2 = _("Update event in timerlist");
 				str3 = _("Really update this event?");
 			}
@@ -556,7 +556,9 @@ bool eTimerManager::addEventToTimerList( eWidget *sel, const ePlaylistEntry& ent
 
 bool eTimerManager::addEventToTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt, int type )
 {
+  eDebug("addEventToTimer");
 	ePlaylistEntry e( *ref, evt->start_time, evt->duration, evt->event_id, type );
+  eDebug("after ePlaylistEntry");	
 // add the event description	
 	eString descr	= _("no description avail");
 	for (ePtrList<Descriptor>::const_iterator d(evt->descriptor); d != evt->descriptor.end(); ++d)
@@ -687,14 +689,14 @@ eString eListBoxEntryTimer::redraw(gPainter *rc, const eRect& rect, gColor coAct
 	eString descr;
 	if (!paraDescr)
 	{
-		eService* s = eServiceInterface::getInstance()->addRef( entry->service );
+/*		eService* s = eServiceInterface::getInstance()->addRef( entry->service );
 		if (s)
 		{
 			descr = s->service_name;
 			eServiceInterface::getInstance()->removeRef( entry->service );
 		}
-		if (entry->service.descr)
-			descr += " - "+entry->service.descr;
+		if (entry->service.descr)*/
+			descr += /*" - "+*/entry->service.descr;
 		paraDescr = new eTextPara( eRect( 0 ,0, rect.width(), rect.height()) );
 		paraDescr->setFont( DescrFont );
 		paraDescr->renderString( descr );
@@ -1054,7 +1056,7 @@ void eTimerView::addPressed()
 void eTimerView::selChanged( eListBoxEntryTimer *entry )
 {
 	if (entry && entry->entry )
-	{
+	{                                     
 		beginTime = *localtime( &entry->entry->time_begin );
 		time_t tmp = entry->entry->time_begin + entry->entry->duration;
 		endTime = *localtime( &tmp );
@@ -1067,6 +1069,8 @@ void eTimerView::selChanged( eListBoxEntryTimer *entry )
 			bSelectService->setText( service->service_name );
 			eServiceInterface::getInstance()->removeRef( eServiceInterface::getInstance()->service );
 		}
+		else // nvod
+			bSelectService->setText("NVOD");
 	}
 	else
 	{
@@ -1210,7 +1214,16 @@ void eTimerView::showServiceSelector()
 
 	if (ref)
 	{
-		if (tmpService != *ref)
+		if ( ref->data[0] == 4 ) // NVOD
+		{
+			eMessageBox box(_("Sorry, you can not add a time shifted service manually to the timer.\nPlease close the Timer and use the EPG of the service you wish to add!"), _("Information"), eMessageBox::iconInfo|eMessageBox::btOK);
+			hide();
+			box.show();
+			box.exec();
+			box.hide();
+			show();
+		}
+		else if (tmpService != *ref)
 		{
 			tmpService = *ref;
 			eService *service =	eServiceInterface::getInstance()->addRef( tmpService );

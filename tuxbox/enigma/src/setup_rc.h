@@ -7,13 +7,16 @@
 class eLabel;
 class eButton;
 class eSlider;
+class eComboBox;
+class eListBoxEntryText;
 
 class eZapRCSetup: public eWindow
 {
 	eSlider *srrate, *srdelay;
-	eLabel *lrrate, *lrdelay;
+	eLabel *lrrate, *lrdelay, *lrcStyle;
 	eStatusBar* statusbar;
-	
+	eComboBox* rcStyle;
+
 	int rdelay;
 	int rrate;
 	                	
@@ -22,6 +25,7 @@ class eZapRCSetup: public eWindow
 	void abortPressed();
 	void repeatChanged( int );
 	void delayChanged( int );
+	void styleChanged( eListBoxEntryText* );
 	void update();
 public:
 	eZapRCSetup();

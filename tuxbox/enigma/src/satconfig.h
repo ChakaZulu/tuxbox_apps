@@ -117,8 +117,8 @@ class eRotorPage : public eWidget
 	eSatellite *sat;
 	eLNB *curlnb;
 	eListBox<eListBoxEntryText> *positions;
-	eLabel *lRotorOffset;
-	eNumber *orbital_position, *number, *RotorOffset;
+	eLabel *lRotorOffset, *lLatitude, *lLongitude, *lOrbitalPosition, *lStoredRotorNo, *lDirection;
+	eNumber *orbital_position, *number, *RotorOffset, *Latitude, *Longitude;
 	eButton *add, *remove, *prev, *save, *cancel;
 	eCheckbox *fine, *useGotoXX;  // if is checked.. then left..right is for finetuning
 	eComboBox *direction;
@@ -129,6 +129,7 @@ class eRotorPage : public eWidget
 	void numSelected(int*);
 	void lnbChanged( eListBoxEntryText* );
 	void posChanged( eListBoxEntryText* );
+	void gotoXXChanged( int );
 public:  
 	eRotorPage( eWidget *parent, eSatellite *sat );
 };

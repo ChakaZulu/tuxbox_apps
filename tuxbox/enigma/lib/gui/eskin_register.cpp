@@ -15,11 +15,15 @@ public:
 		if (default_skin.load( DATADIR "/enigma/skins/default.esml"))
 			eFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
 
-		char *temp=DEFAULTSKIN;
-		eConfig::getInstance()->getKey("/ezap/ui/skin", temp);
+		eString skinfile=DEFAULTSKIN;
 
-		eString skinfile=temp;
-				
+		char *temp=0;
+		if (!eConfig::getInstance()->getKey("/ezap/ui/skin", temp))
+		{
+			skinfile=temp;
+			free(temp);
+		}
+
 		if (default_skin.load(skinfile.c_str()))
 		{
 			eWarning("failed to load user defined skin %s, falling back to " DEFAULTSKIN, skinfile.c_str());

@@ -30,7 +30,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	setText(_("Video Setup"));
 	move(ePoint(150, 136));
-	resize(eSize(400, 270));
+	cresize(eSize(390, 200));
 
 	eLabel *l=new eLabel(this);
 	l->setText("Colorformat:");

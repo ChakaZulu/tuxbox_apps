@@ -91,7 +91,11 @@ int eButton::eventHandler(const eWidgetEvent &event)
 			else
 				return eLabel::eventHandler(event);
 		break;
-
+		case eWidgetEvent::evtShortcut:
+			/*emit*/ selected();
+			/*emit*/ selected_id(this);
+			return 0;
+			break;
 		default:
 			return eLabel::eventHandler(event);
 		break;

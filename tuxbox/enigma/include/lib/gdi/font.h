@@ -56,6 +56,7 @@ public:
 #define RS_DOT		2
 #define RS_DIRECT	4
 #define RS_FADE		8
+#define RS_RTL		16
 
 #define GS_ISSPACE  1
 #define GS_ISFIRST  2
@@ -92,7 +93,7 @@ class eTextPara
 	int refcnt;
 
 	int appendGlyph(FT_UInt glyphIndex, int flags);
-	void newLine();
+	void newLine(int flags);
 	void setFont(Font *font);
 	eRect boundBox;
 	void calc_bbox();

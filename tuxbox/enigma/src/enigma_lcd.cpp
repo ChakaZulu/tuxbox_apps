@@ -17,7 +17,7 @@ eZapLCD::eZapLCD(): eWidget(eZap::getInstance()->getDesktop(eZap::desktopLCD))
 {
 	instance = this;
 	move(ePoint(0, 0));
-	resize(eSize(120, 64));
+	cresize(eSize(140, 64));
 
 	lcdMain = new eZapLCDMain(this);
 	eDebug("lcdMain created: %p", lcdMain);

@@ -220,7 +220,7 @@ struct saveTransponder: public std::unary_function<const eTransponder&, void>
 			return;
 		fprintf(f, "%04x:%04x %d\n", t.transport_stream_id.get(), t.original_network_id.get(), t.state);
 		if (t.cable.valid)
-			fprintf(f, "\tc %d:%d:%d\n", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion);
+			fprintf(f, "\tc %d:%d:%d:%d\n", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion, t.cable.modulation);
 		if (t.satellite.valid)
 			fprintf(f, "\ts %d:%d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.orbital_position, t.satellite.inversion);
 		fprintf(f, "/\n");
@@ -290,9 +290,9 @@ void eDVBSettings::loadServices()
 			}
 			if (line[1]=='c')
 			{
-				int frequency, symbol_rate, inversion=0;
-				sscanf(line+2, "%d:%d:%d", &frequency, &symbol_rate, &inversion);
-				t.setCable(frequency, symbol_rate, inversion);
+				int frequency, symbol_rate, inversion=0, modulation=3;
+				sscanf(line+2, "%d:%d:%d:%d", &frequency, &symbol_rate, &inversion, &modulation);
+				t.setCable(frequency, symbol_rate, inversion, modulation);
 			}
 		}
 	}
@@ -437,6 +437,7 @@ void eDVBSettings::removeOrbitalPosition(int orbital_position)
 	if (transponderlist)
 	{
 		transponderlist->removeOrbitalPosition(orbital_position);
+		removeDVBBouquets();
 		sortInChannels();
 	}
 

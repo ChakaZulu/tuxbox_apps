@@ -57,6 +57,7 @@ eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): 
 	{
 		if ( icon->getSize().height() > text->getSize().height() )
 		{
+			eDebug("icon is higher");
 			eSize s = icon->getSize();
 			icon->move( ePoint( 20, 20 ) );
 			text->move( ePoint( 20 + s.width() + 20, icon->getPosition().y() + s.height() / 2 - txtSize.height() / 2 ) );
@@ -64,6 +65,7 @@ eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): 
 		}
 		else
 		{
+			eDebug("text is higher");
 			text->move( ePoint( 20 + icon->getSize().width() + 20 , 20 ) );
 			icon->move( ePoint( 20, text->getPosition().y() + text->getSize().height() / 2 - icon->getSize().height() / 2 ) );
 			ext.setHeight( text->getPosition().y() + text->getSize().height() + 20 );

@@ -67,6 +67,7 @@ eMainMenu::eMainMenu()
 	: eWidget(0, 1)
 {
 	addActionMap(&i_cursorActions->map);
+	addActionMap(&i_shortcutActions->map);
 	eLabel *background=new eLabel(this);
 	background->setName("background");
 
@@ -193,6 +194,7 @@ void eMainMenu::sel_quit()
 
 int eMainMenu::eventHandler(const eWidgetEvent &event)
 {
+	int num=-1;
 	switch (event.type)
 	{
 	case eWidgetEvent::willShow:
@@ -213,46 +215,78 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 			active%=MENU_ENTRIES;
 			setActive(active);
 		} else if (event.action == &i_cursorActions->ok)
-		{
-			switch (active)
-			{
-			case 0:
-				sel_tv();
-				break;
-			case 1:
-				sel_radio();
-				break;
-			case 2:
-				sel_file();
-				break;
-			case 3:
-				sel_info();
-				break;
-			case 4:
-				sel_quit();
-				break;
-			case 5:
-				sel_setup();
-				break;
-			case 6:
-				sel_plugins();
-				break;
-			case 7:
-				sel_vcr();
-				break;
-			case 8:
-				sel_timer();
-				break;
-			}
-		} else if (event.action == &i_cursorActions->cancel)
+			selected(active);
+		else if (event.action == &i_cursorActions->cancel)
 			close(0);
+		else if (event.action == &i_shortcutActions->number0)
+			num=9;
+		else if (event.action == &i_shortcutActions->number1)
+			num=0;
+		else if (event.action == &i_shortcutActions->number2)
+			num=1;
+		else if (event.action == &i_shortcutActions->number3)
+			num=2;
+		else if (event.action == &i_shortcutActions->number4)
+			num=3;
+		else if (event.action == &i_shortcutActions->number5)
+			num=4;
+		else if (event.action == &i_shortcutActions->number6)
+			num=5;
+		else if (event.action == &i_shortcutActions->number7)
+			num=6;
+		else if (event.action == &i_shortcutActions->number8)
+			num=7;
+		else if (event.action == &i_shortcutActions->number9)
+			num=8;
 		else
 			break;
+		if (num != -1)
+		{
+			if (num < MENU_ENTRIES)
+			{
+				setActive(active=num);
+				selected(num);
+			}
+		}
 		return 1;
 	default:
 		break;
 	}
 	return eWidget::eventHandler(event);
+}
+
+void eMainMenu::selected(int i)
+{
+	switch (active)
+	{
+	case 0:
+		sel_tv();
+		break;
+	case 1:
+		sel_radio();
+		break;
+	case 2:
+		sel_file();
+		break;
+	case 3:
+		sel_info();
+		break;
+	case 4:
+		sel_quit();
+		break;
+	case 5:
+		sel_setup();
+		break;
+	case 6:
+		sel_plugins();
+		break;
+	case 7:
+		sel_vcr();
+		break;
+	case 8:
+		sel_timer();
+		break;
+	}
 }
 
 void eMainMenu::eraseBackground(gPainter *, const eRect &where)

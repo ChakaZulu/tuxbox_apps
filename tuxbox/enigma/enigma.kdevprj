@@ -34,7 +34,7 @@ configure_args=\s--build=i386-linux --host=i386-linux --target=i386-linux\s
 dir_where_make_will_be_called=./
 email=
 kdevprj_version=1.3
-lfv_open_groups=XML Files
+lfv_open_groups=GNU,XML Files
 make_options=\s-j1 install
 makefiles=Makefile.am,enigma/Makefile.am,enigma/docs/Makefile.am,enigma/docs/en/Makefile.am,src/Makefile.am,lib/base/Makefile.am,lib/Makefile.am,lib/driver/Makefile.am,lib/dvb/lowlevel/Makefile.am,lib/dvb/Makefile.am,lib/gdi/Makefile.am,lib/gui/Makefile.am,lib/socket/Makefile.am,lib/system/Makefile.am,include/Makefile.am,include/lib/base/Makefile.am,include/lib/Makefile.am,include/lib/driver/Makefile.am,include/lib/dvb/Makefile.am,include/lib/gdi/Makefile.am,include/lib/gui/Makefile.am,include/lib/socket/Makefile.am,include/lib/system/Makefile.am,include/lib/dvb/lowlevel/Makefile.am,po/Makefile.am,data/skins/Makefile.am,data/Makefile.am,data/resources/Makefile.am
 modifyMakefiles=false
@@ -123,7 +123,7 @@ install_location=
 type=DATA
 
 [data/skins/Makefile.am]
-files=data/skins/chk_blue2.esml,data/skins/chk_blue2.info,data/skins/chkdesign.esml,data/skins/chkdesign.info,data/skins/chkv2.esml,data/skins/chkv2.info,data/skins/default.esml,data/skins/dream.esml,data/skins/dream.info,data/skins/neutrino.esml,data/skins/neutrino.info
+files=data/skins/chk_blue2.esml,data/skins/chk_blue2.info,data/skins/chkdesign.info,data/skins/chkv2.info,data/skins/default.esml,data/skins/dream.info,data/skins/neutrino.esml,data/skins/neutrino.info,data/skins/stone.esml
 sub_dirs=
 type=normal
 
@@ -139,19 +139,7 @@ install=false
 install_location=
 type=DATA
 
-[data/skins/chkdesign.esml]
-dist=true
-install=false
-install_location=
-type=DATA
-
 [data/skins/chkdesign.info]
-dist=true
-install=false
-install_location=
-type=DATA
-
-[data/skins/chkv2.esml]
 dist=true
 install=false
 install_location=
@@ -164,12 +152,6 @@ install_location=
 type=DATA
 
 [data/skins/default.esml]
-dist=true
-install=false
-install_location=
-type=DATA
-
-[data/skins/dream.esml]
 dist=true
 install=false
 install_location=
@@ -188,6 +170,12 @@ install_location=
 type=DATA
 
 [data/skins/neutrino.info]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/skins/stone.esml]
 dist=true
 install=false
 install_location=
@@ -1458,7 +1446,7 @@ type=PO
 
 [src/Makefile.am]
 dist=true
-files=src/channelinfo.cpp,src/channelinfo.h,src/download.cpp,src/download.h,src/enigma.cpp,src/enigma.h,src/enigma_dyn.h,src/enigma_event.cpp,src/enigma_event.h,src/enigma_info.cpp,src/enigma_info.h,src/enigma_lcd.cpp,src/enigma_lcd.h,src/enigma_main.cpp,src/enigma_main.h,src/enigma_mainmenu.cpp,src/enigma_mainmenu.h,src/enigma_plugins.cpp,src/enigma_plugins.h,src/enigma_scan.cpp,src/enigma_scan.h,src/enigma_setup.cpp,src/enigma_setup.h,src/enigma_vcr.cpp,src/enigma_vcr.h,src/enigma_xmlrpc.cpp,src/enigma_xmlrpc.h,src/epgwindow.cpp,src/epgwindow.h,src/Makefile.am,src/satconfig.cpp,src/satconfig.h,src/scan.cpp,src/scan.h,src/setup_harddisk.cpp,src/setup_harddisk.h,src/setup_language.cpp,src/setup_language.h,src/setup_lcd.cpp,src/setup_lcd.h,src/setup_osd.cpp,src/setup_osd.h,src/setup_rc.cpp,src/setup_rc.h,src/setupnetwork.cpp,src/setupnetwork.h,src/setupskin.cpp,src/setupskin.h,src/setupvideo.cpp,src/setupvideo.h,src/showbnversion.cpp,src/showbnversion.h,src/sselect.cpp,src/sselect.h,src/streaminfo.cpp,src/streaminfo.h,src/timer.cpp,src/timer.h,src/enigma_ci.h,src/enigma_ci.cpp,src/enigma_dyn.cpp
+files=src/channelinfo.cpp,src/channelinfo.h,src/download.cpp,src/download.h,src/enigma.cpp,src/enigma.h,src/enigma_dyn.h,src/enigma_event.cpp,src/enigma_event.h,src/enigma_info.cpp,src/enigma_info.h,src/enigma_lcd.cpp,src/enigma_lcd.h,src/enigma_main.cpp,src/enigma_main.h,src/enigma_mainmenu.cpp,src/enigma_mainmenu.h,src/enigma_plugins.cpp,src/enigma_plugins.h,src/enigma_scan.cpp,src/enigma_scan.h,src/enigma_setup.cpp,src/enigma_setup.h,src/enigma_vcr.cpp,src/enigma_vcr.h,src/enigma_xmlrpc.cpp,src/enigma_xmlrpc.h,src/epgwindow.cpp,src/epgwindow.h,src/Makefile.am,src/satconfig.cpp,src/satconfig.h,src/scan.cpp,src/scan.h,src/setup_harddisk.cpp,src/setup_harddisk.h,src/setup_language.cpp,src/setup_language.h,src/setup_lcd.cpp,src/setup_lcd.h,src/setup_osd.cpp,src/setup_osd.h,src/setup_rc.cpp,src/setup_rc.h,src/setupnetwork.cpp,src/setupnetwork.h,src/setupskin.cpp,src/setupskin.h,src/setupvideo.cpp,src/setupvideo.h,src/showbnversion.cpp,src/showbnversion.h,src/sselect.cpp,src/sselect.h,src/streaminfo.cpp,src/streaminfo.h,src/timer.cpp,src/timer.h,src/enigma_ci.h,src/enigma_ci.cpp,src/enigma_dyn.cpp,src/satfind.cpp,src/satfind.h
 install=false
 install_location=
 sharedlib_LDFLAGS=-version-info 0:0:0
@@ -1665,6 +1653,18 @@ install_location=
 type=SOURCE
 
 [src/satconfig.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[src/satfind.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[src/satfind.h]
 dist=true
 install=false
 install_location=

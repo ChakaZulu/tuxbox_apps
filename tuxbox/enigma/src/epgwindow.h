@@ -19,15 +19,21 @@ class eListBoxEntryEPG:public eListBoxEntry
 	eString descr;
 	eString redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited);
 	static int getEntryHeight();
-	eServiceReference& service;
+	eServiceReference service;
+	void build();
 public:
+	bool operator<(const eListBoxEntryEPG& ref) const
+	{
+		return event.start_time < ref.event.start_time;
+	}
+	eListBoxEntryEPG(EITEvent& evt, eListBox<eListBoxEntryEPG> *listbox, eServiceReference &ref);
 	eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox, eServiceReference &ref);
 	~eListBoxEntryEPG();
 };
 
 class eEPGSelector: public eWindow
 {
-	eListBox<eListBoxEntryEPG>* events;
+	eListBox<eListBoxEntryEPG> *events;
 	eServiceReferenceDVB current;
 private:
 	void fillEPGList();

@@ -234,6 +234,18 @@ struct descr_time_shifted_service_struct
         u_char  reference_service_id_lo : 8;
 };
 
+struct descr_time_shifted_event_struct
+{
+	u_char	descriptor_tag		: 8;
+	u_char	descriptor_length	: 8;
+
+        u_char  reference_service_id_hi : 8;
+        u_char  reference_service_id_lo : 8;
+
+        u_char  reference_event_id_hi : 8;
+        u_char  reference_event_id_lo : 8;  
+};
+
 struct descr_stream_identifier_struct
 {
 	u_char  descriptor_tag          : 8;

@@ -3,8 +3,10 @@
 #include <lib/gui/slider.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/elabel.h>
+#include <lib/gui/combobox.h>
 #include <lib/gui/enumber.h>
 #include <lib/gui/eskin.h>
+#include <lib/gui/actions.h>
 #include <lib/system/econfig.h>
 #include <lib/base/i18n.h>
 #include <lib/dvb/dvbwidgets.h>
@@ -33,7 +35,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 {
 	setText(_("Remotecontrol Setup"));
 	move(ePoint(150, 136));
-	resize(eSize(450, 280));
+	resize(eSize(470, 330));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -46,30 +48,50 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	lrrate=new eLabel(this);
 	lrrate->setText(_("Repeat Rate:"));
 	lrrate->move(ePoint(20, 20));
-	lrrate->resize(eSize(160, fd+4));
+	lrrate->resize(eSize(170, fd+4));
 
 	lrdelay=new eLabel(this);
 	lrdelay->setText(_("Repeat Delay:"));
 	lrdelay->move(ePoint(20, 60));
-	lrdelay->resize(eSize(160, fd+4));
+	lrdelay->resize(eSize(170, fd+4));
 
 	srrate=new eSlider(this, lrrate, 0, 250 );
 	srrate->setName("rrate");
-	srrate->move(ePoint(180, 20));
+	srrate->move(ePoint(200, 20));
 	srrate->resize(eSize(220, fd+4));
 	srrate->setHelpText(_("set RC repeat rate ( left / right )"));
 	CONNECT( srrate->changed, eZapRCSetup::repeatChanged );
 
 	srdelay=new eSlider(this, lrdelay, 0, 1000 );
 	srdelay->setName("contrast");
-	srdelay->move(ePoint(180, 60));
+	srdelay->move(ePoint(200, 60));
 	srdelay->resize(eSize(220, fd+4));
 	srdelay->setHelpText(_("set RC repeat delay ( left / right )"));
 	CONNECT( srdelay->changed, eZapRCSetup::delayChanged );
 
+	lrcStyle=new eLabel(this);
+	lrcStyle->move(ePoint(20, 100));
+	lrcStyle->resize(eSize(220, fd+4));
+	lrcStyle->setText("Remotecontrol Style:");
+	rcStyle=new eComboBox(this, 4, lrcStyle);
+	rcStyle->move(ePoint(20, 140));
+	rcStyle->resize(eSize(220, 35));
+	rcStyle->setHelpText(_("select your favourite rc style (ok)"));
+	rcStyle->loadDeco();
+	CONNECT( rcStyle->selchanged, eZapRCSetup::styleChanged );
+	eListBoxEntryText *current=0;
+	for (std::map<eString, eString>::const_iterator it(eActionMapList::getInstance()->getExistingStyles().begin()); it != eActionMapList::getInstance()->getExistingStyles().end(); ++it)
+	{
+		if ( it->first == eActionMapList::getInstance()->getCurrentStyle() )
+			current = new eListBoxEntryText( *rcStyle, it->second, (void*) &it->first );
+		else
+			new eListBoxEntryText( *rcStyle, it->second, (void*) &it->first );
+	}
+	if (current)
+		rcStyle->setCurrent( current );
 	ok=new eButton(this);
 	ok->setText(_("save"));
-	ok->move(ePoint(20, 135));
+	ok->move(ePoint(20, clientrect.height()-80));
 	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("close window and save changes"));
 	ok->loadDeco();
@@ -77,7 +99,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 
 	abort=new eButton(this);
 	abort->setText(_("abort"));
-	abort->move(ePoint(210, 135));
+	abort->move(ePoint(210, clientrect.height()-80));
 	abort->resize(eSize(170, 40));
 	abort->setHelpText(_("close window (no changes are saved)"));
 	abort->loadDeco();
@@ -96,8 +118,16 @@ eZapRCSetup::~eZapRCSetup()
 {
 }
 
+void eZapRCSetup::styleChanged( eListBoxEntryText* e)
+{
+	if (e)
+		eActionMapList::getInstance()->setCurrentStyle( *(eString*)e->getKey() );
+}
+
 void eZapRCSetup::okPressed()
 {
+	// save current selected style
+	eConfig::getInstance()->setKey("/ezap/rc/style", ((eString*)rcStyle->getCurrent()->getKey())->c_str() );
 	eConfig::getInstance()->setKey("/ezap/rc/repeatRate", rrate);
 	eConfig::getInstance()->setKey("/ezap/rc/repeatDelay", rdelay);
 	eConfig::getInstance()->flush();
@@ -106,6 +136,12 @@ void eZapRCSetup::okPressed()
 
 void eZapRCSetup::abortPressed()
 {
+	char *style;
+	if (eConfig::getInstance()->getKey("/ezap/rc/style", style) )
+		eActionMapList::getInstance()->setCurrentStyle("default");
+	else
+		eActionMapList::getInstance()->setCurrentStyle( style );
+
 	eConfig::getInstance()->getKey("/ezap/rc/repeatRate", rrate);
 	eConfig::getInstance()->getKey("/ezap/rc/repeatDelay", rdelay);
 	update();

@@ -392,8 +392,9 @@ int eFrontend::tune(eTransponder *trans,
 		eLNB *lnb = sat->getLNB();
     		// Variables to detect if DiSEqC must sent .. or not
 		int csw = lnb->getDiSEqC().DiSEqCParam,
-							RotorCmd=-1;
-		//					SmatvFreq=-1
+		    RotorCmd=-1,
+		    SmatvFreq=-1,
+		    ToneBurst=-1;
 
 		if (csw <= eDiSEqC::BB)  // use AA/AB/BA/BB ?
 		{
@@ -408,7 +409,7 @@ int eFrontend::tune(eTransponder *trans,
 		//else we sent directly the cmd 0xF0..0xFF
 
 		eDebug("DiSEqC Switch cmd = %04x", csw);
-
+#if 0
 		// Rotor Support
 		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 )
 		{
@@ -422,6 +423,7 @@ int eFrontend::tune(eTransponder *trans,
 
 			commands[cmdCount-1].msg[0]=0xE0;  // no reply... first transmission
 			commands[cmdCount-1].msg[1]=0x31;     // normal positioner
+
 
 			if ( lnb->getDiSEqC().useGotoXX )
 			{
@@ -463,7 +465,6 @@ int eFrontend::tune(eTransponder *trans,
 			}
 		}
 
-#if 0
 		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::SMATV )
 		{
 			if ( uncommitted ) // the we add 2 * repeats + 1 + 1;
@@ -516,23 +517,23 @@ int eFrontend::tune(eTransponder *trans,
 			for ( int i = 0; i < loops;)  // fill commands...
 			{
 				commands[i].msg[0]= i ? 0xE1 : 0xE0; // repeated or not repeated transm.
-				commands[i].msg[1]=0x10;
+				commands[i].msg[1]= 0x10;
 
 				// when DiSEqC V1.0 is avail then loops is always 1 .. see above
 
 				if ( loops > 1 && lnb->getDiSEqC().uncommitted_switch )
 				{
-					commands[i].msg[2]=0x39;          // uncomitted switch
+					commands[i].msg[2] = 0x39;          // uncomitted switch
 					eDebug("0x39");
 				}
 				else // DiSEqC < V1.1 do not support repeats
 				{
-					commands[i].msg[2]=0x38;          // comitted switch
+					commands[i].msg[2] = 0x38;          // comitted switch
 					eDebug("0x38");
 				}
 
-				commands[i].msg[3]=csw;
-				commands[i].msg_len=4;
+				commands[i].msg[3] = csw;
+				commands[i].msg_len = 4;
 
 				i++;
 
@@ -573,20 +574,23 @@ int eFrontend::tune(eTransponder *trans,
 
 
 		// disable tone before anything else
-		ioctl(fd, FE_SET_TONE, SEC_TONE_OFF);
+		if ( csw != lastcsw || ToneBurst != lastToneBurst )
+			ioctl(fd, FE_SET_TONE, SEC_TONE_OFF);
 
 
-
-		// Voltage( 0/14/18V  vertical/horizontal )
-		if ( swParams.VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams.VoltageMode == eSwitchParameter::HV )  )
+		if ( csw != lastcsw )
 		{
-			ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_13);
-			usleep(15 * 1000);
-		}
-		else if ( swParams.VoltageMode == eSwitchParameter::_18V || ( polarisation==polHor && swParams.VoltageMode == eSwitchParameter::HV)  )
-		{
-			ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_18);
-			usleep(15 * 1000);
+        		// Voltage( 0/14/18V  vertical/horizontal )
+			if ( swParams.VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams.VoltageMode == eSwitchParameter::HV )  )
+			{
+				ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_13);
+				usleep(15 * 1000);
+			}
+			else if ( swParams.VoltageMode == eSwitchParameter::_18V || ( polarisation==polHor && swParams.VoltageMode == eSwitchParameter::HV)  )
+			{
+				ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_18);
+				usleep(15 * 1000);
+			}
 		}
 
 
@@ -611,11 +615,12 @@ int eFrontend::tune(eTransponder *trans,
 
 
 		// DiSEqC commands
-		if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_0 && commands && cmdCount)
+		if ( csw != lastcsw && lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_0 && commands && cmdCount)
 		{
 			ioctl(fd, FE_DISEQC_SEND_MASTER_CMD, &commands[0]);
 
-			for (int i = 1; i < cmdCount; i++) {
+			for (int i = 1; i < cmdCount; i++) 
+			{
 				usleep(80 * 1000);
 				ioctl(fd, FE_DISEQC_SEND_MASTER_CMD, &commands[i]);
 			}
@@ -626,27 +631,34 @@ int eFrontend::tune(eTransponder *trans,
 
 
 		// Toneburst (MiniDiSEqC)
-		if (lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::A)
+		if ( ToneBurst != lastToneBurst )
 		{
-			ioctl(fd, FE_DISEQC_SEND_BURST, SEC_MINI_A);
-			usleep(15 * 1000);
+			if ( lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::A)
+			{
+				ioctl(fd, FE_DISEQC_SEND_BURST, SEC_MINI_A);
+				usleep(15 * 1000);
+			}
+			else if (lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::B)
+			{
+				ioctl(fd, FE_DISEQC_SEND_BURST, SEC_MINI_B);
+				usleep(15 * 1000);
+			}
 		}
-		else if (lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::B)
-		{
-			ioctl(fd, FE_DISEQC_SEND_BURST, SEC_MINI_B);
-			usleep(15 * 1000);
-		}
-
 
 
 		// set Continuous Tone ( 22 Khz... low - high band )
-		if ( (swParams.HiLoSignal == eSwitchParameter::ON) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency > lnb->getLOFThreshold()) ) )
+		if ( csw != lastcsw || ToneBurst != lastToneBurst )
 		{
-			ioctl(fd, FE_SET_TONE, SEC_TONE_ON);
-		}
-		else if ( (swParams.HiLoSignal == eSwitchParameter::OFF) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency <= lnb->getLOFThreshold()) ) )
-		{
-			ioctl(fd, FE_SET_TONE, SEC_TONE_OFF);
+	    		if ( (swParams.HiLoSignal == eSwitchParameter::ON) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency > lnb->getLOFThreshold()) ) )
+        		{
+				ioctl(fd, FE_SET_TONE, SEC_TONE_ON);
+			}
+			else if ( (swParams.HiLoSignal == eSwitchParameter::OFF) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency <= lnb->getLOFThreshold()) ) )
+			{
+				ioctl(fd, FE_SET_TONE, SEC_TONE_OFF);
+			}
+			lastToneBurst = ToneBurst;
+			lastcsw = csw;
 		}
 
 

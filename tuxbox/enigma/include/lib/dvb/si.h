@@ -110,6 +110,16 @@ public:
   eString toString();
 };
 
+class TimeShiftedEventDescriptor: public Descriptor
+{
+public:
+  int reference_service_id;
+  int reference_event_id;
+  TimeShiftedEventDescriptor(descr_time_shifted_event_struct *descr);
+  eString toString();
+};
+
+
 class StreamIdentifierDescriptor: public Descriptor
 {
 public:

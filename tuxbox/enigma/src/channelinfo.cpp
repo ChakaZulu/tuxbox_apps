@@ -9,7 +9,10 @@
 #include <time.h>
 
 eChannelInfo::eChannelInfo( eWidget* parent, const char *deco)
-	:eDecoWidget(parent, 0, deco), ctime(this), cname(this), cdescr(this), cdolby(this), cstereo(this), cformat(this), cscrambled(this), eit(0)
+	:eDecoWidget(parent, 0, deco),
+	ctime(this), cname(this), cdescr(this),
+	cgenre(this), cdolby(this), cstereo(this),
+	cformat(this), cscrambled(this), eit(0)
 {
 	cflags = 0;
 
@@ -19,6 +22,12 @@ eChannelInfo::eChannelInfo( eWidget* parent, const char *deco)
 	cdescr.setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
 	cdescr.setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
 	cdescr.setFlags( RS_FADE | eLabel::flagVCenter );
+
+	fn.pointSize = 28;
+	cgenre.setFont( fn );
+	cgenre.setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
+	cgenre.setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
+	cgenre.setFlags( RS_FADE | eLabel::flagVCenter );
 
 	fn.pointSize = 30;
 	cname.setFont( fn );
@@ -57,49 +66,49 @@ const char *eChannelInfo::genresTableShort[256] =
 	/* 0x0 undefined */    	NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL, 
 
-	/* 0x1 Movie */        	"Movie","Thriller","Adventure","SciFi","Comedy",
-							"Soap","Romance","Serious","Adult",
+	/* 0x1 Movie */        	_("Movie"),("Thriller"),_("Adventure"),_("SciFi"),_("Comedy"),
+							_("Soap"),_("Romance"),_("Serious"),_("Adult"),
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 
-	/* 0x2 News */         	"News","Weather","Magazine","Documentary","Discussion",
+	/* 0x2 News */         	_("News"),_("Weather"),_("Magazine"),_("Documentary"),_("Discussion"),
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 							NULL,NULL,NULL,
 
-	/* 0x3 Show */         	"Show","Game Show","Variety","Talk",
+	/* 0x3 Show */         	_("Show"),_("Game Show"),_("Variety"),_("Talk"),
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 							NULL,NULL,NULL,NULL,
 
-	/* 0x4 Sports */       	"Sports","Special Event","Sports Mag.","Football","Tennis","Team Sports",
-							"Athletics","Motor Sports","Water Sports","Winter Sports","Equestrian",
-							"Martial Sports",
+	/* 0x4 Sports */       	_("Sports"),("Special Event"),("Sports Mag."),("Football"),("Tennis"),("Team Sports"),
+							_("Athletics"),("Motor Sports"),("Water Sports"),("Winter Sports"),("Equestrian"),
+							_("Martial Sports"),
 							NULL,NULL,NULL,NULL,
 
-	/* 0x5 Children */     	"Children","Pre-School","Age 6-14","Age 10-16","School",
-							"Cartoons",
+	/* 0x5 Children */     	_("Children"),("Pre-School"),("Age 6-14"),("Age 10-16"),("School"),
+							_("Cartoons"),
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 							NULL,NULL,
 
-	/* 0x6 Music */        	"Music","Rock/Pop","Classical","Folk","Jazz","Musical","Ballet",
+	/* 0x6 Music */        	("Music"),("Rock/Pop"),("Classical"),("Folk"),("Jazz"),("Musical"),("Ballet"),
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 							NULL,
 
-	/* 0x7 Culture */      	"Culture","Perf. Arts","Fine Arts","Religion","Pop. Arts","Literatur",
-							"Film","Experimental","Press","New Media","Art Mag.","Fashion",
+	/* 0x7 Culture */      	_("Culture"),("Perf. Arts"),("Fine Arts"),("Religion"),("Pop. Arts"),("Literatur"),
+							_("Film"),("Experimental"),("Press"),("New Media"),("Art Mag."),("Fashion"),
 							NULL,NULL,NULL,NULL,
 
-	/* 0x8 Social */       	"Social","Soc. Mag.","Economics","Remark. People",
+	/* 0x8 Social */       	_("Social"),("Soc. Mag."),("Economics"),("Remark. People"),
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 							NULL,NULL,NULL,NULL,
 
-	/* 0x9 Education */    	"Education","Nature","Technology","Medicine","Expeditions","Spiritual",
-							"Further Ed.","Languages",
+	/* 0x9 Education */    	_("Education"),("Nature"),("Technology"),("Medicine"),("Expeditions"),("Spiritual"),
+							_("Further Ed."),("Languages"),
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 
-	/* 0xa Leisure */      	"Hobbies","Travel","Handicraft","Motoring","Fitness","Cooking",
-							"Shopping","Gardening",
+	/* 0xa Leisure */      	_("Hobbies"),("Travel"),("Handicraft"),("Motoring"),("Fitness"),("Cooking"),
+							_("Shopping"),("Gardening"),
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 
-	/* 0xb Special */      	"Orig. Lang.","B&W","Unpublished","Live",
+	/* 0xb Special */      	_("Orig. Lang."),("B&W"),("Unpublished"),("Live"),
 							NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 							NULL,NULL,NULL,NULL,
 
@@ -119,7 +128,6 @@ const char *eChannelInfo::genresTableShort[256] =
 void eChannelInfo::ParseEITInfo(EITEvent *e)
 {
 		eString t;
-		eString genre;
 			
 		if(e->start_time!=0)
 		{
@@ -164,23 +172,20 @@ void eChannelInfo::ParseEITInfo(EITEvent *e)
 				{
 					if(genresTableShort[ce->content_nibble_level_1*16+ce->content_nibble_level_2])
 					{
+						if ( !genre.length() )
+							genre+="GENRE:";
 						genre += gettext( genresTableShort[ce->content_nibble_level_1*16+ce->content_nibble_level_2] );
 						genre += " ";
 					}
 				}
 			}
 		}
-//		eDebug( "CINF: Genres found -> %s", genre.c_str() );
-		if((!genre.isNull()) && (genre.c_str()[0]))
-		{
-			descr += "GENRE: ";
-			descr += genre;
-		}
 		if(!t.isNull()) name += t;
 
 		int n = 0;
 		cname.setText( name );
 		cdescr.setText( descr );
+		cgenre.setText( genre );
 		ctime.setText( starttime );
 		n = LayoutIcon(&cdolby, (cflags & cflagDolby), n);
 		n = LayoutIcon(&cstereo, (cflags & cflagStereo), n);
@@ -274,10 +279,12 @@ void eChannelInfo::clear()
 {
 	name="";
 	descr="";
+	genre="";
 	starttime="";
 	cflags=0;
 	cname.setText("");
 	cdescr.setText("");
+	cgenre.setText("");
 	ctime.setText("");
 	cdolby.hide();
 	cstereo.hide();
@@ -344,12 +351,14 @@ int eChannelInfo::eventHandler(const eWidgetEvent &event)
 			cname.move( ePoint(clientrect.width() / 8 + 4, 0 ));
 			cname.resize( eSize(clientrect.width() - (clientrect.width() / 8 + 4), clientrect.height()/3+2));
 			cdescr.move( ePoint(clientrect.width() / 8 + 4, clientrect.height() / 3 + 2 ));
-			cdescr.resize( eSize(clientrect.width() - (clientrect.width() / 8 + 4), (clientrect.height()/3)*2-2 ));
+			cdescr.resize( eSize(clientrect.width() - (clientrect.width() / 8 + 4), (clientrect.height()/3)-2 ));
+			cgenre.move( ePoint(clientrect.width() / 8 + 4, cdescr.getPosition().y() + cdescr.getSize().height()) );
+			cgenre.resize( eSize( clientrect.width() - (clientrect.width() / 8 + 4), (clientrect.height()/3)-2 ));
 			cdolby.resize( eSize(25,15) );
 			cstereo.resize( eSize(25,15) );
 			cformat.resize( eSize(25,15) );
 			cscrambled.resize( eSize(25,15) );
-					 
+
 			invalidate();
 		break;
 

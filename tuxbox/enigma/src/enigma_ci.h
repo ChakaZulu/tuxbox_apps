@@ -10,6 +10,13 @@ class eNumber;
 class eButton;
 class eDVBCI;
 
+class eCImmi: public eWidget
+{
+public:
+	eNumber *answer;
+	eCImmi(eWidget *parent);
+};	
+
 class eListBoxMenuEntry: public eListBoxEntryText
 {
 	friend class eListBox<eListBoxMenuEntry>;
@@ -31,12 +38,14 @@ class enigmaCImmi: public eWindow
 	eLabel *tt,*stt,*bt,*cistate,*headansw;
 	eNumber *answ;
 	eDVBCI *DVBCI;
+	eCImmi *mmi;
 
 private:
 	void okPressed();
 	void abortPressed();
 	void entrySelected(eListBoxMenuEntry *choice);
 	void getmmi(const char *buffer);
+	long LengthField(unsigned char *lengthfield,long maxlength,int *fieldlen);
 	void answokPressed();
 
 	int ci_state;

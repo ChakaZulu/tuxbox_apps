@@ -480,7 +480,7 @@ public:
 		if (!(e.flags & eServiceReference::isDirectory))
 			result+="[PLAY] ";
 
-		result+=eString("<a href=\"/")+ "?path=" + origpath + ";" + ref2string(e) + "\">";
+		result+=eString("<a href=\"/")+ "?path=" + ref2string(e) + "\">";
 
 		eService *service=iface.addRef(e);
 		if (!service)

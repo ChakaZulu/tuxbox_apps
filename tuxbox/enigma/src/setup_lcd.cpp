@@ -2,6 +2,7 @@
 
 #include <lib/gui/slider.h>
 #include <lib/gui/ebutton.h>
+#include <lib/gui/echeckbox.h>
 #include <lib/gui/elabel.h>
 #include <lib/gui/enumber.h>
 #include <lib/gui/eskin.h>
@@ -31,6 +32,12 @@ void eZapLCDSetup::standbyChanged( int i )
 	update(lcdstandby, lcdcontrast);
 }
 
+void eZapLCDSetup::invertedChanged( int i )
+{
+	eDebug("invertion changed to %s", (i?"inverted":"not inverted") );
+	eDBoxLCD::getInstance()->setInverted( i?255:0 );
+}
+
 void eZapLCDSetup::update(int brightness, int contrast)
 {
 	eDBoxLCD::getInstance()->setLCDParameter(brightness, contrast);
@@ -40,15 +47,16 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 {
 	setText(_("LC-Display Setup"));
 	move(ePoint(150, 136));
-	resize(eSize(400, 300));
+	cresize(eSize(400, 280));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	eConfig::getInstance()->getKey("/ezap/lcd/brightness", lcdbrightness);
 	eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
-
-	if ( eConfig::getInstance()->getKey("/ezap/lcd/standby", lcdstandby ) )
-		lcdstandby=0;
+	eConfig::getInstance()->getKey("/ezap/lcd/standby", lcdstandby );
+	int tmp;
+	eConfig::getInstance()->getKey("/ezap/lcd/inverted", tmp );
+	lcdinverted = (unsigned char) tmp;
 
 	bbrightness=new eLabel(this);
 	bbrightness->setText(_("Brightness:"));
@@ -86,9 +94,17 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	p_standby->setHelpText(_("set LCD brightness for Standby Mode ( left / right )"));
 	CONNECT( p_standby->changed, eZapLCDSetup::standbyChanged );
 
+	inverted=new eCheckbox(this);
+	inverted->move(ePoint(20, 140));
+	inverted->resize(eSize(150, fd+4));
+	inverted->setText(_("Inverted: "));
+	inverted->setCheck(lcdinverted);
+	inverted->setHelpText(_("enable/disable inverted lcd (ok)"));
+	CONNECT( inverted->checked, eZapLCDSetup::invertedChanged );
+
 	ok=new eButton(this);
 	ok->setText(_("save"));
-	ok->move(ePoint(20, 155));
+	ok->move(ePoint(20, 195));
 	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("close window and save changes"));
 	ok->loadDeco();
@@ -96,7 +112,7 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 
 	abort=new eButton(this);
 	abort->setText(_("abort"));
-	abort->move(ePoint(210, 155));
+	abort->move(ePoint(210, 195));
 	abort->resize(eSize(170, 40));
 	abort->setHelpText(_("close window (no changes are saved)"));
 	abort->loadDeco();
@@ -121,6 +137,7 @@ void eZapLCDSetup::okPressed()
 	eConfig::getInstance()->setKey("/ezap/lcd/brightness", lcdbrightness);
 	eConfig::getInstance()->setKey("/ezap/lcd/contrast", lcdcontrast);
 	eConfig::getInstance()->setKey("/ezap/lcd/standby", lcdstandby);
+	eConfig::getInstance()->setKey("/ezap/lcd/inverted", inverted->isChecked()?255:0 );
 	eConfig::getInstance()->flush();
 	update(lcdbrightness, lcdcontrast);
 	close(1);
@@ -130,6 +147,8 @@ void eZapLCDSetup::abortPressed()
 {
 	eConfig::getInstance()->getKey("/ezap/lcd/brightness", lcdbrightness);
 	eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
+	eConfig::getInstance()->flush();
+	eDBoxLCD::getInstance()->setInverted( lcdinverted );
 	update(lcdbrightness, lcdcontrast);
 	close(0);
 }

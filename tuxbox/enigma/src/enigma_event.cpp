@@ -8,6 +8,18 @@
 #include <lib/gui/eskin.h>
 #include <lib/gui/guiactions.h>
 
+struct enigmaEventViewActions
+{
+	eActionMap map;
+	eAction close;
+	enigmaEventViewActions():
+		map("enigmaEventView", _("enigma event view")),
+		close(map, "close", _("closes the Event View"), eAction::prioDialog)
+	{
+	}
+};
+eAutoInitP0<enigmaEventViewActions> i_enigmaEventViewActions(5, "enigma event view actions");
+
 void eEventDisplay::nextEvent()
 {
 	if (*events == --eventlist->end())
@@ -53,6 +65,8 @@ int eEventDisplay::eventHandler(const eWidgetEvent &event)
 				else
 					close(2);  // this go the next event and call exec()   (in epgwindow.cpp)
 			}
+			else if (event.action == &i_enigmaEventViewActions->close)
+				close(0);
 			else
 				break;
 		return 1;
@@ -61,7 +75,6 @@ int eEventDisplay::eventHandler(const eWidgetEvent &event)
 	}
 	return eWindow::eventHandler(event);
 }
-
 
 eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEvent* evt)
 : eWindow(1), service(service)
@@ -104,7 +117,7 @@ eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEv
 		setList(*e);
 	else if (evt)
 		setEvent(evt);
-
+	addActionMap( &i_enigmaEventViewActions->map );
 }
 
 eEventDisplay::~eEventDisplay()

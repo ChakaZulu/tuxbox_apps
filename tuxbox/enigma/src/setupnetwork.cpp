@@ -31,7 +31,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 {
 	setText(_("Network setup"));
 	cmove(ePoint(150, 136));
-	cresize(eSize(420, 300));
+	cresize(eSize(390, 300));
 
 	__u32 sip=ntohl(0x0a000061), snetmask=ntohl(0xFF000000), sdns=ntohl(0x7f000001), sgateway=ntohl(0x7f000001);
 	int de[4];

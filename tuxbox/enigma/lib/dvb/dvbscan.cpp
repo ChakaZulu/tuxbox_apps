@@ -9,8 +9,8 @@ static void fakeONIDSID(eOriginalNetworkID &onid, eTransportStreamID &tsid, int 
 		// onid 1 is astra, don't mess with it.
 	if (tsid > 1)
 		return;
-		// fake together a tsid.
-	tsid=freq&0xFFFF;
+		// fake together an onid.
+	onid=freq&0xFFFF;
 }
 
 eDVBScanController::eDVBScanController(eDVB &dvb): eDVBController(dvb)

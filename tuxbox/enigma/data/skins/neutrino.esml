@@ -101,12 +101,12 @@
 		<img name="button_yellow" src="button_yellow.png" />
 		<img name="button_blue" src="button_blue.png" />
 		<img name="button_gray" src="button_gray.png" />
-		<img name="osd_crypt_on" src="crypt_on.png" />
-		<img name="osd_format_on" src="format_on.png" />
+		<img name="osd_crypt_on" src="neutrino/crypt_on.png" />
+		<img name="osd_format_on" src="neutrino/format_on.png" />
 		<img name="osd_dolby_on" src="dolby_on.png" />
-		<img name="osd_dolby_off" src="dolby_off.png" />
-		<img name="osd_crypt_off" src="crypt_off.png" />
-		<img name="osd_format_off" src="format_off.png" />
+		<img name="osd_dolby_off" src="neutrino/dolby_off.png" />
+		<img name="osd_crypt_off" src="neutrino/crypt_off.png" />
+		<img name="osd_format_off" src="neutrino/format_off.png" />
 	</images>
 
 	<object name="ezap_main">

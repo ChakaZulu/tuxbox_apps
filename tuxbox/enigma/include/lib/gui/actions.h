@@ -8,9 +8,12 @@
 #include <set>
 
 #include <libsig_comp.h>
+#include <lib/base/i18n.h>
+#include <lib/base/estring.h>
 #include <lib/driver/rc.h>
 
 class eActionMap;
+class eActionMapList;
 
 /**
  * \brief An action
@@ -21,10 +24,10 @@ class eAction
 {
 	typedef std::set<eRCKey> keylist;
 	char *description, *identifier;
-	std::set<eRCKey> keys;
 	eActionMap *map;
-	int priority;
 	friend struct priorityComperator;
+	std::map<eString, keylist> keys;
+	int priority;
 public:
 	typedef std::pair<void*,eAction*> directedAction;
 	/**
@@ -49,22 +52,20 @@ public:
 	 * global actions, 10 for dialog-local actions, 20 for widget-local actions,
 	 * 30 for dialog-hi-priority actions.
 	 */
-	eAction(eActionMap &map, char *identifier, char *description, int priority=0);
+	eAction(eActionMap &map, char *identifier, char *description, int priority=0 );
 	~eAction();
 	const char *getDescription() const { return description; }
 	const char *getIdentifier() const { return identifier; }
-	int getPriority() const { return priority; }
-	
-	Signal0<void> handler;
-	
-	keylist &getKeyList() { return keys; }
-	
-	int containsKey(const eRCKey &key) const
+
+	void insertKey(const eString& style, const eRCKey& key )
 	{
-		if (keys.find(key)!=keys.end())
-			return 1;
-		return 0;
+		keys[style].insert(key);
 	}
+
+	Signal0<void> handler;
+
+//	keylist &getKeyList();
+	int containsKey(const eRCKey &key, const eString& style ) const;
 };
 
 typedef std::multiset<eAction::directedAction,eAction::priorityComperator> eActionPrioritySet;
@@ -87,19 +88,17 @@ public:
 	{
 		actions.remove(action);
 	}
-	void findAction(eActionPrioritySet &list, const eRCKey &key, void *context) const;
+	void findAction(eActionPrioritySet &list, const eRCKey &key, void *context, const eString &style) const;
 	eAction *findAction(const char *id) const;
 	const char *getDescription() const { return description; }
 	const char *getIdentifier() const { return identifier; }
 	void reloadConfig();
-	void loadXML(eRCDevice *device, std::map<std::string,int> &keymap, const XMLTreeNode *node);
+	void loadXML(eRCDevice *device, std::map<std::string,int> &keymap, const XMLTreeNode *node, const eString& s="");
 	void saveConfig();
 };
 
 class eActionMapList
 {
-public:
-
 	struct lstr
 	{
 		bool operator()(const char *a, const char *b) const
@@ -108,14 +107,21 @@ public:
 		}
 	};
 	typedef std::map<const char*,eActionMap*,lstr> actionMapList;
-	
+
 	actionMapList actionmaps;
+
+	std::map<eString, eString> existingStyles;
+	eString currentStyle;
 
 	static eActionMapList *instance;
 public:
 	eActionMapList();
 	~eActionMapList();
-	void addActionMap(const char *, eActionMap *);
+	const eString &getCurrentStyle() const { return currentStyle; }
+	void setCurrentStyle( const eString& style ) { currentStyle = style; }
+	eString getStyleDescription(const eString &style) const { std::map<eString, eString>::const_iterator i=existingStyles.find(style); if (i==existingStyles.end()) return ""; else return i->second; }
+	const std::map<eString, eString> &getExistingStyles() const { return existingStyles; }
+	void addActionMap(const char *, eActionMap * );
 	void removeActionMap(const char *);
 	int loadXML(const char *filename);
 	eActionMap *findActionMap(const char *id) const;

@@ -9,9 +9,9 @@
 
 class eChannelInfo : public eDecoWidget
 {	
-	eLabel ctime, cname, cdescr, cdolby, cstereo, cformat, cscrambled;
+	eLabel ctime, cname, cdescr, cgenre, cdolby, cstereo, cformat, cscrambled;
 
-  eString name, descr, starttime;
+  eString name, descr, genre, starttime;
 	int cflags;
 
 	static const char *genresTableShort[];

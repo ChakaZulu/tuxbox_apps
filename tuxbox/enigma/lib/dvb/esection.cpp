@@ -119,6 +119,7 @@ eSection::~eSection()
 {
 	if (timer)
 		delete timer;
+	timer=0;
 	closeFilter();
 	if (lockcount)
 		eDebug("deleted still locked table");
@@ -126,7 +127,7 @@ eSection::~eSection()
 
 int eSection::start()
 {
-	if ((version==-1) && !(flags&SECREAD_NOTIMEOUT))
+	if (timer && (version==-1) && !(flags&SECREAD_NOTIMEOUT))
 		timer->start((pid==0x14)?60000:10000, true);
 	return setFilter(pid, tableid, tableidext, version);
 }
@@ -149,9 +150,12 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 		data[3]=version; mask[3]=0xFF;
 	}
 
+	reader.open(pid, data, mask, 4, flags);
+	if (reader.getHandle() < 0)
+		return -ENOENT;
+
 	if (!(flags&SECREAD_NOABORT))
 		active.push_back(this);
-	reader.open(pid, data, mask, 4, flags);
 	
 	if (notifier)
 		delete notifier;
@@ -171,7 +175,8 @@ void eSection::closeFilter()
 			active.remove(this);
 		delete notifier;
 		notifier=0;
-		timer->stop();
+		if (timer)
+			timer->stop();
 		reader.close();
 	}
 }
@@ -183,7 +188,8 @@ void eSection::data(int socket)
 	{
 		if (lockcount)
 			eDebug("eSection::data on locked section!");
-		timer->start(10000, true);
+		if (timer)
+			timer->start(10000, true);
 		if (reader.read(buf))
 			break;
 		maxsec=buf[7];

@@ -7,7 +7,7 @@
 #include <lib/system/nconfig.h>
 
 eAction::eAction(eActionMap &map, char *identifier, char *description, int priority)
-		: description(description), identifier(identifier), map(&map), priority(priority)
+	: description(description), identifier(identifier), map(&map), priority(priority)
 {
 	map.add(this);
 }
@@ -17,13 +17,35 @@ eAction::~eAction()
 	map->remove(this);
 }
 
+/*eAction::keylist &eAction::getKeyList()
+{
+	std::map<eString, keylist>::iterator it=keys.find( eActionMapList::getInstance()->getCurrentStyle() );
+	if ( it != keys.end() )
+		return it->second;
+	it = keys.find("default);
+	return it->second;
+}*/
+
+int eAction::containsKey(const eRCKey &key, const eString &style ) const
+{
+	std::map<eString, keylist>::const_iterator it=keys.find( style );
+	if ( it != keys.end() )
+	{
+		if (it->second.find(key)!=it->second.end())
+			return 1;
+	}
+	return 0;
+}
+
 // ---------------------------------------------------------------------------
 
-void eActionMap::findAction(eActionPrioritySet &list, const eRCKey &key, void *context) const
+void eActionMap::findAction(eActionPrioritySet &list, const eRCKey &key, void *context, const eString &style) const
 {
 	for (std::list<eAction*>::const_iterator i=actions.begin(); i!=actions.end(); ++i)
-		if ((*i)->containsKey(key))
+	{
+		if ((*i)->containsKey(key, style))
 			list.insert(eAction::directedAction(context, *i));
+	}
 }
 
 eAction *eActionMap::findAction(const char *id) const
@@ -45,7 +67,7 @@ eActionMap::~eActionMap()
 	eActionMapList::getInstance()->removeActionMap(identifier);
 }
 
-void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, const XMLTreeNode *node)
+void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, const XMLTreeNode *node, const eString& style)
 {
 	for (XMLTreeNode *xaction=node->GetChild(); xaction; xaction=xaction->GetNext())
 	{
@@ -89,11 +111,11 @@ void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, c
 		if (!flags || !*flags)
 			flags="b";
 		if (strchr(flags, 'm'))
-			action->getKeyList().insert(eRCKey(device, icode, 0));
+			action->insertKey( style, eRCKey(device, icode, 0) );
 		if (strchr(flags, 'b'))
-			action->getKeyList().insert(eRCKey(device, icode, eRCKey::flagBreak));
+			action->insertKey( style, eRCKey(device, icode, eRCKey::flagBreak) );
 		if (strchr(flags, 'r'))
-			action->getKeyList().insert(eRCKey(device, icode, eRCKey::flagRepeat));
+			action->insertKey( style, eRCKey(device, icode, eRCKey::flagRepeat) );
 	}
 }
 
@@ -167,10 +189,21 @@ eActionMapList::eActionMapList()
 {
 	if (!instance)
 		instance=this;
+	char * tmp;
+	if ( eConfig::getInstance()->getKey("/ezap/rc/style", tmp ) )
+		currentStyle="default";
+	else
+	{
+		currentStyle=tmp;
+		delete [] tmp;
+	}
+	eDebug("currentStyle=%s", currentStyle.c_str() );	
 }
 
 eActionMapList::~eActionMapList()
 {
+	eConfig::getInstance()->setKey("/ezap/rc/style", currentStyle.c_str() ) ;
+
 	if (instance==this)
 		instance=0;
 }
@@ -226,7 +259,6 @@ int eActionMapList::loadXML(const char *filename)
 	
 	XMLTreeNode *node=parser->RootNode();
 	
-	
 	for (node=node->GetChild(); node; node=node->GetNext())
 		if (!strcmp(node->GetType(), "device"))
 		{
@@ -263,7 +295,24 @@ int eActionMapList::loadXML(const char *filename)
 						eFatal("end.");
 						continue;
 					}
-					am->loadXML(device, keymap, xam);
+					const char *style=xam->GetAttributeValue("style");
+					if (style)
+					{
+						const char *descr=xam->GetAttributeValue("descr");
+						std::map<eString,eString>::iterator it = existingStyles.find(style);
+						if ( it == existingStyles.end() ) // not in map..
+						{
+							if (descr)
+								existingStyles[style]=descr;
+							else
+								existingStyles[style]=style;
+						}
+						else if ( descr && existingStyles[style] == style )
+							existingStyles[style]=descr;
+						am->loadXML(device, keymap, xam, style );
+					}
+					else
+						am->loadXML( device, keymap, xam );
 				} else if (!strcmp(xam->GetType(), "keys"))
 				{
 					for (XMLTreeNode *k=xam->GetChild(); k; k=k->GetNext())

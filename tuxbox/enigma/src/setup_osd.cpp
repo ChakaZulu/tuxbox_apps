@@ -10,7 +10,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 {
 	setText("OSD Setup");
 	move(ePoint(150, 136));
-	resize(eSize(460, 400));
+	cresize(eSize(440, 335));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -41,7 +41,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	sAlpha = new eSlider( this, l, 0, 512 );
 	sAlpha->setIncrement( 10 ); // Percent !
 	sAlpha->move( ePoint( 140, 105 ) );
-	sAlpha->resize(eSize( 300, fd+4 ) );
+	sAlpha->resize(eSize( 280, fd+4 ) );
 	sAlpha->setHelpText(_("change the transparency correction"));
 	sAlpha->setValue( alpha);
 	CONNECT( sAlpha->changed, eZapOsdSetup::alphaChanged );
@@ -54,7 +54,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	sBrightness = new eSlider( this, l, 0, 255 );
 	sBrightness->setIncrement( 5 ); // Percent !
 	sBrightness->move( ePoint( 140, 145 ) );
-	sBrightness->resize(eSize( 300, fd+4 ) );
+	sBrightness->resize(eSize( 280, fd+4 ) );
 	sBrightness->setHelpText(_("change the brightness correction"));
 	sBrightness->setValue( brightness);
 	CONNECT( sBrightness->changed, eZapOsdSetup::brightnessChanged );
@@ -67,7 +67,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	sGamma = new eSlider( this, l, 0, 255 );
 	sGamma->setIncrement( 5 ); // Percent !
 	sGamma->move( ePoint( 140, 185 ) );
-	sGamma->resize(eSize( 300, fd+4 ) );
+	sGamma->resize(eSize( 280, fd+4 ) );
 	sGamma->setHelpText(_("change the contrast"));
 	sGamma->setValue( gamma);
 	CONNECT( sGamma->changed, eZapOsdSetup::gammaChanged );

@@ -402,15 +402,21 @@ int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 		{
 			const char *afrequency=node->GetAttributeValue("frequency"),
 					*asymbol_rate=node->GetAttributeValue("symbol_rate"),
-					*ainversion=node->GetAttributeValue("inversion");
+					*ainversion=node->GetAttributeValue("inversion"),
+					*amodulation=node->GetAttributeValue("modulation");
 			if (!afrequency)
 				continue;
 			if (!asymbol_rate)
 				asymbol_rate="6900000";
 			if (!ainversion)
 				ainversion="0";
-			int frequency=atoi(afrequency)/1000, symbol_rate=atoi(asymbol_rate), inversion=atoi(ainversion);;
-			t.setCable(frequency, symbol_rate, inversion);
+			if (!amodulation)
+				amodulation="3";
+			int frequency=atoi(afrequency)/1000,
+					symbol_rate=atoi(asymbol_rate),
+					inversion=atoi(ainversion),
+					modulation=atoi(amodulation);
+			t.setCable(frequency, symbol_rate, inversion, modulation );
 			break;
 		}
 		case eFrontend::feSatellite:
@@ -793,7 +799,7 @@ int TransponderScan::exec()
 				switch (eFrontend::getInstance()->Type())
 				{
 				case eFrontend::feCable:
-					transponder.setCable(402000, 6900000, 0);	// some cable transponder
+					transponder.setCable(402000, 6900000, 0, 3);	// some cable transponder
 					break;
 				case eFrontend::feSatellite:
 					transponder.setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0, 0);	// some astra transponder

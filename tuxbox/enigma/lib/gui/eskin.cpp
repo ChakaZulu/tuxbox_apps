@@ -439,6 +439,7 @@ int eSkin::build(eWidget *widget, XMLTreeNode *node)
 			// eDebug("failed.");
 			return -EINVAL;
 		}
+		w->zOrderRaise();
 		int err;
 		if ((err=build(w, c)))
 		{

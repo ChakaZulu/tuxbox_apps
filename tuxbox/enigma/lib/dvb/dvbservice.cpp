@@ -13,6 +13,7 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
 
 	if ( dvb.getInfo("mID") != "05" )  // no dreambox
 	{
+		eDebug("add CAs");
 		availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
 		availableCASystems.push_back(0x1722);	// BetaCrypt D (cable)
 		availableCASystems.push_back(0x1762);	// BetaCrypt F (ORF)
@@ -319,8 +320,10 @@ void eDVBServiceController::scanPMT()
 	Decoder::parms.vpid=Decoder::parms.apid=-1;
 	
 	int isca=0;
-	
-	calist.clear();
+
+	if ( dvb.getInfo("mID") == "05" )
+		calist.clear();
+
 	Decoder::parms.descriptor_length=0;
 	
 	DVBCI=eDVB::getInstance()->DVBCI;
@@ -531,22 +534,27 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 
 			int avail=0;
 			for (std::list<int>::iterator i = availableCASystems.begin(); i != availableCASystems.end() && !avail; i++)
+			{
+				eDebug("ca id %d == %d", *i, ca->CA_system_ID );
 				if (*i == ca->CA_system_ID)
 				{
 					//unsigned  char *buf=new unsigned char[ca->data[1]+2];
 					//memcpy(buf, ca->data, ca->data[1]+2);
           //DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addDescr, buf));
 					avail++;
-				}	
+				}
+			}
 
 			if (avail)
 			{
 				for (ePtrList<CA>::iterator a = list.begin(); a != list.end(); a++)
+				{
 					if (a->casysid==ca->CA_system_ID)
 					{
 						avail=0;
 						break;
 					}
+				}
 				if (avail)
 				{
 					CA *n=new CA;

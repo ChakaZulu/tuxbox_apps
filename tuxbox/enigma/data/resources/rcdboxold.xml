@@ -64,34 +64,53 @@
 			<action name="standby_press" key="power" flags="m" />
 			<action name="standby_repeat" key="power" flags="r" />
 			<action name="standby_release" key="power" flags="b" />
-			<action name="toggleInfobar" key="ok" flags="m" />
-			<action name="showServiceSelector" key="up" flags="m" />
-			<action name="showServiceSelector" key="down" flags="m" />
 			<action name="showSubservices" key="green" flags="m" />
 			<action name="showAudio" key="yellow" flags="m" />
 			<action name="pluginVTXT" key="blue" flags="m" />
 			<action name="showEPGList" key="red" flags="m" />
-			<action name="showEPG" key="?" flags="m" />
-			<action name="nextService" key="right" flags="mr" />
-			<action name="prevService" key="left" flags="mr" />
-			<action name="serviceListDown" key="down" flags="m" />
-			<action name="serviceListUp" key="up" flags="m" />
 			<action name="volumeUp" key="+" flags="mr" />
 			<action name="volumeDown" key="-" flags="mr" />
 			<action name="toggleMute" key="mute" flags="mr" />
+			<action name="startSkipR" key="red" flags="m" />
+			<action name="repeatSkipR" key="red" flags="r" />
+			<action name="stopSkipR" key="red" flags="b" />
+			<action name="play" key="green" flags="m" />
+			<action name="pause" key="yellow" flags="m" />
+			<action name="stop" key="home" flags="m" />
+			<action name="startSkipF" key="blue" flags="m" />
+			<action name="repeatSkipF" key="blue" flags="r" />
+			<action name="stopSkipF" key="blue" flags="b" />
+		</actionmap>
+
+		<actionmap name="enigmaMain" style="default">
+			<action name="nextService" key="right" flags="mr" />
+			<action name="prevService" key="left" flags="mr" />
+			<action name="showInfobar" key="ok" flags="m" />
+			<action name="hideInfobar" key="ok" flags="m" />
+			<action name="serviceListDown" key="down" flags="m" />
+			<action name="serviceListUp" key="up" flags="m" />
+			<action name="showEPG" key="?" flags="m" />
+		</actionmap>
+
+		<actionmap name="enigmaMain" style="classic">  <!-- neutrino -->
+			<action name="hideInfobar" key="home" flags="m" />
+			<action name="nextService" key="up" flags="mr" />
+			<action name="prevService" key="down" flags="mr" />
+			<action name="showInfobar" key="?" flags="m" />
+			<action name="showInfobarEPG" key="?" flags="m" />
+			<action name="showServiceSelector" key="ok" flags="m" />
 		</actionmap>
 
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="+" flags="mr" />
 			<action name="prevBouquet" key="-" flags="mr" />
 			<action name="pathUp" key="d-box" flags="m" />
-			<action name="toggleStyle" key="mute" flags="m" />
+			<action name="showMenu" key="red" flags="m" />
+			<action name="toggleStyle" key="green" flags="m" />
 			<action name="toggleFocus" key="yellow" flags="m" />
+			<action name="showFavourite" key="blue" flags="m" />
 			<action name="pathUp" key="d-box" flags="m" />
 			<action name="showEPGSelector" key="?" flags="m" />
-			<action name="addService" key="green" flags="m" />
-			<action name="showMenu" key="red" flags="m" />
-			<action name="showFavourite" key="blue" flags="m" />
     </actionmap>
 
 		<actionmap name="numbers">

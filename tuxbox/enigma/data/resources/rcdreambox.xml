@@ -76,7 +76,8 @@
 			<action name="standby_press" key="power" flags="m" />
 			<action name="standby_repeat" key="power" flags="r" />
 			<action name="standby_release" key="power" flags="b" />
-			<action name="toggleInfobar" key="ok" flags="m" />
+			<action name="showInfobar" key="ok" flags="m" />
+			<action name="hideInfobar" key="ok" flags="m" />			
 			<action name="showServiceSelector" key="tv" flags="m" />
 			<action name="showSubservices" key="green" flags="m" />
 			<action name="showAudio" key="yellow" flags="m" />

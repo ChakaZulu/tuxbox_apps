@@ -99,7 +99,21 @@ eDBoxLCD::eDBoxLCD(): eLCD(eSize(128, 64))
 			eConfig::getInstance()->setKey("/ezap/lcd/contrast", lcdcontrast);
 		}
 		setLCDParameter(lcdbrightness, lcdcontrast);
+		int tmp;
+		if( eConfig::getInstance()->getKey("/ezap/lcd/inverted", tmp ) )
+		{
+			inverted=0;
+			eConfig::getInstance()->setKey("/ezap/lcd/inverted", (int) 0 );
+		}
+		else
+			inverted=(unsigned char)tmp;
 	}
+}
+
+void eDBoxLCD::setInverted(unsigned char inv)
+{
+	inverted=inv;
+	update();	
 }
 
 int eDBoxLCD::setLCDParameter(int brightness, int contrast)
@@ -170,7 +184,7 @@ void eDBoxLCD::update()
 				{
 					pix|=(_buffer[(y*8+yy)*128+x]>=108)<<yy;
 				}
-				raw[y*120+x]=pix;
+				raw[y*120+x]=(pix^inverted);
 			}
 		}
 		if (lcdfd>0)

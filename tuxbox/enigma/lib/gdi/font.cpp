@@ -241,7 +241,15 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 	{
 		return 1;
 	}
-	if ((flags&GS_MYWRAP) && (cursor.x()+ glyph->xadvance) >= area.right())
+	int nx=cursor.x();
+	if (! (flags & RS_RTL))
+		nx+=glyph->xadvance;
+	else
+	{
+		eDebug("RTL: glyph->xadvance: %d", glyph->xadvance);
+		nx-=glyph->xadvance;
+	}
+	if ((flags&GS_MYWRAP) && ((flags & RS_RTL) ? nx >= area.right() : nx < area.left()))
 	{
 		int cnt = 0;
 		glyphString::iterator i(glyphs.end());
@@ -256,9 +264,10 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 		if (i != glyphs.begin() && ((i->flags&(GS_ISSPACE|GS_ISFIRST))==GS_ISSPACE) && (++i != glyphs.end()))		// skip space
 		{
 			int linelength=cursor.x()-i->x;
+				// RTL: linelength is negative
 			i->flags|=GS_ISFIRST;
 			ePoint offset=ePoint(i->x, i->y);
-			newLine();
+			newLine(flags);
 			offset-=cursor;
 			while (i != glyphs.end())		// rearrange them into the next line
 			{
@@ -272,7 +281,7 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 		{
 	    if (cnt)
 			{
-				newLine();
+				newLine(flags);
 				flags|=GS_ISFIRST;
 			}
 		}
@@ -290,7 +299,6 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 	bbox->setTop( cursor.y() - glyph->top );
 	bbox->setWidth( glyph->width );
 	bbox->setHeight( glyph->height );
-//	eDebug("GS_ISFIRST=%i, bbox left = %i, top = %i, right = %i, bottom = %i", flags&GS_ISFIRST, bbox->left(), bbox->top(), bbox->right(), bbox->bottom() );
 
 	pGlyph ng;
 	ng.x=cursor.x()+kern;
@@ -304,7 +312,10 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 	ng.bbox=bbox;
 	glyphs.push_back(ng);
 
-	cursor+=ePoint(xadvance, 0);
+	if (!(flags & RS_RTL))
+		cursor+=ePoint(xadvance, 0);
+	else
+		cursor-=ePoint(xadvance, 0);
 	previous=glyphIndex;
 	return 0;
 }
@@ -332,11 +343,20 @@ void eTextPara::calc_bbox()
 	bboxValid=1;
 }
 
-void eTextPara::newLine()
+void eTextPara::newLine(int flags)
 {
-	if (maximum.width()<cursor.x())
-		maximum.setWidth(cursor.x());
-	cursor.setX(left);
+	if (!(flags & RS_RTL))
+	{
+		if (maximum.width()<cursor.x())
+			maximum.setWidth(cursor.x());
+		cursor.setX(left);
+		previous=0;
+	} else
+	{
+		if (maximum.width()<(area.right()-cursor.x()))
+			maximum.setWidth(area.right()-cursor.x());
+		cursor.setX(area.right());
+	}
 	int linegap=current_face->size->metrics.height-(current_face->size->metrics.ascender+current_face->size->metrics.descender);
 	cursor+=ePoint(0, (current_face->size->metrics.ascender+current_face->size->metrics.descender+linegap*1/2)>>6);
 	if (maximum.height()<cursor.y())
@@ -440,12 +460,20 @@ int eTextPara::renderString(const eString &string, int rflags)
 			{
 			case '\t':
 				isprintable=0;
-				cursor+=ePoint(current_font->tabwidth, 0);
-				cursor-=ePoint(cursor.x()%current_font->tabwidth, 0);
+				if (!(rflags & RS_RTL))
+				{
+					cursor+=ePoint(current_font->tabwidth, 0);
+					cursor-=ePoint(cursor.x()%current_font->tabwidth, 0);
+				} else
+				{
+						// does this work?
+					cursor-=ePoint(current_font->tabwidth, 0);
+					cursor+=ePoint(cursor.x()%current_font->tabwidth, 0);
+				}
 				break;
 			case '\n':
 				isprintable=0;
-				newLine();
+				newLine(rflags);
 				flags|=GS_ISFIRST;
 				break;
 			case '\r':

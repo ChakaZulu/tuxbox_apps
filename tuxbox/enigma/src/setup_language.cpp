@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.14 2002/11/25 22:43:06 Ghostrider Exp $
+ * $Id: setup_language.cpp,v 1.15 2002/12/12 16:52:51 Ghostrider Exp $
  */
 
 #include <setup_language.h>
@@ -30,7 +30,7 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 {
 	setText(_("Language Setup"));
 	move(ePoint(150, 136));
-	resize(eSize(390, 230));
+	cresize(eSize(390, 160));
 
 	eLabel *l=new eLabel(this);
 	l->setText(_("Language:"));
@@ -74,7 +74,6 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 		}
 		fclose(f);
 	}
-	
 	free(temp);
 	
 	language->setCurrent(cur);

@@ -29,6 +29,7 @@ class eFrontend: public Object
 	int fd;
 
 	int lastcsw,
+			lastToneBurst,
 			lastRotorCmd,
 			lastSmatvFreq,
 			curRotorPos;    // current Orbital Position
@@ -52,6 +53,7 @@ class eFrontend: public Object
 	*/
 	int noRotorCmd;
 public:
+	double calcAzimuth( double Longitude, double Latitude, int OrbitalPos );
 	void disableRotor() { noRotorCmd = 1; }  // no more rotor cmd is sent when tune
 	void enableRotor() { noRotorCmd = 0; }  // rotor cmd is sent when tune
 	int sendDiSEqCCmd( int addr, int cmd, eString params="", int frame=0xE0 );
@@ -62,7 +64,7 @@ public:
 
 	enum
 	{
-		feSatellite=0, feCable
+		feSatellite=0, feCable, feTerrestrical
 	};
 
 	static int open(int type) { if (!frontend) frontend=new eFrontend(type); if (frontend->fd<0) { close(); return frontend->fd; } return 0; }

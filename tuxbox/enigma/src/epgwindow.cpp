@@ -64,20 +64,50 @@ int eListBoxEntryEPG::getEntryHeight()
 	return calcFontHeight(DescrFont)+4;	
 }
 
-eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox, eServiceReference &ref)
-		:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), paraDate(0), paraTime(0), paraDescr(0), event(evt), service(ref)
-{	
-		for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+void eListBoxEntryEPG::build()
+{
+	start_time = *localtime(&event.start_time);
+	for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+	{
+		Descriptor *descriptor=*d;
+		if (descriptor->Tag()==DESCR_SHORT_EVENT)
 		{
-			Descriptor *descriptor=*d;
-			if (descriptor->Tag()==DESCR_SHORT_EVENT)
+			descr = ((ShortEventDescriptor*)descriptor)->event_name;
+			return;
+		}
+		else if (descriptor->Tag()==DESCR_TIME_SHIFTED_EVENT)
+		{
+			// build parent Service Reference
+			eServiceReferenceDVB nvodService(service.data[2], service.data[3], ((TimeShiftedEventDescriptor*)descriptor)->reference_service_id, service.data[0] );
+			// get EITEvent from Parent...
+			EITEvent* evt = eEPGCache::getInstance()->lookupEvent(nvodService, ((TimeShiftedEventDescriptor*)descriptor)->reference_event_id );
+			if (evt)
 			{
-				start_time = *localtime(&event.start_time);
-				descr = ((ShortEventDescriptor*)descriptor)->event_name;
-				return;
+				for (ePtrList<Descriptor>::iterator d(evt->descriptor); d != evt->descriptor.end(); ++d)
+				{
+					Descriptor *descriptor=*d;
+					if (descriptor->Tag()==DESCR_SHORT_EVENT)
+					{
+						descr = ((ShortEventDescriptor*)descriptor)->event_name;
+						return;
+					}
+				}
 			}
 		}
-		descr = "no event data avail";
+	}
+	descr = "no event data avail";
+}
+
+eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox, eServiceReference &ref)
+		:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), paraDate(0), paraTime(0), paraDescr(0), event(evt), service(ref)
+{
+	build();
+}
+
+eListBoxEntryEPG::eListBoxEntryEPG(EITEvent& evt, eListBox<eListBoxEntryEPG> *listbox, eServiceReference &ref)
+	:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), paraDate(0), paraTime(0), paraDescr(0), event(evt), service(ref)
+{
+	build();
 }
 
 extern const char *dayStrShort[];
@@ -148,9 +178,58 @@ void eEPGSelector::fillEPGList()
   if (service)
 		setText(eString("EPG - ")+service->service_name);
  	eDebug("get EventMap for onid: %02x, sid: %02x", current.getOriginalNetworkID().get(), current.getServiceID().get());
+
 	const eventMap* evt = eEPGCache::getInstance()->getEventMap(current);
 	eventMap::const_iterator It;
-	for (It = evt->begin(); It != evt->end(); It++)
+	if (evt)
+		It = evt->begin();
+	if (current.data[0] == 4 ) //NVOD
+	{
+		for (; It != evt->end(); It++)
+		{
+			EITEvent evt(*It->second);   // NVOD Service Event
+
+			const std::list<NVODReferenceEntry> *RefList = eEPGCache::getInstance()->getNVODRefList( (eServiceReferenceDVB&)current );
+			if (RefList)
+			{
+				for (std::list<NVODReferenceEntry>::const_iterator it( RefList->begin() ); it != RefList->end(); it++ )
+				{
+					eServiceReferenceDVB ref( it->transport_stream_id, it->original_network_id, it->service_id, 5 );
+					const eventMap *eMap = eEPGCache::getInstance()->getEventMap( ref );
+					if (eMap)
+					{
+						for ( eventMap::const_iterator refIt( eMap->begin() ); refIt != eMap->end(); refIt++)
+						{
+							EITEvent refEvt(*refIt->second);
+							for (ePtrList<Descriptor>::iterator d(refEvt.descriptor); d != refEvt.descriptor.end(); ++d)
+							{
+								Descriptor *descriptor=*d;
+								if (descriptor->Tag()==DESCR_TIME_SHIFTED_EVENT)
+								{
+									if ( ((TimeShiftedEventDescriptor*)descriptor)->reference_event_id == evt.event_id)
+									{
+										// make copy of ref Event  ( then we habe begintime and duration )
+										EITEvent e(*It->second);
+										// do not delete ePtrListEntrys..
+										e.descriptor.setAutoDelete(false);
+										e.start_time = refEvt.start_time;
+										e.duration = refEvt.duration;
+										e.event_id = refEvt.event_id;
+										e.free_CA_mode = refEvt.free_CA_mode;
+										e.running_status = refEvt.running_status;
+										new eListBoxEntryEPG(e, events, ref);
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		((eListBox<eListBoxEntryEPG>*)events)->sort();
+	}
+	else for (It = evt->begin(); It != evt->end(); It++)
 		new eListBoxEntryEPG(*It->second, events, current);
 }
 
@@ -167,7 +246,7 @@ void eEPGSelector::entrySelected(eListBoxEntryEPG *entry)
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
-	  eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+	  eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
 		eEventDisplay ei(service ? service->service_name.c_str() : "", 0, &entry->event);
 		ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		ei.show();
@@ -214,10 +293,10 @@ int eEPGSelector::eventHandler(const eWidgetEvent &event)
 		case eWidgetEvent::evtAction:
 			if (event.action == &i_epgSelectorActions->addTimerEvent)
 			{
-				if ( eTimerManager::getInstance()->addEventToTimerList( this, (eServiceReference*)&current, &events->getCurrent()->event ) )
+				if ( eTimerManager::getInstance()->addEventToTimerList( this, &events->getCurrent()->service, &events->getCurrent()->event ) )
 				{
 					hide();
-					eTimerView v( eTimerManager::getInstance()->findEvent( (eServiceReference*)&current, &events->getCurrent()->event ) );
+					eTimerView v( eTimerManager::getInstance()->findEvent( &events->getCurrent()->service, &events->getCurrent()->event ) );
 					v.show();
 					v.exec();
 					v.hide();

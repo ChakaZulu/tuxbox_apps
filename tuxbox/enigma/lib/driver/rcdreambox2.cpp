@@ -226,7 +226,7 @@ class eDreamboxRCHardware2
 	eRCDreamboxDriver2 driver;
 	eRCDeviceDreambox2 device;
 public:
-	eDreamboxRCHardware2(): device(&driver), buttondevice(&buttondriver)
+	eDreamboxRCHardware2(): buttondevice(&buttondriver), device(&driver)
 	{
 	}
 };

@@ -48,7 +48,8 @@
 struct enigmaMainActions
 {
 	eActionMap map;
-	eAction showMainMenu, standby_press, standby_repeat, standby_release, toggleInfobar, showServiceSelector,
+	eAction showMainMenu, standby_press, standby_repeat, standby_release, 
+		showInfobar, hideInfobar, showInfobarEPG, showServiceSelector,
 		showSubservices, showAudio, pluginVTXT, showEPGList, showEPG, 
 		nextService, prevService, playlistNextService, playlistPrevService,
 		serviceListDown, serviceListUp, volumeUp, volumeDown, toggleMute,
@@ -64,7 +65,10 @@ struct enigmaMainActions
 		standby_press(map, "standby_press", _("go to standby (press)"), eAction::prioDialog),
 		standby_repeat(map, "standby_repeat", _("go to standby (repeat)"), eAction::prioDialog),
 		standby_release(map, "standby_release", _("go to standby (release)"), eAction::prioDialog),
-		toggleInfobar(map, "toggleInfobar", _("toggle infobar"), eAction::prioDialog),
+
+		showInfobar(map, "showInfobar", _("show infobar"), eAction::prioDialog),
+		hideInfobar(map, "hideInfobar", _("hide infobar"), eAction::prioDialog),
+		showInfobarEPG(map, "showInfobarEPG", _("show infobar or EPG"), eAction::prioDialog),
 		showServiceSelector(map, "showServiceSelector", _("show service selector"), eAction::prioDialog),
 		showSubservices(map, "showSubservices", _("show subservices/NVOD"), eAction::prioDialog),
 		showAudio(map, "showAudio", _("show audio selector"), eAction::prioDialog),
@@ -79,6 +83,7 @@ struct enigmaMainActions
 		
 		serviceListDown(map, "serviceListDown", _("service list and down"), eAction::prioDialog),
 		serviceListUp(map, "serviceListUp", _("service list and up"), eAction::prioDialog),
+
 		volumeUp(map, "volumeUp", _("volume up"), eAction::prioDialog),
 		volumeDown(map, "volumeDown", _("volume down"), eAction::prioDialog),
 		toggleMute(map, "toggleMute", _("toggle mute flag"), eAction::prioDialog),
@@ -162,6 +167,7 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		if (handler)
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
 		eAVSwitch::getInstance()->setInput(1);
+		eAVSwitch::getInstance()->setTVPin8(0);
 		system("/bin/sync");
 		system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
 		system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
@@ -176,6 +182,7 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		if (handler)
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
 		eAVSwitch::getInstance()->setInput(0);
+		eStreamWatchdog::getInstance()->reloadSettings();
 		eDBoxLCD::getInstance()->switchLCD(1);
 		break;
 	}
@@ -692,7 +699,10 @@ eZapMain::eZapMain()
 	{
 		char* str;
 		if ( !eConfig::getInstance()->getKey( eString().sprintf("/ezap/ui/modes/%i", mode).c_str(), str) )
+		{
 			modeLast[mode++].setString(str);
+			free(str);
+		}
 		else
 		{
 			modeLast[mode]=eServiceStructureHandler::getRoot(mode+1);
@@ -723,6 +733,9 @@ eZapMain::eZapMain()
 		playService(*curlist->current, psDontAdd);
 	startMessages();
 	
+
+	dvrFunctions->zOrderRaise();
+	nonDVRfunctions->zOrderRaise();	
 /*	recstatus=new eRecordingStatus();
 	recstatus->hide(); */
 
@@ -770,8 +783,8 @@ eZapMain::~eZapMain()
 	pLCD->lcdMain->hide();
 	pLCD->lcdShutdown->show();
 	gLCDDC::getInstance()->setUpdate(0);
-	eDBoxLCD::getInstance()->switchLCD(0); // BITTE lasst das doch einfach drin :/
-
+	if ( eDVB::getInstance()->getInfo("mID") == "05" )
+		eDBoxLCD::getInstance()->switchLCD(0); 
 	eConfig::getInstance()->setKey("/ezap/ui/serviceSelectorStyle", eZap::getInstance()->getServiceSelector()->getStyle() );
 }
 
@@ -2062,10 +2075,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			standbyRepeat();
 		else if (event.action == &i_enigmaMainActions->standby_release)
 			standbyRelease();
-		else if ((!isVisible()) && (event.action == &i_enigmaMainActions->toggleInfobar))
+		else if ( !isVisible() && event.action == &i_enigmaMainActions->showInfobar)
 			showInfobar();
-		else if (isVisible() && (event.action == &i_enigmaMainActions->toggleInfobar))
+		else if (event.action == &i_enigmaMainActions->hideInfobar)
 			hideInfobar();
+		else if ( isVisible() && event.action == &i_enigmaMainActions->showInfobarEPG)
+			showEPG();
 		else if (event.action == &i_enigmaMainActions->showServiceSelector)
 		{
 			if (handleState())
@@ -2092,8 +2107,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		{
 			if ( handleState() )
 				nextService();
-			 }
-		else if (event.action == &i_enigmaMainActions->prevService)
+		}	else if (event.action == &i_enigmaMainActions->prevService)
 		{
 			if ( handleState() )
 				prevService();

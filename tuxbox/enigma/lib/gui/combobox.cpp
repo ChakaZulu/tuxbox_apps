@@ -180,8 +180,6 @@ struct selectEntryByNum: public std::unary_function<const eListBoxEntryText&, vo
 
 int eComboBox::setCurrent( int num )
 {
-	eListBoxEntryText* cur = listbox.getCurrent();
-
 	if ( num > listbox.getCount() )
 		return E_INVALID_ENTRY;
 
