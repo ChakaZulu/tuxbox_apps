@@ -9,9 +9,7 @@
 #include "eskin.h"
 #include "eavswitch.h"
 #include "streamwd.h"
-
-/*#define ASSIGN(v, t, n)	\
-	v =(t*)search(n); if (! v ) { qFatal("skin has undefined element: %s", n); }*/
+#include <core/system/econfig.h>
 
 void eZapVideoSetup::setPin8(int w)
 {
@@ -104,14 +102,14 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	unsigned int temp;
 	v_colorformat=cfCVBS;
 	v_pin8=0;
-	if (eDVB::getInstance()->config.getKey("/elitedvb/video/colorformat", temp))
+	if (eConfig::getInstance()->getKey("/elitedvb/video/colorformat", temp))
 		temp=cfCVBS;
 	qDebug("colorformat: %i\n", temp);
 	v_colorformat=(eAVColorFormat)temp;
 	if (v_colorformat==cfNull)
 		v_colorformat=cfCVBS;
 
-	eDVB::getInstance()->config.getKey("/elitedvb/video/pin8", v_pin8);
+	eConfig::getInstance()->getKey("/elitedvb/video/pin8", v_pin8);
 	qDebug("Pin8: %i\n", v_pin8);	
 	setColorFormat(v_colorformat);
 	setPin8(v_pin8);
@@ -123,8 +121,8 @@ eZapVideoSetup::~eZapVideoSetup()
 
 void eZapVideoSetup::okPressed()
 {
-	eDVB::getInstance()->config.setKey("/elitedvb/video/colorformat", (unsigned int)v_colorformat);
-	eDVB::getInstance()->config.setKey("/elitedvb/video/pin8", v_pin8);
+	eConfig::getInstance()->setKey("/elitedvb/video/colorformat", (unsigned int)v_colorformat);
+	eConfig::getInstance()->setKey("/elitedvb/video/pin8", v_pin8);
 	eAVSwitch::getInstance()->reloadSettings();
 	eStreamWatchdog::getInstance()->reloadSettings();
 	close(1);
