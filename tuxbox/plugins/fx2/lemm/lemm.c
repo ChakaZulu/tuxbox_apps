@@ -36,7 +36,7 @@ extern	void	dblDrawFrame( void );
 #define	SND_LETSGO		5
 
 static	int	portfolio[8];		// Wieviele Stopper/Buddler/Lemmings
-static	int	level=2;
+static	int	level=1;
 		int	main_x=660;
 static	Sprite	*deko[15];
 static	Sprite	*lemm[100];
