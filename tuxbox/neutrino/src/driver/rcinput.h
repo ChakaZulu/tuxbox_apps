@@ -56,6 +56,25 @@
 #define KEY_BLUE         0x191
 #endif
 
+/* SAGEM FBs have the following additional keys */
+
+#ifndef KEY_TOPLEFT
+#define KEY_TOPLEFT      0x1a2
+#endif
+
+#ifndef KEY_TOPRIGHT
+#define KEY_TOPRIGHT     0x1a3
+#endif
+
+#ifndef KEY_BOTTOMLEFT
+#define KEY_BOTTOMLEFT   0x1a4
+#endif
+
+#ifndef KEY_BOTTOMRIGHT
+#define KEY_BOTTOMRIGHT  0x1a5
+#endif
+
+
 
 
 #define NEUTRINO_UDS_NAME "/tmp/neutrino.sock"
@@ -107,24 +126,28 @@ class CRCInput
 		enum
 		{
 			RC_0=0x0, RC_1=0x1, RC_2=0x2, RC_3=0x3, RC_4=0x4, RC_5=0x5, RC_6=0x6, RC_7=0x7, RC_8=0x8, RC_9=0x9,
-			RC_home      = KEY_HOME,            /* /include/linux/input.h: #define KEY_HOME                102   */
-			RC_up        = KEY_UP,              /* /include/linux/input.h: #define KEY_UP                  103   */
-			RC_page_up   = KEY_PAGEUP,          /* /include/linux/input.h: #define KEY_PAGEUP              104   */
-			RC_left      = KEY_LEFT,            /* /include/linux/input.h: #define KEY_LEFT                105   */
-			RC_right     = KEY_RIGHT,           /* /include/linux/input.h: #define KEY_RIGHT               106   */
-			RC_down      = KEY_DOWN,            /* /include/linux/input.h: #define KEY_DOWN                108   */
-			RC_page_down = KEY_PAGEDOWN,        /* /include/linux/input.h: #define KEY_PAGEDOWN            109   */
-			RC_spkr      = KEY_MUTE,            /* /include/linux/input.h: #define KEY_MUTE                113   */
-			RC_minus     = KEY_VOLUMEDOWN,      /* /include/linux/input.h: #define KEY_VOLUMEDOWN          114   */
-			RC_plus      = KEY_VOLUMEUP,        /* /include/linux/input.h: #define KEY_VOLUMEUP            115   */
-			RC_standby   = KEY_POWER,           /* /include/linux/input.h: #define KEY_POWER               116   */
-			RC_help      = KEY_HELP,            /* /include/linux/input.h: #define KEY_HELP                138   */
-			RC_setup     = KEY_SETUP,           /* /include/linux/input.h: #define KEY_SETUP               141   */
-			RC_ok        = KEY_OK,              /* /include/linux/input.h: #define KEY_OK           0x160        */ /* in patched input.h */
-			RC_red       = KEY_RED,             /* /include/linux/input.h: #define KEY_RED          0x18e        */ /* in patched input.h */
-			RC_green     = KEY_GREEN,           /* /include/linux/input.h: #define KEY_GREEN        0x18f        */ /* in patched input.h */
-			RC_yellow    = KEY_YELLOW,          /* /include/linux/input.h: #define KEY_YELLOW       0x190        */ /* in patched input.h */
-			RC_blue      = KEY_BLUE,            /* /include/linux/input.h: #define KEY_BLUE         0x191        */ /* in patched input.h */
+			RC_home         = KEY_HOME,         /* /include/linux/input.h: #define KEY_HOME                102   */
+			RC_up           = KEY_UP,           /* /include/linux/input.h: #define KEY_UP                  103   */
+			RC_page_up      = KEY_PAGEUP,       /* /include/linux/input.h: #define KEY_PAGEUP              104   */
+			RC_left         = KEY_LEFT,         /* /include/linux/input.h: #define KEY_LEFT                105   */
+			RC_right        = KEY_RIGHT,        /* /include/linux/input.h: #define KEY_RIGHT               106   */
+			RC_down         = KEY_DOWN,         /* /include/linux/input.h: #define KEY_DOWN                108   */
+			RC_page_down    = KEY_PAGEDOWN,     /* /include/linux/input.h: #define KEY_PAGEDOWN            109   */
+			RC_spkr         = KEY_MUTE,         /* /include/linux/input.h: #define KEY_MUTE                113   */
+			RC_minus        = KEY_VOLUMEDOWN,   /* /include/linux/input.h: #define KEY_VOLUMEDOWN          114   */
+			RC_plus         = KEY_VOLUMEUP,     /* /include/linux/input.h: #define KEY_VOLUMEUP            115   */
+			RC_standby      = KEY_POWER,        /* /include/linux/input.h: #define KEY_POWER               116   */
+			RC_help         = KEY_HELP,         /* /include/linux/input.h: #define KEY_HELP                138   */
+			RC_setup        = KEY_SETUP,        /* /include/linux/input.h: #define KEY_SETUP               141   */
+			RC_ok           = KEY_OK,           /* /include/linux/input.h: #define KEY_OK           0x160        */ /* in patched input.h */
+			RC_red          = KEY_RED,          /* /include/linux/input.h: #define KEY_RED          0x18e        */ /* in patched input.h */
+			RC_green        = KEY_GREEN,        /* /include/linux/input.h: #define KEY_GREEN        0x18f        */ /* in patched input.h */
+			RC_yellow       = KEY_YELLOW,       /* /include/linux/input.h: #define KEY_YELLOW       0x190        */ /* in patched input.h */
+			RC_blue         = KEY_BLUE,         /* /include/linux/input.h: #define KEY_BLUE         0x191        */ /* in patched input.h */
+			RC_top_left     = KEY_TOPLEFT,      /* /include/linux/input.h: #define KEY_TOPLEFT      0x1a2        */ /* in patched input.h */
+			RC_top_right    = KEY_TOPRIGHT,     /* /include/linux/input.h: #define KEY_TOPRIGHT     0x1a3        */ /* in patched input.h */
+			RC_bottom_left  = KEY_BOTTOMLEFT,   /* /include/linux/input.h: #define KEY_BOTTOMLEFT   0x1a4        */ /* in patched input.h */
+			RC_bottom_right = KEY_BOTTOMRIGHT,  /* /include/linux/input.h: #define KEY_BOTTOMRIGHT  0x1a5        */ /* in patched input.h */
 
 			RC_timeout	= 0xFFFFFFFF,
 			RC_nokey	= 0xFFFFFFFE

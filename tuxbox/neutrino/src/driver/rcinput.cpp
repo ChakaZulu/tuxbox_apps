@@ -1348,13 +1348,6 @@ int CRCInput::translate(int code)
 	}
 	else if (!(code&0x00))
 	{
-/* FIXME: the following keys exist but are not defined in rcinput.h (they are unused in neutrino) */
-
-#define RC_top_left     RC_nokey
-#define RC_top_right    RC_nokey
-#define RC_bottom_left  RC_nokey
-#define RC_bottom_right RC_nokey
-
 		static const uint translation[0x21 + 1] = 
 			{ RC_0           , RC_1   , RC_2      , RC_3        , RC_4    , RC_5    , RC_6      , RC_7       , RC_8        , RC_9          ,
 			  RC_right       , RC_left, RC_up     , RC_down     , RC_ok   , RC_spkr , RC_standby, RC_green   , RC_yellow   , RC_red        ,
@@ -1408,6 +1401,10 @@ int CRCInput::translate(int code)
 	case KEY_GREEN:
 	case KEY_YELLOW:
 	case KEY_BLUE:
+	case KEY_TOPLEFT:
+	case KEY_TOPRIGHT:
+	case KEY_BOTTOMLEFT:
+	case KEY_BOTTOMRIGHT:
 		return code;
 	default:
 		return RC_nokey;
