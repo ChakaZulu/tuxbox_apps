@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.9 2002/05/17 19:50:41 dirch Exp $
+	$Id: timermanager.h,v 1.10 2002/05/21 13:07:01 dirch Exp $
 
 	License: GPL
 
@@ -32,8 +32,7 @@
 #include <map>
 #include <string>
 
-#include "timerdclient.h"
-#include "../../zapit/clientlib/zapitclient.h"
+//#include "timerdclient.h"
 #include "eventserver.h"
 
 using namespace std;
@@ -48,7 +47,6 @@ class CTimerManager
 	private:
 		int					eventID;
 		CEventServer		*eventServer;
-		CZapitClient		*zapitClient;	
 		CTimerEventMap		events;
 		pthread_t			thrTimer;
 
@@ -57,42 +55,104 @@ class CTimerManager
 		CTimerEvent			*nextEvent();
 
 	public:
+
+
 		static CTimerManager* getInstance();
 
 		CEventServer* getEventServer() {return eventServer;};
-		CZapitClient* getZapitClient() {return zapitClient;};
 		int addEvent(CTimerEvent*);
-		void removeEvent(int eventID);
+		bool removeEvent(int eventID);
 		CTimerEvent* getNextEvent();
-		void listEvents(CTimerEventMap &Events);
+		bool listEvents(CTimerEventMap &Events);
 };
 
 
 class CTimerEvent
 {
 	public:
-		int				eventID;
-		int				eventType;
-		struct tm		alarmtime;
+		struct EventInfo
+		{
+			int      uniqueKey;
+			int      onidSid;
+			char     name[50];
+			int      fsk;
+		};
+		
+		enum CTimerEventRepeat 
+		{ 
+			TIMERREPEAT_ONCE = 0,
+			TIMERREPEAT_DAILY, 
+			TIMERREPEAT_WEEKLY, 
+			TIMERREPEAT_BIWEEKLY, 
+			TIMERREPEAT_FOURWEEKLY, 
+			TIMERREPEAT_MONTHLY, 
+			TIMERREPEAT_BYEVENTDESCRIPTION
+		};
 
-		CTimerEvent( int mon = 0, int day = 0, int hour = 0, int min = 0, int evType = 0) :
-			eventType( evType) { alarmtime.tm_mon = mon; alarmtime.tm_mday = day; alarmtime.tm_hour = hour; alarmtime.tm_min = min;};
+		enum CTimerEventTypes
+		{
+			TIMER_SHUTDOWN = 1,
+			TIMER_NEXTPROGRAM,
+			TIMER_ZAPTO,
+			TIMER_STANDBY,
+			TIMER_RECORD,
+			TIMER_REMIND,
+			TIMER_SLEEPTIMER
+		};
+		
+		enum CTimerEventStates 
+		{ 
+			TIMERSTATE_SCHEDULED, 
+			TIMERSTATE_PREANNOUNCE, 
+			TIMERSTATE_ISRUNNING, 
+			TIMERSTATE_HASFINISHED, 
+			TIMERSTATE_TERMINATED 
+		};
 
-		inline int time();
-		bool operator <= ( CTimerEvent&);
-		bool operator >= ( CTimerEvent&);
+		int					eventID;			// event identifier
+		CTimerEventTypes	eventType;			// Type of event
+		CTimerEventStates	eventState;			// actual event state
+		CTimerEventRepeat	eventRepeat;
+
+	// time values
+		time_t		alarmTime;					// event start time
+		time_t		stopTime;					// 0 = one time shot
+		time_t		announceTime;				// when should event be announced (0=none)
+
+		CTimerEvent( CTimerEventTypes evtype, int mon = 0, int day = 0, int hour = 0, int min = 0, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE);
+		CTimerEvent( CTimerEventTypes evtype, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE);
+		
+		int remain_min(time_t t){return (t - time(NULL)) / 60;};
+//		bool operator <= ( CTimerEvent&);
+//		bool operator >= ( CTimerEvent&);
 		void printEvent(void);
-		static CTimerEvent now();
+//		static CTimerEvent now();
+		void Reschedule();
 
 		virtual void fireEvent(){};
+		virtual void stopEvent(){};
+		virtual void announceEvent(){};
+
 };
 
 class CTimerEvent_Shutdown : public CTimerEvent
 {
 	public:
-		CTimerEvent_Shutdown( int mon = 0, int day = 0, int hour = 0, int min = 0) :
-			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_SHUTDOWN){};
+		CTimerEvent_Shutdown( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
+			CTimerEvent(TIMER_SHUTDOWN, announceTime, alarmTime, stopTime, evrepeat ){};
 		virtual void fireEvent();
+		virtual void announceEvent();
+		virtual void stopEvent();
+};
+
+class CTimerEvent_Sleeptimer : public CTimerEvent
+{
+	public:
+		CTimerEvent_Sleeptimer( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
+			CTimerEvent(TIMER_SLEEPTIMER, announceTime, alarmTime, stopTime,evrepeat ){};
+		virtual void fireEvent();
+		virtual void announceEvent();
+		virtual void stopEvent();
 };
 
 
@@ -101,43 +161,50 @@ class CTimerEvent_Standby : public CTimerEvent
 	public:
 		bool standby_on;
 
-		CTimerEvent_Standby( int mon = 0, int day = 0, int hour = 0, int min = 0) :
-			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_STANDBY){};
+		CTimerEvent_Standby( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
+			CTimerEvent(TIMER_STANDBY, announceTime, alarmTime, stopTime, evrepeat){};
 		virtual void fireEvent();
+		virtual void announceEvent();
+		virtual void stopEvent();
 };
 
 class CTimerEvent_Record : public CTimerEvent
 {
 	public:
 
-		CTimerEvent_Record( int mon = 0, int day = 0, int hour = 0, int min = 0) :
-			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_RECORD){};
+		CTimerEvent_Record( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
+			CTimerEvent(TIMER_RECORD, announceTime, alarmTime, stopTime, evrepeat){};
 		virtual void fireEvent();
+		virtual void announceEvent();
+		virtual void stopEvent();
 };
 
 class CTimerEvent_NextProgram : public CTimerEvent
 {
 	public:
-
-		CTimerd::EventInfo eventInfo;
+		CTimerEvent::EventInfo eventInfo;
 
 		typedef map< int, CTimerEvent_NextProgram*> EventMap;
 		static EventMap events;
 
-		CTimerEvent_NextProgram( int mon = 0, int day = 0, int hour = 0, int min = 0) :
-			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_NEXTPROGRAM){};
+		CTimerEvent_NextProgram( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
+			CTimerEvent(TIMER_NEXTPROGRAM, announceTime, alarmTime, stopTime, evrepeat){};
 		virtual void fireEvent();
+		virtual void announceEvent();
+		virtual void stopEvent();
 };
 
 class CTimerEvent_Zapto : public CTimerEvent
 {
 	public:
 
-		CTimerd::EventInfo eventInfo;
+		CTimerEvent::EventInfo eventInfo;
 
-		CTimerEvent_Zapto( int mon = 0, int day = 0, int hour = 0, int min = 0) :
-			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_ZAPTO){};
+		CTimerEvent_Zapto( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
+			CTimerEvent(TIMER_ZAPTO, announceTime, alarmTime, stopTime, evrepeat){};
 		virtual void fireEvent();
+		virtual void announceEvent();
+		virtual void stopEvent();
 };
 
 

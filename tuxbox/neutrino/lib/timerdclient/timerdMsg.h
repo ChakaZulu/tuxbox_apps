@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdMsg.h,v 1.6 2002/05/14 23:08:00 dirch Exp $
+	$Id: timerdMsg.h,v 1.7 2002/05/21 13:07:01 dirch Exp $
 
 	License: GPL
 
@@ -38,7 +38,7 @@
 #include <vector>
 
 using namespace std;
-
+#include "../timermanager.h"
 
 #define TIMERD_UDS_NAME "/tmp/timerd.sock"
 
@@ -48,13 +48,6 @@ class CTimerd
 
 	public:
 
-		struct EventInfo
-		{
-			int      uniqueKey;
-			int      onidSid;
-			char     name[50];
-			int      fsk;
-		};
 
 		static const char ACTVERSION = 1;
 
@@ -64,6 +57,9 @@ class CTimerd
 			CMD_REMOVETIMER,
 			CMD_GETTIMER,
 			CMD_GETTIMERLIST,
+			CMD_MODIFYTIMER,
+			CMD_GETSLEEPTIMER,
+			CMD_RESCHEDULETIMER,
 
 			CMD_REGISTEREVENT,
 			CMD_UNREGISTEREVENT,
@@ -79,13 +75,14 @@ class CTimerd
 			unsigned char cmd;
 		};
 
+
 		struct commandAddTimer
 		{
-			int   evType;
-			int   month;
-			int   day;
-			int   hour;
-			int   min;
+			CTimerEvent::CTimerEventTypes	eventType;
+			CTimerEvent::CTimerEventRepeat	eventRepeat;
+			time_t							alarmTime;
+			time_t							announceTime;
+			time_t							stopTime;			
 		};
 
 
@@ -109,19 +106,33 @@ class CTimerd
 			int   eventID;
 		};
 
+		struct responseGetSleeptimer
+		{
+			int   eventID;
+		};
+
 		struct commandSetStandby
 		{
 			bool standby_on;
 		};
 
+		struct commandModifyTimer
+		{
+			int			eventID;
+			time_t		announceTime;
+			time_t		alarmTime;
+			time_t		stopTime;
+		};
+
 		struct responseGetTimer
 		{			
-			int	  eventID;
-			int   month;
-			int   day;
-			int   hour;
-			int   min;
-			int   eventType;
+			int								eventID;
+			CTimerEvent::CTimerEventTypes	eventType;
+			CTimerEvent::CTimerEventStates	eventState;
+			CTimerEvent::CTimerEventRepeat	eventRepeat;
+			time_t							alarmTime;
+			time_t							announceTime;
+			time_t							stopTime;
 			unsigned data;
 		};
 		typedef std::vector<responseGetTimer> TimerList;

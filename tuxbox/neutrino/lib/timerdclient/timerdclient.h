@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.11 2002/05/18 02:19:26 dirch Exp $
+	$Id: timerdclient.h,v 1.12 2002/05/21 13:07:01 dirch Exp $
 
 	License: GPL
 
@@ -44,6 +44,7 @@
 #include <string>
 
 #include "timerdMsg.h"
+#include "../timermanager.h"
 
 using namespace std;
 
@@ -60,68 +61,86 @@ class CTimerdClient
 		bool receive(char* data, int size);
 
 	public:
-
-		enum timerTypes
-		{
-			TIMER_SHUTDOWN = 1,
-			TIMER_NEXTPROGRAM,
-			TIMER_ZAPTO,
-			TIMER_STANDBY,
-			TIMER_RECORD
-		};
-
 		enum events
 		{
 			EVT_SHUTDOWN = 1,
+			EVT_ANNOUNCE_SHUTDOWN,
+			EVT_ZAPTO,
+			EVT_ANNOUNCE_ZAPTO,
 			EVT_NEXTPROGRAM,
+			EVT_ANNOUNCE_NEXTPROGRAM,
 			EVT_STANDBY_ON,
 			EVT_STANDBY_OFF,
-			EVT_RECORD
+			EVT_RECORD_START,
+			EVT_RECORD_STOP,
+			EVT_ANNOUNCE_RECORD,
+			EVT_ANNOUNCE_SLEEPTIMER
 		};
+
 
 		CTimerdClient::CTimerdClient();
 
 		void registerEvent(unsigned int eventID, unsigned int clientID, string udsName);
 		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
 
-		bool isTimerdAvailable();
+		bool isTimerdAvailable();			// check if timerd is running
 
-		int addTimerEvent( timerTypes evType, void* data = 0, int min = 0, int hour = 0, int day = 0, int month = 0);
-		void removeTimerEvent( int evId);
+		int addTimerEvent( CTimerEvent::CTimerEventTypes evType,bool _new, void* data, time_t alarmtime,time_t announcetime = 0, time_t stoptime = 0, CTimerEvent::CTimerEventRepeat evrepeat = CTimerEvent::TIMERREPEAT_ONCE);
+		int addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data, int min, int hour, int day = 0, int month = 0, CTimerEvent::CTimerEventRepeat evrepeat = CTimerEvent::TIMERREPEAT_ONCE);
 
-		void getTimerList( CTimerd::TimerList &timerlist);
-		void getTimer( CTimerd::responseGetTimer &timer, unsigned timerID);
+		void removeTimerEvent( int evId);	// remove timer event
 
+		void getTimerList( CTimerd::TimerList &timerlist);		// returns the list of all timers
+		void getTimer( CTimerd::responseGetTimer &timer, unsigned timerID);		// returns specified timer
 
-		int addShutdownTimerEvent(int min = 0, int hour = 0, int day = 0, int month = 0)
-		{
-			return addTimerEvent(TIMER_SHUTDOWN,NULL, min, hour, day, month);
-		};
+		// modify existing timer event
+		bool modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime);
 
-		int addRecordTimerEvent(int min = 0, int hour = 0, int day = 0, int month = 0)
-		{
-			return addTimerEvent(TIMER_RECORD,NULL, min, hour, day, month);
-		};
+		// set existing sleeptimer to new times or create new sleeptimer with these times
+		int setSleeptimer(time_t announcetime, time_t alarmtime, int timerid = 0);		
 
-		int addNextProgramTimerEvent(CTimerd::EventInfo eventInfo,int min = 0, int hour = 0, int day = 0, int month = 0)
+		// returns the id of sleeptimer, 0 of no sleeptimer exists
+		int getSleeptimerID();
+		// returns remaining mins, -1 if no sleeptimer exists
+		int getSleepTimerRemaining();
+
+		// add diff to existing timer event
+		bool rescheduleTimerEvent(int eventid, time_t diff);
+		// add diff to existing timer event
+		bool rescheduleTimerEvent(int eventid, time_t announcediff, time_t alarmdiff, time_t stoptime);
+
+		// adds new sleeptimer event
+		int addSleepTimerEvent(time_t announcetime,time_t alarmtime)	// sleeptimer setzen
+			{return addTimerEvent(CTimerEvent::TIMER_SLEEPTIMER, true, NULL, announcetime, alarmtime, 0);};
+
+		// adds new shutdown timer event
+		int addShutdownTimerEvent(time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0)
+			{return addTimerEvent(CTimerEvent::TIMER_SHUTDOWN, true, NULL, announcetime, alarmtime, stoptime);};
+
+		// adds new record timer event
+		int addRecordTimerEvent(time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
+			{return addTimerEvent(CTimerEvent::TIMER_RECORD, NULL, true, announcetime, alarmtime, stoptime);};
+
+		int addNextProgramTimerEvent(CTimerEvent::EventInfo eventInfo,int min, int hour, int day = 0, int month = 0)
 		{
 			// mal auf verdacht eingebaut
 			// keine ahnung ob / was hier noch fehlt
-			return addTimerEvent(TIMER_NEXTPROGRAM,&eventInfo, min, hour, day, month);
+			return addTimerEvent(CTimerEvent::TIMER_NEXTPROGRAM, &eventInfo, min, hour, day, month);
 		};
-
-		int addZaptoTimerEvent(unsigned onidSid,int min = 0, int hour = 0, int day = 0, int month = 0)
+		// adds new zapto event
+		int addZaptoTimerEvent(unsigned onidSid,int min, int hour, int day = 0, int month = 0)
 		{
-			CTimerd::EventInfo eventInfo;
+			CTimerEvent::EventInfo eventInfo;
 			eventInfo.onidSid = onidSid;
-			return addTimerEvent(TIMER_ZAPTO,&eventInfo, min, hour, day, month);
+			return addTimerEvent(CTimerEvent::TIMER_ZAPTO, &eventInfo, min, hour, day, month);
 		};
 
-		int addStandbyTimerEvent(bool standby_on,int min = 0, int hour = 0, int day = 0, int month = 0)
+		// adds new standby event
+		int addStandbyTimerEvent(bool standby_on,int min, int hour, int day = 0, int month = 0)
 		{
 			CTimerd::commandSetStandby standby;
 			standby.standby_on =standby_on;
-			return addTimerEvent(TIMER_STANDBY,&standby, min, hour, day, month);
+			return addTimerEvent(CTimerEvent::TIMER_STANDBY, &standby, min, hour, day, month);
 		};
 };
 
