@@ -232,7 +232,7 @@ bool CIPChangeNotifier::changeNotify(string OptionName, void* Data)
 	sscanf((char*) Data, "%hhu.%hhu.%hhu.%hhu", &_ip[0], &_ip[1], &_ip[2], &_ip[3]);
 
 	sprintf(ip, "%hhu.%hhu.%hhu.255", _ip[0], _ip[1], _ip[2]);
-	CNeutrinoApp::getInstance()->networkConfig.broadcast = broadcast;
+	CNeutrinoApp::getInstance()->networkConfig.broadcast = ip;
 
 	CNeutrinoApp::getInstance()->networkConfig.netmask = (_ip[0] == 10) ? "255.0.0.0" : "255.255.255.0";
 
