@@ -1,36 +1,27 @@
-// for debugging use:
-// #define SYNC_PAINT
 #include <unistd.h>
-#ifndef SYNC_PAINT
 #include <pthread.h>
-#endif
-
 #include <lib/gdi/grc.h>
 #include <lib/gdi/font.h>
 #include <lib/gdi/lcd.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 
-#define MAXSIZE 1024
-
-#ifndef SYNC_PAINT
 void *gRC::thread_wrapper(void *ptr)
 {
 	nice(3);
 	return ((gRC*)ptr)->thread();
 }
-#endif
 
 gRC *gRC::instance=0;
 
-gRC::gRC(): queue(2048), queuelock(MAXSIZE)
+gRC::gRC()
 {
 	ASSERT(!instance);
 	instance=this;
-	queuelock.lock(MAXSIZE);
-#ifndef SYNC_PAINT
+	pthread_mutex_init(&mutex, 0);
+	pthread_cond_init(&cond, 0);
+	rp=wp=0;
 	eDebug(pthread_create(&the_thread, 0, thread_wrapper, this)?"RC thread couldn't be created":"RC thread createted successfully");
-#endif
 }
 
 gRC::~gRC()
@@ -51,22 +42,23 @@ gRC::~gRC()
 
 void *gRC::thread()
 {
-#ifndef SYNC_PAINT
 	while (1)
-#else
-	while (queue.size())
-#endif
 	{
-		queuelock.lock(1);
-		gOpcode& o(queue.current());
-		if (o.opcode==gOpcode::shutdown)
-			break;
-		o.dc->exec(&o);
-		queue.dequeue();
+		singleLock s(mutex);
+		if ( rp != wp )
+		{
+			gOpcode& o(queue[rp]);
+			if (o.opcode==gOpcode::shutdown)
+				break;
+			o.dc->exec(&o);
+			rp++;
+			if ( rp == MAXSIZE )
+				rp=0;
+		}
+		else
+			pthread_cond_wait(&cond, &mutex);
 	}
-#ifndef SYNC_PAINT
 	pthread_exit(0);
-#endif
 	return 0;
 }
 

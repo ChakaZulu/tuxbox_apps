@@ -12,7 +12,6 @@
 #include <list>
 
 #include <lib/base/estring.h>
-#include <lib/base/ringbuffer.h>
 #include <lib/base/erect.h>
 #include <lib/system/elock.h>
 #include <lib/gdi/gpixmap.h>
@@ -120,32 +119,47 @@ struct gOpcode
 	gDC *dc;
 };
 
+#define MAXSIZE 1024
+
 class gRC
 {
-	static gRC *instance;
-	
 	static void *thread_wrapper(void *ptr);
-	pthread_t the_thread;
 	void *thread();
 
-	queueRingBuffer<gOpcode> queue;
+	static gRC *instance;
+	gOpcode queue[MAXSIZE];
+	pthread_t the_thread;
+	pthread_mutex_t mutex;
+	pthread_cond_t cond;
+	int rp, wp;
 public:
-	eLock queuelock;
+	bool mustDraw() { return rp != wp; }
 	gRC();
 	virtual ~gRC();
 
 	void submit(const gOpcode &o)
 	{
-		static int collected=0;
-		queue.enqueue(o);
-		collected++;
-		if (o.opcode==gOpcode::end||o.opcode==gOpcode::shutdown)
+		while(1)
 		{
-			queuelock.unlock(collected);
-#ifdef SYNC_PAINT
-			thread();
-#endif
-			collected=0;
+			pthread_mutex_lock(&mutex);
+			if ( (wp+1) == rp )
+			{
+				pthread_mutex_unlock(&mutex);
+				//printf("render buffer full...\n");
+				//fflush(stdout);
+				usleep(1000);  // wait 1 msec 
+				continue;
+			}
+			int free=rp-wp;
+			if ( free <= 0 )
+				free+=MAXSIZE;
+			queue[wp++]=o;
+			if ( wp == MAXSIZE )
+				wp = 0;
+			if (o.opcode==gOpcode::end||o.opcode==gOpcode::shutdown)
+				pthread_cond_signal(&cond);
+			pthread_mutex_unlock(&mutex);
+			break;
 		}
 	}
 

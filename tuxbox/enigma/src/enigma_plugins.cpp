@@ -371,7 +371,7 @@ void ePluginThread::start()
 				if ( wasVisible )
 					wnd->hide();
 
-				while(gRC::getInstance().queuelock.getDiff())
+				while ( gRC::getInstance().mustDraw() )
 					usleep(1000);
 
 				if (needfb)
