@@ -913,6 +913,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             ev->y =global_framebuffer.mouse_y;
             ev->dx = rc_dx;
             ev->dy = rc_dy;
+            rc_dx = rc_dy = 0;
+            RetEvent(retval);
          }
       }
       else
