@@ -101,7 +101,7 @@ void CInfoViewer::showData()
 	//proz.
 	frameBuffer->paintBoxRel(BoxEndX-114, ChanNameY+10, 104, 24, COL_INFOBAR+7);
         frameBuffer->paintBoxRel(BoxEndX-112, ChanNameY+12, runningPercent+2, 20, COL_INFOBAR+5);
-	frameBuffer->paintBoxRel(BoxEndX-113+runningPercent, ChanNameY+12, 100-runningPercent, 20, COL_INFOBAR+2);
+	frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, ChanNameY+12, 100-runningPercent, 20, COL_INFOBAR+2);
 
 	//info running
 	int duration1Width = fonts->infobar_info->getRenderWidth(runningDuration); 
