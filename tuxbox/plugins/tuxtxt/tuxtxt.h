@@ -94,30 +94,32 @@ int ymosaic[4];
 #define fontwidth_topmenusmall 8
 #endif
 
-#define TV43STARTX (StartX + 40*fontwidth_topmenumain)
+#define TV43STARTX (StartX + 10 + 40*fontwidth_topmenumain)
 #define TV169STARTX (StartX + 40*fontwidth_small)
 #define TVENDX (StartX + 40*fontwidth_normal)
-#define TV43WIDTH (TVENDX-TV43STARTX-8)
+#define TV43WIDTH 120
 #define TV169WIDTH (TVENDX-TV169STARTX-9)
+#define TV169FULLWIDTH 320
 #define TV43STARTY (TVENDY - TV43WIDTH*3/4-20)
 #define TV169STARTY (TVENDY - TV169WIDTH-50)
 #define TVENDY (StartY + 25*fontheight)
-#define TV43HEIGHT (TVENDY-TV43STARTY-12)
+#define TV43HEIGHT 96
 #define TV169HEIGHT (TVENDY-TV169STARTY)
+#define TV169FULLHEIGHT 576
 
 #define TOPMENU43STARTX (TV43STARTX+2)
-#define TOPMENU169STARTX (TV169STARTX+2)
+#define TOPMENU169STARTX (TV43STARTX+2)
 #define TOPMENUENDX TVENDX
 #define TOPMENUSTARTY StartY
 #define TOPMENU43ENDY TV43STARTY
-#define TOPMENU169ENDY TV169STARTY
+#define TOPMENU169ENDY TV43STARTY
 
 #define TOPMENULINEWIDTH ((TOPMENUENDX-TOPMENU43STARTX+fontwidth_topmenusmall-1)/fontwidth_topmenusmall)
 #define TOPMENUINDENTBLK 0
 #define TOPMENUINDENTGRP 1
 #define TOPMENUINDENTDEF 2
 #define TOPMENUSPC 0
-#define TOPMENUCHARS (TOPMENUINDENTDEF+12+TOPMENUSPC+3+1)
+#define TOPMENUCHARS (TOPMENUINDENTDEF+12+TOPMENUSPC+3+5)
 
 /*  1: blk-1, grp-1, grp+1, blk+1 */
 /*  2: blk-1, grp+1, grp+2, blk+1 */
@@ -493,6 +495,14 @@ const char hotlisttext[][2*5] =
 	{ " add rem. " },
 	{ "ajoutenlev" },
 	{ "toev.verw." },
+};
+
+const char configonoff[][2*5] =
+{
+	{ "einaus" },
+	{ "on off" },
+	{ "actdes" },
+	{ "aanuit" } 
 };
 
 const char configmenu[][2*Menu_Height*Menu_Width] =

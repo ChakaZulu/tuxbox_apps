@@ -413,7 +413,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.74 $";
+	char cvs_revision[] = "$Revision: 1.75 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -1454,10 +1454,10 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 		menu[MenuLine[M_PID]*2*Menu_Width + 28] = ' ';
 
 	/* set 16:9 modi, colors & national subset */
-	hex2str(&menu[2*Menu_Width*MenuLine[M_SC1] + 27], screen_mode1);
-	hex2str(&menu[2*Menu_Width*MenuLine[M_SC2] + 27], screen_mode2);
-	hex2str(&menu[2*Menu_Width*MenuLine[M_COL] + 27], color_mode);
-	hex2str(&menu[2*Menu_Width*MenuLine[M_AUN] + 27], auto_national);
+	memcpy(&menu[2*Menu_Width*MenuLine[M_SC1] + Menu_Width - 5], &configonoff[menulanguage][screen_mode1  ? 3 : 0], 3);
+	memcpy(&menu[2*Menu_Width*MenuLine[M_SC2] + Menu_Width - 5], &configonoff[menulanguage][screen_mode2  ? 3 : 0], 3);
+	memcpy(&menu[2*Menu_Width*MenuLine[M_COL] + Menu_Width - 5], &configonoff[menulanguage][color_mode    ? 3 : 0], 3);
+	memcpy(&menu[2*Menu_Width*MenuLine[M_AUN] + Menu_Width - 5], &configonoff[menulanguage][auto_national ? 3 : 0], 3);
 	if (national_subset != 4)
 		memcpy(&menu[2*Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*26], 26);
 	if (national_subset == 0  || auto_national)
@@ -2728,39 +2728,24 @@ void SwitchScreenMode(int newscreenmode)
 
 		if (screenmode==1) /* split with topmenu */
 		{
-			if (screen_mode2)	/* 16:9 */
-			{
-				fw = fontwidth_small;
-				fh = fontheight;
-				tw = TV169WIDTH;
+			fw = fontwidth_topmenumain;
+			fh = fontheight;
+			tw = TV43WIDTH;
 #if CFGTTF 
-		StartX = sx + (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
+			StartX = sx + (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
 #endif
-				tx = TV169STARTX;
-				ty = TV169STARTY;
-				th = TV169HEIGHT;
-			}
-			else /* 4:3 */
-			{
-				fw = fontwidth_topmenumain;
-				fh = fontheight;
-				tw = TV43WIDTH;
-#if CFGTTF 
-		StartX = sx + (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
-#endif
-				tx = TV43STARTX;
-				ty = TV43STARTY;
-				th = TV43HEIGHT;
-			}
+			tx = TV43STARTX;
+			ty = TV43STARTY;
+			th = TV43HEIGHT;
 		}
 		else /* 2: split with full height tv picture */
 		{
 			fw = fontwidth_small;
 			fh = fontheight;
 			tx = StartX+2+40*fontwidth_small;
-			ty = StartY;
-			tw = 320;
-			th = 526;
+			ty = 25;
+			tw = TV169FULLWIDTH;
+			th = TV169FULLHEIGHT;
 		}
 		
 #if CFGTTF 
@@ -3865,10 +3850,10 @@ void CreateLine25()
 			RenderClearMenuLineBB(line, attrcol, attr);
 		}
 #if CFGTTF 
-		fontwidth = screen_mode2 ? fontwidth_small : fontwidth_topmenumain;
+		fontwidth = fontwidth_topmenumain;
 		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 #else	 /* !TTF */
-		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = screen_mode2 ? fontwidth_small : fontwidth_topmenumain;
+		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fontwidth_topmenumain;
 #endif /* !TTF */
 	}
 }
