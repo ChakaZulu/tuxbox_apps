@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.13  2002/06/03 19:30:48  TheDOC
+scanlist.dat missing -> show error
+
 Revision 1.12  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -225,7 +228,11 @@ channels scan::scanChannels(bool full, int start_frequency, int start_symbol, in
 
 
 
-		fp = fopen(CONFIGDIR "/lcars/scanlist.dat", "r");
+		if ((fp = fopen(CONFIGDIR "/lcars/scanlist.dat", "r")) == NULL);
+		{
+			perror("scanlist.dat");
+			exit(0);
+		}
 		int co = 0;
 		while(!feof(fp))
 		{
