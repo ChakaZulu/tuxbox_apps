@@ -1,5 +1,5 @@
 /*
- * $Id: long_table.h,v 1.1 2003/07/17 01:07:36 obi Exp $
+ * $Id: long_table.h,v 1.2 2003/08/20 22:47:24 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -28,7 +28,6 @@ class LongTable : public ShortTable
 {
 	protected:
 		unsigned tableIdExtension			: 16;
-		unsigned reserved3				: 2;
 		unsigned versionNumber				: 5;
 		unsigned currentNextIndicator			: 1;
 		unsigned sectionNumber				: 8;

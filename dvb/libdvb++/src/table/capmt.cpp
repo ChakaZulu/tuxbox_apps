@@ -1,5 +1,5 @@
 /*
- * $Id: capmt.cpp,v 1.1 2003/07/17 01:07:56 obi Exp $
+ * $Id: capmt.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -22,35 +22,32 @@
 #include <dvb/id/descriptor_tag.h>
 #include <dvb/table/capmt.h>
 
-CaLengthField::CaLengthField(const uint64_t length)
+CaLengthField::CaLengthField(const uint32_t length)
 {
 	if (length < 0x80) {
 		sizeIndicator = 0;
 		lengthValue = length;
 	}
-
 	else {
-		uint64_t mask = 0xFF;
+		uint32_t mask = 0xff;
 
 		sizeIndicator = 1;
 		lengthFieldSize = 1;
 
 		while ((length & mask) != length) {
 			lengthFieldSize++;
-			mask = ((uint64_t)(mask << 8)) | ((uint64_t)0xFFULL);
+			mask = (mask << 8) | 0xff;
 		}
 
 		for (uint8_t i = lengthFieldSize; i > 0; i--)
-			lengthValueByte.push_back((length >> ((i - 1) << 3)) & 0xFF);
+			lengthValueByte.push_back((length >> ((i - 1) << 3)) & 0xff);
 	}
 }
 
 CaElementaryStreamInfo::CaElementaryStreamInfo(const ElementaryStreamInfo * const info, const uint8_t cmdId)
 {
 	streamType = info->streamType;
-	reserved1 = info->reserved1;
 	elementaryPid = info->elementaryPid;
-	reserved2 = info->reserved2;
 	esInfoLength = 0;
 
 	for (DescriptorConstIterator i = info->getDescriptors()->begin(); i != info->getDescriptors()->end(); ++i)
@@ -78,16 +75,14 @@ uint16_t CaElementaryStreamInfo::getLength(void) const
 
 CaProgramMapTable::CaProgramMapTable(const ProgramMapTable * const pmt, const uint8_t listManagement, const uint8_t cmdId)
 {
-	uint64_t length = 6;
+	uint32_t length = 6;
 
-	caPmtTag = 0x9F80C3;
+	caPmtTag = 0x9f80c3;
 	caPmtListManagement = listManagement;
 
 	programNumber = pmt->tableIdExtension;
-	reserved1 = pmt->reserved3;
 	versionNumber = pmt->versionNumber;
 	currentNextIndicator = pmt->currentNextIndicator;
-	reserved2 = pmt->reserved5;
 	programInfoLength = 0;
 
 	for (DescriptorConstIterator i = pmt->getDescriptors()->begin(); i != pmt->getDescriptors()->end(); ++i)

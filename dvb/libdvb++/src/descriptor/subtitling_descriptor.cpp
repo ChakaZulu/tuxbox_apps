@@ -1,5 +1,5 @@
 /*
- * $Id: subtitling_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: subtitling_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,14 +19,15 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/subtitling_descriptor.h>
 
 Subtitling::Subtitling(const uint8_t * const buffer)
 {
 	iso639LanguageCode.assign((char *)&buffer[0], 3);
 	subtitlingType = buffer[3];
-	compositionPageId = (buffer[4] << 8) | buffer[5];
-	ancillaryPageId = (buffer[6] << 8) | buffer[7];
+	compositionPageId = UINT16(&buffer[4]);
+	ancillaryPageId = UINT16(&buffer[6]);
 }
 
 std::string Subtitling::getIso639LanguageCode(void) const

@@ -1,5 +1,5 @@
 /*
- * $Id: local_time_offset_descriptor.h,v 1.1 2003/07/17 01:07:14 obi Exp $
+ * $Id: local_time_offset_descriptor.h,v 1.2 2003/08/20 22:47:18 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -29,7 +29,6 @@ class LocalTimeOffset
 	protected:
 		std::string countryCode;
 		unsigned countryRegionId			: 6;
-		unsigned reserved				: 1;
 		unsigned localTimeOffsetPolarity		: 1;
 		unsigned localTimeOffset			: 16;
 		unsigned timeOfChangeMjd			: 16;

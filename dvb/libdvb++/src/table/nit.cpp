@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.1 2003/07/17 01:07:56 obi Exp $
+ * $Id: nit.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,14 +19,14 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/table/nit.h>
 
 TransportStreamInfo::TransportStreamInfo(const uint8_t * const buffer)
 {
-	transportStreamId = (buffer[0] << 8) | buffer[1];
-	originalNetworkId = (buffer[2] << 8) | buffer[3];
-	reserved1 = (buffer[4] >> 8) & 0x0F;
-	transportDescriptorsLength = ((buffer[4] & 0x0F) << 8) | buffer[5];
+	transportStreamId = UINT16(&buffer[0]);
+	originalNetworkId = UINT16(&buffer[2]);
+	transportDescriptorsLength = DVB_LENGTH(&buffer[4]);
 
 	for (uint16_t i = 6; i < transportDescriptorsLength + 6; i += buffer[i + 1] + 2)
 		descriptor(&buffer[i]);
@@ -44,16 +44,14 @@ uint16_t TransportStreamInfo::getOriginalNetworkId(void) const
 
 NetworkInformationTable::NetworkInformationTable(const uint8_t * const buffer) : LongCrcTable(buffer)
 {
-	reserved4 = (buffer[8] >> 5) & 0x0F;
-	networkDescriptorsLength = ((buffer[8] & 0x0F) << 8) | buffer[9];
+	networkDescriptorsLength = DVB_LENGTH(&buffer[8]);
 
 	for (uint16_t i = 10; i < networkDescriptorsLength + 10; i += buffer[i + 1] + 2)
 		descriptor(&buffer[i]);
 
-	reserved5 = (buffer[networkDescriptorsLength + 10] >> 4) & 0x0F;
-	transportStreamLoopLength = ((buffer[networkDescriptorsLength + 10] & 0x0F) << 8) | buffer[networkDescriptorsLength + 11];
+	transportStreamLoopLength = DVB_LENGTH(&buffer[networkDescriptorsLength + 10]);
 
-	for (uint16_t i = networkDescriptorsLength + 12; i < sectionLength + 3 - 4; i += ((buffer[i + 4] & 0x0F) | buffer[i + 5]) + 6)
+	for (uint16_t i = networkDescriptorsLength + 12; i < sectionLength + 3 - 4; i += DVB_LENGTH(&buffer[i + 4]) + 6)
 		tsInfo.push_back(new TransportStreamInfo(&buffer[i]));
 }
 

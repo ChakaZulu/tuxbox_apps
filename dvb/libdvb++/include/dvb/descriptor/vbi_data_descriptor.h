@@ -1,5 +1,5 @@
 /*
- * $Id: vbi_data_descriptor.h,v 1.1 2003/07/17 01:07:15 obi Exp $
+ * $Id: vbi_data_descriptor.h,v 1.2 2003/08/20 22:47:18 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -27,7 +27,6 @@
 class VbiDataLine
 {
 	protected:
-		unsigned reserved				: 2;
 		unsigned fieldParity				: 1;
 		unsigned lineOffset				: 5;
 
@@ -48,7 +47,6 @@ class VbiDataService
 		unsigned dataServiceId				: 8;
 		unsigned dataServiceDescriptorLength		: 8;
 		VbiDataLineVector vbiDataLines;
-		std::vector<uint8_t> reserved;
 
 	public:
 		VbiDataService(const uint8_t * const buffer);

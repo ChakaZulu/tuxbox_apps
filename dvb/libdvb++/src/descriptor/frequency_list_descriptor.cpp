@@ -1,5 +1,5 @@
 /*
- * $Id: frequency_list_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: frequency_list_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,15 +19,15 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/frequency_list_descriptor.h>
 
 FrequencyListDescriptor::FrequencyListDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	reserved = (buffer[2] >> 2) & 0x3f;
 	codingType = buffer[2] & 0x03;
 
 	for (uint16_t i = 0; i < descriptorLength - 1; i += 4)
-		centreFrequencies.push_back((buffer[i + 3] << 24) | (buffer[i + 4] << 16) | (buffer[i + 5] << 8) | buffer[i + 6]);
+		centreFrequencies.push_back(UINT32(&buffer[i + 3]));
 }
 
 uint8_t FrequencyListDescriptor::getCodingType(void) const

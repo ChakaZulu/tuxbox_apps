@@ -1,5 +1,5 @@
 /*
- * $Id: tdt.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
+ * $Id: byte_stream.h,v 1.1 2003/08/20 22:47:17 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,22 +19,42 @@
  *
  */
 
-#include <dvb/byte_stream.h>
-#include <dvb/table/tdt.h>
+#ifndef __dvb_byte_stream_h__
+#define __dvb_byte_stream_h__
 
-TimeAndDateTable::TimeAndDateTable(const uint8_t * const buffer) : ShortTable(buffer)
+#include <inttypes.h>
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+inline uint16_t UINT16(const void * const ptr)
 {
-	utcTimeMjd = UINT16(&buffer[3]);
-	utcTimeBcd = (buffer[5] << 16) | UINT16(&buffer[6]);
+	return *(const uint16_t * const)ptr;
 }
 
-uint16_t TimeAndDateTable::getUtcTimeMjd(void) const
+inline uint32_t UINT32(const void * const ptr)
 {
-	return utcTimeMjd;
+	return *(const uint32_t * const)ptr;
+}
+#else
+#include <byteswap.h>
+static inline uint16_t UINT16(const void * const ptr)
+{
+	return bswap_16(*(const uint16_t * const)ptr);
 }
 
-uint32_t TimeAndDateTable::getUtcTimeBcd(void) const
+static inline uint32_t UINT32(const void * const ptr)
 {
-	return utcTimeBcd;
+	return bswap_32(*(const uint32_t * const)ptr);
+}
+#endif
+
+inline uint16_t DVB_LENGTH(const void * const ptr)
+{
+	return UINT16(ptr) & 0x0fff;
 }
 
+inline uint16_t DVB_PID(const void * const ptr)
+{
+	return UINT16(ptr) & 0x1fff;
+}
+
+#endif /* __dvb_byte_stream_h__ */

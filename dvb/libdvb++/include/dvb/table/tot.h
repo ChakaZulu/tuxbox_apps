@@ -1,5 +1,5 @@
 /*
- * $Id: tot.h,v 1.1 2003/07/17 01:07:36 obi Exp $
+ * $Id: tot.h,v 1.2 2003/08/20 22:47:24 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -30,7 +30,6 @@ class TimeOffsetTable : public ShortCrcTable, public DescriptorContainer
 	protected:
 		unsigned utcTimeMjd				: 16;
 		unsigned utcTimeBcd				: 24;
-		unsigned reserved				: 4;
 		unsigned descriptorsLoopLength			: 12;
 
 	public:

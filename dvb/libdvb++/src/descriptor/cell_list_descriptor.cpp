@@ -1,5 +1,5 @@
 /*
- * $Id: cell_list_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: cell_list_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,16 +19,16 @@
  *
  */
 
-
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/cell_list_descriptor.h>
 
 Subcell::Subcell(const uint8_t * const buffer)
 {
 	cellIdExtension = buffer[0];
-	subcellLatitude = (buffer[1] << 8) | buffer[2];
-	subcellLongitude = (buffer[3] << 8) | buffer[4];
-	subcellExtendOfLatitude = (buffer[5] << 4) | ((buffer[6] >> 4) & 0x0f);
-	subcellExtendOfLongitude = ((buffer[6] & 0x0f) << 8) | buffer[7];
+	subcellLatitude = UINT16(&buffer[1]);
+	subcellLongitude = UINT16(&buffer[3]);
+	subcellExtendOfLatitude = UINT16(&buffer[5]) >> 4;
+	subcellExtendOfLongitude = UINT16(&buffer[6]) & 0x0fff;
 }
 
 uint8_t Subcell::getCellIdExtension(void) const
@@ -58,11 +58,11 @@ uint16_t Subcell::getSubcellExtendOfLongtitude(void) const
 
 Cell::Cell(const uint8_t * const buffer)
 {
-	cellId = (buffer[0] << 8) | buffer[1];
-	cellLatitude = (buffer[2] << 8) | buffer[3];
-	cellLongtitude = (buffer[4] << 8) | buffer[5];
-	cellExtendOfLatitude = (buffer[6] << 4) | ((buffer[7] >> 4) & 0x0f);
-	cellExtendOfLongtitude = ((buffer[7] & 0x0f) << 8) | buffer[8];
+	cellId = UINT16(&buffer[0]);
+	cellLatitude = UINT16(&buffer[2]);
+	cellLongtitude = UINT16(&buffer[4]);
+	cellExtendOfLatitude = UINT16(&buffer[6]) >> 4;
+	cellExtendOfLongtitude = UINT16(&buffer[7]) & 0x0fff;
 	subcellInfoLoopLength = buffer[9];
 
 	for (uint16_t i = 0; i < subcellInfoLoopLength; i += 8)

@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.1 2003/07/17 01:07:56 obi Exp $
+ * $Id: pmt.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,15 +19,14 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/table/pmt.h>
 
 ElementaryStreamInfo::ElementaryStreamInfo(const uint8_t * const buffer)
 {
 	streamType = buffer[0];
-	reserved1 = (buffer[1] >> 5) & 0x07;
-	elementaryPid = ((buffer[1] & 0x1F) << 8) | buffer[2];
-	reserved2 = (buffer[3] >> 4) & 0x0F;
-	esInfoLength = ((buffer[3] & 0x0F) << 8) | buffer[4];
+	elementaryPid = DVB_PID(&buffer[1]);
+	esInfoLength = DVB_LENGTH(&buffer[3]);
 
 	for (uint16_t i = 5; i < esInfoLength + 5; i += buffer[i + 1] + 2)
 		descriptor(&buffer[i]);
@@ -45,15 +44,13 @@ uint16_t ElementaryStreamInfo::getPid(void) const
 
 ProgramMapTable::ProgramMapTable(const uint8_t * const buffer) : LongCrcTable(buffer)
 {
-	reserved4 = (buffer[8] >> 5) & 0x07;
-	pcrPid = ((buffer[8] & 0x1F) << 8) | buffer[9];
-	reserved5 = (buffer[10] >> 4) & 0x0F;
-	programInfoLength = ((buffer[10] & 0x0F) << 8) | buffer[11];
+	pcrPid = DVB_PID(&buffer[8]);
+	programInfoLength = DVB_LENGTH(&buffer[10]);
 
 	for (uint16_t i = 12; i < programInfoLength + 12; i += buffer[i + 1] + 2)
 		descriptor(&buffer[i]);
 
-	for (uint16_t i = programInfoLength + 12; i < sectionLength - 1; i += ((buffer[i + 3] & 0x0F) | buffer[i + 4]) + 5)
+	for (uint16_t i = programInfoLength + 12; i < sectionLength - 1; i += DVB_LENGTH(&buffer[i + 3]) + 5)
 		esInfo.push_back(new ElementaryStreamInfo(&buffer[i]));
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: cell_frequency_link_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: cell_frequency_link_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,12 +19,13 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/cell_frequency_link_descriptor.h>
 
 SubcellInfo::SubcellInfo(const uint8_t * const buffer)
 {
 	cellIdExtenstion = buffer[0];
-	transposerFrequency = (buffer[1] << 24) | (buffer[2] << 16) | (buffer[3] << 8) | buffer[4];
+	transposerFrequency = UINT32(&buffer[1]);
 }
 
 uint8_t SubcellInfo::getCellIdExtension(void) const
@@ -39,8 +40,8 @@ uint32_t SubcellInfo::getTransposerFrequency(void) const
 
 CellFrequencyLink::CellFrequencyLink(const uint8_t * const buffer)
 {
-	cellId = (buffer[0] << 8) | buffer[1];
-	frequency = (buffer[2] << 24) | (buffer[3] << 16) | (buffer[4] << 8) | buffer[5];
+	cellId = UINT16(&buffer[0]);
+	frequency = UINT32(&buffer[2]);
 	subcellInfoLoopLength = buffer[6];
 
 	for (uint16_t i = 0; i < subcellInfoLoopLength; i += 5)

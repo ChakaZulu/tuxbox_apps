@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.1 2003/07/17 01:07:56 obi Exp $
+ * $Id: sdt.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,18 +19,17 @@
  *
  */
 
-#include <dvb/debug/debug.h>
+#include <dvb/byte_stream.h>
 #include <dvb/table/sdt.h>
 
 ServiceDescription::ServiceDescription(const uint8_t * const buffer)
 {
-	serviceId = (buffer[0] << 8) | buffer[1];
-	reserved1 = (buffer[2] >> 2) & 0x3F;
+	serviceId = UINT16(&buffer[0]);
 	eitScheduleFlag = (buffer[2] >> 1) & 0x01;
 	eitPresentFollowingFlag = buffer[2] & 0x01;
 	runningStatus = (buffer[3] >> 5) & 0x07;
 	freeCaMode = (buffer[3] >> 4) & 0x01;
-	descriptorsLoopLength = ((buffer[3] & 0x0F) << 8) | buffer[4];
+	descriptorsLoopLength = DVB_LENGTH(&buffer[3]);
 
 	for (uint16_t i = 5; i < descriptorsLoopLength + 5; i += buffer[i + 1] + 2)
 		descriptor(&buffer[i]);
@@ -63,10 +62,9 @@ uint8_t ServiceDescription::getFreeCaMode(void) const
 
 ServiceDescriptionTable::ServiceDescriptionTable(const uint8_t * const buffer) : LongCrcTable (buffer)
 {
-	originalNetworkId = (buffer[8] << 8) | buffer[9];
-	reserved4 = buffer[10];
+	originalNetworkId = UINT16(&buffer[8]);
 
-	for (uint16_t i = 11; i < sectionLength - 1; i += ((buffer[i + 3] & 0x0F) | buffer[i + 4]) + 5)
+	for (uint16_t i = 11; i < sectionLength - 1; i += DVB_LENGTH(&buffer[i + 3]) + 5)
 		description.push_back(new ServiceDescription(&buffer[i]));
 }
 

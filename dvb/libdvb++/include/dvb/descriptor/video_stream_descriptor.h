@@ -1,5 +1,5 @@
 /*
- * $Id: video_stream_descriptor.h,v 1.1 2003/07/17 01:07:15 obi Exp $
+ * $Id: video_stream_descriptor.h,v 1.2 2003/08/20 22:47:18 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -35,7 +35,6 @@ class VideoStreamDescriptor : public Descriptor
 		unsigned profileAndLevelIndication		: 8;
 		unsigned chromaFormat				: 2;
 		unsigned frameRateExtensionFlag			: 1;
-		unsigned reserved				: 5;
 
 	public:
 		VideoStreamDescriptor(const uint8_t * const buffer);

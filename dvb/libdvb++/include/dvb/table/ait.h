@@ -1,5 +1,5 @@
 /*
- * $Id: ait.h,v 1.1 2003/07/17 01:07:36 obi Exp $
+ * $Id: ait.h,v 1.2 2003/08/20 22:47:24 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -43,7 +43,6 @@ class ApplicationInformation : public DescriptorContainer
 	protected:
 		ApplicationIdentifier *applicationIdentifier;
 		unsigned applicationControlCode			: 8;
-		unsigned reserved				: 4;
 		unsigned applicationDescriptorsLoopLength	: 12;
 
 	public:
@@ -63,9 +62,7 @@ typedef ApplicationInformationVector::const_iterator ApplicationInformationConst
 class ApplicationInformationTable : public LongCrcTable, public DescriptorContainer
 {
 	protected:
-		unsigned reserved4				: 4;
 		unsigned commonDescriptorsLength		: 12;
-		unsigned reserved5				: 4;
 		unsigned applicationLoopLength			: 12;
 		ApplicationInformationVector applicationInformation;
 

@@ -1,5 +1,5 @@
 /*
- * $Id: terrestrial_delivery_system_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: terrestrial_delivery_system_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,13 +19,13 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/terrestrial_delivery_system_descriptor.h>
 
 TerrestrialDeliverySystemDescriptor::TerrestrialDeliverySystemDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	centreFrequency = (buffer[2] << 24) | (buffer[3] << 16) | (buffer[4] << 8) | buffer[5];
+	centreFrequency = UINT32(&buffer[2]);
 	bandwidth = (buffer[6] >> 5) & 0x07;
-	reserved = buffer[6] & 0x1f;
 	constellation = (buffer[7] >> 6) & 0x03;
 	hierarchyInformation = (buffer[7] >> 3) & 0x07;
 	codeRateHpStream = buffer[7] & 0x07;
@@ -33,7 +33,6 @@ TerrestrialDeliverySystemDescriptor::TerrestrialDeliverySystemDescriptor(const u
 	guardInterval = (buffer[8] >> 3) & 0x03;
 	transmissionMode = (buffer[8] >> 1) & 0x03;
 	otherFrequencyFlag = buffer[8] & 0x01;
-	reserved2 = (buffer[9] << 24) | (buffer[10] << 16) | (buffer[11] << 8) | buffer[12];
 }
 
 uint32_t TerrestrialDeliverySystemDescriptor::getCentreFrequency(void) const

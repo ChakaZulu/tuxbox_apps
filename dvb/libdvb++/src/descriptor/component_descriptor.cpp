@@ -1,5 +1,5 @@
 /*
- * $Id: component_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: component_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -23,7 +23,6 @@
 
 ComponentDescriptor::ComponentDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	reserved = (buffer[2] >> 4) & 0x0f;
 	streamContent = buffer[2] & 0x0f;
 	componentType = buffer[3];
 	componentTag = buffer[4];

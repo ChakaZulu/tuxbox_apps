@@ -1,5 +1,5 @@
 /*
- * $Id: pdc_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: pdc_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,12 +19,12 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/pdc_descriptor.h>
 
 PdcDescriptor::PdcDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	reserved = (buffer[2] >> 4) & 0x0f;
-	programmeIdentificationLabel = ((buffer[2] & 0x0f) << 16) | buffer[3] | buffer[4];
+	programmeIdentificationLabel = ((buffer[2] & 0x0f) << 16) | UINT16(&buffer[3]);
 }
 
 uint32_t PdcDescriptor::getProgrammeIdentificationLabel(void) const

@@ -1,5 +1,5 @@
 /*
- * $Id: ca_descriptor.cpp,v 1.1 2003/07/17 01:07:41 obi Exp $
+ * $Id: ca_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,13 +19,13 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/ca_descriptor.h>
 
 CaDescriptor::CaDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	caSystemId = (buffer[2] << 8) | buffer[3];
-	reserved = buffer[4] >> 5;
-	caPid = ((buffer[4] & 0x1F) << 8) | buffer[5];
+	caSystemId = UINT16(&buffer[2]);
+	caPid = DVB_PID(&buffer[4]);
 
 	for (uint16_t i = 0; i < descriptorLength - 4; ++i)
 		privateDataBytes.push_back(buffer[i + 6]);

@@ -1,5 +1,5 @@
 /*
- * $Id: pat.h,v 1.1 2003/07/17 01:07:36 obi Exp $
+ * $Id: pat.h,v 1.2 2003/08/20 22:47:24 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -28,7 +28,6 @@ class NetworkAssociation
 {
 	protected:
 		unsigned programNumber				: 16;
-		unsigned reserved				: 3;
 		unsigned networkPid				: 13;
 
 	public:
@@ -45,7 +44,6 @@ class ProgramAssociation
 {
 	protected:
 		unsigned programNumber				: 16;
-		unsigned reserved				: 3;
 		unsigned programMapPid				: 13;
 
 	public:

@@ -1,5 +1,5 @@
 /*
- * $Id: bat.h,v 1.1 2003/07/17 01:07:36 obi Exp $
+ * $Id: bat.h,v 1.2 2003/08/20 22:47:24 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -30,7 +30,6 @@ class BouquetAssociation : public DescriptorContainer
 	protected:
 		unsigned transportStreamId			: 16;
 		unsigned originalNetworkId			: 16;
-		unsigned reserved				: 4;
 		unsigned transportStreamLoopLength		: 12;
 
 	public:
@@ -44,9 +43,7 @@ typedef BouquetAssociationVector::const_iterator BouquetAssociationConstIterator
 class BouquetAssociationTable : public LongCrcTable , public DescriptorContainer
 {
 	protected:
-		unsigned reserved4				: 4;
 		unsigned bouquetDescriptorsLength		: 12;
-		unsigned reserved5				: 4;
 		unsigned transportStreamLoopLength		: 12;
 		BouquetAssociationVector bouquet;
 

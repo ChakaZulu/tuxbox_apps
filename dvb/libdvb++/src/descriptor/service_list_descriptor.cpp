@@ -1,5 +1,5 @@
 /*
- * $Id: service_list_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: service_list_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,11 +19,12 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/service_list_descriptor.h>
 
 ServiceListItem::ServiceListItem(const uint8_t * const buffer)
 {
-	serviceId = (buffer[0] << 8) | buffer[1];
+	serviceId = UINT16(&buffer[0]);
 	serviceType = buffer[2];
 }
 

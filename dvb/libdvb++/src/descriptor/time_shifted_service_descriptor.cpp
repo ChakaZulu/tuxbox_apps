@@ -1,5 +1,5 @@
 /*
- * $Id: time_shifted_service_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: time_shifted_service_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,11 +19,12 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/time_shifted_service_descriptor.h>
 
 TimeShiftedServiceDescriptor::TimeShiftedServiceDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	referenceServiceId = (buffer[2] << 8) | buffer[3];
+	referenceServiceId = UINT16(&buffer[2]);
 }
 
 uint16_t TimeShiftedServiceDescriptor::getReferenceServiceId(void) const

@@ -1,5 +1,5 @@
 /*
- * $Id: application_signalling_descriptor.cpp,v 1.1 2003/07/17 01:07:41 obi Exp $
+ * $Id: application_signalling_descriptor.cpp,v 1.2 2003/08/20 22:47:26 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,12 +19,12 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/application_signalling_descriptor.h>
 
 ApplicationSignalling::ApplicationSignalling(const uint8_t * const buffer)
 {
-	applicationType = (buffer[0] << 8) | buffer[1];
-	reserved = (buffer[2] >> 5) & 0x07;
+	applicationType = UINT16(&buffer[0]);
 	aitVersionNumber = buffer[2] & 0x1f;
 }
 

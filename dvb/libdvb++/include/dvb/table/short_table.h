@@ -1,5 +1,5 @@
 /*
- * $Id: short_table.h,v 1.1 2003/07/17 01:07:36 obi Exp $
+ * $Id: short_table.h,v 1.2 2003/08/20 22:47:24 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -32,8 +32,6 @@ class ShortTable
 	protected:
 		unsigned tableId				: 8;
 		unsigned sectionSyntaxIndicator			: 1;
-		unsigned reserved1				: 1;
-		unsigned reserved2				: 2;
 		unsigned sectionLength				: 12;
 
 	public:

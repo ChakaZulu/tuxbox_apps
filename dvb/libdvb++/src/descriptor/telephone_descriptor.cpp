@@ -1,5 +1,5 @@
 /*
- * $Id: telephone_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: telephone_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -23,14 +23,11 @@
 
 TelephoneDescriptor::TelephoneDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	reserved = (buffer[2] >> 6) & 0x03;
 	foreignAvailability = (buffer[2] >> 5) & 0x01;
 	connectionType = buffer[2] & 0x1f;
-	reserved2 = (buffer[3] >> 7) & 0x01;
 	countryPrefixLength = (buffer[3] >> 5) & 0x03;
 	internationalAreaCodeLength = (buffer[3] >> 2) & 0x07;
 	operatorCodeLength = buffer[3] & 0x03;
-	reserved3 = (buffer[4] >> 7) & 0x01;
 	nationalAreaCodeLength = (buffer[4] >> 4) & 0x07;
 	coreNumberLength = buffer[4] & 0x0f;
 

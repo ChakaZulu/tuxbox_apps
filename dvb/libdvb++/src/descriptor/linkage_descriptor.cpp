@@ -1,5 +1,5 @@
 /*
- * $Id: linkage_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: linkage_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,13 +19,14 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/linkage_descriptor.h>
 
 LinkageDescriptor::LinkageDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	transportStreamId = (buffer[2] << 8) | buffer[3];
-	originalNetworkId = (buffer[4] << 8) | buffer[5];
-	serviceId = (buffer[6] << 8) | buffer[7];
+	transportStreamId = UINT16(&buffer[2]);
+	originalNetworkId = UINT16(&buffer[4]);
+	serviceId = UINT16(&buffer[6]);
 	linkageType = buffer[8];
 
 	if (linkageType != 0x08)
@@ -34,18 +35,17 @@ LinkageDescriptor::LinkageDescriptor(const uint8_t * const buffer) : Descriptor(
 
 	else {
 		handOverType = (buffer[9] >> 4) & 0x0f;
-		reserved = (buffer[9] >> 1) & 0x07;
 		originType = buffer[9] & 0x01;
 
 		uint8_t offset = 0;
 
 		if ((handOverType >= 0x01) && (handOverType <= 0x03)) {
-			networkId = (buffer[10] << 8) | buffer[11];
+			networkId = UINT16(&buffer[10]);
 			offset += 2;
 		}
 
 		if (originType == 0x00) {
-			initialServiceId = (buffer[offset + 10] << 8) | buffer[offset + 11];
+			initialServiceId = UINT16(&buffer[offset + 10]);
 			offset += 2;
 		}
 

@@ -1,5 +1,5 @@
 /*
- * $Id: long_table.cpp,v 1.1 2003/07/17 01:07:56 obi Exp $
+ * $Id: long_table.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,13 +19,13 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/table/long_table.h>
 
 LongTable::LongTable(const uint8_t * const buffer) : ShortTable(buffer)
 {
-	tableIdExtension = (buffer[3] << 8) | buffer[4];
-	reserved3 = (buffer[5] >> 6) & 0x03;
-	versionNumber = (buffer[5] >> 1) & 0x1F;
+	tableIdExtension = UINT16(&buffer[3]);
+	versionNumber = (buffer[5] >> 1) & 0x1f;
 	currentNextIndicator = buffer[5] & 0x01;
 	sectionNumber = buffer[6];
 	lastSectionNumber = buffer[7];

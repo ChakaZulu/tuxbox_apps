@@ -1,5 +1,5 @@
 /*
- * $Id: audio_stream_descriptor.cpp,v 1.1 2003/07/17 01:07:41 obi Exp $
+ * $Id: audio_stream_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -27,7 +27,6 @@ AudioStreamDescriptor::AudioStreamDescriptor(const uint8_t * const buffer) : Des
 	id = (buffer[2] >> 6) & 0x01;
 	layer = (buffer[2] >> 4) & 0x03;
 	variableRateAudioIndicator = (buffer[2] >> 3) & 0x01;
-	reserved = buffer[2] & 0x07;
 }
 
 uint8_t AudioStreamDescriptor::getFreeFormatFlag(void) const

@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.1 2003/07/17 01:07:56 obi Exp $
+ * $Id: pat.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,13 +19,13 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/table/pat.h>
 
 NetworkAssociation::NetworkAssociation(const uint8_t * const buffer)
 {
-	programNumber = (buffer[0] << 8) | buffer[1];
-	reserved = (buffer[2] >> 5) & 0x07;
-	networkPid = ((buffer[2] & 0x1F) << 8) | buffer[3];
+	programNumber = UINT16(&buffer[0]);
+	networkPid = DVB_PID(&buffer[2]);
 }
 
 uint16_t NetworkAssociation::getNetworkPid(void) const
@@ -35,9 +35,8 @@ uint16_t NetworkAssociation::getNetworkPid(void) const
 
 ProgramAssociation::ProgramAssociation(const uint8_t * const buffer)
 {
-	programNumber = (buffer[0] << 8) | buffer[1];
-	reserved = (buffer[2] >> 5) & 0x07;
-	programMapPid = ((buffer[2] & 0x1F) << 8) | buffer[3];
+	programNumber = UINT16(&buffer[0]);
+	programMapPid = DVB_PID(&buffer[2]);
 }
 
 uint16_t ProgramAssociation::getProgramNumber(void) const
@@ -53,7 +52,7 @@ uint16_t ProgramAssociation::getProgramMapPid(void) const
 ProgramAssociationTable::ProgramAssociationTable(const uint8_t * const buffer) : LongCrcTable(buffer)
 {
 	for (uint16_t i = 8; i < sectionLength - 1; i += 4) {
-		if (((buffer[i] << 8) | buffer[i + 1]) == 0)
+		if (UINT16(&buffer[i]) == 0)
 			networks.push_back(new NetworkAssociation(&buffer[i]));
 		else
 			programs.push_back(new ProgramAssociation(&buffer[i]));

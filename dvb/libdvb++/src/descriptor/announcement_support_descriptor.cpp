@@ -1,5 +1,5 @@
 /*
- * $Id: announcement_support_descriptor.cpp,v 1.1 2003/07/17 01:07:41 obi Exp $
+ * $Id: announcement_support_descriptor.cpp,v 1.2 2003/08/20 22:47:26 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,18 +19,18 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/announcement_support_descriptor.h>
 
 Announcement::Announcement(const uint8_t * const buffer)
 {
 	announcementType = (buffer[0] >> 4) & 0x0f;
-	reserved = (buffer[0] >> 3) & 0x01;
 	referenceType = buffer[0] & 0x07;
 
 	if ((referenceType >= 0x01) && (referenceType <= 0x03)) {
-		originalNetworkId = (buffer[1] << 8) | buffer[2];
-		transportStreamId = (buffer[3] << 8) | buffer[4];
-		serviceId = (buffer[5] << 8) | buffer[6];
+		originalNetworkId = UINT16(&buffer[1]);
+		transportStreamId = UINT16(&buffer[3]);
+		serviceId = UINT16(&buffer[5]);
 		componentTag = buffer[7];
 	}
 }
@@ -69,7 +69,7 @@ AnnouncementSupportDescriptor::AnnouncementSupportDescriptor(const uint8_t * con
 {
 	Announcement *a;
 
-	announcementSupportIndicator = (buffer[2] << 8) | buffer[3];
+	announcementSupportIndicator = UINT16(&buffer[2]);
 
 	for (uint16_t i = 0; i < descriptorLength - 2; ++i) {
 		a = new Announcement(&buffer[i + 4]);

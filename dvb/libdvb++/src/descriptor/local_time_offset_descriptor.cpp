@@ -1,5 +1,5 @@
 /*
- * $Id: local_time_offset_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: local_time_offset_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,18 +19,18 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/local_time_offset_descriptor.h>
 
 LocalTimeOffset::LocalTimeOffset(const uint8_t * const buffer)
 {
 	countryCode.assign((char *)&buffer[0], 3);
 	countryRegionId = (buffer[3] >> 2) & 0x3f;
-	reserved = (buffer[3] >> 1) & 0x01;
 	localTimeOffsetPolarity = buffer[3] & 0x01;
-	localTimeOffset = (buffer[4] << 8) | buffer[5];
-	timeOfChangeMjd = (buffer[6] << 8) | buffer[7];
-	timeOfChangeBcd = (buffer[8] << 16) | (buffer[9] << 8) | buffer[10];
-	nextTimeOffset = (buffer[11] << 8) | buffer[12];
+	localTimeOffset = UINT16(&buffer[4]);
+	timeOfChangeMjd = UINT16(&buffer[6]);
+	timeOfChangeBcd = (buffer[8] << 16) | UINT16(&buffer[9]);
+	nextTimeOffset = UINT16(&buffer[11]);
 }
 
 std::string LocalTimeOffset::getCountryCode(void) const

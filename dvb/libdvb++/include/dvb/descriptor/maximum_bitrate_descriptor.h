@@ -1,5 +1,5 @@
 /*
- * $Id: maximum_bitrate_descriptor.h,v 1.1 2003/07/17 01:07:14 obi Exp $
+ * $Id: maximum_bitrate_descriptor.h,v 1.2 2003/08/20 22:47:18 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -27,7 +27,6 @@
 class MaximumBitrateDescriptor : public Descriptor
 {
 	protected:
-		unsigned reserved				: 2;
 		unsigned maximumBitrate				: 22;
 
 	public:

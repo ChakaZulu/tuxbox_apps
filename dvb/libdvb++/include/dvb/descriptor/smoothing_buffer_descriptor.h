@@ -1,5 +1,5 @@
 /*
- * $Id: smoothing_buffer_descriptor.h,v 1.1 2003/07/17 01:07:14 obi Exp $
+ * $Id: smoothing_buffer_descriptor.h,v 1.2 2003/08/20 22:47:18 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -27,9 +27,7 @@
 class SmoothingBufferDescriptor : public Descriptor
 {
 	protected:
-		unsigned reserved				: 2;
 		unsigned sbLeakRate				: 22;
-		unsigned reserved2				: 2;
 		unsigned sbSize					: 22;
 
 	public:

@@ -1,5 +1,5 @@
 /*
- * $Id: announcement_support_descriptor.h,v 1.1 2003/07/17 01:07:14 obi Exp $
+ * $Id: announcement_support_descriptor.h,v 1.2 2003/08/20 22:47:17 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -28,7 +28,6 @@ class Announcement
 {
 	protected:
 		unsigned announcementType			: 4;
-		unsigned reserved				: 1;
 		unsigned referenceType				: 3;
 		unsigned originalNetworkId			: 16;
 		unsigned transportStreamId			: 16;

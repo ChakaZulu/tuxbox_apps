@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.1 2003/07/17 01:07:36 obi Exp $
+ * $Id: sdt.h,v 1.2 2003/08/20 22:47:24 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -29,7 +29,6 @@ class ServiceDescription : public DescriptorContainer
 {
 	protected:
 		unsigned serviceId				: 16;
-		unsigned reserved1				: 6;
 		unsigned eitScheduleFlag			: 1;
 		unsigned eitPresentFollowingFlag		: 1;
 		unsigned runningStatus				: 3;
@@ -54,7 +53,6 @@ class ServiceDescriptionTable : public LongCrcTable
 {
 	protected:
 		unsigned originalNetworkId			: 16;
-		unsigned reserved4				: 8;
 		ServiceDescriptionVector description;
 
 	public:

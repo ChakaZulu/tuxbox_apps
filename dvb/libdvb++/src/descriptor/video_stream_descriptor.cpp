@@ -1,5 +1,5 @@
 /*
- * $Id: video_stream_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: video_stream_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -32,7 +32,6 @@ VideoStreamDescriptor::VideoStreamDescriptor(const uint8_t * const buffer) : Des
 		profileAndLevelIndication = buffer[3];
 		chromaFormat = (buffer[4] >> 6) & 0x03;
 		frameRateExtensionFlag = (buffer[4] >> 5) & 0x01;
-		reserved = buffer[4] & 0x1F;
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.2 2003/08/18 00:31:36 obi Exp $
+ * $Id: bat.cpp,v 1.3 2003/08/20 22:47:35 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,14 +19,14 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/table/bat.h>
 
 BouquetAssociation::BouquetAssociation(const uint8_t * const buffer)
 {
-	transportStreamId = (buffer[0] << 8) | buffer[1];
-	originalNetworkId = (buffer[2] << 8) | buffer[3];
-	reserved = (buffer[4] >> 4) & 0x0f;
-	transportStreamLoopLength = ((buffer[4] & 0x0f) << 8) | buffer[5];
+	transportStreamId = UINT16(&buffer[0]);
+	originalNetworkId = UINT16(&buffer[2]);
+	transportStreamLoopLength = DVB_LENGTH(&buffer[4]);
 
 	for (uint16_t i = 6; i < transportStreamLoopLength + 6; i += buffer[i + 1] + 2)
 		descriptor(&buffer[i]);
@@ -34,22 +34,20 @@ BouquetAssociation::BouquetAssociation(const uint8_t * const buffer)
 
 BouquetAssociationTable::BouquetAssociationTable(const uint8_t * const buffer) : LongCrcTable(buffer)
 {
-	reserved4 = (buffer[8] >> 4) & 0x0f;
-	bouquetDescriptorsLength = ((buffer[8] & 0x0f) << 8) | buffer[9];
+	bouquetDescriptorsLength = DVB_LENGTH(&buffer[8]);
 
 	for (uint16_t i = 10; i < bouquetDescriptorsLength + 10; i += buffer[i + 1] + 2)
 		descriptor(&buffer[i]);
 
-	reserved5 = (buffer[bouquetDescriptorsLength + 10] >> 4) & 0x0f;
-	transportStreamLoopLength = ((buffer[bouquetDescriptorsLength + 10] & 0x0f) << 8) | buffer[bouquetDescriptorsLength + 11];
+	transportStreamLoopLength = DVB_LENGTH(&buffer[bouquetDescriptorsLength + 10]);
 
-	for (uint16_t i = bouquetDescriptorsLength + 12; i < sectionLength - 1; i += ((buffer[i + 4] & 0x0f) | buffer[i + 5]) + 6)
+	for (uint16_t i = bouquetDescriptorsLength + 12; i < sectionLength - 1; i += DVB_LENGTH(&buffer[i + 4]) + 6)
 		bouquet.push_back(new BouquetAssociation(&buffer[i]));
 }
 
 BouquetAssociationTable::~BouquetAssociationTable(void)
 {
-	for (BouquetAssociationIterator b = bouquet.begin(); b != bouquet.end(); ++b)
-		delete *b;
+	for (BouquetAssociationIterator i = bouquet.begin(); i != bouquet.end(); ++i)
+		delete *i;
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ca_identifier_descriptor.cpp,v 1.1 2003/07/17 01:07:41 obi Exp $
+ * $Id: ca_identifier_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,12 +19,13 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/ca_identifier_descriptor.h>
 
 CaIdentifierDescriptor::CaIdentifierDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
 	for (uint16_t i = 0; i < descriptorLength; i += 2)
-		caSystemIds.push_back((buffer[i + 2] << 8) | buffer[i + 3]);
+		caSystemIds.push_back(UINT16(&buffer[i + 2]));
 }
 
 const CaSystemIdVector *CaIdentifierDescriptor::getCaSystemIds(void) const

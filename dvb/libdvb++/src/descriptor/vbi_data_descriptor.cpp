@@ -1,5 +1,5 @@
 /*
- * $Id: vbi_data_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: vbi_data_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -23,7 +23,6 @@
 
 VbiDataLine::VbiDataLine(const uint8_t * const buffer)
 {
-	reserved = (buffer[0] >> 6) & 0x03;
 	fieldParity = (buffer[0] >> 5) & 0x01;
 	lineOffset = buffer[0] & 0x1F;
 }
@@ -57,8 +56,6 @@ VbiDataService::VbiDataService(const uint8_t * const buffer)
 		break;
 
 	default:
-		for (i = 0; i < dataServiceDescriptorLength; ++i)
-			reserved.push_back(buffer[i + 2]);
 		break;
 	}
 }

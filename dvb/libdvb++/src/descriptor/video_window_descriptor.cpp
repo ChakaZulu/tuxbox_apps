@@ -1,5 +1,5 @@
 /*
- * $Id: video_window_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: video_window_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,12 +19,13 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/video_window_descriptor.h>
 
 VideoWindowDescriptor::VideoWindowDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	horizontalOffset = ((buffer[2] << 8) | (buffer[3] & 0xF3)) >> 2;
-	verticalOffset = (((buffer[3] & 0x03) << 16) | (buffer[4] << 8) | (buffer[5] & 0xF0)) >> 4;
+	horizontalOffset = UINT16(&buffer[2]) >> 2;
+	verticalOffset = ((buffer[3] & 0x03) << 12) | (UINT16(&buffer[4]) >> 4);
 	windowPriority = buffer[5] & 0x0F;
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: audio_stream_descriptor.h,v 1.1 2003/07/17 01:07:14 obi Exp $
+ * $Id: audio_stream_descriptor.h,v 1.2 2003/08/20 22:47:17 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -31,7 +31,6 @@ class AudioStreamDescriptor : public Descriptor
 		unsigned id					: 1;
 		unsigned layer					: 2;
 		unsigned variableRateAudioIndicator		: 1;
-		unsigned reserved				: 3;
 
 	public:
 		AudioStreamDescriptor(const uint8_t * const buffer);

@@ -1,5 +1,5 @@
 /*
- * $Id: nit.h,v 1.1 2003/07/17 01:07:36 obi Exp $
+ * $Id: nit.h,v 1.2 2003/08/20 22:47:24 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -30,7 +30,6 @@ class TransportStreamInfo : public DescriptorContainer
 	protected:
 		unsigned transportStreamId			: 16;
 		unsigned originalNetworkId			: 16;
-		unsigned reserved1				: 4;
 		unsigned transportDescriptorsLength		: 12;
 
 	public:
@@ -47,9 +46,7 @@ typedef TransportStreamInfoVector::const_iterator TransportStreamInfoConstIterat
 class NetworkInformationTable : public LongCrcTable, public DescriptorContainer
 {
 	protected:
-		unsigned reserved4				: 3;
 		unsigned networkDescriptorsLength		: 12;
-		unsigned reserved5				: 4;
 		unsigned transportStreamLoopLength		: 12;
 		TransportStreamInfoVector tsInfo;
 

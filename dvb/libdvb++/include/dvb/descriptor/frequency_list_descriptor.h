@@ -1,5 +1,5 @@
 /*
- * $Id: frequency_list_descriptor.h,v 1.1 2003/07/17 01:07:14 obi Exp $
+ * $Id: frequency_list_descriptor.h,v 1.2 2003/08/20 22:47:17 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -31,7 +31,6 @@ typedef CentreFrequencyVector::const_iterator CentreFrequencyConstIterator;
 class FrequencyListDescriptor : public Descriptor
 {
 	protected:
-		unsigned reserved				: 6;
 		unsigned codingType				: 2;
 		CentreFrequencyVector centreFrequencies;
 

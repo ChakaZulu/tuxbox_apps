@@ -1,5 +1,5 @@
 /*
- * $Id: system_clock_descriptor.h,v 1.1 2003/07/17 01:07:15 obi Exp $
+ * $Id: system_clock_descriptor.h,v 1.2 2003/08/20 22:47:18 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -28,10 +28,8 @@ class SystemClockDescriptor : public Descriptor
 {
 	protected:
 		unsigned externalClockReferenceIndicator	: 1;
-		unsigned reserved				: 1;
 		unsigned clockAccuracyInteger			: 6;
 		unsigned clockAccuracyExponent			: 3;
-		unsigned reserved2				: 5;
 
 	public:
 		SystemClockDescriptor(const uint8_t * const buffer);

@@ -1,5 +1,5 @@
 /*
- * $Id: cable_delivery_system_descriptor.h,v 1.1 2003/07/17 01:07:14 obi Exp $
+ * $Id: cable_delivery_system_descriptor.h,v 1.2 2003/08/20 22:47:17 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -28,7 +28,6 @@ class CableDeliverySystemDescriptor : public Descriptor
 {
 	protected:
 		unsigned frequency				: 32;
-		unsigned reserved				: 12;
 		unsigned fecOuter				: 4;
 		unsigned modulation				: 8;
 		unsigned symbolRate				: 28;

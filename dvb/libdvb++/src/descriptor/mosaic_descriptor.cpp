@@ -1,5 +1,5 @@
 /*
- * $Id: mosaic_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: mosaic_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,11 +19,11 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/mosaic_descriptor.h>
 
 ElementaryCellField::ElementaryCellField (const uint8_t * const buffer)
 {
-	reserved = (buffer[0] >> 6) & 0x03;
 	elementaryCellId = buffer[0] & 0x3F;
 }
 
@@ -35,7 +35,6 @@ uint8_t ElementaryCellField::getElementaryCellId(void) const
 MosaicCell::MosaicCell (const uint8_t * const buffer)
 {
 	logicalCellId = (buffer[0] >> 2) & 0x3F;
-	reserved = (((buffer[0] & 0x03) << 8) | (buffer[1] & 0xF1)) >> 3;
 	logicalCellPresentationInfo = buffer[1] & 0x07;
 	elementaryCellFieldLength = buffer[2];
 
@@ -46,21 +45,20 @@ MosaicCell::MosaicCell (const uint8_t * const buffer)
 
 	switch (cellLinkageInfo) {
 	case 0x01:
-		bouquetId = (buffer[elementaryCellFieldLength + 4] << 8) | buffer[elementaryCellFieldLength + 5];
+		bouquetId = UINT16(&buffer[elementaryCellFieldLength + 4]);
 		break;
+	case 0x04:
+		eventId = UINT16(&buffer[elementaryCellFieldLength + 10]);
+		/* fall through */
 	case 0x02:
 	case 0x03:
-	case 0x04:
-		originalNetworkId = (buffer[elementaryCellFieldLength + 4] << 8) | buffer[elementaryCellFieldLength + 5];
-		transportStreamId = (buffer[elementaryCellFieldLength + 6] << 8) | buffer[elementaryCellFieldLength + 7];
-		serviceId = (buffer[elementaryCellFieldLength + 8] << 8) | buffer[elementaryCellFieldLength + 9];
+		originalNetworkId = UINT16(&buffer[elementaryCellFieldLength + 4]);
+		transportStreamId = UINT16(&buffer[elementaryCellFieldLength + 6]);
+		serviceId = UINT16(&buffer[elementaryCellFieldLength + 8]);
 		break;
 	default:
 		break;
 	}
-
-	if (cellLinkageInfo == 0x04)
-		eventId = (buffer[elementaryCellFieldLength + 10] << 8) | buffer[elementaryCellFieldLength + 11];
 }
 
 MosaicCell::~MosaicCell(void)
@@ -118,7 +116,6 @@ MosaicDescriptor::MosaicDescriptor(const uint8_t * const buffer) : Descriptor(bu
 {
 	mosaicEntryPoint = (buffer[2] >> 7) & 0x01;
 	numberOfHorizontalElementaryCells = (buffer[2] >> 4) & 0x07;
-	reserved = (buffer[2] >> 3) & 0x01;
 	numberOfVerticalElementaryCells = buffer[2] & 0x07;
 
 	for (uint16_t i = 0; i < descriptorLength - 1; i += buffer[i + 6] + 2) {
@@ -165,4 +162,4 @@ const MosaicCellVector *MosaicDescriptor::getMosaicCells(void) const
 {
 	return &mosaicCells;
 }
-								
+

@@ -1,5 +1,5 @@
 /*
- * $Id: nvod_reference_descriptor.cpp,v 1.1 2003/07/17 01:07:42 obi Exp $
+ * $Id: nvod_reference_descriptor.cpp,v 1.2 2003/08/20 22:47:27 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,14 +19,14 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/descriptor/nvod_reference_descriptor.h>
-
 
 NvodReference::NvodReference(const uint8_t * const buffer)
 {
-	transportStreamId = (buffer[0] << 8) | buffer[1];
-	originalNetworkId = (buffer[2] << 8) | buffer[3];
-	serviceId = (buffer[4] << 8) | buffer[5];
+	transportStreamId = UINT16(&buffer[0]);
+	originalNetworkId = UINT16(&buffer[2]);
+	serviceId = UINT16(&buffer[4]);
 }
 
 uint16_t NvodReference::getTransportStreamId(void) const

@@ -1,5 +1,5 @@
 /*
- * $Id: tot.cpp,v 1.1 2003/07/17 01:07:56 obi Exp $
+ * $Id: tot.cpp,v 1.2 2003/08/20 22:47:35 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,14 +19,14 @@
  *
  */
 
+#include <dvb/byte_stream.h>
 #include <dvb/table/tot.h>
 
 TimeOffsetTable::TimeOffsetTable(const uint8_t * const buffer) : ShortCrcTable(buffer)
 {
-	utcTimeMjd = (buffer[3] << 8) | buffer[4];
-	utcTimeBcd = (buffer[5] << 16) | (buffer[6] << 8) | buffer[7];
-	reserved = (buffer[8] >> 4) & 0x0f;
-	descriptorsLoopLength = ((buffer[8] & 0x0f) << 8) | buffer[9];
+	utcTimeMjd = UINT16(&buffer[3]);
+	utcTimeBcd = (buffer[5] << 16) | UINT16(&buffer[6]);
+	descriptorsLoopLength = DVB_LENGTH(&buffer[8]);
 
 	for (uint16_t i = 0; i < descriptorsLoopLength; i += buffer[i + 11] + 2)
 		descriptor(&buffer[i + 10]);
