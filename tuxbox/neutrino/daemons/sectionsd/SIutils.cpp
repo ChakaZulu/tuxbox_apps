@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.4 2001/05/19 22:46:50 fnbrd Exp $
+// $Id: SIutils.cpp,v 1.5 2001/06/10 14:55:51 fnbrd Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.5  2001/06/10 14:55:51  fnbrd
+// Kleiner Aenderungen und Ergaenzungen (epgMini).
+//
 // Revision 1.4  2001/05/19 22:46:50  fnbrd
 // Jetzt wellformed xml.
 //
@@ -41,6 +44,8 @@
 
 #include <time.h>
 #include <string.h>
+
+//#include <libxml/encoding.h>
 
 static const char descr_tbl[][50] = {
 // defined by ISO/IEC 13818-1 P64
@@ -177,10 +182,20 @@ time_t changeUTCtoCtime(const unsigned char *buffer)
 }
 
 // Thanks to tmbinc
-int saveStringToXMLfile(FILE *out, const char *c)
+int saveStringToXMLfile(FILE *out, const char *c, int withControlCodes)
 {
   if(!c)
     return 1;
+  // Die Umlaute sind ISO-8859-9 [5]
+/*
+  char buf[6000];
+  int inlen=strlen(c);
+  int outlen=sizeof(buf);
+//  UTF8Toisolat1((unsigned char *)buf, &outlen, (const unsigned char *)c, &inlen);
+  isolat1ToUTF8((unsigned char *)buf, &outlen, (const unsigned char *)c, &inlen);
+  buf[outlen]=0;
+  c=buf;
+*/
   for(;*c; c++) {
     switch (*c) {
       case '&':
@@ -189,8 +204,23 @@ int saveStringToXMLfile(FILE *out, const char *c)
       case '<':
         fprintf(out, "&lt;");
         break;
+      case '\"':
+        fprintf(out, "&quot;");
+	break;
       case 0x81:
       case 0x82:
+        break;
+      case 0x86:
+        if(withControlCodes)
+          fprintf(out, "<b>");
+        break;
+      case 0x87:
+        if(withControlCodes)
+          fprintf(out, "</b>");
+        break;
+      case 0x8a:
+        if(withControlCodes)
+          fprintf(out, "<br/>");
         break;
       default:
         if (*c<32)
@@ -200,6 +230,21 @@ int saveStringToXMLfile(FILE *out, const char *c)
         else
           fprintf(out, "&#%d;", *c);
      } // case
+
   } // for
   return 0;
 }
+
+// Entfernt die ControlCodes aus dem String (-> String wird evtl. kuerzer)
+void removeControlCodes(char *string)
+{
+  if(!string)
+    return;
+  for(;*string; )
+    if (!((*string>=32) && (*string<128)))
+      memmove(string, string+1, strlen(string+1)+1);
+    else
+      string++;
+  return ;
+}
+

@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.6 2001/05/21 22:45:43 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.7 2001/06/10 14:55:51 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.7  2001/06/10 14:55:51  fnbrd
+// Kleiner Aenderungen und Ergaenzungen (epgMini).
+//
 // Revision 1.6  2001/05/21 22:45:43  fnbrd
 // Debugausgaben raus.
 //
@@ -302,7 +305,7 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
 //  printf("reading first\n");
   // Erstes Segment lesen
   do {
-    if(time(NULL)>szeit+(long)timeoutInSeconds) {
+    if(time(NULL)>szeit+(long)(timeoutInSeconds)) {
       close(fd);
       return 0; // timeout -> kein EPG
     }
@@ -322,6 +325,7 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
     if(readNbytes(fd, buf+sizeof(header), header.section_length-5)<0) {
       close(fd);
       perror ("read section");
+      delete[] buf;
       return 5;
     }
     if(readNext || header.current_next_indicator) {
@@ -329,6 +333,8 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
       insert(SIsection(sizeof(header)+header.section_length-5, buf));
       firstKey=SIsection::key(&header);
     }
+    else
+      delete[] buf;
   } while (firstKey==(unsigned long long) -1);
   // Die restlichen Segmente lesen
 
@@ -336,7 +342,7 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
 //  printf("reading next\n");
 
   for(;;) {
-    if(time(NULL)>szeit+(long)timeoutInSeconds)
+    if(time(NULL)>szeit+(long)(timeoutInSeconds))
       break; // timeout
     if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
       close(fd);
@@ -419,7 +425,7 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
   printf("Searching missing sections\n");
 #endif // DEBUG
 
-  time_t starttime=time(NULL);
+  szeit=time(NULL);
 //  printf("reading missing\n");
 
   if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
@@ -433,7 +439,7 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
   }
   // Jetzt lesen wir die fehlenden Sections ein
   for(;;) {
-    if(time(NULL)>(long)(starttime+timeoutInSeconds))
+    if(time(NULL)>szeit+(long)(timeoutInSeconds))
       break; // Timeout
     if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
       close(fd);

@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.6 2001/05/20 14:40:15 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.7 2001/06/10 14:55:51 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.7  2001/06/10 14:55:51  fnbrd
+// Kleiner Aenderungen und Ergaenzungen (epgMini).
+//
 // Revision 1.6  2001/05/20 14:40:15  fnbrd
 // Mit parental_rating
 //
@@ -171,6 +174,11 @@ class SIevent {
     SIevent(const struct eit_event *);
     // Std-Copy
     SIevent(const SIevent &);
+    SIevent(void) {
+      serviceID=eventID=0;
+      dauer=0;
+      startzeit=0;
+    }
     unsigned short eventID;
     string name; // Name aus dem Short-Event-Descriptor
     string text; // Text aus dem Short-Event-Descriptor
@@ -195,6 +203,9 @@ class SIevent {
     int saveXML(FILE *file, const char *serviceName) const; // saves the event
     void dump(void) const; // dumps the event to stdout
     void dumpSmall(void) const; // dumps the event to stdout (not all information)
+    // Liefert das aktuelle EPG des senders mit der uebergebenen serviceID,
+    // bei Fehler ist die serviceID des zurueckgelieferten Events 0
+    static SIevent readActualEvent(unsigned short serviceID, unsigned timeoutInSeconds=2);
   protected:
     int saveXML0(FILE *f) const;
     int saveXML2(FILE *f) const;

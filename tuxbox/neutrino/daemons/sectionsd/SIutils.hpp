@@ -1,7 +1,7 @@
 #ifndef SIUTILS_HPP
 #define SIUTILS_HPP
 //
-// $Id: SIutils.hpp,v 1.2 2001/05/19 22:46:50 fnbrd Exp $
+// $Id: SIutils.hpp,v 1.3 2001/06/10 14:55:51 fnbrd Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.hpp,v $
+// Revision 1.3  2001/06/10 14:55:51  fnbrd
+// Kleiner Aenderungen und Ergaenzungen (epgMini).
+//
 // Revision 1.2  2001/05/19 22:46:50  fnbrd
 // Jetzt wellformed xml.
 //
@@ -37,6 +40,9 @@ time_t changeUTCtoCtime(const unsigned char *buffer);
 // returns the descriptor type as readable text
 const char *decode_descr (unsigned char tag_value);
 
-int saveStringToXMLfile(FILE *out, const char *string);
+int saveStringToXMLfile(FILE *out, const char *string, int withControlCodes=0);
+
+// Entfernt die ControlCodes aus dem String (-> String wird evtl. kuerzer)
+void removeControlCodes(char *string);
 
 #endif // SIUTILS_HPP

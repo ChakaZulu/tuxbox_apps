@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.3 2001/05/20 14:40:15 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.4 2001/06/10 14:55:51 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.4  2001/06/10 14:55:51  fnbrd
+// Kleiner Aenderungen und Ergaenzungen (epgMini).
+//
 // Revision 1.3  2001/05/20 14:40:15  fnbrd
 // Mit parental_rating
 //
@@ -33,6 +36,12 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+
+#include <ost/dmx.h>
+
 #include <set>
 #include <algorithm>
 #include <string>
@@ -40,6 +49,7 @@
 #include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
+#include "SIsections.hpp"
 
 SIevent::SIevent(const struct eit_event *e)
 {
@@ -187,4 +197,87 @@ void SIevent::dumpSmall(void) const
     printf("Dauer: %02u:%02u:%02u (%umin, %us)\n", dauer/3600, (dauer%3600)/60, dauer%60, dauer/60, dauer);
   for_each(ratings.begin(), ratings.end(), printSIparentalRating());
   printf("\n");
+}
+
+// Liest n Bytes aus einem Socket per read
+inline int readNbytes(int fd, char *buf, int n)
+{
+int j;
+  for(j=0; j<n;) {
+    int r=read (fd, buf, n-j);
+    if(r<=0) {
+      perror ("read");
+      return -1;
+    }
+    j+=r;
+    buf+=r;
+  }
+  return j;
+}
+
+SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSeconds)
+{
+  int fd;
+  SIevent evt; // Std-Event das bei Fehler zurueckgeliefert wird
+  struct SI_section_header header;
+  struct dmxSctFilterParams flt;
+  char *buf;
+
+  memset (&flt.filter, 0, sizeof (struct dmxFilter));
+
+  flt.pid              = 0x12;
+  flt.filter.filter[0] = 0x4e;
+  flt.filter.mask[0]   = 0xff;
+  flt.timeout          = 0;
+  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+
+  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
+    perror ("/dev/ost/demux0");
+    return evt;
+  }
+  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
+    close(fd);
+    perror ("DMX_SET_FILTER");
+    return evt;
+  }
+
+  time_t szeit=time(NULL);
+
+//  printf("reading first\n");
+  // Segment mit Event fuer sid suchen
+  do {
+    if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
+      close(fd);
+      perror ("read header");
+      return evt;
+    }
+    buf=new char[sizeof(header)+header.section_length-5];
+    if(!buf) {
+      close(fd);
+      printf("Not enough memory!\n");
+      return evt;
+    }
+    // Den Header kopieren
+    memcpy(buf, &header, sizeof(header));
+    if(readNbytes(fd, buf+sizeof(header), header.section_length-5)<0) {
+      close(fd);
+      delete[] buf;
+      perror ("read section");
+      return evt;
+    }
+    if(header.current_next_indicator) {
+      // Wir wollen nur aktuelle sections
+      SIsectionEIT e(SIsection(sizeof(header)+header.section_length-5, buf));
+      time_t zeit=time(NULL);
+      for(SIevents::iterator k=e.events().begin(); k!=e.events().end(); k++)
+        if(k->serviceID==serviceID && k->startzeit<=zeit<=(long)(k->startzeit+k->dauer)) {
+	  close(fd);
+	  return SIevent(*k);
+        }
+    }
+    else
+      delete[] buf;
+  } while (time(NULL)<szeit+(long)(timeoutInSeconds));
+  close(fd);
+  return evt;
 }
