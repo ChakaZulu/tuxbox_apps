@@ -65,7 +65,7 @@ using namespace std;
 
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
 
-#define WEBXFACEVERSION "1.0.1"
+#define WEBXFACEVERSION "1.1"
 
 static int currentBouquet = 0;
 static int currentChannel = -1;
@@ -1061,7 +1061,7 @@ static eString getRecordingStat()
 
 static eString getCurService()
 {
-	eString result = "n/a";
+	eString result = "&nbsp;";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
@@ -1070,13 +1070,11 @@ static eString getCurService()
 		if (current)
 			result = current->service_name.c_str();
 	}
-	return result;
+	return filter_string(result);
 }
 
-static eString getEITC()
+static eString getEITC(eString result)
 {
-	eString result;
-
 	EIT *eit = eDVB::getInstance()->getEIT();
 
 	if (eit)
@@ -2324,10 +2322,7 @@ static eString getEITC2()
 	result.strReplace("#NEXTD#", next_duration);
 	result.strReplace("#NEXTST#", next_text);
 	result.strReplace("#VOLBAR#", getVolBar());
-	eString curService = filter_string(getCurService());
-	if (curService == "n/a")
-		curService = "&nbsp;";
-	result.strReplace("#SERVICENAME#", curService);
+	result.strReplace("#SERVICENAME#", getCurService());
 	result.strReplace("#STATS#", getStats());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
 	result.strReplace("#CHANSTATS#", getChannelStats());
@@ -2786,6 +2781,14 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 	}
 
 	return result.str();
+}
+
+static eString getchannelinfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result = getEITC(readFile(TEMPLATE_DIR + "eit.tmp"));
+	result.strReplace("#SERVICENAME#", getCurService());
+
+	return result;
 }
 
 static eString message(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -3703,6 +3706,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getstreaminfo);
+	dyn_resolver->addDyn("GET", "/cgi-bin/channelinfo", getchannelinfo);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings);
 #ifndef DISABLE_FILE
