@@ -98,8 +98,10 @@
 			<table width=770>
 				<tr>
 					<td width=350px>&nbsp;</td>
-					<td align=right style="line-height: 10px"><br><br><br><br><br>
+					<td align=right style="line-height: 10px"><br><br><br>
 						<script language="javascript">
+							diskspace = '#DISKSPACE#';
+							document.write(diskspace);
 							volbar = '#VOLBAR#';
 							volbar2 = volbar.replace(/\|\|/g,"<img src=\"trans.gif\" border=0>");
 							volbar2 = volbar2.replace(/<td>/g, "<td width=15 height=8>");

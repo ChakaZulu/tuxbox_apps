@@ -755,7 +755,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "about")
 	{
-		result = "Enigma Web Control<br>Version 0.2a";
+		result = "Enigma Web Control<br>Version 0.3";
 	}
 	else
 	if (mode == "aboutDreambox")
@@ -966,6 +966,36 @@ static eString getEITC()
 	return result;
 }
 
+extern int freeRecordSpace();
+
+static eString getDiskSpace()
+{
+	eString result = "";
+	eString tmp;
+	result = "<span class=\"white\">";
+	result += "Remaining Disk Space: ";
+	int fds = freeRecordSpace();
+	if (fds != -1)
+	{
+		if (fds < 1024)
+			tmp.sprintf("%d MB", fds);
+		else
+			tmp.sprintf("%d.%02d GB", fds/1024, (int)((fds%1024)/10.34));
+		result += tmp;
+		result += "/";
+		int min = fds/33;
+		if (min < 60)
+			tmp.sprintf("~%d min", min);
+		else
+			tmp.sprintf("~%dh%02dmin", min/60, min%60);
+		result += tmp;
+	}
+	else
+		result += "unknown";
+
+	result += "</span><br><br>";
+	return result;
+}
 
 static eString getStats()
 {
@@ -1486,7 +1516,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	{
 		result.strReplace("#EIT#", getEITC() );
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
-		
+
 		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 
 		if(sapi && sapi->service)
@@ -1507,6 +1537,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 		DELETE(#SI#);
 		DELETE(#EIT#);
 	}
+	result.strReplace("#DISKSPACE#", getDiskSpace());
 	result.strReplace("#VOLBAR#", getVolBar());
 
 	return result;
