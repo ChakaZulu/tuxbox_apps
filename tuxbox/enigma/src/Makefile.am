@@ -31,7 +31,7 @@ enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/system/libenigma_system.la \
 	$(top_builddir)/enigma/src/core/xml/libenigma_xml.la \
 	$(top_builddir)/edvb/miniqt/libminiqt.la \
-	$(LIBSIGC_LIBS) @INTLLIBS@ \
+	$(LIBSIGC_LIBS) $(INTLLIBS) \
 	-ldl -lpthread
 
 AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
