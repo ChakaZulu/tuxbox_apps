@@ -168,10 +168,10 @@ static eString getControlPlugins(void)
 						<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".cfg')")
 						<< "</td>"
 						<< "<td>"
-						<< getAttribute("/lib/tuxbox/plugins/" + line, "name")
+						<< getAttribute(pluginsDir[j] + line, "name")
 						<< "</td>"
 						<< "<td>"
-						<< getAttribute("/lib/tuxbox/plugins/" + line, "desc")
+						<< getAttribute(pluginsDir[j] + line, "desc")
 						<< "</td>"
 						<< "</tr>";
 				}
