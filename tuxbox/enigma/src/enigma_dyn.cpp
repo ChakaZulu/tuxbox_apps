@@ -13,6 +13,7 @@
 #include <list>
 
 #include <config.h>
+#include <core/system/econfig.h>
 
 #define TEMPLATE_DIR DATADIR+QString("/enigma/templates/")
 
@@ -194,7 +195,7 @@ static QString version(QString request, QString path, QString opt, eHTTPConnecti
 {
 	content->local_header["Content-Type"]="text/plain";
 	QString result;
-	result.sprintf("EliteDVB Version : %s\r\n, eZap Version : %s\r\n",eDVB::getInstance()->getVersion().c_str(), (const char*) eZap::getInstance()->getVersion());
+	result.sprintf("EliteDVB Version : %s\r\n, eZap Version : doof\r\n",eDVB::getInstance()->getVersion().c_str());
 	return result;
 }
 
@@ -496,7 +497,7 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 	} 
 	stats+=" | ";
 
-	eDVB::getInstance()->config.getKey("/elitedvb/system/bootCount", bootcount);
+	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
 
 	stats+="<span class=\"white\">"+getIP()+"</span>";
 

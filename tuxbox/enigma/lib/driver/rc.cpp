@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "init.h"
+#include <core/system/econfig.h>
 
 int eRCDevice::getKeyCompatibleCode(const eRCKey &) const
 {
@@ -69,6 +70,25 @@ eRCShortDriver::~eRCShortDriver()
 		delete sn;
 }
 
+eRCConfig::eRCConfig()
+{
+	reload();
+}
+
+void eRCConfig::reload()
+{
+	rdelay=500;
+	rrate=100;
+	eConfig::getInstance()->getKey("/ezap/rc/repeatRate", rrate);
+	eConfig::getInstance()->getKey("/ezap/rc/repeatDelay", rrate);
+}
+
+void eRCConfig::save()
+{
+	eConfig::getInstance()->setKey("/ezap/rc/repeatRate", rrate);
+	eConfig::getInstance()->setKey("/ezap/rc/repeatDelay", rrate);
+}
+
 eRCInput *eRCInput::instance;
 
 eRCInput::eRCInput()
@@ -108,7 +128,6 @@ void eRCInput::setFile(int newh)
 
 void eRCInput::addDevice(const char *id, eRCDevice *dev)
 {
-	printf("adding driver %s -> %x\n", id, dev);
 	devices.insert(std::pair<const char*,eRCDevice*>(id, dev));
 }
 
@@ -119,14 +138,9 @@ void eRCInput::removeDevice(const char *id)
 
 eRCDevice *eRCInput::getDevice(const char *id)
 {
-	printf("searching for %s\n", id);
 	std::map<const char*,eRCDevice*>::iterator i=devices.find(id);
 	if (i == devices.end())
-	{
-		printf("nix\n");
 		return 0;
-	}
-	printf("ok, %x\n", i->second);
 	return i->second;
 }
 

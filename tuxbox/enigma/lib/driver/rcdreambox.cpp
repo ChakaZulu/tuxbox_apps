@@ -14,7 +14,7 @@ void eRCDeviceDreambox::handleCode(int rccode)
 		/*emit*/ input->keyPressed(eRCKey(this, old&0xF7FF, eRCKey::flagBreak));
 	if (old != rccode)
 	{
-		repeattimer.start(rdelay, 1);
+		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
 		input->keyPressed(eRCKey(this, rccode&0xF7FF, 0));
 	}
 }
@@ -32,15 +32,13 @@ void eRCDeviceDreambox::repeat()
 {
 	if (ccode!=-1)
 		input->keyPressed(eRCKey(this, ccode&0xF7FF, eRCKey::flagRepeat));
-	repeattimer.start(rrate, 1);
+	repeattimer.start(eRCInput::getInstance()->config.rrate, 1);
 }
 
 eRCDeviceDreambox::eRCDeviceDreambox(eRCDriver *driver)
 			: eRCDevice("Dreambox", driver), timeout(eApp), repeattimer(eApp)
 {
 	ccode=-1;
-	rrate=30;
-	rdelay=500;
 	CONNECT(timeout.timeout, eRCDeviceDreambox::timeOut);
 	CONNECT(repeattimer.timeout, eRCDeviceDreambox::repeat);
 }

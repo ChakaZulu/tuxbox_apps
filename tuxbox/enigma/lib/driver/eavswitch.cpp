@@ -4,7 +4,8 @@
 #include <dbox/avs_core.h>
 #include <sys/ioctl.h>
 #include "qglobal.h"
-#include "edvb.h"
+#include <core/system/econfig.h>
+#include <core/dvb/edvb.h>
 
 /* sucks */
 
@@ -60,7 +61,7 @@ eAVSwitch::~eAVSwitch()
 void eAVSwitch::reloadSettings()
 {
 	unsigned int colorformat;
-	eDVB::getInstance()->config.getKey("/elitedvb/video/colorformat", colorformat);
+	eConfig::getInstance()->getKey("/elitedvb/video/colorformat", colorformat);
 	setColorFormat((eAVColorFormat)colorformat);
 }
 

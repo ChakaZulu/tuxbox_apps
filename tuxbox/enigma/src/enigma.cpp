@@ -5,28 +5,31 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include "qrect.h"
+
 #include "enigma.h"
-#include "sselect.h"
 #include "dvb.h"
 #include "edvb.h"
-#include "streaminfo.h"
+
 #include "httpd.h"
 #include "http_file.h"
 #include "http_dyn.h"
 #include "xmlrpc.h"
 #include "enigma_dyn.h"
 #include "enigma_xmlrpc.h"
-#include "decoder.h"
-#include "enigma_main.h"
-#include "emessage.h"
-#include "actions.h"
-#include "rc.h"
-#include "elabel.h"
 
-#include "init.h"
+#include "enigma_main.h"
+
+#include "emessage.h"
+
+#include "actions.h"
+
+#include <core/driver/rc.h>
+#include <core/system/econfig.h>
+
+#include <core/system/init.h>
 
 #include <config.h>
+#include <sselect.h>
 
 eZap *eZap::instance;
 
@@ -96,11 +99,6 @@ void eZap::status()
 {
 }
 
-QString eZap::getVersion()
-{
-	return "enigma 0.1, compiled " __DATE__;
-}
-
 #include "gfbdc.h"
 
 eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
@@ -119,6 +117,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	init = new eInit();
 	init->setRunlevel(5);
 	
+#if 0
 	if(0)
 	{
 		gDC &dc=*gFBDC::getInstance();
@@ -140,6 +139,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 			p.renderText(x, "Hello world dies ist ein ganz langer text der auf den screen gepinselt wird du lieber mensch bla keine ahnung hallo was soll das");
 		}
 	}
+#endif
 
 	focus = 0;
 
@@ -171,7 +171,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 
 	qDebug("[ENIGMA] ok, beginning mainloop");
 
-	if (eDVB::getInstance()->config.getKey("/elitedvb/system/bootCount", bootcount))
+	if (eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount))
 	{
 		bootcount = 1;
 		eMessageBox msg("Willkommen zu enigma.\n\nBitte führen sie zunächst eine Kanalsuche durch, indem sie die d-Box-Taste drücken um in das "
@@ -183,9 +183,9 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	else
 		bootcount++;
 
-	eDVB::getInstance()->config.setKey("/elitedvb/system/bootCount", bootcount);
+	eConfig::getInstance()->setKey("/elitedvb/system/bootCount", bootcount);
 
-	if ((!(e = eDVB::getInstance()->config.getKey("/ezap/ui/lastChannel", lastchannel))) && (eDVB::getInstance()->getTransponders()))
+	if ((!(e = eConfig::getInstance()->getKey("/ezap/ui/lastChannel", lastchannel))) && (eDVB::getInstance()->getTransponders()))
 	{
 		eService *t = eDVB::getInstance()->getTransponders()->searchService(lastchannel >> 16, lastchannel & 0xFFFF);
 		if (t)
@@ -200,7 +200,7 @@ eZap::~eZap()
 {
 	if (eDVB::getInstance()->service)
 	{
-		eDVB::getInstance()->config.setKey("/ezap/ui/lastChannel", (__u32)((eDVB::getInstance()->original_network_id << 16) | eDVB::getInstance()->service_id));
+		eConfig::getInstance()->setKey("/ezap/ui/lastChannel", (__u32)((eDVB::getInstance()->original_network_id << 16) | eDVB::getInstance()->service_id));
 	}
 
 	qDebug("[ENIGMA] beginning clean shutdown");

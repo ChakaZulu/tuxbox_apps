@@ -83,7 +83,7 @@ void eTimer::changeInterval(long msek)
 		nextActivation -= interval;  // sub old interval
 	}
 	else
-			bActive=true;	// then activate Timer
+		bActive=true;	// then activate Timer
 
 	interval = msek;   			 			// set new Interval
 	nextActivation += interval;		// calc nextActivation
@@ -137,7 +137,6 @@ void eMainloop::processOneEvent()
 	long usec;
 	while (!TimerList.empty() && (usec = timeout_usec( (*TimerList.begin())->getNextActivation() ) ) <= 0 )
 		(*TimerList.begin())->activate();
-
 	int ret=poll(&(*pfd.begin()), notifiers.size(), TimerList.empty()?-1:usec / 1000);  // milli .. not micro seks
 
 	if (ret>0)

@@ -10,6 +10,7 @@
 #include "edvb.h"
 #include "init.h"
 #include <dbox/event.h>
+#include <core/system/econfig.h>
 
 #define EVENT_DEVICE "/dev/dbox/event0"
 #define WDE_VIDEOMODE 		(uint)1
@@ -37,7 +38,6 @@ eStreamWatchdog::eStreamWatchdog()
 		else
 		{
 			sn=new eSocketNotifier(eApp, handle, eSocketNotifier::Read);
-//			connect(sn, SIGNAL(activated(int)), SLOT(check(int)));
 			CONNECT(sn->activated, eStreamWatchdog::check);
 		}
 	}
@@ -64,70 +64,68 @@ void eStreamWatchdog::check(int)
 
 void eStreamWatchdog::reloadSettings()
 {
-			int isanamorph=0;
-   		FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
-			if (bitstream)
-			{
-				char buffer[100];
-				int aspect=0;
-				while (fgets(buffer, 100, bitstream))
-				{
-					if (!strncmp(buffer, "A_RATIO: ", 9))
-						aspect=atoi(buffer+9);
-				}
-				fclose(bitstream);
-				switch (aspect)
-				{
-					case 1:
-					case 2:
-						isanamorph=0;
-					break;
-					case 3:
-					case 4:
-						isanamorph=1;
-				}
-			}
-			
-			qDebug("Aratio changed\n");			
+	int isanamorph=0;
+	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
+	if (bitstream)
+	{
+		char buffer[100];
+		int aspect=0;
+		while (fgets(buffer, 100, bitstream))
+		{
+			if (!strncmp(buffer, "A_RATIO: ", 9))
+				aspect=atoi(buffer+9);
+		}
+		fclose(bitstream);
+		switch (aspect)
+		{
+			case 1:
+			case 2:
+				isanamorph=0;
+			break;
+			case 3:
+			case 4:
+				isanamorph=1;
+		}
+	}
+	
+	qDebug("Aratio changed\n");			
+		/*emit*/ AspectRatioChanged(isanamorph);
 
-			/*emit*/ AspectRatioChanged(isanamorph);
+	int fd;
+	if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
 
-			int fd;
+	int videoDisplayFormat=VIDEO_LETTER_BOX;
+	int doanamorph=0;
+	unsigned int pin8;
+	eConfig::getInstance()->getKey("/elitedvb/video/pin8", pin8);
+	switch (pin8)
+	{
+	case 0:
+		doanamorph=0;
+		videoDisplayFormat=isanamorph?VIDEO_LETTER_BOX:VIDEO_PAN_SCAN;
+		break;
+	case 1:
+		doanamorph=0;
+		videoDisplayFormat=VIDEO_PAN_SCAN;
+ 		break;
+	case 2:
+		doanamorph=isanamorph;
+		videoDisplayFormat=isanamorph?VIDEO_CENTER_CUT_OUT:VIDEO_PAN_SCAN;
+		break;
+	}
 
-			if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
-			{
-				perror("open");
-				return;
-			}
+	if (ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
+	{
+		perror("VIDEO SET DISPLAY FORMAT:");
+		return;
+	}
+	close(fd);
 
-			int videoDisplayFormat=VIDEO_LETTER_BOX;
-			int doanamorph=0;
-			unsigned int pin8;
-			eDVB::getInstance()->config.getKey("/elitedvb/video/pin8", pin8);
-			switch (pin8)
-			{
-				case 0:
-					doanamorph=0;
-					videoDisplayFormat=isanamorph?VIDEO_LETTER_BOX:VIDEO_PAN_SCAN;
-				break;
-			 	case 1:
-					doanamorph=0;
-					videoDisplayFormat=VIDEO_PAN_SCAN;
-		 		break;
-				case 2:
-					doanamorph=isanamorph;
-					videoDisplayFormat=isanamorph?VIDEO_CENTER_CUT_OUT:VIDEO_PAN_SCAN;
-		 		break;
-			}
-
-			if (ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
-			{
-				perror("VIDEO SET DISPLAY FORMAT:");
-				return;
-	 		}
-			close(fd);
-
-			eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
+	eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
 }
 
 eStreamWatchdog::~eStreamWatchdog()

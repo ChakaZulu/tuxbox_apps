@@ -7,6 +7,7 @@
 #include <libsig_comp.h>
 #include <sys/poll.h>
 #include <sys/time.h>
+#include <asm/types.h>
 #include <time.h>
 
 class eApplication;

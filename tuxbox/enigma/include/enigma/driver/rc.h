@@ -14,7 +14,6 @@ class eRCKey;
 class eRCDevice: public Object
 {
 protected:
-	int rrate, rdelay;
 	eRCInput *input;
 	eRCDriver *driver;
 	const char *id;
@@ -97,9 +96,19 @@ public:
 	}
 };
 
+class eRCConfig
+{
+public:
+	eRCConfig();
+	void reload();
+	void save();
+	
+	int rdelay, // keypress delay after first keypress to begin of repeat (in ms)
+		rrate;		// repeat rate (in ms)
+};
+
 class eRCInput: public Object
 {
-//	Q_OBJECT
 	int locked;	
 	int handle;
 	static eRCInput *instance;
@@ -144,6 +153,8 @@ public:
 	eRCDevice *getDevice(const char *id);
 	
 	static eRCInput *getInstance() { return instance; }
+	
+	eRCConfig config;
 };
 
 #endif

@@ -2,6 +2,7 @@ INCLUDES = \
 	-I$(DRIVER)/include \
 	-I$(top_srcdir)/enigma/src/core/gui \
 	-I$(top_srcdir)/edvb/miniqt \
+	-I$(top_srcdir)/enigma/src \
 	-I$(top_srcdir)/enigma/src/core/base \
 	-I$(top_srcdir)/enigma/src/core/gdi \
 	-I$(top_srcdir)/enigma/src/core/system \

@@ -1,22 +1,15 @@
 #ifndef __enigma_h
 #define __enigma_h
 
-#include <qapplication.h>
-#include "rc.h"
-#include "fb.h"
-#include "ewidget.h"
-#include "elbwindow.h"
-#include "si.h"
-#include "lcd.h"
-#include <ebase.h>
+#include <core/base/ebase.h>
 
-class gFBDC;
-class gLCDDC;
 class eServiceSelector;
 class eZapMain;
 class eService;
+class eWidget;
 struct gRGB;
 class eInit;
+class eRCKey;
 
 class eZap: public eApplication
 {
@@ -27,7 +20,7 @@ private:// slots:
 	void keyUp(int);
 	void keyDown(int);
 	void status();
-	
+
 private:
 	void Fade(gRGB *pal, int i, __u32 rgb1, __u32 rgb2, int level);
 	void GenFade(gRGB *pal, int in, __u32 rgb1, __u32 rgb2, int num, int tr=0);
@@ -48,8 +41,6 @@ public:
 		return serviceSelector;
 	}
 	
-	QString getVersion();
-
 	eZap(int argc, char **argv);
 	~eZap();
 };

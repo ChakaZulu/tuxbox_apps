@@ -12,6 +12,8 @@
 #include "frontend.h"
 #include "decoder.h"
 
+#include <core/system/econfig.h>
+
 eFrontend* eFrontend::frontend;
 
 eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
@@ -37,10 +39,10 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 	} else
 		secfd=-1;
 		
-	if (eDVB::getInstance()->config.getKey("/elitedvb/frontend/freqOffset", freq_offset))
+	if (eConfig::getInstance()->getKey("/elitedvb/frontend/freqOffset", freq_offset))
 	{
 		freq_offset = 0;
-		eDVB::getInstance()->config.setKey("/elitedvb/frontend/freqOffset", freq_offset);
+		eConfig::getInstance()->setKey("/elitedvb/frontend/freqOffset", freq_offset);
 	}
 
 	qDebug("FreqOffset = %d", freq_offset);

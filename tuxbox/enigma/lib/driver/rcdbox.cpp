@@ -28,7 +28,7 @@ void eRCDeviceDBoxOld::handleCode(int rccode)
 			/* emit */input->keyPressed(eRCKey(this, old, eRCKey::flagBreak));
 		if (old != rccode)
 		{
-			repeattimer.start(rdelay, 1);
+			repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
 			input->keyPressed(eRCKey(this, rccode, 0));
 		}
 	}
@@ -47,14 +47,12 @@ void eRCDeviceDBoxOld::repeat()
 {
 	if (ccode!=-1)
 		input->keyPressed(eRCKey(this, ccode, eRCKey::flagRepeat));
-	repeattimer.start(rrate, 1);
+	repeattimer.start(eRCInput::getInstance()->config.rrate, 1);
 }
 
 eRCDeviceDBoxOld::eRCDeviceDBoxOld(eRCDriver *driver): eRCDevice("DBoxOld", driver), timeout(eApp), repeattimer(eApp)
 {
 	ccode=-1;
-	rrate=100;
-	rdelay=300;
 	CONNECT(timeout.timeout, eRCDeviceDBoxOld::timeOut);
 	CONNECT(repeattimer.timeout, eRCDeviceDBoxOld::repeat);
 }
@@ -155,7 +153,7 @@ void eRCDeviceDBoxNew::handleCode(int rccode)
 		/*emit*/ input->keyPressed(eRCKey(this, old&0x3F, eRCKey::flagBreak));
 	if (old != rccode)
 	{
-		repeattimer.start(rdelay, 1);
+		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
 		input->keyPressed(eRCKey(this, rccode&0x3F, 0));
 	}
 }
@@ -173,14 +171,12 @@ void eRCDeviceDBoxNew::repeat()
 {
 	if (ccode!=-1)
 		input->keyPressed(eRCKey(this, ccode&0x3F, eRCKey::flagRepeat));
-	repeattimer.start(rrate, 1);
+	repeattimer.start(eRCInput::getInstance()->config.rrate, 1);
 }
 
 eRCDeviceDBoxNew::eRCDeviceDBoxNew(eRCDriver *driver): eRCDevice("DBoxNew", driver), timeout(eApp), repeattimer(eApp)
 {
 	ccode=-1;
-	rrate=100;
-	rdelay=400;
 	CONNECT(timeout.timeout, eRCDeviceDBoxNew::timeOut);
 	CONNECT(repeattimer.timeout, eRCDeviceDBoxNew::repeat);
 }
@@ -275,7 +271,7 @@ void eRCDeviceDBoxButton::handleCode(int code)
 		else if ((~last&code)&(1<<i))
 			/*emit*/ input->keyPressed(eRCKey(this, i, 0));
 	if (code)
-		repeattimer.start(rdelay, 1);
+		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
 	else
 		repeattimer.stop();
 	last=code;
@@ -286,13 +282,11 @@ void eRCDeviceDBoxButton::repeat()
 	for (int i=0; i<4; i++)
 		if (last&(1<<i))
 			/*emit*/ input->keyPressed(eRCKey(this, i, eRCKey::flagRepeat));
-	repeattimer.start(rrate, 1);
+	repeattimer.start(eRCInput::getInstance()->config.rrate, 1);
 }
 
 eRCDeviceDBoxButton::eRCDeviceDBoxButton(eRCDriver *driver): eRCDevice("DBoxButton", driver), repeattimer(eApp)
 {
-	rrate=100;
-	rdelay=300;
 	last=0;
 	CONNECT(repeattimer.timeout, eRCDeviceDBoxButton::repeat);
 }

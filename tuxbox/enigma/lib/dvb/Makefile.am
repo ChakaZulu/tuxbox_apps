@@ -3,10 +3,12 @@ SUBDIRS = lowlevel
 INCLUDES = \
 	-I$(DRIVER)/include \
 	-I$(top_srcdir)/edvb/miniqt \
+	-I$(top_srcdir)/enigma/src \
 	-I$(top_srcdir)/enigma/src/core/base \
 	-I$(top_srcdir)/enigma/src/core/driver \
 	-I$(top_srcdir)/enigma/src/core/system \
-	-I$(top_srcdir)/enigma/src/include
+	-I$(top_srcdir)/enigma/src/include \
+	-I/home/tmbinc/dreambox/CVS/driver/include
 
 noinst_LTLIBRARIES = libdvb.la
 

@@ -7,6 +7,7 @@
 #include "echeckbox.h"
 #include "rc.h"
 #include "eskin.h"
+#include <core/system/econfig.h>
 
 static void unpack(__u32 l, int *t)
 {
@@ -33,11 +34,11 @@ eZapNetworkSetup::eZapNetworkSetup():
 	int sdosetup=0;
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
-	eDVB::getInstance()->config.getKey("/elitedvb/network/ip", sip);
-	eDVB::getInstance()->config.getKey("/elitedvb/network/netmask", snetmask);
-	eDVB::getInstance()->config.getKey("/elitedvb/network/dns", sdns);
-	eDVB::getInstance()->config.getKey("/elitedvb/network/gateway", sgateway);
-	eDVB::getInstance()->config.getKey("/elitedvb/network/dosetup", sdosetup);
+	eConfig::getInstance()->getKey("/elitedvb/network/ip", sip);
+	eConfig::getInstance()->getKey("/elitedvb/network/netmask", snetmask);
+	eConfig::getInstance()->getKey("/elitedvb/network/dns", sdns);
+	eConfig::getInstance()->getKey("/elitedvb/network/gateway", sgateway);
+	eConfig::getInstance()->getKey("/elitedvb/network/dosetup", sdosetup);
 
 	eLabel *l=new eLabel(this);
 	l->setText("IP:");
@@ -139,11 +140,11 @@ void eZapNetworkSetup::okPressed()
 
 	int sdosetup=dosetup->isChecked();
 	
-	eDVB::getInstance()->config.setKey("/elitedvb/network/ip", sip);
-	eDVB::getInstance()->config.setKey("/elitedvb/network/netmask", snetmask);
-	eDVB::getInstance()->config.setKey("/elitedvb/network/dns", sdns);
-	eDVB::getInstance()->config.setKey("/elitedvb/network/gateway", sgateway);
-	eDVB::getInstance()->config.setKey("/elitedvb/network/dosetup", sdosetup);
+	eConfig::getInstance()->setKey("/elitedvb/network/ip", sip);
+	eConfig::getInstance()->setKey("/elitedvb/network/netmask", snetmask);
+	eConfig::getInstance()->setKey("/elitedvb/network/dns", sdns);
+	eConfig::getInstance()->setKey("/elitedvb/network/gateway", sgateway);
+	eConfig::getInstance()->setKey("/elitedvb/network/dosetup", sdosetup);
 	
 	eDVB::getInstance()->configureNetwork();
 	close(1);

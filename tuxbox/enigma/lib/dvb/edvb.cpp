@@ -22,6 +22,7 @@
 #include "config.h"
 #include <algorithm>
 #include "streamwd.h"
+#include <core/system/econfig.h>
 
 eDVB *eDVB::instance;
 
@@ -876,21 +877,8 @@ int eDVB::switchService(int nservice_id, int noriginal_network_id, int ntranspor
 
 eDVB::eDVB()
 {
-	config.setName(CONFIGDIR "/enigma/registry");
-	if (config.open())
-	{
-		if (config.createNew())
-		{
-			mkdir(CONFIGDIR "/enigma", 0777);
-			if (config.createNew())
-				qFatal("error while opening/creating registry - create " CONFIGDIR "/enigma");
-		}
-		if (config.open())
-			qFatal("still can't open configfile");
-	}
-
 	time_difference=0;
-	if (config.getKey("/elitedvb/DVB/useBAT", useBAT))
+	if (eConfig::getInstance()->getKey("/elitedvb/DVB/useBAT", useBAT))
 		useBAT=0;
 	if (instance)
 		qFatal("eDVB already initialized!");
@@ -979,9 +967,9 @@ eDVB::eDVB()
 	eStreamWatchdog::getInstance()->reloadSettings();
 
 	int vol, m;
-	if (config.getKey("/elitedvb/audio/volume", vol))
+	if (eConfig::getInstance()->getKey("/elitedvb/audio/volume", vol))
 		vol=10;
-	if (config.getKey("/elitedvb/audio/mute", m))
+	if (eConfig::getInstance()->getKey("/elitedvb/audio/mute", m))
 		m=0;
 	changeVolume(1, vol);
 	changeVolume(3, m);
@@ -994,8 +982,8 @@ eDVB::eDVB()
 eDVB::~eDVB()
 {
 	delete eAVSwitch::getInstance();
-	config.setKey("/elitedvb/audio/volume", volume);
-	config.setKey("/elitedvb/audio/mute", mute);
+	eConfig::getInstance()->setKey("/elitedvb/audio/volume", volume);
+	eConfig::getInstance()->setKey("/elitedvb/audio/mute", mute);
 	Decoder::Close();
 
 	if (!calist.empty())
@@ -1016,7 +1004,6 @@ eDVB::~eDVB()
 		delete transponderlist;
 	eFrontend::close();
 	instance=0;
-	config.close();
 }
 
 eTransponderList *eDVB::getTransponders()
@@ -1418,11 +1405,11 @@ void eDVB::configureNetwork()
 	int ip[4], netmask[4], dns[4], gateway[4];
 	int sdosetup=0;
 
-	eDVB::getInstance()->config.getKey("/elitedvb/network/ip", sip);
-	eDVB::getInstance()->config.getKey("/elitedvb/network/netmask", snetmask);
-	eDVB::getInstance()->config.getKey("/elitedvb/network/dns", sdns);
-	eDVB::getInstance()->config.getKey("/elitedvb/network/gateway", sgateway);
-	eDVB::getInstance()->config.getKey("/elitedvb/network/dosetup", sdosetup);
+	eConfig::getInstance()->getKey("/elitedvb/network/ip", sip);
+	eConfig::getInstance()->getKey("/elitedvb/network/netmask", snetmask);
+	eConfig::getInstance()->getKey("/elitedvb/network/dns", sdns);
+	eConfig::getInstance()->getKey("/elitedvb/network/gateway", sgateway);
+	eConfig::getInstance()->getKey("/elitedvb/network/dosetup", sdosetup);
 
 	unpack(sip, ip);
 	unpack(snetmask, netmask);
