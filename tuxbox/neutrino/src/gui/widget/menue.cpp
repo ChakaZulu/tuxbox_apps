@@ -503,6 +503,8 @@ int CMenuOptionChooser::getOptionValue(void) const
 
 int CMenuOptionChooser::exec(CMenuTarget*)
 {
+	bool wantsRepaint = false;
+
 	for(unsigned int count = 0; count < number_of_options; count++)
 	{
 		if (options[count].key == (*optionValue))
@@ -514,9 +516,12 @@ int CMenuOptionChooser::exec(CMenuTarget*)
 	paint(true);
 	if(observ)
 	{
-		observ->changeNotify(optionName, optionValue);
+		wantsRepaint = observ->changeNotify(optionName, optionValue);
 	}
-	return menu_return::RETURN_NONE;
+	if ( wantsRepaint )
+		return menu_return::RETURN_REPAINT;
+	else
+		return menu_return::RETURN_NONE;
 }
 
 int CMenuOptionChooser::paint( bool selected )
