@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.2 2002/04/20 21:20:56 Simplex Exp $
+ * $Id: configfile.cpp,v 1.3 2002/04/20 21:46:17 Simplex Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 #include "configfile.h"
+
+using namespace std;
 
 CConfigFile::CConfigFile(const char p_delimiter)
 {
