@@ -369,7 +369,7 @@ void eMountMgr::automountMountPoints(void)
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 	{
 		if (mp_it->mp.automount == 1)
-			rc = mp_it->mount();
+			mp_it->mount();
 	}
 }
 
