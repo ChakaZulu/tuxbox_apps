@@ -9,6 +9,8 @@ var bouquetRefs = new Array(
 var currentBouquet = #CURRENTBOUQUET#;
 var currentChannel = #CURRENTCHANNEL#;
 var autoBouquetChange = #AUTOBOUQUETCHANGE#;
+var zapMode = #ZAPMODE#;
+var zapSubMode = #ZAPSUBMODE#;
 			
 function init()
 {	
