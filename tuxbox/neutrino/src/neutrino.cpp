@@ -2563,6 +2563,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 		if ( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
 		{
+			if ( mode == mode_standby )
+			{
+				// WAKEUP
+				standbyMode( false );
+			}
 			ShowHint ( "messagebox.info", g_Locale->getText("zaptotimer.announce") );
 			return messages_return::handled;
 		}
@@ -3084,7 +3089,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.335 2002/10/05 20:46:20 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.336 2002/10/08 20:32:49 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -436,9 +436,13 @@ void CTimerList::paintItem(int pos)
 void CTimerList::paintHead()
 {
 	string strCaption = g_Locale->getText("timerlist.name");
-
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 20, strCaption.c_str(), COL_MENUHEAD);
+	int real_width=width;
+	if(timerlist.size()<=listmaxshow)
+	{
+		real_width-=15; //no scrollbar
+	}
+	frameBuffer->paintBoxRel(x,y, real_width,theight+0, COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, real_width- 20, strCaption.c_str(), COL_MENUHEAD);
 
 /*	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
 	if (bouquetList!=NULL)
@@ -447,25 +451,30 @@ void CTimerList::paintHead()
 
 void CTimerList::paintFoot()
 {
-	int ButtonWidth = (width-28) / 4;
-	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
+	int real_width=width;
+	if(timerlist.size()<=listmaxshow)
+	{
+		real_width-=15; //no scrollbar
+	}
+	int ButtonWidth = (real_width-28) / 4;
+	frameBuffer->paintBoxRel(x,y+height, real_width,buttonHeight, COL_MENUHEAD);
+	frameBuffer->paintHLine(x, x+real_width,  y, COL_INFOBAR_SHADOW);
 
 	if(timerlist.size()>0)
 	{
-		frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
-		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR);
+		frameBuffer->paintIcon("rot.raw", x+real_width- 4* ButtonWidth - 20, y+height+4);
+		g_Fonts->infobar_small->RenderString(x+real_width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR);
 		
-		frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
-		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR);
+		frameBuffer->paintIcon("ok.raw", x+real_width- 1* ButtonWidth - 30, y+height);
+		g_Fonts->infobar_small->RenderString(x+real_width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR);
 
 	}
 
-	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new").c_str(), COL_INFOBAR);
+	frameBuffer->paintIcon("gruen.raw", x+real_width- 3* ButtonWidth - 30, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+real_width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new").c_str(), COL_INFOBAR);
 
-	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload").c_str(), COL_INFOBAR);
+	frameBuffer->paintIcon("gelb.raw", x+real_width- 2* ButtonWidth - 30, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+real_width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload").c_str(), COL_INFOBAR);
 
 }
 
@@ -481,15 +490,19 @@ void CTimerList::paint()
 		paintItem(count);
 	}
 
-	int ypos = y+ theight;
-	int sb = 2*fheight* listmaxshow;
-	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	if(timerlist.size()>listmaxshow)
+	{
+		int ypos = y+ theight;
+		int sb = 2*fheight* listmaxshow;
+		frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
 
-	int sbc= ((timerlist.size()- 1)/ listmaxshow)+ 1;
-	float sbh= (sb- 4)/ sbc;
-	int sbs= (selected/listmaxshow);
+		int sbc= ((timerlist.size()- 1)/ listmaxshow)+ 1;
+		float sbh= (sb- 4)/ sbc;
+		int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+		frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	}
+	
 	paintFoot();
 	visible = true;
 }
