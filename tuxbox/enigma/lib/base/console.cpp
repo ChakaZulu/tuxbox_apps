@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.10 2005/02/02 16:00:52 ghostrider Exp $
+ * $Id: console.cpp,v 1.11 2005/02/18 18:47:07 ghostrider Exp $
  */
 
 #include <lib/base/console.h>
@@ -188,14 +188,14 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
   
 	if ( (pid = bidirpipe(fd, argv[0], argv)) == -1 )
 	{
-		while ( cnt-- > 0 )
-			delete [] argv[cnt];
+		while ( cnt > 0 )
+			delete [] argv[cnt--];
 		delete [] argv;
 		return;
 	}
 
-	while ( cnt-- > 0 )  // release heap memory
-		delete [] argv[cnt];
+	while ( cnt > 0 )  // release heap memory
+		delete [] argv[cnt--];
 	delete [] argv;
 
 //	eDebug("pipe in = %d, out = %d, err = %d", fd[0], fd[1], fd[2]);

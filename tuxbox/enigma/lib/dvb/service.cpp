@@ -210,7 +210,6 @@ int eServiceInterface::play(const eServiceReference &s, int workaround )
 		return -1;
 	}
 	service=s;
-	addRef(s);
 	return currentServiceHandler->play(s, workaround);
 }
 
@@ -218,7 +217,6 @@ int eServiceInterface::stop(int workaround)
 {
 	if (!currentServiceHandler)
 		return -1;
-	removeRef(service);
 	int res=currentServiceHandler->stop(workaround);
 	conn.disconnect();
 	currentServiceHandler=0;

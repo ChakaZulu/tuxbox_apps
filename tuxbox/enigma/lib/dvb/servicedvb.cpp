@@ -1264,13 +1264,10 @@ void eServiceHandlerDVB::leaveDirectory(const eServiceReference &dir)
 
 eService *eServiceHandlerDVB::addRef(const eServiceReference &service)
 {
-	if ((service.data[0] < 0) || (service.path.length()))
+	if ((service.data[0] < 0) || service.path)
 	{
 		eService *s=cache.addRef(service);
-		if (s)
-			return s;
-		else
-			return 0;
+		return s;
 	} else
 	{
 		eTransponderList *tl=eTransponderList::getInstance();
@@ -1282,7 +1279,7 @@ eService *eServiceHandlerDVB::addRef(const eServiceReference &service)
 
 void eServiceHandlerDVB::removeRef(const eServiceReference &service)
 {
-	if ((service.data[0] < 0) || (service.path.length()))
+	if ((service.data[0] < 0) || service.path)
 	{
 		cache.removeRef(service);
 	}

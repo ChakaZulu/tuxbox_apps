@@ -336,6 +336,7 @@ eSubtitleWidget::~eSubtitleWidget()
 		queue.front();
 		delete pkt.pkt;
 	}
+	delete subtitle;
 }
 
 int eSubtitleWidget::getCurPid()

@@ -18,7 +18,7 @@ class eMessagePump
 	int ismt;
 public:
 	eMessagePump(int mt=0);
-	~eMessagePump();
+	virtual ~eMessagePump();
 	int send(const void *data, int len);
 	int recv(void *data, int len); // blockierend
 	int getInputFD() const;

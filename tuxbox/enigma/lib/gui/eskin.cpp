@@ -511,6 +511,7 @@ int eSkin::load(const char *filename)
 		return -1;
 
 	parsers.push_front(new XMLTreeParser("ISO-8859-1"));
+	parsers.setAutoDelete(true);
 	XMLTreeParser &parser=*parsers.first();
 	char buf[2048];
 

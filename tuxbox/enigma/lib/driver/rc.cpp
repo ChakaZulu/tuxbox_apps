@@ -270,6 +270,7 @@ eRCInputEventDriver::~eRCInputEventDriver()
 {
 	if (handle>=0)
 		close(handle);
+	delete sn;
 }
 
 void eRCInputEventDriver::keyPressed(int)
