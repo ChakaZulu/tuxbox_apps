@@ -1,6 +1,11 @@
-<SPAN STYLE="width: 100%; background: #d9e0e7">
-<FONT CLASS="title">#SERVICENAME#</FONT></SPAN><BR>
-#OPS#
+<table width=100% border=0 cellpadding=0 cellspacing=0>
+<tr>
+	<td width=100% class="title">#SERVICENAME#</td>
+</tr>
+<tr>
+	<td>#OPS#</td>
+</tr>
+</table>
 <br>
 <TABLE WIDTH=100% BORDER=0 CELLPADDING=0 CELLSPACING=0>
 	<TR>
@@ -13,7 +18,7 @@
 		<TD>&nbsp;</TD>
 	</TR>
 	<TR>
-		<TD WIDTH=100%>#NEXTT# #NEXTD# <B>#NEXTST#</B></TD>
+		<TD WIDTH=100%>#NEXTT# #NEXTD#<B>#NEXTST#</B></TD>
 	</TR>
 	<TR>
 		<TD WIDTH=100%>#NEXTLT#</TD>
