@@ -1,3 +1,6 @@
+INCLUDES = \
+	@MPEGTOOLS_CFLAGS@
+
 sbin_PROGRAMS = streampes streamts streamsec
 
 streampes_SOURCES = streampes.c

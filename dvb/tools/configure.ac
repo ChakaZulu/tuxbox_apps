@@ -9,6 +9,8 @@ AC_PROG_CXX
 
 TUXBOX_APPS_DVB
 
+TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
+
 AC_OUTPUT([
 Makefile
 skyscan/Makefile

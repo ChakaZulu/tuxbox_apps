@@ -13,12 +13,14 @@ libconfigfile/Makefile
 libcramfs/Makefile
 libeventserver/Makefile
 libmd5sum/Makefile
+libmpegtools/Makefile
 libnet/Makefile
 libucodes/Makefile
 tuxbox-configfile.pc
 tuxbox-cramfs.pc
 tuxbox-eventserver.pc
 tuxbox-md5sum.pc
+tuxbox-mpegtools.pc
 tuxbox-net.pc
 tuxbox-ucodes.pc
 ])

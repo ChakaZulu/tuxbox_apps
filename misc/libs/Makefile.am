@@ -5,6 +5,7 @@ SUBDIRS = \
 	libcramfs \
 	libeventserver \
 	libmd5sum \
+	libmpegtools \
 	libnet \
 	libucodes
 
@@ -14,6 +15,7 @@ pkgconfig_DATA = \
 	tuxbox-cramfs.pc \
 	tuxbox-eventserver.pc \
 	tuxbox-md5sum.pc \
+	tuxbox-mpegtools.pc \
 	tuxbox-net.pc \
 	tuxbox-ucodes.pc
 
