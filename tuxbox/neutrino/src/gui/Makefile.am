@@ -1,18 +1,15 @@
 SUBDIRS = widget bedit
 
 INCLUDES = \
-	-I@DRIVER@/include \
+	-I$(top_srcdir)/daemons \
+	-I$(top_srcdir)/lib \
+	-I$(top_srcdir)/src \
 	@CURL_CFLAGS@ \
 	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
 	@ZAPITCLIENT_CFLAGS@ \
-	-I$(top_srcdir)/daemons/timerd \
-	-I$(top_srcdir)/libs/libcontroldclient \
-	-I$(top_srcdir)/libs/liblcddclient \
-	-I$(top_srcdir)/libs/libsectionsdclient \
-	-I$(top_srcdir)/libs/libtimerdclient \
-	-I$(top_srcdir)/gui
+	-I@DRIVER@/include
 
 noinst_LIBRARIES = libneutrino_gui.a libneutrino_gui2.a
 

@@ -1,8 +1,8 @@
 INCLUDES = \
-	-I@DRIVER@/include \
-	-I$(top_srcdir)/libs/libtimerdclient \
+	-I$(top_srcdir)/libs \
 	@EVENTSERVER_CFLAGS@ \
-	@ZAPITCLIENT_CFLAGS@
+	@ZAPITCLIENT_CFLAGS@ \
+	-I@DRIVER@/include
 
 bin_PROGRAMS = timerd
 
@@ -10,6 +10,6 @@ timerd_SOURCES = timerd.cpp timermanager.cpp
 
 timerd_LDADD = \
 	@EVENTSERVER_LIBS@ \
-	@ZAPITCLIENT_LIBS@
+	@ZAPITCLIENT_LIBS@ \
 	-lpthread
 

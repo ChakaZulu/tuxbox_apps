@@ -1,8 +1,8 @@
 INCLUDES = \
+	-I$(top_srcdir)/libs \
+	@EVENTSERVER_CFLAGS@ \
 	-I@DRIVER@/include \
-	-I@DRIVER@ \
-	-I$(top_srcdir)/libs/libsectionsdclient \
-	@EVENTSERVER_CFLAGS@
+	-I@DRIVER@
 
 bin_PROGRAMS = bat epg epgMini nit sectionsd sdt
 
@@ -16,5 +16,4 @@ sdt_SOURCES = sdt.cpp SIsections.cpp SIevents.cpp SIutils.cpp
 sectionsd_LDADD = \
 	@EVENTSERVER_LIBS@ \
 	-lpthread
-	#$(top_builddir)/libs/libtimerdclient/libtimerdclient.la
 
