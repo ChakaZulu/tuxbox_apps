@@ -13,7 +13,8 @@
 #include <lib/system/econfig.h>
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/decoder.h>
-#include <tuxbox/tuxbox.h>
+
+#include <libtuxbox.h>
 
 /* sucks */
 

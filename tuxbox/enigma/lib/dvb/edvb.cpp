@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dbox/info.h>
-#include <tuxbox/tuxbox.h>
+#include <libtuxbox.h>
 #include <algorithm>
 #include <string.h>
 #include <sys/types.h>
