@@ -278,7 +278,7 @@ static inline unsigned int recode(unsigned char d, int cp)
 	}
 }
 
-eString convertDVBUTF8(unsigned char *data, int len, int table)
+eString convertDVBUTF8(const unsigned char *data, int len, int table)
 {
 	int i;
 	if (!len)

@@ -50,8 +50,8 @@ public:
 	eServiceReferenceDVB service,  // meta-service
 			     parentservice,prevservice;	// for linkage handling
 	eTransponder *transponder;
-	int pmtpid;
-	int service_state;
+	int pmtpid,
+			service_state;
 	MHWEIT *tMHWEIT;
 	TDT *tdt;
 
@@ -63,7 +63,7 @@ public:
 	std::set<int> availableCASystems, usedCASystems;
 	ePtrList<CA> calist;		/** currently used ca-systems */
 
-	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors);
+	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors, int sid);
 	
 #ifndef DISABLE_CI
 	eDVBCI *DVBCI;

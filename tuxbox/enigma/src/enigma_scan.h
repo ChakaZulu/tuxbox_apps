@@ -24,6 +24,7 @@ private:
 	void sel_autoScan();
 	void sel_multiScan();
 	void sel_manualScan();
+	void sel_satfind();
 public:
 	static eLNB* getRotorLNB(int silent);
 	eZapScan();

@@ -19,7 +19,7 @@ eSystemInfo *eSystemInfo::instance;
 
 eSystemInfo::eSystemInfo()
 	:hashdd(0), hasci(0), hasrfmod(0), haslcd(0), hasnetwork(1)
-	,canmeasurelnbcurrent(0)
+	,canmeasurelnbcurrent(0), hasnegfilter(0)
 {
 	instance=this;
 #if HAVE_DVB_API_VERSION == 3
@@ -65,6 +65,7 @@ eSystemInfo::eSystemInfo()
 	}
 #endif
 #if HAVE_DVB_API_VERSION==3
+	hasnegfilter=1;
 	switch (tuxbox_get_submodel())
 	{
 		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
@@ -147,6 +148,13 @@ eSystemInfo::eSystemInfo()
 		hasrfmod=1;
 		close(fd);
 	}
+	fd = open("/dev/dvb/card0/demux0", O_RDWR);
+	if ( fd >=0 )
+	{
+		if ( ::ioctl( fd, DMX_SET_NEGFILTER_MASK, 0 ) >= 0 )
+			hasnegfilter=1;
+		close(fd);
+  }
 #endif
 }
 

@@ -70,34 +70,30 @@ int ePlaylist::load(const char *filename)
 				list.push_back(ref);
 				ignore_next=1;
 			}
-			if (!strncmp(line, "#DESCRIPTION: ", 14))
-			{
-				list.back().service.descr=line+14;				
-				ignore_next=1;
-			}
-			if (!strcmp(line, "#CURRENT"))
+			else if (!strncmp(line, "#DESCRIPTION: ", 14))
+				list.back().service.descr=line+14;
+			else if (!strcmp(line, "#CURRENT"))
 			{
 				current=list.end();
 				current--;
 			}
-			if (!strncmp(line, "#LAST_ACTIVATION ", 17))
+			else if (!strncmp(line, "#LAST_ACTIVATION ", 17))
 				list.back().last_activation=atoi(line+17);
-			if (!strncmp(line, "#CURRENT_POSITION ", 18))
+			else if (!strncmp(line, "#CURRENT_POSITION ", 18))
 				list.back().current_position=atoi(line+18);
-			if (!strncmp(line, "#TYPE ", 6))
+			else if (!strncmp(line, "#TYPE ", 6))
 				list.back().type=atoi(line+6);		
-			if (!strncmp(line, "#EVENT_ID ", 10))
+			else if (!strncmp(line, "#EVENT_ID ", 10))
 				list.back().event_id=atoi(line+10);
-			if (!strncmp(line, "#TIME_BEGIN ", 12))
+			else if (!strncmp(line, "#TIME_BEGIN ", 12))
 				list.back().time_begin=atoi(line+12);
-			if (!strncmp(line, "#DURATION ", 10))
+			else if (!strncmp(line, "#DURATION ", 10))
 				list.back().duration=atoi(line+10);
-			if (!strncmp(line, "#NAME ", 6))
+			else if (!strncmp(line, "#NAME ", 6))
 			{
 				service_name=line+6;
 				service_name_set=1;
 			}
-				 
 			continue;
 		}
 
@@ -134,40 +130,75 @@ int ePlaylist::load(const char *filename)
 
 int ePlaylist::save(const char *filename)
 {
-	if (changed)
+	if (!changed)
+		return 0;
+	if (!filename)
+		filename=this->filename.c_str();
+	FILE *f=0;
+	if ( strstr(filename,"/hdd") )
 	{
-		if (!filename)
-			filename=this->filename.c_str();
-		FILE *f=fopen(filename, "wt");
-		if (!f)
-			return -1;
-		fprintf(f, "#NAME %s\r\n", service_name.c_str());		
-		for (std::list<ePlaylistEntry>::iterator i(list.begin()); i != list.end(); ++i)
-		{
-			fprintf(f, "#SERVICE: %s\r\n", i->service.toString().c_str());
-			if (i->service.descr)
-				fprintf(f, "#DESCRIPTION: %s\r\n", i->service.descr.c_str());
-			if (i->type & ePlaylistEntry::PlaylistEntry && i->current_position != -1)
-				fprintf(f, "#CURRENT_POSITION %d\r\n", i->current_position);
-			else if ( i->type & ePlaylistEntry::isRepeating && i->last_activation != -1 )
-				fprintf(f, "#LAST_ACTIVATION %d\r\n", i->last_activation);
-			else if ( i->event_id != -1)
-				fprintf(f, "#EVENT_ID %d\r\n", i->event_id);
-			if ((int)i->type != ePlaylistEntry::PlaylistEntry)
-				fprintf(f, "#TYPE %d\r\n", i->type);
-			if ((int)i->time_begin != -1)
-				fprintf(f, "#TIME_BEGIN %d\r\n", (int)i->time_begin);
-			if ((int)i->duration != -1)
-				fprintf(f, "#DURATION %d\r\n", (int)i->duration);
-			if (current == i)
-				fprintf(f, "#CURRENT\n");
-			if (i->service.path.size())
-				fprintf(f, "%s\r\n", i->service.path.c_str());
-		}
-		fclose(f);
-		changed=0;
+		eString tmpfile = filename;
+		tmpfile.insert( tmpfile.rfind('/')+1, 1, '$' );
+		f = fopen(tmpfile.c_str(), "wt");
 	}
+	else
+		f = fopen(filename, "wt");
+	if (!f)
+		return -1;
+	if ( fprintf(f, "#NAME %s\r\n", service_name.c_str()) < 0 )
+		goto err;
+	for (std::list<ePlaylistEntry>::iterator i(list.begin()); i != list.end(); ++i)
+	{
+		if ( fprintf(f, "#SERVICE: %s\r\n", i->service.toString().c_str()) < 0 )
+			goto err;
+		if ( i->service.descr &&
+			fprintf(f, "#DESCRIPTION: %s\r\n", i->service.descr.c_str()) < 0 )
+			goto err;
+		if ( i->type & ePlaylistEntry::PlaylistEntry && i->current_position != -1 )
+		{
+			if ( fprintf(f, "#CURRENT_POSITION %d\r\n", i->current_position) < 0 )
+				goto err;
+		}
+		else if ( i->type & ePlaylistEntry::isRepeating && i->last_activation != -1 )
+		{
+			if ( fprintf(f, "#LAST_ACTIVATION %d\r\n", i->last_activation) < 0 )
+				goto err;
+		}
+		else if ( i->event_id != -1)
+		{
+			if ( fprintf(f, "#EVENT_ID %d\r\n", i->event_id) < 0 )
+				goto err;
+		}
+		if ((int)i->type != ePlaylistEntry::PlaylistEntry &&
+			fprintf(f, "#TYPE %d\r\n", i->type) < 0 )
+			goto err;
+		if ((int)i->time_begin != -1 &&
+			fprintf(f, "#TIME_BEGIN %d\r\n", (int)i->time_begin) < 0 )
+			goto err;
+		if ((int)i->duration != -1 &&
+			fprintf(f, "#DURATION %d\r\n", (int)i->duration) < 0 )
+			goto err;
+		if (current == i &&
+			fprintf(f, "#CURRENT\n") < 0 )
+			goto err;
+		if (i->service.path.size() &&
+			fprintf(f, "%s\r\n", i->service.path.c_str()) < 0 )
+			goto err;
+	}
+	fclose(f);
+	if ( strstr(filename,"/hdd") )
+	{
+		eString tmpfile = filename;
+		tmpfile.insert( tmpfile.rfind('/')+1, 1, '$' );
+		unlink(filename);
+		rename(tmpfile.c_str(), filename);
+	}
+	changed=0;
 	return 0;
+err:
+	fclose(f);
+	eDebug("couldn't write file %s", filename);
+	return -1;
 }
 
 int ePlaylist::deleteService(std::list<ePlaylistEntry>::iterator it)

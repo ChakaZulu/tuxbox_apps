@@ -14,6 +14,7 @@ class eZapLCDMenu;
 class eZapLCDScart;
 class eZapLCDStandby;
 class eZapLCDShutdown;
+class eZapLCDSatfind;
 class eServiceReferenceDVB;
 
 class eZapLCD: public eWidget
@@ -26,6 +27,7 @@ public:
 	eZapLCDScart* lcdScart;
 	eZapLCDStandby *lcdStandby;
 	eZapLCDShutdown *lcdShutdown;
+	eZapLCDSatfind *lcdSatfind;
 	eZapLCD();
 	~eZapLCD();
 };
@@ -72,6 +74,15 @@ class eZapLCDShutdown: public eWidget
 {
 public:
 	eZapLCDShutdown(eWidget *parent);
+};
+
+class eZapLCDSatfind: public eWidget
+{
+	eLabel *snrtext, *agctext;
+	eProgress *snr, *agc;
+public:
+	void update(int snr, int agc);
+	eZapLCDSatfind(eWidget *parent);
 };
 
 #endif /* __enigma_lcd_h */

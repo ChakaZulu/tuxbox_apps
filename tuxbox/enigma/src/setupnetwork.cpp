@@ -28,7 +28,7 @@ public:
 	{
 		setText("T - Online");
 		cmove(ePoint(140,150));
-		cresize(eSize(450,240));
+		cresize(eSize(450,250));
 
 		eLabel *l = new eLabel(this);
 		l->move(ePoint(10,10));
@@ -290,12 +290,12 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	eLabel *l=new eLabel(this);
 	l->setText("IP:");
-	l->move(ePoint(20, 20));
+	l->move(ePoint(20, 10));
 	l->resize(eSize(150, fd+4));
 
 	eNumber::unpack(sip, de);
 	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	ip->move(ePoint(160, 20));
+	ip->move(ePoint(160, 10));
 	ip->resize(eSize(200, fd+10));
 	ip->setFlags(eNumber::flagDrawPoints);
 	ip->setHelpText(_("enter IP Address of the box (0..9, left, right)"));
@@ -304,12 +304,12 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	l=new eLabel(this);
 	l->setText("Netmask:");
-	l->move(ePoint(20, 60));
+	l->move(ePoint(20, 50));
 	l->resize(eSize(150, fd+4));
 
 	eNumber::unpack(snetmask, de);
 	netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	netmask->move(ePoint(160, 60));
+	netmask->move(ePoint(160, 50));
 	netmask->resize(eSize(200, fd+10));
 	netmask->setFlags(eNumber::flagDrawPoints);
 	netmask->setHelpText(_("enter netmask of your network (0..9, left, right)"));
@@ -318,12 +318,12 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	l=new eLabel(this);
 	l->setText("Type:");
-	l->move(ePoint(20, 100));
+	l->move(ePoint(20, 90));
 	l->resize(eSize(140, fd+4));
 
 	eListBoxEntryText *sel=0;
 	combo_type=new eComboBox(this, 3, l);
-	combo_type->move(ePoint(160,100));
+	combo_type->move(ePoint(160,90));
 	combo_type->resize(eSize(200, fd+10));
 	combo_type->loadDeco();
 	combo_type->setHelpText(_("press ok to change connection type"));
@@ -342,7 +342,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	}
 	CONNECT(combo_type->selchanged, eZapNetworkSetup::typeChanged);
 	tdsl = new eButton(this);
-	tdsl->move(ePoint(370,100));
+	tdsl->move(ePoint(370,90));
 	tdsl->resize(eSize(70, fd+10));
 	tdsl->setText("T-DSL");
 	tdsl->loadDeco();
@@ -353,12 +353,12 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	lNameserver=new eLabel(this);
 	lNameserver->setText("Nameserver:");
-	lNameserver->move(ePoint(20, 140));
+	lNameserver->move(ePoint(20, 130));
 	lNameserver->resize(eSize(140, fd+4));
 
 	eNumber::unpack(sdns, de);
 	dns=new eNumber(this, 4, 0, 255, 3, de, 0, lNameserver);
-	dns->move(ePoint(160, 140));
+	dns->move(ePoint(160, 130));
 	dns->resize(eSize(200, fd+10));
 	dns->setFlags(eNumber::flagDrawPoints);
 	dns->setHelpText(_("enter your domain name server (0..9, left, right)"));
@@ -368,14 +368,14 @@ eZapNetworkSetup::eZapNetworkSetup():
 #ifdef ENABLE_PPPOE
 	lLogin=new eLabel(this);
 	lLogin->setText(_("Login:"));
-	lLogin->move(ePoint(20, 140));
+	lLogin->move(ePoint(20, 130));
 	lLogin->resize(eSize(140, fd+4));
 	lLogin->hide();
 
 	char *strLogin=0;
 	eConfig::getInstance()->getKey("/elitedvb/network/login", strLogin);
 	login=new eTextInputField(this,lLogin);
-	login->move(ePoint(160, 140));
+	login->move(ePoint(160, 130));
 	login->resize(eSize(280, fd+10));
 	login->setMaxChars(100);
 	login->loadDeco();
@@ -388,12 +388,12 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	lGateway=new eLabel(this);
 	lGateway->setText("Gateway:");
-	lGateway->move(ePoint(20, 180));
+	lGateway->move(ePoint(20, 170));
 	lGateway->resize(eSize(140, fd+4));
 
 	eNumber::unpack(sgateway, de);
 	gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	gateway->move(ePoint(160, 180));
+	gateway->move(ePoint(160, 170));
 	gateway->resize(eSize(200, fd+10));
 	gateway->setFlags(eNumber::flagDrawPoints);
 	gateway->setHelpText(_("enter your gateways IP Address (0..9, left, right)"));
@@ -403,11 +403,11 @@ eZapNetworkSetup::eZapNetworkSetup():
 #ifdef ENABLE_PPPOE
 	lPassword=new eLabel(this);
 	lPassword->setText(_("Password:"));
-	lPassword->move(ePoint(20, 180));
+	lPassword->move(ePoint(20, 170));
 	lPassword->resize(eSize(150, fd+4));
 
 	password=new eTextInputField(this,lPassword);
-	password->move(ePoint(160, 180));
+	password->move(ePoint(160, 170));
 	password->resize(eSize(280, fd+10));
 	password->setMaxChars(30);
 	password->loadDeco();
@@ -418,7 +418,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	dosetup=new eCheckbox(this, sdosetup, 1);
 	dosetup->setText(_("Configure Network"));
-	dosetup->move(ePoint(100, 223));
+	dosetup->move(ePoint(100, 210));
 	dosetup->resize(eSize(fd+4+240, fd+4));
 	dosetup->setHelpText(_("enable/disable network config (ok)"));
 
@@ -426,28 +426,28 @@ eZapNetworkSetup::eZapNetworkSetup():
 	int flags = getRejectFlags();
 	rejectWWW=new eCheckbox(this, flags&1, 1);
 	rejectWWW->setText("WWW");
-	rejectWWW->move(ePoint(20,260));
+	rejectWWW->move(ePoint(20,245));
 	rejectWWW->resize(eSize(90, fd+4));
 	rejectWWW->setHelpText(_("reject incoming connections on port 80"));
 	rejectWWW->hide();
 
 	rejectTelnet=new eCheckbox(this, flags&2, 1);
 	rejectTelnet->setText("Telnet");
-	rejectTelnet->move(ePoint(130,260));
+	rejectTelnet->move(ePoint(130,245));
 	rejectTelnet->resize(eSize(90, fd+4));
 	rejectTelnet->setHelpText(_("reject incoming connections on port 23"));
 	rejectTelnet->hide();
 
 	rejectSamba=new eCheckbox(this, flags&4, 1);
 	rejectSamba->setText("Samba");
-	rejectSamba->move(ePoint(240,260));
+	rejectSamba->move(ePoint(240,245));
 	rejectSamba->resize(eSize(100, fd+4));
 	rejectSamba->setHelpText(_("reject incoming connections on ports 137,138,139"));
 	rejectSamba->hide();
 
 	rejectFTP=new eCheckbox(this, flags&8, 1);
 	rejectFTP->setText("FTP");
-	rejectFTP->move(ePoint(360,260));
+	rejectFTP->move(ePoint(360,245));
 	rejectFTP->resize(eSize(70, fd+4));
 	rejectFTP->setHelpText(_("reject incoming connections on ports 21"));
 	rejectFTP->hide();
@@ -457,7 +457,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ok->setText(_("save"));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 310));
+	ok->move(ePoint(20, 295));
 	ok->resize(eSize(220, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
@@ -465,8 +465,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
 
 	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-30 ) );
-	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->move( ePoint(0, clientrect.height()-50 ) );
+	statusbar->resize( eSize( clientrect.width(), 50) );
 	statusbar->loadDeco();
 	setHelpID(82);
 

@@ -11,7 +11,7 @@ eStatusBar::eStatusBar( eWidget* parent, const char *deco)
 	setFont( eSkin::getActive()->queryFont("eStatusBar") );
 	setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
 	setBackgroundColor ( eSkin::getActive()->queryColor("eStatusBar.background") );
-	eLabel::setFlags( RS_FADE );
+	eLabel::setFlags( RS_WRAP );
 	initialize();
 }
 

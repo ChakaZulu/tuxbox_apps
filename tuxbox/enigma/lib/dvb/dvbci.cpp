@@ -132,7 +132,7 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::mmi_menuansw:
 //		eDebug("[DVBCI] got mmi_menu_answ message..");
-		mmi_menuansw((int)message.pid);
+		mmi_menuansw((int)message.sid);
 		break;
 	case eDVBCIMessage::exit:
 //		eDebug("[DVBCI] got exit message..");
@@ -144,15 +144,15 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::PMTflush:
 //		eDebug("[DVBCI] got PMTflush message..");
-		PMTflush(message.pid);
+		PMTflush(message.sid);
 		break;
 	case eDVBCIMessage::PMTaddPID:
 //		eDebug("[DVBCI] got PMTaddPID message..");
-		PMTaddPID(message.pid,message.streamtype);
+		PMTaddPID(message.sid,message.pid,message.streamtype);
 		break;
 	case eDVBCIMessage::PMTaddDescriptor:
 //		eDebug("[DVBCI] got PMTaddDescriptor message..");
-		PMTaddDescriptor(message.data);
+		PMTaddDescriptor(message.sid, message.data);
 		break;
 	case eDVBCIMessage::enable_ts:
 	{
@@ -219,43 +219,50 @@ void eDVBCI::mmi_menuansw(int val)
 	sendTPDU(0xA0,9,1,buffer);
 }
 
-void eDVBCI::PMTflush(int program)
+void eDVBCI::PMTflush(int sid)
 {
-	//eDebug("got new PMT for Program:%x",program);
-	for(int i=1; i<tempPMTentrys; ++i)
+	for (std::map<int, std::list<tempPMT_t> >::iterator it( services.begin() );
+		it != services.end(); )
 	{
-		if(tempPMT[i].type==2)
+		if ( it->first == sid || sid == -1 )
 		{
-			delete [] tempPMT[i].descriptor;
-			tempPMT[i].type=0;
+			for (std::list<tempPMT_t>::iterator i(it->second.begin());
+				i != it->second.end(); )
+			{
+				if ( i->type == 2 )
+					delete [] i->descriptor;
+				i = it->second.erase(i);
+			}
+			services.erase(it);
+			it = services.begin();
 		}
+		else
+			++it;
 	}
-
-	tempPMT[0].type=0;
-	tempPMT[0].pid=program;	
-	tempPMTentrys=1;
 }
 
-void eDVBCI::PMTaddPID(int pid, int streamtype)
+void eDVBCI::PMTaddPID(int sid, int pid, int streamtype)
 {
 	//eDebug("got new PID:%x",pid);
 
-	tempPMT[tempPMTentrys].type=1;
-	tempPMT[tempPMTentrys].streamtype=streamtype;
-	tempPMT[tempPMTentrys++].pid=pid;
+	tempPMT_t entry;
+	entry.type = 1;
+	entry.streamtype = streamtype;
+	entry.pid=pid;
+	services[sid].push_back(entry);
 }
 
-void eDVBCI::PMTaddDescriptor(unsigned char *data)
+void eDVBCI::PMTaddDescriptor(int sid, unsigned char *data)
 {
 	//eDebug("got new CA-Descr. for CAID:%.2x%.2x",data[2],data[3]);
-
-	tempPMT[tempPMTentrys].type=2;
-	tempPMT[tempPMTentrys++].descriptor=data;
+	tempPMT_t entry;
+	entry.type = 2;
+	entry.descriptor = data;
+	services[sid].push_back(entry);
 }
 
 void eDVBCI::newService()
 {
-	//startTimer(true);
 	//eDebug("got new %d PMT entrys",tempPMTentrys);
 	ci_progress(appName);	
 	unsigned char capmt[2048];
@@ -269,82 +276,95 @@ void eDVBCI::newService()
 	{
 		eDebug("NO SESSION ID for CA-MANAGER");
 		return;
-	}	
+	}
 	session=i;
 
 	memcpy(capmt,"\x90\x2\x0\x3\x9f\x80\x32",7); //session nr.3 & capmt-tag
-	capmt[3]=i;			//session_id
-	capmt[7]=0x81;
 
-	capmt[9]=0x03;	//ca_pmt_list_management
-	capmt[10]=(unsigned char)((tempPMT[0].pid>>8) & 0xff);			//prg-nr
-	capmt[11]=(unsigned char)(tempPMT[0].pid & 0xff);					//prg-nr
-	capmt[12]=0x00;	//reserved - version - current/next
-	capmt[13]=0x00;	//reserved - prg-info len
-	capmt[14]=0x00;	//prg-info len
-
-	int lenpos=13;
-	int len=0;
-	int first=1;
-	int wp=15;
-
-	for(int i=1;i<tempPMTentrys;i++)
+	unsigned int cnt=0;
+	for (std::map<int, std::list<tempPMT_t> >::iterator it = services.begin();
+		it != services.end(); ++it )
 	{
-		switch(tempPMT[i].type)
+		cnt++;
+		capmt[3]=i;			//session_id
+		capmt[7]=0x81;
+
+		capmt[9] = services.size() > 1 ?
+				cnt == 1 ? 0x01 :  // first
+				cnt < services.size() ? 0x00 : // more
+				0x02 : // last
+				0x03; // only
+
+//		eDebug("ca_pmt_list_management = %d", capmt[9]);
+
+		capmt[10]=(unsigned char)((it->first>>8) & 0xff);			//prg-nr
+		capmt[11]=(unsigned char)(it->first & 0xff);					//prg-nr
+
+		capmt[12]=0x00;	//reserved - version - current/next
+		capmt[13]=0x00;	//reserved - prg-info len
+		capmt[14]=0x00;	//prg-info len
+
+		int lenpos=13;
+		int len=0;
+		int first=1;
+		int wp=15;
+
+		for( std::list<tempPMT_t>::iterator i = it->second.begin();
+			i != it->second.end(); ++i )
 		{
-			case 1:				//PID
-				capmt[lenpos]=((len & 0xf00)>>8);
-				capmt[lenpos+1]=(len & 0xff);
-				len=0;
-				lenpos=wp+3;
-				first=1;
-				capmt[wp++]=(tempPMT[i].streamtype & 0xffff);
-				capmt[wp++]=((tempPMT[i].pid >> 8) & 0xff);
-				capmt[wp++]=(tempPMT[i].pid & 0xff);
-				wp+=2;
-				break;
-			case 2:				//Descriptor
-				unsigned int x=0;
-				{
+			switch(i->type)
+			{
+				case 1:				//PID
+					capmt[lenpos]=((len & 0xf00)>>8);
+					capmt[lenpos+1]=(len & 0xff);
+					len=0;
+					lenpos=wp+3;
+					first=1;
+					capmt[wp++]=(i->streamtype & 0xffff);
+					capmt[wp++]=((i->pid >> 8) & 0xff);
+					capmt[wp++]=(i->pid & 0xff);
+					wp+=2;
+					break;
+				case 2:				//Descriptor
+					unsigned int x=0;
 					for(x=0;x<caidcount;x++)
-						if(caids[x]==((tempPMT[i].descriptor[2]<<8)|tempPMT[i].descriptor[3]))
-						//if(caids[x]==(unsigned short)tempPMT[i].descriptor[3])
+						if(caids[x]==(i->descriptor[2]<<8)|(i->descriptor[3]))
 							break;
-				}
 
-				if(x!=caidcount)
-				{
-					if(first)
+					if(x!=caidcount)
 					{
-						first=0;
-						capmt[wp++]=0x01;				//ca_pmt_command_id
-						len++;
+						if(first)
+						{
+							first=0;
+							capmt[wp++]=0x01;				//ca_pmt_command_id
+							len++;
+						}
+
+						memcpy(capmt+wp,i->descriptor,i->descriptor[1]+2);
+						wp+=i->descriptor[1]+2;
+						len+=i->descriptor[1]+2;
 					}
-
-					memcpy(capmt+wp,tempPMT[i].descriptor,tempPMT[i].descriptor[1]+2);
-					wp+=tempPMT[i].descriptor[1]+2;
-					len+=tempPMT[i].descriptor[1]+2;
-				}
-				break;
+					break;
+			}
 		}
-	}			
 
-	//capmt[8]=wp-8;
+		//capmt[8]=wp-8;
 
-	capmt[lenpos]=((len & 0xf00)>>8);
-	capmt[lenpos+1]=(len & 0xff);
+		capmt[lenpos]=((len & 0xf00)>>8);
+		capmt[lenpos+1]=(len & 0xff);
 
-	//sendTPDU(0xA0,wp,1,capmt);
+		//sendTPDU(0xA0,wp,1,capmt);
 
-	create_sessionobject(capmt+4,capmt+9,wp-9,session);
+		create_sessionobject(capmt+4,capmt+9,wp-9,session);
 
 #if 0
-	printf("CAPMT-LEN:%d\n",wp);
-	
-	for(int i=9;i<wp;i++)
-		printf("%02x ",capmt[i]);
-	printf("\n");	
-#endif	
+		printf("CAPMT-LEN:%d\n",wp);
+
+		for(int i=9;i<wp;i++)
+			printf("%02x ",capmt[i]);
+		printf("\n");
+#endif
+	}
 }
 
 void eDVBCI::create_sessionobject(unsigned char *tag,unsigned char *data,unsigned int len,int session)

@@ -467,17 +467,16 @@ eRotorManual::eRotorManual(eLNB *lnb)
 	Mode->setCurrent(0,true);
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	eTransponder *tp=0;
   
 	if (sapi && sapi->transponder)
-		tp = sapi->transponder;
+		transponder = sapi->transponder;
 
 	eListBoxEntryText *sel=0;
 
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		if ( it->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 )
 			for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-				if ( tp && s->getOrbitalPosition() == tp->satellite.orbital_position )
+				if ( transponder && s->getOrbitalPosition() == transponder->satellite.orbital_position )
 					sel = new eListBoxEntryText(*Sat, s->getDescription().c_str(), (void*) *s);
 				else
 					new eListBoxEntryText(*Sat, s->getDescription().c_str(), (void*) *s);
@@ -618,12 +617,6 @@ void eRotorManual::satChanged( eListBoxEntryText *sat)
 	Transponder->clear();
 	if (sat && sat->getKey())
 	{
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-		eTransponder *tp=0;
-
-		if (sapi && sapi->transponder)
-			tp = sapi->transponder;
-
 		eListBoxEntryText *sel=0;
 
 		eSatellite *Sat = (eSatellite*) (sat->getKey());
@@ -633,7 +626,7 @@ void eRotorManual::satChanged( eListBoxEntryText *sat)
 			if ( i->orbital_position == Sat->getOrbitalPosition() )
 			{
 				for (std::list<eTransponder>::const_iterator it( i->possibleTransponders.begin() ); it != i->possibleTransponders.end(); it++)
-					if ( tp && *tp == *it )
+					if ( transponder && *transponder == *it )
 						sel = new eListBoxEntryText( *Transponder, eString().sprintf("%d / %d / %c", it->satellite.frequency/1000, it->satellite.symbol_rate/1000, it->satellite.polarisation?'V':'H' ), (void*)&(*it) );
 					else
 						new eListBoxEntryText( *Transponder, eString().sprintf("%d / %d / %c", it->satellite.frequency/1000, it->satellite.symbol_rate/1000, it->satellite.polarisation?'V':'H' ), (void*)&(*it) );
@@ -654,8 +647,11 @@ void eRotorManual::tpChanged( eListBoxEntryText *tp )
 {
 	if (tp && tp->getKey() )
 	{
-		transponder = (eTransponder*)(tp->getKey());
-		transponder->tune();
+		if ( !(*transponder == *((eTransponder*)tp->getKey())) )
+		{
+			transponder = (eTransponder*)(tp->getKey());
+			transponder->tune();
+		}
 	}
 	else
 		transponder = 0;
@@ -921,6 +917,7 @@ void eStoreWindow::onStorePressed()
 				show();
 				close(StorageLoc->getNumber());
 			break;
+			default:
 			case eMessageBox::btNo:
 				mb.hide();
 				show();

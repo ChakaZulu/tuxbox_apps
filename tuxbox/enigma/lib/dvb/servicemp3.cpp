@@ -308,8 +308,6 @@ int eMP3Decoder::getOutputDelay(int i)
 	(void)i;
 	if (::ioctl(dspfd[type==codecMPG], SNDCTL_DSP_GETODELAY, &delay) < 0)
 		eDebug("SNDCTL_DSP_GETODELAY failed (%m)");
-	else
-		eDebug("%d", delay);
 	return delay;
 }
 
@@ -776,6 +774,8 @@ void eServiceHandlerMP3::gotMessage(const eMP3DecoderMessage &message)
 
 eService *eServiceHandlerMP3::createService(const eServiceReference &service)
 {
+	if ( service.descr )
+		return new eServiceMP3(service.path.c_str(), service.descr.c_str() );
 	return new eServiceMP3(service.path.c_str());
 }
 
@@ -1024,24 +1024,38 @@ eServiceID3::eServiceID3( const eServiceID3 &ref )
 {
 }
 
-eServiceMP3::eServiceMP3(const char *filename)
+eServiceMP3::eServiceMP3(const char *filename, const char *descr)
 : eService(""), id3tags(filename)
 {
 //	eDebug("*************** servicemp3.cpp FILENAME: %s", filename);
+	if (descr)
+	{
+		if (!isUTF8(descr))
+			service_name=convertLatin1UTF8(descr);
+		else
+			service_name=descr;
+	}
+
 	if (!strncmp(filename, "http://", 7))
 	{
-		if (!isUTF8(filename))
-			service_name=convertLatin1UTF8(filename);
-		else
-			service_name=filename;
+		if (!descr)
+		{
+			if (!isUTF8(filename))
+				service_name=convertLatin1UTF8(filename);
+			else
+				service_name=filename;
+		}
 		return;
 	}
-	
-	eString f=filename;
-	eString l=f.mid(f.rfind('/')+1);
-	if (!isUTF8(l))
-		l=convertLatin1UTF8(l);
-	service_name=l;
+
+	if ( !descr )
+	{
+		eString f=filename;
+		eString l=f.mid(f.rfind('/')+1);
+		if (!isUTF8(l))
+			l=convertLatin1UTF8(l);
+		service_name=l;
+	}
 
 	id3 = &id3tags;
 }

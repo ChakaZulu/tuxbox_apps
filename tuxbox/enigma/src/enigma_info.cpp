@@ -17,13 +17,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.23 2003/09/07 00:03:56 ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.24 2003/10/26 00:41:17 ghostrider Exp $
  */
 
 #include <enigma_info.h>
 #include <unistd.h>
 
-#include <satfind.h>
 #include <streaminfo.h>
 #include <showbnversion.h>
 
@@ -38,9 +37,9 @@
 #include <lib/system/info.h>
 
 eZapInfo::eZapInfo()
-	:eListBoxWindow<eListBoxEntryMenu>(_("Infos"), 8, 320)
+	:eListBoxWindow<eListBoxEntryMenu>(_("Infos"), 7, 320)
 {
-	move(ePoint(150, 136));
+	move(ePoint(150, 166));
 	CONNECT((new eListBoxEntryMenu(&list, _("Streaminfo"), _("open the Streaminfo")))->selected, eZapInfo::sel_streaminfo);
 	switch ( eSystemInfo::getInstance()->getHwType() )
 	{
@@ -50,33 +49,11 @@ eZapInfo::eZapInfo()
 			CONNECT((new eListBoxEntryMenu(&list, _("Show BN version"),_("show the Current Version of the Betanova FW")))->selected, eZapInfo::sel_bnversion);
 			break;
 	}
-	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
-		CONNECT((new eListBoxEntryMenu(&list, _("Satfind"), _("shows the satfinder")))->selected, eZapInfo::sel_satfind);	
 	CONNECT((new eListBoxEntryMenu(&list, _("About..."), _("open the about dialog")))->selected, eZapInfo::sel_about);
 }
 
 eZapInfo::~eZapInfo()
 {
-}
-
-void eZapInfo::sel_satfind()
-{
-	int pid;
-	eSatfind s(eFrontend::getInstance());
-	hide();
-
-	pid=fork();
-	if( pid==0 )
-	{   // child process
-		system("satfind");
-		_exit(0);
-	}
-	s.show();
-	s.exec();
-	s.hide();
-	if(pid!=-1)
-		system("killall -9 satfind");
-	show();
 }
 
 void eZapInfo::sel_streaminfo()

@@ -130,3 +130,12 @@
 200309281217 6 45 Fix errors in recorded ts files
 200310021730 2 5 Fix recording services with higher bitrates (MTV2... CT1 or other)
 200310031400 5 * Fix reboot after Flash update...
+200310040230 3 5 No more corrupt recordings.epl when no space left on the hdd
+200310040230 5 5 Small timer fix when no more hdd space is left
+200310040230 5 5 Short [GO UP] entry fix in move mode
+200310091740 5 45 Fix no more updating infobar
+200310112200 3 45 No more lost packets in recordings
+200310131345 5 * No more reboot, when try to switch via service number to a locked service
+200310140017 5 * Add ability to play TS files without enigma private descriptor and outside of the recordings.epl but PAT and PMT must exist
+200310141530 5 * Don't hide infobar in radio mode
+200310141500 5 * Add ability to rename and delete files outside of the recordings.epl (recorded movies)

@@ -1311,7 +1311,7 @@ void eZapMain::reloadPaths(int reset)
 int eZapMain::doHideInfobar()
 {
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
-	if ( ((mode != modeRadio) && ref.type == eServiceReference::idDVB)
+	if ( (ref.type == eServiceReference::idDVB)
 #ifndef DISABLE_FILE
 		||
 			(ref.type == eServiceReference::idUser &&
@@ -5043,7 +5043,7 @@ void eZapMain::setMode(int newmode, int user)
 		else if ( mode == modeFile && mode != newmode && newmode != -1 )
 			eEPGCache::getInstance()->restartEPG();
 #endif
-		eDebug("setting mode to %d", newmode);
+//		eDebug("setting mode to %d", newmode);
 
 		// save oldMode
 		if (mode != -1)
@@ -5404,7 +5404,7 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 	{
 		if (ref)
 		{
-			if ( prev->isSelectable() )
+			if ( prev && prev->isSelectable() )
 				new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			if ( ref.isLocked() )
 				new eListBoxEntryText(&list, _("unlock"), (void*)11);
@@ -5629,7 +5629,10 @@ void eRecTimeInput::setPressed()
 TextEditWindow::TextEditWindow( const char *InputFieldDescr, const char* useableChars )
 	:eWindow(0)
 {
-	input = new eTextInputField(this);
+	eTextInputFieldHelpWidget *image=new eTextInputFieldHelpWidget(this);
+	image->setName("image");
+
+	input = new eTextInputField(this,0,image);
 	input->setName("inputfield");
 	input->setMaxChars(100);
 	input->setHelpText(_("press ok to start edit mode"));
@@ -5640,9 +5643,6 @@ TextEditWindow::TextEditWindow( const char *InputFieldDescr, const char* useable
 	descr->setName("descr");
 	descr->setText(InputFieldDescr);
 
-	image = new eLabel(this);
-	image->setName("image");
-
 	save = new eButton(this);
 	save->setName("save");
 	CONNECT( save->selected, TextEditWindow::accept );
@@ -5651,7 +5651,7 @@ TextEditWindow::TextEditWindow( const char *InputFieldDescr, const char* useable
 	n->setName("statusbar");
 
 	if (eSkin::getActive()->build(this, "TextEditWindow"))
-		eWarning("TextEditWindo widget build failed!");
+		eWarning("TextEditWindow build failed!");
 }
 
 UserBouquetSelector::UserBouquetSelector( std::list<ePlaylistEntry>&list )

@@ -13,6 +13,7 @@
 	<fonts>
 		<font file="md_khmurabi_10.ttf" name="Replacement" scale="78" replacement="yes" />
 		<font file="unmrs.pfa" name="Nimbus" />
+		<font file="pakenham.ttf" name="lcd" />
 	</fonts>
 
 	<values>
@@ -74,6 +75,10 @@
 		<map name="epg.time" font="Nimbus" size="16" />
 		<map name="epg.title" font="Nimbus" size="18" />
 		<map name="epg.description" font="Nimbus" size="16" />
+
+		<map name="textinputfield.helpwidget.big" font="lcd" size="50" />
+		<map name="textinputfield.helpwidget.bigger" font="lcd" size="90" />
+		<map name="textinputfield.helpwidget.normal" font="Replacement" size="30" />
 	</fontalias>
 
 	<images basepath="" target="fb">
@@ -259,6 +264,7 @@
 		<map name="epg.entry.background.selected" color="std_gray+4" />
 		<map name="epg.entry.background" color="volume3" />
 		<map name="indexmark" color="std_red" />
+		<map name="textinput.helpwindow.border" color="std_gray+4" />
 	</colorscheme>
 
 	<object name="eZapMainMenu">
@@ -324,6 +330,17 @@
 		<eZapLCDScart position="0:0" size="120:64">
 			<eLabel position="0:0" size="e:e" pixmap="lcd_shutdown" />	
 		</eZapLCDScart>
+	</object>
+
+	<object name="enigma_lcd_satfind">
+		<eZapLCDSatfind position="0:0" size="120:64">
+			<eLabel position="0:0" size="60:18" font="lcd.menu.title" text="SNR:" />
+			<eLabel position="70:0" size="e:18" font="lcd.menu.title" name="snrtext" />
+			<eProgress position="0:20" size="e:11" name="snr" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
+			<eLabel position="0:32" size="60:18" font="lcd.menu.title" text="AGC:" />
+			<eLabel position="70:32" size="e:18" font="lcd.menu.title" name="agctext" />
+			<eProgress position="0:52" size="e:11" name="agc" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
+		</eZapLCDSatfind>
 	</object>
 
 	<object name="eDownloadWindow">
@@ -401,22 +418,27 @@
 
 	<object name="eSatfind" >
 		<eSatfind cposition="120:120" csize="500:380" text="Satfind" >
-			<eLabel text="SNR:" position="10:10" size="190:50" font="eSatfind" vcenter="on" />
-			<eLabel name="snr_num" position="210:10" size="150:50" font="eSatfind" vcenter="on" />
-			<eProgress name="snr" position="10:60" size="e-10:40" />
+			<eLabel text="SNR:" position="10:0" size="190:50" font="eSatfind" vcenter="on" />
+			<eLabel name="snr_num" position="210:0" size="150:50" font="eSatfind" vcenter="on" />
+			<eCheckbox text="LOCK" name="lock" position="e-125:0" size="125:50" font="eSatfind" vcenter="on" />
+			<eProgress name="snr" position="10:50" size="e-10:40" />
 
-			<eLabel text="AGC:" position="10:110" size="190:50" font="eSatfind" vcenter="on" />
-			<eLabel name="agc_num" position="210:110" size="150:50" font="eSatfind" vcenter="on" />
-			<eProgress name="agc" position="10:160" size="e-10:40" />
+			<eLabel text="AGC:" position="10:90" size="190:50" font="eSatfind" vcenter="on" />
+			<eLabel name="agc_num" position="210:90" size="150:50" font="eSatfind" vcenter="on" />
+			<eCheckbox text="SYNC" name="sync" position="e-125:90" size="125:50" font="eSatfind" vcenter="on"  />
+			<eProgress name="agc" position="10:140" size="e-10:40" />
 
-			<eLabel text="BER" position="10:210" size="190:50" font="eSatfind" vcenter="on" />
-			<eLabel name="ber_num" position="210:210" size="150:50" font="eSatfind" vcenter="on" />
-			<eProgress name="ber" position="10:260" size="e-10:40" />
+			<eLabel text="BER" position="10:180" size="190:50" font="eSatfind" vcenter="on" />
+			<eLabel name="ber_num" position="210:180" size="150:50" font="eSatfind" vcenter="on" />
+			<eProgress name="ber" position="10:230" size="e-10:40" />
 
-			<eButton name="ok" position="e-90:e-50" size="80:40" text="ok" vcenter="on" loadDeco="" shortcut="green" />
-			<eCheckbox text="LOCK" name="lock" position="10:e-50" size="140:40" font="eSatfind" vcenter="on" />
-			<eCheckbox text="SYNC" name="sync" position="160:e-50" size="140:40" font="eSatfind" vcenter="on"  />
-		</eSatfind>
+			<eLabel text="Satellite:" position="10:285" size="160:35" vcenter="on" />
+			<eComboBox name="sat" position="180:285" size="e-10:35" helptext="choose the Satellite you wish to find" loadDeco="" />
+
+			<eLabel text="Transponder:" position="10:330" size="160:35" vcenter="on" />
+			<eComboBox name="transponder" position="180:330" size="e-10:35" helptext="choose the Transponder you wish to find" loadDeco="" />
+
+			</eSatfind>
 	</object>
 	
 	<object name="RotorConfig">
@@ -690,7 +712,7 @@
 	</object>
 
 	<object name="eTimerEditView">
-		<eTimerEditView cposition="70:100" csize="590:310" text="Timer Edit">
+		<eTimerEditView cposition="70:100" csize="590:330" text="Timer Edit">
 			<eTextInputField name="event_name" position="10:10" size="e-10:40" loadDeco="eNumber" helptext="press ok to change event name manually" />
 			<eLabel name="lBegin" text="Starttime" position="405:102" size="103:30" />
 			<eLabel name="lEnd" text="Endtime" position="405:148" size="103:30" />
@@ -714,7 +736,7 @@
 			<eButton name="select_service" position="270:190" size="e-10:35" helptext="to change service press ok" loadDeco="" />
 			<eButton name="apply" text="apply" position="10:235" size="250:35" shortcut="green" helptext="save data and close window" loadDeco="" />
 			<eButton name="scanEPG" text="scan EPG" position="270:235" size="e-10:35" shortcut="blue" helptext="search event name for this beg-/end time in epg" loadDeco="" />
-			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</eTimerEditView>
 	</object>
 
@@ -809,13 +831,42 @@
 		</eUpgrade>
 	</object>
 
+	<object name="eTextInputFieldHelpWidget">
+		<eTextInputFieldHelpWidget size="430:180" >
+			<eLabel text="1" position="10:2" size="25:42" font="textinputfield.helpwidget.big" vcenter="on" />
+			<eLabel name="one" position="30:2" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="2" position="155:2" size="25:42" font="textinputfield.helpwidget.big" vcenter="on"/>
+			<eLabel name="two" position="175:2" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="3" position="295:2" size="25:42" font="textinputfield.helpwidget.big" vcenter="on"/>
+			<eLabel name="three" position="315:2" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="4" position="10:47" size="25:42" font="textinputfield.helpwidget.big" vcenter="on"/>
+			<eLabel name="four" position="30:47" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="5" position="155:47" size="25:42" font="textinputfield.helpwidget.big" vcenter="on"/>
+			<eLabel name="five" position="175:47" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="6" position="295:47" size="25:42" font="textinputfield.helpwidget.big" vcenter="on"/>
+			<eLabel name="six" position="315:47" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="7" position="10:91" size="25:42" font="textinputfield.helpwidget.big" vcenter="on"/>
+			<eLabel name="seven" position="30:91" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="8" position="155:91" size="25:42" font="textinputfield.helpwidget.big" vcenter="on"/>
+			<eLabel name="eight" position="175:91" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="9" position="295:91" size="25:42" font="textinputfield.helpwidget.big" vcenter="on"/>
+			<eLabel name="nine" position="315:91" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="&lt;" position="10:135" size="25:42" font="textinputfield.helpwidget.bigger" vcenter="on"/>
+			<eLabel name="special_one" position="30:135" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="0" position="155:135" size="100:42" font="textinputfield.helpwidget.big" vcenter="on"/>
+			<eLabel name="zero" position="175:135" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="&gt;" position="295:135" size="25:42" font="textinputfield.helpwidget.bigger" vcenter="on"/>
+			<eLabel name="special_two" position="315:135" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+		</eTextInputFieldHelpWidget>
+	</object>
+
 	<object name="TextEditWindow">
-		<TextEditWindow cposition="120:100" csize="450:380" >
+		<TextEditWindow cposition="120:100" csize="450:400" >
 			<eLabel name="descr" position="10:10" size="e-10:30" />
 			<eTextInputField name="inputfield" position="10:50" size="e-10:40" loadDeco="eNumber" helptext="press ok to enter the name" />
-			<eLabel name="image" pixmap="textinput_white" position="10:105" size="367:178" alphatest="on" />
-			<eButton name="save" text="save" position="10:e-80" size="220:40" loadDeco="" helptext="save changes and close window" shortcut="green" />
-			<eStatusbar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+			<eTextInputFieldHelpWidget name="image" pixmap="textinput_white" position="10:104" size="e-10:180" />
+			<eButton name="save" text="save" position="10:e-100" size="220:40" loadDeco="" helptext="save changes and close window" shortcut="green" />
+			<eStatusbar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</TextEditWindow>
 	</object>
 

@@ -23,8 +23,8 @@ ENgrabSetup::ENgrabSetup():
 	eWindow(0)
 {
 	setText(_("Ngrab Server"));
-	cmove(ePoint(170, 176));
-	cresize(eSize(390, 290));
+	cmove(ePoint(170, 146));
+	cresize(eSize(390, 310));
 
 	struct in_addr sinet_address;
 	int nsrvport;
@@ -104,8 +104,8 @@ ENgrabSetup::ENgrabSetup():
 	CONNECT(ok->selected, ENgrabSetup::okPressed);
 
 	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-30 ) );
-	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->move( ePoint(0, clientrect.height()-50 ) );
+	statusbar->resize( eSize( clientrect.width(), 50) );
 	statusbar->loadDeco();
 	
 	setHelpID(91);

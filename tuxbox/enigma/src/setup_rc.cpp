@@ -38,7 +38,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 {
 	setText(_("Remotecontrol Setup"));
 	cmove(ePoint(140, 136));
-	cresize(eSize(470, 345));
+	cresize(eSize(470, 335));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -97,7 +97,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 		rcStyle->setCurrent( current );
 
 	lNextCharTimeout = new eLabel(this);
-	lNextCharTimeout->move(ePoint(20,220));
+	lNextCharTimeout->move(ePoint(20,185));
 	lNextCharTimeout->resize(eSize(300,35));
 	lNextCharTimeout->setText(_("Next Char Timeout:"));
 
@@ -105,7 +105,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	if (eConfig::getInstance()->getKey("/ezap/rc/TextInputField/nextCharTimeout", t) )
 		t=0;
 	NextCharTimeout = new eNumber(this,1,0,3999,4,0,0,lNextCharTimeout);
-	NextCharTimeout->move(ePoint(315,220));
+	NextCharTimeout->move(ePoint(335,180));
 	NextCharTimeout->resize(eSize(65,35));
 	NextCharTimeout->loadDeco();
 	NextCharTimeout->setHelpText(_("Cursor to next char timeout(msek) in textinputfields)"));
@@ -116,15 +116,15 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 	ok->setText(_("save"));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, clientrect.height()-80));
+	ok->move(ePoint(20, clientrect.height()-100));
 	ok->resize(eSize(220, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eZapRCSetup::okPressed);
 
 	statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-30 ) );
-	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->move( ePoint(0, clientrect.height()-50 ) );
+	statusbar->resize( eSize( clientrect.width(), 50) );
 	statusbar->loadDeco();
 
 	srdelay->setValue(rdelay);

@@ -3,6 +3,7 @@
 #ifndef __lib_apps_enigma_setup_harddisk_h
 #define __lib_apps_enigma_setup_harddisk_h
 
+#include <lib/dvb/edvb.h>
 #include <lib/gui/listbox.h>
 #include <lib/base/console.h>
 
@@ -26,6 +27,7 @@ class eHarddiskMenu: public eWindow
 	eComboBox *fs;
 	eStatusBar *sbar;
 	int dev;
+	bool restartNet;
 	int numpart;
 	int visible;
 	void s_format();
@@ -34,6 +36,11 @@ class eHarddiskMenu: public eWindow
 	void readStatus();
 public:
 	eHarddiskMenu(int dev);
+	~eHarddiskMenu()
+	{
+		if ( restartNet )
+			eDVB::getInstance()->configureNetwork();
+	}
 };
 
 class ePartitionCheck: public eWindow

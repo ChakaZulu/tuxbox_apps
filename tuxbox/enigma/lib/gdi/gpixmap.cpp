@@ -88,14 +88,12 @@ void gPixmap::fill(const eRect &area, const gColor &color)
 
 void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip, int flag)
 {
-	
 	eRect area=eRect(pos, src.getSize());
-	if (!clip.isNull())
-		area&=clip;
+	area&=clip;
 	area&=eRect(ePoint(0, 0), getSize());
 	if ((area.width()<0) || (area.height()<0))
 		return;
-	
+
 	eRect srcarea=area;
 	srcarea.moveBy(-pos.x(), -pos.y());
 

@@ -120,8 +120,6 @@ eSatEditDialog::eSatEditDialog( tpPacket *tp )
 	sbar=new eStatusBar(this);
 	sbar->move( ePoint(0, clientrect.height()-50) );
 	sbar->resize( eSize( clientrect.width(), 50) );
-	sbar->removeFlags(RS_FADE);
-	sbar->setFlags(RS_WRAP);
 	sbar->loadDeco();
 }
 

@@ -33,7 +33,7 @@ public:
 	int icompare(const eString& s);
 };
 
-eString convertDVBUTF8(unsigned char *data, int len, int table=5);
+eString convertDVBUTF8(const unsigned char *data, int len, int table=5);
 eString convertUTF8DVB(const eString &string);  // with default ISO8859-5
 eString convertLatin1UTF8(const eString &string);
 int isUTF8(const eString &string);

@@ -1,38 +1,182 @@
 #include <lib/base/estring.h>
 #include <lib/gui/textinput.h>
+#include <lib/gui/actions.h>
 #include <lib/gui/guiactions.h>
 #include <lib/gui/numberactions.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/ewindow.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 #include <lib/gdi/font.h>
+#include <enigma_main.h>
 
-eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, const char *deco )
+struct texteditActions
+{
+	eActionMap map;
+	eAction capslock, swapnum, insertchar, deletechar;
+	texteditActions():
+		map("textedit", "enigma global"),
+		capslock(map, "capslock", _("enable capslock"), eAction::prioDialog),
+		swapnum(map, "swapnum", _("swap number before/after characters"), eAction::prioDialog),
+		insertchar(map, "insertchar", _("insert blank at cursor position"), eAction::prioDialog),
+		deletechar(map, "deletechar", _("remove the character at the cursor position"), eAction::prioDialog)
+	{
+	}
+};
+
+eAutoInitP0<texteditActions> i_texteditActions(eAutoInitNumbers::actions, "textedit field actions");
+
+std::map< eString, std::vector<std::pair< eString,eString > > > eTextInputField::keymappings;
+
+eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFieldHelpWidget *hlp, const char *deco )
 	:eButton( parent, descr, 1, deco), maxChars(0), lastKey(-1), editMode(false),
-	editHelpText(_("press ok to leave edit mode, yellow=capslock")), nextCharTimer(eApp),
-	useableChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-//						 " +-.,:?!\"';_*/()<=>%#@&"),
-             "–—“”‘’÷◊ÿŸ⁄€‹›ﬁﬂ‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔ∞±≤≥¥µ∂∑∏π∫ªºΩæø¿¡¬√ƒ≈∆«»… ÀÃÕŒœ"
-						 " +-.,:?!\"';_*/()<=>%#@&"), capslock(0), editLabel(0)
+	editHelpText(_("press ok to leave edit mode\nyellow=capslock, blue=swap numbers")), nextCharTimer(eApp),
+	useableChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ˆ¸"
+	"–—“”‘’÷◊ÿŸ⁄€‹›ﬁﬂ‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔ∞±≤≥¥µ∂∑∏π∫ªºΩæø¿¡¬√ƒ≈∆«»… ÀÃÕŒœ"
+	" +-.,:?!\"';_*/()<=>%#@&"), capslock(false), swapNum(false), editLabel(0), helpwidget(hlp)
 {
 	if ( eConfig::getInstance()->getKey("/ezap/rc/TextInputField/nextCharTimeout", nextCharTimeout ) )
 		nextCharTimeout=0;
 	CONNECT( nextCharTimer.timeout, eTextInputField::nextChar );
 	addActionMap(&i_numberActions->map);
+	addActionMap(&i_texteditActions->map);
 	flags=0;
 	align=eTextPara::dirLeft;
+	updateHelpWidget();
+}
+
+void eTextInputField::loadKeyMappings()
+{
+	char *filename=DATADIR "/enigma/resources/keymappings.xml";
+	FILE *in=fopen(filename, "rt");
+	if (!in)
+	{
+		eDebug("cannot open %s", filename);
+		return;
+	}
+
+	XMLTreeParser *parser=new XMLTreeParser("ISO-8859-1");
+	char buf[2048];
+
+	int done;
+	do
+	{
+		unsigned int len=fread(buf, 1, sizeof(buf), in);
+		done=len<sizeof(buf);
+		if (!parser->Parse(buf, len, done))
+		{
+			eFatal("parse error: %s at line %d",
+				parser->ErrorString(parser->GetErrorCode()),
+				parser->GetCurrentLineNumber());
+			delete parser;
+			parser=0;
+			fclose(in);
+			return;
+		}
+	} while (!done);
+	fclose(in);
+
+	XMLTreeNode *node=parser->RootNode();
+	if (!node)
+	{
+		eFatal("empty keymappings file?");
+		return;
+	}
+	if (strcmp(node->GetType(), "keymappings"))
+	{
+		eFatal("not a keymappings file");
+		return;
+	}
+	for (node=node->GetChild(); node; node=node->GetNext())
+		if (!strcmp(node->GetType(), "keymapping"))
+		{
+			const char *code=node->GetAttributeValue("code");
+			if (!code)
+			{
+				eFatal("no code specified");
+				return;
+			}
+			keymappings[code]=std::vector< std::pair<eString,eString> >(12);
+			int cnt=0;
+			for (XMLTreeNode *xam=node->GetChild(); xam; xam=xam->GetNext())
+			{
+				if (!strcmp(xam->GetType(), "codes"))
+				{
+					const char 	*lower(xam->GetAttributeValue("lower")),
+											*upper(xam->GetAttributeValue("upper"));
+					if (!lower)
+					{
+						eFatal("no lower specified");
+						return;
+					}
+					if (!upper)
+					{
+						eFatal("no upper specified");
+						return;
+					}
+					keymappings[code][cnt].first=lower;
+					keymappings[code][cnt].second=upper;
+				}
+				++cnt;
+			}
+		}
+		else
+		{
+			eFatal("no keymapping specified");
+			return;
+		}
+}
+
+void eTextInputField::updateHelpWidget()
+{
+	if ( helpwidget )
+	{
+		eString keysStr;
+
+		for (int i=0; i < 12; ++i )
+		{
+			char *language=0;
+			eConfig::getInstance()->getKey("/elitedvb/language", language);
+			if ( language && keymappings.find(language) != keymappings.end() )
+			{
+				keysStr = capslock ? keymappings[language][i].second :
+					keymappings[language][i].first;
+				free(language);
+			}
+			else
+			{
+				keysStr = capslock ? keymappings["default"][i].second :
+					keymappings["default"][i].first;
+			}
+
+			eString tmpStr = convertUTF8DVB(keysStr);
+
+			if ( i < 10)
+			{
+				if ( swapNum )
+					tmpStr = (char)(i+0x30) + tmpStr;
+				else
+					tmpStr += (char)(i+0x30);
+			}
+
+			eString filtered;
+
+			for (unsigned int d=0; d < tmpStr.length(); ++d )
+				if ( useableChars.find(tmpStr[d]) != eString::npos )
+					filtered+=tmpStr[d];
+
+			helpwidget->keys[i]->setText(convertDVBUTF8((unsigned char*)filtered.c_str(),filtered.length()));
+		}
+	}
 }
 
 void eTextInputField::updated()
 {
-	unsigned char c[4096];
-	strcpy((char *)c,isotext.c_str());
-
 	if ( editLabel )
-		editLabel->setText(convertDVBUTF8(c,strlen((char*)c)));
+		editLabel->setText(convertDVBUTF8((unsigned char*)isotext.c_str(),isotext.length()));
 	else
-		text=convertDVBUTF8(c,strlen((char*)c));
+		text=convertDVBUTF8((unsigned char*)isotext.c_str(),isotext.length());
 	drawCursor();
 }
 
@@ -48,47 +192,10 @@ void eTextInputField::nextChar()
 	}
 }
 
-//		"abc2ABC",   // 2
-//		"def3DEF",   // 3
-//		"ghi4GHIª",   // 4
-//		"jkl5JKL",   // 5
-//		"mno6MNO",   // 6
-//		"pqrs7PQRS", // 7
-//		"tuv8TUV",   // 8
-//		"wxyz9WXYZ",   // 9
-
-const char *keys[2][12] = {
-// lowercase
-	  { 	"+0-.,:?!\"';_",     // 0
-		" 1#@&/()<=>%",      // 1
-		"abc2–—“”",   // 2
-		"def3‘’÷◊",   // 3
-		"ghi4ÿŸ⁄€",   // 4
-		"jkl5‹›ﬁﬂ",   // 5
-		"mno6‡·‚„",   // 6
-		"pqrs7‰ÂÊÁ",  // 7
-		"tuv8ËÈÍÎ",   // 8
-		"wxyz9ÌÓÔ",   // 9
-		"*/()<=>%",          // <
-		"#@&`" },            // >
-// uppercase
-	  { 	"+0-.,:?!\"';_",     // 0
-		" 1#@&/()<=>%",      // 1
-		"ABC2∞±≤≥",   // 2
-		"DEF3¥µ∂∑",   // 3
-		"GHI4∏π∫ª",   // 4
-		"JKL5ºΩæø",   // 5
-		"MNO6¿¡¬√",   // 6
-		"PQRS7ƒ≈∆«",  // 7
-		"TUV8»… À",   // 8
-		"WXYZ9ÕŒœ",   // 9
-		"*/()<=>%",          // <
-		"#@&`" }             // >
-};
-
 void eTextInputField::setUseableChars( const char* uchars )
 {
 	useableChars=uchars;
+	updateHelpWidget();
 }
 
 void eTextInputField::setNextCharTimeout( unsigned int newtimeout )
@@ -196,13 +303,43 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 				curPos=0;
 //			eDebug("curPos=%d, isotext.length=%d",curPos, isotext.length());
 			int key = -1;
-			if ( event.action == &i_cursorActions->capslock && editMode)
+			if ( event.action == &i_texteditActions->capslock && editMode)
 			{
 				capslock^=1;
 				if ( capslock )
 					drawCursor();
 				else if ( !capsRect.isEmpty() )
 					eWidget::invalidate( capsRect );
+				updateHelpWidget();
+			}
+			else if ( event.action == &i_texteditActions->swapnum && editMode)
+			{
+				swapNum^=1;
+				updateHelpWidget();
+			}
+			else if (event.action == &i_texteditActions->insertchar && editMode)
+			{
+				if ( isotext.length() && isotext.length() < maxChars )
+				{
+					lastKey=-1;
+					isotext.insert( curPos, " ");
+					updated();
+				}
+			}
+			else if (event.action == &i_texteditActions->deletechar && editMode)
+			{
+				if ( isotext.length() )
+				{
+					lastKey=-1;
+					isotext.erase( curPos, 1 );
+//					eDebug("curPos=%d, length=%d", curPos, text.length() );
+					if ( (int)isotext.length() == curPos )
+					{
+//						eDebug("curPos--");
+						--curPos;
+					}
+					updated();
+				}
 			}
 			else if ( (event.action == &i_cursorActions->up ||
 				event.action == &i_cursorActions->down) && editMode )
@@ -233,30 +370,6 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 				else
 					isotext+=*pc2;
 				updated();
-			}
-			else if (event.action == &i_cursorActions->insertchar && editMode)
-			{
-				if ( isotext.length() && isotext.length() < maxChars )
-				{
-					lastKey=-1;
-					isotext.insert( curPos, " ");
-					updated();
-				}
-			}
-			else if (event.action == &i_cursorActions->deletechar && editMode)
-			{
-				if ( isotext.length() )
-				{
-					lastKey=-1;
-					isotext.erase( curPos, 1 );
-//					eDebug("curPos=%d, length=%d", curPos, text.length() );
-					if ( (int)isotext.length() == curPos )
-					{
-//						eDebug("curPos--");
-						--curPos;
-					}
-					updated();
-				}
 			}
 			else if (event.action == &i_cursorActions->left && editMode )
 			{
@@ -310,7 +423,9 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 					eSize tmpSize=tmp.size();
 					tmpSize.setWidth( tmp.width()*5 );
 					editLabel->resize(tmpSize);
-					editLabel->setText(text);
+					editLabel->setText(text.removeChars('\x86').
+						removeChars('\x87').removeChars('\xC2').
+						removeChars('\x05'));
 					oldHelpText=helptext;
 					setText("");
 					editLabel->show();
@@ -363,21 +478,45 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 					nextCharTimer.stop();
 				nextChar();
 			}
-//			eDebug("editMode = %d, key = %d", editMode, key);
 			if ( editMode && key != -1 )
 			{
+				eString keysStr;
+				char *language=0;
+				eConfig::getInstance()->getKey("/elitedvb/language", language);
+				if ( language && keymappings.find(language) != keymappings.end() )
+				{
+					keysStr = capslock ? keymappings[language][key].second :
+						keymappings[language][key].first;
+					free(language);
+				}
+				else
+				{
+					keysStr = capslock ? keymappings["default"][key].second :
+						keymappings["default"][key].first;
+				}
+
+				eString tmpStr=convertUTF8DVB(keysStr);
+
+				if ( key < 10)
+				{
+					if ( swapNum )
+						tmpStr = (char)(key+0x30) + tmpStr;
+					else
+						tmpStr += (char)(key+0x30);
+				}
+
+				const char *keys = tmpStr.c_str();
+
 				char newChar = 0;
-				
 				if ( key == lastKey )
 				{
-					char *oldkey = strchr( keys[capslock][key], isotext[curPos] );
-					newChar = oldkey?keys[capslock][key][oldkey-keys[capslock][key]+1]:0;
+					char *oldkey = strchr( keys, isotext[curPos] );
+					newChar = oldkey?keys[oldkey-keys+1]:0;
 				}
 
 				if (!newChar)
-				{
-					newChar = keys[capslock][key][0];
-				}
+					newChar = keys[0];
+
 //				eDebug("newChar = %d", newChar );
 				char testChar = newChar;
 				do
@@ -396,10 +535,10 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 					else
 					{
 						nextCharTimer.stop();
-						char *oldkey = strchr( keys[capslock][key], newChar );
-						newChar=oldkey?keys[capslock][key][oldkey-keys[capslock][key]+1]:0;
+						char *oldkey = strchr( keys, newChar );
+						newChar=oldkey?keys[oldkey-keys+1]:0;
 						if (!newChar)
-							newChar=keys[capslock][key][0];
+							newChar=keys[0];
 					}
 				}
 				while( newChar != testChar );  // all chars tested.. and no char is useable..
@@ -417,6 +556,19 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 
 void eTextInputField::lostFocus()
 {
+	if ( editMode )
+	{
+		nextCharTimer.stop();
+		isotext=convertUTF8DVB(editLabel->getText());
+		setText(isotext);
+		setHelpText(oldHelpText);
+		while ( text.length() && text[text.length()-1] == ' ' )
+			text.erase( text.length()-1 );
+		editMode=false;
+		/* emit */ selected();
+		delete editLabel;
+		editLabel=0;
+	}
 	eWindow::globalCancel(eWindow::ON);
 	eButton::lostFocus();
 }
@@ -424,6 +576,40 @@ void eTextInputField::lostFocus()
 void eTextInputField::redrawWidget( gPainter *target, const eRect &area )
 {
 	eButton::redrawWidget( target, area );
+}
+
+void eTextInputFieldHelpWidget::redrawWidget(gPainter *target, const eRect & area )
+{
+	int fieldwidth = (size.width()-4) / 3;
+	target->setForegroundColor( eSkin::getActive()->queryColor("textinput.helpwindow.border") );
+	target->fill(eRect(0,0,size.width(),2));
+	target->fill(eRect(0,0,2,size.height()));
+	target->fill(eRect(size.width()-2,0,2,size.height()));
+	target->fill(eRect(0,size.height()-2,size.width(),2));
+	target->fill(eRect(0,44,size.width(),2));
+	target->fill(eRect(0,89,size.width(),2));
+	target->fill(eRect(0,133,size.width(),2));
+	target->fill(eRect(1+fieldwidth,0,2,size.height()));
+	target->fill(eRect(1+fieldwidth*2,0,2,size.height()));
+}
+
+eTextInputFieldHelpWidget::eTextInputFieldHelpWidget(eWidget *parent)
+	:eWidget(parent, 0)
+{
+	keys[0] = new eLabel(this); keys[0]->setName("zero");
+	keys[1] = new eLabel(this); keys[1]->setName("one");
+	keys[2] = new eLabel(this); keys[2]->setName("two");
+	keys[3] = new eLabel(this); keys[3]->setName("three");
+	keys[4] = new eLabel(this); keys[4]->setName("four");
+	keys[5] = new eLabel(this); keys[5]->setName("five");
+	keys[6] = new eLabel(this); keys[6]->setName("six");
+	keys[7] = new eLabel(this); keys[7]->setName("seven");
+	keys[8] = new eLabel(this); keys[8]->setName("eight");
+	keys[9] = new eLabel(this); keys[9]->setName("nine");
+	keys[10] = new eLabel(this); keys[10]->setName("special_one");
+	keys[11] = new eLabel(this); keys[11]->setName("special_two");
+	if (eSkin::getActive()->build(this, "eTextInputFieldHelpWidget"))
+		eWarning("TextInputFieldHelpWidget build failed!");
 }
 
 static eWidget *create_eTextInputField(eWidget *parent)
@@ -437,6 +623,7 @@ public:
 	eTextInputFieldSkinInit()
 	{
 		eSkin::addWidgetCreator("eTextInputField", create_eTextInputField);
+		eTextInputField::loadKeyMappings();
 	}
 	~eTextInputFieldSkinInit()
 	{

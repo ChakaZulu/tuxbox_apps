@@ -18,7 +18,7 @@ struct session_struct
 	unsigned int state;
 	unsigned int internal_state;
 };
-				
+
 struct tempPMT_t
 {
 	int type;     //0=prg-nr 1=pid 2=descriptor
@@ -26,8 +26,6 @@ struct tempPMT_t
 	unsigned short pid;
 	unsigned short streamtype;
 };
-
-
 
 #define MAXTRANSPORTSESSIONS 32
 #define PCMCIABUFLEN 255
@@ -91,8 +89,9 @@ protected:
 
 	int tempPMTentrys;
 
+	std::map<int, std::list<tempPMT_t> > services;
+
 	struct session_struct sessions[32];
-	struct tempPMT_t tempPMT[PMT_ENTRYS];
 
 	char appName[256];
 	unsigned short caids[256];
@@ -117,8 +116,8 @@ protected:
 	void addCAID(int caid);	
 	void pushCAIDs();	
 	void PMTflush(int program);
-	void PMTaddPID(int pid,int streamtype);
-	void PMTaddDescriptor(unsigned char *data);
+	void PMTaddPID(int sid, int pid,int streamtype);
+	void PMTaddDescriptor(int sid, unsigned char *data);
 	void newService();
 	void create_sessionobject(unsigned char *tag,unsigned char *data,unsigned int len,int session);
 
@@ -171,15 +170,17 @@ public:
 			disable_ts
 		};
 		int type;
+		int sid;
 		unsigned char *data;
 		int pid;
 		int streamtype;
 
+
 		eDVBCIMessage() { }
 		eDVBCIMessage(int type): type(type) { }
-		eDVBCIMessage(int type, unsigned char *data): type(type), data(data) { }
-		eDVBCIMessage(int type, int pid): type(type),pid(pid) { }
-		eDVBCIMessage(int type, int pid, int streamtype): type(type),pid(pid),streamtype(streamtype) { }
+		eDVBCIMessage(int type, int sid, unsigned char *data): type(type),sid(sid),data(data) { }
+		eDVBCIMessage(int type, int sid): type(type),sid(sid) { }
+		eDVBCIMessage(int type, int sid, int pid, int streamtype): type(type),sid(sid),pid(pid),streamtype(streamtype) { }
 
 	};
 	eFixedMessagePump<eDVBCIMessage> messages;

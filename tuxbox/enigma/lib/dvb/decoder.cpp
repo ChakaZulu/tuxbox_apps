@@ -32,6 +32,8 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <errno.h>
+#include <lib/dvb/servicedvb.h>
+#include <lib/dvb/record.h>
 
 // #define OLD_VBI
 
@@ -63,6 +65,9 @@ int Decoder::fd::demux_vtxt;
 static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *descriptors)
 {
 #if 0
+	if ( eDVB::getInstance()->recorder && eServiceInterface::getInstance()->service.path )
+		return;
+
 	eDebug("-------------------Set ECM-----------------");
 	static int lastpid=-1;
 
@@ -105,6 +110,8 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 		close(1);
 		close(2);
 #endif
+		for (unsigned int i=0; i < 60; ++i )
+			close(i);
 
 		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[2], descriptor, 0)<0)
 			eDebug("camd");
@@ -118,11 +125,10 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 
 int Decoder::Initialize()
 {
-	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = parms.ecmpid = -1;
+	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = -1;
 	parms.audio_type=0;
-	parms.emmpid=-2;
-	parms.recordmode=0;
 	parms.descriptor_length=0;
+	parms.restart_camd=0;
 	current=parms;
 	fd.video = fd.audio = fd.demux_video = fd.demux_audio =	fd.demux_pcr = fd.demux_vtxt = -1;
 	return 0;
@@ -138,11 +144,8 @@ void Decoder::Close()
 void Decoder::Flush()
 {
 	eDebug("Decoder::Flush()");
-	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = parms.ecmpid = -1;
-	parms.audio_type=0;
-	parms.descriptor_length=0;
-	parms.emmpid=-2;
-	parms.recordmode=0;
+	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = -1;
+	parms.audio_type=parms.descriptor_length=parms.restart_camd=0;
 	Set();
 }
 
@@ -206,8 +209,6 @@ void Decoder::flushBuffer()
 		eDebug("VIDEO_CLEAR_BUFFER failed (%m)");
 	if (fd.audio != -1 && ::ioctl(fd.audio, AUDIO_CLEAR_BUFFER)<0 )
 		eDebug("AUDIO_CLEAR_BUFFER failed (%m)");
-//	parms.flushbuffer=1;
-//	Set();
 }
 
 void Decoder::SetStreamType(int type)
@@ -243,28 +244,20 @@ int Decoder::Set()
 		changed |= 4;
 	if (parms.pcrpid != current.pcrpid)
 		changed |= 8;
-	if (parms.ecmpid != current.ecmpid)
-		changed |= 0x10;
-	if (parms.emmpid != current.emmpid)
-		changed |= 0x20;
 	if (parms.pmtpid != current.pmtpid)
 		changed |= 0x40;
-	if (parms.casystemid != current.casystemid)
+	if (parms.descriptor_length != current.descriptor_length)
 		changed |= 0x80;
 	if (parms.audio_type != current.audio_type)
 		changed |= 0x100;
-/*	if (parms.recordmode != current.recordmode)
-		changed |= 0xF;*/
-		
-	if (parms.flushbuffer)
-		changed |= 9;
 
-	parms.flushbuffer=0;
-	
 	eDebug(" ------------> changed! %x", changed);
 
-	if (changed & 0xF7)
+	if (changed & 0xC7 || parms.restart_camd)
+	{
 		SetECM(parms.vpid, parms.apid, parms.pmtpid, parms.descriptor_length, parms.descriptors);
+		parms.restart_camd=0;
+	}
 
 	if (changed & 4)
 	{

@@ -3,13 +3,19 @@
 
 #include <set>
 
+#include <ost/dmx.h>
+
+#ifndef DMX_SET_NEGFILTER_MASK
+	#define DMX_SET_NEGFILTER_MASK   _IOW('o',48,uint8_t *)
+#endif
+
 class eString;
 
 class eSystemInfo
 {
 	static eSystemInfo *instance;
 	int hashdd, hasci, hasrfmod, haslcd, hasnetwork,
-	canmeasurelnbcurrent, hwtype, fetype;
+	canmeasurelnbcurrent, hwtype, fetype, hasnegfilter;
 	std::set<int> caids;
 	eString getInfo(const char *info);
 public:
@@ -18,6 +24,7 @@ public:
 	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM5600, Unknown };
 	enum { feSatellite, feCable, feTerrestrial };
 
+	int hasNegFilter() { return hasnegfilter; }
 	int hasHDD() { return hashdd; }
 	int hasCI() { return hasci; }
 	int hasRFMod() { return hasrfmod; }

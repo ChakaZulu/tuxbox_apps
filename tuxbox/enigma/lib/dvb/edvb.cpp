@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -125,8 +126,6 @@ eDVB::eDVB()
 	}
 #endif
 
-//	tMHWEIT=0;
-
 		// init dvb recorder
 	recorder=0;
 
@@ -240,14 +239,32 @@ void eDVB::configureNetwork()
 				eDebug("'%s' failed", buffer.c_str());
 		}
 		system("killall nmbd");
-		system("/bin/nmbd -D");
+		signal(SIGCHLD, SIG_IGN);
+		if (fork() == 0)
+		{
+			for (unsigned int i=0; i < 60; ++i )
+				close(i);
+			execlp("nmbd", "nmbd", "-D", NULL);
+			
+			_exit(0);
+		}
+		system("killall smbd");
+		signal(SIGCHLD, SIG_IGN);
+		if (fork() == 0)
+		{
+			for (unsigned int i=0; i < 60; ++i )
+				close(i);
+			execlp("smbd", "smbd", "-D", NULL);
+			_exit(0);
+		}
 	}
 }
 
 #ifndef DISABLE_FILE
 void eDVB::recUpdatePIDs( PMT *pmt )
 {
-	if (recorder && pmt)
+	if ( recorder && pmt &&
+		eServiceInterface::getInstance()->service == recorder->recRef )
 	{
 		eDebug("recUpdatePIDs");
 		pmt->lock();
@@ -298,6 +315,10 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 		recEnd();
 
 	recorder=new eDVBRecorder();
+	recorder->recRef=eServiceInterface::getInstance()->service;
+
+	eServiceHandler *handler = eServiceInterface::getInstance()->getService();
+	recorder->scrambled = handler->getFlags() & eServiceHandler::flagIsScrambled;
 
 	recorder->open(filename);
 

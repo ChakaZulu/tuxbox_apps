@@ -28,7 +28,7 @@ public:
 	eSectionReader();
 	int getHandle();		// for SocketNotifiers
 	void close();
-	int open(int pid, __u8 *data, __u8 *mask, int len, int flags, const char* dmxdev = DEMUX0 );
+	int open(int pid, __u8 *data, __u8 *mask, __u8 *mode, int len, int flags, const char* dmxdev = DEMUX0 );
 	int read(__u8 *data);
 };
 
@@ -172,9 +172,9 @@ public:
 
 	void getNext(int error)
 	{
-//		printf("eAUTable: got table (ready %d, error %d\n", next->ready, next->error);
+/*		eDebug("eAUTable: got table (ready %d, error %d", next->ready, next->error);
 		if ( current )
-			eDebug("current lockcount = %d", current->getLockCount() );
+			eDebug("current lockcount = %d", current->getLockCount() );*/
 		if (current && current->getLockCount())
 		{
 			delete next;

@@ -191,7 +191,7 @@ class eServiceMP3: public eService
 {
 	eServiceID3 id3tags;
 public:
-	eServiceMP3(const char *filename);
+	eServiceMP3(const char *filename, const char *descr=0);
 	eServiceMP3(const eServiceMP3 &c);
 };
 

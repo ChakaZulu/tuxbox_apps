@@ -409,7 +409,7 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		for (int i=0; i < buf[0]-1; ++i )  // copy user input to answer
 			buf[2+i] = atext[i];
 
-		ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_enqansw, buf));
+		ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_enqansw, 815, buf));
 
 		showWaitForCIAnswer(ret);
 	}

@@ -872,14 +872,6 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	return result;
 }
 
-static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	if(opt!="getpids")
-		return eString("ok\n");
-	else
-		return eString().sprintf("%u\n%u\n", Decoder::parms.vpid, Decoder::parms.apid);
-}
-
 static eString message(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	if (opt.length())
@@ -1207,6 +1199,50 @@ static eString screenshot(eString request, eString dirpath, eString opts, eHTTPC
 	return "nixging\n";
 }
 
+static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if(opt!="getpids")
+		return eString("ok\n");
+	else
+		return eString().sprintf("%u\n%u\n", Decoder::parms.vpid, Decoder::parms.apid);
+}
+
+static eString neutrino_suck_getonidsid(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi || !sapi->service)
+		return "200\n";
+
+	int onidsid = (sapi->service.getOriginalNetworkID().get() << 8)
+		| sapi->service.getServiceID().get();
+
+	return eString().sprintf("%d\n", onidsid);
+}
+
+struct appendonidsidnamestr: public std::unary_function<const eServiceDVB&, void>
+{
+	eString &str;
+	appendonidsidnamestr(eString &s)
+		:str(s)
+	{
+	}
+	void operator()(eServiceDVB& s)
+	{
+		str += filter_string(eString().sprintf("%d %s\n",
+			(s.original_network_id.get()<<8)|s.service_id.get(),
+			s.service_name.c_str() ));
+	}
+};
+
+static eString neutrino_suck_getchannellist(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString channelstring;
+
+	eTransponderList::getInstance()->forEachService( appendonidsidnamestr( channelstring ) );
+
+	return channelstring;
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
@@ -1239,9 +1275,12 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadTimerList", load_timerList);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList);
 	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", start_plugin);
-	
-	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", screenshot);
+
+	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
+	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid );
+	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist );
+
 /*
 	dyn_resolver->addDyn("GET", "/record/on", record_on);
 	dyn_resolver->addDyn("GET", "/record/off", record_off);

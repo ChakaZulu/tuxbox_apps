@@ -12,11 +12,12 @@
 #include <lib/gui/ewindow.h>
 #include <lib/gui/listbox.h>
 #include <lib/gui/multipage.h>
+#include <lib/gui/textinput.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/numberactions.h>
-#include <lib/gui/textinput.h>
 #include <lib/dvb/service.h>
-#include <lib/gui/eprogress.h>
+
+class eProgress;
 
 #ifndef DISABLE_CI
 struct eMMIMessage
@@ -287,7 +288,8 @@ class ePlaylist;
 class TextEditWindow: public eWindow
 {
 	eTextInputField *input;
-	eLabel *descr, *image;
+	eTextInputFieldHelpWidget *image;
+	eLabel *descr;
 	eButton *save;
 public:
 	TextEditWindow( const char *InputFieldDescr, const char* useableChar=0 );

@@ -12,6 +12,7 @@
 #include <lib/base/ebase.h>
 #include <lib/base/eerror.h>
 #include <lib/system/elock.h>
+#include <lib/system/info.h>
 
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
@@ -39,7 +40,7 @@ void eSectionReader::close()
 	handle=-1;
 }
 
-int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags, const char* dmxdev)
+int eSectionReader::open(int pid, __u8 *data, __u8 *mask, __u8 *mode, int len, int _flags, const char* dmxdev)
 {
 	flags=_flags;
 #if HAVE_DVB_API_VERSION < 3
@@ -68,9 +69,8 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags, c
 	secFilterParams.pid=pid;
 
 #if HAVE_DVB_API_VERSION < 3
-	const int maxsize=DMX_FILTER_SIZE;
-	memset(secFilterParams.filter.filter, 0, maxsize);
-	memset(secFilterParams.filter.mask, 0, maxsize);
+	memset(secFilterParams.filter.filter, 0, DMX_FILTER_SIZE);
+	memset(secFilterParams.filter.mask, 0, DMX_FILTER_SIZE);
 #else
 	memset(&secFilterParams.filter, 0, sizeof(struct dmx_filter));
 #endif
@@ -79,10 +79,13 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags, c
 	secFilterParams.flags=DMX_IMMEDIATE_START;
 	if (flags&SECREAD_CRC)
 		secFilterParams.flags|=DMX_CHECK_CRC;
-	for (int i = 0; i < DMX_FILTER_SIZE; i++)
+	for (int i = 0; i < len; i++)
 	{
-		secFilterParams.filter.filter[i]=i<len?data[i]:0;
-		secFilterParams.filter.mask[i]=i<len?mask[i]:0;
+		secFilterParams.filter.filter[i]=data[i];
+		secFilterParams.filter.mask[i]=mask[i];
+#if HAVE_DVB_API_VERSION >= 3
+		secFilterParams.filter.mode[i]=mode[i];
+#endif
 	}
 
 #ifdef ESECTION_DEBUG
@@ -101,6 +104,19 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags, c
 		::close(handle);
 		return -1;
 	}
+
+#if HAVE_DVB_API_VERSION < 3
+	if ( eSystemInfo::getInstance()->hasNegFilter() )
+	{
+		__u8 negfilter[DMX_FILTER_SIZE];
+		memset(&negfilter, 0, DMX_FILTER_SIZE);
+		memcpy(&negfilter, mode, len);
+
+		if (::ioctl(handle, DMX_SET_NEGFILTER_MASK, &negfilter) < 0)
+			eDebug("DMX_SET_NEGFILTER_MASK (%m)");
+	}
+#endif
+
 	return 0;
 }
 
@@ -165,7 +181,8 @@ int eSection::start( const char* dmxdev )
 int eSection::setFilter(int pid, int tableid, int tableidext, int version, const char *dmxdev)
 {
 	closeFilter();
-	__u8 data[4], mask[4];
+	__u8 data[4], mask[4], mode[4];
+	memset(mode,0,4);
 	data[0]=tableid; mask[0]=tableidmask;
 	data[1]=0; mask[1]=0;
 	data[2]=0; mask[2]=0;
@@ -177,10 +194,17 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version, const
 	} 
 	if (version!=-1)
 	{
-		data[3]=version; mask[3]=0xFF;
+		if ( eSystemInfo::getInstance()->hasNegFilter() )
+		{
+			data[3]=version<<1; mask[3]=0x3E; mode[3]=0x3E;
+		}
+		else
+		{
+			data[3]=version; mask[3]=0xFF;
+		}
 	}
 
-	reader.open(pid, data, mask, 4, flags, dmxdev);
+	reader.open(pid, data, mask, mode, 4, flags, dmxdev);
 	if (reader.getHandle() < 0)
 		return -ENOENT;
 

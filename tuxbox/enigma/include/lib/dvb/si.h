@@ -389,9 +389,7 @@ protected:
 public:
 	PMT(int pid, int service_id, int version=-1);
 
-	int program_number;
-	int PCR_PID;
-	int pid;
+	int program_number, PCR_PID, pid, version_number;
 
 	eTable *createNext();
 	ePtrList< Descriptor > program_info;

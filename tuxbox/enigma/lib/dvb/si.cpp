@@ -4,6 +4,7 @@
 #include <time.h>
 #include <sstream>
 #include <iomanip>
+#include <lib/system/info.h>
 
 extern "C"
 {
@@ -959,17 +960,20 @@ PMT::PMT(int pid, int service_id, int version)
 
 eTable *PMT::createNext()
 {
+	if ( eSystemInfo::getInstance()->hasNegFilter() )
+	{
+		eDebug("PMT version = %d", version_number);
+		return new PMT(pid, tableidext, version_number);
+	}
 	int newversion = incrementVersion(version);
-#if 0
-	eDebug("PMT oldversion=%d, newversion=%d\n",version, newversion);
-	eDebug("new pid = %d, service_id = %d, version = %d", pid, tableidext, newversion );
-#endif
+	eDebug("PMT oldversion=%d, newversion=%d",version, newversion);
 	return new PMT(pid, tableidext, newversion);
 }
 
 int PMT::data(__u8 *data)
 {
 	pmt_struct *pmt=(pmt_struct*)data;
+	version_number=pmt->version_number;
 	program_number=HILO(pmt->program_number);
 	PCR_PID=HILO(pmt->PCR_PID);
 	
@@ -1124,8 +1128,13 @@ eTable *EIT::createNext()
 {
 	if (ts != tsFaked)
 	{
+		if ( eSystemInfo::getInstance()->hasNegFilter() )
+		{
+			eDebug("EIT version = %d", version_number);
+			return new EIT(type, service_id, ts, version_number);
+		}
 		int newversion = incrementVersion(version);
-		eDebug("EIT oldversion=%d, newversion=%d\n",version, newversion);
+		eDebug("EIT oldversion=%d, newversion=%d",version, newversion);
 		return new EIT(type, service_id, ts, newversion);
 	}
 	return 0;

@@ -45,11 +45,15 @@
 			<action name="down" key="down" flags="mr" />
 			<action name="left" key="left" flags="mr" />
 			<action name="right" key="right" flags="mr" />
+			<action name="ok" key="ok" flags="m" />
+			<action name="cancel" key="home" flags="m" />
+		</actionmap>
+
+		<actionmap name="textedit">
 			<action name="insertchar" key="+" flags="mr" />
 			<action name="deletechar" key="-" flags="mr" />
 			<action name="capslock" key="yellow" flags="mr" />
-			<action name="ok" key="ok" flags="m" />
-			<action name="cancel" key="home" flags="m" />
+			<action name="swapnum" key="blue" flags="mr" />
 		</actionmap>
 
 		<actionmap name="focus">

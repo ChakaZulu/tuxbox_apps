@@ -245,6 +245,13 @@
 			<action name="close" key="KEY_SPACE" flags="m" />
 		</actionmap>
 
+		<actionmap name="textedit">
+			<action name="insertchar" key="KEY_INSERT" flags="mr" />
+			<action name="deletechar" key="KEY_DELETE" flags="mr" />
+			<action name="capslock" key="KEY_CAPSLOCK" flags="mr" />
+			<action name="swapnum" key="KEY_F1" flags="mr" />
+		</actionmap>
+
 		<actionmap name="cursor">
 			<action name="up" key="KEY_UP" flags="mr" />
 			<action name="down" key="KEY_DOWN" flags="mr" />

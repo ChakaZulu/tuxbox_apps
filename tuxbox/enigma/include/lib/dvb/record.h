@@ -4,6 +4,7 @@
 #define __record_h
 
 #include <libsig_comp.h>
+#include <lib/dvb/dvb.h>
 #include <lib/base/ebase.h>
 #include <lib/base/message.h>
 #include <lib/base/thread.h>
@@ -75,6 +76,8 @@ class eDVBRecorder: private eThread, public Object
 	void openFile(int suffix=0);
 
 public:
+	eServiceReference recRef;
+	bool scrambled;
 		/// the constructor
 	eDVBRecorder();
 		/// the destructor

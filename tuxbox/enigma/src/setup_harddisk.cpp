@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.10 2003/10/03 18:20:30 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.11 2003/10/26 00:41:17 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -253,6 +253,7 @@ void eHarddiskMenu::check()
 	check.exec();
 	check.hide();
 	show();
+	restartNet=true;
 }
 
 void eHarddiskMenu::extPressed()
@@ -319,6 +320,7 @@ void eHarddiskMenu::s_format()
 
 // kill samba server... (exporting /hdd)
 		system("killall -9 smbd");
+		restartNet=true;
 
 		system(
 				eString().sprintf(
@@ -402,8 +404,6 @@ noerr:
 		}
 		readStatus();
 	} while (0);
-	// restart samba...
-	system("/bin/smbd -D");
 	show();
 }
 
@@ -435,7 +435,7 @@ void eHarddiskMenu::readStatus()
 		status->setText(_("initialized, but unknown filesystem"));
 }
 
-eHarddiskMenu::eHarddiskMenu(int dev): dev(dev)
+eHarddiskMenu::eHarddiskMenu(int dev): dev(dev), restartNet(false)
 {
 	visible=0;
 	status=new eLabel(this); status->setName("status");
@@ -601,9 +601,6 @@ void ePartitionCheck::fsckClosed(int state)
 
 	if ( system( eString().sprintf("/bin/mount /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str() ) >> 8 )
 		eDebug("mount hdd after check failed");
-
-	system("/bin/smbd -D");
-	eDebug("smbd restarted");
 
 	if (fsck)
 	{
