@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.16  2003/01/05 22:39:56  alexw
+removed headerfile
+
 Revision 1.15  2003/01/05 20:59:28  TheDOC
 old vbi possible now... just add -DOLD_VBI in Makefile.am to the INCLUDES line
 
@@ -77,7 +80,8 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "teletext.h"
 
 #ifdef OLD_VBI
-#include <dbox/avia_gt_vbi.h>
+#define AVIA_VBI_START_VTXT	1
+#define AVIA_VBI_STOP_VTXT	2 
 #endif
 
 void teletext::getTXT(int PID)
