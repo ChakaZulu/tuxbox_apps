@@ -1634,8 +1634,11 @@ void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 {
 	enigmaMMI m(msg.from);
+
 	if ( !strncmp( msg.data, "INIT", 4 ) )
-		postMessage(eZapMessage(1,"Common Interface",_("please wait while initializing Common Interface ..."),10),0);
+		postMessage(eZapMessage(0,"Common Interface",_("please wait while initializing Common Interface ..."),8),0);
+	else if ( !strncmp( msg.data, "REMOVE", 6 ) )
+		postMessage(eZapMessage(0), 1);
 	else
 		m.handleMMIMessage( msg.data );
 	delete [] msg.data;
