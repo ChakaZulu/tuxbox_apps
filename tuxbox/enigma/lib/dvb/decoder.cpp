@@ -783,6 +783,23 @@ void Decoder::getVideoPTS( unsigned int &dest )
 		eDebug("VIDEO_GET_PTS failed (%m)");
 }
 
+
+int Decoder::getSTC(unsigned long long &dst)
+{
+	struct dmx_stc stc;
+	stc.num = 0;
+	
+	int f = fd.demux_video;
+	if (f < 0)
+		f = fd.demux_audio;
+	if (f < 0)
+		return -1;
+	if (ioctl(f, DMX_GET_STC, &stc) < 0)
+		return -errno;
+	dst = stc.stc;
+	return 0;
+}
+
 void Decoder::setFastZap(int val)
 {
 	int wasOpen = fd.mpeg != -1;

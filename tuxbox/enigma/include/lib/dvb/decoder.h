@@ -53,7 +53,9 @@ public:
 // non api functions
 	static void flushClipBuffer();
 	static void clearScreen();
+			/* video pts is only 32 bit - the lsb is missing! (buggy driver..) */
 	static void getVideoPTS( unsigned int &dest );
+	static int  getSTC(unsigned long long &stc);
 	static void setAutoFlushScreen(int);
 	static void setFastZap(int);
 };
