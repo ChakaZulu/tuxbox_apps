@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.h,v 1.7 2003/02/01 03:32:43 zwen Exp $
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.h,v 1.8 2003/11/19 20:22:17 thegoodguy Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -30,13 +30,13 @@
 #define __LCDFONTRENDERER__
 
 #include "lcddisplay.h"
-#include <freetype/freetype.h>
-#include <freetype/ftcache.h>
-#include <freetype/cache/ftcglyph.h>
-#include <freetype/cache/ftcimage.h>
-#include <freetype/cache/ftcmanag.h>
-#include <freetype/cache/ftcsbits.h>
-#include <freetype/cache/ftlru.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_CACHE_H
+#include FT_CACHE_IMAGE_H
+#include FT_CACHE_SMALL_BITMAPS_H
+
 #include <asm/types.h>
 
 
