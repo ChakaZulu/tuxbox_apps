@@ -63,7 +63,8 @@ function openSI()
 
 function DVRrecord(xy)
 {
-	NewWindow("/cgi-bin/record?command="+xy, "record", "200", "100", "no");
+	NewWindow("/cgi-bin/record?command="+xy, "record", "200", "100", "no", "5000");
+	window.setTimeout("reload()", 2000);
 }
 
 function startPlugin(xy)
