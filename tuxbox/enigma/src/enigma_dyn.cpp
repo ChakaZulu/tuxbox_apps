@@ -4380,16 +4380,21 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	tm end = *localtime(&eventEnd);
 	int evType = atoi(eventType.c_str());
 
-	eString result;
+	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
+	
 	if (evType & ePlaylistEntry::isRepeating)
-		result = readFile(TEMPLATE_DIR + "editRepeatingTimerEvent.tmp");
+	{
+		result.strReplace("#REPEATING#", "selected");
+		result.strReplace("#REGULAR#", "");
+	}
 	else
-		result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
-
-	result.strReplace("#CSS#", (pdaScreen == 0) ? "webif.css" : "webif_small.css");
+	{
+		result.strReplace("#REGULAR#", "selected");
+		result.strReplace("#REPEATING#", "");
+	}
 
 	result.strReplace("#AFTEROPTS#", buildAfterEventOpts(evType));
-// these three values we need to find the old event in timerlist...
+	// these three values we need to find the old event in timerlist...
 	result.strReplace("#SERVICEREF#", serviceRef);
 	result.strReplace("#OLD_TYPE#", eventType);
 	result.strReplace("#OLD_STIME#", eventStartTime);
