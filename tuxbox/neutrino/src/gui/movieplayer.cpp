@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.64 2004/01/30 20:20:54 zwen Exp $
+  $Id: movieplayer.cpp,v 1.65 2004/01/30 23:01:23 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1137,6 +1137,7 @@ PlayFileThread (void *filename)
 	fileposition = 0;
 	if (isTS && !failed)
 	{
+		int mincache_counter = 0;
 		while ((r = read (fd, buf, cache)) > 0 && playstate >= CMoviePlayerGui::PLAY)
 		{
 			done = 0;
@@ -1153,8 +1154,14 @@ PlayFileThread (void *filename)
 			case CMoviePlayerGui::FF:
 			case CMoviePlayerGui::REW:
 				ioctl (dmxa, DMX_STOP);
-				lseek (fd, cache * speed, SEEK_CUR);
-				fileposition += cache * speed;
+                if (mincache_counter == 0) {
+                    lseek (fd, cache * speed, SEEK_CUR);
+                    fileposition += cache * speed;
+                }
+                mincache_counter ++;
+                if (mincache_counter == 2) {
+                    mincache_counter = 0;
+                }
 				break;
 			case CMoviePlayerGui::SOFTRESET:
 				ioctl (vdec, VIDEO_STOP);
@@ -1403,7 +1410,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.64 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.65 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1549,7 +1556,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.64 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.65 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
         else if (msg == CRCInput::RC_left)
