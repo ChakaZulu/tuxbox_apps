@@ -224,8 +224,6 @@ int Decoder::Set()
 		return -1;
 	int changed=0;
 
-	dmxPesFilterParams pes_filter;
-
 	if (parms.vpid != current.vpid)
 		changed |= 1;
 	if (parms.apid != current.apid)
@@ -242,6 +240,11 @@ int Decoder::Set()
 		changed |= 0x100;
 
 	eDebug(" ------------> changed! %x", changed);
+
+	if (!changed)
+		return 0;
+
+	dmxPesFilterParams pes_filter;
 
 	if (changed & 0xC7 || parms.restart_camd)
 	{
