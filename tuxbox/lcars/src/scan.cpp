@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.8  2001/12/17 00:58:08  obi
+scanlist.dat is in CONFIGDIR/lcars now
+
 Revision 1.7  2001/12/17 00:18:18  obi
 readded revision 1.5
 
@@ -134,7 +137,7 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 
 
 
-		fp = fopen("/var/lcars/scanlist.dat", "r");
+		fp = fopen(CONFIGDIR "/lcars/scanlist.dat", "r");
 		int co = 0;
 		while(!feof(fp))
 		{
