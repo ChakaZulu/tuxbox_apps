@@ -35,8 +35,8 @@ static int getEncodingTable( const char * language_code )
 			return 2; // ISO8859-2
 	else 
 		if (!memcmp(language_code,"rus", 3)  // Russian
-/*		|| !memcmp(language_code, "bul", 3)  // Bulgarian
-		|| !memcmp(language_code, "scc", 3)  // Serbian
+		|| !memcmp(language_code, "bul", 3)  // Bulgarian
+/*		|| !memcmp(language_code, "scc", 3)  // Serbian
 		|| !memcmp(language_code, "srp", 3)
 		|| !memcmp(language_code, "mac", 3)  // Macedonian 
 		|| !memcmp(language_code, "mkd", 3)
