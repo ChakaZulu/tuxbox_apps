@@ -176,3 +176,11 @@ function selectImage(image)
 	document.location = "cgi-bin/setConfigMultiBoot?image="+image;
 	setTimeout("reload()", 500);
 }
+
+function vlc()
+{
+	if (parent.data.serviceReference)
+		document.location = "video.pls?sref=" + parent.data.serviceReference;
+	else
+		setTimeout("vlc()", 500);
+}

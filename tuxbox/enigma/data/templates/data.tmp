@@ -32,7 +32,9 @@
 	var crypt = #CRYPT#;
 	var format = #FORMAT#;
 	<!-- recording -->
-	var recording = #RECORDING2#;
+	var recording = #RECORDING#;
+	<!-- vlc streaming -->
+	var serviceReference = "#SERVICEREFERENCE#";
 </script>
 </body>
 </html>

@@ -26,6 +26,7 @@
 #include <lib/system/info.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
+#include <enigma_streamer.h>
 
 gFont eListBoxEntryService::serviceFont;
 gFont eListBoxEntryService::descrFont;
@@ -393,14 +394,27 @@ void eServiceSelector::addService(const eServiceReference &ref)
 	if ( eZap::getInstance()->getServiceSelector() == this )
 	{
 #ifndef DISABLE_FILE
-		if ( eDVB::getInstance()->recorder && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+		eServiceReference streamingRef;
+		bool streaming = eStreamer::getInstance()->getServiceReference(streamingRef);
+		if ((eDVB::getInstance()->recorder || streaming) && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 		{
 			eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
-			eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
-			if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
-					 rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
-					 rec.getDVBNamespace() != Ref.getDVBNamespace() )
-				return;
+			if (streaming)
+			{
+				eServiceReferenceDVB &str = (eServiceReferenceDVB&) streamingRef;
+				if ( str.getTransportStreamID() != Ref.getTransportStreamID() ||
+					str.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
+					str.getDVBNamespace() != Ref.getDVBNamespace() )
+					return;
+			}
+			else
+			{
+				eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
+				if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
+					rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
+					rec.getDVBNamespace() != Ref.getDVBNamespace() )
+					return;
+			}
 		}
 #endif
 	}

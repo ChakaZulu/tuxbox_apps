@@ -54,10 +54,11 @@
 #include <enigma_dyn_flash.h>
 #include <enigma_dyn_rotor.h>
 #include <enigma_dyn_xml.h>
+#include <enigma_streamer.h>
 
 using namespace std;
 
-#define WEBIFVERSION "2.4.1"
+#define WEBIFVERSION "2.4.2"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -297,7 +298,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	result += "<tr><td>sid:</td><td>" + sid + "</td></tr>\n";
 	result += "<tr><td>pmt:</td><td>" + pmt + "</td></tr>\n";
 	result += "<tr><td>vidformat:<td>" + vidform + "</td></tr>\n";
-	
+
 	result += "</table>\n"
 		"</body>\n"
 		"</html>\n";
@@ -1221,9 +1222,8 @@ static eString getUpdatesInternet()
 static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString sref;
 
-	sref = opt["ref"];
+	eString sref = opt["ref"];
 	eServiceReference ref = string2ref(sref);
 	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
 	if (::unlink(ref.path.c_str()) < 0)
@@ -2580,8 +2580,11 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 	return "http://" + getIP() + ":31338/" + eString().sprintf("%02x\n", Decoder::current.apid);
 }
 
-static eString videopls(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString videopls(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eStreamer::getInstance()->setServiceReference(string2ref(opt["sref"]));
+
 	system("killall -9 streamts");
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
 	eString apid = eString().sprintf("%04x", Decoder::current.apid);
@@ -4633,10 +4636,12 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 
 	// recording status
 #ifndef DISABLE_FILE
-	result.strReplace("#RECORDING2#", (eZapMain::getInstance()->isRecording()) ? "1" : "0");
+	result.strReplace("#RECORDING#", (eZapMain::getInstance()->isRecording()) ? "1" : "0");
 #else
-	result.strReplace("#RECORDING2#", "0");
+	result.strReplace("#RECORDING#", "0");
 #endif
+	// vlc streaming
+	result.strReplace("#SERVICEREFERENCE#", (eServiceInterface::getInstance()->service) ? eServiceInterface::getInstance()->service.toString() : "");
 	return result;
 }
 
