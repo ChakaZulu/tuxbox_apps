@@ -169,7 +169,7 @@ int eWindow::eventHandler(const eWidgetEvent &event)
 		return 1;
 
 		case eWidgetEvent::evtAction:
-			if (event.action == &i_cursorActions->cancel)
+			if ((event.action == &i_cursorActions->cancel) && in_loop)	// hack
 				close(-1);
 			else
 				break;
