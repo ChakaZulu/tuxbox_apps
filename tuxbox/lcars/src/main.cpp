@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.19  2002/05/21 04:37:42  TheDOC
+http-update... new web-frontend in http://dbox/file/start.htm... will be main index soon
+
 Revision 1.18  2002/05/20 20:11:13  TheDOC
 version fix - greetings to all readers of the tux-cvs-mailinglist :) just post a quick Hello to #dbox2 if you read that message ;)
 
@@ -114,9 +117,6 @@ int main(int argc, char **argv)
 {
 	variables variables;
 	ir ir;
-	
-	//int cramfs = 6;
-	//bool update_enabled = false;
 	
 	int key = -1;
 	int number = -1;	
@@ -334,7 +334,7 @@ int main(int argc, char **argv)
 
 	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir, &pig, &teletext);
 	
-	network network(container, &rc, &control);
+	network network(container, &rc, &control, &variables);
 	network.startThread();
 	
 

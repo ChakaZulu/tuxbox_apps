@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.7  2002/05/21 04:37:42  TheDOC
+http-update... new web-frontend in http://dbox/file/start.htm... will be main index soon
+
 Revision 1.6  2002/05/20 20:08:12  TheDOC
 some new timer and epg-stuff
 
@@ -71,11 +74,67 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "pat.h"
 #include "pmt.h"
 
-network::network(container &contain, rc *r, control *c) : cont(contain)
+network::network(container &contain, rc *r, control *c, variables *v) : cont(contain)
 {
 	xmlrpc_obj.setObjects(&cont);
 	rc_obj = r;
 	control_obj = c;
+	vars = v;
+}
+
+std::string network::replace_vars(std::string tmp_string)
+{
+	bool quit = false;
+	std::string work_string = tmp_string;
+	int position = 0;
+
+	do
+	{
+		std::string::size_type pos = work_string.find("%");
+		if (std::string::npos == pos)
+		quit = true;
+		else
+		{
+			position += pos;
+			work_string = work_string.substr(pos);
+			std::string::size_type pos = work_string.find(" ");
+			if (std::string::npos == pos)
+				quit = true;
+			else
+			{
+				std::string var = work_string.substr(0, pos);
+				if (var == "%CHANNELLIST")
+				{
+					std::string http1 = getfile(CONFIGDIR "/lcars/http/channels1.htm");
+					std::string http2 = getfile(CONFIGDIR "/lcars/http/channels2.htm");
+					std::string http3 = getfile(CONFIGDIR "/lcars/http/channels3.htm");
+					std::string http4 = getfile(CONFIGDIR "/lcars/http/channels4.htm");
+					std::stringstream iss;
+					for (int count = 0; count < cont.channels_obj->numberChannels(); count++)
+					{
+						iss << http1 << count << http2 << "/channels/zapto/" << count << http3 << cont.channels_obj->getServiceName(count) << http4;
+					}
+					iss << std::ends;
+					tmp_string.replace(tmp_string.find(var), var.length(), iss.str());
+					work_string = work_string.substr(pos);
+					position += pos;
+				}
+				else if (vars->isavailable(var))
+				{
+					tmp_string.replace(tmp_string.find(var), var.length(), vars->getvalue(var));
+					work_string = work_string.substr(pos);
+					position += pos;
+				}
+				else
+				{
+					work_string = work_string.substr(1);
+					position++;
+				}
+				std::cout << work_string << std::endl;
+			}
+		}
+	} while(!quit);
+	return tmp_string;
 }
 
 void network::startThread()
@@ -86,6 +145,20 @@ void network::startThread()
 void network::writetext(std::string text)
 {
 	write(inbound_connection, text.c_str(), text.length());
+}
+
+std::string network::getfile(std::string name)
+{
+	std::ifstream inFile;
+	std::string httpfile;
+										
+	inFile.open(name.c_str());
+	
+	std::string tmp_string;
+	while(getline(inFile, tmp_string))
+		httpfile.append(tmp_string);
+
+	return httpfile;
 }
 
 void *network::startlistening(void *object)
@@ -219,6 +292,35 @@ void *network::startlistening(void *object)
 					std::string response = "<html><body><form action=\"http://192.168.40.4/command\" method=post><input type=text name=command size=80><br><input type=submit name=submit value=\"Befehl ausfuehren\"><br></form><form action=\"http://192.168.40.4/command\" method=post><input type=text name=sub size=80><br><input type=submit name=submit value=\"Sub starten\"></form></body></html>";
 					write(inbound_connection, headerok.c_str(), headerok.length());
 					write(inbound_connection, response.c_str(), response.length());
+				}
+				else if (path[1] == "file")
+				{
+					std::string ending = path[2].substr(path[2].find("."));
+					std::string filename = CONFIGDIR "/lcars/http/" + path[2];
+					if (ending == ".htm" || ending == ".html" || ending == ".css")
+					{
+						std::ifstream inFile;
+						std::string httpfile;
+											
+						inFile.open(filename.c_str());
+	
+						std::string tmp_string;
+						while(getline(inFile, tmp_string))
+							httpfile.append(tmp_string);
+						httpfile = n->replace_vars(httpfile);
+						write(inbound_connection, httpfile.c_str(), httpfile.length());
+					}
+					else
+					{
+			
+						int fd = open(filename.c_str(), O_RDONLY);
+						char c;
+						while(read(fd, &c, 1))
+							write(inbound_connection, &c, 1);
+						close(fd);
+					}
+						
+					
 				}
 				else if (path[1] == "version")
 				{

@@ -1776,6 +1776,8 @@ void control::openMenu(int menuNumber)
 		}
 		else if (number > 29)
 		{
+			if (tmp_menu.entries.count(number) == 0)
+				continue;
 			osd_obj->addCommand("HIDE menu");
 			std::map<int, menu_entry>::iterator it = tmp_menu.entries.find(number);
 			for (int j = 0; (unsigned int) j < it->second.action_commands.size(); j++)

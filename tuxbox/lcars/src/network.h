@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.h,v $
+Revision 1.6  2002/05/21 04:37:42  TheDOC
+http-update... new web-frontend in http://dbox/file/start.htm... will be main index soon
+
 Revision 1.5  2002/05/20 20:08:12  TheDOC
 some new timer and epg-stuff
 
@@ -44,6 +47,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "xmlrpc.h"
 #include "rc.h"
 #include "control.h"
+#include "variables.h"
 
 #define PORT 80
 
@@ -53,12 +57,15 @@ class network
 	
 public:
 	control *control_obj;
+	variables *vars;
+	std::string replace_vars(std::string tmp_string);
+	std::string getfile(std::string name);
 	bool update_enabled;
 	xmlrpc xmlrpc_obj;
 	container cont;
 	rc *rc_obj;
 	void writetext(std::string text);
-	network(container &container, rc *r, control *c);
+	network(container &container, rc *r, control *c, variables *v);
 	int fd;
 	int inbound_connection;
 	static void *startlistening(void *object);
