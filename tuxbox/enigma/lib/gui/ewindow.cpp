@@ -105,19 +105,13 @@ int eWindow::eventHandler(const eWidgetEvent &event)
 		case eWidgetEvent::willShow:
 			if (focus)
 				focusChanged( focus );
-		break;
+			break;
 		case eWidgetEvent::changedText:
-		{
 			redraw(getTitleBarRect());
 			return 1;
-		}
-    
 		case eWidgetEvent::evtAction:
 			if (globCancel && (event.action == &i_cursorActions->cancel) && in_loop)	// hack
-			{
 				close(-1);
-				return eWidget::eventHandler(event);
-			}
 			else
 				break;
 			return 1;
