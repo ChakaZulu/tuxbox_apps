@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_module_descriptor.h,v 1.6 2004/01/01 20:09:19 rasc Exp $ 
+$Id: dsmcc_module_descriptor.h,v 1.7 2004/01/01 20:31:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_module_descriptor.h,v 1.6 2004/01/01 20:09:19 rasc Exp $
 
 
 $Log: dsmcc_module_descriptor.h,v $
+Revision 1.7  2004/01/01 20:31:22  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.6  2004/01/01 20:09:19  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -48,7 +51,6 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 int   descriptorDSMCC (u_char *b);
-void  descriptorDSMCC_any (u_char *b);
 
 
 

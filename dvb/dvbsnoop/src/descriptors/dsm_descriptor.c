@@ -1,5 +1,5 @@
 /*
-$Id: dsm_descriptor.c,v 1.11 2004/01/01 20:09:19 rasc Exp $ 
+$Id: dsm_descriptor.c,v 1.12 2004/01/01 20:31:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsm_descriptor.c,v 1.11 2004/01/01 20:09:19 rasc Exp $
 
 
 $Log: dsm_descriptor.c,v $
+Revision 1.12  2004/01/01 20:31:22  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.11  2004/01/01 20:09:19  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -87,7 +90,7 @@ int  descriptorDSMCC  (u_char *b)
 	if (b[0] < 0x80) {
 	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC context), Report!");
 	}
-	descriptorDSMCC_any (b);
+	descriptor_any (b);
 	break;
   } 
 
@@ -100,37 +103,6 @@ int  descriptorDSMCC  (u_char *b)
 
 
 
-
-
-/*
-  Any  descriptor  (Basic Descriptor output)
-  ETSI  TR 102 206  (ISO 13818-6)
-*/
-
-void descriptorDSMCC_any (u_char *b)
-
-{
-
- typedef struct  _descANY {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    // private data bytes
-
- } descANY;
-
-
- descANY  d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- out_nl (4,"Descriptor-Data:");
- printhexdump_buf (4,b+2,d.descriptor_length);
-
-}
 
 
 

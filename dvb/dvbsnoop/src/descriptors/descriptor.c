@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.14 2004/01/01 20:09:19 rasc Exp $
+$Id: descriptor.c,v 1.15 2004/01/01 20:31:22 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: descriptor.c,v 1.14 2004/01/01 20:09:19 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.15  2004/01/01 20:31:22  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.14  2004/01/01 20:09:19  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -131,31 +134,22 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 
 /*
   Any  descriptor  (Basic Descriptor output)
-  ETSI 300 468 
+  ETSI 300 468 // ISO 13818-1
 */
 
 void descriptor_any (u_char *b)
 
 {
-
- typedef struct  _descANY {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    // private data bytes
-
- } descANY;
+ int  len;
 
 
- descANY  d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
+ // tag		 = b[0];
+ len       	 = b[1];
 
  out_nl (4,"Descriptor-Data:");
- printhexdump_buf (4,b+2,d.descriptor_length);
+	indent (+1);
+	printhexdump_buf (4, b+2, len);
+	indent (-1);
 
 }
 

@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.11 2004/01/01 20:31:22 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.12 2004/01/01 20:35:26 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.11 2004/01/01 20:31:22 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.12  2004/01/01 20:35:26  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.11  2004/01/01 20:31:22  rasc
 PES program stream map, minor descriptor cleanup
 
@@ -807,7 +810,7 @@ void descriptorMPEG_MaxBitrate (u_char *b)
 void descriptorMPEG_PrivateDataIndicator  (u_char *b)
 
 {
-   descriptorMPEG_any (b);
+   descriptor_any (b);
 }
 
 

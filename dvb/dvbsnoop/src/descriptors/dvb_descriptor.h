@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.h,v 1.7 2004/01/01 20:09:19 rasc Exp $ 
+$Id: dvb_descriptor.h,v 1.8 2004/01/01 20:31:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_descriptor.h,v 1.7 2004/01/01 20:09:19 rasc Exp $
 
 
 $Log: dvb_descriptor.h,v $
+Revision 1.8  2004/01/01 20:31:22  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.7  2004/01/01 20:09:19  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -49,7 +52,6 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 int   descriptorDVB (u_char *b);
-void  descriptorDVB_any (u_char *b);
 
 void  descriptorDVB_NetName (u_char *b);
 void  descriptorDVB_ServList (u_char *b);

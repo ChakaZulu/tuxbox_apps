@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.h,v 1.6 2004/01/01 20:09:20 rasc Exp $ 
+$Id: mpeg_descriptor.h,v 1.7 2004/01/01 20:31:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: mpeg_descriptor.h,v 1.6 2004/01/01 20:09:20 rasc Exp $
 
 
 $Log: mpeg_descriptor.h,v $
+Revision 1.7  2004/01/01 20:31:22  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.6  2004/01/01 20:09:20  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -47,7 +50,6 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 int   descriptorMPEG (u_char *b);
-void  descriptorMPEG_any (u_char *b);
 
 void  descriptorMPEG_VideoStream (u_char *b);
 void  descriptorMPEG_AudioStream (u_char *b);

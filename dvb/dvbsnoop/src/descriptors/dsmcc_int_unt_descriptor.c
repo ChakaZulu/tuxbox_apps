@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.8 2004/01/01 20:09:19 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.9 2004/01/01 20:31:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.8 2004/01/01 20:09:19 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.9  2004/01/01 20:31:22  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.8  2004/01/01 20:09:19  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -52,15 +55,14 @@ more PES stuff, DSM descriptors, testdata
 
 
 #include "dvbsnoop.h"
-#include "dsm_int_unt_descriptor.h"
 #include "descriptor.h"
-#include "dsm_descriptor.h"
-#include "dvb_descriptor.h"
+#include "dsm_int_unt_descriptor.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 #include "misc/helper.h"
+
 
 
 
@@ -132,14 +134,14 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
      case 0x13:  descriptorDSMCC_IP_MAC_StreamLocation (b); break;
      case 0x14:  descriptorDSMCC_ISP_access_mode_descriptor (b); break;
      // DVB SI scope...
-     case 0x57:  descriptorDVB_Telephone (b);  break;
-     case 0x5F:  descriptorDVB_PrivateDataSpecifier (b);  break;
+     // case 0x57:  descriptorDVB_Telephone (b);  break;
+     // case 0x5F:  descriptorDVB_PrivateDataSpecifier (b);  break;
 
      default: 
 	if (b[0] < 0x80) {
 	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC INT/UNT context), Report!");
 	}
-	descriptorDSMCC_any (b);
+	descriptor_any (b);
 	break;
   } 
 

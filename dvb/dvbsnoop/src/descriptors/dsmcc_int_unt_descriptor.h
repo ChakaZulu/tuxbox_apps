@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.h,v 1.7 2004/01/01 20:09:19 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.h,v 1.8 2004/01/01 20:31:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_int_unt_descriptor.h,v 1.7 2004/01/01 20:09:19 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.h,v $
+Revision 1.8  2004/01/01 20:31:22  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.7  2004/01/01 20:09:19  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -50,7 +53,6 @@ more PES stuff, DSM descriptors, testdata
 
 
 int   descriptorDSMCC_INT_UNT_Private (u_char *b);
-void  descriptorDSMCC_INT_UNT_any (u_char *b);
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.24 2004/01/01 20:31:22 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.25 2004/01/01 20:35:26 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.24 2004/01/01 20:31:22 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.25  2004/01/01 20:35:26  rasc
+PES program stream map, minor descriptor cleanup
+
 Revision 1.24  2004/01/01 20:31:22  rasc
 PES program stream map, minor descriptor cleanup
 
@@ -343,7 +346,7 @@ void descriptorDVB_ServList (u_char *b)
 void descriptorDVB_Stuffing (u_char *b)
 
 {
-  descriptorDVB_any (b);
+  descriptor_any (b);
 }
 
 
@@ -3030,7 +3033,7 @@ void descriptorDVB_CASystem (u_char *b)
 {
 
 
-  descriptorDVB_any (b);
+  descriptor_any (b);
 
 }
 
@@ -3832,7 +3835,7 @@ void descriptorDVB_ServiceIdentifier (u_char *b)
 //$$$ TODO 
  out_nl (4,"Service Identifier:  [no encoding known, Report!] ");
 
- descriptorDVB_any (b);
+ descriptor_any (b);
 
 
 
