@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.52 2002/02/27 16:08:27 field Exp $
+//  $Id: neutrino.h,v 1.53 2002/02/27 20:25:16 chrissi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.53  2002/02/27 20:25:16  chrissi
+//  network test menu entry added
+//  (for now only console debug information)
+//
+//  2. Versuch! (mal schauen, obs diesmal drin bleibt)
+//
 //  Revision 1.52  2002/02/27 16:08:27  field
 //  Boeser Tasten-Bug behoben, sollte wieder normal laufen :)
 //
@@ -305,6 +311,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void setupColors_classic();
 		void setupColors_neutrino();
 		void setupNetwork( bool force= false );
+		void testNetwork( bool force= false );
 
 		void saveSetup();
 		bool loadSetup(SNeutrinoSettings* load2=NULL);
