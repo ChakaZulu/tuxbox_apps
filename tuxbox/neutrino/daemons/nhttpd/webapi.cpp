@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.48 2004/02/19 16:02:08 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.49 2004/02/19 21:57:00 carjay Exp $
 
 	License: GPL
 
@@ -477,10 +477,10 @@ bool CWebAPI::ShowCurrentStreamInfo(CWebserverRequest* request)
 
 		long header = bitInfo[7];
 
-		char layer =	(header>>17)&3;
-		char sampfreq = (header>>10)&3;
-		char mode =	(header>> 6)&3;
-		char copy =	(header>> 3)&1;
+		unsigned char layer =	(header>>17)&3;
+		unsigned char sampfreq = (header>>10)&3;
+		unsigned char mode =	(header>> 6)&3;
+		unsigned char copy =	(header>> 3)&1;
 
 		sprintf((char*) buf, "%s (%s/%s) %s", modenames[mode],
 								sampfreqnames[sampfreq],
