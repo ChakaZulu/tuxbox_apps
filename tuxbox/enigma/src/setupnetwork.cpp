@@ -19,6 +19,8 @@
 #ifdef USE_IFUPDOWN
 // in Makefile.am INCLUDES @NET_CFLAGS@
 // in configure.ac TUXBOX_APPS_LIB_PKGCONFIG(NET,tuxbox-net)
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <network_interfaces.h> /* getInetAttributes, setInetAttributes */
 #endif
 
@@ -784,11 +786,27 @@ void eZapNetworkSetup::okPressed()
 #ifdef USE_IFUPDOWN
 	system("ifdown eth0");
 	if ( automatic_start )
-		system("ifup eth0");
+	{
+		pid_t pid;
+		switch(pid=fork())
+		{
+			case -1:
+				eDebug("error fork ifup (%m)");
+				break;
+			case 0:
+				for (unsigned int i=3; i < 90; ++i )
+					close(i);
+				system("ifup eth0");
+				_exit(0);
+				break;
+			default:
+				waitpid(pid,0,0);
+				break;
+		}
+	}
 #endif
-
-	eDVB::getInstance()->configureNetwork();  
 	// when USE_IFUPDOWN is defined this only do try to mount the automounts
+	eDVB::getInstance()->configureNetwork();
 
 	if ( oldport != port->getNumber() )
 		eZap::getInstance()->reconfigureHTTPServer();
