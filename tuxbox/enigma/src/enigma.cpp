@@ -102,7 +102,7 @@ extern void ezapInitializeWeb(eHTTPDynPathResolver *dyn_resolver);
 eZap::eZap(int argc, char **argv)
 	: eApplication(/*argc, argv, 0*/)
 	,httpd(0), serialhttpd(0), dyn_resolver(0), fileresolver(0)
-	,xmlrpcresolver(0), logresolver(0), serviceSelector(0)
+	,xmlrpcresolver(0), logresolver(0), serviceSelector(0), tts_fd(-1)
 {
 	int bootcount;
 
