@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.1 2003/07/17 01:07:56 obi Exp $
+ * $Id: bat.cpp,v 1.2 2003/08/18 00:31:36 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -49,7 +49,7 @@ BouquetAssociationTable::BouquetAssociationTable(const uint8_t * const buffer) :
 
 BouquetAssociationTable::~BouquetAssociationTable(void)
 {
-	for (BouquetAssociationIterator b = bouquet.begin(); b != bouquet.end(); b--)
+	for (BouquetAssociationIterator b = bouquet.begin(); b != bouquet.end(); ++b)
 		delete *b;
 }
 
