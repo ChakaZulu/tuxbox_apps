@@ -18,7 +18,7 @@
 
 struct diseqc_cmd {
 	struct dvb_diseqc_master_cmd cmd;
-	uint32_t wait;
+	__u32 wait;
 };
 
 
@@ -45,7 +45,7 @@ struct diseqc_cmd switch_cmds[] = {
 /*--------------------------------------------------------------------------*/
 
 static inline
-void msleep(uint32_t msec)
+void msleep(__u32 msec)
 {
 	struct timespec req = { msec / 1000, 1000000 * (msec % 1000) };
 
