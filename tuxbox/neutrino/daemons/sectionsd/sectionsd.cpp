@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.149 2003/01/07 01:28:39 obi Exp $
+//  $Id: sectionsd.cpp,v 1.150 2003/02/05 22:13:10 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -24,6 +24,8 @@
 //
 //
 //
+
+#include <dmx.h>
 
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -574,212 +576,171 @@ int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds)
 //------------------------------------------------------------
 // class DMX
 //------------------------------------------------------------
-
-class DMX
+DMX::DMX(unsigned char p, unsigned short bufferSizeInKB, bool nCRC)
 {
+	fd = 0;
+	lastChanged = 0;
+	filter_index = 0;
+	pID = p;
+	dmxBufferSizeInKB = bufferSizeInKB;
+	noCRC = nCRC;
+	pthread_mutex_init(&pauselock, NULL); // default = fast mutex
+	pthread_mutex_init(&start_stop_mutex, NULL); // default = fast mutex
+	pthread_cond_init( &change_cond, NULL );
+	pauseCounter = 0;
+	real_pauseCounter = 0;
+}
 
-public:
-	DMX(unsigned char p, unsigned short bufferSizeInKB, int nCRC = 0)
+DMX::~DMX()
+{
+	closefd();
+	pthread_mutex_destroy(&pauselock); // ist bei Linux ein dummy
+	pthread_mutex_destroy(&start_stop_mutex); // ist bei Linux ein dummy
+	pthread_cond_destroy(&change_cond);
+}
+
+int DMX::read(char *buf, const size_t buflength, unsigned timeoutMInSeconds)
+{
+	return readNbytes(fd, buf, buflength, timeoutMInSeconds);
+}
+
+void DMX::closefd(void)
+{
+	if (fd)
 	{
+		close(fd);
 		fd = 0;
-		lastChanged = 0;
-		filter_index = 0;
-		pID = p;
-		dmxBufferSizeInKB = bufferSizeInKB;
-		noCRC = nCRC;
-		pthread_mutex_init(&pauselock, NULL); // default = fast mutex
-		pthread_mutex_init(&start_stop_mutex, NULL); // default = fast mutex
-		pthread_cond_init( &change_cond, NULL );
-		pauseCounter = 0;
-		real_pauseCounter = 0;
 	}
+}
 
-	~DMX()
-	{
+void DMX::addfilter(unsigned char filter, unsigned char mask)
+{
+	s_filters	tmp;
+	tmp.filter = filter;
+	tmp.mask = mask;
+	filters.insert(filters.end(), tmp);
+}
+
+int DMX::stop(void)
+{
+	if (!fd)
+		return 1;
+	
+	pthread_mutex_lock( &start_stop_mutex );
+	
+	if (real_pauseCounter == 0)
 		closefd();
-		pthread_mutex_destroy(&pauselock); // ist bei Linux ein dummy
-		pthread_mutex_destroy(&start_stop_mutex); // ist bei Linux ein dummy
-		pthread_cond_destroy(&change_cond);
-	}
+	
+	pthread_mutex_unlock( &start_stop_mutex );
+	
+	return 0;
+}
 
-	int start(void); // calls unlock at end
-	int read(char *buf, const size_t buflength, unsigned timeoutMInSeconds)
-	{
-		return readNbytes(fd, buf, buflength, timeoutMInSeconds);
-	}
+void DMX::lock(void)
+{
+	pthread_mutex_lock( &start_stop_mutex );
+}
 
-	void closefd(void)
+void DMX::unlock(void)
+{
+	pthread_mutex_unlock( &start_stop_mutex );
+}
+
+bool DMX::isOpen(void)
+{
+	return fd ? true : false;
+}
+
+char * DMX::getSection(unsigned timeoutInMSeconds, int &timeouts)
+{
+	struct minimal_section_header {
+		unsigned char table_id : 8;
+		// 1 byte
+		unsigned char section_syntax_indicator : 1;
+		unsigned char reserved_future_use : 1;
+		unsigned char reserved1 : 2;
+		unsigned short section_length : 12;
+		// 3 bytes
+	} __attribute__ ((packed));
+	
+	minimal_section_header initial_header;
+	char * buf;
+	int    rc;
+	
+	lock();
+	
+	rc = read((char *) &initial_header, 3, timeoutInMSeconds);
+	
+	if (rc <= 0)
 	{
-		if (fd)
+		unlock();
+		if (rc == 0)
 		{
-			close(fd);
-			fd = 0;
+			dprintf("dmx.read timeout - filter: %x - timeout# %d", filters[filter_index].filter, timeouts);
+			timeouts++;
 		}
-	}
-
-	void addfilter(unsigned char filter, unsigned char mask)
-	{
-		s_filters	tmp;
-		tmp.filter = filter;
-		tmp.mask = mask;
-		filters.insert(filters.end(), tmp);
-	}
-
-	int stop(void)
-	{
-		if (!fd)
-			return 1;
-
-		pthread_mutex_lock( &start_stop_mutex );
-
-		if (real_pauseCounter == 0)
-			closefd();
-
-		pthread_mutex_unlock( &start_stop_mutex );
-
-		return 0;
-	}
-
-	int pause(void); // increments pause_counter
-	int unpause(void); // decrements pause_counter
-
-	int real_pause(void);
-	int real_unpause(void);
-
-	int request_pause(void);
-	int request_unpause(void);
-
-	int change(int new_filter_index); // locks while changing
-
-	void lock (void)
-	{
-		pthread_mutex_lock( &start_stop_mutex );
-	}
-
-	void unlock(void)
-	{
-		pthread_mutex_unlock( &start_stop_mutex );
-	}
-
-	struct s_filters
-	{
-		unsigned char filter;
-		unsigned char mask;
-	};
-
-	std::vector<s_filters> filters;
-	int	filter_index;
-	time_t	lastChanged;
-
-	bool isOpen(void)
-	{
-		return fd ? true : false;
-	}
-
-	int pauseCounter;
-	int real_pauseCounter;
-	pthread_cond_t	change_cond;
-	pthread_mutex_t	start_stop_mutex;
-
-	char * getSection(unsigned timeoutInMSeconds, int &timeouts) // section with size < 3 + 5 are skipped !
+		else
 		{
-			struct minimal_section_header {
-				unsigned char table_id : 8;
-				// 1 byte
-				unsigned char section_syntax_indicator : 1;
-				unsigned char reserved_future_use : 1;
-				unsigned char reserved1 : 2;
-				unsigned short section_length : 12;
-				// 3 bytes
-			} __attribute__ ((packed));
-
-			minimal_section_header initial_header;
-			char * buf;
-			int    rc;
-
-			lock();
-
-			rc = read((char *) &initial_header, 3, timeoutInMSeconds);
-
-			if (rc <= 0)
-			{
-				unlock();
-				if (rc == 0)
-				{
-					dprintf("dmx.read timeout - filter: %x - timeout# %d", filters[filter_index].filter, timeouts);
-					timeouts++;
-				}
-				else
-				{
-					dprintf("dmx.read rc: %d - filter: %x", rc, filters[filter_index].filter);
-					// restart DMX
-					real_pause();
-					real_unpause();
-				}
-				return NULL;
-			}
-
-			timeouts = 0;
-			buf = new char[3 + initial_header.section_length];
-
-			if (!buf)
-			{
-				unlock();
-				closefd();
-				fprintf(stderr, "[sectionsd] FATAL: Not enough memory: filter: %x\n", filters[filter_index].filter);
-				throw std::bad_alloc();
-				return NULL;
-			}
-
-			if (initial_header.section_length > 0)
-				rc = read(buf + 3, initial_header.section_length, timeoutInMSeconds);
-
-			unlock();
-
-			if (rc <= 0)
-			{
-				delete[] buf;
-				if (rc == 0)
-				{
-					dprintf("dmx.read timeout after header - filter: %x", filters[filter_index].filter);
-				}
-				else
-				{
-					dprintf("dmx.read rc: %d after header - filter: %x", rc, filters[filter_index].filter);
-				}
-				// DMX restart required, since part of the header has been read
-				real_pause();
-				real_unpause();
-				return NULL;
-			}
-
-			// check if the filter worked correctly
-			if (((initial_header.table_id ^ filters[filter_index].filter) & filters[filter_index].mask) != 0)
-			{
-				delete[] buf;
-				dprintf("[sectionsd] filter 0x%x mask 0x%x -> skip sections for table 0x%x\n", filters[filter_index].filter, filters[filter_index].mask, initial_header.table_id);
-				return NULL;
-			}
-
-			if (initial_header.section_length < 5)  // skip sections which are too short
-			{
-				delete[] buf;
-				return NULL;
-			}
-
-			memcpy(buf, &initial_header, 3);
-
-			return buf;
+			dprintf("dmx.read rc: %d - filter: %x", rc, filters[filter_index].filter);
+			// restart DMX
+			real_pause();
+			real_unpause();
 		}
-
-private:
-	int fd;
-	pthread_mutex_t pauselock;
-	unsigned char pID;
-	unsigned short dmxBufferSizeInKB;
-	int noCRC; // = 1 -> der 2. Filter hat keine CRC
-
-};
+		return NULL;
+	}
+	
+	timeouts = 0;
+	buf = new char[3 + initial_header.section_length];
+	
+	if (!buf)
+	{
+		unlock();
+		closefd();
+		fprintf(stderr, "[sectionsd] FATAL: Not enough memory: filter: %x\n", filters[filter_index].filter);
+		throw std::bad_alloc();
+		return NULL;
+	}
+	
+	if (initial_header.section_length > 0)
+		rc = read(buf + 3, initial_header.section_length, timeoutInMSeconds);
+	
+	unlock();
+	
+	if (rc <= 0)
+	{
+		delete[] buf;
+		if (rc == 0)
+		{
+			dprintf("dmx.read timeout after header - filter: %x", filters[filter_index].filter);
+		}
+		else
+		{
+			dprintf("dmx.read rc: %d after header - filter: %x", rc, filters[filter_index].filter);
+		}
+		// DMX restart required, since part of the header has been read
+		real_pause();
+		real_unpause();
+		return NULL;
+	}
+	
+	// check if the filter worked correctly
+	if (((initial_header.table_id ^ filters[filter_index].filter) & filters[filter_index].mask) != 0)
+	{
+		delete[] buf;
+		dprintf("[sectionsd] filter 0x%x mask 0x%x -> skip sections for table 0x%x\n", filters[filter_index].filter, filters[filter_index].mask, initial_header.table_id);
+		return NULL;
+	}
+	
+	if (initial_header.section_length < 5)  // skip sections which are too short
+	{
+		delete[] buf;
+		return NULL;
+	}
+	
+	memcpy(buf, &initial_header, 3);
+	
+	return buf;
+}
 
 int DMX::start(void)
 {
@@ -1622,7 +1583,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.149 2003/01/07 01:28:39 obi Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.150 2003/02/05 22:13:10 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4236,7 +4197,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.149 2003/01/07 01:28:39 obi Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.150 2003/02/05 22:13:10 thegoodguy Exp $\n");
 
 	try
 	{
