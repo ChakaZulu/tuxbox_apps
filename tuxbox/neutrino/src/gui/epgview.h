@@ -76,6 +76,7 @@ using namespace std;
 	char done[6];
 };
 */
+
 struct EPGData
 {
 	string 	title;
@@ -84,7 +85,8 @@ struct EPGData
 	string 	date;
 	string 	start;
 	string 	end;
-	int		done;
+	int	done;
+	char	fsk;
 	string 	contentClassification;
 	string 	userClassification;
 };

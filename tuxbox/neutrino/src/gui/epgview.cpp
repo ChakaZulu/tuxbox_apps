@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.38 2002/02/22 14:56:43 field Exp $
+// $Id: epgview.cpp,v 1.39 2002/02/23 14:53:47 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.39  2002/02/23 14:53:47  McClean
+// dd fsk
+//
 // Revision 1.38  2002/02/22 14:56:43  field
 // neues Plugin-Interface
 //
@@ -618,7 +621,8 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 			dp+=strlen(dp)+1;
 			epgData.userClassification = dp;
 			dp+=strlen(dp)+1;
-
+			epgData.fsk = *dp++;
+			printf("fsk: %d\n", epgData.fsk);
 
 			epg_times = (sectionsd::sectionsdTime*) dp;
             dp+= sizeof(sectionsd::sectionsdTime);
