@@ -230,6 +230,7 @@ bool CFlashUpdate::checkVersion4Update()
 				}
 			}
 		}
+		CramfsBrowser.hide();
 		
 		if (CFileSelected == NULL)
 		{

@@ -148,12 +148,12 @@ class CFileBrowser
 		void paint();
 		void paintHead();
 		void paintFoot();
-		void hide();
 
 	public:
 		CFileList		filelist;
 
 		void ChangeDir(const std::string & filename);
+		void hide();
 
 		std::string		Path;
 		bool			Multi_Select;
