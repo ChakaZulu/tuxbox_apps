@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.13 2003/10/29 20:54:56 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.14 2003/11/01 21:40:27 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.13 2003/10/29 20:54:56 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.14  2003/11/01 21:40:27  rasc
+some broadcast/linkage descriptor stuff
+
 Revision 1.13  2003/10/29 20:54:56  rasc
 more PES stuff, DSM descriptors, testdata
 
@@ -790,6 +793,18 @@ void descriptorDVB_Linkage (u_char *b)
 
     if (d.linkage_type == 0x08) {		/* EN 300 468 */
         sub_descriptorDVB_Linkage0x08 (b, len);
+    } else if (d.linkage_type == 0x09) {	/* TR 102 006  DSM-CC */
+//        sub_descriptorDVB_Linkage0x09 (b, len);
+//        $$$ TODO 
+
+    } else if (d.linkage_type == 0x0A) {	/* TR 102 006  DSM-CC */
+
+	/* SSU SCAN Linkage */
+ 	u_int table_id;
+
+	table_id			= getBits (b, 0,  0, 8);
+	out_S2W_NL  (4,"Table_id: ",table_id,
+			dsmccStrLinkage0CTable_TYPE(table_id));
 
     } else if (d.linkage_type == 0x0B) {	/* EN 301 192  DSM-CC */
         sub_descriptorDVB_Linkage0x0B (b, len);
@@ -1847,6 +1862,7 @@ void descriptorDVB_Telephone  (u_char *b)
 
 
  descriptorDVB_any (b);
+ /* $$$ TODO ... */
  out_nl (4," ==> ERROR: Telephone descriptor not implemented, Report!");
 
 
@@ -2695,7 +2711,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
  d.data_broadcast_id		 = getBits (b, 0, 16, 16);
  d.component_tag		 = getBits (b, 0, 32, 8);
  d.selector_length		 = getBits (b, 0, 40, 8);
- b += 6;
+ b  += 6;
 
  
  out_S2W_NL (4,"Data_broadcast_ID: ",d.data_broadcast_id,
@@ -2705,10 +2721,10 @@ void descriptorDVB_DataBroadcast (u_char *b)
  out_SB_NL (5,"Selector_length: ",d.selector_length);
 
 
+ indent (+1);
  if (d.data_broadcast_id == 0x0005) {
-	 // -- EN 301 192 Multi-protocol-encapsulation!
+	 /* -- EN 301 192 Multi-protocol-encapsulation! */
 
-	 {
  		typedef struct  _descMultiProtEncaps {
 			u_int	MAC_address_range;
 			u_int	MAC_ip_mapping_flag;
@@ -2721,7 +2737,6 @@ void descriptorDVB_DataBroadcast (u_char *b)
 		descMultiProtEncaps e;
 
  		out_nl    (4,"Multi_Protocol_Encapsulation [EN 301 192]:");
-		indent (+1);
  		e.MAC_address_range	 = getBits (b, 0,  0,  3);
  		e.MAC_ip_mapping_flag	 = getBits (b, 0,  3,  1);
  		e.alignment_indicator	 = getBits (b, 0,  4,  1);
@@ -2735,22 +2750,125 @@ void descriptorDVB_DataBroadcast (u_char *b)
 					(e.alignment_indicator) ?"32 bit": "8 bit");
  		out_SB_NL (6,"reserved: ",e.reserved);
  		out_SB_NL (5,"max_sections_per_datagram: ",e.max_sections_per_datagram);
-		indent (-1);
-
-	 }
 
  } else if (d.data_broadcast_id == 0x0006) {
-	 /* $$$ TODO EN 301 192 8.3.1 */
- 			out_nl    (4,"TODO Data_Carousel_info:");
-		 	printhexdump_buf (4,  b, d.selector_length);
+	 /* --  EN 301 192 8.3.1 */
+
+ 		typedef struct  _descDATA_CAROUSEL_INFO {
+			u_int	carousel_type_id;
+			u_int	reserved_1;
+			u_long	transaction_id;
+			u_long  timeout_value_DSI;
+			u_long  timeout_value_DII;
+			u_int	reserved_2;
+			u_long	leak_rate;
+ 		} descDATA_CAROUSEL_INFO;
+
+
+		descDATA_CAROUSEL_INFO c;
+
+
+ 		out_nl    (4,"Data_Carousel_info:");
+ 		c.carousel_type_id		= getBits (b, 0,  0,  2);
+ 		c.reserved_1			= getBits (b, 0,  2,  6);
+ 		c.transaction_id		= getBits (b, 0,  8, 32);
+ 		c.timeout_value_DSI		= getBits (b, 0, 40, 32);
+ 		c.timeout_value_DII		= getBits (b, 0, 72, 32);
+ 		c.reserved_2			= getBits (b, 0,104,  2);
+ 		c.leak_rate			= getBits (b, 0,106, 22);
+
+ 		out_S2B_NL (5,"carousel_type_id: ",c.carousel_type_id,
+			dsmccStrCarouselType_ID (c.carousel_type_id) );
+ 		out_SB_NL (6,"reserved_1: ",c.reserved_1);
+ 		out_SL_NL (5,"transaction_id: ",c.transaction_id);
+ 		out_SL_NL (5,"timeout_value_DSI: ",c.timeout_value_DSI);
+ 		out_SL_NL (5,"timeout_value_DII: ",c.timeout_value_DII);
+ 		out_SB_NL (6,"reserved_2: ",c.reserved_2);
+ 		out_SL_NL (5,"leak_rate: ",c.leak_rate);
+
  } else if (d.data_broadcast_id == 0x0007) {
-	 /* $$$ TODO EN 301 192 9.3.2 */
- 			out_nl    (4,"TODO Object_Carousel_Info:");
-		 	printhexdump_buf (4,  b, d.selector_length);
+	 /* -- EN 301 192 9.3.2 */
+
+ 		typedef struct  _descOBJECT_CAROUSEL_INFO {
+			u_int	carousel_type_id;
+			u_int	reserved_1;
+			u_long	transaction_id;
+			u_long  timeout_value_DSI;
+			u_long  timeout_value_DII;
+			u_int	reserved_2;
+			u_long	leak_rate;
+			// --
+ 		} descOBJECT_CAROUSEL_INFO;
+
+
+		descOBJECT_CAROUSEL_INFO c;
+		u_char                   *b1; 
+		int                      len1;
+
+
+		out_nl    (4,"Object_Carousel_Info:");
+ 		c.carousel_type_id		= getBits (b, 0,  0,  2);
+ 		c.reserved_1			= getBits (b, 0,  2,  6);
+ 		c.transaction_id		= getBits (b, 0,  8, 32);
+ 		c.timeout_value_DSI		= getBits (b, 0, 40, 32);
+ 		c.timeout_value_DII		= getBits (b, 0, 72, 32);
+ 		c.reserved_2			= getBits (b, 0,104,  2);
+ 		c.leak_rate			= getBits (b, 0,106, 22);
+
+ 		out_S2B_NL (5,"carousel_type_id: ",c.carousel_type_id,
+			dsmccStrCarouselType_ID (c.carousel_type_id) );
+ 		out_SB_NL (6,"reserved_1: ",c.reserved_1);
+ 		out_SL_NL (5,"transaction_id: ",c.transaction_id);
+ 		out_SL_NL (5,"timeout_value_DSI: ",c.timeout_value_DSI);
+ 		out_SL_NL (5,"timeout_value_DII: ",c.timeout_value_DII);
+ 		out_SB_NL (6,"reserved_2: ",c.reserved_2);
+ 		out_SL_NL (5,"leak_rate: ",c.leak_rate);
+
+		b1 = b + 16;
+		len1 = d.selector_length - 16;
+
+		while (len1 > 0) {
+    			u_char     ISO639_2_language_code[4];
+			u_int      object_name_length;
+
+ 			getISO639_3 (ISO639_2_language_code, b1);
+			object_name_length		 = getBits (b1, 0, 24, 8);
+
+			out_nl    (5,"ISO639_2_language_code:  %3.3s", ISO639_2_language_code);
+			out_SB_NL (5,"object_name_length: ",object_name_length);
+			out       (5,"object_name: ");
+				print_name (5, b1+4,object_name_length);
+			 	out_NL (5);
+
+			b1   += (4 + object_name_length);
+			len1 -= (4 + object_name_length);
+		}
+
+
  } else if (d.data_broadcast_id == 0x0009) {
-	 /* $$$ TODO EN 301 192 10.2.1 */
- 			out_nl    (4,"TODO higher_protocol_asynchronous_data_info:");
-		 	printhexdump_buf (4,  b, d.selector_length);
+	 /* --  EN 301 192 10.2.1 */
+
+ 		typedef struct  _descHIGH_PROT_ASYNC_DATA_INFO {
+			u_int	higher_protocol_id;
+			u_int	reserved;
+			// private data
+ 		} descHIGH_PROT_ASYNC_DATA_INFO;
+
+
+		descHIGH_PROT_ASYNC_DATA_INFO  c;
+
+
+		out_nl    (4,"higher_protocol_asynchronous_data_info:");
+ 		c.higher_protocol_id 		= getBits (b, 0,  0,  4);
+ 		c.reserved			= getBits (b, 0,  4,  4);
+
+ 		out_S2B_NL (5,"higher_protocol_id: ",c.higher_protocol_id,
+			dsmccStrHigherProtocol_ID (c.higher_protocol_id) );
+ 		out_SB_NL (6,"reserved: ",c.reserved);
+
+ 		out_nl (5,"private_data: ");
+		 	printhexdump_buf (4,  b+1, d.selector_length-1);
+
  } else if (d.data_broadcast_id == 0x000A) {
 	 /* $$$ TODO TR 102 006 */
  			out_nl    (4,"TODO Software_update_info:");
@@ -2759,6 +2877,8 @@ void descriptorDVB_DataBroadcast (u_char *b)
  	out_nl    (4,"Selector-Bytes:");
  	printhexdump_buf (4,  b, d.selector_length);
  }
+ indent (-1);
+
 
  b += d.selector_length;
  getISO639_3 (d.ISO639_2_language_code, b);
@@ -2836,8 +2956,18 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
  // $$$ ID selector bytes may depend on databroadcast_id
  // $$$ do further more selection here
  // $$$ EN 301 192 Stuff TODO
- 
- if (d.data_broadcast_id == 0x000B) {
+
+
+ if (d.data_broadcast_id == 0x000A) {
+
+
+	// $$$ TODO  TR 102 006  Software update  S.12
+	out_nl    (4,"TODO system_software_update_info:");
+		 	printhexdump_buf (4,  b, len);
+
+
+
+ } else if (d.data_broadcast_id == 0x000B) {
 	 // -- EN 301 192 PSI Signalling IP/MAC Notification Table
 
 	 {

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.21 2003/10/29 20:54:57 rasc Exp $
+$Id: dvb_str.c,v 1.22 2003/11/01 21:40:28 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.21 2003/10/29 20:54:57 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.22  2003/11/01 21:40:28  rasc
+some broadcast/linkage descriptor stuff
+
 Revision 1.21  2003/10/29 20:54:57  rasc
 more PES stuff, DSM descriptors, testdata
 
@@ -148,11 +151,12 @@ char *dvbstrTableID (u_int id)
      {  0x02, 0x02,  "program_map_section" },
      {  0x03, 0x03,  "transport_stream_description_section" },
  // $$$ TODO DSM-CC  anyone a ISO 13818-6 tp spare???
-      {  0x04, 0x3d,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
-      {  0x3b, 0x3b,  "DSM-CC - DSI or DII (DownloadServerInitiate or -InfoIndication" },
+      {  0x04, 0x39,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
+      {  0x3a, 0x3a,  "DSM-CC - LLCSNAP " },		/* $$$ ??? TODO */
+      {  0x3b, 0x3b,  "DSM-CC - DSI or DII (DownloadServerInitiate or -InfoIndication)" },
       {  0x3c, 0x3c,  "DSM-CC - DDB (DownloadDataBlock)" },    /* TR 101 202 */
-      {  0x3d, 0x3d,  "reserved" },
-      {  0x3e, 0x3e,  "DSM-CC - Datagram" },
+      {  0x3d, 0x3d,  "DSM-CC - descriptorlist" },	/* $$$ ??? TODO */
+      {  0x3e, 0x3e,  "DSM-CC - private data section (datagram)" },
       {  0x3f, 0x3f,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
 
      {  0x40, 0x40,  "network_information_section - actual network" },
@@ -2301,6 +2305,7 @@ char *dvbstrBouquetTable_ID (u_int i)
 	{ 0xC000, 0xC01f,   "Canal+ | 902 | Canal +" },
 	{ 0xFC00, 0xFCff,   "France Telecom | 902 | France Telecom" },
 	{ 0xFD08, 0xFD08,   "Xtra Music | 902 | Xtra Music " },
+	{ 0xFFFF, 0xFFFF,   "?????? whatever this is..." },
 
      	{  0,0, NULL }
   };

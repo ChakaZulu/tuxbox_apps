@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.4 2003/10/29 20:54:57 rasc Exp $
+$Id: dsmcc_str.c,v 1.5 2003/11/01 21:40:27 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,9 @@ $Id: dsmcc_str.c,v 1.4 2003/10/29 20:54:57 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.5  2003/11/01 21:40:27  rasc
+some broadcast/linkage descriptor stuff
+
 Revision 1.4  2003/10/29 20:54:57  rasc
 more PES stuff, DSM descriptors, testdata
 
@@ -70,16 +73,28 @@ static char *findTableID (STR_TABLE *t, u_int id)
 
 /*
   -- DSM-CC  Descriptors
-  -- Private Tag Space
+  -- Private Tag Space  (DII, DSI)
   -- see EN 192
  */
 
-char *dsmccStrDSMCC_Private_DescriptorTAG (u_int i)
+char *dsmccStrDSMCC_DataCarousel_DescriptorTAG (u_int i)
 
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "reserved" },
-     {  0xFF, 0xFF,  "reserved" },
+     {  0x01, 0x01,  "type_descriptor" },
+     {  0x02, 0x02,  "name_descriptor" },
+     {  0x03, 0x03,  "info_descriptor" },
+     {  0x04, 0x04,  "module_link_descriptor" },
+     {  0x05, 0x05,  "CRC32_descriptor" },
+     {  0x06, 0x06,  "location_descriptor" },
+     {  0x07, 0x07,  "estimated_download_time_descriptor" },
+     {  0x08, 0x08,  "group_link_descriptor" },
+     {  0x09, 0x09,  "compressed_module_descriptor" },
+     {  0x0A, 0x0A,  "subgroup_association_descriptor" },
+     {  0x0B, 0x6F,  "reserved for future use by DVB" },
+     {  0x70, 0x7F,  "reserved MHP" },
+     {  0x80, 0xFF,  "private_descriptor" },
      {  0,0, NULL }
   };
 
@@ -324,6 +339,50 @@ char *dsmccStrPlatform_ID (u_int id)
 	  /* $$$ TODO   ... */
 	{ 0x000000, 0x000000,   "" },
       {  0,0, NULL }
+  };
+
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  --  Carousel Type ID    EN 301 192
+*/
+
+char *dsmccStrCarouselType_ID (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "reserved" },
+	{ 0x01, 0x01,   "one layer carousel" },
+	{ 0x02, 0x02,   "two layer carousel" },
+	{ 0x03, 0x03,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  --  Higher Protocol ID    EN 301 192
+*/
+
+char *dsmccStrHigherProtocol_ID (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "reserved" },
+	{ 0x01, 0x01,   "dGNSS data" },
+	{ 0x02, 0x02,   "TPEG" },
+	{ 0x03, 0x0F,   "reserved" },
+      	{  0,0, NULL }
   };
 
 

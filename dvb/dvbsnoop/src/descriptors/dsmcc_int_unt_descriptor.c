@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.1 2003/10/29 20:56:18 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.2 2003/11/01 21:40:27 rasc Exp $ 
 
 
   dvbsnoop
@@ -12,6 +12,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.1 2003/10/29 20:56:18 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.2  2003/11/01 21:40:27  rasc
+some broadcast/linkage descriptor stuff
+
 Revision 1.1  2003/10/29 20:56:18  rasc
 more PES stuff, DSM descriptors, testdata
 
@@ -132,5 +135,7 @@ void descriptorDSMCC_INT_UNT_any (u_char *b)
  *
  * */
 
+
+// EN 301 192  S. 26  $$$
 
 

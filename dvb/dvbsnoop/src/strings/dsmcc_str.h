@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.4 2003/10/29 20:54:57 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.5 2003/11/01 21:40:27 rasc Exp $ 
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -8,6 +8,9 @@ $Id: dsmcc_str.h,v 1.4 2003/10/29 20:54:57 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.5  2003/11/01 21:40:27  rasc
+some broadcast/linkage descriptor stuff
+
 Revision 1.4  2003/10/29 20:54:57  rasc
 more PES stuff, DSM descriptors, testdata
 
@@ -28,7 +31,8 @@ some updates to dvbsnoop...
 */
 
 
-char *dsmccStrDSMCC_Private_DescriptorTAG (u_int i);
+
+char *dsmccStrDSMCC_DataCarousel_DescriptorTAG (u_int i);
 char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i);
 
 char *dsmccStrMHPOrg (u_int id);
@@ -39,6 +43,10 @@ char *dsmccStrAddress_scrambling_control (u_int id);
 char *dsmccStrLinkage0CTable_TYPE (u_int i);
 char *dsmccStrMultiProtEncapsMACAddrRangeField (u_int i);
 char *dsmccStrPlatform_ID (u_int id);
+char *dsmccStrCarouselType_ID (u_int id);
+char *dsmccStrHigherProtocol_ID (u_int id);
+
+
 
 
 

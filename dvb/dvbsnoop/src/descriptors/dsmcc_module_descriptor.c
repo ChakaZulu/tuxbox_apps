@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_module_descriptor.c,v 1.8 2003/10/29 20:54:56 rasc Exp $ 
+$Id: dsmcc_module_descriptor.c,v 1.9 2003/11/01 21:40:27 rasc Exp $ 
 
 
   dvbsnoop
@@ -12,6 +12,9 @@ $Id: dsmcc_module_descriptor.c,v 1.8 2003/10/29 20:54:56 rasc Exp $
 
 
 $Log: dsmcc_module_descriptor.c,v $
+Revision 1.9  2003/11/01 21:40:27  rasc
+some broadcast/linkage descriptor stuff
+
 Revision 1.8  2003/10/29 20:54:56  rasc
 more PES stuff, DSM descriptors, testdata
 
@@ -38,7 +41,7 @@ more PES stuff, DSM descriptors, testdata
   return byte length
 */
 
-int  descriptorDSMCCPrivate  (u_char *b)
+int  descriptorDSMCC_DataCarousel_Private  (u_char *b)
 
 {
  int len;
@@ -49,8 +52,8 @@ int  descriptorDSMCCPrivate  (u_char *b)
   len = ((int) b[1]) + 2;
 
   out_NL (4);
-  out_S2B_NL (4,"DSM_CC-Private-DescriptorTag: ",id,
-		  dsmccStrDSMCC_Private_DescriptorTAG(id));
+  out_S2B_NL (4,"DSM_CC-DataCarousel-DescriptorTag: ",id,
+		  dsmccStrDSMCC_DataCarousel_DescriptorTAG (id));
   out_SB_NL  (5,"Descriptor_length: ",b[1]);
   /* $$$$ TODO */
 out_nl (1," ... TODO... $$$ not yet done");

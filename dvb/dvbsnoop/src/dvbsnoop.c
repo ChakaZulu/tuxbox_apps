@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.11 2003/11/01 17:05:46 rasc Exp $
+$Id: dvbsnoop.c,v 1.12 2003/11/01 21:40:26 rasc Exp $
 
 
 
@@ -23,6 +23,9 @@ $Id: dvbsnoop.c,v 1.11 2003/11/01 17:05:46 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.12  2003/11/01 21:40:26  rasc
+some broadcast/linkage descriptor stuff
+
 Revision 1.11  2003/11/01 17:05:46  rasc
 no message
 
@@ -98,8 +101,8 @@ int main(int argc, char **argv)
   indent (0);
   if (! opt.binary_out) {
      if (! opt.hide_copyright) {
-        out_nl (1, "dvbsnoop  Vers. %s   -- (c) Rainer Scherg",DVBSNOOP_VERSION);
-        out_nl (1,"           %s  \n",DVBSNOOP_URL);
+        out_nl (1, "dvbsnoop  Vers. %s   -- %s ",
+			DVBSNOOP_VERSION,DVBSNOOP_URL);
      }
      out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
      out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
