@@ -20,9 +20,10 @@ class eAVSwitch
 {
 	static eAVSwitch *instance;
 	int setVolume(int vol);	// 0..65535
-	void setMute(bool m);
+	void muteAviaAudio(bool);
 	int volume, mute;	
 public:
+	void sendVolumeChanged();
 	int getVolume() { return volume; }
 	int getMute() { return mute; }
 	Signal1<void, int> volumeChanged;

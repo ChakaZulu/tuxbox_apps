@@ -45,11 +45,14 @@ eAVSwitch::eAVSwitch()
 		// initial volume settings
 	if (eConfig::getInstance()->getKey("/elitedvb/audio/volume", volume))
 		volume=10;
+
 	if (eConfig::getInstance()->getKey("/elitedvb/audio/mute", mute))
 		mute=0;
 
-	changeVolume(1, volume);
-	setMute(mute);
+	eDebug("mute = %i, volume = %i", mute, volume);
+
+	mute = !mute;
+	toggleMute();
 }
 
 eAVSwitch *eAVSwitch::getInstance()
@@ -97,12 +100,12 @@ void eAVSwitch::changeVolume(int abs, int vol)
 		case 0:
 			volume+=vol;
 			if (mute)
-				setMute(0);
+				toggleMute();
 		break;
 		case 1:
 			volume=vol;
 			if (mute)
-				setMute(0);
+				toggleMute();
 		break;
 	}
 
@@ -115,23 +118,29 @@ void eAVSwitch::changeVolume(int abs, int vol)
 	if (vol)
 		setVolume( (63-volume) * 65536/64 );
 
-	/*emit*/ volumeChanged(volume);
+	sendVolumeChanged();
+}
+
+void eAVSwitch::sendVolumeChanged()
+{
+	/*emit*/ volumeChanged(mute?63:volume);
 }
 
 void eAVSwitch::toggleMute()
 {
-eDebug("toggle Mute--------------------------------");
 	mute = !mute;
-	setMute(mute);
+
 	if (mute)
-		/*emit*/ volumeChanged(63);	
+	{
+		setVolume(63);
+		sendVolumeChanged();
+	}
 	else
-		/*emit*/ volumeChanged(volume);
+		changeVolume(1,volume);
 }
 
-void eAVSwitch::setMute(bool m)
+void eAVSwitch::muteAviaAudio(bool m)
 {
-	eDebug("setMute--------------------------------");
 	int a;
 
 	if(m)
@@ -139,13 +148,12 @@ void eAVSwitch::setMute(bool m)
 	else
 		a=AVS_UNMUTE;
 
-	if (ioctl(fd,AVSIOSMUTE, &a) < 0)
+	if (ioctl(fd, AVSIOSMUTE, &a) < 0)
 	{
 		perror("AVSIOSMUTE:");
 		return;
 	}
 }
-
 
 int eAVSwitch::setTVPin8(int vol)
 {
@@ -200,8 +208,7 @@ int eAVSwitch::setInput(int v)
 	switch (v)
 	{
 	case 0:	//	Switch to DVB
-		if (!mute)
-			setMute(0);
+		muteAviaAudio(0);  // enable avia audio output !
 		ioctl(fd, AVSIOSVSW1, dvb);
 		ioctl(fd, AVSIOSASW1, dvb+1);
 		ioctl(fd, AVSIOSVSW2, dvb+2);
@@ -211,8 +218,7 @@ int eAVSwitch::setInput(int v)
 		reloadSettings();
 		break;
 	case 1:   // Switch to VCR
-		if (!mute)
-			setMute(1);
+		muteAviaAudio(1);  // dsiable avia audio output !
 		v = (Type == SAGEM)? 0 : 2;
 		ioctl(fd, AVSIOSFBLK, &v);
 		ioctl(fd, AVSIOSVSW1, scart);
@@ -221,8 +227,6 @@ int eAVSwitch::setInput(int v)
 		ioctl(fd, AVSIOSASW2, scart+3);
 		ioctl(fd, AVSIOSVSW3, scart+4);
 		ioctl(fd, AVSIOSASW3, scart+5);
-/*		v = 0;  // full Volume
-		ioctl(fd, AVSIOSVOL, &v);*/
 		break;
 	}
 	return 0;
