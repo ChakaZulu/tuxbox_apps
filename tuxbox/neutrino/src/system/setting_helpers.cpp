@@ -390,9 +390,10 @@ bool CAudioSetupNotifier2::changeNotify(const std::string & OptionName, void*)
 
 	if (g_settings.audio_avs_Control == 2)   
 		g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
-	else
+	else {
 		g_Controld->setVolume(100, 0);
 		g_Controld->setVolume(100, 1);
+  }
  
 	return true;
 
