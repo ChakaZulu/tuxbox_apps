@@ -81,6 +81,7 @@ int main( int argc, char ** argv )
 		DrawFill();
 		DrawGhosts( );
 		DrawPac( );
+		MazePig();
 
 		doexit=0;
 		while( !doexit )

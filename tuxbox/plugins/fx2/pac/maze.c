@@ -209,10 +209,10 @@ static	void	DelOnePices( void )
 	pices--;
 	if ( pices < 0 )
 		pices=0;
-	FBPaintPixel( STATUS_X+pices, STATUS_Y, 0 );
-	FBPaintPixel( STATUS_X+pices, STATUS_Y+1, 0 );
-	FBPaintPixel( STATUS_X+pices, STATUS_Y+2, 0 );
-	FBPaintPixel( STATUS_X+pices, STATUS_Y+3, 0 );
+	FBPaintPixel( STATUS_X+pices, STATUS_Y, BLACK );
+	FBPaintPixel( STATUS_X+pices, STATUS_Y+1, BLACK );
+	FBPaintPixel( STATUS_X+pices, STATUS_Y+2, BLACK );
+	FBPaintPixel( STATUS_X+pices, STATUS_Y+3, BLACK );
 	if ( !pices )
 	{
 		gametime=timeleft;
@@ -257,10 +257,10 @@ static	int	cd = 40;
 	timeleft--;
 	if ( !(timeleft%TPF) )
 	{
-		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+6, 0 );
-		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+7, 0 );
-		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+8, 0 );
-		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+9, 0 );
+		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+6, BLACK );
+		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+7, BLACK );
+		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+8, BLACK );
+		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+9, BLACK );
 	}
 	if ( !timeleft )
 	{
@@ -611,5 +611,9 @@ void	NextLevel( void )
 
 void	MazePig( void )
 {
+#ifdef USEX
+	Fx2ShowPig( (int)pig_x[ level ]*32, (int)pig_y[level]*32, 256, 208 );
+#else
 	Fx2ShowPig( (int)pig_x[ level ]*32-51, (int)pig_y[level]*32+10, 256, 208 );
+#endif
 }
