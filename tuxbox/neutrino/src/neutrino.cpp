@@ -2952,9 +2952,12 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 
 		if(msg==CRCInput::RC_plus)
 		{
-			if(current_volume<100)
+			if (current_volume < 100)
 			{
-				current_volume += 5;
+				if (current_volume < 100 - 5)
+					current_volume += 5;
+				else
+					current_volume = 100;
 			}
 			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
 			//additinal volume setting via lirc
@@ -2963,9 +2966,12 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		}
 		else if(msg==CRCInput::RC_minus)
 		{
-			if(current_volume>0)
+			if (current_volume > 0)
 			{
-				current_volume -= 5;
+				if (current_volume > 5)
+					current_volume -= 5;
+				else
+					current_volume = 0;
 			}
 			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
 			//additinal volume setting via lirc
@@ -3335,7 +3341,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.389 2003/01/12 16:41:17 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.390 2003/01/22 19:12:56 thegoodguy Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
