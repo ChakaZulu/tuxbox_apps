@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.28 2004/02/21 00:50:41 rasc Exp $
+$Id: cmdline.c,v 1.29 2004/02/28 12:13:03 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.28 2004/02/21 00:50:41 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.29  2004/02/28 12:13:03  rasc
+minor stuff
+
 Revision 1.28  2004/02/21 00:50:41  rasc
 bugfix: MHP AIT descriptors
 
@@ -207,6 +210,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 	 opt->pid = DUMMY_PID;			// dummy to avoid usage output
      } else if (!strcmp (argv[i],"-s")) {
          s = argv[++i];
+	 if (!s ) s = ""; 
          if (!strcmp (s,"sec")) opt->packet_mode = SECT;
          else if (!strcmp (s,"ts")) opt->packet_mode = TS;
          else if (!strcmp (s,"pes")) opt->packet_mode = PES;

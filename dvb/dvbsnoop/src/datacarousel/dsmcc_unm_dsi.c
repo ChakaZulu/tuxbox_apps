@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_unm_dsi.c,v 1.4 2004/02/24 23:03:04 rasc Exp $
+$Id: dsmcc_unm_dsi.c,v 1.5 2004/02/28 12:13:03 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_unm_dsi.c,v 1.4 2004/02/24 23:03:04 rasc Exp $
 
 
 $Log: dsmcc_unm_dsi.c,v $
+Revision 1.5  2004/02/28 12:13:03  rasc
+minor stuff
+
 Revision 1.4  2004/02/24 23:03:04  rasc
 private data of DSMCC::DSI
 BIOP::ServiceGatewayInformation()
@@ -83,15 +86,22 @@ int dsmcc_DownloadServerInitiate (int v, u_char *b, u_int len)
 	// because we do not know, if DC or OC, we make a check for BIOP
 	// U-U Objects type_id "src\0"  and "DSM:"
 	// (normally we should remember a databroadcast_id for decision)
-	
-	out (v,"guessing private data: ");
-	uu_type_id = getBits (b+4, 0, 0, 32);
-	if (uu_type_id != 0x73726700 && uu_type_id != 0x53443a4d ) {
-		// Data Carousel
-		dsmcc_GroupInfoIndication (v, b, len2);
+
+	if (len2 >= 8) {
+		out (v,"guessing private data: ");
+		uu_type_id = getBits (b+4, 0, 0, 32);
 	} else {
-		// Object Carousel
-		BIOP_ServiceGatewayInfo   (v, b, len2);
+		uu_type_id = 0;
+	}
+
+	if (len > 0) {
+		if (uu_type_id != 0x73726700 && uu_type_id != 0x53443a4d ) {
+			// Data Carousel
+			dsmcc_GroupInfoIndication (v, b, len2);
+		} else {
+			// Object Carousel
+			BIOP_ServiceGatewayInfo   (v, b, len2);
+		}
 	}
 
 	// b += len2;

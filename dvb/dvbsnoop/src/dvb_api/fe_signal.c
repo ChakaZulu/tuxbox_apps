@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.6 2004/01/06 20:35:14 rasc Exp $
+$Id: fe_signal.c,v 1.7 2004/02/28 12:13:03 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.6 2004/01/06 20:35:14 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.7  2004/02/28 12:13:03  rasc
+minor stuff
+
 Revision 1.6  2004/01/06 20:35:14  rasc
 no message
 
@@ -179,6 +182,7 @@ int  do_SignalStrength (OPTION *opt)
 	out_NL(1);
 
 
+	if (opt->timeout_ms) usleep (opt->timeout_ms * 1000);
 	if (d_tim_ms == 0) usleep (1000);	// don't kill the system
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.26 2004/02/20 22:18:40 rasc Exp $
+$Id: helper.c,v 1.27 2004/02/28 12:13:03 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.26 2004/02/20 22:18:40 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.27  2004/02/28 12:13:03  rasc
+minor stuff
+
 Revision 1.26  2004/02/20 22:18:40  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -601,10 +604,12 @@ void print_time40 (int v, u_long mjd, u_long utc)
 */
 void print_databytes (int v, const char *str, u_char *b, u_int len)
 {
-  out_nl (v,str);
+  if (len > 0) {
+     out_nl (v,str);
 	indent (+1);
 	printhex_buf (v+1,b,len);
 	indent (-1);
+  }
 }
 
 void print_private_data (int v, u_char *b, u_int len)
