@@ -76,7 +76,7 @@ CFlashUpdate::CFlashUpdate()
 
 	BasePath = "http://dboxupdate.berlios.de/images/";
 	ImageFile = "cdk.cramfs";
-	VersionFile = "cdk.cramfs.version";
+	Version_Ext = ".version";
 
 	installedVersion = g_settings.softupdate_currentversion;
 	newVersion = "";
@@ -102,18 +102,18 @@ CFlashUpdate::CFlashUpdate()
 
 			if(fgets(buf,sizeof(buf),fd)!=NULL)
 			{
-				sscanf(buf, "versionfile: %s\n", buf2);
+				sscanf(buf, "version_ext: %s\n", buf2);
 				if (strlen(buf2)> 0)
 				{
-					VersionFile = buf2;
+					Version_Ext = buf2;
 				}
 			}
 		}
 		fclose(fd);
 
-		printf("[CHTTPUpdater] HTTP-Basepath: %s\n", BasePath.c_str() );
-		printf("[CHTTPUpdater] Image-Filename: %s\n", ImageFile.c_str() );
-		printf("[CHTTPUpdater] Version-Filename: %s\n", VersionFile.c_str() );
+		printf("[CHTTPUpdater] HTTP-Basepath: %s\n", BasePath.c_str());
+		printf("[CHTTPUpdater] Image-Filename: %s\n", ImageFile.c_str());
+		printf("[CHTTPUpdater] version_ext: %s\n", Version_Ext.c_str());
 	}
 }
 
@@ -122,8 +122,12 @@ bool CFlashUpdate::getInfo()
 	CHTTPTool httpTool;
 	httpTool.setStatusViewer( this );
 	showStatusMessageUTF(g_Locale->getText("flashupdate.getinfofile")); // UTF-8
-	std::string gURL = BasePath + VersionFile;
-	std::string sFileName = gTmpPath+ VersionFile;
+	std::string gURL = BasePath;
+	gURL += ImageFile;
+	gURL += Version_Ext;
+	std::string sFileName = gTmpPath;
+	sFileName += ImageFile;
+	sFileName += Version_Ext;
 
 	printf("get versioninfo (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
 	return httpTool.downloadFile( gURL, sFileName, 20 );
@@ -135,8 +139,10 @@ bool CFlashUpdate::getUpdateImage(const std::string & version)
 	httpTool.setStatusViewer( this );
 
 	showStatusMessageUTF(std::string(g_Locale->getText("flashupdate.getupdatefile")) + ' ' + version); // UTF-8
-	std::string gURL = BasePath + ImageFile;
-	std::string sFileName = gTmpPath+ ImageFile;
+	std::string gURL = BasePath;
+	gURL += ImageFile;
+	std::string sFileName = gTmpPath;
+	sFileName += ImageFile;
 
 	printf("get update (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
 	return httpTool.downloadFile( gURL, sFileName, 40 );
@@ -161,8 +167,11 @@ bool CFlashUpdate::checkVersion4Update()
 		showGlobalStatus(20);
 		showStatusMessageUTF(g_Locale->getText("flashupdate.versioncheck")); // UTF-8
 
+		filename = gTmpPath;
+		filename += ImageFile;
 
-		std::string sFileName = gTmpPath+VersionFile;
+		std::string sFileName = filename;
+		sFileName += Version_Ext;
 
 		CConfigFile configfile('\t');
 		if(!configfile.loadConfig(sFileName))
@@ -204,14 +213,34 @@ bool CFlashUpdate::checkVersion4Update()
 		CramfsFilter.addFilter("cramfs");
 
 		CramfsBrowser.Filter = &CramfsFilter;
-		
-		if (!(CramfsBrowser.exec(gTmpPath)))
-			return false;
-		
-		CFile * CFileSelected = CramfsBrowser.getSelectedFile();
 
+		CFile * CFileSelected = NULL;
+
+		CramfsBrowser.ChangeDir(gTmpPath);
+		for (CFileList::iterator file = CramfsBrowser.filelist.begin(); file != CramfsBrowser.filelist.end(); file++)
+		{
+			if (!(S_ISDIR(file->Mode)))
+			{
+				if (CFileSelected == NULL)
+					CFileSelected = &(*file);
+				else
+				{
+					CFileSelected = NULL;
+					break;
+				}
+			}
+		}
+		
 		if (CFileSelected == NULL)
-			return false;
+		{
+			if (!(CramfsBrowser.exec(gTmpPath)))
+				return false;
+		
+			CFileSelected = CramfsBrowser.getSelectedFile();
+
+			if (CFileSelected == NULL)
+				return false;
+		}
 
 		filename = CFileSelected->Name;
 
@@ -257,9 +286,6 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	}
 	paint();
 
-	// Unmount all NFS & CIFS volumes
-	CNFSUmountGui::umount();
-
 	if(!checkVersion4Update())
 	{
 		hide();
@@ -277,7 +303,6 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getupdatefileerror")); // UTF-8
 			return menu_return::RETURN_REPAINT;
 		}
-		filename = gTmpPath + ImageFile;
 	}
 
 	showGlobalStatus(40);
@@ -312,6 +337,11 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	showStatusMessageUTF(g_Locale->getText("flashupdate.ready")); // UTF-8
 
 	hide();
+
+	// Unmount all NFS & CIFS volumes
+	nfs_mounted_once = false; /* needed by update.cpp to prevent removal of modules after flashing a new cramfs, since rmmod (busybox) might no longer be available */
+	CNFSUmountGui::umount();
+
 	ShowHintUTF("messagebox.info", g_Locale->getText("flashupdate.flashreadyreboot")); // UTF-8
 	ft.reboot();
 	sleep(20000);

@@ -43,23 +43,23 @@
 
 class CFlashUpdate : public CProgressWindow
 {
-	private:
-		std::string	BasePath;
-		std::string	ImageFile;
-		std::string	VersionFile;
-
-		std::string     filename;
-
-		std::string	installedVersion;
-		std::string	newVersion;
-
-		bool getInfo();
-		bool getUpdateImage(const std::string & version);
-		bool checkVersion4Update();
-
-	public:
-		CFlashUpdate();
-		int exec( CMenuTarget* parent, const std::string & actionKey );
+ private:
+	std::string BasePath;
+	std::string ImageFile;
+	std::string Version_Ext;
+	
+	std::string filename;
+	
+	std::string installedVersion;
+	std::string newVersion;
+	
+	bool getInfo();
+	bool getUpdateImage(const std::string & version);
+	bool checkVersion4Update();
+	
+ public:
+	CFlashUpdate();
+	int exec( CMenuTarget* parent, const std::string & actionKey );
 
 };
 
