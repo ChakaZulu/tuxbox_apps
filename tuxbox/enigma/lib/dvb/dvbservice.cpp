@@ -812,8 +812,8 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 	if ((Decoder::parms.vpid==-1) && (Decoder::parms.apid==-1))
 		service_state=ENOSTREAM;
 
-	for (ePtrList<CA>::iterator i(calist); i != calist.end(); ++i)
-		eDebug("CA %04x ECMPID %04x", i->casysid, i->ecmpid);
+//	for (ePtrList<CA>::iterator i(calist); i != calist.end(); ++i)
+//		eDebug("CA %04x ECMPID %04x", i->casysid, i->ecmpid);
 
 	setDecoder();
 
