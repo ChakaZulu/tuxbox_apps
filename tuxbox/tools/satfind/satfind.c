@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
     return -1;
   }
   
-  if((fe_fd=open(FE,O_RDWR))<0) {
+  if((fe_fd=open(FE,O_RDONLY))<0) {
     fprintf(stderr,"frontend open - Can't open Tuner: %d\n",errno);
     return -1;
   }
