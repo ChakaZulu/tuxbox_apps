@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.34 2002/09/09 18:56:56 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.35 2002/09/11 15:43:39 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -452,57 +452,45 @@ uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t trans
 
 	std::string providerName;
 	std::string serviceName;
-	sciterator I = scanchannels.find((transport_stream_id << 16) | service_id);
-
-	for (pos = 4; pos < service_provider_name_length + 4; pos++)
-	{
-		providerName += charToXML(buffer[pos]);
-	}
-
-	for (pos++; pos < buffer[1] + 2; pos++)
-	{
-		serviceName += charToXML(buffer[pos]);
-	}
+	sciterator I = scanchannels.find((original_network_id << 16) | service_id);
 
 	if (I != scanchannels.end())
-	{
-		I->second.name = serviceName;
-		I->second.onid = original_network_id;
-		I->second.service_type = service_type;
-	}
-	else
-	{
-		found_channels++;
+		return buffer[1];
 
-		eventServer->sendEvent
-		(
-			CZapitClient::EVT_SCAN_NUM_CHANNELS,
-			CEventServer::INITID_ZAPIT,
-			&found_channels,
-			sizeof(found_channels)
-		);
+	for (pos = 4; pos < service_provider_name_length + 4; pos++)
+		providerName += charToXML(buffer[pos]);
 
-		scanchannels.insert
+	for (pos++; pos < buffer[1] + 2; pos++)
+		serviceName += charToXML(buffer[pos]);
+
+	found_channels++;
+
+	eventServer->sendEvent
+	(
+		CZapitClient::EVT_SCAN_NUM_CHANNELS,
+		CEventServer::INITID_ZAPIT,
+		&found_channels,
+		sizeof(found_channels)
+	);
+
+	scanchannels.insert
+	(
+		std::pair <uint32_t, scanchannel>
 		(
-			std::pair <uint32_t, scanchannel>
+			(original_network_id << 16) | service_id,
+			scanchannel
 			(
-				(transport_stream_id << 16) | service_id,
-				scanchannel
-				(
-					serviceName,
-					service_id,
-					transport_stream_id,
-					original_network_id,
-					service_type
-				)
+				serviceName,
+				service_id,
+				transport_stream_id,
+				original_network_id,
+				service_type
 			)
-		);
-	}
+		)
+	);
 
 	if (providerName == "")
-	{
 		providerName = "Unknown Provider";
-	}
 
 	if (lastProviderName != providerName)
 	{
@@ -520,14 +508,11 @@ uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t trans
 	case NVOD_REFERENCE_SERVICE:
 	case NVOD_TIME_SHIFTED_SERVICE:
 		if (bouquetId == -1)
-		{
 			bouquet = scanBouquetManager->addBouquet(providerName);
-		}
 		else
-		{
 			bouquet = scanBouquetManager->Bouquets[bouquetId];
-		}
-		bouquet->addService( new CZapitChannel ( serviceName, service_id, 0, original_network_id, service_type, 0));
+
+		bouquet->addService(new CZapitChannel(serviceName, service_id, 0, original_network_id, service_type, 0));
 		break;
 
 	default:
