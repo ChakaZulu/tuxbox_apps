@@ -32,6 +32,10 @@
 #ifndef __settings__
 #define __settings__
 
+//#include <iostream>
+#include <vector>
+
+using namespace std;
 
 struct SNeutrinoSettings
 {
@@ -180,6 +184,40 @@ const int PARENTALLOCK_PROMPT_NEVER          = 0;
 const int PARENTALLOCK_PROMPT_ONSTART        = 1;
 const int PARENTALLOCK_PROMPT_CHANGETOLOCKED = 2;
 const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
+
+class CScanSettings
+{
+	public:
+		enum
+		{
+			createBouquets,
+			deleteBouquets,
+			donttouchBouquets,
+			appendBouquets         // not yet supported
+		} bouquetMode;
+
+		enum
+		{
+			noDiSEqC,
+			miniDiSEqC,
+			DiSEqC
+		} diseqcMode;
+
+		typedef struct
+		{
+			char name[30];         // satellite-name or cable-provider
+			int  diseqc;
+		} SSatellite;
+
+		typedef vector<SSatellite> SatelliteList;
+		SatelliteList satellites;
+
+		void useDefaults(bool cable = false);
+
+};
+
+ostream& operator<<(ostream&, const CScanSettings&);
+istream& operator>>(istream&, CScanSettings&);
 
 #endif
 
