@@ -98,11 +98,11 @@ eZap::eZap(int argc, char **argv)
 				break;
 			if (!filename)
 				break;
-			eDebug("%s", filename);
-			filename[strlen(filename)]=0;
-			void *handle=dlopen(filename, RTLD_NOW);
+			eString fname(filename);
+			fname.removeChars('\n');
+			void *handle=dlopen(fname.c_str(), RTLD_NOW);
 			if (!handle)
-				eWarning("[PLUGIN] load(%s) failed: %s", filename, dlerror());
+				eWarning("[PLUGIN] load(%s) failed: %s", fname.c_str(), dlerror());
 			else
 				plugins.push_back(handle);
 		}
