@@ -120,7 +120,7 @@ int CNFSMountGui::menuEntry(int nr)
 	mountMenuEntryW.addItem(new CMenuSeparator(CMenuSeparator::LINE));
 	CIPInput  ipInput("nfs.ip", ip);
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.ip", true, ip, &ipInput));
-	CStringInputSMS  dirInput("nfs.dir", dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/"); 
+	CStringInputSMS  dirInput("nfs.dir", dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ "); 
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.dir", true, dir, &dirInput));
 	CStringInputSMS  localDirInput("nfs.localdir", local_dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ "); 
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.localdir", true, local_dir, &localDirInput)); 
