@@ -72,7 +72,6 @@
 #include "driver/rcinput.h"
 #include "driver/vcrcontrol.h"
 #include "driver/irsend.h"
-#include "driver/mp3play.h"
 
 #include "gui/widget/menue.h"
 #include "gui/widget/messagebox.h"
@@ -101,6 +100,7 @@
 #include "gui/alphasetup.h"
 #include "gui/mp3player.h"
 #include "gui/nfs.h"
+#include "gui/pictureviewer.h"
 
 #include "system/setting_helpers.h"
 #include "system/settings.h"
@@ -1038,6 +1038,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart", true, CRCInput::RC_yellow, "gelb.raw") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, "blau.raw") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.mp3player", true, "", new CMP3PlayerGui(), "", true) );
+//	mainMenu.addItem( new CMenuForwarder("mainmenu.pictureviewer", true, "", new CPictureViewerGui(), "", true) );
 
 	mainMenu.addItem( new CMenuForwarder("mainmenu.sleeptimer", true, "", new CSleepTimerWidget, "",true) );
 
@@ -3364,7 +3365,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.398 2003/02/09 16:24:03 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.399 2003/02/09 18:45:39 zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

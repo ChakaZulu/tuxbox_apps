@@ -75,18 +75,21 @@ void CPictureViewer::init_handlers(void)
 
 CPictureViewer::CFormathandler * CPictureViewer::fh_getsize(char *name,int *x,int *y)
 {
-    CFormathandler *fh;
+   dbout("fh_getsize {\n"); 
+	CFormathandler *fh;
     for(fh=fh_root;fh!=NULL;fh=fh->next)
     {
 	if(fh->id_pic(name))
 	    if(fh->get_size(name,x,y)==FH_ERROR_OK) return(fh);
     }
+	 dbout("fh_getsize }\n"); 
     return(NULL);
 }
 
 int CPictureViewer::show_image(char *name)
 {
-    int x,y,xs,ys,xpos,ypos,xdelta,ydelta,eol,xstep,ystep,imx,imy;
+   dbout("show_image {\n"); 
+	int x,y,xs,ys,xpos,ypos,xdelta,ydelta,eol,xstep,ystep,imx,imy;
     unsigned char *buffer;
     CFormathandler *fh;
     eol=1;
@@ -176,11 +179,12 @@ int CPictureViewer::show_image(char *name)
 	else
 		printf("Unable to read file or format not recognized!\n");
 	
+   dbout("show_image }\n"); 
 	return(eol);
 }
 
 
-bool CPictureViewer::ShowImage(string filename)
+bool CPictureViewer::ShowImage(std::string filename)
 {
     int r;
     init_handlers();																       

@@ -53,7 +53,7 @@ int CFile::getType()
 		string extension;
 		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
 		if((strcasecmp(extension.c_str(),"mp3") == 0) || (strcasecmp(extension.c_str(),"m2a") == 0) ||
-			(strcasecmp(extension.c_str(),"mpa")))
+			(strcasecmp(extension.c_str(),"mpa") == 0))
 			return FILE_MP3;
 		if((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
 			return FILE_TEXT;

@@ -4,9 +4,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+extern "C" {
 #include <jpeglib.h>
+}
 #include <setjmp.h>
-
 #include "pictureviewer.h"
 
 struct r_jpeg_error_mgr
@@ -72,7 +73,7 @@ int fh_jpeg_load(char *filename,unsigned char *buffer,int x,int y)
 
     if(c==3)
     {
-	lb=(JSAMPLE *)(*ciptr->mem->alloc_small)((j_common_ptr) ciptr,JPOOL_PERMANENT,c*px);
+	lb=(JSAMPLE*)(*ciptr->mem->alloc_small)((j_common_ptr) ciptr,JPOOL_PERMANENT,c*px);
 	bp=buffer;
 	while (ciptr->output_scanline < ciptr->output_height)
 	{

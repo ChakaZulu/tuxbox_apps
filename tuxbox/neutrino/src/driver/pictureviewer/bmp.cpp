@@ -24,24 +24,29 @@ struct color {
 
 int fh_bmp_id(char *name)
 {
+	dbout("fh_bmp_id {\n");
 	int fd;
 	char id[2];
 	
 	fd = open(name, O_RDONLY);
 	if (fd == -1) {
+		dbout("fh_bmp_id {\n");
 		return(0);
 	}
 	
 	read(fd, id, 2);
 	close(fd);
 	if ( id[0]=='B' && id[1]=='M' ) {
+		dbout("fh_bmp_id {\n");
 		return(1);
 	}
+	dbout("fh_bmp_id {\n");
 	return(0);
 }
 
 void fetch_pallete(int fd, struct color pallete[], int count)
 {
+	dbout("fetch_palette {\n");
 	unsigned char buff[4];
 	int i;
 
@@ -52,11 +57,13 @@ void fetch_pallete(int fd, struct color pallete[], int count)
 		pallete[i].green = buff[1];
 		pallete[i].blue = buff[0];
 	}
+	dbout("fetch_palette }\n");
 	return;
 }
 
 int fh_bmp_load(char *name,unsigned char *buffer,int x,int y)
 {
+	dbout("fh_bmp_load {\n");
 	int fd, bpp, raster, i, j, k, skip;
 	unsigned char buff[4];
 	unsigned char *wr_buffer = buffer + x*(y-1)*3;
@@ -67,135 +74,161 @@ int fh_bmp_load(char *name,unsigned char *buffer,int x,int y)
 		return(FH_ERROR_FILE);
 	}
 
+	dbout("fh_bmp_load 1\n");
 	if (lseek(fd, BMP_TORASTER_OFFSET, SEEK_SET) == -1) {
 		return(FH_ERROR_FORMAT);
 	}
+	dbout("fh_bmp_load 2\n");
 	read(fd, buff, 4);
 	raster = buff[0] + (buff[1]<<8) + (buff[2]<<16) + (buff[3]<<24);
 
+	dbout("fh_bmp_load 3\n");
 	if (lseek(fd, BMP_BPP_OFFSET, SEEK_SET) == -1) {
 		return(FH_ERROR_FORMAT);
 	}
+	dbout("fh_bmp_load 4\n");
 	read(fd, buff, 2);
 	bpp = buff[0] + (buff[1]<<8);
 	
+	dbout("fh_bmp_load 5\n");
 	switch (bpp){
 		case 1: /* monochrome */
 			skip = fill4B(x/8+(x%8?1:0));
 			lseek(fd, raster, SEEK_SET);
-			for (i=0; i<y; i++) {
-				for (j=0; j<x/8; j++) {
-					read(fd, buff, 1);
-					for (k=0; k<8; k++) {
-						if (buff[0] & 0x80) {
-							*wr_buffer++ = 0xff;
-							*wr_buffer++ = 0xff;
-							*wr_buffer++ = 0xff;
-						} else {
-							*wr_buffer++ = 0x00;
-							*wr_buffer++ = 0x00;
-							*wr_buffer++ = 0x00;
+			{
+				int bytes=x/8;
+				if(x%8 >0)
+					bytes++;
+				unsigned char* tbuffer = (unsigned char*) malloc(bytes);
+				for (i=0; i<y; i++) {
+					read(fd, tbuffer, bytes);
+					for (j=0; j<x/8; j++) {
+						for (k=0; k<8; k++) {
+							if (tbuffer[j] & 0x80) {
+								*wr_buffer++ = 0xff;
+								*wr_buffer++ = 0xff;
+								*wr_buffer++ = 0xff;
+							} else {
+								*wr_buffer++ = 0x00;
+								*wr_buffer++ = 0x00;
+								*wr_buffer++ = 0x00;
+							}
+							tbuffer[j] = tbuffer[j]<<1;
 						}
-						buff[0] = buff[0]<<1;
+
 					}
-					
-				}
-				if (x%8) {
-					read(fd, buff, 1);
-					for (k=0; k<x%8; k++) {
-						if (buff[0] & 0x80) {
-							*wr_buffer++ = 0xff;
-							*wr_buffer++ = 0xff;
-							*wr_buffer++ = 0xff;
-						} else {
-							*wr_buffer++ = 0x00;
-							*wr_buffer++ = 0x00;
-							*wr_buffer++ = 0x00;
+					if (x%8) {
+						for (k=0; k<x%8; k++) {
+							if (tbuffer[j] & 0x80) {
+								*wr_buffer++ = 0xff;
+								*wr_buffer++ = 0xff;
+								*wr_buffer++ = 0xff;
+							} else {
+								*wr_buffer++ = 0x00;
+								*wr_buffer++ = 0x00;
+								*wr_buffer++ = 0x00;
+							}
+							tbuffer[j] = tbuffer[j]<<1;
 						}
-						buff[0] = buff[0]<<1;
+
 					}
-					
+					if (skip) {
+						read(fd, tbuffer, skip);
+					}
+					wr_buffer -= x*6; /* backoff 2 lines - x*2 *3 */
 				}
-				if (skip) {
-					read(fd, buff, skip);
-				}
-				wr_buffer -= x*6; /* backoff 2 lines - x*2 *3 */
+				free(tbuffer);
 			}
 			break;
 		case 4: /* 4bit palletized */
+		{
 			skip = fill4B(x/2+x%2);
 			fetch_pallete(fd, pallete, 16);
 			lseek(fd, raster, SEEK_SET);
+			unsigned char* tbuffer = (unsigned char*) malloc(x/2+1);
+			unsigned char c1,c2;
 			for (i=0; i<y; i++) {
+				read(fd, tbuffer, x/2 + x%2);
 				for (j=0; j<x/2; j++) {
-					read(fd, buff, 1);
-					buff[1] = buff[0]>>4;
-					buff[2] = buff[0] & 0x0f;
-					*wr_buffer++ = pallete[buff[1]].red;
-					*wr_buffer++ = pallete[buff[1]].green;
-					*wr_buffer++ = pallete[buff[1]].blue;
-					*wr_buffer++ = pallete[buff[2]].red;
-					*wr_buffer++ = pallete[buff[2]].green;
-					*wr_buffer++ = pallete[buff[2]].blue;
+					c1 = tbuffer[j]>>4;
+					c2 = tbuffer[j] & 0x0f;
+					*wr_buffer++ = pallete[c1].red;
+					*wr_buffer++ = pallete[c1].green;
+					*wr_buffer++ = pallete[c1].blue;
+					*wr_buffer++ = pallete[c2].red;
+					*wr_buffer++ = pallete[c2].green;
+					*wr_buffer++ = pallete[c2].blue;
 				}
 				if (x%2) {
-					read(fd, buff, 1);
-					buff[1] = buff[0]>>4;
-					*wr_buffer++ = pallete[buff[1]].red;
-					*wr_buffer++ = pallete[buff[1]].green;
-					*wr_buffer++ = pallete[buff[1]].blue;
+					c1 = tbuffer[j]>>4;
+					*wr_buffer++ = pallete[c1].red;
+					*wr_buffer++ = pallete[c1].green;
+					*wr_buffer++ = pallete[c1].blue;
 				}
 				if (skip) {
 					read(fd, buff, skip);
 				}
 				wr_buffer -= x*6; /* backoff 2 lines - x*2 *3 */
 			}
-			break;
+			free(tbuffer);
+		}
+		break;
 		case 8: /* 8bit palletized */
+		{
 			skip = fill4B(x);
 			fetch_pallete(fd, pallete, 256);
 			lseek(fd, raster, SEEK_SET);
-			for (i=0; i<y; i++) {
+			unsigned char* tbuffer = (unsigned char*) malloc(x);
+			for (i=0; i<y; i++) 
+		   {
+				read(fd, tbuffer, x);
 				for (j=0; j<x; j++) {
-					read(fd, buff, 1);
-					*wr_buffer++ = pallete[buff[0]].red;
-					*wr_buffer++ = pallete[buff[0]].green;
-					*wr_buffer++ = pallete[buff[0]].blue;
+					wr_buffer[j*3] = pallete[tbuffer[j]].red; 
+					wr_buffer[j*3+1] = pallete[tbuffer[j]].green; 
+					wr_buffer[j*3+2] = pallete[tbuffer[j]].blue; 
 				}
 				if (skip) {
 					read(fd, buff, skip);
 				}
-				wr_buffer -= x*6; /* backoff 2 lines - x*2 *3 */
+				wr_buffer -= x*3; /* backoff 2 lines - x*2 *3 */
 			}
-			break;
+			free(tbuffer);
+		}
+		break;
 		case 16: /* 16bit RGB */
 			return(FH_ERROR_FORMAT);
 			break;
 		case 24: /* 24bit RGB */
 			skip = fill4B(x*3);
 			lseek(fd, raster, SEEK_SET);
-			for (i=0; i<y; i++) {
-				for (j=0; j<x; j++) {
-					read(fd, buff, 3);
-					*wr_buffer++ = buff[2];
-					*wr_buffer++ = buff[1];
-					*wr_buffer++ = buff[0];
+			unsigned char c;
+			for (i=0; i<y; i++) 
+			{
+				read(fd,wr_buffer,x*3);
+				for(j=0; j < x*3 ; j=j+3)
+				{
+					c=wr_buffer[j];
+					wr_buffer[j]=wr_buffer[j+2];
+					wr_buffer[j+2]=c;
 				}
 				if (skip) {
 					read(fd, buff, skip);
 				}
-				wr_buffer -= x*6; /* backoff 2 lines - x*2 *3 */
+				wr_buffer -= x*3; // backoff 1 lines - x*3 
 			}
 			break;
 		default:
 			return(FH_ERROR_FORMAT);
 	}
+	dbout("fh_bmp_load 6\n");
 
 	close(fd);
+	dbout("fh_bmp_load }\n");
 	return(FH_ERROR_OK);
 }
 int fh_bmp_getsize(char *name,int *x,int *y)
 {
+	dbout("fh_bmp_getsize {\n");
 	int fd;
 	unsigned char size[4];
 
@@ -214,6 +247,7 @@ int fh_bmp_getsize(char *name,int *x,int *y)
 	*y = size[0] + (size[1]<<8) + (size[2]<<16) + (size[3]<<24);
 	
 	close(fd);
+	dbout("fh_bmp_getsize }\n");
 	return(FH_ERROR_OK);
 }
 #endif

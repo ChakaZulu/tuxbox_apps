@@ -25,16 +25,17 @@
 
 #ifndef __pictureviewer__
 #define __pictureviewer__
-
+#include <stdio.h>
+#include <jpeglib.h>
 #include <string>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 #define IDSTRING "fbv"
+#define dbout(fmt, args...) printf( "FBD[%d] " fmt, (int)time(NULL), ## args)
 
-using namespace std;
-
+//using namespace std;
 
 class CPictureViewer
 {
@@ -58,7 +59,7 @@ typedef  struct cformathandler CFormathandler;
 public:
 	CPictureViewer(){fh_root=NULL;};
 	~CPictureViewer(){};
-	bool ShowImage(string filename);
+	bool ShowImage(std::string filename);
 };
 
 
