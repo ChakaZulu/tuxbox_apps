@@ -7,6 +7,13 @@
 #include <lib/base/buffer.h>
 #include <lib/codecs/codec.h>
 
+struct syncAudioPacket
+{
+	unsigned int pts;
+	int len;
+	__u8 *data;
+};
+
 // mpeg-2 ps demuxer.
 class eMPEGDemux: public eAudioDecoder
 {
@@ -21,16 +28,13 @@ class eMPEGDemux: public eAudioDecoder
 	unsigned long getBits(unsigned int num);
 	void syncBits();
 	std::map<int,int> audiostreams;
-	int validpackets;
-	int lastAudioPTS, lastVideoPTS;
 	int synced;
-//	FILE *fAudio, *fVideo;
+	int fd;
+	std::list<syncAudioPacket> syncbuffer;
 public:
-	eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio);
+	eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd);
 	~eMPEGDemux()
 	{
-//		fclose(fAudio);
-//		fclose(fVideo);
 	}
 	virtual int decodeMore(int last, int maxsamples, Signal1<void, unsigned int>*newastreamid=0 ); // returns number of samples(!) written to IOBuffer (out)
 	virtual void resync(); // clear (secondary) decoder buffers

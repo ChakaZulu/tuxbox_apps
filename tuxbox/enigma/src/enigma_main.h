@@ -506,7 +506,8 @@ private:
 	void renameFile(eServiceSelector *);
 #endif // DISABLE_FILE
 public:
-	eServicePath getRoot(int list);
+	eServicePath getRoot(int list, int mode=-1);
+	int getFirstBouquetServiceNum( eServiceReference ref, int mode=-1);
 	void deleteService(eServiceSelector *);
 	void renameBouquet(eServiceSelector *);
 	void renameService(eServiceSelector *);

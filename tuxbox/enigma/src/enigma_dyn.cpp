@@ -721,8 +721,8 @@ static eString getStats()
 	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
 	result+=tmp;
 
-	ivpid=Decoder::parms.vpid;
-	iapid=Decoder::parms.apid;
+	ivpid=Decoder::current.vpid;
+	iapid=Decoder::current.apid;
 	if(ivpid==-1)
 		vpid="none";
 	else
@@ -785,7 +785,7 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 
 	content->local_header["Content-Type"]="audio/mpegfile";
 	result="http://"+getIP()+":31338/";
-        tmp.sprintf("%02x\n", Decoder::parms.apid);
+        tmp.sprintf("%02x\n", Decoder::current.apid);
  	result+=tmp;
 	return result;
 }
@@ -867,18 +867,18 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 		name=filter_string(service->service_name);
 		provider=filter_string(service->service_provider);
 	}
-	vpid=eString().sprintf("%04xh (%dd)", Decoder::parms.vpid, Decoder::parms.vpid);
-	apid=eString().sprintf("%04xh (%dd)", Decoder::parms.apid, Decoder::parms.apid);
-	pcrpid=eString().sprintf("%04xh (%dd)", Decoder::parms.pcrpid, Decoder::parms.pcrpid);
-	tpid=eString().sprintf("%04xh (%dd)", Decoder::parms.tpid, Decoder::parms.tpid);
+	vpid=eString().sprintf("%04xh (%dd)", Decoder::current.vpid, Decoder::current.vpid);
+	apid=eString().sprintf("%04xh (%dd)", Decoder::current.apid, Decoder::current.apid);
+	pcrpid=eString().sprintf("%04xh (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid);
+	tpid=eString().sprintf("%04xh (%dd)", Decoder::current.tpid, Decoder::current.tpid);
 	tsid=eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
 	onid=eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
 	sid=eString().sprintf("%04xh", sapi->service.getServiceID().get());
-	pmt=eString().sprintf("%04xh", Decoder::parms.pmtpid);
+	pmt=eString().sprintf("%04xh", Decoder::current.pmtpid);
 
 	FILE *bitstream=0;
 	
-	if (Decoder::parms.vpid!=-1)
+	if (Decoder::current.vpid!=-1)
 		bitstream=fopen("/proc/bus/bitstream", "rt");
 	if (bitstream)
 	{
@@ -1261,7 +1261,7 @@ static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt
 	if(opt!="getpids")
 		return eString("ok\n");
 	else
-		return eString().sprintf("%u\n%u\n", Decoder::parms.vpid, Decoder::parms.apid);
+		return eString().sprintf("%u\n%u\n", Decoder::current.vpid, Decoder::current.apid);
 }
 
 static eString neutrino_suck_getonidsid(eString request, eString dirpath, eString opts, eHTTPConnection *content)

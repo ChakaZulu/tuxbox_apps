@@ -287,6 +287,10 @@ int eAVSwitch::setTVPin8(int vol)
 				fnc=3 -> 12V
 */
 	int fnc;
+	if ( vol != -1 )
+		lastVoltage=vol;
+	else
+		vol=lastVoltage;
 	switch (vol)
 	{
 	case 0:
@@ -295,6 +299,7 @@ int eAVSwitch::setTVPin8(int vol)
 	case 6:
 		fnc=(Type==PHILIPS?2:1);
 		break;
+	default:
 	case 12:
 		fnc=(Type==PHILIPS?3:2);
 		break;

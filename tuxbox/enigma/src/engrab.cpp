@@ -76,9 +76,9 @@ eString ENgrab::startxml( const char* descr )
 	xmlstart+="    <epgtitle>"+(descr?eString(descr):getEPGTitle())+"</epgtitle>\n"; //übernommen von trh
 	xmlstart+="    <onidsid>123456</onidsid>\n"; // keine ahnung aber wies aussieht wird die sid und die onid nicht gebraucht von ngrab
 	xmlstart+="    <epgid>123456</epgid>\n"; // und die epgid auch nicht
-	xmlstart+="    <videopid>"+eString().sprintf("%d", Decoder::parms.vpid)+"</videopid>\n";
-	xmlstart+="    <audiopids selected=\""+eString().sprintf("%d", Decoder::parms.apid)+"\">\n";
-	xmlstart+="       <audio pid=\""+eString().sprintf("%d", Decoder::parms.apid)+"\" name=\"standard\"/>\n";
+	xmlstart+="    <videopid>"+eString().sprintf("%d", Decoder::current.vpid)+"</videopid>\n";
+	xmlstart+="    <audiopids selected=\""+eString().sprintf("%d", Decoder::current.apid)+"\">\n";
+	xmlstart+="       <audio pid=\""+eString().sprintf("%d", Decoder::current.apid)+"\" name=\"standard\"/>\n";
 	xmlstart+="    </audiopids>\n";
 	xmlstart+="  </record>\n";
 	xmlstart+=" </neutrino>\n";

@@ -92,7 +92,7 @@ int eStreamWatchdog::getVCRActivity()
 
 void eStreamWatchdog::reloadSettings()
 {
-	if ( Decoder::parms.vpid != -1 )
+	if ( Decoder::current.vpid != -1 )
 	{
 		FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
 		int frate=0;
@@ -112,6 +112,7 @@ void eStreamWatchdog::reloadSettings()
 			{
 				case 1:
 				case 2:
+				default:
 					isanamorph=0;
 					break;
 				case 3:
@@ -145,7 +146,7 @@ void eStreamWatchdog::reloadSettings()
 		eAVSwitch::getInstance()->setVideoFormat( videoDisplayFormat );
 
 		eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
-	
+
 		switch (frate)
 		{
 			case 1:

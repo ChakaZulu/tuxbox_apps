@@ -28,8 +28,8 @@ class Decoder
 	{
 		static int video, audio, demux_video, demux_audio, demux_pcr, demux_vtxt;
 	} fd;
-	static decoderParameters current;
 public:
+	static decoderParameters current;
 	static bool locked;
 	static int getAudioDevice()	{ return fd.audio; }
 	static int getVideoDevice()	{ return fd.video; }

@@ -131,7 +131,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 	}
 	case eDVBServiceEvent::eventServiceTuneOK:
 	{
-//		eDebug("apid = %04x, vpid = %04x, pcrpid = %04x, tpid = %04x", Decoder::parms.apid, Decoder::parms.vpid, Decoder::parms.pcrpid, Decoder::parms.tpid );
+//		eDebug("apid = %04x, vpid = %04x, pcrpid = %04x, tpid = %04x", Decoder::current.apid, Decoder::current.vpid, Decoder::current.pcrpid, Decoder::current.tpid );
 		/*emit*/ dvb.enterTransponder(event.transponder);
 		int nopmt=0;
 
@@ -522,7 +522,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 
 	int sac3default=eAudio::getInstance()->getAC3default();
 
-	if ( Decoder::parms.pcrpid != pmt->PCR_PID && !service.path.size() )
+	if ( Decoder::current.pcrpid != pmt->PCR_PID && !service.path.size() )
 		Decoder::parms.pcrpid = pmt->PCR_PID;
 
 	// get last selected audio / video pid from pid cache

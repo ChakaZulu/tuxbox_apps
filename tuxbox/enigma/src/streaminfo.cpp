@@ -267,7 +267,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	
 	vpid[1]=new eLabel(this);
 	vpid[1]->setFont(fontfixed);
-	vpid[1]->setText((parms.vpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.vpid, parms.vpid));
+	vpid[1]->setText((Decoder::current.vpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.vpid, Decoder::current.vpid));
 	vpid[1]->move(ePoint(240, yOffs+2));
 	vpid[1]->resize(eSize(260, fs+5));
 	yOffs+=fs+5;
@@ -278,7 +278,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	apid[0]->resize(eSize(140, fs+5));
 	
 	apid[1]=new eLabel(this);
-	apid[1]->setText((parms.apid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.apid, parms.apid));
+	apid[1]->setText((Decoder::current.apid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.apid, Decoder::current.apid));
 	apid[1]->move(ePoint(240, yOffs+2));
 	apid[1]->resize(eSize(260, fs+5));
 	apid[1]->setFont(fontfixed);
@@ -290,7 +290,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	pcrpid[0]->resize(eSize(140, fs+5));
 	
 	pcrpid[1]=new eLabel(this);
-	pcrpid[1]->setText((parms.pcrpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.pcrpid, parms.pcrpid));
+	pcrpid[1]->setText((Decoder::current.pcrpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid));
 	pcrpid[1]->move(ePoint(240, yOffs+2));
 	pcrpid[1]->resize(eSize(260, fs+5));
 	pcrpid[1]->setFont(fontfixed);
@@ -302,7 +302,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	pmtpid[0]->resize(eSize(140, fs+5));
 
 	pmtpid[1]=new eLabel(this);
-	pmtpid[1]->setText((parms.pmtpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.pmtpid, parms.pmtpid));
+	pmtpid[1]->setText((Decoder::current.pmtpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.pmtpid, Decoder::current.pmtpid));
 	pmtpid[1]->move(ePoint(240, yOffs+2));
 	pmtpid[1]->resize(eSize(260, fs+5));
 	pmtpid[1]->setFont(fontfixed);
@@ -314,7 +314,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	tpid[0]->resize(eSize(140, fs+5));
 	
 	tpid[1]=new eLabel(this);
-	tpid[1]->setText((parms.tpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", parms.tpid, parms.tpid));
+	tpid[1]->setText((Decoder::current.tpid==-1)?eString(_("none")):eString().sprintf("%04xh  (%dd)", Decoder::current.tpid, Decoder::current.tpid));
 	tpid[1]->move(ePoint(240, yOffs+2));
 	tpid[1]->resize(eSize(260, fs+5));
 	tpid[1]->setFont(fontfixed);
@@ -323,7 +323,7 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	eString vformat="n/a";
 	FILE *bitstream=0;
 	
-	if (parms.vpid!=-1)
+	if (Decoder::current.vpid!=-1)
 		bitstream=fopen("/proc/bus/bitstream", "rt");
 	if (bitstream)
 	{
@@ -546,7 +546,7 @@ eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParamete
 	
 	if (ref.type == eServiceReference::idDVB)
 	{
-		w=new siPID(parms?*parms:Decoder::parms, service, this);
+		w=new siPID(Decoder::current, service, this);
 		w->move(ePoint(0, 0));
 		w->resize( s );
 		w->hide();

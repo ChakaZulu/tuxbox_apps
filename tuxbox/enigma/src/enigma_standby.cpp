@@ -114,6 +114,7 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		if (rezap)
 			eServiceInterface::getInstance()->play(ref);
 		eAVSwitch::getInstance()->setInput(0);
+		eAVSwitch::getInstance()->setTVPin8(-1); // reset prev voltage
 		eStreamWatchdog::getInstance()->reloadSettings();
 #ifndef DISABLE_LCD
 		eDBoxLCD::getInstance()->switchLCD(1);

@@ -373,7 +373,7 @@ void eServiceSelector::setKeyDescriptions( bool editMode )
 			key[0]->setText(_("Root"));
 			key[1]->setText(_("Movies"));
 			key[2]->setText(_("Playlist"));
-			key[3]->setText(_("Root"));
+			key[3]->setText(_("Bouquets"));
 			break;
 #endif
 	}
@@ -415,21 +415,27 @@ struct renumber: public std::unary_function<const eListBoxEntryService&, void>
 {
 	int &num;
 	bool invalidate;
-	renumber(int &num, bool invalidate=false)
-		:num(num), invalidate(invalidate)
+	ePlaylist *pl;
+	std::list<ePlaylistEntry>::const_iterator it;
+	renumber(int &num, ePlaylist *pl, bool invalidate=false)
+		:num(num), invalidate(invalidate), pl(pl), it(pl->getConstList().begin())
 	{
 	}
-
 	bool operator()(eListBoxEntryService& s)
 	{
 		if (!s.service || s.service.flags == eServiceReference::isMarker )
 			return 0;
 		if ( !(s.service.flags & (eServiceReference::isDirectory)) )
 		{
-			s.num = ++num;
+			while ( !(it->service == s.service) )
+			{
+				if ( !(it->service.flags & eServiceReference::isMarker) )
+					++num;
+				++it;
+			}
+			s.num = num;
 			s.invalidate();
 		}
-
 		return 0;
 	}
 };
@@ -505,8 +511,18 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 
 	if (serviceentryflags & eListBoxEntryService::flagOwnNumber)
 	{
-		int num=0;
-		services->forEachEntry( renumber(num) );
+		int num = this == eZap::getInstance()->getServiceSelector() ?
+			getFirstBouquetServiceNum(ref,-1) :
+			getFirstBouquetServiceNum(ref,path.bottom().data[1] == (1<<2) ?
+				eZapMain::modeRadio :
+				path.bottom().data[1] == ((1<<1) || (1<<4)) ?
+				eZapMain::modeTV : eZapMain::modeFile );
+		ePlaylist *pl = (ePlaylist*) eServiceInterface::getInstance()->addRef( path.top() );
+		if ( pl )
+		{
+			services->forEachEntry( renumber(num, pl) );
+			eServiceInterface::getInstance()->removeRef( path.top() );
+		}
 	}
 
 /*	// now we calc the x size of the biggest number we have;
@@ -526,9 +542,19 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 
 void eServiceSelector::updateNumbers()
 {
-	int num=0;
+	int num = this == eZap::getInstance()->getServiceSelector() ?
+		getFirstBouquetServiceNum(path.bottom(),-1) :
+		getFirstBouquetServiceNum(path.bottom(),path.bottom().data[1] == (1<<2) ?
+			eZapMain::modeRadio :
+			path.bottom().data[1] == ((1<<1) || (1<<4)) ?
+			eZapMain::modeTV : eZapMain::modeFile );
 	services->beginAtomic();
-	services->forEachEntry( renumber(num, true) );
+	ePlaylist *pl = (ePlaylist*) eServiceInterface::getInstance()->addRef( path.top() );
+	if ( pl )
+	{
+		services->forEachEntry( renumber(num, pl, true) );
+		eServiceInterface::getInstance()->removeRef( path.top() );
+	}
 	services->invalidateContent();
 	services->endAtomic();
 }
@@ -865,8 +891,14 @@ void eServiceSelector::serviceSelChanged(eListBoxEntryService *entry)
 		selected = (((eListBoxEntryService*)entry)->service);
 		ci->clear();
 
-		if ( selected.type == eServiceReference::idDVB &&
-					(!(selected.flags & eServiceReference::flagDirectory)))
+		if ( (!(selected.flags & eServiceReference::flagDirectory)) &&
+				 (( selected.type == eServiceReference::idDVB )
+#ifndef DISABLE_FILE
+			|| 	( selected.type == eServiceReference::idUser &&
+						( (selected.data[0] == 0 /*eMP3Decoder::codecMPG*/) ||
+							(selected.data[0] == 1 /*eMP3Decoder::codecMP3*/) ) )
+#endif
+							) )
 			ciDelay.start(selected.path.size() ? 100 : 500, true );
 	}
 }
@@ -1047,9 +1079,6 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 						break;
 				}
 			}
-			else if (event.action == &i_cursorActions->help
-				&& this != eZap::getInstance()->getServiceSelector() )
-				;  // dont show help when this is not the main service selector
 			else if (event.action == &i_serviceSelectorActions->pathUp)
 				pathUp();
 			else if (event.action == &i_serviceSelectorActions->toggleStyle && !movemode && !editMode)
@@ -1084,9 +1113,27 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				show();
 			}
 			else if (event.action == &i_serviceSelectorActions->modeTV && !movemode && !editMode)
-				/*emit*/ setMode(eZapMain::modeTV);
+			{
+				if ( this == eZap::getInstance()->getServiceSelector() )
+					/*emit*/ setMode(eZapMain::modeTV);
+				else
+				{
+					setPath(eServiceReference(eServiceReference::idDVB,
+						eServiceReference::flagDirectory|eServiceReference::shouldSort,
+						-2, (1<<4)|(1<<1), 0xFFFFFFFF ),eServiceReference() );
+				}
+			}
 			else if (event.action == &i_serviceSelectorActions->modeRadio && !movemode && !editMode)
-				/*emit*/ setMode(eZapMain::modeRadio);
+			{
+				if ( this == eZap::getInstance()->getServiceSelector() )
+					/*emit*/ setMode(eZapMain::modeRadio);
+				else
+				{
+					setPath(eServiceReference(eServiceReference::idDVB,
+						eServiceReference::flagDirectory|eServiceReference::shouldSort,
+						-2, 1<<2, 0xFFFFFFFF ),eServiceReference() );
+				}
+			}
 #ifndef DISABLE_FILE
 			else if (event.action == &i_serviceSelectorActions->modeFile && !movemode && !editMode)
 				/*emit*/ setMode(eZapMain::modeFile);
@@ -1145,7 +1192,11 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			}
 			else if (event.action == &i_serviceSelectorActions->showAll && !movemode)
 			{
-				enterPath = /*emit*/ getRoot(listAll);
+				if ( this == eZap::getInstance()->getServiceSelector() )
+					enterPath = /*emit*/ getRoot(listAll, -1);
+				else
+					enterPath = /*emit*/ getRoot(listAll, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
+						path.bottom().data[1] == ((1<<1) || (1<<4)) ? eZapMain::modeTV : eZapMain::modeFile );
 				if ( style == styleCombiColumn && eZapMain::getInstance()->getMode() == eZapMain::modeFile )
 					enterPath.down(eServiceReference());
 			}
@@ -1153,20 +1204,32 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			{
 				if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 				{
-					enterPath = /*emit*/ getRoot(listSatellites);
+					if ( this == eZap::getInstance()->getServiceSelector() )
+						enterPath = /*emit*/ getRoot(listSatellites,-1);
+					else
+						enterPath = /*emit*/ getRoot(listSatellites, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
+						path.bottom().data[1] == ((1<<1) || (1<<4)) ? eZapMain::modeTV : eZapMain::modeFile );
 					if ( style == styleCombiColumn && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 						enterPath.down(eServiceReference());
 				}
 			}
 			else if (event.action == &i_serviceSelectorActions->showProvider && !movemode)
 			{
-				enterPath = /*emit*/ getRoot(listProvider);
+				if ( this == eZap::getInstance()->getServiceSelector() )
+					enterPath = /*emit*/ getRoot(listProvider,-1);
+				else
+					enterPath = /*emit*/ getRoot(listProvider, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
+						path.bottom().data[1] == ((1<<1) || (1<<4)) ? eZapMain::modeTV : eZapMain::modeFile );
 				if ( style == styleCombiColumn && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 					enterPath.down(eServiceReference());
 			}
 			else if (event.action == &i_serviceSelectorActions->showBouquets && !movemode)
 			{
-				enterPath = /*emit*/ getRoot(listBouquets);
+				if ( this == eZap::getInstance()->getServiceSelector() )
+					enterPath = /*emit*/ getRoot(listBouquets,-1);
+				else
+					enterPath = /*emit*/ getRoot(listBouquets, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
+						path.bottom().data[1] == ((1<<1) || (1<<4)) ? eZapMain::modeTV : eZapMain::modeFile );
 				if ( style == styleCombiColumn )
 					enterPath.down(eServiceReference());
 			}
@@ -1502,26 +1565,32 @@ eServiceSelector::eServiceSelector()
 	addActionMap(&i_numberActions->map);
 
 	setHelpID(33);
-	addActionToHelpList(&i_serviceSelectorActions->deletePressed);
-	addActionToHelpList(&i_serviceSelectorActions->markPressed);
-	addActionToHelpList(&i_serviceSelectorActions->renamePressed);
-	addActionToHelpList(&i_serviceSelectorActions->newMarkerPressed);
+	if ( this == eZap::getInstance()->getServiceSelector() )
+	{
+		addActionToHelpList(&i_serviceSelectorActions->deletePressed);
+		addActionToHelpList(&i_serviceSelectorActions->markPressed);
+		addActionToHelpList(&i_serviceSelectorActions->renamePressed);
+		addActionToHelpList(&i_serviceSelectorActions->newMarkerPressed);
+	}
 	addActionToHelpList(&i_serviceSelectorActions->showAll);
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 		addActionToHelpList(&i_serviceSelectorActions->showSatellites);
 	addActionToHelpList(&i_serviceSelectorActions->showProvider);
 	addActionToHelpList(&i_serviceSelectorActions->showBouquets);
-	addActionToHelpList(&i_serviceSelectorActions->showMenu);
+	if ( this == eZap::getInstance()->getServiceSelector() )
+		addActionToHelpList(&i_serviceSelectorActions->showMenu);
 	addActionToHelpList(&i_serviceSelectorActions->toggleStyle);
 	addActionToHelpList(&i_serviceSelectorActions->toggleFocus);
 	addActionToHelpList(&i_serviceSelectorActions->gotoPrevMarker);
 	addActionToHelpList(&i_serviceSelectorActions->gotoNextMarker);
-	addActionToHelpList(&i_serviceSelectorActions->showEPGSelector);
+	if ( this == eZap::getInstance()->getServiceSelector() )
+		addActionToHelpList(&i_serviceSelectorActions->showEPGSelector);
 	addActionToHelpList(&i_serviceSelectorActions->pathUp);
 	addActionToHelpList(&i_serviceSelectorActions->modeTV);
 	addActionToHelpList(&i_serviceSelectorActions->modeRadio);
 #ifndef DISABLE_FILE
-	addActionToHelpList(&i_serviceSelectorActions->modeFile);
+	if ( this == eZap::getInstance()->getServiceSelector() )
+		addActionToHelpList(&i_serviceSelectorActions->modeFile);
 #endif
 	
 	key[0] = key[1] = key[2] = key[3] = 0;

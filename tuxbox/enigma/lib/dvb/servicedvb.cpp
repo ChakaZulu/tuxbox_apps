@@ -453,7 +453,7 @@ void eServiceHandlerDVB::startPlayback(const eString &filename, int livemode)
 	decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::start, livemode));
 	flags=flagIsSeekable|flagSupportPosition;
 	state=statePlaying;
-	pcrpid = Decoder::parms.pcrpid;
+	pcrpid = Decoder::current.pcrpid;
 		// stop pcrpid
 	Decoder::parms.pcrpid = -1;
 	Decoder::Set();
@@ -508,6 +508,7 @@ void eServiceHandlerDVB::switchedService(const eServiceReferenceDVB &, int err)
 		state=stateError;
 	else
 		state=statePlaying;
+
 	if (state != oldstate)
 		serviceEvent(eServiceEvent(eServiceEvent::evtStateChanged));
 

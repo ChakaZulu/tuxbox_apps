@@ -183,16 +183,6 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	
 	length=-1;
 
-	switch (type)
-	{
-	case codecMP3:
-		audiodecoder=new eAudioDecoderMP3(input, output);
-		break;
-	case codecMPG:
-		audiodecoder=new eMPEGDemux(input, output, output2);
-		break;
-	}
-	
 	if (type != codecMPG)
 	{
 		pcmsettings.reconfigure=1;
@@ -243,7 +233,18 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 			CONNECT(outputsn[1]->activated, eMP3Decoder::outputReady2);
 		}
 	}
-	
+
+	switch (type)
+	{
+	case codecMP3:
+		audiodecoder=new eAudioDecoderMP3(input, output);
+		break;
+	case codecMPG:
+		audiodecoder=new eMPEGDemux(input, output, output2, dspfd[0]);
+		break;
+	}
+
+
 	if (sourcefd >= 0)
 	{
 		inputsn=new eSocketNotifier(this, sourcefd, eSocketNotifier::Read, 0);
@@ -388,6 +389,7 @@ void eMP3Decoder::outputReady(int what)
 //			eDebug("reconfigured audio interface...");
 		}
 	}
+//	if ( type != codecMPG || output2.size() )
 	output.tofile(dspfd[0], 65536);
 	checkFlow(0);
 }
@@ -395,6 +397,7 @@ void eMP3Decoder::outputReady(int what)
 void eMP3Decoder::outputReady2(int what)
 {
 	(void)what;
+//	if ( output.size() )
 	output2.tofile(dspfd[1], 65536);
 	checkFlow(0);
 }
@@ -664,7 +667,8 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 					output2.clear();
 					dspSync();
 					audiodecoder->resync();
-					Decoder::Pause();
+					Decoder::Pause();      
+//					Decoder::realPause();
 				}
 				else
 					dspSync();
@@ -681,6 +685,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			{
 				Decoder::Resume();
 				checkFlow(0);
+//				Decoder::realResume();
 			}
 		}
 		else
@@ -711,9 +716,9 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		if ( !skipping )
 		{
 			skipping=true;
-			if ( type == codecMPG )
+/*			if ( type == codecMPG )
 				Decoder::startTrickmode();
-			else if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 1) < 0)
+			else*/ if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 1) < 0)
 				eDebug("AUDIO_SET_MUTE error (%m)");
 		}
 		break;
@@ -721,9 +726,9 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		if ( skipping )
 		{
 			skipping=false;
-			if ( type == codecMPG )
+/*			if ( type == codecMPG )
 				Decoder::stopTrickmode();
-			else if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 0) < 0)
+			else*/ if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 0) < 0)
 				eDebug("AUDIO_SET_MUTE error (%m)");
 		}
 		break;

@@ -6,7 +6,7 @@
 
 	<device identifier="DBOX-2 FP IR" >
 		<keys>
-			<key name="0" code="1" picture="key.0" />
+			<key name="0" code="b" picture="key.0" />
 			<key name="1" code="2" picture="key.1" />
 			<key name="2" code="3" picture="key.2" />
 			<key name="3" code="4" picture="key.3" />

@@ -269,7 +269,15 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 	recorder->recRef=(eServiceReferenceDVB&)eServiceInterface::getInstance()->service;
 
 	eServiceHandler *handler = eServiceInterface::getInstance()->getService();
-	recorder->scrambled = handler->getFlags() & eServiceHandler::flagIsScrambled;
+
+	int fd = open("/var/.zap", O_RDONLY);
+	if ( fd < 0 )
+		recorder->scrambled = handler->getFlags() & eServiceHandler::flagIsScrambled;
+	else
+	{
+		close(fd);
+		recorder->scrambled = false;
+	}
 
 	recorder->open(filename);
 

@@ -280,16 +280,16 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 	int tpid = -1;
 	if (plugin->needvtxtpid)
 	{
-		if(Decoder::parms.tpid==-1)
+		if(Decoder::current.tpid==-1)
 		{
 			MakeParam(P_ID_VTXTPID, 0);
 		}
 		else
 		{
-			MakeParam(P_ID_VTXTPID, Decoder::parms.tpid);
+			MakeParam(P_ID_VTXTPID, Decoder::current.tpid);
 		}
 		// stop vtxt reinsertion
-		tpid = Decoder::parms.tpid;
+		tpid = Decoder::current.tpid;
 		if (tpid != -1)
 		{
 			eDebug("stop vtxt reinsertion");

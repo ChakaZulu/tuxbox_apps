@@ -66,7 +66,10 @@ enigmaVCR::~enigmaVCR()
 	if ( eZapStandby::getInstance() )
 		eAVSwitch::getInstance()->setTVPin8(0);
 	else
+	{
+		eAVSwitch::getInstance()->setTVPin8(-1); // reset prev voltage
 		eStreamWatchdog::getInstance()->reloadSettings();
+	}
 }
 
 void enigmaVCR::volumeUp()

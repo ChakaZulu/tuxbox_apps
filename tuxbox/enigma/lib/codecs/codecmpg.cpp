@@ -5,7 +5,10 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <lib/base/eerror.h>
+
+#define VIDEO_GET_PTS _IOR('o', 1, unsigned int*)
 
 unsigned long eMPEGDemux::getLong()
 {
@@ -53,15 +56,12 @@ void eMPEGDemux::syncBits()
 	remaining&=~7;
 }
 
-eMPEGDemux::eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio)
+eMPEGDemux::eMPEGDemux(eIOBuffer &input, eIOBuffer &video, eIOBuffer &audio, int fd)
 	:input(input), video(video), audio(audio), minFrameLength(4096),
-	mpegtype(-1), curAudioStreamID(0), validpackets(0),
-	lastAudioPTS(-1), lastVideoPTS(-1), synced(0)
+	mpegtype(-1), curAudioStreamID(0), synced(0), fd(fd)
 {
 	remaining=0;
 	memset(&pcmsettings, 0, sizeof(pcmsettings));
-//	fAudio=fopen("/hdd/audio.pes", "w+" );
-//	fVideo=fopen("/hdd/video.pes", "w+" );
 }
 
 int eMPEGDemux::decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*newastreamid )
@@ -82,34 +82,25 @@ int eMPEGDemux::decodeMore(int last, int maxsamples, Signal1<void,unsigned int>*
 			}
 			syncBits();
 			if (getBits(8))
-			{
-//				eDebug("skip");
 				continue;
-			}
-a:
 			if (getBits(8))
-			{
-//				eDebug("skip");
 				continue;
-			}
+a:
 			int c=getBits(8);
 			if (!c)
-			{
-//				eDebug("skip");
 				goto a;
-			}
 			if (c != 1)
-			{
-//				eDebug("skip");
 				continue;
-			}
 			if (!maxsamples)
 				break;
 			code = getBits(8);
 			switch (code)
 			{
 				case 0xb9: // MPEG_program_end_code
+				{
+					eDebug("program_end_code");
 					goto finish;
+				}
 				case 0xba: // pack_start_code
 				{
 					int type=getBits(2);
@@ -173,7 +164,7 @@ a:
 				case 0xF3:
 				case 0xFF:
 				{
-//					eDebug("system_header");
+//					eDebug("system_header %02x", code);
 					int length=getBits(16);
 					while ( length && remaining )
 					{
@@ -330,60 +321,49 @@ a:
 							}
 						}
 					}
-					if (code == 0xE0)
+		// check old audiopackets in syncbuffer
+					if ( syncbuffer.size() )
 					{
-						if (validpackets < 100)
+						unsigned int VideoPTS=0xFFFFFFFF;
+						if ( ::ioctl(fd, VIDEO_GET_PTS, &VideoPTS) < 0 )
+							eDebug("GET PTS failes (%m)");
+						if ( VideoPTS != 0xFFFFFFFF )
 						{
-							++validpackets;
-							break;
-						}
-						if ( lastVideoPTS == -1 ||
-							( lastAudioPTS != -1 && abs(lastAudioPTS-lastVideoPTS) > 0x30000 ) )
-						{
-							int pos=5;
-							while( buffer[++pos] == 0xFF );  // stuffing überspringen
-								if ( (buffer[pos] & 0xC0) == 0x40 ) // buffer scale size
-									pos+=2;
-							if ( ((buffer[pos] & 0xF0) == 0x20) ||  //MPEG1
-									 ((buffer[pos] & 0xF0) == 0x30) ||  //MPEG1
-									 ((buffer[pos] & 0xC0) == 0x80) )   //MPEG2
+							std::list<syncAudioPacket>::iterator it( syncbuffer.begin() );
+							for (;it != syncbuffer.end(); ++it )
 							{
-								int readPTS=1;
-								if ((buffer[pos] & 0xC0) == 0x80) // we must skip many bytes
+								if ( abs(VideoPTS - it->pts) <= 0x1000 )
 								{
-									if ((c & 0x30) != 0)
-										eDebug("warning encrypted multiplex not handled!!!");
-									++pos; // flags
-									if ( ((buffer[pos]&0xC0) != 0x80) &&
-											 ((buffer[pos]&0xC0) != 0xC0) )
-										readPTS=0;
-									pos+=2;
-								}
-								if (readPTS)
-								{
-									lastVideoPTS = (buffer[pos++] & 0x0E) << 28;
-									lastVideoPTS |= (buffer[pos++] & 0xFF) << 21;
-									lastVideoPTS |= (buffer[pos++] & 0xFE) << 13;
-									lastVideoPTS |= (buffer[pos++] & 0xFF) << 5;
-									lastVideoPTS |= (buffer[pos] >> 1) & 0x1F;
-									eDebug("VPTS %08x", lastVideoPTS);
+									eDebug("found :)");
+									break;
 								}
 							}
+							if ( it != syncbuffer.end() )
+							{
+								synced=1;
+		// write data from syncbuffer to audio device
+								for (;it != syncbuffer.end(); ++it )
+									audio.write( it->data, it->len );
+		// cleanup syncbuffer
+								for (it=syncbuffer.begin();it != syncbuffer.end(); ++it )
+									delete [] it->data;
+								syncbuffer.clear();
+							}
 						}
+					}
+					if (code == 0xE0)
+					{
 						video.write(buffer, p);
-//						fwrite(buffer, p, 1, fVideo);
 						written+=p;
 					}
 					else if ( code == curAudioStreamID )
 					{
-						if ( validpackets < 100)
+		// check current audiopacket
+						if (!synced)
 						{
-							++validpackets;
-							break;
-						}
-						if ( !synced )
-						{
-							int pos=5;
+							unsigned int AudioPTS = 0xFFFFFFFF,
+													 VideoPTS = 0xFFFFFFFF,
+													 pos=5;
 							while( buffer[++pos] == 0xFF );  // stuffing überspringen
 								if ( (buffer[pos] & 0xC0) == 0x40 ) // buffer scale size
 									pos+=2;
@@ -404,48 +384,57 @@ a:
 								}
 								if (readPTS)
 								{
-									lastAudioPTS = (buffer[pos++] & 0x0E) << 28;
-									lastAudioPTS |= (buffer[pos++] & 0xFF) << 21;
-									lastAudioPTS |= (buffer[pos++] & 0xFE) << 13;
-									lastAudioPTS |= (buffer[pos++] & 0xFF) << 5;
-									lastAudioPTS |= (buffer[pos] >> 1) & 0x1F;
-									if ( lastVideoPTS != -1 )
-										eDebug("APTS %08x", lastAudioPTS);
+									AudioPTS = (buffer[pos++] >> 1) << 29;
+									AudioPTS |= buffer[pos++] << 21;
+									AudioPTS |=(buffer[pos++] >> 1) << 14;
+									AudioPTS |= buffer[pos++] << 6;
+									AudioPTS |= buffer[pos] >> 2;
+//									eDebug("APTS %08x", AudioPTS);
 								}
 							}
-						}
-						if ( lastVideoPTS != -1 && lastAudioPTS != -1 )
-						{
-							if ( synced || abs(lastAudioPTS-lastVideoPTS) < 0x750 )
+							if ( ::ioctl(fd, VIDEO_GET_PTS, &VideoPTS) < 0 )
+								eDebug("GET PTS failes (%m)");
+							if ( VideoPTS != 0xFFFFFFFF && abs(VideoPTS - AudioPTS) <= 0x1000 )
 							{
 								synced=1;
-								audio.write(buffer, p);
-//								fwrite(buffer, p, 1, fAudio);
+		// cleanup syncbuffer.. we don't need content of it
+								std::list<syncAudioPacket>::iterator it( syncbuffer.begin() );
+								for (;it != syncbuffer.end(); ++it )
+									delete [] it->data;
+								syncbuffer.clear();
 							}
-							else
-								eDebug("PTSA = %08x\nPTSV = %08x\nDIFF = %08x",
-									lastAudioPTS, lastVideoPTS, abs(lastAudioPTS-lastVideoPTS) );
+							else if ( (AudioPTS > VideoPTS) || VideoPTS == 0xFFFFFFFF )
+							{
+								syncAudioPacket pack;
+								pack.pts = AudioPTS;
+								pack.len = p;
+								pack.data = new __u8[p];
+								memcpy( pack.data, buffer, pack.len );
+								syncbuffer.push_back( pack );
+//								eDebug("PTSA = %08x\nPTSV = %08x\nDIFF = %08x",
+//									AudioPTS, VideoPTS, abs(AudioPTS-VideoPTS) );
+							}
 						}
+						if ( synced )
+							audio.write(buffer, p);
 						written+=p;
 					}
 					break;
 				}
 				default:
 				{
-					if ( validpackets )
+					if ( audio.size() || video.size() )
+						eDebug("unhandled code... but already data in buffers!!");
+					for (std::map<int,int>::iterator it(audiostreams.begin());
+						it != audiostreams.end();)
 					{
-						for (std::map<int,int>::iterator it(audiostreams.begin());
-							it != audiostreams.end();)
-							if ( it->second < 30 )
-							{
-								audiostreams.erase(it);
-								it = audiostreams.begin();
-							}
-							else
-								++it;
-						validpackets=0;
-						video.clear();
-						audio.clear();
+						if ( it->second < 30 )
+						{
+							audiostreams.erase(it);
+							it = audiostreams.begin();
+						}
+						else
+							++it;
 					}
 					eDebug("unhandled code %02x", code);
 				}
@@ -459,7 +448,11 @@ finish:
 void eMPEGDemux::resync()
 {
 	remaining=synced=0;
-	lastAudioPTS=lastVideoPTS=-1;
+// clear syncbuffer
+	std::list<syncAudioPacket>::iterator it( syncbuffer.begin() );
+	for (;it != syncbuffer.end(); ++it )
+		delete [] it->data;
+	syncbuffer.clear();
 }
 
 int eMPEGDemux::getMinimumFramelength()
@@ -490,8 +483,6 @@ void eMPEGDemux::setAudioStream( unsigned int id )
 		}
 		curAudioStreamID = id;
 	}
-//	fseek(fAudio, 0, SEEK_SET);
-//	fseek(fVideo, 0, SEEK_SET);
 }
 
 #endif // DISABLE_FILE

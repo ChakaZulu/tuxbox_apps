@@ -107,7 +107,8 @@ public:
 	~eServiceSelector();
 
 	enum { listAll, listSatellites, listProvider, listBouquets };
-	Signal1<eServicePath,int> getRoot;
+	Signal2<eServicePath,int,int> getRoot;
+	Signal2<int,eServiceReference,int> getFirstBouquetServiceNum;
 
 	Signal1<void,const eServiceReference &> addServiceToPlaylist; // add service to the Playlist
 	Signal2<void,eServiceReference*,int> addServiceToUserBouquet;  // add current service to selected User Bouquet

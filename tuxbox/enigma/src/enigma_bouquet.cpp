@@ -20,6 +20,9 @@ eModeSelector::eModeSelector()
 	move( ePoint(100,100) );
 	new eListBoxEntryText( &list, _("TV"), (void*)  eZapMain::modeTV );
 	new eListBoxEntryText( &list, _("Radio"), (void*) eZapMain::modeRadio );
+#ifndef DISABLE_FILE
+	new eListBoxEntryText( &list, _("File"), (void*) eZapMain::modeFile );
+#endif
 	CONNECT( list.selected, eModeSelector::entrySelected );
 }
 
@@ -59,7 +62,6 @@ void eZapBouquetSetup::editModeSelected()
 	m.hide();
 	if ( ret != -1 )
 	{
-		// get service selector reference
 		eServiceSelector &sel = *eZap::getInstance()->getServiceSelector();
 
 		if ( eZapMain::getInstance()->toggleEditMode(&sel,ret) )
@@ -90,15 +92,23 @@ void eZapBouquetSetup::editModeSelected()
 		{
 			if ( ret == eZapMain::modeTV )
 				sel.setPath( eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -4, (1<<4)|(1<<1) ));
-			else
+			else if ( ret == eZapMain::modeRadio )
 				sel.setPath( eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -4, 1<<2) );
+#ifndef DISABLE_FILE
+			else
+				sel.setPath( eZapMain::getInstance()->getRoot(eZapMain::listAll, eZapMain::modeFile) );
+#endif
 		}
 		else  // cable or dvb-t
 		{
 			if ( ret == eZapMain::modeTV )
 				sel.setPath( eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, (1<<4)|(1<<1), 0xFFFFFFFF) );
-			else
+			else if ( ret == eZapMain::modeRadio )
 				sel.setPath( eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, 1<<2, 0xFFFFFFFF) );
+#ifndef DISABLE_FILE
+			else
+				sel.setPath( eZapMain::getInstance()->getRoot(eZapMain::listAll, eZapMain::modeFile) );
+#endif
 		}
 
 		// save current service selector style
@@ -139,7 +149,6 @@ void eZapBouquetSetup::editSelected()
 	// enable edit actions
 	eActionMapList::getInstance()->activateStyle("sselect_edit");
 
-	// get service selector reference
 	eServiceSelector &sel = *eZap::getInstance()->getServiceSelector();
 
 	// save current serviceselector Path

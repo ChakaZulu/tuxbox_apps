@@ -688,13 +688,13 @@ eServiceDVB &eTransponderList::createService(const eServiceReferenceDVB &service
 				chnum=i->first+1;	// letzte kanalnummer +1
 			}
 		}	*/
-		
+
 		if (chnum == -1)
 			chnum=200;
 
 		while (channel_number.find(chnum)!=channel_number.end())
 			++chnum;
-	
+
 		eServiceDVB *n=&services.insert(
 					std::pair<eServiceReferenceDVB,eServiceDVB>
 						(service,

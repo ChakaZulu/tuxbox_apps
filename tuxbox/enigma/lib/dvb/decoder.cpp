@@ -153,7 +153,7 @@ void Decoder::Pause( bool disableAudio )
 	{
 		if ( ::ioctl(fd.video, VIDEO_FREEZE) < 0 )
 			eDebug("VIDEO_FREEZE failed (%m)");
-		if (fd.video == 0x1FFE)
+		if ( fd.audio != -1 && current.vpid == 0x1FFE && current.apid == 0x1FFE )
 		{
 			if ( ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 0) < 0 )
 				eDebug("AUDIO_SET_AV_SYNC failed (%m)");
@@ -166,7 +166,7 @@ void Decoder::Pause( bool disableAudio )
 			}
 		}
 	}
-	if ( fd.audio != -1 && fd.video != 0x1FFE  )  // not Video Clip mode
+	if ( fd.audio != -1 && current.vpid != 0x1FFE && current.apid != 0x1FFE )  // not Video Clip mode
 	{
 		if (::ioctl(fd.audio, AUDIO_STOP)<0)
 			eDebug("AUDIO_STOP failed(%m)");
@@ -180,11 +180,11 @@ void Decoder::Resume(bool enableAudio)
 	eDebug("Decoder::Resume()");
 	if (fd.video != -1)
 	{
-		if (::ioctl(fd.video, VIDEO_CONTINUE)<0)
+		if (::ioctl(fd.video, VIDEO_PLAY)<0)
 			eDebug("VIDEO_CONTINUE failed(%m)");
 		if ( ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1 ) < 0 )
 			eDebug("AUDIO_SET_AV_SYNC failed (%m)");
-		if ( enableAudio && fd.video == 0x1FFE)  // Video Clip Mode
+		if ( enableAudio && current.vpid == 0x1FFE && current.apid == 0x1FFE )  // Video Clip Mode
 		{
 			if (::ioctl(fd.audio, AUDIO_SET_MUTE, 0 )<0)
 				eDebug("AUDIO_SET_MUTE failed (%m)");
@@ -192,7 +192,7 @@ void Decoder::Resume(bool enableAudio)
 				eDebug("audio_pause (success)");
 		}
 	}
-	if ( fd.audio != -1 && fd.video != 0x1FFE )  // not Video Clip Mode
+	if ( fd.audio != -1 && current.vpid != 0x1FFE && current.apid != 0x1FFE )  // not Video Clip Mode
 	{
 		if (::ioctl(fd.audio, AUDIO_PLAY)<0)
 			eDebug("AUDIO_PLAY failed (%m)");
@@ -687,12 +687,20 @@ int Decoder::displayIFrame(const char *frame, int len)
 	if (fdv < 0)
 		return -1;
 
-	parms.vpid=0x1FFF;
-	parms.pcrpid=-1;
-	Set();
+	if ( fd.video != -1 )
+	{
+		if (::ioctl(fd.video, VIDEO_CLEAR_BUFFER)<0 )
+			eDebug("VIDEO_CLEAR_BUFFER failed (%m)");
+		parms.vpid=-1;
+		Set();
+	}
 
-	if (fd.video != -1 && ::ioctl(fd.video, VIDEO_CLEAR_BUFFER)<0 )
-		eDebug("VIDEO_CLEAR_BUFFER failed (%m)");
+	int fd = open(VIDEO_DEV, O_RDWR);
+
+	if (::ioctl(fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY )<0)
+		eDebug("VIDEO_SELECT_SOURCE failed (%m)");
+	if ( ::ioctl(fd, VIDEO_PLAY) < 0 )
+		eDebug("VIDEO_PLAY failed (%m)");
 
 	unsigned char buf[128];
 	memset(&buf, 0, 128);
@@ -701,6 +709,8 @@ int Decoder::displayIFrame(const char *frame, int len)
 		write(fdv, frame, len);
 		write(fdv, &buf, 128);
 	}
+
+	close(fd);
 
 	showPicture();
 
