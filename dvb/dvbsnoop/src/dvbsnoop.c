@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.22 2004/01/03 15:40:45 rasc Exp $
+$Id: dvbsnoop.c,v 1.23 2004/01/03 16:40:11 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,9 @@ $Id: dvbsnoop.c,v 1.22 2004/01/03 15:40:45 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.23  2004/01/03 16:40:11  rasc
+no message
+
 Revision 1.22  2004/01/03 15:40:45  rasc
 simple frontend signal status query added "-s signal"
 
@@ -138,7 +141,9 @@ int main(int argc, char **argv)
      }
 
      if (! opt.inpPidFile) {
-	out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
+	if (opt.pid != DUMMY_PID) {
+		out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
+	}
 	if (opt.packet_mode == SECT) {		// filter are only for sections
 		out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
 		out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);

@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.1 2004/01/03 15:40:45 rasc Exp $
+$Id: fe_signal.c,v 1.2 2004/01/03 16:40:12 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.1 2004/01/03 15:40:45 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.2  2004/01/03 16:40:12  rasc
+no message
+
 Revision 1.1  2004/01/03 15:40:45  rasc
 simple frontend signal status query added "-s signal"
 
@@ -26,6 +29,7 @@ simple frontend signal status query added "-s signal"
 
 
 #include <fcntl.h>
+#include <stdint.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -47,8 +51,8 @@ simple frontend signal status query added "-s signal"
 typedef struct _fe_signal {
 	int16_t   strength;
 	int16_t   snr;
-	int32_t   ber;		// unsigned... compile error $$$
-	int32_t   ublocks;	// unsigned... compile error $$$
+	uint32_t  ber;
+	uint32_t  ublocks;
 	fe_status_t status;
 } FE_SIGNAL;
 
@@ -150,12 +154,13 @@ int  do_SignalStrength (OPTION *opt)
 //		    continue;
 //	    }
 
-	if (has.strength)  out (1,"Sig: %u  ",s.strength);
-	if (has.snr)	   out (1,"SNR: %u  ",s.snr);
-	if (has.ber)	   out (1,"BER: %lu  ",s.ber);
+	    // & 0xFFFF necessary, due to interface transformations??
+	if (has.strength)  out (1,"Sig: %u  ", s.strength & 0xFFFFL);
+	if (has.snr)	   out (1,"SNR: %u  ", s.snr & 0xFFFFL);
+	if (has.ber)	   out (1,"BER: %lu ",s.ber);
 	if (has.ublocks)   out (2,"UBLK: %lu  ",s.ublocks);
 	if (has.status) {
-		out (2,"Stat: 0x%x ",s.status);
+		out (2,"Stat: 0x%02x ",s.status);
 		out_status_detail (3,s.status);
 	}
 	out_NL(1);
@@ -283,6 +288,3 @@ static void out_status_detail (int v,fe_status_t s)
 
 
 
-
-//$$$ TODO
-//FE READ UNCORRECTED BLOCKS, uint32 t *ublocks);
