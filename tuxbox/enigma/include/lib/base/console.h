@@ -30,7 +30,9 @@ class eConsoleAppContainer: public Object
 public:
 	eConsoleAppContainer( const eString &str );
 	~eConsoleAppContainer();
+	int getPID() { return pid; }
 	void kill();
+	void sendCtrlC();
 	void write( const char *data, int len );
 	bool running() { return (fd[0]!=-1) && (fd[1]!=-1) && (fd[2]!=-1); }
 	Signal1<void, eString> dataAvail;
