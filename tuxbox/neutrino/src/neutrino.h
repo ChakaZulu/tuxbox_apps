@@ -153,7 +153,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitLcdSettings(CMenuWidget &lcdSettings);
 		void InitNetworkSettings(CMenuWidget &networkSettings);
 		void AddFontSettingItem(CMenuWidget &fontSettings, string menuname, char *value);
-		void InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist ,CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg );
+		void InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist ,CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg, CMenuWidget &fontSettings_Gamelist );
 		void InitRecordingSettings(CMenuWidget &recordingSettings);
 		void InitScreenSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);

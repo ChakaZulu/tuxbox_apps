@@ -705,7 +705,7 @@ void CEpgData::showTimerEventBar (bool show)
 		g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.recordevent").c_str(), COL_INFOBAR);
 	}
     // Button: Timer Channelswitch
-    pos = 1;
+    pos = 2;
     frameBuffer->paintIcon("gelb.raw", x+8+cellwidth*pos, y+h_offset );
     g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.channelswitch").c_str(), COL_INFOBAR);
 }

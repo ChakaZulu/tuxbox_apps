@@ -1575,7 +1575,7 @@ void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, string menuname
 	fontSettings.addItem( new CMenuForwarder(menuname, true, value ,fontSize));
 }
 
-void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist , CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg )
+void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist , CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg, CMenuWidget &fontSettings_Gamelist )
 {
 	fontSettings_Epg.addItem( new CMenuSeparator() );
 	fontSettings_Epg.addItem( new CMenuForwarder("menu.back") );
@@ -1592,10 +1592,13 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_itemlarge", g_settings.fontsize_eventlist_itemlarge);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_itemsmall", g_settings.fontsize_eventlist_itemsmall);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_datetime", g_settings.fontsize_eventlist_datetime);
-//	fontSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-//	AddFontSettingItem(fontSettings, "fontsize.gamelist_itemLarge", g_settings.fontsize_gamelist_itemLarge);
-//	AddFontSettingItem(fontSettings, "fontsize.gamelist_itemSmall", g_settings.fontsize_gamelist_itemSmall);
-
+	
+	fontSettings_Gamelist.addItem( new CMenuSeparator() );
+	fontSettings_Gamelist.addItem( new CMenuForwarder("menu.back") );
+	fontSettings_Gamelist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemLarge", g_settings.fontsize_gamelist_itemlarge);
+	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemLarge", g_settings.fontsize_gamelist_itemsmall);
+	
 	fontSettings_Channellist.addItem( new CMenuSeparator() );
 	fontSettings_Channellist.addItem( new CMenuForwarder("menu.back") );
 	fontSettings_Channellist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1625,6 +1628,7 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	fontSettings.addItem( new CMenuForwarder("fontmenu.eventlist", true,"", &fontSettings_Eventlist) );
 	fontSettings.addItem( new CMenuForwarder("fontmenu.epg", true,"", &fontSettings_Epg) );
 	fontSettings.addItem( new CMenuForwarder("fontmenu.infobar", true,"", &fontSettings_Infobar) );
+	fontSettings.addItem( new CMenuForwarder("fontmenu.gamelist", true,"", &fontSettings_Gamelist) );
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings )
@@ -2138,6 +2142,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget fontSettings_Eventlist("fontmenu.eventlist", "colors.raw");
 	CMenuWidget fontSettings_Infobar("fontmenu.infobar", "colors.raw");
 	CMenuWidget fontSettings_Epg("fontmenu.epg", "colors.raw");
+	CMenuWidget fontSettings_Gamelist("fontmenu.gamelist", "colors.raw");
 
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
@@ -2235,7 +2240,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	InitRecordingSettings(recordingSettings);
 
 	//font Setup
-	InitFontSettings(fontSettings, fontSettings_Channellist, fontSettings_Eventlist, fontSettings_Infobar, fontSettings_Epg);
+	InitFontSettings(fontSettings, fontSettings_Channellist, fontSettings_Eventlist, fontSettings_Infobar, fontSettings_Epg, fontSettings_Gamelist);
 
 	//color Setup
 	InitColorSettings(colorSettings, fontSettings);
@@ -3264,7 +3269,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.366 2002/11/28 22:20:40 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.367 2002/12/02 20:03:04 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
