@@ -419,6 +419,7 @@ void CNeutrinoApp::firstChannel()
 
 	write(sock_fd, &sendmessage, sizeof(sendmessage));
 	return_buf = (char*) malloc(4);
+	memset(return_buf, 0, sizeof(return_buf));
 	
 	if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
 		perror("Nothing could be received\n");
@@ -484,6 +485,7 @@ void CNeutrinoApp::channelsInit()
 
 	write(sock_fd, &sendmessage, sizeof(sendmessage));
 	return_buf = (char*) malloc(4);
+	memset(return_buf, 0, sizeof(return_buf));
 	if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
 		perror("Nothing could be received\n");
 		exit(-1);
