@@ -568,9 +568,25 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
-	eString audioChannel = opt["channel"];
+	eString audioChannel = httpUnescape(opt["audio"]);
 
-	// set audio channel here...
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if ( sapi )
+	{
+		std::list<eDVBServiceController::audioStream> &astreams( sapi->audioStreams );
+		std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin());
+		for (;it != astreams.end(); ++it )
+			if ( it->text == audioChannel )
+			{
+				eDebug("blasel found... setpid");
+				eServiceHandler *service=eServiceInterface::getInstance()->getService();
+				if (service)
+					service->setPID(it->pmtentry);
+				break;
+			}
+			else
+				eDebug("not found %s", it->text.c_str() );
+	}
 
 	return "<script language=\"javascript\">window.close();</script>";
 }
@@ -579,9 +595,21 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	// retrieve audio channels here...
-	// add some fake entries for the time being...
-	eString audioChannels = "<option>German</option><option>English</option>";
+	eString audioChannels;// = "<option>German</option><option>English</option>";
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if ( sapi )
+	{
+		std::list<eDVBServiceController::audioStream> &astreams( sapi->audioStreams );
+		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
+			;it != astreams.end(); ++it )
+		{
+			audioChannels += "<option>";
+			audioChannels += it->text;
+			audioChannels += "</option>";
+		}
+	}
+	else
+		audioChannels = "<option>no audiodata avail</option>";
 
 	eString result = readFile(TEMPLATE_DIR + "audioSelection.tmp");
 	result.strReplace("#AUDIOCHANS#", audioChannels);
