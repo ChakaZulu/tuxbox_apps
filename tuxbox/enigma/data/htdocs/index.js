@@ -4,7 +4,7 @@ function setVol(xy)
 	if (window.screen.width < 800)
 		setTimeout("reload()", 1000);
 	else
-		parent.update();
+		headerUpdate();
 }
 
 function setVid(xy)
@@ -19,7 +19,7 @@ function toggleMute(xy)
 	if (window.screen.width < 800)
 		setTimeout("reload()", 1000);
 	else
-		parent.update();
+		headerUpdate();
 }
 
 function headerUpdate()
