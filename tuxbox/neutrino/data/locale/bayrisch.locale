@@ -150,26 +150,26 @@ timing.infobar Infobar
 timing.hint_1 Einblendzeit in Sek., die das OSD
 timing.hint_2 auf dem TV angezeigt wird
 
-pluginmenu.head unset
-tuxnews.size unset
-tuxnews_size.small unset
-tuxnews_size.medium unset
-tuxnews_size.large unset
-tuxnews.speed unset
-tuxnews_speed.slow unset
-tuxnews_speed.medium unset
-tuxnews_speed.fast unset
-tuxnews.position unset
-tuxnews_position.top unset
-tuxnews_position.center unset
-tuxnews_position.bottom unset
+pluginmenu.head Plugins Eistellunga
+tuxnews.size Tuxnew Gräss
+tuxnews_size.small kloa
+tuxnews_size.medium mittl
+tuxnews_size.large groß
+tuxnews.speed Gschwindigkeid
+tuxnews_speed.slow langsam
+tuxnews_speed.medium mittl
+tuxnews_speed.fast schnoi
+tuxnews.position Tuxnews Position
+tuxnews_position.top obn
+tuxnews_position.center mittn
+tuxnews_position.bottom untn
 
 repeatblocker.hint_1 Mindestzeit (ms) zwischn zwoa Dasdndrucka
 repeatblocker.hint_2 0 schoitt an Blocka aus (Rot is " ")
 
 keybindingmenu.RC Fernbedienung
 keybindingmenu.repeatblock Wiederholungsverzögerung
-keybindingmenu.repeatblockgeneric Onfangsverzögerung
+keybindingmenu.repeatblockgeneric Ofangsverzögerung
 keybindingmenu.head Dasdn-Eistellunga
 keybindingmenu.modechange Modus wexln
 keybindingmenu.channellist Sendalistn
@@ -623,22 +623,22 @@ fontmenu.head Schriftgrössn Eistellunga
 fontmenu.channellist Kanallistn
 fontmenu.eventlist Eventlistn
 fontmenu.epg EPG
-fontmenu.infobar Infobar
+fontmenu.infobar Infoleistn
 
 colormenu.gtx_alpha unset
 gtxalpha.alpha1 tr1
 gtxalpha.alpha2 tr2
 
-mp3player.name MP3 Player
-mp3player.head Mp3 Playlist
-mp3player.play abspielen
-mp3player.add hinzufuegen
-mp3player.delete loeschen
-mp3player.stop stop
-mp3player.playall alle abspielen
+mp3player.name MP3 Spuia
+mp3player.head Mp3 Playlistn
+mp3player.play obspuin
+mp3player.add dazuadoa
+mp3player.delete löschn
+mp3player.stop stopn
+mp3player.playall olle obspuin
 
-filebrowser.head Filebrowser
-filebrowser.filter Filter
-filebrowser.select auswaehlen
-filebrowser.mark markieren
-filebrowser.scan Durchsuche Verzeichnisse
+filebrowser.head Datiesucha
+filebrowser.filter Fuita
+filebrowser.select auswaehn
+filebrowser.mark markiern
+filebrowser.scan Verzeichnisse durchsuacha
