@@ -3992,7 +3992,7 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 		hintBox->hide();
 		delete hintBox;
 	}
-	else if ((ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING_START)) || (ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING_STOP)))
+	else if ((ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING_START)) || (ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING)))
 	{
 		CTimerd::RecordingInfo eventinfo;
 
