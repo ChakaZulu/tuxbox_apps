@@ -1,5 +1,5 @@
 /*
- * $Id: streampes.c,v 1.7 2003/01/15 18:46:02 gandalfx Exp $
+ * $Id: streampes.c,v 1.8 2003/01/30 13:56:46 gandalfx Exp $
  *
  * Copyright (C) 2001 by tmbinc
  * Copyright (C) 2001 by kwon
@@ -134,9 +134,18 @@ int main(int argc, char **argv)
 					usleep(10000); //wait for 10 ms = max. 10 kb 
 				}
 			}
+			tr = BSIZE;
+			pr = 0;
 
-			if (write(STDOUT_FILENO, buffer, r) != r)
-				break;
+			while (tr) {
+				r = write(STDOUT_FILENO, buffer+pr, tr);
+				
+				if (r <= 0) {
+					continue;
+				}
+				pr += r;
+				tr -= r;
+			}
 		}
 	}
 
