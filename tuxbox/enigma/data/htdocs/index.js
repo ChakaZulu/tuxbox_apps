@@ -79,5 +79,5 @@ function sendMessage2TV()
 
 function selectAudio()
 {
-	NewWindow("/cgi-bin/selectAudio", "audio", "200", "100", "no");
+	NewWindow("/cgi-bin/selectAudio?requester=webif", "audio", "200", "100", "no");
 }
