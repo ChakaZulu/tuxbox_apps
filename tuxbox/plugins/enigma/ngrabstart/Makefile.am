@@ -1,4 +1,4 @@
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(srcdir)/../lib \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/../enigma/include \
