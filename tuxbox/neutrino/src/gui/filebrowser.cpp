@@ -197,7 +197,6 @@ bool sortBySize (const CFile& a, const CFile& b)
 	return a.Size < b.Size;
 }
 
-#define FILEBROWSER_NUMBER_OF_SORT_VARIANTS 5
 bool (* const sortBy[FILEBROWSER_NUMBER_OF_SORT_VARIANTS])(const CFile& a, const CFile& b) =
 {
 	&sortByName,
@@ -228,10 +227,9 @@ CFileBrowser::CFileBrowser()
 	Dirs_Selectable = false;
 	Dir_Mode = false;
 	selected = 0;
-	smode = g_settings.filebrowser_sortmethod;
 
-  x = g_settings.screen_StartX + 20;
-  y = g_settings.screen_StartY + 20;
+	x = g_settings.screen_StartX + 20;
+	y = g_settings.screen_StartY + 20;
 
 	width = (g_settings.screen_EndX - g_settings.screen_StartX - 40);
 	height = (g_settings.screen_EndY - g_settings.screen_StartY - 40);
@@ -330,7 +328,7 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 		filelist.push_back(*file);
 	}
 	// sort result
-	sort(filelist.begin(), filelist.end(), sortBy[smode]);
+	sort(filelist.begin(), filelist.end(), sortBy[g_settings.filebrowser_sortmethod]);
 
 	selected = 0;
 	paintHead();
@@ -630,13 +628,12 @@ bool CFileBrowser::exec(std::string Dirname)
 		}
 		else if (msg==CRCInput::RC_help)
 		{
-			if (smode >= 4)
-				smode = 0;
+			if (g_settings.filebrowser_sortmethod >= 4)
+				g_settings.filebrowser_sortmethod = 0;
 			else
-				smode++;
+				g_settings.filebrowser_sortmethod++;
 
-			g_settings.filebrowser_sortmethod = smode;
-			sort(filelist.begin(), filelist.end(), sortBy[smode]);
+			sort(filelist.begin(), filelist.end(), sortBy[g_settings.filebrowser_sortmethod]);
 
 			paint();
 		}
@@ -939,7 +936,7 @@ void CFileBrowser::paintFoot()
 
 		//?-Button
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by2 - 3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, g_Locale->getText(sortByNames[(smode + 1) % FILEBROWSER_NUMBER_OF_SORT_VARIANTS]), COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, g_Locale->getText(sortByNames[(g_settings.filebrowser_sortmethod + 1) % FILEBROWSER_NUMBER_OF_SORT_VARIANTS]), COL_INFOBAR, 0, true); // UTF-8
 
       if(m_oldKey!=0)
       {

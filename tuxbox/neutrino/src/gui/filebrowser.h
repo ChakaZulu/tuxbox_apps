@@ -114,6 +114,8 @@ public:
 
 typedef std::vector<CFile> CFileList;
 
+#define FILEBROWSER_NUMBER_OF_SORT_VARIANTS 5
+
 class CFileBrowser
 {
 	private:
@@ -132,8 +134,6 @@ class CFileBrowser
 		int 			fheight;	// Fonthoehe Filelist-Inhalt
 		int 			theight;	// Fonthoehe Filelist-Titel
 		int			foheight;	// Hoehe der button leiste
-		unsigned		smode;		// Sortierungsart
-
 		std::string		name;
 		std::string		m_baseurl;
 		int 			width;
