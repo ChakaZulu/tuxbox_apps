@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.18 2004/01/02 00:00:37 rasc Exp $
+$Id: dmx_pes.c,v 1.19 2004/01/02 02:37:54 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dmx_pes.c,v 1.18 2004/01/02 00:00:37 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.19  2004/01/02 02:37:54  rasc
+pes sync bugfix
+
 Revision 1.18  2004/01/02 00:00:37  rasc
 error output for buffer overflow
 
@@ -341,6 +344,7 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
 
     // -- Sync found!
 
+    *skipped_bytes -= 3;
     buf[0] = 0x00;   // write packet_start_code_prefix to buffer
     buf[1] = 0x00;
     buf[2] = 0x01;
