@@ -1,8 +1,21 @@
 /*
- * $Id: nit.cpp,v 1.14 2002/04/14 06:06:31 obi Exp $
+ * $Id: nit.cpp,v 1.15 2002/04/19 14:53:29 obi Exp $
  */
 
+#include <fcntl.h>
+#include <ost/dmx.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include "descriptors.h"
 #include "nit.h"
+#include "getservices.h"
+
+#define DEMUX_DEV "/dev/ost/demux0"
 
 extern std::map <uint32_t, transponder> transponders;
 
@@ -60,36 +73,18 @@ int parse_nit (uint8_t DiSEqC)
 		{
 			switch (buffer[pos])
 			{
-#if 0
-			case 0x40: /* network_name_descriptor */
+			case 0x40:
+				network_name_descriptor(buffer + pos);
 				break;
-			case 0x41: /* service_list_descriptor */
+
+			case 0x4A:
+				linkage_descriptor(buffer + pos);
 				break;
-			case 0x42: /* stuffing_descriptor */
+
+			case 0x5F:
+				private_data_specifier_descriptor(buffer + pos);
 				break;
-			case 0x43: /* satellite_delivery_system_descriptor */
-				sat_deliv_system_desc(&buffer[pos], transport_stream_id, original_network_id, DiSEqC);
-				break;
-			case 0x44: /* cable_delivery_system_descriptor */
-				cable_deliv_system_desc(&buffer[pos], transport_stream_id, original_network_id);
-				break;
-			case 0x4A: /* linkage_descriptor */
-				break;
-			case 0x5A: /* terrestrial_delivery_system_descriptor */
-				break;
-			case 0x5B: /* multilingual_network_name_descriptor */
-				break;
-			case 0x5F: /* private_data_specifier_descriptor */
-				break;
-			case 0x62: /* frequency_list_descriptor */
-				break;
-			case 0x6C: /* cell_list_descriptor */
-				break;
-			case 0x6D: /* cell_frequency_link_descriptor */
-				break;
-			case 0x6E: /* announcement_support_descriptor */
-				break;
-#endif
+
 			default:
 				printf("[nit.cpp] descriptor_tag (a): %02x\n", buffer[pos]);
 				break;
@@ -104,45 +99,24 @@ int parse_nit (uint8_t DiSEqC)
 			original_network_id = (buffer[pos + 2] << 8) | buffer[pos + 3];
 			transport_descriptors_length = ((buffer[pos + 4] & 0x0F) << 8) | buffer[pos + 5];
 
-#ifdef DEBUG
-			printf("[nit.cpp] transport_stream_id: %04x\n", transport_stream_id);
-			printf("[nit.cpp] original_network_id: %04x\n", original_network_id);
-#endif
-
 			if (transponders.count((transport_stream_id << 16) | original_network_id) == 0)
 			{
 				for (pos2 = pos + 6; pos2 < pos + transport_descriptors_length + 6; pos2 += buffer[pos2 + 1] + 2)
 				{
 					switch (buffer[pos2])
 					{
-					case 0x40: /* network_name_descriptor */
+					case 0x41:
+						service_list_descriptor(buffer + pos2);
 						break;
-					case 0x41: /* service_list_descriptor */
+
+					case 0x43:
+						satellite_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id, DiSEqC);
 						break;
-					case 0x42: /* stuffing_descriptor */
+
+					case 0x44:
+						cable_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id);
 						break;
-					case 0x43: /* satellite_delivery_system_descriptor */
-						sat_deliv_system_desc(&buffer[pos2], transport_stream_id, original_network_id, DiSEqC);
-						break;
-					case 0x44: /* cable_delivery_system_descriptor */
-						cable_deliv_system_desc(&buffer[pos2], transport_stream_id, original_network_id);
-						break;
-					case 0x4A: /* linkage_descriptor */
-						break;
-					case 0x5A: /* terrestrial_delivery_system_descriptor */
-						break;
-					case 0x5B: /* multilingual_network_name_descriptor */
-						break;
-					case 0x5F: /* private_data_specifier_descriptor */
-						break;
-					case 0x62: /* frequency_list_descriptor */
-						break;
-					case 0x6C: /* cell_list_descriptor */
-						break;
-					case 0x6D: /* cell_frequency_link_descriptor */
-						break;
-					case 0x6E: /* announcement_support_descriptor */
-						break;
+
 					default:
 						printf("[nit.cpp] descriptor_tag (b): %02x\n", buffer[pos2]);
 						break;

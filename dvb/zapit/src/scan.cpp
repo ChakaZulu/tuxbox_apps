@@ -1,8 +1,20 @@
 /*
- * $Id: scan.cpp,v 1.43 2002/04/19 02:34:17 obi Exp $
+ * $Id: scan.cpp,v 1.44 2002/04/19 14:53:29 obi Exp $
  */
 
+#include "frontend.h"
+#include "nit.h"
 #include "scan.h"
+#include "sdt.h"
+#include "xml/xmltree.h"
+#include "zapit.h"
+#include "zapitclient.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#else
+#define CONFIGDIR "/var/tuxbox/config"
+#endif
 
 typedef std::map <uint32_t, scanchannel>::iterator sciterator;
 typedef std::map <uint32_t, transpondermap>::iterator stiterator;
@@ -58,7 +70,7 @@ void get_sdts()
 		if (frontend->tuneFrequency(tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) == true)
 		{
 			printf("[scan.cpp] parsing sdt of tsid %04x, onid %04x\n", tI->second.transport_stream_id, tI->second.original_network_id);
-			parse_sdt(tI->second.transport_stream_id, true);
+			parse_sdt();
 		}
 		else
 		{
@@ -371,7 +383,7 @@ void *start_scanthread(void *param)
 			}
 
 			/* read network information table */
-			get_nits(frequency, symbol_rate, getFEC(fec_inner), polarization, diseqc_pos, getModulation(modulation));
+			get_nits(frequency, symbol_rate, CFrontend::getFEC(fec_inner), polarization, diseqc_pos, CFrontend::getModulation(modulation));
 
 			/* next transponder */
 			transponder = transponder->GetNext();

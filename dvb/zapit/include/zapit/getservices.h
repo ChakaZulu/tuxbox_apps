@@ -1,22 +1,16 @@
 /*
- * $Id: getservices.h,v 1.35 2002/04/17 09:30:49 obi Exp $
+ * $Id: getservices.h,v 1.36 2002/04/19 14:53:29 obi Exp $
  */
 
 #ifndef __getservices_h__
 #define __getservices_h__
 
-#include <ctype.h>
 #include <ost/dmx.h>
 #include <ost/frontend.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
-#include <map>
 #include <string>
-#include <vector>
 
 #include "descriptors.h"
 #include "eventserver.h"
@@ -50,6 +44,7 @@ typedef struct apid_struct
 	char desc[25];
 	bool is_ac3;
 	uint8_t component_tag;
+
 } apid_struct;
 
 typedef struct pids
@@ -173,22 +168,28 @@ struct transponder
 	}
 };
 
-typedef struct bouquet_msg_struct {
-        uint bouquet_nr;
+typedef struct bouquet_msg_struct
+{
+        uint32_t bouquet_nr;
         char name[30];
+
 } bouquet_msg;
 
-typedef struct channel_msg_struct {
-        uint chan_nr;
+typedef struct channel_msg_struct
+{
+        uint32_t chan_nr;
         char name[30];
         char mode;
+	
 } channel_msg;
 
-typedef struct channel_msg_struct_2 {
-        uint chan_nr;
-        char name[30];
-        char mode;
+typedef struct channel_msg_struct_2
+{
+	uint chan_nr;
+	char name[30];
+	char mode;
 	uint32_t onid_tsid;
+	
 } channel_msg_2;
 
 #endif /* __getservices_h__ */

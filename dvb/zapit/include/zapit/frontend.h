@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.3 2002/04/14 23:26:21 obi Exp $
+ * $Id: frontend.h,v 1.4 2002/04/19 14:53:29 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -25,10 +25,8 @@
 #include <ost/frontend.h>
 #include <ost/sec.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <sys/ioctl.h>
 
-#include "nit.h"
+#include "getservices.h"
 
 #define MAX_LNBS 4
 
@@ -80,6 +78,9 @@ class CFrontend
 		~CFrontend ();
 
 		/* ost tuner api */
+		static CodeRate CFrontend::getFEC (uint8_t FEC_inner);
+		static Modulation CFrontend::getModulation (uint8_t modulation);
+
 		void selfTest ();
 		void setPowerState (FrontendPowerState state);
 		void setFrontend (FrontendParameters *feparams);

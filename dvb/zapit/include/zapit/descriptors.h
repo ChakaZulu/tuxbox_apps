@@ -1,40 +1,90 @@
 /*
- * $Id: descriptors.h,v 1.9 2002/04/10 18:36:21 obi Exp $
+ * $Id: descriptors.h,v 1.10 2002/04/19 14:53:29 obi Exp $
+ *
+ * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
 
 #ifndef __descriptors_h__
 #define __descriptors_h__
 
 #include <stdint.h>
-#include <ost/frontend.h>
 
-CodeRate getFEC(uint8_t FEC_inner);
-Modulation getModulation (uint8_t modulation);
-
-uint8_t ca_descriptor(uint8_t *buffer, uint16_t ca_system_id, uint16_t* ca_pid);
-uint8_t stuffing_desc(uint8_t *buffer);
-uint8_t linkage_desc(uint8_t *buffer);
-uint8_t priv_data_desc(uint8_t *buffer);
-uint8_t network_name_desc(uint8_t *buffer);
-uint8_t service_list_desc(uint8_t *buffer);
-uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id);
-uint8_t sat_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC);
-uint8_t terr_deliv_system_desc(uint8_t *buffer);
-uint8_t multilingual_network_name_desc(uint8_t *buffer);
-uint8_t freq_list_desc(uint8_t *buffer);
-uint8_t cell_list_desc(uint8_t *buffer);
-uint8_t announcement_support_desc(uint8_t *buffer);
-uint8_t service_name_desc(uint8_t *buffer, uint16_t service_id, uint16_t transport_stream_id, uint16_t onid, bool scan_mode);
-uint8_t bouquet_name_desc(uint8_t *buffer);
-uint8_t country_availability_desc(uint8_t *buffer);
-uint8_t nvod_ref_desc(uint8_t *buffer, uint16_t transport_stream_id, bool scan_mode);
-uint8_t time_shift_service_desc(uint8_t *buffer);
-uint8_t mosaic_desc(uint8_t *buffer);
-uint8_t ca_ident_desc(uint8_t *buffer);
-uint8_t telephone_desc(uint8_t *buffer);
-uint8_t multilingual_service_name_desc(uint8_t *buffer);
-uint8_t data_broadcast_desc(uint8_t *buffer);
-uint8_t network_name_desc(uint8_t *buffer);
-uint8_t cell_freq_list_desc(uint8_t *buffer);
+uint8_t generic_descriptor (uint8_t *buffer);
+uint8_t video_stream_descriptor (uint8_t *buffer);
+uint8_t audio_stream_descriptor (uint8_t *buffer);
+uint8_t hierarchy_descriptor (uint8_t *buffer);
+uint8_t registration_descriptor (uint8_t *buffer);
+uint8_t data_stream_alignment_descriptor (uint8_t *buffer);
+uint8_t target_background_grid_descriptor (uint8_t *buffer);
+uint8_t Video_window_descriptor (uint8_t *buffer);
+uint8_t CA_descriptor (uint8_t *buffer, uint16_t ca_system_id, uint16_t* ca_pid);
+uint8_t ISO_639_language_descriptor (uint8_t *buffer);
+uint8_t System_clock_descriptor (uint8_t *buffer);
+uint8_t Multiplex_buffer_utilization_descriptor (uint8_t *buffer);
+uint8_t Copyright_descriptor (uint8_t *buffer);
+uint8_t Maximum_bitrate_descriptor (uint8_t *buffer);
+uint8_t Private_data_indicator_descriptor (uint8_t *buffer);
+uint8_t network_name_descriptor (uint8_t *buffer);
+uint8_t service_list_descriptor (uint8_t *buffer);
+uint8_t stuffing_descriptor (uint8_t *buffer);
+uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC);
+uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id);
+uint8_t VBI_data_descriptor (uint8_t *buffer);
+uint8_t VBI_teletext_descriptor (uint8_t *buffer);
+uint8_t bouquet_name_descriptor (uint8_t *buffer);
+uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t transport_stream_id, uint16_t original_network_id);
+uint8_t country_availability_descriptor (uint8_t *buffer);
+uint8_t linkage_descriptor (uint8_t *buffer);
+uint8_t NVOD_reference_descriptor (uint8_t *buffer);
+uint8_t time_shifted_service_descriptor (uint8_t *buffer);
+uint8_t short_event_descriptor (uint8_t *buffer);
+uint8_t extended_event_descriptor (uint8_t *buffer);
+uint8_t time_shifted_event_descriptor (uint8_t *buffer);
+uint8_t component_descriptor (uint8_t *buffer);
+uint8_t mosaic_descriptor (uint8_t *buffer);
+uint8_t stream_identifier_descriptor (uint8_t *buffer);
+uint8_t CA_identifier_descriptor (uint8_t *buffer);
+uint8_t content_descriptor (uint8_t *buffer);
+uint8_t parental_rating_descriptor (uint8_t *buffer);
+uint8_t teletext_descriptor (uint8_t *buffer);
+uint8_t telephone_descriptor (uint8_t *buffer);
+uint8_t local_time_offset_descriptor (uint8_t *buffer);
+uint8_t subtitling_descriptor (uint8_t *buffer);
+uint8_t terrestrial_delivery_system_descriptor (uint8_t *buffer);
+uint8_t multilingual_network_name_descriptor (uint8_t *buffer);
+uint8_t multilingual_bouquet_name_descriptor (uint8_t *buffer);
+uint8_t multilingual_service_name_descriptor (uint8_t *buffer);
+uint8_t multilingual_component_descriptor (uint8_t *buffer);
+uint8_t private_data_specifier_descriptor (uint8_t *buffer);
+uint8_t service_move_descriptor (uint8_t *buffer);
+uint8_t short_smoothing_buffer_descriptor (uint8_t *buffer);
+uint8_t frequency_list_descriptor (uint8_t *buffer);
+uint8_t partial_transport_stream_descriptor (uint8_t *buffer);
+uint8_t data_broadcast_descriptor (uint8_t *buffer);
+uint8_t CA_system_descriptor (uint8_t *buffer);
+uint8_t data_broadcast_id_descriptor (uint8_t *buffer);
+uint8_t transport_stream_descriptor (uint8_t *buffer);
+uint8_t DSNG_descriptor (uint8_t *buffer);
+uint8_t PDC_descriptor (uint8_t *buffer);
+uint8_t AC3_descriptor (uint8_t *buffer);
+uint8_t ancillary_data_descriptor (uint8_t *buffer);
+uint8_t cell_list_descriptor (uint8_t *buffer);
+uint8_t cell_frequency_link_descriptor (uint8_t *buffer);
+uint8_t announcement_support_descriptor (uint8_t *buffer);
 
 #endif /* __descriptors_h__ */

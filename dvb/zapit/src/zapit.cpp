@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.139 2002/04/19 02:34:17 obi Exp $
+ * $Id: zapit.cpp,v 1.140 2002/04/19 14:53:29 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -25,14 +25,34 @@
 
 // TODO: write a CZapit class
 
+#include <dbox/avia_vbi.h>
+#include <fcntl.h>
+#include <ost/audio.h>
+#include <ost/video.h>
+#include <signal.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+#include "bouquets.h"
 #include "configfile.h"
+#include "cam.h"
+#include "cat.h"
+#include "frontend.h"
+#include "getservices.h"
 #include "lcddclient.h"
+#include "pat.h"
+#include "pmt.h"
 #include "zapit.h"
 
 #define debug(fmt, args...) { if (debug) printf(fmt, ## args); }
-#define dputs(str) { if (debug) puts(str); }
 
-#define VBI_DEV	"/dev/dbox/vbi0"
+#define AUDIO_DEV "/dev/ost/audio0"
+#define DEMUX_DEV "/dev/ost/demux0"
+#define VBI_DEV   "/dev/dbox/vbi0"
+#define VIDEO_DEV "/dev/ost/video0"
+
 #define CONFIGFILE CONFIGDIR "/zapit/zapit.conf"
 
 /* the conditional access module */
@@ -390,9 +410,7 @@ bool setAudioBypassMode (bool isAc3)
 
 int zapit (uint32_t onid_sid, bool in_nvod)
 {
-#ifndef FLUSH_PCR
 	videoStatus video_status;
-#endif
 	std::map <uint, CZapitChannel>::iterator cit;
 	bool new_transponder;
 #ifdef USE_EXTERNAL_CAMD
@@ -447,8 +465,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 	}
 
-#ifdef FLUSH_PCR
-	/* close video device */
+	/* stop video */
 	if (video_fd != -1)
 	{
 		debug("[zapit] close video device\n");
@@ -465,7 +482,6 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	{
 		debug("[zapit] video device already closed\n");
 	}
-#endif
 
 	/* stop demux filters */
 	dmx_video_fd = unsetPesFilter(dmx_video_fd);
@@ -552,11 +568,11 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	}
 
 #ifndef DVBS
-	if (in_nvod)
+	//if (in_nvod)
 	{
-		lcdd.setServiceName(nvodname);
+	//	lcdd.setServiceName(nvodname);
 	}
-	else
+	//else
 	{
 		lcdd.setServiceName(cit->second.getName());
 	}
@@ -612,7 +628,6 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		return -3;
 	}
 
-#ifndef FLUSH_PCR
 	/* get video status */
 	if (ioctl(video_fd, VIDEO_GET_STATUS, &video_status) < 0)
 	{
@@ -622,7 +637,6 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 
 	/* select video source */
 	if ((video_status.streamSource != VIDEO_SOURCE_DEMUX) && (video_status.playState == VIDEO_STOPPED))
-#endif
 	{
 		if (ioctl(video_fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX) < 0)
 		{
@@ -631,7 +645,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	}
 
 	/* start video */
-	if (ioctl(video_fd, VIDEO_PLAY) < 0)
+	if ((video_status.playState != VIDEO_PLAYING) && (ioctl(video_fd, VIDEO_PLAY) < 0))
 	{
 		perror("[zapit] VIDEO_PLAY");
 		return -3;
@@ -1974,7 +1988,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.139 2002/04/19 02:34:17 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.140 2002/04/19 14:53:29 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

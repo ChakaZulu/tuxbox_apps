@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.8 2002/04/17 09:45:54 obi Exp $
+ * $Id: cam.cpp,v 1.9 2002/04/19 14:53:29 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -19,7 +19,15 @@
  *
  */
 
+#include <fcntl.h>
+#include <ost/dmx.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "cam.h"
+
+#define CA_DEV  "/dev/ost/ca0"
 
 CCam::CCam ()
 {

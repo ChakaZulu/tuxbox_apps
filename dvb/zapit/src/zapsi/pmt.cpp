@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.6 2002/04/17 09:30:49 obi Exp $
+ * $Id: pmt.cpp,v 1.7 2002/04/19 14:53:29 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -20,7 +20,17 @@
  *
  */
 
+#include <fcntl.h>
+#include <stdint.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include "descriptors.h"
 #include "pmt.h"
+
+#define DEMUX_DEV "/dev/ost/demux0"
+#define PMT_SIZE  1024
 
 /*
  * Stream types
@@ -73,18 +83,9 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 
 		switch (descriptor_tag)
 		{
-			case 0x02: /* video_stream_descriptor */
-				break;
-
-			case 0x03: /* audio_stream_descriptor */
-				break;
-
-			case 0x07: /* target_background_grid_descriptor */
-				break;
-
 			case 0x09: /* CA_descriptor */
 				if ((ecm_pid == NONE) || (ecm_pid == INVALID))
-					ca_descriptor(buffer + descr_pos, ca_system_id, &ecm_pid);
+					CA_descriptor(buffer + descr_pos, ca_system_id, &ecm_pid);
 				break;
 
 			case 0x0a: /* ISO_639_language_descriptor */
@@ -96,15 +97,6 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 						ret_pids->apids[ap_count].desc[3] = 0;
 					}
 				}
-				break;
-
-			case 0x0e: /* maximum bitrate descriptor */
-				break;
-
-			case 0x0f: /* private data indicator descriptor - used in FUN Promo */
-				break;
-
-			case 0x11: /* STD_descriptor */
 				break;
 
 			case 0x52: /* stream_identifier_descriptor */
@@ -123,15 +115,6 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 				{
 					ret_pids->apids[ap_count].is_ac3 = true;
 				}
-				break;
-
-			case 0xb1: /* User Private descriptor - used in BetaDigital */
-				break;
-
-			case 0xc0: /* User Private descriptor - used in Canal+ */
-				break;
-
-			case 0xc2:
 				break;
 
 			case 0xc5: /* User Private descriptor - Canal+ Radio                                     */
@@ -171,23 +154,8 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 				}
 				break;
 
-			case 0xc6: /* User Private descriptor - Bloomberg */
-				break;
-
-                        case 0xfd: /* User Private descriptor - used in ARD-Online-Kanal */
-                                break;
-
-			case 0xfe: /* User Private descriptor - used in FUN Promo */
-				break;
-
 			default:
-				{
-					//int i;
-					//printf("stream type %#x descriptor tag: %#x\n", stream_type, descriptor_tag);
-					//printf("data: ");
-					//for (i = 0; i < descriptor_length + 2; i++) printf("%02x ", buffer[descr_pos + i]);
-					//printf("\n");
-				}
+				printf("[pmt.cpp] descriptor_tag: %02x\n", descriptor_tag);
 				break;
 		}
 	}
@@ -223,53 +191,11 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 			}
 			break;
 
-                case 0x05: /* ITU-T Rec. H.222.0 | ISO/IEC 13818-1 private_sections, e.g. MHP Application signalling stream */
-                        /*
-                         * RTL World and lots of other providers
-                         */
-                        break;
-
-                case 0x0b: /* ISO/IEC 13818-6 type B */
-                        /*
-                         * RTL World
-                         * ZDFvision
-                         */
-                        break;
-
-                case 0x81: /* User Private - Dolby AC-3 (?) */
-                        /*
-                         * MTV
-                         */
-                        break;
-
-                case 0x90: /* User Private */
-                        /*
-                         * Premiere Mail
-                         * BD_DVB
-                         */
-                        break;
-
-                case 0xc0: /* User Private */
-                        /*
-                         * Canal+
-                         */
-                        break;
-
-                case 0xc1: /* User Private */
-                        /*
-                         * Canal+
-                         */
-                        break;
-
-                case 0xc6: /* User Private */
-                        /*
-                         * Canal+
-                         */
-                        break;
-
                 default:
+			printf("[pmt.cpp] stream_type: %02x\n", stream_type);
                         break;
 	}
+
 	ret_pids->count_apids = ap_count;
 	ret_pids->count_vpids = vp_count;
 	ret_pids->ecmpid = ecm_pid;
@@ -353,12 +279,16 @@ pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, uint16_t program_numbe
 			switch (buffer[pos])
 			{
 			case 0x09:
-				ca_descriptor(buffer + pos, ca_system_id, &ret_pids.ecmpid);
+				if ((ret_pids.ecmpid != NONE) && (ret_pids.ecmpid != INVALID))
+				{
+					CA_descriptor(buffer + pos, ca_system_id, &ret_pids.ecmpid);
+				}
+				break;
+
+			default:
+				printf("[pmt.cpp] decriptor_tag: %02x\n", buffer[pos]);
 				break;
 			}
-
-			if ((ret_pids.ecmpid != NONE) && (ret_pids.ecmpid != INVALID))
-				break;
 		}
 	}
 

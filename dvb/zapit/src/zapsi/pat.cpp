@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.17 2002/04/10 18:36:21 obi Exp $
+ * $Id: pat.cpp,v 1.18 2002/04/19 14:53:29 obi Exp $
  */
 
 #include <stdio.h>
@@ -75,19 +75,12 @@ int parse_pat (uint16_t original_network_id, std::map<uint, CZapitChannel> *cmap
 
 		section_length = ((buffer[1] & 0xF) << 8) + buffer[2];
 		transport_stream_id = (buffer[3] << 8) + buffer[4];
-#ifdef DEBUG
-		printf("[pat.cpp] section_length: %04x\n", section_length);
-		printf("[pat.cpp] transport_stream_id: %04x\n", transport_stream_id);
-		printf("[pat.cpp] section_number: %02x\n", buffer[6]);
-		printf("[pat.cpp] last_section_number: %02x\n", buffer[7]);
-#endif
+
 		for (pos = 8; pos < section_length -2; pos += 4)
 		{
 			program_number = (buffer[pos] << 8) + buffer[pos + 1];
 			program_map_PID = ((buffer[pos + 2] & 0x1f) << 8) | buffer[pos + 3];
-#ifdef DEBUG
-			printf("[pat.cpp] program_number: %04x, program_map_PID: %04x\n", program_number, program_map_PID);
-#endif
+
 			if ((*cmap).count((original_network_id << 16) + program_number) > 0)
 			{
 				cI = (*cmap).find((original_network_id << 16) + program_number);

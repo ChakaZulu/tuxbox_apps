@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.51 2002/04/17 09:30:49 obi Exp $
+ * $Id: zapit.h,v 1.52 2002/04/19 14:53:29 obi Exp $
  */
 
 #ifndef __zapit_h__
@@ -22,14 +22,17 @@
 #include "getservices.h"
 #include "pat.h"
 #include "pmt.h"
-#include "zapitclient.h"
 
 #define AUDIO_DEV "/dev/ost/audio0"
 #define FRONT_DEV "/dev/ost/frontend0"
 #define VIDEO_DEV "/dev/ost/video0"
 
-typedef struct decode_struct {
+#include "zapitclient.h"
+
+typedef struct decode_struct
+{
 	bool new_tp;
+
 } decode_vals;
 
 int prepare_channels();

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.3 2002/04/14 23:26:21 obi Exp $
+ * $Id: frontend.cpp,v 1.4 2002/04/19 14:53:29 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -19,9 +19,16 @@
  *
  */
 
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <iostream>
 
 #include "frontend.h"
+#include "nit.h"
 
 #define FRONTEND_DEVICE	"/dev/ost/frontend0"
 #define SEC_DEVICE	"/dev/ost/sec0"
@@ -70,6 +77,47 @@ CFrontend::~CFrontend ()
 /*
  * ost frontend api
  */
+
+CodeRate CFrontend::getFEC (uint8_t FEC_inner)
+{
+	switch (FEC_inner)
+	{
+	case 0x01:
+		return FEC_1_2;
+	case 0x02:
+		return FEC_2_3;
+	case 0x03:
+		return FEC_3_4;
+	case 0x04:
+		return FEC_5_6;
+	case 0x05:
+		return FEC_7_8;
+	case 0x0F:
+		return FEC_NONE;
+	default:
+		return FEC_AUTO;
+	}
+}
+
+Modulation CFrontend::getModulation (uint8_t modulation)
+{
+	switch (modulation)
+	{
+	case 0x01:
+		return QAM_16;
+	case 0x02:
+		return QAM_32;
+	case 0x03:
+		return QAM_64;
+	case 0x04:
+		return QAM_128;
+	case 0x05:
+		return QAM_256;
+	default:
+		return QAM_64;
+	}
+}
+
 void CFrontend::selfTest ()
 {
 	if (ioctl(frontend_fd, FE_SELFTEST) < 0)
@@ -626,4 +674,5 @@ const bool CFrontend::sendSmatvRemoteTuningCommand (secToneMode toneMode, secVol
 		return false;
 	}
 }
+
 

@@ -1,30 +1,15 @@
 /*
- *  $Id: scan.h,v 1.12 2002/04/14 06:06:31 obi Exp $
+ *  $Id: scan.h,v 1.13 2002/04/19 14:53:29 obi Exp $
  */
 
 #ifndef __scan_h__
 #define __scan_h__
 
 #include <ost/frontend.h>
-#include <pthread.h>
 #include <stdint.h>
-#include <stdio.h>
+
+#include <map>
 #include <string>
-
-struct transpondermap;
-
-#include "frontend.h"
-#include "pat.h"
-#include "sdt.h"
-#include "xml/xmltree.h"
-#include "zapit.h"
-#include "zapitclient.h"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#else
-#define CONFIGDIR "/var/tuxbox/config"
-#endif
 
 struct scanchannel
 {

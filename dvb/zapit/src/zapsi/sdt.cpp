@@ -1,26 +1,22 @@
 /*
- * $Id: sdt.cpp,v 1.18 2002/04/14 06:06:31 obi Exp $
+ * $Id: sdt.cpp,v 1.19 2002/04/19 14:53:29 obi Exp $
  */
 
+#include <fcntl.h>
+#include <ost/dmx.h>
 #include <stdio.h>
-#include <sys/types.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#include <sys/poll.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <ctype.h>
-#include <string>
-#include <ost/dmx.h>
 
 #include "sdt.h"
 #include "descriptors.h"
 
 #define DEMUX_DEV "/dev/ost/demux0"
 
-int parse_sdt (uint16_t oservice_id, bool scan_mode)
+int parse_sdt ()
 {
 	struct dmxSctFilterParams flt;
 	int demux_fd;
@@ -43,9 +39,9 @@ int parse_sdt (uint16_t oservice_id, bool scan_mode)
 		perror("[sdt.cpp] " DEMUX_DEV);
 		return -1;
 	}
-      
+
 	memset (&flt.filter, 0, sizeof(struct dmxFilter));
-      
+
 	flt.pid = 0x0011;
 	flt.filter.filter[0] = 0x42;
 	flt.filter.mask[0] = 0xFF;
@@ -65,66 +61,62 @@ int parse_sdt (uint16_t oservice_id, bool scan_mode)
 		{
 			perror("[sdt.cpp] read");
 			close(demux_fd);
-			return -2;
+			return -1;
 		}
 
 		section_length = ((buffer[1] & 0x0F) << 8) | buffer[2];
 		transport_stream_id = (buffer[3] << 8) | buffer[4];
 		original_network_id = (buffer[8] << 8) | buffer[9];
-#ifdef DEBUG
-		printf("[sdt.cpp] transport_stream_id: %04x\n", transport_stream_id);
-		printf("[sdt.cpp] original_network_id: %04x\n", original_network_id);
-#endif
+
 		for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5)
 		{
 			service_id = (buffer[pos] << 8) | buffer[pos + 1];
 			descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
-#ifdef DEBUG
-			printf("[sdt.cpp] service_id: %04x\n", service_id);
-#endif
 
-			if ((oservice_id == service_id) || (scan_mode == true))
+			for (pos2 = pos + 5; pos2 < pos + descriptors_loop_length + 5; pos2 += buffer[pos2 + 1] + 2)
 			{
-				for (pos2 = pos + 5; pos2 < pos + descriptors_loop_length + 5; pos2 += buffer[pos2 + 1] + 2)
+				switch (buffer[pos2])
 				{
-					switch (buffer[pos2])
-					{
-					case 0x42: /* stuffing_descriptor */
-						break;
-					case 0x47: /* bouquet_name_descriptor */
-						break;
-					case 0x48: /* service_descriptor */
-						service_name_desc(&buffer[pos2], service_id, transport_stream_id, original_network_id, scan_mode);
-						break;
-					case 0x49: /* country_availability_descriptor */
-						break;
-					case 0x4A: /* linkage_descriptor */
-						break;
-					case 0x4B: /* NVOD_reference_descriptor */
-						break;
-					case 0x4C: /* time_shifted_service_descriptor */
-						break;
-					case 0x51: /* mosaic_descriptor */
-						break;
-					case 0x53: /* CA_identifier_descriptor */
-						break;
-					case 0x57: /* telephone_descriptor */
-						break;
-					case 0x5D: /* multilingual_service_name_descriptor */
-						break;
-					case 0x5F: /* private_data_specifier_descriptor */
-						break;
-					case 0x64: /* data_broadcast_descriptor */
-						break;
-					default:
-#ifdef DEBUG
-						printf("[sdt.cpp] unknown descriptor_tag, dump follows:\n");
-						printf("[sdt.cpp]");
-						for (int i = 0; i < buffer[pos2 + 1] + 2; i++) printf(" %02x", buffer[pos2 + i]);
-						printf("\n");
-#endif
-						break;
-					}
+				case 0x47:
+					bouquet_name_descriptor(buffer + pos2);
+					break;
+
+				case 0x48:
+					service_descriptor(buffer + pos2, service_id, transport_stream_id, original_network_id);
+					break;
+
+				case 0x49:
+					country_availability_descriptor(buffer + pos2);
+					break;
+
+				case 0x4A:
+					linkage_descriptor(buffer + pos2);
+					break;
+
+				case 0x4B:
+					NVOD_reference_descriptor(buffer + pos2);
+					break;
+
+				case 0x4C:
+					time_shifted_service_descriptor(buffer + pos2);
+					break;
+
+				case 0x53:
+					CA_identifier_descriptor(buffer + pos2);
+					break;
+
+				case 0x5F:
+					private_data_specifier_descriptor(buffer + pos2);
+					break;
+
+				case 0x64:
+					data_broadcast_descriptor(buffer + pos2);
+					break;
+
+				default:
+					printf("[sdt.cpp] descriptor_tag: %02x\n", buffer[pos2]);
+					generic_descriptor(buffer + pos2);
+					break;
 				}
 			}
 		}
@@ -132,6 +124,6 @@ int parse_sdt (uint16_t oservice_id, bool scan_mode)
 	while (section++ != buffer[7]);
  
 	close(demux_fd);
-	return 23;
+	return 0;
 }
 

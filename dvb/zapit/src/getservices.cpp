@@ -1,7 +1,8 @@
 /*
- * $Id: getservices.cpp,v 1.33 2002/04/14 06:06:31 obi Exp $
+ * $Id: getservices.cpp,v 1.34 2002/04/19 14:53:29 obi Exp $
  */
 
+#include "frontend.h"
 #include "getservices.h"
 
 uint8_t curr_diseqc = 0;
@@ -87,9 +88,9 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 		{
 			sscanf(node->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qam.SymbolRate);
 			sscanf(node->GetAttributeValue("fec_inner"), "%hhu", &tmp);
-			feparams.u.qam.FEC_inner = getFEC(tmp);
+			feparams.u.qam.FEC_inner = CFrontend::getFEC(tmp);
 			sscanf(node->GetAttributeValue("modulation"), "%hhu", &tmp);
-			feparams.u.qam.QAM = getModulation(tmp);
+			feparams.u.qam.QAM = CFrontend::getModulation(tmp);
 		}
 
 		/* satellite */
@@ -97,7 +98,7 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 		{
 			sscanf(node->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qpsk.SymbolRate);
 			sscanf(node->GetAttributeValue("fec_inner"), "%hhu", &tmp);
-			feparams.u.qam.FEC_inner = getFEC(tmp);
+			feparams.u.qam.FEC_inner = CFrontend::getFEC(tmp);
 			sscanf(node->GetAttributeValue("polarization"), "%hhu", &polarization);
 		}
 
