@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.31  2003/01/05 22:48:34  TheDOC
+mtd number
+
 Revision 1.30  2003/01/05 21:42:30  TheDOC
 small changes
 
@@ -188,7 +191,7 @@ int main(int argc, char **argv)
 
 
 	update update(&osd, &rc, &settings);
-	update.cramfsmtd = 6;
+	update.cramfsmtd = 2;
 	//osd.loadSkin("/home/projekte/lcarsneu/skin.lcars");
 	//command_list list;
 	//list.insert(list.end(), "FILLBOX 100 100 200 200 1");
