@@ -55,6 +55,12 @@ struct SNeutrinoSettings
 	int timing_epg;
 	int timing_infobar;
 
+	//scan
+	int scan_astra;
+	int scan_eutel;
+	int scan_kopernikus;
+	int scan_digituerk;
+
 	//colors
 	unsigned char menu_Head_alpha;
 	unsigned char menu_Head_red;

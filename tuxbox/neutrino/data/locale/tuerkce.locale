@@ -187,12 +187,16 @@ date.Dec  ARALIK
 nvod.starting (BASLAMA %d DAK)
 nvod.proz (%d%% GECTI)
 
+mainsettings.scants TRANSPONDER ARAMA
 scants.head TRANSPONDER ARAMA
-scants.info1 BASLAMAK ICIN OK TUSUNA BASINIZ
-scants.info2 CIKMAK ICIN HOME TUSUNA BASINIZ....
+scants.startnow start scan
+scants.actsatellite SATELLITE:
+scants.astra astra
+scants.hotbird hotbird
+scants.kopernikus kopernikus
+scants.digituerk digituerk
 scants.transponders TRANSPONDER:
 scants.services SERVIS:
-mainsettings.scants TRANSPONDER ARAMA
 
 mainsettings.update Software Update
 flashupdate.head Software Update

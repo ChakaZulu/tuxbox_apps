@@ -191,12 +191,16 @@ date.Dec  Dec
 nvod.starting (starting in %d min)
 nvod.proz (%d%% over)
 
+mainsettings.scants Servicescan
 scants.head Scan transponder
-scants.info1 Please press OK to start scan
-scants.info2 home cancels...
+scants.startnow start scan
+scants.actsatellite Satellite:
+scants.astra astra
+scants.hotbird hotbird
+scants.kopernikus kopernikus
+scants.digituerk digituerk
 scants.transponders Transponders:
 scants.services Services:
-mainsettings.scants Servicescan
 
 mainsettings.update Software Update
 flashupdate.head Software Update

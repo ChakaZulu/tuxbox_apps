@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.102 2001/12/17 01:28:26 McClean Exp $
+        $Id: neutrino.cpp,v 1.103 2001/12/17 19:49:55 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.103  2001/12/17 19:49:55  McClean
+  add ts-scan selection
+
   Revision 1.102  2001/12/17 01:28:26  McClean
   accelerate radiomode-logo-paint
 
@@ -540,6 +543,13 @@ void CNeutrinoApp::setupDefaults()
 
 	//colors
 	setupColors_neutrino();
+
+	//ts-scan
+	g_settings.scan_astra = 1;
+	g_settings.scan_eutel = 0;
+	g_settings.scan_kopernikus = 0;
+	g_settings.scan_digituerk = 0;
+
 
 	//timing  (10 = 1 sec )
 	g_settings.timing_menu = 1000;
@@ -1067,7 +1077,31 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.savesettingsnow", true, "", this, "savesettings") );
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.scants", true, "", g_ScanTS) );
+	CMenuWidget* TSScan = new CMenuWidget("mainsettings.scants", "mainmenue.raw");
+		TSScan->addItem( new CMenuForwarder("menu.back") );
+		TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		if (atoi(getenv("fe"))==1)
+		{// only sat-params....
+			CMenuOptionChooser* oj = new CMenuOptionChooser("scants.astra", &g_settings.scan_astra, true );
+				oj->addOption(0, "options.off");
+				oj->addOption(1, "options.on");
+			TSScan->addItem( oj );
+			oj = new CMenuOptionChooser("scants.hotbird", &g_settings.scan_eutel, true );
+				oj->addOption(0, "options.off");
+				oj->addOption(2, "options.on");
+			TSScan->addItem( oj );
+			oj = new CMenuOptionChooser("scants.kopernikus", &g_settings.scan_kopernikus, true );
+				oj->addOption(0, "options.off");
+				oj->addOption(4, "options.on");
+			TSScan->addItem( oj );
+			oj = new CMenuOptionChooser("scants.digituerk", &g_settings.scan_digituerk, true );
+				oj->addOption(0, "options.off");
+				oj->addOption(8, "options.on");
+			TSScan->addItem( oj );
+		}
+		TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		TSScan->addItem( new CMenuForwarder("scants.startnow", true, "", g_ScanTS) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.scants", true, "", TSScan) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
@@ -2020,7 +2054,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.102 2001/12/17 01:28:26 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.103 2001/12/17 19:49:55 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

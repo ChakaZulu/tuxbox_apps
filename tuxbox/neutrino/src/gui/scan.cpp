@@ -76,7 +76,7 @@ void CScanTs::sectionsdPauseScanning(int PauseIt)
     }
 }
 
-bool CScanTs::scanReady(int *ts, int *services)
+bool CScanTs::scanReady(short* sat, int *ts, int *services)
 {
 		int sock_fd;
 		SAI servaddr;
@@ -121,6 +121,10 @@ bool CScanTs::scanReady(int *ts, int *services)
 		}
 		else
 		{
+			if (recv(sock_fd, sat, sizeof(short),0) <= 0 ) {
+				perror("recv(zapit)");
+				exit(-1);
+			}
 			if (recv(sock_fd, ts, sizeof(int),0) <= 0 ) {
 				perror("recv(zapit)");
 				exit(-1);
@@ -147,6 +151,7 @@ void CScanTs::startScan()
 		st_rmsg		sendmessage;
 
 		sendmessage.version=1;
+		sendmessage.param2=g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk;
 		sendmessage.cmd = 'g';
 
 		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -188,28 +193,29 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	}
 	paint();
 
-	int key = g_RCInput->getKey(190);
-	if(key != CRCInput::RC_ok)
-	{
-		hide();
-		return CMenuTarget::RETURN_REPAINT;
-	}
     sectionsdPauseScanning(1);
 	startScan();
 	
 	char buf[100];
 	int ts = 0;
 	int services = 0;
+	short sat = 0;
 	int ypos=y;
 	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 	ypos= y+ hheight + (mheight >>1);
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.transponders").c_str(), COL_MENUCONTENT);
 	ypos+= mheight;
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.services").c_str(), COL_MENUCONTENT);
-	
+	ypos+= mheight;
+	if (atoi(getenv("fe"))==1)
+	{	//sat only
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.actsatellite").c_str(), COL_MENUCONTENT);
+	}
 
 	int xpos1 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.transponders").c_str());
 	int xpos2 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.services").c_str());
+	int xpos3 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actsatellite").c_str());
+
 	g_FrameBuffer->loadPal("radar.pal", 20, 100);
 	int pos = 0;
 	bool finish = false;
@@ -217,7 +223,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	{
 		if(pos==0)
 		{	//query zapit every xth loop
-			finish = scanReady(&ts, &services);
+			finish = scanReady(&sat, &ts, &services);
 		}
 
 		ypos= y+ hheight + (mheight >>1);
@@ -235,7 +241,32 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		sprintf(buf, "%d", services);
 		g_FrameBuffer->paintBoxRel(xpos2, ypos, 80, mheight, COL_MENUCONTENT);
 		g_Fonts->menu->RenderString(xpos2, ypos+ mheight, width, buf, COL_MENUCONTENT);
-		
+		ypos+= mheight;
+
+		if (atoi(getenv("fe"))==1)
+		{	//sat only
+			switch (sat)
+			{
+				case 1: 
+					strcpy(buf, g_Locale->getText("scants.astra").c_str() );
+					break;
+				case 2: 
+					strcpy(buf, g_Locale->getText("scants.hotbird").c_str() );
+					break;
+				case 4: 
+					strcpy(buf, g_Locale->getText("scants.kopernikus").c_str() );
+					break;
+				case 8: 
+					strcpy(buf, g_Locale->getText("scants.digituerk").c_str() );
+					break;
+				default:
+					strcpy(buf,"unknown");
+			}
+			sprintf(buf, "%d", sat);
+			g_FrameBuffer->paintBoxRel(xpos3, ypos, 80, mheight, COL_MENUCONTENT);
+			g_Fonts->menu->RenderString(xpos3, ypos+ mheight, width, buf, COL_MENUCONTENT);
+		}
+
 		//g_RCInput->getKey(190);
 		usleep(100000);
 	}
@@ -263,13 +294,5 @@ void CScanTs::paint()
 	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, g_Locale->getText("scants.head").c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
-
-	ypos+= hheight + (mheight >>1);
-	
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.info1").c_str(), COL_MENUCONTENT);
-	ypos+= mheight;
-
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.info2").c_str(), COL_MENUCONTENT);
-	ypos+= mheight;
 
 }
