@@ -153,25 +153,37 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 				switch (selected)
 				{
 					case 0:
-						if (contrast<63)
+						if (contrast < 63)
 						{
-							contrast+=5;
+							if (contrast < 63 - 5)
+								contrast += 5;
+							else
+								contrast = 63;
+
 							paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", true);
 							setLcd();
 						}
 						break;
 					case 1:
-						if (brightness<245)
+						if (brightness < 255)
 						{
-							brightness+=10;
+							if (brightness < 245)
+								brightness += 10;
+							else
+								brightness = 255;
+
 							paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightness"),"brightness", true);
 							setLcd();
 						}
 						break;
 					case 2:
-						if (brightnessstandby<245)
+						if (brightnessstandby < 255)
 						{
-							brightnessstandby+=10;
+							if (brightnessstandby < 245)
+								brightnessstandby += 10;
+							else
+								brightnessstandby = 255;
+
 							paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", true);
 							setLcd();
 						}
@@ -183,25 +195,37 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 				switch (selected)
 				{
 					case 0:
-						if (contrast>0)
+						if (contrast > 0)
 						{
-							contrast-=5;
+							if (contrast > 5)
+								contrast -= 5;
+							else
+								contrast = 0;
+
 							paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", true);
 							setLcd();
 						}
 						break;
 					case 1:
-						if (brightness>0)
+						if (brightness > 0)
 						{
-							brightness-=10;
+							if (brightness > 10)
+								brightness -= 10;
+							else
+								brightness = 0;
+
 							paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightness"),"brightness", true);
 							setLcd();
 						}
 						break;
 					case 2:
-						if (brightnessstandby>0)
+						if (brightnessstandby > 0)
 						{
-							brightnessstandby-=10;
+							if (brightnessstandby > 10)
+								brightnessstandby -= 10;
+							else
+								brightnessstandby = 0;
+
 							paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", true);
 							setLcd();
 						}
