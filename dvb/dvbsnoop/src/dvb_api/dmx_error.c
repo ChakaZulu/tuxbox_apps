@@ -1,5 +1,5 @@
 /*
-$Id: dmx_error.c,v 1.1 2004/01/02 00:00:37 rasc Exp $
+$Id: dmx_error.c,v 1.2 2004/01/25 22:36:52 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dmx_error.c,v 1.1 2004/01/02 00:00:37 rasc Exp $
 
 
 $Log: dmx_error.c,v $
+Revision 1.2  2004/01/25 22:36:52  rasc
+minor changes & enhancments
+
 Revision 1.1  2004/01/02 00:00:37  rasc
 error output for buffer overflow
 
@@ -30,23 +33,32 @@ error output for buffer overflow
 
 
 
-void  IO_error (char *str)
+int  IO_error (char *str)
 {
    char *s;
+   int  err;
+  
 
    s = (str) ? str : "";
+   err = errno;
 
-   switch (errno) {
+   switch (err) {
 
 	case EOVERFLOW:
-		fprintf (stderr,"Error: %s: Buffer overflow, stream bandwidth to high\n",s);
+		fprintf (stderr,
+			"Error(%d): %s: Buffer overflow, stream bandwidth to high\n",
+			err,s);
 		break;
 
 	default:
-		fprintf (stderr,"Error: ");
+		fprintf (stderr,"Error(%d): ",err);
 		perror(s);
 		break;
 
    }
 
+   return err;
+
 }
+
+

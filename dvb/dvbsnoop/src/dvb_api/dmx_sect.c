@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.17 2004/01/22 22:26:35 rasc Exp $
+$Id: dmx_sect.c,v 1.18 2004/01/25 22:36:52 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.17 2004/01/22 22:26:35 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.18  2004/01/25 22:36:52  rasc
+minor changes & enhancments
+
 Revision 1.17  2004/01/22 22:26:35  rasc
 pes_pack_header
 section read timeout
@@ -91,6 +94,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvb_api.h"
 #include "dmx_error.h"
 #include "dmx_sect.h"
+#include "errno.h"
 
 
 #define SECT_BUF_SIZE (64*1024)
@@ -165,8 +169,14 @@ int  doReadSECT (OPTION *opt)
     n = sect_read(fd,buf,sizeof(buf));
 
     // -- error or eof?
-    if (n == -1) IO_error("read");
-    if (n < 0)  continue;
+    if (n < 0) {
+	int err;
+	
+	err = IO_error("read");
+	if (err == ETIMEDOUT) break;		// Timout, abort
+	continue;
+    }
+
     if (n == 0) {
 	if (dmxMode) continue;	// dmxmode = no eof!
 	else break;		// filemode eof 

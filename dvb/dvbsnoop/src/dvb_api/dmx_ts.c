@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.19 2004/01/25 21:37:28 rasc Exp $
+$Id: dmx_ts.c,v 1.20 2004/01/25 22:36:52 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.19 2004/01/25 21:37:28 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.20  2004/01/25 22:36:52  rasc
+minor changes & enhancments
+
 Revision 1.19  2004/01/25 21:37:28  rasc
 bugfixes, minor changes & enhancments
 
@@ -202,8 +205,14 @@ int  doReadTS (OPTION *opt)
 
 
     // -- error or eof?
-    if (n == -1) IO_error("read");
-    if (n < 0)  continue;
+    if (n < 0) {
+	int err;
+	
+	err = IO_error("read");
+	// if (err == ETIMEDOUT) break;		// Timout, abort
+	continue;
+    }
+
     if (n == 0) {
 	if (!fileMode) continue;	// DVRmode = no eof!
 	else break;			// filemode eof 
