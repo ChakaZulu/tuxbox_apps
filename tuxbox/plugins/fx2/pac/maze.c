@@ -11,12 +11,16 @@
 #include <colors.h>
 #include <pics.h>
 #include <text.h>
+#include <pig.h>
 #include <level.h>
 
 #define	STATUS_X		80
 #define STATUS_Y		50
 #define LOGO_X			600
 #define LOGO_Y			30
+
+/* time per food */
+#define TPF				58
 
 extern	double	sqrt( double in );
 
@@ -29,7 +33,7 @@ int				level = 0;
 int				score = 0;
 static	int		timeleft=0;
 
-static	int		piccs[] = { 166, 153, 162, 191 };
+static	int		piccs[] = { 133, 125, 125, 133 };
 
 typedef struct _Ghost
 {
@@ -58,19 +62,19 @@ static	Ghost	ghost[4];
 static	Ghost	ighost0[4] = {
 { 16, 3, 0, 0, BLUE, 0 },
 { 3, 3, 0, 0, GRAY, 0 },
-{ 16, 11, 0, 0, RED, 1 },
+{ 11, 11, 0, 0, RED, 1 },
 { 3, 12, 0, 0, DARK, 1 } };
 
 static	Ghost	ighost1[4] = {
 { 1, 3, 0, 0, RED, 0 },
-{ 16, 3, 0, 0, RED, 0 },
-{ 16, 13, 0, 0, GREEN, 1 },
+{ 11, 3, 0, 0, RED, 0 },
+{ 16, 14, 0, 0, GREEN, 1 },
 { 5, 7, 0, 0, GREEN, 1 } };
 
 static	Ghost	ighost2[4] = {
 { 5, 3, 0, 0, RED, 1 },
 { 16, 3, 0, 0, BLUE, 0 },
-{ 16, 13, 0, 0, BLUE, 1 },
+{ 11, 14, 0, 0, BLUE, 1 },
 { 8, 7, 0, 0, RED, 1 } };
 
 static	Ghost	ighost3[4] = {
@@ -78,6 +82,9 @@ static	Ghost	ighost3[4] = {
 { 2, 16, 0, 0, BLUE, 1 },
 { 8, 16, 0, 0, BLUE, 1 },
 { 9, 16, 0, 0, RED, 1 } };
+
+static	unsigned char	pig_x[] = { 13, 13, 13, 13 };
+static	unsigned char	pig_y[] = { 11, 3, 11, 11 };
 
 static	Ghost	*ighosts[] = { ighost0, ighost1, ighost2, ighost3 };
 
@@ -135,7 +142,7 @@ void	MazeInitialize( void )
 	actcode=0xee;
 	maze[ pac.y * MAZEW + pac.x ] = ' ';
 	pices = piccs[ level ]-1;
-	timeleft=52*pices;
+	timeleft=TPF*pices;
 	memcpy(ghost,ighosts[ level ],sizeof(Ghost)*4);
 }
 
@@ -202,6 +209,8 @@ static	void	DelOnePices( void )
 		pices=0;
 	FBPaintPixel( STATUS_X+pices, STATUS_Y, 0 );
 	FBPaintPixel( STATUS_X+pices, STATUS_Y+1, 0 );
+	FBPaintPixel( STATUS_X+pices, STATUS_Y+2, 0 );
+	FBPaintPixel( STATUS_X+pices, STATUS_Y+3, 0 );
 	if ( !pices )
 	{
 		gametime=timeleft;
@@ -244,10 +253,12 @@ static	int	cd = 40;
 	else
 		cd=40;
 	timeleft--;
-	if ( !(timeleft%52) )
+	if ( !(timeleft%TPF) )
 	{
-		FBPaintPixel( STATUS_X+(timeleft/52), STATUS_Y+4, 0 );
-		FBPaintPixel( STATUS_X+(timeleft/52), STATUS_Y+5, 0 );
+		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+6, 0 );
+		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+7, 0 );
+		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+8, 0 );
+		FBPaintPixel( STATUS_X+(timeleft/TPF), STATUS_Y+9, 0 );
 	}
 	if ( !timeleft )
 	{
@@ -564,8 +575,8 @@ void	CheckGhosts( void )
 
 void	DrawFill( void )
 {
-	FBFillRect( STATUS_X, STATUS_Y, pices, 2, GREEN );
-	FBFillRect( STATUS_X, STATUS_Y+4, (timeleft/52), 2, RED );
+	FBFillRect( STATUS_X, STATUS_Y, pices, 4, GREEN );
+	FBFillRect( STATUS_X, STATUS_Y+6, (timeleft/TPF), 4, RED );
 }
 
 void	DrawGameOver( void )
@@ -611,4 +622,9 @@ void	NextLevel( void )
 	level++;
 	if ( level > 3 )
 		level=0;
+}
+
+void	MazePig( void )
+{
+	Fx2ShowPig( (int)pig_x[ level ]*32, (int)pig_y[level]*32, 8*32, 6*32 );
 }

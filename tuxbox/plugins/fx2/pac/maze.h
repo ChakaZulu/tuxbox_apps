@@ -13,5 +13,6 @@ extern	void	DrawGameOver( void );
 extern	void	DrawScore( void );
 extern	void	InitLevel( void );
 extern	void	NextLevel( void );
+extern	void	MazePig( void );
 
 #endif

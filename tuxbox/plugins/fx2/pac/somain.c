@@ -10,6 +10,7 @@
 
 #include <rcinput.h>
 #include <draw.h>
+#include <pig.h>
 #include <colors.h>
 #include <maze.h>
 
@@ -57,6 +58,7 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		DrawFill();
 		DrawGhosts( );
 		DrawPac( );
+		MazePig();
 
 		doexit=0;
 		while( !doexit )
@@ -94,6 +96,8 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 				InitLevel();
 		}
 	}
+
+	Fx2StopPig();
 
 	RcClose();
 	FBClose();
