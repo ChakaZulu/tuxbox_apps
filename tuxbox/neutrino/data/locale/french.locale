@@ -147,7 +147,7 @@ channellist.head tous les canaux
 
 infoviewer.epgnotload EPG pas encore non chargé ...
 infoviewer.epgwait attendent EPG...
-infoviewer.streaminfo Stream-Informations
+infoviewer.streaminfo Features
 infoviewer.eventlist l' événement énumérerait
 infoviewer.languages Choix linguistique
 infoviewer.notavailable Channel not available
@@ -176,6 +176,9 @@ streaminfo.audiotype_unknown Argile version: inconnu
 streaminfo.not_crypted not crypted
 streaminfo.ecm_invalid invalid CA-system
 streaminfo.not_available not available
+
+streamfeatures.head Features
+streamfeatures.info Stream-Information
 
 apidselector.head Choix linguistique
 

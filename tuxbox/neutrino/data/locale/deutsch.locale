@@ -146,7 +146,7 @@ channellist.head Alle Kanäle
 
 infoviewer.epgnotload Informationen noch nicht geladen...
 infoviewer.epgwait Warte auf EPG-Informationen...
-infoviewer.streaminfo Stream-Info
+infoviewer.streaminfo Features
 infoviewer.eventlist Programm
 infoviewer.languages Tonauswahl
 infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar
@@ -175,6 +175,9 @@ streaminfo.audiotype_unknown Audiotyp: unbekannt
 streaminfo.not_crypted nicht verschlüsselt
 streaminfo.ecm_invalid ungültiges CA-System
 streaminfo.not_available nicht verfügbar
+
+streamfeatures.head Features
+streamfeatures.info Stream-Information
 
 apidselector.head Sprachauswahl
 

@@ -145,7 +145,7 @@ channellist.head BÜTÜN KANLLAR
 
 infoviewer.epgnotload EPG DAHA BULUNMADI...
 infoviewer.epgwait EPG BEKLENIYOR...
-infoviewer.streaminfo STREAM BILGISI
+infoviewer.streaminfo Features
 infoviewer.eventlist PROGRAM
 infoviewer.languages SES SECENEGI
 infoviewer.notavailable KANAL SIMDILIK BULUNAMIYOR
@@ -174,6 +174,9 @@ streaminfo.audiotype_unknown SES AYARI: unbekannt
 streaminfo.not_crypted not crypted
 streaminfo.ecm_invalid invalid CA-system
 streaminfo.not_available not available
+
+streamfeatures.head Features
+streamfeatures.info Stream-Information
 
 apidselector.head DIL SECENEGI
 

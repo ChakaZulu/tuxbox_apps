@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.46 2002/02/20 00:07:52 McClean Exp $
+//  $Id: neutrino.h,v 1.47 2002/02/22 20:30:22 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.47  2002/02/22 20:30:22  field
+//  Stream-Info durch "Features" ersetzt (vtxt usw :)
+//
 //  Revision 1.46  2002/02/20 00:07:52  McClean
 //  add -flash for directly neutrino-start (for alexW)
 //
@@ -252,6 +255,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CKeySetupNotifier       *keySetupNotifier;
 		CAPIDChangeExec         *APIDChanger;
 		CNVODChangeExec         *NVODChanger;
+		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
 
 		CChannelList		*channelList;
 
@@ -296,7 +300,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void SelectAPID();
 		void SelectNVOD();
 		void CmdParser(int argc, char **argv);
-
+		void ShowStreamFeatures();
 
 	public:
 

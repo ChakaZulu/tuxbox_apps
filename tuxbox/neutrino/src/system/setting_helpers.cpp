@@ -160,6 +160,27 @@ int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 	return RETURN_EXIT;
 }
 
+int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, string actionKey)
+{
+	//printf("CStreamFeaturesChangeExec exec: %s\n", actionKey.c_str());
+	int sel= atoi(actionKey.c_str());
+
+	parent->hide();
+	if (sel==-1)
+	{
+		g_StreamInfo->exec(NULL, "");
+	}
+	else
+	if (sel>=0)
+	{
+		g_PluginList->setvtxtpid( g_RemoteControl->vtxtpid );
+		g_PluginList->startPlugin( sel );
+	}
+
+	return RETURN_EXIT;
+}
+
+
 void setNetworkAddress(char* ip, char* netmask, char* broadcast)
 {
 	printf("IP       : %s\n", ip);

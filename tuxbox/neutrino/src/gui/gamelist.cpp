@@ -28,11 +28,11 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.30 2002/02/22 18:07:54 field Exp $
+$Id: gamelist.cpp,v 1.31 2002/02/22 20:30:23 field Exp $
 
 $Log: gamelist.cpp,v $
-Revision 1.30  2002/02/22 18:07:54  field
-Hiding plugins
+Revision 1.31  2002/02/22 20:30:23  field
+Stream-Info durch "Features" ersetzt (vtxt usw :)
 
 Revision 1.26  2002/01/29 17:26:51  field
 Jede Menge Updates :)
@@ -75,7 +75,7 @@ gamelist: eigener Fontdef fuer 2-zeiliges Menue
 
 void CPlugins::loadPlugins()
 {
-	printf("[CPlugins] Checking plugins-directory\n");
+	//printf("[CPlugins] Checking plugins-directory\n");
 	printf("[CPlugins] Dir: %s\n", PLUGINDIR "/");
 
 	struct dirent **namelist;
@@ -275,8 +275,13 @@ void CPlugins::startPlugin(int number)
 	if (plugin_list[number].rc)
 	{
 		setrc( g_RCInput->getFileHandle() );
+		addParm(P_ID_RCBLK_ANF, g_settings.repeat_genericblocker);
+		addParm(P_ID_RCBLK_REP, g_settings.repeat_blocker);
+
 		// cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << endl;
 		startparam = makeParam(P_ID_RCINPUT, startparam);
+		startparam = makeParam(P_ID_RCBLK_ANF, startparam);
+		startparam = makeParam(P_ID_RCBLK_REP, startparam);
 	}
 	else
 	{
@@ -299,10 +304,15 @@ void CPlugins::startPlugin(int number)
 	{
 		addParm(P_ID_OFF_X, g_settings.screen_StartX);
 		addParm(P_ID_OFF_Y, g_settings.screen_StartY);
+		addParm(P_ID_END_X, g_settings.screen_EndX);
+		addParm(P_ID_END_Y, g_settings.screen_EndY);
+
 		// cout << "With OFFSETS " << params.find(P_ID_OFF_X)->second.c_str() << ":" << params.find(P_ID_OFF_Y)->second.c_str() << endl;
 
 		startparam = makeParam(P_ID_OFF_X, startparam);
 		startparam = makeParam(P_ID_OFF_Y, startparam);
+		startparam = makeParam(P_ID_END_X, startparam);
+		startparam = makeParam(P_ID_END_Y, startparam);
 	}
 
 	PluginParam *par = startparam;
@@ -613,6 +623,7 @@ void CGameList::runGame(int selected )
 	#endif
 
 	g_RemoteControl->CopyPIDs();
+
 	g_PluginList->setvtxtpid( g_RemoteControl->vtxtpid );
 	g_PluginList->startPlugin( gamelist[selected]->number );
 
