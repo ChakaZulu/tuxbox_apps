@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.26 2002/10/18 00:18:31 woglinde Exp $
+	$Id: timerdclient.h,v 1.27 2002/10/18 12:58:57 thegoodguy Exp $
 
 	License: GPL
 
@@ -28,13 +28,10 @@
 #define __timerdclient__
 
 #include <string>
-#include <vector>
 
 #include <zapit/basicclient.h>
 
 #include <timerdclient/timerdtypes.h>
-
-using namespace std;
 
 class CTimerdClient:private CBasicClient
 {
@@ -60,7 +57,7 @@ class CTimerdClient:private CBasicClient
 			EVT_REMIND
 		};
 
-		void registerEvent(unsigned int eventID, unsigned int clientID, string udsName);
+		void registerEvent(unsigned int eventID, unsigned int clientID, std::string udsName);
 		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
 
 		bool isTimerdAvailable();			// check if timerd is running

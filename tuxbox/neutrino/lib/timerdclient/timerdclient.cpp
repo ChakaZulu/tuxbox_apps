@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.31 2002/10/17 10:01:27 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.32 2002/10/18 12:58:57 thegoodguy Exp $
 
 	License: GPL
 
@@ -48,7 +48,7 @@ bool CTimerdClient::send(const unsigned char command, char* data = NULL, const u
 
 //-------------------------------------------------------------------------
 
-void CTimerdClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
+void CTimerdClient::registerEvent(unsigned int eventID, unsigned int clientID, std::string udsName)
 {
 	CEventServer::commandRegisterEvent msg2;
 

@@ -53,7 +53,7 @@ bool CLcddClient::send(const unsigned char command, char* data = NULL, const uns
 }
 
 
-void CLcddClient::setMode(char mode, string head)
+void CLcddClient::setMode(char mode, std::string head)
 {
 	CLcddMsg::commandMode msg2;
 
@@ -65,7 +65,7 @@ void CLcddClient::setMode(char mode, string head)
 	close_connection();
 }
 
-void CLcddClient::setMenuText(char pos, string text, char highlight)
+void CLcddClient::setMenuText(char pos, std::string text, char highlight)
 {
 	CLcddMsg::commandMenuText msg2;
 
@@ -78,7 +78,7 @@ void CLcddClient::setMenuText(char pos, string text, char highlight)
 	close_connection();
 }
 
-void CLcddClient::setServiceName(string name)
+void CLcddClient::setServiceName(std::string name)
 {
 	CLcddMsg::commandServiceName msg2;
 
