@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.23 2001/07/18 03:26:45 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.24 2001/07/18 13:51:05 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.24  2001/07/18 13:51:05  fnbrd
+//  Datumsfehler behoben.
+//
 //  Revision 1.23  2001/07/18 03:26:45  fnbrd
 //  Speicherloch gefixed.
 //
@@ -569,7 +572,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
     pResultData = new char[nResultDataSize];
     SItime siStart = *(evt.times.begin());
     struct tm *pStartZeit = localtime(&siStart.startzeit);
-    int nSDay(pStartZeit->tm_mday), nSMon(pStartZeit->tm_mon), nSYear(pStartZeit->tm_year+1900),
+    int nSDay(pStartZeit->tm_mday), nSMon(pStartZeit->tm_mon+1), nSYear(pStartZeit->tm_year+1900),
      nSH(pStartZeit->tm_hour), nSM(pStartZeit->tm_min);
 
     long int uiEndTime(siStart.startzeit+siStart.dauer);
@@ -1195,7 +1198,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.23 2001/07/18 03:26:45 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.24 2001/07/18 13:51:05 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
