@@ -302,7 +302,7 @@ void enigmaMMI::closeMMI()
 		if ( conn.connected() )
 		{
 //			eDebug("conn is connected... start closeTimer");
-			closeTimer.start(2,true);
+			closeTimer.start(0,true);
 		}
 	}
 	else if ( conn.connected() )
@@ -376,7 +376,7 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 			// this takes not effect while the mainloop is busy...
 
 			scheduledData = data;
-			delayTimer.start(2,true);
+			delayTimer.start(0,true);
 			return false;
 		}
 
@@ -436,7 +436,7 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 			// this takes not effect while the mainloop is busy...
 
 			scheduledData = data;
-			delayTimer.start(2,true);
+			delayTimer.start(0,true);
 			return false;
 		}
 

@@ -643,7 +643,7 @@ void tsScan::dvbEvent(const eDVBEvent &event)
 	case eDVBScanEvent::eventTunedIn:
 		if ( !timer.isActive() )
 			timer.start(1000);
-	break;
+		break;
 	case eDVBScanEvent::eventScanBegin:
 			tpLeft = sapi->getknownTransponderSize();
 			progress->setPerc(0);
@@ -1242,7 +1242,7 @@ int TransponderScan::eventHandler( const eWidgetEvent &event )
 			break;
 		case eWidgetEvent::execBegin:
 			ret = Exec();
-			closeTimer.start(1, true);
+			closeTimer.start(0,true);
 			break;
 		case eWidgetEvent::execDone:
 			if ( Decoder::locked )

@@ -613,7 +613,9 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 
 	/*emit*/ dvb.scrambled(isca);
 
-	if ( eDVB::getInstance()->recorder && service.path )
+	int hideerror=0;
+	eConfig::getInstance()->getKey("/elitedvb/extra/hideerror", hideerror);	
+	if ( hideerror || (eDVB::getInstance()->recorder && service.path) )
 		;
 	else if (isca && !service.path && !calist )
 	{

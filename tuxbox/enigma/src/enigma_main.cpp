@@ -4717,10 +4717,6 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 		}
 		ChannelName->setText(name);
 
-		int hideerror=0;
-		if(err!=0)
-			eConfig::getInstance()->getKey("/elitedvb/extra/hideerror", hideerror);
-
 		switch (err)
 		{
 		case 0:
@@ -4732,14 +4728,11 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 			postMessage(eZapMessage(0, _("switch"), _("One moment please...")), 1);
 			break;
 		case -ENOENT:
-			if (hideerror) break;
 			Description->setText(_("Service could not be found !"));
 			postMessage(eZapMessage(0, _("switch"), _("Service could not be found !")), 1);
 			break;
 		case -ENOCASYS:
 		{
-			if (hideerror) break;
-
 			int serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
 			if( serviceFlags & eServiceHandler::flagIsScrambled )
 			{
@@ -4750,13 +4743,11 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 			break;
 		}
 		case -ENOSTREAM:
-			if (hideerror) break;
 			Description->setText(_("This service doesn't currently send a signal"));
 			postMessage(eZapMessage(0, _("switch"), _("This service doesn't currently send a signal"), 2), 1);
 			eDebug("This service doesn't currently send a signal");
 			break;
 		case -ENOSYS:
-			if (hideerror) break;
 			Description->setText(_("This content could not be displayed"));
 			eDebug("This content could not be displayed");
 			postMessage(eZapMessage(0, _("switch"), _("This content could not be displayed"), 2), 1);
@@ -4767,7 +4758,6 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 			postMessage(eZapMessage(0, _("switch"), _("NVOD Service - please select a starttime"), 5), 1);
 			break;
 		default:
-			if (hideerror) break;
 			Description->setText(_("Unknown error!!"));
 			eDebug("Unknown error!!");
 			postMessage(eZapMessage(0, _("switch"), _("Unknown error!!")), 1);
@@ -4833,6 +4823,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 	}
 #endif // DISABLE_FILE
 	showInfobar();
+	cur_event_id = -1;
 
 	eServiceInterface::getInstance()->removeRef(_serviceref);
 
@@ -4866,11 +4857,11 @@ void eZapMain::gotEIT()
 		{
 			eConfig::getInstance()->getKey("/ezap/osd/showOSDOnEITUpdate", state);
 
-			if (state)
+			if (old_event_id == -1 || state)
 			{
 				showInfobar();
 				if (doHideInfobar())
-					timeout.start((sapi->getState() == eServiceHandler::statePlaying)?10000:2000, 1);
+					timeout.start((sapi->getState() == eServiceHandler::statePlaying)?6000:2000, 1);
 			}
 		}
 //		eDebug("unlock eit");

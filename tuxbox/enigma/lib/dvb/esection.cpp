@@ -263,8 +263,9 @@ void eSection::data(int socket)
 				goto doit;   // YES .. GOTO
 			else if ( count > (maxsec*4) )
 			{
-				eDebug("ERROR !!!!!!!!!");
-				timeout();
+				eDebug("incomplete section... abort!");
+				timer->start(0,true);
+				break;
 			}
 			else if ( prevSection == section )
 				count++;
