@@ -107,10 +107,10 @@
 
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
-			<ePixmap position="0:0" size="120:18" pixmap="enigma_logo" />
-			<eLabel position="0:18" size="120:30" font="NimbusSansL-Regular Sans L Regular;15" wrap="on" name="service_name" />
-			<eLabel position="74:48" size="46:16" font="NimbusSansL-Regular Sans L Regular;16" name="clock" align="right" />
-			<eProgress position="0:55" size="70:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
+			<ePixmap position="0:0" size="120:17" pixmap="enigma_logo" />
+			<eLabel position="0:17" size="120:34" font="NimbusSansL-Regular Sans L Regular;16" wrap="on" name="service_name" />
+			<eLabel position="74:51" size="46:13" font="NimbusSansL-Regular Sans L Regular;14" name="clock" align="right" />
+			<eProgress position="0:56" size="70:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
 		</eZapLCDMain>
 	</object> 
 
@@ -149,7 +149,7 @@
 			<eLabel position="10:5" size="100:50" font="NimbusSansL-Regular Sans L Regular;50" name="ch_number" align="center"
 				backgroundColor="osd_normal"/>
 
-			<eLabel position="140:61" size="445:35" font="NimbusSansL-Regular Sans L Regular;35" name="ch_name"
+			<eLabel position="140:61" size="445:40" font="NimbusSansL-Regular Sans L Regular;34" name="ch_name"
 				backgroundColor="osd_normal"/>
 
 			<eLabel position="50:102" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_time"
