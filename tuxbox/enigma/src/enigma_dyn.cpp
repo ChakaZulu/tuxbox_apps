@@ -837,13 +837,13 @@ static eString getLeftNavi(eString mode, bool javascript)
 {
 	eString result;
 	eString pre, post;
-	
+
 	if (javascript)
 	{
 		pre = "javascript:leftnavi('";
 		post = "')";
 	}
-	
+
 	if (mode.find("zap") == 0)
 	{
 		if (pdaScreen == 0)
@@ -2938,9 +2938,9 @@ public:
 		}
 	}
 
-	eMEPG(time_t start, const eServiceReference & bouquetRef, int channelWidth)
-		:hours(hours)   // horizontally visible hours
-		,d_min((pdaScreen == 0) ? 5 : 3)  // distance on time scale for 1 minute
+	eMEPG(int hours, time_t start, const eServiceReference & bouquetRef, int channelWidth)
+		:d_min((pdaScreen == 0) ? 5 : 3)  // distance on time scale for 1 minute
+		,hours(hours)   // horizontally visible hours
 		,start(start)
 		,end(start + hours * 3600)
 		,tableWidth((end - start) / 60 * d_min + channelWidth)
@@ -3001,7 +3001,7 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	int hours = 24;
 	eConfig::getInstance()->getKey("/elitedvb/multiepg/hours", hours); // horizontally visible hours
 
-	eMEPG mepg(start, bouquetRef, channelWidth);
+	eMEPG mepg(hours, start, bouquetRef, channelWidth);
 
 	eString result = (pdaScreen == 0) ? readFile(TEMPLATE_DIR + "mepg.tmp") : readFile(TEMPLATE_DIR + "mepg_small.tmp");
 	result.strReplace("#TIMESCALE#", mepg.getTimeScale(channelWidth));
