@@ -39,14 +39,19 @@
 #include <string.h>
 #include <errno.h>
 #include <mad.h>
+#include <sched.h>
 
-
+#include <neutrino.h>
 #include <driver/mp3play.h>
+#include <dbox/avs_core.h>
+#define AVS_DEVICE "/dev/dbox/avs0"
 
 // Frames to skip in ff/rev mode
 #define FRAMES_TO_SKIP 75 
 // nr of frames to play after skipping in rev/ff mode
 #define FRAMES_TO_PLAY 5
+
+#define ProgName "CMP3Player"
 
 /****************************************************************************
  * Global variables.														*
@@ -606,9 +611,6 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 	return(Status);
 }
 
-/****************************************************************************
- * Program entry point.														*
- ****************************************************************************/
 bool  CMP3Player::SetDSP(int soundfd, struct mad_header *Header)
 {
 	int fmt = AFMT_S16_NE; /* signed 16 bit native endian */
@@ -626,11 +628,16 @@ bool  CMP3Player::SetDSP(int soundfd, struct mad_header *Header)
 		 printf("setfmt failed\n");
 	 if(::ioctl(soundfd, SNDCTL_DSP_CHANNELS, &channels))
 		 printf("channel set failed\n");
+	 // mute audio to reduce pops when changing samplerate (avia_reset)
+	 bool was_muted = avs_mute(true);
 	 if (::ioctl(soundfd, SNDCTL_DSP_SPEED, &dsp_speed))
 	 {
 		 printf("speed set failed\n");
 		 crit_error=true;
 	 }
+	 usleep(400000);
+	 if (!was_muted)
+		 avs_mute(false);
 //		  printf("Debug: SNDCTL_DSP_RESET %d / SNDCTL_DSP_SPEED %d / SNDCTL_DSP_CHANNELS %d / SNDCTL_DSP_SETFMT %d\n",
 //					SNDCTL_DSP_RESET, SNDCTL_DSP_SPEED, SNDCTL_DSP_CHANNELS, SNDCTL_DSP_SETFMT);
 		  return crit_error;
@@ -707,35 +714,26 @@ void* CMP3Player::PlayThread(void * filename)
 
 bool CMP3Player::play(const char *filename)
 {
-	ProgName=__FILE__;
-	if(true)
+	stop();
+	strcpy(m_mp3info,"");
+	strcpy(m_timePlayed,"0:00");
+	strcpy(m_timeTotal,"0:00");
+	do_loop = true;
+	state = PLAY;
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	struct sched_param param;
+	pthread_attr_setschedpolicy(&attr, SCHED_RR);
+	param.sched_priority=1;
+	pthread_attr_setschedparam(&attr, &param);
+	usleep(100000); // give the event thread some time to handle his stuff
+	                // without this sleep there were duplicated events...
+	if (pthread_create (&thrPlay, &attr, PlayThread,(void *) filename) != 0 )
 	{
-		stop();
-		strcpy(m_mp3info,"");
-		strcpy(m_timePlayed,"0:00");
-		strcpy(m_timeTotal,"0:00");
-      do_loop = true;
-		state = PLAY;
-		if (pthread_create (&thrPlay, NULL, PlayThread,(void *) filename) != 0 )
-		{
-			perror("mp3play: pthread_create(PlayThread)");
-			return false;
-		}
+		perror("mp3play: pthread_create(PlayThread)");
+		return false;
 	}
-	else
-		PlayThread((void *) filename);
 	return true;
-
-/* 	
-	if(Status)
-		fprintf(stderr,"%s: an error occured during decoding.\n",ProgName);
-
-		fclose(fp);
-		fclose(soundfd);
-*/		
-	/* All done. */
-//	return(Status);
-
 }
 
 CMP3Player::CMP3Player()
@@ -747,3 +745,24 @@ void CMP3Player::init()
 {
 	state = STOP;
 }
+
+bool CMP3Player::avs_mute(bool mute)
+{
+	int fd, a, b=AVS_UNMUTE;
+	a = mute ? AVS_MUTE : AVS_UNMUTE;
+	if ((fd = open(AVS_DEVICE, O_RDWR)) < 0)
+		 perror("[CMP3Player::avs_mute] " AVS_DEVICE);
+	 else 
+	 {
+		 if (ioctl(fd, AVSIOGMUTE, &b) < 0)
+			 perror("[CMP3Player::avs_mute] AVSIOSMUTE");
+		 if(a!=b)
+		 {
+			 if (ioctl(fd, AVSIOSMUTE, &a) < 0)
+				 perror("[CMP3Player::avs_mute] AVSIOSMUTE");
+		 }
+		 close(fd);
+	 }
+	 return (b==AVS_MUTE);
+}
+

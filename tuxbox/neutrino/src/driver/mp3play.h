@@ -46,12 +46,9 @@
 #include <pthread.h>
 
 
-
-
 class CMP3Player
 {
 
-	const char	*ProgName;
 	FILE		*soundfd;
 	bool		do_loop;
 	pthread_t	thrPlay;
@@ -73,13 +70,12 @@ class CMP3Player
 	signed short MadFixedToSShort(const mad_fixed_t Fixed);
 	void				CreateInfo();
 	int				MpegAudioDecoder(FILE *InputFp,int OutputFd);
-
+	bool SetDSP(int soundfd, struct mad_header *Header);
 
 public:
 	enum State {STOP = 0, PLAY, PAUSE, FF, REV};
 	State state;
 	static CMP3Player* getInstance();
-	bool SetDSP(int soundfd, struct mad_header *Header);
 	bool play(const char *filename);
 	void stop();
    void pause();
@@ -89,6 +85,7 @@ public:
    char* getMp3Info(){return m_mp3info;}
    char* getTimePlayed(){return m_timePlayed;}
    char* getTimeTotal(){return m_timeTotal;}
+	bool avs_mute(bool mute);
 
 	CMP3Player();
 	~CMP3Player();
