@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.19  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.18  2002/06/15 02:33:03  TheDOC
 some changes + bruteforce-channelscan for cable
 
@@ -330,94 +333,96 @@ void channels::zapCurrentChannel()
 
 	current_mode = CHANNEL;
 
-	tune(getCurrentTS(), getCurrentONID());
-
-	//fprintf(stderr, "Getting pat\n");
-	pat_obj->readPAT();
-	//fprintf(stderr, "Got it\n");
-
-	ECM = 0;
-
-	apid = 0;
-
-	//fprintf(stderr, "Getting pmt\n");
-	int tmp_pmt = pat_obj->getPMT(getCurrentSID());
-	//fprintf(stderr, "Got it\n");
-
-	if (tmp_pmt != 0)
+	if (tune(getCurrentTS(), getCurrentONID()))
 	{
-		setCurrentPMT(pat_obj->getPMT(getCurrentSID()));
-		pmt_data pmt_entry = (pmt_obj->readPMT(getCurrentPMT()));
-		setCurrentPMTdata(pmt_entry);
-		deleteCurrentAPIDs();
-		number_components = 0;
-		video_component = 0;
-		for (int i = 0; i < pmt_entry.pid_counter; i++)
+
+		//fprintf(stderr, "Getting pat\n");
+		pat_obj->readPAT();
+		//fprintf(stderr, "Got it\n");
+	
+		ECM = 0;
+	
+		apid = 0;
+	
+		//fprintf(stderr, "Getting pmt\n");
+		int tmp_pmt = pat_obj->getPMT(getCurrentSID());
+		//fprintf(stderr, "Got it\n");
+	
+		if (tmp_pmt != 0)
 		{
-			if (pmt_entry.type[i] == 0x02)
+			setCurrentPMT(pat_obj->getPMT(getCurrentSID()));
+				pmt_data pmt_entry = (pmt_obj->readPMT(getCurrentPMT()));
+			setCurrentPMTdata(pmt_entry);
+			deleteCurrentAPIDs();
+			number_components = 0;
+			video_component = 0;
+			for (int i = 0; i < pmt_entry.pid_counter; i++)
 			{
-				setCurrentVPID(pmt_entry.PID[i]);
-				video_component = pmt_entry.component[i];
+				if (pmt_entry.type[i] == 0x02)
+				{
+					setCurrentVPID(pmt_entry.PID[i]);
+					video_component = pmt_entry.component[i];
+				}
+				else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03)
+				{
+					addCurrentAPID(pmt_entry.PID[i]);
+					component[number_components++] = pmt_entry.component[i];
+				}
+				else if (pmt_entry.type[i] == 0x06 && pmt_entry.subtype[i] == 1)
+				{
+					setCurrentTXT(pmt_entry.PID[i]);
+				}
+				else if (pmt_entry.type[i] == 0x06 && pmt_entry.subtype[i] != 1)
+				{
+					addCurrentAPID(pmt_entry.PID[i], (bool) true);
+					component[number_components++] = pmt_entry.component[i];
+				}
+			
+				//printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
 			}
-			else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03)
-			{
-				addCurrentAPID(pmt_entry.PID[i]);
-				component[number_components++] = pmt_entry.component[i];
-			}
-			else if (pmt_entry.type[i] == 0x06 && pmt_entry.subtype[i] == 1)
-			{
-				setCurrentTXT(pmt_entry.PID[i]);
-			}
-			else if (pmt_entry.type[i] == 0x06 && pmt_entry.subtype[i] != 1)
-			{
-				addCurrentAPID(pmt_entry.PID[i], (bool) true);
-				component[number_components++] = pmt_entry.component[i];
-			}
-
-			//printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
-		}
-
-		for (int i = 0; i < pmt_entry.ecm_counter; i++)
-		{
-			if (setting->getCAID() == pmt_entry.CAID[i])
-				ECM = pmt_entry.ECM[i];
-			//printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
-		}
-		basic_channellist[cur_pos].PCR = pmt_entry.PCR;
-
-		hardware_obj->useDD(getCurrentDD(0));
-		if (getCurrentAPIDcount() == 1)
-			(*zap_obj).zap_to(pmt_entry, getCurrentVPID(), getCurrentAPID(0), getCurrentPCR(), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS());
-		else
-			(*zap_obj).zap_to(pmt_entry, getCurrentVPID(), getCurrentAPID(0), getCurrentPCR(), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS(), getCurrentAPID(1));
-
 		
-		if (getCurrentAPIDcount() > 1)
-			(*eit_obj).setAudioComponent(component[apid]);
-		else
-			(*eit_obj).setAudioComponent(-1);
-	}
+				for (int i = 0; i < pmt_entry.ecm_counter; i++)
+			{
+				if (setting->getCAID() == pmt_entry.CAID[i])
+					ECM = pmt_entry.ECM[i];
+				//printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
+			}
+			basic_channellist[cur_pos].PCR = pmt_entry.PCR;
+		
+			hardware_obj->useDD(getCurrentDD(0));
+			if (getCurrentAPIDcount() == 1)
+				(*zap_obj).zap_to(pmt_entry, getCurrentVPID(), getCurrentAPID(0), getCurrentPCR(), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS());
+			else
+				(*zap_obj).zap_to(pmt_entry, getCurrentVPID(), getCurrentAPID(0), getCurrentPCR(), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS(), getCurrentAPID(1));
+			
+			
+			if (getCurrentAPIDcount() > 1)
+				(*eit_obj).setAudioComponent(component[apid]);
+			else
+				(*eit_obj).setAudioComponent(-1);
+			}
+	
+		if (getCurrentType() == 4)
+		{
+			vars->setvalue("%IS_NVOD", "true");
+			osd_obj->setNVODAvailable(true);
+		}
+		else 
+		{
+			vars->setvalue("%IS_NVOD", "false");
+			osd_obj->setNVODAvailable(false);
+		}
 
-	if (getCurrentType() == 4)
-	{
-		vars->setvalue("%IS_NVOD", "true");
-		osd_obj->setNVODAvailable(true);
-	}
-	else 
-	{
-		vars->setvalue("%IS_NVOD", "false");
-		osd_obj->setNVODAvailable(false);
-	}
-
-	last_channels.push(cur_pos);
-	int number_last_chans = 2;
-	if (vars->isavailable("%NUMBERLASTCHANNELS"))
-	{
-		number_last_chans = atoi(vars->getvalue("%NUMBERLASTCHANNELS").c_str());
-	}
-	if (last_channels.size() > (unsigned int) number_last_chans)
-	{
-		last_channels.pop();
+		last_channels.push(cur_pos);
+		int number_last_chans = 2;
+		if (vars->isavailable("%NUMBERLASTCHANNELS"))
+		{
+			number_last_chans = atoi(vars->getvalue("%NUMBERLASTCHANNELS").c_str());
+		}
+		if (last_channels.size() > (unsigned int) number_last_chans)
+		{
+			last_channels.pop();
+		}
 	}
 }
 
@@ -878,6 +883,8 @@ pmt_data channels::getCurrentPMTdata()
 		return linkage_pmt;
 	else if (current_mode == NVOD)
 		return NVOD_pmt;
+	pmt_data null_data;
+	return null_data;
 }
 
 int channels::getCurrentONID()
@@ -888,8 +895,7 @@ int channels::getCurrentONID()
 		return tmp_link.ONID;
 	else if (current_mode == NVOD)
 		return getCurrentNVOD_ONID(curr_perspective);
-	else
-		return 0;
+	return 0;
 }
 
 int channels::getCurrentSID()
@@ -929,8 +935,7 @@ int channels::getCurrentVPID()
 			if (NVOD_pmt.type[i] == 0x02)
 				return NVOD_pmt.PID[i];
 	}
-	else
-		return 0;
+	return 0;
 }
 
 int channels::getCurrentAPIDcount()
@@ -979,6 +984,7 @@ int channels::getCurrentAPID(int number)
 	}
 	else
 		return 0;
+	return 0;
 }
 
 int channels::getCurrentAPID()
@@ -1210,7 +1216,7 @@ void channels::dumpChannels()
 	printf("Das sind %d Kan„le\n", basic_channellist.size());
 }
 
-int channels::tune(int TS, int ONID)
+bool channels::tune(int TS, int ONID)
 {
 	transponder trans;
 	trans.TS = TS;
@@ -1221,8 +1227,7 @@ int channels::tune(int TS, int ONID)
 	//std::cout << "ONID: " << trans.ONID << std::endl;
 	//std::cout << "TS: " << trans.TS << std::endl;
 	//std::cout << "Tuning (channel) to " << (*it).second.FREQU << " - " << (*it).second.SYMBOL << std::endl;
-	tuner_obj->tune((*it).second.FREQU, (*it).second.SYMBOL, (*it).second.POLARIZATION, (*it).second.FEC, (*cur_pos_TS).second.diseqc);
-	return true;
+	return tuner_obj->tune((*it).second.FREQU, (*it).second.SYMBOL, (*it).second.POLARIZATION, (*it).second.FEC, (*cur_pos_TS).second.diseqc);
 }
 
 bool channels::setNextTS()
@@ -1234,11 +1239,10 @@ bool channels::setNextTS()
 	return false;
 }
 
-int channels::tuneCurrentTS()
+bool channels::tuneCurrentTS()
 {
-	tuner_obj->tune((*cur_pos_TS).second.FREQU, (*cur_pos_TS).second.SYMBOL, (*cur_pos_TS).second.POLARIZATION, (*cur_pos_TS).second.FEC, (*cur_pos_TS).second.diseqc);
+	return tuner_obj->tune((*cur_pos_TS).second.FREQU, (*cur_pos_TS).second.SYMBOL, (*cur_pos_TS).second.POLARIZATION, (*cur_pos_TS).second.FEC, (*cur_pos_TS).second.diseqc);
 
-	return true;
 }
 
 void channels::saveDVBChannels()

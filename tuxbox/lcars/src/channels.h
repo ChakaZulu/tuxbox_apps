@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.13  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.12  2002/06/15 02:33:03  TheDOC
 some changes + bruteforce-channelscan for cable
 
@@ -302,8 +305,8 @@ public:
 	int getDiseqc(int TS, int ONID);
 	transportstream getTS(int TS, int ONID);
 
-	int tune(int TS, int ONID);
-	int tuneCurrentTS();
+	bool tune(int TS, int ONID);
+	bool tuneCurrentTS();
 
 	void setBeginTS() { cur_pos_TS = basic_TSlist.begin(); }
 	bool setNextTS();

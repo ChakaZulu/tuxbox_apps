@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: checker.cpp,v $
+Revision 1.9  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.8  2002/09/18 10:48:37  obi
 use devfs devices
 
@@ -95,14 +98,21 @@ void checker::fnc(int i, int mode_16_9)
 {
 	int	avs = open("/dev/dbox/avs0",O_RDWR);
 	int vid = open("/dev/dvb/card0/video0", O_RDWR);
+	if (!vid)
+		std::cout << "Couldn't open video-device for 16:9-change" << std::endl;
 	ioctl(avs, AVSIOSFNC, &i);
+	int format = 0;
+
 	if (i == 1)
-		ioctl(vid, VIDEO_SET_DISPLAY_FORMAT, VIDEO_CENTER_CUT_OUT);
+		format = VIDEO_CENTER_CUT_OUT;
 	if (i == 0)
 		if (mode_16_9 == 2)
-			ioctl(vid, VIDEO_SET_DISPLAY_FORMAT, VIDEO_LETTER_BOX);
+			format = VIDEO_LETTER_BOX;
 		else
-			ioctl(vid, VIDEO_SET_DISPLAY_FORMAT, VIDEO_PAN_SCAN);
+			format = VIDEO_PAN_SCAN;
+
+	if (!ioctl(vid, VIDEO_SET_DISPLAY_FORMAT, &format))
+		std::cout << "Couldn't set display format" << std::endl;
 	close(avs);
 	close(vid);
 }

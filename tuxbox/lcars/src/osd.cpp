@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.cpp,v $
+Revision 1.10  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.9  2002/06/15 02:33:03  TheDOC
 some changes + bruteforce-channelscan for cable
 
@@ -80,6 +83,7 @@ void* osd::start_osdqueue( void * this_ptr )
 		}
 		o->executeQueue();
 	}
+	return 0;
 }
 
 osd::osd(settings &set, fbClass *f, variables *v) :setting(set)

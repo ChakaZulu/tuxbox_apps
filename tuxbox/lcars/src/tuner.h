@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tuner.h,v $
+Revision 1.6  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.5  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -57,7 +60,7 @@ class tuner
 public:
 	tuner(settings *s);
 	CodeRate getFEC(int fec);
-	int tune(int frequ, int symbol, int polarization = -1, int fec = 0, int diseqc = 0);
+	bool tune(int frequ, int symbol, int polarization = -1, int fec = 0, int diseqc = 0);
 };
 
 #endif

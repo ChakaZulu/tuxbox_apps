@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tot.cpp,v $
+Revision 1.7  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.6  2002/09/18 17:31:03  TheDOC
 replaced O_RDONLY with O_RDWR on demux-device-open, stupid me
 
@@ -138,5 +141,5 @@ void* tot::start_timereader( void * this_ptr )
 		//printf("Offsetttttt: %d\n", offset);
 		sleep(900);
 	}
-
+	return 0;
 }

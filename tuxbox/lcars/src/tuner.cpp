@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.16  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.15  2002/10/13 01:30:34  obi
 build fix
 
@@ -97,7 +100,7 @@ CodeRate tuner::getFEC(int fec)
 // -- New Tuning API
 // -- 2001-12-16 rasc
 // polarization = 0 -> H, polarization = 1 -> V
-int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
+bool tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 {
 	int device;
 	int frontend;

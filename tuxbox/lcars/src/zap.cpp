@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.9  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.8  2002/09/18 10:48:37  obi
 use devfs devices
 
@@ -256,7 +259,7 @@ void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
 	int avs = open("/dev/dbox/avs0",O_RDWR);
 	ioctl(avs,AVSIOSMUTE,&i);
 	close(avs);
-	ioctl(aud, AUDIO_STOP, true);
+	//ioctl(aud, AUDIO_STOP, true);
 	ioctl(audio, DMX_STOP, true);
 
 	//printf("Zappe auf\nSID: %04x\nVPID: %04x\nAPID: %04x\nECM: %04x\nONID: %04x\n\n", SID, VPID, APID, ECM, ONID);
@@ -270,7 +273,7 @@ void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
 	ioctl(audio, DMX_SET_PES_FILTER, &pes_filter);
 
 	ioctl(audio, DMX_START, true);
-	ioctl(aud, AUDIO_PLAY, true);
+	//ioctl(aud, AUDIO_PLAY, true);
 	usleep(300000);
 	i = AVS_UNMUTE;
 	avs = open("/dev/dbox/avs0",O_RDWR);

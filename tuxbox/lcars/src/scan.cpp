@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.16  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.15  2002/06/15 02:33:03  TheDOC
 some changes + bruteforce-channelscan for cable
 
@@ -164,19 +167,21 @@ channels scan::scanChannels(int type, int start_frequency, int start_symbol, int
 					osd_obj->setPerspectiveName(message);
 					osd_obj->addCommand("SHOW perspective");
 	
-					tuner_obj->tune(start_frequency, start_symbol);
-					//std::cout << "Checking frequ: " << start_frequency << " with symbol: " << start_symbol << std::endl;
-	
-					number = nit_obj->getTransportStreams(&tmp_channels);
-					if (tmp_channels.numberTransponders() > 0)
+					if (tuner_obj->tune(start_frequency, start_symbol))
 					{
-						osd_obj->setScanTSNumber(tmp_channels.numberTransponders());
-						tmp_channels.dumpTS();
-						break;
+						//std::cout << "Checking frequ: " << start_frequency << " with symbol: " << start_symbol << std::endl;
+						
+						number = nit_obj->getTransportStreams(&tmp_channels);
+						if (tmp_channels.numberTransponders() > 0)
+						{
+							osd_obj->setScanTSNumber(tmp_channels.numberTransponders());
+							tmp_channels.dumpTS();
+							break;
+						}
 					}
 					start_frequency += 80;
 					if (start_frequency > 4000)
-						break;
+					break;
 				}
 			}
 		}
@@ -216,15 +221,17 @@ channels scan::scanChannels(int type, int start_frequency, int start_symbol, int
 				osd_obj->setPerspectiveName(message);
 				osd_obj->addCommand("SHOW perspective");
 
-				tuner_obj->tune(i, 6900);
-
-				if (pat_obj->readPAT())
+				if (tuner_obj->tune(i, 6900))
 				{
-					channels tmp_channels2(setting, pat_obj, pmt_obj);
-					sdt_obj->getChannels(&tmp_channels2);
-					tmp_channels.addTS(pat_obj->getTS(), sdt_obj->getONID(), i, 6900);
-					std::cout << "Found TS: " << pat_obj->getTS() << " " << sdt_obj->getONID() << " " << i << " " << 6900 << std::endl;
-					osd_obj->setScanTSNumber(tmp_channels.numberTransponders());
+
+					if (pat_obj->readPAT())
+					{
+						channels tmp_channels2(setting, pat_obj, pmt_obj);
+						sdt_obj->getChannels(&tmp_channels2);
+						tmp_channels.addTS(pat_obj->getTS(), sdt_obj->getONID(), i, 6900);
+						std::cout << "Found TS: " << pat_obj->getTS() << " " << sdt_obj->getONID() << " " << i << " " << 6900 << std::endl;
+						osd_obj->setScanTSNumber(tmp_channels.numberTransponders());
+					}
 				}
 			}
 		}
@@ -296,13 +303,15 @@ channels scan::scanChannels(int type, int start_frequency, int start_symbol, int
 
 				//printf ("Start tuning\n");
 
-				tuner_obj->tune(start_frq[i], start_sym[i], start_pol[i], start_fe[i], dis);
+				if (tuner_obj->tune(start_frq[i], start_sym[i], start_pol[i], start_fe[i], dis))
+				{
 
-				//printf("FInished tuning\n");
+					//printf("FInished tuning\n");
 
-				//printf ("Start NIT\n");
-				number = nit_obj->getTransportStreams(&tmp_channels, dis);
-				//printf ("End NIT\n");
+					//printf ("Start NIT\n");
+					number = nit_obj->getTransportStreams(&tmp_channels, dis);
+					//printf ("End NIT\n");
+				}
 			}
 
 			i++;

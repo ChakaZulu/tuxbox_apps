@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: rc.cpp,v $
+Revision 1.7  2002/10/20 02:03:37  TheDOC
+Some fixes and stuff
+
 Revision 1.6  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -165,6 +168,7 @@ void* rc::start_rcqueue( void * this_ptr )
 		r->key = r->read_from_rc2();
 		//std::cout << "Key: " << r->key << std::endl;
 	}
+	return 0;
 }
 
 int rc::parseKey(std::string key)
@@ -333,6 +337,7 @@ void* rc::start_keyboardqueue( void * this_ptr )
 		}
 		//printf("%d\n", character);
 	}
+	return 0;
 }
 
 void rc::cheat_command(unsigned short cmd)
