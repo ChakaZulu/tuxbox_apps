@@ -24,10 +24,8 @@ struct viewport {
 
 typedef struct {
 	/* physical display */
-#ifdef PLUGIN
 	int framebuf_fds;
 	int smem_len;
-#endif
 	void* p_framebuf;
 	int p_xsize;
 	int p_ysize;

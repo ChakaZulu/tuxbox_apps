@@ -61,7 +61,6 @@ extern Bool addCopyRect;
 extern Bool addRRE;
 extern Bool addCoRRE;
 extern Bool addHextile;
-extern Bool useBGR233;
 extern Bool forceOwnCmap;
 extern Bool forceTruecolour;
 extern int requestedDepth;
@@ -112,7 +111,6 @@ extern Display *dpy;
 extern Window canvas;
 extern Colormap cmap;
 extern GC gc;
-extern unsigned long BGR233ToPixel[];
 
 extern Bool CreateXWindow();
 extern void ShutdownX();
@@ -128,7 +126,6 @@ extern void CopyDataToScreen(CARD8 *buf, int x, int y, int width, int height);
 #ifdef USE_SVGALIB
 /* svga.c */
 
-extern unsigned long BGR233ToPixel[];
 extern Bool InitSvga (void);
 extern void ShutdownSvga (void);
 extern void HandleKeyboardEvent (void);

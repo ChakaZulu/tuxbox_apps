@@ -190,16 +190,7 @@ InitialiseRFBConnection(int sock)
 			}
 			else
 			{
-#ifdef PLUGIN
 				passwd = passwdString;
-#else
-				passwd = getpass("Password: ");
-				if(strlen(passwd) == 0)
-				{
-					fprintf(stderr,"%s: Reading password failed\n",programName);
-					return False;
-				}
-#endif
 				if(strlen(passwd) > 8)
 				{
 					passwd[8] = '\0';
@@ -573,8 +564,7 @@ HandleRFBServerMessage()
 										if(!ReadExact(rfbsock, (char *)&pix8, 1))
 											return False;
 
-										FILL_RECT (rect.r.x, rect.r.y, rect.r.w, rect.r.h,
-													  (useBGR233 ? BGR233ToPixel[pix8] : pix8));
+										FILL_RECT (rect.r.x, rect.r.y, rect.r.w, rect.r.h, pix8);
 
 										for(j = 0; j < hdr.nSubrects; j++)
 										{
@@ -591,8 +581,7 @@ HandleRFBServerMessage()
 											subrect.h = Swap16IfLE(subrect.h);
 
 											FILL_RECT (rect.r.x + subrect.x, rect.r.y + subrect.y, 
-														  subrect.w, subrect.h,
-														  (useBGR233 ? BGR233ToPixel[pix8] : pix8));
+														  subrect.w, subrect.h, pix8);
 										}
 										break;
 
@@ -672,8 +661,7 @@ HandleRFBServerMessage()
 										if(!ReadExact(rfbsock, (char *)&pix8, 1))
 											return False;
 
-										FILL_RECT (rect.r.x, rect.r.y, rect.r.w, rect.r.h,
-													  (useBGR233 ? BGR233ToPixel[pix8] : pix8));
+										FILL_RECT (rect.r.x, rect.r.y, rect.r.w, rect.r.h, pix8);
 
 										if(!ReadExact(rfbsock, buffer, hdr.nSubrects * 5))
 											return False;
@@ -687,8 +675,7 @@ HandleRFBServerMessage()
 											y = *ptr++;
 											w = *ptr++;
 											h = *ptr++;
-											FILL_RECT (rect.r.x + x, rect.r.y + y, w, h, 
-														  (useBGR233 ? BGR233ToPixel[pix8] : pix8));
+											FILL_RECT (rect.r.x + x, rect.r.y + y, w, h, pix8);
 										}
 										break;
 
@@ -831,7 +818,7 @@ static Bool                                                                   \
 HandleHextileEncoding##bpp(int rx, int ry, int rw, int rh)                    \
 {                                                                             \
     CARD##bpp bg, fg;                                                         \
-    int i, col;                                                               \
+    int i;                                                                    \
     CARD8 *ptr;                                                               \
     int x, y, w, h;                                                           \
     int sx, sy, sw, sh;                                                       \
@@ -861,12 +848,7 @@ HandleHextileEncoding##bpp(int rx, int ry, int rw, int rh)                    \
                 if (!ReadExact(rfbsock, (char *)&bg, (bpp/8)))                \
                     return False;                                             \
                                                                               \
-            if ((bpp == 8) && useBGR233)                                      \
-                col = BGR233ToPixel[bg];                                      \
-            else                                                              \
-                col = bg;                                                     \
-                                                                              \
-			FILL_RECT (x, y, w, h, col);                                      \
+			FILL_RECT (x, y, w, h, bg);                                          \
                                                                               \
             if (subencoding & rfbHextileForegroundSpecified)                  \
                 if (!ReadExact(rfbsock, (char *)&fg, (bpp/8)))                \
@@ -893,22 +875,13 @@ HandleHextileEncoding##bpp(int rx, int ry, int rw, int rh)                    \
                     sw = rfbHextileExtractW(*ptr);                            \
                     sh = rfbHextileExtractH(*ptr);                            \
                     ptr++;                                                    \
-                    if ((bpp == 8) && useBGR233)                              \
-                        col = BGR233ToPixel[fg];                              \
-                    else                                                      \
-                        col = fg;                                             \
                                                                               \
-					FILL_RECT (x + sx, y + sy, sw, sh, col);                  \
+					FILL_RECT (x + sx, y + sy, sw, sh, fg);                        \
                 }                                                             \
                                                                               \
             } else {                                                          \
                 if (!ReadExact(rfbsock, buffer, nSubrects * 2))               \
                     return False;                                             \
-                                                                              \
-                if ((bpp == 8) && useBGR233)                                  \
-                    col = BGR233ToPixel[fg];                                  \
-                else                                                          \
-                    col = fg;                                                 \
                                                                               \
                 for (i = 0; i < nSubrects; i++) {                             \
                     sx = rfbHextileExtractX(*ptr);                            \
@@ -917,7 +890,7 @@ HandleHextileEncoding##bpp(int rx, int ry, int rw, int rh)                    \
                     sw = rfbHextileExtractW(*ptr);                            \
                     sh = rfbHextileExtractH(*ptr);                            \
                     ptr++;                                                    \
-					FILL_RECT (x + sx, y + sy, sw, sh, col);                  \
+					FILL_RECT (x + sx, y + sy, sw, sh, fg);                  \
                 }                                                             \
             }                                                                 \
         }                                                                     \

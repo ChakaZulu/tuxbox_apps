@@ -32,12 +32,6 @@
 #define INVALID_PIXEL 0xffffffff
 #define COLORMAP_SIZE 256
 
-unsigned long BGR233ToPixel[COLORMAP_SIZE];
-
-#if 0
-static void CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width,int height);
-#endif
-
 /*
  * CopyDataToScreen.
  */
@@ -47,52 +41,6 @@ CopyDataToScreen(CARD8 *buf, int x, int y, int width, int height)
 {
 	gl_putbox(x, y, width, height, buf);
 }
-
-#if 0
-/*
- * CopyBGR233ToScreen.
- */
-
-static void
-CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width, int height)
-{
-    int p, q;
-    void *screenData = global_framebuffer.v_buf;
-    CARD8 *scr8 = ((CARD8 *)screenData) + y * si.framebufferWidth + x;
-    CARD16 *scr16 = ((CARD16 *)screenData) + y * si.framebufferWidth + x;
-    CARD32 *scr32 = ((CARD32 *)screenData) + y * si.framebufferWidth + x;
-
-    switch (myFormat.bitsPerPixel) {
-
-    case 8:
-	for (q = 0; q < height; q++) {
-	    for (p = 0; p < width; p++) {
-		*(scr8++) = BGR233ToPixel[*(buf++)];
-	    }
-	    scr8 += si.framebufferWidth - width;
-	}
-	break;
-
-    case 16:
-	for (q = 0; q < height; q++) {
-	    for (p = 0; p < width; p++) {
-		*(scr16++) = BGR233ToPixel[*(buf++)];
-	    }
-	    scr16 += si.framebufferWidth - width;
-	}
-	break;
-
-    case 32:
-	for (q = 0; q < height; q++) {
-	    for (p = 0; p < width; p++) {
-		*(scr32++) = BGR233ToPixel[*(buf++)];
-	    }
-	    scr32 += si.framebufferWidth - width;
-	}
-	break;
-    }
-}
-#endif
 
 void
 gl_setpalettecolor(int i, int r, int g, int b) {

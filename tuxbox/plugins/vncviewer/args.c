@@ -47,7 +47,6 @@ Bool addRRE = True;
 Bool addCoRRE = True;
 Bool addHextile = True;
 
-Bool useBGR233 = False;
 Bool forceOwnCmap = False;
 Bool forceTruecolour = False;
 int requestedDepth = 0;
@@ -157,10 +156,6 @@ processArgs(int argc, char **argv)
 	} else if (strcmp(argv[i],"-nocopyrect") == 0) {
 
 	    addCopyRect = False;
-
-	} else if (strcmp(argv[i],"-bgr233") == 0) {
-
-	    useBGR233 = True;
 
 	} else if (strcmp(argv[i],"-owncmap") == 0) {
 
