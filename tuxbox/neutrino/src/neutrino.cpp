@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.129 2002/01/13 23:10:03 McClean Exp $
+        $Id: neutrino.cpp,v 1.130 2002/01/15 20:12:15 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.130  2002/01/15 20:12:15  McClean
+  cleanups
+
   Revision 1.129  2002/01/13 23:10:03  McClean
   standbymode-handling changed
 
@@ -1812,6 +1815,11 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_EventList = new EventList;
 	g_Update = new CFlashUpdate;
 
+	#ifdef USEACTIONLOG
+		g_ActionLog = new CActionLog;
+		g_ActionLog->println("neutrino startup");
+	#endif
+
 	//printf("\nCNeutrinoApp::run - objects initialized...\n\n");
 	g_Locale->loadLocale(g_settings.language);
 
@@ -1941,6 +1949,9 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 						ExitRun();
 					}
 				}
+				#ifdef USEACTIONLOG
+					g_ActionLog->println("mode: standby");
+				#endif
 				g_lcdd->setMode(CLcddClient::MODE_STANDBY);
 				g_Controld->videoPowerDown(true);
 				printf("standby-loop\n");
@@ -1949,6 +1960,18 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				printf("standby-loopended\n");
 				g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
 				g_Controld->videoPowerDown(false);
+
+				//re-set mode
+				if(mode==mode_radio)
+				{
+					mode = -1;
+					radioMode();
+				}
+				else if(mode==mode_tv)
+				{
+					mode = -1;
+					tvMode();
+				}
 			}
 			else
 			{
@@ -2043,6 +2066,10 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 void CNeutrinoApp::ExitRun()
 {
+	#ifdef USEACTIONLOG
+		g_ActionLog->println("neutrino shutdown");
+	#endif
+
 	printf("neutrino exit\n");
 	//shutdown screen
 	g_lcdd->shutdown();
@@ -2158,6 +2185,9 @@ void CNeutrinoApp::tvMode()
 		g_Controld->setScartMode( 0 );
 	}
 	mode = mode_tv;
+	#ifdef USEACTIONLOG
+		g_ActionLog->println("mode: tv");
+	#endif
 
 	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
 	g_FrameBuffer->useBackground(false);
@@ -2169,6 +2199,9 @@ void CNeutrinoApp::tvMode()
 
 void CNeutrinoApp::scartMode()
 {
+	#ifdef USEACTIONLOG
+		g_ActionLog->println("mode: scart");
+	#endif
 	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
 	g_Controld->setScartMode( 1 );
 	g_RCInput->clear();
@@ -2176,7 +2209,18 @@ void CNeutrinoApp::scartMode()
 	while (g_RCInput->getKey(100)!=CRCInput::RC_home);
 	printf("scartmode-loopended\n");
 	g_Controld->setScartMode( 0 );
-	g_FrameBuffer->paintBackground();
+
+	//re-set mode
+	if(mode==mode_radio)
+	{
+		mode = -1;
+		radioMode();
+	}
+	else if(mode==mode_tv)
+	{
+		mode = -1;
+		tvMode();
+	}
 }
 
 void CNeutrinoApp::radioMode()
@@ -2190,6 +2234,9 @@ void CNeutrinoApp::radioMode()
 		g_Controld->setScartMode( 0 );
 	}
 	mode = mode_radio;
+	#ifdef USEACTIONLOG
+		g_ActionLog->println("mode: radio");
+	#endif
 
 	g_FrameBuffer->loadPal("radiomode.pal", 18, 199);
 	g_FrameBuffer->loadBackground("radiomode.raw", 18);
@@ -2293,7 +2340,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.129 2002/01/13 23:10:03 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.130 2002/01/15 20:12:15 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.18 2002/01/03 20:03:20 McClean Exp $
+// $Id: global.h,v 1.19 2002/01/15 20:12:15 McClean Exp $
 //
 // $Log: global.h,v $
+// Revision 1.19  2002/01/15 20:12:15  McClean
+// cleanups
+//
 // Revision 1.18  2002/01/03 20:03:20  McClean
 // cleanup
 //
@@ -99,6 +102,7 @@
 #include "helpers/locale.h"
 #include "helpers/update.h"
 
+
 #ifndef NEUTRINO_CPP
 #define NEUTRINO_CPP extern
 #endif
@@ -128,6 +132,11 @@ NEUTRINO_CPP  CScreenSetup    *g_ScreenSetup;
 
 NEUTRINO_CPP CLocaleManager   *g_Locale;
 
-NEUTRINO_CPP CBouquetList	*bouquetList;
+NEUTRINO_CPP CBouquetList	  *bouquetList;
 
+
+#ifdef USEACTIONLOG
+	#include "helpers/actionlog.h"
+	NEUTRINO_CPP CActionLog	  *g_ActionLog;
+#endif
 
