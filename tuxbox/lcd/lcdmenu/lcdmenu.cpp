@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.20 2002/09/01 00:47:23 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.21 2002/12/16 18:43:50 TheDOC Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -22,6 +22,10 @@
  */
 
 #include "lcdmenu.h"
+
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 CLCDMenu *CLCDMenu::instance;
 
@@ -282,7 +286,7 @@ bool CLCDMenu::rcLoop ()
 			break;
 		default:
 #ifdef DEBUG
-			cout << "pressedKey: " << pressedKey << endl;
+			std::cout << "pressedKey: " << pressedKey << std::endl;
 #endif
 			break;
 		}
