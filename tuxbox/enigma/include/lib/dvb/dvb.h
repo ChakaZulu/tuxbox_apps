@@ -267,8 +267,10 @@ public:
 
 	void updateStats(int &transponders, int &scanned, int &services);
 	eTransponder &createTransponder(int transport_stream_id, int original_network_id);
-	eService &createService(int transport_stream_id, int original_network_id, int service_id, int service_number=-1);
+	eService &createService(int transport_stream_id, int original_network_id, int service_id, int service_number = -1, bool* newService=0);
 	int handleSDT(const SDT *sdt);
+	Signal1<void, eTransponder*> transponder_added;
+	Signal2<void, eService*, bool> service_found;
 
 	void serialize(FILE *out, int ind);
 	eTransponder *searchTS(int original_network_id, int transport_stream_id);

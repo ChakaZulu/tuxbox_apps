@@ -11,6 +11,7 @@ public:
 	enum
 	{
 		eventScanBegin=eDVBEvent::eventUser,		// -> next
+		eventScanTPadded,
 		eventScanNext,		// -> tune
 		eventScanTuneOK,	// tuneOK führt zu "getPAT"
 		eventScanTuneError,	// tuneError führt zu ScanError
@@ -21,7 +22,7 @@ public:
 		eventScanGotBAT,	// scanOK |= BAT
 		eventScanComplete,
 		eventScanError,
-		eventScanCompleted,
+		eventScanCompleted
 	};
 	eDVBScanEvent(int event): eDVBEvent(event) { }
 	eDVBScanEvent(int event, int err, eTransponder *transponder): eDVBEvent(event, err, transponder) { }
@@ -65,7 +66,7 @@ class eDVBScanController: public eDVBController, public Object
 	void BATready(int error);
 	
 	std::list<eTransponder> knownTransponder;
-	
+
 	int handleSDT(eTransponder *&transponder, const SDT *sdt);
 
 public:
@@ -81,6 +82,8 @@ public:
 		knownTransponder.push_back(t);
 		
 	}
+
+	int getknownTransponderSize()	{ return knownTransponder.size(); }
 	
 	void setUseONIT(int useonit);
 	void setUseBAT(int usebat);

@@ -45,23 +45,18 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 	case eDVBScanEvent::eventScanNext:
 	{
 		eDebug("[SCAN] eventScanNext");
-		eTransponder *next=0;
-		for (std::list<eTransponder>::iterator i(knownTransponder.begin()); i != knownTransponder.end(); ++i)
-		{
-			eTransponder &t=*i;
-			
-			if (t.state == eTransponder::stateToScan)
-			{
-				next = &t;
-				break;
-			}
-		}
-		transponder=next;
+		
+		eTransponder* next = 0;
+
+		for (std::list<eTransponder>::iterator i(knownTransponder.begin()); !next && i != knownTransponder.end(); ++i)
+			if (i->state == eTransponder::stateToScan)
+				next = &(*i);
 
 		if (!next)
 			dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanCompleted));
 		else
 		{
+			transponder=next;
 			if (next->tune())
 			{
 				eDebug("[SCAN] tune failed because of missing infos");
@@ -118,15 +113,18 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 	{
 		eDebug("[SCAN] eventScanGotSDT");
 		SDT *sdt=dvb.tSDT.ready()?dvb.tSDT.getCurrent():0;
-		if (handleSDT(transponder, sdt))
+		if (sdt)
 		{
-//			if (scanflags&SCAN_SKIP)
+			if (handleSDT(transponder, sdt))
 			{
-				dvb.tNIT.abort();
-				dvb.tONIT.abort();
+/*				if (scanflags&SCAN_SKIP)
+				{
+					dvb.tNIT.abort();
+					dvb.tONIT.abort();
+				}*/
 			}
+			sdt->unlock();
 		}
-		sdt->unlock();
 
 		scanOK|=1;
 		eDebug("scanOK %d", scanOK);
@@ -163,29 +161,34 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 					}
 				}
 #endif
-				int lnb=transponder->satellite.lnb;
 				for (ePtrList<NITEntry>::iterator i(nit->entries); i != nit->entries.end(); ++i)
 				{
-					eTransponder &transp=dvb.settings->transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
-					int found=0;
-					for (std::list<eTransponder>::iterator n(knownTransponder.begin()); (!found) && n != knownTransponder.end(); ++n)
-						if (*n == transp)
-							found++;
+					eTransponder &transponder=dvb.settings->transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
+
 					for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
 					{
 						switch (d->Tag())
 						{
 						case DESCR_SAT_DEL_SYS:
-							transp.setSatellite((SatelliteDeliverySystemDescriptor*)*d);
-							transp.satellite.lnb=lnb; // on same diseqc position as source
+							transponder.setSatellite((SatelliteDeliverySystemDescriptor*)*d);
 							break;
 						case DESCR_CABLE_DEL_SYS:
-							transp.setCable((CableDeliverySystemDescriptor*)*d);
+							transponder.setCable((CableDeliverySystemDescriptor*)*d);
 							break;
 						}
 					}
+
+					int found=0;
+
+					for (std::list<eTransponder>::iterator n(knownTransponder.begin()); !found && n != knownTransponder.end(); ++n)
+						if (*n == transponder)
+							found++;								
+					
 					if (!found)
-						knownTransponder.push_back(transp);
+					{
+						knownTransponder.push_back(transponder);
+						dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanTPadded));
+					}
 				}
 			}
 			nit->unlock();
@@ -216,8 +219,12 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		eDebug("with error");		// fall through
 	case eDVBScanEvent::eventScanComplete:
 		eDebug("completed");
+
 		if (transponder)
-			knownTransponder.remove(*transponder);		// if no SDT received yet, transponder will be removed here
+			for (std::list<eTransponder>::iterator it(knownTransponder.begin()); it != knownTransponder.end(); it++)
+				if (*it == *transponder)
+					it->state = eTransponder::stateError;
+
 		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanNext));
 		break;
 	case eDVBScanEvent::eventScanCompleted:

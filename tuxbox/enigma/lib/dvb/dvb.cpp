@@ -228,20 +228,26 @@ eTransponder &eTransponderList::createTransponder(int transport_stream_id, int o
 {
 	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(original_network_id,transport_stream_id));
 	if (i==transponders.end())
+	{
 		i=transponders.insert(
 				std::pair<tsref,eTransponder>
 					(tsref(original_network_id, transport_stream_id),
 						eTransponder(original_network_id,transport_stream_id)
 					)
 			).first;
+		/*emit*/ transponder_added(&(*i).second);
+	}
 	return (*i).second;
 }
 
-eService &eTransponderList::createService(int transport_stream_id, int original_network_id, int service_id, int chnum)
+eService &eTransponderList::createService(int transport_stream_id, int original_network_id, int service_id, int chnum, bool* newService)
 {
 	std::map<sref,eService>::iterator i=services.find(sref(original_network_id,service_id));
-	if (i==services.end())
+	if ( i == services.end() )
 	{
+		if (newService)
+			*newService=true;
+
 		if (chnum==-1)
 			chnum=beautifyChannelNumber(transport_stream_id, original_network_id, service_id);
 		
@@ -260,12 +266,12 @@ eService &eTransponderList::createService(int transport_stream_id, int original_
 		while (channel_number.find(chnum)!=channel_number.end())
 			chnum++;
 
-		eService *n=&services.insert(
-					std::pair<sref,eService>
-						(sref(original_network_id,service_id), 
-						eService(transport_stream_id, original_network_id, service_id, chnum))
-					).first->second;
+		eService *n=&services.insert(	
+				std::pair<sref,eService>
+					( sref(original_network_id,service_id),	eService(transport_stream_id, original_network_id, service_id, chnum) )	).first->second;
+
 		channel_number.insert(std::pair<int,eService*>(chnum,n));
+		
 		return *n;
 	}
 	return (*i).second;
@@ -294,11 +300,14 @@ int eTransponderList::handleSDT(const SDT *sdt)
 		// todo: remove dead services (clean up current transport_stream)
 	std::set<int> s;
 	int changed=0;
+	bool newAdded;
 	for (ePtrList<SDTEntry>::const_iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 	{
-		eService &service=createService(sdt->transport_stream_id, sdt->original_network_id, i->service_id);
+		eService &service=createService(sdt->transport_stream_id, sdt->original_network_id, i->service_id, -1, &newAdded);
 		service.update(*i);
 		s.insert(i->service_id);
+
+		/*emit*/ service_found(&service, newAdded);
 	}
 	for (std::map<sref,eService>::iterator i(services.begin()); i != services.end(); ++i)
 		if ((i->first.first == sdt->original_network_id)	&& // if service on this on
