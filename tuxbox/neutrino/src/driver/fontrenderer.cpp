@@ -353,7 +353,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 #ifdef FB_USE_PALETTE
 #define PRE_CALC_TRANSLATION_TABLE
 #ifdef PRE_CALC_TRANSLATION_TABLE
-	unsigned char colors[256];
+	fb_pixel_t colors[256];
 
 	int coff = 7 - ((color + 2) & 7);
 	for (int i = (256 - 32); i >= 0; i -= 32)
@@ -369,9 +369,37 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 	int delta = fgcolor - bgcolor;
 #endif
 #else
+	t_fb_var_screeninfo * screeninfo = frameBuffer->getScreenInfo();
+        int rl = screeninfo->red.length;
+        int ro = screeninfo->red.offset;
+        int gl = screeninfo->green.length;
+        int go = screeninfo->green.offset;
+        int bl = screeninfo->blue.length;
+        int bo = screeninfo->blue.offset;
+        int tl = screeninfo->transp.length;
+        int to = screeninfo->transp.offset;
+
 	fb_pixel_t bgcolor = frameBuffer->realcolor[color];
-	int fgcolor = frameBuffer->realcolor[(((((int)color) + 2) | 7) - 2)];
-	int delta = fgcolor - bgcolor;
+	fb_pixel_t fgcolor = frameBuffer->realcolor[(((((int)color) + 2) | 7) - 2)];
+	int fgr = (((int)fgcolor >> ro) & ((1 << rl) - 1));
+	int fgg = (((int)fgcolor >> go) & ((1 << gl) - 1));
+	int fgb = (((int)fgcolor >> bo) & ((1 << bl) - 1));
+	int fgt = (((int)fgcolor >> to) & ((1 << tl) - 1));
+	int deltar = (((int)bgcolor >> ro) & ((1 << rl) - 1)) - fgr;
+	int deltag = (((int)bgcolor >> go) & ((1 << gl) - 1)) - fgg;
+	int deltab = (((int)bgcolor >> bo) & ((1 << bl) - 1)) - fgb;
+	int deltat = (((int)bgcolor >> to) & ((1 << tl) - 1)) - fgt;
+
+	fb_pixel_t colors[256];
+
+	for (int i = 0; i < 256; i++)
+	{
+		colors[255 - i] =
+			((((fgr + deltar * i / 255) & ((1 << rl) - 1)) << ro) |
+			 (((fgg + deltag * i / 255) & ((1 << gl) - 1)) << go) |
+			 (((fgb + deltab * i / 255) & ((1 << bl) - 1)) << bo) |
+			 (((fgt + deltat * i / 255) & ((1 << tl) - 1)) << to));
+	}
 #endif 
 	
 	int spread_by = 0;
@@ -440,7 +468,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 					*(td++) = bgcolor + (fb_pixel_t)(((int)(*s++)) * delta / 256);
 #endif
 #else
-					*(td++) = bgcolor + (fb_pixel_t)(((int)(*s++)) * delta / 256);
+					*td++= colors[*s++];
 #endif
 				}
 				else
@@ -468,7 +496,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 					*(td++) = bgcolor + (fb_pixel_t)(color * delta / 256);
 #endif
 #else
-					*(td++) = bgcolor + (fb_pixel_t)(color * delta / 256);
+					*td++= colors[color];
 #endif
 					s++;
 				}
