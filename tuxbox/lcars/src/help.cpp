@@ -1,0 +1,76 @@
+/***************************************************************************
+    copyright            : (C) 2001 by TheDOC
+    email                : thedoc@chatville.de
+	homepage			 : www.chatville.de
+	modified by			 : -
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
+#include <iostream.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include <memory.h>
+#include <ost/dmx.h>
+#include <ost/video.h>
+#include <ost/frontend.h>
+#include <ost/audio.h>
+#include <ost/sec.h>
+#include <ost/sec.h>
+#include <ost/ca.h>
+#include <dbox/avs_core.h>
+#include <time.h>
+#include "settings.h"
+
+time_t dvbtimeToLinuxTime(int mjd, int time)
+{
+	struct tm tm_time;
+	time_t tim;
+	int seconds, minutes, hour, day, month, year;
+	int y_, m_, k;
+
+	y_   = (int) ((mjd - 15078.2) / 365.25);
+
+	m_   = (int) ((mjd - 14956.1 - (int) (y_ * 365.25)) / 30.6001);
+
+	day  = mjd - 14956 - (int) (y_ * 365.25) - (int) (m_ * 30.60001);
+
+	if ((m_ == 14) || (m_ == 15))
+		k = 1;
+	else
+		k = 0;
+	year  = y_ + k + 1900;
+	month = m_ - 1 - k*12;
+
+	hour    = (time >> 16) & 0xff;
+	minutes = (time >>  8) & 0xff;
+	seconds = (time) & 0xff;
+
+	memset(&tm_time, 0, sizeof(tm_time));
+	tm_time.tm_sec=(seconds&0x0f)+((seconds&0xf0)>>4)*10;
+	tm_time.tm_min=(minutes&0x0f)+((minutes&0xf0)>>4)*10;
+	tm_time.tm_hour=(hour&0x0f)+((hour&0xf0)>>4)*10;
+	tm_time.tm_mday=day;
+	tm_time.tm_mon=month-1;
+	tm_time.tm_year=year-1900;
+	tm_time.tm_isdst=-1;
+	tim=mktime(&tm_time);
+	tim=mktime(&tm_time);
+
+	struct tm *t;
+	t = localtime(&tim);
+	char acttime[10];
+	strftime(acttime, sizeof acttime, "%H:%M", t);
+	return tim;
+}

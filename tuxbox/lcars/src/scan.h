@@ -1,0 +1,44 @@
+/***************************************************************************
+    copyright            : (C) 2001 by TheDOC
+    email                : thedoc@chatville.de
+	homepage			 : www.chatville.de
+	modified by			 : -
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
+#ifndef SCAN_H
+#define SCAN_H
+
+#include "settings.h"
+#include "channels.h"
+#include "pat.h"
+#include "pmt.h"
+#include "nit.h"
+#include "sdt.h"
+#include "osd.h"
+#include "tuner.h"
+
+class scan
+{
+	settings setting;
+	pat pat_obj;
+	pmt pmt_obj;
+	nit nit_obj;
+	sdt sdt_obj;
+	osd *osd_obj;
+	tuner tuner_obj;
+public:
+	scan(settings &s, pat &p1, pmt &p2, nit &n, sdt &s1, osd *o, tuner &t);	
+	channels scanChannels(bool full = false, int start_frequency = -1, int start_symbol = -1, int start_polarization = -1, int start_fec = -1);
+	void updateChannels(channels *chan);
+};
+
+#endif
