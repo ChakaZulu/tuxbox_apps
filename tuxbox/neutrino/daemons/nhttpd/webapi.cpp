@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.57 2004/05/17 08:17:42 sat_man Exp $
+	$Id: webapi.cpp,v 1.58 2004/12/18 17:46:24 chakazulu Exp $
 
 	License: GPL
 
@@ -922,6 +922,11 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 				sAddData = std::string(timer->message).substr(0,20);
 			}
 			break;
+			case CTimerd::TIMER_EXEC_PLUGIN :
+			{
+				sAddData = std::string(timer->pluginName);
+			}
+			break;
 
 			default:{}
 		}
@@ -1136,6 +1141,8 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite("     my_show(\"ProgramRow\"); else my_hide(\"ProgramRow\");\n");
 	request->printf("  if (tType == \"%d\") my_show(\"MessageRow\"); else my_hide(\"MessageRow\");\n",
 		  (int)CTimerd::TIMER_REMIND);
+	request->printf("  if (tType == \"%d\") my_show(\"PluginNameRow\"); else my_hide(\"PluginNameRow\");\n",
+		  (int)CTimerd::TIMER_EXEC_PLUGIN);
 	request->SocketWrite("  focusNMark();}\n");
 	request->SocketWrite("function onEventChange2() { tType=document.NewTimerForm.rep.value;\n");
 	request->printf("  if (tType == \"%d\") my_show(\"WeekdaysRow\"); else my_hide(\"WeekdaysRow\");\n",
@@ -1152,7 +1159,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	// Timer type
 	request->SocketWrite("<TR><TD align=\"center\">Timer-Typ\n");
 	request->SocketWrite("<select name=\"type\" onchange=\"onEventChange();\">\n");
-	for(int i=1; i<=7;i++)
+	for(int i=1; i<=8;i++)
 	{
 		if(i!=(int)CTimerd::TIMER_NEXTPROGRAM)
 		{
@@ -1253,6 +1260,10 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	//message
 	request->SocketWrite("<tr id=\"MessageRow\" style=\"visibility:hidden\"><TD colspan=2>\n");
 	request->printf("Nachricht <INPUT TYPE=\"text\" name=\"msg\" value=\"\" size=20 maxlength=%d> ('/'=NL)\n",REMINDER_MESSAGE_MAXLEN-1);
+	request->SocketWrite("</TD></TR>\n");
+	//plugin name
+	request->SocketWrite("<tr id=\"PluginNameRow\" style=\"visibility:hidden\"><TD colspan=2>\n");
+	request->printf("Plugin <INPUT TYPE=\"text\" name=\"PluginName\" value=\"\" size=20 maxlength=%d>\n",EXEC_PLUGIN_MESSAGE_MAXLEN-1);
 	request->SocketWrite("</TD></TR>\n");
 	// Buttons
 	request->SocketWrite("<TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form>\n"
@@ -1361,6 +1372,13 @@ time_t	announceTimeT = 0,
 		char msg[REMINDER_MESSAGE_MAXLEN];
 		memset(msg, 0, sizeof(msg));
 		strncpy(msg, request->ParameterList["msg"].c_str(),REMINDER_MESSAGE_MAXLEN-1);
+		data=msg;
+	}
+	else if(type==CTimerd::TIMER_EXEC_PLUGIN)
+	{
+		char msg[EXEC_PLUGIN_MESSAGE_MAXLEN];
+		memset(msg, 0, sizeof(msg));
+		strncpy(msg, request->ParameterList["PluginName"].c_str(),EXEC_PLUGIN_MESSAGE_MAXLEN-1);
 		data=msg;
 	}
 	Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep);

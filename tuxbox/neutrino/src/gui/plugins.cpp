@@ -117,7 +117,7 @@ void CPlugins::scanDir(const char *dir)
 			new_plugin.cfgfile.append(".cfg");
 			parseCfg(&new_plugin);
 			new_plugin.pluginfile = fname;
-			if (new_plugin.type == PLUGIN_TYPE_SCRIPT)
+			if (new_plugin.type == CPlugins::P_TYPE_SCRIPT)
 			{
 				new_plugin.pluginfile.append(".sh");
 			} else {
@@ -175,7 +175,7 @@ void CPlugins::parseCfg(plugin *plugin_data)
 	plugin_data->showpig = false;
 	plugin_data->needoffset = false;
 	plugin_data->hide = false;
-	plugin_data->type = PLUGIN_TYPE_DISABLED;
+	plugin_data->type = CPlugins::P_TYPE_DISABLED;
 
 	for (int i = 0; i < linecount; i++)
 	{
@@ -204,7 +204,7 @@ void CPlugins::parseCfg(plugin *plugin_data)
 		}
 		else if (cmd == "type")
 		{
-			plugin_data->type = (plugin_type_t)atoi(parm.c_str());
+			plugin_data->type = getPluginType(atoi(parm.c_str()));
 		}
 		else if (cmd == "needfb")
 		{
@@ -265,6 +265,9 @@ void CPlugins::startPlugin(const char * const name)
 	int pluginnr = find_plugin(name);
 	if (pluginnr > -1)
 		startPlugin(pluginnr);
+	else 
+		printf("[CPlugins] could not find %s\n", name);
+
 }
 
 void CPlugins::startScriptPlugin(int number)
@@ -300,7 +303,7 @@ void CPlugins::startPlugin(int number)
 	// always delete old output
 	delScriptOutput();
 
-	if (plugin_list[number].type == PLUGIN_TYPE_SCRIPT)
+	if (plugin_list[number].type == CPlugins::P_TYPE_SCRIPT)
 	{
 		startScriptPlugin(number);
 		return;
@@ -490,7 +493,7 @@ void CPlugins::startPlugin(int number)
 	}
 }
 
-bool CPlugins::hasPlugin(plugin_type_t type)
+bool CPlugins::hasPlugin(CPlugins::p_type_t type)
 {
 	for (std::vector<plugin>::iterator it=plugin_list.begin();
 		 it!=plugin_list.end();it++)
@@ -509,6 +512,27 @@ const std::string& CPlugins::getScriptOutput() const
 void CPlugins::delScriptOutput()
 {
 	scriptOutput.clear();
+}
+
+CPlugins::p_type_t CPlugins::getPluginType(int type)
+{
+	switch (type)
+	{
+		case PLUGIN_TYPE_DISABLED:
+			return P_TYPE_DISABLED;
+			break;
+		case PLUGIN_TYPE_GAME:
+			return P_TYPE_GAME;
+			break;
+		case PLUGIN_TYPE_TOOL:
+			return P_TYPE_TOOL;
+			break;
+		case PLUGIN_TYPE_SCRIPT:
+			return P_TYPE_SCRIPT;
+			break;
+		default:
+			return P_TYPE_DISABLED;
+	}
 }
 
 

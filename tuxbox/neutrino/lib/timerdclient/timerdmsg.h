@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.7 2004/04/21 19:30:23 zwen Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.8 2004/12/18 17:46:25 chakazulu Exp $
  *
  * types used for clientlib <-> timerd communication - d-box2 linux project
  *
@@ -89,6 +89,11 @@ class CTimerdMsg : public CBasicMessage
 		char message[REMINDER_MESSAGE_MAXLEN];
 	};
 
+	struct commandExecPlugin
+	{
+		char name[EXEC_PLUGIN_MESSAGE_MAXLEN];
+	};
+
 	struct commandSetAPid
 	{
 		int   eventID;
@@ -138,6 +143,7 @@ class CTimerdMsg : public CBasicMessage
 	{
 		bool status;
 	};
+
 };
 
 #endif /* __timerdmsg_h__ */

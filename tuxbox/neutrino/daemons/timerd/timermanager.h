@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.39 2004/04/21 16:56:56 zwen Exp $
+	$Id: timermanager.h,v 1.40 2004/12/18 17:46:25 chakazulu Exp $
 
 	License: GPL
 
@@ -179,6 +179,20 @@ class CTimerEvent_Remind : public CTimerEvent
 			   const char * const msg,
 			   CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 	CTimerEvent_Remind(CConfigFile *config, int iId);
+	virtual void fireEvent();
+	virtual void saveToConfig(CConfigFile *config);
+};
+
+class CTimerEvent_ExecPlugin : public CTimerEvent
+{
+ public:
+	char name[EXEC_PLUGIN_MESSAGE_MAXLEN];
+
+	CTimerEvent_ExecPlugin(time_t announceTime,
+						   time_t alarmTime, 
+						   const char * const plugin,
+						   CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
+	CTimerEvent_ExecPlugin(CConfigFile *config, int iId);
 	virtual void fireEvent();
 	virtual void saveToConfig(CConfigFile *config);
 };

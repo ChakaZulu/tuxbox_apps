@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.42 2004/04/21 19:30:23 zwen Exp $
+	$Id: timerdclient.h,v 1.43 2004/12/18 17:46:25 chakazulu Exp $
 
 	License: GPL
 
@@ -55,7 +55,8 @@ class CTimerdClient:private CBasicClient
 			EVT_ANNOUNCE_RECORD,
 			EVT_ANNOUNCE_SLEEPTIMER,
 			EVT_SLEEPTIMER,
-			EVT_REMIND
+			EVT_REMIND,
+			EVT_EXEC_PLUGIN
 		};
 
 		void registerEvent(unsigned int eventID, unsigned int clientID, const char * const udsName);

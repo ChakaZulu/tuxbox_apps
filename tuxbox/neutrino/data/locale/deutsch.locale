@@ -805,6 +805,7 @@ timerlist.modetv TV Kanäle
 timerlist.modify Bearbeiten
 timerlist.name Timerliste
 timerlist.new Neuer Timer
+timerlist.plugin Plugin
 timerlist.program.unknown Programm unbekannt
 timerlist.reload Aktualisieren
 timerlist.repeat Wiederholung
@@ -830,6 +831,7 @@ timerlist.standby.off Aufwachen aus Standby
 timerlist.standby.on Auf Standby gehen
 timerlist.stoptime Stoppzeit
 timerlist.type Timertyp
+timerlist.type.execplugin Plugin ausführen
 timerlist.type.nextprogram Nächstes Programm
 timerlist.type.record Aufnahme
 timerlist.type.remind Erinnerung

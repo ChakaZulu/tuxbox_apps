@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.58 2004/02/24 23:34:52 thegoodguy Exp $
+	$Id: webdbox.cpp,v 1.59 2004/12/18 17:46:24 chakazulu Exp $
 
 	License: GPL
 
@@ -297,6 +297,9 @@ void CWebDbox::timerEventType2Str(CTimerd::CTimerEventTypes type, char *str, int
 		break;
 	case CTimerd::TIMER_REMIND:
 		strncpy(str, "Erinnerung", len);
+		break;
+	case CTimerd::TIMER_EXEC_PLUGIN:
+		strncpy(str, "Plugin ausführen", len);
 		break;
 	case CTimerd::TIMER_SLEEPTIMER:
 		strncpy(str, "Sleeptimer", len);

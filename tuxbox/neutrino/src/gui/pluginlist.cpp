@@ -33,6 +33,8 @@
 #include <config.h>
 #endif
 
+#include <plugin.h>
+
 #include <gui/pluginlist.h>
 #include <gui/widget/messagebox.h>
 #include <gui/widget/icons.h>
@@ -68,7 +70,7 @@
 extern CPlugins       * g_PluginList;    /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
-CPluginList::CPluginList(const neutrino_locale_t Name, plugin_type_t listtype)
+CPluginList::CPluginList(const neutrino_locale_t Name, const uint listtype)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
@@ -102,7 +104,6 @@ CPluginList::~CPluginList()
 	pluginlist.clear();
 }
 
-
 int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	neutrino_msg_t      msg;
@@ -128,7 +129,7 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 
 	for(unsigned int count=0;count < (unsigned int)g_PluginList->getNumberOfPlugins();count++)
 	{
-		if (g_PluginList->getType(count) == pluginlisttype && !g_PluginList->isHidden(count))
+		if ((g_PluginList->getType(count) & pluginlisttype) && !g_PluginList->isHidden(count))
 		{
 			tmp = new pluginitem();
 			tmp->number = count;
@@ -217,7 +218,10 @@ int CPluginList::exec(CMenuTarget* parent, const std::string & actionKey)
 			}
 			else
 			{//exec the plugin :))
-				runPlugin( selected );
+				if (pluginSelected() == close)
+				{
+					loop=false;
+				}
 			}
 		}
 		else if( (msg== CRCInput::RC_red) ||
@@ -289,11 +293,11 @@ void CPluginList::paintHead()
 	else
 		frameBuffer->paintBoxRel(x,y, width+15,theight, COL_MENUHEAD_PLUS_0);
 
-	if(pluginlisttype == PLUGIN_TYPE_GAME)
+	if(pluginlisttype == CPlugins::P_TYPE_GAME)
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_GAMES,x+8,y+5);
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+38,y+theight+1, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
-	} else if (pluginlisttype == PLUGIN_TYPE_SCRIPT)
+	} else if (pluginlisttype == CPlugins::P_TYPE_SCRIPT)
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_SHELL,x+8,y+5);
 		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+38,y+theight+1, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
@@ -341,9 +345,9 @@ void CPluginList::paintItems()
 	}
 }
 
-void CPluginList::runPlugin(int selected )
+CPluginList::result_ CPluginList::pluginSelected()
 {
-	g_PluginList->startPlugin( pluginlist[selected]->number );
+	g_PluginList->startPlugin(pluginlist[selected]->number);
 	if (!g_PluginList->getScriptOutput().empty())
 	{
 		hide();
@@ -351,4 +355,17 @@ void CPluginList::runPlugin(int selected )
 				   CMessageBox::mbrBack,CMessageBox::mbBack,NEUTRINO_ICON_SHELL);
 	}
 	paint();
+	return resume;
 }
+
+CPluginChooser::CPluginChooser(const neutrino_locale_t Name, const uint listtype, char* pluginname)
+	: CPluginList(Name, listtype), selected_plugin(pluginname)
+{
+}
+
+CPluginList::result_ CPluginChooser::pluginSelected()
+{
+	strcpy(selected_plugin,g_PluginList->getFileName(pluginlist[selected]->number));
+	return CPluginList::close;
+}
+

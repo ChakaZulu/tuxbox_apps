@@ -767,6 +767,7 @@ timerlist.modetv TV channels
 timerlist.modify Modify
 timerlist.name Timer list
 timerlist.new New timer
+timerlist.plugin Plugin
 timerlist.program.unknown Program unknown
 timerlist.reload Reload
 timerlist.repeat Repeat
@@ -791,6 +792,7 @@ timerlist.standby SB mode
 timerlist.standby.off Leave standby
 timerlist.standby.on Enter standby
 timerlist.stoptime Stop time
+timerlist.type.execplugin Execute plugin
 timerlist.type Timer typ
 timerlist.type.nextprogram Next program
 timerlist.type.record Record

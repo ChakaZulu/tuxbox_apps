@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.32 2004/12/17 14:52:31 diemade Exp $
+ * $Id: locals_intern.h,v 1.33 2004/12/18 17:46:28 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -832,6 +832,7 @@ const char * locale_real_names[] =
 	"timerlist.modify",
 	"timerlist.name",
 	"timerlist.new",
+	"timerlist.plugin",
 	"timerlist.program.unknown",
 	"timerlist.reload",
 	"timerlist.repeat",
@@ -857,6 +858,7 @@ const char * locale_real_names[] =
 	"timerlist.standby.on",
 	"timerlist.stoptime",
 	"timerlist.type",
+	"timerlist.type.execplugin",
 	"timerlist.type.nextprogram",
 	"timerlist.type.record",
 	"timerlist.type.remind",

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.73 2004/04/21 17:05:37 zwen Exp $
+   $Id: timermanager.cpp,v 1.74 2004/12/18 17:46:25 chakazulu Exp $
 
 	License: GPL
 
@@ -454,6 +454,27 @@ void CTimerManager::loadEventsFromConfig()
 					{
 						CTimerEvent_Remind *event=
 						new CTimerEvent_Remind(&config, savedIDs[i]);
+						if((event->alarmTime >= now) || (event->stopTime > now))
+						{
+							addEvent(event,false);
+						}
+						else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
+						{
+							// old periodic timers need to be rescheduled
+							event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
+							addEvent(event,false);
+						}
+						else
+						{
+							dprintf("Timer too old %d/%d\n",(int)now,(int) event->alarmTime);
+							delete event;
+						}
+						break;
+					}
+				case CTimerd::TIMER_EXEC_PLUGIN :
+					{
+						CTimerEvent_ExecPlugin *event=
+						new CTimerEvent_ExecPlugin(&config, savedIDs[i]);
 						if((event->alarmTime >= now) || (event->stopTime > now))
 						{
 							addEvent(event,false);
@@ -1116,5 +1137,44 @@ void CTimerEvent_Remind::saveToConfig(CConfigFile *config)
 	ostr << eventID;
 	std::string id=ostr.str();
 	config->setString("MESSAGE_"+id,message);
+}
+//=============================================================
+// ExecPlugin Event
+//=============================================================
+CTimerEvent_ExecPlugin::CTimerEvent_ExecPlugin(time_t announceTime,
+				       time_t alarmTime, 
+				       const char * const plugin,
+				       CTimerd::CTimerEventRepeat evrepeat) :
+CTimerEvent(CTimerd::TIMER_EXEC_PLUGIN, announceTime, alarmTime, (time_t) 0, evrepeat)
+{
+	memset(name, 0, sizeof(name));
+	strncpy(name, plugin, sizeof(name)-1);
+}
+//------------------------------------------------------------
+CTimerEvent_ExecPlugin::CTimerEvent_ExecPlugin(CConfigFile *config, int iId):
+CTimerEvent(CTimerd::TIMER_EXEC_PLUGIN, config, iId)
+{
+	std::stringstream ostr;
+	ostr << iId;
+	std::string id=ostr.str();
+	strcpy(name, config->getString("NAME_"+id).c_str());
+}
+//------------------------------------------------------------
+void CTimerEvent_ExecPlugin::fireEvent()
+{
+	CTimerManager::getInstance()->getEventServer()->sendEvent(
+		CTimerdClient::EVT_EXEC_PLUGIN,
+		CEventServer::INITID_TIMERD,
+		name,EXEC_PLUGIN_MESSAGE_MAXLEN);
+}
+
+//------------------------------------------------------------
+void CTimerEvent_ExecPlugin::saveToConfig(CConfigFile *config)
+{
+	CTimerEvent::saveToConfig(config);
+	std::stringstream ostr;
+	ostr << eventID;
+	std::string id=ostr.str();
+	config->setString("NAME_"+id,name);
 }
 //=============================================================

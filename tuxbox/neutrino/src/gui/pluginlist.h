@@ -37,13 +37,18 @@
 #include <driver/framebuffer.h>
 #include <system/localize.h>
 
-#include <plugin.h>
-
 #include <string>
 #include <vector>
 
 class CPluginList : public CMenuTarget
 {
+
+	public:
+		enum result_
+		{
+			close  = 0,
+			resume = 1,
+		} result;
 
 	private:
 
@@ -58,11 +63,9 @@ class CPluginList : public CMenuTarget
 
 		unsigned int	    liststart;
 		unsigned int	    listmaxshow;
-		unsigned int	    selected;
 		int		    key;
 		neutrino_locale_t   name;
-		std::vector<pluginitem *> pluginlist;
-		plugin_type_t pluginlisttype;
+		uint pluginlisttype;
 
 		int		fheight; // Fonthoehe Channellist-Inhalt
 		int		theight; // Fonthoehe Channellist-Titel
@@ -79,15 +82,32 @@ class CPluginList : public CMenuTarget
 		void paint();
 		void paintHead();
 
-	public:
+	protected:
 
-		CPluginList(const neutrino_locale_t Name, plugin_type_t listtype);
-		~CPluginList();
+		unsigned int selected;
+		std::vector<pluginitem *> pluginlist;
+
+		virtual CPluginList::result_ pluginSelected();
+
+	public:
+	
+		CPluginList(const neutrino_locale_t Name, const uint listtype);
+		virtual ~CPluginList();
 
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);
-		void runPlugin(int selected );
 };
 
+class CPluginChooser : public CPluginList
+{
+	private:
+	char* selected_plugin;
+	protected:
+	
+	CPluginList::result_ pluginSelected();
+
+	public:
+	CPluginChooser(const neutrino_locale_t Name, const uint listtype, char* pluginname);
+};
 
 #endif

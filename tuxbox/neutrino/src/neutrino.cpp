@@ -1324,7 +1324,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_TVMODE, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true);
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_RADIOMODE, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCARTMODE, true, NULL, this, "scart", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CPluginList(LOCALE_MAINMENU_GAMES,PLUGIN_TYPE_GAME), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CPluginList(LOCALE_MAINMENU_GAMES,CPlugins::P_TYPE_GAME), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::RC_1));
 
@@ -1350,8 +1350,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, CRCInput::RC_3));
 	int shortcut = 4;
-	if (g_PluginList->hasPlugin(PLUGIN_TYPE_SCRIPT))
-		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,PLUGIN_TYPE_SCRIPT), "",
+	if (g_PluginList->hasPlugin(CPlugins::P_TYPE_SCRIPT))
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "",
 											CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 	
@@ -2742,7 +2742,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
 	{
-		if (g_PluginList->getType(count)== PLUGIN_TYPE_TOOL && !g_PluginList->isHidden(count))
+		if (g_PluginList->getType(count)== CPlugins::P_TYPE_TOOL && !g_PluginList->isHidden(count))
 		{
 			// zB vtxt-plugins
 
@@ -3051,6 +3051,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Timerd->registerEvent(CTimerdClient::EVT_SLEEPTIMER, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_ANNOUNCE_SLEEPTIMER, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_REMIND, 222, NEUTRINO_UDS_NAME);
+	g_Timerd->registerEvent(CTimerdClient::EVT_EXEC_PLUGIN, 222, NEUTRINO_UDS_NAME);
 
 	if (display_language_selection)
 		languageSettings.exec(NULL, "");
@@ -3734,6 +3735,13 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	else if (msg == NeutrinoMessages::EVT_START_PLUGIN)
 	{
 		g_PluginList->startPlugin((const char *)data);
+		std::string output = g_PluginList->getScriptOutput();
+		if (!g_PluginList->getScriptOutput().empty())
+		{
+			ShowMsgUTF(LOCALE_PLUGINS_RESULT, Latin1_to_UTF8(g_PluginList->getScriptOutput()),
+					   CMessageBox::mbrBack,CMessageBox::mbBack,NEUTRINO_ICON_SHELL);
+		}
+
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}

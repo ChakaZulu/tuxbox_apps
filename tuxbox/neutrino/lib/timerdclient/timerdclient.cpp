@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.49 2004/06/21 19:55:07 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.50 2004/12/18 17:46:25 chakazulu Exp $
 
 	License: GPL
 
@@ -221,7 +221,7 @@ int CTimerdClient::addTimerEvent( CTimerEventTypes evType, void* data , int min,
 //-------------------------------------------------------------------------
 int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerd::CTimerEventRepeat evrepeat)
 {
-	CTimerd::TransferEventInfo tei;
+	CTimerd::TransferEventInfo tei; 
 	CTimerdMsg::commandAddTimer msgAddTimer;
 	msgAddTimer.alarmTime  = alarmtime;
 	msgAddTimer.announceTime = announcetime;
@@ -254,12 +254,17 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 	{
 		length = sizeof(CTimerdMsg::commandRemind);
 	}
+	else if(evType == CTimerd::TIMER_EXEC_PLUGIN)
+	{
+		length = sizeof(CTimerdMsg::commandExecPlugin);
+	}
 	else
 	{
 		length = 0;
 	}
 
 	send(CTimerdMsg::CMD_ADDTIMER, (char*)&msgAddTimer, sizeof(msgAddTimer));
+
 	if((data != NULL) && (length > 0))
 		send_data((char*)data, length);
 

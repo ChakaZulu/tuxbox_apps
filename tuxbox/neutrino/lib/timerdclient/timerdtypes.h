@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.14 2004/03/12 22:01:02 zwen Exp $
+	$Id: timerdtypes.h,v 1.15 2004/12/18 17:46:25 chakazulu Exp $
 
 	License: GPL
 
@@ -33,6 +33,7 @@
 #include <vector>
 
 #define REMINDER_MESSAGE_MAXLEN 31
+#define EXEC_PLUGIN_MESSAGE_MAXLEN 255
 #define TIMERD_APIDS_MAXLEN 50
 
 class CTimerd
@@ -59,7 +60,8 @@ class CTimerd
 			TIMER_RECORD,
 			TIMER_REMIND,
 			TIMER_SLEEPTIMER,
-			TIMER_IMMEDIATE_RECORD
+			TIMER_EXEC_PLUGIN,
+ 			TIMER_IMMEDIATE_RECORD
 		};
 		
 		enum CTimerEventStates 
@@ -132,6 +134,7 @@ class CTimerd
 			char              apids[TIMERD_APIDS_MAXLEN];       //only filled if applicable
 			bool              standby_on;                       //only filled if applicable
 			char              message[REMINDER_MESSAGE_MAXLEN]; //only filled if applicable
+			char              pluginName[EXEC_PLUGIN_MESSAGE_MAXLEN]; //only filled if applicable
 			bool operator< (const responseGetTimer& a) const
 			{
 				return this->alarmTime < a.alarmTime ;

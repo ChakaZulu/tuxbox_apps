@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.55 2004/04/21 16:56:56 zwen Exp $
+	$Id: timerd.cpp,v 1.56 2004/12/18 17:46:25 chakazulu Exp $
 
 	License: GPL
 
@@ -127,6 +127,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						memset(resp.message, 0, sizeof(resp.message));
 						strncpy(resp.message, static_cast<CTimerEvent_Remind*>(event)->message, sizeof(resp.message)-1);
 					}
+					else if (event->eventType == CTimerd::TIMER_EXEC_PLUGIN)
+					{
+						memset(resp.pluginName, 0, sizeof(resp.pluginName));
+						strncpy(resp.pluginName, static_cast<CTimerEvent_ExecPlugin*>(event)->name, sizeof(resp.message)-1);						
+					}
 				}
 			}
 			CBasicServer::send_data(connfd, &resp, sizeof(CTimerd::responseGetTimer));
@@ -181,6 +186,10 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					{
 						strcpy(resp.message, static_cast<CTimerEvent_Remind*>(event)->message);
 					}
+					else if(event->eventType == CTimerd::TIMER_EXEC_PLUGIN)
+					{
+						strcpy(resp.pluginName, static_cast<CTimerEvent_ExecPlugin*>(event)->name);
+					}
 					CBasicServer::send_data(connfd, &resp, sizeof(CTimerd::responseGetTimer));
 				}
 			}
@@ -200,7 +209,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			{
 				CBasicServer::receive_data(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
 				int ret=CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime,
-																				  msgModifyTimer.eventRepeat);
+																  msgModifyTimer.eventRepeat);
 				CTimerdMsg::responseStatus rspStatus;
 				rspStatus.status = (ret!=0);
 				CBasicServer::send_data(connfd, &rspStatus, sizeof(rspStatus));
@@ -333,7 +342,17 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 								       msgAddTimer.eventRepeat);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
-
+					
+				case CTimerd::TIMER_EXEC_PLUGIN :
+					CTimerdMsg::commandExecPlugin pluginMsg;
+					CBasicServer::receive_data(connfd, &pluginMsg, sizeof(CTimerdMsg::commandExecPlugin));
+					dprintf("TIMERD: exec : %s",pluginMsg.name);
+					event = new CTimerEvent_ExecPlugin(msgAddTimer.announceTime,
+													   msgAddTimer.alarmTime,
+													   pluginMsg.name,
+													   msgAddTimer.eventRepeat);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
+					break;
 				default:
 					printf("[timerd] Unknown TimerType\n");
 			}
