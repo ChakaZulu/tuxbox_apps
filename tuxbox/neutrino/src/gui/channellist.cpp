@@ -497,7 +497,7 @@ void CChannelList::zapTo(int pos)
 {
 	if (chanlist.size() == 0)
 	{
-		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
+		ShowMsg("messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw", 450, -1, true); // UTF-8
 		return;
 	}
 	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
@@ -526,7 +526,7 @@ int CChannelList::numericZap(int key)
 
 	if(chanlist.size()==0)
 	{
-		ShowMsg ( "messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
+		ShowMsg("messagebox.error", g_Locale->getText("channellist.nonefound"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw", 450, -1, true); // UTF-8
 		return res;
 	}
 
@@ -714,19 +714,19 @@ void CChannelList::paintDetails(int index)
 		// löschen
 		frameBuffer->paintBoxRel(x, y+ height, width, info_height, COL_MENUCONTENTDARK);
 
-		char cNoch[50];
-		char cSeit[50];
+		char cNoch[50]; // UTF-8
+		char cSeit[50]; // UTF-8
 
-        struct		tm *pStartZeit = localtime(&chanlist[index]->currentEvent.startTime);
-        unsigned 	seit = ( time(NULL) - chanlist[index]->currentEvent.startTime ) / 60;
-        sprintf( cSeit, g_Locale->getText("channellist.since").c_str(), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
-        int seit_len= g_Fonts->channellist_descr->getRenderWidth(cSeit);
+		struct		tm *pStartZeit = localtime(&chanlist[index]->currentEvent.startTime);
+		unsigned 	seit = ( time(NULL) - chanlist[index]->currentEvent.startTime ) / 60;
+		sprintf( cSeit, g_Locale->getText("channellist.since").c_str(), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
+		int seit_len = g_Fonts->channellist_descr->getRenderWidth(cSeit, true); // UTF-8
 
-        int noch = ( chanlist[index]->currentEvent.startTime + chanlist[index]->currentEvent.duration - time(NULL)   ) / 60;
-        if ( (noch< 0) || (noch>=10000) )
-        	noch= 0;
-        sprintf( cNoch, "(%d / %d min)", seit, noch );
-        int noch_len= g_Fonts->channellist_number->getRenderWidth(cNoch);
+		int noch = ( chanlist[index]->currentEvent.startTime + chanlist[index]->currentEvent.duration - time(NULL)   ) / 60;
+		if ( (noch< 0) || (noch>=10000) )
+			noch= 0;
+		sprintf( cNoch, "(%d / %d min)", seit, noch );
+		int noch_len = g_Fonts->channellist_number->getRenderWidth(cNoch, true); // UTF-8
 
 		string text1= chanlist[index]->currentEvent.description;
 		string text2= chanlist[index]->currentEvent.text;
@@ -760,9 +760,8 @@ void CChannelList::paintDetails(int index)
 		}
 
 		g_Fonts->channellist->RenderString(x+ 10, y+ height+ 5+ fheight, width - 30 - seit_len, text1.c_str(), COL_MENUCONTENTDARK);
-		g_Fonts->channellist_descr->RenderString(x+ width- 10- seit_len, y+ height+ 5+ fheight, seit_len, cSeit, COL_MENUCONTENTDARK);
-
-		g_Fonts->channellist_number->RenderString(x+ width- 10- noch_len, y+ height+ 5+ 2* fheight- 2, noch_len, cNoch, COL_MENUCONTENTDARK);
+		g_Fonts->channellist_descr->RenderString (x+ width- 10- seit_len, y+ height+ 5+    fheight   , seit_len, cSeit, COL_MENUCONTENTDARK, 0, true); // UTF-8
+		g_Fonts->channellist_number->RenderString(x+ width- 10- noch_len, y+ height+ 5+ 2* fheight- 2, noch_len, cNoch, COL_MENUCONTENTDARK, 0, true); // UTF-8
 	}
 }
 

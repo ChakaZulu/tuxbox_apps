@@ -91,7 +91,6 @@ void CLocaleManager::loadLocale(std::string locale)
 	localeData.clear();
 
 	char buf[1000];
-	char keystr[1000];
 	char valstr[1000];
 
 	while(!feof(fd))
@@ -99,7 +98,6 @@ void CLocaleManager::loadLocale(std::string locale)
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
 			char* tmpptr=buf;
-			char* key= (char*) &keystr;
 			char* val= (char*) &valstr;
 			bool keyfound = false;
 			for(; (*tmpptr!=10) && (*tmpptr!=13);tmpptr++)
@@ -107,15 +105,11 @@ void CLocaleManager::loadLocale(std::string locale)
 				if((*tmpptr==' ') && (!keyfound))
 				{
 					keyfound=true;
+					*tmpptr = 0;
 				}
 				else
 				{
-					if(!keyfound)
-					{
-						*key = *tmpptr;
-						key++;
-					}
-					else
+					if (keyfound)
 					{
 						*val = *tmpptr;
 						val++;
@@ -123,7 +117,6 @@ void CLocaleManager::loadLocale(std::string locale)
 				}
 			}
 			*val = 0;
-			*key = 0;
 
 			std::string text= valstr;
 
@@ -137,60 +130,61 @@ void CLocaleManager::loadLocale(std::string locale)
 				}
 			} while ( ( pos != -1 ) );
 
-#warning NFS/CIFS is missing in locales and should be UTF-8 encoded 
+#warning cam.wrong is defined as locale but never used
+#warning dhcp     is missing in locales (used in neutrino.cpp)
+#warning NFS/CIFS is missing in locales (used in neutrino.cpp)
 			if (
-			    (strncmp(keystr, "apidselector", 12) != 0) &&
-			    (strncmp(keystr, "audiomenu", 9) != 0) &&
-			    (strncmp(keystr, "bouqueteditor", 13) != 0) &&
-			    (strncmp(keystr, "cab", 3) != 0) &&
-			    (strncmp(keystr, "co", 2) != 0) &&
-			    (strncmp(keystr, "file", 4) != 0) &&
-			    (strncmp(keystr, "fontmenu", 8) != 0) &&
-			    (strncmp(keystr, "fontsize", 8) != 0) &&
-			    (strncmp(keystr, "k", 1) != 0) &&
-			    (strncmp(keystr, "languagesetup", 13) != 0) &&
-			    (strncmp(keystr, "lcdcontroler", 12) != 0) &&
-			    (strncmp(keystr, "lcdmenu", 7) != 0) &&
-			    (strncmp(keystr, "mainmenu", 8) != 0) &&
-			    (strncmp(keystr, "messagebox", 10) != 0) &&
-			    (strncmp(keystr, "miscsettings", 12) != 0) &&
-			    (strncmp(keystr, "mp3", 3) != 0) &&
-			    (strncmp(keystr, "n", 1) != 0) &&
-			    (strncmp(keystr, "o", 1) != 0) &&
-			    (strncmp(keystr, "parentallock", 12) != 0) &&
-			    (strncmp(keystr, "pictureviewer", 13) != 0) &&
-			    (strncmp(keystr, "recordingmenu", 13) != 0) &&
-			    (strncmp(keystr, "satsetup", 8) != 0) &&
-			    (strncmp(keystr, "scants", 6) != 0) &&
-			    (strncmp(keystr, "streamfeatures", 14) != 0) &&
-			    (strncmp(keystr, "streaminfo", 10) != 0) &&
-			    (strncmp(keystr, "streamingmenu", 13) != 0) &&
-			    (strncmp(keystr, "timersettings", 13) != 0) &&
-			    (strncmp(keystr, "timing", 6) != 0) &&
-			    (strncmp(keystr, "v", 1) != 0) &&
-			    ((strncmp(keystr, "flashupdate", 11) != 0) || 
-			     ((strcmp(keystr, "flashupdate.actionreadflash") == 0) ||
-			      (strcmp(keystr, "flashupdate.getinfofile") == 0) ||
-			      (strcmp(keystr, "flashupdate.getupdatefile") == 0) ||
-			      (strcmp(keystr, "flashupdate.md5check") == 0) ||
-			      (strncmp(keystr, "flashupdate.msgbox", 18) == 0) ||
-			      (strcmp(keystr, "flashupdate.ready") == 0) ||
-			      (strcmp(keystr, "flashupdate.reallyflashmtd") == 0) ||
-			      (strcmp(keystr, "flashupdate.savesuccess") == 0) ||
-			      (strcmp(keystr, "flashupdate.versioncheck") == 0))) &&
-			    ((strncmp(keystr, "mainsettings", 12) != 0) || (strcmp(keystr, "mainsettings.savesettingsnow_hint") == 0)) &&
-			    ((strncmp(keystr, "servicemenu", 11) != 0) || (strcmp(keystr, "servicemenu.reload_hint") == 0)) &&
-			    ((strncmp(keystr, "timerlist", 9) != 0) || (strncmp(keystr, "timerlist.weekdays.hint", 23) == 0)) &&
-			    (strcmp(keystr, "bouquetlist.head") != 0) &&
-			    (strcmp(keystr, "channellist.head") != 0) &&
-			    (strcmp(keystr, "dhcp") != 0) &&
-			    (strcmp(keystr, "epglist.head") != 0) &&
-			    (strcmp(keystr, "menu.back") != 0) &&
-			    (strcmp(keystr, "sleeptimerbox.title") != 0) &&
-			    (strcmp(keystr, "ucodecheck.head") != 0)
+			    (strncmp(buf, "apidselector", 12) != 0) &&
+			    (strncmp(buf, "audiomenu", 9) != 0) &&
+			    (strncmp(buf, "bouqueteditor", 13) != 0) &&
+			    (buf[0] != 'c') &&
+			    (strncmp(buf, "file", 4) != 0) &&
+			    (strncmp(buf, "fontmenu", 8) != 0) &&
+			    (strncmp(buf, "fontsize", 8) != 0) &&
+			    (buf[0] != 'k') &&
+			    (strncmp(buf, "languagesetup", 13) != 0) &&
+			    (strncmp(buf, "lcdcontroler", 12) != 0) &&
+			    (strncmp(buf, "lcdmenu", 7) != 0) &&
+			    (strncmp(buf, "mainmenu", 8) != 0) &&
+			    (strncmp(buf, "messagebox", 10) != 0) &&
+			    (strncmp(buf, "miscsettings", 12) != 0) &&
+			    (strncmp(buf, "mp3", 3) != 0) &&
+			    (buf[0] != 'n') &&
+			    (buf[0] != 'o') &&
+			    (strncmp(buf, "parentallock", 12) != 0) &&
+			    (strncmp(buf, "pictureviewer", 13) != 0) &&
+			    (strncmp(buf, "recordingmenu", 13) != 0) &&
+			    (strncmp(buf, "satsetup", 8) != 0) &&
+			    (strncmp(buf, "scants", 6) != 0) &&
+			    (strncmp(buf, "streamfeatures", 14) != 0) &&
+			    (strncmp(buf, "streaminfo", 10) != 0) &&
+			    (strncmp(buf, "streamingmenu", 13) != 0) &&
+			    (strncmp(buf, "timersettings", 13) != 0) &&
+			    (strncmp(buf, "timing", 6) != 0) &&
+			    (buf[0] != 'v') &&
+			    ((strncmp(buf, "flashupdate", 11) != 0) || 
+			     ((strcmp(buf, "flashupdate.actionreadflash") == 0) ||
+			      (strcmp(buf, "flashupdate.getinfofile") == 0) ||
+			      (strcmp(buf, "flashupdate.getupdatefile") == 0) ||
+			      (strcmp(buf, "flashupdate.md5check") == 0) ||
+			      (strncmp(buf, "flashupdate.msgbox", 18) == 0) ||
+			      (strcmp(buf, "flashupdate.ready") == 0) ||
+			      (strcmp(buf, "flashupdate.reallyflashmtd") == 0) ||
+			      (strcmp(buf, "flashupdate.savesuccess") == 0) ||
+			      (strcmp(buf, "flashupdate.versioncheck") == 0))) &&
+			    ((strncmp(buf, "mainsettings", 12) != 0) || (strcmp(buf, "mainsettings.savesettingsnow_hint") == 0)) &&
+			    ((strncmp(buf, "servicemenu", 11) != 0) || (strcmp(buf, "servicemenu.reload_hint") == 0)) &&
+			    ((strncmp(buf, "timerlist", 9) != 0) || (strncmp(buf, "timerlist.weekdays.hint", 23) == 0)) &&
+			    (strcmp(buf, "bouquetlist.head") != 0) &&
+			    (strcmp(buf, "dhcp") != 0) &&
+			    (strcmp(buf, "epglist.head") != 0) &&
+			    (strcmp(buf, "menu.back") != 0) &&
+			    (strcmp(buf, "NFS/CIFS") != 0) &&
+			    (strcmp(buf, "sleeptimerbox.title") != 0) &&
+			    (strcmp(buf, "ucodecheck.head") != 0)
 			     )
 				text = CZapitClient::Utf8_to_Latin1(text);
-			localeData[keystr] = text;
+			localeData[buf] = text;
 		}
 	}
 	fclose(fd);
