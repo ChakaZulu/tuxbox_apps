@@ -86,11 +86,42 @@ function deleteMovie(xy)
 		else
 		{
 			var selChannel = document.channelselector.channel.selectedIndex;
-			var channel = document.channelselector.channel.options[selChannel].value;
-			document.location = "cgi-bin/deleteMovie?ref="+channel;
-			setTimeout("reload()", 3000);
+			var channel = "";
+			if (selChannel >= 0)
+			{
+				channel = document.channelselector.channel.options[selChannel].value;
+				document.location = "cgi-bin/deleteMovie?ref="+channel;
+				setTimeout("reload()", 3000);
+			}
+			else
+				alert("Please select a movie first!");
 		}
 	}
+}
+
+function downloadMovie()
+{
+	if (window.screen.width >= 800)
+	{
+		var selChannel = document.channelselector.channel.selectedIndex;
+		if (selChannel >= 0)
+		{
+			var channel = document.channelselector.channel.options[selChannel].value;
+			var pos = channel.indexOf("%2f");
+			if (pos >= 0)
+			{
+				var fileName = channel.substr(pos + 3, channel.length - pos - 3);
+				alert("downloading:"+fileName);
+				document.location = "/rootX/" + fileName;
+			}
+			else 
+				alert("Sorry, no valid filename");
+		}
+		else
+			alert("Please select a movie first!");
+	}
+	else
+		alert("Movie download is not supported on this device.");
 }
 
 function recoverMovies()
@@ -123,7 +154,7 @@ function admin(xy)
 
 function openSI()
 {
-	NewWindow("cgi-bin/streaminfo", "si", "310", "300", "no");
+	NewWindow("cgi-bin/streaminfo", "si", "320", "300", "no");
 }
 
 function openChannelInfo()
@@ -170,12 +201,6 @@ function configSwapFile()
 	if (swapfileconfig.swap.checked)
 		activate = "on";
 	document.location = "cgi-bin/setConfigSwapFile?swap="+activate+"&swapfile="+swapfileconfig.swapfile.value;
-	setTimeout("reload()", 500);
-}
-
-function selectImage(image)
-{
-	document.location = "cgi-bin/setConfigMultiBoot?image="+image;
 	setTimeout("reload()", 500);
 }
 

@@ -15,7 +15,15 @@
 		}
 		function video(key)
 		{
-			document.location = "cgi-bin/videocontrol?command=" + key;
+			var selChannel = document.channelselector.channel.selectedIndex;
+			var channel = "";
+			if (selChannel >= 0)
+			{
+				channel = document.channelselector.channel.options[selChannel].value;
+				document.location = "cgi-bin/videocontrol?command=" + key + "&sref=" + channel;
+			}
+			else
+				alert("Please select a movie first!");
 		}
 		function updateVideoBar(playStatus, videoPosition, videoTime)
 		{
@@ -102,20 +110,22 @@
 			<table border=0 cellpadding=0 cellspacing=0>
 				<tr>
 					<td>
-						<select style="width: 0px; font-weight: bold; background-color: #F4F4F4" onChange=bouquetChange() name="bouquet" size=0></select>
+						<select style="width: 0px; font-weight: bold; background-color: #F4F4F4" name="bouquet" size=0></select>
 					</td>
 					<td>
-						<select style="width: 630px; font-weight: bold; background-color: #F4F4F4" onChange=channelChange() name="channel" size=#SELSIZE#></select>
+						<select style="width: 630px; font-weight: bold; background-color: #F4F4F4" name="channel" size=#SELSIZE#></select>
 					</td>
 				</tr>
 			</table>
 		</form>
 		<table border=0 cellpadding=0 cellspacing=0>
 			<tr>
-				<td style="width: 210px">
-					#BUTTON#
+				<td style="width: 250px">
+					<input name="delete" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #FFFFFF;" value="Delete" onClick=javascript:deleteMovie()>
+					&nbsp;
+					<input name="download" type="button" style="width: 100px; height: 22px; background-color: #1FCB12; color: #FFFFFF;" value="Download" onClick=javascript:downloadMovie()>
 				</td>
-				<td style="width: 410px" align=center>
+				<td style="width: 370px" align=center>
 					<a href="javascript:zapChannelBackward()"><img src="up.gif" border="0"></a>
 					&nbsp;&nbsp;
 					<a href="javascript:zapChannelForward()"><img src="down.gif" border="0"></a>

@@ -24,7 +24,7 @@
 			<tr>
 				<td style="width: 200px">
 					<input name="mepg" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #FFFFFF;" value="EPG-Overview" onClick=javascript:mepg()>
-			<!--input name="epg" type="button" style="width: 100px; height: 22px; background-color: #12259E" value="EPG" onClick=javascript:epg()-->
+					<!--input name="epg" type="button" style="width: 100px; height: 22px; background-color: #12259E" value="EPG" onClick=javascript:epg()-->
 				</td>
 				<td style="width: 430px" align=center>
 					<a href="javascript:zapChannelBackward()"><img src="up.gif" border="0"></a>

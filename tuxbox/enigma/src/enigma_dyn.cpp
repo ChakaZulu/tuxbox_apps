@@ -60,7 +60,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.6.0"
+#define WEBIFVERSION "2.7.0"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -500,6 +500,8 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString sReference = opt["sref"];
+	eServiceReference sref = string2ref(sReference);
 	eString command = opt["command"];
 	if (command == "rewind")
 	{
@@ -523,7 +525,10 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	else
 	if (command == "play")
 	{
-		eZapMain::getInstance()->play();
+		if (eServiceInterface::getInstance()->service == sref)
+			eZapMain::getInstance()->play();
+		else
+			playService(sref);
 	}
 
 	return closeWindow(content, "", 500);
@@ -1640,7 +1645,6 @@ static eString getZap(eString mode, eString path)
 			result = readFile(TEMPLATE_DIR + "movies.tmp");
 			result.strReplace("#ZAPDATA#", getZapContent2(mode, path, 1, false, false));
 			selsize = (screenWidth > 1024) ? 25 : 10;
-			result.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()", "#FFFFFF"));
 		}
 		else
 #endif
@@ -1652,7 +1656,6 @@ static eString getZap(eString mode, eString path)
 			{
 				result.strReplace("#ZAPDATA#", tmp);
 				selsize = (screenWidth > 1024) ? 25 : 10;
-				result.strReplace("#BUTTON#", "");
 			}
 			else
 				result = "";
