@@ -168,13 +168,13 @@ int eSkin::parseScheme(XMLTreeNode *xscheme)
 		if (strcmp(node->GetType(), "map"))
 		{
 			eDebug("illegal scheme entry found: %s", node->GetType());
-			return -1;
+			continue;
 		}
 		char *name=node->GetAttributeValue("name"), *color=node->GetAttributeValue("color");
 		if (!name || !color)
 		{
 			eDebug("no name or color specified in colorscheme");
-			return -1;
+			continue;
 		}
 		eString base=color;
 		int offset=0, p;
@@ -187,9 +187,48 @@ int eSkin::parseScheme(XMLTreeNode *xscheme)
 		if (!n)
 		{
 			eDebug("illegal color \"%s\" specified", base.c_str());
-			return -1;
+			continue;
 		}
 		scheme[name] = gColor(n->index+offset);
+	}
+	return 0;
+}
+
+int eSkin::parseFontAlias(XMLTreeNode *xscheme)
+{
+	XMLTreeNode *node;
+	for (node=xscheme->GetChild(); node; node=node->GetNext())
+	{
+		if (strcmp(node->GetType(), "font"))
+		{
+			eDebug("illegal fontalias entry found: %s", node->GetType());
+			continue;
+		}
+		char *name=node->GetAttributeValue("name"),
+				 *alias=node->GetAttributeValue("alias"),
+				 *size=node->GetAttributeValue("size");
+
+		if (!name || !alias || !size)
+		{
+			eDebug("no name, alias or size spezified in fontaliase");
+			continue;
+		}
+
+		std::map<eString, gFont>::iterator it = fontAlias.find(alias);
+		if (it != fontAlias.end())
+		{
+			eDebug("fontalias %s does exist, skip make alias for font %s", alias, name);
+			continue;
+		}
+
+		std::map<eString, eString>::iterator i = fonts.find(name);
+		if (i == fonts.end())
+		{
+			eDebug("font %s not found, skip make alias %s", name, alias);
+			continue;
+		}
+		fontAlias[alias]=gFont(i->second, atoi(size));
+		eDebug("Make Font Alias %s for Font %s with size %i", alias, name, fontAlias[alias].pointSize );
 	}
 	return 0;
 }
@@ -222,6 +261,12 @@ int eSkin::parseImages(XMLTreeNode *inode)
 			eDebug("image/img=\"%s\" no src given", name);
 			continue;
 		}
+		std::map<eString, gPixmap*>::iterator it = images.find(name);
+		if (it != images.end())
+		{
+			eDebug("Image with name %s already loaded, skip %s", name, src);
+			continue;
+		}
 		eString filename=basepath + eString(src);
 		gPixmap *image=loadPNG(filename.c_str());
 		if (!image)
@@ -235,7 +280,7 @@ int eSkin::parseImages(XMLTreeNode *inode)
 			gPainter p(mydc);
 			p.mergePalette(*paldummy);
 		}
- 		images[name]=image;
+		images[name] = image; 		
 	}
 	return 0;
 }
@@ -288,7 +333,19 @@ int eSkin::parseFonts(XMLTreeNode *xfonts)
 			eDebug("fonts entry has no file");
 			continue;
 		}
-		fontRenderClass::getInstance()->AddFont((basepath+eString(file)).c_str());
+		const char *name=node->GetAttributeValue("name");
+		if (!name)
+		{
+			eDebug("fonts entry has no name use filename %s as name", file);
+			name = file;
+		}
+		std::map<eString, eString>::iterator it = fonts.find(name);
+		if (it != fonts.end())
+		{
+			eDebug("Font with name %s already loaded, skip %s", name, file);
+			continue;
+		}
+		fonts[name]=fontRenderClass::getInstance()->AddFont((basepath+eString(file)).c_str());
 	}
 	return 0;
 }
@@ -457,6 +514,15 @@ void eSkin::parseSkins()
 		XMLTreeNode *node=it->RootNode();
 	
 		for (node=node->GetChild(); node; node=node->GetNext())
+			if (!strcmp(node->GetType(), "fontalias"))
+				parseFontAlias(node);
+	 }
+
+	for (ePtrList<XMLTreeParser>::iterator it(parsers); it != parsers.end(); it++)
+	{
+		XMLTreeNode *node=it->RootNode();
+	
+		for (node=node->GetChild(); node; node=node->GetNext())
 			if (!strcmp(node->GetType(), "images"))
 				parseImages(node);
 
@@ -533,7 +599,7 @@ gColor eSkin::queryScheme(const eString& name) const
 	if (it != scheme.end())
 		return it->second + offset;
 
-	eFatal("%s does not exist", name.c_str());
+	eDebug("%s does not exist", name.c_str());
 	
 	return gColor(0);
 }
@@ -582,4 +648,24 @@ gColor eSkin::queryColor(const eString& name)
 		return queryScheme(name);
 	} else
 		return col->index + offset;
+}
+
+const gFont& eSkin::queryFont(const eString& name)
+{
+	std::map<eString, eString>::iterator it = fonts.find(name);
+	
+	if ( it == fonts.end() )
+	{
+//		eDebug("font with alias name %s does not exist", name.c_str() );
+		static gFont g;
+		return g;
+	}
+	std::map<eString, gFont>::iterator i = fontAlias.find(it->second);
+	if ( i == fontAlias.end() )
+	{
+		eDebug("font with name %s does not exist", it->second.c_str() );
+		static gFont g;
+		return g;
+	}
+	return i->second;
 }

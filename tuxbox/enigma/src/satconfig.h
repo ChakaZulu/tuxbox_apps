@@ -18,10 +18,12 @@ public:
 
 class eSatelliteConfigurationManager: public eWindow
 {
+	eWidget *w_buttons;
 	eButton *button_close;
 	int eventFilter(const eWidgetEvent &event);
 public:
 	void okPressed();
+	bool lnbSelected(eString& str);
 public:
 	eSatelliteConfigurationManager();
 	~eSatelliteConfigurationManager();
@@ -41,12 +43,22 @@ public:
 
 class eLNBSelitor: public eWindow  // Selitor = "Sel"ector + Ed"itor" :-)
 {
-	eLNBSelitor();
 	eListBox<eListBoxEntryLNB> *lnb_list;
 	eNumber *lofH, *lofL, *lnbThreshold;
 	eButton *use; 	// use this LNB for Satelite and close LNBSelitor
 	eButton *apply; // apply changed to selected LNB
 	eButton *remove; // remove the selected LNB
+public:
+	eLNBSelitor();
+
+	void setCurrentLNB(int num)
+	{
+	}
+
+	int getCurrentLNB()
+	{
+		return 0;
+	}
 };
 
 inline eLNBSelitor::eLNBSelitor()

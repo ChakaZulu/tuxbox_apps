@@ -74,14 +74,16 @@ int eButton::eventHandler(const eWidgetEvent &event)
 		if (event.action == &i_cursorActions->ok)
 		{
 			/*emit*/ selected();
+
+			if (/*emit*/ selected_id(text) )  // description changed ?
+				invalidate();										// then redraw
 		
 			if (parent && parent->LCDElement)
 			{
-				eString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
 				if (LCDTmp)
-					LCDTmp->setText(txt);
+					LCDTmp->setText(text);
 				else
-					parent->LCDElement->setText(txt);
+					parent->LCDElement->setText(text);
 			}
 			return 1;
 		}

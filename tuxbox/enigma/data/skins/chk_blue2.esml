@@ -61,7 +61,6 @@
 	</colorscheme>
 	
 	 <values>
-	 	
 	 	<value name="eWindow.titleFontSize" value="24" />
 		<value name="eWindow.borderLeft" value="4" />
 		<value name="eWindow.borderRight" value="4" />
@@ -86,6 +85,12 @@
 		<img name="lcd_menu" src="chk_v2/lcdmenu.png" nomerge="yes" />
 		<img name="lcd_scart" src="video.png" nomerge="yes" />
 		<img name="speaker" src="chk_v2/speaker.png" nomerge="yes" />
+
+		<img name="eListBox.arrow.updown" src="chk_v2/lbarrow.png" />
+		<img name="eListBox.arrow.left" src="chk_v2/lbarrow_left.png" />
+		<img name="eListBox.arrow.right" src="chk_v2/lbarrow_right.png" />
+		<img name="eListBox.arrow.up" src="chk_v2/lbarrow_up.png" />
+		<img name="eListBox.arrow.down" src="chk_v2/lbarrow_down.png" />
 
 		<img name="eWindow.top" src="chk_v2/t.png" />
 		<img name="eWindow.topLeft" src="chk_v2/tl.png" />

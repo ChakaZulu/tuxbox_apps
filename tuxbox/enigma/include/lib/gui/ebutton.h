@@ -20,9 +20,11 @@ public:
 	/**
 	 * \brief the "selected" signal.
 	 *
-	 * This signal is emitted when OK is pressed.
+	 * This signals is emitted when OK is pressed.
 	 */
 	Signal0<void> selected;
+
+	Signal1<bool, eString&> selected_id;
 	
 	/**
 	 * \brief Constructs a button.

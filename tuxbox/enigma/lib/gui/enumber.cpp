@@ -45,6 +45,9 @@ void eNumber::redrawWidget(gPainter *p, const eRect &area)
 
 int eNumber::eventHandler(const eWidgetEvent &event)
 {
+	if (LCDTmp)
+		((eNumber*) LCDTmp)->eventHandler(event);
+
 	switch (event.type)
 	{
 	case eWidgetEvent::changedSize:
@@ -178,10 +181,10 @@ void eNumber::gotFocus()
 		}
 		((eNumber*)LCDTmp)->digit=digit;
 		((eNumber*)LCDTmp)->active=active;
-		((eNumber*)LCDTmp)->normalF=0;
-		((eNumber*)LCDTmp)->cursorF=255;
-		((eNumber*)LCDTmp)->normalB=255;
-		((eNumber*)LCDTmp)->cursorB=0;
+		((eNumber*)LCDTmp)->normalF=255;
+		((eNumber*)LCDTmp)->normalB=0;
+		((eNumber*)LCDTmp)->cursorF=0;
+		((eNumber*)LCDTmp)->cursorB=255;
 		((eNumber*)LCDTmp)->have_focus=1;
 		LCDTmp->show();
 	}

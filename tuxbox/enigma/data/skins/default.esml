@@ -41,9 +41,9 @@
 		<eWindow cposition="50:80" csize="590:400" name="title">
 			<eLabel position="10:5" size="e:e-30" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" wrap="on"/>
 			<eWidget position="0:e-30" size="600:e" />
-			<eLabel position="10:e-30" size="130:e" name="date" font="NimbusSansL-Regular Sans L Regular;18" />
-			<eLabel position="130:e-30" size="230:e" name="time" font="NimbusSansL-Regular Sans L Regular;18" />
-			<eLabel position="360:e-30" size="230:e" name="channel" font="NimbusSansL-Regular Sans L Regular;18" align="right"/>
+			<eLabel position="10:e-30" size="130:e" name="date" font="small" />
+			<eLabel position="130:e-30" size="230:e" name="time" font="small" />
+			<eLabel position="360:e-30" size="230:e" name="channel" font="small" align="right"/>
 		</eWindow>
 	</object>
 
@@ -80,10 +80,13 @@
 
 	<object name="eSatelliteConfigurationManager">
 		<eSatelliteConfigurationManager cposition="120:80" csize="500:370" text="Satellitenkonfiguration">
-			<eLabel text="DISEqC" position="70:10" size="100:30" />
-			<eLabel text="Sat/Position" position="230:10" size="280:30" />
-			<eLabel text="LNB" position="420:10" size="100:30" />
-			<eWidget name="buttons" position="50:55" size="e-10:e-10" />
+			<eLabel text="DISEqC" position="60:10" size="80:30" align="center"/>
+
+  		<eLabel text="Sat/Position" position="140:10" size="280:30" align="center"/>
+
+			<eLabel text="LNB" position="420:10" size="80:30" align="center"/>
+
+			<eWidget name="buttons" position="60:55" size="e-10:e-10" />
 			<eButton name="close" position="10:e-40" size="50:30" text="[OK]"/>
 		</eSatelliteConfigurationManager>
 	</object>
@@ -110,13 +113,11 @@
 	
 	<object name="tsAutomatic">
 		<tsAutomatic position="0:0" size="e:350">
-			<eLabel position="10:10" size="200:30" text="Antenne:" />
-			<eListbox name="lnblist" position="210:10" size="e-10:30" />
 			<eLabel position="10:40" size="200:30" text="Netzwerk:" />
 			<eListbox name="network" position="210:40" size="e-10:30" />
 			<eFEStatus name="festatus" position="0:100" size="400:85" />
 			<eLabel name="status" position="10:190" size="e-10:e-30" />
-  		<eButton text="start scan" name="start" position="10:e-30" size="200:30" />
+  		<eButton text="start scan" name="start" position="10:e-30" size="200:30" align="center" />
 			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" />
 		</tsAutomatic>
 	</object>
@@ -155,17 +156,17 @@
 			<eListbox name="polarity" position="150:40:" size="e-150:30" />
 
 			<eLabel text="FEC:" position="10:70" size="140:30" />
-			<eListbox name="fec" position="150:70:" size="e-150:30" />
+			<eListbox name="fec" position="150:70:" size="60:30" />
+
+			<eLabel text="Inversion:" position="250:70" size="140:30" />
+			<eCheckbox name="inversion" position="370:70" size="30:30" />
 
 			<eLabel text="Symbolrate:" position="10:100" size="140:30" />
 			<eNumber name="symbolrate" position="150:100:" size="e-150:30" />
 			<eLabel text="KSymb/s" position="e-150:100" size="e:30" />
 			
-			<eLabel text="Inversion:" position="10:130" size="140:30" />
-			<eCheckbox name="inversion" position="150:130" size="30:30" />
-			
-			<eLabel text="LNB:" position="190:130" size="100:30" />
-			<eNumber name="lnb" position="290:130" size="50:30" />
+			<eLabel text="Satellite:" position="10:130" size="140:30" />
+			<eListbox name="sat" position="150:130" size="e-10:30" />
 		</eTranspondersettings>
 	</object>
 
@@ -197,10 +198,7 @@
 	
 	<object name="eServiceSelector">
 		<eServiceSelector cposition="100:100" csize="500:400" text="Services">
-			<eLabel name="bouquet_prev" position="0:0" size="150:30" />
-			<eLabel name="bouquet" position="150:0" size="200:30" backgroundColor="content_selected" text="test" align="center" />
-			<eLabel name="bouquet_next" position="350:0" size="e:30" />
-			<eListbox name="services" position="0:30" size="e:e" />
+			<eListbox name="services" position="0:0" size="e:e" />
 		</eServiceSelector>
 	</object>
 </eskin>

@@ -146,10 +146,6 @@ int tsManual::eventHandler(const eWidgetEvent &event)
 
 tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 {
-	l_lnb=new eListBox<eListBoxEntryText>(this);
-	l_lnb->setName("lnblist");
-	l_lnb->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
-	
 	l_network=new eListBox<eListBoxEntryText>(this);
 	l_network->setName("network");
 	l_network->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
@@ -171,12 +167,7 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 	if (skin->build(this, "tsAutomatic"))
 		eFatal("skin load of \"tsAutomatic\" failed");
 
-	l_lnb->setCurrent(new eListBoxEntryText(l_lnb, "SAT A", (void*)0));
-	new eListBoxEntryText(l_lnb, "SAT B", (void*)1);
-	new eListBoxEntryText(l_lnb, "SAT A, OPT B", (void*)2);
-	new eListBoxEntryText(l_lnb, "SAT B, OPT B", (void*)3);
-	
-	l_network->setCurrent(new eListBoxEntryText(l_network, _("automatic"), (void*)0));
+	l_network->setCurrent(new eListBoxEntryText(l_network, _("automatic"), (void*)0, eTextPara::dirCenter) );
 
 #if 0
 	new eListBoxEntryText(l_network, "Astra 19.2°E fake", (void*)"astra192");
@@ -199,7 +190,7 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 		// todo: text aendern
 	l_status->setText(_("To begin searching for a valid satellite, enter correct LNB and either select satellite or automatic and press OK"));
 	
-	setFocus(l_lnb);
+	setFocus(l_network);
 }
 
 void tsAutomatic::start()
@@ -214,13 +205,7 @@ void tsAutomatic::start()
 	{
 		tpPacket *pkt=(tpPacket*)(l_network->getCurrent() -> getKey());
 		for (std::list<eTransponder>::iterator i(pkt->possibleTransponders.begin()); i != pkt->possibleTransponders.end(); ++i)
-		{
-#if 0
-			if (i->satellite.valid)
-				i->satellite.lnb=(int)l_lnb->getCurrent()->getKey();
-#endif
 			sapi->addTransponder(*i);
-		}
 
 		// scanflags auswerten
 		sapi->setSkipKnownNIT(pkt->scanflags & 8);
@@ -341,9 +326,12 @@ int tsAutomatic::loadNetworks()
 				networks.push_back(pkt);
 		} else
 			eFatal("unknown packet %s", node->GetType());
-		
-	for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
-		new eListBoxEntryText(l_network, i->name, (void*)&*i);
+
+	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
+			for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
+				if (i->possibleTransponders.front().satellite.orbital_position == s->getOrbitalPosition())
+					new eListBoxEntryText(l_network, i->name, (void*)&*i, eTextPara::dirCenter);
 
 	return 0;
 }
@@ -439,7 +427,7 @@ int tsAutomatic::nextNetwork(int first)
 	return 0;
 }
 
-int tsAutomatic::nextTransponder(int next, int lnb)
+int tsAutomatic::nextTransponder(int next)
 {
 	if (next)
 		++current_tp;
@@ -447,16 +435,12 @@ int tsAutomatic::nextTransponder(int next, int lnb)
 	if (current_tp == last_tp)
 		return 1;
 
-#if 0
-	if (current_tp->satellite.valid)
-		current_tp->satellite.lnb=lnb;
-#endif
 	return current_tp->tune();
 }
 
 int tsAutomatic::tuneNext(int next)
 {
-	while (nextTransponder(next, (int)l_lnb->getCurrent()->getKey()))
+	while (nextTransponder(next))
 	{
 		if (automatic)
 		{

@@ -8,7 +8,6 @@
 #include <core/gui/eskin.h>
 #include <core/gui/ewindow.h>
 #include <core/gui/guiactions.h>
-
 #include <sstream>
 
 template <class T>
@@ -20,6 +19,7 @@ class eListBox: public eWidget
 	ePtrList_T_iterator top, bottom, current;
 
 	int entries, item_height, flags;
+	gPixmap *iArrowUpDown, *iArrowUp, *iArrowDown, *iArrowLeft, *iArrowRight;
 	gColor colorActiveB, colorActiveF;
 
 	void gotFocus();
@@ -66,7 +66,8 @@ public:
 	enum
 	{
 		flagNoUpDownMovement=1,
-		flagNoPageMovement=2
+		flagNoPageMovement=2,
+		flagNewStyle=4
 	};
 	
 	void setFlags(int flags);
@@ -89,6 +90,7 @@ public:
 		if (listbox)
 			listbox->remove(this);
 	}
+	virtual eSize getExtend()	{ return eSize(); }
 };
 
 class eListBoxEntryText: public eListBoxEntry
@@ -97,17 +99,21 @@ class eListBoxEntryText: public eListBoxEntry
 protected:
 	eString text;
 	void *key;
+	int align;
+	eTextPara *para;
 public:
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0)
-		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(key)
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0)
+		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(key), align(align), para(0)
 	{
 	}
 
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0)
-		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(key)
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0)
+		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(key), align(align), para(0)
 	{
 	}
 
+	virtual ~eListBoxEntryText();
+	
 	bool operator < ( const eListBoxEntryText& e) const
 	{
 		if (key == e.key)
@@ -117,32 +123,12 @@ public:
 	}
 	
 	void *getKey() { return key; }
+	const eString& getText() { return text; }
+
+	eSize getExtend();
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited) const
-	{
-		rc->setFont(listbox->getFont());
-
-		if ((coNormalB != -1 && !highlited) || (highlited && coActiveB != -1))
-		{
-			rc->setForegroundColor(highlited?coActiveB:coNormalB);
-			rc->fill(rect);
-			rc->setBackgroundColor(highlited?coActiveB:coNormalB);
-		} else
-		{
-			eWidget *w=listbox->getNonTransparentBackground();
-			rc->setForegroundColor(w->getBackgroundColor());
-			rc->fill(rect);
-			rc->setBackgroundColor(w->getBackgroundColor());
-		}
-
-		rc->setForegroundColor(highlited?coActiveF:coNormalF);
-		rc->renderText(rect, text);
-		
-		eWidget* p = listbox->getParent();			
-		if (highlited && p && p->LCDElement)
-			p->LCDElement->setText(text);
-	}
+	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited);
 };
 
 class eListBoxEntryTextStream: public eListBoxEntry
@@ -163,30 +149,7 @@ public:
 	}
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited) const
-	{
-		rc->setFont(listbox->getFont());
-
-		if ((coNormalB != -1 && !highlited) || (highlited && coActiveB != -1))
-		{
-			rc->setForegroundColor(highlited?coActiveB:coNormalB);
-			rc->fill(rect);
-			rc->setBackgroundColor(highlited?coActiveB:coNormalB);
-		} else
-		{
-			eWidget *w=listbox->getNonTransparentBackground();
-			rc->setForegroundColor(w->getBackgroundColor());
-			rc->fill(rect);
-			rc->setBackgroundColor(w->getBackgroundColor());
-		}
-
-		rc->setForegroundColor(highlited?coActiveF:coNormalF);
-		rc->renderText(rect, text.str());
-
-		eWidget* p = listbox->getParent();			
-		if (highlited && p && p->LCDElement)
-			p->LCDElement->setText(text.str());
-	}
+	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited);
 };
 
 class eListBoxEntryMenu: public eListBoxEntryText
@@ -305,6 +268,11 @@ inline eListBox<T>::eListBox(eWidget *parent)
 		top(childs.end()), bottom(childs.end()), current(childs.end()),
 		item_height(font.pointSize+2),
 		flags(0),
+		iArrowUpDown(eSkin::getActive()->queryImage("eListBox.arrow.updown")),
+		iArrowUp(eSkin::getActive()->queryImage("eListBox.arrow.up")),
+		iArrowDown(eSkin::getActive()->queryImage("eListBox.arrow.down")),
+		iArrowLeft(eSkin::getActive()->queryImage("eListBox.arrow.left")),
+		iArrowRight(eSkin::getActive()->queryImage("eListBox.arrow.right")),
 		colorActiveB(eSkin::getActive()->queryScheme("global.selected.background")),
 		colorActiveF(eSkin::getActive()->queryScheme("global.selected.foreground")),
 		have_focus(0)
@@ -339,20 +307,26 @@ template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
 	int i=0;
+
 	for (ePtrList_T_iterator entry(top); (entry != bottom) && (entry != childs.end()); ++entry)
 	{
 		eRect rect = getEntryRect(i);
 
 		if ( where.contains(rect) )
 		{
-			entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), have_focus && (entry == current));
-
-			if (pixmap && (entry == current) )
+/*			if (entries > 1 && iArrowUpDown && (entry == current) )
 			{
-				ePoint pixmap_pos( getEntryRect(i).right() - (pixmap->getSize().width()+10), getEntryRect(i).top()+1 );
-				target->blit(*pixmap, pixmap_pos, eRect(), gPixmap::blitAlphaTest);
+				int pos = getEntryRect(i).right() - (iArrowUpDown->getSize().width()+10);
+				ePoint pixmap_pos( pos , getEntryRect(i).top()+1 );
+				rect.setRight(i-10);
+				entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), have_focus && (entry == current));
+				target->blit(*iArrowUpDown, pixmap_pos, eRect(), gPixmap::blitAlphaTest);
 			}
+			else*/
+				entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), have_focus && (entry == current));
+
 		}
+
 		i++;
 	}
 
@@ -552,10 +526,6 @@ inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 				else
 					/*emit*/ selected(*current);
 			}
-//			else if (event.action == &i_cursorActions->cancel)
-//			{
-//				/*emit*/ selected(0);
-//			}
 			else
 				break;
 		return 1;

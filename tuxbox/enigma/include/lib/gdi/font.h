@@ -43,7 +43,7 @@ class fontRenderClass
 	FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
 	static fontRenderClass *instance;
 public:
-	int AddFont(const char *filename);
+	const char* AddFont(const char *filename);
 	static fontRenderClass *getInstance();
 	FT_Error FTC_Face_Requester(FTC_FaceID	face_id,
 															FT_Face*		aface);

@@ -50,7 +50,7 @@ public:
 class tsAutomatic: public eWidget
 {
 	eButton *b_start, *b_abort;
-	eListBox<eListBoxEntryText> *l_lnb, *l_network;
+	eListBox<eListBoxEntryText> *l_network;
 	eLabel *l_status;
 	std::list<tpPacket> networks;
 	std::list<eTransponder>::iterator current_tp, last_tp;
@@ -63,7 +63,7 @@ class tsAutomatic: public eWidget
 	int addNetwork(tpPacket &p, XMLTreeNode *node, int type);
 	
 	int nextNetwork(int first=0);
-	int nextTransponder(int next, int lnb);
+	int nextTransponder(int next);
 	int tuneNext(int next);
 public:
 	tsAutomatic(eWidget *parent);

@@ -888,18 +888,25 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 	}
 	else if (prop=="font")
 	{
-		eString family=value;
-		int sem=value.rfind(';');
-		int size=16;
-		if (sem!=-1)
+		const gFont& g = eSkin::getActive()->queryFont(value);
+			
+		if (g)
+			setFont(g);
+		else
 		{
-			family=family.left(sem);
-			eString r=value.mid(sem+1);
-			size=atoi(r.c_str());
-			if (size<=0)
-				size=16;
+			eString family=value;
+			int size=16;
+			int sem=value.rfind(';');
+			if (sem!=-1)
+			{
+				family=family.left(sem);
+				eString r=value.mid(sem+1);
+				size=atoi(r.c_str());
+				if (size<=0)
+					size=16;
+			}
+			setFont(gFont(family, size));
 		}
-		setFont(gFont(family, size));
 	}
 	else if (prop=="name")
 		name=value;

@@ -24,6 +24,7 @@ public:
 
 	void redrawWidget(gPainter *target, const eRect &area);
 	void setFlags(int flag);
+	void setAlign(int align);
 	int setProperty(const eString &prop, const eString &value);
 
 	eSize getExtend();

@@ -19,12 +19,16 @@ int eStreaminfo::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::evtAction:
-		if ((event.action == &i_cursorActions->ok) /*|| (event.action == &i_cursorActions->cancel)*/)
+		if ((event.action == &i_cursorActions->ok))
 			close(0);
 		else if (event.action == &i_cursorActions->right)
 			mp.next();
 		else if (event.action == &i_cursorActions->left)
 			mp.prev();
+		else if (event.action == &i_cursorActions->up)
+			;
+		else if (event.action == &i_cursorActions->down)
+			;
 		else
 			break;
 		return 1;

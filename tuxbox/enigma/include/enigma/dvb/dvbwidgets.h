@@ -13,12 +13,12 @@ class eFrontend;
 
 class eTransponderWidget: public eWidget
 {
-	eNumber *frequency, *symbolrate, *lnb;
+	eNumber *frequency, *symbolrate;
 	eCheckbox *inversion;
 	int type, edit;
 	eListBoxEntryText *fecEntry[6], *polarityEntry[4];
 	
-	eListBox<eListBoxEntryText> *fec, *polarity;
+	eListBox<eListBoxEntryText> *fec, *polarity, *sat;
 	void nextField0(int *);
 	void nextField1(eListBoxEntryText *);
 	void updated1(eListBoxEntryText *);

@@ -33,6 +33,7 @@ class eSkin
 	int parseImages(XMLTreeNode *images);
 	int parseValues(XMLTreeNode *values);
 	int parseFonts(XMLTreeNode *fonts);
+	int parseFontAlias(XMLTreeNode *fonts);
 	
 	gDC *getDCbyName(const char *name);
 	
@@ -48,6 +49,8 @@ class eSkin
 	std::map<eString, gColor> scheme;
 	std::map<eString, gPixmap*> images;
 	std::map<eString, int> values;
+	std::map<eString, eString> fonts;
+	std::map<eString, gFont> fontAlias;
 
 	eNamedColor *searchColor(const eString &name);
 
@@ -65,11 +68,11 @@ public:
 	int build(eWidget *widget, const char *name);
 	void setPalette(gPixmapDC *pal);
 
-
 	gColor queryColor(const eString &name);
 	gColor queryScheme(const eString &name) const;
 	gPixmap *queryImage(const eString &name) const;
 	int queryValue(const eString &name, int d) const;
+	const gFont& queryFont(const eString &name);
 	
 	void makeActive();
 	

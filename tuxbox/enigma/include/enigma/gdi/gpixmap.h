@@ -94,7 +94,13 @@ struct gFont
 	}
 	
 	gFont()
+		:pointSize(0)
 	{
+	}
+	
+	operator const bool() const
+	{
+		return pointSize;
 	}
 };
 

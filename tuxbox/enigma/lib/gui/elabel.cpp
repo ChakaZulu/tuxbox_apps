@@ -52,6 +52,11 @@ void eLabel::setFlags(int flag)
 		invalidate();
 }
 
+void eLabel::setAlign(int align)
+{
+	this->align = align;
+}
+
 void eLabel::redrawWidget(gPainter *target, const eRect &area)
 {
 	if (text.length())

@@ -35,21 +35,25 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	
 	inversion=new eCheckbox(this);
 	inversion->setName("inversion");
-	
-	lnb=new eNumber(this, 1, 0, 3, 1, init, 0, 0, edit);
-	lnb->setName("lnb");
-	
+
+	sat=new eListBox<eListBoxEntryText>(this);
+	sat->setName("sat");
+	sat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
+	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
+			new eListBoxEntryText(sat, s->getDescription().c_str(), (void*) *s);
+
 	CONNECT(frequency->selected, eTransponderWidget::nextField0);
 	CONNECT(polarity->selected, eTransponderWidget::nextField1);
 	CONNECT(fec->selected, eTransponderWidget::nextField1);
 	CONNECT(symbolrate->selected, eTransponderWidget::nextField0);
-	CONNECT(lnb->selected, eTransponderWidget::nextField0);
+	CONNECT(sat->selected, eTransponderWidget::nextField1);
 	
 	CONNECT(fec->selchanged, eTransponderWidget::updated1);
 	CONNECT(polarity->selchanged, eTransponderWidget::updated1);
 	CONNECT(frequency->numberChanged, eTransponderWidget::updated0);
 	CONNECT(symbolrate->numberChanged, eTransponderWidget::updated0);
-	CONNECT(lnb->numberChanged, eTransponderWidget::updated0);
+	CONNECT(sat->selchanged, eTransponderWidget::updated1);
 	CONNECT(inversion->checked, eTransponderWidget::updated2);
 }
 
@@ -97,6 +101,26 @@ int eTransponderWidget::load()
 	return 0;
 }
 
+struct selectSat: public std::unary_function<eListBoxEntryText&, void>
+{
+	const eTransponder* t;
+	eListBox<eListBoxEntryText> *l;
+
+	selectSat(const eTransponder *t, eListBox<eListBoxEntryText>* l ): t(t), l(l)
+	{
+	}
+
+	bool operator()(eListBoxEntryText& e)
+	{
+		if ( ((eSatellite*)e.getKey())->getOrbitalPosition() == t->satellite.orbital_position )
+		{
+	 		l->setCurrent(&e);
+			return 1;
+		}
+		return 0;
+	}
+};
+
 int eTransponderWidget::setTransponder(const eTransponder *transponder)
 {
 	if (!transponder)
@@ -120,7 +144,8 @@ int eTransponderWidget::setTransponder(const eTransponder *transponder)
 		symbolrate->setNumber(transponder->satellite.symbol_rate/1000);
 		
 		inversion->setCheck(transponder->satellite.inversion);
-		lnb->setNumber(transponder->satellite.orbital_position);
+
+		sat->forEachEntry(selectSat(transponder, sat));
 
 		break;
 	}
@@ -138,10 +163,10 @@ int eTransponderWidget::getTransponder(eTransponder *transponder)
 //	    void setCable(int frequency, int symbol_rate, int inversion)
 		return -1;
 	case deliverySatellite:
-		eDebug("setting to: %d %d %d %d %d %d", frequency->getNumber(), symbolrate->getNumber(), (int)polarity->getCurrent()->getKey(), (int)fec->getCurrent()->getKey(), lnb->getNumber(), inversion->isChecked());
+		eDebug("setting to: %d %d %d %d %d %d", frequency->getNumber(), symbolrate->getNumber(), (int)polarity->getCurrent()->getKey(), (int)fec->getCurrent()->getKey(), ((eSatellite*)sat->getCurrent()->getKey())->getOrbitalPosition(), inversion->isChecked());
 		transponder->setSatellite(frequency->getNumber()*1000, 
 			symbolrate->getNumber()*1000, !((int)polarity->getCurrent()->getKey()), 
-			((int)fec->getCurrent()->getKey()), lnb->getNumber(), inversion->isChecked());
+			((int)fec->getCurrent()->getKey()), ((eSatellite*)sat->getCurrent()->getKey())->getOrbitalPosition(), inversion->isChecked());
 		return 0;
 	default:
 		return -1;

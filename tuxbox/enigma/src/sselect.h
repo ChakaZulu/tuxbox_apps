@@ -18,7 +18,6 @@ class eListBoxEntryService: public eListBoxEntry
 public:
 	eServiceReference service;
 	eBouquet *bouquet;		/// buggy!!! :)
-	eString getText(int col=0) const;
 	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service);
 	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eBouquet *bouquet);
 	~eListBoxEntryService();

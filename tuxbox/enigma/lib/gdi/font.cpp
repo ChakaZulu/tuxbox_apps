@@ -108,7 +108,7 @@ FT_Error fontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_in
 	return res;
 }
 
-int fontRenderClass::AddFont(const char *filename)
+const char* fontRenderClass::AddFont(const char *filename)
 {
 	eDebugNoNewLine("[FONT] adding font %s...", filename);
 	fflush(stdout);
@@ -119,10 +119,8 @@ int fontRenderClass::AddFont(const char *filename)
 	eLocker lock(ftlock);
 
 	if ((error=FT_New_Face(library, filename, 0, &face)))
-	{
-		eDebug(" failed: %s", strerror(error));
-		return error;
-	}
+		eFatal(" failed: %s", strerror(error));
+
 	strcpy(n->filename=new char[strlen(filename)+1], filename);
 	strcpy(n->face=new char[strlen(face->family_name)+strlen(face->style_name)+2], face->family_name);
 	if (face->style_name[0]!=' ')
@@ -133,7 +131,8 @@ int fontRenderClass::AddFont(const char *filename)
 	n->next=font;
 	eDebug("OK (%s)", n->face);
 	font=n;
-	return 0;
+
+	return n->face;
 }
 
 fontRenderClass::fontListEntry::~fontListEntry()
