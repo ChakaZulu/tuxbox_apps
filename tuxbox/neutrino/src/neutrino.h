@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.40 2002/01/04 02:38:05 McClean Exp $
+//  $Id: neutrino.h,v 1.41 2002/01/06 18:38:04 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
 //  $Log: neutrino.h,v $
+//  Revision 1.41  2002/01/06 18:38:04  McClean
+//  save-optimize
+//
 //  Revision 1.40  2002/01/04 02:38:05  McClean
 //  cleanup
 //
@@ -230,7 +233,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void setupNetwork( bool force= false );
 
 		void saveSetup();
-		bool loadSetup();
+		bool loadSetup(SNeutrinoSettings* load2=NULL);
 
 		void tvMode();
 		void radioMode();

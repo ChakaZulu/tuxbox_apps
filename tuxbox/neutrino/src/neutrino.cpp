@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.119 2002/01/04 02:41:47 McClean Exp $
+        $Id: neutrino.cpp,v 1.120 2002/01/06 18:38:04 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.120  2002/01/06 18:38:04  McClean
+  save-optimize
+
   Revision 1.119  2002/01/04 02:41:47  McClean
   errormessage changed
 
@@ -655,8 +658,12 @@ void CNeutrinoApp::setupDefaults()
 *          CNeutrinoApp -  loadSetup, load the application-settings                   *
 *                                                                                     *
 **************************************************************************************/
-bool CNeutrinoApp::loadSetup()
+bool CNeutrinoApp::loadSetup(SNeutrinoSettings* load2)
 {
+	if(!load2)
+	{
+		load2 = &g_settings;
+	}
 	int fd;
 	fd = open(settingsFile.c_str(), O_RDONLY );
 
@@ -665,7 +672,7 @@ bool CNeutrinoApp::loadSetup()
 		printf("error while loading settings: %s\n", settingsFile.c_str() );
 		return false;
 	}
-	if(read(fd, &g_settings, sizeof(g_settings))!=sizeof(g_settings))
+	if(read(fd, load2, sizeof(SNeutrinoSettings))!=sizeof(SNeutrinoSettings))
 	{
 		printf("error while loading settings: %s - config from old version?\n", settingsFile.c_str() );
 		return false;
@@ -682,16 +689,36 @@ bool CNeutrinoApp::loadSetup()
 **************************************************************************************/
 void CNeutrinoApp::saveSetup()
 {
-	int fd;
-	fd = open(settingsFile.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH);
+	bool tosave = false;
 
-	if (fd==-1)
+	SNeutrinoSettings tmp;
+	if(loadSetup(&tmp)==1)
 	{
-		printf("error while saving settings: %s\n", settingsFile.c_str() );
-		return;
+		//compare...
+		if(memcmp(&tmp, &g_settings, sizeof(SNeutrinoSettings))!=0)
+		{
+			tosave=true;
+		}
 	}
-	write(fd, &g_settings,  sizeof(g_settings) );
-	close(fd);
+	else
+	{
+		tosave=true;
+	}	
+
+	if(tosave)
+	{
+		int fd;
+		fd = open(settingsFile.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH);
+
+		if (fd==-1)
+		{
+			printf("error while saving settings: %s\n", settingsFile.c_str() );
+			return;
+		}
+		write(fd, &g_settings,  sizeof(SNeutrinoSettings) );
+		close(fd);
+		printf("[neutrino] settings saved\n");
+	}
 }
 
 /**************************************************************************************
@@ -2192,7 +2219,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.119 2002/01/04 02:41:47 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.120 2002/01/06 18:38:04 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
