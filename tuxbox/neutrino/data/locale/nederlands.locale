@@ -431,7 +431,6 @@ movieplayer.vlchelp ROOD/Home Stop\nGROEN Resync\nGEEL Pause/verder\nBLAUW Favor
 movieplayer.wrongvlcversion Functie is niet mogelijk met de gebruikte VLC-versie
 mp3picsettings.general MP3 Speler/ Afbeeldingen
 mp3player.add Voeg toe
-mp3player.artist Artiest
 mp3player.artist_title Artiest, Titel
 mp3player.defdir Startdirectory
 mp3player.delete Wis
@@ -445,13 +444,11 @@ mp3player.keylevel key level
 mp3player.name MP3 Player
 mp3player.pause pauze
 mp3player.play Play
-mp3player.playall Alles afspelen
 mp3player.playing Huidig nummer
 mp3player.rewind terugspoelen
 mp3player.screensaver_timeout screensaver timeout (min, 0=uit)
 mp3player.shuffle shuffle
 mp3player.stop Stop
-mp3player.title Titel
 mp3player.title_artist Titel, Artiest
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standaard Gateway

@@ -438,7 +438,6 @@ movieplayer.vlchelp CZERW./Home Stop\nZIEL. Resync\nZOLTY Przerwa/Dalej\nNIEBIE.
 movieplayer.wrongvlcversion Funkcja jest z terazniejsza wersja VLC niedostepna
 mp3picsettings.general Odtwarzacz MP3 / Przegladarka
 mp3player.add Dodaj
-mp3player.artist Wykonawca
 mp3player.artist_title Interpretacja, Tytul
 mp3player.defdir folder startowy
 mp3player.delete Kasuj
@@ -453,13 +452,11 @@ mp3player.keylevel poziom
 mp3player.name Odtwarzacz MP3
 mp3player.pause pauza
 mp3player.play Start
-mp3player.playall Odtwarzaj wszystkie
 mp3player.playing Biezacy
 mp3player.rewind cofnij
 mp3player.screensaver_timeout wygaszacz za:(min, 0=off)
 mp3player.shuffle Losowo
 mp3player.stop Zatrzymaj
-mp3player.title Tytul
 mp3player.title_artist Tytul, Interpretacja
 networkmenu.broadcast adres rozgloszeniowy
 networkmenu.gateway brama

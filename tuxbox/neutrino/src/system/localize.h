@@ -424,7 +424,6 @@ class CLocaleManager
 #define LOCALE_MOVIEPLAYER_WRONGVLCVERSION          "movieplayer.wrongvlcversion"
 #define LOCALE_MP3PICSETTINGS_GENERAL               "mp3picsettings.general"
 #define LOCALE_MP3PLAYER_ADD                        "mp3player.add"
-//#define LOCALE_MP3PLAYER_ARTIST                     "mp3player.artist"                           /* FIXME: unused */
 #define LOCALE_MP3PLAYER_ARTIST_TITLE               "mp3player.artist_title"
 #define LOCALE_MP3PLAYER_DEFDIR                     "mp3player.defdir"
 #define LOCALE_MP3PLAYER_DELETE                     "mp3player.delete"
@@ -439,13 +438,11 @@ class CLocaleManager
 #define LOCALE_MP3PLAYER_NAME                       "mp3player.name"
 #define LOCALE_MP3PLAYER_PAUSE                      "mp3player.pause"
 #define LOCALE_MP3PLAYER_PLAY                       "mp3player.play"
-//#define LOCALE_MP3PLAYER_PLAYALL                    "mp3player.playall"                          /* FIXME: unused */
 #define LOCALE_MP3PLAYER_PLAYING                    "mp3player.playing"
 #define LOCALE_MP3PLAYER_REWIND                     "mp3player.rewind"
 #define LOCALE_MP3PLAYER_SCREENSAVER_TIMEOUT        "mp3player.screensaver_timeout"
 #define LOCALE_MP3PLAYER_SHUFFLE                    "mp3player.shuffle"
 #define LOCALE_MP3PLAYER_STOP                       "mp3player.stop"
-//#define LOCALE_MP3PLAYER_TITLE                      "mp3player.title"                            /* FIXME: unused */
 #define LOCALE_MP3PLAYER_TITLE_ARTIST               "mp3player.title_artist"
 #define LOCALE_NETWORKMENU_BROADCAST                "networkmenu.broadcast"
 #define LOCALE_NETWORKMENU_GATEWAY                  "networkmenu.gateway"

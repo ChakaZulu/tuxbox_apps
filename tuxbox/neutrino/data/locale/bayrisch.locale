@@ -431,7 +431,6 @@ movieplayer.vlchelp ROT/Hoam Stop\nGREA Resync\nGELB Pause/Weida\nBLAU Merkal se
 movieplayer.wrongvlcversion Des is mit ehnara VLC-Version ne drin
 mp3picsettings.general Musi spuin / Buidl schaugn
 mp3player.add dazuadoa
-mp3player.artist Sänga
 mp3player.artist_title Interpret, Titl
 mp3player.defdir Start-Verz.
 mp3player.delete löschn
@@ -445,14 +444,12 @@ mp3player.keylevel Tasdn-Umschoitung
 mp3player.name MP3 Spuia
 mp3player.pause Pause
 mp3player.play obspuin
-mp3player.playall olle obspuin
 mp3player.playing Spuin
 mp3player.rewind rewind
 mp3player.screensaver_timeout Buidschirmschona (minutn, 0=aus)
 mp3player.shuffle wias kumt
 mp3player.stop stopn
-mp3player.title Titl
-mp3player.title_artist Interpret
+mp3player.title_artist Titl, Interpret
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.head Netzwerk Eistellunga

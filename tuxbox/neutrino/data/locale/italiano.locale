@@ -431,7 +431,6 @@ movieplayer.vlchelp ROSSo/Home Stop\nVERDE Resync\nGIALLO Pausa/avanti\nBLU Inse
 movieplayer.wrongvlcversion Funzione con questa Versione di VLC non possibbile
 mp3picsettings.general MP3 Player / Visore Immaggine
 mp3player.add aggiungi
-mp3player.artist Artista
 mp3player.artist_title Artista, Titolo
 mp3player.defdir Start-Directory.
 mp3player.delete rimuovi
@@ -445,13 +444,11 @@ mp3player.keylevel Cambio-Tasti
 mp3player.name MP3 Player
 mp3player.pause Pausa
 mp3player.play play 
-mp3player.playall Play tutti
 mp3player.playing Brano attuale
 mp3player.rewind Indietro svelto
 mp3player.screensaver_timeout Salvaschermo_Timeout
 mp3player.shuffle shuffle 
 mp3player.stop stop 
-mp3player.title titolo
 mp3player.title_artist Titolo, Artista
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway

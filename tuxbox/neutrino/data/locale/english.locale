@@ -440,7 +440,6 @@ movieplayer.vlchelp Red/Home Stop\nGREEN Resync\nYELLOW Pause/Continue\nBLUE Cre
 movieplayer.wrongvlcversion This feature is not support by your current version of VLC
 mp3picsettings.general MP3 player / picviewer
 mp3player.add Add
-mp3player.artist Artist
 mp3player.artist_title Artist, Title
 mp3player.defdir start dir.
 mp3player.delete Delete
@@ -455,13 +454,11 @@ mp3player.keylevel key level
 mp3player.name MP3 Player
 mp3player.pause pause
 mp3player.play Play
-mp3player.playall Play all
 mp3player.playing Current Track
 mp3player.rewind rewind
 mp3player.screensaver_timeout screensaver timeout (min, 0=off)
 mp3player.shuffle shuffle
 mp3player.stop Stop
-mp3player.title Title
 mp3player.title_artist Title, Artist
 networkmenu.broadcast Broadcast
 networkmenu.gateway Default Gateway

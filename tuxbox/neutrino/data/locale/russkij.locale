@@ -438,7 +438,6 @@ movieplayer.vlchelp КРАСНАЯ/Home Стоп\nЗЕЛЕНАЯ Ресинхр�
 movieplayer.wrongvlcversion Эта функция не поддерживается текущей версией VLC 
 mp3picsettings.general MP3 плеер / картинки
 mp3player.add Добавить
-mp3player.artist Артист
 mp3player.artist_title Артист, Название
 mp3player.defdir Начальная директория.
 mp3player.delete Удалить
@@ -453,13 +452,11 @@ mp3player.keylevel key level
 mp3player.name MP3 плеер
 mp3player.pause Пауза
 mp3player.play Играть
-mp3player.playall Играть все
 mp3player.playing Текущий трек
 mp3player.rewind rewind
 mp3player.screensaver_timeout Таймаут скринсейвера (мин, 0=выкл)
 mp3player.shuffle shuffle
 mp3player.stop Остановить
-mp3player.title Название
 mp3player.title_artist Название, Артист
 networkmenu.broadcast Broadcast
 networkmenu.gateway Default Gateway

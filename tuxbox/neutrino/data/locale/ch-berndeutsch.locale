@@ -431,7 +431,6 @@ movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Pouse/Wyter\nBLAU Bookmark
 movieplayer.wrongvlcversion Funktion isch mit dere Version vom VLC nid müglech
 mp3picsettings.general MP3 Player / Böudbetrachter
 mp3player.add Däzuefüege
-mp3player.artist Interpret
 mp3player.artist_title Interpret, Titu
 mp3player.defdir Schtart-Verz.
 mp3player.delete Lösche
@@ -445,13 +444,11 @@ mp3player.keylevel Taschte-Umschautig
 mp3player.name MP3 Player
 mp3player.pause Pause
 mp3player.play Abschpile
-mp3player.playall Aui abschpile
 mp3player.playing Aktuelle Track
 mp3player.rewind schnäue Rückl.
 mp3player.screensaver_timeout Böudschirmschoner (min, 0=us)
 mp3player.shuffle Shuffle
 mp3player.stop Schtopp
-mp3player.title Titu
 mp3player.title_artist Titu, Interpret
 networkmenu.broadcast Broadcast
 networkmenu.gateway Schtandard Gateway

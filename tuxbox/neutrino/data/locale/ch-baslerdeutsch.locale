@@ -431,7 +431,6 @@ movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Paus/Widdr\nBLAU Bookmark 
 movieplayer.wrongvlcversion Funktion isch mit dr benutzte Version vom VLC nit möglich
 mp3picsettings.general MP3 Player / Bildbetrachter
 mp3player.add A'hänge
-mp3player.artist Pörformer
 mp3player.artist_title Interpret, Titel
 mp3player.defdir Start-Verz.
 mp3player.delete Lösche
@@ -445,13 +444,11 @@ mp3player.keylevel Taschde-Umschaldig
 mp3player.name MP3 Player
 mp3player.pause Pause
 mp3player.play Abspiele
-mp3player.playall Alles abspiele
 mp3player.playing aktuelle track
 mp3player.rewind schnälle Rückl.
 mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
 mp3player.shuffle Zuefällig mische
 mp3player.stop A'halte
-mp3player.title Titel
 mp3player.title_artist Titel, Interpret
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway

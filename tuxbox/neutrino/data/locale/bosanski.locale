@@ -431,7 +431,6 @@ movieplayer.vlchelp crveno/kuci stop\nzeleno resync\nzuto pausa/dalje\nplavo zap
 movieplayer.wrongvlcversion funkcije nije moguca sa trenutacno upotrijebito verziji vlca
 mp3picsettings.general mp3 igrač / promatrač slika
 mp3player.add dodati
-mp3player.artist pjevač
 mp3player.artist_title pjevač, pjesma
 mp3player.defdir pocetni direktorij
 mp3player.delete izbrisati
@@ -445,13 +444,11 @@ mp3player.keylevel promijeniti tipke
 mp3player.name mp3 igrač
 mp3player.pause pauza
 mp3player.play igrati
-mp3player.playall sve igrati
 mp3player.playing pjesma
 mp3player.rewind brzo natrag
 mp3player.screensaver_timeout štititi ekran (min, 0=ugašeno)
 mp3player.shuffle slučaj
 mp3player.stop zaustaviti
-mp3player.title naslov
 mp3player.title_artist pjesma, pjevač
 networkmenu.broadcast broadcast
 networkmenu.gateway standard gateway
