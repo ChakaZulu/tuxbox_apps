@@ -27,6 +27,7 @@ libneutrino_driver_a_SOURCES = \
 	stream2file.cpp \
 	screen_max.cpp \
 	netfile.cpp \
-	slotbuffer.c
+	slotbuffer.c \
+	aviaext.cpp
 
 AM_CPPFLAGS = -DSKIP_CA_STATUS

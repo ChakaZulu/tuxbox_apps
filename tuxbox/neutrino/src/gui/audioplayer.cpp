@@ -42,6 +42,7 @@
 #include <driver/encoding.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
+#include <driver/aviaext.h>
 
 #include <daemonc/remotecontrol.h>
 
@@ -185,6 +186,9 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true); 
 
+	// disable iec aka digi out
+	CAViAExt::getInstance()->iecOff();
+	
 	/*int ret =*/
 
 	show();
@@ -207,6 +211,10 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
+
+	// disable iec aka digi out
+	CAViAExt::getInstance()->iecOff();
+
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
