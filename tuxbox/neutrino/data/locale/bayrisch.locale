@@ -131,15 +131,15 @@ recordingmenu.server_mac MAC-Adressn
 recordingmenu.setupnow los moachs !
 recordingmenu.no_scart Scart Umschoita untadrucka
 
-streamingmenu.head unset
-streamingmenu.streaming_type unset
-streamingmenu.server_ip unset
-streamingmenu.server_port unset
-streamingmenu.streaming_server_cddrive unset
-streamingmenu.streaming_videorate unset
-streamingmenu.streaming_audiorate unset
-streamingmenu.off unset
-streamingmenu.on unset
+streamingmenu.head Fuimspuia Eistellunga
+streamingmenu.streaming_type Streamingserva
+streamingmenu.server_ip Streamingserva IP
+streamingmenu.server_port Streamingserva Port
+streamingmenu.streaming_server_cddrive DVD Laufwerk
+streamingmenu.streaming_videorate Datenrate Video
+streamingmenu.streaming_audiorate Datenrate Audio
+streamingmenu.off Ausgschoitn
+streamingmenu.on Eigschoitn
 
 ping.ok kumt wos (ping)
 ping.unreachable kumt nix (unreachable)
@@ -707,8 +707,8 @@ movieplayer.choosepes PES spuin
 movieplayer.bookmark Vormerka
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait unset
-movieplayer.nostreamingserver unset
+movieplayer.pleasewait Oan Moment, de Verbindung\nzum Streamingserva werd hergsteaid 
+movieplayer.nostreamingserver Koa Vabindung\nzum Streamingserva m�glich.
 
 filebrowser.head Datiesucha
 filebrowser.filter.active Fuita o
@@ -726,16 +726,16 @@ nfs.localdir Verzeichnis auf da Box
 nfs.automount Beim Startn mountn
 nfs.mountnow Jetzad mountn
 nfs.mounterror Mount-Fähla
-nfs.mounttimeout unset
+nfs.mounttimeout Mount-Fehla: Timeout
 nfs.umount NFS/CIFS Verzeichnis freigem
 nfs.umounterror Fähla beim Freigem
 nfs.alreadymounted Verzeichnis is scho gmounted
-nfs.mount_options unset
+nfs.mount_options NFS Mount-Optionen
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS
-nfs.username unset
-nfs.password unset
+nfs.username CIFS Benutzanama
+nfs.password CIFS Passwort
 nfsmenu.head NFS/CIFS Eistellunga
 
 apids.hint_1 Gems de APIDs zu streama getrend

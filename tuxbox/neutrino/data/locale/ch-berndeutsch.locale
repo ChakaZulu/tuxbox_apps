@@ -131,15 +131,15 @@ recordingmenu.server_mac Mac AdrÃ¤ssi
 recordingmenu.setupnow IschtÃ¶uigÃ¤ jetzt Ã¼bernÃ¤Ã¤
 recordingmenu.no_scart UngerdrÃ¼cke Scart-Umschautig
 
-streamingmenu.head unset
-streamingmenu.streaming_type unset
-streamingmenu.server_ip unset
-streamingmenu.server_port unset
-streamingmenu.streaming_server_cddrive unset
-streamingmenu.streaming_videorate unset
-streamingmenu.streaming_audiorate unset
-streamingmenu.off unset
-streamingmenu.on unset
+streamingmenu.head Movieplayer Iischtöuige
+streamingmenu.streaming_type Streamingsörver
+streamingmenu.server_ip Streamingsörver IP
+streamingmenu.server_port Streamingsörver Port
+streamingmenu.streaming_server_cddrive DVD Loufwärch
+streamingmenu.streaming_videorate Daterate Video
+streamingmenu.streaming_audiorate Daterate Audio
+streamingmenu.off Deaktiviert
+streamingmenu.on Aktiviert
 
 ping.ok isch erreichbar (ping)
 ping.unreachable isch nid erreichbar (unreachable)
@@ -707,8 +707,8 @@ movieplayer.choosepes PES Abschpile
 movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait unset
-movieplayer.nostreamingserver unset
+movieplayer.pleasewait Bitte warte.\nd'Verbindig zum Streamingsörver wird härgschtöut.
+movieplayer.nostreamingserver Verbindig zum\n Streamingsörver fäugschlage.
 
 filebrowser.head Filebrowser
 filebrowser.filter.active FÃ¶uter a
@@ -726,7 +726,7 @@ nfs.localdir lokaus Verzeichnis
 nfs.automount Bim Schtart mounte
 nfs.mountnow Jetz mounte
 nfs.mounterror Mount-FÃ¤hler: lade default-IschtÃ¶uige
-nfs.mounttimeout unset
+nfs.mounttimeout Mount-Fehler: Timeout
 nfs.umount NFS/CIFS Verzeichnis unmounte
 nfs.umounterror Umount-FÃ¤hler
 nfs.alreadymounted Verzeichnis bereits gemountet
@@ -734,8 +734,8 @@ nfs.mount_options Mount-Optione
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS
-nfs.username unset
-nfs.password unset
+nfs.username CIFS Benutzername
+nfs.password CIFS Passwort
 nfsmenu.head NFS/CIFS IschtÃ¶uige
 
 apids.hint_1 Gib diÃ¤ z'streamende APIDs i,

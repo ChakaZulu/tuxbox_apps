@@ -131,15 +131,15 @@ recordingmenu.server_mac Mac Adräss
 recordingmenu.setupnow Iinsdellige jetz überneh
 recordingmenu.no_scart  Scart-Umschaldig underdrugge
 
-streamingmenu.head unset
-streamingmenu.streaming_type unset
-streamingmenu.server_ip unset
-streamingmenu.server_port unset
-streamingmenu.streaming_server_cddrive unset
-streamingmenu.streaming_videorate unset
-streamingmenu.streaming_audiorate unset
-streamingmenu.off unset
-streamingmenu.on unset
+streamingmenu.head Movieplayer Iistellige
+streamingmenu.streaming_type Streamingserver
+streamingmenu.server_ip Streamingserver IP
+streamingmenu.server_port Streamingserver Port
+streamingmenu.streaming_server_cddrive DVD Laufwerk
+streamingmenu.streaming_videorate Daterade Video
+streamingmenu.streaming_audiorate Daterade Audio
+streamingmenu.off Deaktiviert
+streamingmenu.on Aktiviert
 
 ping.ok isch erreichbar (ping)
 ping.unreachable isch nidd erreichbar (unreachable)
@@ -707,8 +707,8 @@ movieplayer.choosepes PES abspiele
 movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait unset
-movieplayer.nostreamingserver unset
+movieplayer.pleasewait Bitte warde.\nD'Verbindig zuem Streamingserver wird herg'stellt.
+movieplayer.nostreamingserver Es het kei Verbindig\nzuem Streamingserver herg'stellt werde chönne.
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter aah
@@ -726,16 +726,16 @@ nfs.localdir lokales Verzeichniss
 nfs.automount Biem Start i'hänge
 nfs.mountnow Jetz i'hänge
 nfs.mounterror I'häng - Fehler
-nfs.mounttimeout unset
+nfs.mounttimeout Mount-Fehler: Timeout
 nfs.umount NFS/CIFS Verzeichniss abhänge
 nfs.umounterror Abhäng-Fehler
 nfs.alreadymounted Verzeichnis bereits a'ghängt
-nfs.mount_options unset
+nfs.mount_options NFS Mount-Optionen
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS
-nfs.username unset
-nfs.password unset
+nfs.username CIFS Benutzername
+nfs.password CIFS Passwort
 nfsmenu.head NFS/CIFS Iischdellige
 
 apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,
