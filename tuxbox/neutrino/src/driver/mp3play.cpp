@@ -557,7 +557,7 @@ void* CMP3Player::PlayThread(void * filename)
 	soundfd=::fopen("/dev/sound/dsp","w");
 	if (soundfd!=NULL)
 	{
-		fp = fopen((char *)filename,"r");
+		fp = ::fopen((char *)filename,"r");
 		if (fp!=NULL)
 		{
 			/* Decode stdin to stdout. */
