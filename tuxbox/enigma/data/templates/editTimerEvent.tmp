@@ -7,7 +7,7 @@
 		<form action="/changeTimerEvent">
 			<input type="hidden" name="ID" value="#EVENTID#">
 			<input type="hidden" name="ref" value="#SERVICEREF#">
-			<table width=100% border=0 cellpadding=0 cellspacing=0>
+			<table width=100% border=0 cellpadding=0 cellspacing=10>
 				<tr>
 					<td>Start:</d>
 					<td>
@@ -26,14 +26,6 @@
 						<select name="smin" size="1">
 							#SMINOPTS#
 						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						&nbsp;
-					</td>
-					<td>
-						&nbsp;
 					</td>
 				</tr>
 				<tr>
@@ -57,31 +49,15 @@
 					</td>
 				</tr>
 				<tr>
-					<td>
-						&nbsp;
-					</td>
-					<td>
-						&nbsp;
-					</td>
-				</tr>
-				<tr>
 					<td>Channel:</td>
 					<td>
-						<input name="channel" type="text" size="100" maxlength="100" value="#CHANNEL#">
-					</td>
-				</tr>
-				<tr>
-					<td>
-						&nbsp;
-					</td>
-					<td>
-						&nbsp;
+						<input name="channel" type="text" size="100" maxlength="100" value="#CHANNEL#" style="color: #000000">
 					</td>
 				</tr>
 				<tr>
 					<td>Description:</td>
 					<td>
-						<input name="descr" type="text" size="100" maxlength="100" value="#DESCRIPTION#">
+						<input name="descr" type="text" size="100" maxlength="100" value="#DESCRIPTION#" style="color: #000000">
 					</td>
 				</tr>
 				<tr>
@@ -89,15 +65,7 @@
 						&nbsp;
 					</td>
 					<td>
-						&nbsp;
-					</td>
-				</tr>
-				<tr>
-					<td>
-						&nbsp;
-					</td>
-					<td>
-						<input type="submit" value="  Change  ">
+						<input type="submit" value="Change" size="100px" style="color:#000000">
 					</td>
 				</tr>
 			</table>
