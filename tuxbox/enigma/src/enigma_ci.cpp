@@ -6,6 +6,8 @@
 #include <lib/gui/elabel.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/eskin.h>
+#include <lib/gdi/font.h>
+
 #include <lib/system/econfig.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvbci.h>
@@ -21,17 +23,19 @@ enigmaCImmi::enigmaCImmi(): eWindow(0)
 	resize(eSize(500, 420));
 
 	tt=new eLabel(this);
+	tt->setAlign(eTextPara::dirCenter);
 	tt->setText("-- title text --");
 	tt->move(ePoint(20,10));
 	tt->resize(eSize(460,fd+4));
-	//l->realign(eTextPara::dirCenter);
 
 	stt=new eLabel(this);
+	stt->setAlign(eTextPara::dirCenter);
 	stt->setText("-- sub title text --");
 	stt->move(ePoint(20,40));
 	stt->resize(eSize(360,fd+4));
 		
 	bt=new eLabel(this);
+	bt->setAlign(eTextPara::dirCenter);
 	bt->setText("-- bottom text --");
 	bt->move(ePoint(20,220));
 	bt->resize(eSize(360,fd+4));
@@ -56,8 +60,8 @@ enigmaCImmi::enigmaCImmi(): eWindow(0)
 	lentrys->resize(eSize(460, (fd+4)*6));
 	lentrys->setFlags(eListBoxBase::flagNoPageMovement);
 	
-	for(int i=0;i<4;i++)
-		eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,"blub");
+	//for(int i=0;i<4;i++)
+	//	eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,"blub");
 
 	status = new eStatusBar(this);	
 	status->move( ePoint(0, clientrect.height()-30) );
@@ -83,15 +87,54 @@ void enigmaCImmi::abortPressed()
 	close(0);
 }
 
-void enigmaCImmi::getmmi(const char *buffer)
+void enigmaCImmi::getmmi(const char *data)
 {
 	eDebug("new mmi message received");
 	
-	for(int i=1;i<buffer[0];i++)
-		printf("%02x ",buffer[i]);
+	for(int i=1;i<data[0];i++)
+		printf("%02x ",data[i]);
 	printf("\n");
-	
+
+	if(data[5] == 0x9F && data[6] == 0x88)
+	{
+		int pos=12;
+		int menupos=0;
+		if(data[7]== 0x09)		//t_menu_last
+		{
+			int len=data[8];
+			int choice=data[8];
+			
+			eDebug("entering t_menu_last");
+			
+			while(pos<len)
+			{
+				if(data[pos++]==0x9f && data[pos++]==0x88 && data[pos++]==0x03) //fixed lines
+				{
+					int len=data[pos++];
+					char buffer[len+1];
+					eDebug("entering text_last");
+
+					memcpy(buffer,data+pos,len);
+					buffer[len]=0;
+					pos+=len;
+					
+					if(menupos==0)
+						tt->setText(buffer);					
+					if(menupos==1)
+						stt->setText(buffer);					
+					if(menupos==2)
+						bt->setText(buffer);					
+					if(menupos>2)
+					{
+						eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,"blub");
+					}							
+					menupos++;
+				}	
+			}	
+		}	
+	}	
 }
+
 
 enigmaCI::enigmaCI(): eWindow(0)
 {
