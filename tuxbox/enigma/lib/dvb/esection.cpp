@@ -410,7 +410,7 @@ void eTable::sectionFinish(int err)
 
 eTable::eTable(int pid, int tableid, int tableidext, int version)
 	:eSection(pid, tableid, tableidext, version
-	,(pid==0x14)?0:(SECREAD_INORDER|SECREAD_CRC))
+	,(pid==0x14)?0:(SECREAD_INORDER|SECREAD_CRC), (pid==0x14)?0xFC:0xFF)
 	,error(0), ready(0)
 {
 }

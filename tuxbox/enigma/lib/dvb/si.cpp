@@ -1476,14 +1476,20 @@ eTable *EIT::createNext()
 int TDT::data(__u8 *data)
 {
 	tdt_t *tdt=(tdt_t*)data;
+
+	// only table id 0x70(TDT) and 0x73(TOT) are valid
+	if ( data[0] != 0x70 && data[0] != 0x73 )
+		return -1;
+		
 	if (tdt->utc_time5!=0xFF)
 	{
 		UTC_time=parseDVBtime(tdt->utc_time1, tdt->utc_time2, tdt->utc_time3,
 			tdt->utc_time4, tdt->utc_time5);
 		return 1;
-	} else
+	} 
+	else
 	{
-		eFatal("invalide TDT::data");
+		eDebug("invalide TDT::data");
 		UTC_time=-1;
 		return -1;
 	}
