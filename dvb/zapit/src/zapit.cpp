@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.4 2001/09/30 16:49:26 faralla Exp $
+  $Id: zapit.cpp,v 1.5 2001/10/03 14:07:45 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -47,6 +47,9 @@
   cmd = 'e' change nvod (Es muss vorher auf den Basiskanal geschaltet worden sein)
   param = (onid<<16)|sid
   
+  cmd = 'f' is nvod-base-channel?
+  if true returns chans_msg2 for each nvod_channel;
+
   Bei Fehlschlagen eines Kommandos wird der negative Wert des kommandos zurückgegeben.
   
   License: GPL
@@ -66,6 +69,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.5  2001/10/03 14:07:45  faralla
+  nvod-switch-hack
+
   Revision 1.4  2001/09/30 16:49:26  faralla
   auto-pmt support added
 
@@ -121,8 +127,8 @@
 
 uint16_t old_tsid  = 0;
 uint curr_onid_sid = 0;
-secVoltage Oldvoltage = -1;
-secToneMode OldTone = -1;
+secVoltage Oldvoltage = 0;
+secToneMode OldTone = 0;
 boolean OldAC3 = false;
 char    OldParam;
 
@@ -719,7 +725,7 @@ int tune(uint tsid)
   if (caid == 0)
     caid=0x1722;
 
-  Fec_inner = 0;
+  Fec_inner = transponder->second.fec;
   
   if ( ( device = open(FRONT_DEV, O_RDWR) ) < 0 )
     {
@@ -755,6 +761,8 @@ int tune(uint tsid)
   
   return 23;
 }
+
+
 
 int zapit (uint onid_sid,boolean in_nvod) {
 
@@ -853,8 +861,8 @@ else
 	{
 	  curr_onid_sid = onid_sid;
 	  save_settings();
-	  printf("Trying to zap to %08x\n", nvodchannels.rbegin()->first);
-	  if (zapit(nvodchannels.rbegin()->first, true) > 0)
+	  printf("Trying to zap to %08x\n", nvodchannels.begin()->first);
+	  if (zapit(nvodchannels.begin()->first, true) > 0)
 	    return 3;
 	  else
 	    return -3;
@@ -1649,7 +1657,34 @@ void parse_command()
 	return;
       }
       break;
-    default:  
+    case 'f':
+      if (current_is_nvod)
+	status = "00f";
+      else
+	status = "-0f";
+      if (send(connfd, status, strlen(status),0) == -1) {
+	perror("Could not send any retun\n");
+	return;
+      }
+      if (current_is_nvod)
+	{
+	  number = 1;
+	  for (cit = nvodchannels.begin(); cit != nvodchannels.end(); cit++)
+	    {
+	      channel_msg_2 chanmsg;
+	      strncpy(chanmsg.name, cit->second.name.c_str(),30);
+	      chanmsg.chan_nr = number++;
+	      chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
+	      
+	      if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1) 
+		{
+		  perror("Could not send any retun\n");
+		  return;
+		}
+	    }
+	}
+      break;
+	default:  
       status = "000";
       //printf("zapit is sending back a status-msg %s\n", status);
       if (send(connfd, status, strlen(status),0) == -1) {
@@ -1703,7 +1738,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.4 2001/09/30 16:49:26 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.5 2001/10/03 14:07:45 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   
   testmsg = load_settings();
