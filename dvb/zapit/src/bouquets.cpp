@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.10 2002/01/30 22:41:00 Simplex Exp $
+  $Id: bouquets.cpp,v 1.11 2002/01/31 22:52:48 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.11  2002/01/31 22:52:48  Simplex
+  bugfix
+
   Revision 1.10  2002/01/30 22:41:00  Simplex
   prevent deleting special bouquet
 
@@ -380,6 +383,8 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 	ChannelList numberedChannels;
 	ChannelList unnumberedChannels;
 
+	remainChannels = addBouquet(strTitle);
+
 	for ( map<uint, channel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
 	{
 		if (it->second.chan_nr > 0)
@@ -399,8 +404,6 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 		allChannels.insert( allChannels.end(), unnumberedChannels[i]);
 	}
 
-	remainChannels = addBouquet(strTitle);
-
 	for ( uint i=0; i<allChannels.size(); i++)
 	{
 		if (tvChannelsFind( allChannels[i]->OnidSid()) == tvChannelsEnd())
@@ -410,7 +413,6 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 			remainChannels->addService( chan);
 		}
 	}
-
 
 	allChannels.clear();
 	numberedChannels.clear();
@@ -434,8 +436,6 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 	{
 		allChannels.insert( allChannels.end(), unnumberedChannels[i]);
 	}
-
-	remainChannels = addBouquet(strTitle);
 
 	for ( uint i=0; i<allChannels.size(); i++)
 	{
