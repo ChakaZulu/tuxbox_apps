@@ -54,6 +54,10 @@
 # define mktime my_mktime
 #endif /* DEBUG */
 
+#ifdef SEPARATE_MKTIME
+# define mktime separate_mktime
+#endif
+
 #ifndef __P
 # if defined __GNUC__ || (defined __STDC__ && __STDC__)
 #  define __P(args) args
@@ -382,7 +386,7 @@ mktime (struct tm *tp) __THROW
 #ifdef weak_alias
 weak_alias (mktime, timelocal)
 #endif
-
+
 #if DEBUG
 
 static int
@@ -520,7 +524,7 @@ main (argc, argv)
 }
 
 #endif /* DEBUG */
-
+
 /*
 Local Variables:
 compile-command: "gcc -DDEBUG -DHAVE_LIMITS_H -DSTDC_HEADERS -Wall -W -O -g mktime.c -o mktime"
