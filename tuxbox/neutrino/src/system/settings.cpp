@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.5 2002/05/07 23:39:11 McClean Exp $
+        $Id: settings.cpp,v 1.6 2002/05/14 21:37:06 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -112,11 +112,9 @@ bool CScanSettings::loadSettings( string fileName )
 	diseqcRepeat = configfile.getInt( "diseqcRepeat", 0 );
 	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt( "bouquetMode", CZapitClient::BM_DONTTOUCHBOUQUETS );
 
-	if (diseqcMode == NO_DISEQC)
-	{
-		strcpy( satNameNoDiseqc, configfile.getString( "satNameNoDiseqc", g_info.fe==1?"Astra 19.2E":"Telekom").c_str() );
-	}
-	else
+	strcpy( satNameNoDiseqc, configfile.getString( "satNameNoDiseqc", g_info.fe==1?"Astra 19.2E":"Telekom").c_str() );
+
+	if (diseqcMode != NO_DISEQC)
 	{
 		int satCount = configfile.getInt( "satCount", 0 );
 		for (int i=0; i<satCount; i++)
@@ -137,11 +135,8 @@ bool CScanSettings::saveSettings( string fileName )
 	configfile.setInt( "diseqcMode", diseqcMode );
 	configfile.setInt( "diseqcRepeat", diseqcRepeat );
 	configfile.setInt( "bouquetMode", bouquetMode );
-	if (diseqcMode == NO_DISEQC)
-	{
-		configfile.setString( "satNameNoDiseqc", satNameNoDiseqc );
-	}
-	else
+	configfile.setString( "satNameNoDiseqc", satNameNoDiseqc );
+	if (diseqcMode != NO_DISEQC)
 	{
 		int satCount = 0;
 		for (int i=0; i<MAX_SATELLITES; i++)
