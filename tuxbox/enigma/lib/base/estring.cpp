@@ -461,8 +461,15 @@ eString convertDVBUTF8(const unsigned char *data, int len, int table)
 	while (i < len)
 	{
 		unsigned long code=0;
-		if (i+1 < len && (code=doVideoTexSuppl(data[i], data[i+1])) )
-			i+=2;
+		if ( i+1 < len && (code=doVideoTexSuppl(data[i], data[i+1])) )
+		{
+	// argh !! workaround for Ä (0xC4) in combination with n(0x6E)
+	// see doVideoTexSuppl
+			if ( !strncmp((const char*)(data+i), "Änder", 5) )
+				code=0;
+			else
+				i+=2;
+		}
 		if (!code)
 			code=recode(data[i++], table);
 		if (!code)
