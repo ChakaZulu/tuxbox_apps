@@ -9,6 +9,7 @@ noinst_HEADERS = \
 	output.h \
 	pkt_time.h \
 	pid_mem.h \
+	packet_mem.h \
 	print_header.h 
 
 #	crc32.h
@@ -21,6 +22,7 @@ libmisc_a_SOURCES = \
 	output.c \
 	pkt_time.c \
 	pid_mem.c \
+	packet_mem.c \
 	print_header.c 
 
 #	crc32.c

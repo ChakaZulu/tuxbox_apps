@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.22 2004/03/31 21:14:23 rasc Exp $
+$Id: dmx_ts.c,v 1.23 2004/04/15 03:38:50 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dmx_ts.c,v 1.22 2004/03/31 21:14:23 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.23  2004/04/15 03:38:50  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.22  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -105,6 +109,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/print_header.h"
 
 #include "ts/tslayer.h"
+#include "ts/ts2secpes.h"
 #include "dvb_api.h"
 #include "dmx_error.h"
 #include "dmx_ts.h"
@@ -185,8 +190,13 @@ int  doReadTS (OPTION *opt)
       return -1;
     }
 
-}
+  }
 
+
+  // -- acquire TS subdecoding buffer
+  if (opt->ts_subdecode) {
+	ts2SecPesInit ();
+  }
 
 
 
@@ -235,6 +245,13 @@ int  doReadTS (OPTION *opt)
 
     } else {
 
+       // -- subdecode prev. collected TS data
+       if (opt->printdecode && opt->ts_subdecode) {
+	       ts2SecPes_subdecode (b, n);
+       }
+
+
+       // -- new packet, output header
        indent (0);
        print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
 
@@ -269,10 +286,11 @@ int  doReadTS (OPTION *opt)
 
 
 
-  /*
-    -- Stop Demux
-  */
+  // -- release TS subdecoding buffer
+  if (opt->ts_subdecode) ts2SecPesFree ();
 
+
+  // -- Stop Demux
   if (!fileMode) {
      ioctl (fd_dmx, DMX_STOP, 0);
 

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.18 2004/03/31 21:14:23 rasc Exp $
+$Id: cmdline.h,v 1.19 2004/04/15 03:38:50 rasc Exp $
 
 
  DVBSNOOP
@@ -45,6 +45,7 @@ typedef struct _OPTIONS {
   long        timeout_ms;		// read timeout in ms
   long        packet_count;		// read n packets
   int         spider_pid;		// Section PID spider mode
+  int         ts_subdecode;		// sub decode PES or SEC in TS stream
   int         time_mode;		// time print mode
   int         hide_copyright;  		// suppress message at prog start
   int         help;

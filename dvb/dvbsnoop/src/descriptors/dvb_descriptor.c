@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.30 2004/04/05 17:32:13 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.31 2004/04/15 03:38:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dvb_descriptor.c,v 1.30 2004/04/05 17:32:13 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.31  2004/04/15 03:38:50  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.30  2004/04/05 17:32:13  rasc
 mass typo fix adaption --> adaptation
 
@@ -322,7 +326,7 @@ void descriptorDVB_ServList (u_char *b)
    
 
     out_S2W_NL (4,"Service_ID: ",d2.service_id,
-	   " --> refers to PMS program_number");
+	   " --> refers to PMT program_number");
     out_S2B_NL (4,"Service_type: ",d2.service_type,
 	   dvbstrService_TYPE(d2.service_type));
     out_NL (4);
@@ -744,7 +748,7 @@ void descriptorDVB_Linkage (u_char *b)
  out_S2W_NL (4,"Original_network_ID: ",d.original_network_id,
 	dvbstrOriginalNetwork_ID(d.original_network_id));
  out_S2W_NL (4,"Service_ID: ",d.service_id,
-      " --> refers to PMS program_number");
+      " --> refers to PMT program_number");
  out_S2B_NL (4,"Linkage_type: ",d.linkage_type,
 	dvbstrLinkage_TYPE (d.linkage_type));
 
@@ -1045,7 +1049,7 @@ void descriptorDVB_NVOD_Reference  (u_char *b)
     out_S2W_NL (4,"Original_network_ID: ",d2.original_network_id,
 	  dvbstrOriginalNetwork_ID(d2.original_network_id));
     out_S2W_NL (4,"Service_ID: ",d2.service_id,
-        " --> refers to PMS program_number");
+        " --> refers to PMT program_number");
     out_NL (4);
  }
  indent (-1);
@@ -1495,7 +1499,7 @@ void descriptorDVB_Mosaic  (u_char *b)
 	out_S2W_NL (4,"Original_network_ID: ",d2.original_network_id,
 	    dvbstrOriginalNetwork_ID(d2.original_network_id));
 	out_S2W_NL (4,"Service_ID: ",d2.service_id,
-          " --> refers to PMS program_number");
+          " --> refers to PMT program_number");
 
 
 	if (d2.cell_linkage_info == 0x03)

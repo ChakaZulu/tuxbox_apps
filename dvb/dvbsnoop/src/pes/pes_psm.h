@@ -11,8 +11,8 @@
 
 */
 
-#ifndef __PES_PMS_H
-#define __PES_PMS_H 1
+#ifndef __PES_PSM_H
+#define __PES_PSM_H 1
 
 void  PES_decodePSM (u_char *b, int len);
 

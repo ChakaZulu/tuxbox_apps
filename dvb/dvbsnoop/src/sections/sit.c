@@ -1,5 +1,5 @@
 /*
-$Id: sit.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
+$Id: sit.c,v 1.9 2004/04/15 03:38:51 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: sit.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
 
 
 $Log: sit.c,v $
+Revision 1.9  2004/04/15 03:38:51  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.8  2004/02/12 21:21:21  rasc
 MHP AIT descriptors
 some smaller changes
@@ -177,7 +181,7 @@ void decode_SIT (u_char *b, int len)
 
    out_NL (3);
    out_S2W_NL (3,"Service_ID: ",s2.service_id, 
-          " --> refers to PMS program_number");
+          " --> refers to PMT program_number");
    out_SB_NL  (6,"reserved_1: ",s2.reserved_1);
    out_S2B_NL (3,"Running_status: ",s2.running_status,
           dvbstrRunningStatus_FLAG (s2.running_status));

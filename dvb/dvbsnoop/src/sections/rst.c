@@ -1,5 +1,5 @@
 /*
-$Id: rst.c,v 1.6 2004/01/02 16:40:39 rasc Exp $
+$Id: rst.c,v 1.7 2004/04/15 03:38:51 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,10 @@ $Id: rst.c,v 1.6 2004/01/02 16:40:39 rasc Exp $
 
 
 $Log: rst.c,v $
+Revision 1.7  2004/04/15 03:38:51  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.6  2004/01/02 16:40:39  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -132,7 +136,7 @@ void decode_RST (u_char *b, int len)
    out_S2W_NL (3,"Original_network_ID: ",r2.original_network_id,
         dvbstrOriginalNetwork_ID(r2.original_network_id));
    out_S2W_NL (3,"Service_ID: ",r2.service_id,
-	 " --> refers to PMS program_number"); 
+	 " --> refers to PMT program_number"); 
    out_SW_NL  (3,"Event_ID: ",r2.event_id);
    out_SB_NL  (6,"reserved_1: ",r2.reserved_1);
    out_S2B_NL (3,"Running_status: ",r2.running_status,

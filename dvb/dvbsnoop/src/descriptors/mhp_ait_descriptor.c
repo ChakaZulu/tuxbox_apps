@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.8 2004/02/21 00:50:40 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.9 2004/04/15 03:38:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: mhp_ait_descriptor.c,v 1.8 2004/02/21 00:50:40 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.9  2004/04/15 03:38:50  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.8  2004/02/21 00:50:40  rasc
 bugfix: MHP AIT descriptors
 
@@ -288,7 +292,7 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 			(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
 		outBit_Sx_NL  (4,"transport_stream_ID: ",	b, 16, 16);
 		outBit_S2Tx_NL(4,"service_ID: ",		b, 32, 16,
-			" --> refers to PMS program_number"); 
+			" --> refers to PMT program_number"); 
 		b += 6;
 		len -= 6;
 	}

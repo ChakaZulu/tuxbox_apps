@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.16 2004/02/20 22:18:39 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.17 2004/04/15 03:38:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.16 2004/02/20 22:18:39 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.17  2004/04/15 03:38:50  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.16  2004/02/20 22:18:39  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -812,7 +816,7 @@ void descriptorDSMCC_IP_MAC_StreamLocation (u_char *b)
 			(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
   outBit_Sx_NL  (4,"transport_stream_ID: ",	b, 48, 16);
   outBit_Sx     (4,"service_ID: ",		b, 64, 16);
-		out_nl (4," --> refers to PMS program_number"); 
+		out_nl (4," --> refers to PMT program_number"); 
   outBit_Sx_NL  (4,"component_tag: ",		b, 80,  8);
 
 }

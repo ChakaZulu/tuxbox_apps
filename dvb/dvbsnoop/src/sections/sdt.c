@@ -1,5 +1,5 @@
 /*
-$Id: sdt.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
+$Id: sdt.c,v 1.10 2004/04/15 03:38:51 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: sdt.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
 
 
 $Log: sdt.c,v $
+Revision 1.10  2004/04/15 03:38:51  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.9  2004/02/12 21:21:21  rasc
 MHP AIT descriptors
 some smaller changes
@@ -176,7 +180,7 @@ void decode_SDT (u_char *b, int len)
    out_NL (3);
 
    out_S2W_NL (3,"Service_id: ",s2.service_id,
-	  " --> refers to PMS program_number"); 
+	  " --> refers to PMT program_number"); 
    out_SB_NL  (6,"reserved_1: ",s2.reserved_1);
    out_SB_NL  (3,"EIT_schedule_flag: ",s2.EIT_schedule_flag);
    out_SB_NL  (3,"EIT_present_following_flag: ",s2.EIT_present_following_flag);

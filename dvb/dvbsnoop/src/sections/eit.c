@@ -1,5 +1,5 @@
 /*
-$Id: eit.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
+$Id: eit.c,v 1.10 2004/04/15 03:38:51 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: eit.c,v 1.9 2004/02/12 21:21:21 rasc Exp $
 
 
 $Log: eit.c,v $
+Revision 1.10  2004/04/15 03:38:51  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.9  2004/02/12 21:21:21  rasc
 MHP AIT descriptors
 some smaller changes
@@ -146,7 +150,7 @@ void decode_EIT (u_char *b, int len)
  out_SW_NL (5,"Section_length: ",e.section_length);
 
  out_S2W_NL (3,"Service_ID: ",e.service_id,
-	" --> refers to PMS program_number"); 
+	" --> refers to PMT program_number"); 
  if (e.service_id == 0xFFFF) out_nl (3,"  ==> EIT is scrambled");
 
  out_SB_NL (6,"reserved_3: ",e.reserved_3);

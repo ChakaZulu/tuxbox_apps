@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.33 2004/04/01 19:19:06 rasc Exp $
+$Id: cmdline.c,v 1.34 2004/04/15 03:38:50 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: cmdline.c,v 1.33 2004/04/01 19:19:06 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.34  2004/04/15 03:38:50  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.33  2004/04/01 19:19:06  rasc
 cmdline options renamed...
 
@@ -180,6 +184,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->timeout_ms = 0;		// no timeout (0) or default timeout in ms (SECTIONS)
   opt->crc = 0;
   opt->spider_pid = 0;
+  opt->ts_subdecode = 0;
   opt->packet_count = 0;
   opt->packet_header_sync = 1;
   opt->packet_mode = SECT;
@@ -219,6 +224,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-nohexdumpbuffer")) opt->buffer_hexdump = 0;
      else if (!strcmp (argv[i],"-help")) opt->help = 1;
      else if (!strcmp (argv[i],"-nph")) opt->buffer_hexdump = 0; // old option  use -ph and -nhdb/-hdb
+     else if (!strcmp (argv[i],"-tssubdecode")) opt->ts_subdecode = 1;
      else if (!strcmp (argv[i],"-spiderpid")) {
 	 opt->spider_pid = 1;
 	 opt->packet_count = 1;
@@ -309,7 +315,7 @@ static void usage (void)
     printf("   -dvr device:   dvr device [%s]\n",DVR_DEVICE);
     printf("   -frontend device: frontend   device [%s]\n",FRONTEND_DEVICE);
     printf("   -s [type]:    snoop type  [-s sec]\n");
-    printf("                   type: stream type (sec, pes or ts),\n");
+    printf("                   stream type: sec, pes or ts\n");
     printf("                   or special scan type:\n");
     printf("                         pidscan = transponder pid scan,\n");
     printf("                         bandwidth = data rate statistics for pid\n");
@@ -325,13 +331,14 @@ static void usage (void)
     printf("   -sync:        Simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -nosync:      No header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -n count:     receive count packets (0=no limit) [-n 0]\n");
-    printf("   -spiderpid:   snoop referenced pids (sets -n 1) \n");
+    printf("   -spiderpid:   snoop referenced section pids (sets -n 1) \n");
+    printf("   -tssubdecode: sub-decode sections or pes from ts stream decoding\n");
     printf("   -b:           binary output of packets (disables other output)\n");
     printf("   -if:          input file, reads from binary file instead of demux device\n");
     printf("   -ph mode:     data hex dump mode, modes: [-ph 4]\n");
     printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line 4=hexdump2\n");
     printf("   -nph:         don't print hex dump of buffer [= -nohexdumpbuffer -ph 0]\n");
-    printf("   -hexdumpbuffer:    print hex dump of read buffer [-hexdumpbuffer]\n");
+    printf("   -hexdumpbuffer:   print hex dump of read buffer [-hexdumpbuffer]\n");
     printf("   -nohexdumpbuffer: don't print hex dump of read buffer [-hexdumpbuffer]\n");
     printf("   -pd verbose:  print stream decode (verbose level 0..9) [-pd 7]\n");
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");

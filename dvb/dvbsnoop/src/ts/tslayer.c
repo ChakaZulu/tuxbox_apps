@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.17 2004/04/05 17:32:14 rasc Exp $
+$Id: tslayer.c,v 1.18 2004/04/15 03:38:51 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: tslayer.c,v 1.17 2004/04/05 17:32:14 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.18  2004/04/15 03:38:51  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.17  2004/04/05 17:32:14  rasc
 mass typo fix adaption --> adaptation
 
@@ -141,11 +145,11 @@ void decodeTS_buf (u_char *b, int len, int pid)
 
  out_SB_NL (3,"Sync-Byte: ",t.sync_byte);
  out_SB    (3,"Transport_error_indicator: ",t.transport_error_indicator);
-    if (t.transport_error_indicator) out_nl (4,"  [= Packet has uncorrectable errors!]");
+    if (t.transport_error_indicator) out_nl (3,"  [= Packet has uncorrectable errors!]");
     else out_NL (3);
 
  out_SB    (3,"Payload_unit_start_indicator: ",t.payload_unit_start_indicator);
-    if (t.payload_unit_start_indicator) out_nl (6,"  [= Packet data starts]");
+    if (t.payload_unit_start_indicator) out_nl (3,"  [= Packet data starts]");
     else out_NL (3);
 
  out_SB_NL (3,"transport_priority: ",t.transport_priority);
@@ -202,7 +206,7 @@ void decodeTS_buf (u_char *b, int len, int pid)
 	    indent (-1);
 	}
 
-    	print_databytes (4, "Data-Bytes:", b,len); 
+    	print_databytes (5, "Data-Bytes:", b,len); 
 
     indent (-1);
 
@@ -269,7 +273,7 @@ int ts_adaptation_field (u_char  *b)
 
  a.adaptation_field_length   	 		= b[0];
 
- out_SB_NL (5,"Adaptation_field_length: ",a.adaptation_field_length);
+ out_SB_NL (3,"Adaptation_field_length: ",a.adaptation_field_length);
  b  += 1;
  len = a.adaptation_field_length;
 
@@ -309,7 +313,7 @@ int ts_adaptation_field (u_char  *b)
 
      out_nl (3,"program_clock_reference_base: 0x%01lx%08lx",
      	a.program_clock_reference_baseH, a.program_clock_reference_baseL);
-     out_SB_NL (6,"reserved: ",a.reserved1);
+     out_SB_NL (3,"reserved: ",a.reserved1);
      out_nl (3,"program_clock_reference_extension: 0x%03lx",
      	a.program_clock_reference_extension);
   }
@@ -327,7 +331,7 @@ int ts_adaptation_field (u_char  *b)
      out_nl (3,"original_program_clock_reference_base: 0x%01lx%08lx",
      	a.original_program_clock_reference_baseH,
 	a.original_program_clock_reference_baseL);
-     out_SB_NL (6,"reserved: ",a.reserved2);
+     out_SB_NL (3,"reserved: ",a.reserved2);
      out_nl (3,"original_program_clock_reference_extension: 0x%03lx",
      	a.original_program_clock_reference_extension);
   }
@@ -346,9 +350,9 @@ int ts_adaptation_field (u_char  *b)
   if (a.transport_private_data_flag) {
      a.transport_private_data_length		= b[0];
 
-     out_SB_NL (5,"transport_private_data_length: ",
+     out_SB_NL (3,"transport_private_data_length: ",
 			a.transport_private_data_length);
-     print_databytes (4,"Transport_private_data:",b+1,
+     print_databytes (3,"Transport_private_data:",b+1,
 			a.transport_private_data_length);
 
      n = 1 + a.transport_private_data_length;
@@ -373,8 +377,8 @@ int ts_adaptation_field (u_char  *b)
    // Stuffing bytes
 
    if (len > 0) {
-     out_nl (5,"(Stuffing_bytes length: %d) ",len);
-     print_databytes (4,"Stuffing bytes:",b,len);
+     out_nl (3,"(Stuffing_bytes length: %d) ",len);
+     print_databytes (3,"Stuffing bytes:",b,len);
    }
 
 
@@ -425,7 +429,7 @@ int ts_adaptation_field_extension (u_char  *b)
 
  a.adaptation_field_extension_length  		= b[0];
 
- out_SB_NL (5,"Adaptation_field_extension_length: ",
+ out_SB_NL (3,"Adaptation_field_extension_length: ",
 	a.adaptation_field_extension_length);
  b  += 1;
  if (a.adaptation_field_extension_length == 0)
@@ -446,7 +450,7 @@ int ts_adaptation_field_extension (u_char  *b)
   out_SB_NL (3,"ltw_flag: ",a.ltw_flag);
   out_SB_NL (3,"piecewise_rate_flag: ",a.piecewise_rate_flag);
   out_SB_NL (3,"seamless_splice_flag: ",a.seamless_splice_flag);
-  out_SB_NL (6,"reserved: ",a.reserved1);
+  out_SB_NL (3,"reserved: ",a.reserved1);
 
 
   if (a.ltw_flag) {
@@ -467,7 +471,7 @@ int ts_adaptation_field_extension (u_char  *b)
      b   += 3;
      len -= 3;
 
-     out_SB_NL (6,"reserved: ",a.reserved2);
+     out_SB_NL (3,"reserved: ",a.reserved2);
      out_SL_NL (3,"piecewise_rate: ",a.piecewise_rate);
   }
 
@@ -485,22 +489,24 @@ int ts_adaptation_field_extension (u_char  *b)
 
 //$$$ TODO types display ??
      out_SB_NL (3,"splice_type: ",a.splice_type);
-     out_SB_NL (4,"DTS_next_AU[32..30]: ",a.DTS_next_AU32_30);
-     out_SB_NL (4,"marker_bit: ",a.marker_bit1);
-     out_SB_NL (4,"DTS_next_AU[29..15]: ",a.DTS_next_AU29_15);
-     out_SB_NL (4,"marker_bit: ",a.marker_bit2);
-     out_SB_NL (4,"DTS_next_AU[14..0]: ",a.DTS_next_AU14_0);
-     out_SB_NL (4,"marker_bit: ",a.marker_bit3);
+     out_SB_NL (3,"DTS_next_AU[32..30]: ",a.DTS_next_AU32_30);
+     out_SB_NL (3,"marker_bit: ",a.marker_bit1);
+     out_SB_NL (3,"DTS_next_AU[29..15]: ",a.DTS_next_AU29_15);
+     out_SB_NL (3,"marker_bit: ",a.marker_bit2);
+     out_SB_NL (3,"DTS_next_AU[14..0]: ",a.DTS_next_AU14_0);
+     out_SB_NL (3,"marker_bit: ",a.marker_bit3);
      out_SL_NL (3," ==> DTS_next_AU: ",
 		     (long)(a.DTS_next_AU32_30<<30) + (a.DTS_next_AU29_15<<15) +a.DTS_next_AU14_0);
   }
 
 
   if (len > 0) {
-     out_nl (6,"(Reserved Bytes length: %d) ",len);
-     print_databytes (6,"Reserved bytes:",b,len);
+     out_nl (3,"(Reserved Bytes length: %d) ",len);
+     print_databytes (3,"Reserved bytes:",b,len);
   }
 
 
  return a.adaptation_field_extension_length + 1;
 }
+
+

@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.23 2004/02/09 22:57:00 rasc Exp $
+$Id: pespacket.c,v 1.24 2004/04/15 03:38:51 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: pespacket.c,v 1.23 2004/02/09 22:57:00 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.24  2004/04/15 03:38:51  rasc
+new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
+checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
+
 Revision 1.23  2004/02/09 22:57:00  rasc
 Bugfix VBI Data descriptor
 
@@ -210,7 +214,12 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 	default:
  		if ((p.PES_packet_length==0) && ((p.stream_id & 0xF0)==0xE0)) {
 
-			 out_nl (3," ==> video elementary stream... \n");
+			 out_nl (3," ==> unbound video elementary stream... \n");
+			 if (len > 0)  {
+				indent (+1);
+				PES_decode_std (b, len, p.stream_id);
+				indent (-1);
+			 }
 
  		} else {
 
