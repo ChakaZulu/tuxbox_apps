@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/dvbstring.h,v 1.2 2002/10/07 23:36:27 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/dvbstring.h,v 1.3 2002/10/08 10:01:35 thegoodguy Exp $
  *
  * Strings conforming to the DVB Standard - d-box2 linux project
  *
@@ -31,12 +31,80 @@
 class CDVBString
 {
  private:
+	enum t_encoding {
+		ISO_8859_5     = 0x01,
+		ISO_8859_6     = 0x02,
+		ISO_8859_7     = 0x03,
+		ISO_8859_8     = 0x04,
+		ISO_8859_9     = 0x05,
+		NONE_SPECIFIED = 0x20
+	};
+
+	t_encoding encoding;
+
 	std::string content;
+
+	void add_character(unsigned char character)
+		{
+			int character_unicode_value = character;
+			switch (encoding)
+			{
+			case ISO_8859_5:
+				if ((character >= 0xA1) && (character != 0xAD))
+				{
+					switch (character)
+					{
+					case 0xF0:
+						character_unicode_value = 0x2116;
+						break;
+					case 0xFD:
+						character_unicode_value = 0x00A7;
+						break;
+					default:
+						character_unicode_value += (0x0401 - 0xA1);
+						break;
+					}
+				}
+				break;
+
+			case ISO_8859_9:
+				switch (character)
+				{
+				case 0xD0:
+					character_unicode_value = 0x011E;
+					break;
+				case 0xDD:
+					character_unicode_value = 0x0130;
+					break;
+				case 0xDE:
+					character_unicode_value = 0x015E;
+					break;
+				case 0xF0:
+					character_unicode_value = 0x011F;
+					break;
+				case 0xFD:
+					character_unicode_value = 0x0131;
+					break;
+				case 0xFE:
+					character_unicode_value = 0x015F;
+					break;
+				}
+				break;
+			default:
+				break;
+			}
+			content += Unicode_Character_to_UTF8(character_unicode_value);
+		}
 
  public:
 	CDVBString(const char * the_content, const int size)
 		{
 			int i;
+
+			if ((size > 0) && (((unsigned char)the_content[0]) >= 0x01) && (((unsigned char)the_content[0]) <= 0x05))
+				encoding = (t_encoding)((unsigned char)the_content[0]);
+			else
+				encoding = NONE_SPECIFIED;
 
 			for (i = 0; i < size; i++)                            // skip initial encoding information
 				if (((unsigned char)the_content[i]) >= 0x20)
@@ -52,11 +120,9 @@ class CDVBString
 					i++;
 					// skip characters 0x00 - 0x1F & 0x80 - 0x9F
 					if ((((unsigned char)the_content[i]) & 0x60) != 0)
-						s += the_content[i];
+						add_character((unsigned char)the_content[i]);
 				}
-				content = convert_to_UTF8(s);
 			}
-//					content = convert_to_UTF8(std::string(&(the_content[i]), size - i));
 		};
 
 	bool operator== (const CDVBString s)
@@ -71,8 +137,6 @@ class CDVBString
 		};
 
 	std::string           getContent()           { return content; };
-// TODO:
-// getEncoding()
 };
 
 #endif /* __dvbstring_h__ */
