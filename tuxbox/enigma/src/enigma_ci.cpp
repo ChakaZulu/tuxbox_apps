@@ -115,12 +115,12 @@ enigmaCI::enigmaCI()
 	status->loadDeco();
 
 	CONNECT(DVBCI->ci_progress, enigmaCI::gotCIinfoText);
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getAppName));
 
 	if( eSystemInfo::getInstance()->hasCI() > 1 )
 	{
 		CONNECT(DVBCI2->ci_progress, enigmaCI::gotCI2infoText);
-		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
+		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::getAppName));
 	}
 }
 

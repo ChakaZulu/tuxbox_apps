@@ -170,6 +170,9 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 //		eDebug("");
 		PMTaddDescriptor(message.sid, message.data);
 		break;
+	case eDVBCIMessage::getAppName:
+		ci_progress(appName);
+		break;
 /*
 // disabled... see dvbservice.cpp for more info
     

@@ -169,6 +169,7 @@ public:
 			getcaids,
 			enable_ts,
 			disable_ts,
+			getAppName
 		};
 		int type;
 		int sid;
