@@ -354,10 +354,7 @@ void eDVBRecorder::validatePIDs()
 	{
 		std::set<pid_t>::iterator i = newpids.find(*it);
 		if ( i == newpids.end() )  // no more existing pid...
-		{
-			removePID(it->pid);
-			it = pids.begin();
-		}
+			removePID((it++)->pid);
 	}
 	for (std::set<pid_t>::iterator it(newpids.begin()); it != newpids.end(); ++it )
 	{

@@ -326,10 +326,8 @@ void eDVBCI::PMTflush(int sid)
 
 			versions.erase(it->first); // remove from last send version map
 
-			services.erase(it);        // remove from known service map
-			if ( sid == -1 )
-				it=services.begin();     // start at begin of the map
-			else
+			services.erase(it++);        // remove from known service map
+			if ( sid != -1 )
 				break;     // the only one service is flushed.. break now
 		}
 		else

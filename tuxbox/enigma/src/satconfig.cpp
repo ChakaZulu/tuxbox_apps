@@ -649,14 +649,14 @@ void eSatelliteConfigurationManager::delSatellite( eSatellite* s, bool redraw, b
 	}
 	eLNB* lnb = s->getLNB();
 	lnb->deleteSatellite( s );
-	eDebug("Satellite is now removed");
+//	eDebug("Satellite is now removed");
 	if ( !lnb->getSatelliteList().size() )   // the lnb that have no more satellites must be deleted
 	{
-		eDebug("delete no more used lnb");
+//		eDebug("delete no more used lnb");
 		eTransponderList::getInstance()->getLNBs().remove( *s->getLNB() );
 	}
-	else
-		eDebug("do not delete lnb");
+//	else
+//		eDebug("do not delete lnb");
 
 	deleteEntryList.push_back(&entryMap[ s ]);
 

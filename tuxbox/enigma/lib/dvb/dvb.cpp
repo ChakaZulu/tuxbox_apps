@@ -722,6 +722,7 @@ eTransponderList::eTransponderList()
 
 void eTransponderList::removeOrbitalPosition(int orbital_position)
 {
+	std::set<tsref> removedTransponders;
 		// search for all transponders on given orbital_position
 	for (std::map<tsref,eTransponder>::iterator it(transponders.begin());
 		it != transponders.end(); )
@@ -733,35 +734,30 @@ void eTransponderList::removeOrbitalPosition(int orbital_position)
 		{
 //			eDebug("found transponder to remove");
 			t.satellite.valid=0;
-			if (!t.cable.isValid())
-			{
-//				eDebug("removing transponder");
-				// delete this transponder (including services)
-				eTransportStreamID tsid=it->first.tsid;
-				eOriginalNetworkID onid=it->first.onid;
-				eDVBNamespace dvbnamespace=it->first.dvbnamespace;
-				transponders.erase(it++); // remove transponder from list
-
-				for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator sit=services.begin();
-					sit != services.end(); )
-				{
-					const eServiceReferenceDVB &ref=sit->first;
-						// service on this transponder?
-					if ((ref.getOriginalNetworkID() == onid) &&
-							(ref.getTransportStreamID() == tsid) &&
-							(ref.getDVBNamespace() == dvbnamespace))
-					{
-//						eDebug("removing service");
-						services.erase(sit);
-						sit=services.begin();
-					}
-					else
-						++sit;
-				}
-			}
+//			eDebug("removing transponder");
+			// delete this transponder (including services)
+			removedTransponders.insert(it->second);
+			transponders.erase(it++); // remove transponder from list
 		}
 		else
 			++it;
+	}
+
+	std::set<tsref>::iterator it =
+		removedTransponders.end();
+
+	const eServiceReferenceDVB *ref = 0;
+
+	for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator sit=services.begin();
+		sit != services.end(); )
+	{
+		ref = &(sit->first);
+		tsref tmp(ref->getDVBNamespace(),ref->getTransportStreamID(),ref->getOriginalNetworkID());
+		it = removedTransponders.find(tmp);
+		if ( it != removedTransponders.end() )
+			services.erase(sit++);
+		else
+			++sit;
 	}
 }
 
@@ -940,8 +936,7 @@ void eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOr
 						break;
 					}
 				/*emit*/ service_removed(i->first);
-				services.erase(i->first);
-				i=services.begin();
+				services.erase(i++);
 				changed=true;
 		}
 

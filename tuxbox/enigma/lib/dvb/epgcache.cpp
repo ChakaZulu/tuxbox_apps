@@ -345,8 +345,7 @@ bool eEPGCache::finishEPG()
 			if ( eventDB.find( It->first ) == eventDB.end() )
 			{
 //				eDebug("REMOVE from update Map");
-				temp.erase(It);
-				It = temp.begin();
+				temp.erase(It++);
 			}
 			else
 				It++;

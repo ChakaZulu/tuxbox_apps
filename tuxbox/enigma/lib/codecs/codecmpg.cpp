@@ -447,10 +447,7 @@ a:
 						it != audiostreams.end();)
 					{
 						if ( it->second < 10 )
-						{
-							audiostreams.erase(it);
-							it = audiostreams.begin();
-						}
+							audiostreams.erase(it++);
 						else
 							++it;
 					}

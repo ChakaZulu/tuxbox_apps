@@ -367,8 +367,7 @@ void eServicePlaylistHandler::removePlaylist(const eServiceReference &service)
 			{
 				usedUniqueIDs.erase( service.data[1] );
 				found=1;
-				playlists.erase(i);
-				i=playlists.begin();
+				playlists.erase(i++);
 			}
 			else
 				++i;

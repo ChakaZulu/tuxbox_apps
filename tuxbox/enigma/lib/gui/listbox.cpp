@@ -326,7 +326,7 @@ int eListBoxBase::setCurrent(const eListBoxEntry *c, bool sendSelected )
 					invalidateEntry(oldCurPos);
 			}
 		}
-	}	else // the we start to search from begin
+	}	else // then we start to search from begin
 	{
 		bottom = childs.begin();
 

@@ -20,13 +20,13 @@ void eDVBSettings::removeDVBBouquets()
 	{
 		if ( i->bouquet_id >= 0)
 		{
-			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
+//			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
 			i = bouquets.erase(i);
 			bouquetsChanged=1;
 		}
 		else
 		{
-			eDebug("leaving bouquet '%s'", i->bouquet_name.c_str());
+//			eDebug("leaving bouquet '%s'", i->bouquet_name.c_str());
 			i++;
 		}
 	}
@@ -38,14 +38,12 @@ void eDVBSettings::removeDVBBouquet(int bouquet_id)
 	{
 		if ( i->bouquet_id == bouquet_id)
 		{
-			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
-			i = bouquets.erase(i);
+//			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
+			bouquets.erase(i);
 			bouquetsChanged=1;
+			break;
 		}
-		else
-		{
-			i++;
-		}
+		++i;
 	}
 }
 
@@ -55,9 +53,10 @@ void eDVBSettings::renameDVBBouquet(int bouquet_id, eString& new_name)
 	{
 		if ( i->bouquet_id == bouquet_id)
 		{
-			eDebug("renaming bouquet '%s' to '%s'", i->bouquet_name.c_str(), new_name.c_str());
+//			eDebug("renaming bouquet '%s' to '%s'", i->bouquet_name.c_str(), new_name.c_str());
 			i->bouquet_name=new_name;
 			bouquetsChanged=1;
+			break;
 		}
 		i++;
 	}
