@@ -1,8 +1,10 @@
+#include <string.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/file.h>
 #include <sys/time.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <linux/route.h>
@@ -35,18 +37,12 @@ static	void	scanip( char *str, unsigned char *to )
 int	netSetIP( char *dev, char *ip, char *mask, char *brdcast )
 {
 	int					fd;
-	struct sockaddr_in	*in_addr;
-	struct ifreq		*ifr;
 	struct ifreq		req;
-	struct ifconf		ifc;
-	char				buf[2048];
-	unsigned char		*addr;
-	int					n;
-	char				found=0;
 	int					rc=-1;
 	unsigned char		adr_ip[4];
 	unsigned char		adr_mask[4];
 	unsigned char		adr_brdcast[4];
+	struct sockaddr_in	addr;
 
 	fd=socket(AF_INET,SOCK_DGRAM,0);
 	if ( !fd )
@@ -56,49 +52,30 @@ int	netSetIP( char *dev, char *ip, char *mask, char *brdcast )
 	scanip( mask, adr_mask );
 	scanip( brdcast, adr_brdcast );
 
-/* alle devices auslesen */
-	ifc.ifc_len = sizeof(buf);
-	ifc.ifc_buf = buf;
+	/* init structures */
+	bzero(&req,sizeof(req));
+	strcpy(req.ifr_name,dev);
 
-	while( 1 )	/* trick jump */
-	{
-		if( ioctl(fd,(int)SIOCGIFCONF, (char*)&ifc ) < 0 )
-			break;
+	bzero(&addr,sizeof(addr));
+	addr.sin_family = AF_INET;
 
-		for( ifr = ifc.ifc_req, n = ifc.ifc_len / sizeof(struct ifreq);
-			--n >= 0;
-			ifr++ )
-		{
-			if ( !strcmp(ifr->ifr_name,dev) )
-			{
-				found=1;
-				break;
-			}
-		}
+	addr.sin_addr.s_addr = *((unsigned long *) adr_ip);
+	memcpy(&req.ifr_addr,&addr,sizeof(addr));
+	if( ioctl(fd,SIOCSIFADDR,&req) < 0 )
+		goto abbruch;
 
-		if ( !found )
-			break;
+	addr.sin_addr.s_addr = *((unsigned long *) adr_mask);
+	memcpy(&req.ifr_addr,&addr,sizeof(addr));
+	if( ioctl(fd,SIOCSIFNETMASK,&req) < 0 )
+		goto abbruch;
 
-		req = *ifr;
-		in_addr = (struct sockaddr_in *)&req.ifr_addr;
-		addr = (unsigned char*)&in_addr->sin_addr.s_addr;
+	addr.sin_addr.s_addr = *((unsigned long *) adr_brdcast);
+	memcpy(&req.ifr_addr,&addr,sizeof(addr));
+	if( ioctl(fd,SIOCSIFBRDADDR,&req) < 0 )
+		goto abbruch;
 
-		memcpy(addr,adr_ip,4);
-		if( ioctl(fd,SIOCSIFADDR,&req) == -1 )
-			break;
-
-		memcpy(addr,adr_mask,4);
-		if( ioctl(fd,SIOCSIFNETMASK,&req) == -1 )
-			break;
-
-		memcpy(addr,adr_brdcast,4);
-		if( ioctl(fd,SIOCSIFBRDADDR,&req) == -1 )
-			break;
-
-		rc=0;
-		break;
-	}
-
+	rc = 0;
+abbruch:
 	close(fd);
 
 	return rc;
@@ -107,14 +84,9 @@ int	netSetIP( char *dev, char *ip, char *mask, char *brdcast )
 void	netGetIP( char *dev, char *ip, char *mask, char *brdcast )
 {
 	int					fd;
-	struct sockaddr_in	*in_addr;
-	struct ifreq		*ifr;
 	struct ifreq		req;
-	struct ifconf		ifc;
-	char				buf[2048];
+	struct sockaddr_in	*saddr;
 	unsigned char		*addr;
-	int					n;
-	char				found=0;
 
 	*ip=0;
 	*mask=0;
@@ -124,53 +96,22 @@ void	netGetIP( char *dev, char *ip, char *mask, char *brdcast )
 	if ( !fd )
 		return;
 
-/* alle devices auslesen */
-	ifc.ifc_len = sizeof(buf);
-	ifc.ifc_buf = buf;
 
-	while( 1 )	/* trick jump */
-	{
-		if( ioctl(fd,(int)SIOCGIFCONF, (char*)&ifc ) < 0 )
-			break;
+	bzero(&req,sizeof(req));
+	strcpy(req.ifr_name,dev);
+	saddr = (struct sockaddr_in *) &req.ifr_addr;
+	addr= (unsigned char*) &saddr->sin_addr.s_addr;
 
-		for( ifr = ifc.ifc_req, n = ifc.ifc_len / sizeof(struct ifreq);
-			--n >= 0;
-			ifr++ )
-		{
-			if ( !strcmp(ifr->ifr_name,dev) )
-			{
-				found=1;
-				break;
-			}
-		}
-
-		if ( !found )
-			break;
-
-		req = *ifr;
-		in_addr = (struct sockaddr_in *)&req.ifr_addr;
-		addr=(unsigned char*)&in_addr->sin_addr.s_addr;
-
-		if( ioctl(fd,SIOCGIFADDR,&req) == -1 )
-			break;
-
+	if( ioctl(fd,SIOCGIFADDR,&req) == 0 )
 		sprintf(ip,"%d.%d.%d.%d",addr[0],addr[1],addr[2],addr[3]);
 
-		if( ioctl(fd,SIOCGIFNETMASK,&req) == -1 )
-			break;
-
+	if( ioctl(fd,SIOCGIFNETMASK,&req) == 0 )
 		sprintf(mask,"%d.%d.%d.%d",addr[0],addr[1],addr[2],addr[3]);
 
-		if( ioctl(fd,SIOCGIFBRDADDR,&req) == -1 )
-			break;
-
+	if( ioctl(fd,SIOCGIFBRDADDR,&req) == 0 )
 		sprintf(brdcast,"%d.%d.%d.%d",addr[0],addr[1],addr[2],addr[3]);
 
-		break;
-	}
-
 	close(fd);
-
 	return;
 }
 
