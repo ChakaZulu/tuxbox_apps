@@ -1,10 +1,17 @@
 #include <time.h>
 #include <qmap.h>
+#include <qfile.h>
+#include <qtextstream.h>
 #include "enigma.h"
 #include "enigma_dyn.h"
 #include "http_dyn.h"
 #include "dvb.h"
 #include "edvb.h"
+
+#include <config.h>
+
+#define TEMPLATE_DIR DATADIR+QString("/enigma/templates/")
+
 
 static QMap<QString,QString> getRequestOptions(QString opt)
 {
@@ -193,8 +200,475 @@ static QString channels_getcurrent(QString request, QString path, QString opt, c
 	return result+"\r\n";
 }
 
+
+static void unpack(__u32 l, int *t)
+{
+        for (int i=0; i<4; i++)
+                *t++=(l>>((3-i)*8))&0xFF;
+}
+
+static QString getVolume()
+{
+	return QString().setNum((63-eDVB::getInstance()->volume)*100/63, 10);
+}
+
+
+
+static QString setVolume(QString request, QString path, QString opts, const eHTTPConnection *content)
+{
+	QMap<QString,QString> opt=getRequestOptions(opts);
+	QString mute="0";
+	QString volume;
+	QString result;
+	int mut=0, vol=0;
+
+	result="Content-Type: text/html\r\n";
+	result+="\r\n";
+
+	result+="<script language=\"javascript\">window.close();</script>"; 
+	mute=opt["mute"];
+	volume=opt["volume"];
+
+	if(!mute) {
+		mut=0;
+	} else {
+		eDVB::getInstance()->changeVolume(2,1);
+		result+="[mute OK]";
+		return result;
+	}
+
+	if(volume) {
+		vol=atoi(volume);
+	} else {
+		result+="[no params]";
+		return result;
+	}
+	if(vol>10) vol=10;
+	if(vol<0) vol=0;
+
+	float temp=(float)vol;
+	temp=temp*6.3;
+	vol=(int)temp;
+
+	eDVB::getInstance()->changeVolume(1, 63-vol);
+	result+="[volume OK]";
+
+	return result;
+}
+
+
+static QString read_file(QString filename)
+{
+	QFile f(filename);
+	QString res("");
+
+	if(f.open(IO_ReadOnly))
+	{
+		QTextStream t(&f);
+		while(!t.eof()) 
+		{
+			res+=t.readLine()+"\n";
+		}  
+	} 
+	else
+	{
+		res+="file: "+filename+" not found\n";
+	}
+ 
+	return res;
+}
+
+static QString filter_string(QString string)
+{
+	string=string.replace(QRegExp("\x86"), "");
+	string=string.replace(QRegExp("\x87"), "");
+	string=string.replace(QRegExp("\x05"), "");
+	return string;
+}
+
+
+eBouquet *getBouquet(int bouquet_id)
+{
+	QList<eBouquet> bouquets;
+	
+	bouquets=*eDVB::getInstance()->getBouquets();
+
+        for (QListIterator<eBouquet> i(bouquets); i.current(); ++i)
+                if (i.current()->bouquet_id==bouquet_id)
+                        return i.current();
+        return 0;
+}
+
+
+static QString getVolBar()
+{
+	QString result="";
+	int volume=atoi(getVolume());
+
+	result+="<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
+	result+="<tr>";
+
+	for(int i=1;i<=(volume/10);i++)
+	{
+		result+="<td><a class=\"volgreen\" href=\"javascript:setVol(";
+		result+=QString().setNum(i, 10);
+		result+=")\">||</a></span></td>";  
+	}
+	for(int i=(volume/10)+1;i<=(100/10);i++)
+	{
+		result+="<td><a class=\"volnot\" href=\"javascript:setVol(";
+		result+=QString().setNum(i, 10);
+		result+=")\">||</a></span></td>";  
+	}
+
+	result+="<td>";
+ 
+	if(eDVB::getInstance()->mute==1) {
+		result+="<a class=\"mute\" href=\"javascript:unMute()\">";
+		result+="unmute";
+	} else {
+		result+="<a class=\"mute\" href=\"javascript:Mute()\">";
+		result+="mute";
+	}
+	result+="</a></td>";
+	result+="</tr>";
+	result+="</table>";
+	return result;
+}
+
+
+static QString getContent(QString mode, int bouquetid)
+{
+	QString result="";
+	QString tmp="";
+	QList<eBouquet> bouquets;
+	QList<eServiceReference> esref;
+	eService *es;
+
+	bouquets=*eDVB::getInstance()->getBouquets();
+ 
+	bouquets.sort();
+
+	if(mode=="tv")
+	{
+		result+="<form action=\"/?mode=tv\" method=\"get\" name=\"bouquetsel\">";
+		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageTV(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
+		for(QListIterator<eBouquet> i(bouquets); i.current(); ++i)
+		{
+			tmp=filter_string(i.current()->bouquet_name);
+			if(tmp.find("[TV]")>-1)
+			{
+				result+="<option value=\"" + QString().setNum(i.current()->bouquet_id, 10) + "\"";
+				if(i.current()->bouquet_id==bouquetid) 
+				{
+					result+=" selected";
+				}
+				result+=">" + i.current()->bouquet_name + "</option>";
+		}
+	}
+	result+="</select>";
+	result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
+	eBouquet *act;
+	act=getBouquet(bouquetid);
+	esref=act->list;
+	for(QListIterator<eServiceReference> j(esref); j.current(); ++j)
+	{
+		es=j.current()->service;
+		result+="<option value=\"";
+		tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
+		result+=tmp;
+		result+="\">";
+		result+=filter_string(es->service_name);
+		result+="</option>";
+	}
+	result+="</select>";
+	result+="</form>";
+	}
+
+	if(mode=="radio")
+	{
+		result+="<form action=\"/?mode=radio\" method=\"get\" name=\"bouquetsel\">";
+		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageRadio(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
+		for(QListIterator<eBouquet> i(bouquets); i.current(); ++i)
+		{
+			tmp=filter_string(i.current()->bouquet_name);
+			if(tmp.find("[Radio]")>-1)
+			{
+				result+="<option value=\"" + QString().setNum(i.current()->bouquet_id, 10) + "\"";
+				if(i.current()->bouquet_id==bouquetid) 
+				{
+					result+=" selected";
+				}
+				result+=">" + i.current()->bouquet_name + "</option>";
+			}
+		}
+		result+="</select>";
+		result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
+		eBouquet *act;
+		act=getBouquet(bouquetid);
+		esref=act->list;
+		for(QListIterator<eServiceReference> j(esref); j.current(); ++j)
+		{
+			es=j.current()->service;
+			result+="<option value=\"";
+			tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
+			result+=tmp;
+			result+="\">";
+			result+=filter_string(es->service_name);
+			result+="</option>";
+		}
+		result+="</select>";
+		result+="</form>";
+	}
+
+
+
+	 if(result.length()<3)
+		result="not ready yet";
+
+	return result;
+}
+
+static QString getCurService()
+{
+	eService *current;
+	current=eDVB::getInstance()->service;
+	return current->service_name;
+}
+
+static QString web_root(QString request, QString path, QString opts, const eHTTPConnection *content)
+{
+	QString result;
+	QMap<QString,QString> opt=getRequestOptions(opts);
+
+	QString mode=opt["mode"];
+	QString bid="1";
+
+	if(opt["bouquetid"])
+		bid=opt["bouquetid"];
+
+	int bouquetid=atoi(bid);
+
+	result ="Content-Type: text/html\r\n";
+	result+="\r\n";
+
+	result+=read_file(TEMPLATE_DIR+"index.tmp");
+ 
+	QString radioc, tvc, aboutc, linksc, updatesc;
+	QString cop;
+	QString navi;
+	QString stats;
+	QString tmp;
+	__u32 myipp=0;
+	int myip[4];
+	int bootcount=0;
+	
+	stats+="<span class=\"white\">";
+	system("/bin/uptime > /tmp/uptime");
+	tmp=read_file("/tmp/uptime");
+	stats+=tmp.mid( tmp.find("m")+1 );
+	stats+="</span> | ";
+ 
+	tmp=read_file("/proc/mounts");
+	if(!tmp.find("cramfs"))
+	{
+		stats+="<span class=\"white\">running from flash</span>";
+	} 
+	else
+	{
+		stats+="<span class=\"white\">running via net</span>";
+	} 
+	stats+=" | ";
+ 
+	eDVB::getInstance()->config.getKey("/elitedvb/network/ip", myipp);
+	unpack(myipp, myip); 
+
+	eDVB::getInstance()->config.getKey("/elitedvb/system/bootCount", bootcount);
+
+	tmp.sprintf("%d.%d.%d.%d", myip[0], myip[1], myip[2], myip[3]);
+ 
+	stats+="<span class=\"white\">"+tmp+"</span>";
+
+	stats+=" | ";
+	tmp.sprintf("<span class=\"white\">booted enigma %d times</span>", bootcount);
+	stats+=tmp;
+ 
+	tvc="normal";
+	radioc="normal";
+	aboutc="normal";
+	linksc="normal";
+	updatesc="normal";
+
+	if(!mode)
+		mode="tv";
+	if(mode=="tv")
+		tvc="white";
+	if(mode=="radio")
+		radioc="white";
+	if(mode=="about")
+		aboutc="white";
+	if(mode=="links")
+		linksc="white";
+	if(mode=="updates")
+		updatesc="white";
+
+	navi ="<a class=\"";
+	navi+=tvc;
+	navi+="\" href=\"/?mode=tv\">tv</a> | <a class=\"";
+	navi+=radioc;
+	navi+="\" href=\"/?mode=radio\">radio</a> | <a class=\"";
+	navi+=aboutc;
+	navi+="\" href=\"/?mode=about\">about</a> | <a class=\"";
+	navi+=linksc;
+	navi+="\" href=\"/?mode=links\">links</a> | <a class=\"";
+	navi+=updatesc;
+	navi+="\" href=\"/?mode=updates\">updates</a>";
+
+	tmp="<span class=\"titel\">"+mode+"</span>";
+	tmp=tmp.upper();
+
+	cop=getContent(mode, bouquetid);
+
+	QString eitc;
+
+	EIT *eit=eDVB::getInstance()->getEIT();
+	QString now_time="", now_duration="", now_text="", now_longtext="";
+	QString next_time="", next_duration="", next_text="", next_longtext="";
+ 
+	if(eit)
+	{
+		int p=0;
+
+		for(QListIterator<EITEvent> i(eit->events); i.current(); ++i)
+		{
+			EITEvent *event=i.current();
+			if(event)
+			{
+				if(p==0)
+				{
+					if(event->start_time!=0) {
+						now_time.sprintf("%s", ctime(&event->start_time));
+						now_time=now_time.mid(10, 6);
+					} else {
+						now_time="";
+					}
+					now_duration.sprintf("%d", (int)(event->duration/60));
+				}
+				if(p==1)
+				{
+					next_time.sprintf("%s", ctime(&event->start_time));
+					next_time=next_time.mid(10,6);
+					next_duration.sprintf("%d", (int)(event->duration/60));
+				}
+				for(QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
+			        {
+					Descriptor *descriptor=d.current();
+					if(descriptor->Tag()==DESCR_SHORT_EVENT)
+					{
+						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
+						switch(p)
+						{
+							case 0:
+								now_text=ss->event_name;
+								break;
+							case 1:
+								next_text=ss->event_name;
+								break;
+						}
+					}
+					if(descriptor->Tag()==DESCR_EXTENDED_EVENT)
+					{
+						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)descriptor;
+						switch(p)
+						{
+							case 0:
+								now_longtext+=ss->item_description;
+								break;
+							case 1:
+								next_longtext+=ss->item_description;
+								break;
+						}
+					}
+				}
+				p++;
+		 	}
+		}
+  
+		if(now_time!="") {
+			eitc+=read_file(TEMPLATE_DIR+"eit.tmp");
+			eitc.replace(QRegExp("#NOWT#"), now_time);
+			eitc.replace(QRegExp("#NOWD#"), now_duration);
+			eitc.replace(QRegExp("#NOWST#"), now_text);
+			eitc.replace(QRegExp("#NOWLT#"), filter_string(now_longtext));
+			eitc.replace(QRegExp("#NEXTT#"), next_time);
+			eitc.replace(QRegExp("#NEXTD#"), next_duration);
+			eitc.replace(QRegExp("#NEXTST#"), next_text);
+			eitc.replace(QRegExp("#NEXTLT#"), filter_string(next_longtext));
+		} else {
+			eitc+"eit undefined";
+		}	
+		eit->unlock();
+	}
+	else
+	{
+		eitc+="no eit";
+	}
+
+
+	result.replace(QRegExp("#STATS#"), stats);
+	result.replace(QRegExp("#NAVI#"), navi);
+	result.replace(QRegExp("#MODE#"), tmp);
+	result.replace(QRegExp("#COP#"), cop);
+	result.replace(QRegExp("#SERVICENAME#"), filter_string(getCurService()));
+	result.replace(QRegExp("#VOLBAR#"), getVolBar());
+	if(mode=="tv"||mode=="radio")
+		result.replace(QRegExp("#EIT#"), eitc);
+	else
+		result.replace(QRegExp("#EIT#"), QString(""));
+	return result;
+}
+
+static QString switchServiceWeb(QString request, QString path, QString opt, const eHTTPConnection *content)
+{
+	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
+	if (opt.find("="))
+		opt=opt.mid(opt.find("=")+1);
+        if(opt)
+ 	 sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
+	QString result;
+	
+	result="Content-Type: text/html\r\n";
+	result+="\r\n";
+	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
+	{
+		eService *meta=0;
+		for (QListIterator<eService> i(*eDVB::getInstance()->getServices()); i.current(); ++i)
+		{
+			if ((i.current()->service_id==service_id) &&
+					(i.current()->original_network_id==original_network_id) &&
+					(i.current()->transport_stream_id==transport_stream_id) &&
+					(i.current()->service_type==service_type))
+				meta=i.current();
+		}
+		if (meta)
+			eDVB::getInstance()->switchService(meta);
+		else
+			eDVB::getInstance()->switchService(service_id, original_network_id, transport_stream_id, service_type);
+		result+="<script language=\"javascript\">window.close();</script>";
+	} else
+	{
+		result+="<script language=\"javascript\">alert(\"ERROR wrong parms\")</script>";
+	}
+	return result;
+}
+
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
+	dyn_resolver->addDyn("GET", "/", web_root);
+	dyn_resolver->addDyn("GET", "/switchTo", switchServiceWeb);
+	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
+
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/listServices", listServices);
