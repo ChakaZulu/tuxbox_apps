@@ -42,8 +42,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include <dbox/avia_gt_vbi.h>
-
 #include <global.h>
 #include <neutrino.h>
 
