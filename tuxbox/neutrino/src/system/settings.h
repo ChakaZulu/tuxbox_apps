@@ -232,8 +232,9 @@ struct SNeutrinoSettings
 	int    picviewer_scaling;
 
    	//mp3player
-   	int   mp3player_display;
-   	int   mp3player_follow;
+	int   mp3player_display;
+	int   mp3player_follow;
+	char  mp3player_screensaver[3];
 };
 
 struct SglobalInfo

@@ -117,6 +117,8 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-(width+ConnectLineBox_Width)) / 2) + g_settings.screen_StartX + ConnectLineBox_Width;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height)/ 2) + g_settings.screen_StartY;
+   m_idletime=time(NULL);
+   m_screensaver=false;
 
 	if(parent)
 	{
@@ -181,9 +183,13 @@ int CMP3PlayerGui::show()
 	key_level=0;
 	while(loop)
 	{
-		updateTimes();
-		updateMP3Infos();
-		if(CNeutrinoApp::getInstance()->getMode()!=NeutrinoMessages::mode_mp3)
+      if(!m_screensaver)
+      {
+         updateTimes();
+         updateMP3Infos();
+      }
+
+      if(CNeutrinoApp::getInstance()->getMode()!=NeutrinoMessages::mode_mp3)
 		{
 			// stop if mode was changed in another thread
 			loop=false;
@@ -202,13 +208,29 @@ int CMP3PlayerGui::show()
 		}
 		g_RCInput->getMsg( &msg, &data, 10 ); // 1 sec timeout to update play/stop state display
 
-		if( msg == CRCInput::RC_home)
+		if( msg == CRCInput::RC_timeout  || msg == NeutrinoMessages::EVT_TIMER)
+		{
+         int timeout = time(NULL) - m_idletime;
+         int screensaver_timeout=0;
+         screensaver_timeout=atoi(g_settings.mp3player_screensaver);
+         if(screensaver_timeout !=0 && timeout > screensaver_timeout*60 && !m_screensaver)
+            screensaver(true);
+		}
+      else
+      {
+          m_idletime=time(NULL);
+         if(m_screensaver)
+         {
+            screensaver(false);
+         }
+      }
+		if( msg == CRCInput::RC_timeout)
+		{
+         // nothing
+      }
+		else if( msg == CRCInput::RC_home)
 		{ //Exit after cancel key
 			loop=false;
-		}
-		else if( msg == CRCInput::RC_timeout )
-		{
-			// do nothing
 		}
 		else if( msg == CRCInput::RC_left)
 		{
@@ -501,6 +523,10 @@ int CMP3PlayerGui::show()
 			loop = false;
 			g_RCInput->postMsg(msg, data);
 		}
+      else if(msg == NeutrinoMessages::EVT_TIMER)
+      {
+         CNeutrinoApp::getInstance()->handleMsg( msg, data );
+      }
 		else
 		{
 			if( CNeutrinoApp::getInstance()->handleMsg( msg, data ) == messages_return::cancel_all )
@@ -1228,23 +1254,32 @@ void CMP3PlayerGui::play(int pos)
    if(selected - liststart >= listmaxshow && g_settings.mp3player_follow)
    {
       liststart=selected;
-      paint();
+      if(!m_screensaver)
+         paint();
    }
    else if(liststart - selected < 0 && g_settings.mp3player_follow)
    {
       liststart=selected-listmaxshow+1;
-      paint();
+      if(!m_screensaver)
+         paint();
    }
    else
    {
       if(old_current - liststart >=0 && old_current - liststart < listmaxshow)
-         paintItem(old_current - liststart);
+      {
+         if(!m_screensaver)
+            paintItem(old_current - liststart);
+      }
       if(pos - liststart >=0 && pos - liststart < listmaxshow)
-         paintItem(pos - liststart);
+      {
+         if(!m_screensaver)
+            paintItem(pos - liststart);
+      }
       if(g_settings.mp3player_follow)
       {
          if(old_selected - liststart >=0 && old_selected - liststart < listmaxshow)
-            paintItem(old_selected - liststart);
+            if(!m_screensaver)
+               paintItem(old_selected - liststart);
       }
    }
 
@@ -1263,9 +1298,11 @@ void CMP3PlayerGui::play(int pos)
 	//LCD
 	paintLCD();
 	// Display
-	paintInfo();
+   if(!m_screensaver)
+      paintInfo();
 	key_level=1;
-	paintFoot();
+   if(!m_screensaver)
+      paintFoot();
 }
 
 int CMP3PlayerGui::getNext()
@@ -1353,4 +1390,23 @@ void CMP3PlayerGui::paintLCD()
 		case REV:
 			break;
 	}
+}
+
+void CMP3PlayerGui::screensaver(bool on)
+{
+   if(on)
+   {
+      m_screensaver=true;
+      frameBuffer->ClearFrameBuffer();
+   }
+   else
+   {
+      m_screensaver=false;
+      frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
+      frameBuffer->loadBackground("radiomode.raw");
+      frameBuffer->useBackground(true);
+      frameBuffer->paintBackground();
+      paint();
+      m_idletime=time(NULL);
+   }
 }

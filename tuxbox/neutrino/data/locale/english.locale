@@ -676,6 +676,7 @@ mp3player.artist_title Artist, Title
 mp3player.title_artist Title, Artist
 mp3player.display_order display order
 mp3player.follow auto select current
+mp3player.screensaver_timeout screensaver timeout (min, 0=off)
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer

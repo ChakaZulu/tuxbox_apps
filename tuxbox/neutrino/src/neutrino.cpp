@@ -511,8 +511,9 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
 	
-   	g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
-   	g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
+	g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
+	g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
+	strcpy( g_settings.mp3player_screensaver, configfile.getString( "mp3player_screensaver", "0" ).c_str() );
 
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
@@ -740,6 +741,7 @@ void CNeutrinoApp::saveSetup()
 
 	configfile.setInt32( "mp3player_display", g_settings.mp3player_display );
 	configfile.setInt32( "mp3player_follow", g_settings.mp3player_follow );
+	configfile.setString( "mp3player_screensaver", g_settings.mp3player_screensaver );
 
    if(configfile.getModifiedFlag())
 	{
@@ -1292,7 +1294,7 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( oj );
 	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
 	
-   	oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
+	oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
 	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title");
 	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, "mp3player.title_artist"); 
    	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
@@ -1301,6 +1303,8 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	oj->addOption(0, "messagebox.no"); 
 	oj->addOption(1, "messagebox.yes"); 
 	mp3PicSettings.addItem( oj );
+	CStringInput*  mp3_screensaver= new CStringInput("mp3player.screensaver_timeout", g_settings.mp3player_screensaver, 2, "", "", "0123456789 ");
+	mp3PicSettings.addItem( new CMenuForwarder("mp3player.screensaver_timeout", true, g_settings.mp3player_screensaver, mp3_screensaver ));
 }
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
@@ -3442,7 +3446,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.472 2003/06/26 05:11:46 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.473 2003/07/04 11:14:22 zwen Exp $\n\n");
 
 	tzset();
 	initGlobals();

@@ -676,6 +676,7 @@ mp3player.artist_title Interpret, Titel
 mp3player.title_artist Titel, Interpret
 mp3player.display_order Anzeige
 mp3player.follow Selektiere akt. Track
+mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer
