@@ -20,11 +20,11 @@ solitair_la_SOURCES = \
 solitair_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version -lz
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install solitair.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/solitair.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install solitair.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/solitair.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/solitair.so
-	-rm $(PLUGINDIR)/solitair.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/solitair.so
+	-rm $(DESTDIR)$(PLUGINDIR)/solitair.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

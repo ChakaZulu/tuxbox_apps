@@ -7,11 +7,11 @@ tank_la_SOURCES = board.c somain.c
 tank_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install tank.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/tank.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install tank.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/tank.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/tank.so
-	-rm $(PLUGINDIR)/tank.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/tank.so
+	-rm $(DESTDIR)$(PLUGINDIR)/tank.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

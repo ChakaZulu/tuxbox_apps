@@ -7,11 +7,11 @@ lcdcirc_la_SOURCES = lcdcirc.c
 lcdcirc_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install lcdcirc.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/lcdcirc.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install lcdcirc.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/lcdcirc.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/lcdcirc.so
-	-rm $(PLUGINDIR)/lcdcirc.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/lcdcirc.so
+	-rm $(DESTDIR)$(PLUGINDIR)/lcdcirc.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

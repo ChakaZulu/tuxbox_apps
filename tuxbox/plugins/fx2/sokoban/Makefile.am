@@ -7,15 +7,15 @@ soko_la_SOURCES = board.c somain.c
 soko_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install -d $(DATADIR)/sokoban
-	$(LIBTOOL) install soko.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/soko.cfg $(PLUGINDIR)
-	install -m 0644 $(srcdir)/*.xsb $(DATADIR)/sokoban
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install -d $(DESTDIR)$(DATADIR)/sokoban
+	$(LIBTOOL) install soko.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/soko.cfg $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/*.xsb $(DESTDIR)$(DATADIR)/sokoban
 
 uninstall-local:
-	-rm $(PLUGINDIR)/soko.so
-	-rm $(PLUGINDIR)/soko.cfg
-	-rm $(DATADIR)/sokoban/*.xsb
-	-rmdir $(PLUGINDIR)
-	-rmdir $(DATADIR)/sokoban
+	-rm $(DESTDIR)$(PLUGINDIR)/soko.so
+	-rm $(DESTDIR)$(PLUGINDIR)/soko.cfg
+	-rm $(DESTDIR)$(DATADIR)/sokoban/*.xsb
+	-rmdir $(DESTDIR)$(PLUGINDIR)
+	-rmdir $(DESTDIR)$(DATADIR)/sokoban

@@ -12,14 +12,14 @@ tetris_la_LIBADD =       \
 tetris_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install -d $(CONFIGDIR)
-	$(LIBTOOL) install tetris.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/tetris.cfg $(PLUGINDIR)
-	install -m 0644 $(srcdir)/games.cfg $(CONFIGDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install -d $(DESTDIR)$(CONFIGDIR)
+	$(LIBTOOL) install tetris.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/tetris.cfg $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/games.cfg $(DESTDIR)$(CONFIGDIR)
 
 uninstall-local:
-	-rm $(CONFIGDIR)/games.cfg
-	-rm $(PLUGINDIR)/tetris.so
-	-rm $(PLUGINDIR)/tetris.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(CONFIGDIR)/games.cfg
+	-rm $(DESTDIR)$(PLUGINDIR)/tetris.so
+	-rm $(DESTDIR)$(PLUGINDIR)/tetris.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

@@ -9,11 +9,11 @@ vierg_la_LIBADD = ../lib/libfx2.la
 vierg_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install vierg.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/vierg.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install vierg.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/vierg.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/vierg.so
-	-rm $(PLUGINDIR)/vierg.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/vierg.so
+	-rm $(DESTDIR)$(PLUGINDIR)/vierg.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

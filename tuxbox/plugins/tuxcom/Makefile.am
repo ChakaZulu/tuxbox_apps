@@ -16,7 +16,7 @@ tuxcom_la_LIBADD = \
 tuxcom_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version 
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install -d $(CONFIGDIR)
-	$(LIBTOOL) install tuxcom.la $(PLUGINDIR) 
-	install -m 0644 $(srcdir)/tuxcom.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install -d $(DESTDIR)$(CONFIGDIR)
+	$(LIBTOOL) install tuxcom.la $(DESTDIR)$(PLUGINDIR) 
+	install -m 0644 $(srcdir)/tuxcom.cfg $(DESTDIR)$(PLUGINDIR)

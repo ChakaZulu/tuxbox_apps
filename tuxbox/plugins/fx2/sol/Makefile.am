@@ -7,11 +7,11 @@ sol_la_SOURCES = solboard.c somain.c
 sol_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install sol.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/sol.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install sol.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/sol.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/sol.so
-	-rm $(PLUGINDIR)/sol.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/sol.so
+	-rm $(DESTDIR)$(PLUGINDIR)/sol.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

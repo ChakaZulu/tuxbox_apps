@@ -9,11 +9,11 @@ snake_la_LIBADD = ../lib/libfx2.la
 snake_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install snake.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/snake.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install snake.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/snake.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/snake.so
-	-rm $(PLUGINDIR)/snake.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/snake.so
+	-rm $(DESTDIR)$(PLUGINDIR)/snake.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

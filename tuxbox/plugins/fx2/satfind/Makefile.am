@@ -7,11 +7,11 @@ satfind_la_SOURCES = satfind.c
 satfind_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install satfind.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/satfind.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install satfind.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/satfind.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/satfind.so
-	-rm $(PLUGINDIR)/satfind.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/satfind.so
+	-rm $(DESTDIR)$(PLUGINDIR)/satfind.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

@@ -7,11 +7,11 @@ lemmings_la_SOURCES = somain.c sprite.c lemm.c pic.c sound.c double.c
 lemmings_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @CURL_LIBS@ -lz
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install lemmings.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/lemmings.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install lemmings.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/lemmings.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/lemmings.so
-	-rm $(PLUGINDIR)/lemmings.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/lemmings.so
+	-rm $(DESTDIR)$(PLUGINDIR)/lemmings.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

@@ -7,11 +7,11 @@ yahtzee_la_SOURCES = yahtzee.c somain.c
 yahtzee_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install yahtzee.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/yahtzee.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install yahtzee.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/yahtzee.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/yahtzee.so
-	-rm $(PLUGINDIR)/yahtzee.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/yahtzee.so
+	-rm $(DESTDIR)$(PLUGINDIR)/yahtzee.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

@@ -14,9 +14,9 @@ tuxmail_la_LIBADD = \
 tuxmail_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install -d $(CONFIGDIR)
-	install -d $(CONFIGDIR)/tuxmail
-	$(LIBTOOL) install tuxmail.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/tuxmail.cfg $(PLUGINDIR)
-	install -m 0644 $(srcdir)/tuxmail.conf $(CONFIGDIR)/tuxmail
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install -d $(DESTDIR)$(CONFIGDIR)
+	install -d $(DESTDIR)$(CONFIGDIR)/tuxmail
+	$(LIBTOOL) install tuxmail.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/tuxmail.cfg $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/tuxmail.conf $(DESTDIR)$(CONFIGDIR)/tuxmail

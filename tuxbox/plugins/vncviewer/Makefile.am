@@ -12,8 +12,8 @@ vnc_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @CONFIGFILE_LIBS@
 vnc_la_LIBADD = rfb/librfb.a
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install -d $(CONFIGDIR)
-	$(LIBTOOL) install vnc.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/vnc.cfg $(PLUGINDIR)
-	if test ! -e  $(CONFIGDIR)/vnc.conf; then cp $(srcdir)/vnc.conf $(CONFIGDIR);fi
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install -d $(DESTDIR)$(CONFIGDIR)
+	$(LIBTOOL) install vnc.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/vnc.cfg $(DESTDIR)$(PLUGINDIR)
+	if test ! -e  $(DESTDIR)$(CONFIGDIR)/vnc.conf; then cp $(srcdir)/vnc.conf $(DESTDIR)$(CONFIGDIR);fi

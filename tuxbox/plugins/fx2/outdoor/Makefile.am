@@ -7,11 +7,11 @@ outdoor_la_SOURCES = outdoor.c
 outdoor_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install outdoor.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/outdoor.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install outdoor.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/outdoor.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/outdoor.so
-	-rm $(PLUGINDIR)/outdoor.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/outdoor.so
+	-rm $(DESTDIR)$(PLUGINDIR)/outdoor.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

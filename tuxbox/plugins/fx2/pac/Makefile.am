@@ -7,11 +7,11 @@ pacman_la_SOURCES = maze.c somain.c
 pacman_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install pacman.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/pacman.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install pacman.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/pacman.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/pacman.so
-	-rm $(PLUGINDIR)/pacman.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/pacman.so
+	-rm $(DESTDIR)$(PLUGINDIR)/pacman.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

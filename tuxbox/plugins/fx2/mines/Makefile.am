@@ -7,11 +7,11 @@ mines_la_SOURCES = board.c somain.c
 mines_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	$(LIBTOOL) install mines.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/mines.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) install mines.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/mines.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/mines.so
-	-rm $(PLUGINDIR)/mines.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/mines.so
+	-rm $(DESTDIR)$(PLUGINDIR)/mines.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)
