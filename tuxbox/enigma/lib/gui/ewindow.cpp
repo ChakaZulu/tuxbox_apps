@@ -47,7 +47,8 @@ eRect eWindow::getTitleBarRect()
 
 void eWindow::redrawWidget(gPainter *target, const eRect &where)
 {
-	if ( deco && where.contains( eRect( 0,0, width(), height() ) ) )  // the draw Deco
+//	eDebug( "redraw Window where left = %i. top = %i, width = %i, height = %i", where.left(), where.top(), where.width(), where.height() );
+	if ( deco && where.contains( eRect( 0,0, width(), height() ) ) )  // then draw Deco
 		deco.drawDecoration(target, ePoint(width(), height()));	
 
 	if ( where.contains( getTitleBarRect() ) );
