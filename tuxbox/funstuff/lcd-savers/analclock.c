@@ -16,7 +16,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 
-#include "lcd-ks0713.h"
+#include <lcd-ks0713.h>
 #include "sinus.h"
 
 #define SQRT 64*64+1
