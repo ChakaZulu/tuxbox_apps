@@ -419,12 +419,11 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		off64_t offset=0;
 		if (message.type != eDVRPlayerThreadMessage::seekreal)
 		{
-			int br=10000; // assuming 3MBit bitrate...
-			br/=8;
-			
-			br*=message.parm;
+			offset=10000; // assuming 3MBit bitrate...
+			offset/=8;
+			offset*=message.parm;
+
 			buffer.clear();
-			offset=br;
 			offset-=(buffer.size()+1000*1000); // account for pvr buffer
 			if (message.type == eDVRPlayerThreadMessage::skip)
 				offset+=lseek64(sourcefd, 0, SEEK_CUR)+slice*slicesize;

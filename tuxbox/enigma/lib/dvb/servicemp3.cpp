@@ -778,10 +778,10 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			break;
 		}
 		seekbusy=128*1024; // next seek only after 128k (video) data
-		int offset=0;
+		off64_t offset=0;
 		if (message.type != eMP3DecoderMessage::seekreal)
 		{
-			int br=audiodecoder->getAverageBitrate();
+			off64_t br=audiodecoder->getAverageBitrate();
 			if ( br <= 0 )
 				break;
 			if ( type == codecMPG )
@@ -794,18 +794,16 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 				offset+=br/125;
 			else
 				offset+=br/1000;
-			eDebug("skipping %d bytes (br: %d)..", offset, br);
 			if (message.type == eMP3DecoderMessage::skip)
-				offset+=::lseek(sourcefd, 0, SEEK_CUR);
+				offset+=::lseek64(sourcefd, 0, SEEK_CUR);
 			if (offset<0)
 				offset=0;
-			eDebug("so final offset is %d", offset);
 		}
 		else
 			offset=message.parm;
 
 		input.clear();
-		if ( ::lseek(sourcefd, offset, SEEK_SET) < 0 )
+		if ( ::lseek64(sourcefd, offset, SEEK_SET) < 0 )
 			eDebug("seek error (%m)");
 		output.clear();
 		if ( type == codecMPG )
