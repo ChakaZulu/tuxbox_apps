@@ -101,17 +101,20 @@ void CLCDDisplay::resume()
 
 void CLCDDisplay::convert_data ()
 {
-	int x,y,z;
-	char tmp2[LCD_ROWS];
-	for(x=0;x < LCD_COLS;x++) {   
-		for(y=0;y < LCD_ROWS;y++) {
-			tmp2[y] = 0;
-			for(z=0;z <= 7;z++) {
-				if(raw[y * 8 + z][x] == 1){
-					tmp2[y]|=1<<z;
-				}
-			}
-			lcd[y][x] = tmp2[y];
+	unsigned int x, y, z;
+	char tmp;
+
+	for (x = 0; x < LCD_COLS; x++)
+	{   
+		for (y = 0; y < LCD_ROWS; y++)
+		{
+			tmp = 0;
+
+			for (z = 0; z < 8; z++)
+				if (raw[y * 8 + z][x] == 1)
+					tmp |= (1 << z);
+
+			lcd[y][x] = tmp;
 		}
 	}
 }
