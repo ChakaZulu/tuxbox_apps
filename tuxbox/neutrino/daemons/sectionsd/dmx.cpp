@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.7 2003/02/27 19:43:46 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.8 2003/02/27 20:48:52 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -260,6 +260,9 @@ int DMX::real_pause(void)
 
 	if (real_pauseCounter == 0)
 	{
+		stop();
+		
+		/*
 		if (ioctl(fd, DMX_STOP, 0) == -1)
 		{
 			closefd();
@@ -267,6 +270,7 @@ int DMX::real_pause(void)
 			pthread_mutex_unlock(&start_stop_mutex);
 			return 2;
 		}
+		*/
 	}
 
 	//dprintf("real_pause: %d\n", real_pauseCounter);
@@ -284,6 +288,8 @@ int DMX::real_unpause(void)
 
 	if (real_pauseCounter == 0)
 	{
+		start();
+		/*
 		if (ioctl(fd, DMX_START, 0) == -1)
 		{
 			closefd();
@@ -291,6 +297,7 @@ int DMX::real_unpause(void)
 			pthread_mutex_unlock(&start_stop_mutex);
 			return 2;
 		}
+		*/
 
 		//dprintf("real_unpause DONE: %d\n", real_pauseCounter);
 	}
