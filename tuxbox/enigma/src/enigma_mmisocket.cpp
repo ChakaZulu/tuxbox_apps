@@ -79,17 +79,21 @@ void eSocketMMIHandler::listenDataAvail(int what)
 			connfd=accept(listenfd, (struct sockaddr *) &servaddr, (socklen_t *) &clilen);
 			ssize_t length = read(connfd, msgbuffer, sizeof(msgbuffer));
 //			eDebug("got %d bytes", length);
-			if ( !length || length < 4
-				|| strncmp(msgbuffer, CMD_SET_NAME, 4) )
+			if ( !length || ( length == -1 && errno != EAGAIN ) )
 			{
-				eDebug("CMD_SET_NAME not found");
+				eDebug("Connection error.. close connection");
+				closeConn();
+			}
+			else if ( (length < 4) || strncmp(msgbuffer, CMD_SET_NAME, 4) )
+			{
+				eDebug("CMD_SET_NAME not found.. close connection");
 				closeConn();
 				break;
 			}
 			length-=4;
 			if ( !length )
 			{
-				eDebug("CMD_SET_NAME ... no more characters for name left");
+				eDebug("CMD_SET_NAME failed.. no more characters for name left");
 				closeConn();
 				break;
 			}
