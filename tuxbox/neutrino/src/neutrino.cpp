@@ -1071,9 +1071,9 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem( new CMenuForwarder("menu.back") );
 	service.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
-	service.addItem( new CMenuForwarder("timerlist.name", true, "", new CTimerList()));
 	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", &scanSettings ) );
 	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", UCodeChecker ) );
+//	service.addItem( new CMenuForwarder("timerlist.name", true, "", new CTimerList() ) );
 
 	//softupdate
 	if (softupdate)
@@ -1739,6 +1739,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 //		new CFavorites, id, true, CRCInput::RC_yellow, "gelb.raw"), false );
 
 	// -- Stream Info
+	StreamFeatureSelector.addItem( new CMenuForwarder("timerlist.name", true, "", 
+		new CTimerList(), id, true, CRCInput::RC_yellow, "gelb.raw"), false );
 	StreamFeatureSelector.addItem( new CMenuForwarder("streamfeatures.info", true, "",
 		StreamFeaturesChanger, id, true, CRCInput::RC_help, "help_small.raw"), false );
 
@@ -2023,11 +2025,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 		if ( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
 		{
-			ShowHint ( "messagebox.info", "In einer Minute wird umschaltet");
+			ShowHint ( "messagebox.info", g_Locale->getText("zaptotimer.announce") );
 		}
 		if ( msg == NeutrinoMessages::ANNOUNCE_RECORD)
 		{
-			ShowHint ( "messagebox.info", "Die Aufnahme beginnt in einer minute");
+			ShowHint ( "messagebox.info", g_Locale->getText("recordtimer.announce") );
 		}
 		if ( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
 		{
@@ -2783,7 +2785,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.313 2002/09/03 08:39:47 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.314 2002/09/04 00:16:52 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
