@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.5 2002/04/21 21:18:32 obi Exp $
+ * $Id: frontend.h,v 1.6 2002/04/24 12:11:07 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -103,12 +103,18 @@ class CFrontend
 		//void secResetOverload ();
 		const secStatus *secGetStatus ();
 
-		/* zapit api */
+		/* zapit tuner api */
 		const bool tuneChannel (CZapitChannel *channel);
 		const bool tuneFrequency (FrontendParameters feparams, uint8_t polarization, uint8_t diseqc);
-		const bool sendMiniDiseqcCommand (secToneMode mode, secVoltage voltage, uint8_t diseqc);
+
+		/* zapit diseqc api */
+		const bool sendDiseqcMiniCommand (secToneMode mode, secVoltage voltage, uint8_t diseqc);
 		const bool sendDiseqcCommand (secToneMode mode, secVoltage voltage, uint8_t diseqc, uint32_t repeats);
-		const bool sendSmatvRemoteTuningCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t frequency);
+		const bool sendDiseqcPowerOn ();
+		const bool sendDiseqcReset ();
+		const bool sendDiseqcStandby ();
+		const bool sendDiseqcZeroByteCommand (uint8_t addr, uint8_t cmd);
+		const bool sendDiseqcSmatvRemoteTuningCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t frequency);
 
 		void setDiseqcRepeats(uint32_t repeats)	{ diseqcRepeats = repeats; }
 		void setDiseqcType(diseqc_t type)	{ diseqcType = type; }

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.8 2002/04/22 18:11:56 obi Exp $
+ * $Id: frontend.cpp,v 1.9 2002/04/24 12:11:07 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -324,6 +324,8 @@ const bool CFrontend::getEvent ()
 
 	case 0:
 		std::cerr << "[CFrontend::getEvent] timeout" << std::endl;
+		failed = false;
+		tuned = true;
 		break;
 
 	default:
@@ -526,7 +528,7 @@ const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polari
 		case MINI_DISEQC:
 			if ((currentVoltage != voltage) || (currentToneMode != toneMode) || (currentDiseqc != diseqc))
 			{
-				sendMiniDiseqcCommand(toneMode, voltage, diseqc);
+				sendDiseqcMiniCommand(toneMode, voltage, diseqc);
 				secChanged = true;
 			}
 			break;
@@ -550,7 +552,7 @@ const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polari
 		case SMATV_REMOTE_TUNING:
 			if ((currentFrequency != feparams.Frequency) || (currentVoltage != voltage) || (currentToneMode != toneMode) || (currentDiseqc != diseqc))
 			{
-				sendSmatvRemoteTuningCommand(toneMode, voltage, diseqc, feparams.Frequency);
+				sendDiseqcSmatvRemoteTuningCommand(toneMode, voltage, diseqc, feparams.Frequency);
 				secChanged = true;
 			}
 			break;
@@ -570,9 +572,9 @@ const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polari
 }
 
 /*
- * zapit sec api
+ * zapit diseqc api
  */
-const bool CFrontend::sendMiniDiseqcCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc)
+const bool CFrontend::sendDiseqcMiniCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc)
 {
 	secCmdSequence *sequence = new secCmdSequence();
 
@@ -609,8 +611,58 @@ const bool CFrontend::sendMiniDiseqcCommand (secToneMode toneMode, secVoltage vo
 	}
 }
 
+const bool CFrontend::sendDiseqcPowerOn ()
+{
+	return sendDiseqcZeroByteCommand(0x10, 0x03);
+}
+
+const bool CFrontend::sendDiseqcReset ()
+{
+	return sendDiseqcZeroByteCommand(0x10, 0x00);
+}
+
+const bool CFrontend::sendDiseqcStandby ()
+{
+	return sendDiseqcZeroByteCommand(0x10, 0x02);
+}
+
+const bool CFrontend::sendDiseqcZeroByteCommand (uint8_t addr, uint8_t cmd)
+{
+	secCmdSequence *sequence = new secCmdSequence();
+	sequence->commands = new secCommand();
+
+	sequence->miniCommand = SEC_MINI_NONE;
+	sequence->continuousTone = SEC_TONE_OFF;
+	sequence->voltage = SEC_VOLTAGE_OFF;
+
+	sequence->commands[0].type = SEC_CMDTYPE_DISEQC;
+	sequence->commands[0].u.diseqc.addr = addr;
+	sequence->commands[0].u.diseqc.cmd = cmd;
+	sequence->commands[0].u.diseqc.numParams = 0;
+
+	secSendSequence(sequence);
+
+	delete sequence->commands;
+	delete sequence;
+
+	if (failed == false)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t repeats)
 {
+	if (diseqc > (repeats << 1) + 1)
+	{
+		std::cerr << "[CFrontend::sendDiseqcCommand] Not enough repeats (" << repeats << ") for requested DiSEqC position (" << diseqc << ")." << std::endl;
+		return false;
+	}
+
 	secCmdSequence *sequence = new secCmdSequence();
 	sequence->commands = new secCommand[(repeats * 2) + 1];
 
@@ -620,48 +672,53 @@ const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltag
 
 #ifdef DBOX2
 	sequence->commands[0].type = SEC_CMDTYPE_DISEQC_RAW;
-	sequence->commands[0].u.diseqc_raw.cmdtype = 0xE0;	/* from master, no reply, 1st transmission */
-	sequence->commands[0].u.diseqc_raw.addr = 0x10;		/* any lnb switcher or smatv */
-	sequence->commands[0].u.diseqc_raw.cmd = 0x38;		/* write to port group 0 (committed switches) */
-	sequence->commands[0].u.diseqc_raw.numParams = 1;
-	sequence->commands[0].u.diseqc_raw.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
-
-	for (sequence->numCommands = 1; sequence->numCommands < (repeats << 1) + 1; sequence->numCommands += 2)
-	{
-		sequence->commands[sequence->numCommands].type = SEC_CMDTYPE_DISEQC_RAW;
-		sequence->commands[sequence->numCommands].u.diseqc_raw.cmdtype = (sequence->numCommands - 1 ? 0xE1 : 0xE0);
-		sequence->commands[sequence->numCommands].u.diseqc_raw.addr = 0x10;
-		sequence->commands[sequence->numCommands].u.diseqc_raw.cmd = 0x39;		/* write to port group 1 (uncommitted switches) */
-		sequence->commands[sequence->numCommands].u.diseqc_raw.numParams = 1;
-		sequence->commands[sequence->numCommands].u.diseqc_raw.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
-		sequence->commands[sequence->numCommands + 1].type = SEC_CMDTYPE_DISEQC_RAW;
-		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.cmdtype = 0xE1;	/* from master, no reply, repeated transmission */
-		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.addr = 0x10;
-		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.cmd = 0x38;
-		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.numParams = 1;
-		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
-	}
+	sequence->commands[0].u.diseqc.cmdtype = 0xE0;	/* from master, no reply, 1st transmission */
 #else
 	sequence->commands[0].type = SEC_CMDTYPE_DISEQC;
-	sequence->commands[0].u.diseqc.addr = 0x10;
-	sequence->commands[0].u.diseqc.cmd = 0x38;
-	sequence->commands[0].u.diseqc.numParams = 1;
-	sequence->commands[0].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+#endif
+	sequence->commands[0].u.diseqc.addr = 0x10;	/* any lnb switcher or smatv */
+	sequence->commands[0].u.diseqc.cmd = 0x38;	/* write to port group 0 (committed switches) */
+
+	if ((diseqc == 0) || (diseqc == 1))
+	{
+		sequence->commands[0].u.diseqc.numParams = 1;
+		sequence->commands[0].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+	}
+	else
+	{
+		sequence->commands[0].u.diseqc.numParams = 0;
+	}
 
 	for (sequence->numCommands = 1; sequence->numCommands < (repeats << 1) + 1; sequence->numCommands += 2)
 	{
+#ifdef DBOX2
+		sequence->commands[sequence->numCommands].type = SEC_CMDTYPE_DISEQC_RAW;
+		sequence->commands[sequence->numCommands].u.diseqc.cmdtype = (sequence->numCommands - 1 ? 0xE1 : 0xE0);
+		sequence->commands[sequence->numCommands + 1].type = SEC_CMDTYPE_DISEQC_RAW;
+		sequence->commands[sequence->numCommands + 1].u.diseqc.cmdtype = 0xE1;	/* from master, no reply, repeated transmission */
+#else
 		sequence->commands[sequence->numCommands].type = SEC_CMDTYPE_DISEQC;
-		sequence->commands[sequence->numCommands].u.diseqc.addr = 0x10;
-		sequence->commands[sequence->numCommands].u.diseqc.cmd = 0x39;
-		sequence->commands[sequence->numCommands].u.diseqc.numParams = 1;
-		sequence->commands[sequence->numCommands].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
 		sequence->commands[sequence->numCommands + 1].type = SEC_CMDTYPE_DISEQC;
+#endif
+		sequence->commands[sequence->numCommands].u.diseqc.addr = 0x10;
+		sequence->commands[sequence->numCommands].u.diseqc.cmd = 0x39;		/* write to port group 1 (uncommitted switches) */
 		sequence->commands[sequence->numCommands + 1].u.diseqc.addr = 0x10;
 		sequence->commands[sequence->numCommands + 1].u.diseqc.cmd = 0x38;
-		sequence->commands[sequence->numCommands + 1].u.diseqc.numParams = 1;
-		sequence->commands[sequence->numCommands + 1].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+
+		if ((diseqc == sequence->numCommands + 1) || (diseqc == sequence->numCommands + 2))
+		{
+			sequence->commands[sequence->numCommands].u.diseqc.numParams = 1;
+			sequence->commands[sequence->numCommands].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+			sequence->commands[sequence->numCommands + 1].u.diseqc.numParams = 1;
+			sequence->commands[sequence->numCommands + 1].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+		}
+		else
+		{
+			sequence->commands[sequence->numCommands].u.diseqc.numParams = 0;
+			sequence->commands[sequence->numCommands + 1].u.diseqc.numParams = 0;
+		}
 	}
-#endif
+
 	secSendSequence(sequence);
 
 	delete sequence->commands;
@@ -678,7 +735,7 @@ const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltag
 	}
 }
 
-const bool CFrontend::sendSmatvRemoteTuningCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t frequency)
+const bool CFrontend::sendDiseqcSmatvRemoteTuningCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t frequency)
 {
 	secCmdSequence *sequence = new secCmdSequence();
 	sequence->commands = new secCommand[2];
@@ -693,6 +750,7 @@ const bool CFrontend::sendSmatvRemoteTuningCommand (secToneMode toneMode, secVol
 	sequence->commands[0].u.diseqc.cmd = 0x38;	/* write n0 */
 	sequence->commands[0].u.diseqc.numParams = 1;
 	sequence->commands[0].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+
 	sequence->commands[1].type = SEC_CMDTYPE_DISEQC;
 	sequence->commands[1].u.diseqc.addr = 0x71;	/* intelligent slave interface for multi-master bus */
 	sequence->commands[1].u.diseqc.cmd = 0x58;	/* write channel frequency */
@@ -716,5 +774,4 @@ const bool CFrontend::sendSmatvRemoteTuningCommand (secToneMode toneMode, secVol
 		return false;
 	}
 }
-
 
