@@ -1186,7 +1186,9 @@ void control::loadModes()
 	inFile.open(CONFIGDIR "/lcars/modes.lcars");
 	if (!inFile)
 	{
-		perror("modes.lcars");
+		inFile.open(DATADIR "/lcars/modes.lcars");
+		if (!inFile)
+			perror("modes.lcars");
 	}
 
 	std::string tmp_string;
@@ -1289,7 +1291,9 @@ void control::loadSubs()
 	inFile.open(CONFIGDIR "/lcars/subs.lcars");
 	if (!inFile)
 	{
-		perror("subs.lcars");
+		inFile.open(DATADIR "/lcars/subs.lcars");
+		if (!inFile)
+			perror("subs.lcars");
 	}
 
 	std::string tmp_string;
@@ -1418,7 +1422,9 @@ void control::loadMenus()
 	inFile.open(CONFIGDIR "/lcars/menus.lcars");
 	if (!inFile)
 	{
-		perror("menus.lcars");
+		inFile.open(DATADIR "/lcars/menus.lcars");
+		if (!inFile)
+			perror("menus.lcars");
 	}
 
 	std::string tmp_string;
