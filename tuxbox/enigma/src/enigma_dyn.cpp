@@ -68,6 +68,8 @@ using namespace std;
 
 #define WEBXFACEVERSION "1.2.6"
 
+static int smallScreen = 0;
+
 static int currentBouquet = 0;
 static int currentChannel = -1;
 
@@ -175,34 +177,10 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 	return result.str();
 }
 
-#if 0
-eString button(int width, eString buttonText, eString buttonColor, eString buttonRef)
-{
-	eString ref1, ref2;
-
-	std::stringstream result;
-	if (buttonRef.find("javascript") == eString::npos)
-	{
-		ref1 = "\"self.location.href='";
-		ref2 = "'\"";
-	}
-	result << "<button name=\"" << buttonText << "\""
-		"type=\"button\" style='width: " << width <<
-		"px; height: 22px; background-color: " << buttonColor <<
-		"' value=\"" << buttonText <<
-		"\" onclick=" << ref1 << buttonRef <<
-		ref2 << "><span class=\"button\">" << buttonText <<
-		"</span></button>";
-	return result.str();
-}
-#endif
-
 eString getTitle(eString title)
 {
 	std::stringstream result;
-	result << "<span class=\"title\" style=\"width: 100%; background-color: " << LIGHTGREY << "\">"
-		<< title
-		<< "</span><br><br>";
+	result << "<h1>" << title << "</h1>";
 	return result.str();
 }
 
@@ -2556,7 +2534,7 @@ public:
 								<< "</span>"
 								<< "<br><b>"
 								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\")\'>"
-								<< "<span class=\"description\">"
+								<< "<span class=\"event\">"
 								<< short_description
 								<< "</span>"
 								<< "</a>"
@@ -2564,7 +2542,11 @@ public:
 								<< "</b><br>";
 
 							if (eventDuration >= 15 * 60)
-								result << filter_string(ext_description);
+							{
+								result << "<span class=\"description\">"
+									<< filter_string(ext_description)
+									<< "</span>";
+							}
 
 							result << "</td\n>";
 							tablePos += colUnits * 15 * d_min;
@@ -2693,8 +2675,10 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
 				{
 					tm* t = localtime(&event.start_time);
+					result << "<tr valign=\"middle\">";
 #ifndef DISABLE_FILE
-					result << "<a href=\"javascript:record('"
+					result << "<td>"
+						<< "<a href=\"javascript:record('"
 						<< "ref=" << ref2string(ref)
 						<< "&ID=" << std::hex << event.event_id << std::dec
 						<< "&start=" << event.start_time
@@ -2702,9 +2686,10 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 						<< "&descr=" << ((ShortEventDescriptor*)descriptor)->event_name
 						<< "&channel=" << filter_string(current->service_name)
 						<< "')\"><img src=\"timer.gif\" border=0></a>"
-						<< "&nbsp;&nbsp;";
+						<< "</td>";
 #endif
-					result << std::setw(2) << t->tm_mday << '.'
+					result << "<td>"
+						<< std::setw(2) << t->tm_mday << '.'
 						<< std::setw(2) << t->tm_mon+1 << ". - "
 						<< std::setw(2) << t->tm_hour << ':'
 						<< std::setw(2) << t->tm_min << ' '
@@ -2713,8 +2698,9 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 						<< "&ID=" << std::hex << event.event_id << std::dec
 						<< "')\">"
 						<< ((ShortEventDescriptor*)descriptor)->event_name
-						<< "</a><br>\n";
-				}
+						<< "</a>"
+						<< "</td>"
+						<< "</tr>\n";				}
 			}
 		}
 	}
@@ -2973,7 +2959,7 @@ static eString load_recordings(eString request, eString dirpath, eString opt, eH
 static eString save_recordings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eZapMain::getInstance()->saveRecordings();
-	return "+ok";       
+	return "+ok";
 }
 #endif
 
@@ -3164,6 +3150,23 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	result = readFile(TEMPLATE_DIR + "index.tmp");
+
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		result.strReplace("#BOX#", "Dreambox");
+	else
+		result.strReplace("#BOX#", "dBox");
+
+	return result;
+}
+
+static eString web_root_small(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	smallScreen = 1;
+	result = readFile(TEMPLATE_DIR + "index_small.tmp");
 
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 		result.strReplace("#BOX#", "Dreambox");
@@ -3589,7 +3592,7 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	eString eventID = opt["ID"];
 	int eventid;
 	eString description = _("No description available");
-	
+
 	sscanf(eventID.c_str(), "%x", &eventid);
 	eDebug("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %04x", serviceRef.c_str(), eventid);
 
@@ -3623,15 +3626,10 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	}
 	if (!ext_description)
 		ext_description = _("No detailed description available");
-	description = filter_string(description);
-	ext_description = filter_string(ext_description);
 
-	result = "<html>" + eString(CHARSETMETA) + "<head><title>EPG Details</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>";
-	result += "<span class=\"title\"><b>" + description + "</b></span>";
-	result += "<p>";
-	result += ext_description;
-	result += "</body>";
-	result += "</html>";
+	result = readFile(TEMPLATE_DIR + "epgDetails.tmp");
+	result.strReplace("#EVENT#", filter_string(description));
+	result.strReplace("#BODY#", filter_string(ext_description));
 
 	return result;
 }
@@ -3786,6 +3784,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/header", header);
 	dyn_resolver->addDyn("GET", "/body", body);
 	dyn_resolver->addDyn("GET", "/blank", blank);
+	dyn_resolver->addDyn("GET", "/webrootSmall", web_root_small);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG);

@@ -5,7 +5,7 @@ function record(xy)
 
 function EPGDetails(xy)
 {
-	NewWindow('/EPGDetails?'+xy, 'EPGDetails', '600', '700', 'no');
+	NewWindow('/EPGDetails?'+xy, 'EPGDetails', '780', '400', 'no');
 }
 
 function switchChannel(xy)

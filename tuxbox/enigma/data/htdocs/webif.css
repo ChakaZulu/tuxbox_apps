@@ -25,6 +25,14 @@ body {
 	background-image: url(bg.png);
 }
 
+h1 {
+	font-size: 20px;
+}
+
+h2 {
+	font-size: 18px;
+}
+
 td {
 	font-size: 13px;
 }
@@ -100,6 +108,15 @@ a:hover {
 #contentcell .title {
 	font-size:16pt;
 }
+
+#mepg .channel { 
+	font-size: 16px;
+	font-weight: bold; 
+}
+
+#mepg .description {
+	font-size: 8px;
+}	
 
 #mepg TR {
 	background-color: #E0E6EB;
