@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.209 2002/08/31 22:30:28 obi Exp $
+ * $Id: zapit.cpp,v 1.210 2002/08/31 22:59:08 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -96,6 +96,8 @@ int connfd;
 #ifdef DBOX2
 CLcddClient lcdd;
 #endif /* DBOX2 */
+
+bool playbackStopForced = false;
 
 bool debug = false;
 
@@ -1019,11 +1021,13 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				break;
 			}
 			case CZapitClient::CMD_SB_START_PLAYBACK:
+				playbackStopForced = false;
 				startPlayBack();
 				break;
 
 			case CZapitClient::CMD_SB_STOP_PLAYBACK:
 				stopPlayBack();
+				playbackStopForced = true;
 				break;
 
 			case CZapitClient::CMD_GETPIDS:
@@ -1117,7 +1121,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.209 2002/08/31 22:30:28 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.210 2002/08/31 22:59:08 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1462,6 +1466,9 @@ void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder 
 
 int startPlayBack()
 {
+	if (playbackStopForced == true)
+		return -1;
+
 	if ((dmx_pcr_fd == -1) && (dmx_pcr_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
 		perror("[zapit] " DEMUX_DEV);
@@ -1579,6 +1586,8 @@ int startPlayBack()
 
 int stopPlayBack()
 {
+	if (playbackStopForced == true)
+		return -1;
 
 #ifdef DBOX2
 	stopVbi();
