@@ -21,12 +21,16 @@
  *
  *
  *   $Log: libavs.c,v $
+ *   Revision 1.2  2002/03/06 08:54:06  gillem
+ *   - some fixes
+ *   - add testavs
+ *
  *   Revision 1.1  2002/03/04 16:10:11  gillem
  *   - initial release
  *
  *
  *
- *   $Revision: 1.1 $
+ *   $Revision: 1.2 $
  *
  */
 
@@ -127,7 +131,7 @@ int avsGetVolume( void )
     return ret;
 }
 
-int avsSetMute( int mute )
+int avsSetMute( eSwitch mute )
 {
     int ret = -1;
     

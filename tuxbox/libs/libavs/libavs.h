@@ -21,20 +21,24 @@
  *
  *
  *   $Log: libavs.h,v $
+ *   Revision 1.2  2002/03/06 08:53:55  gillem
+ *   - some fixes
+ *   - add testavs
+ *
  *   Revision 1.1  2002/03/04 16:10:11  gillem
  *   - initial release
  *
  *
  *
- *   $Revision: 1.1 $
+ *   $Revision: 1.2 $
  *
  */
 
 #ifndef _LIBAVS_H_
 #define _LIBAVS_H_
 
-#define AVS_DEVICE	"dbox/avs0"
-#define SAA_DEVICE	"dbox/saa0"
+#define AVS_DEVICE	"/dev/dbox/avs0"
+#define SAA_DEVICE	"/dev/dbox/saa0"
 
 typedef enum ePort
 {
@@ -52,18 +56,24 @@ typedef enum eSource
 
 typedef enum eMode
 {
-    emNone,
+    emNONE,
     emCVBS,
     emRGB,
     emYC
 } eMode;
+
+typedef enum eSwitch
+{
+	esOFF = 0,
+	esON
+} eSwitch;
 
 int avsInit( int debug );
 void avsDeInit( void );
 
 int avsSetVolume( int vol );
 int avsGetVolume( void );
-int avsSetMute( int mute );
+int avsSetMute( eSwitch mute );
 
 int avsSetRoute( ePort port, eSource source, eMode mode );
 
