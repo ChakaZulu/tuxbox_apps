@@ -33,7 +33,7 @@
 
 #define LCDD_PORT 1510
 
-#define LCDD_VERSION 2
+#define LCDD_VERSION 3
 
 /* Aaaaaalso gut, damit ihr lcdd-Benutzer wisst, was ihr machen könnt, hier
  * eine Kurze Übersicht der Befehle.
@@ -42,7 +42,7 @@
  * LC_VOLUME    erwartet in param einen Wert 0..100 und zeigt das als Balken an
  * LC_MUTE      erwartet in param LC_MUTE_ON oder _OFF und zeigt das an
  * LC_SET_MODE  ändert den Anzeigemodus entsprechend dem lcdd_mode in param
- * LC_MENU_MSG  zeigt ein Menü mit param3=Titel und param4=Inhalt
+ * LC_MENU_MSG  ändert Zeile param im Menü zu param3
  * LC_POWEROFF  zeigt shutdown-logo und beendet lcdd.
  */
 enum lcdd_cmd {
@@ -61,7 +61,7 @@ enum lcdd_cmd {
 /* param für LC_SET_MODE-Befehl,
  *
  * LCDM_TV        Normaler Anzeigemodus von Kanal (gross), Lautstärke und Zeit
- * LCDM_MENU      Menü-Ansicht (param=Markierung; p3=Titel; p4[0..3]=Inhalt)
+ * LCDM_MENU      Menü-Ansicht (param=Zeilennummer; p3=Inhalt)
  * LCDM_SAVER     Startet einen Screenhack der eigenen Wahl (irgendwann mal)
  * LCDM_POWEROFF  Setzt shutdown-Logo, beendet aber NICHT den lcdd.
  */
@@ -78,7 +78,9 @@ struct lcdd_msg {
   unsigned char param;
   unsigned short param2;
   char param3[30];
-  char param4[10][30];
+  // XXX +++ WARNING +++ XXX
+  // changed interface
+  //char param4[10][30];
 }__attribute((packed));
 
 

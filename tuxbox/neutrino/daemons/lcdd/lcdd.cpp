@@ -38,6 +38,9 @@
 #include <time.h>
 #include "pthread.h"
 
+/* Signal quality */
+#include <ost/frontend.h>
+
 #include "lcdd.h"
 
 
@@ -59,7 +62,7 @@ bool			muted, shall_exit;
 void show_channelname(char *);
 void show_volume(unsigned char);
 void show_menu(lcdd_msg msg);
-void set_mode(lcdd_mode);
+void set_mode(lcdd_mode, char *title);
 void set_poweroff();
 
 void parse_command(lcdd_msg rmsg) {
@@ -92,13 +95,13 @@ void parse_command(lcdd_msg rmsg) {
 		show_volume(volume);
 		break;
 	case LC_SET_MODE:
-		set_mode((lcdd_mode)rmsg.param);
+		set_mode((lcdd_mode)rmsg.param, rmsg.param3);
 		break;
 	case LC_MENU_MSG:
 		show_menu(rmsg);
 		break;
 	case LC_POWEROFF:
-		set_mode(LCDM_POWEROFF);
+		set_mode(LCDM_POWEROFF, NULL);
 		shall_exit = true;
 		break;
 	default: 
@@ -127,6 +130,14 @@ void show_time()
 	display.update();
 }
 
+
+void show_signal() {
+	int sig;
+
+	sig = 1;
+}
+
+
 void show_volume(unsigned char vol)
 {
 	if (mode!=LCDM_TV) return;
@@ -138,24 +149,22 @@ void show_volume(unsigned char vol)
 	display.update();
 }
 
-
 void show_menu(lcdd_msg msg) {
 	int i;
 
+	/* WARNING: interface change; if something doesn't work, read lcdd.h */
 	mode = LCDM_MENU;
-	display.load_screen(&icon_setup);
-	fonts.channelname->RenderString(1,15, 120, msg.param3, CLCDDisplay::PIXEL_ON);
-	for (i=0; i<4; i++) {
-		if (i==msg.param) {
-			display.draw_fill_rect (0,18+11*i,120,30+11*i, CLCDDisplay::PIXEL_ON);
-		}
-		fonts.menu->RenderString(1,27+11*i, 120, msg.param4[i], CLCDDisplay::PIXEL_INV);
-	}
+	//display.load_screen(&icon_setup);
+	// reload specified line
+	i = msg.param;
+	display.draw_fill_rect(0,17+11*i,120,29+11*i, CLCDDisplay::PIXEL_OFF);
+	fonts.menu->RenderString(1,27+11*i, 120, msg.param3,
+	    CLCDDisplay::PIXEL_ON);
 	display.update();
 }
 
 
-void set_mode(lcdd_mode m) {
+void set_mode(lcdd_mode m, char *title) {
 	//int y, t;
 	//raw_display_t s;
 	switch (m) {
@@ -170,6 +179,8 @@ void set_mode(lcdd_mode m) {
 	case LCDM_MENU:
 		mode = m;
 		display.load_screen(&icon_setup);
+		fonts.channelname->RenderString(1,15, 120, title,
+		    CLCDDisplay::PIXEL_ON);
 		display.update();
 		break;
 	case LCDM_POWEROFF:
