@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.18 2001/07/16 15:57:58 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.19 2001/07/17 02:38:56 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.19  2001/07/17 02:38:56  fnbrd
+//  Fehlertoleranter
+//
 //  Revision 1.18  2001/07/16 15:57:58  fnbrd
 //  Parameter -d fuer debugausgaben
 //
@@ -125,32 +128,117 @@ static SIservices services; // die Menge mit den services (aus der sdt)
 static pthread_mutex_t eventsLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
 static pthread_mutex_t servicesLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
 static pthread_mutex_t dmxEITlock=PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t dmxSDTlock=PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t dmxEITnvodLock=PTHREAD_MUTEX_INITIALIZER;
 static int dmxEITfd=0;
+static int dmxSDTfd=0;
 static int dmxEITfd2=0;
 
+static int startDMXeit(void)
+{
+  if ((dmxEITfd = open("/dev/ost/demux0", O_RDWR)) == -1) {
+    perror ("/dev/ost/demux0");
+    return 1;
+  }
+  if (ioctl (dmxEITfd, DMX_SET_BUFFER_SIZE, 384*1024) == -1) {
+    close(dmxEITfd);
+    dmxEITfd=0;
+    perror ("DMX_SET_BUFFER_SIZE");
+    return 2;
+  }
+  struct dmxSctFilterParams flt;
+  memset (&flt.filter, 0, sizeof (struct dmxFilter));
+  flt.pid              = 0x12;
+  flt.filter.filter[0] = 0x50; // schedule
+  flt.filter.mask[0]   = 0xf0; // -> 5x
+  flt.timeout          = 0;
+  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+
+  if (ioctl (dmxEITfd, DMX_SET_FILTER, &flt) == -1) {
+    close(dmxEITfd);
+    dmxEITfd=0;
+    perror ("DMX_SET_FILTER");
+    return 3;
+  }
+  pthread_mutex_unlock(&dmxEITlock);
+  return 0;
+}
+
 static int stopDMXeit(void)
+{
+  pthread_mutex_lock(&dmxEITlock);
+  close(dmxEITfd);
+  dmxEITfd=0;
+  return 0;
+}
+
+static int pauseDMXeit(void)
 {
   pthread_mutex_lock(&dmxEITlock);
   if (ioctl (dmxEITfd, DMX_STOP, 0) == -1) {
     close(dmxEITfd);
     dmxEITfd=0;
     perror ("DMX_STOP");
-    return -1;
+    return 1;
   }
   return 0;
 }
 
-static int startDMXeit(void)
+static int unpauseDMXeit(void)
 {
   if (ioctl (dmxEITfd, DMX_START, 0) == -1) {
     close(dmxEITfd);
     dmxEITfd=0;
     perror ("DMX_START");
     pthread_mutex_unlock(&dmxEITlock);
-    return -1;
+    return 4;
   }
   pthread_mutex_unlock(&dmxEITlock);
+  return 0;
+}
+
+static int startDMXsdt(void)
+{
+  if ((dmxSDTfd = open("/dev/ost/demux0", O_RDWR)) == -1) {
+    perror ("/dev/ost/demux0");
+    return 1;
+  }
+  struct dmxSctFilterParams flt;
+  memset (&flt.filter, 0, sizeof (struct dmxFilter));
+  flt.pid              = 0x11;
+  flt.filter.filter[0] = 0x42;
+  flt.filter.mask[0]   = 0xff;
+  flt.timeout          = 0;
+  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+  if (ioctl (dmxSDTfd, DMX_SET_FILTER, &flt) == -1) {
+    close(dmxSDTfd);
+    dmxSDTfd=0;
+    perror ("DMX_SET_FILTER");
+    return 2;
+  }
+  pthread_mutex_unlock(&dmxSDTlock);
+  return 0;
+}
+
+static int stopDMXsdt(void)
+{
+  pthread_mutex_lock(&dmxSDTlock);
+  close(dmxSDTfd);
+  dmxSDTfd=0;
+  return 0;
+}
+
+
+static int startDMXeitNVOD(void)
+{
+  if (ioctl (dmxEITfd2, DMX_START, 0) == -1) {
+    close(dmxEITfd2);
+    dmxEITfd2=0;
+    perror ("DMX_START");
+    pthread_mutex_unlock(&dmxEITnvodLock);
+    return -1;
+  }
+  pthread_mutex_unlock(&dmxEITnvodLock);
   return 0;
 }
 
@@ -163,19 +251,6 @@ static int stopDMXeitNVOD(void)
     perror ("DMX_STOP");
     return -1;
   }
-  return 0;
-}
-
-static int startDMXeitNVOD(void)
-{
-  if (ioctl (dmxEITfd2, DMX_START, 0) == -1) {
-    close(dmxEITfd2);
-    dmxEITfd2=0;
-    perror ("DMX_START");
-    pthread_mutex_unlock(&dmxEITnvodLock);
-    return -1;
-  }
-  pthread_mutex_unlock(&dmxEITnvodLock);
   return 0;
 }
 
@@ -302,7 +377,7 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
   data[dataLength-1]=0; // to be sure it has an trailing 0
   dprintf("Request of current/next information for '%s'\n", data);
 
-  if(stopDMXeit())
+  if(pauseDMXeit())
     return;
   pthread_mutex_lock(&eventsLock);
   pthread_mutex_lock(&servicesLock);
@@ -348,7 +423,7 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
     }
   }
   pthread_mutex_unlock(&eventsLock);
-  startDMXeit();
+  unpauseDMXeit();
 
   // response
   struct msgSectionsdResponseHeader pmResponse;
@@ -371,7 +446,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   data[dataLength-1]=0; // to be sure it has an trailing 0
   dprintf("Request of actual EPG for '%s'\n", data);
 
-  if(stopDMXeit())
+  if(pauseDMXeit())
     return;
   pthread_mutex_lock(&eventsLock);
   pthread_mutex_lock(&servicesLock);
@@ -409,7 +484,7 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
   else
     dprintf("actual EPG not found!\n");
   pthread_mutex_unlock(&eventsLock);
-  startDMXeit();
+  unpauseDMXeit();
 
   // response
   struct msgSectionsdResponseHeader pmResponse;
@@ -430,7 +505,7 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
     return;
   }
   *evtList=0;
-  if(stopDMXeit())
+  if(pauseDMXeit())
     return;
   pthread_mutex_lock(&servicesLock);
   pthread_mutex_lock(&eventsLock);
@@ -446,7 +521,7 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
     } // if TV
   pthread_mutex_unlock(&eventsLock);
   pthread_mutex_unlock(&servicesLock);
-  startDMXeit();
+  unpauseDMXeit();
   struct msgSectionsdResponseHeader msgResponse;
   msgResponse.dataLength=strlen(evtList)+1;
   if(msgResponse.dataLength==1)
@@ -505,62 +580,42 @@ struct connectionData *client=(struct connectionData *)conn;
 //*********************************************************************
 static void *sdtThread(void *)
 {
-int fd;
 struct SI_section_header header;
-struct dmxSctFilterParams flt;
 char *buf;
 const unsigned timeoutInSeconds=2;
 
   dprintf("sdt-thread started.\n");
-  memset (&flt.filter, 0, sizeof (struct dmxFilter));
-  flt.pid              = 0x11;
-  flt.filter.filter[0] = 0x42;
-  flt.filter.mask[0]   = 0xff;
-//  flt.filter.mask[0]   = 0xff;
-  flt.timeout          = 0;
-  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-
-  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
+  pthread_mutex_lock(&dmxSDTlock);
+  if(startDMXsdt()) // -> unlock
     return 0;
-//    return 1;
-  }
-  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
-    close(fd);
-    perror ("DMX_SET_FILTER");
-    return 0;
-//    return 2;
-  }
   for(;;) {
-    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+    pthread_mutex_lock(&dmxSDTlock);
+    int rc=readNbytes(dmxSDTfd, (char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
-//      return 0; // timeout -> kein EPG
+      pthread_mutex_unlock(&dmxSDTlock);
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
-      close(fd);
-//      perror ("read header");
+      pthread_mutex_unlock(&dmxSDTlock);
       break;
-//      return 3;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
+      pthread_mutex_unlock(&dmxSDTlock);
       fprintf(stderr, "Not enough memory!\n");
       break;
     }
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
-    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    rc=readNbytes(dmxSDTfd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    pthread_mutex_unlock(&dmxSDTlock);
     if(!rc) {
       delete[] buf;
       continue; // timeout -> kein EPG
-//      return 0; // timeout -> kein EPG
     }
     else if(rc<0) {
-//      perror ("read section");
       delete[] buf;
       break;
-//      return 5;
     }
     if(header.current_next_indicator) {
       // Wir wollen nur aktuelle sections
@@ -578,7 +633,8 @@ const unsigned timeoutInSeconds=2;
     else
       delete[] buf;
   } // for
-  close(fd);
+  close(dmxSDTfd);
+  dmxSDTfd=0;
   dprintf("sdt-thread ended\n");
   return 0;
 }
@@ -804,39 +860,13 @@ int timeset=0;
 static void *eitThread(void *)
 {
 struct SI_section_header header;
-struct dmxSctFilterParams flt;
 char *buf;
 const unsigned timeoutInSeconds=2;
 
   dprintf("eit-thread started.\n");
-  memset (&flt.filter, 0, sizeof (struct dmxFilter));
-  flt.pid              = 0x12;
-//  flt.filter.filter[0] = 0x4e; // present/following
-//  flt.filter.mask[0]   = 0xfe; // -> 4e und 4f
-  flt.filter.filter[0] = 0x50; // schedule
-  flt.filter.mask[0]   = 0xf0; // -> 5x
-  flt.timeout          = 0;
-  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-
-  if ((dmxEITfd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
+  pthread_mutex_lock(&dmxEITlock);
+  if(startDMXeit()) // -> unlock
     return 0;
-//    return 1;
-  }
-  if (ioctl (dmxEITfd, DMX_SET_BUFFER_SIZE, 512*1024) == -1) {
-    close(dmxEITfd);
-    dmxEITfd=0;
-    perror ("DMX_SET_BUFFER_SIZE");
-    return 0;
-//    return 2;
-  }
-  if (ioctl (dmxEITfd, DMX_SET_FILTER, &flt) == -1) {
-    close(dmxEITfd);
-    dmxEITfd=0;
-    perror ("DMX_SET_FILTER");
-    return 0;
-//    return 2;
-  }
   for(;;) {
     pthread_mutex_lock(&dmxEITlock);
     int rc=readNbytes(dmxEITfd, (char *)&header, sizeof(header), timeoutInSeconds);
@@ -1005,6 +1035,8 @@ static void *houseKeepingThread(void *)
     dprintf("housekeeping.\n");
     if(stopDMXeit())
       return 0;
+    if(stopDMXsdt())
+      return 0;
 //    if(stopDMXeitNVOD())
 //      return 0;
     pthread_mutex_lock(&eventsLock);
@@ -1027,6 +1059,8 @@ static void *houseKeepingThread(void *)
     pthread_mutex_unlock(&servicesLock);
     if(startDMXeit())
       return 0;
+    if(startDMXsdt())
+      return 0;
 //    if(startDMXeitNVOD())
 //      return 0;
     // Speicher-Info abfragen
@@ -1048,7 +1082,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.18 2001/07/16 15:57:58 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.19 2001/07/17 02:38:56 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
