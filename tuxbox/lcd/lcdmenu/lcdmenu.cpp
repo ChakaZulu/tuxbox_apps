@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.5 2001/11/16 20:05:36 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.6 2001/11/16 20:49:04 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.6  2001/11/16 20:49:04  obi
+ * - option show_numbers now works with config file too
+ *
  * Revision 1.5  2001/11/16 20:05:36  obi
  * - pin does really work now, can be checked, changed and saved :)
  * - default selection is visible again on startup
@@ -35,11 +38,6 @@
  * Revision 1.2  2001/11/14 22:42:06  obi
  * fall back to defaults correctly
  *
- */
-
-/*
- * TODO - fix show_numbers has no effect when
- *        reading options from a file
  */
 
 #include "lcdmenu.h"
@@ -87,8 +85,22 @@ CLCDMenu::CLCDMenu()
     pinEntries = config->getIntVector("pin_protect");
     entryCount = entries.size();
 
+    if (showNumbers)
+	addNumberPrefix();
+
     newSalt = getNewSalt();
     menuFont = fontRenderer->getFont("Arial", "Bold", fontSize);
+}
+
+void CLCDMenu::addNumberPrefix()
+{
+    int i;
+    for(i=0; i<entryCount; i++)
+    {
+        char *entryCountChar = (char *) malloc(sizeof(i+1)+2);
+        sprintf(entryCountChar, "%d) ", i+1);
+        entries[i] = string(entryCountChar) + entries[i];
+    }
 }
 
 const char *CLCDMenu::getCurrentSalt()
@@ -118,16 +130,7 @@ CLCDMenu::~CLCDMenu()
 void CLCDMenu::addEntry(string title)
 {
     entryCount++;
-    if (showNumbers)
-    {
-	char *entryCountChar = (char *) malloc(sizeof(entryCount)+2);
-	sprintf(entryCountChar, "%d) ", entryCount);
-	entries.push_back(string(entryCountChar) + title);
-    }
-    else
-    {
-        entries.push_back(title);
-    }
+    entries.push_back(title);
 }
 
 void CLCDMenu::addPinProtection(int index)
@@ -297,9 +300,7 @@ bool CLCDMenu::isPinProtected(int entry)
 	for (i=0; i<pinEntries.size(); i++)
 	{
 		if (pinEntries[i]-1 == entry)
-		{
 			return true;
-		}
 	}
 	return false;
 }
@@ -383,13 +384,9 @@ string CLCDMenu::pinScreen(string title, bool isNewPin)
     }
 
     if (isNewPin)
-    {
         return string(crypt(pin.c_str(), newSalt));
-    }
     else
-    {
         return string(crypt(pin.c_str(), getCurrentSalt()));
-    }
 }
 
 bool CLCDMenu::checkPin(string title)
@@ -414,7 +411,7 @@ bool CLCDMenu::checkPin(string title)
 int main(int argc, char **argv)
 {
     /* print version information */
-    cout << "$Id: lcdmenu.cpp,v 1.5 2001/11/16 20:05:36 obi Exp $" << endl;
+    cout << "$Id: lcdmenu.cpp,v 1.6 2001/11/16 20:49:04 obi Exp $" << endl;
 
     /* create menu instance */
     CLCDMenu *menu = new CLCDMenu();

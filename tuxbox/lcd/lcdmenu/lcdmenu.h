@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.3 2001/11/16 20:05:36 obi Exp $
+ * $Id: lcdmenu.h,v 1.4 2001/11/16 20:49:04 obi Exp $
  *
  * Copyright (C) 2001 Andreas Oberritter <obi@saftware.de>
  *
@@ -50,6 +50,7 @@ class CLCDMenu : public CLCDDisplay
 	bool selectEntry(int);
 	int getDefaultEntry() { return defaultEntry; }
 	int getSelectedEntry() { return selectedEntry; }
+	void addNumberPrefix();
 
 	bool drawMenu();
 	bool drawString(string, int, int, int);
