@@ -32,6 +32,7 @@ public:
 	eXMLRPCVariant(double *_double);
 //	eXMLRPCVariant(QDateTime *_datetime);
 //	eXMLRPCVariant(QByteArray *_base64);
+	eXMLRPCVariant(const eXMLRPCVariant &c);
 	~eXMLRPCVariant();
 	
 	std::map<eString,eXMLRPCVariant*> *getStruct();

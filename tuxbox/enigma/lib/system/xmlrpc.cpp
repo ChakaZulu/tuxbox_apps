@@ -69,6 +69,28 @@ eXMLRPCVariant::eXMLRPCVariant(double *__double)
 	_base64=__base64;
 } */
 
+eXMLRPCVariant::eXMLRPCVariant(const eXMLRPCVariant &c)
+{
+	zero();
+	if (c._i4)
+		_i4=new int(*c._i4);
+	if (c._boolean)
+		_boolean=new bool(*c._boolean);
+	if (c._string)
+		_string=new eString(*c._string);
+	if (c._double)
+		_double=new double(*c._double);
+	// datetime, base64
+	if (c._struct)
+	{
+		_struct=new std::map<eString,eXMLRPCVariant*>;
+		for (std::map<eString,eXMLRPCVariant*>::iterator b(c._struct->begin()); b != c._struct->end(); ++b)
+			_struct->insert(std::pair<eString,eXMLRPCVariant*>(b->first, new eXMLRPCVariant(*b->second)));
+	}
+	if (c._array)
+		_array = new std::vector<eXMLRPCVariant>(*c._array);
+}
+
 eXMLRPCVariant::~eXMLRPCVariant()
 {
 	if (_struct)
@@ -333,7 +355,7 @@ int eXMLRPCResponse::doCall()
 	std::vector<eXMLRPCVariant> vparams;
 
 	// copy ePtrList to std::vector
-	for (ePtrList<eXMLRPCVariant>::iterator it(ret); it != ret.end(); it++)
+	for (ePtrList<eXMLRPCVariant>::iterator it(params); it != params.end(); ++it)
 		vparams.push_back(**it);
 
 	int (*proc)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant> &)=rpcproc[methodName];
@@ -385,7 +407,7 @@ int eXMLRPCResponse::doWrite(int hm)
 		return -1;
 	connection->writeBlock(result.c_str()+wptr, tw);
 	wptr+=tw;
-	return tw;
+	return size > wptr ? 1 : -1;
 }
 
 void eXMLRPCResponse::haveData(void *data, int len)
@@ -394,14 +416,16 @@ void eXMLRPCResponse::haveData(void *data, int len)
 		return;
 	int err=0;
 
-	if (len)
+	if (!parser.Parse((char*)data, len, !len))
 	{
-		if (!parser.Parse((char*)data, len, 1))
-		{
-			eDebug("xml parse error");
-			err=1;
-		}
-	} else
+		char temp[len+1];
+		temp[len]=0;
+		memcpy(temp, data, len);
+		eDebug("%s: %s", temp, parser.ErrorString(parser.GetErrorCode()));
+		err=1;
+	}
+	
+	if ((!err) && (!len))
 		err=doCall();
 
 	if (err)
@@ -495,6 +519,8 @@ eHTTPXMLRPCResolver::eHTTPXMLRPCResolver()
 eHTTPDataSource *eHTTPXMLRPCResolver::getDataSource(eString request, eString path, eHTTPConnection *conn)
 {
 	if ((path=="/RPC2") && (request=="POST"))
+		return new eXMLRPCResponse(conn);
+	if ((path=="/SID2") && (request=="POST"))
 		return new eXMLRPCResponse(conn);
 	return 0;
 }
