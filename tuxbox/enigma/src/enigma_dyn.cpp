@@ -1752,20 +1752,20 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 			bouquets = "\"Dummy bouquet\"";
 			bouquetrefs = "\"Dummy bouquet ref\"";
 		}
-	}
 
-	result = readFile(HTDOCS_DIR + "zapdata.js");
-	result.strReplace("#BOUQUETS#", bouquets);
-	result.strReplace("#BOUQUETREFS#", bouquetrefs);
-	result.strReplace("#CHANNELS#", channels);
-	result.strReplace("#CHANNELREFS#", channelrefs);
-	result.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
-	result.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
-	int autobouquetchange = 0;
-	eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autobouquetchange);
-	result.strReplace("#AUTOBOUQUETCHANGE#", eString().sprintf("%d", autobouquetchange));
-	result.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
-	result.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
+		result = readFile(HTDOCS_DIR + "zapdata.js");
+		result.strReplace("#BOUQUETS#", bouquets);
+		result.strReplace("#BOUQUETREFS#", bouquetrefs);
+		result.strReplace("#CHANNELS#", channels);
+		result.strReplace("#CHANNELREFS#", channelrefs);
+		result.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
+		result.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
+		int autobouquetchange = 0;
+		eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autobouquetchange);
+		result.strReplace("#AUTOBOUQUETCHANGE#", eString().sprintf("%d", autobouquetchange));
+		result.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
+		result.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
+	}
 
 	return result;
 }
@@ -3060,10 +3060,10 @@ static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPCo
 		return "No EPG available";
 
 	eString serviceRef = opt["ref"];
-	if (!serviceRef)
-		ref = sapi->service;
-	else
+	if (serviceRef)
 		ref = string2ref(serviceRef);
+	else
+		ref = sapi->service;
 
 	eDebug("[ENIGMA_DYN] getcurepg: opts = %s, serviceRef = %s", opts.c_str(), serviceRef.c_str());
 
@@ -3114,7 +3114,7 @@ static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPCo
 			}
 
 			tm* t = localtime(&event.start_time);
-			
+
 			if (type == "extended")
 			{
 				if (!genre)
@@ -4744,10 +4744,10 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 	result.strReplace("#LOCK#", (lockWebIf == 1) ? "locked" : "unlocked");
 
 	// vpid
-	result.strReplace("#VPID#", (Decoder::current.vpid == -1) ? "\"none\"" : eString().sprintf("0x%x", Decoder::current.vpid));
+	result.strReplace("#VPID#", (Decoder::current.vpid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.vpid));
 
 	// apid
-	result.strReplace("#APID#", (Decoder::current.apid == -1) ? "\"none\"" : eString().sprintf("0x%x", Decoder::current.apid));
+	result.strReplace("#APID#", (Decoder::current.apid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.apid));
 
 	// free recording space on disk
 #ifndef DISABLE_FILE
@@ -4805,6 +4805,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	eString zapModeS = opt["zapmode"];
 	if (zapModeS)
 		zapMode = atoi(zapModeS.c_str());
+
 	eString zapSubModeS = opt["zapsubmode"];
 	if (zapSubModeS)
 		zapSubMode = atoi(zapSubModeS.c_str());
@@ -4812,13 +4813,17 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	eString curBouquet = opt["curBouquet"];
 	if (curBouquet)
 		currentBouquet = atoi(curBouquet.c_str());
+
 	eString curChannel = opt["curChannel"];
 	if (curChannel)
 		currentChannel = atoi(curChannel.c_str());
-	eString path = opt["path"];
 
-	if (zapMode >= 0 && zapMode <= 4 && zapSubMode >= 0 && zapSubMode <= 4)
-		path = zap[zapMode][zapSubMode];
+	eString path = opt["path"];
+	if ((zapMode >= 0) && (zapMode <= 4) && (zapSubMode >= 0) && (zapSubMode <= 4))
+	{
+		if (!path)
+			path = zap[zapMode][zapSubMode];
+	}
 	else
 	{
 		zapMode = ZAPMODETV;

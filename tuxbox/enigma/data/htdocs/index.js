@@ -39,7 +39,7 @@ function switchChannel(xy, bouquet, channel)
 		if (zapMode < 4)
 			document.location = "cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
 		else
-			document.location = "?path = "+xy;
+			document.location = "body?mode=zap&zapmode=4&zapsubmode=1&path="+xy;
 
 		setTimeout("parent.data.location.reload()", 2000);
 		setTimeout("parent.channavi.location.reload()", 2000);
