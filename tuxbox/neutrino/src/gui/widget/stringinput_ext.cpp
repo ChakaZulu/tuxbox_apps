@@ -410,9 +410,9 @@ void CIPInput::onBeforeExec()
 		printf("[neutrino] value-before(2): %s\n", value);
 		return;
 	}
-	int _ip[4];
-	sscanf(ip->c_str(), "%d.%d.%d.%d", &_ip[0], &_ip[1], &_ip[2], &_ip[3] );
-	sprintf( value, "%03d.%03d.%03d.%03d", _ip[0], _ip[1], _ip[2], _ip[3]);
+	unsigned char _ip[4];
+	sscanf(ip->c_str(), "%hhu.%hhu.%hhu.%hhu", &_ip[0], &_ip[1], &_ip[2], &_ip[3]);
+	sprintf( value, "%03hhu.%03hhu.%03hhu.%03hhu", _ip[0], _ip[1], _ip[2], _ip[3]);
 }
 
 void CIPInput::onAfterExec()
