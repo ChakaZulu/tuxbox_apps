@@ -125,6 +125,17 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 
 	Fx2StopPig();
 
+/* fx2 */
+/* buffer leeren, damit neutrino nicht rumspinnt */
+	realcode = RC_0;
+	while( realcode != 0xee )
+	{
+		tv.tv_sec = 0;
+		tv.tv_usec = 300000;
+		x = select( 0, 0, 0, 0, &tv );		/* 300ms pause */
+		RcGetActCode( );
+	}
+
 	RcClose();
 	FBClose();
 

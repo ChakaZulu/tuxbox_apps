@@ -22,6 +22,7 @@ extern	int	gametime;
 extern	int	pices;
 extern	int	score;
 extern	unsigned short	actcode;
+extern	unsigned short	realcode;
 
 extern	void	RemovePics( void );
 extern	int		InitLemm( void );
@@ -126,12 +127,20 @@ int lemmings_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	SoundPlay(-2);	// stop thread
 
 	dblFree();
-
 	RemoveBg();
-
 	RemovePics();
-
 	Fx2StopPig();
+
+/* fx2 */
+/* buffer leeren, damit neutrino nicht rumspinnt */
+	realcode = RC_0;
+	while( realcode != 0xee )
+	{
+		tv.tv_sec = 0;
+		tv.tv_usec = 300000;
+		x = select( 0, 0, 0, 0, &tv );		/* 300ms pause */
+		RcGetActCode( );
+	}
 
 	RcClose();
 	FBClose();
