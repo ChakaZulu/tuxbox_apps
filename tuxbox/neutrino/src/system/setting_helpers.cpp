@@ -269,6 +269,9 @@ bool CSPTSNotifier::changeNotify(const neutrino_locale_t, void * data)
 		CAViAExt::getInstance()->playbackPES();
 		remove(filename);
 	}
+	g_Zapit->stopPlayBack();
+	sleep(1);
+	g_Zapit->startPlayBack();
 	return true;
 }
 
