@@ -464,7 +464,8 @@ void CDateInput::onAfterExec()
 				&tmTime.tm_hour, &tmTime.tm_min);
 	tmTime.tm_mon-=1;
 	tmTime.tm_year-=1900;
-   
+	tmTime.tm_sec=0;
+
 	if(tmTime.tm_year>129)
       tmTime.tm_year=129;
    if(tmTime.tm_year<0)

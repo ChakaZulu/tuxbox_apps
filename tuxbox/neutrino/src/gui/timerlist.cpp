@@ -58,14 +58,17 @@ class CTimerListNewNotifier : public CChangeObserver
 		CMenuForwarder* m1;
 		CMenuOptionChooser* m2;
 		CMenuOptionChooser* m3;
+		char* display;
 		int* iType;
 		time_t* stopTime;
 	public:
-		CTimerListNewNotifier( int* Type, time_t* time,CMenuForwarder* a1, CMenuOptionChooser* a2, CMenuOptionChooser* a3)
+		CTimerListNewNotifier( int* Type, time_t* time,CMenuForwarder* a1, CMenuOptionChooser* a2, 
+									  CMenuOptionChooser* a3, char* d)
 		{
 			m1 = a1;
 			m2 = a2;
 			m3 = a3;
+			display=d;
 			iType=Type;
 			stopTime=time;
 		}
@@ -74,13 +77,18 @@ class CTimerListNewNotifier : public CChangeObserver
 			CTimerEvent::CTimerEventTypes type = (CTimerEvent::CTimerEventTypes) *iType;
 			if(type == CTimerEvent::TIMER_RECORD)
 			{
+				*stopTime=(time(NULL)/60)*60;
+				struct tm *tmTime2 = localtime(stopTime);
+				sprintf( display, "%02d.%02d.%04d %02d:%02d", tmTime2->tm_mday, tmTime2->tm_mon+1,
+							tmTime2->tm_year+1900,
+							tmTime2->tm_hour, tmTime2->tm_min);
 				m1->setActive (true);
-				*stopTime=time(NULL);
 			}
 			else
 			{
-				m1->setActive (false);
 				*stopTime=0;
+				strcpy(display,"                ");
+				m1->setActive (false);
 			}
 			if(type == CTimerEvent::TIMER_RECORD ||
 				type == CTimerEvent::TIMER_ZAPTO ||
@@ -418,6 +426,10 @@ void CTimerList::paintFoot()
 	{
 		frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
 		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR);
+		
+		frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
+		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR);
+
 	}
 
 	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
@@ -425,9 +437,6 @@ void CTimerList::paintFoot()
 
 	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
 	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload").c_str(), COL_INFOBAR);
-
-	frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
-	g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR);
 
 }
 
@@ -550,7 +559,7 @@ void CTimerList::newTimer()
 	// Defaults
 	timerNew.eventType = CTimerEvent::TIMER_SHUTDOWN ;
 	timerNew.eventRepeat = CTimerEvent::TIMERREPEAT_ONCE ;
-	timerNew.alarmTime = time(NULL);
+	timerNew.alarmTime = (time(NULL)/60)*60;
 	timerNew.stopTime = 0;
 	timerNew.onidSid = 0;
 	timerNew_standby_on =false;
@@ -561,7 +570,7 @@ void CTimerList::newTimer()
 	timerSettings.addItem( new CMenuSeparator() );
 	timerSettings.addItem( new CMenuForwarder("menu.back") );
 	timerSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	
+
 	CDateInput*	timerSettings_alarmTime= new CDateInput("timerlist.alarmtime", &(timerNew.alarmTime) , "ipsetup.hint_1", "ipsetup.hint_2");
 	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime->getValue (), timerSettings_alarmTime );
 	
@@ -599,7 +608,8 @@ void CTimerList::newTimer()
 
 	
 	CTimerListNewNotifier* notifier = new CTimerListNewNotifier(&((int)timerNew.eventType ),
-																					&timerNew.stopTime,m2,m4,m5);
+																					&timerNew.stopTime,m2,m4,m5,
+																					timerSettings_stopTime->getValue ());
 	CMenuOptionChooser* m0 = new CMenuOptionChooser("timerlist.type", &((int)timerNew.eventType ), true, notifier); 
 	m0->addOption((int)CTimerEvent::TIMER_SHUTDOWN, "timerlist.type.shutdown");
 	//m0->addOption((int)CTimerEvent::TIMER_NEXTPROGRAM, "timerlist.type.nextprogram");
@@ -616,7 +626,7 @@ void CTimerList::newTimer()
 	timerSettings.addItem( m4);
 	timerSettings.addItem( m5);
 	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, "", this, "newtimer") );
-	
+	strcpy(timerSettings_stopTime->getValue (), "                ");
 	if (timerSettings.exec(this,"")==menu_return::RETURN_EXIT_ALL)
 		g_RCInput->postMsg( CRCInput::RC_setup, 0 );
 }
