@@ -20,9 +20,10 @@ eThread::~eThread()
 	pthread_join(thread_id, 0);
 }
 
-eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested): context(*context), requested(requested)
+eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested): fd(fd), context(*context), requested(requested)
 {
 	state=0;
+	start();
 }
 
 eSocketNotifier::~eSocketNotifier()
@@ -85,7 +86,7 @@ void eTimer::changeInterval(long msek)
 void eTimer::activate()   // Internal Funktion... called from eApplication
 {
 	/*emit*/ timeout();
-	printf("Timer emitted\n");
+//	printf("Timer emitted\n");
 	context.removeTimer(this);
 	if (!bSingleShot)
 	{
@@ -109,18 +110,21 @@ void eMainloop::removeSocketNotifier(eSocketNotifier *sn)
 
 void eMainloop::processOneEvent()
 {
+	int cnt=0;
 	std::vector<pollfd> pfd;
-	printf("wir haben FDs:");
+//	printf("wir haben FDs:\n");
 //	pfd.clear();
 	for (std::map<int,eSocketNotifier*>::iterator i(notifiers.begin()); i!=notifiers.end(); ++i)
 	{
 		pollfd p;
 		p.fd=i->first;
-		p.events=i->second->getRequested();
-		p.revents=0;
-		
-		pfd.push_back(p);
-		printf("%d (%x)", i->first, i->second->getRequested());
+		if (p.fd)
+		{
+			p.events=i->second->getRequested();
+
+			pfd.push_back(p);
+//			printf("%d (%x)\n", i->first , i->second->getRequested());
+		}
 	}
 
 			// process pending timers...
@@ -129,18 +133,16 @@ void eMainloop::processOneEvent()
 	while (!TimerList.empty() && (usec = timeout_usec( (*TimerList.begin())->getNextActivation() ) ) <= 0 )
 		(*TimerList.begin())->activate();
 
-	if (!TimerList.empty())
-		printf("Next Timer in %d\n", usec);
-	else
-		usec=-1;
+	int ret=poll(&(*pfd.begin()), notifiers.size(), TimerList.empty()?-1:usec / 1000);
 
-	int ret=poll(&(*pfd.begin()), pfd.size(), usec);
 	if (ret>0)
 	{
-		printf("bin aussem poll raus und da war was");
+//		printf("bin aussem poll raus und da war was\n");
 		for (std::vector<pollfd>::iterator i(pfd.begin()); i != pfd.end(); ++i)
 		{
-			if (i->revents)
+			int req = notifiers[i->fd]->getRequested();
+		
+			if ( (i->revents & req) == req)
 			{
 				notifiers[i->fd]->activate(i->revents);
 				if (!--ret)		// shortcut
@@ -149,7 +151,7 @@ void eMainloop::processOneEvent()
 		}
 	} else if (ret<0)
 	{
-		printf("poll made error");
+		printf("poll made error\n");
 	}
 		// das ist noch doof hier
 	while (!TimerList.empty() && (timeout_usec( (*TimerList.begin())->getNextActivation() ) ) <= 0 )
