@@ -21,7 +21,7 @@ eZapRFmodSetup::eZapRFmodSetup()
 
 	setText(_("UHF-Modulator Setup"));
 	move(ePoint(150, 86));
-	cresize(eSize(390, 320));
+	cresize(eSize(390, 340));
 		
 	TestPatternEnable=new eCheckbox(this);
 	TestPatternEnable->setText(_("Test Pattern"));
@@ -136,8 +136,8 @@ eZapRFmodSetup::eZapRFmodSetup()
 	CONNECT(ok->selected, eZapRFmodSetup::okPressed);		
 
 	status = new eStatusBar(this);	
-	status->move( ePoint(0, clientrect.height()-30) );
-	status->resize( eSize( clientrect.width(), 30) );
+	status->move( ePoint(0, clientrect.height()-50) );
+	status->resize( eSize( clientrect.width(), 50) );
 	status->loadDeco();
 }
 
