@@ -1,5 +1,5 @@
 /*
-$Id: pes_misc.c,v 1.2 2004/01/22 22:26:35 rasc Exp $
+$Id: pes_misc.c,v 1.3 2004/01/25 21:37:28 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pes_misc.c,v 1.2 2004/01/22 22:26:35 rasc Exp $
 
 
 $Log: pes_misc.c,v $
+Revision 1.3  2004/01/25 21:37:28  rasc
+bugfixes, minor changes & enhancments
+
 Revision 1.2  2004/01/22 22:26:35  rasc
 pes_pack_header
 section read timeout
@@ -66,7 +69,7 @@ void  print_xTS_field (int v, const char *str, u_char *b, int bit_offset)
                 outBit_Sx_NL (v1,"marker_bit: ",	b+bo, 35, 1);
 
     ul = (xTS_32_30<<30) + (xTS_29_15<<15) + xTS_14_0;
-    out_nl (v," ==> %s: %s%lu (0x%08lx) [cycles of the 90 kHz system clock]",
+    out_nl (v," ==> %s: %lu (0x%08lx) [cycles of the 90 kHz system clock]",
 		str, ul,ul);
 
   indent (-1);

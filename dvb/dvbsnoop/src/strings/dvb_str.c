@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.38 2004/01/12 22:49:53 rasc Exp $
+$Id: dvb_str.c,v 1.39 2004/01/25 21:37:28 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.38 2004/01/12 22:49:53 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.39  2004/01/25 21:37:28  rasc
+bugfixes, minor changes & enhancments
+
 Revision 1.38  2004/01/12 22:49:53  rasc
 get rid of stream descriptor module
 
@@ -206,7 +209,6 @@ char *dvbstrTableID (u_int id)
 {
   STR_TABLE  TableIDs[] = {
 
- 	// $$$ TODO DSM-CC  anyone a ISO 13818-6 tp spare???
  	// updated -- 2003-11-04
 	// ATSC Table IDs could be included...
      {  0x00, 0x00,  "program_association_section" },
@@ -215,14 +217,14 @@ char *dvbstrTableID (u_int id)
      {  0x03, 0x03,  "transport_stream_description_section" },
      {  0x04, 0x04,  "ISO_IEC_14496_scene_description_section" },	/* $$$ TODO */
      {  0x05, 0x05,  "ISO_IEC_14496_object_description_section" },	/* $$$ TODO */
-      {  0x06, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
-      {  0x38, 0x39,  "DSM-CC - reserved " },
+     {  0x06, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
+     {  0x38, 0x39,  "ISO/IEC 13818-6 reserved" },
      {  0x3a, 0x3a,  "DSM-CC - multiprotocol encapsulated data" },
      {  0x3b, 0x3b,  "DSM-CC - U-N messages (DSI or DII)" },
      {  0x3c, 0x3c,  "DSM-CC - Download Data Messages (DDB)" },    /* TR 101 202 */
      {  0x3d, 0x3d,  "DSM-CC - stream descriptorlist" },
-     {  0x3e, 0x3e,  "DSM-CC - private data section (datagram)" },
-      {  0x3f, 0x3f,  "DSM-CC - addressable sections" },	// $$$ TODO
+     {  0x3e, 0x3e,  "DSM-CC - private data section  // DVB datagram" }, /* EN 301 192 // ISO 13818-6 */
+     {  0x3f, 0x3f,  "ISO/IEC 13818-6 reserved" },
 
      {  0x40, 0x40,  "network_information_section - actual network" },
      {  0x41, 0x41,  "network_information_section - other network" },
@@ -778,12 +780,14 @@ char *dvbstrDataBroadcast_ID (u_int flag)
 	{ 0x0007, 0x0007,   "Object Carousel" },
 	{ 0x0008, 0x0008,   "DVB ATM streams" },
 	{ 0x0009, 0x0009,   "Higher Protocols based on asynchronous data streams" },
-	// $$$ 0x0A = System Software Update   $$$ TODO TR 102 006
-	{ 0x000A, 0x00ef,   "Reserved for future use by DVB" },
+	{ 0x000A, 0x000A,   "System Software Update" }, // TR 102 006
+
+	{ 0x000B, 0x00ef,   "Reserved for future use by DVB" },
 	{ 0x00F0, 0x00F0,   "MHP Object Carousel" },
 	{ 0x00F1, 0x00F1,   "reserved for MHP Multi Protocol Encapsulation" },
 	{ 0x00F2, 0x00Fe,   "Reserved for MHP use" },
 	{ 0x00FF, 0x00FF,   "Reserved for future use by DVB" },
+
 	{ 0x0100, 0x0100,   "Eutelsat Data Piping" },
 	{ 0x0101, 0x0101,   "Eutelsat Data Streaming" },
 	{ 0x0102, 0x0102,   "SAGEM IP encapsulation in MPEG-2 PES packets" },

@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.21 2004/01/12 23:05:24 rasc Exp $
+$Id: descriptor.c,v 1.22 2004/01/25 21:37:27 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: descriptor.c,v 1.21 2004/01/12 23:05:24 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.22  2004/01/25 21:37:27  rasc
+bugfixes, minor changes & enhancments
+
 Revision 1.21  2004/01/12 23:05:24  rasc
 no message
 
@@ -130,7 +133,7 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 		break;
 
      case MHP:
-		descriptor_any (b);	// $$$ TODO
+		descriptor_any (b);	// $$$ TODO  MHP AIT descriptors
 		break;
 
      case MPEG:

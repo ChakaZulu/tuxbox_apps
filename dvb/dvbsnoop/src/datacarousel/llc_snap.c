@@ -1,5 +1,5 @@
 /*
-$Id: llc_snap.c,v 1.4 2004/01/01 20:09:16 rasc Exp $
+$Id: llc_snap.c,v 1.5 2004/01/25 21:37:27 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: llc_snap.c,v 1.4 2004/01/01 20:09:16 rasc Exp $
 
 
 $Log: llc_snap.c,v $
+Revision 1.5  2004/01/25 21:37:27  rasc
+bugfixes, minor changes & enhancments
+
 Revision 1.4  2004/01/01 20:09:16  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -35,6 +38,7 @@ LLC-SNAP
 
 #include "dvbsnoop.h"
 #include "llc_snap.h"
+#include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
@@ -58,25 +62,26 @@ int  llc_snap (int v, u_char *b)
 
   out_nl (v,"LLC/SNAP:");
   indent (+1);
+
   out_nl (v,"LLC:");
   dsap = outBit_Sx_NL (v," DSAP: ",  		b, 0, 8);
   ssap = outBit_Sx_NL (v," SSAP: ",  		b, 8, 8);
   ctrl = outBit_Sx_NL (v," Control: ",	 	b,16, 8);
   
   out_nl (v,"SNAP:");
-  oui   = outBit_Sx_NL (v," Org. Unique ID: ", 		b,24,24);
-  prot  = outBit_Sx_NL (v," Protocol Identifier: ", 	b,48,16);
+  oui   = outBit_S2x_NL (v," Org. Unique ID: ", 	b,24,24,
+	  	(char *(*)(u_long))dsmccStrOUI );
+  prot  = outBit_S2x_NL (v," Protocol Identifier: ", 	b,48,16,
+	  	(char *(*)(u_long))dsmccStr_LLC_SNAP_prot );
+
   indent (-1);
-
-  // $$$ TODO  tables
-
   return 8;
 
 }
 
 /*
  *
- * $$$ TODO
+ * $$$ TODO  LLC-Snap
  *
  LLCSNAP() -- This structure shall contain the datagram according to the ISO/IEC 8802-2 Logical Link Control
 (LLC) and ISO/IEC 8802-1a SubNetwork Attachment Point (SNAP) specifications. In LLC Type 1 operation,

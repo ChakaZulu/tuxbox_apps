@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.19 2004/01/17 23:06:10 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.20 2004/01/25 21:37:28 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_str.h,v 1.19 2004/01/17 23:06:10 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.20  2004/01/25 21:37:28  rasc
+bugfixes, minor changes & enhancments
+
 Revision 1.19  2004/01/17 23:06:10  rasc
 minor stuff, some restructs in output
 
@@ -103,7 +106,6 @@ char *dsmccStrPlatform_ID (u_int id);
 char *dsmccStrCarouselType_ID (u_int id);
 char *dsmccStrHigherProtocol_ID (u_int id);
 char *dsmccStrUpdateType_ID (u_int id);
-char *dsmccStrOUI  (u_int id);
 
 char *dsmccStr_Command_ID  (u_int id);
 char *dsmccStr_SelectMode_ID  (u_int id);
@@ -122,6 +124,9 @@ char *dsmccStr_compression_method (u_int id);
 
 char *dsmccStr_streamMode (u_int id);
 char *dsmccStr_postDiscontinuityIndicator (u_int id);
+
+char *dsmccStrOUI  (u_int id);
+char *dsmccStr_LLC_SNAP_prot (u_int id);
 
 
 #endif

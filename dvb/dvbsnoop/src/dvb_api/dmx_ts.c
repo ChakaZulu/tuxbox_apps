@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.18 2004/01/02 02:45:33 rasc Exp $
+$Id: dmx_ts.c,v 1.19 2004/01/25 21:37:28 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.18 2004/01/02 02:45:33 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.19  2004/01/25 21:37:28  rasc
+bugfixes, minor changes & enhancments
+
 Revision 1.18  2004/01/02 02:45:33  rasc
 no message
 
@@ -336,7 +339,7 @@ static long  ts_SyncRead (int fd, u_char *buf, long buflen, long *skipped_bytes)
     // -- $$$ to be improved:
     // -- $$$  (best would be: check if buf[188] is also a sync byte)
  
-    // -- $$$ TODO speed optimize! (read TS_PACKET_LEN, seek Sync, read missing parts)
+    // -- $$$ todo  speed optimize! (read TS_PACKET_LEN, seek Sync, read missing parts)
 
     *skipped_bytes = 0;
     while (1) {

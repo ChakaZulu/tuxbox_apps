@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.22 2004/01/17 23:06:10 rasc Exp $
+$Id: dsmcc_str.c,v 1.23 2004/01/25 21:37:28 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.22 2004/01/17 23:06:10 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.23  2004/01/25 21:37:28  rasc
+bugfixes, minor changes & enhancments
+
 Revision 1.22  2004/01/17 23:06:10  rasc
 minor stuff, some restructs in output
 
@@ -199,7 +202,7 @@ char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i)
      {  0x13, 0x13,  "IP/MAC_stream_location_descriptor" },
      {  0x14, 0x14,  "ISP_access_mode_descriptor" },
      {  0x15, 0x3F,  "reserved" },
-     //     {  0x40, 0x7F,  "DVB-SI scope" },  Telphone, private_data_spec  $$$ TODO
+//   {  0x40, 0x7F,  "DVB-SI scope" },  Telphone, private_data_spec, use: dvb scope
      {  0x80, 0xFE,  "user_private_descriptor" },
      {  0xFF, 0xFF,  "reserved" },
      {  0,0, NULL }
@@ -479,20 +482,6 @@ char *dsmccStrUpdateType_ID (u_int id)
 }
 
 
-
-
-/*
-  --  OUI  Table    LLC-SNAP  IEEE 802
-  --  real table is very large!!
-  --  see: http://standards.ieee.org/regauth/oui/index.shtml
-*/
-
-char *dsmccStrOUI  (u_int id)
-
-{
-	// http://standards.ieee.org/cgi-bin/ouisearch?hex-id
-	return (char *) "http://standards.ieee.org/regauth/oui/";
-}
 
 
 
@@ -786,6 +775,41 @@ char *dsmccStr_postDiscontinuityIndicator (u_int id)
 
 
 
+/*
+  --  OUI  Table    (e.g.: LLC-SNAP  IEEE 802)
+  --  real table is very large!!
+  --  see: http://standards.ieee.org/regauth/oui/index.shtml
+*/
+
+char *dsmccStrOUI  (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x000000, 0x000000,   "EtherType or routed non-OSI protocol" },
+	{ 0x0080c2, 0x0080c2,   "Bridged protocol" },
+	{ 0x000000, 0xFFFFFF,  	"http://standards.ieee.org/regauth/oui/" },
+      	{  0,0, NULL }
+  };
+
+	// http://standards.ieee.org/cgi-bin/ouisearch?hex-id
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  -- DSM-CC  LLC SNAP protocol 
+*/
+
+char *dsmccStr_LLC_SNAP_prot (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x0800, 0x0800,   "IP protocol" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
 
 
 
