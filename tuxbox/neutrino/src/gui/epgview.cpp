@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.36 2002/02/04 06:15:30 field Exp $
+// $Id: epgview.cpp,v 1.37 2002/02/08 17:49:15 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.37  2002/02/08 17:49:15  field
+// epg verbessert
+//
 // Revision 1.36  2002/02/04 06:15:30  field
 // sectionsd interface verbessert (bug beseitigt)
 //
@@ -126,32 +129,26 @@
 #include "epgdata.h"
 #include "../global.h"
 
-static char* ocopyStringto(const char* from, char* to, int len)
-{
-	const char *fromend=from+len;
-	while(*from!='\xff' && from<fromend)
-		*(to++)=*(from++);
-	*to=0;
-	return (char *)++from;
-}
-
 CEpgData::CEpgData()
 {}
 
 void CEpgData::start()
 {
-	oy = 350;
 
+	ox = 540;
+    sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
+    oy = 320;
 	topheight= g_Fonts->epg_title->getHeight();
 	topboxheight=topheight+6;
 	botheight=g_Fonts->epg_date->getHeight();
 	botboxheight=botheight+6;
 	medlineheight=g_Fonts->epg_info1->getHeight();
-	medlinecount=(oy-topboxheight-botboxheight)/medlineheight;
+	medlinecount=(oy- botboxheight)/medlineheight;
 
-	oy=topboxheight+botboxheight+medlinecount*medlineheight; // recalculate
+	oy = botboxheight+medlinecount*medlineheight; // recalculate
+	sy = (((g_settings.screen_EndY-g_settings.screen_StartY)-(oy- topboxheight) ) / 2) + g_settings.screen_StartY;
+	toph = topboxheight;
 
-	sy = (((g_settings.screen_EndY-g_settings.screen_StartY)-oy) / 2) + g_settings.screen_StartY;
 }
 
 void CEpgData::addTextToArray( string text  )
@@ -172,20 +169,20 @@ void CEpgData::addTextToArray( string text  )
 	}
 }
 
-void CEpgData::processTextToArray( char* text  )
+void CEpgData::processTextToArray( string text )
 {
 	string	aktLine = "";
 	string	aktWord = "";
 	int	aktWidth = 0;
-	strcat(text, " ");
+	text+= " ";
+	char* text_= (char*) text.c_str();
 
-	//printf("orginaltext:\n%s\n\n", text);
-	while(*text!=0)
+	while(*text_!=0)
 	{
-		if ( (*text==' ') || (*text=='\n') || (*text=='-') || (*text=='.') )
+		if ( (*text_==' ') || (*text_=='\n') || (*text_=='-') || (*text_=='.') )
 		{
 			//check the wordwidth - add to this line if size ok
-			if(*text=='\n')
+			if(*text_=='\n')
 			{	//enter-handler
 				//printf("enter-");
 				addTextToArray( aktLine );
@@ -194,7 +191,7 @@ void CEpgData::processTextToArray( char* text  )
 			}
 			else
 			{
-				aktWord += *text;
+				aktWord += *text_;
 
 				int aktWordWidth = g_Fonts->epg_info2->getRenderWidth(aktWord.c_str());
 				if((aktWordWidth+aktWidth)<(ox- 20- 15))
@@ -213,9 +210,9 @@ void CEpgData::processTextToArray( char* text  )
 		}
 		else
 		{
-			aktWord += *text;
+			aktWord += *text_;
 		}
-		text++;
+		text_++;
 	}
 	//add the rest
 	addTextToArray( aktLine + aktWord );
@@ -249,6 +246,99 @@ void CEpgData::showText( int startPos, int ypos )
 
 }
 
+string GetGenre( char contentClassification )
+{
+	string res= "UNKNOWN";
+	char subClass[2];
+	sprintf( subClass, "%d", (contentClassification&0x0F) );
+
+	switch (contentClassification&0x0F0)
+	{
+		case 0x010: {
+						res="MOVIE.";
+						if ( (contentClassification&0x0F)< 9 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+		case 0x020: {
+						res="NEWS.";
+						if ( (contentClassification&0x0F)< 5 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+		case 0x030: {
+						res="SHOW.";
+						if ( (contentClassification&0x0F)< 4 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+		case 0x040: {
+						res="SPORTS.";
+						if ( (contentClassification&0x0F)< 12 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+		case 0x050: {
+						res="CHILDRENs_PROGRAMMES.";
+						if ( (contentClassification&0x0F)< 6 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+		case 0x060: {
+						res="MUSIC_DANCE.";
+						if ( (contentClassification&0x0F)< 7 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+		case 0x070: {
+						res="ARTS.";
+						if ( (contentClassification&0x0F)< 12 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+		case 0x080: {
+						res="SOZIAL_POLITICAL.";
+						if ( (contentClassification&0x0F)< 4 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+		case 0x090: {
+						res="DOCUS_MAGAZINES.";
+						if ( (contentClassification&0x0F)< 8 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+		case 0x0A0: {
+						res="TRAVEL_HOBBIES.";
+						if ( (contentClassification&0x0F)< 8 )
+							res+= subClass;
+						else
+							res+= "0";
+					 	break;
+					}
+	}
+	return g_Locale->getText("GENRE."+res);
+}
+
+
 void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit, bool doLoop )
 {
 	int height;
@@ -265,7 +355,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 		g_FrameBuffer->paintBackgroundBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5);
 	}
 
-	if(strlen(epgData.title)==0)
+	if(epgData.title.length()==0)
 	{
 		//no epg-data found :(
 		char *text = (char*) g_Locale->getText("epgviewer.notfound").c_str();
@@ -283,66 +373,81 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 		return;
 	}
 
-	int oldx= ox;
-	int oldsx= sx;
-	// Variable Breite, falls der Text zu lang' ist...
-	ox = g_Fonts->epg_title->getRenderWidth( epgData.title )+ 15;
-	if (ox < 500 )
-		ox = 500;
-	else if ( ox > ( g_settings.screen_EndX- g_settings.screen_StartX - 20) )
-		ox = ( g_settings.screen_EndX- g_settings.screen_StartX - 20);
 
-	sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
-
-	if ( (oldx> ox) && (!doLoop) )
-	{
-		g_FrameBuffer->paintBackgroundBoxRel (oldsx, sy, sx- oldsx+ 1, oy+10);
-		g_FrameBuffer->paintBackgroundBoxRel (sx+ ox, sy, sx- oldsx+ 1, oy+10);
+	int pos;
+	string text1 = epgData.title;
+	string text2 = "";
+	if ( g_Fonts->epg_title->getRenderWidth(text1.c_str())> 520 )
+    {
+    	do
+    	{
+			pos = text1.find_last_of("[ .]+");
+			if ( pos!=-1 )
+				text1 = text1.substr( 0, pos );
+		} while ( ( pos != -1 ) && ( g_Fonts->epg_title->getRenderWidth(text1.c_str())> 520 ) );
+        text2 = epgData.title.substr(text1.length()+ 1, -1);
 	}
 
-	if(strlen(epgData.info1)!=0)
+	int oldtoph= toph;
+
+	if (text2!="")
+		toph = 2* topboxheight;
+	else
+		toph = topboxheight;
+
+
+	if ( (oldtoph> toph) && (!doLoop) )
 	{
-		processTextToArray( epgData.info1 );
+		g_FrameBuffer->paintBackgroundBox (sx, sy- oldtoph- 1, sx+ ox, sy- toph);
+	}
+
+	if(epgData.info1.length()!=0)
+	{
+		processTextToArray( epgData.info1.c_str() );
 	}
 	info1_lines = epgText.size();
 
 	//scan epg-data - sort to list
-	if ( ( strlen(epgData.info2)==0 ) && (info1_lines == 0) )
+	if ( ( epgData.info2.length()==0 ) && (info1_lines == 0) )
 	{
-		strcpy(epgData.info2, g_Locale->getText("epgviewer.nodetailed").c_str());
+		epgData.info2= g_Locale->getText("epgviewer.nodetailed");
 	}
 
-	processTextToArray( epgData.info2 );
+	processTextToArray( epgData.info2.c_str() );
+
+	if (epgData.contentClassification.length()> 0)
+		processTextToArray( "\n"+ GetGenre(epgData.contentClassification[0]) );
+//	processTextToArray( epgData.userClassification.c_str() );
 
 	//show the epg
-	g_FrameBuffer->paintBoxRel(sx, sy, ox, topboxheight, COL_MENUHEAD);
-	g_Fonts->epg_title->RenderString(sx+10, sy+topheight+3, ox-15, epgData.title, COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(sx, sy- toph, ox, toph, COL_MENUHEAD);
+	g_Fonts->epg_title->RenderString(sx+10, sy- toph+ topheight+ 3, ox-15, text1.c_str(), COL_MENUHEAD);
+	if (text2!="")
+		g_Fonts->epg_title->RenderString(sx+10, sy- toph+ 2* topheight+ 3, ox-15, text2.c_str(), COL_MENUHEAD);
 
 	//show date-time....
 	g_FrameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);
-	char fromto[40];
+	string fromto;
 	int widthl,widthr;
-	strcpy(fromto,epgData.start);
-	strcat(fromto," - ");
-	strcat(fromto,epgData.end);
-	widthl = g_Fonts->epg_date->getRenderWidth(fromto);
-	g_Fonts->epg_date->RenderString(sx+40,  sy+oy-3, widthl, fromto, COL_MENUHEAD);
-	widthr = g_Fonts->epg_date->getRenderWidth(epgData.date);
-	g_Fonts->epg_date->RenderString(sx+ox-40-widthr,  sy+oy-3, widthr, epgData.date, COL_MENUHEAD);
+	fromto= epgData.start+ " - "+ epgData.end;
+
+	widthl = g_Fonts->epg_date->getRenderWidth(fromto.c_str());
+	g_Fonts->epg_date->RenderString(sx+40,  sy+oy-3, widthl, fromto.c_str(), COL_MENUHEAD);
+	widthr = g_Fonts->epg_date->getRenderWidth(epgData.date.c_str());
+	g_Fonts->epg_date->RenderString(sx+ox-40-widthr,  sy+oy-3, widthr, epgData.date.c_str(), COL_MENUHEAD);
 
 	int showPos = 0;
 	textCount = epgText.size();
-	int textypos = sy+topboxheight;
+	int textypos = sy;
 	showText(showPos, textypos);
 
 	//show progressbar
-	if ( strlen(epgData.done)!= 0 )
+	if ( epgData.done!= -1 )
 	{
-		int progress = atoi(epgData.done);
 		int pbx = sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1);
 		g_FrameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUCONTENT+6);
 		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUCONTENT);
-		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, progress, height-10, COL_MENUCONTENT+3);
+		g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, epgData.done, height-10, COL_MENUCONTENT+3);
 	}
 
 	GetPrevNextEPGData(current_id, &current_zeit);
@@ -423,7 +528,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 
 void CEpgData::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel (sx, sy, ox+10, oy+10);
+	g_FrameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
 }
 
 void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
@@ -433,14 +538,16 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 	char rip[]="127.0.0.1";
 
 	epgText.clear();
-	emptyLineCount = 0;
-	strcpy(epgData.title,"");
-	strcpy(epgData.info1,"");
-	strcpy(epgData.info2,"");
-	strcpy(epgData.date,"");
-	strcpy(epgData.start,"");
-	strcpy(epgData.end,"");
-	strcpy(epgData.done,"");
+	emptyLineCount 	= 0;
+	epgData.title	= "";
+	epgData.info1 	= "";
+	epgData.info2 	= "";
+	epgData.date 	= "";
+	epgData.start 	= "";
+	epgData.end 	= "";
+	epgData.done 	= -1;
+	epgData.contentClassification	= "";
+	epgData.userClassification		= "";
 
 	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	memset(&servaddr,0,sizeof(servaddr));
@@ -492,39 +599,44 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 			char* pData = new char[nBufSize] ;
 			read(sock_fd, pData, nBufSize);
 
-			sectionsd::sectionsdTime    epg_times;
+			sectionsd::sectionsdTime*    epg_times;
 			char* dp = pData;
 
-			sscanf(dp, "%012llx\xFF", &current_id);
-			dp+= 13;
-			dp = ocopyStringto( dp, epgData.title, sizeof(epgData.title) );
-			dp = ocopyStringto( dp, epgData.info1, sizeof(epgData.info1) );
-			dp = ocopyStringto( dp, epgData.info2, sizeof(epgData.info2) );
+			current_id = *((unsigned long long *)dp);
+            dp+= sizeof(current_id);
 
-			/* char whs[256];
-			dp = ocopyStringto( dp, whs, sizeof(whs) );
-			printf("WH: %s\n", whs); */
+			epgData.title = dp;
+			dp+=strlen(dp)+1;
+			epgData.info1 = dp;
+			dp+=strlen(dp)+1;
+			epgData.info2 = dp;
+			dp+=strlen(dp)+1;
+			epgData.contentClassification = dp;
+			dp+=strlen(dp)+1;
+			epgData.userClassification = dp;
+			dp+=strlen(dp)+1;
 
-			sscanf(dp, "%08lx\xFF%08x\xFF", &epg_times.startzeit, &epg_times.dauer );
-			current_zeit= epg_times.startzeit;
 
-			struct tm *pStartZeit = localtime(&epg_times.startzeit);
-			int nSDay(pStartZeit->tm_mday), nSMon(pStartZeit->tm_mon+1), nSYear(pStartZeit->tm_year+1900),
-			nSH(pStartZeit->tm_hour), nSM(pStartZeit->tm_min);
-			sprintf( epgData.date, "%02d.%02d.%04d", nSDay, nSMon, nSYear );
-			sprintf( epgData.start, "%02d:%02d", nSH, nSM );
+			epg_times = (sectionsd::sectionsdTime*) dp;
+            dp+= sizeof(sectionsd::sectionsdTime);
 
-			long int uiEndTime(epg_times.startzeit+ epg_times.dauer);
+			struct tm *pStartZeit = localtime(&(*epg_times).startzeit);
+			char temp[11];
+			strftime( temp, sizeof(temp), "%d.%m.%Y", pStartZeit);
+			epgData.date= temp;
+			strftime( temp, sizeof(temp), "%H:%M", pStartZeit);
+			epgData.start= temp;
+
+			long int uiEndTime((*epg_times).startzeit+ (*epg_times).dauer);
 			struct tm *pEndeZeit = localtime((time_t*)&uiEndTime);
-			int nFH(pEndeZeit->tm_hour), nFM(pEndeZeit->tm_min);
-			sprintf( epgData.end, "%02d:%02d", nFH, nFM );
+			strftime( temp, sizeof(temp), "%H:%M", pEndeZeit);
+            epgData.end= temp;
 
-
-			if (( time(NULL)- epg_times.startzeit )>= 0 )
+			if (( time(NULL)- (*epg_times).startzeit )>= 0 )
 			{
-				unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-epg_times.startzeit)/(float)epg_times.dauer*100.);
+				unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-(*epg_times).startzeit)/(float)(*epg_times).dauer*100.);
 				if (nProcentagePassed<= 100)
-					sprintf( epgData.done, "%03u", nProcentagePassed );
+					epgData.done= nProcentagePassed;
 			}
 
 			#ifdef USEACTIONLOG
