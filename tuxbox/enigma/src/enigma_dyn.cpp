@@ -63,7 +63,7 @@ using namespace std;
 
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
 
-#define WEBXFACEVERSION "0.9"
+#define WEBXFACEVERSION "1.0.1"
 
 static int currentBouquet = 0;
 static int currentChannel = -1;
@@ -1448,10 +1448,10 @@ public:
 		}
 #endif
 		eString serviceRef = ref2string(e);
-		result1 += "\"" + serviceRef + "\", ";
 		eService *service = iface.addRef(e);
 		if (service)
 		{
+			result1 += "\"" + serviceRef + "\", ";
 			eString tmp = filter_string(service->service_name);
 			tmp.strReplace("\"", "'");
 			result2 += "\"" + tmp + "\", ";
@@ -1460,6 +1460,7 @@ public:
 	}
 };
 
+#if 0
 static eString getZapContent(eString mode, eString path)
 {
 	eString result;
@@ -1502,6 +1503,7 @@ static eString getZapContent(eString mode, eString path)
 
 	return result;
 }
+#endif
 
 static eString getZapContent2(eString mode, eString path)
 {
@@ -1589,17 +1591,13 @@ static eString getZapContent2(eString mode, eString path)
 	return result;
 }
 
-#if 0
-static void getZapContent3(eString mode, eString path)
+static eString getZapContent3(eString mode, eString path)
 {
-	eString result1, result2;
+	eString result, result1, result2;
+	eString bouquets, bouquetrefs, channels, channelrefs;
 	eString tpath;
-	std::stringstream tmp;
 
 	unsigned int pos = 0, lastpos = 0, temp = 0;
-
-	if (!path)
-		path = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
 
 	if ((path.find(";", 0)) == eString::npos)
 		path = ";" + path;
@@ -1618,28 +1616,37 @@ static void getZapContent3(eString mode, eString path)
 		eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
 		Signal1<void, const eServiceReference&> signal;
 		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
+
+		channels += "channels[0] = new Array(";
+		channelrefs += "channelRefs[0] = new Array(";
+
 		iface->enterDirectory(current_service, signal);
 		eDebug("entered");
-		tmp.str(result1.left(result1.length() - 1));
+
+		channels += result2.left(result2.length() - 2);
+		channels += ");";
+		channelrefs += result1.left(result1.length() - 2);
+		channelrefs += ");";
+
 		iface->leaveDirectory(current_service);
 		eDebug("exited");
 	}
 
-	int i = 0;
-	while(tmp)
-	{
-		tmp >> tpath;
-		if (tpath)
-		{
-			printf("[GETZAPCONTENT3] processing bouquet: tpath = %s", tpath.c_str());
-			tpath = tpath.mid(1, tpath.length() - 3);
-			printf("[GETZAPCONTENT3] processing bouquet: tpath = %s", tpath.c_str());
-			zapPathes[i] = tpath;
-			i++;
-		}
-	}
+	bouquets = "\"dummy bouquet\"";
+	bouquetrefs = "\"dummy bouquet ref\"";
+
+	eString tmpFile = readFile(HTDOCS_DIR + "zapdata.js");
+	tmpFile.strReplace("#BOUQUETS#", bouquets);
+	tmpFile.strReplace("#BOUQUETREFS#", bouquetrefs);
+	tmpFile.strReplace("#CHANNELS#", channels);
+	tmpFile.strReplace("#CHANNELREFS#", channelrefs);
+	tmpFile.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
+	tmpFile.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
+
+	result = readFile(TEMPLATE_DIR + "rec.tmp");
+	result.strReplace("#ZAPDATA#", tmpFile);
+	return result;
 }
-#endif
 
 static eString getZap(eString mode, eString path)
 {
@@ -1652,7 +1659,7 @@ static eString getZap(eString mode, eString path)
 		eString tmpFile = readFile(TEMPLATE_DIR + "videocontrols.tmp");
 		tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
 		result += tmpFile;
-		zap_result += getZapContent(mode, path);
+		zap_result += getZapContent3(mode, path);
 	}
 	else
 #endif
@@ -1951,7 +1958,7 @@ struct getEntryString
 			result << "<td align=center><img src=\"off.gif\"></td>";
 		else
 			result << "<td>&nbsp;</td>";
-		
+
 		result << "<td>";
 		if (se->type & ePlaylistEntry::isRepeating)
 		{
@@ -2008,7 +2015,7 @@ static eString getControlTimerList()
 {
 	eString tableBody;
 	eString result = readFile(TEMPLATE_DIR + "timerListBody.tmp");
-	
+
 	// regular timers
 	int count = 0;
 	eTimerManager::getInstance()->forEachEntry(countTimer(count, false));
@@ -2017,7 +2024,7 @@ static eString getControlTimerList()
 	else
 		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString(_("No regular timer events available")) + "</td></tr>";
 	result.strReplace("#TIMER_REGULAR#", tableBody);
-	
+
 	// repeated timers
 	count = 0;
 	eTimerManager::getInstance()->forEachEntry(countTimer(count, true));
@@ -2026,11 +2033,11 @@ static eString getControlTimerList()
 	else
 		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString(_("No repeated timer events available")) + "</td></tr>";
 	result.strReplace("#TIMER_REPEATED#", tableBody);
-	
+
 	// buttons
 	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()"));
 	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()"));
-	
+
 	return result;
 }
 
@@ -3126,6 +3133,13 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 			}
 		}
 
+		if ((spath == ";4097:7:0:1:0:0:0:0:0:0:") && (zapMode != ZAPMODERECORDINGS)) // recordings
+		{
+			zapMode = ZAPMODERECORDINGS;
+			currentBouquet = 0;
+			currentChannel = -1;
+		}
+
 		for (int i = 2; i < 5; i++)
 		{
 			if (spath == zap[zapMode][i])
@@ -3160,7 +3174,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 		result.strReplace("#BOX#", "dBox");
 	}
 
-	if ((mode == "zap") && (spath != ";4097:7:0:1:0:0:0:0:0:0:"))
+	if ((mode == "zap") /* && (spath != ";4097:7:0:1:0:0:0:0:0:0:")*/)
 		result.strReplace("#ONLOAD#", "onLoad=init()");
 
 	return result;
