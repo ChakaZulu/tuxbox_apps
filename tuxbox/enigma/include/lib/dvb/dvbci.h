@@ -7,6 +7,7 @@
 #include <lib/base/message.h>
 #include <lib/system/elock.h>
 #include <set>
+#include <queue>
 
 #define PMT_ENTRYS  256
 
@@ -38,6 +39,23 @@ typedef struct _lpduQueueElem * ptrlpduQueueElem;
 
 typedef struct _lpduQueueHeader lpduQueueHeader;
 
+struct queueData
+{
+	__u8 prio;
+	unsigned char tc_id;
+	unsigned char *data;
+	unsigned int len;
+	queueData( unsigned char tc_id, unsigned char *data, unsigned int len, __u8 prio = 0 )
+		:prio(prio), tc_id(tc_id), data(data), len(len)
+	{
+
+	}
+	bool operator < ( const struct queueData &a ) const
+	{
+		return prio < a.prio;
+	}
+};
+
 struct _lpduQueueElem
 {
 	unsigned char lpduLen;
@@ -55,6 +73,7 @@ struct _lpduQueueHeader
 class eDVBCI: private eThread, public eMainloop, public Object
 {
 	static int instance_count;
+	std::priority_queue<queueData> queue;
 protected:
  enum
 	{
@@ -66,8 +85,8 @@ protected:
 
 	int ci_state;
 	int buffersize;	
-		
-	eTimer pollTimer, deadTimer;
+
+	eTimer pollTimer;
 	eLock lock;
 
 	int tempPMTentrys;
@@ -103,8 +122,8 @@ protected:
 	void newService();
 	void create_sessionobject(unsigned char *tag,unsigned char *data,unsigned int len,int session);
 
-	void sendData(unsigned char tc_id,unsigned char *data,unsigned int len);	
-	void sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data);
+	bool sendData(unsigned char tc_id,unsigned char *data,unsigned int len);	
+	void sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data,bool dontQueue=false);
 	void help_manager(unsigned int session);
 	void app_manager(unsigned int session);
 	void ca_manager(unsigned int session);
@@ -116,9 +135,8 @@ protected:
 	void incoming(unsigned char *buffer,int len);
 	void dataAvailable(int what);
 	void poll();
-	void startTimer(bool onlyDead=false);
+	void startTimer();
 	void stopTimer();
-	void deadReset();
 	void updateCIinfo(unsigned char *buffer);
 
 	void mmi_begin();
