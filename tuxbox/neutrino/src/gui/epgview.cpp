@@ -4,7 +4,8 @@
 
 static char* ocopyStringto(const char* from, char* to, int len)
 {
-	while(*from!='\xff' && from<from+len)
+	const char *fromend=from+len;
+	while(*from!='\xff' && from<fromend)
 	{
 		*(to++)=*(from++);
 	}
