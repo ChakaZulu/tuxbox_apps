@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.27 2001/11/05 17:12:05 field Exp $
+// $Id: SIsections.cpp,v 1.28 2002/08/27 19:00:45 obi Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.28  2002/08/27 19:00:45  obi
+// use devfs device names
+//
 // Revision 1.27  2001/11/05 17:12:05  field
 // Versuch zu Wiederholungen
 //
@@ -447,8 +450,8 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
 //  flt.flags            = DMX_IMMEDIATE_START;
   flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
-  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
+  if ((fd = open("/dev/dvb/card0/demux0", O_RDWR)) == -1) {
+    perror ("/dev/dvb/card0/demux0");
     return 1;
   }
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
@@ -610,8 +613,8 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
   szeit=time(NULL);
 //  printf("reading missing\n");
 
-  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
+  if ((fd = open("/dev/dvb/card0/demux0", O_RDWR)) == -1) {
+    perror ("/dev/dvb/card0/demux0");
     return 9;
   }
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {

@@ -323,7 +323,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 			//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
 	}
 
-	if ((fd = open("/dev/ost/video0",O_RDWR)) < 0)
+	if ((fd = open("/dev/dvb/card0/video0",O_RDWR)) < 0)
 	{
 		perror("open");
 		return;
@@ -762,7 +762,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.60 2002/08/12 17:11:58 wjoost Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.61 2002/08/27 19:00:45 obi Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())

@@ -177,10 +177,10 @@ int find_emmpid(int ca_system_id) {
 	int fd, r=1000,count;
 	struct dmxSctFilterParams flt;
 
-	fd=open("/dev/ost/demux0", O_RDWR);
+	fd=open("/dev/dvb/card0/demux0", O_RDWR);
 	if (fd<0)
 	{
-		perror("/dev/ost/demux0");
+		perror("/dev/dvb/card0/demux0");
 		return -fd;
 	}
 
@@ -255,10 +255,10 @@ int find_ecmpid(int pid,int ca_system_id) {
 	int fd, r=1000,ecm_pid=0;
 	struct dmxSctFilterParams flt;
 
-	fd=open("/dev/ost/demux0", O_RDWR);
+	fd=open("/dev/dvb/card0/demux0", O_RDWR);
 	if (fd<0)
 	{
-		perror("/dev/ost/demux0");
+		perror("/dev/dvb/card0/demux0");
 		return -fd;
 	}
 	

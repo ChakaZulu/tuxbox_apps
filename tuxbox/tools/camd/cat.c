@@ -1,5 +1,5 @@
 /*
- * $Id: cat.c,v 1.1 2002/05/05 01:37:37 obi Exp $
+ * $Id: cat.c,v 1.2 2002/08/27 19:00:45 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -31,7 +31,7 @@
 #include "cat.h"
 
 #define CAT_SIZE 1024
-#define DEMUX_DEV "/dev/ost/demux0"
+#define DEMUX_DEV "/dev/dvb/card0/demux0"
 
 /*
  * parse conditional access table

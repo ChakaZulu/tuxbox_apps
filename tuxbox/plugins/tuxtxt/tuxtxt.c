@@ -202,9 +202,9 @@ int Init()
 
 	//open demuxer
 
-		if((dmx = open("/dev/ost/demux0", O_RDWR)) == -1)
+		if((dmx = open("/dev/dvb/card0/demux0", O_RDWR)) == -1)
 		{
-			perror("TuxTxt <open /dev/ost/demux0>");
+			perror("TuxTxt <open /dev/dvb/card0/demux0>");
 			return 0;
 		}
 

@@ -41,10 +41,10 @@ int main(int argc, char **argv)
 	}
 	fflush(stdout);
 	
-	fd=open("/dev/ost/demux0", O_RDWR);
+	fd=open("/dev/dvb/card0/demux0", O_RDWR);
 	if (fd<0)
 	{
-		perror("/dev/ost/demux0");
+		perror("/dev/dvb/card0/demux0");
 		return -fd;
 	}
 	ioctl(fd, DMX_SET_BUFFER_SIZE, 1024*1024);

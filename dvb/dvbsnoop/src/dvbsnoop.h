@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: dvbsnoop.h,v 1.3 2002/08/27 19:00:45 obi Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -8,6 +8,9 @@ $Id: dvbsnoop.h,v 1.2 2001/10/06 18:19:18 Toerli Exp $
    (c) rasc
 
 $Log: dvbsnoop.h,v $
+Revision 1.3  2002/08/27 19:00:45  obi
+use devfs device names
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -46,8 +49,8 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-#define DEMUX_DEVICE "/dev/ost/demux0"
-#define DVR_DEVICE   "/dev/ost/dvr0"
+#define DEMUX_DEVICE "/dev/dvb/card0/demux0"
+#define DVR_DEVICE   "/dev/dvb/card0/dvr0"
 
 
 

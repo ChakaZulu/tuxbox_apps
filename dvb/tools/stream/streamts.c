@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.6 2002/08/11 01:44:09 obi Exp $
+ * $Id: streamts.c,v 1.7 2002/08/27 19:00:45 obi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -51,8 +51,8 @@
 
 #define BSIZE	1024 * 16
 #define MAXPIDS	8
-#define DMXDEV	"/dev/ost/demux0"
-#define DVRDEV	"/dev/ost/dvr0"
+#define DMXDEV	"/dev/dvb/card0/demux0"
+#define DVRDEV	"/dev/dvb/card0/dvr0"
 
 #define IN_SIZE	TS_SIZE * 10
 

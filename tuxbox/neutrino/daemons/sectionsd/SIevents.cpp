@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.16 2002/02/28 01:52:21 field Exp $
+// $Id: SIevents.cpp,v 1.17 2002/08/27 19:00:45 obi Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.17  2002/08/27 19:00:45  obi
+// use devfs device names
+//
 // Revision 1.16  2002/02/28 01:52:21  field
 // Verbessertes Umschalt-Handling
 //
@@ -335,8 +338,8 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
   flt.timeout          = 0;
   flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
-  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
-    perror ("/dev/ost/demux0");
+  if ((fd = open("/dev/dvb/card0/demux0", O_RDWR)) == -1) {
+    perror ("/dev/dvb/card0/demux0");
     return evt;
   }
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {

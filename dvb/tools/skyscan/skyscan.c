@@ -11,7 +11,7 @@
 
 #include <ost/sec.h>
 
-#define SEC_DEV   "/dev/ost/sec0"
+#define SEC_DEV   "/dev/dvb/card0/sec0"
 #define CMD_MAXLEN 1024
 #define VERSION "0.1a"
 

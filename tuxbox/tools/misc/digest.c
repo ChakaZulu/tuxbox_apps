@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 	int x,y;
 	struct videoDigest digest;
 
-	if((fd = open("/dev/ost/video0",O_RDWR|O_NONBLOCK)) < 0){
+	if((fd = open("/dev/dvb/card0/video0",O_RDWR|O_NONBLOCK)) < 0){
 		perror("VIDEO DEVICE: ");
 		return -1;
 	}

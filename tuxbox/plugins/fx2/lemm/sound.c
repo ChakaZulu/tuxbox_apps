@@ -66,7 +66,7 @@ void	SoundStart( void )
 	int speed = 11025;
 
 	if ( sound_fd == -1 )
-		sound_fd=open("/dev/dsp",O_WRONLY);
+		sound_fd=open("/dev/sound/dsp",O_WRONLY);
 	if ( sound_fd == -1 )
 		sound_fd = -2;
 

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.12 2002/07/22 18:25:18 obi Exp $
+ * $Id: frontend.h,v 1.13 2002/08/27 19:00:46 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -32,8 +32,8 @@
 /* zapit */
 #include <channel.h>
 
-#define FRONTEND_DEVICE "/dev/ost/frontend0"
-#define SEC_DEVICE      "/dev/ost/sec0"
+#define FRONTEND_DEVICE "/dev/dvb/card0/frontend0"
+#define SEC_DEVICE      "/dev/dvb/card0/sec0"
 #define MAX_LNBS	4
 
 enum diseqc_t

@@ -40,9 +40,9 @@
 
 #define LCD "/dev/dbox/lcd0"
 #define FP "/dev/dbox/fp0"
-#define DMX "/dev/ost/demux0"
-#define QPSK "/dev/ost/frontend0"
-#define SEC "/dev/ost/sec0"
+#define DMX "/dev/dvb/card0/demux0"
+#define QPSK "/dev/dvb/card0/frontend0"
+#define SEC "/dev/dvb/card0/sec0"
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 

@@ -39,7 +39,7 @@ void audioControl::setAudioMode(int mode)
 {
 	int fd;
 
-	if ((fd = open("/dev/ost/audio0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/dvb/card0/audio0",O_RDWR)) <= 0)
 	{
 		perror("open");
 		return;

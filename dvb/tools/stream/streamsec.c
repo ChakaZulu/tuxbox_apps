@@ -44,10 +44,10 @@ int main(int argc, char **argv)
 	}
 	fflush(stdout);
 	
-	fd=open("/dev/ost/demux0", O_RDONLY);
+	fd=open("/dev/dvb/card0/demux0", O_RDONLY);
 	if (fd<0)
 	{
-		perror("/dev/ost/demux0");
+		perror("/dev/dvb/card0/demux0");
 		return -fd;
 	}
 	

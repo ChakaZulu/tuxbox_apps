@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.c,v 1.2 2002/07/29 19:22:33 obi Exp $
+ * $Id: sdt.c,v 1.3 2002/08/27 19:00:45 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -33,7 +33,7 @@
 #include "sdt.h"
 
 #define SDT_SIZE 10
-#define DEMUX_DEV "/dev/ost/demux0"
+#define DEMUX_DEV "/dev/dvb/card0/demux0"
 
 /*
  * parse service description table
