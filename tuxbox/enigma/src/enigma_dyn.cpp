@@ -334,10 +334,10 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	return result;
 }
 
-static bool playService( const eServiceReference &ref )
+static bool playService(const eServiceReference &ref)
 {
 	// ignore locked service
-	if ( ref.isLocked() && eConfig::getInstance()->pLockActive() )
+	if (ref.isLocked() && eConfig::getInstance()->pLockActive())
 		return false;
 	eZapMain::getInstance()->playService(ref, eZapMain::psSetMode|eZapMain::psDontAdd);
 	return true;
@@ -420,7 +420,7 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 			}
 		}
 #endif
-		if ( playService(*ref) )
+		if (playService(*ref))
 			result = "0";
 		else
 			result = "-1";
@@ -607,9 +607,9 @@ eString getAudioChannels(void)
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
-		std::list<eDVBServiceController::audioStream> &astreams( sapi->audioStreams );
+		std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
 		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
-			;it != astreams.end(); ++it )
+			;it != astreams.end(); ++it)
 		{
 			if (it->pmtentry->elementary_PID == Decoder::current.apid)
 				result += eString().sprintf("<option selected value=\"0x%04x\">", it->pmtentry->elementary_PID);
@@ -998,10 +998,6 @@ static eString getLeftNavi(eString mode, bool javascript)
 #ifdef ENABLE_DYN_CONF
 		result += button(110, "Swap File", LEFTNAVICOLOR, pre + "?mode=configSwapFile" + post);
 		result += "<br>";
-#if 0
-		result += button(110, "Multi-Boot", LEFTNAVICOLOR, pre + "?mode=configMultiBoot" + post);
-		result += "<br>";
-#endif
 		result += button(110, "Settings", LEFTNAVICOLOR, pre + "?mode=configSettings" + post);
 		result += "<br>";
 #endif
@@ -1137,107 +1133,6 @@ static eString getIP()
 	return eString().sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
 }
 
-#ifndef DISABLE_FILE
-extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
-
-#if 0
-static eString getDiskSpace(void)
-{
-	eString result = "unknown";
-
-	result = "Remaining Disk: ";
-	int fds = freeRecordSpace();
-	if (fds != -1)
-	{
-		if (fds < 1024)
-			result += eString().sprintf("%d MB", fds);
-		else
-			result += eString().sprintf("%d.%02d GB", fds/1024, (int)((fds % 1024) / 10.34));
-		result += "/";
-		int min = fds / 33;
-		if (min < 60)
-			result += eString().sprintf("~%d min", min);
-		else
-			result += eString().sprintf("~%d h %02d min", min/60, min%60);
-	}
-
-	return result;
-}
-#endif
-#endif
-
-#if 0
-static eString getStats()
-{
-	eString result;
-	eString apid, vpid;
-
-#ifndef DISABLE_FILE
-	result += getDiskSpace();
-	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
-#endif
-	int sec = atoi(readFile("/proc/uptime").c_str());
-	result += eString().sprintf("%d:%02d h up", sec/3600, (sec%3600)/60);
-	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
-
-	result += getIP();
-	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
-
-	int lockWebIf = 1;
-	eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf);
-	result += (lockWebIf == 1) ? "locked" : "unlocked";
-	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
-
-	vpid = (Decoder::current.vpid == -1) ? "none" : vpid.sprintf("0x%x", Decoder::current.vpid);
-	result += "vpid: " + vpid;
-	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
-
-	apid = (Decoder::current.apid == -1) ? "none" : apid.sprintf("0x%x", Decoder::current.apid);
-	result += "<a href=\"/audio.m3u\">apid: " + apid + "</a>";
-
-	return result;
-}
-
-static eString getChannelStats()
-{
-	std::stringstream result;
-
-	if (eZapMain::getInstance()->getAC3Logo())
-		result << "<img src=\"dolby_on.png\" border=0>";
-	else
-		result << "<img src=\"dolby_off.png\" border=0>";
-
-	result << "&nbsp;";
-
-	if (eZapMain::getInstance()->getSmartcardLogo())
-		result << "<img src=\"crypt_on.png\" border=0>";
-	else
-		result << "<img src=\"crypt_off.png\" border=0>";
-
-	result << "&nbsp;";
-
-	if (eZapMain::getInstance()->get16_9Logo())
-		result << "<img src=\"format_on.png\" border=0>";
-	else
-		result << "<img src=\"format_off.png\" border=0>";
-
-	return result.str();
-}
-
-static eString getRecordingStat()
-{
-	std::stringstream result;
-#ifndef DISABLE_FILE
-	if (eZapMain::getInstance()->isRecording())
-		result << "<img src=\"blinking_red.gif\" border=0>";
-	else
-#endif
-		result << "&nbsp;";
-
-	return result.str();
-}
-#endif
-
 static eString getVolBar()
 {
 	std::stringstream result;
@@ -1271,49 +1166,6 @@ static eString getMute()
 
 	return result.str();
 }
-
-#if 0
-#ifndef DISABLE_FILE
-static eString getVideoBar()
-{
-	std::stringstream result;
-	int videopos = 0;
-	int min = 0, sec = 0;
-	int total = 0, current = 0;
-
-	if (eServiceHandler *handler = eServiceInterface::getInstance()->getService())
-	{
-		total = handler->getPosition(eServiceHandler::posQueryLength);
-		current = handler->getPosition(eServiceHandler::posQueryCurrent);
-	}
-
-	if ((total > 0) && (current != -1))
-	{
-		min = total - current;
-		sec = min % 60;
-		min /= 60;
-		videopos = (current * 10) / total;
-	}
-
-
-	for (int i = 1; i <= 10; i++)
-	{
-		result << "<td width=\"15\" height=\"8\">"
-			"<a href=\"javascript:setVid(" << i << ")\">";
-		if (i <= videopos)
-			result << "<img src=\"led_on.gif\" border=\"0\" width=\"15\" height=\"8\">";
-		else
-			result << "<img src=\"led_off.gif\" border=\"0\" width=\"15\" height=\"8\">";
-		result << "</a>"
-			"</td>";
-	}
-
-	result << "<td>&nbsp;&nbsp;-" << min << ":" << sec << "</td>";
-
-	return result.str();
-}
-#endif
-#endif
 
 static eString getUpdates()
 {
@@ -1451,7 +1303,7 @@ struct countDVBServices: public Object
 	{
 		if (ref.path
 			|| ref.flags & eServiceReference::isDirectory
-			|| ref.type != eServiceReference::idDVB )
+			|| ref.type != eServiceReference::idDVB)
 			return;
 
 		// sorry.. at moment we dont show any directory.. or locked service in webif
@@ -2210,29 +2062,6 @@ eString getConfigSwapFile(void)
 	return result;
 }
 
-#if 0
-eString getConfigMultiBoot(void)
-{
-	eString result;
-	if (dreamFlashIsInstalled())
-	{
-		result = readFile(TEMPLATE_DIR + "configMultiBoot.tmp");
-		eString mediaPath = getImageMediaPath();
-		eString dreamFlashVersion = getAttribute(mediaPath + "/tools/lcdmenu.conf", "version");
-		if (dreamFlashVersion == "&nbsp;")
-			dreamFlashVersion = "not installed";
-		result.strReplace("#DREAMFLASHVERSION#", dreamFlashVersion);
-		result.strReplace("#MEDIAPATH#", getImageMediaPath());
-		result.strReplace("#INSTALLEDIMAGES#", getInstalledImages());
-		result.strReplace("#REBOOTBUTTON#", button(110, "Reboot", RED, "javascript:admin(\'/cgi-bin/admin?command=reboot\')"));
-	}
-	else
-		result = "DreamFlash plugin is required for this function but not installed.";
-
-	return result;
-}
-#endif
-
 eString getConfigSettings(void)
 {
 	eString result = readFile(TEMPLATE_DIR + "configSettings.tmp");
@@ -2333,7 +2162,7 @@ eString getSatellitesAndTransponders(void)
 		{
 			bouquets += "\"" + s->getDescription() + "\", ";
 			bouquetrefs += "\"" + s->getDescription() + "\", ";
-			if (tp && s->getOrbitalPosition() == tp->satellite.orbital_position )
+			if (tp && s->getOrbitalPosition() == tp->satellite.orbital_position)
 			{
 				//this is the current satellite...
 				currentSatellite = k;
@@ -2539,14 +2368,6 @@ static eString getContent(eString mode, eString path, eString opts)
 		result += getConfigSwapFile();
 	}
 	else
-#if 0
-	if (mode == "configMultiBoot")
-	{
-		result = getTitle("CONFIG: Multi-Boot");
-		result += getConfigMultiBoot();
-	}
-	else
-#endif
 	if (mode == "configSettings")
 	{
 		result = getTitle("CONFIG: Settings");
@@ -3924,6 +3745,99 @@ static eString getTransponderServices(eString request, eString dirpath, eString 
 	return "E: no DVB service is running.. or this is a playback";
 }
 
+class treeNode
+{
+public:
+	eString serviceNode;
+	eString serviceName;
+	treeNode(eString sname, eString snode)
+	{
+//		eDebug("new Service: %s - %s", sname.c_str(), snode.c_str());
+		serviceName = sname;
+		serviceNode = snode;
+	};
+	~treeNode() {};
+	bool operator < (const treeNode &a) const {return serviceName < a.serviceName;}
+};
+
+eString genNodes(bool sort, std::list <treeNode> &myList)
+{
+	std::list <treeNode>::iterator myIt;
+	eString result;
+
+	eDebug("[ENIGMA_DYN] start sorting...");
+
+	if (sort)
+		myList.sort();
+
+	for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+		result += myIt->serviceNode + "\n";
+
+	eDebug("[ENIGMA_DYN] sorting done.");
+	return result;
+}
+
+struct listChannels: public Object
+{
+	eString &result;
+	std::list <treeNode> myList;
+	eServiceInterface *iface;
+	bool sort;
+
+	listChannels(const eServiceReference &service, eString &result, bool sort)
+		:result(result), iface(eServiceInterface::getInstance()), sort(sort)
+	{
+		myList.clear();
+		Signal1<void, const eServiceReference&> cbSignal;
+		CONNECT(cbSignal, listChannels::addTreeNode);
+		iface->enterDirectory(service, cbSignal);
+		iface->leaveDirectory(service);
+	}
+
+	void addTreeNode(const eServiceReference& ref)
+	{
+		eString serviceReference, serviceName, orbitalPosition;
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
+
+		eService *service = iface ? iface->addRef(ref) : 0;
+
+		serviceReference = ref.toString();
+		if (ref.descr)
+			serviceName = filter_string(ref.descr);
+		else
+		{
+			if (service)
+			{
+				serviceName = filter_string(service->service_name);
+				iface->removeRef(ref);
+			}
+			else
+				serviceName = "unnamed service";
+		}
+
+		if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
+		{
+			const eServiceReferenceDVB& dvb_ref = (const eServiceReferenceDVB&)ref;
+			eTransponder *tp = eTransponderList::getInstance()->searchTS(
+				dvb_ref.getDVBNamespace(),
+				dvb_ref.getTransportStreamID(),
+				dvb_ref.getOriginalNetworkID());
+			if (tp && tp->satellite.isValid())
+				orbitalPosition = eString().setNum(tp->satellite.orbital_position);
+			else
+				orbitalPosition = 0;
+		}
+
+
+		if (ref.flags & eServiceReference::isDirectory)
+			listChannels(ref, result, sort);
+		else
+			myList.push_back(treeNode("ab", "ab"));
+	}
+};
+
 struct listContent: public Object
 {
 	eString &result;
@@ -3946,12 +3860,12 @@ struct listContent: public Object
 		eService *service = iface ? iface->addRef(ref) : 0;
 		result += ref.toString();
 		result += ";";
-		if ( ref.descr )
+		if (ref.descr)
 			result += filter_string(ref.descr);
-		else if ( service )
+		else if (service)
 		{
 			result += filter_string(service->service_name);
-			if ( ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory) )
+			if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
 			{
 				result += ';';
 				result += filter_string(((eServiceDVB*)service)->service_provider);
@@ -3960,17 +3874,17 @@ struct listContent: public Object
 		else
 		{
 			result += "unnamed service";
-			if ( ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory) )
+			if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
 				result += ";unnamed provider";
 		}
-		if ( ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory) )
+		if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
 		{
 			const eServiceReferenceDVB& dvb_ref = (const eServiceReferenceDVB&)ref;
 			eTransponder *tp = eTransponderList::getInstance()->searchTS(
 				dvb_ref.getDVBNamespace(),
 				dvb_ref.getTransportStreamID(),
 				dvb_ref.getOriginalNetworkID());
-			if ( tp && tp->satellite.isValid())
+			if (tp && tp->satellite.isValid())
 			{
 				result += ';';
 				result += eString().setNum(tp->satellite.orbital_position);
@@ -3979,7 +3893,7 @@ struct listContent: public Object
 		result += "\n";
 		if (service)
 			iface->removeRef(ref);
-		if ( listCont && ref.flags & eServiceReference::isDirectory )
+		if (listCont && ref.flags & eServiceReference::isDirectory)
 			listContent(ref, result, false);
 	}
 };
@@ -3989,7 +3903,7 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
 	std::map<eString,eString> opts=getRequestOptions(opt, '&');
 
-	if ( !opts["ref"] )
+	if (!opts["ref"])
 		return "E: no ref given";
 
 	bool listCont = opts["listContent"] == "true";
@@ -3998,7 +3912,7 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 	eServiceReference ref(opts["ref"]);
 	listContent t(ref, result, listCont);
 
-	if ( result )
+	if (result)
 		return result;
 
 	return "E: error during list services";
@@ -4169,7 +4083,7 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	if ( ret == -1 )  // event currently running...
+	if (ret == -1)  // event currently running...
 	{
 		// ask user if he really wants to do this..
 		// then call deleteEventFromtTimerList again.. with true as second parameter..
@@ -4287,7 +4201,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 		atoi(oldStartTime.c_str()),
 		-1, -1, oldType);
 
-	if ( oldStartTime < now && eventStartTime >= now )
+	if (oldStartTime < now && eventStartTime >= now)
 	{
 		oldType &=
 			~(ePlaylistEntry::stateRunning|
@@ -4356,7 +4270,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 
 	int ret = eTimerManager::getInstance()->modifyEventInTimerList(oldEvent, newEvent, (force == "yes"));
 
-	if ( ret == -1 )  // event currently running...
+	if (ret == -1)  // event currently running...
 	{
 		// ask user if he wants to update only after_event action and duration
 		// then call modifyEvent again.. with true as third parameter..
@@ -4497,21 +4411,21 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 static eString buildAfterEventOpts(int type)
 {
 	std::stringstream afterOpts;
-	if ( type & ePlaylistEntry::doGoSleep || type & ePlaylistEntry::doShutdown )
+	if (type & ePlaylistEntry::doGoSleep || type & ePlaylistEntry::doShutdown)
 		afterOpts << "<option value=\"0\">";
 	else
 		afterOpts << "<option selected value=\"0\">";
 	afterOpts << "Nothing"
 		<< "</option>";
-	if ( type & ePlaylistEntry::doGoSleep )
+	if (type & ePlaylistEntry::doGoSleep)
 		afterOpts << "<option selected value=\"" << ePlaylistEntry::doGoSleep << "\">";
 	else
 		afterOpts << "<option value=\"" << ePlaylistEntry::doGoSleep << "\">";
 	afterOpts << "Standby"
 		<< "</option>";
-	if ( eSystemInfo::getInstance()->canShutdown() )
+	if (eSystemInfo::getInstance()->canShutdown())
 	{
-		if ( type & ePlaylistEntry::doShutdown )
+		if (type & ePlaylistEntry::doShutdown)
 			afterOpts << "<option selected value=\"" << ePlaylistEntry::doShutdown << "\">";
 		else
 			afterOpts << "<option value=\"" << ePlaylistEntry::doShutdown << "\">";
@@ -4530,7 +4444,7 @@ static eString showEditTimerEventWindow(eString request, eString dirpath, eStrin
 	eString eventDuration = opt["duration"];
 	eString description = httpUnescape(opt["descr"]);
 
-	// this is only for renamed services ( or subservices )... changing this in the edit dialog has no effect to
+	// this is only for renamed services (or subservices)... changing this in the edit dialog has no effect to
 	// the recording service
 	eString channel = httpUnescape(opt["channel"]);
 	eString eventType = opt["type"];
@@ -4705,25 +4619,8 @@ static eString channavi(eString request, eString dirpath, eString opt, eHTTPConn
 	return result;
 }
 
-#if 0
-static eString header(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString result = readFile(TEMPLATE_DIR + "header.tmp");
-	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
-		result.strReplace("#TOPBALK#", "topbalk.png");
-	else
-	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)
-		result.strReplace("#TOPBALK#", "topbalk2.png");
-	else
-	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem)
-		result.strReplace("#TOPBALK#", "topbalk3.png");
-	else
-//	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
-		result.strReplace("#TOPBALK#", "topbalk4.png");
-	result.strReplace("#EMPTYCELL#", "&nbsp;");
-	return getEITC(result);
-}
+#ifndef DISABLE_FILE
+extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 #endif
 
 static eString data(eString request, eString dirpath, eString opt, eHTTPConnection *content)
