@@ -47,8 +47,10 @@ public:
 	void SocketWrite( char* text);
 	void SocketWriteLn( char* text);
 	void SocketWriteData( char* data, long length );
-//	void SocketWriteLn( char * text);
 	bool SendFile(char *path,char *filename);
+
+	void SendHTMLFooter();
+	void SendHTMLHeader(char * Titel);
 
 	int Method;
 	TString *URL;

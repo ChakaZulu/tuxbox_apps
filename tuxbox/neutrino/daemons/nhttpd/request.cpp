@@ -29,6 +29,9 @@
 
 #include "request.h"
 #include "webdbox.h"
+#include <arpa/inet.h> 
+
+
 
 //-------------------------------------------------------------------------
 TWebserverRequest::TWebserverRequest(TWebserver *server) 
@@ -244,15 +247,16 @@ char *ende,*anfang;
 		}
 		return true;
 	}
-	return false;
+	else
+	{
+		printf("rawbuffer_len = 0\n");
+		return false;
+	}
 }
 //-------------------------------------------------------------------------
 
 void TWebserverRequest::PrintRequest()
 {
-
-//	printf("------ Request Data: ------\n");
-
 	char method[6] = {0};
 	if(Method == M_GET)
 		sprintf(method,"GET");
@@ -260,13 +264,23 @@ void TWebserverRequest::PrintRequest()
 		sprintf(method,"POST");
 
 
-	printf("%X %3d %-6s %-30s %-20s %-25s %-25s %-12s\n",cliaddr.sin_addr,HttpStatus,method,Path?Path->c_str():"",Filename?Filename->c_str():"",URL?URL->c_str():"",ContentType?ContentType->c_str():"",Param_String?Param_String->c_str():"");
-	if(Parent->DEBUG) printf("Requestlänge: %ld\n",rawbuffer_len);
-	if(Parent->DEBUG) printf("Buffer:\n%s\n",rawbuffer);
-
-//	printf("----------------------------\n");
+	printf("%s %3d %-6s %-35s %-20s %-25s %-10s %s\n",inet_ntoa(cliaddr.sin_addr),HttpStatus,method,Path?Path->c_str():"",Filename?Filename->c_str():"",URL?URL->c_str():"",ContentType?ContentType->c_str():"",Param_String?Param_String->c_str():"");
 }
 
+//-------------------------------------------------------------------------
+void TWebserverRequest::SendHTMLHeader(char * Titel)
+{
+	SocketWrite("<html>\n<head><title>");
+	SocketWrite(Titel);
+	SocketWrite("DBOX2-Neutrino Kanalliste</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\">");
+	SocketWriteLn("<meta http-equiv=\"cache-control\" content=\"no-cache\">\n</head>\n<body>\n");
+}
+
+//-------------------------------------------------------------------------
+void TWebserverRequest::SendHTMLFooter()
+{
+	SocketWriteLn("</body></html>");
+}
 //-------------------------------------------------------------------------
 void TWebserverRequest::Send404Error()
 {
@@ -398,71 +412,58 @@ bool TWebserverRequest::SendResponse()
 int file;
 
 	if(Parent->DEBUG) printf("SendeResponse()\n");
-	{
-		RewriteURL();		
 
-		if(strncmp(Path->c_str(),"/control",8) == 0)
-		{
-			if(Parent->DEBUG) printf("Web api\n");
-			Parent->WebDbox->ExecuteCGI(this);
-			return true;
-		}
-		if(strcmp(Path->c_str(),"/fb") == 0)
-		{
-			if(Parent->DEBUG) printf("Webbrowser api\n");
-			Parent->WebDbox->Execute(this);
-			return true;
+	RewriteURL();		// Erst mal die URL umschreiben
+
+	if(strncmp(Path->c_str(),"/control",8) == 0)
+	{
+		if(Parent->DEBUG) printf("Web api\n");
+		Parent->WebDbox->ExecuteCGI(this);
+		return true;
+	}
+	if(strcmp(Path->c_str(),"/fb") == 0)
+	{
+		if(Parent->DEBUG) printf("Browser api\n");
+		Parent->WebDbox->Execute(this);
+		return true;
+	}
+	else
+	{
+	// Normale Datei
+		if(Parent->DEBUG) printf("Normale Datei\n");
+		if( (file = OpenFile(Path->c_str(),Filename->c_str()) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
+		{											// Wenn Datei geöffnet werden konnte
+			SocketWrite("HTTP/1.0 200 OK\n");		
+			HttpStatus = 200;
+			if( (!FileExt) )		// Anhand der Dateiendung den Content bestimmen
+				ContentType = new TString("text/html");
+			else
+			{
+				
+				if( (strcasecmp(FileExt->c_str(),"html") == 0) || (strcasecmp(FileExt->c_str(),"htm") == 0) )
+				{
+					ContentType = new TString("text/html");
+				}
+				else if(strcasecmp(FileExt->c_str(),"gif") == 0)
+				{
+					ContentType = new TString("image/gif");
+				}
+				else if(strcasecmp(FileExt->c_str(),"jpg") == 0)
+				{
+					ContentType = new TString("image/jpeg");
+				}
+				else
+					ContentType = new TString("text/plain");
+
+			}
+			SocketWrite("Content-Type: ");SocketWrite(ContentType->c_str());SocketWrite("\n\n");
+
+			if(Parent->DEBUG) printf("content-type: %s - %s\n", ContentType->c_str(),Filename->c_str());
+			SendOpenFile(file);
 		}
 		else
-		{
-		// Normale Datei
-			if(Parent->DEBUG) printf("Normale Datei\n");
-/*
-			char dateiname[255]={0};
-			if(Path)
-				strcpy(dateiname,Path->c_str());
-			if(Filename)
-			{
-				if(strlen(Path->c_str()) > 1)
-					strcat(dateiname,"/");
-				strcat(dateiname,);
-			}
-			if(Parent->DEBUG) printf("Oeffne Datei '%s'\n",dateiname);		
-*/
-			if( (file = OpenFile(Path->c_str(),Filename->c_str()) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
-			{											// Wenn Datei geöffnet werden konnte
-				SocketWrite("HTTP/1.0 200 OK\n");		
-				HttpStatus = 200;
-				if( (!FileExt) )		// Anhand der Dateiendung den Content bestimmen
-					ContentType = new TString("text/html");
-				else
-				{
-					
-					if( (strcasecmp(FileExt->c_str(),"html") == 0) || (strcasecmp(FileExt->c_str(),"htm") == 0) )
-					{
-						ContentType = new TString("text/html");
-					}
-					else if(strcasecmp(FileExt->c_str(),"gif") == 0)
-					{
-						ContentType = new TString("image/gif");
-					}
-					else if(strcasecmp(FileExt->c_str(),"jpg") == 0)
-					{
-						ContentType = new TString("image/jpeg");
-					}
-					else
-						ContentType = new TString("text/plain");
-
-				}
-				SocketWrite("Content-Type: ");SocketWrite(ContentType->c_str());SocketWrite("\n\n");
-
-				if(Parent->DEBUG) printf("content-type: %s - %s\n", ContentType->c_str(),Filename->c_str());
-				SendOpenFile(file);
-			}
-			else
-			{											// Wenn Datei nicht geöffnet werden konnte
-				Send404Error();							// 404 Error senden
-			}
+		{											// Wenn Datei nicht geöffnet werden konnte
+			Send404Error();							// 404 Error senden
 		}
 		if(Parent->DEBUG) printf("Response gesendet\n");
 		return true;
@@ -506,9 +507,7 @@ int file;
 		return true;
 	}
 	else
-	{
 		return false;
-	}
 }
 //-------------------------------------------------------------------------
 void TWebserverRequest::SendOpenFile(int file)
@@ -544,12 +543,12 @@ int file = 0;
 		memset(fname,0,strlen(path) + strlen(filename)+1);
 		sprintf(fname,format,path,filename);
 		file = open( fname, O_RDONLY );
-		delete[] fname;
 		if (file<=0)
 		{
 			printf("cannot open file %s\n", fname);
 			if(Parent->DEBUG) perror("");
 		}	
+		delete[] fname;
 	}
 	return file;
 }
