@@ -35,7 +35,7 @@ void NVODStream::EITready(int error)
 	qDebug("NVOD eit ready: %d", error);
 	parent->sort();
 	if (parent && parent->isVisible())
-		parent->redraw();
+		parent->invalidate();
 }
 
 NVODStream::NVODStream(eListbox *listbox, int transport_stream_id, int original_network_id, int service_id)

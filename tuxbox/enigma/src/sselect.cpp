@@ -66,7 +66,7 @@ void eServiceSelector::fillServiceList()
 	list->clearList();
 	if (eDVB::getInstance()->getTransponders())
 		eDVB::getInstance()->getTransponders()->forEachChannel(eServiceSelector_addService(list, result));
-	list->redraw();
+	list->invalidate();
 }
 
 void eServiceSelector::entrySelected(eListboxEntry *entry)
@@ -166,7 +166,7 @@ void eServiceSelector::useBouquet(eBouquet *bouquet)
 		if (bouquet->bouquet_id>=0)
 			list->sort();
 	}
-	list->redraw();
+	list->invalidate();
 }
 
 eService *eServiceSelector::choose(eService *current, int irc)

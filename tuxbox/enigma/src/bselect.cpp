@@ -30,7 +30,7 @@ void eBouquetSelector::fillBouquetList()
 		}
 		list->sort();
 	}
-	list->redraw();
+	list->invalidate();
 }
 
 void eBouquetSelector::entrySelected(eListboxEntry *entry)

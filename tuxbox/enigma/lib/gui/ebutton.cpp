@@ -53,7 +53,7 @@ void eButton::gotFocus()
 	}
 
 	setBackgroundColor(focus);
-	redraw();
+	invalidate();
 }
 
 void eButton::lostFocus()
@@ -74,7 +74,7 @@ void eButton::lostFocus()
 			parent->LCDElement->setText("");	
 	}
 	setBackgroundColor(normal);
-	redraw();
+	invalidate();
 }
 
 static eWidget *create_eButton(eWidget *parent)
