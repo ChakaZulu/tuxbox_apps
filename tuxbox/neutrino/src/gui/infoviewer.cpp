@@ -51,6 +51,9 @@
 #define BOTTOM_BAR_OFFSET 0
 #define SHADOW_OFFSET 6
 
+// in us
+#define FADE_TIME 40000
+
 int time_left_width;
 int time_dot_width;
 int time_width;
@@ -265,10 +268,10 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
         {
             bool show_dot= true;
 			if ( fadeIn )
-            	fadeTimer = g_RCInput->addTimer(40000, false);
+            	fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
 
        		bool hideIt = true;
-			unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar >> 1 );
+			unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar );
 
 			int res = messages_return::none;
 
@@ -330,7 +333,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
     					 ( g_info.enx_ID != -1 ) && ( g_settings.widget_fade ) )
     				{
                     	fadeOut = true;
-                    	fadeTimer = g_RCInput->addTimer( 40000, false );
+                    	fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
             			timeoutEnd = g_RCInput->calcTimeoutEnd( 1 );
     				}
     				else

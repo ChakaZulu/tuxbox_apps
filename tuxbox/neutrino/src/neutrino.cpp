@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.250 2002/04/26 09:56:08 field Exp $
+        $Id: neutrino.cpp,v 1.251 2002/04/26 10:28:36 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1506,7 +1506,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_settings.timing_menu = 60;
 	g_settings.timing_chanlist = 60;
 	g_settings.timing_epg = 2* 60;
-	g_settings.timing_infobar = 8;
+	g_settings.timing_infobar = 6;
 
 	CmdParser(argc, argv);
 
@@ -2051,8 +2051,13 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 	uint msg = key;
 	uint data;
 
+	unsigned long long timeoutEnd;
+
 	do
 	{
+		if ( msg <= CRCInput::RC_MaxRC )
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar/ 2 );
+
 		if (msg==CRCInput::RC_plus)
 		{
 			if (current_volume<100)
@@ -2091,7 +2096,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 
 		if ( msg != CRCInput::RC_timeout )
 		{
-			g_RCInput->getMsg( &msg, &data, 30 );
+			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 		}
 
 	}
@@ -2353,7 +2358,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.250 2002/04/26 09:56:08 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.251 2002/04/26 10:28:36 field Exp $\n\n");
 	tzset();
 	initGlobals();
 
