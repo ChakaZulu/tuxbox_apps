@@ -12,5 +12,7 @@ libenigma_dvb_la_SOURCES = \
 	dvbscan.cpp service.cpp servicedvb.cpp servicestructure.cpp \
 	servicefile.cpp servicemp3.cpp serviceplaylist.cpp dvbci.cpp
 
+libenigma_dvb_la_LDFLAGS = @ID3TAG_LIBS@ @MAD_LIBS@
+
 AM_CPPFLAGS = -DPROFILE
 
