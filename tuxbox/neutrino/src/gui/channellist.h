@@ -132,6 +132,7 @@ class CChannelList
 		const string getActiveChannelID();
 		CChannel* getChannelFromOnidSid(int onidSid);
 		void zapTo(int pos);
+		void zapToOnidSid(unsigned int onid_sid);
 		bool showInfo(int pos);
 		void updateEvents(void);
 		int numericZap(int key);

@@ -499,6 +499,27 @@ bool CChannelList::handleLockage( CChannel* chan)
 	return( true);
 }
 
+
+//
+// -- Zap to channel with onid_sid
+// -- 2002-04-14 rasc
+//
+//
+void CChannelList::zapToOnidSid (unsigned int onid_sid)
+{
+	int i;
+
+	for (i=0; i<chanlist.size(); i++) {
+		if (chanlist[i]->onid_sid == onid_sid) {
+			zapTo (i);
+			break;
+		}
+	}
+
+}
+
+
+
 void CChannelList::zapTo(int pos)
 {
 	if (chanlist.size() == 0)

@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.73 2002/04/10 16:39:19 field Exp $
+//  $Id: neutrino.h,v 1.74 2002/04/12 22:43:59 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -201,7 +201,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
 		CIPChangeNotifier			*MyIPChanger;
 
-		CChannelList				*channelList;
 
 		void isCamValid();
 		void firstChannel();
@@ -252,6 +251,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
         long long last_profile_call;
 
 	public:
+		CChannelList				*channelList;
 
 		CNeutrinoApp();
 		~CNeutrinoApp();

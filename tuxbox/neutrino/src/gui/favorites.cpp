@@ -25,6 +25,8 @@
 */
 
 #include "../global.h"
+#include "../neutrino.h"
+#include "../widget/channellist.h"
 #include "../widget/hintbox.h"
 #include "favorites.h"
 
@@ -34,6 +36,7 @@
 // -- Return Status (bit-Status):A
 // --    1 = Bouquet created
 // --    2 = Channel added   (if not set, channel already in BQ)
+// -- rasc
 //
 
 int CFavorites::addChannelToFavorites()
@@ -76,7 +79,7 @@ int CFavorites::addChannelToFavorites()
 
 		// -- same to Neutrino (keep current channel!)
 		neutrino->channelsInit();
-		//g_RCInput->postMsg( messages::EVT_BOUQUETSCHANGED, 1 );
+		neutrino->channelList->zapToOnidSid(onid_sid);
 	}
 
 	return status;
