@@ -2733,7 +2733,8 @@ void eZapMain::toggleMute()
 // better do pause
 	if ( ( (ref.type == eServiceReference::idDVB && ref.path)
 				|| (ref.type == eServiceReference::idUser
-				&& ref.data[0] == eMP3Decoder::codecMPG ) )
+				&& ref.data[0] == eMP3Decoder::codecMPG )
+				|| timeshift )
 			&& (!eAVSwitch::getInstance()->getMute()) )
 		pause();
 	else
