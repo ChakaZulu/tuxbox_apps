@@ -5,7 +5,6 @@
 #include <sstream>
 #include <iomanip>
 #include <lib/system/info.h>
-#include <lib/dvb/cainfo.h>
 
 extern "C"
 {
@@ -973,7 +972,6 @@ eTable *PMT::createNext()
 
 int PMT::data(__u8 *data)
 {
-	eCAInfo::saveCAIDsInfo(data);
 	pmt_struct *pmt=(pmt_struct*)data;
 	version_number=pmt->version_number;
 	program_number=HILO(pmt->program_number);
