@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 
 #include <dbox/avia_gt_pig.h>
+#include <dbox/avs_core.h>
 #include <dbox/fp.h>
 #include <ost/dmx.h>
 #include <plugin.h>
@@ -129,6 +130,9 @@
 
 void CleanUp();
 void PageInput(int Number);
+void PageCatching();
+void CatchNextPage(int Init);
+void CatchPrevPage();
 void GetNextPageOne();
 void GetPrevPageOne();
 void GetNextPageTen();
@@ -137,15 +141,15 @@ void GetNextSubPage();
 void GetPrevSubPage();
 void SwitchTranspMode();
 void SwitchScreenMode();
-void SwitchTVMode();
 void SwitchHintMode();
+void RenderCatchedPage();
 void RenderCharFB(int Char, int Attribute);
 void RenderCharBB(int Char, int Attribute);
 void RenderPageNotFound();
 void RenderPage();
 void DecodePage();
 void *CacheThread(void *arg);
-int Init();
+int  Init();
 int  GetRCCode();
 
 //framebuffer stuff
@@ -161,14 +165,16 @@ FT_Face		face;
 
 //some data
 
-int dmx, pig, rc, fb;
+int dmx, pig, avs, rc, fb;
 int sx, ex, sy, ey;
 int vtxtpid;
 int PosX, PosY, StartX, StartY;
 int current_page, current_subpage, page, subpage, lastpage, pageupdate, zap_subpage_manual;
 int inputcounter;
-int screenmode, transpmode, tvmode, hintmode;
+int screenmode, transpmode, hintmode;
 int fontwidth, fontheight;
+int fnc_old, fnc_new;
+int catch_row, catch_col, catched_page;
 
 pthread_t thread_id;
 void *thread_result;

@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.11: added pagecatching, use 16:9 for text&picture mode               *
  *    V1.10: added conceal/hold mosaics/release mosaics                       *
  *    V1.09: enx fixed, subpage zapping fixed, tvmode reactivated             *
  *    V1.08: zap subpages, text&picture mode, subtitle fixed                  *
@@ -27,7 +28,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.10 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.11 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -137,13 +138,13 @@ void plugin_exec(PluginParam *par)
 					case RC_9:		PageInput(9);
 									break;
 
-					case RC_OK:		SwitchTranspMode();
+					case RC_OK:		PageCatching();
 									break;
 
 					case RC_DBOX:	SwitchScreenMode();
 									break;
 
-					case RC_MUTE:	SwitchTVMode();
+					case RC_MUTE:	SwitchTranspMode();
 									break;
 
 					case RC_HELP:	SwitchHintMode();
@@ -183,10 +184,20 @@ int Init()
 
 		pig = -1;
 
-		if((pig = open("/dev/dbox/pig0", O_RDONLY)) == -1)
+		if((pig = open("/dev/dbox/pig0", O_RDWR)) == -1)
 		{
 			perror("TuxTxt <open /dev/dbox/pig0>");
 		}
+
+	//open avs
+
+		if((avs = open("/dev/dbox/avs0", O_RDWR)) == -1)
+		{
+			perror("TuxTxt <open /dev/dbox/avs0>");
+			return 0;
+		}
+
+		ioctl(avs, AVSIOGSCARTPIN8, &fnc_old);
 
 	//setup rc
 
@@ -319,9 +330,14 @@ void CleanUp()
 {
 	int clear_page, clear_subpage;
 
-	//hide pig
+	//hide pig & restore fnc
 
-		if(screenmode) avia_pig_hide(pig);
+		if(screenmode)
+		{
+			avia_pig_hide(pig);
+
+			ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
+		}
 
 	//stop decode-thread
 
@@ -817,6 +833,202 @@ void GetPrevSubPage()
 }
 
 /******************************************************************************
+ * PageCatching                                                               *
+ ******************************************************************************/
+
+void PageCatching()
+{
+	int val;
+
+	//check for pagenumber(s)
+
+		CatchNextPage(1);
+
+		if(!catched_page) return;
+
+	//set blocking mode
+
+		val = fcntl(rc, F_GETFL);
+		fcntl(rc, F_SETFL, val &~ O_NONBLOCK);
+
+	//loop
+
+		do
+		{
+			GetRCCode();
+
+			switch(RCCode)
+			{
+				case RC_DOWN:	CatchNextPage(0);
+								break;
+
+				case RC_UP:		CatchPrevPage();
+								break;
+
+				case RC_HOME:	fcntl(rc, F_SETFL, O_NONBLOCK);
+								pageupdate = 1;
+								RCCode = 0;
+								return;
+			}
+		}
+		while(RCCode != RC_OK);
+
+	//set new page
+
+		lastpage = page;
+		page = catched_page;
+		subpage = subpagetable[page];
+		pageupdate = 1;
+
+	//reset to nonblocking mode
+
+		fcntl(rc, F_SETFL, O_NONBLOCK);
+}
+
+/******************************************************************************
+ * CatchNextPage                                                              *
+ ******************************************************************************/
+
+void CatchNextPage(int Init)
+{
+	int tmp_page, pages_found;
+
+	//init
+
+		if(Init)
+		{
+			catch_row = 1;
+			catch_col = 0;
+			catched_page = 0;
+		}
+
+	//catch next page
+
+		for( ; catch_row < 24; catch_row++)
+		{
+			for( ; catch_col < 40; catch_col++)
+			{
+				if(!(page_atrb[catch_row*40 + catch_col] & 1<<8) && (page_char[catch_row*40 + catch_col] >= '0' && page_char[catch_row*40 + catch_col] <= '9' && page_char[catch_row*40 + catch_col + 1] >= '0' && page_char[catch_row*40 + catch_col + 1] <= '9' && page_char[catch_row*40 + catch_col + 2] >= '0' && page_char[catch_row*40 + catch_col + 2] <= '9') && (page_char[catch_row*40 + catch_col - 1] < '0' || page_char[catch_row*40 + catch_col - 1] > '9') && (page_char[catch_row*40 + catch_col + 3] < '0' || page_char[catch_row*40 + catch_col + 3] > '9'))
+				{
+					tmp_page = (page_char[catch_row*40 + catch_col] - '0')<<8 | (page_char[catch_row*40 + catch_col + 1] - '0')<<4 | page_char[catch_row*40 + catch_col + 2] - '0';
+
+					if(tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
+					{
+						catched_page = tmp_page;
+						pages_found += 1;
+
+						RenderCatchedPage();
+
+						catch_col += 3;
+
+						printf("TuxTxt <PageCatching => %.3X\n", catched_page);
+
+						return;
+					}
+				}
+			}
+
+			catch_col = 0;
+		}
+
+		if(Init)
+		{
+			printf("TuxTxt <PageCatching => no PageNumber>\n");
+			return;
+		}
+
+	//wrap around
+
+		catch_row = 1;
+		catch_col = 0;
+
+		if(!pages_found) return;
+
+		pages_found = 0;
+
+		CatchNextPage(0);
+}
+
+/******************************************************************************
+ * CatchPrevPage                                                              *
+ ******************************************************************************/
+
+void CatchPrevPage()
+{
+	int tmp_page, pages_found;
+
+	//catch prev page
+
+		for( ; catch_row > 0; catch_row--)
+		{
+			for( ; catch_col > 0; catch_col--)
+			{
+				if(!(page_atrb[catch_row*40 + catch_col] & 1<<8) && (page_char[catch_row*40 + catch_col] >= '0' && page_char[catch_row*40 + catch_col] <= '9' && page_char[catch_row*40 + catch_col + 1] >= '0' && page_char[catch_row*40 + catch_col + 1] <= '9' && page_char[catch_row*40 + catch_col + 2] >= '0' && page_char[catch_row*40 + catch_col + 2] <= '9') && (page_char[catch_row*40 + catch_col - 1] < '0' || page_char[catch_row*40 + catch_col - 1] > '9') && (page_char[catch_row*40 + catch_col + 3] < '0' || page_char[catch_row*40 + catch_col + 3] > '9'))
+				{
+					tmp_page = (page_char[catch_row*40 + catch_col] - '0')<<8 | (page_char[catch_row*40 + catch_col + 1] - '0')<<4 | page_char[catch_row*40 + catch_col + 2] - '0';
+
+					if(tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
+					{
+						catched_page = tmp_page;
+						pages_found += 1;
+
+						RenderCatchedPage();
+
+						catch_col -= 3;
+
+						printf("TuxTxt <PageCatching => %.3X\n", catched_page);
+
+						return;
+					}
+				}
+			}
+
+			catch_col = 39;
+		}
+
+	//wrap around
+
+		catch_row = 23;
+		catch_col = 39;
+
+		if(!pages_found) return;
+
+		pages_found = 0;
+
+		CatchPrevPage();
+}
+
+/******************************************************************************
+ * RenderCatchedPage                                                          *
+ ******************************************************************************/
+
+void RenderCatchedPage()
+{
+	static int old_row, old_col;
+
+	//restore pagenumber
+
+		PosX = StartX + old_col*fontwidth;
+		PosY = StartY + old_row*fixfontheight;
+
+		RenderCharFB(page_char[old_row*40 + old_col    ], page_atrb[old_row*40 + old_col    ]);
+		RenderCharFB(page_char[old_row*40 + old_col + 1], page_atrb[old_row*40 + old_col + 1]);
+		RenderCharFB(page_char[old_row*40 + old_col + 2], page_atrb[old_row*40 + old_col + 2]);
+
+		old_row = catch_row;
+		old_col = catch_col;
+
+	//mark pagenumber
+
+		PosX = StartX + catch_col*fontwidth;
+		PosY = StartY + catch_row*fixfontheight;
+
+		RenderCharFB(page_char[catch_row*40 + catch_col    ], page_atrb[catch_row*40 + catch_col    ] & 1<<9 | (page_atrb[catch_row*40 + catch_col    ] & 0x0F)<<4 | (page_atrb[catch_row*40 + catch_col    ] & 0xF0)>>4);
+		RenderCharFB(page_char[catch_row*40 + catch_col + 1], page_atrb[catch_row*40 + catch_col + 1] & 1<<9 | (page_atrb[catch_row*40 + catch_col + 1] & 0x0F)<<4 | (page_atrb[catch_row*40 + catch_col + 1] & 0xF0)>>4);
+		RenderCharFB(page_char[catch_row*40 + catch_col + 2], page_atrb[catch_row*40 + catch_col + 2] & 1<<9 | (page_atrb[catch_row*40 + catch_col + 2] & 0x0F)<<4 | (page_atrb[catch_row*40 + catch_col + 2] & 0xF0)>>4);
+}
+
+/******************************************************************************
  * SwitchTranspMode                                                           *
  ******************************************************************************/
 
@@ -827,13 +1039,20 @@ void SwitchTranspMode()
 		//toggle mode
 
 			transpmode++;
-			transpmode &= 1;
+			if(transpmode == 3) transpmode = 0;
 
 			printf("TuxTxt <SwitchTranspMode => %d>\n", transpmode);
 
-		//update page
+		//set mode
 
-			pageupdate = 1;
+			if(!transpmode || transpmode == 1)
+			{
+				pageupdate = 1;
+			}
+			else
+			{
+				memset(lfb, transp, var_screeninfo.xres * var_screeninfo.yres);
+			}
 	}
 }
 
@@ -849,7 +1068,7 @@ void SwitchScreenMode()
 	{
 		//reset transparency mode
 
-			if(transpmode) SwitchTranspMode();
+			if(transpmode) transpmode = 0;
 
 		//toggle mode
 
@@ -873,6 +1092,9 @@ void SwitchScreenMode()
 				fontwidth  =  8;
 				fontheight = 21;
 
+				fnc_new = AVS_FNCOUT_EXT169;
+				ioctl(avs, AVSIOSSCARTPIN8, &fnc_new);
+
 				avia_pig_set_pos(pig, (StartX+269), (StartY+20));
 				avia_pig_set_size(pig, 320, 504);
 				avia_pig_show(pig);
@@ -882,40 +1104,15 @@ void SwitchScreenMode()
 				fontwidth  = 16;
 				fontheight = 22;
 
+				fnc_new = AVS_FNCOUT_EXT43;
+				ioctl(avs, AVSIOSSCARTPIN8, &fnc_new);
+
 				avia_pig_hide(pig);
 			}
 
 			if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
 			{
 				printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
-			}
-	}
-}
-
-/******************************************************************************
- * SwitchTVMode                                                               *
- ******************************************************************************/
-
-void SwitchTVMode()
-{
-	if(!screenmode)
-	{
-		//toggle mode
-
-			tvmode++;
-			tvmode &= 1;
-
-			printf("TuxTxt <SwitchTVMode => %d>\n", tvmode);
-
-		//set mode
-
-			if(tvmode)
-			{
-				memset(lfb, transp, var_screeninfo.xres * var_screeninfo.yres);
-			}
-			else
-			{
-				pageupdate = 1;
 			}
 	}
 }
@@ -967,16 +1164,20 @@ void RenderCharFB(int Char, int Attribute)
 					if((face->glyph->bitmap.buffer[Row * face->glyph->bitmap.pitch + Pitch]) & 1<<Bit)
 					{
 						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute & 15;
+
+						if(Attribute & 1<<9) *(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute & 15;
 					}
 					else
 					{
-						if(transpmode)
+						if(transpmode == 1)
 						{
 							Attribute &= 0xFF0F;
 							Attribute |= transp<<4;
 						}
 
 						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute>>4 & 15;
+
+						if(Attribute & 1<<9) *(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute>>4 & 15;
 					}
 
 					x++;
@@ -985,6 +1186,8 @@ void RenderCharFB(int Char, int Attribute)
 
 			x = 0;
 			y++;
+
+			if(Attribute & 1<<9) y++;
 		}
 
 	PosX += fontwidth;
@@ -1032,7 +1235,7 @@ void RenderCharBB(int Char, int Attribute)
 					}
 					else
 					{
-						if(transpmode)
+						if(transpmode == 1)
 						{
 							Attribute &= 0xFF0F;
 							Attribute |= transp<<4;
@@ -1141,7 +1344,7 @@ void RenderPage()
 {
 	int row, col, byte;
 
-	if(!tvmode && pageupdate && current_page != page && inputcounter == 2)
+	if(transpmode != 2 && pageupdate && current_page != page && inputcounter == 2)
 	{
 		//reset update flag
 
@@ -1176,7 +1379,7 @@ void RenderPage()
 
 			memcpy(lfb, &backbuffer, sizeof(backbuffer));
 	}
-	else if(!tvmode)
+	else if(transpmode != 2)
 	{
 		//update timestring
 
