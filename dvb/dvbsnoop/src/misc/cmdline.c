@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.37 2004/10/12 21:12:05 rasc Exp $
+$Id: cmdline.c,v 1.38 2004/11/03 21:00:59 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: cmdline.c,v 1.37 2004/10/12 21:12:05 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.38  2004/11/03 21:00:59  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.37  2004/10/12 21:12:05  rasc
 no message
 
@@ -153,8 +159,9 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 #include "dvbsnoop.h"
-#include "dvb_api/dvb_api.h"
 #include "cmdline.h"
+#include "dvb_api/dvb_api.h"
+#include "private/userdefs.h"
 
 
 
@@ -205,6 +212,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->time_mode = FULL_TIME;
   opt->hide_copyright= 0;
   opt->help = 0;
+  opt->privateProviderStr = (char *)NULL;  // decoding known private tables/descriptors, ProviderStr
 
 
 
@@ -239,8 +247,9 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-tn")) opt->time_mode = NO_TIME;
      else if (!strcmp (argv[i],"-hexdumpbuffer")) opt->buffer_hexdump = 1;
      else if (!strcmp (argv[i],"-nohexdumpbuffer")) opt->buffer_hexdump = 0;
-     else if (!strcmp (argv[i],"-help")) opt->help = 1;
      else if (!strcmp (argv[i],"-nph")) opt->buffer_hexdump = 0; // old option  use -ph and -nhdb/-hdb
+     else if (!strcmp (argv[i],"-help")) opt->help = 1;
+     else if (!strcmp (argv[i],"-privateprovider")) opt->privateProviderStr = argv[++i];
      else if (!strcmp (argv[i],"-tssubdecode")) opt->ts_subdecode = 1;
      else if (!strcmp (argv[i],"-spiderpid")) {
 	 opt->spider_pid = 1;
@@ -292,8 +301,20 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
   if (opt->help) {
     usage ();
+    printf("\nKnown private providers for private sections and descriptors:\n");
+    list_PRIVATE_ProviderStrs ();
     return(0); 
   } 
+
+
+  /*
+    -- set private scope id strings (if specified)
+   */
+  if (opt->privateProviderStr) {
+     set_PRIVATE_ProviderStr (opt->privateProviderStr);
+  }
+
+
 
   if ((argc==1) || ((opt->pid > MAX_PID) && (opt->pid != DUMMY_PID)) ) {
     title ();
@@ -363,6 +384,7 @@ static void usage (void)
     printf("   -pd verbose:  print stream decode (verbose level 0..9) [-pd 7]\n");
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");
     printf("   -t[n|d|f]:    print timestamp (no, delta, full) [-tf] \n");
+    printf("   -privateprovider id: set provider <id> string for decoding private tables and descriptors\n");
     printf("   -hideproginfo: hide copyright and program info header at program start\n");
     printf("   -help:        this usage info...\n");
     printf("\n");
@@ -374,4 +396,5 @@ static void usage (void)
 
 
 
-// $$$ TODO  commandline needs a redesign 
+// $$$ TODO  commandline handling needs a redesign 
+

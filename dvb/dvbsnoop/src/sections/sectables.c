@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.29 2004/10/17 22:20:36 rasc Exp $
+$Id: sectables.c,v 1.30 2004/11/03 21:01:03 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: sectables.c,v 1.29 2004/10/17 22:20:36 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.30  2004/11/03 21:01:03  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.29  2004/10/17 22:20:36  rasc
 section decoding functions renamed due to preparation of private structures
 
@@ -144,7 +150,6 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "eit.h"
 #include "mdt.h"
 #include "emm_ecm.h"
-#include "userdef.h"
 #include "datacarousel/ait.h"
 #include "datacarousel/dsmcc.h"
 #include "datacarousel/datagram.h"
@@ -152,6 +157,9 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "datacarousel/unts.h"
 #include "datacarousel/mpe_fec.h"
 #include "tvanytime/rnt.h"
+
+#include "private/userdefs.h"
+
 #include "testdata/test0x1d.h"
 
 #include "strings/dvb_str.h"

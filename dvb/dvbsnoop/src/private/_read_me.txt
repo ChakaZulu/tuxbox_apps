@@ -1,0 +1,11 @@
+
+Private Data Decoding
+=====================
+
+Here is a place to provide code and structures
+for decoding of private/userdef section tables or descriptors.
+
+If you know section or descriptor strcutures of "private"
+protocols or provider defined structures, please let the
+author know.
+

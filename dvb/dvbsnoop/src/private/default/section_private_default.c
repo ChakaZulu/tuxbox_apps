@@ -1,5 +1,5 @@
 /*
-$Id: userdef.c,v 1.6 2004/10/17 22:20:36 rasc Exp $
+$Id: section_private_default.c,v 1.1 2004/11/03 21:01:00 rasc Exp $
 
 
  DVBSNOOP
@@ -15,9 +15,12 @@ $Id: userdef.c,v 1.6 2004/10/17 22:20:36 rasc Exp $
 
 
 
-$Log: userdef.c,v $
-Revision 1.6  2004/10/17 22:20:36  rasc
-section decoding functions renamed due to preparation of private structures
+$Log: section_private_default.c,v $
+Revision 1.1  2004/11/03 21:01:00  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
 
 Revision 1.5  2004/02/16 22:45:37  rasc
 small bugfix: crc is 32 bit
@@ -46,15 +49,14 @@ Revision 1.1  2003/10/19 13:59:00  rasc
 
 
 #include "dvbsnoop.h"
-#include "userdef.h"
-#include "descriptors/descriptor.h"
+#include "section_private_default.h"
 #include "strings/dvb_str.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
 
 
 
-void section_PRIVATE (u_char *b, int len)
+void section_PRIVATE_default (u_char *b, int len)
 {
  u_int      table_id;
  u_int      section_syntax_indicator;

@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.h,v 1.10 2004/07/24 11:44:44 rasc Exp $ 
+$Id: descriptor.h,v 1.11 2004/11/03 21:00:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: descriptor.h,v 1.10 2004/07/24 11:44:44 rasc Exp $
 
 
 $Log: descriptor.h,v $
+Revision 1.11  2004/11/03 21:00:50  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.10  2004/07/24 11:44:44  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -51,7 +57,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 #ifndef __DESCRIPTOR_H
-#define __DESCRIPTOR_H 1
+#define __DESCRIPTOR_H
 
 
 // Descriptor tag space/scope...

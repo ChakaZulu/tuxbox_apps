@@ -20,8 +20,7 @@ noinst_HEADERS = \
 	tdt.h \
 	tot.h \
 	tsdt.h \
-	emm_ecm.h \
-	userdef.h 
+	emm_ecm.h 
 
 
 libsections_a_SOURCES = \
@@ -41,7 +40,6 @@ libsections_a_SOURCES = \
 	tdt.c \
 	tot.c \
 	tsdt.c \
-	emm_ecm.c \
-	userdef.c 
+	emm_ecm.c 
 
 

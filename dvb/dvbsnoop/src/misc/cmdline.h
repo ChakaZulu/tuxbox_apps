@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.21 2004/10/12 20:37:48 rasc Exp $
+$Id: cmdline.h,v 1.22 2004/11/03 21:00:59 rasc Exp $
 
 
  DVBSNOOP
@@ -16,7 +16,7 @@ $Id: cmdline.h,v 1.21 2004/10/12 20:37:48 rasc Exp $
 
 
 #ifndef __CMDLINE_H
-#define __CMDLINE_H 1
+#define __CMDLINE_H 
 
 
 /*
@@ -50,6 +50,7 @@ typedef struct _OPTIONS {
   int         spider_pid;		// Section PID spider mode
   int         ts_subdecode;		// sub decode PES or SEC in TS stream
   int         time_mode;		// time print mode
+  char        *privateProviderStr;	// Private Provider ID str (usedef tables, descr)
   int         hide_copyright;  		// suppress message at prog start
   int         help;
 } OPTION;

@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.12 2004/08/06 22:21:38 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.13 2004/11/03 21:00:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,12 @@ $Id: mhp_ait_descriptor.c,v 1.12 2004/08/06 22:21:38 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.13  2004/11/03 21:00:50  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.12  2004/08/06 22:21:38  rasc
 New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
 
@@ -78,6 +84,7 @@ some AIT descriptors
 #include "descriptor.h"
 #include "mhp_ait_descriptor.h"
 #include "dvb_descriptor.h"
+#include "private/userdefs.h"
 #include "datacarousel/mhp_misc.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
@@ -147,7 +154,8 @@ int  descriptorMHP_AIT (u_char *b)
 	if (b[0] < 0x80) {
 	    out_nl (0,"  ----> ERROR: unimplemented descriptor (MHP_AIT context), Report!");
 	}
-	descriptor_any (b);
+	//descriptor_any (b);
+	descriptor_PRIVATE (b,MHP_AIT);
 	break;
   } 
 

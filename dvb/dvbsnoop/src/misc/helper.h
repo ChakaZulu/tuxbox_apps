@@ -36,6 +36,8 @@ void print_text_468A (int v, const char *s, u_char *b, u_int len);
 void print_text_UTF8 (int v, const char *s, u_char *b, u_int len);
 void print_std_ascii (int v, const char *s, u_char *b, u_int len);
 
+void print_time_utc (int v, u_long utc);
+void print_time_mjd (int v, u_long mjd);
 void print_time40 (int verbose, u_long mjd, u_long utc);
 void print_timebase90kHz (int v, long long time90kHz);
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.22 2004/02/24 23:03:05 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.23 2004/11/03 21:00:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: dsmcc_carousel_descriptor.c,v 1.22 2004/02/24 23:03:05 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.23  2004/11/03 21:00:50  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.22  2004/02/24 23:03:05  rasc
 private data of DSMCC::DSI
 BIOP::ServiceGatewayInformation()
@@ -84,6 +90,7 @@ more PES stuff, DSM descriptors, testdata
 #include "descriptor.h"
 #include "dsmcc_carousel_descriptor.h"
 #include "dsmcc_int_unt_descriptor.h"
+#include "private/userdefs.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
@@ -151,7 +158,8 @@ int  descriptorDSMCC_CAROUSEL (u_char *b)
 	if (b[0] < 0x80) {
 	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC_CAROUSEL context), Report!");
 	}
-	descriptor_any (b);
+	// descriptor_any (b);
+	descriptor_PRIVATE (b,DSMCC_CAROUSEL);
 	break;
   } 
 

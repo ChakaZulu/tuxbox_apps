@@ -1,7 +1,9 @@
-
- - section decoding functions renamed due to preparation of private structures
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: option -privateprovider <providerstr>
+ - New: Private provider sections and descriptors decoding 
+ - Changed: complete restructuring of private descriptors and sections 
+ - Changed: section decoding functions renamed due to preparation of private structures
  - Changed: TS pid filtering from file, behavior changed
-// - New: new cmdline option -N <count>  (max decode <count> packets, similar to -n)
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
  - New: new cmdline option -buffersize x (in Kbytes) to tweak DMX Buffer
  - Update: changes due to  EN 300 468 v1.6.1

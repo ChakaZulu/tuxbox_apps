@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.25 2004/08/13 11:05:29 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.26 2004/11/03 21:00:52 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: mpeg_descriptor.c,v 1.25 2004/08/13 11:05:29 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.26  2004/11/03 21:00:52  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.25  2004/08/13 11:05:29  rasc
 Metadata_STD_descriptor
 
@@ -124,6 +130,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 #include "descriptor.h"
 #include "mpeg_descriptor.h"
 #include "descriptor_misc.h"
+#include "private/userdefs.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
@@ -223,7 +230,8 @@ int  descriptorMPEG  (u_char *b)
 	if (b[0] < 0x80) {
 	   out_nl (0,"  ----> ERROR: unimplemented descriptor (mpeg context), Report!");
 	}
-	descriptor_any (b);
+	// descriptor_any (b);
+	descriptor_PRIVATE (b,MPEG);
 	break;
   } 
 

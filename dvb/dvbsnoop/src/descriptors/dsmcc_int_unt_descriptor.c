@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.19 2004/08/06 22:21:38 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.20 2004/11/03 21:00:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,12 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.19 2004/08/06 22:21:38 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.20  2004/11/03 21:00:50  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.19  2004/08/06 22:21:38  rasc
 New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
 
@@ -94,6 +100,7 @@ more PES stuff, DSM descriptors, testdata
 #include "descriptor.h"
 #include "dsmcc_int_unt_descriptor.h"
 #include "dvb_descriptor.h"
+#include "private/userdefs.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
@@ -179,7 +186,8 @@ int  descriptorDSMCC_INT_UNT  (u_char *b)
 	if (b[0] < 0x80) {
 	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC INT/UNT context), Report!");
 	}
-	descriptor_any (b);
+	// descriptor_any (b);
+	descriptor_PRIVATE (b,DSMCC_INT_UNT);
 	break;
   } 
 

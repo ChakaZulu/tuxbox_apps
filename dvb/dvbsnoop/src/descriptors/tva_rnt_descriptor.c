@@ -1,5 +1,5 @@
 /*
-$Id: tva_rnt_descriptor.c,v 1.3 2004/09/01 20:20:34 rasc Exp $ 
+$Id: tva_rnt_descriptor.c,v 1.4 2004/11/03 21:00:58 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,12 @@ $Id: tva_rnt_descriptor.c,v 1.3 2004/09/01 20:20:34 rasc Exp $
 
 
 $Log: tva_rnt_descriptor.c,v $
+Revision 1.4  2004/11/03 21:00:58  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.3  2004/09/01 20:20:34  rasc
 new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
 
@@ -37,6 +43,7 @@ New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
 #include "descriptor.h"
 #include "tva_rnt_descriptor.h"
 #include "dvb_descriptor.h"
+#include "private/userdefs.h"
 #include "strings/dvb_str.h"
 #include "strings/tva_str.h"
 #include "misc/hexprint.h"
@@ -90,7 +97,8 @@ int  descriptorTVA  (u_char *b)
 	if (b[0] < 0x80) {
 	    out_nl (0,"  ----> ERROR: unimplemented descriptor (TVA context), Report!");
 	}
-	descriptor_any (b);
+	// descriptor_any (b);
+	descriptor_PRIVATE (b, TVA_RNT);
 	break;
   } 
 

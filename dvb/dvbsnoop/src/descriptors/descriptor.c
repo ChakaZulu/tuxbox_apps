@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.28 2004/09/01 20:20:34 rasc Exp $
+$Id: descriptor.c,v 1.29 2004/11/03 21:00:50 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: descriptor.c,v 1.28 2004/09/01 20:20:34 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.29  2004/11/03 21:00:50  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.28  2004/09/01 20:20:34  rasc
 new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
 
@@ -130,7 +136,6 @@ kleiner Fehler
 */
 
 int  descriptor  (u_char *b, DTAG_SCOPE scope)
-
 {
  int len;
  int id;
@@ -198,7 +203,6 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 */
 
 void descriptor_any (u_char *b)
-
 {
  int  len;
 

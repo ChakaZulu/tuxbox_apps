@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.39 2004/08/27 23:25:52 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.40 2004/11/03 21:00:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: dvb_descriptor.c,v 1.39 2004/08/27 23:25:52 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.40  2004/11/03 21:00:50  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.39  2004/08/27 23:25:52  rasc
  - Update: changes due to  EN 300 468 v1.6.1
  - Bugfix: Multilingual component descriptor  (tnx to Karsten Siebert)
@@ -165,6 +171,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 #include "dvbsnoop.h"
 #include "descriptor.h"
 #include "dvb_descriptor.h"
+#include "private/userdefs.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
@@ -276,7 +283,8 @@ int  descriptorDVB  (u_char *b)
 	if (b[0] < 0x80) {
 	    out_nl (0,"  ----> ERROR: unimplemented descriptor (dvb context), Report!");
 	}
-	descriptor_any (b);
+	// descriptor_any (b);
+	descriptor_PRIVATE (b, DVB_SI);
 	break;
   } 
 

@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.34 2004/10/12 20:37:48 rasc Exp $
+$Id: helper.c,v 1.35 2004/11/03 21:00:59 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,12 @@ $Id: helper.c,v 1.34 2004/10/12 20:37:48 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.35  2004/11/03 21:00:59  rasc
+ - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
+ - New: cmd option "-privateprovider <provider name>"
+ - New: Private provider sections and descriptors decoding
+ - Changed: complete restructuring of private descriptors and sections
+
 Revision 1.34  2004/10/12 20:37:48  rasc
  - Changed: TS pid filtering from file, behavior changed
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
@@ -590,15 +596,14 @@ void print_std_ascii (int v, const char *s, u_char *b, u_int len)
 
 
 /*
- -- print time   40 bit
+ -- print time  40 bit (MJD, UTC)
+ -- print time  MJD
+ -- print time  UTC
  --   16 Bit  MJD,  24 Bit UTC
 */ 
 
-void print_time40 (int v, u_long mjd, u_long utc)
+static void _print_time_mjd (int v, u_long mjd)
 {
-
- out (v, "0x%lx%06lx [=",mjd, utc);
-
  if (mjd > 0) {
    long   y,m,d ,k;
 
@@ -613,12 +618,37 @@ void print_time40 (int v, u_long mjd, u_long utc)
 
    out (v, "%02d-%02d-%02d",y,m,d);
  }
+}
 
- out (v, " %02lx:%02lx:%02lx (UTC)]",
+static void _print_time_utc (int v, u_long utc)
+{
+ out (v, " %02lx:%02lx:%02lx (UTC)",
 	 (utc>>16) &0xFF, (utc>>8) &0xFF, (utc) &0xFF);
+}
+
+
+void print_time_mjd (int v, u_long mjd)
+{
+  out (v, "0x%04lx [=",mjd);
+  _print_time_mjd (v, mjd);
+  out (v,"]");
+}
+
+void print_time_utc (int v, u_long utc)
+{
+  out (v, "0x%06lx [=",utc);
+  _print_time_utc (v, utc);
+  out (v,"]");
 
 }
 
+void print_time40 (int v, u_long mjd, u_long utc)
+{
+  out (v, "0x%lx%06lx [=",mjd, utc);
+  _print_time_mjd (v, mjd);
+  _print_time_utc (v, utc);
+  out (v,"]");
+}
 
 
 
