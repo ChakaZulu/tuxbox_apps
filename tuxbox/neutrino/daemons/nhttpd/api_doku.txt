@@ -692,13 +692,32 @@ Character encoding: UTF-8, spaces must be transmitted using %20
 Neutrino opens a pop up (popup) or message (nmsg) window in which the text part of the parameter is displayed.
 A pop up window closes itself after a few seconds whereas a message window must be closed using the remote control.
 
-Examples:
 
+Examples:
+---------
 >>>http://dbox/control/message?popup=Hello%20World
 opens a popup window on the TV screen with content "Hello World"
 
 >>>http://dbox/control/message?nmsg=Hello%20Welt
 opens a message window on the TV screen with content "Hello World"
+
+
+Setting up UTF-8 for KDE Konqueror users:
+-----------------------------------------
+Use "Settings -> Web Shortcuts -> Add" to add an additional search provider - for example:
+- Search Provider Name: DBox Popup
+- Search URI: http://dbox/control/message?popup=\{@}
+- URI shortcut: dbox
+- Charset: UTF-8
+Accept the addition.
+ 
+Now you can simply time your popup messages in the location bar by preceeding the text with "dbox: ", like in:
+dbox: Hello ä ö ü Ä Ö Ü ß World
+
+
+UTF-8 help sponsored by google:
+-------------------------------
+http://www.google.com/search?q=%C3%A4%20%C3%B6%20%C3%BC%20%C3%84%20%C3%96%20%C3%9C%20%C3%9F&ie=UTF-8&oe=UTF-8
 
 
 **********************************************************************************************
@@ -716,12 +735,29 @@ Neutrino oeffnet ein Popup(popup)- oder Message(nmsg)-Fenster, in dem der Text d
 Ein Popupfenster schliesst sich nach wenigen Sekunden selbst, wohingegen ein Message-Fenster mit der Fernbedienung geschlossen werden muss.
 
 Beispiele:
-
+----------
 >>>http://dbox/control/message?popup=Hallo%20World
 öffnet ein Popup-Fenster auf dem Fernseher, in dem "Hallo World" steht
 
 >>>http://dbox/control/message?nmsg=Hallo%20Welt
 öffnet ein Message-Fenster auf dem Fernseher, in dem "Hallo Welt" steht
+
+
+KDE Konqueror Benutzer koennen folgendes Verfahren benutzen:
+------------------------------------------------------------
+Mit Hilfe von "Settings -> Web Shortcuts -> Add" einen neuen Search Provider hinzufuegen. z.B.:
+- Search Provider Name: DBox Popup
+- Search URI: http://dbox/control/message?popup=\{@}
+- URI shortcut: dbox
+- Charset: UTF-8
+ 
+Nun kann eine Popup Message direkt in die Location Bar eingegeben werden, wenn man ein "dbox: " davor setzt. Beispiel:
+dbox: Hallo ä ö ü Ä Ö Ü ß World
+
+
+Google's UTF-8 Tutorial:
+------------------------
+http://www.google.com/search?q=%C3%A4%20%C3%B6%20%C3%BC%20%C3%84%20%C3%96%20%C3%9C%20%C3%9F&ie=UTF-8&oe=UTF-8
 
 
 
