@@ -656,6 +656,7 @@ bool CPINProtection::check()
 	return ( strncmp(cPIN,validPIN,4) == 0);
 }
 
+
 bool CZapProtection::check()
 {
 	int res;
@@ -667,6 +668,7 @@ bool CZapProtection::check()
 		strcpy( cPIN, "" );
 
 		CPLPINInput* PINInput = new CPLPINInput( "parentallock.head", cPIN, 4, hint2.c_str(), fsk );
+
 		res = PINInput->exec( getParent(), "");
 		delete PINInput;
 

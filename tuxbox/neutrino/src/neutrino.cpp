@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.227 2002/04/18 12:26:23 field Exp $
+        $Id: neutrino.cpp,v 1.228 2002/04/19 09:41:49 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -679,6 +679,7 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 void CNeutrinoApp::SetupFonts()
 {
+/*
 	g_Fonts->menu =         g_fontRenderer->getFont("Arial", "Bold", 20);
 	g_Fonts->menu_title =   g_fontRenderer->getFont("Arial", "Bold", 30);
 	g_Fonts->menu_info =    g_fontRenderer->getFont("Arial", "Regular", 16);
@@ -708,7 +709,39 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->infobar_channame =	g_fontRenderer->getFont("Arial", "Bold", 30);
 	g_Fonts->infobar_info =		g_fontRenderer->getFont("Arial", "Regular", 20);
 	g_Fonts->infobar_small =	g_fontRenderer->getFont("Arial", "Regular", 14);
+*/
+
+	g_Fonts->menu =         g_fontRenderer->getFont("GillSans", "Bold", 20);
+	g_Fonts->menu_title =   g_fontRenderer->getFont("GillSans", "Bold", 30);
+	g_Fonts->menu_info =    g_fontRenderer->getFont("GillSans", "Regular", 16);
+
+	g_Fonts->epg_title =    g_fontRenderer->getFont("GillSans", "Regular", 26);
+
+	g_Fonts->epg_info1 =	g_fontRenderer->getFont("GillSans", "Italic", 19); // info1 must be same size as info2, but italic
+	g_Fonts->epg_info2 =	g_fontRenderer->getFont("GillSans", "Regular", 19);
+
+	g_Fonts->epg_date =		g_fontRenderer->getFont("GillSans", "Regular", 17);
+	g_Fonts->alert =		g_fontRenderer->getFont("GillSans", "Regular", 100);
+
+	g_Fonts->eventlist_title =		g_fontRenderer->getFont("GillSans", "Regular", 30);
+	g_Fonts->eventlist_itemLarge =	g_fontRenderer->getFont("GillSans", "Bold", 21);
+	g_Fonts->eventlist_itemSmall =	g_fontRenderer->getFont("GillSans", "Regular", 15);
+	g_Fonts->eventlist_datetime =	g_fontRenderer->getFont("GillSans", "Regular", 17);
+
+	g_Fonts->gamelist_itemLarge =	g_fontRenderer->getFont("GillSans", "Bold", 21);
+	g_Fonts->gamelist_itemSmall =	g_fontRenderer->getFont("GillSans", "Regular", 17);
+
+	g_Fonts->channellist =			g_fontRenderer->getFont("GillSans", "Bold", 21);
+	g_Fonts->channellist_descr =	g_fontRenderer->getFont("GillSans", "Regular", 21);
+	g_Fonts->channellist_number =	g_fontRenderer->getFont("GillSans", "Bold", 16);
+	g_Fonts->channel_num_zap =		g_fontRenderer->getFont("GillSans", "Bold", 40);
+
+	g_Fonts->infobar_number =	g_fontRenderer->getFont("GillSans", "Bold", 50);
+	g_Fonts->infobar_channame =	g_fontRenderer->getFont("GillSans", "Bold", 30);
+	g_Fonts->infobar_info =		g_fontRenderer->getFont("GillSans", "Regular", 21);
+	g_Fonts->infobar_small =	g_fontRenderer->getFont("GillSans", "Regular", 15);
 }
+
 
 void CNeutrinoApp::ClearFrameBuffer()
 {
@@ -1061,6 +1094,16 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(1, "options.on");
 		miscSettings.addItem( oj );
 	}
+
+	keySetupNotifier = new CKeySetupNotifier;
+	CStringInput*	keySettings_repeat_genericblocker= new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
+	CStringInput*	keySettings_repeatBlocker= new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_genericblocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
+	keySetupNotifier->changeNotify("initial", NULL);
+
+	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
+	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
+	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
+
 }
 
 
@@ -1306,11 +1349,6 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 	keySettings.addItem( new CMenuForwarder("menu.back") );
 
-	keySetupNotifier = new CKeySetupNotifier;
-	CStringInput*	keySettings_repeat_genericblocker= new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
-	CStringInput*	keySettings_repeatBlocker= new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_genericblocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
-	keySetupNotifier->changeNotify("initial", NULL);
-
 	CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", "settings.raw");
 	CKeyChooser*	keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, "keybindingmenu.pageup_head", "settings.raw");
 	CKeyChooser*	keySettings_channelList_pagedown = new CKeyChooser(&g_settings.key_channelList_pagedown, "keybindingmenu.pagedown_head", "settings.raw");
@@ -1321,11 +1359,6 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	CKeyChooser*	keySettings_bouquet_down = new CKeyChooser(&g_settings.key_bouquet_down, "keybindingmenu.bouquetdown_head", "settings.raw");
 	CKeyChooser*	keySettings_subchannel_up = new CKeyChooser(&g_settings.key_subchannel_up, "keybindingmenu.subchannelup_head",   "settings.raw");
 	CKeyChooser*	keySettings_subchannel_down = new CKeyChooser(&g_settings.key_subchannel_down, "keybindingmenu.subchanneldown_head", "settings.raw");
-
-
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
-	keySettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.modechange") );
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.tvradiomode", true, "", keySettings_tvradio_mode ));
@@ -1569,7 +1602,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
-	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400, 520);
+	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400, 460);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 	CMenuWidget scanSettings("mainsettings.scan", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
@@ -2360,7 +2393,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.227 2002/04/18 12:26:23 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.228 2002/04/19 09:41:49 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

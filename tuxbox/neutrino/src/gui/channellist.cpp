@@ -44,7 +44,7 @@ CChannelList::CChannelList( const std::string &Name )
 {
 	name = Name;
 	selected = 0;
-	width = 520;
+	width = 560;
 	height = 420;
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
@@ -477,7 +477,7 @@ int CChannelList::numericZap(int key)
 
 	int ox=300;
 	int oy=200;
-	int sx = g_Fonts->channel_num_zap->getRenderWidth("0000")+14;
+	int sx = 4* g_Fonts->channel_num_zap->getRenderWidth(widest_number)+ 14;
 	int sy = g_Fonts->channel_num_zap->getHeight()+6;
 	char valstr[10];
 	int chn=key;
@@ -807,10 +807,11 @@ void CChannelList::paintHead()
 {
 	string strCaption = g_Locale->getText(name).c_str();
 
-	if (strCaption == "")
+/*	if (strCaption == "")
 	{
 		strCaption = name;
 	}
+*/
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width- 65, strCaption.c_str(), COL_MENUHEAD);
 

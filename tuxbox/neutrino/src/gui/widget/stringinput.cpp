@@ -32,7 +32,7 @@
 #include "stringinput.h"
 #include "../global.h"
 
-CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ )
+CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon )
 {
 	name = Name;
 	value = Value;
@@ -41,6 +41,7 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
 	hint_1 = Hint_1;
 	hint_2 = Hint_2;
 	validchars = Valid_Chars;
+	iconfile = Icon;
 
 	observ = Observ;
 	width = (Size*20)+40;
@@ -51,6 +52,8 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
 	}
 
 	int neededWidth = g_Fonts->menu_title->getRenderWidth( g_Locale->getText(name).c_str() );
+	if ( iconfile != "" )
+		neededWidth += 28;
 	if (neededWidth+20> width)
 	{
 		width= neededWidth+20;
@@ -273,8 +276,16 @@ void CStringInput::hide()
 void CStringInput::paint()
 {
 	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+
+	int iconoffset= (iconfile!="")?28:0;
+	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	if ( iconoffset> 0 )
+		g_FrameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
+
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
+
+
+
 
 	if ( hint_1.length()> 0 )
 	{
@@ -311,8 +322,8 @@ void CStringInput::paintChar(int pos)
 	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
 }
 
-CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL)
-		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ)
+CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL, string Icon)
+		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
 	Chars[1] = "1.,:!?";
 	Chars[2] = "abc2ä";
@@ -381,7 +392,12 @@ void CStringInputSMS::keyRightPressed()
 void CStringInputSMS::paint()
 {
 	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+
+	int iconoffset= (iconfile!="")?28:0;
+	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	if ( iconoffset> 0 )
+		g_FrameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
+
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	if ( hint_1.length()> 0 )
@@ -490,7 +506,7 @@ int CPINInput::exec( CMenuTarget* parent, string )
 			}
 			else if ( r & messages_return::unhandled )
 			{
-				if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+				if ( neutrino->handleMsg( msg, data ) & ( messages_return::cancel_all | messages_return::cancel_info ) )
 				{
 					loop = false;
 					res = menu_return::RETURN_EXIT_ALL;
@@ -525,6 +541,8 @@ int CPLPINInput::handleOthers( uint msg, uint data )
 {
 	int res = messages_return::unhandled;
 
+	printf("CPLPINInput::handleOthers %x %x\n", msg, data);
+
 	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
 	{
 		// trotzdem handlen
@@ -537,9 +555,21 @@ int CPLPINInput::handleOthers( uint msg, uint data )
 	return messages_return::unhandled;
 }
 
+#define borderwidth 4
 
 int CPLPINInput::exec( CMenuTarget* parent, string )
 {
+
+	unsigned char* pixbuf= new unsigned char[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
+	if (pixbuf!= NULL)
+		g_FrameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
+
+	// clear border
+	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
+	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
+	g_FrameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
+	g_FrameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
+
 	char hint[100];
 	if ( fsk == 0x100 )
 		strcpy(hint, g_Locale->getText("parentallock.lockedsender").c_str());
@@ -548,6 +578,14 @@ int CPLPINInput::exec( CMenuTarget* parent, string )
 
 	hint_1= hint;
 
-	return ( CPINInput::exec ( parent, "" ) );
+	int res = CPINInput::exec ( parent, "" );
+
+	if (pixbuf!= NULL)
+	{
+		g_FrameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
+		delete pixbuf;
+	}
+
+	return ( res );
 }
 

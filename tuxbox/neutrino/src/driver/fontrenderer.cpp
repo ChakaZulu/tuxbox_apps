@@ -63,11 +63,15 @@ fontRenderClass::fontRenderClass()
 	printf("\n[FONT] loading fonts...\n");
 	fflush(stdout);
 	font=0;
-
+/*
 	AddFont( FONTDIR "/Arial.ttf");
 	AddFont( FONTDIR "/Arial_Bold.ttf");
 	AddFont( FONTDIR "/Arial_Italic.ttf");
 	AddFont( FONTDIR "/Arial_Black.ttf");
+*/
+	AddFont( FONTDIR "/gs_reg.ttf");
+	AddFont( FONTDIR "/gs_it.ttf");
+	AddFont( FONTDIR "/gs_bd.ttf");
 
 	int maxbytes= 4 *1024*1024;
 	printf("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);

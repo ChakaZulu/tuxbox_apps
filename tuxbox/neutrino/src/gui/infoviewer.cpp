@@ -64,13 +64,13 @@ void CInfoViewer::start()
                       25;
 	InfoHeightY_Info = g_Fonts->infobar_small->getHeight()+ 5;
 
-	ChanWidth = g_Fonts->infobar_number->getRenderWidth("0000") + 10;
+	ChanWidth = 4* g_Fonts->infobar_number->getRenderWidth(widest_number) + 10;
 	ChanHeight = g_Fonts->infobar_number->getHeight()*9/8;
 
 	aspectRatio = g_Controld->getAspectRatio();
 
 	time_height = g_Fonts->infobar_channame->getHeight()+5;
-	time_left_width = g_Fonts->infobar_channame->getRenderWidth("22");
+	time_left_width = 2* g_Fonts->infobar_channame->getRenderWidth(widest_number);
 	time_dot_width = g_Fonts->infobar_channame->getRenderWidth(":");
 	time_width = time_left_width* 2+ time_dot_width;
 }
@@ -90,7 +90,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 		if ( ( !firstPaint ) && ( strcmp( timestr, old_timestr ) == 0 ) )
 		{
 			if ( show_dot )
-        		g_FrameBuffer->paintBoxRel(BoxEndX- time_width+ time_left_width- 10, ChanNameY, time_dot_width, time_height/2, COL_INFOBAR);
+        		g_FrameBuffer->paintBoxRel(BoxEndX- time_width+ time_left_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR);
         	else
         		g_Fonts->infobar_channame->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
         	strcpy( old_timestr, timestr );
@@ -109,7 +109,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 			g_Fonts->infobar_channame->RenderString(BoxEndX- time_left_width- 10, ChanNameY+ time_height, time_left_width, &timestr[3], COL_INFOBAR);
 			g_Fonts->infobar_channame->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
             if ( show_dot )
-        		g_FrameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2, COL_INFOBAR);
+        		g_FrameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR);
 		}
 	}
 }

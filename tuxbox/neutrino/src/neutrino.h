@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.78 2002/04/17 18:37:08 field Exp $
+//  $Id: neutrino.h,v 1.79 2002/04/19 09:41:49 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -95,10 +95,8 @@ using namespace std;
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
-/* class for handling when bouquets changed.                  */
-/* This class should be a temporarily work around             */
-/* and should be replaced by standard neutrino event handlers */
-/* (libevent) */
+#define widest_number "1"
+
 class CNeutrinoApp;
 
 struct messages_return {

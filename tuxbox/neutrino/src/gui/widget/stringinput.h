@@ -55,6 +55,7 @@ class CStringInput : public CMenuTarget
 
 		string	name;
 		string  hint_1, hint_2;
+		string	iconfile;
 		char*   validchars;
 		char*	value;
 		int		size;
@@ -75,7 +76,7 @@ class CStringInput : public CMenuTarget
 
 	public:
 
-		CStringInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL );
+		CStringInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, string Icon="" );
 
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );
@@ -101,7 +102,7 @@ class CStringInputSMS : public CStringInput
 		virtual void paint();
 
 	public:
-		CStringInputSMS(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL) ;
+		CStringInputSMS(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL, string Icon="");
 };
 
 class CPINInput : public CStringInput
@@ -110,7 +111,7 @@ class CPINInput : public CStringInput
 		virtual void paintChar(int pos);
 	public:
 		CPINInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
-		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ) {};
+		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, "lock.raw") {};
 
 		 int exec( CMenuTarget* parent, string actionKey );
 };
