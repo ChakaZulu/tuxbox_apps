@@ -367,7 +367,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			else
 			if (evt.action == &i_cursorActions->up)
 			{
-				if (myIt++ == slideshowList.end())
+				if (++myIt == slideshowList.end())
 					myIt = slideshowList.begin();
 				DecodeImage(*myIt, false);
 				DisplayNextImage();
@@ -376,7 +376,10 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			if (evt.action == &i_cursorActions->down)
 			{
 				if (myIt == slideshowList.begin())
-					myIt = slideshowList.end()--;
+				{
+					myIt = slideshowList.end();
+					myIt--;
+				}
 				else
 					myIt--;
 				DecodeImage(*myIt, false);
