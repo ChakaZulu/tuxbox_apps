@@ -557,20 +557,18 @@ void disableVideoOutput(bool disable)
 
 void setBoxType()
 {
-	unsigned int manufacturer = tuxbox_get_manufacturer();
-
-	switch ( manufacturer )
+	switch ( tuxbox_get_vendor() )
 	{
-	case TUXBOX_MANUFACTURER_SAGEM:	settings.boxtype= CControldClient::BOXTYPE_SAGEM;
+	case TUXBOX_VENDOR_SAGEM:	settings.boxtype= CControldClient::BOXTYPE_SAGEM;
 		break;
-	case TUXBOX_MANUFACTURER_PHILIPS:	settings.boxtype= CControldClient::BOXTYPE_PHILIPS;
+	case TUXBOX_VENDOR_PHILIPS:	settings.boxtype= CControldClient::BOXTYPE_PHILIPS;
 		break;
-	case TUXBOX_MANUFACTURER_NOKIA:
+	case TUXBOX_VENDOR_NOKIA:
 	default:
 		settings.boxtype= CControldClient::BOXTYPE_NOKIA;
 	}
 
-	printf("[controld] Boxtype detected: (%d, %d, %s %s)\n", manufacturer, settings.boxtype, tuxbox_get_manufacturer_str(), tuxbox_get_model_str());
+	printf("[controld] Boxtype detected: (%d, %d, %s %s)\n", tuxbox_get_vendor(), settings.boxtype, tuxbox_get_vendor_str(), tuxbox_get_model_str());
 }
 
 
@@ -768,7 +766,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.83 2003/01/01 23:45:55 Jolt Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.84 2003/01/03 17:48:09 Jolt Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;

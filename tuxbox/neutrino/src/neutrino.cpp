@@ -1637,7 +1637,7 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", colorSettings_statusbarColors) );
 
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	if(tuxbox_get_manufacturer() != TUXBOX_MANUFACTURER_NOKIA)
+	if(tuxbox_get_vendor() != TUXBOX_VENDOR_NOKIA)
 	{
 		//menuefaden nur bei enx-chips!
 		CMenuOptionChooser* oj = new CMenuOptionChooser("colormenu.fade", &g_settings.widget_fade, true );
@@ -2029,21 +2029,21 @@ int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
 
-	switch(tuxbox_get_manufacturer()) {
-		case TUXBOX_MANUFACTURER_NOKIA:
+	switch(tuxbox_get_vendor()) {
+		case TUXBOX_VENDOR_NOKIA:
 			g_info.box_Type = 1;
 			break;
-		case TUXBOX_MANUFACTURER_PHILIPS:
+		case TUXBOX_VENDOR_PHILIPS:
 			g_info.box_Type = 2;
 			break;
-		case TUXBOX_MANUFACTURER_SAGEM:
+		case TUXBOX_VENDOR_SAGEM:
 			g_info.box_Type = 3;
 			break;
 		default:
 			g_info.box_Type = 3;
 	}
 	
-	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d (%s %s)\n", g_info.box_Type, tuxbox_get_manufacturer_str(), tuxbox_get_model_str());
+	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d (%s %s)\n", g_info.box_Type, tuxbox_get_vendor_str(), tuxbox_get_model_str());
 
 
 
@@ -3295,7 +3295,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.384 2003/01/02 16:19:39 Jolt Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.385 2003/01/03 17:48:09 Jolt Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
