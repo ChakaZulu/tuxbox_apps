@@ -101,21 +101,24 @@ void* CEventWatchDog::watchdogThread (void *arg)
 
 		struct event_t event;
 
-		if ( (fd_ev = open( EVENT_DEVICE, O_RDWR ) ) < 0)
-		{
-			perror("open");
-			return NULL;
-		}
 
-		if ( ioctl(fd_ev, EVENT_SET_FILTER, EVENT_VCR_CHANGED | EVENT_ARATIO_CHANGE /*| EVENT_VHSIZE_CHANGE*/ ) < 0 )
-		{
-			perror("ioctl");
-			close(fd_ev);
-			return NULL;
-		}
 
 		while (1)
 		{
+
+			if ( (fd_ev = open( EVENT_DEVICE, O_RDWR ) ) < 0)
+			{
+				perror("open");
+				return NULL;
+			}
+
+			if ( ioctl(fd_ev, EVENT_SET_FILTER, EVENT_VCR_CHANGED | EVENT_ARATIO_CHANGE /*| EVENT_VHSIZE_CHANGE*/ ) < 0 )
+			{
+				perror("ioctl");
+				close(fd_ev);
+				return NULL;
+			}
+
 			//printf("[controld] before read\n", status);
 			status = read(fd_ev, &event, sizeof(event));
 			printf("[controld] read result <%d>\n", status);
@@ -146,6 +149,10 @@ void* CEventWatchDog::watchdogThread (void *arg)
 					}
 				}
 			}
+
+			close(fd_ev);
+
+			usleep(500*1000);
 		}
 	}
 	catch (std::exception& e)
