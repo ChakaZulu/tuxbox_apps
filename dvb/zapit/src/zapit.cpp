@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.90 2002/03/16 03:05:41 obi Exp $
+  $Id: zapit.cpp,v 1.91 2002/03/16 14:08:55 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -268,9 +268,9 @@ int set_vtxt (uint vpid)
 
 uint32_t _(uint8_t*_,uint16_t ___,uint16_t __){uint8_t o,O=0x00;for(o=0;o<___;o+=_[o+1]+2){if((_[o]==9)&&((_[o+2]<<8)+_[o+3]==__)&&((((_[o+2]<<8)+_[o+3])>>8)==(215&(24|_[o]+30))))return((_[o+4]&31)<<8)+_[o+5];if(_[o]==9)O=0x01;}if(O<=++o+-1*--o)return(1<<16)|(0<<8)|(O);else{return(O);}}
 
-pids parse_pmt (int pid, int ca_system_id)
+pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 {
-	unsigned char buffer[PMT_SIZE];
+	uint8_t buffer[PMT_SIZE];
 	int fd;
 	int ap_count = 0;
 	int vp_count = 0;
@@ -314,7 +314,11 @@ pids parse_pmt (int pid, int ca_system_id)
 
 	flt.pid = pid;
 	flt.filter.filter[0] = 0x02;
+	flt.filter.filter[1] = (program_number >> 8) & 0xFF;
+	flt.filter.filter[2] = program_number & 0xFF;
 	flt.filter.mask[0]  = 0xFF;
+	flt.filter.mask[1]  = 0xFF;
+	flt.filter.mask[2]  = 0xFF;
 	flt.timeout = 5000;
 	flt.flags= DMX_CHECK_CRC | DMX_ONESHOT | DMX_IMMEDIATE_START;
 
@@ -916,7 +920,7 @@ int zapit (uint onid_sid, bool in_nvod)
 	}
 
 	memset(&parse_pmt_pids, 0, sizeof(parse_pmt_pids));
-	parse_pmt_pids = parse_pmt(cit->second.pmt, caid);
+	parse_pmt_pids = parse_pmt(cit->second.pmt, caid, cit->second.sid);
 
 	//printf("VPID parsed from pmt: %x\n", parse_pmt_pids.vpid);
 	//for (i = 0;i<parse_pmt_pids.count_apids;i++)
@@ -2456,7 +2460,7 @@ int main (int argc, char **argv)
 	int channelcount;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.90 2002/03/16 03:05:41 obi Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.91 2002/03/16 14:08:55 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
