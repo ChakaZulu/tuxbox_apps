@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.24 2002/09/05 06:52:22 thegoodguy Exp $
+ * $Id: pzapit.cpp,v 1.25 2002/09/05 23:48:50 thegoodguy Exp $
  *
  * simple commandline client for zapit
  *
@@ -50,7 +50,7 @@ int usage (std::string basename)
 	std::cout << "mute audio: " << basename << " -mute" << std::endl;
 	std::cout << "unmute audio: " << basename << " -unmute" << std::endl;
 	std::cout << "set volume: " << basename << " -vol <0..64>" << std::endl;
-	std::cout << "register neutrino as event client: " << basename << " -cn" << std::endl;
+	std::cout << "register neutrino as event client: " << basename << " -rn" << std::endl;
 	return -1;
 }
 
@@ -124,7 +124,7 @@ int main (int argc, char** argv)
 			reload = true;
 			continue;
 		}
-		else if (!strncmp(argv[i], "-cn", 2))
+		else if (!strncmp(argv[i], "-rn", 3))
 		{
 			register_neutrino = true;
 			continue;
