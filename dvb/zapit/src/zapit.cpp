@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.223 2002/09/11 21:14:22 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.224 2002/09/16 00:24:40 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -55,7 +55,7 @@
 #include "getservices.h"
 #include "zapit.h"
 
-#define debug(fmt, args...) { if (debug) printf(fmt, ## args); }
+#define debug(fmt, args...) { if (debug) { printf(fmt, ## args); fflush(stdout); } }
 
 #define CONFIGFILE CONFIGDIR "/zapit/zapit.conf"
 
@@ -765,6 +765,15 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
 				break;
 			}
+			case CZapitClient::CMD_COMMIT_BOUQUET_CHANGE:
+			{
+				CZapitClient::responseCmd response;
+				bouquetManager->renumServices();
+				response.cmd = CZapitClient::CMD_READY;
+				send(connfd, &response, sizeof(response), 0);
+				eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
+				break;
+			}
 			case CZapitClient::CMD_SCANSTART:
 				start_scan();
 				break;
@@ -1079,7 +1088,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.223 2002/09/11 21:14:22 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.224 2002/09/16 00:24:40 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{

@@ -80,14 +80,8 @@ int CFavorites::addChannelToFavorites()
 
 	// -- tell zapit to save Boquets and reinit (if changed)
 	if (status) {
-		g_Zapit->saveBouquets();
-		g_Zapit->reinitChannels();
-/*
-		// -- same to Neutrino (keep current channel!)
-		CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
-		neutrino->channelsInit();
-		neutrino->channelList->zapToOnidSid(onid_sid);
-*/
+		g_Zapit->saveBouquets();        // better be save than sorry (save first, commit later)
+		g_Zapit->commitBouquetChange();
 	}
 
 	return status;
@@ -142,9 +136,9 @@ int CFavorites::exec(CMenuTarget* parent, string)
 
 	ShowMsg ( "favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
 
-	if (status) {
-		g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );
-	}
+//	if (status) {
+//		g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );
+//	}
 
 	return res;
 }

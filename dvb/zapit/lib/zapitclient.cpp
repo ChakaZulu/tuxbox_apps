@@ -417,6 +417,22 @@ void CZapitClient::reinitChannels()
 	zapit_close();
 }
 
+
+/* commit bouquet change */
+void CZapitClient::commitBouquetChange()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_COMMIT_BOUQUET_CHANGE;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseCmd response;
+	receive((char* )&response, sizeof(response));
+	zapit_close();
+}
+
 void CZapitClient::muteAudio (bool mute)
 {
 	commandHead msgHead;
