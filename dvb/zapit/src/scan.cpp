@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.77 2002/10/07 14:59:32 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.78 2002/10/07 22:49:13 obi Exp $
  */
 
 #include <fcntl.h>
@@ -153,10 +153,11 @@ int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint
 int get_sdts()
 {
 	stiterator tI;
-	int demux_fd = open(DEMUX_DEVICE, O_RDWR);
+	int demux_fd = -1;
 
-	if (demux_fd == -1)
-		perror(DEMUX_DEVICE);
+	//demux_fd = open(DEMUX_DEVICE, O_RDWR);
+	//if (demux_fd == -1)
+	//	perror(DEMUX_DEVICE);
 
 	for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	{
