@@ -147,16 +147,19 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 			n=num;
 		else
 			n=pservice->service_number;
-		if (!numPara)
+		if (n != -1)
 		{
-			numPara = new eTextPara( eRect( 0, 0, maxNumSize, rect.height() ) );
-			numPara->setFont( numberFont );
-			numPara->renderString( eString().setNum(n) );
-			numPara->realign(eTextPara::dirRight);
-			numYOffs = ((rect.height() - numPara->getBoundBox().height()) / 2 ) - numPara->getBoundBox().top();
-			nameXOffs = maxNumSize+numPara->getBoundBox().height();
+			if (!numPara)
+			{
+				numPara = new eTextPara( eRect( 0, 0, maxNumSize, rect.height() ) );
+				numPara->setFont( numberFont );
+				numPara->renderString( eString().setNum(n) );
+				numPara->realign(eTextPara::dirRight);
+				numYOffs = ((rect.height() - numPara->getBoundBox().height()) / 2 ) - numPara->getBoundBox().top();
+				nameXOffs = maxNumSize+numPara->getBoundBox().height();
+			}
+			rc->renderPara(*numPara, ePoint( rect.left(), rect.top() + numYOffs ) );
 		}
-		rc->renderPara(*numPara, ePoint( rect.left(), rect.top() + numYOffs ) );
 	}
 
 	if (!namePara)
