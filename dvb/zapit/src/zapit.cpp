@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.205 2002/08/29 21:57:10 dirch Exp $
+ * $Id: zapit.cpp,v 1.206 2002/08/30 14:04:08 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -119,12 +119,10 @@ std::map <std::string, uint32_t> allnamechannels_radio;
 
 std::map <uint32_t, transponder>transponders;
 
-std::map <uint32_t, CZapitChannel> allchans_tv;
-std::map <uint32_t, uint32_t> numchans_tv;
+std::map <uint32_t, CZapitChannel> allchans_tv;  // Key: (original_network_id << 16) | service_id
 std::map <std::string, uint32_t> namechans_tv;
 
 std::map <uint32_t, CZapitChannel> allchans_radio;
-std::map <uint32_t, uint32_t> numchans_radio;
 std::map <std::string, uint32_t> namechans_radio;
 
 /* transponder scan */
@@ -560,10 +558,8 @@ int prepare_channels ()
 	allnamechannels_radio.clear();
 	transponders.clear();
 	allchans_tv.clear();
-	numchans_tv.clear();
 	namechans_tv.clear();
 	allchans_radio.clear();
-	numchans_radio.clear();
 	namechans_radio.clear();
 	bouquetManager->clearAll();
 
@@ -594,9 +590,7 @@ int start_scan ()
 
 	transponders.clear();
 	namechans_tv.clear();
-	numchans_tv.clear();
 	namechans_radio.clear();
-	numchans_radio.clear();
 	allchans_tv.clear();
 	allchans_radio.clear();
 	allnumchannels_tv.clear();
@@ -1136,7 +1130,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.205 2002/08/29 21:57:10 dirch Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.206 2002/08/30 14:04:08 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{

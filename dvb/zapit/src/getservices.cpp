@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.41 2002/08/27 15:46:23 obi Exp $
+ * $Id: getservices.cpp,v 1.42 2002/08/30 14:04:08 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -12,10 +12,8 @@ uint8_t curr_diseqc = 0;
 
 extern std::map <uint32_t, transponder> transponders;
 extern std::map <uint32_t, CZapitChannel> allchans_tv;
-extern std::map <uint32_t, uint32_t> numchans_tv;
 extern std::map <std::string, uint32_t> namechans_tv;
 extern std::map <uint32_t, CZapitChannel> allchans_radio;
-extern std::map <uint32_t, uint32_t> numchans_radio;
 extern std::map <std::string, uint32_t> namechans_radio;
 
 void nameinsert (std::string name, uint16_t original_network_id, uint16_t service_id, uint8_t service_type)
@@ -171,22 +169,8 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 				)
 			);
 
-			if (channel_number != 0)
-			{
-				numchans_tv.insert
-				(
-					std::pair <uint16_t, uint32_t>
-					(
-						channel_number,
-						(original_network_id << 16) | service_id
-					)
-				);
-			}
-			else
-			{
+			if (channel_number == 0)
 				nameinsert(name, original_network_id, service_id, service_type);
-			}
-
 			break;
 
 		case DIGITAL_RADIO_SOUND_SERVICE:
@@ -208,21 +192,8 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 				)
 			);
 
-			if (channel_number != 0)
-			{
-				numchans_radio.insert
-				(
-					std::pair <uint16_t, uint32_t>
-					(
-						channel_number,
-						(original_network_id << 16) | service_id
-					)
-				);
-			}
-			else
-			{
+			if (channel_number == 0)
 				nameinsert(name, original_network_id, service_id, service_type);
-			}
 			break;
 
 		default:

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.39 2002/08/29 18:21:57 obi Exp $
+ * $Id: bouquets.cpp,v 1.40 2002/08/30 14:04:08 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -23,14 +23,13 @@
  */
 
 #include <map>
+#include <stdint.h>
 
 #include "bouquets.h"
 
 extern std::map <unsigned int, CZapitChannel> allchans_tv;
-extern std::map <unsigned int, unsigned int> numchans_tv;
 extern std::map <std::string, unsigned int> namechans_tv;
 extern std::map <unsigned int, CZapitChannel> allchans_radio;
-extern std::map <unsigned int, unsigned int> numchans_radio;
 extern std::map <std::string, unsigned int> namechans_radio;
 
 /**** class CBouquet ********************************************************/
@@ -320,9 +319,6 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 
 		unsigned int onid, sid;
 
-		numchans_tv.clear();
-		numchans_radio.clear();
-
 		printf("[zapit] reading Bouquets ");
 		while ((search) && (!(strcmp(search->GetType(), "Bouquet"))))
 		{
@@ -348,12 +344,12 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 						case 4:
 							chan->setChannelNumber(nChNrTV);
 							newBouquet->addService(chan);
-							numchans_tv.insert(std::pair<unsigned int, unsigned int>(nChNrTV++, (onid<<16)+sid));
+							nChNrTV++;
 						break;
 						case 2:
 							chan->setChannelNumber(nChNrRadio);
 							newBouquet->addService(chan);
-							numchans_radio.insert(std::pair<unsigned int, unsigned int>(nChNrRadio++, (onid<<16)+sid));
+							nChNrRadio++;
 						break;
 					}
 				}
@@ -539,74 +535,57 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 
 void CBouquetManager::renumServices()
 {
+	map<unsigned int, CZapitChannel>::iterator     cit;
+	extern map<unsigned int, unsigned int> allnumchannels_tv;
+	extern map<std::string, unsigned int> allnamechannels_tv;
+	extern map<unsigned int, unsigned int> allnumchannels_radio;
+	extern map<std::string, unsigned int> allnamechannels_radio;
 	int nChNrRadio = 1;
 	int nChNrTV = 1;
 
-	numchans_tv.clear();
-	numchans_radio.clear();
+	allnumchannels_tv.clear();
+	allnamechannels_tv.clear();
+	allnumchannels_radio.clear();
+	allnamechannels_radio.clear();
 
 	for (unsigned int i=0; i<Bouquets.size(); i++)
 	{
 		for (unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
 		{
+			uint32_t OnidSid = Bouquets[i]->tvChannels[j]->getOnidSid();
 			Bouquets[i]->tvChannels[j]->setChannelNumber(nChNrTV);
-			numchans_tv.insert(std::pair<unsigned int, unsigned int>(nChNrTV++, Bouquets[i]->tvChannels[j]->getOnidSid()));
+			cit = allchans_tv.find(OnidSid);
+			cit->second.setChannelNumber(nChNrTV);   // necessary ?
+			allnumchannels_tv.insert(std::pair<unsigned int,unsigned int>(nChNrTV++, OnidSid));
+			allnamechannels_tv.insert(std::pair<std::string, unsigned int>(cit->second.getName(), OnidSid));
 		}
 		for (unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
 		{
+			uint32_t OnidSid = Bouquets[i]->radioChannels[j]->getOnidSid();
 			Bouquets[i]->radioChannels[j]->setChannelNumber(nChNrRadio);
-			numchans_radio.insert(std::pair<unsigned int, unsigned int>(nChNrRadio++, Bouquets[i]->radioChannels[j]->getOnidSid()));
+			cit = allchans_radio.find(OnidSid);
+			cit->second.setChannelNumber(nChNrRadio);   // necessary ?
+			allnumchannels_radio.insert(std::pair<unsigned int, unsigned int>(nChNrRadio++, OnidSid));
+			allnamechannels_radio.insert(std::pair<std::string, unsigned int>(cit->second.getName(), OnidSid));
 		}
 	}
 
-	map<unsigned int, unsigned int>::iterator	numit;
 	map<std::string, unsigned int>::iterator nameit;
-	map<unsigned int, CZapitChannel>::iterator     cit;
-
-	extern map<unsigned int, unsigned int> allnumchannels_tv;
-	extern map<unsigned int, unsigned int> allnumchannels_radio;
-	extern map<std::string, unsigned int> allnamechannels_tv;
-	extern map<std::string, unsigned int> allnamechannels_radio;
-
-
-	int number = 1;
-	allnumchannels_tv.clear();
-	allnamechannels_tv.clear();
-	allnumchannels_radio.clear();
-	allnamechannels_radio.clear();
-	for (numit = numchans_tv.begin(); numit != numchans_tv.end(); numit++)
-	{
-		cit = allchans_tv.find(numit->second);
-		cit->second.setChannelNumber(number);
-		allnumchannels_tv.insert(std::pair<unsigned int,unsigned int>(number++, cit->second.getOnidSid()));
-		allnamechannels_tv.insert(std::pair<std::string, unsigned int>(cit->second.getName(), cit->second.getOnidSid()));
-	}
-	numchans_tv.clear();
 
 	for (nameit = namechans_tv.begin(); nameit != namechans_tv.end(); nameit++)
 	{
 		cit = allchans_tv.find(nameit->second);
-		cit->second.setChannelNumber(number);
-		allnumchannels_tv.insert(std::pair<unsigned int, unsigned int>(number++, cit->second.getOnidSid()));
+		cit->second.setChannelNumber(nChNrTV);
+		allnumchannels_tv.insert(std::pair<unsigned int, unsigned int>(nChNrTV++, cit->second.getOnidSid()));
 		allnamechannels_tv.insert(std::pair<std::string, unsigned int>(nameit->first, cit->second.getOnidSid()));
 	}
 	namechans_tv.clear();
 
-	number = 1;
-	for (numit = numchans_radio.begin(); numit != numchans_radio.end(); numit++)
-	{
-		cit = allchans_radio.find(numit->second);
-		cit->second.setChannelNumber(number);
-		allnumchannels_radio.insert(std::pair<unsigned int,unsigned int>(number++, cit->second.getOnidSid()));
-		allnamechannels_radio.insert(std::pair<std::string, unsigned int>(cit->second.getName(), cit->second.getOnidSid()));
-	}
-	numchans_radio.clear();
-
 	for (nameit = namechans_radio.begin(); nameit != namechans_radio.end(); nameit++)
 	{
 		cit = allchans_radio.find(nameit->second);
-		cit->second.setChannelNumber(number);
-		allnumchannels_radio.insert(std::pair<unsigned int, unsigned int>(number++, cit->second.getOnidSid()));
+		cit->second.setChannelNumber(nChNrRadio);
+		allnumchannels_radio.insert(std::pair<unsigned int, unsigned int>(nChNrRadio++, cit->second.getOnidSid()));
 		allnamechannels_radio.insert(std::pair<std::string, unsigned int>(nameit->first, cit->second.getOnidSid()));
 	}
 	namechans_radio.clear();
