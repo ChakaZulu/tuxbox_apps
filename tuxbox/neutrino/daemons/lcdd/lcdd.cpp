@@ -51,6 +51,7 @@ pthread_t		thrTime;
 bool			setup_mode;
 raw_display_t		icon_lcd;
 raw_display_t		icon_setup;
+raw_display_t		icon_power;
 
 char			channelname[30];
 unsigned char		volume;
@@ -59,6 +60,7 @@ bool			muted;
 void show_channelname(char *);
 void show_volume(unsigned char);
 void set_setup(unsigned char);
+void set_poweroff();
 
 void parse_command() {
 	//byteorder!!!!!!
@@ -90,6 +92,9 @@ void parse_command() {
 		break;
 	case LC_SET_SETUP:
 		set_setup(rmsg.param);
+		break;
+	case LC_POWEROFF:
+		set_poweroff();
 		break;
 	default: 
 		printf("unknown command %i\n", rmsg.cmd);
@@ -154,6 +159,13 @@ void set_setup(unsigned char mode) {
 	}
 } 
 
+void set_poweroff() {
+	// verhindern, dass irgendwelche ausgaben stattfinden
+	setup_mode = true;
+	display.load_screen(&icon_power);
+	display.update();
+}
+
 void * TimeThread (void *)
 {
 	while(1)
@@ -188,6 +200,13 @@ int main(int argc, char **argv)
 	}
 	display.dump_screen(&icon_setup);
 
+	if (!display.paintIcon("neutrino_power.raw",0,0,false))
+	{
+		printf("exit...(no neutrino_power.raw)\n");
+		exit(-1);
+	}
+	display.dump_screen(&icon_power);
+
 	if (!display.paintIcon("neutrino_lcd.raw",0,0,false))
 	{
 		printf("exit...(no neutrino_lcd.raw)\n");
@@ -196,9 +215,8 @@ int main(int argc, char **argv)
 	display.dump_screen(&icon_lcd);
 	setup_mode = false;
 
+	show_channelname("");
 	show_time();
-
-	show_channelname("neutrinoNG");
 
 	if (pthread_create (&thrTime, NULL, TimeThread, NULL) != 0 )
 	{
@@ -231,8 +249,6 @@ int main(int argc, char **argv)
 		exit( -1 );
 	}
 
-	//set_setup(LC_SET_SETUP_ON);
-	//set_setup(LC_SET_SETUP_OFF);
 	printf("\n");
 	while(1)
 	{

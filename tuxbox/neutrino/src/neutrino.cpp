@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.16 2001/08/21 00:30:38 tw-74 Exp $
+        $Id: neutrino.cpp,v 1.17 2001/08/21 18:30:15 ge0rg Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.17  2001/08/21 18:30:15  ge0rg
+  added power down LCD logo
+
   Revision 1.16  2001/08/21 00:30:38  tw-74
   more fontrendering (see comments there), screen cosmetics
 
@@ -976,6 +979,7 @@ void CNeutrinoApp::ExitRun()
 	frameBuffer.paletteSet();	
 	frameBuffer.paintIcon8("shutdown.raw",0,0);
 	frameBuffer.loadPal("shutdown.pal");
+	Controld.shutdown();
 	sleep(5);
 	remoteControl.shutdown();
 	sleep(55555);

@@ -57,27 +57,6 @@ struct rmsg {
  
 } rmsg;
 
-void shutdownBox()
-{
-    if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
-    {
-      perror("exec failed - halt\n");
-    }
-}
-
-
-void setVideoRGB()
-{
-	if(fork()==0)
-	{
-		if (execlp("/bin/switch", "/bin/switch", "-fnc", "2", "-fblk", "1", 0)<0)
-		{
-			perror("exec failed - /bin/switch\n");
-		}
-	}
-}
-
-
 void sendto_lcdd(unsigned char cmd, unsigned char param) {
 	int sock_fd;
 	SAI servaddr;
@@ -99,6 +78,28 @@ void sendto_lcdd(unsigned char cmd, unsigned char param) {
 	}
 
 }
+
+void shutdownBox()
+{
+    sendto_lcdd(LC_POWEROFF, 0);
+    if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
+    {
+      perror("exec failed - halt\n");
+    }
+}
+
+
+void setVideoRGB()
+{
+	if(fork()==0)
+	{
+		if (execlp("/bin/switch", "/bin/switch", "-fnc", "2", "-fblk", "1", 0)<0)
+		{
+			perror("exec failed - /bin/switch\n");
+		}
+	}
+}
+
 
 char gen_Volume;
 void setVolume(char volume)

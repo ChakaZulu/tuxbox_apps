@@ -44,7 +44,8 @@ enum lcdd_cmd {
 	LC_VOLUME = 2,
 	LC_MUTE,
 	LC_SET_SETUP,
-	LC_SETUP_MSG
+	LC_SETUP_MSG,
+	LC_POWEROFF
 };
 
 struct lcdd_msg {
