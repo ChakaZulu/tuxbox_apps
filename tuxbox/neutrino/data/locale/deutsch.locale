@@ -11,10 +11,15 @@ mainmenu.games Spiele spielen
 mainmenu.shutdown Ausschalten
 mainmenu.settings Einstellungen
 
+servicemenu.head Service
+servicemenu.update Software-Aktualisierung
+servicemenu.scants Transponderscan
+servicemenu.ucodecheck UCodes überprüfen
+
 mainsettings.head Einstellungen
 mainsettings.savesettingsnow Einstellung jetzt speichern
 mainsettings.language Sprache
-mainsettings.audio Ton
+mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.colors Farben / Themes
@@ -22,7 +27,6 @@ mainsettings.keybinding Tasten-Einstellungen
 mainsettings.misc Diverse Einstellungen
 
 miscsettings.head Diverse Einstellungen
-miscsettings.ucodecheck UCodes überprüfen
 miscsettings.epgold EPG auf alte Art anzeigen
 miscsettings.boxtype DBox Hersteller
 
@@ -188,7 +192,6 @@ date.Dec  Dez
 nvod.starting (Beginn in %d min)
 nvod.proz (%d%% vorbei)
 
-mainsettings.scants Transponderscan
 scants.head Transponderscan
 scants.startnow Scan starten
 scants.actsatellite Satellit:
@@ -203,8 +206,6 @@ scants.bouquet_leave nicht ändern
 scants.bouquet_create neu erstellen
 scants.bouquet_erase löschen
 
-
-mainsettings.update Software-Aktualisierung
 flashupdate.head Aktualisierung
 flashupdate.action Aktion:
 flashupdate.globalprogress Gesamtstatus:

@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.35 2001/12/14 16:56:42 faralla Exp $
+//  $Id: neutrino.h,v 1.36 2001/12/19 18:41:25 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.36  2001/12/19 18:41:25  McClean
+//  change menue-structure
+//
 //  Revision 1.35  2001/12/14 16:56:42  faralla
 //  better bouquet-key handling
 //
@@ -209,6 +212,7 @@ class CNeutrinoApp : public CMenuTarget
 	void RealRun(CMenuWidget &mainSettings);
 	void InitZapper();
 	void InitKeySettings(CMenuWidget &);
+	void InitServiceSettings(CMenuWidget &);
 	void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
 	void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier);
 	void InitColorSettings(CMenuWidget &);
@@ -220,7 +224,7 @@ class CNeutrinoApp : public CMenuTarget
 	void InitMiscSettings(CMenuWidget &);
 	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
 	void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
-			CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings);
+			CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service);
 	void ClearFrameBuffer();
 	void SetupFonts();
 	void SetupFrameBuffer();

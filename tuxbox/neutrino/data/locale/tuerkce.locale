@@ -11,6 +11,11 @@ mainmenu.games OYUNLAR
 mainmenu.shutdown KAPAT
 mainmenu.settings AYARLAR
 
+servicemenu.head Service
+servicemenu.update Software Update
+servicemenu.scants Servicescan
+servicemenu.ucodecheck Check ucodes
+
 mainsettings.head AYARLAR
 mainsettings.savesettingsnow save settings now
 mainsettings.language MENÜ DIL
@@ -22,7 +27,6 @@ mainsettings.keybinding TUS AYARLARI
 mainsettings.misc SECENEKLER
 
 miscsettings.head SECENEKLER
-miscsettings.ucodecheck UCodes KONTROLLÜ
 miscsettings.epgold EPG SECENEKLERI GÖSTER
 miscsettings.boxtype DBox ÜRETICI
 
@@ -187,7 +191,6 @@ date.Dec  ARALIK
 nvod.starting (BASLAMA %d DAK)
 nvod.proz (%d%% GECTI)
 
-mainsettings.scants TRANSPONDER ARAMA
 scants.head TRANSPONDER ARAMA
 scants.startnow start scan
 scants.actsatellite SATELLITE:
@@ -202,10 +205,6 @@ scants.bouquet_leave leave current
 scants.bouquet_create create new
 scants.bouquet_erase erase all
 
-mainsettings.update Software Update
-flashupdate.head Software Update
-
-mainsettings.update Software Update
 flashupdate.head Software Update
 flashupdate.action Action:
 flashupdate.globalprogress Global Progress:

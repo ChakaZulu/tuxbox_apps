@@ -11,6 +11,11 @@ mainmenu.games Play Games
 mainmenu.shutdown mettre hors circuit
 mainmenu.settings Settings
 
+servicemenu.head Service
+servicemenu.update Software Update
+servicemenu.scants Servicescan
+servicemenu.ucodecheck Check ucodes
+
 mainsettings.head Settings
 mainsettings.savesettingsnow save settings now
 mainsettings.language Langue
@@ -22,7 +27,6 @@ mainsettings.keybinding Ajuster des clés
 mainsettings.misc Misc Settings
 
 miscsettings.head Misc Settings
-miscsettings.ucodecheck Check ucodes
 miscsettings.epgold EPG the old way...
 miscsettings.boxtype DBox type
 
@@ -189,7 +193,6 @@ date.Dec  Dec
 nvod.starting (starting in %d min)
 nvod.proz (%d%% over)
 
-mainsettings.scants Servicescan
 scants.head Scan transponder
 scants.startnow start scan
 scants.actsatellite Satellite:
@@ -204,7 +207,6 @@ scants.bouquet_leave leave current
 scants.bouquet_create create new
 scants.bouquet_erase erase all
 
-mainsettings.update Software Update
 flashupdate.head Software Update
 mainsettings.update Software Update
 

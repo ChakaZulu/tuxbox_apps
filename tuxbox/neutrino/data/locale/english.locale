@@ -10,6 +10,13 @@ mainmenu.scartmode Scart-Mode
 mainmenu.games Play Games
 mainmenu.shutdown Shutdown
 mainmenu.settings Settings
+mainmenu.service Service
+
+servicemenu.head Service
+servicemenu.update Software Update
+servicemenu.scants Servicescan
+servicemenu.ucodecheck Check ucodes
+
 
 mainsettings.head Settings
 mainsettings.savesettingsnow save settings now
@@ -22,7 +29,7 @@ mainsettings.keybinding Key Setup
 mainsettings.misc Misc Settings
 
 miscsettings.head Misc Settings
-miscsettings.ucodecheck Check ucodes
+
 miscsettings.epgold EPG the old way...
 miscsettings.boxtype DBox type
 
@@ -191,7 +198,6 @@ date.Dec  Dec
 nvod.starting (starting in %d min)
 nvod.proz (%d%% over)
 
-mainsettings.scants Servicescan
 scants.head Scan transponder
 scants.startnow start scan
 scants.actsatellite Satellite:
@@ -206,7 +212,6 @@ scants.bouquet_leave leave current
 scants.bouquet_create create new
 scants.bouquet_erase erase all
 
-mainsettings.update Software Update
 flashupdate.head Software Update
 flashupdate.action Action:
 flashupdate.globalprogress Global Progress:

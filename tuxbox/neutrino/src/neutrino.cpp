@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.105 2001/12/19 12:11:01 McClean Exp $
+        $Id: neutrino.cpp,v 1.106 2001/12/19 18:41:25 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.106  2001/12/19 18:41:25  McClean
+  change menue-structure
+
   Revision 1.105  2001/12/19 12:11:01  McClean
   scan-bouquethandling added
 
@@ -1071,7 +1074,7 @@ void CNeutrinoApp::ClearFrameBuffer()
 }
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &networkSettings,
-				     CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings)
+				     CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
 {
 	mainMenu.addItem( new CMenuSeparator() );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv"), true );
@@ -1081,13 +1084,31 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.settings", true, "", &mainSettings) );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.service", true, "", &service) );
+
 
 	mainSettings.addItem( new CMenuSeparator() );
 	mainSettings.addItem( new CMenuForwarder("menu.back") );
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.savesettingsnow", true, "", this, "savesettings") );
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	CMenuWidget* TSScan = new CMenuWidget("mainsettings.scants", "mainmenue.raw");
+	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
+}
+
+void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
+{
+	service.addItem( new CMenuSeparator() );
+	service.addItem( new CMenuForwarder("menu.back") );
+	service.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	//servicescan
+	CMenuWidget* TSScan = new CMenuWidget("servicemenu.scants", "mainmenue.raw");
 		TSScan->addItem( new CMenuForwarder("menu.back") );
 		TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 		CMenuOptionChooser* oj = new CMenuOptionChooser("scants.bouquet", &g_settings.scan_bouquet, true );
@@ -1117,18 +1138,18 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 		}
 		TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 		TSScan->addItem( new CMenuForwarder("scants.startnow", true, "", g_ScanTS) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.scants", true, "", TSScan) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
+	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", TSScan) );
+
+	//ucodecheck
+	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", g_UcodeCheck ) );
+//	miscSettings.addItem( new CMenuForwarder("miscsettings.reload_services", true, "", g_ReloadServices ) );
+
+
+	//softupdate
 	if (softupdate)
 	{
 		printf("init soft-update-stuff\n");
-		CMenuWidget* updateSettings = new CMenuWidget("mainsettings.update", "mainmenue.raw");
+		CMenuWidget* updateSettings = new CMenuWidget("servicemenu.update", "mainmenue.raw");
 		updateSettings->addItem( new CMenuSeparator() );
 		updateSettings->addItem( new CMenuForwarder("menu.back") );
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1182,12 +1203,10 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 		updateSettings->addItem( new CMenuForwarder("flashupdate.checkupdate", true, "", g_Update ) );
 
-		mainSettings.addItem( new CMenuForwarder("mainsettings.update", true, "", updateSettings ) );
-		printf("ready - soft-update-stuff\n");
+		service.addItem( new CMenuForwarder("servicemenu.update", true, "", updateSettings ) );
 	}
 
 }
-
 
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
@@ -1200,9 +1219,6 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(2, "Sagem");
 		oj->addOption(3, "Philips");
 	miscSettings.addItem( oj );
-
-	miscSettings.addItem( new CMenuForwarder("miscsettings.ucodecheck", true, "", g_UcodeCheck ) );
-//	miscSettings.addItem( new CMenuForwarder("miscsettings.reload_services", true, "", g_ReloadServices ) );
 }
 
 
@@ -1708,8 +1724,12 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw",400,500);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
+	CMenuWidget service("servicemenu.head", "settings.raw");
 
-	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings, miscSettings);
+	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings, miscSettings, service);
+
+	//service
+	InitServiceSettings(service);
 
 	//language Setup
 	InitLanguageSettings(languageSettings);
@@ -2087,7 +2107,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.105 2001/12/19 12:11:01 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.106 2001/12/19 18:41:25 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
