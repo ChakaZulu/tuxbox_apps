@@ -204,7 +204,7 @@ int LoadServices(void)
   if (!in)
     {
       perror("/var/zapit/services.xml");
-      return -1;
+      return -23;
     }
   
   char buf[2048];

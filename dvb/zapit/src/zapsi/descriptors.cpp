@@ -10,7 +10,8 @@
 std::map<int,transpondermap> scantransponders;
 std::map<int,scanchannel> scanchannels;
 std::string curr_chan_name;
-
+int found_transponders;
+int found_channels;
 #define NVOD_HACK;
 
 int stuffing_desc(char *buffer)
@@ -35,11 +36,12 @@ int network_name_desc(char *buffer)
 	int len = buffer[1];
 	int i;
 	std::string name;
-		
+	/*	
 	for (i=0;i<len;i++)
 		name += buffer[i+2];
 	
 	printf("Network-name: %s\n",name.c_str());
+	*/
 	return len+2;
 }
 
@@ -75,6 +77,7 @@ int cable_deliv_system_desc(char *buffer, int tsid)
   
   if (scantransponders.count(tsid) == 0)
     {
+    	found_transponders++;
     	printf("New transponder\n");
 	printf("tsid: %04x\n",tsid);
 	printf("frequency: %d\n", freq);
@@ -98,6 +101,7 @@ int sat_deliv_system_desc(char *buffer, int tsid)
 	
 	if (scantransponders.count(tsid) == 0)
 	{
+	  found_transponders++;
 	  printf("New transponder\n");
 	  printf("tsid: %04x\n",tsid);
 	  printf("frequency: %d\n", freq);
@@ -275,6 +279,7 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 	}
 	else
 	{
+		found_channels++;
 		scanchannels.insert(std::pair<int,scanchannel>((tsid<<16)+sid,scanchannel(servicename,sid,tsid,onid,service_type)));
 	}
 	}
@@ -293,7 +298,7 @@ int bouquet_name_desc(char *buffer)
 	{
 	  name += buffer[i+2];
 	}
-	printf("Bouquet name: %s\n",name.c_str());
+	//printf("Bouquet name: %s\n",name.c_str());
 	return len+2;
 }
 
@@ -339,6 +344,7 @@ int nvod_ref_desc(char *buffer,int tsid,bool scan_mode)
 		  	}
 			else
 		  	{
+		  	found_channels++;
 		    	scanchannels.insert(std::pair<int,scanchannel>((tsid<<16)+sid,scanchannel(servicename,sid,tsid,onid,1)));
 			}
 		}

@@ -87,4 +87,4 @@ int sdt(uint osid,bool scan_mode);
 int pat(uint oonid,std::map<uint,channel> *cmap);
 void nit();
 int tune(uint tsid);
-void start_scan();
+void *start_scanthread(void *);

@@ -35,6 +35,8 @@ std::string services_xml = "/var/zapit/services.xml";
 int finaltune(int freq, int symbolrate, int polarity, int fec,int diseq);
 int nit();
 int sdt(uint osid, bool scan_mode);
+int prepare_channels();
+short scan_runs;     	
 
 int issatbox()
 {
@@ -143,13 +145,15 @@ void write_transponder(int tsid, FILE *fd)
     }
   fprintf(fd,"%s\n",transponder.c_str()); 
 }
-void start_scan()
+
+void *start_scanthread(void *)
 {
   FILE *fd;
   std::string transponder;
-
+  
   fd = fopen(services_xml.c_str(), "w" );
   
+  scan_runs = 1;
   if (!issatbox())
     {
       for (int freq = 3300; freq<=4500; freq +=80)
@@ -256,4 +260,15 @@ void start_scan()
       write_bouquets(fd);
   fprintf(fd,"</ZAPIT>\n"); 
   fclose(fd);
+  
+        	
+  if (prepare_channels() <0) 
+  {
+    printf("Error parsing Services\n");
+    exit(-1);
+   }
+  printf("Channels have been loaded succesfully\n");
+  
+  scan_runs = 0;
+  pthread_exit(0);
 }

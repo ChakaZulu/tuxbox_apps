@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.12 2001/10/11 11:35:55 faralla Exp $
+  $Id: zapit.cpp,v 1.13 2001/10/12 16:14:21 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.13  2001/10/12 16:14:21  faralla
+  scan threaded and status-poll
+
   Revision 1.12  2001/10/11 11:35:55  faralla
   getting nvodchannels from neutrino
 
@@ -179,6 +182,12 @@ boolean Radiomode_on = false;
 pids pids_desc;
 boolean caid_set = false;
 
+pthread_t scan_thread;
+extern int found_transponders;
+extern int found_channels;
+extern short scan_runs;
+
+void start_scan();
 volatile sig_atomic_t keep_going = 1; /* controls program termination */
 
 void termination_handler (int signum)
@@ -1157,8 +1166,9 @@ int prepare_channels()
   std::map<uint, uint>::iterator numit;
   std::map<std::string, uint>::iterator nameit;
   std::map<uint, channel>::iterator cit;
-
-  if (LoadServices() > 0)
+  int ls = LoadServices();
+  
+  if (ls > 0)
     {
       int number = 1;
       for (numit = numchans_tv.begin(); numit != numchans_tv.end(); numit++)
@@ -1201,12 +1211,45 @@ int prepare_channels()
     }
 else
   {
-    printf("No channels found\n");
-    return -1;
+    if (ls == -23)
+    {
+    	printf("No services.xml found. Starting to scan one.");
+    	start_scan();
+    	while (scan_runs > 0)
+    	{
+    		printf("Found transponders: %d\n",found_transponders);
+    		printf("Found_channels: %d\n",found_channels);
+    		sleep(3);
+    	}
+    	}
+    	else
+    		return -1;
   }
   return 23;
 }
 
+void start_scan()
+{
+  transponders.clear();
+  namechans_tv.clear();
+  numchans_tv.clear();
+  namechans_radio.clear();
+  numchans_radio.clear();
+  allchans_tv.clear();
+  allchans_radio.clear();
+  allnumchannels_tv.clear();
+  allnumchannels_radio.clear();
+  allnamechannels_tv.clear();
+  allnamechannels_radio.clear();	
+  if (pthread_create(&scan_thread, 0, start_scanthread,0))
+  {
+  	perror("pthread_create: ");
+  	exit(0);
+}
+
+  while (scan_runs == 0);
+
+}
 
 void parse_command()
 {
@@ -1583,23 +1626,36 @@ void parse_command()
 	}
       break;
       case 'g':
-      	allchans_tv.clear();
-      	allchans_radio.clear();
-      	allnumchannels_tv.clear();
-      	allnumchannels_radio.clear();
-      	allnamechannels_tv.clear();
-      	allnamechannels_radio.clear();
-      	
-      	start_scan();
-      	
-      	prepare_channels();
-      	
+        start_scan();
+
       	status = "00g";
       	if (send(connfd, status, strlen(status),0) == -1) {
 	perror("Could not send any retun\n");
 	return;
 	}
       break;
+      case 'h':
+      	if (scan_runs>0)
+      		status = "00h";
+      	else
+      		status = "-0h";
+      	if (send(connfd, status, strlen(status),0) == -1) {
+	perror("Could not send any retun\n");
+	return;
+	}
+	if (scan_runs>0)
+	{
+		if (send(connfd, &found_transponders, sizeof(int),0) == -1) 
+		{
+		perror("Could not send any retun\n");
+		return;
+		}
+		if (send(connfd, &found_channels, sizeof(int),0) == -1) {
+		perror("Could not send any retun\n");
+		return;
+	}
+	}
+	break;
        uint nvod_tsid, nvod_onidsid;
        struct pollfd recv_fd;
        case 'i':
@@ -1686,8 +1742,11 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.12 2001/10/11 11:35:55 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.13 2001/10/12 16:14:21 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
+  scan_runs = 0;
+  found_transponders = 0;
+  found_channels = 0;
   
   testmsg = load_settings();
   
@@ -1700,7 +1759,7 @@ int main(int argc, char **argv) {
 
   if (prepare_channels() <0) {
     printf("Error parsing Services\n");
-    exit(-1);
+    //exit(-1);
   }
   
   printf("Channels have been loaded succesfully\n");
@@ -1714,7 +1773,7 @@ int main(int argc, char **argv) {
   else
     channelcount = 0;
   printf("%d radio-channels\n", channelcount);
-  
+
   if (network_setup()!=0){
     printf("Error during network_setup\n");
     exit(0);
@@ -1747,6 +1806,7 @@ int main(int argc, char **argv) {
   
   /* Main program loop */
   descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
+
   while (keep_going)
     {      
       clilen = sizeof(cliaddr);
