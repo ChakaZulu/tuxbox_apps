@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.36 2002/04/07 04:17:50 obi Exp $
+ * $Id: scan.cpp,v 1.37 2002/04/07 09:20:37 obi Exp $
  */
 
 #include "scan.h"
@@ -293,53 +293,10 @@ void *start_scanthread(void *param)
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
 		printf("[scan.cpp] scanning %s\n", satName);
-#if 0
-		FrontendParameters feparams;
-		feparams.Inversion = INVERSION_AUTO;
-		feparams.u.qam.FEC_inner = FEC_AUTO;
-		feparams.u.qam.QAM = QAM_64;
-
-		for (feparams.Frequency = 306000; feparams.Frequency <= 460000; feparams.Frequency += 8000)
+		if (get_nits(346000, 6900000, FEC_AUTO, 0, 0xFF) != 0)
 		{
-			feparams.u.qam.SymbolRate = 6900000;
-
-			if (finaltune(feparams, 0, 0) == 0)
-			{
-				fake_pat(&scantransponders, feparams);
-			}
-			else
-			{
-				printf("[scan.cpp] No signal found on transponder. Trying SymbolRate 6875000\n");
-
-				feparams.u.qam.SymbolRate = 6875000;
-
-				if (finaltune(feparams, 0, 0) == 0)
-				{
-					fake_pat(&scantransponders, feparams);
-				}
-				else
-				{
-					printf("[scan.cpp] No signal found on transponder\n");
-				}
-			}
+			get_nits(346000, 6875000, FEC_AUTO, 0, 0xFF);
 		}
-
-		feparams.Frequency = 522000;
-
-		if (finaltune(feparams, 0, 0) == 0)
-		{
-			fake_pat(&scantransponders, feparams);
-		}
-		else
-		{
-			printf("[scan.cpp] No signal found on transponder.\n");
-		}
-#else
-		if (get_nits(306000, 6900000, FEC_AUTO, 0, 0xFF) != 0)
-		{
-			get_nits(306000, 6875000, FEC_AUTO, 0, 0xFF);
-		}
-#endif
 		get_sdts();
 
 		if (!scantransponders.empty())
