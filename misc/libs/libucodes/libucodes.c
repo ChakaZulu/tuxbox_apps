@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.23 2003/04/04 17:34:06 obi Exp $
+  $Id: libucodes.c,v 1.24 2003/07/18 13:43:44 obi Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.24  2003/07/18 13:43:44  obi
+  cam_01_02_102E
+
   Revision 1.23  2003/04/04 17:34:06  obi
   added cam_01_01_005G
 
@@ -94,6 +97,7 @@ static struct Sucode ucodes[] =
 	{"4336e7d3fed43c9e063210bcdc95d23e","cam_01_01_004E"},
 	{"997b1f858f1efee525e6842558edbe3c","cam_01_01_005E"},
 	{"7f56e693a916b39a6e2734dc9b5aab7a","cam_01_02_002E"},
+	{"d6cf250ea2ca43a5b3750cf78ece8f7b","cam_01_02_102E"},
 	{"bac1970b0e865c00015b3d78a209b5bf","cam_01_02_105E"},
 	{"ed944f0450fbeec867b7377f39b205a8","cam_01_02_106E"},
 	{"c734207ddea7b8ceafa2505f1360f3bf","cam_01_01_004F"},
