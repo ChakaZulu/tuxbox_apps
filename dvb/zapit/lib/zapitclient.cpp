@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.13 2002/03/14 20:42:47 McClean Exp $
+  $Id: zapitclient.cpp,v 1.14 2002/03/22 17:12:59 field Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.14  2002/03/22 17:12:59  field
+  Clientlib-Updates
+
   Revision 1.13  2002/03/14 20:42:47  McClean
   fixme
 
@@ -150,6 +153,40 @@ void CZapitClient::zapTo( unsigned int channel )
 	send((char*)&msgHead, sizeof(msgHead));
 	send((char*)&msg, sizeof(msg));
 
+	zapit_close();
+}
+
+void CZapitClient::setSubServices( subServiceList& subServices )
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SETSUBSERVICES;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	for (int i= 0; i< subServices.size(); i++)
+		send((char*)&subServices[i], sizeof(subServices[i]));
+
+	zapit_close();
+}
+
+void CZapitClient::getPIDS( responseGetPIDs& pids )
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_GETPIDS;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	responseGetOtherPIDs response;
+    receive((char* )&response, sizeof(response));
+    memcpy(&response, &pids.PIDs, sizeof(response));
+
+	responseGetAPIDs responseAPID;
+	pids.APIDs.clear();
+	while ( receive((char*)&responseAPID, sizeof(responseAPID)))
+		pids.APIDs.insert( pids.APIDs.end(), responseAPID );
 	zapit_close();
 }
 

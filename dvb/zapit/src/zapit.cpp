@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.99 2002/03/20 01:31:23 happydude Exp $
+  $Id: zapit.cpp,v 1.100 2002/03/22 17:12:59 field Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -299,7 +299,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 	stream_type = buffer[0];
 	elementary_PID = ((buffer[1] & 0x1f) << 8) | buffer[2];
 	ES_info_length = ((buffer[3] & 0x0f) << 8) | buffer[4];
-	
+
 	if ((stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06) && ap_count < max_num_apids)
 	{
 		ret_pids->apids[ap_count].component_tag = -1;
@@ -449,7 +449,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 				if (destination_apid_list_entry != -1)
 				{
 					ret_pids->apids[destination_apid_list_entry].pid = elementary_PID;
-					if ((!apid_previously_found) || (destination_apid_list_entry == ap_count && 
+					if ((!apid_previously_found) || (destination_apid_list_entry == ap_count &&
 					    ret_pids->apids[destination_apid_list_entry].desc[0] != 0 &&
 					    strncmp(ret_pids->apids[destination_apid_list_entry].desc, "LIBRE", 5) != 0))
 					{
@@ -1286,7 +1286,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		return -3;
 	}
 
-	
+
 	if (cit->second.vpid != 0x1fff)
 	{
 		/* Open demux device (video) */
@@ -1306,7 +1306,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		{
 			debug("[zapit] demux device (video) already open\n");
 		}
-		
+
 		/* setup vpid */
 		pes_filter.pid = Vpid;
 		pes_filter.input = DMX_IN_FRONTEND;
@@ -1325,7 +1325,7 @@ int zapit (uint onid_sid, bool in_nvod)
 			vpid = Vpid;
 		}
 	}
-	
+
 	if ((cit->second.pcrpid != 0x1fff) && (cit->second.pcrpid != cit->second.vpid))
 	{
 		/* Open demux device (pcr) */
@@ -2072,7 +2072,7 @@ void parse_command()
 					cit = allchans_tv.find(curr_onid_sid);
 				}
 			}
-			
+
 			if (curr_onid_sid == 0)
 			{
 				status = "-0b";
@@ -2082,13 +2082,13 @@ void parse_command()
 			{
 				status = "00b";
 			}
-			
+
 			if (send(connfd, status, strlen(status), 0) == -1)
 			{
 				perror("[zapit] send");
 				return;
 			}
-			
+
 			carsten = (short) cit->second.vpid;
 			if (send(connfd, &carsten, 2, 0) == -1)
 			{
@@ -2305,13 +2305,13 @@ void parse_command()
 				perror("[zapit] send");
 				return;
 			}
-			
+
 			if (send(connfd, &found_transponders, sizeof(int), 0) == -1)
 			{
 				perror("[zapit] send");
 				return;
 			}
-			
+
 			if (send(connfd, &found_channels, sizeof(int), 0) == -1)
 			{
 				perror("[zapit] send");
@@ -2334,7 +2334,7 @@ void parse_command()
 			{
 				status = "-0i";
 			}
-				
+
 			if (send(connfd, status, strlen(status), 0) == -1)
 			{
 				perror("[zapit] send");
@@ -2602,6 +2602,28 @@ void parse_command()
 				stopPlayBack();
 			break;
 
+			case CZapitClient::CMD_GETPIDS :
+				CZapitClient::responseGetOtherPIDs responseGetOtherPIDs;
+				responseGetOtherPIDs.vpid = pids_desc.vpid;
+				responseGetOtherPIDs.ecmpid = pids_desc.ecmpid;
+				responseGetOtherPIDs.vtxtpid = pids_desc.vtxtpid;
+				responseGetOtherPIDs.pcrpid = pids_desc.pcrpid;
+				send( connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs),0);
+				sendAPIDs();
+			break;
+
+			case CZapitClient::CMD_SETSUBSERVICES :
+				CZapitClient::commandAddSubServices msgAddSubService;
+
+				while ( read( connfd, &msgAddSubService, sizeof(msgAddSubService)))
+				{
+					printf("got subchan %x %x\n", msgAddSubService.onidsid, msgAddSubService.tsid);
+                	nvodchannels.insert(std::pair<int,channel>(msgAddSubService.onidsid,channel("NVOD",0,0,0,0,0,(msgAddSubService.onidsid&0xFFFF),msgAddSubService.tsid,(msgAddSubService.onidsid>>16),1)));
+				}
+
+				current_is_nvod = true;
+			break;
+
 			default:
 				printf("[zapit] unknown command (version %d)\n", CZapitClient::ACTVERSION);
 		}
@@ -2749,7 +2771,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.99 2002/03/20 01:31:23 happydude Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.100 2002/03/22 17:12:59 field Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2942,6 +2964,25 @@ void internalSendChannels( ChannelList* channels)
 		}
 	}
 }
+
+void sendAPIDs()
+{
+	for (uint i = 0; i < pids_desc.count_apids; i++)
+	{
+		CZapitClient::responseGetAPIDs response;
+		response.pid= pids_desc.apids[i].pid;
+		strncpy(response.desc, pids_desc.apids[i].desc, 25);
+		response.is_ac3= pids_desc.apids[i].is_ac3;
+		response.component_tag= pids_desc.apids[i].component_tag;
+
+		if (send(connfd, &response, sizeof(response),0) == -1)
+		{
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+	}
+}
+
 
 void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT)
 {

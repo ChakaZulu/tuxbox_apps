@@ -126,3 +126,4 @@ void startPlayBack();
 void stopPlayBack();
 void zapTo(unsigned int channel);
 void zapTo(unsigned int bouquet, unsigned int channel);
+void sendAPIDs();
