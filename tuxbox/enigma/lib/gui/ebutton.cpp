@@ -19,10 +19,11 @@ void eButton::keyUp(int key)
 		
 		if (parent && parent->LCDElement)
 		{
+			QString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
 			if (LCDTmp)
-				LCDTmp->setText(text);
+				LCDTmp->setText(txt);
 			else
-				parent->LCDElement->setText(text);
+				parent->LCDElement->setText(txt);
 		}
 	}
 }
@@ -31,14 +32,16 @@ void eButton::gotFocus()
 {
 	if (parent && parent->LCDElement)
 	{
+		QString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
+		int chkbx = (text=="\x19" || text=="\x18")?1:0;
 		if (descr != "")
 		{
 			LCDTmp = new eLabel(parent->LCDElement);
 			LCDTmp->hide();
 			QSize s = parent->LCDElement->getSize();
 			LCDTmp->move(QPoint(0,s.height()/2));
-			LCDTmp->resize(QSize(s.width(), s.height()/2));
-			LCDTmp->setText(text);
+			LCDTmp->resize(QSize(chkbx?s.height()/2:s.width(), s.height()/2));
+			LCDTmp->setText(txt);
 			LCDTmp->setBackgroundColor(255);
 			LCDTmp->show();
 			tmpDescr = new eLabel(parent->LCDElement);
@@ -49,7 +52,7 @@ void eButton::gotFocus()
 			tmpDescr->show();
 		}
 		else
-				parent->LCDElement->setText(text);
+			parent->LCDElement->setText(txt);
 	}
 
 	setBackgroundColor(focus);

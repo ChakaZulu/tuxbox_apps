@@ -26,11 +26,6 @@ void eCheckbox::setCheck(int c)
 {
 	ischecked=c;
 	setText(ischecked?"\x19":"\x18");
-
-	static QString Desc(descr);
-
-	if (parent && parent->LCDElement)
-		descr = Desc+'\n'+(ischecked?"[X]":"[  ]");
 }
 
 static eWidget *create_eCheckbox(eWidget *parent)
