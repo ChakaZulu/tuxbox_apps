@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.33 2002/02/28 01:49:27 field Exp $
+ $Id: rcinput.cpp,v 1.34 2002/02/28 22:59:38 McClean Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.34  2002/02/28 22:59:38  McClean
+ nokia frontpanel-fix
+
  Revision 1.33  2002/02/28 01:49:27  field
  Ein/Aus Handling verbessert, SectionsD gepaused beim Update
 
@@ -227,6 +230,9 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 	fd_set rfds;
 	__u16 rc_key;
 
+	//set 0
+	*data = 0;
+
 	//es ist ein event im Buffer - diesen zurückgeben
 	if( eventlist.size() > 0 )
 	{
@@ -274,10 +280,32 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 		{
 			status = read(fd_rc, &rc_key, sizeof(rc_key));
 			if (status==2)
-			{	//loslassen bei alten nokia fb's
-				if(rc_key!=0x5cfe)
+			{	
+				bool doParse = true;
+				switch (g_settings.box_Type)
 				{
-					//printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
+					case 1: //nokia
+						switch (rc_key)
+						{
+							case 0xff9d:
+								*msg = RC_standby;
+								return;
+							case 0xffc7:
+								*msg = RC_up;
+								return;
+							case 0xffab:
+								*msg = RC_down;
+								return;
+							case 0x5cfe: //alter nokialoslasscode
+							case 0xff9f:
+							case 0xffcf:
+							case 0xffaf:
+								doParse = false;
+						}			
+				}
+				if(doParse)
+				{
+					printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
 					long long now_pressed;
 					bool keyok = true;
 
