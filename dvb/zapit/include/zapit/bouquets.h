@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.24 2002/08/29 15:17:26 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.25 2002/08/29 17:04:03 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -86,6 +86,7 @@ class CBouquetManager
 		string convertForXML( string s);
 		void storeBouquets();
 	public:
+		CBouquetManager() { remainChannels = NULL; };
 		class ChannelIterator
 		{
 			private:
@@ -118,8 +119,8 @@ class CBouquetManager
 		void renumServices();
 
 		CBouquet* addBouquet( string name);
-		void deleteBouquet( unsigned int id);
-		void deleteBouquet( string name);
+		void deleteBouquet(const unsigned int id);
+		void deleteBouquet(const CBouquet* bouquet);
 		int  existsBouquet( string name);
 		void moveBouquet( unsigned int oldId, unsigned int newId);
 		bool existsChannelInBouquet( unsigned int bq_id, unsigned int onid_sid);

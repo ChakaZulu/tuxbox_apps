@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.37 2002/08/29 15:17:26 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.38 2002/08/29 17:04:03 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -115,10 +115,10 @@ void CBouquet::addService (CZapitChannel* newChannel)
 	{
 		case 1:
 		case 4:
-			tvChannels.insert( tvChannels.end(), newChannel);
+			tvChannels.push_back(newChannel);
 		break;
 		case 2:
-			radioChannels.insert( radioChannels.end(), newChannel);
+			radioChannels.push_back(newChannel);
 		break;
 	}
 }
@@ -439,7 +439,7 @@ void CBouquetManager::storeBouquets()
 
 	for (unsigned int i=0; i<Bouquets.size(); i++)
 	{
-		storedBouquets.insert( storedBouquets.end(), new CBouquet( *Bouquets[i]));
+		storedBouquets.push_back(new CBouquet( *Bouquets[i]));
 	}
 }
 
@@ -453,7 +453,7 @@ void CBouquetManager::restoreBouquets()
 
 	for (unsigned int i=0; i<storedBouquets.size(); i++)
 	{
-		Bouquets.insert( Bouquets.end(), new CBouquet( *storedBouquets[i]));
+		Bouquets.push_back(new CBouquet( *storedBouquets[i]));
 	}
 }
 
@@ -478,30 +478,23 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 	ChannelList numberedChannels;
 	ChannelList unnumberedChannels;
 
-	if (remainChannels != NULL)
-	{
-		deleteBouquet(strTitle);
-	}
+	deleteBouquet(remainChannels);
 	remainChannels = addBouquet(strTitle);
 
 	for ( map<unsigned int, CZapitChannel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
 	{
 		if (it->second.getChannelNumber() > 0)
-			numberedChannels.insert( numberedChannels.end(), &(it->second));
+			numberedChannels.push_back(&(it->second));
 		else
-			unnumberedChannels.insert( unnumberedChannels.end(), &(it->second));
+			unnumberedChannels.push_back(&(it->second));
 	}
 	sort(numberedChannels.begin(), numberedChannels.end(), CmpChannelByChNr());
 	sort(unnumberedChannels.begin(), unnumberedChannels.end(), CmpChannelByChName());
 
 	for (unsigned int i = 0; i<numberedChannels.size(); i++)
-	{
-		allChannels.insert( allChannels.end(), numberedChannels[i]);
-	}
+		allChannels.push_back(numberedChannels[i]);
 	for (unsigned int i = 0; i<unnumberedChannels.size(); i++)
-	{
-		allChannels.insert( allChannels.end(), unnumberedChannels[i]);
-	}
+		allChannels.push_back(unnumberedChannels[i]);
 
 	for ( unsigned int i=0; i<allChannels.size(); i++)
 	{
@@ -520,21 +513,17 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 	for ( map<unsigned int, CZapitChannel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
 	{
 		if (it->second.getChannelNumber() > 0)
-			numberedChannels.insert( numberedChannels.end(), &(it->second));
+			numberedChannels.push_back(&(it->second));
 		else
-			unnumberedChannels.insert( unnumberedChannels.end(), &(it->second));
+			unnumberedChannels.push_back(&(it->second));
 	}
 	sort(numberedChannels.begin(), numberedChannels.end(), CmpChannelByChNr());
 	sort(unnumberedChannels.begin(), unnumberedChannels.end(), CmpChannelByChName());
 
 	for (unsigned int i = 0; i<numberedChannels.size(); i++)
-	{
-		allChannels.insert( allChannels.end(), numberedChannels[i]);
-	}
+		allChannels.push_back(numberedChannels[i]);
 	for (unsigned int i = 0; i<unnumberedChannels.size(); i++)
-	{
-		allChannels.insert( allChannels.end(), unnumberedChannels[i]);
-	}
+		allChannels.push_back(unnumberedChannels[i]);
 
 	for ( unsigned int i=0; i<allChannels.size(); i++)
 	{
@@ -558,7 +547,7 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 
 	if ((remainChannels->tvChannels.size() == 0) && (remainChannels->radioChannels.size() == 0))
 	{
-		deleteBouquet(strTitle);
+		deleteBouquet(remainChannels);
 		remainChannels = NULL;
 	}
 }
@@ -636,42 +625,32 @@ void CBouquetManager::renumServices()
 		allnamechannels_radio.insert(std::pair<std::string, unsigned int>(nameit->first, cit->second.getOnidSid()));
 	}
 	namechans_radio.clear();
-
 }
 
 CBouquet* CBouquetManager::addBouquet( string name)
 {
 	CBouquet* newBouquet = new CBouquet(name);
-	Bouquets.insert( Bouquets.end(), newBouquet);
+	Bouquets.push_back(newBouquet);
 	return( newBouquet);
 }
 
-void CBouquetManager::deleteBouquet( unsigned int id)
+void CBouquetManager::deleteBouquet(const unsigned int id)
 {
 	if (id < Bouquets.size() && Bouquets[id] != remainChannels)
-	{
-		CBouquet* bouquet = Bouquets[id];
-
-		BouquetList::iterator it;
-		unsigned int i;
-		for (i=0, it = Bouquets.begin(); i<id; i++, it++);
-		Bouquets.erase( it);
-		delete bouquet;
-	}
+		deleteBouquet(Bouquets[id]);
 }
 
-void CBouquetManager::deleteBouquet( string name)
+void CBouquetManager::deleteBouquet(const CBouquet* bouquet)
 {
-
-	BouquetList::iterator it;
-	unsigned int i;
-	for (i=0, it = Bouquets.begin(); (i<Bouquets.size()) && (Bouquets[i]->Name != name); i++, it++);
-
-	if (i<Bouquets.size())
+	if (bouquet != NULL)
 	{
-		CBouquet* bouquet = *it;
-		Bouquets.erase( it);
-		delete bouquet;
+		BouquetList::iterator it = find(Bouquets.begin(), Bouquets.end(), bouquet);
+
+		if (it != Bouquets.end())
+		{
+			Bouquets.erase(it);
+			delete bouquet;
+		}
 	}
 }
 
