@@ -51,9 +51,9 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 {
 	if ( zap_completion_timeout != 0 )
 	{
-    	if ( ( msg == messages::EVT_ZAP_COMPLETE ) ||
-    		 ( msg == messages:: EVT_ZAP_FAILED ) ||
-    		 ( msg == messages:: EVT_ZAP_ISNVOD ) )
+    	if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) ||
+    		 ( msg == NeutrinoMessages:: EVT_ZAP_FAILED ) ||
+    		 ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD ) )
 		{
 			if ( data != current_onid_sid )
 			{
@@ -67,7 +67,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 		}
 	}
 
-    if ( msg == messages::EVT_CURRENTEPG )
+    if ( msg == NeutrinoMessages::EVT_CURRENTEPG )
 	{
 		sectionsd::CurrentNextInfo* info_CN = (sectionsd::CurrentNextInfo*) data;
 
@@ -88,18 +88,18 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 		}
 	    return messages_return::handled;
 	}
-	else if ( ( msg == messages::EVT_ZAP_COMPLETE ) || ( msg == messages:: EVT_ZAP_SUB_COMPLETE ) )
+	else if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) || ( msg == NeutrinoMessages:: EVT_ZAP_SUB_COMPLETE ) )
 	{
-		if ( data == (( msg == messages::EVT_ZAP_COMPLETE )?current_onid_sid:current_sub_onid_sid) )
+		if ( data == (( msg == NeutrinoMessages::EVT_ZAP_COMPLETE )?current_onid_sid:current_sub_onid_sid) )
 		{
 			g_Zapit->getPIDS( current_PIDs );
-			g_RCInput->postMsg( messages::EVT_ZAP_GOTPIDS, current_onid_sid, false );
+			g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOTPIDS, current_onid_sid, false );
 
 			processAPIDnames();
 		}
 	    return messages_return::handled;
 	}
-	else if ( msg == messages::EVT_ZAP_ISNVOD )
+	else if ( msg == NeutrinoMessages::EVT_ZAP_ISNVOD )
 	{
 		if ( data == current_onid_sid )
 		{
@@ -138,7 +138,7 @@ void CRemoteControl::getSubChannels()
 				}
 
 				copySubChannelsToZapit();
-    	        g_RCInput->postMsg( messages::EVT_ZAP_GOT_SUBSERVICES, current_onid_sid, false );
+    	        g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, current_onid_sid, false );
 			}
 		}
 	}
@@ -173,7 +173,7 @@ void CRemoteControl::getNVODs()
 			}
 
 			copySubChannelsToZapit();
-            g_RCInput->postMsg( messages::EVT_ZAP_GOT_SUBSERVICES, current_onid_sid, false );
+            g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, current_onid_sid, false );
 			setSubChannel( subChannels.size()- 1 );
 		}
 	}
@@ -257,7 +257,7 @@ void CRemoteControl::processAPIDnames()
 	}
 
 
-	g_RCInput->postMsg( messages::EVT_ZAP_GOTAPIDS, current_onid_sid, false );
+	g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOTAPIDS, current_onid_sid, false );
 }
 
 

@@ -101,21 +101,21 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		{
 			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-			if ( msg == messages::EVT_SCAN_SATELLITE )
+			if ( msg == NeutrinoMessages::EVT_SCAN_SATELLITE )
 			{
 				g_FrameBuffer->paintBoxRel(xpos3, ypos+ 2* mheight, 80, mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos3, ypos+ 3*mheight, width, (char*)data, COL_MENUCONTENT);
 				delete (unsigned char*) data;
 			}
             else
-			if ( msg == messages::EVT_SCAN_PROVIDER )
+			if ( msg == NeutrinoMessages::EVT_SCAN_PROVIDER )
 			{
 				g_FrameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight, width- 10, mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width- 10, (char*)data, COL_MENUCONTENT);
 				delete (unsigned char*) data;
 			}
 			else
-			if ( msg == messages::EVT_SCAN_NUM_CHANNELS )
+			if ( msg == NeutrinoMessages::EVT_SCAN_NUM_CHANNELS )
 			{
 				char cb[10];
 				sprintf(cb, "%d", data);
@@ -123,7 +123,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 				g_Fonts->menu->RenderString(xpos2, ypos+ 2* mheight, width, cb, COL_MENUCONTENT);
 			}
 			else
-			if ( msg == messages::EVT_SCAN_NUM_TRANSPONDERS )
+			if ( msg == NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS )
 			{
 				char cb[10];
 				sprintf(cb, "%d", data);
@@ -131,7 +131,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 				g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
 			}
             else
-			if ( msg == messages::EVT_SCAN_COMPLETE )
+			if ( msg == NeutrinoMessages::EVT_SCAN_COMPLETE )
 			{
 				finish= true;
 				msg = CRCInput::RC_timeout;
@@ -144,7 +144,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 
 	hide();
-	g_RCInput->postMsg( messages::EVT_SERVICESCHANGED, 0 );
+	g_RCInput->postMsg( NeutrinoMessages::EVT_SERVICESCHANGED, 0 );
 	g_Sectionsd->setPauseScanning( false );
 	ShowMsg ( "messagebox.info", g_Locale->getText("scants.finished"), CMessageBox::mbBack, CMessageBox::mbBack);
 

@@ -199,7 +199,7 @@ neutrino->showProfiling("vor Schatten;");
 
 				if ( msg == CRCInput::RC_help )
 				{
-					g_RCInput->postMsg( messages::SHOW_EPG, 0 );
+					g_RCInput->postMsg( NeutrinoMessages::SHOW_EPG, 0 );
 					res = messages_return::cancel_info;
 				}
 				else if ( ( msg == CRCInput::RC_timeout ) ||
@@ -215,11 +215,11 @@ neutrino->showProfiling("vor Schatten;");
 					g_RCInput->postMsg( msg, data );
 					res = messages_return::cancel_info;
 				}
-				else if ( msg == messages::EVT_TIMESET )
+				else if ( msg == NeutrinoMessages::EVT_TIMESET )
 				{
 					// Handle anyway!
 					neutrino->handleMsg( msg, data );
-        			g_RCInput->postMsg( messages::SHOW_INFOBAR, 0 );
+        			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 					res = messages_return::cancel_all;
 				}
 				else
@@ -260,7 +260,7 @@ void CInfoViewer::showIcon_VTXT()
 
 int CInfoViewer::handleMsg(uint msg, uint data)
 {
-    if ( msg == messages::EVT_CURRENTNEXT_EPG )
+    if ( msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG )
 	{
 		if ( data == current_onid_sid )
 		{
@@ -271,7 +271,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		}
 	    return messages_return::handled;
 	}
-    else if ( msg == messages::EVT_ZAP_GOTAPIDS )
+    else if ( msg == NeutrinoMessages::EVT_ZAP_GOTAPIDS )
 	{
 		if ( data == current_onid_sid )
 		{
@@ -280,7 +280,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		}
 	    return messages_return::handled;
 	}
-	else if ( msg == messages::EVT_ZAP_GOTPIDS )
+	else if ( msg == NeutrinoMessages::EVT_ZAP_GOTPIDS )
 	{
 		if ( data == current_onid_sid )
 		{
@@ -289,7 +289,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		}
 	    return messages_return::handled;
 	}
-	else if ( msg == messages::EVT_ZAP_GOT_SUBSERVICES )
+	else if ( msg == NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES )
 	{
 		if ( data == current_onid_sid )
 		{
@@ -298,7 +298,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		}
 	    return messages_return::handled;
 	}
-	else if ( msg == messages::EVT_ZAP_SUB_COMPLETE )
+	else if ( msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE )
 	{
 		//if ( data == current_onid_sid )
 		{
@@ -307,7 +307,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		}
 	    return messages_return::handled;
 	}
-	else if ( msg == messages::EVT_ZAP_FAILED )
+	else if ( msg == NeutrinoMessages::EVT_ZAP_FAILED )
 	{
 		if ( data == current_onid_sid )
 		{
@@ -319,7 +319,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		}
 	    return messages_return::handled;
 	}
-    else if ( msg == messages::EVT_MODECHANGED )
+    else if ( msg == NeutrinoMessages::EVT_MODECHANGED )
 	{
         aspectRatio = data;
         if ( is_visible && showButtonBar )
@@ -327,7 +327,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 
         return messages_return::handled;
 	}
-	else if ( msg == messages::EVT_TIMESET )
+	else if ( msg == NeutrinoMessages::EVT_TIMESET )
 	{
 		gotTime = true;
 	}
@@ -361,7 +361,7 @@ void CInfoViewer::getEPG()
 	{
 		sectionsd::CurrentNextInfo*	_info = new sectionsd::CurrentNextInfo;
 		*_info = info_CurrentNext;
-		g_RCInput->postMsg( messages::EVT_CURRENTEPG, (unsigned) _info, false );
+		g_RCInput->postMsg( NeutrinoMessages::EVT_CURRENTEPG, (unsigned) _info, false );
 	}
 
 

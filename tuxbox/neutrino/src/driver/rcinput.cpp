@@ -243,7 +243,7 @@ void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, long long *TimeoutEn
 
 	getMsg( msg, data, diff, bAllowRepeatLR );
 
-	if ( *msg == messages::EVT_TIMESET )
+	if ( *msg == NeutrinoMessages::EVT_TIMESET )
 	{
 		// recalculate timeout....
 		gettimeofday( &tv, NULL );
@@ -364,22 +364,22 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 						{
 							if (emsg.eventID==CControldClient::EVT_VOLUMECHANGED)
 							{
-								*msg = messages::EVT_VOLCHANGED;
+								*msg = NeutrinoMessages::EVT_VOLCHANGED;
 								*data = *(char*) p;
 							}
 							else if (emsg.eventID==CControldClient::EVT_MUTECHANGED)
 							{
-								*msg = messages::EVT_MUTECHANGED;
+								*msg = NeutrinoMessages::EVT_MUTECHANGED;
 								*data = *(bool*) p;
 							}
 							else if (emsg.eventID==CControldClient::EVT_VCRCHANGED)
 							{
-								*msg = messages::EVT_VCRCHANGED;
+								*msg = NeutrinoMessages::EVT_VCRCHANGED;
 								*data = *(int*) p;
 							}
 							else if (emsg.eventID==CControldClient::EVT_MODECHANGED)
 							{
-								*msg = messages::EVT_MODECHANGED;
+								*msg = NeutrinoMessages::EVT_MODECHANGED;
 								*data = *(int*) p;
 							}
 							else
@@ -390,13 +390,13 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 							//printf("[neutrino] event - from SECTIONSD %x %x\n", emsg.eventID, *(unsigned*) p);
 							if (emsg.eventID==CSectionsdClient::EVT_TIMESET)
 							{
-								*msg = messages::EVT_TIMESET;
+								*msg = NeutrinoMessages::EVT_TIMESET;
 								*data = (unsigned) p;
 								dont_delete_p = true;
 							}
 							else if (emsg.eventID==CSectionsdClient::EVT_GOT_CN_EPG)
 							{
-								*msg = messages::EVT_CURRENTNEXT_EPG;
+								*msg = NeutrinoMessages::EVT_CURRENTNEXT_EPG;
 								*data = *(unsigned*) p;
 							}
 
@@ -408,48 +408,48 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 							//printf("[neutrino] event - from ZAPIT %x %x\n", emsg.eventID, *(unsigned*) p);
 							if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE)
 							{
-								*msg = messages::EVT_ZAP_COMPLETE;
+								*msg = NeutrinoMessages::EVT_ZAP_COMPLETE;
 								*data = *(unsigned*) p;
 							}
 							else if (emsg.eventID==CZapitClient::EVT_ZAP_FAILED)
 							{
-								*msg = messages::EVT_ZAP_FAILED;
+								*msg = NeutrinoMessages::EVT_ZAP_FAILED;
 								*data = *(unsigned*) p;
 							}
 							else if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD)
 							{
-								*msg = messages::EVT_ZAP_ISNVOD;
+								*msg = NeutrinoMessages::EVT_ZAP_ISNVOD;
 								*data = *(unsigned*) p;
 							}
 							else if (emsg.eventID==CZapitClient::EVT_ZAP_SUB_COMPLETE)
 							{
-								*msg = messages::EVT_ZAP_SUB_COMPLETE;
+								*msg = NeutrinoMessages::EVT_ZAP_SUB_COMPLETE;
 								*data = *(unsigned*) p;
 							}
 							else if (emsg.eventID==CZapitClient::EVT_SCAN_COMPLETE)
 							{
-								*msg = messages::EVT_SCAN_COMPLETE;
+								*msg = NeutrinoMessages::EVT_SCAN_COMPLETE;
 								*data = 0;
 							}
 							else if (emsg.eventID==CZapitClient::EVT_SCAN_NUM_TRANSPONDERS)
 							{
-								*msg = messages::EVT_SCAN_NUM_TRANSPONDERS;
+								*msg = NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS;
 								*data = *(unsigned*) p;
 							}
 							else if (emsg.eventID==CZapitClient::EVT_SCAN_NUM_CHANNELS)
 							{
-								*msg = messages::EVT_SCAN_NUM_CHANNELS;
+								*msg = NeutrinoMessages::EVT_SCAN_NUM_CHANNELS;
 								*data = *(unsigned*) p;
 							}
 							else if (emsg.eventID==CZapitClient::EVT_SCAN_PROVIDER)
 							{
-								*msg = messages::EVT_SCAN_PROVIDER;
+								*msg = NeutrinoMessages::EVT_SCAN_PROVIDER;
 								*data = (unsigned) p;
 								dont_delete_p = true;
 							}
 							else if (emsg.eventID==CZapitClient::EVT_SCAN_SATELLITE)
 							{
-								*msg = messages::EVT_SCAN_SATELLITE;
+								*msg = NeutrinoMessages::EVT_SCAN_SATELLITE;
 								*data = (unsigned) p;
 								dont_delete_p = true;
 							}
@@ -460,7 +460,7 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 						{
 							if (emsg.eventID==CTimerdClient::EVT_NEXTPROGRAM)
 							{
-								*msg = messages::EVT_NEXTPROGRAM;
+								*msg = NeutrinoMessages::EVT_NEXTPROGRAM;
 								*data = (unsigned) p;
 								dont_delete_p = true;
 							}
