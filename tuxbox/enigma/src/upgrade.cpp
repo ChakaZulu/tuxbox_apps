@@ -176,6 +176,9 @@ eUpgrade::eUpgrade(bool manual)
 		case eSystemInfo::DM5620:
 			mIDStr="6";
 			break;
+		case eSystemInfo::DM500:
+			mIDStr="7";
+			break;
 		case eSystemInfo::dbox2Nokia:
 		default:
 			mIDStr="1";

@@ -233,6 +233,7 @@ public:
 	bool quickzapmode();
 	void prev();
 	void next();
+	void play();
 	eSubServiceSelector(bool showbuttons=true);
 	eServiceReferenceDVB *getSelected() { return list.getCount()?&list.getCurrent()->service:0; }
 	void clear();
@@ -292,6 +293,7 @@ class eZapMain: public eWidget
 {
 	friend class eEPGSelector;
 	friend class eWizardScanInit;
+	friend class eSubServiceSelector;
 public:
 	enum { modeTV, modeRadio, modeFile, modeEnd };
 	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32, recNgrab=64, statePaused=128 };
@@ -484,7 +486,6 @@ private:
 	void getPlaylistPosition();
 	void setPlaylistPosition();
 	bool handleState(int justask=0);
-
 #ifndef DISABLE_FILE
 	void blinkRecord();
 	void toggleIndexmark();

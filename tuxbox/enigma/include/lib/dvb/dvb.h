@@ -809,6 +809,7 @@ public:
 	void handleSDT(const SDT *sdt, eDVBNamespace dvb_namespace, eOriginalNetworkID onid=-1, eTransportStreamID tsid=-1, Signal0<void> *callback=0 );
 	Signal1<void, eTransponder*> transponder_added;
 	Signal2<void, const eServiceReferenceDVB &, bool> service_found;
+	Signal1<void, const eServiceReferenceDVB &> service_removed;
 
 	eTransponder *searchTS(eDVBNamespace dvbnamespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eServiceDVB *searchService(const eServiceReference &service);

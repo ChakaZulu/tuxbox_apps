@@ -149,6 +149,11 @@ eSystemInfo::eSystemInfo()
 				hasnetwork=0;
 			caids.insert(0x4a70);
 			break;
+		case 7:
+			hasnetwork = 1;
+			hwtype = DM500;
+			caids.insert(0x4a70);
+			break;
 		case 1 ... 3:
 			caids.insert(0x1702);
 			caids.insert(0x1722);

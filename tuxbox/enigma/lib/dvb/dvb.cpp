@@ -814,6 +814,7 @@ void eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOr
 						channel_number.erase(m);
 						break;
 					}
+				/*emit*/ service_removed(i->first);
 				services.erase(i->first);
 				i=services.begin();
 				changed=true;
@@ -831,11 +832,7 @@ void eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOr
 		this->callback = 0;
 		/*emit*/ cb();
 	}
-
-	if ( changed )
-		/* emit */ eDVB::getInstance()->serviceListChanged();
 }
-
 
 void eTransponderList::addService()
 {

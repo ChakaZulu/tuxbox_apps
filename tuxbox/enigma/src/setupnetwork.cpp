@@ -756,7 +756,7 @@ eNFSSetup::eNFSSetup()
 	ip->move(ePoint(120, y));
 	ip->resize(eSize(200, fd+10));
 	ip->setFlags(eNumber::flagDrawPoints);
-	ip->setHelpText(_("enter IP Address of the box (0..9, left, right)"));
+	ip->setHelpText(_("enter IP Address (0..9, left, right)"));
 	ip->loadDeco();
 	CONNECT(ip->selected, eNFSSetup::fieldSelected);
 	
@@ -764,7 +764,7 @@ eNFSSetup::eNFSSetup()
 	combo_fstype->move(ePoint(360,y));
 	combo_fstype->resize(eSize(80, fd+10));
 	combo_fstype->loadDeco();
-	combo_fstype->setHelpText(_("press ok to change connection type"));
+	combo_fstype->setHelpText(_("press ok to change mount type"));
 	new eListBoxEntryText( *combo_fstype, "NFS", (void*)0, 0, "Network File System");
 	new eListBoxEntryText( *combo_fstype, "CIFS", (void*)1, 0, "Common Internet File System");
 	combo_fstype->setCurrent(0,true);
@@ -780,9 +780,10 @@ eNFSSetup::eNFSSetup()
 	sdir = new eTextInputField(this,l);
 	sdir->move(ePoint(120, y));
 	sdir->resize(eSize(320, fd+10));
-	sdir->setUseableChars("abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/");
+	sdir->setUseableChars("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/");
 	sdir->loadDeco();
-	
+	sdir->setHelpText(_("enter the name of the share without trailing slash"));
+
 	y = y + 34;
 	
 	l = new eLabel(this);
@@ -793,8 +794,9 @@ eNFSSetup::eNFSSetup()
 	ldir = new eTextInputField(this,l);
 	ldir->move(ePoint(120, y));
 	ldir->resize(eSize(320, fd+10));
-	ldir->setUseableChars("abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/");
+	ldir->setUseableChars("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/");
 	ldir->loadDeco();
+	ldir->setHelpText(_("enter name of the local mount point with trailing slash"));
 
 	y = y + 34;
 
@@ -807,7 +809,7 @@ eNFSSetup::eNFSSetup()
 	combo_options->move(ePoint(120,y));
 	combo_options->resize(eSize(320, fd+10));
 	combo_options->loadDeco();
-	combo_options->setHelpText(_("press ok to change options"));
+	combo_options->setHelpText(_("press ok to change mount options"));
 	new eListBoxEntryText( *combo_options, "", (void*)0, 0);
 	new eListBoxEntryText( *combo_options, "ro", (void*)1, 0);
 	new eListBoxEntryText( *combo_options, "rw", (void*)2, 0);
@@ -882,6 +884,7 @@ eNFSSetup::eNFSSetup()
 	prev->move(ePoint(10, clientrect.height() - (80+fd) ));
 	prev->resize(eSize(40, 40));
 	prev->setText("<");
+	prev->setHelpText(_("go to previous share"));
 	prev->loadDeco();
 	CONNECT(prev->selected, eNFSSetup::prevPressed);
 
@@ -889,6 +892,7 @@ eNFSSetup::eNFSSetup()
 	mount->move(ePoint(55, clientrect.height() - (80+fd) ));
 	mount->resize(eSize(100, 40));
 	mount->setText("mount");
+	mount->setHelpText(_("press ok to mount this share"));
 	mount->loadDeco();
 	CONNECT(mount->selected, eNFSSetup::mountPressed);
 
@@ -896,6 +900,7 @@ eNFSSetup::eNFSSetup()
 	ok->move(ePoint(160, clientrect.height() - (80+fd) ));
 	ok->resize(eSize(130, 40));
 	ok->setText(_("save"));
+	ok->setHelpText(_("press ok to save this share"));
 	ok->loadDeco();
 	CONNECT(ok->selected, eNFSSetup::okPressed);
 
@@ -903,6 +908,7 @@ eNFSSetup::eNFSSetup()
 	umount->move(ePoint(clientrect.width() - 155, clientrect.height() - (80+fd) ));
 	umount->resize(eSize(100, 40));
 	umount->setText("umount");
+	umount->setHelpText(_("press ok to unmount this share"));
 	umount->loadDeco();
 	CONNECT(umount->selected, eNFSSetup::umountPressed);
 
@@ -911,6 +917,7 @@ eNFSSetup::eNFSSetup()
 	next->resize(eSize(40, 40));
 	next->setText(">");
 	next->loadDeco();
+	next->setHelpText(_("go to next share"));
 	CONNECT(next->selected, eNFSSetup::nextPressed);
 
 	//statusbar

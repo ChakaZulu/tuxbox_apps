@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.25 2003/11/27 15:14:32 ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.26 2004/03/13 13:58:05 ghostrider Exp $
  */
 
 #include <enigma_info.h>
@@ -189,6 +189,12 @@ public:
 				vendor->setText("Sagem");
 				processor->setText(_("Processor: XPC823, 66MHz"));
 				break;
+			case eSystemInfo::DM500:
+				machine->setText("DM500");
+				vendor->setText("Dream-Multimedia-TV");
+				dreamlogo->show();
+				processor->setText(_("Processor: STBx25xx, 252MHz"));
+				break;
 			case eSystemInfo::DM5600:
 				machine->setText("DM5600");
 				vendor->setText("Dream-Multimedia-TV");
@@ -282,6 +288,7 @@ public:
 				eString date=verid.mid(4, 8);
 //				eString time=verid.mid(12, 4);
 				if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+				|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500
 				|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600
 				|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 )
 					version->setText(

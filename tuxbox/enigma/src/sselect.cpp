@@ -1619,6 +1619,7 @@ eServiceSelector::eServiceSelector()
 	
 	key[0] = key[1] = key[2] = key[3] = 0;
 
+	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::actualize );
 	eActionMapList::getInstance()->activateStyle("sselect_default");
 }
 

@@ -2,10 +2,11 @@
 #define __src_lib_dvb_settings_h
 
 #include <lib/dvb/dvb.h>
+#include <libsig_comp.h>
 
 class eDVB;
 
-class eDVBSettings
+class eDVBSettings: public Object
 {
 	eDVB &dvb;
 	ePtrList<eBouquet> bouquets;
@@ -26,7 +27,6 @@ public:
 	void revalidateBouquets();
 	eTransponderList *getTransponders() { return transponderlist; }
 	ePtrList<eBouquet> *getBouquets() { return &bouquets; }
-	void setTransponders(eTransponderList *tlist);
 	void sortInChannels();
 
 	void saveServices();
@@ -38,7 +38,10 @@ public:
 	void clearList();
 	void removeOrbitalPosition(int orbital_position);
 	int importSatcoDX(eString line);
-	
+
+	void service_found( const eServiceReferenceDVB &, bool );
+	void service_removed( const eServiceReferenceDVB &);
+
 	eDVBSettings(eDVB &dvb);
 	~eDVBSettings();
 };

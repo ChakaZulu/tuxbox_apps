@@ -94,7 +94,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		if (flags & flagUseBAT)
 			dvb.settings->removeDVBBouquets();
 
-		/*emit*/ dvb.serviceListChanged();
+//		/*emit*/ dvb.serviceListChanged();
 
 		currentONID=-1;
 		knownNetworks.clear();
@@ -323,8 +323,8 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 
 		dvb.settings->saveServices();
 		dvb.settings->sortInChannels();
-		/*emit*/ dvb.serviceListChanged();
 		dvb.settings->saveBouquets();
+		/*emit*/ dvb.serviceListChanged();
 
 		dvb.setState(eDVBState(eDVBState::stateIdle));
 		break;

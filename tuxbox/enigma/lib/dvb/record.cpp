@@ -434,8 +434,16 @@ eDVBRecorder::~eDVBRecorder()
 	delete [] PatData;
 	delete [] PmtData;
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-	if ( sapi && sapi->service != recRef )
+
+// workaround for faked service types..
+	eServiceReferenceDVB tmp = sapi->service;
+	tmp.data[0] = recRef.getServiceType();
+
+	if ( sapi && tmp != recRef )
+	{
+		eServiceReferenceDVB ref=sapi->service;
 		eDVBCaPMTClientHandler::distribute_leaveService(recRef);
+	}
 	close();
 }
 

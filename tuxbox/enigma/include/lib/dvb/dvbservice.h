@@ -66,23 +66,47 @@ public:
 
 	static void distribute_enterService( const eServiceReferenceDVB &service )
 	{
+		eServiceReferenceDVB ref = service;
+		switch(ref.getServiceType())
+		{
+			case 4:
+			case 7:
+				ref.data[0]=1; // TV
+				break;
+		}
 		for ( std::set<eDVBCaPMTClient*>::iterator it(capmtclients.begin());
 			it != capmtclients.end(); ++it )
-		(*it)->enterService(service);
+			(*it)->enterService(ref);
 	}
 
 	static void distribute_leaveService( const eServiceReferenceDVB &service )
 	{
+		eServiceReferenceDVB ref = service;
+		switch(ref.getServiceType())
+		{
+			case 4:
+			case 7:
+				ref.data[0]=1; // TV
+				break;
+		}
 		for ( std::set<eDVBCaPMTClient*>::iterator it(capmtclients.begin());
 			it != capmtclients.end(); ++it )
-		(*it)->leaveService(service);
+			(*it)->leaveService(ref);
 	}
 
 	static void distribute_gotPMT(const eServiceReferenceDVB &service, PMT *pmt)
 	{
+		eServiceReferenceDVB ref = service;
+		switch(ref.getServiceType())
+		{
+			case 4:
+			case 7:
+				ref.data[0]=1; // TV
+				break;
+		}
 		for ( std::set<eDVBCaPMTClient*>::iterator it(capmtclients.begin());
 			it != capmtclients.end(); ++it )
-		(*it)->handlePMT(service,pmt);
+			(*it)->handlePMT(ref,pmt);
 	}
 };
 

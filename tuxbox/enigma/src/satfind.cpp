@@ -186,8 +186,9 @@ void eSatfind::update()
 #ifndef DISABLE_LCD
 	eZapLCD::getInstance()->lcdSatfind->update(snr,agc);
 #endif
+	updateTimer.start(250,true);
 	if (status & FE_HAS_LOCK)
-		updateTimer.start(250,true);
+		;
 	else if( lockcount++ == 5 )
 		retune();
 }

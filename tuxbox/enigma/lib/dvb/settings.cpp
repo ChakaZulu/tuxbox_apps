@@ -10,6 +10,8 @@ eDVBSettings::eDVBSettings(eDVB &dvb): dvb(dvb)
 	loadServices();
 	loadBouquets();
 	bouquets.setAutoDelete(true);
+	CONNECT( transponderlist->service_found, eDVBSettings::service_found );
+	CONNECT( transponderlist->service_removed, eDVBSettings::service_removed );
 }
 
 void eDVBSettings::removeDVBBouquets()
@@ -186,14 +188,6 @@ void eDVBSettings::revalidateBouquets()
 	/*emit*/ dvb.bouquetListChanged();
 }
 
-void eDVBSettings::setTransponders(eTransponderList *tlist)
-{
-	if (transponderlist)
-		delete transponderlist;
-	transponderlist=tlist;
-	/*emit*/ dvb.serviceListChanged();
-}
-
 struct sortinChannel
 {
 	eDVBSettings &edvb;
@@ -206,6 +200,44 @@ struct sortinChannel
 		b->add(eServiceReferenceDVB(service.dvb_namespace, service.transport_stream_id, service.original_network_id, service.service_id, service.service_type));
 	}
 };
+
+void eDVBSettings::service_found( const eServiceReferenceDVB &ref, bool newAdded )
+{
+	if ( !eDVB::getInstance()->getScanAPI() && newAdded )
+	{
+		eServiceDVB *service = transponderlist->searchService(ref);
+		if ( service )
+		{
+			eBouquet *b = createBouquet(beautifyBouquetName(service->service_provider));
+			if ( b->bouquet_id >=0 && !b->list.size() || std::find(b->list.begin(),b->list.end(),ref) == b->list.end() )
+			{
+				b->add(ref);
+				/* emit */ eDVB::getInstance()->serviceListChanged();
+			}
+		}
+	}
+}
+
+void eDVBSettings::service_removed( const eServiceReferenceDVB &ref)
+{
+	eServiceDVB *service = transponderlist->searchService(ref);
+	if ( !eDVB::getInstance()->getScanAPI() && service )
+	{
+		eBouquet *b = createBouquet(beautifyBouquetName(service->service_provider));
+		if (b->bouquet_id >=0 )
+		{
+			std::list<eServiceReferenceDVB>::iterator it =
+				std::find(b->list.begin(), b->list.end(), ref);
+			if ( it != b->list.end() )
+			{
+				b->list.erase(it);
+				if ( !b->list.size()) // delete last service in bouquet
+					removeDVBBouquet(b->bouquet_id);
+				/* emit */ eDVB::getInstance()->serviceListChanged();
+			}
+		}
+	}
+}
 
 void eDVBSettings::sortInChannels()
 {
@@ -302,9 +334,6 @@ void eDVBSettings::loadServices()
 		eDebug("services invalid, no transponders");
 		return;
 	}
-/*	if (transponderlist)
-		delete transponderlist;
-	transponderlist=new eTransponderList;*/
 	if (transponderlist)
 		transponderlist->clearAllTransponders();
 

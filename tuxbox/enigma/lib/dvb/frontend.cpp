@@ -79,6 +79,7 @@ void eFrontend::timeout()
 		int updateTransponder=0;
 		switch ( eSystemInfo::getInstance()->getHwType() )
 		{
+			case eSystemInfo::DM500:
 			case eSystemInfo::DM5600:
 			case eSystemInfo::DM5620:
 			case eSystemInfo::DM7000:

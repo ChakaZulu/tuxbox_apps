@@ -52,6 +52,7 @@ eHelpWindow::eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID):
 
 	int t = eSystemInfo::getInstance()->getHwType();
 	const char *hwstr =
+		(t==eSystemInfo::DM500)?"dreambox" :
 		(t==eSystemInfo::DM5600)?"dreambox" :
 		(t==eSystemInfo::DM5620)?"dreambox" :
 		(t==eSystemInfo::DM7000)?"dreambox" :

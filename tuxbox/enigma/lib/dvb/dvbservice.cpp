@@ -715,14 +715,32 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 	Decoder::Flush();
 
+#ifndef DISABLE_FILE
+	eServiceReferenceDVB recRef =
+		eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef ?
+			eDVB::getInstance()->recorder->recRef : eServiceReferenceDVB();
+	recRef.data[0] = service.getServiceType();
+#endif
+
 	if ( service
 #ifndef DISABLE_FILE
 		&& !service.path
 		&& Decoder::locked != 2 // leave service for (timer) zap in Background
-		&& !(eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef == service)
+		&& service != recRef
 #endif
 		)
-		eDVBCaPMTClientHandler::distribute_leaveService(service); // capmt handler call..
+	{
+		// must replace faked service types.. for capmt handlers
+		eServiceReferenceDVB ref=service;
+		switch(ref.getServiceType())
+		{
+			case 4:
+			case 7:
+				ref.data[0]=1; // TV
+				break;
+		}
+		eDVBCaPMTClientHandler::distribute_leaveService(ref); // capmt handler call..
+	}
 
 	/*emit*/ dvb.leaveService(service);
 
@@ -746,11 +764,7 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 	if (service)
 	{
-		if ( service && !service.path
-#ifndef DISABLE_FILE
-			&& !( Decoder::locked == 2 && eDVB::getInstance()->recorder )
-#endif
-		)
+		if ( service && !service.path )
 			eDVBCaPMTClientHandler::distribute_enterService(service); // capmt handler call..
 
 		dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitch));

@@ -23,7 +23,7 @@ class eSystemInfo
 public:
 	static eSystemInfo *getInstance() { return instance; }
 	eSystemInfo();
-	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM5600, DM5620, Unknown };
+	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM5600, DM5620, DM500, Unknown };
 	enum { feSatellite, feCable, feTerrestrial };
 
 	int hasNegFilter() { return hasnegfilter; }

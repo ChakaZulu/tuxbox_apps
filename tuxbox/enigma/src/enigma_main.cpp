@@ -801,7 +801,7 @@ void eSubServiceSelector::quickZapPressed()
 
 void eSubServiceSelector::selected(SubService *ss)
 {
-	if (ss) // bitte nicht schlagen für das was jetzt kommt *duck*
+	if (ss)
 		close(0);
 	else
 		close(-1);
@@ -841,11 +841,7 @@ void eSubServiceSelector::next()
 	selectCurrent();
 	if ( !list.goNext() )
 		list.moveSelection( eListBox<SubService>::dirFirst );
-
-	SubService* ss = list.getCurrent();
-
-	if (ss)
-		eServiceInterface::getInstance()->play(ss->service);
+	play();
 }
 
 void eSubServiceSelector::prev()
@@ -853,11 +849,45 @@ void eSubServiceSelector::prev()
 	selectCurrent();
 	if ( !list.goPrev() )
 		list.moveSelection( eListBox<SubService>::dirLast );
+	play();
+}
 
+void eSubServiceSelector::play()
+{
 	SubService* ss = list.getCurrent();
-
 	if (ss)
-		eServiceInterface::getInstance()->play(ss->service);
+	{
+		eServiceReferenceDVB &ref=ss->service;
+#ifndef DISABLE_FILE
+		if ( eDVB::getInstance()->recorder &&
+			eDVB::getInstance()->recorder->recRef != ref )
+		{
+			int canHandleTwoScrambledServices=0;
+			eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices",
+				canHandleTwoScrambledServices);
+
+			if ( !canHandleTwoScrambledServices && eDVB::getInstance()->recorder->scrambled )
+			{
+				if ( !eZapMain::getInstance()->handleState() )
+					return;
+			}
+			else
+			{
+				eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
+				if (rec.getTransportStreamID() != ref.getTransportStreamID() ||
+						rec.getOriginalNetworkID() != ref.getOriginalNetworkID() ||
+						rec.getDVBNamespace() != ref.getDVBNamespace() )
+				{
+					if (!eZapMain::getInstance()->handleState())
+						return;
+				}
+			}
+		}
+#else
+		if ( !eZapMain::getInstance()->handleState() )
+#endif
+			eServiceInterface::getInstance()->play(ref);
+	}
 }
 
 void eServiceNumberWidget::selected(int *res)
@@ -3917,9 +3947,8 @@ void eZapMain::showSubserviceMenu()
 		subservicesel.show();
 		int ret = subservicesel.exec();
 		subservicesel.hide();
-		eServiceReferenceDVB *ref=0;
-		if ( !ret && ( ref = subservicesel.getSelected() ) && handleState() )
-			eServiceInterface::getInstance()->play(*ref);
+		if ( !ret )
+			subservicesel.play();
 	}
 	else if (flags&ENIGMA_VIDEO)
 	{
@@ -6146,6 +6175,7 @@ eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdE
 	move(ePoint(150, 130));
 	switch( eSystemInfo::getInstance()->getHwType() )
 	{
+		case eSystemInfo::DM500:
 		case eSystemInfo::DM5600:
 		case eSystemInfo::DM5620:
 			new eListBoxEntryText(&list, _("reboot now"), (void*)4, 0, _("restart your dreambox"));

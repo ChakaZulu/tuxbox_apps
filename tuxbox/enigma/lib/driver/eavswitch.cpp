@@ -64,10 +64,11 @@ eAVSwitch::eAVSwitch()
 	avsfd=open("/dev/dbox/avs0", O_RDWR);
 
 	saafd=open("/dev/dbox/saa0", O_RDWR);
-	
+
 	system = vsPAL;
 
 	useOst =
+		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500 ||
 		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600 ||
 		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620 ||
 		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000;

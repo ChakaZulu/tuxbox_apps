@@ -294,11 +294,16 @@ static eString record(eString request, eString dirpath, eString opts, eHTTPConne
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString command=opt["command"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eZapMain::getInstance()->record();
 	if (command == "start")
+	{
+		eZapMain::getInstance()->recordDVR(1,0);
 		return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording started...</body></html>";
+	}
 	else
+	{
+		eZapMain::getInstance()->recordDVR(0,0);
 		return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording stopped.</body></html>";
+	}
 }
 
 static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -363,8 +368,13 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	{
 		if (command=="shutdown")
 		{
-			eZap::getInstance()->quit();
-			return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated...</body></html>";
+			if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM5600 &&
+						eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM5620 &&
+						eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500)
+			{
+				eZap::getInstance()->quit();
+				return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated...</body></html>";
+			}
 		}
 		else if (command=="reboot")
 		{
@@ -617,8 +627,13 @@ static eString getNavi(eString mode, eString path)
 	else
 	if (mode.find("menu") == 0)
 	{
-		result += button(110, "Shutdown", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=shutdown\')");
-		result += "<br>";
+		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM5600
+				&& eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM5620
+				&& eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500)
+		{
+			result += button(110, "Shutdown", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=shutdown\')");
+			result += "<br>";
+		}
 		result += button(110, "Restart", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=restart\')");
 		result += "<br>";
 		result += button(110, "Reboot", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=reboot\')");
@@ -628,10 +643,15 @@ static eString getNavi(eString mode, eString path)
 		result += button(110, "Wakeup", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=wakeup\')");
 		result += "<br>";
 		result += button(110, "OSDshot", LEFTNAVICOLOR, "?mode=menuFBShot");
+#ifndef DISABLE_LCD
 		result += "<br>";
 		result += button(110, "LCDshot", LEFTNAVICOLOR, "?mode=menuLCDShot");
-		result += "<br>";
-		result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=menuScreenShot");
+#endif
+		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+		{
+			result += "<br>";
+			result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=menuScreenShot");
+		}
 		result += "<br>";
 		result += button(110, "Timer List", LEFTNAVICOLOR, "?mode=menuTimerList");
 	}
@@ -894,6 +914,11 @@ static eString aboutDreambox(void)
 			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Sagem</td></tr>";
 			result += "<tr><td>Processor</td><td>&nbsp;</td><td>XPC823, 66MHz</td></tr>";
 			break;
+		case eSystemInfo::DM500:
+			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM500</td></tr>";
+			result += "<tr><td>Manufacturer</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
+			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STBx25xx, 252MHz</td></tr>";
+			break;
 		case eSystemInfo::DM5600:
 			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM5600</td></tr>";
 			result += "<tr><td>Manufacturer</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
@@ -988,6 +1013,7 @@ static eString aboutDreambox(void)
 		eString date=verid.mid(4, 8);
 //		eString time=verid.mid(12, 4);
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500
 			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600
 			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620)
 			result += eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]+ ", " + date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4);
@@ -1613,6 +1639,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				{
 					tm* t = localtime(&event.start_time);
 					result << "<span class=\"epg\">"
+#ifndef DISABLE_FILE
 						"<u><a href=\'"
 						"javascript:record(\"ref=" << serviceRef
 						<< "&ID=" << event.event_id
@@ -1620,6 +1647,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 						<< "&duration=" << event.duration
 						<< "\")\'>Record"
 						"</a></u>&nbsp;&nbsp;"
+#endif
 						"<a href=\'"
 						"javascript:EPGDetails(\"ref=" << serviceRef
 						<< "&ID=" << event.event_id
@@ -2394,8 +2422,8 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
-	dyn_resolver->addDyn("GET", "/", web_root);
-	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator);
+	dyn_resolver->addDyn("GET", "/", web_root, true);
+	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator, true);
 
 	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory);
 	dyn_resolver->addDyn("GET", "/cgi-bin/mkdir", makeDirectory, true);
@@ -2410,10 +2438,10 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/record", record);
 #endif
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
-	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList);
-	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent);
-	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList);
-	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList);
+	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, true);
+	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, true);
+	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, true);
+	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList, true);
 	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
