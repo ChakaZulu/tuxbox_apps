@@ -1,16 +1,19 @@
 #ifndef __E_ERROR__
 #define __E_ERROR__
 
+//#define MEMLEAK_CHECK
+#undef MEMLEAK_CHECK
+
+#ifdef MEMLEAK_CHECK
 #include <list>
+#include <lib/system/elock.h>
+#endif
+
 #include <string>
 #include <map>       
 #include <new>
 #include <libsig_comp.h>
 #include <config.h>
-#include <lib/system/elock.h>
-
-//#define MEMLEAK_CHECK
-#undef MEMLEAK_CHECK
 
 void eFatal(const char* fmt, ...);
 
