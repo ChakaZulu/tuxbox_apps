@@ -167,8 +167,8 @@ public:
 			mmi_enqansw,
 			mmi_menuansw,
 			getcaids,
-			suspendPoll,
-			restartPoll
+			enable_ts,
+			disable_ts
 		};
 		int type;
 		unsigned char *data;
