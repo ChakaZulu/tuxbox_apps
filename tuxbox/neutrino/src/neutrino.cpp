@@ -37,29 +37,19 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <sys/time.h>
-#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <dirent.h>
 #include <dlfcn.h>
 
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
 
 #include <tuxbox.h>
 
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
-#include <map>
 
 
 #include "global.h"
@@ -108,8 +98,6 @@
 #include "system/flashtool.h"
 
 
-using namespace std;
-
 // Globale Variablen - to use import global.h
 
 // I don't like globals, I would have hidden them in classes,
@@ -118,23 +106,23 @@ using namespace std;
 
 static void initGlobals(void)
 {
-	g_fontRenderer = NULL;
-	g_Fonts =    NULL;
+	g_fontRenderer  = NULL;
+	g_Fonts         = NULL;
 
-	g_RCInput =    NULL;
-	g_Controld =   NULL;
-	g_Timerd =  NULL;
-	g_Zapit =   NULL;
+	g_RCInput       = NULL;
+	g_Controld      = NULL;
+	g_Timerd        = NULL;
+	g_Zapit         = NULL;
 	g_RemoteControl = NULL;
 
-	g_EpgData =    NULL;
-	g_InfoViewer =    NULL;
-	g_EventList =  NULL;
+	g_EpgData       = NULL;
+	g_InfoViewer    = NULL;
+	g_EventList     = NULL;
 
-	g_Locale =  NULL;
-	g_PluginList =    NULL;
+	g_Locale        = NULL;
+	g_PluginList    = NULL;
 }
-// Ende globale Variablen
+
 
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1371,7 +1359,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	//		printf("scanning locale dir now....(perhaps)\n");
 
 	char *pfad[] = {DATADIR "/neutrino/locale","/var/tuxbox/config/locale"};
-	string filen, locale;
+	std::string filen, locale;
 	int pos;
 
 	for(int p = 0;p < 2;p++)
@@ -1608,7 +1596,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingstatus = 0;
 }
 
-void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, string menuname, char *value)
+void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, std::string menuname, char *value)
 {
 	CStringInput *fontSize;
 	fontSize = new CStringInput(menuname, value, 3, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ",this);
@@ -2471,7 +2459,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	}
 }
 
-void CNeutrinoApp::showProfiling( string text )
+void CNeutrinoApp::showProfiling(std::string text)
 {
 	struct timeval tv;
 
@@ -2732,8 +2720,8 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		if( g_settings.recording_server_wakeup )
 		{
-			string command;
-			command = "ether-wake "+ string(g_settings.recording_server_mac);
+			std::string command;
+			command = "ether-wake " + std::string(g_settings.recording_server_mac);
 			if(system(command.c_str()) != 0)
 				perror("ether-wake failed");
 		}
@@ -2809,22 +2797,22 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if( msg == NeutrinoMessages::EVT_POPUP )
 	{
 		if( mode != mode_scart )
-			ShowHint ( "messagebox.info", string((char *) data) );
+			ShowHint ( "messagebox.info", std::string((char *) data) );
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::EVT_EXTMSG )
 	{
 		if( mode != mode_scart )
-			ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+			ShowMsg ( "messagebox.info", std::string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::REMIND)
 	{
-		string text = (char*)data;
-		string::size_type pos;
-		while((pos=text.find("/",0))!=string::npos)
+		std::string text = (char*)data;
+		std::string::size_type pos;
+		while((pos=text.find("/",0))!= std::string::npos)
 		{
 			text.replace(pos,1,"\n");
 		}
@@ -2913,10 +2901,19 @@ void CNeutrinoApp::ExitRun()
 
 	saveSetup();
 	g_Controld->shutdown();
+
 	sleep(55555);
+
+	if (g_RCInput != NULL)
+		delete g_RCInput;
+
+	if (frameBuffer != NULL)
+		delete frameBuffer;
+
+	exit(0);
 }
 
-bool CNeutrinoApp::onPaintNotify(string MenuName)
+bool CNeutrinoApp::onPaintNotify(std::string MenuName)
 {
 	if(MenuName == "videomenu.head")
 	{//aktuelle werte vom controld holen...
@@ -3246,7 +3243,7 @@ void CNeutrinoApp::startNextRecording()
 *          CNeutrinoApp -  exec, menuitem callback (shutdown)                         *
 *                                                                                     *
 **************************************************************************************/
-int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
+int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 {
 	//	printf("ac: %s\n", actionKey.c_str());
 	int returnval = menu_return::RETURN_REPAINT;
@@ -3309,7 +3306,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 *          changeNotify - features menu recording start / stop                        *
 *                                                                                     *
 **************************************************************************************/
-bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
+bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 {
 //	printf("OptionName: %s\n",OptionName.c_str());
 	if(OptionName.substr(0,9).compare("fontsize.") == 0)
@@ -3379,7 +3376,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.406 2003/02/12 22:02:37 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.407 2003/02/13 21:46:54 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -33,8 +33,6 @@
 #ifndef __neutrino__
 #define __neutrino__
 
-#include <string>
-
 #include <configfile.h>
 
 #include <zapit/client/zapitclient.h>
@@ -44,7 +42,7 @@
 #include "system/setting_helpers.h"
 #include "timerdclient/timerdtypes.h"
 
-using namespace std;
+#include <string>
 
 #define widest_number "1"
 
@@ -76,12 +74,12 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		};
 
 		CConfigFile			configfile;
-		string				settingsFile;
-		string				scanSettingsFile;
+		std::string			settingsFile;
+		std::string			scanSettingsFile;
 		CScanSettings			scanSettings;
 
-		string				fontName;
-		string				fontFile;
+		std::string			fontName;
+		std::string			fontFile;
 		int				fontsSizeOffset;
 
 		int				mode;
@@ -155,7 +153,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitColorSettingsTiming(CMenuWidget &colorSettings_timing);
 		void InitLcdSettings(CMenuWidget &lcdSettings);
 		void InitNetworkSettings(CMenuWidget &networkSettings);
-		void AddFontSettingItem(CMenuWidget &fontSettings, string menuname, char *value);
+		void AddFontSettingItem(CMenuWidget &fontSettings, std::string menuname, char *value);
 		void InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist ,CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg, CMenuWidget &fontSettings_Gamelist);
 		void InitRecordingSettings(CMenuWidget &recordingSettings);
 		void InitScreenSettings(CMenuWidget &);
@@ -192,14 +190,14 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void channelsInit();
 		int run(int argc, char **argv);
 		//callback stuff only....
-		int exec(CMenuTarget* parent, string actionKey);
+		int exec(CMenuTarget* parent, std::string actionKey);
 		//callback for menue
-		bool onPaintNotify(string MenuName);
+		bool onPaintNotify(std::string MenuName);
 		//onchange
-		bool changeNotify(string OptionName, void *Data);
+		bool changeNotify(std::string OptionName, void *Data);
 
 		int handleMsg(uint msg, uint data);
-		void showProfiling( string text );
+		void showProfiling(std::string text);
 
 		int getMode() {return mode;}
 		int getLastMode() {return lastMode;}

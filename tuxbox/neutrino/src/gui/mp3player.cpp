@@ -51,6 +51,8 @@
 #include "widget/hintbox.h"
 #include "widget/stringinput.h"
 
+#include <id3tag.h>
+
 #define ConnectLineBox_Width	15
 
 //------------------------------------------------------------------------
