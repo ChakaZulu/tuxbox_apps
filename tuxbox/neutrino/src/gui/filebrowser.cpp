@@ -458,7 +458,7 @@ bool CFileBrowser::exec(string Dirname)
 			if(filelist[i].Marked)
 			{
 				if(S_ISDIR(filelist[i].Mode))
-					addRecursiveDir(&selected_filelist,filelist[i].Name, progress);
+					addRecursiveDir(&selected_filelist,filelist[i].Name, true, progress);
 				else
 					selected_filelist.push_back(filelist[i]);
 			}
@@ -475,13 +475,29 @@ bool CFileBrowser::exec(string Dirname)
 
 //------------------------------------------------------------------------
 
-void CFileBrowser::addRecursiveDir(CFileList * re_filelist, string rpath, CProgressWindow * progress)
+void CFileBrowser::addRecursiveDir(CFileList * re_filelist, string rpath, bool bRootCall, CProgressWindow * progress)
 {
 struct stat statbuf;
 struct dirent **namelist;
 int n;
+uint msg, data;
 CFile file;
-
+	if (bRootCall) bCancel=false;
+	
+	g_RCInput->getMsg_us(&msg, &data, 1);
+	if (msg==CRCInput::RC_home)
+	{
+		// home key cancel scan
+		bCancel=true;
+	}
+	else if (msg!=CRCInput::RC_timeout)
+	{
+		// other event, save to low priority queue
+		g_RCInput->postMsg( msg, data, false );
+	}
+	if(bCancel)
+		return;
+		
 	if(rpath[rpath.length()-1]!='/')
 	{
 		rpath = rpath + "/";
@@ -523,7 +539,7 @@ CFile file;
 				if(!S_ISDIR(file.Mode))
 					re_filelist->push_back(file);
 				else
-					addRecursiveDir(re_filelist,file.Name, progress);
+					addRecursiveDir(re_filelist,file.Name, false, progress);
 			}
 			free(namelist[i]);
 		}

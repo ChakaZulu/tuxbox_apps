@@ -110,7 +110,7 @@ class CFileBrowser
 		CFileList		filelist;
 		CFileList		selected_filelist;
 		bool			readDir(string dirname);
-		void			addRecursiveDir(CFileList * re_filelist, string path, CProgressWindow * progress = NULL);
+		void			addRecursiveDir(CFileList * re_filelist, string path, bool bRootCall, CProgressWindow * progress = NULL);
 
 		unsigned int		selected;
 		unsigned int		liststart;
@@ -124,6 +124,7 @@ class CFileBrowser
 		int 			width;
 		int 			height;
 		bool			use_filter;
+		bool			bCancel;
 
 		int 			x;
 		int 			y;
