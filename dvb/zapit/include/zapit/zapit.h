@@ -31,10 +31,6 @@
 
 /*Thread stuff */
 #include <pthread.h>
-#define errexit(code,str)                          \
-	fprintf(stderr,"%s: %s\n",(str),strerror(code)); \
-	exit(1);
-
 
 #define FRONT_DEV "/dev/ost/qpskfe0"
 #define DEMUX_DEV "/dev/ost/demux0"

@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.43 2001/12/06 21:21:24 faralla Exp $
+  $Id: zapit.cpp,v 1.44 2001/12/13 19:42:06 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -90,6 +90,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.44  2001/12/13 19:42:06  faralla
+  moved last_chan to /tmp. Make sure it exists!
+
   Revision 1.43  2001/12/06 21:21:24  faralla
   nvod-grabbing fix
 
@@ -266,7 +269,6 @@ boolean OldAC3 = false;
 
 uint8_t fec_inner = 0;
 uint16_t vpid, apid, pmt = 0;
-boolean im_gone = true;
 boolean current_is_nvod;
 std::string nvodname;
 
@@ -306,8 +308,10 @@ void sendChannelListOfBouquet( uint nBouquet);
 
 void termination_handler (int signum)
 {
+  dprintf("[zapit] received Signal\n");
   keep_going = 0;
-  signal (signum, termination_handler);
+  close(connfd);
+  system("cp /tmp/zapit_last_chan /var/zapit/last_chan");
 }
 
 void write_lcd(char *name) {
@@ -759,11 +763,11 @@ void save_settings()
 {
   FILE *channel_settings;
   std::map<uint, channel>::iterator cit;
-  channel_settings = fopen("/var/zapit/last_chan", "w");
+  channel_settings = fopen("/tmp/zapit_last_chan", "w");
 
   if (channel_settings == NULL)
     {
-      perror("[zapit] fopen: /var/zapit/last_chan");
+      perror("[zapit] fopen: /tmp/zapit_last_chan");
     }
 
   if (Radiomode_on)
@@ -795,11 +799,11 @@ channel_msg load_settings()
 
   memset(&output_msg, 0, sizeof(output_msg));
 
-  channel_settings = fopen("/var/zapit/last_chan", "r");
+  channel_settings = fopen("/tmp/zapit_last_chan", "r");
 
   if (channel_settings == NULL)
     {
-      perror("[zapit] fopen: /var/zapit/last_chan");
+      perror("[zapit] fopen: /tmp/zapit_last_chan");
       output_msg.mode = 't';
       output_msg.chan_nr = 1;
       return output_msg;
@@ -2044,135 +2048,6 @@ void parse_command()
 
 }
 
-int network_setup() {
-  listenfd = socket(AF_INET, SOCK_STREAM, 0);
-
-  memset(&servaddr, 0, sizeof(servaddr));
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(1505);
-
-  if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
-    {
-      perror("[zapit] bind failed...\n");
-      exit(-1);
-    }
-
-
-  if (listen(listenfd, 5) !=0)
-    {
-      perror("[zapit] listen failed...\n");
-      exit( -1 );
-    }
-
-  return 0;
-}
-
-int main(int argc, char **argv) {
-
-    channel_msg testmsg;
-    int channelcount = 0;
-
-    if (argc > 1)
-    {
-        int i= 1;
-        if (!strcmp(argv[i], "-d"))
-        {
-            debug=1;
-            i++;
-        }
-        else
-        if (!strcmp(argv[i], "-o"))
-        {
-            offset = atoi(argv[++i]);
-        }
-        else
-        {
-            printf("Usage: zapit [-d] [-o offset in Hz]\n");
-            exit(0);
-        }
-    }
-
-  system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.43 2001/12/06 21:21:24 faralla Exp $\n\n");
-  //  printf("Zapit 0.1\n\n");
-  scan_runs = 0;
-  found_transponders = 0;
-  found_channels = 0;
-
-  testmsg = load_settings();
-
-  if (testmsg.mode== 'r')
-    Radiomode_on = true;
-
-  caver = get_caver();
-  caid = get_caid();
-
-  memset(&pids_desc, 0, sizeof(pids));
-
-  if (prepare_channels() <0) {
-    printf("[zapit] error parsing services!\n");
-    //exit(-1);
-  }
-
-  printf("[zapit] channels have been loaded succesfully\n");
-
-  printf("[zapit] we have got ");
-  if (!allnumchannels_tv.empty())
-    channelcount = allnumchannels_tv.rbegin()->first;
-  printf("%d tv- and ", channelcount);
-  if (!allnumchannels_radio.empty())
-    channelcount = allnumchannels_radio.rbegin()->first;
-  else
-    channelcount = 0;
-  printf("%d radio-channels\n", channelcount);
-
-  if (network_setup()!=0){
-    printf("[zapit] error during network_setup\n");
-    exit(0);
-  }
-
-
-  switch (fork ())
-    {
-    case -1:                    // can't fork
-      perror ("[zapit] fork()");
-      exit (3);
-    case 0:                     // child, process becomes a daemon:
-      //close (STDIN_FILENO);
-      //close (STDOUT_FILENO);
-      //close (STDERR_FILENO);
-      if (setsid () == -1)      // request a new session (job control)
-	{
-	  exit (4);
-	}
-      break;
-    default:                    // parent returns to calling process:
-      return 0;
-    }
-
-
-//  descramble(0xffff,0xffff,0xffff,0xffff,0xffff, 0xffff,0xffff);
-    pids _pids;
-    _pids.count_vpids= 1;
-    _pids.vpid= 0xffff;
-    _pids.count_apids= 1;
-    _pids.apids[0].pid= 0xffff;
-    descramble(0xffff,0xffff,0xffff,0xffff,0xffff, &_pids);
-
-  while (keep_going)
-    {
-      clilen = sizeof(cliaddr);
-      connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
-      memset(&rmsg, 0, sizeof(rmsg));
-      read(connfd,&rmsg,sizeof(rmsg));
-      parse_command();
-      close(connfd);
-    }
-
-  return 0;
-}
-
 void sendBouquetList()
 {
 	char* status = "00q";
@@ -2276,4 +2151,139 @@ void sendChannelListOfBouquet( uint nBouquet)
 		}
 	}
 }
+
+int network_setup() {
+  listenfd = socket(AF_INET, SOCK_STREAM, 0);
+
+  memset(&servaddr, 0, sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(1505);
+
+  if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
+    {
+      perror("[zapit] bind failed...\n");
+      exit(-1);
+    }
+
+
+  if (listen(listenfd, 5) !=0)
+    {
+      perror("[zapit] listen failed...\n");
+      exit( -1 );
+    }
+
+  return 0;
+}
+
+int main(int argc, char **argv) {
+
+    channel_msg testmsg;
+    int channelcount = 0;
+
+    if (argc > 1)
+    {
+        int i= 1;
+        if (!strcmp(argv[i], "-d"))
+        {
+            debug=1;
+            i++;
+        }
+        else
+        if (!strcmp(argv[i], "-o"))
+        {
+            offset = atoi(argv[++i]);
+        }
+        else
+        {
+            printf("Usage: zapit [-d] [-o offset in Hz]\n");
+            exit(0);
+        }
+    }
+
+  system("/usr/bin/killall camd");
+  system("cp /var/zapit/last_chan /tmp/zapit_last_chan");
+  printf("Zapit $Id: zapit.cpp,v 1.44 2001/12/13 19:42:06 faralla Exp $\n\n");
+  //  printf("Zapit 0.1\n\n");
+  scan_runs = 0;
+  found_transponders = 0;
+  found_channels = 0;
+
+  testmsg = load_settings();
+
+  if (testmsg.mode== 'r')
+    Radiomode_on = true;
+
+  caver = get_caver();
+  caid = get_caid();
+
+  memset(&pids_desc, 0, sizeof(pids));
+
+  if (prepare_channels() <0) {
+    printf("[zapit] error parsing services!\n");
+    //exit(-1);
+  }
+
+  printf("[zapit] channels have been loaded succesfully\n");
+
+  printf("[zapit] we have got ");
+  if (!allnumchannels_tv.empty())
+    channelcount = allnumchannels_tv.rbegin()->first;
+  printf("%d tv- and ", channelcount);
+  if (!allnumchannels_radio.empty())
+    channelcount = allnumchannels_radio.rbegin()->first;
+  else
+    channelcount = 0;
+  printf("%d radio-channels\n", channelcount);
+
+  if (network_setup()!=0){
+    printf("[zapit] error during network_setup\n");
+    exit(0);
+  }
+
+  signal(SIGHUP,termination_handler);
+  signal(SIGKILL,termination_handler);
+  signal(SIGTERM,termination_handler);
+
+  switch (fork ())
+    {
+    case -1:                    // can't fork
+      perror ("[zapit] fork()");
+      exit (3);
+    case 0:                     // child, process becomes a daemon:
+      //close (STDIN_FILENO);
+      //close (STDOUT_FILENO);
+      //close (STDERR_FILENO);
+      if (setsid () == -1)      // request a new session (job control)
+	{
+	  exit (4);
+	}
+      break;
+    default:                    // parent returns to calling process:
+      return 0;
+    }
+
+
+//  descramble(0xffff,0xffff,0xffff,0xffff,0xffff, 0xffff,0xffff);
+    pids _pids;
+    _pids.count_vpids= 1;
+    _pids.vpid= 0xffff;
+    _pids.count_apids= 1;
+    _pids.apids[0].pid= 0xffff;
+    descramble(0xffff,0xffff,0xffff,0xffff,0xffff, &_pids);
+
+  while (keep_going)
+    {
+      clilen = sizeof(cliaddr);
+      connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
+      memset(&rmsg, 0, sizeof(rmsg));
+      read(connfd,&rmsg,sizeof(rmsg));
+      parse_command();
+      close(connfd);
+    }
+
+  return 0;
+}
+
+
 
