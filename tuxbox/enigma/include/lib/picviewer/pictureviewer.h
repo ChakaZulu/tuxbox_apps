@@ -32,7 +32,6 @@ class ePictureViewer: public eWidget
 	void previousPicture();
 	bool showBusySign;
 	bool slideshowPaused;
-	bool blockOK;
 public:
 	ePictureViewer( const eString &filename);
 	~ePictureViewer();
@@ -67,15 +66,6 @@ private:
 	int m_NextPic_YPos;
 	int m_NextPic_XPan;
 	int m_NextPic_YPan;
-
-	std::string m_CurrentPic_Name;
-	unsigned char *m_CurrentPic_Buffer;
-	int m_CurrentPic_X;
-	int m_CurrentPic_Y;
-	int m_CurrentPic_XPos;
-	int m_CurrentPic_YPos;
-	int m_CurrentPic_XPan;
-	int m_CurrentPic_YPan;
 
 	unsigned char *m_busy_buffer;
 	int m_busy_x;

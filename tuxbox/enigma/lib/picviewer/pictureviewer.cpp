@@ -89,14 +89,7 @@ ePictureViewer::ePictureViewer(const eString &filename)
 
 	fh_root = NULL;
 	m_scaling = COLOR;
-	m_CurrentPic_Name = "";
-	m_CurrentPic_Buffer = NULL;
-	m_CurrentPic_X = 0;
-	m_CurrentPic_Y = 0;
-	m_CurrentPic_XPos = 0;
-	m_CurrentPic_YPos = 0;
-	m_CurrentPic_XPan = 0;
-	m_CurrentPic_YPan = 0;
+
 	m_NextPic_Name = "";
 	m_NextPic_Buffer = NULL;
 	m_NextPic_X = 0;
@@ -125,8 +118,6 @@ ePictureViewer::ePictureViewer(const eString &filename)
 
 	m_busy_buffer = NULL;
 
-	blockOK = true;
-
 	init_handlers();
 
 	CONNECT(slideshowTimer.timeout, ePictureViewer::slideshowTimeout);
@@ -144,11 +135,6 @@ ePictureViewer::~ePictureViewer()
 	{
 		free(m_NextPic_Buffer);
 		m_NextPic_Buffer = NULL;
-	}
-	if (m_CurrentPic_Buffer != NULL)
-	{
-		free(m_CurrentPic_Buffer);
-		m_CurrentPic_Buffer = NULL;
 	}
 
 	CFormathandler *tmp = NULL;
@@ -347,7 +333,6 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 #endif
 	}
 	DisplayNextImage();
-	blockOK = false;
 	eDebug("Show Image }");
 	return true;
 }
@@ -384,14 +369,6 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 		{
 			if (evt.action == &i_cursorActions->cancel)
 				close(0);
-			else
-			if (evt.action == &i_cursorActions->ok)
-			{
-			 	if (!blockOK)
-					close(0);
-				else
-					return eWidget::eventHandler(evt);
-			}
 			else
 			if (evt.action == &i_shortcutActions->yellow)
 			{
@@ -561,41 +538,41 @@ void ePictureViewer::Zoom(float factor)
 	eDebug("Zoom %f {",factor);
 	showBusy(m_startx + 3, m_starty + 3, 10, 0xff, 0xff, 0);
 
-	int oldx = m_CurrentPic_X;
-	int oldy = m_CurrentPic_Y;
-	unsigned char *oldBuf = m_CurrentPic_Buffer;
-	m_CurrentPic_X = (int)(factor * m_CurrentPic_X);
-	m_CurrentPic_Y = (int)(factor * m_CurrentPic_Y);
+	int oldx = m_NextPic_X;
+	int oldy = m_NextPic_Y;
+	unsigned char *oldBuf = m_NextPic_Buffer;
+	m_NextPic_X = (int)(factor * m_NextPic_X);
+	m_NextPic_Y = (int)(factor * m_NextPic_Y);
 
 	if (m_scaling == COLOR)
-		m_CurrentPic_Buffer = color_average_resize(m_CurrentPic_Buffer, oldx, oldy, m_CurrentPic_X, m_CurrentPic_Y);
+		m_NextPic_Buffer = color_average_resize(m_NextPic_Buffer, oldx, oldy, m_NextPic_X, m_NextPic_Y);
 	else
-		m_CurrentPic_Buffer = simple_resize(m_CurrentPic_Buffer, oldx, oldy, m_CurrentPic_X, m_CurrentPic_Y);
+		m_NextPic_Buffer = simple_resize(m_NextPic_Buffer, oldx, oldy, m_NextPic_X, m_NextPic_Y);
 
-	if (m_CurrentPic_Buffer == oldBuf)
+	if (m_NextPic_Buffer == oldBuf)
 	{
 		// resize failed
 		hideBusy();
 		return;
 	}
 
-	if (m_CurrentPic_X < (m_endx - m_startx))
-		m_CurrentPic_XPos = (m_endx - m_startx - m_CurrentPic_X) / 2 + m_startx;
+	if (m_NextPic_X < (m_endx - m_startx))
+		m_NextPic_XPos = (m_endx - m_startx - m_NextPic_X) / 2 + m_startx;
 	else
-		m_CurrentPic_XPos = m_startx;
-	if (m_CurrentPic_Y < (m_endy - m_starty))
-		m_CurrentPic_YPos = (m_endy - m_starty - m_CurrentPic_Y) / 2 + m_starty;
+		m_NextPic_XPos = m_startx;
+	if (m_NextPic_Y < (m_endy - m_starty))
+		m_NextPic_YPos = (m_endy - m_starty - m_NextPic_Y) / 2 + m_starty;
 	else
-		m_CurrentPic_YPos = m_starty;
-	if (m_CurrentPic_X > (m_endx - m_startx))
-		m_CurrentPic_XPan = (m_CurrentPic_X - (m_endx - m_startx)) / 2;
+		m_NextPic_YPos = m_starty;
+	if (m_NextPic_X > (m_endx - m_startx))
+		m_NextPic_XPan = (m_NextPic_X - (m_endx - m_startx)) / 2;
 	else
-		m_CurrentPic_XPan = 0;
-	if (m_CurrentPic_Y > (m_endy - m_starty))
-		m_CurrentPic_YPan = (m_CurrentPic_Y - (m_endy - m_starty)) / 2;
+		m_NextPic_XPan = 0;
+	if (m_NextPic_Y > (m_endy - m_starty))
+		m_NextPic_YPan = (m_NextPic_Y - (m_endy - m_starty)) / 2;
 	else
-		m_CurrentPic_YPan = 0;
-	fb_display(m_CurrentPic_Buffer, m_CurrentPic_X, m_CurrentPic_Y, m_CurrentPic_XPan, m_CurrentPic_YPan, m_CurrentPic_XPos, m_CurrentPic_YPos);
+		m_NextPic_YPan = 0;
+	fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
 	eDebug("Zoom }");
 }
 
@@ -606,30 +583,30 @@ void ePictureViewer::Move(int dx, int dy)
 
 	int xs, ys;
 	getCurrentRes(&xs, &ys);
-	m_CurrentPic_XPan += dx;
-	if (m_CurrentPic_XPan + xs >= m_CurrentPic_X)
-		m_CurrentPic_XPan = m_CurrentPic_X - xs - 1;
-	if (m_CurrentPic_XPan < 0)
-		m_CurrentPic_XPan = 0;
+	m_NextPic_XPan += dx;
+	if (m_NextPic_XPan + xs >= m_NextPic_X)
+		m_NextPic_XPan = m_NextPic_X - xs - 1;
+	if (m_NextPic_XPan < 0)
+		m_NextPic_XPan = 0;
 
-	m_CurrentPic_YPan += dy;
-	if (m_CurrentPic_YPan + ys >= m_CurrentPic_Y)
-		m_CurrentPic_YPan = m_CurrentPic_Y - ys - 1;
-	if(m_CurrentPic_YPan < 0)
-		m_CurrentPic_YPan = 0;
+	m_NextPic_YPan += dy;
+	if (m_NextPic_YPan + ys >= m_NextPic_Y)
+		m_NextPic_YPan = m_NextPic_Y - ys - 1;
+	if(m_NextPic_YPan < 0)
+		m_NextPic_YPan = 0;
 
-	if (m_CurrentPic_X < (m_endx - m_startx))
-		m_CurrentPic_XPos = (m_endx - m_startx - m_CurrentPic_X) / 2 + m_startx;
+	if (m_NextPic_X < (m_endx - m_startx))
+		m_NextPic_XPos = (m_endx - m_startx - m_NextPic_X) / 2 + m_startx;
 	else
-		m_CurrentPic_XPos = m_startx;
-	if (m_CurrentPic_Y < (m_endy - m_starty))
-		m_CurrentPic_YPos = (m_endy - m_starty - m_CurrentPic_Y) / 2 + m_starty;
+		m_NextPic_XPos = m_startx;
+	if (m_NextPic_Y < (m_endy - m_starty))
+		m_NextPic_YPos = (m_endy - m_starty - m_NextPic_Y) / 2 + m_starty;
 	else
-		m_CurrentPic_YPos = m_starty;
-//	dbout("Display x(%d) y(%d) xpan(%d) ypan(%d) xpos(%d) ypos(%d)\n",m_CurrentPic_X, m_CurrentPic_Y,
-//	m_CurrentPic_XPan, m_CurrentPic_YPan, m_CurrentPic_XPos, m_CurrentPic_YPos);
+		m_NextPic_YPos = m_starty;
+//	dbout("Display x(%d) y(%d) xpan(%d) ypan(%d) xpos(%d) ypos(%d)\n",m_NextPic_X, m_NextPic_Y,
+//	m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
 
-	fb_display(m_CurrentPic_Buffer, m_CurrentPic_X, m_CurrentPic_Y, m_CurrentPic_XPan, m_CurrentPic_YPan, m_CurrentPic_XPos, m_CurrentPic_YPos);
+	fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
 	eDebug("Move }");
 }
 
