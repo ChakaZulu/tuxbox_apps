@@ -19,7 +19,10 @@ function Mute(xy)
 function switchChannel(xy, bouquet, channel)
 {
 	document.location = "/cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
-	setTimeout("parent.header.location.reload()", 2000);
+	if (screen.width < 800)
+		setTimeout("reload()", 3000);
+	else
+		setTimeout("parent.header.location.reload()", 3000);
 }
 
 function deleteMovie(xy)
