@@ -67,9 +67,9 @@ eAudioDynamicCompression::eAudioDynamicCompression(): pollTimer(eApp)
 		eWarning("can't open /dev/audio (%m) - disabling audio dynamic compression support.");
 		return;
 	}
-	
-	CONNECT(pollTimer.timeout, eAudioDynamicCompression::doPoll);
-	
+
+//	CONNECT(pollTimer.timeout, eAudioDynamicCompression::doPoll);
+
 	enabled = 0;
 	eConfig::getInstance()->getKey("/elitedvb/audio/dynamicadjust", enabled);
 	int val = 8000;;
