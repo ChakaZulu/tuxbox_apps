@@ -157,6 +157,7 @@ static	void	SaveGame( void )
 	char		*user=0;
 	char		luser[ 32 ];
 	int			x;
+	int			n;
 	char		*p;
 	struct timeval	tv;
 	unsigned long	chk=0;
@@ -211,12 +212,18 @@ static	void	SaveGame( void )
 	{
 		Fx2PigPause();
 
-		FBFillRect( 150,350,570,64,BLACK );
-		x=FBDrawString( 150,350,64,"name : ",WHITE,0);
-		user=FBEnterWord(150+x,350,64,9,WHITE);
+		FBFillRect( 500,32,3*52,4*52+4,BLACK );
+
+		FBFillRect( 150,420,470,64,BLACK );
+		FBDrawRect( 149,419,472,66,WHITE );
+		FBDrawRect( 148,418,474,68,WHITE );
+		x=FBDrawString( 154,420,64,"name : ",WHITE,0);
+		user=FBEnterWord(154+x,420,64,9,WHITE);
 
 		Fx2PigResume();
 	}
+
+	n=FBDrawString( 210,360,48,"sending",BLACK,WHITE);
 
 /* clean name */
 	x = strlen(user);
@@ -257,10 +264,11 @@ static	void	SaveGame( void )
 	}
 	res = curl_easy_perform(curl);
 
+	FBFillRect( 210,360,n,48,GRAY);
 	if ( !res )
-		FBDrawString( 170,415,64,"success",WHITE,0);
+		FBDrawString( 210,360,48,"success",GREEN,GRAY);
 	else
-		FBDrawString( 170,415,64,"failed",WHITE,0);
+		FBDrawString( 210,360,48,"failed",RED,GRAY);
 
 	curl_easy_cleanup(curl);
 	fclose( fp );
@@ -473,6 +481,9 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		{
 			actcode=0xee;
 			DrawGameOver();
+#ifdef USEX
+			FBFlushGrafic();
+#endif
 			SaveGame();
 			doexit=0;
 			if ( use_ihsc )
