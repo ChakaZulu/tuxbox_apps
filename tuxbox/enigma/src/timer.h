@@ -80,6 +80,7 @@ public:
 	void loadTimerList();
 	void saveTimerList();
 	void timeChanged();
+	int getTimerCount() { return timerlist->getConstList().size(); }
 	ePlaylistEntry* findEvent( eServiceReference *service, EITEvent *evt );
 	template <class Z>
 	void forEachEntry(Z ob)
