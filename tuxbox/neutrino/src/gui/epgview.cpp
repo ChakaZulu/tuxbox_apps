@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.10 2001/09/16 03:38:44 McClean Exp $
+// $Id: epgview.cpp,v 1.11 2001/09/20 13:44:57 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.11  2001/09/20 13:44:57  field
+// epg-Anzeige verbessert
+//
 // Revision 1.10  2001/09/16 03:38:44  McClean
 // i18n + small other fixes
 //
@@ -84,30 +87,34 @@ void CEpgData::processTextToArray( char* text  )
 	//printf("orginaltext:\n%s\n\n", text);
 	while(*text!=0)
 	{
-		if ((*text==' ') || (*text=='\n'))
+		if ( (*text==' ') || (*text=='\n') || (*text=='-') || (*text=='.') )
 		{
 			//check the wordwidth - add to this line if size ok
-			aktWord += ' ';
-			int aktWordWidth = g_Fonts->epg_info2->getRenderWidth(aktWord.c_str());
-			if((aktWordWidth+aktWidth)<(ox-20))
-			{//space ok, add
-				aktWidth += aktWordWidth;
-				aktLine += aktWord;
-			}
-			else
-			{//new line needed
-				addTextToArray( aktLine );
-				aktLine = aktWord;
-				aktWidth = aktWordWidth;
-			}
-			aktWord = "";
-			if(*text=='\n')
+            if(*text=='\n')
 			{	//enter-handler
 				//printf("enter-");
 				addTextToArray( aktLine );
 				aktLine = "";
 				aktWidth= 0;
 			}
+            else
+            {
+    			aktWord += *text;
+
+    			int aktWordWidth = g_Fonts->epg_info2->getRenderWidth(aktWord.c_str());
+    			if((aktWordWidth+aktWidth)<(ox-20))
+    			{//space ok, add
+				    aktWidth += aktWordWidth;
+    				aktLine += aktWord;
+    			}
+    			else
+    			{//new line needed
+				    addTextToArray( aktLine );
+    				aktLine = aktWord;
+    				aktWidth = aktWordWidth;
+    			}
+    			aktWord = "";
+            }
 		}
 		else
 		{
@@ -126,16 +133,20 @@ void CEpgData::showText( int startPos, int ypos )
 	int linecount=medlinecount;
 	string t;
 	g_FrameBuffer->paintBoxRel(sx, y, ox, linecount*medlineheight, COL_MENUCONTENT);
-	if(startPos==0){
+/*	if(startPos==0){
 		t=epgData.info1;
 		g_Fonts->epg_info1->RenderString(sx+10,y+medlineheight,ox-15,t.c_str(),COL_MENUCONTENT);
 		y+=medlineheight;
 		linecount--;
 	}
+*/
 	for(int i=startPos; i<textCount && i<startPos+linecount; i++,y+=medlineheight)
 	{
 		t=epgText[i];
-		g_Fonts->epg_info2->RenderString(sx+10, y+medlineheight, ox-15, t.c_str(), COL_MENUCONTENT);
+        if ( i< info1_lines )
+            g_Fonts->epg_info1->RenderString(sx+10, y+medlineheight, ox-15, t.c_str(), COL_MENUCONTENT);
+        else
+    		g_Fonts->epg_info2->RenderString(sx+10, y+medlineheight, ox-15, t.c_str(), COL_MENUCONTENT);
 	}
 }
 
@@ -165,11 +176,21 @@ void CEpgData::show( string channelName )
 		return;
 	}
 
-	//scan epg-data - sort to list
-	if(strlen(epgData.info2)!=0)
+
+	if(strlen(epgData.info1)!=0)
 	{
-		processTextToArray( epgData.info2 );
+		processTextToArray( epgData.info1 );
 	}
+    info1_lines = epgText.size();
+
+	//scan epg-data - sort to list
+	if ( ( strlen(epgData.info2)==0 ) && (info1_lines == 0) )
+	{
+        strcpy(epgData.info2, g_Locale->getText("epgviewer.nodetailed").c_str());
+    }
+
+    processTextToArray( epgData.info2 );
+
 
 	//show the epg
 	g_FrameBuffer->paintBoxRel(sx, sy, ox, topboxheight, COL_MENUHEAD);

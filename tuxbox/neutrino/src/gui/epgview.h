@@ -53,7 +53,7 @@ class CEpgData
 		EPGData			epgData;
 
 		int			ox, oy, sx, sy;
-		int			emptyLineCount;
+		int			emptyLineCount, info1_lines;
 		vector<string>		epgText;
 		int			topheight,topboxheight;
 		int			botheight,botboxheight;

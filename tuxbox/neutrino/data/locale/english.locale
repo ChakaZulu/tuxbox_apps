@@ -119,6 +119,7 @@ infoviewer.eventlist Event-List
 infoviewer.languages Languages
 
 epgviewer.notfound no epg found
+epgviewer.nodetailed No detailed informations available
 epglist.head Event-list - %s
 epglist.noevents EPG is not available...
 
@@ -133,4 +134,3 @@ streaminfo.audiotype Audiotype
 streaminfo.audiotype_unknown Audiotype: unknown
 
 apidselector.head Select language
-apidselector.hint Careful, zapit f..s up
