@@ -83,7 +83,7 @@ class CStringInputSMS : public CStringInput
 {
 		bool	capsMode;
 		int 	arraySizes[10];
-		char*	Chars[10];
+		char	Chars[10][9];					// maximal 9 character in one CharList entry!
 
 		int keyCounter;
 		int lastKey;

@@ -56,17 +56,13 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
 	width = (Size*20)+40;
 
 	if (width<420)
-	{
-		width=420;
-	}
+		width = 420;
 
 	int neededWidth = g_Fonts->menu_title->getRenderWidth( g_Locale->getText(name).c_str() );
 	if ( iconfile != "" )
 		neededWidth += 28;
 	if (neededWidth+20> width)
-	{
-		width= neededWidth+20;
-    }
+		width = neededWidth+20;
 
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
@@ -86,11 +82,13 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
 void CStringInput::key0_9Pressed(int key)
 {
 	value[selected]=validchars[key];
-	paintChar(selected);
 
-	if (selected < (size- 1))
+	if (selected < (size - 1))
+	{
 		selected++;
-	paintChar(selected-1);
+		paintChar(selected - 1);
+	}
+  
 	paintChar(selected);
 }
 
@@ -146,7 +144,7 @@ void CStringInput::keyLeftPressed()
 
 void CStringInput::keyRightPressed()
 {
-	if(selected<(int)strlen(value)-1)
+	if (selected < (size - 1))
 	{
 		selected++;
 		paintChar(selected-1);
@@ -342,21 +340,29 @@ void CStringInput::paintChar(int pos)
 CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon)
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
-	Chars[1] = "1.,:!?";
-	Chars[2] = "abc2ä";
-	Chars[3] = "def3";
-	Chars[4] = "ghi4";
-	Chars[5] = "jkl5";
-	Chars[6] = "mno6ö";
-	Chars[7] = "pqrs7ß";
-	Chars[8] = "tuv8ü";
-	Chars[9] = "wxyz9";
-	Chars[0] = "0 -/()<>=";
+	lastKey = -1;				// no key pressed yet
+	const char CharList[10][10] = { "0 -/()<>=",	// 9 characters
+					"1.,:!?",
+					"abc2ä",
+					"def3",
+					"ghi4",
+					"jkl5",
+					"mno6ö",
+					"pqrs7ß",
+					"tuv8ü",
+					"wxyz9" };
 
-	for(int i=0; i<10; i++)
+	for (int i = 0; i < 10; i++)
 	{
-		arraySizes[i] = strlen(Chars[i]);
+		int j = 0;
+		for (int k = 0; k < (int) strlen(CharList[i]); k++)
+			if (strchr(Valid_Chars, CharList[i][k]) != NULL)
+				Chars[i][j++] = CharList[i][k];
+		if (j == 0)
+			Chars[i][j++] = ' ';	// prevent empty char lists 
+		arraySizes[i] = j;
 	}
+
 	height+=260;
 	y = ((500-height)>>1);
 }
@@ -366,25 +372,27 @@ void CStringInputSMS::key0_9Pressed(int key)
 {
 	if (lastKey != key)
 	{
+		if ((lastKey != -1) &&		// there is a last key
+			(selected < (size- 1)))	// we can shift the cursor one field to the right
+		{
+			selected++;
+			paintChar(selected - 1);
+		}
 		keyCounter = 0;
 	}
-	keyCounter = keyCounter % strlen(Chars[key]);
+	else
+		keyCounter = (keyCounter + 1) % arraySizes[key];
 	value[selected] = Chars[key][keyCounter];
 	paintChar(selected);
-	keyCounter++;
 	lastKey = key;
 }
 
-void CStringInputSMS::keyRedPressed()
+void CStringInputSMS::keyRedPressed()		// switch between lower & uppercase
 {
-	if ((value[selected]>='a') && (value[selected]<='z'))
-	{
-		value[selected] -= 32;
-	}
-	else if ((value[selected]>='A') && (value[selected]<='Z'))
-	{
-		value[selected] += 32;
-	}
+	if (((value[selected]>='a') && (value[selected]<='z')) ||
+		((value[selected]>='A') && (value[selected]<='Z')))
+	value[selected] ^= 32;
+
 	paintChar(selected);
 }
 
@@ -396,13 +404,13 @@ void CStringInputSMS::keyDownPressed()
 
 void CStringInputSMS::keyLeftPressed()
 {
-	keyCounter=0;
+	lastKey = -1;				// no key pressed yet
 	CStringInput::keyLeftPressed();
 }
 
 void CStringInputSMS::keyRightPressed()
 {
-	keyCounter=0;
+	lastKey = -1;				// no key pressed yet
 	CStringInput::keyRightPressed();
 }
 
@@ -462,7 +470,6 @@ void CPINInput::paintChar(int pos)
 int CPINInput::exec( CMenuTarget* parent, string )
 {
 	int res = menu_return::RETURN_REPAINT;
-	char oldval[size];
 
 	if (parent)
 	{
@@ -471,7 +478,6 @@ int CPINInput::exec( CMenuTarget* parent, string )
 
 	for(int count=strlen(value)-1;count<size-1;count++)
 		strcat(value, " ");
-	strcpy(oldval, value);
 
 	paint();
 
