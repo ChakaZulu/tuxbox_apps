@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.147 2002/01/31 00:33:25 field Exp $
+        $Id: neutrino.cpp,v 1.148 2002/01/31 12:41:02 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.148  2002/01/31 12:41:02  field
+  dd-availibility, eventlist-beginnt in...
+
   Revision 1.147  2002/01/31 00:33:25  field
   Kosmetik
 
@@ -1159,29 +1162,29 @@ void CNeutrinoApp::SetupFonts()
 
 	g_Fonts->epg_title =    g_fontRenderer->getFont("Arial", "Regular", 30);
 
-	g_Fonts->epg_info1=g_fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
-	g_Fonts->epg_info2=g_fontRenderer->getFont("Arial", "Regular", 17);
+	g_Fonts->epg_info1 =	g_fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
+	g_Fonts->epg_info2 =	g_fontRenderer->getFont("Arial", "Regular", 17);
 
-	g_Fonts->epg_date=g_fontRenderer->getFont("Arial", "Regular", 15);
-	g_Fonts->alert=g_fontRenderer->getFont("Arial", "Regular", 100);
+	g_Fonts->epg_date =		g_fontRenderer->getFont("Arial", "Regular", 15);
+	g_Fonts->alert =		g_fontRenderer->getFont("Arial", "Regular", 100);
 
-	g_Fonts->eventlist_title=g_fontRenderer->getFont("Arial", "Regular", 30);
-	g_Fonts->eventlist_itemLarge=g_fontRenderer->getFont("Arial", "Bold", 20);
-	g_Fonts->eventlist_itemSmall=g_fontRenderer->getFont("Arial", "Regular", 14);
-	g_Fonts->eventlist_datetime=g_fontRenderer->getFont("Arial", "Regular", 16);
+	g_Fonts->eventlist_title =		g_fontRenderer->getFont("Arial", "Regular", 30);
+	g_Fonts->eventlist_itemLarge =	g_fontRenderer->getFont("Arial", "Bold", 20);
+	g_Fonts->eventlist_itemSmall =	g_fontRenderer->getFont("Arial", "Regular", 14);
+	g_Fonts->eventlist_datetime =	g_fontRenderer->getFont("Arial", "Regular", 16);
 
-	g_Fonts->gamelist_itemLarge=g_fontRenderer->getFont("Arial", "Bold", 20);
-	g_Fonts->gamelist_itemSmall=g_fontRenderer->getFont("Arial", "Regular", 16);
+	g_Fonts->gamelist_itemLarge =	g_fontRenderer->getFont("Arial", "Bold", 20);
+	g_Fonts->gamelist_itemSmall =	g_fontRenderer->getFont("Arial", "Regular", 16);
 
-	g_Fonts->channellist=g_fontRenderer->getFont("Arial", "Bold", 20);
-	g_Fonts->channellist_descr=g_fontRenderer->getFont("Arial", "Regular", 20);
-	g_Fonts->channellist_number=g_fontRenderer->getFont("Arial", "Regular", 14);
-	g_Fonts->channel_num_zap=g_fontRenderer->getFont("Arial", "Bold", 40);
+	g_Fonts->channellist =			g_fontRenderer->getFont("Arial", "Bold", 20);
+	g_Fonts->channellist_descr =	g_fontRenderer->getFont("Arial", "Regular", 20);
+	g_Fonts->channellist_number =	g_fontRenderer->getFont("Arial", "Bold", 14);
+	g_Fonts->channel_num_zap =		g_fontRenderer->getFont("Arial", "Bold", 40);
 
-	g_Fonts->infobar_number=g_fontRenderer->getFont("Arial", "Regular", 50);
-	g_Fonts->infobar_channame=g_fontRenderer->getFont("Arial", "Bold", 30);
-	g_Fonts->infobar_info=g_fontRenderer->getFont("Arial", "Regular", 20);
-	g_Fonts->infobar_small=g_fontRenderer->getFont("Arial", "Regular", 14);
+	g_Fonts->infobar_number =	g_fontRenderer->getFont("Arial", "Bold", 50);
+	g_Fonts->infobar_channame =	g_fontRenderer->getFont("Arial", "Bold", 30);
+	g_Fonts->infobar_info =		g_fontRenderer->getFont("Arial", "Regular", 20);
+	g_Fonts->infobar_small =	g_fontRenderer->getFont("Arial", "Regular", 14);
 }
 
 void CNeutrinoApp::ClearFrameBuffer()
@@ -2450,7 +2453,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.147 2002/01/31 00:33:25 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.148 2002/01/31 12:41:02 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

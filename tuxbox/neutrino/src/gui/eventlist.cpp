@@ -30,15 +30,15 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.33 2002/01/31 00:33:25 field Exp $
+// $Id: eventlist.cpp,v 1.34 2002/01/31 12:41:02 field Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
-// Revision 1.33  2002/01/31 00:33:25  field
-// Kosmetik
+// Revision 1.34  2002/01/31 12:41:02  field
+// dd-availibility, eventlist-beginnt in...
 //
 // Revision 1.31  2002/01/16 00:28:30  McClean
 // cleanup
@@ -498,6 +498,16 @@ void EventList::paintItem(unsigned int pos)
 		        evt->datetime1_str.c_str(), color);
 		g_Fonts->eventlist_datetime->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10- 20,
 		        evt->datetime2_str.c_str(), color);
+
+		int seit = ( evt->epg.startzeit - time(NULL) ) / 60;
+		if ( (seit> 0) && (seit<100) )
+		{
+			char beginnt[100];
+			sprintf((char*) &beginnt, "in %d min", seit);
+			int w= g_Fonts->eventlist_itemSmall->getRenderWidth(beginnt) + 10;
+
+			g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20- w, ypos+ fheight1+3, fwidth2, beginnt, color);
+		}
 		g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2,
 		        evt->duration_str.c_str(), color);
 		// 2nd line

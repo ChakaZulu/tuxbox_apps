@@ -693,8 +693,13 @@ void CInfoViewer::showButtonAudio()
                 for (int count= 0; count< g_RemoteControl->audio_chans.count_apids; count++)
                 	if ( g_RemoteControl->audio_chans.apids[count].is_ac3 )
                 	{
-                		g_FrameBuffer->paintIcon("dd.raw", BoxEndX- ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-                		break;
+                		if (g_RemoteControl->audio_chans.selected== count )
+                		{
+	                		g_FrameBuffer->paintIcon("dd.raw", BoxEndX- ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+	                		break;
+	                	}
+	                	else
+	                		g_FrameBuffer->paintIcon("dd_avail.raw", BoxEndX- ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
                 	}
         };
 }
