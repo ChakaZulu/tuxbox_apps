@@ -55,7 +55,6 @@ miscsettings.boxtype DBox Hersteller
 miscsettings.startneutrinodirect Neutrino direkt starten
 miscsettings.general Allgemein
 miscsettings.fb_destination EXPERT! Boot-Konsole
-miscsettings.spdif_control SPDIF Steuerung
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache
@@ -66,6 +65,9 @@ audiomenu.monoright mono rechts
 audiomenu.monoleft mono links
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digital
+audiomenu.avs_ost_control Volume Steuerung avs/ost
+audiomenu.avs avs
+audiomenu.ost ost
 
 videomenu.head Video-Einstellungen
 videomenu.screensetup Bildbereich einstellen
