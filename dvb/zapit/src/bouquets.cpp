@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.42 2002/08/30 23:48:13 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.43 2002/08/31 01:39:49 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -721,9 +721,23 @@ CZapitChannel* CBouquetManager::copyChannelByOnidSid( unsigned int onid_sid)
 	return( chan);
 }
 
+CBouquetManager::ChannelIterator::ChannelIterator(CBouquetManager* owner, const bool TV)
+{
+	Owner = owner;
+	tv = TV;
+	if (Owner->Bouquets.size() == 0)
+		c = -2;
+	else
+	{
+		b = 0;
+		c = -1; 
+		(*this)++;
+	}
+}
+
 CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::operator ++(int)
 {
-	if ((c != -2) || (b != 0))   // we can add if it's not the end marker
+	if (c != -2)  // we can add if it's not the end marker
 	{
 		c++;
 		if ((unsigned int) c >= getBouquet()->size())
@@ -734,7 +748,7 @@ CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::operator ++(i
 					c = 0;
 					goto end;
 				}
-			b = 0; c = -2;
+			c = -2;
 		}
 	}
  end:
@@ -754,7 +768,7 @@ CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::FindChannelNr
 			goto end;
 		else
 			c -= getBouquet()->size();
-	b = 0; c = -2;
+	c = -2;
  end:
 	return (*this);
 }
