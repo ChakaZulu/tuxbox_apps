@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.158 2002/04/21 22:09:59 obi Exp $
+ * $Id: zapit.cpp,v 1.159 2002/04/22 19:32:00 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -25,7 +25,7 @@
 
 // TODO: write a CZapit class
 
-#include <dbox/avia_vbi.h>
+#include <dbox/avia_gt_vbi.h>
 #include <fcntl.h>
 #include <ost/audio.h>
 #include <ost/video.h>
@@ -36,7 +36,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "bouquets.h"
 #include "configfile.h"
 #include "cam.h"
 #include "cat.h"
@@ -1884,7 +1883,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.158 2002/04/21 22:09:59 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.159 2002/04/22 19:32:00 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
