@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.184 2002/03/02 14:55:21 McClean Exp $
+        $Id: neutrino.cpp,v 1.185 2002/03/03 17:24:22 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -338,6 +338,11 @@ void CNeutrinoApp::setupDefaults()
 	//BouquetHandling
 	g_settings.bouquetlist_mode=0; // show channellist of current bouquet
 
+	// parentallock
+	g_settings.parentallock_prompt = 0;
+	g_settings.parentallock_lockage = 12;
+	strcpy(g_settings.parentallock_pincode, "0000");
+
 }
 
 
@@ -527,7 +532,7 @@ void CNeutrinoApp::isCamValid()
 	{
 		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 		//ShowMsg ( "messagebox.error", g_Locale->getText("cam.wrong"), CMessageBox::mbrCancel, CMessageBox::mbCancel );
-		
+
 		if (g_settings.show_camwarning)
 		{
 			if( ShowMsg ( "messagebox.error", g_Locale->getText("cam.wrong"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo ) == CMessageBox::mbrNo )
@@ -831,8 +836,9 @@ void CNeutrinoApp::ClearFrameBuffer()
 	g_FrameBuffer->paletteSet();
 }
 
-void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &networkSettings,
-                                CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
+void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
+                                CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
+                                CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
 {
 	mainMenu.addItem( new CMenuSeparator() );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv", true, CRCInput::RC_red, "rot.raw"), true );
@@ -861,6 +867,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.video", true, "", &videoSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.audio", true, "", &audioSettings) );
+	mainSettings.addItem( new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, "", &parentallockSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
@@ -1104,6 +1111,29 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	}
 
 	videoSettings.addItem( oj );
+}
+
+void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
+{
+	parentallockSettings.addItem( new CMenuSeparator() );
+	parentallockSettings.addItem( new CMenuForwarder("menu.back") );
+	parentallockSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, true);
+	oj->addOption(0, "parentallock.never");
+	oj->addOption(1, "parentallock.onstart");
+	oj->addOption(2, "parentallock.changetolocked");
+	oj->addOption(3, "parentallock.onsignal");
+	parentallockSettings.addItem( oj );
+
+	oj = new CMenuOptionChooser("parentallock.lockage", &g_settings.parentallock_lockage, true);
+	oj->addOption(12, "parentallock.lockage12");
+	oj->addOption(16, "parentallock.lockage16");
+	oj->addOption(18, "parentallock.lockage18");
+	parentallockSettings.addItem( oj );
+
+	CPINChangeWidget* pinChangeWidget = new CPINChangeWidget("parentallock.changepin", g_settings.parentallock_pincode, 4, "parentallock.changepin_hint1", "");
+	parentallockSettings.addItem( new CMenuForwarder("parentallock.changepin", true, g_settings.parentallock_pincode, pinChangeWidget));
 }
 
 void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
@@ -1494,13 +1524,15 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget languageSettings("languagesetup.head", "language.raw");
 	CMenuWidget videoSettings("videomenu.head", "video.raw");
 	CMenuWidget audioSettings("audiomenu.head", "audio.raw");
+	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw",400,520);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
 
-	InitMainMenu(mainMenu, mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings, languageSettings, miscSettings, service);
+	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings,
+	             colorSettings, keySettings, videoSettings, languageSettings, miscSettings, service);
 
 	//service
 	InitServiceSettings(service);
@@ -1519,6 +1551,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	InitVideoSettings(videoSettings, videoSetupNotifier);
 	videoSettings.setOnPaintNotifier(this);
 
+	// Parentallock settings
+	InitParentalLockSettings( parentallockSettings);
 
 	//network Setup
 	InitNetworkSettings(networkSettings);
@@ -2219,7 +2253,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.184 2002/03/02 14:55:21 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.185 2002/03/03 17:24:22 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

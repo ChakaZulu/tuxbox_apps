@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.57 2002/02/28 15:03:55 field Exp $
+//  $Id: neutrino.h,v 1.58 2002/03/03 17:24:22 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.58  2002/03/03 17:24:22  Simplex
+//  menu and helper classes for youth protection
+//
 //  Revision 1.57  2002/02/28 15:03:55  field
 //  Weiter Updates :)
 //
@@ -344,9 +347,12 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitNetworkSettings(CMenuWidget &networkSettings);
 		void InitScreenSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);
+		void InitParentalLockSettings(CMenuWidget &);
 		void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
-		void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
-		                  CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service);
+		void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings,
+		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings,
+		                  CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
+		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service);
 		void ClearFrameBuffer();
 		void SetupFonts();
 		void SetupFrameBuffer();
