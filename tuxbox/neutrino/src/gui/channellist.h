@@ -23,6 +23,7 @@ class CChannelList
 		int	key;
 		int	number;
 		string	name;
+		string  currentEvent;
 	};
 
 
@@ -56,7 +57,7 @@ class CChannelList
 
 		void zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer, int pos);
 		bool showInfo(CInfoViewer *infoViewer, int pos);
-
+		void updateEvents(void);
 		void numericZap(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, int key);
 		void exec(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings);
 		void quickZap(CFrameBuffer *frameBuffer, FontsDef *fonts, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings, int key);

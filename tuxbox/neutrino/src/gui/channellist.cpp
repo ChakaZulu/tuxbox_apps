@@ -1,6 +1,86 @@
 #include "channellist.h"
 
 
+static char* copyStringto(const char* from, char* to, int len)
+{
+	const char *fromend=from+len;
+	while(*from!='\n' && from<fromend && *from)
+	{
+		*(to++)=*(from++);
+	}
+	*to=0;
+	return (char *)++from;
+}
+
+// quick'n dirty
+void CChannelList::updateEvents(void)
+{
+char rip[]="127.0.0.1";
+
+  int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  SAI servaddr;
+  memset(&servaddr,0,sizeof(servaddr));
+  servaddr.sin_family=AF_INET;
+  servaddr.sin_port=htons(sectionsd::portNumber);
+  inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+  if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1) {
+    perror("Couldn't connect to sectionsd!");
+    return;
+  }
+  sectionsd::msgRequestHeader req;
+  req.version = 2;
+  req.command = sectionsd::actualEventListTVshort;
+  req.dataLength = 0;
+  write(sock_fd,&req,sizeof(req));
+
+  sectionsd::msgResponseHeader resp;
+  memset(&resp, 0, sizeof(resp));
+  if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) {
+    close(sock_fd);
+    return;
+  }
+  if(resp.dataLength<=0) {
+    close(sock_fd);
+    return;
+  }
+
+  char* pData = new char[resp.dataLength] ;
+  if(read(sock_fd, pData, resp.dataLength)<=0) {
+    delete[] pData;
+    close(sock_fd);
+    return;
+  }
+  close(sock_fd);
+  for(unsigned int count=0;count<chanlist.size();count++)
+    chanlist[count]->currentEvent="";
+  char epgID[20];
+  char channelName[50];
+  char channelDescription[1000];
+  char *actPos=pData;
+  while(*actPos && actPos<pData+resp.dataLength) {
+    *epgID=0;
+    actPos = copyStringto( actPos, epgID, sizeof(epgID));
+//    printf("id: %s\n", epgID);
+    *channelName=0;
+    actPos = copyStringto( actPos, channelName, sizeof(channelName));
+//    printf("name: %s\n", channelName);
+    *channelDescription=0;
+    actPos = copyStringto( actPos, channelDescription, sizeof(channelDescription));
+//    printf("desc: %s\n", channelDescription);
+    // quick'n dirty, sollte man mal anders machen
+    for(unsigned int count=0;count<chanlist.size();count++) {
+      if(!strcasecmp(chanlist[count]->name.c_str(), channelName)) {
+        chanlist[count]->currentEvent=channelDescription;
+//	printf("Channel found\n");
+	break;
+      }
+    }
+  }
+  delete[] pData;
+  return;
+}
+
 CChannelList::CChannelList(int Key=-1, string Name="")
 {
 	key = Key;
@@ -96,7 +176,7 @@ void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rc
 				paint(frameBuffer, fonts);
 			}
 			else 
-			{	
+			{
 				paintItem(frameBuffer, fonts, selected - liststart);
 			}
 		}
@@ -152,8 +232,15 @@ void CChannelList::paintItem(CFrameBuffer* frameBuffer, FontsDef *fonts, int pos
                 sprintf((char*) tmp, "%d", chan->number);
 		int numpos = x+5+numwidth-fonts->menu_number->getRenderWidth(tmp);
 		fonts->menu_number->RenderString(numpos,ypos+16, numwidth+5, tmp, color);
-		//name
-		fonts->menu->RenderString(x+5+numwidth+5,ypos+17, width-numwidth-20, chan->name.c_str(), color);
+		if(strlen(chan->currentEvent.c_str())) {
+    		  // name + description
+		  char nameAndDescription[100];
+		  snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
+		  fonts->menu->RenderString(x+5+numwidth+5,ypos+17, width-numwidth-20, nameAndDescription, color);
+                }
+		else
+		  //name
+		  fonts->menu->RenderString(x+5+numwidth+5,ypos+17, width-numwidth-20, chan->name.c_str(), color);
 	}
 }
 
