@@ -557,21 +557,22 @@ static eString getStats()
 	result +="<span class=\"white\">";
 #ifndef DISABLE_FILE
 	result += getDiskSpace();
-	result += " | ";
+	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 #endif
 	int sec = atoi(read_file("/proc/uptime").c_str());
 	result += eString().sprintf("%d:%02dh up", sec/3600, (sec%3600)/60);
-	result += " | ";
+	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
 	result += getIP();
-	result += " | ";
+	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
 	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
 	result += eString().sprintf("booted %d times", bootcount);
-	result +=" | ";
+	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
 	vpid = (Decoder::current.vpid == -1) ? "none" : vpid.sprintf("0x%x", Decoder::current.vpid);
-	result += "vpid: " + vpid + " | ";
+	result += "vpid: " + vpid;
+	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
 	apid = (Decoder::current.apid == -1) ? "none" : apid.sprintf("0x%x", Decoder::current.apid);
 	result += "<u><a href=\"/audio.m3u\">apid: " + apid + "</a></u>";
@@ -704,10 +705,10 @@ static eString getZapContent(eString mode, eString path)
 		{
 			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
 //			iface->play(current_service);
-//			result+="ok, hear the music..";
+			result += "Done. Please select ZAP to refresh screen.";
 		}
-//		else
-//		{
+		else
+		{
 			eWebNavigatorListDirectory navlist(result, path, tpath, *iface);
 			Signal1<void,const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
@@ -717,7 +718,7 @@ static eString getZapContent(eString mode, eString path)
 			eDebug("entered");
 			iface->leaveDirectory(current_service);
 			eDebug("exited");
-//		}
+		}
 	}
 
 	return result;
@@ -887,13 +888,13 @@ struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 		begin.sprintf("%02d.%02d.- %02d:%02d", startTime.tm_mday, startTime.tm_mon+1, startTime.tm_hour, startTime.tm_min);
 		end.sprintf("%02d.%02d.- %02d:%02d", endTime.tm_mday, endTime.tm_mon+1, endTime.tm_hour, endTime.tm_min);
 		if (se->type & ePlaylistEntry::stateFinished)
-			result += "<td><img src=\"on.gif\"></td>";
+			result += "<td align=center><img src=\"on.gif\"></td>";
 		else
 		if (se->type & (ePlaylistEntry::errorNoSpaceLeft |
 				ePlaylistEntry::errorUserAborted |
 				ePlaylistEntry::errorZapFailed|
 				ePlaylistEntry::errorOutdated))
-			result += "<td><img src=\"off.gif\"></td>";
+			result += "<td align=center><img src=\"off.gif\"></td>";
 		else
 			result += "<td>&nbsp;</td>";
 
@@ -920,7 +921,7 @@ static eString genTimerListBody(void)
 	eString tmpFile = "";
 	eTimerManager::getInstance()->forEachEntry(getEntryString(tbody));
 	if (tbody == "")
-		result = "No Timer Events available";
+		result = "No timer events available.<br>";
 	else
 	{
 		result += "<table width=100% border=1 rules=all>";
@@ -1063,11 +1064,11 @@ static eString getContent(eString mode, eString path)
 	if (mode == "zap")
 	{
 		zap_result += getZapContent(mode, path);
-		if (path)
-		{
-			path = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
-			zap_result += getZapContent(mode, path);
-		}
+//		if (path)
+//		{
+//			path = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
+//			zap_result += getZapContent(mode, path);
+//		}
 		result += getEITC();
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
 
@@ -1114,7 +1115,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "about")
 	{
-		result = "Enigma Web Control<br>Version 0.3";
+		result = "Enigma Web Control<br>Version 0.4";
 	}
 	else
 	if (mode == "aboutDreambox")
@@ -2134,7 +2135,7 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result = "";
-	eService* current;
+	eService *current = NULL;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
