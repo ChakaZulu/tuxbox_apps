@@ -579,7 +579,7 @@ inline void eListBox<T>::setCurrent(const T *c)
 	ePtrList_T_iterator it = current;	
 
 	for (it = childs.begin(); it != childs.end() ; it++)
-		if ( *it == c )
+		if ( *it == c )		// das suckt... hier werden Zeiger verglichen ! Hier wird nicht der Operator== von T benutzt !
 			break;
 
 	if ( it == childs.end() )

@@ -109,7 +109,7 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 	orbital_position=descriptor->orbital_position;
 	if (!descriptor->west_east_flag)
 		orbital_position=-orbital_position;
-	eDebug("%d %d", descriptor->orbital_position, descriptor->west_east_flag);
+//	eDebug("%d %d", descriptor->orbital_position, descriptor->west_east_flag);
 	inversion=0;
 	valid=1;
 }
@@ -306,7 +306,7 @@ eTransponderList::eTransponderList()
 		lnb.getDiSEqC().sat=1;
 		
 		lnb.addSatellite(130)->setDescription("Eutelsat 13.0E");
-	} 
+	}
 }
 
 eTransponder &eTransponderList::createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)

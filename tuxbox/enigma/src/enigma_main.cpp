@@ -576,8 +576,10 @@ void eZapMain::setEIT(EIT *eit)
 				cur_start=event->start_time;
 				cur_duration=event->duration;
 				clockUpdate();
+
 				eZapLCD* pLCD = eZapLCD::getInstance();
 				pLCD->lcdMain->updateProgress(cur_start,cur_duration);
+
 				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 					if (d->Tag()==DESCR_LINKAGE)
 					{
@@ -690,14 +692,18 @@ void eZapMain::handleNVODService(SDTEntry *sdtentry)
 void eZapMain::showServiceSelector(int dir)
 {
 	hide();
+
 	eZapLCD* pLCD = eZapLCD::getInstance();
 	pLCD->lcdMain->hide();
 	pLCD->lcdMenu->show();
+
 	eServiceSelector *e = eZap::getInstance()->getServiceSelector();
 	e->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	const eServiceReference *service = e->choose(0, dir);
+
 	pLCD->lcdMain->show();
 	pLCD->lcdMenu->hide();
+
 	if (!service)
 		return;
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
@@ -769,10 +775,12 @@ void eZapMain::showMainMenu()
 	eZapLCD* pLCD = eZapLCD::getInstance();
 	pLCD->lcdMain->hide();
 	pLCD->lcdMenu->show();
+
 	eMainMenu mm;
 	mm.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	if (mm.exec() == 1)
 		eZap::getInstance()->quit();
+
 	pLCD->lcdMenu->hide();
 	pLCD->lcdMain->show();
 }
@@ -1019,6 +1027,7 @@ void eZapMain::serviceChanged(const eServiceReference &serviceref, int err)
 	setVTButton(isVT);
 
 	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(serviceref);
+	eDebug("service = %p", service);
 
 		// es wird nur dann versucht einen service als referenz-service zu uebernehmen, wenns den ueberhaupt
 		// gibt.
@@ -1031,6 +1040,8 @@ void eZapMain::serviceChanged(const eServiceReference &serviceref, int err)
 			refservice=serviceref;
 			break;
 		}
+
+	eDebug ("service type = %i", serviceref.service_type);
 
 	eService *rservice=0;
 	if (refservice != serviceref)

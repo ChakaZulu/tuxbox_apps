@@ -16,6 +16,16 @@ class eDVB;
 #include <string>
 #include <set>
 
+#ifndef MIN
+	#define MIN(a,b) (a < b ? a : b)
+#endif
+
+#ifndef MAX
+	#define MAX(a,b) (a > b ? a : b)
+#endif
+
+#define MAXDIFF(a,b) (MAX(a,b)-MIN(a,b))
+
 class eTransponderList;
 class eServiceReference;
 class eLNB;
@@ -124,18 +134,25 @@ public:
 		{
 			if (valid != c.valid)
 				return 0;
-			if (frequency != c.frequency)
+//   		eDebug("frequency %i - %i = %i", frequency, c.frequency, MAXDIFF(frequency,c.frequency) );
+			if ( MAXDIFF(frequency,c.frequency) > 1000 )
 				return 0;
+//   		eDebug("symbol_rate -> %i != %i", symbol_rate, c.symbol_rate );
 			if (symbol_rate != c.symbol_rate)
 				return 0;
+//   		eDebug("polarisation -> %i != %i", polarisation, c.polarisation );
 			if (polarisation != c.polarisation)
 				return 0;
+//   		eDebug("fec -> %i != %i", fec, c.fec );
 			if (fec != c.fec)
 				return 0;
+//   		eDebug("inversion -> %i != %i", inversion, c.inversion );
 			if (inversion != c.inversion)
 				return 0;
+//			eDebug("orbital_position -> %i != %i", orbital_position, c.orbital_position);
 			if (orbital_position != c.orbital_position)
 				return 0;
+//			eDebug("Satellite Data is equal");
 			return 1;
 		}
 	} satellite;
@@ -168,19 +185,21 @@ public:
 	
 	bool operator==(const eTransponder &c) const
 	{
-		if (original_network_id != c.original_network_id)
-			return 0;
-		if (transport_stream_id != c.transport_stream_id)
-			return 0;
-		if ((original_network_id == -1) && (transport_stream_id == -1))	// yet unnamed transponder. compare settings.
+//		eDebug("onid = %i, c.onid = %i, tsid = %i, c.tsid = %i", original_network_id.get(), transport_stream_id.get(), c.original_network_id.get(), c.transport_stream_id.get() );
+		if ( original_network_id != -1 && c.original_network_id != -1 && transport_stream_id != -1 && c.transport_stream_id != -1)
+//		{
+//	  	eDebug("TSID / ONID Vergleich");
+			return ( (original_network_id == c.original_network_id) && (transport_stream_id == c.transport_stream_id) );
+//		}
+		else
 		{
 			if (satellite.valid && c.satellite.valid)
 				return satellite == c.satellite;
 			if (cable.valid && c.cable.valid)
 				return cable == c.cable;
-			return 1;
 		}
-		return 1;
+
+		return 1;		
 	}
 
 	bool operator<(const eTransponder &c) const
@@ -192,7 +211,6 @@ public:
 			else
 				return 1;
 		}
-
 		if (original_network_id < c.original_network_id)
 			return 1;
 		else if (original_network_id == c.original_network_id)
@@ -483,6 +501,7 @@ public:
 
 	eTransponder *getFirstTransponder(int state);
 	eSatellite *findSatellite(int orbital_position);
+	std::list<eLNB>& getLNBs()	{	return lnbs;	}
 };
 
 #endif

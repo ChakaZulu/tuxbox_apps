@@ -54,9 +54,8 @@ eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(5, "service selecto
 eAutoInitP0<numberActions> i_numberActions(5, "number actions");
 
 eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service): 
-		eListBoxEntry((eListBox<eListBoxEntry>*)lb), service(service)
+		eListBoxEntry((eListBox<eListBoxEntry>*)lb), service(service), bouquet(0)
 {
-	bouquet=0;
 #if 0
 	sort=eString().sprintf("%06d", service->service_number);
 #else
@@ -69,7 +68,6 @@ eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, c
 eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eBouquet *bouquet): 
 		eListBoxEntry((eListBox<eListBoxEntry>*)lb), bouquet(bouquet)
 {
-	sort="";
 }
 
 eListBoxEntryService::~eListBoxEntryService()
@@ -164,10 +162,9 @@ void eServiceSelector::fillServiceList()
 
 struct moveFirstChar: public std::unary_function<const eListBoxEntryService&, void>
 {
-	eListBox<eListBoxEntryService> &lb;
 	char c;
 
-	moveFirstChar(char c, eListBox<eListBoxEntryService> &lb ): lb(lb), c(c)
+	moveFirstChar(char c): c(c)
 	{
 	}
 
@@ -175,7 +172,7 @@ struct moveFirstChar: public std::unary_function<const eListBoxEntryService&, vo
 	{
 		if (s.sort[0] == c)
 		{
-	 		lb.setCurrent(&s);
+	 		( (eListBox<eListBoxEntryService>*) s.listbox)->setCurrent(&s);
 			return 1;
 		}
 		return 0;
@@ -246,7 +243,7 @@ void eServiceSelector::gotoChar(char c)
 	if (BrowseChar != 0)
 	{
 		BrowseTimer.start(5000);
-		services->forEachEntry(moveFirstChar(BrowseChar, *services));
+		services->forEachEntry(moveFirstChar(BrowseChar));
 	}
 }
 
@@ -345,9 +342,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 }
 
 eServiceSelector::eServiceSelector()
-								:eWindow(0), BrowseChar(0), BrowseTimer(eApp)
+								:eWindow(0), inBouquet(0), result(0), BrowseChar(0), BrowseTimer(eApp)
 {
-	inBouquet = 0;
 	services = new eListBox<eListBoxEntryService>(this);
 	services->setName("services");
 	services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));

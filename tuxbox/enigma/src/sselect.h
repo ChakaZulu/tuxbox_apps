@@ -27,6 +27,7 @@ public:
 	{
 		return sort < r.sort;
 	}
+
 protected:
 	void redraw(gPainter *rc, const eRect &rect, gColor, gColor, gColor, gColor, bool highlighted);
 };

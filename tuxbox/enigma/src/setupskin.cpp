@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.6 2002/07/02 00:19:33 Ghostrider Exp $
+ * $Id: setupskin.cpp,v 1.7 2002/07/15 10:41:36 Ghostrider Exp $
  */
 
 #include "setupskin.h"
@@ -33,9 +33,11 @@ extern eString getInfo(const char *file, const char *info);
 
 void eSkinSetup::loadSkins()
 {
+	eListBoxEntrySkin* selection=0;
+
 	const char *skinPath = DATADIR "/enigma/skins/";
 	struct dirent **namelist;
-	char *current_skin="";
+	char *current_skin=0;
 	eConfig::getInstance()->getKey("/ezap/ui/skin", current_skin);
 
 	int n = scandir(skinPath, &namelist, 0, alphasort);
@@ -49,6 +51,7 @@ void eSkinSetup::loadSkins()
 		msg.hide();
 		return;
 	}
+
 	for(int count=0;count<n;count++)
 	{
 		eString	fileName=eString(skinPath) + eString(namelist[count]->d_name);
@@ -57,19 +60,20 @@ void eSkinSetup::loadSkins()
 		{
 			eString esml=getInfo(fileName.c_str(), "esml");
 			eString name=getInfo(fileName.c_str(), "name");
+			eDebug("esml = %s, name = %s", esml.c_str(), name.c_str());
 			if (esml.size() && name.size())
 			{
-				eListBoxEntrySkin *s=new eListBoxEntrySkin(lskins, name, esml);
-				if (esml == current_skin)
-				{
-					eDebug("got current");
-					lskins->setCurrent(s);
-				}
+				eListBoxEntrySkin *s=new eListBoxEntrySkin(lskins, name, esml);		
+				if (current_skin && esml == current_skin)
+					selection=s;
 			}
 		}
 		free(namelist[count]);
   }
   free(namelist);
+	
+	if (selection)
+		lskins->setCurrent(selection);
 }
 
 void eSkinSetup::accept()

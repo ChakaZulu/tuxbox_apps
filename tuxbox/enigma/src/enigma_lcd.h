@@ -34,6 +34,7 @@ private:
 	void clockUpdate();
 	void volumeUpdate(int);
 	void serviceChanged(const eServiceReference &, int);
+	void leaveService(const eServiceReference &service);
 public:
 	eLabel *ServiceName;
 	void updateProgress(int,int);

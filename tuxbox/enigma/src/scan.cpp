@@ -204,6 +204,7 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 
 void tsAutomatic::start()
 {
+	eDebug("tsAutomatic start");
 	eDVBScanController *sapi=eDVB::getInstance()->getScanAPI();
 	if (!sapi)
 	{	
@@ -226,6 +227,9 @@ void tsAutomatic::start()
 		sapi->setUseONIT(pkt->scanflags & 4);
 		sapi->setUseBAT(pkt->scanflags & 2);
 		sapi->setNetworkSearch(pkt->scanflags & 1);
+
+		// macht nur Probleme...bzw dauert recht lang...
+		sapi->setSkipOtherOrbitalPositions(1);
 
 		sapi->setClearList(0);
 
@@ -425,7 +429,7 @@ int tsAutomatic::nextNetwork(int first)
 		
 	tpPacket *pkt=(tpPacket*)(l_network->getCurrent() -> getKey());
 	
-	eDebug("pkt: %p", pkt);
+//	eDebug("pkt: %p", pkt);
 
 	if (!pkt)
 		return -1;
@@ -663,6 +667,7 @@ void tsScan::dvbEvent(const eDVBEvent &event)
 			progress->setPerc(perc);
 		break;
 	case eDVBScanEvent::eventScanCompleted:
+			tpScanned--;
 			timer.stop();
 			close(0);
 		break;

@@ -9,6 +9,7 @@ class eListBoxEntryBouquet: public eListBoxEntryText
 	friend class eListBox<eListBoxEntryBouquet>;
 	friend class eBouquetSelector;
 	eBouquet* bouquet;
+
 public:
 	eListBoxEntryBouquet(eListBox<eListBoxEntryBouquet>* lb, eBouquet* b)
 		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, b->bouquet_name), bouquet(b)
