@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.1 2002/09/25 18:51:13 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.2 2002/10/08 20:18:53 thegoodguy Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -34,7 +34,7 @@ typedef uint16_t t_transport_stream_id;
 /* unique channel identification */
 typedef uint32_t t_channel_id;
 #define CREATE_CHANNEL_ID ((original_network_id << 16) | service_id)
-
+#define PRINTF_CHANNEL_ID_TYPE "%08x"
 
 /* diseqc types */
 enum diseqc_t

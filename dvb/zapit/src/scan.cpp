@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.79 2002/10/07 23:36:27 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.80 2002/10/08 20:19:10 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -482,7 +482,7 @@ void *start_scanthread(void *param)
 			{
 				if (scI->second.getServiceType() != stI->second)
 				{
-					printf("[scan.cpp] setting service_type of channel_id %08x from %02x to %02x\n",
+					printf("[scan.cpp] setting service_type of channel_id " PRINTF_CHANNEL_ID_TYPE " from %02x to %02x\n",
 							stI->first,
 							scI->second.getServiceType(),
 							stI->second);

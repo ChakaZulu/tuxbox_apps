@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.255 2002/10/07 23:36:27 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.256 2002/10/08 20:19:10 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -234,7 +234,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		cit = nvodchannels.find(channel_id);
 		if (cit == nvodchannels.end())
 		{
-			debug("[zapit] channel_id %08x not found\n", channel_id);
+			debug("[zapit] channel_id " PRINTF_CHANNEL_ID_TYPE " not found\n", channel_id);
 			return -1;
 		}
 	}
@@ -248,7 +248,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		{
 			if ((cit == allchans.end()) || (cit->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE))
 			{
-				debug("[zapit] channel_id %08x not found\n", channel_id);
+				debug("[zapit] channel_id " PRINTF_CHANNEL_ID_TYPE " not found\n", channel_id);
 				return -1;
 			}
 		}
@@ -256,7 +256,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		{
 			if (cit == allchans.end() || (cit->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE))
 			{
-				debug("[zapit] channel_id %08x not found\n", channel_id);
+				debug("[zapit] channel_id " PRINTF_CHANNEL_ID_TYPE " not found\n", channel_id);
 				return -1;
 			}
 			nvodname = cit->second.getName();
@@ -334,7 +334,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		bool failed = false;
 		int dmx_sct_fd;
 
-		debug("[zapit] looking up pids for channel_id %08x\n", channel->getChannelID());
+		debug("[zapit] looking up pids for channel_id " PRINTF_CHANNEL_ID_TYPE "\n", channel->getChannelID());
 
 		/* open demux device */
 		if ((dmx_sct_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
@@ -1016,7 +1016,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.255 2002/10/07 23:36:27 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.256 2002/10/08 20:19:10 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
