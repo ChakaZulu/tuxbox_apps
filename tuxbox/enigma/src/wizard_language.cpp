@@ -28,9 +28,14 @@ public:
 		eString language=id;
 		if (id.find('_') != eString::npos)
 			id=id.left(id.find('_'));
-		pixmap=eSkin::getActive()->queryImage(eString("country_") + getCountry(id.c_str()));
+		eString str("country_");
+		str+=getCountry(id.c_str());
+		pixmap=eSkin::getActive()->queryImage(str);
 		if (!pixmap)
+		{
+			eDebug("dont find %s use country_missing", str.c_str() );
 			pixmap=eSkin::getActive()->queryImage(eString("country_missing"));
+		}
 		if (!font.pointSize)
 			font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");
 		para=0;
@@ -83,8 +88,11 @@ static struct
 		{"ar", "ae"},
 		{"cs", "cz"},
 		{"el", "gr"},
+		{"et", "ee"},
 		{"sv", "se"},
-		{"uk", "ua"}};
+		{"sl", "si"},
+		{"sr", "yu"},
+		{"ur", "in"}};
 
 static const char * getCountry(const char *language)
 {
@@ -136,7 +144,7 @@ eWizardLanguage::eWizardLanguage()
 		{
 			*id++=0;
 			struct stat s;
-			if ( strlen(id) == 2 && stat(eString().sprintf("/usr/share/locale/%c%c/LC_MESSAGES/tuxbox-enigma.mo", id[0], id[1]).c_str(), &s)
+			if ( strlen(id) > 1 && stat(eString().sprintf("/usr/share/locale/%c%c/LC_MESSAGES/tuxbox-enigma.mo", id[0], id[1]).c_str(), &s)
 				&& stat(eString().sprintf("/share/locale/%c%c/LC_MESSAGES/tuxbox-enigma.mo", id[0], id[1]).c_str(), &s) )
 				continue;
 			eLanguageEntry *c=new eLanguageEntry(list, id, d);
