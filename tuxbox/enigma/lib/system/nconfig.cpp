@@ -1,3 +1,4 @@
+// this is nconfig 0.92, a bit modified
 #define NO_MAP_SHARED
 #include <stdlib.h>
 #include <stdio.h>
@@ -68,8 +69,16 @@ void NConfig::close()
 	cname = NULL;
 	if (fd > -1) {
 #ifdef NO_MAP_SHARED
-		::lseek(fd, 0, SEEK_SET);
-		::write(fd, data, sb->size);
+		if (data) {
+			int size=sb->size;
+			char *buffer=new char[size];
+			memcpy(buffer, data, size);
+			munmap(data, size);
+			data = NULL;
+			::lseek(fd, 0, SEEK_SET);
+			::write(fd, buffer, size);
+			delete[] buffer;
+		}
 #endif
 		::close(fd);
 		fd = -1;
