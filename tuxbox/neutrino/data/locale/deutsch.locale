@@ -188,3 +188,19 @@ scants.transponders Transponder:
 scants.services Services:
 mainsettings.scants Transponderscan
 
+mainsettings.update Software-Aktualisierung
+flashupdate.head Software-Aktualisierung
+flashupdate.action Aktion:
+flashupdate.globalprogress Gesamtstatus:
+flashupdate.getinfofile lade Versioninfo
+flashupdate.getinfofileerror kann Versioninfo nicht laden
+flashupdate.getupdatefile lade Update
+flashupdate.getupdatefileerror kann Update nicht laden
+flashupdate.cantopenfile kann Datei nicht öffnen
+flashupdate.fileis0bytes die Dateigröße ist 0 Byte
+flashupdate.eraseingflash lösche Flash
+flashupdate.programmingflash programmiere Flash
+flashupdate.cantopenmtd kann das MTD-Device nicht öffen
+flashupdate.ready fertig
+flashupdate.reboot Bitte restarten sie ihre DBox
+

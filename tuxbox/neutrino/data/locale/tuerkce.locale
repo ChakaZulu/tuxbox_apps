@@ -186,3 +186,22 @@ scants.info2 CIKMAK ICIN HOME TUSUNA BASINIZ....
 scants.transponders TRANSPONDER:
 scants.services SERVIS:
 mainsettings.scants TRANSPONDER ARAMA
+
+mainsettings.update Software Update
+flashupdate.head Software Update
+
+mainsettings.update Software Update
+flashupdate.head Software Update
+flashupdate.action Action:
+flashupdate.globalprogress Global Progress:
+flashupdate.getinfofile getting versioninfo
+flashupdate.getinfofileerror can't get versioninfo
+flashupdate.getupdatefile getting update
+flashupdate.getupdatefileerror can't get update
+flashupdate.cantopenfile can't open file
+flashupdate.fileis0bytes the filesize is 0 Bytes
+flashupdate.eraseingflash eraseing flash
+flashupdate.programmingflash programming flash
+flashupdate.cantopenmtd can't open mtd-device
+flashupdate.ready ready
+flashupdate.reboot Please reboot your DBox
