@@ -696,6 +696,7 @@ void eDVB::restartSamba()
 
 void eDVB::configureNetwork()
 {
+#ifndef USE_IFUPDOWN
 	__u32 sip=0, snetmask=0, sdns=0, sgateway=0;
 	int ip[4], netmask[4], dns[4], gateway[4];
 	int sdosetup=0, maxmtu=0, useDHCP=0;
@@ -805,6 +806,9 @@ void eDVB::configureNetwork()
 		system("killall -9 smbd nmbd");
 	}
 #endif
+#else
+	doMounts();
+#endif // USE_IFUPDOWN
 }
 #endif
 ///////////////////////////////////////////////////////////////////////////////
