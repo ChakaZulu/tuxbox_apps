@@ -328,7 +328,7 @@ void ePluginThread::start()
 					int rd = ::read(fd, buf, 8192);
 					for (int i=0; i < rd-15; ++i )
 					{
-						if (!strcmp(buf+i, "_ZN7eWidgetD0Ev")||!strcmp(buf+i)
+						if (!strcmp(buf+i, "_ZN7eWidgetD0Ev"))
 							isEnigmaPlugin=true;
 					}
 					if ( rd < 8192 )
