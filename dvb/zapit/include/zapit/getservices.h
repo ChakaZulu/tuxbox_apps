@@ -34,7 +34,7 @@ struct channel {
       }
 };
 
-struct transponder 
+struct transponder
 {
   uint tsid;
   uint frequency;
@@ -55,6 +55,21 @@ struct transponder
     onid = Onid;
   }
 };
+
+struct bouquet{
+	std::string name;
+	std::vector<channel> radio_channels;
+	std::vector<channel> tv_channels;
+	bouquet(std::string Name)
+	{
+		name = Name;
+	}
+};
+
+typedef struct bouquet_msg_struct {
+        uint bouquet_nr;
+        char name[30];
+} bouquet_msg;
 
 typedef struct channel_msg_struct {
         uint chan_nr;
@@ -97,5 +112,6 @@ extern std::map<uint, channel> allchans_radio;
 extern std::map<uint, uint> numchans_radio;
 extern std::map<std::string, uint> namechans_radio;
 extern std::vector<unsigned long> sortlist_tv;
+extern std::map<uint, bouquet> allbouquets;
 
 #endif

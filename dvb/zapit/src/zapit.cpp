@@ -1,44 +1,44 @@
 /*
   Zapit  -   DBoxII-Project
-  
-  $Id: zapit.cpp,v 1.32 2001/11/14 17:44:28 faralla Exp $
-  
-  Done 2001 by Philipp Leusmann using many parts of code from older 
+
+  $Id: zapit.cpp,v 1.33 2001/11/15 21:00:10 Simplex Exp $
+
+  Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
-  
+
   Kommentar:
-  
+
   Dies ist ein zapper der für die kommunikation über tcp/ip ausgelegt ist.
   Er benutzt Port 1505
   Die Kanalliste muß als /var/zapit/settings.xml erstellt vorhanden sein.
-  
-  
+  Die Bouqueteinstellungen liegen in /var/zapit/bouquets.xml
+
   cmd = 1 zap to channel (numeric)
   param = channelnumber
-  
+
   cmd = 2 kill current zap for streaming
-  
-  
+
+
   cmd = 3 zap to channel (channelname)
   param3 = channelname
-  
+
   cmd = 4 shutdown the box
-  
+
   cmd = 5 Get the Channellist
-  
+
   cmd = 6 Switch to RadioMode
-  
+
   cmd = 7 Switch to TVMode
-  
-  cmd = 8 Get back a struct of current Apid-descriptions. 
-  
-  cmd = 9 Change apid 
+
+  cmd = 8 Get back a struct of current Apid-descriptions.
+
+  cmd = 9 Change apid
   param = apid-number (0 .. count_apids-1)
-  
+
   cmd = 'a' Get last channel
-  
+
   cmd = 'b' Get current vpid and apid
-  
+
   cmd = 'c'  - wie cmd 5, nur mit onid_sid
 
   cmd = 'd'  wie cmd 1, nut mit onid_sid
@@ -47,29 +47,38 @@
 
   cmd = 'e' change nvod (Es muss vorher auf den Basiskanal geschaltet worden sein)
   param = (onid<<16)|sid
-  
+
   cmd = 'f' is nvod-base-channel?
   if true returns chans_msg2 for each nvod_channel;
 
+  cmd = 'q' get list of all bouquets
+
+  cmd = 'r' get list of channels of a specified bouquet
+  param = id of bouquet
+
   Bei Fehlschlagen eines Kommandos wird der negative Wert des kommandos zurückgegeben.
-  
+
   License: GPL
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-  
+
   $Log: zapit.cpp,v $
+  Revision 1.33  2001/11/15 21:00:10  Simplex
+  Prepared for using bouquets
+  My first checkin :)
+
   Revision 1.32  2001/11/14 17:44:28  faralla
   some optimizations
 
@@ -162,38 +171,38 @@
 
   Revision 1.36  2001/09/26 16:26:26  field
   BUGFIX (argh)
-  
+
   Revision 1.35  2001/09/26 15:01:55  field
   Crypted Sender-Handling verbessert
-  
+
   Revision 1.33  2001/09/26 11:05:43  field
   Sprach/Tonhandling verbessert
-  
+
   Revision 1.32  2001/09/26 09:55:31  field
   Tontraeger-Auswahl
-  
+
   Revision 1.31  2001/09/25 12:46:24  field
   AC3 gefixt
-  
+
   Revision 1.30  2001/09/24 16:30:31  field
   Sprachnamen (ausser bei PW)
-  
+
   Revision 1.27  2001/09/22 01:45:21  field
   kleiner fix
-  
+
   Revision 1.26  2001/09/22 01:18:27  field
   Sprachauswahl gefixt, Bug behoben
-  
+
   Revision 1.25  2001/09/19 23:30:31  field
   sid integriert
-  
+
   Revision 1.23  2001/09/19 20:46:33  field
   audio-handling gefixt!
 
   Revision 1.22  2001/09/14 16:34:51  fnbrd
   Added id and log
-  
-  
+
+
 */
 
 
@@ -210,7 +219,7 @@ extern uint16_t old_tsid;
 uint curr_onid_sid = 0;
 boolean OldAC3 = false;
 
-uint8_t fec_inner = 0; 
+uint8_t fec_inner = 0;
 uint16_t vpid, apid, pmt = 0;
 boolean im_gone = true;
 boolean current_is_nvod;
@@ -232,6 +241,7 @@ std::map<uint, channel> allchans_radio;
 std::map<uint, uint> numchans_radio;
 std::map<std::string, uint> namechans_radio;
 std::vector<unsigned long> sortlist_tv;
+std::vector<bouquet> allBouquets;
 
 typedef std::map<uint, transponder>::iterator titerator;
 
@@ -247,6 +257,9 @@ extern short scan_runs;
 void start_scan();
 volatile sig_atomic_t keep_going = 1; /* controls program termination */
 
+void sendBouquetList();
+void sendChannelListOfBouquet( int nBouquet);
+
 void termination_handler (int signum)
 {
   keep_going = 0;
@@ -260,7 +273,7 @@ void write_lcd(char *name) {
   servaddr.sin_family=AF_INET;
   servaddr.sin_port=htons(1510);
   inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr);
-  
+
   //printf("Writing name %s to lcdd", name);
   if(connect(lcdd_fd, (SA *)&servaddr, sizeof(servaddr))!=-1)
     {
@@ -315,7 +328,7 @@ int parsePMTInfo(char *buffer, int len, int ca_system_id)
 {
   int count=0;
   int desc,len2,ca_id, ca_pid=0;
-  
+
   while(count<len)
     {
       desc=buffer[count++];
@@ -350,29 +363,29 @@ pids parse_pmt(int pid, int ca_system_id)
   struct dmxSctFilterParams flt;
   pids ret_pids;
   struct pollfd dmx_fd;
-  
-  
-  
+
+
+
   //printf("Starting parsepmt()\n");
   memset(&ret_pids,0,sizeof(ret_pids));
-  
+
   fd=open(DEMUX_DEV, O_RDWR);
   if (fd<0)
     {
       perror("[zapit] /dev/ost/demux0");
       return ret_pids;
     }
-  
+
   memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
   memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
-  
+
   flt.pid=pid;
   flt.filter.filter[0]=2;
-  
+
   flt.filter.mask[0]  =0xFF;
 //  flt.timeout=5000;
   flt.flags=DMX_ONESHOT | DMX_CHECK_CRC;
-  
+
   //printf("parsepmt is setting DMX-FILTER\n");
   if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
     {
@@ -382,15 +395,15 @@ pids parse_pmt(int pid, int ca_system_id)
     }
   //printf("parsepmt is starting DEMUX\n");
   ioctl(fd, DMX_START, 0);
-  
+
   dmx_fd.fd = fd;
   dmx_fd.events = POLLIN;
   dmx_fd.revents = 0;
-  
+
   // wenn er ordentlich tuned, dann hat er nach 250ms die pmt, wenn nicht, dann hilft längeres warten auch nicht....
   // Bei mir kommt trotzdem manchmal nen timeout. Setze auf 400 (faralla)
   pt = poll(&dmx_fd, 1, 400);  // war 500;
-  
+
   if (!pt)
     {
       dprintf("[zapit] poll timeout - zapping is probably going to fail...\n");
@@ -412,19 +425,19 @@ pids parse_pmt(int pid, int ca_system_id)
             close(fd);
             return ret_pids;
         }
-      
+
         //printf("parsepmt is parsing pmts\n");
         int PMTInfoLen, dp, sec_len;
-      
+
         sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
-      
+
         if ((r=read(fd, buffer+3, sec_len))<=0)
         {
             perror("[zapit] read");
             close(fd);
             return ret_pids;
         }
-      
+
 
 /*        FILE *file=fopen("zapit.pmt", "wb");
         if(file) {
@@ -434,7 +447,7 @@ pids parse_pmt(int pid, int ca_system_id)
 */
         PMTInfoLen = ( (buffer[10]&0xF)<<8 )| buffer[11];
         dp= 12;
-      
+
         if ( PMTInfoLen> 0 )
         {
             ecm_pid= parsePMTInfo(&buffer[12], PMTInfoLen, ca_system_id);
@@ -444,18 +457,18 @@ pids parse_pmt(int pid, int ca_system_id)
         {
             ecm_pid = no_ecmpid_found; // not scrambled...
         }
-      
+
         while ( dp < ( r- 4 ) )
         {
             int epid, esinfo, stype;
             stype = buffer[dp++];
             // printf("stream type: %x\n", stype);
-	  
+
             epid = (buffer[dp++]&0x1F)<<8;
             epid|= buffer[dp++];
             esinfo = (buffer[dp++]&0xF)<<8;
             esinfo|= buffer[dp++];
-	  
+
             if (((stype == 1) || (stype == 2)) && (epid != 0))
             {
                 ret_pids.vpid = epid;
@@ -468,10 +481,10 @@ pids parse_pmt(int pid, int ca_system_id)
                 int tag_type, tag_len;
                 ret_pids.apids[ap_count].component_tag= -1;
                 dp+= esinfo;
-	      
+
                 ret_pids.apids[ap_count].is_ac3 = false;
                 ret_pids.apids[ap_count].desc[0] = 0;
-	      
+
                 while ( i_pt< dp )
                 {
                     tag_type = buffer[i_pt++];
@@ -485,7 +498,7 @@ pids parse_pmt(int pid, int ca_system_id)
                         if ( ret_pids.apids[ap_count].desc[0] == 0 )
                         {
                             buffer[i_pt+ 3]= 0; // quick'n'dirty
-			  
+
                             strcpy( ret_pids.apids[ap_count].desc, &(buffer[i_pt]) );
                         }
                     }
@@ -504,13 +517,13 @@ pids parse_pmt(int pid, int ca_system_id)
                 {
                     if ( ret_pids.apids[ap_count].desc[0] == 0 )
                         sprintf(ret_pids.apids[ap_count].desc, "%02d", ap_count+ 1);
-		  
+
                     ret_pids.apids[ap_count].pid = epid;
 
                     if (ap_count <max_num_apids )
                         ap_count++;
                 }
-	      
+
             }
             else
                 dp+= esinfo;
@@ -524,57 +537,57 @@ pids parse_pmt(int pid, int ca_system_id)
     return ret_pids;
 }
 
-int find_emmpid(int ca_system_id) 
-{           
-  char buffer[1000];           
-  int fd, r=1000 ,count;           
-  struct dmxSctFilterParams flt;              
+int find_emmpid(int ca_system_id)
+{
+  char buffer[1000];
+  int fd, r=1000 ,count;
+  struct dmxSctFilterParams flt;
 
-  fd=open("/dev/ost/demux0", O_RDWR);           
-  if (fd<0)           
-    {                   
-      perror("[zapit] /dev/ost/demux0");                   
-      return 0;           
-    }              
+  fd=open("/dev/ost/demux0", O_RDWR);
+  if (fd<0)
+    {
+      perror("[zapit] /dev/ost/demux0");
+      return 0;
+    }
 
-  memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);           
-  memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);              
-  flt.pid=1;           
-  flt.filter.filter[0]=1;              
-  flt.filter.mask[0]        =0xFF;           
-  flt.timeout=1000;           
-  flt.flags=DMX_ONESHOT;              
-  //flt.flags=0;           
+  memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
+  memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
+  flt.pid=1;
+  flt.filter.filter[0]=1;
+  flt.filter.mask[0]        =0xFF;
+  flt.timeout=1000;
+  flt.flags=DMX_ONESHOT;
+  //flt.flags=0;
   if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
-    {           
-      close(fd);                   
-      perror("[zapit] DMX_SET_FILTER");                   
+    {
+      close(fd);
+      perror("[zapit] DMX_SET_FILTER");
       return 0;
-    }              
-  
-  ioctl(fd, DMX_START, 0);           
-  if ((r=read(fd, buffer, r))<=0)
-    {           
-      close(fd);                   
-      perror("[zapit] read");                   
-      return 0;
-    }              
-  close(fd);              
-  
-  if (r<=0) return 0;              
-  r=((buffer[1]&0x0F)<<8)|buffer[2];
-  //for(count=0;count<r-1;count++)          
-  //        printf("%02d: %02X\n",count,buffer[count]);              
-  count=8;           
+    }
 
-  while(count<r-1) {                    
-    //printf("CAID %04X EMM: %04X\n",((buffer[count+2]<<8)|buffer[count+3]),((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);      
-    if ((((buffer[count+2]<<8)|buffer[count+3]) == ca_system_id) && (buffer[count+2] == ((0x18|0x27)&0xD7)))                           
-      return (((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);                          
+  ioctl(fd, DMX_START, 0);
+  if ((r=read(fd, buffer, r))<=0)
+    {
+      close(fd);
+      perror("[zapit] read");
+      return 0;
+    }
+  close(fd);
+
+  if (r<=0) return 0;
+  r=((buffer[1]&0x0F)<<8)|buffer[2];
+  //for(count=0;count<r-1;count++)
+  //        printf("%02d: %02X\n",count,buffer[count]);
+  count=8;
+
+  while(count<r-1) {
+    //printf("CAID %04X EMM: %04X\n",((buffer[count+2]<<8)|buffer[count+3]),((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
+    if ((((buffer[count+2]<<8)|buffer[count+3]) == ca_system_id) && (buffer[count+2] == ((0x18|0x27)&0xD7)))
+      return (((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
     count+=buffer[count+1]+2;
-  }           
-  
-  return 0;  
+  }
+
+  return 0;
 }
 
 void _writecam(int cmd, unsigned char *data, int len)
@@ -583,16 +596,16 @@ void _writecam(int cmd, unsigned char *data, int len)
   ca_msg_t ca_msg;
   char buffer[128];
   int csum=0, i;
-  
+
   camfd=open("/dev/ost/ca0", O_RDWR);
-  
+
   if( camfd <= 0 )
     {
       close(camfd);
       perror("[zapit] _writecam: open ca0");
       return;
     }
-  
+
   buffer[0]=0x6E;
   buffer[1]=0x50;
   buffer[2]=(len+1)|((cmd!=0x23)?0x80:0);
@@ -602,15 +615,15 @@ void _writecam(int cmd, unsigned char *data, int len)
   for (i=0; i<len; i++)
     csum^=buffer[i];
   buffer[len++]=csum;
-  
+
   /* init ca message */
   ca_msg.index = 0;
   ca_msg.type = 0;
-  
+
   ca_msg.length = len-1;
   memcpy(ca_msg.msg,buffer+1,len-1);
-  
-  
+
+
   if ( ioctl(camfd,CA_SEND_MSG,&ca_msg) != 0 )
     {
       perror("[zapit] _writecam: ioctl");
@@ -703,12 +716,12 @@ void save_settings()
   FILE *channel_settings;
   std::map<uint, channel>::iterator cit;
   channel_settings = fopen("/var/zapit/last_chan", "w");
-  
+
   if (channel_settings == NULL)
     {
       perror("[zapit] fopen: /var/zapit/last_chan");
     }
-  
+
   if (Radiomode_on)
     {
     fprintf(channel_settings, "radio\n");
@@ -720,10 +733,10 @@ void save_settings()
     cit = allchans_tv.find(curr_onid_sid);
     }
 
-  
+
   fprintf(channel_settings, "%06d\n", cit->second.chan_nr);
   fprintf(channel_settings, "%s\n", cit->second.name.c_str());
-  
+
   fclose(channel_settings);
   //printf("Saved settings\n");
 }
@@ -733,13 +746,13 @@ channel_msg load_settings()
   FILE *channel_settings;
   channel_msg output_msg;
   char *buffer;
-  
+
   buffer = (char*) malloc(31);
-  
+
   memset(&output_msg, 0, sizeof(output_msg));
-  
+
   channel_settings = fopen("/var/zapit/last_chan", "r");
-  
+
   if (channel_settings == NULL)
     {
       perror("[zapit] fopen: /var/zapit/last_chan");
@@ -747,7 +760,7 @@ channel_msg load_settings()
       output_msg.chan_nr = 1;
       return output_msg;
     }
-  
+
   fscanf(channel_settings, "%s", buffer);
   if (!strcmp(buffer, "tv"))
     output_msg.mode = 't';
@@ -760,17 +773,17 @@ channel_msg load_settings()
       output_msg.chan_nr = 1;
       return output_msg;
     }
-  
-  
-  
+
+
+
   fscanf(channel_settings, "%s", buffer);
   output_msg.chan_nr = atoi(buffer);
-  
+
   fscanf(channel_settings, "%s", buffer);
   strncpy(output_msg.name, buffer, 30);
-  
+
   fclose(channel_settings);
-  
+
   return output_msg;
 }
 
@@ -779,7 +792,7 @@ void *decode_thread(void *ptr)
 	decode_vals *vals;
 	vals = (decode_vals *) ptr;
 	int emmpid = 0;
-	
+
 	dprintf("[zapit] starting decode_thread\n");
 	if (vals->do_cam_reset)
 			cam_reset();
@@ -794,8 +807,8 @@ void *decode_thread(void *ptr)
 	      else
 		dprintf("[zapit] no emmpid found...\n");
 	    }
-	free(vals);	    
-	
+	free(vals);
+
 	dprintf("[zapit] ending decode_thread\n");
 	pthread_exit(0);
 }
@@ -813,7 +826,7 @@ int zapit (uint onid_sid,boolean in_nvod) {
   //std::map<uint,channel>::iterator cI;
   pthread_t dec_thread;
   bool do_cam_reset = false;
- 
+
   if (in_nvod)
     {
       current_is_nvod = true;
@@ -854,13 +867,13 @@ int zapit (uint onid_sid,boolean in_nvod) {
     	    }
     	}
     }
-  
+
   if ( ( vid = open(VIDEO_DEV, O_RDWR) ) < 0)
     {
       printf("[zapit] Cannot open video device \"%s\"\n",FRONT_DEV);
       exit(1);
     }
-  
+
   ioctl(vid, VIDEO_STOP, false);
 
   if ( video>= 0 )
@@ -869,14 +882,14 @@ int zapit (uint onid_sid,boolean in_nvod) {
       close(video);
       video = -1;
     }
-  
+
   if ( audio>= 0 )
     {
       ioctl(audio,DMX_STOP,0);
       close(audio);
       audio = -1;
     }
-  
+
   if (cit->second.tsid != old_tsid)
     {
     	do_cam_reset = true;
@@ -915,7 +928,7 @@ else
     }
   if (caid==0)
      caid = get_caid();
- 
+
   memset(&parse_pmt_pids,0,sizeof(parse_pmt_pids));
   parse_pmt_pids = parse_pmt(cit->second.pmt, caid);
 
@@ -923,7 +936,7 @@ else
   //for (i = 0;i<parse_pmt_pids.count_apids;i++) {
   //   printf("Audio-PID %d from parse_pmt() ist: %x\n",i,parse_pmt_pids.apid[i]);
   //}
-  
+
   if (parse_pmt_pids.count_vpids >0)
     {
       cit->second.vpid = parse_pmt_pids.vpid;
@@ -935,56 +948,56 @@ else
     {
       dprintf("[zapit] using standard-pids (this probably fails...)\n");
     }
-  
+
   if (parse_pmt_pids.count_apids >0)
     {
       cit->second.apid = parse_pmt_pids.apids[0].pid;
       //  cit->second.last_update = current_time;
     }
-  
+
   //    if (parse_pmt_pids.ecmpid != 0)
   {
     cit->second.ecmpid = parse_pmt_pids.ecmpid;
     //	cit->second.last_update = current_time;
   }
-  
+
   if (in_nvod)
     write_lcd((char*) nvodname.c_str());
   else
     write_lcd((char*) cit->second.name.c_str());
-  
+
   if (cit->second.vpid != 0x1fff || cit->second.apid != 0x8191)
     {
       pids_desc = parse_pmt_pids;
-      
+
       Vpid = cit->second.vpid;
       Apid = cit->second.apid;
       Pmt = cit->second.pmt;
-      
+
       dprintf("[zapit] zapping to sid: %04x %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", cit->second.sid, cit->second.name.c_str(), cit->second.vpid, cit->second.apid, cit->second.pmt);
-      
+
 
       if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
 	{
 		decode_vals *vals =(decode_vals*) malloc(sizeof(decode_vals));
-	
+
 		vals->onid = cit->second.onid;
 		vals->tsid = cit->second.tsid;
 		vals->ecmpid = cit->second.ecmpid;
 		vals->parse_pmt_pids = &parse_pmt_pids;
 		vals->do_search_emmpids = do_search_emmpid;
 		vals->do_cam_reset = do_cam_reset;
-	
+
 		pthread_create(&dec_thread, 0,decode_thread, (void*) vals);
 	}
-		
+
 
       if ( (video = open(DEMUX_DEV, O_RDWR)) < 0)
         {
 	  printf("[zapit] cannot open demux device \"%s\"\n",DEMUX_DEV);
 	  exit(1);
         }
-      
+
       dprintf("[zapit] setting vpid\n");
       /* vpid */
       pes_filter.pid     = Vpid;
@@ -994,13 +1007,13 @@ else
       pes_filter.flags   = 0;
       ioctl(video,DMX_SET_PES_FILTER,&pes_filter);
       vpid = Vpid;
-     
+
       if((audio = open(DEMUX_DEV, O_RDWR)) < 0)
         {
 	  printf("[zapit] cannot open demux device \"%s\"\n",DEMUX_DEV);
 	  exit(1);
         }
-      
+
       dprintf("[zapit] setting apid\n");
       /* apid */
       pes_filter.pid     = Apid;
@@ -1011,7 +1024,7 @@ else
       //printf("changing filtered apid to %d\n", Apid);
       ioctl(audio,DMX_SET_PES_FILTER,&pes_filter);
       apid = Apid;
-      
+
       if ( parse_pmt_pids.apids[0].is_ac3 != OldAC3 )
         {
 	  OldAC3 = parse_pmt_pids.apids[0].is_ac3;
@@ -1028,17 +1041,17 @@ else
 	      close(ac3d);
 	    }
     	}
-      
+
       dprintf("[zapit] starting dmx\n");
       if (ioctl(audio,DMX_START,0) < 0)
         dprintf("[zapit] \t\tATTENTION audio-ioctl not succesfull\n");
       if (ioctl(video,DMX_START,0)<0)
 	    dprintf("[zapit] \t\tATTENTION video-ioctl not succesfull\n");
-      
+
       dprintf("[zapit] playing\n");
       ioctl(vid, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX);
       ioctl(vid, VIDEO_PLAY, 0);
-      
+
       close(vid);
       vid= -1;
 
@@ -1050,7 +1063,7 @@ else
       curr_onid_sid = onid_sid;
       if (!in_nvod)
 	save_settings();
-	
+
 	//wait for decode_thread to exit
 	dprintf("[zapit] waiting for decode_thread\n");
 	pthread_join(dec_thread,0);
@@ -1058,7 +1071,7 @@ else
   else
     {
       dprintf("[zapit] not a channel. Won´t zap\n");
-      
+
       close(vid);
       return -3;
     }
@@ -1068,7 +1081,7 @@ else
 
 int numzap(int channel_number) {
   std::map<uint, uint>::iterator cit;
-  
+
   nvodchannels.clear();
   if (Radiomode_on)
     {
@@ -1088,7 +1101,7 @@ int numzap(int channel_number) {
 	}
       cit = allnumchannels_tv.find(channel_number);
     }
-  
+
   dprintf("[zapit] zapping to onid_sid %04x\n", cit->second);
   if (zapit(cit->second,false) > 0)
     return 2;
@@ -1099,7 +1112,7 @@ int numzap(int channel_number) {
 
 int namezap(std::string channel_name) {
   std::map<std::string,uint>::iterator cit;
-  
+
   nvodchannels.clear();
   // Search current channel
   if (Radiomode_on)
@@ -1120,7 +1133,7 @@ int namezap(std::string channel_name) {
 	}
       cit = allnamechannels_tv.find(channel_name);
     }
-  
+
   dprintf("[zapit] zapping to onid_sid %04x\n", cit->second);
   if (zapit(cit->second,false) > 0)
     return 3;
@@ -1128,7 +1141,7 @@ int namezap(std::string channel_name) {
     return -3;
 }
 
-int changeapid(ushort pid_nr) 
+int changeapid(ushort pid_nr)
 {
   struct dmxPesFilterParams pes_filter;
   std::map<uint,channel>::iterator cit;
@@ -1144,7 +1157,7 @@ int changeapid(ushort pid_nr)
       else
 	cit = allchans_tv.find(curr_onid_sid);
     }
-  
+
   if (pid_nr <= pids_desc.count_apids)
     {
       if ( audio>= 0 )
@@ -1152,37 +1165,37 @@ int changeapid(ushort pid_nr)
 	  close(audio);
 	  audio = -1;
         }
-      
+
       //        descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
-      
-      
+
+
       if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
         {
 /*	  cam_reset();
 	  descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid,  pids_desc.apids[pid_nr].pid , vpid);
  */       }
-      
+
 
       //        printf("Changing APID of %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", current->name, current->vpid, pids_desc.apid[pid_nr], current->pmt);
-      
+
       if((audio = open(DEMUX_DEV, O_RDWR)) < 0)
         {
 	  printf("[zapit] cannot open demux device \"%s\"\n",DEMUX_DEV);
 	  exit(1);
         }
-      
+
       /* apid */
       pes_filter.pid     = pids_desc.apids[pid_nr].pid;
       pes_filter.input   = DMX_IN_FRONTEND;
       pes_filter.output  = DMX_OUT_DECODER;
       pes_filter.pesType = DMX_PES_AUDIO;
       pes_filter.flags   = 0;
-      
+
       //        printf("changing filtered apid to %d [%d]\n",  pids_desc.apid[pid_nr], pid_nr);
       ioctl(audio,DMX_STOP);
       ioctl(audio,DMX_SET_PES_FILTER,&pes_filter);
       apid = pids_desc.apids[pid_nr].pid;
-      
+
       if ( pids_desc.apids[pid_nr].is_ac3 != OldAC3 )
         {
 	  OldAC3 = pids_desc.apids[pid_nr].is_ac3;
@@ -1217,56 +1230,56 @@ int changeapid(ushort pid_nr)
   int pic_fd;
   struct stat pic_desc;
   int vid, error;
-  
+
   pic_fd = open("/root/ilogo.mpeg", O_RDONLY);
   if (pic_fd < 0) {
   perror("open");
   exit(0);
   }
-  
+
   if((vid = open(VIDEO_DEV, O_RDWR|O_NONBLOCK)) < 0) {
   printf("Cannot open video device \"%s\"\n",FRONT_DEV);
   exit(1);
   }
-  
+
   fstat(pic_fd, &pic_desc);
-  
-  
+
+
   sp.iFrame = (char *) malloc(pic_desc.st_size);
   sp.size = pic_desc.st_size;
   printf("I-frame size: %d\n", sp.size);
-	
+
 	if(!sp.iFrame) {
 		printf("No memory for I-Frame\n");
 		exit(0);
 	}
-	
+
 	printf("read: %d bytes\n",read(pic_fd,sp.iFrame,sp.size));
-	
+
 	if ( ioctl(vid,VIDEO_STOP,false) < 0){
 		perror("VIDEO PLAY: ");
 		//exit(0);
 	}
-	
+
 	if ( (error = ioctl(vid,VIDEO_STILLPICTURE, sp) < 0)){
 		perror("VIDEO STILLPICTURE: ");
 		//exit(0);
 	}
-	
+
 	sleep(3);
-	
+
 	if ( ioctl(vid,VIDEO_PLAY,0) < 0){
 		perror("VIDEO PLAY: ");
 		//exit(0);
 	}
-	
+
       close(vid);
 
 }
 
-*/		
+*/
 
-	
+
 
 void endzap()
 {
@@ -1297,7 +1310,7 @@ int sleepBox() {
     printf("[zapit] cannot open frontend device \"%s\"\n",FRONT_DEV);
     return -4;
   };
-  
+
   if (ioctl(device, OST_SET_POWER_STATE, OST_POWER_SUSPEND)!=0){
     printf("[zapit] cannot set suspend-mode");
     return -4;
@@ -1320,7 +1333,7 @@ int prepare_channels()
   std::map<std::string, uint>::iterator nameit;
   std::map<uint, channel>::iterator cit;
   int ls = LoadServices();
-  
+
   if (ls > 0)
     {
       int number = 1;
@@ -1404,7 +1417,7 @@ void start_scan()
   allnamechannels_tv.clear();
   allnamechannels_radio.clear();
   found_transponders = 0;
-  found_channels = 0;	
+  found_channels = 0;
 
   set_vtxt(0); // vtxt stoppen
 
@@ -1416,7 +1429,7 @@ void start_scan()
       printf("[zapit] cannot open video device \"%s\"\n",FRONT_DEV);
       exit(1);
     }
-  
+
   ioctl(vid, VIDEO_STOP, false);
 
   if ( video>= 0 )
@@ -1425,7 +1438,7 @@ void start_scan()
       close(video);
       video = -1;
     }
-  
+
   if ( audio>= 0 )
     {
       ioctl(audio,DMX_STOP,0);
@@ -1453,13 +1466,13 @@ void parse_command()
   std::map<uint,channel>::iterator cit;
   int number = 0;
   //printf ("parse_command\n");
-  
+
   //byteorder!!!!!!
   rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
-  
+
   /*
     printf("Command received\n");
-    printf("  Version: %d\n", rmsg.version);  
+    printf("  Version: %d\n", rmsg.version);
     printf("  Command: %d\n", rmsg.cmd);
     printf("  Param: %c\n", rmsg.param);
     printf("  Param2: %d\n", rmsg.param2);
@@ -1471,7 +1484,7 @@ void parse_command()
       perror("[zapit] unknown cmd version\n");
       return;
     }
-  
+
   switch (rmsg.cmd)
     {
     case 1:
@@ -1494,11 +1507,11 @@ void parse_command()
       if (send(connfd, status, strlen(status),0) <0) {
 	perror("[zapit] could not send any return\n");
 	return;
-      }	
+      }
       break;
     case 3:
       dprintf("[zapit] zapping by name\n");
-      if (namezap(rmsg.param3) == 3) 
+      if (namezap(rmsg.param3) == 3)
       	status = "003";
       else
       	status = "-03";
@@ -1510,7 +1523,7 @@ void parse_command()
       break;
     case 4:
       status = "004";
-      
+
       dprintf("[zapit] shutdown\n");
       shutdownBox();
       //printf("zapit is sending back a status-msg %s\n", status);
@@ -1521,7 +1534,7 @@ void parse_command()
       break;
     case 5:
       if (Radiomode_on)
-    	{ 
+    	{
 	  if (!allchans_radio.empty())
 	    {
 	      status = "005";
@@ -1536,7 +1549,7 @@ void parse_command()
 		  strncpy(chanmsg.name, cit->second.name.c_str(),29);
 		  chanmsg.chan_nr = sit->first;
 		  chanmsg.mode = 'r';
-		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1) 
+		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
 		    {
 		      perror("[zapit] could not send any return\n");
 		      return;
@@ -1547,7 +1560,7 @@ void parse_command()
 	    {
 	      printf("[zapit] radio_channellist is empty\n");
 	      status = "-05";
-	      if (send(connfd, status, strlen(status),0) == -1) 
+	      if (send(connfd, status, strlen(status),0) == -1)
 	       {
 		 perror("[zapit] could not send any return\n");
 		 return;
@@ -1557,7 +1570,7 @@ void parse_command()
 	  if (!allchans_tv.empty())
 	    {
 	    status = "005";
-	    if (send(connfd, status, strlen(status),0) == -1) 
+	    if (send(connfd, status, strlen(status),0) == -1)
 	      {
 		perror("[zapit] could not send any return\n");
 		return;
@@ -1569,7 +1582,7 @@ void parse_command()
 		  strncpy(chanmsg.name, cit->second.name.c_str(),29);
 		  chanmsg.chan_nr = sit->first;
 		  chanmsg.mode = 't';
-		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1) 
+		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
 		    {
 		      perror("[zapit] could not send any return\n");
 		      return;
@@ -1580,7 +1593,7 @@ void parse_command()
 	    {
 	      printf("[zapit] tv_channellist is empty\n");
 	      status = "-05";
-	      if (send(connfd, status, strlen(status),0) == -1) 
+	      if (send(connfd, status, strlen(status),0) == -1)
 		{
 		  perror("[zapit] could not send any return\n");
 		  return;
@@ -1622,7 +1635,7 @@ void parse_command()
       }
       break;
     case 9:
-      if (changeapid(atoi((const char*) &rmsg.param)) > 0) 
+      if (changeapid(atoi((const char*) &rmsg.param)) > 0)
 	status = "009";
       else
 	status = "-09";
@@ -1660,7 +1673,7 @@ void parse_command()
 	}
       else
 	status = "00b";
-      //printf("zapit is sending back a status-msg %s\n", status);	
+      //printf("zapit is sending back a status-msg %s\n", status);
       if (send(connfd, status, strlen(status),0) == -1) {
 	perror("[zapit] could not send any return\n");
 	return;
@@ -1675,10 +1688,10 @@ void parse_command()
 	perror("[zapit] could not send any return\n");
 	return;
       }
-      break;		
+      break;
     case 'c':
        if (Radiomode_on)
-    	{ 
+    	{
 	  if (!allchans_radio.empty())
 	    {
 	      status = "00c";
@@ -1694,7 +1707,7 @@ void parse_command()
 		  chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
 		  chanmsg.chan_nr = sit->first;
 
-		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1) 
+		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
 		    {
 		      perror("[zapit] could not send any return\n");
 		      return;
@@ -1705,7 +1718,7 @@ void parse_command()
 	    {
 	      printf("[zapit] tv_channellist is empty\n");
 	      status = "-0c";
-	      if (send(connfd, status, strlen(status),0) == -1) 
+	      if (send(connfd, status, strlen(status),0) == -1)
 	       {
 		 perror("[zapit] could not send any return\n");
 		 return;
@@ -1715,7 +1728,7 @@ void parse_command()
 	  if (!allchans_tv.empty())
 	    {
 	    status = "00c";
-	    if (send(connfd, status, strlen(status),0) == -1) 
+	    if (send(connfd, status, strlen(status),0) == -1)
 	      {
 		perror("[zapit] could not send any return\n");
 		return;
@@ -1728,7 +1741,7 @@ void parse_command()
 		  chanmsg.chan_nr = sit->first;
 		  chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
 
-		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1) 
+		  if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
 		    {
 		      perror("[zapit] could not send any return\n");
 		      return;
@@ -1739,7 +1752,7 @@ void parse_command()
 	    {
 	      printf("tv_channellist is empty\n");
 	      status = "-0c";
-	      if (send(connfd, status, strlen(status),0) == -1) 
+	      if (send(connfd, status, strlen(status),0) == -1)
 		{
 		  perror("[zapit] could not send any return\n");
 		  return;
@@ -1781,7 +1794,7 @@ void parse_command()
         dprintf("[zapit] changing nvod\n");
         number = 0;
         sscanf((const char*) &rmsg.param3, "%x", &number);
-      
+
         if (zapit(number,true) > 0)
         {
             strcpy(m_status, "00e");
@@ -1824,8 +1837,8 @@ void parse_command()
 	      strncpy(chanmsg.name, cit->second.name.c_str(),30);
 	      chanmsg.chan_nr = number++;
 	      chanmsg.onid_tsid = (cit->second.onid<<16)|cit->second.sid;
-	      
-	      if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1) 
+
+	      if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
 		{
 		  perror("[zapit] could not send any return\n");
 		  return;
@@ -1853,7 +1866,7 @@ void parse_command()
 	}
 	if (scan_runs>0)
 	{
-		if (send(connfd, &found_transponders, sizeof(int),0) == -1) 
+		if (send(connfd, &found_transponders, sizeof(int),0) == -1)
 		{
 		perror("[zapit] could not send any return\n");
 		return;
@@ -1865,7 +1878,7 @@ void parse_command()
 	}
 	break;
        case 'i':
-       uint nvod_onidsid; 
+       uint nvod_onidsid;
        ushort  nvod_tsid, cnt_nvods;
        //quick hack
        current_is_nvod= true;
@@ -1906,7 +1919,17 @@ void parse_command()
 
     }
 	break;
-	default:  
+
+	case 'q' :
+		sendBouquetList();
+		return;
+	break;
+
+	case 'r' :
+		sendChannelListOfBouquet(atoi((const char*) &rmsg.param));
+	break;
+
+	default:
       status = "000";
       //printf("zapit is sending back a status-msg %s\n", status);
       if (send(connfd, status, strlen(status),0) == -1) {
@@ -1915,39 +1938,39 @@ void parse_command()
       }
       printf("[zapit] unknown command\n");
     }
-  
-  
+
+
 }
 
 int network_setup() {
   listenfd = socket(AF_INET, SOCK_STREAM, 0);
-  
+
   memset(&servaddr, 0, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   servaddr.sin_port = htons(1505);
-  
+
   if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
     {
       perror("[zapit] bind failed...\n");
       exit(-1);
     }
-  
-  
+
+
   if (listen(listenfd, 5) !=0)
     {
       perror("[zapit] listen failed...\n");
       exit( -1 );
     }
-  
+
   return 0;
 }
 
 int main(int argc, char **argv) {
-  
+
     channel_msg testmsg;
     int channelcount = 0;
-  
+
     if (argc > 1)
     {
         int i= 1;
@@ -1967,30 +1990,30 @@ int main(int argc, char **argv) {
             exit(0);
         }
     }
-  
+
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.32 2001/11/14 17:44:28 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.33 2001/11/15 21:00:10 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
   found_channels = 0;
-  
+
   testmsg = load_settings();
-  
+
   if (testmsg.mode== 'r')
     Radiomode_on = true;
- 
+
   caid = get_caid();
-  
+
   memset(&pids_desc, 0, sizeof(pids));
 
   if (prepare_channels() <0) {
     printf("[zapit] error parsing services!\n");
     //exit(-1);
   }
-  
+
   printf("[zapit] channels have been loaded succesfully\n");
-  
+
   printf("[zapit] we have got ");
   if (!allnumchannels_tv.empty())
     channelcount = allnumchannels_tv.rbegin()->first;
@@ -2005,8 +2028,8 @@ int main(int argc, char **argv) {
     printf("[zapit] error during network_setup\n");
     exit(0);
   }
-  
-  
+
+
   switch (fork ())
     {
     case -1:                    /* can't fork */
@@ -2024,13 +2047,13 @@ int main(int argc, char **argv) {
     default:                    /* parent returns to calling process: */
       return 0;
     }
-  
+
   /* Establish signal handler to clean up before termination: */
 //  if (signal (SIGTERM, termination_handler) == SIG_IGN)
 //    signal (SIGTERM, SIG_IGN);
 //  signal (SIGINT, SIG_IGN);
 //  signal (SIGHUP, SIG_IGN);
-  
+
   /* Main program loop */
 
 //  descramble(0xffff,0xffff,0xffff,0xffff,0xffff, 0xffff,0xffff);
@@ -2042,7 +2065,7 @@ int main(int argc, char **argv) {
     descramble(0xffff,0xffff,0xffff,0xffff,0xffff, &_pids);
 
   while (keep_going)
-    {      
+    {
       clilen = sizeof(cliaddr);
       connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
       memset(&rmsg, 0, sizeof(rmsg));
@@ -2053,4 +2076,110 @@ int main(int argc, char **argv) {
   return 0;
 }
 
+void sendBouquetList()
+{
+
+	char* status = "00q";
+	if (send(connfd, status, strlen(status),0) == -1)
+	{
+		perror("[zapit] could not send any return\n");
+		return;
+	}
+
+	if (allBouquets.size() == 0)
+	{
+		printf("[zapit] bouquet list is empty\n");
+		status = "-0q";
+		if (send(connfd, status, strlen(status),0) == -1)
+		{
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+		return;
+	}
+	else
+	{
+		for (int i=0; i<allBouquets.size(); i++)
+		{
+			// send bouquet only if there are channels in it
+			if ( (Radiomode_on) && (allBouquets[i].radio_channels.size()> 0) ||
+				!(Radiomode_on) && (allBouquets[i].tv_channels.size()> 0))
+			{
+				bouquet_msg msgBouquet;
+				// we'll send name and i+1 as bouquet number
+				strncpy(msgBouquet.name, allBouquets[i].name.c_str(),30);
+				msgBouquet.bouquet_nr = i+1;
+
+				if (send(connfd, &msgBouquet, sizeof(msgBouquet),0) == -1)
+				{
+					perror("[zapit] could not send any return\n");
+					return;
+				}
+			}
+		}
+	}
+}
+
+void sendChannelListOfBouquet( int nBouquet)
+{
+	char* status;
+
+	// we get the bouquet number as 1-beginning but need it 0-beginning
+	nBouquet--;
+
+	if (nBouquet < 0 || nBouquet>allBouquets.size())
+	{
+		printf("[zapit] invalid bouquet number");
+		status = "-0r";
+	}
+	else
+	{
+		status = "00r";
+	}
+
+	if (send(connfd, status, strlen(status),0) == -1)
+	{
+		perror("[zapit] could not send any return\n");
+		return;
+	}
+
+	std::vector<channel> channels;
+	if (Radiomode_on)
+		channels = allBouquets[nBouquet].radio_channels;
+	else
+		channels = allBouquets[nBouquet].tv_channels;
+
+	if (!channels.empty())
+	{
+		status = "00c";
+		if (send(connfd, status, strlen(status),0) == -1)
+		{
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+		for (int i = 0; i < channels.size();i++)
+		{
+			channel_msg_2 chanmsg;
+			strncpy(chanmsg.name, channels[i].name.c_str(),30);
+			chanmsg.onid_tsid = (channels[i].onid<<16)|channels[i].sid;
+			chanmsg.chan_nr = channels[i].chan_nr;
+
+			if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
+			{
+				perror("[zapit] could not send any return\n");
+				return;
+			}
+		}
+	}
+	else
+	{
+		printf("[zapit] channel list of bouquet %d is empty\n", nBouquet + 1);
+		status = "-0r";
+		if (send(connfd, status, strlen(status),0) == -1)
+		{
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+	}
+}
 
