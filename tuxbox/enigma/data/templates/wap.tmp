@@ -14,11 +14,11 @@
 	</card>
 	<card id="ctl" title="Control">
 	<p>
-		<a href="/wap?mode=admin&command=shutdown">Shutdown</a><br/>
-		<a href="/wap?mode=admin&command=restart">Restart</a><br/>
-		<a href="/wap?mode=admin&command=reboot">Reboot</a><br/>
-		<a href="/wap?mode=admin&command=standby">Standby</a><br/>
-		<a href="/wap?mode=admin&command=wakeup">Wakeup</a><br/>
+		<a href="/wap?mode=admin,command=shutdown">Shutdown</a><br/>
+		<a href="/wap?mode=admin,command=restart">Restart</a><br/>
+		<a href="/wap?mode=admin,command=reboot">Reboot</a><br/>
+		<a href="/wap?mode=admin,command=standby">Standby</a><br/>
+		<a href="/wap?mode=admin,command=wakeup">Wakeup</a><br/>
 		<a href="/wap?mode=timer">Timer</a><br/>
 	</p>
 	</card>
