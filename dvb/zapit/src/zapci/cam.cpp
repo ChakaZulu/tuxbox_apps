@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.27 2002/10/12 20:19:44 obi Exp $
+ * $Id: cam.cpp,v 1.28 2002/12/07 13:37:59 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -22,7 +22,9 @@
 
 /* zapit */
 #include <zapit/cam.h>
-#include <zapit/settings.h>   // CAMD_UDS_NAME
+#include <zapit/settings.h>           /* CAMD_UDS_NAME         */
+#include <connection/messagetools.h>  /* get_length_field_size */
+
 
 bool CCam::sendMessage(char* data, const size_t length)
 {
@@ -41,7 +43,9 @@ bool CCam::setCaPmt(CCaPmt * caPmt)
 	if (caPmt == NULL)
 		return true;
 
-	char buffer[caPmt->getLength()];
+	unsigned int size = caPmt->getLength();
+
+	char buffer[3 + get_length_field_size(size) + size];
 
 	size_t pos = caPmt->writeToBuffer((unsigned char*)buffer);
 
