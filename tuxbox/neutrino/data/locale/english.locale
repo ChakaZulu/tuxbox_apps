@@ -2,6 +2,9 @@ menu.back back
 
 options.off off
 options.on on
+options.serial serial
+options.fb framebuffer
+options.null null
 
 mainmenu.head Main menue
 mainmenu.tvmode TV-Mode
@@ -41,17 +44,17 @@ mainsettings.video Video
 mainsettings.network Network
 mainsettings.streaming Streamingserver
 mainsettings.colors Colors
-mainsettings.lcd LCD Settings
+mainsettings.lcd LC-Display
 mainsettings.keybinding Key Setup
 mainsettings.misc Misc Settings
 mainsettings.scan Scan settings
-
 
 miscsettings.head Misc Settings
 miscsettings.shutdown_real Enable Standby
 miscsettings.boxtype DBox type
 miscsettings.startneutrinodirect start neutrino directly
 miscsettings.general General
+miscsettings.fb_destination Expert! Boot-Console
 
 languagesetup.head Language Setup
 languagesetup.select Language
@@ -114,7 +117,6 @@ colormenu.fade Fade menus
 colorthememenu.head Theme Selector
 colorthememenu.neutrino_theme Neutrino Theme
 colorthememenu.classic_theme Classic Theme
-
 
 colormenusetup.head Menu Colors
 colormenusetup.menuhead Menu Header
@@ -359,7 +361,6 @@ messagebox.error Error
 messagebox.discard Discard changes?
 messagebox.info Information
 
-
 settings.noconffile No neutrino-settings found.\nUseing defaults.
 settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
 
@@ -491,6 +492,7 @@ favorites.finalhint \nUse the bouqueteditor to modify your favorites.\n
 sleeptimerbox.title Sleeptimer
 sleeptimerbox.hint1 Shutdown time in min. (000=off)
 sleeptimerbox.hint2 The dbox2 will shutdown after this time.
+sleeptimerbox.announce Sleeptimer in 1 min
 
 timerbar.channelswitch Schedule
 timerbar.recordevent Record
