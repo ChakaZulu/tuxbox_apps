@@ -62,6 +62,7 @@
 #include <algorithm>
 #include <sys/time.h>
 #include <fstream>
+#include <iostream>
 
 #if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/audio.h>
@@ -558,10 +559,14 @@ int CAudioPlayerGui::show()
 			}
 			else
 			{
-				if(m_state!=CAudioPlayerGui::STOP)
+			        if(m_state!=CAudioPlayerGui::STOP)
 				{
 					key_level=1;
 					paintFoot();
+				} else {
+				  if (!playlist.empty()) {
+				    savePlaylist();
+				  }
 				}
 			}
 		}
@@ -822,6 +827,11 @@ void CAudioPlayerGui::paintFoot()
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + 1* ButtonWidth2 + 25, y+(height-info_height-buttonHeight)-3);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_AUDIOPLAYER_PLAY), COL_INFOBAR, 0, true); // UTF-8
+		if (m_state==CAudioPlayerGui::STOP) {
+		  // help will store a playlist file
+		  frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth + 25, y+(height-info_height-buttonHeight)-3);
+		  g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_AUDIOPLAYER_SAVE_PLAYLIST), COL_INFOBAR, 0, true); // UTF-8
+		}
 	}
 	if(m_state!=CAudioPlayerGui::STOP)
 	{
@@ -1354,5 +1364,165 @@ void CAudioPlayerGui::GetMetaData(CAudiofile *File)
 		File->Title = Latin1_to_UTF8(File->Title);
 #endif
 	}
+}
+
+void CAudioPlayerGui::savePlaylist() {
+
+  // .m3u playlist
+  // http://hanna.pyxidis.org/tech/m3u.html
+
+  CFileBrowser browser;
+  browser.Multi_Select = false;
+  browser.Dir_Mode = true;
+  CFileFilter dirFilter;
+  dirFilter.addFilter("m3u");
+  browser.Filter = &dirFilter;
+  std::string path;
+  // select preferred directory if exists
+  if(strlen(g_settings.network_nfs_mp3dir)!=0)
+    path = g_settings.network_nfs_mp3dir;
+  else
+    path = "/";
+
+  // let user select target directory
+  if (browser.exec(path)) {
+    // refresh view
+    this->paint();
+    CFile *file = browser.getSelectedFile();
+    std::string playlistDirPath = file->getPath();
+    std::string absPlaylistDir;
+
+    // add a trailing slash if necessary
+    if (playlistDirPath.size() > 0 
+	&& playlistDirPath[playlistDirPath.size()-1] == '/') {
+      absPlaylistDir = playlistDirPath + file->getFileName();
+    } else {
+      absPlaylistDir = playlistDirPath + "/" + file->getFileName();
+    }
+
+    const int filenamesize = 30;
+    char filename[filenamesize+1] = "";
+
+    if (file->getType() == CFile::FILE_PLAYLIST) {
+      // file is playlist so we should ask if we can overwrite it
+      std::string name = file->getPath() + "/" + file->getFileName();
+      bool overwrite = askToOverwriteFile(name);
+      if (!overwrite) {
+	return;
+      }
+      snprintf(filename, name.size(), "%s", name.c_str());
+    } else if (file->getType() == CFile::FILE_DIR) {
+      // query for filename
+      CStringInputSMS filenameInput(LOCALE_AUDIOPLAYER_PLAYLIST_NAME,
+				    filename,
+				    filenamesize-1,
+				    LOCALE_AUDIOPLAYER_PLAYLIST_NAME_HINT1,
+				    LOCALE_AUDIOPLAYER_PLAYLIST_NAME_HINT2,
+				    "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
+      filenameInput.exec(NULL, "");
+      // refresh view
+      this->paint();
+      std::string name = absPlaylistDir + "/" + filename + ".m3u";
+      std::ifstream input(name.c_str());
+
+      // test if file exists and query for overwriting it or not
+      if (input.is_open()) {
+	bool overwrite = askToOverwriteFile(name);
+	if (!overwrite) {
+	  return;
+	}
+      }
+      input.close();
+    } else {
+      std::cout << "neither .m3u nor directory selected, abort" << std::endl;
+      return;
+    }
+    std::string absPlaylistFilename = absPlaylistDir;
+    absPlaylistFilename.append("/").append(filename).append(".m3u");
+    std::ofstream playlistFile(absPlaylistFilename.c_str());
+    std::cout << "Audioplayer: writing playlist to " << absPlaylistFilename << std::endl;
+    if (!playlistFile) {
+      // an error occured
+      const int msgsize = 255;
+      char msg[msgsize] = "";
+      snprintf(msg,
+	       msgsize,
+	       "%s\n%s",
+	       g_Locale->getText(LOCALE_AUDIOPLAYER_PLAYLIST_FILEERROR_MSG),
+	       absPlaylistFilename.c_str());
+
+      DisplayErrorMessage(msg);
+      // refresh view
+      this->paint();
+      std::cout << "could not create play list file " 
+		<< absPlaylistFilename << std::endl;
+      return;
+    }
+    // writing .m3u file
+    playlistFile << "#EXTM3U" << std::endl;
+    
+    CPlayList::const_iterator it;
+    for (it = playlist.begin();it!=playlist.end();it++) {
+      playlistFile << "#EXTINF:" << it->Duration << ","
+		   << it->Artist << " - " << it->Title << std::endl;
+      playlistFile << absPath2Rel(absPlaylistDir, it->Filename) << std::endl;
+    }
+    playlistFile.close();
+  }  
+  this->paint();
+}
+
+bool CAudioPlayerGui::askToOverwriteFile(const std::string& filename) {
+
+  char msg[filename.length()+127];
+  snprintf(msg,
+	   filename.length()+126,
+	   "%s\n%s",
+	   g_Locale->getText(LOCALE_AUDIOPLAYER_PLAYLIST_FILEOVERWRITE_MSG),
+	   filename.c_str());
+  bool res = (ShowMsgUTF(LOCALE_AUDIOPLAYER_PLAYLIST_FILEOVERWRITE_TITLE,
+			 msg,CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo)
+	      == CMessageBox::mbrYes);
+  this->paint();
+  return res;
+}
+
+std::string CAudioPlayerGui::absPath2Rel(const std::string& fromDir,
+					 const std::string& absFilename) {
+  std::string res = "";
+
+  int length = fromDir.length() < absFilename.length() ? fromDir.length() : absFilename.length();
+  int lastSlash = 0;
+  // find common prefix for both paths
+  // fromDir:     /foo/bar/angle/1          (length: 16)
+  // absFilename: /foo/bar/devil/2/fire.mp3 (length: 19)
+  // -> /foo/bar/ is prefix, lastSlash will be 8
+  for (int i=0;i<length;i++) {
+    if (fromDir[i] == absFilename[i]) {
+      if (fromDir[i] == '/') {
+	lastSlash = i;
+      }
+    } else {
+      break;
+    }
+  }
+  // cut common prefix
+  std::string relFilepath = absFilename.substr(lastSlash+1,absFilename.length()-lastSlash+1);
+  // relFilepath is devil/2/fire.mp3
+                           
+  // First slash is not removed because we have to go up each directory.
+  // Since the slashes are counted later we make sure for each directory one slash is present
+  std::string relFromDir = fromDir.substr(lastSlash,fromDir.length()-lastSlash);
+  // relFromDir is /angle/1
+
+  // go up as many directories as neccessary
+  for (unsigned int i=0;i<relFromDir.size();i++) {
+    if (relFromDir[i] == '/') {
+      res = res + "../";
+    }
+  }
+  
+  res = res + relFilepath;
+  return res;
 }
 

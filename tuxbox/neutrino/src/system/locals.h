@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.6 2004/07/02 09:45:55 thegoodguy Exp $
+ * $Id: locals.h,v 1.7 2004/07/06 20:57:02 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -527,6 +527,14 @@ typedef enum
 	LOCALE_AUDIOPLAYER_SHUFFLE                            ,
 	LOCALE_AUDIOPLAYER_STOP                               ,
 	LOCALE_AUDIOPLAYER_TITLE_ARTIST                       ,
+	LOCALE_AUDIOPLAYER_SAVE_PLAYLIST                      ,
+	LOCALE_AUDIOPLAYER_PLAYLIST_NAME                      ,
+	LOCALE_AUDIOPLAYER_PLAYLIST_NAME_HINT1                ,
+	LOCALE_AUDIOPLAYER_PLAYLIST_NAME_HINT2                ,
+	LOCALE_AUDIOPLAYER_PLAYLIST_FILEERROR_TITLE           ,
+	LOCALE_AUDIOPLAYER_PLAYLIST_FILEERROR_MSG             ,
+	LOCALE_AUDIOPLAYER_PLAYLIST_FILEOVERWRITE_TITLE       ,
+	LOCALE_AUDIOPLAYER_PLAYLIST_FILEOVERWRITE_MSG         ,
 	LOCALE_NETWORKMENU_BROADCAST                          ,
 	LOCALE_NETWORKMENU_DHCP                               ,
 	LOCALE_NETWORKMENU_GATEWAY                            ,

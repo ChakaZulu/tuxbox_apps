@@ -493,6 +493,14 @@ mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
 mp3player.shuffle Shuffle
 mp3player.stop Stopp
 mp3player.title_artist Titel, Interpret
+mp3player.save_playlist Playlist speichern
+mp3player.playlist_name Dateiname der Playlist
+mp3player.playlist_name_hint1 Geben Sie den Dateinamen der Playlist ein
+mp3player.playlist_name_hint2 Die Erweiterung .m3u wird automatisch angehaengt
+mp3player.playlist_fileerror_title Fehler
+mp3player.playlist_fileerror_msg Datei kann nicht erstellt werden:
+mp3player.playlist_fileoverwrite_title Ueberschreiben?
+mp3player.playlist_fileoverwrite_msg Soll diese Datei ueberschrieben werden:
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
 networkmenu.gateway Standard Gateway

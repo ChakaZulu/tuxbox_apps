@@ -462,6 +462,14 @@ mp3player.screensaver_timeout screensaver timeout (min, 0=off)
 mp3player.shuffle shuffle
 mp3player.stop Stop
 mp3player.title_artist Title, Artist
+mp3player.save_playlist save play list
+mp3player.playlist_name filename of the play list
+mp3player.playlist_name_hint1 Please enter the filename of the playlist
+mp3player.playlist_name_hint2 The extension .m3u will be added automatically
+mp3player.playlist_fileerror_title Error
+mp3player.playlist_fileerror_msg File could not be created:
+mp3player.playlist_fileoverwrite_title Overwrite?
+mp3player.playlist_fileoverwrite_msg Do you want to overwrite this file:
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
 networkmenu.gateway default gateway
