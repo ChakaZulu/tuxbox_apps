@@ -78,7 +78,7 @@ void CAlphaSetup::setAlpha()
 
 	c=(*alpha2)<<8 | (*alpha1);
 
-	if ((fd = open("/dev/fb0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/fb/0",O_RDWR)) <= 0)
 	{
 		perror("open");
 		return;
