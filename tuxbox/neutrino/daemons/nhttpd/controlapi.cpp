@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.25 2003/09/18 09:15:08 zwen Exp $
+	$Id: controlapi.cpp,v 1.26 2003/09/18 16:45:19 zwen Exp $
 
 	License: GPL
 
@@ -46,7 +46,14 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 	};
 
 	dprintf("Execute CGI : %s\n",request->Filename.c_str());
-
+	if(CDEBUG::getInstance()->Debug)
+	{
+		for(CStringList::iterator it = request->ParameterList.begin() ;
+			 it != request->ParameterList.end() ; it++)
+		{
+			dprintf("  Parameter %s : %s\n",it->first.c_str(), it->second.c_str());
+		}
+	}
 	// tolower(filename)
 	for(unsigned int i = 0; i < request->Filename.length(); i++)
 		request->Filename[i] = tolower(request->Filename[i]);
@@ -757,9 +764,14 @@ void CControlAPI::SendStreamInfo(CWebserverRequest* request)
 void CControlAPI::SendcurrentVAPid(CWebserverRequest* request)
 {
 	CZapitClient::responseGetPIDs pids;
+	pids.PIDs.vpid=0;
 	Parent->Zapit->getPIDS(pids);
 
-	request->printf("%u\n%u\n", pids.PIDs.vpid, pids.APIDs[0].pid);
+	request->printf("%u\n", pids.PIDs.vpid);
+	if(!pids.APIDs.empty())
+		request->printf("%u\n", pids.APIDs[0].pid);
+	else
+		request->printf("0\n");
 }
 
 //-------------------------------------------------------------------------
@@ -767,22 +779,17 @@ void CControlAPI::SendcurrentVAPid(CWebserverRequest* request)
 void CControlAPI::SendAllCurrentVAPid(CWebserverRequest* request)
 {
 	CZapitClient::responseGetPIDs pids;
-	Parent->Zapit->getPIDS(pids);
-	for (unsigned int i=0; i<sizeof(pids.PIDs);i++) {
-	    pids.APIDs[i].pid=0;
-	}
-	for (unsigned int i=0; i<sizeof(pids.PIDs);i++) {
-	    pids.APIDs[i].pid=0;
-	}
-
+	pids.PIDs.vpid=0;
 	Parent->Zapit->getPIDS(pids);
 
 	request->printf("%u\n", pids.PIDs.vpid);
-        for (unsigned int i=0; i<sizeof(pids.PIDs);i++) {
-	    if (pids.APIDs[i].pid > 0) {
-	        request->printf("%u\n", pids.APIDs[i].pid);
-	    }
-	}
+        
+	for (CZapitClient::APIDList::iterator it = pids.APIDs.begin() ; 
+		  it!=pids.APIDs.end(); it++)
+		request->printf("%u\n", it->pid);
+	if(pids.APIDs.empty())
+		request->printf("0\n"); // shouldnt happen, but print at least one apid
+
 }
 
 //-------------------------------------------------------------------------
