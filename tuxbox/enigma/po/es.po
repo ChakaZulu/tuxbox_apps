@@ -4344,7 +4344,7 @@ msgstr "Pulse OK para cambiar tipo de conexión"
 
 #: src/setupnetwork.cpp:993
 msgid "Samba File System(to mount share from another Dreambox)"
-msgstr ""
+msgstr "Samba File System (añadir un directorio de otro Dreambox)"
 
 #: src/setupnetwork.cpp:1014
 msgid "enter name of the local mount point with trailing slash"
@@ -4380,11 +4380,11 @@ msgstr "Pulse OK para terminar el uso del directorio compartido"
 
 #: src/setupnetwork.cpp:1101
 msgid "press ok to mount this share"
-msgstr "Pulse OK para activar el directorio compartido"
+msgstr "Pulse OK para activar este directorio compartido"
 
 #: src/setupnetwork.cpp:1111
 msgid "press ok to save this share"
-msgstr "Pulse OK para grabar el directorio compartido"
+msgstr "Pulse OK para grabar este directorio compartido"
 
 #: src/setupnetwork.cpp:1122
 msgid "go to next share"
@@ -4392,12 +4392,11 @@ msgstr "Ir al próximo directorio compartido"
 
 #: src/setupnetwork.cpp:1173
 msgid "enter the name of the share without trailing slash"
-msgstr "Nombre del directorio remoto sin barra"
+msgstr "Nombre del directorio compartido remoto sin barra"
 
 #: src/setupnetwork.cpp:1176
-#, fuzzy
 msgid "enter the name of the share (//DreamBOX/harddisk)"
-msgstr "Nombre del directorio remoto sin barra"
+msgstr "Nombre del directorio compartido (//DreamBOX/harddisk)"
 
 #: src/setupnetwork.cpp:1295 src/setupnetwork.cpp:1336
 msgid "invalid or missing dir or local dir"
