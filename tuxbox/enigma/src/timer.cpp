@@ -2424,6 +2424,9 @@ void eTimerEditView::multipleChanged( int i )
 		emonth->show();
 		bday->show();
 		eday->show();
+		byear->setCurrent(0, true);
+		eyear->setCurrent(0, true);
+		setFocus(multiple);
 	}
 }
 
