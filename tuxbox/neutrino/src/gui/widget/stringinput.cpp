@@ -97,11 +97,13 @@ void CStringInput::keyRedPressed()
 	if ( strstr(validchars, " ")!=NULL )
 	{
 		value[selected]=' ';
-		paintChar(selected);
 
-		if (selected < (size- 1))
+		if (selected < (size - 1))
+		{
 			selected++;
-		paintChar(selected-1);
+			paintChar(selected - 1);
+		}
+  
 		paintChar(selected);
 	}
 }
@@ -159,9 +161,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 	char oldval[size], dispval[size];
 
 	if (parent)
-	{
 		parent->hide();
-	}
 
 	for(int count=strlen(value)-1;count<size-1;count++)
 		strcat(value, " ");
@@ -205,11 +205,13 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		else if ( (msg==CRCInput::RC_green) && ( strstr(validchars, ".")!=NULL ) )
 		{
 			value[selected]='.';
-			paintChar(selected);
 
-			if (selected < (size- 1))
+			if (selected < (size - 1))
+			{
 				selected++;
-			paintChar(selected-1);
+				paintChar(selected - 1);
+			}
+  
 			paintChar(selected);
 		}
 		else if (msg==CRCInput::RC_up)
@@ -314,16 +316,14 @@ void CStringInput::paint()
 
 }
 
-void CStringInput::paintChar(int pos)
+void CStringInput::paintChar(int pos, const char c)
 {
-	int xs = 20;
+	const int xs = 20;
 	int ys = mheight;
 	int xpos = x+ 20+ pos* xs;
 	int ypos = y+ hheight+ 25;
 
-	string ch = "";
-	if(pos<(int)strlen(value))
-		ch = *(value+pos);
+	char ch[2] = {c, 0};
 
 	int color = COL_MENUCONTENT;
 	if (pos==selected)
@@ -332,9 +332,15 @@ void CStringInput::paintChar(int pos)
 	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
 	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
 
-	int xfpos = xpos + ((xs- g_Fonts->menu->getRenderWidth(ch.c_str()))>>1);
+	int xfpos = xpos + ((xs- g_Fonts->menu->getRenderWidth(ch))>>1);
 
-	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
+	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch, color);
+}
+
+void CStringInput::paintChar(int pos)
+{
+	if(pos<(int)strlen(value))
+		paintChar(pos, value[pos]);
 }
 
 CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon)
@@ -416,25 +422,9 @@ void CStringInputSMS::keyRightPressed()
 
 void CStringInputSMS::paint()
 {
-	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	CStringInput::paint();
 
-	int iconoffset= (iconfile!="")?28:0;
-	g_Fonts->menu_title->RenderString(x+ 10+ iconoffset, y+ hheight, width- 10- iconoffset, g_Locale->getText(name).c_str(), COL_MENUHEAD);
-	if ( iconoffset> 0 )
-		frameBuffer->paintIcon(iconfile.c_str(),x+8,y+5);
-
-	frameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
-
-	if ( hint_1.length()> 0 )
-	{
-		g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, g_Locale->getText(hint_1).c_str(), COL_MENUCONTENT);
-		if ( hint_2.length()> 0 )
-			g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2).c_str(), COL_MENUCONTENT);
-	}
 	frameBuffer->paintIcon("numericpad.raw", x+20+140, y+ hheight+ mheight+ iheight* 3+ 30, COL_MENUCONTENT);
-
-	for (int count=0;count<size;count++)
-		paintChar(count);
 
 	frameBuffer->paintBoxRel(x,y+height-25, width,25, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
@@ -446,25 +436,7 @@ void CStringInputSMS::paint()
 
 void CPINInput::paintChar(int pos)
 {
-	int xs = 20;
-	int ys = mheight;
-	int xpos = x+ 20+ pos* xs;
-	int ypos = y+ hheight+ 25;
-
-	string ch = " ";
-	if(value[pos] != ' ')
-		ch = "*";
-
-	int color = COL_MENUCONTENT;
-	if (pos==selected)
-		color = COL_MENUCONTENTSELECTED;
-
-	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
-	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
-
-	int xfpos = xpos + ((xs- g_Fonts->menu->getRenderWidth(ch.c_str()))>>1);
-
-	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
+	CStringInput::paintChar(pos, (value[pos] == ' ') ? ' ' : '*');
 }
 
 int CPINInput::exec( CMenuTarget* parent, string )
@@ -472,9 +444,7 @@ int CPINInput::exec( CMenuTarget* parent, string )
 	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
-	{
 		parent->hide();
-	}
 
 	for(int count=strlen(value)-1;count<size-1;count++)
 		strcat(value, " ");

@@ -59,6 +59,7 @@ class CStringInput : public CMenuTarget
 		CChangeObserver*   observ;
 
 		virtual void paint();
+		virtual void paintChar(int pos, char c);
 		virtual void paintChar(int pos);
 
 		virtual void key0_9Pressed(int key);
