@@ -414,13 +414,6 @@ movieplayer.bookmarkname Merkal Nama
 movieplayer.bookmarkname_hint1 Bitte gems den Nama fürs neie Merkal o.
 movieplayer.bookmarkname_hint2 movieplayer.skipping Umsortiern bitte wartn 
 movieplayer.buffering Buffern..
-movieplayer.choosepes PES spuin
-movieplayer.chooseps PS Spuin
-movieplayer.choosestream Streama
-movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile Datei vom VLC
-movieplayer.choosestreamsvcd (S)VCD
-movieplayer.choosets TS Spuin
 movieplayer.defdir Start-Verz.
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback Fuim mim VLC
@@ -428,10 +421,8 @@ movieplayer.goto Spring zu ...
 movieplayer.goto.h1 = -> absoluter Sprung
 movieplayer.goto.h2 +,- -> relativer Sprung
 movieplayer.head Fuimspuia
-movieplayer.name Fuimspuia
 movieplayer.nostreamingserver Koa Vabindung\nzum Streamingserva möglich.
 movieplayer.pesplayback PES Abspuin (Experiment)
-movieplayer.play Spuin
 movieplayer.pleasewait Oan Moment, de Verbindung\nzum Streamingserva werd hergsteaid
 movieplayer.toomanybookmarks Sie ham scho zvui Merkal oglegt.\nEs muas erst a andas glöscht wern.
 movieplayer.tsplayback TS Abspuin

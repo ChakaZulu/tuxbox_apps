@@ -414,13 +414,6 @@ movieplayer.bookmarkname Bookmark Name
 movieplayer.bookmarkname_hint1 Gib de Name für's neue Bookmark ii
 movieplayer.bookmarkname_hint2
 movieplayer.buffering Puffere...
-movieplayer.choosepes PES abspiele
-movieplayer.chooseps PS abspiele
-movieplayer.choosestream Streame
-movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile Datei via VLC
-movieplayer.choosestreamsvcd (S)VCD
-movieplayer.choosets TS abspiele
 movieplayer.defdir Start-Verz.
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback Datei via VLC
@@ -428,10 +421,8 @@ movieplayer.goto Spring' zue ...
 movieplayer.goto.h1 = -> absolute Sprung
 movieplayer.goto.h2 +,- -> relative Sprung
 movieplayer.head Movieplayer
-movieplayer.name Movieplayer
 movieplayer.nostreamingserver Es het kei Verbindig\nzuem Streamingserver herg'stellt werde chönne.
 movieplayer.pesplayback PES Abspiele (Experimendell)
-movieplayer.play Abspiele
 movieplayer.pleasewait Bitte warde.\nD'Verbindig zuem Streamingserver wird herg'stellt.
 movieplayer.toomanybookmarks D'hesch bereits z'viel Bookmarks a'glegt.\nEs mueß erscht e anderes g'löscht werde.
 movieplayer.tsplayback TS Abspiele

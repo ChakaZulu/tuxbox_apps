@@ -421,13 +421,6 @@ movieplayer.bookmarkname Имя закладки
 movieplayer.bookmarkname_hint1 Введите имя новой закладки
 movieplayer.bookmarkname_hint2 
 movieplayer.buffering Буферизация...
-movieplayer.choosepes Play PES
-movieplayer.chooseps Play PS
-movieplayer.choosestream Stream
-movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile Файл через VLC
-movieplayer.choosestreamsvcd (S)VCD
-movieplayer.choosets Play TS
 movieplayer.defdir start dir.
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback Файл через VLC
@@ -435,10 +428,8 @@ movieplayer.goto Прыгнуть в ...
 movieplayer.goto.h1 = -> абсолютный прыжок
 movieplayer.goto.h2 +,- -> относительный прыжок
 movieplayer.head Видеоплеер
-movieplayer.name Видеоплеер
 movieplayer.nostreamingserver  Streaming сервер недоступен.
 movieplayer.pesplayback Play PES (Экспериментально)
-movieplayer.play Play
 movieplayer.pleasewait Подождите пожалуйста.\nСодиняюсь с streaming сервером...
 movieplayer.toomanybookmarks Слишком много закладок.\n Удалите прадварительно одну из существующих.
 movieplayer.tsplayback Play TS

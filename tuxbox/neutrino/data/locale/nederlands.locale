@@ -414,13 +414,6 @@ movieplayer.bookmarkname Bookmark Naam
 movieplayer.bookmarkname_hint1 Geef de naam voor de nieuwe favoriet in
 movieplayer.bookmarkname_hint2
 movieplayer.buffering Bufferen...
-movieplayer.choosepes Play PES
-movieplayer.chooseps Play PS
-movieplayer.choosestream Stream
-movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile Bestand via VLC
-movieplayer.choosestreamsvcd (S)VCD
-movieplayer.choosets Play TS
 movieplayer.defdir startdirectory
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback Bestand via VLC
@@ -428,10 +421,8 @@ movieplayer.goto Ga naar...
 movieplayer.goto.h1 = -> absolute sprong
 movieplayer.goto.h2 +,- -> relatieve sprong
 movieplayer.head Filmplayer
-movieplayer.name Filmplayer
 movieplayer.nostreamingserver De streamserver kon niet gevonden worden
 movieplayer.pesplayback PES Afspelen (Experiment)
-movieplayer.play Speel
 movieplayer.pleasewait Even geduld aub.\nBezig met verbinden met streamserver...
 movieplayer.toomanybookmarks U heeft te veel favorieten.\nEr moet een andere favoriet gewist worden.
 movieplayer.tsplayback Speel TS

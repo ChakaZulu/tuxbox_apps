@@ -354,13 +354,6 @@ class CLocaleManager
 #define LOCALE_MOVIEPLAYER_BOOKMARKNAME_HINT1      "movieplayer.bookmarkname_hint1"
 #define LOCALE_MOVIEPLAYER_BOOKMARKNAME_HINT2      "movieplayer.bookmarkname_hint2"
 #define LOCALE_MOVIEPLAYER_BUFFERING               "movieplayer.buffering"
-//#define LOCALE_MOVIEPLAYER_CHOOSEPES               "movieplayer.choosepes"                      /* FIXME: unused */
-//#define LOCALE_MOVIEPLAYER_CHOOSEPS                "movieplayer.chooseps"                       /* FIXME: unused */
-//#define LOCALE_MOVIEPLAYER_CHOOSESTREAM            "movieplayer.choosestream"                   /* FIXME: unused */
-//#define LOCALE_MOVIEPLAYER_CHOOSESTREAMDVD         "movieplayer.choosestreamdvd"                /* FIXME: unused */
-//#define LOCALE_MOVIEPLAYER_CHOOSESTREAMFILE        "movieplayer.choosestreamfile"               /* FIXME: unused */
-//#define LOCALE_MOVIEPLAYER_CHOOSESTREAMSVCD        "movieplayer.choosestreamsvcd"               /* FIXME: unused */
-//#define LOCALE_MOVIEPLAYER_CHOOSETS                "movieplayer.choosets"                       /* FIXME: unused */
 #define LOCALE_MOVIEPLAYER_DEFDIR                  "movieplayer.defdir"
 #define LOCALE_MOVIEPLAYER_DVDPLAYBACK             "movieplayer.dvdplayback"
 #define LOCALE_MOVIEPLAYER_FILEPLAYBACK            "movieplayer.fileplayback"
@@ -368,10 +361,8 @@ class CLocaleManager
 #define LOCALE_MOVIEPLAYER_GOTO_H1                 "movieplayer.goto.h1"
 #define LOCALE_MOVIEPLAYER_GOTO_H2                 "movieplayer.goto.h2"
 #define LOCALE_MOVIEPLAYER_HEAD                    "movieplayer.head"
-//#define LOCALE_MOVIEPLAYER_NAME                    "movieplayer.name"                           /* FIXME: unused */
 #define LOCALE_MOVIEPLAYER_NOSTREAMINGSERVER       "movieplayer.nostreamingserver"
 #define LOCALE_MOVIEPLAYER_PESPLAYBACK             "movieplayer.pesplayback"
-//#define LOCALE_MOVIEPLAYER_PLAY                    "movieplayer.play"                           /* FIXME: unused */
 #define LOCALE_MOVIEPLAYER_PLEASEWAIT              "movieplayer.pleasewait"
 #define LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS        "movieplayer.toomanybookmarks"
 #define LOCALE_MOVIEPLAYER_TSHELP                  "movieplayer.tshelp"

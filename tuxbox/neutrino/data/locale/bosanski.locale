@@ -414,13 +414,6 @@ movieplayer.bookmarkname ime zapamcenog mjesta
 movieplayer.bookmarkname_hint1 Imenujte novo zapamceno mjesto
 movieplayer.bookmarkname_hint2
 movieplayer.buffering predraditi...
-movieplayer.choosepes odigrati pes
-movieplayer.chooseps odigrati ps
-movieplayer.choosestream streamati
-movieplayer.choosestreamdvd dvd
-movieplayer.choosestreamfile datoteka preko vlca
-movieplayer.choosestreamsvcd (s)vcd
-movieplayer.choosets odigrati ts
 movieplayer.defdir početni direktorij
 movieplayer.dvdplayback dvd
 movieplayer.fileplayback datoteka preko vlcea
@@ -428,10 +421,8 @@ movieplayer.goto Skacem prema ...
 movieplayer.goto.h1 = -> absolutni skok
 movieplayer.goto.h2 +,- -> relativni skok
 movieplayer.head promatrač filmova
-movieplayer.name promatrač filmova
 movieplayer.nostreamingserver Nije bilo moguće\nuspostaviti vezu sa streamingserverom.
 movieplayer.pesplayback odigrati pes (eksperimentalno)
-movieplayer.play odigrati
 movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nČekajte molim ...
 movieplayer.toomanybookmarks Previse mjesta su zapamcena.\nMora se prvo jedno drugo izbrisati.
 movieplayer.tsplayback odigrati ts

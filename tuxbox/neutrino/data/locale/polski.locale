@@ -421,13 +421,6 @@ movieplayer.bookmarkname Nazwa zaznaczenia
 movieplayer.bookmarkname_hint1 Podaj bowa nazwe dla zaznaczenia
 movieplayer.bookmarkname_hint2 
 movieplayer.buffering Buforuje...
-movieplayer.choosepes Odtwarzaj PES
-movieplayer.chooseps Odtwarzaj PS
-movieplayer.choosestream strumien
-movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile plik z VLC
-movieplayer.choosestreamsvcd (S)VCD
-movieplayer.choosets Odtwarzaj TS
 movieplayer.defdir folder startowy
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback Plik przez VLC
@@ -435,10 +428,8 @@ movieplayer.goto Skoch do ...
 movieplayer.goto.h1 = -> absolutny skok
 movieplayer.goto.h2 +,- -> relatywny skok
 movieplayer.head Odtwarzacz filmów 
-movieplayer.name Odtwarzacz filmów
 movieplayer.nostreamingserver Sreaming serwer nieosiagalny.
 movieplayer.pesplayback Odtwarzaj PES (Experymentalnie)
-movieplayer.play Start
 movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...
 movieplayer.toomanybookmarks Zostalo juz za duzo zaznaczone.\nMusisz najpierw jakies zaznaczenie zmazac.
 movieplayer.tsplayback Odtwarzaj TS

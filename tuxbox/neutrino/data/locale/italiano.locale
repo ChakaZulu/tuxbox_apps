@@ -414,13 +414,6 @@ movieplayer.bookmarkname Nome Bookmark
 movieplayer.bookmarkname_hint1 Inoltrare il Nome del nuovo Bookmark 
 movieplayer.bookmarkname_hint2 
 movieplayer.buffering Buffering...
-movieplayer.choosepes PES Play
-movieplayer.chooseps PS Play
-movieplayer.choosestream Streamen
-movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile File via VLC
-movieplayer.choosestreamsvcd (S)VCD
-movieplayer.choosets TS Play
 movieplayer.defdir Start-Directory.
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback File via VLC
@@ -428,10 +421,8 @@ movieplayer.goto Salta ad ...
 movieplayer.goto.h1 = -> Salto assoluto
 movieplayer.goto.h2 +,- -> Salto relativo
 movieplayer.head movieplayer
-movieplayer.name movieplayer
 movieplayer.nostreamingserver Nije bilo moguce\nuspostaviti vezu sa streamingserverom.
 movieplayer.pesplayback PES playback (Sperimentale)
-movieplayer.play Play
 movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...
 movieplayer.toomanybookmarks Lei ha gia creato troppi Bookmarks.\nEs prima deve Cancellare un altro.
 movieplayer.tsplayback TS playback
