@@ -2883,57 +2883,66 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		}
 		return messages_return::handled | messages_return::cancel_info;
 	}
-	else if( msg == CRCInput::RC_standby )
+	else if (msg == CRCInput::RC_standby)
 	{
 		if (data == 0)
 		{
-			// trigger StandBy
-			gettimeofday(&standby_pressed_at, NULL );
+			uint new_msg;
 
 			if (mode == mode_standby)
 			{
-				g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
+				new_msg = NeutrinoMessages::STANDBY_OFF;
 			}
-			else if( !g_settings.shutdown_real && !g_settings.shutdown_real_rcdelay )
+			else if ((g_settings.shutdown_real))
 			{
-				g_RCInput->postMsg( NeutrinoMessages::STANDBY_ON, 0 );
+				new_msg = NeutrinoMessages::SHUTDOWN;
 			}
-			else if( !g_settings.shutdown_real )
+			else
 			{
-				int timeout = 5;
-				int timeout1 = 5;
+                                /* Note: pressing the power button on the dbox (not the remote control) over 1 second */
+				/*       shuts down the system even if !g_settings.shutdown_real_rcdelay (see below)  */
+				gettimeofday(&standby_pressed_at, NULL);
 
-				sscanf(g_settings.repeat_blocker, "%d", &timeout);
-				timeout = int(timeout/100.0) + 5;
-				sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
-				timeout1 = int(timeout1/100.0) + 5;
-				if(timeout1>timeout)
-					timeout=timeout1;
+				new_msg = NeutrinoMessages::STANDBY_ON;
 
-				uint msg; uint data;
-				struct timeval endtime;
-				time_t seconds = 0;
-
-				do
+				if ((g_settings.shutdown_real_rcdelay))
 				{
-					g_RCInput->getMsg(&msg, &data, timeout );
+					uint msg;
+					uint data;
+					struct timeval endtime;
+					time_t seconds;
 
-					if( msg != CRCInput::RC_timeout )
+					int timeout = 0;
+					int timeout1 = 0;
+
+					sscanf(g_settings.repeat_blocker, "%d", &timeout);
+					sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
+
+					if (timeout1 > timeout)
+						timeout = timeout1;
+
+					timeout += 500;
+
+					while(true)
 					{
+						g_RCInput->getMsg_ms(&msg, &data, timeout);
+
+						if (msg == CRCInput::RC_timeout)
+							break;
+
 						gettimeofday(&endtime, NULL);
 						seconds = endtime.tv_sec - standby_pressed_at.tv_sec;
 						if (endtime.tv_usec < standby_pressed_at.tv_usec)
 							seconds--;
+						if (seconds >= 1)
+						{
+							new_msg = NeutrinoMessages::SHUTDOWN;
+							break;
+						}
 					}
-
-				} while ((msg != CRCInput::RC_timeout) && (seconds < 1));
-
-				g_RCInput->postMsg((seconds >= 1) ? NeutrinoMessages::SHUTDOWN : NeutrinoMessages::STANDBY_ON, 0);
+				}
 			}
-			else
-			{
-				g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
-			}
+			g_RCInput->postMsg(new_msg, 0);
 			return messages_return::cancel_all | messages_return::handled;
 		}
 		else                                        /* data == 1: KEY_POWER released                         */
@@ -2947,7 +2956,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 					seconds--;
 				if (seconds >= 1)
 				{
-					g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
+					g_RCInput->postMsg(NeutrinoMessages::SHUTDOWN, 0);
 					return messages_return::cancel_all | messages_return::handled;
 				}
 			}
