@@ -3009,17 +3009,13 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			/*       shuts down the system even if !g_settings.shutdown_real_rcdelay (see below)  */
 			gettimeofday(&standby_pressed_at, NULL);
 
-			if (mode == mode_standby)
-			{
-				new_msg = NeutrinoMessages::STANDBY_OFF;
-			}
-			else if ((g_settings.shutdown_real))
+			if ((mode != mode_standby) && (g_settings.shutdown_real))
 			{
 				new_msg = NeutrinoMessages::SHUTDOWN;
 			}
 			else
 			{
-				new_msg = NeutrinoMessages::STANDBY_ON;
+				new_msg = (mode == mode_standby) ? NeutrinoMessages::STANDBY_OFF : NeutrinoMessages::STANDBY_ON;
 
 				if ((g_settings.shutdown_real_rcdelay))
 				{
