@@ -856,9 +856,9 @@ eDVB::eDVB()
 	case 1:
 		new eAVSwitchNokia;
 		break;
-/*	case 2:
+	case 2:
 		new eAVSwitchPhilips;
-		break; */
+		break;
 	case 3:
 		new eAVSwitchSagem;
 		break;
