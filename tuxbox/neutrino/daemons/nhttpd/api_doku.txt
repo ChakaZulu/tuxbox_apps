@@ -465,7 +465,7 @@ Handler: http://dbox/control/gettime
 Parameter: keine
 Rückgabe:
 
-Es wird das Datum zurückgegeben.
+Es wird die Uhrzeit  zurückgegeben.
 
 Rückgabe-Format: hh:mm:ss
 
@@ -473,7 +473,19 @@ Beispiel:
 
 >>>http://dbox/control/gettime
 20:34:24
- 
+
+
+Parameter: rawtime
+Rückgabe:
+
+Es wird das Uhrzeit im time_t Format zurückgegeben.
+
+Rückgabe-Format: time_t
+
+Beispiel:
+
+>>>http://dbox/control/gettime?rawtime
+1046804654
 
 **********************************************************************************************
 10. Allgemeine Informationen abfragen

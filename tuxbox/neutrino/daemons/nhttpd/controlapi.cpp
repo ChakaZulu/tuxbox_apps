@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.17 2003/02/21 19:23:49 dirch Exp $
+	$Id: controlapi.cpp,v 1.18 2003/03/04 19:34:37 dirch Exp $
 
 	License: GPL
 
@@ -231,22 +231,28 @@ bool CControlAPI::GetDateCGI(CWebserverRequest *request)
 
 bool CControlAPI::GetTimeCGI(CWebserverRequest *request)
 {
+time_t now = time(NULL);
+
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size()==0)
 	{	//paramlos
 		char *timestr = new char[50];
-		time_t jetzt = time(NULL);
-		struct tm *tm = localtime(&jetzt);
+		struct tm *tm = localtime(&now);
 		strftime(timestr, 50, "%H:%M:%S\n", tm );	// aktuelles datum ausgeben
 		request->SocketWrite(timestr);
 		delete[] timestr;
 		return true;
 	}
-	else
+
+	if( request->ParameterList["1"].compare("rawtime") == 0)
 	{
-		request->SendError();
-		return false;
+		request->printf("%ld\n",now);
+		return true;
 	}
+
+	// if nothing matches
+	request->SendError();
+	return false;
 }
 //-------------------------------------------------------------------------
 
