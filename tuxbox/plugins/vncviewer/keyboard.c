@@ -9,7 +9,7 @@
 
 int *fbvnc_keymap;
 struct hbtn hbtn;
-
+static int caps_lock=0;
 static int keys_sent_map[N_SCANCODE];
 
 static int fbvnc_keymap_ps2_de[N_SCANCODE*4] = {
@@ -324,7 +324,7 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	XK_KP_Multiply, 0, 0, 0,
 	XK_Alt_L, 0, 0, 0,
 	XK_space, 0, 0, 0,
-	XK_Control_L /* Caps_Lock */, 0, 0, 0,
+	XK_Caps_Lock , 0, 0, 0,
 	XK_F1, 0, 0, 0,
 	XK_F2, 0, 0, 0,			/* 60 */
 	XK_F3, 0, 0, 0,
@@ -473,6 +473,8 @@ key_special_action(int key)
 		cleanup_and_exit("Bye.", EXIT_OK);
 	} else if (key==XK_z && img_saved) {
 		show_pnm_image();
+	} else if (key==XK_Caps_Lock) {
+		caps_lock = !caps_lock;
 	}
 	return 1;
 }
@@ -495,7 +497,7 @@ key_map(int hwkey)
 			fn_action = 1;
 		}
 	}
-	if (btn_state[hbtn.shift_l] || btn_state[hbtn.shift_r]) {
+	if (btn_state[hbtn.shift_l] || btn_state[hbtn.shift_r] || caps_lock) {
 		if (fbvnc_keymap[pos+1]) pos++;
 	}
 	key = fbvnc_keymap[pos];
