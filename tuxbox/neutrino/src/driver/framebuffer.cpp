@@ -804,7 +804,9 @@ bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned c
 
 	if (!loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, 0, background))
 	{
-		delete[] background;
+		//delete[] background;
+		for (int i = 0; i < BACKGROUNDIMAGEWIDTH * 576; i++)
+			background[i] = 0;
 		return false;
 	}
 
