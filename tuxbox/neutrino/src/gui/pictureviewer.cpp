@@ -379,17 +379,12 @@ int CPictureViewerGui::show()
 		}
 		else if(msg==CRCInput::RC_help)
 		{
-			if(m_sort==FILENAME)
+			if (m_state == MENU)
 			{
-				m_sort=DATE;
-				std::sort(playlist.begin(),playlist.end(),comparePictureByDate);
+				std::string fullhelptext = g_Locale->getText(LOCALE_PICTUREVIEWER_HELP);
+				fullhelptext += "\n\nVersion: $Revision: 1.55 $";
+				ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 			}
-			else if(m_sort==DATE)
-			{
-				m_sort=FILENAME;
-				std::sort(playlist.begin(),playlist.end(),comparePictureByFilename);
-			}
-			update=true;
 		}
 		else if( msg == CRCInput::RC_1 )
 		{ 
@@ -399,17 +394,6 @@ int CPictureViewerGui::show()
 			else
 			{
 				m_viewer->Zoom(2.0/3);
-			}
-
-		}
-		else if( msg == CRCInput::RC_3 )
-		{ 
-			if(m_state==MENU)
-			{
-			}
-			else
-			{
-				m_viewer->Zoom(1.5);
 			}
 
 		}
@@ -423,6 +407,17 @@ int CPictureViewerGui::show()
 				m_viewer->Move(0,-50);
 			}
 		}
+		else if( msg == CRCInput::RC_3 )
+		{ 
+			if(m_state==MENU)
+			{
+			}
+			else
+			{
+				m_viewer->Zoom(1.5);
+			}
+
+		}
 		else if( msg == CRCInput::RC_4 )
 		{ 
 			if(m_state==MENU)
@@ -432,6 +427,20 @@ int CPictureViewerGui::show()
 			{
 				m_viewer->Move(-50,0);
 			}
+		}
+		else if ( msg == CRCInput::RC_5 )
+		{
+			if(m_sort==FILENAME)
+			{
+				m_sort=DATE;
+				std::sort(playlist.begin(),playlist.end(),comparePictureByDate);
+			}
+			else if(m_sort==DATE)
+			{
+				m_sort=FILENAME;
+				std::sort(playlist.begin(),playlist.end(),comparePictureByFilename);
+			}
+			update=true;
 		}
 		else if( msg == CRCInput::RC_6 )
 		{ 
@@ -569,6 +578,7 @@ void CPictureViewerGui::paintHead()
 	int ypos=y+0;
 	if(theight > 26)
 		ypos = (theight-26) / 2 + y ;
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 60, ypos );
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+ width- 30, ypos );
 //	printf("paintHead}\n");
 }
@@ -594,7 +604,8 @@ void CPictureViewerGui::paintFoot()
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + 1* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_PICTUREVIEWER_SHOW), COL_INFOBAR, 0, true); // UTF-8
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
+
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_5, x+ 0* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
 		std::string tmp = g_Locale->getText(LOCALE_PICTUREVIEWER_SORTORDER);
 		tmp += ' ';
 		if(m_sort==FILENAME)

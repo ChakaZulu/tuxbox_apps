@@ -101,6 +101,7 @@ audiomenu.ost ost
 audiomenu.stereo stereo
 audioplayer.add Add
 audioplayer.artist_title Artist, Title
+audioplayer.building_search_index building search index
 audioplayer.button_select_title_by_id search by ID
 audioplayer.button_select_title_by_name search by name
 audioplayer.defdir start dir.
@@ -129,6 +130,7 @@ audioplayer.playlist_fileoverwrite_title Overwrite?
 audioplayer.playlist_name filename of the play list
 audioplayer.playlist_name_hint1 Please enter the filename of the playlist
 audioplayer.playlist_name_hint2 The extension .m3u will be added automatically
+audioplayer.reading_files reading files
 audioplayer.repeat_on enable repeat mode
 audioplayer.rewind rewind
 audioplayer.save_playlist save play list
@@ -537,6 +539,7 @@ parentallock.parentallock Youth protection
 parentallock.prompt prompt for PIN
 pictureviewer.defdir start dir.
 pictureviewer.head Picture viewer
+pictureviewer.help menu mode\n OK display image\n 5 change sort order\n 0 do not scale pictur\n\ndiashow mode\n LEFT previous image\n RIGHT next image\n 5 change sort order\n HOME exit\n\nshow mode\n LEFT previous image\n RIGHT next image\n HOME exit\n 1 Zoom out\n 3 Zoom in\n 2 scroll up\n 4 scroll left\n 6 scroll right\n scroll down\n 5 change sort order\n 0 reread image (no scaling)\n OK reread image
 pictureviewer.resize.color_average advanced
 pictureviewer.resize.none none
 pictureviewer.resize.simple simple
