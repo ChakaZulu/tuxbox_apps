@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.9 2003/10/24 22:45:04 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.10 2003/10/25 19:11:49 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.9 2003/10/24 22:45:04 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.10  2003/10/25 19:11:49  rasc
+no message
+
 Revision 1.9  2003/10/24 22:45:04  rasc
 code reorg...
 
@@ -51,6 +54,8 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 #include "dvbsnoop.h"
 #include "dvb_descriptor.h"
+#include "strings/dvb_str.h"
+#include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
@@ -743,15 +748,6 @@ void descriptorDVB_Linkage (u_char *b)
     u_int      original_network_id;
     u_int      service_id;
     u_int      linkage_type;
-
-    // if linkage_type == 8
-    // the following field are conditional!!
-    u_int      handover_type;
-    u_int      reserved_1; 
-    u_int      origin_type;
-    u_int      network_id;
-    u_int      initial_service_id;
-
  } descLinkage;
 
 
@@ -781,11 +777,13 @@ void descriptorDVB_Linkage (u_char *b)
  b  += 7 + 2;
 
  indent (+1);
- if (d.linkage_type != 0x08) {
 
-    if (d.linkage_type == 0x0B) {		/* EN 301 192 */
+    if (d.linkage_type == 0x08) {		/* EN 300 468 */
+        sub_descriptorDVB_Linkage0x08 (b, len);
+
+    } else if (d.linkage_type == 0x0B) {	/* EN 301 192  DSM-CC */
         sub_descriptorDVB_Linkage0x0B (b, len);
-    } else if (d.linkage_type == 0x0C) {	/* EN 301 192 */
+    } else if (d.linkage_type == 0x0C) {	/* EN 301 192  DSM-CC */
         sub_descriptorDVB_Linkage0x0C (b, len);
     } else {
     	// private data
@@ -793,7 +791,33 @@ void descriptorDVB_Linkage (u_char *b)
     	printhexdump_buf (4, b,len);
     }
 
- } else {
+ indent (-1);
+
+}
+
+
+/*
+ * DVB Linkage Subdescriptor  0x08
+ */
+
+void sub_descriptorDVB_Linkage0x08 (u_char *b, int len)
+{
+ /* ETSI 300 468   6.2.xx */
+
+ typedef struct  _descLinkage0x08 {
+    u_int      handover_type;
+    u_int      reserved_1; 
+    u_int      origin_type;
+    u_int      network_id;
+    u_int      initial_service_id;
+
+ } descLinkage0x08;
+
+
+ descLinkage0x08  d;
+
+
+
     d.handover_type		= getBits (b, 0, 0, 4);
     d.reserved_1		= getBits (b, 0, 4, 3);
     d.origin_type		= getBits (b, 0, 7, 1);
@@ -829,17 +853,13 @@ void descriptorDVB_Linkage (u_char *b)
        out_nl (4,"Private data:"); 
        printhexdump_buf (4, b,len);
     }
-    
-
- } //if
- indent (-1);
 
 }
 
 
 
 /*
- * -- as defined as private data for DSM-CC
+ * -- as defined as private data for DSM-CC  
  * -- in EN 301 192
  */
 
@@ -935,7 +955,7 @@ void sub_descriptorDVB_Linkage0x0C (u_char *b, int len)
  descLinkage0x0C  d;
 
  d.table_id				= getBits (b, 0,  0, 8);
- out_S2W_NL  (4,"Table_id: ",d.table_id, dvbstrLinkage0CTable_TYPE(d.table_id));
+ out_S2W_NL  (4,"Table_id: ",d.table_id, dsmccStrLinkage0CTable_TYPE(d.table_id));
 
  if (d.table_id == 2) {
 	d.bouquet_id			= getBits (b, 0,  8, 16);
@@ -943,6 +963,15 @@ void sub_descriptorDVB_Linkage0x0C (u_char *b, int len)
  }
 
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2689,7 +2718,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
  		e.max_sections_per_datagram = getBits (b, 0,  8,  8);
 
  		out_S2B_NL (5,"MAC_address_range: ",e.MAC_address_range,
-			dvbstrMultiProtEncapsMACAddrRangeField (e.MAC_address_range) );
+			dsmccStrMultiProtEncapsMACAddrRangeField (e.MAC_address_range) );
  		out_SB_NL (5,"MAC_ip_mapping_flag: ",e.MAC_ip_mapping_flag);
  		out_S2B_NL (5,"alignment_indicator: ",e.alignment_indicator,
 					(e.alignment_indicator) ?"32 bit": "8 bit");
@@ -2832,7 +2861,7 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 		   len2 -= 5;
 
  		   out_SL_NL  (5,"Platform_id: ",d.platform_id);	/* $$$$ TODO: platform_id_str nach EN 162 */
- 		   out_SB_NL  (5,"Action_type: ",d.action_type);
+ 		   out_S2B_NL  (5,"Action_type: ",d.action_type,dsmccStrAction_Type(d.action_type));
  		   out_SB_NL  (5,"reserved: ",d.reserved);
  		   out_SB_NL  (5,"INT_versioning_flag: ",d.INT_versioning_flag);
  		   out_SB_NL  (5,"INT_version: ",d.INT_version);

@@ -1,5 +1,5 @@
 /*
-$Id: ints.c,v 1.3 2003/10/24 22:17:14 rasc Exp $
+$Id: ints.c,v 1.4 2003/10/25 19:11:49 rasc Exp $
 
    INT Section
    IP/MAC Notification Section
@@ -9,6 +9,9 @@ $Id: ints.c,v 1.3 2003/10/24 22:17:14 rasc Exp $
 
 
 $Log: ints.c,v $
+Revision 1.4  2003/10/25 19:11:49  rasc
+no message
+
 Revision 1.3  2003/10/24 22:17:14  rasc
 code reorg...
 
@@ -28,6 +31,9 @@ no message
 #include "dvbsnoop.h"
 #include "ints.h"
 #include "descriptors/descriptor.h"
+// DSM-Secriptors TODO
+#include "strings/dvb_str.h"
+#include "strings/dsmcc_str.h"
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.1 2003/10/16 19:02:28 rasc Exp $
+$Id: dsmcc_str.c,v 1.2 2003/10/25 19:11:50 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,9 @@ $Id: dsmcc_str.c,v 1.1 2003/10/16 19:02:28 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.2  2003/10/25 19:11:50  rasc
+no message
+
 Revision 1.1  2003/10/16 19:02:28  rasc
 some updates to dvbsnoop...
 - small bugfixes
@@ -104,5 +107,139 @@ char *dsmccStrMHPOrg (u_int id)
 
   return findTableID (TableIDs, id);
 }
+
+
+
+
+/*
+  --  Action Type (Linkage) EN 301 192 7.6.x
+*/
+
+char *dsmccStrAction_Type (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "reserved" },
+	{ 0x01, 0x01,   "location of IP/MAC streams in DVB networks" },
+	{ 0x02, 0xff,   "reserved" },
+      {  0,0, NULL }
+  };
+
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+/*
+  --  Processing Order (INT)   EN 301 192
+*/
+
+char *dsmccStrProcessing_order (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "first action" },
+	{ 0x01, 0xfe,   "subsequent actions (ascending)" },
+	{ 0xff, 0xff,   "no ordering implied" },
+      {  0,0, NULL }
+  };
+
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+/*
+  --  Payload scrambling control (INT)   EN 301 192
+  --  Address scrambling control (INT)   EN 301 192
+*/
+
+char *dsmccStrPayload_scrambling_control (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "unscrambled" },
+	{ 0x01, 0x03,   "defined by service" },
+      {  0,0, NULL }
+  };
+
+
+  return findTableID (TableIDs, id);
+}
+
+
+char *dsmccStrAddress_scrambling_control (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "unscrambled" },
+	{ 0x01, 0x03,   "defined by service" },
+      {  0,0, NULL }
+  };
+
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+ * -- LinkageDescriptor0x0C Table_type  EN301192
+ *
+ */
+
+char *dsmccStrLinkage0CTable_TYPE (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "not defined" },
+     {  0x01, 0x01,  "NIT" },
+     {  0x02, 0x02,  "BAT" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+
+/*
+ * -- MultiProtocolEncapsulationMACAddressRangeField
+ * -- EN 301 192
+ */
+
+char *dsmccStrMultiProtEncapsMACAddrRangeField (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "reserved" },
+     {  0x01, 0x01,  "6" },
+     {  0x02, 0x02,  "6,5" },
+     {  0x03, 0x03,  "6,5,4" },
+     {  0x04, 0x04,  "6,5,4,3" },
+     {  0x05, 0x05,  "6,5,4,3,2" },
+     {  0x06, 0x06,  "6,5,4,3,2,1" },
+     {  0x07, 0x07,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.10 2003/10/19 21:05:53 rasc Exp $ 
+$Id: dvb_str.h,v 1.11 2003/10/25 19:11:50 rasc Exp $ 
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -8,6 +8,9 @@ $Id: dvb_str.h,v 1.10 2003/10/19 21:05:53 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.11  2003/10/25 19:11:50  rasc
+no message
+
 Revision 1.10  2003/10/19 21:05:53  rasc
 - some datacarousell stuff started
 
@@ -93,9 +96,6 @@ char *dvbstrPESscrambling_ctrl_TYPE(u_int id);
 
 char *dvbstrCountryCode_ID (u_int i);
 char *dvbstrPrivateDataSpecifier_ID (u_int i);
-
-char *dvbstrLinkage0CTable_TYPE (u_int i);
-char *dvbstrMultiProtEncapsMACAddrRangeField (u_int i);
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.17 2003/10/21 19:54:43 rasc Exp $
+$Id: dvb_str.c,v 1.18 2003/10/25 19:11:50 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.17 2003/10/21 19:54:43 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.18  2003/10/25 19:11:50  rasc
+no message
+
 Revision 1.17  2003/10/21 19:54:43  rasc
 no message
 
@@ -1755,9 +1758,7 @@ char *dvbstrTS_ScramblingCtrl_TYPE (u_int i)
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "not scrambled" },
-     {  0x01, 0x01,  "user defined (scrambled?)" },
-     {  0x02, 0x02,  "user defined (scrambled?)" },
-     {  0x03, 0x03,  "user defined (scrambled?)" },
+     {  0x01, 0x03,  "user defined (scrambled?)" },
      {  0,0, NULL }
   };
 
@@ -2290,49 +2291,5 @@ char *dvbstrBouquetTable_ID (u_int i)
 
 
 
-
-/*
- * -- LinkageDescriptor0x0C Table_type  EN301192
- *
- */
-
-char *dvbstrLinkage0CTable_TYPE (u_int i)
-
-{
-  STR_TABLE  Table[] = {
-     {  0x00, 0x00,  "not defined" },
-     {  0x01, 0x01,  "NIT" },
-     {  0x02, 0x02,  "BAT" },
-     {  0,0, NULL }
-  };
-
-  return findTableID (Table, i);
-}
-
-
-
-
-/*
- * -- MultiProtocolEncapsulationMACAddressRangeField
- * -- EN 301 192
- */
-
-char *dvbstrMultiProtEncapsMACAddrRangeField (u_int i)
-
-{
-  STR_TABLE  Table[] = {
-     {  0x00, 0x00,  "reserved" },
-     {  0x01, 0x01,  "6" },
-     {  0x02, 0x02,  "6,5" },
-     {  0x03, 0x03,  "6,5,4" },
-     {  0x04, 0x04,  "6,5,4,3" },
-     {  0x05, 0x05,  "6,5,4,3,2" },
-     {  0x06, 0x06,  "6,5,4,3,2,1" },
-     {  0x07, 0x07,  "reserved" },
-     {  0,0, NULL }
-  };
-
-  return findTableID (Table, i);
-}
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.4 2003/10/24 22:17:14 rasc Exp $
+$Id: datagram.c,v 1.5 2003/10/25 19:11:49 rasc Exp $
 
    DATAGRAM section
    DSM-CC Data Carousel  EN 301 192 
@@ -8,20 +8,14 @@ $Id: datagram.c,v 1.4 2003/10/24 22:17:14 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.5  2003/10/25 19:11:49  rasc
+no message
+
 Revision 1.4  2003/10/24 22:17:14  rasc
 code reorg...
 
-Revision 1.3  2003/10/21 21:31:29  rasc
-no message
-
-Revision 1.2  2003/10/21 19:54:44  rasc
-no message
-
 Revision 1.1  2003/10/19 22:22:58  rasc
 - some datacarousell stuff started
-
-
-
 
 */
 
@@ -30,7 +24,10 @@ Revision 1.1  2003/10/19 22:22:58  rasc
 
 #include "dvbsnoop.h"
 #include "datagram.h"
-#include "descriptors/descriptor.h"
+#include "strings/dvb_str.h"
+#include "strings/dsmcc_str.h"
+#include "misc/hexprint.h"
+#include "misc/output.h"
 
 
 
@@ -72,14 +69,13 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
     u_int      stuffing_bytes;
 
     // conditional
-    unsigned long checksum;
-    unsigned long crc;
+    unsigned long crc_checksum;
  } DATAGRAM;
 
 
 
  DATAGRAM   d;
- int        len1,len2;
+ int        len1;
 
 
  d.table_id 			 = b[0];
@@ -104,7 +100,9 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
  d.MAC_addr2			 = getBits (b, 0, 80, 8);
  d.MAC_addr1			 = getBits (b, 0, 88, 8);
     	// MAC-Bits:  MSB first ! 
-
+	
+ b += 12;
+ len1 = d.section_length - 9;
 
 
  out_nl (3,"DATAGRAM-decoding....");
@@ -123,8 +121,12 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
  out_SB_NL (5,"MAC_addr_byte 6: ",d.MAC_addr6);
  out_SB_NL (5,"MAC_addr_byte 5: ",d.MAC_addr5);
  out_SB_NL (6,"reserved_2: ",d.reserved_2);
- out_SB_NL (3,"payload_scrambling_control: ",d.payload_scrambling_control);  // $$$$ TODO
- out_SB_NL (3,"address_scrambling_control: ",d.address_scrambling_control);  // $$$$ TODO
+
+ out_S2B_NL (3,"payload_scrambling_control: ",d.payload_scrambling_control,
+		 dsmccStrPayload_scrambling_control(d.payload_scrambling_control));
+ out_S2B_NL (3,"address_scrambling_control: ",d.address_scrambling_control,
+		 dsmccStrAddress_scrambling_control(d.address_scrambling_control));
+
  out_SB_NL (3,"LLC_SNAP_flag: ",d.LLC_SNAP_flag);
 
  out_SB_NL (3,"Current_next_indicator: ",d.current_next_indicator);
@@ -141,15 +143,21 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
 
  if (d.LLC_SNAP_flag == 0x01) {
 	 /*  ISO/IEC 8802-2   */
-
 	 /* $$$ TODO   ...... */
-
-
+	 out_nl (3, "LLC_SNAP data:");
+	 indent (+1);
+	 printhexdump_buf (4,b,len1-2);
+	 indent (-1);
  } else {
-	 /* $$$  TODO */
-	 out_nl (1, "...TODO.... IP datagram data bytes output ");
-
+	 out_nl (3, "IP_datagram_bytes:");
+	 indent (+1);
+	 printhexdump_buf (4,b,len1-2);
+	 indent (-1);
  }
+
+ b += (len1 - 2);
+
+
 
   
  // $$$$ unknown 
@@ -161,18 +169,13 @@ void decode_DATAGRAM_DSMCC (u_char *b, int len)
 
 
 
+ d.crc_checksum		 = getBits (b, 0, 0, 32);
 
- out_nl (1," ...TODO.. to be finished... ");
-/*
- *
- * .... $$$$$$ TODO
- * */
-
-
-
-
-
-
+ if (d.section_syntax_indicator) {
+     out_SB_NL (5,"CRC: ",d.crc_checksum);
+ } else {
+     out_SB_NL (5,"Checksum: ",d.crc_checksum);
+ }
 
 
 }

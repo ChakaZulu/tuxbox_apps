@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.5 2003/10/24 22:45:04 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.6 2003/10/25 19:11:49 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,9 @@ $Id: mpeg_descriptor.c,v 1.5 2003/10/24 22:45:04 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.6  2003/10/25 19:11:49  rasc
+no message
+
 Revision 1.5  2003/10/24 22:45:04  rasc
 code reorg...
 
@@ -33,6 +36,8 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 #include "dvbsnoop.h"
 #include "mpeg_descriptor.h"
+#include "strings/dvb_str.h"
+#include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
@@ -1005,8 +1010,7 @@ void descriptorMPEG_MPEG4_audio (u_char *b)
 
  d.mpeg4_audio_profile_and_level = getBits (b, 0, 16, 8);
 
- out_SB_NL (4,"MPEG4 audio profile and level: ",d.mpeg4_audio_profile_and_level);
- /* $$$  Table .... */
+ out_SB_NL (4,"MPEG4 audio profile and level: ",d.mpeg4_audio_profile_and_level); /* $$$  Table .... */
 
 }
 
