@@ -5,6 +5,8 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.18: hide navbar in newsflash/subtitle mode, workaround for gtx-pig   *
+ *    V1.17: some mods by AlexW                                               *
  *    V1.16: colorkeys fixed                                                  *
  *    V1.15: added colorkeys                                                  *
  *    V1.14: use videoformat-settings                                         *
@@ -33,7 +35,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.16 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.18 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -192,6 +194,15 @@ int Init()
 	int error;
 	int fnc_169 = AVS_FNCOUT_EXT169;
 
+	//get mID -> workaround for pig on gtx
+
+		mID = atoi(getenv("mID"));
+		if(mID == 0)
+		{
+			printf("TuxTxt <mID not found>\n");
+			return 0;
+		}
+
 	//open demuxer
 
 		if((dmx = open("/dev/ost/demux0", O_RDWR)) == -1)
@@ -306,6 +317,10 @@ int Init()
 
 		page	 = 0x100;
 		lastpage = 0x100;
+		prev_100 = 0x100;
+		prev_10  = 0x100;
+		next_100 = 0x100;
+		next_10  = 0x100;
 		subpage	 = 0;
 
 		pageupdate = 0;
@@ -725,7 +740,6 @@ void Prev100()
 
 	lastpage = page;
 	page = prev_100;
-	if(page == 0) page = lastpage;
 	subpage = subpagetable[page];
 	pageupdate = 1;
 
@@ -742,7 +756,6 @@ void Prev10()
 
 	lastpage = page;
 	page = prev_10;
-	if(page == 0) page = lastpage;
 	subpage = subpagetable[page];
 	pageupdate = 1;
 
@@ -759,7 +772,6 @@ void Next10()
 
 	lastpage = page;
 	page = next_10;
-	if(page == 0) page = lastpage;
 	subpage = subpagetable[page];
 	pageupdate = 1;
 
@@ -776,7 +788,6 @@ void Next100()
 
 	lastpage = page;
 	page = next_100;
-	if(page == 0) page = lastpage;
 	subpage = subpagetable[page];
 	pageupdate = 1;
 
@@ -1051,7 +1062,8 @@ void SwitchScreenMode()
 			fontwidth  =  8;
 			fontheight = 21;
 
-			avia_pig_set_pos(pig, (StartX+322), StartY);
+			if(mID == 1) avia_pig_set_pos(pig, (StartX+322-55), StartY);
+			else		 avia_pig_set_pos(pig, (StartX+322), StartY);
 			avia_pig_set_size(pig, 320, 526);
 			avia_pig_set_stack(pig, 2);
 			avia_pig_show(pig);
@@ -1479,7 +1491,8 @@ void CreateLine25()
 
 		for(byte = 0; byte < 40; byte++)
 		{
-			RenderCharBB(line25[byte], line25[byte + 40]);
+			if(boxed) RenderCharBB(' ', transp<<4 | transp);
+			else	  RenderCharBB(line25[byte], line25[byte + 40]);
 		}
 }
 
@@ -1538,7 +1551,7 @@ void CopyBB2FB()
 void DecodePage()
 {
 	int row, col;
-	int boxed = 0, hold, clear, loop;
+	int hold, clear, loop;
 	int foreground, background, doubleheight, charset;
 	unsigned char held_mosaic;
 
@@ -1554,6 +1567,7 @@ void DecodePage()
 	//check for newsflash & subtitle
 
 		if(dehamming[page_char[11-6]] & 12 && !screenmode) boxed = 1;
+		else											   boxed = 0;
 
 	//modify header
 

@@ -170,13 +170,15 @@ FT_Face		face;
 
 //some data
 
+int mID;
+
 int dmx, pig, avs, rc, fb;
 int sx, ex, sy, ey;
 int vtxtpid;
 int PosX, PosY, StartX, StartY;
 int current_page, current_subpage, page, subpage, lastpage, pageupdate, zap_subpage_manual;
 int inputcounter;
-int zoommode, screenmode, transpmode, hintmode;
+int zoommode, screenmode, transpmode, hintmode, boxed;
 int fontwidth, fontheight;
 int vidformat, fnc_old;
 int catch_row, catch_col, catched_page;
