@@ -1,8 +1,8 @@
 INCLUDES = \
 	-I$(top_srcdir)/include
 
-lib_LTLIBRARIES = libenigma_base.la
+noinst_LIBRARIES = libenigma_base.a
 
-libenigma_base_la_SOURCES = \
+libenigma_base_a_SOURCES = \
 	ebase.cpp erect.cpp message.cpp thread.cpp estring.cpp eerror.cpp buffer.cpp console.cpp
 

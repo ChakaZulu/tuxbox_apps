@@ -1,8 +1,8 @@
 INCLUDES = \
 	-I$(top_srcdir)/include
 
-lib_LTLIBRARIES = libenigma_socket.la
+noinst_LIBRARIES = libenigma_socket.a
 
-libenigma_socket_la_SOURCES = \
+libenigma_socket_a_SOURCES = \
 	serversocket.cpp socket.cpp
 

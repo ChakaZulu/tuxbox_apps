@@ -1,10 +1,8 @@
 INCLUDES = \
 	-I$(top_srcdir)/include
 
-lib_LTLIBRARIES = libenigma_codecs.la
+noinst_LIBRARIES = libenigma_codecs.a
 
-libenigma_codecs_la_SOURCES = \
+libenigma_codecs_a_SOURCES = \
 	codecmp3.cpp codec.cpp pic.cpp
-	
-# picjpeg.cpp
 

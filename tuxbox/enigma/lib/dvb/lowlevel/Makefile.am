@@ -1,7 +1,7 @@
 INCLUDES = \
 	-I$(top_srcdir)/include
 
-lib_LTLIBRARIES = libenigma_dvb_lowlevel.la
+noinst_LIBRARIES = libenigma_dvb_lowlevel.a
 
-libenigma_dvb_lowlevel_la_SOURCES = decode.cpp
+libenigma_dvb_lowlevel_a_SOURCES = decode.cpp
 
