@@ -40,7 +40,7 @@ mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Siet
 mainsettings.colors Farby
-mainsettings.keybinding nastavenie klavesnice
+mainsettings.keybinding nastavenie dial. ovladania
 mainsettings.misc ine nastavenia
 mainsettings.scan Scan settings
 
@@ -116,14 +116,14 @@ colormenusetup.menucontent_selected obsah okna vybrany
 colorstatusbar.head farba ukazovatela
 colorstatusbar.text ukazovatel
 
-repeatblocker.hint_1 najkratsi cas (ms) medzi 2 stlaceniami klavesy
+repeatblocker.hint_1 najkratsi cas (ms) medzi 2 stlaceniami tlacitka
 repeatblocker.hint_2 0 vypina blokator (cervena je " ")
 
 keybindingmenu.RC Dialkove ovladanie
-keybindingmenu.repeatblock Blokator opakovania klavesy
+keybindingmenu.repeatblock Blokator opakovania tlacitka
 keybindingmenu.repeatblock Oddialenie opakovania
 keybindingmenu.repeatblockgeneric Zacatie oddialenia
-keybindingmenu.head Nastavenie klavesov
+keybindingmenu.head Nastavenie tlacitka
 keybindingmenu.modechange Zmena modusu
 keybindingmenu.channellist Zoznam kanalov
 keybindingmenu.quickzap Rychloprepinanie
@@ -157,19 +157,19 @@ colorchooser.green zelena
 colorchooser.blue modra
 colorchooser.alpha alpha
 
-keychoosermenu.setnew novu klavesu nastavit
-keychoosermenu.setnone ziadna klavesa
-keychoosermenu.currentkey aktualna klavesa
+keychoosermenu.setnew nove tlacitko nastavit
+keychoosermenu.setnone ziadne tlacitko
+keychoosermenu.currentkey aktualne tlacitko
 
-keychooser.head novu klavesu nastavit
-keychooser.text1 prosim stlacte novu klavesu
+keychooser.head nove tlacitko nastavit
+keychooser.text1 prosim stlacte nove tlacitko
 keychooser.text2 cakajte na prerusenie
 
 screensetup.upperleft cervena = obraz hore vlavo
 screensetup.lowerright zelena = obraz dole vpravo
 
 channellist.head Vsetky kanaly
-channellist.nonefound Neboli najdene ziadne kanaly!\nPrevedte hladanie kanalov\n(dbox-klavesa -> service menu)
+channellist.nonefound Neboli najdene ziadne kanaly!\nPrevedte hladanie kanalov\n(dbox-tlacitko -> service menu)
 channellist.since od %02d:%02d
 
 infoviewer.epgnotload EPG not loaded...
@@ -177,7 +177,7 @@ infoviewer.epgwait cakam na EPG...
 infoviewer.streaminfo prid. sluzby
 infoviewer.eventlist Prehl. prog
 infoviewer.languages vyber jazyk
-infoviewer.notavailable kanal momentane nie je k dispozicii
+infoviewer.notavailable kanal momentalne nie je k dispozicii
 infoviewer.cantdecode kanal nemoze byt dekodovany
 infoviewer.selecttime casy startu
 infoviewer.nocurrent ziadna informacia k aktualnemu programu
