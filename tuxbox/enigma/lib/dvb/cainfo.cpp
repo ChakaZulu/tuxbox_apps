@@ -6,7 +6,7 @@ static t_CASystems CASystems[] =
 	/*  CaID */
 	{0, 0x17}, // betacrypt
 	{0, 0x06}, // irdeto
-	{0, 0x01}, // irdeto
+	{0, 0x01}, // seca 
 	{0, 0x05}, // via
 	{0, 0x18}, // nagra
 	{0, 0x09}, // nds
