@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.2 2002/09/21 20:20:05 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.3 2002/10/05 15:25:32 obi Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -44,11 +44,6 @@
 #define FRONTEND_DEVICE "/dev/dvb/card0/frontend0"
 #define SEC_DEVICE      "/dev/dvb/card0/sec0"
 #define VIDEO_DEVICE    "/dev/dvb/card0/video0"
-
-
-#ifdef DBOX2
-#define VBI_DEVICE      "/dev/dbox/vbi0"
-#endif
 
 
 #define CAMD_UDS_NAME  "/tmp/camd.socket"

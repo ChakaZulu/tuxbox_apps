@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.253 2002/10/04 18:25:17 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.254 2002/10/05 15:25:32 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -34,11 +34,6 @@
 #include <sys/un.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-/* d-box specific headers */
-#ifdef DBOX2
-#include <dbox/avia_gt_vbi.h>
-#endif
 
 /* tuxbox headers */
 #include <configfile.h>
@@ -111,10 +106,9 @@ bool current_is_nvod;
 
 /* file descriptors */
 int dmx_audio_fd = -1;
-int dmx_general_fd = -1;
 int dmx_pcr_fd = -1;
+int dmx_teletext_fd = -1;
 int dmx_video_fd = -1;
-int vbi_fd = -1;
 
 /* list of all channels (services) */
 tallchans allchans;             //  tallchans defined in "bouquets.h"
@@ -149,14 +143,14 @@ void CZapitDestructor()
 
 	stopPlayBack();
 
-	if (dmx_video_fd != -1)
-		close(dmx_video_fd);
 	if (dmx_audio_fd != -1)
 		close(dmx_audio_fd);
 	if (dmx_pcr_fd != -1)
 		close(dmx_pcr_fd);
-	if (dmx_general_fd != -1)
-		close(dmx_general_fd);
+	if (dmx_teletext_fd != -1)
+		close(dmx_teletext_fd);
+	if (dmx_video_fd != -1)
+		close(dmx_video_fd);
 
 	delete cam;
 	delete video;
@@ -180,60 +174,6 @@ void signal_handler (int signum)
 			CZapitDestructor();
 	}
 }
-
-#ifdef DBOX2
-/*
- * return 0 on success or if nothing to do
- * return -1 otherwise
- */
-int startVbi ()
-{
-	if ((channel->getTeletextPid() == NONE) || (channel->getTeletextPid() >= INVALID))
-	{
-		return -1;
-	}
-
-	if ((vbi_fd == -1) && ((vbi_fd = open(VBI_DEVICE, O_RDWR)) < 0))
-	{
-		perror ("[zapit] " VBI_DEVICE);
-		return -1;
-	}
-
-	if (ioctl(vbi_fd, AVIA_VBI_START_VTXT, channel->getTeletextPid()) < 0)
-	{
-		perror("[zapit] VBI_START_VTXT");
-		close(vbi_fd);
-		vbi_fd = -1;
-		return -1;
-	}
-
-	return 0;
-}
-
-/*
- * return 0 on success or if nothing to do
- * return -1 otherwise
- */
-int stopVbi ()
-{
-	if (vbi_fd == -1)
-	{
-		return 0;
-	}
-
-	if (ioctl(vbi_fd, AVIA_VBI_STOP_VTXT, 0) < 0)
-	{
-		perror("[zapit] VBI_STOP_VTXT");
-		close(vbi_fd);
-		vbi_fd = -1;
-		return -1;
-	}
-
-	close(vbi_fd);
-	vbi_fd = -1;
-	return 0;
-}
-#endif /* DBOX2 */
 
 void save_settings (bool write)
 {
@@ -1076,7 +1016,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.253 2002/10/04 18:25:17 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.254 2002/10/05 15:25:32 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1396,62 +1336,56 @@ void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder 
 
 int startPlayBack()
 {
-	bool have_audio = false;
 	bool have_pcr = false;
+	bool have_audio = false;
 	bool have_video = false;
+	bool have_teletext = false;
 
 	if (playbackStopForced == true)
 		return -1;
 
-	if ((dmx_pcr_fd == -1) && (dmx_pcr_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
-	{
+	if ((dmx_pcr_fd == -1) && (dmx_pcr_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
 		perror("[zapit] " DEMUX_DEVICE);
 		return -1;
 	}
-
-	if ((dmx_audio_fd == -1) && (dmx_audio_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
-	{
+	if ((dmx_audio_fd == -1) && (dmx_audio_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
 		perror("[zapit] " DEMUX_DEVICE);
 		return -1;
 	}
-
-	if ((dmx_video_fd == -1) && (dmx_video_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
-	{
+	if ((dmx_video_fd == -1) && (dmx_video_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
 		perror("[zapit] " DEMUX_DEVICE);
 		return -1;
 	}
-
-	if (channel->getAudioPid() != 0)
-		have_audio = true;
+	if ((dmx_teletext_fd == -1) && (dmx_teletext_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
+		perror("[zapit] " DEMUX_DEVICE);
+		return -1;
+	}
 
 	if (channel->getPcrPid() != 0)
 		have_pcr = true;
-
+	if (channel->getAudioPid() != 0)
+		have_audio = true;
 	if ((channel->getVideoPid() != 0) && (currentMode & TV_MODE))
 		have_video = true;
+	if (channel->getTeletextPid() != 0)
+		have_teletext = true;
 
 	if ((!have_audio) && (!have_video))
 		return -1;
 
 	/* set demux filters */
 	if (have_pcr)
-		setDmxPesFilter(dmx_pcr_fd, DMX_OUT_DECODER, DMX_PES_PCR, channel->getPcrPid());
-
+		if (setDmxPesFilter(dmx_pcr_fd, DMX_OUT_DECODER, DMX_PES_PCR, channel->getPcrPid()) < 0)
+			return -1;
 	if (have_audio)
-		setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid());
-#ifdef DBOX2
-	/* FIXME: what happens on other devices, when setting an invalid pid? */
-	else
-		setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, 0xFFFF);
-#endif
-
+		if (setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid()) < 0)
+			return -1;
 	if (have_video)
-		setDmxPesFilter(dmx_video_fd, DMX_OUT_DECODER, DMX_PES_VIDEO, channel->getVideoPid());
-#ifdef DBOX2
-	/* FIXME: what happens on other devices, when setting an invalid pid? */
-	else
-		setDmxPesFilter(dmx_video_fd, DMX_OUT_DECODER, DMX_PES_VIDEO, 0xFFFF);
-#endif
+		if (setDmxPesFilter(dmx_video_fd, DMX_OUT_DECODER, DMX_PES_VIDEO, channel->getVideoPid()) < 0)
+			return -1;
+	if (have_teletext)
+		if (setDmxPesFilter(dmx_teletext_fd, DMX_OUT_DECODER, DMX_PES_TELETEXT, channel->getTeletextPid()) < 0)
+			return -1;
 
 	if (have_video) {
 		/* start video */
@@ -1473,81 +1407,17 @@ int startPlayBack()
 
 	/* start demux filters */
 	if (have_pcr)
-		startDmxFilter(dmx_pcr_fd);
+		if (startDmxFilter(dmx_pcr_fd) < 0)
+			return -1;
 	if (have_audio)
-		startDmxFilter(dmx_audio_fd);
+		if (startDmxFilter(dmx_audio_fd) < 0)
+			return -1;
 	if (have_video)
-		startDmxFilter(dmx_video_fd);
-
-#if 0
-	if ((dmx_general_fd == -1) && (dmx_general_fd = open(DEMUX_DEVICE, O_RDWR)))
-	{
-		perror("[zapit] " DEMUX_DEVICE);
-		return -1;
-	}
-
-	setPesFilter(dmx_general_fd, DMX_OUT_TAP, DMX_PES_OTHER, channel->getAudioPid());
-
-	bool indicator = true;
-	struct pollfd pfd[1];
-	uint8_t i;
-	uint8_t buf[16384];
-	uint16_t j;
-	uint8_t k = 8;
-	ssize_t len;
-
-	pfd[0].fd = dmx_general_fd;
-	pfd[0].events = POLLIN;
-
-	if ((dmx_general_fd != -1) && (poll(pfd, 1, 1000) > 0) && (pfd[0].revents & POLLIN))
-	{
-		for (i = 0; i < k; i++)
-		{
-			if ((len = read(dmx_general_fd, buf, sizeof(buf))) < 0)
-			{
-				perror("[zapit] read");
-				break;
-			}
-
-			for (j = 0; j < len; j++)
-			{
-				if ((buf[j] == 0x00) && (buf[j+1] == 0x00) && (buf[j+2] == 0x01))
-				{
-					switch (buf[j+3])
-					{
-							case 0xC0 ... 0xDF:
-							if (((buf[j+6] >> 6) & 0x03) == 2)
-							{
-								if (((buf[j+6] >> 4) & 0x03) == 0)
-								{
-									indicator = false;
-								}
-							}
-							break;
-					}
-				}
-
-				if (indicator == false)
-				{
-					break;
-				}
-			}
-
-			if (indicator == false)
-			{
-				break;
-			}
-		}
-	}
-
-	unsetPesFilter(dmx_general_fd);
-
-	printf("[zapit] indicator: %d\n", indicator);
-#endif
-
-#ifdef DBOX2
-	startVbi();
-#endif /* DBOX2 */
+		if (startDmxFilter(dmx_video_fd) < 0)
+			return -1;
+	if (have_teletext)
+		if (startDmxFilter(dmx_teletext_fd) < 0)
+			return -1;
 
 	return 0;
 }
@@ -1557,13 +1427,10 @@ int stopPlayBack()
 	if (playbackStopForced == true)
 		return -1;
 
-#ifdef DBOX2
-	stopVbi();
-#endif /* DBOX2 */
-
 	audio->stop();
 	video->stop();
 
+	stopDmxFilter(dmx_teletext_fd);
 	stopDmxFilter(dmx_video_fd);
 	stopDmxFilter(dmx_audio_fd);
 	stopDmxFilter(dmx_pcr_fd);
