@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.55 2001/12/12 19:11:32 McClean Exp $
+// $Id: infoviewer.cpp,v 1.56 2001/12/13 00:51:52 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.56  2001/12/13 00:51:52  McClean
+// fix infobar - showepg-bug
+//
 // Revision 1.55  2001/12/12 19:11:32  McClean
 // prepare timing setup...
 //
@@ -551,6 +554,10 @@ void CInfoViewer::showData()
             }
         }
     }
+	if (!is_visible)
+	{
+		killTitle();
+	}
 }
 
 void CInfoViewer::showButtonAudio()
@@ -608,8 +615,8 @@ void CInfoViewer::killTitle()
     pthread_mutex_lock( &epg_mutex );
     if (is_visible )
     {
-    	g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
         is_visible = false;
+		g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
     }
     pthread_mutex_unlock( &epg_mutex );
 }
@@ -713,7 +720,6 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                 if ( InfoViewer->KillShowEPG )
                     repCount = 0;
 
-                pthread_mutex_unlock( &InfoViewer->epg_mutex );
 
                 if ( ( !requeryEPG) && ( InfoViewer->is_visible ) && ( !InfoViewer->KillShowEPG) )
 				{
@@ -724,6 +730,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                 {
 //                    printf("CInfoViewer::InfoViewerThread unsuccessful\n");
                 }
+                pthread_mutex_unlock( &InfoViewer->epg_mutex );
 
 
             } while ( ( requeryEPG ) && (repCount > 0) );
