@@ -1033,22 +1033,30 @@ void eFrontend::RotorStartLoop()
 //		eDebug("running %d mA", runningPowerInput);
 //		eDebug("delta %d mA", DeltaA);
 
-		if ( abs(runningPowerInput-idlePowerInput ) >= DeltaA ) // rotor running ?
+		if ( abs(runningPowerInput-idlePowerInput ) >= (DeltaA&0xFF) ) // rotor running ?
 		{
-			eDebug("Rotor is Running");
-			if ( !eDVB::getInstance()->getScanAPI() )
+			if ( (DeltaA & 0x200) == 0x200 )
 			{
-//				eDebug("ROTOR RUNNING EMIT");
-				/* emit */ s_RotorRunning( newPos );
-			}
+				eDebug("Rotor is Running");
 
-			// set rotor running timeout  // 150 sek
-			gettimeofday(&rotorTimeout,0);
-			rotorTimeout+=150000;
-			RotorRunningLoop();
+				if ( !eDVB::getInstance()->getScanAPI() )
+				{
+//					eDebug("ROTOR RUNNING EMIT");
+					/* emit */ s_RotorRunning( newPos );
+				}
+
+				// set rotor running timeout  // 150 sek
+				gettimeofday(&rotorTimeout,0);
+				rotorTimeout+=150000;
+				RotorRunningLoop();
+				return;
+			}
+			else
+				DeltaA+=0x100;
 		}
 		else
-			rotorTimer1.start(50,true);  // restart timer
+			DeltaA &= ~0xF00;
+		rotorTimer1.start(50,true);  // restart timer
 	}
 }
 
@@ -1068,28 +1076,50 @@ void eFrontend::RotorRunningLoop()
 			return;
 //		eDebug("running %d mA", runningPowerInput);
 
-		if ( abs( idlePowerInput-runningPowerInput ) <= DeltaA ) // rotor stoped ?
+		if ( abs( idlePowerInput-runningPowerInput ) <= (DeltaA&0xFF) ) // rotor stoped ?
 		{
-			eDebug("Rotor Stopped");
-			/* emit */ s_RotorStopped();
-			RotorFinish();
+			if ( (DeltaA & 0x200) == 0x200 )
+			{
+				eDebug("Rotor Stopped");
+				/* emit */ s_RotorStopped();
+				RotorFinish();
+				return;
+			}
+			else
+				DeltaA+=0x100;
 		}
 		else
-			rotorTimer2.start(50,true);  // restart timer
+			DeltaA &= ~0xF00;
+		rotorTimer2.start(50,true);  // restart timer
 	}
 }
 
 void eFrontend::RotorFinish(bool tune)
 {
-	if ( voltage != eSecCmdSequence::VOLTAGE_18 )
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	{
+		if ( voltage != eSecCmdSequence::VOLTAGE_18 )
 #if HAVE_DVB_API_VERSION < 3
-		if (ioctl(secfd, SEC_SET_VOLTAGE, increased ? SEC_VOLTAGE_13_5 : SEC_VOLTAGE_13) < 0 )
-			eDebug("SEC_SET_VOLTAGE failed (%m)");
+			if (ioctl(secfd, SEC_SET_VOLTAGE, increased ? SEC_VOLTAGE_13_5 : SEC_VOLTAGE_13) < 0 )
+				eDebug("SEC_SET_VOLTAGE failed (%m)");
 #else
-	 if ( ioctl(fd, FE_SET_VOLTAGE, voltage) < 0 )
-		eDebug("FE_SET_VOLTAGE failed (%m)");
-	curVoltage = voltage;
+		if ( ioctl(fd, FE_SET_VOLTAGE, voltage) < 0 )
+			eDebug("FE_SET_VOLTAGE failed (%m)");
+		curVoltage = voltage;
 #endif
+	}
+	else  // workaround.. fix later..
+	{
+		if ( voltage != eSecCmdSequence::VOLTAGE_13 )
+#if HAVE_DVB_API_VERSION < 3
+			if (ioctl(secfd, SEC_SET_VOLTAGE, increased ? SEC_VOLTAGE_18_5 : SEC_VOLTAGE_18) < 0 )
+				eDebug("SEC_SET_VOLTAGE failed (%m)");
+#else
+		 if ( ioctl(fd, FE_SET_VOLTAGE, voltage) < 0 )
+			eDebug("FE_SET_VOLTAGE failed (%m)");
+		curVoltage = voltage;
+#endif
+	}
 	curRotorPos=newPos;
 	if ( tune && transponder )
 		transponder->tune();
@@ -1436,8 +1466,8 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 		int polarisation, 			// polarisation (polHor, polVert, ...)
 		uint32_t SymbolRate,		// symbolrate in symbols/s (e.g. 27500000)
 		uint8_t FEC_inner,			// FEC_inner (-1 for none, 0 for auto, but please don't use that)
-		int Inversion,					// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
-		eSatellite &sat)				// Satellite Data.. LNB, DiSEqC, switch..
+		int Inversion,				// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
+		eSatellite &sat)			// Satellite Data.. LNB, DiSEqC, switch..
 {
 	tune_all(trans);
 	int finalTune=1;
@@ -1856,7 +1886,12 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 		// drive rotor with 18V when we can measure inputpower
 		// or we know which orbital pos currently is selected
 		if ( lnb->getDiSEqC().useRotorInPower&1 )
-			seq.voltage = eSecCmdSequence::VOLTAGE_18;
+		{
+			if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+				seq.voltage = eSecCmdSequence::VOLTAGE_18;
+			else
+				seq.voltage = eSecCmdSequence::VOLTAGE_13;
+		}
 		else
 			seq.voltage = voltage;
 
