@@ -172,7 +172,7 @@ static  unsigned short cw=0;
 		
 			x = read(fd, &ev, sizeof(struct input_event));
 			
-			if ((x == sizeof(struct input_event)) && (ev.value == 1))
+			if ((x == sizeof(struct input_event)) && ((ev.value == 1)||(ev.value == 2)))
 				break;
 
 		} while (x == sizeof(struct input_event));
