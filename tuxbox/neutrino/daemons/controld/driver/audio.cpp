@@ -100,7 +100,7 @@ void audioControl::setMute(bool mute)
 
 	if (ioctl(fd,AUDIO_SET_MUTE, mute) < 0)
 	{
-		perror("AVSIOGVOL:");
+		perror("AUDIO_SET_MUTE:");
 		return;
 	}
 	close(fd);
