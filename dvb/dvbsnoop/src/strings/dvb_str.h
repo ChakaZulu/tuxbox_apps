@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.24 2004/07/26 20:58:03 rasc Exp $ 
+$Id: dvb_str.h,v 1.25 2004/08/06 22:21:38 rasc Exp $ 
 
 
  DVBSNOOP
@@ -10,11 +10,14 @@ $Id: dvb_str.h,v 1.24 2004/07/26 20:58:03 rasc Exp $
  (c) 2001-2004   Rainer.Scherg@gmx.de
 
 
- -- dvb decoder helper functions
+ -- dvb strings
 
 
 
 $Log: dvb_str.h,v $
+Revision 1.25  2004/08/06 22:21:38  rasc
+New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
+
 Revision 1.24  2004/07/26 20:58:03  rasc
 RNT completed..  (TS 102 323)
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.17 2004/07/25 20:12:58 rasc Exp $
+$Id: dsmcc_misc.c,v 1.18 2004/08/06 22:21:38 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.17 2004/07/25 20:12:58 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.18  2004/08/06 22:21:38  rasc
+New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
+
 Revision 1.17  2004/07/25 20:12:58  rasc
  - New: content_identifier_descriptor (TS 102 323)
  - New: TVA_id_descriptor (TS 102 323)
@@ -135,6 +138,7 @@ int dsmcc_pto_descriptor_loop (u_char *name, u_char *b)
 	 b   += i;
 	 len -= i;
      }
+     out_NL (4);
 
    indent (-2);
    return  (loop_length +2);

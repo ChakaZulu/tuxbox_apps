@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.18 2004/08/04 21:58:41 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.19 2004/08/06 22:21:38 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.18 2004/08/04 21:58:41 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.19  2004/08/06 22:21:38  rasc
+New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
+
 Revision 1.18  2004/08/04 21:58:41  rasc
 BugFix: IPv6 (INT) descriptor display, got wrong values
 
@@ -493,8 +496,6 @@ void descriptorDSMCC_target_IP_address (u_char *b)
   ETSI EN 301 192  (ISO 13818-6)
 */
 
-static struct IPv6ADDR *_getIPv6Addr (u_char *b, struct IPv6ADDR *x);
-
 void descriptorDSMCC_target_IPv6_address (u_char *b)
 {
  int    len;
@@ -503,7 +504,7 @@ void descriptorDSMCC_target_IPv6_address (u_char *b)
  // descriptor_tag	= b[0];
  len			= b[1];
 
- _getIPv6Addr (b+2, &x);
+ getIPv6Addr (b+2, &x);
  out (4,"IPv6_addr_mask: %08lx%08lx%08lx%08lx [= ",
 		 x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
   	displ_IPv6_addr (4, &x);
@@ -512,7 +513,7 @@ void descriptorDSMCC_target_IPv6_address (u_char *b)
  len -= 16;
 
  while (len > 0) {
- 	_getIPv6Addr (b, &x);
+ 	getIPv6Addr (b, &x);
 	out (4,"IPv6_addr_mask: %08lx%08lx%08lx%08lx [= ",
 		 	x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
 	  	displ_IPv6_addr (4, &x);
@@ -523,15 +524,6 @@ void descriptorDSMCC_target_IPv6_address (u_char *b)
 
 }
 
-
-static struct IPv6ADDR *_getIPv6Addr (u_char *b, struct IPv6ADDR *x)
-{
- 	x->ip[0] = getBits (b, 0,   0, 32);
-	x->ip[1] = getBits (b, 0,  32, 32);
-	x->ip[2] = getBits (b, 0,  64, 32);
-	x->ip[3] = getBits (b, 0,  96, 32);
-	return x;
-}
 
 
 
@@ -731,7 +723,7 @@ void descriptorDSMCC_target_IPv6_slash (u_char *b)
  	struct IPv6ADDR  x;
 	int    mask;
 
- 	_getIPv6Addr (b, &x);
+ 	getIPv6Addr (b, &x);
 	out_nl (4,"IPv6_addr_mask: %08lx%08lx%08lx%08lx",
 		 	x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
 
@@ -767,7 +759,7 @@ void descriptorDSMCC_target_IPv6_source_slash (u_char *b)
  	struct IPv6ADDR  x;
 	int    mask;
 
- 	_getIPv6Addr (b, &x);
+ 	getIPv6Addr (b, &x);
 	out_nl (4,"IPv6_source_addr: %08lx%08lx%08lx%08lx",
 		 	x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
 
@@ -780,7 +772,7 @@ void descriptorDSMCC_target_IPv6_source_slash (u_char *b)
 	len -= 17;
 
 
- 	_getIPv6Addr (b, &x);
+ 	getIPv6Addr (b, &x);
 	out_nl (4,"IPv6_dest_addr: %08lx%08lx%08lx%08lx",
 		 	x.ip[0], x.ip[1], x.ip[2], x.ip[3] );
 

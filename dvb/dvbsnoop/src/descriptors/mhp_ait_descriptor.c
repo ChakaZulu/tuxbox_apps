@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.11 2004/07/24 11:44:44 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.12 2004/08/06 22:21:38 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: mhp_ait_descriptor.c,v 1.11 2004/07/24 11:44:44 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.12  2004/08/06 22:21:38  rasc
+New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
+
 Revision 1.11  2004/07/24 11:44:44  rasc
 EN 301 192 update
  - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
@@ -326,7 +329,6 @@ void descriptorMHP_AIT_transport_protocol (u_char *b)
 
 			out_NL (4);
 			len2 = outBit_Sx_NL (4,"URL_length: ",	b,  0,  8);
-  			out (4,"URL: ");
 	 		print_text_UTF8 (4, "URL: ", b+1, len2);
 			b += 1+len2;
 			len -= 1+len2;

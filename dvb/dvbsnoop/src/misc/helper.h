@@ -54,6 +54,7 @@ struct IPv6ADDR {
 
 void displ_mac_addr (int v, long mac_H24, long mac_L24);
 void displ_IPv4_addr (int v, u_long ip);
+struct IPv6ADDR *getIPv6Addr (u_char *b, struct IPv6ADDR *x);
 void displ_IPv6_addr (int v, struct IPv6ADDR *ip);
 
 

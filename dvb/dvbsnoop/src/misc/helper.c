@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.30 2004/04/19 22:09:33 rasc Exp $
+$Id: helper.c,v 1.31 2004/08/06 22:21:38 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.30 2004/04/19 22:09:33 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.31  2004/08/06 22:21:38  rasc
+New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
+
 Revision 1.30  2004/04/19 22:09:33  rasc
 minor change
 
@@ -581,7 +584,7 @@ void print_std_ascii (int v, const char *s, u_char *b, u_int len)
 void print_time40 (int v, u_long mjd, u_long utc)
 {
 
- out (v, "0x%lx%06lx (=",mjd, utc);
+ out (v, "0x%lx%06lx [=",mjd, utc);
 
  if (mjd > 0) {
    long   y,m,d ,k;
@@ -598,7 +601,7 @@ void print_time40 (int v, u_long mjd, u_long utc)
    out (v, "%02d-%02d-%02d",y,m,d);
  }
 
- out (v, " %02lx:%02lx:%02lx [UTC])",
+ out (v, " %02lx:%02lx:%02lx (UTC)]",
 	 (utc>>16) &0xFF, (utc>>8) &0xFF, (utc) &0xFF);
 
 }
@@ -738,7 +741,7 @@ void displ_mac_addr (int v, long mac_H24, long mac_L24)
 
    out (v,"%02x:%02x:%02x",
 	   (mac_H24>>16) & 0xFF, (mac_H24>>8) & 0xFF, mac_H24 & 0xFF);
-   out (v,"%02x:%02x:%02x",
+   out (v,":%02x:%02x:%02x",
 	   (mac_L24>>16) & 0xFF, (mac_L24>>8) & 0xFF, mac_L24 & 0xFF);
 
 }
@@ -757,6 +760,18 @@ void displ_IPv4_addr (int v, u_long ip)
 	(ip>>24) & 0xFF, (ip>>16) & 0xFF, (ip>>8) & 0xFF, ip & 0xFF);
 }
 
+
+
+
+
+struct IPv6ADDR *getIPv6Addr (u_char *b, struct IPv6ADDR *x)
+{
+ 	x->ip[0] = getBits (b, 0,   0, 32);
+	x->ip[1] = getBits (b, 0,  32, 32);
+	x->ip[2] = getBits (b, 0,  64, 32);
+	x->ip[3] = getBits (b, 0,  96, 32);
+	return x;
+}
 
 
 /*

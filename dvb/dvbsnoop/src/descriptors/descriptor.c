@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.26 2004/07/26 20:58:03 rasc Exp $
+$Id: descriptor.c,v 1.27 2004/08/06 22:21:38 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: descriptor.c,v 1.26 2004/07/26 20:58:03 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.27  2004/08/06 22:21:38  rasc
+New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
+
 Revision 1.26  2004/07/26 20:58:03  rasc
 RNT completed..  (TS 102 323)
 
@@ -160,8 +163,7 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 
      case TVA_RNT:		// TS 102 323
   		if (id < 0x40)	descriptorMPEG (b);
-//$$$ TODO		else		descriptorTVA_RNT (b);
-out_nl (1, "TVA_RNT descriptors TODO $$$");
+		else		descriptorTVA (b);
 		break;
 
      case MPEG:
