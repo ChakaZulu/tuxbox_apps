@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.9 2002/08/31 00:23:38 dirch Exp $
+ * $Id: configfile.cpp,v 1.10 2002/08/31 22:29:01 obi Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -24,27 +24,28 @@
 #include <stdint.h>
 #include "configfile.h"
 
-using namespace std;
-
-CConfigFile::CConfigFile(const char p_delimiter)
+CConfigFile::CConfigFile (const char p_delimiter)
 {
 	modifiedFlag = false;
 	unknownKeyQueryedFlag = false;
 	delimiter = p_delimiter;
 }
 
-void CConfigFile::clear()
+void CConfigFile::clear ()
 {
 	configData.clear();
 }
 
-const bool CConfigFile::loadConfig(string p_filename)
+//
+// public file operation methods
+//
+const bool CConfigFile::loadConfig (std::string filename)
 {
-	FILE* fd = fopen(p_filename.c_str(), "r");
+	FILE * fd = fopen(filename.c_str(), "r");
 
 	if (fd == NULL)
 	{
-		perror(p_filename.c_str());
+		perror(filename.c_str());
 		return false;
 	}
 
@@ -59,29 +60,26 @@ const bool CConfigFile::loadConfig(string p_filename)
 	{
 		if (fgets(buf, sizeof(buf), fd) != NULL)
 		{
-			char * tmpptr = buf;
+			char * tmpptr;
 			char * key = (char *) &keystr;
 			char * val = (char *) &valstr;
 			bool keyfound = false;
 
-			for (; (*tmpptr != 10) && (*tmpptr != 13) && (*tmpptr != '#'); tmpptr++)
+			for (tmpptr = buf; (*tmpptr != 10) && (*tmpptr != 13) && (*tmpptr != '#'); tmpptr++)
 			{
 				if ((*tmpptr == '=') && (keyfound == false))
 				{
 					keyfound = true;
 				}
+				else if (keyfound == false)
+				{
+					*key = *tmpptr;
+					key++;
+				}
 				else
 				{
-					if (keyfound == false)
-					{
-						*key = *tmpptr;
-						key++;
-					}
-					else
-					{
-						*val = *tmpptr;
-						val++;
-					}
+					*val = *tmpptr;
+					val++;
 				}
 			}
 
@@ -95,135 +93,9 @@ const bool CConfigFile::loadConfig(string p_filename)
 	return true;
 }
 
-string CConfigFile::getString (string p_keyName, const string defaultValue)
+const bool CConfigFile::saveConfig (std::string filename)
 {
-	if (configData.find(p_keyName) == configData.end())
-	{
-		unknownKeyQueryedFlag = true;
-		configData[p_keyName] = defaultValue;
-	}
-
-	return configData[p_keyName];
-}
-
-void CConfigFile::setString (string p_keyName, string p_keyValue)
-{
-	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
-	unknownKeyQueryedFlag = false;
-	string oldValue = getString(p_keyName);
-	
-	if ((oldValue!=p_keyValue) || (unknownKeyQueryedFlag))
-	{
-		modifiedFlag = true;
-		configData[p_keyName] = p_keyValue;
-	}
-
-	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
-}
-
-int CConfigFile::getInt (string p_keyName, const int defaultValue)
-{
-	if (configData.find(p_keyName) == configData.end())
-	{
-		unknownKeyQueryedFlag = true;
-		char * configDataChar = (char *) malloc(sizeof(defaultValue));
-		sprintf(configDataChar, "%d", defaultValue);
-		configData[p_keyName] = string(configDataChar);
-		free(configDataChar);
-	}
-
-	return atoi(configData[p_keyName].c_str());
-}
-
-void CConfigFile::setInt (string p_keyName, int p_keyValue)
-{
-	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
-	unknownKeyQueryedFlag = false;
-	int oldValue = getInt(p_keyName);
-
-	if ((oldValue != p_keyValue) || (unknownKeyQueryedFlag))
-	{
-		modifiedFlag = true;
-		char * configDataChar = (char *) malloc(sizeof(p_keyValue));
-		sprintf(configDataChar, "%d", p_keyValue);
-		configData[p_keyName] = string(configDataChar);
-		free(configDataChar);
-	}
-
-	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
-}
-
-long long CConfigFile::getLongLong (string p_keyName, const long long defaultValue)
-{
-	if (configData.find(p_keyName) == configData.end())
-	{
-		unknownKeyQueryedFlag = true;
-		char * configDataChar = (char *) malloc(sizeof(defaultValue));
-		sprintf(configDataChar, "%lld", defaultValue);
-		configData[p_keyName] = string(configDataChar);
-		free(configDataChar);
-	}
-	return atoll(configData[p_keyName].c_str());
-}
-
-void CConfigFile::setLongLong (string p_keyName, const long long p_keyValue)
-{
-	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
-	unknownKeyQueryedFlag = false;
-	long long oldValue = getLongLong(p_keyName);
-
-	if ((oldValue != p_keyValue) || (unknownKeyQueryedFlag))
-	{
-		modifiedFlag = true;
-		char * configDataChar = (char *) malloc(sizeof(p_keyValue));
-		sprintf(configDataChar, "%lld", p_keyValue);
-		configData[p_keyName] = string(configDataChar);
-		free(configDataChar);
-	}
-
-	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
-}
-
-bool CConfigFile::getBool (string p_keyName, const bool defaultValue)
-{
-	if (configData.find(p_keyName) == configData.end())
-	{
-		unknownKeyQueryedFlag = true;
-
-		if (defaultValue == true)
-			configData[p_keyName] = string("true");
-		else
-			configData[p_keyName] = string("false");
-	}
-
-	if (configData[p_keyName] == "true")
-		return true;
-	else
-		return false;
-}
-
-void CConfigFile::setBool (string p_keyName, bool p_keyValue)
-{
-	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
-	unknownKeyQueryedFlag = false;
-	bool oldValue = getBool(p_keyName);
-
-	if ((oldValue!=p_keyValue) || (unknownKeyQueryedFlag))
-	{
-		modifiedFlag = true;
-
-		if (p_keyValue)
-			configData[p_keyName] = string("true");
-		else
-			configData[p_keyName] = string("false");
-	}
-
-	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
-}
-
-const bool CConfigFile::saveConfig (string p_filename)
-{
-	ofstream configFile (p_filename.c_str());
+	std::ofstream configFile (filename.c_str());
 
 	if (configFile != NULL)
 	{
@@ -231,7 +103,7 @@ const bool CConfigFile::saveConfig (string p_filename)
 
 		for (it = configData.begin(); it != configData.end(); it++)
 		{
-			configFile << it->first << "=" << it->second << endl;
+			configFile << it->first << "=" << it->second << std::endl;
 		}
 
 		configFile.close();
@@ -239,24 +111,105 @@ const bool CConfigFile::saveConfig (string p_filename)
 	}
 	else
 	{
-		cerr << "unable to open file " << p_filename << "for writing." << endl;
+		std::cerr << "unable to open file " << filename << "for writing." << std::endl;
 		return false;
 	}
 }
 
-vector <string> CConfigFile::getStringVector (string p_keyName)
+
+
+//
+// private "store" methods
+// 
+void CConfigFile::storeBool (const std::string key, const bool val)
 {
-	string keyValue = configData[p_keyName];
-	vector <string> vec;
+	if (val == true)
+		configData[key] = std::string("true");
+	else
+		configData[key] = std::string("false");
+}
+
+void CConfigFile::storeInt32 (const std::string key, const int32_t val)
+{
+	char tmp[11];
+	sprintf(tmp, "%d", val);
+	configData[key] = std::string(tmp);
+}
+
+void CConfigFile::storeInt64 (const std::string key, const int64_t val)
+{
+	char tmp[21];
+	sprintf(tmp, "%lld", val);
+	configData[key] = std::string(tmp);
+}
+
+void CConfigFile::storeString (const std::string key, const std::string val)
+{
+	configData[key] = val;
+}
+
+
+
+//
+// public "get" methods
+//
+bool CConfigFile::getBool (const std::string key, const bool defaultVal)
+{
+	if (configData.find(key) == configData.end())
+	{
+		unknownKeyQueryedFlag = true;
+		storeBool(key, defaultVal);
+	}
+
+	return (configData[key] == "true");
+}
+
+int32_t CConfigFile::getInt32 (const std::string key, const int32_t defaultVal)
+{
+	if (configData.find(key) == configData.end())
+	{
+		unknownKeyQueryedFlag = true;
+		storeInt32(key, defaultVal);
+	}
+
+	return atoi(configData[key].c_str());
+}
+
+int64_t CConfigFile::getInt64 (const std::string key, const int64_t defaultVal)
+{
+	if (configData.find(key) == configData.end())
+	{
+		unknownKeyQueryedFlag = true;
+		storeInt64(key, defaultVal);
+	}
+
+	return atoll(configData[key].c_str());
+}
+
+std::string CConfigFile::getString (const std::string key, const std::string defaultVal)
+{
+	if (configData.find(key) == configData.end())
+	{
+		unknownKeyQueryedFlag = true;
+		storeString(key, defaultVal);
+	}
+
+	return configData[key];
+}
+
+std::vector <int32_t> CConfigFile::getInt32Vector (const std::string key)
+{
+	std::string val = configData[key];
+	std::vector <int32_t> vec;
 	uint16_t length = 0;
 	uint16_t pos = 0;
 	uint16_t i;
 
-	for (i = 0; i < keyValue.length(); i++)
+	for (i = 0; i < val.length(); i++)
 	{
-		if (keyValue[i] == delimiter)
+		if (val[i] == delimiter)
 		{
-			vec.push_back(keyValue.substr(pos, length));
+			vec.push_back(atoi(val.substr(pos, length).c_str()));
 			pos = i + 1;
 			length = 0;
 		}
@@ -265,43 +218,28 @@ vector <string> CConfigFile::getStringVector (string p_keyName)
 			length++;
 		}
 	}
-	if(length==0)
-	{
-		unknownKeyQueryedFlag = true;
-	}
 
-	vec.push_back(keyValue.substr(pos, length));
+	if (length == 0)
+		unknownKeyQueryedFlag = true;
+	else
+		vec.push_back(atoi(val.substr(pos, length).c_str()));
+
 	return vec;
 }
 
-void CConfigFile::setStringVector (string p_keyName, vector <string> p_vec)
+std::vector <std::string> CConfigFile::getStringVector (const std::string key)
 {
-	uint16_t i;
-
-	for (i = 0; i < p_vec.size(); i++)
-	{
-		if (i > 0)
-		{
-			configData[p_keyName] += delimiter;
-		}
-
-		configData[p_keyName] += p_vec[i];
-	}
-}
-
-vector <int> CConfigFile::getIntVector (string p_keyName)
-{
-	string keyValue = configData[p_keyName];
-	vector <int> vec;
+	std::string val = configData[key];
+	std::vector <std::string> vec;
 	uint16_t length = 0;
 	uint16_t pos = 0;
 	uint16_t i;
 
-	for (i = 0; i < keyValue.length(); i++)
+	for (i = 0; i < val.length(); i++)
 	{
-		if (keyValue[i] == delimiter)
+		if (val[i] == delimiter)
 		{
-			vec.push_back(atoi(keyValue.substr(pos, length).c_str()));
+			vec.push_back(val.substr(pos, length));
 			pos = i + 1;
 			length = 0;
 		}
@@ -311,30 +249,108 @@ vector <int> CConfigFile::getIntVector (string p_keyName)
 		}
 	}
 
-	if(length==0)
-	{
+	if (length == 0)
 		unknownKeyQueryedFlag = true;
-	}
+	else
+		vec.push_back(val.substr(pos, length));
 
-	vec.push_back(atoi(keyValue.substr(pos, length).c_str()));
 	return vec;
 }
 
-void CConfigFile::setIntVector (string p_keyName, vector <int> p_vec)
+
+
+//
+// public "set" methods
+//
+void CConfigFile::setBool (const std::string key, const bool val)
+{
+	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
+	unknownKeyQueryedFlag = false;
+	bool oldVal = getBool(key);
+
+	if ((oldVal != val) || (unknownKeyQueryedFlag))
+	{
+		modifiedFlag = true;
+		storeBool(key, val);
+	}
+
+	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
+}
+
+void CConfigFile::setInt32 (const std::string key, int32_t val)
+{
+	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
+	unknownKeyQueryedFlag = false;
+	int32_t oldVal = getInt32(key);
+
+	if ((oldVal != val) || (unknownKeyQueryedFlag))
+	{
+		modifiedFlag = true;
+		storeInt32(key, val);
+	}
+
+	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
+}
+
+void CConfigFile::setInt64 (const std::string key, const int64_t val)
+{
+	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
+	unknownKeyQueryedFlag = false;
+	int64_t oldVal = getInt64(key);
+
+	if ((oldVal != val) || (unknownKeyQueryedFlag))
+	{
+		modifiedFlag = true;
+		storeInt64(key, val);
+	}
+
+	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
+}
+
+void CConfigFile::setString (const std::string key, const std::string val)
+{
+	bool tmpUnknownKeyQueryedFlag = unknownKeyQueryedFlag;
+	unknownKeyQueryedFlag = false;
+	std::string oldVal = getString(key);
+	
+	if ((oldVal != val) || (unknownKeyQueryedFlag))
+	{
+		modifiedFlag = true;
+		storeString(key, val);
+	}
+
+	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
+}
+
+void CConfigFile::setInt32Vector (const std::string key, std::vector <int32_t> vec)
 {
 	uint16_t i;
+	char tmp[11];
 
-	for (i = 0; i < p_vec.size(); i++)
+	for (i = 0; i < vec.size(); i++)
 	{
 		if (i > 0)
 		{
-			configData[p_keyName] += delimiter;
+			configData[key] += delimiter;
 		}
 
-		char *tmp = (char *) malloc (sizeof(p_vec[i]));
-		sprintf(tmp, "%d", p_vec[i]);
-		configData[p_keyName] += string(tmp);
-		free(tmp);
+		sprintf(tmp, "%d", vec[i]);
+		configData[key] += std::string(tmp);
+	}
+}
+
+void CConfigFile::setStringVector (const std::string key, const std::vector <std::string> vec)
+{
+	uint16_t i;
+
+	for (i = 0; i < vec.size(); i++)
+	{
+		if (i > 0)
+		{
+			configData[key] += delimiter;
+		}
+
+		configData[key] += vec[i];
 	}
 }
 

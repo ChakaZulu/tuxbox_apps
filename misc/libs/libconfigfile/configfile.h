@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.h,v 1.7 2002/08/31 00:23:38 dirch Exp $
+ * $Id: configfile.h,v 1.8 2002/08/31 22:29:01 obi Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -40,34 +40,57 @@ class CConfigFile
 		bool modifiedFlag;
 		bool unknownKeyQueryedFlag;
 
+		void storeBool (const std::string key, const bool val);
+		void storeInt32 (const std::string key, const int32_t val);
+		void storeInt64 (const std::string key, const int64_t val);
+		void storeString (const std::string key, const std::string val);
+
 	public:
 		CConfigFile (const char p_delimiter);
 
-		const bool loadConfig (const std::string p_filename);
-		const bool saveConfig (const std::string p_filename);
+		const bool loadConfig (const std::string filename);
+		const bool saveConfig (const std::string filename);
 
 		void clear();
 
-		std::string getString (const std::string p_keyName, const std::string defaultValue = "");
-		void setString (const std::string p_keyName, const std::string p_keyValue);
-		int getInt (const std::string p_keyName, const int defaultValue = 0);
-		void setInt (const std::string p_keyName, const int p_keyValue);
-		long long getLongLong (const std::string p_keyName, const long long defaultValue = 0);
-		void setLongLong (const std::string p_keyName, const long long p_keyValue);
-		bool getBool (const std::string p_keyName, const bool defaultValue = false);
-		void setBool (const std::string p_keyName, const bool p_keyValue);
+		//
+		// strings
+		//
+		std::string getString (const std::string key, const std::string defaultVal = "");
+		void setString (const std::string key, const std::string val);
 
-		std::vector <std::string> getStringVector (const std::string p_keyName);
-		void setStringVector (const std::string p_keyName, const std::vector <std::string> p_vec);
+		//
+		// 32, 64 bit int
+		//
+		int32_t getInt32 (const std::string key, const int32_t defaultVal = 0);
+		void setInt32 (const std::string key, const int32_t val);
 
-		std::vector <int> getIntVector (const std::string p_keyName);
-		void setIntVector (const std::string p_keyName, const std::vector <int> p_vec);
+		int64_t getInt64 (const std::string key, const int64_t defaultVal = 0);
+		void setInt64 (const std::string key, const int64_t val);
 
+		//
+		// boolean
+		//
+		bool getBool (const std::string key, const bool defaultVal = false);
+		void setBool (const std::string key, const bool val);
+
+		//
+		// vectors
+		//
+		std::vector <std::string> getStringVector (const std::string key);
+		void setStringVector (const std::string key, const std::vector <std::string> vec);
+
+		std::vector <int32_t> getInt32Vector (const std::string key);
+		void setInt32Vector (const std::string key, const std::vector <int32_t> vec);
+
+		//
+		// flags
+		//
 		const bool getModifiedFlag () { return modifiedFlag; }
-		void setModifiedFlag (const bool p_value) { modifiedFlag = p_value; }
+		void setModifiedFlag (const bool val) { modifiedFlag = val; }
 
 		const bool getUnknownKeyQueryedFlag () { return unknownKeyQueryedFlag; }
-		void setUnknownKeyQueryedFlag (const bool p_value) { unknownKeyQueryedFlag = p_value; }
+		void setUnknownKeyQueryedFlag (const bool val) { unknownKeyQueryedFlag = val; }
 
 };
 
