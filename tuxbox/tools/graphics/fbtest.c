@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *  									      
  ******************************************************************************
- * $Id: fbtest.c,v 1.3 2003/11/22 23:54:37 carjay Exp $
+ * $Id: fbtest.c,v 1.4 2003/12/22 02:54:23 carjay Exp $
  ******************************************************************************/
 
 // TODO: - should restore the colour map and mode to what it was before
@@ -191,7 +191,9 @@ int setmode(int fbd, const struct pixelformat *pixf,const struct vidsize *vids){
 	if (stat<0) return -2;
 	
 	var.xres= vids->width;
+	var.xres_virtual = vids->width;
 	var.yres= vids->height;
+	var.yres_virtual = vids->height;
 	
 	var.bits_per_pixel = pixf->bpp;
 	var.red = pixf->red;
