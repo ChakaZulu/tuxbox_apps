@@ -11,7 +11,7 @@
 #include "eskin.h"
 #include "lcd.h"
 #include <plugin.h>
-#include <dbox/avia_vbi.h>
+#include <dbox/avia_gt_vbi.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
