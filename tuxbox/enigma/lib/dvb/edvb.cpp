@@ -20,7 +20,6 @@
 #include "eavswitch.h"
 #include "streamwd.h"
 #include "init.h"
-
 #include "config.h"
 #include <algorithm>
 
@@ -544,7 +543,7 @@ void eDVB::serviceEvent(int event)
 	case eventServiceSwitched:
 		emit enterService(service);
 	case eventServiceFailed:
-		switchedService(service, -service_state);
+		emit switchedService(service, -service_state);
 		setState(stateIdle);
 		break;
 	}

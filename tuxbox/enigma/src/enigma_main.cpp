@@ -783,19 +783,44 @@ void eZapMain::keyUp(int code)
 	}
 	case eRCInput::RC_HELP:
 	{
-		if (!eDVB::getInstance()->service)
+		eService* service = eDVB::getInstance()->service;
+
+		if (!service)
 			break;
+
 		if (isVisible())
 		{
 			timeout.stop();
 			hide();
 		}
-		EIT *eit=eDVB::getInstance()->getEIT();
-		QList<EITEvent> dummy;
+
+		const eventMap* pMap = eEPGCache::getInstance()->getEventMap(service->original_network_id, service->service_id);
+
+		if (!pMap)  // no events for this service in EPG Cache
 		{
-			eEventDisplay ei(eDVB::getInstance()->service->service_name, eit?&eit->events:&dummy);
-			if (eit)
-				eit->unlock();		// HIER liegt der hund begraben.
+			EIT *eit=eDVB::getInstance()->getEIT();
+			QList<EITEvent> dummy;
+			{
+				eEventDisplay ei(service->service_name, eit?&eit->events:&dummy);
+				if (eit)
+					eit->unlock();		// HIER liegt der hund begraben.
+	
+				actual_eventDisplay=&ei;
+				ei.show();
+				ei.exec();
+				ei.hide();
+				actual_eventDisplay=0;
+			}
+		}
+		else	// events in EPG Cache found
+		{
+			eventMap::const_iterator It = pMap->begin();
+			QList<EITEvent> events;
+			events.setAutoDelete(TRUE);
+			events.append( new EITEvent(*(It++)->second));
+			if (It != pMap->end())  // sicher ist sicher !
+				events.append( new EITEvent(*It->second));
+			eEventDisplay ei(service->service_name, &events);			
 			actual_eventDisplay=&ei;
 			ei.show();
 			ei.exec();

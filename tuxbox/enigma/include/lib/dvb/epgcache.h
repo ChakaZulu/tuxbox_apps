@@ -23,7 +23,7 @@ namespace std
 {
 struct hash<sref>
 {
-	size_t operator()(const sref &x) const
+	inline size_t operator()(const sref &x) const
 	{
 		int v=(x.first^x.second);
 		v^=v>>8;
@@ -97,7 +97,7 @@ public:
 	static eEPGCache *getInstance() { return instance; }
 //	EITEvent *lookupEvent(int original_network_id, int service_id, int event_id);
 	EITEvent *lookupCurrentEvent(int original_network_id, int service_id);
-	inline const eventMap& eEPGCache::getEventMap(int original_network_id, int service_id);
+	inline const eventMap* eEPGCache::getEventMap(int original_network_id, int service_id);
 signals:
 	void EPGAvail(bool);
 };
@@ -106,14 +106,15 @@ inline void eEPGCache::enterService(eService* service, int err)
 {
 	current_service = service;
 	firstEventId = 0;
+
 	sref SREF = sref(service->original_network_id,service->service_id);
-	time_t t = serviceLastUpdated[SREF];
+	updateMap::iterator It = serviceLastUpdated.find(SREF);
 
 	int update;
 
 	if (!err)
 	{
-		update = ( t ? ( UPDATE_INTERVAL - ( (time(0)+eDVB::getInstance()->time_difference-t) * 1000 ) ) : ZAP_DELAY );
+		update = ( It != serviceLastUpdated.end() ? ( UPDATE_INTERVAL - ( (time(0)+eDVB::getInstance()->time_difference-It->second) * 1000 ) ) : ZAP_DELAY );
 
 		if (update < ZAP_DELAY)
 			update = ZAP_DELAY;
@@ -125,7 +126,7 @@ inline void eEPGCache::enterService(eService* service, int err)
 			qDebug("[EPGC] next update in %i sec", update/1000);
 	}
 
-	if (!eventDB[SREF].empty())
+	if (It != serviceLastUpdated.end() && !eventDB[SREF].empty())
 	{
 		qDebug("[EPGC] service has EPG");
 		emit EPGAvail(1);
@@ -165,9 +166,11 @@ inline void eEPGCache::stopEPG()
 	}
 }
 
-inline const eventMap& eEPGCache::getEventMap(int original_network_id, int service_id)
+inline const eventMap* eEPGCache::getEventMap(int original_network_id, int service_id)
 {
-	return eventDB[sref(original_network_id,service_id)];
+	eventCache::iterator It = eventDB.find(sref(original_network_id,service_id));
+	return (It != eventDB.end())?(&(It->second)):0;
 }
+
 
 #endif

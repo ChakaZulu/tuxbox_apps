@@ -40,7 +40,9 @@ int eEPGCache::sectionRead(__u8 *data)
 		sref SREF = sref(original_network_id,service_id);
 		time_t TM;
 
-		if (!temp[SREF])
+  	updateMap::iterator It = temp.find(SREF);
+			
+		if (It == temp.end())
 		  temp[SREF] = time(0)+eDVB::getInstance()->time_difference;
 
 		if (firstEventId == HILO( eit_event->event_id ) )  // EPGCache around....
@@ -49,21 +51,12 @@ int eEPGCache::sectionRead(__u8 *data)
 			zapTimer.start(UPDATE_INTERVAL, 1);
 			qDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
 			
-			updateMap::iterator It = temp.begin();
+			It = temp.begin();
 
 			while (It != temp.end())
 				serviceLastUpdated.insert(*(It++));
 
-			// diese SREF verdeckt hier die obige.. deshalb klapp das
-			sref SREF=sref(current_service->original_network_id, current_service->service_id);
-
-			if (temp[SREF])
-			  serviceLastUpdated[SREF] = time(0)+eDVB::getInstance()->time_difference;
-				// ich verstehe nicht, warum ich diesen einen Eintrag in serviceLastUpdated manuell machen muss
-				// eigentlich müsste dieser Eintrage mit in obiger while schleife erzeugt werden.
-				// Komischerweise wird er aber nicht in der while schleife erzeugt......
-
-			if (!eventDB[SREF].empty())
+			if (!eventDB[sref(current_service->original_network_id, current_service->service_id)].empty())
 		  	emit EPGAvail(1);
 
 			return -1;
@@ -81,6 +74,8 @@ int eEPGCache::sectionRead(__u8 *data)
 
 			if ( (time(0)+eDVB::getInstance()->time_difference) <= (TM+duration))  // old events should not be cached
 			{
+				// hier wird entweder eine vorhanden eventMap zurück gegeben.. oder
+				// auf jeden Fall eine erzeugt !
 				eventMap &service = eventDB[SREF];
 
 				if (service.find(TM) == service.end())   // event still not cached
@@ -148,11 +143,11 @@ eEPGCache::~eEPGCache()
 
 EITEvent *eEPGCache::lookupCurrentEvent(int original_network_id, int service_id)
 {
-	eventMap &service=eventDB[sref(original_network_id,service_id)];
-	eventMap::iterator event=service.begin();
-	if (event==service.end())
+	eventCache::iterator It =	eventDB.find(sref(original_network_id,service_id));
+	if (It != eventDB.end())
+		return It->second.empty()? 0 : new EITEvent ( *It->second.begin()->second );
+	else
 		return 0;
-	return new EITEvent(*event->second);
 }
 
 eAutoInitP0<eEPGCache> init_eEPGCacheInit(5, "EPG cache");
