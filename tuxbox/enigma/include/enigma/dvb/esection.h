@@ -12,11 +12,23 @@
 #define SECREAD_NOTIMEOUT	4		// never timeout
 #define SECREAD_NOABORT	8			// do not abort on transponderchange
 
+class eSectionReader
+{
+	int handle;
+	int flags;
+public:
+	eSectionReader();
+	int getHandle();		// for SocketNotifiers
+	void close();
+	int open(int pid, __u8 *data, __u8 *mask, int len, int flags);
+	int read(__u8 *data);
+};
+
 class eSection: public QObject
 {
 	Q_OBJECT
+	eSectionReader reader;
 	static QList<eSection> active;
-	int handle;
 	QSocketNotifier *notifier;
 	virtual int sectionRead(__u8 *data);
 	virtual void sectionFinish(int error);
@@ -27,6 +39,7 @@ class eSection: public QObject
 	QTimer *timer;
 	__u8 buf[65536];
 	int lockcount;
+	int setFilter(int pid, int tableid, int tableidext, int version);
 public slots:
 	void data(int socket);
 	void timeout();
@@ -35,8 +48,6 @@ public:
 	eSection();
 	virtual ~eSection();
 
-	int setFilter(int pid, __u8 *data, __u8 *mask, int len);
-	int setFilter(int pid, int tableid, int tableidext, int version);
 	int start();
 	int abort();
 	static int abortAll();
