@@ -183,6 +183,12 @@ bool CRecordingNotifier2::changeNotify(const std::string & OptionName, void*)
    return true;
 }
 
+bool CRecordingSafetyNotifier::changeNotify(const std::string & OptionName, void*)
+{
+	g_Timerd->setRecordingSafety(atoi(g_settings.record_safety_time_before)*60, atoi(g_settings.record_safety_time_after)*60);
+   return true;
+}
+
 CMiscNotifier::CMiscNotifier( CMenuItem* i1)
 {
    toDisable[0]=i1;
@@ -364,15 +370,13 @@ bool CAudioSetupNotifier::changeNotify(const std::string & OptionName, void*)
 	{
 		if (g_settings.audio_avs_Control == 2)   //lirc
 			g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
-
-		return true;
 	}
 
 	if(OptionName=="audiomenu.analogout")
 	{
 		g_Zapit->setAudioMode(g_settings.audio_AnalogMode);
-		return true;
 	}
+	return true;
 }
 
 CAudioSetupNotifier2::CAudioSetupNotifier2( CMenuItem* i1)

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.49 2003/03/14 06:43:04 obi Exp $
+	$Id: timerd.cpp,v 1.50 2003/11/30 13:21:02 zwen Exp $
 
 	License: GPL
 
@@ -260,6 +260,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 				case CTimerd::TIMER_RECORD :
 					CBasicServer::receive_data(connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
+				   if(evInfo.recordingSafety)
+					{
+						int pre,post;
+						CTimerManager::getInstance()->getRecordingSafety(pre,post);
+						msgAddTimer.announceTime -= pre;
+						msgAddTimer.alarmTime -= pre;
+						msgAddTimer.stopTime += post;
+					}
 					event = new CTimerEvent_Record(
 															msgAddTimer.announceTime,
 															msgAddTimer.alarmTime,
@@ -363,6 +371,20 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				CTimerdMsg::commandSetAPid data;
 				CBasicServer::receive_data(connfd,&data, sizeof(data));
 				CTimerManager::getInstance()->modifyEvent(data.eventID , data.apids);
+			}
+			break;
+		case CTimerdMsg::CMD_SETRECSAFETY:				  // aufnahmekorrektur setzen
+			{
+				CTimerdMsg::commandRecordingSafety data;
+				CBasicServer::receive_data(connfd,&data, sizeof(data));
+				CTimerManager::getInstance()->setRecordingSafety(data.pre , data.post);
+			}
+			break;
+		case CTimerdMsg::CMD_GETRECSAFETY:				  // aufnahmekorrektur lesen
+			{
+				CTimerdMsg::commandRecordingSafety data;
+				CTimerManager::getInstance()->getRecordingSafety(data.pre , data.post);
+				CBasicServer::send_data(connfd, &data, sizeof(data));
 			}
 			break;
 		default:

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.10 2003/01/26 15:07:11 zwen Exp $
+	$Id: timerdtypes.h,v 1.11 2003/11/30 13:21:04 zwen Exp $
 
 	License: GPL
 
@@ -82,6 +82,7 @@ class CTimerd
 			t_channel_id       channel_id;
 			std::string             apids;
 			CChannelMode       mode;
+			bool               recordingSafety;
 		};
 		
 		struct TransferEventInfo
@@ -91,6 +92,7 @@ class CTimerd
 			t_channel_id       channel_id;
 			char               apids[TIMERD_APIDS_MAXLEN];
 			CChannelMode       mode;
+			bool               recordingSafety;
 		};
 		
 		class RecordingInfo : public EventInfo

@@ -218,11 +218,11 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 						mode = CTimerd::MODE_TV;
 					
 					timerdclient.addRecordTimerEvent(channel_id,
-																evtlist[selected].startTime - (atoi(g_settings.record_safety_time_before)*60),
-																evtlist[selected].startTime + evtlist[selected].duration + (atoi(g_settings.record_safety_time_after)*60),
+																evtlist[selected].startTime,
+																evtlist[selected].startTime + evtlist[selected].duration,
 																evtlist[selected].eventID, evtlist[selected].startTime,
-																evtlist[selected].startTime - (ANNOUNCETIME + 120 + (atoi(g_settings.record_safety_time_before)*60)),
-																"", mode );
+																evtlist[selected].startTime - (ANNOUNCETIME + 120),
+																"", mode, true );
 					ShowMsgUTF("timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 				}
 				else

@@ -375,8 +375,6 @@ int CNeutrinoApp::loadSetup()
 	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", true );
 	g_settings.shutdown_real_rcdelay = configfile.getInt32( "shutdown_real_rcdelay", true );
 	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
-	strcpy(g_settings.record_safety_time_before, configfile.getString( "record_safety_time_before", "00").c_str());
-	strcpy(g_settings.record_safety_time_after, configfile.getString( "record_safety_time_after", "00").c_str());
 	g_settings.infobar_sat_display = configfile.getInt32( "infobar_sat_display", true );
 
 	//audio
@@ -689,8 +687,6 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "shutdown_real", g_settings.shutdown_real );
 	configfile.setInt32( "shutdown_real_rcdelay", g_settings.shutdown_real_rcdelay );
 	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock);
-	configfile.setString( "record_safety_time_before", g_settings.record_safety_time_before );
-	configfile.setString( "record_safety_time_after", g_settings.record_safety_time_after );
 	configfile.setInt32( "infobar_sat_display", g_settings.infobar_sat_display );
 
 	//audio
@@ -1721,10 +1717,15 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	oj5->addOption(0, "options.off");
 	oj5->addOption(1, "options.on");
 
-	CStringInput * timerSettings_record_safety_time_before = new CStringInput("timersettings.record_safety_time_before", g_settings.record_safety_time_before, 2, "timersettings.record_safety_time_before.hint_1", "timersettings.record_safety_time_before.hint_2","0123456789 ");
+	int pre,post;
+	g_Timerd->getRecordingSafety(pre,post);
+	sprintf(g_settings.record_safety_time_before, "%02d", pre/60);
+	sprintf(g_settings.record_safety_time_after, "%02d", post/60);
+	CRecordingSafetyNotifier *RecordingSafetyNotifier = new CRecordingSafetyNotifier;
+	CStringInput * timerSettings_record_safety_time_before = new CStringInput("timersettings.record_safety_time_before", g_settings.record_safety_time_before, 2, "timersettings.record_safety_time_before.hint_1", "timersettings.record_safety_time_before.hint_2","0123456789 ", RecordingSafetyNotifier);
 	CMenuForwarder *mf5 = new CMenuForwarder("timersettings.record_safety_time_before", true, g_settings.record_safety_time_before, timerSettings_record_safety_time_before );
 
-	CStringInput * timerSettings_record_safety_time_after = new CStringInput("timersettings.record_safety_time_after", g_settings.record_safety_time_after, 2, "timersettings.record_safety_time_after.hint_1", "timersettings.record_safety_time_after.hint_2","0123456789 ");
+	CStringInput * timerSettings_record_safety_time_after = new CStringInput("timersettings.record_safety_time_after", g_settings.record_safety_time_after, 2, "timersettings.record_safety_time_after.hint_1", "timersettings.record_safety_time_after.hint_2","0123456789 ", RecordingSafetyNotifier);
 	CMenuForwarder *mf6 = new CMenuForwarder("timersettings.record_safety_time_after", true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
 	CRecordingNotifier *RecordingNotifier =

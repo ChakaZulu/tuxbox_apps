@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.41 2003/11/29 14:31:44 zwen Exp $
+	$Id: webapi.cpp,v 1.42 2003/11/30 13:21:01 zwen Exp $
 
 	License: GPL
 
@@ -504,7 +504,7 @@ char mode;
 		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
 		request->printf("<TR VALIGN=\"middle\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
 		request->printf("<TD><NOBR>");
-		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&stop=%u&channel_id=%c%u\">&nbsp;<IMG BORDER=0 SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerd::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,mode,channel_id); 
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&stop=%u&channel_id=%c%u&rs=1\">&nbsp;<IMG BORDER=0 SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerd::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,mode,channel_id); 
 		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%c%u\">&nbsp;<IMG BORDER=0 SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerd::TIMER_ZAPTO,(uint) eventIterator->startTime,mode,channel_id); 
 		request->printf("</NOBR></TD><TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
 		request->printf("<TD><A CLASS=\"elist\" HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
@@ -1340,6 +1340,7 @@ time_t	announceTimeT = 0,
 	eventinfo.epgID = 0;
 	eventinfo.epg_starttime = 0;
 	eventinfo.apids = "";
+	eventinfo.recordingSafety = (request->ParameterList["rs"] == "1");
 	if(request->ParameterList["channel_id"].substr(0,1)=="R")
 		eventinfo.mode = CTimerd::MODE_RADIO;
 	else

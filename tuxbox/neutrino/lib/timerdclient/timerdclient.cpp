@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.44 2003/10/03 17:59:21 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.45 2003/11/30 13:21:04 zwen Exp $
 
 	License: GPL
 
@@ -242,6 +242,7 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 		tei.epg_starttime	= ei->epg_starttime;
 		tei.epgID = ei->epgID;
 		tei.mode	= ei->mode;
+		tei.recordingSafety = ei->recordingSafety;
 		length = sizeof( CTimerd::TransferEventInfo);
 		data = &tei;
 	}
@@ -311,6 +312,28 @@ void CTimerdClient::modifyTimerAPid(int eventid, std::string apids)
 	strcpy(data.apids, apids.substr(0, TIMERD_APIDS_MAXLEN-1).c_str());
 	send(CTimerdMsg::CMD_SETAPID, (char*) &data, sizeof(data)); 
 	close_connection();
+}
+
+//-------------------------------------------------------------------------
+void CTimerdClient::setRecordingSafety(int pre, int post)
+{
+	CTimerdMsg::commandRecordingSafety data;
+	data.pre = pre;
+	data.post = post;
+	send(CTimerdMsg::CMD_SETRECSAFETY, (char*) &data, sizeof(data)); 
+	close_connection();
+}
+
+//-------------------------------------------------------------------------
+void CTimerdClient::getRecordingSafety(int &pre, int &post)
+{
+	send(CTimerdMsg::CMD_GETRECSAFETY);
+	CTimerdMsg::commandRecordingSafety data;
+
+	receive_data((char*)&data, sizeof(data));
+	close_connection();
+	pre = data.pre;
+	post = data.post;
 }
 
 //-------------------------------------------------------------------------

@@ -195,6 +195,7 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 		eventinfo.channel_id=timerNew.channel_id;
 		eventinfo.mode = timerNew.mode;
 		eventinfo.apids = "";
+		eventinfo.recordingSafety = false;
 		timerNew.standby_on = (timerNew_standby_on == 1);
 		void *data=NULL;
 		if(timerNew.eventType == CTimerd::TIMER_STANDBY)

@@ -869,7 +869,7 @@ Dem zuvolge ist Montag+Mittwoch+Samstag
 ----------------   ----
 0010010100000000 = 9472
 
-Sihe dazu auch
+Siehe dazu auch
 http://cvs.berlios.de/cgi-bin/viewcvs.cgi/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdtypes.h?rev=1.10&content-type=text/vnd.viewcvs-markup
 
 
@@ -888,7 +888,7 @@ die zeiten sind time_t (Unix Zeitstempel)
 
 
 
-Parameter: action,[id],<alarm|ad,amo,ay,ah,ami>,<stop|sd,smo,sy,sh,smi>,announce,type,rep,channel_id,msg
+Parameter: action,[id],<alarm|ad,amo,ay,ah,ami>,<stop|sd,smo,sy,sh,smi>,announce,type,rep,channel_id,msg,rs
 Rückgabe: ok / error
 
 announce, type und rep analog zum oben.
@@ -903,7 +903,10 @@ a/sh  = Stunde
 a/smi = Minute
 
 Channel_id ist onid des Senders mit dem Prefix "R" für Radiokanäle und "T" für TV-Kanäle
-msg ist die Massage die bei REMIND gesendet wird
+msg ist die Message die bei REMIND gesendet wird
+
+Ist der Parameter "rs" auf "1" gesetzt, so wird bei Aufnahmetimern, die in Neutrino konfigurierte 
+"Aufnahmestart/stop-Korrektur" berücksichtigt.
 
 siehe dazu auch:
 http://cvs.berlios.de/cgi-bin/viewcvs.cgi/tuxbox/apps/tuxbox/neutrino/daemons/nhttpd/webapi.cpp?rev=HEAD&content-type=text/vnd.viewcvs-markup

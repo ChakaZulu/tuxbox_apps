@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.38 2003/10/03 17:59:21 thegoodguy Exp $
+	$Id: timerdclient.h,v 1.39 2003/11/30 13:21:04 zwen Exp $
 
 	License: GPL
 
@@ -101,7 +101,7 @@ class CTimerdClient:private CBasicClient
 		// adds new record timer event
 		int addRecordTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t stoptime, 
 										unsigned long long epgID=0, time_t epg_starttime=0, time_t announcetime = 0, 
-										std::string apids="", CTimerd::CChannelMode mode=CTimerd::MODE_TV) 
+										std::string apids="", CTimerd::CChannelMode mode=CTimerd::MODE_TV, bool safety=false) 
 			{
 				CTimerd::EventInfo eventInfo;
 				eventInfo.channel_id = channel_id;
@@ -109,6 +109,7 @@ class CTimerdClient:private CBasicClient
 				eventInfo.epg_starttime = epg_starttime;
             eventInfo.apids = apids;
 				eventInfo.mode = mode;
+				eventInfo.recordingSafety = safety;
 				return addTimerEvent(CTimerd::TIMER_RECORD, &eventInfo, announcetime, alarmtime, stoptime);
 			};
 
@@ -139,6 +140,10 @@ class CTimerdClient:private CBasicClient
 
 		// Exit timerd and programm wakeup
 		bool shutdown();
+
+		// set and get recording safety time (in sec)
+		void setRecordingSafety(int pre, int post);
+		void getRecordingSafety(int &pre, int &post);
 
 		// Convert String of O and X to repeat type and vice versa
 		void getWeekdaysFromStr(int *rep, const char* str);

@@ -79,6 +79,12 @@ class CRecordingNotifier : public CChangeObserver
 		bool changeNotify(const std::string & OptionName, void*);
 };
 
+class CRecordingSafetyNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(const std::string & OptionName, void*);
+};
+
 class CRecordingNotifier2 : public CChangeObserver
 {
 	private:

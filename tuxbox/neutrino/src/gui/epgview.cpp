@@ -458,11 +458,11 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 							else
 								mode = CTimerd::MODE_TV;
 							timerdclient.addRecordTimerEvent(channel_id,
-																		epgData.epg_times.startzeit - (atoi(g_settings.record_safety_time_before)*60),
-																		epgData.epg_times.startzeit + epgData.epg_times.dauer + (atoi(g_settings.record_safety_time_after)*60),
+																		epgData.epg_times.startzeit,
+																		epgData.epg_times.startzeit + epgData.epg_times.dauer,
 																		epgData.eventID, epgData.epg_times.startzeit,
-																		epgData.epg_times.startzeit - (ANNOUNCETIME + 120 + (atoi(g_settings.record_safety_time_before)*60)),
-																		"", mode );
+																		epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
+																		"", mode, true );
 							ShowMsgUTF("timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 						}
 						else

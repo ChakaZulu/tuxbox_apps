@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.3 2003/02/26 14:58:30 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.4 2003/11/30 13:21:04 zwen Exp $
  *
  * types used for clientlib <-> timerd communication - d-box2 linux project
  *
@@ -54,7 +54,9 @@ class CTimerdMsg : public CBasicMessage
 			CMD_UNREGISTEREVENT,
 			CMD_TIMERDAVAILABLE,
 			CMD_SHUTDOWN,
-			CMD_SETAPID
+			CMD_SETAPID,
+			CMD_GETRECSAFETY,
+			CMD_SETRECSAFETY
 		};
 
 
@@ -100,6 +102,12 @@ class CTimerdMsg : public CBasicMessage
 	struct commandSetStandby
 	{
 		bool standby_on;
+	};
+
+	struct commandRecordingSafety
+	{
+		int pre;
+		int post;
 	};
 
 
