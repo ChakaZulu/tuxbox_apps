@@ -54,6 +54,7 @@
 */
 
 #include <global.h>
+#if HAVE_DVB_API_VERSION >= 3
 #include <neutrino.h>
 #include <zapit/debug.h>
 
@@ -619,3 +620,4 @@ void CMoviePlayerGui::paint()
 void CMoviePlayerGui::paintLCD()
 {
 }
+#endif

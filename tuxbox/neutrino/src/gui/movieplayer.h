@@ -32,7 +32,7 @@
 #ifndef __movieplayergui__
 #define __movieplayergui__
 
-
+#if HAVE_DVB_API_VERSION >= 3
 #include "driver/framebuffer.h"
 #include "gui/filebrowser.h"
 #include "gui/widget/menue.h"
@@ -108,4 +108,4 @@ class CMoviePlayerGui : public CMenuTarget
 
 #endif
 
-
+#endif
