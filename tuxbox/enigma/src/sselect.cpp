@@ -4,7 +4,7 @@
 #include "edvb.h"
 #include "dvb.h"
 #include "rc.h"
-#include "ezap.h"
+#include "enigma.h"
 #include "eskin.h"
 
 void eServiceSelector::fillServiceList()

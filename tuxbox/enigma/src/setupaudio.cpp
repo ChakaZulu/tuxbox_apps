@@ -4,7 +4,7 @@
 #include "elistbox.h"
 #include "ebutton.h"
 #include "rc.h"
-#include "ezap.h"
+#include "enigma.h"
 
 eZapAudioSetup::eZapAudioSetup():eWindow(0)
 {

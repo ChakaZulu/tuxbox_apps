@@ -4,7 +4,7 @@
 #include "edvb.h"
 #include "echeckbox.h"
 #include "rc.h"
-#include "ezap.h"
+#include "enigma.h"
 
 eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 {

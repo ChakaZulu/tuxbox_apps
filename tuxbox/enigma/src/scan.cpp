@@ -3,7 +3,7 @@
 #include "frontend.h"
 #include "si.h"
 #include "dvb.h"
-#include "ezap.h"
+#include "enigma.h"
 
 #include "elabel.h"
 #include "ewindow.h"

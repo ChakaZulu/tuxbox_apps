@@ -6,7 +6,7 @@
 #include "elabel.h"
 #include "decoder.h"
 #include "multipage.h"
-#include "ezap.h"
+#include "enigma.h"
 
 void eStreaminfo::keyUp(int code)
 {
