@@ -80,6 +80,7 @@ videomenu.vcrswitch Switch Scart automatically
 
 networkmenu.head Network Settings
 networkmenu.test test network now
+networkmenu.show show active network settings
 networkmenu.setupnow setup network now
 networkmenu.setuponstartup setup network on startup
 networkmenu.ipaddress IP-Address

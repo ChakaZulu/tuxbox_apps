@@ -74,6 +74,7 @@ videomenu.vcrswitch Switch Scart automatically
 
 networkmenu.head Ajuster un Réseau
 networkmenu.test test network now
+networkmenu.show show active network settings
 networkmenu.setupnow utiliser maintenant des réglages de Réseau
 networkmenu.setuponstartup Lors du démarrage des réglages de réseau commencent
 networkmenu.ipaddress IP-adresse

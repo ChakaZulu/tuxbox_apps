@@ -135,6 +135,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void setupColors_neutrino();
 		void setupNetwork( bool force= false );
 		void testNetwork();
+		void showNetwork();
 
 		void saveSetup();
 		int loadSetup();

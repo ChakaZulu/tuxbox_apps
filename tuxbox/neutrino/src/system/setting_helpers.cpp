@@ -419,30 +419,79 @@ int retvalue=0;
 	return "";
 }
 
-void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway, char* nameserver)
+void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway, char* nameserver, int dhcp)
 {
-	printf("testNw IP       : %s\n", ip);
-	printf("testNw Netmask  : %s\n", netmask);
-	printf("testNw Broadcast: %s\n", broadcast);
-	printf("testNw Gateway: %s\n", gateway);
-	printf("testNw Nameserver: %s\n", nameserver);
+	char our_ip[16];
+	char our_mask[16];
+	char our_broadcast[16];
+	char our_gateway[16];
+	char our_nameserver[16];
+	if (!dhcp) {
+		strcpy(our_ip,ip);
+		strcpy(our_mask,netmask);
+		strcpy(our_broadcast,broadcast);
+		strcpy(our_gateway,gateway);
+		strcpy(our_nameserver,nameserver);
+	}
+	else {
+		netGetIP("eth0",our_ip,our_mask,our_broadcast);
+		netGetDefaultRoute(our_gateway);
+		netGetNameserver(our_nameserver);
+	}
+		
+	printf("testNw IP       : %s\n", our_ip);
+	printf("testNw Netmask  : %s\n", our_mask);
+	printf("testNw Broadcast: %s\n", our_broadcast);
+	printf("testNw Gateway: %s\n", our_gateway);
+	printf("testNw Nameserver: %s\n", our_nameserver);
 
 	string 	text;
 	char _text[100];
 
-	sprintf(_text, "%s %s\n", ip, mypinghost(ip).c_str() );
+	sprintf(_text, "%s %s\n", our_ip, mypinghost(our_ip).c_str() );
 	text= _text;
 
-	sprintf(_text, "Gateway %s %s\n", gateway, mypinghost(gateway).c_str() );
+	sprintf(_text, "Gateway %s %s\n", our_gateway, mypinghost(our_gateway).c_str() );
 	text= text+ _text;
 
-	sprintf(_text, "Nameserver %s %s\n", nameserver, mypinghost(nameserver).c_str() );
+	sprintf(_text, "Nameserver %s %s\n", our_nameserver, mypinghost(our_nameserver).c_str() );
 	text= text+ _text;
 
 	sprintf(_text, "dboxupdate.berlios.de %s\n",mypinghost("195.37.77.138").c_str() );
 	text= text+ _text;
 
 	ShowMsg( "networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack );
+}
+
+void showCurrentNetworkSettings()
+{
+	char ip[16];
+	char mask[16];
+	char broadcast[16];
+	char router[16];
+	char nameserver[16];
+	string text;
+	char _text[100];
+
+	netGetIP("eth0",ip,mask,broadcast);
+	if (ip[0] == 0) {
+		text = "Network inactive\n";
+	}
+	else {
+		sprintf(_text,"IP-address: %s\n",ip);
+		text= _text;
+		sprintf(_text,"Network-mask: %s\n",mask);
+		text= text + _text;
+		sprintf(_text,"Broadcast: %s\n",broadcast);
+		text= text + _text;
+		netGetNameserver(nameserver);
+		sprintf(_text,"Nameserver: %s\n",nameserver);
+		text= text + _text;
+		netGetDefaultRoute(router);
+		sprintf(_text,"Default-router: %s\n",router);
+		text= text + _text;
+	}
+	ShowMsg( "networkmenu.show", text, CMessageBox::mbrBack, CMessageBox::mbBack );
 }
 
 unsigned long long getcurrenttime()

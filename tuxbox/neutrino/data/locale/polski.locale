@@ -74,6 +74,7 @@ videomenu.vcrswitch Switch Scart automatically
 
 networkmenu.head Ustawienia Sieciowe
 networkmenu.test test network now
+networkmenu.show show active network settings
 networkmenu.setupnow Ustawienia teraz przekazac
 networkmenu.setuponstartup Przy starcie przekazac
 networkmenu.ipaddress IP-Adres

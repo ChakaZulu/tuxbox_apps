@@ -74,6 +74,7 @@ videomenu.vcrswitch Switch Scart automatically
 
 networkmenu.head AG AYARLARI
 networkmenu.test test network now
+networkmenu.show show active network settings
 networkmenu.setupnow AG AYARINI SIMDI KAYID ED
 networkmenu.setuponstartup TEKRAR ACIMININDA KAYIDLAMA
 networkmenu.ipaddress IP-ADRESI

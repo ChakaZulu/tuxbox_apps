@@ -202,10 +202,14 @@ void CNeutrinoApp::testNetwork( )
 
 	dprintf(DEBUG_INFO, "doing network test...\n");
 	//test network
-	testNetworkSettings(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast, g_settings.network_defaultgateway, g_settings.network_nameserver);
+	testNetworkSettings(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast, g_settings.network_defaultgateway, g_settings.network_nameserver,g_settings.network_dhcp);
 }
 
-
+void CNeutrinoApp::showNetwork( )
+{
+	dprintf(DEBUG_INFO, "showing current network settings...\n");
+	showCurrentNetworkSettings();
+}
 
 /**************************************************************************************
 *                                                                                     *
@@ -1358,6 +1362,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 
 	networkSettings.addItem( oj );
 	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, "", this, "networktest") );
+	networkSettings.addItem( new CMenuForwarder("networkmenu.show", true, "", this, "networkshow") );
 	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", g_settings.network_dhcp==0, "", this, "network");
 	networkSettings.addItem( m0 );
 
@@ -2714,6 +2719,10 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	{
 		 testNetwork( );
 	}
+	else if(actionKey=="networkshow")
+	{
+		showNetwork( );
+	}
 
 	else if(actionKey=="savesettings")
 	{
@@ -2769,7 +2778,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.306 2002/07/19 21:47:58 waldi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.307 2002/07/22 21:08:07 wjoost Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

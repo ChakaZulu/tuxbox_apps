@@ -80,6 +80,7 @@ videomenu.vcrswitch Scart-Eingang automatisch
 
 networkmenu.head Netzwerk Einstellungen
 networkmenu.test Netzwerk testen
+networkmenu.show aktive Netzwerkeinstellungen zeigen
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen
 networkmenu.setuponstartup Beim Starten Netzwerk setzen
 networkmenu.ipaddress IP-Adresse

@@ -73,6 +73,7 @@ videomenu.vcrswitch automaticky scart vstup
 
 networkmenu.head nastavenie siete
 networkmenu.test testovanie siete
+networkmenu.show show active network settings
 networkmenu.setupnow aktivovanie nastavenia siete
 networkmenu.setuponstartup konfiguracia siete pri starte
 networkmenu.ipaddress IP-Adresa
