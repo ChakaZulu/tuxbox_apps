@@ -279,6 +279,26 @@ static QString read_file(QString filename)
 	return res;
 }
 
+static QString getIP()
+{
+	QString tmp;
+	int ip[4];
+	ip[0]=0;
+	ip[1]=0;
+	ip[2]=0;
+	ip[3]=0;
+
+	system("cat /proc/net/tcp | grep -v \": 00000000\"> /tmp/ip_temp");
+	system("cat /tmp/ip_temp | grep \"0050\" > /tmp/ip");
+	tmp=read_file("/tmp/ip");
+	tmp=tmp.mid(5, 9);
+	
+	sscanf(tmp, "%02x%02x%02x%02x", &ip[0], &ip[1], &ip[2], &ip[3]);
+	tmp.sprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+	return tmp;
+}
+
+
 static QString filter_string(QString string)
 {
 	string=string.replace(QRegExp("\x86"), "");
@@ -484,21 +504,15 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 	} 
 	stats+=" | ";
 
-	eDVB::getInstance()->config.getKey("/elitedvb/network/ip", myipp);
-	unpack(myipp, myip); 
-
 	eDVB::getInstance()->config.getKey("/elitedvb/system/bootCount", bootcount);
 
-	tmp.sprintf("%d.%d.%d.%d", myip[0], myip[1], myip[2], myip[3]);
- 
-	stats+="<span class=\"white\">"+tmp+"</span>";
+	stats+="<span class=\"white\">"+getIP()+"</span>";
 
 	stats+=" | ";
-	tmp.sprintf("<span class=\"white\">booted enigma %d times</span>", bootcount);
+	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
 	stats+=tmp;
 
-	stats+=" | ";
-	tmp.sprintf("<span class=\"white\">vpid: %x, apid: %x</span>", Decoder::parms.vpid, Decoder::parms.apid);
+	tmp.sprintf("<span class=\"white\">vpid: 0x%x | <a class=\"audio\" href=\"http://"+getIP()+"/audio.pls\">apid: 0x%x</a></span>", Decoder::parms.vpid, Decoder::parms.apid);
 	stats+=tmp;
 	
 	tvc="normal";
@@ -675,6 +689,21 @@ static QString switchServiceWeb(QString request, QString path, QString opt, cons
 	return result;
 }
 
+static QString audiopls(QString request, QString path, QString opt, const eHTTPConnection *content)
+{
+	QString result;
+	QString tmp;
+
+	result="Content-Type: audio/x-scpls\r\n";
+	result+="\r\n";
+
+	result+="[playlist]\n";
+	result+="NumberOfEntries=1\n";
+	result+="File1=http://"+getIP()+":31338/";
+        tmp.sprintf("%02x\n", Decoder::parms.apid);
+ 	result+=tmp;
+	return result;
+}
 
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
@@ -689,6 +718,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
 
+	dyn_resolver->addDyn("GET", "/audio.pls", audiopls);
 	dyn_resolver->addDyn("GET", "/version", version);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
 /*	dyn_resolver->addDyn("GET", "/channels/numberchannels", channels_numberchannels);
