@@ -326,10 +326,9 @@ void CLCD::showPercentOver(const unsigned char perc)
 
 void CLCD::showMenuText(const int position, const std::string text, const int highlight, const bool utf_encoded)
 {
-	if ( (mode != MODE_MENU) && (mode != MODE_MENU_UTF8) )
-	{
+	if (mode != MODE_MENU_UTF8)
 		return;
-	}
+
 	// reload specified line
 	display.draw_fill_rect(-1,35+14*position,120,35+14+14*position, CLCDDisplay::PIXEL_OFF);
 	fonts.menu->RenderString(0,35+11+14*position, 140, text.c_str() , CLCDDisplay::PIXEL_INV, highlight, utf_encoded);
@@ -459,14 +458,13 @@ void CLCD::setMode(MODES m, std::string title)
 			showTime();
 			display.update();
 			break;
-		case MODE_MENU:
 		case MODE_MENU_UTF8:
 			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 			//printf("[lcdd] mode: menu\n");
 			mode = m;
 			showclock = false;
 			display.load_screen(&icon_setup);
-			fonts.menutitle->RenderString(-1,28, 140, title.c_str(), CLCDDisplay::PIXEL_ON, 0, m == MODE_MENU_UTF8);
+			fonts.menutitle->RenderString(-1,28, 140, title.c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 			display.update();
 			break;
 		case MODE_SHUTDOWN:
