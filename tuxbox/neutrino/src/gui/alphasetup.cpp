@@ -58,6 +58,10 @@
 #include <global.h>
 #include <neutrino.h>
 
+#define ALPHA_SETUP_ICON_DESELECTED      "volumeslider2.raw"
+#define ALPHA_SETUP_ICON_ALPHA1_SELECTED "volumeslider2red.raw"
+#define ALPHA_SETUP_ICON_ALPHA2_SELECTED "volumeslider2green.raw"
+
 
 CAlphaSetup::CAlphaSetup(const neutrino_locale_t Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer)
 {
@@ -107,88 +111,95 @@ int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
 
 		switch ( msg )
 		{
-			case CRCInput::RC_down:
+		case CRCInput::RC_down:
+		{
+			if(selected<max)
+			{
+				paintSlider(x + 10, y + hheight          , alpha1, LOCALE_GTXALPHA_ALPHA1, ALPHA_SETUP_ICON_DESELECTED     , false);
+				paintSlider(x + 10, y + hheight + mheight, alpha2, LOCALE_GTXALPHA_ALPHA2, ALPHA_SETUP_ICON_DESELECTED     , false);
+
+				selected++;
+
+				switch (selected)
 				{
-					if(selected<max)
-					{
-						paintSlider(x+10, y+ hheight, alpha1, g_Locale->getText("gtxalpha.alpha1"),"red", false);
-						paintSlider(x+10, y+ hheight+ mheight, alpha2, g_Locale->getText("gtxalpha.alpha2"),"green", false);
-						selected++;
-						switch (selected)
-						{
-							case 0:
-								paintSlider(x+ 10, y+ hheight, alpha1, g_Locale->getText("gtxalpha.alpha1"),"red", true);
-								break;
-							case 1:
-								paintSlider(x+ 10, y+ hheight+ mheight, alpha2, g_Locale->getText("gtxalpha.alpha2"),"green", true);
-								break;
-						}
-					}
+				case 0:
+					paintSlider(x + 10, y + hheight          , alpha1, LOCALE_GTXALPHA_ALPHA1, ALPHA_SETUP_ICON_ALPHA1_SELECTED, true );
 					break;
+				case 1:
+					paintSlider(x + 10, y + hheight + mheight, alpha2, LOCALE_GTXALPHA_ALPHA2, ALPHA_SETUP_ICON_ALPHA2_SELECTED, true );
+					break;
+				}
+			}
+			break;
     	        }
-			case CRCInput::RC_up:
-				if(selected>0)
-				{
-					paintSlider(x+10, y+hheight, alpha1, g_Locale->getText("gtxalpha.alpha1"),"red", false);
-					paintSlider(x+10, y+hheight+mheight, alpha2, g_Locale->getText("gtxalpha.alpha2"),"green", false);
-					selected--;
-					switch (selected)
-					{
-						case 0:
-							paintSlider(x+10, y+hheight, alpha1, g_Locale->getText("gtxalpha.alpha1"),"red", true);
-							break;
-						case 1:
-							paintSlider(x+10, y+hheight+mheight, alpha2, g_Locale->getText("gtxalpha.alpha2"),"green", true);
-							break;
-					}
-				}
-				break;
+		case CRCInput::RC_up:
+		{
+			if (selected > 0)
+			{
+				paintSlider(x + 10, y + hheight          , alpha1, LOCALE_GTXALPHA_ALPHA1, ALPHA_SETUP_ICON_DESELECTED     , false);
+				paintSlider(x + 10, y + hheight + mheight, alpha2, LOCALE_GTXALPHA_ALPHA2, ALPHA_SETUP_ICON_DESELECTED     , false);
+				
+				selected--;
 
-			case CRCInput::RC_right:
 				switch (selected)
 				{
-					case 0:
-						if (*alpha1<8)
-						{
-							*alpha1+=1;
-							paintSlider(x+10, y+hheight, alpha1,g_Locale->getText("gtxalpha.alpha1"),"red", true);
-							frameBuffer->setBlendLevel(*alpha1, *alpha2);
-						}
-						break;
-					case 1:
-						if (*alpha2<8)
-						{
-							*alpha2+=1;
-							paintSlider(x+10, y+hheight+mheight, alpha2,g_Locale->getText("gtxalpha.alpha2"),"green", true);
-							frameBuffer->setBlendLevel(*alpha1, *alpha2);
-						}
-						break;
+				case 0:
+					paintSlider(x + 10, y + hheight          , alpha1, LOCALE_GTXALPHA_ALPHA1, ALPHA_SETUP_ICON_ALPHA1_SELECTED, true );
+					break;
+				case 1:
+					paintSlider(x + 10, y + hheight + mheight, alpha2, LOCALE_GTXALPHA_ALPHA2, ALPHA_SETUP_ICON_ALPHA2_SELECTED, true );
+					break;
 				}
-				break;
-
-			case CRCInput::RC_left:
-				switch (selected)
+			}
+			break;
+		}
+		case CRCInput::RC_right:
+		{
+			switch (selected)
+			{
+			case 0:
+				if (*alpha1<8)
 				{
-					case 0:
-						if (*alpha1>=1)
-						{
-							*alpha1-=1;
-							paintSlider(x+10, y+hheight, alpha1,g_Locale->getText("gtxalpha.alpha1"),"red", true);
-							frameBuffer->setBlendLevel(*alpha1, *alpha2);
-						}
-						break;
-					case 1:
-						if (*alpha2>=1)
-						{
-							*alpha2-=1;
-							paintSlider(x+10, y+hheight+mheight, alpha2,g_Locale->getText("gtxalpha.alpha2"),"green", true);
-							frameBuffer->setBlendLevel(*alpha1, *alpha2);
-						}
-						break;
+					*alpha1+=1;
+					paintSlider(x + 10, y + hheight          , alpha1, LOCALE_GTXALPHA_ALPHA1, ALPHA_SETUP_ICON_ALPHA1_SELECTED, true );
+					frameBuffer->setBlendLevel(*alpha1, *alpha2);
 				}
 				break;
-
-			case CRCInput::RC_home:
+			case 1:
+				if (*alpha2<8)
+				{
+					*alpha2+=1;
+					paintSlider(x + 10, y + hheight + mheight, alpha2, LOCALE_GTXALPHA_ALPHA2, ALPHA_SETUP_ICON_ALPHA2_SELECTED, true );
+					frameBuffer->setBlendLevel(*alpha1, *alpha2);
+				}
+				break;
+			}
+			break;
+		}
+		case CRCInput::RC_left:
+		{
+			switch (selected)
+			{
+			case 0:
+				if (*alpha1>=1)
+				{
+					*alpha1-=1;
+					paintSlider(x + 10, y + hheight          , alpha1, LOCALE_GTXALPHA_ALPHA1, ALPHA_SETUP_ICON_ALPHA1_SELECTED, true );
+					frameBuffer->setBlendLevel(*alpha1, *alpha2);
+				}
+				break;
+			case 1:
+				if (*alpha2>=1)
+				{
+					*alpha2-=1;
+					paintSlider(x + 10, y + hheight + mheight, alpha2, LOCALE_GTXALPHA_ALPHA2, ALPHA_SETUP_ICON_ALPHA2_SELECTED, true );
+					frameBuffer->setBlendLevel(*alpha1, *alpha2);
+				}
+				break;
+			}
+			break;
+		}
+		case CRCInput::RC_home:
 				if ((*alpha1 != alpha1_alt) || (*alpha2 != alpha2_alt))
 				{
 					if (ShowMsgUTF(name, g_Locale->getText(LOCALE_MESSAGEBOX_DISCARD), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel) // UTF-8
@@ -234,22 +245,20 @@ void CAlphaSetup::paint()
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT_PLUS_0);
 
-	paintSlider(x+10, y+hheight, alpha1,g_Locale->getText("gtxalpha.alpha1"),"red", true);
-	paintSlider(x+10, y+hheight+mheight, alpha2,g_Locale->getText("gtxalpha.alpha2"),"green", false);
+	paintSlider(x + 10, y + hheight          , alpha1, LOCALE_GTXALPHA_ALPHA1, ALPHA_SETUP_ICON_ALPHA1_SELECTED, true );
+	paintSlider(x + 10, y + hheight + mheight, alpha2, LOCALE_GTXALPHA_ALPHA2, ALPHA_SETUP_ICON_DESELECTED     , false);
 }
 
-void CAlphaSetup::paintSlider(const int x, const int y, const unsigned char * const spos, const char * const text, const char * const iconname, const bool selected) // UTF-8
+void CAlphaSetup::paintSlider(const int x, const int y, const unsigned char * const spos, const neutrino_locale_t text, const char * const iconname, const bool selected) // UTF-8
 {
 	if (!spos)
 		return;
 	int sspos = (*spos)*100/8;
-	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT_PLUS_0);
-	frameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
-	std::string iconfile = "volumeslider2";
-	if (selected)
-		iconfile += iconname;
-	iconfile +=".raw";
-	frameBuffer->paintIcon(iconfile,x+73+sspos,y+mheight/4);
 
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x,y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
+	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT_PLUS_0);
+
+	frameBuffer->paintIcon("volumebody.raw", x + 70        , y + 2 + mheight / 4);
+	frameBuffer->paintIcon(iconname        , x + 73 + sspos, y     + mheight / 4);
+
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x,y+mheight, width, g_Locale->getText(text), COL_MENUCONTENT, 0, true); // UTF-8
 }

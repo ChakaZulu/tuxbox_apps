@@ -274,6 +274,10 @@ class CLocaleManager
 #define LOCALE_FILEBROWSER_SORT_TYPE               "filebrowser.sort.type"
 
 
+#define LOCALE_GTXALPHA_ALPHA1                     "gtxalpha.alpha1"
+#define LOCALE_GTXALPHA_ALPHA2                     "gtxalpha.alpha2"
+
+
 #define LOCALE_IPSETUP_HINT_1                      "ipsetup.hint_1"
 #define LOCALE_IPSETUP_HINT_2                      "ipsetup.hint_2"
 
