@@ -1,8 +1,60 @@
-<h1>Network Settings</h1>
-not available yet.
-<h1>HDD Settings</h1>
-not available yet.
-<h1>Timer Settings</h1>
-not available yet.
-<h1>Miscellaneous Settings</h1>
-not available yet.
+<form name="configsettings" action="/cgi-bin/setConfigSettings">
+<h2>Network</h2>
+<table border=0 cellspacing=5 cellpadding=0>
+<tr>
+	<td>MaxMTU (default: 1500):</td>
+	<td>
+		<input style="color:#000000" name="maxmtu" type="text" size="4" maxlength="4" value="#MAXMTU#">
+	</td>
+</tr>
+<tr>
+	<td>Activate Samba daemons:</td>
+	<td>
+		<input type="checkbox" name="samba" value="on" #SAMBA#>
+	</td>
+</tr>
+</table>
+<h2>Harddisk</h2>
+<table border=0 cellspacing=5 cellpadding=0>
+<tr>
+	<td>Standby (min):</td>
+	<td>
+		<input style="color:#000000" name="hddstandby" type="text" size="3" maxlength="3" value="#HDDSTANDBY#">
+	</td>
+</tr>
+<tr>
+	<td>Acoustics:</td>
+	<td>
+		<input style="color:#000000" name="hddacoustics" type="text" size="3" maxlength="3" value="#HDDACOUSTICS#">
+	</td>
+	</td>
+</tr>
+</table>
+<h2>Timer</h2>
+<table border=0 cellspacing=5 cellpadding=0>
+<tr>
+	<td>Time Offset (min):</td>
+	<td>
+		<input style="color:#000000" name="timeroffset" type="text" size="2" maxlenght="2" value="#TIMEROFFSET#">
+		&nbsp;&nbsp;(time a timer event starts earlier and finishes later)
+	</td>	
+</tr>
+</table>
+<h2>Miscellaneous</h2>
+<table border=0 cellspacing=5 cellpdding=0>
+<tr>
+	<td>Show satellite positions on info bar:</td>
+	<td>
+		<input type="checkbox" name="showsatpos" value="on" #SHOWSATPOS#>
+	</td>	
+</tr>
+<tr>
+	<td>Web Interface passwort protection:</td>
+	<td>
+		<input type="checkbox" name="webiflock" value="on" #WEBIFLOCK#>
+	</td>
+</tr>
+</table>
+<br><br>
+<input style="color: #000000" type="submit" size="100px" value="Save">
+</form>
