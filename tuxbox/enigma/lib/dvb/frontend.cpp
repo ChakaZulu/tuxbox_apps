@@ -8,7 +8,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-
+#include <error.h>
 #include <cmath>
 
 #include <lib/base/ebase.h>
@@ -58,6 +58,28 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 
 void eFrontend::checkLock()
 {
+#if 0	
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	{
+		int fp = ::open("/dev/dbox/fp0", O_RDWR);
+		if ( fp >= 0 )
+		{
+#define FP_IOCTL_IS_LOOPTHROUGH 0x103
+			__u8 isloopthrough=0;
+			int ret = ::ioctl(fp, FP_IOCTL_IS_LOOPTHROUGH, &isloopthrough);
+			if ( ret < 0 )
+				eDebug("%m");
+			::close(fp);
+			if ( isloopthrough )
+			{
+				eDebug("loopthrough active.. dont retune... ");
+				return;
+			}
+			else
+				eDebug("loopthrough not active.. retune... ");
+		}
+	}
+#endif
 	if (state == stateIdle && !eDVB::getInstance()->getScanAPI() )
 	{
 		if (!Locked() && transponder)
@@ -285,7 +307,9 @@ int eFrontend::readInputPower()
 					eDebug("couldn't open fp");
 					return -1;
 				}
-				if ( ioctl(fp, eSystemInfo::getInstance()->hasStandbyWakeupTimer() ? 0x100 : 9, &power ) < 0 )
+#define FP_IOCTL_GET_ID 0
+				static bool old_fp = (::ioctl(fp, FP_IOCTL_GET_ID) < 0);
+				if ( ioctl( fp, old_fp ? 9 : 0x100, &power ) < 0 )
 				{
 					eDebug("FP_IOCTL_GET_LNB_CURRENT failed (%m)");
 					return -1;
