@@ -666,4 +666,3 @@ nfs.mounterror Mount-Fehler
 nfs.umount NFS Verzeichniss unmounten
 nfs.umounterror Umount-Fehler
 nfs.alreadymounted Verzeichniss bereits gemountet
-

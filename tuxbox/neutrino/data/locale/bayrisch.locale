@@ -655,3 +655,14 @@ filebrowser.filter Fuita
 filebrowser.select auswaehn
 filebrowser.mark markiern
 filebrowser.scan Verzeichnisse durchsuacha
+
+nfs.mount unset
+nfs.ip unset
+nfs.dir unset
+nfs.localdir unset
+nfs.automount unset
+nfs.mountnow unset
+nfs.mounterror unset
+nfs.umount unset
+nfs.umounterror unset
+nfs.alreadymounted unset

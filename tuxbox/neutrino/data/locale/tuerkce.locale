@@ -509,3 +509,14 @@ filebrowser.filter unset
 filebrowser.select unset
 filebrowser.mark unset
 filebrowser.scan unset
+
+nfs.mount unset
+nfs.ip unset
+nfs.dir unset
+nfs.localdir unset
+nfs.automount unset
+nfs.mountnow unset
+nfs.mounterror unset
+nfs.umount unset
+nfs.umounterror unset
+nfs.alreadymounted unset
