@@ -1062,7 +1062,7 @@ void eNFSSetup::fstypeChanged(eListBoxEntryText *le)
 {
 	if ( le )
 	{
-		if ( le->getKey() )
+		if ( le->getKey() )  // CIFS
 		{
 			luser->show();
 			lpass->show();
@@ -1351,14 +1351,6 @@ int eNFSSetup::eventHandler(const eWidgetEvent &e)
 {
 	if (e.type == eWidgetEvent::execBegin )
 	{
-		if ( combo_fstype->getCount() > 1 )
-		{
-			errorMessage(
-				_("Recording on CIFS shares is unstable.\n"
-					"Therefore CIFS support is not included "
-					"in the standard distribution. Use it at "
-					"your own risk!"));
-		}
 		setFocus(ip);
 		return 1;
 	}
