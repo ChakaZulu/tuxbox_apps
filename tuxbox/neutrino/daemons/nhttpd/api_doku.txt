@@ -306,6 +306,23 @@ Beispiel:
 305
 306
 
+Parameter: getallpids
+Rückgabe:
+
+Es werden die VPID und alle APIDs des laufenden Senders angezeigt. Die Werte sind durch ein Enter voneinander getrennt.
+
+Rückgabe-Format:
+       VPID
+       APID
+       [APID...]
+
+Beispiel:
+
+>>>http://dbox/control/zapto?getallpids
+305
+306
+307
+308
 
 
 Parameter: stopplayback

@@ -1,9 +1,9 @@
-/*      
+/*
         nhttpd  -  DBoxII-Project
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.5 2003/03/27 00:35:04 dirch Exp $
+        $Id: controlapi.h,v 1.6 2003/07/14 09:48:28 gagga Exp $
 
         License: GPL
 
@@ -38,6 +38,7 @@ class CControlAPI
 		// send functions for ExecuteCGI (controld api)
 		void SendEventList(CWebserverRequest *request,t_channel_id channel_id);
 		void SendcurrentVAPid(CWebserverRequest* request);
+		void SendAllCurrentVAPid(CWebserverRequest* request);
 		void SendSettings(CWebserverRequest* request);
 		void SendStreamInfo(CWebserverRequest* request);
 		void SendBouquets(CWebserverRequest *request);
