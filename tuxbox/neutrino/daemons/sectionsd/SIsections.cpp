@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.29 2002/11/05 19:56:26 obi Exp $
+// $Id: SIsections.cpp,v 1.30 2003/02/06 17:52:18 thegoodguy Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -21,95 +21,6 @@
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
-// $Log: SIsections.cpp,v $
-// Revision 1.29  2002/11/05 19:56:26  obi
-// ported to dvb api version 3
-//
-// Revision 1.28  2002/08/27 19:00:45  obi
-// use devfs device names
-//
-// Revision 1.27  2001/11/05 17:12:05  field
-// Versuch zu Wiederholungen
-//
-// Revision 1.26  2001/11/03 15:39:57  field
-// Deadlock behoben, Perspektiven
-//
-// Revision 1.25  2001/11/03 03:13:52  field
-// Auf Perspektiven vorbereitet
-//
-// Revision 1.24  2001/10/24 14:00:14  field
-// Ueberpruefung auf fehlerhafte Laengen verbessert
-//
-// Revision 1.23  2001/10/22 16:15:51  field
-// Bugfix
-//
-// Revision 1.22  2001/10/22 14:27:24  field
-// Kleinigkeiten
-//
-// Revision 1.21  2001/10/22 04:10:58  fnbrd
-// debug enhanced (commented printfs)
-//
-// Revision 1.20  2001/10/10 13:40:25  fnbrd
-// Fixed small bug with service names
-//
-// Revision 1.19  2001/10/02 16:18:53  fnbrd
-// Fehler behoben.
-//
-// Revision 1.18  2001/09/20 10:12:46  fnbrd
-// Fehler behoben.
-//
-// Revision 1.17  2001/07/26 21:36:59  fnbrd
-// Ein paar Absicherungen gegen defekte EIT-Packete.
-//
-// Revision 1.16  2001/07/25 11:39:17  fnbrd
-// Added unique keys to Events and Services
-//
-// Revision 1.15  2001/07/23 00:21:23  fnbrd
-// removed using namespace std.
-//
-// Revision 1.14  2001/07/17 12:39:18  fnbrd
-// Neue Kommandos
-//
-// Revision 1.13  2001/07/16 11:49:31  fnbrd
-// Neuer Befehl, Zeichen fuer codetable aus den Texten entfernt
-//
-// Revision 1.12  2001/06/13 19:08:27  fnbrd
-// Timeout bei read() per poll() implementiert.
-//
-// Revision 1.11  2001/06/11 01:53:54  fnbrd
-// Kleiner Fehler behoben.
-//
-// Revision 1.10  2001/06/11 01:19:58  fnbrd
-// Debugausgabe raus.
-//
-// Revision 1.9  2001/06/11 01:15:16  fnbrd
-// NVOD reference descriptors und Service-Typ
-//
-// Revision 1.8  2001/06/10 15:40:34  fnbrd
-// Kleine Aenderung die das einlesen von Sections mit nur einer Section beschleunigt (z.b. sdt).
-//
-// Revision 1.7  2001/06/10 14:55:51  fnbrd
-// Kleiner Aenderungen und Ergaenzungen (epgMini).
-//
-// Revision 1.6  2001/05/21 22:45:43  fnbrd
-// Debugausgaben raus.
-//
-// Revision 1.5  2001/05/21 22:44:44  fnbrd
-// Timeout verbessert.
-//
-// Revision 1.4  2001/05/20 14:40:15  fnbrd
-// Mit parental_rating
-//
-// Revision 1.3  2001/05/18 20:31:04  fnbrd
-// Aenderungen fuer -Wall
-//
-// Revision 1.2  2001/05/18 13:11:46  fnbrd
-// Fast komplett, fehlt nur noch die Auswertung der time-shifted events
-// (Startzeit und Dauer der Cinedoms).
-//
-// Revision 1.1  2001/05/16 15:23:47  fnbrd
-// Alles neu macht der Mai.
-//
 //
 
 #include <stdio.h>
@@ -117,8 +28,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h> // fuer poll()
-
-#include <linux/dvb/dmx.h>
 
 #include <set>
 #include <algorithm>
@@ -128,6 +37,7 @@
 #include "SIservices.hpp"
 #include "SIevents.hpp"
 #include "SIsections.hpp"
+#include <dmxapi.h>
 
 //#define DEBUG
 
@@ -435,33 +345,23 @@ int j;
 //
 // Beachtung der Stuffing tables (ST) fehlt noch
 //
-int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigned char mask, int readNext, unsigned timeoutInSeconds)
+int SIsections :: readSections(const unsigned short pid, const unsigned char filter, const unsigned char mask, int readNext, unsigned timeoutInSeconds)
 {
-  int fd;
-  struct SI_section_header header;
-  struct dmx_sct_filter_params flt;
-  unsigned long long firstKey=(unsigned long long)-1;
-  SIsections missingSections;
-  char *buf;
+	int fd;
+	struct SI_section_header header;
+	unsigned long long firstKey=(unsigned long long)-1;
+	SIsections missingSections;
+	char *buf;
 
-  memset (&flt.filter, 0, sizeof (struct dmx_filter));
-
-  flt.pid              = pid;
-  flt.filter.filter[0] = filter;
-  flt.filter.mask[0]   = mask;
-  flt.timeout          = 0;
-//  flt.flags            = DMX_IMMEDIATE_START;
-  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-
-  if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1) {
-    perror ("/dev/dvb/adapter0/demux0");
-    return 1;
-  }
-  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
-    close(fd);
-    perror ("DMX_SET_FILTER");
-    return 2;
-  }
+	if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1) {
+		perror(DEMUX_DEVICE);
+		return 1;
+	}
+	if (!setfilter(fd, pid, filter, mask, DMX_IMMEDIATE_START | DMX_CHECK_CRC))
+	{
+		close(fd);
+		return 2;
+	}
 
   time_t szeit=time(NULL);
 
@@ -616,15 +516,15 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
   szeit=time(NULL);
 //  printf("reading missing\n");
 
-  if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1) {
-    perror ("/dev/dvb/adapter0/demux0");
+  if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1) {
+    perror(DEMUX_DEVICE);
     return 9;
   }
-  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
-    close(fd);
-    perror ("DMX_SET_FILTER");
-    return 10;
-  }
+	if (!setfilter(fd, pid, filter, mask, DMX_IMMEDIATE_START | DMX_CHECK_CRC))
+	{
+		close(fd);
+		return 10;
+	}
   // Jetzt lesen wir die fehlenden Sections ein
   for(;;) {
     if(time(NULL)>szeit+(long)(timeoutInSeconds))

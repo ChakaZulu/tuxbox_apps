@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.22 2002/11/05 19:56:26 obi Exp $
+// $Id: SIevents.cpp,v 1.23 2003/02/06 17:52:18 thegoodguy Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -21,70 +21,6 @@
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
-// $Log: SIevents.cpp,v $
-// Revision 1.22  2002/11/05 19:56:26  obi
-// ported to dvb api version 3
-//
-// Revision 1.21  2002/11/03 22:26:54  thegoodguy
-// Use more frequently types defined in zapittypes.h(not complete), fix some warnings, some code cleanup
-//
-// Revision 1.20  2002/10/08 18:56:43  thegoodguy
-// Improve interpretation of the parental rating descriptor & locking of channels in a locked bouquet
-//
-// Revision 1.19  2002/09/21 21:58:55  thegoodguy
-// Speed up code (hey - sets are a great structure)
-//
-// Revision 1.18  2002/09/20 23:07:42  thegoodguy
-// Speed up code
-//
-// Revision 1.17  2002/08/27 19:00:45  obi
-// use devfs device names
-//
-// Revision 1.16  2002/02/28 01:52:21  field
-// Verbessertes Umschalt-Handling
-//
-// Revision 1.15  2002/02/23 20:52:41  field
-// Bugfix
-//
-// Revision 1.14  2002/02/23 14:53:18  McClean
-// add fsk
-//
-// Revision 1.13  2001/11/03 15:39:57  field
-// Deadlock behoben, Perspektiven
-//
-// Revision 1.12  2001/11/03 03:13:52  field
-// Auf Perspektiven vorbereitet
-//
-// Revision 1.11  2001/07/25 11:39:17  fnbrd
-// Added unique keys to Events and Services
-//
-// Revision 1.10  2001/07/16 15:19:32  fnbrd
-// removeOldEvents beschleunigt.
-//
-// Revision 1.9  2001/07/16 13:33:40  fnbrd
-// removeOldEvents geaendert.
-//
-// Revision 1.8  2001/07/14 22:59:58  fnbrd
-// removeOldEvents() in SIevents
-//
-// Revision 1.7  2001/06/13 19:08:27  fnbrd
-// Timeout bei read() per poll() implementiert.
-//
-// Revision 1.6  2001/06/11 19:22:54  fnbrd
-// Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
-//
-// Revision 1.5  2001/06/10 15:48:31  fnbrd
-// Noch einen kleinen Fehler behoben.
-//
-// Revision 1.4  2001/06/10 14:55:51  fnbrd
-// Kleiner Aenderungen und Ergaenzungen (epgMini).
-//
-// Revision 1.3  2001/05/20 14:40:15  fnbrd
-// Mit parental_rating
-//
-// Revision 1.2  2001/05/19 22:46:50  fnbrd
-// Jetzt wellformed xml.
-//
 //
 
 #ifdef DEBUG
@@ -99,8 +35,6 @@
 #include <fcntl.h>
 #include <sys/poll.h> // fuer poll()
 
-#include <linux/dvb/dmx.h>
-
 #include <set>
 #include <algorithm>
 #include <string>
@@ -109,6 +43,7 @@
 #include "SIservices.hpp"
 #include "SIevents.hpp"
 #include "SIsections.hpp"
+#include <dmxapi.h>
 
 SIevent::SIevent(const struct eit_event *e)
 {
@@ -351,24 +286,15 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
 	int fd;
 	SIevent evt; // Std-Event das bei Fehler zurueckgeliefert wird
 	struct SI_section_header header;
-	struct dmx_sct_filter_params flt;
 	char *buf;
 
-	memset (&flt.filter, 0, sizeof (struct dmx_filter));
-
-	flt.pid              = 0x12;
-	flt.filter.filter[0] = 0x4e;
-	flt.filter.mask[0]   = 0xff;
-	flt.timeout          = 0;
-	flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
-
-	if ((fd = open("/dev/dvb/adapter0/demux0", O_RDWR)) == -1) {
-		perror ("/dev/dvb/adapter0/demux0");
+	if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1) {
+		perror(DEMUX_DEVICE);
 		return evt;
 	}
-	if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
+	if (!setfilter(fd, 0x12, 0x4e, 0xff, DMX_IMMEDIATE_START | DMX_CHECK_CRC))
+	{
 		close(fd);
-		perror ("DMX_SET_FILTER");
 		return evt;
 	}
 
