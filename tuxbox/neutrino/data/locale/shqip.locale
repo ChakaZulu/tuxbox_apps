@@ -593,3 +593,7 @@ fontmenu.channellist lista e kanal-eve
 fontmenu.eventlist lista e ngjarjeve 
 fontmenu.epg epg 
 fontmenu.infobar traka informative 
+
+colormenu.gtx_alpha unset
+gtxalpha.alpha1 tr1
+gtxalpha.alpha2 tr2

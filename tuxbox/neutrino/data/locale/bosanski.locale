@@ -55,7 +55,6 @@ miscsettings.boxtype proizvodjac dbox2
 miscsettings.startneutrinodirect direktni start neutrina 
 miscsettings.general generalno 
 miscsettings.fb_destination majstori! boot konsola 
-miscsettings.spdif_control upravljanje spdifa 
 
 languagesetup.head izabrati jezik 
 languagesetup.select jezik 
@@ -594,3 +593,7 @@ fontmenu.channellist lista kanala
 fontmenu.eventlist lista dogadjaja 
 fontmenu.epg epg 
 fontmenu.infobar informativna traka 
+
+colormenu.gtx_alpha unset
+gtxalpha.alpha1 tr1
+gtxalpha.alpha2 tr2

@@ -593,3 +593,7 @@ fontmenu.channellist unset
 fontmenu.eventlist unset
 fontmenu.epg unset
 fontmenu.infobar unset
+
+colormenu.gtx_alpha unset
+gtxalpha.alpha1 tr1
+gtxalpha.alpha2 tr2
