@@ -84,7 +84,6 @@ class CMenuTarget
 class CMenuItem
 {
 	protected:
-		CFrameBuffer	*frameBuffer;
 		int x, y, dx, offx;
 		bool		active;
 	public:
@@ -328,6 +327,11 @@ class CLockedMenuForwarder : public CMenuForwarder, public CPINProtection
 
 		virtual int exec(CMenuTarget* parent);
 };
+
+extern CMenuSeparator * const GenericMenuSeparator;
+extern CMenuSeparator * const GenericMenuSeparatorLine;
+extern CMenuForwarder * const GenericMenuBack;
+
 
 
 #endif

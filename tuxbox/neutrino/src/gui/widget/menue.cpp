@@ -44,6 +44,18 @@
 
 #include <cctype>
 
+
+/* the following generic menu items are integrated into multiple menus at the same time */
+CMenuSeparator CGenericMenuSeparator;
+CMenuSeparator CGenericMenuSeparatorLine(CMenuSeparator::LINE);
+CMenuForwarder CGenericMenuBack("menu.back");
+CMenuSeparator * const GenericMenuSeparator = &CGenericMenuSeparator;
+CMenuSeparator * const GenericMenuSeparatorLine = &CGenericMenuSeparatorLine;
+CMenuForwarder * const GenericMenuBack = &CGenericMenuBack;
+
+
+
+
 bool isNumber(const std::string& str)
 {
 	for (std::string::const_iterator i = str.begin(); i != str.end(); i++)
@@ -74,7 +86,11 @@ CMenuWidget::~CMenuWidget()
 {
 	for(unsigned int count=0;count<items.size();count++)
 	{
-		delete items[count];
+		CMenuItem * item = items[count];
+		if ((item != GenericMenuSeparator) &&
+		    (item != GenericMenuSeparatorLine) &&
+		    (item != GenericMenuBack))
+			delete item;
 	}
 	items.clear();
 	page_start.clear();
@@ -380,7 +396,6 @@ void CMenuWidget::paintItems()
 
 CMenuOptionChooser::CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const bool Localizing, const uint DirectKey, const std::string IconName)
 {
-	frameBuffer = CFrameBuffer::getInstance();
 	height= g_Fonts->menu->getHeight();
 	optionName = OptionName;
 	active = Active;
@@ -447,6 +462,8 @@ int CMenuOptionChooser::exec(CMenuTarget*)
 
 int CMenuOptionChooser::paint( bool selected )
 {
+	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
+
 	unsigned char color = COL_MENUCONTENT;
 	if (selected)
 		color = COL_MENUCONTENTSELECTED;
@@ -505,7 +522,6 @@ int CMenuOptionChooser::paint( bool selected )
 
 CMenuOptionStringChooser::CMenuOptionStringChooser(const char * const OptionName, char* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
 {
-	frameBuffer = CFrameBuffer::getInstance();
 	height= g_Fonts->menu->getHeight();
 	optionName = OptionName;
 	active = Active;
@@ -561,7 +577,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 	if (!active)
 		color = COL_MENUCONTENTINACTIVE;
 
-	frameBuffer->paintBoxRel(x,y, dx, height, color );
+	CFrameBuffer::getInstance()->paintBoxRel(x,y, dx, height, color );
 
 	std::string  l_optionName = g_Locale->getText(optionName);
 	std::string  l_option;
@@ -591,7 +607,6 @@ int CMenuOptionStringChooser::paint( bool selected )
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
 {
-	frameBuffer = CFrameBuffer::getInstance();
 	text=Text;
 	option = Option;
 	option_string = NULL;
@@ -605,7 +620,6 @@ CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const
 
 CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
 {
-	frameBuffer = CFrameBuffer::getInstance();
 	text=Text;
 	option = NULL;
 	option_string = &Option;
@@ -637,6 +651,7 @@ int CMenuForwarder::exec(CMenuTarget* parent)
 
 int CMenuForwarder::paint(bool selected)
 {
+	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 	int height = getHeight();
 	std::string l_text = localizing ? g_Locale->getText(text) : text;
 
@@ -644,15 +659,16 @@ int CMenuForwarder::paint(bool selected)
 
 	if (selected)
 	{
-		CLCD::getInstance()->showMenuText(0, l_text, -1, true); // UTF-8
+		CLCD * lcd = CLCD::getInstance();
+		lcd->showMenuText(0, l_text, -1, true); // UTF-8
 
 		if (option)
-			CLCD::getInstance()->showMenuText(1, option);
+			lcd->showMenuText(1, option);
 		else
 			if (option_string)
-				CLCD::getInstance()->showMenuText(1, *option_string);
+				lcd->showMenuText(1, *option_string);
 			else
-				CLCD::getInstance()->showMenuText(1, "", -1, true); // UTF-8
+				lcd->showMenuText(1, "", -1, true); // UTF-8
 	}
 
 	unsigned char color = COL_MENUCONTENT;
@@ -694,7 +710,6 @@ int CMenuForwarder::paint(bool selected)
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuSeparator::CMenuSeparator(const int Type, const char * const Text)
 {
-	frameBuffer = CFrameBuffer::getInstance();
 	directKey = CRCInput::RC_nokey;
 	iconName = "";
 	type = Type;
@@ -714,6 +729,8 @@ CMenuSeparator::CMenuSeparator(const int Type, const char * const Text)
 
 int CMenuSeparator::paint(bool selected)
 {
+	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
+	
 	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT );
 	if(type&LINE)
 	{
