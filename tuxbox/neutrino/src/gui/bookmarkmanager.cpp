@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.1 2004/02/05 01:05:30 gagga Exp $
+  $Id: bookmarkmanager.cpp,v 1.2 2004/02/05 08:46:35 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -118,7 +118,7 @@ int CBookmarkManager::createBookmark (std::string name, std::string url, std::st
 }
 
 int CBookmarkManager::createBookmark (std::string url, std::string time) {
-    char *bookmarkname="";
+    char bookmarkname[26]="";
     CStringInputSMS * bookmarkname_input = new CStringInputSMS("movieplayer.bookmarkname", bookmarkname, 25, "movieplayer.bookmarkname_hint1", "movieplayer.bookmarkname_hint1", "abcdefghijklmnopqrstuvwxyz0123456789-_");
     bookmarkname_input->exec(NULL, "");
     std::string *namestring = new std::string(bookmarkname);
