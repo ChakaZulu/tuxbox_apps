@@ -168,22 +168,22 @@ int CScanTs::handleMsg(uint msg, uint data)
 			
 		case NeutrinoMessages::EVT_SCAN_NUM_CHANNELS:
 			sprintf(buffer, " = %d", data);
-			paintLine(x + 210, ypos_service_numbers + mheight, g_Fonts->menu->getRenderWidth(buffer), buffer);
+			paintLine(x + 210, ypos_service_numbers + mheight, g_Fonts->menu->getRenderWidth("0000"), buffer);
 			break;
 			
 		case NeutrinoMessages::EVT_SCAN_FOUND_TV_CHAN:
 			sprintf(buffer, "%d", data);
-			paintLine(xpos1, ypos_service_numbers + mheight, g_Fonts->menu->getRenderWidth(buffer), buffer);
+			paintLine(xpos1, ypos_service_numbers + mheight, g_Fonts->menu->getRenderWidth("0000"), buffer);
 			break;
 			
 		case NeutrinoMessages::EVT_SCAN_FOUND_RADIO_CHAN:
 			sprintf(buffer, "%d", data);
-			paintLine(x + 72, ypos_service_numbers + mheight, g_Fonts->menu->getRenderWidth(buffer), buffer);
+			paintLine(x + 72, ypos_service_numbers + mheight, g_Fonts->menu->getRenderWidth("0000"), buffer);
 			break;
 			
 		case NeutrinoMessages::EVT_SCAN_FOUND_DATA_CHAN:
 			sprintf(buffer, "%d", data);
-			paintLine(x + 148, ypos_service_numbers + mheight, g_Fonts->menu->getRenderWidth(buffer), buffer);
+			paintLine(x + 148, ypos_service_numbers + mheight, g_Fonts->menu->getRenderWidth("0000"), buffer);
 			break;
 			
 		case NeutrinoMessages::EVT_SCAN_COMPLETE:
