@@ -48,7 +48,7 @@ int master_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
-	Fx2ShowPig( 440, 360, 160, 144 );
+	Fx2ShowPig( 430, 355, 176, 144 );
 
 	while( doexit != 3 )
 	{

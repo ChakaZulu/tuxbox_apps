@@ -495,7 +495,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		LoadHScore();
 	}
 
-	Fx2ShowPig( 450, 105, 128, 96 );
+	Fx2ShowPig( 480, 400, 176, 144 );
 
 	while( doexit != 3 )
 	{
@@ -535,6 +535,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			if ( use_ihsc )
 				ShowIHScore();
 			ShowHScore(hsc);
+			Fx2PigPause();
 
 #ifdef USEX
 			FBFlushGrafic();
@@ -556,6 +557,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 #endif
 				}
 			}
+			Fx2PigResume();
 		}
 	}
 

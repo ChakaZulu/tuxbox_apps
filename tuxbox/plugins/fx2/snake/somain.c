@@ -47,7 +47,7 @@ int snake_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
-	Fx2ShowPig( 489, 470, 128, 96 );
+	Fx2ShowPig( 540, 449, 135, 96 );
 
 	while( doexit != 3 )
 	{
