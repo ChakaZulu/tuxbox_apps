@@ -179,7 +179,7 @@ static	void	SaveGame( void )
 	if ( x == 8 )
 		return;
 
-	FBDrawString( 150,350,64,"Inet-Send Highscore ? (OK/BLUE)",WHITE,0);
+	FBDrawString( 150,230,64,"Inet-Send Highscore ? (OK/BLUE)",GREEN,0);
 
 	while( realcode != 0xee )
 		RcGetActCode();
@@ -263,9 +263,7 @@ static	void	SaveGame( void )
 	fclose( fp );
 	unlink( "/var/tmp/trash" );
 
-	tv.tv_sec = 2;
-	tv.tv_usec = 0;
-	select( 0,0,0,0, &tv );
+	LoadHScore();
 
 	return;
 }
@@ -289,6 +287,9 @@ static	void	ShowHScore( HScore *g )
 		x = FBDrawString( 400, 100+i*48, 48, pp, BLACK, BLACK );
 		FBDrawString( 500-x, 100+i*48, 48, pp, WHITE, BLACK );
 	}
+#ifdef USEX
+	FBFlushGrafic();
+#endif
 	while( realcode != 0xee )
 		RcGetActCode();
 }
@@ -479,6 +480,7 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			FBFlushGrafic();
 #endif
 			i=0;
+			actcode=0xee;
 			while(( actcode != RC_OK ) && !doexit )
 			{
 				tv.tv_sec = 0;
