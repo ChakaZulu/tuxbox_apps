@@ -1,6 +1,8 @@
 #ifndef __enumber_h
 #define __enumber_h
 
+#include <netinet/in.h>
+
 #include <lib/gui/ewidget.h>
 
 class eLabel;
@@ -32,8 +34,8 @@ protected:
 	void gotFocus();
 	void lostFocus();
 public:
-	static void unpack(__u32 l, int *t);
-	static void pack(__u32 &l, int *t);
+	static void unpack(const struct in_addr &l, int *t);
+	static void pack(struct in_addr &l, const int *const t);
 	void invalidateNum();
 	Signal1<void, int*> selected;
 	Signal0<void> numberChanged;
