@@ -3,8 +3,8 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: tuxbox-eventserver
-Description: eventserver
+Name: tuxbox-net
+Description: net
 Version: @VERSION@
-Libs: -L${libdir} -leventserver
+Libs: -L${libdir} -lnet
 Cflags: -I${includedir}/tuxbox

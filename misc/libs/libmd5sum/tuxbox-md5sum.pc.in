@@ -3,8 +3,8 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: tuxbox-eventserver
-Description: eventserver
+Name: tuxbox-md5sum
+Description: md5sum
 Version: @VERSION@
-Libs: -L${libdir} -leventserver
+Libs: -L${libdir} -lmd5sum
 Cflags: -I${includedir}/tuxbox

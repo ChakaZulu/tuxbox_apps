@@ -9,7 +9,17 @@ AM_PROG_LIBTOOL
 
 AC_OUTPUT([
 Makefile
+libconfigfile/Makefile
+libcramfs/Makefile
 libeventserver/Makefile
-libeventserver.pc
+libmd5sum/Makefile
+libnet/Makefile
+libucodes/Makefile
+tuxbox-configfile.pc
+tuxbox-cramfs.pc
+tuxbox-eventserver.pc
+tuxbox-md5sum.pc
+tuxbox-net.pc
+tuxbox-ucodes.pc
 ])
 
