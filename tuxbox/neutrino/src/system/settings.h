@@ -282,6 +282,7 @@ struct SNeutrinoSettings
 	char  audioplayer_screensaver[3];
 	int   audioplayer_highprio;
 	int   audioplayer_select_title_by_name;
+	int   audioplayer_repeat_on;
 
 	//Filebrowser
 	int filebrowser_showrights;

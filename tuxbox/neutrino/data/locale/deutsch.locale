@@ -167,6 +167,7 @@ audioplayer.playlist_fileoverwrite_title Überschreiben?
 audioplayer.playlist_name Dateiname der Playlist
 audioplayer.playlist_name_hint1 Geben Sie den Dateinamen der Playlist ein
 audioplayer.playlist_name_hint2 Die Erweiterung .m3u wird automatisch angehängt
+audioplayer.repeat_on Repeatmodus aktivieren
 audioplayer.rewind schneller Rückl.
 audioplayer.save_playlist Playlist speichern
 audioplayer.screensaver_timeout Bildschirmschoner (min, 0=aus)

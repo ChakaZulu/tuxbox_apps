@@ -129,6 +129,7 @@ audioplayer.playlist_fileoverwrite_title Overwrite?
 audioplayer.playlist_name filename of the play list
 audioplayer.playlist_name_hint1 Please enter the filename of the playlist
 audioplayer.playlist_name_hint2 The extension .m3u will be added automatically
+audioplayer.repeat_on enable repeat mode
 audioplayer.rewind rewind
 audioplayer.save_playlist save play list
 audioplayer.screensaver_timeout screensaver timeout (min, 0=off)

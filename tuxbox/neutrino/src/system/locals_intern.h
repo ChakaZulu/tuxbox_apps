@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.16 2004/07/29 22:05:37 sepp776 Exp $
+ * $Id: locals_intern.h,v 1.17 2004/07/30 00:52:26 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -194,6 +194,7 @@ const char * locale_real_names[] =
 	"audioplayer.playlist_name",
 	"audioplayer.playlist_name_hint1",
 	"audioplayer.playlist_name_hint2",
+	"audioplayer.repeat_on",
 	"audioplayer.rewind",
 	"audioplayer.save_playlist",
 	"audioplayer.screensaver_timeout",

@@ -1300,8 +1300,12 @@ int CAudioPlayerGui::getNext()
 	int ret=current+1;
 	if(playlist.empty())
 		return -1;
-	if((unsigned)ret >= playlist.size())
-		ret=0;
+	if((unsigned)ret >= playlist.size()) {
+		if (g_settings.audioplayer_repeat_on==1)
+			ret=0;
+		else
+			ret=-1;
+	}
 	return ret;
 }
 //------------------------------------------------------------------------
