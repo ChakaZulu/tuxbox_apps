@@ -29,12 +29,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
 
-#include "gamelist.h"
-#include "neutrino.h"
-
-/*#include <strstream.h>*/
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -48,6 +43,11 @@
 #include <sys/ioctl.h>
 
 #include <dbox/avia_gt_vbi.h>
+
+#include <global.h>
+#include <neutrino.h>
+
+#include "gamelist.h"
 
 
 void CPlugins::loadPlugins()
@@ -659,4 +659,3 @@ void CGameList::runGame(int selected )
     paintHead();
     paint();
 }
-

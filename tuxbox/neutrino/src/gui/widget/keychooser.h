@@ -29,16 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __keychooser__
 #define __keychooser__
 
-#include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
-#include "gui/widget/menue.h"
-
 #include <string>
+
+#include <driver/framebuffer.h>
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include "menue.h"
+
 
 using namespace std;
 
@@ -47,9 +49,9 @@ class CKeyChooserItemNoKey;
 class CKeyChooser : public CMenuWidget
 {
 	private:
-		CFrameBuffer			*frameBuffer;
-		int*					key;
-		CKeyChooserItem			*keyChooser;
+		CFrameBuffer		*frameBuffer;
+		int*			key;
+		CKeyChooserItem		*keyChooser;
 		CKeyChooserItemNoKey	*keyDeleter;
 
 	public:
@@ -68,9 +70,9 @@ class CKeyChooserItem : public CMenuTarget
 		int y;
 		int width;
 		int height;
-		int hheight,mheight; // head/menu font height
-
-		string	name;
+		int hheight; // head font height
+		int mheight; // menu font height
+		string		name;
 		int		*key;
 		FontsDef	*fonts;
 
@@ -106,4 +108,3 @@ class CKeyChooserItemNoKey : public CMenuTarget
 
 
 #endif
-

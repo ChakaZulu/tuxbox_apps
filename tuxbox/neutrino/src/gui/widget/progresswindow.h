@@ -21,15 +21,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __progresswindow__
 #define __progresswindow__
 
-#include "driver/framebuffer.h"
-
-#include "gui/widget/progressstatus.h"
-#include "gui/widget/menue.h"
-
 #include <string>
+
+#include <driver/framebuffer.h>
+
+#include "progressstatus.h"
+#include "menue.h"
+
 
 using namespace std;
 
@@ -38,18 +40,20 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 	protected:
 
 		CFrameBuffer	*frameBuffer;
-		string			caption;
+		string		caption;
 
 		int x;
 		int y;
 		int width;
 		int height;
-		int hheight,mheight; // head/menu font height
-
-		int globalstatus, globalstatusX, globalstatusY, localstatusY;
+		int hheight; // head font height
+		int mheight; // menu font height
+		int globalstatus; 
+		int globalstatusX;
+		int globalstatusY;
+		int localstatusY;
 		int statusTextY;
 		string statusText;
-
 
 
 		//----------------------------

@@ -29,15 +29,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/rcinput.h>
+
+#include "color.h"
 #include "scan.h"
-#include "global.h"
-#include "neutrino.h"
 
-#include "driver/rcinput.h"
-
-#include "gui/widget/menue.h"
-#include "gui/widget/messagebox.h"
-#include "gui/color.h"
+#include "widget/menue.h"
+#include "widget/messagebox.h"
 
 
 CScanTs::CScanTs()

@@ -62,13 +62,13 @@ NEUTRINO_CPP  SNeutrinoSettings	g_settings;
 NEUTRINO_CPP  SglobalInfo		g_info;
 
 NEUTRINO_CPP  CLcddClient		*g_lcdd;
-NEUTRINO_CPP  CControldClient	*g_Controld;
+NEUTRINO_CPP  CControldClient		*g_Controld;
 NEUTRINO_CPP  CZapitClient		*g_Zapit;
-NEUTRINO_CPP  CSectionsdClient	*g_Sectionsd;
+NEUTRINO_CPP  CSectionsdClient		*g_Sectionsd;
 NEUTRINO_CPP  CTimerdClient		*g_Timerd;
-NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
+NEUTRINO_CPP  CRemoteControl		*g_RemoteControl;
 
-NEUTRINO_CPP  fontRenderClass	*g_fontRenderer;
+NEUTRINO_CPP  fontRenderClass		*g_fontRenderer;
 NEUTRINO_CPP  FontsDef			*g_Fonts;
 
 NEUTRINO_CPP  CRCInput			*g_RCInput;
@@ -87,4 +87,3 @@ NEUTRINO_CPP CPlugins   		*g_PluginList;
 	#include "helpers/actionlog.h"
 	NEUTRINO_CPP CActionLog	  *g_ActionLog;
 #endif
-

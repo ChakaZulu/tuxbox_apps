@@ -22,12 +22,12 @@
 */
 
 
-#include "global.h"
+#include <global.h>
+
+#include <driver/framebuffer.h>
+#include <driver/fontrenderer.h>
 
 #include "window.h"
-
-#include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
 
 
 CWindow::CWindow(string title, string icon, CDimension clientWindowDimension, int mode, CPoint windowPosition)
@@ -110,4 +110,3 @@ void CWindow::hide()
 		CFrameBuffer::getInstance()->paintBackgroundBoxRel(cWindowOrigin, cWindowDimension);
 	}
 }
-

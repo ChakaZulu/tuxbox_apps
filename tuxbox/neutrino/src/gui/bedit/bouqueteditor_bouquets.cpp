@@ -29,26 +29,25 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "zapit/zapitclient.h"
+#include <zapit/zapitclient.h>
 
-#include "global.h"
+#include <global.h>
+#include <neutrino.h>
 
-#include "neutrino.h"
+#include <driver/fontrenderer.h>
+#include <gui/widget/messagebox.h>
+#include <gui/widget/hintbox.h>
+#include <gui/widget/stringinput.h>
 
 #include "bouqueteditor_bouquets.h"
 #include "bouqueteditor_channels.h"
-
-#include "driver/fontrenderer.h"
-#include "gui/widget/messagebox.h"
-#include "gui/widget/hintbox.h"
-#include "gui/widget/stringinput.h"
 
 
 CBEBouquetWidget::CBEBouquetWidget()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	selected = 0;
-	width = 500;
+	width  = 500;
 	height = 440;
 	ButtonHeight = 25;
 	theight= g_Fonts->menu_title->getHeight();
@@ -530,4 +529,3 @@ void CBEBouquetWidget::discardChanges()
 	hintBox->hide();
 	delete hintBox;
 }
-

@@ -29,16 +29,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include <gui/color.h>
 
 #include "colorchooser.h"
-#include "neutrino.h"
-
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
-#include "gui/color.h"
-#include "gui/widget/messagebox.h"
+#include "messagebox.h"
 
 
 CColorChooser::CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer)
@@ -317,4 +318,3 @@ void CColorChooser::paintSlider(int x, int y, unsigned char *spos, string text, 
 
 	g_Fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT);
 }
-

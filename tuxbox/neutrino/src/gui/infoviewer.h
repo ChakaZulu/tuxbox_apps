@@ -29,17 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __infoview__
 #define __infoview__
 
 #include <sectionsdclient/sectionsdMsg.h>
 
-#include "driver/rcinput.h"
-#include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
+#include <driver/rcinput.h>
+#include <driver/framebuffer.h>
+#include <driver/fontrenderer.h>
+#include <system/settings.h>
 
 #include "gui/color.h"
-#include "system/settings.h"
 
 
 using namespace std;

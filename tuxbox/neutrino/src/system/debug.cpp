@@ -21,8 +21,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "debug.h"
 
+#include "debug.h"
 
 
 void setDebugLevel( int level )

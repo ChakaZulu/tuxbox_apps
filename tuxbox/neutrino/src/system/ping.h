@@ -19,12 +19,15 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+
+
 #ifndef PING_H
 #define PING_H
 
-# include "ping-config.h"
-
 #include <stdio.h>
+
+#include "ping-config.h"
+
 
 #ifdef  HAVE_UNISTD_H
 # include <unistd.h>
@@ -78,5 +81,6 @@ int pinghost  ( const char *hostname );
 int pingthost ( const char *hostname, int t );
 int tpinghost ( const char *hostname );
 int tpingthost( const char *hostname, int t );
+
 
 #endif/*PING_H*/

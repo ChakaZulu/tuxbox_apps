@@ -18,13 +18,14 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
-#include "global.h"
-
-#include "httptool.h"
 
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
+
+#include <global.h>
+
+#include "httptool.h"
 
 
 CHTTPTool::CHTTPTool()
@@ -103,5 +104,6 @@ bool CHTTPTool::downloadFile( string URL, string downloadTarget, int globalProgr
 		fflush(headerfile);
 		fclose(headerfile);
 	}
+
 	return res==0;
 }

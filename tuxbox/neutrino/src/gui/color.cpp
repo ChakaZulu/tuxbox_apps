@@ -29,14 +29,15 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #include "color.h"
 
 
 int convertSetupColor2RGB(unsigned char r, unsigned char g, unsigned char b)
 {
-	unsigned char red =  int( float(255./100.)*float(r) );
-	unsigned char green =  int( float(255./100.)*float(g) );
-	unsigned char blue =  int( float(255./100.)*float(b) );
+	unsigned char red =  	int( float(255./100.)*float(r) );
+	unsigned char green =  	int( float(255./100.)*float(g) );
+	unsigned char blue =  	int( float(255./100.)*float(b) );
 
 	return (red << 16) | (green << 8) | blue;
 }

@@ -29,24 +29,26 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __EVENTLIST_HPP__
 #define __EVENTLIST_HPP__
 
-#include <sectionsdclient/sectionsdclient.h>
-
-#include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "daemonc/remotecontrol.h"
-
-#include "system/settings.h"
-
-#include "gui/widget/menue.h"
-#include "gui/color.h"
-#include "gui/infoviewer.h"
-
 #include <string>
 #include <vector>
+
+#include <sectionsdclient/sectionsdclient.h>
+
+#include <daemonc/remotecontrol.h>
+#include <driver/framebuffer.h>
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+#include <system/settings.h>
+
+#include "color.h"
+#include "infoviewer.h"
+
+#include "widget/menue.h"
+
 
 using namespace std;
 
@@ -61,18 +63,18 @@ class EventList
 		unsigned int	liststart;
 		unsigned int	listmaxshow;
 		unsigned int	numwidth;
-		int				fheight; // Fonthoehe Channellist-Inhalt
-		int				fheight1,fheight2;
-		int				fwidth1,fwidth2;
-		int				theight; // Fonthoehe Channellist-Titel
+		int		fheight; // Fonthoehe Channellist-Inhalt
+		int		fheight1,fheight2;
+		int		fwidth1,fwidth2;
+		int		theight; // Fonthoehe Channellist-Titel
 
-		int				key;
-		string			name;
+		int		key;
+		string		name;
 
-		int 			width;
-		int 			height;
-		int 			x;
-		int 			y;
+		int 		width;
+		int 		height;
+		int 		x;
+		int 		y;
 
 		void paintItem(unsigned pos);
 		void paint();

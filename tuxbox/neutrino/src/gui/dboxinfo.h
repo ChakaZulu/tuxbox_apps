@@ -29,18 +29,20 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __dboxinfo__
 #define __dboxinfo__
 
-#include "driver/framebuffer.h"
-
-#include "gui/widget/menue.h"
-#include "gui/color.h"
-
 #include <string>
 
-using namespace std;
+#include <driver/framebuffer.h>
 
+#include "color.h"
+
+#include "widget/menue.h"
+
+
+using namespace std;
 
 class CDBoxInfoWidget : public CMenuTarget
 {
@@ -65,6 +67,4 @@ class CDBoxInfoWidget : public CMenuTarget
 };
 
 
-
 #endif
-

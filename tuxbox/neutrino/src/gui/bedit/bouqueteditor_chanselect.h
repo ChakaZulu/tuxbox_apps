@@ -32,11 +32,12 @@
 #ifndef __bouqueteditor_chanselect__
 #define __bouqueteditor_chanselect__
 
-#include "driver/framebuffer.h"
-#include "gui/widget/listbox.h"
-
 #include <string>
 #include <vector>
+
+#include <driver/framebuffer.h>
+#include <gui/widget/listbox.h>
+
 
 using namespace std;
 

@@ -29,6 +29,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __locale__
 #define __locale__
 
@@ -36,8 +37,8 @@
 #include <string>
 #include <map>
 
-using namespace std;
 
+using namespace std;
 
 char* getISO639Description(char *iso);
 

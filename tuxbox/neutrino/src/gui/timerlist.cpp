@@ -30,27 +30,26 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+#include <global.h>
+#include <neutrino.h>
 
-#include "timerlist.h"
-#include "neutrino.h"
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+#include <daemonc/remotecontrol.h>
+#include <system/settings.h>
 
 #include "eventlist.h"
+#include "timerlist.h"
+#include "color.h"
+#include "infoviewer.h"
 
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "daemonc/remotecontrol.h"
-#include "system/settings.h"
-
-#include "gui/widget/menue.h"
-#include "gui/widget/messagebox.h"
-#include "gui/widget/hintbox.h"
-#include "gui/widget/stringinput.h"
-#include "gui/color.h"
-#include "gui/infoviewer.h"
-
+#include "widget/menue.h"
+#include "widget/messagebox.h"
+#include "widget/hintbox.h"
+#include "widget/stringinput.h"
 
 #define info_height 60
+
 
 class CTimerListNewNotifier : public CChangeObserver
 {
@@ -709,5 +708,3 @@ void CTimerList::newTimer()
 	if(timerSettings.exec(this,"")==menu_return::RETURN_EXIT_ALL)
 		g_RCInput->postMsg( CRCInput::RC_setup, 0 );
 }
-
-

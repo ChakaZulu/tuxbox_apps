@@ -29,18 +29,19 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __stringinput_ext__
 #define __stringinput_ext__
-
-#include "driver/framebuffer.h"
-#include "gui/widget/menue.h"
 
 #include <string>
 #include <vector>
 
+#include <driver/framebuffer.h>
+
+#include "menue.h"
+
+
 using namespace std;
-
-
 
 class CExtendedInput_Item;
 class CExtendedInput : public CMenuTarget
@@ -52,7 +53,9 @@ class CExtendedInput : public CMenuTarget
 		int width;
 		int height;
 		int hintPosY;
-		int hheight, mheight, iheight; // head/menu font height
+		int hheight; // head font height
+		int mheight; // menu font height
+		int iheight; 
 
 		vector<CExtendedInput_Item*> inputFields;
 		int selectedChar;
@@ -60,7 +63,8 @@ class CExtendedInput : public CMenuTarget
 		bool localizing;
 		string	name;
 
-		string  hint_1, hint_2;
+		string  hint_1;
+		string  hint_2;
 		char*	value;
 		CChangeObserver*   observ;
 
@@ -173,5 +177,3 @@ class CDateInput : public CExtendedInput
 
 
 #endif
-
-

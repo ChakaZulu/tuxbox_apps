@@ -25,13 +25,12 @@
 #ifndef __window__
 #define __window__
 
-#include "component.h"
-
 #include <string>
 
+#include "component.h"
+
+
 using namespace std;
-
-
 
 class CWindow : public CComponent
 {

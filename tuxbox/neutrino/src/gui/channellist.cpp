@@ -29,27 +29,25 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+#include <daemonc/remotecontrol.h>
+#include <system/settings.h>
+#include <system/lastchannel.h>
+
+#include "widget/menue.h"
+#include "widget/messagebox.h"
 
 #include "channellist.h"
-#include "neutrino.h"
-
+#include "color.h"
 #include "eventlist.h"
-
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "daemonc/remotecontrol.h"
-#include "system/settings.h"
-#include "system/lastchannel.h"
-
-#include "gui/widget/menue.h"
-#include "gui/widget/messagebox.h"
-#include "gui/color.h"
-#include "gui/infoviewer.h"
+#include "infoviewer.h"
 
 
-//#define info_height 60
-int info_height;
+int info_height = 0;
 
 
 CChannelList::CChannel::CChannel(const int _key, const int _number, const std::string& _name, const t_channel_id ids)
@@ -931,4 +929,3 @@ CChannelList::CChannel* CChannelList::getChannelFromChannelID(const t_channel_id
 	}
 	return(NULL);
 }
-

@@ -29,23 +29,26 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
 
+#include <global.h>
+#include <neutrino.h>
+
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include <gui/color.h>
+
+#include "messagebox.h"
 #include "stringinput.h"
-#include "neutrino.h"
 
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
-#include "gui/color.h"
-#include "gui/widget/messagebox.h"
 
 CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon )
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	name = Name;
+	name =  Name;
 	value = Value;
-	size = Size;
+	size =  Size;
 
 	hint_1 = Hint_1;
 	hint_2 = Hint_2;
@@ -579,4 +582,3 @@ int CPLPINInput::exec( CMenuTarget* parent, string )
 
 	return ( res );
 }
-

@@ -19,6 +19,7 @@ nicht gespeichert werden.
  
 */
 
+
 #ifndef SEEN_LastChannel
 #define SEEN_LastChannel
 
@@ -52,4 +53,3 @@ class CLastChannel
 
 
 #endif
-

@@ -29,10 +29,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #include <config.h>
 
 #include "localize.h"
 #include "iso639.h"
+
 
 char* getISO639Description(char *iso)
 {

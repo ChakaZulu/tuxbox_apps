@@ -29,18 +29,20 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __remotecontrol__
 #define __remotecontrol__
+
+#include <vector>
+#include <set>
+#include <string>
 
 #include <zapit/zapitclient.h>
 
 #include <sectionsdclient/sectionsdMsg.h>
 
-using namespace std;
-#include <vector>
-#include <set>
-#include <string>
 
+using namespace std;
 
 struct st_rmsg
 {
@@ -59,8 +61,8 @@ public:
 		original_network_id = aoriginal_network_id;
 		service_id          = aservice_id;
 		transport_stream_id = atransport_stream_id;
-		startzeit=0;
-		dauer=0;
+		startzeit = 0;
+		dauer =     0;
 		subservice_name= asubservice_name;
 	}
 	CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const time_t &astartzeit, const unsigned adauer)
@@ -134,6 +136,3 @@ public:
 
 
 #endif
-
-
-

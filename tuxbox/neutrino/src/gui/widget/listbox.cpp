@@ -21,10 +21,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
-#include "global.h"
+#include <global.h>
+#include <neutrino.h>
 
 #include "listbox.h"
-#include "neutrino.h"
 
 
 CListBox::CListBox()
@@ -32,10 +32,10 @@ CListBox::CListBox()
 	frameBuffer = CFrameBuffer::getInstance();
 	caption = "";
 	saveBoxCaption = "";
-	saveBoxText = "";
+	saveBoxText = 	 "";
 	liststart = 0;
-	selected = 0;
-	width = 400;
+	selected =  0;
+	width =  400;
 	height = 420;
 	ButtonHeight = 25;
 	toSave = false;

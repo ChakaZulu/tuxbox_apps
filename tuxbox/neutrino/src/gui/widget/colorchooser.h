@@ -29,13 +29,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __colorchooser__
 #define __colorchooser__
 
-#include "driver/framebuffer.h"
-#include "gui/widget/menue.h"
-
 #include <string>
+
+#include <driver/framebuffer.h>
+
+#include "menue.h"
+
 
 using namespace std;
 

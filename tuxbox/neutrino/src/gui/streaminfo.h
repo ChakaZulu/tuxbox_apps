@@ -29,18 +29,19 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __streaminfo__
 #define __streaminfo__
 
-#include "driver/framebuffer.h"
-
-#include "gui/widget/menue.h"
-#include "gui/color.h"
-
 #include <string>
 
-using namespace std;
+#include <driver/framebuffer.h>
 
+#include "color.h"
+#include "widget/menue.h"
+
+
+using namespace std;
 
 class CStreamInfo : public CMenuTarget
 {
@@ -65,6 +66,4 @@ class CStreamInfo : public CMenuTarget
 };
 
 
-
 #endif
-

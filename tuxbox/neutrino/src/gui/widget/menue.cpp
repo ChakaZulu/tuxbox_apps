@@ -29,16 +29,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include <gui/color.h>
 
 #include "menue.h"
-
-#include "neutrino.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
-#include "gui/color.h"
-#include "gui/widget/stringinput.h"
+#include "stringinput.h"
 
 
 bool isDigit(const char ch)
@@ -731,4 +732,3 @@ int CLockedMenuForwarder::exec(CMenuTarget* parent)
 		return menu_return::RETURN_REPAINT;
 	}
 }
-

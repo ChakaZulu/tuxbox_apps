@@ -78,7 +78,7 @@ class CVCRControl
 		{
 			public:
 				CDeviceInfo(){Name="";};
-				std::string		Name;
+				std::string   Name;
 		};
 
 		class CVCRDeviceInfo : public CDeviceInfo
@@ -192,5 +192,6 @@ class CVCRControl
 		bool Pause(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Pause(); else return false;};
 		bool Resume(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Resume(); else return false;};
 };
+
 
 #endif

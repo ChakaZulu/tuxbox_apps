@@ -1,5 +1,5 @@
 //
-// $Id: sdt.cpp,v 1.4 2001/06/11 19:22:54 fnbrd Exp $
+// $Id: sdt.cpp,v 1.5 2002/10/16 01:14:06 woglinde Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,13 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: sdt.cpp,v $
+// Revision 1.5  2002/10/16 01:14:06  woglinde
+//
+//
+// yeah its look huge, it is
+// mostly beautified the files
+// with local and external headers
+//
 // Revision 1.4  2001/06/11 19:22:54  fnbrd
 // Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
 //
@@ -36,6 +43,7 @@
 //
 //
 
+
 #include <stdio.h>
 #include <time.h>
 
@@ -47,6 +55,7 @@
 #include "SIservices.hpp"
 #include "SIevents.hpp"
 #include "SIsections.hpp"
+
 
 int main(int argc, char **argv)
 {

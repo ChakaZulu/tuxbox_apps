@@ -29,14 +29,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __httptool__
 #define __httptool__
 
 #include <string>
-#include "gui/widget/progressstatus.h"
+
+#include <gui/widget/progressstatus.h>
+
 
 using namespace std;
-
 
 class CHTTPTool
 {
@@ -58,4 +60,3 @@ class CHTTPTool
 
 
 #endif
-

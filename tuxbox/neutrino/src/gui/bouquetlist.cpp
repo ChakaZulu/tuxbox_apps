@@ -29,22 +29,21 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
-#include "neutrino.h"
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+#include <daemonc/remotecontrol.h>
+#include <system/settings.h>
+
+#include "widget/menue.h"
 
 #include "bouquetlist.h"
-
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "daemonc/remotecontrol.h"
-#include "system/settings.h"
-
-
-#include "gui/widget/menue.h"
-#include "gui/color.h"
-#include "gui/infoviewer.h"
-#include "gui/eventlist.h"
-
+#include "color.h"
+#include "eventlist.h"
+#include "infoviewer.h"
 
 
 CBouquetList::CBouquetList( const std::string &Name )
@@ -52,7 +51,7 @@ CBouquetList::CBouquetList( const std::string &Name )
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	selected = 0;
-	width = 500;
+	width =  500;
 	height = 440;
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
@@ -399,6 +398,4 @@ void CBouquetList::paint()
 	int sbs= (selected/listmaxshow);
 
 	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
-
 }
-

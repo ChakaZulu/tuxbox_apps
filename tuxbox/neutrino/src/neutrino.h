@@ -34,7 +34,9 @@
 #define __neutrino__
 
 #include <string>
+
 #include <configfile.h>
+
 #include <zapit/zapitclient.h>
 
 #include "neutrinoMessages.h"
@@ -42,8 +44,8 @@
 #include "system/setting_helpers.h"
 #include "driver/vcrcontrol.h"
 
-using namespace std;
 
+using namespace std;
 
 #define widest_number "1"
 
@@ -64,27 +66,27 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		enum
 		{
 			mode_unknown = -1,
-		    mode_tv = 1,
-		    mode_radio = 2,
-		    mode_scart = 3,
-		    mode_standby = 4
+		    	mode_tv = 1,
+			mode_radio = 2,
+			mode_scart = 3,
+			mode_standby = 4
 		};
 
 		CConfigFile			configfile;
 		string				settingsFile;
 		string				scanSettingsFile;
-		CScanSettings		scanSettings;
+		CScanSettings			scanSettings;
 
 		string				fontName;
 		string				fontFile;
-		int					fontsSizeOffset;
+		int				fontsSizeOffset;
 
-		int				    mode;
+		int				mode;
 
-		int					lastMode;
+		int				lastMode;
 		bool				softupdate;
 		bool				fromflash;
-		int					streamstatus;
+		int				streamstatus;
 		bool				record_mode;
 
 		long long 			standby_pressed_at;
@@ -95,19 +97,19 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		char				current_volume;
 		bool				current_muted;
 
-		bool           skipShutdownTimer;
+		bool				skipShutdownTimer;
 
-		CColorSetupNotifier			*colorSetupNotifier;
-		CAudioSetupNotifier			*audioSetupNotifier;
-		CVideoSetupNotifier			*videoSetupNotifier;
+		CColorSetupNotifier		*colorSetupNotifier;
+		CAudioSetupNotifier		*audioSetupNotifier;
+		CVideoSetupNotifier		*videoSetupNotifier;
 		CLanguageSetupNotifier  	*languageSetupNotifier;
 		CKeySetupNotifier       	*keySetupNotifier;
 		CAPIDChangeExec         	*APIDChanger;
 		CNVODChangeExec         	*NVODChanger;
-		CUCodeCheckExec				*UCodeChecker;
+		CUCodeCheckExec			*UCodeChecker;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
-		CIPChangeNotifier			*MyIPChanger;
-		CVCRControl					*vcrControl;
+		CIPChangeNotifier		*MyIPChanger;
+		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
 
 
@@ -193,6 +195,3 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
 
 #endif
-
-
-

@@ -42,19 +42,19 @@
 #include <libmd5sum.h>
 #include <libcramfs.h>
 
-#include "global.h"
+#include <global.h>
+#include <neutrino.h>
+
+#include <system/flashtool.h>
+#include <system/httptool.h>
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
 
 #include "update.h"
-#include "neutrino.h"
+#include "color.h"
 
-#include "gui/color.h"
-#include "gui/widget/messagebox.h"
-#include "gui/widget/hintbox.h"
-#include "system/flashtool.h"
-#include "system/httptool.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
+#include "widget/messagebox.h"
+#include "widget/hintbox.h"
 
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"

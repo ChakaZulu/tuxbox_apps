@@ -103,9 +103,4 @@ class CPoint
 };
 
 
-
-
 #endif
-
-
-

@@ -25,39 +25,41 @@
 #ifndef __listbox__
 #define __listbox__
 
-#include "neutrinoMessages.h"
-#include "driver/framebuffer.h"
-#include "gui/widget/menue.h"
-#include "gui/widget/messagebox.h"
-
 #include <string>
 
-using namespace std;
+#include <neutrinoMessages.h>
 
+#include <driver/framebuffer.h>
+
+#include "menue.h"
+#include "messagebox.h"
+
+
+using namespace std;
 
 class CListBox : public CMenuWidget
 {
 	protected:
 		CFrameBuffer*	frameBuffer;
-		string			caption;
-		string			saveBoxCaption, saveBoxText;
+		string		caption;
+		string		saveBoxCaption, saveBoxText;
 
-		int				width;
-		int				height;
-		int				x;
-		int				y;
+		int		width;
+		int		height;
+		int		x;
+		int		y;
 
-		int				fheight;
-		int				theight;
+		int		fheight;
+		int		theight;
 
 		unsigned int	selected;
 		unsigned int	liststart;
 		unsigned int	listmaxshow;
 	
 		unsigned int	numwidth;
-		int 			ButtonHeight;
+		int 		ButtonHeight;
 
-		bool			toSave;
+		bool		toSave;
 
 		//----------------------------
 
@@ -99,7 +101,6 @@ class CListBox : public CMenuWidget
 		CListBox(); 
 		virtual int exec(CMenuTarget* parent, string actionKey);
 };
-
 
 
 #endif

@@ -29,10 +29,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
 
-#include "rcinput.h"
-#include "neutrino.h"
+
 
 #include <dbox/fp.h>
 #include <stdio.h>
@@ -55,6 +53,11 @@
 #include <arpa/inet.h>
 
 #include <eventserver.h>
+
+#include <global.h>
+#include <neutrino.h>
+
+#include "rcinput.h"
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -105,7 +108,7 @@ CRCInput::CRCInput()
 
 	//network-setup
     struct sockaddr_un servaddr;
-    int clilen;
+    int    clilen;
     memset(&servaddr, 0, sizeof(struct sockaddr_un));
     servaddr.sun_family = AF_UNIX;
     strcpy(servaddr.sun_path, NEUTRINO_UDS_NAME);

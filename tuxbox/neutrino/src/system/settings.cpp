@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.10 2002/09/01 23:15:09 Homar Exp $
+        $Id: settings.cpp,v 1.11 2002/10/16 01:14:09 woglinde Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -21,11 +21,13 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
-#include "settings.h"
-
-#include "global.h"
 
 #include <string>
+
+#include <global.h>
+
+#include "settings.h"
+
 
 using namespace std;
 

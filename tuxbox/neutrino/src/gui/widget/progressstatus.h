@@ -21,11 +21,12 @@
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
+
 #ifndef __progressstatus__
 #define __progressstatus__
 
-
 #include <string>
+
 
 using namespace std;
 

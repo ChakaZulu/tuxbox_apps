@@ -2,6 +2,7 @@
 #define ICMP_ECHO               8
 #define ICMP_MINLEN             8
 
+
 struct ip {
 #if (BYTE_ORDER == LITTLE_ENDIAN || BYTE_ORDER == PDP_ENDIAN)
         u_char  ip_hl:4,                /* header length */

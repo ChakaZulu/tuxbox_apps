@@ -22,9 +22,6 @@
 */
 
 
-#include "framebuffer.h"
-#include "../global.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -33,25 +30,30 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <memory.h>
+
 #include <linux/kd.h>
+
+#include <global.h>
+
+#include "framebuffer.h"
 
 
 CFrameBuffer::CFrameBuffer()
 : active ( true )
 {
 	iconBasePath = "";
-	available=0;
-	cmap.start=0;
-	cmap.len=256;
-	cmap.red=red;
-	cmap.green=green;
-	cmap.blue=blue;
-	cmap.transp=trans;
+	available  = 0;
+	cmap.start = 0;
+	cmap.len = 256;
+	cmap.red = red;
+	cmap.green = green;
+	cmap.blue  = blue;
+	cmap.transp = trans;
 	backgroundColor = 0;
 	useBackgroundPaint = false;
 	background = NULL;
 	backgroundFilename = "";
-	fd = 0;
+	fd  = 0;
 	tty = 0;
 }
 
@@ -223,9 +225,9 @@ int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int n
 		return -1;
 	}
 
-	xRes=screeninfo.xres;
-	yRes=screeninfo.yres;
-	bpp=screeninfo.bits_per_pixel;
+	xRes = screeninfo.xres;
+	yRes = screeninfo.yres;
+	bpp  = screeninfo.bits_per_pixel;
 	fb_fix_screeninfo fix;
 
 	if (ioctl(fd, FBIOGET_FSCREENINFO, &fix)<0)
@@ -242,9 +244,9 @@ int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int n
 
 void CFrameBuffer::paletteFade(int i, __u32 rgb1, __u32 rgb2, int level)
 {
-	__u16 *r=cmap.red+i;
-	__u16 *g=cmap.green+i;
-	__u16 *b=cmap.blue+i;
+	__u16 *r = cmap.red+i;
+	__u16 *g = cmap.green+i;
+	__u16 *b = cmap.blue+i;
 	*r= ((rgb2&0xFF0000)>>16)*level;
 	*g= ((rgb2&0x00FF00)>>8 )*level;
 	*b= ((rgb2&0x0000FF)    )*level;
@@ -391,7 +393,7 @@ bool CFrameBuffer::paintIcon8(string filename, int x, int y, unsigned char offse
 
 	fd = open(filename.c_str(), O_RDONLY );
 
-	if (fd==-1)
+	if (fd == -1)
 	{
 		printf("error while loading icon: %s", filename.c_str() );
 		return false;
@@ -441,7 +443,7 @@ bool CFrameBuffer::paintIcon(string filename, int x, int y, unsigned char offset
 
 	fd = open(filename.c_str(), O_RDONLY );
 
-	if (fd==-1)
+	if (fd == -1)
 	{
 		printf("error while loading icon: %s", filename.c_str() );
 		return false;
@@ -497,7 +499,7 @@ void CFrameBuffer::loadPal(string filename, unsigned char offset, unsigned char 
 
 	fd = open(filename.c_str(), O_RDONLY );
 
-	if (fd==-1)
+	if (fd == -1)
 	{
 		printf("error while loading palette: %s", filename.c_str() );
 		return;
@@ -534,11 +536,11 @@ void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, unsigned char col)
 		return;
 
 	int dx = abs (xa - xb);
-	int	dy = abs (ya - yb);
-	int	x;
-	int	y;
-	int	End;
-	int	step;
+	int dy = abs (ya - yb);
+	int x;
+	int y;
+	int End;
+	int step;
 
 	if ( dx > dy )
 	{
@@ -836,4 +838,3 @@ void CFrameBuffer::switch_signal (int signal)
 		memset(thiz->lfb, 0, thiz->stride*thiz->yRes);
 	}
 }
-

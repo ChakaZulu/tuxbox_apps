@@ -33,29 +33,30 @@
 #ifndef __hintbox__
 #define __hintbox__
 
-#include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "gui/widget/menue.h"
-
 #include <string>
 #include <vector>
 
-using namespace std;
+#include <driver/framebuffer.h>
+#include <driver/fontrenderer.h>
 
+#include "menue.h"
+
+
+using namespace std;
 
 class CHintBox
 {
 	private:
 		CFrameBuffer			*frameBuffer;
-		int						width;
-		int						height;
-		int						x;
-		int						y;
-		int						fheight;
-		int						theight;
-		string					caption;
+		int				width;
+		int				height;
+		int				x;
+		int				y;
+		int				fheight;
+		int				theight;
+		string				caption;
 		vector<string>			text;
-		string					iconfile;
+		string				iconfile;
 
 		unsigned char*			pixbuf;
 

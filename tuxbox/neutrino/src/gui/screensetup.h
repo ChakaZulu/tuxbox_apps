@@ -29,13 +29,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __screensetup__
 #define __screensetup__
 
-#include "driver/framebuffer.h"
-#include "gui/widget/menue.h"
-
 #include <string>
+
+#include "driver/framebuffer.h"
+
+#include "widget/menue.h"
+
 
 using namespace std;
 
@@ -63,4 +66,3 @@ class CScreenSetup : public CMenuTarget
 
 
 #endif
-

@@ -1,11 +1,11 @@
 INCLUDES = \
+	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/src \
 	@CONFIGFILE_CFLAGS@ \
 	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
-	@ZAPIT_CFLAGS@ \
-	-I$(top_srcdir)/lib
+	@ZAPIT_CFLAGS@
 
 noinst_LIBRARIES = libneutrino_gui_widget_basic.a libneutrino_gui_widget.a libneutrino_gui_widget2.a 
 

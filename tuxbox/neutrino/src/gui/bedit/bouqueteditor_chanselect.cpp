@@ -30,14 +30,14 @@
 */
 
 
-#include "zapit/zapitclient.h"
+#include <zapit/zapitclient.h>
 
-#include "global.h"
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/fontrenderer.h>
 
 #include "bouqueteditor_chanselect.h"
-#include "neutrino.h"
-
-#include "driver/fontrenderer.h"
 
 
 CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode)
@@ -45,9 +45,9 @@ CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouq
 {
 	setTitle(Caption);
 	bouquet = Bouquet;
-	mode = Mode;
-	width = 500;
-	height = 440;
+	mode =    Mode;
+	width =   500;
+	height =  440;
 }
 
 uint	CBEChannelSelectWidget::getItemCount()
@@ -134,5 +134,4 @@ void CBEChannelSelectWidget::paintFoot()
 
 	frameBuffer->paintIcon("home.raw", x+width - ButtonWidth+ 8, y+height+1);
 	g_Fonts->infobar_small->RenderString(x+width - ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.return").c_str(), COL_INFOBAR);
-
 }

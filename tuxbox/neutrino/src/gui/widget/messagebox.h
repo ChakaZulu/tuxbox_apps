@@ -29,19 +29,20 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __messagebox__
 #define __messagebox__
-
-#include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "gui/widget/menue.h"
 
 #include <string>
 #include <vector>
 
+#include <driver/framebuffer.h>
+#include <driver/fontrenderer.h>
+
+#include "menue.h"
+
+
 using namespace std;
-
-
 
 class CMessageBoxNotifier
 {
@@ -58,18 +59,20 @@ class CMessageBox
 	private:
 
 		CFrameBuffer			*frameBuffer;
-		int						width;
-		int						height;
-		int						x;
-		int						y;
-		int						fheight;
-		int						theight;
-		string					caption;
+		int				width;
+		int				height;
+		int				x;
+		int				y;
+		int				fheight;
+		int				theight;
+
+		string				caption;
 		vector<string>			text;
-		string					iconfile;
-		CMessageBoxNotifier*	notifier;
-		int						selected;
-		int						showbuttons;
+		string				iconfile;
+		CMessageBoxNotifier*		notifier;
+
+		int				selected;
+		int				showbuttons;
 
 		void paintHead();
 		void paintButtons();
@@ -103,5 +106,6 @@ class CMessageBox
 };
 
 int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, string Icon="", int Width = 450, int timeout = -1 );
+
 
 #endif

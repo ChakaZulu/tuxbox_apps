@@ -29,13 +29,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __MENU__
 #define __MENU__
 
-#include "driver/framebuffer.h"
-#include "driver/rcinput.h"
 #include <string>
 #include <vector>
+
+#include <driver/framebuffer.h>
+#include <driver/rcinput.h>
+
 
 using namespace std;
 
@@ -43,10 +46,10 @@ struct menu_return
 {
 	enum
 		{
-			RETURN_NONE		= 0,
-		    RETURN_REPAINT 	= 1,
-		    RETURN_EXIT 	= 2,
-		    RETURN_EXIT_ALL = 4
+			RETURN_NONE	= 0,
+			RETURN_REPAINT 	= 1,
+			RETURN_EXIT 	= 2,
+			RETURN_EXIT_ALL = 4
 		};
 };
 
@@ -141,11 +144,11 @@ class CMenuSeparator : public CMenuItem
 	public:
 		enum
 		{
-		    EMPTY = 0,
-		    LINE = 1,
-		    STRING = 2,
+		    EMPTY =	0,
+		    LINE =	1,
+		    STRING =	2,
 		    ALIGN_CENTER = 4,
-		    ALIGN_LEFT = 8,
+		    ALIGN_LEFT =   8,
 		    ALIGN_RIGHT = 16
 		};
 
@@ -166,7 +169,7 @@ class CMenuForwarder : public CMenuItem
 		char*		option;
 		CMenuTarget*	jumpTarget;
 		string		actionKey;
-		bool        localizing;
+		bool		localizing;
 	public:
 
 		CMenuForwarder(string Text, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, string IconName= "");
@@ -256,16 +259,16 @@ class CMenuWidget : public CMenuTarget
 		CFrameBuffer		*frameBuffer;
 		COnPaintNotifier*	onPaintNotifier;
 		vector<CMenuItem*>	items;
-		string				name;
-		string				iconfile;
-		bool				localizing;
+		string			name;
+		string			iconfile;
+		bool			localizing;
 
 		int			width;
 		int			height;
 		int			x;
 		int			y;
 		int			selected;
-		int 		iconOffset;
+		int 			iconOffset;
 
 	public:
 		CMenuWidget()
@@ -333,6 +336,6 @@ class CLockedMenuForwarder : public CMenuForwarder, public CPINProtection
 
 		virtual int exec(CMenuTarget* parent);
 };
+
+
 #endif
-
-

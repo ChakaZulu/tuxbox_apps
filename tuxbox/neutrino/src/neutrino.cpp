@@ -34,6 +34,32 @@
 
 #define NEUTRINO_CPP
 
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/time.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <dlfcn.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+
+
 #include "global.h"
 #include "neutrino.h"
 
@@ -74,33 +100,7 @@
 #include "system/flashtool.h"
 
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/time.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <dlfcn.h>
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <map>
-
 using namespace std;
-
 
 // Globale Variablen - to use import global.h
 
@@ -110,21 +110,21 @@ using namespace std;
 static void initGlobals(void)
 {
 	g_fontRenderer = NULL;
-	g_Fonts = NULL;
+	g_Fonts = 	 NULL;
 
-	g_RCInput = NULL;
-	g_lcdd = NULL;
-	g_Controld = NULL;
-	g_Timerd = NULL;
-	g_Zapit = NULL;
+	g_RCInput = 	NULL;
+	g_lcdd = 	NULL;
+	g_Controld = 	NULL;
+	g_Timerd = 	NULL;
+	g_Zapit = 	NULL;
 	g_RemoteControl = NULL;
 
-	g_EpgData = NULL;
-	g_InfoViewer = NULL;
-	g_EventList = NULL;
+	g_EpgData = 	NULL;
+	g_InfoViewer = 	NULL;
+	g_EventList = 	NULL;
 
-	g_Locale = NULL;
-	g_PluginList = NULL;
+	g_Locale = 	NULL;
+	g_PluginList = 	NULL;
 }
 // Ende globale Variablen
 
@@ -2028,7 +2028,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	dprintf( DEBUG_NORMAL, "control event register\n");
 	g_Controld->registerEvent(CControldClient::EVT_MUTECHANGED, 222, NEUTRINO_UDS_NAME);
-    g_Controld->registerEvent(CControldClient::EVT_VOLUMECHANGED, 222, NEUTRINO_UDS_NAME);
+	g_Controld->registerEvent(CControldClient::EVT_VOLUMECHANGED, 222, NEUTRINO_UDS_NAME);
 	g_Controld->registerEvent(CControldClient::EVT_MODECHANGED, 222, NEUTRINO_UDS_NAME);
 	g_Controld->registerEvent(CControldClient::EVT_VCRCHANGED, 222, NEUTRINO_UDS_NAME);
 
@@ -3121,7 +3121,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.342 2002/10/15 22:42:11 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.343 2002/10/16 01:14:06 woglinde Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

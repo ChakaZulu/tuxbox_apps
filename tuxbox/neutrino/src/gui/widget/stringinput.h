@@ -29,13 +29,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __stringinput__
 #define __stringinput__
 
-#include "driver/framebuffer.h"
-#include "gui/widget/menue.h"
-
 #include <string>
+
+#include <driver/framebuffer.h>
+
+#include "menue.h"
+
 
 using namespace std;
 
@@ -47,14 +50,16 @@ class CStringInput : public CMenuTarget
 		int y;
 		int width;
 		int height;
-		int hheight, mheight, iheight; // head/menu font height
+		int hheight; // head font height
+		int mheight; // menu font height
+		int iheight;
 
 		string	name;
 		string  hint_1, hint_2;
 		string	iconfile;
 		char*   validchars;
 		char*	value;
-		int		size;
+		int	   	size;
 		int		selected;
 		CChangeObserver*   observ;
 
@@ -133,6 +138,5 @@ class CPINChangeWidget : public CStringInput
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ){};
 };
 
+
 #endif
-
-

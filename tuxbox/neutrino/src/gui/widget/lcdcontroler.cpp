@@ -29,16 +29,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include <gui/color.h>
 
 #include "lcdcontroler.h"
-#include "neutrino.h"
-
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
-#include "gui/color.h"
-#include "gui/widget/messagebox.h"
+#include "messagebox.h"
 
 #define BRIGHTNESSFACTOR 2.55
 #define CONTRASTFACTOR 0.63
@@ -272,4 +273,3 @@ void CLcdControler::paintSlider(int x, int y, unsigned int spos, float factor, s
 
 	g_Fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT);
 }
-

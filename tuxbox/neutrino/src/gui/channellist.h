@@ -29,18 +29,20 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __channellist__
 #define __channellist__
-
-#include "driver/framebuffer.h"
-#include "system/lastchannel.h"
-#include "gui/widget/menue.h"
 
 #include <string>
 #include <vector>
 
-using namespace std;
+#include <driver/framebuffer.h>
+#include <system/lastchannel.h>
 
+#include "widget/menue.h"
+
+
+using namespace std;
 
 class CChannelList
 {
@@ -74,10 +76,10 @@ class CChannelList
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
 		unsigned int		numwidth;
-		int					fheight; // Fonthoehe Channellist-Inhalt
-		int					theight; // Fonthoehe Channellist-Titel
+		int			fheight; // Fonthoehe Channellist-Inhalt
+		int			theight; // Fonthoehe Channellist-Titel
 
-		string				name;
+		string			name;
 		vector<CChannel*>	chanlist;
 		CZapProtection* 	zapProtection;
 
@@ -113,9 +115,9 @@ class CChannelList
 		bool adjustToChannelID(const t_channel_id channel_id);
 		bool showInfo(int pos);
 		void updateEvents(void);
-		int numericZap(int key);
-		int  show();
-		int	 exec();
+		int 	numericZap(int key);
+		int  	show();
+		int	exec();
 		void quickZap(int key);
 		int  hasChannel(int nChannelNr);
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
@@ -125,5 +127,3 @@ class CChannelList
 
 
 #endif
-
-

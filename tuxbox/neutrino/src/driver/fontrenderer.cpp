@@ -28,21 +28,22 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-#include "global.h"
-
-#include "fontrenderer.h"
-
-#include "system/debug.h"
-#include <config.h>
+ 
 
 #include <stdio.h>
 #include <stdlib.h>
 
-
 // this method is recommended for FreeType >2.0.x:
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+#include <config.h>
+
+#include <global.h>
+
+#include "fontrenderer.h"
+
+#include "system/debug.h"
 
 
 FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
@@ -169,13 +170,13 @@ Font *fontRenderClass::getFont(const char *family, const char *style, int size)
 
 Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize)
 {
-	frameBuffer = CFrameBuffer::getInstance();
-	renderer=render;
-	font.font.face_id=faceid;
-	font.font.pix_width  = isize;
-	font.font.pix_height = isize;
-	font.image_type = ftc_image_grays;
-	font.image_type |= ftc_image_flag_autohinted;
+	frameBuffer 		= CFrameBuffer::getInstance();
+	renderer 		= render;
+	font.font.face_id 	= faceid;
+	font.font.pix_width  	= isize;
+	font.font.pix_height 	= isize;
+	font.image_type 	= ftc_image_grays;
+	font.image_type 	|= ftc_image_flag_autohinted;
 
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{
@@ -458,4 +459,3 @@ int Font::getRenderWidth(string text)
 	getRenderWidth( text.c_str() );
 	return 0;
 }
-

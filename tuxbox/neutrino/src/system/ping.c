@@ -19,6 +19,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+
+
 #include "ping.h"
 
 
@@ -265,5 +267,3 @@ tpingthost( const char *hostname, int t )
   else
     return ret;
 }
-
-

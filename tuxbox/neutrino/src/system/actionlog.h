@@ -35,11 +35,11 @@
 #include <termios.h>
 #include <string>
 
+
 using namespace std;
 
-
-#define BAUDRATE B115200
-#define SERIALDEVICE "/dev/tts/0"
+#define BAUDRATE 		B115200
+#define SERIALDEVICE 		"/dev/tts/0"
 #define SERIALDEVICEALTERNATE "/dev/ttyS"
 
 class CActionLog
@@ -58,7 +58,6 @@ class CActionLog
 		void print(string text);
 		void println(string text);
 };
-
 
 
 #endif

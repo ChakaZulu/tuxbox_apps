@@ -1,5 +1,4 @@
 INCLUDES = \
-	-I$(top_srcdir)/daemons \
 	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/src \
 	@EVENTSERVER_CFLAGS@ \
@@ -13,4 +12,3 @@ libneutrino_system_a_SOURCES = \
 	localize.cpp setting_helpers.cpp debug.cpp \
 	actionlog.cpp ping.c flashtool.cpp httptool.cpp \
 	settings.cpp lastchannel.cpp 
-

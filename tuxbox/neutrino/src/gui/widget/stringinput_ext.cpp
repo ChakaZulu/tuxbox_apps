@@ -29,15 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
 
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include <gui/color.h>
+
+#include "messagebox.h"
 #include "stringinput_ext.h"
-#include "neutrino.h"
 
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "gui/color.h"
-#include "gui/widget/messagebox.h"
 
 CExtendedInput::CExtendedInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ, bool Localizing)
 {
@@ -496,4 +499,3 @@ void CDateInput::onAfterExec()
 				tmTime2->tm_year+1900,
 				tmTime2->tm_hour, tmTime2->tm_min);
 }
-

@@ -21,16 +21,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include <gui/color.h>
 
 #include "progresswindow.h"
-#include "neutrino.h"
-
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
-#include "gui/color.h"
-
 
 
 CProgressWindow::CProgressWindow()
@@ -162,5 +162,6 @@ int CProgressWindow::exec( CMenuTarget* parent, string actionKey )
 		parent->hide();
 	}
 	paint();
+
 	return menu_return::RETURN_REPAINT;
 }

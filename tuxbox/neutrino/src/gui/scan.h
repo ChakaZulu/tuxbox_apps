@@ -29,16 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __scants__
 #define __scants__
 
-#include "driver/framebuffer.h"
-#include "gui/widget/menue.h"
-
 #include <string>
 
-using namespace std;
+#include "driver/framebuffer.h"
 
+#include "widget/menue.h"
+
+
+using namespace std;
 
 class CScanTs : public CMenuTarget
 {
@@ -57,10 +59,7 @@ class CScanTs : public CMenuTarget
 		CScanTs();
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );
-
 };
 
 
-
 #endif
-

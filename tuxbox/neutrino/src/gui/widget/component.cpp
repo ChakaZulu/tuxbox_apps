@@ -25,7 +25,6 @@
 #include "component.h"
 
 
-
 CComponent::CComponent()
 {
 	bHasFocus = false;
@@ -198,4 +197,3 @@ void CPoint::addYPos(int yPos)
 {
 	iYPos += yPos;
 }
-

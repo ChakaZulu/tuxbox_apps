@@ -29,10 +29,11 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+
+#include <global.h>
+#include <neutrino.h>
 
 #include "messagebox.h"
-#include "neutrino.h"
 
 #define borderwidth 4
 
@@ -325,4 +326,3 @@ int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, strin
 
 	return res;
 }
-

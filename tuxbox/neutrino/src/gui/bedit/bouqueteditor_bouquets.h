@@ -32,15 +32,14 @@
 #ifndef __bouqueteditor_bouquets__
 #define __bouqueteditor_bouquets__
 
-#include "driver/framebuffer.h"
-#include "gui/widget/menue.h"
-
 #include <string>
 #include <vector>
 
+#include <driver/framebuffer.h>
+#include <gui/widget/menue.h>
+
+
 using namespace std;
-
-
 
 /* class for handling when bouquets changed.                  */
 /* This class should be a temporarily work around             */
@@ -120,4 +119,3 @@ class CBEBouquetWidget : public CMenuWidget
 
 
 #endif
-

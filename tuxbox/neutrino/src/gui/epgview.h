@@ -29,20 +29,22 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __epgview__
 #define __epgview__
 
-#include <sectionsdclient/sectionsdclient.h>
-
-#include "driver/framebuffer.h"
-#include "driver/rcinput.h"
-#include "driver/fontrenderer.h"
-
-#include "gui/color.h"
-#include "system/settings.h"
-
 #include <vector>
 #include <string>
+
+#include <sectionsdclient/sectionsdclient.h>
+
+#include <driver/framebuffer.h>
+#include <driver/rcinput.h>
+#include <driver/fontrenderer.h>
+#include <system/settings.h>
+
+#include "color.h"
+
 
 using namespace std;
 
@@ -51,21 +53,21 @@ class CEpgData
 	private:
 		CFrameBuffer		*frameBuffer;
 		CChannelEventList	evtlist;
-		CEPGData			epgData;
+		CEPGData		epgData;
 
-		string 		epg_date;
-		string 		epg_start;
-		string 		epg_end;
+		string 			epg_date;
+		string 			epg_start;
+		string 			epg_end;
 		int			epg_done;
 
-		unsigned long long prev_id;
-		time_t prev_zeit;
-		unsigned long long next_id;
-		time_t next_zeit;
+		unsigned long long	prev_id;
+		time_t			prev_zeit;
+		unsigned long long 	next_id;
+		time_t 			next_zeit;
 
 		int			ox, oy, sx, sy, toph;
 		int			emptyLineCount, info1_lines;
-		int         textCount;
+		int         		textCount;
 		vector<string>		epgText;
 		int			topheight,topboxheight;
 		int			botheight,botboxheight;

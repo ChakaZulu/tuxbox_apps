@@ -35,10 +35,10 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
-
 #define NEUTRINO_UDS_NAME "/tmp/neutrino.sock"
+
+
+using namespace std;
 
 class CRCInput
 {
@@ -132,7 +132,5 @@ class CRCInput
 		int messageLoop( bool anyKeyCancels = false, int timeout= -1 );
 };
 
+
 #endif
-
-
-

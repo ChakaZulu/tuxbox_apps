@@ -29,14 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "actionlog.h"
-#include "../global.h"
 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+
+#include <global.h>
+
+#include "actionlog.h"
+
+
 
 #ifdef USEACTIONLOG
 
@@ -104,5 +108,6 @@ void CActionLog::println(string text)
 {
 	print(text + "\r\n");
 }
+
 
 #endif

@@ -21,6 +21,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __neutrino_debug__
 #define __neutrino_debug__
 
@@ -28,8 +29,8 @@ static int debug = 1;
 
 
 #define DEBUG_NORMAL	1
-#define DEBUG_INFO		2
-#define DEBUG_DEBUG		3
+#define DEBUG_INFO	2
+#define DEBUG_DEBUG	3
 
 void setDebugLevel( int level );
 

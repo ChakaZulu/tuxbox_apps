@@ -32,24 +32,23 @@
 #ifndef __gamelist__
 #define __gamelist__
 
-#include <plugin.h>
-
-#include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
-#include "daemonc/remotecontrol.h"
-#include "system/settings.h"
-
-#include "gui/widget/menue.h"
-#include "gui/color.h"
-
 #include <string>
 #include <vector>
 #include <map>
 
-using namespace std;
+#include <plugin.h>
 
+#include <driver/framebuffer.h>
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+#include <daemonc/remotecontrol.h>
+#include <system/settings.h>
+
+#include "color.h"
+#include "widget/menue.h"
+
+
+using namespace std;
 
 class CPlugins
 {
@@ -127,7 +126,7 @@ class CGameList : public CMenuTarget
 
 		struct game
 		{
-			int		number;
+			int	number;
 			string	name;
 			string	desc;
 		};
@@ -135,20 +134,20 @@ class CGameList : public CMenuTarget
 		unsigned int	liststart;
 		unsigned int	listmaxshow;
 		unsigned int	selected;
-		int				key;
-		string			name;
+		int		key;
+		string		name;
 		vector<game*>   gamelist;
 
 
-		int				fheight; // Fonthoehe Channellist-Inhalt
-		int				theight; // Fonthoehe Channellist-Titel
+		int		fheight; // Fonthoehe Channellist-Inhalt
+		int		theight; // Fonthoehe Channellist-Titel
 
-		int				fheight1,fheight2;
+		int		fheight1,fheight2;
 
-		int 			width;
-		int 			height;
-		int 			x;
-		int 			y;
+		int 		width;
+		int 		height;
+		int 		x;
+		int 		y;
 
 		void paintItem(int pos);
 		void paint();
@@ -166,6 +165,3 @@ class CGameList : public CMenuTarget
 
 
 #endif
-
-
-

@@ -29,10 +29,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __FONTRENDERER__
 #define __FONTRENDERER__
 
-#include "framebuffer.h"
 #include <pthread.h>
 #include <string>
 
@@ -42,6 +42,9 @@
 
 #include FT_CACHE_IMAGE_H
 #include FT_CACHE_SMALL_BITMAPS_H
+
+#include "framebuffer.h"
+
 
 class Font;
 class fontRenderClass
@@ -55,9 +58,9 @@ class fontRenderClass
 		*font;
 
 		FT_Library	library;
-		FTC_Manager	cacheManager;       	 /* the cache manager               */
-		FTC_Image_Cache	imageCache;          /* the glyph image cache           */
-		FTC_SBit_Cache	sbitsCache;          /* the glyph small bitmaps cache   */
+		FTC_Manager	cacheManager;	/* the cache manager               */
+		FTC_Image_Cache	imageCache;	/* the glyph image cache           */
+		FTC_SBit_Cache	sbitsCache;	/* the glyph small bitmaps cache   */
 
 		FTC_FaceID getFaceID(const char *family, const char *style);
 		FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
@@ -89,8 +92,8 @@ class Font
 		CFrameBuffer	*frameBuffer;
 		FTC_Image_Desc	font;
 		fontRenderClass *renderer;
-		FT_Face			face;
-		FT_Size			size;
+		FT_Face		face;
+		FT_Size		size;
 
 		FT_Error getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit);
 
@@ -141,7 +144,5 @@ class FontsDef
 		*infobar_small;
 };
 
+
 #endif
-
-
-

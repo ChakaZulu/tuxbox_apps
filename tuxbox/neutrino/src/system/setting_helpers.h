@@ -29,11 +29,15 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __setting_helpers__
 #define __setting_helpers__
 
-#include "gui/widget/menue.h"
-#include "gui/widget/stringinput_ext.h"
+#include <gui/widget/menue.h>
+#include <gui/widget/stringinput_ext.h>
+
+
+unsigned long long getcurrenttime();
 
 class CSatDiseqcNotifier : public CChangeObserver
 {
@@ -155,6 +159,5 @@ void setNameServer(char* ip);
 void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway, char* nameserver, int dhcp);
 void showCurrentNetworkSettings();
 
-unsigned long long getcurrenttime();
 
 #endif

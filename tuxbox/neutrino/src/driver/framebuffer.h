@@ -26,17 +26,17 @@
 #define __framebuffer__
 
 
-#include "gui/widget/component.h"
-
 #include <linux/fb.h>
 #include <linux/vt.h>
 #include <stdint.h>
-#include "dbox/fb.h"
+#include <dbox/fb.h>
 
 #include <string>
 
-using namespace std;
+#include <gui/widget/component.h>
 
+
+using namespace std;
 
 /** Ausführung als Singleton */
 class CFrameBuffer
@@ -55,11 +55,11 @@ class CFrameBuffer
 
 		string			iconBasePath;
 
-		int				fd, tty;
+		int			fd, tty;
 		unsigned char	*lfb;
-		int				available;
+		int		available;
 		unsigned char	*background;
-		int				backgroundColor;
+		int			backgroundColor;
 		string			backgroundFilename;
 		bool			useBackgroundPaint;
 		unsigned int	xRes, yRes, stride, bpp;
@@ -69,10 +69,10 @@ class CFrameBuffer
 
 		void paletteFade(int i, __u32 rgb1, __u32 rgb2, int level);
 
-		int kd_mode;
-		struct vt_mode vt_mode;
-		bool active;
-		static void switch_signal (int);
+		int 	kd_mode;
+		struct	vt_mode vt_mode;
+		bool	active;
+		static	void switch_signal (int);
 
 	public:
 
@@ -134,8 +134,4 @@ class CFrameBuffer
 };
 
 
-
 #endif
-
-
-

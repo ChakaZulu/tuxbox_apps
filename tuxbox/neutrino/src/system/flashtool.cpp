@@ -18,9 +18,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
-#include "global.h"
-
-#include "flashtool.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -34,13 +31,17 @@
 
 #include <dbox/fp.h>
 
+#include <global.h>
+
+#include "flashtool.h"
+
 
 CFlashTool::CFlashTool()
 {
 	fd_fp = -1;
 	statusViewer = NULL;
-	mtdDevice = "";
-	ErrorMessage = "";
+	mtdDevice = 	"";
+	ErrorMessage = 	"";
 }
 
 CFlashTool::~CFlashTool()
@@ -508,4 +509,3 @@ int CMTDInfo::getMTDEraseSize( string filename )
 {
 	return getMTDEraseSize( findMTDNumber(filename) );
 }
-

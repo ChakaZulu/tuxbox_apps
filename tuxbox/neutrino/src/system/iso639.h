@@ -29,6 +29,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 struct ISO639
 {
 	char *iso639foreign, *iso639int, *twoletterm, *description1, *description2;

@@ -29,12 +29,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+#include <global.h>
+#include <neutrino.h>
+
+#include <gui/color.h>
 
 #include "keychooser.h"
-#include "neutrino.h"
-
-#include "gui/color.h"
 
 
 CKeyChooser::CKeyChooser( int* Key, string title, string Icon )
@@ -141,5 +141,3 @@ void CKeyChooserItem::paint()
 	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText("keychooser.text1").c_str(), COL_MENUCONTENT);
 	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight* 2, width, g_Locale->getText("keychooser.text2").c_str(), COL_MENUCONTENT);
 }
-
-

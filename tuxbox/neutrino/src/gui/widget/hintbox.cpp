@@ -29,12 +29,14 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+
+#include <global.h>
+#include <neutrino.h>
 
 #include "hintbox.h"
-#include "neutrino.h"
 
 #define borderwidth 4
+
 
 CHintBox::CHintBox( string Caption, string Text, string Icon, int Width )
 {
@@ -158,4 +160,3 @@ int ShowHint ( string Caption, string Text, string Icon, int Width, int timeout 
 	delete hintBox;
 	return 1;
 }
-

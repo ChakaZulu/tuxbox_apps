@@ -29,22 +29,23 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
 
 #include "dboxinfo.h"
-#include "neutrino.h"
-
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
 
 
 CDBoxInfoWidget::CDBoxInfoWidget()
 {
-	frameBuffer = CFrameBuffer::getInstance();
-	width = 600;
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
-	height = hheight+13*mheight+ 10;
+	frameBuffer =	CFrameBuffer::getInstance();
+	width = 	600;
+	hheight = 	g_Fonts->menu_title->getHeight();
+	mheight = 	g_Fonts->menu->getHeight();
+	height = 	hheight+13*mheight+ 10;
 
     x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;

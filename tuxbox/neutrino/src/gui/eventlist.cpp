@@ -29,10 +29,11 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+
+#include <global.h>
+#include <neutrino.h>
 
 #include "eventlist.h"
-#include "neutrino.h"
 
 
 EventList::EventList()
@@ -41,15 +42,14 @@ EventList::EventList()
 	selected = 0;
 	current_event = 0;
 
-	width = 580;
-	//	height = 440;
+	width  = 580;
+	//height = 440;
 	height = 480;
-	theight= g_Fonts->eventlist_title->getHeight();
-	fheight1= g_Fonts->eventlist_itemLarge->getHeight();
+	theight  = g_Fonts->eventlist_title->getHeight();
+	fheight1 = g_Fonts->eventlist_itemLarge->getHeight();
 	{
-		int h1,h2;
-		h1 = g_Fonts->eventlist_itemSmall->getHeight();
-		h2 = g_Fonts->eventlist_datetime->getHeight();
+		int h1 = g_Fonts->eventlist_itemSmall->getHeight();
+		int h2 = g_Fonts->eventlist_datetime->getHeight();
 		fheight2 = (h1 > h2) ? h1 : h2;
 	}
 	fheight = fheight1 + fheight2 + 2;
@@ -117,7 +117,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 		g_ActionLog->println(buf);
 	#endif
 
-    uint msg; uint data;
+	uint msg; uint data;
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
 	bool loop=true;
@@ -345,7 +345,4 @@ void EventList::paint()
 	int sbs= (selected/listmaxshow);
 
 	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
-
 }
-
-

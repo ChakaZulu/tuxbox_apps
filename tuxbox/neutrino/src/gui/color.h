@@ -29,15 +29,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __color__
 #define __color__
 
-#define COL_MAXFREE					254-8*7 - 1
-#define COL_INFOBAR_SHADOW			254-8*7
-#define COL_INFOBAR					254-8*6
-#define COL_MENUHEAD				254-8*5
-#define COL_MENUCONTENT				254-8*4
-#define COL_MENUCONTENTDARK			254-8*3
+#define COL_MAXFREE			254-8*7 - 1
+#define COL_INFOBAR_SHADOW		254-8*7
+#define COL_INFOBAR			254-8*6
+#define COL_MENUHEAD			254-8*5
+#define COL_MENUCONTENT			254-8*4
+#define COL_MENUCONTENTDARK		254-8*3
 #define COL_MENUCONTENTSELECTED		254-8*2
 #define COL_MENUCONTENTINACTIVE		254-8*1
 
@@ -48,5 +49,5 @@ int convertSetupAlpha2Alpha(unsigned char alpha);
 
 void fadeColor(unsigned char &r, unsigned char &g, unsigned char &b, int fade, bool protect=true);
 
-#endif
 
+#endif

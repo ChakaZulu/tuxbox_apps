@@ -29,29 +29,29 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <global.h>
 
 #include "remotecontrol.h"
-#include "global.h"
 #include "neutrino.h"
 
 CRemoteControl::CRemoteControl()
 {
-	current_channel_id = 0;
+	current_channel_id = 	0;
 	current_sub_channel_id = 0;
-	current_channel_name = "";
+	current_channel_name = 	"";
 
 	zap_completion_timeout = 0;
 
-	current_EPGid= 0;
-	next_EPGid= 0;
+	current_EPGid =	0;
+	next_EPGid = 	0;
 	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
-	has_ac3 = false;
+	has_ac3 = 	false;
 	selected_subchannel = -1;
-	needs_nvods = false;
+	needs_nvods = 	false;
 	director_mode = 0;
 	current_programm_timer = 0;
-	is_video_started= true;
-	zapCount = 0;
+	is_video_started = true;
+	zapCount = 	0;
 }
 
 int CRemoteControl::handleMsg(uint msg, uint data)
@@ -562,5 +562,3 @@ void CRemoteControl::tvMode()
 {
 	g_Zapit->setMode( CZapitClient::MODE_TV );
 }
-
-

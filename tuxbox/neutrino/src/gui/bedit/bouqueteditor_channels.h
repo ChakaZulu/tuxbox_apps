@@ -29,17 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __bouqueteditor_channels__
 #define __bouqueteditor_channels__
-
-#include "driver/framebuffer.h"
-#include "gui/widget/menue.h"
 
 #include <string>
 #include <vector>
 
-using namespace std;
+#include <driver/framebuffer.h>
+#include <gui/widget/menue.h>
 
+
+using namespace std;
 
 class CBEChannelWidget : public CMenuWidget
 {

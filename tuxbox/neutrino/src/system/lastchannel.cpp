@@ -20,8 +20,8 @@ nicht gespeichert werden.
 */
 
 
-#include "sys/time.h"
-#include "unistd.h"
+#include <sys/time.h>
+#include <unistd.h>
 
 #include "lastchannel.h"
 
@@ -146,4 +146,3 @@ int CLastChannel::get_store_difftime (void)
 {
 	return    secs_diff_before_store;
 }
-

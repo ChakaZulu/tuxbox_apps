@@ -28,20 +28,25 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "global.h"
-#include "neutrino.h"
-#include "config.h"
-#include "setting_helpers.h"
 
-#include "libnet.h"
-#include "gui/streaminfo.h"
-#include "gui/widget/messagebox.h"
 
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include "libnet.h"
+
 #include <libucodes.h>
+
+#include <config.h>
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <gui/streaminfo.h>
+#include <gui/widget/messagebox.h>
+
+#include "setting_helpers.h"
 
 
 extern "C" int pinghost( const char *hostname );
@@ -501,4 +506,3 @@ unsigned long long getcurrenttime()
 	gettimeofday( &tv, NULL );
 	return (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 }
-

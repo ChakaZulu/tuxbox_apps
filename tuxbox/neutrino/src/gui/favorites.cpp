@@ -24,15 +24,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #include <zapit/zapitclient.h>
 
-#include "global.h"
-#include "neutrino.h"
-#include "favorites.h"
+#include <global.h>
+#include <neutrino.h>
 
-#include "gui/widget/messagebox.h"
-#include "gui/widget/hintbox.h"
+#include "favorites.h"
 #include "gui/channellist.h"
+
+#include "widget/messagebox.h"
+#include "widget/hintbox.h"
 
 
 //
@@ -87,9 +89,6 @@ int CFavorites::addChannelToFavorites()
 }
 
 
-
-
-
 //
 // -- Menue Handler Interface
 // -- to fit the MenueClasses from McClean
@@ -141,5 +140,3 @@ int CFavorites::exec(CMenuTarget* parent, string)
 
 	return res;
 }
-
-

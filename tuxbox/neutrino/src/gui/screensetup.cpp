@@ -29,17 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
+#include <global.h>
+#include <neutrino.h>
 
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+#include <system/settings.h>
+
+#include "color.h"
 #include "screensetup.h"
-#include "neutrino.h"
 
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "system/settings.h"
+#include "widget/messagebox.h"
 
-#include "gui/widget/messagebox.h"
-#include "gui/color.h"
 
 CScreenSetup::CScreenSetup()
 {
@@ -241,5 +242,3 @@ void CScreenSetup::paint()
 	paintBorderLR();
 	paintCoords();
 }
-
-

@@ -29,15 +29,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __bouquetlist__
 #define __bouquetlist__
 
-#include "driver/framebuffer.h"
-#include "system/lastchannel.h"
-#include "channellist.h"
-
 #include <string>
 #include <vector>
+
+#include <driver/framebuffer.h>
+#include <system/lastchannel.h>
+
+#include "channellist.h"
 
 
 using namespace std;
@@ -115,5 +117,3 @@ class CBouquetList
 
 
 #endif
-
-

@@ -29,19 +29,19 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "global.h"
-
-#include "infoviewer.h"
-#include "neutrino.h"
-
-#include "gui/widget/hintbox.h"
-
 #include <sys/timeb.h>
 #include <time.h>
-
 #include <string>
 
-#define COL_INFOBAR_BUTTONS				COL_INFOBAR_SHADOW+ 1
+#include <global.h>
+#include <neutrino.h>
+
+#include "infoviewer.h"
+
+#include "widget/hintbox.h"
+
+
+#define COL_INFOBAR_BUTTONS			COL_INFOBAR_SHADOW+ 1
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1
 
 #define ICON_LARGE 30
@@ -261,7 +261,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, const t_channel_id new
         frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
         frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
 
-        uint msg; uint data;
+        uint msg; 
+	uint data;
 
 
         if ( !calledFromNumZap )
@@ -861,6 +862,3 @@ void CInfoViewer::killTitle()
 		frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET );
 	}
 }
-
-
-

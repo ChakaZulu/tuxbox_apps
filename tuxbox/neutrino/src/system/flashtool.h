@@ -29,15 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __flashtool__
 #define __flashtool__
 
 #include <string>
 #include <vector>
-#include "gui/widget/progressstatus.h"
+
+
+#include <gui/widget/progressstatus.h>
+
 
 using namespace std;
-
 
 class CFlashTool
 {
@@ -129,4 +132,3 @@ class CMTDInfo
 
 
 #endif
-

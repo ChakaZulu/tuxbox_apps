@@ -20,14 +20,15 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #ifndef __favorites__
 #define __favorites__
 
-#include "gui/widget/menue.h"
 #include <string>
 
-using namespace std;
+#include "widget/menue.h"
 
+using namespace std;
 
 
 //
@@ -46,4 +47,3 @@ class CFavorites : public CMenuTarget
 
 
 #endif
-

@@ -30,23 +30,22 @@
 */
 
 
-#include "zapit/zapitclient.h"
+#include <zapit/zapitclient.h>
 
-#include "global.h"
+#include <global.h>
+#include <neutrino.h>
 
-#include "neutrino.h"
+#include <driver/fontrenderer.h>
 
 #include "bouqueteditor_channels.h"
 #include "bouqueteditor_chanselect.h"
-
-#include "driver/fontrenderer.h"
 
 
 CBEChannelWidget::CBEChannelWidget(string Caption, unsigned int Bouquet)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	selected = 0;
-	width = 500;
+	width =  500;
 	height = 440;
 	ButtonHeight = 25;
 	theight= g_Fonts->menu_title->getHeight();
@@ -397,4 +396,3 @@ bool CBEChannelWidget::hasChanged()
 {
 	return (channelsChanged);
 }
-

@@ -23,12 +23,11 @@
 #ifndef __sleeptimer__
 #define __sleeptimer__
 
-#include "gui/widget/menue.h"
 #include <string>
+#include "widget/menue.h"
+
 
 using namespace std;
-
-
 
 //
 // -- Sleep Timer Input Widget
@@ -42,4 +41,3 @@ class CSleepTimerWidget: public CMenuTarget
 
 
 #endif
-
