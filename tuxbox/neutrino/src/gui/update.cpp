@@ -121,8 +121,8 @@ bool CFlashUpdate::getInfo()
 	CHTTPTool httpTool;
 	httpTool.setStatusViewer( this );
 	showStatusMessageUTF(g_Locale->getText("flashupdate.getinfofile")); // UTF-8
-	string gURL = BasePath + VersionFile;
-	string sFileName = gTmpPath+ VersionFile;
+	std::string gURL = BasePath + VersionFile;
+	std::string sFileName = gTmpPath+ VersionFile;
 
 	printf("get versioninfo (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
 	return httpTool.downloadFile( gURL, sFileName, 20 );
@@ -133,9 +133,9 @@ bool CFlashUpdate::getUpdateImage(std::string version)
 	CHTTPTool httpTool;
 	httpTool.setStatusViewer( this );
 
-	showStatusMessageUTF(std::string(g_Locale->getText("flashupdate.getupdatefile")) + " " + version); // UTF-8
-	string gURL = BasePath + ImageFile;
-	string sFileName = gTmpPath+ ImageFile;
+	showStatusMessageUTF(std::string(g_Locale->getText("flashupdate.getupdatefile")) + ' ' + version); // UTF-8
+	std::string gURL = BasePath + ImageFile;
+	std::string sFileName = gTmpPath+ ImageFile;
 
 	printf("get update (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
 	return httpTool.downloadFile( gURL, sFileName, 40 );
@@ -161,7 +161,7 @@ bool CFlashUpdate::checkVersion4Update()
 		showStatusMessageUTF(g_Locale->getText("flashupdate.versioncheck")); // UTF-8
 
 
-		string sFileName = gTmpPath+VersionFile;
+		std::string sFileName = gTmpPath+VersionFile;
 
 		CConfigFile configfile('\t');
 		if(!configfile.loadConfig(sFileName))
@@ -198,7 +198,7 @@ bool CFlashUpdate::checkVersion4Update()
 	else
 	{
 		//manuelles update -- filecheck + abfrage
-		FILE* fd = fopen((string(gTmpPath+ ImageFile)).c_str(), "r");
+		FILE* fd = fopen((gTmpPath+ ImageFile).c_str(), "r");
 		if(fd)
 		{
 			fclose(fd);
@@ -206,7 +206,7 @@ bool CFlashUpdate::checkVersion4Update()
 		else
 		{
 			hide();
-			printf("flash-file not found: %s\n", (string(gTmpPath+ ImageFile)).c_str() );
+			printf("flash-file not found: %s\n", (gTmpPath+ ImageFile).c_str() );
 			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.cantopenfile")); // UTF-8
 			return false;
 		}
@@ -214,7 +214,7 @@ bool CFlashUpdate::checkVersion4Update()
 		
 		//bestimmung der CramfsDaten
 		char cramfsName[30];
-		cramfs_name( (char*) (string(gTmpPath+ImageFile)).c_str(), (char*) &cramfsName);
+		cramfs_name( (char*) (gTmpPath+ImageFile).c_str(), (char*) &cramfsName);
 
 		versionInfo = new CFlashVersionInfo(cramfsName);
 
@@ -231,7 +231,7 @@ bool CFlashUpdate::checkVersion4Update()
 	return (ShowMsgUTF("messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") == CMessageBox::mbrYes); // UTF-8
 }
 
-int CFlashUpdate::exec(CMenuTarget* parent, string)
+int CFlashUpdate::exec(CMenuTarget* parent, std::string)
 {
 	if(parent)
 	{
@@ -267,7 +267,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	ft.setMTDDevice("/dev/mtd/2");
 	ft.setStatusViewer(this);
 
-	string sFileName = gTmpPath+ ImageFile;
+	std::string sFileName = gTmpPath+ ImageFile;
 
 	//image-check
 	showStatusMessageUTF(g_Locale->getText("flashupdate.md5check")); // UTF-8
@@ -317,7 +317,7 @@ void CFlashExpert::readmtd(int readmtd)
 {
 	char tmp[10];
 	sprintf(tmp, "%d", readmtd);
-	std::string filename = "/tmp/mtd" + string(tmp) + string(".img"); // US-ASCII (subset of UTF-8 and ISO8859-1)
+	std::string filename = std::string("/tmp/mtd") + tmp + ".img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
 	if (readmtd == -1)
 	{
 		//ganzes flashimage lesen
@@ -327,7 +327,7 @@ void CFlashExpert::readmtd(int readmtd)
 	setTitle(g_Locale->getText("flashupdate.titlereadflash")); // UTF-8
 	paint();
 	showGlobalStatus(0);
-	showStatusMessageUTF((std::string(g_Locale->getText("flashupdate.actionreadflash")) + " (" + string(CMTDInfo::getInstance()->getMTDName(readmtd)) + ")")); // UTF-8
+	showStatusMessageUTF((std::string(g_Locale->getText("flashupdate.actionreadflash")) + " (" + CMTDInfo::getInstance()->getMTDName(readmtd) + ')')); // UTF-8
 	CFlashTool ft;
 	ft.setStatusViewer( this );
 	ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(readmtd));
@@ -348,7 +348,7 @@ void CFlashExpert::readmtd(int readmtd)
 	}
 }
 
-void CFlashExpert::writemtd(string filename, int mtdNumber)
+void CFlashExpert::writemtd(std::string filename, int mtdNumber)
 {
 	char message[500];
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
@@ -382,7 +382,7 @@ void CFlashExpert::writemtd(string filename, int mtdNumber)
 }
 
 
-void CFlashExpert::showMTDSelector(string actionkey)
+void CFlashExpert::showMTDSelector(std::string actionkey)
 {
 	//mtd-selector erzeugen
 	CMenuWidget* mtdselector = new CMenuWidget("flashupdate.mtdselector", "softupdate.raw");
@@ -399,7 +399,7 @@ void CFlashExpert::showMTDSelector(string actionkey)
 	mtdselector->exec(NULL,"");
 }
 
-void CFlashExpert::showFileSelector(string actionkey)
+void CFlashExpert::showFileSelector(std::string actionkey)
 {
 	CMenuWidget* fileselector = new CMenuWidget("flashupdate.fileselector", "softupdate.raw");
 	fileselector->addItem( new CMenuSeparator() );
@@ -416,7 +416,7 @@ void CFlashExpert::showFileSelector(string actionkey)
 	{
 		for(int count=0;count<n;count++)
 		{
-			string filen = namelist[count]->d_name;
+			std::string filen = namelist[count]->d_name;
 			int pos = filen.find(".img");
 			if(pos!=-1)
 			{
@@ -431,7 +431,7 @@ void CFlashExpert::showFileSelector(string actionkey)
 }
 
 
-int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
+int CFlashExpert::exec( CMenuTarget* parent, std::string actionKey )
 {
 	if(parent)
 	{

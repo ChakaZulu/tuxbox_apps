@@ -29,7 +29,14 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "alphasetup.h"
+#include <gui/alphasetup.h>
+
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+
+#include <gui/color.h>
+
+#include <gui/widget/messagebox.h>
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -46,13 +53,6 @@
 
 #include <global.h>
 #include <neutrino.h>
-
-#include <driver/fontrenderer.h>
-#include <driver/rcinput.h>
-
-#include "widget/messagebox.h"
-
-#include "color.h"
 
 
 CAlphaSetup::CAlphaSetup(const char * const Name, unsigned char* Alpha1, unsigned char* Alpha2, CChangeObserver* Observer)

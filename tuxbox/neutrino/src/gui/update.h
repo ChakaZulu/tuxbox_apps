@@ -33,34 +33,31 @@
 #ifndef __update__
 #define __update__
 
-#include <string>
+#include <gui/widget/menue.h>
+#include <gui/widget/progressstatus.h>
+#include <gui/widget/progresswindow.h>
 
 #include <driver/framebuffer.h>
 
-#include "widget/progressstatus.h"
-#include "widget/progresswindow.h"
-#include "widget/menue.h"
-
-
-using namespace std;
+#include <string>
 
 class CFlashUpdate : public CProgressWindow
 {
 	private:
-		string	BasePath;
-		string	ImageFile;
-		string	VersionFile;
+		std::string	BasePath;
+		std::string	ImageFile;
+		std::string	VersionFile;
 
-		string	installedVersion;
-		string	newVersion;
+		std::string	installedVersion;
+		std::string	newVersion;
 
 		bool getInfo();
-		bool getUpdateImage(string version);
+		bool getUpdateImage(std::string version);
 		bool checkVersion4Update();
 
 	public:
 		CFlashUpdate();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 
 };
 
@@ -69,15 +66,15 @@ class CFlashExpert : public CProgressWindow
 	private:
 		int selectedMTD;
 
-		void showMTDSelector(string actionkey);
-		void showFileSelector(string actionkey);
+		void showMTDSelector(std::string actionkey);
+		void showFileSelector(std::string actionkey);
 
 		void readmtd(int readmtd);
-		void writemtd(string filename, int mtdNumber);
+		void writemtd(std::string filename, int mtdNumber);
 
 	public:
 		CFlashExpert();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 
 };
 

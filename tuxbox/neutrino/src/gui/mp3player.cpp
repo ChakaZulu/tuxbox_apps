@@ -76,6 +76,9 @@
 #define DVR	ADAP "/dvr0"
 #endif
 
+#ifdef ConnectLineBox_Width
+#undef ConnectLineBox_Width
+#endif
 #define ConnectLineBox_Width	15
 
 //------------------------------------------------------------------------

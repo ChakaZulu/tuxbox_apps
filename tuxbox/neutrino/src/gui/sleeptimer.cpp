@@ -35,16 +35,15 @@
 */
 
 
+#include <gui/sleeptimer.h>
+
+#include <gui/widget/hintbox.h>
+#include <gui/widget/messagebox.h>
+#include <gui/widget/stringinput.h>
+
+#include <timerdclient/timerdclient.h>
+
 #include <stdlib.h>
-
-#include <global.h>
-#include <neutrino.h>
-
-#include "sleeptimer.h"
-
-#include "widget/stringinput.h"
-#include "widget/messagebox.h"
-#include "widget/hintbox.h"
 
 
 //
@@ -54,7 +53,7 @@
 // -- Add current channel to Favorites and display user messagebox
 //
 
-int CSleepTimerWidget::exec(CMenuTarget* parent, string)
+int CSleepTimerWidget::exec(CMenuTarget* parent, std::string)
 {
 	int    res = menu_return::RETURN_EXIT_ALL;
 	int    shutdown_min;

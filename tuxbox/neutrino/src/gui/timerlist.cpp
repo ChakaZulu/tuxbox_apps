@@ -30,26 +30,29 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <global.h>
-#include <neutrino.h>
+#include <gui/timerlist.h>
+
+#include <daemonc/remotecontrol.h>
 
 #include <driver/encoding.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
-#include <daemonc/remotecontrol.h>
+
+#include <gui/color.h>
+#include <gui/eventlist.h>
+#include <gui/infoviewer.h>
+
+#include <gui/widget/menue.h>
+#include <gui/widget/messagebox.h>
+#include <gui/widget/hintbox.h>
+#include <gui/widget/icons.h>
+#include <gui/widget/stringinput.h>
+
 #include <system/settings.h>
 
-#include "eventlist.h"
-#include "timerlist.h"
-#include "color.h"
-#include "infoviewer.h"
+#include <global.h>
+#include <neutrino.h>
 
-#include "widget/menue.h"
-#include "widget/messagebox.h"
-#include "widget/hintbox.h"
-#include "widget/stringinput.h"
-
-#include <gui/widget/icons.h>
 
 #define info_height 60
 
@@ -76,7 +79,7 @@ public:
 		iType=Type;
 		stopTime=time;
 	}
-	bool changeNotify(string OptionName, void* dummy)
+	bool changeNotify(std::string OptionName, void* dummy)
 	{
 		CTimerd::CTimerEventTypes type = (CTimerd::CTimerEventTypes) *iType;
 		if(type == CTimerd::TIMER_RECORD)
@@ -127,7 +130,7 @@ public:
 		m = a;
 		iRepeat=repeat;
 	}
-	bool changeNotify(string OptionName, void* dummy)
+	bool changeNotify(std::string OptionName, void* dummy)
 	{
 		if(*iRepeat >= (int)CTimerd::TIMERREPEAT_WEEKDAYS)
 			m->setActive (true);
@@ -163,7 +166,7 @@ CTimerList::~CTimerList()
 	delete Timer;
 }
 
-int CTimerList::exec(CMenuTarget* parent, string actionKey)
+int CTimerList::exec(CMenuTarget* parent, std::string actionKey)
 {
 	if(actionKey=="modifytimer")
 	{
@@ -482,7 +485,7 @@ void CTimerList::paintItem(int pos)
 		}
 		g_Fonts->menu->RenderString(x+160,ypos+fheight, (real_width-160)/2-5, convertTimerRepeat2String(timer.eventRepeat), color, fheight, true); // UTF-8
 		g_Fonts->menu->RenderString(x+160+(real_width-160)/2,ypos+fheight, (real_width-160)/2-5, convertTimerType2String(timer.eventType), color, fheight, true); // UTF-8
-		string zAddData("");
+		std::string zAddData("");
 		switch(timer.eventType)
 		{
 			case CTimerd::TIMER_NEXTPROGRAM :
@@ -492,7 +495,7 @@ void CTimerList::paintItem(int pos)
 					zAddData = convertChannelId2String(timer.channel_id, timer.mode); // UTF-8
 					if(strlen(timer.apids) != 0)
 					{
-						zAddData += string(" (") + timer.apids + ")"; // must be UTF-8 encoded !
+						zAddData += std::string(" (") + timer.apids + ")"; // must be UTF-8 encoded !
 					}
 					if(timer.epgID!=0)
 					{
@@ -521,8 +524,8 @@ void CTimerList::paintItem(int pos)
 		// LCD Display
 		if(liststart+pos==selected)
 		{
-			string line1 = convertTimerType2String(timer.eventType); // UTF-8
-			string line2 = zAlarmTime;
+			std::string line1 = convertTimerType2String(timer.eventType); // UTF-8
+			std::string line2 = zAlarmTime;
 			switch(timer.eventType)
 			{
 				case CTimerd::TIMER_RECORD :
@@ -645,7 +648,7 @@ std::string CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRepe
 			if(rep >=CTimerd::TIMERREPEAT_WEEKDAYS)
 			{
 				int weekdays = (((int)rep) >> 9);
-				string weekdayStr="";
+				std::string weekdayStr="";
 				if(weekdays & 1)
 					weekdayStr+= g_Locale->getText("timerlist.repeat.monday");
 				weekdays >>= 1;
@@ -822,7 +825,7 @@ int CTimerList::newTimer()
 		{
 			char cChannelId[11];
 			sprintf(cChannelId,"%010u",channel->channel_id);
-			mwtv->addItem(new CMenuForwarder(channel->name, true, NULL, this, string("SCT:")+string(cChannelId)+string(channel->name)));
+			mwtv->addItem(new CMenuForwarder(channel->name, true, NULL, this, std::string("SCT:") + cChannelId + channel->name));
 		}
 		if (subchannellist.size()>0)
 			mctv.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwtv));
@@ -833,7 +836,7 @@ int CTimerList::newTimer()
 		{
 			char cChannelId[11];
 			sprintf(cChannelId,"%010u",channel->channel_id);
-			mwradio->addItem(new CMenuForwarder(channel->name, true, NULL, this, string("SCR:")+string(cChannelId)+string(channel->name)));
+			mwradio->addItem(new CMenuForwarder(channel->name, true, NULL, this, std::string("SCR:") + cChannelId + channel->name));
 		}
 		if (subchannellist.size()>0)
 			mcradio.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwradio));

@@ -36,16 +36,15 @@
 #include <timerdclient/timerdclient.h>
 #include <zapit/client/zapitclient.h>
 
-#include "driver/framebuffer.h"
-#include "gui/widget/menue.h"
+#include <gui/widget/menue.h>
 
-using namespace std;
+#include <driver/framebuffer.h>
+
+#include <string>
 
 
 class CTimerList : public CMenuTarget
 {
-	public:
-
 	private:
 		CFrameBuffer		*frameBuffer;
 		unsigned int		selected;
@@ -85,7 +84,7 @@ class CTimerList : public CMenuTarget
 		~CTimerList();
 		void updateEvents(void);
 		int  show();
-		int  exec(CMenuTarget* parent, string actionKey);
+		int  exec(CMenuTarget* parent, std::string actionKey);
 		std::string convertTimerType2String(const CTimerd::CTimerEventTypes type); // UTF-8
 		std::string convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep); // UTF-8
 		std::string convertChannelId2String(const t_channel_id id, const CTimerd::CChannelMode mode); // UTF-8
