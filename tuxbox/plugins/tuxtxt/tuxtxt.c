@@ -5,6 +5,8 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.25: fixed colors (color 0 transparent)                               *
+ *    V1.2x: some mods by Homar                                               *
  *    V1.22: small zoom-fix                                                   *
  *    V1.21: cleanup                                                          *
  *    V1.20: show servicename instead of pid                                  *
@@ -39,7 +41,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.22 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.25 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -598,21 +600,21 @@ void ConfigMenu()
 	int val, byte, line, menuitem = 1;
 	int current_pid = 0;
 
-	char menu[] =	"àááááááááááááááááááááááááááááâèššššššššššššššššššššššššššššššŠ"
-					"ã    TuxTxt-Konfiguration    äéš““““““““““““““““““““““““““““šŠ"
-					"åææææææææææææææææææææææææææææçéššššššššššššššššššššššššššššššŠ"
-					"ã                            äéººººººººººººººººººººººººººººººŠ"
-					"ã      Videotextauswahl      äéº¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶ºŠ"
-					"ã                            äéººººººººººººººººººººººººººººººŠ"
-					"ãí                          îäéIGGGGGGGGGGGGGGGGGGGGGGGGGGGGIŠ"
-					"ã                            äéººººººººººººººººººººººººººººººŠ"
-					"ã      Bildschirmformat      äéº¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶ºŠ"
-					"ã                            äéººººººººººººººººººººººººººººººŠ"
-					"ã16:9 im Standard-Modus = ausäéº····························ºŠ"
-					"ã                            äéººººººººººººººººººººººººººººººŠ"
-					"ã16:9 im TextBild-Modus = einäéº····························ºŠ"
-					"åææææææææææææææææææææææææææææçéººººººººººººººººººººººººººººººŠ"
-					"ëìììììììììììììììììììììììììììììêŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠ";
+	char menu[] =	"àááááááááááááááááááááááááááááâè««««««««««««««««««««««««««««««›"
+					"ã    TuxTxt-Konfiguration    äé«¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤«›"
+					"åææææææææææææææææææææææææææææçé««««««««««««««««««««««««««««««›"
+					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+					"ã      Videotextauswahl      äéËÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+					"ãí                          îäéZXXXXXXXXXXXXXXXXXXXXXXXXXXXXZ›"
+					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+					"ã      Bildschirmformat      äéËÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+					"ã16:9 im Standard-Modus = ausäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+					"ã16:9 im TextBild-Modus = einäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+					"åææææææææææææææææææææææææææææçéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+					"ëìììììììììììììììììììììììììììììê›››››››››››››››››››››››››››››››";
 
 	//set current vtxt
 
@@ -986,17 +988,17 @@ void PageInput(int Number)
 		switch(inputcounter)
 		{
 			case 2:	PosX = StartX + 8*fontwidth;
-					RenderCharFB(Number | '0', white);
-					RenderCharFB('-', white);
-					RenderCharFB('-', white);
+					RenderCharFB(Number | '0', black<<4 | white);
+					RenderCharFB('-', black<<4 | white);
+					RenderCharFB('-', black<<4 | white);
 					break;
 
 			case 1:	PosX = StartX + 9*fontwidth;
-					RenderCharFB(Number | '0', white);
+					RenderCharFB(Number | '0', black<<4 | white);
 					break;
 
 			case 0:	PosX = StartX + 10*fontwidth;
-					RenderCharFB(Number | '0', white);
+					RenderCharFB(Number | '0', black<<4 | white);
 					break;
 		}
 
@@ -1944,7 +1946,7 @@ void RenderPage()
 void CreateLine25()
 {
 	int byte;
-	char line25[] = "   ?00<      ??0<      >??0      >?00             0000000000GGGGGGGGGG";
+	char line25[] = "   ?00<      ??0<      >??0      >?00   ((((((((((1111111111AAAAAAAAAAXXXXXXXXXX";
 
 	//get prev 100th
 
