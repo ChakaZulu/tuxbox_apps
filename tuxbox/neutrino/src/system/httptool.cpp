@@ -77,7 +77,7 @@ bool CHTTPTool::downloadFile(const std::string & URL, const char * const downloa
 		curl_easy_setopt(curl, CURLOPT_FILE, headerfile);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, show_progress);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, this);
-		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
