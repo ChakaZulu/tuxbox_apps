@@ -6,8 +6,6 @@
 eCheckbox::eCheckbox(eWidget *parent, int checked=0, int Size, eLabel* descr):
 	eButton(parent, descr)
 {
-	setFlags(RS_DIRECT);
-	setFont(gFont("Marlett Regular", Size));
 	setCheck(checked);
 //	connect(this, SIGNAL(selected()), SLOT(sel()));
 	CONNECT(selected, eCheckbox::sel);
@@ -26,8 +24,22 @@ void eCheckbox::sel()
 void eCheckbox::setCheck(int c)
 {
 	ischecked=c;
-	setText(ischecked?"\x19":"\x18");
+	gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked");
+	setPixmap(pm);
 }
+
+int eCheckbox::eventFilter(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::changedSize:
+		pixmap_position=ePoint(0, (size.height()-16)/2);
+		text_position=ePoint(20, 0);
+		break;
+	}
+	return 0;
+}
+
 
 static eWidget *create_eCheckbox(eWidget *parent)
 {

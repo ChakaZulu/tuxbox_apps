@@ -82,14 +82,10 @@ eZapNetworkSetup::eZapNetworkSetup():
 //	connect(ip, SIGNAL(selected(int*)), SLOT(fieldSelected(int*)));
 	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
-	l=new eLabel(this);
-	l->setText("Configure Network");
-	l->move(ePoint(130, 160));
-	l->resize(eSize(240, fd+4));
-
 	dosetup=new eCheckbox(this, sdosetup, fd, l);
+	dosetup->setText("Configure Network");
 	dosetup->move(ePoint(100, 163));
-	dosetup->resize(eSize(fd+4, fd+4));
+	dosetup->resize(eSize(fd+4+240, fd+4));
 
 	ok=new eButton(this);
 	ok->setText("[OK]");

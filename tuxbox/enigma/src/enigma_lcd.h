@@ -2,7 +2,6 @@
 #define __enigma_lcd_h
 
 #include "ewidget.h"
-#include "epixmap.h"
 #include "eprogress.h"
 #include "elabel.h"
 #include "multipage.h"
@@ -48,7 +47,7 @@ public:
 class eZapLCDScart: public eWidget
 {
 public:
-	ePixmap *Title, *Scart;
+	eLabel *Title, *Scart;
 	eZapLCDScart(eWidget *parent);
 };
 

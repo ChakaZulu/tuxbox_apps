@@ -11,6 +11,8 @@ eLabel::eLabel(eWidget *parent, int flags, int takefocus):
 	para=0;
 	align=eTextPara::dirLeft;
 //	setBackgroundColor(eSkin::getActive()->queryScheme("fgColor"));
+	pixmap_position=ePoint(0, 0);
+	text_position=ePoint(0, 0);
 }
 
 eLabel::~eLabel()
@@ -29,7 +31,7 @@ void eLabel::validate()
 {
 	if (!para)
 	{
-		para=new eTextPara(eRect(0, 0, size.width(), size.height()));
+		para=new eTextPara(eRect(text_position.x(), text_position.y(), size.width()-text_position.x(), size.height()-text_position.y()));
 		para->setFont(font);
 		para->renderString(text, flags);
 		para->realign(align);
@@ -50,12 +52,14 @@ void eLabel::setFlags(int flag)
 
 void eLabel::redrawWidget(gPainter *target, const eRect &area)
 {
-	if (isVisible())
+	if (text && text.length())
 	{
 		validate();
 		target->setFont(font);
 		target->renderPara(*para);
 	}
+	if (pixmap)
+		target->blit(*pixmap, pixmap_position);
 }
 
 int eLabel::eventFilter(const eWidgetEvent &event)

@@ -13,6 +13,7 @@ private: // slots:
 /*signals:
 	void checked(int);*/
 	Signal1<void, int> checked;
+	int eventFilter(const eWidgetEvent &event);
 public:
 	eCheckbox(eWidget *parent, int checked=0, int Size=25, eLabel* descr=0);
 	~eCheckbox();

@@ -11,6 +11,7 @@ class eLabel: public eWidget
 protected:
 	int flags;
 	eTextPara *para;
+	ePoint pixmap_position, text_position;
 	int align;
 	void invalidate();
 	void validate();

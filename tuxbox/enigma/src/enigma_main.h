@@ -3,7 +3,6 @@
 
 #include "elistbox.h"
 #include "ewindow.h"
-#include "epixmap.h"
 #include "si.h"
 #include "dvb.h"
 #include "enigma_lcd.h"
@@ -120,7 +119,7 @@ class eZapMain: public eWidget
 		*ButtonYellowEn, *ButtonYellowDis,
 		*ButtonBlueEn, *ButtonBlueDis;
 	
-	ePixmap *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff;
+	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff;
 	
 	eProgress *Progress, *VolumeBar;
 

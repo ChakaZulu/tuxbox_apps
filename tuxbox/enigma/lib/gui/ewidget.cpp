@@ -274,7 +274,6 @@ void eWidget::show()
 
 	checkFocus();
 	getTLW()->just_showing--;
-
 	if (!(oldstate&stateShow))
 		redraw();
 }
@@ -459,8 +458,6 @@ void eWidget::setForegroundColor(gColor color)
 
 void eWidget::setPixmap(gPixmap *pmap)
 {
-	if (pixmap)
-		delete pixmap;
 	pixmap=pmap;
 	event(eWidgetEvent(eWidgetEvent::changedPixmap));
 }

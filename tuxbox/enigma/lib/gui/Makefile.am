@@ -14,7 +14,7 @@ noinst_LTLIBRARIES = libgui.la
 
 libgui_la_SOURCES = \
 	ebutton.cpp echeckbox.cpp elabel.cpp elbwindow.cpp elistbox.cpp \
-	emessage.cpp enumber.cpp epixmap.cpp eprogress.cpp eskin.cpp \
+	emessage.cpp enumber.cpp eprogress.cpp eskin.cpp \
 	eskin_register.cpp ewidget.cpp ewindow.cpp multipage.cpp actions.cpp \
 	esize.cpp epoint.cpp erect.cpp
 	
