@@ -1466,6 +1466,7 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	oj = new CMenuOptionChooser("audiomenu.avs_control", &g_settings.audio_avs_Control, true, audioSetupNotifier);
 	oj->addOption(0, "audiomenu.ost");
 	oj->addOption(1, "audiomenu.avs");
+	oj->addOption(2, "audiomenu.lirc");
 	audioSettings.addItem( oj );
 
 }
@@ -3000,124 +3001,141 @@ bool CNeutrinoApp::onPaintNotify(std::string MenuName)
 
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 {
-	int dx = 40;
-	int dy = 40;
-	int x = g_settings.screen_EndX-dx;
-	int y = g_settings.screen_StartY;
+   if(g_settings.audio_avs_Control==2) //lirc
+   {
+      CIRSend irs("mute");
+      irs.Send();
+   }
+   else
+   {
+      int dx = 40;
+      int dy = 40;
+      int x = g_settings.screen_EndX-dx;
+      int y = g_settings.screen_StartY;
 
-	CLCD::getInstance()->setMuted(newValue);
-	if( newValue != current_muted )
-	{
-		current_muted = newValue;
+      CLCD::getInstance()->setMuted(newValue);
+      if( newValue != current_muted )
+      {
+         current_muted = newValue;
 
-		if( !isEvent )
-		{
-			if( current_muted )
-				g_Controld->Mute((g_settings.audio_avs_Control));
-			else
-				g_Controld->UnMute((g_settings.audio_avs_Control));
-		}
-	}
+         if( !isEvent )
+         {
+            if( current_muted )
+               g_Controld->Mute((g_settings.audio_avs_Control));
+            else
+               g_Controld->UnMute((g_settings.audio_avs_Control));
+         }
+      }
 
-	if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3) && ( mode != mode_pic))
-	{
-		// anzeigen NUR, wenn es vom Event kommt
-		if( current_muted )
-		{
-			frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
-			frameBuffer->paintIcon("mute.raw", x+5, y+5);
-		}
-		else
-			frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
-	}
+      if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3) && ( mode != mode_pic))
+      {
+         // anzeigen NUR, wenn es vom Event kommt
+         if( current_muted )
+         {
+            frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
+            frameBuffer->paintIcon("mute.raw", x+5, y+5);
+         }
+         else
+            frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+      }
+   }
 }
 
 void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 {
-	int dx = 256;
-	int dy = 40;
-	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
-	int y = g_settings.screen_EndY- 100;
-
-	unsigned char* pixbuf = NULL;
-
-	if(bDoPaint)
-	{
-		pixbuf= new unsigned char[ dx * dy ];
-		if(pixbuf!= NULL)
-			frameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
-		frameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
-	}
-
 	uint msg = key;
-	uint data;
-
-	unsigned long long timeoutEnd;
-
-	do
+	if(g_settings.audio_avs_Control==2) //lirc
 	{
-		if( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar/ 2 );
-
 		if(msg==CRCInput::RC_plus)
 		{
-			if (current_volume < 100)
-			{
-				if (current_volume < 100 - 5)
-					current_volume += 5;
-				else
-					current_volume = 100;
-			}
-			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
-			//additinal volume setting via lirc
 			CIRSend irs("volplus");
 			irs.Send();
 		}
 		else if(msg==CRCInput::RC_minus)
 		{
-			if (current_volume > 0)
-			{
-				if (current_volume > 5)
-					current_volume -= 5;
-				else
-					current_volume = 0;
-			}
-			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
-			//additinal volume setting via lirc
 			CIRSend irs("volminus");
 			irs.Send();
 		}
-		else
-		{
-			if( (msg!=CRCInput::RC_ok) || (msg!=CRCInput::RC_home) )
-			{
-				if( handleMsg( msg, data ) & messages_return::unhandled )
-				{
-					g_RCInput->postMsg( msg, data );
+	}
+	else
+	{
+		int dx = 256;
+		int dy = 40;
+		int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
+		int y = g_settings.screen_EndY- 100;
 
-					msg= CRCInput::RC_timeout;
-				}
-			}
-		}
+		unsigned char* pixbuf = NULL;
 
 		if(bDoPaint)
-		{
-			int vol = current_volume<<1;
-			frameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
-			frameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
+	  	{
+			pixbuf= new unsigned char[ dx * dy ];
+			if(pixbuf!= NULL)
+				frameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
+			frameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 		}
+
+		uint data;
+
+		unsigned long long timeoutEnd;
+
+		do
+	  	{
+			if( msg <= CRCInput::RC_MaxRC )
+				timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar/ 2 );
+
+			if(msg==CRCInput::RC_plus)
+			{
+				if (current_volume < 100)
+				{
+					if (current_volume < 100 - 5)
+						current_volume += 5;
+					else
+						current_volume = 100;
+				}
+				g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
+			}
+			else if(msg==CRCInput::RC_minus)
+		  	{
+				if (current_volume > 0)
+				{
+					if (current_volume > 5)
+						current_volume -= 5;
+					else
+						current_volume = 0;
+				}
+				g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
+			}
+			else
+		  	{
+				if( (msg!=CRCInput::RC_ok) || (msg!=CRCInput::RC_home) )
+				{
+					if( handleMsg( msg, data ) & messages_return::unhandled )
+					{
+						g_RCInput->postMsg( msg, data );
+						msg= CRCInput::RC_timeout;
+					}
+				}
+			}
+
+			if(bDoPaint)
+		  	{
+				int vol = current_volume<<1;
+				frameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
+				frameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
+			}
 		
-		CLCD::getInstance()->showVolume(current_volume);
-		if( msg != CRCInput::RC_timeout )
-		{
-			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+			CLCD::getInstance()->showVolume(current_volume);
+			if( msg != CRCInput::RC_timeout )
+			{
+				g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+			}
+
 		}
+		while( msg != CRCInput::RC_timeout );
 
+		if( (bDoPaint) && (pixbuf!= NULL) )
+			frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 	}
-	while( msg != CRCInput::RC_timeout );
-
-	if( (bDoPaint) && (pixbuf!= NULL) )
-		frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 }
 
 void CNeutrinoApp::tvMode( bool rezap )
@@ -3542,7 +3560,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.477 2003/07/16 08:58:13 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.478 2003/07/25 18:21:48 zwen Exp $\n\n");
 
 	tzset();
 	initGlobals();
