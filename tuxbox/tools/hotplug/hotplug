@@ -1,6 +1,5 @@
 #!/bin/sh
 
-#redirect to console for error messages
 exec &1>/dev/console
 FIRMWARE_DIR="/var/tuxbox/ucodes"
 SYSFS="/sys"
@@ -10,7 +9,7 @@ if [ $FIRMWARE != ""  ]; then
     case $ACTION in
 	add)
 #	    echo "firmware add"
-	    if [ ! e $SYSFS/$DEVPATH/loading ]; then
+	    if [ ! -e $SYSFS/$DEVPATH/loading ]; then
 		sleep 1
 	    fi
 	    if [ -f $FIRMWARE_DIR/$FIRMWARE ]; then
@@ -28,5 +27,7 @@ else
 #    echo cmd line: $@
 #    echo env :
 #    export
+if [ -e /dev/.udev ]; then
     /sbin/udev $@
+fi
 fi
