@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.31 2001/07/23 09:00:10 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.32 2001/07/23 20:59:48 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.32  2001/07/23 20:59:48  fnbrd
+//  Fehler im Time-Thread behoben.
+//
 //  Revision 1.31  2001/07/23 09:00:10  fnbrd
 //  Fehler behoben.
 //
@@ -437,7 +440,7 @@ int j;
 
 class DMX {
   public:
-    DMX(unsigned char p, unsigned char f1, unsigned char m1, unsigned char f2, unsigned char m2, unsigned short bufferSizeInKB) {
+    DMX(unsigned char p, unsigned char f1, unsigned char m1, unsigned char f2, unsigned char m2, unsigned short bufferSizeInKB, int nCRC=0) {
       fd=0;
       isScheduled=false;
       lastChanged=0;
@@ -447,6 +450,7 @@ class DMX {
       filter2=f2;
       mask2=m2;
       dmxBufferSizeInKB=bufferSizeInKB;
+      noCRC=nCRC;
       pthread_mutex_init(&dmxlock, NULL); // default = fast mutex
     }
     ~DMX() {
@@ -491,6 +495,7 @@ class DMX {
     pthread_mutex_t dmxlock;
     unsigned char pID, filter1, mask1, filter2, mask2;
     unsigned short dmxBufferSizeInKB;
+    int noCRC; // = 1 -> der 2. Filter hat keine CRC
 };
 
 int DMX::start(void)
@@ -564,20 +569,22 @@ int DMX::change(void)
     return 2;
   struct dmxSctFilterParams flt;
   memset (&flt, 0, sizeof (struct dmxSctFilterParams));
-//  memset (&flt.filter, 0, sizeof (struct dmxFilter));
   if(isScheduled) {
     flt.pid              = pID;
     flt.filter.filter[0] = filter1; // current/next
     flt.filter.mask[0]   = mask1; // -> 4e und 4f
+    flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
     isScheduled=false;
   }
   else {
     flt.pid              = pID;
     flt.filter.filter[0] = filter2; // schedule
     flt.filter.mask[0]   = mask2; // -> 5x
+    flt.flags            = DMX_IMMEDIATE_START;
+    if(!noCRC)
+      flt.flags|=DMX_CHECK_CRC;
     isScheduled=true;
   }
-  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
   if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
     closefd();
@@ -1245,7 +1252,7 @@ static void *timeThread(void *)
 {
 const unsigned timeoutInSeconds=31;
 char *buf;
-DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256);
+DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
 
 //  pthread_detach(pthread_self());
   dprintf("time-thread started.\n");
@@ -1517,7 +1524,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.31 2001/07/23 09:00:10 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.32 2001/07/23 20:59:48 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
