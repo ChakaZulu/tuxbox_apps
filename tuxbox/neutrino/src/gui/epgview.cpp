@@ -241,7 +241,7 @@ void CEpgData::GetEPGData( string channelName )
 	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	memset(&servaddr,0,sizeof(servaddr));
 	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(1600);
+	servaddr.sin_port=htons(sectionsd::portNumber);
 	inet_pton(AF_INET, rip, &servaddr.sin_addr);
 
 	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
@@ -252,9 +252,9 @@ void CEpgData::GetEPGData( string channelName )
 
 	#ifdef EPG_SECTIONSD
 		//use new sectionsd-daemon
-		msgSectionsdRequestHeader req;
+		sectionsd::msgRequestHeader req;
 		req.version = 2;
-		req.command = actualEPGchannelName;
+		req.command = sectionsd::actualEPGchannelName;
 		req.dataLength = channelName.length()+1;
 		write(sock_fd,&req,sizeof(req));
 
@@ -272,9 +272,9 @@ void CEpgData::GetEPGData( string channelName )
 		printf("query epg for >%s<\n", chanName);
 		write(sock_fd, chanName, strlen(chanName)+1);
 
-		msgSectionsdResponseHeader resp;
+		sectionsd::msgResponseHeader resp;
 		memset(&resp, 0, sizeof(resp));
-		read(sock_fd, &resp, sizeof(msgSectionsdResponseHeader));
+		read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
 
 		int nBufSize = resp.dataLength;
 		if(nBufSize>0)
