@@ -117,7 +117,7 @@ int fh_gif_load(const char *name,unsigned char *buffer,int x,int y)
 	DGifCloseFile(gft);
 	return(FH_ERROR_OK);
 }
-int fh_gif_getsize(const char *name,int *x,int *y, int wanted_width)
+int fh_gif_getsize(const char *name,int *x,int *y, int wanted_width, int wanted_height)
 {
 	int px,py,i,fby,fbx,fbl,ibxs;
 	int eheight,j;

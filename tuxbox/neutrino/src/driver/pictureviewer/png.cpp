@@ -82,7 +82,7 @@ int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 	fclose(fh);
 	return(FH_ERROR_OK);
 }
-int fh_png_getsize(const char *name,int *x,int *y, int wanted_width)
+int fh_png_getsize(const char *name,int *x,int *y, int wanted_width, int wanted_height)
 {
 	png_structp png_ptr;
 	png_infop info_ptr;
