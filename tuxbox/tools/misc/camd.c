@@ -153,10 +153,10 @@ int main(int argc, char **argv)
   int initok=0, caid=0x1722;
   int SID=9, ONID=0x85, ECMPID=0x150A, EMMPID=0x1500, VPID=0x1FF, APID=0x200;
   
-  camfd=open("/dev/cam", O_RDWR);
+  camfd=open("/dev/dbox/cam0", O_RDWR);
   if (camfd<0)
   {
-    perror("/dev/cam");
+    perror("/dev/dbox/cam0");
     return 1;
   }
   
