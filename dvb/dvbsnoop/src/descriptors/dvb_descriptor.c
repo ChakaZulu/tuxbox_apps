@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.36 2004/08/22 18:36:45 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.37 2004/08/24 21:30:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.36 2004/08/22 18:36:45 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.37  2004/08/24 21:30:22  rasc
+more Metadata
+
 Revision 1.36  2004/08/22 18:36:45  rasc
  - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert)
  - New: MetaData Section  (Basic) (H.222.0 AMD1)
@@ -3928,7 +3931,7 @@ void descriptorDVB_TimesliceFecIdentifier (u_char *b)
   mbd = outBit_Sx (4,"max_burst_duration: ",	b,24,8);
   if (tslice_fec_id == 0) {
   	if (tslice)  out_nl  (4," [= %ld msec]",(mbd+1)*20);
-  	else         out_nl  (4," [reserved]");
+  	else         out_nl  (4," [= reserved]");
   } else {
      out_nl  (4," [not defined]");
   }
@@ -3940,7 +3943,7 @@ void descriptorDVB_TimesliceFecIdentifier (u_char *b)
 		 	(char *(*)(u_long)) dvbstrMPE_FEC_max_average_rate );
   } else {
 	  outBit_Sx      (4,"max_average_rate: ",	b,32, 4);
-  	  out_nl         (4," [not defined]");
+  	  out_nl         (4," [= not defined]");
   }
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: mdt.c,v 1.1 2004/08/22 18:36:45 rasc Exp $
+$Id: mdt.c,v 1.2 2004/08/24 21:30:23 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: mdt.c,v 1.1 2004/08/22 18:36:45 rasc Exp $
 
 
 $Log: mdt.c,v $
+Revision 1.2  2004/08/24 21:30:23  rasc
+more Metadata
+
 Revision 1.1  2004/08/22 18:36:45  rasc
  - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert)
  - New: MetaData Section  (Basic) (H.222.0 AMD1)
@@ -42,6 +45,7 @@ void decode_MDT (u_char *b, int len)
   int   table_id;
   int   m_len;
   int   sfi;	
+  int   x;
 
 
   out_nl (3,"MDT-decoding....");
@@ -56,8 +60,19 @@ void decode_MDT (u_char *b, int len)
 
   outBit_Sx_NL (3,"section_syntax_indicator: ",		b,  8, 1);
   outBit_Sx_NL (3,"private_indicator: ",		b,  9, 1);
-  outBit_Sx_NL (3,"random_access_indicator: ",		b, 10, 1);	// $$$ TODO
-  outBit_Sx_NL (3,"decoder_config_flag: ",		b, 11, 1);	// $$$ TODO
+  x = outBit_Sx(3,"random_access_indicator: ",		b, 10, 1);
+	if (x == 1) {
+		out (3," [= access point to the metadata]");
+	}
+	out_NL(3);
+
+
+  x = outBit_Sx (3,"decoder_config_flag: ",		b, 11, 1);
+	if (x == 1) {
+		out (3," [= decoder configuration information is present in the metadata Access Unit]");
+	}
+	out_NL(3);
+
 
 
   m_len = outBit_Sx_NL (5,"metadata_section_length: ",	b, 12, 12);
@@ -65,7 +80,8 @@ void decode_MDT (u_char *b, int len)
   outBit_Sx_NL (3,"metadata_service_id: ",		b, 24,  8);
   outBit_Sx_NL (6,"reserved: ",				b, 32,  8);
 
-  sfi = outBit_Sx_NL (3,"section_fragment_indication: ",b, 40,  2);	// $$$ TODO
+  sfi = outBit_S2x_NL (3,"section_fragment_indication: ",b, 40,  2,
+                 (char *(*)(u_long)) dvbstrMPEG_metadata_section_frag_indication );
 
   outBit_Sx_NL (3,"version_number: ",			b, 42,  5);
   outBit_S2x_NL(3,"current_next_indicator: ",		b, 47,  1,

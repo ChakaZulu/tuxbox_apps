@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.27 2004/08/13 11:05:29 rasc Exp $ 
+$Id: dvb_str.h,v 1.28 2004/08/24 21:30:24 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.27 2004/08/13 11:05:29 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.28  2004/08/24 21:30:24  rasc
+more Metadata
+
 Revision 1.27  2004/08/13 11:05:29  rasc
 Metadata_STD_descriptor
 
@@ -229,6 +232,8 @@ char *dvbstrTVA_content_id_type (u_int i);
 
 char *dvbstrMPEG_metadata_application_format (u_int i);
 char *dvbstrMPEG_Content_time_base_indicator (u_int i);
+char *dvbstrMPEG_metadata_section_frag_indication (u_int i);
+
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.58 2004/08/13 11:05:29 rasc Exp $
+$Id: dvb_str.c,v 1.59 2004/08/24 21:30:24 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.58 2004/08/13 11:05:29 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.59  2004/08/24 21:30:24  rasc
+more Metadata
+
 Revision 1.58  2004/08/13 11:05:29  rasc
 Metadata_STD_descriptor
 
@@ -811,6 +814,16 @@ char *dvbstrStream_TYPE_SHORT (u_int flag)
      {  0x0D, 0x0D,  "S" },
      {  0x0E, 0x0E,  "P" },
      {  0x0F, 0xFF,  "" },
+     {  0x10, 0x10,  "" },
+     {  0x11, 0x11,  "" },
+     {  0x12, 0x12,  "P" },
+     {  0x13, 0x13,  "S" },
+     {  0x14, 0x14,  "" },	// $$$ TODO  sect o PES
+     {  0x15, 0x15,  "P" },
+     {  0x16, 0x16,  "S" },
+
+     {  0x17, 0x7F,  "" },	// ??? $$$ TODO
+
      {  0,0, NULL }
   };
 
@@ -3270,6 +3283,30 @@ char *dvbstrMPEG_Content_time_base_indicator (u_int i)
 
   return findTableID (Table, i);
 }
+
+
+
+
+/*
+ -- metadata section_fragmentation_indication
+ -- H.222.0 AMD1
+*/
+
+char *dvbstrMPEG_metadata_section_frag_indication (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "next metadata section with data from one metadata Access Unit" },
+     {  0x01, 0x01,  "last metadata section with data from one metadata Access Unit" },
+     {  0x02, 0x02,  "first metadata section with data from one metadata Access Unit" },
+     {  0x03, 0x03,  "single metadata section carrying a complete metadata Access Unit" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
 
 
 

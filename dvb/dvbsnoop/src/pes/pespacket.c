@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.24 2004/04/15 03:38:51 rasc Exp $
+$Id: pespacket.c,v 1.25 2004/08/24 21:30:22 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pespacket.c,v 1.24 2004/04/15 03:38:51 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.25  2004/08/24 21:30:22  rasc
+more Metadata
+
 Revision 1.24  2004/04/15 03:38:51  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -198,6 +201,8 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 		print_databytes (3,"PES_packet_data_bytes:", b, p.PES_packet_length);
 		break;
 
+	// case 0xFC:		// metadata stream	(see: H.222.0 AMD1)
+	// $$$ TODO 
 
 	// case 0xBD:		// Data Stream, privat_stream_1 (EN301192-1.3.1 S.11)
 	// case 0xC0-0xDF	// ISO/IEC 13818-3 or 11172-3 or 13818-7 or 14496-3 audio stream 
@@ -210,7 +215,9 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 	// case 0xF9		// ancillary_stream
 	// case 0xFA		// ISO/IEC14496-1_SL-packetized_stream
 	// case 0xFB		// ISO/IEC14496-1_FlexMux_stream
-	// case 0xFC-0xFE	// reserved data stream
+	// case 0xFD		// extended_stream_id
+	// case 0xFE		// reserved data stream
+	
 	default:
  		if ((p.PES_packet_length==0) && ((p.stream_id & 0xF0)==0xE0)) {
 
@@ -253,7 +260,7 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
 // Annotations: 
 //
-// $$$ TODO  0x000001B9    ISO 13818-1/H.222.0 2.5.3.1  End Progam Stream ???
+// $$$ TODO  0x000001B9    ISO 13818-1/H.222.0 2.5.3.1  End Program Stream ???
 
 
 
