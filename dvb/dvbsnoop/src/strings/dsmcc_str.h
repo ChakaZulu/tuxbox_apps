@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.16 2004/01/11 21:01:33 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.17 2004/01/12 22:49:53 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_str.h,v 1.16 2004/01/11 21:01:33 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.17  2004/01/12 22:49:53  rasc
+get rid of stream descriptor module
+
 Revision 1.16  2004/01/11 21:01:33  rasc
 PES stream directory, PES restructured
 
@@ -80,7 +83,6 @@ some updates to dvbsnoop...
 #define __DSMCC_H 1
 
 
-char *dsmccStrDSMCC_STREAM_DescriptorTAG (u_int i);
 char *dsmccStrDSMCC_CAROUSEL_DescriptorTAG (u_int i);
 char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i);
 

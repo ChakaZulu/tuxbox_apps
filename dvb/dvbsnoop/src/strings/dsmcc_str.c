@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.19 2004/01/11 21:01:33 rasc Exp $
+$Id: dsmcc_str.c,v 1.20 2004/01/12 22:49:53 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.19 2004/01/11 21:01:33 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.20  2004/01/12 22:49:53  rasc
+get rid of stream descriptor module
+
 Revision 1.19  2004/01/11 21:01:33  rasc
 PES stream directory, PES restructured
 
@@ -122,39 +125,13 @@ static char *findTableID (STR_TABLE *t, u_int id)
 /* -----------------------------------------  */
 
 
-/*
-  -- DSM-CC STREAM Descriptors
-  -- Private Tag Space  (PES, Section)
-  -- see ISO 13818-6
-  // $$$ TODO   yek!!!! this number are old due to an old
-  // $$$ TODO   ISO 13818-6 standard.
-  // $$$ TODO   ATSC ref shows this in MPEG descriptor range!!!!
-  // $$$ TODO   to be checked and may be I have to get rid of these here...
- */
-
-char *dsmccStrDSMCC_STREAM_DescriptorTAG (u_int i)
-
-{
-  STR_TABLE  Table[] = {
-     {  0x00, 0x00,  "ISO/IEC 13818-6 reserved" },
-     {  0x01, 0x01,  "NPT_Reference_descriptor" },
-     {  0x02, 0x02,  "NPT_Endpoint_descriptor" },
-     {  0x03, 0x03,  "Stream_Mode_descriptor" },
-     {  0x04, 0x04,  "Stream_Event_descriptor" },
-     {  0x05, 0xFF,  "ISO/IEC 13818-6 reserved" },
-     {  0,0, NULL }
-  };
-
-  return findTableID (Table, i);
-}
-
 
 
 /*
   -- DSM-CC CAROUSEL Descriptors
   -- Private Tag Space  (DII, DSI)
   -- see  EN 301 192 
-  -- ATSC ref. shows this in DVB-descriptor lower ranges
+  -- ... shows  in DVB-descriptor lower ranges
  */
 
 char *dsmccStrDSMCC_CAROUSEL_DescriptorTAG (u_int i)

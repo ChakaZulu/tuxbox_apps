@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.37 2004/01/11 22:49:41 rasc Exp $
+$Id: dvb_str.c,v 1.38 2004/01/12 22:49:53 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.37 2004/01/11 22:49:41 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.38  2004/01/12 22:49:53  rasc
+get rid of stream descriptor module
+
 Revision 1.37  2004/01/11 22:49:41  rasc
 PES restructured
 
@@ -288,13 +291,11 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x14, 0x14,  "association_tag_descriptor" },
      {  0x15, 0x15,  "deferred_association_tag_descriptor" },
      {  0x16, 0x16,  "ISO/IEC13818-6 Reserved" },
-     /* $$$ TODO... vvvvvvv */
      	  /* DSM-CC stream descriptors */
      {  0x17, 0x17,  "NPT_reference_descriptor" },
      {  0x18, 0x18,  "NPT_endpoint_descriptor" },
      {  0x19, 0x19,  "stream_mode_descriptor" },
      {  0x1A, 0x1A,  "stream_event_descriptor" },
-     /* $$$ TODO... ^^^^^^^^ */
           /* MPEG-4 descriptors */
      {  0x1B, 0x1B,  "MPEG4_video_descriptor" },
      {  0x1C, 0x1C,  "MPEG4_audio_descriptor" },
