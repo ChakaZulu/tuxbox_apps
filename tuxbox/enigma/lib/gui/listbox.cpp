@@ -219,20 +219,10 @@ int eListBoxBase::eventHandler(const eWidgetEvent &event)
 				moveSelection(dirPageDown);
 			else if ( !childs.empty() && current->eventHandler(event) )
 				return 1;
-			else if ((event.action == &i_cursorActions->up) && !(flags & flagNoUpDownMovement) )
-			{
-				ePtrList<eListBoxEntry>::iterator bla(current);
-				++bla;
-				if ( bla == childs.end() )
-					return eWidget::eventHandler(event);
+			else if ((event.action == &i_cursorActions->up) && !(flags & flagNoUpDownMovement))
 				moveSelection(dirUp);
-			}
 			else if ((event.action == &i_cursorActions->down) && !(flags & flagNoUpDownMovement))
-			{
-				if ( current == childs.begin() )
-					return eWidget::eventHandler(event);
 				moveSelection(dirDown);
-			}
 			else if (event.action == &i_cursorActions->ok)
 			{
 				if ( current == childs.end() )
