@@ -6,7 +6,7 @@
 		<frame src="/blank" frameborder=1 marginwidth=0 marginheight=0 noresize>
 		<frameset rows="138, *">
 			<frame name="header" src="/header" scrolling=no frameborder=1 marginwidth=0 marginheight=0 noresize>
-			<frame name="body" src="/body" scrolling=no frameborder=1 marginwidth=0 marginheight=0 noresize>
+			<frame name="body" src="/body" scrolling=yes frameborder=1 marginwidth=0 marginheight=0 noresize>
 		</frameset>
 		<frame src="/blank" frameborder=1 marginwidth=0 marginheight=0 noresize>
 		<noframes>
