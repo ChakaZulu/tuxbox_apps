@@ -93,8 +93,20 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 	{
 		parent->hide();
 	}
-
+	
+	// set radio mode background
+	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
+	frameBuffer->loadBackground("radiomode.raw");
+	frameBuffer->useBackground(true);
+	frameBuffer->paintBackground();
+ 
 	int ret = show();
+	t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
+	g_Zapit->zapTo_serviceID_NOWAIT(channel_id);
+	// Restore normal background
+	if(frameBuffer->getActive())
+		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
+	frameBuffer->useBackground(false);
 
 	if( ret > -1)
 	{
@@ -123,23 +135,34 @@ int CMP3PlayerGui::show()
 
 	bool loop=true;
 	bool update=true;
+	CMP3Player::State last_state=CMP3Player::STOP;
 	while(loop)
 	{
+		if(CMP3Player::getInstance()->state != last_state)
+		{
+			last_state=CMP3Player::getInstance()->state;
+			update=true;
+		}
+		
 		if(update)
 		{
 			hide();
 			update=false;
 			paint();
 		}
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+//		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		g_RCInput->getMsg( &msg, &data, 30 ); // 3 sec timeout to update play/stop state display
 
 		if( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
-		if( ( msg == CRCInput::RC_timeout ) ||
-			 ( msg == CRCInput::RC_home) )
-		{ //Exit after timeout or cancel key
+		if( msg == CRCInput::RC_home)
+		{ //Exit after cancel key
 			loop=false;
+		}
+		else if ( msg == CRCInput::RC_timeout )
+		{
+			// do nothing
 		}
 		else if ( msg == CRCInput::RC_left )
 		{
@@ -200,7 +223,11 @@ int CMP3PlayerGui::show()
 			// OK button
 			if(CMP3Player::getInstance()->state == CMP3Player::STOP)
 				CMP3Player::getInstance()->play(playlist[selected].Filename.c_str());
-			update=true;
+			else
+			{
+				CMP3Player::getInstance()->stop();
+				CMP3Player::getInstance()->play(playlist[selected].Filename.c_str());
+			}
 		}
 		else if(msg==CRCInput::RC_red && playlist.size() > 0)
 		{
@@ -244,7 +271,6 @@ int CMP3PlayerGui::show()
 		{
 			if(CMP3Player::getInstance()->state == CMP3Player::PLAY)
 				CMP3Player::getInstance()->stop();
-			update=true;
 		}
 		else if((msg==CRCInput::RC_blue)||
 				  (msg==CRCInput::RC_setup) ||
@@ -268,6 +294,9 @@ int CMP3PlayerGui::show()
 		}
 	}
 	hide();
+	
+	if(CMP3Player::getInstance()->state == CMP3Player::PLAY)
+		CMP3Player::getInstance()->stop();
 
 	return(res);
 }
@@ -337,11 +366,8 @@ void CMP3PlayerGui::paintFoot()
 		frameBuffer->paintIcon("rot.raw", x+ width - 4* ButtonWidth - 20, y+height+4);
 		g_Fonts->infobar_small->RenderString(x + width - 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("mp3player.delete").c_str(), COL_INFOBAR);
 		
-		if(CMP3Player::getInstance()->state == CMP3Player::STOP)
-		{
-			frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
-			g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("mp3player.play").c_str(), COL_INFOBAR);
-		}
+		frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
+		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("mp3player.play").c_str(), COL_INFOBAR);
 	}
 
 	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
