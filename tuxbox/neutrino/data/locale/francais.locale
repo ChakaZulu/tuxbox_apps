@@ -199,7 +199,7 @@ bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bouquets
 cablesetup.provider Fournisseur de service
 channellist.head tout les services
-channellist.nonefound Aucune chaines trouvée!\néxecuter un scan\n(DREAM-key -> service)
+channellist.nonefound Aucune chaines trouvée!\néxecuter un scan\n(DBOX-key -> service)
 channellist.since depuis %02d:%02d
 colorchooser.alpha alpha
 colorchooser.blue bleu
@@ -590,7 +590,7 @@ ping.socket est injoignable (erreur socket)
 ping.unreachable est injoignable 
 pinprotection.head Entrer code PIN
 pinprotection.wrongcode Le code PIN est faux! Essayer encore.
-rclock.lockmsg votre télécommande Récepteur sera bloquée.\n pour débloquer, Appuyer <ROUGE> \n et <DREAM> sur la Télécommande.
+rclock.lockmsg votre télécommande Récepteur sera bloquée.\n pour débloquer, Appuyer <ROUGE> \n et <DBOX> sur la Télécommande.
 rclock.menueadd Bloquer Télécommande (RC) 
 rclock.title Bloquer Télécommande (RC)
 rclock.unlockmsg Télécommande réactivée.
