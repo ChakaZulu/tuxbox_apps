@@ -93,16 +93,10 @@ class CPlugins
 		PluginParam * makeParam(const char * const id, const char * const value, PluginParam * const next);
 		PluginParam * makeParam(const char * const id, const int          value, PluginParam * const next);
 
-		int getNumberOfPlugins() { return plugin_list.size(); }
-		const char * getName(int number) { return plugin_list[number].name.c_str(); }
-		std::string getDescription(int number) { return plugin_list[number].description; }
-		int getVTXT(int number) { return plugin_list[number].vtxtpid; }
-		int getShowPig(int number) { return plugin_list[number].showpig; }
-		int getPosX(int number) { return plugin_list[number].posx; }
-		int getPosY(int number) { return plugin_list[number].posy; }
-		int getSizeX(int number) { return plugin_list[number].sizex; }
-		int getSizeY(int number) { return plugin_list[number].sizey; }
-		int getType(int number) { return plugin_list[number].type; }
+		inline       int           getNumberOfPlugins(void            ) const { return plugin_list.size()              ; }
+		inline const char *        getName           (const int number) const { return plugin_list[number].name.c_str(); }
+		inline const std::string & getDescription    (const int number) const { return plugin_list[number].description ; }
+		inline       int           getType           (const int number) const { return plugin_list[number].type        ; }
 
 		void startPlugin(int number);
 
