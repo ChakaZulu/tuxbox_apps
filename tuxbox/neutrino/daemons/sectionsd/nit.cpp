@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.8 2001/05/14 13:44:23 fnbrd Exp $
+// $Id: nit.cpp,v 1.1 2001/05/14 13:45:32 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -21,27 +21,11 @@
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
-// $Log: epg.cpp,v $
-// Revision 1.8  2001/05/14 13:44:23  fnbrd
+// $Log: nit.cpp,v $
+// Revision 1.1  2001/05/14 13:45:32  fnbrd
 // Erweitert.
 //
-// Revision 1.7  2001/05/13 12:42:00  fnbrd
-// Unnoetiges Zeug entfernt.
 //
-// Revision 1.6  2001/05/13 12:37:11  fnbrd
-// Noch etwas verbessert.
-//
-// Revision 1.5  2001/05/13 00:39:30  fnbrd
-// Etwas aufgeraeumt.
-//
-// Revision 1.4  2001/05/13 00:08:54  fnbrd
-// Kleine Debugausgabe dazu.
-//
-// Revision 1.2  2001/05/12 23:55:04  fnbrd
-// Ueberarbeitet, geht aber noch nicht ganz.
-//
-
-//#define READ_PRESENT_INFOS
 
 #include <stdio.h>
 #include <time.h>
@@ -51,19 +35,15 @@
 int main(int argc, char **argv)
 {
   time_t starttime, endtime;
-#ifdef READ_PRESENT_INFOS
-  SIsectionsEIT epgset;
-#else
-  SIsectionsEITschedule epgset;
-#endif
+  SIsectionsNIT nitset;
 
   starttime=time(NULL);
-  epgset.readSections();
+  nitset.readSections();
   endtime=time(NULL);
-  printf("Sections read: %d\n", epgset.size());
+  printf("Sections read: %d\n", nitset.size());
   printf("Time needed: %ds\n", (int)difftime(endtime, starttime));
-//  for_each(epgset.begin(), epgset.end(), printSmallSectionHeader());
-//  for_each(epgset.begin(), epgset.end(), printSIsection());
-//  for_each(epgset.begin(), epgset.end(), printSIsectionEIT());
+//  for_each(nitset.begin(), nitset.end(), printSmallSectionHeader());
+//  for_each(nitset.begin(), nitset.end(), printSIsection());
+  for_each(nitset.begin(), nitset.end(), printSIsectionNIT());
   return 0;
 }
