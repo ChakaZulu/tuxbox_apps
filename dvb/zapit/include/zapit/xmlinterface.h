@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.13 2002/12/22 21:25:12 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.14 2002/12/22 22:56:57 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -36,6 +36,8 @@ inline void       xmlFreeDoc          (xmlDocPtr  doc)           { delete doc; }
 inline char*      xmlGetAttribute     (xmlNodePtr cur, char * s) { return cur->GetAttributeValue(s); };
 inline char*      xmlGetName          (xmlNodePtr cur)           { return cur->GetType();  };
 
+
+xmlNodePtr xmlGetNextOccurence        (xmlNodePtr cur, const char * s);
 
 std::string Unicode_Character_to_UTF8(const int character);
 

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.90 2002/12/22 21:25:12 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.91 2002/12/22 22:56:57 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -321,7 +321,7 @@ void *start_scanthread(void *param)
 	std::map <uint8_t, std::string>::iterator spI;
 
 	/* read all sat or cable sections */
-	while ((search) && (!strcmp(xmlGetName(search), type)))
+	while ((search = xmlGetNextOccurence(search, type)) != NULL)
 	{
 		/* get name of current satellite oder cable provider */
 		strcpy(providerName, xmlGetAttribute(search, "name"));
@@ -358,7 +358,7 @@ void *start_scanthread(void *param)
 		transponder = search->xmlChildrenNode;
 
 		/* read all transponders */
-		while ((transponder) && (!strcmp(xmlGetName(transponder), "transponder")))
+		while ((transponder = xmlGetNextOccurence(transponder, "transponder")) != NULL)
 		{
 			uint8_t tmp;
 			dvb_frontend_parameters feparams;
