@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.10 2004/04/08 07:38:19 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.11 2004/04/08 08:00:55 thegoodguy Exp $
  *
  * Basic Server Class Class - The Tuxbox Project
  *
@@ -66,7 +66,7 @@ char * CBasicServer::receive_string(int fd)
 	if (receive_data(fd, &length, sizeof(length)))
 	{
 		char * data = (char *)malloc(((size_t)length) + 1);
-		if (receive_data(fd, &data, length))
+		if (receive_data(fd, data, length))
 		{
 			data[length] = 0; /* add terminating 0 */
 			return data;
