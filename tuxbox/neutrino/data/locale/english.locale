@@ -109,7 +109,6 @@ recordingmenu.server_wakeup recording server WOL
 recordingmenu.server_mac MAC address
 recordingmenu.setupnow activate changes
 recordingmenu.no_scart do not switch to scart mode
-
 ping.ok is reachable (ping)
 ping.unreachable is unreachable
 ping.protocol is unreachable (host or protocol error)
@@ -148,6 +147,7 @@ timing.menu Menu
 timing.chanlist Channellist
 timing.epg Epg
 timing.infobar Infobar
+timing.filebrowser Filebrowser
 timing.hint_1 Time in sec. After this time the
 timing.hint_2 infobar will be faded out.
 
@@ -624,6 +624,7 @@ fontsize.infobar_info info
 fontsize.infobar_small small
 fontsize.gamelist_itemLarge large
 fontsize.gamelist_itemSmall small
+
 fontmenu.head Fontsize settings
 fontmenu.channellist Channellist
 fontmenu.eventlist Eventlist

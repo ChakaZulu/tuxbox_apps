@@ -147,6 +147,7 @@ timing.menu izbor
 timing.chanlist lista kanala
 timing.epg epg
 timing.infobar infromativna traka
+timing.filebrowser unset
 timing.hint_1 vrijeme u sekundama u kojemu
 timing.hint_2 ce biti pokazana informativna traka
 
@@ -597,6 +598,9 @@ timersettings.separator namjescenje vremenskog brojaca
 timersettings.record_safety_time ispraviti snimanje
 timersettings.record_safety_time.hint_1 vrijeme u minutama koje se odbija od
 timersettings.record_safety_time.hint_2  vremeskog brojaca (00=ugaseno)
+timersettings.record_safety_time_after unset
+timersettings.record_safety_time_after.hint_1 unset
+timersettings.record_safety_time_after.hint_2 unset
 
 fontsize.menu tekst u izboru
 fontsize.menu_title naslov izbora
@@ -618,12 +622,15 @@ fontsize.infobar_number infromativna traka za broj
 fontsize.infobar_channame infromativna traka za kanal
 fontsize.infobar_info infromativna traka za informaciju
 fontsize.infobar_small mala infromativna traka
+fontsize.gamelist_itemLarge unset
+fontsize.gamelist_itemSmall unset
 
 fontmenu.head namjescenje velicine slova
 fontmenu.channellist lista kanala
 fontmenu.eventlist lista dogadjaja
 fontmenu.epg epg
 fontmenu.infobar informativna traka
+fontmenu.gamelist unset
 
 colormenu.gtx_alpha providnost (gtx)
 gtxalpha.alpha1 alpha 1
@@ -636,6 +643,12 @@ mp3player.add unset
 mp3player.delete unset
 mp3player.stop unset
 mp3player.playall unset
+mp3player.shuffle unset
+mp3player.deleteall unset
+mp3player.title unset
+mp3player.artist unset
+mp3player.playing unset
+mp3player.id3scan unset
 
 filebrowser.head unset
 filebrowser.filter unset

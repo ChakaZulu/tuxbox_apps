@@ -114,7 +114,6 @@ ping.ok isch erreichbar (ping)
 ping.unreachable isch nidd erreichbar (unreachable)
 ping.protocol isch nidd erreichbar (Host or protocol error)
 ping.socket isch nidd erreichbar (Socket error)
-
 ipsetup.hint_1 Nimm  0..9 odder abe/uffe
 ipsetup.hint_2 OK speichert, Home bricht ab
 
@@ -148,6 +147,7 @@ timing.menu Menu
 timing.chanlist Kanallischde
 timing.epg Epg
 timing.infobar Infobar
+timing.filebrowser unset
 timing.hint_1 Iinbländzit in Sek., di's OSD
 timing.hint_2 uffem TV a'zeigt wird
 
@@ -643,6 +643,12 @@ mp3player.add unset
 mp3player.delete unset
 mp3player.stop unset
 mp3player.playall unset
+mp3player.shuffle unset
+mp3player.deleteall unset
+mp3player.title unset
+mp3player.artist unset
+mp3player.playing unset
+mp3player.id3scan unset
 
 filebrowser.head unset
 filebrowser.filter unset

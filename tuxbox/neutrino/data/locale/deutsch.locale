@@ -147,6 +147,7 @@ timing.menu Menu
 timing.chanlist Kanalliste
 timing.epg Epg
 timing.infobar Infobar
+timing.filebrowser Filebrowser
 timing.hint_1 Einblendzeit in Sek., die das OSD
 timing.hint_2 auf dem TV angezeigt wird
 
@@ -610,7 +611,7 @@ fontsize.epg_info2 EPG Info 2
 fontsize.epg_date EPG Datum
 fontsize.alert Alert
 fontsize.eventlist_title Eventlist Titel
-fontsize.eventlist_itemlarge Eventlist gross
+fontsize.eventlist_itemlarge Eventlist groß
 fontsize.eventlist_itemsmall Eventlist klein
 fontsize.eventlist_datetime Eventlist Datum / Zeit
 fontsize.channellist Kanalliste
@@ -621,7 +622,7 @@ fontsize.infobar_number Infobar Nummer
 fontsize.infobar_channame Infobar Kanal
 fontsize.infobar_info Infobar Info
 fontsize.infobar_small Infobar klein
-fontsize.gamelist_itemLarge gross
+fontsize.gamelist_itemLarge groß
 fontsize.gamelist_itemSmall klein
 
 fontmenu.head Schriftgrössen Einstellungen
@@ -651,6 +652,6 @@ mp3player.id3scan Scanne ID3-Tags
 
 filebrowser.head Filebrowser
 filebrowser.filter Filter
-filebrowser.select auswaehlen
-filebrowser.mark markieren
+filebrowser.select Auswählen
+filebrowser.mark Markieren
 filebrowser.scan Durchsuche Verzeichnisse

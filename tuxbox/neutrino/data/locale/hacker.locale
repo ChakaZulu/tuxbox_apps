@@ -146,6 +146,7 @@ timing.head unset
 timing.menu unset
 timing.chanlist unset
 timing.epg unset
+timing.filebrowser unset
 timing.infobar unset
 timing.hint_1 unset
 timing.hint_2 unset
@@ -597,6 +598,9 @@ timersettings.separator unset
 timersettings.record_safety_time unset
 timersettings.record_safety_time.hint_1 unset
 timersettings.record_safety_time.hint_2 unset
+timersettings.record_safety_time_after unset
+timersettings.record_safety_time_after.hint_1 unset
+timersettings.record_safety_time_after.hint_2 unset
 
 fontsize.menu unset
 fontsize.menu_title unset
@@ -618,12 +622,15 @@ fontsize.infobar_number unset
 fontsize.infobar_channame unset
 fontsize.infobar_info unset
 fontsize.infobar_small unset
+fontsize.gamelist_itemLarge large
+fontsize.gamelist_itemSmall small
 
 fontmenu.head unset
 fontmenu.channellist unset
 fontmenu.eventlist unset
 fontmenu.epg unset
 fontmenu.infobar unset
+fontmenu.gamelist unset
 
 colormenu.gtx_alpha unset
 gtxalpha.alpha1 unset
@@ -636,6 +643,12 @@ mp3player.add unset
 mp3player.delete unset
 mp3player.stop unset
 mp3player.playall unset
+mp3player.shuffle unset
+mp3player.deleteall unset
+mp3player.title unset
+mp3player.artist unset
+mp3player.playing unset
+mp3player.id3scan unset
 
 filebrowser.head unset
 filebrowser.filter unset

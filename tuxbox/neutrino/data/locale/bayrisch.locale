@@ -147,6 +147,7 @@ timing.menu Menu
 timing.chanlist Kanalliste
 timing.epg Epg
 timing.infobar Infobar
+timing.filebrowser unset
 timing.hint_1 Einblendzeit in Sek., die das OSD
 timing.hint_2 auf dem TV angezeigt wird
 
@@ -597,6 +598,9 @@ timersettings.separator Timer Eistellunga
 timersettings.record_safety_time Aufnemma - Korrekturzeid
 timersettings.record_safety_time.hint_1 De Zeid in Minutn (00=aus) werd beim Startn
 timersettings.record_safety_time.hint_2 vom Timer obzogn
+timersettings.record_safety_time_after unset
+timersettings.record_safety_time_after.hint_1 unset
+timersettings.record_safety_time_after.hint_2 unset
 
 fontsize.menu Menutext
 fontsize.menu_title Menutitl
@@ -618,12 +622,15 @@ fontsize.infobar_number Numma
 fontsize.infobar_channame Nama
 fontsize.infobar_info Infobar Info
 fontsize.infobar_small Infobar kloa
+fontsize.gamelist_itemLarge groß
+fontsize.gamelist_itemSmall kloa
 
 fontmenu.head Schriftgrössn Eistellunga
 fontmenu.channellist Kanallistn
 fontmenu.eventlist Eventlistn
 fontmenu.epg EPG
 fontmenu.infobar Infoleistn
+fontmenu.gamelist unset
 
 colormenu.gtx_alpha unset
 gtxalpha.alpha1 tr1
@@ -636,6 +643,12 @@ mp3player.add dazuadoa
 mp3player.delete löschn
 mp3player.stop stopn
 mp3player.playall olle obspuin
+mp3player.shuffle unset
+mp3player.deleteall unset
+mp3player.title unset
+mp3player.artist unset
+mp3player.playing unset
+mp3player.id3scan unset
 
 filebrowser.head Datiesucha
 filebrowser.filter Fuita
