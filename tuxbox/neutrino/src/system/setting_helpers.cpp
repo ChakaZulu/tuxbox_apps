@@ -45,7 +45,7 @@
 #include <global.h>
 #include <neutrino.h>
 
-#include <gui/streaminfo.h>
+// obsolete #include <gui/streaminfo.h>
 
 #include <gui/widget/messagebox.h>
 
