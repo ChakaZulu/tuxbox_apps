@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.22 2002/08/29 10:42:18 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.23 2002/08/29 11:28:04 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -96,20 +96,16 @@ class CBouquetManager
 				ChannelList* getBouquet() { return (tv ? &(Owner->Bouquets[b]->tvChannels) : &(Owner->Bouquets[b]->radioChannels)); };
 			public:
 				ChannelIterator(CBouquetManager* owner, unsigned int B=0, int C=0, bool TV=true) { Owner = owner; b=B; c=C; tv = TV; };
-				bool operator != (const ChannelIterator& it) const;
-				bool operator == (const ChannelIterator& it) const;
 				ChannelIterator operator ++(int);
 				CZapitChannel* operator *();
 				ChannelIterator FindChannelNr(const unsigned int channel);
-				bool EndOfChannels () { return (c == -2) && (b == 0); };
+				bool EndOfChannels() { return (c == -2) && (b == 0); };
 		};
 
 		ChannelIterator tvChannelsBegin() { return ChannelIterator(this, 0, -1, true)++; };
-		ChannelIterator tvChannelsEnd()   { return ChannelIterator(this, 0, -2, true);   };
 		ChannelIterator tvChannelsFind(unsigned int onid_sid);
 
 		ChannelIterator radioChannelsBegin() { return ChannelIterator(this, 0, -1, false)++; };
-		ChannelIterator radioChannelsEnd()   { return ChannelIterator(this, 0, -2, false);   };
 		ChannelIterator radioChannelsFind(unsigned int onid_sid);
 
 		BouquetList Bouquets;

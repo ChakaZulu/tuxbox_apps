@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.33 2002/08/29 10:42:18 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.34 2002/08/29 11:28:04 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -505,7 +505,7 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 
 	for ( unsigned int i=0; i<allChannels.size(); i++)
 	{
-		if (tvChannelsFind( allChannels[i]->getOnidSid()) == tvChannelsEnd())
+		if (tvChannelsFind( allChannels[i]->getOnidSid()).EndOfChannels())
 		{
 			CZapitChannel* chan = copyChannelByOnidSid( allChannels[i]->getOnidSid());
 			chan->setChannelNumber(tvChanNr++);
@@ -538,7 +538,7 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 
 	for ( unsigned int i=0; i<allChannels.size(); i++)
 	{
-		if (radioChannelsFind( allChannels[i]->getOnidSid()) == radioChannelsEnd())
+		if (radioChannelsFind( allChannels[i]->getOnidSid()).EndOfChannels())
 		{
 			CZapitChannel* chan = copyChannelByOnidSid( allChannels[i]->getOnidSid());
 			chan->setChannelNumber(radioChanNr++);
@@ -548,7 +548,7 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 
 	for ( map<unsigned int, CZapitChannel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
 	{
-		if (radioChannelsFind( it->second.getOnidSid()) == radioChannelsEnd())
+		if (radioChannelsFind( it->second.getOnidSid()).EndOfChannels())
 		{
 			CZapitChannel* chan = copyChannelByOnidSid( it->second.getOnidSid());
 			chan->setChannelNumber(radioChanNr++);
@@ -814,16 +814,6 @@ CZapitChannel* CBouquetManager::ChannelIterator::operator *()
 	return (*getBouquet())[c];               // returns junk if we are an end marker !!
 }
 
-bool CBouquetManager::ChannelIterator::operator != (const ChannelIterator& it) const
-{
-	return( (b != it.b) || (c != it.c));    // not quite correct (might have different Owner and/or be radio/tv iterator!)
-}
-
-bool CBouquetManager::ChannelIterator::operator == (const ChannelIterator& it) const
-{
-	return( (b == it.b) && (c == it.c));    // not quite correct (might have different Owner and/or be radio/tv iterator!)
-}
-
 CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::FindChannelNr(const unsigned int channel)
 {
 	c = channel;
@@ -840,7 +830,7 @@ CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::FindChannelNr
 CBouquetManager::ChannelIterator CBouquetManager::tvChannelsFind( unsigned int onid_sid)
 {
 	ChannelIterator it = tvChannelsBegin();
-	while ((it != tvChannelsEnd()) && ((*it)->getOnidSid() != onid_sid))
+	while ((!it.EndOfChannels()) && ((*it)->getOnidSid() != onid_sid))
 		it++;
 	return( it);
 }
@@ -848,7 +838,7 @@ CBouquetManager::ChannelIterator CBouquetManager::tvChannelsFind( unsigned int o
 CBouquetManager::ChannelIterator CBouquetManager::radioChannelsFind( unsigned int onid_sid)
 {
 	ChannelIterator it = radioChannelsBegin();
-	while ((it != radioChannelsEnd()) && ((*it)->getOnidSid() != onid_sid))
+	while ((!it.EndOfChannels()) && ((*it)->getOnidSid() != onid_sid))
 		it++;
 	return( it);
 }
