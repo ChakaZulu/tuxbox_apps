@@ -70,6 +70,7 @@ protected:
 	eAUTable<NIT> tNIT, tONIT;
 	eAUTable<EIT> tEIT;
 	eAUTable<BAT> tBAT;
+	MHWEIT *tMHWEIT;
 	
 	TDT *tdt;
 	
@@ -120,6 +121,7 @@ private slots:
 	void EITready(int error);
 	void TDTready(int error);
 	void BATready(int error);
+	void MHWEITready(int error);
 
 public:
 	enum

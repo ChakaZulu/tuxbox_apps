@@ -180,6 +180,7 @@ class ShortEventDescriptor: public Descriptor
 {
 public:
 	ShortEventDescriptor(descr_gen_t *descr);
+	ShortEventDescriptor(): Descriptor(DESCR_SHORT_EVENT) { };
 	QString toString();
 	char language_code[3];
 	QString event_name;
@@ -361,6 +362,7 @@ class EITEvent
 {
 public:
 	EITEvent(eit_event_struct *event);
+	EITEvent();
 	int event_id;
 	time_t start_time;
 	int duration;
@@ -376,14 +378,15 @@ protected:
 public:
 	enum
 	{
-		tsActual=0, tsOther
+		tsActual=0, tsOther, tsFaked
 	};
 	enum
 	{
 		typeNowNext=0, typeSchedule
 	};
 	
-	EIT(int type=typeNowNext, int service_id=-1, int ts=tsActual, int version=-1);
+	EIT(int type, int service_id=-1, int ts=tsActual, int version=-1);
+	EIT();
 	eTable *createNext();
 	
 	int type, ts, service_id, version_number, current_next_indicator, transport_stream_id, original_network_id;
@@ -435,7 +438,7 @@ public:
 class MHWEIT: public eSection
 {
 	Q_OBJECT
-	int data(__u8 *data);
+	int sectionRead(__u8 *data);
 	int available;
 	void sectionFinish(int);
 signals:

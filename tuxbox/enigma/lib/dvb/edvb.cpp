@@ -19,6 +19,7 @@
 #include <dbox/info.h>
 #include "eavswitch.h"
 #include "streamwd.h"
+#include "init.h"
 
 #include "config.h"
 
@@ -26,7 +27,7 @@ eDVB *eDVB::instance;
 
 QString eDVB::getVersion()
 {
-	return "eDVB core 1.0RC2, compiled " __DATE__;
+	return "eDVB core 1.0, compiled " __DATE__;
 }
 
 void eDVB::removeDVBBouquets()
@@ -582,8 +583,26 @@ void eDVB::scanPMT()
 			}
 			break;
 		}
-		default:
-			qDebug("streamtype %d (Pid: %x) unused", pe->stream_type, pe->elementary_PID);
+		case 0xC1:
+		{
+			if (tMHWEIT)	// nur eine zur zeit
+				delete tMHWEIT;
+			tMHWEIT=0;
+			for (QListIterator<Descriptor> i(pe->ES_info); i.current(); ++i)
+				if (i.current()->Tag()==DESCR_MHW_DATA)
+				{
+					MHWDataDescriptor *mhwd=(MHWDataDescriptor*)i.current();
+					if (!strncmp(mhwd->type, "PILOTE", 6))
+					{
+						qDebug("starting MHWEIT on pid %x, sid %x", pe->elementary_PID, service_id);
+						tMHWEIT=new MHWEIT(pe->elementary_PID, service_id);
+						connect(tMHWEIT, SIGNAL(ready(int)), SLOT(MHWEITready(int)));
+						tMHWEIT->start();
+						break;
+					}
+				}
+			break;
+		}
 		}
 	}
 
@@ -591,13 +610,8 @@ void eDVB::scanPMT()
 	setPID(audio);
 	setPID(teletext);
 
-	if (!isca)
-	{
-		qDebug("channel is FTA!");
-	}
+	emit scrambled(isca);
 
-    	emit scrambled(isca);
-	
 	if (isca && calist.isEmpty())
 	{
 		qDebug("NO CASYS");
@@ -622,10 +636,12 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 	currentTransponderState=err;
 	if (!err)
 		emit enterTransponder(trans);
-	qDebug("state davor: %d\n", state);
 	tPAT.start(new PAT());
 	if (tdt)
 		delete tdt;
+	if (tMHWEIT)
+		delete tMHWEIT;
+	tMHWEIT=0;
 	tdt=new TDT();
 	connect(tdt, SIGNAL(tableReady(int)), SLOT(TDTready(int)));
 	tdt->start();
@@ -741,6 +757,50 @@ void eDVB::BATready(int error)
 	case stateScanWait:
 		scanEvent(eventScanGotBAT);
 		break;	
+	}
+}
+
+void eDVB::MHWEITready(int error)
+{
+	if (!error)
+	{
+		EIT *e=new EIT();
+		e->ts=EIT::tsFaked;
+		e->type=EIT::typeNowNext;
+		e->version_number=0;
+		e->current_next_indicator=0;
+		e->transport_stream_id=transport_stream_id;
+		e->original_network_id=original_network_id;
+		
+		for (int i=0; i<2; i++)
+		{
+			MHWEITEvent *me=&tMHWEIT->events[i];
+			EITEvent *ev=new EITEvent;
+			int thisday=time_difference+time(0);
+			thisday-=thisday%(60*60*24);
+			if (thisday < (time_difference+time(0)))
+				thisday+=60*60*24;
+			e->service_id=me->service_id;
+			ev->event_id=0xFFFF;
+			ev->start_time=thisday+(me->starttime>>8)*60*60+(me->starttime&0xFF)*60;
+			ev->duration=(me->duration>>8)*60*60+(me->duration&0xFF)*60;
+			ev->running_status=1;
+			ev->free_CA_mode=0;
+			ShortEventDescriptor *se=new ShortEventDescriptor();
+			se->language_code[0]='?';
+			se->language_code[1]='?';
+			se->language_code[2]='?';
+			se->event_name=me->event_name;
+			se->text=me->short_description;
+			ev->descriptor.append(se);
+			e->events.append(ev);
+		}
+		e->ready=1;
+		tEIT.inject(e);
+	} else
+	{
+		delete tMHWEIT;
+		tMHWEIT=0;
 	}
 }
 
@@ -888,6 +948,7 @@ eDVB::eDVB()
 	changeVolume(3, m);
 	
 	streamwd=new eStreamWatchdog();
+	tMHWEIT=0;
 	
 	qDebug("eDVB::eDVB done.");
 }
@@ -1307,3 +1368,5 @@ void eDVB::configureNetwork()
 		}
 	}
 }
+
+eAutoInitP0<eDVB, 5> init_dvb("eDVB core");

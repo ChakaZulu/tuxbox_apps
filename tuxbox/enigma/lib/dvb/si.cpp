@@ -612,7 +612,6 @@ ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr): Descriptor
 	language_code[1]=evt->iso_639_2_language_code_2;
 	language_code[2]=evt->iso_639_2_language_code_3;
 
-	qDebug("ExtendedEventDescriptor: %d bytes of items.", evt->length_of_items);
 	int ptr = sizeof(struct eit_extended_descriptor_struct);
 	__u8* data = (__u8*) descr;
 	for (int i = 0; i < item_description_length; i++)
@@ -843,12 +842,12 @@ int NIT::data(__u8* data)
 
 EITEvent::EITEvent(eit_event_struct *event)
 {
+	descriptor.setAutoDelete(true);
 	event_id=HILO(event->event_id);
 	if (event->start_time_5!=0xFF)
 	{
 		start_time=parseDVBtime(event->start_time_1, event->start_time_2, event->start_time_3, 
 			event->start_time_4, event->start_time_5);
-		qDebug("start time: %02x%02x%02x", event->start_time_3, event->start_time_4, event->start_time_5);
 	}
 	else
 		start_time=-1;
@@ -866,6 +865,11 @@ EITEvent::EITEvent(eit_event_struct *event)
 		descriptor.append(Descriptor::create(d));
 		ptr+=d->descriptor_length+2;
 	}
+}
+
+EITEvent::EITEvent()
+{
+	descriptor.setAutoDelete(true);
 }
 
 int EIT::data(__u8 *data)
@@ -891,9 +895,16 @@ EIT::EIT(int type, int service_id, int ts, int version): eTable(PID_EIT, ts?TID_
 	events.setAutoDelete(true);
 }
 
+EIT::EIT()
+{
+	events.setAutoDelete(true);
+}
+
 eTable *EIT::createNext()
 {
-	return new EIT(type, service_id, ts, incrementVersion(version));
+	if (ts != tsFaked)
+		return new EIT(type, service_id, ts, incrementVersion(version));
+	return 0;
 }
 
 int TDT::data(__u8 *data)
@@ -975,7 +986,7 @@ void MHWEIT::sectionFinish(int err)
 	emit ready(err);
 }
 
-int MHWEIT::data(__u8 *data)
+int MHWEIT::sectionRead(__u8 *data)
 {
 	struct mhweit90_s
 	{
@@ -995,11 +1006,9 @@ int MHWEIT::data(__u8 *data)
 	} *table=(mhweit90_s*)data;
 	if (table->table_id != 0x90)
 		return 0;
-	printf(" MHW EIT %s", table->event_name);
-	printf(" starttime %d:%02d\n", HILO(table->starttime)>>8, HILO(table->starttime)&0xFF);
 	
 	int nownext;
-	switch (HILO(table->flags)&3)
+	switch ((HILO(table->flags)>>6)&3)
 	{
 	case 3:
 		nownext=0;
@@ -1008,10 +1017,11 @@ int MHWEIT::data(__u8 *data)
 		nownext=1;
 		break;
 	case 2:
-		printf("service not running\n");
+		return -1;
 		break;
 	default:
-		printf("bla falsche flags\n");
+		printf("bla falsche flags (%x)\n", HILO(table->flags));
+		return -1;
 	}
 	available|=nownext?1:2;
 	MHWEITEvent &event=events[nownext];
@@ -1022,14 +1032,14 @@ int MHWEIT::data(__u8 *data)
 	event.event_name="";
 	event.flags=HILO(table->flags);
 	int len=30;
-	while (len-- && (table->event_name[len]==' '));
+	while (len-- && (table->event_name[len+1]==' '));
 	for (int i=0; i<len; i++)
 		event.event_name+=table->event_name[i];
 	len=15;
 	event.short_description="";
-	while (len-- && (table->short_description[len]==' '))
+	while (len-- && (table->short_description[len+1]==' '));
 	for (int i=0; i<len; i++)
-		event.short_description+=table->short_description[len];
+		event.short_description+=table->short_description[i];
 	if (available==3)
 		return 1;
 	return 0;
