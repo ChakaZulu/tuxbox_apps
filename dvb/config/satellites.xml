@@ -115,7 +115,7 @@ and combinations of this -->
 		<!-- astra 1a -->
 		<transponder frequency="11370000" symbol_rate="3260000" polarization="1" fec_inner="5"/>
 	</sat>
-	<sat name="Eutelsat, 7.0E" flags="5" position="70">
+	<sat name="Eutelsat 7.0E" flags="5" position="70">
 		<transponder frequency="11175000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 		<transponder frequency="11262000" symbol_rate="27500000" polarization="0" fec_inner="2"/>
 		<transponder frequency="11283000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
