@@ -493,7 +493,7 @@ sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)
 sleeptimerbox.hint2 Die dbox2 schaltet sich nach dieser Zeit aus.
 sleeptimerbox.announce Sleeptimer in 1 min
 
-zaptotimer.announce In einer Minute wird umschaltet
+zaptotimer.announce In einer Minute wird umgeschaltet
 recordtimer.announce Die Aufnahme beginnt in einer Minute
 
 timerbar.channelswitch Umschalten
