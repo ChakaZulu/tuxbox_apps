@@ -3,12 +3,7 @@
 
 #include "elbwindow.h"
 #include "epgcache.h"
-
-#include <sigc++/signal_system.h>
-#ifdef SIGC_CXX_NAMESPACES
-using namespace SigC;
-#endif
-
+#include <libsig_comp.h>
 
 class eListboxEntryEPG: public eListboxEntry
 {

@@ -7,6 +7,7 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/core/dvb \
 	-I$(top_srcdir)/enigma/src/core/driver \
 	-I$(top_srcdir)/enigma/src/core/xml \
+	-I$(top_srcdir)/enigma/src/include \
 	-I$(top_srcdir)/include
 
 bin_PROGRAMS = enigma

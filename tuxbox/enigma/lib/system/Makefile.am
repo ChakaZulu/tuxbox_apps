@@ -5,7 +5,8 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/apps/enigma \
 	-I$(top_srcdir)/enigma/src/core/driver \
 	-I$(top_srcdir)/enigma/src/core/gdi \
-	-I$(top_srcdir)/enigma/src/core/gui
+	-I$(top_srcdir)/enigma/src/core/gui \
+	-I$(top_srcdir)/enigma/src/include
 
 noinst_LTLIBRARIES = libsystem.la
 

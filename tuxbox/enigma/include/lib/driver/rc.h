@@ -6,10 +6,7 @@
 #include <qtimer.h>
 #include <list>
 #include <map>
-#include <sigc++/signal_system.h>
-#ifdef SIGC_CXX_NAMESPACES
-using namespace SigC;
-#endif
+#include <libsig_comp.h>
 
 class eRCInput;
 class eRCDriver;

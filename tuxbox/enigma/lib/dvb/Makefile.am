@@ -4,7 +4,8 @@ INCLUDES = \
 	-I$(DRIVER)/include \
 	-I$(top_srcdir)/edvb/miniqt \
 	-I$(top_srcdir)/enigma/src/core/driver \
-	-I$(top_srcdir)/enigma/src/core/system
+	-I$(top_srcdir)/enigma/src/core/system \
+	-I$(top_srcdir)/enigma/src/include
 
 noinst_LTLIBRARIES = libdvb.la
 

@@ -8,12 +8,7 @@
 #include <qlist.h>
 #include "grc.h"
 #include <list>
-
-#include <sigc++/signal_system.h>
-#ifdef SIGC_CXX_NAMESPACES
-using namespace SigC;
-#endif
-
+#include <libsig_comp.h>
 
 class eWidgetEvent
 {

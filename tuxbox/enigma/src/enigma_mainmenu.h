@@ -2,11 +2,7 @@
 #define __enigma_mainmenu_h
 
 #include "elbwindow.h"
-
-#include <sigc++/signal_system.h>
-#ifdef SIGC_CXX_NAMESPACES
-using namespace SigC;
-#endif
+#include <libsig_comp.h>
 
 class eListBoxEntry;
 

@@ -2,6 +2,7 @@
 #define __streamwd_h
 
 #include "qsocketnotifier.h"
+#include <libsig_comp.h>
 #include "si.h"
 #include "dvb.h"
 

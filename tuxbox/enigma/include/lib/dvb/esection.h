@@ -6,6 +6,7 @@
 #include <qtimer.h>
 #include <qlist.h>
 #include <asm/types.h>
+#include <libsig_comp.h>
 
 #define SECREAD_INORDER	1			// read them in order (read full tables)
 #define SECREAD_CRC			2			// check CRCs
