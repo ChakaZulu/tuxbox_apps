@@ -208,7 +208,7 @@ void eWidget::invalidate(eRect area, int force)
 	while (force || (((int)w->getBackgroundColor())==-1))
 	//	while (1)
 	{
-		force=0;
+//		force=0;
 		if (!w->parent)	// spaetestens fuers TLW sollte backgroundcolor aber non-transparent sein
 			break;
 		area.moveBy(w->position.x(), w->position.y());

@@ -1,7 +1,13 @@
+# created by Enigma Language Editor 0.2
+#       (c) 10/2002 ole <olest@gmx.net>
+# *************************************
+# *   use/modify on your own risk!    *
+# *************************************
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
-"POT-Creation-Date: 2002-10-31 15:16+0100\n"
+"POT-Creation-Date: 2002-11-01 17:51+0100\n"
 "PO-Revision-Date: 2002-05-04 02:00+0200\n"
 "Last-Translator: Angelo Guarini <angeloguarini@web.de>\n"
 "Language-Team: Italian <it@tuxbox.org>\n"
@@ -801,170 +807,170 @@ msgstr ""
 msgid "Timerlist"
 msgstr "Lista Timer"
 
-#: src/timer.cpp:413
+#: src/timer.cpp:414
 msgid ""
 "You would to delete the running event.. this stops the timer mode "
 "(recording)!"
 msgstr ""
 
-#: src/timer.cpp:414
+#: src/timer.cpp:415
 msgid "Delete event from timerlist"
 msgstr ""
 
-#: src/timer.cpp:415
+#: src/timer.cpp:416
 #, fuzzy
 msgid "Really delete this event?"
 msgstr "É sicuro di voler cancellare questo servizio?"
 
-#: src/timer.cpp:419
+#: src/timer.cpp:420
 msgid ""
 "You would to update the running event.. this stops the timer mode "
 "(recording)!"
 msgstr ""
 
-#: src/timer.cpp:420 src/timer.cpp:920
+#: src/timer.cpp:421 src/timer.cpp:921
 msgid "Update event in timerlist"
 msgstr ""
 
-#: src/timer.cpp:421
+#: src/timer.cpp:422
 #, fuzzy
 msgid "Really update this event?"
 msgstr "É sicuro di voler cancellare questo servizio?"
 
-#: src/timer.cpp:466
+#: src/timer.cpp:467
 msgid ""
 "This event already began.\n"
 "You can not add this to timerlist"
 msgstr ""
 
-#: src/timer.cpp:466 src/timer.cpp:477 src/timer.cpp:487 src/timer.cpp:976
+#: src/timer.cpp:467 src/timer.cpp:478 src/timer.cpp:488 src/timer.cpp:977
 msgid "Add event to timerlist"
 msgstr ""
 
-#: src/timer.cpp:477
+#: src/timer.cpp:478
 #, fuzzy
 msgid "This event is already in the timerlist."
 msgstr "Questo servizio é giá contenuto nella lista dei favoriti."
 
-#: src/timer.cpp:487
+#: src/timer.cpp:488
 msgid ""
 "This service can not added to the timerlist.\n"
 "The event overlaps with another event in the timerlist\n"
 "Please check manually the timerlist."
 msgstr ""
 
-#: src/timer.cpp:510
+#: src/timer.cpp:511
 #, fuzzy
 msgid "no description avail"
 msgstr "nessuna descrizione disponibile"
 
-#: src/timer.cpp:539
+#: src/timer.cpp:540
 msgid "timerView"
 msgstr ""
 
-#: src/timer.cpp:540
+#: src/timer.cpp:541
 msgid "remove this entry from timer list"
 msgstr ""
 
-#: src/timer.cpp:758
+#: src/timer.cpp:759
 msgid "January"
 msgstr ""
 
-#: src/timer.cpp:758
+#: src/timer.cpp:759
 msgid "February"
 msgstr ""
 
-#: src/timer.cpp:758
+#: src/timer.cpp:759
 msgid "March"
 msgstr ""
 
-#: src/timer.cpp:759
+#: src/timer.cpp:760
 msgid "April"
 msgstr ""
 
-#: src/timer.cpp:759
+#: src/timer.cpp:760
 msgid "May"
 msgstr ""
 
-#: src/timer.cpp:759
+#: src/timer.cpp:760
 msgid "June"
 msgstr ""
 
-#: src/timer.cpp:759
+#: src/timer.cpp:760
 msgid "July"
 msgstr ""
 
-#: src/timer.cpp:760
+#: src/timer.cpp:761
 msgid "August"
 msgstr ""
 
-#: src/timer.cpp:760
+#: src/timer.cpp:761
 msgid "September"
 msgstr ""
 
-#: src/timer.cpp:760
+#: src/timer.cpp:761
 msgid "October"
 msgstr ""
 
-#: src/timer.cpp:761
+#: src/timer.cpp:762
 msgid "November"
 msgstr ""
 
-#: src/timer.cpp:761
+#: src/timer.cpp:762
 msgid "December"
 msgstr ""
 
-#: src/timer.cpp:762
+#: src/timer.cpp:763
 msgid "Sunday"
 msgstr ""
 
-#: src/timer.cpp:762
+#: src/timer.cpp:763
 msgid "Monday"
 msgstr ""
 
-#: src/timer.cpp:762
+#: src/timer.cpp:763
 msgid "Tuesday"
 msgstr ""
 
-#: src/timer.cpp:762
+#: src/timer.cpp:763
 msgid "Wednesday"
 msgstr ""
 
-#: src/timer.cpp:763
+#: src/timer.cpp:764
 msgid "Thursday"
 msgstr ""
 
-#: src/timer.cpp:763
+#: src/timer.cpp:764
 msgid "Friday"
 msgstr ""
 
-#: src/timer.cpp:763
+#: src/timer.cpp:764
 msgid "Saturday"
 msgstr ""
 
-#: src/timer.cpp:832
+#: src/timer.cpp:833
 #, fuzzy
 msgid "Timer list"
 msgstr "Lista Timer"
 
-#: src/timer.cpp:871 src/enigma_main.cpp:2129 src/enigma_main.cpp:2133
-#: src/enigma_main.cpp:2142 src/enigma_main.cpp:2149 src/enigma_main.cpp:2155
-#: src/enigma_main.cpp:2160 src/enigma_main.cpp:2165
+#: src/timer.cpp:872 src/enigma_main.cpp:2133 src/enigma_main.cpp:2137
+#: src/enigma_main.cpp:2146 src/enigma_main.cpp:2153 src/enigma_main.cpp:2159
+#: src/enigma_main.cpp:2164 src/enigma_main.cpp:2169
 msgid "switch"
 msgstr "cambiare"
 
-#: src/timer.cpp:872
+#: src/timer.cpp:873
 #, fuzzy
 msgid "record DVR"
 msgstr "Registrazione"
 
-#: src/timer.cpp:920
+#: src/timer.cpp:921
 msgid ""
 "Invalid begin or end time.!\n"
 "Please check time and date"
 msgstr ""
 
-#: src/timer.cpp:976
+#: src/timer.cpp:977
 msgid ""
 "Invalid begin or end time.!\n"
 "You can not add this to timerlist"
@@ -1247,7 +1253,7 @@ msgstr ""
 
 #: src/enigma_setup.cpp:61
 msgid "Common Interface..."
-msgstr ""
+msgstr "Modulo CI ( Common Interface ) "
 
 #: src/enigma_setup.cpp:152
 msgid "You have to reboot to apply the new skin"
@@ -1488,9 +1494,13 @@ msgstr ""
 msgid "sends two repeats"
 msgstr ""
 
-#: src/channelinfo.cpp:215
+#: src/channelinfo.cpp:218
 msgid "no data for this service avail"
 msgstr "Il servizio non dispone dati"
+
+#: src/channelinfo.cpp:245
+msgid "Filesize: "
+msgstr ""
 
 #: src/setup_osd.cpp:21
 msgid "Show OSD on EIT Update"
@@ -1522,7 +1532,7 @@ msgstr "luminosità"
 
 #: src/setup_osd.cpp:58
 msgid "change the brightness correction"
-msgstr ""
+msgstr "correggere la luminositá"
 
 #: src/setup_osd.cpp:64 src/setup_lcd.cpp:59
 msgid "Contrast:"
@@ -1530,7 +1540,7 @@ msgstr "Contrasto"
 
 #: src/setup_osd.cpp:71
 msgid "change the contrast"
-msgstr ""
+msgstr "correggere il contrasto"
 
 #: src/streaminfo.cpp:161 src/streaminfo.cpp:172 src/streaminfo.cpp:184
 #: src/streaminfo.cpp:196 src/streaminfo.cpp:309 src/streaminfo.cpp:340
@@ -1540,7 +1550,7 @@ msgstr "niente"
 
 #: src/streaminfo.cpp:236
 msgid "Video format:"
-msgstr ""
+msgstr "formato Video"
 
 #: src/streaminfo.cpp:304
 msgid "supported coding systems:"
@@ -1548,7 +1558,7 @@ msgstr "Sistemi di codifica supportati"
 
 #: src/streaminfo.cpp:336
 msgid "by it uses:"
-msgstr ""
+msgstr "viene utilizzato"
 
 #: src/streaminfo.cpp:426
 #, fuzzy
@@ -1576,11 +1586,11 @@ msgstr "Prego, selezionare un Plugin e premere OK"
 
 #: src/enigma_plugins.cpp:142 src/enigma_main.cpp:1669
 msgid "Couldn't read plugin directory"
-msgstr ""
+msgstr "non é stato possibile leggere l'archivio Plugin"
 
 #: src/enigma_plugins.cpp:142 src/enigma_main.cpp:1669
 msgid "Error"
-msgstr ""
+msgstr "errore"
 
 #: src/enigma_scan.cpp:35
 msgid "Channels"
@@ -1784,7 +1794,7 @@ msgstr "Favoriti ("
 
 #: src/enigma_main.cpp:618
 msgid "recorded movies"
-msgstr ""
+msgstr "il numero dei Film"
 
 #: src/enigma_main.cpp:877
 #, fuzzy
@@ -1800,7 +1810,7 @@ msgstr "Questo servizio non puó essere cancellato."
 msgid "Sorry, you cannot delete this service."
 msgstr "Questo servizio non puó essere cancellato."
 
-#: src/enigma_main.cpp:1431 src/enigma_main.cpp:1437 src/enigma_main.cpp:2628
+#: src/enigma_main.cpp:1431 src/enigma_main.cpp:1437 src/enigma_main.cpp:2632
 msgid "delete service"
 msgstr "cancellare il servizio"
 
@@ -1831,7 +1841,7 @@ msgstr "Sicuro di voler inserire questo servizio nella lista dei favoriti?"
 
 #: src/enigma_main.cpp:1796
 msgid "Currently an timer based digital recording is in progress!"
-msgstr ""
+msgstr "momentaneamente é in corso una registrazione programmata con il Timer"
 
 #: src/enigma_main.cpp:1798
 msgid "Currently an digital recording is in progress!"
@@ -1858,53 +1868,53 @@ msgstr ""
 msgid "This stops the timer based event!"
 msgstr ""
 
-#: src/enigma_main.cpp:2128 src/enigma_main.cpp:2129
+#: src/enigma_main.cpp:2132 src/enigma_main.cpp:2133
 msgid "One moment please..."
 msgstr "Un momento per favore..."
 
-#: src/enigma_main.cpp:2132 src/enigma_main.cpp:2133
+#: src/enigma_main.cpp:2136 src/enigma_main.cpp:2137
 msgid "Service could not be found !"
 msgstr "Il servizio non é stato trovato."
 
-#: src/enigma_main.cpp:2141 src/enigma_main.cpp:2142
+#: src/enigma_main.cpp:2145 src/enigma_main.cpp:2146
 msgid "This service could not be descrambled"
 msgstr "Il servizio non puó essere decodificato"
 
-#: src/enigma_main.cpp:2148 src/enigma_main.cpp:2149
+#: src/enigma_main.cpp:2152 src/enigma_main.cpp:2153
 msgid "This service sends (currently) no signal"
 msgstr "Momentaneamente questo servizio non trasmette nessun segnale."
 
-#: src/enigma_main.cpp:2153 src/enigma_main.cpp:2155
+#: src/enigma_main.cpp:2157 src/enigma_main.cpp:2159
 msgid "This content could not be displayed"
 msgstr "Il contenuto non puó essere visualizzato"
 
-#: src/enigma_main.cpp:2158 src/enigma_main.cpp:2160
+#: src/enigma_main.cpp:2162 src/enigma_main.cpp:2164
 msgid "NVOD Service - select a starttime, please"
 msgstr "Servizio NVOD - prego, selezionare un'orario di partenza!"
 
-#: src/enigma_main.cpp:2163 src/enigma_main.cpp:2165
+#: src/enigma_main.cpp:2167 src/enigma_main.cpp:2169
 msgid "Unknown error!!"
 msgstr "Errore sconosciuto!!"
 
-#: src/enigma_main.cpp:2621
+#: src/enigma_main.cpp:2625
 #, fuzzy
 msgid "Service Menu"
 msgstr "Menú di servizio"
 
-#: src/enigma_main.cpp:2624 src/setup_harddisk.cpp:126
+#: src/enigma_main.cpp:2628 src/setup_harddisk.cpp:126
 msgid "back"
 msgstr "[Indietro]"
 
-#: src/enigma_main.cpp:2627
+#: src/enigma_main.cpp:2631
 msgid "move service"
 msgstr "spostare servizio"
 
-#: src/enigma_main.cpp:2630
+#: src/enigma_main.cpp:2634
 #, fuzzy
 msgid "add service to favourites"
 msgstr "Aggiungere il Servizio alla lista dei favoriti"
 
-#: src/enigma_main.cpp:2631
+#: src/enigma_main.cpp:2635
 #, fuzzy
 msgid "add service to playlist"
 msgstr "Aggiungere il Servizio alla lista dei favoriti"
@@ -1961,11 +1971,11 @@ msgstr "Impostare luminositá LCD per modalitá Standby"
 
 #: src/setup_harddisk.cpp:120
 msgid "harddisk setup..."
-msgstr ""
+msgstr "setup dell'harddisk"
 
 #: src/setup_harddisk.cpp:199
 msgid "Are you SURE that you want to format this disk?\n"
-msgstr ""
+msgstr "é sicuro di voler formattare l'harddisk?\n"
 
 #: src/setup_harddisk.cpp:200 src/setup_harddisk.cpp:213
 #: src/setup_harddisk.cpp:231 src/setup_harddisk.cpp:241
@@ -2005,23 +2015,23 @@ msgstr ""
 msgid "uninitialized - format it to use!"
 msgstr ""
 
-# created by Enigma Language Editor 0.2
-#       (c) 10/2002 ole <olest@gmx.net>
-# *************************************
-# *   use/modify on your own risk!    *
-# *************************************
-#
 #: src/setup_harddisk.cpp:309
 #, c-format
 msgid "in use, %d.%03d GB (~%d minutes) free"
-msgstr ""
+msgstr "in uso, %d.%03d GB (~%d minuti) libero"
 
 #: src/setup_harddisk.cpp:311
 msgid "initialized, but unknown filesystem"
 msgstr ""
 
+#~ msgid "select DiSEqC parameter (ok)"
+#~ msgstr "selezionare i parametri DiSEqC (ok)"
+
 #~ msgid "sends MiniDiSEqC burst"
 #~ msgstr "trasmette un MiniDiSEqC burst"
+
+#~ msgid "sends no MiniDiSEqC burst"
+#~ msgstr "Non trasmette nessun MiniDiSEqC burst"
 
 #~ msgid "Use Mini DiSEqC Mode (for simple switches)"
 #~ msgstr "attivare la modalitá Mini DiSEqC (per interruttore semplice)"

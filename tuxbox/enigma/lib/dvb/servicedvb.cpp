@@ -202,6 +202,8 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 	switch (message.type)
 	{
 	case eDVRPlayerThreadMessage::start:
+		if (!(inputsn && outputsn))
+			break;
 		if (state == stateInit)
 		{
 			state=stateBuffering;
@@ -214,6 +216,8 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		quit();
 		break;
 	case eDVRPlayerThreadMessage::setSpeed:
+		if (!(inputsn && outputsn))
+			break;
 		speed=message.parm;
 		if (message.parm == 0)
 		{
@@ -239,6 +243,8 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		}
 		break;
 	case eDVRPlayerThreadMessage::seekmode:
+		if (!(inputsn && outputsn))
+			break;
 		switch (message.parm)
 		{
 		case 0:
@@ -257,6 +263,8 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 	case eDVRPlayerThreadMessage::skip:
 	case eDVRPlayerThreadMessage::seekreal:
 	{
+		if (!(inputsn && outputsn))
+			break;
 		if (seekbusy)
 			break;
 		seekbusy=256*1024; // next seek only after 128k (video) data

@@ -120,9 +120,13 @@ void eDVBRecorder::s_open(const char *_filename)
 	::ioctl(dvrfd, DMX_SET_BUFFER_SIZE, 1024*1024);
 
 	eDebug("eDVBRecorder::s_start();");	
-	sn=new eSocketNotifier(this, dvrfd, eSocketNotifier::Read);
-	CONNECT(sn->activated, eDVBRecorder::dataAvailable);
-	sn->start();
+	if (outfd >= 0)
+	{
+		sn=new eSocketNotifier(this, dvrfd, eSocketNotifier::Read);
+		CONNECT(sn->activated, eDVBRecorder::dataAvailable);
+		sn->start();
+	} else
+		rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
 }
 
 void eDVBRecorder::s_addPID(int pid)

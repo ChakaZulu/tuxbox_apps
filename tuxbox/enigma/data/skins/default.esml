@@ -448,7 +448,7 @@
 	</object>
 	
 	<object name="eHarddiskMenu">
-		<eHarddiskMenu name="Harddisk" cposition="140:200" csize="450:210">
+		<eHarddiskMenu text="Harddisk" cposition="140:200" csize="450:210">
 			<eLabel text="model:" position="10:10" size="150:30" />
 			<eLabel name="model" position="160:10" size="e:30" />
 			<eLabel text="capacity:" position="10:40" size="150:30" />

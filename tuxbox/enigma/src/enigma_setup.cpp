@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.26 2002/10/30 13:00:41 TripleDES Exp $
+ * $Id: enigma_setup.cpp,v 1.27 2002/11/02 02:05:39 tmbinc Exp $
  */
 
 #include <enigma_setup.h>
@@ -197,7 +197,7 @@ void eZapSetup::sel_harddisk()
 
 	if (!setup.getNr())
 	{
-		eMessageBox msg(_("Harddisk setup..."), _("sorry, no harddisks found!"));
+		eMessageBox msg(_("sorry, no harddisks found!"), _("Harddisk setup..."));
 		msg.show();
 		msg.exec();
 		msg.hide();

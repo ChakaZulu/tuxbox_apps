@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.11 2002/10/15 23:31:29 Ghostrider Exp $
+ * $Id: setupskin.cpp,v 1.12 2002/11/02 02:05:39 tmbinc Exp $
  */
 
 #include <setupskin.h>
@@ -33,42 +33,49 @@ void eSkinSetup::loadSkins()
 {
 	eListBoxEntrySkin* selection=0;
 
-	const char *skinPath = DATADIR "/enigma/skins/";
+	const char *skinPaths[] = { DATADIR "/enigma/skins/", CONFIGDIR "/enigma/skins/", 0 };
+
 	struct dirent **namelist;
 	char *current_skin=0;
 	eConfig::getInstance()->getKey("/ezap/ui/skin", current_skin);
 
-	int n = scandir(skinPath, &namelist, 0, alphasort);
-
-	if (n<0)
+	for (int i=0; skinPaths[i]; ++i)
 	{
-		eDebug("error reading skin directory");
-		eMessageBox msg("error reading skin directory", "error");
-		msg.show();
-		msg.exec();
-		msg.hide();
-		return;
-	}
+		int n = scandir(skinPaths[i], &namelist, 0, alphasort);
 
-	for(int count=0;count<n;count++)
-	{
-		eString	fileName=eString(skinPath) + eString(namelist[count]->d_name);
-
-		if (fileName.find(".info") != eString::npos)
+		if (n<0)
 		{
-			eString esml=getInfo(fileName.c_str(), "esml");
-			eString name=getInfo(fileName.c_str(), "name");
-			eDebug("esml = %s, name = %s", esml.c_str(), name.c_str());
-			if (esml.size() && name.size())
+			if (i)
 			{
-				eListBoxEntrySkin *s=new eListBoxEntrySkin(lskins, name, esml);		
-				if (current_skin && esml == current_skin)
-					selection=s;
+				eDebug("error reading skin directory");
+				eMessageBox msg("error reading skin directory", "error");
+				msg.show();
+				msg.exec();
+				msg.hide();
+				continue;
 			}
 		}
-		free(namelist[count]);
-  }
-  free(namelist);
+
+		for(int count=0;count<n;count++)
+		{
+			eString	fileName=eString(skinPaths[i]) + eString(namelist[count]->d_name);
+	
+			if (fileName.find(".info") != eString::npos)
+			{
+				eString esml=getInfo(fileName.c_str(), "esml");
+				eString name=getInfo(fileName.c_str(), "name");
+				eDebug("esml = %s, name = %s", esml.c_str(), name.c_str());
+				if (esml.size() && name.size())
+				{
+					eListBoxEntrySkin *s=new eListBoxEntrySkin(lskins, name, esml);		
+					if (current_skin && esml == current_skin)
+						selection=s;
+				}
+			}
+			free(namelist[count]);
+		}
+		free(namelist);
+	}
 	
 	if (selection)
 		lskins->setCurrent(selection);

@@ -55,7 +55,8 @@ struct enigmaMainActions
 		startSkipForward, repeatSkipForward, stopSkipForward, 
 		startSkipReverse, repeatSkipReverse, stopSkipReverse,
 		showBouquets, showFavourites,
-		modeTV, modeRadio, modeFile;
+		modeTV, modeRadio, modeFile,
+		toggleDVRFunctions;
 	enigmaMainActions(): 
 		map("enigmaMain", _("enigma Zapp")),
 		showMainMenu(map, "showMainMenu", _("show main menu"), eAction::prioDialog),
@@ -99,7 +100,9 @@ struct enigmaMainActions
 
 		modeTV(map, "modeTV", _("switch to TV mode"), eAction::prioDialog),
 		modeRadio(map, "modeRadio", _("switch to Radio mode"), eAction::prioDialog),
-		modeFile(map, "modeFile", _("switch to File mode"), eAction::prioDialog)
+		modeFile(map, "modeFile", _("switch to File mode"), eAction::prioDialog),
+
+		toggleDVRFunctions(map, "toggleDVRFunctions", _("toggle DVR panel"), eAction::prioDialog)
 	{
 	}
 };
@@ -485,6 +488,12 @@ eZapMain::eZapMain()
 	VolumeBar.setLeftColor( eSkin::getActive()->queryColor("volume_left") );
 	VolumeBar.setRightColor( eSkin::getActive()->queryColor("volume_right") );
 	VolumeBar.setBorder(0);
+	
+	dvrFunctions=new eWidget(this);
+	dvrFunctions->setName("dvrFunctions");
+	dvrFunctions->hide();
+	
+	dvrfunctions=0;
 
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
@@ -1887,13 +1896,13 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			volumeDown();
 		else if (event.action == &i_enigmaMainActions->toggleMute)
 			toggleMute();
-		else if (isSeekable() && event.action == &i_enigmaMainActions->play)
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->play)
 			play();
-		else if (isSeekable() && event.action == &i_enigmaMainActions->stop)
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->stop)
 			stop();
-		else if (isSeekable() && event.action == &i_enigmaMainActions->pause)
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->pause)
 			pause();
-		else if (event.action == &i_enigmaMainActions->record && handleState(0))
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->record && handleState(0))
 		{
  			if ((state & stateMask) == stateRecording)
  				recordDVR(0, 1);
@@ -1913,17 +1922,17 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 				recordDVR(1, 1, name);
 			}
 		}
-		else if (isSeekable() && event.action == &i_enigmaMainActions->startSkipForward)
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->startSkipForward)
 			startSkip(skipForward);
-		else if (isSeekable() && event.action == &i_enigmaMainActions->repeatSkipForward)
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->repeatSkipForward)
 			repeatSkip(skipForward);
-		else if (isSeekable() && event.action == &i_enigmaMainActions->stopSkipForward)
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->stopSkipForward)
 			stopSkip(skipForward);
-		else if (isSeekable() && event.action == &i_enigmaMainActions->startSkipReverse)
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->startSkipReverse)
 			startSkip(skipReverse);
-		else if (isSeekable() && event.action == &i_enigmaMainActions->repeatSkipReverse)
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->repeatSkipReverse)
 			repeatSkip(skipReverse);
-		else if (isSeekable() && event.action == &i_enigmaMainActions->stopSkipReverse)
+		else if (dvrfunctions && event.action == &i_enigmaMainActions->stopSkipReverse)
 			stopSkip(skipReverse);
 		else if (event.action == &i_enigmaMainActions->showEPG)
 			showEPG();
@@ -1959,6 +1968,11 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		{
 			setMode(modeTV);
 			showServiceSelector(-1, 1);
+		} else if (event.action == &i_enigmaMainActions->toggleDVRFunctions)
+		{
+			showDVRFunctions(!dvrfunctions);
+			if (!isVisible())
+				showInfobar();
 		} else
 		{
 			startMessages();
@@ -2011,6 +2025,8 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 			eDebug("doesn't support position query");
 			progresstimer.stop();
 		}
+		
+		showDVRFunctions(serviceFlags & eServiceHandler::flagIsSeekable);
 		updateProgress();
 		break;
 	}
@@ -2586,6 +2602,16 @@ void eZapMain::showBouquetList(int last)
 		b.down( recordings->list.back().service);
 	setServiceSelectorPath(b);
 	showServiceSelector(-1, !last);
+}
+
+void eZapMain::showDVRFunctions(int show)
+{
+	dvrfunctions=show;
+
+	if (dvrfunctions)
+		dvrFunctions->show();
+	else
+		dvrFunctions->hide();
 }
 
 void eZapMain::showFavourites()

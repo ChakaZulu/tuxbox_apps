@@ -71,7 +71,6 @@
 			<action name="standby_release" key="power" flags="b" />
 			<action name="toggleInfobar" key="ok" flags="m" />
 			<action name="showSubservices" key="green" flags="m" />
-			<action name="showSubservices" key="video" flags="m" />
 			<action name="showAudio" key="yellow" flags="m" />
 			<action name="showAudio" key="audio" flags="m" />
 			<action name="pluginVTXT" key="blue" flags="m" />
@@ -92,6 +91,7 @@
 			<action name="pause" key="yellow" flags="m" />
 
 			<action name="record" key="record" flags="m" />
+			<action name="record" key="radio" flags="m" />
 			
 			<action name="startSkipF" key="blue" flags="m" />
 			<action name="repeatSkipF" key="blue" flags="r" />
@@ -109,6 +109,7 @@
 			<action name="modeTV" key="tv" flags="m" />
 			<action name="modeRadio" key="radio" flags="m" />
 			<action name="modeFile" key="text" flags="m" />
+			<action name="toggleDVRFunctions" key="video" flags="m" />
 		</actionmap>
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="next" flags="mr" />

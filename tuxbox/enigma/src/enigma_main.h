@@ -178,6 +178,9 @@ private:
 	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff;
 	eLabel mute, volume;
 	
+	eWidget *dvrFunctions;
+	int dvrfunctions;
+	
 	eRecordingStatus *recstatus;
 	
 	eProgress *Progress, VolumeBar;
@@ -268,6 +271,8 @@ private:
 	
 	void showFavourites();
 	void showBouquetList(int sellast);
+
+	void showDVRFunctions(int show);
 
 	static eZapMain *instance;
 	
