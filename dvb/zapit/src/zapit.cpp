@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.358 2005/01/03 21:35:37 chakazulu Exp $
+ * $Id: zapit.cpp,v 1.359 2005/01/09 16:56:55 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -101,7 +101,8 @@ bool current_is_nvod = false;
 tallchans allchans;             //  tallchans defined in "bouquets.h"
 
 /* transponder scan */
-std::map <uint32_t, transponder>transponders;
+transponder_list_t transponders;
+
 pthread_t scan_thread;
 extern int found_transponders;
 extern int processed_transponders;
@@ -123,7 +124,6 @@ extern std::map<t_satellite_position, uint8_t> motorPositions;
 extern std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 
 extern std::map<string, t_satellite_position> satellitePositions;
-extern std::map<string, t_satellite_position>::iterator spos_it;
 
 extern std::map<string, int> satelliteDiseqcs; //diseqcs per satellite
 extern std::map<string, int>::iterator satdiseqc_it;
@@ -191,20 +191,20 @@ CZapitClient::responseGetLastChannel load_settings(void)
  *
  */
 
-static uint32_t tuned_transponder_id = 0;
+static transponder_id_t tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 static int pmt_update_fd = -1;
 static bool update_pmt = false;
 
-int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
+int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transponder_id)
 {
 	bool transponder_change;
 	tallchans_iterator cit;
-	uint32_t current_transponder_id;
+	transponder_id_t current_transponder_id;
 
-	DBG("tuned_transponder_id: %08x", tuned_transponder_id);
+	DBG("tuned_transponder_id: " PRINTF_TRANSPONDER_ID_TYPE, tuned_transponder_id);
 
-	/* usual zap */
-	if (!tsid_onid) {
+	if (transponder_id == TRANSPONDER_ID_NOT_TUNED)	/* usual zap */
+	{
 		if (in_nvod) {
 			current_is_nvod = true;
 			cit = nvodchannels.find(channel_id);
@@ -236,12 +236,11 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 		if ((!channel) || (channel_id != channel->getChannelID()))
 			channel = &(cit->second);
 
-		current_transponder_id = channel->getTsidOnid();
+		current_transponder_id = channel->getTransponderId();
 	}
-
-	/* nvod subservice zap */
-	else {
-		current_transponder_id = tsid_onid;
+	else /* nvod subservice zap */
+	{
+		current_transponder_id = transponder_id;
 	}
 
 	stopPlayBack();
@@ -271,8 +270,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 		if (currentMode & RECORD_MODE)
 			return -1;
 
-		/* find transponder which matches tsid onid pair */
-		std::map <uint32_t, transponder>::iterator t;
+		transponder_list_t::iterator t;
 		t = transponders.find(current_transponder_id);
 		if (t == transponders.end())
 			return -1;
@@ -282,7 +280,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 		switch (diff) {
 		case -1:
 			WARN("tuning failed\n");
-			tuned_transponder_id = 0;
+			tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 			return -1;
 		case 0:
 			break;
@@ -301,7 +299,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 
 	CZapitChannel *thisChannel;
 
-	if (!tsid_onid) {
+	if (transponder_id == TRANSPONDER_ID_NOT_TUNED)
+	{
 		thisChannel = channel;
 		if (thisChannel->getServiceType() == ST_NVOD_REFERENCE_SERVICE) {
 			current_is_nvod = true;
@@ -309,12 +308,15 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 			return 0;
 		}
 	}
-
-	else {
+	else
+	{
 		thisChannel = new CZapitChannel(channel->getName(),
-					channel_id & 0xffff, (tsid_onid >> 16) & 0xffff,
-					tsid_onid & 0xffff, 1, frontend->getDiseqcPosition(),
-					channel->getSatellitePosition());
+						channel_id & 0xffff,
+						GET_TRANSPORT_STREAM_ID_FROM_TRANSPONDER_ID(transponder_id),
+						GET_ORIGINAL_NETWORK_ID_FROM_TRANSPONDER_ID(transponder_id),
+						1,
+						frontend->getDiseqcPosition(),
+						channel->getSatellitePosition());
 	}
 
 	/* search pids if they are unknown */
@@ -384,8 +386,8 @@ int select_nvod_subservice_num(int num)
 	if ((!channel) || (channel->getServiceType() != ST_NVOD_REFERENCE_SERVICE) || (num < 0))
 		return -1;
 
-	if (channel->getTsidOnid() != tuned_transponder_id)
-		zapit(channel->getChannelID(), false, 0);
+	if (tuned_transponder_id != channel->getTransponderId())
+		zapit(channel->getChannelID(), false, TRANSPONDER_ID_NOT_TUNED);
 
 	if (nvod_service_ids(channel->getTransportStreamId(), channel->getOriginalNetworkId(), channel->getServiceId(),
 				num, &transport_stream_id, &original_network_id, &service_id) < 0)
@@ -393,7 +395,7 @@ int select_nvod_subservice_num(int num)
 
 	DBG("tsid: %04x, onid: %04x, sid: %04x\n", transport_stream_id, original_network_id, service_id);
 
-	return zapit(CREATE_CHANNEL_ID, false, (transport_stream_id << 16) | original_network_id);
+	return zapit(CREATE_CHANNEL_ID, false, CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(channel->getSatellitePosition(), original_network_id, transport_stream_id));
 }
 
 int change_audio_pid(uint8_t index)
@@ -526,12 +528,10 @@ int start_scan(bool scan_mode)
 		}
 	}
 
-	transponders.clear();
 	bouquetManager->clearAll();
-	allchans.clear();  // <- this invalidates all bouquets, too!
 	stopPlayBack();
 
-	tuned_transponder_id = 0;
+	tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 	found_transponders = 0;
 	found_channels = 0;
 	scan_runs = 1;
@@ -642,7 +642,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_GET_CURRENT_SERVICEID:
 	{
 		CZapitMessages::responseGetCurrentServiceID msgCurrentSID;
-		msgCurrentSID.channel_id = tuned_transponder_id ? channel->getChannelID() : 0;
+		msgCurrentSID.channel_id = (tuned_transponder_id != TRANSPONDER_ID_NOT_TUNED) ? channel->getChannelID() : 0;
 		CBasicServer::send_data(connfd, &msgCurrentSID, sizeof(msgCurrentSID));
 		break;
 	}
@@ -763,7 +763,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		TP_params TP;
 		CBasicServer::receive_data(connfd, &TP, sizeof(TP));
-		std::map <uint32_t, transponder>::iterator transponder = transponders.find(channel->getTsidOnid());
+		transponder_list_t::iterator transponder = transponders.find(channel->getTransponderId());
 		if(!(TP.feparams.frequency > 0) && channel)
 		 {
 
@@ -1295,8 +1295,8 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo)
 // ATTENTION: in RECORD_MODE empty bouquets are not send!
 			if ((!(currentMode & RECORD_MODE)) ||
 			    ((channel != NULL) &&
-			     (((currentMode & RADIO_MODE) && (bouquetManager->Bouquets[i]->recModeRadioSize(channel->getTsidOnid()) > 0)) ||
-			      ((currentMode & TV_MODE)    && (bouquetManager->Bouquets[i]->recModeTVSize   (channel->getTsidOnid()) > 0)))))
+			     (((currentMode & RADIO_MODE) && (bouquetManager->Bouquets[i]->recModeRadioSize(channel->getTransponderId()) > 0)) ||
+			      ((currentMode & TV_MODE)    && (bouquetManager->Bouquets[i]->recModeTVSize   (channel->getTransponderId()) > 0)))))
 			{
 				msgBouquet.bouquet_nr = i;
 				strncpy(msgBouquet.name, bouquetManager->Bouquets[i]->Name.c_str(), 30);
@@ -1336,7 +1336,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 	if (currentMode & RECORD_MODE)
 	{
 		for (uint32_t i = 0; i < channels->size(); i++)
-			if ((*channels)[i]->getTsidOnid() != channel->getTsidOnid())
+			if ((*channels)[i]->getTransponderId() != channel->getTransponderId())
 				data_count--;
 	}
 
@@ -1345,7 +1345,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 
 	for (uint32_t i = 0; i < channels->size();i++)
 	{
-		if ((currentMode & RECORD_MODE) && ((*channels)[i]->getTsidOnid() != channel->getTsidOnid()))
+		if ((currentMode & RECORD_MODE) && ((*channels)[i]->getTransponderId() != channel->getTransponderId()))
 			continue;
 
 		CZapitClient::responseGetBouquetChannels response;
@@ -1579,7 +1579,7 @@ void enterStandby(void)
 		videoDecoder = NULL;
 	}
 
-	tuned_transponder_id = 0;
+	tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 }
 
 void leaveStandby(void)
@@ -1691,7 +1691,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.358 2005/01/03 21:35:37 chakazulu Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.359 2005/01/09 16:56:55 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

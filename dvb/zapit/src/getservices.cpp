@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.86 2004/12/01 11:06:22 diemade Exp $
+ * $Id: getservices.cpp,v 1.87 2005/01/09 16:56:55 thegoodguy Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -27,7 +27,7 @@
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
 
-extern std::map <uint32_t, transponder> transponders;
+extern transponder_list_t transponders;
 extern tallchans allchans;
 
 std::map<std::string, t_satellite_position> satellitePositions; //satellite position as specified in satellites.xml
@@ -82,7 +82,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 		}
 
 		/* add current transponder to list */
-		if (transponders.find((transport_stream_id << 16) | original_network_id) != transponders.end())
+		if (transponders.find(CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellitePosition,original_network_id,transport_stream_id)) != transponders.end())
 		{
 			printf("[getservices] dup transponder id %X onid %X\n", transport_stream_id, original_network_id);
 		}
@@ -91,9 +91,9 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 
 		transponders.insert
 		(
-			std::pair <uint32_t, transponder>
+			std::pair <transponder_id_t, transponder>
 			(
-				(transport_stream_id << 16) | original_network_id,
+				CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellitePosition,original_network_id,transport_stream_id),
 				transponder
 				(
 					transport_stream_id,
@@ -226,8 +226,6 @@ int LoadMotorPositions(void)
 
 int LoadSatellitePositions(void)
 {
-	std::map<string, t_satellite_position>::iterator spos_it;
-	
 	xmlDocPtr parser = parseXmlFile(SATELLITES_XML);
 
 	if (parser == NULL)
@@ -249,7 +247,7 @@ int LoadSatellitePositions(void)
 	}
 	
 	xmlFreeDoc(parser);
-//	for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
+//	for (std::map<string, t_satellite_position>::iterator spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
 //		printf("satelliteName = %s, satellitePosition = %d\n", spos_it->first.c_str(), spos_it->second);
 
 	return 0;

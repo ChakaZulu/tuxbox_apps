@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.137 2004/11/02 12:16:42 lucgas Exp $
+ * $Id: scan.cpp,v 1.138 2005/01/09 16:56:55 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -29,6 +29,7 @@
 #include <zapit/client/zapitclient.h>
 #include <zapit/debug.h>
 #include <zapit/frontend.h>
+#include <zapit/getservices.h>
 #include <zapit/nit.h>
 #include <zapit/scan.h>
 #include <zapit/sdt.h>
@@ -47,7 +48,8 @@ int one_tpid, one_onid;
 
 CBouquetManager* scanBouquetManager;
 
-extern tallchans allchans;   //  defined in zapit.cpp
+extern transponder_list_t transponders; //  defined in zapit.cpp
+extern tallchans allchans;              //  defined in zapit.cpp
 extern int found_transponders;
 extern int found_channels;
 extern std::map <t_channel_id, uint8_t> service_types;
@@ -595,6 +597,8 @@ void *start_scanthread(void *scanmode)
 	/* get first child */
 	xmlNodePtr search = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
 
+	transponders.clear();
+	allchans.clear();  // <- this invalidates all bouquets, too!
 
 	if  (!strcmp(frontendType, "cable"))
 	{

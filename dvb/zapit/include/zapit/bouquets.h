@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.57 2004/08/02 08:13:45 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.58 2005/01/09 16:56:54 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -67,8 +67,8 @@ class CBouquet
 	
 	void moveService (const unsigned int oldPosition, const unsigned int newPosition, const unsigned char serviceType);
 	
-	size_t recModeRadioSize(const uint32_t tsid_onid);
-	size_t recModeTVSize(const uint32_t tsid_onid);
+	size_t recModeRadioSize(const transponder_id_t transponder_id);
+	size_t recModeTVSize   (const transponder_id_t transponder_id);
 	CZapitChannel* getChannelByChannelID(const t_channel_id channel_id, const unsigned char serviceType = ST_RESERVED);
 };
 

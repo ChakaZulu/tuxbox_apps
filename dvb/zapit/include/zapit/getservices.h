@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.57 2003/06/10 09:42:47 digi_casi Exp $
+ * $Id: getservices.h,v 1.58 2005/01/09 16:56:54 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -31,6 +31,8 @@
 #include "sdt.h"
 #include "types.h"
 #include "xmlinterface.h"
+
+#include <map>
 
 #define zapped_chan_is_nvod 0x80
 
@@ -69,5 +71,7 @@ struct transponder
 		original_network_id = p_original_network_id;
 	}
 };
+
+typedef std::map<transponder_id_t, transponder> transponder_list_t;
 
 #endif /* __getservices_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.26 2003/10/14 12:48:57 thegoodguy Exp $
+ * $Id: channel.h,v 1.27 2005/01/09 16:56:54 thegoodguy Exp $
  *
  * (C) 2002 Steffen Hehn <mcclean@berlios.de>
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
@@ -85,8 +85,8 @@ class CZapitChannel
 		t_original_network_id	getOriginalNetworkId(void) 	const { return original_network_id; }
 		unsigned char        	getServiceType(void)       	const { return serviceType; }
 		unsigned char        	getDiSEqC(void)            	const { return DiSEqC; }
-		t_channel_id         	getChannelID(void)         	const { return CREATE_CHANNEL_ID; }
-		uint32_t             	getTsidOnid(void)          	const { return (transport_stream_id << 16) | original_network_id; }
+		t_channel_id            getChannelID(void)              const { return CREATE_CHANNEL_ID; }
+		transponder_id_t        getTransponderId(void)          const { return CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellitePosition,original_network_id,transport_stream_id); }
 		
 		/* get methods - read and write variables */
 		const std::string	getName(void)			const { return name; }
