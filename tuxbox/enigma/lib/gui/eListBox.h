@@ -187,7 +187,8 @@ inline void eListBox<T>::remove(T* entry)
 template <class T>
 inline void eListBox<T>::clearList()
 {
-	childs.clear();
+	while (!childs.empty)
+		delete childs.first();
 }
 
 template <class T>
