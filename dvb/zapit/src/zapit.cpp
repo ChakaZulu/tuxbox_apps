@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.354 2004/06/10 19:56:12 rasc Exp $
+ * $Id: zapit.cpp,v 1.355 2004/08/01 19:55:42 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1080,7 +1080,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		response_FEsig.ber = frontend->getBitErrorRate();
 
 		CBasicServer::send_data(connfd, &response_FEsig, sizeof(CZapitClient::responseFESignal));
-		sendAPIDs(connfd);
 		break;
 	}
 
@@ -1645,7 +1644,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.354 2004/06/10 19:56:12 rasc Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.355 2004/08/01 19:55:42 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
