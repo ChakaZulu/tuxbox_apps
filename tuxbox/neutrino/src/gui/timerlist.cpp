@@ -731,9 +731,9 @@ int CTimerList::modifyTimer()
 	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
 	timerSettings.addItem( m1);
 
+   CDateInput timerSettings_stopTime("timerlist.stoptime", &timer->stopTime , "ipsetup.hint_1", "ipsetup.hint_2");
 	if(timer->stopTime != 0)
 	{
-		CDateInput timerSettings_stopTime("timerlist.stoptime", &timer->stopTime , "ipsetup.hint_1", "ipsetup.hint_2");
 		CMenuForwarder *m2 = new CMenuForwarder("timerlist.stoptime", true, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
 		timerSettings.addItem( m2);
 	}
@@ -757,10 +757,10 @@ int CTimerList::modifyTimer()
 	timerSettings.addItem(m3);
 	timerSettings.addItem(m4);
 
+   sprintf(m_apid,"%04x",timer->apid);
+   CStringInput  timerSettings_apid("timerlist.apid", m_apid , 4, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789ABCDEF");
 	if(timer->eventType ==  CTimerd::TIMER_RECORD)
 	{
-		sprintf(m_apid,"%04x",timer->apid);
-		CStringInput  timerSettings_apid("timerlist.apid", m_apid , 4, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789ABCDEF");
 		CMenuForwarder *m5 = new CMenuForwarder("timerlist.apid", true, m_apid, &timerSettings_apid );
 		timerSettings.addItem( m5);
 	}

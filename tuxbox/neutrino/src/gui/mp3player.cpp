@@ -208,29 +208,41 @@ int CMP3PlayerGui::show()
 		{
 			// do nothing
 		}
-		else if( msg == CRCInput::RC_left )
+		else if( msg == CRCInput::RC_left)
 		{
-			if(current-1 > 0)
-				play(current-1);
-			else
-				play(0);
-
-/*			selected+=listmaxshow;
-			if (selected>playlist.size()-1)
-				selected=0;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();*/
-		}
-		else if( msg == CRCInput::RC_right )
-		{
-			int next = getNext();
-			play(next);
-/*			if ((int(selected)-int(listmaxshow))<0)
-				selected=playlist.size()-1;
-			else
+         if(m_state==PLAY)
+         {
+            if(current-1 > 0)
+               play(current-1);
+            else
+               play(0);
+         }
+         else
+         {
+            if ((int(selected)-int(listmaxshow))<0)
+               selected=playlist.size()-1;
+            else
 				selected -= listmaxshow;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();*/
+            liststart = (selected/listmaxshow)*listmaxshow;
+            update=true;
+         }
+
+		}
+		else if( msg == CRCInput::RC_right)
+		{
+         if(m_state==PLAY)
+         {
+            int next = getNext();
+            play(next);
+         }
+         else
+         {
+            selected+=listmaxshow;
+            if (selected>playlist.size()-1)
+               selected=0;
+            liststart = (selected/listmaxshow)*listmaxshow;
+            update=true;
+         }
 		}
 		else if( msg == CRCInput::RC_up && playlist.size() > 0)
 		{
@@ -246,7 +258,7 @@ int CMP3PlayerGui::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
 			{
-				paint();
+				update=true;
 			}
 			else
 			{
@@ -262,7 +274,7 @@ int CMP3PlayerGui::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
 			{
-				paint();
+				update=true;
 			}
 			else
 			{
@@ -364,6 +376,7 @@ int CMP3PlayerGui::show()
 		else if(msg==CRCInput::RC_help)
 		{
 			int i=0;
+         srandom((unsigned int) time(NULL));
 			for(CPlayList::iterator p=playlist.begin(); p!=playlist.end() ;p++)
 			{
 				p->Index = random();
