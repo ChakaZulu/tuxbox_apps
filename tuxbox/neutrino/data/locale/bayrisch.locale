@@ -316,7 +316,7 @@ nvod.proz (%d%% vorbei)
 scants.head Senda suacha
 scants.startnow Ofanga mim Senda suacha
 scants.actsatellite Satellit:
-scants.actcable unset:
+scants.actcable Kabi:
 scants.astra Astra
 scants.hotbird Hotbird
 scants.kopernikus Kopernikus
@@ -325,8 +325,8 @@ scants.thor Thor
 scants.digituerk Digituerk
 scants.tuerksat Tuerksat
 scants.transponders Transponder:
-scants.freqdata	unset
-scants.servicenames	unset
+scants.freqdata	Frequenz:
+scants.servicenames	TV     Radio  Data
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave ned olanga
