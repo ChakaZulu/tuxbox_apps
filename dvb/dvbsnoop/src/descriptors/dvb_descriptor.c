@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.4 2003/10/19 22:22:57 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.5 2003/10/19 22:31:38 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.4 2003/10/19 22:22:57 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.5  2003/10/19 22:31:38  rasc
+- some datacarousell stuff started
+
 Revision 1.4  2003/10/19 22:22:57  rasc
 - some datacarousell stuff started
 
@@ -2649,7 +2652,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
  /* $$$    EN 192  has to be implemented here!!! */
 
- if (d.data_broadcast_id == 0x05) {
+ if (d.data_broadcast_id == 0x0005) {
 	 // -- EN 301 192 Multi-protocol-encapsulation!
 
 	 {
@@ -2683,6 +2686,10 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
 	 }
 
+ } else if (d.data_broadcast_id == 0x0007) {
+	 /* $$$ TODO EN 301 192 9.3.2 */
+ 			out_nl    (4,"TODO Data Carousel ID, etc:");
+		 	printhexdump_buf (4,  b, d.selector_length);
  } else {
  	out_nl    (4,"Selector-Bytes:");
  	printhexdump_buf (4,  b, d.selector_length);
