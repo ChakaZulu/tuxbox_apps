@@ -15,7 +15,6 @@
 #include <map>
 
 #include "webserver.h"
-#include "upload.h"
 
 using namespace std;
 
@@ -46,13 +45,16 @@ private:
 	long tmplong;
 	int tmpint;
 	string tmpstring;
+
+	bool CheckAuth();
 	
 
 public:
- 	int sock_fd;
-	SAI servaddr;
-	SAI	cliaddr;
-	int Socket;
+// 	int				sock_fd;
+//	SAI				servaddr;
+	string			Client_Addr;
+	int				Socket;
+	unsigned long	RequestNumber;
 
 	void SocketWrite( char* text);
 	void SocketWriteLn( char* text);
@@ -66,6 +68,12 @@ public:
 	void SendPlainHeader(string contenttype = "text/plain");
 	void Send404Error();
 	void Send500Error();
+
+	bool Authenticate();
+
+	bool ParseFile(string file,CStringList params);
+	string ParseLine(string line,CStringList params);
+
 
 	int Method;
 	string URL;
@@ -82,9 +90,9 @@ public:
 	
 	int HttpStatus;
 
-	class TWebserver * Parent;
+	class CWebserver * Parent;
 
-	CWebserverRequest(TWebserver *server);
+	CWebserverRequest(CWebserver *server);
 	~CWebserverRequest();
 
 	bool GetRawRequest();

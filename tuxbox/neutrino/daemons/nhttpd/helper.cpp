@@ -30,16 +30,22 @@
 #include    <stdlib.h>                      // calloc and free prototypes.
 #include    <stdio.h>                       // printf prototype.
 #include    <string.h>                      // str* and memset prototypes.
-
-void TString::Set(char * t, int len)
+//-------------------------------------------------------------------------
+string itoh(unsigned int conv)
 {
-	laenge=len;
-	if(laenge > 0)
-		if((text = (char *) malloc(laenge+1)) != NULL){
-			strncpy(text,t,laenge);
-			text[laenge] = 0;
-		}else perror("Kein Speicher in TString\n");	
+	static char buf[20];
+	sprintf(buf,"0x%06x\0",conv);
+	return string(buf);
 }
+//-------------------------------------------------------------------------
+
+string itoa(unsigned int conv)
+{
+	static char buf[20];
+	sprintf(buf,"%u\0",conv);
+	return string(buf);
+}
+//-------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------
 

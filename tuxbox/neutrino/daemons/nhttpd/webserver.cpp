@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.9 2002/04/22 20:38:13 dirch Exp $
+	$Id: webserver.cpp,v 1.10 2002/05/12 18:16:09 dirch Exp $
 
 	License: GPL
 
@@ -32,18 +32,31 @@
 #include <sys/wait.h> 
 
 #define NHTTPD_CONFIGFILE CONFIGDIR "/nhttpd.conf"
+struct Cmyconn
+{
+	socklen_t			clilen;
+	string				Client_Addr;
+	int					Socket;
+	CWebserver			*Parent;	
+};
+
+pthread_mutex_t ServerData_mutex;
+unsigned long Requests = 0;
+int ThreadsCount = 0;
 
 //-------------------------------------------------------------------------
-TWebserver::TWebserver()
+CWebserver::CWebserver()
 {
 	Port=0;
 	ListenSocket = 0;
 	PublicDocumentRoot = "";
 	PrivateDocumentRoot = "";
-	DEBUG=false;
+	DEBUG = false;
+	STOP = false;
+	NewGui = false;
 }
 //-------------------------------------------------------------------------
-TWebserver::~TWebserver()
+CWebserver::~CWebserver()
 {
 	Config->saveConfig(NHTTPD_CONFIGFILE );
 
@@ -54,18 +67,10 @@ TWebserver::~TWebserver()
 		delete WebDbox;
 }
 //-------------------------------------------------------------------------
-//bool TWebserver::Init(int port,string publicdocumentroot,bool debug,bool verbose,bool threads, bool auth)
-bool TWebserver::Init()
+bool CWebserver::Init(bool debug)
 {
-/*
-	Port=port;
 	DEBUG = debug;
-	THREADS = threads;
-	VERBOSE = verbose;
-	MustAuthenticate = auth;
-	PrivateDocumentRoot = PRIVATEDOCUMENTROOT;
-	PublicDocumentRoot = publicdocumentroot;
-*/
+
 	Config = new CConfigFile(',');
 
 	char tmp[16];
@@ -73,24 +78,23 @@ bool TWebserver::Init()
 	if (!Config->loadConfig(NHTTPD_CONFIGFILE) )
 	{
 		Config->setInt("Port", 80);
-		Config->setBool("DEBUG",false);
-		Config->setBool("THREADS",false);
+		Config->setBool("THREADS",true);
 		Config->setBool("VERBOSE",false);
 		Config->setBool("Authenticate",false);
-		Config->setString("User","root");
-		Config->setString("Password","dbox2");
+		Config->setString("AuthUser","root");
+		Config->setString("AuthPassword","dbox2");
 		Config->setString("PublicDocRoot",PUBLICDOCUMENTROOT);
 		Config->setString("PrivatDocRoot",PRIVATEDOCUMENTROOT);
 		Config->saveConfig(NHTTPD_CONFIGFILE);
 	}
  
 	Port = Config->getInt("Port");
-	DEBUG = Config->getBool("DEBUG");
 	THREADS = Config->getBool("THREADS");
 	VERBOSE = Config->getBool("VERBOSE");
 	MustAuthenticate = Config->getBool("Authenticate");
 	PrivateDocumentRoot = Config->getString("PrivatDocRoot");
 	PublicDocumentRoot = Config->getString("PublicDocRoot");
+	NewGui = Config->getBool("RC");
 
 	EventServer.registerEvent2( NeutrinoMessages::SHUTDOWN, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
 	EventServer.registerEvent2( NeutrinoMessages::STANDBY_ON, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
@@ -101,7 +105,7 @@ bool TWebserver::Init()
 }
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
-bool TWebserver::Start()
+bool CWebserver::Start()
 {
 	SAI servaddr;
 
@@ -131,116 +135,133 @@ bool TWebserver::Start()
 			return false;
 	}
 	Debug("Server gestartet\n");
-
-	// TimerThread starten
 				
 	return true;
 }
-
 //-------------------------------------------------------------------------
-void * WebThread(void * request)
+void * WebThread(void * myconn)
 {
-static int ThreadsCount = 0;
-CWebserverRequest *req = (CWebserverRequest *)request;
+CWebserverRequest	*req;
+	pthread_detach(pthread_self());
+	req = new CWebserverRequest(((Cmyconn *)myconn)->Parent);
+	req->Client_Addr = ((Cmyconn *)myconn)->Client_Addr;
+	req->Socket = ((Cmyconn *)myconn)->Socket;
+	
+	pthread_mutex_lock( &ServerData_mutex );
+	req->RequestNumber = Requests++;
 	ThreadsCount++;
-	while(ThreadsCount > 15)
+	pthread_mutex_unlock( &ServerData_mutex );
+	if(req->GetRawRequest())
 	{
-		printf("[nhttpd] Too many requests, waitin one sec\n");
-		sleep(1);
-	}
-	if(req->Parent->DEBUG) printf("*********** Thread %d (%X) gestartet\n",ThreadsCount,(int)pthread_self());	
-	if(req)
-	{
+		while(ThreadsCount > 15)
+		{
+			printf("[nhttpd] Too many requests, waitin one sec\n");
+			sleep(1);
+		}
+		if( (req->Parent->DEBUG) || (req->Parent->VERBOSE) ) printf("++ Thread 0x06%X gestartet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);	
 		if(req->ParseRequest())
 		{
 			req->SendResponse();
-
-			if(req->Parent->VERBOSE) req->PrintRequest();
-
+			if( (req->Parent->DEBUG) || (req->Parent->VERBOSE) ) req->PrintRequest();
 			req->EndRequest();
-
 		}
 		else
 			printf("Error while parsing request\n");
 
+		pthread_mutex_lock( &ServerData_mutex );
+		ThreadsCount--;
+		pthread_mutex_unlock( &ServerData_mutex );
+
+		if( (req->Parent->DEBUG) || (req->Parent->VERBOSE) ) printf("-- Thread 0x06%X beendet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);
 		delete req;
-		if(req->Parent->DEBUG) printf("Nach delete req\n");
+		delete (Cmyconn *) myconn;
 	}
-	ThreadsCount--;
-	if(req->Parent->DEBUG) printf("*********** Thread %X beendet, ThreadCount: %d\n",(int)pthread_self(),ThreadsCount);
 	pthread_exit((void *)NULL);
+	return NULL;
 }
 //-------------------------------------------------------------------------
-void TWebserver::DoLoop()
+void CWebserver::DoLoop()
 {
 socklen_t			clilen;
 SAI					cliaddr;
 CWebserverRequest	*req;
 int sock_connect;
 int thread_num =0;
-pthread_t Threads[10];
+pthread_t Threads[30];
 
+
+   pthread_attr_t attr;
+   pthread_attr_init(&attr);
+   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+   pthread_mutex_init( &ServerData_mutex, NULL );
 
 	clilen = sizeof(cliaddr);
-	while(1)
+	while(!STOP)
 	{
 		memset(&cliaddr, 0, sizeof(cliaddr));
-
-		if ((sock_connect = accept(ListenSocket, (SA *) &cliaddr, &clilen)) == -1) 
+		if ((sock_connect = accept(ListenSocket, (SA *) &cliaddr, &clilen)) == -1)		// accepting requests
 		{
                 perror("Error in accept");
                 continue;
         }
-        if(DEBUG) printf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
-		req = new CWebserverRequest(this);
-		memcpy(&(req->cliaddr),&cliaddr,sizeof(cliaddr));
-		req->Socket = sock_connect;
-		if(req->GetRawRequest())
-		{
+        if(DEBUG) printf("nhttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));		// request from client arrives
 
-			if(THREADS)
-			{
-				if (pthread_create (&Threads[thread_num++], NULL, WebThread, (void *)req) != 0 )
-					perror("[nhttpd]: pthread_create(WebThread)");
-				if(thread_num == 10)
-					thread_num = 0;
-			}
+
+		if(THREADS)		
+		{																						// Multi Threaded 
+			Cmyconn *myconn = new Cmyconn;														// prepare Cmyconn struct
+			myconn->clilen = clilen;
+			myconn->Client_Addr = inet_ntoa(cliaddr.sin_addr);
+			myconn->Socket = sock_connect;
+			myconn->Parent = this;
+			if (pthread_create (&Threads[thread_num], &attr, WebThread, (void *)myconn) != 0 )	// start WebThread 
+				perror("[nhttpd]: pthread_create(WebThread)");
+			if(thread_num == 20)																// testing
+				thread_num = 0;
 			else
+				thread_num++;
+		}
+		else
+		{													// Single Threaded
+			req = new CWebserverRequest(this);													// create new request
+			req->Socket = sock_connect;	
+			req->Client_Addr = inet_ntoa(cliaddr.sin_addr);
+			req->RequestNumber = Requests++;
+			if(req->GetRawRequest())															//read request from client
 			{
-				if(req->ParseRequest())
+				if(req->ParseRequest())															// parse it
 				{
 				
-					req->SendResponse();
-					req->PrintRequest();
+					req->SendResponse();														// send the proper response
+					if( DEBUG || VERBOSE ) req->PrintRequest();									// and print if wanted
 				}
 				else
 					Ausgabe("Error while parsing request");
 				
-				req->EndRequest();
-				delete req;
-				if(DEBUG) printf("Request beendet und gelöscht\n");
+				req->EndRequest();																// end the request
+				delete req;													
 				req = NULL;
 			}
+			else
+				Ausgabe("Unable to read request");
 		}
-		else
-			Ausgabe("Unable to read request");
 	}
 }
 
 //-------------------------------------------------------------------------
-void TWebserver::Stop()
+void CWebserver::Stop()
 {
 	if(ListenSocket != 0)
 	{
 		Debug("ListenSocket closed\n");
-		close( ListenSocket );
+		close( ListenSocket );					
 		ListenSocket = 0;
 	}
 }
 
 //-------------------------------------------------------------------------
 
-int TWebserver::SocketConnect(Tmconnect * con,int Port)
+int CWebserver::SocketConnect(Tmconnect * con,int Port)
 {
 	char rip[]="127.0.0.1";
 

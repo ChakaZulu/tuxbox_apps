@@ -25,7 +25,7 @@
 	// Revision 1.2  22.03.2002 20:20  dirch
 
 */
-#define NHTTPD_VERSION "1.2"
+#define NHTTPD_VERSION "1.3"
 
 #include <signal.h>
  
@@ -44,7 +44,7 @@ using namespace std;
 
 //-------------------------------------------------------------------------
 
-TWebserver* nwebserver;
+CWebserver* webserver;
 
 
 //-------------------------------------------------------------------------
@@ -57,19 +57,16 @@ void Ausgabe(char * OutputString)
 void sig_catch(int)
 {
         Ausgabe("stop requested......");
-        nwebserver->Stop();
-        delete(nwebserver);
+        webserver->Stop();
+        delete(webserver);
         exit(0);
 }
 //-------------------------------------------------------------------------
 
 int main(int argc, char **argv)
 {
-//	bool debug = false;
-//	bool verbose = false;
-//	bool threads = true;
+	bool debug = false;
 	bool do_fork = true;
-//	bool auth = false;
 
 	int i;
 
@@ -78,30 +75,17 @@ int main(int argc, char **argv)
 		for(i = 1; i < argc; i++)
 		{
 
-/*			if (strncmp(argv[i], "-d", 2) == 0)
+			if (strncmp(argv[i], "-d", 2) == 0)
 			{
 				debug = true;
 				do_fork = false;
 			}
 			else 
-*/
+
 			if (strncmp(argv[i], "-f", 2) == 0)
 			{
 				do_fork = false;
 			}
-/*			else if (strncmp(argv[i], "-v", 2) == 0)
-			{
-				verbose = true;
-			}
-			else if (strncmp(argv[i], "-t", 2) == 0)
-			{
-				threads = false;
-			}
-			else if (strncmp(argv[i], "-a", 2) == 0)
-			{
-				auth = true;
-			}
-*/
 			else if (strncmp(argv[i],"--version", 9) == 0) 
 			{
 				printf("nhttp - Neutrino Webserver\n");
@@ -111,23 +95,15 @@ int main(int argc, char **argv)
 			else if ((strncmp(argv[i], "--help", 6) == 0) || (strncmp(argv[i], "-h", 2) == 0))
 			{
 				printf("nhttpd parameters:\n");
-//				printf("-a\t\tauthenticatoin mode\n");
-//				printf("-d\t\tdebug\n");
-//				printf("-v\t\tverbose\n");
-//				printf("-t\t\trun multi-threaded\n");
+				printf("-d\t\tdebug\n");
 				printf("-f\t\tdo not fork\n");
-//				printf("--version\tversion\n");
+				printf("--version\tversion\n");
 				printf("--help\t\tthis text\n\n");
 				return 0;
 			}
 		}
 	}
-/*
-	if (debug)
-	{
-		printf("Starte %s\n",threads?"multi threaded":"single threaded");
-	}
-*/
+
 	signal(SIGINT,sig_catch);
 	signal(SIGHUP,sig_catch);
 	signal(SIGTERM,sig_catch);
@@ -154,16 +130,15 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ((nwebserver = new TWebserver()) != NULL)
+	if ((webserver = new CWebserver()) != NULL)
 	{
-//		if (nwebserver->Init(80, DATADIR "/neutrino/httpd", debug, verbose, threads, auth))
-		if (nwebserver->Init())
+		if (webserver->Init(debug))
 		{
-			if (nwebserver->Start())
+			if (webserver->Start())
 			{
 				printf("httpd gestartet\n");
-				nwebserver->DoLoop();
-				nwebserver->Stop();
+				webserver->DoLoop();
+				webserver->Stop();
 			}
 		}
 		else
@@ -171,7 +146,7 @@ int main(int argc, char **argv)
 			Ausgabe("Error initializing httpd");
 			return -1;
 		}
-		delete nwebserver;
+		delete webserver;
 	}
 	else
 	{

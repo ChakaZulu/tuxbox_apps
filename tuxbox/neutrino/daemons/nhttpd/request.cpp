@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.10 2002/04/27 16:47:54 dirch Exp $
+	$Id: request.cpp,v 1.11 2002/05/12 18:16:09 dirch Exp $
 
 	License: GPL
 
@@ -33,7 +33,7 @@
 
 
 //-------------------------------------------------------------------------
-CWebserverRequest::CWebserverRequest(TWebserver *server) 
+CWebserverRequest::CWebserverRequest(CWebserver *server) 
 {
 	Parent = server;
 	Method = M_UNKNOWN; 
@@ -43,8 +43,6 @@ CWebserverRequest::CWebserverRequest(TWebserver *server)
 	Path = "";
 	Param_String="";
 	ContentType = "";
-//	Boundary = NULL;
-//	Upload = NULL;
 	HttpStatus = 0;
 }
 
@@ -52,15 +50,61 @@ CWebserverRequest::CWebserverRequest(TWebserver *server)
 CWebserverRequest::~CWebserverRequest() 
 {
 	EndRequest();
-//	if(Upload) delete Upload;
+}
+
+bool CWebserverRequest::Authenticate()
+{
+	if(Parent->MustAuthenticate)
+	{
+		if(!CheckAuth())
+		{
+			if(Parent->DEBUG) printf("Authenticate\n");
+			SocketWriteLn("HTTP/1.0 401 Unauthorized");
+			SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\n\n");
+			SocketWriteLn("Access denied\n");
+			return false;
+		}
+		else
+		{
+			if(Parent->DEBUG) printf("Zugriff ok\n");
+			return true;
+		}
+	}
+	else
+		return true;
+}
+
+//-------------------------------------------------------------------------
+bool CWebserverRequest::CheckAuth()
+{
+	if(HeaderList["Authorization"] == "")
+		return false;
+	string encodet = HeaderList["Authorization"].substr(6,HeaderList["Authorization"].length() - 6);
+	string decodet = b64decode((char *)encodet.c_str());
+	int pos = decodet.find_first_of(':');
+	string user = decodet.substr(0,pos);
+	string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
+	if(Parent->DEBUG) printf("user: '%s' passwd: '%s'\n",user.c_str(),passwd.c_str());
+
+	if(user.compare(Parent->Config->getString("User")) == 0 && passwd.compare(Parent->Config->getString("Password")) == 0)
+	{
+		if(Parent->DEBUG) printf("passwort ok\n");
+		return true;
+	}
+	else
+	{
+		if(Parent->DEBUG) printf("passwort nicht ok\n");
+		return false;
+	}
 }
 
 //-------------------------------------------------------------------------
 bool CWebserverRequest::GetRawRequest()
 {
+#define bufferlen 1024
 	char *buffer;
-	buffer = new char[1024];
-	if((rawbuffer_len = read(Socket,buffer,1023)) != -1)
+	buffer = new char[bufferlen+1];
+	if((rawbuffer_len = read(Socket,buffer,bufferlen)) != -1)
 	{
 		rawbuffer = string(buffer,rawbuffer_len);
 		delete[] buffer;
@@ -79,13 +123,11 @@ string nummer = "1";
 		if(pos != -1)
 		{
 			ParameterList[param_str.substr(0,pos)] = param_str.substr(pos+1,param_str.length() - (pos+1));
-			if(Parent->DEBUG) printf("Parameter[%s] = '%s'\n",param_str.substr(0,pos).c_str(),param_str.substr(pos+1,param_str.length() - (pos+1)).c_str());
 		}
 		else
 		{
 			ParameterList[nummer] = param_str;
 			nummer[0]++;
-			if(Parent->DEBUG) printf("Parameter[1] = '%s'\n",param_str.c_str());
 		}
 	}
 }
@@ -98,7 +140,6 @@ string param_str;
 int pos;
 bool ende = false;
 
-	if(Parent->DEBUG) printf("param_string: %s\n",param_string.c_str());
 	if(param_string.length() <= 0)
 		return false;
 
@@ -116,7 +157,7 @@ bool ende = false;
 			param = param_str;
 			ende = true;
 		}
-		if(Parent->DEBUG) printf("param: '%s' param_str: '%s'\n",param.c_str(),param_str.c_str());
+//		if(Parent->DEBUG) printf("param: '%s' param_str: '%s'\n",param.c_str(),param_str.c_str());
 		SplitParameter(param);
 	}
 	return true;
@@ -172,7 +213,6 @@ bool CWebserverRequest::ParseHeader(string header)
 bool ende = false;
 int pos;
 string sheader;
-	if(Parent->DEBUG) printf("Header:\n");
 	while(!ende)
 	{
 		if((pos = header.find_first_of("\n")) > 0)
@@ -189,7 +229,7 @@ string sheader;
 		if((pos = sheader.find_first_of(':')) > 0)
 		{
 			HeaderList[sheader.substr(0,pos)] = sheader.substr(pos+2,sheader.length() - pos - 2);
-			if(Parent->DEBUG) printf("%s: %s\n",sheader.substr(0,pos).c_str(),HeaderList[sheader.substr(0,pos)].c_str());
+//			if(Parent->DEBUG) printf("%s: %s\n",sheader.substr(0,pos).c_str(),HeaderList[sheader.substr(0,pos)].c_str());
 		}
 	}
 	
@@ -226,32 +266,26 @@ bool CWebserverRequest::ParseBoundaries(string bounds)
 //-------------------------------------------------------------------------
 bool CWebserverRequest::ParseRequest()
 {
-//int i = 0,zeile2_offset = 0;
-//char *zeile;
 int ende;
-//string buffer;
 	if(rawbuffer_len > 0 )
 	{
-//		buffer= string(rawbuffer,rawbuffer_len);
 		if((ende = rawbuffer.find_first_of('\n')) == 0)
 		{
-			printf("Kein Zeilenende gefunden\n");
+			Parent->Ausgabe("ParseRequest: Kein Zeilenende gefunden\n");
 			Send500Error();
 			return false;
 		}
 		string zeile1 = rawbuffer.substr(0,ende-1);
-		if(Parent->DEBUG) printf("REQUEST: '%s'\n",zeile1.c_str());
 
 		if(ParseFirstLine(zeile1))
 		{
 			int i;
 			for(i = 0; ((rawbuffer[i] != '\n') || (rawbuffer[i+2] != '\n')) && (i < rawbuffer.length());i++);
-//				printf("rawbuffer[%d] = '%c',rawbuffer[%d] = '%c'\n",i,rawbuffer[i],i+1,rawbuffer[i+1]);
-			int headerende = i; //rawbuffer.find("\n\n");//length() - 1;
-			if(Parent->DEBUG) printf("headerende: %d buffer_len: %d\n",headerende,rawbuffer_len);
+			int headerende = i;
+//			if(Parent->DEBUG) printf("headerende: %d buffer_len: %d\n",headerende,rawbuffer_len);
 			if(headerende == 0)
 			{
-				printf("Keine Header gefunden\n");
+				Parent->Ausgabe("ParseRequest: Keine Header gefunden\n");
 				Send500Error();
 				return false;
 			}
@@ -324,7 +358,6 @@ int ende;
 //-------------------------------------------------------------------------
 bool CWebserverRequest::HandleUpload()
 {
-//	char buffer[1024];
 	int t = 0;
 	FILE *output;
 	int count = 0;
@@ -380,13 +413,13 @@ void CWebserverRequest::PrintRequest()
 		sprintf(method,"POST");
 
 
-	printf("%s %3d %-6s %-35s %-20s %-25s %-10s %s\n",inet_ntoa(cliaddr.sin_addr),HttpStatus,method,Path.c_str(),Filename.c_str(),URL.c_str(),ContentType.c_str(),Param_String.c_str());
+	printf("%04lu %s %3d %-6s %-35s %-20s %-25s %-10s %s\n",RequestNumber,Client_Addr.c_str(),HttpStatus,method,Path.c_str(),Filename.c_str(),URL.c_str(),ContentType.c_str(),Param_String.c_str());
 }
 
 //-------------------------------------------------------------------------
 void CWebserverRequest::SendHTMLHeader(string Titel)
 {
-	SocketWriteLn("<html>\n<head><title>" + Titel + "</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\">");
+	SocketWriteLn("<html>\n<head><title>" + Titel + "</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../global.css\">");
 	SocketWriteLn("<meta http-equiv=\"cache-control\" content=\"no-cache\">");
 	SocketWriteLn("<meta http-equiv=\"expires\" content=\"0\"></head>\n<body>");
 }
@@ -419,13 +452,6 @@ void CWebserverRequest::Send500Error()
 void CWebserverRequest::SendPlainHeader(string contenttype = "text/plain")
 {
 	SocketWrite("HTTP/1.0 200 OK\nContent-Type: " + contenttype + "\n\n");
-/*
-	if(contenttype)
-		SocketWrite(contenttype);
-	else
-		SocketWrite("text/plain");
-	SocketWrite("\n\n");
-*/
 	HttpStatus = 200;
 }
 
@@ -458,9 +484,11 @@ void CWebserverRequest::RewriteURL()
 
 	if( (strncmp(Path.c_str(),"/fb",3) != 0) && (strncmp(Path.c_str(),"/control",8) != 0) )	// Nur umschreiben wenn nicht mit /fb/ anfängt
 	{
-//		sprintf(urlbuffer,"%s%s\0",Parent->PublicDocumentRoot->c_str(),Path.c_str());
-		Path = Parent->PrivateDocumentRoot + Path;
-//		Path = urlbuffer;
+		if(strncmp(Path.c_str(),"/public",7) == 0)
+			Path = Parent->PublicDocumentRoot + Path.substr(7,Path.length() - 7);	
+		else
+			Path = Parent->PrivateDocumentRoot + Path;
+
 		if(Parent->DEBUG) printf("Umgeschrieben: '%s'\n",Path.c_str());
 	}
 	else
@@ -541,7 +569,9 @@ bool CWebserverRequest::SendResponse()
 					ContentType = "text/html";
 				else if(FileExt.compare("gif") == 0)
 					ContentType = "image/gif";
-				else if(FileExt.compare("jpg") == 0)
+				else if((FileExt.compare("png") == 0) || (FileExt.compare("PNG") == 0) )
+					ContentType = "image/png";
+				else if( (FileExt.compare("jpg") == 0) || (FileExt.compare("JPG") == 0) )
 					ContentType = "image/jpeg";
 				else if(FileExt.compare("xml") == 0)
 					ContentType = "text/xml";
@@ -590,8 +620,8 @@ void CWebserverRequest::SocketWriteData( char* data, long length )
 
 bool CWebserverRequest::SendFile(string path,string filename)
 {
-	if( (tmpint = OpenFile(path,filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
-	{											// Wenn Datei geöffnet werden konnte
+	if( (tmpint = OpenFile(path,filename) ) != -1 )	
+	{											
 		SendOpenFile(tmpint);
 		return true;
 	}
@@ -646,3 +676,43 @@ int CWebserverRequest::OpenFile(string path, string filename)
 
 
 //-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
+bool CWebserverRequest::ParseFile(string file,CStringList params)
+{
+	FILE * f;
+	if((f = fopen(file.c_str(),"r")) == NULL)
+	{
+		printf("[nhttpd] Parse file open error: '%s'\n",file.c_str());
+		return false;
+	}
+	char zeile[1024];
+	while(!feof(f))
+	{
+		fgets(zeile,sizeof(zeile),f);
+		SocketWrite(ParseLine(zeile,params));
+	}
+	fclose(f);
+	return true;
+}
+//-------------------------------------------------------------------------
+
+string CWebserverRequest::ParseLine(string line,CStringList params)
+{
+	int a = 0,e = 0,anfang = 0, ende = 0;
+	if((a = line.find_first_of('%')) >= 0)
+	{
+		if(line[a] == '%')
+		{
+			anfang = a;
+			string rest = line.substr(a+2,line.length() - (a+2));
+			if((e = rest.find_first_of('%')) > 0)
+				if(rest[e] == '%')
+				{
+					ende = a + 2 + e + 2;					
+					return line.substr(0,anfang) + ((params[rest.substr(0,e)].length() > 0)?params[rest.substr(0,e)]:"param '"+rest.substr(0,e)+"' not found") + line.substr(ende, line.length() - ende);
+				}
+		}
+	}
+	return line;
+}

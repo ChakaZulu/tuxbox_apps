@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.25 2002/04/22 21:42:33 McClean Exp $
+	$Id: webdbox.cpp,v 1.26 2002/05/12 18:16:09 dirch Exp $
 
 	License: GPL
 
@@ -44,14 +44,56 @@
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
+
+//-------------------------------------------------------------------------
+void TWebDbox::UpdateBouquets(void)
+{
+	GetBouquets();
+	for(int i = 1; i <= BouquetList.size();i++)
+		GetBouquet(i);
+	GetChannelList();
+}
+//-------------------------------------------------------------------------
+
+void TWebDbox::ZapTo(string target)
+{
+	int sidonid = atoi(target.c_str());
+	if(sidonid == zapit.getCurrentServiceID())
+	{
+		if(Parent->DEBUG) printf("Kanal ist aktuell\n");
+		return;
+	}
+	zapit.zapTo_serviceID(sidonid);
+	sectionsd.setServiceChanged(sidonid,false);
+
+}
+//-------------------------------------------------------------------------
+
+
 //-------------------------------------------------------------------------
 // Konstruktor und destruktor
 //-------------------------------------------------------------------------
 
-TWebDbox::TWebDbox(TWebserver *server)
+TWebDbox::TWebDbox(CWebserver *server)
 {
 	Parent=server;
+	standby_mode=false;
 	UpdateBouquets();
+
+	Dbox_Hersteller[1] = "Nokia";
+	Dbox_Hersteller[2] = "Sagem";
+	Dbox_Hersteller[3] = "Philips";
+	videooutput_names[0] = "Composite";
+	videooutput_names[1] = "RGB";
+	videooutput_names[2] = "S-Video";
+	videoformat_names[0] = "automatic";
+	videoformat_names[1] = "16:9";
+	videoformat_names[2] = "4:3";
+	audiotype_names[1] =  "single channel";
+	audiotype_names[2] = "dual channel";
+	audiotype_names[3] = "joint stereo";
+	audiotype_names[4] = "stereo";
+
 }
 //-------------------------------------------------------------------------
 
@@ -59,11 +101,63 @@ TWebDbox::~TWebDbox()
 {
 }
 //-------------------------------------------------------------------------
+// Get functions
+//-------------------------------------------------------------------------
 
+bool TWebDbox::GetStreamInfo(int bitInfo[10])
+{
+	char *key,*tmpptr,buf[100];
+	int value, pos=0;
+
+	FILE* fd = fopen("/proc/bus/bitstream", "rt");
+	if (fd==NULL)
+	{
+		printf("error while opening proc-bitstream\n" );
+		return false;
+	}
+
+	fgets(buf,29,fd);//dummy
+	while(!feof(fd))
+	{
+		if(fgets(buf,29,fd)!=NULL)
+		{
+			buf[strlen(buf)-1]=0;
+			tmpptr=buf;
+			key=strsep(&tmpptr,":");
+			for(;tmpptr[0]==' ';tmpptr++);
+			value=atoi(tmpptr);
+			bitInfo[pos]= value;
+			pos++;
+		}
+	}
+	fclose(fd);
+
+	return true;
+}
+
+//-------------------------------------------------------------------------
+
+void TWebDbox::GetChannelEvents()
+{
+	eList = sectionsd.getChannelEvents();
+	CChannelEventList::iterator eventIterator;
+
+    for( eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++ )
+		ChannelListEvents[(*eventIterator).serviceID()] = &(*eventIterator);
+}
+//-------------------------------------------------------------------------
+string TWebDbox::GetServiceName(int onid_sid)
+{
+	for(int i = 0; i < ChannelList.size();i++)
+		if( ChannelList[i].onid_sid == onid_sid)
+			return ChannelList[i].name;
+	return "";
+}
 
 //-------------------------------------------------------------------------
 // ExecuteCGI und Execute
 //-------------------------------------------------------------------------
+/*
 bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 {
 	if(Parent->DEBUG) printf("Execute CGI : %s\n",request->Filename.c_str());
@@ -146,10 +240,13 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			if (request->ParameterList["1"] == "on")	// in standby mode schalten
 			{
 				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_NHTTPD);
-				printf("Event fired\n");
+				standby_mode = true;
 			}
 			if (request->ParameterList["1"] == "off")	// standby mode ausschalten
+			{
 				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_NHTTPD);
+				standby_mode = false;
+			}
 		}
 		request->SocketWrite("ok");
 		return true;
@@ -238,7 +335,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		{
 			if (request->ParameterList["1"] == "streaminfo")	// streminfo ausgeben
 			{
-				SendStreaminfo(request);
+				SendStreamInfo(request);
 				return true;
 			}
 			else if (request->ParameterList["1"] == "settings")	// settings ausgeben
@@ -264,7 +361,6 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		request->SendPlainHeader();          // Standard httpd header senden
 		if (request->ParameterList.size() == 0)
 		{	//paramlos
-//			controld.shutdown();			// dbox runterfahren
 			Parent->EventServer.sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_NHTTPD);
 
 			request->SocketWrite("ok");
@@ -362,7 +458,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			{
 				if(ChannelListEvents[ChannelList[i].onid_sid])
 				{
-					sprintf(buffer,"%u %llu %s\n",ChannelList[i].onid_sid,ChannelListEvents[ChannelList[i].onid_sid]->eventID,ChannelListEvents[ChannelList[i].onid_sid]->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
+					sprintf(buffer,"%u %llu %s\n",ChannelList[i].onid_sid,ChannelListEvents[ChannelList[i].onid_sid]->eventID,ChannelListEvents[ChannelList[i].onid_sid]->description.c_str());
 					request->SocketWrite(buffer);
 				}
 			}
@@ -370,7 +466,6 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		else if(request->ParameterList.size() == 1)
 		{
 
-//			request->ParameterList->PrintParameterList();
 			if(request->ParameterList["1"] == "ext")
 			{
 				char buffer[255];
@@ -378,7 +473,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 				{
 					if(ChannelListEvents[ChannelList[i].onid_sid])
 					{
-						sprintf(buffer,"%u %ld %ld %llu %s\n",ChannelList[i].onid_sid,ChannelListEvents[ChannelList[i].onid_sid]->startTime,ChannelListEvents[ChannelList[i].onid_sid]->duration,ChannelListEvents[ChannelList[i].onid_sid]->eventID,ChannelListEvents[ChannelList[i].onid_sid]->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
+						sprintf(buffer,"%u %ld %ld %llu %s\n",ChannelList[i].onid_sid,ChannelListEvents[ChannelList[i].onid_sid]->startTime,ChannelListEvents[ChannelList[i].onid_sid]->duration,ChannelListEvents[ChannelList[i].onid_sid]->eventID,ChannelListEvents[ChannelList[i].onid_sid]->description.c_str());
 						request->SocketWrite(buffer);
 					}
 				}
@@ -483,118 +578,24 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 	}
 	return true;
 }
-//-------------------------------------------------------------------------
-
-bool TWebDbox::Authenticate(CWebserverRequest* request)
-{
-	if(Parent->MustAuthenticate)
-	{
-		if(!CheckAuth(request))
-		{
-			if(Parent->DEBUG) printf("Authenticate\n");
-			request->SocketWriteLn("HTTP/1.0 401 Unauthorized");
-			request->SocketWriteLn("WWW-Authenticate: Basic realm=\"dbox\"\n\n");
-			return false;
-		}
-		else
-		{
-			if(Parent->DEBUG) printf("Zugriff ok\n");
-			return true;
-		}
-	}
-	else
-		return true;
-//	request->SocketWriteLn("Keiner da :)\n");
-}
 
 //-------------------------------------------------------------------------
-bool TWebDbox::CheckAuth(CWebserverRequest* request)
-{
-	if(request->HeaderList["Authorization"] == "")
-		return false;
-	string encodet = request->HeaderList["Authorization"].substr(6,request->HeaderList["Authorization"].length() - 6);
-//	printf("base64: '%s'\n",encodet.c_str());
-	string decodet = b64decode((char *)encodet.c_str());
-//	printf("decodet: '%s'\n",decodet.c_str());
-	int pos = decodet.find_first_of(':');
-	string user = decodet.substr(0,pos);
-	string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
-	if(Parent->DEBUG) printf("user: '%s' passwd: '%s'\n",user.c_str(),passwd.c_str());
-
-	if(user.compare(Parent->Config->getString("User")) == 0 && passwd.compare(Parent->Config->getString("Password")) == 0)
-	{
-		printf("passwort ok\n");
-		return true;
-	}
-	else
-	{
-		printf("nicht ok\n");
-		return false;
-	}
-}
-
-//-------------------------------------------------------------------------
-
+*/
+/*
 bool TWebDbox::Execute(CWebserverRequest* request)
 {
 	if(Parent->DEBUG) printf("Executing %s\n",request->Filename.c_str());
 	if(request->Filename.compare("test.dbox2") == 0)
 	{
-//		request->SocketWrite("HTTP/1.1 401 Unauthorized\n\n");
 		printf("Teste nun\n");
-//		request->SendPlainHeader("text/html");
-//		request->SocketWrite("alles wird gut\n");
 		return true;
 	}
-/*
-	if(strcmp(request->Filename.c_str(),"avcontrol.dbox2") == 0)
+	if(request->Filename.compare("info.dbox2") == 0)
 	{
-		request->SendPlainHeader("text/html");
-		if (request->ParameterList.size() == 4)
-		{
-			int vcrvideo,vcraudio,tvvideo,tvaudio,auxaudio;
-			if(request->ParameterList->GetIndex("TV_AUDIO") != -1)
-			{
-				tvaudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("TV_AUDIO")));
-				if(request->ParameterList->GetIndex("TV_VIDEO") != -1)
-				{
-					tvvideo = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("TV_VIDEO")));
-					if(request->ParameterList->GetIndex("VCR_AUDIO") != -1)
-					{
-						vcraudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("VCR_AUDIO")));
-						if(request->ParameterList->GetIndex("VCR_VIDEO") != -1)
-						{
-							vcraudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("VCR_AUDIO")));
-							if(request->ParameterList->GetIndex("AUX_AUDIO") != -1)
-							{
-								auxaudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("AUX_AUDIO")));
-								TAvControl *av = new TAvControl();
-								av->Set_TV_Sources(tvvideo,tvaudio);
-								av->Set_VCR_Sources(vcrvideo,vcraudio);
-								av->Set_AUX_Sources(auxaudio);
-								delete av;
-								return true;
-							}
-						}
-					}
-				}
-			}
-		}
-		return false;
+		request->SendPlainHeader("text/html");		
+		ShowCurrentStreamInfo(request);
 	}
-*/
 
-/*	if(request->Filename.compare("upload.dbox2") == 0)
-	{
-		if(request->Upload != NULL)
-		{
-			request->Upload->HandleUpload();
-		}
-		else
-			printf("Kein Dateianhang gefunden\n");
-		return true;
-	}
-*/
 	else if(request->Filename.compare("services.xml") == 0)		// sendet die datei services.xml
 	{
 		request->SendPlainHeader("text/xml");
@@ -700,12 +701,9 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 				request->SocketWriteLn("HTTP/1.0 302 Moved Temporarily");
 
 				if(request->ParameterList["bouquet"] != "")
-				{
-					t = "Location: channellist.dbox2?bouquet="+request->ParameterList["bouquet"]+"#akt";
-				}
+					request->SocketWriteLn("Location: channellist.dbox2?bouquet="+request->ParameterList["bouquet"]+"#akt");
 				else
-					t = "Location: channellist.dbox2#akt";
-				request->SocketWriteLn(t);
+					request->SocketWriteLn("Location: channellist.dbox2#akt");
 				return true;
 			}
 
@@ -714,6 +712,13 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 				request->SendPlainHeader("text/html");
 				unsigned id = atol( request->ParameterList["eventlist"].c_str() );
 				ShowEventList( request, id );
+				return true;
+			}
+			if(request->ParameterList["1"] == "eventlist")
+			{
+				request->SendPlainHeader("text/html");
+				printf("service id: %u\n",zapit.getCurrentServiceID());
+				ShowEventList( request, zapit.getCurrentServiceID() );
 				return true;
 			}
 
@@ -775,28 +780,9 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 		return false;
 	}
 }
+*/
 
-//-------------------------------------------------------------------------
-// Get functions
-//-------------------------------------------------------------------------
-
-
-void TWebDbox::GetChannelEvents()
-{
-	eList = sectionsd.getChannelEvents();
-	CChannelEventList::iterator eventIterator;
-
-    for( eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++ )
-		ChannelListEvents[(*eventIterator).serviceID()] = &(*eventIterator);
-}
-
-string TWebDbox::GetServiceName(int onid_sid)
-{
-	for(int i = 0; i < ChannelList.size();i++)
-		if( ChannelList[i].onid_sid == onid_sid)
-			return ChannelList[i].name;
-	return "";
-}
+/*
 //-------------------------------------------------------------------------
 // Send functions (for ExecuteCGI)
 //-------------------------------------------------------------------------
@@ -854,35 +840,13 @@ char *buffer = new char[500];
 };
 
 //-------------------------------------------------------------------------
-void TWebDbox::SendStreaminfo(CWebserverRequest* request)
+
+void TWebDbox::SendStreamInfo(CWebserverRequest* request)
 {
+
 	int bitInfo[10];
-	char *key,*tmpptr,buf[100];
-	int value, pos=0;
-
-	FILE* fd = fopen("/proc/bus/bitstream", "rt");
-	if (fd==NULL)
-	{
-		printf("error while opening proc-bitstream\n" );
-		return;
-	}
-
-	fgets(buf,29,fd);//dummy
-	while(!feof(fd))
-	{
-		if(fgets(buf,29,fd)!=NULL)
-		{
-			buf[strlen(buf)-1]=0;
-			tmpptr=buf;
-			key=strsep(&tmpptr,":");
-			for(;tmpptr[0]==' ';tmpptr++);
-			value=atoi(tmpptr);
-			bitInfo[pos]= value;
-			pos++;
-		}
-	}
-	fclose(fd);
-
+	char buf[100];
+	GetStreamInfo(bitInfo);
 	sprintf((char*) buf, "%d\n%d\n", bitInfo[0], bitInfo[1] );
 	request->SocketWrite(buf); //Resolution x y
 	sprintf((char*) buf, "%d\n", bitInfo[4]*50);
@@ -902,15 +866,15 @@ void TWebDbox::SendStreaminfo(CWebserverRequest* request)
 		case 6: request->SocketWrite("50\n"); break;
 		default: request->SocketWrite("unknown\n");
 	}
-
-	switch ( bitInfo[6] )
-	{
-		case 1: request->SocketWrite("single channel\n"); break;
-		case 2: request->SocketWrite("dual channel\n"); break;
-		case 3: request->SocketWrite("joint stereo\n"); break;
-		case 4: request->SocketWrite("stereo\n"); break;
-		default: request->SocketWrite("unknown\n");
-	}
+	request->SocketWriteLn(audiotype_names[bitInfo[6]]);
+//	switch ( bitInfo[6] )
+//	{
+//		case 1: request->SocketWrite("single channel\n"); break;
+//		case 2: request->SocketWrite("dual channel\n"); break;
+//		case 3: request->SocketWrite("joint stereo\n"); break;
+//		case 4: request->SocketWrite("stereo\n"); break;
+//		default: request->SocketWrite("unknown\n");
+//	}
 
 }
 //-------------------------------------------------------------------------
@@ -931,24 +895,76 @@ CZapitClient::responseGetPIDs pids;
 void TWebDbox::SendSettings(CWebserverRequest* request)
 {
 //	request->SendPlainHeader("text/html");
-	char dbox_names[4][10]={"","Nokia","Sagem","Philips"};
-	char videooutput_names[3][13]={"Composite","RGB","S-Video"};
-	char videoformat_names[3][13]={"automatic","16:9","4:3"};
 
-	int boxtype = controld.getBoxType();
-	int videooutput = controld.getVideoOutput();
-	int videoformat = controld.getVideoFormat();
-	char *buffer = new char[500];
+//	int boxtype = controld.getBoxType();
+//	int videooutput = controld.getVideoOutput();
+//	int videoformat = controld.getVideoFormat();
+//	char *buffer = new char[500];
 
-	sprintf(buffer,"Boxtype %s\nvideooutput %s\nvideoformat %s\n",dbox_names[boxtype],videooutput_names[videooutput],videoformat_names[videoformat]);
-	request->SocketWrite(buffer);
-	delete[] buffer;
+//	sprintf(buffer,"Boxtype %s\nvideooutput %s\nvideoformat %s\n",dbox_names[boxtype],videooutput_names[videooutput],videoformat_names[videoformat]);
+	request->SocketWriteLn("Boxtype "+Dbox_Hersteller[controld.getBoxType()]+"\nvideooutput "+videooutput_names[controld.getVideoOutput()]+"\nvideoformat "+videoformat_names[controld.getVideoFormat()]);
+//	request->SocketWrite(buffer);
+//	delete[] buffer;
 	if(Parent->DEBUG) printf("End SendSettings\n");
 }
-
+*/
+/*
 //-------------------------------------------------------------------------
 // Show funtions (Execute)
 //-------------------------------------------------------------------------
+void TWebDbox::ShowCurrentStreamInfo(CWebserverRequest* request)
+{
+	CStringList params;
+	CZapitClient::CCurrentServiceInfo serviceinfo;
+	serviceinfo = zapit.getCurrentServiceInfo();
+	params["onid"] = itoh(serviceinfo.onid);
+	params["sid"] = itoh(serviceinfo.sid);
+	params["tsid"] = itoh(serviceinfo.tsid);
+	params["vpid"] = itoh(serviceinfo.vdid);
+	params["apid"] = itoh(serviceinfo.apid);
+	params["vtxtpid"] = itoh(serviceinfo.vtxtpid);
+	params["tsfrequency"] = itoa(serviceinfo.tsfrequency);
+	params["polarisation"] = serviceinfo.polarisation==1?"v":"h";
+	params["ServiceName"] = GetServiceName(zapit.getCurrentServiceID());
+	int bitInfo[10];
+	char buf[100];
+
+	GetStreamInfo(bitInfo);
+//	params["AspectRatio"] = controld.getAspectRatio();
+	
+	sprintf((char*) buf, "%d x %d", bitInfo[0], bitInfo[1] );
+	params["VideoFormat"] = buf; //Resolution x y
+	sprintf((char*) buf, "%d\n", bitInfo[4]*50);
+	params["BitRate"] = buf; //Bitrate bit/sec
+	
+	switch ( bitInfo[2] ) //format
+	{
+		case 2: params["AspectRatio"] = "4:3"; break;
+		case 3: params["AspectRatio"] = "16:9"; break;
+		case 4: params["AspectRatio"] = "2.21:1"; break;
+		default: params["AspectRatio"] = "unknown"; break;
+	}
+
+	switch ( bitInfo[3] ) //fps
+	{
+		case 3: params["FPS"] = "25"; break;
+		case 6: params["FPS"] = "50"; break;
+		default: params["FPS"] = "unknown";
+	}
+
+	switch ( bitInfo[6] )
+	{
+		case 1: params["AudioType"] = "single channel"; break;
+		case 2: params["AudioType"] = "dual channel"; break;
+		case 3: params["AudioType"] = "joint stereo"; break;
+		case 4: params["AudioType"] = "stereo"; break;
+		default: params["AudioType"] = "unknown";
+	}
+	request->ParseFile(Parent->PrivateDocumentRoot + "/settings.html",params);
+
+
+}
+
 //-------------------------------------------------------------------------
 void TWebDbox::ShowEventList(CWebserverRequest *request,unsigned onidSid)
 {
@@ -1100,59 +1116,63 @@ bool TWebDbox::ShowControlpanel(CWebserverRequest* request)
 		else if( request->ParameterList["standby"] != "")
 		{
 			if(request->ParameterList["standby"] == "on")
+			{
 				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_NHTTPD);
-
-//				zapit.stopPlayBack();
+				standby_mode = true;
+			}
 			if(request->ParameterList["standby"] == "off")
+			{
 				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_NHTTPD);
-//				zapit.startPlayBack();
+				standby_mode = false;
+			}
 		}
 	}
-	
-	request->SendPlainHeader("text/html");
-
-	string mutefile = controld.getMute()?"mute":"muted";
-	string mutestring = "<td><a href=\"/fb/controlpanel.dbox2?volumemute\" target=navi onMouseOver=\"mute.src='../images/"+ mutefile+"_on.jpg';\" onMouseOut=\"mute.src='../images/"+ mutefile+"_off.jpg';\"><img src=/images/"+ mutefile+"_off.jpg width=25 height=28 border=0 name=mute></a><br></td>\n";
-
-	char vol = controld.getVolume();
-	sprintf((char*) &volstr_on, "%d\0", vol);
-	sprintf((char*) &volstr_off, "%d\0", 100-vol);
- 
-	request->SendFile(request->Parent->PrivateDocumentRoot,"/controlpanel.include1");
-	//muted
-	request->SocketWrite(mutestring);
-	request->SendFile(request->Parent->PrivateDocumentRoot,"/controlpanel.include2");
-	//volume bar...
-	request->SocketWrite("<td><img src=../images/vol_flashed.jpg width=");
-	request->SocketWrite(volstr_on);
-	request->SocketWrite(" height=10 border=0><br></td>\n");
-	request->SocketWrite("<td><img src=../images/vol_unflashed.jpg width=");
-	request->SocketWrite(volstr_off);
-	request->SocketWrite(" height=10 border=0><br></td>\n");
-	request->SendFile(request->Parent->PrivateDocumentRoot,"/controlpanel.include3");
-//	request->SocketWrite("</table><table><tr><td><A HREF=\"/fb/controlpanel.dbox2?standby="+string(zapit.isPlayBackActive()?"on":"off")+"\">standby</A></td></tr></table>\n");
-//	request->SocketWrite("</body>\n</html>\n");	
-	return true;
-}
-
-
-//-------------------------------------------------------------------------
-void TWebDbox::UpdateBouquets(void)
-{
-	GetBouquets();
-	for(int i = 1; i <= BouquetList.size();i++)
-		GetBouquet(i);
-	GetChannelList();
-}
-//-------------------------------------------------------------------------
-
-void TWebDbox::ZapTo(string target)
-{
-	int sidonid = atol(target.c_str());
-	if(sidonid == zapit.getCurrentServiceID())
+	if(Parent->DEBUG)
 	{
-		if(Parent->DEBUG) printf("Kanal ist aktuell\n");
-		return;
+		CStringList params;
+		params["standby"] = standby_mode?"off":"on";
+		switch(controld.getBoxType())
+		{
+			case CControldClient::BOXTYPE_NOKIA :
+				params["IMG"] = "<img src=\"/images/nokia.gif\" usemap=\"#nokia\" border=0>";
+				break;
+			case CControldClient::BOXTYPE_SAGEM :
+				params["IMG"] = "<img src=\"/images/sagem.gif\" usemap=\"#sagem\" border=0>";
+				break;
+			default :
+				params["IMG"] = "<img src=\"/images/nokia.gif\" usemap=\"#nokia\" border=0>";
+		}
+		printf("params[IMG]: '%s'\n",params["IMG"].c_str());
+		request->ParseFile(request->Parent->PrivateDocumentRoot + "/controlpanel.html", params);
 	}
-	zapit.zapTo_serviceID(sidonid);
+	else
+	{
+
+		request->SendPlainHeader("text/html");
+
+		string mutefile = controld.getMute()?"mute":"muted";
+		string mutestring = "<td><a href=\"/fb/controlpanel.dbox2?volumemute\" target=navi onMouseOver=\"mute.src='../images/"+ mutefile+"_on.jpg';\" onMouseOut=\"mute.src='../images/"+ mutefile+"_off.jpg';\"><img src=/images/"+ mutefile+"_off.jpg width=25 height=28 border=0 name=mute></a><br></td>\n";
+
+		char vol = controld.getVolume();
+		sprintf((char*) &volstr_on, "%d\0", vol);
+		sprintf((char*) &volstr_off, "%d\0", 100-vol);
+	 
+		request->SendFile(request->Parent->PrivateDocumentRoot,"/controlpanel.include1");
+		//muted
+		request->SocketWrite(mutestring);
+		request->SendFile(request->Parent->PrivateDocumentRoot,"/controlpanel.include2");
+		//volume bar...
+		request->SocketWrite("<td><img src=../images/vol_flashed.jpg width=");
+		request->SocketWrite(volstr_on);
+		request->SocketWrite(" height=10 border=0><br></td>\n");
+		request->SocketWrite("<td><img src=../images/vol_unflashed.jpg width=");
+		request->SocketWrite(volstr_off);
+		request->SocketWrite(" height=10 border=0><br></td>\n");
+		request->SendFile(request->Parent->PrivateDocumentRoot,"/controlpanel.include3");
+	}
+	return true;
+
 }
+
+
+*/

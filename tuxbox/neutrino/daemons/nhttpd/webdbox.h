@@ -11,7 +11,7 @@
 #include <map>
 
 #include "request.h"
-#include "controldclient.h"
+//#include "controldclient.h"
 
 #include "../controld/clientlib/controldclient.h"
 #include "../../sections/clientlib/sectionsdclient.h"
@@ -25,10 +25,11 @@ using namespace std;
 #define SAI struct sockaddr_in
 
 extern string b64decode(char *s);
+extern string itoh(unsigned int conv);
+extern string itoa(unsigned int conv);
 
 
-
-class TWebserver;
+class CWebserver;
 class CWebserverRequest;
 class CWebserverCGI;
 
@@ -37,7 +38,7 @@ class CWebserverCGI;
 
 class TWebDbox
 {
-	TWebserver * Parent;
+	CWebserver * Parent;
 	CControldClient controld;
 	CSectionsdClient sectionsd;
 	CZapitClient zapit;
@@ -46,10 +47,16 @@ class TWebDbox
 	map<unsigned, CChannelEvent *> ChannelListEvents;
 	map<int, CZapitClient::BouquetChannelList> BouquetsList;
 	CZapitClient::BouquetList BouquetList;
+	bool standby_mode;
+	string Dbox_Hersteller[4];
+	string videooutput_names[3];
+	string videoformat_names[3];
+	string audiotype_names[5];
+
 
 
 public:
-	TWebDbox(TWebserver * server);
+	TWebDbox(CWebserver * server);
 	~TWebDbox();
 
 	CChannelEventList eList;
@@ -57,6 +64,7 @@ public:
 
 // get functions to collect data
 	void GetChannelEvents();
+	bool GetStreamInfo(int bitinfo[10]);
 
 	string GetServiceName(int onid_sid);
 
@@ -86,7 +94,7 @@ public:
 	void SendEventList(CWebserverRequest *request,unsigned onidSid);
 	void SendcurrentVAPid(CWebserverRequest* request);
 	void SendSettings(CWebserverRequest* request);
-	void SendStreaminfo(CWebserverRequest* request);
+	void SendStreamInfo(CWebserverRequest* request);
 	void SendBouquets(CWebserverRequest *request);
 	void SendBouquet(CWebserverRequest *request,int BouquetNr);
 	void SendChannelList(CWebserverRequest *request);
@@ -96,16 +104,16 @@ public:
 // show functions for Execute (web api)
 	void ShowEventList(CWebserverRequest* request, unsigned onidSid);
 	void ShowBouquet(CWebserverRequest *request,int BouquetNr = -1);
-	void ShowBouquets(CWebserverRequest *request);
+	void ShowBouquets(CWebserverRequest *request, int BouquetNr = 0);
 	bool ShowControlpanel(CWebserverRequest* request);
 	void ShowSettings(CWebserverRequest *request);
+	void ShowCurrentStreamInfo(CWebserverRequest* request);
+	bool ShowEpg(CWebserverRequest* request,string EpgID,string Startzeit = "");
 
 // support functions
 	void ZapTo(string target);
 	void UpdateBouquets(void);
 
-	bool Authenticate(CWebserverRequest* request);
-	bool CheckAuth(CWebserverRequest* request);
 
 // alt
 	void GetEPG(CWebserverRequest *request,unsigned long long epgid, time_t *,bool cgi=false);
