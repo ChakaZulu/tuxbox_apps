@@ -168,8 +168,8 @@ if test "$DVBINCLUDES"; then
 fi
 
 AC_CHECK_HEADERS(linux/dvb/version.h,[
-	AC_PROG_EGREP
 	AC_LANG_PREPROC_REQUIRE()
+	AC_REQUIRE([AC_PROG_EGREP])
 	AC_LANG_CONFTEST([AC_LANG_SOURCE([[
 #include <linux/dvb/version.h>
 version DVB_API_VERSION
@@ -365,6 +365,7 @@ AC_SUBST(DUMMYPOFILES)
 AC_SUBST(CATALOGS)
 ])
 
+dnl backward compatiblity
 AC_DEFUN([AC_GNU_SOURCE],
 [AH_VERBATIM([_GNU_SOURCE],
 [/* Enable GNU extensions on systems that have them.  */
@@ -374,5 +375,15 @@ AC_DEFUN([AC_GNU_SOURCE],
 AC_BEFORE([$0], [AC_COMPILE_IFELSE])dnl
 AC_BEFORE([$0], [AC_RUN_IFELSE])dnl
 AC_DEFINE([_GNU_SOURCE])
+])
+
+AC_DEFUN([AC_PROG_EGREP],
+[AC_CACHE_CHECK([for egrep], [ac_cv_prog_egrep],
+   [if echo a | (grep -E '(a|b)') >/dev/null 2>&1
+    then ac_cv_prog_egrep='grep -E'
+    else ac_cv_prog_egrep='egrep'
+    fi])
+ EGREP=$ac_cv_prog_egrep
+ AC_SUBST([EGREP])
 ])
 
