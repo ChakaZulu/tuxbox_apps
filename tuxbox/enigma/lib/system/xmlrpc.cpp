@@ -1,7 +1,7 @@
 #include <time.h>
 #include <qmap.h>
 #include "xmltree.h"
-#include "ezap.h"
+#include "enigma.h"
 #include "http_dyn.h"
 #include "dvb.h"
 #include "edvb.h"

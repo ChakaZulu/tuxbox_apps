@@ -1,4 +1,4 @@
-#include "ezap.h"
+#include "enigma.h"
 #include "ewidget.h"
 #include <errno.h>
 #include <qobjectlist.h>

@@ -1,6 +1,6 @@
 #include "ewindow.h"
 #include <qrect.h>
-#include "ezap.h"
+#include "enigma.h"
 #include "grc.h"
 #include "eskin.h"
 #include "epng.h"
