@@ -2043,11 +2043,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 			g_info.box_Type = 3;
 	}
 	
-	g_info.fe = 0;
-	if (!getEnvironment("fe", &g_info.fe))
-		return 1;
-
-	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d (%s %s), fe: %d\n", g_info.box_Type, tuxbox_get_manufacturer_str(), tuxbox_get_model_str(), g_info.fe);
+	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d (%s %s)\n", g_info.box_Type, tuxbox_get_manufacturer_str(), tuxbox_get_model_str());
 
 
 
@@ -2069,6 +2065,20 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Locale = new CLocaleManager;
 	g_RCInput = new CRCInput;
 	g_Zapit = new CZapitClient;
+
+	switch(g_Zapit->getDeliverySystem()) {
+	
+		case DVB_S:
+			g_info.fe=1;
+			break;
+		case DVB_C:
+		case DVB_T:
+		default:
+			g_info.fe=0;
+			break;
+			
+	}
+	
 	g_Sectionsd = new CSectionsdClient;
 	g_Timerd = new CTimerdClient;
 
@@ -3285,7 +3295,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.383 2003/01/02 00:25:52 Jolt Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.384 2003/01/02 16:19:39 Jolt Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
