@@ -50,6 +50,7 @@
 
 #include "../lcdd/lcdd.h"
 
+#include "eventwatchdog.h"
 
 #define CONF_FILE CONFIGDIR "/controld.conf"
 
@@ -77,7 +78,15 @@ struct Ssettings
 
 void sig_catch(int);
 
+class CControldAspectRatioNotifier : public CAspectRatioNotifier
+{
+	public:
+		virtual void aspectRatioChanged( int newAspectRatio); //override;
+};
 
+bool bNotifyRegistered = false;
+CEventWatchDog* watchDog;
+CControldAspectRatioNotifier* aspectRatioNotifier;
 
 int loadSettings()
 {
@@ -176,7 +185,7 @@ void setVideoType(int format)
 	close(fd);
 }
 
-void setVideoFormat(int format)
+void setVideoFormat(int format, bool bUnregNotifier = true)
 {
 	int fd;
 	int videoDisplayFormat;
@@ -195,41 +204,60 @@ void setVideoFormat(int format)
 	}
 	settings.videoformat = format;
 
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	if (format==0) // automatic switch
 	{
-		perror("open");
-		return;
+		if (!bNotifyRegistered)
+		{
+			printf("[controld] setting VideoFormat to auto \n");
+			watchDog->registerNotifier(WDE_VIDEOMODE, aspectRatioNotifier);
+			bNotifyRegistered = true;
+		}
 	}
-
-	if (ioctl(fd,AVSIOSFNC,&format)< 0)
+	else
 	{
-		perror("AVSIOSFNC:");
-		return;
-	}
-	close(fd);
+		if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+		{
+			perror("open");
+			return;
+		}
 
-	switch( format)
-	{
-//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
-		case AVS_FNCOUT_EXT169	: videoDisplayFormat = VIDEO_CENTER_CUT_OUT; break;
-		case AVS_FNCOUT_EXT43	: videoDisplayFormat = VIDEO_LETTER_BOX; break;
-		default: videoDisplayFormat = VIDEO_LETTER_BOX;
-//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
-	}
+		if (ioctl(fd,AVSIOSFNC,&format)< 0)
+		{
+			perror("AVSIOSFNC:");
+			return;
+		}
+		close(fd);
 
-	if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
+		switch( format)
+		{
+	//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
+			case AVS_FNCOUT_EXT169	: videoDisplayFormat = VIDEO_CENTER_CUT_OUT; break;
+			case AVS_FNCOUT_EXT43	: videoDisplayFormat = VIDEO_LETTER_BOX; break;
+			default: videoDisplayFormat = VIDEO_LETTER_BOX;
+	//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
+		}
 
-	if ( ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
-	{
-		perror("VIDEO SET DISPLAY FORMAT:");
-		return;
-	}
-	close(fd);
+		if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
+		{
+			perror("open");
+			return;
+		}
 
+		if ( ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
+		{
+			perror("VIDEO SET DISPLAY FORMAT:");
+			return;
+		}
+		close(fd);
+
+		watchDog->lastVideoMode = format;
+		if ((bNotifyRegistered) && (bUnregNotifier))
+		{
+			watchDog->unregisterNotifier(WDE_VIDEOMODE, aspectRatioNotifier);
+			bNotifyRegistered = false;
+		}
+
+	}
 }
 
 void routeVideo(int a, int b, int nothing, int fblk)
@@ -527,7 +555,7 @@ int main(int argc, char **argv)
 
 	if (!loadSettings())
 	{
-		printf("[controld] useing defaults\n");
+		printf("[controld] using defaults\n");
 		settings.volume = 100;
 		settings.mute = 0;
 		settings.videotype = 1; // fblk1 - rgb
@@ -535,7 +563,8 @@ int main(int argc, char **argv)
 		settings.boxtype = 1; //nokia
 	}
 
-
+	watchDog = new CEventWatchDog();
+	aspectRatioNotifier = new CControldAspectRatioNotifier();
 	//init
 	setVolume(settings.volume);
 	setVideoType(settings.videotype);
@@ -554,3 +583,15 @@ int main(int argc, char **argv)
   }
 
 }
+
+void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio)
+{
+//	printf("[controld] CControldAspectRatioNotifier::aspectRatioChanged( %d) \n", newAspectRatio);
+	switch (newAspectRatio)
+	{
+		case 2 : setVideoFormat(2, false); break;
+		case 3 : setVideoFormat(1, false); break;
+		default: printf("[controld] Unknown apsectRatio: %d", newAspectRatio);
+	}
+}
+
