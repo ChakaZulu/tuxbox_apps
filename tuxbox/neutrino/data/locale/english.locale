@@ -199,6 +199,7 @@ favorites.finalhint \nUse the bouqueteditor to modify your favorites.\n
 favorites.menueadd add channel to favorites
 favorites.nobouquets Favorites are available with activated Bouquets only.
 filebrowser.delete Delete
+filebrowser.denydirectoryleave Absolute start directory
 filebrowser.dodelete1 Delete
 filebrowser.dodelete2 ?
 filebrowser.filter.active Filter on
@@ -749,4 +750,3 @@ videomenu.videosignal_svideo S-Video
 videomenu.videosignal_yuv_c YUV + CVBS
 videomenu.videosignal_yuv_v YUV + VBS
 zaptotimer.announce Zapto timer in one minute
-filebrowser.denydirectoryleave Absolute start directory
