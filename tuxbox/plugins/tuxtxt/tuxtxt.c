@@ -332,7 +332,7 @@ int Init()
 		next_100 = 0x100;
 		next_10  = 0x100;
 		subpage	 = 0;
-		SDT_ready = 1;
+		SDT_ready = 0;
 		pageupdate = 0;
 
 		zap_subpage_manual = 0;
@@ -342,8 +342,9 @@ int Init()
 		RenderPageNotFound();
 
 	//get all vtxt-pids
-
+		SDT_ready = 1;
 		if(GetVideotextPIDs() == 0) return 0;
+		RenderPageNotFound();
 
 	//set filter & start demuxer
 
@@ -1814,10 +1815,30 @@ void RenderPageNotFound()
 {
 	int byte;
 	int fbcolor, timecolor, menucolor;
+		int current_pid = 0;
+		char message_2[] = "ã Textname:                          äé";
+
+	
+		if (SDT_ready)
+		{
+			if(vtxtpid == 0)
+				vtxtpid = pid_table[0].vtxt_pid;
+			else
+			{
+				while(pid_table[current_pid].vtxt_pid != vtxtpid)
+				{
+					current_pid++;
+				}
+			}
+			memcpy(&message_2[12], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
+		}
+		else
+			memcpy(&message_2[12], "Suche...", 8);
+	
 	char message_1[] = "àááááááááááááááááááááááááááááááááááááâè";
-	char message_2[] = "ã Seite ??? nicht vorhanden: warte...äé";
-	char message_3[] = "åææææææææææææææææææææææææææææææææææææçé";
-	char message_4[] = "ëìììììììììììììììììììììììììììììììììììììê";
+	char message_3[] = "ã Seite ??? nicht im Cache: warte... äé";
+	char message_4[] = "åææææææææææææææææææææææææææææææææææææçé";
+	char message_5[] = "ëìììììììììììììììììììììììììììììììììììììê";
 
 	//reset zoom
 
@@ -1849,9 +1870,9 @@ void RenderPageNotFound()
 
 	//set pagenumber
 
-		message_2[ 8] = (page >> 8) | '0';
-		message_2[ 9] = (page & 0x0F0)>>4 | '0';
-		message_2[10] = (page & 0x00F) | '0';
+		message_3[ 8] = (page >> 8) | '0';
+		message_3[ 9] = (page & 0x0F0)>>4 | '0';
+		message_3[10] = (page & 0x00F) | '0';
 
 	//render infobar
 
@@ -1875,17 +1896,27 @@ void RenderPageNotFound()
 
 		PosX = StartX + fontwidth-3;
 		PosY = StartY + fixfontheight*20;
-		for(byte = 0; byte < 38; byte++)
+		RenderCharFB(message_3[0], menucolor<<4 | menu2);
+		for(byte = 1; byte < 37; byte++)
 		{
-			RenderCharFB(message_3[byte], menucolor<<4 | menu2);
+			RenderCharFB(message_3[byte], menucolor<<4 | white);
 		}
+		RenderCharFB(message_3[37], menucolor<<4 | menu2);
 		RenderCharFB(message_3[38], fbcolor<<4 | menu2);
 
 		PosX = StartX + fontwidth-3;
 		PosY = StartY + fixfontheight*21;
+		for(byte = 0; byte < 38; byte++)
+		{
+			RenderCharFB(message_4[byte], menucolor<<4 | menu2);
+		}
+		RenderCharFB(message_4[38], fbcolor<<4 | menu2);
+
+		PosX = StartX + fontwidth-3;
+		PosY = StartY + fixfontheight*22;
 		for(byte = 0; byte < 39; byte++)
 		{
-			RenderCharFB(message_4[byte], fbcolor<<4 | menu2);
+			RenderCharFB(message_5[byte], fbcolor<<4 | menu2);
 		}
 }
 
