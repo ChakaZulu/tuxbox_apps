@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.3 2001/11/15 22:37:47 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.4 2001/11/16 14:07:25 McClean Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.4  2001/11/16 14:07:25  McClean
+ * fixed missing index-check
+ *
  * Revision 1.3  2001/11/15 22:37:47  obi
  * fix pin protection settings
  * actually display words not dots :-)
@@ -122,7 +125,7 @@ void CLCDMenu::addPinProtection(int index)
 
 bool CLCDMenu::selectEntry(int index)
 {
-    if ((index <= 3) && (index >= 0))
+    if ((index < entryCount) && (index >= 0))
     {
 	selectedEntry = index;
 
@@ -379,7 +382,7 @@ bool CLCDMenu::checkPin(string title)
 int main(int argc, char **argv)
 {
     /* print version information */
-    cout << "$Id: lcdmenu.cpp,v 1.3 2001/11/15 22:37:47 obi Exp $" << endl;
+    cout << "$Id: lcdmenu.cpp,v 1.4 2001/11/16 14:07:25 McClean Exp $" << endl;
 
     /* create menu instance */
     CLCDMenu *menu = new CLCDMenu();
