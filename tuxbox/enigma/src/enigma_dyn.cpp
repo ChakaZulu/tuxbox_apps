@@ -88,43 +88,6 @@ eString zap[5][5] =
 
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 
-eString removeBadChars(eString s)
-{
-//	s.strReplace("\x00", "");
-	s.strReplace("\x01", "");
-	s.strReplace("\x02", "");
-	s.strReplace("\x03", "");
-	s.strReplace("\x04", "");
-	s.strReplace("\x05", "");
-	s.strReplace("\x06", "");
-	s.strReplace("\x07", "");
-	s.strReplace("\x08", "");
-	s.strReplace("\x09", "");
-	s.strReplace("\x0a", "");
-	s.strReplace("\x0b", "");
-	s.strReplace("\x0c", "");
-	s.strReplace("\x0d", "");
-	s.strReplace("\x0e", "");
-	s.strReplace("\x0f", "");
-	s.strReplace("\x10", "");
-	s.strReplace("\x11", "");
-	s.strReplace("\x12", "");
-	s.strReplace("\x13", "");
-	s.strReplace("\x14", "");
-	s.strReplace("\x15", "");
-	s.strReplace("\x16", "");
-	s.strReplace("\x17", "");
-	s.strReplace("\x18", "");
-	s.strReplace("\x19", "");
-	s.strReplace("\x1a", "");
-	s.strReplace("\x1b", "");
-	s.strReplace("\x1c", "");
-	s.strReplace("\x1d", "");
-	s.strReplace("\x1e", "");
-	s.strReplace("\x1f", "");
-	return s;
-}
-
 eString firmwareLevel(eString verid)
 {
 	eString result = "unknown";
@@ -623,7 +586,7 @@ eString getAudioChannels(void)
 			else
 				result += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
 
-			result += removeBadChars(it->text);
+			result += it->text;
 			result += "</option>";
 		}
 	}
@@ -689,7 +652,7 @@ eString getCurrentSubChannel(eString curServiceRef)
 								eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
 									+ eString(nspace) + ":0:0:0:";
 								if (subServiceRef == curServiceRef)
-									subChannel = removeBadChars(subService);
+									subChannel = subService;
 							}
 						}
 					}
@@ -738,7 +701,7 @@ eString getSubChannels(void)
 									result += "<option selected value=\"" + subServiceRef + "\">";
 								else
 									result += "<option value=\"" + subServiceRef + "\">";
-								result += removeBadChars(subService);
+								result += subService;
 								result += "</option>";
 							}
 						}

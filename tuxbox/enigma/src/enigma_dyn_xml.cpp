@@ -44,7 +44,6 @@ using namespace std;
 extern eString zap[5][5];
 extern eString firmwareLevel(eString verid);
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
-extern eString removeBadChars(eString s);
 extern eString getIP(void);
 
 static eString getimageinfoXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -68,139 +67,6 @@ static eString getimageinfoXML(eString request, eString dirpath, eString opts, e
 	result << "</content>";
 
 	return result.str();
-}
-
-class eXMLNavigatorListDirectory: public Object
-{
-	eString &result;
-	eString origpath;
-	eString path;
-	eServiceInterface &iface;
-public:
-	eXMLNavigatorListDirectory(eString &result, eString origpath, eString path, eServiceInterface &iface): result(result), origpath(origpath), path(path), iface(iface)
-	{
-		eDebug("path: %s", path.c_str());
-	}
-	void addEntry(const eServiceReference &e)
-	{
-#ifndef DISABLE_FILE
-		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
-		{
-			if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
-					 return;
-		}
-#endif
-		eString serviceRef = ref2string(e);
-
-		if (!(e.flags & eServiceReference::isDirectory))
-			result += "<name path=\"" + serviceRef + "\">";
-		else
-			result += "<name path=\"" + serviceRef + "\">";
-
-		eService *service = iface.addRef(e);
-		if (!service)
-			result += "n/a";
-		else
-		{
-			result +=  filter_string(service->service_name);
-			iface.removeRef(e);
-		}
-		result += "</name>";
-	}
-};
-
-static eString getXMLZapContent(eString path)
-{
-	eString tpath, result;
-
-	unsigned int pos = 0, lastpos = 0, temp = 0;
-
-	if ((path.find(";", 0)) == eString::npos)
-		path = ";" + path;
-
-	while ((pos = path.find(";", lastpos)) != eString::npos)
-	{
-		lastpos = pos + 1;
-		if ((temp = path.find(";", lastpos)) != eString::npos)
-			tpath = path.mid(lastpos, temp - lastpos);
-		else
-			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
-
-		eServiceReference current_service = string2ref(tpath);
-		eServiceInterface *iface = eServiceInterface::getInstance();
-
-		// first pass thru is to get all user bouquets
-		eXMLNavigatorListDirectory navlist(result, path, tpath, *iface);
-		Signal1<void, const eServiceReference&> signal;
-		signal.connect(slot(navlist, &eXMLNavigatorListDirectory::addEntry));
-		iface->enterDirectory(current_service, signal);
-		eDebug("entered");
-		iface->leaveDirectory(current_service);
-		eDebug("exited");
-	}
-
-	return result;
-}
-
-static eString zaplist(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	eString result;
-
-	std::map<eString,eString> opt = getRequestOptions(opts, ',');
-	eString mode = opt["mode"];
-	eString spath = opt["path"];
-
-	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
-
-	result = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content>";
-
-	if (mode == "tv"){
-		result += "<zapmode id=\"TV-BOUQUETS\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODETV][ZAPSUBMODEBOUQUETS];
-	}else	if (mode == "tvprov")	{
-		result += "<zapmode id=\"TV-PROVIDER\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODETV][ZAPSUBMODEPROVIDERS];
-	}else	if (mode == "tvsat")	{
-		result += "<zapmode id=\"TV-SATELLITES\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODETV][ZAPSUBMODESATELLITES];
-	}else if (mode == "radio"){
-		result += "<zapmode id=\"RADIO-BOUQUETS\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODERADIO][ZAPSUBMODEBOUQUETS];
-	}else if (mode == "radioprov"){
-		result += "<zapmode id=\"RADIO-PROVIDERS\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODERADIO][ZAPSUBMODEPROVIDERS];
-	}else if (mode == "radiosat"){
-		result += "<zapmode id=\"RADIO-SATELLITES\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODERADIO][ZAPSUBMODESATELLITES];
-	}else if (mode == "datasat"){
-		result += "<zapmode id=\"DATA-SATELLITES\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODEDATA][ZAPSUBMODESATELLITES];
-	}else if (mode == "dataprov"){
-		result += "<zapmode id=\"DATA-PROVIDERS\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODEDATA][ZAPSUBMODEPROVIDERS];
-	}else if (mode == "movie"){
-		result += "<zapmode id=\"RECORDINGS\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODERECORDINGS][ZAPSUBMODECATEGORY];
-	}else{
-		result += "<zapmode id=\"TV-BOUQUETS\">";
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODETV][ZAPSUBMODEBOUQUETS];
-	}
-	result += getXMLZapContent(spath);
-	result += "</zapmode>";
-	result += "</content>";
-
-	return result;
 }
 
 static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -325,7 +191,7 @@ static eString getAudioChannelsXML(eString request, eString dirpath, eString opt
 			else
 				result << eString().sprintf("<audio pid=\"0x%04x\">", it->pmtentry->elementary_PID);
 
-			result << removeBadChars(it->text);
+			result << it->text;
 			result << "</audio>";
 		}
 	}
@@ -731,7 +597,6 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/xml", doStatusXML, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/zap", zaplist, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/epg", getcurepgXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/epgdetails", getepgdetailsXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/imginfo", getimageinfoXML, lockWeb);
