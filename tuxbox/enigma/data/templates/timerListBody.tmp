@@ -13,6 +13,8 @@
 		#TIMER_REGULAR#
 	</tbody>
 </table>
+#BUTTONADD#
+<br>
 <h2>Repeating Timer Events</h2>
 <table id="timer2" width=100% border=1 rules=all>
 	<thead>
@@ -29,5 +31,5 @@
 	</tbody>
 </table>
 <br>
-#BUTTONCLEANUP# #BUTTONCLEAR# #BUTTONADD#
+#BUTTONCLEANUP# #BUTTONCLEAR#
 
