@@ -9,6 +9,7 @@ a.audio { color:#000000; font-size:8pt; font-family:Verdana; }
 
 .white { color:#000000; font-size:8pt; font-family: Verdana; letter-spacing: -1pt}
 .black { color:#000000; font-size: 9pt; font-family: Verdana; }
+.button { color:#ffffff; font-size: 10pt; font-weight: bold; font-family: Verdana; }
 .titel { color:#ffffff; font-size:14pt; font-family: tahoma, arial; }
 .servicename { color:#ffffff; font-size:13pt; font-family: tahoma, arial; }
 .epgzeit { color:#000000; font-size:12pt; font-family: tahoma, arial; }
