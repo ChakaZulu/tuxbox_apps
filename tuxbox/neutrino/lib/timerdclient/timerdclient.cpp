@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: timerdclient.cpp,v 1.14 2002/07/25 22:15:59 woglinde Exp $
+	$Id: timerdclient.cpp,v 1.15 2002/08/21 11:21:14 obi Exp $
 
 	License: GPL
 
@@ -129,12 +129,12 @@ int timerID;
 
 	if(timerID != 0)
 	{
-		dprintf("Modify Sleeptimer announce: %d alarm: %d\n",announcetime,alarmtime);
+		dprintf("Modify Sleeptimer announce: %ld alarm: %ld\n",announcetime,alarmtime);
 		modifyTimerEvent(timerID, announcetime, alarmtime, 0);
 	}
 	else
 	{
-		dprintf("Set New Sleeptimerannounce: %d alarm: %d\n",announcetime,alarmtime);
+		dprintf("Set New Sleeptimerannounce: %ld alarm: %ld\n",announcetime,alarmtime);
 		timerID = addTimerEvent(CTimerEvent::TIMER_SLEEPTIMER,NULL,announcetime,alarmtime,0);
 	}
 
@@ -274,7 +274,7 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 */
 int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerEvent::CTimerEventRepeat evrepeat)
 {
-	dprintf("addTimerEvent(Type: %d,data: %x announce: %ld, alarm: %ld, stop: %ld repeat: %d\n",evType,data,announcetime,alarmtime,stoptime,evrepeat);
+	dprintf("addTimerEvent(Type: %d, announce: %ld, alarm: %ld, stop: %ld repeat: %d\n",evType,announcetime,alarmtime,stoptime,evrepeat);
 	CTimerd::commandHead msg;
 	msg.version=CTimerd::ACTVERSION;
 	msg.cmd=CTimerd::CMD_ADDTIMER;
