@@ -103,6 +103,11 @@ class CControld
 			unsigned char mode;
 		};
 
+		struct commandVideoPowerSave
+		{
+			bool powerdown;
+		};
+
 		//response structures
 		struct responseVolume
 		{
@@ -134,10 +139,6 @@ class CControld
 			unsigned char mode;
 		};
 
-		struct responseVideoPowerSave
-		{
-			bool powerdown;
-		};
 };
 
 #endif

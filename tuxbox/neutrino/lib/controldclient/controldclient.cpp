@@ -265,15 +265,46 @@ bool CControldClient::getMute()
 	return rmsg.mute;
 }
 
-void CControldClient::videoPowerDown(bool powerdown)
+
+
+void CControldClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
 {
 	CControld::commandHead msg;
-	CControld::responseVideoPowerSave msg2;
+	CEventServer::commandRegisterEvent msg2;
 	msg.version=CControld::ACTVERSION;
-	msg.cmd=CControld::CMD_SETVIDEOPOWERDOWN;
-	msg2.powerdown = powerdown;
+	msg.cmd=CControld::CMD_REGISTEREVENT;
+	msg2.eventID = eventID;
+	msg2.clientID = clientID;
+	strcpy(msg2.udsName, udsName.c_str());
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
 	send((char*)&msg2, sizeof(msg2));
 	controld_close();
+}
+
+void CControldClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
+{
+	CControld::commandHead msg;
+	CEventServer::commandUnRegisterEvent msg2;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_UNREGISTEREVENT;
+	msg2.eventID = eventID;
+	msg2.clientID = clientID;
+	controld_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	controld_close();
+}
+
+void CControldClient::videoPowerDown(bool powerdown)
+{
+        CControld::commandHead msg;
+        CControld::commandVideoPowerSave msg2;
+        msg.version=CControld::ACTVERSION;
+        msg.cmd=CControld::CMD_SETVIDEOPOWERDOWN;
+        msg2.powerdown = powerdown;
+        controld_connect();
+        send((char*)&msg, sizeof(msg));
+        send((char*)&msg2, sizeof(msg2));
+        controld_close();
 }

@@ -553,7 +553,7 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			break;
 		case CControld::CMD_SETVIDEOPOWERDOWN:
 			//printf("[controld] set scartmode\n");
-			CControld::responseVideoPowerSave msg10;
+			CControld::commandVideoPowerSave msg10;
 			read(connfd, &msg10, sizeof(msg10));
 			disableVideoOutput(msg10.powerdown);
 			break;

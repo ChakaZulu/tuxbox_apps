@@ -34,6 +34,7 @@
 #include <string>
 
 #include "controldMsg.h"
+#include "eventserver.h"
 
 using namespace std;
 
@@ -159,6 +160,18 @@ class CControldClient
 			die Dbox herunterfahren
 		*/
 		void shutdown();
+
+
+		/*
+			ein beliebiges Event anmelden
+		*/
+		void registerEvent(unsigned int eventID, unsigned int clientID, string udsName);
+
+		/*
+			ein beliebiges Event abmelden
+		*/
+		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
+
 };
 
 #endif
