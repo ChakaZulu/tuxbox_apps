@@ -7,7 +7,7 @@ function setVol(xy)
 function setVid(xy)
 {
 	document.location = "/setVideo?position="+xy;
-	setTimeout("reload()", 1000);
+	setTimeout("reload()", 100);
 }	
 
 function Mute(xy)
@@ -30,6 +30,11 @@ function switchChannel(xy, bouquet, channel)
 			document.location = "?path="+xy;
 		setTimeout("zapHeaderReload()", 3000);
 	}
+}
+
+function remoteControl()
+{
+	NewWindow("/showRemoteControl", "RC", "293", "750", "no");
 }
 
 function deleteMovie(xy)
@@ -94,7 +99,7 @@ function openSI()
 
 function openChannelInfo()
 {
-	NewWindow("/cgi-bin/channelinfo", "ci", "780", "400", "yes");
+	NewWindow("/cgi-bin/channelinfo", "ci", "820", "600", "yes");
 }
 
 function DVRrecord(xy)

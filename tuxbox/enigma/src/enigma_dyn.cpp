@@ -895,6 +895,12 @@ static eString getLeftNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "Recover Movies", LEFTNAVICOLOR, "javascript:recoverMovies()");
 #endif
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+		{
+			result += "<br>";
+			result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl()");
+		}
 	}
 	else
 
@@ -2186,14 +2192,14 @@ struct getEntryString
 				days += "Sa";
 
 			tmp.strReplace("#DAYS#", days);
-			tmp.strReplace("#START#", eString().sprintf("%02d:%02d", startTime.tm_hour, startTime.tm_min));
-			tmp.strReplace("#END#", eString().sprintf("%02d:%02d", endTime.tm_hour, endTime.tm_min));
+			tmp.strReplace("#START#", eString().sprintf("XX.XX. - %02d:%02d", startTime.tm_hour, startTime.tm_min));
+			tmp.strReplace("#END#", eString().sprintf("XX.XX. - %02d:%02d", endTime.tm_hour, endTime.tm_min));
 		}
 		else
 		{
 			tmp.strReplace("#DAYS#", "&nbsp;");
-			tmp.strReplace("#START#", eString().sprintf("%02d.%02d - %02d:%02d", startTime.tm_mday, startTime.tm_mon + 1, startTime.tm_hour, startTime.tm_min));
-			tmp.strReplace("#END#", eString().sprintf("%02d.%02d - %02d:%02d", endTime.tm_mday, endTime.tm_mon + 1, endTime.tm_hour, endTime.tm_min));
+			tmp.strReplace("#START#", eString().sprintf("%02d.%02d. - %02d:%02d", startTime.tm_mday, startTime.tm_mon + 1, startTime.tm_hour, startTime.tm_min));
+			tmp.strReplace("#END#", eString().sprintf("%02d.%02d. - %02d:%02d", endTime.tm_mday, endTime.tm_mon + 1, endTime.tm_hour, endTime.tm_min));
 		}
 		tmp.strReplace("#CHANNEL#", channel);
 		tmp.strReplace("#DESCRIPTION#", description);
@@ -3664,22 +3670,58 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	eString keyS = opt["key"];
-	eString durationS = opt["duration"];
-	eString reptimeS = opt["reptime"];
+	eString keysS = opts;
+	eString durationS;
+	eString reptimeS;
 
-	unsigned long duration = 0;
-	if (durationS)
-		duration = atol(durationS.c_str());
-
-	unsigned long reptime = 500;
-	if (reptimeS)
-		atol(reptimeS.c_str());
-
-	unsigned long time = duration * 1000 / reptime;
-
-	if (keyS)
+	while (keysS)
 	{
+		int pos;
+		eString keyS;
+		if ((pos = keyS.find(",")) != eString::npos)
+		{
+			keyS = keysS.left(pos);
+			keysS = keysS.right(keysS.length() - pos - 1);
+		}
+		else
+		{
+			keyS = keysS;
+			keysS = "";
+		}
+
+		eString tmp = keyS;
+		if ((pos = tmp.find(":")) != eString::npos)
+		{
+			keyS = tmp.left(pos);
+			tmp = tmp.right(tmp.length() - pos - 1);
+		}
+		else
+		{
+			keyS = tmp;
+			tmp = "";
+		}
+
+		if ((pos = tmp.find(":")) != eString::npos)
+		{
+			durationS = tmp.left(pos);
+			reptimeS = tmp.right(tmp.length() - pos - 1);
+		}
+		else
+		{
+			durationS = tmp;
+			reptimeS = "";
+		}
+
+		unsigned long duration = 0;
+		if (durationS)
+			duration = atol(durationS.c_str());
+
+		unsigned long reptime = 500;
+		if (reptimeS)
+			atol(reptimeS.c_str());
+
+		unsigned long time = duration * 1000 / reptime;
+
 		int key = atoi(keyS.c_str());
 		int evd = open("/dev/input/event0", O_RDWR);
 		if (evd)
@@ -3693,10 +3735,16 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 			sendKey(evd, key, KEY_RELEASED);
 			close(evd);
 		}
-		return "key sent.";
 	}
-	else
-		return "a key code has to be specified /cgi-bin/rc?key=ddd (decimal)";
+	return closeWindow(content, "", 10);
+}
+
+static eString showRemoteControl(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	return readFile(TEMPLATE_DIR + "remoteControl.tmp");
 }
 
 static eString getCurrentVpidApid(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -4018,8 +4066,8 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 	}
 	else
 	{
+		eTimerManager::getInstance()->saveTimerList();
 		result = readFile(TEMPLATE_DIR + "deleteTimerComplete.tmp");
-		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	}
 
 	return result;
@@ -4323,7 +4371,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 		result += "Timer event could not be added because time of the event overlaps with an already existing event.";
 	else
 	{
-		result += "Timer event was created successfully.";
+		result += "<html><body onUnload=\"parent.window.opener.location.close(true)\">Timer event was created successfully.</body></html>";
 		eTimerManager::getInstance()->saveTimerList();
 	}
 
@@ -4667,6 +4715,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/control/message", message, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/rc", remoteControl, lockWeb);
+	dyn_resolver->addDyn("GET", "/showRemoteControl", showRemoteControl, lockWeb);
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, lockWeb);
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
 	dyn_resolver->addDyn("GET", "/header", header, lockWeb);

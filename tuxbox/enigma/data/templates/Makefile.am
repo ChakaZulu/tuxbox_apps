@@ -4,7 +4,8 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	index_small.tmp index_big.tmp eit_small.tmp addTimerEvent.tmp wap.tmp wapepg.tmp wapzap.tmp \
 	wapEPGDetails.tmp wapTimerList.tmp queryEditTimer.tmp queryDeleteTimer.tmp deleteTimerComplete.tmp \
 	mountPoint.tmp mountPoints.tmp mountPointWindow.tmp subChannelSelection.tmp mepg_small.tmp \
-	pdaResponse.tmp flashMgr.tmp configSettings.tmp addRepeatingTimerEvent.tmp addTimerListEntry.tmp 
+	pdaResponse.tmp flashMgr.tmp configSettings.tmp addRepeatingTimerEvent.tmp addTimerListEntry.tmp \
+	remoteControl.tmp
 
 install-data-local:
 	install -d $(DESTDIR)$(DATADIR)/enigma/templates
