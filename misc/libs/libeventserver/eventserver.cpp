@@ -57,7 +57,7 @@ void CEventServer::sendEvent(unsigned int eventID, unsigned int initiatorID, voi
 	{
 		//allen clients ein event schicken
 		eventClient client = pos->second;
-		printf("[eventserver]: send event (%d) to: %d - %s\n", eventID, client.clientID, client.udsName);
+		//printf("[eventserver]: send event (%d) to: %d - %s\n", eventID, client.clientID, client.udsName);
 		sendEvent2Client(eventID, initiatorID, &client, eventbody, eventbodysize);
 	}
 }
@@ -87,12 +87,13 @@ bool CEventServer::sendEvent2Client(unsigned int eventID, unsigned int initiator
 	eventHead head;
 	head.eventID = eventID;
 	head.initiatorID = initiatorID;
+	head.dataSize = eventbodysize;
 	int written = write(sock_fd, &head, sizeof(head));
-	//printf ("[eventserver]: sent 0x%x\n", written );
+	//printf ("[eventserver]: sent 0x%x - following eventbody= %d\n", written, eventbodysize );
 
 	if(eventbodysize!=0)
 	{
-		write(sock_fd, eventbody, eventbodysize);
+		written = write(sock_fd, eventbody, eventbodysize);
 	}
 	close(sock_fd);
 }
