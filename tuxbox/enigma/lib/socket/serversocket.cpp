@@ -37,12 +37,16 @@ eServerSocket::eServerSocket(int port)
 #if 0
 	eDebug("[SERVERSOCKET] enigma-http-server bound on port %d", port);
 #endif
-	
+
+	int val=1;
+
+	setsockopt(socket->getDescriptor(), SOL_SOCKET, SO_REUSEADDR, &val, 4);
+
 	if(bind(socket->getDescriptor(),
 		(struct sockaddr *) &serv_addr,
 		sizeof(serv_addr))<0)
 	{
-		eDebug("[SERVERSOCKET] ERROR on bind()");
+		eDebug("[SERVERSOCKET] ERROR on bind() (%m)");
 		okflag=0;
 	}
 	listen(socket->getDescriptor(), 0);
