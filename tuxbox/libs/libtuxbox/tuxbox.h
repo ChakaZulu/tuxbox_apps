@@ -1,8 +1,11 @@
 /*
 
-  $Id: tuxbox.h,v 1.1 2003/01/04 23:38:46 waldi Exp $
+  $Id: tuxbox.h,v 1.2 2003/02/18 18:42:13 obi Exp $
  
   $Log: tuxbox.h,v $
+  Revision 1.2  2003/02/18 18:42:13  obi
+  #include <tuxbox/tuxbox.h>
+
   Revision 1.1  2003/01/04 23:38:46  waldi
   move libtuxbox
 
@@ -23,38 +26,10 @@
 
 */
 
-#ifndef TUXBOX_H
-#define TUXBOX_H
+#ifndef LIBTUXBOX_H
+#define LIBTUXBOX_H
 
-#ifdef __KERNEL__
-#define TUXBOX_VERSION						KERNEL_VERSION(2,0,1)
-#endif
-
-#define TUXBOX_TAG_CAPABILITIES				"TUXBOX_CAPABILITIES"
-#define TUXBOX_TAG_VENDOR					"TUXBOX_VENDOR"
-#define TUXBOX_TAG_MODEL					"TUXBOX_MODEL"
-#define TUXBOX_TAG_VERSION					"TUXBOX_VERSION"
-
-#define TUXBOX_CAPABILITIES_IR_RC			0x00000001
-#define TUXBOX_CAPABILITIES_IR_KEYBOARD		0x00000002
-#define TUXBOX_CAPABILITIES_LCD				0x00000004
-#define TUXBOX_CAPABILITIES_NETWORK			0x00000008
-#define TUXBOX_CAPABILITIES_HDD				0x00000010
-#define TUXBOX_CAPABILITIES_CAM_CI			0x00000020
-#define TUXBOX_CAPABILITIES_CAM_EMBEDDED	0x00000040
-
-#define	TUXBOX_VENDOR_UNKNOWN				0x00000000
-#define	TUXBOX_VENDOR_NOKIA					0x00000001
-#define	TUXBOX_VENDOR_SAGEM					0x00000002
-#define	TUXBOX_VENDOR_PHILIPS				0x00000003
-#define	TUXBOX_VENDOR_DREAM_MM				0x00000004
-
-#define TUXBOX_MODEL_UNKNOWN				0x00000000
-#define TUXBOX_MODEL_DBOX2					0x00000001
-#define TUXBOX_MODEL_DREAMBOX_DM7000		0x00000002
-#define TUXBOX_MODEL_DREAMBOX_DM5600		0x00000003
-
-#ifndef __KERNEL__
+#include <tuxbox/tuxbox.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,6 +46,4 @@ unsigned int tuxbox_get_version(void);
 }
 #endif
 
-#endif
-
-#endif
+#endif /* LIBTUXBOX_H */
