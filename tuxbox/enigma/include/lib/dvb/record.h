@@ -62,7 +62,8 @@ class eDVBRecorder: private eThread, public Object
 	std::set<pid_t> pids, newpids;
 	eFixedMessagePump<eDVBRecorderMessage> rmessagepump;
 
-	int splits, splitsize, size, dvrfd, outfd;
+	off64_t splitsize, size;
+	int splits, dvrfd, outfd;
 
 	eString filename;
 

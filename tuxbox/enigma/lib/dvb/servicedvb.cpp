@@ -143,11 +143,19 @@ int eDVRPlayerThread::openFile(int slice)
 			{
 				slicesize=lseek64(sourcefd, 0, SEEK_END);
 				if (slicesize <= 0)
-					slicesize=1024*1024*1024;
+				{
+					int tmp=1024*1024;
+					eConfig::getInstance()->getKey("/extra/record_splitsize", tmp);
+					slicesize=tmp*1024;
+				}
 				lseek64(sourcefd, 0, SEEK_SET);
 			}
 			else
-				slicesize=1024*1024*1024;
+			{
+				int tmp=1024*1024;
+				eConfig::getInstance()->getKey("/extra/record_splitsize", tmp);
+				slicesize=tmp*1024;
+			}
 		}
 
 		inputsn=new eSocketNotifier(this, sourcefd, eSocketNotifier::Read, 0);

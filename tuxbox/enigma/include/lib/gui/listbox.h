@@ -60,6 +60,7 @@ public:
 	enum	{		flagNoUpDownMovement=1,		flagNoPageMovement=2,		flagShowEntryHelp=4, flagShowPartial=8, flagLostFocusOnFirst=16, flagLostFocusOnLast=32 };
 	enum	{		OK = 0,		ERROR=1,		E_ALLREADY_SELECTED = 2,		E_COULDNT_FIND = 4,		E_INVALID_ENTRY = 8,	 E_NOT_VISIBLE = 16		};
 	void setFlags(int);
+	int getFlags() const { return flags; }
 	void removeFlags(int);
 	void invalidateEntry(int n){	invalidate(getEntryRect(n));}
 	void invalidateContent();

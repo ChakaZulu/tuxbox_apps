@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.20 2005/01/10 18:05:57 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.21 2005/01/20 21:04:03 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -37,7 +37,7 @@ eExpertSetup::eExpertSetup()
 	int lockWebIf=1;
 	if ( eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf) )
 		eConfig::getInstance()->setKey("/ezap/webif/lockWebIf", lockWebIf);
-		
+
 	int showSatPos=1;
 	if ( eConfig::getInstance()->getKey("/extras/showSatPos", showSatPos) )
 		eConfig::getInstance()->setKey("/extras/showSatPos", showSatPos);
@@ -56,10 +56,26 @@ eExpertSetup::eExpertSetup()
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 		CONNECT((new eListBoxEntryMenu(&list, _("Factory reset"), eString().sprintf("(%d) %s", ++entry, _("all settings will set to factory defaults")) ))->selected, eExpertSetup::factory_reset);
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+#ifndef DISABLE_FILE
+	list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
+	record_split_size = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("record split size (left, right)"));
+	record_split_size->add("         650MB        >", 650*1024);
+	record_split_size->add("<        700MB        >", 700*1024);
+	record_split_size->add("<        800MB        >", 800*1024);
+	record_split_size->add("<         1GB         >", 1024*1024);
+	record_split_size->add("<        1,5GB        >", 1536*1024);
+	record_split_size->add("<         2GB         >", 2*1024*1024);
+	record_split_size->add("<         4GB         >", 4*1024*1024);
+	record_split_size->add("<         8GB         >", 8*1024*1024);
+	record_split_size->add("<        16GB         ", 16*1024*1024);
+	int splitsize=0;
+	if (eConfig::getInstance()->getKey("/extras/record_splitsize", splitsize))
+		splitsize=1024*1024; // 1G
+	record_split_size->setCurrent(splitsize);
+#endif
 	CONNECT((new eListBoxEntryCheck((eListBox<eListBoxEntry>*)&list,_("Serviceselector help buttons"),"/ezap/serviceselector/showButtons",_("show colored help buttons in service selector")))->selected, eExpertSetup::colorbuttonsChanged );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Show Sat position"), "/extras/showSatPos", _("show sat position in the infobar"));
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
-		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
+	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 		CONNECT((new eListBoxEntryCheck((eListBox<eListBoxEntry>*)&list,_("Enable fast zapping"),"/elitedvb/extra/fastzapping",_("enables faster zapping.. but with visible sync")))->selected, eExpertSetup::fastZappingChanged );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Skip confirmations"), "/elitedvb/extra/profimode", _("enable/disable confirmations"));
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Hide error windows"), "/elitedvb/extra/hideerror", _("don't show zap error messages"));
@@ -69,6 +85,13 @@ eExpertSetup::eExpertSetup()
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Don't open serial port"), "/ezap/extra/disableSerialOutput", _("don't write debug messages to /dev/tts/0")))->selected, eExpertSetup::reinitializeHTTPServer );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Auto bouquet change"), "/elitedvb/extra/autobouquetchange", _("change into next bouquet when end of current bouquet is reached"));
 	setHelpID(92);
+	CONNECT( list.selchanged, eExpertSetup::selChanged );
+}
+
+void eExpertSetup::selChanged(eListBoxEntryMenu* e)
+{
+	if ( e == (eListBoxEntryMenu*)record_split_size )
+		eConfig::getInstance()->setKey("/extras/record_splitsize", (int)e->getKey());
 }
 
 void eExpertSetup::colorbuttonsChanged(bool b)

@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/system/file_eraser.h>
+#include <lib/system/econfig.h>
 #include <signal.h>
 
 #ifndef DMX_LOW_BITRATE
@@ -81,14 +82,39 @@ int eDVBRecorder::flushBuffer()
 {
 	if (!bufptr)
 		return 0;
-	int wr = ::write(outfd, buf, bufptr);
-	if ( wr < bufptr )
+	int towrite = splitsize-size>bufptr ? bufptr : splitsize-size;
+	int wr = ::write(outfd, buf, towrite);
+	if ( wr < towrite )
 	{
 		eDebug("recording write error, maybe disk full");
+		state = stateError;
 		rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
 		return -1;
 	}
 	size+=wr;
+	if (size >= splitsize)
+	{
+		if ( openFile(++splits) )
+		{
+			eDebug("create new file failed, maybe disk full");
+			state = stateError;
+			rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
+			return -1;
+		}
+		if ( wr < bufptr )  // must flush remaining bytes from buffer..
+		{
+			towrite=bufptr-wr;
+			wr = ::write(outfd, buf+wr, towrite);
+			if ( wr < towrite )
+			{
+				eDebug("recording write error, maybe disk full");
+				state = stateError;
+				rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
+				return -1;
+			}
+			size+=wr;
+		}
+	}
 	bufptr=0;
 	return 0;
 }
@@ -101,11 +127,6 @@ void SAHandler(int ptr)
 
 void eDVBRecorder::thread()
 {
-/*	struct sigaction act;
-	act.sa_handler = SAHandler;
-	sigemptyset (&act.sa_mask);
-	act.sa_flags = 0;
-	sigaction (SIGALRM, &act, NULL);*/
 	signal(SIGALRM, SAHandler);
 	PatPmtWrite();
 	while (state == stateRunning)
@@ -126,13 +147,6 @@ void eDVBRecorder::thread()
 			if (flushBuffer())
 				state = stateError;
 		}
-
-		if (size > splitsize)
-			if (openFile(++splits))
-			{
-				state = stateError;
-				rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
-			}
 	}
 	alarm(0);
 	signal(SIGALRM, SIG_DFL );
@@ -260,7 +274,13 @@ void eDVBRecorder::open(const char *_filename)
 
 	filename=_filename;
 
-	splitsize=1024*1024*1024; // 1G
+	int tmp=1024*1024;  // 1G
+	eConfig::getInstance()->getKey("/extras/record_splitsize", tmp);
+
+	splitsize=tmp;
+	splitsize*=1024;
+	splitsize/=188;  // align to 188 bytes..
+	splitsize*=188;
 
 	openFile(splits=0);
 
