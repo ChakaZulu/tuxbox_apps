@@ -101,7 +101,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CZapitClient::responseGetLastChannel    firstchannel;
 		st_rmsg				sendmessage;
 
-		char				current_volume;
 		bool				current_muted;
 
 		bool				skipShutdownTimer;

@@ -1594,14 +1594,13 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	CStringInput * audio_PCMOffset = new CStringInput("audiomenu.PCMOffset", g_settings.audio_PCMOffset, 2, NULL, NULL, "0123456789 ", audioSetupNotifier);
 	CMenuForwarder *mf = new CMenuForwarder("audiomenu.PCMOffset", true, g_settings.audio_PCMOffset, audio_PCMOffset );
 	CAudioSetupNotifier2 *audioSetupNotifier2 = new CAudioSetupNotifier2(mf);
-	audioSettings.addItem( mf);
 
 	oj = new CMenuOptionChooser("audiomenu.avs_control", &g_settings.audio_avs_Control, true, audioSetupNotifier2);
 	oj->addOption(0, "audiomenu.ost");
 	oj->addOption(1, "audiomenu.avs");
 	oj->addOption(2, "audiomenu.lirc");
-	audioSettings.addItem( oj );
-
+	audioSettings.addItem(oj);
+	audioSettings.addItem(mf);
 }
 
 void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
@@ -2490,8 +2489,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//lcd aktualisieren
 	CLCD::getInstance()->setlcdparameter();
-	CLCD::getInstance()->showVolume(g_Controld->getVolume(g_settings.audio_avs_Control==1));
-	CLCD::getInstance()->setMuted(g_Controld->getMute(g_settings.audio_avs_Control==1));
+	CLCD::getInstance()->showVolume(g_Controld->getVolume(g_settings.audio_avs_Control == 1));
+	CLCD::getInstance()->setMuted(g_Controld->getMute(g_settings.audio_avs_Control == 1));
 
 	SetupTiming();
 
@@ -2696,7 +2695,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//keySettings
 	InitKeySettings(keySettings);
 
-	current_volume= g_Controld->getVolume(g_settings.audio_avs_Control);
 	AudioMute( g_Controld->getMute(g_settings.audio_avs_Control), true );
 
 	//load Pluginlist
@@ -2971,7 +2969,6 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if( msg == NeutrinoMessages::EVT_VOLCHANGED )
 	{
-		current_volume = data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::EVT_MUTECHANGED )
@@ -3388,50 +3385,50 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 
 		unsigned long long timeoutEnd;
 
+		char current_volume = g_Controld->getVolume(g_settings.audio_avs_Control == 1);
+
 		do
 	  	{
-			if( msg <= CRCInput::RC_MaxRC )
+			if (msg <= CRCInput::RC_MaxRC)
 				timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_infobar/ 2 );
 
-			if(msg==CRCInput::RC_plus)
+			if (msg == CRCInput::RC_plus)
 			{
-				if (current_volume < 100)
-				{
-					if (current_volume < 100 - 5)
-						current_volume += 5;
-					else
-						current_volume = 100;
-				}
-				g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
+				if (current_volume < 100 - 5)
+					current_volume += 5;
+				else
+					current_volume = 100;
+
+				g_Controld->setVolume(current_volume, g_settings.audio_avs_Control);
 			}
-			else if(msg==CRCInput::RC_minus)
+			else if (msg == CRCInput::RC_minus)
 		  	{
-				if (current_volume > 0)
-				{
-					if (current_volume > 5)
-						current_volume -= 5;
-					else
-						current_volume = 0;
-				}
-				g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
+				if (current_volume > 5)
+					current_volume -= 5;
+				else
+					current_volume = 0;
+
+				g_Controld->setVolume(current_volume, g_settings.audio_avs_Control);
 			}
-			else
-		  	{
-				if( (msg!=CRCInput::RC_ok) || (msg!=CRCInput::RC_home) )
-				{
-					if( handleMsg( msg, data ) & messages_return::unhandled )
-					{
-						g_RCInput->postMsg( msg, data );
-						msg= CRCInput::RC_timeout;
-					}
-				}
+			else if ((msg == CRCInput::RC_ok) || (msg == CRCInput::RC_home))
+			{
+				break;
+			}
+			else if (msg == NeutrinoMessages::EVT_VOLCHANGED)
+			{
+				current_volume = g_Controld->getVolume(g_settings.audio_avs_Control == 1);
+			}
+			else if (handleMsg( msg, data ) & messages_return::unhandled)
+			{
+				g_RCInput->postMsg( msg, data );
+				msg= CRCInput::RC_timeout;
 			}
 
 			if(bDoPaint)
 		  	{
-				int vol = current_volume<<1;
-				frameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
-				frameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
+				int vol = current_volume << 1;
+				frameBuffer->paintBoxRel(x + 40      , y + 12, vol      , 15, COL_INFOBAR + 3);
+				frameBuffer->paintBoxRel(x + 40 + vol, y + 12, 200 - vol, 15, COL_INFOBAR + 1);
 			}
 
 			CLCD::getInstance()->showVolume(current_volume);
