@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.255 2002/04/29 00:03:37 McClean Exp $
+        $Id: neutrino.cpp,v 1.256 2002/04/29 00:17:36 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -49,6 +49,7 @@
 
 #include "gui/widget/menue.h"
 #include "gui/widget/messagebox.h"
+#include "gui/widget/hintbox.h"
 #include "gui/widget/colorchooser.h"
 #include "gui/widget/keychooser.h"
 #include "gui/widget/stringinput.h"
@@ -1746,14 +1747,13 @@ int CNeutrinoApp::run(int argc, char **argv)
 	{
 		printf("config file missing\n");
 		saveSetup();
-		ShowMsg ( "messagebox.info", g_Locale->getText("settings.noconffile"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
-
+		ShowHint ( "messagebox.info", g_Locale->getText("settings.noconffile") );
 	}
 	else if(loadSettingsErg==2)
 	{
 		printf("parts of configfile missing\n");
 		saveSetup();
-		ShowMsg ( "messagebox.info", g_Locale->getText("settings.missingoptionsconffile"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
+		ShowHint ( "messagebox.info", g_Locale->getText("settings.missingoptionsconffile") );
 	}
 
 	//init programm
@@ -2501,7 +2501,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.255 2002/04/29 00:03:37 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.256 2002/04/29 00:17:36 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
