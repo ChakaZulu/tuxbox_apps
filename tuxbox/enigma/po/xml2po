@@ -1,0 +1,30 @@
+#! /usr/bin/perl
+
+my %used;
+
+open($list, @ARGV[0]) or die "cannot open list";
+
+chdir "@ARGV[1]";
+
+while (<$list>) {
+	$xmlpath=$_;
+	$xmlfile=`basename $xmlpath`;
+	chomp $xmlfile;
+
+	open ($fh, "<$xmlpath") or die "cannot open file $xmlpath";
+
+	while (<$fh>) {
+		while (s/(\w+)=\"(.*?)\"//) {
+			if ($1 eq "text" or $1 eq "helptext")
+			{
+				$used{$2} = $used{$2} . "#: $xmlfile:$line\n";
+			}
+		} 
+		$line++;
+	} 
+	close ($fh);
+}
+
+for (keys %used) {
+	print "$used{$_}msgid \"$_\"\nmsgstr \"\"\n\n"
+}
