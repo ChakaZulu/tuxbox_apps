@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.220 2002/04/12 15:28:52 field Exp $
+        $Id: neutrino.cpp,v 1.221 2002/04/14 08:42:27 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -40,6 +40,10 @@
 #define NEUTRINO_CPP
 #include "global.h"
 
+#include <iostream>
+#include <fstream>
+
+using namespace std;
 // Globale Variablen - to use import global.h
 
 // I don't like globals, I would have hidden them in classes,
@@ -86,6 +90,7 @@ CNeutrinoApp::CNeutrinoApp()
 	SetupFrameBuffer();
 
 	settingsFile = CONFIGDIR "/neutrino.conf";
+	scanSettingsFile = CONFIGDIR "/scan.conf";
 
 	mode = mode_unknown;
 	channelList = NULL;
@@ -397,6 +402,19 @@ bool CNeutrinoApp::loadSetup(SNeutrinoSettings* load2)
 	}
 	close(fd);
 
+	if ((!load2) || (load2 == &g_settings))
+	{
+		ifstream is( scanSettingsFile.c_str());
+		if ( !is.is_open())
+		{
+			cout << "error while loading scan-settings!" << endl;
+			scanSettings.useDefaults();
+		}
+		else
+		{
+			is >> scanSettings;
+		}
+	}
 	return true;
 }
 
@@ -436,6 +454,16 @@ void CNeutrinoApp::saveSetup()
 		write(fd, &g_settings,  sizeof(SNeutrinoSettings) );
 		close(fd);
 		printf("[neutrino] settings saved\n");
+	}
+
+	ofstream os( scanSettingsFile.c_str(), ios::out | ios::trunc);
+	try
+	{
+		os << scanSettings;
+	}
+	catch (...)
+	{
+		cout << "error while saving scan-settings!" << endl;
 	}
 }
 
@@ -699,7 +727,7 @@ void CNeutrinoApp::ClearFrameBuffer()
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
                                 CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
-                                CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
+                                CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &scanSettings, CMenuWidget &service)
 {
 	mainMenu.addItem( new CMenuSeparator() );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv", true, CRCInput::RC_red, "rot.raw"), true );
@@ -733,8 +761,117 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.scan", true, "", &scanSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
+
 }
+
+
+void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
+{
+	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser("scants.bouquet", &((int)(scanSettings.bouquetMode)), true );
+	ojBouquets->addOption( CScanSettings::deleteBouquets, "scants.bouquet_erase");
+	ojBouquets->addOption( CScanSettings::createBouquets, "scants.bouquet_create");
+	ojBouquets->addOption( CScanSettings::donttouchBouquets, "scants.bouquet_leave");
+
+	//kabel-lnb-settings
+	if (atoi(getenv("fe"))==1)
+	{
+		settings.addItem( new CMenuSeparator() );
+		settings.addItem( new CMenuForwarder("menu.back") );
+		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+		CZapitClient::SatelliteList satList;
+		g_Zapit->getScanSatelliteList(satList);
+		static int sat = 0;
+		for ( uint i=0; i<satList.size(); i++)
+		{
+			cout << satList[i].satName << endl;
+			if( !strcmp( satList[i].satName, scanSettings.satellites[0].name))
+			{
+				cout << "found" << satList[i].satName << endl;
+				sat = i;
+				break;
+			}
+		}
+
+		CMenuOptionChooser* ojSat = new CMenuOptionChooser("satsetup.satellite", &sat, scanSettings.diseqcMode == CScanSettings::noDiSEqC/*, new CSatelliteNotifier*/, NULL, false);
+		for ( uint i=0; i< satList.size(); i++)
+		{
+			ojSat->addOption(i, satList[i].satName);
+		}
+
+
+		CMenuWidget* extSatSettings = new CMenuWidget("satsetup.extended", "settings.raw");
+		extSatSettings->addItem( new CMenuSeparator() );
+		extSatSettings->addItem( new CMenuForwarder("menu.back") );
+		extSatSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		CMenuForwarder* ojExtSatSettings = new CMenuForwarder("satsetup.extended", scanSettings.diseqcMode != CScanSettings::noDiSEqC, "", extSatSettings);
+		for ( uint i=0; i< satList.size(); i++)
+		{
+			static int dummy = 0;
+			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, &dummy, true/*, new CSatelliteNotifier*/);
+			oj->addOption( 0, "options.off");
+			for ( int j=1; j<=32; j++)
+			{
+				char jj[3];
+				sprintf( jj, "%d", j);
+				oj->addOption( j, jj);
+			}
+			extSatSettings->addItem( oj);
+		}
+
+		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.disqeqc", &((int)(scanSettings.diseqcMode)), true, new CSatDiseqcNotifier( ojExtSatSettings, ojSat));
+		ojDiseqc->addOption( CScanSettings::noDiSEqC,   "satsetup.nodiseqc");
+		ojDiseqc->addOption( CScanSettings::miniDiSEqC, "satsetup.minidiseqc");
+		ojDiseqc->addOption( CScanSettings::DiSEqC,     "satsetup.stddiseqc");
+
+		settings.addItem( ojDiseqc );
+		settings.addItem( ojBouquets);
+		settings.addItem( ojSat);
+		settings.addItem( ojExtSatSettings);
+
+	}
+	else
+	{//kabel
+		settings.addItem( new CMenuSeparator() );
+		settings.addItem( new CMenuForwarder("menu.back") );
+		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+		static int dummy = 0;
+		FILE* fd = fopen("/var/etc/.specinv", "r");
+		if(fd)
+		{
+			dummy=1;
+			fclose(fd);
+		}
+		CMenuOptionChooser* ojInv = new CMenuOptionChooser("cablesetup.spectralInversion", &dummy, true, new CCableSpectalInversionNotifier );
+		ojInv->addOption(0, "options.off");
+		ojInv->addOption(1, "options.on");
+
+		CZapitClient::SatelliteList providerList;
+		g_Zapit->getScanSatelliteList(providerList);
+		static int cableProvider = 0;
+		for ( uint i=0; i<providerList.size(); i++)
+		{
+			if( !strcmp( providerList[i].satName, scanSettings.satellites[0].name))
+			{
+				cableProvider = i;
+				break;
+			}
+		}
+		CMenuOptionChooser* oj = new CMenuOptionChooser("cablesetup.provider", &cableProvider, true/*, new CCableProviderNotifier*/);
+
+		for ( uint i=0; i< providerList.size(); i++)
+		{
+			oj->addOption(i, providerList[i].satName);
+		}
+		settings.addItem( ojBouquets);
+		settings.addItem( ojInv );
+		settings.addItem( oj);
+	}
+}
+
 
 void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 {
@@ -747,12 +884,8 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 	TSScan->addItem( new CMenuForwarder("menu.back") );
 	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
-	CMenuOptionChooser* oj = new CMenuOptionChooser("scants.bouquet", &g_settings.scan_bouquet, true );
-	oj->addOption(1024, "scants.bouquet_erase");
-	oj->addOption(512, "scants.bouquet_create");
-	oj->addOption(256, "scants.bouquet_leave");
-	TSScan->addItem( oj );
 
+/*
 	if (atoi(getenv("fe"))==1)
 	{// only sat-params....
 		oj = new CMenuOptionChooser("scants.astra", &g_settings.scan_astra, true );
@@ -785,35 +918,9 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 		TSScan->addItem( oj );
 	}
 	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+*/
 	TSScan->addItem( new CMenuForwarder("scants.startnow", true, "", g_ScanTS) );
 	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", TSScan) );
-
-
-	//kabel-lnb-settings
-	if (atoi(getenv("fe"))==1)
-	{// only sat-params....
-		//todo
-	}
-	else
-	{//kabel
-		CMenuWidget* cableSettings = new CMenuWidget("servicemenu.cablesetup", "settings.raw");
-		cableSettings->addItem( new CMenuSeparator() );
-		cableSettings->addItem( new CMenuForwarder("menu.back") );
-		cableSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-		static int dummy = 0;
-		FILE* fd = fopen("/var/etc/.specinv", "r");
-		if(fd)
-		{
-			dummy=1;
-			fclose(fd);
-		}
-		oj = new CMenuOptionChooser("cablesetup.spectralInversion", &dummy, true, new CCableSpectalInversionNotifier );
-		oj->addOption(0, "options.off");
-		oj->addOption(1, "options.on");
-		cableSettings->addItem( oj );
-		service.addItem( new CMenuForwarder("servicemenu.cablesetup", true, "", cableSettings) );
-	}
 
 	//ucodecheck
 	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", UCodeChecker ) );
@@ -1435,10 +1542,11 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400, 520);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
+	CMenuWidget scanSettings("mainsettings.scan", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings,
-	             colorSettings, keySettings, videoSettings, languageSettings, miscSettings, service);
+	             colorSettings, keySettings, videoSettings, languageSettings, miscSettings, scanSettings, service);
 
 	//service
 	InitServiceSettings(service);
@@ -1459,6 +1567,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	// Parentallock settings
 	InitParentalLockSettings( parentallockSettings);
+
+	// ScanSettings
+	InitScanSettings(scanSettings);
 
 	g_Controld->registerEvent(CControldClient::EVT_MUTECHANGED, 222, NEUTRINO_UDS_NAME);
     g_Controld->registerEvent(CControldClient::EVT_VOLUMECHANGED, 222, NEUTRINO_UDS_NAME);
@@ -1523,7 +1634,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data );
 
-		if ( msg == messages::STANDBY_ON )
+		if ( msg == NeutrinoMessages::STANDBY_ON )
 		{
 			if ( mode != mode_standby )
 			{
@@ -1533,7 +1644,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			g_RCInput->clearMsg();
 		}
 
-		if ( msg == messages::STANDBY_OFF )
+		if ( msg == NeutrinoMessages::STANDBY_OFF )
 		{
 			if ( mode == mode_standby )
 			{
@@ -1543,13 +1654,13 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			g_RCInput->clearMsg();
 		}
 
-		else if ( msg == messages::SHUTDOWN )
+		else if ( msg == NeutrinoMessages::SHUTDOWN )
 		{
 			// AUSSCHALTEN...
 			ExitRun();
 		}
 
-		else if ( msg == messages::VCR_ON )
+		else if ( msg == NeutrinoMessages::VCR_ON )
 		{
 			if  ( mode != mode_scart )
 			{
@@ -1558,7 +1669,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 		}
 
-		else if ( msg == messages::VCR_OFF )
+		else if ( msg == NeutrinoMessages::VCR_OFF )
 		{
 			if ( mode == mode_scart )
 			{
@@ -1570,7 +1681,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		{
 			if ( ( mode == mode_tv ) || ( ( mode == mode_radio ) ) )
 			{
-				if ( msg == messages::SHOW_EPG )
+				if ( msg == NeutrinoMessages::SHOW_EPG )
 				{
 					// show EPG
 
@@ -1642,7 +1753,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					channelList->quickZap( msg );
 				}
 				else if ( ( msg == CRCInput::RC_help ) ||
-						  ( msg == messages::SHOW_INFOBAR ) )
+						  ( msg == NeutrinoMessages::SHOW_INFOBAR ) )
 				{
 					// show Infoviewer
 					g_InfoViewer->showTitle( channelList->getActiveChannelNumber(),
@@ -1717,14 +1828,14 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		return ( res & ( 0xFFFFFFFF - messages_return::unhandled ) );
 	}
 
-    if ( msg == messages::EVT_VCRCHANGED )
+    if ( msg == NeutrinoMessages::EVT_VCRCHANGED )
 	{
 		if ( g_settings.vcr_AutoSwitch == 1 )
 		{
 			if ( data != VCR_STATUS_OFF )
-				g_RCInput->postMsg( messages::VCR_ON, 0 );
+				g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
 			else
-				g_RCInput->postMsg( messages::VCR_OFF, 0 );
+				g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
 		}
 		return messages_return::handled | messages_return::cancel_info;
 	}
@@ -1738,7 +1849,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 		if ( mode == mode_standby )
 		{
-        	g_RCInput->postMsg( messages::STANDBY_OFF, 0 );
+        	g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
 		}
 		else if ( !g_settings.shutdown_real )
 		{
@@ -1769,11 +1880,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 			} while ( ( msg != CRCInput::RC_timeout ) && ( diff < 10 ) );
 
-			g_RCInput->postMsg( ( diff >= 10 ) ? messages::SHUTDOWN : messages::STANDBY_ON, 0 );
+			g_RCInput->postMsg( ( diff >= 10 ) ? NeutrinoMessages::SHUTDOWN : NeutrinoMessages::STANDBY_ON, 0 );
         }
         else
         {
-        	g_RCInput->postMsg( messages::SHUTDOWN, 0 );
+        	g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
 		}
 		return messages_return::cancel_all | messages_return::handled;
 	}
@@ -1785,7 +1896,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		int diff = int((endtime - standby_pressed_at)/100000. );
 		if ( diff >= 10 )
 		{
-        	g_RCInput->postMsg( messages::SHUTDOWN, 0 );
+        	g_RCInput->postMsg( NeutrinoMessages::SHUTDOWN, 0 );
         	return messages_return::cancel_all | messages_return::handled;
         }
 	}
@@ -1802,18 +1913,18 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		AudioMute( !current_muted );
 		return messages_return::handled;
 	}
-	else if ( msg == messages::EVT_VOLCHANGED )
+	else if ( msg == NeutrinoMessages::EVT_VOLCHANGED )
 	{
 		current_volume = data;
 		return messages_return::handled;
 	}
-	else if ( msg == messages::EVT_MUTECHANGED )
+	else if ( msg == NeutrinoMessages::EVT_MUTECHANGED )
 	{
 		AudioMute( (bool)data, true );
 		return messages_return::handled;
 	}
-	else if ( ( msg == messages::EVT_BOUQUETSCHANGED ) ||
-			  ( msg == messages::EVT_SERVICESCHANGED ) )
+	else if ( ( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED ) ||
+			  ( msg == NeutrinoMessages::EVT_SERVICESCHANGED ) )
 	{
 		channelsInit();
 		tvMode( true );
@@ -1824,7 +1935,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		return messages_return::handled;
 	}
 
-	else if ( msg == messages::EVT_NEXTPROGRAM )
+	else if ( msg == NeutrinoMessages::EVT_NEXTPROGRAM )
 	{
 		int* p = (int*)data;
 		int evUniqueKey = *p;
@@ -2196,7 +2307,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	}
 	else if(actionKey=="scart")
 	{
-		g_RCInput->postMsg( messages::VCR_ON, 0 );
+		g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
 		returnval = menu_return::RETURN_EXIT_ALL;
 	}
 	else if(actionKey=="network")
@@ -2254,7 +2365,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.220 2002/04/12 15:28:52 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.221 2002/04/14 08:42:27 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 
@@ -2262,3 +2373,41 @@ int main(int argc, char **argv)
 	return neutrino->run(argc, argv);
 }
 
+ostream &operator<<(ostream& os, const CScanSettings& settings)
+{
+	os << settings.bouquetMode << endl;
+	os << settings.diseqcMode << endl;
+	for (uint i=0; i<settings.satellites.size(); i++)
+	{
+		os << '"' << settings.satellites[i].name << '"' << endl << settings.satellites[i].diseqc << endl;
+	}
+	return os;
+}
+
+istream &operator>>(istream& is, CScanSettings& settings)
+{
+	string token;
+	settings.satellites.clear();
+	is >> (int)settings.bouquetMode;
+	is >> (int)settings.diseqcMode;
+	while (!is.eof())
+	{
+		is >> token;
+		string satname = token;
+		int diseqc;
+		while ( satname[ satname.length()-1] != '"')
+		{
+			is >> token;
+			satname += " " + token;
+		}
+		CScanSettings::SSatellite sat;
+		is >> sat.diseqc;
+		strncpy( sat.name, satname.substr(1, satname.length()-2).c_str(), 30);
+		settings.satellites.insert( settings.satellites.end(), sat);
+
+		cout << "[sat]:" << sat.name << "|" << sat.diseqc << endl;
+	}
+	// for an unknown reason the last entry is waste
+	settings.satellites.erase( settings.satellites.end()--);
+	return is;
+}
