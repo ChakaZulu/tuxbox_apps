@@ -1,3 +1,11 @@
+// 
+// $Id: global.h,v 1.5 2001/09/17 18:37:40 fnbrd Exp $
+//
+// $Log: global.h,v $
+// Revision 1.5  2001/09/17 18:37:40  fnbrd
+// inserted id and log.
+//
+//
 #include "neutrino.h"
 #include "daemonc/lcdd.h"
 #include "daemonc/controld.h"
