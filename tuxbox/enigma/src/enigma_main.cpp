@@ -3412,6 +3412,8 @@ void eZapMain::skipLoop()
 				(ref.data[0] ==  eMP3Decoder::codecMP3) ) )
 			{ 
 				time <<= (faktor<0) ? 4 : 2; // ermittelt per trial & error (bitrate?)
+				time *= 3;
+				time /= 2;
 				ts=0;
 			}
 			else 
@@ -3443,19 +3445,21 @@ void eZapMain::repeatSkip(int dir)
 	if(aktiv) 
 		return;		// not more...
 
-	// ts only
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 
 	if(ref.type == eServiceReference::idUser &&
-		( (ref.data[0] == eMP3Decoder::codecMPG) ||
-		    (ref.data[0] == eMP3Decoder::codecMP3) ) ) 
+		( (ref.data[0] != eMP3Decoder::codecMPG) &&
+			(ref.data[0] != eMP3Decoder::codecMP3) ) ) 
 		return;
 
 	aktiv=1;
 
 	// Enter distance in minutes
 	SkipEditWindow dlg( (dir == skipForward) ? ">> Min:" : "<< Min:" );
-	dlg.setEditText("6"); // pre value (advertising) :-)
+	if(ref.type == eServiceReference::idUser && ref.data[0] == eMP3Decoder::codecMP3)
+		dlg.setEditText("1"); // pre value (advertising) :-)
+	else
+		dlg.setEditText("6"); // pre value (advertising) :-)
 
 	dlg.show();
 	int ret=dlg.exec();
@@ -3472,7 +3476,21 @@ void eZapMain::repeatSkip(int dir)
 				time = -time;
 
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*400)); //ca. in TS
+			if (ref.type == eServiceReference::idUser)
+			{
+				switch(ref.data[0])
+				{
+					case eMP3Decoder::codecMPG:
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*2000));
+						break;
+					case eMP3Decoder::codecMP3:
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*3800));
+						break;
+				}
+			}
+			else
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*380)); // ca in TS
+
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
 
 			updateProgress();
@@ -7352,7 +7370,7 @@ SkipEditWindow::SkipEditWindow( const char *InputFieldDescr)
 	input->move(ePoint(100, 4));
 	input->resize(eSize(50,fsize));
 	input->setMaxChars(3);
-	input->setFlags(eTextInputField::flagCloseParent);
+	input->setFlags(eTextInputField::flagCloseParent|eTextInputField::flagGoAlwaysNext);
 	input->setUseableChars("0123456789");
 	CONNECT( input->selected, TextEditWindow::accept );
 }
