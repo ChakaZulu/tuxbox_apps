@@ -26,11 +26,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include <algorithm>
+#include <errno.h>
 #include <stdio.h>
 #include <oggdec.h>
 #include <driver/netfile.h>
 #include <linux/soundcard.h>
+#include <algorithm>
 #include <sstream>
 
 #define ProgName "OggDec"
