@@ -36,6 +36,7 @@
 
 #include <driver/fontrenderer.h>
 #include <gui/bedit/bouqueteditor_chanselect.h>
+#include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
 
 #include <zapit/client/zapitclient.h>
@@ -120,23 +121,20 @@ void CBEChannelWidget::paintHead()
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, caption.c_str() , COL_MENUHEAD);
 }
 
+const struct button_label CBEChannelWidgetButtons[4] =
+{
+	{ NEUTRINO_ICON_BUTTON_RED   , "bouqueteditor.delete"     },
+	{ NEUTRINO_ICON_BUTTON_GREEN , "bouqueteditor.add"        },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, "bouqueteditor.move"       },
+	{ NEUTRINO_ICON_BUTTON_BLUE  , "bouqueteditor.switchmode" }
+};
+
 void CBEChannelWidget::paintFoot()
 {
-	int ButtonWidth = width / 4;
 	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+width- 4* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete"), COL_INFOBAR, 0, true); // UTF-8
-
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+width- 3* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add"), COL_INFOBAR, 0, true); // UTF-8
-
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+width- 2* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move"), COL_INFOBAR, 0, true); // UTF-8
-
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x+width- ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.switchmode"), COL_INFOBAR, 0, true); // UTF-8
+	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + height + 4, (width - 20) / 4, 4, CBEChannelWidgetButtons);
 }
 
 void CBEChannelWidget::hide()
@@ -270,6 +268,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, std::string actionKey)
 					mode = CZapitClient::MODE_TV;
 				Channels.clear();
 				g_Zapit->getBouquetChannels( bouquet, Channels, mode);
+				selected = 0;
 				paint();
 			}
 		}
