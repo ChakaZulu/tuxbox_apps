@@ -151,18 +151,18 @@ void enigmaMMI::closeMMI()
 
 bool enigmaMMI::handleMMIMessage(const char *data)
 {
-	const unsigned char TAG_MMI_CLOSE[]={0x9F,0x88,0x00};
-	const unsigned char TAG_MMI_DISPLAY_CONTROL[]={0x9F,0x88,0x01};
-	const unsigned char TAG_MMI_TEXT_LAST[]={0x9F,0x88,0x03};
-	const unsigned char TAG_MMI_TEXT_MORE[]={0x9F,0x88,0x04};
+	static const unsigned char TAG_MMI_CLOSE[]={0x9F,0x88,0x00};
+	static const unsigned char TAG_MMI_DISPLAY_CONTROL[]={0x9F,0x88,0x01};
+	static const unsigned char TAG_MMI_TEXT_LAST[]={0x9F,0x88,0x03};
+	static const unsigned char TAG_MMI_TEXT_MORE[]={0x9F,0x88,0x04};
 
-	const unsigned char TAG_MMI_ENQ[]      ={0x9F,0x88,0x07};
+	static const unsigned char TAG_MMI_ENQ[]      ={0x9F,0x88,0x07};
 
-	const unsigned char TAG_MMI_MENU_LAST[]={0x9F,0x88,0x09};
-	const unsigned char TAG_MMI_MENU_MORE[]={0x9F,0x88,0x0A};
+	static const unsigned char TAG_MMI_MENU_LAST[]={0x9F,0x88,0x09};
+	static const unsigned char TAG_MMI_MENU_MORE[]={0x9F,0x88,0x0A};
 
-	const unsigned char TAG_MMI_LIST_LAST[]={0x9F,0x88,0x0C};
-	const unsigned char TAG_MMI_LIST_MORE[]={0x9F,0x88,0x0D};
+	static const unsigned char TAG_MMI_LIST_LAST[]={0x9F,0x88,0x0C};
+	static const unsigned char TAG_MMI_LIST_MORE[]={0x9F,0x88,0x0D};
 
 	int rp=0;
 
@@ -229,13 +229,13 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		if ( nrcount > 32 )
 			nrcount = 32;
 
-		char text[size-1];
+		unsigned char text[size-1];
 		memset(text,0,size-1);
 		memcpy(text,data+rp,size-2);
+		eDebug("TEXT:%s",text);
 
-//		eDebug("TEXT:%s",text);
 		hideWaitForAnswer();
-		eMMIEnqWindow wnd(this->text, text, nrcount, blind );
+		eMMIEnqWindow wnd(this->text, convertDVBUTF8(text,size-2), nrcount, blind );
 		open = &wnd;
 		int ret = wnd.exec();
 		open = 0;
@@ -282,9 +282,9 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 
 		rp += LengthBytes;
 
-		unsigned char choices=data[rp++];
+/*		unsigned char choices=*/data[rp++];
 
-		eDebug("Size: %x Choices: %d",size,choices);
+//		eDebug("Size: %x Choices: %d",size,choices);
 
 		int currElement=0;
 		int endpos=rp+size;
@@ -301,24 +301,28 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 				int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
 				rp += LengthBytes;
 
-				char text[size+1];
+				unsigned char text[size+1];
 				memset(text,0,size+1);
 				memcpy(text,data+rp,size);
 				eDebug("TEXT:%s",text);
 
 				currElement++;
 
-				if(currElement==1)
-					titleText=text;
-				if(currElement==2)
-					subTitleText=text;
-				if(currElement==3)
-					bottomText=text;
-
-				if(currElement>3)
+				switch (currElement)
 				{
-					eDebug("new entry text %s", text);
-					entrys.push_back( std::pair<eString, int>( text, currElement-3 ) );
+					case 1:
+						titleText=convertDVBUTF8(text,size);
+						break;
+					case 2:
+						subTitleText=convertDVBUTF8(text,size);
+						break;
+					case 3:
+						bottomText=convertDVBUTF8(text,size);
+						break;
+					default:
+						eDebug("new entry text %s", text);
+						entrys.push_back( std::pair<eString, int>( convertDVBUTF8(text,size), currElement-3 ) );
+						break;
 				}
 				rp += size;
 			}
