@@ -413,7 +413,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.75 $";
+	char cvs_revision[] = "$Revision: 1.76 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -1949,7 +1949,7 @@ void ConfigMenu(int Init)
 					screen_mode1++;
 					screen_mode1 &= 1;
 
-					hex2str(&menu[2*Menu_Width*MenuLine[M_SC1] + 27], screen_mode1);
+					memcpy(&menu[2*Menu_Width*MenuLine[M_SC1] + Menu_Width - 5], &configonoff[menulanguage][screen_mode1  ? 3 : 0], 3);
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 
 					ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
@@ -1962,7 +1962,7 @@ void ConfigMenu(int Init)
 					screen_mode2++;
 					screen_mode2 &= 1;
 
-					hex2str(&menu[2*Menu_Width*MenuLine[M_SC2] + 27], screen_mode2);
+					memcpy(&menu[2*Menu_Width*MenuLine[M_SC2] + Menu_Width - 5], &configonoff[menulanguage][screen_mode2  ? 3 : 0], 3);
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 					break;
 
@@ -1971,7 +1971,7 @@ void ConfigMenu(int Init)
 					color_mode++;
 					color_mode &= 1;
 
-					hex2str(&menu[2*Menu_Width*MenuLine[M_COL] + 27], color_mode);
+					memcpy(&menu[2*Menu_Width*MenuLine[M_COL] + Menu_Width - 5], &configonoff[menulanguage][color_mode    ? 3 : 0], 3);
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 
 					if (color_mode)
@@ -3477,20 +3477,20 @@ void RenderMessage(int Message)
 	const char *msg;
 
 
-	char message_1[] = "אבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט";
+/*                     00000000001111111111222222222233333333334 */
+/*                     01234567890123456789012345678901234567890 */
+	char message_1[] = "אבבבבבבב www.tuxtxt.com x.xx בבבבבבבגט";
 	char message_2[] = "ד                                   הי";
 /* 	char message_3[] = "ד   suche nach Teletext-Anbietern   הי"; */
 	char message_4[] = "ד                                   הי";
-	char message_5[] = "וזזזזזזז www.tuxtxt.com x.xx זזזזזזזחי";
-/*                     00000000001111111111222222222233333333334 */
-/*                     01234567890123456789012345678901234567890 */
+	char message_5[] = "וזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי";
 	char message_6[] = "כללללללללללללללללללללללללללללללללללללך";
 
 /* 	char message_7[] = "ד kein Teletext auf dem Transponder הי"; */
 /* 	char message_8[] = "ד  warte auf Empfang von Seite 100  הי"; */
 /* 	char message_9[] = "ד     Seite 100 existiert nicht!    הי"; */
 
-	memcpy(&message_5[24], versioninfo, 4);
+	memcpy(&message_1[24], versioninfo, 4);
 
 	/* reset zoom */
 	zoommode = 0;
@@ -3550,7 +3550,7 @@ void RenderMessage(int Message)
 	PosX = StartX + fontwidth+5;
 	PosY = StartY + fontheight*16;
 	for (byte = 0; byte < 37; byte++)
-		RenderCharFB(message_1[byte], menucolor<<4 | menu2);
+		RenderCharFB(message_1[byte], menucolor<<4 | ((byte >= 9 && byte <= 27) ? yellow : menu2));
 	RenderCharFB(message_1[37], fbcolor<<4 | menu2);
 
 	PosX = StartX + fontwidth+5;
@@ -3580,7 +3580,7 @@ void RenderMessage(int Message)
 	PosX = StartX + fontwidth+5;
 	PosY = StartY + fontheight*20;
 	for (byte = 0; byte < 37; byte++)
-		RenderCharFB(message_5[byte], menucolor<<4 | ((byte >= 9 && byte <= 27) ? yellow : menu2));
+		RenderCharFB(message_5[byte], menucolor<<4 | menu2);
 	RenderCharFB(message_5[37], fbcolor<<4 | menu2);
 
 	PosX = StartX + fontwidth+5;

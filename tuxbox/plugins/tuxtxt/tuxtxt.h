@@ -497,12 +497,12 @@ const char hotlisttext[][2*5] =
 	{ "toev.verw." },
 };
 
-const char configonoff[][2*5] =
+const char configonoff[][2*3] =
 {
-	{ "einaus" },
-	{ "on off" },
-	{ "actdes" },
-	{ "aanuit" } 
+	{ "ausein" },
+	{ "offon " },
+	{ "desact" },
+	{ "uitaan" } 
 };
 
 const char configmenu[][2*Menu_Height*Menu_Width] =
