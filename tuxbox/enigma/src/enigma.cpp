@@ -43,6 +43,7 @@
 #include <enigma_xmlrpc.h>
 #include <enigma_main.h>
 #include <timer.h>
+#include <enigma_mount.h>
 
 // #include <mcheck.h>
 
@@ -227,6 +228,9 @@ eZap::eZap(int argc, char **argv)
 		swapfilename = "";
 	extern void activateSwapFile(eString);
 	activateSwapFile(eString(swapfilename));
+#endif
+#ifdef ENABLE_DYN_MOUNT
+	eMountMgr::getInstance()->automountMountPoints();
 #endif
 #endif
 	eDVB::getInstance()->configureNetwork();
