@@ -3,21 +3,16 @@
 
 #include "ewindow.h"
 class eCheckbox;
-class eLabel;
 class eButton;
 
 class eZapOsdSetup: public eWindow
 {
-	eLabel *labelOsd, *labelFonts;
+	eCheckbox* showOSDOnEITUpdate;
 	eButton *ok, *abort;
-	eCheckbox* bigosd;
-	eCheckbox* bigfonts;
-private:// slots:
+private:
 	void fieldSelected(int *number);
 	void okPressed();
 	void abortPressed();
-protected:
-	int eventFilter(const eWidgetEvent &event);
 public:
 	eZapOsdSetup();
 	~eZapOsdSetup();

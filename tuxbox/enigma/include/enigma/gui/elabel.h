@@ -2,16 +2,17 @@
 #define __elabel_h
 
 #include <core/gui/ewidget.h>
-#include "qstring.h"
 #include <core/gdi/grc.h>
+
+// Definition Blit Flags
+#define BF_ALPHATEST 1
 
 class eLabel: public eWidget
 {
-//	Q_OBJECT
 protected:
+	int blitFlags;
 	int flags;
 	eTextPara *para;
-	ePoint pixmap_position, text_position;
 	int align;
 	void invalidate();
 	void validate();
@@ -26,6 +27,8 @@ public:
 	int setProperty(const eString &prop, const eString &value);
 
 	eSize getExtend();
+
+	ePoint pixmap_position, text_position;
 };
 
 #endif

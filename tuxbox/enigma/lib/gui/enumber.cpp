@@ -144,7 +144,7 @@ void eNumber::gotFocus()
 	have_focus++;
 	digit=isactive;
 	invalidate(getNumberRect(active));
-	if (parent && parent->LCDElement)
+	if (parent && parent->LCDElement)  // detect if LCD Avail
 	{
 		if (descr != "")
 		{
@@ -154,9 +154,11 @@ void eNumber::gotFocus()
 			LCDTmp->move(ePoint(0,s.height()/2));
 			LCDTmp->resize(eSize(s.width(), s.height()/2));
 			tmpDescr = new eLabel(parent->LCDElement);
+			tmpDescr->hide();
 			tmpDescr->move(ePoint(0,0));
 			tmpDescr->resize(eSize(s.width(), s.height()/2));
 			tmpDescr->setText(descr);
+			tmpDescr->show();
 		}
 		else
 		{
@@ -186,9 +188,7 @@ void eNumber::lostFocus()
 			delete tmpDescr;
 			tmpDescr=0;
 		}
-
 	}
-
 	have_focus--;
 	invalidate(getNumberRect(active));
 }

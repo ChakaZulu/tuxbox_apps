@@ -15,16 +15,14 @@ void eButton::gotFocus()
 {
 	if (parent && parent->LCDElement)
 	{
-		eString txt(text=="\x19"?"[X]":text=="\x18"?"[  ]":text);
-		int chkbx = (text=="\x19" || text=="\x18")?1:0;
 		if (descr != "")
 		{
 			LCDTmp = new eLabel(parent->LCDElement);
 			LCDTmp->hide();
 			eSize s = parent->LCDElement->getSize();
 			LCDTmp->move(ePoint(0,s.height()/2));
-			LCDTmp->resize(eSize(chkbx?s.height()/2:s.width(), s.height()/2));
-			LCDTmp->setText(txt);
+			LCDTmp->resize(eSize(s.width(), s.height()/2));
+			LCDTmp->setText(text);
 			LCDTmp->setBackgroundColor(255);
 			LCDTmp->show();
 			tmpDescr = new eLabel(parent->LCDElement);
@@ -35,7 +33,7 @@ void eButton::gotFocus()
 			tmpDescr->show();
 		}
 		else
-			parent->LCDElement->setText(txt);
+			parent->LCDElement->setText(text);
 	}
 
 	setBackgroundColor(focus);

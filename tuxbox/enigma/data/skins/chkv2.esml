@@ -8,9 +8,6 @@
 		<font file="bluebold.ttf" /> <!-- Found at dafont.com freeware -->
 		<font file="v5loxicar.ttf" /> <!-- Found at dafont.com freeware -->
 		<font file="v5loxical.ttf" /> <!-- Found at dafont.com freeware -->
-		<font file="unmrs.pfa" />
-		<font file="Marlett.ttf" />
-	
 	</fonts>
 
 	<colors>
@@ -78,17 +75,13 @@
 		<img name="osd_dolby_off" src="chk_v2/dolby_off.png" />
 		<img name="osd_crypt_off" src="chk_v2/crypt_off.png" />
 		<img name="osd_format_off" src="chk_v2/format_off.png" />
-
-<img name="br" src="chk_v2/br2.png" />
-<img name="bl" src="chk_v2/bl2.png" />
-		
+		<img name="br" src="chk_v2/br2.png" />
+		<img name="bl" src="chk_v2/bl2.png" />
 		<img name="enigma_logo" src="chk_v2/logo.png" nomerge="yes" />
 		<img name="lcd_menu" src="chk_v2/lcdmenu.png" nomerge="yes" />
 		<img name="lcd_scart" src="video.png" nomerge="yes" />
-
 		<img name="speaker" src="chk_v2/speaker.png" nomerge="yes" />
-
-		
+	
 		<img name="eWindow.top" src="chk_v2/t.png" />
 		<img name="eWindow.topLeft" src="chk_v2/tl.png" />
 		<img name="eWindow.topRight" src="chk_v2/tr.png" />
@@ -98,8 +91,6 @@
 		<img name="eWindow.bottom" src="chk_v2/b.png" />
 		<img name="eWindow.bottomRight" src="chk_v2/br.png" />
 		
-		<img name="eCheckbox.checked" src="checked.png" />
-		<img name="eCheckbox.unchecked" src="unchecked.png" />
 	</images>
 	
 	<object name="eventview">
@@ -208,16 +199,16 @@
 			
 			<eLabel name="description" />
 		<!--	 -->
-			<eLabel name="button_red_enabled" position="390:102" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_red" />
-			<eLabel name="button_green_enabled" position="410:102" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_green"  />
-			<eLabel name="button_yellow_enabled" position="430:102" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_yellow"  />
-			<eLabel name="button_blue_enabled" position="450:102" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_blue" />
+			<eLabel position="393:105" size="12:12" pixmap="button_red" name="button_red_enabled" alphatest="on" />
+			<eLabel position="413:105" size="12:12" pixmap="button_green" name="button_green_enabled" alphatest="on" />
+			<eLabel position="433:105" size="12:12" pixmap="button_yellow" name="button_yellow_enabled" alphatest="on" />
+			<eLabel position="453:105" size="12:12" pixmap="button_blue" name="button_blue_enabled" alphatest="on" />
 
-			<eLabel name="button_red_disabled" position="390:102" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_green_disabled" position="410:102" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_yellow_disabled" position="430:102" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_blue_disabled" position="450:102" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-	                  
+			<eLabel position="393:105" size="12:12" pixmap="button_gray" name="button_red_disabled" alphatest="on" />
+			<eLabel position="413:105" size="12:12" pixmap="button_gray" name="button_green_disabled" alphatest="on" />
+			<eLabel position="433:105" size="12:12" pixmap="button_gray" name="button_yellow_disabled" alphatest="on" />
+			<eLabel position="453:105" size="12:12" pixmap="button_gray" name="button_blue_disabled" alphatest="on" />
+
 		</eZapMain>
 	</object>
 </eskin>

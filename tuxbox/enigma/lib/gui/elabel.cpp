@@ -9,6 +9,7 @@ eLabel::eLabel(eWidget *parent, int flags, int takefocus):
 	eWidget(parent, takefocus), flags(flags)
 {
 	para=0;
+	blitFlags=0;
 	align=eTextPara::dirLeft;
 //	setBackgroundColor(eSkin::getActive()->queryScheme("fgColor"));
 	pixmap_position=ePoint(0, 0);
@@ -59,7 +60,7 @@ void eLabel::redrawWidget(gPainter *target, const eRect &area)
 		target->renderPara(*para);
 	}
 	if (pixmap)
-		target->blit(*pixmap, pixmap_position);
+		target->blit(*pixmap, pixmap_position, eRect(), (blitFlags & BF_ALPHATEST) ? gPixmap::blitAlphaTest : 0);
 }
 
 int eLabel::eventFilter(const eWidgetEvent &event)
@@ -84,8 +85,10 @@ eSize eLabel::getExtend()
 
 int eLabel::setProperty(const eString &prop, const eString &value)
 {
-	if (prop=="wrap")
+	if (prop=="wrap" && value == "on")
 		setFlags(RS_WRAP);
+	else if (prop=="alphatest" && value == "on")
+		blitFlags |= BF_ALPHATEST;
 	else if (prop=="align")
 	{
 		if (value=="left")

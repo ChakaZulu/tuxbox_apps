@@ -390,7 +390,7 @@ int eSkin::load(const char *filename)
 		return -1;
 
 	parsers.push_front(new XMLTreeParser("ISO-8859-1"));
-	XMLTreeParser &parser=*parsers.front();
+	XMLTreeParser &parser=*parsers.first();
 	char buf[2048];
 
 	int done;
@@ -419,22 +419,58 @@ int eSkin::load(const char *filename)
 		return -1;
 	}
 	
-	XMLTreeNode *node=parser.RootNode();
-	
-	for (node=node->GetChild(); node; node=node->GetNext())
-		if (!strcmp(node->GetType(), "colors"))
-			parseColors(node);
-		else if (!strcmp(node->GetType(), "colorscheme"))
-			parseScheme(node);
-		else if (!strcmp(node->GetType(), "images"))
-			parseImages(node);
-		else if (!strcmp(node->GetType(), "values"))
-			parseValues(node);
-		else if (!strcmp(node->GetType(), "fonts"))
-			parseFonts(node);
-
 	return 0;
 }
+
+void eSkin::parseSkins()
+{
+	for (ePtrList<XMLTreeParser>::reverse_iterator it(parsers); it != parsers.rend(); it++)
+	{
+		XMLTreeNode *node=it->RootNode();
+	
+		for (node=node->GetChild(); node; node=node->GetNext())
+			if (!strcmp(node->GetType(), "colors"))
+				parseColors(node);
+	 }
+
+	for (ePtrList<XMLTreeParser>::reverse_iterator it(parsers); it != parsers.rend(); it++)
+	{
+		XMLTreeNode *node=it->RootNode();
+	
+		for (node=node->GetChild(); node; node=node->GetNext())
+			if (!strcmp(node->GetType(), "colorscheme"))
+				parseScheme(node);
+	 }
+
+	for (ePtrList<XMLTreeParser>::iterator it(parsers); it != parsers.end(); it++)
+	{
+		XMLTreeNode *node=it->RootNode();
+	
+		for (node=node->GetChild(); node; node=node->GetNext())
+			if (!strcmp(node->GetType(), "fonts"))
+				parseFonts(node);
+	 }
+
+	for (ePtrList<XMLTreeParser>::iterator it(parsers); it != parsers.end(); it++)
+	{
+		XMLTreeNode *node=it->RootNode();
+	
+		for (node=node->GetChild(); node; node=node->GetNext())
+			if (!strcmp(node->GetType(), "images"))
+				parseImages(node);
+
+	 }
+
+	for (ePtrList<XMLTreeParser>::iterator it(parsers); it != parsers.end(); it++)
+	{
+		XMLTreeNode *node=it->RootNode();
+	
+		for (node=node->GetChild(); node; node=node->GetNext())
+			if (!strcmp(node->GetType(), "values"))
+				parseValues(node);
+	}
+}
+
 
 int eSkin::build(eWidget *widget, const char *name)
 {

@@ -11,11 +11,11 @@ int eDownloadWindow::eventFilter(const eWidgetEvent &event)
 		c=eHTTPConnection::doRequest(url.c_str(), &err);
 		if (!c)
 		{
-			qDebug("doRequest failed");
+			eDebug("doRequest failed");
 			close(err);
 		} else
 		{
-			qDebug("ok, let's start");
+			eDebug("ok, let's start");
 //			connect(c, SIGNAL(closing()), SLOT(httpDone()));
 			CONNECT(c.closing, eDownloadWindow::httpDone);
 			c->start();
@@ -51,7 +51,7 @@ eDownloadWindow::eDownloadWindow(const char *url): eWindow(), url(url)
 {
 	c=0;
 	if (eSkin::getActive()->build(this, "eDownloadWindow"))
-		qFatal("skin load of \"eDownloadWindow\" failed");
+		eFatal("skin load of \"eDownloadWindow\" failed");
 }
 
 eDownloadWindow::~eDownloadWindow()

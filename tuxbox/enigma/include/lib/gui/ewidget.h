@@ -397,6 +397,7 @@ public:
 	void setTarget(gDC *target);
 	void setLCD(eWidget *lcdtitle, eWidget *lcdelement);
 	void setName(const char *name);
+	eWidget*& getParent() { return parent; }
 	
 	const gColor& getBackgroundColor() { return backgroundColor; }
 	const gColor& getForegroundColor() { return foregroundColor; }

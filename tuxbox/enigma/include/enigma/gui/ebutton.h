@@ -9,9 +9,9 @@
  */
 class eButton: public eLabel
 {
-	gColor focus, normal;
 	eLabel*	tmpDescr; // used for LCD with description
 protected:
+	gColor focus, normal;
 	eString descr;
 	int eventHandler(const eWidgetEvent &event);
 	void gotFocus();

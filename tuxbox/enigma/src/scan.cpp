@@ -413,7 +413,7 @@ int TransponderScan::exec()
 		total--;
 		progress->setPerc(n*100/total);
 		int res=mp.getCurrent()->exec();
-		qDebug("res: %d", res);
+		eDebug("res: %d", res);
 		if (res==1)
 		{
 			mp.prev();

@@ -60,9 +60,11 @@ public:
 	static void removeWidgetCreator(const eString &name, tWidgetCreator creator);
 
 	int load(const char *filename);
+	void parseSkins();
 	
 	int build(eWidget *widget, const char *name);
 	void setPalette(gPixmapDC *pal);
+
 
 	gColor queryColor(const eString &name);
 	gColor queryScheme(const eString &name) const;
@@ -75,6 +77,6 @@ public:
 };
 
 #define ASSIGN(v, t, n) \
-  v =(t*)search(n); if (! v ) { qWarning("skin has undefined element: %s", n); v=new t(this); }
+  v =(t*)search(n); if (! v ) { eWarning("skin has undefined element: %s", n); v=new t(this); }
 
 #endif

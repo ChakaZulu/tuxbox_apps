@@ -115,6 +115,10 @@ protected:
 					rc->fill(rect);
 
 			rc->renderText(rect, text);
+			
+			eWidget* p = listbox->getParent();			
+			if (highlited && p && p->LCDElement)
+				p->LCDElement->setText(text);
 	}
 };
 
@@ -145,6 +149,10 @@ protected:
 					rc->fill(rect);
 
 			rc->renderText(rect, text.str());
+
+			eWidget* p = listbox->getParent();			
+			if (highlited && p && p->LCDElement)
+				p->LCDElement->setText(text.str());
 	}
 };
 
@@ -286,9 +294,7 @@ template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
 	int i=0;
-	for (ePtrList_T_iterator entry(top); 
-			(entry != bottom) && (entry != childs.end());
-			++entry)
+	for (ePtrList_T_iterator entry(top); (entry != bottom) && (entry != childs.end()); ++entry)
 	{
 		eRect rect = getEntryRect(i);
 
@@ -333,8 +339,8 @@ inline void eListBox<T>::lostFocus()
 				invalidateEntry(i);
 	}
 
-/*	if (parent && parent->LCDElement)
-		parent->LCDElement->setText("");*/
+	if (parent && parent->LCDElement)
+		parent->LCDElement->setText("");
 }
 
 template <class T>

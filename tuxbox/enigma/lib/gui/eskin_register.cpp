@@ -30,6 +30,8 @@ public:
 				eFatal("couldn't load fallback skin " DATADIR "/enigma/skins/" DEFAULTSKIN);
 		}
 
+		default_skin.parseSkins();
+
 		default_skin.setPalette(gFBDC::getInstance());
 		default_skin.makeActive();
 	}

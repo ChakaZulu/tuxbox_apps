@@ -1,8 +1,7 @@
-#include <time.h>
 #include <errno.h>
-
 #include <core/base/i18n.h>
 #include <core/system/init.h>
+#include <core/system/econfig.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/epgcache.h>
 #include <core/dvb/esection.h>
@@ -17,7 +16,6 @@
 #include <core/gui/actions.h>
 #include <core/driver/rc.h>
 #include <core/driver/streamwd.h>
-
 
 #include "enigma_main.h"
 #include "iso639.h"
@@ -458,24 +456,6 @@ eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp)
 	CryptOff->show();
 	WideOff->show();
 
-	ButtonRedEn->setFlags(RS_DIRECT);
-	ButtonRedEn->setText("\x19");
-	ButtonGreenEn->setFlags(RS_DIRECT);
-	ButtonGreenEn->setText("\x19");
-	ButtonYellowEn->setFlags(RS_DIRECT);
-	ButtonYellowEn->setText("\x19");
-	ButtonBlueEn->setFlags(RS_DIRECT);
-	ButtonBlueEn->setText("\x19");
-
-	ButtonRedDis->setFlags(RS_DIRECT);
-	ButtonRedDis->setText("\x19");
-	ButtonGreenDis->setFlags(RS_DIRECT);
-	ButtonGreenDis->setText("\x19");
-	ButtonYellowDis->setFlags(RS_DIRECT);
-	ButtonYellowDis->setText("\x19");
-	ButtonBlueDis->setFlags(RS_DIRECT);
-	ButtonBlueDis->setText("\x19");
-	
 	ButtonRedEn->hide();
 	ButtonRedDis->show();
 	ButtonGreenEn->hide();
@@ -1095,13 +1075,17 @@ void eZapMain::serviceChanged(eService *service, int err)
 void eZapMain::gotEIT(EIT *eit, int error)
 {
 	setEIT(error?0:eit);
-	if (!error)  // Ansonsten erscheint immer wenn die EIT geupdatet wurde das OSD kurz auf dem Screen
-// Das nervt gerade wenn man was aufnehmen möchte :)   Ghostrider
-	// ach was das RULT  - tmb
+
+	if (!error )
 	{
-		if (!eZap::getInstance()->focus)
+		int state=0;
+		eConfig::getInstance()->getKey("/ezap/osd/showOSDOnEITUpdate", state);
+
+		if (!eZap::getInstance()->focus && state)
+		{
 			show();
-		timeout.start(eDVB::getInstance()->service_state?10000:2000, 1);
+			timeout.start(eDVB::getInstance()->service_state?10000:2000, 1);
+		}
 	}
 }
 

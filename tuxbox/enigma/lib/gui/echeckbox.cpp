@@ -4,8 +4,8 @@
 #include <core/system/init.h>
 #include <core/gui/eskin.h>
 
-eCheckbox::eCheckbox(eWidget *parent, int checked, int Size, eLabel* descr):
-	eButton(parent, descr)
+eCheckbox::eCheckbox(eWidget *parent, int checked, int Size):
+	eButton(parent)
 {
 	setCheck(checked);
 	CONNECT(selected, eCheckbox::sel);
@@ -21,6 +21,27 @@ void eCheckbox::sel()
 	/*emit*/ checked(ischecked);
 }
 
+void eCheckbox::gotFocus()
+{
+	if (parent && parent->LCDElement)
+	{
+			LCDTmp = new eLabel(parent->LCDElement);
+			LCDTmp->hide();
+			eSize s = parent->LCDElement->getSize();
+			LCDTmp->move(ePoint(0,0));
+			LCDTmp->resize(eSize(s.width(), s.height()));
+			((eLabel*)LCDTmp)->setFlags(RS_WRAP);
+			gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckboxLCD.checked":"eCheckboxLCD.unchecked");
+			LCDTmp->setPixmap(pm);
+			((eLabel*)LCDTmp)->pixmap_position=ePoint(0, (size.height()-15)/2);
+			((eLabel*)LCDTmp)->text_position=ePoint(21, 0);
+			LCDTmp->setText(text);
+			LCDTmp->show();
+	}
+	setBackgroundColor(focus);
+	invalidate();
+}
+
 void eCheckbox::setCheck(int c)
 {
 	if (ischecked == c)
@@ -28,6 +49,12 @@ void eCheckbox::setCheck(int c)
 	ischecked=c;
 	gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked");
 	setPixmap(pm);
+
+	if (LCDTmp)
+	{
+			gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckboxLCD.checked":"eCheckboxLCD.unchecked");
+			LCDTmp->setPixmap(pm);
+	}
 }
 
 int eCheckbox::eventFilter(const eWidgetEvent &event)
@@ -35,13 +62,12 @@ int eCheckbox::eventFilter(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::changedSize:
-		pixmap_position=ePoint(0, (size.height()-16)/2);
-		text_position=ePoint(20, 0);
+		pixmap_position=ePoint(2, (size.height()-20)/2);
+		text_position=ePoint(26, 0);
 		break;
 	}
 	return 0;
 }
-
 
 static eWidget *create_eCheckbox(eWidget *parent)
 {

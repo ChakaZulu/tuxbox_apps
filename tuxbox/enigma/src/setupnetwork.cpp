@@ -89,7 +89,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
-	dosetup=new eCheckbox(this, sdosetup, fd, l);
+	dosetup=new eCheckbox(this, sdosetup, fd);
 	dosetup->setText("Configure Network");
 	dosetup->move(ePoint(100, 163));
 	dosetup->resize(eSize(fd+4+240, fd+4));
@@ -135,7 +135,7 @@ void eZapNetworkSetup::okPressed()
 	pack(sdns, eDNS);
 	pack(sgateway, eGateway);
 
-	qDebug("IP: %d.%d.%d.%d, Netmask: %d.%d.%d.%d, gateway %d.%d.%d.%d, DNS: %d.%d.%d.%d", 
+	eDebug("IP: %d.%d.%d.%d, Netmask: %d.%d.%d.%d, gateway %d.%d.%d.%d, DNS: %d.%d.%d.%d",
 		eIP[0], eIP[1],  eIP[2], eIP[3],
 		eMask[0], eMask[1],  eMask[2], eMask[3],
 		eGateway[0], eGateway[1], eGateway[2], eGateway[3],

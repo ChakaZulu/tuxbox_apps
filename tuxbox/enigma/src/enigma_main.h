@@ -105,7 +105,7 @@ public:
 
 #define ENIGMA_NVOD		1	
 #define ENIGMA_AUDIO	2
-#define ENIGMA_SUBSERVICES	4
+#define ENIGMA_SUBSERVICES 4
 
 class eEventDisplay;
 
@@ -133,7 +133,8 @@ class eZapMain: public eWidget
 	eEventDisplay *actual_eventDisplay;
 	int flags;
 	int isVT;
-	int isEPG;	
+	int isEPG;
+	int showOSDOnEITUpdate;
 	eZapLCD lcdmain;
 	
 	void redrawWidget(gPainter *, const eRect &where);

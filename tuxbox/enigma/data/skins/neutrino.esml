@@ -60,9 +60,6 @@
 		<img name="enigma_logo" src="enigma2.png" nomerge="yes" />
 		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
 		<img name="lcd_scart" src="video.png" nomerge="yes" />
-
-		<img name="eCheckbox.checked" src="checked.png" />
-		<img name="eCheckbox.unchecked" src="unchecked.png" />
 	</images>
 
 	<object name="eventview">
@@ -131,16 +128,16 @@
 			<eLabel position="208:41" size="104:24" pixmap="osd_dolby_off" name="osd_dolby_off"/>
 			<eLabel position="140:37" size="104:24" pixmap="osd_crypt_off" name="osd_crypt_off"/>
 			<eLabel name="description" />
-			
-			<eLabel name="button_red_enabled" position="243:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_red" />
-			<eLabel name="button_green_enabled" position="263:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_green"  />
-			<eLabel name="button_yellow_enabled" position="283:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_yellow"  />
-			<eLabel name="button_blue_enabled" position="303:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_blue" />
 
-			<eLabel name="button_red_disabled" position="243:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_green_disabled" position="263:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_yellow_disabled" position="283:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_blue_disabled" position="303:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel position="246:42" size="12:12" pixmap="button_red" name="button_red_enabled" alphatest="on" />
+			<eLabel position="266:42" size="12:12" pixmap="button_green" name="button_green_enabled" alphatest="on" />
+			<eLabel position="286:42" size="12:12" pixmap="button_yellow" name="button_yellow_enabled" alphatest="on" />
+			<eLabel position="306:42" size="12:12" pixmap="button_blue" name="button_blue_enabled" alphatest="on" />
+
+			<eLabel position="246:42" size="12:12" pixmap="button_gray" name="button_red_disabled" alphatest="on" />
+			<eLabel position="266:42" size="12:12" pixmap="button_gray" name="button_green_disabled" alphatest="on" />
+			<eLabel position="286:42" size="12:12" pixmap="button_gray" name="button_yellow_disabled" alphatest="on" />
+			<eLabel position="306:42" size="12:12" pixmap="button_gray" name="button_blue_disabled" alphatest="on" />
 	
 		</eZapMain>
 	</object>

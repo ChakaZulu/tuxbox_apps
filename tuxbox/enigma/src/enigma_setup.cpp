@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.14 2002/05/12 20:46:28 tmbinc Exp $
+ * $Id: enigma_setup.cpp,v 1.15 2002/06/17 23:24:46 Ghostrider Exp $
  */
 
 #include "enigma_setup.h"
@@ -25,6 +25,7 @@
 #include "setupnetwork.h"
 #include "setupvideo.h"
 #include "setup_language.h"
+#include "setup_osd.h"
 #include "enigma_scan.h"
 #include "setupskin.h"
 
@@ -44,6 +45,7 @@ eZapSetup::eZapSetup()
 	CONNECT((new eListboxEntryText(&list, _("Channels...")))->selected, eZapSetup::sel_channels);
 	CONNECT((new eListboxEntryText(&list, _("Network...")))->selected, eZapSetup::sel_network);
 //	CONNECT((list, _("Audio...")))->selected, sel_sound);
+	CONNECT((new eListboxEntryText(&list, _("OSD...")))->selected, eZapSetup::sel_osd);
 	CONNECT((new eListboxEntryText(&list, _("Video...")))->selected, eZapSetup::sel_video);
 	CONNECT((new eListboxEntryText(&list, _("Skin...")))->selected, eZapSetup::sel_skin);
 	CONNECT((new eListboxEntryText(&list, _("Language...")))->selected, eZapSetup::sel_language);
@@ -82,6 +84,17 @@ void eZapSetup::sel_network(eListboxEntry *lbe)
 
 void eZapSetup::sel_sound(eListboxEntry *lbe)
 {
+}
+
+void eZapSetup::sel_osd(eListboxEntry *lbe)
+{
+	hide();
+	eZapOsdSetup setup;
+	setup.setLCD(LCDTitle, LCDElement);
+	setup.show();
+	setup.exec();
+	setup.hide();
+	show();
 }
 
 void eZapSetup::sel_skin(eListboxEntry *lbe)

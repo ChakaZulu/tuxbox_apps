@@ -15,6 +15,7 @@ private:
 	void sel_video(eListboxEntry *);
 	void sel_language(eListboxEntry *);
 	void sel_skin(eListboxEntry *);
+	void sel_osd(eListboxEntry *);
 public:
 	eZapSetup();
 	~eZapSetup();

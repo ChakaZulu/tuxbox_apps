@@ -50,12 +50,14 @@ void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip, int flag)
 			unsigned char *dst=(unsigned char*)dstptr;
 				// use duff's device here!
 			while (width--)
+			{
 				if (!*src)
 				{
 					src++;
 					dst++;
 				} else
 					*dst++=*src++;
+			}
 		} else
 			memcpy(dstptr, srcptr, area.width()*bypp); 
 		srcptr+=src.stride;
