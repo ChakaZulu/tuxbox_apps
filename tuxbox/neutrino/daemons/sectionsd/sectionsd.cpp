@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.46 2001/08/16 01:35:23 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.47 2001/08/16 10:55:41 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.47  2001/08/16 10:55:41  fnbrd
+//  Actual event list only with channels with event.
+//
 //  Revision 1.46  2001/08/16 01:35:23  fnbrd
 //  internal changes.
 //
@@ -1018,7 +1021,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.46 2001/08/16 01:35:23 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.47 2001/08/16 10:55:41 fnbrd Exp $\n"
     "Current time: %s\n"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1294,15 +1297,16 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
         char id[20];
         sprintf(id, "%012llx\n", evt.uniqueKey());
         strcat(evtList, id);
-      }
-      else
-        strcat(evtList, "0\n");
-      strcat(evtList, s->first->serviceName.c_str());
-      strcat(evtList, "\n");
-      if(evt.serviceID!=0)
+//      }
+//      else
+//        strcat(evtList, "0\n");
+        strcat(evtList, s->first->serviceName.c_str());
+        strcat(evtList, "\n");
+//      if(evt.serviceID!=0)
         //Found
         strcat(evtList, evt.name.c_str());
-      strcat(evtList, "\n");
+        strcat(evtList, "\n");
+      }
     } // if ==serviceTyp
   unlockEvents();
   unlockServices();
@@ -1991,7 +1995,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.46 2001/08/16 01:35:23 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.47 2001/08/16 10:55:41 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
