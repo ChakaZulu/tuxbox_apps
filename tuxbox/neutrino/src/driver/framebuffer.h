@@ -33,6 +33,7 @@
 
 #include <gui/widget/component.h>
 
+typedef struct fb_var_screeninfo t_fb_var_screeninfo;
 
 /** Ausführung als Singleton */
 class CFrameBuffer
@@ -59,7 +60,7 @@ class CFrameBuffer
 		std::string			backgroundFilename;
 		bool			useBackgroundPaint;
 		unsigned int	xRes, yRes, stride, bpp;
-		struct fb_var_screeninfo screeninfo, oldscreen;
+		t_fb_var_screeninfo screeninfo, oldscreen;
 		fb_cmap cmap;
 		__u16 red[256], green[256], blue[256], trans[256];
 
@@ -79,6 +80,7 @@ class CFrameBuffer
 
 
 		int getFileHandle(); //only used for plugins (games) !!
+		t_fb_var_screeninfo *getScreenInfo();
 
 		unsigned char* getFrameBufferPointer(); //pointer to framebuffer
 		unsigned int getStride(); //stride (anzahl bytes die eine Zeile im Framebuffer belegt)
@@ -90,7 +92,7 @@ class CFrameBuffer
 		void setAlphaFade(int in, int num, int tr);
 		void paletteGenFade(int in, __u32 rgb1, __u32 rgb2, int num, int tr=0);
 		void paletteSetColor(int i, __u32 rgb, int tr);
-		void paletteSet();
+		void paletteSet(struct fb_cmap *map = NULL);
 
 		//paint functions
 		void paintPixel(int x, int y, unsigned char col);
@@ -127,6 +129,9 @@ class CFrameBuffer
 
 		void SaveScreen(int x, int y, int dx, int dy, unsigned char* memp);
 		void RestoreScreen(int x, int y, int dx, int dy, unsigned char* memp);
+
+		void ClearFrameBuffer();
+
 };
 
 

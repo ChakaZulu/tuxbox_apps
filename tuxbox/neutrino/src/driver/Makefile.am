@@ -1,3 +1,5 @@
+SUBDIRS = pictureviewer
+
 INCLUDES = \
 	-I$(top_srcdir)/daemons \
 	-I$(top_srcdir)/src \

@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 
+#include <string.h>
 
 
 #include <daemonc/remotecontrol.h>
@@ -53,33 +54,71 @@
 
 using namespace std;
 
-struct CFile
+class CFileFilter
 {
+	vector<string> Filter;
+public:
+	void addFilter(string filter){Filter.push_back(filter);};
+	bool matchFilter(string name)
+	{
+		int ext_pos = 0;
+		ext_pos = name.rfind(".");
+		if( ext_pos > 0)
+		{
+			string extension;
+			extension = name.substr(ext_pos + 1, name.length() - ext_pos);
+			for(unsigned int i = 0; i < Filter.size();i++)
+				if(strcasecmp(Filter[i].c_str(),extension.c_str()) == 0)
+					return true;
+		}
+		return false;
+	};
+};
+
+class CFile
+{
+public:
+	enum 
+	{
+		FILE_UNKNOWN = 0,
+		FILE_DIR,
+		FILE_TEXT,
+		FILE_MP3,
+		FILE_PICTURE
+	};
+
+	int CFile::getType();
+	CFile(){Marked = false; Size=0;Mode=0;};
 	off_t Size;
 	string Name;
 	mode_t Mode;
-
+	bool Marked;
 };
 
-typedef std::vector<CFile> CCFileBrowser;
+typedef vector<CFile> CFileList;
 
 class CFileBrowser
 {
 	private:
 		CFrameBuffer	*frameBuffer;
-		CCFileBrowser	filelist;
+
+		CFileList		filelist;
+		CFileList		selected_filelist;
 		bool			readDir(string dirname);
+		void			addRecursiveDir(CFileList * re_filelist, string path);
+
 		unsigned int	selected;
-		unsigned int	current_event;
 		unsigned int	liststart;
 		unsigned int	listmaxshow;
-		int 			fheight; // Fonthoehe Filelist-Inhalt
-		int 			theight; // Fonthoehe Filelist-Titel
+		int 			fheight;	// Fonthoehe Filelist-Inhalt
+		int 			theight;	// Fonthoehe Filelist-Titel
+		int				foheight;	// Hoehe der button leiste
 
 		string			name;
-
 		int 			width;
 		int 			height;
+		bool			use_filter;
+
 		int 			x;
 		int 			y;
 
@@ -88,17 +127,26 @@ class CFileBrowser
 		void paintItem(unsigned pos, unsigned int spalte = 0);
 		void paint();
 		void paintHead();
+		void paintFoot();
 		void hide();
 
 	public:
-		CFile		current_file;
-		string		path;
+		string			path;
+		bool			multi_select;
+		bool			select_dirs;
+		CFileFilter *	filter;
 
 		CFileBrowser();
 		~CFileBrowser();
 
-		string exec(const std::string& dirname);
+		bool exec(string Dirname);
+		string getFileName();
+		CFileList *getSelectedFiles();
+
+		
 };
+
+
 
 
 #endif

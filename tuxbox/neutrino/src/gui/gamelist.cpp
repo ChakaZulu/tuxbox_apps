@@ -54,7 +54,7 @@ void CPlugins::loadPlugins()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	//printf("[CPlugins] Checking plugins-directory\n");
-	printf("[CPlugins] Dir: %s\n", PLUGINDIR "/");
+//	printf("[CPlugins] Dir: %s\n", PLUGINDIR "/");
 
 	struct dirent **namelist;
 
@@ -86,7 +86,7 @@ void CPlugins::loadPlugins()
 			plugin_list.insert(plugin_list.end(), new_plugin);
 		}
 	}
-	printf("[CPlugins] %d plugins found...\n", number_of_plugins);
+//	printf("[CPlugins] %d plugins found...\n", number_of_plugins);
 
 }
 

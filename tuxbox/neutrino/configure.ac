@@ -1,5 +1,5 @@
 AC_INIT(tuxbox-neutrino,0.0.1)
-AM_INIT_AUTOMAKE(tuxbox-neutrino,0.0.1)
+AM_INIT_AUTOMAKE(tuxbox-neutrino,0.0.1) 
 
 TUXBOX_APPS
 TUXBOX_APPS_DIRECTORY
@@ -24,6 +24,9 @@ TUXBOX_APPS_LIB_PKGCONFIG(PLUGINS,tuxbox-plugins)
 TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 TUXBOX_APPS_LIB_PKGCONFIG(LIRCDCLIENT,tuxbox-lircdclient)
+TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
+TUXBOX_APPS_LIB_PKGCONFIG(ID3TAG,id3tag)
+TUXBOX_APPS_LIB_PKGCONFIG(MAD,mad)
 
 AC_OUTPUT([
 Makefile
@@ -41,6 +44,7 @@ daemons/sectionsd/Makefile
 daemons/timerd/Makefile
 src/Makefile
 src/daemonc/Makefile
+src/driver/pictureviewer/Makefile
 src/driver/Makefile
 src/gui/Makefile
 src/gui/bedit/Makefile

@@ -24,6 +24,7 @@ neutrino_LDADD = \
 	gui/libneutrino_gui.a \
 	gui/widget/libneutrino_gui_widget2.a \
 	gui/widget/libneutrino_gui_widget_basic.a \
+	driver/pictureviewer/libneutrino_pictureviewer.a \
 	system/libneutrino_system.a \
 	gui/libneutrino_gui2.a \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
@@ -40,7 +41,9 @@ neutrino_LDADD = \
 	@ZAPIT_LIBS@ \
 	@LIRCDCLIENT_LIBS@ \
 	@LCDDISPLAY_LIBS@ \
+	@PNG_LIBS@ \
 	-lmad \
 	-lid3tag \
-	-lpthread -lz
+	-lpthread -lz \
+	-ljpeg
 

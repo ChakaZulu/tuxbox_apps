@@ -60,7 +60,7 @@ class CMP3PlayerGui : public CMenuTarget
 
 	private:
 		CFrameBuffer		*frameBuffer;
-		CFileBrowser		filebrowser;
+		CFileBrowser		*filebrowser;
 		unsigned int		selected;
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
@@ -84,7 +84,9 @@ class CMP3PlayerGui : public CMenuTarget
 		void hide();
 
 		void get_id3(CMP3 * mp3);
-
+		CFileFilter mp3filter;
+		void paintItemID3DetailsLine (int pos);
+		void clearItemID3DetailsLine ();
 
 	public:
 		CMP3PlayerGui();

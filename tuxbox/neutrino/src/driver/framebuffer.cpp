@@ -36,7 +36,7 @@
 #include <dbox/fb.h>
 
 #include "framebuffer.h"
-
+#include "gui/color.h"
 
 CFrameBuffer::CFrameBuffer()
 : active ( true )
@@ -202,6 +202,11 @@ bool CFrameBuffer::getActive()
 	return active;
 }
 
+t_fb_var_screeninfo *CFrameBuffer::getScreenInfo()
+{
+	return &screeninfo;
+}
+
 int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
 {
 	if (!available&&!active)
@@ -295,12 +300,15 @@ void CFrameBuffer::paletteSetColor(int i, __u32 rgb, int tr)
 	cmap.transp[i] =tr;
 }
 
-void CFrameBuffer::paletteSet()
+void CFrameBuffer::paletteSet(struct fb_cmap *map)
 {
 	if (!active)
 		return;
+	
+	if(map == NULL)
+		map = &cmap;
 
-	ioctl(fd, FBIOPUTCMAP, &cmap);
+	ioctl(fd, FBIOPUTCMAP, map);
 }
 
 
@@ -395,7 +403,7 @@ bool CFrameBuffer::paintIcon8(std::string filename, int x, int y, unsigned char 
 
 	if (fd == -1)
 	{
-		printf("error while loading icon: %s", filename.c_str() );
+		printf("error while loading icon: %s\n", filename.c_str() );
 		return false;
 	}
 
@@ -445,7 +453,7 @@ bool CFrameBuffer::paintIcon(std::string filename, int x, int y, unsigned char o
 
 	if (fd == -1)
 	{
-		printf("error while loading icon: %s", filename.c_str() );
+		printf("error while loading icon: %s\n", filename.c_str() );
 		return false;
 	}
 
@@ -517,7 +525,7 @@ void CFrameBuffer::loadPal(std::string filename, unsigned char offset, unsigned 
 		readb = read(fd, &rgbdata,  sizeof(rgbdata) );
 		pos++;
 	}
-	paletteSet();
+	paletteSet(&cmap);
 	close(fd);
 }
 
@@ -632,7 +640,7 @@ bool CFrameBuffer::loadPicture2Mem(std::string filename, unsigned char* memp)
 
 	if (fd==-1)
 	{
-		printf("error while loading icon: %s", filename.c_str() );
+		printf("error while loading icon: %s\n", filename.c_str() );
 		return false;
 	}
 
@@ -700,7 +708,7 @@ bool CFrameBuffer::loadBackground(std::string filename, unsigned char col)
 
 	if (fd==-1)
 	{
-		printf("error while loading icon: %s", filename.c_str() );
+		printf("error while loading icon: %s\n", filename.c_str() );
 		return false;
 	}
 
@@ -713,7 +721,7 @@ bool CFrameBuffer::loadBackground(std::string filename, unsigned char col)
 
 	if((width!=720) || (height!=576))
 	{
-		printf("error while loading icon: %s - invalid resulution = %dx%d", filename.c_str(), width, height );
+		printf("error while loading icon: %s - invalid resulution = %dx%d\n", filename.c_str(), width, height );
 		return false;
 	}
 
@@ -834,7 +842,43 @@ void CFrameBuffer::switch_signal (int signal)
 		ioctl(thiz->tty, VT_RELDISP, VT_ACKACQ);
 		thiz->active = true;
 		printf ("ackquire display\n");
-		thiz->paletteSet();
+		thiz->paletteSet(NULL);
 		memset(thiz->lfb, 0, thiz->stride*thiz->yRes);
 	}
+}
+
+void CFrameBuffer::ClearFrameBuffer()
+{
+	if(getActive())
+		memset(lfb, 255, stride * 576);
+
+	//backgroundmode
+	setBackgroundColor(COL_BACKGROUND);
+	useBackground(false);
+
+	//background
+	paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff);
+	//Windows Colors
+	paletteSetColor(0x1, 0x010101, 0);
+	paletteSetColor(0x2, 0x800000, 0);
+	paletteSetColor(0x3, 0x008000, 0);
+	paletteSetColor(0x4, 0x808000, 0);
+	paletteSetColor(0x5, 0x000080, 0);
+	paletteSetColor(0x6, 0x800080, 0);
+	paletteSetColor(0x7, 0x008080, 0);
+	//	frameBuffer.paletteSetColor(0x8, 0xC0C0C0, 0);
+	paletteSetColor(0x8, 0xA0A0A0, 0);
+
+	//	frameBuffer.paletteSetColor(0x9, 0x808080, 0);
+	paletteSetColor(0x9, 0x505050, 0);
+
+	paletteSetColor(0xA, 0xFF0000, 0);
+	paletteSetColor(0xB, 0x00FF00, 0);
+	paletteSetColor(0xC, 0xFFFF00, 0);
+	paletteSetColor(0xD, 0x0000FF, 0);
+	paletteSetColor(0xE, 0xFF00FF, 0);
+	paletteSetColor(0xF, 0x00FFFF, 0);
+	paletteSetColor(0x10, 0xFFFFFF, 0);
+
+	paletteSet();
 }

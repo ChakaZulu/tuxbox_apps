@@ -966,47 +966,6 @@ void CNeutrinoApp::SetupTiming()
 	
 }
 
-/**************************************************************************************
-*                                                                                     *
-*          CNeutrinoApp -  clear the frame buffer                                     *
-*                                                                                     *
-**************************************************************************************/
-
-void CNeutrinoApp::ClearFrameBuffer()
-{
-	if(frameBuffer->getActive())
-		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
-
-	//backgroundmode
-	frameBuffer->setBackgroundColor(COL_BACKGROUND);
-	frameBuffer->useBackground(false);
-
-	//background
-	frameBuffer->paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff);
-	//Windows Colors
-	frameBuffer->paletteSetColor(0x1, 0x010101, 0);
-	frameBuffer->paletteSetColor(0x2, 0x800000, 0);
-	frameBuffer->paletteSetColor(0x3, 0x008000, 0);
-	frameBuffer->paletteSetColor(0x4, 0x808000, 0);
-	frameBuffer->paletteSetColor(0x5, 0x000080, 0);
-	frameBuffer->paletteSetColor(0x6, 0x800080, 0);
-	frameBuffer->paletteSetColor(0x7, 0x008080, 0);
-	//	frameBuffer.paletteSetColor(0x8, 0xC0C0C0, 0);
-	frameBuffer->paletteSetColor(0x8, 0xA0A0A0, 0);
-
-	//	frameBuffer.paletteSetColor(0x9, 0x808080, 0);
-	frameBuffer->paletteSetColor(0x9, 0x505050, 0);
-
-	frameBuffer->paletteSetColor(0xA, 0xFF0000, 0);
-	frameBuffer->paletteSetColor(0xB, 0x00FF00, 0);
-	frameBuffer->paletteSetColor(0xC, 0xFFFF00, 0);
-	frameBuffer->paletteSetColor(0xD, 0x0000FF, 0);
-	frameBuffer->paletteSetColor(0xE, 0xFF00FF, 0);
-	frameBuffer->paletteSetColor(0xF, 0x00FFFF, 0);
-	frameBuffer->paletteSetColor(0x10, 0xFFFFFF, 0);
-
-	frameBuffer->paletteSet();
-}
 
 /**************************************************************************************
 *                                                                                     *
@@ -2105,7 +2064,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Fonts = new FontsDef;
 	SetupFonts();
 
-	ClearFrameBuffer();
+	frameBuffer->ClearFrameBuffer();
 
 	g_Locale = new CLocaleManager;
 	g_RCInput = new CRCInput;
@@ -3277,7 +3236,6 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 	{
 // this code will never be reached
 		CMP3Player::getInstance()->init();
-//		p.play("/neutrino.mp3");
 	}
 
 	else if(OptionName.substr(0,18).compare("mainmenu.recording") == 0)
@@ -3326,7 +3284,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.380 2002/12/19 17:49:59 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.381 2002/12/23 05:17:40 dirch Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

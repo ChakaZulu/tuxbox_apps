@@ -39,6 +39,30 @@
 
 #include "filebrowser.h"
 
+
+int CFile::getType()
+{
+	if(S_ISDIR(Mode))
+		return FILE_DIR;
+
+	int ext_pos = Name.rfind(".");
+	if( ext_pos > 0)
+	{
+		string extension;
+		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
+		if(extension == "mp3")
+			return FILE_MP3;
+		if((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
+			return FILE_TEXT;
+		if((strcasecmp(extension.c_str(),"jpg") == 0) || (strcasecmp(extension.c_str(),"png") == 0) || (strcasecmp(extension.c_str(),"bmp") == 0))
+			return FILE_PICTURE;
+	}
+	return FILE_UNKNOWN;
+}
+
+//------------------------------------------------------------------------
+//------------------------------------------------------------------------
+
 // sort operators
 bool sortByName (const CFile& a, const CFile& b)
 {
@@ -48,6 +72,8 @@ bool sortByName (const CFile& a, const CFile& b)
 		return a.Name < b.Name ;
 }
 
+//------------------------------------------------------------------------
+
 bool sortByType (const CFile& a, const CFile& b)
 {
 	if(a.Mode == b.Mode)
@@ -56,29 +82,59 @@ bool sortByType (const CFile& a, const CFile& b)
 		return a.Mode < b.Mode ;
 }
 
+//------------------------------------------------------------------------
+
 CFileBrowser::CFileBrowser()
 {
 	frameBuffer = CFrameBuffer::getInstance();
+
+	filter = NULL;
+	use_filter = true;
+	multi_select = false;
+	select_dirs = false;
 	selected = 0;
 
 	width  = 500;
 	height = 380;
+	foheight = 30;
+
 	theight  = g_Fonts->eventlist_title->getHeight();
 	fheight = g_Fonts->eventlist_itemLarge->getHeight();
 
-	listmaxshow = (height-theight-0)/fheight;
-	height = theight+0+listmaxshow*fheight; // recalc height
+
+	listmaxshow = (height - theight - foheight)/fheight;
+	height = theight+foheight+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	
 	liststart = 0;
 }
 
+//------------------------------------------------------------------------
+
 
 CFileBrowser::~CFileBrowser()
 {
 }
 
+//------------------------------------------------------------------------
+
+string CFileBrowser::getFileName()
+{
+	if(filelist[selected].Name.length() > 0)
+		return path + filelist[selected].Name;
+	else
+		return "";
+}
+
+//------------------------------------------------------------------------
+
+CFileList *CFileBrowser::getSelectedFiles()
+{
+	return &selected_filelist;
+}
+
+//------------------------------------------------------------------------
 
 bool CFileBrowser::readDir(string dirname)
 {
@@ -94,7 +150,7 @@ int n;
 	filelist.clear();
 	n = scandir(path.c_str(), &namelist, 0, alphasort);
 	if (n < 0)
-		perror("Filebrowser scandir");
+		perror(("Filebrowser scandir: "+path).c_str());
 	else 
 	{
 		for(int i = 0; i < n;i++)
@@ -107,6 +163,13 @@ int n;
 					perror("stat error");
 				file.Mode = statbuf.st_mode;
 				file.Size = statbuf.st_size;
+
+				if(filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
+					if(!filter->matchFilter(file.Name))
+					{
+						free(namelist[i]);
+						continue;
+					}
 				filelist.push_back(file);
 			}
 			free(namelist[i]);
@@ -119,17 +182,17 @@ int n;
 	return true;
 }
 
+//------------------------------------------------------------------------
 
-string CFileBrowser::exec(const std::string& dirname)
+bool CFileBrowser::exec(string Dirname)
 {
+	bool res = false;
 
-	string res;
-
-	name = dirname;
-
+	name = Dirname;
 	paintHead();
-	readDir(dirname);
+	readDir(Dirname);
 	paint();
+	paintFoot();
 
 	int oldselected = selected;
 
@@ -150,7 +213,23 @@ string CFileBrowser::exec(const std::string& dirname)
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_filebrowser );
 
-		if ( msg == (uint) g_settings.key_channelList_pageup )
+		if ( msg == CRCInput::RC_yellow )
+		{
+			if(multi_select)
+			{
+				if(filelist[selected].Name != "..")
+				{
+					if( (S_ISDIR(filelist[selected].Mode) && select_dirs) || !S_ISDIR(filelist[selected].Mode) )
+					{
+						filelist[selected].Marked = !filelist[selected].Marked;
+						paintItem(selected - liststart);
+					}
+				}
+				msg = CRCInput::RC_down;	// jump to next item
+			}
+		}
+
+		if ( msg == CRCInput::RC_red )
 		{
 			selected+=listmaxshow;
 			if (selected>filelist.size()-1)
@@ -158,7 +237,7 @@ string CFileBrowser::exec(const std::string& dirname)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pagedown )
+		else if ( msg == CRCInput::RC_green )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=filelist.size()-1;
@@ -204,17 +283,10 @@ string CFileBrowser::exec(const std::string& dirname)
 				paintItem(selected - liststart);
 			}
 		}
-		else if ( ( msg == CRCInput::RC_timeout ) ||
-			 	  ( msg == (uint) g_settings.key_channelList_cancel ) )
+		else if ( ( msg == CRCInput::RC_timeout ) )
 		{
 			selected = oldselected;
 			loop=false;
-		}
-
-		else if ( ( msg == CRCInput::RC_help ) ||
-				  ( msg == CRCInput::RC_red ) )
-		{
-			loop= false;
 		}
 		else if ( msg == CRCInput::RC_right )
 		{
@@ -230,24 +302,49 @@ string CFileBrowser::exec(const std::string& dirname)
 					ChangeDir("..");
 			}
 		}
+		else if ( msg == CRCInput::RC_blue )
+		{
+			if(filter != NULL)
+			{
+				use_filter = !use_filter;
+				ChangeDir("");
+			}
+		}
+		else if ( msg == CRCInput::RC_home )
+		{
+			if(multi_select)
+				res = true;
+			loop = false;
+		}
 		else if (msg==CRCInput::RC_ok)
 		{
-			string filename = filelist[selected].Name;
-			if ( filename.length() > 1 )
+			if(multi_select)
 			{
-//				printf("Ausgewaehlt: '%s'\n",filename.c_str());
-				if(S_ISDIR(filelist[selected].Mode))
+				if(filelist[selected].Name != "..")
 				{
-					ChangeDir(filelist[selected].Name);
+					if( (S_ISDIR(filelist[selected].Mode) && select_dirs) || !S_ISDIR(filelist[selected].Mode) )
+					{
+						filelist[selected].Marked = !filelist[selected].Marked;
+						paintItem(selected - liststart);
+					}
 				}
-				else
+			}
+			else
+			{
+				string filename = filelist[selected].Name;
+				if ( filename.length() > 1 )
 				{
-					loop = false;
-					res = path + filename;
-					current_file = filelist[selected];
+					if(S_ISDIR(filelist[selected].Mode))
+					{
+						ChangeDir(filelist[selected].Name);
+					}
+					else
+					{
+						filelist[selected].Marked = true;
+						loop = false;
+						res = true;
+					}
 				}
-
-
 			}
 		}
 		else
@@ -261,12 +358,72 @@ string CFileBrowser::exec(const std::string& dirname)
 
 	hide();
 
+	selected_filelist.clear();
+
+	if(res && multi_select)
+	{
+		for(unsigned int i = 0; i < filelist.size();i++)
+			if(filelist[i].Marked)
+			{
+				if(S_ISDIR(filelist[i].Mode))
+					addRecursiveDir(&selected_filelist,filelist[i].Name);
+				else
+					selected_filelist.push_back(filelist[i]);
+			}
+	}
+
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("Filebrowser: closed");
 	#endif
 
 	return res;
 }
+
+void CFileBrowser::addRecursiveDir(CFileList * re_filelist, string path)
+{
+struct stat statbuf;
+struct dirent **namelist;
+int n;
+
+	if(path[path.length()-1]!='/')
+		path = path + "/";
+
+	n = scandir(path.c_str(), &namelist, 0, alphasort);
+	if (n < 0)
+		perror(("Recursive scandir: "+path).c_str());
+	else 
+	{
+		for(int i = 0; i < n;i++)
+		{
+		CFile file;
+			if( (strcmp(namelist[i]->d_name,".") != 0) && (strcmp(namelist[i]->d_name,"..") != 0) )
+			{
+				file.Name = path + namelist[i]->d_name;
+				if(stat((file.Name).c_str(),&statbuf) != 0)
+					perror("stat error");
+				file.Mode = statbuf.st_mode;
+				file.Size = statbuf.st_size;
+
+				if(filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
+				{
+					if(!filter->matchFilter(file.Name))
+					{
+						free(namelist[i]);
+						continue;
+					}
+				}
+				if(!S_ISDIR(file.Mode))
+					re_filelist->push_back(file);
+				else
+					addRecursiveDir(re_filelist,file.Name);
+			}
+			free(namelist[i]);
+		}
+		free(namelist);
+	}
+}
+
+//------------------------------------------------------------------------
 
 void CFileBrowser::ChangeDir(string filename)
 {
@@ -275,78 +432,83 @@ void CFileBrowser::ChangeDir(string filename)
 		int pos = path.substr(0,path.length()-1).rfind("/");
 		string newpath = path.substr(0,pos);
 		readDir(newpath);
+		name = newpath;
 	}
 	else
 	{
 		readDir( path + filename );
+		name = filename;
 	}
-	name = filename;
 	paintHead();
 	paint();
 }
+
+//------------------------------------------------------------------------
 
 void CFileBrowser::hide()
 {
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
 }
 
+//------------------------------------------------------------------------
+
 void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 {
 	int color;
 	int ypos = y+ theight+0 + pos*fheight;
+	CFile * actual_file = NULL;
+	string fileicon;
+
 
 	if (liststart+pos==selected)
 	{
 		color = COL_MENUCONTENTSELECTED;
+		paintFoot();
 	}
 	else
 	{
 		color = COL_MENUCONTENTDARK;
 	}
-
-	CFile * actual_file;
-	actual_file = &filelist[liststart+pos];
-
-	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
-
+	
 	if( (liststart + pos) <filelist.size() )
 	{
-		if ( actual_file->Name.length() != 0 )
+		actual_file = &filelist[liststart+pos];
+		if(actual_file->Marked)
+			color = color+1;
+
+		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+
+		if ( actual_file->Name.length() > 0 )
 		{
-			if( S_ISDIR(actual_file->Mode) )
+			if (liststart+pos==selected)
+				CLCD::getInstance()->showMenuText(0, actual_file->Name.c_str() );
+			switch(actual_file->getType())
 			{
-				//paint folder icon
-				frameBuffer->paintIcon("folder.raw", x+5 , ypos +7 );
-
-				g_Fonts->filebrowser_itemFolder->RenderString(x+35, ypos+ fheight+3, width-20, actual_file->Name.c_str(), color);
+				case CFile::FILE_MP3 : 
+						fileicon = "mp3.raw";
+//						color = COL_MENUCONTENT;
+					break;
+				case CFile::FILE_DIR : 
+						fileicon = "folder.raw";
+					break;
+				case CFile::FILE_PICTURE:
+				case CFile::FILE_TEXT:
+				default:
+						fileicon = "file.raw";
 			}
-			else
-			{
-				// paint file icon
-				frameBuffer->paintIcon("file.raw", x+5 , ypos +7 );
+			frameBuffer->paintIcon(fileicon, x+5 , ypos +7 );
+			
+			g_Fonts->filebrowser_itemFile->RenderString(x+35, ypos+ fheight+3, width -(35+170) , actual_file->Name.c_str(), color);
 
-				int ext_pos = actual_file->Name.rfind(".");
-				if( ext_pos > 0)
-				{
-					string extension;
-					extension = actual_file->Name.substr(ext_pos + 1, actual_file->Name.length() - ext_pos);
-					if(extension == "mp3")
-					{
-						frameBuffer->paintIcon("mp3.raw", x+5 , ypos +7 );
-						color = COL_MENUCONTENT;
-					}
-				}
-				int mode = actual_file->Mode & 0x777;
+			if( S_ISREG(actual_file->Mode) )
+			{
 				string modestring;
 				for(int m = 2; m >=0;m--)
 				{
-					modestring += string((mode & (4 << (m*8)))?"r":"-");
-					modestring += string((mode & (2 << (m*8)))?"w":"-");
-					modestring += string((mode & (1 << (m*8)))?"x":"-");
+					modestring += string((actual_file->Mode & (4 << (m*3)))?"r":"-");
+					modestring += string((actual_file->Mode & (2 << (m*3)))?"w":"-");
+					modestring += string((actual_file->Mode & (1 << (m*3)))?"x":"-");
 				}
-				
-				g_Fonts->filebrowser_itemFile->RenderString(x+35, ypos+ fheight+3, width -(35+170) , actual_file->Name.c_str(), color);
-
 				g_Fonts->filebrowser_itemFile->RenderString(x + width - 160 , ypos+ fheight+3, 80, modestring.c_str(), color);
 
 				char tmpstr[256];
@@ -356,29 +518,72 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 			}
 		}
 	}
+	else
+		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, COL_MENUCONTENTDARK);
 }
+
+//------------------------------------------------------------------------
 
 void CFileBrowser::paintHead()
 {
 	char l_name[100];
-	snprintf(l_name, sizeof(l_name), name.c_str(), g_Locale->getText("filebrowser.head").c_str()  );
+	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText("filebrowser.head").c_str(), name.c_str());
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD);
 
 }
 
+//------------------------------------------------------------------------
+
+void CFileBrowser::paintFoot()
+{
+//	int ButtonWidth = 25;
+	int dx = width / 4;
+	int type = filelist[selected].getType();
+	int by = y + height - (foheight -8);
+	int ty = by + g_Fonts->infobar_small->getHeight();
+
+	frameBuffer->paintBoxRel(x, y+height- (foheight -5), width, (foheight -5), COL_MENUHEAD);
+
+	if(filelist.size()>0)
+	{
+		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
+		{
+			frameBuffer->paintIcon("ok.raw", x +3 , by -3);
+			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText(multi_select?"filebrowser.mark":"filebrowser.select").c_str(), COL_INFOBAR);
+		}
+
+		if(multi_select)
+		{
+			frameBuffer->paintIcon("home.raw", x + (1 * dx), by - 3);
+			g_Fonts->infobar_small->RenderString(x + 35 + (1 * dx), ty, dx - 35, g_Locale->getText("filebrowser.commit").c_str(), COL_INFOBAR);
+
+			frameBuffer->paintIcon("gelb.raw", x + (2 * dx), by);
+			g_Fonts->infobar_small->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark").c_str(), COL_INFOBAR);
+			
+		}
+
+		if(filter != NULL)
+		{
+			frameBuffer->paintIcon("blau.raw", x + (3 * dx), by);
+			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, g_Locale->getText("filebrowser.filter").c_str(), COL_INFOBAR);
+		}
+	}
+}
+
+//------------------------------------------------------------------------
+
 void CFileBrowser::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
 
-	if (filelist[0].Name.length() != 0)
-		frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
+//	if (filelist[0].Name.length() != 0)
+//		frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU, g_Locale->getText("filebrowser.head") );
 
 	for(unsigned int count=0;count<listmaxshow;count++)
-	{
 		paintItem(count);
-	}
 
 	int ypos = y+ theight;
 	int sb = fheight* listmaxshow;
