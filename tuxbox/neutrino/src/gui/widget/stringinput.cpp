@@ -291,6 +291,8 @@ CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint
 	{
 		arraySizes[i] = strlen(Chars[i]);
 	}
+	height+=180;
+	y = ((500-height)>>1);
 }
 
 
@@ -340,3 +342,21 @@ void CStringInputSMS::keyRightPressed()
 	CStringInput::keyRightPressed();
 }
 
+void CStringInputSMS::paint()
+{
+	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
+
+    if ( hint_1.length()> 0 )
+    {
+        g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, g_Locale->getText(hint_1).c_str(), COL_MENUCONTENT);
+        if ( hint_2.length()> 0 )
+            g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2).c_str(), COL_MENUCONTENT);
+    }
+	g_FrameBuffer->paintIcon("numericpad.raw", x+20+140, y+ hheight+ mheight+ iheight* 3+ 30, COL_MENUCONTENT);
+
+	for (int count=0;count<size;count++)
+		paintChar(count);
+
+}

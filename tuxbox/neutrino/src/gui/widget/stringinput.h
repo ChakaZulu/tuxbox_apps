@@ -96,6 +96,8 @@ class CStringInputSMS : public CStringInput
 	virtual void keyLeftPressed();
 	virtual void keyRightPressed();
 
+	virtual void paint();
+
 	public:
 		CStringInputSMS(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL) ;
 };

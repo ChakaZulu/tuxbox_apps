@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.111 2001/12/29 02:17:00 McClean Exp $
+        $Id: neutrino.cpp,v 1.112 2001/12/30 15:47:29 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.112  2001/12/30 15:47:29  McClean
+  use sms-input..
+
   Revision 1.111  2001/12/29 02:17:00  McClean
   make some settings get from controld
 
@@ -1200,17 +1203,17 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
 
-		CStringInput*	updateSettings_proxy= new CStringInput("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23,
+		CStringInputSMS*	updateSettings_proxy= new CStringInputSMS("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23,
 			                                                   "flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2",
                                                                "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyserver", true, g_settings.softupdate_proxyserver, updateSettings_proxy ) );
 
-		CStringInput*	updateSettings_proxyuser= new CStringInput("flashupdate.proxyusername", g_settings.softupdate_proxyusername, 23,
+		CStringInputSMS*	updateSettings_proxyuser= new CStringInputSMS("flashupdate.proxyusername", g_settings.softupdate_proxyusername, 23,
 			                                                   "flashupdate.proxyusername_hint1", "flashupdate.proxyusername_hint2",
                                                                "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyusername", true, g_settings.softupdate_proxyusername, updateSettings_proxyuser ) );
 
-		CStringInput*	updateSettings_proxypass= new CStringInput("flashupdate.proxypassword", g_settings.softupdate_proxypassword, 20,
+		CStringInputSMS*	updateSettings_proxypass= new CStringInputSMS("flashupdate.proxypassword", g_settings.softupdate_proxypassword, 20,
 			                                                   "flashupdate.proxypassword_hint1", "flashupdate.proxypassword_hint2",
                                                                "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxypassword", true, g_settings.softupdate_proxypassword, updateSettings_proxypass ) );
@@ -2139,7 +2142,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.111 2001/12/29 02:17:00 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.112 2001/12/30 15:47:29 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
