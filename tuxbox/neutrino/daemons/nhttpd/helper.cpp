@@ -34,7 +34,7 @@
 string itoh(unsigned int conv)
 {
 	static char buf[20];
-	sprintf(buf,"0x%06x\0",conv);
+	sprintf(buf,"0x%06x",conv);
 	return string(buf);
 }
 //-------------------------------------------------------------------------
@@ -42,7 +42,7 @@ string itoh(unsigned int conv)
 string itoa(unsigned int conv)
 {
 	static char buf[20];
-	sprintf(buf,"%u\0",conv);
+	sprintf(buf,"%u",conv);
 	return string(buf);
 }
 //-------------------------------------------------------------------------

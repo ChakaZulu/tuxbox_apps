@@ -96,7 +96,7 @@ public:
 	void ShowTimerList(CWebserverRequest* request);
 	void ShowEventList(CWebserverRequest* request, unsigned onidSid);
 	void ShowBouquet(CWebserverRequest *request,int BouquetNr = -1);
-	void ShowBouquets(CWebserverRequest *request, int BouquetNr = 0);
+	void ShowBouquets(CWebserverRequest *request, unsigned int BouquetNr = 0);
 	bool ShowControlpanel(CWebserverRequest* request);
 	void ShowCurrentStreamInfo(CWebserverRequest* request);
 	bool ShowEpg(CWebserverRequest* request,string EpgID,string Startzeit = "");

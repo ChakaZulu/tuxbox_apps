@@ -20,8 +20,7 @@ Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 13. aktuelle cramfs Version 	http://dbox/control/version (veraltet, bitte /control/info?version benutzen)
 14. Bouquetlist abfragen	http://dbox/control/getbouquets
 15. Bouquet abfragen		http://dbox/control/getbouquet
-16. Popup-Fenster 		http://dbox/control/popup
-17. Message-Fenster		http://dbox/control/nmsg
+16. Fenster in neutrino		http://dbox/control/message
 
 
 **********************************************************************************************
@@ -486,7 +485,17 @@ videooutput RGB
 videoformat 4:3
 
 
+Parameter: httpdversion
+Rückgabe: 
 
+Version des httpd 
+1 : nhttpd
+2 : thttpd
+
+Beispiel:
+
+>>>http://dbox/control/info?httpdversion
+1
 
 
 **********************************************************************************************
@@ -627,9 +636,9 @@ Beispiel:
 **********************************************************************************************
 16. Popup-Fenster öffnen
 **********************************************************************************************
-Handler: http://dbox/control/popup
+Handler: http://dbox/control/message
 
-Parameter: Text
+Parameter: popup=Text
 Rückgabe:
 
 Neutrino öffnet ein Popup-Fenster, in dem der Parameter als Text dargestellt wird. 
@@ -640,16 +649,12 @@ Rückgabe-Format: ok / error
 
 Beispiel:
 
->>>http://dbox/control/popup?Hallo%20Welt
+>>>http://dbox/control/message?popup=Hallo%20Welt
 öffnet ein Popup-Fenster auf dem Fernseher, in dem "Hallo Welt" steht
 
 
-**********************************************************************************************
-17. Message-Fenster öffnen
-**********************************************************************************************
-Handler: http://dbox/control/nmsg
 
-Parameter: Text
+Parameter: nmsg=Text
 Rückgabe:
 
 Neutrino öffnet ein Message-Fenster, in dem der Parameter als Text dargestellt wird. 
@@ -659,5 +664,5 @@ Rückgabe-Format: ok / error
 
 Beispiel:
 
->>>http://dbox/control/nmsg?Hallo%20Welt
+>>>http://dbox/control/message?nmsg=Hallo%20Welt
 öffnet ein Message-Fenster auf dem Fernseher, in dem "Hallo Welt" steht

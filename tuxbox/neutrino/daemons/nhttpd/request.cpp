@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.26 2002/07/25 22:15:58 woglinde Exp $
+	$Id: request.cpp,v 1.27 2002/08/05 12:06:52 dirch Exp $
 
 	License: GPL
 
@@ -380,13 +380,14 @@ int ende;
 			return false;
 		}
 	}
+	return false;
 }
 //-------------------------------------------------------------------------
 bool CWebserverRequest::HandleUpload()				// momentan broken 
 {
 	int t = 0;
-	FILE *output;
-	int count = 0;
+//	FILE *output;
+//	int count = 0;
 
 	SocketWrite("HTTP/1.1 100 Continue \r\n\r\n");		// Erstmal weitere Daten anfordern
 
@@ -402,7 +403,7 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 			return false;
 		}
 		long long gelesen = 0;
-		if(Parent->DEBUG) printf("Buffer ok Groesse:%ld\n",contentsize);
+		if(Parent->DEBUG) printf("Buffer ok Groesse:%d\n",contentsize);
 		while(gelesen < contentsize)
 		{
 			t = read(Socket,&buffer2[gelesen],contentsize-gelesen);
@@ -424,9 +425,9 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 		
 		if(gelesen == contentsize)
 		{
-			if(Parent->DEBUG) printf("Upload komplett gelesen: %ld bytes\n",contentsize);
+			if(Parent->DEBUG) printf("Upload komplett gelesen: %d bytes\n",contentsize);
 			return true;
-		}
+		} 
 		else
 		{
 			if(Parent->DEBUG) printf("Upload konnte nicht komplett gelesen werden  %ld bytes\n",contentsize);

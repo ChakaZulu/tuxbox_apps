@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.14 2002/07/20 20:06:48 wjoost Exp $
+	$Id: webserver.cpp,v 1.15 2002/08/05 12:06:52 dirch Exp $
 
 	License: GPL
 
@@ -95,7 +95,7 @@ CWebserver::CWebserver(bool debug)
 //-------------------------------------------------------------------------
 CWebserver::~CWebserver()
 {
-	Config->saveConfig(NHTTPD_CONFIGFILE );
+//	Config->saveConfig(NHTTPD_CONFIGFILE );
 
 	if(ListenSocket)
 		Stop();
@@ -236,17 +236,19 @@ pthread_t Threads[30];
 			req->Socket = sock_connect;	
 			req->Client_Addr = inet_ntoa(cliaddr.sin_addr);
 			req->RequestNumber = Requests++;
+			if(DEBUG) printf("GetRawRequest()\n");
 			if(req->GetRawRequest())															//read request from client
 			{
+				if(DEBUG) printf("ParseRequest()\n");
 				if(req->ParseRequest())															// parse it
 				{
-				
+					if(DEBUG) printf("SendResponse()\n");				
 					req->SendResponse();														// send the proper response
 					if( DEBUG || VERBOSE ) req->PrintRequest();									// and print if wanted
 				}
 				else
 					dperror("Error while parsing request");
-				
+				if(DEBUG) printf("EndRequest()\n");
 				req->EndRequest();																// end the request
 				delete req;													
 				req = NULL;
