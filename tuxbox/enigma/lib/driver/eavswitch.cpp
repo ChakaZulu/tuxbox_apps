@@ -122,7 +122,7 @@ int eAVSwitch::setInput(int v)
 	switch (v)
 	{
 	case 0:
-		v = (Type == SAGEM)?0:2;
+		v = (Type == SAGEM)?0:((colorformat == cfRGB)?1:2);
 		ioctl(fd, AVSIOSFBLK, &v);
 		ioctl(fd, AVSIOSVSW1, dvb);
 		ioctl(fd, AVSIOSASW1, dvb+1);
@@ -134,7 +134,7 @@ int eAVSwitch::setInput(int v)
 			ioctl(fd, AVSIOSVOL, &eDVB::getInstance()->volume);
 		break;
 	case 1:
-		v = (colorformat == cfRGB?1:0);
+		v = (colorformat == cfRGB)?1:0;
 		ioctl(fd, AVSIOSFBLK, &v);
 		ioctl(fd, AVSIOSVSW1, scart);
 		ioctl(fd, AVSIOSASW1, scart+1);
