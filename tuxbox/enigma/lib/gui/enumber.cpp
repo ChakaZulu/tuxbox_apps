@@ -20,7 +20,17 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	p->setForegroundColor((have_focus && n==active)?cursor:normal);
 	p->fill(pos);
 	p->setFont(font);
-	p->renderText(pos, eString().sprintf("%s%d", n?".":"", number[n]));
+	
+	eString t;
+	if (base==10)
+		t.sprintf("%d", number[n]);
+	else if (base==0x10)
+		t.sprintf("%X", number[n]);
+
+	if (n && (flags & flagDrawPoints))
+		t="."+t;
+	
+	p->renderText(pos, t);
 	p->flush();
 }
 
@@ -41,11 +51,16 @@ int eNumber::eventFilter(const eWidgetEvent &event)
 	return 0;
 }
 
-eNumber::eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive, eLabel* descr, int grabfocus)
-	:eWidget(parent, grabfocus), len(len), min(min), max(max), maxdigits(maxdigits), isactive(isactive), descr(descr?descr->getText():""),
+eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eLabel* descr, int grabfocus)
+	:eWidget(parent, grabfocus), isactive(isactive), descr(descr?descr->getText():""),
 	active(0), digit(isactive),have_focus(0), cursor(cursor=eSkin::getActive()->queryScheme("focusedColor")),	normal(eSkin::getActive()->queryScheme("fgColor")),
 	tmpDescr(0)
 {
+	setNumberOfFields(_len);
+	setLimits(_min, _max);
+	setMaximumDigits(_maxdigits);
+	setFlags(0);
+	setBase(10);
 	for (int i=0; i<len; i++)
 		number[i]=init[i];
 }
@@ -188,3 +203,54 @@ void eNumber::setNumber(int f, int n)
 		number[f]=n;
 	invalidate(getNumberRect(f));
 }
+
+void eNumber::setLimits(int _min, int _max)
+{
+	min=_min;
+	max=_max;
+}
+
+void eNumber::setNumberOfFields(int n)
+{
+	len=n;
+}
+
+void eNumber::setMaximumDigits(int n)
+{
+	if (n > 16)
+		n=16;
+	maxdigits=n;
+	if (digit >= maxdigits)
+		digit=0;
+}
+
+void eNumber::setFlags(int _flags)
+{
+	flags=_flags;
+}
+
+void eNumber::setBase(int _base)
+{
+	base=_base;
+}
+
+void eNumber::setNumber(int n)
+{
+	for (int i=len-1; i>=0; --i)
+	{
+		number[i]=n%base;
+		n/=base;
+	}
+}
+
+int eNumber::getNumber()
+{
+	int n=0;
+	for (int i=len-1; i>=0; --i)
+	{
+		n*=base;
+		n+=number[i];
+	}
+	return n;
+}
+    

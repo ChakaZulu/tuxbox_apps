@@ -16,8 +16,6 @@ private:
 	void fieldSelected(int *number);
 	void okPressed();
 	void abortPressed();
-protected:
-	int eventFilter(const eWidgetEvent &event);
 public:
 	eZapNetworkSetup();
 	~eZapNetworkSetup();

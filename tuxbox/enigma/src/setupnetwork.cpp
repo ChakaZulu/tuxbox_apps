@@ -29,8 +29,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	eWindow(0)
 {
 	setText(_("Network setup"));
-	move(ePoint(150, 136));
-	resize(eSize(420, 290));
+	cmove(ePoint(150, 136));
+	cresize(eSize(420, 290));
 
 	__u32 sip=ntohl(0x0a000061), snetmask=ntohl(0xFF000000), sdns=ntohl(0x7f000001), sgateway=ntohl(0x7f000001);
 	int de[4];
@@ -52,6 +52,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	ip->move(ePoint(160, 0));
 	ip->resize(eSize(200, fd+4));
+	ip->setFlags(eNumber::flagDrawPoints);
 
 	l=new eLabel(this);
 	l->setText("Netmask:");
@@ -62,6 +63,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	netmask->move(ePoint(160, 40));
 	netmask->resize(eSize(200, fd+4));
+	netmask->setFlags(eNumber::flagDrawPoints);
 	
 	l=new eLabel(this);
 	l->setText("Nameserver:");
@@ -72,6 +74,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	dns=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	dns->move(ePoint(160, 80));
 	dns->resize(eSize(200, fd+4));
+	dns->setFlags(eNumber::flagDrawPoints);
 
 	l=new eLabel(this);
 	l->setText("Gateway:");
@@ -82,8 +85,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	gateway->move(ePoint(160, 120));
 	gateway->resize(eSize(200, fd+4));
+	gateway->setFlags(eNumber::flagDrawPoints);
 
-//	connect(ip, SIGNAL(selected(int*)), SLOT(fieldSelected(int*)));
 	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
 	dosetup=new eCheckbox(this, sdosetup, fd, l);
@@ -96,7 +99,6 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ok->move(ePoint(160, 200));
 	ok->resize(eSize(90, fd+4));
 	
-//	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
 
 	abort=new eButton(this);
@@ -104,9 +106,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	abort->move(ePoint(270, 200));
 	abort->resize(eSize(120, fd+4));
 
-	//connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
 	CONNECT(abort->selected, eZapNetworkSetup::abortPressed);
-
 }
 
 eZapNetworkSetup::~eZapNetworkSetup()
@@ -158,47 +158,3 @@ void eZapNetworkSetup::abortPressed()
 	close(0);
 }
 
-int eZapNetworkSetup::eventFilter(const eWidgetEvent &event)
-{
-#if 0
-	// work around for sucking event priority
-	int ineNumber=0;
-	eWidget *current=getTLW()->focusList()->current();
-	if (current == ip)
-		ineNumber = 1;
-	else if (current == netmask)
-		ineNumber = 1;
-	else if (current == dns)
-		ineNumber = 1;
-	else if (current == gateway)
-		ineNumber = 1;
-	switch (event.type)
-	{
-	case eWidgetEvent::keyDown:
-		switch(event.parameter)
-		{
-		case eRCInput::RC_DOWN:
-			focusNext(eWidget::focusDirS);
-			return 1;
-		case eRCInput::RC_LEFT:
-			if (!ineNumber)
-			{
-				focusNext(eWidget::focusDirW);
-				return 1;
-			}
-			break;
-		case eRCInput::RC_RIGHT:
-			if (!ineNumber)
-			{
-				focusNext(eWidget::focusDirE);
-				return 1;
-			}
-			break;
-		case eRCInput::RC_UP:
-			focusNext(eWidget::focusDirN);
-			return 1;
-		}
-	}
-#endif
-	return 0;
-}
