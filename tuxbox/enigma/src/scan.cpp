@@ -329,10 +329,10 @@ int existNetworks::parseNetworks()
 	switch (fetype)
 	{
 	case eFrontend::feSatellite:
-		filename="/etc/satellites.xml";
+		filename=DATADIR "/satellites.xml";
 		break;
 	case eFrontend::feCable:
-		filename="/etc/cables.xml";
+		filename=DATADIR "/cables.xml";
 		break;
 	default:
 		break;
