@@ -14,7 +14,7 @@
 #include <pig.h>
 #include <colors.h>
 #include <yahtzee.h>
-#include <include/plugin.h>
+#include <plugin.h>
 #include <fx2math.h>
 
 extern	int	doexit;

@@ -13,7 +13,7 @@
 #include <colors.h>
 #include <board.h>
 #include <pig.h>
-#include <include/plugin.h>
+#include <plugin.h>
 #include <fx2math.h>
 
 extern	int				debug;

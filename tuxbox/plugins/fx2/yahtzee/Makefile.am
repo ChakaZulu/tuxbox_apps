@@ -1,4 +1,4 @@
-INCLUDES = -I$(srcdir)/../lib
+INCLUDES = -I$(srcdir)/../lib -I$(top_srcdir)/include
 
 bin_PROGRAMS = yahtzee
 noinst_LTLIBRARIES = libyahtzee.la
