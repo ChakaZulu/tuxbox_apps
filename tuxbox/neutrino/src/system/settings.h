@@ -156,14 +156,16 @@ struct SNeutrinoSettings
 
 	//streaming
 	int  streaming_type;
-        std::string streaming_server_ip;
+	std::string streaming_server_ip;
 	char streaming_server_port[10];
-        char streaming_server_cddrive[21];
+	char streaming_server_cddrive[21];
 	char streaming_videorate[6];
 	char streaming_audiorate[6];
 	char streaming_server_startdir[40];
 	int streaming_ac3_enabled;
-
+	int streaming_force_transcode;
+	int streaming_resolution;
+    
 	//key configuration
 	int key_tvradio_mode;
 

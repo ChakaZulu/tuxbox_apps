@@ -142,6 +142,12 @@ streamingmenu.streaming_audiorate Daterade Audio
 streamingmenu.streaming_ac3_enabled unset
 streamingmenu.off Deaktiviert
 streamingmenu.on Aktiviert
+streamingmenu.streaming_force_transcode Transcode Forcieren
+streamingmenu.streaming_resolution Auflösung
+streamingmenu.352x288 352x288
+streamingmenu.352x576 352x576
+streamingmenu.480x576 480x576
+streamingmenu.704x576 704x576
 
 ping.ok isch erreichbar (ping)
 ping.unreachable isch nidd erreichbar (unreachable)

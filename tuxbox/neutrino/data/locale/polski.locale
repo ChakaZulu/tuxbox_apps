@@ -142,6 +142,14 @@ streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
 streamingmenu.streaming_ac3_enabled Obsluga AC3
 streamingmenu.off Wyl
 streamingmenu.on Wl
+streamingmenu.streaming_res_horiz Horizontal Resolution
+streamingmenu.streaming_res_vert Vertical Resolution
+streamingmenu.streaming_force_transcode Force Transcoding
+streamingmenu.streaming_resolution Resolution
+streamingmenu.352x288 352x288
+streamingmenu.352x576 352x576
+streamingmenu.480x576 480x576
+streamingmenu.704x576 704x576
 
 ping.ok osiagalny (ping)
 ping.unreachable nieosiagalny

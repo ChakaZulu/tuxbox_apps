@@ -142,6 +142,12 @@ streamingmenu.streaming_audiorate brzina audia
 streamingmenu.streaming_ac3_enabled unset
 streamingmenu.off ugaseno
 streamingmenu.on upaljeno
+streamingmenu.streaming_force_transcode Force Transcoding
+streamingmenu.streaming_resolution Resolution
+streamingmenu.352x288 352x288
+streamingmenu.352x576 352x576
+streamingmenu.480x576 480x576
+streamingmenu.704x576 704x576
 
 ping.ok e raggiungibile (ping)
 ping.unreachable non e raggiungibile (unreachable)

@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.56 2003/10/07 16:51:29 obi Exp $
+  $Id: movieplayer.cpp,v 1.57 2003/10/12 16:30:42 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -148,7 +148,8 @@ CMoviePlayerGui::CMoviePlayerGui ()
 	videofilefilter.addFilter ("ts");
 	videofilefilter.addFilter ("ps");
 	videofilefilter.addFilter ("mpg");
-	videofilefilter.addFilter ("m2p");
+  videofilefilter.addFilter ("mpeg");
+  videofilefilter.addFilter ("m2p");
 	videofilefilter.addFilter ("avi");
 	filebrowser->Filter = &videofilefilter;
 	if (strlen (g_settings.network_nfs_moviedir) != 0)
@@ -310,10 +311,40 @@ ReceiveStreamThread (void *mrl)
 	// Example(ohne transcode zu mpeg1): ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
 	//TODO make this nicer :-)
 	std::string souturl;
-	if(!memcmp((char*)mrl, "vcd:", 4) || 
-	   !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "mpg") || 
-	   !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "ac3") || 
-	   !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "m2p"))
+
+  //Resolve Resolution from Settings...
+  char* res_horiz = "";
+  char* res_vert = "";
+  switch (g_settings.streaming_resolution)
+  {
+    case 0:
+      res_horiz = "352";
+      res_vert = "288";
+      break;
+    case 1:
+      res_horiz = "352";
+      res_vert = "576";
+      break;
+    case 2:
+      res_horiz = "480";
+      res_vert = "576";
+      break;
+    case 3:
+      res_horiz = "704";
+      res_vert = "576";
+      break;
+    default:
+      res_horiz = "352";
+      res_vert = "288";
+  } //switch
+
+  //Menu Option Force Transcode: Transcode all Files, including mpegs.
+	if (!g_settings.streaming_force_transcode &&           
+		(!memcmp((char*)mrl, "vcd:", 4) ||
+		!strcasecmp(addurl.substr(addurl.length()-3).c_str(), "mpg") || 
+		!strcasecmp(addurl.substr(addurl.length()-4).c_str(), "mpeg") ||
+		!strcasecmp(addurl.substr(addurl.length()-3).c_str(), "ac3") || 
+		!strcasecmp(addurl.substr(addurl.length()-3).c_str(), "m2p")))
 	{
 		// no transcode
 		souturl = "#duplicate{dst=std{access=http,mux=ts,url=:";
@@ -325,6 +356,10 @@ ReceiveStreamThread (void *mrl)
 		// transcode video only
 		souturl = "#transcode{vcodec=mpgv,vb=";
 		souturl += g_settings.streaming_videorate;
+    souturl += ",width=";                                 //transcode to size specified
+    souturl += res_horiz;                                 //in Settings
+    souturl += ",height=";                                //
+    souturl += res_vert;                                  //
 		souturl += "}:duplicate{dst=std{access=http,mux=ts,url=:";
 		souturl += g_settings.streaming_server_port;
 		souturl += "/dboxstream}}";
@@ -334,6 +369,10 @@ ReceiveStreamThread (void *mrl)
 		// transcode audio and video
 		souturl = "#transcode{vcodec=mpgv,vb=";
 		souturl += g_settings.streaming_videorate;
+    souturl += ",width=";                                   //transcode to size specified
+    souturl += res_horiz;                                   //in Settings
+    souturl += ",height=";                                  //
+    souturl += res_vert;                                    //
 		souturl += ",acodec=mpga,ab=";
 		souturl += g_settings.streaming_audiorate;
 		souturl += ",channels=2}:duplicate{dst=std{access=http,mux=ts,url=:";
@@ -1253,6 +1292,7 @@ CMoviePlayerGui::show ()
 		g_RCInput->getMsg (&msg, &data, 10);	// 1 sec timeout to update play/stop state display
 		if (msg == CRCInput::RC_home)
 		{			//Exit after cancel key
+    
 			loop = false;
 		}
 		else if (msg == CRCInput::RC_timeout)
