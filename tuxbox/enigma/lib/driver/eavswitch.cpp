@@ -32,8 +32,12 @@ eAVSwitch *eAVSwitch::instance=0;
 
 eAVSwitch::eAVSwitch()
 {
+	active=0;
 	if (!instance)
 		instance=this;
+	fd=open("/dev/dbox/avs0", O_RDWR);
+	saafd=open("/dev/dbox/saa0", O_RDWR);
+	reloadSettings();
 }
 
 eAVSwitch *eAVSwitch::getInstance()
@@ -45,7 +49,13 @@ eAVSwitch::~eAVSwitch()
 {
 	if (instance==this)
 		instance=0;
+
+	if (fd>=0)
+		close(fd);
+	if (saafd>=0)
+		close(saafd);
 }
+
 
 void eAVSwitch::reloadSettings()
 {
@@ -54,33 +64,18 @@ void eAVSwitch::reloadSettings()
 	setColorFormat((eAVColorFormat)colorformat);
 }
 
-eAVSwitchNokia::eAVSwitchNokia()
-{
-	fd=open("/dev/dbox/avs0", O_RDWR);
-	saafd=open("/dev/dbox/saa0", O_RDWR);
-	
-	reloadSettings();
-}
-
-eAVSwitchNokia::~eAVSwitchNokia()
-{
-	if (fd>=0)
-		close(fd);
-	if (saafd>=0)
-		close(saafd);
-}
-
-int eAVSwitchNokia::setVolume(int vol)
+int eAVSwitch::setVolume(int vol)
 {
 	vol=63-vol/(65536/64);
 	if (vol<0)
 		vol=0;
 	if (vol>63)
 		vol=63;
+
 	return ioctl(fd, AVSIOSVOL, &vol);
 }
 
-int eAVSwitchNokia::setTVPin8(int vol)
+int eAVSwitch::setTVPin8(int vol)
 {
 	int fnc;
 	switch (vol)
@@ -92,304 +87,81 @@ int eAVSwitchNokia::setTVPin8(int vol)
 		fnc=1;
 		break;
 	case 12:
-		fnc=2;
+		fnc=(Type==PHILIPS?3:2);
 		break;
 	}
 	return ioctl(fd, AVSIOSFNC, &fnc);
 }
 
-int eAVSwitchNokia::setColorFormat(eAVColorFormat c)
+int eAVSwitch::setColorFormat(eAVColorFormat c)
 {
 	colorformat=c;
-	int arg=0, fblk;
+	int arg=0;
 	switch (c)
 	{
 	case cfNull:
 		return -1;
 	case cfCVBS:
 		arg=SAA_MODE_FBAS;
-		fblk=0;
 		break;
 	case cfRGB:
 		arg=SAA_MODE_RGB;
-		fblk=1;
 		break;
 	case cfYC:
 		arg=SAA_MODE_SVIDEO;
-		fblk=0;
 		break;
 	}
+	int fblk = (c == cfRGB)?1:0;
 	ioctl(saafd, SAAIOSMODE, &arg);
 	ioctl(fd, AVSIOSFBLK, &fblk);
 }
 
-int eAVSwitchNokia::setAspectRatio(eAVAspectRatio as)
-{
-	aspect=as;
-	return setTVPin8(active?((aspect==r169)?6:12):0);
-}
-
-int eAVSwitchNokia::isVCRActive()
-{
-	return 0;
-}
-
-int eAVSwitchNokia::setActive(int a)
-{
-	active=a;
-	return setTVPin8(active?((aspect==r169)?6:12):0);
-}
-
-int eAVSwitchNokia::setInput(int v)
-{
+int eAVSwitch::setInput(int v)
+{	
 	qDebug("setInput %d, fd=%d", v, fd);
 	switch (v)
 	{
 	case 0:
-		v=5;
-		ioctl(fd, AVSIOSVSW1, &v);
-		v=1;
-		ioctl(fd, AVSIOSASW1, &v);
-		v=7;
-		ioctl(fd, AVSIOSVSW2, &v);
-		v=3;
+		v = eDVB::getInstance()->mute?63:eDVB::getInstance()->volume;
+		ioctl(fd, AVSIOSVOL, &v);
+		v = (Type == SAGEM)?0:2;
 		ioctl(fd, AVSIOSFBLK, &v);
+		ioctl(fd, AVSIOSVSW1, dvb);
+		ioctl(fd, AVSIOSASW1, dvb+1);
+		ioctl(fd, AVSIOSVSW2, dvb+2);
+		ioctl(fd, AVSIOSASW2, dvb+3);
+		ioctl(fd, AVSIOSVSW3, dvb+4);
+		ioctl(fd, AVSIOSASW3, dvb+5);
 		break;
 	case 1:
-		v=3;
-		ioctl(fd, AVSIOSVSW1, &v);
-		v=2;
-		ioctl(fd, AVSIOSASW1, &v);
-		v=7;
-		ioctl(fd, AVSIOSVSW2, &v);
-		setColorFormat(colorformat);
+		v = (colorformat == cfRGB?1:0);
+		ioctl(fd, AVSIOSFBLK, &v);
+		v = 0;
+		ioctl(fd, AVSIOSVOL, &v);
+		ioctl(fd, AVSIOSVSW1, scart);
+		ioctl(fd, AVSIOSASW1, scart+1);
+		ioctl(fd, AVSIOSVSW2, scart+2);
+		ioctl(fd, AVSIOSASW2, scart+3);
+		ioctl(fd, AVSIOSVSW3, scart+4);
+		ioctl(fd, AVSIOSASW3, scart+5);
 		break;
 	}
 	return 0;
 }
 
-
-eAVSwitchPhilips::eAVSwitchPhilips()
-{
-	fd=open("/dev/dbox/avs0", O_RDWR);
-	saafd=open("/dev/dbox/saa0", O_RDWR);
-	active=0;
-        
-	reloadSettings();
-}
-
-eAVSwitchPhilips::~eAVSwitchPhilips()
-{
-	if (fd>=0)
-		close(fd);
-	if (saafd>=0)
-		close(saafd);
-}
-
-int eAVSwitchPhilips::setVolume(int vol)
-{
-	vol=63-vol/(65536/64);
-	if (vol<0)
-		vol=0;
-	if (vol>63)
-		vol=63;
-	return ioctl(fd, AVSIOSVOL, &vol);
-}
-
-int eAVSwitchPhilips::setTVPin8(int vol)
-{
-	int fnc;
-	switch (vol)
-	{
-	case 0:
-		fnc=0;
-		break;
-	case 6:
-		fnc=1;
-		break;
-	case 12:
-		fnc=3;
-		break;
-	 default:
-		fnc=3;
-		break;
-	}
-	return ioctl(fd, AVSIOSFNC, &fnc);
-}
-
-int eAVSwitchPhilips::setColorFormat(eAVColorFormat c)
-{
-	int arg=0;
-	switch (c)
-	{
-	case cfNull:
-		return -1;
-	case cfCVBS:
-		arg=SAA_MODE_FBAS;
-		break;
-	case cfRGB:
-		arg=SAA_MODE_RGB;
-		break;
-	case cfYC:
-		arg=SAA_MODE_SVIDEO;
-		break;
-	}
-	return ioctl(saafd, SAAIOSMODE, &arg);
-}
-
-int eAVSwitchPhilips::setAspectRatio(eAVAspectRatio as)
+int eAVSwitch::setAspectRatio(eAVAspectRatio as)
 {
 	aspect=as;
 	return setTVPin8(active?((aspect==r169)?6:12):0);
 }
 
-int eAVSwitchPhilips::isVCRActive()
+int eAVSwitch::isVCRActive()
 {
 	return 0;
 }
 
-int eAVSwitchPhilips::setActive(int a)
+int eAVSwitch::setActive(int a)
 {
 	active=a;
 	return setTVPin8(active?((aspect==r169)?6:12):0);
-}
-
-int eAVSwitchPhilips::setInput(int v)
-{
-	qDebug("setInput %d, fd=%d", v, fd);
-
-	switch (v)
-	{
-	case 0:
-		v=1;
-		ioctl(fd, AVSIOSVSW1, &v);
-		v=1;
-		ioctl(fd, AVSIOSASW1, &v);
-		v=1;
-		ioctl(fd, AVSIOSVSW2, &v);
-		v=0;
-		ioctl(fd, AVSIOSFBLK, &v);
-		break;
-	case 1:
-		v=2;
-		ioctl(fd, AVSIOSVSW1, &v);
-		v=2;
-		ioctl(fd, AVSIOSASW1, &v);
-		v=3;
-		ioctl(fd, AVSIOSVSW2, &v);
-		v=2;
-		ioctl(fd, AVSIOSFBLK, &v);
-		break;
-	}
-	return 0;
-}
-
-
-eAVSwitchSagem::eAVSwitchSagem()
-{
-	fd=open("/dev/dbox/avs0", O_RDWR);
-	saafd=open("/dev/dbox/saa0", O_RDWR);
-	
-	reloadSettings();
-}
-
-eAVSwitchSagem::~eAVSwitchSagem()
-{
-	if (fd>=0)
-		close(fd);
-	if (saafd>=0)
-		close(saafd);
-}
-
-int eAVSwitchSagem::setVolume(int vol)
-{
-	vol=63-vol/(65536/64);
-	if (vol<0)
-		vol=0;
-	if (vol>63)
-		vol=63;
-	return ioctl(fd, AVSIOSVOL, &vol);
-}
-
-int eAVSwitchSagem::setTVPin8(int vol)
-{
-	int fnc;
-	switch (vol)
-	{
-	case 0:
-		fnc=0;
-		break;
-	case 6:
-		fnc=1;
-		break;
-	case 12:
-		fnc=2;
-		break;
-	}
-	return ioctl(fd, AVSIOSFNC, &fnc);
-}
-
-int eAVSwitchSagem::setColorFormat(eAVColorFormat c)
-{
-	int arg=0;
-	switch (c)
-	{
-	case cfNull:
-		return -1;
-	case cfCVBS:
-		arg=SAA_MODE_FBAS;
-		break;
-	case cfRGB:
-		arg=SAA_MODE_RGB;
-		break;
-	case cfYC:
-		arg=SAA_MODE_SVIDEO;
-		break;
-	}
-	return ioctl(saafd, SAAIOSMODE, &arg);
-}
-
-int eAVSwitchSagem::setAspectRatio(eAVAspectRatio as)
-{
-	aspect=as;
-	return setTVPin8(active?((aspect==r169)?6:12):0);
-}
-
-int eAVSwitchSagem::isVCRActive()
-{
-	return 0;
-}
-
-int eAVSwitchSagem::setActive(int a)
-{
-	active=a;
-	return setTVPin8(active?((aspect==r169)?6:12):0);
-}
-
-int eAVSwitchSagem::setInput(int v)
-{
-	switch (v)
-	{
-	case 0:
-		v=0;
-		ioctl(fd, AVSIOSVSW1, &v);
-		v=0;
-		ioctl(fd, AVSIOSASW1, &v);
-		v=0;
-		ioctl(fd, AVSIOSVSW2, &v);
-		v=1;
-		ioctl(fd, AVSIOSFBLK, &v);
-		break;
-	case 1:
-		v=2;
-		ioctl(fd, AVSIOSVSW1, &v);
-		v=1;
-		ioctl(fd, AVSIOSASW1, &v);
-		v=7;
-		ioctl(fd, AVSIOSVSW2, &v);
-		v=2;
-		ioctl(fd, AVSIOSFBLK, &v);
-		break;
-	}
-	return 0;
 }

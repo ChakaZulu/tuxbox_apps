@@ -18,75 +18,87 @@ class eAVSwitch
 {
 	static eAVSwitch *instance;
 public:
+	enum {NOKIA, SAGEM, PHILIPS} Type;
+	int scart[6];
+	int dvb[6];
+	int active;
+	int fd, saafd;
+	eAVAspectRatio aspect;
+	eAVColorFormat colorformat;
 	static eAVSwitch *getInstance();
 	eAVSwitch();
-	virtual int setVolume(int vol)=0;	// 0..65535
-	virtual int setColorFormat(eAVColorFormat cf)=0;
-	virtual int setAspectRatio(eAVAspectRatio as)=0;
-	virtual int isVCRActive()=0;
-	virtual int setActive(int active)=0;
-	virtual int setInput(int v)=0;	// 0: dbox, 1: vcr
+	virtual int setTVPin8(int vol);
+	virtual int setVolume(int vol);	// 0..65535
+	virtual int setColorFormat(eAVColorFormat cf);
+	virtual int setAspectRatio(eAVAspectRatio as);
+	virtual int setActive(int active);
+	virtual int isVCRActive();
+	virtual int setInput(int v);	// 0: dbox, 1: vcr
 	virtual ~eAVSwitch();
-	
 	void reloadSettings();
 };
 
 class eAVSwitchNokia: public eAVSwitch
 {
-	int fd, saafd;
-	int setTVPin8(int vol);
-	
-	int active;
-	eAVAspectRatio aspect;
-	eAVColorFormat colorformat;
 public:
-	eAVSwitchNokia();
-	~eAVSwitchNokia();
-
-	int setVolume(int vol);	// 0..65535
-	int setColorFormat(eAVColorFormat cf);
-	int setAspectRatio(eAVAspectRatio as);
-	int isVCRActive();
-	int setActive(int active); 
-	int setInput(int v);	// 0: dbox, 1: vcr
+	eAVSwitchNokia()
+	{
+		Type = NOKIA;
+		scart[0] = 3;
+		scart[1] = 2;
+		scart[2] = 1;
+		scart[3] = 0;
+		scart[4] = 1;
+		scart[5] = 1;
+		dvb[0] = 5;
+		dvb[1] = 1;
+		dvb[2] = 1;
+		dvb[3] = 0;
+		dvb[4] = 1;
+		dvb[5] = 0;
+	}
 };
 
 class eAVSwitchPhilips: public eAVSwitch
 {
-	int fd, saafd;
-	int setTVPin8(int vol);
-	
-	int active;
-	eAVAspectRatio aspect;
 public:
-	eAVSwitchPhilips();
-	~eAVSwitchPhilips();
-
-	int setVolume(int vol);	// 0..65535
-	int setColorFormat(eAVColorFormat cf);
-	int setAspectRatio(eAVAspectRatio as);
-	int isVCRActive();
-	int setActive(int active); 
-	int setInput(int v);	// 0: dbox, 1: vcr
+	eAVSwitchPhilips()
+	{
+		Type = PHILIPS;
+		scart[0] = 2;
+		scart[1] = 2;
+		scart[2] = 3;
+		scart[3] = 0;
+		scart[4] = 3;
+		scart[5] = 0;
+		dvb[0] = 5;
+		dvb[1] = 1;
+		dvb[2] = 1;
+		dvb[3] = 0;
+		dvb[4] = 1;
+		dvb[5] = 0;
+	}
 };
 
 class eAVSwitchSagem: public eAVSwitch
 {
-	int fd, saafd;
-	int setTVPin8(int vol);
-	
-	int active;
-	eAVAspectRatio aspect;
 public:
-	eAVSwitchSagem();
-	~eAVSwitchSagem();
-
-	int setVolume(int vol);	// 0..65535
-	int setColorFormat(eAVColorFormat cf);
-	int setAspectRatio(eAVAspectRatio as);
-	int isVCRActive();
-	int setActive(int active); 
-	int setInput(int v);	// 0: dbox, 1: vcr
+	eAVSwitchSagem()
+	{
+		Type = SAGEM;
+		scart[0] = 2;
+		scart[1] = 1;
+		scart[2] = 0;
+		scart[3] = 0;
+		scart[4] = 0;
+		scart[5] = 0;
+		dvb[0] = 0;
+		dvb[1] = 0;
+		dvb[2] = 0;
+		dvb[3] = 0;
+		dvb[4] = 0;
+		dvb[5] = 0;
+	}
 };
 
 #endif
