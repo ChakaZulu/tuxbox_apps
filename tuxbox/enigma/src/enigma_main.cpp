@@ -1716,7 +1716,7 @@ eZapMain::eZapMain()
 
 	int fastzap;
 	if ( eConfig::getInstance()->getKey("/elitedvb/extra/fastzapping", fastzap ) )
-		fastzap = 0;
+		fastzap=0;
 
 	Decoder::setFastZap(fastzap);
 

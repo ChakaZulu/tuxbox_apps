@@ -735,7 +735,7 @@ struct updateEPGChangedService
 		{
 			tmpMap::const_iterator it;
 			if (updatedEntrys)
-			 it = updatedEntrys->find( (const eServiceReferenceDVB&)l.service );
+				it = updatedEntrys->find( (const eServiceReferenceDVB&)l.service );
 			if ( (updatedEntrys && it != updatedEntrys->end()) )  // entry is updated
 			{
 				EITEvent *e=eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)l.service );
@@ -751,8 +751,8 @@ struct updateEPGChangedService
 					delete e;
 				}
 			}
-			cnt++;
 		}
+		cnt++;
 		return 0;
 	}
 };
@@ -761,9 +761,10 @@ void eServiceSelector::EPGUpdated()
 {
 	eEPGCache *epgcache = eEPGCache::getInstance();
 	epgcache->Lock();
-	const tmpMap *tmp = epgcache->getUpdatedMap();
+	tmpMap *tmp = epgcache->getUpdatedMap();
 	services->forEachEntry( updateEPGChangedService( tmp ) );
 	services->forEachVisibleEntry( updateEPGChangedService( tmp, true ) );
+	tmp->clear();
 	epgcache->Unlock();
 }
 

@@ -48,6 +48,8 @@ void eEPGCache::timeUpdated()
 		eDebug("[EPGC] time updated.. start EPG Mainloop");
 		run();
 	}
+	else
+		messages.send(Message(Message::timeChanged));
 }
 
 int eEPGCache::sectionRead(__u8 *data, int source)
@@ -59,7 +61,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 	int ptr=EIT_SIZE;
 	if ( ptr >= len )
 		return 0;
-	uniqueEPGKey service( HILO(eit->service_id), HILO(eit->original_network_id), current_service.opos );	
+	uniqueEPGKey service( HILO(eit->service_id), HILO(eit->original_network_id), current_service.opos );
 	eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
 	int eit_event_size;
 	int duration;
@@ -216,7 +218,6 @@ bool eEPGCache::finishEPG()
 		Lock();
 		tmpMap::iterator It = temp.begin();
 
-//		eDebug("tempmap size=%d", temp.size() );
 		while (It != temp.end())
 		{
 //		eDebug("sid = %02x, onid = %02x, opos = %d", It->first.sid, It->first.onid, It->first.opos);
@@ -290,6 +291,11 @@ void eEPGCache::flushEPG(const uniqueEPGKey & s)
 
 void eEPGCache::cleanLoop()
 {
+	if ( isRunning )
+	{
+		CleanTimer.start(2000,true);
+		return;
+	}
 	Lock();
 	if (!eventDB.empty() && !paused )
 	{
@@ -371,6 +377,7 @@ nextEvent:
 		eDebug("[EPGC] %i bytes for cache used", eventData::CacheSize);
 	}
 	Unlock();
+	CleanTimer.start(CLEAN_INTERVAL,true);
 }
 
 eEPGCache::~eEPGCache()
@@ -546,7 +553,9 @@ void eEPGCache::startEPG()
 				return;
 			firstStart=0;
 		}
+		Lock();
 		temp.clear();
+		Unlock();
 		eDebug("[EPGC] start caching events");
 		firstScheduleEvent.invalidate();
 		firstNowNextEvent.invalidate();
@@ -703,6 +712,9 @@ void eEPGCache::gotMessage( const Message &msg )
 		case Message::quit:
 			quit(0);
 			break;
+		case Message::timeChanged:
+			cleanLoop();
+			break;
 		default:
 			eDebug("unhandled EPGCache Message!!");
 			break;
@@ -712,7 +724,7 @@ void eEPGCache::gotMessage( const Message &msg )
 void eEPGCache::thread()
 {
 	nice(10);
-	CleanTimer.start(CLEAN_INTERVAL);
+	CleanTimer.start(CLEAN_INTERVAL,true);
 	exec();
 }
 

@@ -124,10 +124,27 @@ void eHTTPStream::haveData(void *vdata, int len)
 	dataAvailable();
 }
 
+void eMP3Decoder::checkVideoFinished()
+{
+	unsigned int newPTS=0xFFFFFFFF;
+	Decoder::getVideoPTS(newPTS);
+	if ( prevVideoPTS != 0xFFFFFFFF )
+	{
+		if ( newPTS == prevVideoPTS )
+			handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::done));
+		else
+			checkVideoFinishedTimer.start(2000, true);
+	}
+	else
+		checkVideoFinishedTimer.start(2000, true);
+	prevVideoPTS = newPTS;
+}
+
 eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *handler)
 : handler(handler), input(8*1024), output(256*1024),
 	output2(256*1024), skipping(false), type(type), outputbr(0)
-	,inputsn(0), audio_tracks(0), messages(this, 1)
+	,inputsn(0), audio_tracks(0), checkVideoFinishedTimer(this)
+	,prevVideoPTS(0xFFFFFFFF), messages(this, 1)
 {
 	state=stateInit;
 
@@ -242,6 +259,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 		break;
 	case codecMPG:
 		audiodecoder=new eMPEGDemux(input, output, output2, dspfd[0]);
+		CONNECT(checkVideoFinishedTimer.timeout, eMP3Decoder::checkVideoFinished );
 		break;
 	}
 
@@ -429,7 +447,10 @@ void eMP3Decoder::checkFlow(int last)
 			if (outputsn[1])
 				outputsn[1]->stop();
 			eDebug("ok, everything played..");
-			handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::done));
+			if ( type != codecMPG )
+				handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::done));
+			else
+				checkVideoFinished();
 			return;
 		} else if (state != stateBuffering)
 		{

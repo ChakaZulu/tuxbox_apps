@@ -84,6 +84,10 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	
 	void dspSync();
 	void newAudioStreamIdFound( unsigned int );
+
+	void checkVideoFinished();
+	eTimer checkVideoFinishedTimer;
+	unsigned int prevVideoPTS;
 public:
 	int getType() { return type; }
 	struct eMP3DecoderMessage

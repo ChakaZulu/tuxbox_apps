@@ -27,10 +27,13 @@ struct uniqueEPGKey
 {
 	int sid, onid, opos;
 	uniqueEPGKey( const eServiceReferenceDVB &ref )
-		:sid( ref.type != eServiceReference::idInvalid ? ref.data[1] : -1 )
-		,onid( ref.type != eServiceReference::idInvalid ? ref.data[3] : -1 )
-		,opos( ref.type != eServiceReference::idInvalid ? (ref.data[4]&0x00FF0000) >> 16 : -1 )
+		:sid( ref.type != eServiceReference::idInvalid ? ref.getServiceID().get() : -1 )
+		,onid( ref.type != eServiceReference::idInvalid ? ref.getOriginalNetworkID().get() : -1 )
+		,opos( ref.type != eServiceReference::idInvalid ? ref.data[4] >> 16 : -1 )
 	{
+		eTransponder *tp = eTransponderList::getInstance()->searchTS( ref.getDVBNamespace(), ref.getTransportStreamID(), ref.getOriginalNetworkID() );
+		if ( tp && tp->satellite.isValid() )
+			opos = tp->satellite.orbital_position;
 	}
 	uniqueEPGKey()
 		:sid(-1), onid(-1), opos(-1)
@@ -217,7 +220,8 @@ public:
 			restart,
 			updated,
 			isavail,
-			quit
+			quit,
+			timeChanged
 		};
 		int type;
 		uniqueEPGKey service;
@@ -287,7 +291,7 @@ public:
 
 	const eventMap* getEventMap(const eServiceReferenceDVB &service);
 	const timeMap* getTimeMap(const eServiceReferenceDVB &service);
-	const tmpMap* getUpdatedMap() { return &temp; }
+	tmpMap* getUpdatedMap() { return &temp; }
 	const std::list<NVODReferenceEntry>* getNVODRefList(const eServiceReferenceDVB &service);
 
 	EITEvent *lookupEvent(const eServiceReferenceDVB &service, int event_id, bool plain=false );
