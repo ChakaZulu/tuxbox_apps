@@ -1,4 +1,4 @@
-SUBDIRS = icons
+SUBDIRS = icons clock
 
 INCLUDES = \
 	-I$(top_srcdir)/lib \
