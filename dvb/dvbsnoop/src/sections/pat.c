@@ -1,11 +1,14 @@
 /*
-$Id: pat.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: pat.c,v 1.3 2002/12/05 18:33:19 rasc Exp $
 
    -- PAT section
 
    (c) rasc
 
 $Log: pat.c,v $
+Revision 1.3  2002/12/05 18:33:19  rasc
+bugfix: PAT didn't see the last entry (tnx to obi)
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -103,7 +106,7 @@ void decode_PAT (u_char *b, int len)
 
  b = b + 8;
  indent (+1);
- for (; n>4; n=n-4) {
+ for (; n>=4; n=n-4) {
 	pl.program_number	 = getBits (b, 0, 0, 16);
 	pl.reserved		 = getBits (b, 0, 16, 3);
 	pl.network_pmt_PID	 = getBits (b, 0, 19, 13);
