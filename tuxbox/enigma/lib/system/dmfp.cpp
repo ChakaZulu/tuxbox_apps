@@ -25,8 +25,7 @@ int eDreamboxFP::doUpgrade(int magic)
 	int fd = ::open("/dev/dbox/fp0", O_RDWR);
 	if (fd < 0)
 		return 0;
-	int val = 0xd15ea5e;
-	int res = ::ioctl(fd, 0x200, &val);
+	int res = ::ioctl(fd, 0x200, &magic);
 	::close(fd);
 	return res;
 }
