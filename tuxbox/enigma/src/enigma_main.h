@@ -48,6 +48,7 @@ class AudioStream: public eListBoxEntry
 	friend class eListBox<AudioStream>;
 	friend class eAudioSelector;
 public:
+	eString text;
 	enum
   {
 		audioMPEG, audioAC3
@@ -56,7 +57,6 @@ public:
 	PMTEntry *stream;
 
 	bool operator < ( const AudioStream& e) const	{	return 0;	}
-
 protected:
 	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const;
 };

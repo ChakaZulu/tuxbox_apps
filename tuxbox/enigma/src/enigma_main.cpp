@@ -250,29 +250,24 @@ void eNVODSelector::add(NVODReferenceEntry *ref)
 AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
 	:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), stream(stream)
 {
-}
-
-void AudioStream::redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
-{
 		int isAC3=0;
-		eString language;
 		int component_tag=-1;
 		for (ePtrList<Descriptor>::iterator c(stream->ES_info); c != stream->ES_info.end(); ++c)
 		{
 			if (c->Tag()==DESCR_AC3)
 				isAC3=1;
 			else if (c->Tag()==DESCR_ISO639_LANGUAGE)
-				language=getISO639Description(((ISO639LanguageDescriptor*)*c)->language_code);
+				text=getISO639Description(((ISO639LanguageDescriptor*)*c)->language_code);
 			else if (c->Tag()==DESCR_STREAM_ID)
 				component_tag=((StreamIdentifierDescriptor*)*c)->component_tag;
 			else if (c->Tag()==DESCR_LESRADIOS)
 			{
-				language=eString().sprintf("%d.) ", (((LesRadiosDescriptor*)*c)->id));
-				language+=((LesRadiosDescriptor*)*c)->name;
+				text=eString().sprintf("%d.) ", (((LesRadiosDescriptor*)*c)->id));
+				text+=((LesRadiosDescriptor*)*c)->name;
 			}
 		}
-		if (!language)
-			language.sprintf("PID %04x", stream->elementary_PID);
+		if (!text)
+			text.sprintf("PID %04x", stream->elementary_PID);
 		if (component_tag!=-1)
 		{
 			EIT *eit=eDVB::getInstance()->getEIT();
@@ -282,12 +277,17 @@ void AudioStream::redraw(gPainter *rc, const eRect& rect, const gColor& coActive
 					if ((e->running_status>=2)||(!e->running_status))		// currently running service
 						for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
 							if (d->Tag()==DESCR_COMPONENT && ((ComponentDescriptor*)*d)->component_tag == component_tag)
-									language=((ComponentDescriptor*)*d)->text;
+									text=((ComponentDescriptor*)*d)->text;
     					eit->unlock();
 			}
 		}
 		if (isAC3)
-			language+=" (AC3)";
+			text+=" (AC3)";
+
+}
+
+void AudioStream::redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
+{
 
 		rc->setForegroundColor(highlited?coActive:coNormal);
 		rc->setFont(listbox->getFont());
@@ -295,11 +295,11 @@ void AudioStream::redraw(gPainter *rc, const eRect& rect, const gColor& coActive
 		if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
 				rc->fill(rect);
 
-		rc->renderText(rect, language);
+		rc->renderText(rect, text);
 
 		eWidget* p = listbox->getParent();			
 		if (highlited && p && p->LCDElement)
- 			p->LCDElement->setText(language);
+ 			p->LCDElement->setText(text);
 	}
 
 void eAudioSelector::selected(AudioStream *l)
@@ -310,6 +310,7 @@ void eAudioSelector::selected(AudioStream *l)
 		sapi->setPID(l->stream);
 		sapi->setDecoder();
 	}
+
 	close(0);
 }
 

@@ -80,12 +80,19 @@ public:
 
 class tsScan: public eWidget
 {
-	eLabel *headline;
+	eTimer timer;
+	eLabel *timeleft, *service_name, *service_provider;
+	eProgress *progress;
+	int tpLeft;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 	void dvbEvent(const eDVBEvent &event);
 	void dvbState(const eDVBState &event);
+	void updateTime();
+	void serviceFound( eService*, bool );
+	void addedTransponder( eTransponder* );
 public:
+	int tpScanned, newTVServices, newRadioServices, newDataServices, servicesScanned, newTransponders;
 	tsScan(eWidget *parent);
 };
 

@@ -20,6 +20,10 @@
 
 #include <string>
 
+#define USE_NETWORK 1
+#define USE_BAT			2
+#define USE_ONIT		4
+
 tsSelectType::tsSelectType(eWidget *parent): eWidget(parent)
 {
 	list=new eListBox<eListBoxEntryText>(this);
@@ -216,10 +220,13 @@ void tsAutomatic::start()
 			sapi->addTransponder(*i);
 
 		// scanflags auswerten
-//		sapi->setUseONIT(network->useONIT);
-//		sapi->setUseBAT(network->useBAT);
-		sapi->setNetworkSearch(1);
+		eDebug("ScanFlags = %i", pkt->scanflags);
+		sapi->setUseONIT(pkt->scanflags & 4);
+		sapi->setUseBAT(pkt->scanflags & 2);
+		sapi->setNetworkSearch(pkt->scanflags & 1);
+
 		sapi->setClearList(0);
+
 		close(0);
 	}
 }
@@ -343,9 +350,13 @@ int tsAutomatic::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 		eFatal("no name");
 		return -1;
 	}
-	
 	packet.name=name;
-	packet.scanflags=0;
+
+	const char *flags=node->GetAttributeValue("flags");
+	if (flags)
+		packet.scanflags=atoi(flags);
+	else
+		packet.scanflags=1; // default use Network ??
 
 	for (node=node->GetChild(); node; node=node->GetNext())
 	{
@@ -495,14 +506,31 @@ int tsText::eventHandler(const eWidgetEvent &event)
 	return eWidget::eventHandler(event);
 }
 
-tsScan::tsScan(eWidget *parent): eWidget(parent, 1)
+tsScan::tsScan(eWidget *parent): eWidget(parent, 1), timer(eApp)
 {
 	addActionMap(&i_cursorActions->map);
-	headline=new eLabel(this);
-	headline->setText("Scanning...");
+
+	timeleft = new eLabel(this);
+	timeleft->setName("time_left");
+
+	service_name = new eLabel(this);
+	service_name->setName("service_name");
+
+	service_provider = new eLabel(this);
+	service_provider->setName("service_provider");
+
+	progress = new eProgress(this);
+	progress->setName("scan_progress");
+
+	eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "tsScan"))
+		eFatal("skin load of \"tsScan\" failed");
 	
 	CONNECT(eDVB::getInstance()->eventOccured, tsScan::dvbEvent);
 	CONNECT(eDVB::getInstance()->stateChanged, tsScan::dvbState);
+	CONNECT(timer.timeout, tsScan::updateTime);
+	CONNECT(eDVB::getInstance()->settings->transponderlist->service_found, tsScan::serviceFound);
+	CONNECT(eDVB::getInstance()->settings->transponderlist->transponder_added, tsScan::addedTransponder);
 }
 
 int tsScan::eventHandler(const eWidgetEvent &event)
@@ -510,8 +538,8 @@ int tsScan::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::changedSize:
-		headline->move(ePoint(0, 0));
-		headline->resize(eSize(size.width(), 40));
+//		headline->move(ePoint(0, 0));
+//		headline->resize(eSize(size.width(), 40));
 		return 1;
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_cursorActions->cancel)
@@ -536,15 +564,87 @@ int tsScan::eventHandler(const eWidgetEvent &event)
 	return eWidget::eventHandler(event);
 }
 
+void tsScan::updateTime()
+{
+		static int scantime=0;
+		scantime++;
+		int sek = (int) (( (double) scantime / tpScanned) * tpLeft);
+		if (sek > 59)
+			timeleft->setText(eString().sprintf("%02i minutes and %02i seconds left", sek / 60, sek % 60));
+		else
+			timeleft->setText(eString().sprintf("%02i seconds left", sek ));
+}
+
+void tsScan::serviceFound(eService* s, bool newService)
+{
+	servicesScanned++;
+	service_name->setText(s->service_name);
+	service_provider->setText(s->service_provider);
+
+	if (newService)
+	switch(s->service_type)
+	{
+		case 1:	// digital television service
+			newTVServices++;
+		break;
+
+		case 2:	// digital radio service
+			newRadioServices++;
+		break;
+
+		case 3:	// teletext service
+		break;
+
+		case 4:	// NVOD reference service
+		break;
+
+		case 5:	// NVOD time shifted service
+		break;
+
+		case 6:	// mosaic service
+		break;
+
+		default: // data
+			newDataServices++;
+		break;
+	}
+}
+
+void tsScan::addedTransponder( eTransponder* )
+{
+	newTransponders++;
+	// hier landen wir jedesmal, wenn ein NEUER Transponder gefunden wurde...
+}
+
 void tsScan::dvbEvent(const eDVBEvent &event)
 {
+	eDVBScanController *sapi=eDVB::getInstance()->getScanAPI();
+	
+	int perc;
+
 	switch (event.type)
 	{
+	case eDVBScanEvent::eventScanBegin:
+			tpLeft = sapi->getknownTransponderSize();
+			progress->setPerc(0);
+			timer.start(1000);
+			tpScanned = newTVServices = newRadioServices = newDataServices = servicesScanned = newTransponders = 0;
+		break;
+	case eDVBScanEvent::eventScanTPadded:
+			tpLeft++;
+			perc=(int) ( ( 100.00 / (tpLeft+tpScanned) ) * tpScanned );
+			progress->setPerc(perc);
+		break;
 	case eDVBScanEvent::eventScanNext:
-		// update();
+			tpLeft--;
+			tpScanned++;
+			perc=(int) ( ( 100.00 / (tpLeft+tpScanned) ) * tpScanned );
+			progress->setPerc(perc);
 		break;
 	case eDVBScanEvent::eventScanCompleted:
-		close(0);
+			eDebug("Scan Finished: %i Transponder scanned, TP Left = %i", tpScanned, tpLeft);
+			timer.stop();
+			close(0);
 		break;
 	default:
 		break;
@@ -557,7 +657,6 @@ void tsScan::dvbState(const eDVBState &state)
 
 TransponderScan::TransponderScan()
 {
-
 	window=new eWindow(0);
 	window->setText("Transponder Scan");
 	window->cmove(ePoint(100, 100));
@@ -583,6 +682,8 @@ int TransponderScan::exec()
 {
 	eDVB::getInstance()->setMode(eDVB::controllerScan);
 	eSize size=eSize(window->getClientSize().width(), window->getClientSize().height()-30);
+
+	eString text;
 
 	enum
 	{
@@ -689,13 +790,15 @@ int TransponderScan::exec()
 			scan.show();
 			scan.exec();
 			scan.hide();
+
+			text.sprintf(_("The transponderscan has finished and found %i new Transponders, %i new TV Services, %i new Radio Services and %i new Data Services. %i Transponders within %i Services scanned."), scan.newTransponders, scan.newTVServices, scan.newRadioServices, scan.newDataServices, scan.tpScanned, scan.servicesScanned );
 			
 			state=stateDone;
 			break;
 		}
 		case stateDone:
 		{
-			tsText finish(_("Done."), _("The transponderscan has finished and found n new Transponders with n new services."), window);
+			tsText finish(_("Done."), text, window);
 			finish.move(ePoint(0, 0));
 			finish.resize(size);
 			finish.show();

@@ -25,7 +25,7 @@ public:
 
 class eZapLCDMain: public eWidget
 {
-	eLabel *Clock, *ServiceName;
+	eLabel *Clock;
 	eProgress *Volume;
 	eTimer clocktimer;
 private:
@@ -33,6 +33,7 @@ private:
 	void volumeUpdate(int);
 	void serviceChanged(eService *, int);
 public:
+	eLabel *ServiceName;
 	eZapLCDMain(eWidget *parent);
 };
 

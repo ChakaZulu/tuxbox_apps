@@ -82,6 +82,11 @@ void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, const gColor 
 				continue;
 			sname+=ch;
 		}
+
+		eWidget* p = listbox->getParent();			
+		if (highlighted && p && p->LCDElement)
+				p->LCDElement->setText(sname);
+
 		EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service->original_network_id, service->service_id);
 		if (e)
 		{
@@ -195,8 +200,10 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					if (e && !e->empty())
 					{
 						eEPGWindow wnd(selected);
+
 						if (LCDElement && LCDTitle)
 							wnd.setLCD(LCDTitle, LCDElement);
+
 						hide();
 						wnd.show();
 						wnd.exec();
