@@ -332,7 +332,10 @@ scants.transponders Transponder:
 scants.freqdata Frequenz:
 scants.provider Anbieter:
 scants.channel Kanal:
-scants.numberofservices TV     Radio  Data
+scants.numberoftvservices TV
+scants.numberofradioservices Radio
+scants.numberofdataservices Data
+scants.numberoftotalservices Gesamt
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave nicht ändern

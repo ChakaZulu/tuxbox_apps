@@ -274,7 +274,10 @@ void CScanTs::paint()
 	ypos += mheight >> 1; // 1/2 blank line
 
 	ypos_service_numbers = ypos;
-	paintLine(xpos1, &ypos, width - xpos1, "scants.numberofservices");
+	paintLine(xpos1, ypos, 72, "scants.numberoftvservices");
+	paintLine(xpos1 + 72, ypos, 72, "scants.numberofradioservices");
+	paintLine(xpos1 + 2 * 72, ypos, 72, "scants.numberofdataservices");
+	paintLine(xpos1 + 3 * 72, ypos, width - 3 * 72 - 10, "scants.numberoftotalservices");
 }
 
 int CScanTs::greater_xpos(int xpos, char * txt)
