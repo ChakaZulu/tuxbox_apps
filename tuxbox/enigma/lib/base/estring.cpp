@@ -2,15 +2,14 @@
 #include <ctype.h>
 #include <limits.h>
 #include <lib/system/elock.h>
-
-static pthread_mutex_t lock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+#include <time.h>
+#include <sys/time.h>
 
 ///////////////////////////////////////// eString sprintf /////////////////////////////////////////////////
 eString& eString::sprintf(char *fmt, ...)
 {
-	singleLock s(lock);
 // Implements the normal sprintf method, to use format strings with eString
-// The max length of the result string is 1024 char.
+// The max length of the result string is 2048 char.
 	static char buf[1024];
 	va_list ap;
 	va_start(ap, fmt);
@@ -169,89 +168,156 @@ static unsigned long c88599[128]={
 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x00e4, 0x00e5, 0x00e6, 0x00e7, 0x00e8, 0x00e9, 0x00ea, 0x00eb, 0x00ec, 0x00ed, 0x00ee, 0x00ef, 
 0x011f, 0x00f1, 0x00f2, 0x00f3, 0x00f4, 0x00f5, 0x00f6, 0x00f7, 0x00f8, 0x00f9, 0x00fa, 0x00fb, 0x00fc, 0x0131, 0x015f, 0x00ff};
 
-		// UPC Direct / HBO strange two-character encoding. 0xC2 means acute, 0xC8 doule 'dot', 0xCA small 'circle', 0xCD double 'acute', 0xCF acute.
-		// many thanks to the czechs who helped me while solving this.
-static inline unsigned int doCzech(int c1, int c2)
+// Two Char Mapping ( many polish services and UPC Direct/HBO services)
+// get from http://mitglied.lycos.de/buran/charsets/videotex-suppl.html
+static inline unsigned int doVideoTexSuppl(int c1, int c2)
 {
 	switch (c1)
 	{
-	case 0xC2: // acute
-		switch (c2)
-		{
-		case 'A': return 0x00C1;
-		case 'a': return 0x00E1;
-		case 'E': return 0x00C9;
-		case 'e': return 0x00E9;
-		case 'I': return 0x00CD;
-		case 'i': return 0x00ED;
-		case 'O': return 0x00D3;
-		case 'o': return 0x00F3; // corrected, was 0x00E3
-		case 'U': return 0x00DA;
-		case 'u': return 0x00FA;
-		case 'Y': return 0x00DD;
-		case 'y': return 0x00FD;
-		default:
-			return 0;
-		}
-	case 0xC8: // double 'dot'
-		switch (c2)
-		{
-		case 'A': return 0x00C4;
-		case 'a': return 0x00E4;
-		case 'E': return 0x00CB;
-		case 'e': return 0x00EB;
-		case 'O': return 0x00D6;
-		case 'o': return 0x00F6;
-		case 'U': return 0x00DC;
-		case 'u': return 0x00FC;
-		default:
-			return 0;
-		}
-	case 0xCA: // small 'circle'
-		switch (c2)               
-		{                         
-		case 'U': return 0x016E;  
-		case 'u': return 0x016F;  
-		default:                  
-			return 0;             
-		}                         
-	case 0xCD: // double 'acute'
-		switch (c2)               
-		{                         
-		case 'O': return 0x0150;  
-		case 'o': return 0x0151;  
-		case 'U': return 0x0170;  
-		case 'u': return 0x0171;  
-		default:                  
-			return 0;             
-		}                         
-	case 0xCF: // caron
-		switch (c2)
-		{
-		case 'C': return 0x010C;
-		case 'c': return 0x010D;
-		case 'D': return 0x010E;
-		case 'd': return 0x010F;
-		case 'E': return 0x011A;
-		case 'e': return 0x011B;
-		case 'L': return 0x013D;	// not sure if they really exist.
-		case 'l': return 0x013E;
-		case 'N': return 0x0147;
-		case 'n': return 0x0148;
-		case 'R': return 0x0158;
-		case 'r': return 0x0159;
-		case 'S': return 0x0160;
-		case 's': return 0x0161;
-		case 'T': return 0x0164;
-		case 't': return 0x0165;
-		case 'Z': return 0x017D;
-		case 'z': return 0x017E;
-		default:
-			return 0;
-		}
-	default:
-		return 0;
-	}
+		case 0xC1: // grave
+			switch (c2)
+			{
+				case 0x61: return 224;				case 0x41: return 192;
+				case 0x65: return 232;				case 0x45: return 200;
+				case 0x69: return 236;				case 0x49: return 204;
+				case 0x6f: return 242;				case 0x4f: return 210;
+				case 0x75: return 249;				case 0x55: return 217;
+				default: return 0;
+			}
+		case 0xC2: // acute
+			switch (c2)
+			{
+				case 0x20: return 180;				case 0x61: return 225;
+				case 0x41: return 193;				case 0x65: return 233;
+				case 0x45: return 201;				case 0x69: return 237;
+				case 0x49: return 205;				case 0x6f: return 243;
+				case 0x4f: return 211;				case 0x75: return 250;
+				case 0x55: return 218;				case 0x79: return 253;
+				case 0x59: return 221;				case 0x63: return 263;
+				case 0x43: return 262;				case 0x6c: return 314;
+				case 0x4c: return 313;				case 0x6e: return 324;
+				case 0x4e: return 323;				case 0x72: return 341;
+				case 0x52: return 340;				case 0x73: return 347;
+				case 0x53: return 346;				case 0x7a: return 378;
+				case 0x5a: return 377;
+				default: return 0;
+			}
+		case 0xC3: // cedilla
+			switch (c2)
+			{
+				case 0x61: return 226;				case 0x41: return 194;
+				case 0x65: return 234;				case 0x45: return 202;
+				case 0x69: return 238;				case 0x49: return 206;
+				case 0x6f: return 244;				case 0x4f: return 212;
+				case 0x75: return 251;				case 0x55: return 219;
+				case 0x79: return 375;				case 0x59: return 374;
+				case 0x63: return 265;				case 0x43: return 264;
+				case 0x67: return 285;				case 0x47: return 284;
+				case 0x68: return 293;				case 0x48: return 292;
+				case 0x6a: return 309;				case 0x4a: return 308;
+				case 0x73: return 349;				case 0x53: return 348;
+				case 0x77: return 373;				case 0x57: return 372;
+				default: return 0;
+			}
+		case 0xC4: // tilde
+			switch (c2)
+			{
+				case 0x20: return 126;				case 0x61: return 227;
+				case 0x41: return 195;				case 0x6e: return 241;
+				case 0x4e: return 209;				case 0x69: return 297;
+				case 0x49: return 296;				case 0x6f: return 245;
+				case 0x4f: return 213;				case 0x75: return 361;
+				case 0x55: return 360;
+				default: return 0;
+			}
+		case 0xC6: // breve
+			switch (c2)
+			{
+				case 0x20: return 728;				case 0x61: return 259;
+				case 0x41: return 258;				case 0x67: return 287;
+				case 0x47: return 286;				case 0x75: return 365;
+				case 0x55: return 364;
+				default: return 0;
+			}
+		case 0xC7: // dot above
+			switch (c2)
+			{
+				case 0x20: return 729;				case 0x63: return 267;
+				case 0x43: return 266;				case 0x65: return 279;
+				case 0x45: return 278;				case 0x67: return 289;
+				case 0x47: return 288;				case 0x49: return 304;
+				case 0x7a: return 380;				case 0x5a: return 379; 
+				default: return 0;
+			}
+		case 0xC8: // diaeresis
+			switch (c2)
+			{
+				case 0x20: return 168;				case 0x61: return 228;
+				case 0x41: return 196;				case 0x65: return 235;
+				case 0x45: return 203;				case 0x69: return 239;
+				case 0x49: return 207;				case 0x6f: return 246;
+				case 0x4f: return 214;				case 0x75: return 252;
+				case 0x55: return 220;				case 0x79: return 255;
+				case 0x59: return 376;
+				default: return 0;
+				}
+		case 0xCA: // ring above
+			switch (c2)
+			{
+				case 0x20: return 730;				case 0x61: return 229;
+				case 0x41: return 197;				case 0x75: return 367;
+				case 0x55: return 366;
+				default: return 0;
+			}
+		case 0xCB: // cedilla
+			switch (c2)
+			{
+				case 0x20: return 184;				case 0x63: return 231;
+				case 0x43: return 199;				case 0x67: return 291;
+				case 0x47: return 290;				case 0x6b: return 311;
+				case 0x4b: return 310;				case 0x6c: return 316;
+				case 0x4c: return 315;				case 0x6e: return 326;
+				case 0x4e: return 325;				case 0x72: return 343;
+				case 0x52: return 342;				case 0x73: return 351;
+				case 0x53: return 350;				case 0x74: return 355;
+				case 0x54: return 354;
+				default: return 0;
+			}
+		case 0xCD: // double acute accent
+			switch (c2)
+			{
+				case 0x20: return 733;				case 0x6f: return 337;
+				case 0x4f: return 336;				case 0x75: return 369;
+				case 0x55: return 368;
+				default: return 0;
+			}
+		case 0xCE: // ogonek
+			switch (c2)
+			{
+				case 0x20: return 731;				case 0x61: return 261;
+				case 0x41: return 260;				case 0x65: return 281;
+				case 0x45: return 280;				case 0x69: return 303;
+				case 0x49: return 302;				case 0x75: return 371;
+				case 0x55: return 370;
+				default: return 0;
+			}
+		case 0xCF: // caron
+			switch (c2)
+			{
+				case 0x20: return 711;				case 0x63: return 269;
+				case 0x43: return 268;				case 0x64: return 271;
+				case 0x44: return 270;				case 0x65: return 283;
+				case 0x45: return 282;				case 0x6c: return 318;
+				case 0x4c: return 317;				case 0x6e: return 328;
+				case 0x4e: return 327;				case 0x72: return 345;
+				case 0x52: return 344;				case 0x73: return 353;
+				case 0x53: return 352;				case 0x74: return 357;
+				case 0x54: return 356;				case 0x7a: return 382;
+				case 0x5a: return 381;
+				default: return 0;
+			}
+	}                   
+	return 0;
 }
 
 static inline unsigned int recode(unsigned char d, int cp)
@@ -281,20 +347,20 @@ static inline unsigned int recode(unsigned char d, int cp)
 
 eString convertDVBUTF8(const unsigned char *data, int len, int table)
 {
-	int i;
 	if (!len)
 		return "";
 
-	i=0;
+	int i=0, t=0;
+
 	switch(data[0])
 	{
 		case 1 ... 5:
 			table=data[i++];
-//			eDebug("(0..5)text encoded in ISO-8859-%d",table+4);
+//			eDebug("(1..5)text encoded in ISO-8859-%d",table+4);
 			break;
 		case 0x10:
 		{
-//			eDebug("(0x10)text encoded in ISO-8859-%d",n);			
+//			eDebug("(0x10)text encoded in ISO-8859-%d",n);
 			int n=(data[++i]<<8)|(data[++i]);
 			++i;
 			switch(n)
@@ -326,35 +392,12 @@ eString convertDVBUTF8(const unsigned char *data, int len, int table)
 			++i;
 			break;
 	}
-	int bytesneeded=0, t=0, s=i;
 
-	for (; i<len; ++i)
-	{
-		unsigned long code=0;
-	// braindead czech encoding...
-		if (i+1 < len && (code=doCzech(data[i], data[i+1])) )
-			++i;
-		if (!code)
-			code=recode(data[i], table);
-		if (!code)
-			continue;
-		if (code >= 0x10000)
-			bytesneeded++;
-		if (code >= 0x800)
-			bytesneeded++;
-		if (code >= 0x80)
-			bytesneeded++;
-		bytesneeded++;
-	}
-	
-	i=s;
-	
-	unsigned char res[bytesneeded];
-	
+	unsigned char res[2048];
 	while (i < len)
 	{
 		unsigned long code=0;
-		if (i+1 < len && (code=doCzech(data[i], data[i+1])) )
+		if (i+1 < len && (code=doVideoTexSuppl(data[i], data[i+1])) )
 			i+=2;
 		if (!code)
 			code=recode(data[i++], table);
@@ -379,19 +422,22 @@ eString convertDVBUTF8(const unsigned char *data, int len, int table)
 			res[t++]=((code>>6)&0x3F)|0x80;
 			res[t++]=(code&0x3F)|0x80;
 		}
+		if (t+4 > 2047)
+		{
+			eDebug("convertDVBUTF8 buffer to small.. break now");
+			break;
+		}
 	}
-	if ( t != bytesneeded)
-		eFatal("t: %d, bytesneeded: %d", t, bytesneeded);
-	return eString().assign((char*)res, t);
+	return eString((char*)res, t);
 }
 
 eString convertUTF8DVB(const eString &string, int table)
 {
 	unsigned long *coding_table=0;
 
-	eString ss;
+	int len=string.length(), t=0;
 
-	int len=string.length();
+	unsigned char buf[len];
 
 	for(int i=0;i<len;i++)
 	{
@@ -440,35 +486,17 @@ eString convertUTF8DVB(const eString &string, int table)
 				}
 			}
 		}
-		ss+=c;
+		buf[t++]=(unsigned char)c;
 	}
-	return ss;
+	return eString((char*)buf,t);
 }
 
 eString convertLatin1UTF8(const eString &string)
 {
-	unsigned int bytesneeded=0, t=0, i;
-	
-	unsigned int len=string.size();
-	
-	for (i=0; i<len; ++i)
-	{
-		unsigned long code=string[i];
-		if (!code)
-			continue;
-		if (code >= 0x10000)
-			bytesneeded++;
-		if (code >= 0x800)
-			bytesneeded++;
-		if (code >= 0x80)
-			bytesneeded++;
-		bytesneeded++;
-	}
-	
-	i=0;
-	
-	unsigned char res[bytesneeded];
-	
+	unsigned int t=0, i=0, len=string.size();
+
+	unsigned char res[2048];
+
 	while (i < len)
 	{
 		unsigned long code=string[i++];
@@ -491,10 +519,13 @@ eString convertLatin1UTF8(const eString &string)
 			res[t++]=((code>>6)&0x3F)|0x80;
 			res[t++]=(code&0x3F)|0x80;
 		}
+		if (t+4 > 2047)
+		{
+			eDebug("convertLatin1UTF8 buffer to small.. break now");
+			break;
+		}
 	}
-	if ( t != bytesneeded)
-		eFatal("t: %d, bytesneeded: %d", t, bytesneeded);
-	return eString().assign((char*)res, t);
+	return eString((char*)res, t);
 }
 
 int isUTF8(const eString &string)
