@@ -57,7 +57,8 @@ class eDVBCI: private eThread, public eMainloop, public Object
 	void mmi_end();
 	void mmi_answ(unsigned char *answ,int len);
 	void mmi_menuansw(int);
-				
+
+					
 public:
 	struct eDVBCIMessage
 	{
@@ -102,4 +103,19 @@ public:
 	Signal1<void, const char*> ci_mmi_progress;
 
 };
+
+//rewrite starts here
+struct _lpduQueueElem
+{
+	unsigned char lpduLen;
+	unsigned char lpdu[256];		//fixed buffer-size (pcmcia)
+	_lpduQueueElem *nextElem;
+};
+
+typedef struct _lpduQueueElem * ptrlpduQueueElem;	
+
+ptrlpduQueueElem AllocLpduQueueElem(unsigned char t_c_id);	
+void SendLPDU(unsigned char lpdu,unsigned char length);
+void LinkSendData(unsigned char t_c_id, unsigned char *toSend, long numBytes);
+void lpduQueueElemSetMore(ptrlpduQueueElem curElem, int more);
 #endif

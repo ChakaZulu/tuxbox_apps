@@ -2,6 +2,7 @@
 #define __enigmaci_h
 
 #include <lib/gui/ewindow.h>
+#include <lib/gui/enumber.h>
 #include <lib/gui/listbox.h>
 #include <lib/gui/statusbar.h>
 
@@ -24,10 +25,11 @@ public:
 
 class enigmaCImmi: public eWindow
 {
-	eButton *ok,*abort;
+	eButton *ok,*abort,*answok;
 	eListBox<eListBoxMenuEntry> *lentrys;
 	eStatusBar *status;
-	eLabel *tt,*stt,*bt,*cistate;
+	eLabel *tt,*stt,*bt,*cistate,*headansw;
+	eNumber *answ;
 	eDVBCI *DVBCI;
 
 private:
@@ -35,6 +37,7 @@ private:
 	void abortPressed();
 	void entrySelected(eListBoxMenuEntry *choice);
 	void getmmi(const char *buffer);
+	void answokPressed();
 
 	int ci_state;
 

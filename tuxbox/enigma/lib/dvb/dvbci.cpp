@@ -12,14 +12,27 @@
 #define CI_SOFTRESET			1
 #define CI_GET_BUFFERSIZE	2
 #define CI_GET_STATUS			3
-#define CI_ACTIVATE				4
-#define CI_DEACTIVATE			5
 #define CI_TS_ACTIVATE		6
 #define CI_TS_DEACTIVATE	7
 
 #define MAX_SESSIONS			32
 #define STATE_FREE				0
 #define STATE_OPEN				1
+
+/*
+This is the fast development of an ci-driver it isn't nice
+but it works (sometimes ;).
+
+->  a easy driver for good documented interfaces..of course if 
+every manufacturer of modules will use this documentation too.. *grrr*
+
+oh i forgot...there is only ONE manufacturer ... 
+	-> is it ok that this one is able to work its own way...
+
+wtf is the sense of a standard???	
+	
+What is the meaning of "COMMON" Interface ???
+*/
 
 struct session_struct
 {
@@ -30,7 +43,6 @@ struct session_struct
 };
 
 struct session_struct sessions[32];
-
 
 eDVBCI::eDVBCI():pollTimer(this),messages(this, 1)
 {
@@ -153,7 +165,7 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		break;
 	case eDVBCIMessage::mmi_answ:
 		eDebug("[DVBCI] got mmi_answ message..");
-		//mmi_answ();
+		mmi_answ(message.data,0);
 		break;
 	case eDVBCIMessage::mmi_menuansw:
 		eDebug("[DVBCI] got mmi_menu_answ message..");
@@ -183,15 +195,18 @@ void eDVBCI::mmi_end()
 void eDVBCI::mmi_answ(unsigned char *buf,int len)
 {
 	eDebug("got mmi_answer");
+	unsigned char buffer[13];
+	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x08\x05\x1\x0\x0\x0\x0",13);
+	sendTPDU(0xA0,13,1,buffer);
 }
 
 void eDVBCI::mmi_menuansw(int val)
 {
 	eDebug("got mmi_menu_answer %d",val);
-	unsigned char buffer[10];
-	memcpy(buffer,"\x90\x2\x0\x1\x9f\x88\x0B\x1",8);
+	unsigned char buffer[9];
+	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x0B\x1",8);
 	buffer[8]=val&0xff;
-	sendTPDU(0xA0,9,2,buffer);
+	sendTPDU(0xA0,9,1,buffer);
 }
 
 void eDVBCI::createCAPMT(int type,unsigned char *data)
@@ -199,7 +214,16 @@ void eDVBCI::createCAPMT(int type,unsigned char *data)
 	switch(type)
 	{
 		case 0:				//flush
-			memcpy(CAPMT,"\x90\x2\x0\x4\x9f\x80\x32\x0\x3\x0\x0\x0",12);
+			int i;
+			for(i=0;i<MAX_SESSIONS;i++)
+				if(sessions[i].state && (sessions[i].service_class==0x30041 || sessions[i].service_class==0x34100))
+					break;
+			if(i==MAX_SESSIONS)
+				eDebug("NO SESSION ID for CA-MANAGER");		
+
+			memcpy(CAPMT,"\x90\x2\x0\x3\x9f\x80\x32\x0\x3\x0\x0\x0",12);
+			
+			CAPMT[3]=i;
 			CAPMTlen=14;
 			CAPMTpos=14;
 			CAPMT[7]=0;
@@ -308,21 +332,21 @@ void eDVBCI::help_manager(unsigned int session)
 
         buffer[7]=0x14;
 
-        buffer[8]=0x00;
+        buffer[8]=0x00;			//res. manager
         buffer[9]=0x01;
         buffer[10]=0x00;
-        buffer[11]=0x41;
+        buffer[11]=0x41;		//? :)
         buffer[12]=0x00;
         buffer[13]=0x00;
         buffer[14]=0x00;
-        buffer[15]=0x41;
+        buffer[15]=0x41;		//CA
         buffer[16]=0x00;
         buffer[17]=0x03;
-        buffer[18]=0x41;
-        buffer[19]=0x00;
+        buffer[18]=0x41;		//date-time
+        buffer[19]=0x00;		
         buffer[20]=0x24;
         buffer[21]=0x00;
-        buffer[22]=0x41;
+        buffer[22]=0x41;		//mmi
         buffer[23]=0x00;
         buffer[24]=0x40;
         buffer[25]=0x00;
@@ -332,7 +356,7 @@ void eDVBCI::help_manager(unsigned int session)
         break;
       }
     default:
-      //printf("[HELP MANAGER] undefined state\n");
+      //printf("[HELP MANAGER] undefined state\n");  //or ready ;)
       break;
   }
 }
@@ -347,7 +371,6 @@ void eDVBCI::app_manager(unsigned int session)
         eDebug("[DVBCI] [APPLICATION MANAGER] up to now nothing happens -> app_info_enq");
         memcpy(buffer,"\x90\x2\x0\x2\x9f\x80\x20\x0",8);
         sendTPDU(0xA0,8,sessions[session].tc_id,buffer);
-
         sessions[session].internal_state=1;
         break;
       }
@@ -431,14 +454,21 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 			eDebug("[DVBCI] [CA MANAGER] add CAID: %04x",data[i]<<8|data[i+1]);
 			addCAID(data[i]<<8|data[i+1]);
 		}	
-		ca_manager(4);
+
+		for(i=0;i<MAX_SESSIONS;i++)
+			if(sessions[i].state && (sessions[i].service_class==0x30041 || sessions[i].service_class==0x34100))
+				break;
+		if(i==MAX_SESSIONS)
+			eDebug("NO SESSION ID for CA-MANAGER");		
+
+		ca_manager(i);
 	}
 
 	if(data[4]==0x9f && data[5]==0x88 && data[6]==0x01)
 	{
 		unsigned char buffer[20];
 		eDebug("[DVBCI] [APPLICATION MANAGER] -> display-control");
-		memcpy(buffer,"\x90\x2\x0\x5\x9f\x88\x2\x2\x1\x1",10);
+		memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x2\x2\x1\x1",10);
 		sendTPDU(0xA0,10,1,buffer);
 	}
 
@@ -449,7 +479,6 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 		memcpy(buffer,"\x90\x2\x0\x5\x9f\x88\x41\x5\xcd\x64\x1\x51\x40",13);
 		sendTPDU(0xA0,13,1,buffer);
 	}
-
 
 	if(data[4]==0x9f && data[5]==0x88)
 	{
@@ -469,7 +498,8 @@ int eDVBCI::service_available(unsigned long service_class)
 		case 0x010041:
 		case 0x020041:
 		case 0x030041:
-		case 0x034100:
+		case 0x034100:	//WTF? find the bug ... endianess fool on integer-fields?
+										//if it is so...perhaps its better you switch the xa to 8bit mode *g*
 		case 0x400041:
 		case 0x240041:
 			return 1;
@@ -512,6 +542,8 @@ void eDVBCI::handle_spdu(unsigned int tpdu_tc_id,unsigned char *data,int len)
 				buffer[7]=i>>8;
 				buffer[8]=i& 0xff;
 				sendTPDU(0xA0,9,tpdu_tc_id,buffer);
+
+				eDebug("[DVBCI] serviceclass (%x) requested accepted on %d",*(unsigned long*)(data+2),i);
 				
 				if(sessions[i].service_class==0x10041)
 					help_manager(i);
@@ -537,8 +569,6 @@ void eDVBCI::handle_spdu(unsigned int tpdu_tc_id,unsigned char *data,int len)
 
 void eDVBCI::receiveTPDU(unsigned char tpdu_tag,unsigned int tpdu_len,unsigned char tpdu_tc_id,unsigned char *data)
 {
-	//unsigned char buffer[40]; //temporary	
-	
 	switch(tpdu_tag)
 	{
 		case 0x80:
@@ -573,13 +603,16 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 	int tpdu_tc_id;
 	int x=0;
 	
-	//for(int i=0;i<len;i++)
-	//	printf("%02x ",buffer[i]);
-	//printf("\n");	
+	for(int i=0;i<len;i++)
+		printf("%02x ",buffer[i]);
+	printf("\n");	
 	
 	tc_id=buffer[x++];
 	m_l=buffer[x++];
 
+	if(len<6)
+		return;
+	//the cheapest defrag on earth *g*
 	if(m_l && ml_bufferlen==0)			//first fragment
 	{
 		int y;
@@ -705,5 +738,86 @@ void eDVBCI::poll()
 	::ioctl(fd,CI_GET_STATUS,&present);	
 
 	if(present)						//CI removed
+	{
 		sendTPDU(0xA0,0,1,0);
+	}	
+}
+
+//rewrite
+ptrlpduQueueElem AllocLpduQueueElem(unsigned char t_c_id)
+{
+	ptrlpduQueueElem curElem;
+	
+	curElem = (ptrlpduQueueElem) malloc(sizeof(_lpduQueueElem));
+	curElem->lpduLen=0;
+	(curElem->lpdu)[0] = t_c_id;
+	curElem->nextElem = NULL;
+	
+	return curElem;
+}
+
+
+void lpduQueueElemSetMore(ptrlpduQueueElem curElem, int more)
+{
+	if(more)
+		(curElem->lpdu)[1] = 0x80;
+	else
+		(curElem->lpdu)[1] = 0x00;
+}			
+
+void SendLPDU(unsigned char *lpdu,unsigned char length)
+{
+	printf("<-");
+	for(int i=0;i<length;i++)
+		printf("%02x ",lpdu[i]);
+	printf("\n");	
+}
+
+void LinkSendData(unsigned char t_c_id, unsigned char *toSend, long numBytes)
+{
+	ptrlpduQueueElem curElem;
+	
+	int index;
+	unsigned char *dataptr;
+	long lengthLeft;
+	
+	curElem = AllocLpduQueueElem(t_c_id);
+
+	lengthLeft = numBytes;
+	dataptr = toSend;
+	
+	//LOCK!
+	while(lengthLeft)
+	{
+#define PAYLOADLEN		254		//bufsize (256) - Header (2)
+		if(lengthLeft > PAYLOADLEN)
+		{
+			//fragment
+			lpduQueueElemSetMore(curElem,1);
+			for(index = 0;index < PAYLOADLEN;index++)
+			{
+				(curElem->lpdu)[2+index] = *dataptr;
+				dataptr++;
+			}
+			lengthLeft -= PAYLOADLEN;
+			
+			SendLPDU(curElem->lpdu,(unsigned char)256);
+		}
+		else
+		{
+			//last
+			lpduQueueElemSetMore(curElem,0);
+					
+			for(index = 0;index < lengthLeft;index++)
+			{
+				(curElem->lpdu)[2+index] = *dataptr;
+				dataptr++;
+			}
+		
+			SendLPDU(curElem->lpdu, lengthLeft + 2);
+			lengthLeft = 0;
+		}
+	}	
+	//UNLOCK!
+	free(curElem);
 }

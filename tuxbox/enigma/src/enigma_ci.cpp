@@ -22,7 +22,12 @@ void enigmaCImmi::entrySelected(eListBoxMenuEntry *choice)
 	eDebug("menu_answ: %d",choice->getEntry());	
 
 	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,choice->getEntry()));
+}
 
+void enigmaCImmi::answokPressed()
+{
+	eDebug("Answer Ok pressed");
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_answ,0));
 }
 
 enigmaCImmi::enigmaCImmi(): eWindow(0)
@@ -72,8 +77,33 @@ enigmaCImmi::enigmaCImmi(): eWindow(0)
 	lentrys->move(ePoint(20, 70));
 	lentrys->resize(eSize(460, (fd+4)*6));
 	lentrys->setFlags(eListBoxBase::flagNoPageMovement);
-
+	lentrys->hide();
 	CONNECT(lentrys->selected, enigmaCImmi::entrySelected);		
+
+	headansw=new eLabel(this);
+	headansw->setAlign(eTextPara::dirCenter);
+	headansw->setText("-- bottom text --");
+	headansw->move(ePoint(20,70));
+	headansw->resize(eSize(460,fd+4));
+	headansw->hide();
+
+	int valinit[4]={0,0,0,0};
+	answ=new eNumber(this,4,0,9,1,valinit,0,0);
+	answ->move(ePoint(20,110));
+	answ->resize(eSize(460, fd+4));
+	answ->setHelpText(_("mmi input field"));
+	answ->loadDeco();
+	answ->hide();
+
+	answok=new eButton(this);
+	answok->setText(_("OK"));
+	answok->move(ePoint(200, 170));
+	answok->resize(eSize(90, fd+4));
+	answok->setHelpText(_("send data to ci"));
+	answok->loadDeco();
+	answok->hide();
+
+	CONNECT(answok->selected, enigmaCImmi::answokPressed);		
 	
 	//for(int i=0;i<4;i++)
 	//	eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,"blub");
@@ -108,18 +138,40 @@ void enigmaCImmi::getmmi(const char *data)
 	eDebug("new mmi message received");
 
 	lentrys->clearList();		
-	//for(int i=1;i<data[0];i++)
-	//	printf("%02x ",data[i]);
-	//printf("\n");
+	lentrys->hide();
+	answ->hide();
+	answok->hide();
+	headansw->hide();
+	
+	for(int i=1;i<data[0];i++)
+		printf("%02x ",data[i]);
+	printf("\n");
 
 	if(data[5] == 0x9F && data[6] == 0x88)
 	{
 		int menupos=0;
-		if(data[7]== 0x09 || data[7]==0xC)		//t_menu_last
+		if(data[7]== 0x07)		//t_enq
+		{
+			int len=data[8];
+			int blind=data[9]&1;
+			int answerlen=data[10];
+			char buf[len-2];
+			answ->show();
+			answok->show();						
+			headansw->show();
+			memcpy(buf,data+11,len-2);
+			buf[len-2]=0;			
+
+			headansw->setText(buf);
+	
+		}
+		else if(data[7]== 0x09 || data[7]==0xC)		//t_menu_last
 		{
 			int pos=10;
 			int len=data[8];
 			int choice=data[8];
+			
+			lentrys->show();
 			
 			if(len&0x80)
 			{
@@ -152,7 +204,6 @@ void enigmaCImmi::getmmi(const char *data)
 						lentrys->beginAtomic();	
 						eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,buffer,entry++);
 						lentrys->endAtomic();	
-
 					}							
 					menupos++;
 				}	
