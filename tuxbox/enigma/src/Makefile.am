@@ -22,9 +22,12 @@ enigma_LDADD = \
 	$(top_builddir)/lib/gdi/libenigma_gdi.la \
 	$(top_builddir)/lib/socket/libenigma_socket.la \
 	$(top_builddir)/lib/system/libenigma_system.la \
+	@ID3TAG_LIBS@ \
+	@MAD_LIBS@ \
 	@MD5SUM_LIBS@ \
 	@SIGC_LIBS@ \
+	@TUXBOX_LIBX@ \
 	@XMLTREE_LIBS@ \
-	-ldl -lpthread -lid3tag -lmad -lcrypt -lresolv -ltuxbox
+	-ldl -lpthread -lcrypt -lresolv
 #\
 #	/dbox2/cdkroot/lib/libmpatrolmt.a -lpthread -lbfd -liberty
