@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.52 2004/02/08 20:00:07 carjay Exp $
+	$Id: webdbox.cpp,v 1.53 2004/02/09 16:30:57 metallica Exp $
 
 	License: GPL
 
@@ -102,8 +102,8 @@ CWebDbox::CWebDbox(CWebserver *server)
 	UpdateBouquets();
 
 	Dbox_Hersteller[1] = "Nokia";
-	Dbox_Hersteller[2] = "Sagem";
-	Dbox_Hersteller[3] = "Philips";
+	Dbox_Hersteller[2] = "Philips";
+	Dbox_Hersteller[3] = "Sagem";
 	videooutput_names[0] = "Composite";
 	videooutput_names[1] = "RGB";
 	videooutput_names[2] = "S-Video";

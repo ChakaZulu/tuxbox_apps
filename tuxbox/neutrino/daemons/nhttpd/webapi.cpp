@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.45 2004/02/01 20:11:25 carjay Exp $
+	$Id: webapi.cpp,v 1.46 2004/02/09 16:30:57 metallica Exp $
 
 	License: GPL
 
@@ -445,7 +445,7 @@ bool CWebAPI::ShowCurrentStreamInfo(CWebserverRequest* request)
 	params["apid"] = itoh(serviceinfo.apid);
 	params["vtxtpid"] = (serviceinfo.vtxtpid != 0)?itoh(serviceinfo.vtxtpid):"nicht verfügbar";
 	params["tsfrequency"] = itoa(serviceinfo.tsfrequency);
-	params["polarisation"] = serviceinfo.polarisation==1?"v":"h";
+	params["polarisation"] = serviceinfo.polarisation==1?"h":"v";
 	params["ServiceName"] = Parent->GetServiceName(Parent->Zapit->getCurrentServiceID());
 	Parent->GetStreamInfo(bitInfo);
 	
