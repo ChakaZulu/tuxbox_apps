@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.16 2002/05/13 05:20:52 obi Exp $
+ * $Id: pmt.cpp,v 1.17 2002/05/13 14:56:51 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -22,6 +22,7 @@
 
 #include <fcntl.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>

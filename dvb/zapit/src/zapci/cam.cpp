@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.12 2002/05/05 01:52:36 obi Exp $
+ * $Id: cam.cpp,v 1.13 2002/05/13 14:56:51 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -20,6 +20,7 @@
  */
 
 #include <fcntl.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>

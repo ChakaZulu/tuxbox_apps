@@ -1,6 +1,8 @@
 /*
- * $Id: getservices.cpp,v 1.38 2002/05/12 01:56:18 obi Exp $
+ * $Id: getservices.cpp,v 1.39 2002/05/13 14:56:51 obi Exp $
  */
+
+#include <stdio.h>
 
 #include <zapost/frontend.h>
 
@@ -353,7 +355,7 @@ CZapitAudioChannel * CZapitChannel::getAudioChannel (uint8_t index)
 	return NULL;
 }
 
-dvb_pid_t CZapitChannel::getAudioPid (uint8_t index = 0xFF)
+unsigned short CZapitChannel::getAudioPid (uint8_t index = 0xFF)
 {
 	if (index == 0xFF)
 	{
@@ -367,7 +369,7 @@ dvb_pid_t CZapitChannel::getAudioPid (uint8_t index = 0xFF)
 	return 0;
 }
 
-int CZapitChannel::addAudioChannel(dvb_pid_t pid, bool isAc3, string description, unsigned char componentTag)
+int CZapitChannel::addAudioChannel(unsigned short pid, bool isAc3, string description, unsigned char componentTag)
 {
 	unsigned char i;
 
