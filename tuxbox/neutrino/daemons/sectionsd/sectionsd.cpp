@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.54 2001/09/18 18:15:27 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.55 2001/09/20 11:01:59 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.55  2001/09/20 11:01:59  fnbrd
+//  Format bei currentNextinformationChannelID geaendert.
+//
 //  Revision 1.54  2001/09/18 18:15:27  fnbrd
 //  2 new commands.
 //
@@ -1091,7 +1094,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.54 2001/09/18 18:15:27 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.55 2001/09/20 11:01:59 fnbrd Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1229,17 +1232,13 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
     const SIevent &nextEvt=findNextSIevent(evt.uniqueKey(), zeitEvt2);
     if(nextEvt.serviceID!=0) {
       dprintf("next EPG found.\n");
-      // Folgendes ist grauenvoll, habs aber einfach kopiert aus epgd
-      // und keine Lust das grossartig zu verschoenern
       nResultDataSize=
-        12+1+					// Unique-Key + del
-        strlen(evt.name.c_str())+1+		// name + del
-        8+1+					// start time + del
-        8+1+					// duration + del
-        12+1+					// Unique-Key + del
-        strlen(nextEvt.name.c_str())+1+		// name + del
-        8+1+					// start time + del
-        8+1+1;					// duration + del + 0
+	sizeof(unsigned long long)+       // Unique-Key 
+        sizeof(sectionsd::sectionsdTime)+ // zeit 
+        strlen(evt.name.c_str())+1+	  // name + 0
+	sizeof(unsigned long long)+       // Unique-Key
+        sizeof(sectionsd::sectionsdTime)+
+        strlen(nextEvt.name.c_str())+1;		// name + 0
       pResultData = new char[nResultDataSize];
       if(!pResultData) {
         fprintf(stderr, "low on memory!\n");
@@ -1247,16 +1246,23 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         dmxEIT.unpause();
         return;
       }
-      sprintf(pResultData,
-        "%012llx\n%s\n%08lx\n%08x\n%012llx\n%s\n%08lx\n%08x\n",
-        evt.uniqueKey(),
-        evt.name.c_str(),
-        zeitEvt1.startzeit,
-	zeitEvt1.dauer,
-        nextEvt.uniqueKey(),
-        nextEvt.name.c_str(),
-        zeitEvt2.startzeit,
-	zeitEvt2.dauer);
+      *((unsigned long long *)pResultData)=evt.uniqueKey();
+      pResultData+=sizeof(unsigned long long);
+      sectionsd::sectionsdTime zeit;
+      zeit.startzeit=zeitEvt1.startzeit;
+      zeit.dauer=zeitEvt1.dauer;
+      *((sectionsd::sectionsdTime *)pResultData)=zeit;
+      pResultData+=sizeof(sectionsd::sectionsdTime);
+      strcpy(pResultData, evt.name.c_str());
+      pResultData+=strlen(evt.name.c_str())+1;
+      *((unsigned long long *)pResultData)=nextEvt.uniqueKey();
+      pResultData+=sizeof(unsigned long long);
+      zeit.startzeit=zeitEvt2.startzeit;
+      zeit.dauer=zeitEvt2.dauer;
+      *((sectionsd::sectionsdTime *)pResultData)=zeit;
+      pResultData+=sizeof(sectionsd::sectionsdTime);
+      strcpy(pResultData, nextEvt.name.c_str());
+//      pResultData+=strlen(nextEvt.name.c_str())+1;
     }
   }
   unlockEvents();
@@ -2318,7 +2324,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.54 2001/09/18 18:15:27 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.55 2001/09/20 11:01:59 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
