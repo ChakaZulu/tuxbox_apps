@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.21 2003/01/18 03:13:50 obi Exp $
+ * $Id: camd.c,v 1.22 2003/08/03 22:35:48 obi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -49,10 +49,11 @@ int send_to_camd(unsigned char *buf, size_t len) {
 int main(int argc, char **argv) {
 
 	size_t length;
-	unsigned char in_buf[2048];
-	unsigned char out_buf[2048];
+	unsigned char in_buf[8192];
+	unsigned char out_buf[4096];
 	unsigned int i, j = 0;
 	unsigned int pid;
+	unsigned short desc_len;
 
 	if (argc != 5) {
 		fprintf(stderr, "usage: %s <vpid> <apid> <pmtpid> <cadescriptors>\n", argv[0]);
@@ -66,6 +67,8 @@ int main(int argc, char **argv) {
 	out_buf[j++] = 0x9f;
 	out_buf[j++] = 0x80;
 	out_buf[j++] = 0x32;
+	out_buf[j++] = 0x82; /* length_field */
+	out_buf[j++] = 0x00; /* length_field */
 	out_buf[j++] = 0x00; /* length_field */
 	out_buf[j++] = 0x03; /* ca_pmt_list_management */
 	out_buf[j++] = 0x00; /* service_id [15:8] */
@@ -75,19 +78,17 @@ int main(int argc, char **argv) {
 	out_buf[j++] = 0x00; /* program_info_length [7:0] */
 	out_buf[j++] = 0x01; /* ca_pmt_cmd_id */
 
-	for (i = 0; i < length; i += in_buf[i + 1] + 2) {
+	for (i = 0; i < length; i += desc_len) {
+		desc_len = in_buf[i + 1] + 2;
 		if (in_buf[i] == 0x09) {
-			out_buf[j++] = 0x09;
-			out_buf[j++] = 0x04;
-			out_buf[j++] = in_buf[i + 2];
-			out_buf[j++] = in_buf[i + 3];
-			out_buf[j++] = in_buf[i + 4];
-			out_buf[j++] = in_buf[i + 5];
+			memcpy(&out_buf[j], &in_buf[i], desc_len);
+			j += desc_len;
 		}
 	}
 
 	/* program_info_length */
-	out_buf[9] = j - 10;
+	out_buf[10] = ((j - 12) >> 8) & 0xff;
+	out_buf[11] = (j - 12) & 0xff;
 
 	/* video pid */
 	out_buf[j++] = 0x02;
@@ -106,7 +107,8 @@ int main(int argc, char **argv) {
 	out_buf[j++] = 0x00;
 
 	/* length_field */
-	out_buf[3] = j - 4;
+	out_buf[4] = ((j - 6) >> 8) & 0xff;
+	out_buf[5] = (j - 6) & 0xff;
 
 	return send_to_camd(out_buf, j);
 }
