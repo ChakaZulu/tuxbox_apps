@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.13: some fixes                                                       *
  *    V1.12: added zoom, removed +/-10                                        *
  *    V1.11: added pagecatching, use 16:9 for text&picture mode               *
  *    V1.10: added conceal/hold mosaics/release mosaics                       *
@@ -29,7 +30,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.12 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.13 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -416,28 +417,31 @@ void PageInput(int Number)
 
 	//show pageinput
 
-		if(zoommode != 2)
+		if(zoommode == 2)
 		{
-			if(zoommode == 1) zoom = 1<<9;
+			zoommode = 1;
+			CopyBB2FB();
+		}
 
-			PosY = StartY;
+		if(zoommode == 1) zoom = 1<<9;
 
-			switch(inputcounter)
-			{
-				case 2:	PosX = StartX + 8*fontwidth;
-						RenderCharFB(Number | '0', white);
-						RenderCharFB('-', white);
-						RenderCharFB('-', white);
-						break;
+		PosY = StartY;
 
-				case 1:	PosX = StartX + 9*fontwidth;
-						RenderCharFB(Number | '0', white);
-						break;
+		switch(inputcounter)
+		{
+			case 2:	PosX = StartX + 8*fontwidth;
+					RenderCharFB(Number | '0', white);
+					RenderCharFB('-', white);
+					RenderCharFB('-', white);
+					break;
 
-				case 0:	PosX = StartX + 10*fontwidth;
-						RenderCharFB(Number | '0', white);
-						break;
-			}
+			case 1:	PosX = StartX + 9*fontwidth;
+					RenderCharFB(Number | '0', white);
+					break;
+
+			case 0:	PosX = StartX + 10*fontwidth;
+					RenderCharFB(Number | '0', white);
+					break;
 		}
 
 	//generate pagenumber
@@ -466,8 +470,6 @@ void PageInput(int Number)
 
 				if(subpagetable[page] != 0xFF)
 				{
-					if(zoommode == 2) zoommode = 1;
-
 					subpage = subpagetable[page];
 					pageupdate = 1;
 					printf("TuxTxt <DirectInput => %.3X-%.2X>\n", page, subpage);
@@ -965,7 +967,7 @@ void SwitchScreenMode()
 				fnc_new = AVS_FNCOUT_EXT169;
 				ioctl(avs, AVSIOSSCARTPIN8, &fnc_new);
 
-				avia_pig_set_pos(pig, (StartX+269), (StartY+20));
+				avia_pig_set_pos(pig, (StartX+267), StartY);
 				avia_pig_set_size(pig, 320, 504);
 				avia_pig_set_stack(pig, 1);
 				avia_pig_show(pig);
@@ -1005,8 +1007,14 @@ void SwitchTranspMode()
 
 		//set mode
 
-			if(!transpmode || transpmode == 1)
+			if(!transpmode)
 			{
+				memset(&backbuffer, black, var_screeninfo.xres * var_screeninfo.yres);
+				pageupdate = 1;
+			}
+			else if(transpmode == 1)
+			{
+				memset(&backbuffer, transp, var_screeninfo.xres * var_screeninfo.yres);
 				pageupdate = 1;
 			}
 			else
@@ -1317,6 +1325,7 @@ void RenderPage()
 void CopyBB2FB()
 {
 	int src, dst = 0;
+	int fillcolor = black;
 
 	//copy backbuffer to framebuffer
 
@@ -1327,22 +1336,28 @@ void CopyBB2FB()
 		}
 		else if(zoommode == 1)
 		{
-			src = StartX + StartY*var_screeninfo.xres;
+			src = StartY*var_screeninfo.xres;
 		}
 		else
 		{
-			src = StartX + StartY*var_screeninfo.xres + 12*fixfontheight*var_screeninfo.xres;
+			src = StartY*var_screeninfo.xres + 12*fixfontheight*var_screeninfo.xres;
 		}
+
+		if(transpmode) fillcolor = transp;
+
+		memset(lfb, fillcolor, StartY*var_screeninfo.xres);
 
 		do
 		{
-			memcpy(lfb + StartX + StartY*var_screeninfo.xres + dst, backbuffer + src, fontwidth*40);
+			memcpy(lfb + StartY*var_screeninfo.xres + dst, backbuffer + src, var_screeninfo.xres);
 			dst += var_screeninfo.xres;
-			memcpy(lfb + StartX + StartY*var_screeninfo.xres + dst, backbuffer + src, fontwidth*40);
+			memcpy(lfb + StartY*var_screeninfo.xres + dst, backbuffer + src, var_screeninfo.xres);
 			dst += var_screeninfo.xres;
 			src += var_screeninfo.xres;
 		}
 		while(dst < var_screeninfo.xres * 24*fixfontheight);
+
+		memset(lfb + (StartY + 24*fixfontheight)*var_screeninfo.xres, fillcolor, var_screeninfo.xres*var_screeninfo.yres - (StartY + 24*fixfontheight)*var_screeninfo.xres);
 }
 
 /******************************************************************************
