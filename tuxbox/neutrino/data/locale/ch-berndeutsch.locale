@@ -771,8 +771,3 @@ pictureviewer.scaling Skalierig
 pictureviewer.defdir Schtart-Verz.
 
 
-rclock.menueadd unset
-rclock.title unset
-rclock.lockmsg unset
-rclock.unlockmsg unset
-

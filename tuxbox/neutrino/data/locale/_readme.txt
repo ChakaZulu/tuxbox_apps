@@ -1,12 +1,1 @@
-Important:
-
-new strings which are not translated should be filled with "unset"!
-
-e.g:
-
-topic.title unset
-rclock.msg unset
-
-
-This way it's easier to identify untranslated text...
-
+Use the check.locale.files shell script to figure out missing translations and legacy strings (deutsch.locale is considered being the most recent locale file).

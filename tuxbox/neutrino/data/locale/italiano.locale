@@ -763,16 +763,9 @@ apids.hint_2 Diviso con ' ' in Formato hexadecimale
 pictureviewer.head Lettore immaggini
 pictureviewer.sortorder.date (Data)
 pictureviewer.sortorder.filename (Nome File)
-pictureviewer.slideshow vedi immagine in slideshow 
 pictureviewer.show Vedi
-pictureviewer.slideshow Vedi tipo Diashow
 pictureviewer.slide_time Diashow-Durata
 pictureviewer.scaling Graduazione
 pictureviewer.defdir Start-Directory
 
-
-rclock.menueadd unset
-rclock.title unset
-rclock.lockmsg unset
-rclock.unlockmsg unset
 
