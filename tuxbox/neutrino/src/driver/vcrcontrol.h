@@ -99,7 +99,7 @@ class CVCRControl
 				bool	StopSectionsd;
 		};
 
-	private:
+//	private:
 
 		class CDevice			// basisklasse für die devices
 		{
