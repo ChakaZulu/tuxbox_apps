@@ -1,23 +1,20 @@
 #include <lib/dvb/dvbscan.h>
 
-inline int isValidONIDTSID(eOriginalNetworkID onid, eTransportStreamID tsid)
+inline int isValidONIDTSID(eOriginalNetworkID onid, eTransportStreamID tsid, int orbital_position)
 {
 	switch( onid.get() )
 	{
 		case 0:
-		case 0xFFFF:
 		case 0x1111:
 			return 0;
 		case 1:
-			return tsid>1
-	// on Hispasat 30.0W 11615Mhz and 11931Mhz have same tsid(0x14)/onid(0x01) :(
-				&& tsid != 0x0014;
+			return orbital_position == 192;
 		case 0x00B1:
 			return tsid != 0x00B0;
 		case 0x0002:
-			return tsid != 0x07E8;
+			return orbital_position == 282;
 		default:
-			return 1;
+			return onid.get() < 0xFF00;
 	}
 }
 
@@ -26,7 +23,7 @@ eDVBNamespace eTransponder::buildNamespace(eOriginalNetworkID onid, eTransportSt
 {
 	int dvb_namespace=orbital_position<<16;
 		// on invalid ONIDs, build hash from frequency and polarisation
-	if (!isValidONIDTSID(onid, tsid))
+	if (!isValidONIDTSID(onid, tsid, orbital_position))
 		dvb_namespace|=((freq/1000)&0xFFFF)|((pol&1)<<15);
 	return eDVBNamespace(dvb_namespace);
 }
@@ -404,7 +401,7 @@ void eDVBScanController::handleSDT(const SDT *sdt)
 	transponder->dvb_namespace=dvb_namespace;
 
 	eTransponder *tmp = 0;
-	if ( !isValidONIDTSID(onid,tsid) )  // feeds.. scpc.. or muxxers with default values
+	if ( transponder->satellite.valid && !isValidONIDTSID(onid,tsid,transponder->satellite.orbital_position) )  // feeds.. scpc.. or muxxers with default values
 	{
 		eDebug("[SCAN] SCPC detected... compare complete transponder");
 		// we must search transponder via freq pol usw..
