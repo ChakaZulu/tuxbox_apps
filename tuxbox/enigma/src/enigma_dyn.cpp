@@ -576,9 +576,6 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 
 static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString requester = opt["requester"];
-
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	content->local_header["Cache-Control"] = "no-cache";
 
@@ -2234,17 +2231,6 @@ static eString getControlTimerList()
 	return result;
 }
 
-#if 0
-static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	eString result;
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	result = readFile(TEMPLATE_DIR + "timerList.tmp");
-	result.strReplace("#BODY#", getControlTimerList());
-	return result;
-}
-#endif
-
 #ifndef DISABLE_FILE
 #ifdef ENABLE_DYN_CONF
 eString getConfigSwapFile(void)
@@ -3125,8 +3111,6 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 		sid,
 		pmt;
 
-	std::map<eString,eString> opt = getRequestOptions(opts, '&');
-	eString requester = opt["requester"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
@@ -3180,44 +3164,23 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 		}
 	}
 
-	if (requester == "webif")
-	{
-		result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>"
-			"<!-- " << sapi->service << "-->" << std::endl <<
-			"<table cellspacing=0 cellpadding=0 border=0>"
-			"<tr><td>Name:</td><td>" << name << "</td></tr>"
-			"<tr><td>Provider:</td><td>" << provider << "</td></tr>"
-			"<tr><td>VPID:</td><td>" << vpid << "</td></tr>"
-			"<tr><td>APID:</td><td>" << apid << "</td></tr>"
-			"<tr><td>PCRPID:</td><td>" << pcrpid << "</td></tr>"
-			"<tr><td>TPID:</td><td>" << tpid << "</td></tr>"
-			"<tr><td>TSID:</td><td>" << tsid << "</td></tr>"
-			"<tr><td>ONID:</td><td>" << onid << "</td></tr>"
-			"<tr><td>SID:</td><td>" << sid << "</td></tr>"
-			"<tr><td>PMT:</td><td>" << pmt << "</td></tr>"
-			"<tr><td>Video Format:<td>" << vidform << "</td></tr>"
-			"</table>"
-			"</body></html>";
-	}
-	else
-	{
-		result << "<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>"
-			"<!-- " << sapi->service.toString() << "-->\n"
-			"<table cellspacing=0 cellpadding=0 border=0>"
-			"<tr><td>name:</td><td>" + name + "</td></tr>"
-			"<tr><td>provider:</td><td>" + provider + "</td></tr>"
-			"<tr><td>vpid:</td><td>" + vpid + "</td></tr>"
-			"<tr><td>apid:</td><td>" + apid + "</td></tr>"
-			"<tr><td>pcrpid:</td><td>" + pcrpid + "</td></tr>"
-			"<tr><td>tpid:</td><td>" + tpid + "</td></tr>"
-			"<tr><td>tsid:</td><td>" + tsid + "</td></tr>"
-			"<tr><td>onid:</td><td>" + onid + "</td></tr>"
-			"<tr><td>sid:</td><td>" + sid + "</td></tr>"
-			"<tr><td>pmt:</td><td>" + pmt + "</td></tr>"
-			"<tr><td>vidformat:<td>" + vidform + "</td></tr>"
-			"</table>"
-			"</body></html>";
-	}
+	result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>"
+		"<!-- " << sapi->service << "-->" << std::endl <<
+		"<table cellspacing=5 cellpadding=0 border=0>"
+		"<tr><td>Name:</td><td>" << name << "</td></tr>"
+		"<tr><td>Provider:</td><td>" << provider << "</td></tr>"
+		"<tr><td>VPID:</td><td>" << vpid << "</td></tr>"
+		"<tr><td>APID:</td><td>" << apid << "</td></tr>"
+		"<tr><td>PCRPID:</td><td>" << pcrpid << "</td></tr>"
+		"<tr><td>TPID:</td><td>" << tpid << "</td></tr>"
+		"<tr><td>TSID:</td><td>" << tsid << "</td></tr>"
+		"<tr><td>ONID:</td><td>" << onid << "</td></tr>"
+		"<tr><td>SID:</td><td>" << sid << "</td></tr>"
+		"<tr><td>PMT:</td><td>" << pmt << "</td></tr>"
+		"<tr><td>Video Format:<td>" << vidform << "</td></tr>"
+		"</table>"
+		"</body>"
+		"</html>";
 
 	return result.str();
 }
@@ -3285,7 +3248,7 @@ static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPCo
 	std::map<eString, eString> opts = getRequestOptions(opt, '&');
 	eString requester = opts["requester"];
 	eString result;
-	
+
 	if (ePluginThread::getInstance())
 	{
 		ePluginThread::getInstance()->kill(true);
@@ -3293,7 +3256,7 @@ static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPCo
 	}
 	else
 		result = "E: no plugin is running";
-		
+
 	if (requester == "webif")
 		result = closeWindow(content, "", 500);
 
@@ -3412,123 +3375,6 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	}
 	return result;
 }
-
-#if 0
-is this still used???
-
-#define NAVIGATOR_PATH "/cgi-bin/navigator"
-
-class eNavigatorListDirectory: public Object
-{
-	eString &result;
-	eString path;
-	eServiceInterface &iface;
-	int num;
-public:
-	eNavigatorListDirectory(eString &result, eString path, eServiceInterface &iface): result(result), path(path), iface(iface)
-	{
-		eDebug("path: %s", path.c_str());
-		num = 0;
-	}
-	void addEntry(const eServiceReference &e)
-	{
-		// sorry.. at moment we dont show any directory.. or locked service in webif
-		if (e.isLocked() && eConfig::getInstance()->pLockActive())
-			return;
-		result += "<tr><td bgcolor=\"#";
-		if (num & 1)
-			result += "c0c0c0";
-		else
-			result += "d0d0d0";
-		result+="\"><font color=\"#000000\">";
-		if (!(e.flags & eServiceReference::isDirectory))
-			result += "[PLAY] ";
-
-		result += eString("<a href=\"" NAVIGATOR_PATH) + "?path=" + path + ref2string(e) +"\">" ;
-
-		eService *service = iface.addRef(e);
-		if (!service)
-			result += "N/A";
-		else
-			result += service->service_name;
-		iface.removeRef(e);
-
-		result += "</a></font></td></tr>\n";
-		eDebug("+ok");
-		num++;
-	}
-};
-
-static eString navigator(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	std::map<eString, eString> opts = getRequestOptions(opt, '&');
-
-	if (opts.find("path") == opts.end())
-	{
-		content->code=301;
-		content->code_descr="Moved Permanently";
-		content->local_header["Location"]=eString(NAVIGATOR_PATH) + "?path=" + ref2string(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0));
-		return "redirecting..";
-	}
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString spath = opts["path"];
-
-	eServiceInterface *iface = eServiceInterface::getInstance();
-	if (!iface)
-		return "n/a\n";
-
-	eString current;
-
-	unsigned int pos;
-	if ((pos=spath.rfind(';')) != eString::npos)
-	{
-		current = spath.mid(pos + 1);
-		spath = spath.left(pos);
-	} else
-	{
-		current = spath;
-		spath = "";
-	}
-
-	eDebug("current service: %s", current.c_str());
-	eServiceReference current_service(string2ref(current));
-
-	eString res;
-
-	res="<html>\n"
-		CHARSETMETA
-		"<head><title>Enigma Navigator</title></head>\n"
-		"<body bgcolor=\"#f0f0f0\">\n"
-		"<font color=\"#000000\">\n";
-
-	res += eString("Current: ") + current + "<br>\n";
-	res += "<hr>\n";
-	res += eString("path: ") + spath + "<br>\n";
-
-	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
-	{
-		if ( playService(current_service) )
-			res += "+ok, hear the music..";
-		else
-			res += "+error, service is parental locked..";
-	}
-	else
-	{
-		eNavigatorListDirectory navlist(res, spath + ";" + current + ";", *iface);
-		Signal1<void,const eServiceReference&> signal;
-		signal.connect(slot(navlist, &eNavigatorListDirectory::addEntry));
-
-		res += "<table width=\"100%\">\n";
-		iface->enterDirectory(current_service, signal);
-		res += "</table>\n";
-		eDebug("entered");
-		iface->leaveDirectory(current_service);
-		eDebug("exited");
-	}
-
-	return res;
-}
-#endif
 
 static eString getCurrentServiceRef(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -3897,6 +3743,43 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	return result;
 }
 
+static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString serviceRef = opt["ref"];
+	eString eventID = opt["ID"];
+	eString eventStartTime = opt["start"];
+	eString eventDuration = opt["duration"];
+	eString channel = httpUnescape(opt["channel"]);
+	eString description = httpUnescape(opt["descr"]);
+	if (description == "")
+		description = _("No description available");
+
+	int eventid;
+	sscanf(eventID.c_str(), "%x", &eventid);
+	eDebug("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+
+	int timeroffset = 0;
+	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
+		timeroffset = 0;
+
+	int start = atoi(eventStartTime.c_str()) - (timeroffset * 60);
+	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
+
+	ePlaylistEntry entry(string2ref(serviceRef), start, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+	entry.service.descr = channel + "/" + description;
+
+	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
+		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
+	else
+		result += _("Timer event was created successfully.");
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	return result;
+}
+
 static eString deleteTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -3933,6 +3816,30 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 		result = readFile(TEMPLATE_DIR + "deleteTimerComplete.tmp");
 		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	}
+
+	return result;
+}
+
+static eString deleteTVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString serviceRef = opt["ref"];
+	eString eventType = opt["type"];
+	eString eventStartTime = opt["start"];
+	eString result;
+
+	eDebug("[ENIGMA_DYN] deleteTimerEvent: serviceRef = %s, type = %s, start = %s", serviceRef.c_str(), eventType.c_str(), eventStartTime.c_str());
+
+	ePlaylistEntry e(
+		string2ref(serviceRef),
+		atoi(eventStartTime.c_str()),
+		-1, -1, atoi(eventType.c_str()));
+
+	int ret = eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	eTimerManager::getInstance()->saveTimerList();
 
 	return result;
 }
@@ -4397,7 +4304,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 
 	dyn_resolver->addDyn("GET", "/", web_root, lockWeb);
 	dyn_resolver->addDyn("GET", "/pda", pda_root, lockWeb);
-//	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator, lockWeb);
 
 	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/mkdir", makeDirectory, lockWeb);
@@ -4414,10 +4320,11 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #endif
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume, lockWeb);
 	dyn_resolver->addDyn("GET", "/setVideo", setVideo, lockWeb);
-//	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/addTimerEvent2", addTimerEvent2, lockWeb);
+	dyn_resolver->addDyn("GET", "/addTVBrowserTimerEvent", addTVBrowserTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/deleteTimerEvent", deleteTimerEvent, lockWeb);
+	dyn_resolver->addDyn("GET", "/deleteTVBrowserTimerEvent", deleteTVBrowserTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/editTimerEvent", editTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/showAddTimerEventWindow", showAddTimerEventWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/changeTimerEvent", changeTimerEvent, lockWeb);
@@ -4426,7 +4333,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails, lockWeb);
 	dyn_resolver->addDyn("GET", "/msgWindow", msgWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus, true); //always pw protected for dreamtv
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin, lockWeb);
