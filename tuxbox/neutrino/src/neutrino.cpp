@@ -428,7 +428,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_nfs_mount_options[0], configfile.getString( "network_nfs_mount_options_1", "ro,soft,udp" ).c_str() );
 	strcpy( g_settings.network_nfs_mount_options[1], configfile.getString( "network_nfs_mount_options_2", "nolock,rsize=8192,wsize=8192" ).c_str() );
 
-	//streaming (server + vcr)
+	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32( "recording_type", 0 );
 	g_settings.recording_stopplayback = configfile.getInt32( "recording_stopplayback", 0 );
 	g_settings.recording_stopsectionsd = configfile.getInt32( "recording_stopsectionsd", 1 );
@@ -438,6 +438,14 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
 	g_settings.recording_vcr_no_scart = configfile.getInt32( "recording_vcr_no_scart", false);
 
+	//streaming (server)
+	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
+        g_settings.streaming_server_ip = configfile.getString("streaming_server_ip", "10.10.10.10");
+	strcpy( g_settings.streaming_server_port, configfile.getString( "streaming_server_port", "8080").c_str() );
+	strcpy( g_settings.streaming_server_cddrive, configfile.getString("streaming_server_cddrive", "D:").c_str() );
+	strcpy( g_settings.streaming_videorate,  configfile.getString("streaming_videorate", "1000").c_str() );
+	strcpy( g_settings.streaming_audiorate, configfile.getString("streaming_audiorate", "192").c_str() );
+	
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
 
@@ -554,7 +562,7 @@ void CNeutrinoApp::saveSetup()
 
 	if(!scanSettings.saveSettings(scanSettingsFile))
 	{
-		dprintf(DEBUG_NORMAL, "error while saveing scan-settings!\n");
+		dprintf(DEBUG_NORMAL, "error while saving scan-settings!\n");
 	}
 
 	//video
@@ -681,6 +689,14 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "recording_server_mac", g_settings.recording_server_mac );
 	configfile.setInt32 ( "recording_vcr_no_scart", g_settings.recording_vcr_no_scart );
 
+	//streaming
+	configfile.setInt32 ( "streaming_type", g_settings.streaming_type );
+	configfile.setString( "streaming_server_ip", g_settings.streaming_server_ip );
+	configfile.setString( "streaming_server_port", g_settings.streaming_server_port );
+	configfile.setString( "streaming_server_cddrive", g_settings.streaming_server_cddrive );
+	configfile.setString ( "streaming_videorate", g_settings.streaming_videorate );
+	configfile.setString ( "streaming_audiorate", g_settings.streaming_audiorate );
+	
 	//rc-key configuration
 	configfile.setInt32( "key_tvradio_mode", g_settings.key_tvradio_mode );
 
@@ -775,7 +791,7 @@ void CNeutrinoApp::saveSetup()
 
    if(configfile.getModifiedFlag())
 	{
-		dprintf(DEBUG_INFO, "saveing neutrino txt-config\n");
+		dprintf(DEBUG_INFO, "saving neutrino txt-config\n");
 		configfile.saveConfig(CONFIGDIR "/neutrino.conf");
 	}
 }
@@ -1024,7 +1040,7 @@ void CNeutrinoApp::SetupTiming()
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
 										  CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
 										  CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings,
-										  CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &mp3picSettings)
+										  CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem( new CMenuSeparator() );
@@ -1061,7 +1077,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, "", &parentallockSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.recording", true, "", &recordingSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.streaming", true, "", &streamingSettings) );	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.lcd", true,"", &lcdSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
@@ -1654,7 +1670,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CRecordingNotifier *RecordingNotifier =
 		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5);
 
-   CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type,
+    CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type,
                                                     true, RecordingNotifier);
 	oj1->addOption(0, "recordingmenu.off");
 	oj1->addOption(1, "recordingmenu.server");
@@ -1679,6 +1695,42 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( mf6);
 
 	recordingstatus = 0;
+}
+
+void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
+{
+	CIPInput*   streamingSettings_server_ip= new CIPInput("streamingmenu.server_ip",  g_settings.streaming_server_ip, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput*  streamingSettings_server_port= new CStringInput("streamingmenu.server_port", g_settings.streaming_server_port, 6, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+ 	CStringInputSMS*  cddriveInput = new CStringInputSMS("streamingmenu.streaming_server_cddrive", g_settings.streaming_server_cddrive, 20,"", "","abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:");
+	CStringInput*  streamingSettings_videorate= new CStringInput("streamingmenu.streaming_videorate", g_settings.streaming_videorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+	CStringInput*  streamingSettings_audiorate= new CStringInput("streamingmenu.streaming_audiorate", g_settings.streaming_audiorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+
+	CMenuForwarder* mf1 = new CMenuForwarder("streamingmenu.server_ip", (g_settings.streaming_type==1), g_settings.streaming_server_ip,streamingSettings_server_ip);
+	CMenuForwarder* mf2 = new CMenuForwarder("streamingmenu.server_port", (g_settings.streaming_type==1), g_settings.streaming_server_port,streamingSettings_server_port);
+	CMenuForwarder* mf3 = new CMenuForwarder("streamingmenu.streaming_server_cddrive", (g_settings.streaming_type==1), g_settings.streaming_server_cddrive,cddriveInput);
+	CMenuForwarder* mf4 = new CMenuForwarder("streamingmenu.streaming_videorate", (g_settings.streaming_type==1), g_settings.streaming_videorate,streamingSettings_videorate);
+	CMenuForwarder* mf5 = new CMenuForwarder("streamingmenu.streaming_audiorate", (g_settings.streaming_type==1), g_settings.streaming_audiorate,streamingSettings_audiorate);
+
+	CStreamingNotifier *StreamingNotifier =
+		new CStreamingNotifier(mf1,mf2,mf3,mf4,mf5);
+
+        CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_type", &g_settings.streaming_type,
+                                                    true, StreamingNotifier);
+	oj1->addOption(0, "streamingmenu.off");
+	oj1->addOption(1, "streamingmenu.on");
+
+
+	streamingSettings.addItem( new CMenuSeparator() );
+	streamingSettings.addItem( new CMenuForwarder("menu.back") );
+	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	streamingSettings.addItem( oj1);
+	streamingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	streamingSettings.addItem( mf1);
+	streamingSettings.addItem( mf2);
+	streamingSettings.addItem( mf3);
+	streamingSettings.addItem( mf4);
+	streamingSettings.addItem( mf5);
+
 }
 
 void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, std::string menuname, char *value)
@@ -2264,6 +2316,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
 	CMenuWidget recordingSettings("recordingmenu.head", "recording.raw");
+	CMenuWidget streamingSettings("streamingmenu.head", "streaming.raw");
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
 	CMenuWidget fontSettings("fontmenu.head", "colors.raw");
 	CMenuWidget lcdSettings("lcdmenu.head", "lcd.raw");
@@ -2282,7 +2335,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
-					 service, fontSettings, mp3picSettings);
+					 service, fontSettings, mp3picSettings, streamingSettings);
 
 	//service
 	InitServiceSettings(service, scanSettings);
@@ -2389,8 +2442,11 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//network Setup
 	InitNetworkSettings(networkSettings);
 
-	//streaming Setup
+	//Recording Setup
 	InitRecordingSettings(recordingSettings);
+
+	//Recording Setup
+	InitStreamingSettings(streamingSettings);
 
 	//font Setup
 	InitFontSettings(fontSettings, fontSettings_Channellist, fontSettings_Eventlist, fontSettings_Infobar, fontSettings_Epg, fontSettings_Gamelist);

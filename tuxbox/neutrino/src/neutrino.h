@@ -160,6 +160,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void AddFontSettingItem(CMenuWidget &fontSettings, std::string menuname, char *value);
 		void InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontSettings_Channellist ,CMenuWidget &fontSettings_Eventlist , CMenuWidget &fontSettings_Infobar ,CMenuWidget &fontSettings_Epg, CMenuWidget &fontSettings_Gamelist);
 		void InitRecordingSettings(CMenuWidget &recordingSettings);
+		void InitStreamingSettings(CMenuWidget &streamingSettings);
 		void InitScreenSettings(CMenuWidget &);
 		void InitMp3PicSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);
@@ -170,7 +171,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings, CMenuWidget &networkSettings,
 		                  CMenuWidget &colorSettings, CMenuWidget &lcdSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
 		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service, CMenuWidget &fontSettings,
-                        	  CMenuWidget &mp3picSettings);
+                        	  CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings);
 		void ClearFrameBuffer();
 		void SetupFonts();
 		void SetupTiming();

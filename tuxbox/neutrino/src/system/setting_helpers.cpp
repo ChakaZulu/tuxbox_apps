@@ -96,8 +96,39 @@ bool CDHCPNotifier::changeNotify(string OptionName, void* data)
 	return true;
 }
 
-CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, 
-                                        CMenuItem* i4, CMenuItem* i5, CMenuItem* i6, 
+CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5)
+{
+   toDisable[0]=i1;
+   toDisable[1]=i2;
+   toDisable[2]=i3;
+   toDisable[3]=i4;
+   toDisable[4]=i5;
+
+}
+
+bool CStreamingNotifier::changeNotify(string OptionName, void*)
+{
+   if(g_settings.streaming_type==0)
+   {
+      toDisable[0]->setActive(false);
+      toDisable[1]->setActive(false);
+      toDisable[2]->setActive(false);
+      toDisable[3]->setActive(false);
+      toDisable[4]->setActive(false);
+   }
+   else if(g_settings.streaming_type==1)
+   {
+      toDisable[0]->setActive(true);
+      toDisable[1]->setActive(true);
+      toDisable[2]->setActive(true);
+      toDisable[3]->setActive(true);
+      toDisable[4]->setActive(true);
+   }
+   return true;
+}
+
+CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3,
+                                        CMenuItem* i4, CMenuItem* i5, CMenuItem* i6,
                                         CMenuItem* i7)
 {
    toDisable[0]=i1;

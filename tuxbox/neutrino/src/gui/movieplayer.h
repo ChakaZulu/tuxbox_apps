@@ -38,6 +38,9 @@
 #include "driver/framebuffer.h"
 #include "gui/filebrowser.h"
 #include "gui/widget/menue.h"
+extern "C" {
+           	#include "ringbuffer.h"
+}           	
 #include <stdio.h>
 
 #include <string>
@@ -92,7 +95,8 @@ class CMoviePlayerGui : public CMenuTarget
 	std::string Path;
 	CFileBrowser * filebrowser;
 
-	void PlayStream();
+	void PlayStream(int streamtype);
+	void PlayFile();
 	void paintItem(int pos);
 	void paint();
 	void paintHead();

@@ -56,6 +56,7 @@ mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.recording Aufnahme
+mainsettings.streaming Movieplayer
 mainsettings.colors Farben / Themes / Schrift
 mainsettings.plugins Plugin Einstellungen
 mainsettings.lcd LC-Display
@@ -129,6 +130,16 @@ recordingmenu.server_wakeup Aufnahmeserver WOL
 recordingmenu.server_mac Mac Adresse
 recordingmenu.setupnow Einstellungen jetzt übernehmen
 recordingmenu.no_scart Unterdrücke Scart-Umschaltung
+
+streamingmenu.head Movieplayer Einstellungen
+streamingmenu.streaming_type Streamingserver
+streamingmenu.server_ip Streamingserver IP
+streamingmenu.server_port Streamingserver Port
+streamingmenu.streaming_server_cddrive DVD Laufwerk
+streamingmenu.streaming_videorate Datenrate Video
+streamingmenu.streaming_audiorate Datenrate Audio
+streamingmenu.off Deaktiviert
+streamingmenu.on Aktiviert
 
 ping.ok ist erreichbar (ping)
 ping.unreachable ist nicht erreichbar (unreachable)
@@ -691,8 +702,13 @@ movieplayer.head Movieplayer
 movieplayer.play Abspielen
 movieplayer.choosets TS Abspielen
 movieplayer.chooseps PS Abspielen
+movieplayer.choosestream Streamen
 movieplayer.choosepes PES Abspielen
 movieplayer.bookmark Bookmarks
+movieplayer.choosestreamsvcd (S)VCD
+movieplayer.choosestreamdvd DVD
+movieplayer.pleasewait Bitte warten Sie.\nDie Verbindung zum Streamingserver wird hergestellt.
+movieplayer.nostreamingserver Es konnte keine Verbindung\nzum Streamingserver hergestellt werden.
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter an
