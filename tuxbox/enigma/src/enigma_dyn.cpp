@@ -65,7 +65,7 @@ using namespace std;
 
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
 
-#define WEBXFACEVERSION "1.1"
+#define WEBXFACEVERSION "1.2"
 
 static int currentBouquet = 0;
 static int currentChannel = -1;
@@ -713,6 +713,133 @@ static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnec
 	return result;
 }
 
+static eString getChannelNavi(void)
+{
+	eString result = "&nbsp;";
+
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+
+	if (sapi && sapi->service)
+	{
+		result = button(100, "AUDIO", OCKER, "javascript:selectAudio()");
+		if (getCurService() != "&nbsp;")
+		{
+			result += button(100, "EPG", GREEN, "javascript:openEPG()");
+			result += button(100, "Info", PINK, "javascript:openChannelInfo()");
+			result += button(100, "Stream Info", YELLOW, "javascript:openSI()");
+#ifndef DISABLE_FILE
+			result += button(100, "Record", RED, "javascript:DVRrecord('start')");
+			result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
+		}
+#endif
+	}
+
+	return result;
+}
+
+static eString getZapNavi(eString mode, eString path)
+{
+	eString result;
+	result += button(100, "TV", RED, "?path=" + zap[ZAPMODETV][ZAPMODECATEGORY]);
+	result += button(100, "Radio", GREEN, "?path=" + zap[ZAPMODERADIO][ZAPMODECATEGORY]);
+	result += button(100, "Data", BLUE, "?path=" + zap[ZAPMODEDATA][ZAPMODECATEGORY]);
+	result += "<br><br>";
+	return result;
+}
+
+static eString getLeftNavi(eString mode, eString path)
+{
+	eString result;
+	if (mode.find("zap") == 0)
+	{
+		result += button(110, "Satellites", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODESATELLITES]);
+		result += "<br>";
+		result += button(110, "Providers", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEPROVIDERS]);
+		result += "<br>";
+		result += button(110, "Bouquets", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEBOUQUETS]);
+#ifndef DISABLE_FILE
+		result += "<br><br>";
+		result += button(110, "Recordings", LEFTNAVICOLOR,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
+#endif
+	}
+	else
+	if (mode.find("control") == 0)
+	{
+		if (eSystemInfo::getInstance()->canShutdown())
+		{
+			result += button(110, "Shutdown", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=shutdown\')");
+			result += "<br>";
+		}
+		result += button(110, "Restart", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=restart\')");
+		result += "<br>";
+		result += button(110, "Reboot", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=reboot\')");
+		result += "<br>";
+		result += button(110, "Standby", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=standby\')");
+		result += "<br>";
+		result += button(110, "Wakeup", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=wakeup\')");
+		result += "<br>";
+		result += button(110, "OSDshot", LEFTNAVICOLOR, "?mode=controlFBShot");
+#ifndef DISABLE_LCD
+		result += "<br>";
+		result += button(110, "LCDshot", LEFTNAVICOLOR, "?mode=controlLCDShot");
+#endif
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+		{
+			result += "<br>";
+			result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=controlScreenShot");
+		}
+		result += "<br>";
+		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
+		result += "<br>";
+		result += button(110, "Plugins", LEFTNAVICOLOR, "?mode=controlPlugins");
+		result += "<br>";
+		result += button(110, "Timer List", LEFTNAVICOLOR, "?mode=controlTimerList");
+	}
+	else
+#ifndef DISABLE_FILE
+	if (mode.find("config") == 0)
+	{
+		result += button(110, "HDD", LEFTNAVICOLOR, "?mode=configHDD");
+		result += "<br>";
+		result += button(110, "USB", LEFTNAVICOLOR, "?mode=configUSB");
+		result += "<br>";
+	}
+	else
+#endif
+	if (mode.find("updates") == 0)
+	{
+		result += button(110, "Internet", LEFTNAVICOLOR, "?mode=updatesInternet");
+	}
+	else
+	if (mode.find("help") == 0)
+	{
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		{
+			result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=helpDMMSites");
+			result += "<br>";
+			result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=helpOtherSites");
+			result += "<br>";
+		}
+		result += button(110, "Boards", LEFTNAVICOLOR, "?mode=helpForums");
+		result += "<br>";
+	}
+
+	return result;
+}
+
+static eString getTopNavi(eString mode, eString path)
+{
+	eString result;
+	result += button(100, "ZAP", TOPNAVICOLOR, "?mode=zap");
+	result += button(100, "CONTROL", TOPNAVICOLOR, "?mode=control");
+	result += button(100, "CONFIG", TOPNAVICOLOR, "?mode=config");
+	result += button(100, "UPDATES", TOPNAVICOLOR, "?mode=updates");
+	result += button(100, "HELP", TOPNAVICOLOR, "?mode=help");
+
+	return result;
+}
+
 static eString version(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain";
@@ -837,132 +964,6 @@ eString filter_string(eString string)
 	string.strReplace("\xc2\x87","");
 	string.strReplace("\xc2\x8a"," ");
 	return string;
-}
-
-static eString getZapNavi(eString mode, eString path)
-{
-	eString result;
-	result += button(100, "TV", RED, "?path=" + zap[ZAPMODETV][ZAPMODECATEGORY]);
-	result += button(100, "Radio", GREEN, "?path=" + zap[ZAPMODERADIO][ZAPMODECATEGORY]);
-	result += button(100, "Data", BLUE, "?path=" + zap[ZAPMODEDATA][ZAPMODECATEGORY]);
-	result += "<br><br>";
-	return result;
-}
-
-static eString getLeftNavi(eString mode, eString path)
-{
-	eString result;
-	if (mode.find("zap") == 0)
-	{
-		result += button(110, "Satellites", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODESATELLITES]);
-		result += "<br>";
-		result += button(110, "Providers", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEPROVIDERS]);
-		result += "<br>";
-		result += button(110, "Bouquets", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEBOUQUETS]);
-#ifndef DISABLE_FILE
-		result += "<br><br>";
-		result += button(110, "Recordings", LEFTNAVICOLOR,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
-#endif
-	}
-	else
-	if (mode.find("control") == 0)
-	{
-		if (eSystemInfo::getInstance()->canShutdown())
-		{
-			result += button(110, "Shutdown", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=shutdown\')");
-			result += "<br>";
-		}
-		result += button(110, "Restart", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=restart\')");
-		result += "<br>";
-		result += button(110, "Reboot", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=reboot\')");
-		result += "<br>";
-		result += button(110, "Standby", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=standby\')");
-		result += "<br>";
-		result += button(110, "Wakeup", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=wakeup\')");
-		result += "<br>";
-		result += button(110, "OSDshot", LEFTNAVICOLOR, "?mode=controlFBShot");
-#ifndef DISABLE_LCD
-		result += "<br>";
-		result += button(110, "LCDshot", LEFTNAVICOLOR, "?mode=controlLCDShot");
-#endif
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
-			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
-		{
-			result += "<br>";
-			result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=controlScreenShot");
-		}
-		result += "<br>";
-		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
-		result += "<br>";
-		result += button(110, "Plugins", LEFTNAVICOLOR, "?mode=controlPlugins");
-		result += "<br>";
-		result += button(110, "Timer List", LEFTNAVICOLOR, "?mode=controlTimerList");
-	}
-	else
-#ifndef DISABLE_FILE
-	if (mode.find("config") == 0)
-	{
-		result += button(110, "HDD", LEFTNAVICOLOR, "?mode=configHDD");
-		result += "<br>";
-		result += button(110, "USB", LEFTNAVICOLOR, "?mode=configUSB");
-		result += "<br>";
-	}
-	else
-#endif
-	if (mode.find("updates") == 0)
-	{
-		result += button(110, "Internet", LEFTNAVICOLOR, "?mode=updatesInternet");
-	}
-	else
-	if (mode.find("help") == 0)
-	{
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
-		{
-			result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=helpDMMSites");
-			result += "<br>";
-			result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=helpOtherSites");
-			result += "<br>";
-		}
-		result += button(110, "Boards", LEFTNAVICOLOR, "?mode=helpForums");
-		result += "<br>";
-	}
-
-	return result;
-}
-
-static eString getTopNavi(eString mode, eString path)
-{
-	eString result;
-	result += button(100, "ZAP", TOPNAVICOLOR, "?mode=zap");
-	result += button(100, "CONTROL", TOPNAVICOLOR, "?mode=control");
-	result += button(100, "CONFIG", TOPNAVICOLOR, "?mode=config");
-	result += button(100, "UPDATES", TOPNAVICOLOR, "?mode=updates");
-	result += button(100, "HELP", TOPNAVICOLOR, "?mode=help");
-
-	return result;
-}
-
-static eString getChannelNavi(eString mode, eString path)
-{
-	eString result;
-
-	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-
-	if (sapi && sapi->service)
-	{
-		result = button(100, "AUDIO", OCKER, "javascript:selectAudio()");
-		result += button(100, "EPG", GREEN, "javascript:openEPG()");
-		result += button(100, "Info", PINK, "javascript:openChannelInfo()");
-		result += button(100, "Stream Info", YELLOW, "javascript:openSI()");
-#ifndef DISABLE_FILE
-		result += button(100, "Record", RED, "javascript:DVRrecord('start')");
-		result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
-#endif
-	}
-	else
-		result = "&nbsp;";
-
-	return result;
 }
 
 #ifndef DISABLE_FILE
@@ -1853,7 +1854,7 @@ static eString aboutDreambox(void)
 	result << "<table border=0 cellspacing=0 cellpadding=0>";
 
 	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
-		result << "<img src=\"dm7000.jpg\" width=\"650\" border=\"0\"><br>";
+		result << "<img src=\"dm7000.jpg\" width=\"650\" border=\"0\"><br><br>";
 
 	result  << "<tr><td>Model:</td><td>" << eSystemInfo::getInstance()->getModel() << "</td></tr>"
 		<< "<tr><td>Manufacturer:</td><td>" << eSystemInfo::getInstance()->getManufacturer() << "</td></tr>"
@@ -2248,11 +2249,10 @@ static eString getContent(eString mode, eString path)
 	return result;
 }
 
-static eString getEITC2()
+static eString getEITC2(eString result)
 {
 	eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;",
-		next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;",
-		result;
+		next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;";
 
 	EIT *eit = eDVB::getInstance()->getEIT();
 	if (eit)
@@ -2308,7 +2308,6 @@ static eString getEITC2()
 
 	now_text = now_text.left(30);
 	next_text = next_text.left(30);
-	result = readFile(TEMPLATE_DIR + "header.tmp");
 	result.strReplace("#NOWT#", now_time);
 	if (now_duration != "&nbsp;")
 		if (atoi(now_duration.c_str()) < 1000)
@@ -3107,85 +3106,12 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	eString mode = opt["mode"];
-	eString spath = opt["path"];
-	eString curBouquet = opt["curBouquet"];
-	eString curChannel = opt["curChannel"];
-	if (opts.find("curBouquet") != eString::npos)
-		currentBouquet = atoi(curBouquet.c_str());
-	if (opts.find("curChannel") != eString::npos)
-		currentChannel = atoi(curChannel.c_str());
-
-	eDebug("[ENIGMA_DYN] web_root: mode = %s, spath = %s", mode.c_str(), spath.c_str());
-
-	if (!mode)
-		mode = "zap";
-
-	if (!spath)
-	{
-		if (zapMode == ZAPMODERECORDINGS)
-			zapMode = ZAPMODETV;
-		spath = zap[zapMode][ZAPSUBMODEBOUQUETS];
-		zapSubMode = ZAPSUBMODEBOUQUETS;
-	}
-	else
-	{
-		for (int i = 0; i < 3; i++)
-		{
-			if (spath == zap[i][ZAPMODECATEGORY])
-			{
-				zapMode = i;
-				spath = zap[i][ZAPSUBMODEBOUQUETS];
-				currentBouquet = 0;
-				currentChannel = -1;
-				break;
-			}
-		}
-
-		if ((spath == ";4097:7:0:1:0:0:0:0:0:0:") && (zapMode != ZAPMODERECORDINGS)) // recordings
-		{
-			zapMode = ZAPMODERECORDINGS;
-			currentBouquet = 0;
-			currentChannel = -1;
-		}
-
-		for (int i = 2; i < 5; i++)
-		{
-			if (spath == zap[zapMode][i])
-			{
-				zapSubMode = i;
-				break;
-			}
-		}
-	}
-
 	result = readFile(TEMPLATE_DIR + "index.tmp");
-	result.strReplace("#CONTENT#", getContent(mode, spath));
-	result.strReplace("#HEADER#", getEITC2());
-	result.strReplace("#CHANNAVI#", getChannelNavi(mode, spath));
-	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
-	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
+
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
-	{
-		result.strReplace("#TOPBALK#", "topbalk.png");
 		result.strReplace("#BOX#", "Dreambox");
-	}
 	else
-	{
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
-			result.strReplace("#TOPBALK#", "topbalk2.png");
-		else
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
-			result.strReplace("#TOPBALK#", "topbalk3.png");
-		else
-//		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
-			result.strReplace("#TOPBALK#", "topbalk4.png");
-
 		result.strReplace("#BOX#", "dBox");
-	}
-
-	if (mode == "zap")
-		result.strReplace("#ONLOAD#", "onLoad=init()");
 
 	return result;
 }
@@ -3653,6 +3579,104 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	return result;
 }
 
+static eString blank(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	return readFile(TEMPLATE_DIR + "blank.tmp");
+}
+
+static eString header(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eString result = readFile(TEMPLATE_DIR + "header.tmp");
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+	{
+		result.strReplace("#TOPBALK#", "topbalk.png");
+	}
+	else
+	{
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Nokia)
+			result.strReplace("#TOPBALK#", "topbalk2.png");
+		else
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Sagem)
+			result.strReplace("#TOPBALK#", "topbalk3.png");
+		else
+//		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
+			result.strReplace("#TOPBALK#", "topbalk4.png");
+	}
+	result.strReplace("#CHANNAVI#", getChannelNavi());
+	return getEITC2(result);
+}
+
+static eString body(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	eString mode = opt["mode"];
+	eString spath = opt["path"];
+	eString curBouquet = opt["curBouquet"];
+	eString curChannel = opt["curChannel"];
+	if (opts.find("curBouquet") != eString::npos)
+		currentBouquet = atoi(curBouquet.c_str());
+	if (opts.find("curChannel") != eString::npos)
+		currentChannel = atoi(curChannel.c_str());
+
+	eDebug("[ENIGMA_DYN] body: mode = %s, spath = %s", mode.c_str(), spath.c_str());
+
+	if (!mode)
+		mode = "zap";
+
+	if (!spath)
+	{
+		if (zapMode == ZAPMODERECORDINGS)
+			zapMode = ZAPMODETV;
+		spath = zap[zapMode][ZAPSUBMODEBOUQUETS];
+		zapSubMode = ZAPSUBMODEBOUQUETS;
+	}
+	else
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			if (spath == zap[i][ZAPMODECATEGORY])
+			{
+				zapMode = i;
+				spath = zap[i][ZAPSUBMODEBOUQUETS];
+				currentBouquet = 0;
+				currentChannel = -1;
+				break;
+			}
+		}
+
+		if ((spath == ";4097:7:0:1:0:0:0:0:0:0:") && (zapMode != ZAPMODERECORDINGS)) // recordings
+		{
+			zapMode = ZAPMODERECORDINGS;
+			currentBouquet = 0;
+			currentChannel = -1;
+		}
+
+		for (int i = 2; i < 5; i++)
+		{
+			if (spath == zap[zapMode][i])
+			{
+				zapSubMode = i;
+				break;
+			}
+		}
+	}
+
+	result = readFile(TEMPLATE_DIR + "index2.tmp");
+	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
+	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
+	result.strReplace("#CONTENT#", getContent(mode, spath));
+
+	if (mode == "zap")
+		result.strReplace("#ONLOAD#", "onLoad=init()");
+
+	return result;
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root, true);
@@ -3702,6 +3726,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);
+	dyn_resolver->addDyn("GET", "/header", header);
+	dyn_resolver->addDyn("GET", "/body", body);
+	dyn_resolver->addDyn("GET", "/blank", blank);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG);

@@ -1,60 +1,20 @@
 <html>
 	<head>
 		<title>Enigma Web Interface - #BOX#</title>
-		<link rel="stylesheet" type="text/css" href="webif.css">
-		<script language="javascript" type="text/javascript" src="window.js"></script>
-		<script language="javascript" type="text/javascript" src="index.js"></script>
-
-		<script language="javascript" type="text/javascript" src="timer.js"></script>
-		<meta HTTP-EQUIV="Content-Type" content="text/html; charset=iso-8859-1">
 	</head>
-	<body #ONLOAD# leftmargin=0 topmargin=0 marginwidth=0 marginheight=0 id="mainbody">
-		<div align="center">
-			<table width="780" height=100% border=0 cellpadding=0 cellspacing=0 id="megatable">
-				<tr>
-					<td background=#TOPBALK# height=112>
-						<table>
-						<tr>
-							<td width=160>&nbsp;</td>
-							<td>#HEADER#</td>
-						</tr>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td height=22>
-						<table width=100% border=0 cellpadding=0 cellspacing=0>
-							<tr>
-								<td id="channavi">#CHANNAVI#</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td height=22>
-						<table width=100% border=0 cellpadding=0 cellspacing=0>
-							<tr>
-								<td id="topnavi">#TOPNAVI#</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td valign=top>
-						<table width=100% height=100% border=0 cellspacing=0 cellpadding=0>
-							<tr>
-								<td align=right valign=top width=110 class=menu id="leftnavi">
-									#LEFTNAVI#
-								</td>
-								<td align=left valign=top id="contentcell">
-									#CONTENT#
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-			</table>
-		</div>
-		<br>
-	</body>
+	<frameset cols="*, 780, *">
+		<frame src="/blank" frameborder=1 marginwidth=0 marginheight=0 noresize>
+		<frameset rows="138, *">
+			<frame name="header" src="/header" scrolling=no frameborder=1 marginwidth=0 marginheight=0 noresize>
+			<frame name="body" src="/body" scrolling=no frameborder=1 marginwidth=0 marginheight=0 noresize>
+		</frameset>
+		<frame src="/blank" frameborder=1 marginwidth=0 marginheight=0 noresize>
+		<noframes>
+			Sorry, your browser doesn't support frames.
+			<br>
+			Please use a browser that supports frames.
+			<br>
+			Thank you.
+		</noframes>
+	</frameset>
 </html>
