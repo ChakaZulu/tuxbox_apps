@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.26 2003/05/09 12:07:04 digi_casi Exp $
+ * $Id: frontend.h,v 1.27 2003/05/09 13:10:49 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -96,7 +96,9 @@ class CFrontend
 		void				setDiseqcType(const diseqc_t type);
 		void				setLnbOffset(const bool high, const uint8_t index, const int offset);
 		int				setParameters(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc);
-		void 				setCurrentSatellitePosition(int32_t satellitePosition) {currentSatellitePosition = satellitePosition; } 
+		void 				setCurrentSatellitePosition(int32_t satellitePosition) {currentSatellitePosition = satellitePosition; }
+		
+		void 				positionMotor(uint8_t diseqc); 
 };
 
 #endif /* __zapit_frontend_h__ */

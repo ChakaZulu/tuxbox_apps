@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.110 2003/05/06 16:49:37 digi_casi Exp $
+ * $Id: scan.cpp,v 1.111 2003/05/09 13:10:49 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -58,6 +58,7 @@ extern uint32_t found_data_chans;
 extern CFrontend *frontend;
 extern xmlDocPtr scanInputParser;
 extern std::map <uint8_t, std::string> scanProviders;
+extern std::map <string, int32_t> satellitePositions;
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 
@@ -408,13 +409,9 @@ int scan_transponder(xmlNodePtr transponder, bool satfeed, uint8_t diseqc_pos)
 void scan_provider(xmlNodePtr search, char * providerName, bool satfeed, uint8_t diseqc_pos)
 {
 	xmlNodePtr transponder = NULL;
-	char myprovider[32];
-
-	memset(myprovider, 0, sizeof(myprovider));
-	strncpy(myprovider, providerName, 31);
 
 	/* send sat name to client */
-	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &myprovider, strlen(myprovider) + 1);
+	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, providerName, strlen(providerName) + 1);
 	transponder = search->xmlChildrenNode;
 
 	/* read all transponders */
@@ -475,6 +472,7 @@ void *start_scanthread(void *)
  	found_tv_chans = 0;
  	found_radio_chans = 0;
  	found_data_chans = 0;
+ 	string prov =" ";
 
 
 	curr_sat = 0;
@@ -530,6 +528,13 @@ void *start_scanthread(void *)
 				/* satellite receivers might need diseqc */
 				if (frontend->getInfo()->type == FE_QPSK)
 					diseqc_pos = spI->first;
+				
+				/* position satellite dish if provider is on a different satellite */
+				if ((frontend->getDiseqcType() == DISEQC_1_2) && (frontend->getCurrentSatellitePosition() != satellitePositions[prov]))
+				{
+					printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", frontend->getCurrentSatellitePosition(), satellitePositions[prov]);
+					frontend->positionMotor(diseqc_pos);
+				}
 						
 				scan_provider(search, providerName, satfeed, diseqc_pos);
 					

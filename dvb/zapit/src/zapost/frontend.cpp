@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.47 2003/04/21 20:41:17 obi Exp $
+ * $Id: frontend.cpp,v 1.48 2003/05/09 13:10:50 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -424,6 +424,11 @@ void CFrontend::setLnbOffset(const bool high, const uint8_t index, int offset)
 		else
 			lnbOffsetsLow[index] = offset;
 	}
+}
+
+void CFrontend::positionMotor(uint8_t diseqc)
+{
+	//not implemented yet
 }
 
 int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uint8_t polarization, const uint8_t diseqc)
