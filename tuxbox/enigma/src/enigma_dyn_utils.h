@@ -10,8 +10,8 @@
 #include <lib/dvb/serviceplaylist.h>
 #include <lib/system/http_dyn.h>
 
-#define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
-#define HTDOCS_DIR DATADIR+eString("/enigma/htdocs/")
+#define TEMPLATE_DIR TUXBOXDATADIR+eString("/enigma/templates/")
+#define HTDOCS_DIR TUXBOXDATADIR+eString("/enigma/htdocs/")
 
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 #define WINDOWCLOSE "<html><head><META http-equiv=Content-Type content=\"text/html; charset=UTF-8\"></head><body><script  language=\"javascript\">close();</script></body></html>"
