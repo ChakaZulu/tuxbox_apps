@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.2 2002/03/24 13:28:21 obi Exp $
+ * $Id: pzapit.cpp,v 1.3 2002/03/24 16:21:20 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -24,60 +24,90 @@
 #include "clientlib/zapitclient.h"
 #include <iostream>
 
+void usage(char *basename)
+{
+	printf("usage: %s -b\n", basename);
+	printf("       %s -b bouquet-number\n", basename);
+	printf("       %s bouquet-number channel-number\n", basename);
+}
+
 int main (int argc, char** argv)
 {
 	unsigned int bouquet;
 	unsigned int channel;
-	bool zap = true;
+	unsigned int count;
+	bool show_bouquets;
+	bool show_channels;
+	bool zap;
+		
 
 	/* commandline parameters */
-	if ((argc < 3) || (argc > 4))
+	if ((argc < 2) || (argc > 3))
 	{
-		printf("usage: %s [-d] bouquet-number channel-number\n", argv[0]);
+		usage(argv[0]);
 		return -1;
 	}
-	else if (argc == 3)
+	else if (argc == 2)
 	{
-		sscanf(argv[1], "%d", &bouquet);
-        	sscanf(argv[2], "%d", &channel);
-	}
-	else if (argc == 4)
-	{
-		if (!strncmp(argv[1], "-d", 2))
+		if (!strncmp(argv[1], "-b", 2))
+		{
 			zap = false;
+			show_bouquets = true;
+			show_channels = false;
+		}
 		else
+		{
+			usage(argv[0]);
 			return -1;
-
-		sscanf(argv[2], "%d", &bouquet);
-        	sscanf(argv[3], "%d", &channel);
+		}
+	}
+	else
+	{
+		if (!strncmp(argv[1], "-b", 2))
+		{
+			zap = false;
+			show_bouquets = false;
+			show_channels = true;
+			sscanf(argv[2], "%d", &bouquet);
+		}
+		else
+		{
+			zap = true;
+			show_bouquets = false;
+			show_channels = false;
+			sscanf(argv[1], "%d", &bouquet);
+        		sscanf(argv[2], "%d", &channel);
+		}
 	}
 
-	/* create objects */
+	std::vector<CZapitClient::responseGetBouquets> bouquets;
+	std::vector<CZapitClient::responseGetBouquetChannels> channels;
+
 	CZapitClient *zapit = new CZapitClient();
-	CZapitClient::BouquetList *bouquets = new CZapitClient::BouquetList();
-	CZapitClient::BouquetChannelList *channels = new CZapitClient::BouquetChannelList();
+	zapit->getBouquets(bouquets, true);
+	zapit->getBouquetChannels(bouquet, channels);
 
-	/* get and show bouquets */
-	std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
-	zapit->getBouquets(*bouquets, true);
-	for (b_resp = bouquets->begin(); b_resp < bouquets->end(); b_resp++)
-		std::cout << b_resp->bouquet_nr << ": " << b_resp->name << std::endl;
-
-	/* get and show channels */
-	std::vector<CZapitClient::responseGetBouquetChannels>::iterator ch_resp;
-	zapit->getBouquetChannels(bouquet, *channels);
-	for (ch_resp = channels->begin(); ch_resp < channels->end(); ch_resp++)
-		cout << ch_resp->nr << ": " << ch_resp->name << "(" << ch_resp->onid_sid << ")" << endl;
-
-	/* zap */
-	if (zap == true)
+	if (show_bouquets)
 	{
+		std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
+		for (b_resp = bouquets.begin(); b_resp < bouquets.end(); b_resp++)
+			std::cout << b_resp->bouquet_nr << ": " << b_resp->name << std::endl;
+	}
+
+	if (show_channels)
+	{
+		std::vector<CZapitClient::responseGetBouquetChannels>::iterator ch_resp;
+		for (ch_resp = channels.begin(), count = 1; ch_resp < channels.end(); ch_resp++, count++)
+			cout << count << ": " << ch_resp->name << "(" << ch_resp->onid_sid << ")" << endl;
+	}
+
+	if (zap)
+	{
+		std::cout << "zapping to bouquet " << bouquets[bouquet].name << ", channel " << channels[channel].name << "." << endl;
 		zapit->zapTo(bouquet, channel);
 	}
 
-	/* bla */
 	std::cout << "this is the end... my only friend, the end..." << std::endl;
-
 	return 0;
 }
 
