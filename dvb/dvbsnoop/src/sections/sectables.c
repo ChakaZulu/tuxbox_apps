@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.7 2003/10/21 19:54:43 rasc Exp $
+$Id: sectables.c,v 1.8 2003/10/21 20:12:51 rasc Exp $
 
  --  For more information please see: ISO 13818 (-1) and ETSI 300 468
  -- Verbose Level >= 2
@@ -7,6 +7,9 @@ $Id: sectables.c,v 1.7 2003/10/21 19:54:43 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.8  2003/10/21 20:12:51  rasc
+no message
+
 Revision 1.7  2003/10/21 19:54:43  rasc
 no message
 
@@ -202,14 +205,14 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x02, 0x02,  decode_PMT	},
      {  0x03, 0x03,  decode_TSDT },
      /* res. */
-     {  0x3e, 0x3e,  decode_DATAGRAM_DSMCC	},
+     {  0x3e, 0x3e,  decode_DATAGRAM_DSMCC },
      {  0x40, 0x41,  decode_NIT	},
      {  0x42, 0x42,  decode_SDT	},
      /* res. */
      {  0x46, 0x46,  decode_SDT	},
      /* res. */
      {  0x4A, 0x4A,  decode_BAT	},
-     {  0x4C, 0x4C,  decode_INT_DSMCC	},
+     {  0x4C, 0x4C,  decode_INT_DSMCC },
      {  0x4E, 0x6E,  decode_EIT	},  /*  4 different types */
      {  0x70, 0x70,  decode_TDT },
      {  0x71, 0x71,  decode_RST },

@@ -4,5 +4,5 @@ noinst_LIBRARIES = libdatacarousel.a
 
 noinst_HEADERS = datagram.h ints.h
 
-libdatacarousel_a_SOURCES = datagram.c ints.h
+libdatacarousel_a_SOURCES = datagram.c ints.c
 
