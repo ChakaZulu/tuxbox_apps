@@ -3339,6 +3339,7 @@ static eString save_userBouquets(eString request, eString dirpath, eString opt, 
 
 static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	eString result;
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 
 	eString mode = opt["mode"];
@@ -3353,9 +3354,13 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	eServiceReference current_service = string2ref(spath);
 
 	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
+	{
 		playService(current_service);
-
-	return closeWindow(content, "Please wait...", 3000);
+		result = closeWindow(content, "Please wait...", 3000);
+	}
+	else
+		result = getZapContent3("zap", spath);
+	return result;
 }
 
 #if 0

@@ -31,7 +31,7 @@ function switchChannel(xy, bouquet, channel)
 		}
 		else
 		{
-			document.location = "?path="+xy;
+			document.location = "/cgi-bin/zapTo?path="+xy;
 			setTimeout("zapBodyReload()", 3000);
 		}
 	}
