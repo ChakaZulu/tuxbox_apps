@@ -93,7 +93,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		int				recordingstatus;
 		int				recording_id;
 		CTimerd::RecordingInfo* nextRecordingInfo;
-		//		bool				record_mode;
+		//bool				record_mode;
 
 		long long 			standby_pressed_at;
 
@@ -169,7 +169,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings, CMenuWidget &networkSettings,
 		                  CMenuWidget &colorSettings, CMenuWidget &lcdSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
 		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service, CMenuWidget &fontSettings,
-                        CMenuWidget &mp3picSettings);
+                        	  CMenuWidget &mp3picSettings);
 		void ClearFrameBuffer();
 		void SetupFonts();
 		void SetupTiming();
@@ -188,7 +188,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 	public:
 		const CScanSettings& getScanSettings(){ return scanSettings;};
 
-		CChannelList				*channelList;
+		CChannelList			*channelList;
 		CNetworkConfig                  networkConfig;
 
 		static CNeutrinoApp* getInstance();

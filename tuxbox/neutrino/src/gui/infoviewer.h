@@ -103,7 +103,7 @@ class CInfoViewer
 
 	void	start();
 
-	void	showTitle(const int ChanNum, const std::string Channel, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false); // Channel must be UTF-8 encoded
+	void	showTitle(const int ChanNum, const std::string Channel, const std::string Satellite, const t_channel_id new_channel_id = 0, const bool calledFromNumZap = false); // Channel must be UTF-8 encoded
 	void	killTitle();
 	CSectionsdClient::CurrentNextInfo getEPG(const t_channel_id for_channel_id);
 	

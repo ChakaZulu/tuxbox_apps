@@ -319,6 +319,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.show_camwarning = configfile.getInt32( "show_camwarning", 1 );
 	strcpy(g_settings.record_safety_time_before, configfile.getString( "record_safety_time_before", "00").c_str());
 	strcpy(g_settings.record_safety_time_after, configfile.getString( "record_safety_time_after", "00").c_str());
+	g_settings.infobar_sat_display = configfile.getInt32( "infobar_sat_display", true );
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
@@ -503,8 +504,8 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
 	
-   g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
-   g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
+   	g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
+   	g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
 
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
@@ -547,6 +548,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "show_camwarning", g_settings.show_camwarning );
 	configfile.setString( "record_safety_time_before", g_settings.record_safety_time_before );
 	configfile.setString( "record_safety_time_after", g_settings.record_safety_time_after );
+	configfile.setInt32( "infobar_sat_display", g_settings.infobar_sat_display );
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
@@ -797,7 +799,7 @@ void CNeutrinoApp::channelsInit()
 	g_Zapit->getChannels(zapitChannels, CZapitClient::MODE_CURRENT, CZapitClient::SORT_BOUQUET, true); // UTF-8
 	for(uint i=0; i<zapitChannels.size(); i++)
 	{
-		channelList->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].channel_id); // UTF-8
+		channelList->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].satellite, zapitChannels[i].channel_id); // UTF-8
 	}
 	dprintf(DEBUG_DEBUG, "got channels\n");
 
@@ -1244,7 +1246,7 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( new CMenuSeparator() );
 	mp3PicSettings.addItem( new CMenuForwarder("menu.back") );
 	
-   CMenuOptionChooser *oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
+   	CMenuOptionChooser *oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
 	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
 	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
 	oj->addOption((int)CPictureViewer::NONE, "None");
@@ -1253,12 +1255,12 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( oj );
 	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
 	
-   oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
+   	oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
 	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title"); 
 	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, "mp3player.title_artist"); 
-   mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
+   	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
 	mp3PicSettings.addItem( oj );
-   oj = new CMenuOptionChooser("mp3player.follow", &g_settings.mp3player_follow, true );
+  	oj = new CMenuOptionChooser("mp3player.follow", &g_settings.mp3player_follow, true );
 	oj->addOption(0, "messagebox.no"); 
 	oj->addOption(1, "messagebox.yes"); 
 	mp3PicSettings.addItem( oj );
@@ -1318,6 +1320,11 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(2, "options.fb");
 		miscSettings.addItem( oj );
 	}
+	
+	CMenuOptionChooser *oj2 = new CMenuOptionChooser("miscsettings.infobar_sat_display", &g_settings.infobar_sat_display, true );
+	oj2->addOption(1, "options.on");
+	oj2->addOption(0, "options.off");
+	miscSettings.addItem( oj2 );
 
 	keySetupNotifier = new CKeySetupNotifier;
 	CStringInput*  keySettings_repeat_genericblocker= new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
@@ -2379,7 +2386,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 						( msg == NeutrinoMessages::SHOW_INFOBAR ) )
 			{
 				// show Infoviewer
-				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveChannel_ChannelID()); // UTF-8
+				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatelliteName(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
 			else if( ( msg >= CRCInput::RC_0 ) && ( msg <= CRCInput::RC_9 ))
 			{ //numeric zap
@@ -3367,7 +3374,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.438 2003/04/21 23:38:09 mws Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.439 2003/05/01 19:32:25 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();

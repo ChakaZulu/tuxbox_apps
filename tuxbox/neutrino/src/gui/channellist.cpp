@@ -50,11 +50,12 @@
 int info_height = 0;
 
 
-CChannelList::CChannel::CChannel(const int _key, const int _number, const std::string& _name, const t_channel_id ids)
+CChannelList::CChannel::CChannel(const int _key, const int _number, const std::string& _name, const std::string& _satellite, const t_channel_id ids)
 {
 	key                 = _key;
 	number              = _number;
 	name                = _name;
+	satellite	    = _satellite;
 	channel_id          = ids;
 	bAlwaysLocked       = false;
 	last_unlocked_EPGid = 0;
@@ -128,9 +129,9 @@ void CChannelList::updateEvents(void)
 			}
 }
 
-void CChannelList::addChannel(int key, int number, const std::string& name, t_channel_id ids)
+void CChannelList::addChannel(int key, int number, const std::string& name, const std::string& satellite, t_channel_id ids)
 {
-	chanlist.push_back(new CChannel(key, number, name, ids));
+	chanlist.push_back(new CChannel(key, number, name, satellite, ids));
 }
 
 void CChannelList::addChannel(CChannelList::CChannel* chan)
@@ -158,6 +159,14 @@ string CChannelList::getActiveChannelName()
 {
 	if (selected< chanlist.size())
 		return chanlist[selected]->name;
+	else
+		return "";
+}
+
+string CChannelList::getActiveSatelliteName()
+{
+	if (selected< chanlist.size())
+		return chanlist[selected]->satellite;
 	else
 		return "";
 }
@@ -395,7 +404,7 @@ bool CChannelList::showInfo(int pos)
 	}
 
 	CChannel* chan = chanlist[pos];
-	g_InfoViewer->showTitle(pos+1, chan->name, chan->channel_id, true); // UTF-8
+	g_InfoViewer->showTitle(pos+1, chan->name, chan->satellite, chan->channel_id, true); // UTF-8
 	return true;
 }
 

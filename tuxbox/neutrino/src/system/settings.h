@@ -49,6 +49,7 @@ struct SNeutrinoSettings
 	int show_camwarning;
 	char record_safety_time_before[3];
 	char record_safety_time_after[3];
+	int infobar_sat_display;
 
 	//audio
 	int audio_AnalogMode;

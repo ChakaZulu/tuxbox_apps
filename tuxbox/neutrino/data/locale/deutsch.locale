@@ -59,6 +59,7 @@ miscsettings.boxtype DBox Hersteller
 miscsettings.startneutrinodirect Neutrino direkt starten
 miscsettings.general Allgemein
 miscsettings.fb_destination EXPERT! Boot-Konsole
+miscsettings.infobar_sat_display Infobar Satellitenanzeige
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache

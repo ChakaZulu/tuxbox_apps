@@ -150,7 +150,7 @@ void CInfoViewer::showRecordIcon(const bool show)
 	}
 }
 
-void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const t_channel_id new_channel_id, const bool calledFromNumZap)
+void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const std::string Satellite, const t_channel_id new_channel_id, const bool calledFromNumZap)
 {
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
@@ -196,11 +196,27 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
         frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW);
         frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR);
 
-        //channel number
-        char strChanNum[10];
-        sprintf( (char*) strChanNum, "%d", ChanNum);
-        int ChanNumXPos = BoxStartX + ((ChanWidth - g_Fonts->infobar_number->getRenderWidth(strChanNum))>>1);
-        g_Fonts->infobar_number->RenderString(ChanNumXPos, BoxStartY+ChanHeight, ChanWidth, strChanNum, COL_INFOBAR);
+	if (!g_settings.infobar_sat_display)
+	{
+		//channel number
+        	char strChanNum[10];
+        	sprintf( (char*) strChanNum, "%d", ChanNum);
+        	int ChanNumXPos = BoxStartX + ((ChanWidth - g_Fonts->infobar_number->getRenderWidth(strChanNum))>>1);
+        	g_Fonts->infobar_number->RenderString(ChanNumXPos, BoxStartY+ChanHeight, ChanWidth, strChanNum, COL_INFOBAR);
+        }
+	else
+	{
+        	//channel number
+        	char strChanNum[10];
+        	sprintf( (char*) strChanNum, "%d", ChanNum);
+        	int ChanNumXPos = BoxStartX + ((ChanWidth - g_Fonts->infobar_number->getRenderWidth(strChanNum))>>1);
+        	g_Fonts->infobar_number->RenderString(ChanNumXPos, BoxStartY+ChanHeight + 10, ChanWidth, strChanNum, COL_INFOBAR);
+        
+       		//satellite
+        	printf("[infoviewer] satellite = %s\n", Satellite.c_str());
+        	int ChanSatXPos = BoxStartX + ((ChanWidth - g_Fonts->infobar_small->getRenderWidth(Satellite.c_str()))>>1);
+        	g_Fonts->infobar_small->RenderString(ChanSatXPos, BoxStartY + 22, ChanWidth, Satellite.c_str(), COL_INFOBAR);
+	}
 
         //infobox
         int ChanNameX = BoxStartX + ChanWidth + 10;

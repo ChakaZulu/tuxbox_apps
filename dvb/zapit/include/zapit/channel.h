@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.20 2003/03/14 07:31:50 obi Exp $
+ * $Id: channel.h,v 1.21 2003/05/01 19:33:08 digi_casi Exp $
  *
  * (C) 2002 Steffen Hehn <mcclean@berlios.de>
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
@@ -45,6 +45,8 @@ class CZapitChannel
 	private:
 		/* channel name */
 		std::string name;
+		/* satellite */
+		std::string satellite;
 
 		/* pids of this channel */
 		std::vector <CZapitAudioChannel *> audioChannels;
@@ -74,7 +76,7 @@ class CZapitChannel
 
 	public:
 		/* constructor, desctructor */
-		CZapitChannel(std::string p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC);
+		CZapitChannel(std::string p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, std::string p_satellite);
 		~CZapitChannel(void);
 
 		/* get methods - read only variables */
@@ -89,6 +91,7 @@ class CZapitChannel
 
 		/* get methods - read and write variables */
 		const std::string	getName(void)			const { return name; }
+		const std::string	getSatelliteName(void)		const { return satellite; }
 		unsigned char 		getAudioChannelCount(void)	{ return audioChannels.size(); }
 		unsigned short		getPcrPid(void)			{ return pcrPid; }
 		unsigned short		getPmtPid(void)			{ return pmtPid; }

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.306 2003/03/30 13:23:17 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.307 2003/05/01 19:33:09 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -258,7 +258,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	else {
 		thisChannel = new CZapitChannel(channel->getName(),
 					channel_id & 0xffff, (tsid_onid >> 16) & 0xffff,
-					tsid_onid & 0xffff, 1, frontend->getDiseqcPosition());
+					tsid_onid & 0xffff, 1, frontend->getDiseqcPosition(), channel->getSatelliteName());
 	}
 
 	/* search pids if they are unknown */
@@ -949,7 +949,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					    msgAddSubService.transport_stream_id,
 					    original_network_id,
 					    1,
-					    channel->getDiSEqC()
+					    channel->getDiSEqC(),
+					    channel->getSatelliteName()
 					)
 				)
 			);
@@ -1099,6 +1100,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 
 		CZapitClient::responseGetBouquetChannels response;
 		strncpy(response.name, ((*channels)[i]->getName()).c_str(), 30);
+		strncpy(response.satellite, ((*channels)[i]->getSatelliteName()).c_str(), 30);
 		response.channel_id = (*channels)[i]->getChannelID();
 		response.nr = first_channel_nr + i;
 		response.service_type = (*channels)[i]->getServiceType();
@@ -1426,7 +1428,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.306 2003/03/30 13:23:17 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.307 2003/05/01 19:33:09 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
