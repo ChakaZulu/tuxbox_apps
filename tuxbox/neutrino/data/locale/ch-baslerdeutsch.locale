@@ -262,7 +262,6 @@ fontmenu.eventlist Eventlist
 fontmenu.gamelist Gameliste
 fontmenu.head Schriftgrössen Iischdellige
 fontmenu.infobar Infobar
-fontsize.alert Alert
 fontsize.channellist Kanallischde
 fontsize.channellist_descr Beschriebig
 fontsize.channellist_number Nummere
@@ -363,7 +362,6 @@ lcdmenu.statusline.volume Lutstärki
 mainmenu.games Spiele
 mainmenu.head Haupdmenü
 mainmenu.movieplayer Movieplayer
-mainmenu.mp3player MP3 Player
 mainmenu.pausesectionsd EPG uss'läse
 mainmenu.pictureviewer Bildbedrachder
 mainmenu.radiomode Radio-Modus
@@ -429,7 +427,6 @@ movieplayer.tsplayback TS Abspiele
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Paus/Widdr\nBLAU Bookmark setze\nd-box Ziit iiblände\nv Sprung\n1 ca. 1 Minute zruck\n3 ca. 1 Minute vor\n4 ca. 5 Minute zruck\n6 ca. 5 Minute vor\n7 ca. 10 Minute zruck\n9 ca. 10 Minute vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Funktion isch mit dr benutzte Version vom VLC nit möglich
-mp3picsettings.general MP3 Player / Bildbetrachter
 mp3player.add A'hänge
 mp3player.artist_title Interpret, Titel
 mp3player.defdir Start-Verz.
@@ -438,10 +435,8 @@ mp3player.deleteall Alles lösche
 mp3player.display_order Anzeig'
 mp3player.fastforward schnälle Vorl.
 mp3player.follow Selektiere akt. Track
-mp3player.head Mp3
 mp3player.id3scan scänn ID3-Tags
 mp3player.keylevel Taschde-Umschaldig
-mp3player.name MP3 Player
 mp3player.pause Pause
 mp3player.play Abspiele
 mp3player.playing aktuelle track

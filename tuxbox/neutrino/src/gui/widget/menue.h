@@ -118,10 +118,10 @@ class CMenuItem
 
 class CMenuSeparator : public CMenuItem
 {
-		int		type;
+		int               type;
 
 	public:
-		std::string	text;
+		neutrino_locale_t text;
 
 		enum
 		{
@@ -134,10 +134,12 @@ class CMenuSeparator : public CMenuItem
 		};
 
 
-		CMenuSeparator(const int Type = 0, const char * const Text = NULL); // UTF-8
+		CMenuSeparator(const int Type = 0, const neutrino_locale_t Text = NONEXISTANT_LOCALE);
 
 		int paint(bool selected=false);
 		int getHeight(void) const;
+
+		virtual const char * getString(void);
 };
 
 class CMenuForwarder : public CMenuItem

@@ -262,7 +262,6 @@ fontmenu.eventlist Lista eventi
 fontmenu.gamelist Lista Giochi
 fontmenu.head Impostazioni dei caratteri
 fontmenu.infobar Infobar
-fontsize.alert Allerta
 fontsize.channellist Lista canali
 fontsize.channellist_descr descrizione
 fontsize.channellist_number Nummero
@@ -363,7 +362,6 @@ lcdmenu.statusline.volume Volume
 mainmenu.games Giochi
 mainmenu.head Menu Principale
 mainmenu.movieplayer Movieplayer
-mainmenu.mp3player Mp3player 
 mainmenu.pausesectionsd Leggere EPG
 mainmenu.pictureviewer Lettore immaggini
 mainmenu.radiomode Modo-Radio
@@ -429,7 +427,6 @@ movieplayer.tsplayback TS playback
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROSSo/Home Stop\nVERDE Resync\nGIALLO Pausa/avanti\nBLU Inserire Bookmark\n1 ca. 1 Minuto indietro\n3 ca. 1 Minuto avanti\n4 ca. 5 Minuti indietro\n6 ca. 5 Minuti avanti\n7 ca. 10 Minuti indietro\n9 ca. 10 Minuti avanti\nAiuto: http://www.giggo.de/dbox2/movieplayer.html\nmovieplayer.toomanybookmarks Ha Inserito troppi Bookmarks.\nprima cancellare uno vecchio.
 movieplayer.wrongvlcversion Funzione con questa Versione di VLC non possibbile
-mp3picsettings.general MP3 Player / Visore Immaggine
 mp3player.add aggiungi
 mp3player.artist_title Artista, Titolo
 mp3player.defdir Start-Directory.
@@ -438,10 +435,8 @@ mp3player.deleteall Cancella tutti
 mp3player.display_order Visore
 mp3player.fastforward Avanti svelto
 mp3player.follow Selezionare Track attuale
-mp3player.head Mp3
 mp3player.id3scan leggo ID3-Tags
 mp3player.keylevel Cambio-Tasti
-mp3player.name MP3 Player
 mp3player.pause Pausa
 mp3player.play play 
 mp3player.playing Brano attuale

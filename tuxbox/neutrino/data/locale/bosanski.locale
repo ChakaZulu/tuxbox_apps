@@ -262,7 +262,6 @@ fontmenu.eventlist lista događaja
 fontmenu.gamelist lista igara
 fontmenu.head namješćenje veličine slova
 fontmenu.infobar informativna traka
-fontsize.alert uzbuna
 fontsize.channellist lista kanala
 fontsize.channellist_descr opis
 fontsize.channellist_number broj
@@ -363,7 +362,6 @@ lcdmenu.statusline.volume glasnost
 mainmenu.games igre
 mainmenu.head glavni izbor
 mainmenu.movieplayer promatrač filmova
-mainmenu.mp3player mp3 igrač
 mainmenu.pausesectionsd čitati epg
 mainmenu.pictureviewer promatrač slika
 mainmenu.radiomode radio
@@ -429,7 +427,6 @@ movieplayer.tsplayback odigrati ts
 movieplayer.vcdplayback (s)vcd
 movieplayer.vlchelp crveno/kuci stop\nzeleno resync\nzuto pausa/dalje\nplavo zapamtiti mjesto\n1 oko 1 minuta nazad\n3 oko 1 minuta naprijed\n4 oko 5 minuta nazad\n6 oko5 minuta naprijed\n7 oko 10 minuta nazad\n9 oko 10 minuta naprijed\npomoc:http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion funkcije nije moguca sa trenutacno upotrijebito verziji vlca
-mp3picsettings.general mp3 igrač / promatrač slika
 mp3player.add dodati
 mp3player.artist_title pjevač, pjesma
 mp3player.defdir pocetni direktorij
@@ -438,10 +435,8 @@ mp3player.deleteall sve izbrisati
 mp3player.display_order redoslijed
 mp3player.fastforward brzo naprijed
 mp3player.follow izabjere ovu pjesmu
-mp3player.head mp3 lista
 mp3player.id3scan čitaj id3-tag
 mp3player.keylevel promijeniti tipke
-mp3player.name mp3 igrač
 mp3player.pause pauza
 mp3player.play igrati
 mp3player.playing pjesma

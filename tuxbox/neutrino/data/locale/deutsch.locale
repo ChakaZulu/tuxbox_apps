@@ -99,6 +99,9 @@ audiomenu.monoleft mono links
 audiomenu.monoright mono rechts
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayerpicsettings.general Audioplayer / Bildbetrachter
+audioplayer.head Audio Playlist
+audioplayer.name Audioplayer
 bookmarkmanager.delete Löschen
 bookmarkmanager.name Bookmarks
 bookmarkmanager.rename Umbenennen
@@ -268,7 +271,6 @@ fontmenu.eventlist Eventlist
 fontmenu.gamelist Gameliste
 fontmenu.head Schriftgrössen Einstellungen
 fontmenu.infobar Infobar
-fontsize.alert Alert
 fontsize.channel_num_zap Direktauswahl
 fontsize.channellist Kanalliste
 fontsize.channellist_descr Beschreibung
@@ -367,10 +369,10 @@ lcdmenu.statusline Statuszeile
 lcdmenu.statusline.both Lautstärke / Fortschritt
 lcdmenu.statusline.playtime Sendungsfortschritt
 lcdmenu.statusline.volume Lautstärke
+mainmenu.audioplayer Audioplayer
 mainmenu.games Spiele
 mainmenu.head Hauptmenü
 mainmenu.movieplayer Movieplayer
-mainmenu.mp3player Audioplayer
 mainmenu.pausesectionsd EPG auslesen
 mainmenu.pictureviewer Bildbetrachter
 mainmenu.radiomode Radio-Modus
@@ -440,7 +442,6 @@ movieplayer.tsplayback TS Abspielen
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Pause/Weiter\nBLAU Bookmark setzen\nd-box Zeit einblenden\nv Sprung\n1 ca. 1 Minute zurück\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zurück\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zurück\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Funktion ist mit der benutzten Version des VLC nicht möglich
-mp3picsettings.general Audioplayer / Bildbetrachter
 mp3player.add Hinzufügen
 mp3player.artist_title Interpret, Titel
 mp3player.defdir Start-Verz.
@@ -449,11 +450,9 @@ mp3player.deleteall Alle löschen
 mp3player.display_order Anzeige
 mp3player.fastforward schneller Vorl.
 mp3player.follow Selektiere akt. Track
-mp3player.head Audio Playlist
 mp3player.highprio Hohe Decodier-Priorität
 mp3player.id3scan Scanne ID3-Tags
 mp3player.keylevel Tasten-Umschaltung
-mp3player.name Audioplayer
 mp3player.pause Pause
 mp3player.play Abspielen
 mp3player.playing Aktueller Track
@@ -463,9 +462,11 @@ mp3player.shuffle Shuffle
 mp3player.stop Stopp
 mp3player.title_artist Titel, Interpret
 networkmenu.broadcast Broadcast
+networkmenu.dhcp DHCP
 networkmenu.gateway Standard Gateway
 networkmenu.head Netzwerk Einstellungen
 networkmenu.ipaddress IP-Adresse
+networkmenu.mount NFS/CIFS
 networkmenu.nameserver Nameserver
 networkmenu.netmask Netzmaske
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen

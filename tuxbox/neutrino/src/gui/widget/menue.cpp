@@ -768,19 +768,23 @@ int CMenuForwarder::paint(bool selected)
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuSeparator::CMenuSeparator(const int Type, const char * const Text)
+CMenuSeparator::CMenuSeparator(const int Type, const neutrino_locale_t Text)
 {
 	directKey = CRCInput::RC_nokey;
 	iconName = "";
-	type = Type;
-
-	text = Text ? Text : "";
+	type     = Type;
+	text     = Text;
 }
 
 
 int CMenuSeparator::getHeight(void) const
 {
-	return text.empty() ? 10 : g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	return (text == NONEXISTANT_LOCALE) ? 10 : g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+}
+
+const char * CMenuSeparator::getString(void)
+{
+	return g_Locale->getText(text);
 }
 
 int CMenuSeparator::paint(bool selected)
@@ -790,33 +794,38 @@ int CMenuSeparator::paint(bool selected)
 	height = getHeight();
 	
 	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT_PLUS_0);
-	if(type&LINE)
+	if ((type & LINE))
 	{
 		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1), COL_MENUCONTENT_PLUS_3);
 		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1)+1, COL_MENUCONTENT_PLUS_1);
 	}
-	if(type&STRING)
+	if ((type & STRING))
 	{
-		int stringstartposX;
-		const char * l_text = g_Locale->getText(text.c_str()); // FIXME
-		int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_text, true); // UTF-8
 
-		/* if no alignment is specified, align centered */
-		if (type & ALIGN_LEFT)
-			stringstartposX = x + 20;
-		else if (type & ALIGN_RIGHT)
-			stringstartposX = x + dx - stringwidth - 20;
-		else /* ALIGN_CENTER */
-			stringstartposX = x + (dx >> 1) - (stringwidth >> 1);
-
-		frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT_PLUS_0);
-
-		g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
-
-		if(selected)
+		if (text != NONEXISTANT_LOCALE)
 		{
-			CLCD::getInstance()->showMenuText(0, l_text, -1, true); // UTF-8
-			CLCD::getInstance()->showMenuText(1, "", -1, true); // UTF-8
+			int stringstartposX;
+
+			const char * l_text = getString();
+			int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_text, true); // UTF-8
+
+			/* if no alignment is specified, align centered */
+			if (type & ALIGN_LEFT)
+				stringstartposX = x + 20;
+			else if (type & ALIGN_RIGHT)
+				stringstartposX = x + dx - stringwidth - 20;
+			else /* ALIGN_CENTER */
+				stringstartposX = x + (dx >> 1) - (stringwidth >> 1);
+
+			frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT_PLUS_0);
+
+			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
+
+			if (selected)
+			{
+				CLCD::getInstance()->showMenuText(0, l_text, -1, true); // UTF-8
+				CLCD::getInstance()->showMenuText(1, "", -1, true); // UTF-8
+			}
 		}
 	}
 	return y+ height;

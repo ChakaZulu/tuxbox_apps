@@ -265,7 +265,6 @@ fontmenu.eventlist Список событий
 fontmenu.gamelist Список игр
 fontmenu.head Настройки размера шрифтов
 fontmenu.infobar Инфопанель
-fontsize.alert Тревога
 fontsize.channel_num_zap keine Ahnung
 fontsize.channellist Список каналов
 fontsize.channellist_descr Описание
@@ -367,7 +366,6 @@ lcdmenu.statusline.volume громкость
 mainmenu.games Игры
 mainmenu.head Главное Меню
 mainmenu.movieplayer Видеоплеер
-mainmenu.mp3player MP3 Player
 mainmenu.pausesectionsd Чтение EPG
 mainmenu.pictureviewer Просмотр изображений
 mainmenu.radiomode Radio-режим
@@ -436,7 +434,6 @@ movieplayer.tsplayback Play TS
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp КРАСНАЯ/Home Стоп\nЗЕЛЕНАЯ Ресинхронизазия\nЖЕЛТАЯ Пауза/Продолжить\nСИНЯЯ Create bookmark\nd-box время высветить\n1 примерно на 1 мин. назад\n3 пропустить около 1 мин.\n4 примерно на 5 мин. назад \n6 пропустить около 5 мин.\n7 примерно на 10 мин. назад\n9 пропустить около 10 мин.\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Эта функция не поддерживается текущей версией VLC 
-mp3picsettings.general MP3 плеер / картинки
 mp3player.add Добавить
 mp3player.artist_title Артист, Название
 mp3player.defdir Начальная директория.
@@ -445,11 +442,9 @@ mp3player.deleteall Удалить все
 mp3player.display_order Сортировка
 mp3player.fastforward fast forw.
 mp3player.follow auto Выбрать текущую
-mp3player.head Mp3 плейлист
 mp3player.highprio высокая декодировка
 mp3player.id3scan Сканировать ID3 теги
 mp3player.keylevel key level
-mp3player.name MP3 плеер
 mp3player.pause Пауза
 mp3player.play Играть
 mp3player.playing Текущий трек

@@ -136,10 +136,6 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 				}
 			} while ( ( pos != -1 ) );
 
-#warning cam.wrong is defined as locale but never used
-#warning dhcp     is missing in locales (used in neutrino.cpp)
-#warning NFS/CIFS is missing in locales (used in neutrino.cpp)
-
 			localeData[buf] = text;
 		}
 	}

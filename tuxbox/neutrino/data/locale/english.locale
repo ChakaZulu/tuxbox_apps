@@ -99,6 +99,9 @@ audiomenu.monoleft mono left
 audiomenu.monoright mono right
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayerpicsettings.general audioplayer / picviewer
+audioplayer.head Audio Playlist
+audioplayer.name Audioplayer
 bookmarkmanager.delete delete
 bookmarkmanager.name bookmarks
 bookmarkmanager.rename rename
@@ -268,7 +271,6 @@ fontmenu.eventlist Eventlist
 fontmenu.gamelist Gamelist
 fontmenu.head Fontsize settings
 fontmenu.infobar Infobar
-fontsize.alert Alert
 fontsize.channel_num_zap direct selection
 fontsize.channellist Channellist
 fontsize.channellist_descr Description
@@ -367,10 +369,10 @@ lcdmenu.statusline status line
 lcdmenu.statusline.both volume / playtime
 lcdmenu.statusline.playtime playtime
 lcdmenu.statusline.volume volume
+mainmenu.audioplayer Audioplayer
 mainmenu.games Games
 mainmenu.head Main Menu
 mainmenu.movieplayer Movieplayer
-mainmenu.mp3player Audioplayer
 mainmenu.pausesectionsd Read EPG
 mainmenu.pictureviewer Picture viewer
 mainmenu.radiomode Radio-Mode
@@ -440,7 +442,6 @@ movieplayer.tsplayback Play TS
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp Red/Home Stop\nGREEN Resync\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion This feature is not support by your current version of VLC
-mp3picsettings.general audioplayer / picviewer
 mp3player.add Add
 mp3player.artist_title Artist, Title
 mp3player.defdir start dir.
@@ -449,11 +450,9 @@ mp3player.deleteall delete all
 mp3player.display_order display order
 mp3player.fastforward fast forw.
 mp3player.follow auto select current
-mp3player.head Audio Playlist
 mp3player.highprio High decode priority
 mp3player.id3scan Scanning ID3 tags
 mp3player.keylevel key level
-mp3player.name Audioplayer
 mp3player.pause pause
 mp3player.play Play
 mp3player.playing Current Track
@@ -463,11 +462,13 @@ mp3player.shuffle shuffle
 mp3player.stop Stop
 mp3player.title_artist Title, Artist
 networkmenu.broadcast Broadcast
-networkmenu.gateway Default Gateway
+networkmenu.dhcp DHCP
+networkmenu.gateway default gateway
 networkmenu.head Network Settings
-networkmenu.ipaddress IP-Address
-networkmenu.nameserver Nameserver
-networkmenu.netmask Netmask
+networkmenu.ipaddress IP address
+networkmenu.mount NFS/CIFS
+networkmenu.nameserver name server
+networkmenu.netmask netmask
 networkmenu.setupnow setup network now
 networkmenu.setuponstartup setup network on startup
 networkmenu.show show active network settings

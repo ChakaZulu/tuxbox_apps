@@ -154,6 +154,7 @@ bool CFlashUpdate::selectHttpImage(void)
 		}
 		updates_lists.push_back(url.substr(startpos, endpos - startpos));
 
+#warning CMenuSeparator expects neutrino_locale_t as second argument!
 		SelectionWidget.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, updates_lists.rbegin()->c_str()));
 		
 		if (httpTool.downloadFile(url, gTmpPath LIST_OF_UPDATES_LOCAL_FILENAME, 20))

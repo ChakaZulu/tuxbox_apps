@@ -41,6 +41,26 @@
 #include <gui/color.h>
 
 
+class CKeyValue : public CMenuSeparator
+{
+	std::string the_text;
+public:
+	int         keyvalue;
+
+	CKeyValue() : CMenuSeparator(CMenuSeparator::STRING, LOCALE_KEYCHOOSERMENU_CURRENTKEY)
+		{
+		};
+
+	virtual const char * getString(void)
+		{
+			the_text  = g_Locale->getText(LOCALE_KEYCHOOSERMENU_CURRENTKEY);
+			the_text += ": ";
+			the_text += CRCInput::getKeyName(keyvalue);
+			return the_text.c_str();
+		};
+};
+
+
 
 CKeyChooser::CKeyChooser( int* Key, const char * const title, const std::string & Icon )
 		: CMenuWidget(title, Icon)
@@ -50,7 +70,7 @@ CKeyChooser::CKeyChooser( int* Key, const char * const title, const std::string 
 	keyChooser = new CKeyChooserItem(LOCALE_KEYCHOOSER_HEAD, key);
 	keyDeleter = new CKeyChooserItemNoKey(key);
 
-	addItem( new CMenuSeparator(CMenuSeparator::STRING, " ") );
+	addItem(new CKeyValue());
 	addItem(GenericMenuSeparatorLine);
 	addItem(GenericMenuBack);
 	addItem(GenericMenuSeparatorLine);
@@ -68,10 +88,7 @@ CKeyChooser::~CKeyChooser()
 
 void CKeyChooser::paint()
 {
-	std::string * text = &(((CMenuSeparator *)(items[0]))->text);
-	*text = g_Locale->getText(LOCALE_KEYCHOOSERMENU_CURRENTKEY);
-	(*text) += ": ";
-	(*text) += CRCInput::getKeyName(*key);
+	(((CKeyValue *)(items[0]))->keyvalue) = *key;
 
 	CMenuWidget::paint();
 }

@@ -99,6 +99,7 @@ audiomenu.monoleft mono links
 audiomenu.monoright mono rechts
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayerpicsettings.general Musi spuin / Buidl schaugn
 bookmarkmanager.delete Löschn
 bookmarkmanager.name Lesezeichn
 bookmarkmanager.rename Umbnenna
@@ -262,7 +263,6 @@ fontmenu.eventlist Eventlistn
 fontmenu.gamelist Spuilistn
 fontmenu.head Schriftgrössn Eistellunga
 fontmenu.infobar Infoleistn
-fontsize.alert Alarm
 fontsize.channellist Kanallistn
 fontsize.channellist_descr Beschreibung
 fontsize.channellist_number Numma
@@ -363,7 +363,6 @@ lcdmenu.statusline.volume Lautstärkn
 mainmenu.games Spuin
 mainmenu.head Hauptmenü
 mainmenu.movieplayer Fuimspuia
-mainmenu.mp3player MP3 Player
 mainmenu.pausesectionsd EPG aussalesn
 mainmenu.pictureviewer Buidlschauga
 mainmenu.radiomode Radio hern
@@ -429,7 +428,6 @@ movieplayer.tsplayback TS Abspuin
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROT/Hoam Stop\nGREA Resync\nGELB Pause/Weida\nBLAU Merkal setzn\n1 ca. 1 Minutn zruck\n3 ca. 1 Minutn viri\n4 ca. 5 Minutn zruck\n6 ca. 5 Minutn viri\n7 ca. 10 Minutn zruck\n9 ca. 10 Minutn viri\nHuif: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Des is mit ehnara VLC-Version ne drin
-mp3picsettings.general Musi spuin / Buidl schaugn
 mp3player.add dazuadoa
 mp3player.artist_title Interpret, Titl
 mp3player.defdir Start-Verz.
@@ -438,10 +436,8 @@ mp3player.deleteall olle löschn
 mp3player.display_order Ozoagn
 mp3player.fastforward schnei vieri
 mp3player.follow aktuelle Liad
-mp3player.head Mp3 Playlistn
 mp3player.id3scan ID3-Tags durchsuacha
 mp3player.keylevel Tasdn-Umschoitung
-mp3player.name MP3 Spuia
 mp3player.pause Pause
 mp3player.play obspuin
 mp3player.playing Spuin
