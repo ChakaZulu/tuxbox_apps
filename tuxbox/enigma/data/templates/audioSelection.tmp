@@ -2,16 +2,22 @@
 	<head>
 		<title>Audio Channel Selection</title>
 		<link rel="stylesheet" type="text/css" href="webif.css">
+		<script>
+			function audioChange()
+			{
+				var i = document.audioselector.audio.selectedIndex;
+				var audioPID = document.audioselector.audio.options[i].value;
+				document.location = "/cgi-bin/setAudio?audio="+audioPID;
+			}
+		</script>
 	</head>
 	<body>
 		Please select audio channel:
 		<br>
-		<form action="/cgi-bin/setAudio">
-			<select name="audio" size="1">
+		<form name="audioselector">
+			<select name="audio" size="1" onChange=audioChange()>
 				#AUDIOCHANS#
 			</select>
-			&nbsp;&nbsp;
-			<input type="submit" value="  Select  ">
 		</form>
 	</body>
 </html>
