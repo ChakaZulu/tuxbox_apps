@@ -152,6 +152,7 @@ void CScanTs::startScan()
 
 		sendmessage.version=1;
 		sendmessage.param2=g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk;
+		printf("sending scanparam: %d\n", sendmessage.param2 );
 		sendmessage.cmd = 'g';
 
 		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -196,7 +197,13 @@ int CScanTs::exec(CMenuTarget* parent, string)
     sectionsdPauseScanning(1);
 	startScan();
 	
-	char buf[100];
+	char strServices[100] = "";
+	char strTransponders[100] = "";
+	char strSatellite[100] = "";
+	char strLastServices[100] = "";
+	char strLastTransponders[100] = "";
+	char strLastSatellite[100] = "";
+
 	int ts = 0;
 	int services = 0;
 	short sat = 0;
@@ -233,14 +240,22 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		pos = (pos+1)%10;
 		g_FrameBuffer->paintIcon8(filename, x+300,ypos+15, 20);
 
-		sprintf(buf, "%d", ts);
-		g_FrameBuffer->paintBoxRel(xpos1, ypos, 80, mheight, COL_MENUCONTENT);
-		g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, buf, COL_MENUCONTENT); 
+		sprintf(strTransponders, "%d", ts);
+		if(strcmp(strLastTransponders, strTransponders)!=0)
+		{
+			g_FrameBuffer->paintBoxRel(xpos1, ypos, 80, mheight, COL_MENUCONTENT);
+			g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, strTransponders, COL_MENUCONTENT); 
+			strcpy(strLastTransponders, strTransponders);
+		}
 		ypos+= mheight;
 
-		sprintf(buf, "%d", services);
-		g_FrameBuffer->paintBoxRel(xpos2, ypos, 80, mheight, COL_MENUCONTENT);
-		g_Fonts->menu->RenderString(xpos2, ypos+ mheight, width, buf, COL_MENUCONTENT);
+		sprintf(strServices, "%d", services);
+		if(strcmp(strLastServices,strServices)!=0)
+		{
+			g_FrameBuffer->paintBoxRel(xpos2, ypos, 80, mheight, COL_MENUCONTENT);
+			g_Fonts->menu->RenderString(xpos2, ypos+ mheight, width, strServices, COL_MENUCONTENT);
+			strcpy(strLastServices,strServices);
+		}
 		ypos+= mheight;
 
 		if (atoi(getenv("fe"))==1)
@@ -248,23 +263,26 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			switch (sat)
 			{
 				case 1: 
-					strcpy(buf, g_Locale->getText("scants.astra").c_str() );
+					strcpy(strSatellite, g_Locale->getText("scants.astra").c_str() );
 					break;
 				case 2: 
-					strcpy(buf, g_Locale->getText("scants.hotbird").c_str() );
+					strcpy(strSatellite, g_Locale->getText("scants.hotbird").c_str() );
 					break;
 				case 4: 
-					strcpy(buf, g_Locale->getText("scants.kopernikus").c_str() );
+					strcpy(strSatellite, g_Locale->getText("scants.kopernikus").c_str() );
 					break;
 				case 8: 
-					strcpy(buf, g_Locale->getText("scants.digituerk").c_str() );
+					strcpy(strSatellite, g_Locale->getText("scants.digituerk").c_str() );
 					break;
 				default:
-					strcpy(buf,"unknown");
+					strcpy(strSatellite,"unknown");
 			}
-			sprintf(buf, "%d", sat);
-			g_FrameBuffer->paintBoxRel(xpos3, ypos, 80, mheight, COL_MENUCONTENT);
-			g_Fonts->menu->RenderString(xpos3, ypos+ mheight, width, buf, COL_MENUCONTENT);
+			if(strcmp(strLastSatellite,strSatellite)!=0)
+			{
+				g_FrameBuffer->paintBoxRel(xpos3, ypos, 80, mheight, COL_MENUCONTENT);
+				g_Fonts->menu->RenderString(xpos3, ypos+ mheight, width, strSatellite, COL_MENUCONTENT);
+				strcpy(strLastSatellite,strSatellite);
+			}
 		}
 
 		//g_RCInput->getKey(190);
