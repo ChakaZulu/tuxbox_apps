@@ -488,6 +488,7 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 	eString requester = opt["requester"];
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache";
 
 	eString audioChannels;
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
@@ -563,6 +564,7 @@ eString getCurrentSubChannel(eString curServiceRef)
 static eString selectSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache";
 	eString subChannels;
 
 	eString curServiceRef = ref2string(eServiceInterface::getInstance()->service);
@@ -725,7 +727,7 @@ static eString getZapNavi(eString mode, eString path)
 	result += button(100, "Radio", GREEN, "?path=" + zap[ZAPMODERADIO][ZAPMODECATEGORY]);
 	result += button(100, "Data", BLUE, "?path=" + zap[ZAPMODEDATA][ZAPMODECATEGORY]);
 #ifndef DISABLE_FILE
-	result += button(100, "Recordings", OCKER,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
+	result += button(100, "Movies", OCKER,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
 #endif
 	result += "<br><br>";
 	return result;
@@ -763,7 +765,9 @@ static eString getLeftNavi(eString mode, eString path)
 			result += button(110, "Data", LEFTNAVICOLOR, "?path=;0:7:6:0:0:0:0:0:0:0:");
 #ifndef DISABLE_FILE
 			result += "<br>";
-			result += button(110, "Recordings", LEFTNAVICOLOR, "?path=;4097:7:0:1:0:0:0:0:0:0:");
+			result += button(110, "Root", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2f");
+			result += "<br>";
+			result += button(110, "Movies", LEFTNAVICOLOR, "?path=;4097:7:0:1:0:0:0:0:0:0:");
 #endif
 		}
 	}
@@ -3966,6 +3970,7 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	// TODO: check if ( type & ePlaylistEntry::isRepeating )
 	// .. then load another template.. with checkboxes for weekdays..
 	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
+	result.strReplace("#CSS#", (pdaScreen == 0) ? "webif.css" : "webif_small.css");
 
 	result.strReplace("#AFTERTEXT#", _("After Event:"));
 	result.strReplace("#AFTEROPTS#", buildAfterEventOpts(evType));
@@ -4003,10 +4008,11 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 	tm end = *localtime(&now);
 
 	eString result = readFile(TEMPLATE_DIR + "addTimerEvent.tmp");
+	result.strReplace("#CSS#", (pdaScreen == 0) ? "webif.css" : "webif_small.css");
 
 	result.strReplace("#AFTERTEXT#", _("After Event:"));
 	result.strReplace("#AFTEROPTS#", buildAfterEventOpts(0));
-	
+
 	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
 	result.strReplace("#SMONTHOPTS#", genOptions(1, 12, 1, start.tm_mon + 1));
 	result.strReplace("#SHOUROPTS#", genOptions(0, 23, 1, start.tm_hour));
@@ -4018,6 +4024,8 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
 
 	result.strReplace("#ZAPDATA#", getZapContent2("zap", zap[ZAPMODETV][ZAPSUBMODEBOUQUETS]));
+	if (pdaScreen == 1)
+		result = "<html><head><title>Info</title></head><body>This function is not available for PDAs.</body></html>";
 
 	return result;
 }

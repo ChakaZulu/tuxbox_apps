@@ -8,7 +8,6 @@
 				var i = document.audioselector.audio.selectedIndex;
 				var audioPID = document.audioselector.audio.options[i].value;
 				document.location = "/cgi-bin/setAudio?audio="+audioPID;
-				setTime("window.location.reload()", 100);
 			}
 		</script>
 	</head>

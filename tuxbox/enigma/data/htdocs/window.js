@@ -1,10 +1,5 @@
 function NewWindow(mypage, myname, w, h, scroll, timeout)
 {
-	if (screen.width < 800)
-	{
-		w = w / 2;
-		h = h / 2;
-	}
 	var winl = (screen.width - w) / 2;
 	var wint = (screen.height - h) / 2;
 	winprops = 'height='+h+', width='+w+', top='+wint+', left='+winl+', scrollbars='+scroll+', resizable'

@@ -21,12 +21,11 @@ function switchChannel(xy, bouquet, channel)
 	if (window.screen.width < 800)
 	{
 		NewWindow('/cgi-bin/zapTo?path='+xy+'&curBouquet='+bouquet+'&curChannel='+channel, 'zap', '1', '1', 'no');
-		setTimeout("reload()", 3000);
 	}
 	else
 	{
 		document.location = "/cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
-		setTimeout("zapHeaderReload()", 100);
+		setTimeout("zapHeaderReload()", 3000);
 	}
 }
 
@@ -37,7 +36,6 @@ function deleteMovie(xy)
 		if (window.screen.width < 800)
 		{
 			document.location = "/cgi-bin/deleteMovie?ref="+xy;
-			setTimeout("reload()", 100);
 		}
 		else
 		{
