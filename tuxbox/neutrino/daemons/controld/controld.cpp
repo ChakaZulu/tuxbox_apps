@@ -42,6 +42,9 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
+
+#include "dbox/avs_core.h"
+#include <sys/ioctl.h>
  
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -80,18 +83,32 @@ void setVideoRGB()
 char gen_Volume;
 void setVolume(char volume)
 {
+	int fd;
 	gen_Volume = volume;
-	char val[10];
-	if(fork()==0)
+
+	int i = 64-int(volume*64.0/100.0);
+	printf("set volume: %d ------------------\n", i );
+	if (i < 0)
 	{
-		char vol = 64-char(volume*64.0/100.0);
-		printf("volume set: %d-----------------------\n", vol);
-		sprintf((char*) val, "%d", vol);
-		if (execlp("/bin/switch", "/bin/switch", "-v", val, 0)<0)
-		{
-			perror("exec failed - /bin/switch\n");
-		}
+		i=0;
 	}
+	else if (i > 63)
+	{
+		i=63;
+	}
+
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSVOL,&i)< 0)
+	{
+		perror("AVSIOGVOL:");
+		return;
+	}
+	close(fd);
 
 	struct
 	{
@@ -123,14 +140,42 @@ void setVolume(char volume)
 
 void Mute()
 {
-	char tmp = gen_Volume;
-	setVolume(0);
-	gen_Volume = tmp;
+	int i;
+	int fd;
+	i=AVS_MUTE;
+
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSMUTE,&i)< 0)
+	{
+		perror("AVSIOSMUTE:");
+		return;
+	}
+	close(fd);
 }
 
 void UnMute()
 {
-	setVolume(gen_Volume);
+	int i;
+	int fd;
+	i=AVS_UNMUTE;
+
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSMUTE,&i)< 0)
+	{
+		perror("AVSIOSMUTE:");
+		return;
+	}
+	close(fd);
 }
 
 
@@ -218,7 +263,6 @@ int main(int argc, char **argv)
 	//init 
 	gen_Volume = 100;
 	setVolume(gen_Volume);
-
 	while(1)
 	{
 		clilen = sizeof(cliaddr);
