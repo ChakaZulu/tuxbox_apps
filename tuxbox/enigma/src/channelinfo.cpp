@@ -204,7 +204,7 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 
 	EITEvent *e = 0;
 	e = eEPGCache::getInstance()->lookupEvent(service);
-	eDebug(" e = %p", e);	
+//	eDebug(" e = %p", e);	
 	if (e)  // data is in cache...
 	{
   	ParseEITInfo(e);
