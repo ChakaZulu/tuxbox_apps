@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.27 2001/11/03 15:40:49 field Exp $
+  $Id: zapit.cpp,v 1.28 2001/11/03 16:27:50 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.28  2001/11/03 16:27:50  field
+  Perspektiven Displayname gefixt
+
   Revision 1.27  2001/11/03 15:40:49  field
   Perspektiven
 
@@ -799,6 +802,7 @@ int zapit (uint onid_sid,boolean in_nvod) {
     	  if (allchans_tv.count(onid_sid) >0)
 	        {
     	      cit = allchans_tv.find(onid_sid);
+              nvodname = cit->second.name;
 	        }
     	  else
 	        {
@@ -843,10 +847,11 @@ int zapit (uint onid_sid,boolean in_nvod) {
 else
   do_search_emmpid = false;
 
+
   if (cit->second.service_type == 4)
     {
-      nvodname = cit->second.name;
       current_is_nvod = true;
+  //    nvodname = cit->second.name;
         curr_onid_sid = onid_sid;
         save_settings();
 
@@ -1919,7 +1924,7 @@ int main(int argc, char **argv) {
     }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.27 2001/11/03 15:40:49 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.28 2001/11/03 16:27:50 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
