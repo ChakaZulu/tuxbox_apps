@@ -430,7 +430,11 @@ CGameList::CGameList(string Name)
 	name = Name;
 	selected = 0;
 	width = 500;
-	height = 440;
+   if(width>(g_settings.screen_EndX-g_settings.screen_StartX))
+      width=(g_settings.screen_EndX-g_settings.screen_StartX);
+	height = 526;
+   if((height+50)>(g_settings.screen_EndY-g_settings.screen_StartY))
+      height=(g_settings.screen_EndY-g_settings.screen_StartY) - 50; // 2*25 pixel frei
 	theight= g_Fonts->menu_title->getHeight();
 	//
 	fheight1= g_Fonts->gamelist_itemLarge->getHeight();
@@ -463,8 +467,6 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	{
 		parent->hide();
 	}
-
-	paintHead();
 
 	//scan4games here!
     for(unsigned int count=0;count<gamelist.size();count++)
@@ -509,20 +511,20 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		}
 		else if ( msg == (uint) g_settings.key_channelList_pageup )
 		{
-			selected+=listmaxshow;
-			if (selected>gamelist.size()-1)
-				selected=0;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
-		}
-		else if ( msg == (uint) g_settings.key_channelList_pagedown )
-		{
 			if ((int(selected)-int(listmaxshow))<0)
-				selected=gamelist.size()-1;
+				selected=0;
 			else
 				selected -= listmaxshow;
 			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
+			paintItems();
+		}
+		else if ( msg == (uint) g_settings.key_channelList_pagedown )
+		{
+			selected+=listmaxshow;
+			if (selected>gamelist.size()-1)
+				selected=gamelist.size()-1;
+			liststart = (selected/listmaxshow)*listmaxshow;
+			paintItems();
 		}
 		else if ( msg == CRCInput::RC_up )
 		{
@@ -538,7 +540,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
 			{
-				paint();
+				paintItems();
 			}
 			else
 			{
@@ -548,13 +550,13 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if ( msg == CRCInput::RC_down )
 		{
 			int prevselected=selected;
-			selected = (selected+1)%(gamelist.size());
+			selected = (selected+1)%gamelist.size();
 			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
 			{
-				paint();
+				paintItems();
 			}
 			else
 			{
@@ -593,14 +595,13 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 
 void CGameList::hide()
 {
-	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	frameBuffer->paintBackgroundBoxRel(x,y, width+15,height);
 }
 
 void CGameList::paintItem(int pos)
 {
 	int ypos = (y+theight) + pos*fheight;
 	int itemheight = fheight;
-
 	int color = COL_MENUCONTENT;
 	if (liststart+pos==selected)
 	{
@@ -614,11 +615,14 @@ void CGameList::paintItem(int pos)
 		frameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT+5);
 		frameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT+2);
 	}
-	else
+	else if(liststart==0)
 	{
 		ypos -= (fheight / 2) - 15;
+		if(pos==(int)listmaxshow-1)
+			frameBuffer->paintBoxRel(x,ypos+itemheight, width, (fheight / 2)-15, COL_MENUCONTENT);
+
 	}
-    frameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
+	frameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
 
 
 	if(liststart+pos<gamelist.size())
@@ -631,16 +635,49 @@ void CGameList::paintItem(int pos)
 
 void CGameList::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
+	if(listmaxshow > gamelist.size()+1)
+      frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
+   else
+      frameBuffer->paintBoxRel(x,y, width+15,theight, COL_MENUHEAD);
+
 	frameBuffer->paintIcon("games.raw",x+8,y+5);
 	g_Fonts->menu_title->RenderString(x+38,y+theight+1, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 }
 
 void CGameList::paint()
 {
-	liststart = (selected/listmaxshow)*listmaxshow;
+	hide();
+	width = 500;
+   if(width>(g_settings.screen_EndX-g_settings.screen_StartX))
+      width=(g_settings.screen_EndX-g_settings.screen_StartX);
+	height = 526;
+   if((height+50)>(g_settings.screen_EndY-g_settings.screen_StartY))
+      height=(g_settings.screen_EndY-g_settings.screen_StartY) - 50; // 2*25 pixel frei
+	listmaxshow = (height-theight-0)/fheight;
+	height = theight+0+listmaxshow*fheight; // recalc height
+	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	
+   liststart = (selected/listmaxshow)*listmaxshow;
+	
+	paintHead();
+	paintItems();
+}
 
-	for(unsigned int count=0;count<listmaxshow;count++)
+void CGameList::paintItems()
+{
+	if(listmaxshow <= gamelist.size()+1)
+   {
+      // Scrollbar
+      int nrOfPages = ((gamelist.size()-1) / listmaxshow)+1; 
+      int currPage  = (liststart/listmaxshow) +1;
+      float blockHeight = (height-theight-4)/nrOfPages;
+      frameBuffer->paintBoxRel(x+width, y+theight, 15, height-theight,  COL_MENUCONTENT+ 1);
+		frameBuffer->paintBoxRel(x+ width +2, y+theight+2+int((currPage-1)*blockHeight) , 11, 
+										 int(blockHeight),  COL_MENUCONTENT+ 3);
+   }
+	
+   for(unsigned int count=0;count<listmaxshow;count++)
 	{
 		paintItem(count);
 	}
@@ -656,6 +693,5 @@ void CGameList::runGame(int selected )
 	g_PluginList->startPlugin( gamelist[selected]->number );
 
     //redraw menue...
-    paintHead();
     paint();
 }

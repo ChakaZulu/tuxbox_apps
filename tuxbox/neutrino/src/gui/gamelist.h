@@ -150,6 +150,7 @@ class CGameList : public CMenuTarget
 		int 		y;
 
 		void paintItem(int pos);
+		void paintItems();
 		void paint();
 		void paintHead();
 
