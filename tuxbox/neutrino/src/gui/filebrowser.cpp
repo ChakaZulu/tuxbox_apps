@@ -68,13 +68,13 @@ typedef struct stat64 stat_struct;
 #define my_stat stat64
 #define my_lstat lstat64
 #else
-#warning not using 64 bit file offsets
 typedef struct dirent dirent_struct;
 #define my_alphasort alphasort
 #define my_scandir scandir
 typedef struct stat stat_struct;
 #define my_stat stat
 #define my_lstat lstat
+#error not using 64 bit file offsets
 #endif
 
 #define SMSKEY_TIMEOUT 2000

@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.103 2004/12/28 11:18:21 gmo18t Exp $
+  $Id: movieplayer.cpp,v 1.104 2005/01/28 16:16:08 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -117,6 +117,9 @@ extern CPlugins       * g_PluginList;
 static CMoviePlayerGui::state g_playstate;
 static bool isTS, isPES, isBookmark;
 int g_speed = 1;
+#ifndef __USE_FILE_OFFSET64
+#error not using 64 bit file offsets
+#endif /* __USE_FILE__OFFSET64 */
 static off_t g_fileposition;
 ringbuffer_t *ringbuf;
 bool bufferfilled;
@@ -2824,7 +2827,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.103 $");
+	helpbox.addLine("Version: $Revision: 1.104 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2845,7 +2848,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.103 $");
+	helpbox.addLine("Version: $Revision: 1.104 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
