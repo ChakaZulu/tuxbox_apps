@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.5 2002/09/16 13:06:27 obi Exp $
+ * $Id: dmx.cpp,v 1.6 2002/09/19 07:45:11 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -27,8 +27,9 @@
 
 int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigned char * mask)
 {
-	dmxSctFilterParams sctFilterParams;
+	struct dmxSctFilterParams sctFilterParams;
 
+	memset(&sctFilterParams, 0x00, sizeof(sctFilterParams));
 	memcpy(&sctFilterParams.filter.filter, filter, DMX_FILTER_SIZE);
 	memcpy(&sctFilterParams.filter.mask, mask, DMX_FILTER_SIZE);
 
