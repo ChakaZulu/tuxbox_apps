@@ -653,11 +653,6 @@ void	NextLevel( void )
 		level=0;
 }
 
-void	JumpLevel( int l )
-{
-	level=l;
-}
-
 void	MazePig( void )
 {
 #ifdef USEX
