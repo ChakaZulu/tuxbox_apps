@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.51 2001/10/02 17:56:33 McClean Exp $
+        $Id: neutrino.cpp,v 1.52 2001/10/02 23:16:48 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.52  2001/10/02 23:16:48  McClean
+  game interface
+
   Revision 1.51  2001/10/02 17:56:33  McClean
   time in infobar (thread probs?) and "0" quickzap added
 
@@ -198,7 +201,7 @@ static void initGlobals(void)
 }
 // Ende globale Variablen
 
-
+/*
 struct SPluginInfo
 {
 	char name[20];
@@ -211,9 +214,10 @@ struct SPluginInfo
 };
 
 //int getInfo(SPluginInfo* Info);
-
+*/
 void CNeutrinoApp::PluginDemo()
 {
+	/*
 	printf("PLUGINDEMO------------------------------------------------\n\n");
 	void		*handle;
 	//typedef int   (*getInfo)( SPluginInfo * info);//
@@ -258,6 +262,7 @@ void CNeutrinoApp::PluginDemo()
 	//restore framebuffer...
 	g_FrameBuffer->paletteSet();
 	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+	*/
 }
 
 
@@ -798,8 +803,7 @@ void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audi
 	mainSettings.addItem( new CMenuForwarder("mainmenu.network", true, "", &networkSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainmenu.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainmenu.keybinding", true,"", &keySettings) );
-	mainSettings.addItem( new CMenuForwarder("mainmenu.games", true, "", this, "pacman") );
-
+	mainSettings.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
 }
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
@@ -1543,7 +1547,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.51 2001/10/02 17:56:33 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.52 2001/10/02 23:16:48 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.20 2001/10/01 20:41:08 McClean Exp $
+//  $Id: neutrino.h,v 1.21 2001/10/02 23:16:48 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.21  2001/10/02 23:16:48  McClean
+//  game interface
+//
 //  Revision 1.20  2001/10/01 20:41:08  McClean
 //  plugin interface for games - beta but nice.. :)
 //
@@ -82,6 +85,7 @@
 #include "widget/keychooser.h"
 #include "widget/stringinput.h"
 #include "widget/screensetup.h"
+#include "widget/gamelist.h"
 #include "widget/setting_helpers.h"
 
 #include "../zapit/getservices.h"

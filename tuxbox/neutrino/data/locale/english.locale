@@ -20,7 +20,7 @@ mainmenu.video Video
 mainmenu.network Network
 mainmenu.colors Colors
 mainmenu.keybinding Key Setup
-mainmenu.games Play Pacman
+mainmenu.games Play Games
 
 languagesetup.head Language Setup
 languagesetup.select Language
