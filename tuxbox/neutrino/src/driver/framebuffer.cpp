@@ -774,13 +774,6 @@ void CFrameBuffer::restoreBackgroundImage(void)
 		delete[] tmp;
 }
 
-void CFrameBuffer::paintBackgroundBox(int xa, int ya, int xb, int yb)
-{
-	int dx = xb - xa;
-	int dy = yb - ya;
-	paintBackgroundBoxRel(xa, ya, dx, dy);
-}
-
 void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 {
 	if (!getActive())
