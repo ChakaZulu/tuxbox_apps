@@ -30,6 +30,9 @@ class CAViAExt
 		void iecOn();
 		void iecOff();
 		int iecState();
+		void playbackSPTS();
+		void playbackPES();
+		int playbackState();
 	private:
 };
 

@@ -115,6 +115,17 @@ class CPauseSectionsdNotifier : public CChangeObserver
 		bool changeNotify(const neutrino_locale_t, void * Data);
 };
 
+class CSPTSNotifier : public CChangeObserver
+{
+	const char * filename;
+ public:
+	inline CSPTSNotifier(const char * file_to_modify)
+		{
+			filename = file_to_modify;
+		};
+	bool changeNotify(const neutrino_locale_t, void * data);
+};
+
 class CTouchFileNotifier : public CChangeObserver
 {
 	const char * filename;

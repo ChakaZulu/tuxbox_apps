@@ -107,3 +107,64 @@ int CAViAExt::iecState()
 	return param;
 }	
 
+void CAViAExt::playbackSPTS()
+{
+	int res,fd;
+	
+        if ((fd = open(AVIAEXT_DEV,O_RDWR))<0)
+	{
+		if (errno==ENOENT)
+			fprintf (stderr,"%s does not exist, did you forget to load the aviaEXT module?\n",AVIAEXT_DEV);
+		else
+			perror ("aviaext: error opening /dev/dbox/aviaEXT");
+		return;
+	}
+	res = ioctl(fd, AVIA_EXT_AVIA_PLAYBACK_MODE_SET, 1);
+	if (res<0)
+		perror("aviaext: ioctl");
+	close(fd);
+}
+
+void CAViAExt::playbackPES()
+{
+	int res,fd;
+	
+        if ((fd = open(AVIAEXT_DEV,O_RDWR))<0)
+	{
+		if (errno==ENOENT)
+			fprintf (stderr,"%s does not exist, did you forget to load the aviaEXT module?\n",AVIAEXT_DEV);
+		else
+			perror ("aviaext: error opening /dev/dbox/aviaEXT");
+		return;
+	}
+	res = ioctl(fd, AVIA_EXT_AVIA_PLAYBACK_MODE_SET, 0);
+	if (res<0)
+		perror("aviaext: ioctl");
+	close(fd);
+}
+
+int CAViAExt::playbackState()
+{
+	int res,fd;
+	unsigned int param;
+	
+        if ((fd = open(AVIAEXT_DEV,O_RDWR))<0)
+	{
+		if (errno==ENOENT)
+			fprintf (stderr,"%s does not exist, did you forget to load the aviaEXT module?\n",AVIAEXT_DEV);
+		else
+			perror ("aviaext: error opening /dev/dbox/aviaEXT");
+		return -1;
+	}
+	res = ioctl(fd, AVIA_EXT_AVIA_PLAYBACK_MODE_GET, &param);
+
+	close(fd);
+
+	if (res<0)
+	{
+		perror("aviaext: ioctl");
+		return -1;
+	}
+	return param;
+}	
+
