@@ -291,14 +291,14 @@ void CGameList::runGame(int selected )
 			break;
 		}
 	}
-	if ( i == argc )		// alles geladen
+	while ( i == argc )		// alles geladen
 	{
 		handle = dlopen ( ("/usr/lib/neutrino/games/"+pluginname+".so").c_str(), RTLD_NOW);
 		if (!handle)
 		{
 			fputs (dlerror(), stderr);
 			//should unload libs!
-			return;
+			break;
 		}
 		execPlugin = (PluginExecProc) dlsym(handle, (pluginname+"_exec").c_str());
 		if ((error = dlerror()) != NULL)
@@ -306,7 +306,7 @@ void CGameList::runGame(int selected )
 			fputs(error, stderr);
 			dlclose(handle);
 			//should unload libs!
-			return;
+			break;
 		}
 		g_RCInput->stopInput();
 		printf("try exec...\n");
@@ -321,6 +321,7 @@ void CGameList::runGame(int selected )
 		//redraw menue...
 		paintHead();
 		paint();
+		break;	// break every time - never loop - run once !!!
 	}
 
 	/* unload shared libs */
