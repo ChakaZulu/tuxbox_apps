@@ -1,36 +1,39 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- 
-$Id: gamelist.cpp,v 1.25 2002/01/15 23:17:59 McClean Exp $
- 
+
+$Id: gamelist.cpp,v 1.26 2002/01/29 17:26:51 field Exp $
+
 $Log: gamelist.cpp,v $
+Revision 1.26  2002/01/29 17:26:51  field
+Jede Menge Updates :)
+
 Revision 1.25  2002/01/15 23:17:59  McClean
 cleanup
 
@@ -42,20 +45,20 @@ cleanup
 
 Revision 1.22  2002/01/02 04:49:36  McClean
 fix libfx2.so-location *grrr*
- 
+
 Revision 1.21  2001/12/25 11:40:30  McClean
 better pushback handling
- 
+
 Revision 1.20  2001/12/12 19:11:32  McClean
 prepare timing setup...
- 
+
 Revision 1.19  2001/12/12 18:45:39  McClean
 fix gamelist-design, manual-update bug, add save settings now
- 
+
 Revision 1.18  2001/12/05 21:38:09  rasc
 gamelist: eigener Fontdef fuer 2-zeiliges Menue
- 
- 
+
+
 */
 
 #include "gamelist.h"
@@ -66,6 +69,28 @@ gamelist: eigener Fontdef fuer 2-zeiliges Menue
 // hi McClean - hab schon mal was geaendert - falls es nicht gefaellt
 // altes gamelist.cpp ist als svd.gamelist.cpp eingecheckt.
 
+/*
+if (plugin_list[number].vtxtpid)
+[11:54] <TheDOC1> 	{
+[11:54] <TheDOC1> 		cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
+[11:54] <TheDOC1> 		startparam = makeParam(P_ID_VTXTPID, startparam);
+[11:54] <TheDOC1> 	}
+[11:54] <TheDOC1> und dann makeParam als:
+[11:54] <TheDOC1> PluginParam* plugins::makeParam(std::string id, PluginParam *next)
+[11:54] <TheDOC1> {
+[11:54] <TheDOC1> 	cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << endl;
+[11:54] <TheDOC1>
+[11:54] <TheDOC1> 	PluginParam *startparam = new PluginParam;
+[11:54] <TheDOC1> 	startparam->next = next;
+[11:54] <TheDOC1> 	startparam->id = new char[id.length() + 2];
+[11:54] <TheDOC1> 	startparam->val = new char[params.find(id)->second.length() + 2];
+[11:54] <TheDOC1> 	strcpy(startparam->id, id.c_str());
+[11:54] <TheDOC1> 	strcpy(startparam->val, params.find(id)->second.c_str());
+[11:54] <TheDOC1>
+[11:54] <TheDOC1> 	cout << "Startparam: " << (int) startparam << endl;
+[11:54] <TheDOC1> 	return startparam;
+[11:54] <TheDOC1> }
+*/
 
 CGameList::CGameList(string Name)
 {
@@ -349,7 +374,7 @@ void CGameList::runGame(int selected )
 
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("mode: game, " + gamelist[selected]->name);
-	#endif 
+	#endif
 
 	string pluginname = gamelist[selected]->filename;
 
@@ -437,7 +462,7 @@ void CGameList::runGame(int selected )
 		{
 			g_ActionLog->println("mode: radio");
 		}
-	#endif 
+	#endif
 
 }
 

@@ -1,29 +1,29 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -45,22 +45,28 @@ int CScreenSetup::exec( CMenuTarget* parent, string )
 	selected = 1;
 	while(loop)
 	{
-		int key = g_RCInput->getKey(300);
+		int key = g_RCInput->getKey(300, true);
 		if (key==CRCInput::RC_timeout)
 		{//timeout, close
 			loop = false;
 		}
-		else if (key==CRCInput::RC_ok)
+		else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_home) )
 		{
 			loop=false;
 		}
-		else if (key==CRCInput::RC_red)
+		else if ( (key==CRCInput::RC_red) || (key==CRCInput::RC_green) )
 		{
-			selected = 1;
-		}
-		else if (key==CRCInput::RC_green)
-		{
-			selected = 2;
+			if (key==CRCInput::RC_green)
+				selected = 2;
+			else
+				selected = 1;
+
+			int x=15*5;
+			int y=15*24;
+
+			g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft").c_str(), (selected == 1)?COL_MENUHEAD:COL_MENUCONTENT);
+			g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), (selected == 2)?COL_MENUHEAD:COL_MENUCONTENT);
+
 		}
 
 
@@ -164,31 +170,20 @@ void CScreenSetup::hide()
 void CScreenSetup::paintBorderUL()
 {
 	g_FrameBuffer->paintIcon("border_ul.raw", g_settings.screen_StartX, g_settings.screen_StartY);
-	int x=15*19;
-	int y=15*16;
-	g_FrameBuffer->paintBoxRel(x,y, 15*9,15*6, COL_MENUHEAD);
-	char xpos[30];
-	char ypos[30];
-	char xepos[30];
-	char yepos[30];
-
-	sprintf((char*) &xpos, "SX: %d", g_settings.screen_StartX);
-	sprintf((char*) &ypos, "SY: %d", g_settings.screen_StartY);
-	sprintf((char*) &xepos, "EX: %d", g_settings.screen_EndX);
-	sprintf((char*) &yepos, "EY: %d", g_settings.screen_EndY);
-
-	g_Fonts->fixedabr20->RenderString(x+10,y+30, 200, xpos, COL_MENUHEAD);
-	g_Fonts->fixedabr20->RenderString(x+10,y+50, 200, ypos, COL_MENUHEAD);
-	g_Fonts->fixedabr20->RenderString(x+10,y+70, 200, xepos, COL_MENUHEAD);
-	g_Fonts->fixedabr20->RenderString(x+10,y+90, 200, yepos, COL_MENUHEAD);
+	paintCoords();
 }
 
 void CScreenSetup::paintBorderLR()
 {
 	g_FrameBuffer->paintIcon("border_lr.raw", g_settings.screen_EndX-96, g_settings.screen_EndY-96);
+	paintCoords();
+}
+
+void CScreenSetup::paintCoords()
+{
 	int x=15*19;
 	int y=15*16;
-	g_FrameBuffer->paintBoxRel(x,y, 15*9,15*6, COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x,y, 15*9,15*6, COL_MENUCONTENT);
 	char xpos[30];
 	char ypos[30];
 	char xepos[30];
@@ -199,10 +194,10 @@ void CScreenSetup::paintBorderLR()
 	sprintf((char*) &xepos, "EX: %d", g_settings.screen_EndX);
 	sprintf((char*) &yepos, "EY: %d", g_settings.screen_EndY);
 
-	g_Fonts->fixedabr20->RenderString(x+10,y+30, 200, xpos, COL_MENUHEAD);
-	g_Fonts->fixedabr20->RenderString(x+10,y+50, 200, ypos, COL_MENUHEAD);
-	g_Fonts->fixedabr20->RenderString(x+10,y+70, 200, xepos, COL_MENUHEAD);
-	g_Fonts->fixedabr20->RenderString(x+10,y+90, 200, yepos, COL_MENUHEAD);
+	g_Fonts->menu->RenderString(x+10,y+30, 200, xpos, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+10,y+50, 200, ypos, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+10,y+70, 200, xepos, COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+10,y+90, 200, yepos, COL_MENUCONTENT);
 }
 
 void CScreenSetup::paint()
@@ -220,10 +215,10 @@ void CScreenSetup::paint()
 
 	int x=15*5;
 	int y=15*24;
-	g_FrameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUCONTENT);
 
 	g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft").c_str(), COL_MENUHEAD);
-	g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), COL_MENUHEAD);
+	g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), COL_MENUCONTENT);
 
 
 	paintBorderUL();

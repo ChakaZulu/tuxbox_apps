@@ -1,38 +1,41 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
- 
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 //
-// $Id: channellist.cpp,v 1.53 2002/01/18 23:34:36 McClean Exp $
+// $Id: channellist.cpp,v 1.54 2002/01/29 17:26:51 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.54  2002/01/29 17:26:51  field
+// Jede Menge Updates :)
+//
 // Revision 1.53  2002/01/18 23:34:36  McClean
 // repair infobar
 //
@@ -302,60 +305,29 @@ void CChannelList::updateEvents(void)
 
 	//printf("\n read finished CChannelList::updateEvents \n\n");
 
-	if ( req.command == sectionsd::actualEventListTVshortIDs )
+	// printf("data length: %u\n", resp.dataLength);
+	while(actPos<pData+resp.dataLength)
 	{
-		printf("data length: %u\n", resp.dataLength);
-		while(actPos<pData+resp.dataLength)
-		{
-			unsigned* serviceID = (unsigned*) actPos;
-			actPos+=4;
+		unsigned* serviceID = (unsigned*) actPos;
+		actPos+=4;
 
-			unsigned long long* evt_id = (unsigned long long*) actPos;
-			actPos+=8;
+		unsigned long long* evt_id = (unsigned long long*) actPos;
+		actPos+=8;
 
-			// quick'n dirty, sollte man mal anders machen
-			for (unsigned int count=0;count<chanlist.size();count++)
-			{
-				if (chanlist[count]->onid_sid==*serviceID)
-				{
-					chanlist[count]->currentEvent.id= *evt_id;
-					chanlist[count]->currentEvent.description= actPos;
-					//	printf("Channel found: %s\n", actPos);
-					break;
-				}
-			}
-			actPos+=strlen(actPos)+1;
-		}
-	} // if sectionsd::actualEventListTVshortIDs
-	else
-	{
-		// old way
-		char epgID[20];
-		char channelName[50];
-		char channelDescription[1000];
-		while (*actPos && actPos<pData+resp.dataLength)
+		// quick'n dirty, sollte man mal anders machen
+		for (unsigned int count=0;count<chanlist.size();count++)
 		{
-			*epgID=0;
-			actPos = copyStringto( actPos, epgID, sizeof(epgID));
-			//    printf("id: %s\n", epgID);
-			*channelName=0;
-			actPos = copyStringto( actPos, channelName, sizeof(channelName));
-			//    printf("name: %s\n", channelName);
-			*channelDescription=0;
-			actPos = copyStringto( actPos, channelDescription, sizeof(channelDescription));
-			//    printf("desc: %s\n", channelDescription);
-			// quick'n dirty, sollte man mal anders machen
-			for(unsigned int count=0;count<chanlist.size();count++)
+			if (chanlist[count]->onid_sid==*serviceID)
 			{
-				if(!strcasecmp(chanlist[count]->name.c_str(), channelName))
-				{
-					chanlist[count]->currentEvent.description = channelDescription;
-					//	printf("Channel found\n");
-					break;
-				}
+				chanlist[count]->currentEvent.id= *evt_id;
+				chanlist[count]->currentEvent.description= actPos;
+				//	printf("Channel found: %s\n", actPos);
+				break;
 			}
 		}
-	} // else zapit
+		actPos+=strlen(actPos)+1;
+	}
+
 	delete[] pData;
 	//printf("\n END CChannelList::updateEvents \n\n");
 	return;
@@ -609,7 +581,7 @@ void CChannelList::numericZap(int key)
 		sprintf((char*) &valstr, "%d", chn);
 		while(strlen(valstr)<4)
 		{
-			strcat(valstr,"-");
+			strcat(valstr,"_");
 		}
 		g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
 		g_Fonts->channel_num_zap->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
@@ -740,7 +712,7 @@ void CChannelList::quickZap(int key)
 		}
 		channel* chan = chanlist[selected];
 		g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
-		
+
 		key = g_RCInput->getKey(timeout);
 	}
 	while ((key==g_settings.key_quickzap_down) || (key==g_settings.key_quickzap_up ));
@@ -786,10 +758,25 @@ void CChannelList::paintItem(int pos)
 		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 		if(strlen(chan->currentEvent.description.c_str()))
 		{
-			// name + description
 			char nameAndDescription[100];
-			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.description.c_str());
+			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", chan->name.c_str());
+
+			int ch_name_len= g_Fonts->channellist->getRenderWidth(nameAndDescription);
+			int ch_desc_len= g_Fonts->channellist_descr->getRenderWidth(chan->currentEvent.description.c_str());
+
+			if ( (width- numwidth- 20- 15- ch_name_len)< ch_desc_len )
+				ch_desc_len = (width- numwidth- 20- 15- ch_name_len);
+			if (ch_desc_len< 0)
+				ch_desc_len = 0;
+
 			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
+
+
+			// rechtsbündig - auskommentiert
+			// g_Fonts->channellist_descr->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description.c_str(), color);
+
+			// linksbündig
+			g_Fonts->channellist_descr->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, chan->currentEvent.description.c_str(), color);
 		}
 		else
 			//name

@@ -1,38 +1,41 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 //
-// $Id: epgview.cpp,v 1.33 2002/01/16 00:28:04 McClean Exp $
+// $Id: epgview.cpp,v 1.34 2002/01/29 17:26:51 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.34  2002/01/29 17:26:51  field
+// Jede Menge Updates :)
+//
 // Revision 1.33  2002/01/16 00:28:04  McClean
 // cleanup
 //
@@ -287,8 +290,8 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 
 	if ( (oldx> ox) && (!doLoop) )
 	{
-		g_FrameBuffer->paintBackgroundBoxRel (oldsx, sy, sx- oldsx, oy+10);
-		g_FrameBuffer->paintBackgroundBoxRel (sx+ ox, sy, sx- oldsx, oy+10);
+		g_FrameBuffer->paintBackgroundBoxRel (oldsx, sy, sx- oldsx+ 1, oy+10);
+		g_FrameBuffer->paintBackgroundBoxRel (sx+ ox, sy, sx- oldsx+ 1, oy+10);
 	}
 
 	if(strlen(epgData.info1)!=0)
@@ -458,7 +461,7 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 
 			write(sock_fd, &id, sizeof(id));
 			write(sock_fd, startzeit, sizeof(*startzeit));
-			printf("query epg for evt_id >%llx<, time %lx\n", id, *startzeit);
+			printf("[epgdata] query for evt_id >%llx<, time %lx\n", id, *startzeit);
 		}
 		else
 		{
@@ -470,7 +473,7 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 			write(sock_fd,&req,sizeof(req));
 
 			write(sock_fd, &onid_tsid, sizeof(onid_tsid));
-			printf("query epg for onid_tsid >%x< (%s)\n", onid_tsid, channelName.c_str());
+			printf("[epgdata] query for onid_tsid >%x< (%s)\n", onid_tsid, channelName.c_str());
 		}
 
 		sectionsd::msgResponseHeader resp;
@@ -562,7 +565,7 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 
 	write(sock_fd, &id, sizeof(id));
 	write(sock_fd, startzeit, sizeof(*startzeit));
-	printf("query prev/next for evt_id >%llx<, time %lx\n", id, *startzeit);
+	printf("[epgdata] query prev/next for evt_id >%llx<, time %lx\n", id, *startzeit);
 
 	sectionsd::msgResponseHeader resp;
 	memset(&resp, 0, sizeof(resp));

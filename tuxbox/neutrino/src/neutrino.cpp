@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.139 2002/01/28 23:46:47 field Exp $
+        $Id: neutrino.cpp,v 1.140 2002/01/29 17:26:51 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.140  2002/01/29 17:26:51  field
+  Jede Menge Updates :)
+
   Revision 1.139  2002/01/28 23:46:47  field
   Boxtyp automatisch, Vol im Scartmode, Kleinigkeiten
 
@@ -636,10 +639,12 @@ void CNeutrinoApp::setupColors_classic()
 void CNeutrinoApp::setupDefaults()
 {
 	//language
+
 	strcpy(g_settings.language, "english");
 
 	//misc
-	g_settings.box_Type = 1;
+	//g_settings.box_Type = 1;
+	g_settings.box_Type = g_Controld->getBoxType();
 	g_settings.shutdown_real = 1;
 	g_settings.shutdown_showclock = 1;
 
@@ -692,8 +697,17 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.key_bouquet_up = CRCInput::RC_right;
 	g_settings.key_bouquet_down = CRCInput::RC_left;
 
-	strcpy(g_settings.repeat_blocker, "25");
-	strcpy(g_settings.repeat_genericblocker, "0");
+	if ( g_settings.box_Type == 2 )
+	{
+		// Sagem - andere Defaults...
+		strcpy(g_settings.repeat_blocker, "150");
+		strcpy(g_settings.repeat_genericblocker, "25");
+	}
+	else
+	{
+		strcpy(g_settings.repeat_blocker, "25");
+		strcpy(g_settings.repeat_genericblocker, "0");
+	}
 
 	//screen settings
 	g_settings.screen_StartX=37;
@@ -1022,6 +1036,7 @@ void CNeutrinoApp::channelsInit()
 	printf("All bouquets received (%d). Receiving channels... \n", nBouquetCount);
 	close(sock_fd);
 
+	printf("receiving channels for bouquets");
 	for ( uint i=0; i< bouquetList->Bouquets.size(); i++ )
 	{
 		sendmessage.version=1;
@@ -1057,7 +1072,7 @@ void CNeutrinoApp::channelsInit()
 		free(return_buf);
 
 		memset(&zapitchannel,0,sizeof(zapitchannel));
-		printf("receiving channels for %s\n", bouquetList->Bouquets[i]->name.c_str());
+		printf(".");
 		while (recv(sock_fd, &zapitchannel, sizeof(zapitchannel),0)>0)
 		{
 			char channel_name[30];
@@ -1066,7 +1081,7 @@ void CNeutrinoApp::channelsInit()
 		}
 		close(sock_fd);
 	}
-	printf("All bouquets-channels received\n");
+	printf("\nAll bouquets-channels received\n");
 }
 
 
@@ -1141,16 +1156,15 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->gamelist_itemLarge=g_fontRenderer->getFont("Arial", "Bold", 20);
 	g_Fonts->gamelist_itemSmall=g_fontRenderer->getFont("Arial", "Regular", 16);
 
-	g_Fonts->channellist=g_fontRenderer->getFont("Arial", "Regular", 20);
+	g_Fonts->channellist=g_fontRenderer->getFont("Arial", "Bold", 20);
+	g_Fonts->channellist_descr=g_fontRenderer->getFont("Arial", "Regular", 20);
 	g_Fonts->channellist_number=g_fontRenderer->getFont("Arial", "Regular", 14);
-	g_Fonts->channel_num_zap=g_fontRenderer->getFont("Arial", "Regular", 40);
+	g_Fonts->channel_num_zap=g_fontRenderer->getFont("Arial", "Bold", 40);
 
 	g_Fonts->infobar_number=g_fontRenderer->getFont("Arial", "Regular", 50);
-	g_Fonts->infobar_channame=g_fontRenderer->getFont("Arial", "Regular", 30);
+	g_Fonts->infobar_channame=g_fontRenderer->getFont("Arial", "Bold", 30);
 	g_Fonts->infobar_info=g_fontRenderer->getFont("Arial", "Regular", 20);
 	g_Fonts->infobar_small=g_fontRenderer->getFont("Arial", "Regular", 14);
-
-	g_Fonts->fixedabr20=g_fontRenderer->getFont("Arial Black", "Regular", 20);
 }
 
 void CNeutrinoApp::ClearFrameBuffer()
@@ -1814,6 +1828,8 @@ void CNeutrinoApp::InitZapper()
 
 int CNeutrinoApp::run(int argc, char **argv)
 {
+	g_Controld = new CControldClient;
+
 	if(!loadSetup())
 	{
 		//setup default if configfile not exists
@@ -1831,7 +1847,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Locale = new CLocaleManager;
 	g_RCInput = new CRCInput;
 	g_lcdd = new CLcddClient;
-	g_Controld = new CControldClient;
+
 	g_RemoteControl = new CRemoteControl;
 	g_EpgData = new CEpgData;
 	g_InfoViewer = new CInfoViewer;
@@ -1965,14 +1981,14 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				int timeout1 = 5;
 
 				sscanf(g_settings.repeat_blocker, "%d", &timeout);
-				timeout = int(timeout/100.0) + 3;
+				timeout = int(timeout/100.0) + 5;
 				sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
-				timeout1 = int(timeout1/100.0) + 3;
+				timeout1 = int(timeout1/100.0) + 5;
 				if(timeout1>timeout)
 				{
 					timeout=timeout1;
 				}
-				printf("standby timeout is %d\n", timeout);
+				//printf("standby timeout is %d\n", timeout);
 
 				struct timeval tv;
 				gettimeofday( &tv, NULL );
@@ -1983,7 +1999,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
 					int diff = int((endtime-starttime)/100000. );
 					//printf("standby diff: %d\n", diff);
-					if(diff>=15)
+					if(diff>=10) // war 15 - warum so lange? 1 sec reicht (find ich...)
 					{
 						ExitRun();
 					}
@@ -2415,7 +2431,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.139 2002/01/28 23:46:47 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.140 2002/01/29 17:26:51 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.38 2002/01/28 19:52:32 field Exp $
+// $Id: remotecontrol.cpp,v 1.39 2002/01/29 17:26:51 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.39  2002/01/29 17:26:51  field
+// Jede Menge Updates :)
+//
 // Revision 1.38  2002/01/28 19:52:32  field
 // Streaminfo ausfuehrlicher
 //
@@ -376,7 +379,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 										RemoteControl->getNVODs( r_msg.param3 );
 										// send_mutex ist danach wieder locked
 
-										printf("NVOD-Basechannel - got %d nvods for >%s<!\n", RemoteControl->subChannels_internal.list.size(), RemoteControl->subChannels_internal.name.c_str());
+										//printf("[remotecontrol]: %d nvods for >%s<!\n", RemoteControl->subChannels_internal.list.size(), RemoteControl->subChannels_internal.name.c_str());
 
 										if ( RemoteControl->subChannels_internal.list.size()> 0 )
 										{
@@ -396,7 +399,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 										// Nur dann die Audio-Channels /PIDs abholen, wenn nicht NVOD-Basechannel
 
 										RemoteControl->audio_chans_int.count_apids = apid_return_buf.count_apids;
-										printf("got apids for: %s - %d apids!\n", RemoteControl->audio_chans_int.name, RemoteControl->audio_chans_int.count_apids);
+										// printf("[remotecontrol]: %s - %d apids!\n", RemoteControl->audio_chans_int.name, RemoteControl->audio_chans_int.count_apids);
 										// printf("%d - %d - %d - %d - %d\n", apid_return_buf.apid[0], apid_return_buf.apid[1], apid_return_buf.apid[2], apid_return_buf.apid[3], apid_return_buf.apid[4] );
 										for(int count=0;count<apid_return_buf.count_apids;count++)
 										{

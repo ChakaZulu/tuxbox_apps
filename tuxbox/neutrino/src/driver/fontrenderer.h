@@ -1,63 +1,66 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-$Id: fontrenderer.h,v 1.17 2002/01/03 20:03:20 McClean Exp $
- 
- 
+$Id: fontrenderer.h,v 1.18 2002/01/29 17:26:51 field Exp $
+
+
 $Log: fontrenderer.h,v $
+Revision 1.18  2002/01/29 17:26:51  field
+Jede Menge Updates :)
+
 Revision 1.17  2002/01/03 20:03:20  McClean
 cleanup
 
 Revision 1.16  2001/12/05 21:38:09  rasc
 gamelist: eigener Fontdef fuer 2-zeiliges Menue
- 
+
 Revision 1.15  2001/11/15 11:42:41  McClean
 gpl-headers added
- 
+
 Revision 1.14  2001/10/16 19:11:16  rasc
 -- CR LF --> LF in einigen Modulen
- 
+
 Revision 1.13  2001/10/14 14:30:47  rasc
 -- EventList Darstellung ueberarbeitet
 -- kleiner Aenderungen und kleinere Bugfixes
 -- locales erweitert..
- 
+
 Revision 1.12  2001/09/27 11:23:50  field
 Numzap gefixt, kleiner Bugfixes
- 
+
 Revision 1.11  2001/09/26 16:24:17  rasc
 - kleinere Aenderungen: Channel Num Zap fuer >999 Channels (Eutelsat/Astra) und eigener Font
- 
- 
+
+
 */
 
 #ifndef __FONTRENDERER__
@@ -171,15 +174,14 @@ class FontsDef
 
 		*alert,
 		*channellist,
+		*channellist_descr,
 		*channellist_number,
 		*channel_num_zap,
 
 		*infobar_number,
 		*infobar_channame,
 		*infobar_info,
-		*infobar_small,
-
-		*fixedabr20; // fixed arial black 20
+		*infobar_small;
 }
 ;
 

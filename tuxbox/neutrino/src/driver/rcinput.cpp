@@ -1,41 +1,44 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
- $Id: rcinput.cpp,v 1.25 2002/01/16 02:09:04 McClean Exp $
- 
+ $Id: rcinput.cpp,v 1.26 2002/01/29 17:26:51 field Exp $
+
  Module for Remote Control Handling
- 
+
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.26  2002/01/29 17:26:51  field
+ Jede Menge Updates :)
+
  Revision 1.25  2002/01/16 02:09:04  McClean
  cleanups+quickzap-fix
 
@@ -65,36 +68,36 @@ History:
 
  Revision 1.16  2001/12/25 11:40:30  McClean
  better pushback handling
- 
+
  Revision 1.15  2001/12/25 03:28:42  McClean
  better pushback-handling
- 
+
  Revision 1.14  2001/11/26 02:34:04  McClean
  include (.../../stuff) changed - correct unix-formated files now
- 
+
  Revision 1.13  2001/11/15 11:42:41  McClean
  gpl-headers added
- 
+
  Revision 1.12  2001/10/29 16:49:00  field
  Kleinere Bug-Fixes (key-input usw.)
- 
+
  Revision 1.11  2001/10/27 11:54:08  field
  Tastenwiederholblocker entruempelt
- 
+
  Revision 1.10  2001/10/11 21:00:56  rasc
  clearbuffer() fuer RC-Input bei Start,
  Klassen etwas erweitert...
- 
+
  Revision 1.9  2001/10/01 20:41:08  McClean
  plugin interface for games - beta but nice.. :)
- 
+
  Revision 1.8  2001/09/23 21:34:07  rasc
  - LIFObuffer Module, pushbackKey fuer RCInput,
  - In einige Helper und widget-Module eingebracht
    ==> harmonischeres Menuehandling
  - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
- 
- 
+
+
 */
 
 
@@ -176,7 +179,7 @@ void CRCInput::restartInput()
 *	get rc-key - timeout can be specified
 *
 **************************************************************************/
-int CRCInput::getKey(int Timeout)
+int CRCInput::getKey(int Timeout, bool bAllowRepeatLR)
 {
 	static long long last_keypress=0;
 	long long getKeyBegin;
@@ -213,7 +216,7 @@ int CRCInput::getKey(int Timeout)
 		//nicht genau - verbessern!
 	    tvselect.tv_sec = Timeout/10;
 		tvselect.tv_usec = (Timeout*100000)%1000000;
-		
+
 		FD_ZERO(&rfds);
 		FD_SET(fd, &rfds);
 		int status =  select(fd+1, &rfds, NULL, NULL, tvslectp);
@@ -231,7 +234,7 @@ int CRCInput::getKey(int Timeout)
 					gettimeofday( &tv, NULL );
 					now_pressed = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 					//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
-					
+
 					//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
 					if((rc_key&0xff00)==0x5c00)
 					{
@@ -241,9 +244,10 @@ int CRCInput::getKey(int Timeout)
 					if (rc_key == rc_last_key)
 					{
 						keyok = false;
-						//nur diese tasten sind wiederholbar 
+						//nur diese tasten sind wiederholbar
 						int trkey = translate(rc_key);
-						if ((trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby))
+						if  ( (trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby) ||
+							  ((bAllowRepeatLR) && ((trkey==RC_left) || (trkey==RC_right))) )
 						{
 							if( rc_last_repeat_key!=rc_key)
 							{
