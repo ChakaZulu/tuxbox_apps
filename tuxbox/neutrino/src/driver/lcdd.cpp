@@ -497,7 +497,7 @@ int CLCD::getContrast()
 void CLCD::setPower(int power)
 {
 	g_settings.lcd_power = power;
-	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+	setlcdparameter((mode==MODE_STANDBY)?g_settings.lcd_standbybrightness:g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 int CLCD::getPower()

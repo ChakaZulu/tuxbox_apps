@@ -443,7 +443,6 @@ int CNeutrinoApp::loadSetup()
 	g_settings.screen_EndY = configfile.getInt32( "screen_EndY", 555 );
 
 	//font configuration
-//	g_settings.fontsize_ = configfile.getInt32( "fontsize_",  );
 	strcpy( g_settings.fontsize_menu    ,  configfile.getString( "fontsize_menu", "20").c_str() );
 	strcpy( g_settings.fontsize_menu_title ,  configfile.getString( "fontsize_menu_title", "30").c_str() );
 	strcpy( g_settings.fontsize_menu_info  ,  configfile.getString( "fontsize_menu_info", "16").c_str() );
@@ -1123,29 +1122,6 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( new CMenuForwarder("menu.back") );
 		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-/*		static int dummy = 0;
-		FILE* fd = fopen("/var/etc/.specinv", "r");
-		if(fd)
-		{
-			dummy=1;
-			fclose(fd);
-		}
-		CMenuOptionChooser* ojInv = new CMenuOptionChooser("cablesetup.spectralInversion", &dummy, true, new CCableSpectalInversionNotifier );
-		ojInv->addOption(0, "options.off");
-		ojInv->addOption(1, "options.on");
-
-		CZapitClient::SatelliteList providerList;
-		g_Zapit->getScanSatelliteList(providerList);
-		static int cableProvider = 0;
-		for ( uint i=0; i<providerList.size(); i++)
-		{
-			if( !strcmp( providerList[i].satName, scanSettings.satellites[0].name))
-			{
-				cableProvider = i;
-				break;
-			}
-		}
-*/
 		CZapitClient::SatelliteList providerList;
 		g_Zapit->getScanSatelliteList(providerList);
 
@@ -1157,7 +1133,6 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			dprintf(DEBUG_DEBUG, "got scanprovider (cable): %s\n", providerList[i].satName );
 		}
 		settings.addItem( ojBouquets);
-//		settings.addItem( ojInv );
 		settings.addItem( oj);
 	}
 
@@ -1178,7 +1153,6 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
 	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", &scanSettings ) );
 	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", UCodeChecker ) );
-//	service.addItem( new CMenuForwarder("timerlist.name", true, "", new CTimerList() ) );
 
 	//softupdate
 	if(softupdate)
@@ -1319,7 +1293,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		miscSettings.addItem( oj );
 
 
-		static int dummy2 = 0;
+#if HAVE_DVB_API_VERSION == 1
+		dummy2 = 0;
 		fd = fopen("/var/etc/.bh", "r");
 		if(fd)
 		{
@@ -1330,6 +1305,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 		miscSettings.addItem( oj );
+#endif
 
 
 		static int fb_destination = 0;
@@ -1557,8 +1533,6 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( m4);
 	networkSettings.addItem( m5);
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "NFS") );
-//	networkSettings.addItem( new CMenuForwarder("networkmenu.mount", true, "", this, "mount"));
-//	networkSettings.addItem( new CMenuForwarder("networkmenu.umount", true, "", this, "umount"));
 	networkSettings.addItem( new CMenuForwarder("nfs.mount", true, "", new CNFSMountGui()));
 	networkSettings.addItem( new CMenuForwarder("nfs.umount", true, "", new CNFSUmountGui()));
 }
@@ -1833,7 +1807,7 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 {
-	static int lcdpower = CLCD::getInstance()->getPower()?1:0;
+	lcdpower = CLCD::getInstance()->getPower()?1:0;
 	static int lcdinverse = CLCD::getInstance()->getInverse()?1:0;
 	dprintf(DEBUG_DEBUG, "init lcdsettings\n");
 	lcdSettings.addItem( new CMenuSeparator() );
@@ -2014,12 +1988,9 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 			sprintf(id, "%d", count);
 
-			bool enable_it = true; //( ( !g_PluginList->getVTXT(count) )  || (g_RemoteControl->current_PIDs.PIDs.vtxtpid!=0) );
-			if( enable_it )
-				enabled_count++;
+			enabled_count++;
 
-			StreamFeatureSelector.addItem( new CMenuForwarder(g_PluginList->getName(count), enable_it, "",
-																			  StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?"blau.raw":""), (cnt == 0) && enable_it );
+			StreamFeatureSelector.addItem( new CMenuForwarder(g_PluginList->getName(count), true, "", StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?"blau.raw":""), (cnt == 0) );
 			cnt++;
 		}
 	}
@@ -2560,14 +2531,14 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				do
 				{
 					g_RCInput->getMsg( &msg, &data, timeout );
-					
+
 					if( msg != CRCInput::RC_timeout )
 					{
 						gettimeofday( &tv, NULL );
 						endtime = (tv.tv_sec*1000000) + tv.tv_usec;
 						diff = int((endtime - standby_pressed_at)/100000. );
 					}
-					
+
 				} while( ( msg != CRCInput::RC_timeout ) && ( diff < 10 ) );
 
 				g_RCInput->postMsg( ( diff >= 10 ) ? NeutrinoMessages::SHUTDOWN : NeutrinoMessages::STANDBY_ON, 0 );
@@ -2603,16 +2574,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		if( mode == mode_standby )
 		{
 			//switch lcd off/on
-			if ( CLCD::getInstance()->getPower() == 1 )
-			{
-				CLCD::getInstance()->setPower(0);
-				//CLCD::getInstance()->update();
-			}
-			else
-			{
-				CLCD::getInstance()->setPower(1);
-				CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
-			}
+			CLCD::getInstance()->setPower( !CLCD::getInstance()->getPower() );
 		}
 		else
 		{
@@ -2645,9 +2607,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		if((old_id == 0) || (!(channelList->adjustToChannelID(old_id))))
 			channelList->zapTo(0);
 	}
-//	else if ( ( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED ) ||   // EVT_BOUQUETSCHANGED: initiated by zapit
-//		  ( msg == NeutrinoMessages::EVT_SERVICESCHANGED ) )    // EVT_SERVICESCHANGED: no longer used
-	else if( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED )			// EVT_BOUQUETSCHANGED: initiated by zapit
+	else if( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED )			// EVT_BOUQUETSCHANGED: initiated by zapit ; EVT_SERVICESCHANGED: no longer used
 	{
 		t_channel_id old_id = channelList->getActiveChannel_ChannelID();
 
@@ -3164,8 +3124,6 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 
 void CNeutrinoApp::standbyMode( bool bOnOff )
 {
-	static int lcdpower;
-
 #ifdef USEACTIONLOG
 	g_ActionLog->println( ( bOnOff ) ? "mode: standby on" : "mode: standby off" );
 #endif
@@ -3419,7 +3377,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.446 2003/05/17 12:23:41 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.447 2003/05/18 11:42:34 alexw Exp $\n\n");
 
 	tzset();
 	initGlobals();

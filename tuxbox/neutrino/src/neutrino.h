@@ -86,7 +86,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		int				fontsSizeOffset;
 
 		int				mode;
-
+		int				lcdpower;
 		int				lastMode;
 		bool				softupdate;
 		bool				fromflash;
