@@ -218,6 +218,36 @@ static  unsigned short cw=0;
 	case RC_HOME:
 		doexit=3;
 		break;
+	case KEY_1:
+		actcode = 1;
+		break;
+	case KEY_2:
+		actcode = 2;
+		break;
+	case KEY_3:
+		actcode = 3;
+		break;
+	case KEY_4:
+		actcode = 4;
+		break;
+	case KEY_5:
+		actcode = 5;
+		break;
+	case KEY_6:
+		actcode = 6;
+		break;
+	case KEY_7:
+		actcode = 7;
+		break;
+	case KEY_8:
+		actcode = 8;
+		break;
+	case KEY_9:
+		actcode = 9;
+		break;
+	case KEY_0:
+		actcode = 0;
+		break;
 #if 0
 	case RC_UP:
 	case RC_DOWN:
