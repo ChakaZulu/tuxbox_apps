@@ -287,6 +287,7 @@ void CPlugins::startPlugin(int number)
 	}
 	if (plugin_list[number].needoffset)
 	{
+		addParm(P_ID_VFORMAT, g_settings.video_Format);
 		addParm(P_ID_OFF_X, g_settings.screen_StartX);
 		addParm(P_ID_OFF_Y, g_settings.screen_StartY);
 		addParm(P_ID_END_X, g_settings.screen_EndX);
@@ -294,6 +295,7 @@ void CPlugins::startPlugin(int number)
 
 		// cout << "With OFFSETS " << params.find(P_ID_OFF_X)->second.c_str() << ":" << params.find(P_ID_OFF_Y)->second.c_str() << endl;
 
+		startparam = makeParam(P_ID_VFORMAT, startparam);
 		startparam = makeParam(P_ID_OFF_X, startparam);
 		startparam = makeParam(P_ID_OFF_Y, startparam);
 		startparam = makeParam(P_ID_END_X, startparam);
