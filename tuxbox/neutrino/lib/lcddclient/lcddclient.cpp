@@ -29,8 +29,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "lcddclient.h"
-#include "lcddMsg.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -38,6 +36,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+
+#include <lcddclient.h>
 
 
 CLcddClient::CLcddClient()

@@ -1,4 +1,7 @@
-INCLUDES = @EVENTSERVER_CFLAGS@
+INCLUDES = \
+	-I../../../../dvb/zapit/include/zapit \
+	-I../include \
+	@EVENTSERVER_CFLAGS@
 
 lib_LTLIBRARIES  = libcontroldclient.la
 

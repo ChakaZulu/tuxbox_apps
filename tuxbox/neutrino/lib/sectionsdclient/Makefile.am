@@ -1,4 +1,6 @@
-INCLUDES = @EVENTSERVER_CFLAGS@
+INCLUDES = \
+	-I../include \
+	@EVENTSERVER_CFLAGS@
 
 lib_LTLIBRARIES  = libsectionsdclient.la
 

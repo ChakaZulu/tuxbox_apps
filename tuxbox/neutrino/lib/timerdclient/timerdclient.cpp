@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.23 2002/10/11 15:12:27 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.24 2002/10/13 05:42:52 woglinde Exp $
 
 	License: GPL
 
@@ -36,11 +36,7 @@
 //#include <netdb.h>
 //#include <arpa/inet.h>
 
-
-#include "timerdclient.h"
-#include "timerdMsg.h"
-#include "../timermanager.h"
-#include "../debug.h"
+#include <timerdclient.h>
 
 
 CTimerdClient::CTimerdClient()

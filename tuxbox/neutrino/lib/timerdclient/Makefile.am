@@ -1,8 +1,6 @@
 INCLUDES = \
-	-I@DRIVER@/include \
-	-I$(top_srcdir)/daemons/timerd \
-	@EVENTSERVER_CFLAGS@ \
-	@ZAPITCLIENT_CFLAGS@
+	-I../include \
+	@EVENTSERVER_CFLAGS@
 
 lib_LTLIBRARIES  = libtimerdclient.la
 
