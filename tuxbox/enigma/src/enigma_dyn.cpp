@@ -49,10 +49,11 @@
 #include <enigma_dyn_mount.h>
 #include <enigma_dyn_wap.h>
 #include <enigma_dyn_conf.h>
+#include <enigma_dyn_flash.h>
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.4.2"
+#define WEBXFACEVERSION "1.4.3"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -818,18 +819,29 @@ static eString getLeftNavi(eString mode, eString path)
 		result += button(110, "Timer", LEFTNAVICOLOR, "?mode=controlTimerList");
 	}
 	else
-#ifndef DISABLE_FILE
+
 	if (mode.find("config") == 0)
 	{
+#ifndef DISABLE_FILE
+#ifdef ENABLE_DYN_CONF
 		result += button(110, "Mount Manager", LEFTNAVICOLOR, "?mode=configMountMgr");
 		result += "<br>";
+#endif
+#endif
+#ifdef ENABLE_DYN_FLASH
+		result += button(110, "Flash Manager", LEFTNAVICOLOR, "?mode=configFlashMgr");
+		result += "<br>";
+#endif
+#ifndef DISABLE_FILE
+#ifdef ENABLE_DYN_CONF
 		result += button(110, "Swap File", LEFTNAVICOLOR, "?mode=configSwapFile");
 		result += "<br>";
 		result += button(110, "Multi-Boot", LEFTNAVICOLOR, "?mode=configMultiBoot");
 		result += "<br>";
+#endif
+#endif
 	}
 	else
-#endif
 	if (mode.find("updates") == 0)
 	{
 		result += button(110, "Internet", LEFTNAVICOLOR, "?mode=updatesInternet");
@@ -2243,11 +2255,19 @@ static eString getContent(eString mode, eString path)
 		result += getZap(mode, path);
 	}
 	else
-#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF
+#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH
 	if (mode == "config")
 	{
 		result = getTitle("CONFIG");
 		result += "Select one of the configuration categories on the left";
+	}
+	else
+#endif
+#ifdef ENABLE_DYN_FLASH
+	if (mode == "configFlashMgr")
+	{
+		result = getTitle("CONFIG: Flash Manager");
+		result += getConfigFlashMgr();
 	}
 	else
 #endif
@@ -4263,6 +4283,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #endif
 #ifdef ENABLE_DYN_CONF
 	ezapConfInitializeDyn(dyn_resolver, lockWeb);
+#endif
+#ifdef ENABLE_DYN_FLASH
+	ezapFlashInitializeDyn(dyn_resolver, lockWeb);
 #endif
 }
 
