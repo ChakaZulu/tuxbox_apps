@@ -277,7 +277,7 @@ static eString getControlPlugins(void)
 			{
 				result  << "<tr>"
 					<< "<td width=100>"
-					<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".so')")
+					<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".cfg')")
 					<< "</td>"
 					<< "<td>"
 					<< getAttribute("/lib/tuxbox/plugins/" + line, "name")
