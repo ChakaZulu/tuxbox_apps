@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.23 2002/01/10 01:23:22 McClean Exp $
+ $Id: rcinput.cpp,v 1.24 2002/01/10 12:45:09 McClean Exp $
  
  Module for Remote Control Handling
  
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.24  2002/01/10 12:45:09  McClean
+ fix rc-timeout-prob
+
  Revision 1.23  2002/01/10 01:23:22  McClean
  optimize rc-routines
 
@@ -205,8 +208,8 @@ int CRCInput::getKey(int Timeout)
 	while(1)
 	{
 		//nicht genau - verbessern!
-	    tvselect.tv_sec = Timeout / 10;
-		tvselect.tv_usec = 0;
+	    tvselect.tv_sec = Timeout/10;
+		tvselect.tv_usec = (Timeout*100000)%1000000;
 		
 		FD_ZERO(&rfds);
 		FD_SET(fd, &rfds);
@@ -270,18 +273,17 @@ int CRCInput::getKey(int Timeout)
 					//printf("!!!!!!!eat  native key: %04x %04x\n", rc_key, rc_key&0x1f );
 				}
 			}
-
-			if(tvslectp != NULL)
-			{//timeout neu kalkulieren
-				gettimeofday( &tv, NULL );
-				long long getKeyNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
-				long long diff = abs( (getKeyNow - getKeyBegin) / 1000000 );
-				//printf("diff timeout: %lld\n", diff);
-				if(diff>=Timeout2)
-				{
-					return RC_timeout;
-				}
-				Timeout -= diff;
+		}
+		if(tvslectp != NULL)
+		{//timeout neu kalkulieren
+			gettimeofday( &tv, NULL );
+			long long getKeyNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+			long long diff = abs( (getKeyNow - getKeyBegin) / 100000 );
+			Timeout -= diff;
+			//printf("[rcin] diff timeout: %lld, %d von %d\n", diff, Timeout, Timeout2);
+			if(Timeout<=0)
+			{
+				return RC_timeout;
 			}
 		}
 	}

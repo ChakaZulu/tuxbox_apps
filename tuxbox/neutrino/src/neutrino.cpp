@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.125 2002/01/10 01:23:22 McClean Exp $
+        $Id: neutrino.cpp,v 1.126 2002/01/10 12:45:09 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.126  2002/01/10 12:45:09  McClean
+  fix rc-timeout-prob
+
   Revision 1.125  2002/01/10 01:23:22  McClean
   optimize rc-routines
 
@@ -2185,7 +2188,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 			{
 				timeout=timeout1;
 			}
-			printf("timeout is %d\n", timeout);
+			printf("standby timeout is %d\n", timeout);
 
 			struct timeval tv;
 			gettimeofday( &tv, NULL );
@@ -2194,8 +2197,9 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 			{
 				gettimeofday( &tv, NULL );
 				long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
-				//printf("diff: %d\n",  int((endtime-starttime)/100000. ));
-				if(int((endtime-starttime)/100000.)>25)
+				int diff = int((endtime-starttime)/100000. );
+				//printf("standby diff: %d\n", diff);
+				if(diff>=20)
 				{
 					ExitRun();
 				}
@@ -2279,7 +2283,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.125 2002/01/10 01:23:22 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.126 2002/01/10 12:45:09 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
