@@ -4,6 +4,7 @@
 #include "eskin.h"
 #include "elabel.h"
 #include <core/gdi/grc.h>
+#include <core/gui/guiactions.h>
 
 eRect eNumber::getNumberRect(int n)
 {
@@ -16,7 +17,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 
 	if (!area.contains(pos))
 		return;
-	
+		
 	p->setForegroundColor((have_focus && n==active)?cursor:normal);
 	p->fill(pos);
 	p->setFont(font);
@@ -40,15 +41,44 @@ void eNumber::redrawWidget(gPainter *p, const eRect &area)
 		redrawNumber(p, i, area);
 }
 
-int eNumber::eventFilter(const eWidgetEvent &event)
+int eNumber::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
 	case eWidgetEvent::changedSize:
 		space=(size.width()-2)/len;
 		break;
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_cursorActions->left)
+		{
+			int oldac=active;
+			active--;
+			invalidate(getNumberRect(oldac));
+			if (active<0)
+				active=len-1;
+			if (active!=oldac)
+				invalidate(getNumberRect(active));
+			digit=0;
+		} else if ((event.action == &i_cursorActions->right) || (event.action == &i_cursorActions->ok))
+		{
+			int oldac=active;
+			active++;
+			invalidate(getNumberRect(oldac));
+			if (active>=len)
+			{
+				if (event.action == &i_cursorActions->ok)
+					/*emit*/ selected(number);
+				active=0;
+			}
+	
+			if (active!=oldac)
+				invalidate(getNumberRect(active));
+			digit=0;
+		} else
+			break;
+		return 1;
 	}
-	return 0;
+	return eWidget::eventHandler(event);
 }
 
 eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eLabel* descr, int grabfocus)
@@ -63,15 +93,11 @@ eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, 
 	setBase(10);
 	for (int i=0; i<len; i++)
 		number[i]=init[i];
+	addActionMap(&i_cursorActions->map);
 }
 
 eNumber::~eNumber()
 {
-}
-
-int eNumber::keyUp(int key)
-{
-	return 0;
 }
 
 int eNumber::keyDown(int key)
@@ -81,36 +107,6 @@ int eNumber::keyDown(int key)
 
 	switch (key)
 	{
-	case eRCInput::RC_OK:
-	case eRCInput::RC_RIGHT:
-	{
-		int oldac=active;
-		active++;
-		invalidate(getNumberRect(oldac));
-		if (active>=len)
-		{
-			if (key==eRCInput::RC_OK)
-				/*emit*/ selected(number);
-			active=0;
-		}
-
-		if (active!=oldac)
-			invalidate(getNumberRect(active));
-		digit=0;
-		break;
-	}
-	case eRCInput::RC_LEFT:
-	{
-		int oldac=active;
-		active--;
-		invalidate(getNumberRect(oldac));
-		if (active<0)
-			active=len-1;
-		if (active!=oldac)
-			invalidate(getNumberRect(active));
-		digit=0;
-		break;
-	}
 	case eRCInput::RC_0 ... eRCInput::RC_9:
 	{
 		int nn=(digit!=0)?number[active]*10:0;

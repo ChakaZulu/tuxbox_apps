@@ -16,7 +16,7 @@ private:
 	void redrawNumber(gPainter *, int n, const eRect &rect);
 	void redrawWidget(gPainter *, const eRect &rect);
 	eRect getNumberRect(int n);
-	int eventFilter(const eWidgetEvent &event);
+	int eventHandler(const eWidgetEvent &event);
 	int number[16];
 	int len, space, active;
 	gColor cursor, normal;
@@ -27,7 +27,6 @@ private:
 	eString descr;
 	eLabel* tmpDescr; // used for description Label in LCD
 protected:
-	int keyUp(int key);
 	int keyDown(int key);
 	void gotFocus();
 	void lostFocus();
