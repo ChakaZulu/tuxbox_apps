@@ -1,5 +1,6 @@
 
 
+ - Bugfix: dvr device open set to read only 
  - Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 
  - New: bad ts packet counter  on -s bandwidth (tnx to W.J. Beksi, setabox for basic patch)

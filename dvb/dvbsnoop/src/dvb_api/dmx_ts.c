@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.30 2004/12/07 21:01:41 rasc Exp $
+$Id: dmx_ts.c,v 1.31 2005/01/23 21:52:01 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dmx_ts.c,v 1.30 2004/12/07 21:01:41 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de  (rasc)
 
 
  -- Transport Streams
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.30 2004/12/07 21:01:41 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.31  2005/01/23 21:52:01  rasc
+DVR device needs to be open in RD only mode...
+
 Revision 1.30  2004/12/07 21:01:41  rasc
 Large file support (> 2 GB) for -if cmd option. (tnx to K.Zheng,  Philips.com for reporting)
 
@@ -178,7 +181,7 @@ int  doReadTS (OPTION *opt)
         fileMode = 1;
   } else {
   	f        = opt->devDvr;
-  	openMode = O_RDWR;
+  	openMode = O_RDONLY;
         fileMode = 0;
   } 
 

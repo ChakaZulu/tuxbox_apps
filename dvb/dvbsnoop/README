@@ -133,6 +133,9 @@ Bugs, requests:
   the option "dvbsnoop -s ... -b ... > file" on your harddrive.
   It might be helpful for further investigations.
 
+  To prevent spam-filtering please preceed your mail subject
+  with "dvbsnoop: "  (e.g. mail topic: "dvbsnoop: bugreport xyz")
+
 
 
 Keywords:
