@@ -6,28 +6,27 @@ static char brief_usage_msg[] =
 "usage: ether-wake [-i <ifname>] [-p aa:bb:cc:dd[:ee:ff]] 00:11:22:33:44:55\n"
 "   Use '-u' to see the complete set of options.\n";
 static char usage_msg[] =
-"usage: ether-wake [-i <ifname>] [-p aa:bb:cc:dd[:ee:ff]] 00:11:22:33:44:55
-
-	This program generates and transmits a Wake-On-LAN (WOL) \"Magic Packet\",
-	used for restarting machines that have been soft-powered-down
-	(ACPI D3-warm state).  It currently generates the standard AMD Magic Packet
-	format, with an optional password appended.
-
-	The single required parameter is the Ethernet MAC (station) address
-	of the machine to wake.  This is typically retrieved with the 'arp'
-	program while the target machine is awake.
-
-	Options:
-		-b	Send wake-up packet to the broadcast address.
-		-D	Increase the debug level.
-		-i ifname	Use interface IFNAME instead of the default 'eth0'.
-		-p <pw>		Append the four or six byte password PW to the packet.
-					A password is only required for a few adapter types.
-					The password may be specified in ethernet hex format
-					or dotted decimal (Internet address)
-		-p 00:22:44:66:88:aa
-		-p 192.168.1.1
-";
+"usage: ether-wake [-i <ifname>] [-p aa:bb:cc:dd[:ee:ff]] 00:11:22:33:44:55\n"
+"\n"
+"	This program generates and transmits a Wake-On-LAN (WOL) \"Magic Packet\",\n"
+"	used for restarting machines that have been soft-powered-down\n"
+"	(ACPI D3-warm state).  It currently generates the standard AMD Magic Packet\n"
+"	format, with an optional password appended.\n"
+"\n"
+"	The single required parameter is the Ethernet MAC (station) address\n"
+"	of the machine to wake.  This is typically retrieved with the 'arp'\n"
+"	program while the target machine is awake.\n"
+"\n"
+"	Options:\n"
+"		-b	Send wake-up packet to the broadcast address.\n"
+"		-D	Increase the debug level.\n"
+"		-i ifname	Use interface IFNAME instead of the default 'eth0'.\n"
+"		-p <pw>		Append the four or six byte password PW to the packet.\n"
+"					A password is only required for a few adapter types.\n"
+"					The password may be specified in ethernet hex format\n"
+"					or dotted decimal (Internet address)\n"
+"		-p 00:22:44:66:88:aa\n"
+"		-p 192.168.1.1\n";
 
 /*
 	This program generates and transmits a Wake-On-LAN (WOL) "Magic Packet",
