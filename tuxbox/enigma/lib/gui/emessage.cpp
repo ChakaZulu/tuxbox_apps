@@ -7,7 +7,7 @@
 #include <lib/base/i18n.h>
 
 eMessageBox::eMessageBox(eString message, eString caption, int flags, int def, int timeout )
-	:eWindow(0), timer(0), icon(0), def(0), timeout(timeout)
+	:eWindow(0), timer(0), sectimer(0), icon(0), def(0), timeout(timeout)
 {
 	if ( timeout )
 	{
@@ -167,6 +167,7 @@ int eMessageBox::eventHandler( const eWidgetEvent &e )
 			{
 				timer->stop();
 				delete sectimer;
+				sectimer=0;
 				updateTimeoutLabel();
 			}
 			break;
@@ -176,6 +177,7 @@ int eMessageBox::eventHandler( const eWidgetEvent &e )
 			if ( timeout )
 			{
 				timer->start(timeout*1000, true);
+				delete sectimer;
 				sectimer = new eTimer(eApp);
 				CONNECT( sectimer->timeout, eMessageBox::updateTimeoutLabel );
 				sectimer->start(1000);
@@ -227,4 +229,10 @@ void eMessageBox::updateTimeoutLabel()
 	}
 	else
 		lTimeout->hide();
+}
+
+eMessageBox::~eMessageBox()
+{
+	delete timer;
+	delete sectimer;
 }

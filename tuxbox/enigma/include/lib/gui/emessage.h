@@ -40,6 +40,7 @@ public:
 	 * \param caption The title of the messagebox.
 	 */
 	eMessageBox(eString string, eString caption, int flags=btOK, int def=btOK, int timeout=0 );
+	~eMessageBox();
 };
 
 #endif

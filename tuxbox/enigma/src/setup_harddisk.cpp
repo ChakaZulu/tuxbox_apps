@@ -1,3 +1,4 @@
+#ifndef DISABLE_HDD
 #ifndef DISABLE_FILE
 /*
  * setup_harddisk.cpp
@@ -18,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.16 2004/05/25 21:38:20 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.17 2004/06/23 08:34:33 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -637,3 +638,4 @@ void ePartitionCheck::getData( eString str )
 }
 
 #endif // DISABLE_FILE
+#endif // DISABLE_HDD

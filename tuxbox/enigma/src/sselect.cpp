@@ -16,6 +16,7 @@
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/serviceplaylist.h>
 #include <lib/dvb/record.h>
+#include <lib/dvb/servicemp3.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/actions.h>
 #include <lib/gui/eskin.h>
@@ -101,7 +102,7 @@ struct serviceSelectorActions
 			addService, addServiceToUserBouquet, modeTV, modeRadio,
 			modeFile, toggleStyle, toggleFocus, gotoPrevMarker, gotoNextMarker,
 			showAll, showSatellites, showProvider, showBouquets, deletePressed,
-			markPressed, renamePressed, newMarkerPressed;
+			markPressed, renamePressed, insertPressed;
 	serviceSelectorActions():
 		map("serviceSelector", _("service selector")),
 		nextBouquet(map, "nextBouquet", _("switch to next bouquet"), eAction::prioDialogHi),
@@ -127,13 +128,13 @@ struct serviceSelectorActions
 		deletePressed(map, "delete", _("delete selected entry"), eAction::prioDialog),
 		markPressed(map, "mark", _("mark selected entry for move"), eAction::prioDialog),
 		renamePressed(map, "rename", _("rename selected entry"), eAction::prioDialog),
-		newMarkerPressed(map, "marker", _("create new marker entry"), eAction::prioDialog)
+		insertPressed(map, "marker", _("create new marker entry"), eAction::prioDialog)
 	{
 	}
 };
 eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(eAutoInitNumbers::actions, "service selector actions");
 
-eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num)
+eListBoxEntryService::eListBoxEntryService(eListBoxExt<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num)
 	:eListBoxEntry((eListBox<eListBoxEntry>*)lb), numPara(0),
 	namePara(0), descrPara(0), nameXOffs(0), flags(flags),
 	num(num), curEventId(-1), service(service)
@@ -145,13 +146,13 @@ eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, c
 		sort=eString().sprintf("%06d", service->service_number);
 #else
 		if( service.descr )
-			sort = service.descr;
+			sort = service.descr.c_str();
 		else
 		{
 			const eService *pservice=eServiceInterface::getInstance()->addRef(service);
 			if ( pservice )
 			{
-				sort=pservice?pservice->service_name:"";
+				sort=pservice?pservice->service_name.c_str():"";
 				eServiceInterface::getInstance()->removeRef(service);
 			}
 		}
@@ -263,7 +264,6 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 	if (!namePara)
 	{
 		eString sname;
-
 		if (service.descr.length())
 			sname=service.descr;
 		else if (pservice)
@@ -1293,10 +1293,25 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					/*emit*/ renameService( this );
 				show();
 			}
-			else if ( event.action == &i_serviceSelectorActions->newMarkerPressed )
+			else if ( event.action == &i_serviceSelectorActions->insertPressed )
 			{
 				if ( path.current().type == eServicePlaylistHandler::ID )
 					/*emit*/ newMarkerPressed( this );
+				else if ( selected.flags & eServiceReference::flagDirectory )
+				{
+					if ( selected.type == eServiceReference::idDVB
+						&& (selected.data[0] == -2 || selected.data[0] == -3) )
+						/*emit*/ copyToBouquetList(this);
+				}
+				else if ( selected.type == eServiceReference::idDVB
+					|| ( selected.type == eServiceReference::idUser
+						&& ( (selected.data[0] == eMP3Decoder::codecMPG)
+							|| (selected.data[0] == eMP3Decoder::codecMP3) ) ) )
+				{
+					hide();
+					/*emit*/ addServiceToUserBouquet(&selected, 0);
+					show();
+				}
 			}
 			else
 				break;
@@ -1478,12 +1493,12 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Number");
 			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Name");
 		}
-		services = new eListBox<eListBoxEntryService>(this);
+		services = new eListBoxExt<eListBoxEntryService>(this);
 		services->setName("services");
 		services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 		services->hide();
 
-		bouquets = new eListBox<eListBoxEntryService>(this);
+		bouquets = new eListBoxExt<eListBoxEntryService>(this);
 		bouquets->setName("bouquets");
 		bouquets->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 		bouquets->hide();
@@ -1599,7 +1614,7 @@ eServiceSelector::eServiceSelector()
 		addActionToHelpList(&i_serviceSelectorActions->deletePressed);
 		addActionToHelpList(&i_serviceSelectorActions->markPressed);
 		addActionToHelpList(&i_serviceSelectorActions->renamePressed);
-		addActionToHelpList(&i_serviceSelectorActions->newMarkerPressed);
+		addActionToHelpList(&i_serviceSelectorActions->insertPressed);
 	}
 	addActionToHelpList(&i_serviceSelectorActions->showAll);
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
@@ -1833,7 +1848,7 @@ int eServiceSelector::toggleMoveMode()
 			services->append( goUpEntry, true, true );
 	}
 	else if ( goUpEntry )
-		services->remove(goUpEntry, true);
+		services->take(goUpEntry, true);
 
 	services->endAtomic();
 	return movemode;

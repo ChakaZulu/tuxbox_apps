@@ -4397,11 +4397,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/setFakeRecordingState", setFakeRecordingState, lockWeb);
 #endif
-#if 0
-	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto, false); // this dont really zap.. only used to return currently used pids;
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist, lockWeb);
-#endif
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);
 }
 

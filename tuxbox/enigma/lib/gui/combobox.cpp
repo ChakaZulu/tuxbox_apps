@@ -163,36 +163,34 @@ void eComboBox::onSelChanged(eListBoxEntryText* le)
 #endif
 }
 
-void eComboBox::removeEntry( eListBoxEntryText* le )
+void eComboBox::takeEntry( eListBoxEntryText* le )
 {
 	if (le)
-	{
-		listbox.remove(le);
-		if ( flags & flagSorted )
-			listbox.sort();
-	}
+		listbox.take(le);
 }
 
-void eComboBox::removeEntry( int num )
+eListBoxEntryText *eComboBox::takeEntry( int num )
 {
-	if ( listbox.getCount() >= num)
+	if ( listbox.getCount() <= num)
 	{
-		setCurrent(	num );
-	  listbox.remove( listbox.getCurrent() );
-		if ( flags & flagSorted )
-			listbox.sort();
+		setCurrent( num );
+		eListBoxEntryText *cur = listbox.getCurrent();
+		listbox.take(cur);
+		return cur;
 	}
+	return 0;
 }
 
-void eComboBox::removeEntry( void* key )
+eListBoxEntryText *eComboBox::takeEntry( void *key )
 {
 	setCurrent(key);
 	if (listbox.getCurrent() && key == listbox.getCurrent()->getKey() )
 	{
-		listbox.remove( listbox.getCurrent() );
-		if ( flags & flagSorted )
-			listbox.sort();
+		eListBoxEntryText *cur = listbox.getCurrent();
+		listbox.take( cur );
+		return cur;
 	}
+	return 0;
 }
 
 int eComboBox::setCurrent( const eListBoxEntryText* le, bool sendSelChanged )

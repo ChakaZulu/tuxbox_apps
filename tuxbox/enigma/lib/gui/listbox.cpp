@@ -1,5 +1,6 @@
 #include <lib/gui/listbox.h>
 #include <lib/gui/eprogress.h>
+#include <lib/gui/numberactions.h>
 #include <lib/system/econfig.h>
 #include <lib/gdi/font.h>
 
@@ -379,9 +380,9 @@ void eListBoxBase::append(eListBoxEntry* entry, bool holdCurrent, bool front)
 		setCurrent(cur);
 }
 
-void eListBoxBase::remove(eListBoxEntry* entry, bool holdCurrent)
+void eListBoxBase::take(eListBoxEntry* entry, bool holdCurrent)
 {
-	eListBoxEntry* cur = 0;
+	eListBoxEntry *cur = 0;
 
 	if (holdCurrent && current != entry)
 		cur = current;
@@ -539,6 +540,7 @@ void eListBoxBase::gotFocus()
 	}
 	if (flags & flagShowEntryHelp)
 		setHelpText( current != childs.end() ? current->getHelpText(): eString(" ")); // eString(_("no description available")));
+	eRCInput::getInstance()->setKeyboardMode(eRCInput::kmAscii);
 }
 
 void eListBoxBase::lostFocus()
@@ -571,6 +573,15 @@ void eListBoxBase::lostFocus()
 	if (parent && parent->LCDElement)
 		parent->LCDElement->setText("");
 #endif
+	eRCInput::getInstance()->setKeyboardMode(eRCInput::kmNone);
+}
+
+void eListBoxBase::invalidateCurrent()
+{
+	int n=0;
+	for (ePtrList<eListBoxEntry>::iterator i(top); i != bottom; ++i, ++n)
+		if ( i == current )
+			invalidate(getEntryRect(n));
 }
 
 void eListBoxBase::init()
@@ -892,6 +903,84 @@ void eListBoxBase::sort()
 		setCurrent(cur);
 }
 
+eListBoxBaseExt::eListBoxBaseExt(eWidget* parent, const eWidget* descr, int takefocus, int item_height, const char *deco)
+	:eListBoxBase(parent, descr, takefocus, item_height, deco), browseTimer(eApp)
+{
+	CONNECT(browseTimer.timeout, eListBoxBaseExt::browseTimeout);
+	addActionMap(&i_numberActions->map);
+}
+
+int eListBoxBaseExt::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+		case eWidgetEvent::evtAction:
+			if (event.action == &i_cursorActions->ok)
+			{
+				browseText="";
+				browseHistory.clear();
+				return eListBoxBase::eventHandler(event);
+			}
+			else if (event.action == &i_numberActions->keyBackspace)
+			{
+				if ( browseText )
+					browseText.erase(browseText.length()-1,1);
+				if ( browseHistory.size() )
+				{
+					setCurrent(browseHistory.front(),false);
+					browseHistory.pop_front();
+				}
+				browseTimer.start(2*1000,true);
+			}
+			else
+				break;
+		return 1;
+		default:
+		break;
+	}
+	return eListBoxBase::eventHandler(event);
+}
+
+int eListBoxBaseExt::keyDown(int key)
+{
+	if (key >= KEY_ASCII)
+	{
+		browseTimer.start(2*1000,true);
+		// TODO convert browseText to utf8 !!
+		browseText+=(char)key;
+		const char *browseBuf = browseText.c_str();
+		int len = browseText.length();
+		for (ePtrList<eListBoxEntry>::iterator it(childs.begin());
+			it != childs.end(); ++it )
+		{
+			if ( !strncasecmp(it->getText().c_str(), browseBuf, len) )
+			{
+				if ( it != current )
+				{
+					browseHistory.push_front(current);
+					setCurrent(*it,false);
+				}
+				return 1;
+			}
+		}
+		browseText.erase(len-1,1);
+	}
+	return 0;
+}
+
+void eListBoxBaseExt::clearList()
+{
+	eListBoxBase::clearList();
+	browseHistory.clear();
+}
+
+void eListBoxBaseExt::lostFocus()
+{
+	eListBoxBase::lostFocus();
+	browseText="";
+	browseHistory.clear();
+}
+ 
 void eListBoxEntry::drawEntryBorder(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF )
 {
 	rc->setForegroundColor(coActiveB);

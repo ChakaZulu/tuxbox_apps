@@ -473,13 +473,10 @@
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="KEY_CHANNELUP" flags="mr" />
 			<action name="prevBouquet" key="KEY_CHANNELDOWN" flags="mr" />
-			<action name="pathUp" key="KEY_BACKSPACE" flags="m" />
 			<action name="gotoPrevMarker" key="KEY_HOME" flags="mr" />
 			<action name="gotoNextMarker" key="KEY_END" flags="mr" />
 			<action name="gotoPrevMarker" key="KEY_BACK" flags="mr" />
 			<action name="gotoNextMarker" key="KEY_FORWARD" flags="mr" />
-			<action name="rename" key="KEY_R" flags="m" />
-			<action name="marker" key="KEY_M" flags="m" />
 		</actionmap>
 
 		<actionmap name="serviceSelector" style="sselect_default">
@@ -495,11 +492,17 @@
 			<action name="showMenu" key="KEY_SETUP" flags="m" />
 			<action name="toggleStyle" key="KEY_VIDEO" flags="m" />
 			<action name="toggleFocus" key="KEY_AUDIO" flags="m" />
+			<action name="delete" key="KEY_DELETE" flags="m" />
+			<action name="marker" key="KEY_INSERT" flags="m" />
 		</actionmap>
 
 		<actionmap name="serviceSelector" style="sselect_edit">
+			<action name="mark" key="KEY_GREEN" flags="m" />
+			<action name="rename" key="KEY_YELLOW" flags="m" />
+			<action name="marker" key="KEY_BLUE" flags="m" />
+			<action name="marker" key="KEY_INSERT" flags="m" />
+			<action name="delete" key="KEY_RED" flags="m" />
 			<action name="delete" key="KEY_DELETE" flags="m" />
-			<action name="delete" key="KEY_BACKSPACE" flags="m" />
 			<action name="mark" key="KEY_SPACE" flags="m" />
 		</actionmap>
 
@@ -516,6 +519,7 @@
 			<action name="9" key="KEY_9" flags="mr" />
 			<action name="ext1" key="KEY_LEFT" flags="mr" />
 			<action name="ext2" key="KEY_RIGHT" flags="mr" />
+			<action name="backspace" key="KEY_BACKSPACE" flags="mr" />
 		</actionmap>
 
 		<actionmap name="enigmaStandby">

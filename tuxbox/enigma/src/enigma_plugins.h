@@ -2,6 +2,7 @@
 #define __enigma_plugins_h
 
 #include <lib/base/thread.h>
+#include <lib/base/message.h>
 #include <lib/gui/listbox.h>
 
 class ePlugin: public eListBoxEntryText
@@ -29,8 +30,9 @@ public:
 	int exec();
 };
 
-class ePluginThread: public eThread
+class ePluginThread: public eThread, public Object
 {
+	eFixedMessagePump<int> message;
 	void *libhandle[20];
 	int argc, tpid;
 	static ePluginThread *instance;
@@ -41,14 +43,17 @@ class ePluginThread: public eThread
 	eString PluginPath[3];
 	void thread();
 	void thread_finished();
+	void finalize_plugin();
+	void recv_msg(const int &);
 public:
 	ePluginThread( ePlugin *p, eString PluginPath[3], eZapPlugins *wnd )
-		:depend(p->depend), sopath(p->sopath), pluginname(p->pluginname),
+		:message(eApp,1), depend(p->depend), sopath(p->sopath), pluginname(p->pluginname),
 		needfb(p->needfb), needrc(p->needrc), needlcd(p->needlcd),
 		needvtxtpid(p->needvtxtpid), needoffsets(p->needoffsets),
 		showpig(p->showpig), posx(p->posx), posy(p->posy), sizex(p->sizex),
 		sizey(p->sizey), wasVisible(0), wnd(wnd)
 	{
+		CONNECT(message.recv_msg, ePluginThread::recv_msg);
 		instance=this;
 		this->PluginPath[0] = PluginPath[0];
 		this->PluginPath[1] = PluginPath[1];

@@ -39,16 +39,16 @@ protected:
 	eListBoxEntry* goNext();
 	eListBoxEntry* goPrev();
 	int setProperty(const eString &prop, const eString &value);
+	int eventHandler(const eWidgetEvent &event);
+	void lostFocus();
 private:
 	eRect getEntryRect(int n);
-	int eventHandler(const eWidgetEvent &event);
 	void eraseBackground() {};
 	void recalcMaxEntries();
 	void recalcClientRect();
 	void recalcScrollBar();
 	int newFocus();
 	void redrawWidget(gPainter *target, const eRect &area);
-	void lostFocus();
 	void gotFocus();
 	void init();
 	virtual void SendSelected( eListBoxEntry* entry )=0;
@@ -66,7 +66,8 @@ public:
 	int getColumns() { return columns; }
 	void setMoveMode(int move) { movemode=move; }
 	void append(eListBoxEntry* e, bool holdCurrent=false, bool front=false);
-	void remove(eListBoxEntry* e, bool holdCurrent=false);
+	void take(eListBoxEntry *e, bool holdCurrent=false);
+	inline void remove(eListBoxEntry* entry, bool holdCurrent=false);
 	void clearList();
 	int getCount() { return childs.size(); }
 	int setCurrent(const eListBoxEntry *c, bool sendSelected=false);
@@ -76,13 +77,7 @@ public:
 	void beginAtomic();
 	void endAtomic();
 	void FakeFocus( int i ) { have_focus=i; }
-	void invalidateCurrent()
-	{
-		int n=0;
-		for (ePtrList<eListBoxEntry>::iterator i(top); i != bottom; ++i, ++n)
-			if ( i == current )
-				invalidate(getEntryRect(n));
-	}
+	void invalidateCurrent();
 };
 
 template <class T>
@@ -101,6 +96,70 @@ public:
 	Signal1<void, T*> selchanged;
 	eListBox(eWidget *parent, const eWidget* descr=0, int takefocus=1 )
 		:eListBoxBase( parent, descr, takefocus, T::getEntryHeight() )
+	{
+	}
+	T* getCurrent()	{ return (T*)eListBoxBase::getCurrent(); }
+	T* getNext() { return (T*)eListBoxBase::getNext(); }
+	T* goNext() { return (T*)eListBoxBase::goNext(); }
+	T* goPrev() { return (T*)eListBoxBase::goPrev(); }
+
+	template <class Z>
+	int forEachEntry(Z ob)
+	{
+		for (ePtrList<eListBoxEntry>::iterator i(childs.begin()); i!=childs.end(); ++i)
+			if ( ob((T&)(**i)) )
+				return OK;
+
+		return ERROR;
+	}
+
+	template <class Z>
+	int forEachVisibleEntry(Z ob)
+	{
+		if (!isVisible())
+			return E_NOT_VISIBLE;
+
+		for (ePtrList<eListBoxEntry>::iterator i(top); i!=bottom; ++i)
+			if ( ob((T&)(**i)) )
+				return OK;
+
+		return ERROR;
+	}
+};
+
+class eListBoxBaseExt: public eListBoxBase
+{
+	// for textbrowsing via keyboard
+	eString browseText;
+	std::list<eListBoxEntry*> browseHistory;
+	eTimer browseTimer;
+	void browseTimeout() { browseText=""; }
+	int eventHandler( const eWidgetEvent &e );
+protected:
+	eListBoxBaseExt(eWidget* parent, const eWidget* descr=0, int takefocus=1, int item_height=0, const char *deco="eListBox" );
+public:
+// for text browsing via keyboard	
+	int keyDown(int key);
+	void lostFocus();
+	void clearList();
+};
+
+template <class T>
+class eListBoxExt: public eListBoxBaseExt
+{
+	void SendSelected( eListBoxEntry* entry )
+	{
+		/*emit*/ selected((T*)entry);
+	}
+	void SendSelChanged( eListBoxEntry* entry )
+	{
+		/*emit*/ selchanged((T*)entry);
+	}
+public:
+	Signal1<void, T*> selected;
+	Signal1<void, T*> selchanged;
+	eListBoxExt(eWidget *parent, const eWidget* descr=0, int takefocus=1 )
+		:eListBoxBaseExt( parent, descr, takefocus, T::getEntryHeight() )
 	{
 	}
 	T* getCurrent()	{ return (T*)eListBoxBase::getCurrent(); }
@@ -151,7 +210,7 @@ public:
 	virtual ~eListBoxEntry()
 	{
 		if (listbox)
-			listbox->remove(this);
+			listbox->take(this);
 	}
 	virtual bool operator < ( const eListBoxEntry& e)const
 	{
@@ -165,7 +224,18 @@ public:
 	void drawEntryRect(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state);
 	void drawEntryBorder(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF);
 	const eString &getHelpText() const { return helptext; }
+	virtual const eString& getText() const 
+	{ 
+		static eString str;
+		return str; 
+	}
 };
+
+inline void eListBoxBase::remove(eListBoxEntry* entry, bool holdCurrent)
+{ 
+	take(entry,holdCurrent);
+	delete entry;
+}
 
 class eListBoxEntrySeparator: public eListBoxEntry
 {
@@ -219,7 +289,7 @@ public:
 
 	void *& getKey() { return key; }
 	const void* getKey() const { return key; }
-	const eString& getText() { return text; }
+	const eString& getText() const { return text; }
 	void SetText(const eString& txt); // not setText !!!
 protected:
 	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );

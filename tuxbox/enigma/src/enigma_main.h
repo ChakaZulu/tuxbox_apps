@@ -472,7 +472,9 @@ private:
 	eServicePath modeLast[modeEnd];
 
 	int mode,             // current mode .. TV, Radio, File
-			state;
+			state,
+			wasSleeping;
+
 	void onRotorStart( int newPos );
 	void onRotorStop();
 	void onRotorTimeout();

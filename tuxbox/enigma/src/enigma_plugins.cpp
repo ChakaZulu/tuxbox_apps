@@ -407,7 +407,7 @@ void ePluginThread::start()
 				{
 					eDebug("start plugin in current thread");
 					thread();
-					thread_finished();
+					finalize_plugin();
 				}
 				else
 				{
@@ -432,7 +432,17 @@ void ePluginThread::thread()
 	eDebug("execute plugin finished");
 }
 
+void ePluginThread::recv_msg(const int &)
+{
+	finalize_plugin();
+}
+
 void ePluginThread::thread_finished()
+{
+	message.send(1); 
+}
+
+void ePluginThread::finalize_plugin()
 {
 	while (argc)
 		dlclose(libhandle[--argc]);
@@ -472,6 +482,5 @@ void ePluginThread::thread_finished()
 			Decoder::Set();
 		}
 	}
-
 	delete this;
 }

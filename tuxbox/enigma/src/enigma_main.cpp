@@ -368,7 +368,7 @@ NVODStream::NVODStream(eListBox<NVODStream> *listbox, eDVBNamespace dvb_namespac
 			eServiceID(ref->service_id), 5), eit(EIT::typeNowNext, ref->service_id, type)
 {
 	CONNECT(eit.tableReady, NVODStream::EITready);
-	listbox->remove(this);
+	listbox->take(this);
 	begTime=0;
 	eit.start();
 }
@@ -378,7 +378,7 @@ const eString &NVODStream::redraw(gPainter *rc, const eRect& rect, gColor coActi
 	if (begTime && (begTime = validate()) )
 		return eListBoxEntryTextStream::redraw(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state);
 
-	listbox->remove( this );
+	listbox->take( this );
 	eit.start();
 
 	static eString ret;
@@ -1521,9 +1521,16 @@ eZapMain::eZapMain()
 	,volumeTimer(eApp), recStatusBlink(eApp), doubleklickTimer(eApp)
 	,unusedTimer(eApp), currentSelectedUserBouquet(0), timeshift(0)
 	,state(0)
+	,wasSleeping(0)
 {
 	if (!instance)
 		instance=this;
+
+	int wasDeepstandby=0;
+	eConfig::getInstance()->getKey("/ezap/timer/deepstandbywakeupset", wasDeepstandby );
+	eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
+	eConfig::getInstance()->flush();
+	wasSleeping = wasDeepstandby ? 2 : 0;
 
 // Mute Symbol
 	gPixmap *pm = eSkin::getActive()->queryImage("mute_symbol");
@@ -1746,7 +1753,7 @@ eZapMain::eZapMain()
 	CONNECT(sel->renameService, eZapMain::renameService );
 	CONNECT(sel->renameBouquet, eZapMain::renameBouquet );
 	CONNECT(sel->newMarkerPressed, eZapMain::createMarker );
-
+	CONNECT(sel->copyToBouquetList, eZapMain::copyProviderToBouquets );
 	reloadPaths();
 
 	eServiceReference::loadLockedList( (eplPath+"/services.locked").c_str() );
@@ -3266,19 +3273,22 @@ void eZapMain::stopSkip(int dir)
 int eZapMain::handleStandby(int i)
 {
 	int force=0;	
-	if ( !i )
+	if ( i == 0 )
 	{
 		if ( state & stateSleeping )
 		{
 			wakeUp();
+			wasSleeping=3;
 			// this breakes the eZapStandby mainloop...
 			// and enigma wakes up
-			return 3;
 		}
-		int wasDeepstandby=0;
-		eConfig::getInstance()->getKey("/ezap/timer/deepstandbywakeupset", wasDeepstandby );
-		eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
-		return wasDeepstandby ? 2 : 0;
+		return 0;
+	}
+	else if ( i == 1 ) // get wasSleeping state
+	{
+		int tmp = wasSleeping;
+		wasSleeping=0;
+		return tmp;
 	}
 	else switch(i) // before record we was in sleep mode...
 	{
@@ -5630,13 +5640,7 @@ void eZapMain::timeOut()
 {
 	int state=1;
 	eConfig::getInstance()->getKey("/ezap/osd/enableAutohideOSDOn", state);
-	if (pRotorMsg && pRotorMsg->isVisible() )
-	{
-		pRotorMsg->hide();
-		delete pRotorMsg;
-		pRotorMsg=0;
-	}
-	else if ( doHideInfobar() && (currentFocus==this) && ((state == 1) || (stateOSD == 0)))
+	if ( doHideInfobar() && (currentFocus==this) && ((state == 1) || (stateOSD == 0)))
 		hide();
 }
 

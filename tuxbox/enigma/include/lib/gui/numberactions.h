@@ -8,7 +8,7 @@
 struct numberActions
 {
 	eActionMap map;
-	eAction key0, key1, key2, key3, key4, key5, key6, key7, key8, key9, keyExt1, keyExt2;
+	eAction key0, key1, key2, key3, key4, key5, key6, key7, key8, key9, keyExt1, keyExt2, keyBackspace;
 	numberActions():
 		map("numbers", _("number actions")),
 		key0(map, "0", _("key 0"), eAction::prioGlobal),
@@ -22,7 +22,8 @@ struct numberActions
 		key8(map, "8", _("key 8"), eAction::prioGlobal),
 		key9(map, "9", _("key 9"), eAction::prioGlobal),
 		keyExt1(map, "ext1", _("extended key1"), eAction::prioGlobal),
-		keyExt2(map, "ext2", _("extended key2"), eAction::prioGlobal)
+		keyExt2(map, "ext2", _("extended key2"), eAction::prioGlobal),
+		keyBackspace(map, "backspace", _("backspace"), eAction::prioGlobal)
 	{
 	}
 };

@@ -416,40 +416,9 @@ void eTimerManager::actionHandler()
 			if ( !(nextStartingEvent->type&ePlaylistEntry::doFinishOnly) )
 			{
 				writeToLogfile("call eZapMain::getInstance()->handleStandby()");
-				switch(eZapMain::getInstance()->handleStandby())
-				{
-					case 2:
-						if ( eSystemInfo::getInstance()->canShutdown() )
-						{
-							if ( nextStartingEvent->type&(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown) )
-								writeToLogfile("eZapMain::getInstance()->handleStandby() returned 2"
-									" .. but already select what todo after event");
-							else
-							{
-								writeToLogfile("eZapMain::getInstance()->handleStandby() returned 2"
-									" .. set doShutdown flag to timer type");
-								nextStartingEvent->type |= ePlaylistEntry::doShutdown;
-							}
-						}
-						break;
-					case 3:
-							if ( nextStartingEvent->type&(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown) )
-								writeToLogfile("eZapMain::getInstance()->handleStandby() returned 3"
-									" .. but already select what todo after event");
-							else
-							{
-								writeToLogfile("eZapMain::getInstance()->handleStandby() returned 3"
-									" .. set doGotoSleep flag to timer type");
-								nextStartingEvent->type |= ePlaylistEntry::doGoSleep;
-							}
-						break;
-					case 0:
-					default:
-						writeToLogfile("eZapMain::getInstance()->handleStandby() returned 0"
-							" .. box was already running..");
-						break;
-				}
+				eZapMain::getInstance()->handleStandby();
 			}
+
 			if ( nextStartingEvent->service &&
 					eServiceInterface::getInstance()->service != nextStartingEvent->service )
 			{
@@ -886,11 +855,19 @@ void eTimerManager::actionHandler()
 						i=2;
 					else if ( prevEvent->type & ePlaylistEntry::doGoSleep )
 						i=3;
-					
+
 					// is sleeptimer?
 					if ( prevEvent->type & ePlaylistEntry::doFinishOnly && 
 						!prevEvent->service )
 						i*=2; // force.. look in eZapMain::handleStandby
+
+					// this gets wasSleeping from enigma.. 
+					// 2 -> enigma was Wakedup from timer
+					// 3 -> enigma was coming up from deepstandby.. initiated by timer
+					int enigmaState = eZapMain::getInstance()->handleStandby(1);
+
+					if ( i == -1 )
+						i = enigmaState;
 
 					writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)",i));
 					if ( prevEvent != timerlist->getConstList().end() 

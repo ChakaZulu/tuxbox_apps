@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: system_settings.cpp,v 1.6 2004/05/05 13:30:43 ghostrider Exp $
+ * $Id: system_settings.cpp,v 1.7 2004/06/23 08:34:34 ghostrider Exp $
  */
 
 #include <system_settings.h>
@@ -110,6 +110,7 @@ void eSystemSettings::av_settings()
 	show();
 }
 
+#ifndef DISABLE_HDD
 #ifndef DISABLE_FILE
 void eSystemSettings::harddisc_setup()
 {
@@ -133,6 +134,7 @@ void eSystemSettings::harddisc_setup()
 	show();
 }
 #endif
+#endif // DISABLE_HDD
 
 #ifdef ENABLE_KEYBOARD
 void eSystemSettings::keyboard_setup()

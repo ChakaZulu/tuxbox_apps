@@ -10,8 +10,10 @@ private:
 	void osd_language();
 	void time_settings();
 	void av_settings();
+#ifndef DISABLE_HDD
 #ifndef DISABLE_FILE
 	void harddisc_setup();
+#endif
 #endif
 #ifdef ENABLE_KEYBOARD
 	void keyboard_setup();

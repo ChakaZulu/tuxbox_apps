@@ -15,7 +15,7 @@ class eLabel;
 class eListBoxEntryService: public eListBoxEntry
 {
 	friend class eServiceSelector;
-	friend class eListBox<eListBoxEntryService>;
+	friend class eListBoxExt<eListBoxEntryService>;
 	friend struct moveFirstChar;
 	friend struct moveServiceNum;
 	friend struct _selectService;
@@ -31,6 +31,7 @@ class eListBoxEntryService: public eListBoxEntry
 	int num;
 	int curEventId;
 public:
+	const eString &getText() const { return sort; }
 	static eListBoxEntryService *selectedToMove;
 	static std::set<eServiceReference> hilitedEntrys;
 	int getNum() const { return num; }
@@ -39,7 +40,7 @@ public:
 	static int getEntryHeight();
 	eServiceReference service;
 	enum { flagShowNumber=1, flagOwnNumber=2, flagIsReturn=4 };
-	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num=-1);
+	eListBoxEntryService(eListBoxExt<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num=-1);
 	~eListBoxEntryService();
 
 	bool operator<(const eListBoxEntry &r) const
@@ -61,7 +62,7 @@ class eServiceSelector: public eWindow
 {
 	eServiceReference selected;
 	eServiceReference *result;
-	eListBox<eListBoxEntryService> *services, *bouquets;
+	eListBoxExt<eListBoxEntryService> *services, *bouquets;
 
 	eLabel *key[4];
 	const eWidget *rfocus;
@@ -119,7 +120,8 @@ public:
 																	showMenu, // shows the contextmenu
 																	toggleStyle, // switch service selector style
 																	renameService, renameBouquet,
-																	deletePressed, newMarkerPressed;
+																	deletePressed, newMarkerPressed,
+																	copyToBouquetList;
 
 	Signal3<void,
 		const eServiceReference &, 		// path
