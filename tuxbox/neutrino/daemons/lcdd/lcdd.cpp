@@ -121,6 +121,31 @@ void show_servicename( string name )
 		return;
 	}
 	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
+	if (fonts.channelname->getRenderWidth(name.c_str())>120)
+	{
+		//try split...
+		int pos = name.find(" ");
+		if(pos!=-1)
+		{               //ok-show 2-line text
+			string text1 = name.substr(0,pos);
+			string text2 = name.substr(pos+1, name.length()-(pos+1) );
+			fonts.channelname->RenderString(1,29, 130, text1.c_str(), CLCDDisplay::PIXEL_ON);
+			fonts.channelname->RenderString(1,29+16, 130, text2.c_str(), CLCDDisplay::PIXEL_ON);
+		}
+		else
+			fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
+	}
+	else
+	{
+		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
+	}
+	display.update();
+/*
+	if (mode!=CLcddClient::MODE_TVRADIO)
+	{
+		return;
+	}
+	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
 
 	if (fonts.channelname->getRenderWidth(name.c_str())>120)
 	{
@@ -151,6 +176,7 @@ void show_servicename( string name )
 		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
 	}
 	display.update();
+*/
 }
 
 void show_time()
