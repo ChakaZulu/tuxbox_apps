@@ -59,6 +59,80 @@ eHTTPFile::~eHTTPFile()
 	close(fd);
 }
 
+eHTTPMovie::eHTTPMovie(eHTTPConnection *c, int _fd, int method, const char *mime, const eString &_filename )
+	:eHTTPDataSource(c), fd(_fd), slice(0), size(0), filename(_filename), method(method)
+{
+	if (method == methodGET)
+	{
+		int slice=0;
+		struct stat s;
+		while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+		{
+			size+=s.st_size;
+			++slice;
+		}
+		c->local_header["Content-Type"]=eString(mime);
+		char asize[32];
+		snprintf(asize, 32, "%lld", size);
+		c->local_header["Content-Length"]=asize;
+	}
+	connection->code_descr="OK";
+	connection->code=200;
+}
+
+int eHTTPMovie::doWrite(int bytes)
+{
+	if (method == methodGET)
+	{
+		char buff[bytes];
+		if (!size)
+			return -1;
+reread:
+		int len=bytes;
+		if (len>size)
+			len=size;
+		len=read(fd, buff, len);
+		if (len<=0)  // file end..
+		{
+			if ( size )
+			{
+				close(fd);
+				++slice;
+				fd=open((filename+eString().sprintf(".%03d", slice)).c_str(), O_RDONLY, 0644);
+				if ( fd < 0 )
+				{
+					eDebug("file not exist.. but %d bytes left.. abort transfer!!", size);
+					return -1;
+				}
+				goto reread;
+			}
+			else
+				return -1;
+		}
+		size-=connection->writeBlock(buff, len);
+		if (!size)
+			return -1;
+		else
+			return 1;
+	} else if (method == methodPUT)
+		return 1;
+	else
+		return -1;
+}
+
+void eHTTPMovie::haveData(void *data, int len)
+{
+	if (method != methodPUT)
+		return;
+	::write(fd, data, len);
+}
+
+eHTTPMovie::~eHTTPMovie()
+{
+	close(fd);
+}
+
+
 eHTTPFilePathResolver::eHTTPFilePathResolver()
 {
 	translate.setAutoDelete(true);
@@ -158,7 +232,15 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 	if (path[path.length()-1]=='/')
 		path+="index.html";
 
+	bool isMovieDownload=false;
 	eHTTPDataSource *data=0;
+
+	if ( path.left(6) == "/rootX" )  // movie download
+	{
+		isMovieDownload=true;
+		path.erase(5,1);  // remove X
+	}
+
 	for (ePtrList<eHTTPFilePath>::iterator i(translate); i != translate.end(); ++i)
 	{
 		if (i->root==path.left(i->root.length()))
@@ -167,8 +249,7 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 			if (newpath.find('?'))
 				newpath=newpath.left(newpath.find('?'));
 			newpath = httpUnescape(newpath);
-			eDebug("translated %s to %s", path.c_str(), newpath.c_str());
-
+			//eDebug("translated %s to %s", path.c_str(), newpath.c_str());
 			if (i->authorized & ((method==eHTTPFile::methodGET)?1:2))
 			{
 				std::map<eString, eString>::iterator i=conn->remote_header.find("Authorization");
@@ -180,7 +261,6 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 			}
 
 			int fd=open(newpath.c_str(), (method==eHTTPFile::methodGET)?O_RDONLY:(O_WRONLY|O_CREAT|O_TRUNC), 0644);
-
 			if (fd==-1)
 			{
 				switch (errno)
@@ -197,7 +277,7 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 				}
 				break;
 			}
-			
+
 			eString ext=path.mid(path.rfind('.'));
 			const char *mime="text/unknown";
 			if ((ext==".html") || (ext==".htm"))
@@ -214,8 +294,13 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 				mime="text/xml";
 			else if (ext==".xsl")
 				mime="text/xsl";
+			else if (ext.find(".ts") != eString::npos)
+				mime="binary/ts";
 
-			data=new eHTTPFile(conn, fd, method, mime);
+			if ( isMovieDownload )
+				data=new eHTTPMovie(conn, fd, method, mime, newpath);
+			else
+				data=new eHTTPFile(conn, fd, method, mime);
 			break;
 		}
 	}

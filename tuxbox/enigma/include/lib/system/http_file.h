@@ -17,6 +17,21 @@ public:
 	void haveData(void *data, int len);
 };
 
+class eHTTPMovie: public eHTTPDataSource
+{
+	int fd, slice;
+	off64_t size;
+	const char *mime;
+	eString filename;
+	int method;
+public:
+	enum { methodGET, methodPUT };
+	eHTTPMovie(eHTTPConnection *c, int fd, int method, const char *mime, const eString &filename);
+	~eHTTPMovie();
+	int doWrite(int);
+	void haveData(void *data, int len);
+};
+
 class eHTTPFilePathResolver: public eHTTPPathResolver
 {
 	struct eHTTPFilePath
