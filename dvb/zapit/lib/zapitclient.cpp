@@ -1,7 +1,7 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.76 2003/02/14 15:19:31 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.77 2003/02/25 19:55:50 thegoodguy Exp $ *
  *
- * Client-Interface für zapit - DBoxII-Project
+ * Zapit client interface - DBoxII-Project
  *
  * (C) 2002 by thegoodguy <thegoodguy@berlios.de> & the DBoxII-Project
  *
@@ -258,18 +258,28 @@ void CZapitClient::setSubServices( subServiceList& subServices )
 	close_connection();
 }
 
-void CZapitClient::getPIDS( responseGetPIDs& pids )
+void CZapitClient::getPIDS(responseGetPIDs& pids)
 {
+	CZapitMessages::responseGeneralInteger responseInteger;
+	responseGetAPIDs                       responseAPID;
+
 	send(CZapitMessages::CMD_GETPIDS);
 
-	responseGetOtherPIDs response;
-	CBasicClient::receive_data((char* )&response, sizeof(response));
-	memcpy(&pids.PIDs, &response, sizeof(response));
+	CBasicClient::receive_data((char* )&(pids.PIDs), sizeof(pids.PIDs));
 
-	responseGetAPIDs responseAPID;
 	pids.APIDs.clear();
-	while ( CBasicClient::receive_data((char*)&responseAPID, sizeof(responseAPID)))
-		pids.APIDs.push_back(responseAPID );
+
+	if (CBasicClient::receive_data((char* )&responseInteger, sizeof(responseInteger)))
+	{
+		pids.APIDs.reserve(responseInteger.number);
+
+		while (responseInteger.number-- > 0)
+		{
+			CBasicClient::receive_data((char*)&responseAPID, sizeof(responseAPID));
+			pids.APIDs.push_back(responseAPID);
+		};
+	}
+
 	close_connection();
 }
 

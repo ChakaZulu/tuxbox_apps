@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.293 2003/02/25 14:18:18 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.294 2003/02/25 19:55:50 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1082,6 +1082,14 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 
 void sendAPIDs(int connfd)
 {
+	CZapitMessages::responseGeneralInteger responseInteger;
+	responseInteger.number = channel->getAudioChannelCount();
+	if (CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger)) == false)
+	{
+		ERROR("could not send any return");
+		return;
+	}
+
 	for (uint32_t i = 0; i < channel->getAudioChannelCount(); i++)
 	{
 		CZapitClient::responseGetAPIDs response;
@@ -1391,7 +1399,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.293 2003/02/25 14:18:18 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.294 2003/02/25 19:55:50 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
