@@ -2047,7 +2047,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget colorSettings("colormenu.head", "colors.raw");
 	CMenuWidget fontSettings("fontmenu.head", "colors.raw");
 	CMenuWidget lcdSettings("lcdmenu.head", "lcd.raw");
-	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400, 460);
+	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 	CMenuWidget scanSettings("servicemenu.scants", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
@@ -3086,7 +3086,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.355 2002/11/03 11:31:47 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.356 2002/11/04 19:28:15 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

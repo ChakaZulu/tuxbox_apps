@@ -546,8 +546,8 @@ timerlist.weekdays Wochentog
 timerlist.weekdays.hint_1 Mo Die Mi Do Fr Sa So
 timerlist.weekdays.hint_2 'X'=Timer '-' koa Timer
 timerlist.program.unknown Kenn den Senda ned
-timerlist.standby.off In Standy geh
-timerlist.standby.on Ausm Standy aufwacha
+timerlist.standby.off Ausm Standy aufwacha
+timerlist.standby.on In Standy geh
 timerlist.alarmtime Alarmzeid
 timerlist.stoptime Stopzeid
 timerlist.new Neia Timer
@@ -562,6 +562,8 @@ timerlist.reload akualisiern
 timerlist.modify ändan
 timerlist.message Nochricht
 timerlist.apid Audio PID
+timerlist.bouquetselect undef
+timerlist.channelselect undef
 timersettings.separator Timer Eistellunga
 timersettings.record_safety_time Aufnemma - Korrekturzeid
 timersettings.record_safety_time.hint_1 De Zeid in Minutn (00=aus) werd beim Startn

@@ -562,6 +562,8 @@ timerlist.reload Reload
 timerlist.modify Modify
 timerlist.message Message
 timerlist.apid Audio PID
+timerlist.bouquetselect choose bouquet
+timerlist.channelselect choose channel
 timersettings.separator Timersettings
 timersettings.record_safety_time Record time correction
 timersettings.record_safety_time.hint_1 Correction time in min. (00=off).

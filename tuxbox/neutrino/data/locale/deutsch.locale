@@ -562,6 +562,8 @@ timerlist.reload Aktualisieren
 timerlist.modify Bearbeiten
 timerlist.message Nachricht
 timerlist.apid Audio PID
+timerlist.bouquetselect Bouquet wählen
+timerlist.channelselect Kanal wählen
 timersettings.separator Timereinstellungen
 timersettings.record_safety_time Aufnahmekorrektur
 timersettings.record_safety_time.hint_1 Korrekturzeit in Min. (00=aus), die beim Start

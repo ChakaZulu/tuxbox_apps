@@ -563,6 +563,8 @@ timerlist.modify unset
 timerlist.message unset
 timerlist.apid unset
 timersettings.separator unset
+timerlist.bouquetselect undef
+timerlist.channelselect undef
 timersettings.record_safety_time unset
 timersettings.record_safety_time.hint_1 unset
 timersettings.record_safety_time.hint_2 unset

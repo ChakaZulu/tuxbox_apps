@@ -562,6 +562,8 @@ timerlist.reload përseritje
 timerlist.modify parashkrimi 
 timerlist.message unset
 timerlist.apid unset
+timerlist.bouquetselect undef
+timerlist.channelselect undef
 timersettings.separator unset
 timersettings.record_safety_time unset
 timersettings.record_safety_time.hint_1 unset

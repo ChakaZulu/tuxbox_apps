@@ -562,6 +562,8 @@ timerlist.reload obnoviti
 timerlist.modify obrada 
 timerlist.message obavijest 
 timerlist.apid audio pid 
+timerlist.bouquetselect undef
+timerlist.channelselect undef
 timersettings.separator namjescenje vremenskog brojaca 
 timersettings.record_safety_time ispraviti snimanje 
 timersettings.record_safety_time.hint_1 vrijeme u minutama koje se odbija od 
