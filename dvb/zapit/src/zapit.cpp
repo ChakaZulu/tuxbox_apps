@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.238 2002/09/24 16:46:17 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.239 2002/09/25 16:48:02 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -655,7 +655,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 			}
 			case CZapitClient::CMD_GET_CURRENT_SERVICEINFO:
 			{
-				CZapitClient::responseCurrentServiceInfo msgCurrentServiceInfo;
+				CZapitClient::CCurrentServiceInfo msgCurrentServiceInfo;
 				msgCurrentServiceInfo.onid = channel->getOriginalNetworkId();
 				msgCurrentServiceInfo.sid = channel->getServiceId();
 				msgCurrentServiceInfo.tsid = channel->getTransportStreamId();
@@ -1054,7 +1054,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.238 2002/09/24 16:46:17 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.239 2002/09/25 16:48:02 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
