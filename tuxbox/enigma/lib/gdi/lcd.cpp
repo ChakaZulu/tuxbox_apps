@@ -181,8 +181,9 @@ void eDBoxLCD::update()
 {
 	unsigned char raw[120*8];
 	int x, y, yy;
+	struct stat s;
 
-	if ( locked )
+	if ( locked || !stat("/tmp/lcd.locked", &s) )
 		return;
 
 	for (y=0; y<8; y++)
