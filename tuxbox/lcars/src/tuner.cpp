@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.15  2002/10/13 01:30:34  obi
+build fix
+
 Revision 1.14  2002/09/18 10:48:37  obi
 use devfs devices
 
@@ -213,7 +216,9 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 	        (long)frequ,(long)frontp.Frequency,(int)polarization ,(int)fec,
 	        (long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
 
-	printf ("... Tuner-Lock Status: %ld\n",status);
+	printf ("... Tuner-Lock Status: %d\n",status);
+
+	int state1, state2;
 
 	if (ioctl(frontend, FE_READ_SNR, &state1) < 0)
 	{
@@ -225,7 +230,7 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 		perror("FE_READ_SIGNAL_STRENGTH");
 	}
 
-	printf ("... S/N: %ld  SigStrength: %ld \n",state1,state2);
+	printf ("... S/N: %d  SigStrength: %d \n",state1,state2);
 #endif
 
 	close(frontend);
