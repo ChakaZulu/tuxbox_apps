@@ -631,6 +631,7 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			//printf("[controld] mute\n");
 			settings.mute = 1;
 			audioControl::setMute(true);
+			audioControl::setMuteSPDIF(true);
 			lcdd.setMute(true);
 			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 			break;
@@ -638,8 +639,14 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			//printf("[controld] unmute\n");
 			settings.mute = 0;
 			audioControl::setMute(false);
+			audioControl::setMuteSPDIF(false);
 			lcdd.setMute(false);
 			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
+			break;
+		case CControld::CMD_SETANALOGMODE:
+			CControld::commandAnalogMode msgmd;
+			read(connfd, &msgmd, sizeof(msgmd));
+			audioControl::setAudioMode(msgmd.mode);
 			break;
 		case CControld::CMD_SETVIDEOFORMAT:
 			//printf("[controld] set videoformat\n");
@@ -735,7 +742,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.54 2002/03/19 17:34:37 McClean Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.55 2002/03/19 23:23:25 McClean Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	if (fork() != 0)

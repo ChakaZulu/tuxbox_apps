@@ -53,6 +53,8 @@ class CControld
 			CMD_MUTE,
 			CMD_UNMUTE,
 			CMD_GETMUTESTATUS,
+			CMD_SETANALOGMODE,
+			CMD_GETANALOGMODE,
 			CMD_SETVIDEOFORMAT,
 			CMD_GETVIDEOFORMAT,
 			CMD_SETVIDEOOUTPUT,
@@ -83,6 +85,11 @@ class CControld
 		struct commandVolume
 		{
 			unsigned char volume;
+		};
+
+		struct commandAnalogMode
+		{
+			unsigned char mode;
 		};
 
 		struct commandVideoFormat

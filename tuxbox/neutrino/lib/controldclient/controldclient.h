@@ -118,6 +118,11 @@ class CControldClient
 		void UnMute();
 
 		/*
+			Setzen des AnalogOutputs (0 = stereo, 1 = mono left, 2 = mono right)
+		*/
+		void setAnalogOutput(int mode);
+
+		/*
 			setVideoFormat(char) : Setzten des Bildformates ( 4:3 / 16:9 )
 			Parameter: VIDEOFORMAT_AUTO = auto
 			           VIDEOFORMAT_4_3  = 4:3
