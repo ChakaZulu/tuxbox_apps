@@ -45,9 +45,26 @@ function remoteControl(box)
 		NewWindow("/showRemoteControl", "RC", "293", "750", "no");
 }
 
-function satFinder()
+function tuneTransponder(transponder)
 {
-	NewWindow("/satFinder", "satfind", "170", "150", "no");
+	if (transponder == "none")
+	{
+		var currentTransponder = document.channelselector.channel.selectedIndex;
+		if (currentTransponder >= 0)
+		{
+			transponder = document.channelselector.channel.options[currentTransponder].value;
+			satFinder(transponder);
+		}
+		else
+			alert("Error: No transponder selected.");
+	}
+	else
+		satFinder(transponder);
+}
+
+function satFinder(transponder)
+{
+	NewWindow("/satFinder?" + transponder, "satfind", "170", "150", "no");
 }
 
 function deleteMovie(xy)

@@ -59,6 +59,7 @@ using namespace std;
 
 int pdaScreen = 0;
 int screenWidth = 1024;
+eString lastTransponder;
 
 int currentBouquet = 0;
 int currentChannel = -1;
@@ -427,11 +428,10 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 	return result;
 }
 
-static eString tuneTransponder(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+void tuneTransponder(eString transponder)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	int frequency, symbol_rate, polarisation, fec, orbital_position, inversion;
-	sscanf(opt.c_str(), "%d:%d:%d:%d:%d:%d:", &frequency, &symbol_rate, &polarisation, &fec, &orbital_position, &inversion);
+	sscanf(transponder.c_str(), "%d:%d:%d:%d:%d:%d:", &frequency, &symbol_rate, &polarisation, &fec, &orbital_position, &inversion);
 
 	// search for the right transponder...
 	for (std::list<tpPacket>::iterator it3(eTransponderList::getInstance()->getNetworks().begin()); it3 != eTransponderList::getInstance()->getNetworks().end(); it3++)
@@ -445,12 +445,11 @@ static eString tuneTransponder(eString request, eString dirpath, eString opt, eH
 				{
 					// and this should be the right transponder...
 					it->tune();
+					lastTransponder = transponder;
 				}
 			}
 		}
 	}
-
-	return closeWindow(content, "", 5);
 }
 
 static eString admin(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -2349,7 +2348,7 @@ eString getSatellites(void)
 {
 	eString result;
 	int num = 0;
-	
+
 	for (std::list<eLNB>::iterator it2(eTransponderList::getInstance()->getLNBs().begin()); it2 != eTransponderList::getInstance()->getLNBs().end(); it2++)
 	{
 		// go thru all satellites...
@@ -2370,7 +2369,7 @@ eString getTransponders(int orbital_position)
 {
 	eString result;
 	int num = 0;
-	
+
 	result += "<h2>Satellite Orbital Position: " + eString().sprintf("%d", orbital_position) + "</h2>\n";
 	// go thru all transponders...
 	for (std::list<tpPacket>::iterator it3(eTransponderList::getInstance()->getNetworks().begin()); it3 != eTransponderList::getInstance()->getNetworks().end(); it3++)
@@ -2483,23 +2482,23 @@ eString getSatellitesAndTransponders(void)
 }
 
 static eString getControlSatFinder(eString opts)
-{	
+{
 	eString result;
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	
+
 	if (pdaScreen == 0)
 		result = getSatellitesAndTransponders();
 	else
 	{
 		// pda satfinder
-		result += "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
+		result += "<table width="100%" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
 		eString display = opt["display"];
 		if (display == "transponders")
 			result += getTransponders(atoi(opt["sat"].c_str()));
-		else 
+		else
 			result += getSatellites();
 		result += "</table>";
-	}	
+	}
 	return result;
 }
 
@@ -2567,6 +2566,7 @@ static eString getControlScreenShot(void)
 static eString getContent(eString mode, eString path, eString opts)
 {
 	eString result, tmp;
+	lastTransponder = "";
 
 	if (mode == "zap")
 	{
@@ -3416,6 +3416,9 @@ eString genBar(int val)
 
 static eString satFinder(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	if (opts != lastTransponder)
+		tuneTransponder(opts);
+
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "satFinder.tmp");
 
@@ -4924,7 +4927,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus, true); //always pw protected for dreamtv
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/tuneTransponder", tuneTransponder, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio, lockWeb);
