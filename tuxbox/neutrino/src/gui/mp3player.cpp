@@ -181,26 +181,6 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	frameBuffer->useBackground(usedBackground);
 	frameBuffer->paintBackground();
 
-#if HAVE_DVB_API_VERSION >= 3
-        // gagga: don't ask me why. But opening the drivers, setting bogus parameters for clipmode
-        // and closing the drivers solves the problem of black screens after closing MP3Player
-        int dmx, dvr;
-  	struct dmx_pes_filter_params p;
-
-      	dmx = open (DMX, O_RDWR);
-      	dvr = open (DVR, O_WRONLY);
-
-	memset(&p, 0, sizeof(p));
-	p.output = DMX_OUT_DECODER;	// needed
-	p.flags = DMX_IMMEDIATE_START;	// needed
-	p.pid = 0x1fff;			// bogus
-	p.pes_type = DMX_PES_VIDEO;	// anything but DMX_PES_OTHER
-	ioctl (dmx, DMX_SET_PES_FILTER, &p);
-
-  	close (dmx);
-  	close (dvr);
-#endif
-
 	// Restore last mode
 	//t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
 	//g_Zapit->zapTo_serviceID(channel_id);
