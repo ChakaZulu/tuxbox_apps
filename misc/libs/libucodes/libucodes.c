@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.25 2003/10/31 00:14:10 obi Exp $
+  $Id: libucodes.c,v 1.26 2004/05/23 11:35:42 derget Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.26  2004/05/23 11:35:42  derget
+  ucode_00F0
+
   Revision 1.25  2003/10/31 00:14:10  obi
   avia600vb012
 
@@ -90,6 +93,7 @@ static struct Sucode ucodes[] =
 	{"36a05f39caa0fb375df85c99e66e406d","ucode_B102"},
 	{"d4c12df0d4ce8ba9eb858509d832df65","ucode_B107"},
 	{"4e080873126f156a0b489af176520620","ucode_B121"},
+	{"10b220119652137409c006af21312549","ucode_00F0"},
 	{"ff6fafbd2aa1f29afe232a72fac57870","cam_01_01_001D"},
 	{"c42d6753794dd95146eac31f2a65b516","cam_01_01_004D"},
 	{"be4b0f38557c416ce04e7fa3fa634f95","cam_01_01_005D"},
