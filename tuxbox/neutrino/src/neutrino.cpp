@@ -490,8 +490,8 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.fontsize_eventlist_itemsmall, configfile.getString( "fontsize_eventlist_itemsmall", "14").c_str() );
 	strcpy( g_settings.fontsize_eventlist_datetime , configfile.getString( "fontsize_eventlist_datetime", "16").c_str() );
 
-//	strcpy( g_settings.fontsize_gamelist_itemlarge	,  configfile.getString( "fontsize_gamelist_itemlarge", "20").c_str() );
-//	strcpy( g_settings.fontsize_gamelist_itemsmall	,  configfile.getString( "fontsize_gamelist_itemsmall", "16").c_str() );
+	strcpy( g_settings.fontsize_gamelist_itemlarge	,  configfile.getString( "fontsize_gamelist_itemlarge", "20").c_str() );
+	strcpy( g_settings.fontsize_gamelist_itemsmall	,  configfile.getString( "fontsize_gamelist_itemsmall", "16").c_str() );
 
 	strcpy( g_settings.fontsize_channellist         ,  configfile.getString( "fontsize_channellist", "20").c_str() );
 	strcpy( g_settings.fontsize_channellist_descr   ,  configfile.getString( "fontsize_channellist_descr", "20").c_str() );
@@ -690,8 +690,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "fontsize_eventlist_itemsmall", g_settings.fontsize_eventlist_itemsmall );
 	configfile.setString( "fontsize_eventlist_datetime", g_settings.fontsize_eventlist_datetime );
 
-//	configfile.setString( "fontsize_gamelist_itemlarge", g_settings.fontsize_gamelist_itemlarge );
-//	configfile.setString( "fontsize_gamelist_itemsmall", g_settings.fontsize_gamelist_itemsmall );
+	configfile.setString( "fontsize_gamelist_itemlarge", g_settings.fontsize_gamelist_itemlarge );
+	configfile.setString( "fontsize_gamelist_itemsmall", g_settings.fontsize_gamelist_itemsmall );
 
 	configfile.setString( "fontsize_channellist", g_settings.fontsize_channellist );
 	configfile.setString( "fontsize_channellist_descr", g_settings.fontsize_channellist_descr );
@@ -927,8 +927,8 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->eventlist_itemSmall =   g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_eventlist_itemsmall) + fontsSizeOffset );
 	g_Fonts->eventlist_datetime  =   g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_eventlist_datetime) + fontsSizeOffset );
 
-	g_Fonts->gamelist_itemLarge = g_fontRenderer->getFont(fontName.c_str(), "Bold", /*atoi(g_settings.fontsize_gamelist_itemlarge)*/ 20 + fontsSizeOffset );
-	g_Fonts->gamelist_itemSmall = g_fontRenderer->getFont(fontName.c_str(), "Regular", /*atoi(g_settings.fontsize_gamelist_itemsmall)*/ 16 + fontsSizeOffset );
+	g_Fonts->gamelist_itemLarge = g_fontRenderer->getFont(fontName.c_str(), "Bold", atoi(g_settings.fontsize_gamelist_itemlarge) + fontsSizeOffset );
+	g_Fonts->gamelist_itemSmall = g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_gamelist_itemsmall) + fontsSizeOffset );
 
 	g_Fonts->channellist    =  g_fontRenderer->getFont(fontName.c_str(), "Bold", atoi(g_settings.fontsize_channellist) + fontsSizeOffset );
 	g_Fonts->channellist_descr =  g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_channellist_descr) + fontsSizeOffset );
@@ -1610,7 +1610,7 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	fontSettings_Gamelist.addItem( new CMenuForwarder("menu.back") );
 	fontSettings_Gamelist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemLarge", g_settings.fontsize_gamelist_itemlarge);
-	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemLarge", g_settings.fontsize_gamelist_itemsmall);
+	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemSmall", g_settings.fontsize_gamelist_itemsmall);
 	
 	fontSettings_Channellist.addItem( new CMenuSeparator() );
 	fontSettings_Channellist.addItem( new CMenuForwarder("menu.back") );
@@ -3268,7 +3268,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.368 2002/12/03 19:59:35 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.369 2002/12/03 20:08:41 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
