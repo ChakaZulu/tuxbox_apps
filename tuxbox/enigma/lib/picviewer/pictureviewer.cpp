@@ -72,8 +72,9 @@ void ePictureViewer::previousPicture()
 
 void ePictureViewer::showNameOnLCD(const eString& filename)
 {
-	int pos = filename.find_last_of("/");
-	eString name = filename.substr(pos + 1, filename.length() - 1);
+	unsigned int pos = filename.find_last_of("/");
+	pos = (pos == eString::npos) ? 0 : pos + 1;
+	eString name = filename.substr(pos, filename.length() - 1);
 #ifndef DISABLE_LCD
 	pLCD->lcdMain->ServiceName->setText(name);
 	pLCD->lcdMain->show();
