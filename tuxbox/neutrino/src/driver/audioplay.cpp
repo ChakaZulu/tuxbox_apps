@@ -161,22 +161,22 @@ void CAudioPlayer::sc_callback(void *arg)
 {
   bool changed=false;
   CSTATE *stat = (CSTATE*)arg;
-  if(m_MetaData.artist ==stat->artist)
+  if(m_MetaData.artist != stat->artist)
   {
 	  m_MetaData.artist = stat->artist;
 	  changed=true;
   }
-  if (m_MetaData.title == stat->title)
+  if (m_MetaData.title != stat->title)
   {
 	  m_MetaData.title = stat->title;
 	  changed=true;
   }
-  if (m_MetaData.sc_station == stat->station)
+  if (m_MetaData.sc_station != stat->station)
   {
-	  m_MetaData.sc_station == stat->station;
+	  m_MetaData.sc_station = stat->station;
 	  changed=true;
   }
-  if (m_MetaData.genre == stat->genre)
+  if (m_MetaData.genre != stat->genre)
   {
 	  m_MetaData.genre = stat->genre;
 	  changed=true;
