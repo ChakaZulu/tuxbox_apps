@@ -1395,7 +1395,7 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 		int Inversion,					// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
 		eSatellite &sat)				// Satellite Data.. LNB, DiSEqC, switch..
 {
-	tune_all(transponder);
+	tune_all(trans);
 	int finalTune=1;
 //	eDebug("op = %d", trans->satellite.orbital_position );
 	checkRotorLockTimer.stop();
@@ -1903,7 +1903,7 @@ int eFrontend::tune_qam(eTransponder *trans,
 		int QAM)								// Modulation, QAM_xx
 {
 	eDebug("Cable Frontend detected");
-	tune_all(transponder);
+	tune_all(trans);
 
 #if HAVE_DVB_API_VERSION < 3
 	front.Inversion=(Inversion == 2 ? INVERSION_AUTO :
@@ -1935,7 +1935,7 @@ int eFrontend::tune_ofdm(eTransponder *trans,
 		int inversion)
 {
 	eDebug("DVB-T Frontend detected");
-	tune_all(transponder);
+	tune_all(trans);
 
 #if HAVE_DVB_API_VERSION < 3
 	front.Frequency = centre_frequency;
