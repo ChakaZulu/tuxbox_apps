@@ -31,7 +31,7 @@ enigma_LDADD = \
 
 enigma_LDFLAGS = -rpath $(LIBDIR)/enigma
 
-AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS)
+AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
 
 $(top_builddir)/enigma/src/core/driver/libdriver.la:
 	$(MAKE) -C $(top_builddir)/enigma/src/core/driver

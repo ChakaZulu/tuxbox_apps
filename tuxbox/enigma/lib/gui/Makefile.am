@@ -16,7 +16,7 @@ libgui_la_SOURCES = \
 
 libgui_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
 
-AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS)
+AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
 
 install-exec-local:
 	install -d $(LIBDIR)/enigma

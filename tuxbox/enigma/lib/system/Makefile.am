@@ -15,7 +15,7 @@ libsystem_la_SOURCES = \
 
 libsystem_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
 
-AM_CXXFLAGS = $(LIBSIGC_CFLAGS)
+AM_CXXFLAGS = $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
 
 install-exec-local:
 	install -d $(LIBDIR)/enigma

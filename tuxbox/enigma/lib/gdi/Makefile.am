@@ -13,7 +13,7 @@ libgdi_la_LIBADD = $(LIBFREETYPE_LIBS) $(LIBPNG_LIBS)
 
 libgdi_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
 
-AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS)
+AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
 
 install-exec-local:
 	install -d $(LIBDIR)/enigma
