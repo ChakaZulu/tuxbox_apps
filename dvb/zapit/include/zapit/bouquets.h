@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.54 2003/10/14 17:24:50 obi Exp $
+ * $Id: bouquets.h,v 1.55 2004/08/01 19:35:57 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -72,18 +72,24 @@ class CBouquet
 	CZapitChannel* getChannelByChannelID(const t_channel_id channel_id, const unsigned char serviceType = ST_RESERVED);
 };
 
-typedef vector<CBouquet*> BouquetList;
+typedef std::vector<CBouquet *> BouquetList;
 
 class CBouquetManager
 {
-	private:
-		CBouquet* remainChannels;
-		void makeRemainingChannelsBouquet();
-		void parseBouquetsXml(const xmlNodePtr root);
-		void writeBouquetHeader(FILE * bouq_fd, uint i, const char * bouquetName);
-		void writeBouquetFooter(FILE * bouq_fd);
-		void writeBouquetChannels(FILE * bouq_fd, uint i);
-	public:
+ private:
+	CBouquet * remainChannels;
+	CBouquet * storedremainChannels;
+
+	void makeRemainingChannelsBouquet(void);
+	void parseBouquetsXml            (const xmlNodePtr root);
+	void writeBouquetHeader          (FILE * bouq_fd, uint i, const char * bouquetName);
+	void writeBouquetFooter          (FILE * bouq_fd);
+	void writeBouquetChannels        (FILE * bouq_fd, uint i);
+
+	void copy_bouquet_list(BouquetList const * const from, CBouquet   * const from_remainChannels,
+			       BouquetList       * const to  , CBouquet * * const to_remainChannels  );
+
+ public:
 		CBouquetManager() { remainChannels = NULL; };
 		class ChannelIterator
 		{
@@ -112,8 +118,8 @@ class CBouquetManager
 		void saveBouquets(void);
 		void saveBouquets(const CZapitClient::bouquetMode bouquetMode, const char * const providerName);
 		void loadBouquets(bool ignoreBouquetFile = false);
-		void storeBouquets();
-		void restoreBouquets();
+		void storeBouquets(void);
+		void restoreBouquets(void);
 		void renumServices();
 
 		CBouquet* addBouquet(const std::string & name);

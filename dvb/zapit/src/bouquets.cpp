@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.99 2004/04/02 13:26:58 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.100 2004/08/01 19:35:58 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -415,35 +415,37 @@ void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 	renumServices();
 }
 
-void CBouquetManager::storeBouquets()
+void CBouquetManager::copy_bouquet_list(BouquetList const * const from, CBouquet * const from_remainChannels, BouquetList * const to, CBouquet * * const to_remainChannels)
 {
-	for (unsigned int i=0; i<storedBouquets.size(); i++)
-	{
-		delete storedBouquets[i];
-	}
-	storedBouquets.clear();
+	for (std::vector<CBouquet *>::iterator it = to->begin(); it != to->end(); it++)
+		delete (*it);
 
-	for (unsigned int i=0; i<Bouquets.size(); i++)
+	to->clear();
+	*to_remainChannels = NULL;
+
+	for (std::vector<CBouquet *>::const_iterator it = from->begin(); it != from->end(); it++)
 	{
-		storedBouquets.push_back(new CBouquet( *Bouquets[i]));
+		CBouquet * orig_bouquet = *it;
+		CBouquet * new_bouquet  = new CBouquet(*orig_bouquet);
+
+		to->push_back(new_bouquet);
+
+		if (orig_bouquet == from_remainChannels)
+			*to_remainChannels = new_bouquet;
 	}
 }
 
-void CBouquetManager::restoreBouquets()
+void CBouquetManager::storeBouquets(void)
 {
-	for (unsigned int i=0; i<Bouquets.size(); i++)
-	{
-		delete Bouquets[i];
-	}
-	Bouquets.clear();
-
-	for (unsigned int i=0; i<storedBouquets.size(); i++)
-	{
-		Bouquets.push_back(new CBouquet( *storedBouquets[i]));
-	}
+	copy_bouquet_list(&Bouquets, remainChannels, &storedBouquets, &storedremainChannels);
 }
 
-void CBouquetManager::makeRemainingChannelsBouquet()
+void CBouquetManager::restoreBouquets(void)
+{
+	copy_bouquet_list(&storedBouquets, storedremainChannels, &Bouquets, &remainChannels);
+}
+
+void CBouquetManager::makeRemainingChannelsBouquet(void)
 {
 	ChannelList unusedChannels;
 	set<t_channel_id> chans_processed;
