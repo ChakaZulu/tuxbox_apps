@@ -118,9 +118,9 @@ void CStringInput::keyBackspacePressed(void)
 
 void CStringInput::keyRedPressed()
 {
-	if ( strstr(validchars, " ")!=NULL )
+	if (index(validchars, ' ') != NULL)
 	{
-		value[selected]=' ';
+		value[selected] = ' ';
 
 		if (selected < (size - 1))
 		{
@@ -243,9 +243,9 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		{
 			keyYellowPressed();
 		}
-		else if ( (msg==CRCInput::RC_green) && ( strstr(validchars, ".")!=NULL ) )
+		else if ( (msg==CRCInput::RC_green) && (index(validchars, '.') != NULL))
 		{
-			value[selected]='.';
+			value[selected] = '.';
 
 			if (selected < (size - 1))
 			{
