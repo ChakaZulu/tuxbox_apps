@@ -34,6 +34,8 @@
 #include "webserver.h"
 #include "webdbox.h"
 
+#include "config.h"
+
 using namespace std;
 
 #define SA struct sockaddr
@@ -62,56 +64,89 @@ void sig_catch(int)
 
 int main(int argc, char **argv)
 {
-bool debug = false;
-bool verbose = false;
-bool threads = true;
-bool forken = false;
+	bool debug = false;
+	bool verbose = false;
+	bool threads = true;
+	bool do_fork = true;
+	int i;
 
-	
-	if(argc > 1)
+	if (argc > 1)
 	{
-		for(int i = 1; i < argc;i++)
+		for(i = 1; i < argc; i++)
 		{
-			if(strcmp(argv[i],"-d") == 0)
-				debug = true;
-			if(strcmp(argv[i],"-v") == 0)
-				verbose = true;
-			if(strcmp(argv[i],"-t") == 0)
-				threads = false;
-			if(strcmp(argv[i],"-f") == 0)
-				forken = true;
-			if( (strcmp(argv[i],"-version") == 0) || (strcmp(argv[i],"--version") == 0) ) 
+			if (strncmp(argv[i], "-d", 2) == 0)
 			{
-				printf("nhttp - Neutrino Webserver\nVersion: %s\n",NHTTPD_VERSION);
+				debug = true;
+				do_fork = false;
+			}
+			else if (strncmp(argv[i], "-f", 2) == 0)
+			{
+				do_fork = false;
+			}
+			else if (strncmp(argv[i], "-v", 2) == 0)
+			{
+				verbose = true;
+			}
+			else if (strncmp(argv[i], "-t", 2) == 0)
+			{
+				threads = false;
+			}
+			else if (strncmp(argv[i],"--version", 9) == 0) 
+			{
+				printf("nhttp - Neutrino Webserver\n");
+				printf("Version: %s\n", NHTTPD_VERSION);
 				return 0;
 			}
-			if( (strcmp(argv[i],"--help") == 0) || (strcmp(argv[i],"-h") == 0) )
+			else if ((strncmp(argv[i], "--help", 6) == 0) || (strncmp(argv[i], "-h", 2) == 0))
 			{
-				printf("nhttpd Parameter:\n -d\t\tdebug Mode\n -v\t\tverbose Mode\n -t\t\tmultithreaded ausschalten\n -f\t\tforken\n -version\tversion\n --help\t\tdieser Text\n\n");
+				printf("nhttpd parameters:\n");
+				printf("-d\t\tdebug\n");
+				printf("-v\t\tverbose\n");
+				printf("-t\t\trun single-threaded\n");
+				printf("-f\t\tdo not fork\n");
+				printf("--version\tversion\n");
+				printf("--help\t\tthis text\n\n");
 				return 0;
 			}
 		}
 	}
-	if(debug)
+
+	if (debug)
+	{
 		printf("Starte %s\n",threads?"threaded":"nicht threaded");
-	signal(SIGINT,sig_catch);	
+	}
+
+	signal(SIGINT,sig_catch);
 	signal(SIGHUP,sig_catch);
 	signal(SIGTERM,sig_catch);
 
 	Ausgabe("Neutrino HTTP-Server starting..\n");
 
-	if(forken)
-		if (fork()) 
-		{ 
-			printf("nhttpd forked\n");
-			exit(0); 
+	if (do_fork)
+	{
+		switch (fork())
+		{
+		case -1:
+			perror("[nhttpd] fork");
+			return -1;
+		case 0:
+			break;
+		default:
+			return 0;
 		}
 
-	if((ws = new TWebserver()) != NULL)
-	{
-		if(ws->Init(80,"/share/tuxbox/neutrino/httpd",debug,verbose,threads))
+		if (setsid() == -1)
 		{
-			if(ws->Start())
+			perror("[nhttpd] setsid");
+			return -1;
+		}
+	}
+
+	if ((ws = new TWebserver()) != NULL)
+	{
+		if (ws->Init(80, DATADIR "/neutrino/httpd", debug, verbose, threads))
+		{
+			if (ws->Start())
 			{
 				printf("httpd gestartet\n");
 				ws->DoLoop();
@@ -119,10 +154,18 @@ bool forken = false;
 			}
 		}
 		else
+		{
 			Ausgabe("Error initializing httpd");
+			return -1;
+		}
 		delete ws;
 	}
 	else
-		Ausgabe("Error while creating httpd");		
+	{
+		Ausgabe("Error while creating httpd");
+		return -1;
+	}
+
 	return 0; 
 }
+
