@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.15  2005/03/28 14:14:15  lazyt
+ * support for userdefined audio notify (put your 12/24/48KHz pcm wavefile to /var/tuxbox/config/tuxmail/tuxmail.wav)
+ *
  * Revision 1.14  2005/03/24 13:12:11  lazyt
  * cosmetics, support for syslog-server (start with -syslog)
  *
@@ -710,6 +713,12 @@ void *InterfaceThread(void *arg)
 				case 'L':
 
 					ReadSpamList();
+
+					break;
+
+				case 'V':
+
+					send(fd_conn, &versioninfo, 12, 0);
 			}
 
 			close(fd_conn);
@@ -1431,63 +1440,182 @@ int CheckAccount(int account)
 }
 
 /******************************************************************************
+ * SwapEndian
+ ******************************************************************************/
+
+void SwapEndian(unsigned char *header)
+{
+	/* wrote the PlaySound() on my pc not in mind that dbox is big endian. so this was the lazy way to make it work, sorry... */
+
+	struct WAVEHEADER *wave = (struct WAVEHEADER*)header;
+
+	wave->ChunkID1 = (wave->ChunkID1 << 24) | ((wave->ChunkID1 & 0x0000ff00) << 8) | ((wave->ChunkID1 & 0x00ff0000) >> 8) | (wave->ChunkID1 >> 24);
+//	wave->ChunkSize1 = (wave->ChunkSize1 << 24) | ((wave->ChunkSize1 & 0x0000ff00) << 8) | ((wave->ChunkSize1 & 0x00ff0000) >> 8) | (wave->ChunkSize1 >> 24);
+	wave->ChunkType = (wave->ChunkType << 24) | ((wave->ChunkType & 0x0000ff00) << 8) | ((wave->ChunkType & 0x00ff0000) >> 8) | (wave->ChunkType >> 24);
+
+	wave->ChunkID2 = (wave->ChunkID2 << 24) | ((wave->ChunkID2 & 0x0000ff00) << 8) | ((wave->ChunkID2 & 0x00ff0000) >> 8) | (wave->ChunkID2 >> 24);
+//	wave->ChunkSize2 = (wave->ChunkSize2 << 24) | ((wave->ChunkSize2 & 0x0000ff00) << 8) | ((wave->ChunkSize2 & 0x00ff0000) >> 8) | (wave->ChunkSize2 >> 24);
+	wave->Format = (wave->Format >> 8) | (wave->Format << 8);
+	wave->Channels = (wave->Channels >> 8) | (wave->Channels << 8);
+	wave->SampleRate = (wave->SampleRate << 24) | ((wave->SampleRate & 0x0000ff00) << 8) | ((wave->SampleRate & 0x00ff0000) >> 8) | (wave->SampleRate >> 24);
+//	wave->BytesPerSecond = (wave->BytesPerSecond << 24) | ((wave->BytesPerSecond & 0x0000ff00) << 8) | ((wave->BytesPerSecond & 0x00ff0000) >> 8) | (wave->BytesPerSecond >> 24);
+//	wave->BlockAlign = (wave->BlockAlign >> 8) | (wave->BlockAlign << 8);
+	wave->BitsPerSample = (wave->BitsPerSample >> 8) | (wave->BitsPerSample << 8);
+
+	wave->ChunkID3 = (wave->ChunkID3 << 24) | ((wave->ChunkID3 & 0x0000ff00) << 8) | ((wave->ChunkID3 & 0x00ff0000) >> 8) | (wave->ChunkID3 >> 24);
+	wave->ChunkSize3 = (wave->ChunkSize3 << 24) | ((wave->ChunkSize3 & 0x0000ff00) << 8) | ((wave->ChunkSize3 & 0x00ff0000) >> 8) | (wave->ChunkSize3 >> 24);
+}
+
+/******************************************************************************
  * PlaySound
  ******************************************************************************/
 
 void PlaySound()
 {
-	int dsp, format = AFMT_S16_LE, channels = 1, speed = 12000;
+	FILE *fd_wav;
+	unsigned char header[sizeof(struct WAVEHEADER)];
+	int dsp, format, channels, speed, blocksize, count = 0;
+	unsigned char *samples;
+	struct WAVEHEADER *wave = (struct WAVEHEADER*)header;
 
-	if((dsp = open(DSP, O_WRONLY)) == -1)
-	{
-		slog ? syslog(LOG_DAEMON | LOG_INFO, "could not open DSP") : printf("TuxMailD <could not open DSP>\n");
+	// check for userdefined soundfile
 
-		audio = 'N';
+		if(!(fd_wav = fopen(CFGPATH SNDFILE, "rb")))
+		{
+			format = AFMT_S16_LE;
+			channels = 1;
+			speed = 12000;
+			wave->ChunkSize3 = sizeof(audiodata);
+			samples = audiodata;
+		}
+		else
+		{
+			// read header and detect format
 
-		return;
-	}
+				fread(header, 1, sizeof(header), fd_wav);
 
-	if(ioctl(dsp, SNDCTL_DSP_SETFMT, &format) == -1)
-	{
-		slog ? syslog(LOG_DAEMON | LOG_INFO, "could not set DSP-Format") : printf("TuxMailD <could not set DSP-Format>\n");
+				SwapEndian(header);
+
+				if(wave->ChunkID1 != RIFF || wave->ChunkType != WAVE || wave->ChunkID2 != FMT)
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "unsupported Soundfile (WAVE only)") : printf("TuxMailD <unsupported Soundfile (WAVE only)>\n");
+
+					fclose(fd_wav);
+
+					return;
+				}
+
+				if(wave->Format != PCM)
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "unsupported Soundfile (PCM only)") : printf("TuxMailD <unsupported Soundfile (PCM only)>\n");
+
+					fclose(fd_wav);
+
+					return;
+				}
+
+				if(wave->SampleRate != 12000 && wave->SampleRate != 24000 && wave->SampleRate != 48000)
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "unsupported Soundfile (12/24/48KHz only)") : printf("TuxMailD <unsupported Soundfile (12/24/48KHz only)>\n");
+
+					fclose(fd_wav);
+
+					return;
+				}
+
+				if(wave->ChunkID3 != DATA)
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not find Sounddata") : printf("TuxMailD <could not find Sounddata>\n");
+
+					fclose(fd_wav);
+
+					return;
+				}
+
+				format = (wave->BitsPerSample == 8) ? AFMT_U8 : AFMT_S16_LE;
+				channels = wave->Channels;
+				speed = wave->SampleRate;
+
+			// get samples
+
+				if(!(samples = (unsigned char*)malloc(wave->ChunkSize3)))
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "not enough Memory for Sounddata") : printf("TuxMailD <not enough Memory for Sounddata>\n");
+
+					fclose(fd_wav);
+
+					return;
+				}
+
+				fread(samples, 1, wave->ChunkSize3, fd_wav);
+
+				fclose(fd_wav);
+		}
+
+	// play sound
+
+		if((dsp = open(DSP, O_WRONLY)) == -1)
+		{
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "could not open DSP") : printf("TuxMailD <could not open DSP>\n");
+
+			audio = 'N';
+
+			return;
+		}
+
+		if(ioctl(dsp, SNDCTL_DSP_SETFMT, &format) == -1)
+		{
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "could not set DSP-Format") : printf("TuxMailD <could not set DSP-Format>\n");
+
+			close(dsp);
+
+			return;
+		}
+
+		if(ioctl(dsp, SNDCTL_DSP_CHANNELS, &channels) == -1)
+		{
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "could not set DSP-Channels") : printf("TuxMailD <could not set DSP-Channels>\n");
+
+			close(dsp);
+
+			return;
+		}
+
+		if(ioctl(dsp, SNDCTL_DSP_SPEED, &speed) == -1)
+		{
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "could not set DSP-Samplerate") : printf("TuxMailD <could not set DSP-Samplerate>\n");
+
+			close(dsp);
+
+			return;
+		}
+
+		if(ioctl(dsp, SNDCTL_DSP_GETBLKSIZE, &blocksize) == -1)
+		{
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "could not get DSP-Blocksize") : printf("TuxMailD <could not get DSP-Blocksize>\n");
+
+			close(dsp);
+
+			return;
+		}
+
+		while(count < wave->ChunkSize3)
+		{
+			write(dsp, samples + count, (count + blocksize > wave->ChunkSize3) ?  wave->ChunkSize3 - count : blocksize);
+
+			count += blocksize;
+		}
+
+		ioctl(dsp, SNDCTL_DSP_SYNC);
+
+	// cleanup
+
+		if(samples != audiodata)
+		{
+			free(samples);
+		}
 
 		close(dsp);
-
-		return;
-	}
-
-	if(ioctl(dsp, SNDCTL_DSP_CHANNELS, &channels) == -1)
-	{
-		slog ? syslog(LOG_DAEMON | LOG_INFO, "could not set DSP-Channels") : printf("TuxMailD <could not set DSP-Channels>\n");
-
-		close(dsp);
-
-		return;
-	}
-
-	if(ioctl(dsp, SNDCTL_DSP_SPEED, &speed) == -1)
-	{
-		slog ? syslog(LOG_DAEMON | LOG_INFO, "could not set DSP-Samplingrate") : printf("TuxMailD <could not set DSP-Samplingrate>\n");
-
-		close(dsp);
-
-		return;
-	}
-
-#ifdef DREAMBOX
-
-	write(dsp, &audiodata, sizeof(audiodata));
-#else
-	int count = 0;
-
-	while(count < sizeof(audiodata))
-	{
-	    write(dsp, &audiodata[count += 16], 16);
-	}
-#endif
-	ioctl(dsp, SNDCTL_DSP_SYNC);
-
-	close(dsp);
 }
 
 /******************************************************************************
@@ -1591,9 +1719,9 @@ void NotifyUser(int mails)
 	struct sockaddr_in SockAddr;
 	char http_cmd[1024], tmp_buffer[128];
 	char *http_cmd1 = "GET /cgi-bin/startPlugin?name=tuxmail.cfg HTTP/1.1\n\n";
-	char *http_cmd2 = (osd == 'G') ? "GET /cgi-bin/xmessage?timeout=5&caption=TuxMail%20Information&body=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A" : "GET /cgi-bin/xmessage?timeout=5&caption=TuxMail%20Information&body=New%20Mail%20on%20the%20Server:%0A%0A";
-	char *http_cmd3 = (osd == 'G') ? "GET /control/message?nmsg=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A" : "GET /control/message?nmsg=New%20Mail%20on%20the%20Server:%0A%0A";
-	char *http_cmd4 = (osd == 'G') ? "GET /control/message?popup=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A" : "GET /control/message?popup=New%20Mail%20on%20the%20Server:%0A%0A";
+	char *http_cmd2 = "GET /cgi-bin/xmessage?timeout=10&caption=TuxMail%20Information&body=";
+	char *http_cmd3 = "GET /control/message?nmsg=";
+	char *http_cmd4 = "GET /control/message?popup=";
 
 	// lcd notify
 
@@ -1641,12 +1769,12 @@ void NotifyUser(int mails)
 				{
 					if(video == 2)
 					{
-						sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
+						sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
 					}
 
 					if(video == 3 || video == 4)
 					{
-						sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
+						sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
 					}
 
 					strcat(http_cmd, tmp_buffer);
@@ -1735,8 +1863,6 @@ void SigHandler(int signal)
 			{
 				printf(online ? "TuxMailD <wakeup>\n" : "TuxMailD <sleep>\n");
 			}
-
-			break;
 	}
 }
 
@@ -1746,7 +1872,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.14 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.15 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -1783,8 +1909,8 @@ int main(int argc, char **argv)
 
 				slog ? syslog(LOG_DAEMON | LOG_INFO, "%s started [%s]", versioninfo, timeinfo) : printf("TuxMailD %s started [%s]\n", versioninfo, timeinfo);
 
-				chdir("/");
 				setsid();
+				chdir("/");
 
 				break;
 

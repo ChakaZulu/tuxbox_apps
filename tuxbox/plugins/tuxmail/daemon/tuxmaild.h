@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.12  2005/03/28 14:14:15  lazyt
+ * support for userdefined audio notify (put your 12/24/48KHz pcm wavefile to /var/tuxbox/config/tuxmail/tuxmail.wav)
+ *
  * Revision 1.11  2005/03/24 13:12:11  lazyt
  * cosmetics, support for syslog-server (start with -syslog)
  *
@@ -65,9 +68,16 @@
 #define DSP "/dev/sound/dsp"
 #define LCD "/dev/dbox/lcd0"
 
+#define RIFF	0x46464952
+#define WAVE	0x45564157
+#define FMT	0x20746D66
+#define DATA	0x61746164
+#define PCM	1
+
 #define CFGPATH "/var/tuxbox/config/tuxmail/"
 #define CFGFILE "tuxmail.conf"
 #define SPMFILE "spamlist"
+#define SNDFILE "tuxmail.wav"
 #define SCKFILE "/tmp/tuxmaild.socket"
 #define LOGFILE "/tmp/tuxmaild.log"
 #define PIDFILE "/tmp/tuxmaild.pid"
@@ -98,8 +108,30 @@ struct
 
 }spamfilter[100];
 
+// waveheader
+
+struct WAVEHEADER
+{
+	unsigned long	ChunkID1;
+	unsigned long	ChunkSize1;
+	unsigned long	ChunkType;
+
+	unsigned long	ChunkID2;
+	unsigned long	ChunkSize2;
+	unsigned short	Format;
+	unsigned short	Channels;
+	unsigned long	SampleRate;
+	unsigned long	BytesPerSecond;
+	unsigned short	BlockAlign;
+	unsigned short	BitsPerSample;
+
+	unsigned long	ChunkID3;
+	unsigned long	ChunkSize3;
+};
+
 // some data
 
+char versioninfo[12];
 FILE *fd_pid;
 int slog = 0;
 int pid;

@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.14  2005/03/28 14:14:14  lazyt
+ * support for userdefined audio notify (put your 12/24/48KHz pcm wavefile to /var/tuxbox/config/tuxmail/tuxmail.wav)
+ *
  * Revision 1.13  2005/03/24 13:15:20  lazyt
  * cosmetics, add SKIN=0/1 for different osd-colors
  *
@@ -165,6 +168,13 @@ int ControlDaemon(int command)
 			case RELOAD_SPAMLIST:
 
 				send(fd_sock, "L", 1, 0);
+
+				break;
+
+			case GET_VERSION:
+
+				send(fd_sock, "V", 1, 0);
+				recv(fd_sock, &versioninfo_d, sizeof(versioninfo_d), 0);
 		}
 
 		close(fd_sock);
@@ -914,10 +924,10 @@ void ShowMessage(int message)
 
 	// layout
 
-		RenderBox(155, 178, 464, 220, FILL, BLUE0);
-		RenderBox(155, 220, 464, 327, FILL, BLUE1);
-		RenderBox(155, 178, 464, 327, GRID, BLUE2);
-		RenderBox(155, 220, 464, 327, GRID, BLUE2);
+		RenderBox(155, 178, 464, 220, FILL, SKIN0);
+		RenderBox(155, 220, 464, 327, FILL, SKIN1);
+		RenderBox(155, 178, 464, 327, GRID, SKIN2);
+		RenderBox(155, 220, 464, 327, GRID, SKIN2);
 
 	// message
 
@@ -984,13 +994,15 @@ void ShowMessage(int message)
 
 			case INFO:
 
-				sprintf(info, "TuxMail Version %s", versioninfo);
+				ControlDaemon(GET_VERSION);
+
+				sprintf(info, "TuxMail (P%s/D%s)", versioninfo_p, versioninfo_d);
 
 				RenderString(info, 157, 213, 306, CENTER, BIG, ORANGE);
 				RenderString("(C) 2003-2005 Thomas \"LazyT\" Loewe", 157, 265, 306, CENTER, SMALL, WHITE);
 		}
 
-		RenderBox(285, 286, 334, 310, FILL, BLUE2);
+		RenderBox(285, 286, 334, 310, FILL, SKIN2);
 		RenderString("OK", 287, 305, 46, CENTER, SMALL, WHITE);
 		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 
@@ -1012,18 +1024,18 @@ void ShowMailInfo(int account, int mailindex)
 
 	// layout
 
-		RenderBox(0, 0, 619, 504, FILL, BLUE0);
-		RenderBox(0, 42, 593, 504, FILL, BLUE1);
-		RenderBox(0, 0, 619, 504, GRID, BLUE2);
-		RenderBox(0, 42, 593, 504, GRID, BLUE2);
-		RenderBox(592, 42, 619, 69, GRID, BLUE2);
-		RenderBox(592, 477, 619, 504, GRID, BLUE2);
+		RenderBox(0, 0, 619, 504, FILL, SKIN0);
+		RenderBox(0, 42, 593, 504, FILL, SKIN1);
+		RenderBox(0, 0, 619, 504, GRID, SKIN2);
+		RenderBox(0, 42, 593, 504, GRID, SKIN2);
+		RenderBox(592, 42, 619, 69, GRID, SKIN2);
+		RenderBox(592, 477, 619, 504, GRID, SKIN2);
 
 	// selectbar
 
 		if(maildb[account].mails)
 		{
-			RenderBox(2, 44 + (mailindex%10)*46, 591, 44 + (mailindex%10)*46 + 44, FILL, BLUE2);
+			RenderBox(2, 44 + (mailindex%10)*46, 591, 44 + (mailindex%10)*46 + 44, FILL, SKIN2);
 		}
 
 	// scrollbar
@@ -1039,7 +1051,7 @@ void ShowMailInfo(int account, int mailindex)
 		scrollbar_len = 403 / ((maildb[account].mails - 1)/10 + 1);
 		scrollbar_ofs = scrollbar_len*mailindex / 10;
 		scrollbar_cor = 403 - ((403/scrollbar_len)*scrollbar_len);
-		RenderBox(596, 72 + scrollbar_ofs, 615, 72 + scrollbar_ofs + scrollbar_len + scrollbar_cor - 1, FILL, BLUE2);
+		RenderBox(596, 72 + scrollbar_ofs, 615, 72 + scrollbar_ofs + scrollbar_len + scrollbar_cor - 1, FILL, SKIN2);
 
 	// status and mails
 
@@ -1284,15 +1296,15 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.13 $";
+	char cvs_revision[] = "$Revision: 1.14 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
 	
 	// show versioninfo
 
-		sscanf(cvs_revision, "%*s %s", versioninfo);
-		printf("TuxMail %s\n", versioninfo);
+		sscanf(cvs_revision, "%*s %s", versioninfo_p);
+		printf("TuxMail %s\n", versioninfo_p);
 
 	// get params
 
