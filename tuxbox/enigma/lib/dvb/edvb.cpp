@@ -1083,9 +1083,8 @@ struct sortinChannel: public std::unary_function<const eService&, void>
 	sortinChannel(eDVB &edvb): edvb(edvb)
 	{
 	}
-	void operator()(std::pair<const sref, eService>& x)
+	void operator()(eService &service)
 	{
-		eService &service=x.second;
 		QString add;
 		switch (service.service_type)
 		{
@@ -1121,9 +1120,8 @@ struct saveService: public std::unary_function<const eService&, void>
 	{
 		fprintf(f, "services\n");
 	}
-	void operator()(std::pair<const sref, eService>& x)
+	void operator()(eService& s)
 	{
-		eService &s=x.second;
 		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id, s.transport_stream_id,
 				s.original_network_id, s.service_type, s.service_number);
 		fprintf(f, "%s\n", (const char*)s.service_name);
@@ -1142,9 +1140,8 @@ struct saveTransponder: public std::unary_function<const eTransponder&, void>
 	{
 		fprintf(f, "transponders\n");
 	}
-	void operator()(std::pair<const tsref, eTransponder>& x)
+	void operator()(eTransponder &t)
 	{
-		eTransponder &t=x.second;
 		if (t.state!=eTransponder::stateOK)
 			return;
 		fprintf(f, "%04x:%04x %d\n", t.transport_stream_id, t.original_network_id, t.state);

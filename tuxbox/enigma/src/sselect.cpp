@@ -43,16 +43,15 @@ QString eListboxEntryService::getText(int col=0) const
 	}
 }
 
-struct eServiceSelector_addService: public std::unary_function<std::pair<sref,eService>&,void>
+struct eServiceSelector_addService: public std::unary_function<eService&,void>
 {
 	eListbox *list;
 	eService *result;
 	eServiceSelector_addService(eListbox *list, eService *result): list(list), result(result)
 	{
 	}
-	void operator()(std::pair<const sref,eService>& r)
+	void operator()(eService& c)
 	{
-		eService &c=r.second;
 		if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
 			return;
 		eListboxEntry *l=new eListboxEntryService(c, list);
@@ -66,10 +65,7 @@ void eServiceSelector::fillServiceList()
 	setText("full services");
 	list->clearList();
 	if (eDVB::getInstance()->getTransponders())
-	{
-		eDVB::getInstance()->getTransponders()->forEachService(eServiceSelector_addService(list, result));
-		list->sort();
-	}
+		eDVB::getInstance()->getTransponders()->forEachChannel(eServiceSelector_addService(list, result));
 	list->redraw();
 }
 

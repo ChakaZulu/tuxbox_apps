@@ -90,11 +90,10 @@ struct listService: public std::unary_function<std::pair<sref,eService>&,void>
 	listService(QString &result, const QString &search): result(result), search(search)
 	{
 	}
-	void operator()(std::pair<const sref,eService> &r)
+	void operator()(eService &service)
 	{
-		eService &service=r.second;
 		if (search && (service.service_name.find(search)==-1))
-			continue;
+			return;
 		QString sc;
 		sc.sprintf("%x:%x:%x:%x", service.service_id, service.transport_stream_id, service.original_network_id, service.service_type);
 		result+="<tr><td><a href=\"/cgi-bin/switchService?service=" + sc + "\">" + service.service_name + "</a></td>"

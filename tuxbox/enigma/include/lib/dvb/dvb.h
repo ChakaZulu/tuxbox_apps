@@ -167,8 +167,22 @@ public:
 	eService *searchService(int original_network_id, int service_id);
 	eService *searchServiceByNumber(int channel_number);
 	
-	template <class T> void forEachService(T ob) { for_each(services.begin(), services.end(), ob); }
-	template <class T> void forEachTransponder(T ob) { for_each(transponders.begin(), transponders.end(), ob); }
+	template <class T> 
+	void forEachService(T ob)
+	{
+		for (std::map<sref,eService>::iterator i(services.begin()); i!=services.end(); ++i)
+			ob(i->second);
+	}
+	template <class T> void forEachTransponder(T ob)
+	{
+		for (std::map<tsref,eTransponder>::iterator i(transponders.begin()); i!=transponders.end(); ++i)
+			ob(i->second);
+	}
+	template <class T> void forEachChannel(T ob)
+	{
+		for (std::map<int,eService*>::iterator i(channel_number.begin()); i!=channel_number.end(); ++i)
+			ob(*i->second);
+	}
 
 	eTransponder *getFirstTransponder(int state);
 };
