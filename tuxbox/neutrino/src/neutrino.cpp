@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.145 2002/01/30 18:10:19 McClean Exp $
+        $Id: neutrino.cpp,v 1.146 2002/01/30 20:58:55 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.146  2002/01/30 20:58:55  field
+  DD-Symbol
+
   Revision 1.145  2002/01/30 18:10:19  McClean
   dont use home-key for modeswitch by default (dont worxx) :(
 
@@ -2344,7 +2347,7 @@ void CNeutrinoApp::radioMode()
 		g_ActionLog->println("mode: radio");
 	#endif
 
-	g_FrameBuffer->loadPal("radiomode.pal", 18, 199);
+	g_FrameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
 	g_FrameBuffer->loadBackground("radiomode.raw");
 	g_FrameBuffer->useBackground(true);
 	g_FrameBuffer->paintBackground();
@@ -2447,7 +2450,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.145 2002/01/30 18:10:19 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.146 2002/01/30 20:58:55 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
