@@ -17,6 +17,8 @@ protected:
   void OnFontSizeChanged(int NewFontSize);
 	void recalcClientRect();
 	int eventFilter(const eWidgetEvent &event);
+	void willShow();
+	void willHide();
 public:
 	eWindow(int takefocus=0);
 	~eWindow();
