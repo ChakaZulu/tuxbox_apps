@@ -129,7 +129,6 @@ class CMenuItem
 
 class CMenuSeparator : public CMenuItem
 {
-		int		height;
 		int		type;
 		std::string	text;
 
@@ -148,10 +147,7 @@ class CMenuSeparator : public CMenuItem
 		CMenuSeparator(const int Type = 0, const char * const Text = NULL); // UTF-8
 
 		int paint(bool selected=false);
-		int getHeight(void) const
-		{
-			return height;
-		}
+		int getHeight(void) const;
 };
 
 class CMenuForwarder : public CMenuItem
@@ -165,8 +161,8 @@ class CMenuForwarder : public CMenuItem
 	public:
 
 		// Text must be UTF-8 encoded:
-		CMenuForwarder(const char * const Text, const bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
-		CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, std::string IconName= "");
+		CMenuForwarder(const char * const Text, const bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, std::string ActionKey="", const bool Localizing = true, uint DirectKey= CRCInput::RC_nokey, const char * const IconName = NULL);
+		CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target=NULL, std::string ActionKey="", const bool Localizing = true, uint DirectKey= CRCInput::RC_nokey, const char * const IconName = NULL);
 		int paint(bool selected=false);
 		int getHeight(void) const;
 		int exec(CMenuTarget* parent);
@@ -318,8 +314,8 @@ class CLockedMenuForwarder : public CMenuForwarder, public CPINProtection
 		virtual CMenuTarget* getParent(){ return Parent;};
 	public:
 		CLockedMenuForwarder(const char * const Text, char* validPIN, bool alwaysAsk=false, const bool Active=true, char *Option=NULL,
-		                     CMenuTarget* Target=NULL, std::string ActionKey="", bool Localizing= true,
-		                     uint DirectKey= CRCInput::RC_nokey, std::string IconName= "")
+		                     CMenuTarget* Target=NULL, std::string ActionKey="", const bool Localizing = true,
+		                     uint DirectKey= CRCInput::RC_nokey, const char * const IconName = NULL)
 
 		                     : CMenuForwarder(Text, Active, Option, Target, ActionKey, Localizing,
 		                     DirectKey, IconName) ,

@@ -605,7 +605,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
+CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, std::string ActionKey, const bool Localizing, uint DirectKey, const char * const IconName)
 {
 	text=Text;
 	option = Option;
@@ -615,10 +615,10 @@ CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const
 	actionKey = ActionKey;
 	localizing = Localizing;
 	directKey = DirectKey;
-	iconName = IconName;
+	iconName = IconName ? IconName : "";
 }
 
-CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, std::string ActionKey, bool Localizing, uint DirectKey, std::string IconName)
+CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, std::string ActionKey, const bool Localizing, uint DirectKey, const char * const IconName)
 {
 	text=Text;
 	option = NULL;
@@ -628,7 +628,7 @@ CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const
 	actionKey = ActionKey;
 	localizing = Localizing;
 	directKey = DirectKey;
-	iconName = IconName;
+	iconName = IconName ? IconName : "";
 }
 
 int CMenuForwarder::getHeight(void) const
@@ -714,22 +714,20 @@ CMenuSeparator::CMenuSeparator(const int Type, const char * const Text)
 	iconName = "";
 	type = Type;
 
-	if (Text == NULL)
-	{
-		height = 10;
-		text = "";
-	}
-	else
-	{
-		height = g_Fonts->menu->getHeight();
-		text = Text;
-	}
+	text = Text ? Text : "";
 }
 
 
+int CMenuSeparator::getHeight(void) const
+{
+	return text.empty() ? 10 : g_Fonts->menu->getHeight();
+}
+
 int CMenuSeparator::paint(bool selected)
 {
+	int height;
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
+	height = getHeight();
 	
 	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT );
 	if(type&LINE)
