@@ -43,16 +43,33 @@ void eZapLCDMain::clockUpdate()
 		s.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
 		clocktimer.start((70-t->tm_sec)*1000);
 		Clock->setText(s);
+		if ((cur_start <= c) && (c < cur_start+cur_duration))
+		{
+			Progress->setPerc((c-cur_start)*100/cur_duration);
+			Progress->show();
+		}
+		else {
+			Progress->clear();
+			Progress->hide();
+		}
 	} else
 	{
 		Clock->setText("--:--");
 		clocktimer.start(60000);
+		Progress->clear();
+		Progress->hide();
 	}
 }
 
 void eZapLCDMain::volumeUpdate(int vol)
 {
 	Volume->setPerc((63-vol)*100/63);
+}
+
+void eZapLCDMain::updateProgress(int start,int duration) {
+	cur_start = start;
+	cur_duration = duration;
+	clockUpdate();
 }
 
 void eZapLCDMain::serviceChanged(const eServiceReference &sref, int)
@@ -70,10 +87,14 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0), clocktimer(eApp)
 	if (eSkin::getActive()->build(this, "enigma_lcd_main"))
 		eFatal("skin load of \"enigma_lcd\" failed");
 
+	cur_start = cur_duration = -1;
+	
 	ASSIGN(Volume, eProgress, "volume_bar");
+	ASSIGN(Progress, eProgress, "progress_bar");
 	ASSIGN(ServiceName, eLabel, "service_name");
 	ASSIGN(Clock, eLabel, "clock");
 	Volume->show();
+	Progress->hide();
 	
 	CONNECT(clocktimer.timeout, eZapLCDMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->timeUpdated, eZapLCDMain::clockUpdate);
@@ -98,4 +119,5 @@ eZapLCDScart::eZapLCDScart(eWidget *parent): eWidget(parent, 0)
 
 	ASSIGN(Title, eLabel, "enigma_logo");
 	ASSIGN(Scart, eLabel, "lcd_scart");
+
 }

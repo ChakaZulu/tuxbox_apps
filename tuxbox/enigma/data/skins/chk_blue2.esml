@@ -111,6 +111,7 @@
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
 			<eLabel position="0:0" size="120:17" pixmap="enigma_logo" />
+			<eProgress position="7:2" size="65:6" name="progress_bar" foregroundColor="0" leftColor="0" rightColor="255" border="1" />
 			<eLabel position="0:53" size="11:13" pixmap="speaker" />
 			<eLabel position="2:17" size="118:32" font="V5 Loxica Robusta;18" wrap="on" name="service_name" />
 			<eLabel position="74:49" size="46:15" font="V5 Loxica Robusta;18" name="clock" align="right" />

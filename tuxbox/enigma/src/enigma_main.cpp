@@ -576,6 +576,8 @@ void eZapMain::setEIT(EIT *eit)
 				cur_start=event->start_time;
 				cur_duration=event->duration;
 				clockUpdate();
+				eZapLCD* pLCD = eZapLCD::getInstance();
+				pLCD->lcdMain->updateProgress(cur_start,cur_duration);
 				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 					if (d->Tag()==DESCR_LINKAGE)
 					{
