@@ -6,6 +6,7 @@ function channelChange()
 		var channel = document.channelselector.channel.options[currentChannel].value;
 		currentBouquet = document.channelselector.bouquet.selectedIndex;
 		switchChannel(channel, currentBouquet, currentChannel);
+		document.channelselector.channel.focus();
 	}
 }
 function zapChannelForward()
