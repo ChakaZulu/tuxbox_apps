@@ -1,5 +1,3 @@
-#include <enigma_dyn.h>
-
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -45,6 +43,8 @@
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
 #include <lib/system/dmfp.h>
+#include <enigma_dyn.h>
+#include <enigma_dyn_mount.h>
 
 using namespace std;
 
@@ -77,57 +77,57 @@ extern eString button(int width, eString buttonText, eString buttonColor, eStrin
 extern eString httpUnescape(const eString &string);
 extern eString filter_string(eString string);
 extern eString httpEscape(const eString &string);
-extern std::map<eString, eString> getRequestOptions(eString opt, char delimiter = '&');
+extern std::map<eString, eString> getRequestOptions(eString, char);
 
-static eString addMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString addMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-static eString removeMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString removeMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-static eString editMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString editMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-static eString showMountPoints(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString showMountPoints(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-static eString addMountPointWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString addMountPointWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-static eString editMountPointWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString editMountPointWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
 
-static eString mountMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString mountMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	return "+ok";
 }
-static eString unmountMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString unmountMountPoint(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
