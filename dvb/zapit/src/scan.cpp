@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.136 2004/10/27 16:08:42 lucgas Exp $
+ * $Id: scan.cpp,v 1.137 2004/11/02 12:16:42 lucgas Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -194,6 +194,9 @@ void get_transponder (TP_params *TP)
 
 int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(uint32_t TsidOnid, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
 {
+	if (TsidOnid == 0)
+		return 1;
+
 	if (scantransponders.find(TsidOnid) == scantransponders.end())
 	{
 		found_transponders++;
@@ -276,10 +279,28 @@ int get_sdts(char * frontendType)
 			TsidOnid = get_sdt_TsidOnid();
 			tI->second.transport_stream_id = (TsidOnid >> 16)&0xFFFF;
 			tI->second.original_network_id = TsidOnid &0xFFFF;
-		}
 
-		INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
- 		parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+			INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
+ 			parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+		}
+		else {
+			INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
+			status = parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+		
+			if (status == -1)
+			{
+				TsidOnid = get_sdt_TsidOnid();
+		
+				if ((TsidOnid != 0) && (tI->second.transport_stream_id != (TsidOnid >> 16)&0xFFFF) && (tI->second.original_network_id = TsidOnid &0xFFFF))
+				{
+					tI->second.transport_stream_id = (TsidOnid >> 16)&0xFFFF;
+					tI->second.original_network_id = TsidOnid &0xFFFF;
+
+					INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
+					parse_sdt(tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+				}
+			}
+		}
 	}
 
 	return 0;
