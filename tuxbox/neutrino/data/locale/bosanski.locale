@@ -70,7 +70,7 @@ miscsettings.head namjestiti razne stvari
 miscsettings.shutdown_real pripravnost
 miscsettings.shutdown_real_rcdelay ugasiti sa zastojanjem
 miscsettings.boxtype proizvođač dbox2
-miscsettings.bootinfo unset
+miscsettings.bootinfo pokazati informacije pri startovanju
 miscsettings.startbhdriver startovati bh-mode driver
 miscsettings.general generalno
 miscsettings.fb_destination majstori! boot konsola
@@ -84,12 +84,12 @@ audiomenu.analogout analogni izlaz
 audiomenu.monoright mono desno
 audiomenu.monoleft mono lijevo
 audiomenu.stereo stereo
-audiomenu.dolbydigital dolby digital
+audiomenu.dolbydigital dolby digital automaticno
 audiomenu.avs_control upravljanje glasnosti avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
-audiomenu.PCMOffset unset
+audiomenu.PCMOffset smanjivanje glasnoce pcm
 
 videomenu.head namjestiti video
 videomenu.screensetup namjestiti ekran
@@ -140,7 +140,7 @@ streamingmenu.streaming_server_cddrive dvd
 streamingmenu.streaming_server_startdir direktorij (VLC)
 streamingmenu.streaming_videorate brzina videa
 streamingmenu.streaming_audiorate brzina audia
-streamingmenu.streaming_ac3_enabled unset
+streamingmenu.streaming_ac3_enabled podrzavati ac3
 streamingmenu.off ugaseno
 streamingmenu.on upaljeno
 streamingmenu.streaming_force_transcode Force Transcoding
@@ -241,7 +241,7 @@ colorchooser.alpha alfa
 lcdmenu.head namjestiti tečni kristal
 lcdmenu.inverse invertirati
 lcdmenu.power struja
-lcdmenu.autodimm unset
+lcdmenu.autodimm automaticno smanjiti svjetlost
 lcdmenu.lcdcontroler kontrast / svjetlost
 lcdmenu.statusline statusna linija
 lcdmenu.statusline.volume glasnost
@@ -360,7 +360,7 @@ scants.bouquet_leave ne promijeniti
 scants.bouquet_create novo sastaviti
 scants.bouquet_erase izbrisati
 scants.bouquet_satellite satelitski buket
-scants.bouquet_update unset
+scants.bouquet_update obnoviti
 scants.failed Neuspjesno traženje kanala!
 scants.finished Uspješno izvršeno traženje kanala!
 
@@ -376,7 +376,7 @@ flashupdate.getupdatefileerror nemože se dobiti najnoviji softver
 flashupdate.cantopenfile nemože se otvoriti datoteka
 flashupdate.fileis0bytes veličina datoteke je 0 bajtova
 flashupdate.eraseingflash briše se fleš
-flashupdate.erasefailed unset
+flashupdate.erasefailed brisanje flesa nije uspjelo
 flashupdate.programmingflash programira se fleš
 flashupdate.cantopenmtd nemože se otvoriti mtd-uredaj
 flashupdate.ready gotovo
@@ -393,7 +393,7 @@ flashupdate.checkupdate tražiti novu verziju
 flashupdate.versioncheck provjeriti verziju
 flashupdate.md5check provjera imidža
 flashupdate.md5sumerror imidž ima greške
-flashupdate.url_file unset
+flashupdate.url_file datoteka za konfiguraciju
 flashupdate.proxyserver_sep proxyserver
 flashupdate.proxyserver proxyname
 flashupdate.proxyserver_hint1 utipkajte ime proxya ili ip adresu (host:port)
@@ -404,7 +404,7 @@ flashupdate.proxyusername_hint2 prazno znači da nema provjere
 flashupdate.proxypassword lozinka
 flashupdate.proxypassword_hint1 utipkajte lozinku za proxy
 flashupdate.proxypassword_hint2
-flashupdate.selectimage unset
+flashupdate.selectimage izbor imidza
 flashupdate.msgbox Nađen je novi imidž:\nDatum: %s, %s\nOsnovni imidž: %s\nvrsta imidža: %s\n\nHoćete li ovu verziju sada preuzeti\nsa interneta i instalirati?
 flashupdate.msgbox_manual Nađen je novi imidž:\nDatum: %s, %s\nOsnovni imidž: %s\nVrsta imidža: %s\n\nHoćete li ovu verziju sada instalirati?
 flashupdate.expertfunctions funkcije za majstore
@@ -422,7 +422,7 @@ flashupdate.actionwriteflash piše se fleš
 flashupdate.flashreadyreboot Imidž je uspješno flešovan.\nVaš dbox2 startuje sada ponovno.
 flashupdate.reallyflashmtd Hoćete li stvarno nastaviti flešovanje?\n\nAko se desi greška ili imidž nije\nu redu, onda vaš dbox2 neće više raditi.\n\nIme imidža: %s\nPozicija: %s
 flashupdate.wrongbase Verzija osnovnog imidža ne paše više,\ntreba se instalirati novi osnovni imidž!
-flashupdate.experimentalimage unset
+flashupdate.experimentalimage Izabrali ste snapshot,\novo je verzija za pokusavanje i mozda vas\ndbox2 poslije obnavljanja nece vise raditi.\n\nHocete li stvarno sa ovom verzijom obnoviti softver?
 
 bouqueteditor.name namjestiti buket
 bouqueteditor.delete izbrisati
@@ -717,16 +717,16 @@ movieplayer.head promatrač filmova
 movieplayer.play odigrati
 movieplayer.choosets odigrati ts
 movieplayer.chooseps odigrati ps
-movieplayer.choosestream unset
+movieplayer.choosestream streamati
 movieplayer.choosepes odigrati pes
 movieplayer.bookmark oznaka
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile unset
+movieplayer.choosestreamfile datoteka preko vlca
 movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...
 movieplayer.nostreamingserver Nije bilo moguce\nuspostaviti vezu sa streamingserverom.
 movieplayer.defdir pocetni direktorij
-movieplayer.buffering unset
+movieplayer.buffering predraditi...
 
 filebrowser.head pretraživač datoteka
 filebrowser.filter.active upaljen filter
@@ -754,7 +754,7 @@ nfs.type_nfs NFS
 nfs.type_cifs CIFS
 nfs.username ime korisnika za cifs
 nfs.password lozinka za cifs
-nfs.mounterror_notsup unset
+nfs.mounterror_notsup ne podnosi se sistem datoteka
 nfsmenu.head namješćenje nfsa/cifsa
 
 apids.hint_1 Utipkajte heksadecimalne apids

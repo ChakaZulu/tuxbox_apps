@@ -452,7 +452,7 @@ settings.noconffile Le Impostazioni-Neutrino non sono stati\ntrovati. Verranno u
 settings.missingoptionsconffile Le Impostazioni-Neutrino sono stati avanzati.\n i Nuovi parametri verrano aggiunti al Standart.
 
 cam.wrong Attenzione la vostra CAM_ALPHA.BIN non e adatta\nper la vostra Smart-Card!!!\n\nVuole rivedere questa informazione?
-ucodes.failure Attenzione non sono stati trovati le Ã‚ÂµCodes !\nCaricarle via FTP (oppure DBox-BootManager)\ e riavviare il  DBox !
+ucodes.failure Attenzione non sono stati trovati le �Codes!\nCaricarle via FTP (oppure DBox-BootManager)\ne riavviare il DBox !
 
 stringinput.caps Caratteri grandi/piccoli
 stringinput.clear Cancellare tutto
@@ -663,7 +663,7 @@ fontsize.alert Allerta
 fontsize.eventlist_title Lista eventi
 fontsize.eventlist_itemlarge langa
 fontsize.eventlist_itemsmall stretta
-fontsize.eventlist_datetime Lista eventi data \ orari
+fontsize.eventlist_datetime Lista eventi data/orari
 fontsize.channellist Lista canali
 fontsize.channellist_descr descrizione
 fontsize.channellist_number Nummero
