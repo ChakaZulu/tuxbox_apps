@@ -213,7 +213,6 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
         	g_Fonts->infobar_number->RenderString(ChanNumXPos, BoxStartY+ChanHeight + 10, ChanWidth, strChanNum, COL_INFOBAR);
         
        		//satellite
-        	printf("[infoviewer] satellite = %s\n", Satellite.c_str());
         	int ChanSatXPos = BoxStartX + ((ChanWidth - g_Fonts->infobar_small->getRenderWidth(Satellite.c_str()))>>1);
         	g_Fonts->infobar_small->RenderString(ChanSatXPos, BoxStartY + 22, ChanWidth, Satellite.c_str(), COL_INFOBAR);
 	}
