@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.6 2001/07/14 16:38:46 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.7 2001/07/14 16:41:44 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.7  2001/07/14 16:41:44  fnbrd
+//  fork angemacht
+//
 //  Revision 1.6  2001/07/14 16:38:46  fnbrd
 //  Mit workaround fuer defektes mktime der glibc
 //
@@ -600,12 +603,12 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.6 2001/07/14 16:38:46 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.7 2001/07/14 16:41:44 fnbrd Exp $\n");
 
   tzset(); // TZ auswerten
 
-//  if( fork()!= 0 ) // switching to background
-//    return 0;
+  if( fork()!= 0 ) // switching to background
+    return 0;
 
   // from here on forked
 
