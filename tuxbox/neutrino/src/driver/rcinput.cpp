@@ -489,7 +489,7 @@ void CRCInput::getMsg_ms(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR
 
 void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool bAllowRepeatLR)
 {
-	static unsigned long long last_keypress = 0;
+	static unsigned long long last_keypress = 0ULL;
 	unsigned long long getKeyBegin;
 
 	static __u16 rc_last_key = 0;
@@ -832,6 +832,9 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									p= new unsigned char[ sizeof(long long) ];
 									*(long long*) p = timeNew - timeOld;
 
+									if ((long long)last_keypress > *(long long*)p)
+										last_keypress += *(long long *)p;
+
 									// Timer anpassen
 									for(std::vector<timer>::iterator e = timers.begin(); e != timers.end(); ++e)
 										if (e->correct_time)
@@ -1119,7 +1122,9 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 								{
 									if (rc_last_repeat_key != ev.code)
 									{
-										if (now_pressed > last_keypress + repeat_block)
+										if ((now_pressed > last_keypress + repeat_block) ||
+										    /* accept all keys after time discontinuity: */
+										    (now_pressed < last_keypress)) 
 											rc_last_repeat_key = ev.code;
 										else
 											keyok = false;
@@ -1133,19 +1138,23 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 
 							rc_last_key = ev.code;
 
-							if (keyok &&
-							    (now_pressed > last_keypress + repeat_block_generic))
+							if (keyok)
 							{
-								last_keypress = now_pressed;
+								if ((now_pressed > last_keypress + repeat_block_generic) ||
+								    /* accept all keys after time discontinuity: */
+								    (now_pressed < last_keypress)) 
+								{
+									last_keypress = now_pressed;
 
 #ifdef OLD_RC_API
-								*msg  = (trkey == RC_standby_release) ? RC_standby : trkey;
-								*data = (trkey == RC_standby_release) ? 1 : 0; /* <- button released / pressed */
+									*msg  = (trkey == RC_standby_release) ? RC_standby : trkey;
+									*data = (trkey == RC_standby_release) ? 1 : 0; /* <- button released / pressed */
 #else /* OLD_RC_API */
-								*msg = trkey;
-								*data = 0; /* <- button pressed */
+									*msg = trkey;
+									*data = 0; /* <- button pressed */
 #endif /* OLD_RC_API */
-								return;
+									return;
+								}
 							}
 						}
 #ifndef OLD_RC_API
