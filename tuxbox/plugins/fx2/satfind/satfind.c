@@ -256,7 +256,6 @@ void prepare_main(screen_t screen) {
 }
 
 int satfind_exec() {
-//  int lcd_fd;
   int fe_fd,dmx_fd;
   int lcd_mode;
   fd_set rfds;
@@ -265,19 +264,8 @@ int satfind_exec() {
   struct timeval tv;
   struct signal signal_quality,old_signal;
   struct dmx_sct_filter_params flt;
-#if HAVE_DVB_API_VERSION >= 3
-  struct dvb_frontend_info info;
-#else
-  FrontendInfo info;
-#endif
   unsigned char buf[1024];
   char network_name[31],old_name[31];
-
-  /* open dbox2-specific devices (LCD and FP)
-  if((lcd_fd=open(LCD,O_RDWR))<0) {
-    fprintf(stderr,"lcd open - Can't open LCD: %d\n",errno);
-    return -1;
-  } */
 
   /* open nokia-api specific devices (demux,tuner and sat-control) */
   if((dmx_fd=open(DMX,O_RDWR))<0) {
@@ -287,14 +275,6 @@ int satfind_exec() {
   
   if((fe_fd=open(FE,O_RDONLY))<0) {
     perror("[satfind.so] Can't open Tuner");
-    return -1;
-  }
-  if(ioctl(fe_fd, FE_GET_INFO, &info) < 0) {
-    perror("[satfind.so] error ioctl FE_GET_INFO");
-    return -1;
-  }
-  if (info.type != FE_QPSK) {
-    fprintf(stderr,"[satfind.so] Fehler: Keine Satbox gefunden.\n");
     return -1;
   }
 
@@ -308,13 +288,7 @@ int satfind_exec() {
   memset(&old_signal,0,sizeof(old_signal));
   
   /* initialize demux to get the NIT */
- 
-#if HAVE_DVB_API_VERSION >= 3
   memset(&flt, 0, sizeof(flt));
-#else
-  memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
-  memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
-#endif
 
   flt.pid=0x10;
   flt.filter.filter[0]=0x40;
