@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.95 2002/02/14 14:40:38 field Exp $
+//  $Id: sectionsd.cpp,v 1.96 2002/02/14 14:59:24 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,8 +23,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
-//  Revision 1.95  2002/02/14 14:40:38  field
-//  Besseres Handling, wenn kein EPG gesendet
+//  Revision 1.96  2002/02/14 14:59:24  field
+//  CD-Fix
 //
 //  Revision 1.94  2002/02/08 17:50:05  field
 //  Updates - neues Format bei sendEPG
@@ -1514,7 +1514,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.95 2002/02/14 14:40:38 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.96 2002/02/14 14:59:24 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1706,7 +1706,7 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         if(si!=mySIservicesOrderUniqueKey.end())
         {
             dprintf("[sectionsd] current service has%s scheduled events, and has%s present/following events\n", si->second->eitScheduleFlag()?"":" no", si->second->eitPresentFollowingFlag()?"":" no" );
-            if ( ( !si->second->eitScheduleFlag() ) ||
+            if ( /*( !si->second->eitScheduleFlag() ) || */
                  ( !si->second->eitPresentFollowingFlag() ) )
             {
                 flag|= sectionsd::epg_not_broadcast;
@@ -3291,7 +3291,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.95 2002/02/14 14:40:38 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.96 2002/02/14 14:59:24 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
