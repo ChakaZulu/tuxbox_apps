@@ -67,10 +67,11 @@ Die EVENTID dient als Handle um genauere Informationen abzufragen.
 Beispiel:
 
 >>>http://dbox/control/epg
-69530 4556718105 Planet RTL
-69531 4556783630 News on the Hour
-74537 4884856871 Journal télévisé belge
-74540 4885053468 Porta a porta
+8716804 571264467523 Wasserloch Nr. 3
+8716304 571231699926 Ein Käfig voller Helden
+8716311 571232198133 Cop Rock
+
+
  
  
 
@@ -86,10 +87,12 @@ Die EVENTID dient als Handle um genauere EPG-Informationen abzufragen.
 
 Beispiel:
 
->>>http://dbox/control/epg?69530
-00010f9a0017 22.11 23:00 30 De Magazin
-00010f9a0018 22.11 23:30 30 De Journal
-00010f9a0019 23.11 00:00 60 Planet RTL
+>>>http://dbox/control/epg?8716304
+571231699925 1021322700 1500 Shooting Stars
+571231699926 1021324200 1500 Ein Käfig voller Helden
+571231699927 1021325700 1500 The Hitchhiker
+571231699928 1021327200 1500 The Hitchhiker
+
  
  
 
@@ -108,13 +111,10 @@ Rückgabe-Format:
 
 Beispiel:
 
->>>http://dbox/control/epg?eventid=008500296150
-Outer Limits - Die unbekannte Dimension
-Mission Mars III
-Drei amerikanische Astronauten befinden sich nach einer Mars-Expedition auf dem Rückflug zur Erde. Bald machen sie eine Grauen erregenden Entdeckung: Eine unbekannte Lebensform hat von einem der drei Besitz ergriffen.
-CDN 1995. Von Tibor Takacs, mit Jay O. Sanders, Matt Craven, Michael Dorn.
- 
- 
+>>>http://dbox/control/epg?eventid=571231699926
+Ein Käfig voller Helden
+Operation 'Tiger' 
+blablabla 
 
 Parameter: ext
 Rückgabe:
