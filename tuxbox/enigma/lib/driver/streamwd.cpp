@@ -22,8 +22,6 @@
 #include <lib/system/econfig.h>
 
 #define EVENT_DEVICE "/dev/dbox/event0"
-#define WDE_VIDEOMODE 		(uint)1
-#define WDE_VCRONOFF 		(uint)2
 
 #ifndef EVENT_FRATE_CHANGE
 #define EVENT_FRATE_CHANGE  64  /* framerate has changed */
@@ -72,11 +70,8 @@ void eStreamWatchdog::check(int)
 	int status;
 	while ( (status = read(handle, &event, eventSize)) == eventSize )
 	{
-		if (event.event & (EVENT_ARATIO_CHANGE|EVENT_FRATE_CHANGE))
+		if (event.event & (EVENT_ARATIO_CHANGE|EVENT_FRATE_CHANGE|EVENT_VCR_CHANGED))
 			reloadSettings();
-
-		if (event.event & EVENT_VCR_CHANGED)
-				/*emit*/VCRActivityChanged( getVCRActivity() );
 	}
 }
 
@@ -163,6 +158,9 @@ void eStreamWatchdog::reloadSettings()
 		eAVSwitch::getInstance()->setVSystem(vsNTSC);
 		break;
 	}
+	unsigned int auto_vcr_switching=1;
+	eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", auto_vcr_switching );
+	/*emit*/VCRActivityChanged( auto_vcr_switching?getVCRActivity():0 );
 }
 
 int eStreamWatchdog::isAnamorph()

@@ -1586,6 +1586,7 @@ eZapMain::eZapMain()
 	dvrInfoBar->zOrderRaise();
 	dvbInfoBar->zOrderRaise();
 	CONNECT( eStreamWatchdog::getInstance()->VCRActivityChanged, eZapMain::toggleScart );
+	eStreamWatchdog::getInstance()->reloadSettings();
 #ifndef DISABLE_CI
 	mmi_messages.start();
 	CONNECT( mmi_messages.recv_msg, eZapMain::handleMMIMessage );
@@ -2426,7 +2427,7 @@ void eZapMain::showInfobar()
 				eZap::getInstance()->focus == this
 			)
 		 )
-  show();
+	show();
 
 	if (doHideInfobar())
 		timeout.start(6000, 1);

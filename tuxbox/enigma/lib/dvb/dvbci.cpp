@@ -1066,7 +1066,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 void eDVBCI::startTimer()
 {
 	pollTimer.start(80,true);
-} 
+}                  
 
 void eDVBCI::stopTimer()
 {

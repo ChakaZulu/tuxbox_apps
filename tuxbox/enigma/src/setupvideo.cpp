@@ -35,11 +35,14 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	if (eConfig::getInstance()->getKey("/elitedvb/video/palM", v_palM ))
 		v_palM=0;
 
+	if (eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", v_VCRSwitching ))
+		v_VCRSwitching=1;
+
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	setText(_("A/V Settings"));
-	move(ePoint(160, 100));
-	cresize(eSize(390, 330));
+	move(ePoint(160, 90));
+	cresize(eSize(390, 340));
 
 	eLabel *l=new eLabel(this);
 	l->setText(_("Color Format:"));
@@ -82,7 +85,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	CONNECT( pin8->selchanged, eZapVideoSetup::VPin8Changed );
 
 	c_disableWSS = new eCheckbox(this, v_disableWSS, 1);
-	c_disableWSS->move(ePoint(20,110));
+	c_disableWSS->move(ePoint(20,105));
 	c_disableWSS->resize(eSize(350,30));
 	c_disableWSS->setText(_("Disable WSS on 4:3"));
 	c_disableWSS->setHelpText(_("don't send WSS signal when A-ratio is 4:3"));
@@ -93,17 +96,24 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	ac3default=new eCheckbox(this, sac3default, 1);
 	ac3default->setText(_("AC3 default output"));
-	ac3default->move(ePoint(20, 150));
+	ac3default->move(ePoint(20, 140));
 	ac3default->resize(eSize(350, 30));
 	ac3default->setHelpText(_("enable/disable ac3 default output (ok)"));
 	CONNECT( ac3default->checked, eZapVideoSetup::ac3defaultChanged );
 
 	palM=new eCheckbox(this, v_palM, 1);
 	palM->setText(_("use PAL-M for NTSC"));
-	palM->move(ePoint(20, 190));
+	palM->move(ePoint(20, 175));
 	palM->resize(eSize(350, 30));
 	palM->setHelpText(_("use PAL-M instead of real NTSC"));
 	CONNECT( palM->checked, eZapVideoSetup::palMChanged );
+
+	VCRSwitching=new eCheckbox(this, v_VCRSwitching, 1);
+	VCRSwitching->setText(_("Auto VCR switching"));
+	VCRSwitching->move(ePoint(20, 210));
+	VCRSwitching->resize(eSize(350, 30));
+	VCRSwitching->setHelpText(_("auto switch to VCR connector"));
+	CONNECT( VCRSwitching->checked, eZapVideoSetup::VCRChanged );
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
@@ -131,6 +141,7 @@ eZapVideoSetup::~eZapVideoSetup()
 
 void eZapVideoSetup::okPressed()
 {
+	eConfig::getInstance()->setKey("/elitedvb/video/vcr_switching", v_VCRSwitching );
 	eConfig::getInstance()->setKey("/elitedvb/video/colorformat", v_colorformat );
 	eConfig::getInstance()->setKey("/elitedvb/video/pin8", v_pin8 );
 	eConfig::getInstance()->setKey("/elitedvb/video/disableWSS", v_disableWSS );
@@ -193,10 +204,22 @@ void eZapVideoSetup::DisableWSSChanged( int i )
 	eConfig::getInstance()->setKey("/elitedvb/video/disableWSS", old );
 }
 
+void eZapVideoSetup::VCRChanged( int i )
+{
+	unsigned int old = 0;
+	eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", old );
+
+	v_VCRSwitching = (unsigned int) i;
+	eConfig::getInstance()->setKey("/elitedvb/video/vcr_switching", v_VCRSwitching );
+	eStreamWatchdog::getInstance()->reloadSettings();
+	eConfig::getInstance()->setKey("/elitedvb/video/vcr_switching", old );
+}
+
 void eZapVideoSetup::palMChanged( int i )
 {
 	unsigned int old = 0;
 	eConfig::getInstance()->getKey("/elitedvb/video/palM", old );
+
 	v_palM = (unsigned int) i;
 	eConfig::getInstance()->setKey("/elitedvb/video/palM", v_palM);
 	eAVSwitch::getInstance()->reloadSettings();

@@ -309,6 +309,7 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 	const unsigned char TAG_MMI_LIST_MORE[]={0x9F,0x88,0x0D};
 
 	int rp=0;
+
 	while ( data[rp] != 0x9F || data[rp+1] != 0x88 )
 		rp++;
 
@@ -369,7 +370,6 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 			close(0);
 
 		showWaitForCIAnswer(ret);
-//		send_to_sock( buf, 5+nrcount );  // send to socket
 
 		rp+=size;
 	}
@@ -445,7 +445,6 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		hideWaitForCIAnswer();
 		eMMIListWindow wnd(titleText, subTitleText, bottomText, entrys );
 		open = &wnd;
-		eDebug("open = %p", open);
 		int ret = wnd.exec();
 		open = 0;
 		if ( ret > -2 )
@@ -571,7 +570,7 @@ eString eMMIEnqWindow::getAnswer()
 }
 
 eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eString bottomTextT, std::list< std::pair< eString, int> > &entrys )
-	:eListBoxWindow<eListBoxEntryText>(_("Common Interface Module - mmi"), entrys.size(), 520, false)
+	:eListBoxWindow<eListBoxEntryText>(_("Common Interface Module - mmi"), entrys.size() > 8 ? 8 : entrys.size() , 520, false)
 {
 	cmove(ePoint(120, 130));
 

@@ -20,7 +20,6 @@
 #endif
 
 #include <lib/driver/eavswitch.h>
-#include <lib/driver/streamwd.h>
 #include <lib/driver/rfmod.h>
 #include <lib/dvb/esection.h>
 #include <lib/dvb/si.h>
@@ -122,9 +121,6 @@ eDVB::eDVB()
 		new eAVSwitchNokia;
 		break;
 	}
-
-	// init stream watchdog
-	eStreamWatchdog::getInstance()->reloadSettings();
 
 //	tMHWEIT=0;
 
