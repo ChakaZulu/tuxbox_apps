@@ -22,6 +22,9 @@ Contributor(s):
 ChangeLog:
 
   $Log: xmlparse.cpp,v $
+  Revision 1.2  2003/02/26 22:21:24  obi
+  Mismatched free() / delete / delete []
+
   Revision 1.1  2002/01/18 20:22:39  tmbinc
   initial checkin
 
@@ -189,7 +192,7 @@ XML_Parser::~XML_Parser()
     p=tagStack;
     tagStack=tagStack->parent;
 
-    delete p->buf;
+    delete[] p->buf;
     delete p;
   };
 
@@ -197,10 +200,10 @@ XML_Parser::~XML_Parser()
   poolDestroy(&temp2Pool);
   dtdDestroy(&dtd);
 
-  delete atts;
+  delete[] atts;
   free(groupConnector);
   free(buffer);
-  delete dataBuf;
+  delete[] dataBuf;
   free(unknownEncodingMem);
 
   if (unknownEncodingRelease)
