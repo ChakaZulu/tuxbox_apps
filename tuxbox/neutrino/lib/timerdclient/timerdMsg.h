@@ -82,14 +82,6 @@ class CTimerd
 		{
 			int   eventID;
 		};
-
-		//response structures
-		struct responseBlah
-		{
-			unsigned char volume;
-		};
-
-
 };
 
 #endif

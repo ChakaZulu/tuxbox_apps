@@ -41,6 +41,9 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#include <string>
+
+using namespace std;
 
 class CTimerdClient
 {
@@ -62,7 +65,16 @@ class CTimerdClient
 			TIMER_NEXTPROGRAM
 		};
 
+		enum events
+		{
+			EVT_SHUTDOWN = 1,
+			EVT_NEXTPROGRAM
+		};
+
 		CTimerdClient::CTimerdClient();
+
+		void registerEvent(unsigned int eventID, unsigned int clientID, string udsName);
+		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
 
 		int addTimerEvent( timerTypes evType, void* data = 0, int min = 0, int hour = 0, int day = 0, int month = 0);
 		void removeTimerEvent( int evId);

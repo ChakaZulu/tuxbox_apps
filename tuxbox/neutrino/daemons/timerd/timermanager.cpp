@@ -27,10 +27,13 @@
 #include "debug.h"
 #include <unistd.h>
 
+CTimerEvent_NextProgram::EventMap CTimerEvent_NextProgram::events;
 
 CTimerManager::CTimerManager()
 {
 	eventID = 0;
+	eventServer = new CEventServer;
+
 	//thread starten
 	if (pthread_create (&thrTimer, NULL, timerThread, (void *) this) != 0 )
 	{
@@ -56,7 +59,7 @@ void* CTimerManager::timerThread(void *arg)
 	while (1)
 	{
 		CTimerEvent eNow = CTimerEvent::now();
-
+		printf("[timerd] our time: %d\n", eNow.time());
 		// fire events who's time has come
 		CTimerEventMap::iterator pos = timerManager->events.begin();
 		for(;pos != timerManager->events.end();pos++)
@@ -64,6 +67,10 @@ void* CTimerManager::timerThread(void *arg)
 			if( *(pos->second) <= eNow)
 			{
 				pos->second->fireEvent();
+			}
+			else if (pos->second->time() <= eNow.time()+10)
+			{
+				printf("[timerd] soon starting: %s (%d:%d)\n", static_cast<CTimerEvent_NextProgram*>(pos->second)->eventInfo.name, pos->second->alarmtime.tm_hour, pos->second->alarmtime.tm_min);
 			}
 		}
 
@@ -128,7 +135,6 @@ CTimerEvent CTimerEvent::now()
 	time_t actTime_t;
 	::time(&actTime_t);
 	struct tm* actTime = localtime(&actTime_t);
-	actTime->tm_mon += 1;
 	result.alarmtime = *actTime;
 
 	return(result);
@@ -156,5 +162,9 @@ void CTimerEvent_Shutdown::fireEvent()
 
 void CTimerEvent_NextProgram::fireEvent()
 {
-	printf("[timerd] next program \n");
+	CTimerManager::getInstance()->getEventServer()->sendEvent(
+		CTimerdClient::EVT_NEXTPROGRAM,
+		CEventServer::INITID_TIMERD,
+		&eventInfo,
+		sizeof(eventInfo));
 }

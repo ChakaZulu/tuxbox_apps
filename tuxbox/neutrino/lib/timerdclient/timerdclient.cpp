@@ -83,6 +83,41 @@ bool CTimerdClient::receive(char* data, int size)
 	read(sock_fd, data, size);
 }
 
+void CTimerdClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
+{
+	CTimerd::commandHead msg;
+	CEventServer::commandRegisterEvent msg2;
+
+	msg.version = CTimerd::ACTVERSION;
+	msg.cmd = CTimerd::CMD_REGISTEREVENT;
+
+	msg2.eventID = eventID;
+	msg2.clientID = clientID;
+
+	strcpy(msg2.udsName, udsName.c_str());
+	timerd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	timerd_close();
+}
+
+void CTimerdClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
+{
+	CTimerd::commandHead msg;
+	CEventServer::commandUnRegisterEvent msg2;
+
+	msg.version = CTimerd::ACTVERSION;
+	msg.cmd = CTimerd::CMD_UNREGISTEREVENT;
+
+	msg2.eventID = eventID;
+	msg2.clientID = clientID;
+
+	timerd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	timerd_close();
+}
+
 int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0, int hour = 0, int day = 0, int month = 0)
 {
 	CTimerd::commandHead msg;
@@ -111,16 +146,17 @@ int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0
 	msgAddTimer.evType = evType ;
 
 	int length;
-	switch( evType)
+	if ( evType == TIMER_SHUTDOWN )
 	{
-		TIMER_SHUTDOWN :
-			length = 0;
-		break;
-		TIMER_NEXTPROGRAM :
-			length = sizeof( CTimerEvent_NextProgram::EventInfo);
-		break;
-		default:
-			length = 0;
+		length = 0;
+	}
+	else if (evType == TIMER_NEXTPROGRAM)
+	{
+		length = sizeof( CTimerEvent_NextProgram::EventInfo);
+	}
+	else
+	{
+		length = 0;
 	}
 
 	timerd_connect();

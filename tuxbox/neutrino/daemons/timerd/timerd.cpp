@@ -45,8 +45,6 @@
 #include "timerdMsg.h"
 #include "debug.h"
 
-static CTimerManager* TimerManager = NULL;
-
 void parse_command(int connfd, CTimerd::commandHead* rmessage)
 {
 
@@ -56,12 +54,23 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 		return;
 	}
 
+	CTimerEvent_NextProgram::EventMap::iterator it = NULL;
 	switch (rmessage->cmd)
 	{
+
+		case CTimerd::CMD_REGISTEREVENT :
+			CTimerManager::getInstance()->getEventServer()->registerEvent( connfd );
+		break;
+
+		case CTimerd::CMD_UNREGISTEREVENT :
+			CTimerManager::getInstance()->getEventServer()->unRegisterEvent( connfd );
+		break;
+
 		case CTimerd::CMD_ADDTIMER:
 			CTimerd::commandAddTimer msgAddTimer;
 			read(connfd,&msgAddTimer, sizeof(msgAddTimer));
 
+			CTimerd::responseAddTimer rspAddTimer;
 			CTimerEvent* event;
 			switch (msgAddTimer.evType)
 			{
@@ -69,12 +78,33 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 					event = new CTimerEvent_Shutdown(
 						msgAddTimer.month, msgAddTimer.day,
 						msgAddTimer.hour, msgAddTimer.min);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
 				break;
+
 				case CTimerdClient::TIMER_NEXTPROGRAM :
-					event = new CTimerEvent_NextProgram(
-						msgAddTimer.month, msgAddTimer.day,
-						msgAddTimer.hour, msgAddTimer.min);
-					read( connfd, &(static_cast<CTimerEvent_NextProgram*>(event)->eventInfo), sizeof(CTimerEvent_NextProgram::EventInfo));
+					CTimerEvent_NextProgram::EventInfo evInfo;
+					read( connfd, &evInfo, sizeof(CTimerEvent_NextProgram::EventInfo));
+
+					it = CTimerEvent_NextProgram::events.find( evInfo.uniqueKey);
+					if (it == CTimerEvent_NextProgram::events.end())
+					{
+						event = new CTimerEvent_NextProgram(
+							msgAddTimer.month, msgAddTimer.day,
+							msgAddTimer.hour, msgAddTimer.min);
+						static_cast<CTimerEvent_NextProgram*>(event)->eventInfo = evInfo;
+						CTimerEvent_NextProgram::events.insert(make_pair(static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.uniqueKey, static_cast<CTimerEvent_NextProgram*>(event)));
+						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+					}
+					else
+					{
+						event = it->second;
+						static_cast<CTimerEvent_NextProgram*>(event)->eventInfo = evInfo;
+						event->alarmtime.tm_mon  = msgAddTimer.month;
+						event->alarmtime.tm_mday = msgAddTimer.day;
+						event->alarmtime.tm_hour = msgAddTimer.hour;
+						event->alarmtime.tm_min  = msgAddTimer.min;
+						rspAddTimer.eventID = event->eventID;
+					}
 				break;
 				default:
 					event = new CTimerEvent(
@@ -83,15 +113,13 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 						msgAddTimer.evType);
 			}
 
-			CTimerd::responseAddTimer rspAddTimer;
-			rspAddTimer.eventID = TimerManager->addEvent( event);
 			write( connfd, &rspAddTimer, sizeof(rspAddTimer));
 
 			break;
 		case CTimerd::CMD_REMOVETIMER:
 			break;
 		default:
-		dprintf("unknown command\n");
+			dprintf("unknown command\n");
 	}
 }
 
@@ -139,15 +167,13 @@ int main(int argc, char **argv)
 	}
 
 	//busyBox
-	/*
+
 	signal(SIGHUP,sig_catch);
 	signal(SIGINT,sig_catch);
 	signal(SIGQUIT,sig_catch);
 	signal(SIGTERM,sig_catch);
-*/
 
 	//startup Timer
-	TimerManager = CTimerManager::getInstance();
 	try
 	{
 		struct CTimerd::commandHead rmessage;

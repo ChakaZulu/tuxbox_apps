@@ -33,6 +33,7 @@
 #include <string>
 
 #include "timerdclient.h"
+#include "eventserver.h"
 
 using namespace std;
 
@@ -45,16 +46,18 @@ class CTimerManager
 	//singleton
 	private:
 		int					eventID;
-		CTimerManager();
+		CEventServer		*eventServer;
 		CTimerEventMap		events;
-		CTimerEvent			*nextEvent();
 		pthread_t			thrTimer;
 
+		CTimerManager();
 		static void* timerThread(void *arg);
+		CTimerEvent			*nextEvent();
 
 	public:
 		static CTimerManager* getInstance();
 
+		CEventServer* getEventServer() {return eventServer;};
 		int addEvent(CTimerEvent*);
 		void removeEvent(int eventID);
 		CTimerEvent* getNextEvent();
@@ -91,13 +94,16 @@ class CTimerEvent_Shutdown : public CTimerEvent
 class CTimerEvent_NextProgram : public CTimerEvent
 {
 	public:
-
 		struct EventInfo
 		{
+			int      uniqueKey;
 			int      onidSid;
 			char     name[50];
 			int      fsk;
 		} eventInfo;
+
+		typedef map< int, CTimerEvent_NextProgram*> EventMap;
+		static EventMap events;
 
 		CTimerEvent_NextProgram( int mon = 0, int day = 0, int hour = 0, int min = 0) :
 			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_NEXTPROGRAM){};
