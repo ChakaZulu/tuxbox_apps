@@ -114,6 +114,7 @@ struct NeutrinoMessages {
 		mode_radio = 2,
 		mode_scart = 3,
 		mode_standby = 4,
+		mode_mp3 = 5,
 		mode_mask = 0xFF,
 		norezap = 0x100
 	};

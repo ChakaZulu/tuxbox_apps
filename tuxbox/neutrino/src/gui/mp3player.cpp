@@ -99,29 +99,27 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 	frameBuffer->loadBackground("radiomode.raw");
 	frameBuffer->useBackground(true);
 	frameBuffer->paintBackground();
- 
-	int ret = show();
-	t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
-	g_Zapit->zapTo_serviceID_NOWAIT(channel_id);
+
+	// tell neutrino we're in mp3_mode
+	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_mp3 );
+	// remember last mode
+	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() /*| NeutrinoMessages::norezap*/);
+	
+	/*int ret =*/ show();
+	
 	// Restore normal background
 	if(frameBuffer->getActive())
 		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 	frameBuffer->useBackground(false);
+	
+	// Restore last mode
+ 	//t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
+ 	//g_Zapit->zapTo_serviceID(channel_id);
+	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
+	//sleep(5); // zapit doesnt like fast zapping in the moment
 
-	if( ret > -1)
-	{
-		return menu_return::RETURN_REPAINT;
-	}
-	else if( ret == -1)
-	{
-		// -1 bedeutet nur REPAINT
-		return menu_return::RETURN_REPAINT;
-	}
-	else
-	{
-		// -2 bedeutet EXIT_ALL
-		return menu_return::RETURN_EXIT_ALL;
-	}
+	// always exit all	
+	return menu_return::RETURN_EXIT_ALL;
 }
 
 //------------------------------------------------------------------------
@@ -138,6 +136,11 @@ int CMP3PlayerGui::show()
 	CMP3Player::State last_state=CMP3Player::STOP;
 	while(loop)
 	{
+		if(CNeutrinoApp::getInstance()->getMode()!=NeutrinoMessages::mode_mp3)
+		{
+			// stop if mode was changed in another thread
+			loop=false;
+		}
 		if(CMP3Player::getInstance()->state != last_state)
 		{
 			last_state=CMP3Player::getInstance()->state;
@@ -284,12 +287,29 @@ int CMP3PlayerGui::show()
 		{
 			// help key
 		}
-		else
+		else if(msg == NeutrinoMessages::CHANGEMODE)
 		{
+			if((data & NeutrinoMessages::mode_mask) !=NeutrinoMessages::mode_mp3)
+			{
+				loop = false;
+				m_LastMode=data;
+			}
+		}
+		else if(msg == NeutrinoMessages::RECORD_START ||
+				  msg == NeutrinoMessages::ZAPTO ||
+				  msg == NeutrinoMessages::STANDBY_ON ||
+				  msg == NeutrinoMessages::SHUTDOWN ||
+				  msg == NeutrinoMessages::SLEEPTIMER)
+		{
+			// Exit for Record/Zapto Timers
+			loop = false;
+			g_RCInput->postMsg(msg, data);
+		}
+		else 
+	   {
 			if( CNeutrinoApp::getInstance()->handleMsg( msg, data ) == messages_return::cancel_all )
 			{
 				loop = false;
-				res = - 2;
 			}
 		}
 	}

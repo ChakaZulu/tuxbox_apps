@@ -77,6 +77,8 @@ class CMP3PlayerGui : public CMenuTarget
 		int 			x;
 		int 			y;
 
+		int         m_LastMode;
+
 		void paintItem(int pos);
 		void paint();
 		void paintHead();

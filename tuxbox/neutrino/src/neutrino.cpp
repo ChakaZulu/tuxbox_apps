@@ -2789,6 +2789,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			if(mode != mode_standby)
 				standbyMode( true );
 		}
+		if((data &mode_mask)== mode_mp3)
+		{
+			lastMode=mode;
+			mode=mode_mp3;
+		}
 	}
 	else if( msg == NeutrinoMessages::VCR_ON )
 	{
@@ -3296,7 +3301,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.386 2003/01/04 12:50:07 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.387 2003/01/04 17:21:03 Zwen Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
