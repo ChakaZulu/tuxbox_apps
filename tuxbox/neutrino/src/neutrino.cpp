@@ -114,12 +114,14 @@ CRemoteControl * g_RemoteControl;
 
 // I don't like globals, I would have hidden them in classes,
 // but if you wanna do it so... ;)
+static bool parentallocked = false;
 
 CZapitClient::SatelliteList satList;
 CZapitClient::SatelliteList::iterator satList_it;
 
 #define NEUTRINO_SETTINGS_FILE      CONFIGDIR "/neutrino.conf"
 #define NEUTRINO_SCAN_SETTINGS_FILE CONFIGDIR "/scan.conf"
+#define NEUTRINO_PARENTALLOCKED_FILE    DATADIR   "/neutrino/.plocked"
 
 static void initGlobals(void)
 {
@@ -356,7 +358,12 @@ int CNeutrinoApp::loadSetup()
 		//file existiert nicht
 		erg = 1;
 	}
-
+        std::ifstream checkParentallocked(NEUTRINO_PARENTALLOCKED_FILE);
+	if(checkParentallocked) 	 
+	{ 	 
+	        parentallocked = true; 	 
+	        checkParentallocked.close(); 	 
+	} 
 	//video
 	g_settings.video_Signal = configfile.getInt32( "video_Signal", 1 ); //RGB + CVBS
 	g_settings.video_Format = configfile.getInt32( "video_Format", 2 ); //4:3
@@ -533,8 +540,16 @@ int CNeutrinoApp::loadSetup()
 	g_settings.bouquetlist_mode = configfile.getInt32( "bouquetlist_mode", 0 );
 
 	// parentallock
-	g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
-	g_settings.parentallock_lockage = configfile.getInt32( "parentallock_lockage", 12 );
+	if(!parentallocked) 	 
+  	{	 
+	  	g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
+		g_settings.parentallock_lockage = configfile.getInt32( "parentallock_lockage", 12 );
+	} 	 
+	else 	 
+	{ 	 
+	        g_settings.parentallock_prompt = 3; 	 
+	        g_settings.parentallock_lockage = 18; 	 
+	}
 	strcpy( g_settings.parentallock_pincode, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
 
 	//timing  (Einheit= 1 sec )
@@ -1132,8 +1147,10 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem(GenericMenuSeparatorLine);
 	mainSettings.addItem(new CMenuForwarder("mainsettings.video", true, NULL, &videoSettings));
 	mainSettings.addItem(new CMenuForwarder("mainsettings.audio", true, NULL, &audioSettings));
-	mainSettings.addItem(GenericMenuSeparatorLine);
-	mainSettings.addItem(new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings));
+	if(g_settings.parentallock_prompt)
+		mainSettings.addItem(new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings));
+	else
+	        mainSettings.addItem(new CMenuForwarder("parentallock.parentallock", true, NULL, &parentallockSettings));
 	mainSettings.addItem(new CMenuForwarder("mainsettings.network", true, NULL, &networkSettings));
 	mainSettings.addItem(new CMenuForwarder("mainsettings.recording", true, NULL, &recordingSettings));
 	mainSettings.addItem(new CMenuForwarder("mainsettings.streaming", true, NULL, &streamingSettings));
@@ -1588,14 +1605,14 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	parentallockSettings.addItem(GenericMenuBack);
 	parentallockSettings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, true);
+	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, !parentallocked);
 	oj->addOption(PARENTALLOCK_PROMPT_NEVER         , "parentallock.never");
 //	oj->addOption(PARENTALLOCK_PROMPT_ONSTART       , "parentallock.onstart");
 	oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, "parentallock.changetolocked");
 	oj->addOption(PARENTALLOCK_PROMPT_ONSIGNAL      , "parentallock.onsignal");
 	parentallockSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("parentallock.lockage", &g_settings.parentallock_lockage, true);
+	oj = new CMenuOptionChooser("parentallock.lockage", &g_settings.parentallock_lockage, !parentallocked);
 	oj->addOption(12, "parentallock.lockage12");
 	oj->addOption(16, "parentallock.lockage16");
 	oj->addOption(18, "parentallock.lockage18");
