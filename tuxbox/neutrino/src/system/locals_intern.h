@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.19 2004/08/01 22:40:08 sepp776 Exp $
+ * $Id: locals_intern.h,v 1.20 2004/09/12 22:41:53 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -166,6 +166,7 @@ const char * locale_real_names[] =
 	"audiomenu.stereo",
 	"audioplayer.add",
 	"audioplayer.artist_title",
+	"audioplayer.building_search_index",
 	"audioplayer.button_select_title_by_id",
 	"audioplayer.button_select_title_by_name",
 	"audioplayer.defdir",
@@ -194,6 +195,7 @@ const char * locale_real_names[] =
 	"audioplayer.playlist_name",
 	"audioplayer.playlist_name_hint1",
 	"audioplayer.playlist_name_hint2",
+	"audioplayer.reading_files",
 	"audioplayer.repeat_on",
 	"audioplayer.rewind",
 	"audioplayer.save_playlist",
@@ -602,6 +604,7 @@ const char * locale_real_names[] =
 	"parentallock.prompt",
 	"pictureviewer.defdir",
 	"pictureviewer.head",
+	"pictureviewer.help",
 	"pictureviewer.resize.color_average",
 	"pictureviewer.resize.none",
 	"pictureviewer.resize.simple",
