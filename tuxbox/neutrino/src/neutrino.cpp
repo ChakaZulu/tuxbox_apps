@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.43 2001/09/20 19:21:37 fnbrd Exp $
+        $Id: neutrino.cpp,v 1.44 2001/09/22 13:18:07 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.44  2001/09/22 13:18:07  field
+  epg-anzeige bug gefixt
+
   Revision 1.43  2001/09/20 19:21:37  fnbrd
   Channellist mit IDs.
 
@@ -723,7 +726,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 		
 		struct dirent **namelist;
 		int n;
-		printf("scanning locale dir now....(perhaps)\n");
+//		printf("scanning locale dir now....(perhaps)\n");
 
 		n = scandir("/usr/lib/locale", &namelist, 0, alphasort);
 		if (n < 0)
@@ -741,7 +744,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 				if(pos!=-1)
 				{
 					string locale = filen.substr(0,pos);
-					printf("locale found: %s\n", locale.c_str() );
+//					printf("locale found: %s\n", locale.c_str() );
 					oj->addOption( locale );
 				}
 				free(namelist[count]);
@@ -1106,7 +1109,7 @@ int CNeutrinoApp::run(int argc, char **argv)
     g_EventList = new EventList;
 
 
-    printf("\nCNeutrinoApp::run - objects initialized...\n\n");
+//    printf("\nCNeutrinoApp::run - objects initialized...\n\n");
 	g_Locale->loadLocale(g_settings.language);
 
 
@@ -1341,7 +1344,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.43 2001/09/20 19:21:37 fnbrd Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.44 2001/09/22 13:18:07 field Exp $\n\n");
     tzset();
 
     initGlobals();

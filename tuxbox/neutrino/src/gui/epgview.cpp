@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.13 2001/09/21 14:33:39 field Exp $
+// $Id: epgview.cpp,v 1.14 2001/09/22 13:18:07 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.14  2001/09/22 13:18:07  field
+// epg-anzeige bug gefixt
+//
 // Revision 1.13  2001/09/21 14:33:39  field
 // Eventlist - ok/? vertauscht, epg-Breite flexibel
 //
@@ -175,6 +178,14 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 		return;
 	}
 
+    // Variable Breite, falls der Text zu lang' ist...
+    ox = g_Fonts->epg_title->getRenderWidth( epgData.title )+ 15;
+    if (ox < 500 )
+        ox = 500;
+    else if ( ox > ( g_settings.screen_EndX- g_settings.screen_StartX - 20) )
+        ox = ( g_settings.screen_EndX- g_settings.screen_StartX - 20);
+
+	sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
 
 	if(strlen(epgData.info1)!=0)
 	{
@@ -189,15 +200,6 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
     }
 
     processTextToArray( epgData.info2 );
-
-    // Variable Breite, falls der Text zu lang' ist...
-    ox = g_Fonts->epg_title->getRenderWidth( epgData.title )+ 15;
-    if (ox < 500 )
-        ox = 500;
-    else if ( ox > ( g_settings.screen_EndX- g_settings.screen_StartX - 20) )
-        ox = ( g_settings.screen_EndX- g_settings.screen_StartX - 20);
-
-	sx = (((g_settings.screen_EndX-g_settings.screen_StartX) -ox) / 2) + g_settings.screen_StartX;
 
 	//show the epg
 	g_FrameBuffer->paintBoxRel(sx, sy, ox, topboxheight, COL_MENUHEAD);
