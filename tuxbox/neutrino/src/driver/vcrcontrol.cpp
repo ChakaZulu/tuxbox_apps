@@ -110,6 +110,7 @@ void CVCRControl::setDeviceOptions(CDeviceInfo *deviceInfo)
 			if (!(serverinfo->Directory.empty()))
 				device->Directory = serverinfo->Directory;
 			device->SplitSize = serverinfo->SplitSize;
+			device->StreamAllAudioPids = serverinfo->StreamAllAudioPids;
 
 			device->StopPlayBack = serverinfo->StopPlayBack;
 			device->StopSectionsd = serverinfo->StopSectionsd;
@@ -532,27 +533,39 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		/* no video pid */
 		numpids = 0;
 	}
-
-	if (apids.empty())
+	
+	if (StreamAllAudioPids)
 	{
-		pids[numpids++] = si.apid;
+		CZapitClient::responseGetPIDs allpids;
+		g_Zapit->getPIDS(allpids);
+	    	for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
+		{
+			pids[numpids++] = allpids.APIDs[i].pid;
+		}
 	}
 	else
 	{
-		unsigned int index = 0;
-		pos = 0;
-		
-		while(pos != std::string::npos)
+		if (apids.empty())
 		{
-			pos = apids.find(' ', index);
-			if(pos != std::string::npos)
+			pids[numpids++] = si.apid;
+		}
+		else
+		{
+			unsigned int index = 0;
+			pos = 0;
+			
+			while(pos != std::string::npos)
 			{
-				pids[numpids++] = strtol(apids.substr(index,pos-index).c_str(),NULL,16);
-				index = pos+1;
-			}
-			else
-			{
-				pids[numpids++] = strtol(apids.substr(index).c_str(),NULL,16);
+				pos = apids.find(' ', index);
+				if(pos != std::string::npos)
+				{
+					pids[numpids++] = strtol(apids.substr(index,pos-index).c_str(),NULL,16);
+					index = pos+1;
+				}
+				else
+				{
+					pids[numpids++] = strtol(apids.substr(index).c_str(),NULL,16);
+				}
 			}
 		}
 	}

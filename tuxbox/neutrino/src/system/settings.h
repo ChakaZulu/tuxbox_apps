@@ -157,6 +157,7 @@ struct SNeutrinoSettings
 	char recording_server_mac[31];
 	int  recording_vcr_no_scart;
 	char recording_splitsize[10];
+	int  recording_stream_all_audio_pids;
 
 	//streaming
 	int  streaming_type;

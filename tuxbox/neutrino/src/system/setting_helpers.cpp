@@ -135,7 +135,8 @@ bool CStreamingNotifier::changeNotify(const std::string & OptionName, void*)
 
 CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3,
                                         CMenuItem* i4, CMenuItem* i5, CMenuItem* i6,
-                                        CMenuItem* i7, CMenuItem* i8, CMenuItem* i9)
+                                        CMenuItem* i7, CMenuItem* i8, CMenuItem* i9,
+					CMenuItem* i10)
 {
    toDisable[0]=i1;
    toDisable[1]=i2;
@@ -146,19 +147,21 @@ CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[6]=i7;
    toDisable[7]=i8;
    toDisable[8]=i9;
+   toDisable[9]=i10;
 }
 bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
 {
    if ((g_settings.recording_type == CNeutrinoApp::RECORDING_OFF) ||
        (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE))
    {
-	   for(int i = 0; i < 8; i++)
+	   for(int i = 0; i < 10; i++)
 		   toDisable[i]->setActive(false);
 
 	   if (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE)
 	   {
 		   toDisable[7]->setActive(true);
 		   toDisable[8]->setActive(true);
+		   toDisable[9]->setActive(true);
 	   }
    }
    else if (g_settings.recording_type == CNeutrinoApp::RECORDING_SERVER)
@@ -172,6 +175,7 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
       toDisable[6]->setActive(false);
       toDisable[7]->setActive(false);
       toDisable[8]->setActive(false);
+      toDisable[9]->setActive(false);
    }
    else if (g_settings.recording_type == CNeutrinoApp::RECORDING_VCR)
    {
@@ -184,6 +188,7 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
       toDisable[6]->setActive(true);
       toDisable[7]->setActive(false);
       toDisable[8]->setActive(false);
+      toDisable[9]->setActive(false);
    }
    
    return true;

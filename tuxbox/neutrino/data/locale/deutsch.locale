@@ -140,6 +140,7 @@ recordingmenu.server_mac Mac Adresse
 recordingmenu.setupnow Einstellungen jetzt übernehmen
 recordingmenu.no_scart Unterdrücke Scart-Umschaltung
 recordingmenu.splitsize Max. Dateigröße (MB)
+recordingmenu.stream_all_audio_pids Alle Audiopids aufzeichnen
 
 streaming.buffer_overflow Die Aufnahme wurde leider abgebrochen,\nda die Daten nicht schnell genug geschrieben werden konnten.
 streaming.busy Ein oder mehrere Aufnahmeprozesse sind aktiv.\nSollte die Aufnahme eigentlich beendet sein,\nschafft ein Neustart von Neutrino Abhilfe.

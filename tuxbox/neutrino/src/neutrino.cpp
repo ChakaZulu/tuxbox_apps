@@ -534,7 +534,8 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
 	g_settings.recording_vcr_no_scart = configfile.getInt32( "recording_vcr_no_scart", false);
 	strcpy( g_settings.recording_splitsize, configfile.getString( "recording_splitsize", "2048").c_str() );
-    
+	g_settings.recording_stream_all_audio_pids = configfile.getInt32("recordingmenu.stream_all_audio_pids", true);
+
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
 	g_settings.streaming_server_ip = configfile.getString("streaming_server_ip", "10.10.10.10");
@@ -844,15 +845,16 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_nfs_recordingdir", g_settings.network_nfs_recordingdir);
 
 	//recording (server + vcr)
-	configfile.setInt32 ("recording_type", g_settings.recording_type);
-	configfile.setInt32 ( "recording_stopplayback", g_settings.recording_stopplayback);
-	configfile.setInt32 ( "recording_stopsectionsd", g_settings.recording_stopsectionsd );
-	configfile.setString( "recording_server_ip", g_settings.recording_server_ip );
-	configfile.setString( "recording_server_port", g_settings.recording_server_port );
-	configfile.setInt32 ( "recording_server_wakeup", g_settings.recording_server_wakeup );
-	configfile.setString( "recording_server_mac", g_settings.recording_server_mac );
-	configfile.setInt32 ( "recording_vcr_no_scart", g_settings.recording_vcr_no_scart );
-	configfile.setString( "recording_splitsize", g_settings.recording_splitsize );
+	configfile.setInt32 ("recording_type",                      g_settings.recording_type);
+	configfile.setInt32 ("recording_stopplayback",              g_settings.recording_stopplayback);
+	configfile.setInt32 ("recording_stopsectionsd",             g_settings.recording_stopsectionsd);
+	configfile.setString("recording_server_ip",                 g_settings.recording_server_ip);
+	configfile.setString("recording_server_port",               g_settings.recording_server_port);
+	configfile.setInt32 ("recording_server_wakeup",             g_settings.recording_server_wakeup);
+	configfile.setString("recording_server_mac",                g_settings.recording_server_mac);
+	configfile.setInt32 ("recording_vcr_no_scart",              g_settings.recording_vcr_no_scart);
+	configfile.setString("recording_splitsize",                 g_settings.recording_splitsize);
+	configfile.setInt32 ("recordingmenu.stream_all_audio_pids", g_settings.recording_stream_all_audio_pids);
 
 	//streaming
 	configfile.setInt32 ( "streaming_type", g_settings.streaming_type );
@@ -1830,8 +1832,12 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CMenuForwarder* mf7 = new CMenuForwarder("recordingmenu.defdir", (g_settings.recording_type == RECORDING_FILE), g_settings.network_nfs_recordingdir,this,"recordingdir");
 	CStringInput * recordingSettings_splitsize = new CStringInput("recordingmenu.splitsize", g_settings.recording_splitsize, 6, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789 ");
 	CMenuForwarder* mf8 = new CMenuForwarder("recordingmenu.splitsize", (g_settings.recording_type == RECORDING_FILE), g_settings.recording_splitsize,recordingSettings_splitsize);
+
+	CMenuOptionChooser* oj6 = new CMenuOptionChooser("recordingmenu.stream_all_audio_pids", &g_settings.recording_stream_all_audio_pids, (g_settings.recording_type == RECORDING_VCR));
+	oj6->addOption(0, "options.off");
+	oj6->addOption(1, "options.on");
 	
-	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8);
+	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6);
 
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type, true, RecordingNotifier);
 	oj1->addOption(RECORDING_OFF   , "recordingmenu.off"   );
@@ -1859,6 +1865,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "recordingmenu.filesettingsseparator") );
 	recordingSettings.addItem( mf7);
 	recordingSettings.addItem( mf8);
+	recordingSettings.addItem( oj6);
 
 	recordingstatus = 0;
 }

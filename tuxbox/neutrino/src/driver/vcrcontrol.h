@@ -88,7 +88,8 @@ class CVCRControl
 			public:
 				std::string	Directory;
 				unsigned int	SplitSize;
-				CFileDeviceInfo() : CFileAndServerDeviceInfo() { Directory = ""; SplitSize = 0; };
+				bool            StreamAllAudioPids;
+				CFileDeviceInfo() : CFileAndServerDeviceInfo() { Directory = ""; SplitSize = 0; StreamAllAudioPids = true; };
 		};
 
 		class CServerDeviceInfo : public CFileAndServerDeviceInfo
@@ -166,6 +167,7 @@ class CVCRControl
 			public:
 				std::string  Directory;
 				unsigned int SplitSize;
+				bool         StreamAllAudioPids;
 				
 				virtual CVCRDevices getDeviceType(void) const
 					{
