@@ -121,7 +121,7 @@ void CInfoViewer::showData()
 void CInfoViewer::killTitle()
 {
 	intTimer = 0;
-	frameBuffer->paintBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY, COL_BACKGROUND);
+	frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX, BoxEndY );
 }
 
 void * CInfoViewer::InfoViewerThread (void *arg)
