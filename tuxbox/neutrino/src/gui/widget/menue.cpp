@@ -114,8 +114,7 @@ void CMenuWidget::paint(CFrameBuffer* frameBuffer)
 	int hheight= 30; //fonts->menu_title->getHeight()+10;
 	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD); //hheight was: 30
 
-	fonts->menu_title->RenderString(x+36,y+30, width, name.c_str(), COL_MENUHEAD); //hheight was: 23
-	//fonts->menu_title->RenderString(x+36,y+hheight-5, width, name.c_str(), COL_MENUHEAD); //hheight was: 23
+	fonts->menu_title->RenderString(x+36,y+hheight, width, name.c_str(), COL_MENUHEAD); //hheight was: 23
 	frameBuffer->paintIcon(iconfile.c_str(),x+8,y+6);
 
 	int ypos = y+hheight; //hheight was: 30

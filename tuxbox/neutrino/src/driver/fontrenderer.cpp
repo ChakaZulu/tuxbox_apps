@@ -168,7 +168,7 @@ int Font::getHeight(void)
 	return ((size->metrics.height+32) >> 6); // was (why?): (size->metrics.height >> 6)*3/4 + 4;
 }
 
-void Font::RenderString(int x, int y, int width, const char *string, unsigned char color)
+void Font::RenderString(int x, int y, int width, const char *string, unsigned char color, int boxheight)
 {
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
@@ -179,8 +179,50 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 	int left=x;
 	int step_y=((size->metrics.height+32) >> 6); // was (why?): (size->metrics.height >> 6 )*3/4 + 4;
 
-	y += ((size->metrics.descender+32) >> 6); // tw: y coordinate now gives font bottom line, not base line. descender is neg.
+	// ----------------------------------- box upper end (this is NOT a font metric, this is our method for y centering)
+	//
+	// *  -------------------------------- y=baseline+ascender+linegap/2
+	// |
+	// |  --------------------*----------- y=baseline+ascender
+	// |                     * *
+	// h                    *   *
+	// e     *        *    *     *
+	// i      *      *     *******
+	// g       *    *      *     *
+	// h        *  *       *     *
+	// t  -------**--------*-----*-------- y=baseline
+	// |         *
+	// |        *
+	// |  -----**------------------------- y=baseline+descender   // descender is a NEGATIVE value
+	// |
+	// *  -------------------------------- y=baseline+descender-linegap/2 == YCALLER
+	//
+	// ----------------------------------- box lower end (this is NOT a font metric, this is our method for y centering)
+	
+	// height = ascender + -1*descender + linegap           // descender is negative!
+	
+	// now we adjust the given y value (which is the line marked as YCALLER) to be the baseline after adjustment:
+	int linegap = size->metrics.height - size->metrics.ascender + size->metrics.descender;
+	y += ((size->metrics.descender - (linegap>>1)) >> 6);
+	// y coordinate now gives font baseline which is used for drawing
 
+	//printf("a %lx - d %lx + l %lx = h %lx\n",
+	//    (size->metrics.ascender) >> 6,
+	//    (size->metrics.descender) >> 6,
+	//    (size->metrics.height-size->metrics.ascender+size->metrics.descender) >> 6,
+	//    (size->metrics.height) >> 6
+	//);
+
+	// caution: this only works if we print a single line of text
+	// if we have multiple lines, don't use boxheight or specify boxheight==0.
+	// if boxheight is !=0, we further adjust y, so that text is y-centered in the box
+	if(boxheight){
+		if(boxheight>step_y)			// this is a real box (bigger than text)
+			y -= ((boxheight-step_y)>>1);
+		else if(boxheight<0)			// this normally would be wrong, so we just use it to define a "border"
+			y += (boxheight>>1);		// half of border value at lower end, half at upper end
+	}
+		
 	int lastindex=-1;
 	FT_Vector kerning;
 	int pen1=-1; // "pen" positions for kerning, pen2 is "x"

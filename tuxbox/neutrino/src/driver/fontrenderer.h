@@ -63,7 +63,7 @@ class Font
 	FT_Error getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit);
 	
 	public:
-		void RenderString(int x, int y, int width, const char *string, unsigned char color);
+		void RenderString(int x, int y, int width, const char *string, unsigned char color, int boxheight=0);
 		
 		int getRenderWidth(const char *string);
 		int getHeight(void);
@@ -83,6 +83,7 @@ class FontsDef
 					*epg_date,
 					*alert, 
 					*channellist,
+					*channellist_number,
 
 					*infobar_number,
 					*infobar_channame,

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.15 2001/08/20 13:13:38 tw-74 Exp $
+        $Id: neutrino.cpp,v 1.16 2001/08/21 00:30:38 tw-74 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.16  2001/08/21 00:30:38  tw-74
+  more fontrendering (see comments there), screen cosmetics
+
   Revision 1.15  2001/08/20 13:13:38  tw-74
   cosmetic changes and changes for variable font size
 
@@ -651,6 +654,8 @@ void CNeutrinoApp::SetupFonts()
 	fonts->alert=fontRenderer->getFont("Arial", "Regular", 100);
 	fonts->channellist=fontRenderer->getFont("Arial", "Regular", 20);
 	fonts->channellist->RenderString( 10,100, 500, "DEMO!", 0 );
+	fonts->channellist_number=fontRenderer->getFont("Arial", "Regular", 14);
+	fonts->channellist_number->RenderString( 10,100, 500, "DEMO!", 0 );
 	fonts->infobar_number=fontRenderer->getFont("Arial", "Regular", 50);
 	fonts->infobar_number->RenderString( 10,100, 500, "DEMO!", 0 );
 	fonts->infobar_channame=fontRenderer->getFont("Arial", "Regular", 30);

@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.10 2001/08/20 13:10:27 tw-74 Exp $
+// $Id: channellist.cpp,v 1.11 2001/08/21 00:30:38 tw-74 Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.11  2001/08/21 00:30:38  tw-74
+// more fontrendering (see comments there), screen cosmetics
+//
 // Revision 1.10  2001/08/20 13:10:27  tw-74
 // cosmetic changes and changes for variable font size
 //
@@ -277,22 +280,21 @@ void CChannelList::zapTo(CRemoteControl *remoteControl, CInfoViewer *infoViewer,
 
 void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, int key)
 {
-  int ox=300, oy=200, sx=50, sy=22;
-//  char valstr[10];
+  int ox=300, oy=200;
+  int sx=fonts->channellist->getRenderWidth("000")+14, sy=fonts->channellist->getHeight()+6;
+  char valstr[10];
   int chn=key;
   int pos=1;
 
   while(1)
   {
-/*
     sprintf((char*) &valstr, "%d",chn);
     while(strlen(valstr)<3)
     {
       strcat(valstr,"-");
     }
     frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
-    fonts->channellist->RenderString(ox+7, oy+18, sx, valstr, COL_INFOBAR);
-*/
+    fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
 	if(!showInfo(infoViewer, chn-1))
 	{	//channelnumber out of bounds
 		infoViewer->killTitle(); //warum tut das net?
@@ -319,17 +321,15 @@ void CChannelList::numericZap(CFrameBuffer *frameBuffer, CRCInput *rcInput, CRem
     }
   }
   //channel selected - show+go
-/*
   frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
   sprintf((char*) &valstr, "%d",chn);
   while(strlen(valstr)<3)
   {
     strcat(valstr,"-");
   }
-  fonts->channellist->RenderString(ox+7, oy+18, sx, valstr, COL_INFOBAR);
+  fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
   usleep(100000);
   frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
-*/
   chn--;
   if (chn<0)
     chn=0;
@@ -381,24 +381,24 @@ void CChannelList::paintItem(CFrameBuffer* frameBuffer, int pos)
 		//number
                 char tmp[10];
                 sprintf((char*) tmp, "%d", chan->number);
-		int numpos = x+5+numwidth-fonts->menu->getRenderWidth(tmp);
-		fonts->menu->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color);
+		int numpos = x+5+numwidth-fonts->channellist_number->getRenderWidth(tmp);
+		fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 		if(strlen(chan->currentEvent.c_str())) {
     		  // name + description
 		  char nameAndDescription[100];
 		  snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
-		  fonts->menu->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
+		  fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
                 }
 		else
 		  //name
-		  fonts->menu->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, chan->name.c_str(), color);
+		  fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, chan->name.c_str(), color);
 	}
 }
 
 void CChannelList::paintHead(CFrameBuffer* frameBuffer)
 {
 	frameBuffer->paintBoxRel(x,y, width,theight+10, COL_MENUHEAD);
-	fonts->menu_title->RenderString(x+10,y+theight+5, width, name.c_str(), COL_MENUHEAD);
+	fonts->menu_title->RenderString(x+10,y+theight+10, width, name.c_str(), COL_MENUHEAD);
 }
 
 void CChannelList::paint(CFrameBuffer* frameBuffer)
