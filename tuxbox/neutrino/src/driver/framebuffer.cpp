@@ -193,6 +193,24 @@ void CFrameBuffer::paletteFade(int i, __u32 rgb1, __u32 rgb2, int level)
 	*b+=((rgb1&0x0000FF)    )*(255-level);
 }
 
+void CFrameBuffer::setTransparency( int tr )
+{
+	if (tr> 8)
+		tr= 8;
+
+	if (ioctl(fd, CCUBEFB_BLEV0, tr ))
+		perror("CCUBEFB_BLEV0");
+
+	if (ioctl(fd, CCUBEFB_BLEV1, tr ))
+		perror("CCUBEFB_BLEV1");
+
+	if (ioctl(fd, CCUBEFB_BLEV0, tr ))
+		perror("CCUBEFB_BLEV0");
+
+	if (ioctl(fd, CCUBEFB_BLEV1, tr ))
+		perror("CCUBEFB_BLEV1");
+}
+
 void CFrameBuffer::setAlphaFade(int in, int num, int tr)
 {
 	for (int i=0; i<num; i++)

@@ -47,9 +47,16 @@ int time_dot_width;
 int time_width;
 int time_height;
 char old_timestr[10];
+int mID;
 
 CInfoViewer::CInfoViewer()
 {
+	// UGLY
+	char strmID[40];
+	strcpy( strmID, getenv("mID") );
+	mID = atoi(strmID);
+	// (tm)
+
 	BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
 	is_visible		= false;
 	showButtonBar	= false;
@@ -121,9 +128,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
         current_onid_sid = onid_sid;
         showButtonBar = !calledFromNumZap;
 
-        bool fadeIn = ( !is_visible ) && showButtonBar;
+        bool fadeIn = ( !is_visible ) && showButtonBar && ( mID>= 2 ); // only enx
         bool fadeOut = false;
-        int fadeTimer = 0;
         int fadeValue;
 
         is_visible = true;
@@ -300,7 +306,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
     					g_RCInput->killTimer(fadeTimer);
     					fadeIn = false;
     				}
-    				if (!fadeOut)
+    				if ( (!fadeOut) && ( mID>= 2 ) ) // only enx
     				{
                     	fadeOut = true;
                     	fadeTimer = g_RCInput->addTimer(80000, false);
@@ -390,6 +396,15 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 			show_Data( true );
 
 	    return messages_return::handled;
+	}
+	else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == fadeTimer ) )
+	{
+		// hierher kann das event nur dann kommen, wenn ein anderes Fenster im Vordergrund ist!
+		g_RCInput->killTimer(fadeTimer);
+        g_FrameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+        g_FrameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+        g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
+		g_FrameBuffer->paletteSet();
 	}
     else if ( msg == NeutrinoMessages::EVT_ZAP_GOTAPIDS )
 	{

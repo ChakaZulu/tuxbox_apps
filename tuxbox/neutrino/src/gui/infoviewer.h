@@ -96,6 +96,7 @@ class CInfoViewer
 		char aspectRatio;
 
 		int	 	sec_timer_id;
+		int 	fadeTimer;
 
 		void getEPG( unsigned int onid_sid );
 

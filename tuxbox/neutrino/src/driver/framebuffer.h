@@ -34,6 +34,7 @@
 #define __framebuffer__
 
 #include <linux/fb.h>
+#include "dbox/fb.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,6 +92,8 @@ class CFrameBuffer
 
 		unsigned char* getFrameBufferPointer(); //pointer to framebuffer
 		unsigned int getStride(); //stride (anzahl bytes die eine Zeile im Framebuffer belegt)
+
+		void setTransparency( int tr = 0 );
 
 		//Palette stuff
 		void setAlphaFade(int in, int num, int tr);
