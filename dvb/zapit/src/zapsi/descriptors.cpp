@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.41 2002/09/24 10:40:13 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.42 2002/09/24 12:55:13 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -45,41 +45,6 @@ std::map <t_channel_id, uint8_t> service_types;
 
 extern CFrontend *frontend;
 extern CEventServer *eventServer;
-
-std::string charToXML (uint8_t character)
-{
-	std::string returnString;
-
-	switch (character)
-	{
-	case 0x00 ... 0x1F:
-		return "";
-	case 0x20 ... 0x21:
-		return returnString += character;
-	case 0x22:
-		return "&quot;";
-	case 0x23 ... 0x25:
-		return returnString += character;
-	case 0x26:
-		return "&amp;";
-	case 0x27 ... 0x3B:
-		return returnString += character;
-	case 0x3C:
-		return "&lt;";
-	case 0x3D ... 0x7F:
-		return returnString += character;
-	case 0x80 ... 0x82:
-	case 0x86 ... 0x87:
-	case 0x8A:
-		return "";
-	case 0xE9:
-		return returnString += character;
-	default:
-		char val[7];
-		sprintf(val, "&#%d;", character);
-		return val;
-	}
-}
 
 uint8_t generic_descriptor (uint8_t *buffer)
 {
@@ -449,22 +414,16 @@ uint8_t bouquet_name_descriptor (uint8_t *buffer)
 /* 0x48 */
 uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t transport_stream_id, uint16_t original_network_id)
 {
-	uint8_t service_type = buffer[2];
-	uint8_t service_provider_name_length = buffer[3];
-	uint16_t pos;
-
-	std::string providerName;
-	std::string serviceName;
 	sciterator I = scanchannels.find(CREATE_CHANNEL_ID);
 
 	if (I != scanchannels.end())
 		return buffer[1];
 
-	for (pos = 4; pos < service_provider_name_length + 4; pos++)
-		providerName += charToXML(buffer[pos]);
+	uint8_t service_type = buffer[2];
+	uint8_t service_provider_name_length = buffer[3];
 
-	for (pos++; pos < buffer[1] + 2; pos++)
-		serviceName += charToXML(buffer[pos]);
+	std::string providerName = convertForXML(std::string((const char*)&(buffer[4]), service_provider_name_length));
+	std::string serviceName  = convertForXML(std::string((const char*)&(buffer[service_provider_name_length + 4]), (2 + buffer[1]) - (service_provider_name_length + 4)));
 
 	found_channels++;
 
@@ -501,24 +460,23 @@ uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t trans
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_PROVIDER, CEventServer::INITID_ZAPIT, (void *) lastProviderName.c_str(), lastProviderName.length() + 1);
 	}
 
-	int bouquetId = scanBouquetManager->existsBouquet(providerName);
-	CBouquet* bouquet = NULL;
-
 	switch (service_type)
 	{
 	case DIGITAL_TELEVISION_SERVICE:
 	case DIGITAL_RADIO_SOUND_SERVICE:
 	case NVOD_REFERENCE_SERVICE:
 	case NVOD_TIME_SHIFTED_SERVICE:
+		CBouquet* bouquet;
+		int bouquetId;
+
+		bouquetId = scanBouquetManager->existsBouquet(providerName);
+
 		if (bouquetId == -1)
 			bouquet = scanBouquetManager->addBouquet(providerName);
 		else
 			bouquet = scanBouquetManager->Bouquets[bouquetId];
 
 		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0));
-		break;
-
-	default:
 		break;
 	}
 
