@@ -53,10 +53,9 @@ int master_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	while( doexit != 3 )
 	{
 		MasterInitialize();
-Fx2ShowPig( 440, 300, 160, 144 );
 
 #ifdef USEX
-			FBFlushGrafic();
+		FBFlushGrafic();
 #endif
 
 		doexit=0;
@@ -94,6 +93,11 @@ Fx2ShowPig( 440, 300, 160, 144 );
 				tv.tv_usec = 100000;
 				x = select( 0, 0, 0, 0, &tv );		/* 100ms pause */
 				RcGetActCode( );
+				if (( actcode > 0 ) && (actcode < 5 ))
+				{
+					Play();
+					doexit=1;
+				}
 			}
 		}
 	}

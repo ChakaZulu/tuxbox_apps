@@ -254,7 +254,11 @@ static	int	lcount=0;
 			doexit=2;
 			FBDrawString( 260, 37, 64, " you lost ", RED, 0 );
 			for( i=0; i < 5; i++ )
+			{
+				FBDrawRect( 65+(i*34), 60, 30, 30, GRAY );
+				FBDrawRect( 66+(i*34), 61, 28, 28, GRAY );
 				FBFillRect( 67+(i*34), 62, 27, 27, cnum[seq[i]]);
+			}
 			return;
 		}
 		by++;
