@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.5 2003/02/09 23:01:10 rasc Exp $
+$Id: helper.c,v 1.6 2003/02/09 23:02:47 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -9,6 +9,9 @@ $Id: helper.c,v 1.5 2003/02/09 23:01:10 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.6  2003/02/09 23:02:47  rasc
+-- endian check (bug fix)
+
 Revision 1.5  2003/02/09 23:01:10  rasc
 -- endian check (bug fix)
 
@@ -65,8 +68,6 @@ void setEndianArch (void)
 
 /* 
   -- get bits out of buffer
-  -- This code is system dependend (works not on Intel!)
-  -- startbit ist von links nach rechts im buffer!!!!
   -- return: value
 */
 
