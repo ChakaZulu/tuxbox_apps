@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.h,v 1.6 2002/08/24 11:10:53 obi Exp $
+ * $Id: dmx.h,v 1.7 2002/09/16 13:06:27 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -32,6 +32,7 @@
 
 int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigned char * mask);
 int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned short pid);
-int unsetDmxFilter (int fd);
+int startDmxFilter (int fd);
+int stopDmxFilter (int fd);
 
 #endif /* __dmx_h__ */

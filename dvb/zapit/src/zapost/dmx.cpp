@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.4 2002/09/04 11:52:55 obi Exp $
+ * $Id: dmx.cpp,v 1.5 2002/09/16 13:06:27 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -229,7 +229,7 @@ int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned 
 	pesFilterParams.input = DMX_IN_FRONTEND;
 	pesFilterParams.output = output;
 	pesFilterParams.pesType = pesType;
-	pesFilterParams.flags = DMX_IMMEDIATE_START;
+	pesFilterParams.flags = 0;
 
 	if (ioctl(fd, DMX_SET_PES_FILTER, &pesFilterParams) < 0)
 	{
@@ -240,10 +240,22 @@ int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned 
 	return 0;
 }
 
-int unsetDmxFilter (int fd)
+int startDmxFilter (int fd)
+{
+	if (ioctl(fd, DMX_START) < 0)
+	{
+		perror("[dmx.cpp] DMX_START");
+		return -1;
+	}
+
+	return 0;
+}
+
+int stopDmxFilter (int fd)
 {
 	if (ioctl(fd, DMX_STOP) < 0)
 	{
+		perror("[dmx.cpp] DMX_STOP");
 		return -1;
 	}
 

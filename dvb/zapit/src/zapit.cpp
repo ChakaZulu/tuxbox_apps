@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.224 2002/09/16 00:24:40 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.225 2002/09/16 13:06:27 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -459,29 +459,24 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 int changeapid (uint8_t index)
 {
 	/* stop demux filter */
-	if (unsetDmxFilter(dmx_audio_fd) < 0)
-	{
+	if (stopDmxFilter(dmx_audio_fd) < 0)
 		return -1;
-	}
 
 	/* update current channel */
 	channel->setAudioChannel(index);
 
 	/* set bypass mode */
 	if (channel->getAudioChannel()->isAc3)
-	{
 		audio->enableBypass();
-	}
 	else
-	{
 		audio->disableBypass();
-	}
 
 	/* start demux filter */
 	if (setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid()) < 0)
-	{
 		return -1;
-	}
+
+	if (startDmxFilter(dmx_audio_fd) < 0)
+		return -1;
 
 	return 0;
 }
@@ -1088,7 +1083,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.224 2002/09/16 00:24:40 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.225 2002/09/16 13:06:27 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1442,6 +1437,10 @@ int startPlayBack()
 	video->setSource(VIDEO_SOURCE_DEMUX);
 	video->start();
 
+	startDmxFilter(dmx_pcr_fd);
+	startDmxFilter(dmx_audio_fd);
+	startDmxFilter(dmx_video_fd);
+
 	/* set bypass mode */
 	if (channel->getAudioChannel())
 		if (channel->getAudioChannel()->isAc3)
@@ -1538,9 +1537,9 @@ int stopPlayBack()
 	audio->stop();
 	video->stop();
 
-	unsetDmxFilter(dmx_video_fd);
-	unsetDmxFilter(dmx_audio_fd);
-	unsetDmxFilter(dmx_pcr_fd);
+	stopDmxFilter(dmx_video_fd);
+	stopDmxFilter(dmx_audio_fd);
+	stopDmxFilter(dmx_pcr_fd);
 
 	return 0;
 }
