@@ -142,21 +142,23 @@ void blit2FB(void *fbbuff,
     xc = (pic_xs > scr_xs) ? scr_xs : pic_xs;
     yc = (pic_ys > scr_ys) ? scr_ys : pic_ys;
     
+    unsigned int stride = CFrameBuffer::getInstance()->getStride();
+
 	 switch(cpp){
 		 case 1:
 	    set332map();
 	    for(i = 0; i < yc; i++){
-			 memcpy(lfb+((i+yoffs)*scr_xs+xoffs)*cpp,cp + (i+yp)*pic_xs+xp,xc*cpp);
+			 memcpy(lfb+(i+yoffs)*stride+xoffs*cpp,cp + (i+yp)*pic_xs+xp,xc*cpp);
 		 }
 		 break;
 		 case 2:
 			 for(i = 0; i < yc; i++){
-				 memcpy(lfb+((i+yoffs)*scr_xs+xoffs)*cpp,sp + (i+yp)*pic_xs+xp, xc*cpp);
+				 memcpy(lfb+(i+yoffs)*stride+xoffs*cpp,sp + (i+yp)*pic_xs+xp, xc*cpp);
 			 }
 			 break;
 		 case 4:
 			 for(i = 0; i < yc; i++){
-				 memcpy(lfb+((i+yoffs)*scr_xs+xoffs)*cpp,ip + (i+yp)*pic_xs+xp, xc*cpp);
+				 memcpy(lfb+(i+yoffs)*stride+xoffs*cpp,ip + (i+yp)*pic_xs+xp, xc*cpp);
 			 }
 			 break;
 	 }
