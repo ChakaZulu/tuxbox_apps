@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.107 2003/05/05 21:04:17 diemade Exp $
+ * $Id: scan.cpp,v 1.108 2003/05/06 07:59:37 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -465,29 +465,26 @@ void *start_scanthread(void *)
 		}
 
 		/* provider is not wanted - jump to the next one */
-		if (spI == scanProviders.end())
+		if (spI != scanProviders.end())
 		{
-			search = search->xmlNextNode;
-			continue;
-		}
+			/* Special mode for cable-users with sat-feed */
+			if (frontend->getInfo()->type == FE_QAM)
+				if (!strcmp(type, "cable") && xmlGetAttribute(search, "satfeed"))
+					if (!strcmp(xmlGetAttribute(search, "satfeed"), "true"))
+						satfeed = true;
 
-		/* Special mode for cable-users with sat-feed */
-		if (frontend->getInfo()->type == FE_QAM)
-			if (!strcmp(type, "cable") && xmlGetAttribute(search, "satfeed"))
-				if (!strcmp(xmlGetAttribute(search, "satfeed"), "true"))
-					satfeed = true;
+			/* increase sat counter */
+			curr_sat++;
 
-		/* increase sat counter */
-		curr_sat++;
-
-		/* satellite receivers might need diseqc */
-		if (frontend->getInfo()->type == FE_QPSK)
-			diseqc_pos = spI->first;
+			/* satellite receivers might need diseqc */
+			if (frontend->getInfo()->type == FE_QPSK)
+				diseqc_pos = spI->first;
 			
-		scan_provider(search, providerName, satfeed, diseqc_pos, type);
+			scan_provider(search, providerName, satfeed, diseqc_pos, type);
 		
-		/* write services */
-		fd = write_provider(fd, type, providerName, diseqc_pos);
+			/* write services */
+			fd = write_provider(fd, type, providerName, diseqc_pos);
+		}
 
 		/* go to next satellite */
 		search = search->xmlNextNode;
