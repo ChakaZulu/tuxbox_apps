@@ -74,7 +74,7 @@
 
  function openEPG()
  {
-  win=window.open("/cgi-bin/getcurrentepg", "epg", "width=600, left=0, top=0");
+  win=window.open("/cgi-bin/getcurrentepg", "epg", "width=500, height=600 left=0, scrollbars=yes top=0");
   win.focus();
  }
 
@@ -97,7 +97,7 @@
 		<TD background="topbalk.png" style="height: 88">
 			<table width=770>
 				<tr>
-					<td width=355px>&nbsp;</td>
+					<td width=350px>&nbsp;</td>
 					<td align=right style="line-height: 10px"><br><br><br><br><br>
 						<script language="javascript">
 							volbar = '#VOLBAR#';
@@ -150,7 +150,7 @@
 				document.write(" ");
 			}
 			if('#MODE#'.indexOf("ABOUT") >- 1) {
-				document.write("<a href=\"?mode=aboutDreambox\">About Dreambox</a><br><a href=\"?mode=aboutDMM\">About DMM</a>");
+				document.write("<a href=\"?mode=aboutDreambox\">About Box</a><br><a href=\"?mode=aboutDMM\">About DMM</a>");
 			}
 			</script>
 			</td>

@@ -37,6 +37,7 @@
 #include <lib/gui/emessage.h>
 #include <lib/system/http_dyn.h>
 #include <lib/system/econfig.h>
+#include <lib/system/info.h>
 
 // #include <lib/dvr/dvrsocket.h>
 
@@ -44,6 +45,30 @@
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 
 #define DELETE(WHAT) result.strReplace(#WHAT, "")
+
+static eString getVersionInfo(const char *info)
+{
+	FILE *f=fopen("/.version", "rt");
+	if (!f)
+		return "";
+	eString result;
+	while (1)
+	{
+		char buffer[128];
+		if (!fgets(buffer, 128, f))
+			break;
+		if (strlen(buffer))
+			buffer[strlen(buffer)-1]=0;
+		if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)]=='=')))
+		{
+			int i = strlen(info)+1;
+			result = eString(buffer).mid(i, strlen(buffer)-i);
+			break;
+		}
+	}
+	fclose(f);
+	return result;
+}
 
 static int getHex(int c)
 {
@@ -566,6 +591,154 @@ static eString getZapContent(eString mode, eString path)
 	return result;
 }
 
+static eString aboutDreambox(void)
+{
+	eString result("");
+
+	switch (eSystemInfo::getInstance()->getHwType())
+	{
+		case eSystemInfo::dbox2Nokia:
+			result += "Box: d-Box 2";
+			result += "<br>";
+			result += "Manufacturer: Nokia";
+			result += "<br>";
+			result += "Processor: XPC823, 66MHz";
+			result += "<br>";
+			break;
+		case eSystemInfo::dbox2Philips:
+			result += "Box: d-Box 2";
+			result += "<br>";
+			result += "Manufacturer: Philips";
+			result += "<br>";
+			result += "Processor: XPC823, 66MHz";
+			result += "<br>";
+			break;
+		case eSystemInfo::dbox2Sagem:
+			result += "Box: d-Box 2";
+			result += "<br>";
+			result += "Manufacturer: Sagem";
+			result += "<br>";
+			result += "Processor: XPC823, 66MHz";
+			result += "<br>";
+			break;
+		case eSystemInfo::DM5600:
+			result += "Box: DM5600";
+			result += "<br>";
+			result += "Manufacturer: Dream-Multimedia-TV";
+			result += "<br>";
+			result += "Processor: STBx25xx, 252MHz";
+			result += "<br>";
+			break;
+		case eSystemInfo::DM5620:
+			result += "DM5620";
+			result += "<br>";
+			result += "Manufacturer: Box: Dream-Multimedia-TV";
+			result += "<br>";
+			result += "Processor: STBx25xx, 252MHz";
+			result += "<br>";
+			break;
+		case eSystemInfo::DM7000:
+			result += "Box: DM7000";
+			result += "<br>";
+			result += "Manufacturer: Dream-Multimedia-TV";
+			result += "<br>";
+			result += "Processor: STB04500, 252MHz";
+			result += "<br>";
+			break;
+	}
+
+	switch (eSystemInfo::getInstance()->getFEType())
+	{
+		case eSystemInfo::feSatellite:
+			result += "Frontend: Satellite";
+			result += "<br>";
+			break;
+		case eSystemInfo::feCable:
+			result += "Frontend: Cable";
+			result += "<br>";
+			break;
+		case eSystemInfo::feTerrestrial:
+			result += "Frontend: Terrestrial";
+			result += "<br>";
+			break;
+	}
+
+	eString sharddisks;
+#ifndef DISABLE_FILE
+	for (int c='a'; c<'h'; c++)
+	{
+		char line[1024];
+		int ok=1;
+		FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/media", c).c_str(), "r");
+		if (!f)
+			continue;
+		if ((!fgets(line, 1024, f)) || strcmp(line, "disk\n"))
+			ok=0;
+		fclose(f);
+		if (ok)
+		{
+			FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/model", c).c_str(), "r");
+			if (!f)
+				continue;
+			*line=0;
+			fgets(line, 1024, f);
+			fclose(f);
+			if (!*line)
+				continue;
+			line[strlen(line)-1]=0;
+			sharddisks+=line;
+			f=fopen(eString().sprintf("/proc/ide/hd%c/capacity", c).c_str(), "r");
+			if (!f)
+				continue;
+			int capacity=0;
+			fscanf(f, "%d", &capacity);
+			fclose(f);
+			sharddisks+=" (";
+			if (c&1)
+				sharddisks+="master";
+			else
+				sharddisks+="slave";
+			if (capacity)
+				sharddisks+=eString().sprintf(", %d MB", capacity/2048);
+			sharddisks+=")";
+		}
+	}
+#endif //DISABLE_FILE
+	result += "Harddisk: ";
+	if (sharddisks == "")
+		sharddisks="none";
+	result += sharddisks;
+	result += "<br>";
+
+	result += "Firmware Version: ";
+	eString verid=getVersionInfo("version");
+	if (!verid)
+	{
+		result += "unknown";
+		result += "<br>";
+	}
+	else
+	{
+		int type=atoi(verid.left(1).c_str());
+		char *typea[3];
+		typea[0]="release";
+		typea[1]="beta";
+		typea[2]="internal";
+		eString ver=verid.mid(1, 3);
+		eString date=verid.mid(4, 8);
+//		eString time=verid.mid(12, 4);
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5600
+			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM5620)
+			result += eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]+ ", " + date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4);
+		else
+			result += eString().sprintf("%s %c.%d. %s", typea[type%3], ver[0], atoi(eString().sprintf("%c%c", ver[1], ver[2]).c_str()	), (date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4)).c_str());
+			result += "<br>";
+	}
+
+	return result;
+}
+
 static eString getContent(eString mode, eString path)
 {
 	eString result("");
@@ -607,7 +780,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "aboutDreambox")
 	{
-		result = read_file(TEMPLATE_DIR+"aboutDreambox.tmp");
+		result = aboutDreambox();
 	}
 	else
 	if (mode == "aboutDMM")
@@ -684,7 +857,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "menuScreenShot")
 	{
-		if (access("/dev/grabber", R_OK) == 0)
+		if (access("/dev/grabber", 0) == 0)
 		{
 			eString cmd("cat /dev/grabber > /tmp/screenshot.bmp");
 			system(cmd.c_str());
