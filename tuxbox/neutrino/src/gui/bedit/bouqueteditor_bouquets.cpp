@@ -267,10 +267,8 @@ void CBEBouquetWidget::deleteBouquet()
 	g_Zapit->getBouquets(Bouquets, true);
 	if (selected >= Bouquets.size())
 		selected--;
-	hide();
-	paintHead();
+	bouquetsChanged = true;
 	paint();
-	paintFoot();
 }
 
 void CBEBouquetWidget::addBouquet()
