@@ -18,5 +18,3 @@ function confirmAction(xy)
 	var check = window.confirm(xy);
 	return(check);
 }
-
-

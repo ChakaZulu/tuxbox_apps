@@ -1,13 +1,13 @@
 function cleanupTimerList()
 {
 	document.location = "/cleanupTimerList";
-	parent.setTimeout("reload()", 500);
+	setTimeout("reload()", 500);
 }
 
 function clearTimerList()
 {
 	document.location = "/clearTimerList";
-	parent.setTimeout("reload()", 500);
+	setTimeout("reload()", 500);
 }
 
 function editTimerEvent(xy)
@@ -18,5 +18,5 @@ function editTimerEvent(xy)
 function deleteTimerEvent(xy)
 {
 	document.location = "/deleteTimerEvent?"+xy;
-	parent.setTimeout("reload()", 500);
+	setTimeout("reload()", 500);
 }

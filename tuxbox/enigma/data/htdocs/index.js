@@ -1,25 +1,25 @@
 function setVol(xy)
 {
 	document.location = "/setVolume?volume="+xy;
-	parent.setTimeout("reload()", 100);
+	setTimeout("reload()", 100);
 }
 
 function setVid(xy)
 {
 	document.location = "/setVideo?position="+xy;
-	parent.setTimeout("reload()", 100);
+	setTimeout("reload()", 100);
 }	
 
 function Mute(xy)
 {
 	document.location = "/setVolume?mute="+xy;
-	parent.setTimeout("reload()", 100);
+	setTimeout("reload()", 100);
 }
 
 function switchChannel(xy, bouquet, channel)
 {
 	document.location = "/cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
-	parent.setTimeout("reload()", 2000);
+	setTimeout("parent.header.location.reload()", 2000);
 }
 
 function deleteMovie(xy)
@@ -27,7 +27,7 @@ function deleteMovie(xy)
 	if (confirmAction('Do you really want to delete this movie?'))
 	{
 		document.location = "/cgi-bin/deleteMovie?ref="+xy;
-		parent.setTimeout("reload()", 3000);
+		setTimeout("reload()", 3000);
 	}
 }
 
@@ -56,10 +56,15 @@ function openSI()
 	NewWindow("/cgi-bin/streaminfo?requester=webif", "si", "300", "250", "no");
 }
 
+function openChannelInfo()
+{
+	NewWindow("/cgi-bin/channelinfo", "ci", "780", "400", "yes");
+}
+
 function DVRrecord(xy)
 {
 	NewWindow("/cgi-bin/record?command="+xy, "record", "200", "100", "no", "5000");
-	window.setTimeout("reload()", 2000);
+	setTimeout("reload()", 2000);
 }
 
 function startPlugin(xy)

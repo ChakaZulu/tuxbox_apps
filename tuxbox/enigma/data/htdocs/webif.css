@@ -55,6 +55,20 @@ a:hover {
 	padding-bottom: 10px;
 }
 
+#headercell {
+	padding-left: 10px;
+	padding-top: 5px;
+	padding-right: 10px;
+	padding-bottom: 5px;
+}
+
+#statcell {
+	padding-left: 0px;
+	padding-right: 0px;
+	padding-top: 10px;
+	padding-bottom: 0px;
+}
+
 #contentcell TD {
 	color: #333333;
 }
