@@ -86,8 +86,7 @@
 
 	<object name="eventview">
 		<eWindow position="50:70" size="600:420" name="title">
-			<eLabel position="10:5" size="590:355" name="epg_description" font="NimbusSansL-Regular Sans L Regular;20" backgroundColor="content" align="wrap"/>
-
+			<eLabel position="10:5" size="590:355" name="epg_description" font="NimbusSansL-Regular Sans L Regular;20" backgroundColor="content" wrap="on"/>
 			<eWidget position="0:367" size="600:40" backgroundColor="osd_shadowcol" />
 			<eLabel position="10:367" size="130:40" name="date" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
 			<eLabel position="130:367" size="230:40" name="time" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
