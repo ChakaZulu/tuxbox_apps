@@ -165,7 +165,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 			char *timestr = new char[50];
 			struct timeb tm;
 			ftime(&tm);
-			strftime(timestr, 20, "%H:%M:%S\n", localtime(&tm.time) );	// aktuelles datum ausgeben
+			strftime(timestr, 20, "%H:%M:%S\n", localtime(&tm.time) - timezone );	// aktuelles datum ausgeben
 			request->SocketWrite(timestr);
 			delete[] timestr;
 		}
@@ -261,6 +261,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(), "epg") == 0)
 	{
+		GetChannelEvents();
 		request->SendPlainHeader();          // Standard httpd header senden
 		if(Parent->DEBUG) printf("EPG, Parameter: %d\n",request->ParameterList->Count);
 		if(Parent->DEBUG && request->ParameterList->Count > 0)
@@ -268,40 +269,61 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 		if(request->ParameterList->Count == 0)
 		{
 			
-			TChannel *channel = old_ChannelList->Head;
 			if(Parent->DEBUG) printf("Jetzt channelList\n");
 			char buffer[255];
 			for(int i = 0; i < ChannelList.size();i++)
 			{
-				sprintf(buffer,"channel id: %ld\n",ChannelList[i].onid_sid);
-				if(Parent->DEBUG) printf(buffer);
-				request->SocketWrite(buffer);
-				channel = channel->Next;
+				if(ChannelListEvents[ChannelList[i].onid_sid])
+				{
+					sprintf(buffer,"%u %llu %s\n",ChannelList[i].onid_sid,ChannelListEvents[ChannelList[i].onid_sid]->eventID,ChannelListEvents[ChannelList[i].onid_sid]->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
+					request->SocketWrite(buffer);
+				}
 			}
 		}
 		else if(request->ParameterList->Count == 1)
 		{
 //			request->ParameterList->PrintParameterList();
+
 			if(request->ParameterList->GetIndex("eventid") != -1)
 			{	//special epg query
-				if(Parent->DEBUG) printf("event_id: %s\n",request->ParameterList->GetValue(request->ParameterList->GetIndex("eventid")));
-				long long id;
-				sscanf( request->ParameterList->GetValue(request->ParameterList->GetIndex("eventid")), "%llx", &id);
-				if(Parent->DEBUG) printf("query spezial epg: %llx\n", id);
-				GetEPG( request, id, true );
+				unsigned long long epgid;
+				sscanf( request->ParameterList->GetValue(request->ParameterList->GetIndex("eventid")), "%llx", &epgid);
+				CShortEPGData epg;
+				if(sectionsd.getEPGidShort(epgid,&epg))
+				{
+					request->SocketWriteLn("test\n");
+					request->SocketWriteLn((char*)epg.title.c_str());
+					request->SocketWriteLn((char*)epg.info1.c_str());
+					request->SocketWriteLn((char*)epg.info2.c_str());					
+				}
 			}
 			else
 			{	//eventlist for a chan
 				unsigned id = atol( request->ParameterList->Head->Name->c_str() );
-				GetEventList( request, NULL, id, true);
+				GetEventList( request, id, true);
 			}
+
 		}
+/*
 		else if (request->ParameterList->Count == 3)
 		{
-			long long id;
-			sscanf(request->ParameterList->GetValue(0), "%llx", &id);
-			GetEPG( request, id, true);
+			long long epgid;
+			sscanf(request->ParameterList->GetValue(0), "%llx", &epgid);
+
+			time_t startzeit;
+			sscanf
+//			GetEPG( request, id, NULL, true);
+			CEPGData * epg = new CEPGData;
+			if(sectionsd.getEPGid(epgid,*startzeit,epg))
+			{
+				request->SocketWriteLn((char*)epg.title.c_str());
+				request->SocketWriteLn((char*)epg.info1.c_str());
+				request->SocketWriteLn((char*)epg.info2.c_str());
+			}
+			delete epg;
+
 		}
+*/
 	}
 	if(strcmp(request->Filename->c_str(),"version") == 0)
 	{
@@ -379,7 +401,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 		printf("Teste nun\n");
 		request->SendPlainHeader("text/html");
 		printf("vorher\n");
-
+//		GetChannelEvents();
 		printf("fertig\n");
 		request->SocketWrite("alles wird gut\n");
 		return true;
@@ -435,7 +457,6 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 	if (strcmp(request->Filename->c_str(),"bouquetlist.dbox2") == 0)
 	{
 		request->SendPlainHeader("text/html");
-//		request->SocketWriteLn("Test");
 		ShowBouquets(request);
 		return true;
 	}
@@ -517,7 +538,8 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 		{
 			if(request->ParameterList->Count > 0)
 			{											// wenn parameter vorhanden sind
-				request->SendPlainHeader("text/html");
+				request->SendHTMLHeader("EPG");
+
 				request->SocketWriteLn("<html>\n<head><title>DBOX2-Neutrino EPG</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\"></head>");
 				//request->println("<script> function openWindow(theURL) { window.open(theURL,'Neutrino-EPG','scrollbars=no,width=100,height=100');}</script>");
 				request->SocketWriteLn("<body>");
@@ -530,16 +552,27 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 				}
 				else if(request->ParameterList->GetIndex("epgid") != -1)
 				{
-					char * idstr = request->ParameterList->GetValue(request->ParameterList->GetIndex("epgid"));
-					long long id;
-					sscanf(idstr, "%llx", &id);
+					unsigned long long epgid;
+					time_t startzeit;
 
-					GetEPG( request, id );
+					char * idstr = request->ParameterList->GetValue(request->ParameterList->GetIndex("epgid"));
+					sscanf(idstr, "%llx", &epgid);
+
+					char * timestr = request->ParameterList->GetValue(request->ParameterList->GetIndex("startzeit"));
+					sscanf(timestr, "%x", &startzeit);
+	
+					char *buffer2 = new char[1024];
+					CEPGData epg;
+					if(sectionsd.getEPGid(epgid,startzeit,&epg))
+					{
+						sprintf(buffer2,"<H1>%s</H1><BR>\n<H2>%s</H2><BR>\n<B>%s</B><BR>\n\0",epg.title.c_str(),epg.info1.c_str(),epg.info2.c_str());
+						request->SocketWrite(buffer2);
+					}
 
 				}
 				else
 					printf("Fehler\n");
-				request->SocketWriteLn("</body></html>");
+				request->SendHTMLFooter();
 				return true;
 			}
 		}
@@ -595,7 +628,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 				{
 					request->SendPlainHeader("text/html");
 					unsigned id = atol( request->ParameterList->GetValue(request->ParameterList->GetIndex("eventlist")) );
-					GetEventList( request, NULL, id );
+					GetEventList( request, id );
 					return true;
 				}
 
@@ -749,42 +782,6 @@ CZapitClient::responseGetPIDs pids;
 	sprintf(buf, "%u\n%u\n", pids.PIDs.vpid, pids.APIDs[0].pid);
 	request->SocketWrite(buf);
 	delete buf;
-
-/*
-char return_buf[4] = {0};
-st_rmsg		sendmessage;
-int sock_fd;
-Tmconnect con;
-
-	if((sock_fd = Parent->SocketConnect(&con,EZAP_PORT)) != -1)
-	{
-		sendmessage.version=1;
-		sendmessage.cmd = 'b';
-
-		write(sock_fd, &sendmessage, sizeof(sendmessage));
-
-		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
-			perror("recv(zapit)");
-			close(sock_fd);
-			return;
-		}
-
-		if(strcmp(return_buf,"00b")==0)
-		{
-			short apid = 0;
-			short vpid = 0;
-			read(sock_fd, &vpid, sizeof(vpid));
-			read(sock_fd, &apid, sizeof(apid));
-			char buf[30];
-			sprintf(buf, "%u\n%u\n", vpid, apid);
-			request->SocketWrite(buf);
-		}
-		else
-			request->SocketWrite(return_buf);
-
-		close(sock_fd);
-	}
-*/
 }
 
 //-------------------------------------------------------------------------
@@ -820,18 +817,20 @@ void TWebDbox::UpdateBouquets(void)
 void TWebDbox::ShowBouquets(TWebserverRequest *request)
 {
 char *buffer = new char[500];
-	request->SocketWriteLn("<html>\n<head><title>DBOX2-Neutrino Bouquetliste</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\"></head>");
-	request->SocketWriteLn("<body style=\"background-color:#000000;\"><table cellspacing=0 cellpadding=0 border=0><tr height=10>\n");
-	sprintf(buffer,"<td><a class=b href=\"channellist.dbox2\" target=\"content\"><h4>Alle Kanäle</h4></a></td>\n");
+//	request->SocketWriteLn("<html>\n<head><title>DBOX2-Neutrino Bouquetliste</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\"></head>");
+	request->SendHTMLHeader("DBOX2-Neutrino Bouquetliste");
+	request->SocketWriteLn("<table cellspacing=0 cellpadding=0 border=0>\n");
+	sprintf(buffer,"<tr><td><a class=b href=\"channellist.dbox2\" target=\"content\"><h5>Alle Kanäle</h5></a></td></tr>\n");
 	request->SocketWrite(buffer);
 
 	for(int i = 0; i < BouquetList.size();i++)
 	{
-		sprintf(buffer,"<td width=25>&nbsp;</td><td><h4><a class=b href=\"channellist.dbox2?bouquet=%d\" target=\"content\">%s</a></h4></td>\n",BouquetList[i].bouquet_nr,BouquetList[i].name);
+		sprintf(buffer,"<tr><td><h5><a class=b href=\"channellist.dbox2?bouquet=%d\" target=\"content\">%s</a></h5></td></tr>\n",BouquetList[i].bouquet_nr,BouquetList[i].name);
 		request->SocketWrite(buffer);
 	}
-	sprintf(buffer,"</tr><tr><td colspan=%d><hr></td><tr></table></body></html>\n",BouquetList.size() + 1);
+	sprintf(buffer,"</table>\n");
 	request->SocketWrite(buffer);
+	request->SendHTMLFooter();
 	delete[] buffer;
 }
 
@@ -849,8 +848,11 @@ void TWebDbox::ShowBouquet(TWebserverRequest *request,int BouquetNr)
 //-------------------------------------------------------------------------
 void TWebDbox::ShowChannelList(TWebserverRequest* request,CZapitClient::BouquetChannelList channellist)
 {
-	request->SocketWriteLn("<html>\n<head><title>DBOX2-Neutrino Kanalliste</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\"></head>");
-	request->SocketWriteLn("<body>\n<table cellspacing=\"0\">");
+	GetChannelEvents();
+
+	request->SendHTMLHeader("DBOX2-Neutrino Kanalliste");
+
+	request->SocketWriteLn("<table cellspacing=\"0\">");
 
 	int i = 1;
 	char classname[] = "a\0";
@@ -878,20 +880,23 @@ void TWebDbox::ShowChannelList(TWebserverRequest* request,CZapitClient::BouquetC
 		params->Add("CHANNEL_NR",nr);
 
 
-		char teststr[] = "<tr><td class=\"%%CLASS%%\">%%AKT%%<a href=\"switch.dbox2?zapto=%%CHANNEL_ID%%\">%%CHANNEL_NR%%. %%CHANNEL_NAME%%</a> <a href=\"switch.dbox2?eventlist=%%CHANNEL_ID%%\"><img src=\"../images/elist.gif\" border=\"0\"></a></td></tr>\n\0";
+		char teststr[] = "<tr><td class=\"%%CLASS%%\">%%AKT%%<a href=\"switch.dbox2?zapto=%%CHANNEL_ID%%\">%%CHANNEL_NR%%. %%CHANNEL_NAME%%</a> </td></tr>\n\0";
 		ParseString(request,teststr,params);
 		delete params;
-/*
-		if(channel->EPG != NULL)
-		{
-			sprintf(buffer,"<tr><td class=\"%cepg\"><a href=epg.dbox2?channel=%d>%s</a> <font size=-3>(%d von %d min, %d\%)</font></td></tr>\n",classname[0],channel->onid_tsid,channel->EPG->c_str(),(time(NULL)-channel->Starttime)/60,channel->Duration / 60,100 * (time(NULL)-channel->Starttime) / channel->Duration  );
+		if(ChannelListEvents[channellist[i].onid_sid])
+		{	
+			sprintf(buffer,"<tr><td class=\"%cepg\"><a href=epg.dbox2?epgid=%llx&startzeit=%lx>",classname[0],ChannelListEvents[channellist[i].onid_sid]->eventID,ChannelListEvents[channellist[i].onid_sid]->startTime);
+			request->SocketWrite(buffer);
+			request->SocketWrite((char *)ChannelListEvents[channellist[i].onid_sid]->description.c_str());
+			request->SocketWrite("</a>&nbsp;");
+			sprintf(buffer,"<font size=-3>(%d von %d min, %d\%)</font>&nbsp;<a href=\"switch.dbox2?eventlist=%u\"><img src=\"../images/elist.gif\" border=\"0\"></a></td></tr>\n",(time(NULL)-ChannelListEvents[channellist[i].onid_sid]->startTime)/60,ChannelListEvents[channellist[i].onid_sid]->duration / 60,100 * (time(NULL)-ChannelListEvents[channellist[i].onid_sid]->startTime) / ChannelListEvents[channellist[i].onid_sid]->duration, channellist[i].onid_sid  );
 			request->SocketWrite(buffer);
 		}
-*/
 	}
 
 	request->SocketWriteLn("</table>");
-	request->SocketWriteLn("</body></html>");
+
+	request->SendHTMLFooter();
 }
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
@@ -910,14 +915,28 @@ Tmconnect con;
 	zapit.zapTo_serviceID(sidonid);
 }
 //-------------------------------------------------------------------------
-
-void TWebDbox::GetEventList(TWebserverRequest *request,TEventList *Events,unsigned onidSid, bool cgi = false)
+void TWebDbox::GetChannelEvents()
 {
-char epgID[20];
-char edate[6];
-char etime[6];
-char eduration[10];
-char ename[100];
+	
+	eList = sectionsd.getChannelEvents();
+	CChannelEventList::iterator eventIterator;
+
+    for( eventIterator = eList.begin();
+		 eventIterator != eList.end();
+		 eventIterator++ )
+	{
+//		(*eventIterator).serviceID;
+		ChannelListEvents[(*eventIterator).serviceID] = &(*eventIterator);
+	}
+
+}
+//-------------------------------------------------------------------------
+
+void TWebDbox::GetEventList(TWebserverRequest *request,unsigned onidSid, bool cgi = false)
+{
+
+char *epgID,*edate,*etime,*eduration,*ename;
+
 char *actPos=NULL;
 int pos;
 char classname;
@@ -953,13 +972,11 @@ Tmconnect con;
 			}
 			if(!cgi)
 			{
-				request->SocketWriteLn("<html>");
-				request->SocketWriteLn("<head><title>DBOX2-Neutrino Channellist</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../eventlist.css\"></head>");
-				request->SocketWriteLn("<body>");
+				request->SendHTMLHeader("DBOX2-Neutrino Channellist");
 
 				//search channame...
 				request->SocketWrite("<h3>Eventlist: ");
-//				request->SocketWrite(GetServiceName(onidSid));
+				request->SocketWrite(GetServiceName(onidSid));
 				request->SocketWriteLn("</h3>");
 
 				request->SocketWrite("<table cellspacing=\"0\">\n");
@@ -969,16 +986,28 @@ Tmconnect con;
 
 			while(*actPos && actPos<buffer+resp.dataLength)
 			{
-				*epgID=0;
-				actPos = copyStringto( actPos, epgID, sizeof(epgID), ' ');
-				*edate=0;
-				actPos = copyStringto( actPos, edate, sizeof(edate), ' ');
-				*etime=0;
-				actPos = copyStringto( actPos, etime, sizeof(etime), ' ');
-				*eduration=0;
-				actPos = copyStringto( actPos, eduration, sizeof(eduration), ' ');
-				*ename=0;
-				actPos = copyStringto( actPos, ename, sizeof(ename), '\n');
+				epgID = actPos;
+				for(;actPos<buffer+resp.dataLength && (*actPos != ' ');actPos++)
+				;
+				*actPos=0;
+				edate = ++actPos;
+				for(;actPos<buffer+resp.dataLength && (*actPos != ' ');actPos++)
+				;
+				*actPos=0;
+				etime = ++actPos;
+				for(;actPos<buffer+resp.dataLength && (*actPos != ' ');actPos++)
+				;
+				*actPos=0;
+				eduration = ++actPos;
+				for(;actPos<buffer+resp.dataLength && (*actPos != ' ');actPos++)
+				;
+				*actPos=0;
+				ename = ++actPos;
+				for(;actPos<buffer+resp.dataLength && (*actPos != '\n');actPos++)
+				;
+				*actPos=0;
+				actPos++;
+//				printf("epgID: '%s' edate: '%s' etime: '%s' ename: '%s'\n",epgID,edate,etime,ename);
 
 				char *buf = new char[1400];
 				struct  tm *tmzeit;
@@ -1007,9 +1036,8 @@ Tmconnect con;
 					{
 						classname = (pos&1)?'a':'b';
 
-//						sprintf(buf, "<tr><td class=\"%c\">%s, %s <small>(%smin)</small> <a href=\"timer.dbox2?set&time=%ld&channel=%ld\"><IMG SRC=\"../images/timer.gif\" WIDTH=21 HEIGHT=21 BORDER=0 ALT=\"Timer\"></a></tr></td>", classname, edate, etime, eduration,zeit,onidSid);
 						sprintf(buf, "<tr><td class=\"%c\">%s, %s <small>(%smin)</small></tr></td>", classname, edate, etime, eduration,zeit,onidSid);
-						sprintf(&buf[strlen(buf)], "<tr><td class=\"%ctext\"><a href=epg.dbox2?epgid=%s>%s</a></td></tr>\n", classname,epgID, ename);
+						sprintf(&buf[strlen(buf)], "<tr><td class=\"%c\"><a href=epg.dbox2?epgid=%s>%s</a></td></tr>\n", classname,epgID, ename);
 					}
 					request->SocketWrite(buf);
 					pos++;
@@ -1023,513 +1051,40 @@ Tmconnect con;
 		if(!cgi)
 		{
 			request->SocketWriteLn("</table>");
-			request->SocketWriteLn("</body></html>");
+			request->SendHTMLFooter();
+//			request->SocketWriteLn("</body></html>");
 		}
 	}
+
 }
-//-------------------------------------------------------------------------
 
-void TWebDbox::GetEPG(TWebserverRequest *request,long long epgid,bool cgi = false)
-{
-int sock_fd;
-Tmconnect con;
-
-	Parent->DEBUG = false;
-	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
-	{
-
-		sectionsd::msgRequestHeader req;
-		req.version = 2;
-		req.command = sectionsd::epgEPGidShort;
-		req.dataLength = 8;
-		write(sock_fd, &req, sizeof(req));
-		write(sock_fd, &epgid, req.dataLength);
-
-		sectionsd::msgResponseHeader resp;
-		memset(&resp, 0, sizeof(resp));
-		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-		{
-			printf("Error reading epg from sectionsd\n");
-			close(sock_fd);
-			return;
-		}
-		Parent->DEBUG=true;
-		if(Parent->DEBUG) printf("GetEPG: response gelesen:%ld\n",resp.dataLength);
-		if ( resp.dataLength>0 )
-		{
-			char* buffer = new char[resp.dataLength] ;
-			int buffer_len;
-			if( (buffer_len = read(sock_fd, buffer, resp.dataLength)) <= 0)
-			{
-				printf("Fehler\n");
-				return;
-			}
-			if(Parent->DEBUG) printf("GetEPG %d Bytes gelesen\n",buffer_len);
-			char * anfang, *ende;
-			char *title,*info1,*info2;
-			int i;
-			title = buffer;
-			for(i = 0; (i < buffer_len) && (buffer[i] != 255);i++);
-			buffer[i] = 0;
-			info1 = &buffer[i+1];
-			for(i = i + 1; (i < buffer_len) && (buffer[i] != 255);i++);
-			buffer[i] = 0;
-			info2 = &buffer[i+1];
-			for(i = i + 1; (i < buffer_len) && (buffer[i] != 255);i++);
-			buffer[i] = 0;
-
-			char *buffer2 = new char[buffer_len + 400];
-			buffer2[0]=0;
-			if(cgi)
-				sprintf(buffer2, "%s\n%s\n%s\n", title, info1, info2);
-			else
-				sprintf(buffer2,"<H1>%s</H1><BR>\n<H2>%s</H2><BR>\n<B>%s</B><BR>\n\0",title,info1,info2);
-			request->SocketWrite(buffer2);
-	//		printf(buffer2);
-
-			delete[] buffer2;
-			delete[] buffer;
-		}
-		close(sock_fd);
-	}
-}
 //-------------------------------------------------------------------------
 /*
-void TWebDbox::GetCurrentEPG(TWebserverRequest *request,unsigned onidSid)
+void TWebDbox::GetEPG(TWebserverRequest *request,unsigned long long epgid,time_t *startzeit,bool cgi = false)
 {
-int sock_fd;
-Tmconnect con;
-	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
+	char *buffer2 = new char[1024];
+	CEPGData * epg = new CEPGData;
+	if(sectionsd.getEPGid(epgid,*startzeit,epg))
 	{
-		printf("Connected to sectionsd\n");
-		sectionsd::msgRequestHeader req;
-	//	printf("Versuche Daten zu lesen\n");
-		req.version = 2;
-		req.command = sectionsd::actualEPGchannelID;
-		req.dataLength = 4;
-		write(sock_fd, &req, sizeof(req));
-		write(sock_fd, &onidSid, req.dataLength);
-
-		sectionsd::msgResponseHeader resp;
-		memset(&resp, 0, sizeof(resp));
-		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-		{
-			printf("Fehler in read\n");
-			close(sock_fd);
-			return;
-		}
-		if ( resp.dataLength>0 )
-		{
-			char* buffer = new char[resp.dataLength] ;
-			int buffer_len;
-			if( (buffer_len = read(sock_fd, buffer, resp.dataLength)) <= 0)
-			{
-				printf("Fehler\n");
-				return;
-			}
-			printf("%d Bytes gelesen\n",buffer_len);
-			char *titel,*titel2,*text;
-			titel = buffer + sizeof(long long);
-			titel2 = titel + strlen(titel) + 1;
-			text = titel2 + strlen(titel2) + 1;
-			sectionsd::sectionsdTime *epg_times = (sectionsd::sectionsdTime*) (text + strlen(text) + 1);
-
-			char *buffer2 = new char[buffer_len + 400];
-			buffer[0]=0;
-			sprintf(buffer2,"<H1>%s</H1><BR>\n<H2>%s</H2><BR>\n<B>%s</B><BR>\0",titel,titel2,text);
-			request->SocketWrite(buffer2);
-
-			delete[] buffer2;
-			delete[] buffer;
-		}
-		close(sock_fd);
+		if(cgi)
+			sprintf(buffer2, "%s\n%s\n%s\n", epg->title.c_str(), epg->info1.c_str(), epg->info2.c_str());
+		else
+			sprintf(buffer2,"<H1>%s</H1><BR>\n<H2>%s</H2><BR>\n<B>%s</B><BR>\n\0",epg->title.c_str(),epg->info1.c_str(),epg->info2.c_str());
+		request->SocketWrite(buffer2);
 	}
+	delete epg;
 }
 */
 //-------------------------------------------------------------------------
 
-/*
-unsigned int TWebDbox::GetcurrentONIDSID()
+char* TWebDbox::GetServiceName(int onid_sid)
 {
-	return zapit.getCurrentServiceID();
-unsigned int curOnidSid = 0;
-char return_buf[4] = {0};
-int sock_fd;
-Tmconnect con;
-
-	if((sock_fd = Parent->SocketConnect(&con,EZAP_PORT)) != -1)
-	{
-		st_rmsg sendmessage;
-
-		sendmessage.version=1;
-		sendmessage.cmd = 's';
-
-		write(sock_fd, &sendmessage, sizeof(sendmessage));
-
-		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
-			perror("recv(zapit)");
-			exit(-1);
-		}
-
-		if(strcmp(return_buf,"00s")==0)
-			read(sock_fd, &curOnidSid, sizeof(curOnidSid));
-
-		close(sock_fd);
-		return curOnidSid;
-	}
-}
-*/
-//-------------------------------------------------------------------------
-
-/*
-void TWebDbox::SetZapitMode(int mode)
-{
-st_rmsg sendmessage;
-char return_buf[4] = {0};
-int sock_fd;
-Tmconnect con;
-
-	if((sock_fd = Parent->SocketConnect(&con,EZAP_PORT)) != -1)
-	{
-
-		sendmessage.version=1;
-		sendmessage.cmd = mode;
-
-
-		write(sock_fd, &sendmessage, sizeof(sendmessage));
-		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
-			perror("recv(zapit)");
-			exit(-1);
-		}
-		close(sock_fd);
-	}
-}
-*/
-
-//-------------------------------------------------------------------------
-/*
-char* TWebDbox::GetServiceName(int onidsid)
-{
-	if(!old_ChannelList)
-	{
-		if(!GetChannelList())
-			return "";
-	}
-	TChannel * channel = old_ChannelList->Head;
-	do
-	{
-		if( channel->onid_tsid == onidsid)
-		{
-			return channel->Name;
-		}
-		channel = channel->Next;
-	}while(channel);
+	for(int i = 0; i < ChannelList.size();i++)
+		if( ChannelList[i].onid_sid == onid_sid)
+			return ChannelList[i].name;
 	return "";
 }
-*/
-//-------------------------------------------------------------------------
 
-/*
-bool TWebDbox::GetChannelList()
-{
-	if(!old_ChannelList)
-		old_ChannelList = new TChannelList;
-	TChannel *channel = NULL,*last = NULL;
-	CZapitClient::BouquetChannelList zapitChannels;
-	zapit.getChannels( zapitChannels);
-	for (uint i=0; i<zapitChannels.size(); i++)
-	{
-		if(Parent->DEBUG) 
-		{
-			printf("Neuen Channel anlegen: nr: %ld id: %ld name: %s\n",zapitChannels[i].nr,zapitChannels[i].onid_sid,zapitChannels[i].name);
-		}
-		channel= new TChannel(zapitChannels[i].nr,zapitChannels[i].onid_sid,zapitChannels[i].name);
-		old_ChannelList->Add(channel,last);
-		last = channel;
-	}
-	return true;
-}
-
-bool TWebDbox::GetBouquetList()
-{
-	CZapitClient::BouquetList zapitBouquets;
-	zapit.getBouquets(zapitBouquets, false);
-	for (uint i=0; i<zapitBouquets.size(); i++)
-	{
-		printf("Name: %s nr: %ld\n", zapitBouquets[i].name, zapitBouquets[i].bouquet_nr);
-	}
-
-
-}
-
-*/
-/*
-void TWebDbox::GetEPGList()
-{
-	return;
-	char rip[]="127.0.0.1";
-
-	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	SAI servaddr;
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(sectionsd::portNumber);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-	{
-		perror("Couldn't connect to sectionsd!");
-		return;
-	}
-
-	sectionsd::msgRequestHeader req;
-	req.version = 2;
-
-	req.command = sectionsd::actualEventListTVshortIDs;
-	req.dataLength = 0;
-	write(sock_fd,&req,sizeof(req));
-
-	sectionsd::msgResponseHeader resp;
-	memset(&resp, 0, sizeof(resp));
-	if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-	{
-		close(sock_fd);
-		return;
-	}
-	if(resp.dataLength<=0)
-	{
-		close(sock_fd);
-		return;
-	}
-
-	char* pData = new char[resp.dataLength] ;
-	if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
-	{
-		delete[] pData;
-		close(sock_fd);
-		return;
-	}
-
-	close(sock_fd);
-
-	char *actPos = pData;
-// insert ab hier
-	EventList.clear();
-
-//		char *actPos = pData;
-	while(actPos<pData+resp.dataLength)
-	{
-		CChannelEvent aEvent;
-
-		aEvent.serviceID = (unsigned) *actPos;
-		actPos+=4;
-
-		aEvent.eventID = (unsigned long long) *actPos;
-		actPos+=8;
-
-		aEvent.startTime = (time_t) *actPos;
-		actPos+=4;
-
-		aEvent.duration = (unsigned) *actPos;
-		actPos+=4;
-
-		aEvent.description= actPos;
-		printf("desc %s\n",actPos);
-		actPos+=strlen(actPos)+1;
-
-		aEvent.text= actPos;
-		actPos+=strlen(actPos)+1;
-
-		EventList.insert(EventList.end(), aEvent);
-	}
-
-
-	while(actPos<pData+resp.dataLength)
-	{
-		unsigned* serviceID = (unsigned*) actPos;
-		actPos+=4;
-
-		unsigned long long* evt_id = (unsigned long long*) actPos;
-		actPos+=8;
-
-		time_t* startt = (time_t*) actPos;
-		actPos+=4;
-
-		unsigned* dauert = (unsigned*) actPos;
-		actPos+=4;
-
-		char* descriptiont= actPos;
-		actPos+=strlen(actPos)+1;
-		char *textt= actPos;
-		actPos+=strlen(actPos)+1;
-		if(Parent->DEBUG)
-		{
-			printf("Kanal: %ld, event: %ld\n",*serviceID,*evt_id);
-			if(strlen(descriptiont) > 0)
-				printf("Beschr: %s\n",descriptiont);
-			if(strlen(textt) > 0)
-				printf("Text: %s\n",textt);
-		}
-
-		TChannel *channel = ChannelList->Head;
-		// quick'n dirty, sollte man mal anders machen
-		for (unsigned int count=0;count<ChannelList->Count;count++)
-		{
-			if (channel->onid_tsid==*serviceID)
-			{
-				channel->EPG_ID = *evt_id;
-				if(channel->EPG)
-				{
-					delete channel->EPG;
-					channel->EPG = NULL;
-				}
-				if(strlen(descriptiont) > 0)
-					channel->EPG = new TString(descriptiont);
-
-				if(channel->ExtendedEPG)
-				{
-					delete channel->ExtendedEPG;
-					channel->ExtendedEPG = NULL;
-				}
-				if(strlen(textt) > 0)
-					channel->ExtendedEPG = new TString(textt);
-				channel->Starttime = *startt;
-				channel->Duration = *dauert;
-//				chanlist[count]->currentEvent.startzeit= *startt;
-//				chanlist[count]->currentEvent.dauer= *dauert;
-				//	printf("Channel found: %s\n", actPos);
-				break;
-			}
-			channel = channel->Next;
-		}
-
-	}
-	delete[] pData;
-	//printf("\n END CChannelList::updateEvents \n\n");
-	return;
-}
-*/
-
-//-------------------------------------------------------------------------
-
-
-//-------------------------------------------------------------------------
-/*
-void TWebDbox::GetEPGList()
-{
-int sock_fd;
-Tmconnect con;
-
-	if(!ChannelList)
-	{
-		printf("Keine Channelliste\n");
-		return;
-	}
-
-	updateEvents();
-	return;
-
-	if((EPGDate + 2 * 60L) > time(NULL))
-	{
-		if(Parent->DEBUG) printf("EPGListe ist aktuell\n");
-		return;
-	}
-	if(Parent->DEBUG) printf("EPG aktualisieren\n");
-	EPGDate = time(NULL);
-//-----------------------------
-	TChannel *channel = ChannelList->Head;
-	int i = 1;
-	char classname[] = "a\0";
-	char buffer[400];
-	int current_channel = GetcurrentONIDSID();
-	do
-	{
-		if(Parent->DEBUG) printf("GetEPG for %s\n",channel->Name);
-		if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
-		{
-			sectionsd::msgRequestHeader req;
-			req.version = 2;
-			req.command = sectionsd::actualEPGchannelID;
-			req.dataLength = 4;
-			write(sock_fd,&req,sizeof(req));
-			write(sock_fd,&channel->onid_tsid,4);
-
-			sectionsd::msgResponseHeader resp;
-			memset(&resp, 0, sizeof(resp));
-			if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-			{
-				if(Parent->DEBUG) printf("nix gelesen\n");
-				close(sock_fd);
-//				return;
-			}
-			else
-			{
-				if(resp.dataLength<=0)
-				{
-					if(Parent->DEBUG) printf("keine epg Daten\n");
-					close(sock_fd);
-//					return;
-				}
-				else
-				{
-
-					char* pData = new char[resp.dataLength];
-					if(Parent->DEBUG) printf("Lese eine %d byte lange EventList\n",resp.dataLength);
-					if ( read(sock_fd, pData, resp.dataLength)<=0 )
-					{
-						delete[] pData;
-						close(sock_fd);
-//						return;
-					}
-					else
-					{
-
-						char *eventid;
-//						char * anfang, *ende;
-						char *name,*text,*text2,*contentClassification,*userClassification,fsk;
-						char *dp;
-						sectionsd::sectionsdTime* epg_times;
-
-						eventid = pData;
-						name = pData + sizeof(long long);
-						dp = name;
-
-						dp+=strlen(dp)+1;
-						text = dp;
-						dp+=strlen(dp)+1;
-						text2 = dp;
-						dp+=strlen(dp)+1;
-						contentClassification = dp;
-						dp+=strlen(dp)+1;
-						userClassification = dp;
-						dp+=strlen(dp)+1;
-						fsk = *dp++;
-
-						epg_times = (sectionsd::sectionsdTime*) dp;
-
-						struct tm *pStartZeit = localtime(&(*epg_times).startzeit);
-//						printf("Startzeit %s Dauer: %ld\n",asctime(pStartZeit),(*epg_times).dauer);
-						channel->Starttime = (*epg_times).startzeit;
-						channel->Duration = (*epg_times).dauer;
-
-//						printf("ID: '%s' NAME: '%s' TEXT: '%s'\n",eventid,name,text);
-						if(channel->EPG) delete channel->EPG;
-						channel->EPG = new TString(name);
-
-						if(channel->ExtendedEPG) delete channel->ExtendedEPG;
-						channel->ExtendedEPG = new TString(text);
-
-						delete[] pData;
-					}
-				}
-			}
-		}
-
-		channel = channel->Next;
-		i++;
-	}while(channel && (i < ChannelList->Count));
-}
-*/
 //-------------------------------------------------------------------------
 /*
 void TWebDbox::ShowTimerList(TWebserverRequest *request)
@@ -1559,57 +1114,3 @@ void TWebDbox::ShowTimerList(TWebserverRequest *request)
 */
 
 //-------------------------------------------------------------------------
-/*
-void TWebDbox::StopEPGScanning(TWebserverRequest* request, bool off)
-{
-
-int sock_fd;
-Tmconnect con;
-	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
-	{
-
-		sectionsd::msgRequestHeader req;
-		req.version = 2;
-		req.command = sectionsd::pauseScanning;
-		req.dataLength = 4;
-		write(sock_fd, &req, sizeof(req));
-		int stopit = off?1:0;
-		write(sock_fd, &stopit, req.dataLength);
-
-		close(sock_fd);
-	}
-
-}
-*/
-//-------------------------------------------------------------------------
-/*
-//-------------------------------------------------------------------------
-void TWebDbox::StopPlayback(TWebserverRequest* request)
-{
-char return_buf[4]={0};
-st_rmsg		sendmessage;
-int sock_fd;
-Tmconnect con;
-
-	if((sock_fd = Parent->SocketConnect(&con,EZAP_PORT)) != -1)
-	{
-		sendmessage.version=1;
-		sendmessage.cmd = 2;
-
-		write(sock_fd, &sendmessage, sizeof(sendmessage));
-		if (recv(sock_fd, return_buf, 3,0) <= 0 )
-		{
-			perror("recv(zapit)");
-			close(sock_fd);
-			return;
-		}
-
-		request->SocketWrite(return_buf);
-
-		close(sock_fd);
-	}
-}
-
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-*/

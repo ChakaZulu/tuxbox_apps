@@ -8,14 +8,13 @@
 #include <sys/timeb.h>
 
 #include <vector>
-
 #include <map>
-#include "../../zapit/getservices.h"
+
 #include "request.h"
 #include "helper.h"
 #include "controldclient.h"
+
 #include "../controld/clientlib/controldclient.h"
-//#include "../../sections/sectionsdMsg.h"
 #include "../../sections/clientlib/sectionsdclient.h"
 #include "../../zapit/clientlib/zapitclient.h"
 
@@ -161,6 +160,7 @@ public:
 
 };
 //-------------------------------------------------------------------------
+/*
 //-------------------------------------------------------------------------
 class TEvent
 {
@@ -240,6 +240,7 @@ public:
 	}
 
 };
+*/
 //-------------------------------------------------------------------------
 
 
@@ -250,7 +251,10 @@ class TWebDbox
 	CControldClient controld;
 	CSectionsdClient sectionsd;
 	CZapitClient zapit;
-//	map<unsigned, char*> ChannelListEvents;
+	CZapitClient::BouquetChannelList ChannelList;
+	map<unsigned, CChannelEvent *> ChannelListEvents;
+	map<int, CZapitClient::BouquetChannelList> BouquetsList;
+	CZapitClient::BouquetList BouquetList;
 
 //	time_t EPGDate;
 //	CChannelEventList EventList;
@@ -259,13 +263,16 @@ public:
 	TWebDbox(TWebserver * server);
 	~TWebDbox();
 
-	CZapitClient::BouquetList BouquetList;
-	CZapitClient::BouquetChannelList BouquetsList[125];		// quick ´n dirty: Sollte reichen
-	CZapitClient::BouquetChannelList ChannelList;
+//	CZapitClient::BouquetChannelList BouquetsList[125];		// quick ´n dirty: Sollte reichen
 	CChannelEventList eList;
 
 	bool ExecuteCGI(TWebserverRequest* request);
+
 // get functions to collect data
+	void GetChannelEvents();
+	void GetEventList(TWebserverRequest* request, unsigned onidSid, bool cgi = false);
+	char* GetServiceName(int onid_sid);
+
 	bool GetBouquets(void)
 	{
 		BouquetList.clear();
@@ -287,83 +294,6 @@ public:
 		return true;
 	};
 
-	void GetChannelEvents()
-	{
-	char rip[]="127.0.0.1";
-
-		int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		SAI servaddr;
-		memset(&servaddr,0,sizeof(servaddr));
-		servaddr.sin_family=AF_INET;
-		servaddr.sin_port=htons(sectionsd::portNumber);
-		inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-		{
-			perror("Couldn't connect to sectionsd!");
-			return;
-		}
-
-		sectionsd::msgRequestHeader req;
-		req.version = 2;
-
-		req.command = sectionsd::actualEventListTVshortIDs;
-		req.dataLength = 0;
-		write(sock_fd,&req,sizeof(req));
-
-		sectionsd::msgResponseHeader resp;
-		memset(&resp, 0, sizeof(resp));
-
-		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-		{
-			close(sock_fd);
-			return ;
-		}
-		if(resp.dataLength<=0)
-		{
-			close(sock_fd);
-			return;
-		}
-
-		char* pData = new char[resp.dataLength] ;
-		if ( recv(sock_fd, pData, resp.dataLength, MSG_WAITALL)!= resp.dataLength )
-		{
-			delete[] pData;
-			close(sock_fd);
-			return;
-		}
-		close(sock_fd);
-
-
-		char *actPos = pData;
-		while(actPos<pData+resp.dataLength)
-		{
-			CChannelEvent aEvent;
-
-			aEvent.serviceID = (unsigned) *actPos;
-			actPos+=4;
-
-			aEvent.eventID = (unsigned long long) *actPos;
-			actPos+=8;
-
-			aEvent.startTime = (time_t) *actPos;
-			actPos+=4;
-
-			aEvent.duration = (unsigned) *actPos;
-			actPos+=4;
-
-			aEvent.description= actPos;
-			actPos+=strlen(actPos)+1;
-
-			aEvent.text= actPos;
-			actPos+=strlen(actPos)+1;
-
-			eList.insert(eList.end(), aEvent);
-		}
-
-		delete[] pData;
-
-	}
 
 
 // send functions for ExecuteCGI (controld api)
@@ -389,8 +319,7 @@ public:
 
 
 // alt
-	void GetEventList(TWebserverRequest* request, TEventList *Events,unsigned onidSid, bool cgi = false);
-	void GetEPG(TWebserverRequest *request,long long epgid,bool cgi=false);
+	void GetEPG(TWebserverRequest *request,unsigned long long epgid, time_t *,bool cgi=false);
 
 //	bool GetChannelList();
 //	void ShowTimerList(TWebserverRequest *request);
@@ -398,18 +327,12 @@ public:
 //	void GetCurrentEPG(TWebserverRequest *request,unsigned onidSid);
 //	unsigned GetcurrentONIDSID();
 //	void SetZapitMode(int mode);
-//	void GetEPGList();
 //	void StopEPGScanning(TWebserverRequest* request, bool off);
 //	void StopPlayback(TWebserverRequest* request); 
 //	void updateEvents(void);
 //	bool GetEPG(int Channel_onsid);
 //	bool GetEventList(int Channel_onsid);
 
-	bool GetEPGShortList()
-	{
-		CChannelEventList test = sectionsd.getChannelEvents();
-
-	}
 
 
 };
