@@ -1,22 +1,3 @@
-/*
-   Copyright (c) 2003 Harald Maiss
-   
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
-
-*/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -48,6 +29,7 @@ typedef struct {
    unsigned BufPacketNum;
    int Stopped;
    int fd;
+   int fdvr;
    struct dmx_pes_filter_params Filter;
    void *Ptr;
    pthread_t Thread;
@@ -55,9 +37,10 @@ typedef struct {
 } StreamType;
 
 StreamType Stream[MAX_PID_NUM];
-unsigned StreamNum;
+unsigned StreamNum, StreamThreadNum;
 int StreamStop;   
 pid_t mainProcessID;
+int TSMode;
 
 struct {
    int Socket;
@@ -131,10 +114,9 @@ void * UdpSender( void * Ptr )
    int i;
    unsigned u;
    unsigned char *ReadPtr;
+	
+	(void)Ptr;
 
-   (void)Ptr;
-
- //  fd_set wfds;
  //  struct timespec ts;
  //  FD_ZERO(&wfds);
  //  FD_SET(Send.Socket, &wfds);
@@ -169,7 +151,7 @@ void * UdpSender( void * Ptr )
  //              } 
             }
             if ( ((PacketHeaderType*)ReadPtr)->Status == 2 ) {
-               for ( u=0; u< StreamNum; u++ ) free( SPkt.Buf[u] );
+               for ( u=0; u< StreamThreadNum; u++ ) free( SPkt.Buf[u] );
                close( Send.Socket );
                StreamStop = 1;
                pthread_exit(0);
@@ -184,103 +166,196 @@ void * UdpSender( void * Ptr )
    }
 }
 
-void * DmxReader( void * Ptr )
+void * DmxTSReader( void * Ptr )
 {
    unsigned BufLen, BufSize;
    int  RetVal;
-   StreamType *Stream;        
-   Stream = (StreamType*)Ptr;
-   BufSize = (Stream->BufPacketNum) * NET_DATA_PER_PACKET;
+   StreamType *CurStream;        
+   CurStream = (StreamType*)&Stream[0];
+   BufSize = (CurStream->BufPacketNum) * NET_DATA_PER_PACKET;
+   int fd_dvr;  
+	unsigned u;
+	
 
+   for (u = 0; u < StreamNum; u++) {
+		Stream[u].fd = open("/dev/dvb/adapter0/demux0", O_RDWR);
+		if (-1 == Stream[u].fd) {
+			perror("ERROR: main() - demux0 open");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		}
+		Stream[u].Filter.input=DMX_IN_FRONTEND;
+		Stream[u].Filter.output=DMX_OUT_TS_TAP;
+		Stream[u].Filter.pes_type=DMX_PES_OTHER;
+		Stream[u].Filter.flags=0;
+		//Stream[u].Filter.flags=DMX_IMMEDIATE_START;
+		if (-1==ioctl(Stream[u].fd, DMX_SET_PES_FILTER, &(Stream[u].Filter)) ) {
+			perror("ERROR: main() - DMX_SET_PES_FILTER ioctl");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		}
+		if ( -1==ioctl(Stream[u].fd, DMX_START, 0) ) {
+			perror("ERROR: DmxReader() - DMX_START ioctl");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		} 
+	}
 
-   Stream->fd = open("/dev/dvb/adapter0/demux0", O_RDWR);
-   if (-1 == Stream->fd) {
-      perror("ERROR: main() - dmx open");
+   fd_dvr = open("/dev/dvb/adapter0/dvr0", O_RDONLY);
+   if (-1 == fd_dvr) {
+      perror("ERROR: main() - dvr0 open");
       fprintf(stderr, "EXIT\n");
       fflush(stderr);
       exit(-1);
    }
 
-   if ( -1 == ioctl(Stream->fd, DMX_SET_BUFFER_SIZE, // 1024*1024) ) { 
-       Stream->BufPacketNum * NET_DATA_PER_PACKET * DMX_BUF_FACTOR) ) { 
-      perror("ERROR: main() - dmx set buffer ioctl");
-      fprintf(stderr, "EXIT\n");
-      fflush(stderr);
-      exit(-1);
-   }
-
-   Stream->Filter.input=DMX_IN_FRONTEND;
-   Stream->Filter.output=DMX_OUT_TAP;
-   Stream->Filter.pes_type=DMX_PES_OTHER;
-   Stream->Filter.flags=DMX_IMMEDIATE_START;
-
-   if (-1==ioctl(Stream->fd, DMX_SET_PES_FILTER, &(Stream->Filter)) ) {
-      perror("ERROR: main() - dmx set filter ioctl");
-      fprintf(stderr, "EXIT\n");
-      fflush(stderr);
-      exit(-1);
-   }
-
-
-    
-   if ( -1==ioctl(Stream->fd, DMX_START, 0) ) {
-      perror("ERROR: DmxReader() - dmx start ioctl");
-      fprintf(stderr, "EXIT\n");
-      fflush(stderr);
-      exit(-1);
-   } 
-
-   // DMX-Buffer von alten Daten leeren
-   // Diese Daten den "avia_gt_dmx: queue 3 overflow (count: 1)" am Start,
-   // wenn man mehrere Male hintereinander streamt. Kritisch ist vor allem
-   // MP2-Audio. Die Altdaten wuerden zu einem Wingrab-Abbruch fuehren.
-   //for (i=0; i<DMX_BUF_FACTOR+1; i++) 
-    // read( Stream->fd, Stream->Buf[0], BufSize);
-
-
-   printf("INFO: DmxReader() - Pid %x %u %i %i\n", Stream->Filter.pid,
-         BufSize, Stream->WriteBuf, Stream->ReadBuf);
+   printf("INFO: DmxTSReader() - Pid %u %i %i\n", 
+         BufSize, CurStream->WriteBuf, CurStream->ReadBuf);
    fflush(stdout); 
 
    BufLen = 0;
    while( !StreamStop ) {
-      RetVal = read( Stream->fd, 
-	             Stream->Buf[Stream->WriteBuf]+BufLen,
+      RetVal = read( fd_dvr, 
+	             CurStream->Buf[CurStream->WriteBuf]+BufLen,
 	             BufSize - BufLen );
 	  
       if (RetVal == -1) {
          perror("ERROR: DmxReader() - read");
-         fprintf(stderr, "EXIT (pid %x)\n", Stream->Filter.pid);
+         fprintf(stderr, "EXIT (pid %x)\n", CurStream->Filter.pid);
          fflush(stderr);
          exit(-1);
       }
       BufLen += RetVal;
       if ( BufLen < BufSize ) continue; 
+
+      //usleep(100000);
 	    	    
-      if ( Stream->WriteBuf != Stream->ReadBuf ) {
-         usleep( 300000 );
-         if ( Stream->WriteBuf != Stream->ReadBuf ) {
-            fprintf(stderr, "ERROR: DmxReader() - buffer overflow Pid %x %i %i\n",
-                 Stream->Filter.pid, Stream->WriteBuf, Stream->ReadBuf);
+      if ( CurStream->WriteBuf != CurStream->ReadBuf ) {
+         usleep( 200000 );
+         if ( CurStream->WriteBuf != CurStream->ReadBuf ) {
+            fprintf(stderr, 
+						"ERROR: DmxReader() - buffer overflow Pid %i %i\n",
+                  CurStream->WriteBuf, CurStream->ReadBuf);
             fflush(stderr);
             continue;
             //exit(-1);
          }
       }
-      if (Stream->WriteBuf == 0) Stream->WriteBuf = 1;
-                            else Stream->WriteBuf = 0;  
+      if (CurStream->WriteBuf == 0) CurStream->WriteBuf = 1;
+                            else CurStream->WriteBuf = 0;  
 
       BufLen = 0;
    }	 
-   if ( -1 == ioctl(Stream->fd, DMX_STOP, 0) ) {
+	
+	for (u = 0; u < StreamNum; u++) {
+		if ( -1 == ioctl(Stream[u].fd, DMX_STOP, 0) ) {
+			perror("ERROR: DmxReader() - dmx stop ioctl");
+			fprintf(stderr, "Pid %x\n", Stream[u].Filter.pid);
+			fflush(stderr);
+		} 	 
+		close( Stream[u].fd );
+	}
+   close( fd_dvr );
+   free( CurStream->Buf[0] );
+   free( CurStream->Buf[1] );
+   CurStream->Stopped = 1;
+   pthread_exit(0);
+}
+
+void * DmxReader( void * Ptr )
+{
+   unsigned BufLen, BufSize;
+   int  RetVal;
+   StreamType *CurStream;        
+   CurStream = (StreamType*)Ptr;
+   BufSize = (CurStream->BufPacketNum) * NET_DATA_PER_PACKET;
+   
+   CurStream->fd = open("/dev/dvb/adapter0/demux0", O_RDWR);
+   if (-1 == CurStream->fd) {
+      perror("ERROR: main() - demux0 open");
+      fprintf(stderr, "EXIT\n");
+      fflush(stderr);
+      exit(-1);
+   }
+	
+   if ( -1 == ioctl(CurStream->fd, DMX_SET_BUFFER_SIZE, // 1024*1024) ) { 
+       CurStream->BufPacketNum * NET_DATA_PER_PACKET * DMX_BUF_FACTOR) ) { 
+      perror("ERROR: main() - dmx set buffer ioctl");
+      fprintf(stderr, "EXIT\n");
+      fflush(stderr);
+      exit(-1);
+   }
+		 
+   CurStream->Filter.input=DMX_IN_FRONTEND;
+   CurStream->Filter.output=DMX_OUT_TAP;
+   CurStream->Filter.pes_type=DMX_PES_OTHER;
+   CurStream->Filter.flags=0;
+   //CurStream->Filter.flags=DMX_IMMEDIATE_START;
+
+   if (-1==ioctl(CurStream->fd, DMX_SET_PES_FILTER, &(CurStream->Filter)) ) {
+      perror("ERROR: main() - DMX_SET_PES_FILTER ioctl");
+      fprintf(stderr, "EXIT\n");
+      fflush(stderr);
+      exit(-1);
+   }
+    
+   if ( -1==ioctl(CurStream->fd, DMX_START, 0) ) {
+      perror("ERROR: DmxReader() - DMX_START ioctl");
+      fprintf(stderr, "EXIT\n");
+      fflush(stderr);
+      exit(-1);
+   } 
+
+   printf("INFO: DmxReader() - Pid %x %u %i %i\n", CurStream->Filter.pid,
+         BufSize, CurStream->WriteBuf, CurStream->ReadBuf);
+   fflush(stdout); 
+
+   BufLen = 0;
+   while( !StreamStop ) {
+      RetVal = read( CurStream->fd, 
+	             CurStream->Buf[CurStream->WriteBuf]+BufLen,
+	             BufSize - BufLen );
+	  
+      if (RetVal == -1) {
+         perror("ERROR: DmxReader() - read");
+         fprintf(stderr, "EXIT (pid %x)\n", CurStream->Filter.pid);
+         fflush(stderr);
+         exit(-1);
+      }
+      BufLen += RetVal;
+      if ( BufLen < BufSize ) continue; 
+
+      usleep(100000);
+	    	    
+      if ( CurStream->WriteBuf != Stream->ReadBuf ) {
+         usleep( 300000 );
+         if ( CurStream->WriteBuf != CurStream->ReadBuf ) {
+            fprintf(stderr, 
+						"ERROR: DmxReader() - buffer overflow Pid %x %i %i\n",
+                 CurStream->Filter.pid, CurStream->WriteBuf, 
+					  CurStream->ReadBuf);
+            fflush(stderr);
+            continue;
+            //exit(-1);
+         }
+      }
+      if (CurStream->WriteBuf == 0) CurStream->WriteBuf = 1;
+                            else CurStream->WriteBuf = 0;  
+
+      BufLen = 0;
+   }	 
+   if ( -1 == ioctl(CurStream->fd, DMX_STOP, 0) ) {
       perror("ERROR: DmxReader() - dmx stop ioctl");
-      fprintf(stderr, "Pid %x\n", Stream->Filter.pid);
+      fprintf(stderr, "Pid %x\n", CurStream->Filter.pid);
       fflush(stderr);
    } 	 
-   close( Stream->fd );
-   free( Stream->Buf[0] );
-   free( Stream->Buf[1] );
-   Stream->Stopped = 1;
+   close( CurStream->fd );
+   free( CurStream->Buf[0] );
+   free( CurStream->Buf[1] );
+   CurStream->Stopped = 1;
    pthread_exit(0);
 }
 
@@ -302,8 +377,8 @@ void * TcpReceiver( void * Ptr )
 {
    char TcpString[STRING_SIZE], PacketString[STRING_SIZE];
    unsigned SPktBuf, u;
-
-   (void)Ptr;
+	
+	(void)Ptr;
 
    while(true) {
       ReadLine( TcpString );
@@ -336,32 +411,31 @@ PacketHeaderType *PacketHeader;
 
 void CheckNextSPktWriteBuf()
 {
-
-                  if (SPkt.WritePkt == SPKT_BUF_PACKET_NUM ) {
-                     PacketHeader->Status = 1; 
-                     // Trigger fuer TCP-Kommunikation - SPkt-Ende 
-                                            
-                     if (NextSPktBuf[SPkt.WriteBuf] == SPkt.ReadBuf) {
-                        fprintf(stderr, "ERROR: main() - SPkt buffer overflow\n");
-                        fflush(stderr);
-                        // exit(-1);
-                     } else {
-                        SPkt.WriteBuf = NextSPktBuf[SPkt.WriteBuf];
-                     }
-                     SPkt.WritePkt = 0;
-                     WritePtr = SPkt.Buf[SPkt.WriteBuf];
-              
-                     if (Send.Watchdog >= WATCHDOG_TRESHOLD ) {
-                        fprintf(stderr, "ERROR: main() - Send.Watchdog kill %i\n",
-                                                         Send.ProcessID);
-                        fflush(stderr);
-                        pthread_cancel( Send.Thread );
-                        Send.Watchdog = 0;
-                        RestartUdpSender();
-                     } else {
-                        Send.Watchdog++;
-                     }
-                  }
+	if (SPkt.WritePkt == SPKT_BUF_PACKET_NUM ) {
+		PacketHeader->Status = 1; 
+		// Trigger fuer TCP-Kommunikation - SPkt-Ende 
+			 
+		if (NextSPktBuf[SPkt.WriteBuf] == SPkt.ReadBuf) {
+			fprintf(stderr, "ERROR: main() - SPkt buffer overflow\n");
+			fflush(stderr);
+			// exit(-1);
+		} else {
+			SPkt.WriteBuf = NextSPktBuf[SPkt.WriteBuf];
+		}
+		SPkt.WritePkt = 0;
+		WritePtr = SPkt.Buf[SPkt.WriteBuf];
+						  
+		if (Send.Watchdog >= WATCHDOG_TRESHOLD ) {
+			fprintf(stderr, "ERROR: main() - Send.Watchdog kill %i\n",
+					  Send.ProcessID);
+			fflush(stderr);
+			pthread_cancel( Send.Thread );
+			Send.Watchdog = 0;
+			RestartUdpSender();
+		} else {
+			Send.Watchdog++;
+		}
+	}
 }
    
 int main ()
@@ -369,6 +443,7 @@ int main ()
    unsigned Bouquet;
    unsigned Channel;
    unsigned BufNum;
+   int RadioMode;
    int ExtraPidNum;
    unsigned ExtraPid[MAX_PID_NUM];
    char ExtraAVString[MAX_PID_NUM+1], AVString[MAX_PID_NUM+1];
@@ -377,8 +452,8 @@ int main ()
    char TcpString[STRING_SIZE];
 
    pthread_t TcpReceiverThread;
-   pthread_attr_t ThreadAttr;
-   struct sched_param SchedParam;
+   //pthread_attr_t ThreadAttr;
+   //struct sched_param SchedParam;
  
    int RetVal, i;
    unsigned u, v;
@@ -417,28 +492,41 @@ int main ()
    for (u=0; u<BufNum-1; u++) NextSPktBuf[u] = u+1;
    NextSPktBuf[BufNum-1] = 0;
 
-   if ( Bouquet == 0 ) {
-      StreamNum = 0;
-   } else { 
+   if (!strcmp(CmdString, "VIDEO")) {
+      RadioMode = 0;
+      TSMode = 0;
+   } else if (!strcmp(CmdString, "VIDEOTS")) {
+      RadioMode = 0;
+      TSMode = 1;
+   } else if (!strcmp(CmdString, "AUDIO")) {
+      RadioMode = 1;
+      TSMode = 0;
+   } else if (!strcmp(CmdString, "AUDIOTS")) {
+      RadioMode = 1;
+      TSMode = 1;
+   } else {
+      fprintf(stderr, "ERROR: main() - illegal command\nEXIT\n");
+      fflush(stderr);
+      exit(-1);
+   }
+
+   CZapitClient zapit;
+	
+   StreamNum = 0;
+   if ( Bouquet != 0 ) {
       // Programm umschalten
-      CZapitClient zapit;
       CZapitClient::responseGetPIDs pids;
  
-      if ( !strcmp(CmdString, "VIDEO" ) ) {
-         zapit.setMode(CZapitClient::MODE_TV);
-      } else if ( !strcmp(CmdString, "AUDIO" ) ) {
+      if (RadioMode) {
          zapit.setMode(CZapitClient::MODE_RADIO);
       } else {
-         fprintf(stderr, "ERROR: main() - illegal command\nEXIT\n");
-         fflush(stderr);
-         exit(-1);
+         zapit.setMode(CZapitClient::MODE_TV);
       }
- 
+
       zapit.zapTo(Bouquet-1,Channel);
       zapit.getPIDS(pids);
    
       // Pid's ermitteln
-      StreamNum = 0;
       if (pids.PIDs.vpid) {
           Stream[StreamNum].Filter.pid = pids.PIDs.vpid;
           AVString[StreamNum] = 'v';
@@ -450,6 +538,19 @@ int main ()
          AVString[StreamNum] = 'a';
          Stream[StreamNum++].BufPacketNum = AUDIO_BUF_PACKET_NUM;
       }
+      if (TSMode) {
+			// PMT-Pid wird benotigt nicht ServiceID!!
+         //Stream[StreamNum].Filter.pid = zapit.getCurrentServiceID();
+         //AVString[StreamNum] = 'a';
+         //Stream[StreamNum++].BufPacketNum = AUDIO_BUF_PACKET_NUM;
+			zapit.stopPlayBack();  // TS-Streaming geht sonst nicht!
+      }
+   }
+
+   if (TSMode) {
+      Stream[StreamNum].Filter.pid = 0;
+      AVString[StreamNum] = 'a';
+      Stream[StreamNum++].BufPacketNum = AUDIO_BUF_PACKET_NUM;
    }
 
    for ( i=0; i<ExtraPidNum; i++) { 
@@ -471,13 +572,19 @@ int main ()
       }
    }
    if (StreamNum == 0) {
-      fprintf(stderr, "ERORR: main() - StreamNum == 0\nEXIT\n");
+      fprintf(stderr, "ERROR: main() - no pids to record\nEXIT\n");
       fflush(stderr);
       exit(-1);
    }
 
    AVString[StreamNum] = 0;
-   
+
+   if (TSMode) {
+		StreamThreadNum = 1;
+		Stream[0].BufPacketNum = 188;
+	} else {
+		StreamThreadNum = StreamNum;
+	}
  
 
    // Adresse fuer Send.Socket ermitteln
@@ -495,7 +602,7 @@ int main ()
    fflush(stdout);
 
    // Antwort an Client
-   printf("PID %s %i", AVString, StreamNum);
+   printf("PID %s %i", AVString, StreamThreadNum);
    for (u=0; u<StreamNum; u++) printf(" %x", Stream[u].Filter.pid);
    printf("\n");
    fflush(stdout);
@@ -538,25 +645,27 @@ int main ()
    Send.Packet = 0;
    RestartUdpSender();
 
-   // DmxReader vorbereiten
-   StreamStop = 0;
-   for (u=0; u<StreamNum; u++) {
-      Stream[u].ReadBuf = 0;
-      Stream[u].WriteBuf = 0;
-      Stream[u].ReadPkt = 0;
-      Stream[u].Stopped = 0;
 
-      Stream[u].Ptr = (void*)&(Stream[u]);
-      for( v=0; v<2; v++) {
-         Stream[u].Buf[v] = (unsigned char*)malloc( 
-               Stream[u].BufPacketNum * NET_DATA_PER_PACKET );
-         if ( Stream[u].Buf[v] == 0 ) {
-            fprintf(stderr, "ERROR: main() - malloc Stream.Buf\nEXIT\n");
-            fflush(stderr);
-            exit(-1);
-         }
-      }
-   }        
+
+	// DmxReader vorbereiten
+	StreamStop = 0;
+	for (u=0; u<StreamThreadNum; u++) {
+		Stream[u].ReadBuf = 0;
+		Stream[u].WriteBuf = 0;
+		Stream[u].ReadPkt = 0;
+		Stream[u].Stopped = 0;
+
+		Stream[u].Ptr = (void*)&(Stream[u]);
+		for( v=0; v<2; v++) {
+			Stream[u].Buf[v] = (unsigned char*)malloc( 
+			Stream[u].BufPacketNum * NET_DATA_PER_PACKET );
+			if ( Stream[u].Buf[v] == 0 ) {
+				fprintf(stderr, "ERROR: main() - malloc Stream.Buf\nEXIT\n");
+				fflush(stderr);
+				exit(-1);
+			}
+		}
+	}        
 
 
    // Tcp Receiver starten -> STOP, RESEND Befehle auswerten
@@ -567,21 +676,31 @@ int main ()
       exit(-1);
    }
 
-   SchedParam.sched_priority = 10;
-   pthread_attr_init(&ThreadAttr);
-   pthread_attr_setschedpolicy(&ThreadAttr, SCHED_FIFO );
-   pthread_attr_setschedparam(&ThreadAttr, &SchedParam);
+   //SchedParam.sched_priority = 10;
+   //pthread_attr_init(&ThreadAttr);
+   //pthread_attr_setschedpolicy(&ThreadAttr, SCHED_FIFO );
+   //pthread_attr_setschedparam(&ThreadAttr, &SchedParam);
 
-   // DmxReader Thread's starten
-   for (u=0; u<StreamNum; u++) {
-      if ( pthread_create(&(Stream[u].Thread), &ThreadAttr, 
-                            DmxReader, Stream[u].Ptr ) ) {
+	// DmxReader Thread's starten
+   if (TSMode) {
+      if ( pthread_create(&(Stream[u].Thread), 0, //&ThreadAttr, 
+                            DmxTSReader, 0 ) ) {
          perror("ERROR: main() - DmxReader pthread_create");
          fprintf(stderr, "EXIT\n");
          fflush(stderr);
          exit(-1);
       }
-   }
+   } else {		
+		for (u=0; u<StreamThreadNum; u++) {
+			if ( pthread_create(&(Stream[u].Thread), 0, //&ThreadAttr, 
+										 DmxReader, Stream[u].Ptr ) ) {
+				perror("ERROR: main() - DmxReader pthread_create");
+				fprintf(stderr, "EXIT\n");
+				fflush(stderr);
+				exit(-1);
+			}
+		}
+	}
    
    // ****************************************************************
    // Hauptschleife
@@ -613,7 +732,7 @@ int main ()
       }
       EmptyStreamBuffers = 0;
       do {
-         for(u=0; u<StreamNum; u++) {
+         for(u=0; u<StreamThreadNum; u++) {
             if ( Stream[u].Stopped ) {
                StoppedDmxReaders++;
                EmptyStreamBuffers++;
@@ -642,9 +761,9 @@ int main ()
                EmptyStreamBuffers++;
             }
          }
-      } while ( EmptyStreamBuffers < StreamNum );      
+      } while ( EmptyStreamBuffers < StreamThreadNum );      
       usleep(15000);  // 10% * 128 * 1468 * 8 / 10 MBit/s 
-   } while (StoppedDmxReaders < StreamNum );
+   } while (StoppedDmxReaders < StreamThreadNum );
    PacketHeader->Status = 2; 
    SPkt.WriteBuf = NextSPktBuf[SPkt.WriteBuf];
    StreamStop = 0;
@@ -652,6 +771,8 @@ int main ()
    printf("EXIT\n" );
    fflush(stdout);
 
+	if (TSMode) {
+		zapit.startPlayBack();  // TS-Streaming geht sonst nicht!
+	}
    return 0;
 }
-
