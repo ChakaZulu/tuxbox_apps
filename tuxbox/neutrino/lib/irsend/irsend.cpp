@@ -5,6 +5,9 @@
 	License: GPL
 
 	Aenderungen: $Log: irsend.cpp,v $
+	Aenderungen: Revision 1.3  2004/02/19 23:07:29  zwen
+	Aenderungen: removed debug printf
+	Aenderungen:
 	Aenderungen: Revision 1.2  2004/02/19 23:00:34  zwen
 	Aenderungen: Improved neutrino volume/mute handling:
 	Aenderungen: - nhttpd now mutes and sets the correct volume (avs,ost & LIRC !)
@@ -51,7 +54,6 @@ CIRSend::CIRSend(const char * const configfile)
 
 bool CIRSend::Send()
 {
-	printf("CIRSend::Send() %s\n",m_configFile.c_str());
 	std::ifstream inp;
 	char buffer[101];
 	int wait_time;
