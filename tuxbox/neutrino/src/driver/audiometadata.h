@@ -46,7 +46,7 @@ public:
 		NONE,
 		MP3,
 		OGG,
-		PCM
+		WAV
 	};
 	AudioType type;
 	std::string type_info;

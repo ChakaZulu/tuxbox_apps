@@ -102,6 +102,10 @@ void* CAudioPlayer::PlayThread(void * filename)
 			{
 				Status = COggDec::getInstance()->Decoder(fp,soundfd,&CAudioPlayer::getInstance()->state);
 			}
+			else if(ftype(fp, "wav"))
+			{
+				Status = CWavDec::getInstance()->Decoder(fp,soundfd,&CAudioPlayer::getInstance()->state);
+			}
 			else
 			{
 				Status = CMP3Dec::getInstance()->Decoder(fp,soundfd,&CAudioPlayer::getInstance()->state);
@@ -224,6 +228,10 @@ CAudioMetaData CAudioPlayer::readMetaData(const char* filename, bool nice)
 		if(ftype(fp, "ogg"))
 		{
 			Status = COggDec::getInstance()->GetMetaData(fp, nice, &m);
+		}
+		else if(ftype(fp, "wav"))
+		{
+			Status = CWavDec::getInstance()->GetMetaData(fp, nice, &m);
 		}
 		else
 		{

@@ -112,6 +112,8 @@ CFile::FileType CFile::getType(void) const
 			return STREAM_PICTURE;
 		if (strcasecmp(extension.c_str(),"ogg") == 0)
 			return FILE_OGG;
+		if (strcasecmp(extension.c_str(),"wav") == 0)
+			return FILE_WAV;
 	}
 	return FILE_UNKNOWN;
 }
