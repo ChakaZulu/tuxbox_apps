@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.15 2002/10/25 11:18:08 dirch Exp $
+	$Id: webapi.cpp,v 1.16 2002/10/28 15:45:06 dirch Exp $
 
 	License: GPL
 
@@ -549,17 +549,17 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 bool CWebAPI::ShowControlpanel(CWebserverRequest* request)
 {
 CStringList params;
+char volbuf[5];
+
+	int vol = Parent->Controld->getVolume();
+	sprintf(volbuf,"%d",vol);
+	params["VOL1"] = volbuf;
+	sprintf(volbuf,"%d",100 - vol);
+	params["VOL2"] = volbuf;
 
 	if(Parent->Parent->NewGui)
 	{
 		request->SendPlainHeader("text/html");
-
-		int vol = Parent->Controld->getVolume();
-		char volbuf[5];
-		sprintf(volbuf,"%d",vol);
-		params["VOL1"] = volbuf;
-		sprintf(volbuf,"%d",100 - vol);
-		params["VOL2"] = volbuf;
 
 		if(	Parent->Controld->getMute())
 		{
@@ -576,24 +576,12 @@ CStringList params;
 	}
 	else
 	{
-		char mutestr[6]={0};
-
 		request->SendPlainHeader("text/html");
-
-		int vol = Parent->Controld->getVolume();
-
-		request->SendFile(Parent->Parent->PrivateDocumentRoot,"/controlpanel.include1");
-		//muted
 		if(	Parent->Controld->getMute())
-			strcpy(mutestr,"mute");
+			params["MUTE"] == "mute";
 		else
-			strcpy(mutestr,"muted");
-		request->printf("<TD><a HREF=\"/fb/controlpanel.dbox2?volumemute\" target=navi onMouseOver=\"mute.src='../images/%s_on.jpg';\" onMouseOut=\"mute.src='../images/%s_off.jpg';\"><img src=/images/%s_off.jpg width=25 height=28 name=mute></a><br></TD>\n",mutestr,mutestr,mutestr);
-		request->SendFile(Parent->Parent->PrivateDocumentRoot,"/controlpanel.include2");
-		//volume bar...
-		request->printf("<TD><img src=../images/vol_flashed.jpg width=%d height=10><br></TD>\n",vol);
-		request->printf("<TD><img src=../images/vol_unflashed.jpg width=%d height=10><br></TD>\n",100-vol);
-		request->SendFile(Parent->Parent->PrivateDocumentRoot,"/controlpanel.include3");
+			params["MUTE"] == "muted";
+		request->ParseFile(Parent->Parent->PrivateDocumentRoot + "/controlpanel_old.html", params);
 	}
 	return true;
 
