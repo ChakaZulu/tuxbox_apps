@@ -1,18 +1,23 @@
 
-dvbsnoop
-========
+dvbsnoop   - an open source DVB/MPEG stream analyzer
+====================================================
+
 
 http://dvbsnoop.sourceforge.net/
 http://cvs.tuxbox.org/
 
 
-dvbsnoop is a simple dvb/mpeg stream analyzer program.
+
+dvbsnoop is a dvb/mpeg stream analyzer program.
 The program can be used to sniff, monitor, debug, dump
-or view dvb/mpeg/dsm-cc/MHP stream information (digital television)
-send via satellite, cable or terrestrial.
+or view dvb/mpeg/dsm-cc/MHP stream information (digital
+television or data broadcasts) send via satellite, cable
+or terrestrial.
 
 The programm was mainly written to learn and understand the DVB 
-protocol structures and streams.
+protocol structures and streams. dvbsnoop is currently part of
+the tuxbox project, bringing linux based TV software to some
+set top boxes (digital satellite/cable receivers).
 
 
 Documentation and example outputs can be found on:
@@ -22,14 +27,15 @@ Documentation and example outputs can be found on:
 
 
 Disclaimer:
+===========
   You are using this program at your own risk!
-
   This program may not be used to hack pay tv or encrypted dvb services
   in any way.
 
 
 
 License: 
+========
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
@@ -47,13 +53,23 @@ License:
 
 It is not allowed to sell this or parts of this software without prior written
 permission by the author. It is also not allowed to bundle this software for
-commercial purpose without prior written permission by the author. This
-includes also offers in online auctions...
+commercial purpose without prior written permission by the author. 
+
+
+
+Basic Requirements:
+===================
+
+  - a DVB card  (not needed for offline decoding of streamed files)
+  - Linux DVB-API 1 or 3 installed  (see: www.linuxtv.org)
+ or
+  - a linux based SetTopBox (using DVB-API 1 or 3)
+    (e.g. 'dbox2' or 'dreambox')
 
 
 
 Installation:
-
+=============
   - install the dvb-api driver from http://www.linuxtv.org
     (linux kernel 2.6.x and above are already providing the dvb-api)
 
@@ -66,7 +82,7 @@ Installation:
       cd dvbsnoop-<version>
 
   - configure the source
-      ./autogen.sh	# e.g. on dbox2 cdk, use if needed
+      ./autogen.sh	# e.g. on "dbox2" cdk, use if needed
       ./configure
     
     or you may specify path to dvb-api include files
@@ -82,6 +98,7 @@ Installation:
 
 
 Posting DVBSNOOP output:
+========================
   If you are posting dvbsnoop output to mail lists, newsgroups, public boards
   or whatever, please always include the dvbsnoop header:
 
@@ -92,8 +109,29 @@ Posting DVBSNOOP output:
 
 
 
+Using source code snipsets for your own purpose:
+================================================
+  You may do so. But you should follow the rules of the GPL.
+  Please include a link or reference to dvbsnoop in your program or
+  documentation... Tnx.
+
+
+
+Bugs, Requests:
+===============
+  Well, if you find some bugs, please let me know.
+  (check first, if the data stream is not broken).
+
+  Please do not send binary data stream files or large 
+  decoding output via email! (I needed, I will ask for it!)
+  But it is a good advise to save the data stream using
+  the option "dvbsnoop -s ... -b ... > file" on your harddrive.
+  It might be helpful for further investigations.
+
+
 
 Keywords:
+=========
    DVB stream analyzer mpeg stream analyzer, ts stream analyzer, MPEG,
    MPG, descriptor, digital television, satellite TV, cable TV, dvb-c,
    dvb-s, dvb-t, MHP, DSM-CC, SI, PES, TOT, PAT, PMT, SDT, EIT, NIT,

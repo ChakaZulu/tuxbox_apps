@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.4 2004/04/15 22:29:23 rasc Exp $
+$Id: ts2secpes.c,v 1.5 2004/04/15 23:22:58 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ts2secpes.c,v 1.4 2004/04/15 22:29:23 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.5  2004/04/15 23:22:58  rasc
+no message
+
 Revision 1.4  2004/04/15 22:29:23  rasc
 PMT: some brainded section check
 TS: filter single pids from multi-pid ts-input-file
@@ -250,9 +253,9 @@ void ts2SecPes_Output_subdecode (void)
 
      indent (+1);
      out_NL (3);
-     out_nl (3,"TS-Packet(s) sub-decoding (%4d packet(s) for PID 0x%04x stored):",
+     out_nl (3,"TS-Packet(s) sub-decoding (%d packet(s) for PID 0x%04x stored):",
 		     tsd.packet_counter,tsd.pid & 0xFFFF);
-     out_nl (3,"==================================================================");
+     out_nl (3,"===============================================================");
 
 
      if (! packetMem_length (tsd.mem_handle) ) {
