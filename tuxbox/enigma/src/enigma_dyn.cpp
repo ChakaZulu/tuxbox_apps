@@ -50,7 +50,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.3.3"
+#define WEBXFACEVERSION "1.3.4"
 
 int smallScreen = 0;
 
@@ -521,13 +521,58 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 	return result;
 }
 
+eString getCurrentSubChannel(eString curServiceRef)
+{
+	eString subChannel;
+
+	if (curServiceRef)
+	{
+		eString s1 = curServiceRef; int pos; eString nspace;
+		for (int i = 0; i < 7 && s1.find(":") != eString::npos; i++)
+		{
+			pos = s1.find(":");
+			nspace = s1.substr(0, pos);
+			s1 = s1.substr(pos + 1);
+		}
+		EIT *eit = eDVB::getInstance()->getEIT();
+		if (eit)
+		{
+			ePtrList<EITEvent>::iterator s(eit->events);
+			for (ePtrList<Descriptor>::iterator d(s->descriptor); d != s->descriptor.end(); ++d)
+			{
+				if (d->Tag() == DESCR_LINKAGE)
+				{
+					char tmp[256];
+					LinkageDescriptor *ld =(LinkageDescriptor *)*d;
+					if ((unsigned int)ld->priv_len < sizeof(tmp))
+					{
+						strncpy(tmp, (char *)ld->private_data, ld->priv_len);
+						tmp[ld->priv_len] = '\0';
+					}
+					else
+						strcpy(tmp, "buffer too small");
+					eString subService(tmp);
+
+					eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
+							  + eString(nspace) + ":0:0:0:";
+
+					if (subServiceRef == curServiceRef)
+						subChannel = removeBadChars(subService);
+				}
+			}
+			eit->unlock();
+		}
+	}
+
+	return subChannel;
+}
+
 static eString selectSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString subChannels = "<option>no subchannels available</option>";
+	eString subChannels;
 
 	eString curServiceRef = ref2string(eServiceInterface::getInstance()->service);
-	printf("[SELECTSUBCHANNEL] curService = %s\n", curServiceRef.c_str());
 	if (curServiceRef)
 	{
 		eString s1 = curServiceRef; int pos; eString nspace;
@@ -571,6 +616,9 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 			eit->unlock();
 		}
 	}
+
+	if (subChannels == "")
+		subChannels = "<option>No subchannels available</option>";
 
 	eString result = readFile(TEMPLATE_DIR + "subChannelSelection.tmp");
 	result.strReplace("#SUBCHANS#", subChannels);
@@ -657,7 +705,8 @@ static eString getChannelNavi(void)
 	{
 		result = button(100, "Audio", OCKER, "javascript:selectAudio()");
 		result += button(100, "SubChannel", OCKER, "javascript:selectSubChannel()");
-		if (getCurService() != "&nbsp;")
+
+		if (getCurService() != "&nbsp;" || getCurrentSubChannel(ref2string(sapi->service)) != "")
 		{
 			result += button(100, "EPG", GREEN, "javascript:openEPG()");
 			if (smallScreen == 0)
@@ -2403,7 +2452,21 @@ eString getEITC2(eString result)
 	result.strReplace("#NEXTST#", next_text);
 	result.strReplace("#VOLBAR#", getVolBar());
 	result.strReplace("#MUTE#", getMute());
-	result.strReplace("#SERVICENAME#", getCurService());
+	eString curService = getCurService();
+	eString curServiceRef;
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+		curServiceRef = ref2string(sapi->service);
+	eString curSubService = getCurrentSubChannel(curServiceRef);
+	if (curSubService != "")
+	{
+		if (curService != "&nbsp;")
+			curService += ": ";
+		else
+			curService = "";
+		curService += curSubService;
+	}
+	result.strReplace("#SERVICENAME#", curService);
 	result.strReplace("#STATS#", getStats());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
 	result.strReplace("#CHANSTATS#", getChannelStats());
