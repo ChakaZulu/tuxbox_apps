@@ -26,7 +26,7 @@ Descriptor::~Descriptor()
 {
 }
 
-static int fromBCD(int bcd)
+int fromBCD(int bcd)
 {
 	if ((bcd&0xF0)>=0xA0)
 		return -1;
@@ -35,7 +35,7 @@ static int fromBCD(int bcd)
 	return ((bcd&0xF0)>>4)*10+(bcd&0xF);
 }
 
-static time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5)
+time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5)
 {
 	tm t;
 	t.tm_sec=fromBCD(t5);
