@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.cpp,v 1.3 2003/03/03 05:48:02 obi Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.cpp,v 1.4 2003/03/14 11:56:53 alexw Exp $
  *
  * DMX low level functions (sectionsd) - d-box2 linux project
  *
@@ -99,12 +99,14 @@ bool getUTC(UTC_t * const UTC, const bool TDT)
 	if (::ioctl(fd, DMX_SET_FILTER, &flt) == -1)
 	{
 		perror("[sectionsd] getUTC: set filter");
+		::close(fd);
 		return false;
 	}
 
 	if (::read(fd, &tdt_tot_header, sizeof(tdt_tot_header)) != sizeof(tdt_tot_header))
 	{
 		perror("[sectionsd] getUTC: read");
+		::close(fd);
 		return false;
 	}
 
