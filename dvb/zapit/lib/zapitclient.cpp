@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.20 2002/04/04 14:41:08 rasc Exp $
+  $Id: zapitclient.cpp,v 1.21 2002/04/05 01:14:18 rasc Exp $
 
   License: GPL
 
@@ -20,13 +20,12 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.21  2002/04/05 01:14:18  rasc
+  -- Favorites Bouquet handling (Easy Add Channels)
+
   Revision 1.20  2002/04/04 14:41:08  rasc
   - New functions in zapitclient for handling favorites
     - test if a bouquet exists
-  - Some Log - CVS Entries in modules
-
-  Revision 1.19  2002/04/02 23:08:04  rasc
-  -- ...existBouquet: check if Bouquet exists (returns true/false)
 
   Revision 1.18  2002/03/25 00:07:45  McClean
   use UDS - add getLastChannel
@@ -525,9 +524,9 @@ void CZapitClient::moveBouquet( unsigned int bouquet, unsigned int newPos)
 
 //
 // -- check if Bouquet-Name exists (2002-04-02 rasc)
-// -- Return: Bouquet-ID  or -1 
+// -- Return: Bouquet-ID  or  0 == no Bouquet found
 //
-int CZapitClient::existsBouquet( string name)
+unsigned int CZapitClient::existsBouquet( string name)
 {
         commandHead msgHead;
         commandExistsBouquet msg;
@@ -542,10 +541,9 @@ int CZapitClient::existsBouquet( string name)
         send((char*)&msgHead, sizeof(msgHead));
         send((char*)&msg, sizeof(msg));
 
-#warning "Help me here! Please someone check this: simplex?? (rasc)"
 	receive((char* )&response, sizeof(response));
         zapit_close();
-	return response.number;
+	return (unsigned int) response.number;
 }
  
 

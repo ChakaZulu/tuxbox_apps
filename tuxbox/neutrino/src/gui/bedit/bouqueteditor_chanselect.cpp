@@ -1,4 +1,7 @@
 /*
+$Id: bouqueteditor_chanselect.cpp,v 1.12 2002/04/05 01:14:43 rasc Exp $
+
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -27,6 +30,14 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+$Log: bouqueteditor_chanselect.cpp,v $
+Revision 1.12  2002/04/05 01:14:43  rasc
+-- Favorites Bouquet handling (Easy Add Channels)
+
+
+
 */
 
 #include "bouqueteditor_chanselect.h"

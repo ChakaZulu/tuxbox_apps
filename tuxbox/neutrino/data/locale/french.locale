@@ -420,3 +420,11 @@ parentallock.changepin_hint1 Enter your new youth protection pin code here!
 
 pinprotection.wrongcode PIN-Code was wrong! Try again.
 pinprotection.head Enter PIN code
+
+favorites.bouquetname My Favorites
+favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds... 
+favorites.menueadd add channel to favorites
+favorites.bqcreated Bouquet "My Favorites" has been created...\n
+favorites.chadded The current channel has been added to your favorites...\n
+favorites.chalreadyinbq The current channel is already in your favorites...\n
+favorites.finalhint \nUse the bouqueteditor to modify your favorites.\n

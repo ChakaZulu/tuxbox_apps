@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.118 2002/04/04 23:40:55 obi Exp $
+  $Id: zapit.cpp,v 1.119 2002/04/05 01:14:18 rasc Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -93,6 +93,9 @@
 
 
 $Log: zapit.cpp,v $
+Revision 1.119  2002/04/05 01:14:18  rasc
+-- Favorites Bouquet handling (Easy Add Channels)
+
 Revision 1.118  2002/04/04 23:40:55  obi
 support for new camd
 
@@ -2088,9 +2091,11 @@ void parse_command()
 			case CZapitClient::CMD_BQ_EXISTS_BOUQUET :		// 2002-04-03 rasc
 				CZapitClient::commandExistsBouquet msgExistsBouquet;
 				read( connfd, &msgExistsBouquet, sizeof(msgExistsBouquet));
-				responseInteger.number = g_BouquetMan->existsBouquet(msgExistsBouquet.name);
+				// -- for some unknown reason BQ-IDs are externally  1..n
+				// -- internally BQ-IDs are 0..n-1, so add 1!!
+				// -- This also means "not found (-1)" get's to zero (0)
+				responseInteger.number = g_BouquetMan->existsBouquet(msgExistsBouquet.name)+1;
 				send( connfd, &responseInteger, sizeof(responseInteger),0);
-#warning "Help needed here, someone check this please: simplex?? (rasc)"
 			break;
 
 
@@ -2308,7 +2313,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.118 2002/04/04 23:40:55 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.119 2002/04/05 01:14:18 rasc Exp $\n\n");
 
 	if (argc > 1)
 	{

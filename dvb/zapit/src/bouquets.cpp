@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.19 2002/04/04 14:41:08 rasc Exp $
+  $Id: bouquets.cpp,v 1.20 2002/04/05 01:14:18 rasc Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.20  2002/04/05 01:14:18  rasc
+  -- Favorites Bouquet handling (Easy Add Channels)
+
   Revision 1.19  2002/04/04 14:41:08  rasc
   - New functions in zapitclient for handling favorites
     - test if a bouquet exists
@@ -682,7 +685,7 @@ void CBouquetManager::deleteBouquet( string name)
 
 //
 // -- Find Bouquet-Name, if BQ exists   (2002-04-02 rasc)
-// -- Return: Bouqet-ID (found)  or -1 (Bouquet does not exist)
+// -- Return: Bouqet-ID (found: 0..n)  or -1 (Bouquet does not exist)
 //
 int CBouquetManager::existsBouquet( string name)
 {

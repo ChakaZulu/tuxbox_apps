@@ -1,5 +1,5 @@
 /*
-$Id: favorites.cpp,v 1.1 2002/04/04 22:29:32 rasc Exp $
+$Id: favorites.cpp,v 1.2 2002/04/05 01:14:43 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -26,6 +26,9 @@ $Id: favorites.cpp,v 1.1 2002/04/04 22:29:32 rasc Exp $
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 $Log: favorites.cpp,v $
+Revision 1.2  2002/04/05 01:14:43  rasc
+-- Favorites Bouquet handling (Easy Add Channels)
+
 Revision 1.1  2002/04/04 22:29:32  rasc
 -- Favorites Bouquet handling (Easy Add Channels)
 
@@ -69,10 +72,10 @@ int CFavorites::addChannelToFavorites()
 
 
 	onid_sid = g_Zapit->getCurrentServiceID();
-fprintf (stderr, "ADDFav: %08lx  (onid_sid)  bq_id: %u \n", onid_sid, bouquet_id);
+	//fprintf (stderr, "ADDFav: %08lx  (onid_sid)  bq_id: %u \n", onid_sid, bouquet_id);
+
 
 	// ToDO:  Check if channel is already in this bouquet $$$$ (rasc)
-
 	g_Zapit->addChannelToBouquet( (unsigned int) bouquet_id, onid_sid);
 	status |= 2;
 
@@ -85,19 +88,32 @@ fprintf (stderr, "ADDFav: %08lx  (onid_sid)  bq_id: %u \n", onid_sid, bouquet_id
 	neutrino->channelsInit();
 	//g_RCInput->postMsg( messages::EVT_BOUQUETSCHANGED, 1 );
 
+
+	return status;
 }
 
 
 
 
+
 //
+// -- Menue Handler Interface
+// -- to fit the MenueClasses from McClean
 // -- Add current channel to Favorites and display user messagebox
 //
 
-void CFavorites::UserAddChannelToFavorites()
-
+int CFavorites::exec(CMenuTarget* parent, string)
 {
-	int status;
+	int    res = menu_return::RETURN_EXIT_ALL;
+	int    status;
+	string str;
+
+
+	if (parent)
+	{
+		parent->hide();
+	}
+
 
 	CHintBox* hintBox= new CHintBox(NULL, "favorites.bouquetname", g_Locale->getText("favorites.addchannel"), 380 );
 	hintBox->paint();
@@ -107,6 +123,19 @@ void CFavorites::UserAddChannelToFavorites()
 	hintBox->hide();
 	delete hintBox;
 
+	// -- Display result
+	
+	str = "";
+	if (status & 1)  str += g_Locale->getText("favorites.bqcreated");
+	if (status & 2)  str += g_Locale->getText("favorites.chadded"); 
+	else             str += g_Locale->getText("favorites.chalreadyinbq");
+
+	str +=  g_Locale->getText("favorites.finalhint");
+
+	ShowMsg ( "favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack );
+
+ 
+	return res;
 }
 
 

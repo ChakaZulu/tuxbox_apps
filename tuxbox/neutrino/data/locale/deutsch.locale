@@ -417,4 +417,10 @@ parentallock.changepin_hint1 Geben Sie hier Ihren neuen PIN-Code ein!
 pinprotection.wrongcode Geben Sie den Code nocheinmal ein!
 pinprotection.head PIN-Abfrage
 
-
+favorites.bouquetname Meine Favoriten
+favorites.addchannel Der aktuelle Kanal wird dem Bouquet \n"Meine Favoriten" hinzugefügt. \nDie Speicherung benötigt einen Moment...
+favorites.menueadd Kanal Favoriten hinzufügen
+favorites.bqcreated Bouquet "Meine Favoriten" wurde angelegt...\n
+favorites.chadded Der aktuelle Kanal wurde Ihren Favoriten hinzugefügt...\n
+favorites.chalreadyinbq Der aktuelle Kanal ist bereits in Ihren Favoriten...\n
+favorites.finalhint \nVersehentlich hinzugefügte Kanäle können mit\nder Bouquetverwaltung korrigiert werden.\n 

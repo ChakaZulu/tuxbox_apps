@@ -1,10 +1,11 @@
 /*
 
-        $Id: neutrino.cpp,v 1.212 2002/04/02 14:59:42 obi Exp $
+        $Id: neutrino.cpp,v 1.213 2002/04/05 01:14:43 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
+	                   and some other guys
 	Homepage: http://dbox.cyberphoria.org/
 
 	Kommentar:
@@ -30,6 +31,12 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+$Log: neutrino.cpp,v $
+Revision 1.213  2002/04/05 01:14:43  rasc
+-- Favorites Bouquet handling (Easy Add Channels)
+
 
 */
 
@@ -745,9 +752,9 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
 	CMenuOptionChooser* oj = new CMenuOptionChooser("scants.bouquet", &g_settings.scan_bouquet, true );
-	oj->addOption(256, "scants.bouquet_leave");
-	oj->addOption(512, "scants.bouquet_create");
 	oj->addOption(1024, "scants.bouquet_erase");
+	oj->addOption(512, "scants.bouquet_create");
+	oj->addOption(256, "scants.bouquet_leave");
 	TSScan->addItem( oj );
 
 	if (atoi(getenv("fe"))==1)
@@ -1308,7 +1315,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 				enabled_count++;
 
 			StreamFeatureSelector.addItem( new CMenuForwarder(g_PluginList->getName(count), enable_it, "",
-										   StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?"blau.raw":""), (cnt == 0) && enable_it );
+				StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue : CRCInput::RC_nokey, (cnt== 0)?"blau.raw":""), (cnt == 0) && enable_it );
 			cnt++;
 		}
 	}
@@ -1319,8 +1326,16 @@ void CNeutrinoApp::ShowStreamFeatures()
 	}
 
 	sprintf(id, "%d", -1);
+
+	// -- Add Channel to favorites
+	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
+		new CFavorites, id, true, CRCInput::RC_yellow, "gelb.raw"), false );
+
+	// -- Stream Info
 	StreamFeatureSelector.addItem( new CMenuForwarder("streamfeatures.info", true, "",
-									   StreamFeaturesChanger, id, true, CRCInput::RC_help, "help_small.raw"), (enabled_count==0) );
+		StreamFeaturesChanger, id, true, CRCInput::RC_help, "help_small.raw"), false );
+
+
 	StreamFeatureSelector.exec(NULL, "");
 }
 
@@ -2213,7 +2228,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.212 2002/04/02 14:59:42 obi Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.213 2002/04/05 01:14:43 rasc Exp $\n\n");
 	tzset();
 	initGlobals();
 
