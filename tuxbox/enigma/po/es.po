@@ -749,7 +749,7 @@ msgstr "Pulse OK para editar el nombre"
 
 #: default.esml:705
 msgid "delete the current selected timer (ok)"
-msgstr "Borrar temporizador seleccionado (ok)"
+msgstr "Borrar temporizador elegido (ok)"
 
 #: default.esml:397
 msgid "select MiniDiSEqC parameter (ok)"
@@ -821,7 +821,7 @@ msgid ""
 "satellite"
 msgstr ""
 "Guardar cambios y utilzar LNB elegido (en la primera página) para satélite "
-"seleccionado"
+"elegido"
 
 #: default.esml:402
 msgid "DiSEqC Parameter:"
@@ -833,7 +833,7 @@ msgstr "Añadir 0,5V a la tensión LNB (para cables largos) (ok)"
 
 #: default.esml:512
 msgid "enable/disable check ONIT on any transponder"
-msgstr "Activar/desactivar comprobación ONIT en cada transpondedor"
+msgstr "Comprobación ONIT en cada transpondedor"
 
 #: default.esml:747
 msgid "harddisk: "
@@ -841,7 +841,7 @@ msgstr "Disco duro:"
 
 #: default.esml:751
 msgid "FP Version:"
-msgstr "Verión FP:"
+msgstr "Verisón FP:"
 
 #: default.esml:803
 msgid "status:"
@@ -941,7 +941,7 @@ msgstr "Contador (movimiento)"
 
 #: default.esml:515
 msgid "enable/disable initiate network search"
-msgstr "activar/desactivar búsqueda de red"
+msgstr "Activar/desactivar búsqueda de red"
 
 #: chk_blue2.esml:317
 msgid "Stop "
@@ -1967,7 +1967,7 @@ msgstr "Cambiar al modo ficheros"
 
 #: src/enigma_main.cpp:150
 msgid "toggle DVR panel"
-msgstr "Conmutar grabadora digital"
+msgstr "Conmutar vista grabadora digital"
 
 #: src/enigma_main.cpp:151
 msgid "toggle index mark"
@@ -2128,7 +2128,7 @@ msgstr "Nombre nuevo:"
 
 #: src/enigma_main.cpp:3293
 msgid "Rename entry"
-msgstr "Cambiar nombre"
+msgstr "Renombrar"
 
 #: src/enigma_main.cpp:3347
 msgid "Sorry, you cannot delete this service."
@@ -2173,7 +2173,7 @@ msgstr "Nombre nuevo del fichero:"
 
 #: src/enigma_main.cpp:3517
 msgid "Rename File"
-msgstr "Cambiar nombre del fichero"
+msgstr "Renombrar fichero"
 
 #: src/enigma_main.cpp:3580
 msgid "Enter new name for the bouquet:"
@@ -2181,7 +2181,7 @@ msgstr "Nombre nuevo del bouquete:"
 
 #: src/enigma_main.cpp:3581
 msgid "Rename bouquet"
-msgstr "Cambiar nombre del bouquete"
+msgstr "Renombrar bouquete"
 
 #: src/enigma_main.cpp:3606
 msgid "Enter name for the new bouquet:"
@@ -2197,11 +2197,11 @@ msgstr "Sin nombre"
 
 #: src/enigma_main.cpp:3653
 msgid "Enter marker name:"
-msgstr "Nombre de la división:"
+msgstr "Nombre de la separación:"
 
 #: src/enigma_main.cpp:3654
 msgid "create marker"
-msgstr "Crear división"
+msgstr "Crear separación"
 
 #: src/enigma_main.cpp:3692
 msgid "unnamed bouquet"
@@ -2321,11 +2321,11 @@ msgstr "Menú servicios"
 
 #: src/enigma_main.cpp:6299 src/sselect.cpp:112
 msgid "add service to playlist"
-msgstr "Añadir servicio a la lista de reproducción"
+msgstr "Añadir a la lista de reproducción"
 
 #: src/enigma_main.cpp:6299
 msgid "add selected service to the playlist"
-msgstr "Añadir servicio a la lista de reproducción"
+msgstr "Añadir servicio elegido a la lista de reproducción"
 
 #: src/enigma_main.cpp:6308
 msgid "create new bouquet"
@@ -2346,31 +2346,31 @@ msgstr "Duplicar bouquete entero con todo su contenido"
 #: src/enigma_main.cpp:6326 src/enigma_main.cpp:6380 src/enigma_main.cpp:6385
 #: src/enigma_main.cpp:6393
 msgid "add to specific bouquet"
-msgstr "Añadir al bouquete específico"
+msgstr "Añadir a bouquete determinado"
 
 #: src/enigma_main.cpp:6326
 msgid "add the selected service to another bouquet"
-msgstr "Añadir canal elegido a otro bouquete"
+msgstr "Añadir canal elegido a un bouquete determinado"
 
 #: src/enigma_main.cpp:6328
 msgid "add marker"
-msgstr "Añadir división"
+msgstr "Añadir línea separación"
 
 #: src/enigma_main.cpp:6328
 msgid "create a new marker in the current bouquet"
-msgstr "Introducir una división nueva en el bouquete actual"
+msgstr "Introducir una separación nueva en el bouquete actual"
 
 #: src/enigma_main.cpp:6337 src/enigma_main.cpp:6351 src/sselect.cpp:354
 msgid "rename"
-msgstr "Cambiar nombre"
+msgstr "Renombrar"
 
 #: src/enigma_main.cpp:6337
 msgid "rename the current selected bouquet"
-msgstr "Cambiar nombre del bouquete seleccionado"
+msgstr "Renombrar bouquete elegido"
 
 #: src/enigma_main.cpp:6351
 msgid "rename the current selected service/movie"
-msgstr "Cambiar nombre del servicio seleccionado"
+msgstr "Renombrar servicio elegido"
 
 #: src/enigma_main.cpp:6355 src/sselect.cpp:352
 msgid "delete"
@@ -2378,7 +2378,7 @@ msgstr "Borrar"
 
 #: src/enigma_main.cpp:6355
 msgid "delete the current selected service/movie"
-msgstr "Borrar servicio/fichero seleccionado"
+msgstr "Borrar servicio/fichero elegido"
 
 #: src/enigma_main.cpp:6362
 msgid "disable move mode"
@@ -2402,7 +2402,7 @@ msgstr "Copiar a la lista de bouquetes"
 
 #: src/enigma_main.cpp:6373
 msgid "copy the selected provider to the bouquet list"
-msgstr "Copiar proveedor seleccionado a la lista de bouquetes"
+msgstr "Copiar proveedor elegido a la lista de bouquetes"
 
 #: src/enigma_main.cpp:6380 src/enigma_main.cpp:6385
 msgid "add the selected service to a selectable bouquet"
@@ -2422,12 +2422,12 @@ msgstr "Borrar fichero elegido (con todos ficheros ts correspondientes)"
 
 #: src/enigma_main.cpp:6396
 msgid "rename file"
-msgstr "Cambiar nombre del fichero"
+msgstr "Renombrar fichero"
 
 #: src/enigma_main.cpp:6396
 msgid "rename the selected file (and all corresponding ts files"
 msgstr ""
-"Cambiar nombre del fichero elegido (con todos ficheros ts correspondientes)"
+"Renombrar fichero elegido (con todos sus ficheros ts)"
 
 #: src/enigma_main.cpp:6408
 msgid "disable edit mode"
@@ -2682,7 +2682,7 @@ msgstr "Editar transpondedor"
 
 #: src/enigma_scan.cpp:51
 msgid "for automatic scan"
-msgstr "Para la búsqueda automática"
+msgstr "Editar lista de transpondedores para la búsqueda automática"
 
 #: src/enigma_scan.cpp:54 src/scan.cpp:36
 msgid "Automatic Transponder Scan"
@@ -4459,11 +4459,11 @@ msgstr "Ver guía electónica para canal elegido"
 
 #: src/sselect.cpp:111
 msgid "show service selector menu"
-msgstr "Mostrar menu servicios"
+msgstr "Editar los servicios"
 
 #: src/sselect.cpp:113
 msgid "add service to a specific bouquet"
-msgstr "Añadir servicio a un bouquete específico"
+msgstr "Añadir servicio a un bouquete determinado"
 
 #: src/sselect.cpp:117
 msgid "toggle between classic and multi column style"
@@ -4471,19 +4471,19 @@ msgstr "Conmutar entre vista clasica y multicolumnas"
 
 #: src/sselect.cpp:118
 msgid "toggle focus between service and bouquet list (in combi column style)"
-msgstr "Conmutar foco entre lista servicios y bouquetes (estílo combi-comluna)"
+msgstr "Conmutar foco entre lista servicios y bouquetes (estílo combi-columna)"
 
 #: src/sselect.cpp:119
 msgid "go to the prev Marker if exist.. else goto first service"
-msgstr "Si hay, ir a la división prévia... sino ir al servício primero"
+msgstr "Saltar a la separación prévia, ó ir al primer servício de la lista"
 
 #: src/sselect.cpp:120
 msgid "go to the next Marker if exist.. else goto last service"
-msgstr "Si hay, ir a la división proxima... sino ir al servício último"
+msgstr "Saltar a la separación proxima, ó ir al último servício de la lista"
 
 #: src/sselect.cpp:122
 msgid "show all services"
-msgstr "mostrar todo"
+msgstr "Mostrar todo los servicios"
 
 #: src/sselect.cpp:123
 msgid "show satellite list"
@@ -4499,7 +4499,7 @@ msgstr "Mostrar lista bouquetes"
 
 #: src/sselect.cpp:127
 msgid "delete selected entry"
-msgstr "borrar elemento elegido"
+msgstr "Borrar elemento elegido"
 
 #: src/sselect.cpp:128
 msgid "mark selected entry for move"
@@ -4507,11 +4507,11 @@ msgstr "Mover elemento elegido"
 
 #: src/sselect.cpp:129
 msgid "rename selected entry"
-msgstr "Cambiar nombre del elemento seleccionado"
+msgstr "Renombrar elemento elegido"
 
 #: src/sselect.cpp:130
 msgid "create new marker entry"
-msgstr "Introducir una división nueva"
+msgstr "Introducir una separación nueva"
 
 #: src/sselect.cpp:272
 msgid "[GO UP]"
@@ -4527,7 +4527,7 @@ msgstr "Separador"
 
 #: src/sselect.cpp:355
 msgid "marker"
-msgstr "División"
+msgstr "Separación"
 
 #: src/sselect.cpp:363
 msgid "All Services"
@@ -4543,7 +4543,7 @@ msgstr "Proveedores"
 
 #: src/sselect.cpp:373
 msgid "Root"
-msgstr "Root"
+msgstr "Raíz"
 
 #: src/sselect.cpp:374
 msgid "Movies"
