@@ -30,7 +30,6 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 	noRotorCmd(0)
 {
 	timer=new eTimer(eApp);
-	CONNECT(eDVB::getInstance()->leaveTransponder, eFrontend::updateTransponder );
 	CONNECT(rotorTimer1.timeout, eFrontend::RotorStartLoop );
 	CONNECT(rotorTimer2.timeout, eFrontend::RotorRunningLoop );
 	CONNECT(timer->timeout, eFrontend::timeout);
@@ -66,9 +65,12 @@ void eFrontend::checkLock()
 	{
 		if (!Locked() && transponder)
 		{
+			tries=0;
 			timer2.stop();
 			transponder->tune();
 		}
+		else if ( ++tries > 2 && tries < 4 )
+			updateTransponder();
 	}
 }
 
@@ -123,9 +125,11 @@ void eFrontend::timeout()
 		state=stateIdle;
 		needreset=0;
 		if (!inScan)
+		{
+			tries=0;
 			timer2.start(1000);
+		}
 		/*emit*/ tunedIn(transponder, 0);
-//		updateTransponder(transponder);
 	}
 	else
 	{
@@ -1082,11 +1086,9 @@ double calcSatHourangle( double Azimuth, double Elevation, double Declination, d
 	return returnvalue;
 }
 
-void eFrontend::updateTransponder( eTransponder *tp )
+void eFrontend::updateTransponder()
 {
-	if ( !tp || !transponder || !(*transponder == *tp) )
-		return;  // only update transponder data for current tp
-	if ( transponder->satellite.valid && eSystemInfo::getInstance()->canUpdateTransponder() )
+	if ( transponder->satellite.valid && eSystemInfo::getInstance()->canUpdateTransponder())
 	{
 #if HAVE_DVB_API_VERSION < 3
 		FrontendParameters front;
@@ -1144,6 +1146,7 @@ int eFrontend::tune(eTransponder *trans,
 		Modulation QAM)					// Modulation, QAM_xx
 {
 //	eDebug("op = %d", trans->satellite.orbital_position );
+	tries=0;
 	int finalTune=1;
 #if HAVE_DVB_API_VERSION < 3
 	FrontendParameters front;
