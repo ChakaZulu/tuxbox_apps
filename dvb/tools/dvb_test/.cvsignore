@@ -6,6 +6,7 @@ setpid
 setvoltage
 test_av
 test_clip
+test_clip_pes
 test_pes
 test_sec_ne
 test_sections
