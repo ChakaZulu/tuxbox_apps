@@ -2293,7 +2293,7 @@ const neutrino_locale_t keydescription[13] =
 	LOCALE_KEYBINDINGMENU_PAGEDOWN,
 	LOCALE_KEYBINDINGMENU_CANCEL,
 	LOCALE_KEYBINDINGMENU_SORT,
-	LOCALE_KEYBINDINGMENU_ADDRECORD
+	LOCALE_KEYBINDINGMENU_ADDRECORD,
 	LOCALE_KEYBINDINGMENU_ADDREMIND,
 	LOCALE_KEYBINDINGMENU_CHANNELUP,
 	LOCALE_KEYBINDINGMENU_CHANNELDOWN,
@@ -2343,6 +2343,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
 
 	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_QUICKZAP));
+
 	for (int i = KEY_CHANNEL_UP; i <= KEY_SUBCHANNEL_DOWN; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
 }
