@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 program: fserver by Axel Buehning <mail at diemade.de>
 
-$Id: fserver.h,v 1.1 2004/04/26 08:32:59 diemade Exp $
+$Id: fserver.h,v 1.2 2004/04/26 10:02:11 diemade Exp $
 
 */
 
@@ -38,7 +38,6 @@ enum CVCRDevices
 typedef struct 
     {    
     int cmd; 
-    int onidsid;
     int apid;
     int vpid;
     char    channelname[264];
