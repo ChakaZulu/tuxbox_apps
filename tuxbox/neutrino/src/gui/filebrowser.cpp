@@ -310,7 +310,7 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 	if(filename == "..")
 	{
 		unsigned int pos;
-		if(Path.find(VLC_URI)==0)
+		if (strncmp(Path.c_str(), VLC_URI, strlen(VLC_URI)) == 0)
 		{
 			pos = Path.substr(strlen(VLC_URI), Path.length()-strlen(VLC_URI)-1).rfind('/');
 			if (pos != std::string::npos)
@@ -320,15 +320,17 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 		{
 			pos = Path.substr(0,Path.length()-1).rfind('/');
 		}
-		if(pos == std::string::npos)
-			pos = Path.length();
-		newpath = Path.substr(0,pos);
-//		printf("path: %s filename: %s newpath: %s\n",Path.c_str(),filename.c_str(),newpath.c_str());
-		if (base.length())
+		if (pos == std::string::npos)
 		{
- 		  pos = newpath.find(base);
-		  if (pos != 0) return;
+			newpath = Path;
 		}
+		else
+		{
+			newpath = Path.substr(0,pos);
+		}
+
+		if (strncmp(newpath.c_str(), base.c_str(), base.length()) != 0)
+			return;
 	}
 	else
 	{
@@ -375,7 +377,7 @@ bool CFileBrowser::readDir(const std::string & dirname, CFileList* flist)
 {
 	bool ret;
 
-	if (dirname.find(VLC_URI)==0)
+	if (strncmp(dirname.c_str(), VLC_URI, strlen(VLC_URI)) == 0)
 	{
 		ret = readDir_vlc(dirname, flist);
 	}
@@ -414,9 +416,10 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 	httpres = curl_easy_perform(curl_handle);
 	/* cleanup curl stuff */
 	curl_easy_cleanup(curl_handle);
+
 	/* Convert \ to / */
-	for( unsigned int pos=answer.find('\\'); pos!=std::string::npos ; pos=answer.find('\\'))
-		answer[pos]='/';
+	std::replace(answer.begin(), answer.end(), '\\', '/');
+
 	// std::cout << "Answer:" << std::endl << "----------------" << std::endl << answer << std::endl;
 	/*!!! TODO check httpres and display error */
 	if (!answer.empty() && !httpres)
@@ -434,9 +437,12 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 			unsigned int spos = entry.rfind('/');
 			if(spos!=std::string::npos)
 			{
-				file.Name = dirname + entry.substr(spos+1);
+				file.Name = dirname;
+				file.Name += entry.substr(spos+1);
+
 				file.Size = 0;
 				file.Time = 0;
+
 				flist->push_back(file);
 			}
 			else
@@ -451,7 +457,10 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 		/* since all CURL error messages use only US-ASCII characters, when can safely print them as if they were UTF-8 encoded */
 		DisplayErrorMessage(error); // UTF-8
 		CFile file;
-		file.Name = dirname + "..";
+
+		file.Name = dirname;
+		file.Name += "..";
+
 		file.Mode = S_IFDIR + 0777;
 		file.Size = 0;
 		file.Time = 0;
@@ -478,7 +487,9 @@ bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 		CFile file;
 		if(strcmp(namelist[i]->d_name,".") != 0)
 		{
-			file.Name = dirname + namelist[i]->d_name;
+			file.Name = dirname;
+			file.Name += namelist[i]->d_name;
+
 //			printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
 			if(my_stat((file.Name).c_str(),&statbuf) != 0)
 				perror("stat error");
@@ -504,7 +515,6 @@ bool CFileBrowser::exec(const char * const dirname)
 {
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
-	std::string Dirname = dirname;
 
 	bool res = false;
 
@@ -514,11 +524,11 @@ bool CFileBrowser::exec(const char * const dirname)
 	m_baseurl += g_settings.streaming_server_port;
 	m_baseurl += "/admin/dboxfiles.html?dir=";
 
-	for(unsigned int pos=Dirname.find('\\'); pos!=std::string::npos ; pos=Dirname.find('\\'))
-		Dirname[pos]='/';
-	name = Dirname;
+	name = dirname;
+	std::replace(name.begin(), name.end(), '\\', '/');
+
 	paintHead();
-	ChangeDir(Dirname);
+	ChangeDir(name);
 	paint();
 	paintFoot();
 
@@ -694,7 +704,8 @@ bool CFileBrowser::exec(const char * const dirname)
 		}
 		else if (CRCInput::isNumeric(msg))
 		{
-			SMSInput(msg);
+			if (!(filelist.empty()))
+				SMSInput(msg);
 		}
 		else
 	  	{
@@ -756,7 +767,7 @@ void CFileBrowser::addRecursiveDir(CFileList * re_filelist, std::string rpath, b
 	if(bCancel)
 		return;
 		
-	if(rpath[rpath.length()-1]!='/')
+	if ((rpath.empty()) || ((*rpath.rbegin()) != '/'))
 	{
 		rpath += '/';
 	}
