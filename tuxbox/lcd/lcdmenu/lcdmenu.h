@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.14 2002/10/13 04:18:12 obi Exp $
+ * $Id: lcdmenu.h,v 1.15 2003/02/01 03:38:37 zwen Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -91,8 +91,8 @@ class CLCDMenu : public CLCDDisplay
 	
 		CConfigFile *config;
 		CRCInput *rc;
-		fontRenderClass *fontRenderer;
-		Font *menuFont;
+		LcdFontRenderClass *fontRenderer;
+		LcdFont *menuFont;
 
 		int upperRow;
 		int fontSize;

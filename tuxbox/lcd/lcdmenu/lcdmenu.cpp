@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.22 2002/12/26 09:14:03 Jolt Exp $
+ * $Id: lcdmenu.cpp,v 1.23 2003/02/01 03:38:37 zwen Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -33,7 +33,7 @@ CLCDMenu::CLCDMenu (std::string configFilename)
 {
 	rc = new CRCInput();
 
-	fontRenderer = new fontRenderClass(this);
+	fontRenderer = new LcdFontRenderClass(this);
 	fontRenderer->AddFont(FONTDIR "/micron_bold.ttf");
 	fontRenderer->InitFontCache();
 
