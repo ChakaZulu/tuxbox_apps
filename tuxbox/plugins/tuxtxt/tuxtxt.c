@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.19: added configmenu                                                 *
  *    V1.18: hide navbar in newsflash/subtitle mode, workaround for gtx-pig   *
  *    V1.17: some mods by AlexW                                               *
  *    V1.16: colorkeys fixed                                                  *
@@ -35,7 +36,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.18 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.19 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -46,7 +47,6 @@ void plugin_exec(PluginParam *par)
 		ex = -1;
 		sy = -1;
 		ey = -1;
-		vidformat = -1;
 
 		for(; par; par = par->next)
 		{
@@ -78,13 +78,9 @@ void plugin_exec(PluginParam *par)
 			{
 				ey = atoi(par->val);
 			}
-			else if (!strcmp(par->id, P_ID_VFORMAT))
-			{
-				vidformat = atoi(par->val);
-			}
 		}
 
-		if(vtxtpid == -1 || fb == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1 || vidformat == -1)
+		if(vtxtpid == -1 || fb == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
 		{
 			printf("TuxTxt <Invalid Param(s)>\n");
 			return;
@@ -169,6 +165,9 @@ void plugin_exec(PluginParam *par)
 									break;
 
 					case RC_HELP:	SwitchHintMode();
+									break;
+
+					case RC_DBOX:	ConfigMenu();
 				}
 			}
 
@@ -192,7 +191,6 @@ int Init()
 {
 	struct dmxPesFilterParams dmx_flt;
 	int error;
-	int fnc_169 = AVS_FNCOUT_EXT169;
 
 	//get mID -> workaround for pig on gtx
 
@@ -219,6 +217,17 @@ int Init()
 			return 0;
 		}
 
+	//load config
+
+		if((conf = fopen(CONFIGDIR "/tuxtxt/tuxtxt.conf", "rb+")) == 0)
+		{
+			perror("TuxTxt <fopen tuxtxt.conf>");
+			return 0;
+		}
+
+		fread(&fnc_mode1, 1, sizeof(fnc_mode1), conf);
+		fread(&fnc_mode2, 1, sizeof(fnc_mode2), conf);
+
 	//open avs
 
 		if((avs = open("/dev/dbox/avs0", O_RDWR)) == -1)
@@ -229,7 +238,7 @@ int Init()
 
 		ioctl(avs, AVSIOGSCARTPIN8, &fnc_old);
 
-		if(vidformat != 2) ioctl(avs, AVSIOSSCARTPIN8, &fnc_169);
+		ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode1);
 
 	//setup rc
 
@@ -246,7 +255,7 @@ int Init()
 
 	//load font
 
-		if((error = FT_New_Face(library,"/share/fonts/tuxtxt.fon", 0, &face)) != 0)
+		if((error = FT_New_Face(library, FONTDIR "/tuxtxt.fon", 0, &face)) != 0)
 		{
 			printf("TuxTxt <FT_New_Face => 0x%.2X>", error);
 			return 0;
@@ -327,23 +336,34 @@ int Init()
 
 		zap_subpage_manual = 0;
 
-	//set filter & start demuxer
-
-		dmx_flt.pid		= vtxtpid;
-		dmx_flt.input	= DMX_IN_FRONTEND;
-		dmx_flt.output	= DMX_OUT_TAP;
-		dmx_flt.pesType	= DMX_PES_OTHER;
-		dmx_flt.flags	= DMX_IMMEDIATE_START;
-
-		if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
-		{
-			perror("TuxTxt <DMX_SET_PES_FILTER>");
-			return 0;
-		}
-
 	//show infobar
 
 		RenderPageNotFound();
+
+	//get all vtxt-pids
+
+		if(GetVideotextPIDs() == 0) return 0;
+
+	//set filter & start demuxer
+
+		if(vtxtpid == 0)
+		{
+			ConfigMenu();
+		}
+		else
+		{
+			dmx_flt.pid		= vtxtpid;
+			dmx_flt.input	= DMX_IN_FRONTEND;
+			dmx_flt.output	= DMX_OUT_TAP;
+			dmx_flt.pesType	= DMX_PES_OTHER;
+			dmx_flt.flags	= DMX_IMMEDIATE_START;
+
+			if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
+			{
+				perror("TuxTxt <DMX_SET_PES_FILTER>");
+				return 0;
+			}
+		}
 
 	//create decode-thread
 
@@ -364,8 +384,6 @@ int Init()
 
 void CleanUp()
 {
-	int clear_page, clear_subpage;
-
 	//hide pig
 
 		if(screenmode) avia_pig_hide(pig);
@@ -417,6 +435,457 @@ void CleanUp()
 				}
 			}
 		}
+
+	//save config
+
+		if(fnc_mode1 != fnc_old1 || fnc_mode2 != fnc_old2)
+		{
+			rewind(conf);
+
+			fwrite(&fnc_mode1, 1, sizeof(fnc_mode1), conf);
+			fwrite(&fnc_mode2, 1, sizeof(fnc_mode2), conf);
+		}
+
+		fclose(conf);
+}
+
+/******************************************************************************
+ * GetVideotextPIDs                                                           *
+ ******************************************************************************/
+ 
+int GetVideotextPIDs()
+{
+	struct dmxSctFilterParams dmx_flt;
+	int pat_scan, pmt_scan, desc_scan, pmt_scan_start, pid_test;
+
+	unsigned char PAT[1024];
+	unsigned char PMT[1024];
+
+	//read PAT to get all PMT's
+
+		memset(&dmx_flt.filter.filter, 0x00, DMX_FILTER_SIZE);
+		memset(&dmx_flt.filter.mask,   0x00, DMX_FILTER_SIZE);
+
+		dmx_flt.pid				= 0x0000;
+		dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+		dmx_flt.filter.filter[0]= 0x00;
+		dmx_flt.filter.mask[0]	= 0xFF;
+		dmx_flt.timeout			= 1000;
+
+		if(ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
+		{
+			perror("TuxTxt <DMX_SET_FILTER PAT>");
+			return;
+		}
+
+		if(read(dmx, PAT, sizeof(PAT)) == -1)
+		{
+			perror("TuxTxt <read PAT>");
+			return;
+		}
+
+	//scan each PMT for vtxt-pid
+
+		pids_found = 0;
+
+		for(pat_scan = 0x0A; pat_scan < 0x0A + (((PAT[0x01]<<8 | PAT[0x02]) & 0x0FFF) - 9); pat_scan += 4)
+		{
+			if((PAT[pat_scan - 2]<<8 | PAT[pat_scan - 1]) == 0) continue;
+
+			dmx_flt.pid				= (PAT[pat_scan]<<8 | PAT[pat_scan+1]) & 0x1FFF;
+			dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+			dmx_flt.filter.filter[0]= 0x02;
+			dmx_flt.filter.mask[0]	= 0xFF;
+			dmx_flt.timeout			= 1000;
+
+			if(ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
+			{
+				perror("TuxTxt <DMX_SET_FILTER PMT>");
+				continue;
+			}
+
+			if(read(dmx, PMT, sizeof(PMT)) == -1)
+			{
+				perror("TuxTxt <read PMT>");
+				continue;
+			}
+
+			for(pmt_scan = 0x0C + ((PMT[0x0A]<<8 | PMT[0x0B]) & 0x0FFF); pmt_scan < (((PMT[0x01]<<8 | PMT[0x02]) & 0x0FFF) - 7); pmt_scan += 5 + PMT[pmt_scan + 4])
+			{
+				if(PMT[pmt_scan] == 6)
+				{
+					for(desc_scan = pmt_scan + 5; desc_scan < pmt_scan + ((PMT[pmt_scan + 3]<<8 | PMT[pmt_scan + 4]) & 0x0FFF); desc_scan += 2 + PMT[desc_scan + 1])
+					{
+						if(PMT[desc_scan] == 0x56)
+						{
+							for(pid_test = 0; pid_test < pids_found; pid_test++)
+							{
+								if(pid_table[pid_test] == ((PMT[pmt_scan + 1]<<8 | PMT[pmt_scan + 2]) & 0x1FFF)) goto skip_pid;
+							}
+
+							pid_table[pids_found] = (PMT[pmt_scan + 1]<<8 | PMT[pmt_scan + 2]) & 0x1FFF;
+							pids_found++;
+skip_pid:;
+						}
+					}
+				}
+			}
+		}
+
+	//check videotext
+
+		if(pids_found == 0)
+		{
+			printf("TuxTxt <no Videotext on TS found>\n");
+			return 0;
+		}
+
+		return 1;
+}
+
+/******************************************************************************
+ * ConfigMenu                                                                 *
+ ******************************************************************************/
+
+void ConfigMenu()
+{
+	struct dmxPesFilterParams dmx_flt;
+	int val, byte, line, menuitem = 1;
+	int current_pid = 0;
+
+	char menu[] =	"àááááááááááááááááááááááááááááâèššššššššššššššššššššššššššššššŠ"
+					"ã    TuxTxt-Konfiguration    äéš““““““““““““““““““““““““““““šŠ"
+					"åææææææææææææææææææææææææææææçéššššššššššššššššššššššššššššššŠ"
+					"ã                            äéººººººººººººººººººººººººººººººŠ"
+					"ã      Videotextauswahl      äéº¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶ºŠ"
+					"ã                            äéººººººººººººººººººººººººººººººŠ"
+					"ãí          0x????          îäéIGGGGGGGGGGGGGGGGGGGGGGGGGGGGIŠ"
+					"ã                            äéººººººººººººººººººººººººººººººŠ"
+					"ã      Bildschirmformat      äéº¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶ºŠ"
+					"ã                            äéººººººººººººººººººººººººººººººŠ"
+					"ã16:9 im Standard-Modus = ausäéº····························ºŠ"
+					"ã                            äéººººººººººººººººººººººººººººººŠ"
+					"ã16:9 im TextBild-Modus = einäéº····························ºŠ"
+					"åææææææææææææææææææææææææææææçéººººººººººººººººººººººººººººººŠ"
+					"ëìììììììììììììììììììììììììììììêŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠ";
+
+	//set current vtxt-pid
+
+		if(vtxtpid == 0) vtxtpid = pid_table[0];
+		else
+		{
+			while(pid_table[current_pid] != vtxtpid)
+			{
+				current_pid++;
+			}
+		}
+
+		sprintf(&menu[6*62 + 14], "%.4X", vtxtpid);
+
+		if(current_pid == 0 || pids_found == 1)				 menu[6*62 +  1] = ' ';
+		if(current_pid == pids_found - 1 || pids_found == 1) menu[6*62 + 28] = ' ';
+
+	//set 16:9 modi
+
+		if(fnc_mode1 == AVS_FNCOUT_EXT169) memcpy(&menu[10*62 + 26], "ein", 3);
+		if(fnc_mode2 == AVS_FNCOUT_EXT43)  memcpy(&menu[12*62 + 26], "aus", 3);
+
+	//clear framebuffer
+
+		memset(lfb, transp, var_screeninfo.xres * var_screeninfo.yres);
+
+	//reset to normal mode
+
+		if(zoommode) zoommode = 0;
+
+		if(transpmode)
+		{
+			transpmode = 0;
+
+			memset(&backbuffer, black, sizeof(backbuffer));
+		}
+
+		if(screenmode)
+		{
+			screenmode = 0;
+
+			avia_pig_hide(pig);
+
+			ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode1);
+
+			fontwidth  = 16;
+			fontheight = 22;
+			FT_Set_Pixel_Sizes(face, fontwidth, fontheight);
+		}
+
+	//render menu
+
+		PosY = StartY + fixfontheight*5;
+
+		for(line = 0; line < 15; line++)
+		{
+			PosX = StartX + fontwidth*4 + fontwidth/2;
+
+			for(byte = 0; byte < 31; byte++)
+			{
+				RenderCharFB(menu[line*62 + byte], menu[line*62 + byte+31]);
+			}
+
+			PosY += fixfontheight;
+		}
+
+	//set blocking mode
+
+		val = fcntl(rc, F_GETFL);
+		fcntl(rc, F_SETFL, val &~ O_NONBLOCK);
+
+	//loop
+
+		do
+		{
+			GetRCCode();
+
+			switch(RCCode)
+			{
+				case RC_UP:		if(menuitem > 1) menuitem--;
+
+								if(menuitem == 1)
+								{
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*11;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*6 + byte], menu[62*6 + byte+31]);
+									}
+
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*15;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*10 + byte], menu[62*10 + byte+31]);
+									}
+								}
+								else
+								{
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*15;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*10 + byte], menu[62*6 + byte+31]);
+									}
+
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*17;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*12 + byte], menu[62*10 + byte+31]);
+									}
+								}
+								break;
+
+				case RC_DOWN:	if(menuitem < 3) menuitem++;
+
+								if(menuitem == 2)
+								{
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*11;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*6 + byte], menu[62*10 + byte+31]);
+									}
+
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*15;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*10 + byte], menu[62*6 + byte+31]);
+									}
+								}
+								else
+								{
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*15;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*10 + byte], menu[62*10 + byte+31]);
+									}
+
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*17;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*12 + byte], menu[62*6 + byte+31]);
+									}
+								}
+								break;
+
+				case RC_LEFT:	if(menuitem == 1 && current_pid > 0)
+								{
+									current_pid--;
+
+									sprintf(&menu[6*62 + 14], "%.4X", pid_table[current_pid]);
+
+										if(pids_found > 1)
+										{
+											if(current_pid == 0)
+											{
+												menu[6*62 +  1] = ' ';
+												menu[6*62 + 28] = 'î';
+											}
+											else
+											{
+												menu[6*62 +  1] = 'í';
+												menu[6*62 + 28] = 'î';
+											}
+										}
+
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*11;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*6 + byte], menu[62*6 + byte+31]);
+									}
+								}
+								break;
+
+				case RC_RIGHT:	if(menuitem == 1 && current_pid < pids_found - 1)
+								{
+									current_pid++;
+
+									sprintf(&menu[6*62 + 14], "%.4X", pid_table[current_pid]);
+
+									if(pids_found > 1)
+									{
+										if(current_pid == pids_found - 1)
+										{
+											menu[6*62 +  1] = 'í';
+											menu[6*62 + 28] = ' ';
+										}
+										else
+										{
+											menu[6*62 +  1] = 'í';
+											menu[6*62 + 28] = 'î';
+										}
+									}
+
+									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosY = StartY + fixfontheight*11;
+									for(byte = 0; byte < 31; byte++)
+									{
+										RenderCharFB(menu[62*6 + byte], menu[62*6 + byte+31]);
+									}
+								}
+								break;
+
+				case RC_OK:		switch(menuitem)
+								{
+									case 1:	if(pids_found > 1)
+											{
+												//stop demuxer
+
+													ioctl(dmx, DMX_STOP);
+
+												//reset data
+
+													memset(&cachetable, 0, sizeof(cachetable));
+													memset(&subpagetable, 0xFF, sizeof(subpagetable));
+													memset(&backbuffer, black, sizeof(backbuffer));
+
+													page_atrb[32] = transp<<4 | transp;
+
+													inputcounter = 2;
+
+													current_page	= -1;
+													current_subpage	= -1;
+
+													page	 = 0x100;
+													lastpage = 0x100;
+													prev_100 = 0x100;
+													prev_10  = 0x100;
+													next_100 = 0x100;
+													next_10  = 0x100;
+													subpage	 = 0;
+
+													pageupdate = 0;
+
+													zap_subpage_manual = 0;
+
+												//free pagebuffers
+
+													for(clear_page = 0; clear_page < 0x8FF; clear_page++)
+													{
+														for(clear_subpage = 0; clear_subpage < 0x79; clear_subpage++)
+														{
+															if(cachetable[clear_page][clear_subpage] != 0);
+															{
+																free(cachetable[clear_page][clear_subpage]);
+															}
+														}
+													}
+
+												//start demuxer with new vtxtpid
+
+													vtxtpid = pid_table[current_pid];
+
+													dmx_flt.pid		= vtxtpid;
+													dmx_flt.input	= DMX_IN_FRONTEND;
+													dmx_flt.output	= DMX_OUT_TAP;
+													dmx_flt.pesType	= DMX_PES_OTHER;
+													dmx_flt.flags	= DMX_IMMEDIATE_START;
+
+													if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
+													{
+														perror("TuxTxt <DMX_SET_PES_FILTER>");
+													}
+
+												//show new videotext
+
+													fcntl(rc, F_SETFL, O_NONBLOCK);
+													pageupdate = 1;
+													RCCode = 0;
+													return;
+											}
+											break;
+
+									case 2:	fnc_mode1++;
+											if(fnc_mode1 > 2) fnc_mode1 = 1;
+
+											if(fnc_mode1 == 1) memcpy(&menu[62*10 + 26], "ein", 3);
+											else			   memcpy(&menu[62*10 + 26], "aus", 3);
+
+											PosX = StartX + fontwidth*4 + fontwidth/2;
+											PosY = StartY + fixfontheight*15;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*10 + byte], menu[62*6 + byte+31]);
+											}
+
+											ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode1);
+
+											break;
+
+									case 3:	fnc_mode2++;
+											if(fnc_mode2 > 2) fnc_mode2 = 1;
+
+											if(fnc_mode2 == 1) memcpy(&menu[62*12 + 26], "ein", 3);
+											else			   memcpy(&menu[62*12 + 26], "aus", 3);
+
+											PosX = StartX + fontwidth*4 + fontwidth/2;
+											PosY = StartY + fixfontheight*17;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*12 + byte], menu[62*6 + byte+31]);
+											}
+								}
+			}
+		}
+		while(RCCode != RC_HOME);
+
+	//reset to nonblocking mode
+
+		fcntl(rc, F_SETFL, O_NONBLOCK);
+		pageupdate = 1;
+		RCCode = 0;
 }
 
 /******************************************************************************
@@ -821,10 +1290,10 @@ void PageCatching()
 
 			switch(RCCode)
 			{
-				case RC_DOWN:	CatchNextPage(0);
+				case RC_UP:		CatchPrevPage();
 								break;
 
-				case RC_UP:		CatchPrevPage();
+				case RC_DOWN:	CatchNextPage(0);
 								break;
 
 				case RC_HOME:	fcntl(rc, F_SETFL, O_NONBLOCK);
@@ -879,7 +1348,7 @@ void CatchNextPage(int Init)
 					if(tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
 					{
 						catched_page = tmp_page;
-						pages_found += 1;
+						pages_found++;
 
 						RenderCatchedPage();
 
@@ -934,7 +1403,7 @@ void CatchPrevPage()
 					if(tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
 					{
 						catched_page = tmp_page;
-						pages_found += 1;
+						pages_found++;
 
 						RenderCatchedPage();
 
@@ -1067,6 +1536,8 @@ void SwitchScreenMode()
 			avia_pig_set_size(pig, 320, 526);
 			avia_pig_set_stack(pig, 2);
 			avia_pig_show(pig);
+
+			ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode2);
 		}
 		else
 		{
@@ -1074,6 +1545,8 @@ void SwitchScreenMode()
 			fontheight = 22;
 
 			avia_pig_hide(pig);
+
+			ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode1);
 		}
 
 		if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
@@ -1101,12 +1574,12 @@ void SwitchTranspMode()
 
 			if(!transpmode)
 			{
-				memset(&backbuffer, black, var_screeninfo.xres * var_screeninfo.yres);
+				memset(&backbuffer, black, sizeof(backbuffer));
 				pageupdate = 1;
 			}
 			else if(transpmode == 1)
 			{
-				memset(&backbuffer, transp, var_screeninfo.xres * var_screeninfo.yres);
+				memset(&backbuffer, transp, sizeof(backbuffer));
 				pageupdate = 1;
 			}
 			else
@@ -1145,7 +1618,7 @@ void RenderCharFB(int Char, int Attribute)
 
 	//load char
 
-		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FT_Load_Char(face, 1 + Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
 		{
 			printf("TuxTxt <FT_Load_Char => 0x%.2X>\n", error);
 			PosX += fontwidth;
@@ -1224,7 +1697,7 @@ void RenderCharBB(int Char, int Attribute)
 
 	//load char
 
-		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FT_Load_Char(face, 1 + Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
 		{
 			printf("TuxTxt <FT_Load_Char %.3d => 0x%.2X>\n", Char, error);
 			PosX += fontwidth;
@@ -1278,7 +1751,7 @@ void RenderCharBB(int Char, int Attribute)
 void RenderPageNotFound()
 {
 	int byte;
-	int fbcolor, timecolor;
+	int fbcolor, timecolor, menucolor;
 	char message_1[] = "àááááááááááááááááááááááááááááááááááááâè";
 	char message_2[] = "ã Seite ??? nicht vorhanden: warte...äé";
 	char message_3[] = "åææææææææææææææææææææææææææææææææææææçé";
@@ -1294,12 +1767,14 @@ void RenderPageNotFound()
 		{
 			fbcolor   = black;
 			timecolor = black;
+			menucolor = menu1;
 		}
 		else
 		{
 
 			fbcolor   = transp;
 			timecolor = transp<<4 | transp;
+			menucolor = menu3;
 		}
 
 	//clear framebuffer
@@ -1322,25 +1797,25 @@ void RenderPageNotFound()
 		PosY = StartY + fixfontheight*18;
 		for(byte = 0; byte < 38; byte++)
 		{
-			RenderCharFB(message_1[byte], menu1<<4 | menu2);
+			RenderCharFB(message_1[byte], menucolor<<4 | menu2);
 		}
 		RenderCharFB(message_1[38], fbcolor<<4 | menu2);
 
 		PosX = StartX + fontwidth-3;
 		PosY = StartY + fixfontheight*19;
-		RenderCharFB(message_2[0], menu1<<4 | menu2);
+		RenderCharFB(message_2[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 37; byte++)
 		{
-			RenderCharFB(message_2[byte], menu1<<4 | white);
+			RenderCharFB(message_2[byte], menucolor<<4 | white);
 		}
-		RenderCharFB(message_2[37], menu1<<4 | menu2);
+		RenderCharFB(message_2[37], menucolor<<4 | menu2);
 		RenderCharFB(message_2[38], fbcolor<<4 | menu2);
 
 		PosX = StartX + fontwidth-3;
 		PosY = StartY + fixfontheight*20;
 		for(byte = 0; byte < 38; byte++)
 		{
-			RenderCharFB(message_3[byte], menu1<<4 | menu2);
+			RenderCharFB(message_3[byte], menucolor<<4 | menu2);
 		}
 		RenderCharFB(message_3[38], fbcolor<<4 | menu2);
 
@@ -1869,6 +2344,9 @@ int GetRCCode()
 											break;
 
 							case RC1_HELP:	RCCode = RC_HELP;
+											break;
+
+							case RC1_DBOX:	RCCode = RC_DBOX;
 											break;
 
 							case RC1_HOME:	RCCode = RC_HOME;

@@ -35,6 +35,7 @@
 #define transp	0x08
 #define menu1	0x09
 #define menu2	0x0A
+#define menu3	0x0B
 
 //spacing attributes
 
@@ -128,6 +129,7 @@
 
 //functions
 
+void ConfigMenu();
 void CleanUp();
 void PageInput(int Number);
 void Prev100();
@@ -155,6 +157,7 @@ void RenderPage();
 void DecodePage();
 void *CacheThread(void *arg);
 int  Init();
+int  GetVideotextPIDs();
 int  GetRCCode();
 
 //framebuffer stuff
@@ -180,9 +183,13 @@ int current_page, current_subpage, page, subpage, lastpage, pageupdate, zap_subp
 int inputcounter;
 int zoommode, screenmode, transpmode, hintmode, boxed;
 int fontwidth, fontheight;
-int vidformat, fnc_old;
 int catch_row, catch_col, catched_page;
 int prev_100, prev_10, next_10, next_100;
+int fnc_old, fnc_mode1, fnc_mode2, fnc_old1, fnc_old2;
+int clear_page, clear_subpage;
+int pids_found;
+
+FILE *conf;
 
 pthread_t thread_id;
 void *thread_result;
@@ -191,6 +198,7 @@ unsigned short RCCode;
 
 //buffers
 
+int			   pid_table[100];
 unsigned char  backbuffer[720*576];
 unsigned char  timestring[8];
 unsigned char  page_char[PAGESIZE];
@@ -203,11 +211,11 @@ unsigned char subpagetable[0x900];
 
 //colormap
 
-unsigned short rd[] = {0x01<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0x00<<8};
-unsigned short gn[] = {0x01<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x20<<8, 0x10<<8};
-unsigned short bl[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x40<<8, 0x20<<8};
-unsigned short tr[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 };
-struct fb_cmap colormap = {0, 11, rd, gn, bl, tr};
+unsigned short rd[] = {0x01<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8};
+unsigned short gn[] = {0x01<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x20<<8, 0x10<<8, 0x20<<8};
+unsigned short bl[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x40<<8, 0x20<<8, 0x40<<8};
+unsigned short tr[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 , 0x0A00 };
+struct fb_cmap colormap = {0, 12, rd, gn, bl, tr};
 
 //hamming table
 

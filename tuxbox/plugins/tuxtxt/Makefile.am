@@ -15,7 +15,8 @@ AM_CFLAGS = $(LIBFREETYPE_CFLAGS)
 install-exec-local:
 	install -d $(PLUGINDIR)
 	install -d $(CONFIGDIR)
+	install -d $(CONFIGDIR)/tuxtxt
 	install .libs/tuxtxt.so $(PLUGINDIR)
 	install -m 0644 tuxtxt.cfg $(PLUGINDIR)
 	install -m 0644 font/tuxtxt.fon $(FONTDIR)
-
+	install -m 0644 tuxtxt.conf $(CONFIGDIR)/tuxtxt
