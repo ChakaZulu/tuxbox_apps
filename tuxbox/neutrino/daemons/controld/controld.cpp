@@ -282,6 +282,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		perror("open");
 		return;
 	}
+
 	if (format< 0)
 		format= 0;
 
@@ -306,7 +307,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	}
 	close(fd);
 
-    switch( format )
+	switch( format )
 	{
 		//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
 		case AVS_FNCOUT_EXT169	:
@@ -320,28 +321,18 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		default:
 			videoDisplayFormat = VIDEO_LETTER_BOX;
 			wss = SAA_WSS_43F;
+			break;
 			//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
 	}
 
-	if ((fd = open("/dev/dvb/card0/video0",O_RDWR)) < 0)
-	{
-		perror("open");
-		return;
-	}
-
-	if ( ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
-	{
-		perror("VIDEO SET DISPLAY FORMAT:");
-		close(fd);
-		return;
-	}
-	close(fd);
+	zapit.setDisplayFormat((int)videoDisplayFormat);
 
 	if ( (fd = open(SAA7126_DEVICE,O_RDWR)) < 0)
 	{
 		perror("open " SAA7126_DEVICE);
 		return;
 	}
+
 	ioctl(fd,SAAIOSWSS,&wss);
 	close(fd);
 }
@@ -660,7 +651,7 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 		case CControld::CMD_SETANALOGMODE:
 			CControld::commandAnalogMode msgmd;
 			read(connfd, &msgmd, sizeof(msgmd));
-			audioControl::setAudioMode(msgmd.mode);
+			zapit.setAudioMode(msgmd.mode);
 			break;
 		case CControld::CMD_SETVIDEOFORMAT:
 			//printf("[controld] set videoformat\n");
@@ -762,7 +753,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.61 2002/08/27 19:00:45 obi Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.62 2002/09/18 09:49:16 obi Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())

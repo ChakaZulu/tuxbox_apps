@@ -40,7 +40,6 @@ class audioControl
 			MONO_RIGHT = AUDIO_MONO_RIGHT
 		};
 
-		static void setAudioMode(int mode);
 		static void setVolume(char volume);
 		static void setMute(bool mute);
 

@@ -35,24 +35,6 @@
 #include <math.h>
 
 
-void audioControl::setAudioMode(int mode)
-{
-	int fd;
-
-	if ((fd = open("/dev/dvb/card0/audio0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
-
-	if (ioctl(fd,AUDIO_CHANNEL_SELECT,mode) < 0)
-	{
-		perror("AVSIOGVOL:");
-		return;
-	}
-	close(fd);
-}
-
 void audioControl::setVolume(char volume)
 {
 	int fd;
