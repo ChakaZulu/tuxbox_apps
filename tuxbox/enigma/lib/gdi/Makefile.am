@@ -1,9 +1,7 @@
 INCLUDES = \
 	-I$(DRIVER)/lcd \
 	-I$(top_srcdir)/edvb/miniqt \
-	-I$(top_srcdir)/enigma/src/core/system \
-  -I$(includedir)/sigc++-1.0 \
-	-I$(includedir)/../lib/sigc++-1.0/include
+	-I$(top_srcdir)/enigma/src/core/system
 
 noinst_LTLIBRARIES = libgdi.la
 
@@ -15,7 +13,7 @@ libgdi_la_LIBADD = $(LIBFREETYPE_LIBS) $(LIBPNG_LIBS)
 
 libgdi_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
 
-AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS)
+AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS)
 
 install-exec-local:
 	install -d $(LIBDIR)/enigma

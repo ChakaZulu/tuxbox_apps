@@ -5,9 +5,7 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/core/xml \
 	-I$(top_srcdir)/enigma/src/core/driver \
 	-I$(top_srcdir)/enigma/src/apps/enigma \
-	-I$(top_srcdir)/enigma/src/core/dvb \
-  -I$(includedir)/sigc++-1.0 \
-	-I$(includedir)/../lib/sigc++-1.0/include
+	-I$(top_srcdir)/enigma/src/core/dvb
 
 noinst_LTLIBRARIES = libgui.la
 
@@ -18,10 +16,9 @@ libgui_la_SOURCES = \
 
 libgui_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
 
-AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS)
+AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS)
 
 install-exec-local:
 	install -d $(LIBDIR)/enigma
 	$(LIBTOOL) --mode=install $(INSTALL) libgui.la $(LIBDIR)/enigma
 
-clean-local:

@@ -5,9 +5,7 @@ INCLUDES = \
 	-I$(top_srcdir)/enigma/src/apps/enigma \
 	-I$(top_srcdir)/enigma/src/core/driver \
 	-I$(top_srcdir)/enigma/src/core/gdi \
-	-I$(top_srcdir)/enigma/src/core/gui \
-  -I$(includedir)/sigc++-1.0 \
-	-I$(includedir)/../lib/sigc++-1.0/include
+	-I$(top_srcdir)/enigma/src/core/gui
 
 noinst_LTLIBRARIES = libsystem.la
 
@@ -17,8 +15,9 @@ libsystem_la_SOURCES = \
 
 libsystem_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
 
+AM_CXXFLAGS = $(LIBSIGC_CFLAGS)
+
 install-exec-local:
 	install -d $(LIBDIR)/enigma
 	$(LIBTOOL) --mode=install $(INSTALL) libsystem.la $(LIBDIR)/enigma
 
-clean-local:
