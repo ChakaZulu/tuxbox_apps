@@ -450,6 +450,7 @@ void setVolume(char volume)
 
 
 	lcdd.setVolume(volume);
+	eventServer.sendEvent(CControldClient::EVT_VOLUMECHANGED, 0);
 }
 
 void Mute()
@@ -473,6 +474,7 @@ void Mute()
 	close(fd);
 
 	lcdd.setMute(true);
+	eventServer.sendEvent(CControldClient::EVT_MUTECHANGED, 0);
 }
 
 void UnMute()
@@ -496,6 +498,7 @@ void UnMute()
 	close(fd);
 
 	lcdd.setMute(false);
+	eventServer.sendEvent(CControldClient::EVT_MUTECHANGED, 0);
 }
 
 
@@ -524,7 +527,7 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			Mute();
 			break;
 		case CControld::CMD_UNMUTE:
-			printf("[controld] unmute\n");
+			//printf("[controld] unmute\n");
 			UnMute();
 			break;
 		case CControld::CMD_SETVIDEOFORMAT:
