@@ -4,44 +4,16 @@
 		1		->	Network Scan
 		2		->	use BAT
 		4		->	use ONIT	
+		8   ->  skip NITs of known networks
 and combinations of this -->
 
 <satellites>
-	<sat name="Arabsat 30.5E">
-		<transponder frequency="12566000" symbol_rate="7029000" polarization="1" fec_inner="3"/>
-	</sat>
-	<sat name="Arabsat 36.0E">
-		<transponder frequency="11727000" symbol_rate="24571000" polarization="0" fec_inner="5"/>
-	</sat>
-	<sat name="Astra 19.2E" flags="1">
+	<sat name="Astra 19.2E" flags="9" position="192">
 		<transponder frequency="10876000" symbol_rate="22000000" polarization="1" fec_inner="4"/>
 		<transponder frequency="12187500" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12551000" symbol_rate="22000000" polarization="1" fec_inner="4"/>
 	</sat>
-	<sat name="Astra 23.5E">
-		<transponder frequency="11540000" symbol_rate="6110000" polarisation="1" fec_inner="3"/>
-		<transponder frequency="11592000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
-		<transponder frequency="11635000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
-		<transponder frequency="11675000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
-		<transponder frequency="11675000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
-		<transponder frequency="12508000" symbol_rate="2170000" polarisation="1" fec_inner="5"/>
-		<transponder frequency="12525000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
-		<transponder frequency="12565000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
-		<transponder frequency="12605000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
-		<transponder frequency="12605000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
-	</sat>
-	<sat name="Astra 28.2E">
-		<transponder frequency="11954000" symbol_rate="27500000" polarization="0" fec_inner="2"/>
-		<transponder frequency="12051000" symbol_rate="27500000" polarization="1" fec_inner="2"/>
-	</sat>
-	<sat name="Eutelsat 7.0E">
-		<transponder frequency="11575000" symbol_rate="30000000" polarization="1" fec_inner="3"/>
-		<transponder frequency="11596000" symbol_rate="30000000" polarization="0" fec_inner="3"/>
-	</sat>
-	<sat name="Eutelsat 10.0E">
-		<transponder frequency="10957000" symbol_rate="3050000" polarization="0" fec_inner="5"/>
-	</sat>
-	<sat name="Eutelsat 13.0E" flags="4">
+	<sat name="Eutelsat 13.0E" flags="5" position="130">
 		<transponder frequency="12692000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12539000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="11746000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
@@ -53,17 +25,46 @@ and combinations of this -->
 		<transponder frequency="12539000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12111000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 	</sat>
-	<sat name="HispaSat 30.0W">
+	<sat name="Arabsat 30.5E" flags="5" position="305">
+		<transponder frequency="12566000" symbol_rate="7029000" polarization="1" fec_inner="3"/>
+	</sat>
+	<sat name="Arabsat 36.0E" flags="5" position="360">
+		<transponder frequency="11727000" symbol_rate="24571000" polarization="0" fec_inner="5"/>
+	</sat>
+	<sat name="Astra 23.5E" flags="5" position="235">
+		<transponder frequency="11540000" symbol_rate="6110000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="11592000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="11635000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
+		<transponder frequency="11675000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
+		<transponder frequency="11675000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="12508000" symbol_rate="2170000" polarisation="1" fec_inner="5"/>
+		<transponder frequency="12525000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
+		<transponder frequency="12565000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="12605000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="12605000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
+	</sat>
+	<sat name="Astra 28.2E" flags="5" position="282">
+		<transponder frequency="11954000" symbol_rate="27500000" polarization="0" fec_inner="2"/>
+		<transponder frequency="12051000" symbol_rate="27500000" polarization="1" fec_inner="2"/>
+	</sat>
+	<sat name="Eutelsat 7.0E" flags="5" position="70">
+		<transponder frequency="11575000" symbol_rate="30000000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11596000" symbol_rate="30000000" polarization="0" fec_inner="3"/>
+	</sat>
+	<sat name="Eutelsat 10.0E" flags="5" position="100">
+		<transponder frequency="10957000" symbol_rate="3050000" polarization="0" fec_inner="5"/>
+	</sat>
+	<sat name="HispaSat 30.0W" flags="5" position="-300">
 		<transponder frequency="11811000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="11811000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 	</sat>
-	<sat name="Sirius 5.0E">
+	<sat name="Sirius 5.0E" flags="5" position="50">
 		<transponder frequency="11376000" symbol_rate="2170000" polarization="1" fec_inner="3"/>
 	</sat>
-	<sat name="Thor 0.8W">
+	<sat name="Thor 0.8W" flags="5" position="8">
 		<transponder frequency="10966000" symbol_rate="2963000" polarization="1" fec_inner="3"/>
 	</sat>
-	<sat name="Tuerksat 42.0E">
+	<sat name="Tuerksat 42.0E" flags="5" position="420">
 		<transponder frequency="10980000" symbol_rate="4688000" polarization="1" fec_inner="3"/>
 	</sat>
 </satellites>
