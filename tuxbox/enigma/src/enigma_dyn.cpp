@@ -2993,7 +2993,7 @@ static eString wapEPG(void)
 		timeMap::const_iterator It;
 
 		int i = 0;
-		for(It=evt->begin(); (It!= evt->end()) && (i < 50); It++)
+		for(It=evt->begin(); (It!= evt->end()) && (i < 25); It++)
 		{
 //			ext_description = "";
 			EITEvent event(*It->second);
