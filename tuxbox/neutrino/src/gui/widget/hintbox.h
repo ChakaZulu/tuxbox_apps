@@ -74,7 +74,7 @@ class CHintBox
 };
 
 // Text is UTF-8 encoded
-int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const int Width = 450, int timeout = -1);
+int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const int Width = 450, int timeout = -1, const char * const Icon = "info.raw");
 
 
 #endif

@@ -209,12 +209,12 @@ void CHintBox::hide(void)
 	}
 }
 
-int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const int Width, int timeout)
+int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const int Width, int timeout, const char * const Icon)
 {
 	neutrino_msg_t msg;
 	neutrino_msg_data_t data;
 
- 	CHintBox * hintBox = new CHintBox(Caption, Text, Width);
+ 	CHintBox * hintBox = new CHintBox(Caption, Text, Width, Icon);
 	hintBox->paint();
 
 	if ( timeout == -1 )
