@@ -144,6 +144,7 @@ void saveSettings()
 void shutdownBox()
 {
 	lcdd.shutdown();
+	saveSettings();
 
 	if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
 	{
@@ -560,7 +561,9 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			read(connfd, &msg10, sizeof(msg10));
 			disableVideoOutput(msg10.powerdown);
 			break;
-
+		case CControld::CMD_SAVECONFIG:
+			saveSettings();
+			break;
 
 		case CControld::CMD_GETVOLUME:
 			//printf("[controld] get volume\n");

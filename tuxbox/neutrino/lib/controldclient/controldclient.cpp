@@ -308,3 +308,13 @@ void CControldClient::videoPowerDown(bool powerdown)
         send((char*)&msg2, sizeof(msg2));
         controld_close();
 }
+
+void CControldClient::saveSettings()
+{
+        CControld::commandHead msg;
+        msg.version=CControld::ACTVERSION;
+        msg.cmd=CControld::CMD_SAVECONFIG;
+        controld_connect();
+        send((char*)&msg, sizeof(msg));
+        controld_close();
+}

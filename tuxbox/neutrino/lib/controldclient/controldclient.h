@@ -172,6 +172,8 @@ class CControldClient
 		*/
 		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
 
+		void saveSettings();
+
 };
 
 #endif
