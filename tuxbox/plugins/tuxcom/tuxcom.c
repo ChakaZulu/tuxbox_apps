@@ -234,7 +234,7 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 
 		if(!(glyphindex = FT_Get_Char_Index(face, currentchar)))
 		{
-			printf("TuxCom <FT_Get_Char_Index for Char \"%c\" failed with Errorcode 0x%.2X>\n", (int)currentchar, error);
+			printf("TuxCom <FT_Get_Char_Index for Char \"%c\" failed: \"undefined character code\">\n", (int)currentchar);
 			return 0;
 		}
 
