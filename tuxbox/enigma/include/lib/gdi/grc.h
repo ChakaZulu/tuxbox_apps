@@ -143,7 +143,11 @@ public:
 		while(1)
 		{
 			pthread_mutex_lock(&mutex);
-			if ( (wp+1) == rp )
+			int tmp=wp;
+			tmp+=1;
+			if ( tmp == MAXSIZE )
+				tmp=0;
+			if ( tmp == rp )
 			{
 				pthread_mutex_unlock(&mutex);
 				//printf("render buffer full...\n");
