@@ -42,8 +42,8 @@ class eFrontend: public Object
 	int tries;
 	int tune(eTransponder *transponder, 
 			uint32_t Frequency, int polarisation,
-			uint32_t SymbolRate, CodeRate FEC_inner,
-			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
+			uint32_t SymbolRate, fe_code_rate_t FEC_inner,
+			fe_spectral_inversion_t Inversion, eSatellite* sat, fe_modulation_t QAM);
 
 	void timeout();
 /*

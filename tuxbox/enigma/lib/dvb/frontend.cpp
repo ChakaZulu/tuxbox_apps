@@ -538,7 +538,7 @@ int eFrontend::tune(eTransponder *trans,
 
 				if ( i < loops && lnb->getDiSEqC().uncommitted_gap )
 				{
-					memcpy( commands[i], commands[i-1], sizeof(commands[i]) );
+					memcpy( &commands[i], &commands[i-1], sizeof(struct dvb_diseqc_master_cmd) );
 					commands[i].msg[0]=0xE1;
 					commands[i].msg[2]=0x39;
 					i++;
