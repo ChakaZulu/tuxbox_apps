@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.30 2004/08/16 10:30:15 ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.31 2004/11/04 09:51:36 ghostrider Exp $
  */
 
 #include <enigma_info.h>
@@ -237,7 +237,8 @@ public:
 		else if ( !strcmp(eSystemInfo::getInstance()->getManufacturer(),"Dream-Multimedia-TV") )
 			dreamlogo->show();
 
-		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		{
 			eString fp_version = fpversion->getText();
 			fp_version += eString().sprintf(" 1.%02d", eDreamboxFP::getFPVersion());

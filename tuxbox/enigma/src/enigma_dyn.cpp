@@ -1810,7 +1810,8 @@ static eString aboutDreambox(void)
 	std::stringstream result;
 	result << "<table border=0 cellspacing=0 cellpadding=0>";
 
-	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		if (pdaScreen == 0)
 			result << "<img src=\"dm7000.jpg\" width=\"630\" border=\"0\"><br><br>";
 		else
@@ -1826,7 +1827,8 @@ static eString aboutDreambox(void)
 #endif
 	result	<< "<tr><td>Linux Kernel:</td><td>" << readFile("/proc/version") << "</td></tr>"
 		<< "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>";
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
+			eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
 			result << "<tr><td>FP Firmware:</td><td>" << eString().sprintf(" 1.%02d", eDreamboxFP::getFPVersion()) << "</td></tr>";
 		result << "<tr><td>Web Interface:</td><td>" << WEBIFVERSION << "</td></tr>"
 		<< "</table>";

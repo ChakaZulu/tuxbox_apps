@@ -1332,6 +1332,7 @@ eTimerManager::~eTimerManager()
 					break;
 				}
 				case eSystemInfo::DM7000:
+				case eSystemInfo::DM7020:
 				{
 					time_t tmp=0;
 					if ( !(tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, nextStartingEvent->last_activation ) ) )

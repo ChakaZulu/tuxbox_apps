@@ -1912,7 +1912,8 @@ eZapMain::~eZapMain()
 	pLCD->lcdMain->hide();
 	pLCD->lcdShutdown->show();
 	gLCDDC::getInstance()->setUpdate(0);
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
 		eDBoxLCD::getInstance()->switchLCD(0);
 #endif
 	delete subtitle;

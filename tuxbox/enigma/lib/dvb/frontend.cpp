@@ -573,6 +573,7 @@ int eFrontend::readInputPower()
 		switch ( eSystemInfo::getInstance()->getHwType() )
 		{
 			case eSystemInfo::DM7000:
+			case eSystemInfo::DM7020:
 			{
 				// open front prozessor
 				int fp=::open("/dev/dbox/fp0", O_RDWR);
