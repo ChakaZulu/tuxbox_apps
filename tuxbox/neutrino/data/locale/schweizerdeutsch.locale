@@ -30,8 +30,8 @@ cablesetup.provider Kabelabieder
 satsetup.disqeqc DiSEqC
 satsetup.satellite Sadellid
 satsetup.extended DiSEqC-Iinstellig
-satsetup.extended_lnb unset
-satsetup.extended_motor unset
+satsetup.extended_lnb LNB-Iistellige
+satsetup.extended_motor Motor-Iistellige
 satsetup.nodiseqc Kein DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
@@ -39,8 +39,8 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-Widderholigge
-satsetup.savesettingsnow unset
-satsetup.motorcontrol unset
+satsetup.savesettingsnow Iischdellige jetz speichere
+satsetup.motorcontrol Motor-Setup
 
 mainsettings.head Iischdellige
 mainsettings.savesettingsnow Iischdellige jetz speichere
@@ -62,7 +62,7 @@ miscsettings.head Diverse Iischdellige
 miscsettings.shutdown_real Sdändbymodus
 miscsettings.boxtype DBox Hersdeller
 miscsettings.startneutrinodirect Neutrino diräkt starte
-miscsettings.startbhdriver unset
+miscsettings.startbhdriver BH-Mode Triiber lade
 miscsettings.general Allg'mein
 miscsettings.fb_destination EXPERT! Boot-Chonsole
 miscsettings.infobar_sat_display Infobar Satellite-A'zeig
@@ -344,7 +344,7 @@ scants.bouquet_erase lösche
 scants.failed Kanalsuechii fehlg'schlage!
 scants.finished Kanalsueche erfolgrich beändet!
 
-motorcontrol.head unset
+motorcontrol.head Motor-Setup
 
 flashupdate.head Aktualisierig
 flashupdate.action Aktion:
