@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.138 2005/01/09 16:56:55 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.139 2005/01/12 18:33:27 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -293,7 +293,8 @@ int get_sdts(char * frontendType)
 			{
 				TsidOnid = get_sdt_TsidOnid();
 		
-				if ((TsidOnid != 0) && (tI->second.transport_stream_id != (TsidOnid >> 16)&0xFFFF) && (tI->second.original_network_id = TsidOnid &0xFFFF))
+				if ((TsidOnid != 0) &&
+				    ((tI->second.transport_stream_id != (TsidOnid >> 16)&0xFFFF) || (tI->second.original_network_id != TsidOnid &0xFFFF)))
 				{
 					tI->second.transport_stream_id = (TsidOnid >> 16)&0xFFFF;
 					tI->second.original_network_id = TsidOnid &0xFFFF;
@@ -334,34 +335,21 @@ void write_bouquets(const char * const providerName)
 		scanBouquetManager->saveBouquets(bouquetMode, providerName);
 }
 
-void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id)
+void write_transponder(FILE *fd, const transpondermap & transponder)
 {
-	stiterator tI;
-	if(scan_mode)
-	{
-		for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++) 
-		{
-			if((tI->second.transport_stream_id == transport_stream_id) && (tI->second.original_network_id == original_network_id)) break;
-		}
-	}
-	else
-	{
-	tI = scantransponders.find((transport_stream_id << 16) | original_network_id);
-	}
-	
 	static bool emptyTransponder = false;
 	switch (frontend->getInfo()->type) {
 	case FE_QAM: /* cable */
 		fprintf(fd,
 			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n",
 
-			tI->second.transport_stream_id,
-			tI->second.original_network_id,
-			tI->second.feparams.frequency,
-			tI->second.feparams.inversion,
-			tI->second.feparams.u.qam.symbol_rate,
-			tI->second.feparams.u.qam.fec_inner,
-			tI->second.feparams.u.qam.modulation);
+			transponder.transport_stream_id,
+			transponder.original_network_id,
+			transponder.feparams.frequency,
+			transponder.feparams.inversion,
+			transponder.feparams.u.qam.symbol_rate,
+			transponder.feparams.u.qam.fec_inner,
+			transponder.feparams.u.qam.modulation);
 		break;
 
 	case FE_QPSK: /* satellite */
@@ -371,17 +359,17 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 	case FE_OFDM: /* terrestrial */
 		fprintf(fd,
 			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" bandwidth=\"%hu\" code_rate_HP=\"%hu\" code_rate_LP=\"%hu\" constellation=\"%hu\" transmission_mode=\"%hu\" guard_interval=\"%hu\" hierarchy_information=\"%hu\">\n",
-			tI->second.transport_stream_id,
-			tI->second.original_network_id,
-			tI->second.feparams.frequency,
-			tI->second.feparams.inversion,
-			tI->second.feparams.u.ofdm.bandwidth,
-			tI->second.feparams.u.ofdm.code_rate_HP,
-			tI->second.feparams.u.ofdm.code_rate_LP,
-			tI->second.feparams.u.ofdm.constellation,
-			tI->second.feparams.u.ofdm.transmission_mode,
-			tI->second.feparams.u.ofdm.guard_interval,
-			tI->second.feparams.u.ofdm.hierarchy_information);
+			transponder.transport_stream_id,
+			transponder.original_network_id,
+			transponder.feparams.frequency,
+			transponder.feparams.inversion,
+			transponder.feparams.u.ofdm.bandwidth,
+			transponder.feparams.u.ofdm.code_rate_HP,
+			transponder.feparams.u.ofdm.code_rate_LP,
+			transponder.feparams.u.ofdm.constellation,
+			transponder.feparams.u.ofdm.transmission_mode,
+			transponder.feparams.u.ofdm.guard_interval,
+			transponder.feparams.u.ofdm.hierarchy_information);
 		break;
 
 	default:
@@ -389,19 +377,19 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 	}
 
 	for (tallchans::const_iterator cI = allchans.begin(); cI != allchans.end(); cI++)
-		if ((cI->second.getTransportStreamId() == transport_stream_id) && (cI->second.getOriginalNetworkId() == original_network_id)) {
+		if ((cI->second.getTransportStreamId() == transponder.transport_stream_id) && (cI->second.getOriginalNetworkId() == transponder.original_network_id)) {
 			if(emptyTransponder){
 					fprintf(fd,
 			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n",
 
-			one_flag ? one_tpid : tI->second.transport_stream_id,
-			one_flag ? one_onid : tI->second.original_network_id,
+			one_flag ? one_tpid : transponder.transport_stream_id,
+			one_flag ? one_onid : transponder.original_network_id,
 			
-			tI->second.feparams.frequency,
-			tI->second.feparams.inversion,
-			tI->second.feparams.u.qpsk.symbol_rate,
-			tI->second.feparams.u.qpsk.fec_inner,
-			tI->second.polarization);
+			transponder.feparams.frequency,
+			transponder.feparams.inversion,
+			transponder.feparams.u.qpsk.symbol_rate,
+			transponder.feparams.u.qpsk.fec_inner,
+			transponder.polarization);
 			emptyTransponder = false;
 			}
 			if (cI->second.getName().empty())
@@ -444,7 +432,7 @@ int write_provider(FILE *fd, const char *frontendType, const char *provider_name
 		/* channels */
 		for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 		{
-			write_transponder(fd, tI->second.transport_stream_id, tI->second.original_network_id);
+			write_transponder(fd, tI->second);
 		}
 
 		/* end tag */
@@ -821,7 +809,7 @@ int scan_transponder(TP_params *TP)
 	{
 		/* channels */
 		for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-			write_transponder(fd, tI->second.transport_stream_id, tI->second.original_network_id);
+			write_transponder(fd, tI->second);
 		fprintf(fd, "\t</%s>\n", frontendType);
 		allchans.clear();
 		scantransponders.clear();
