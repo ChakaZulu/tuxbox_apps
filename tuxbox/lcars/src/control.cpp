@@ -993,6 +993,8 @@ int control::runCommand(command_class command, bool val)
 				else if (atoi(command.args[1].c_str()) < channels_obj->currentNumberPerspectives())
 				{
 					channels_obj->setPerspective(atoi(command.args[1].c_str()));
+					if (channels_obj->getCurrentType() == 4)
+						channels_obj->receiveCurrentEIT();
 					vars->setvalue("%CURR_PERSPECTIVE", command.args[1]);
 					vars->setvalue("%CURR_PERSPECTIVE_NAME", channels_obj->getPerspectiveName(atoi(command.args[1].c_str())));
 				}

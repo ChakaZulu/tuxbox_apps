@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.10  2002/06/13 01:35:48  TheDOC
+NVOD should work now
+
 Revision 1.9  2002/06/08 15:11:47  TheDOC
 autostart in yadd added
 
@@ -353,9 +356,16 @@ void eit::receiveNow(int SID)
 		it++;
 	}
 	(*osd_obj).setNowTime(now.starttime);
-	(*osd_obj).setNowDescription(now.event_name);
+
+	if (strlen(now.event_name) != 0)
+	{
+		(*osd_obj).setNowDescription(now.event_name);
+	}
 	(*osd_obj).setNextTime(next.starttime);
-	(*osd_obj).setNextDescription(next.event_name);
+	if (strlen(next.event_name) != 0)
+	{
+		(*osd_obj).setNextDescription(next.event_name);
+	}
 	(*osd_obj).setParentalRating(now.par_rating);
 
 

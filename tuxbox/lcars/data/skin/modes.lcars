@@ -472,19 +472,40 @@ GREEN:
 	CONTROL Mode 1
 1:
 	CHANNELS Perspectives Zap 0
-	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
-	OSD direct SHOW perspective
-	CONTROL Mode 3
+	OSD direct SHOW proginfo 5
 2:
 	CHANNELS Perspectives Zap 1
-	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
-	OSD direct SHOW perspective
-	CONTROL Mode 3
+	OSD direct SHOW proginfo 5
 3:
 	CHANNELS Perspectives Zap 2
-	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
-	OSD direct SHOW perspective
-	CONTROL Mode 3
+	OSD direct SHOW proginfo 5
+4:
+	CHANNELS Perspectives Zap 3
+	OSD direct SHOW proginfo 5
+5:
+	CHANNELS Perspectives Zap 4
+	OSD direct SHOW proginfo 5
+6:
+	CHANNELS Perspectives Zap 5
+	OSD direct SHOW proginfo 5
+7:
+	CHANNELS Perspectives Zap 6
+	OSD direct SHOW proginfo 5
+8:
+	CHANNELS Perspectives Zap 7
+	OSD direct SHOW proginfo 5
+RIGHT:
+	CHANNELS Zap Audio Next
+LEFT:
+	CHANNELS Zap Audio Previous
+STANDBY:
+	HARDWARE Shutdown
+BLUE:
+	CONTROL Menu Mode 0
+OK:
+	OSD direct SHOW proginfo 5
+DBOX:
+	HARDWARE Switch Vcr
 ------
 +++
 Title:

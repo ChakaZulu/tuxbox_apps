@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pmt.cpp,v $
+Revision 1.6  2002/06/13 01:35:48  TheDOC
+NVOD should work now
+
 Revision 1.5  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -69,6 +72,7 @@ pmt_data pmt::readPMT(int pmt_pid)
 	struct pmt_data tmp_pmt;
 	memset (&tmp_pmt, 0, sizeof (struct pmt_data));
 	tmp_pmt.ecm_counter = 0;
+	tmp_pmt.pmt = pmt_pid;
 
 	tmp_pmt.PCR = (buffer[8] & 0x1f) << 8 | buffer[9];
 
