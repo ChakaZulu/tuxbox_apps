@@ -402,19 +402,15 @@ CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool
 
 CMenuOptionChooser::~CMenuOptionChooser()
 {
-	for(unsigned int count=0;count<options.size();count++)
-	{
-		delete options[count];
-	}
-	options.clear();
+	removeAllOptions();
 }
 
-void CMenuOptionChooser::addOption(int key, string value)
+void CMenuOptionChooser::addOption(const int key, const char * const value_utf8_encoded)
 {
 	keyval *tmp = new keyval();
 	tmp->key=key;
-	tmp->value=value;
-	options.insert(options.end(), tmp);
+	tmp->value = value_utf8_encoded;
+	options.push_back(tmp);
 }
 
 void CMenuOptionChooser::removeAllOptions()
@@ -500,12 +496,12 @@ int CMenuOptionChooser::paint( bool selected )
 	else
 		l_option = option;
 
-	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
+	int stringwidth = g_Fonts->menu->getRenderWidth(l_option, true); // UTF-8
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
 	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName.c_str(), color);
-	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color, 0, true); // UTF-8
 
 	if(selected)
 	{

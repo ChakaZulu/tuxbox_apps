@@ -192,7 +192,7 @@ class CMenuOptionChooser : public CMenuItem
 		struct keyval
 		{
 			int key;
-			string value;
+			std::string value;
 		};
 
 		vector<keyval*>    options;
@@ -208,7 +208,7 @@ class CMenuOptionChooser : public CMenuItem
 		~CMenuOptionChooser();
 
 
-		void addOption(int key, string value);
+		void addOption(const int key, const char * const value_utf8_encoded); // UTF-8
 		void removeAllOptions();
 		void setOptionValue(int val);
 		int getOptionValue();

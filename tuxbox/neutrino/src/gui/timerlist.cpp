@@ -472,13 +472,13 @@ void CTimerList::paintItem(int pos)
 		char zStopTime[25] = {0};
 		struct tm *stopTime = localtime(&(timer.stopTime));
 		strftime(zStopTime,20,"%d.%m. %H:%M",stopTime);
-		g_Fonts->menu->RenderString(x+10,ypos+fheight, 150, zAlarmTime, color, fheight);
+		g_Fonts->menu->RenderString(x+10,ypos+fheight, 150, zAlarmTime, color, fheight, true); // UTF-8
 		if(timer.stopTime != 0)
 		{
-			g_Fonts->menu->RenderString(x+10,ypos+2*fheight, 150, zStopTime, color, fheight);
+			g_Fonts->menu->RenderString(x+10,ypos+2*fheight, 150, zStopTime, color, fheight, true); // UTF-8
 		}
-		g_Fonts->menu->RenderString(x+160,ypos+fheight, (real_width-160)/2-5, convertTimerRepeat2String(timer.eventRepeat), color, fheight);
-		g_Fonts->menu->RenderString(x+160+(real_width-160)/2,ypos+fheight, (real_width-160)/2-5, convertTimerType2String(timer.eventType), color, fheight);
+		g_Fonts->menu->RenderString(x+160,ypos+fheight, (real_width-160)/2-5, convertTimerRepeat2String(timer.eventRepeat), color, fheight, true); // UTF-8
+		g_Fonts->menu->RenderString(x+160+(real_width-160)/2,ypos+fheight, (real_width-160)/2-5, convertTimerType2String(timer.eventType), color, fheight, true); // UTF-8
 		string zAddData("");
 		switch(timer.eventType)
 		{
@@ -486,41 +486,39 @@ void CTimerList::paintItem(int pos)
 			case CTimerd::TIMER_ZAPTO :
 			case CTimerd::TIMER_RECORD :
 				{
-					zAddData=convertChannelId2String(timer.channel_id,timer.mode);
+					zAddData = convertChannelId2String(timer.channel_id, timer.mode); // UTF-8
 					if(strlen(timer.apids) != 0)
 					{
-						zAddData+= string(" (") + timer.apids + ")";
+						zAddData += string(" (") + timer.apids + ")"; // must be UTF-8 encoded !
 					}
 					if(timer.epgID!=0)
 					{
 						CEPGData epgdata;
 						if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
 						{
+#warning fixme sectionsd should deliver data in UTF-8 format
 							zAddData+= " : " + epgdata.title;
 						}
 					}
 				}
 				break;
-			case CTimerd::TIMER_STANDBY :
+			case CTimerd::TIMER_STANDBY:
 				{
-					if(timer.standby_on)
-						zAddData = g_Locale->getText("timerlist.standby.on");
-					else
-						zAddData	= g_Locale->getText("timerlist.standby.off");
+					zAddData = g_Locale->getText(timer.standby_on ? "timerlist.standby.on" : "timerlist.standby.off"); // UTF-8
+					break;
 				}
-				break;
 			case CTimerd::TIMER_REMIND :
 				{
-					zAddData = timer.message ;
+					zAddData = timer.message; // must be UTF-8 encoded !
 				}
 				break;
 			default:{}
 		}
-		g_Fonts->menu->RenderString(x+160,ypos+2*fheight, real_width-165, zAddData, color, fheight);
+		g_Fonts->menu->RenderString(x+160,ypos+2*fheight, real_width-165, zAddData, color, fheight, true); // UTF-8
 		// LCD Display
 		if(liststart+pos==selected)
 		{
-			string line1 = convertTimerType2String(timer.eventType);
+			string line1 = convertTimerType2String(timer.eventType); // UTF-8
 			string line2 = zAlarmTime;
 			switch(timer.eventType)
 			{
@@ -530,8 +528,8 @@ void CTimerList::paintItem(int pos)
 				case CTimerd::TIMER_NEXTPROGRAM :
 				case CTimerd::TIMER_ZAPTO :
 					{
-						line1+=" ";
-						line1+=convertChannelId2String(timer.channel_id,timer.mode);
+						line1 += " ";
+						line1 += convertChannelId2String(timer.channel_id,timer.mode); // UTF-8
 					}
 					break;
 				case CTimerd::TIMER_STANDBY :
@@ -542,21 +540,19 @@ void CTimerList::paintItem(int pos)
 							line1+=" OFF";
 					}
 					break;
-				default:{}
+			default:;
 			}
-			CLCD::getInstance()->showMenuText(0, line1 );
-			CLCD::getInstance()->showMenuText(1, line2 );
+			CLCD::getInstance()->showMenuText(0, line1, -1, true); // UTF-8
+			CLCD::getInstance()->showMenuText(1, line2, -1, true); // UTF-8
 		}
 	}
 }
 
 void CTimerList::paintHead()
 {
-	string strCaption = g_Locale->getText("timerlist.name");
-
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	frameBuffer->paintIcon("timer.raw",x+5,y+4);
-	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, strCaption.c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("timerlist.name").c_str(), COL_MENUHEAD, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
 /*	if (bouquetList!=NULL)
@@ -572,18 +568,18 @@ void CTimerList::paintFoot()
 	if(timerlist.size()>0)
 	{
 		frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
-		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR);
+		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 		frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
-		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR);
+		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 	}
 
 	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload").c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 }
 
@@ -592,7 +588,7 @@ void CTimerList::paint()
 	unsigned int page_nr = (listmaxshow == 0) ? 0 : (selected / listmaxshow);
 	liststart = page_nr * listmaxshow;
 
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU, g_Locale->getText("timerlist.name") );
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("timerlist.name"));
 
 	paintHead();
 	for(unsigned int count=0;count<listmaxshow;count++)
@@ -616,7 +612,7 @@ void CTimerList::paint()
 	visible = true;
 }
 
-string CTimerList::convertTimerType2String(CTimerd::CTimerEventTypes type)
+std::string CTimerList::convertTimerType2String(const CTimerd::CTimerEventTypes type) // UTF-8
 {
 	switch(type)
 	{
@@ -631,7 +627,7 @@ string CTimerList::convertTimerType2String(CTimerd::CTimerEventTypes type)
 	}
 }
 
-string CTimerList::convertTimerRepeat2String(CTimerd::CTimerEventRepeat rep)
+std::string CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep) // UTF-8
 {
 	switch(rep)
 	{
@@ -673,16 +669,17 @@ string CTimerList::convertTimerRepeat2String(CTimerd::CTimerEventRepeat rep)
 				return g_Locale->getText("timerlist.repeat.unknown");
 	}
 }
-string CTimerList::convertChannelId2String(t_channel_id id, CTimerd::CChannelMode mode)
+
+std::string CTimerList::convertChannelId2String(const t_channel_id id, const CTimerd::CChannelMode mode) // UTF-8
 {
-	string name=g_Locale->getText("timerlist.program.unknown");
+	std::string name = g_Locale->getText("timerlist.program.unknown"); // UTF-8
    
 	if(mode==CTimerd::MODE_TV)
 	{
 		if(channellist_tv.size()==0)
 		{
 			CZapitClient Zapit;
-			Zapit.getChannels(channellist_tv,CZapitClient::MODE_TV);
+			Zapit.getChannels(channellist_tv, CZapitClient::MODE_TV, CZapitClient::SORT_BOUQUET, true); // UTF-8
 		}
 		CZapitClient::BouquetChannelList::iterator channel = channellist_tv.begin();
 		for(; channel != channellist_tv.end();channel++)
@@ -699,7 +696,7 @@ string CTimerList::convertChannelId2String(t_channel_id id, CTimerd::CChannelMod
 		if(channellist_radio.size()==0)
 		{
 			CZapitClient Zapit;
-			Zapit.getChannels(channellist_radio,CZapitClient::MODE_RADIO);
+			Zapit.getChannels(channellist_radio, CZapitClient::MODE_RADIO, CZapitClient::SORT_BOUQUET, true); // UTF-8
 		}
 		CZapitClient::BouquetChannelList::iterator channel = channellist_radio.begin();
 		for(; channel != channellist_radio.end();channel++)
@@ -723,7 +720,7 @@ int CTimerList::modifyTimer()
 	timerSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
 	char type[80];
-	strcpy(type,convertTimerType2String(timer->eventType ).c_str()); 
+	strcpy(type, CZapitClient::Utf8_to_Latin1(convertTimerType2String(timer->eventType)).c_str()); // UTF8, UTF8 -> Latin1
 	CMenuForwarder *m0 = new CMenuForwarder("timerlist.type", false, type);
 	timerSettings.addItem( m0);
 

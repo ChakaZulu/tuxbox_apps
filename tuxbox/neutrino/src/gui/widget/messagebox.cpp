@@ -144,7 +144,7 @@ void CMessageBox::paintButtons()
 			color = COL_MENUCONTENTSELECTED;
 		window->paintBoxRel(xpos, height - fheight - 20, ButtonWidth, fheight, (CFBWindow::color_t)color);
 		window->paintIcon("rot.raw", xpos + 14, height - fheight - 15);
-		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), (CFBWindow::color_t)color);
+		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
 
 	xpos = startpos+ButtonWidth+ButtonSpacing;
@@ -157,7 +157,7 @@ void CMessageBox::paintButtons()
 
 		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
 		window->paintIcon("gruen.raw", xpos+14, height-fheight-15);
-		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.no"), (CFBWindow::color_t)color);
+		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.no"), (CFBWindow::color_t)color, 0, true); // UTF-8
     }
 
     xpos = startpos+ButtonWidth*2+ButtonSpacing*2;

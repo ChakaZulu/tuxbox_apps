@@ -139,15 +139,52 @@ void CLocaleManager::loadLocale(std::string locale)
 
 			if (
 			    (strncmp(keystr, "file", 4) != 0) &&  // filebrowser.head (FIXME)
+			    (strncmp(keystr, "flashupdate.title", 17) != 0) &&
+			    (strncmp(keystr, "flashupdate.updatemode_", 23) != 0) &&
+			    (strncmp(keystr, "lcdmenu.statusline.", 19) != 0) &&
+			    (strncmp(keystr, "mainmenu.recording_", 19) != 0) &&
 			    (strncmp(keystr, "mp3player", 9) != 0) &&
+			    (strncmp(keystr, "nfs.t", 5) != 0) &&
+			    (strncmp(keystr, "parentallock.lockage1", 21) != 0) &&
+			    (strncmp(keystr, "pictureviewer", 13) != 0) &&
+			    (strncmp(keystr, "recordingmenu.o", 15) != 0) &&
+			    (strncmp(keystr, "recordingmenu.v", 15) != 0) &&
+			    (strncmp(keystr, "satsetup.mi", 11) != 0) &&
+			    (strncmp(keystr, "satsetup.n", 10) != 0) &&
+			    (strncmp(keystr, "satsetup.diseqc1", 16) != 0) &&
 			    (strncmp(keystr, "streaminfo", 10) != 0) &&
-			    (strcmp(keystr, "epglist.head") != 0) &&
+			    (strncmp(keystr, "streamingmenu.o", 15) != 0) &&
+			    (strncmp(keystr, "timerlist.d", 11) != 0) &&
+			    (strncmp(keystr, "timerlist.modi", 14) != 0) &&
+			    (strncmp(keystr, "timerlist.n", 11) != 0) &&
+			    (strncmp(keystr, "timerlist.p", 11) != 0) &&
+			    (strncmp(keystr, "timerlist.standby.", 18) != 0) &&
+			    (strncmp(keystr, "timerlist.type.", 15) != 0) &&
+			    (strncmp(keystr, "videomenu.videoformat_", 22) != 0) &&
+			    (strncmp(keystr, "videomenu.videosignal_", 22) != 0) &&
+			    ((strncmp(keystr, "timerlist.r", 11) != 0) || (strcmp(keystr, "timerlist.repeat") == 0)) &&
+			    ((strncmp(keystr, "options", 7) != 0) || (strcmp(keystr, "options.default") == 0)) &&
+			    ((strncmp(keystr, "scants", 6) != 0) || ((strcmp(keystr, "scants.bouquet") == 0) || (strncmp(keystr, "scants.s", 8) == 0))) &&
+			    (strcmp(keystr, "audiomenu.avs") != 0) &&
+			    (strcmp(keystr, "audiomenu.lirc") != 0) &&
+			    (strcmp(keystr, "audiomenu.monoleft") != 0) &&
+			    (strcmp(keystr, "audiomenu.monoright") != 0) &&
+			    (strcmp(keystr, "audiomenu.ost") != 0) &&
+			    (strcmp(keystr, "audiomenu.stereo") != 0) &&
 			    (strcmp(keystr, "bouquetlist.head") != 0) &&
 			    (strcmp(keystr, "channellist.head") != 0) &&
+			    (strcmp(keystr, "epglist.head") != 0) &&
 			    (strcmp(keystr, "flashupdate.head") != 0) &&
-			    (strncmp(keystr, "flashupdate.title", 17) != 0) &&
-			    (strncmp(keystr, "pictureviewer", 13) != 0) &&
-			    ((strncmp(keystr, "scants", 6) != 0) || ((strncmp(keystr, "scants.b", 8) == 0) || (strncmp(keystr, "scants.s", 8) == 0)))
+			    (strcmp(keystr, "keybindingmenu.allchannels_on_ok") != 0) &&
+			    (strcmp(keystr, "keybindingmenu.bouquetchannels_on_ok") != 0) &&
+			    (strcmp(keystr, "keybindingmenu.bouquetlist_on_ok") != 0) &&
+			    (strcmp(keystr, "messagebox.no") != 0) &&
+			    (strcmp(keystr, "messagebox.yes") != 0) &&
+			    (strcmp(keystr, "parentallock.changetolocked") != 0) &&
+			    (strcmp(keystr, "parentallock.never") != 0) &&
+			    (strcmp(keystr, "parentallock.onsignal") != 0) &&
+			    (strcmp(keystr, "parentallock.onstart") != 0) &&
+			    (strcmp(keystr, "recordingmenu.server") != 0)
 			    )
 				text = CZapitClient::Utf8_to_Latin1(text);
 			localeData[keystr] = text;
