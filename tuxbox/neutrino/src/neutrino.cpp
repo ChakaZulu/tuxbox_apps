@@ -37,7 +37,6 @@
 #include "global.h"
 #include "neutrino.h"
 
-#include "zapit/getservices.h"
 #include "daemonc/remotecontrol.h"
 
 #include "driver/framebuffer.h"
@@ -3051,7 +3050,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.326 2002/09/18 23:02:17 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.327 2002/09/19 13:12:02 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

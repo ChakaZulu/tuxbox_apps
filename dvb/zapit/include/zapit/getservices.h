@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.45 2002/09/19 10:24:50 thegoodguy Exp $
+ * $Id: getservices.h,v 1.46 2002/09/19 13:12:01 thegoodguy Exp $
  */
 
 #ifndef __getservices_h__
@@ -63,29 +63,5 @@ struct transponder
 		original_network_id = p_original_network_id;
 	}
 };
-
-typedef struct bouquet_msg_struct
-{
-	unsigned int bouquet_nr;
-	char name[30];
-
-} bouquet_msg;
-
-typedef struct channel_msg_struct
-{
-	unsigned int chan_nr;
-	char name[30];
-	char mode;
-
-} channel_msg;
-
-typedef struct channel_msg_struct_2
-{
-	unsigned int chan_nr;
-	char name[30];
-	char mode;
-	unsigned int onid_tsid;
-
-} channel_msg_2;
 
 #endif /* __getservices_h__ */

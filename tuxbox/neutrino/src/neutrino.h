@@ -34,7 +34,7 @@
 #define __neutrino__
 
 // hat beides hier drin nix verloren
-#include "zapit/getservices.h"
+#include "zapit/message.h"
 
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"

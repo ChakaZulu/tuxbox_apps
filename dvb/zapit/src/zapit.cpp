@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.231 2002/09/19 10:24:50 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.232 2002/09/19 13:12:01 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -43,6 +43,7 @@
 #include <lcddclient.h>
 
 /* zapit library headers */
+#include <message.h>
 #include <zapci/cam.h>
 #include <zapost/audio.h>
 #include <zapost/dmx.h>
@@ -1056,7 +1057,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.231 2002/09/19 10:24:50 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.232 2002/09/19 13:12:01 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
