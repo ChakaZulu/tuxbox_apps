@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.23 2003/11/07 16:33:32 rasc Exp $
+$Id: dvb_str.c,v 1.24 2003/11/09 20:48:35 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.23 2003/11/07 16:33:32 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.24  2003/11/09 20:48:35  rasc
+pes data packet (DSM-CC)
+
 Revision 1.23  2003/11/07 16:33:32  rasc
 no message
 
@@ -136,7 +139,7 @@ static char *findTableID (STR_TABLE *t, u_int id)
 
 
 /*
-  --  Table IDs (stream)
+  --  Table IDs (sections)
  ETSI EN 468   5.2
  EN 301 192
  TR 102 006
@@ -1843,7 +1846,7 @@ char *dvbstrPESstream_ID (u_int i)
 
 {
   STR_TABLE  Table[] = {
-     {  0x00, 0xBB,  "???? report!" },
+     {  0x00, 0xBB,  "??$$$?? report!" },
      {  0xBC, 0xBC,  "program_stream_map" },
      {  0xBD, 0xBD,  "private_stream_1" },
      {  0xBE, 0xBE,  "padding_stream" },
@@ -2353,6 +2356,32 @@ char *dvbstrPESTrickModeControl (u_int i)
 
   return findTableID (Table, i);
 }
+
+
+
+
+/*
+  -- Data Identifier 
+  -- ETR 162 [3] and EN 300 472 [6]).
+*/
+
+char *dvbstrPESDataIdentifier (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x0F,   "reserved" },
+	{ 0x10, 0x1F,   "EBU data EN 300 472" },
+	{ 0x20, 0x20,   "DVB subtitling EN 300 743" },
+	{ 0x21, 0x21,   "DVB synchronous data stream" },
+	{ 0x22, 0x22,   "DVB synchronized data stream" },
+	{ 0x23, 0x7F,   "reserved" },
+	{ 0x80, 0xFF,   "user defined" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
 
 
 

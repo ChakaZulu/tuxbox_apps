@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.9 2003/11/01 17:05:47 rasc Exp $
+$Id: pespacket.c,v 1.10 2003/11/09 20:48:35 rasc Exp $
 
    -- PES Decode/Table section
 
@@ -7,6 +7,9 @@ $Id: pespacket.c,v 1.9 2003/11/01 17:05:47 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.10  2003/11/09 20:48:35  rasc
+pes data packet (DSM-CC)
+
 Revision 1.9  2003/11/01 17:05:47  rasc
 no message
 
@@ -47,9 +50,10 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/hexprint.h"
 
 
-int PES_decode2 (u_char *b, int len, int pid);
+void PES_decode2 (u_char *b, int len, int pid);
 void print_xTS_field (u_char *b, int bit_offset);
 void pack_header (u_char *b, int len);
+void PES_data_packet (u_char *b, int len);
 
 
 
@@ -94,10 +98,11 @@ void decodePES_buf (u_char *b, int len, int pid)
  len2  = p.PES_packet_length;
 
 
+ n = 0;
  switch (p.stream_id) {
 
 	case 0xBC:		// program_stream_map
-	case 0xBF:		// private_stream_2
+	case 0xBF:		// private_stream_2  (EN301192-1.3.1 S.10)
 	case 0xF0:		// ECM
 	case 0xF1:		// EMM
 	case 0xF2:		// DSMCC stream
@@ -105,20 +110,28 @@ void decodePES_buf (u_char *b, int len, int pid)
 	case 0xFF:		// program_stream_directory
     		out_nl (4,"PES_packet_data_bytes:");
 		printhexdump_buf (4, b, len2);
+		n = len2;
 		break;
 
+
+	case 0xBD:		// Data Stream, privat_stream_1 (EN301192-1.3.1 S.11)
+    		out_nl (3,"PES_data_packet:");
+		indent (+1);
+		PES_data_packet (b, len2);
+		indent (-1);
+		break;
 
 	case 0xBE:		// padding stream!
     		out_nl (4,"Padding_bytes:");
 		printhexdump_buf (4, b, len2);
+		n = len2;
 		break;
 
 	default:
-		n = PES_decode2 (b, len2, pid);
-
-		b    += n;
-		len2 -= n;
-		len  -= n;
+    		out_nl (4,"Default PES decoding:");
+		indent (+1);
+		PES_decode2 (b, len2, pid);
+		indent (-1);
 		break;
 
  }
@@ -128,7 +141,7 @@ void decodePES_buf (u_char *b, int len, int pid)
 
 
 
-int  PES_decode2 (u_char *b, int len, int pid)
+void  PES_decode2 (u_char *b, int len, int pid)
 
 {
  /* IS13818-1  2.4.3.6  */
@@ -434,7 +447,6 @@ int  PES_decode2 (u_char *b, int len, int pid)
 
 
 
- return 0;
 }
 
 
@@ -485,5 +497,95 @@ void pack_header (u_char *b, int len)
    printhexdump_buf (4, b, len);
 
 }
+
+
+
+/*
+   -- Data Packet Synchronous and synchronized data streaming
+   -- EN 301 192  v1.3.1  S. 11
+
+*/
+void PES_data_packet (u_char *b, int len)
+
+{
+
+ typedef struct  _PES_DATA {
+        u_int     data_identifier;
+        u_int     sub_stream_id;
+        u_int     PTS_extension_flag;
+        u_int     output_data_rate_flag;
+        u_int     reserved;
+        u_int     PES_data_packet_header_length;
+
+	// N ... optional data
+
+ } PES_DATA;
+
+ PES_DATA   p;
+ int        len2;
+
+
+   p.data_identifier			= getBits (b, 0,  0,  8);
+   p.sub_stream_id			= getBits (b, 0,  8,  8);
+   p.PTS_extension_flag			= getBits (b, 0, 16,  1);
+   p.output_data_rate_flag		= getBits (b, 0, 17,  1);
+   p.reserved                           = getBits (b, 0, 18,  2);
+   p.PES_data_packet_header_length	= getBits (b, 0, 20,  4);
+   b   += 3;
+   len -= 3;
+   len2 = p.PES_data_packet_header_length;
+
+
+   out_S2B_NL  (3,"data_identifier: ", p.data_identifier,
+		   dvbstrPESDataIdentifier (p.data_identifier) );
+   out_SB_NL  (3,"sub_stream_id: ", p.sub_stream_id);
+   out_SB_NL  (3,"PTS_extension_flag: ", p.PTS_extension_flag);
+   out_SB_NL  (3,"output_data_rate_flag: ", p.output_data_rate_flag);
+   out_SB_NL  (6,"reserved_1: ", p.reserved);
+   out_SB_NL  (3,"PES_data_packet_header_length: ", p.PES_data_packet_header_length);
+
+   if (p.PTS_extension_flag = 0x01) {
+   	out_nl (3,"PTS_extension:");
+	indent (+1);
+	out_SB_NL  (6,"reserved: ", getBits (b, 0,  0,  7) );
+	out_SW_NL  (6,"PTS_extension: ", getBits (b, 0,  7, 9) );
+	/* $$$ TODO  PCR extension output in clear text, see ISO 13818-1*/
+	b   += 2;
+	len -= 2;
+	len2 -= 2;
+	indent (-1);
+   }
+
+   if (p.output_data_rate_flag == 0x01) {
+   	out_nl (3,"output_data_rate:");
+	indent (+1);
+	out_SB_NL  (6,"reserved: ", getBits (b, 0,  0,  4) );
+	out_SL_NL  (6,"output_data_rate: ", getBits (b, 0,  4, 28) );
+	b   += 4;
+	len -= 4;
+	len2 -= 4;
+	indent (-1);
+   }
+
+
+   out_nl (3,"PES_data_private_byte: ");
+   indent (+1);
+   printhexdump_buf (3, b, len2);
+   b   += len2;
+   len -= len2;
+   indent (-1);
+
+
+   out_nl (3,"PES_data_byte: ");
+   indent (+1);
+   printhexdump_buf (3, b, len);
+   b   += len;
+   len -= len;
+   indent (-1);
+
+}
+
+
+
 
 

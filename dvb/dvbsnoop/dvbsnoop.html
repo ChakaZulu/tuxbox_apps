@@ -73,9 +73,9 @@ License:
 		dvbsnoop. dvbsnoop is text-based, so it should work on any unix based system,
 		which offers you shell access.</P> 
 	 <H3> on a dbox2/linux (ppc)</H3> 
-	 <P>dvbsnoop is part of the dbox2 cdk. The dbox2 is a digital satellite
-		receiver (set top box).<BR> Just follow the install instruction of the dbox2
-		cdk:</P> 
+	 <P>dvbsnoop is part of the dbox2 cdk. The dbox2 is a powerfull digital
+		satellite receiver (set top box) with a network interface.<BR> Just follow the
+		install instruction of the dbox2 cdk:</P> 
 	 <TABLE CELLPADDING="10"> 
 		<TR> 
 		  <TD>&nbsp;</TD> 
@@ -103,10 +103,10 @@ make
 </PRE></TD> 
 		</TR> 
 	 </TABLE> 
-	 <P><B>Important:</B> Currently I only work with a dbox2 (I own no dvb card
-		for my linux server) - so I do not know if dvbsnoop is compiling on a linux
-		based PC smoothly. Feedback or Makefile.am patches would be nice, if there is
-		any problem...</P> 
+	 <P><B>Important:</B> Currently I work with a dbox2 only (I do not own a dvb
+		card for my linux server) - so I do not know if dvbsnoop is compiling on a
+		linux based PC smoothly. Feedback or Makefile.am patches would be nice, if
+		there is any problem...</P> 
 	 <H3> on a PC/linux (i386)</H3> 
 	 <TABLE CELLPADDING="10"> 
 		<TR> 
@@ -400,12 +400,26 @@ Current_next_indicator: 1 (0x01)
 	 <H4>dvbsnoop -n 200 -s ts -b 0x00 &gt; ts-stream.pid0x1000.file</H4> 
 	 <P>Dump 200 packets of PID 0x00 in transport stream mode to an image
 		file.<BR>The raw datastream will be dumped in the specified stream mode (PES,
-		SECTION or TS).<BR>This file can be used, to postprocess dvb the data
+		SECTION or TS).<BR>This file can be used, to postprocess the dvb data
 		streams.</P> 
 	 <H4>dvbsnoop -if ts-stream.pid0x1000.file &nbsp; -s ts 0x00</H4> 
-	 <P>Read a data stream from filea and analyze ithe stream.<BR>It is
-		important that you specify which mode an which pid!</P> 
-	 <P><BR></P> 
+	 <P>Read a data stream from file and analyze the stream.<BR>It is important
+		that you specify mode (si, pes, ...) and pid!</P> 
+	 <P><BR><BR><BR></P> 
+	 <H2>Pitfalls...</H2> 
+	 <P><B>dvbsnoop tries to decode every data it gets....</B><BR>E.g. if you
+		try to decode a video or audio stream in section mode - dvbsnoop may assume a
+		section table and will decode wrong data. In this case the decoding will be
+		garbage! Using the -crc option should prevent this (if supported at
+		hardware/driver level).<BR><BR><B>Bugs and wrong decoding:</B><BR>Currently I
+		do not have the ISO 13818-6 (DSM-CC), so I try to get these information out of
+		other documents, which are freely available. Unfortunatly these document are
+		describing only a certain parts of the data carousel, so missunderstandings by
+		me may be possible - If you see any odd output, <B>please report</B> this. If
+		you have the ISO 13818-6:1998 to spare, I would be glad to have a look on it.
+		(340 CHF at www.iso.ch is very expensive for a small open source
+		project...).<BR></P>
+	 <P><BR><BR><BR></P> 
 	 <H2>Related Topic and Links</H2> 
 	 <P>Please visit the following websites for more information:</P> 
 	 <TABLE> 
@@ -495,6 +509,12 @@ Current_next_indicator: 1 (0x01)
 		  <TD>&nbsp;</TD> 
 		  <TD>dvbsak is a general-purpose Digital Video Broadcasting library with
 			 tools. </TD> 
+		</TR>
+		<TR>
+		  <TD VALIGN="TOP"><A
+			 HREF="http://ardmore.net/~thepaces/vk_tools/">http://ardmore.net/~thepaces/vk_tools/</A></TD>
+		  <TD>&nbsp;</TD>
+		  <TD>MPEG analyzing tool</TD>
 		</TR> 
 		<TR> 
 		  <TD VALIGN="TOP"><A
@@ -525,7 +545,7 @@ Current_next_indicator: 1 (0x01)
 	 <P>Please send bugreports with a detailed description to: &nbsp;&nbsp;
 		<A
 		 HREF="mailto:rasc@users.sourceforge.net?DVBSNOOP - Bugreport...">rasc@users.sourceforge.net</A><BR>Do
-		NOT send saved stream files via email!</P> 
+		NOT send saved stream files or large files without permission via email!</P> 
 	 <P></P> 
-	 <P><BR><BR><BR>Rainer Scherg</P> </BODY>
+	 <P><BR><BR><BR>(c) 2001-2003 Rainer Scherg<BR></P> </BODY>
 </HTML>
