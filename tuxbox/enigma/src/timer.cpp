@@ -2176,12 +2176,14 @@ void eTimerEditView::createWidgets()
 	time_t tmp = time(0)+eDVB::getInstance()->time_difference;
 	tm now = *localtime( &tmp );
 
+	new eListBoxEntryText( *byear, "1970", (void*)70 ); // needed when change a multiple event to single event
 	for ( int i=0; i<10; i++ )
 		new eListBoxEntryText( *byear, eString().sprintf("20%02d", now.tm_year+(i-100)), (void*) (now.tm_year+i) );
 
 	for ( int i=0; i<=11; i++ )
 		new eListBoxEntryText( *bmonth, monthStr[i], (void*) i );
 
+	new eListBoxEntryText( *eyear, "1970", (void*)70 ); // needed when change a multiple event to single event
 	for ( int i=0; i<10; i++ )
 		new eListBoxEntryText( *eyear, eString().sprintf("20%02d", now.tm_year+(i-100)), (void*) (now.tm_year+i) );
 
@@ -2582,8 +2584,6 @@ void eTimerEditView::multipleChanged( int i )
 		emonth->show();
 		bday->show();
 		eday->show();
-		byear->setCurrent(0, true);
-		eyear->setCurrent(0, true);
 		setFocus(multiple);
 	}
 }
