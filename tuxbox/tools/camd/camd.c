@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.17 2003/10/12 17:13:08 obi Exp $
+ * $Id: camd.c,v 1.18 2003/10/14 15:36:49 obi Exp $
  *
  * (C) 2001, 2002, 2003 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -441,7 +441,7 @@ int parse_ca_pmt(const unsigned char *buffer, const unsigned int length)
 	pmt->program_number = *(unsigned short *)&buffer[1];
 	pmt->program_info_length = *(unsigned short *)&buffer[4] & 0x0fff;
 
-	if ((pmt->program_number & 0xff00) != 0x3200) {
+	if ((pmt->program_number & 0xf000) == 0x0000) {
 		printf("[camd] program number %04x unsupported due to missing parental control\n",
 				pmt->program_number);
 		free(pmt);
