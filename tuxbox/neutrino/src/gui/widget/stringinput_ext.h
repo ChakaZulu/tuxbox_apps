@@ -70,7 +70,8 @@ class CExtendedInput : public CMenuTarget
 
 
 		virtual void paint();
-
+		virtual void onBeforeExec(){};
+		virtual void onAfterExec(){};
 
 	public:
 
@@ -102,7 +103,7 @@ class CExtendedInput_Item
 
 class CExtendedInput_Item_Spacer : public CExtendedInput_Item
 {
-	private:
+	protected:
 		int mSpacingX;
 		int mSpacingY;
 	public:
@@ -114,7 +115,7 @@ class CExtendedInput_Item_Spacer : public CExtendedInput_Item
 
 class CExtendedInput_Item_newLiner : public CExtendedInput_Item
 {
-	private:
+	protected:
 		int mSpacingY;
 	public:
 		CExtendedInput_Item_newLiner(){};
@@ -126,7 +127,7 @@ class CExtendedInput_Item_newLiner : public CExtendedInput_Item
 
 class CExtendedInput_Item_Char : public CExtendedInput_Item
 {
-	private:
+	protected:
 		string allowedChars;
 		bool selectable;
 		
@@ -147,6 +148,10 @@ class CExtendedInput_Item_Char : public CExtendedInput_Item
 
 class CIPInput : public CExtendedInput
 {
+	protected:
+		virtual void onBeforeExec();
+		virtual void onAfterExec();
+
 	public:
 		CIPInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
 };

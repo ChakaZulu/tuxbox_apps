@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.210 2002/04/01 21:46:01 McClean Exp $
+        $Id: neutrino.cpp,v 1.211 2002/04/02 10:55:18 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -295,8 +295,8 @@ void CNeutrinoApp::setupDefaults()
 
 
 	//network
-	strcpy(g_settings.network_netmask, "255.255.255.000");
-	strcpy(g_settings.network_defaultgateway, "000.000.000.000");
+	strcpy(g_settings.network_netmask, "255.255.255.0");
+	strcpy(g_settings.network_defaultgateway, "");
 	strcpy(g_settings.network_nameserver, "");
 
 	FILE* fd = fopen("/var/tuxbox/config/ip", "r");
@@ -304,20 +304,20 @@ void CNeutrinoApp::setupDefaults()
 	{
 		char _ip[4];
 		fread(_ip, 4, 4, fd);
-		sprintf( g_settings.network_ip, "%3d.%3d.%3d.%3d", _ip[0], _ip[1], _ip[2], _ip[3] );
-		sprintf( g_settings.network_broadcast, "%3d.%3d.%3d.255", _ip[0], _ip[1], _ip[2] );
+		sprintf( g_settings.network_ip, "%d.%d.%d.%d", _ip[0], _ip[1], _ip[2], _ip[3] );
+		sprintf( g_settings.network_broadcast, "%d.%d.%d.255", _ip[0], _ip[1], _ip[2] );
 		fclose(fd);
 		g_settings.networkSetOnStartup = 1;
 	}
 	else
 	{
-		strcpy(g_settings.network_ip, "010.010.010.100");
-		strcpy(g_settings.network_broadcast, "010.010.010.255");
+		strcpy(g_settings.network_ip, "10.10.10.100");
+		strcpy(g_settings.network_broadcast, "10.10.10.255");
 		g_settings.networkSetOnStartup = 0;
 	}
 
 	g_settings.network_streaming_use = 0;
-	strcpy(g_settings.network_streamingserver, "010.010.010.010");
+	strcpy(g_settings.network_streamingserver, "10.10.10.10");
 	strcpy(g_settings.network_streamingserverport, "4000");
 
 
@@ -2213,7 +2213,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.210 2002/04/01 21:46:01 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.211 2002/04/02 10:55:18 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

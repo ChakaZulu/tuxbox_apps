@@ -108,6 +108,7 @@ void CExtendedInput::calculateDialog()
 
 int CExtendedInput::exec( CMenuTarget* parent, string )
 {
+	onBeforeExec();
 	int res = menu_return::RETURN_REPAINT;
 	char oldval[inputFields.size()+10];
 
@@ -197,6 +198,7 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 
 	hide();
 
+	onAfterExec();
 
 	if ( (observ) && (msg==CRCInput::RC_ok) )
 	{
@@ -367,9 +369,29 @@ CIPInput::CIPInput(string Name, char* Value, string Hint_1 = "", string Hint_2 =
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_newLiner(30) );
-	Value[3] = '.';
-	Value[7] = '.';
-	Value[11] = '.';
-	Value[15] = 0;
 	calculateDialog();
 }
+
+void CIPInput::onBeforeExec()
+{
+	if(strcmp(value,"")==0)
+	{
+		strcpy(value, "000.000.000.000");
+		return;
+	}
+	char _ip[4];
+	sscanf( value, "%d.%d.%d.%d", &_ip[0], &_ip[1], &_ip[2], &_ip[3] );
+	sprintf( value, "%3d.%3d.%3d.%3d", _ip[0], _ip[1], _ip[2], _ip[3]);
+}
+
+void CIPInput::onAfterExec()
+{
+	char _ip[4];
+	sscanf( value, "%3d.%3d.%3d.%3d", &_ip[0], &_ip[1], &_ip[2], &_ip[3] );
+	sprintf( value, "%d.%d.%d.%d", _ip[0], _ip[1], _ip[2], _ip[3]);
+	if(strcmp(value,"0.0.0.0")==0)
+	{
+		strcpy(value, "");
+	}
+}
+
