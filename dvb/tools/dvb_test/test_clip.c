@@ -1,5 +1,5 @@
 /*
- * $Id: test_clip.c,v 1.1 2003/04/12 06:09:05 obi Exp $
+ * $Id: test_clip.c,v 1.2 2003/04/12 07:36:37 obi Exp $
  *
  * (C) 2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -39,13 +38,15 @@
 
 int main(int argc, char **argv)
 {
+	unsigned char buf[65535];
 	unsigned char *tsfilename;
 	unsigned short pida, pidv;
 	int dmxa, dmxv, dvr, adec, vdec, ts;
 	struct dmx_pes_filter_params p;
 	struct stat stat;
-	void *mm, *ptr;
-	ssize_t len, wr;
+	ssize_t wr;
+	size_t r;
+	int done;
 
 	if (argc != 4) {
 		printf("usage: %s <filename> <video pid> <audio pid>\n", argv[0]);
@@ -123,26 +124,15 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if ((mm = mmap(NULL, stat.st_size, PROT_READ, MAP_SHARED, ts, 0)) == NULL) {
-		perror("mmap");
-		return 1;
-	}
-
-	ptr = mm;
-	len = stat.st_size;
-
-	while (len > 0) {
-
-		if ((wr = write(dvr, ptr, len)) < 0) {
-			perror("write");
-			break;
+	while ((r = read(ts, buf, sizeof(buf))) > 0) {
+		done = 0;
+		while (r > 0) {
+			if ((wr = write(dvr, &buf[done], r)) < 0)
+				continue;
+			r -= wr;
+			done += wr;
 		}
-
-		len -= wr;
-		ptr += wr;
 	}
-
-	munmap(mm, stat.st_size);
 
 	ioctl(vdec, VIDEO_STOP);
 	ioctl(adec, AUDIO_STOP);
