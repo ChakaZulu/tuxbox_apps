@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.125 2003/06/13 21:13:44 digi_casi Exp $
+ * $Id: scan.cpp,v 1.126 2003/07/21 12:07:21 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -512,9 +512,9 @@ void *start_scanthread(void *)
  	found_data_chans = 0;
  	t_satellite_position satellitePosition = 0;
 
-	printf("[scan] start...\n");
-	for (spI = scanProviders.begin(); spI != scanProviders.end(); spI++)
-		printf("[scan] scanProviders: %s\n", providerName);
+//	printf("[scan] start...\n");
+//	for (spI = scanProviders.begin(); spI != scanProviders.end(); spI++)
+//		printf("[scan] scanProviders: %s\n", providerName);
 
 	curr_sat = 0;
 
