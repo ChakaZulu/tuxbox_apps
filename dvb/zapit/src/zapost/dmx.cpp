@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.18 2003/03/14 07:31:51 obi Exp $
+ * $Id: dmx.cpp,v 1.19 2003/05/03 03:13:33 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -75,7 +75,7 @@ int CDemux::sectionFilter(const unsigned short pid, const unsigned char * const 
 		break;
 
 	case 0x41: /* network_information_section - other_network */
-		sctFilterParams.timeout = 10000;
+		sctFilterParams.timeout = 15000;
 		break;
 
 	case 0x42: /* service_description_section - actual_transport_stream */
