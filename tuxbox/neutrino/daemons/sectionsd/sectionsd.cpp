@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.132 2002/10/02 17:45:30 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.133 2002/10/02 17:52:49 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.133  2002/10/02 17:52:49  thegoodguy
+//  Make driver developers happy :)
+//
 //  Revision 1.132  2002/10/02 17:45:30  thegoodguy
 //  Bugfixes: Fix handling of "small" sections & implement own table_id filter (joint effort with the sedulous alexw)
 //
@@ -1894,7 +1897,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.132 2002/10/02 17:45:30 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.133 2002/10/02 17:52:49 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4004,17 +4007,17 @@ static void *eitThread(void *)
 	bool sendToSleepNow = false;
 	//dmxEIT.addfilter( 0x4e, (0xff) );
 	//dmxEIT.addfilter( 0x4f, (0xff) );
-	dmxEIT.addfilter( 0x4f, (0xff - 0x01) );
+	dmxEIT.addfilter( 0x4e, (0xff - 0x01) );
 	dmxEIT.addfilter( 0x50, (0xff) );
 	dmxEIT.addfilter( 0x51, (0xff) );
-	dmxEIT.addfilter( 0x53, (0xff - 0x01) );
-	dmxEIT.addfilter( 0x57, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x5b, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x5f, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x63, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x67, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x6b, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x6f, (0xff - 0x03) );
+	dmxEIT.addfilter( 0x52, (0xff - 0x01) );
+	dmxEIT.addfilter( 0x54, (0xff - 0x03) );
+	dmxEIT.addfilter( 0x58, (0xff - 0x03) );
+	dmxEIT.addfilter( 0x5c, (0xff - 0x03) );
+	dmxEIT.addfilter( 0x60, (0xff - 0x03) );
+	dmxEIT.addfilter( 0x64, (0xff - 0x03) );
+	dmxEIT.addfilter( 0x68, (0xff - 0x03) );
+	dmxEIT.addfilter( 0x6c, (0xff - 0x03) );
 
 	try
 	{
@@ -4562,7 +4565,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.132 2002/10/02 17:45:30 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.133 2002/10/02 17:52:49 thegoodguy Exp $\n");
 
 	try
 	{
