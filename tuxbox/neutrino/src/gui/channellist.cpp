@@ -1,9 +1,13 @@
 //
-// $Id: channellist.cpp,v 1.25 2001/09/26 16:24:17 rasc Exp $
+// $Id: channellist.cpp,v 1.26 2001/09/26 22:11:08 rasc Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.26  2001/09/26 22:11:08  rasc
+// - kleiner Bugfix bei Abort NumericChannelzap
+//
 // Revision 1.25  2001/09/26 16:24:17  rasc
-// - kleinere Aenderungen: Channel Num Zap fuer >999 Channels (Eutelsat/Astra) und eigener Font
+// - kleinere Aenderungen: Channel Num Zap fuer >999 Channels
+//   (Eutelsat/Astra) und eigener Font
 //
 // Revision 1.24  2001/09/23 21:34:07  rasc
 // - LIFObuffer Module, pushbackKey fuer RCInput,
@@ -413,14 +417,13 @@ void CChannelList::numericZap(int key)
         showInfo(chn- 1);
 
 		if ((key=g_RCInput->getKey(30))==CRCInput::RC_timeout)
-    		break;
-		if (key==CRCInput::RC_left || key==CRCInput::RC_right)
-		break;
-// $$$ Das ist noch nicht rund hier!
-//  beim "querverlassen" muss der Ursprungskanal wieder in chn eingestellt sein.
-// da man nicht zappen moechte (siehe RC_DBOX_HOME), sorry ist nicht viel, aber
-// ich kann im Moment nicht kompilieren 8-(  [rasc]
-// BTW: jemand braeuchte mal einen Editor mit vernuenftigen TABs! ;-)
+    			break;
+		// Abbruch ohne Channel zu wechseln
+		if (key==CRCInput::RC_left || key==CRCInput::RC_right) {
+			chn = tuned + 1;
+			break;
+		}
+
 
 		if ( (key>=0) && (key<=9) )
 		{ //numeric
