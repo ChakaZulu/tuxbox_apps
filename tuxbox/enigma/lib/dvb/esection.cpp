@@ -188,11 +188,11 @@ eSection::eSection()
 
 eSection::~eSection()
 {
-	delete timer;
-	timer=0;
 	closeFilter();
 	if (lockcount)
 		eDebug("deleted still locked table");
+	delete timer;
+	timer=0;
 }
 
 int eSection::start( const char* dmxdev )
@@ -291,7 +291,7 @@ void eSection::data(int socket)
 		{
 			// restart timer when data from another table_id
 			// is received
-			if ( ret == 2 )
+			if ( ret == 2 && timer)
 				timer->start(10000, true);
 			break;
 		}
@@ -327,7 +327,8 @@ void eSection::data(int socket)
 			break;
 		}
 		// when more data to read.. restart timeout..
-		timer->start(10000,true);
+		if ( timer )
+			timer->start(10000,true);
 	}
 }
 
@@ -394,9 +395,8 @@ int eSection::unlock()
 void eSection::setContext( eMainloop *context )
 {
 	this->context = context;
-	if ( timer )
-		delete timer;
-	timer = new eTimer(context);
+	delete timer;
+	timer=new eTimer(context);
 	CONNECT(timer->timeout, eSection::timeout);
 	if ( notifier )
 		eWarning("setContext with running notifier !!!");
