@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.19 2002/09/03 22:52:01 obi Exp $
+  $Id: libucodes.c,v 1.20 2002/09/18 07:44:07 obi Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.20  2002/09/18 07:44:07  obi
+  some more ucodes
+
   Revision 1.19  2002/09/03 22:52:01  obi
   another avia600 ucode
 
@@ -62,9 +65,13 @@ static struct Sucode ucodes[] =
 	{"6a748fb28000738cafeb9e27443ac623","avia600vb022"},
 	{"f8577c6a7056590ca5847520d81339fc","avia600vb028"},
 	{"53c5bc4081dfadab9935ad256e4d6239","ucode_0000"},
+	{"936b13b9018b2541036a7f20e76648ff","ucode_0001"},
+	{"0f610f3e0f1f2b56fc2bb4007700836b","ucode_000C"},
+	{"f0418c350547e98f2c5d7f4df00f9261","ucode_0010"},
 	{"66627c5ddf269a1f3a9f9f3c22fbd41b","ucode_0013"},
 	{"6582a89e7e13e410c366e47b4ef9d38e","ucode_0014"},
 	{"e8fb834466d34cb75bb0e64ef08b5544","ucode_001A"},
+	{"36a05f39caa0fb375df85c99e66e406d","ucode_B102"},
 	{"d4c12df0d4ce8ba9eb858509d832df65","ucode_B107"},
 	{"4e080873126f156a0b489af176520620","ucode_B121"},
 	{"ff6fafbd2aa1f29afe232a72fac57870","cam_01_01_001D"},
@@ -84,6 +91,7 @@ static struct Sucode ucodes[] =
 	{"704cb8d9965babbdc7d4e7cae6e5584e","cam_01_02_002F"},
 	{"c51074b2edf6c14e0bb99ee3ed8b9c47","cam_01_02_105F"},
 	{"16c5e1eba0cfe63f2bbc648e1644c883","cam_NOKIA_PRODTEST2"},
+	{"ff441ce2f3feab815d360e3032d23888","cam_ProdTestImage_2"},
 	{"420baf447bfd529a794bb36ef80f1652","cam_STREAMHACK"}
 };
 
