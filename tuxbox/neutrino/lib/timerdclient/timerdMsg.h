@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdMsg.h,v 1.7 2002/05/21 13:07:01 dirch Exp $
+	$Id: timerdMsg.h,v 1.8 2002/05/27 21:45:18 dirch Exp $
 
 	License: GPL
 
@@ -50,6 +50,24 @@ class CTimerd
 
 
 		static const char ACTVERSION = 1;
+
+		enum externalcommand 
+		{
+			CMD_VCR_UNKNOWN =	0;
+			CMD_VCR_START	=	1;
+			CMD_VCR_STOP	=	2;
+			CMD_VCR_PAUSE	=	3;
+			CMD_VCR_RESUME	=	4;
+		};
+
+
+		struct externalCommand
+		{
+			unsigned char messageType;		// maybe vcr or server ?
+			unsigned char version;			// ACTVERSION
+			unsigned int command;			// externalcommand
+			unsigned long long epgID;		// may be zero
+		};
 
 		enum commands
 		{
