@@ -21,6 +21,9 @@
  *
  *
  *   $Log: osd.c,v $
+ *   Revision 1.4  2002/10/03 14:26:50  Jolt
+ *   AViA AV cleanups
+ *
  *   Revision 1.3  2002/08/21 08:37:05  obi
  *   no more compile warnings
  *
@@ -32,7 +35,7 @@
  *
  *
  *
- *   $Revision: 1.3 $
+ *   $Revision: 1.4 $
  *
  */
 
@@ -46,7 +49,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#include "dbox/avia_osd.h"
+#include <dbox/avia_av_osd.h>
 #include "tuxbox.h"
 
 /* ---------------------------------------------------------------------- */
