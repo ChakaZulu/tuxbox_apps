@@ -287,7 +287,7 @@ void CTimerList::updateEvents(void)
 		listmaxshow=timerlist.size();
 		height = theight+0+listmaxshow*fheight*2;	// recalc height
 	}
-	if(selected==timerlist.size() && timerlist.size()!=0)
+	if(selected==timerlist.size() && !(timerlist.empty()))
 	{
 		selected=timerlist.size()-1;
 		liststart = (selected/listmaxshow)*listmaxshow;
@@ -313,12 +313,12 @@ int CTimerList::show()
 			hide();
 			updateEvents();
 			update=false;
-			if(timerlist.size()==0)
-			{
+//			if (timerlist.empty())
+//			{
 				//evtl. anzeige dass keine kanalliste....
 				/* ShowHintUTF("messagebox.info", g_Locale->getText("timerlist.empty")); // UTF-8
 				 return -1;*/
-			}
+//			}
 			paint();
 		}
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
@@ -331,7 +331,7 @@ int CTimerList::show()
 		{ //Exit after timeout or cancel key
 			loop=false;
 		}
-		else if( msg == CRCInput::RC_up && timerlist.size() > 0)
+		else if ((msg == CRCInput::RC_up) && !(timerlist.empty()))
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -352,7 +352,7 @@ int CTimerList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if( msg == CRCInput::RC_down && timerlist.size() > 0)
+		else if ((msg == CRCInput::RC_down) && !(timerlist.empty()))
 		{
 			int prevselected=selected;
 			selected = (selected+1)%timerlist.size();
@@ -368,7 +368,7 @@ int CTimerList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if( msg == CRCInput::RC_ok && timerlist.size() > 0)
+		else if ((msg == CRCInput::RC_ok) && !(timerlist.empty()))
 		{
 			if (modifyTimer()==menu_return::RETURN_EXIT_ALL)
 			{
@@ -378,7 +378,7 @@ int CTimerList::show()
 			else
 				update=true;
 		}
-		else if(msg==CRCInput::RC_red && timerlist.size() > 0)
+		else if((msg == CRCInput::RC_red) && !(timerlist.empty()))
 		{
 			Timer->removeTimerEvent(timerlist[selected].eventID);
 			skipEventID=timerlist[selected].eventID;
@@ -494,10 +494,12 @@ void CTimerList::paintItem(int pos)
 			case CTimerd::TIMER_ZAPTO :
 			case CTimerd::TIMER_RECORD :
 				{
-					zAddData = convertChannelId2String(timer.channel_id, timer.mode); // UTF-8
+					zAddData = convertChannelId2String(timer.channel_id); // UTF-8
 					if(strlen(timer.apids) != 0)
 					{
-						zAddData += std::string(" (") + timer.apids + ')'; // must be UTF-8 encoded !
+						zAddData += " (";
+						zAddData += timer.apids; // must be UTF-8 encoded !
+						zAddData += ')';
 					}
 					if(timer.epgID!=0)
 					{
@@ -505,7 +507,8 @@ void CTimerList::paintItem(int pos)
 						if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
 						{
 #warning fixme sectionsd should deliver data in UTF-8 format
-							zAddData += " : " + Latin1_to_UTF8(epgdata.title);
+							zAddData += " : ";
+							zAddData += Latin1_to_UTF8(epgdata.title);
 						}
 					}
 				}
@@ -537,7 +540,7 @@ void CTimerList::paintItem(int pos)
 				case CTimerd::TIMER_ZAPTO :
 					{
 						line1 += ' ';
-						line1 += convertChannelId2String(timer.channel_id,timer.mode); // UTF-8
+						line1 += convertChannelId2String(timer.channel_id); // UTF-8
 					}
 					break;
 				case CTimerd::TIMER_STANDBY :
@@ -635,7 +638,7 @@ const char * CTimerList::convertTimerType2String(const CTimerd::CTimerEventTypes
 	}
 }
 
-const char * CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep) // UTF-8
+std::string CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRepeat rep) // UTF-8
 {
 	switch(rep)
 	{
@@ -671,51 +674,20 @@ const char * CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRep
 				weekdays >>= 1;
 				if(weekdays & 1)
 					weekdayStr+= g_Locale->getText("timerlist.repeat.sunday");
-				return weekdayStr.c_str();
+				return weekdayStr;
 			}
 			else
 				return g_Locale->getText("timerlist.repeat.unknown");
 	}
 }
 
-std::string CTimerList::convertChannelId2String(const t_channel_id id, const CTimerd::CChannelMode mode) // UTF-8
+std::string CTimerList::convertChannelId2String(const t_channel_id id) // UTF-8
 {
-	std::string name = g_Locale->getText("timerlist.program.unknown"); // UTF-8
+	CZapitClient Zapit;
+	std::string name = Zapit.getChannelName(id); // UTF-8
+	if (name.empty())
+		name = g_Locale->getText("timerlist.program.unknown"); // UTF-8
    
-	if(mode==CTimerd::MODE_TV)
-	{
-		if(channellist_tv.size()==0)
-		{
-			CZapitClient Zapit;
-			Zapit.getChannels(channellist_tv, CZapitClient::MODE_TV, CZapitClient::SORT_BOUQUET, true); // UTF-8
-		}
-		CZapitClient::BouquetChannelList::iterator channel = channellist_tv.begin();
-		for(; channel != channellist_tv.end();channel++)
-		{
-			if(channel->channel_id==id)
-			{
-				name=channel->name;
-				break;
-			}
-		}
-	}
-	else
-	{
-		if(channellist_radio.size()==0)
-		{
-			CZapitClient Zapit;
-			Zapit.getChannels(channellist_radio, CZapitClient::MODE_RADIO, CZapitClient::SORT_BOUQUET, true); // UTF-8
-		}
-		CZapitClient::BouquetChannelList::iterator channel = channellist_radio.begin();
-		for(; channel != channellist_radio.end();channel++)
-		{
-			if(channel->channel_id==id)
-			{
-				name=channel->name;
-				break;
-			}
-		}
-	}
 	return name;
 }
 
@@ -829,7 +801,7 @@ int CTimerList::newTimer()
 			sprintf(cChannelId,"%010u",channel->channel_id);
 			mwtv->addItem(new CMenuForwarder(channel->name, true, NULL, this, std::string("SCT:") + cChannelId + channel->name));
 		}
-		if (subchannellist.size()>0)
+		if (!subchannellist.empty())
 			mctv.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwtv));
 		subchannellist.clear();
 		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_RADIO, true); // UTF-8
@@ -840,7 +812,7 @@ int CTimerList::newTimer()
 			sprintf(cChannelId,"%010u",channel->channel_id);
 			mwradio->addItem(new CMenuForwarder(channel->name, true, NULL, this, std::string("SCR:") + cChannelId + channel->name));
 		}
-		if (subchannellist.size()>0)
+		if (!subchannellist.empty())
 			mcradio.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwradio));
 	}
 	CMenuWidget mm("timerlist.modeselect", NEUTRINO_ICON_SETTINGS);
