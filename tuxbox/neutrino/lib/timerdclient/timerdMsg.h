@@ -76,10 +76,12 @@ class CTimerd
 			int   hour;
 			int   min;
 			int   evType;
-			int   evID;
-			void* data;
 		};
 
+		struct responseAddTimer
+		{
+			int   eventID;
+		};
 
 		//response structures
 		struct responseBlah

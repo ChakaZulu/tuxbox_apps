@@ -27,9 +27,32 @@
 #ifndef __timerdclient__
 #define __timerdclient__
 
+#include <stdio.h>
+#include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
 
 class CTimerdClient
 {
+
+	private:
+
+		int sock_fd;
+
+		bool timerd_connect();
+		bool timerd_close();
+		bool send(char* data, int size);
+		bool receive(char* data, int size);
 
 	public:
 
@@ -39,7 +62,10 @@ class CTimerdClient
 			TIMER_NEXTPROGRAM
 		};
 
+		CTimerdClient::CTimerdClient();
 
+		int addTimerEvent( timerTypes evType, void* data = 0, int min = 0, int hour = 0, int day = 0, int month = 0);
+		void removeTimerEvent( int evId);
 
 
 

@@ -68,24 +68,25 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 				case CTimerdClient::TIMER_SHUTDOWN :
 					event = new CTimerEvent_Shutdown(
 						msgAddTimer.month, msgAddTimer.day,
-						msgAddTimer.hour, msgAddTimer.min,
-						msgAddTimer.evID);
+						msgAddTimer.hour, msgAddTimer.min);
 				break;
 				case CTimerdClient::TIMER_NEXTPROGRAM :
 					event = new CTimerEvent_NextProgram(
 						msgAddTimer.month, msgAddTimer.day,
-						msgAddTimer.hour, msgAddTimer.min,
-						msgAddTimer.evID);
-					static_cast<CTimerEvent_NextProgram*>(event)->eventInfo = *((CTimerEvent_NextProgram::EventInfo*)msgAddTimer.data);
+						msgAddTimer.hour, msgAddTimer.min);
+					read( connfd, &(static_cast<CTimerEvent_NextProgram*>(event)->eventInfo), sizeof(CTimerEvent_NextProgram::EventInfo));
 				break;
 				default:
 					event = new CTimerEvent(
 						msgAddTimer.month, msgAddTimer.day,
 						msgAddTimer.hour, msgAddTimer.min,
-						msgAddTimer.evID, msgAddTimer.evType);
+						msgAddTimer.evType);
 			}
 
-			TimerManager->addEvent( event);
+			CTimerd::responseAddTimer rspAddTimer;
+			rspAddTimer.eventID = TimerManager->addEvent( event);
+			write( connfd, &rspAddTimer, sizeof(rspAddTimer));
+
 			break;
 		case CTimerd::CMD_REMOVETIMER:
 			break;

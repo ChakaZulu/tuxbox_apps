@@ -68,8 +68,8 @@ class CTimerEvent
 		int				eventType;
 		struct tm		alarmtime;
 
-		CTimerEvent( int mon = 0, int day = 0, int hour = 0, int min = 0, int evID = 0, int evType = 0) :
-			eventID(evID), eventType( evType) { alarmtime.tm_mon = mon; alarmtime.tm_mday = day; alarmtime.tm_hour = hour; alarmtime.tm_min = min;};
+		CTimerEvent( int mon = 0, int day = 0, int hour = 0, int min = 0, int evType = 0) :
+			eventType( evType) { alarmtime.tm_mon = mon; alarmtime.tm_mday = day; alarmtime.tm_hour = hour; alarmtime.tm_min = min;};
 
 		inline int time();
 		bool operator <= ( CTimerEvent&);
@@ -83,8 +83,8 @@ class CTimerEvent
 class CTimerEvent_Shutdown : public CTimerEvent
 {
 	public:
-		CTimerEvent_Shutdown( int mon = 0, int day = 0, int hour = 0, int min = 0, int evID = 0) :
-			CTimerEvent(mon, day, hour, min, evID, CTimerdClient::TIMER_SHUTDOWN){};
+		CTimerEvent_Shutdown( int mon = 0, int day = 0, int hour = 0, int min = 0) :
+			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_SHUTDOWN){};
 		virtual void fireEvent();
 };
 
@@ -94,13 +94,13 @@ class CTimerEvent_NextProgram : public CTimerEvent
 
 		struct EventInfo
 		{
-			int     onidSid;
-			string  name;
-			int     fsk;
+			int      onidSid;
+			char     name[50];
+			int      fsk;
 		} eventInfo;
 
-		CTimerEvent_NextProgram( int mon = 0, int day = 0, int hour = 0, int min = 0, int evID = 0) :
-			CTimerEvent(mon, day, hour, min, evID, CTimerdClient::TIMER_NEXTPROGRAM){};
+		CTimerEvent_NextProgram( int mon = 0, int day = 0, int hour = 0, int min = 0) :
+			CTimerEvent(mon, day, hour, min, CTimerdClient::TIMER_NEXTPROGRAM){};
 		virtual void fireEvent();
 };
 

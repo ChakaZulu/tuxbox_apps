@@ -127,12 +127,7 @@ CTimerEvent CTimerEvent::now()
 
 	time_t actTime_t;
 	::time(&actTime_t);
-
-	dprintf("time_t %d\n", actTime_t);
-
 	struct tm* actTime = localtime(&actTime_t);
-    printf("%x\n", actTime);
-	printf("%d %d %d %d", actTime->tm_mon+1, actTime->tm_mday, actTime->tm_hour, actTime->tm_min);
 	actTime->tm_mon += 1;
 	result.alarmtime = *actTime;
 
@@ -141,7 +136,7 @@ CTimerEvent CTimerEvent::now()
 
 bool CTimerEvent::operator <= ( CTimerEvent& e)
 {
-	dprintf( "compare %d %d \n", time(), e.time());
+	// todo: comparision over year borders: december < january!!
 	return ( time() <= e.time());
 }
 
