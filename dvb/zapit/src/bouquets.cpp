@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.16 2002/03/03 20:39:57 Simplex Exp $
+  $Id: bouquets.cpp,v 1.17 2002/03/14 20:52:48 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.17  2002/03/14 20:52:48  Simplex
+  small fix
+
   Revision 1.16  2002/03/03 20:39:57  Simplex
   handling locked and hidden bouquets
 
@@ -198,7 +201,7 @@ void CBouquet::moveService(  char* serviceName, uint newPosition, uint serviceTy
 		case 2: channels = &radioChannels; break;
 	}
 
-	uint i;
+	uint i=0;
 	ChannelList::iterator it = channels->begin();
 	while ((it<=channels->end()) && ((*it)->name != string(serviceName)))
 	{

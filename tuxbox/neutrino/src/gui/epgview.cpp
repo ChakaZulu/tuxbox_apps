@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.46 2002/03/13 21:17:51 McClean Exp $
+// $Id: epgview.cpp,v 1.47 2002/03/14 20:51:16 Simplex Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.47  2002/03/14 20:51:16  Simplex
+// small fix
+//
 // Revision 1.46  2002/03/13 21:17:51  McClean
 // block unknown caids
 //
@@ -448,11 +451,8 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 
 	processTextToArray( epgData.info2.c_str() );
 
-	char _tfsk[5];
-	if (epgData.fsk)
-		sprintf (_tfsk, "FSK: ab %d", epgData.fsk );
-	else
-		sprintf (_tfsk, "FSK: keine" );
+	char _tfsk[11];
+	sprintf (_tfsk, "FSK: ab %d", epgData.fsk );
 	processTextToArray( _tfsk );
 
 	if (epgData.contentClassification.length()> 0)
