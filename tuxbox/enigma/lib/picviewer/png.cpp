@@ -157,3 +157,4 @@ int fh_png_getsize(const char *name, int *x, int *y, int wanted_width, int wante
 }
 #endif
 #endif
+
