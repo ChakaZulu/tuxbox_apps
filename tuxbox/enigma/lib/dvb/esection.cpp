@@ -55,7 +55,7 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, __u8 *mode, int len, i
 	close();
 
 	handle=::open(dmxdev, O_RDWR|O_NONBLOCK);
-	eDebug("opened handle %d", handle);
+//	eDebug("opened handle %d", handle);
 	if (handle<0)
 	{
 		perror(dmxdev);
