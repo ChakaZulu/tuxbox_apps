@@ -577,7 +577,10 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	int apid = -1;
-	sscanf(opt["audio"].c_str(), "0x%04x", &apid);
+	sscanf(opt["language"].c_str(), "0x%04x", &apid);
+	
+	eString channel = opt["channel"];
+	eAVSwitch::getInstance()->selectAudioChannel(atoi(channel.c_str()));
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
@@ -620,11 +623,17 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 		}
 	}
 	else
-		audioChannels = "<option>no audio data available</option>";
+		audioChannels = "<option>none</option>";
 
 	eString result = readFile(TEMPLATE_DIR + "audioSelection.tmp");
-	result.strReplace("#AUDIOCHANS#", audioChannels);
-
+	result.strReplace("#LANGUAGES#", audioChannels);
+	
+	int channel = eAVSwitch::getInstance()->getAudioChannel();
+	result.strReplace(eString().sprintf("#%d#", channel).c_str(), eString("selected"));
+	result.strReplace("#0#", "");
+	result.strReplace("#1#", "");
+	result.strReplace("#2#", "");
+	
 	return result;
 }
 
