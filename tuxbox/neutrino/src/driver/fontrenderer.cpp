@@ -2,15 +2,7 @@
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
-
-	Kommentar:
-
-	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
-	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
+        Copyright (C) 2003 thegoodguy
 
 	License: GPL
 
@@ -37,9 +29,9 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
-
-#include <global.h>
+#endif
 
 #include "fontrenderer.h"
 
@@ -112,6 +104,18 @@ FT_Error FBFontRenderClass::FTC_Face_Requester(FTC_FaceID face_id, FT_Face* afac
 		dprintf(DEBUG_NORMAL, "[FONT] FTC_Face_Requester (%s/%s) failed: %i\n", font->family, font->style, error);
 		return error;
 	}
+
+	if (strcmp(font->style, (*aface)->style_name) != 0)
+	{
+		FT_Matrix matrix; // Italics
+
+		matrix.xx = 1 * 0x10000;
+		matrix.xy = (0x10000 >> 3);
+		matrix.yx = 0 * 0x10000;
+		matrix.yy = 1 * 0x10000;
+
+		FT_Set_Transform(*aface, &matrix, NULL);
+	}
 	return 0;
 }
 
@@ -122,6 +126,12 @@ FTC_FaceID FBFontRenderClass::getFaceID(const char *family, const char *style)
 		if ((!strcmp(f->family, family)) && (!strcmp(f->style, style)))
 			return (FTC_FaceID)f;
 	}
+	if (strncmp(style, "Bold ", 5) == 0)
+		for (fontListEntry *f=font; f; f=f->next)
+		{
+			if ((!strcmp(f->family, family)) && (!strcmp(f->style, &(style[5]))))
+				return (FTC_FaceID)f;
+		}
 	return 0;
 }
 
@@ -130,7 +140,7 @@ FT_Error FBFontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_
 	return FTC_SBit_Cache_Lookup(sbitsCache, font, glyph_index, sbit);
 }
 
-int FBFontRenderClass::AddFont(const char *filename)
+int FBFontRenderClass::AddFont(const char *filename, const bool make_italics)
 {
 	fflush(stdout);
 	int error;
@@ -142,11 +152,10 @@ int FBFontRenderClass::AddFont(const char *filename)
 		dprintf(DEBUG_NORMAL, "[FONT] adding font %s, failed: %i\n", filename, error);
 		return error;
 	}
-	strcpy(n->filename=new char[strlen(filename)], filename);
-	strcpy(n->family=new char[strlen(filename)], face->family_name);
-	strcpy(n->style=new char[strlen(filename)], face->style_name);
+	n->filename = strdup(filename);
+	n->family   = strdup(face->family_name);
+	n->style    = strdup(make_italics ? "Italic" : face->style_name);
 	FT_Done_Face(face);
-
 	n->next=font;
 	dprintf(DEBUG_DEBUG, "[FONT] adding font %s... ok\n", filename);
 	font=n;
@@ -165,11 +174,13 @@ Font *FBFontRenderClass::getFont(const char *family, const char *style, int size
 	FTC_FaceID id=getFaceID(family, style);
 	if (!id)
 		return 0;
-	return new Font(this, id, size);
+	return new Font(this, id, size, (std::string(((fontListEntry *)id)->style) == style) ? Font::Regular: Font::Embolden);
 }
 
-Font::Font(FBFontRenderClass *render, FTC_FaceID faceid, int isize)
+Font::Font(FBFontRenderClass *render, FTC_FaceID faceid, const int isize, const fontmodifier _stylemodifier)
 {
+	stylemodifier           = _stylemodifier;
+
 	frameBuffer 		= CFrameBuffer::getInstance();
 	renderer 		= render;
 	font.font.face_id 	= faceid;
@@ -190,6 +201,7 @@ Font::Font(FBFontRenderClass *render, FTC_FaceID faceid, int isize)
 	index=FT_Get_Char_Index(face, 'M'); // "M" gives us ascender
 	getGlyphBitmap(index, &glyph);
 	int tM=glyph->top;
+	fontwidth = glyph->width;
 
 	index=FT_Get_Char_Index(face, 'g'); // "g" gives us descender
 	getGlyphBitmap(index, &glyph);
@@ -335,6 +347,14 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 		for (int j= i*32; j< (i+1)*32; j++)
 			colors[j]= c;
 	}
+	
+	int spread_by = 0;
+	if (stylemodifier == Font::Embolden)
+	{
+		spread_by = (fontwidth / 6) - 1;
+		if (spread_by < 1)
+			spread_by = 1;
+	}
 
 	for (; *text; text++)
 	{
@@ -361,7 +381,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 		}
 
 		// width clip
-		if(x+glyph->xadvance > left+width)
+		if(x + glyph->xadvance + spread_by > left + width)
 		{
 			pthread_mutex_unlock( &renderer->render_mutex );
 			return;
@@ -391,14 +411,36 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 			__u8 *td=d;
 
 			int ax;
-			for (ax=0; ax<w; ax++)
+			for (ax=0; ax < w + spread_by; ax++)
 			{
 /*				int c = (*s++>>5)- coff; // c = 0..7
 				if (c< 0)
 					c= 0;
 				*td++=color + c;   // we use color as "base color" plus 7 consecutive colors for anti-aliasing
 */
-				*td++= colors[*s++];
+				if (stylemodifier != Font::Embolden)
+					*td++= colors[*s++];
+				else
+				{
+					int start, end;
+					int color = -1;
+
+					if (ax < w)
+						start = 0;
+					else
+						start = ax - w + 1;
+
+					if (ax < spread_by)
+						end = ax + 1;
+					else
+						end = spread_by + 1;
+
+					for (int i = start; i < end; i++)
+						if (color < *(s - i))
+							color = *(s - i);
+					*td++ = colors[color];
+					s++;
+				}
 			}
 			s+= pitch- ax;
 			d+= stride;
@@ -465,6 +507,17 @@ int Font::getRenderWidth(const char *text, const bool utf8_encoded)
 		pen1=x;
 		lastindex=index;
 	}
+
+	int spread_by = 0;
+	if (stylemodifier == Font::Embolden)
+	{
+		spread_by = (fontwidth / 6) - 1;
+		if (spread_by < 1)
+			spread_by = 1;
+	}
+
+	x += spread_by; 
+
 	pthread_mutex_unlock( &renderer->render_mutex );
 
 	return x;

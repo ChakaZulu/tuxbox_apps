@@ -2,15 +2,7 @@
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
-
-	Kommentar:
-
-	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
-	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
+        Copyright (C) 2003 thegoodguy
 
 	License: GPL
 
@@ -46,7 +38,40 @@
 #include "framebuffer.h"
 
 
-class Font;
+class FBFontRenderClass;
+class Font
+{
+	CFrameBuffer	*frameBuffer;
+	FTC_Image_Desc	font;
+	FBFontRenderClass *renderer;
+	FT_Face		face;
+	FT_Size		size;
+	
+	FT_Error getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit);
+	
+	// these are HACKED values, because the font metrics were unusable.
+	int height,ascender,descender,upper,lower;
+	int fontwidth;
+	
+ public:
+	enum fontmodifier
+		{
+			Regular,
+			Embolden
+		};
+	fontmodifier stylemodifier;
+
+	void RenderString(int x, int y, const int width, const char *      text, const unsigned char color, const int boxheight = 0, const bool utf8_encoded = false);
+	void RenderString(int x, int y, const int width, const std::string text, const unsigned char color, const int boxheight = 0, const bool utf8_encoded = false);
+	
+	int getRenderWidth(const char *      text, const bool utf8_encoded = false);
+	int getRenderWidth(const std::string text, const bool utf8_encoded = false);
+	int getHeight(void);
+	
+	Font(FBFontRenderClass *render, FTC_FaceID faceid, const int isize, const fontmodifier _stylemodifier);
+	~Font(){}
+};
+
 class FBFontRenderClass
 {
 		struct fontListEntry
@@ -79,37 +104,12 @@ class FBFontRenderClass
 		//FT_Face getFace(const char *family, const char *style);
 		Font *getFont(const char *family, const char *style, int size);
 
-		int AddFont(const char *filename);
+		int AddFont(const char *filename, const bool make_italics = false);
 
 		FBFontRenderClass();
 		~FBFontRenderClass();
 
 		friend class Font;
-};
-
-class Font
-{
-		CFrameBuffer	*frameBuffer;
-		FTC_Image_Desc	font;
-		FBFontRenderClass *renderer;
-		FT_Face		face;
-		FT_Size		size;
-
-		FT_Error getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit);
-
-		// these are HACKED values, because the font metrics were unusable.
-		int height,ascender,descender,upper,lower;
-
-	public:
-		void RenderString(int x, int y, const int width, const char *      text, const unsigned char color, const int boxheight = 0, const bool utf8_encoded = false);
-		void RenderString(int x, int y, const int width, const std::string text, const unsigned char color, const int boxheight = 0, const bool utf8_encoded = false);
-
-                int getRenderWidth(const char *      text, const bool utf8_encoded = false);
-		int getRenderWidth(const std::string text, const bool utf8_encoded = false);
-		int getHeight(void);
-
-		Font(FBFontRenderClass *render, FTC_FaceID faceid, int isize);
-		~Font(){}
 };
 
 class FontsDef
