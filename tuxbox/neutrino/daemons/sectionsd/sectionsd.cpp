@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.139 2002/10/15 20:39:47 woglinde Exp $
+//  $Id: sectionsd.cpp,v 1.140 2002/11/03 22:26:54 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -22,392 +22,6 @@
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
-//  $Log: sectionsd.cpp,v $
-//  Revision 1.139  2002/10/15 20:39:47  woglinde
-//
-//
-//  mostly coding styles, adding license to some files,
-//  using dos2unix on one file
-//
-//  Revision 1.138  2002/10/13 21:21:49  thegoodguy
-//  Cleanup includes
-//
-//  Revision 1.137  2002/10/13 11:35:03  woglinde
-//
-//
-//  yeah, its done neutrino compiles now again,
-//  you can go on and find bugs
-//
-//  Revision 1.136  2002/10/08 22:09:10  thegoodguy
-//  Code cleanup (SDTThread & EITThread now use common read routine)
-//
-//  Revision 1.135  2002/10/04 16:31:25  thegoodguy
-//  Bugfix: In the event of a timeout with part of the section read, the eitthread should use the correct commands to restart the dmx, too
-//
-//  Revision 1.134  2002/10/02 21:00:15  thegoodguy
-//  Only read 3 bytes of eit table first, fixed memory leak & locking problem
-//
-//  Revision 1.133  2002/10/02 17:52:49  thegoodguy
-//  Make driver developers happy :)
-//
-//  Revision 1.132  2002/10/02 17:45:30  thegoodguy
-//  Bugfixes: Fix handling of "small" sections & implement own table_id filter (joint effort with the sedulous alexw)
-//
-//  Revision 1.131  2002/09/25 23:27:48  thegoodguy
-//  Tiny code cleanup
-//
-//  Revision 1.130  2002/09/24 22:29:06  thegoodguy
-//  Code cleanup (kick out onid_sid)
-//
-//  Revision 1.129  2002/09/20 00:05:55  thegoodguy
-//  Fixed potential deadlock
-//
-//  Revision 1.128  2002/08/27 19:00:45  obi
-//  use devfs device names
-//
-//  Revision 1.127  2002/08/17 06:27:25  obi
-//  - no more compiler warnings
-//  - formatted sourcecode, it's almost readable now...
-//
-//  Revision 1.126  2002/05/15 10:00:55  dirch
-//  timerd removed
-//
-//  Revision 1.125  2002/05/04 00:14:51  rasc
-//  -- default cache 21 days, processor load should be no problem
-//
-//  Revision 1.124  2002/04/27 10:48:07  field
-//  Geschindigkeit gefixt
-//
-//  Revision 1.123  2002/04/25 16:17:10  field
-//  Updates
-//
-//  Revision 1.122  2002/04/24 10:56:46  field
-//  Kleinigkeiten
-//
-//  Revision 1.121  2002/04/19 07:04:44  field
-//  Zeit-setzen verbessert
-//
-//  Revision 1.120  2002/04/18 13:09:53  field
-//  Sectionsd auf clientlib umgestellt :)
-//
-//  Revision 1.119  2002/04/18 10:43:56  field
-//  Clientlib
-//
-//  Revision 1.118  2002/04/17 15:58:24  field
-//  Anpassungen
-//
-//  Revision 1.117  2002/04/17 13:07:06  field
-//  Bugfix (current-event)
-//
-//  Revision 1.116  2002/04/16 13:03:26  field
-//  stime in neutrino verschoben
-//
-//  Revision 1.115  2002/04/16 11:23:50  field
-//  Timeout-Handling umgestellt
-//
-//  Revision 1.114  2002/04/15 12:33:44  field
-//  Wesentlich verbessertes Paket-Handling (CPU-Last sollte viel besser sein
-//  *g*)
-//
-//  Revision 1.113  2002/04/12 15:47:27  field
-//  laestigen Bug in der glibc2.2.5 umschifft
-//
-//  Revision 1.112  2002/04/10 16:40:46  field
-//  Timeset verändert, timerd (einstweilen) auskommentiert
-//
-//  Revision 1.111  2002/04/08 18:46:06  Simplex
-//  checks availability of timerd
-//
-//  Revision 1.110  2002/04/06 20:01:50  Simplex
-//  - made EVT_NEXTPROGRAM work
-//  - communication with timerd should be changed to eventserver
-//
-//  Revision 1.109  2002/03/29 15:47:18  obi
-//  use setsid()
-//  field, mcclean: i guess that is what you wanted instead of catching signals ;)
-//
-//  Revision 1.108  2002/03/28 08:49:14  obi
-//  sigkill cannot be caught
-//  exit on all signals except sighup
-//
-//  Revision 1.107  2002/03/22 17:12:06  field
-//  Weitere Updates, compiliert wieder
-//
-//  Revision 1.104  2002/03/18 16:55:16  field
-//  Bugfix
-//
-//  Revision 1.102  2002/03/12 16:12:55  field
-//  Bugfixes
-//
-//  Revision 1.101  2002/03/07 18:33:43  field
-//  ClientLib angegangen, Events angefangen
-//
-//  Revision 1.100  2002/02/28 01:52:21  field
-//  Verbessertes Umschalt-Handling
-//
-//  Revision 1.99  2002/02/23 21:08:43  field
-//  Bugfix des Bugfixes :)
-//
-//  Revision 1.97  2002/02/23 20:23:23  McClean
-//  fix up
-//
-//  Revision 1.96  2002/02/14 14:59:24  field
-//  CD-Fix
-//
-//  Revision 1.94  2002/02/08 17:50:05  field
-//  Updates - neues Format bei sendEPG
-//
-//  Revision 1.93  2002/02/04 14:43:42  field
-//  Start/Stop/Restart u. Threading veraendert ;)
-//
-//  Revision 1.92  2002/01/31 17:02:35  field
-//  Buffergroesse
-//
-//  Revision 1.91  2002/01/30 13:35:02  field
-//  Verbesserungen
-//
-//  Revision 1.90  2002/01/29 23:23:57  field
-//  Mehr Details in ListAll
-//
-//  Revision 1.89  2002/01/06 18:23:44  McClean
-//  better busybox-handling
-//
-//  Revision 1.88  2002/01/06 03:03:13  McClean
-//  busybox 0.60 workarround
-//
-//  Revision 1.87  2001/11/22 13:19:00  field
-//  Liefert nun auch nur NEXT Epg ab
-//
-//  Revision 1.85  2001/11/15 13:25:58  field
-//  Bugfix, zeigt endlich auch die Events im gleichen Bouquet
-//
-//  Revision 1.84  2001/11/08 13:50:32  field
-//  Debug-Out verbessert
-//
-//  Revision 1.83  2001/11/07 23:49:45  field
-//  Current/Next Umschaltung funktioniert wieder
-//
-//  Revision 1.82  2001/11/05 17:12:05  field
-//  Versuch zu Wiederholungen
-//
-//  Revision 1.81  2001/11/03 15:39:57  field
-//  Deadlock behoben, Perspektiven
-//
-//  Revision 1.80  2001/11/03 03:13:53  field
-//  Auf Perspektiven vorbereitet
-//
-//  Revision 1.79  2001/10/31 18:04:46  field
-//  dmxTOT wird bei scan nicht gestoppt
-//
-//  Revision 1.78  2001/10/31 12:38:30  field
-//  Timethread auch gepaust beim scanning
-//
-//  Revision 1.77  2001/10/30 21:13:11  field
-//  bugfix
-//
-//  Revision 1.76  2001/10/29 17:57:09  field
-//  Problem, dass Events mit hoeherer Nummer vorgehen, behoben
-//
-//  Revision 1.75  2001/10/25 12:24:29  field
-//  verbeserte Behandlung von unvollstaendigen EPGs
-//
-//  Revision 1.72  2001/10/24 17:03:42  field
-//  Deadlock behoben, Geschwindigkeit gesteigert
-//
-//  Revision 1.71  2001/10/22 14:27:24  field
-//  Kleinigkeiten
-//
-//  Revision 1.70  2001/10/22 11:41:09  field
-//  nvod-zeiten
-//
-//  Revision 1.69  2001/10/21 13:04:40  field
-//  nvod-zeiten funktionieren
-//
-//  Revision 1.68  2001/10/18 23:57:18  field
-//  Gesamtliste massiv beschleunigt
-//
-//  Revision 1.66  2001/10/10 14:56:30  fnbrd
-//  tsid wird bei nvod mitgeschickt
-//
-//  Revision 1.65  2001/10/10 02:53:47  fnbrd
-//  Neues kommando (noch nicht voll funktionsfaehig).
-//
-//  Revision 1.64  2001/10/05 02:37:00  fnbrd
-//  Removed forgotten comment.
-//
-//  Revision 1.63  2001/10/04 20:12:59  fnbrd
-//  Removed duplicate code.
-//
-//  Revision 1.62  2001/10/04 19:25:59  fnbrd
-//  Neues Kommando allEventsChannelID.
-//
-//  Revision 1.61  2001/10/02 16:18:53  fnbrd
-//  Fehler behoben.
-//
-//  Revision 1.59  2001/09/26 09:54:50  field
-//  Neues Kommando (fuer Tontraeger-Auswahl)
-//
-//  Revision 1.58  2001/09/20 19:22:10  fnbrd
-//  Changed format of eventlists with IDs
-//
-//  Revision 1.57  2001/09/20 12:53:22  fnbrd
-//  More speed with event list.More speed with event list.More speed with event list.More speed with event list.More speed with event list.More speed with event list.More speed with event list.
-//
-//  Revision 1.56  2001/09/20 11:24:47  fnbrd
-//  Fehler behoben.
-//
-//  Revision 1.55  2001/09/20 11:01:59  fnbrd
-//  Format bei currentNextinformationChannelID geaendert.
-//
-//  Revision 1.54  2001/09/18 18:15:27  fnbrd
-//  2 new commands.
-//
-//  Revision 1.53  2001/09/10 02:58:00  fnbrd
-//  Cinedom-Hack
-//
-//  Revision 1.52  2001/08/29 22:41:51  fnbrd
-//  Fix error with pause.
-//
-//  Revision 1.51  2001/08/17 16:37:28  fnbrd
-//  Some mor informational output with -d and cache decrease
-//
-//  Revision 1.50  2001/08/17 16:21:06  fnbrd
-//  Intelligent cache decrease to prevent dmx buffer overflows.
-//
-//  Revision 1.49  2001/08/17 14:33:15  fnbrd
-//  Added a reopen of DMX connections after 15 timeouts to fix possible buffer overflows.
-//
-//  Revision 1.48  2001/08/16 13:13:12  fnbrd
-//  New commands.
-//
-//  Revision 1.47  2001/08/16 10:55:41  fnbrd
-//  Actual event list only with channels with event.
-//
-//  Revision 1.46  2001/08/16 01:35:23  fnbrd
-//  internal changes.
-//
-//  Revision 1.45  2001/08/09 23:36:26  fnbrd
-//  Pause command for the grabbers, internal changes.
-//
-//  Revision 1.43  2001/07/26 01:38:35  fnbrd
-//  All events shows now all nvod-times.
-//
-//  Revision 1.42  2001/07/26 01:12:46  fnbrd
-//  Removed a warning.
-//
-//  Revision 1.41  2001/07/26 00:58:09  fnbrd
-//  Fixed one bug when time was not set.
-//
-//  Revision 1.40  2001/07/25 20:46:21  fnbrd
-//  Neue Kommandos, kleine interne Verbesserungen.
-//
-//  Revision 1.39  2001/07/25 16:46:46  fnbrd
-//  Added unique-keys to all commands.
-//
-//  Revision 1.37  2001/07/25 15:06:18  fnbrd
-//  Added exception-handlers for better bug hunting.
-//
-//  Revision 1.36  2001/07/25 11:42:15  fnbrd
-//  Added support for 'unique keys' in services and events.
-//
-//  Revision 1.35  2001/07/24 20:26:46  fnbrd
-//  Fixed some nasty bugs introduced with (too) quickly implemented writeNBytes().
-//
-//  Revision 1.34  2001/07/24 18:19:06  fnbrd
-//  Scheint stabil zu laufen, daher cache jetzt 5 Tage (und ein paar kleinere interne Aenderungen).
-//
-//  Revision 1.33  2001/07/24 15:05:31  fnbrd
-//  sectionsd benutzt voruebergehend smart pointers der Boost-Lib.
-//
-//  Revision 1.32  2001/07/23 20:59:48  fnbrd
-//  Fehler im Time-Thread behoben.
-//
-//  Revision 1.31  2001/07/23 09:00:10  fnbrd
-//  Fehler behoben.
-//
-//  Revision 1.30  2001/07/23 02:43:30  fnbrd
-//  internal changes.
-//
-//  Revision 1.29  2001/07/23 00:22:15  fnbrd
-//  Many internal changes, nvod-events now functional.
-//
-//  Revision 1.28  2001/07/20 00:02:47  fnbrd
-//  Kleiner Hack fuer besseres Zusammenspiel mit Neutrino.
-//
-//  Revision 1.26  2001/07/19 14:12:30  fnbrd
-//  Noch ein paar Kleinigkeiten verbessert.
-//
-//  Revision 1.25  2001/07/19 10:33:52  fnbrd
-//  Beschleunigt, interne Strukturen geaendert, Ausgaben sortiert.
-//
-//  Revision 1.24  2001/07/18 13:51:05  fnbrd
-//  Datumsfehler behoben.
-//
-//  Revision 1.23  2001/07/18 03:26:45  fnbrd
-//  Speicherloch gefixed.
-//
-//  Revision 1.22  2001/07/17 14:15:52  fnbrd
-//  Kleine Aenderung damit auch static geht.
-//
-//  Revision 1.21  2001/07/17 13:14:59  fnbrd
-//  Noch ne Verbesserung in Bezug auf alte Events.
-//
-//  Revision 1.19  2001/07/17 02:38:56  fnbrd
-//  Fehlertoleranter
-//
-//  Revision 1.18  2001/07/16 15:57:58  fnbrd
-//  Parameter -d fuer debugausgaben
-//
-//  Revision 1.17  2001/07/16 13:08:34  fnbrd
-//  Noch ein Fehler beseitigt.
-//
-//  Revision 1.16  2001/07/16 12:56:50  fnbrd
-//  Noch ein Fehler behoben.
-//
-//  Revision 1.15  2001/07/16 12:52:30  fnbrd
-//  Fehler behoben.
-//
-//  Revision 1.14  2001/07/16 11:49:31  fnbrd
-//  Neuer Befehl, Zeichen fuer codetable aus den Texten entfernt
-//
-//  Revision 1.13  2001/07/15 15:09:27  fnbrd
-//  Informative Ausgabe.
-//
-//  Revision 1.12  2001/07/15 15:05:09  fnbrd
-//  Speichert jetzt alle Events die bis zu 24h in der Zukunft liegen.
-//
-//  Revision 1.11  2001/07/15 11:58:20  fnbrd
-//  Vergangene Zeit in Prozent beim EPG
-//
-//  Revision 1.10  2001/07/15 04:32:46  fnbrd
-//  neuer sectionsd (mit event-liste)
-//
-//  Revision 1.9  2001/07/14 22:59:58  fnbrd
-//  removeOldEvents() in SIevents
-//
-//  Revision 1.8  2001/07/14 17:36:04  fnbrd
-//  Verbindungsthreads sind jetzt detached (kein Mem-leak mehr)
-//
-//  Revision 1.7  2001/07/14 16:41:44  fnbrd
-//  fork angemacht
-//
-//  Revision 1.6  2001/07/14 16:38:46  fnbrd
-//  Mit workaround fuer defektes mktime der glibc
-//
-//  Revision 1.5  2001/07/14 10:19:26  fnbrd
-//  Mit funktionierendem time-thread (mktime der glibc muss aber gefixt werden)
-//
-//  Revision 1.4  2001/07/12 22:51:25  fnbrd
-//  Time-Thread im sectionsd (noch disabled, da prob mit mktime)
-//
-//  Revision 1.3  2001/07/11 22:08:55  fnbrd
-//  wegen gcc 3.0
-//
-//  Revision 1.2  2001/07/06 10:25:04  fnbrd
-//  Debug-Zeug raus.
-//
-//  Revision 1.1  2001/06/27 11:59:44  fnbrd
-//  Angepasst an gcc 3.0
 //
 //
 
@@ -1489,7 +1103,7 @@ static const SIevent& findSIeventForEventUniqueKey(const long long& eventUniqueK
 	return nullEvt;
 }
 
-static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned serviceUniqueKey, SItime& zeit, long plusminus = 0, unsigned *flag = 0)
+static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id serviceUniqueKey, SItime& zeit, long plusminus = 0, unsigned *flag = 0)
 {
 	time_t azeit = time(NULL);
 
@@ -1525,7 +1139,7 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
 	return nullEvt;
 }
 
-static const SIevent& findNextSIeventForServiceUniqueKey(const unsigned serviceUniqueKey, SItime& zeit)
+static const SIevent& findNextSIeventForServiceUniqueKey(const t_channel_id serviceUniqueKey, SItime& zeit)
 {
 	time_t azeit = time(NULL);
 
@@ -1842,7 +1456,7 @@ static void commandSetHoursToCache(struct connectionData *client, char *data, co
 	return ;
 }
 
-static void sendAllEvents(struct connectionData *client, unsigned serviceUniqueKey, bool oldFormat = true )
+static void sendAllEvents(struct connectionData *client, t_channel_id serviceUniqueKey, bool oldFormat = true )
 {
 	char *evtList = new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
 
@@ -1852,7 +1466,7 @@ static void sendAllEvents(struct connectionData *client, unsigned serviceUniqueK
 		return ;
 	}
 
-	dprintf("sendAllEvents for %x\n", serviceUniqueKey);
+	dprintf("sendAllEvents for " PRINTF_CHANNEL_ID_TYPE "\n", serviceUniqueKey);
 	*evtList = 0;
 	char *liste = evtList;
 
@@ -1958,7 +1572,7 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
 	data[dataLength - 1] = 0; // to be sure it has an trailing 0
 	dprintf("Request of all events for '%s'\n", data);
 	lockServices();
-	unsigned uniqueServiceKey = findServiceUniqueKeyforServiceName(data);
+	t_channel_id uniqueServiceKey = findServiceUniqueKeyforServiceName(data);
 	unlockServices();
 	sendAllEvents(client, uniqueServiceKey);
 	return ;
@@ -1966,12 +1580,12 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
 
 static void commandAllEventsChannelID(struct connectionData *client, char *data, const unsigned dataLength)
 {
-	if (dataLength != 4)
+	if (dataLength != sizeof(t_channel_id))
 		return ;
 
-	unsigned serviceUniqueKey = *(unsigned *)data;
+	t_channel_id serviceUniqueKey = *(t_channel_id *)data;
 
-	dprintf("Request of all events for 0x%x\n", serviceUniqueKey);
+	dprintf("Request of all events for " PRINTF_CHANNEL_ID_TYPE "\n", serviceUniqueKey);
 
 	sendAllEvents(client, serviceUniqueKey, false);
 
@@ -2014,7 +1628,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.139 2002/10/15 20:39:47 woglinde Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.140 2002/11/03 22:26:54 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2339,7 +1953,7 @@ static void commandLinkageDescriptorsUniqueKey(struct connectionData *client, ch
 	return ;
 }
 
-static unsigned	messaging_current_servicekey = 0;
+static t_channel_id messaging_current_servicekey = 0;
 std::vector<long long> messaging_skipped_sections_ID [0x22];		// 0x4e .. 0x6f
 static long long messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
 static int messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
@@ -2353,21 +1967,15 @@ static bool	messaging_neutrino_sets_time = false;
 
 static void commandserviceChanged(struct connectionData *client, char *data, const unsigned dataLength)
 {
-	//int nResultDataSize=0;
-	//char* pResultData=0;
+	if (dataLength != sizeof(sectionsd::commandSetServiceChanged))
+		return;
 
-	if (dataLength != 8)
-		return ;
-
-	unsigned* uniqueServiceKey = (unsigned *)data;
-
-	data += 4;
-
-	bool* requestCN_Event = (bool *)data;
+	t_channel_id * uniqueServiceKey = &(((sectionsd::commandSetServiceChanged *)data)->channel_id);
+	bool         * requestCN_Event  = &(((sectionsd::commandSetServiceChanged *)data)->requestEvent);
 
 	bool doWakeUp = false;
 
-	dprintf("[sectionsd] Service changed to 0x%x\n", *uniqueServiceKey);
+	dprintf("[sectionsd] Service changed to " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
 
 	showProfiling("before messaging lock");
 
@@ -2442,12 +2050,12 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
 	int nResultDataSize = 0;
 	char* pResultData = 0;
 
-	if (dataLength != 4)
+	if (dataLength != sizeof(t_channel_id))
 		return ;
 
-	unsigned* uniqueServiceKey = (unsigned *)data;
+	t_channel_id * uniqueServiceKey = (t_channel_id *)data;
 
-	dprintf("[sectionsd] Request of current/next information for 0x%x\n", *uniqueServiceKey);
+	dprintf("[sectionsd] Request of current/next information for " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
 
 	if (dmxEIT.pause()) // -> lock
 		return ;
@@ -2729,12 +2337,12 @@ static void commandGetNextEPG(struct connectionData *client, char *data, const u
 
 static void commandActualEPGchannelID(struct connectionData *client, char *data, const unsigned dataLength)
 {
-	if (dataLength != 4)
+	if (dataLength != sizeof(t_channel_id))
 		return ;
 
-	unsigned* uniqueServiceKey = (unsigned *)data;
+	t_channel_id * uniqueServiceKey = (t_channel_id *)data;
 
-	dprintf("Request of actual EPG for 0x%x\n", * uniqueServiceKey);
+	dprintf("Request of actual EPG for " PRINTF_CHANNEL_ID_TYPE "\n", * uniqueServiceKey);
 
 	if (dmxEIT.pause()) // -> lock
 		return ;
@@ -3287,12 +2895,12 @@ static void commandEPGepgIDshort(struct connectionData *client, char *data, cons
 
 static void commandTimesNVODservice(struct connectionData *client, char *data, const unsigned dataLength)
 {
-	if (dataLength != 4)
+	if (dataLength != sizeof(t_channel_id))
 		return ;
 
-	unsigned uniqueServiceKey = *(unsigned *)data;
+	t_channel_id uniqueServiceKey = *(t_channel_id *)data;
 
-	dprintf("Request of NVOD times for 0x%x\n", uniqueServiceKey);
+	dprintf("Request of NVOD times for " PRINTF_CHANNEL_ID_TYPE "\n", uniqueServiceKey);
 
 	if (dmxEIT.pause()) // -> lock
 		return ;
@@ -3333,9 +2941,7 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
 			for (SInvodReferences::iterator ni = si->second->nvods.begin(); ni != si->second->nvods.end(); ni++)
 			{
 				// Zeiten sind erstmal dummy, d.h. pro Service eine Zeit
-				*(t_service_id          *)p = ni->serviceID;			p += sizeof(t_service_id);
-				*(t_original_network_id *)p = ni->originalNetworkID;		p += sizeof(t_original_network_id);
-				*(t_transport_stream_id *)p = ni->transportStreamID;		p += sizeof(t_transport_stream_id);
+				ni->toStream(p); // => p += sizeof(t_service_id) + sizeof(t_original_network_id) + sizeof(t_transport_stream_id);
 
 				SItime zeitEvt1(0, 0);
 				//        const SIevent &evt=
@@ -4574,7 +4180,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.139 2002/10/15 20:39:47 woglinde Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.140 2002/11/03 22:26:54 thegoodguy Exp $\n");
 
 	try
 	{

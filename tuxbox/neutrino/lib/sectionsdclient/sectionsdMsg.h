@@ -1,12 +1,13 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.1 2002/10/13 11:35:03 woglinde Exp $
+//  $Id: sectionsdMsg.h,v 1.2 2002/11/03 22:26:55 thegoodguy Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
 //
-//	Copyright (C) 2001 by fnbrd
+//	Copyright (C) 2001 by fnbrd,
+//                    2002 by thegoodguy
 //
 //    Homepage: http://dbox2.elxsi.de
 //
@@ -24,128 +25,13 @@
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
-//  $Log: sectionsdMsg.h,v $
-//  Revision 1.1  2002/10/13 11:35:03  woglinde
-//
-//
-//  yeah, its done neutrino compiles now again,
-//  you can go on and find bugs
-//
-//  Revision 1.1  2002/10/13 05:38:16  woglinde
-//
-//
-//  make include dir for all libs,
-//  most headers are needed by other applications,
-//  and I am tired writing -I for each directory
-//
-//  Revision 1.37  2002/09/24 22:29:06  thegoodguy
-//  Code cleanup (kick out onid_sid)
-//
-//  Revision 1.36  2002/04/18 13:09:53  field
-//  Sectionsd auf clientlib umgestellt :)
-//
-//  Revision 1.35  2002/04/18 10:43:56  field
-//  Clientlib
-//
-//  Revision 1.34  2002/04/17 15:58:24  field
-//  Anpassungen
-//
-//  Revision 1.33  2002/04/15 12:33:44  field
-//  Wesentlich verbessertes Paket-Handling (CPU-Last sollte viel besser sein
-//  *g*)
-//
-//  Revision 1.32  2002/03/22 17:12:06  field
-//  Weitere Updates, compiliert wieder
-//
-//  Revision 1.30  2002/03/18 15:08:50  field
-//  Updates...
-//
-//  Revision 1.29  2002/03/12 16:12:55  field
-//  Bugfixes
-//
-//  Revision 1.28  2002/03/07 18:33:43  field
-//  ClientLib angegangen, Events angefangen
-//
-//  Revision 1.27  2002/02/08 17:50:05  field
-//  Updates - neues Format bei sendEPG
-//
-//  Revision 1.26  2001/11/22 13:19:00  field
-//  Liefert nun auch nur NEXT Epg ab
-//
-//  Revision 1.24  2001/10/21 13:04:40  field
-//  nvod-zeiten funktionieren
-//
-//  Revision 1.23  2001/10/18 21:09:51  field
-//  neuer Befehl fuer EPGPrev/Next
-//
-//  Revision 1.22  2001/10/10 14:56:30  fnbrd
-//  tsid wird bei nvod mitgeschickt
-//
-//  Revision 1.21  2001/10/10 02:53:47  fnbrd
-//  Neues kommando (noch nicht voll funktionsfaehig).
-//
-//  Revision 1.20  2001/10/04 19:25:59  fnbrd
-//  Neues Kommando allEventsChannelID.
-//
-//  Revision 1.19  2001/09/26 09:54:50  field
-//  Neues Kommando (fuer Tontraeger-Auswahl)
-//
-//  Revision 1.17  2001/09/20 19:22:10  fnbrd
-//  Changed format of eventlists with IDs
-//
-//  Revision 1.15  2001/09/18 18:15:28  fnbrd
-//  2 new commands.
-//
-//  Revision 1.14  2001/08/16 13:13:12  fnbrd
-//  New commands.
-//
-//  Revision 1.13  2001/08/09 23:35:54  fnbrd
-//  Moved the stuff into a struct.
-//
-//  Revision 1.12  2001/07/25 20:46:21  fnbrd
-//  Neue Kommandos, kleine interne Verbesserungen.
-//
-//  Revision 1.11  2001/07/25 16:46:46  fnbrd
-//  Added unique-keys to all commands.
-//
-//  Revision 1.10  2001/07/25 11:39:42  fnbrd
-//  Added Port number
-//
-//  Revision 1.9  2001/07/20 00:02:47  fnbrd
-//  Kleiner Hack fuer besseres Zusammenspiel mit Neutrino.
-//
-//  Revision 1.8  2001/07/19 22:19:41  fnbrd
-//  Noch ne Beschreibung.
-//
-//  Revision 1.6  2001/07/19 22:02:13  fnbrd
-//  Mehr Befehle.
-//
-//  Revision 1.5  2001/07/17 12:39:18  fnbrd
-//  Neue Kommandos
-//
-//  Revision 1.4  2001/07/16 12:52:30  fnbrd
-//  Fehler behoben.
-//
-//  Revision 1.3  2001/07/16 11:49:31  fnbrd
-//  Neuer Befehl, Zeichen fuer codetable aus den Texten entfernt
-//
-//  Revision 1.2  2001/07/15 11:58:20  fnbrd
-//  Vergangene Zeit in Prozent beim EPG
-//
-//  Revision 1.1  2001/07/15 04:33:10  fnbrd
-//  first release
-//
-//
+
 
 #include <string>
 #include <vector>
 
 
-#include <stdint.h>
-
-typedef uint16_t t_service_id;
-typedef uint16_t t_original_network_id;
-typedef uint16_t t_transport_stream_id;
+#include <zapit/client/zapittypes.h>  // t_channel_id, t_service_id, t_original_network_id, t_transport_stream_id;
 
 
 using namespace std;
@@ -223,7 +109,13 @@ struct sectionsd
 		CMD_unregisterEvents
 	};
 
-    struct responseIsTimeSet
+	struct commandSetServiceChanged
+	{
+		t_channel_id channel_id;
+		bool         requestEvent;
+	};
+
+	struct responseIsTimeSet
 	{
 		bool IsTimeSet;
 	};
@@ -242,9 +134,9 @@ struct sectionsd
 	struct responseGetLinkageDescriptors
 	{
 		std::string name;
-    	unsigned short transportStreamId;
-		unsigned short originalNetworkId;
-		unsigned short serviceId;
+		t_transport_stream_id transportStreamId;
+		t_original_network_id originalNetworkId;
+		t_service_id          serviceId;
 	};
 
     typedef std::vector<responseGetLinkageDescriptors> LinkageDescriptorList;
@@ -369,7 +261,7 @@ struct sectionsd
 //
 // actualEPGchannelID:
 //   data of request:
-//     is channel ID (4 byte onid<<16+sid)
+//     is channel ID
 //   data of response:
 //     is a string (c-string) describing the EPG:
 //     unique key (long long, hex) 0xff name  0xff text  0xff extended text  0xff start time GMT (ctime, hex ) 0xff duration (seconds, hex) 0xff
@@ -431,14 +323,14 @@ struct sectionsd
 //
 // allEventsChannelID:
 //   data of request:
-//     is channel ID (4 byte, onid<<16+sid)
+//     is channel ID
 //   data of response:
 //     is a string (c-string) describing the cached events for the requestet channel
 //     1 line per event, format: uniqueEventKey DD.MM HH:MM durationInMinutes Event name
 //
 // timesNVODservice
 //   data of request:
-//     is channel ID (4 byte, onid<<16+sid)
+//     is channel ID
 //   data of response:
 //     for every (sub-)channel
 //       channelID (4 byte, onid<<16+sid)

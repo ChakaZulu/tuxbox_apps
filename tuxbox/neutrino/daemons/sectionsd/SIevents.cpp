@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.20 2002/10/08 18:56:43 thegoodguy Exp $
+// $Id: SIevents.cpp,v 1.21 2002/11/03 22:26:54 thegoodguy Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.21  2002/11/03 22:26:54  thegoodguy
+// Use more frequently types defined in zapittypes.h(not complete), fix some warnings, some code cleanup
+//
 // Revision 1.20  2002/10/08 18:56:43  thegoodguy
 // Improve interpretation of the parental rating descriptor & locking of channels in a locked bouquet
 //
@@ -492,7 +495,7 @@ void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
 				for(SInvodReferences::iterator n=k->nvods.begin(); n!=k->nvods.end(); n++) {
 					// Alle druchgehen und deren Events suchen
 					for(iterator en=begin(); en!=end(); en++) {
-						if(en->serviceID==n->serviceID) {
+						if(en->serviceID==n->getServiceID()) {
 							newEvent.times.insert(en->times.begin(), en->times.end());
 //              newEvent.times.insert(SItime(en->startzeit, en->dauer));
 //	      eventsToDelete.insert(SIevent(*en));

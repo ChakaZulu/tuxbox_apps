@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.26 2002/10/15 20:39:48 woglinde Exp $
+  $Id: sectionsdclient.cpp,v 1.27 2002/11/03 22:26:55 thegoodguy Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.27  2002/11/03 22:26:55  thegoodguy
+  Use more frequently types defined in zapittypes.h(not complete), fix some warnings, some code cleanup
+
   Revision 1.26  2002/10/15 20:39:48  woglinde
 
 
@@ -225,14 +228,14 @@ void CSectionsdClient::setPauseScanning(const bool doPause)
 	close_connection();
 }
 
-void CSectionsdClient::setServiceChanged(const unsigned ServiceKey, const bool requestEvent)
+void CSectionsdClient::setServiceChanged(const t_channel_id channel_id, const bool requestEvent)
 {
-	char pData[8];
+	sectionsd::commandSetServiceChanged msg;
 
-	*((unsigned *)pData) = ServiceKey;
-	*((bool *)(pData + 4)) = requestEvent;
+	msg.channel_id   = channel_id;
+	msg.requestEvent = requestEvent; 
 
-	send(sectionsd::serviceChanged, pData, 8);
+	send(sectionsd::serviceChanged, (char *)&msg, sizeof(msg));
 
 	readResponse();
 	close_connection();
@@ -318,9 +321,9 @@ bool CSectionsdClient::getLinkageDescriptorsUniqueKey( unsigned long long unique
 	}
 }
 
-bool CSectionsdClient::getNVODTimesServiceKey( unsigned serviceKey, sectionsd::NVODTimesList& nvod_list )
+bool CSectionsdClient::getNVODTimesServiceKey(const t_channel_id channel_id, sectionsd::NVODTimesList& nvod_list )
 {
-	if (send(sectionsd::timesNVODservice, (char*)&serviceKey, sizeof(serviceKey)))
+	if (send(sectionsd::timesNVODservice, (char*)&channel_id, sizeof(channel_id)))
 	{
 		nvod_list.clear();
 
@@ -352,9 +355,9 @@ bool CSectionsdClient::getNVODTimesServiceKey( unsigned serviceKey, sectionsd::N
 }
 
 
-bool CSectionsdClient::getCurrentNextServiceKey( unsigned serviceKey, sectionsd::responseGetCurrentNextInfoChannelID& current_next )
+bool CSectionsdClient::getCurrentNextServiceKey(const t_channel_id channel_id, sectionsd::responseGetCurrentNextInfoChannelID& current_next )
 {
-	if (send(sectionsd::currentNextInformationID, (char*)&serviceKey, sizeof(serviceKey)))
+	if (send(sectionsd::currentNextInformationID, (char*)&channel_id, sizeof(channel_id)))
 	{
 		int nBufSize = readResponse();
 
@@ -438,11 +441,11 @@ CChannelEventList CSectionsdClient::getChannelEvents()
 	return eList;
 }
 
-CChannelEventList CSectionsdClient::getEventsServiceKey( unsigned serviceKey )
+CChannelEventList CSectionsdClient::getEventsServiceKey(const t_channel_id channel_id)
 {
 	CChannelEventList eList;
 
-	if (send(sectionsd::allEventsChannelID_, (char*)&serviceKey, sizeof(serviceKey)))
+	if (send(sectionsd::allEventsChannelID_, (char*)&channel_id, sizeof(channel_id)))
 	{
 		int nBufSize = readResponse();
 
@@ -482,11 +485,11 @@ CChannelEventList CSectionsdClient::getEventsServiceKey( unsigned serviceKey )
 	return eList;
 }
 
-bool CSectionsdClient::getActualEPGServiceKey( unsigned serviceKey, CEPGData * epgdata)
+bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEPGData * epgdata)
 {
 	epgdata->title = "";
 
-	if (send(sectionsd::actualEPGchannelID, (char*)&serviceKey, sizeof(serviceKey)))
+	if (send(sectionsd::actualEPGchannelID, (char*)&channel_id, sizeof(channel_id)))
 	{
 		int nBufSize = readResponse();
 		if( nBufSize > 0)

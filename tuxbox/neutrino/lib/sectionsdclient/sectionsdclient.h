@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <zapit/client/basicclient.h>
+#include <zapit/client/zapittypes.h>  // t_channel_id
 
 
 using namespace std;
@@ -74,9 +75,9 @@ class CSectionsdClient : private CBasicClient
 
 		bool getLinkageDescriptorsUniqueKey( unsigned long long uniqueKey, sectionsd::LinkageDescriptorList& descriptors );
 
-		bool getNVODTimesServiceKey( unsigned serviceKey, sectionsd::NVODTimesList& nvod_list );
+		bool getNVODTimesServiceKey(const t_channel_id channel_id, sectionsd::NVODTimesList& nvod_list );
 
-		bool getCurrentNextServiceKey( unsigned serviceKey, sectionsd::responseGetCurrentNextInfoChannelID& current_next );
+		bool getCurrentNextServiceKey(const t_channel_id channel_id, sectionsd::responseGetCurrentNextInfoChannelID& current_next );
 
 		bool getIsTimeSet();
 
@@ -86,15 +87,15 @@ class CSectionsdClient : private CBasicClient
 
 		void setPauseSorting(const bool doPause);
 
-		void setServiceChanged(const unsigned ServiceKey, const bool requestEvent);
+		void setServiceChanged(const t_channel_id channel_id, const bool requestEvent);
 
 		CChannelEventList getChannelEvents();
 
-		CChannelEventList getEventsServiceKey( unsigned serviceKey );
+		CChannelEventList getEventsServiceKey(const t_channel_id channel_id);
 
 		bool getEPGid( unsigned long long eventid, time_t starttime, CEPGData * epgdata);
 
-		bool getActualEPGServiceKey( unsigned serviceKey, CEPGData * epgdata);
+		bool getActualEPGServiceKey(const t_channel_id channel_id, CEPGData * epgdata);
 
 		bool getEPGidShort( unsigned long long eventid,CShortEPGData * epgdata);
 

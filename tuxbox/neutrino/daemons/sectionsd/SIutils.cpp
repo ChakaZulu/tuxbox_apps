@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.12 2001/07/17 14:15:52 fnbrd Exp $
+// $Id: SIutils.cpp,v 1.13 2002/11/03 22:26:54 thegoodguy Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.13  2002/11/03 22:26:54  thegoodguy
+// Use more frequently types defined in zapittypes.h(not complete), fix some warnings, some code cleanup
+//
 // Revision 1.12  2001/07/17 14:15:52  fnbrd
 // Kleine Aenderung damit auch static geht.
 //
@@ -221,7 +224,7 @@ int saveStringToXMLfile(FILE *out, const char *c, int withControlCodes)
   c=buf;
 */
   for(;*c; c++) {
-    switch (*c) {
+    switch ((unsigned char)*c) {
       case '&':
         fprintf(out, "&amp;");
         break;
@@ -249,7 +252,7 @@ int saveStringToXMLfile(FILE *out, const char *c, int withControlCodes)
       default:
         if (*c<32)
           break;
-        if ((*c>=32) && (*c<128))
+        if ((*c>=32) && (((unsigned char)*c)<128))
           fprintf(out, "%c", *c);
         else
           fprintf(out, "&#%d;", *c);
@@ -265,7 +268,7 @@ void removeControlCodes(char *string)
   if(!string)
     return;
   for(;*string; )
-    if (!((*string>=32) && (*string<128)))
+    if (!((*string>=32) && (((unsigned char)*string)<128)))
       memmove(string, string+1, strlen(string+1)+1);
     else
       string++;
