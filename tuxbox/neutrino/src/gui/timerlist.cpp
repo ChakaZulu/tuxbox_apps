@@ -54,16 +54,16 @@
 class CTimerListNewNotifier : public CChangeObserver
 {
 private:
-	CMenuForwarder* m1;
-	CMenuOptionChooser* m2;
-	CMenuOptionChooser* m3;
-	CMenuForwarder* m4;
+	CMenuItem* m1;
+	CMenuItem* m2;
+	CMenuItem* m3;
+	CMenuItem* m4;
 	char* display;
 	int* iType;
 	time_t* stopTime;
 public:
-	CTimerListNewNotifier( int* Type, time_t* time,CMenuForwarder* a1, CMenuOptionChooser* a2, 
-								  CMenuOptionChooser* a3, CMenuForwarder* a4, char* d)
+	CTimerListNewNotifier( int* Type, time_t* time,CMenuItem* a1, CMenuItem* a2, 
+								  CMenuItem* a3, CMenuItem* a4, char* d)
 	{
 		m1 = a1;
 		m2 = a2;
@@ -170,7 +170,7 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 		}
 		return menu_return::RETURN_EXIT;
 	}
-	if(actionKey=="newtimer")
+	else if(actionKey=="newtimer")
 	{
 		timerNew.announceTime=timerNew.alarmTime-60;
 		CTimerd::EventInfo eventinfo;
@@ -184,7 +184,9 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 		else if(timerNew.eventType==CTimerd::TIMER_NEXTPROGRAM || 
 				  timerNew.eventType==CTimerd::TIMER_ZAPTO ||
 				  timerNew.eventType==CTimerd::TIMER_RECORD)
+		{
 			data= &eventinfo;
+		}
 		else if(timerNew.eventType==CTimerd::TIMER_REMIND)
 			data= timerNew.message;
 		if(timerNew.eventRepeat >= CTimerd::TIMERREPEAT_WEEKDAYS)
@@ -193,10 +195,13 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 									timerNew.stopTime,timerNew.eventRepeat);
 		return menu_return::RETURN_EXIT;
 	}
-/*	if(actionKey.substr(0,3)=="SC!")
+	else if(actionKey.substr(0,3)=="SC:")
 	{
-		printf("SC: %s\n",actionKey.substr(3).c_str());
-	}*/
+		sscanf(actionKey.substr(3,10).c_str(),"%u",&timerNew.channel_id);
+		strncpy(timerNew_channel_name,actionKey.substr(13).c_str(),30);
+		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
+		return menu_return::RETURN_EXIT;
+	}
 
 
 	if(parent)
@@ -239,7 +244,7 @@ void CTimerList::updateEvents(void)
 	}
 	sort(timerlist.begin(), timerlist.end());
 
-	height = 450;
+	height = (g_settings.screen_EndY-g_settings.screen_StartY)-(info_height+50);
 	listmaxshow = (height-theight-0)/(fheight*2);
 	height = theight+0+listmaxshow*fheight*2;	// recalc height
 	if(timerlist.size() < listmaxshow)
@@ -371,8 +376,6 @@ int CTimerList::show()
 		}
 	}
 	hide();
-
-	//g_lcdd->setMode(CLcddTypes::MODE_TVRADIO, g_Locale->getText(name) );
 
 	return(res);
 }
@@ -660,12 +663,10 @@ void CTimerList::modifyTimer()
 	}
 
 	Timer->setWeekdaysToStr(timer->eventRepeat, m_weekdaysStr);
-	printf("Rep1: %x\n",(int)timer->eventRepeat);
 	timer->eventRepeat = (CTimerd::CTimerEventRepeat)(((int)timer->eventRepeat) & 0x1FF);
 	CStringInput*  timerSettings_weekdays= new CStringInput("timerlist.weekdays", m_weekdaysStr , 7, 
 																		 "timerlist.weekdays.hint_1", 
 																		 "timerlist.weekdays.hint_2", "-X");
-	printf("Rep2: %x\n",(int)timer->eventRepeat);
 	CMenuForwarder *m4 = new CMenuForwarder("timerlist.weekdays", ((int)timer->eventRepeat) >= (int)CTimerd::TIMERREPEAT_WEEKDAYS,
 														  m_weekdaysStr, timerSettings_weekdays );
 	CTimerListRepeatNotifier* notifier = new CTimerListRepeatNotifier(&((int)timer->eventRepeat ),m4);
@@ -731,21 +732,27 @@ void CTimerList::newTimer()
 	m3->addOption((int)CTimerd::TIMERREPEAT_MONTHLY , "timerlist.repeat.monthly");
 	m3->addOption((int)CTimerd::TIMERREPEAT_WEEKDAYS , "timerlist.repeat.weekdays");
 
-	CMenuOptionChooser* m5 = new CMenuOptionChooser("timerlist.channel", &((int) timerNew.channel_id) , false); 
-	if(channellist.size()==0)
+	CZapitClient zapit;
+	CZapitClient::BouquetList bouquetlist;
+	zapit.getBouquets(bouquetlist);
+	CZapitClient::BouquetList::iterator bouquet = bouquetlist.begin();
+	CMenuWidget* mc = new CMenuWidget("timerlist.bouquetselect", "settings.raw");
+	for(; bouquet != bouquetlist.end();bouquet++)
 	{
-		CZapitClient *Zapit = new CZapitClient();
-		Zapit->getChannels(channellist);
-		delete Zapit;
+		CMenuWidget* mw = new CMenuWidget("timerlist.channelselect", "settings.raw");
+		CZapitClient::BouquetChannelList subchannellist;
+		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist);
+		CZapitClient::BouquetChannelList::iterator channel = subchannellist.begin();
+		for(; channel != subchannellist.end();channel++)
+		{
+			char cChannelId[11];
+			sprintf(cChannelId,"%010u",channel->channel_id);
+			mw->addItem(new CMenuForwarder(channel->name, true, "", this, string("SC:")+string(cChannelId)+string(channel->name)));
+		}
+		mc->addItem(new CMenuForwarder(bouquet->name, true, "",mw));
 	}
-	CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
-	m5->addOption (0, "---");
-	for(; channel != channellist.end();channel++)
-	{
-		m5->addOption((int)channel->channel_id , channel->name);
-	}
-//	CMenuWidget mc ("xxx", "settings.raw");
-//	CMenuForwarder* m4 = new CMenuForwarder("timerlist.channel", true, timerNew_channel_name, &mc); 
+	strcpy(timerNew_channel_name,"---");
+	CMenuForwarder* m5 = new CMenuForwarder("timerlist.channel", false, timerNew_channel_name, mc); 
 
 
 	CMenuOptionChooser* m6 = new CMenuOptionChooser("timerlist.standby", &timerNew_standby_on , false); 

@@ -42,7 +42,10 @@ bool sortById (const CChannelEvent& a, const CChannelEvent& b)
 }
 bool sortByDescription (const CChannelEvent& a, const CChannelEvent& b)
 {
-	return a.description < b.description ;
+	if(a.description == b.description)
+		return a.eventID < b.eventID;
+	else
+		return a.description < b.description ;
 }
 
 EventList::EventList()
