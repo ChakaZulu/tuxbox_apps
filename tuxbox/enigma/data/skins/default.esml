@@ -97,7 +97,7 @@
 
 	<object name="eventview">
 		<eWindow position="50:70" size="600:420" name="title">
-			<eLabel position="10:5" size="590:355" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" backgroundColor="content" align="wrap"/>
+			<eLabel position="10:5" size="590:355" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" backgroundColor="content" wrap="on"/>
 			<eWidget position="0:367" size="600:40" backgroundColor="osd_shadowcol" />
 			<eLabel position="10:367" size="130:40" name="date" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
 			<eLabel position="130:367" size="230:40" name="time" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
@@ -197,5 +197,16 @@
 			<eLabel name="button_blue_disabled" position="303:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
 	
 		</eZapMain>
+	</object>
+	
+	<object name="eSatelliteConfigurationManager">
+		<eSatelliteConfigurationManager position="120:80" size="500:370" text="Satellitenkonfiguration">
+			
+			<eLabel text="Satelliten:" position="0:0" size="400:30" font="NimbusSansL-Regular Sans L Regular;25" />
+			<eListbox name="list" position="0:30" size="400:300" />
+			<eButton name="close" position="300:300" size="50:30" text="[OK]"/>
+			<eButton name="new" position="50:300" size="50:30" text="Neu..."/>
+			<eButton name="delete" position="0:300" size="50:30" text="Loeschen..."/>
+		</eSatelliteConfigurationManager>
 	</object>
 </eskin>
