@@ -663,7 +663,7 @@ void CTimerList::modifyTimer()
 	printf("Rep1: %x\n",(int)timer->eventRepeat);
 	timer->eventRepeat = (CTimerd::CTimerEventRepeat)(((int)timer->eventRepeat) & 0x1FF);
 	CStringInput*  timerSettings_weekdays= new CStringInput("timerlist.weekdays", m_weekdaysStr , 7, 
-																		 "timerlist.weekday.hint_1", 
+																		 "timerlist.weekdays.hint_1", 
 																		 "timerlist.weekdays.hint_2", "-X");
 	printf("Rep2: %x\n",(int)timer->eventRepeat);
 	CMenuForwarder *m4 = new CMenuForwarder("timerlist.weekdays", ((int)timer->eventRepeat) >= (int)CTimerd::TIMERREPEAT_WEEKDAYS,
