@@ -30,6 +30,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <config.h>
 #include <sys/mount.h>
 #include <unistd.h>
 #include <fstream>
