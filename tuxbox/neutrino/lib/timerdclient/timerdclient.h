@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.10 2002/05/17 19:50:41 dirch Exp $
+	$Id: timerdclient.h,v 1.11 2002/05/18 02:19:26 dirch Exp $
 
 	License: GPL
 
@@ -95,33 +95,33 @@ class CTimerdClient
 
 		int addShutdownTimerEvent(int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
-			addTimerEvent(TIMER_SHUTDOWN,NULL, min, hour, day, month);
+			return addTimerEvent(TIMER_SHUTDOWN,NULL, min, hour, day, month);
 		};
 
 		int addRecordTimerEvent(int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
-			addTimerEvent(TIMER_RECORD,NULL, min, hour, day, month);
+			return addTimerEvent(TIMER_RECORD,NULL, min, hour, day, month);
 		};
 
 		int addNextProgramTimerEvent(CTimerd::EventInfo eventInfo,int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
 			// mal auf verdacht eingebaut
 			// keine ahnung ob / was hier noch fehlt
-			addTimerEvent(TIMER_NEXTPROGRAM,&eventInfo, min, hour, day, month);
+			return addTimerEvent(TIMER_NEXTPROGRAM,&eventInfo, min, hour, day, month);
 		};
 
 		int addZaptoTimerEvent(unsigned onidSid,int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
 			CTimerd::EventInfo eventInfo;
 			eventInfo.onidSid = onidSid;
-			addTimerEvent(TIMER_ZAPTO,&eventInfo, min, hour, day, month);
+			return addTimerEvent(TIMER_ZAPTO,&eventInfo, min, hour, day, month);
 		};
 
 		int addStandbyTimerEvent(bool standby_on,int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
 			CTimerd::commandSetStandby standby;
 			standby.standby_on =standby_on;
-			addTimerEvent(TIMER_STANDBY,&standby, min, hour, day, month);
+			return addTimerEvent(TIMER_STANDBY,&standby, min, hour, day, month);
 		};
 };
 
