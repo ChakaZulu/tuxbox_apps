@@ -966,15 +966,20 @@ FILE *f_open(const char *filename, const char *acctype)
 
 			   if( strstr( (char*)&magic, "ID3") )	{ f_type(fd, "audio/mpeg"); magic = 0; }
 			   if( strstr( (char*)&magic, "Ogg") )	{ f_type(fd, "audio/ogg");  magic = 0; }
-			   
+
+#if 0
+#error this magic is nonsense			   
 			   if(magic & 0xFFFB0000)		{ f_type(fd, "audio/mpeg"); magic = 0; }
+#endif
 
 			   /* stage two: try to determine the filetype from the file name */
 			   /* a smarter solution would be to get this info from /etc/mime.types */
 
   			   ptr = strrchr(url.file , '.');
+#warning what about filenames without dots?
                          
-			   if((!magic) && (ptr++))
+#warning what if initial bytes are zero (i.e. magic == 0)?
+			   if (magic && (ptr++))
                            {
                              if( strcasecmp(ptr, "cdr") == 0) f_type(fd, "audio/cdr");
                              if( strcasecmp(ptr, "wav") == 0) f_type(fd, "audio/wave");
