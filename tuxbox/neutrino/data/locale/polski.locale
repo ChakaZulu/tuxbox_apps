@@ -31,7 +31,7 @@ mainsettings.keybinding Ustawienie klawiszy
 mainsettings.misc Misc Settings
 
 miscsettings.head Misc Settings
-miscsettings.shutdown_real Real Shutdown
+miscsettings.shutdown_real Enable Standby
 miscsettings.boxtype DBox type
 
 languagesetup.head Ustawienie jezyka

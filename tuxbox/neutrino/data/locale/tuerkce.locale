@@ -31,7 +31,7 @@ mainsettings.keybinding TUS AYARLARI
 mainsettings.misc SECENEKLER
 
 miscsettings.head SECENEKLER
-miscsettings.shutdown_real Real Shutdown
+miscsettings.shutdown_real Enable Standby
 miscsettings.boxtype DBox ÜRETICI
 
 languagesetup.head DIL AYARI
