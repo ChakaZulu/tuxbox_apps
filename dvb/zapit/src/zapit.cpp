@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.36 2001/11/18 13:55:43 faralla Exp $
+  $Id: zapit.cpp,v 1.37 2001/11/18 22:45:58 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -51,6 +51,9 @@
   cmd = 'f' is nvod-base-channel?
   if true returns chans_msg2 for each nvod_channel;
 
+  cmd = 'p' prepare channels
+  calls prepare_channels to reload services and bouquets
+
   cmd = 'q' get list of all bouquets
 
   cmd = 'r' get list of channels of a specified bouquet
@@ -75,6 +78,10 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.37  2001/11/18 22:45:58  Simplex
+  little modifications for bouquethandling
+  new command for reolading services.xml and bouquets.xml
+
   Revision 1.36  2001/11/18 13:55:43  faralla
   command to get curr_onidsid small fix
 
@@ -1340,6 +1347,26 @@ int prepare_channels()
   std::map<uint, uint>::iterator numit;
   std::map<std::string, uint>::iterator nameit;
   std::map<uint, channel>::iterator cit;
+
+	// for the case this function is NOT called for the first time (by main())
+	// we clear all cannel lists, they are refilled
+	// by LoadServices() and LoadBouquets()
+	allnumchannels_tv.clear();
+	allnumchannels_radio.clear();
+	allnamechannels_tv.clear();
+	allnamechannels_radio.clear();
+	transponders.clear();
+	allchans_tv.clear();
+	numchans_tv.clear();
+	namechans_tv.clear();
+	allchans_radio.clear();
+	numchans_radio.clear();
+	namechans_radio.clear();
+	sortlist_tv.clear();
+	allBouquets.clear();
+	found_transponders = 0;
+	found_channels = 0;
+
   int ls = LoadServices();
   int lb = LoadBouquets();
 
@@ -1929,13 +1956,23 @@ void parse_command()
     }
 	break;
 
+	case 'p':
+		status = "00p";
+		prepare_channels();
+		if (send(connfd, status, strlen(status),0) == -1) {
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+		break;
+
+
 	case 'q' :
 		sendBouquetList();
 		return;
 	break;
 
 	case 'r' :
-		sendChannelListOfBouquet(atoi((const char*) &rmsg.param));
+		sendChannelListOfBouquet(rmsg.param);
 	break;
 	case 's':
 		status = "00s";
@@ -2011,7 +2048,7 @@ int main(int argc, char **argv) {
     }
 
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.36 2001/11/18 13:55:43 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.37 2001/11/18 22:45:58 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2097,7 +2134,6 @@ int main(int argc, char **argv) {
 
 void sendBouquetList()
 {
-
 	char* status = "00q";
 	if (send(connfd, status, strlen(status),0) == -1)
 	{
@@ -2145,10 +2181,9 @@ void sendChannelListOfBouquet( uint nBouquet)
 
 	// we get the bouquet number as 1-beginning but need it 0-beginning
 	nBouquet--;
-
 	if (nBouquet < 0 || nBouquet>allBouquets.size())
 	{
-		printf("[zapit] invalid bouquet number");
+		printf("[zapit] invalid bouquet number: %d",nBouquet);
 		status = "-0r";
 	}
 	else
@@ -2170,12 +2205,6 @@ void sendChannelListOfBouquet( uint nBouquet)
 
 	if (!channels.empty())
 	{
-		status = "00c";
-		if (send(connfd, status, strlen(status),0) == -1)
-		{
-			perror("[zapit] could not send any return\n");
-			return;
-		}
 		for (uint i = 0; i < channels.size();i++)
 		{
 			channel_msg_2 chanmsg;
