@@ -379,7 +379,7 @@ void RenderClearMenuLineBB(char *p, int attrcol, int attr)
 {
 	int col;
 
-	PosX = screen_mode2 ? TOPMENU169STARTX : TOPMENU43STARTX;
+	PosX = TOPMENUSTARTX;
 	RenderCharBB(' ', attrcol);			 /* indicator for navigation keys */
 #if 0
 	RenderCharBB(' ', attr);				 /* separator */
@@ -413,7 +413,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.76 $";
+	char cvs_revision[] = "$Revision: 1.77 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -2742,8 +2742,8 @@ void SwitchScreenMode(int newscreenmode)
 		{
 			fw = fontwidth_small;
 			fh = fontheight;
-			tx = StartX+2+40*fontwidth_small;
-			ty = 25;
+			tx = TV169FULLSTARTX;
+			ty = TV169FULLSTARTY;
 			tw = TV169FULLWIDTH;
 			th = TV169FULLHEIGHT;
 		}
@@ -3755,7 +3755,6 @@ void CreateLine25()
 		int prev10done, next10done, next100done, indent;
 		int attrcol; /* color attribute for navigation keys */
 		int attr;
-		int topmenuendy = screen_mode2 ? TOPMENU169ENDY : TOPMENU43ENDY;
 
 #if CFGTTF 
 		fontwidth = fontwidth_topmenusmall;
@@ -3780,21 +3779,21 @@ void CreateLine25()
 #endif
 
 		prev10done = next10done = next100done = 0;
-		while (PosY <= (topmenuendy-fontheight))
+		while (PosY <= (TOPMENUENDY-fontheight))
 		{
 			attr = 0;
 			attrcol = black<<4 | white;
-			if (!next100done && (PosY > (topmenuendy - 2*fontheight))) /* last line */
+			if (!next100done && (PosY > (TOPMENUENDY - 2*fontheight))) /* last line */
 			{
 				attrcol = 'X';
 				current = next_100;
 			}
-			else if (!next10done && (PosY > (topmenuendy - 3*fontheight))) /* line before */
+			else if (!next10done && (PosY > (TOPMENUENDY - 3*fontheight))) /* line before */
 			{
 				attrcol = 'A';
 				current = next_10;
 			}
-			else if (!prev10done && (PosY > (topmenuendy - 4*fontheight))) /* line before */
+			else if (!prev10done && (PosY > (TOPMENUENDY - 4*fontheight))) /* line before */
 			{
 				attrcol = '1';
 				current = prev_10;
@@ -3912,15 +3911,11 @@ void CopyBB2FB()
 
 	memset(dst - StartY*var_screeninfo.xres, fillcolor, StartY*var_screeninfo.xres);
 
-	if (screenmode) /* copy topmenu in normal height (since PIG also keeps dimensions) */
+	if (screenmode == 1) /* copy topmenu in normal height (since PIG also keeps dimensions) */
 	{
 		unsigned char *topdst = dst;
 		
-		if (screen_mode2)	/* 16:9 */
-			screenwidth = TV169STARTX;
-		else
-			screenwidth = TV43STARTX;
-		
+		screenwidth = TV43STARTX;
 		topsrc += screenwidth;
 		topdst += screenwidth;
 		for (i = 0; i < 25*fontheight; i++)
@@ -3930,6 +3925,8 @@ void CopyBB2FB()
 			topsrc += var_screeninfo.xres;
 		}
 	}
+	else if (screenmode == 2)
+		screenwidth = TV169FULLSTARTX;
 	else
 		screenwidth = var_screeninfo.xres;
 		

@@ -94,25 +94,21 @@ int ymosaic[4];
 #define fontwidth_topmenusmall 8
 #endif
 
-#define TV43STARTX (StartX + 10 + 40*fontwidth_topmenumain)
-#define TV169STARTX (StartX + 40*fontwidth_small)
+#define TV43STARTX (StartX + 2 + 40*fontwidth_topmenumain)
 #define TVENDX (StartX + 40*fontwidth_normal)
-#define TV43WIDTH 120
-#define TV169WIDTH (TVENDX-TV169STARTX-9)
-#define TV169FULLWIDTH 320
-#define TV43STARTY (TVENDY - TV43WIDTH*3/4-20)
-#define TV169STARTY (TVENDY - TV169WIDTH-50)
 #define TVENDY (StartY + 25*fontheight)
-#define TV43HEIGHT 96
-#define TV169HEIGHT (TVENDY-TV169STARTY)
+#define TV43WIDTH 144 /* 120 */
+#define TV43HEIGHT 116 /* 96 */
+#define TV43STARTY (TVENDY - TV43HEIGHT)
+#define TV169FULLSTARTX (StartX + 2 + 40*fontwidth_small)
+#define TV169FULLSTARTY 25
+#define TV169FULLWIDTH 320
 #define TV169FULLHEIGHT 576
 
-#define TOPMENU43STARTX (TV43STARTX+2)
-#define TOPMENU169STARTX (TV43STARTX+2)
+#define TOPMENUSTARTX TV43STARTX
 #define TOPMENUENDX TVENDX
 #define TOPMENUSTARTY StartY
-#define TOPMENU43ENDY TV43STARTY
-#define TOPMENU169ENDY TV43STARTY
+#define TOPMENUENDY TV43STARTY
 
 #define TOPMENULINEWIDTH ((TOPMENUENDX-TOPMENU43STARTX+fontwidth_topmenusmall-1)/fontwidth_topmenusmall)
 #define TOPMENUINDENTBLK 0
