@@ -76,15 +76,17 @@
 	</values>
 
 	<images basepath="" target="fb">
+		<img name="button_red" src="button_red.png" />
+		<img name="button_green" src="button_green.png" />
+		<img name="button_yellow" src="button_yellow.png" />
+		<img name="button_blue" src="button_blue.png" />
+		<img name="button_gray" src="button_gray.png" />
 		<img name="osd_crypt_on" src="crypt_on.png" />
 		<img name="osd_format_on" src="format_on.png" />
 		<img name="osd_dolby_on" src="dolby_on.png" />
 		<img name="osd_dolby_off" src="dolby_off.png" />
 		<img name="osd_crypt_off" src="crypt_off.png" />
 		<img name="osd_format_off" src="format_off.png" />
-		<img name="enigma_logo" src="enigma2.png" nomerge="yes" />
-		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
-		<img name="lcd_scart" src="video.png" nomerge="yes" />
 		<img name="chnum" src="decoration/ch-num.png" />
 		<img name="chbar" src="decoration/ch-bar.png" />
 		<img name="eWindow.top" src="decoration/oben_mitte-fs8.png" />
@@ -92,16 +94,6 @@
 		<img name="eWindow.topRight" src="decoration/oben_rechts-fs8.png" />
 		<img name="eWindow.left" src="decoration/left-fs8.png" />
 	</images>
-
-	<object name="eventview">
-		<eWindow cposition="50:80" csize="590:400" name="title">
-			<eLabel position="10:5" size="e:e-30" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" backgroundColor="content" wrap="on"/>
-			<eWidget position="0:e-30" size="600:e" backgroundColor="osd_shadowcol" />
-			<eLabel position="10:e-30" size="130:e" name="date" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
-			<eLabel position="130:e-30" size="230:e" name="time" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
-			<eLabel position="360:e-30" size="230:e" name="channel" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" align="right"/>
-		</eWindow>
-	</object>
 
 	<object name="ezap_main">
 		<eZapMain position="50:355" size="670:180">

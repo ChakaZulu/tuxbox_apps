@@ -43,6 +43,8 @@ eWindow::eWindow(int takefocus)
 	titleFontSize=eSkin::getActive()->queryValue("eWindow.titleFontSize", 20);
 	titleHeight=eSkin::getActive()->queryValue("eWindow.titleHeight", titleFontSize+10);
 
+	font = eSkin::getActive()->queryFont("eWindow.Childs");
+
 	addActionMap(&i_cursorActions->map);
 }
 
@@ -154,7 +156,7 @@ void eWindow::drawTitlebar(gPainter *target)
 
 	target->setBackgroundColor(titleBarColor);
 	target->setForegroundColor(fontColor);
-	target->setFont(gFont("NimbusSansL-Regular Sans L Regular", titleFontSize));
+	target->setFont( eSkin::getActive()->queryFont("eWindow.TitleBar") );
 	target->renderText(eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX-titleBorderY, titleHeight), text);
 	target->flush();
 }
@@ -174,7 +176,10 @@ int eWindow::eventHandler(const eWidgetEvent &event)
 
 		case eWidgetEvent::evtAction:
 			if ((event.action == &i_cursorActions->cancel) && in_loop)	// hack
+			{
 				close(-1);
+				return eWidget::eventHandler(event);
+			}
 			else
 				break;
 			return 1;

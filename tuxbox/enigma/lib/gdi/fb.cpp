@@ -77,6 +77,7 @@ int fbClass::showConsole(int state)
 		ioctl(fd, KDSETMODE, state?KD_TEXT:KD_GRAPHICS);
 		close(fd);
 	}
+	return 0;
 }
 
 int fbClass::SetMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)

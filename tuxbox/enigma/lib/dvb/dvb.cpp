@@ -250,8 +250,11 @@ void eService::update(const SDTEntry *sdtentry)
 					continue;
 				service_name+=ch;
 			}
+			if (!service_name.length())
+				service_name="no name";
 
 			service_provider=nd->service_provider;
+
 			service_type=nd->service_type;
 		}
 //	printf("%04x:%04x %02x %s", transport_stream_id, service_id, service_type, (const char*)service_name);

@@ -41,7 +41,7 @@ eSatelliteConfigurationManager::~eSatelliteConfigurationManager()
 
 bool eSatelliteConfigurationManager::lnbSelected(eString& descr)
 {
-	int lnbnumber;
+/*	int lnbnumber;
 	if (descr == _("none") )
 		lnbnumber = -1;
 	else
@@ -60,7 +60,7 @@ bool eSatelliteConfigurationManager::lnbSelected(eString& descr)
 			descr.sprintf("%i", lnbnumber);
 			return true;
 		}
-	}
+	}*/
 	return false;
 }
 

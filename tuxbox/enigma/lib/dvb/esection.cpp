@@ -228,6 +228,8 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 	notifier=new eSocketNotifier(eApp, reader.getHandle(), eSocketNotifier::Read);
 
 	CONNECT(notifier->activated, eSection::data);
+
+	return 0;
 }
 
 void eSection::closeFilter()

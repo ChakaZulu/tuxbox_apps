@@ -14,6 +14,10 @@ class eRCKey;
 class eZap: public eApplication
 {
 	static eZap *instance;
+
+	__u32 lastTvChannel, lastRadioChannel;
+	int mode; // 0 = TV, 1 = Radio
+
 private:
 	void keyEvent(const eRCKey &key);
 	void status();
@@ -31,6 +35,11 @@ private:
 	eZapMain *main;
 //	eTimer statusTimer;
 public:
+	enum {	TV,		Radio	};
+
+	bool setMode(int mode);
+ 	int getMode() { return mode; }
+
 	static eZap *getInstance();
 	eWidget *focus;
 	eServiceSelector *getServiceSelector()

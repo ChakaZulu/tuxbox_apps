@@ -24,6 +24,7 @@
 #include <core/gui/actions.h>
 #include <core/driver/rc.h>
 #include <core/dvb/dvbservice.h>
+#include <core/dvb/decoder.h>
 
 #include <core/system/xmlrpc.h>
 #include <apps/enigma/enigma.h>
@@ -58,11 +59,49 @@ void eZap::status()
 {
 }
 
+bool eZap::setMode(int m)
+{
+	if ( (m != TV && m != Radio) || m == mode )
+		return false;
+
+	mode=m;	
+
+	__u32 channel;
+
+		if (mode == TV)
+				channel = lastTvChannel;
+		else
+				channel = lastRadioChannel;
+
+	serviceSelector->actualize(channel);
+
+	if ( eDVB::getInstance()->settings->getTransponders() )
+	{
+		const eServiceReference *ref=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(channel>>16), eServiceID(channel&0xFFFF));
+
+		if (eDVB::getInstance()->getServiceAPI())
+		{
+			if (mode == TV)	
+				lastRadioChannel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.original_network_id.get() << 16) | eDVB::getInstance()->getServiceAPI()->service.service_id.get() );
+			else
+				lastTvChannel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.original_network_id.get() << 16) | eDVB::getInstance()->getServiceAPI()->service.service_id.get() );
+
+			if (ref)			
+				eDVB::getInstance()->getServiceAPI()->switchService(*ref);
+			else
+				Decoder::Flush();
+
+		 	return true;
+		}
+	}
+	return false;
+}
+
 eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 {
 	int bootcount;
-	int e;
-	__u32 lastchannel;
+
+	const eServiceReference* currentService=0;
 
 	eZapLCD *pLCD;
 	eHTTPD *httpd;
@@ -106,13 +145,53 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	eDVB::getInstance()->configureNetwork();
 	eDebug("<-- network");
 
+	__u32 tmp;
+
+	eConfig::getInstance()->setKey("/ezap/ui/lastchannel", tmp);
+
+	if (!eConfig::getInstance()->getKey("/ezap/ui/lastchannel", tmp))
+	{
+			eDebug("Erase old config Files");
+			eConfig::getInstance()->delKey("/ezap/ui/lastchannel");
+			eConfig::getInstance()->delKey("/ezap/ui/skin");
+			
+			unlink(CONFIGDIR"/enigma/services");
+			unlink(CONFIGDIR"/enigma/bouquets");
+	}
+
 	main = new eZapMain();
 	eDebug("<-- eZapMain");
 
 	pLCD = eZapLCD::getInstance();
 	eDebug("<-- pLCD");
-	serviceSelector = new eServiceSelector();
+
+	if (eConfig::getInstance()->getKey("/ezap/ui/lastTvChannel", lastTvChannel))
+		lastTvChannel=0;
+
+	if (eConfig::getInstance()->getKey("/ezap/ui/lastRadioChannel", lastRadioChannel))
+		lastRadioChannel=0;
+
+	if (eConfig::getInstance()->getKey("/ezap/ui/mode", mode))
+		mode=0;  // default TV mode
+
+	if ( (mode && lastRadioChannel) || (!mode && lastTvChannel) )
+	{
+		__u32 channel;
+
+		if (mode == TV)
+			channel = lastTvChannel;
+		else
+			channel = lastRadioChannel;		
+
+		currentService=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(channel>>16), eServiceID(channel&0xFFFF));
+
+		if (currentService && eDVB::getInstance()->getServiceAPI())
+    	eDVB::getInstance()->getServiceAPI()->switchService(*currentService);
+	}
+
+	serviceSelector = new eServiceSelector(mode?lastRadioChannel:lastTvChannel);
 	eDebug("<-- service selector");
+
 	serviceSelector->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	eDebug("..");
 
@@ -160,13 +239,6 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 
 	eConfig::getInstance()->setKey("/elitedvb/system/bootCount", bootcount);
 
-	if ((!(e = eConfig::getInstance()->getKey("/ezap/ui/lastChannel", lastchannel))) && (eDVB::getInstance()->settings->getTransponders()))
-	{
-		const eServiceReference *ref=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(lastchannel>>16), eServiceID(lastchannel&0xFFFF));
-		
-		if (ref && eDVB::getInstance()->getServiceAPI())
-			eDVB::getInstance()->getServiceAPI()->switchService(*ref);
-	}
 	init->setRunlevel(10);
 }
 
@@ -175,9 +247,23 @@ eZap::~eZap()
 	if (eDVB::getInstance()->getServiceAPI() &&
 			eDVB::getInstance()->getServiceAPI()->service != eServiceReference())
 	{
-		eConfig::getInstance()->setKey("/ezap/ui/lastChannel", 
-			(__u32)((eDVB::getInstance()->getServiceAPI()->service.original_network_id.get() << 16) 
-				|  eDVB::getInstance()->getServiceAPI()->service.service_id.get()));
+		__u32 channel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.original_network_id.get() << 16 ) | eDVB::getInstance()->getServiceAPI()->service.service_id.get() );
+
+		eConfig::getInstance()->setKey("/ezap/ui/mode", mode);
+
+		eDebug("Save lastTvChannel = %u, lastRadioChannel = %u, channel = %u", lastTvChannel, lastRadioChannel, channel);
+
+		if (mode == TV)
+		{
+			eDebug("Save channel as lastTvChannel");
+			eConfig::getInstance()->setKey("/ezap/ui/lastRadioChannel", lastRadioChannel);
+			eConfig::getInstance()->setKey("/ezap/ui/lastTvChannel", channel);
+		}
+		else
+		{
+			eConfig::getInstance()->setKey("/ezap/ui/lastTvChannel", lastTvChannel);
+			eConfig::getInstance()->setKey("/ezap/ui/lastRadioChannel", channel);
+		}
 	}
 
 	eDebug("[ENIGMA] beginning clean shutdown");

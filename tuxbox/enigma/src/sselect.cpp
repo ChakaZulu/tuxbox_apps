@@ -1,9 +1,10 @@
 #include <algorithm>
 #include <list>
 
-#include "sselect.h"
-#include "bselect.h"
-#include "epgwindow.h"
+#include <apps/enigma/enigma.h>
+#include <apps/enigma/sselect.h>
+#include <apps/enigma/bselect.h>
+#include <apps/enigma/epgwindow.h>
 
 #include <core/base/i18n.h>
 #include <core/gui/actions.h>
@@ -11,9 +12,14 @@
 #include <core/gui/elabel.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/dvb.h>
+#include <core/dvb/dvbservice.h>
 #include <core/dvb/epgcache.h>
 #include <core/driver/rc.h>
 #include <core/system/init.h>
+
+gFont eListBoxEntryService::serviceFont;
+gFont eListBoxEntryService::descrFont;
+gFont eListBoxEntryService::numberFont;
 
 struct serviceSelectorActions
 {
@@ -53,9 +59,15 @@ struct numberActions
 eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(5, "service selector actions");
 eAutoInitP0<numberActions> i_numberActions(5, "number actions");
 
-eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service): 
-		eListBoxEntry((eListBox<eListBoxEntry>*)lb), service(service), bouquet(0)
+eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service)
+	:eListBoxEntry((eListBox<eListBoxEntry>*)lb), service(service)
 {
+	if (!serviceFont.pointSize)
+	{
+		serviceFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Name");
+		descrFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Description");
+		numberFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Number");
+	}
 #if 0
 	sort=eString().sprintf("%06d", service->service_number);
 #else
@@ -63,11 +75,6 @@ eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, c
 	sort=pservice?pservice->service_name:"";
 	sort.upper();
 #endif
-}
-
-eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eBouquet *bouquet): 
-		eListBoxEntry((eListBox<eListBoxEntry>*)lb), bouquet(bouquet)
-{
 }
 
 eListBoxEntryService::~eListBoxEntryService()
@@ -103,12 +110,11 @@ void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActi
 			}
 			delete e;
 		}
-	} else if (bouquet)
-		sname=bouquet->bouquet_name;
+	}
 	else
 		return;
 
-	rc->setFont(listbox->getFont());
+	rc->setFont( serviceFont );
 
 	if ((coNormalB != -1 && !hilited) || (hilited && coActiveB != -1))
 	{
@@ -131,30 +137,42 @@ void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActi
 struct eServiceSelector_addService: public std::unary_function<eServiceReference&,void>
 {
 	eListBox<eListBoxEntryService> &list;
-	const eServiceReference &result;
-	eServiceSelector_addService(eListBox<eListBoxEntryService> &list, const eServiceReference &result): list(list), result(result)
+
+	int mode;
+
+	eServiceSelector_addService(eListBox<eListBoxEntryService> &list, int mode)
+		:list(list), mode(mode)
 	{
 	}
+
 	void operator()(const eServiceReference& c)
 	{
-		if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
-			return;
-		eListBoxEntryService *l=new eListBoxEntryService(&list, c);
-		if (c == result)
-			list.setCurrent(l);
+		int useable=0;
+
+		if ( mode == eZap::TV)
+		{
+			if ( c.service_type == 1 || c.service_type == 4)
+				useable++;
+		}
+		else
+			if (c.service_type == 2)
+				useable++;
+
+		if (useable)
+			new eListBoxEntryService(&list, c);
 	}
 };
 
 void eServiceSelector::fillServiceList()
 {
-	inBouquet = 0;
+	inFullServiceList=1;
 
 	setText("full services");
 
 	services->clearList();
-	
+
 	if (eDVB::getInstance()->settings->getTransponders())
-		eDVB::getInstance()->settings->getTransponders()->forEachServiceReference(eServiceSelector_addService(*services, result?*result:eServiceReference()));
+		eDVB::getInstance()->settings->getTransponders()->forEachServiceReference(eServiceSelector_addService(*services, eZap::getInstance()->getMode() ));
 
 	services->sort();
 	services->invalidate();
@@ -179,9 +197,11 @@ struct moveFirstChar: public std::unary_function<const eListBoxEntryService&, vo
 	}
 };
 
-
 void eServiceSelector::gotoChar(char c)
 {
+	if (pbs->current()->bouquet_id < 0)   // user defined bouquets... no key choosing...
+		return;
+
 	switch(c)
 	{
 		case 2:	// A,B,C
@@ -251,14 +271,31 @@ void eServiceSelector::entrySelected(eListBoxEntryService *entry)
 {
 	if (!entry)
 	{
+    inFullServiceList=0;
 		result=0;
+		hide();			// a little tricky..
+		resetBouquet();
 		close(1);
-	} else if (entry->service)
+	}
+	else if (entry->service)
 	{
+		if (inFullServiceList)
+		{
+			if (eZap::getInstance()->getMode() == eZap::TV)
+				lastTvBouquet = 9999;
+			else
+				lastRadioBouquet = 9999;
+
+      inFullServiceList=0;
+		}
+		else if (eZap::getInstance()->getMode() == eZap::TV)
+			lastTvBouquet = pbs->current()->bouquet_id;
+		else
+			lastRadioBouquet = pbs->current()->bouquet_id;
+
 		result=&entry->service;
 		close(0);
-	} else if (entry->bouquet)
-		useBouquet(entry->bouquet);
+	}
 }
 
 void eServiceSelector::selchanged(eListBoxEntryService *entry)
@@ -309,6 +346,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					b=pbs->choose();
 					if (b)
 						useBouquet(b);
+
 					show();
 			}
 			else if (event.action == &i_serviceSelectorActions->showEPGSelector)
@@ -341,19 +379,51 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 	return eWindow::eventHandler(event);
 }
 
-eServiceSelector::eServiceSelector()
-								:eWindow(0), inBouquet(0), result(0), BrowseChar(0), BrowseTimer(eApp)
+void eServiceSelector::actualize(int currentService, int dum)
+{
+	if (pbs->current() || dum)
+	{
+		pbs->fillBouquetList();
+		if (eZap::getInstance()->getMode() == eZap::TV)
+		{
+		 	if (currentService && lastTvBouquet != 9999 && pbs->moveTo(lastTvBouquet))
+				useBouquet( pbs->current() );
+			else
+				fillServiceList();
+		}
+		else
+		{
+		 	if (currentService && lastRadioBouquet != 9999 && pbs->moveTo(lastRadioBouquet))
+				useBouquet( pbs->current() );			
+			else
+				fillServiceList();
+		}
+	}
+}
+
+eServiceSelector::eServiceSelector(int currentService)
+								:eWindow(0), inFullServiceList(0), result(0), BrowseChar(0), BrowseTimer(eApp)
 {
 	services = new eListBox<eListBoxEntryService>(this);
 	services->setName("services");
 	services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 	
 	pbs = new eBouquetSelector();
-	fillServiceList();
+
+	if (eConfig::getInstance()->getKey("/ezap/ui/lastTvBouquet", lastTvBouquet))
+		lastTvBouquet = 9999;
+
+	if (eConfig::getInstance()->getKey("/ezap/ui/lastRadioBouquet", lastRadioBouquet))
+		lastRadioBouquet = 9999;
+
+	actualize(currentService, 1);
+
+	CONNECT_2_0(eDVB::getInstance()->bouquetListChanged, eServiceSelector::actualize, 0, 0);
 	CONNECT(services->selected, eServiceSelector::entrySelected);
 	CONNECT(services->selchanged, eServiceSelector::selchanged);
 	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::fillServiceList);
 	CONNECT(BrowseTimer.timeout, eServiceSelector::ResetBrowseChar);
+	CONNECT(pbs->cancel, eServiceSelector::resetBouquet);
 
 	if (eSkin::getActive()->build(this, "eServiceSelector"))
 		eWarning("Service selector widget build failed!");
@@ -363,28 +433,79 @@ eServiceSelector::eServiceSelector()
 	addActionMap(&i_numberActions->map);
 }
 
+void eServiceSelector::resetBouquet()
+{
+		int id = eZap::getInstance()->getMode()?lastRadioBouquet:lastTvBouquet;
+
+		if (id == 9999)
+			fillServiceList();
+		else if ( pbs->current() )
+		{
+			pbs->moveTo( id );
+			useBouquet( pbs->current() );
+		}
+		selectCurrentService();
+}
+
 eServiceSelector::~eServiceSelector()
 {
+	eConfig::getInstance()->setKey("/ezap/ui/lastTvBouquet", lastTvBouquet);
+	eConfig::getInstance()->setKey("/ezap/ui/lastRadioBouquet", lastRadioBouquet);		
+
 	if (pbs)
 		delete pbs;
 }
 
+struct selectService: public std::unary_function<const eListBoxEntryService&, void>
+{
+	const eServiceReference& service;
+
+	selectService(const eServiceReference& e): service(e)
+	{
+	}
+
+	bool operator()(const eListBoxEntryService& s)
+	{
+		if (service == s.service)
+		{
+	 		( (eListBox<eListBoxEntryService>*) s.listbox)->setCurrent(&s);
+			return 1;
+		}
+		return 0;
+	}
+};
+
+void eServiceSelector::selectCurrentService()
+{
+	if (selected != eDVB::getInstance()->getServiceAPI()->service)
+		services->forEachEntry( selectService( eDVB::getInstance()->getServiceAPI()->service ) );
+}
+
 void eServiceSelector::useBouquet(eBouquet *bouquet)
 {
-	inBouquet = 1;
+  inFullServiceList=0;
 	services->clearList();
 	if (bouquet)
 	{
 		setText(bouquet->bouquet_name);
+
 		for (std::list<eServiceReference>::iterator i(bouquet->list.begin()); i != bouquet->list.end(); i++)
 		{
-			if ((i->service_type!=1) && (i->service_type!=2) && (i->service_type!=4))
-				continue;
-			eListBoxEntryService *l=new eListBoxEntryService(services, *i);
-			if (result && (*i == *result) )
-				services->setCurrent(l);
+			int addToList=0;
+
+			if (eZap::getInstance()->getMode() == eZap::TV)
+			{
+				if (i->service_type == 1 || i->service_type == 4) // TV or Nvod
+					addToList++;
+			}
+			else
+				if (i->service_type == 2) //Radio
+					addToList++;
+
+			if (addToList)
+				new eListBoxEntryService(services, *i);
 		}
-		if (bouquet->bouquet_id>=0)
+		if (bouquet->bouquet_id >= 0)
 			services->sort();
 	}
 	services->invalidate();
@@ -395,9 +516,11 @@ void eServiceSelector::ResetBrowseChar()
 	BrowseChar=0;
 }
 
-const eServiceReference *eServiceSelector::choose(const eServiceReference *current, int irc)
+const eServiceReference *eServiceSelector::choose(int irc)
 {
-	result=current;
+	selectCurrentService();
+
+	result=0;
 	switch (irc)
 	{
 	case dirUp:
@@ -418,6 +541,8 @@ const eServiceReference *eServiceSelector::choose(const eServiceReference *curre
 
 const eServiceReference *eServiceSelector::next()
 {
+	selectCurrentService();
+
 	eListBoxEntryService *s=services->goNext();
 	if (s)
 		return &s->service;
@@ -427,6 +552,8 @@ const eServiceReference *eServiceSelector::next()
 
 const eServiceReference *eServiceSelector::prev()
 {
+	selectCurrentService();
+
 	eListBoxEntryService *s=services->goPrev();
 	if (s)
 		return &s->service;

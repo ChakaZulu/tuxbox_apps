@@ -2,35 +2,38 @@
 
 #include <list>
 
+#include <apps/enigma/enigma.h>
 #include <core/gui/eskin.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/dvb.h>
 
 void eBouquetSelector::fillBouquetList()
 {
-	list.clearList();
+	bouquets->clearList();
 	if (eDVB::getInstance()->settings->getBouquets())
 	{
 		for (ePtrList<eBouquet>::iterator i(*eDVB::getInstance()->settings->getBouquets()); i != eDVB::getInstance()->settings->getBouquets()->end(); ++i)
 		{
-			int usable=0;
-			for (std::list<eServiceReference>::iterator s = i->list.begin(); (!usable) && s != i->list.end(); s++)
-			{
-				int st=s->service_type;
-				if ((st==1) || (st==2) || (st==4))
-					usable=1;
-			}
-			if (!usable)
+      int useable=0;
+
+			for (std::list<eServiceReference>::iterator s = i->list.begin(); (!useable) && s != i->list.end(); s++)
+				if ( eZap::getInstance()->getMode() == eZap::TV)
+				{
+					if (s->service_type == 1 || s->service_type == 4) // Nvod or TV
+						useable++;
+				}
+				else
+					if (s->service_type == 2) //Radio
+						useable++;
+
+			if (!useable)
 				continue;
 
-			eListBoxEntryBouquet *l=new eListBoxEntryBouquet(&list, *i);
-
-			if (*i==result)
-				list.setCurrent(l);
+			new eListBoxEntryBouquet(bouquets, *i);
 		}
-		list.sort();
+		bouquets->sort();
 	}
-	list.invalidate();
+	bouquets->invalidate();
 }
 
 void eBouquetSelector::entrySelected(eListBoxEntryBouquet *entry)
@@ -38,17 +41,27 @@ void eBouquetSelector::entrySelected(eListBoxEntryBouquet *entry)
 	if (entry)
 		result=entry->bouquet;
 	else
+	{	
+		eDebug("CANCEL");
+		/* emit */ cancel();
 		result=0;
+	}
 	close(1);
 }
 
 eBouquetSelector::eBouquetSelector()
-								:eListBoxWindow<eListBoxEntryBouquet>("Select Bouquet...", 17, 400)
+	:eWindow(0)
 {
-	move(ePoint(80, 60));
-	CONNECT(list.selected, eBouquetSelector::entrySelected);
-	CONNECT(eDVB::getInstance()->bouquetListChanged, eBouquetSelector::fillBouquetList);
-	fillBouquetList();
+	bouquets = new eListBox<eListBoxEntryBouquet>(this);
+	bouquets->setName("bouquets");
+	bouquets->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
+
+	if (eSkin::getActive()->build(this, "eBouquetSelector"))
+		eWarning("Bouquet selector widget build failed!");
+	
+	CONNECT(bouquets->selected, eBouquetSelector::entrySelected);
+
+//	fillBouquetList();
 }
 
 
@@ -56,9 +69,9 @@ eBouquetSelector::~eBouquetSelector()
 {
 }
 
-eBouquet *eBouquetSelector::choose(eBouquet *current, int irc)
+eBouquet *eBouquetSelector::choose(int irc)
 {
-	result=current;
+	result=0;
 	show();
 	if (irc!=-1)
 	{
@@ -71,9 +84,38 @@ eBouquet *eBouquetSelector::choose(eBouquet *current, int irc)
 	return result;
 }
 
+struct moveTo_bouquet_id: public std::unary_function<const eListBoxEntryBouquet&, void>
+{
+	int bouquet_id;
+
+	moveTo_bouquet_id(int bouquet_id): bouquet_id(bouquet_id)
+	{
+	}
+
+	bool operator()(const eListBoxEntryBouquet& s)
+	{
+		if (s.bouquet->bouquet_id == bouquet_id)
+		{
+	 		( (eListBox<eListBoxEntryBouquet>*) s.listbox)->setCurrent(&s);
+			return 1;
+		}
+		return 0;
+	}
+};
+
+
+bool eBouquetSelector::moveTo(int bouquet_id)
+{
+	bouquets->forEachEntry( moveTo_bouquet_id(bouquet_id) );	
+	
+	eListBoxEntryBouquet* b = bouquets->getCurrent();
+
+	return b?b->bouquet->bouquet_id == bouquet_id:0;
+}	
+
 eBouquet *eBouquetSelector::next()
 {
-	eListBoxEntryBouquet *s=list.goNext();
+	eListBoxEntryBouquet *s=bouquets->goNext();
 	if (s)
 		return s->bouquet;
 	else
@@ -82,9 +124,15 @@ eBouquet *eBouquetSelector::next()
 
 eBouquet *eBouquetSelector::prev()
 {
-	eListBoxEntryBouquet *s=list.goPrev();
+	eListBoxEntryBouquet *s=bouquets->goPrev();
 	if (s)
 		return s->bouquet;
 	else
 		return 0;
+}
+
+eBouquet *eBouquetSelector::current()
+{
+	eListBoxEntryBouquet* b = bouquets->getCurrent();
+	return b?b->bouquet:0;
 }

@@ -6,7 +6,7 @@
 #include <core/system/init.h>
 #include <core/system/econfig.h>
 
-#define DEFAULTSKIN "chkv2.esml"
+#define DEFAULTSKIN "chk_blue2.esml"
 
 class eSkinInit
 {

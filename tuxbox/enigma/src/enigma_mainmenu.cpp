@@ -1,8 +1,9 @@
-#include "enigma_mainmenu.h"
-#include "enigma_setup.h"
-#include "enigma_plugins.h"
-#include "enigma_info.h"
-#include "enigma_lcd.h"
+#include <apps/enigma/enigma.h>
+#include <apps/enigma/enigma_mainmenu.h>
+#include <apps/enigma/enigma_setup.h>
+#include <apps/enigma/enigma_plugins.h>
+#include <apps/enigma/enigma_info.h>
+#include <apps/enigma/enigma_lcd.h>
 
 #include <core/gui/eskin.h>
 #include <core/driver/eavswitch.h>
@@ -12,11 +13,12 @@
 #include <core/base/i18n.h>
 
 eMainMenu::eMainMenu()
-	:window("enigma" , 7, 200)
+	:window("enigma" , 8, 200)
 {
 	window.cmove(ePoint(150, 150));
-	CONNECT((new eListBoxEntryMenu(&window.list, _("[back]")))->selected, eMainMenu::sel_close);
-	CONNECT((new eListBoxEntryMenu(&window.list, _("VCR mode")))->selected, eMainMenu::sel_vcr);
+	CONNECT((new eListBoxEntryMenu(&window.list, _("TV Mode")))->selected, eMainMenu::sel_tv);
+	CONNECT((new eListBoxEntryMenu(&window.list, _("Radio Mode")))->selected, eMainMenu::sel_radio);
+	CONNECT((new eListBoxEntryMenu(&window.list, _("VCR Mode")))->selected, eMainMenu::sel_vcr);
 	CONNECT((new eListBoxEntryMenu(&window.list, _("Plugins")))->selected, eMainMenu::sel_plugins);	
 	CONNECT((new eListBoxEntryMenu(&window.list, _("Infos")))->selected, eMainMenu::sel_info);
 	CONNECT((new eListBoxEntryMenu(&window.list, _("Setup")))->selected, eMainMenu::sel_setup);
@@ -31,8 +33,15 @@ int eMainMenu::exec()
 	return res;
 }
 
-void eMainMenu::sel_close()
+void eMainMenu::sel_tv()
 {
+  eZap::getInstance()->setMode(eZap::TV);
+	window.close(0);
+}
+
+void eMainMenu::sel_radio()
+{
+  eZap::getInstance()->setMode(eZap::Radio);
 	window.close(0);
 }
 

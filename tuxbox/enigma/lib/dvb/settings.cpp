@@ -64,18 +64,25 @@ eBouquet *eDVBSettings::getBouquet(int bouquet_id)
 
 static eString beautifyBouquetName(eString bouquet_name)
 {
-	if (bouquet_name.find("ARD")!=eString::npos)
-		bouquet_name="ARD";		
+	if ( (bouquet_name.find("ARD") != eString::npos)
+		  || (bouquet_name.find("ZDF") != eString::npos)
+			|| (bouquet_name.find("RTL") != eString::npos)
+			|| (bouquet_name.find("ntv") != eString::npos)
+			|| (bouquet_name.find("ProSieben") != eString::npos)
+			|| (bouquet_name.find("VIVA") != eString::npos) )
+		bouquet_name="German Free";		
 	if (bouquet_name=="ABsat")
 		bouquet_name="AB sat";
 	if (bouquet_name=="Astra-Net")
 		bouquet_name="ASTRA";
-/*	if (bouquet_name=="CANALSATELLITE")
-		bouquet_name="CANAL SATELLITE"; */
+	if (bouquet_name=="CSAT")
+		bouquet_name="CANALSATELLITE";
 	if (bouquet_name.find("SES")!=eString::npos)
 		bouquet_name="SES Multimedia";
 	if (bouquet_name=="\x05ZDF.vision")	// ja ich weiss was \x05 bedeutet - SPÄTER
 		bouquet_name="ZDF.vision";
+	if (!bouquet_name)
+		bouquet_name="no name";
 	return bouquet_name;
 }
 
@@ -162,21 +169,7 @@ struct sortinChannel: public std::unary_function<const eService&, void>
 	}
 	void operator()(eService &service)
 	{
-		eString add;
-		switch (service.service_type)
-		{
-			case 1:
-			case 4:
-			case 5:
-				add=" [TV]";
-			break;
-			case 2:
-				add=" [Radio]";
-			break;
-			default:
-				add=" [Data]";
-		}
-		eBouquet *b = edvb.createBouquet(0, beautifyBouquetName(service.service_provider.c_str())+add);
+		eBouquet *b = edvb.createBouquet(0, beautifyBouquetName(service.service_provider) );
 		b->add(eServiceReference(service.transport_stream_id, service.original_network_id, service.service_id, service.service_type));
 	}
 };

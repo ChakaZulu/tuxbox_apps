@@ -16,7 +16,7 @@ std::list<eWidget*> eWidget::toplevel;
 eWidget::eWidget(eWidget *parent, int takefocus):
 	parent(parent),
 	focus(0), takefocus(takefocus),
-	font(parent?parent->font:gFont("NimbusSansL-Regular Sans L Regular", eSkin::getActive()->queryValue("fontsize", 20))),
+	font( parent ? parent->font : eSkin::getActive()->queryFont("global.normal") ),
 	backgroundColor(parent?gColor(-1):gColor(eSkin::getActive()->queryScheme("global.normal.background"))),
 	foregroundColor(parent?parent->foregroundColor:gColor(eSkin::getActive()->queryScheme("global.normal.foreground")))
 {

@@ -101,15 +101,18 @@ protected:
 	void *key;
 	int align;
 	eTextPara *para;
+	gFont font;
 public:
 	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0)
-		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(key), align(align), para(0)
+		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb ), text(txt), key(key), align(align), para(0)
 	{
+			font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");
 	}
 
 	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0)
-		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(key), align(align), para(0)
+		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb ), text(txt), key(key), align(align), para(0)
 	{
+			font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");
 	}
 
 	virtual ~eListBoxEntryText();
@@ -136,11 +139,12 @@ class eListBoxEntryTextStream: public eListBoxEntry
 	friend class eListBox<eListBoxEntryTextStream>;
 protected:
 	std::stringstream text;
+	gFont font;
 public:
 	eListBoxEntryTextStream(eListBox<eListBoxEntryTextStream>* lb)
 		:eListBoxEntry((eListBox<eListBoxEntry>*)lb)
 	{		
-	
+			font = eSkin::getActive()->queryFont("eListBox.EntryText.normal");	
 	}
 
 	bool operator < ( const eListBoxEntryTextStream& e) const
@@ -526,13 +530,16 @@ inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 				else
 					/*emit*/ selected(*current);
 			}
+			else if (event.action == &i_cursorActions->cancel)
+				/*emit*/ selected(0);
 			else
 				break;
 		return 1;
-	case eWidgetEvent::changedSize:
-		init();
+		case eWidgetEvent::changedSize:
+			init();
 		break;
-	default:
+		default:
+
 		break;
 	}
 	return eWidget::eventHandler(event);

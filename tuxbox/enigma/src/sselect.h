@@ -13,13 +13,15 @@ class eListBoxEntryService: public eListBoxEntry
 {
 	friend class eListBox<eListBoxEntryService>;
 	friend struct moveFirstChar;
+	friend struct selectService;
 	eString sort;
 	eString short_name;
+	static gFont serviceFont;
+	static gFont descrFont;
+	static gFont numberFont;
 public:
 	eServiceReference service;
-	eBouquet *bouquet;		/// buggy!!! :)
 	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service);
-	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eBouquet *bouquet);
 	~eListBoxEntryService();
 	
 	bool operator<(const eListBoxEntryService &r) const
@@ -33,11 +35,11 @@ protected:
 
 class eServiceSelector: public eWindow
 {
-	bool inBouquet;
+	int lastTvBouquet, lastRadioBouquet, inFullServiceList;
+	bool selectioChanged;
 
-	const eServiceReference *result;
 	eServiceReference selected;
-	
+	eServiceReference *result;
 	eListBox<eListBoxEntryService> *services;
 
 	eBouquetSelector* pbs;
@@ -51,17 +53,20 @@ private:
 	eTimer BrowseTimer;
 	void ResetBrowseChar();
 	void gotoChar(char c);
-	public:
+public:
 	enum
 	{
 		dirNo,
 		dirUp,
 		dirDown
 	};
-	eServiceSelector();
+	void actualize(int currentService, int dum=0);
+	void selectCurrentService();
+	void resetBouquet();
+	eServiceSelector(int currentService);
 	~eServiceSelector();
 	void useBouquet(eBouquet *bouquet);
-	const eServiceReference *choose(const eServiceReference *current=0, int irc=-1);
+	const eServiceReference *choose(int irc=-1);
 	const eServiceReference *next();
 	const eServiceReference *prev();
 };

@@ -8,7 +8,8 @@ class eMainMenu: public Object
 {
 	eListBoxWindow<eListBoxEntryMenu> window;
 private:
-	void sel_close();
+	void sel_tv();
+	void sel_radio();
 	void sel_vcr();
 	void sel_setup();
 	void sel_info();	

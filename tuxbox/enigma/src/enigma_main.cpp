@@ -764,7 +764,7 @@ void eZapMain::showServiceSelector(int dir)
 
 	eServiceSelector *e = eZap::getInstance()->getServiceSelector();
 	e->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-	const eServiceReference *service = e->choose(0, dir);
+	const eServiceReference *service = e->choose(dir);
 
 	pLCD->lcdMain->show();
 	pLCD->lcdMenu->hide();
@@ -1124,7 +1124,6 @@ void eZapMain::serviceChanged(const eServiceReference &serviceref, int err)
 	setVTButton(isVT);
 
 	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(serviceref);
-	eDebug("service = %p", service);
 
 		// es wird nur dann versucht einen service als referenz-service zu uebernehmen, wenns den ueberhaupt
 		// gibt.
@@ -1137,8 +1136,6 @@ void eZapMain::serviceChanged(const eServiceReference &serviceref, int err)
 			refservice=serviceref;
 			break;
 		}
-
-	eDebug ("service type = %i", serviceref.service_type);
 
 	eService *rservice=0;
 	if (refservice != serviceref)

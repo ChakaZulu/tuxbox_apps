@@ -57,32 +57,18 @@
 	</values>
 
 	<images basepath="" target="fb">
+		<img name="button_red" src="button_red.png" />
+		<img name="button_green" src="button_green.png" />
+		<img name="button_yellow" src="button_yellow.png" />
+		<img name="button_blue" src="button_blue.png" />
+		<img name="button_gray" src="button_gray.png" />
 		<img name="osd_crypt_on" src="crypt_on.png" />
 		<img name="osd_format_on" src="format_on.png" />
 		<img name="osd_dolby_on" src="dolby_on.png" />
 		<img name="osd_dolby_off" src="dolby_off.png" />
 		<img name="osd_crypt_off" src="crypt_off.png" />
 		<img name="osd_format_off" src="format_off.png" />
-		<img name="enigma_logo" src="enigma2.png" nomerge="yes" />
-		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
-		<img name="lcd_scart" src="video.png" nomerge="yes" />
 	</images>
-
-	<object name="eventview">
-		<eWindow cposition="50:80" csize="590:400" name="title">
-			<eLabel position="10:5" size="e:e-30" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" backgroundColor="content" foregroundColor="content+15" wrap="on"/>
-			<eWidget position="0:e-30" size="600:e" backgroundColor="osd_shadowcol" />
-			<eLabel position="10:e-30" size="130:e" name="date" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" foregroundColor="osd_shadow+15" />
-			<eLabel position="130:e-30" size="230:e" name="time" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" foregroundColor="osd_shadow+15" />
-			<eLabel position="360:e-30" size="230:e" name="channel" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" foregroundColor="osd_shadow+15" align="right"/>
-		</eWindow>
-	</object>
-
-	<object name="eServiceSelector">
-		<eServiceSelector cposition="70:70" csize="580:460" text="Services">
-			<eListbox name="services" position="10:5" size="e:e" font="NimbusSansL-Regular Sans L Regular;24"/>
-		</eServiceSelector>
-	</object>
 
 	<object name="ezap_main">
 		<eZapMain position="50:355" size="670:180">
@@ -107,28 +93,28 @@
 			-->
 
 			<!--texte-->
-			<eLabel position="10:5" size="100:50" font="NimbusSansL-Regular Sans L Regular;50" name="ch_number" align="center"
+			<eLabel position="10:5" size="100:50" font="Nimbus;50" name="ch_number" align="center"
 				backgroundColor="osd_normal" foregroundColor="osd_normal+15" />
 
-			<eLabel position="140:61" size="445:40" font="NimbusSansL-Regular Sans L Regular;34" name="ch_name"
+			<eLabel position="140:61" size="445:40" font="Nimbus;34" name="ch_name"
 				backgroundColor="osd_normal" foregroundColor="osd_normal+15" />
 
-			<eLabel position="50:102" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_time"
+			<eLabel position="50:102" size="75:27" font="Nimbus;25" name="e_now_time"
 				backgroundColor="osd_epg" foregroundColor="osd_epg+15" />
-			<eLabel position="50:134" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_time"
-				backgroundColor="osd_epg" foregroundColor="osd_epg+15" />
-
-			<eLabel position="140:102" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_title"
-				backgroundColor="osd_epg" foregroundColor="osd_epg+15" />
-			<eLabel position="140:134" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_title"
+			<eLabel position="50:134" size="75:27" font="Nimbus;25" name="e_next_time"
 				backgroundColor="osd_epg" foregroundColor="osd_epg+15" />
 
-			<eLabel position="495:102" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_duration" align="right"
+			<eLabel position="140:102" size="345:35" font="Nimbus;25" name="e_now_title"
 				backgroundColor="osd_epg" foregroundColor="osd_epg+15" />
-			<eLabel position="495:134" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_duration" align="right"
+			<eLabel position="140:134" size="345:35" font="Nimbus;25" name="e_next_title"
 				backgroundColor="osd_epg" foregroundColor="osd_epg+15" />
 
-			<eLabel position="521:35" size="65:21" font="NimbusSansL-Regular Sans L Regular;21" name="time" align="right"
+			<eLabel position="495:102" size="90:35" font="Nimbus;25" name="e_now_duration" align="right"
+				backgroundColor="osd_epg" foregroundColor="osd_epg+15" />
+			<eLabel position="495:134" size="90:35" font="Nimbus;25" name="e_next_duration" align="right"
+				backgroundColor="osd_epg" foregroundColor="osd_epg+15" />
+
+			<eLabel position="521:35" size="65:21" font="Nimbus;21" name="time" align="right"
 				backgroundColor="osd_shadow" foregroundColor="osd_shadow+15" />
 
 			<eProgress position="14:62" size="95:17" name="progress_bar" foregroundColor="osd_normal" border="1" />

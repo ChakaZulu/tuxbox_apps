@@ -40,7 +40,7 @@ void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB
 		}
 
 		para = new eTextPara(rect);
-		para->setFont(listbox->getFont());
+		para->setFont( font );
 		para->renderString(text);
 		para->realign(align);
 	}
@@ -54,7 +54,7 @@ void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB
 
 void eListBoxEntryTextStream::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited)
 {
-	rc->setFont(listbox->getFont());
+	rc->setFont( font );
 
 	if ((coNormalB != -1 && !highlited) || (highlited && coActiveB != -1))
 	{

@@ -677,7 +677,7 @@ gFont eSkin::queryFont(const eString& name)
 		if ( i->second == family)
 			return gFont(i->second, size);
 
-	eFatal("Font %s does not exist", family.c_str() );			//  halt Programm now... Font does not exist
+	eFatal("Font %s does not exist", name.c_str() );			//  halt Programm now... Font does not exist
 
 	return gFont();
 }
