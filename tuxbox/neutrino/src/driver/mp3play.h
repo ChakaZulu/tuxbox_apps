@@ -57,7 +57,7 @@ class CMP3Player
 	pthread_t	thrPlay;
 	FILE		*fp;
 	static void* PlayThread(void*);
-
+   char m_mp3info[100];
 
 	const char		*MadErrorString(const struct mad_stream *Stream);
 	unsigned short	MadFixedToUshort(mad_fixed_t Fixed);
@@ -73,8 +73,9 @@ public:
 	bool play(const char *filename);
 	void stop();
 	void init();
-	CMP3Player::CMP3Player();
-	CMP3Player::~CMP3Player();
+   char* getMp3Info(){return m_mp3info;}
+	CMP3Player();
+	~CMP3Player();
 
 };
 

@@ -188,10 +188,10 @@ int CMP3Player::PrintFrameInfo(FILE *fp, struct mad_header *Header)
 			Mode="dual channel";
 			break;
 		case MAD_MODE_JOINT_STEREO:
-			Mode="joint (MS/intensity) stereo";
+			Mode="joint stereo";
 			break;
 		case MAD_MODE_STEREO:
-			Mode="normal LR stereo";
+			Mode="normal stereo";
 			break;
 		default:
 			Mode="(unexpected mode value)";
@@ -221,6 +221,8 @@ int CMP3Player::PrintFrameInfo(FILE *fp, struct mad_header *Header)
 			Header->flags&MAD_FLAG_PROTECTION?"with":"without",
 			Mode,Emphasis,Header->samplerate);
 	fprintf(fp,"This roxx!;)\n");
+   sprintf(m_mp3info,"%lukbs / %.1fKHz / %s / layer %s",Header->bitrate/1000,(float)Header->samplerate/1000,
+           Mode,Layer);
 	return(ferror(fp));
 }
 
@@ -583,4 +585,5 @@ CMP3Player::CMP3Player()
 void CMP3Player::init()
 {
 	state = STOP;
+	strcpy(m_mp3info,"");
 }

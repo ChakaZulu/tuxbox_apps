@@ -64,6 +64,7 @@ CMP3PlayerGui::CMP3PlayerGui()
 
 	visible = false;
 	selected = 0;
+	m_mp3info = "";
 
 	filebrowser = new CFileBrowser();
 	filebrowser->Multi_Select = true;
@@ -97,8 +98,9 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, string actionKey)
 	buttonHeight = min(25,g_Fonts->infobar_small->getHeight());
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->menu->getHeight();
-	title_height=fheight*3+4;
-	info_height=fheight*2+4;
+	sheight= g_Fonts->infobar_small->getHeight();
+	title_height=fheight*2+20+sheight+4;
+	info_height=fheight*2;
 	listmaxshow = (height-info_height-title_height-theight-2*buttonHeight)/(fheight);
 	height = theight+info_height+title_height+2*buttonHeight+listmaxshow*fheight;	// recalc height
 
@@ -169,6 +171,7 @@ int CMP3PlayerGui::show()
 	while(loop)
 	{
 		showTime();
+		showMP3Info();
 		if(CNeutrinoApp::getInstance()->getMode()!=NeutrinoMessages::mode_mp3)
 		{
 			// stop if mode was changed in another thread
@@ -289,7 +292,7 @@ int CMP3PlayerGui::show()
 			hide();
 			if(filebrowser->exec(Path))
 			{
-				CProgressWindow * progress;
+/*				CProgressWindow * progress;
 				int nrOfFiles=filebrowser->getSelectedFiles()->size();
 				if(nrOfFiles > 100)
 				{
@@ -298,14 +301,14 @@ int CMP3PlayerGui::show()
 					progress->exec(NULL,"");
 				}
 				else
-					progress = NULL;
+					progress = NULL;*/
 
 				CFileList::iterator files = filebrowser->getSelectedFiles()->begin();
 
-				int nr=0,v1=0,v2=0;
+//				int nr=0,v1=0,v2=0;
 				for(; files != filebrowser->getSelectedFiles()->end();files++)
 				{
-					nr++;
+/*					nr++;
 					if( nrOfFiles > 100 && (nr % 10)==0 ) // update each 10 files only
 					{
 						v1=((int)((float)nr/nrOfFiles*100));
@@ -315,9 +318,9 @@ int CMP3PlayerGui::show()
 							v2=v1;
 						}
 					}
-
+*/
 					string file = files->Name;
-//					Path = file.substr(0,file.rfind("/"));
+					
 					if(file.length() > 0)
 					{
 						int ext_pos = file.rfind(".");
@@ -336,11 +339,11 @@ int CMP3PlayerGui::show()
 						}
 					}
 				}
-				if(progress != NULL)
+/*				if(progress != NULL)
 				{
 					progress->hide();
 					delete progress;
-				}
+				}*/
 			}
 			CLCD::getInstance()->setMode(CLCD::MODE_MP3);
 			update=true;
@@ -866,17 +869,15 @@ void CMP3PlayerGui::play(int pos)
 	{
 		// id3tag noch nicht geholt
 		get_id3(&playlist[pos]);
-		if(m_state==PLAY)
-			usleep(100*1000);
 	}
-
+	m_mp3info="";
 	//LCD
 	CLCD::getInstance()->showMP3Play(true);
 	CLCD::getInstance()->showMP3(playlist[current].Artist, playlist[current].Title);
 	// Display
 	unsigned char colFrame = COL_MENUCONTENT+6;
-	frameBuffer->paintBoxRel(x,         y, width, title_height-20, colFrame);
-	frameBuffer->paintBoxRel(x+2, y +2 , width-4, title_height-24, COL_MENUCONTENTSELECTED);
+	frameBuffer->paintBoxRel(x,         y, width, title_height-10, colFrame);
+	frameBuffer->paintBoxRel(x+2, y +2 , width-4, title_height-14, COL_MENUCONTENTSELECTED);
 	char sNr[20];
 	sprintf(sNr, ": %2d", pos+1);
 	int w=g_Fonts->menu->getRenderWidth(g_Locale->getText("mp3player.playing") + sNr);
@@ -915,8 +916,19 @@ void CMP3PlayerGui::showTime()
 		char sTime[11];
 		sprintf(sTime,"%3d:%02d",diff/60,diff%60);
 		int w=g_Fonts->menu->getRenderWidth("000:00");
-		frameBuffer->paintBoxRel(x+width-w-5, y+4, w+3, fheight, COL_MENUCONTENTSELECTED);
+		frameBuffer->paintBoxRel(x+width-w-5, y+4, w+3, 1*fheight, COL_MENUCONTENTSELECTED);
 		g_Fonts->menu->RenderString(x+width-w-10, y+4 + 1*fheight, w, sTime, COL_MENUCONTENTSELECTED);
+	}
+}
+
+void CMP3PlayerGui::showMP3Info()
+{
+	if(m_state==PLAY && m_mp3info!=CMP3Player::getInstance()->getMp3Info())
+	{
+		m_mp3info=CMP3Player::getInstance()->getMp3Info();
+		frameBuffer->paintBoxRel(x + 10, y+ 4 + 2*fheight, width-20, sheight, COL_MENUCONTENTSELECTED);
+		int xstart = ((width - 20 - g_Fonts->infobar_small->getRenderWidth( m_mp3info ))/2)+10;
+		g_Fonts->infobar_small->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, m_mp3info, COL_MENUCONTENTSELECTED);
 	}
 }
 

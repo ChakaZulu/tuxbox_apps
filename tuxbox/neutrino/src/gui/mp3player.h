@@ -72,6 +72,7 @@ class CMP3PlayerGui : public CMenuTarget
 		unsigned int		listmaxshow;
 		int					fheight; // Fonthoehe Playlist-Inhalt
 		int					theight; // Fonthoehe Playlist-Titel
+		int					sheight; // Fonthoehe MP Info
 		int					buttonHeight;
 		int               title_height;
 		int               info_height;
@@ -81,11 +82,13 @@ class CMP3PlayerGui : public CMenuTarget
 
 		CPlayList			playlist;
 		string				Path;
+		string m_mp3info;
 
 		int 			width;
 		int 			height;
 		int 			x;
 		int 			y;
+		int         m_title_w;
 
 		int         m_LastMode;
 
@@ -103,6 +106,7 @@ class CMP3PlayerGui : public CMenuTarget
 		void stop();
 		int getNext();
 		void showTime();
+		void showMP3Info();
 
 	public:
 		CMP3PlayerGui();
