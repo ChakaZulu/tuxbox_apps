@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.35 2004/02/24 21:06:40 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.36 2004/02/24 23:34:51 thegoodguy Exp $
 
 	License: GPL
 
@@ -511,7 +511,7 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 	{
 		int mode = CZapitClient::MODE_CURRENT;
 		
-		if (request->ParameterList["mode"] != "")
+		if (!(request->ParameterList["mode"].empty()))
 		{
 			if (request->ParameterList["mode"].compare("TV") == 0)
 				mode = CZapitClient::MODE_TV;
@@ -523,7 +523,12 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 		CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
 
 		for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
-			request->printf("%u %u %s\n",channel->nr, channel->channel_id, channel->name);
+			request->printf("%u "
+					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+					" %s\n",
+					channel->nr,
+					channel->channel_id,
+					channel->name);
 
 		return true;
 	}
@@ -567,7 +572,11 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 			event = Parent->ChannelListEvents[channel->channel_id];
 
 			if (event)
-				request->printf("%u %llu %s\n",channel->channel_id,event->eventID,event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
+				request->printf(PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+						" %llu %s\n",
+						channel->channel_id,
+						event->eventID,
+						event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
 		}
 
 		return true;
@@ -585,7 +594,13 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 				event = Parent->ChannelListEvents[channel->channel_id];
 				if(event)
 				{
-					request->printf("%u %ld %u %llu %s\n",channel->channel_id,event->startTime,event->duration,event->eventID,event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
+					request->printf(PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+							" %ld %u %llu %s\n",
+							channel->channel_id,
+							event->startTime,
+							event->duration,
+							event->eventID,
+							event->description.c_str() /*eList[n].eventID,eList[n].description.c_str()*/);
 				}
 			}
 
@@ -606,9 +621,13 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 				return true;
 			}
 		}
-		else if (request->ParameterList["onidsid"] != "")
+		else if (!(request->ParameterList["id"].empty()))
 		{
-			t_channel_id channel_id = atol(request->ParameterList["onidsid"].c_str()); // FIXME
+			t_channel_id channel_id;
+			sscanf(request->ParameterList["id"].c_str(),
+			       SCANF_CHANNEL_ID_TYPE,
+			       &channel_id);
+
 			Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
 			CChannelEventList::iterator eventIterator;
 
@@ -619,11 +638,8 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 				if (Parent->Sectionsd->getEPGidShort(eventIterator->eventID,&epg))
 				{
 					request->printf("%llu %ld %d\n", eventIterator->eventID, eventIterator->startTime, eventIterator->duration);
-					if(epg.title.length() > 0)
 					request->printf("%s\n",epg.title.c_str());
-					if(epg.info1.length() > 0)
 					request->printf("%s\n",epg.info1.c_str());
-					if(epg.info2.length() > 0)
 					request->printf("%s\n\n",epg.info2.c_str());
 				}
 			}
@@ -633,8 +649,13 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 		else
 		{
 			//eventlist for a chan
-			unsigned id = atol( request->ParameterList["1"].c_str());
-			SendEventList( request, id);
+			t_channel_id channel_id;
+			sscanf(request->ParameterList["1"].c_str(),
+			       SCANF_CHANNEL_ID_TYPE,
+			       &channel_id);
+
+			SendEventList(request, channel_id);
+
 			return true;
 		}
 	}
@@ -713,12 +734,7 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 		}
 		else
 		{
-			const char * argument = request->ParameterList["1"].c_str();
-
-			if ((argument[0] == '0') && (argument[1] == 'x'))
-				Parent->ZapTo(&(argument[2]));
-			else
-				Parent->ZapTo_decimal(argument);
+			Parent->ZapTo(request->ParameterList["1"].c_str());
 
 			request->SendOk();
 		}
@@ -874,66 +890,25 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 	timerlist.clear();
 	Parent->Timerd->getTimerList(timerlist);
 
-	CZapitClient::BouquetChannelList channellist_tv;
-	CZapitClient::BouquetChannelList channellist_radio;
-	channellist_tv.clear();
-	channellist_radio.clear();
-
 	CTimerd::TimerList::iterator timer = timerlist.begin();
 	
 	for(; timer != timerlist.end();timer++)
 	{
 		// Add Data
-		char zAddData[20+1] = { 0 };
+		char zAddData[22+1] = { 0 };
 		
 		switch(timer->eventType) {
 		case CTimerd::TIMER_NEXTPROGRAM:
 		case CTimerd::TIMER_ZAPTO:
 		case CTimerd::TIMER_RECORD:
-			if (timer->mode == CTimerd::MODE_RADIO)
-			{
-				// Radiokanal
-				if (channellist_radio.empty())
-					Parent->Zapit->getChannels(channellist_radio,CZapitClient::MODE_RADIO);
+			strncpy(zAddData, Parent->Zapit->getChannelName(timer->channel_id).c_str(), 22);
+			zAddData[22]=0;
 
-				CZapitClient::BouquetChannelList::iterator channel = channellist_radio.begin();
-				
-				for(; channel != channellist_radio.end();channel++)
-				{
-					if (channel->channel_id == timer->channel_id)
-					{
-						strncpy(zAddData, channel->name, 20);
-						zAddData[20]=0;
-						break;
-					}
-				}
-
-				if (channel == channellist_radio.end())
-					strcpy(zAddData,"Unbekannter Radiokanal");
-
-			}
-			else
-			{
-				//TV Kanal
-				if (channellist_tv.empty())
-					Parent->Zapit->getChannels(channellist_tv, CZapitClient::MODE_TV);
-
-				CZapitClient::BouquetChannelList::iterator channel = channellist_tv.begin();
-
-				for(; channel != channellist_tv.end();channel++)
-				{
-					if (channel->channel_id == timer->channel_id)	
-					{				
-						strncpy(zAddData, channel->name, 20);						
-						zAddData[20]=0;						
-						break;						
-					}
-				}
-
-				if (channel == channellist_tv.end())
-					strcpy(zAddData,"Unbekannter TV-Kanal");
-
-			}
+			if (zAddData[0] == 0)
+				if (timer->mode == CTimerd::MODE_RADIO)
+					strcpy(zAddData, "Unbekannter Radiokanal");
+				else
+					strcpy(zAddData, "Unbekannter TV-Kanal");
 			break;
 			
 		case CTimerd::TIMER_STANDBY:
@@ -941,8 +916,8 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 			break;
 
 		case CTimerd::TIMER_REMIND :
-			strncpy(zAddData, timer->message, 20);
-			zAddData[20]=0;
+			strncpy(zAddData, timer->message, 22);
+			zAddData[22]=0;
 			break;
 
 		default:

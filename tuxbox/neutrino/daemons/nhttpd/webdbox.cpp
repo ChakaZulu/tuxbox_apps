@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.57 2004/02/21 09:03:40 thegoodguy Exp $
+	$Id: webdbox.cpp,v 1.58 2004/02/24 23:34:52 thegoodguy Exp $
 
 	License: GPL
 
@@ -48,20 +48,6 @@ void CWebDbox::UpdateBouquets(void)
 }
 
 //-------------------------------------------------------------------------
-void CWebDbox::ZapTo_decimal(const char * const target)
-{
-	t_channel_id channel_id = atoi(target);
-	
-	if (channel_id == Zapit->getCurrentServiceID())
-	{
-		//printf("Kanal ist aktuell\n");
-		return;
-	}
-	
-	if (Zapit->zapTo_serviceID(channel_id) != CZapitClient::ZAP_INVALID_PARAM)
-		Sectionsd->setServiceChanged(channel_id, false);
-}
-
 void CWebDbox::ZapTo(const char * const target)
 {
 	t_channel_id channel_id;
