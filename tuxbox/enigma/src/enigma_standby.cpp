@@ -30,7 +30,9 @@ eAutoInitP0<enigmaStandbyActions> i_enigmaStandbyActions(eAutoInitNumbers::actio
 
 eZapStandby* eZapStandby::instance=0;
 
-Signal0<void> eZapStandby::enterStandby, eZapStandby::leaveStandby;
+Signal0<void> eZapStandby::enterStandby, 
+							eZapStandby::leaveStandby,
+							eZapStandby::RCWakeUp;
 
 void eZapStandby::wakeUp(int norezap)
 {
@@ -70,7 +72,10 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 	{
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_enigmaStandbyActions->wakeUp)
+		{
 			close(0);
+			/*emit*/ RCWakeUp();
+		}
 		else
 			break;
 		return 0;

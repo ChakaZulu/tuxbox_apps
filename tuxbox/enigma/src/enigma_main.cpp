@@ -1713,6 +1713,8 @@ eZapMain::eZapMain()
 	CONNECT( i_enigmaGlobalActions->volumeDown.handler, eZapMain::volumeDown);
 	CONNECT( i_enigmaGlobalActions->toggleMute.handler, eZapMain::toggleMute);
 
+	CONNECT( eZapStandby::RCWakeUp, eZapMain::clearWasSleeping );
+
 	actual_eventDisplay=0;
 
 	clockUpdate();

@@ -486,6 +486,7 @@ private:
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
+	void clearWasSleeping() { wasSleeping=0; }
 	void ShowTimeCorrectionWindow( tsref ref );
 	bool CheckService(const eServiceReference &ref );
 	void handleServiceEvent(const eServiceEvent &event);
