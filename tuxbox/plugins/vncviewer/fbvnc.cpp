@@ -139,7 +139,7 @@ get_fbinfo() {
 	global_framebuffer.p_buf = f->sbuf;
 	global_framebuffer.kb_fd = f->tty;
 #else
-	global_framebuffer.kb_fd = 0;
+	global_framebuffer.kb_fd = -1;
 #endif
 }
 
@@ -700,6 +700,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 		ev->key = k&0x7f;
 		RetEvent((k&0x80) ? FBVNC_EVENT_BTN_UP : FBVNC_EVENT_BTN_DOWN);
 	}
+
 #ifdef INPUT_TS
 	if (FD_ISSET(ts_fd, &rfds)) {
 		int t_x=0, t_y=0, pressed=0;
