@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.74 2002/09/25 12:12:54 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.75 2002/09/25 16:05:33 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -513,7 +513,8 @@ void *start_scanthread(void *param)
 	printf("[scan.cpp] found %d transponders and %d channels\n", found_transponders, found_channels);
 
 	/* load new services */
-	(new CZapitClient)->reinitChannels();
+	CZapitClient myZapitClient;
+	myZapitClient.reinitChannels();
 
 	stop_scan();
 	pthread_exit(0);
