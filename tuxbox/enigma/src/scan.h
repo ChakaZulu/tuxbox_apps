@@ -92,7 +92,7 @@ class tsScan: public eWidget
 {
 	eTimer timer;
 	eLabel *status;
-	eLabel *timeleft, *service_name, *service_provider, *services_scanned, *transponder_scanned;
+	eLabel *timeleft, *service_name, *service_provider, *transponder_data, *services_scanned, *transponder_scanned;
 	eProgress *progress;
 	int tpLeft, scantime;
 	int ret;
