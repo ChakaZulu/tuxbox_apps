@@ -230,11 +230,11 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 
 		switch (aspectRatio)
 		{
-		case 2 :	// 4:3
+		case 0 :	// 4:3
 			format= 2;
 			break;
-		case 3 :	// 16:9
-		case 4 :	// 21,1:1
+		case 1 :	// 16:9
+		case 2 :	// 21,1:1
 			format= 1;
 			break;
 		default:
@@ -802,7 +802,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.108 2003/08/26 20:13:55 zwen Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.109 2003/10/17 17:49:18 obi Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -905,11 +905,11 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 	{
 		switch (newAspectRatio)
 		{
-		case 2 :	// 4:3
+		case 0 :	// 4:3
 			setVideoFormat( 2, false );
 			break;
-		case 3 :	// 16:9
-		case 4 :	// 2,21:1
+		case 1 :	// 16:9
+		case 2 :	// 2,21:1
 			setVideoFormat( 1, false );
 			break;
 		default:
