@@ -59,6 +59,9 @@
 #include <global.h>
 #include <neutrino.h>
 
+/* alexW images are based on the old API: */
+#define OLD_RC_API 1
+
 #ifdef OLD_RC_API
 #define RC_EVENT_DEVICE "/dev/dbox/rc0"
 #define RC_standby_release (KEY_MAX + 1)
@@ -466,9 +469,9 @@ void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *
 	}
 }
 
-void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg(uint *msg, unsigned long long *data, int Timeout, bool bAllowRepeatLR)
 {
-	getMsg_us( msg, data, (unsigned long long) Timeout * 100* 1000, bAllowRepeatLR );
+	getMsg_us( msg, (uint *)data, (unsigned long long) Timeout * 100* 1000, bAllowRepeatLR );
 }
 
 void CRCInput::getMsg_ms(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)

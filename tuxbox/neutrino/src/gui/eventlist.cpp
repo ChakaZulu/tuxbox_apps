@@ -132,13 +132,13 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 		g_ActionLog->println(buf);
 	#endif
 
-	uint msg; uint data;
+	uint msg; uint64_t data;
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
 	bool loop=true;
 	while (loop)
 	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &(uint)data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );

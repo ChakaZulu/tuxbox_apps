@@ -111,7 +111,7 @@ public:
 	void radioMode();
 	void tvMode();
 
-	int handleMsg(uint msg, uint data);
+	int handleMsg(uint msg, uint64_t data);
 	std::string getCurrentChannelName(){ return current_channel_name; }
 };
 

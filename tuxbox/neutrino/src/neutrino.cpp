@@ -2358,7 +2358,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	dprintf(DEBUG_NORMAL, "initialized everything\n");
 	while( true )
 	{
-		uint msg; uint data;
+		uint msg; uint64_t data;
 		g_RCInput->getMsg( &msg, &data, 100 );	// 10 secs..
 
 		if( ( mode == mode_tv ) || ( ( mode == mode_radio ) ) )
@@ -2506,7 +2506,7 @@ void CNeutrinoApp::showProfiling(std::string text)
 	last_profile_call = now;
 }
 
-int CNeutrinoApp::handleMsg(uint msg, uint data)
+int CNeutrinoApp::handleMsg(uint msg, uint64_t data)
 {
 	int res = 0;
 
@@ -2557,7 +2557,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				if(timeout1>timeout)
 					timeout=timeout1;
 
-				uint msg; uint data;
+				uint msg; uint64_t data;
 				int diff = 0;
 				long long endtime;
 				
@@ -3424,7 +3424,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.462 2003/06/04 20:13:42 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.463 2003/06/05 14:49:54 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();

@@ -124,7 +124,7 @@ class CChannelList
 		int  hasChannel(int nChannelNr);
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
 
-		int handleMsg(uint msg, uint data);
+		int handleMsg(uint msg, uint64_t data);
 };
 
 

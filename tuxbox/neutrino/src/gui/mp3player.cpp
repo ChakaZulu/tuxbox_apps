@@ -174,7 +174,7 @@ int CMP3PlayerGui::show()
 
 	CLCD::getInstance()->setMode(CLCD::MODE_MP3);
 
-	uint msg; uint data;
+	uint msg; uint64_t data;
 
 	bool loop=true;
 	bool update=true;

@@ -222,13 +222,13 @@ int CChannelList::show()
 	int zapOnExit = false;
 	bool bShowBouquetList = false;
 
-	uint msg; uint data;
+	uint msg; uint64_t data;
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
 	bool loop=true;
 	while (loop)
 	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &(uint)data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
@@ -408,7 +408,7 @@ bool CChannelList::showInfo(int pos)
 	return true;
 }
 
-int CChannelList::handleMsg(uint msg, uint data)
+int CChannelList::handleMsg(uint msg, uint64_t data)
 {
 	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS)
 	{
@@ -548,7 +548,7 @@ int CChannelList::numericZap(int key)
 	int chn=key;
 	int lastchan= -1;
 	int pos=1;
-	uint msg; uint data;
+	uint msg; uint64_t data;
 	bool doZap = true;
 
 

@@ -167,7 +167,7 @@ int CPictureViewerGui::show()
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("pictureviewer.head") );
 	m_state=MENU;
 
-	uint msg; uint data;
+	uint msg; uint64_t data;
 	int timeout;
 
 	bool loop=true;

@@ -82,12 +82,12 @@ CRemoteControl::CRemoteControl()
 	is_video_started = true;
 }
 
-int CRemoteControl::handleMsg(uint msg, uint data)
+int CRemoteControl::handleMsg(uint msg, uint64_t data)
 {
 	if ( zap_completion_timeout != 0 )
 	{
 		// warte auf Meldung vom ZAPIT
-    	if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) ||
+    		if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) ||
     		 ( msg == NeutrinoMessages:: EVT_ZAP_FAILED ) ||
     		 ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD ) )
 		{
@@ -162,7 +162,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 
     if ( msg == NeutrinoMessages::EVT_CURRENTEPG )
 	{
-		CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
+		CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) (uint)data;
 
 		if ( ( info_CN->current_uniqueKey >> 16) == current_channel_id )
 		{
@@ -208,7 +208,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 	}
 	else if ( msg == NeutrinoMessages::EVT_NEXTEPG )
 	{
-		CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
+		CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) (uint)data;
 
 		if ( ( info_CN->next_uniqueKey >> 16) == current_channel_id )
 		{

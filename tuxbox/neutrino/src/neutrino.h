@@ -203,7 +203,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		//onchange
 		bool changeNotify(std::string OptionName, void *Data);
 
-		int handleMsg(uint msg, uint data);
+		int handleMsg(uint msg, uint64_t data);
 		void showProfiling(std::string text);
 
 		int getMode() {return mode;}
