@@ -2,6 +2,9 @@
 #include "../include/debug.h"
 #include "../global.h"
 
+// hi McClean - hab schon mal was geaendert - falls es nicht gefaellt
+// altes gamelist.cpp ist als svd.gamelist.cpp eingecheckt.
+
 
 CGameList::CGameList(string Name)
 {
