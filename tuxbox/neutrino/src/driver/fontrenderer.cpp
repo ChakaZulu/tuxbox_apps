@@ -1,72 +1,75 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-$Id: fontrenderer.cpp,v 1.20 2002/01/03 20:03:20 McClean Exp $
- 
+$Id: fontrenderer.cpp,v 1.21 2002/02/05 11:34:40 field Exp $
+
 -- misc font / text rendering functions
- 
+
 $Log: fontrenderer.cpp,v $
+Revision 1.21  2002/02/05 11:34:40  field
+VTxt Icon
+
 Revision 1.20  2002/01/03 20:03:20  McClean
 cleanup
 
 Revision 1.19  2001/12/03 23:21:23  McClean
 hmm?
- 
+
 Revision 1.18  2001/12/02 11:59:51  waldi
 - add config.h include
 - change dir for fonts
- 
+
 Revision 1.17  2001/11/26 02:34:03  McClean
 include (.../../stuff) changed - correct unix-formated files now
- 
+
 Revision 1.16  2001/11/15 11:42:41  McClean
 gpl-headers added
- 
+
 Revision 1.15  2001/10/18 10:55:56  field
 Rendert jetzt auch Schriftfarben zwischen den Hauptfarben richtig (zb
 COLOR_MENUCONTENT+1)
- 
+
 Revision 1.14  2001/10/16 19:11:16  rasc
 -- CR LF --> LF in einigen Modulen
- 
+
 Revision 1.13  2001/10/14 15:48:16  McClean
 use font-cache
- 
+
 Revision 1.12  2001/10/14 14:30:47  rasc
 -- EventList Darstellung ueberarbeitet
 -- kleiner Aenderungen und kleinere Bugfixes
 -- locales erweitert..
- 
- 
+
+
 */
 
 #include <config.h>

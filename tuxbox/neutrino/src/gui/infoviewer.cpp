@@ -227,7 +227,8 @@
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1
 
 #define ICON_LARGE 30
-#define ICON_OFFSET (2*ICON_LARGE+ 5)
+#define ICON_SMALL 20
+#define ICON_OFFSET (2*ICON_LARGE+ ICON_SMALL+ 5)
 #define BOTTOM_BAR_OFFSET 0
 #define SHADOW_OFFSET 6
 
@@ -250,7 +251,7 @@ char* copyStringto( char* from, char* to, int len)
 
 CInfoViewer::CInfoViewer()
 {
-        intShowDuration = g_settings.timing_infobar; //15 means7,5 sec
+        intShowDuration = g_settings.timing_infobar;
         BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
         is_visible=false;
         ShowInfo_Info=false;
@@ -327,11 +328,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
         ShowInfo_Info = !CalledFromNumZap;
 
-        //if (  )
-        	EPG_NotFound_Text = (char*) g_Locale->getText(CalledFromNumZap?"infoviewer.epgnotload":"infoviewer.epgwait").c_str();
-/*        else
-			EPG_NotFound_Text = (char*) g_Locale->getText("infoviewer.epgwait").c_str();
-*/
+        EPG_NotFound_Text = (char*) g_Locale->getText(CalledFromNumZap?"infoviewer.epgnotload":"infoviewer.epgwait").c_str();
+
         BoxStartX = g_settings.screen_StartX+ 20;
         BoxEndX   = g_settings.screen_EndX- 20;
         BoxEndY   = g_settings.screen_EndY- 20;
@@ -343,7 +341,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         pthread_mutex_unlock( &epg_mutex );
 
 		// kill linke seite
-        g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth >>1), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
+        g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth/3), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
         // kill progressbar
         g_FrameBuffer->paintBackgroundBox(BoxEndX- 120, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
 
@@ -376,7 +374,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 		// ... with channel name
         g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+height, BoxEndX- (ChanNameX+ 20)- timewidth- 15, Channel.c_str(), COL_INFOBAR);
 
-        ChanInfoX = BoxStartX + (ChanWidth >>1);
+        ChanInfoX = BoxStartX + (ChanWidth / 3);
         int ChanInfoY = BoxStartY + ChanHeight+10;
 
         g_FrameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR);
@@ -408,8 +406,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 				//g_FrameBuffer->paintIcon("gray.raw", BoxEndX- ICON_OFFSET- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 				//g_Fonts->infobar_small->RenderString(BoxEndX- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR_BUTTONS_GRAY);
 
-                g_FrameBuffer->paintIcon("dd_gray.raw", BoxEndX- ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-                g_FrameBuffer->paintIcon((GetVideoFormat() == 3)?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+                g_FrameBuffer->paintIcon("dd_gray.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+                g_FrameBuffer->paintIcon((GetVideoFormat() == 3)?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+                g_FrameBuffer->paintIcon("vtxt_gray.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
                 showButtonNVOD(true);
 
@@ -417,6 +416,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
                 showButtonAudio();
         }
 
+		// Schatten
         g_FrameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
         g_FrameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
 
@@ -435,9 +435,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         {
         		for (int i= 0; i< 10; i++)
         		{
-        			g_FrameBuffer->paintIcon((GetVideoFormat() == 3)?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+        			g_FrameBuffer->paintIcon((GetVideoFormat() == 3)?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
-					key = g_RCInput->getKey( intShowDuration>> 2 );
+					key = g_RCInput->getKey( intShowDuration>>1 ); // weil Intervall in 500ms angegeben ist,
 					if ( key != CRCInput::RC_timeout )
 						break;
 				}
@@ -569,12 +569,9 @@ void CInfoViewer::showData()
         }
 
         int height = g_Fonts->infobar_channame->getHeight()/3;
-        //int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
         int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
 
-
         //percent
-
         if ( ShowInfo_Info )
         {
                 int posy = BoxStartY+12;
@@ -596,7 +593,7 @@ void CInfoViewer::showData()
         }
 
         height = g_Fonts->infobar_info->getHeight();
-        int xStart= BoxStartX + ChanWidth + 20;
+        int xStart= BoxStartX + ChanWidth;// + 20;
 
         if ( is_nvod )
                 g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
@@ -708,12 +705,15 @@ void CInfoViewer::showButtonAudio()
                 	{
                 		if (g_RemoteControl->audio_chans.selected== count )
                 		{
-	                		g_FrameBuffer->paintIcon("dd.raw", BoxEndX- ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+	                		g_FrameBuffer->paintIcon("dd.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 	                		break;
 	                	}
 	                	else
-	                		g_FrameBuffer->paintIcon("dd_avail.raw", BoxEndX- ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+	                		g_FrameBuffer->paintIcon("dd_avail.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
                 	}
+
+                if ( g_RemoteControl->vtxtpid != 0 )
+                	g_FrameBuffer->paintIcon("vtxt.raw", BoxEndX- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         };
 }
 
@@ -812,7 +812,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                                 pthread_mutex_unlock( &InfoViewer->epg_mutex );
 
 
-                                //                printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
+                                //printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
 
                                 gotEPG = InfoViewer->getEPGData(query, query_onid_tsid);
 
@@ -823,14 +823,14 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 
                                 if ( ( InfoViewer->Flag & ( sectionsd::epg_has_later | sectionsd::epg_has_current ) ) && (!gotEPG) )
                                 {
-                                        if (repCount> 3)
-                                        {
-                                                repCount= 3;
-                                                //printf("CInfoViewer::InfoViewerThread epg noch nicht komplett -> repCount decreased to %d\n", repCount);
-                                        }
-                                        else
-                                                if (repCount== 1)
-                                                        gotEPG= true;
+                                	if (repCount> 3)
+                                    {
+                                    	repCount= 3;
+                                        //printf("CInfoViewer::InfoViewerThread epg noch nicht komplett -> repCount decreased to %d\n", repCount);
+									}
+                                    else
+                                    if (repCount== 1)
+                                    	gotEPG= true;
                                 }
                                 else
                                 {
@@ -851,20 +851,20 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                                 */
 
                                 if (query!=InfoViewer->CurrentChannel)
-                                        repCount = 10;
+                                	repCount = 10;
 
                                 if ( InfoViewer->KillShowEPG )
-                                        repCount = 0;
+									repCount = 0;
 
 
                                 if ( ( !requeryEPG) && ( InfoViewer->is_visible ) && ( !InfoViewer->KillShowEPG) )
                                 {
-                                        //                    printf("CInfoViewer::InfoViewerThread success\n");
-                                        InfoViewer->showData();
+									//printf("CInfoViewer::InfoViewerThread success\n");
+                                    InfoViewer->showData();
                                 }
                                 else
                                 {
-                                        //                    printf("CInfoViewer::InfoViewerThread unsuccessful\n");
+									//printf("CInfoViewer::InfoViewerThread unsuccessful\n");
                                 }
                                 pthread_mutex_unlock( &InfoViewer->epg_mutex );
 
