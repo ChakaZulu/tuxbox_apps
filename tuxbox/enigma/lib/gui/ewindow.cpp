@@ -76,7 +76,7 @@ void eWindow::eraseBackground(gPainter *target, const eRect &clip)
 void eWindow::drawTitlebar(gPainter *target)
 {
 	eRect rc = getTitleBarRect();
-  target->clip( rc );
+	target->clip( rc );
 	if ( titleHeight )
 	{
 		target->setForegroundColor(titleBarColor);
@@ -90,7 +90,7 @@ void eWindow::drawTitlebar(gPainter *target)
 	target->setForegroundColor(fontColor);
 	target->renderPara( *p );
 	p->destroy();
-  target->clippop();
+	target->clippop();
 }
 
 void eWindow::recalcClientRect()
