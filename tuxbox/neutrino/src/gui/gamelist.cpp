@@ -47,6 +47,14 @@
 
 #include "gamelist.h"
 
+bool CPlugins::plugin_exists(string filename)
+{
+	for(int i = 0; i < number_of_plugins;i++)
+		if(filename.compare(plugin_list[i].filename) == 0)
+			return true;
+	return false;
+}
+
 void CPlugins::scanDir(const char *dir)
 {
 struct dirent **namelist;
@@ -62,8 +70,6 @@ std::string fname;
 		int pos = filename.find(".cfg");
 		if (pos > -1)
 		{
-			number_of_plugins++;
-
 			plugin new_plugin;
 			new_plugin.filename = filename.substr(0, pos);
 			fname = string(dir) + "/";
@@ -72,8 +78,11 @@ std::string fname;
 			new_plugin.sofile = fname;
 			new_plugin.sofile.append(".so");
 			parseCfg(&new_plugin);
-
-			plugin_list.insert(plugin_list.end(), new_plugin);
+			if(!plugin_exists(new_plugin.filename))
+			{
+				plugin_list.insert(plugin_list.end(), new_plugin);
+				number_of_plugins++;
+			}
 		}
 	}
 }
@@ -84,8 +93,8 @@ void CPlugins::loadPlugins()
 	number_of_plugins = 0;
 	plugin_list.clear();
 
-	scanDir(PLUGINDIR);
 	scanDir("/var/tuxbox/plugins");
+	scanDir(PLUGINDIR);
 }
 
 CPlugins::~CPlugins()

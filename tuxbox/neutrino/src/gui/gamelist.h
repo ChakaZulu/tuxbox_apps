@@ -83,6 +83,8 @@ class CPlugins
 
 		void parseCfg(plugin *plugin_data);
 		void scanDir(const char *dir);
+		bool plugin_exists(string filename);
+
 
 		std::map<std::string, std::string> params;
 	public:
