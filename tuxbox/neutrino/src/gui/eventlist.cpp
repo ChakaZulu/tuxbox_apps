@@ -342,7 +342,7 @@ void EventList::hide()
 
 void EventList::paintItem(unsigned int pos)
 {
-	int color;
+	fb_pixel_t color;
 	int ypos = y+ theight+0 + pos*fheight;
 	std::string datetime1_str, datetime2_str, duration_str;
 
@@ -352,7 +352,7 @@ void EventList::paintItem(unsigned int pos)
 	}
 	else if (liststart+pos == current_event )
 	{
-		color = COL_MENUCONTENT+ 1; //COL_MENUCONTENTINACTIVE+ 4;
+		color = COL_MENUCONTENT_PLUS_1;
 	}
 	else
 	{
@@ -429,13 +429,13 @@ void EventList::paint()
 
 	int ypos = y+ theight;
 	int sb = fheight* listmaxshow;
-	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT_PLUS_1);
 
 	int sbc= ((evtlist.size()- 1)/ listmaxshow)+ 1;
 	float sbh= (sb- 4)/ sbc;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT_PLUS_3);
 }
 
 

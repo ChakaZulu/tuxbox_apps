@@ -812,8 +812,8 @@ void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
 	int ypos2 = y + height;
 	int ypos1a = ypos1 + (fheight/2)-2;
 	int ypos2a = ypos2 + (info_height/2)-2;
-	unsigned char col1 = COL_MENUCONTENT_PLUS_6;
-	unsigned char col2 = COL_MENUCONTENT_PLUS_1;
+	fb_pixel_t col1 = COL_MENUCONTENT_PLUS_6;
+	fb_pixel_t col2 = COL_MENUCONTENT_PLUS_1;
 
 
 	// Clear

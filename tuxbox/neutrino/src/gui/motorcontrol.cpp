@@ -350,8 +350,8 @@ void CMotorControl::paintSeparator(int xpos, int * ypos, int width, char * txt)
 	int stringstartposX = 0;
 	
 	*ypos += mheight;
-	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1), COL_MENUCONTENT + 3);
-	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1) + 1, COL_MENUCONTENT + 1);
+	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1), COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintHLineRel(xpos, width - 20, *ypos - (mheight >> 1) + 1, COL_MENUCONTENT_PLUS_1);
 	
 	stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(txt);
 	stringstartposX = 0;

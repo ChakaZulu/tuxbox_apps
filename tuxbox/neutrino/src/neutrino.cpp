@@ -3506,8 +3506,8 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		if (bDoPaint)
 		{
 			int vol = current_volume << 1;
-			frameBuffer->paintBoxRel(x + 40      , y + 12, vol      , 15, COL_INFOBAR + 3);
-			frameBuffer->paintBoxRel(x + 40 + vol, y + 12, 200 - vol, 15, COL_INFOBAR + 1);
+			frameBuffer->paintBoxRel(x + 40      , y + 12, vol      , 15, COL_INFOBAR_PLUS_3);
+			frameBuffer->paintBoxRel(x + 40 + vol, y + 12, 200 - vol, 15, COL_INFOBAR_PLUS_1);
 		}
 		
 		CLCD::getInstance()->showVolume(current_volume);

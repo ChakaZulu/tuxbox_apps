@@ -648,8 +648,8 @@ void CGameList::paintItem(int pos)
 	{	//back is half-height...
 		itemheight = (fheight / 2) + 3;
 		frameBuffer->paintBoxRel(x,ypos+itemheight, width, 15, COL_MENUCONTENT);
-		frameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT+5);
-		frameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT+2);
+		frameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT_PLUS_5);
+		frameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT_PLUS_2);
 	}
 	else if(liststart==0)
 	{
@@ -703,15 +703,14 @@ void CGameList::paint()
 void CGameList::paintItems()
 {
 	if(listmaxshow <= gamelist.size()+1)
-   {
-      // Scrollbar
-      int nrOfPages = ((gamelist.size()-1) / listmaxshow)+1; 
-      int currPage  = (liststart/listmaxshow) +1;
-      float blockHeight = (height-theight-4)/nrOfPages;
-      frameBuffer->paintBoxRel(x+width, y+theight, 15, height-theight,  COL_MENUCONTENT+ 1);
-		frameBuffer->paintBoxRel(x+ width +2, y+theight+2+int((currPage-1)*blockHeight) , 11, 
-										 int(blockHeight),  COL_MENUCONTENT+ 3);
-   }
+	{
+		// Scrollbar
+		int nrOfPages = ((gamelist.size()-1) / listmaxshow)+1; 
+		int currPage  = (liststart/listmaxshow) +1;
+		float blockHeight = (height-theight-4)/nrOfPages;
+		frameBuffer->paintBoxRel(x+width, y+theight, 15, height-theight,  COL_MENUCONTENT_PLUS_1);
+		frameBuffer->paintBoxRel(x+ width +2, y+theight+2+int((currPage-1)*blockHeight) , 11, int(blockHeight), COL_MENUCONTENT_PLUS_3);
+	}
 	
    for(unsigned int count=0;count<listmaxshow;count++)
 	{

@@ -526,8 +526,8 @@ int CMP3PlayerGui::show()
 				sprintf(str,"%d",val);
 				int w = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getRenderWidth(str);
 				int h = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight();
-				frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT         + 6);
-				frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED    );
+				frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT_PLUS_6 );
+				frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED);
 				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->RenderString(x1,y1,w+1,str,COL_MENUCONTENTSELECTED,0);
 				g_RCInput->getMsg( &msg, &data, 100 ); 
 			} while (g_RCInput->isNumeric(msg) && val < 1000000);
@@ -765,7 +765,7 @@ void CMP3PlayerGui::paintInfo()
 		frameBuffer->paintBackgroundBoxRel(x, y, width, title_height);
 	else
 	{
-		unsigned char colFrame = COL_MENUCONTENT+6;
+		fb_pixel_t colFrame = COL_MENUCONTENT_PLUS_6;
 		frameBuffer->paintBoxRel(x,         y, width, title_height-10, colFrame);
 		frameBuffer->paintBoxRel(x+2, y +2 , width-4, title_height-14, COL_MENUCONTENTSELECTED);
 		char sNr[20];
@@ -824,13 +824,13 @@ void CMP3PlayerGui::paint()
 
 	int ypos = y+title_height+ theight;
 	int sb = fheight* listmaxshow;
-	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT_PLUS_1);
 
 	int sbc= ((playlist.size()- 1)/ listmaxshow)+ 1;
 	float sbh= (sb- 4)/ sbc;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT_PLUS_3);
 
 	paintFoot();
 	paintInfo();
@@ -1168,8 +1168,8 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 	int ypos2 = y + (height-info_height);
 	int ypos1a = ypos1 + (fheight/2)-2;
 	int ypos2a = ypos2 + (info_height/2)-2;
-	unsigned char col1 = COL_MENUCONTENT+6;
-	unsigned char col2 = COL_MENUCONTENT+1;
+	fb_pixel_t col1 = COL_MENUCONTENT_PLUS_6;
+	fb_pixel_t col2 = COL_MENUCONTENT_PLUS_1;
 
 
 	// Clear
