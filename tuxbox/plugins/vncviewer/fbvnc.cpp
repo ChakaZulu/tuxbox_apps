@@ -898,9 +898,9 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched) {
 				struct timeval now;
 				gettimeofday(&now, NULL);
 				if((now.tv_sec == evttime.tv_sec
-					 && (now.tv_usec - evttime.tv_usec) < 150000) ||
+					 && (now.tv_usec - evttime.tv_usec) < 225000) ||
 					((now.tv_sec-1) == evttime.tv_sec
-					 && ((now.tv_usec+1000000) -evttime.tv_usec) < 150000))
+					 && ((now.tv_usec+1000000) -evttime.tv_usec) < 225000))
 				{
 					countevt++;
 				}
