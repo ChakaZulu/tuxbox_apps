@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.13 2001/08/09 23:35:54 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.14 2001/08/16 13:13:12 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.14  2001/08/16 13:13:12  fnbrd
+//  New commands.
+//
 //  Revision 1.13  2001/08/09 23:35:54  fnbrd
 //  Moved the stuff into a struct.
 //
@@ -76,7 +79,7 @@ struct sectionsd {
     unsigned short dataLength;
   } __attribute__ ((packed)) ;
 
-  static const int numberOfCommands=12;
+  static const int numberOfCommands=16;
   enum commands {
     actualEPGchannelName=0,
     actualEventListTVshort,
@@ -89,7 +92,11 @@ struct sectionsd {
     actualEventListRadioshort,
     getNextEPG,
     getNextShort,
-    pauseScanning // for the grabbers ;)
+    pauseScanning, // for the grabbers ;)
+    actualEPGchannelID,
+    actualEventListTVshortIDs,
+    actualEventListRadioShortIDs,
+    currentNextInformationID
   };
 };
 
@@ -184,5 +191,33 @@ struct sectionsd {
 //     int (1 = pause, 0 = continue)
 //   data of response:
 //     -
+//
+// actualEPGchannelID:
+//   data of request:
+//     is channel ID (4 byte onid<<16+sid)
+//   data of response:
+//     is a string (c-string) describing the EPG:
+//     unique key (long long, hex) 0xff name  0xff text  0xff extended text  0xff start time GMT (ctime, hex ) 0xff duration (seconds, hex)
+//
+// actualEventListTVshortIDs:
+//   data of request:
+//     -
+//   data of response:
+//     is a string (c-string) with all cached actual events,
+//     3 lines per service, first line unique-event-key, second line unique-service-key, third line event name
+//
+// actualEventListRadioShortIDs:
+//   data of request:
+//     -
+//   data of response:
+//     is a string (c-string) with all cached actual events,
+//     3 lines per service, first line unique-event-key, second line unique-service-key, third line event name
+//
+// currentNextInformationID:
+//   data of request:
+//     is channel ID (4 byte onid<<16+sid)
+//   data of response:
+//     is a string (c-string) describing the current/next EPGs
+//     every event: 1. line unique key (long long, hex), 2. line name, 3. line start time GMT (ctime, hex ), 4 line  duration (seconds, hex)
 //
 #endif // SECTIONSDMSG_H
