@@ -26,7 +26,7 @@
 
 #include <string>
 
-#include "eventserver.h"
+#include <basicclient.h>
 
 using namespace std;
 
@@ -35,14 +35,8 @@ using namespace std;
 #define VCR_STATUS_ON 1
 #define VCR_STATUS_16_9 2
 
-class CControldClient
+class CControldClient:private CBasicClient
 {
-		int sock_fd;
-
-		bool controld_connect();
-		bool send_data(char* data, int size);
-		bool receive(char* data, int size);
-		bool controld_close();
 		void send(const unsigned char command, char* data, const unsigned int size);
 
 	public:
@@ -77,11 +71,6 @@ class CControldClient
 		//scartmode
 		static const char SCARTMODE_ON  = 1;
 		static const char SCARTMODE_OFF = 0;
-
-		/*
-			Konstruktor
-		*/
-		CControldClient();
 
 		/*
 			setVolume(char) : Setzten der Lautstärke

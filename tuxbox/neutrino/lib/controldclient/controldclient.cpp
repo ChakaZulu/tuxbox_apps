@@ -36,72 +36,20 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include "eventserver.h"
+
 #include "controldclient.h"
 #include "controldMsg.h"
 
-
-CControldClient::CControldClient()
-{
-	sock_fd = 0;
-}
-
-bool CControldClient::controld_connect()
-{
-	controld_close();
-
-	struct sockaddr_un servaddr;
-	int clilen;
-	memset(&servaddr, 0, sizeof(struct sockaddr_un));
-	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, CONTROLD_UDS_NAME);
-	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-
-	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	{
-		perror("controldclient: socket");
-		return false;
-	}
-
-	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
-	{
-  		perror("controldclient: connect");
-		return false;
-	}
-	return true;
-}
-
-bool CControldClient::controld_close()
-{
-	if(sock_fd!=0)
-	{
-		close(sock_fd);
-		sock_fd=0;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-bool CControldClient::send_data(char* data, int size)
-{
-	write(sock_fd, data, size);
-	return true;
-}
-
-bool CControldClient::receive(char* data, int size)
-{
-	read(sock_fd, data, size);
-	return true;
-}
 
 void CControldClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
 	CControld::commandHead msgHead;
 	msgHead.version = CControld::ACTVERSION;
 	msgHead.cmd     = command;
-	controld_connect();
+
+	open_connection(CONTROLD_UDS_NAME);
+
 	send_data((char*)&msgHead, sizeof(msgHead));
 	if (size != 0)
 	    send_data(data, size);
@@ -110,7 +58,7 @@ void CControldClient::send(const unsigned char command, char* data = NULL, const
 void  CControldClient::shutdown()
 {
 	send(CControld::CMD_SHUTDOWN);
-	controld_close();
+	close_connection();
 }
 
 void CControldClient::setBoxType(char type)
@@ -121,7 +69,7 @@ void CControldClient::setBoxType(char type)
 
 	send(CControld::CMD_SETBOXTYPE, (char*)&msg2, sizeof(msg2));
 
-	controld_close();
+	close_connection();
 }
 
 char CControldClient::getBoxType()
@@ -130,9 +78,9 @@ char CControldClient::getBoxType()
 
 	send(CControld::CMD_GETBOXTYPE);
 
-	receive((char*)&rmsg, sizeof(rmsg));
+	receive_data((char*)&rmsg, sizeof(rmsg));
 
-	controld_close();
+	close_connection();
 
 	return rmsg.boxtype;
 }
@@ -145,7 +93,7 @@ void CControldClient::setScartMode(bool mode)
 
 	send(CControld::CMD_SETSCARTMODE, (char*)&msg2, sizeof(msg2));
 
-	controld_close();
+	close_connection();
 }
 
 void CControldClient::setVolume(char volume )
@@ -156,7 +104,7 @@ void CControldClient::setVolume(char volume )
 
 	send(CControld::CMD_SETVOLUME_AVS, (char*)&msg2, sizeof(msg2));
 
-	controld_close();
+	close_connection();
 }
 
 char CControldClient::getVolume()
@@ -165,9 +113,9 @@ char CControldClient::getVolume()
 
 	send(CControld::CMD_GETVOLUME_AVS);
 
-	receive((char*)&rmsg, sizeof(rmsg));
+	receive_data((char*)&rmsg, sizeof(rmsg));
 
-	controld_close();
+	close_connection();
 
 	return rmsg.volume;
 }
@@ -180,7 +128,7 @@ void CControldClient::setVideoFormat(char format)
 
 	send(CControld::CMD_SETVIDEOFORMAT, (char*)&msg2, sizeof(msg2));
 
-	controld_close();
+	close_connection();
 }
 
 char CControldClient::getAspectRatio()
@@ -189,9 +137,9 @@ char CControldClient::getAspectRatio()
 
 	send(CControld::CMD_GETASPECTRATIO);
 
-	receive((char*)&rmsg, sizeof(rmsg));
+	receive_data((char*)&rmsg, sizeof(rmsg));
 
-	controld_close();
+	close_connection();
 
 	return rmsg.aspectRatio;
 }
@@ -202,9 +150,9 @@ char CControldClient::getVideoFormat()
 
 	send(CControld::CMD_GETVIDEOFORMAT);
 
-	receive((char*)&rmsg, sizeof(rmsg));
+	receive_data((char*)&rmsg, sizeof(rmsg));
 
-	controld_close();
+	close_connection();
 
 	return rmsg.format;
 }
@@ -217,7 +165,7 @@ void CControldClient::setVideoOutput(char output)
 
 	send(CControld::CMD_SETVIDEOOUTPUT, (char*)&msg2, sizeof(msg2));
 
-	controld_close();
+	close_connection();
 }
 
 char CControldClient::getVideoOutput()
@@ -226,9 +174,9 @@ char CControldClient::getVideoOutput()
 
 	send(CControld::CMD_GETVIDEOOUTPUT);
 
-	receive((char*)&rmsg, sizeof(rmsg));
+	receive_data((char*)&rmsg, sizeof(rmsg));
 
-	controld_close();
+	close_connection();
 
 	return rmsg.output;
 }
@@ -240,7 +188,7 @@ void CControldClient::Mute(const bool avs)
 		send(CControld::CMD_MUTE_AVS);
 	else
 		send(CControld::CMD_MUTE);
-	controld_close();
+	close_connection();
 }
 
 void CControldClient::UnMute(const bool avs)
@@ -249,7 +197,7 @@ void CControldClient::UnMute(const bool avs)
 		send(CControld::CMD_UNMUTE_AVS);
 	else
 		send(CControld::CMD_UNMUTE);
-	controld_close();
+	close_connection();
 }
 
 void CControldClient::setMute(const bool mute, const bool avs)
@@ -269,9 +217,9 @@ bool CControldClient::getMute(const bool avs)
 	else
 		send(CControld::CMD_GETMUTESTATUS);
 
-	receive((char*)&rmsg, sizeof(rmsg));
+	receive_data((char*)&rmsg, sizeof(rmsg));
 
-	controld_close();
+	close_connection();
 
 	return rmsg.mute;
 }
@@ -284,7 +232,7 @@ void CControldClient::setAnalogOutput(int mode)
 
 	send(CControld::CMD_SETANALOGMODE, (char*)&msg2, sizeof(msg2));
 
-	controld_close();
+	close_connection();
 }
 
 void CControldClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
@@ -297,7 +245,7 @@ void CControldClient::registerEvent(unsigned int eventID, unsigned int clientID,
 
 	send(CControld::CMD_REGISTEREVENT, (char*)&msg2, sizeof(msg2));
 
-	controld_close();
+	close_connection();
 }
 
 void CControldClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
@@ -309,7 +257,7 @@ void CControldClient::unRegisterEvent(unsigned int eventID, unsigned int clientI
 
 	send(CControld::CMD_UNREGISTEREVENT, (char*)&msg2, sizeof(msg2));
 
-	controld_close();
+	close_connection();
 }
 
 void CControldClient::videoPowerDown(bool powerdown)
@@ -320,11 +268,11 @@ void CControldClient::videoPowerDown(bool powerdown)
 
         send(CControld::CMD_SETVIDEOPOWERDOWN, (char*)&msg2, sizeof(msg2));
 
-        controld_close();
+        close_connection();
 }
 
 void CControldClient::saveSettings()
 {
         send(CControld::CMD_SAVECONFIG);
-        controld_close();
+        close_connection();
 }
