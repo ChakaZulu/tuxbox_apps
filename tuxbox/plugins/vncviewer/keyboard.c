@@ -278,8 +278,8 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	XK_8, XK_parenleft, XK_bracketleft, 0,
 	XK_9, XK_parenright, XK_bracketright, 0,		/* 10 */
 	XK_0, XK_equal, XK_braceright, 0,
-	XK_ssharp, XK_question, XK_backslash, 0,
-	XK_apostrophe, XK_grave, 0, 0,
+	XK_minus, XK_underscore, 0, 0,
+	0, 0, 0, 0,
 	XK_BackSpace, 0, 0, 0,
 	XK_Tab, 0, 0, 0,	
 	XK_q, XK_Q, XK_at, 0,
@@ -287,13 +287,13 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	XK_e, XK_E, 0, 0,
 	XK_r, XK_R, 0, 0,
 	XK_t, XK_T, 0, 0,			/* 20 */
-	XK_z, XK_Z, 0, 0,
+	XK_y, XK_Y, 0, 0,
 	XK_u, XK_U, 0, 0,
 	XK_i, XK_I, 0, 0,
 	XK_o, XK_O, 0, 0,
 	XK_p, XK_P, 0, 0,	
-	XK_udiaeresis, XK_Udiaeresis, 0, 0,
-	XK_plus, XK_asterisk, XK_asciitilde, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0,	
 	XK_Return, 0, 0, 0,
 	XK_Control_L, 0, 0, 0,
 	XK_a, XK_A, 0, 0,	/* 30 */
@@ -305,12 +305,12 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	XK_j, XK_J, 0, 0,
 	XK_k, XK_K, 0, 0,
 	XK_l, XK_L, 0, 0,
-	XK_odiaeresis, XK_Odiaeresis, 0, 0,
-	XK_adiaeresis, XK_Adiaeresis, 0, 0,	/* 40 */
-	XK_asciicircum, XK_degree, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0,                  /* 40 */	
+	0, 0, 0, 0,	
 	XK_Shift_L, 0, 0, 0,
-	XK_numbersign, XK_apostrophe, 0, 0,
-	XK_y, XK_Y, 0, 0,
+	0, 0, 0, 0,	
+	XK_z, XK_Z, 0, 0,
 	XK_x, XK_X, 0, 0,
 	XK_c, XK_C, 0, 0,
 	XK_v, XK_V, 0, 0,
@@ -319,7 +319,7 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	XK_m, XK_M, XK_mu, 0,			/* 50 */
 	XK_comma, XK_semicolon, 0, 0,
 	XK_period, XK_colon, 0, 0,
-	XK_minus, XK_underscore, 0, 0,
+	0, 0, 0, 0,	
 	XK_Shift_R, 0, 0, 0,
 	XK_KP_Multiply, 0, 0, 0,
 	XK_Alt_L, 0, 0, 0,
@@ -352,7 +352,7 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	XK_KP_Separator, 0, 0, 0,
 	0, 0, 0, 0,
 	0, 0, 0, 0,
-	XK_less, XK_greater, XK_bar, 0,
+	0, 0, 0, 0,
 	XK_F11, 0, 0, 0,
 	XK_F12, 0, 0, 0,
 	0, 0, 0, 0,
@@ -384,9 +384,20 @@ static int fbvnc_keymap_dbox[N_SCANCODE*4] = {
 	0, 0, 0, 0,
 	0, 0, 0, 0,
 	0, 0, 0, 0,
-	0, 0, 0, 0,
+	0, 0, 0, 0,		
 	XK_Pause, 0, 0, 0,
 };
+/*	
+   XK_odiaeresis, XK_Odiaeresis, 0, 0,
+	XK_adiaeresis, XK_Adiaeresis, 0, 0,
+	XK_udiaeresis, XK_Udiaeresis, 0, 0,
+	XK_plus, XK_asterisk, XK_asciitilde, 0,
+	XK_apostrophe, XK_grave, 0, 0,
+	XK_asciicircum, XK_degree, 0, 0,
+	XK_numbersign, XK_apostrophe, 0, 0,
+	XK_ssharp, XK_question, XK_backslash, 0,
+	XK_less, XK_greater, XK_bar, 0,
+*/
 
 /*
 shift_l, shift_r, altgr,
