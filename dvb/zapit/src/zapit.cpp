@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.131 2002/04/15 23:02:45 obi Exp $
+ * $Id: zapit.cpp,v 1.132 2002/04/17 08:03:07 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -33,6 +33,7 @@
 #define VBI_DEV	"/dev/dbox/vbi0"
 #define CONFIGFILE CONFIGDIR "/zapit/zapit.conf"
 
+CCam *cam = NULL;
 CConfigFile *config = NULL;
 CFrontend *frontend = NULL;
 
@@ -51,10 +52,6 @@ struct {
 } lastChannel;
 
 int connfd;
-
-/* ca stuff */
-uint16_t caid = 0;
-int caver = 0;
 
 #ifndef DVBS
 CLcddClient lcdd;
@@ -127,6 +124,9 @@ void signal_handler (int signum)
 		break;
 	default:
 		save_settings(true);
+		delete frontend;
+		delete config;
+		delete cam;
 #ifdef USE_EXTERNAL_CAMD
 		if (camdpid != -1)
 		{
@@ -277,19 +277,19 @@ void *decode_thread(void *ptr)
 	if (vals->new_tp == true)
 	{
 		debug("[zapit] resetting cam\n");
-		cam_reset();
+		cam->reset();
 	}
 
 	if ((vals->chanpids->ecmpid != NONE) && (vals->chanpids->ecmpid != INVALID))
 	{
 		debug("[zapit] setting ecm pid %04x\n", vals->chanpids->ecmpid);
-		descramble(vals->tsid_onid, 0x104, caid, vals->chanpids);
+		cam->setEcm(vals->tsid_onid, vals->chanpids);
 	}
 
 	if ((vals->new_tp == true) && (vals->chanpids->emmpid != NONE) && (vals->chanpids->emmpid != INVALID))
 	{
 		debug("[zapit] setting emm pid %04x\n", vals->chanpids->emmpid);
-		setemm(0x104, caid, vals->chanpids->emmpid);
+		cam->setEmm(vals->chanpids->emmpid);
 	}
 
 	delete vals;
@@ -441,15 +441,6 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		return 3;
 	}
 
-	if (caid == 0)
-	{
-#ifdef DVBS
-		caid = 0x1702;
-#else
-		caid = get_caid();
-#endif /* DVBS */
-	}
-
 #ifdef USE_EXTERNAL_CAMD
 	if (camdpid != -1)
 	{
@@ -479,10 +470,10 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 
 		/* parse program map table and store pids */
-		cit->second.setPids(parse_pmt(cit->second.getPmtPid(), caid, cit->second.getServiceId()));
+		cit->second.setPids(parse_pmt(cit->second.getPmtPid(), cam->getCaSystemId(), cit->second.getServiceId()));
 
 		/* parse conditional access table and store emm pid */
-		cit->second.setEmmPid(parse_cat(caid));
+		cit->second.setEmmPid(parse_cat(cam->getCaSystemId()));
 
 		if ((cit->second.getAudioPid() == NONE) && (cit->second.getVideoPid() == NONE))
 		{
@@ -525,7 +516,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		if ((chanpids.ecmpid != NONE) && (chanpids.ecmpid != INVALID))
 		{
 			cadescrbuf = (char*) malloc(13);
-			sprintf(cadescrbuf, "0904%04x%04x", caid, chanpids.ecmpid);
+			sprintf(cadescrbuf, "0904%04x%04x", cam->getCaSystemId(), chanpids.ecmpid);
 		}
 		else
 		{
@@ -1203,10 +1194,6 @@ void parse_command()
 	std::map<uint, uint>::iterator sit;
 	std::map<uint, CZapitChannel>::iterator cit;
 	int number = 0;
-	int caid_ver = 0;
-
-	//byteorder!!!!!!
-	//rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
 
 #ifdef DEBUG
 	debug("Command received\n");
@@ -1754,36 +1741,7 @@ void parse_command()
 				return;
 			}
 			break;
-		case 't':
-			status = "00t";
 
-			switch (caid)
-			{
-				case 0x1722 :
-					caid_ver = 1;
-					break;
-				case 0x1702 :
-					caid_ver = 2;
-					break;
-				case 0x1762 :
-					caid_ver = 4;
-					break;
-				default :
-					caid_ver = 8;
-					break;
-			}
-			caid_ver |= caver;
-			if (send(connfd, status, strlen(status),0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			if (send(connfd, &caid_ver, sizeof(int),0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
 		case 'u':
 			status = "00u";
 			if (send(connfd, status, strlen(status),0) == -1)
@@ -2237,7 +2195,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.131 2002/04/15 23:02:45 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.132 2002/04/17 08:03:07 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2306,6 +2264,7 @@ int main (int argc, char **argv)
 	{
 		printf("[zapit] unable to open frontend devices. bye.\n");
 		delete frontend;
+		delete config;
 		return -1;
 	}
 	else
@@ -2324,6 +2283,22 @@ int main (int argc, char **argv)
 		}
 	}
 
+	/* initialize cam */
+	cam = new CCam();
+
+	if (!cam->isInitialized())
+	{
+		printf("[zapit] unable to initialize cam. bye.\n");
+		delete cam;
+		delete frontend;
+		delete config;
+		return -1;
+	}
+	else
+	{
+		debug("[zapit] ca_system_id %04x\n", cam->getCaSystemId());
+	}
+
 	/* create bouquet manager */
 	g_BouquetMan = new CBouquetManager();
 
@@ -2333,11 +2308,6 @@ int main (int argc, char **argv)
 	{
 		Radiomode_on = true;
 	}
-
-#ifndef USE_EXTERNAL_CAMD
-	caver = get_caver();
-	caid = get_caid();
-#endif /* USE_EXTERNAL_CAMD */
 
 	memset(&chanpids, 0, sizeof(pids));
 
@@ -2411,15 +2381,6 @@ int main (int argc, char **argv)
 			return 0;
 		}
 	}
-
-#ifndef USE_EXTERNAL_CAMD
-	pids _pids;
-	_pids.count_vpids = 1;
-	_pids.vpid = 0xffff;
-	_pids.count_apids = 1;
-	_pids.apids[0].pid = 0xffff;
-	descramble(0xffffffff, 0xffff, 0xffff, &_pids);
-#endif /* USE_EXTERNAL_CAMD */
 
 	// create eventServer
 	eventServer = new CEventServer;

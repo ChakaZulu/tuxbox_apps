@@ -1,398 +1,176 @@
 /*
- * $Id: cam.cpp,v 1.5 2002/04/14 06:06:31 obi Exp $
+ * $Id: cam.cpp,v 1.6 2002/04/17 08:03:07 obi Exp $
+ *
+ * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
-
-#ifndef DVBS
-#include <fcntl.h>
-#include <ost/ca.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/poll.h>
-#include <unistd.h>
-#include <string>
 
 #include "cam.h"
 
-int get_caver ()
+CCam::CCam ()
 {
-	uint8_t cmd[4];
-	int step = 0;
-	int camfd;
-	
-	char buffer[128];
-	std::string cam_says;
-	int v_pos;
-	int pt;
-	struct pollfd cam_pfd;
-
-	cam_reset();
-	usleep(10000);
-	camfd = open(CAM_DEV, O_RDWR);
-  
-	if (camfd < 0)
+	if ((ca_fd = open(CA_DEV, O_RDWR)) < 0)
 	{
-		perror("[cam.cpp] " CAM_DEV);
-		return -1;
+		perror(CA_DEV);
+		initialized = false;
 	}
-  
-	cmd[0] = 0x50;
-	cmd[1] = 0x81;
-	cmd[2] = 0xF1;
-	cmd[3] = 0x4E;
-
-	if (write(camfd, &cmd, 4) < 0)
+#ifndef DVBS
+	else if ((caSystemId = readCaSystemId()) == 0)
 	{
-		perror("[cam.cpp] write");
-		close(camfd);
-		return -1;
+		initialized = false;
 	}
-
-	while (step < 10)
+	else
 	{
-		cam_pfd.fd = camfd;
-		cam_pfd.events = POLLIN;
-		cam_pfd.revents = 0;
-      
-		pt = poll(&cam_pfd, 1, 5000);
-  
-		switch (pt)
-		{
-		case -1:
-			perror("[cam.cpp] poll");
-			close(camfd);
-			return -1;
-		case 0:
-			printf("[cam.cpp] poll timeout\n");
-			close(camfd);
-			return 128;
-		}
-  	
-		memset(&buffer,0,sizeof(buffer));
-		step++;
-
-		if (read(camfd, &buffer, sizeof(buffer)) < 0)
-		{
-			perror("[cam.cpp] read");
-			usleep(500);
-			continue;
-		}
-
-		cam_says = buffer;
-		v_pos = cam_says.find("01.01.00");
-	
-		if (v_pos >= 0)
-		{
-			close(camfd);
-
-			switch (*cam_says.substr(v_pos + 9, 1).c_str())
-			{
-				case 'E':
-					return 16;
-				case 'D':
-					return 32;
-				case 'F':
-					return 64;
-				default:
-					return 128;
-			}
-		}
+		initialized = true;
 	}
-
-	close(camfd);
-	return -1;
+#else
+	else
+	{
+		caSystemId = 0x1702;
+		initialized = true;
+	}
+#endif
 }
 
-int get_caid ()
+CCam::~CCam ()
+{
+	close(ca_fd);
+}
+
+int CCam::reset ()
+{
+	uint8_t buffer[1] = { 0x09 };
+	return sendMessage(buffer, 1);
+}
+
+uint16_t CCam::readCaSystemId ()
 {
 	ca_msg_t ca_msg;
-	char cmd = 0x03;
-	int caid = 0;
-	int retries = 0;
 
-	int step = 0;
-	int camfd;
+	uint8_t buffer[1] = { 0x03 };
+	sendMessage(buffer, 1);
 
-	char buffer[128];
-	int i;
-	int len;
-	int csum;
-
-	int newcaid;
-
-	while ((caid == 0) && (retries < 3))
+	do
 	{
-		if (retries > 0)
-		{
-			usleep(100000);
-			printf("[cam.cpp] trying to read CAID, try #%d\n", retries + 1);
-		}
-  
-		camfd = open(CA_DEV, O_RDWR);
-  
-		if(camfd < 0)
-		{
-			perror("[cam.cpp] " CA_DEV);
-			return -1;
-		}
-  
-		cam_reset();
-		usleep(10000);
-  
-		/* init ca message */
-		ca_msg.index = 0;
-		ca_msg.type = 0;
-  
-		writecam((unsigned char*) &cmd,1);
-		while (step < 10)
-		{
-			step++;
-			ca_msg.length = 4;
-
-			if (ioctl(camfd, CA_GET_MSG, &ca_msg) < 0)
-			{
-				perror("[cam.cpp] CA_GET_MSG");
-				break;
-			}
-
-			len = ca_msg.length;
-      
-			if (len <= 0)
-			{
-				usleep(500);
-				//printf("Step: %d\n", step);
-				continue;
-			}
-			else
-			{
-				memcpy(buffer,ca_msg.msg,ca_msg.length);
-			}
-
-			if ((buffer[0] != 0x6F) || (buffer[1] != 0x50))
-			{
-				printf("[cam.cpp] out of sync! %02x %02x %02x %02x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
-				break;
-			}
-
-			len = buffer[2] & 0x7F;
-
-			ca_msg.length = len;
-
-			if (ioctl(camfd, CA_GET_MSG, &ca_msg) < 0)
-			{
-				perror("[cam.cpp] CA_GET_MSG");
-				break;
-			}
-
-			if ((int)ca_msg.length != len)
-			{
-				printf("[cam.cpp] invalid length");
-				break;
-			}
-      
-			memcpy(buffer + 4, ca_msg.msg, ca_msg.length);
-      
-			csum = 0;
-			for (i = 0; i < len + 4; i++)
-				csum ^= buffer[i];
-
-			if (csum)
-			{
-				printf("[cam.cpp] checksum failed. packet was: ");
-				for (i=0; i<len+4; i++) printf("%02x ", buffer[i]);
-				printf("\n");
-				continue;
-			}
-      
-			if (buffer[3] == 0x23)
-			{
-				if ((unsigned)buffer[4] == 0x83)
-				{
-					newcaid = (buffer[6]<<8)|buffer[7];
-
-					if (newcaid != caid)
-					{
-						printf("[zapit] CAID is: %04X\n", newcaid);
-						close(camfd);
-						return newcaid;
-					}
-				}
-			}
-			else
-			{
-				printf("[zapit] cam: no CAID found!\n");
-			}
-		}
-		close(camfd);
-		retries++;
+		ca_msg = getMessage(9);
 	}
-	return 0;
+	while (ca_msg.length == 0);
+
+	return (ca_msg.msg[6] << 8) | ca_msg.msg[7];
 }
 
-int _writecamnu (uint8_t cmd, uint8_t *data, uint8_t len)
+ca_msg_t CCam::getMessage (uint16_t length)
 {
-	int camfd;
-	uint8_t buffer[256];
-	int csum = 0;
-	int i;
-	int pt;
-	struct pollfd cam_pfd;
-	bool output = false;
+	ca_msg_t ca_msg;
+	ca_msg.length = length;
 
-	if((camfd = open(CAM_DEV, O_RDWR)) < 0)
+	if (ioctl(ca_fd, CA_GET_MSG, &ca_msg) < 0)
 	{
-		perror("[cam.cpp] " CAM_DEV);
-		close(camfd);
-		return -1;
+		perror("[cam.cpp] CA_GET_MSG");
+		ca_msg.length = 0;
+		return ca_msg;
 	}
 
-	buffer[0] = 0x6E;
-	buffer[1] = 0x50;
-	buffer[2] = (len + 1) | ((cmd != 0x23) ? 0x80 : 0);
-	buffer[3] = cmd;
-
-	memcpy(buffer + 4, data, len);
-
-	len += 4;
-
-	for (i = 0; i < len; i++)
-		csum ^= buffer[i];
-
-	buffer[len++]=csum;
-
-	if (write(camfd, buffer + 1, len - 1) <= 0)
-	{
-		perror("[zapit] cam write");
-		close(camfd);
-		return -1;
-	}
-
-	if (buffer[4] == 0x03)
-	{
-		close(camfd);
-		return 0; // Let get_caid read the caid;
-	}
-
-#if 0
-	if (buffer[4] == 0x84)
-	{
-  		close(camfd);
-		return; //Setting emmpid. No answer expected.
-	}
-#endif
-
-	if (buffer[4] == 0x0d)
-	{
-		output = true;
-	}
-
-#ifdef DEBUG
-	if (output)
-	{
-		printf("[cam.cpp] sending to cam:");
-		for (i = 0; i < len; i++) printf(" %02x", buffer[i]);
-		printf("\n");
-	}
-#endif
-
-	cam_pfd.fd = camfd;
-	cam_pfd.events = POLLIN;
-	cam_pfd.revents = 0;
-
-	pt = poll(&cam_pfd, 1, 2000);
-
-	if (!pt)
-	{
-		printf("[cam.cpp] poll timeout\n");
-		close(camfd);
-		return -1;
-	}
-
-	if (read(camfd, &buffer, sizeof(buffer)) < 0)
-	{
-		perror("[cam.cpp] read");
-		close(camfd);
-		return -1;
-	}
-
-#ifdef DEBUG
-	if (output)
-	{
-		printf("[cam.cpp] answer: ");
-		for (i = 0; i < buffer[2] + 4; i++) printf("%02X ", buffer[i]);
-		printf("\n");
-	}
-#endif
-
-	close(camfd);
-	return 0;
+	return ca_msg;
 }
 
-int writecam (uint8_t *data, uint8_t len)
+int CCam::sendMessage (uint8_t *data, uint16_t length)
 {
-	return _writecamnu(0x23, data, len);
-}
-
-int descramble (uint32_t tsid_onid, uint16_t unknown, uint16_t ca_system_id, pids *decode_pids)
-{
-	uint8_t buffer[100];
 	uint8_t i;
-	uint8_t p;
+	ca_msg_t *ca_msg = new ca_msg_t();
+
+	ca_msg->index = 0;
+	ca_msg->type = 0;
+	ca_msg->length = length + 4;
+
+	ca_msg->msg[0] = 0x50;
+	ca_msg->msg[1] = ca_msg->length - 3;
+	ca_msg->msg[2] = 0x23;
+
+	memcpy(ca_msg->msg + 3, data, length);
+
+	ca_msg->msg[ca_msg->length - 1] = 0x6E;
+
+	for (i = 0; i < ca_msg->length - 1; i++)
+	{
+		ca_msg->msg[ca_msg->length - 1] ^= ca_msg->msg[i];
+	}
+
+	if (ioctl(ca_fd, CA_SEND_MSG, ca_msg) < 0)
+	{
+		perror("[cam.cpp] CA_SEND_MSG");
+		delete ca_msg;
+		return -1;
+	}
+
+	delete ca_msg;
+	return 0;
+}
+
+int CCam::setEcm (uint32_t tsidOnid, pids *decodePids)
+{
+	uint8_t i;
+	uint8_t buffer[12 + (4 * (decodePids->count_vpids + decodePids->count_apids))];
+	uint8_t pos = 12;
 
 	buffer[0] = 0x0D;
-	buffer[1] = tsid_onid >> 8;
-	buffer[2] = tsid_onid & 0xFF;
-	buffer[3] = tsid_onid >> 24;
-	buffer[4] = (tsid_onid >> 16) & 0xFF;
-	buffer[5] = unknown >> 8;
-	buffer[6] = unknown & 0xFF;
-	buffer[7] = ca_system_id >> 8;
-	buffer[8] = ca_system_id & 0xFF;
-	buffer[9] = decode_pids->ecmpid >> 8;
-	buffer[10] = decode_pids->ecmpid & 0xFF;
-	buffer[11] = decode_pids->count_vpids + decode_pids->count_apids;
+	buffer[1] = tsidOnid >> 8;
+	buffer[2] = tsidOnid & 0xFF;
+	buffer[3] = tsidOnid >> 24;
+	buffer[4] = (tsidOnid >> 16) & 0xFF;
+	buffer[5] = 0x01;
+	buffer[6] = 0x04;
+	buffer[7] = caSystemId >> 8;
+	buffer[8] = caSystemId & 0xFF;
+	buffer[9] = decodePids->ecmpid >> 8;
+	buffer[10] = decodePids->ecmpid & 0xFF;
+	buffer[11] = decodePids->count_vpids + decodePids->count_apids;
 
-	p = 12;
-
-	for(i = 0; i < decode_pids->count_vpids; i++)
+	for (i = 0; i < decodePids->count_vpids; i++)
   	{
-		buffer[p++] = decode_pids->vpid >> 8;
-		buffer[p++] = decode_pids->vpid & 0xFF;
-		buffer[p++] = 0x80;
-		buffer[p++] = 0;
+		buffer[pos++] = decodePids->vpid >> 8;
+		buffer[pos++] = decodePids->vpid & 0xFF;
+		buffer[pos++] = 0x80;
+		buffer[pos++] = 0x00;
 	}
 
-	for(i = 0; i < decode_pids->count_apids; i++)
+	for (i = 0; i < decodePids->count_apids; i++)
 	{
-		buffer[p++] = decode_pids->apids[i].pid >> 8;
-		buffer[p++] = decode_pids->apids[i].pid & 0xFF;
-		buffer[p++] = 0x80;
-		buffer[p++] = 0;
+		buffer[pos++] = decodePids->apids[i].pid >> 8;
+		buffer[pos++] = decodePids->apids[i].pid & 0xFF;
+		buffer[pos++] = 0x80;
+		buffer[pos++] = 0x00;
 	}
 
-	return writecam(buffer, p);
+	return sendMessage(buffer, pos);
 }
 
-int cam_reset ()
-{
-	uint8_t buffer[1];
-	buffer[0] = 0x9;
-	return writecam(buffer, sizeof(buffer));
-}
-
-int setemm (uint16_t unknown, uint16_t ca_system_id, dvb_pid_t emm_pid)
+int CCam::setEmm (dvb_pid_t emmPid)
 {
 	uint8_t buffer[7];
-	buffer[0] = 0x84;
-	buffer[1] = unknown >> 8;
-	buffer[2] = unknown & 0xFF;
-	buffer[3] = ca_system_id >> 8;
-	buffer[4] = ca_system_id & 0xFF;
-	buffer[5] = emm_pid >> 8;
-	buffer[6] = emm_pid & 0xFF;
-	return writecam(buffer, sizeof(buffer));
-}
 
-#endif /* DVBS */
+	buffer[0] = 0x84;
+	buffer[1] = 0x01;
+	buffer[2] = 0x04;
+	buffer[3] = caSystemId >> 8;
+	buffer[4] = caSystemId & 0xFF;
+	buffer[5] = emmPid >> 8;
+	buffer[6] = emmPid & 0xFF;
+
+	return sendMessage(buffer, 7);
+}
 
