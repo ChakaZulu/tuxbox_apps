@@ -192,7 +192,7 @@ void eTextInputField::updated()
 
 void eTextInputField::nextChar()
 {
-	if ( curPos+1 < (int)maxChars )
+	if ( !maxChars || (curPos+1 < (int)maxChars) )
 	{
 		lastKey=-1;
 		++curPos;
@@ -302,11 +302,6 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 		isotext=convertUTF8DVB(text, table);
 	switch (event.type)
 	{
-		case eWidgetEvent::changedText:
-			if ( maxChars < isotext.length() )
-				maxChars = isotext.length();
-			return eButton::eventHandler( event );
-		break;
 		case eWidgetEvent::evtAction:
 		{
 			if ( curPos < 0 )
@@ -329,7 +324,7 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 			}
 			else if (event.action == &i_texteditActions->insertchar && editMode)
 			{
-				if ( isotext.length() && isotext.length() < maxChars )
+				if ( isotext.length() && (!maxChars || (isotext.length() < maxChars)) )
 				{
 					lastKey=-1;
 					isotext.insert( curPos, " ");
