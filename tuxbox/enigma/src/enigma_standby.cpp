@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>
 #include <enigma_lcd.h>
 #include <lib/gdi/lcd.h>
+#include <lib/dvb/record.h>
 #include <lib/dvb/service.h>
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbservice.h>
@@ -57,27 +58,18 @@ void eZapStandby::renewSleep()
 			eServiceInterface::getInstance()->stop();
 		}
 	}
-	eFrontend::getInstance()->savePower();
-	if ( eDVB::getInstance()->time_difference &&
-		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
-		&& eSystemInfo::getInstance()->hasStandbyWakeupTimer() )
+	if ( !eDVB::getInstance()->recorder )
 	{
-		time_t nowTime=time(0)+eDVB::getInstance()->time_difference;
-		extern void setRTC(time_t); // defined in dvb/dvbservice.cpp
-		setRTC(nowTime);
+		::sync();
+		struct stat s;
+		if (::stat("/sbin/hdparm", &s))
+			return;
+		system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
+		system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
 	}
-
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (sapi)
-		sapi->transponder=0;
-	::sync();
-
-	struct stat s;
-	if (::stat("/sbin/hdparm", &s))
-		return;
-	system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
-	system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
 }
+
+extern bool canPlayService( const eServiceReference & ref ); // implemented in timer.cpp
 
 int eZapStandby::eventHandler(const eWidgetEvent &event)
 {
@@ -107,10 +99,7 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 #endif
 		eAVSwitch::getInstance()->setInput(1);
 		eAVSwitch::getInstance()->setTVPin8(0);
-		if (!dontStopService)
-			renewSleep();
-		else
-			dontStopService=0;
+		renewSleep();
 		if( !eSystemInfo::getInstance()->hasLCD() ) //  in standby
 		{
 			time_t c=time(0)+eDVB::getInstance()->time_difference;
@@ -141,12 +130,11 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		pLCD->lcdMain->show();
 #endif
 		if (handler->getFlags() & eServiceHandler::flagIsSeekable)
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
-		if ( !eDVB::getInstance()->recorder && 
-			rezap && eServiceInterface::getInstance()->service != ref)
-		{
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 2));
+		else if ( rezap && canPlayService(ref) )
 			eServiceInterface::getInstance()->play(ref);
-		}
+		else if ( rezap && eDVB::getInstance()->recorder )
+			eServiceInterface::getInstance()->play(eDVB::getInstance()->recorder->recRef);
 		eAVSwitch::getInstance()->setInput(0);
 		eAVSwitch::getInstance()->setTVPin8(-1); // reset prev voltage
 		eStreamWatchdog::getInstance()->reloadSettings();
@@ -172,7 +160,7 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 	return eWidget::eventHandler(event);
 }
 
-eZapStandby::eZapStandby(): eWidget(0, 1), dontStopService(0)
+eZapStandby::eZapStandby(): eWidget(0, 1)
 {
 	addActionMap(&i_enigmaStandbyActions->map);
 	if (!instance)

@@ -417,6 +417,8 @@ void eDVB::recEnd()
 		return;
 	delete recorder;
 	recorder=0;
+	if ( controller && controllertype == controllerService )
+		((eDVBServiceController*)controller)->disableFrontend();
 }
 #endif //DISABLE_FILE
 

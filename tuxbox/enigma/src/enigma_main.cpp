@@ -2855,10 +2855,7 @@ standby:
 			state |= stateSleeping;
 			standbyTime.tv_sec=-1;
 			if (state&stateInTimerMode && state&stateRecording)
-			{
 				wasSleeping=3;
-				standby.setDontStopService();
-			}
 			standby.exec();   // this blocks all main actions...
 /*
 	  ...... sleeeeeeeep
