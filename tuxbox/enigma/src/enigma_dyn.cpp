@@ -1879,6 +1879,20 @@ static eString recoverRecordings(eString request, eString dirpath, eString opt, 
 }
 #endif
 
+class myTimerEntry
+{
+public:
+	int start;
+	eString timerData;
+	myTimerEntry(int pStart, eString pTimerData)
+	{
+		start = pStart;
+		timerData = pTimerData;
+	};
+	~myTimerEntry() {};
+	bool operator < (const myTimerEntry &a) const {return start < a.start;}
+};
+
 struct countTimer
 {
 	int &count;
@@ -1905,10 +1919,10 @@ struct countTimer
 
 struct getEntryString
 {
-	std::map<int, eString> &myList;
+	std::list<myTimerEntry> &myList;
 	bool repeating;
 
-	getEntryString(std::map<int, eString> &myList, bool repeating)
+	getEntryString(std::list<myTimerEntry> &myList, bool repeating)
 		:myList(myList), repeating(repeating)
 	{
 	}
@@ -1981,15 +1995,15 @@ struct getEntryString
 		tmp.strReplace("#CHANNEL#", channel);
 		tmp.strReplace("#DESCRIPTION#", description);
 
-		myList[se->time_begin]= tmp;
+		myList.push_back(myTimerEntry(se->time_begin, tmp));
 	}
 };
 
 static eString getControlTimerList()
 {
 	eString result = readFile(TEMPLATE_DIR + "timerListBody.tmp");
-	std::map<int, eString> myList;
-	std::map<int, eString>::iterator myIt;
+	std::list<myTimerEntry> myList;
+	std::list<myTimerEntry>::iterator myIt;
 
 	// regular timers
 	int count = 0;
@@ -1999,8 +2013,9 @@ static eString getControlTimerList()
 	if (count)
 	{
 		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 0));
+		myList.sort();
 		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
-			tmp += myIt->second;
+			tmp += myIt->timerData;
 		result.strReplace("#TIMER_REGULAR#", tmp);
 	}
 	else
@@ -2015,9 +2030,10 @@ static eString getControlTimerList()
 	if (count)
 	{
 		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 1));
-			for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
-				tmp += myIt->second;
-			result.strReplace("#TIMER_REPEATED#", tmp);
+		myList.sort();
+		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+			tmp += myIt->timerData;
+		result.strReplace("#TIMER_REPEATED#", tmp);
 	}
 	else
 		result.strReplace("#TIMER_REPEATED#", "<tr><td colspan=\"7\">None</td></tr>");
