@@ -4,6 +4,12 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.h,v $
+ * Revision 1.34  2003/02/21 19:18:24  happydude
+ * implement parallel transmission reception - fixes some channels
+ * improve auto detection of national subset
+ * introduce new option in config menu to disable auto detection of nat subset
+ * fix some bugs, loops, memory leaks
+ *
  * Revision 1.33  2003/02/15 11:24:06  lazyt
  * port rel to head
  *
@@ -221,12 +227,13 @@ int dmx, pig, avs, saa, rc, fb, lcd;
 int sx, ex, sy, ey;
 int vtxtpid;
 int PosX, PosY, StartX, StartY;
-int cached_pages, current_page, current_subpage, page, subpage, lastpage, pageupdate, zap_subpage_manual;
+int cached_pages, page_receiving, current_page[9], current_subpage[9], page, subpage, lastpage, pageupdate, zap_subpage_manual;
+char country_code[4];
 int inputcounter;
 int zoommode, screenmode, transpmode, hintmode, boxed;
 int catch_row, catch_col, catched_page, pagecatching;
 int prev_100, prev_10, next_10, next_100;
-int fnc_old, saa_old, screen_mode1, screen_mode2, screen_old1, screen_old2, color_mode, color_old, national_subset, national_subset_old;
+int fnc_old, saa_old, screen_mode1, screen_mode2, screen_old1, screen_old2, color_mode, color_old, national_subset, national_subset_old, auto_national, auto_national_old;
 int clear_page, clear_subpage;
 int pids_found, current_service;
 int SDT_ready;
@@ -265,6 +272,9 @@ char countrystring[] =	"  CS/SK  (#$@[\\]^_`{|}~)  "	/* czech, slovak */
 						" SR/HR/SL (#$@[\\]^_`{|}~) "	/* serbian, croatian, slovenian */
 						" SV/FI/HU (#$@[\\]^_`{|}~) "	/* swedish, finnish, hungarian */
 						"    TR (#$@[\\]^_`{|}~)    ";	/* turkish */
+
+unsigned char countryconverstiontable[] = { 1, 4, 11, 5, 3, 8, 0, 1 };
+
 //buffers
 
 unsigned char  backbuffer[720*576];
@@ -277,6 +287,7 @@ unsigned short page_atrb[PAGESIZE];	// ?????:h:cc:bbbb:ffff -> ?=reserved, h=dou
 
 unsigned char *cachetable[0x900][0x80];
 unsigned char subpagetable[0x900];
+unsigned char countrycontrolbitstable[0x900][0x80];
 
 //colormaps
 
