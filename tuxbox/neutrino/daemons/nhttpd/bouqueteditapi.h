@@ -1,0 +1,30 @@
+#ifndef __bouqueteditapi__
+#define __bouqueteditapi__
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/timeb.h>
+
+#include "request.h"
+#include "webdbox.h"
+
+
+using namespace std;
+
+//-------------------------------------------------------------------------
+class CBouqueteditAPI
+{
+	private:
+		CWebDbox * Parent;
+
+	void BEShowBouquets(CWebserverRequest* request, unsigned int selected);
+
+	public:
+		CBouqueteditAPI(CWebDbox *parent){Parent = parent;};
+		~CBouqueteditAPI(){};
+		bool Execute(CWebserverRequest* request);
+};
+
+#endif
