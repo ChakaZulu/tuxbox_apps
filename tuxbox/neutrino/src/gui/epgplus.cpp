@@ -1353,12 +1353,12 @@ EpgPlus::TChannelEventEntries::const_iterator EpgPlus::getSelectedEvent() const
 void EpgPlus::hide()
 {
 	this->frameBuffer->paintBackgroundBoxRel
-		( g_settings.screen_StartX
-		, g_settings.screen_StartY
-		, g_settings.screen_EndX - g_settings.screen_StartX
-		, g_settings.screen_EndY - g_settings.screen_StartY
-		);
-}
+	( this->usableScreenX
+	, this->usableScreenY
+	, this->usableScreenWidth
+	, this->usableScreenHeight
+	);
+} 
 
 void EpgPlus::paintChannelEntry ( int position)
 {
