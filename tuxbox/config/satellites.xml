@@ -11,6 +11,18 @@
 		<transponder frequency="12187500" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12551000" symbol_rate="22000000" polarization="1" fec_inner="4"/>
 	</sat>
+	<sat name="Astra 23.5E">
+		<transponder frequency="11540000" symbol_rate="6110000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="11592000"	symbol_rate="27500000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="11635000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
+		<transponder frequency="11675000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
+		<transponder frequency="11675000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="12508000" symbol_rate="2170000" polarisation="1" fec_inner="5"/>
+		<transponder frequency="12525000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
+		<transponder frequency="12565000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="12605000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="12605000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
+	</sat>
 	<sat name="Astra 28.2E">
 		<transponder frequency="11954000" symbol_rate="27500000" polarization="0" fec_inner="2"/>
 		<transponder frequency="12051000" symbol_rate="27500000" polarization="1" fec_inner="2"/>
@@ -29,9 +41,6 @@
 	<sat name="HispaSat 30.0W">
 		<transponder frequency="11811000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="11811000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
-	</sat>
-	<sat name="Kopernikus 23.5E">
-		<transponder frequency="11466000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 	</sat>
 	<sat name="Sirius 5.0E">
 		<transponder frequency="11376000" symbol_rate="2170000" polarization="1" fec_inner="3"/>
