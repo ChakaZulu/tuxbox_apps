@@ -35,6 +35,7 @@
 
 #include "widget/messagebox.h"
 #include "widget/hintbox.h"
+#include "widget/stringinput.h"
 
 
 //
@@ -105,6 +106,18 @@ int CFavorites::exec(CMenuTarget* parent, string)
 	if (parent)
 	{
 		parent->hide();
+	}
+	
+	// PIN
+	if(g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_CHANGETOLOCKED)
+	{
+		char pin[5]={0,0,0,0,0};
+		CPINInput pi( "parentallock.head", pin, 4);
+		pi.exec(this,"");
+		if(strcmp(pin, g_settings.parentallock_pincode)!=0)
+		{
+			return res;
+		}
 	}
 
 	if (!bouquetList) {
