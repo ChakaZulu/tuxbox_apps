@@ -436,15 +436,13 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eString command = opt["command"];
 	if (command == "rewind")
 	{
-		videopos -= 1;
-		if (videopos < 0)
+		if (!--videopos)
 			videopos = 0;
 	}
 	else
 	if (command == "forward")
 	{
-		videopos += 1;
-		if (videopos > 10)
+		if (++videopos > 10)
 			videopos = 10;
 	}
 	else
@@ -462,28 +460,29 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	{
 		eZapMain::getInstance()->play();
 	}
+
 	return "<script language=\"javascript\">window.close();</script>";
 }
 
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt = getRequestOptions(opts);
 	eString result;
-	eString volume=opt["volume"];
+	eString volume = opt["volume"];
 	if (volume)
 	{
-		int vol=atoi(volume.c_str());
+		int vol = atoi(volume.c_str());
 		eAVSwitch::getInstance()->changeVolume(1, vol);
-		result+="Volume set.<br>\n";
+		result += "Volume set.<br>\n";
 	}
-	eString mute=opt["mute"];
+	eString mute = opt["mute"];
 	if (mute)
 	{
 		eAVSwitch::getInstance()->toggleMute();
-		result+="mute set<br>\n";
+		result += "mute set<br>\n";
 	}
-	result+=eString().sprintf("volume: %d<br>\nmute: %d<br>\n", eAVSwitch::getInstance()->getVolume(), eAVSwitch::getInstance()->getMute());
+	result += eString().sprintf("volume: %d<br>\nmute: %d<br>\n", eAVSwitch::getInstance()->getVolume(), eAVSwitch::getInstance()->getMute());
 	return result;
 }
 
@@ -564,52 +563,39 @@ static eString channels_getcurrent(eString request, eString dirpath, eString opt
 
 static eString getVolume()
 {
-	return eString().setNum((63-eAVSwitch::getInstance()->getVolume())*100/63, 10);
+	return eString().setNum((63 - eAVSwitch::getInstance()->getVolume()) * 100 / 63, 10);
 }
 
 static eString setVolume(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString,eString> opt=getRequestOptions(opts);
-	eString mute = "0";
+	std::map<eString,eString> opt = getRequestOptions(opts);
+	eString mute;
 	eString volume;
 	eString result;
-	int mut = 0, vol = 0;
+	int vol = 0;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	result += "<script language=\"javascript\">window.close();</script>";
 	mute = opt["mute"];
 	volume = opt["volume"];
 
-	if (!mute)
-	{
-		mut = 0;
-	}
-	else
-	{
+	if (mute)
 		eAVSwitch::getInstance()->toggleMute();
-		result += "+ok";
-		return result;
-	}
 
 	if (volume)
 	{
 		vol = atoi(volume.c_str());
-	}
-	else
-	{
-		result += "[no params]";
-		return result;
-	}
-	if (vol > 10) vol = 10;
-	if (vol < 0) vol = 0;
+		if (vol > 10) vol = 10;
+		if (vol < 0) vol = 0;
 
-	float temp = (float)vol;
-	temp = temp * 6.3;
-	vol = (int)temp;
+		float temp = (float)vol;
+		temp = temp * 6.3;
+		vol = (int)temp;
 
-	eAVSwitch::getInstance()->changeVolume(1, 63-vol);
-	result += "+ok";
+		eAVSwitch::getInstance()->changeVolume(1, 63 - vol);
+	}
+
+	result += "<script language=\"javascript\">window.close();</script>";
 
 	return result;
 }
@@ -623,24 +609,19 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	result += "<script language=\"javascript\">window.close();</script>";
-	video = opt["videopos"];
+	video = opt["position"];
 
 	if (video)
 	{
-		vid=atoi(video.c_str());
-	}
-	else
-	{
-		result += "[no params]";
-		return result;
-	}
-	if (vid > 10) vid = 10;
-	if (vid < 0) vid = 0;
+		vid = atoi(video.c_str());
+		if (vid > 10) vid = 10;
+		if (vid < 0) vid = 0;
 
-	//set video position here...
-	videopos = vid;
-	result += "+ok";
+		//set video position here...
+		videopos = vid;
+	}
+
+	result += "<script language=\"javascript\">window.close();</script>";
 
 	return result;
 }
@@ -839,67 +820,57 @@ static eString getStats()
 
 static eString getVolBar()
 {
-	eString result;
+	std::stringstream result;
 	int volume = atoi(getVolume().c_str());
 
-	result += "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
-	result += "<tr>";
+	result << "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
+		"<tr>";
 
 	for (int i = 1; i <= (volume / 10); i++)
 	{
-		result += "<td width=15 height=8><a class=\"volgreen\" href=\"javascript:setVol(";
-		result += eString().setNum(i, 10);
-		result += ")\"><img src=\"trans.gif\" border=0></a></span></td>";
+		result << "<td width=15 height=8><a class=\"volgreen\" href=\"javascript:setVol(" << i << ")\">"
+			"<img src=\"trans.gif\" border=0></a></span></td>";
 	}
 	for (int i = (volume / 10) + 1; i <= 10; i++)
 	{
-		result += "<td width=15 height=8><a class=\"volnot\" href=\"javascript:setVol(";
-		result += eString().setNum(i, 10);
-  		result += ")\"><img src=\"trans.gif\" border=0></a></span></td>";
+		result << "<td width=15 height=8><a class=\"volnot\" href=\"javascript:setVol(" << i << ")\">"
+			"<img src=\"trans.gif\" border=0></a></span></td>";
 	}
 
-	result += "<td>";
-	if (eAVSwitch::getInstance()->getMute() == 1)
-	{
-		result += "<a class=\"mute\" href=\"javascript:Mute()\">";
-		result += "<img src=\"speak_off.gif\" border=0></a>";
-	}
+	result << "<td>"
+		"<a class=\"mute\" href=\"javascript:Mute(" << eAVSwitch::getInstance()->getMute() << ")\">";
+	if (eAVSwitch::getInstance()->getMute())
+		result << "<img src=\"speak_off.gif\" border=0></a>";
 	else
-	{
-		result += "<a class=\"mute\" href=\"javascript:unMute()\">";
-		result += "<img src=\"speak_on.gif\" border=0></a>";
-	}
-	result += "</td>";
+		result << "<img src=\"speak_on.gif\" border=0></a>";
+	result << "</td>"
 
-	result += "</tr>";
-	result += "</table>";
-	return result;
+		<< "</tr>"
+		<< "</table>";
+	return result.str();
 }
 
 static eString getVideoBar()
 {
-	eString result;
-//	int videopos = 0;
+	std::stringstream result;
 
-	result += "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
-	result += "<tr>";
+	result << "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
+		"<tr>";
 
 	for (int i = 1; i <= (videopos / 10); i++)
 	{
-		result += "<td width=15 height=8><a class=\"vidblue\" href=\"javascript:setVid(";
-		result += eString().setNum(i, 10);
-		result += ")\"><img src=\"trans.gif\" border=0></a></span></td>";
+		result << "<td width=15 height=8><a class=\"vidblue\" href=\"javascript:setVid(" << i << ")\">"
+			"<img src=\"trans.gif\" border=0></a></span></td>";
 	}
 	for (int i = (videopos / 10) + 1; i <= 10; i++)
 	{
-		result += "<td width=15 height=8><a class=\"vidnot\" href=\"javascript:setVid(";
-		result += eString().setNum(i, 10);
-  		result += ")\"><img src=\"trans.gif\" border=0></a></span></td>";
+		result << "<td width=15 height=8><a class=\"vidnot\" href=\"javascript:setVid(" << i << ")\">"
+			"<img src=\"trans.gif\" border=0></a></span></td>";
 	}
 
-	result += "</tr>";
-	result += "</table>";
-	return result;
+	result << "</tr>"
+		"</table>";
+	return result.str();
 }
 
 class eWebNavigatorListDirectory: public Object
