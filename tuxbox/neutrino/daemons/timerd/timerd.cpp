@@ -45,6 +45,7 @@
 #include "timerdMsg.h"
 #include "debug.h"
 
+static CTimerManager* TimerManager = NULL;
 
 void parse_command(int connfd, CTimerd::commandHead* rmessage)
 {
@@ -58,6 +59,33 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 	switch (rmessage->cmd)
 	{
 		case CTimerd::CMD_ADDTIMER:
+			CTimerd::commandAddTimer msgAddTimer;
+			read(connfd,&msgAddTimer, sizeof(msgAddTimer));
+
+			CTimerEvent* event;
+			switch (msgAddTimer.evType)
+			{
+				case CTimerdClient::TIMER_SHUTDOWN :
+					event = new CTimerEvent_Shutdown(
+						msgAddTimer.month, msgAddTimer.day,
+						msgAddTimer.hour, msgAddTimer.min,
+						msgAddTimer.evID);
+				break;
+				case CTimerdClient::TIMER_NEXTPROGRAM :
+					event = new CTimerEvent_NextProgram(
+						msgAddTimer.month, msgAddTimer.day,
+						msgAddTimer.hour, msgAddTimer.min,
+						msgAddTimer.evID);
+					static_cast<CTimerEvent_NextProgram*>(event)->eventInfo = *((CTimerEvent_NextProgram::EventInfo*)msgAddTimer.data);
+				break;
+				default:
+					event = new CTimerEvent(
+						msgAddTimer.month, msgAddTimer.day,
+						msgAddTimer.hour, msgAddTimer.min,
+						msgAddTimer.evID, msgAddTimer.evType);
+			}
+
+			TimerManager->addEvent( event);
 			break;
 		case CTimerd::CMD_REMOVETIMER:
 			break;
@@ -82,7 +110,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 	*/
-	
+
 	struct sockaddr_un servaddr;
 	int clilen;
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
@@ -118,8 +146,7 @@ int main(int argc, char **argv)
 */
 
 	//startup Timer
-	CTimerManager* TimerManager = CTimerManager::getInstance();
-
+	TimerManager = CTimerManager::getInstance();
 	try
 	{
 		struct CTimerd::commandHead rmessage;

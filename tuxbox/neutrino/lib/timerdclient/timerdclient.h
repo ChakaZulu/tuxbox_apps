@@ -35,8 +35,11 @@ class CTimerdClient
 
 		enum timerTypes
 		{
-			TIMER_SHUTDOWN = 1
+			TIMER_SHUTDOWN = 1,
+			TIMER_NEXTPROGRAM
 		};
+
+
 
 
 

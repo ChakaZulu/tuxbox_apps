@@ -71,7 +71,13 @@ class CTimerd
 
 		struct commandAddTimer
 		{
-
+			int   month;
+			int   day;
+			int   hour;
+			int   min;
+			int   evType;
+			int   evID;
+			void* data;
 		};
 
 

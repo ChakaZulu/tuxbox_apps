@@ -32,15 +32,21 @@
 #include <map>
 #include <string>
 
+#include "timerdclient.h"
+
+using namespace std;
 
 class CTimerEvent;
+typedef map<int, CTimerEvent*> CTimerEventMap;
+
+
 class CTimerManager
 {
 	//singleton
 	private:
 		int					eventID;
 		CTimerManager();
-		std::map<int, CTimerEvent*>	events;
+		CTimerEventMap		events;
 		CTimerEvent			*nextEvent();
 		pthread_t			thrTimer;
 
@@ -48,7 +54,7 @@ class CTimerManager
 
 	public:
 		static CTimerManager* getInstance();
-		
+
 		int addEvent(CTimerEvent*);
 		void removeEvent(int eventID);
 		CTimerEvent* getNextEvent();
@@ -62,13 +68,39 @@ class CTimerEvent
 		int				eventType;
 		struct tm		alarmtime;
 
+		CTimerEvent( int mon = 0, int day = 0, int hour = 0, int min = 0, int evID = 0, int evType = 0) :
+			eventID(evID), eventType( evType) { alarmtime.tm_mon = mon; alarmtime.tm_mday = day; alarmtime.tm_hour = hour; alarmtime.tm_min = min;};
+
+		inline int time();
+		bool operator <= ( CTimerEvent&);
+		bool operator >= ( CTimerEvent&);
+
+		static CTimerEvent now();
+
 		virtual void fireEvent(){};
 };
 
 class CTimerEvent_Shutdown : public CTimerEvent
 {
 	public:
-		CTimerEvent_Shutdown();
+		CTimerEvent_Shutdown( int mon = 0, int day = 0, int hour = 0, int min = 0, int evID = 0) :
+			CTimerEvent(mon, day, hour, min, evID, CTimerdClient::TIMER_SHUTDOWN){};
+		virtual void fireEvent();
+};
+
+class CTimerEvent_NextProgram : public CTimerEvent
+{
+	public:
+
+		struct EventInfo
+		{
+			int     onidSid;
+			string  name;
+			int     fsk;
+		} eventInfo;
+
+		CTimerEvent_NextProgram( int mon = 0, int day = 0, int hour = 0, int min = 0, int evID = 0) :
+			CTimerEvent(mon, day, hour, min, evID, CTimerdClient::TIMER_NEXTPROGRAM){};
 		virtual void fireEvent();
 };
 

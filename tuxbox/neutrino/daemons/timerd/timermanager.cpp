@@ -24,9 +24,8 @@
 */
 
 #include "timermanager.h"
-#include "timerdclient.h"
 #include "debug.h"
-
+#include <unistd.h>
 
 
 CTimerManager::CTimerManager()
@@ -56,26 +55,41 @@ void* CTimerManager::timerThread(void *arg)
 	CTimerManager *timerManager = (CTimerManager*) arg;
 	while (1)
 	{
-		//tooooooooooooooooooooooooooooooooodoooo	
+		CTimerEvent eNow = CTimerEvent::now();
+
+		// fire events who's time has come
+		CTimerEventMap::iterator pos = timerManager->events.begin();
+		for(;pos != timerManager->events.end();pos++)
+		{
+			if( *(pos->second) <= eNow)
+			{
+				pos->second->fireEvent();
+			}
+		}
+
+		// delete events who's time has gone
+		pos = timerManager->events.begin();
+		for(;pos != timerManager->events.end();pos++)
+		{
+			if( *(pos->second) <= eNow)
+			{
+				delete pos->second;
+				timerManager->events.erase( pos->first);
+			}
+		}
+		usleep( 60000000);
 	}
 }
 
 CTimerEvent* CTimerManager::getNextEvent()
 {
-	int lngTime = (events[0]->alarmtime.tm_mon+ 1)* 1000000+ (events[0]->alarmtime.tm_mday)* 10000+
-		(events[0]->alarmtime.tm_hour)* 100+ events[0]->alarmtime.tm_min;	
 	CTimerEvent *erg = events[0];
-	std::map<int, CTimerEvent*>::iterator pos = events.begin();
+	CTimerEventMap::iterator pos = events.begin();
 	for(;pos!=events.end();pos++)
 	{
-		CTimerEvent *tmp = pos->second;
-		int lngTime2 = (tmp->alarmtime.tm_mon+ 1)* 1000000+ (tmp->alarmtime.tm_mday)* 10000+
-			(tmp->alarmtime.tm_hour)* 100+ tmp->alarmtime.tm_min;	
-
-		if(lngTime2<lngTime)
+		if(pos->second <= erg)
 		{
-			erg = events[0];
-			lngTime=lngTime2;
+			erg = pos->second;
 		}
 	}
 	return erg;
@@ -98,15 +112,54 @@ void CTimerManager::removeEvent(int eventID)
 	events.erase(eventID);
 }
 
-
 //------------------------------------------------------------
-
-CTimerEvent_Shutdown::CTimerEvent_Shutdown()
+int CTimerEvent::time()
 {
-	eventType = CTimerdClient::TIMER_SHUTDOWN;
+	return( (alarmtime.tm_mon+ 1) * 1000000 +
+			(alarmtime.tm_mday)   * 10000 +
+			(alarmtime.tm_hour)   * 100 +
+			 alarmtime.tm_min );
 }
+
+CTimerEvent CTimerEvent::now()
+{
+	CTimerEvent result = CTimerEvent( );
+
+	time_t actTime_t;
+	::time(&actTime_t);
+
+	dprintf("time_t %d\n", actTime_t);
+
+	struct tm* actTime = localtime(&actTime_t);
+    printf("%x\n", actTime);
+	printf("%d %d %d %d", actTime->tm_mon+1, actTime->tm_mday, actTime->tm_hour, actTime->tm_min);
+	actTime->tm_mon += 1;
+	result.alarmtime = *actTime;
+
+	return(result);
+}
+
+bool CTimerEvent::operator <= ( CTimerEvent& e)
+{
+	dprintf( "compare %d %d \n", time(), e.time());
+	return ( time() <= e.time());
+}
+
+bool CTimerEvent::operator >= ( CTimerEvent& e)
+{
+	return ( time() >= e.time());
+}
+
+//-----------------------------------------
 
 void CTimerEvent_Shutdown::fireEvent()
 {
 	//event in neutrinos remoteq. schreiben
+}
+
+//-----------------------------------------
+
+void CTimerEvent_NextProgram::fireEvent()
+{
+	printf("[timerd] next program \n");
 }
