@@ -435,8 +435,6 @@ static	void	DelLines( int li1, int li2 )
 			*t = *s;
 
 	FBMove( 3*32, 2*32, 3*32, (2+lines)*32, 10*32, (ny-2)*32 );
-
-	level+=(lines-1);
 }
 
 void	RemoveCompl( void )
@@ -446,6 +444,7 @@ void	RemoveCompl( void )
 	unsigned char	*s;
 	int				li1=0;
 	int				li2=0;
+	int				lines = 0;
 
 	for( y=15; y>1; y-- )
 	{
@@ -457,11 +456,15 @@ void	RemoveCompl( void )
 		if ( x != 13 )
 		{
 			if ( li1 )
+			{
 				DelLines( li1, li2 );
+				y=li1+1;
+			}
 			li1=0;
 			li2=0;
 			continue;
 		}
+		lines++;
 		if ( li1 )
 			li2=y;
 		else
@@ -469,6 +472,9 @@ void	RemoveCompl( void )
 	}
 	if ( li1 )
 		DelLines( li1, li2 );
+
+	if ( lines )
+		level+=(lines-1);
 }
 
 void	BoardInitialize( void )
