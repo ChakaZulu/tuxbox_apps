@@ -1,9 +1,10 @@
 #ifndef __esection_h
 #define __esection_h
 
-#include <ebase.h>
 #include <asm/types.h>
-#include <libsig_comp.h>
+
+#include <include/libsig_comp.h>
+#include <core/base/ebase.h>
 
 #define SECREAD_INORDER	1			// read them in order (read full tables)
 #define SECREAD_CRC			2			// check CRCs

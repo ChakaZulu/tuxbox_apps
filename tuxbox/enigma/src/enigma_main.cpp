@@ -1,34 +1,32 @@
+#include "enigma_main.h"
+
 #include <errno.h>
+#include <iomanip>
+
+#include <apps/enigma/enigma_mainmenu.h>
+#include <apps/enigma/enigma_event.h>
+#include <apps/enigma/sselect.h>
+#include <apps/enigma/enigma.h>
+#include <apps/enigma/enigma_lcd.h>
+#include <apps/enigma/enigma_plugins.h>
+#include <apps/enigma/download.h>
+#include <apps/enigma/epgwindow.h>
 #include <core/base/i18n.h>
 #include <core/system/init.h>
 #include <core/system/econfig.h>
-#include <core/dvb/edvb.h>
 #include <core/dvb/epgcache.h>
 #include <core/dvb/esection.h>
 #include <core/dvb/decoder.h>
+#include <core/dvb/iso639.h>
 #include <core/gdi/font.h>
 #include <core/gui/elabel.h>
 #include <core/gui/eprogress.h>
 #include <core/gui/enumber.h>
 #include <core/gui/eskin.h>
-#include <core/gui/elistbox.h>
 #include <core/gui/ebutton.h>
 #include <core/gui/actions.h>
 #include <core/driver/rc.h>
 #include <core/driver/streamwd.h>
-
-#include "enigma_main.h"
-#include "iso639.h"
-#include "enigma_mainmenu.h"
-#include "enigma_event.h"
-#include "sselect.h"
-#include "eskin.h"
-#include "font.h"
-#include "enigma.h"
-#include "enigma_lcd.h"
-#include "enigma_plugins.h"
-#include "download.h"
-#include "epgwindow.h"
 
 struct enigmaMainActions
 {
@@ -148,7 +146,7 @@ public:
 	}
 };
 
-static eString getISO639Description(char *iso)
+eString getISO639Description(char *iso)
 {
 	for (unsigned int i=0; i<sizeof(iso639)/sizeof(*iso639); ++i)
 	{
@@ -163,13 +161,43 @@ static eString getISO639Description(char *iso)
 void NVODStream::EITready(int error)
 {
 	eDebug("NVOD eit ready: %d", error);
-	listbox->sort();
+
+	if (!eit.error)
+	{
+		for (ePtrList<EITEvent>::const_iterator event(eit.events); event != eit.events.end(); ++event)		// always take the first one
+		{
+			tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
+
+			if (begin)
+				text << std::setfill('0') << std::setw(2) << begin->tm_hour << ':' << std::setw(2) << begin->tm_min;
+
+			time_t endtime=event->start_time+event->duration;
+			tm *end=event->start_time!=-1?localtime(&endtime):0;
+
+			if (end)
+				text << " bis " << std::setw(2) << end->tm_hour << ':' << std::setw(2) << end->tm_min;
+
+			time_t now=time(0)+eDVB::getInstance()->time_difference;
+			if ((event->start_time <= now) && (now < endtime))
+			{
+				int perc=(now-event->start_time)*100/event->duration;
+				text << " (" << perc << "%, " << perc*3/100 << '.' << std::setw(2) << (perc*3)%100 << " Euro lost)";
+			}
+			break;
+		}
+	}
+	else
+		text << "Service " << std::setw(4) << std::hex << service_id;
+
+	((eListBox<NVODStream>*)listbox)->sort(); // <<< without explicit cast the compiler nervs ;)
+
 	if (listbox && listbox->isVisible())
 		listbox->invalidate();
+
 }
 
-NVODStream::NVODStream(eListbox *listbox, int transport_stream_id, int original_network_id, int service_id)
-	: eListboxEntry(listbox), transport_stream_id(transport_stream_id), original_network_id(original_network_id),
+NVODStream::NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, int original_network_id, int service_id)
+	: eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox), transport_stream_id(transport_stream_id), original_network_id(original_network_id),
 		service_id(service_id), eit(EIT::typeNowNext, service_id,
 		(			(eDVB::getInstance()->transport_stream_id==transport_stream_id)
 			&&	(eDVB::getInstance()->original_network_id==original_network_id))?EIT::tsActual:EIT::tsOther		)
@@ -178,188 +206,153 @@ NVODStream::NVODStream(eListbox *listbox, int transport_stream_id, int original_
 	eit.start();
 }
 
-eString NVODStream::getText(int col) const
+void eNVODSelector::selected(NVODStream* nv)
 {
-	if (eit.ready && !eit.error)
-	{
-		for (ePtrList<EITEvent>::const_iterator i(eit.events); i != eit.events.end(); ++i)		// always take the first one
-		{
-			eString s="--:--";
-			EITEvent *event=*i;
-			if (col==-1)
-				return eString().sprintf("%08x", (unsigned int)event->start_time);
-			tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
-			if (begin)
-				s.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
-			time_t endtime=event->start_time+event->duration;
-			tm *end=event->start_time!=-1?localtime(&endtime):0;
-			if (end)
-				s+=eString().sprintf(" bis %02d:%02d", end->tm_hour, end->tm_min);
-			time_t now=time(0)+eDVB::getInstance()->time_difference;
-			if ((event->start_time <= now) && (now < endtime))
-			{
-				int perc=(now-event->start_time)*100/event->duration;
-				s+=+" ("+eString().sprintf("%d%%, %d.%02d Euro lost)", perc, perc*3/100, (perc*3)%100);
-			}
-			return s;
-		}
-	}
-	eString s;
-	s.sprintf("Service %04x", service_id);
-	return s;
-}
-
-void eNVODSelector::selected(eListboxEntry *l)
-{
-	NVODStream *nv=(NVODStream*)l;
 	if (nv)
 		eDVB::getInstance()->switchService(nv->service_id, nv->original_network_id, nv->transport_stream_id, 5);	// faked service_type
+
 	close(0);
 }
 
-eNVODSelector::eNVODSelector(): eWindow(0)
+eNVODSelector::eNVODSelector()
+	:eListBoxWindow<NVODStream>(_("NVOD"), 10, eSkin::getActive()->queryValue("fontsize", 20), 440)
 {
-	setText("NVOD");
 	move(ePoint(100, 100));
-	resize(eSize(440, 380));
-	list=new eListbox(this, eSkin::getActive()->queryValue("fontsize", 20));
-	list->move(ePoint(0, 0));
-	list->resize(getClientSize());
-	CONNECT(list->selected, eNVODSelector::selected);
+	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
+	CONNECT(list.selected, eNVODSelector::selected);
 }
 
 void eNVODSelector::clear()
 {
-	list->clearList();
+	list.clearList();
 }
 
 void eNVODSelector::add(NVODReferenceEntry *ref)
 {
-	new NVODStream(list, ref->transport_stream_id, ref->original_network_id, ref->service_id);
+	new NVODStream(&list, ref->transport_stream_id, ref->original_network_id, ref->service_id);
 }
 
-AudioStream::AudioStream(eListbox *listbox, PMTEntry *stream): eListboxEntry(listbox), stream(stream)
+AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
+	:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), stream(stream)
 {
 }
 
-eString AudioStream::getText(int col) const
+void AudioStream::redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
 {
-	int isAC3=0;
-	eString language;
-	int component_tag=-1;
-	language.sprintf("PID %04x", stream->elementary_PID);
-	for (ePtrList<Descriptor>::iterator i(stream->ES_info); i != stream->ES_info.end(); ++i)
-	{
-		Descriptor *c=*i;
-		if (c->Tag()==DESCR_AC3)
-			isAC3=1;
-		else if (c->Tag()==DESCR_ISO639_LANGUAGE)
-			language=getISO639Description(((ISO639LanguageDescriptor*)c)->language_code);
-		else if (c->Tag()==DESCR_STREAM_ID)
-			component_tag=((StreamIdentifierDescriptor*)c)->component_tag;
-		else if (c->Tag()==DESCR_LESRADIOS)
+		int isAC3=0;
+		eString language;
+		int component_tag=-1;
+		for (ePtrList<Descriptor>::iterator c(stream->ES_info); c != stream->ES_info.end(); ++c)
 		{
-			language=eString().sprintf("%d.) ", (((LesRadiosDescriptor*)c)->id));
-			language+=((LesRadiosDescriptor*)c)->name;
+			if (c->Tag()==DESCR_AC3)
+				isAC3=1;
+			else if (c->Tag()==DESCR_ISO639_LANGUAGE)
+				language=getISO639Description(((ISO639LanguageDescriptor*)*c)->language_code);
+			else if (c->Tag()==DESCR_STREAM_ID)
+				component_tag=((StreamIdentifierDescriptor*)*c)->component_tag;
+			else if (c->Tag()==DESCR_LESRADIOS)
+			{
+				language=eString().sprintf("%d.) ", (((LesRadiosDescriptor*)*c)->id));
+				language+=((LesRadiosDescriptor*)*c)->name;
+			}
 		}
-	}
-	if (component_tag!=-1)
-	{
-		EIT *eit=eDVB::getInstance()->getEIT();
-		if (eit)
+		if (!language)
+			language.sprintf("PID %04x", stream->elementary_PID);
+		if (component_tag!=-1)
 		{
-			for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
-				if ((e->running_status>=2)||(!e->running_status))		// currently running service
-					for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
-						if (d->Tag()==DESCR_COMPONENT)
-							if (((ComponentDescriptor*)*d)->component_tag==component_tag)
-								language=((ComponentDescriptor*)*d)->text;
-			eit->unlock();
+			EIT *eit=eDVB::getInstance()->getEIT();
+			if (eit)
+			{
+				for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
+					if ((e->running_status>=2)||(!e->running_status))		// currently running service
+						for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+							if (d->Tag()==DESCR_COMPONENT && ((ComponentDescriptor*)*d)->component_tag == component_tag)
+									language=((ComponentDescriptor*)*d)->text;
+    					eit->unlock();
+			}
 		}
-	}
-	if (isAC3)
-		language+=" (AC3)";
-	return language;
-}
+		if (isAC3)
+			language+=" (AC3)";
 
-void eAudioSelector::selected(eListboxEntry *l)
+		rc->setForegroundColor(highlited?coActive:coNormal);
+		rc->setFont(listbox->getEntryFnt());
+
+		if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
+				rc->fill(rect);
+
+		rc->renderText(rect, language);
+
+		eWidget* p = listbox->getParent();			
+		if (highlited && p && p->LCDElement)
+ 			p->LCDElement->setText(language);
+	}
+
+void eAudioSelector::selected(AudioStream *l)
 {
 	if (l)
 	{
-		eDVB::getInstance()->setPID(((AudioStream*)l)->stream);
+		eDVB::getInstance()->setPID(l->stream);
 		eDVB::getInstance()->setDecoder();
 	}
 	close(0);
 }
 
-eAudioSelector::eAudioSelector(): eWindow(0)
+eAudioSelector::eAudioSelector()
+	:eListBoxWindow<AudioStream>(_("Audio"), 10, eSkin::getActive()->queryValue("fontsize", 20), 330)
 {
-	setText("Audio");
 	move(ePoint(100, 100));
-	resize(eSize(300, 330));
-	list=new eListbox(this, eSkin::getActive()->queryValue("fontsize", 20));
-	list->move(ePoint(0, 0));
-	list->resize(getClientSize());
-	CONNECT(list->selected, eAudioSelector::selected);
+	CONNECT(list.selected, eAudioSelector::selected);
 }
 
 void eAudioSelector::clear()
 {
-	list->clearList();
+	list.clearList();
 }
 
 void eAudioSelector::add(PMTEntry *pmt)
 {
-	new AudioStream(list, pmt);
+	new AudioStream(&list, pmt);
 }
 
-SubService::SubService(eListbox *listbox, LinkageDescriptor *descr): eListboxEntry(listbox)
+SubService::SubService(eListBox<SubService> *listbox, LinkageDescriptor *descr)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*) listbox)
 {
-	name=eString((const char*)descr->private_data);
+	text=(const char*)descr->private_data;
 	transport_stream_id=descr->transport_stream_id;
 	original_network_id=descr->original_network_id;
 	service_id=descr->service_id;
 }
 
-eString SubService::getText(int col) const
+eSubServiceSelector::eSubServiceSelector()
+	:eListBoxWindow<SubService>(_("Regie"), 10, eSkin::getActive()->queryValue("fontsize", 20), 330)
 {
-	return name;
-}
-
-eSubServiceSelector::eSubServiceSelector(): eWindow(0)
-{
-	setText("Bildregie");
 	move(ePoint(100, 100));
-	resize(eSize(350, 330));
-	list=new eListbox(this, eSkin::getActive()->queryValue("fontsize", 20));
-	list->move(ePoint(0, 0));
-	list->resize(getClientSize());
-	CONNECT(list->selected, eSubServiceSelector::selected);
+	CONNECT(list.selected, eSubServiceSelector::selected);
 }
 
-void eSubServiceSelector::selected(eListboxEntry *l)
+void eSubServiceSelector::selected(SubService *ss)
 {
-	SubService *ss=(SubService*)l;
-
 	if (ss)
 		eDVB::getInstance()->switchService(ss->service_id, ss->original_network_id, ss->transport_stream_id, 5);	// faked service_type
+
 	close(0);
 }
 
 void eSubServiceSelector::clear()
 {
-	list->clearList();
+	list.clearList();
 }
 
 void eSubServiceSelector::add(LinkageDescriptor *ref)
 {
-	new SubService(list, ref);
+	new SubService(&list, ref);
 }
 
 void eServiceNumberWidget::selected(int *res)
 {
 	if (!res)
 		close(-1);
+
 	chnum=*res;
 	close(chnum);
 //	timer->start(100);
@@ -821,6 +814,9 @@ void eZapMain::hideInfobar()
 
 void eZapMain::showSubserviceMenu()
 {
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	pLCD->lcdMain->hide();
+	pLCD->lcdMenu->show();
 	if (flags&ENIGMA_NVOD)
 	{
 		if (isVisible())
@@ -828,6 +824,7 @@ void eZapMain::showSubserviceMenu()
 			timeout.stop();
 			hide();
 		}
+		nvodsel.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		nvodsel.show();
 		nvodsel.exec();
 		nvodsel.hide();
@@ -839,24 +836,33 @@ void eZapMain::showSubserviceMenu()
 			timeout.stop();
 			hide();
 		}
+		subservicesel.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		subservicesel.show();
 		subservicesel.exec();
 		subservicesel.hide();
 	}
+	pLCD->lcdMenu->hide();
+	pLCD->lcdMain->show();
 }
 
 void eZapMain::showAudioMenu()
 {
 	if (flags&ENIGMA_AUDIO)
 	{
+		eZapLCD* pLCD = eZapLCD::getInstance();
+		pLCD->lcdMain->hide();
+		pLCD->lcdMenu->show();
 		if (isVisible())
 		{
 			timeout.stop();
 			hide();
 		}
+		audiosel.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		audiosel.show();
 		audiosel.exec();
 		audiosel.hide();
+		pLCD->lcdMenu->hide();
+		pLCD->lcdMain->show();
 	}
 }
 
@@ -930,9 +936,15 @@ void eZapMain::showEPG()
 		}
 		eEventDisplay ei(service->service_name.c_str(), &events);			
 		actual_eventDisplay=&ei;
+		eZapLCD* pLCD = eZapLCD::getInstance();
+		pLCD->lcdMain->hide();
+		pLCD->lcdMenu->show();
+		ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		ei.show();
 		ei.exec();
 		ei.hide();
+		pLCD->lcdMenu->hide();
+		pLCD->lcdMain->show();
 		actual_eventDisplay=0;
 	} else	
 #endif
@@ -944,9 +956,15 @@ void eZapMain::showEPG()
 			if (eit)
 				eit->unlock();		// HIER liegt der hund begraben.
 			actual_eventDisplay=&ei;
+			eZapLCD* pLCD = eZapLCD::getInstance();
+			pLCD->lcdMain->hide();
+			pLCD->lcdMenu->show();
+			ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 			ei.show();
 			ei.exec();
 			ei.hide();
+			pLCD->lcdMenu->hide();
+			pLCD->lcdMain->show();
 			actual_eventDisplay=0;
 		}
 	}
@@ -982,9 +1000,9 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (event.action == &i_enigmaMainActions->prevService)
 			prevService();
 		else if (event.action == &i_enigmaMainActions->serviceListDown)
-			showServiceSelector(eListbox::dirDown);
+			showServiceSelector(eListBox<eService>::dirDown);
 		else if (event.action == &i_enigmaMainActions->serviceListUp)
-			showServiceSelector(eListbox::dirUp);
+			showServiceSelector(eListBox<eService>::dirUp);
 		else if (event.action == &i_enigmaMainActions->volumeUp)
 			volumeUp();
 		else if (event.action == &i_enigmaMainActions->volumeDown) 

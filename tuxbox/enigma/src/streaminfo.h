@@ -1,8 +1,8 @@
 #ifndef __streaminfo_h
 #define __streaminfo_h
 
-#include "ewindow.h"
-#include "multipage.h"
+#include <core/gui/ewindow.h>
+#include <core/gui/multipage.h>
 
 class eLabel;
 class eMultipage;

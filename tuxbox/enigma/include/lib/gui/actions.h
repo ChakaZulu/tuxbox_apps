@@ -2,13 +2,13 @@
 #define __actions_h
 
 #include <string.h>
-#include <string>
 #include <list>
+#include <string>
 #include <functional>
 #include <set>
-#include <libsig_comp.h>
 
-#include "rc.h"
+#include <include/libsig_comp.h>
+#include <core/driver/rc.h>
 
 class eActionMap;
 

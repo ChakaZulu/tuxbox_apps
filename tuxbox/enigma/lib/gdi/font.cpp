@@ -1,6 +1,5 @@
 #include "font.h"
 
-#include <eerror.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -8,28 +7,17 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "config.h"
-
 // use this for init Freetype...
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include "config.h"
+
+#include <core/base/eerror.h>
 #include <core/gdi/lcd.h>
 #include <core/gdi/grc.h>
 #include <core/system/elock.h>
 #include <core/system/init.h>
-
-
-//#include <freetype/freetype.h>
-
-	/* the following header shouldn't be used in normal programs */
-//#include <freetype/internal/ftdebug.h>
-
-	/* showing driver name */
-//#include <freetype/ftmodule.h>
-//#include <freetype/internal/ftobjs.h>
-//#include <freetype/internal/ftdriver.h>
 
 fontRenderClass *fontRenderClass::instance;
 static eLock ftlock;

@@ -1,12 +1,13 @@
-#include <time.h>
-#include <qmap.h>
-#include "xmltree.h"
-#include "enigma.h"
-#include "dvb.h"
-#include "edvb.h"
 #include "xmlrpc.h"
 
-static QMap<eString, int (*)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant>&)> rpcproc;
+#include "xmlrpc.h"
+
+#include <core/xml/xmltree.h>
+#include <core/dvb/dvb.h>
+#include <core/dvb/edvb.h>
+
+
+static std::map<eString, int (*)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant>&)> rpcproc;
 
 void eXMLRPCVariant::zero()
 {
@@ -16,21 +17,20 @@ void eXMLRPCVariant::zero()
 	_boolean=0;
 	_string=0;
 	_double=0;
-	_datetime=0;
-	_base64=0;
+//	_datetime=0;
+//	_base64=0;
 }
 
-eXMLRPCVariant::eXMLRPCVariant(QMap<eString,eXMLRPCVariant*> *__struct)
+eXMLRPCVariant::eXMLRPCVariant(std::map<eString,eXMLRPCVariant*> *__struct)
 {
 	zero();
 	_struct=__struct;
 }
 
-eXMLRPCVariant::eXMLRPCVariant(QVector<eXMLRPCVariant> *__array)
+eXMLRPCVariant::eXMLRPCVariant(std::vector<eXMLRPCVariant> *__array)
 {
 	zero();
 	_array=__array;
-	_array->setAutoDelete(true);
 }
 
 eXMLRPCVariant::eXMLRPCVariant(__s32 *__i4)
@@ -57,24 +57,25 @@ eXMLRPCVariant::eXMLRPCVariant(double *__double)
 	_double=__double;
 }
 
-eXMLRPCVariant::eXMLRPCVariant(QDateTime *__datetime)
+/*eXMLRPCVariant::eXMLRPCVariant(QDateTime *__datetime)
 {
 	zero();
 	_datetime=__datetime;
-}
+} */
 
-eXMLRPCVariant::eXMLRPCVariant(QByteArray *__base64)
+/*eXMLRPCVariant::eXMLRPCVariant(QByteArray *__base64)
 {
 	zero();
 	_base64=__base64;
-}
+} */
 
 eXMLRPCVariant::~eXMLRPCVariant()
 {
 	if (_struct)
 	{
-		for (QMap<eString,eXMLRPCVariant*>::Iterator i=_struct->begin(); i!=_struct->end(); ++i)
-			delete i.data();
+		for (std::map<eString,eXMLRPCVariant*>::iterator i(_struct->begin()); i != _struct->end(); ++i)
+			delete i->second;
+
 		delete _struct;
 	}
 	if (_array)
@@ -87,18 +88,18 @@ eXMLRPCVariant::~eXMLRPCVariant()
 		delete _string;
 	if (_double)
 		delete _string;
-	if (_datetime)
-		delete _datetime;
-	if (_base64)
-		delete _base64;
+/*	if (_datetime)
+		delete _datetime;*/
+/*	if (_base64)
+		delete _base64;*/
 }
 
-QMap<eString,eXMLRPCVariant*> *eXMLRPCVariant::getStruct()
+std::map<eString,eXMLRPCVariant*> *eXMLRPCVariant::getStruct()
 {
 	return _struct;
 }
 
-QVector<eXMLRPCVariant> *eXMLRPCVariant::getArray()
+std::vector<eXMLRPCVariant> *eXMLRPCVariant::getArray()
 {
 	return _array;
 }
@@ -123,15 +124,15 @@ double *eXMLRPCVariant::getDouble()
 	return _double;
 }
 
-QDateTime *eXMLRPCVariant::getDatetime()
+/*QDateTime *eXMLRPCVariant::getDatetime()
 {
 	return _datetime;
-}
+} */
 
-QByteArray *eXMLRPCVariant::getBase64()
+/*QByteArray *eXMLRPCVariant::getBase64()
 {
 	return _base64;
-}
+} */
 
 void eXMLRPCVariant::toXML(eString &result)
 {
@@ -139,11 +140,11 @@ void eXMLRPCVariant::toXML(eString &result)
 	{
 		static eString s1("<value><array><data>");
 		result+=s1;
-		for (unsigned int i=0; i<getArray()->count(); i++)
+		for (unsigned int i=0; i<getArray()->size(); i++)
 		{
 			static eString s("  ");
 			result+=s;
-			(*getArray())[i]->toXML(result);
+			(*getArray())[i].toXML(result);
 			static eString s1("\n");
 			result+=s1;
 		}
@@ -153,14 +154,14 @@ void eXMLRPCVariant::toXML(eString &result)
 	{
 		static eString s1("<value><struct>");
 		result+=s1;
-		for (QMap<eString,eXMLRPCVariant*>::Iterator i=_struct->begin(); i!=_struct->end(); ++i)
+		for (std::map<eString,eXMLRPCVariant*>::iterator i(_struct->begin()); i != _struct->end(); ++i)
 		{
 			static eString s1("  <member><name>");
 			result+=s1;
-			result+=i.key();
+			result+=i->first;
 			static eString s2("</name>");
 			result+=s2;
-			i.data()->toXML(result);
+			i->second->toXML(result);
 			static eString s3("</member>\n");
 			result+=s3;
 		}
@@ -189,7 +190,7 @@ void eXMLRPCVariant::toXML(eString &result)
 	{
 		result+=eString().sprintf("<value><double>%lf</double></value>", *getDouble());
 	}	else
-		qFatal("couldn't append");
+		eFatal("couldn't append");
 }
 
 static eXMLRPCVariant *fromXML(XMLTreeNode *n)
@@ -209,7 +210,7 @@ static eXMLRPCVariant *fromXML(XMLTreeNode *n)
 	else if (!strcmp(n->GetType(), "double"))
 		return new eXMLRPCVariant(new double(atof(data)));
 	else if (!strcmp(n->GetType(), "struct")) {
-		QMap<eString,eXMLRPCVariant*> *s=new QMap<eString,eXMLRPCVariant*>;
+		std::map<eString,eXMLRPCVariant*> *s=new std::map<eString,eXMLRPCVariant*>;
 		for (n=n->GetChild(); n; n=n->GetNext())
 		{
 			if (strcmp(data, "member"))
@@ -231,12 +232,12 @@ static eXMLRPCVariant *fromXML(XMLTreeNode *n)
 				delete s;
 				return 0;
 			}
-			s->insert(name, value);
+			s->INSERT(name,value);
 		}
 		return new eXMLRPCVariant(s);
 	} else if (!strcmp(n->GetType(), "array"))
 	{
-		QList<eXMLRPCVariant> l;
+		ePtrList<eXMLRPCVariant> l;
 		n=n->GetChild();
 		if (strcmp(data, "data"))
 			return 0;
@@ -246,14 +247,17 @@ static eXMLRPCVariant *fromXML(XMLTreeNode *n)
 				eXMLRPCVariant *value=fromXML(n);
 				if (!value)
 					return 0;
-				l.append(value);
+				l.push_back(value);
 			}
-		QVector<eXMLRPCVariant> *nv=new QVector<eXMLRPCVariant>;
-		nv->resize(l.count());
-		l.toVector(nv);
+		std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
+
+	// copy ePtrList to std::vector
+		for (ePtrList<eXMLRPCVariant>::iterator it(l); it != l.end(); it++)
+			nv->push_back(**it);
+
 		return new eXMLRPCVariant(nv);
 	}
-	qDebug("couldn't convert %s", n->GetType());
+	eDebug("couldn't convert %s", n->GetType());
 	return 0;
 }
 
@@ -270,30 +274,30 @@ eXMLRPCResponse::~eXMLRPCResponse()
 
 int eXMLRPCResponse::doCall()
 {
-	qDebug("doing call");
+	eDebug("doing call");
 	result="";
 		// get method name
 	eString methodName=0;
 	
 	if (connection->remote_header["Content-Type"]!="text/xml")
 	{
-		qDebug("remote header failure (%s != text/xml)", (connection->remote_header["Content-Type"]).c_str());
+		eDebug("remote header failure (%s != text/xml)", (connection->remote_header["Content-Type"]).c_str());
 		return -3;
 	}
 	
 	XMLTreeNode *methodCall=parser.RootNode();
 	if (!methodCall)
 	{
-		qDebug("empty xml");
+		eDebug("empty xml");
 		return -1;
 	}
 	if (strcmp(methodCall->GetType(), "methodCall"))
 	{
-		qDebug("no methodCall found");
+		eDebug("no methodCall found");
 		return -2;
 	}
 
-	QList<eXMLRPCVariant> params;
+	ePtrList<eXMLRPCVariant> params;
 	params.setAutoDelete(true);
 	
 	for (XMLTreeNode *c=methodCall->GetChild(); c; c=c->GetNext())
@@ -304,32 +308,35 @@ int eXMLRPCResponse::doCall()
 		{
 			for (XMLTreeNode *p=c->GetChild(); p; p=p->GetNext())
 				if (!strcmp(p->GetType(), "param"))
-					params.append(fromXML(p->GetChild()));
+					params.push_back(fromXML(p->GetChild()));
 		} else
 		{
-			qDebug("unknown stuff found");
+			eDebug("unknown stuff found");
 			return 0;
 		}
 	}
 	
 	if (!methodName)
 	{
-		qDebug("no methodName found!");
+		eDebug("no methodName found!");
 		return -3;
 	}
 	
-	qDebug("methodName: %s", methodName.c_str() );
+	eDebug("methodName: %s", methodName.c_str() );
 	
 	result="<?xml version=\"1.0\"?>\n"
 		"<methodResponse>";
 	
-	QList<eXMLRPCVariant> ret;
+	ePtrList<eXMLRPCVariant> ret;
 	ret.setAutoDelete(true);
 
-	QVector<eXMLRPCVariant> vparams;
-	vparams.resize(params.count());
-	params.toVector(&vparams);
-	int (*proc)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant> &)=rpcproc[methodName];
+	std::vector<eXMLRPCVariant> vparams;
+
+	// copy ePtrList to std::vector
+	for (ePtrList<eXMLRPCVariant>::iterator it(ret); it != ret.end(); it++)
+		vparams.push_back(**it);
+
+	int (*proc)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant> &)=rpcproc[methodName];
 	int fault;
 	
 	if (!proc)
@@ -339,7 +346,7 @@ int eXMLRPCResponse::doCall()
 	} else
 		fault=proc(vparams, ret);
 
-	qDebug("converting to text...");
+	eDebug("converting to text...");
 
 	if (fault)
 	{
@@ -349,10 +356,10 @@ int eXMLRPCResponse::doCall()
 	} else
 	{
 		result+="<params>\n";
-		for (QListIterator<eXMLRPCVariant> i(ret); i.current(); ++i)
+		for (ePtrList<eXMLRPCVariant>::iterator i(ret); i != ret.end(); ++i)
 		{
 			result+="<param>";
-			i.current()->toXML(result);
+			i->toXML(result);
 			result+="</param>";
 		}
 		result+="</params>";
@@ -390,7 +397,7 @@ void eXMLRPCResponse::haveData(void *data, int len)
 	{
 		if (!parser.Parse((char*)data, len, 1))
 		{
-			qDebug("xml parse error");
+			eDebug("xml parse error");
 			err=1;
 		}
 	} else
@@ -398,7 +405,7 @@ void eXMLRPCResponse::haveData(void *data, int len)
 
 	if (err)
 	{
-		qDebug("schade: %d", err);
+		eDebug("schade: %d", err);
 		connection->code=400;
 		connection->code_descr="Bad request";
 		char buffer[10];
@@ -416,24 +423,24 @@ void xmlrpc_initialize(eHTTPD *httpd)
 	httpd->addResolver(new eHTTPXMLRPCResolver);
 }
 
-void xmlrpc_addMethod(eString methodName, int (*proc)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant>&))
+void xmlrpc_addMethod(eString methodName, int (*proc)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant>&))
 {
-	rpcproc.insert(methodName, proc);
+	rpcproc[methodName]=proc;
 }
 
-void xmlrpc_fault(QList<eXMLRPCVariant> &res, int faultCode, eString faultString)
+void xmlrpc_fault(ePtrList<eXMLRPCVariant> &res, int faultCode, eString faultString)
 {
-	QMap<eString,eXMLRPCVariant*> *s=new QMap<eString,eXMLRPCVariant*>;
-	s->insert("faultCode", new eXMLRPCVariant(new __s32(faultCode)));
-	s->insert("faultString", new eXMLRPCVariant(new eString(faultString)));
-	res.append(new eXMLRPCVariant(s));
+	std::map<eString,eXMLRPCVariant*> *s=new std::map<eString,eXMLRPCVariant*>;
+	s->INSERT("faultCode", new eXMLRPCVariant(new __s32(faultCode)));
+	s->INSERT("faultString", new eXMLRPCVariant(new eString(faultString)));
+	res.push_back(new eXMLRPCVariant(s));
 }
 
-int xmlrpc_checkArgs(eString args, const QVector<eXMLRPCVariant> &parm, QList<eXMLRPCVariant> &res)
+int xmlrpc_checkArgs(eString args, std::vector<eXMLRPCVariant> &parm, ePtrList<eXMLRPCVariant> &res)
 {
-	if (parm.count() != args.length())
+	if (parm.size() != args.length())
 	{
-	 	xmlrpc_fault(res, -500, eString().sprintf("parameter count mismatch (found %d, expected %d)", parm.count(), args.length()));
+	 	xmlrpc_fault(res, -500, eString().sprintf("parameter count mismatch (found %d, expected %d)", parm.size(), args.length()));
 		return 1;
 	}
 	
@@ -442,35 +449,35 @@ int xmlrpc_checkArgs(eString args, const QVector<eXMLRPCVariant> &parm, QList<eX
 		switch (args[i])
 		{
 		case 'i':
-			if (parm[i]->getI4())
+			if (parm[i].getI4())
 				continue;
 			break;
 		case 'b':
-			if (parm[i]->getBoolean())
+			if (parm[i].getBoolean())
 				continue;
 			break;
 		case 's':
-			if (parm[i]->getString())
+			if (parm[i].getString())
 				continue;
 			break;
 		case 'd':
-			if (parm[i]->getDouble())
+			if (parm[i].getDouble())
 				continue;
 			break;
-		case 't':
-			if (parm[i]->getDatetime())
+/*		case 't':
+			if (parm[i].getDatetime())
 				continue;
 			break;
 		case '6':
-			if (parm[i]->getBase64())
+			if (parm[i].getBase64())
 				continue;
-			break;
+			break;*/
 		case '$':
-			if (parm[i]->getStruct())
+			if (parm[i].getStruct())
 				continue;
 			break;
 		case 'a':
-			if (parm[i]->getArray())
+			if (parm[i].getArray())
 				continue;
 			break;
 		}

@@ -1,7 +1,7 @@
 #ifndef __emessage_h
 #define __emessage_h
 
-#include "ewindow.h"
+#include <core/gui/ewindow.h>
 
 class eLabel;
 
@@ -10,9 +10,8 @@ class eLabel;
  */
 class eMessageBox: public eWindow
 {
-//	Q_OBJECT
 	eLabel *text;
-public:// slots:
+public:
 	void okPressed();
 public:
 	/**

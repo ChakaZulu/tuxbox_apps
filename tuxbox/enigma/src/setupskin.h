@@ -1,19 +1,31 @@
 #ifndef __apps_enigma_setupskin_h
 #define __apps_enigma_setupskin_h
 
-#include <core/gui/ewindow.h>
+#include <core/gui/listbox.h>
 
 class eButton;
-class eListbox;
-class eListboxEntry;
+
+class eListBoxEntrySkin: public eListBoxEntryText
+{
+	friend class eSkinSetup;
+	friend class eListBox<eListBoxEntrySkin>;
+	eString esml;
+public:
+	eListBoxEntrySkin(eListBox<eListBoxEntrySkin> *parent, eString name, eString esml)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*)parent, name), esml(esml)
+	{
+	}
+
+	const eString &getESML() const { return esml; };
+};
 
 class eSkinSetup: public eWindow
 {
 	eButton *baccept, *breject;
-	eListbox *lskins;
+	eListBox<eListBoxEntrySkin> *lskins;
 	void loadSkins();
 	void accept();
-	void skinSelected(eListboxEntry *l);
+	void skinSelected(eListBoxEntrySkin *l);
 	int keyDown(int rc);
 public:
 	eSkinSetup();

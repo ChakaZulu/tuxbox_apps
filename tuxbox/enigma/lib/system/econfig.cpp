@@ -2,7 +2,7 @@
 #include "init.h"
 #include "config.h"
 #include <sys/stat.h>
-#include "qglobal.h"
+#include <core/base/eerror.h>
 
 eConfig *eConfig::instance;
 
@@ -21,10 +21,10 @@ eConfig::eConfig()
 		{
 			mkdir(CONFIGDIR "/enigma", 0777);
 			if (createNew())
-				qFatal("error while opening/creating registry - create " CONFIGDIR "/enigma");
+				eFatal("error while opening/creating registry - create " CONFIGDIR "/enigma");
 		}
 		if (open())
-			qFatal("still can't open configfile");
+			eFatal("still can't open configfile");
 	}
 }
 

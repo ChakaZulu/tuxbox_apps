@@ -1,11 +1,13 @@
+#include "lcd.h"
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <esize.h>
-#include "lcd.h"
 #include "lcd-ks0713.h"
-#include "init.h"
-#include "glcddc.h"
+
+#include <core/base/esize.h>
+#include <core/system/init.h>
+#include <core/gdi/glcddc.h>
 
 eLCD *eLCD::primary;
 

@@ -1,14 +1,5 @@
 INCLUDES = \
-	-I$(top_srcdir)/edvb/miniqt \
-	-I$(top_srcdir)/enigma/src \
-	-I$(top_srcdir)/enigma/src/core/base \
-	-I$(top_srcdir)/enigma/src/core/dvb \
-	-I$(top_srcdir)/enigma/src/core/xml \
-	-I$(top_srcdir)/enigma/src/apps/enigma \
-	-I$(top_srcdir)/enigma/src/core/driver \
-	-I$(top_srcdir)/enigma/src/core/gdi \
-	-I$(top_srcdir)/enigma/src/core/gui \
-	-I$(top_srcdir)/enigma/src/include
+	-I$(top_srcdir)/enigma/src
 
 lib_LTLIBRARIES = libenigma_system.la
 

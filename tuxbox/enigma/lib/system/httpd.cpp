@@ -1,12 +1,12 @@
+#include "httpd.h"
+
 #include <sys/socket.h>
 #include <error.h>
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
-#include "edvb.h"
-#include "httpd.h"
-#include <string>
 
+#include <core/dvb/edvb.h>
 
 void eHTTPGarbage::doGarbage()
 {

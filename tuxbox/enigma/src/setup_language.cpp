@@ -17,24 +17,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.3 2002/05/22 17:53:53 tmbinc Exp $
+ * $Id: setup_language.cpp,v 1.4 2002/06/23 15:51:24 Ghostrider Exp $
  */
 
 #include "setup_language.h"
 
-#include "elabel.h"
-#include "edvb.h"
-#include "enumber.h"
-#include "ebutton.h"
-#include "echeckbox.h"
-#include "rc.h"
-#include "enigma.h"
-#include "eskin.h"
-#include "eavswitch.h"
-#include "streamwd.h"
-
 #include <core/base/i18n.h>
-
+#include <core/gui/elabel.h>
+#include <core/gui/enumber.h>
+#include <core/gui/ebutton.h>
+#include <core/gui/echeckbox.h>
+#include <core/gui/eskin.h>
 #include <core/system/econfig.h>
 
 void eZapLanguageSetup::setLanguage(std::map<std::string, std::string>::iterator&it)

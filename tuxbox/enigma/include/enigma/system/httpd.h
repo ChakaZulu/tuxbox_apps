@@ -2,13 +2,14 @@
 #define __httpd_h
 
 #include <asm/types.h>
-#include <eptrlist.h>
-#include <ebase.h>
+#include <map>
+
+#include <core/base/eptrlist.h>
+#include <core/base/ebase.h>
+#include <core/base/estring.h>
+#include <core/base/eerror.h>
 #include <core/socket/socket.h>
 #include <core/socket/serversocket.h>
-#include <map>
-#include <estring.h>
-#include <eerror.h>
 
 class eHTTPConnection;
 class eHTTPDataSource;
@@ -121,7 +122,7 @@ class eHTTPD: public eServerSocket
 {
 	friend class eHTTPConnection;
 	ePtrList<eHTTPPathResolver> resolver;
-private:// slots:
+private:
 	void oneConnectionClosed();
 	eHTTPConnection *conn;
 	

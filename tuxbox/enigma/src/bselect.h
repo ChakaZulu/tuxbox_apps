@@ -1,17 +1,28 @@
 #ifndef __bselect_h
 #define __bselect_h
 
-#include <core/gui/elbwindow.h>
+#include <core/gui/listbox.h>
+#include <core/dvb/dvb.h>
 
-class eBouquet;
-class eLBWindow;
+class eListBoxEntryBouquet: public eListBoxEntryText
+{
+	friend class eListBox<eListBoxEntryBouquet>;
+	friend class eBouquetSelector;
+	eBouquet* bouquet;
+public:
+	eListBoxEntryBouquet(eListBox<eListBoxEntryBouquet>* lb, eBouquet* b)
+		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, b->bouquet_name), bouquet(b)
+	{
+	}
+};
 
-class eBouquetSelector: public eLBWindow
+
+class eBouquetSelector: public eListBoxWindow<eListBoxEntryBouquet>
 {
 	eBouquet *result;
 private:
 	void fillBouquetList();
-	void entrySelected(eListboxEntry *entry);
+	void entrySelected(eListBoxEntryBouquet *entry);
 public:
 	eBouquetSelector();
 	~eBouquetSelector();

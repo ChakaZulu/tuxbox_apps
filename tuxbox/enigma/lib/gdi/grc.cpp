@@ -1,10 +1,12 @@
 // for debugging use: 
 // #define SYNC_PAINT
 #include "grc.h"
-#include "font.h"
+
 #include <unistd.h>
 #include <pthread.h>
-#include "init.h"
+
+#include <core/gdi/font.h>
+#include <core/system/init.h>
 
 #define MAXSIZE 1024
 

@@ -1,8 +1,8 @@
 #include "enumber.h"
-#include "fb.h"
-#include "rc.h"
-#include "eskin.h"
-#include "elabel.h"
+#include <core/driver/rc.h>
+#include <core/gui/eskin.h>
+#include <core/gui/elabel.h>
+#include <core/gdi/fb.h>
 #include <core/gdi/grc.h>
 #include <core/gui/guiactions.h>
 

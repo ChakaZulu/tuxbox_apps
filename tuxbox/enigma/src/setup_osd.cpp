@@ -1,5 +1,5 @@
 #include "setup_osd.h"
-#include "enigma.h"
+
 #include <core/gui/echeckbox.h>
 #include <core/gui/eskin.h>
 #include <core/system/econfig.h>

@@ -11,7 +11,6 @@ class gPainter;
  */
 class eNumber: public eWidget
 {
-//	Q_OBJECT
 private:
 	void redrawNumber(gPainter *, int n, const eRect &rect);
 	void redrawWidget(gPainter *, const eRect &rect);

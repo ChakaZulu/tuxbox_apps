@@ -1,17 +1,14 @@
 #ifndef __edvb_h
 #define __edvb_h
 
-#include "esection.h"
 #include <stdio.h>
-#include "nconfig.h"
 #include <list>
-#include <estring.h>
-#include <eptrlist.h>
 
-#include <sigc++/signal_system.h>
-#ifdef SIGC_CXX_NAMESPACES
-using namespace SigC;
-#endif
+#include <include/libsig_comp.h>
+#include <core/base/estring.h>
+#include <core/base/eptrlist.h>
+#include <core/dvb/esection.h>
+#include <core/system/nconfig.h>
 
 class eService;
 class eTransponder;
@@ -117,7 +114,7 @@ protected:
 	void serviceEvent(int event);	
 	void scanPMT();
 
-private:// slots:
+private:
 	void tunedIn(eTransponder*, int);
 	void PATready(int error);
 	void SDTready(int error);

@@ -1,19 +1,17 @@
-#include <time.h>
 #include "scan.h"
-#include "frontend.h"
-#include "si.h"
-#include "dvb.h"
-#include "enigma.h"
 
-#include "elabel.h"
-#include "ewindow.h"
-#include "font.h"
-#include "eprogress.h"
-#include "edvb.h"
-#include "rc.h"
+#include <time.h>
 
 #include <core/base/i18n.h>
+#include <core/dvb/frontend.h>
+#include <core/dvb/si.h>
+#include <core/dvb/dvb.h>
+#include <core/dvb/edvb.h>
+#include <core/gui/elabel.h>
+#include <core/gui/ewindow.h>
+#include <core/gui/eprogress.h>
 #include <core/gui/guiactions.h>
+#include <core/gdi/font.h>
 
 tsText::tsText(eString sheadline, eString sbody, eWidget *parent): eWidget(parent, 1)
 {

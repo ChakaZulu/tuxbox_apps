@@ -1,5 +1,7 @@
-#include <stdlib.h>
 #include "streaminfo.h"
+
+#include <stdlib.h>
+
 #include <core/driver/rc.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>

@@ -1,8 +1,8 @@
 #ifndef ERECT_H
 #define ERECT_H
 
-#include <esize.h>
-#include <epoint.h>
+#include <core/base/esize.h>
+#include <core/base/epoint.h>
 
 class eRect					// rectangle class
 {

@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <dbox/avs_core.h>
 #include <sys/ioctl.h>
-#include "qglobal.h"
 #include <core/system/econfig.h>
 #include <core/dvb/edvb.h>
 
@@ -124,7 +123,7 @@ int eAVSwitch::setColorFormat(eAVColorFormat c)
 
 int eAVSwitch::setInput(int v)
 {	
-	qDebug("setInput %d, fd=%d", v, fd);
+	eDebug("setInput %d, fd=%d", v, fd);
 	switch (v)
 	{
 	case 0:

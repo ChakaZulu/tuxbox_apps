@@ -2,45 +2,46 @@
 #define __xmlrpc_h_
 
 #include <asm/types.h>
-#include <qmap.h>
-#include <estring.h>
-#include <qvector.h>
-#include <qdatetime.h>
-#include <qlist.h>
+#include <map>
+#include <vector>
 
-#include "xmltree.h"
-#include "httpd.h"
+#include <core/base/estring.h>
+#include <core/base/eptrlist.h>
+#include <core/xml/xmltree.h>
+#include <core/system/httpd.h>
+
+#define INSERT(KEY,VALUE) insert(std::pair<eString, eXMLRPCVariant*>(KEY,VALUE))
 
 class eXMLRPCVariant
 {
-	QMap<eString,eXMLRPCVariant*> *_struct;
-	QVector<eXMLRPCVariant> *_array;
+	std::map<eString,eXMLRPCVariant*> *_struct;
+	std::vector<eXMLRPCVariant> *_array;
 	__s32 *_i4;
 	bool *_boolean;
 	eString *_string;
 	double *_double;
-	QDateTime *_datetime;
-	QByteArray *_base64;
+//	QDateTime *_datetime;
+//	QByteArray *_base64;
 	void zero();
 public:
-	eXMLRPCVariant(QMap<eString,eXMLRPCVariant*> *_struct);
-	eXMLRPCVariant(QVector<eXMLRPCVariant> *_array);
+	eXMLRPCVariant(std::map<eString,eXMLRPCVariant*> *_struct);
+	eXMLRPCVariant(std::vector<eXMLRPCVariant> *_array);
 	eXMLRPCVariant(__s32 *_i4);
 	eXMLRPCVariant(bool *_boolean);
 	eXMLRPCVariant(eString *_string);
 	eXMLRPCVariant(double *_double);
-	eXMLRPCVariant(QDateTime *_datetime);
-	eXMLRPCVariant(QByteArray *_base64);
+//	eXMLRPCVariant(QDateTime *_datetime);
+//	eXMLRPCVariant(QByteArray *_base64);
 	~eXMLRPCVariant();
 	
-	QMap<eString,eXMLRPCVariant*> *getStruct();
-	QVector<eXMLRPCVariant> *getArray();
+	std::map<eString,eXMLRPCVariant*> *getStruct();
+	std::vector<eXMLRPCVariant> *getArray();
 	__s32 *getI4();
 	bool *getBoolean();
 	eString *getString();
 	double *getDouble();
-	QDateTime *getDatetime();
-	QByteArray *getBase64();
+//	QDateTime *getDatetime();
+//	QByteArray *getBase64();
 	
 	void toXML(eString &);
 };
@@ -61,9 +62,9 @@ public:
 };
 
 void xmlrpc_initialize(eHTTPD *httpd);
-void xmlrpc_addMethod(eString methodName, int (*)(const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant>&));
-void xmlrpc_fault(QList<eXMLRPCVariant> &res, int faultCode, eString faultString);
-int xmlrpc_checkArgs(eString args, const QVector<eXMLRPCVariant>&, QList<eXMLRPCVariant> &res);
+void xmlrpc_addMethod(eString methodName, int (*)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant>&));
+void xmlrpc_fault(ePtrList<eXMLRPCVariant> &res, int faultCode, eString faultString);
+int xmlrpc_checkArgs(eString args, std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant> &res);
 
 class eHTTPXMLRPCResolver: public eHTTPPathResolver
 {

@@ -1,12 +1,12 @@
 #include "satconfig.h"
-#include "eskin.h"
-#include "elistbox.h"
-#include "ebutton.h"
-#include "rc.h"
+
+#include <core/gui/eskin.h>
+#include <core/gui/ebutton.h>
+#include <core/driver/rc.h>
 
 eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 {
-	list=new eListbox(this);
+	list=new eListBox<eListBoxEntryMenu>(this);
 	list->setName("list");
 
 	button_close=new eButton(this);
@@ -21,7 +21,7 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eSatelliteConfigurationManager"))
-		qFatal("skin load of \"eSatelliteConfigurationManager\" failed");
+		eFatal("skin load of \"eSatelliteConfigurationManager\" failed");
 }
 
 eSatelliteConfigurationManager::~eSatelliteConfigurationManager()

@@ -1,7 +1,8 @@
-#include "xmlrpc.h"
-#include "dvb.h"
-#include "edvb.h"
 #include <errno.h>
+
+#include <core/dvb/dvb.h>
+#include <core/dvb/edvb.h>
+#include <core/system/xmlrpc.h>
 
 static eBouquet *getBouquetByID(const char *id)
 {
@@ -29,62 +30,64 @@ static eService *getServiceByID(const char *id)
 	return tl->searchService(original_network_id, service_id);
 }
 
-static int testrpc(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> &result)
+static int testrpc(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &result)
 {
 	if (xmlrpc_checkArgs("ii", params, result))
 		return 1;
 	
-	QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
-	s->insert("sum", new eXMLRPCVariant(new __s32(*params[0]->getI4()+*params[1]->getI4())));
-	s->insert("difference", new eXMLRPCVariant(new __s32(*params[0]->getI4()-*params[1]->getI4())));
+	std::map<eString, eXMLRPCVariant*> *s=new std::map<eString, eXMLRPCVariant*>;
+	s->INSERT("sum",new eXMLRPCVariant(new __s32(*params[0].getI4()+*params[1].getI4())));
+	s->INSERT("difference",new eXMLRPCVariant(new __s32(*params[0].getI4()-*params[1].getI4())));
 	
-	result.append(new eXMLRPCVariant(s));
-	
+	result.push_back(new eXMLRPCVariant(s));
+
 	return 0;
 }
 
 			// SID2
 
-static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> &result)
+static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &result)
 {
 	if (xmlrpc_checkArgs("s", params, result))
 		return 1;
 	
-	eString &param=*params[0]->getString();
+	eString &param=*params[0].getString();
 	
 	eDebug("getList(%s);", param.c_str());
 	
 	if (!param.length())		// root
 	{
-		QList<eXMLRPCVariant> l;
+		ePtrList<eXMLRPCVariant> l;
 		ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->getBouquets();
 		if (pBouquets)
 		{
 			for (ePtrList<eBouquet>::iterator i(*pBouquets); i != pBouquets->end(); ++i)
 			{
 				eBouquet *b=*i;
-				QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
+				std::map<eString, eXMLRPCVariant*> *s=new std::map<eString, eXMLRPCVariant*>;
 				static eString s0("caption");
 				static eString s1("type");
 				static eString s2("handle");
 				static eString s3("zappable");
 				
-				s->insert(s0, new eXMLRPCVariant(new eString(b->bouquet_name.c_str())));
+				s->INSERT(s0, new eXMLRPCVariant(new eString(b->bouquet_name.c_str())));
 				static eString g("Group");
-				s->insert(s1, new eXMLRPCVariant(new eString(g)));
+				s->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 				static eString bs("B:");
 				eString handle=bs;
 				handle+=eString().setNum(b->bouquet_id, 16);
-				s->insert(s2, new eXMLRPCVariant(new eString(handle)));
-				s->insert(s3, new eXMLRPCVariant(new bool(0)));
-				l.append(new eXMLRPCVariant(s));
+				s->INSERT(s2, new eXMLRPCVariant(new eString(handle)));
+				s->INSERT(s3, new eXMLRPCVariant(new bool(0)));
+				l.push_back(new eXMLRPCVariant(s));
 			}
 		}
-		QVector<eXMLRPCVariant> *nv=new QVector<eXMLRPCVariant>;
-		nv->setAutoDelete(true);
-		nv->resize(l.count());
-		l.toVector(nv);
-		result.append(new eXMLRPCVariant(nv));
+		std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
+		
+		for (ePtrList<eXMLRPCVariant>::iterator it(l); it != l.end(); it++)		
+			nv->push_back(**it);
+
+		result.push_back(new eXMLRPCVariant(nv));
+
 	} else if (param[0]=='B')
 	{
 		eBouquet *b=getBouquetByID(param.c_str());
@@ -92,22 +95,22 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			xmlrpc_fault(result, 3, "invalid handle");
 		else
 		{
-			QList<eXMLRPCVariant> l;
+			ePtrList<eXMLRPCVariant> l;
 
 			for (std::list<eServiceReference>::iterator s = b->list.begin(); s != b->list.end(); s++)
 			{
 				eService *service=s->service;
 				if (!service)
 					continue;
-				QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
+				std::map<eString, eXMLRPCVariant*> *s=new std::map<eString, eXMLRPCVariant*>;
 				static eString s0("caption");
 				static eString s1("type");
 				static eString s2("handle");
 				static eString s3("zappable");
 
-				s->insert(s0, new eXMLRPCVariant(new eString(service->service_name.c_str())));
+				s->INSERT(s0, new eXMLRPCVariant(new eString(service->service_name.c_str())));
 				static eString g("Service");
-				s->insert(s1, new eXMLRPCVariant(new eString(g)));
+				s->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 				static eString bs("S:");
 				eString handle=bs;
 				handle+=eString().setNum(service->original_network_id, 16);
@@ -115,15 +118,16 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 				handle+=eString().setNum(service->transport_stream_id, 16);
 				handle+=':';
 				handle+=eString().setNum(service->service_id, 16);
-				s->insert(s2, new eXMLRPCVariant(new eString(handle)));
-				s->insert(s3, new eXMLRPCVariant(new bool(1)));
-				l.append(new eXMLRPCVariant(s));
+				s->INSERT(s2, new eXMLRPCVariant(new eString(handle)));
+				s->INSERT(s3, new eXMLRPCVariant(new bool(1)));
+				l.push_back(new eXMLRPCVariant(s));
 			}
-			QVector<eXMLRPCVariant> *nv=new QVector<eXMLRPCVariant>;
-			nv->setAutoDelete(true);
-			nv->resize(l.count());
-			l.toVector(nv);
-			result.append(new eXMLRPCVariant(nv));
+			std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
+			
+			for (ePtrList<eXMLRPCVariant>::iterator it(l); it != l.end(); it++)
+				nv->push_back(**it);
+
+			result.push_back(new eXMLRPCVariant(nv));
 		}
 	} else if (param[0]=='S')
 	{
@@ -150,7 +154,7 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			return 0;
 		}
 
-		QList<eXMLRPCVariant> l;
+		ePtrList<eXMLRPCVariant> l;
 
 		for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
 		{
@@ -171,15 +175,15 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			if (!event_name)
 				continue;
 
-			QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
+			std::map<eString, eXMLRPCVariant*> *s=new std::map<eString, eXMLRPCVariant*>;
 			static eString s0("caption");
 			static eString s1("type");
 			static eString s2("handle");
 			static eString s3("zappable");
 
-			s->insert(s0, new eXMLRPCVariant(new eString(event_name)));
+			s->INSERT(s0, new eXMLRPCVariant(new eString(event_name)));
 			static eString g("Event");
-			s->insert(s1, new eXMLRPCVariant(new eString(g)));
+			s->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 			static eString bs("E:");
 			eString handle=bs;
 			handle+=eString().setNum(service->original_network_id, 16);
@@ -190,28 +194,29 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			handle+=':';
 			handle+=eString().setNum(event->event_id, 16);
 
-			s->insert(s2, new eXMLRPCVariant(new eString(handle)));
-			s->insert(s3, new eXMLRPCVariant(new bool(1)));
-			l.append(new eXMLRPCVariant(s));
+			s->INSERT(s2, new eXMLRPCVariant(new eString(handle)));
+			s->INSERT(s3, new eXMLRPCVariant(new bool(1)));
+			l.push_back(new eXMLRPCVariant(s));
 		}
 		eit->unlock();
 
-		QVector<eXMLRPCVariant> *nv=new QVector<eXMLRPCVariant>;
-		nv->setAutoDelete(true);
-		nv->resize(l.count());
-		l.toVector(nv);
-		result.append(new eXMLRPCVariant(nv));
+		std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
+
+		for (ePtrList<eXMLRPCVariant>::iterator it(l); it != l.end(); it++)
+			nv->push_back(**it);
+		
+		result.push_back(new eXMLRPCVariant(nv));
 	} else
 		xmlrpc_fault(result, 3, "couldn't get of this");
 	return 0;
 }
 
-static int zapTo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> &result)
+static int zapTo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &result)
 {
 	if (xmlrpc_checkArgs("s", params, result))
 		return 1;
 
-	eString &param=*params[0]->getString();
+	eString &param=*params[0].getString();
 
 	eDebug("zapTo(%s);", param.c_str());
 	
@@ -223,12 +228,12 @@ static int zapTo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> &r
 	return 0;
 }
 
-static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> &result)
+static int getInfo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &result)
 {
 	if (xmlrpc_checkArgs("s", params, result))
 		return 1;
 
-	eString &param=*params[0]->getString();
+	eString &param=*params[0].getString();
 
 	eDebug("getInfo(%s);", param.c_str());
 	
@@ -239,7 +244,7 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			// mal gucken
   } else if (param[0]=='S')
   {
-		QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
+		std::map<eString, eXMLRPCVariant*> *s=new std::map<eString, eXMLRPCVariant*>;
 
 		eService *service=getServiceByID(param.c_str());
 		if (!service)
@@ -260,14 +265,14 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		
 		static eString s1("type");
 		static eString g("Service");
-		s->insert(s1, new eXMLRPCVariant(new eString(g)));
+		s->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 
 		static eString s0("caption");
-		s->insert(s0, new eXMLRPCVariant(new eString(service->service_name.c_str())));
+		s->INSERT(s0, new eXMLRPCVariant(new eString(service->service_name.c_str())));
 		
 		static eString s2("parentHandle");
 		static eString g2("NA");
-		s->insert(s2, new eXMLRPCVariant(new eString(g2)));
+		s->INSERT(s2, new eXMLRPCVariant(new eString(g2)));
 		
 		PMT *pmt=eDVB::getInstance()->getPMT();
 		if (!pmt)
@@ -292,10 +297,10 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		if (v)
 		{
 			static eString s2("videoPid");
-			s->insert(s2, new eXMLRPCVariant(new int(v->elementary_PID)));
+			s->INSERT(s2, new eXMLRPCVariant(new int(v->elementary_PID)));
 		}
 
-		QList<eXMLRPCVariant> asl;
+		ePtrList<eXMLRPCVariant> asl;
 
 		for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 		{
@@ -323,26 +328,27 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			}
 			if (isaudio)
 			{
-				QMap<eString, eXMLRPCVariant*> *a=new QMap<eString, eXMLRPCVariant*>;
+				std::map<eString, eXMLRPCVariant*> *a=new std::map<eString, eXMLRPCVariant*>;
 				static eString s1("audioPid"), s2("handle"), s3("type"), s4("language"), s5("mpeg"), s6("ac3");
 				
-				a->insert(s1, new eXMLRPCVariant(new int(pe->elementary_PID)));
-				a->insert(s2, new eXMLRPCVariant(new eString("A")));	// nyi
-				a->insert(s3, new eXMLRPCVariant(new eString(isAC3?s6:s5)));
+				a->INSERT(s1, new eXMLRPCVariant(new int(pe->elementary_PID)));
+				a->INSERT(s2, new eXMLRPCVariant(new eString("A")));	// nyi
+				a->INSERT(s3, new eXMLRPCVariant(new eString(isAC3?s6:s5)));
 
-				asl.append(new eXMLRPCVariant(a));
+				asl.push_back(new eXMLRPCVariant(a));
 			}
 		}
 		static eString as("audioPids");
 
-		QVector<eXMLRPCVariant> *nv=new QVector<eXMLRPCVariant>;
-		nv->setAutoDelete(true);
-		nv->resize(asl.count());
-		asl.toVector(nv);	
-		s->insert(as, new eXMLRPCVariant(nv));
+		std::vector<eXMLRPCVariant> *nv=new std::vector<eXMLRPCVariant>;
+
+    for (ePtrList<eXMLRPCVariant>::iterator it(asl); it != asl.end(); it++)
+			nv->push_back(**it);
+
+		s->INSERT(as, new eXMLRPCVariant(nv));
 		pmt->unlock();
 		
-		result.append(new eXMLRPCVariant(s));
+		result.push_back(new eXMLRPCVariant(s));
 		
 		eString res="";
 		result.first()->toXML(res);

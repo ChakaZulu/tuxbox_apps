@@ -1,8 +1,6 @@
-#include <time.h>
-
-#include "enigma.h"
 #include "enigma_event.h"
 
+#include <time.h>
 #include <core/base/eerror.h>
 #include <core/driver/rc.h>
 #include <core/gdi/font.h>
@@ -137,6 +135,10 @@ void eEventDisplay::setEvent(EITEvent *event)
 			{
 				ShortEventDescriptor *s=(ShortEventDescriptor*)*d;
 				_title=s->event_name;
+	
+				if (LCDElement)
+					LCDElement->setText(s->text);
+
 				if ((s->text.length() > 0) && (s->text!=_title))
 				{
 					_long_description+=s->text;
@@ -150,7 +152,7 @@ void eEventDisplay::setEvent(EITEvent *event)
 		}
 
 		if (!_title)
-			_title ="keine Information verfügbar";
+			_title = _("no description available");
 
 		eventTime->setText(_eventTime);
 		eventDate->setText(_eventDate);

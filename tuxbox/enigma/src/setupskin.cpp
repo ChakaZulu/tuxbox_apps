@@ -17,37 +17,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.3 2002/05/22 17:53:53 tmbinc Exp $
+ * $Id: setupskin.cpp,v 1.4 2002/06/23 15:51:24 Ghostrider Exp $
  */
 
 #include "setupskin.h"
+
+#include <dirent.h>
+#include "config.h"
+
 #include <core/gui/ebutton.h>
-#include <core/gui/elistbox.h>
 #include <core/gui/emessage.h>
 #include <core/system/econfig.h>
-#include "config.h"
-#include <dirent.h>
 
 extern eString getInfo(const char *file, const char *info);
-
-class eListboxSkin: public eListboxEntry
-{
-	eString name, esml;
-public:
-	eString getText(int col) const;
-	const eString &getESML() const { return esml; };
-	eListboxSkin(eListbox *parent, eString name, eString esml);
-};
-
-eString eListboxSkin::getText(int col) const
-{
-	return name;
-}
-
-eListboxSkin::eListboxSkin(eListbox *parent, eString name, eString esml):
-		eListboxEntry(parent), name(name), esml(esml)
-{
-}
 
 void eSkinSetup::loadSkins()
 {
@@ -77,7 +59,7 @@ void eSkinSetup::loadSkins()
 			eString name=getInfo(fileName.c_str(), "name");
 			if (esml.size() && name.size())
 			{
-				eListboxSkin *s=new eListboxSkin(lskins, name, esml);
+				eListBoxEntrySkin *s=new eListBoxEntrySkin(lskins, name, esml);
 				if (esml == current_skin)
 				{
 					eDebug("got current");
@@ -85,7 +67,6 @@ void eSkinSetup::loadSkins()
 				}
 			}
 		}
-
 		free(namelist[count]);
   }
   free(namelist);
@@ -96,12 +77,16 @@ void eSkinSetup::accept()
 	skinSelected(lskins->getCurrent());
 }
 
-void eSkinSetup::skinSelected(eListboxEntry *l)
+void eSkinSetup::skinSelected(eListBoxEntrySkin *skin)
 {
-	if (!l)
+	if (!skin)
+	{
 		close(1);
-	eListboxSkin *skin=(eListboxSkin*)l;
+		return;
+	}
+
 	eConfig::getInstance()->setKey("/ezap/ui/skin", skin->getESML().c_str());
+
 	close(0);
 }
 
@@ -111,7 +96,7 @@ eSkinSetup::eSkinSetup()
 	baccept->setName("accept");
 	breject=new eButton(this);
 	breject->setName("reject");
-	lskins=new eListbox(this);
+	lskins=new eListBox<eListBoxEntrySkin>(this, eSkin::getActive()->queryValue("fontsize", 20));
 	lskins->setName("skins");
 	CONNECT(baccept->selected, eSkinSetup::accept);
 	CONNECT(breject->selected, eSkinSetup::reject);
@@ -121,7 +106,7 @@ eSkinSetup::eSkinSetup()
 
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "setup.skins"))
-		qFatal("skin load of \"setup.skins\" failed");
+		eFatal("skin load of \"setup.skins\" failed");
 
 	loadSkins();
 }

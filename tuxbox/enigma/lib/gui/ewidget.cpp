@@ -1,15 +1,16 @@
 #include <errno.h>
 
-#include "enigma.h"
+#include <apps/enigma/enigma.h>
+#include <core/base/eptrlist.h>
 #include <core/base/eerror.h>
-#include <core/gui/ewidget.h>
 #include <core/gdi/gfbdc.h>
 #include <core/gdi/epng.h>
-#include <core/gui/eskin.h>
-#include <core/system/init.h>
 #include <core/gui/actions.h>
-#include <core/base/eptrlist.h>
-#include "guiactions.h"
+#include <core/gui/eskin.h>
+#include <core/gui/ewidget.h>
+#include <core/gui/guiactions.h>
+#include <core/system/init.h>
+
 
 eWidget::eWidget(eWidget *parent, int takefocus):
 	parent(parent),

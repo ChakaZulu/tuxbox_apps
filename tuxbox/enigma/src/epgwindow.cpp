@@ -4,10 +4,10 @@
 #include <algorithm>
 #include <iomanip>
 
+#include <apps/enigma/enigma_lcd.h>
 #include <core/driver/rc.h>
 #include <core/gui/eskin.h>
 #include <core/dvb/edvb.h>
-
 
 eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox)
 		:eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox), event(evt)	
@@ -47,7 +47,11 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 	{	
 		int ret;
 		hide();
+		eZapLCD* pLCD = eZapLCD::getInstance();
+		pLCD->lcdMain->hide();
+		pLCD->lcdMenu->show();
 		eEventDisplay ei(eDVB::getInstance()->service->service_name.c_str(), 0, &entry->event);
+		ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		ei.show();
 		while(ret = ei.exec())
 		{
@@ -62,6 +66,8 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 				ei.setEvent(&tmp->event);					
 		}
 		ei.hide();
+		pLCD->lcdMenu->hide();
+		pLCD->lcdMain->show();
 		show();
 	}
 }

@@ -7,7 +7,7 @@ void eFatal(const char* fmt, ...);
 #undef ASSERT
 #endif
 
-//#define __DEBUG__
+#define __DEBUG__
 
 #ifdef __DEBUG__
     void eDebug(const char* fmt, ...);

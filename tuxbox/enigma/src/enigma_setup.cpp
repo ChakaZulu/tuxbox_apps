@@ -17,50 +17,48 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.15 2002/06/17 23:24:46 Ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.16 2002/06/23 15:51:24 Ghostrider Exp $
  */
 
 #include "enigma_setup.h"
-#include "enigma_scan.h"
-#include "setupnetwork.h"
-#include "setupvideo.h"
-#include "setup_language.h"
-#include "setup_osd.h"
-#include "enigma_scan.h"
-#include "setupskin.h"
 
+#include <apps/enigma/enigma_scan.h>
+#include <apps/enigma/setupnetwork.h>
+#include <apps/enigma/setupvideo.h>
+#include <apps/enigma/setup_language.h>
+#include <apps/enigma/setup_osd.h>
+#include <apps/enigma/enigma_scan.h>
+#include <apps/enigma/setupskin.h>
 #include <core/gui/emessage.h>
 #include <core/base/i18n.h>
 #include <core/dvb/edvb.h>
-#include <core/gui/elistbox.h>
 #include <core/gui/eskin.h>
 #include <core/gui/elabel.h>
-#include <core/gui/ewindow.h>
 
 eZapSetup::eZapSetup()
-	:eLBWindow(_("Setup"), 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
+	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
 {
 	move(ePoint(150, 136));
-	CONNECT((new eListboxEntryText(&list, _("[back]")))->selected, eZapSetup::sel_close);
-	CONNECT((new eListboxEntryText(&list, _("Channels...")))->selected, eZapSetup::sel_channels);
-	CONNECT((new eListboxEntryText(&list, _("Network...")))->selected, eZapSetup::sel_network);
+	CONNECT((new eListBoxEntryMenu(&list, _("[back]")))->selected, eZapSetup::sel_close);
+	CONNECT((new eListBoxEntryMenu(&list, _("Channels...")))->selected, eZapSetup::sel_channels);
+	CONNECT((new eListBoxEntryMenu(&list, _("Network...")))->selected, eZapSetup::sel_network);
 //	CONNECT((list, _("Audio...")))->selected, sel_sound);
-	CONNECT((new eListboxEntryText(&list, _("OSD...")))->selected, eZapSetup::sel_osd);
-	CONNECT((new eListboxEntryText(&list, _("Video...")))->selected, eZapSetup::sel_video);
-	CONNECT((new eListboxEntryText(&list, _("Skin...")))->selected, eZapSetup::sel_skin);
-	CONNECT((new eListboxEntryText(&list, _("Language...")))->selected, eZapSetup::sel_language);
+	CONNECT((new eListBoxEntryMenu(&list, _("OSD...")))->selected, eZapSetup::sel_osd);
+	CONNECT((new eListBoxEntryMenu(&list, _("Video...")))->selected, eZapSetup::sel_video);
+	CONNECT((new eListBoxEntryMenu(&list, _("Skin...")))->selected, eZapSetup::sel_skin);
+	CONNECT((new eListBoxEntryMenu(&list, _("Language...")))->selected, eZapSetup::sel_language);
 }
 
 eZapSetup::~eZapSetup()
 {
 }
 
-void eZapSetup::sel_close(eListboxEntry *lbe)
+void eZapSetup::sel_close()
 {
 	close(0);
 }
 
-void eZapSetup::sel_channels(eListboxEntry *lbe)
+void eZapSetup::sel_channels()
 {
 	hide();
 	eZapScan setup;
@@ -71,7 +69,7 @@ void eZapSetup::sel_channels(eListboxEntry *lbe)
 	show();	
 }
 
-void eZapSetup::sel_network(eListboxEntry *lbe)
+void eZapSetup::sel_network()
 {
 	hide();
 	eZapNetworkSetup setup;
@@ -82,11 +80,11 @@ void eZapSetup::sel_network(eListboxEntry *lbe)
 	show();
 }
 
-void eZapSetup::sel_sound(eListboxEntry *lbe)
+void eZapSetup::sel_sound()
 {
 }
 
-void eZapSetup::sel_osd(eListboxEntry *lbe)
+void eZapSetup::sel_osd()
 {
 	hide();
 	eZapOsdSetup setup;
@@ -97,7 +95,7 @@ void eZapSetup::sel_osd(eListboxEntry *lbe)
 	show();
 }
 
-void eZapSetup::sel_skin(eListboxEntry *lbe)
+void eZapSetup::sel_skin()
 {
 	hide();
 	eSkinSetup setup;
@@ -116,7 +114,7 @@ void eZapSetup::sel_skin(eListboxEntry *lbe)
 	show();
 }
 
-void eZapSetup::sel_video(eListboxEntry *lbe)
+void eZapSetup::sel_video()
 {
 	hide();
 	eZapVideoSetup setup;
@@ -127,7 +125,7 @@ void eZapSetup::sel_video(eListboxEntry *lbe)
 	show();
 }
 
-void eZapSetup::sel_language(eListboxEntry *lbe)
+void eZapSetup::sel_language()
 {
 	hide();
 	eZapLanguageSetup setup;

@@ -1,21 +1,19 @@
 #ifndef __enigma_setup_h
 #define __enigma_setup_h
 
-#include <core/gui/elbwindow.h>
+#include <core/gui/listbox.h>
 
-class eListboxEntry;
-
-class eZapSetup: public eLBWindow
+class eZapSetup: public eListBoxWindow<eListBoxEntryMenu>
 {
 private:
-	void sel_close(eListboxEntry *);
-	void sel_channels(eListboxEntry *);	
-	void sel_network(eListboxEntry *);
-	void sel_sound(eListboxEntry *);
-	void sel_video(eListboxEntry *);
-	void sel_language(eListboxEntry *);
-	void sel_skin(eListboxEntry *);
-	void sel_osd(eListboxEntry *);
+	void sel_close();
+	void sel_channels();	
+	void sel_network();
+	void sel_sound();
+	void sel_video();
+	void sel_language();
+	void sel_skin();
+	void sel_osd();
 public:
 	eZapSetup();
 	~eZapSetup();

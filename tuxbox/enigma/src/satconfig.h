@@ -1,9 +1,8 @@
 #ifndef __satconfig_h
 #define __satconfig_h
 
-#include <core/gui/ewindow.h>
+#include <core/gui/listbox.h>
 
-class eListbox;
 class eButton;
 
 class eSatelliteConfiguration: public eWindow
@@ -14,7 +13,7 @@ public:
 
 class eSatelliteConfigurationManager: public eWindow
 {
-	eListbox *list;
+	eListBox<eListBoxEntryMenu> *list;
 	eButton *button_close, *sat_new, *sat_delete;
 	int eventFilter(const eWidgetEvent &event);
 public:

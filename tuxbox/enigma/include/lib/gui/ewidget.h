@@ -59,7 +59,6 @@ public:
  */
 class eWidget: public Object
 {
-//	Q_OBJECT
 	enum
 	{
 		/// Widget was shown with show() or implicit show()
@@ -68,7 +67,7 @@ class eWidget: public Object
 		stateVisible=2
 	};
 
-public:// slots:
+public:
 	/**
 	 * \brief Exits a (model) widget.
 	 *

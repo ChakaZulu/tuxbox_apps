@@ -1,7 +1,8 @@
 #ifndef __setuposd_h
 #define __setuposd_h
 
-#include "ewindow.h"
+#include <core/gui/ewindow.h>
+
 class eCheckbox;
 class eButton;
 

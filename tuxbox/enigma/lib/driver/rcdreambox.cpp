@@ -1,6 +1,7 @@
-#include <dbox/fp.h>
 #include "rcdreambox.h"
-#include "init.h"
+#include <dbox/fp.h>
+
+#include <core/system/init.h>
 
 	/* ----------------------- dreambox fernbedienung ---------------------- */
 void eRCDeviceDreambox::handleCode(int rccode)

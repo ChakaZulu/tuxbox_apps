@@ -1,10 +1,12 @@
 #include "eprogress.h"
-#include "fb.h"
-#include <erect.h>
+
 #include <stdlib.h>
-#include "lcd.h"
-#include "eskin.h"
-#include "init.h"
+
+#include <core/base/erect.h>
+#include <core/gdi/fb.h>
+#include <core/gdi/lcd.h>
+#include <core/gui/eskin.h>
+#include <core/system/init.h>
 
 eProgress::eProgress(eWidget *parent)
 	: eWidget(parent)

@@ -1,11 +1,11 @@
 #ifndef __rc_h
 #define __rc_h
 
-//#include <qobject.h>
-#include <ebase.h>
 #include <list>
 #include <map>
-#include <libsig_comp.h>
+
+#include <core/base/ebase.h>
+#include <include/libsig_comp.h>
 
 class eRCInput;
 class eRCDriver;
@@ -65,7 +65,6 @@ public:
  */
 class eRCDriver: public Object
 {
-//	Q_OBJECT
 protected:
 	std::list<eRCDevice*> listeners;
 	eRCInput *input;
@@ -96,11 +95,9 @@ public:
 
 class eRCShortDriver: public eRCDriver
 {
-//	Q_OBJECT
 protected:
 	int handle;
 	eSocketNotifier *sn;
-/*private slots:*/
 	void keyPressed(int);
 public:
 	eRCShortDriver(const char *filename);

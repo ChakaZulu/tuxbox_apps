@@ -13,16 +13,13 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-#include "enigma.h"
-
+#include <apps/enigma/enigma.h>
 #include <core/base/eerror.h>
 #include <core/gdi/lcd.h>
 #include <core/driver/rc.h>
 #include <core/driver/streamwd.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/decoder.h>
-#include <core/gui/elistbox.h>
-#include <core/gui/ewindow.h>
 #include <core/gui/emessage.h>
 #include <core/gui/eskin.h>
 
@@ -74,7 +71,8 @@ void MakeParam(char* id, int val)
 	tmp = p;		
 }
 
-ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
+ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile)
+	:eListBoxEntry((eListBox<eListBoxEntry>*)parent)
 {
 	if (!cfgfile)
 	{
@@ -120,20 +118,9 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	pluginname=pluginname.left(pluginname.length()-4);
 }
 
-eString ePlugin::getText(int t) const
-{
-	if (t)
-		return 0;
-
-	if (isback)
-		return "[Zurück]";
-
-	return name + " - " + desc;
-}
-
 eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 {
-	window=new eLBWindow("Plugins", 10, eSkin::getActive()->queryValue("fontsize", 20), 400);
+	window=new eListBoxWindow<ePlugin>(_("Plugins"), 10, eSkin::getActive()->queryValue("fontsize", 20), 400);
 	window->move(ePoint(150, 136));
 	window->setLCD(lcdTitle, lcdElement);
 	new ePlugin(&window->list, 0);
@@ -157,26 +144,16 @@ int eZapPlugins::exec()
 		return -1;
 	}
 
-/*	int nPlugins = 0;
-
-	for(int count=0; count<n; count++)
-	{       	
+	for(int count=0;count<n;count++)
+	{
 		eString	FileName = namelist[count]->d_name;
+
 		if ( FileName.find(".cfg") != -1 )
-			nPlugins++;
-	}
-	if (nPlugins > 1)
-	{*/
-		for(int count=0;count<n;count++)
-		{
-			eString	FileName = namelist[count]->d_name;
+			new ePlugin(&window->list, (PluginPath+FileName).c_str());		
 
-			if ( FileName.find(".cfg") != -1 )
-				new ePlugin(&window->list, (PluginPath+FileName).c_str());		
+		free(namelist[count]);
+  }
 
-			free(namelist[count]);
-	  }
-//	}
 	free(namelist);
 
 	window->show();
@@ -346,16 +323,13 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 
 }
 
-void eZapPlugins::selected(eListboxEntry *lbe)
+void eZapPlugins::selected(ePlugin *plugin)
 {
-	ePlugin *plugin=(ePlugin*)lbe;
-	
 	if (!plugin || plugin->isback)
 	{
 		window->close(0);
 		return;
 	}
-
 	execPlugin(plugin);
 
 	window->hide();

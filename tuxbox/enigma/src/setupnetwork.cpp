@@ -1,15 +1,16 @@
-#include <netinet/in.h>
 #include "setupnetwork.h"
-#include "elabel.h"
-#include "edvb.h"
-#include "enumber.h"
-#include "ebutton.h"
-#include "echeckbox.h"
-#include "rc.h"
-#include "eskin.h"
+
+#include <netinet/in.h>
 
 #include <core/base/i18n.h>
 
+#include <core/dvb/edvb.h>
+#include <core/gui/elabel.h>
+#include <core/gui/enumber.h>
+#include <core/gui/ebutton.h>
+#include <core/gui/echeckbox.h>
+#include <core/gui/eskin.h>
+#include <core/driver/rc.h>
 #include <core/system/econfig.h>
 
 static void unpack(__u32 l, int *t)

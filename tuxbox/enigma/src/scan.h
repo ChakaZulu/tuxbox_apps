@@ -1,9 +1,9 @@
 #ifndef __scan_h
 #define __scan_h
 
-#include "dvb.h"
-#include "multipage.h"
-#include "ewidget.h"
+#include <core/dvb/dvb.h>
+#include <core/gui/multipage.h>
+#include <core/gui/ewidget.h>
 
 class eWindow;
 class eLabel;

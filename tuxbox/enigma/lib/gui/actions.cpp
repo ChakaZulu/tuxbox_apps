@@ -1,8 +1,9 @@
 #include "actions.h"
+
 #include <core/base/eerror.h>
-#include "init.h"
-#include "nconfig.h"
-#include "edvb.h"
+#include <core/dvb/edvb.h>
+#include <core/system/init.h>
+#include <core/system/nconfig.h>
 #include <core/xml/xmltree.h>
 
 eAction::eAction(eActionMap &map, char *identifier, char *description, int priority)

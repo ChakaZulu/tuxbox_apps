@@ -1,9 +1,10 @@
 #include "elabel.h"
-#include "fb.h"
-#include "font.h"
-#include "lcd.h"
-#include "eskin.h"
-#include "init.h"
+
+#include <core/gdi/fb.h>
+#include <core/gdi/font.h>
+#include <core/gdi/lcd.h>
+#include <core/gui/eskin.h>
+#include <core/system/init.h>
 
 eLabel::eLabel(eWidget *parent, int flags, int takefocus):
 	eWidget(parent, takefocus), flags(flags)

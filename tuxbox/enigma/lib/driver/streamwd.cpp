@@ -5,12 +5,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <eerror.h>
 
 #include "ost/video.h"
-#include "edvb.h"
-#include "init.h"
 #include <dbox/event.h>
+
+#include <core/base/eerror.h>
+#include <core/dvb/edvb.h>
+#include <core/system/init.h>
 #include <core/system/econfig.h>
 
 #define EVENT_DEVICE "/dev/dbox/event0"

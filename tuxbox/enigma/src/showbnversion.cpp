@@ -1,9 +1,9 @@
-#include "rc.h"
 #include "showbnversion.h"
-#include "edvb.h"
-#include "elabel.h"
-#include "si.h"
-#include "enigma.h"
+
+#include <core/driver/rc.h>
+#include <core/dvb/edvb.h>
+#include <core/dvb/si.h>
+#include <core/gui/elabel.h>
 
 /*
 	was hier fehlt: parsen der BAT (batid: 5001) auf 0001:0085. daher wird 0001:0085:0F03 assumed.

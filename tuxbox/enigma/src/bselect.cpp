@@ -1,8 +1,7 @@
-#include <list>
-
 #include "bselect.h"
 
-#include <core/gui/elbwindow.h>
+#include <list>
+
 #include <core/gui/eskin.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/dvb.h>
@@ -26,9 +25,9 @@ void eBouquetSelector::fillBouquetList()
 			if (!usable)
 				continue;
 
-			eBouquet *c=*i;
-			eListboxEntry *l=new eListboxEntryText(&list, c->bouquet_name.c_str(), "", c);
-			if (c==result)
+			eListBoxEntryBouquet *l=new eListBoxEntryBouquet(&list, *i);
+
+			if (*i==result)
 				list.setCurrent(l);
 		}
 		list.sort();
@@ -36,17 +35,17 @@ void eBouquetSelector::fillBouquetList()
 	list.invalidate();
 }
 
-void eBouquetSelector::entrySelected(eListboxEntry *entry)
+void eBouquetSelector::entrySelected(eListBoxEntryBouquet *entry)
 {
 	if (entry)
-		result=(eBouquet*)entry->data;
+		result=entry->bouquet;
 	else
 		result=0;
 	close(1);
 }
 
 eBouquetSelector::eBouquetSelector()
-								:eLBWindow("Select Bouquet...", 17, eSkin::getActive()->queryValue("fontsize", 20), 400)
+								:eListBoxWindow<eListBoxEntryBouquet>("Select Bouquet...", 17, eSkin::getActive()->queryValue("fontsize", 20), 400)
 {
 	move(ePoint(80, 60));
 	CONNECT(list.selected, eBouquetSelector::entrySelected);
@@ -76,18 +75,18 @@ eBouquet *eBouquetSelector::choose(eBouquet *current, int irc)
 
 eBouquet *eBouquetSelector::next()
 {
-	eListboxEntry *s=list.goNext();
+	eListBoxEntryBouquet *s=list.goNext();
 	if (s)
-		return (eBouquet*)s->data;
+		return s->bouquet;
 	else
 		return 0;
 }
 
 eBouquet *eBouquetSelector::prev()
 {
-	eListboxEntry *s=list.goPrev();
+	eListBoxEntryBouquet *s=list.goPrev();
 	if (s)
-		return (eBouquet*)s->data;
+		return s->bouquet;
 	else
 		return 0;
 }

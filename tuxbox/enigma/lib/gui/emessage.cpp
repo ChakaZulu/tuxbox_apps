@@ -1,9 +1,10 @@
-#include "enigma.h"
-#include "elabel.h"
 #include "emessage.h"
-#include "ebutton.h"
-#include "font.h"
-#include "eskin.h"
+
+//#include "enigma.h"   //
+#include <core/gui/elabel.h>
+#include <core/gui/ebutton.h>
+#include <core/gui/eskin.h>
+#include <core/gdi/font.h>
 
 eMessageBox::eMessageBox(eString message, eString caption): eWindow(0)
 {
@@ -31,9 +32,7 @@ eMessageBox::eMessageBox(eString message, eString caption): eWindow(0)
 	b->setText("...OK!");
 	ext=b->getExtend();
 	b->resize(ext);
-//	b->move(ePoint((clientrect.width()-ext.width())/2, clientrect.height()-fontsize-14));	// center
 	b->move(ePoint(clientrect.width()-ext.width(), clientrect.height()-fontsize-14));	// right align
-//	connect(b, SIGNAL(selected()), SLOT(okPressed()));
 	CONNECT(b->selected, eMessageBox::okPressed);
 }
 

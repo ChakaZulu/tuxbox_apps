@@ -8,12 +8,13 @@
 */
 
 #include <pthread.h>
-#include <estring.h>
-#include <erect.h>
-#include "elock.h"
-#include "gpixmap.h"
-
 #include <deque>
+
+#include <core/base/estring.h>
+#include <core/base/erect.h>
+#include <core/system/elock.h>
+#include <core/gdi/gpixmap.h>
+
 
 class eTextPara;
 

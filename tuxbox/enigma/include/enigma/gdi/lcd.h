@@ -2,8 +2,8 @@
 #define __lcd_h
 
 #include <asm/types.h>
-#include <esize.h>
-#include <erect.h>
+#include <core/base/esize.h>
+#include <core/base/erect.h>
 
 class eLCD
 {

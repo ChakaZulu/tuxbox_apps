@@ -1,10 +1,10 @@
 #ifndef __enigma_lcd_h
 #define __enigma_lcd_h
 
-#include "ewidget.h"
-#include "eprogress.h"
-#include "elabel.h"
-#include "multipage.h"
+#include <core/gui/ewidget.h>
+#include <core/gui/eprogress.h>
+#include <core/gui/elabel.h>
+#include <core/gui/multipage.h>
 
 class eService;
 class eZapLCDMain;

@@ -1,7 +1,6 @@
 #ifndef __FONT_H
 #define __FONT_H
 
-#include "fb.h"
 #include <freetype/freetype.h>
 #include <freetype/ftcache.h>
 #include <freetype/cache/ftcglyph.h>
@@ -9,11 +8,13 @@
 #include <freetype/cache/ftcmanag.h>
 #include <freetype/cache/ftcsbits.h>
 #include <freetype/cache/ftlru.h>
-#include <esize.h>
-#include <epoint.h>
-#include <erect.h>
 #include <vector>
-#include <estring.h>
+
+#include <core/gdi/fb.h>
+#include <core/base/esize.h>
+#include <core/base/epoint.h>
+#include <core/base/erect.h>
+#include <core/base/estring.h>
 
 class FontRenderClass;
 class Font;

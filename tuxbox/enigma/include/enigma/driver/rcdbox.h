@@ -1,14 +1,13 @@
 #ifndef __rcdbox_h
 #define __rcdbox_h
 
-#include "rc.h"
+#include <core/driver/rc.h>
 
 class eRCDeviceDBoxOld: public eRCDevice
 {
-//	Q_OBJECT
 	int last, ccode;
 	eTimer timeout, repeattimer;
-private:// slots:
+private:
 	void timeOut();
 	void repeat();
 public:
@@ -22,10 +21,9 @@ public:
 
 class eRCDeviceDBoxNew: public eRCDevice
 {
-//	Q_OBJECT
 	int last, ccode;
 	eTimer timeout, repeattimer;
-private:// slots:
+private:
 	void timeOut();
 	void repeat();
 public:
@@ -39,10 +37,9 @@ public:
 
 class eRCDeviceDBoxButton: public eRCDevice
 {
-//	Q_OBJECT
 	int last;
 	eTimer repeattimer;
-private:// slots:
+private:
 	void repeat();
 public:
 	void handleCode(int code);

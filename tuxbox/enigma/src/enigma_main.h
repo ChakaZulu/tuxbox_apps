@@ -1,16 +1,15 @@
 #ifndef __enigma_main_h
 #define __enigma_main_h
 
-#include "elistbox.h"
-#include "ewindow.h"
-#include "si.h"
-#include "dvb.h"
-#include "enigma_lcd.h"
-#include "multipage.h"
+#include <apps/enigma/enigma_lcd.h>
+#include <core/dvb/si.h>
+#include <core/dvb/dvb.h>
+#include <core/dvb/edvb.h>
+#include <core/gui/ewindow.h>
+#include <core/gui/listbox.h>
+#include <core/gui/multipage.h>
 
-class eListbox;
 class eLabel;
-class eListboxEntry;
 class eProgress;
 class EIT;
 class SDT;
@@ -20,47 +19,51 @@ class PMTEntry;
 class eNumber;
 class gPainter;
 
-class NVODStream: public eListboxEntry
+class NVODStream: public eListBoxEntryTextStream
 {
+	friend class eListBox<NVODStream>;
+	friend class eNVODSelector;
 private:
 	void EITready(int error);
 public:
-	NVODStream(eListbox *listbox, int transport_stream_id, int original_network_id, int service_id);
-	eString getText(int col=0) const;
+	NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, int original_network_id, int service_id);
 	int transport_stream_id, original_network_id, service_id;
 	EIT eit;
 };
 
 class NVODReferenceEntry;
 
-class eNVODSelector: public eWindow
+class eNVODSelector: public eListBoxWindow<NVODStream>
 {
-	eListbox *list;
 private:
-	void selected(eListboxEntry *);
+	void selected(NVODStream *);
 public:
 	eNVODSelector();
 	void clear();
 	void add(NVODReferenceEntry *ref);
 };
 
-class AudioStream: public eListboxEntry
+class AudioStream: public eListBoxEntry
 {
+	friend class eListBox<AudioStream>;
+	friend class eAudioSelector;
 public:
 	enum
-	{
+  {
 		audioMPEG, audioAC3
 	};
-	AudioStream(eListbox *listbox, PMTEntry *stream);
-	eString getText(int col=0) const;
+	AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream);
 	PMTEntry *stream;
+
+	bool operator < ( const AudioStream& e) const	{	return 0;	}
+
+protected:
+	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const;
 };
 
-class eAudioSelector: public eWindow
+class eAudioSelector: public eListBoxWindow<AudioStream>
 {
-	eListbox *list;
-private:
-	void selected(eListboxEntry *);
+	void selected(AudioStream *);
 public:
 	eAudioSelector();
 	void clear();
@@ -69,21 +72,18 @@ public:
 
 class LinkageDescriptor;
 
-class SubService: public eListboxEntry
+class SubService: public eListBoxEntryText
 {
-public:
-	SubService(eListbox *listbox, LinkageDescriptor *descr);
-	eString getText(int col=0) const;
-
+	friend class eListBox<SubService>;
+	friend class eSubServiceSelector;
 	int transport_stream_id, original_network_id, service_id;
-	eString name;
+public:
+	SubService(eListBox<SubService> *listbox, LinkageDescriptor *descr);
 };
 
-class eSubServiceSelector: public eWindow
+class eSubServiceSelector: public eListBoxWindow<SubService>
 {
-	eListbox *list;
-private:
-	void selected(eListboxEntry *);
+	void selected(SubService *);
 public:
 	eSubServiceSelector();
 	void clear();

@@ -17,40 +17,39 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.2 2002/05/12 16:22:25 Ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.3 2002/06/23 15:51:24 Ghostrider Exp $
  */
 
 #include "enigma_scan.h"
-#include "satconfig.h"
-#include "scan.h"
 
-#include <core/gui/elistbox.h>
-#include <core/gui/ewindow.h>
+#include <apps/enigma/satconfig.h>
+#include <apps/enigma/scan.h>
 #include <core/dvb/edvb.h>
+#include <core/gui/ewindow.h>
 #include <core/gui/eskin.h>
 #include <core/gui/elabel.h>
 #include <core/base/i18n.h>
 
 eZapScan::eZapScan()
-	:eLBWindow(_("Channels"), 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
+	:eListBoxWindow<eListBoxEntryMenu>(_("Channels"), 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
 {
 	move(ePoint(150, 136));
-	CONNECT((new eListboxEntryText(&list, _("[back]")))->selected, eZapScan::sel_close);
-	CONNECT((new eListboxEntryText(&list, _("Transponder scan")))->selected, eZapScan::sel_scan);	
-	CONNECT((new eListboxEntryText(&list, _("Satellites...")))->selected, eZapScan::sel_satconfig);	
-	CONNECT((new eListboxEntryText(&list, _("Bouquets...")))->selected, eZapScan::sel_bouquet);	
+	CONNECT((new eListBoxEntryMenu(&list, _("[back]")))->selected, eZapScan::sel_close);
+	CONNECT((new eListBoxEntryMenu(&list, _("Transponder scan")))->selected, eZapScan::sel_scan);	
+	CONNECT((new eListBoxEntryMenu(&list, _("Satellites...")))->selected, eZapScan::sel_satconfig);	
+	CONNECT((new eListBoxEntryMenu(&list, _("Bouquets...")))->selected, eZapScan::sel_bouquet);	
 }
 
 eZapScan::~eZapScan()
 {
 }
 
-void eZapScan::sel_close(eListboxEntry *)
+void eZapScan::sel_close()
 {
 	close(0);
 }
 
-void eZapScan::sel_scan(eListboxEntry *)
+void eZapScan::sel_scan()
 {
 	TransponderScan setup;
 	hide();
@@ -58,12 +57,12 @@ void eZapScan::sel_scan(eListboxEntry *)
 	show();
 }
 
-void eZapScan::sel_bouquet(eListboxEntry *)
+void eZapScan::sel_bouquet()
 {
 	eDVB::getInstance()->sortInChannels();
 }
 
-void eZapScan::sel_satconfig(eListboxEntry *)
+void eZapScan::sel_satconfig()
 {
 	eSatelliteConfigurationManager satconfig;
 	hide();

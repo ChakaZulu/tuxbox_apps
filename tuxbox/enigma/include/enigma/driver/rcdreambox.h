@@ -1,14 +1,13 @@
 #ifndef __rcdreambox_h
 #define __rcdreambox_h
 
-#include "rc.h"
+#include <core/driver/rc.h>
 
 class eRCDeviceDreambox: public eRCDevice
 {
-//	Q_OBJECT
 	int last, ccode;
 	eTimer timeout, repeattimer;
-private:// slots:
+private:
 	void timeOut();
 	void repeat();
 public:

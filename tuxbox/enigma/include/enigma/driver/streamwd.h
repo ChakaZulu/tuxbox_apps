@@ -1,10 +1,10 @@
 #ifndef __streamwd_h
 #define __streamwd_h
 
-#include <ebase.h>
-#include <libsig_comp.h>
-#include "si.h"
-#include "dvb.h"
+#include <include/libsig_comp.h>
+#include <core/base/ebase.h>
+#include <core/dvb/si.h>
+#include <core/dvb/dvb.h>
 
 class eStreamWatchdog: public Object
 {

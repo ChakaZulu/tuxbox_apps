@@ -42,6 +42,7 @@ public:
 	void init();
 	void clearList();
 	void setCurrent(T *c);
+	T* getCurrent()	{ return current != childs.end() ? *current : 0; }
 	void sort();
 	T* goNext();
 	T* goPrev();
@@ -91,7 +92,12 @@ protected:
 	void *key;
 public:
 	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0)
-		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(0)
+		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(key)
+	{
+	}
+
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0)
+		:eListBoxEntry((eListBox<eListBoxEntry>*)lb), text(txt), key(key)
 	{
 	}
 
@@ -124,7 +130,7 @@ protected:
 
 class eListBoxEntryTextStream: public eListBoxEntry
 {
-	friend class eListBox<eListBoxEntryText>;
+	friend class eListBox<eListBoxEntryTextStream>;
 protected:
 	std::stringstream text;
 public:

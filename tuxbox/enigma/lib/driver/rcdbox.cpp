@@ -1,8 +1,10 @@
-#include <ebase.h>
+#include "rcdbox.h"
+
 #include <sys/ioctl.h>
 #include <dbox/fp.h>
-#include "rcdbox.h"
-#include "init.h"
+
+#include <core/base/ebase.h>
+#include <core/system/init.h>
 
 	/* ----------------------- alte fernbedienung ---------------------- */
 void eRCDeviceDBoxOld::handleCode(int rccode)

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.h,v 1.1 2002/05/03 23:59:31 waldi Exp $
+ * $Id: setup_language.h,v 1.2 2002/06/23 15:51:24 Ghostrider Exp $
  */
 
 #ifndef __APPS__ENIGMA__SETUP_LANGUAGE_H
@@ -26,8 +26,7 @@
 #include <map>
 #include <string>
 
-#include "ewindow.h"
-#include "eavswitch.h"
+#include <core/gui/ewindow.h>
 
 class eNumber;
 class eButton;

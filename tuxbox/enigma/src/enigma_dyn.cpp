@@ -1,36 +1,35 @@
+#include "enigma_dyn.h"
+
+#include <map>
 #include <time.h>
-#include <qmap.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "enigma.h"
-#include "decoder.h"
-#include "enigma_dyn.h"
-#include "http_dyn.h"
-#include "dvb.h"
-#include "edvb.h"
-
-#include "epgcache.h"
-
-#include <config.h>
-#include <core/system/econfig.h>
-#include <core/gdi/fb.cpp>
-
-#include <stdio.h>
 #include <sys/socket.h>
-#include <net/if.h>
 #include <sys/ioctl.h>
+#include <net/if.h>
 #include <arpa/inet.h>
 #include <linux/if_ether.h>
+
+#include <config.h>
+#include <apps/enigma/enigma.h>
+#include <core/system/http_dyn.h>
+#include <core/dvb/dvb.h>
+#include <core/dvb/edvb.h>
+#include <core/dvb/epgcache.h>
+#include <core/system/econfig.h>
+#include <core/gdi/fb.cpp>
+#include <core/dvb/decoder.h>
 
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 
 #define DELETE(WHAT) result.strReplace(#WHAT, "")
 
-static QMap<eString,eString> getRequestOptions(eString opt)
+static std::map<eString,eString> getRequestOptions(eString opt)
 {
-	QMap<eString,eString> result;
+	std::map<eString,eString> result;
 	
 	if (opt[0]=='?')
 		opt=opt.mid(1);
@@ -49,7 +48,7 @@ static QMap<eString,eString> getRequestOptions(eString opt)
 		if(b==eString::npos)
 			b=-1;
 		eString r=opt.mid(e+1, b-e-1);
-		result.insert(n, r);
+		result.insert(std::pair<eString, eString>(n, r));
 		opt=opt.mid(a+1);
 	}
 	return result;
@@ -126,7 +125,7 @@ static eString listServices(eString request, eString path, eString opts, eHTTPCo
 {
 	content->local_header["Content-Type"]="text/html";
 	eString result;
-	QMap<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString search=opt["search"];
 	result="<html>\n"
 		"<head>\n"
@@ -147,7 +146,7 @@ static eString listServices(eString request, eString path, eString opts, eHTTPCo
 static eString admin(eString request, eString path, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
-	QMap<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString command=opt["command"];
 	if (command && command=="shutdown")
 	{
@@ -160,7 +159,7 @@ static eString admin(eString request, eString path, eString opts, eHTTPConnectio
 static eString audio(eString request, eString path, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
-	QMap<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString result="";
 	eString volume=opt["volume"];
 	if (volume)
@@ -232,7 +231,7 @@ static eString getVolume()
 
 static eString setVolume(eString request, eString path, eString opts, eHTTPConnection *content)
 {
-	QMap<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString mute="0";
 	eString volume;
 	eString result="";
@@ -677,7 +676,7 @@ static eString getMode(eString mode)
 static eString web_root(eString request, eString path, eString opts, eHTTPConnection *content)
 {
 	eString result;
-	QMap<eString,eString> opt=getRequestOptions(opts);
+	std::map<eString,eString> opt=getRequestOptions(opts);
 	content->local_header["Content-Type"]="text/html";
 
 	eString mode=opt["mode"];

@@ -14,8 +14,6 @@
 eMainMenu::eMainMenu()
 	:window("enigma" , 7, eSkin::getActive()->queryValue("fontsize", 20), 200)
 {
-	eZapLCD *pLCD=eZapLCD::getInstance();
-	window.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	window.cmove(ePoint(150, 150));
 	CONNECT((new eListBoxEntryMenu(&window.list, _("[back]")))->selected, eMainMenu::sel_close);
 	CONNECT((new eListBoxEntryMenu(&window.list, _("VCR mode")))->selected, eMainMenu::sel_vcr);

@@ -9,23 +9,23 @@
 #include <config.h>
 
 #include <core/base/i18n.h>
+#include <core/driver/rc.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
+#include <core/gdi/gfbdc.h>
+#include <core/gui/emessage.h>
+#include <core/gui/actions.h>
+#include <core/system/econfig.h>
 #include <core/system/httpd.h>
 #include <core/system/http_file.h>
 #include <core/system/http_dyn.h>
-#include <core/system/xmlrpc.h>
-#include <core/system/econfig.h>
 #include <core/system/init.h>
-#include <core/gui/emessage.h>
-#include <core/gui/actions.h>
-#include <core/driver/rc.h>
-
-#include "enigma.h"
-#include "enigma_dyn.h"
-#include "enigma_xmlrpc.h"
-#include "enigma_main.h"
-#include "sselect.h"
+#include <core/system/xmlrpc.h>
+#include <apps/enigma/enigma.h>
+#include <apps/enigma/enigma_dyn.h>
+#include <apps/enigma/enigma_xmlrpc.h>
+#include <apps/enigma/enigma_main.h>
+#include <apps/enigma/sselect.h>
 
 eZap *eZap::instance;
 
@@ -52,8 +52,6 @@ void eZap::keyEvent(const eRCKey &key)
 void eZap::status()
 {
 }
-
-#include "gfbdc.h"
 
 eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 {
