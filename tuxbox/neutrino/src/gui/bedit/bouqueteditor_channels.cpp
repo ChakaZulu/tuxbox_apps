@@ -144,6 +144,9 @@ void CBEChannelWidget::hide()
 
 int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
@@ -158,7 +161,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 	paintFoot();
 
 	channelsChanged = false;
-	uint msg; uint data;
+
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_epg );
 
 	bool loop=true;
@@ -169,7 +172,8 @@ int CBEChannelWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_epg );
 
-		if ((msg==CRCInput::RC_timeout) || (msg == (uint) g_settings.key_channelList_cancel))
+		if ((msg == CRCInput::RC_timeout) ||
+		    (msg == (neutrino_msg_t)g_settings.key_channelList_cancel))
 		{
 			if (state == beDefault)
 			{
