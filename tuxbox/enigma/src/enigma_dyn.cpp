@@ -974,7 +974,7 @@ static eString getLeftNavi(eString mode, bool javascript)
 #ifdef ENABLE_DYN_CONF
 		result += button(110, "Swap File", LEFTNAVICOLOR, pre + "?mode=configSwapFile" + post);
 		result += "<br>";
-#if
+#if 0
 		result += button(110, "Multi-Boot", LEFTNAVICOLOR, pre + "?mode=configMultiBoot" + post);
 		result += "<br>";
 #endif

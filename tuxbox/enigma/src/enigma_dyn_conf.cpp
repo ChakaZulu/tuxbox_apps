@@ -44,6 +44,7 @@
 
 using namespace std;
 
+#if 0
 eString getImageMediaPath(void)
 {
 	eString mediaPath;
@@ -110,6 +111,7 @@ eString getInstalledImages(void)
 	
 	return result;
 }
+#endif
 
 void deactivateSwapFile(eString swapFile)
 {
