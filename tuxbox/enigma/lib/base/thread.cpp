@@ -1,5 +1,7 @@
 #include <lib/base/thread.h>
+
 #include <stdio.h>
+#include <unistd.h>
 #include <lib/base/eerror.h>
 
 void eThread::thread_completed(void *ptr)
@@ -37,16 +39,31 @@ void eThread::run( int prio, int policy )
 		pthread_attr_setschedparam(&attr, &p);
 	}
 	pthread_create(&the_thread, &attr, wrapper, this);
+	usleep(1000);
+	int timeout=20;
+	while(!alive && timeout--)
+	{
+		eDebug("waiting for thread start...");
+		usleep(1000*10);
+	}
+	if ( !timeout )
+		eDebug("thread couldn't be started !!!");
 }                     
 
 eThread::~eThread()
 {
-	if (alive)
+	if ( alive )
 		kill();
 }
 
 void eThread::kill(bool hard)
 {
+	if ( !alive )
+	{
+		eDebug("kill.. but thread don't running");
+		return;
+	}
+
 	if ( hard )
 	{
 		eDebug("killing the thread...");
