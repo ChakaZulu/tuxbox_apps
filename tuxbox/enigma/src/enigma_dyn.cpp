@@ -276,7 +276,7 @@ eString httpEscape(const eString &string)
 	return result;
 }
 
-std::map<eString, eString> getRequestOptions(eString opt)
+std::map<eString, eString> getRequestOptions(eString opt, char delimiter = '&')
 {
 	std::map<eString, eString> result;
 
@@ -288,12 +288,12 @@ std::map<eString, eString> getRequestOptions(eString opt)
 		unsigned int e = opt.find("=");
 		if (e == eString::npos)
 			e = opt.length();
-		unsigned int a = opt.find("&", e);
+		unsigned int a = opt.find(delimiter, e);
 		if (a == eString::npos)
 			a = opt.length();
 		eString n = opt.left(e);
 
-		unsigned int b = opt.find("&", e + 1);
+		unsigned int b = opt.find(delimiter, e + 1);
 		if (b == eString::npos)
 			b = (unsigned)-1;
 		eString r = httpUnescape(opt.mid(e + 1, b - e - 1));
@@ -1484,9 +1484,9 @@ public:
 		eString serviceRef = ref2string(e);
 
 		if (!(e.flags & eServiceReference::isDirectory))
-			result += "<a href=\"/wap?mode=zapto&path=" + serviceRef + "\">";
+			result += "<a href=\"/wap?mode=zapto,path=" + serviceRef + "\">";
 		else
-			result += "<a href=\"/wap?mode=zap&path=" + serviceRef + "\">";
+			result += "<a href=\"/wap?mode=zap,path=" + serviceRef + "\">";
 
 		eService *service = iface.addRef(e);
 		if (!service)
@@ -3017,8 +3017,8 @@ static eString wapEPG(void)
 				<< "<br/>";
 
 			result << "<a href=\"/wap?mode=epgDetails"
-						<< "&path=" << ref2string(ref)
-						<< "&ID=" << std::hex << event.event_id << std::dec
+						<< ",path=" << ref2string(ref)
+						<< ",ID=" << std::hex << event.event_id << std::dec
 						<< "\">"
 						<< filter_string(description)
 						<< "</a><br/>\n";
@@ -3802,7 +3802,7 @@ static eString wapAddTimerEvent(eString opts)
 {
 	eString result;
 
-	std::map<eString, eString> opt = getRequestOptions(opts);
+	std::map<eString, eString> opt = getRequestOptions(opts, ',');
 	eString serviceRef = opt["path"];
 	eString eventID = opt["ID"];
 	eString eventStartTime = opt["start"];
@@ -4214,12 +4214,12 @@ static eString wapEPGDetails(eString serviceRef, eString eventID)
 					ext_description = _("No detailed information available");
 #ifndef DISABLE_FILE
 				record << "<a href=\"/wap?mode=addTimerEvent"
-					<< "&path=" << ref2string(ref)
-					<< "&ID=" << std::hex << event->event_id << std::dec
-					<< "&start=" << event->start_time
-					<< "&duration=" << event->duration
-					<< "&descr=" << filter_string(description)
-					<< "&channel=" << filter_string(current->service_name)
+					<< ",path=" << ref2string(ref)
+					<< ",ID=" << std::hex << event->event_id << std::dec
+					<< ",start=" << event->start_time
+					<< ",duration=" << event->duration
+					<< ",descr=" << filter_string(description)
+					<< ",channel=" << filter_string(current->service_name)
 					<< "\">Record</a>";
 #endif
 				delete event;
@@ -4337,7 +4337,7 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 {
 	eString result;
 
-	std::map<eString,eString> opt = getRequestOptions(opts);
+	std::map<eString,eString> opt = getRequestOptions(opts, ',');
 	eString mode = opt["mode"];
 	eString spath = opt["path"];
 

@@ -6,7 +6,7 @@
 
 extern eString httpUnescape(const eString &string);
 extern eString httpEscape(const eString &string);
-extern std::map<eString,eString> getRequestOptions(eString opt);
+extern std::map<eString,eString> getRequestOptions(eString opt, char delimiter = '&');
 extern eString ref2string(const eServiceReference &r);
 extern eServiceReference string2ref(const eString &service);
 
