@@ -2528,8 +2528,17 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if( msg == CRCInput::RC_spkr )
 	{
-		//mute
-		AudioMute( !current_muted );
+		if( mode == mode_standby )
+		{
+			//turn off lcd
+			g_lcdd->setPower( !(g_lcdd->getPower()?1:0) );
+			g_lcdd->update();
+		}
+		else
+		{
+			//mute
+			AudioMute( !current_muted );
+		}
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::EVT_VOLCHANGED )
@@ -3036,6 +3045,8 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 
 void CNeutrinoApp::standbyMode( bool bOnOff )
 {
+	static int lcdpower;
+
 #ifdef USEACTIONLOG
 	g_ActionLog->println( ( bOnOff ) ? "mode: standby on" : "mode: standby off" );
 #endif
@@ -3046,6 +3057,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	if( bOnOff )
 	{
 		// STANDBY AN
+		lcdpower = g_lcdd->getPower()?1:0;
 
 		if( mode == mode_scart )
 		{
@@ -3069,6 +3081,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	{
 		// STANDBY AUS
 
+		g_lcdd->setPower(&lcdpower);
 		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 
@@ -3269,7 +3282,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.370 2002/12/03 22:54:09 Homar Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.371 2002/12/07 14:03:09 alexw Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
