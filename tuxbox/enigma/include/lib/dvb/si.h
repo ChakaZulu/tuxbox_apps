@@ -269,6 +269,15 @@ public:
 	eString name;
 };
 
+class ItemEntry
+{
+public:
+	eString item_description;
+	eString item;
+	ItemEntry(eString &item_description, eString &item);
+	~ItemEntry();
+};
+
 class ExtendedEventDescriptor: public Descriptor
 {
 public:
@@ -277,8 +286,8 @@ public:
 	int descriptor_number;
 	int last_descriptor_number;
 	char language_code[3];
-	int item_description_length;
-	eString item_description;
+	ePtrList< ItemEntry > items;
+	eString text;
 };
 
 class ComponentDescriptor: public Descriptor

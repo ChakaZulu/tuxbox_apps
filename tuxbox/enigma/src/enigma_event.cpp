@@ -264,7 +264,7 @@ void eEventDisplay::setEvent(EITEvent *event)
 			{
 				valid |= 16;
 				ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*d;
-				_long_description+=ss->item_description;
+				_long_description+=ss->text;
 			}
 		}
 

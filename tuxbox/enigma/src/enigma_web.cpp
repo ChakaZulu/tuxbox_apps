@@ -344,7 +344,7 @@ static void processEvent(eString &res, EITEvent *ev, const eString &search, int 
 			{
 				const ExtendedEventDescriptor *e=(ExtendedEventDescriptor*)*d;
 				res += "E: ";
-				eString t = e->item_description;
+				eString t = e->text;
 				t.strReplace("\n", eString("\\n"));
 				res += t;
 				res +=" \n";

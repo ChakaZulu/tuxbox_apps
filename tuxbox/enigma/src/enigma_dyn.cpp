@@ -1062,10 +1062,10 @@ static eString getEITC()
 						switch(p)
 						{
 							case 0:
-								now_longtext+=ss->item_description;
+								now_longtext+=ss->text;
 								break;
 							case 1:
-								next_longtext+=ss->item_description;
+								next_longtext+=ss->text;
 								break;
 						}
 					}
@@ -2318,7 +2318,7 @@ public:
 							}
 							if (d->Tag() == DESCR_EXTENDED_EVENT)
 							{
-								ext_description += ((ExtendedEventDescriptor*)descriptor)->item_description;
+								ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
 							}
 						}
 
@@ -3423,7 +3423,7 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 					}
 					if (d->Tag() == DESCR_EXTENDED_EVENT)
 					{
-						ext_description += ((ExtendedEventDescriptor*)*d)->item_description;
+						ext_description += ((ExtendedEventDescriptor*)*d)->text;
 						eDebug("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
 					}
 				}

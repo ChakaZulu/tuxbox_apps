@@ -157,8 +157,6 @@ struct eit_extended_descriptor_struct {
 	u_char iso_639_2_language_code_1 : 8;
 	u_char iso_639_2_language_code_2 : 8;
 	u_char iso_639_2_language_code_3 : 8;
-	u_char length_of_items : 8;
-	u_char item_description_length : 8;
 };
 
 

@@ -817,17 +817,25 @@ eString BouquetNameDescriptor::toString()
 }
 #endif
 
+ItemEntry::ItemEntry(eString &item_description, eString &item)
+	:item_description(item_description), item(item)
+{
+}
+
+ItemEntry::~ItemEntry()
+{
+}
+
 ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
 {
 	struct eit_extended_descriptor_struct *evt=(struct eit_extended_descriptor_struct *)descr;
 	descriptor_number = evt->descriptor_number;
 	last_descriptor_number = evt->last_descriptor_number;
-	item_description_length = evt->item_description_length;
 	language_code[0]=evt->iso_639_2_language_code_1;
 	language_code[1]=evt->iso_639_2_language_code_2;
 	language_code[2]=evt->iso_639_2_language_code_3;
-
+	
 	int table=5;
 	if (!memcmp(language_code, "gre", 3))
 		table=3;
@@ -836,7 +844,46 @@ ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr)
 
 	int ptr = sizeof(struct eit_extended_descriptor_struct);
 	__u8* data = (__u8*) descr;
-	item_description=convertDVBUTF8((unsigned char*)data+ptr, item_description_length, table);
+
+	int length_of_items=data[ptr++];
+	int item_ptr=ptr;
+	int item_description_len;
+	int item_len;
+	
+	while (ptr < item_ptr+length_of_items)
+	{
+		eString item_description;
+		eString item;
+		
+		item_description_len=data[ptr++];
+		if (item_description_len && (data[ptr]<0x20))           // ignore charset
+		{
+			ptr++;
+			item_description_len--;
+		}
+		item_description=convertDVBUTF8((unsigned char*) data+ptr, item_description_len, table);
+		ptr+=item_description_len;
+		
+		item_len=data[ptr++];
+		if (item_len && (data[ptr]<0x20))                       // ignore charset
+		{
+			ptr++;
+			item_len--;
+		}
+		item=convertDVBUTF8((unsigned char*) data+ptr, item_len, table);
+		ptr+=item_len;
+		
+		items.push_back(new ItemEntry(item_description, item));
+	}
+	
+	int text_length=data[ptr++];
+	if (text_length && (data[ptr]<0x20))                    // ignore charset
+	{
+		ptr++;
+		text_length--;
+	}
+	text=convertDVBUTF8((unsigned char*) data+ptr, text_length, table);
+	ptr+=text_length;
 }
 
 #ifdef SUPPORT_XML
@@ -845,7 +892,15 @@ eString ExtendedEventDescriptor::toString()
 	eString res="<ExtendedEventDescriptor>";
 	res+=eString().sprintf("<language_code>%c%c%c</language_code>", language_code[0], language_code[1], language_code[2]);
 	res+=eString().sprintf("<descriptor>%i</descriptor><last_descriptor_number>%i</last_descriptor_number>\n", descriptor_number, last_descriptor_number);
-	res+="<description>"+item_description+"</description></ExtendedEventDescriptor>\n";
+
+	for (ePtrList<ItemEntry>::iterator i(items); i != items.end(); ++i)
+	{
+		res+="<ItemEntry>";
+		res+="<item_description>" + i->item_description + "</item_description>";
+		res+="<item>" + i->item + "</item>";
+		res+="</ItemEntry>";
+	}
+	res+="<text>"+text+"</text></ExtendedEventDescriptor>\n";
 	return res;
 }
 #endif
