@@ -137,11 +137,11 @@ char CControldClient::getVideoFormat()
 
 	send(CControldMsg::CMD_GETVIDEOFORMAT);
 
-	receive_data((char*)&rmsg, sizeof(rmsg));
+	bool success = receive_data((char*)&rmsg, sizeof(rmsg));
 
 	close_connection();
 
-	return rmsg.format;
+	return success ? rmsg.format : 2; /* default value is 2 (cf. controld.cpp) */
 }
 
 void CControldClient::setVideoOutput(char output)
@@ -161,11 +161,11 @@ char CControldClient::getVideoOutput()
 
 	send(CControldMsg::CMD_GETVIDEOOUTPUT);
 
-	receive_data((char*)&rmsg, sizeof(rmsg));
+	bool success = receive_data((char*)&rmsg, sizeof(rmsg));
 
 	close_connection();
 
-	return rmsg.output;
+	return success ? rmsg.output : 1; /* default value is 1 (cf. controld.cpp) */
 }
 
 void CControldClient::Mute(const CControld::volume_type volume_type)

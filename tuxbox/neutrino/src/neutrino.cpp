@@ -527,7 +527,6 @@ int CNeutrinoApp::loadSetup()
 	        checkParentallocked.close(); 	 
 	} 
 	//video
-	g_settings.video_Signal = configfile.getInt32( "video_Signal", 1 ); //RGB + CVBS
 	g_settings.video_Format = configfile.getInt32("video_Format", CControldClient::VIDEOFORMAT_4_3);
 	g_settings.video_csync = configfile.getInt32( "video_csync", 0 ); 
 
@@ -539,7 +538,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", true );
 	g_settings.shutdown_real_rcdelay = configfile.getInt32( "shutdown_real_rcdelay", true );
 	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
-	g_settings.infobar_sat_display = configfile.getInt32( "infobar_sat_display", true );
+	g_settings.infobar_sat_display = configfile.getBool("infobar_sat_display", true);
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
@@ -844,7 +843,6 @@ void CNeutrinoApp::saveSetup()
 	}
 
 	//video
-	configfile.setInt32( "video_Signal", g_settings.video_Signal );
 	configfile.setInt32( "video_Format", g_settings.video_Format );
 	configfile.setInt32( "video_csync", g_settings.video_csync );
 
@@ -856,7 +854,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "shutdown_real", g_settings.shutdown_real );
 	configfile.setInt32( "shutdown_real_rcdelay", g_settings.shutdown_real_rcdelay );
 	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock);
-	configfile.setInt32( "infobar_sat_display", g_settings.infobar_sat_display );
+	configfile.setBool("infobar_sat_display", g_settings.infobar_sat_display);
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
@@ -1804,21 +1802,6 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem(mf);
 }
 
-class CVideoSettings : public CMenuWidget
-{
- public:
-	CVideoSettings() : CMenuWidget(LOCALE_VIDEOMENU_HEAD, "video.raw")
-		{
-		};
-
-	virtual void paint()
-		{
-			g_settings.video_Signal = g_Controld->getVideoOutput();
-			g_settings.video_Format = g_Controld->getVideoFormat();
-			
-			CMenuWidget::paint();
-		};
-};
 
 #define VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT 5
 const CMenuOptionChooser::keyval VIDEOMENU_VIDEOSIGNAL_OPTIONS[VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT] =
@@ -1839,32 +1822,51 @@ const CMenuOptionChooser::keyval VIDEOMENU_VIDEOFORMAT_OPTIONS[VIDEOMENU_VIDEOFO
 	{ 0, LOCALE_VIDEOMENU_VIDEOFORMAT_AUTODETECT }
 };
 
-void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
+class CVideoSettings : public CMenuWidget
 {
-	videoSettings.addItem(GenericMenuSeparator);
-	videoSettings.addItem(GenericMenuBack);
-	videoSettings.addItem(GenericMenuSeparatorLine);
+public:
+	CMenuForwarder * SyncControlerForwarder;
 
-	CRGBCSyncControler* sc = new CRGBCSyncControler(LOCALE_VIDEOMENU_RGB_CENTERING, &g_settings.video_csync);
-	bool bVisible = ( g_settings.video_Signal == 1 ) || ( g_settings.video_Signal == 3 ) || ( g_settings.video_Signal == 4 );  
-	CMenuForwarder* scf = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, bVisible, NULL, sc);
+	CVideoSettings() : CMenuWidget(LOCALE_VIDEOMENU_HEAD, "video.raw")
+		{
+			addItem(GenericMenuSeparator);
+			addItem(GenericMenuBack);
+			addItem(GenericMenuSeparatorLine);
+
+			CRGBCSyncControler * sc = new CRGBCSyncControler(LOCALE_VIDEOMENU_RGB_CENTERING, &g_settings.video_csync);
+			SyncControlerForwarder = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, false, NULL, sc);
 	
-	CVideoSetupNotifier * videoSetupNotifier = new CVideoSetupNotifier(scf);
-	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOSIGNAL, &g_settings.video_Signal, VIDEOMENU_VIDEOSIGNAL_OPTIONS, VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT, true, videoSetupNotifier);
-	videoSettings.addItem(oj);
+			CVideoSetupNotifier * videoSetupNotifier = new CVideoSetupNotifier(SyncControlerForwarder);
+			CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOSIGNAL, &g_settings.video_Signal, VIDEOMENU_VIDEOSIGNAL_OPTIONS, VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT, true, videoSetupNotifier);
+			
+			addItem(oj);
+			addItem(SyncControlerForwarder);
 
-	videoSettings.addItem(scf);
+			oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &g_settings.video_Format, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT, true, videoSetupNotifier);
 
-	oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &g_settings.video_Format, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT, true, videoSetupNotifier);
+			if (g_settings.video_Format == CControldClient::VIDEOFORMAT_AUTO)
+			{
+				videoSetupNotifier->changeNotify(LOCALE_VIDEOMENU_VIDEOFORMAT, NULL);
+			}
 
-	if (g_settings.video_Format == CControldClient::VIDEOFORMAT_AUTO)
-	{
-		videoSetupNotifier->changeNotify(LOCALE_VIDEOMENU_VIDEOFORMAT, NULL);
-	}
+			addItem(oj);
+		};
 
-	videoSettings.addItem( oj );
+	virtual void paint()
+		{
+			g_settings.video_Signal = g_Controld->getVideoOutput();
 
-	oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSWITCH, &g_settings.vcr_AutoSwitch, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
+			SyncControlerForwarder->setActive((g_settings.video_Signal == 1) || (g_settings.video_Signal == 3) || (g_settings.video_Signal == 4));
+
+			g_settings.video_Format = g_Controld->getVideoFormat();
+			
+			CMenuWidget::paint();
+		};
+};
+
+void CNeutrinoApp::InitVideoSettings(CMenuWidget & videoSettings)
+{
+	CMenuOptionChooser * oj = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSWITCH, &g_settings.vcr_AutoSwitch, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 	videoSettings.addItem(oj);
 
 	videoSettings.addItem(GenericMenuSeparatorLine);

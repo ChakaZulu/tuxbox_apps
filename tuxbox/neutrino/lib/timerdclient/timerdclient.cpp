@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.48 2004/04/21 19:30:23 zwen Exp $
+	$Id: timerdclient.cpp,v 1.49 2004/06/21 19:55:07 thegoodguy Exp $
 
 	License: GPL
 
@@ -330,10 +330,19 @@ void CTimerdClient::getRecordingSafety(int &pre, int &post)
 	send(CTimerdMsg::CMD_GETRECSAFETY);
 	CTimerdMsg::commandRecordingSafety data;
 
-	receive_data((char*)&data, sizeof(data));
+	bool success = receive_data((char*)&data, sizeof(data));
 	close_connection();
-	pre = data.pre;
-	post = data.post;
+	if (success)
+	{
+		pre = data.pre;
+		post = data.post;
+	}
+	else
+	{
+		/* fill with default values (cf. timermanager.cpp) */
+		pre  = 0;
+		post = 0;
+	}
 }
 
 //-------------------------------------------------------------------------
