@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.32 2002/09/03 11:02:23 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.33 2002/09/04 11:52:56 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -39,6 +39,7 @@ std::string curr_chan_name;
 uint32_t found_transponders;
 uint32_t found_channels;
 std::string lastProviderName;
+std::map <uint32_t, uint8_t> service_types;
 
 extern CFrontend *frontend;
 extern CEventServer *eventServer;
@@ -274,8 +275,13 @@ uint8_t network_name_descriptor (uint8_t *buffer)
 }
 
 /* 0x41 */
-uint8_t service_list_descriptor (uint8_t *buffer)
+uint8_t service_list_descriptor (uint8_t *buffer, unsigned short transport_stream_id)
 {
+	unsigned char i;
+
+	for (i = 0; i < buffer[1]; i += 3)
+		service_types[(transport_stream_id << 16) | (buffer[i+2] << 8) | buffer[i+3]] = buffer[i+4];
+
 	return buffer[1];
 }
 

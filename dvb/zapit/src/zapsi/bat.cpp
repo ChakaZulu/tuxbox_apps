@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.4 2002/08/24 11:10:53 obi Exp $
+ * $Id: bat.cpp,v 1.5 2002/09/04 11:52:56 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,9 +35,11 @@
 #include "bat.h"
 #include "descriptors.h"
 
+#define BAT_SIZE 1024
+
 int parse_bat (int demux_fd)
 {
-	unsigned char buffer[1024];
+	unsigned char buffer[BAT_SIZE];
 
 	/* position in buffer */
 	unsigned short pos;
@@ -81,19 +83,16 @@ int parse_bat (int demux_fd)
 		bouquet_id = (buffer[3] << 8) | buffer[4];
 		bouquet_descriptors_length = ((buffer[8] & 0x0F) << 8) | buffer[9];
 
-		printf("[bat.cpp] dump:\n");
-		for (pos = 0; pos < section_length + 3; pos++)
-		{
-			printf("%02x ", buffer[pos]);
-		}
-		printf("\n");
-
 		for (pos = 10; pos < bouquet_descriptors_length + 10; pos += buffer[pos + 1] + 2)
 		{
 			switch (buffer[pos])
 			{
 			case 0x47:
 				bouquet_name_descriptor(buffer + pos);
+				break;
+
+			case 0x49:
+				country_availability_descriptor(buffer + pos);
 				break;
 
 			case 0x4A:
@@ -104,6 +103,11 @@ int parse_bat (int demux_fd)
 				private_data_specifier_descriptor(buffer + pos);
 				break;
 
+			case 0x80:
+			case 0x91:
+			case 0xF0:
+				break;
+
 			default:
 				printf("[bat.cpp] descriptor_tag (a): %02x\n", buffer[pos]);
 				generic_descriptor(buffer + pos);
@@ -112,22 +116,35 @@ int parse_bat (int demux_fd)
 		}
 
 		transport_stream_loop_length = ((buffer[pos] & 0x0F) << 8) | buffer[pos + 1];
-		printf("[bat.cpp] transport_stream_loop_length: %04x\n", transport_stream_loop_length);
 
-		for (pos2 = pos + 2; pos2 < pos + 2 + transport_stream_loop_length; pos += transport_descriptors_length + 6)
+		for (pos2 = pos + 2; pos2 < pos + 2 + transport_stream_loop_length; pos2 += transport_descriptors_length + 6)
 		{
 			transport_stream_id = (buffer[pos2] << 8) | buffer[pos2 + 1];
 			original_network_id = (buffer[pos2 + 2] << 8) | buffer[pos2 + 3];
 			transport_descriptors_length = ((buffer[pos2 + 4] & 0x0F) << 8) | buffer[pos2 + 5];
-
-			printf("[bat.cpp] transport_descriptors_length: %04x\n", transport_descriptors_length);
 
 			for (pos3 = pos2 + 6; pos3 < transport_descriptors_length + pos2 + 6; pos3 += buffer[pos3 + 1] + 2)
 			{
 				switch (buffer[pos3])
 				{
 				case 0x41:
-					service_list_descriptor(buffer + pos3);
+					service_list_descriptor(buffer + pos3, transport_stream_id);
+					break;
+
+				case 0x42:
+					stuffing_descriptor(buffer + pos3);
+					break;
+
+				case 0x5F:
+					private_data_specifier_descriptor(buffer + pos3);
+					break;
+
+				case 0x80:
+				case 0x81:
+				case 0x83:
+				case 0x93:
+				case 0xC9:
+				case 0xD3:
 					break;
 
 				default:

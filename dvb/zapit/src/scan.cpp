@@ -1,10 +1,15 @@
 /*
- * $Id: scan.cpp,v 1.59 2002/09/03 11:02:22 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.60 2002/09/04 11:52:55 obi Exp $
  */
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <clientlib/zapitclient.h>
 #include <xml/xmltree.h>
 #include <zapost/frontend.h>
+#include <zapsi/bat.h>
 #include <zapsi/nit.h>
 #include <zapsi/pat.h>
 #include <zapsi/sdt.h>
@@ -19,6 +24,8 @@
 #define CONFIGDIR "/var/tuxbox/config"
 #endif
 
+#define DEMUX_DEV "/dev/dvb/card0/demux0"
+
 short scan_runs;
 short curr_sat;
 static int status = 0;
@@ -29,6 +36,7 @@ CBouquetManager* scanBouquetManager;
 
 extern int found_transponders;
 extern int found_channels;
+extern std::map <uint32_t, uint8_t> service_types;
 
 /* zapit.cpp */
 extern CFrontend *frontend;
@@ -138,27 +146,26 @@ int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint
 int get_sdts()
 {
 	stiterator tI;
+	int demux_fd = open(DEMUX_DEV, O_RDWR);
+
+	if (demux_fd == -1)
+		perror(DEMUX_DEV);
 
 	for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	{
 		if (frontend->tuneFrequency(tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) == true)
 		{
-			printf("[scan.cpp] parsing sdt of tsid %04x, onid %04x\n", tI->second.transport_stream_id, tI->second.original_network_id);
+			printf("[scan.cpp] parsing SDT (tsid:onid %04x:%04x)\n", tI->second.transport_stream_id, tI->second.original_network_id);
 			status = parse_sdt();
-#if 0
-			int tmp = found_transponders;
-			
-			parse_nit(tI->second.DiSEqC);
 
-			if (found_transponders != tmp)
-			{
-				printf("found new transponder(s) on %u %u %hhu\n", tI->second.feparams.Frequency, tI->second.feparams.u.qpsk.SymbolRate, tI->second.polarization);
+			if (demux_fd != -1) {
+				printf("[scan.cpp] parsing PAT\n");
+				parse_pat(demux_fd, NULL, tI->second.original_network_id);
+				printf("[scan.cpp] parsing BAT\n");
+				parse_bat(demux_fd);
+				printf("[scan.cpp] parsing NIT\n");
+				parse_nit(tI->second.DiSEqC);
 			}
-			else
-			{
-				printf("no new transponder(s) in current nit\n");
-			}
-#endif
 		}
 		else
 		{
@@ -166,6 +173,9 @@ int get_sdts()
 			status = -1;
 		}
 	}
+
+	if (demux_fd != -1)
+		close(demux_fd);
 
 	return status;
 }
@@ -262,7 +272,7 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original
 			if (cI->second.name.length() == 0)
 			{
 				fprintf(fd,
-					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%04x\" channel_nr=\"0\"/>\n",
+					"\t\t\t<channel service_id=\"%04x\" name=\"%04x\" service_type=\"%02x\" channel_nr=\"0\"/>\n",
 					cI->second.sid,
 					cI->second.sid,
 					cI->second.service_type);
@@ -270,7 +280,7 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original
 			else
 			{
 				fprintf(fd,
-					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%04x\" channel_nr=\"0\"/>\n",
+					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\" channel_nr=\"0\"/>\n",
 					cI->second.sid,
 					cI->second.name.c_str(),
 					cI->second.service_type);
@@ -443,10 +453,39 @@ void *start_scanthread(void *param)
 			transponder = transponder->GetNext();
 		}
 
-		/* read service description table */
+		/* 
+		 * parse:
+		 * service description table,
+		 * program association table,
+		 * bouquet association table,
+		 * network information table
+		 */
 		status = get_sdts();
 
-		//todo: Statiauswertung
+		/*
+		 * channels from PAT do not have service_type set.
+		 * some channels set the service_type in the BAT or the NIT.
+		 * should the NIT be parsed on every transponder?
+		 */
+		std::map <uint32_t, uint8_t>::iterator stI;
+		for (stI = service_types.begin(); stI != service_types.end(); stI++)
+		{
+			sciterator scI = scanchannels.find(stI->first);
+
+			if (scI != scanchannels.end())
+			{
+				if (scI->second.service_type != stI->second)
+				{
+					printf("[scan.cpp] setting service_type of tsid:sid %04x:%04x from %02x to %02x\n",
+							(stI->first >> 16) & 0xFFFF,
+							stI->first & 0xFFFF,
+							scI->second.service_type,
+							stI->second);
+
+					scI->second.service_type = stI->second;
+				}
+			}
+		}
 
 		/* write services */
 		fd = write_provider(fd, type, providerName, diseqc_pos);

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.49 2002/09/03 18:31:01 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.50 2002/09/04 11:52:55 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -25,6 +25,8 @@
 #include <map>
 #include <ext/hash_set>
 
+#include <zapsi/sdt.h>
+
 #include "bouquets.h"
 
 extern tallchans allchans_tv, allchans_radio;   //  defined in zapit.cpp
@@ -48,12 +50,19 @@ CZapitChannel* CBouquet::getChannelByOnidSid (unsigned int onidSid, unsigned cha
 	CZapitChannel* result = NULL;
 
 	ChannelList* channels = &tvChannels;
+	
 	switch (serviceType)
 	{
-		case 0:
-		case 1:
-		case 4: channels = &tvChannels; break;
-		case 2: channels = &radioChannels; break;
+		case RESERVED: // ?
+		case DIGITAL_TELEVISION_SERVICE:
+		case NVOD_REFERENCE_SERVICE:
+		case NVOD_TIME_SHIFTED_SERVICE:
+			channels = &tvChannels;
+			break;
+				
+		case DIGITAL_RADIO_SOUND_SERVICE:
+			channels = &radioChannels;
+			break;
 	}
 
 	unsigned int i;
@@ -62,7 +71,7 @@ CZapitChannel* CBouquet::getChannelByOnidSid (unsigned int onidSid, unsigned cha
 	if (i<channels->size())
 		result = (*channels)[i];
 
-	if ((serviceType==0) && (result==NULL))
+	if ((serviceType == RESERVED) && (result == NULL))
 	{
 		result = getChannelByOnidSid(onidSid, 2);
 	}
@@ -74,13 +83,15 @@ void CBouquet::addService (CZapitChannel* newChannel)
 {
 	switch (newChannel->getServiceType())
 	{
-		case 1:
-		case 4:
+		case DIGITAL_TELEVISION_SERVICE:
+		case NVOD_REFERENCE_SERVICE:
+		case NVOD_TIME_SHIFTED_SERVICE:
 			tvChannels.push_back(newChannel);
-		break;
-		case 2:
+			break;
+			
+		case DIGITAL_RADIO_SOUND_SERVICE:
 			radioChannels.push_back(newChannel);
-		break;
+			break;
 	}
 }
 
@@ -91,9 +102,15 @@ void CBouquet::removeService (CZapitChannel* oldChannel)
 		ChannelList* channels = &tvChannels;
 		switch (oldChannel->getServiceType())
 		{
-			case 1:
-			case 4: channels = &tvChannels; break;
-			case 2: channels = &radioChannels; break;
+			case DIGITAL_TELEVISION_SERVICE:
+			case NVOD_REFERENCE_SERVICE:
+			case NVOD_TIME_SHIFTED_SERVICE:
+				channels = &tvChannels;
+				break;
+
+			case DIGITAL_RADIO_SOUND_SERVICE:
+				channels = &radioChannels;
+				break;
 		}
 
 		ChannelList::iterator it = channels->begin();
@@ -118,9 +135,15 @@ void CBouquet::moveService (unsigned int oldPosition, unsigned int newPosition, 
 	ChannelList* channels = &tvChannels;
 	switch (serviceType)
 	{
-		case 1:
-		case 4: channels = &tvChannels; break;
-		case 2: channels = &radioChannels; break;
+		case DIGITAL_TELEVISION_SERVICE:
+		case NVOD_REFERENCE_SERVICE:
+		case NVOD_TIME_SHIFTED_SERVICE:
+			channels = &tvChannels;
+			break;
+			
+		case DIGITAL_RADIO_SOUND_SERVICE:
+			channels = &radioChannels;
+			break;
 	}
 	if ((oldPosition < channels->size()) && (newPosition < channels->size()))
 	{

@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.29 2002/09/03 11:02:23 thegoodguy Exp $
+ * $Id: pat.cpp,v 1.30 2002/09/04 11:52:56 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -32,6 +32,7 @@
 #define PAT_LENGTH 1024
 
 extern CEventServer * eventServer;
+extern unsigned int found_channels;
 extern unsigned int found_transponders;
 static int status = 0;
 
@@ -71,7 +72,7 @@ int fake_pat (uint32_t TsidOnid, FrontendParameters feparams, uint8_t polarity, 
 	return status;
 }
 
-int parse_pat (int demux_fd, CZapitChannel * channel)
+int parse_pat (int demux_fd, CZapitChannel * channel, unsigned short original_network_id)
 {
 	/* buffer for program association table */
 	unsigned char buffer[PAT_LENGTH];
@@ -105,11 +106,54 @@ int parse_pat (int demux_fd, CZapitChannel * channel)
 			return status;
 		}
 
+		unsigned short transport_stream_id = (buffer[3] << 8) | buffer[4];
+
 		/* loop over service id / program map table pid pairs */
 		for (i = 8; i < (((buffer[1] & 0x0F) << 8) | buffer[2]) + 3; i += 4)
 		{
+			unsigned short service_id = (buffer[i] << 8) | buffer[i+1];
+
+			if (channel == NULL)
+			{
+				if ((service_id != 0x0000) && (original_network_id != 0x0000))
+				{
+					sciterator I = scanchannels.find((transport_stream_id << 16) | service_id);
+
+					if (I == scanchannels.end())
+					{
+						char service_name[5];
+						sprintf(service_name, "%hx", service_id);
+						
+						found_channels++;
+						eventServer->sendEvent
+						(
+							CZapitClient::EVT_SCAN_NUM_CHANNELS,
+							CEventServer::INITID_ZAPIT,
+							&found_channels,
+							sizeof(found_channels)
+						);
+
+						scanchannels.insert
+						(
+							std::pair <uint32_t, scanchannel>
+							(
+								(transport_stream_id << 16) | service_id,
+								scanchannel
+								(
+									string(service_name),
+									service_id,
+									transport_stream_id,
+									original_network_id,
+									0x00 // dummy service_type
+								)
+							)
+						);
+					}
+				}
+			}
+			
 			/* compare service id */
-			if (channel->getServiceId() == ((buffer[i] << 8) | buffer[i+1]))
+			else if (channel->getServiceId() == service_id)
 			{
 				/* store program map table pid */
 				channel->setPmtPid(((buffer[i+2] & 0x1F) << 8) | buffer[i+3]);

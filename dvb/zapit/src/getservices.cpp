@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.43 2002/09/01 22:03:21 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.44 2002/09/04 11:52:55 obi Exp $
  */
 
 #include <stdio.h>
@@ -83,20 +83,21 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 {
 	uint16_t service_id;
 	std::string name;
-	uint16_t service_type;
+	uint8_t service_type;
 	uint16_t channel_number;
 
 	while ((node != NULL) && (!strcmp(node->GetType(), "channel")))
 	{
 		sscanf(node->GetAttributeValue("service_id"), "%hx", &service_id);
 		name = node->GetAttributeValue("name");
-		sscanf(node->GetAttributeValue("service_type"), "%hd", &service_type);
+		sscanf(node->GetAttributeValue("service_type"), "%hhx", &service_type);
 		sscanf(node->GetAttributeValue("channel_nr"), "%hd", &channel_number);
 
 		switch (service_type)
 		{
 		case DIGITAL_TELEVISION_SERVICE:
 		case NVOD_REFERENCE_SERVICE:
+		case NVOD_TIME_SHIFTED_SERVICE:
 			allchans_tv.insert
 			(
 				std::pair <uint32_t, CZapitChannel>

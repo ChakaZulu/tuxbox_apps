@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.214 2002/09/03 10:24:52 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.215 2002/09/04 11:52:55 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -638,7 +638,6 @@ void parse_command (CZapitClient::commandHead &rmsg)
 	debug("  Version: %d\n", rmsg.version);
 	debug("  Command: %d\n", rmsg.cmd);
 #endif
-	printf("[zapit] Command %d received (Version: %d).\n", rmsg.cmd, rmsg.version);
 
 	if (rmsg.version == CZapitClient::ACTVERSION)
 	{
@@ -1082,7 +1081,6 @@ void parse_command (CZapitClient::commandHead &rmsg)
 #ifdef DEBUG
 	debug("[zapit] Command %d processed.\n", rmsg.cmd);
 #endif
-	printf("[zapit] Command %d processed.\n", rmsg.cmd);
 }
 
 int main (int argc, char **argv)
@@ -1094,7 +1092,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.214 2002/09/03 10:24:52 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.215 2002/09/04 11:52:55 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

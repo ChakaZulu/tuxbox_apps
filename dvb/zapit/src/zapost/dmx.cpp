@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.3 2002/08/24 11:10:53 obi Exp $
+ * $Id: dmx.cpp,v 1.4 2002/09/04 11:52:55 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -147,7 +147,7 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 		return -1;
 
 	case 0x4A: /* bouquet_association_section */
-		sctFilterParams.timeout = 10000;
+		sctFilterParams.timeout = 11000;
 		break;
 
 	case 0x4B ... 0x4D: /* reserved for future use */

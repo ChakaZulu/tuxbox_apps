@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.7 2002/07/22 01:57:19 Homar Exp $
+ * $Id: sdt.h,v 1.8 2002/09/04 11:52:56 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -44,6 +44,6 @@ enum service_type_e
 };
 
 int parse_sdt ();
-uint32_t get_sdt_TsidOnid ();
+unsigned int get_sdt_TsidOnid ();
 
 #endif /* __sdt_h__ */
