@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.6 2001/08/16 23:19:18 McClean Exp $
+// $Id: channellist.cpp,v 1.7 2001/08/16 23:24:17 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.7  2001/08/16 23:24:17  McClean
+// positioning and display-clear bug fixed
+//
 // Revision 1.6  2001/08/16 23:19:18  McClean
 // epg-view and quickview changed
 //
@@ -23,6 +26,32 @@ static char* copyStringto(const char* from, char* to, int len)
 	*to=0;
 	return (char *)++from;
 }
+
+
+CChannelList::CChannelList(int Key=-1, string Name="")
+{
+        key = Key;
+        name = Name;
+        selected = 0;
+        width = 500;
+        height = 440;
+        x=((720-width) >> 1);
+        y=((576-height)>>1);
+        listmaxshow = 20;
+        liststart = 0;
+        tuned=0xfffffff;
+}
+
+CChannelList::~CChannelList()
+{
+        for(unsigned int count=0;count<chanlist.size();count++)
+        {
+                delete chanlist[count];
+        }
+        chanlist.clear();
+}
+
+
 
 // quick'n dirty
 void CChannelList::updateEvents(void)
@@ -91,29 +120,6 @@ char rip[]="127.0.0.1";
   }
   delete[] pData;
   return;
-}
-
-CChannelList::CChannelList(int Key=-1, string Name="")
-{
-	key = Key;
-	name = Name;
-	selected = 0;
-	width = 500;
-	height = 400;
-	x=((720-width) >> 1);
-	y=((576-height)>>1);
-	listmaxshow = 20;
-	liststart = 0;
-	tuned=0xfffffff;
-}
-
-CChannelList::~CChannelList()
-{
-	for(unsigned int count=0;count<chanlist.size();count++)
-	{
-		delete chanlist[count];
-	}
-	chanlist.clear();
 }
 
 void CChannelList::addChannel(int key, int number, string name)
