@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.6 2002/01/15 23:08:50 Simplex Exp $
+  $Id: bouquets.cpp,v 1.7 2002/01/16 22:42:30 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.7  2002/01/16 22:42:30  Simplex
+  improved build up of "special" bouquet
+
   Revision 1.6  2002/01/15 23:08:50  Simplex
   added iterating  through channellists
   added "special" bouquet
@@ -308,58 +311,129 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 	}
 
 #ifdef USEBOUQUETMAN
-	makeRemainingChannelsBouquet( nChNrTV, nChNrRadio);
+	makeRemainingChannelsBouquet( nChNrTV, nChNrRadio, "Andere");  // TODO: use locales
 #endif
 
 	printf("[zapit] Found %d bouquets.\n", Bouquets.size());
 
 }
-void CBouquetManager::loadBouquets()
+void CBouquetManager::loadBouquets(bool ignoreBouquetFile = false)
 {
-	XMLTreeParser *parser=new XMLTreeParser("ISO-8859-1");
-	FILE *in=fopen(CONFIGDIR "/zapit/bouquets.xml", "r");
-	if (!in)
+	FILE* in;
+	XMLTreeParser* parser;
+	if (!ignoreBouquetFile)
 	{
-		perror("[zapit] " CONFIGDIR "/zapit/bouquets.xml");
-		return;
+		parser=new XMLTreeParser("ISO-8859-1");
+		in=fopen(CONFIGDIR "/zapit/bouquets.xml", "r");
+		if (!in)
+		{
+			perror("[zapit] " CONFIGDIR "/zapit/bouquets.xml");
+			ignoreBouquetFile = true;
+		}
 	}
 
-	char buf[2048];
-
-	int done;
-	do
+	if (!ignoreBouquetFile)
 	{
-		unsigned int len=fread(buf, 1, sizeof(buf), in);
-		done=len<sizeof(buf);
-		if (!parser->Parse(buf, len, done))
+		char buf[2048];
+
+		int done;
+		do
 		{
-			printf("[zapit] parse error: %s at line %d\n",
-			parser->ErrorString(parser->GetErrorCode()),
-			parser->GetCurrentLineNumber());
-			fclose(in);
-			delete parser;
-			return;
-		}
-	} while (!done);
+			unsigned int len=fread(buf, 1, sizeof(buf), in);
+			done=len<sizeof(buf);
+			if (!parser->Parse(buf, len, done))
+			{
+				printf("[zapit] parse error: %s at line %d\n",
+				parser->ErrorString(parser->GetErrorCode()),
+				parser->GetCurrentLineNumber());
+				fclose(in);
+				delete parser;
+				return;
+			}
+		} while (!done);
 
-	if (parser->RootNode())
-		parseBouquetsXml(parser->RootNode());
+		if (parser->RootNode())
+			parseBouquetsXml(parser->RootNode());
 
-	delete parser;
+		delete parser;
 
-	fclose(in);
+		fclose(in);
+	}
+	else
+	{
+		makeRemainingChannelsBouquet( 1, 1, "Alle Kanäle");    // TODO: use locales
+	}
 }
 
-void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsigned int radioChanNr )
+void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsigned int radioChanNr, string strTitle )
 {
-	remainChannels = addBouquet("Andere"); // TODO: use locales
+	ChannelList allChannels;
+	ChannelList numberedChannels;
+	ChannelList unnumberedChannels;
 
 	for ( map<uint, channel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
 	{
-		if (tvChannelsFind( it->second.OnidSid()) == tvChannelsEnd())
+		if (it->second.chan_nr > 0)
+			numberedChannels.insert( numberedChannels.end(), &(it->second));
+		else
+			unnumberedChannels.insert( unnumberedChannels.end(), &(it->second));
+	}
+	sort(numberedChannels.begin(), numberedChannels.end(), CmpChannelByChNr());
+	sort(unnumberedChannels.begin(), unnumberedChannels.end(), CmpChannelByChName());
+
+	for (uint i = 0; i<numberedChannels.size(); i++)
+	{
+		allChannels.insert( allChannels.end(), numberedChannels[i]);
+	}
+	for (uint i = 0; i<unnumberedChannels.size(); i++)
+	{
+		allChannels.insert( allChannels.end(), unnumberedChannels[i]);
+	}
+
+	remainChannels = addBouquet(strTitle);
+
+	for ( uint i=0; i<allChannels.size(); i++)
+	{
+		if (tvChannelsFind( allChannels[i]->OnidSid()) == tvChannelsEnd())
 		{
-			channel* chan = copyChannelByOnidSid( it->second.OnidSid());
+			channel* chan = copyChannelByOnidSid( allChannels[i]->OnidSid());
 			chan->chan_nr = tvChanNr++;
+			remainChannels->addService( chan);
+		}
+	}
+
+
+	allChannels.clear();
+	numberedChannels.clear();
+	unnumberedChannels.clear();
+
+	for ( map<uint, channel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
+	{
+		if (it->second.chan_nr > 0)
+			numberedChannels.insert( numberedChannels.end(), &(it->second));
+		else
+			unnumberedChannels.insert( unnumberedChannels.end(), &(it->second));
+	}
+	sort(numberedChannels.begin(), numberedChannels.end(), CmpChannelByChNr());
+	sort(unnumberedChannels.begin(), unnumberedChannels.end(), CmpChannelByChName());
+
+	for (uint i = 0; i<numberedChannels.size(); i++)
+	{
+		allChannels.insert( allChannels.end(), numberedChannels[i]);
+	}
+	for (uint i = 0; i<unnumberedChannels.size(); i++)
+	{
+		allChannels.insert( allChannels.end(), unnumberedChannels[i]);
+	}
+
+	remainChannels = addBouquet(strTitle);
+
+	for ( uint i=0; i<allChannels.size(); i++)
+	{
+		if (radioChannelsFind( allChannels[i]->OnidSid()) == radioChannelsEnd())
+		{
+			channel* chan = copyChannelByOnidSid( allChannels[i]->OnidSid());
+			chan->chan_nr = radioChanNr++;
 			remainChannels->addService( chan);
 		}
 	}
@@ -376,7 +450,7 @@ void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsig
 
 	if ((remainChannels->tvChannels.size() == 0) && (remainChannels->radioChannels.size() == 0))
 	{
-		deleteBouquet("Andere");
+		deleteBouquet(strTitle);
 	}
 }
 

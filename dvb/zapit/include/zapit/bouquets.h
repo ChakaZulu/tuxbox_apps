@@ -5,6 +5,9 @@
 #define BOUQUETS_CPP extern
 #endif
 
+#include <algorithm>
+#include <functional>
+
 #include <vector>
 #include "getservices.h"
 #include "xml/xmltree.h"
@@ -12,6 +15,25 @@
 using namespace std;
 
 typedef vector<channel*> ChannelList;
+
+/* struct for comparing channels by channel number*/
+struct CmpChannelByChNr: public binary_function< channel* , channel* , bool>
+{
+	bool operator()(channel*  c1, channel*  c2)
+	{
+		return (c1->chan_nr < c2->chan_nr);
+	};
+};
+
+/* struct for comparing channels by channel name*/
+struct CmpChannelByChName: public binary_function< channel* , channel* , bool>
+{
+	bool operator()(channel*  c1, channel*  c2)
+	{
+		return (c1->name < c2->name);
+	};
+};
+
 
 class CBouquet
 {
@@ -45,7 +67,7 @@ class CBouquetManager
 {
 	private:
 		CBouquet* remainChannels;
-		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr);
+		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr, string strTitle);
 		void parseBouquetsXml(XMLTreeNode *root);
 	public:
 		class tvChannelIterator
@@ -89,7 +111,7 @@ class CBouquetManager
 		BouquetList Bouquets;
 
 		void saveBouquets();
-		void loadBouquets();
+		void loadBouquets( bool ignoreBouquetFile = false);
 		void renumServices();
 
 		CBouquet* addBouquet( string name);
