@@ -545,6 +545,13 @@ static eString version(eString request, eString dirpath, eString opt, eHTTPConne
 	return result;
 }
 
+static eString setFakeRecordingState(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	int state = (opt == "on") ? 1 : 0;
+	eZapMain::getInstance()->setFakeRecordingState(state);
+	return "+ok";
+}
+
 static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
@@ -2904,6 +2911,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", osdshot); // for backward compatibility
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setFakeRecordingState", setFakeRecordingState);
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist);
